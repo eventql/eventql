@@ -1,26 +1,34 @@
-include_directories(${CMAKE_CURRENT_BINARY_DIR})
-file(GLOB PROTO_FILES *.proto)
-PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS ${PROTO_FILES})
+# This file is part of the "FnordMetric" project
+#   Copyright (c) 2014 Paul Asmuth, Google Inc.
+#
+# Licensed under the MIT license (see LICENSE).
+cmake_minimum_required(VERSION 2.6)
 
-add_library(
-    sensord-common OBJECT
-    HostStatsSensor.cc
-    Sensor.cc
-    SensorRepository.cc
-    Sampler.cc
-    ${PROTO_SRCS})
+set(FNORDMETRIC_SOURCES
+        query.cc
+        query/astnode.cc
+        query/compile.cc
+        query/executable.cc
+        query/execute.cc
+        query/grouper.cc
+        query/parser.cc
+        query/queryplan.cc
+        query/svalue.cc
+        query/symboltable.cc
+        query/token.cc
+        query/tokenize.cc
+        query/expressions/aggregate.cc
+        query/expressions/boolean.cc
+        query/expressions/math.cc
+        drawables/barchart.cc
+        format.cc)
 
-add_executable(
-    sensord
-    $<TARGET_OBJECTS:fnord-base>
-    $<TARGET_OBJECTS:fnord-msg>
-    $<TARGET_OBJECTS:fnord-http>
-    $<TARGET_OBJECTS:sensord-common>
-    sensord.cc)
+include_directories(./)
+set(CMAKE_CXX_FLAGS "-std=c++0x -stdlib=libc++")
 
-target_link_libraries(
-    sensord
-    ${CMAKE_THREAD_LIBS_INIT}
-    ${FNORD_MSG_LIBS})
+add_library(fnordmetric SHARED ${FNORDMETRIC_SOURCES})
 
+add_executable(query-test query_test.cc)
+target_link_libraries(query-test fnordmetric)
+add_test(QueryTest query-test)
 
