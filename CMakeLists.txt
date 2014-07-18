@@ -1,11 +1,9 @@
-cmake_minimum_required(VERSION 2.8)
-project(xzero-libraries)
+# This file is part of the "FnordMetric" project
+#   Copyright (c) 2014 Paul Asmuth, Google Inc.
+#
+# Licensed under the MIT license (see LICENSE).
+cmake_minimum_required(VERSION 2.6)
+project(fnordmetric)
+enable_testing()
 
-set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
-
-add_subdirectory(xzero-base)
-add_subdirectory(xzero-http)
-add_subdirectory(xzero-flow)
-
-add_subdirectory(examples)
-add_subdirectory(flow-tool)
+add_subdirectory(fnordmetric-core)
