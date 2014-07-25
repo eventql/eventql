@@ -39,8 +39,6 @@
   } while (0)
 #endif
 
-#define XZERO_TMPDIR "/tmp" // FIXME
-
 namespace xzero {
 
 /**
@@ -57,6 +55,18 @@ namespace xzero {
  * - should request bodies land in requestBuffer_? someone with a good line
  * could flood us w/ streaming request bodies.
  */
+
+std::string HttpConnection::tempDirectory_("/tmp");
+
+const std::string& HttpConnection::tempDirectory() {
+  return tempDirectory_;
+}
+
+void HttpConnection::setTempDirectory(const char* path) {
+  if (path && *path) {
+    tempDirectory_ = path;
+  }
+}
 
 /** initializes a new connection object, created by given listener.
  *
@@ -428,13 +438,13 @@ bool HttpConnection::onMessageHeaderEnd() {
     } else {
       const int flags = O_RDWR;
 
-#if defined(O_TMPFILE) && defined(XZERO_ENABLE_O_TMPFILE)
+#if defined(O_TMPFILE)
       static bool otmpfileSupported = true;
       if (otmpfileSupported) {
-        requestBodyFd_ = open(XZERO_TMPDIR, flags | O_TMPFILE);
+        requestBodyFd_ = open(tempDirectory_.c_str(), flags | O_TMPFILE);
         if (requestBodyFd_ >= 0) {
-          requestBodyPath_[0] =
-              '\0';  // explicitely mark it as O_TMPFILE-opened
+          // explicitely mark it as O_TMPFILE-opened
+          requestBodyPath_[0] = '\0';
         } else {
           // do not attempt to try it again
           otmpfileSupported = false;
@@ -443,7 +453,7 @@ bool HttpConnection::onMessageHeaderEnd() {
 #endif
       if (requestBodyFd_ < 0) {
         snprintf(requestBodyPath_, sizeof(requestBodyPath_),
-                 XZERO_TMPDIR "/x0d-request-body-XXXXXX");
+                 "%s/x0d-request-body-XXXXXX", tempDirectory_.c_str());
         requestBodyFd_ = mkostemp(requestBodyPath_, flags);
       }
     }
