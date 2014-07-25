@@ -94,6 +94,10 @@ configure_file(
     ${CMAKE_CURRENT_SOURCE_DIR}/libxzero.pc.cmake
     ${CMAKE_CURRENT_BINARY_DIR}/libxzero.pc)
 
+configure_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.cmake
+    ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
+
 install(
     FILES ${CMAKE_CURRENT_BINARY_DIR}/libxzero.pc
     DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/pkgconfig)
