@@ -548,11 +548,11 @@ static inline Buffer escapeChunk(const BufferRef& chunk) {
 }
 
 void HttpConnection::onProtocolError(const BufferRef& chunk, size_t offset) {
-  log(Severity::diag, "HTTP protocol error at chunk offset %zu (0x%02x): %s",
+  log(Severity::debug, "HTTP protocol error at chunk offset %zu (0x%02x): %s",
       offset, chunk[offset], tos(parserState()).c_str());
 
-  log(Severity::debug, "Request parser offset: %zu", requestParserOffset_);
-  log(Severity::debug, "Request Buffer: \"%s\"",
+  log(Severity::trace, "Request parser offset: %zu", requestParserOffset_);
+  log(Severity::trace, "Request Buffer: \"%s\"",
       escapeChunk(requestBuffer_.ref(0, std::min(requestParserOffset_ + 1,
                                                  requestBuffer_.size())))
           .c_str());
@@ -930,7 +930,7 @@ bool HttpConnection::process() {
     }
 
     if (rv < chunk.size()) {
-      request_->log(Severity::debug1, "parser aborted early.");
+      request_->log(Severity::trace1, "parser aborted early.");
       return false;
     }
   }

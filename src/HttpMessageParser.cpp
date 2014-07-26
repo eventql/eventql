@@ -12,7 +12,7 @@ namespace xzero {
 #if !defined(XZERO_NDEBUG)
 #define TRACE(level, fmt...)                     \
   do {                                           \
-    LogMessage msg(Severity::debug##level, fmt); \
+    LogMessage msg(Severity::trace##level, fmt); \
     msg.addTag("parser");                        \
     log(std::move(msg));                         \
   } while (0)

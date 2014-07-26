@@ -86,7 +86,7 @@ HttpServer::HttpServer(struct ::ev_loop* loop, unsigned generation)
       requestHeaderBufferSize(8 * 1024),
       requestBodyBufferSize(8 * 1024) {
   DebugLogger::get().onLogWrite = [&](const char* msg, size_t n) {
-    LogMessage lm(Severity::debug1, "%s", msg);
+    LogMessage lm(Severity::trace1, "%s", msg);
     logger_->write(lm);
   };
 

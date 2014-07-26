@@ -23,7 +23,7 @@
 
 #if 0  //!defined(XZERO_NDEBUG)
 //#	define TRACE(n, msg...) X0_DEBUG("worker", (n), msg)
-#define TRACE(n, msg...) log(Severity::debug##n, msg)
+#define TRACE(n, msg...) log(Severity::trace##n, msg)
 #else
 #define TRACE(n, msg...) \
   do {                   \
@@ -416,7 +416,7 @@ void HttpWorker::_kill() {
 
 #ifndef XZERO_NDEBUG
     for (HttpConnection* c = connections_; c != nullptr; c = c->next_)
-      c->log(Severity::debug, "connection still open");
+      c->log(Severity::trace, "connection still open");
 #endif
   }
 

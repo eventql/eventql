@@ -290,12 +290,12 @@ bool HttpRequest::setUri(const BufferRef& uri) {
           break;
         }
 
-        log(Severity::debug, "Failed decoding Request-URI.");
+        log(Severity::trace, "Failed decoding Request-URI.");
         return false;
       case UriState::QuoteChar2:
         if (ch >= '0' && ch <= '9') {
           ch = decodedChar | (ch - '0');
-          log(Severity::debug, "parse-uri: decoded character 0x%02x",
+          log(Severity::trace, "parse-uri: decoded character 0x%02x",
               ch & 0xFF);
 
           switch (ch) {
@@ -333,7 +333,7 @@ bool HttpRequest::setUri(const BufferRef& uri) {
           //
           ch = decodedChar | (ch - ('a' - 10));
 
-          log(Severity::debug, "parse-uri: decoded character 0x%02x",
+          log(Severity::trace, "parse-uri: decoded character 0x%02x",
               ch & 0xFF);
 
           switch (ch) {
@@ -367,7 +367,7 @@ bool HttpRequest::setUri(const BufferRef& uri) {
         query = unparsedUri.ref((i - unparsedUri.cbegin()) - 1, e - i);
         goto done;
       default:
-        log(Severity::debug, "Internal error. Unhandled state");
+        log(Severity::trace, "Internal error. Unhandled state");
         return false;
     }
   }
