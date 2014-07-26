@@ -635,6 +635,14 @@ std::unique_ptr<Source> HttpRequest::serialize() {
   return std::unique_ptr<BufferSource>(new BufferSource(std::move(buffers)));
 }
 
+void HttpRequest::write(const char* text) {
+  if (text && *text) {
+    Buffer buf;
+    buf.push_back(text, strlen(text));
+    write<BufferSource>(std::move(buf));
+  }
+}
+
 /** write given source to response content and invoke the completion handler
  *when done.
  *
