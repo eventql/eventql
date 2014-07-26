@@ -18,7 +18,7 @@ include(CheckCSourceCompiles)
 include(CMakeDetermineCCompiler)
 
 option(XZERO_ENABLE_TESTS "Build unit tests [default: off]" OFF)
-option(XZERO_ENABLE_EXAMPLES "Includes example plugins and programs [default: off]" OFF)
+option(XZERO_ENABLE_EXAMPLES "Includes example plugins and programs [default: on]" ON)
 
 # libxzero feature flags
 option(XZERO_ENABLE_O_TMPFILE "Try to open temporary files with O_TMPFILE flag before falling back to standard behaviour [default: on]" ON)
