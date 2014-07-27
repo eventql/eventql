@@ -17,7 +17,7 @@ include(CheckLibraryExists)
 include(CheckCSourceCompiles)
 include(CMakeDetermineCCompiler)
 
-option(XZERO_ENABLE_TESTS "Build unit tests [default: off]" OFF)
+option(ENABLE_TESTS "Build unit tests [default: off]" OFF)
 option(XZERO_ENABLE_EXAMPLES "Includes example plugins and programs [default: on]" ON)
 
 # libxzero feature flags
@@ -83,7 +83,7 @@ else()
   message("libbase libdir: ${BASE_LIBRARY_DIRS}")
 endif()
 
-if(XZERO_ENABLE_TESTS)
+if(ENABLE_TESTS)
   CHECK_INCLUDE_FILES(gtest/gtest.h HAVE_GTEST_GTEST_H)
 endif()
 
