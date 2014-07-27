@@ -16,7 +16,6 @@
 #include <base/AnsiColor.h>
 #include <base/strutils.h>
 #include <base/sysconfig.h>
-#include <systemd/sd-daemon.h>
 
 #include <iostream>
 #include <fstream>
