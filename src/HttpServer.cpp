@@ -33,7 +33,7 @@
 #include <getopt.h>
 #include <stdio.h>
 
-#if 0  // !defined(XZERO_NDEBUG)
+#if 0  // !defined(NDEBUG)
 #define TRACE(msg...) DEBUG("HttpServer: " msg)
 #else
 #define TRACE(msg...) \
@@ -237,7 +237,7 @@ void HttpServer::kill() {
 
 void HttpServer::log(LogMessage&& msg) {
   if (logger_) {
-#if !defined(XZERO_NDEBUG)
+#if !defined(NDEBUG)
 #ifndef __APPLE__
     if (msg.isDebug() && msg.hasTags() && DebugLogger::get().isConfigured()) {
       int level = 3 - msg.severity();  // compute proper debug level

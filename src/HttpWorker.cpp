@@ -21,7 +21,7 @@
 
 // XXX one a connection has been passed to a worker, it is *bound* to it.
 
-#if 0  //!defined(XZERO_NDEBUG)
+#if 0  //!defined(NDEBUG)
 //#	define TRACE(n, msg...) X0_DEBUG("worker", (n), msg)
 #define TRACE(n, msg...) log(Severity::trace##n, msg)
 #else
@@ -414,7 +414,7 @@ void HttpWorker::_kill() {
 
     for (auto c : copy) c->abort();
 
-#ifndef XZERO_NDEBUG
+#ifndef NDEBUG
     for (HttpConnection* c = connections_; c != nullptr; c = c->next_)
       c->log(Severity::trace, "connection still open");
 #endif

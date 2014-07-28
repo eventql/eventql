@@ -27,7 +27,7 @@
 #include <fcntl.h>
 #include <stdlib.h>
 
-#if !defined(XZERO_NDEBUG)
+#if !defined(NDEBUG)
 #define TRACE(level, msg...) XZERO_DEBUG("HttpRequest", (level), msg)
 #else
 #define TRACE(msg...) \
@@ -102,7 +102,7 @@ HttpRequest::HttpRequest(HttpConnection& conn)
       directoryDepth_(0),
       errorHandler_(nullptr),
       timeStart_() {
-#ifndef XZERO_NDEBUG
+#ifndef NDEBUG
   static std::atomic<unsigned long long> rid(0);
   setLoggingPrefix("HttpRequest(%lld,%s:%d)", ++rid,
                    connection.remoteIP().c_str(), connection.remotePort());
@@ -139,7 +139,7 @@ bool HttpRequest::setUri(const BufferRef& uri) {
     QueryStart,
   };
 
-#if !defined(XZERO_NDEBUG)
+#if !defined(NDEBUG)
   static const char* uriStateNames[] = {
       "Content",    "Slash",      "Dot",        "DotDot",
       "QuoteStart", "QuoteChar2", "QueryStart", };
@@ -154,7 +154,7 @@ bool HttpRequest::setUri(const BufferRef& uri) {
   unsigned char decodedChar;
   char ch = *i++;
 
-#if !defined(XZERO_NDEBUG)  // suppress uninitialized warning
+#if !defined(NDEBUG)  // suppress uninitialized warning
   quotedState = UriState::Content;
   decodedChar = '\0';
 #endif
@@ -935,7 +935,7 @@ void HttpRequest::finish() {
       }
       break;
     case HttpConnection::SendingReplyDone:
-#if !defined(XZERO_NDEBUG)
+#if !defined(NDEBUG)
       log(Severity::error,
           "BUG: invalid invocation of finish() on a already finished request.");
       Process::dumpCore();

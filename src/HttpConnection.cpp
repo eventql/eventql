@@ -31,7 +31,7 @@
 #include <arpa/inet.h>
 #include <fcntl.h>
 
-#if !defined(XZERO_NDEBUG)
+#if !defined(NDEBUG)
 #define TRACE(level, msg...) XZERO_DEBUG("HttpConnection", (level), msg)
 #else
 #define TRACE(msg...) \
@@ -950,7 +950,7 @@ void HttpConnection::setShouldKeepAlive(bool enabled) {
 }
 
 void HttpConnection::setState(State value) {
-#if !defined(XZERO_NDEBUG)
+#if !defined(NDEBUG)
   static const char* str[] = {"undefined",          "reading-request",
                               "processing-request", "sending-reply",
                               "sending-reply-done", "keep-alive-read"};

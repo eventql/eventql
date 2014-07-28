@@ -9,7 +9,7 @@
 
 namespace xzero {
 
-#if !defined(XZERO_NDEBUG)
+#if !defined(NDEBUG)
 #define TRACE(level, fmt...)                     \
   do {                                           \
     LogMessage msg(Severity::trace##level, fmt); \
@@ -288,7 +288,7 @@ bool HttpMessageParser::onMessageContent(const BufferRef& chunk) {
 bool HttpMessageParser::onMessageEnd() { return true; }
 
 void HttpMessageParser::onProtocolError(const BufferRef& chunk, size_t offset) {
-#if !defined(XZERO_NDEBUG)
+#if !defined(NDEBUG)
   TRACE(1, "parse: protocol error at %zu: %s", offset, tos(state()).c_str());
   if (std::isprint(chunk[offset])) {
     TRACE(1, "parse: protocol error at nparsed: %ld, character: '%c'", offset,
@@ -400,7 +400,7 @@ std::size_t HttpMessageParser::parseFragment(const BufferRef& chunk,
 #endif
 
   while (i != e) {
-#if !defined(XZERO_NDEBUG)
+#if !defined(NDEBUG)
     if (std::isprint(*i)) {
       TRACE(3, "parse: %4ld, 0x%02X (%c),  %s", *nparsed, *i, *i,
             tos(state()).c_str());
@@ -1127,7 +1127,7 @@ std::size_t HttpMessageParser::parseFragment(const BufferRef& chunk,
       case PROTOCOL_ERROR:
         goto done;
       default:
-#if !defined(XZERO_NDEBUG)
+#if !defined(NDEBUG)
         TRACE(1, "parse: unknown state %i", state_);
         if (std::isprint(*i)) {
           TRACE(1, "parse: internal error at nparsed: %ld, character: '%c'",
