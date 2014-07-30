@@ -18,14 +18,17 @@ include(CheckCSourceCompiles)
 include(CMakeDetermineCCompiler)
 
 option(ENABLE_TESTS "Build unit tests [default: off]" OFF)
-option(XZERO_ENABLE_EXAMPLES "Includes example plugins and programs [default: on]" ON)
+option(ENABLE_EXAMPLES "Includes example plugins and programs [default: on]" ON)
 
-# libxzero feature flags
+# libxzero platform feature flags
+option(XZERO_ENABLE_INOTIFY "Build with inotify support [default: on]" ON)
 option(XZERO_ENABLE_O_TMPFILE "Try to open temporary files with O_TMPFILE flag before falling back to standard behaviour [default: on]" ON)
+
+# libxzero implementation feature flags
 option(XZERO_ENABLE_POST_FN_OPTIMIZATION "Optimize code path for post()'ing code blocks into current worker threads [default: OFF]" OFF)
+option(XZERO_OPPORTUNISTIC_WRITE "Builds with support for opportunistic write() calls to client sockets [default: off]." OFF)
 option(XZERO_WORKER_POST_LIBEV "Use libev's async method to post into HTTP workers instead of a locking queue [default: on]" ON)
 option(XZERO_WORKER_RR "Uses round-robin instead of lead-load for request scheduling" ON)
-option(XZERO_OPPORTUNISTIC_WRITE "Builds with support for opportunistic write() calls to client sockets [default: off]." OFF)
 
 # XXX do not use -std=c++11 here, as it's not supported on GCC 4.6 (default on Ubuntu 12.04)
 set(CMAKE_CXX_FLAGS "-std=c++0x")
