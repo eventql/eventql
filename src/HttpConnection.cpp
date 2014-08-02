@@ -68,16 +68,15 @@ void HttpConnection::setTempDirectory(const char* path) {
   }
 }
 
-/** initializes a new connection object, created by given listener.
+/**
+ * @brief initializes a new connection object.
  *
- * \param lst the listener object that created this connection.
- * \note This triggers the onConnectionOpen event.
+ * @note This triggers the onConnectionOpen event.
  */
 HttpConnection::HttpConnection(HttpWorker* w, unsigned long long id)
     : HttpMessageParser(HttpMessageParser::REQUEST),
       refCount_(0),
       state_(Undefined),
-      listener_(nullptr),
       worker_(w),
       id_(id),
       requestCount_(0),
@@ -207,7 +206,7 @@ void HttpConnection::onReadWriteTimeout(Socket*) {
 
 bool HttpConnection::isSecure() const {
 #if defined(WITH_SSL)
-  return listener_->socketDriver()->isSecure();
+  return socket_->isSecure();
 #else
   return false;
 #endif
@@ -227,10 +226,8 @@ bool HttpConnection::isSecure() const {
  * @see abort(HttpStatus)
  */
 void HttpConnection::start(std::unique_ptr<Socket>&& client,
-                           ServerSocket* listener) {
+                           bool acceptDeferred) {
   setState(ReadingRequest);
-
-  listener_ = listener;
 
   socket_ = std::move(client);
   socket_->setReadyCallback<HttpConnection, &HttpConnection::onReadWriteReady>(
@@ -266,7 +263,7 @@ void HttpConnection::start(std::unique_ptr<Socket>&& client,
     socket_->handshake<HttpConnection, &HttpConnection::onHandshakeComplete>(
         this);
   } else {
-    if (listener->deferAccept()) {
+    if (acceptDeferred) {
       TRACE(1, "start: processing input");
 
       // initialize I/O watching state to READ
@@ -559,7 +556,8 @@ void HttpConnection::onProtocolError(const BufferRef& chunk, size_t offset) {
 }
 
 void HttpConnection::wantRead(const TimeSpan& timeout) {
-  TRACE(3, "wantRead(): cstate:%s pstate:%s", state_str(), tos(parserState()).c_str());
+  TRACE(3, "wantRead(): cstate:%s pstate:%s", state_str(),
+        tos(parserState()).c_str());
 
   if (timeout)
     socket_->setTimeout<HttpConnection, &HttpConnection::onReadWriteTimeout>(

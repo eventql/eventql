@@ -493,7 +493,7 @@ std::string HttpRequest::cookie(const std::string& name) const {
 
 std::string HttpRequest::hostid() const {
   if (hostid_.empty())
-    hostid_ = make_hostid(hostname, connection.listener().port());
+    hostid_ = make_hostid(hostname, connection.socket()->remotePort());
 
   return hostid_;
 }
