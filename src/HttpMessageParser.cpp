@@ -169,8 +169,8 @@ HttpMessageParser::HttpMessageParser(ParseMode mode)
       name_(),
       value_(),
       chunked_(false),
-      contentLength_(-1),
-      filters_() {}
+      contentLength_(-1)
+{}
 
 inline bool HttpMessageParser::isChar(char value) {
   return /* static_cast<unsigned>(value) >= 0 && */ static_cast<unsigned>(
@@ -388,9 +388,7 @@ std::size_t HttpMessageParser::parseFragment(const BufferRef& chunk,
         case CONTENT_ENDLESS: // endless-sized content (until stream end)
         {
             *nparsed += chunk.size();
-            bool rv = filters_.empty()
-                ? onMessageContent(chunk)
-                : onMessageContent(filters_.process(chunk));
+            bool rv = onMessageContent(chunk);
 
             goto done;
         }
@@ -989,9 +987,7 @@ std::size_t HttpMessageParser::parseFragment(const BufferRef& chunk,
         *nparsed += c.size();
         i += c.size();
 
-        bool rv = filters_.empty()
-                      ? onMessageContent(c)
-                      : onMessageContent(filters_.process(c).ref());
+        bool rv = onMessageContent(c);
 
         if (!rv) goto done;
 
@@ -1007,11 +1003,7 @@ std::size_t HttpMessageParser::parseFragment(const BufferRef& chunk,
         *nparsed += chunkSize;
         i += chunkSize;
 
-        bool rv =
-            filters_.empty()
-                ? onMessageContent(chunk.ref(offset, chunkSize))
-                : onMessageContent(
-                      filters_.process(chunk.ref(offset, chunkSize)).ref());
+        bool rv = onMessageContent(chunk.ref(offset, chunkSize));
 
         if (contentLength_ == 0) state_ = MESSAGE_BEGIN;
 
@@ -1076,11 +1068,7 @@ std::size_t HttpMessageParser::parseFragment(const BufferRef& chunk,
           *nparsed += chunkSize;
           i += chunkSize;
 
-          bool rv =
-              filters_.empty()
-                  ? onMessageContent(chunk.ref(offset, chunkSize))
-                  : onMessageContent(
-                        filters_.process(chunk.ref(offset, chunkSize)).ref());
+          bool rv = onMessageContent(chunk.ref(offset, chunkSize));
 
           if (!rv) {
             goto done;
