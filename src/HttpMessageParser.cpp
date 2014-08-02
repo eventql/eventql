@@ -6,16 +6,12 @@
 // the License at: http://opensource.org/licenses/MIT
 
 #include <xzero/HttpMessageParser.h>
+#include <base/DebugLogger.h>
 
 namespace xzero {
 
 #if !defined(NDEBUG)
-#define TRACE(level, fmt...)                     \
-  do {                                           \
-    LogMessage msg(Severity::trace##level, fmt); \
-    msg.addTag("parser");                        \
-    log(std::move(msg));                         \
-  } while (0)
+#define TRACE(level, fmt...) XZERO_DEBUG("http-parser", level, fmt)
 #else
 #define TRACE(level, msg...) \
   do {                       \

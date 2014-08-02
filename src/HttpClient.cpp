@@ -192,12 +192,6 @@ bool HttpClient::onMessageEnd() {
   return true;
 }
 
-void HttpClient::log(LogMessage&& msg) {
-  Buffer text;
-  text << msg;
-  fprintf(stderr, "HttpClient: %s\n", text.c_str());
-}
-
 void HttpClient::request(
     const IPAddress& host, int port, const std::string& method,
     const std::string& path,
