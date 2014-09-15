@@ -7,30 +7,26 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#ifndef _FNORDMETRIC_CSVBACKEND_H
-#define _FNORDMETRIC_CSVBACKEND_H
+#ifndef _FNORDMETRIC_SQL_BACKEND_H
+#define _FNORDMETRIC_SQL_BACKEND_H
 #include <memory>
-#include <fnordmetric/sql/backend.h>
-#include <fnordmetric/sql/backends/csv/csvtableref.h>
+#include <vector>
+#include <fnordmetric/util/uri.h>
+#include <fnordmetric/sql/tableref.h>
 
 namespace fnordmetric {
 namespace query {
-class ASTNode;
-namespace csv_backend {
 
-class CSVBackend : public fnordmetric::query::Backend {
+class Backend {
 public:
 
-  static CSVBackend* singleton();
-
-  bool openTables(
+  virtual bool openTables(
       const std::vector<std::string>& table_names,
       const util::URI& source_uri,
-      std::vector<std::unique_ptr<TableRef>>* target) override;
+      std::vector<std::unique_ptr<TableRef>>* target) = 0;
 
 };
 
-}
 }
 }
 #endif
