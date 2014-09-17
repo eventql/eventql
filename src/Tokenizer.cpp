@@ -5,6 +5,13 @@
 // file except in compliance with the License. You may obtain a copy of
 // the License at: http://opensource.org/licenses/MIT
 
-#include <xzero/HttpStatus.h>
+#include <xzero/Tokenizer.h>
+#include <xzero/Buffer.h>
+#include <string>
 
-namespace xzero {}  // namespace x0
+namespace xzero {
+
+template class Tokenizer<BufferRef, Buffer>;
+template class Tokenizer<BufferRef, BufferRef>;
+
+}  // namespace xzero

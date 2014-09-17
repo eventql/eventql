@@ -1,20 +1,67 @@
 set(libxzero_SRC
-  HttpClient.cpp
-  HttpConnection.cpp
-  HttpFile.cpp
-  HttpFileMgr.cpp
-  HttpMessageParser.cpp
-  HttpRequest.cpp
-  HttpServer.cpp
-  HttpStatus.cpp
-  HttpWorker.cpp
-  HttpVary.cpp
-  http2.cpp
-  hpack.cpp
+  # base
+  Base64.cpp
+  Buffer.cpp
+  DateTime.cpp
+  IdleTimeout.cpp
+  TimeSpan.cpp
+  Tokenizer.cpp
+
+  executor/DirectExecutor.cpp
+  executor/DirectLoopExecutor.cpp
+  executor/Scheduler.cpp
+  executor/ThreadedExecutor.cpp
+  executor/ThreadPool.cpp
+
+  io/Selectable.cpp
+
+  net/ByteArrayEndPoint.cpp
+  net/Cidr.cpp
+  net/Connection.cpp
+  net/ConnectionFactory.cpp
+  net/Connector.cpp
+  net/EndPoint.cpp
+  net/EndPointWriter.cpp
+  net/InetConnector.cpp
+  net/InetEndPoint.cpp
+  net/LocalConnector.cpp
+  net/Server.cpp
+
+  # http common
+  http/HeaderField.cpp
+  http/HeaderFieldList.cpp
+  http/HttpChannel.cpp
+  http/HttpConnectionFactory.cpp
+  http/HttpDateGenerator.cpp
+  http/HttpInput.cpp
+  http/HttpListener.cpp
+  http/HttpOutput.cpp
+  http/HttpRequest.cpp
+  http/HttpResponse.cpp
+  http/HttpTransport.cpp
+
+  # http support
+  http/HttpFileHandler.cpp
+
+  # http/1
+  http/v1/HttpConnection.cpp
+  http/v1/HttpConnectionFactory.cpp
+  http/v1/HttpGenerator.cpp
+  http/v1/HttpInput.cpp
+  http/v1/HttpParser.cpp
+  http/v1/HttpChannel.cpp
+
+  # http/2
+  #...
+
+  # support
+  support/LibevClock.cpp
+  support/LibevScheduler.cpp
+  support/LibevSelector.cpp
 )
 
 add_library(xzero SHARED ${libxzero_SRC})
-target_link_libraries(xzero ${BASE_LIBRARIES})
+target_link_libraries(xzero ev pthread)
 set_target_properties(xzero PROPERTIES VERSION ${LIBXZERO_VERSION})
 set_target_properties(xzero PROPERTIES COMPILE_FLAGS "-fvisibility=hidden -fvisibility-inlines-hidden -DBUILD_XZERO=1")
 #set_target_properties(xzero PROPERTIES LINK_FLAGS "${BASE_LDFLAGS}")
