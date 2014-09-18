@@ -51,7 +51,6 @@ int main() {
     printf("Incoming request. '%s' '%s'\n", request->method().c_str(),
            request->path().c_str());
 
-    request->setHandled(true);
     response->setStatus(xzero::HttpStatus::Ok);
     response->addHeader("Foo", "breach");
     response->output()->write("Hello, World!\n");
