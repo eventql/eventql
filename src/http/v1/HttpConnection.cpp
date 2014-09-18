@@ -110,9 +110,6 @@ void HttpConnection::send(HttpResponseInfo&& responseInfo,
     responseInfo.headers().push_back("Connection", "closed");
   }
 
-  // add server related headers
-  responseInfo.headers().push_back("Server", "xzero/" LIBXZERO_VERSION);
-
   generator_.generateResponse(responseInfo, chunk, false, &writer_);
   onComplete_ = onComplete;
 
