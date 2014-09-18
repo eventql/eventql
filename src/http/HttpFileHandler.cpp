@@ -190,8 +190,6 @@ bool HttpFileHandler::handle(HttpRequest* request, HttpResponse* response,
   if (handleClientCache(transferFile, request, response))
     return true;
 
-  request->setHandled(true);
-
   switch (transferFile.errorCode()) {
     case 0:
       break;
@@ -258,7 +256,6 @@ bool HttpFileHandler::handleClientCache(const HttpFile& transferFile,
     // XXX: on static files we probably don't need the token-list support
     if (value != transferFile.etag()) continue;
 
-    request->setHandled(true);
     response->setStatus(HttpStatus::NotModified);
     response->completed();
     return true;
@@ -274,7 +271,6 @@ bool HttpFileHandler::handleClientCache(const HttpFile& transferFile,
 
     if (transferFile.mtime() > dt.unixtime()) continue;
 
-    request->setHandled(true);
     response->setStatus(HttpStatus::NotModified);
     response->completed();
     return true;
@@ -290,7 +286,6 @@ bool HttpFileHandler::handleClientCache(const HttpFile& transferFile,
     // XXX: on static files we probably don't need the token-list support
     if (value == transferFile.etag()) continue;
 
-    request->setHandled(true);
     response->setStatus(HttpStatus::PreconditionFailed);
     response->completed();
     return true;
@@ -306,7 +301,6 @@ bool HttpFileHandler::handleClientCache(const HttpFile& transferFile,
 
     if (transferFile.mtime() <= dt.unixtime()) continue;
 
-    request->setHandled(true);
     response->setStatus(HttpStatus::PreconditionFailed);
     response->completed();
     return true;
@@ -333,7 +327,6 @@ bool HttpFileHandler::handleRangeRequest(const HttpFile& transferFile, int fd,
         && !equals(ifRangeCond, transferFile.lastModified()))
     return false;
 
-  request->setHandled(true);
   response->setStatus(HttpStatus::PartialContent);
 
   if (range.size() > 1) {

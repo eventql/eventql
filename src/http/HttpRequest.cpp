@@ -21,8 +21,7 @@ HttpRequest::HttpRequest(const std::string& method, const std::string& path,
       version_(version),
       secure_(secure),
       headers_(headers),
-      input_(std::move(input)),
-      handled_(false) {
+      input_(std::move(input)) {
   // .
 }
 
@@ -33,7 +32,6 @@ void HttpRequest::recycle() {
   secure_ = false;
   headers_.reset();
   input_ = nullptr;
-  handled_ = false;
 }
 
 }  // namespace xzero
