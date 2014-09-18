@@ -232,7 +232,8 @@ bool HttpFileHandler::handle(HttpRequest* request, HttpResponse* response,
   response->setStatus(HttpStatus::Ok);
   response->addHeader("Accept-Ranges", "bytes");
   response->addHeader("Content-Type", transferFile.mimetype());
-  response->addHeader("Content-Length", std::to_string(transferFile.size()));
+
+  response->setContentLength(transferFile.size());
 
   if (fd >= 0) {  // GET request
 #if defined(HAVE_POSIX_FADVISE)
