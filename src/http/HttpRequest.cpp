@@ -20,6 +20,7 @@ HttpRequest::HttpRequest(const std::string& method, const std::string& path,
       path_(path),
       version_(version),
       secure_(secure),
+      expect100Continue_(false),
       headers_(headers),
       input_(std::move(input)) {
   // .

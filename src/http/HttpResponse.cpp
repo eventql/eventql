@@ -1,9 +1,13 @@
 #include <xzero/http/HttpResponse.h>
+#include <xzero/http/HttpRequest.h>
+#include <xzero/http/HttpChannel.h>
 
 namespace xzero {
 
-HttpResponse::HttpResponse(std::unique_ptr<HttpOutput>&& output)
-    : output_(std::move(output)),
+HttpResponse::HttpResponse(HttpChannel* channel,
+                           std::unique_ptr<HttpOutput>&& output)
+    : channel_(channel),
+      output_(std::move(output)),
       version_(HttpVersion::UNKNOWN),
       status_(HttpStatus::Undefined),
       contentType_(),
@@ -72,6 +76,10 @@ void HttpResponse::removeHeader(const std::string& name) {
 
 const std::string& HttpResponse::getHeader(const std::string& name) const {
   return headers_.get(name);
+}
+
+void HttpResponse::send100Continue() {
+  channel_->send100Continue();
 }
 
 void HttpResponse::completed() {

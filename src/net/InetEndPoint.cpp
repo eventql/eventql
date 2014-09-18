@@ -187,10 +187,12 @@ void InetEndPoint::onSelectable() noexcept {
 
 void InetEndPoint::wantFlush() {
   if (selector()) {
-    if (selectionKey_)
-      selectionKey_->change(WRITE);
-    else
+    if (selectionKey_) {
+      int cur = selectionKey_->interest();
+      selectionKey_->change(cur | WRITE);
+    } else {
       selectionKey_ = registerSelectable(WRITE);
+    }
   } else {
     connection()->onFlushable();
   }

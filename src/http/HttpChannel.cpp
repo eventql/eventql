@@ -14,7 +14,7 @@ HttpChannel::HttpChannel(HttpTransport* transport, const HttpHandler& handler,
     : state_(HttpChannelState::IDLE),
       transport_(transport),
       request_(new HttpRequest(std::move(input))),
-      response_(new HttpResponse(createOutput())),
+      response_(new HttpResponse(this, createOutput())),
       handler_(handler) {
   //.
 }
@@ -36,6 +36,10 @@ std::unique_ptr<HttpOutput> HttpChannel::createOutput() {
 void HttpChannel::send(const BufferRef& data, CompletionHandler&& onComplete) {
   if (!response_->isCommitted()) {
     response_->setCommitted(true);
+
+    if (request_->expect100Continue()) {
+      response_->send100Continue();
+    }
 
     const bool isHeadReq = request_->method() == "HEAD";
     HttpResponseInfo info(request_->version(), response_->status(),
@@ -59,6 +63,18 @@ void HttpChannel::send(FileRef&& file, CompletionHandler&& completed) {
 
   transport_->send(std::forward<FileRef>(file),
                    std::forward<CompletionHandler>(completed));
+}
+
+void HttpChannel::send100Continue() {
+  if (!request()->expect100Continue())
+    throw std::runtime_error("Illegal State. no 100-continue expected.");
+
+  request()->setExpect100Continue(false);
+
+  HttpResponseInfo info(request_->version(), HttpStatus::ContinueRequest,
+                        "Continue", false, 0, {});
+
+  transport_->send(std::move(info), BufferRef(), nullptr);
 }
 
 bool HttpChannel::onMessageBegin(const BufferRef& method,
@@ -95,6 +111,9 @@ bool HttpChannel::onMessageHeader(const BufferRef& name,
                                   const BufferRef& value) {
   request_->headers().push_back(name.str(), value.str());
 
+  if (iequals(name, "Expect") && iequals(value, "100-continue"))
+    request_->setExpect100Continue(true);
+
   return true;
 }
 
@@ -104,7 +123,6 @@ bool HttpChannel::onMessageHeaderEnd() {
 }
 
 bool HttpChannel::onMessageContent(const BufferRef& chunk) {
-  printf("onMessageContent() %zu bytes\n", chunk.size());
   request_->input()->onContent(chunk);
 
   return true;

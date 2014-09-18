@@ -95,19 +95,21 @@ void HttpConnection::send(HttpResponseInfo&& responseInfo,
   // printf("HttpConnection.send(status=%d, chunkSize=%zu)\n",
   //        responseInfo.status(), chunk.size());
 
-  // patch in HTTP transport-layer headers
-  if (channel_->isPersistent() && requestCount_ < requestMax_) {
-    ++requestCount_;
+  if (static_cast<int>(responseInfo.status()) >= 200) {
+    // patch in HTTP transport-layer headers
+    if (channel_->isPersistent() && requestCount_ < requestMax_) {
+      ++requestCount_;
 
-    char keepAlive[64];
-    snprintf(keepAlive, sizeof(keepAlive), "timeout=%lu, max=%zu",
-             maxKeepAlive_.totalSeconds(), requestMax_ - requestCount_);
+      char keepAlive[64];
+      snprintf(keepAlive, sizeof(keepAlive), "timeout=%lu, max=%zu",
+               maxKeepAlive_.totalSeconds(), requestMax_ - requestCount_);
 
-    responseInfo.headers().push_back("Connection", "keep-alive");
-    responseInfo.headers().push_back("Keep-Alive", keepAlive);
-  } else {
-    channel_->setPersistent(false);
-    responseInfo.headers().push_back("Connection", "closed");
+      responseInfo.headers().push_back("Connection", "keep-alive");
+      responseInfo.headers().push_back("Keep-Alive", keepAlive);
+    } else {
+      channel_->setPersistent(false);
+      responseInfo.headers().push_back("Connection", "closed");
+    }
   }
 
   generator_.generateResponse(responseInfo, chunk, false, &writer_);
@@ -157,6 +159,8 @@ void HttpConnection::onFillable() {
 void HttpConnection::onFlushable() {
   const bool complete = writer_.flush(endpoint());
   if (complete) {
+    wantFill(); // restore interest to NONE or READ
+
     if (onComplete_) {
       auto callback = std::move(onComplete_);
       callback(true);

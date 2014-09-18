@@ -33,7 +33,19 @@ void HttpGenerator::generateResponse(const HttpResponseInfo& info,
                                      const BufferRef& chunk, bool last,
                                      EndPointWriter* output) {
   generateResponseLine(info);
-  generateHeaders(info);
+
+  if (static_cast<int>(info.status()) >= 200) {
+    if (dateGenerator_) {
+      buffer_.push_back("Date: ");
+      dateGenerator_->fill(&buffer_);
+      buffer_.push_back("\r\n");
+    }
+
+    generateHeaders(info);
+  } else {
+    buffer_.push_back("\r\n");
+  }
+
   flushBuffer(output);
   generateBody(chunk, last, output);
 }
@@ -153,12 +165,6 @@ void HttpGenerator::generateHeaders(const HttpInfo& info) {
   } else {
     buffer_.push_back("Content-Length: ");
     buffer_.push_back(info.contentLength());
-    buffer_.push_back("\r\n");
-  }
-
-  if (dateGenerator_) {
-    buffer_.push_back("Date: ");
-    dateGenerator_->fill(&buffer_);
     buffer_.push_back("\r\n");
   }
 

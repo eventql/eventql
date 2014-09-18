@@ -27,7 +27,8 @@ class LibevIO : public SelectionKey { // {{{
   LibevIO(LibevSelector* selector, Selectable* selectable, unsigned ops)
       : SelectionKey(selector),
         io_(selector->loop()),
-        selectable_(selectable) {
+        selectable_(selectable),
+        interest_(0) {
 
     assert(selector != nullptr);
     assert(selectable != nullptr);
@@ -46,6 +47,10 @@ class LibevIO : public SelectionKey { // {{{
     TRACE("~LibevIO: fd=%d", io_.fd);
   }
 
+  int interest() const noexcept override {
+    return interest_;
+  }
+
   void change(int ops) override {
     unsigned flags = 0;
     if (ops & Selectable::READ)
@@ -57,6 +62,7 @@ class LibevIO : public SelectionKey { // {{{
     TRACE("LibevIO.change: fd=%d, ops=%d", selectable_->handle(), ops);
 
     io_.set(selectable_->handle(), flags);
+    interest_ = flags;
   }
 
   void io(ev::io&, int revents) {
@@ -76,6 +82,7 @@ class LibevIO : public SelectionKey { // {{{
  private:
   ev::io io_;
   Selectable* selectable_;
+  int interest_;
 };
 // }}}
 
