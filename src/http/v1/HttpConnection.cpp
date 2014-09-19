@@ -3,6 +3,8 @@
 #include <xzero/http/v1/HttpInput.h>
 #include <xzero/http/HttpDateGenerator.h>
 #include <xzero/http/HttpResponseInfo.h>
+#include <xzero/http/HttpResponse.h>
+#include <xzero/http/HttpRequest.h>
 #include <xzero/net/Connection.h>
 #include <xzero/net/EndPoint.h>
 #include <xzero/net/EndPointWriter.h>
@@ -165,6 +167,25 @@ void HttpConnection::onFlushable() {
       auto callback = std::move(onComplete_);
       callback(true);
     }
+  }
+}
+
+void HttpConnection::onInterestFailure(const std::exception& error) {
+  if (!channel_->response()->isCommitted()) {
+    channel_->setPersistent(false);
+    channel_->response()->setStatus(HttpStatus::InternalServerError);
+    channel_->response()->setReason(error.what());
+    channel_->response()->headers().reset();
+    channel_->response()->addHeader("Cache-Control",
+                                    "no-cache,no-store,must-revalidate");
+    channel_->response()->completed();
+
+    // channel_->response()->sendError(HttpStatus::InternalServerError,
+    //                                 error.what());
+
+    // TODO: add some nice body and some special heades, such as cache-control
+  } else {
+    abort();
   }
 }
 
