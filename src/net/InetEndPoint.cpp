@@ -29,14 +29,65 @@ InetEndPoint::~InetEndPoint() {
 }
 
 std::pair<IPAddress, int> InetEndPoint::remoteAddress() const {
+  if (handle_ < 0)
+    throw std::runtime_error("Illegal State. Socket is closed.");
+
   std::pair<IPAddress, int> result;
-  // TODO
+  switch (connector_->addressFamily()) {
+    case AF_INET6: {
+      sockaddr_in6 saddr;
+      socklen_t slen = sizeof(saddr);
+      if (getpeername(handle_, (sockaddr*)&saddr, &slen) == 0) {
+        result.first = IPAddress(&saddr);
+        result.second = ntohs(saddr.sin6_port);
+      }
+      break;
+    }
+    case AF_INET: {
+      sockaddr_in saddr;
+      socklen_t slen = sizeof(saddr);
+      if (getpeername(handle_, (sockaddr*)&saddr, &slen) == 0) {
+        result.first = IPAddress(&saddr);
+        result.second = ntohs(saddr.sin_port);
+      }
+      break;
+    }
+    default:
+      throw std::runtime_error("Illegal State. IPAddress.addressFamily?");
+  }
   return result;
 }
 
 std::pair<IPAddress, int> InetEndPoint::localAddress() const {
+  if (handle_ < 0)
+    throw std::runtime_error("Illegal State. Socket is closed.");
+
   std::pair<IPAddress, int> result;
-  // TODO
+  switch (connector_->addressFamily()) {
+    case AF_INET6: {
+      sockaddr_in6 saddr;
+      socklen_t slen = sizeof(saddr);
+
+      if (getsockname(handle_, (sockaddr*)&saddr, &slen) == 0) {
+        result.first = IPAddress(&saddr);
+        result.second = ntohs(saddr.sin6_port);
+      }
+      break;
+    }
+    case AF_INET: {
+      sockaddr_in saddr;
+      socklen_t slen = sizeof(saddr);
+
+      if (getsockname(handle_, (sockaddr*)&saddr, &slen) == 0) {
+        result.first = IPAddress(&saddr);
+        result.second = ntohs(saddr.sin_port);
+      }
+      break;
+    }
+    default:
+      break;
+  }
+
   return result;
 }
 

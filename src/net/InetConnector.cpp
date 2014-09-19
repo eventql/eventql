@@ -50,6 +50,7 @@ InetConnector::InetConnector(const std::string& name, Executor* executor,
       scheduler_(scheduler),
       connectedEndPoints_(),
       socket_(-1),
+      addressFamily_(IPAddress::V4),
       typeMask_(0),
       flags_(0),
       backlog_(256),
@@ -71,7 +72,8 @@ void InetConnector::open(const IPAddress& ipaddress, int port, int backlog,
   if (isOpen())
     throw std::runtime_error("InetConnector already opened");
 
-  socket_ = ::socket(AF_INET, SOCK_STREAM, 0);
+  socket_ = ::socket(ipaddress.family(), SOCK_STREAM, 0);
+  addressFamily_ = ipaddress.family();
 
   if (socket_ < 0)
     throw std::system_error(errno, std::system_category());
@@ -120,6 +122,8 @@ void InetConnector::bind(const IPAddress& ipaddr, int port) {
   int rv = ::bind(socket_, (sockaddr*)sa, salen);
   if (rv < 0)
     throw std::system_error(errno, std::system_category());
+
+  addressFamily_ = ipaddr.family();
 }
 
 void InetConnector::listen(int backlog) {
