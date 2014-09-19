@@ -17,16 +17,16 @@ LogSource::~LogSource() {
   LogAggregator::get().unregisterSource(this);
 }
 
-#define LOG_SOURCE_MSG(level, fmt) {                               \
-  char msg[512];                                                   \
-  int n = snprintf(msg, sizeof(msg), "[%s] ", className_.c_str()); \
-  va_list va;                                                      \
-  va_start(va, fmt);                                               \
-  vsnprintf(msg + n, sizeof(msg) - n, fmt, va);                    \
-  va_end(va);                                                      \
-  if (LogTarget* target = LogAggregator::get().logTarget()) {      \
-    target->level(msg);                                            \
-  }                                                                \
+#define LOG_SOURCE_MSG(level, fmt) {                                 \
+  if (LogTarget* target = LogAggregator::get().logTarget()) {        \
+    char msg[512];                                                   \
+    int n = snprintf(msg, sizeof(msg), "[%s] ", className_.c_str()); \
+    va_list va;                                                      \
+    va_start(va, fmt);                                               \
+    vsnprintf(msg + n, sizeof(msg) - n, fmt, va);                    \
+    va_end(va);                                                      \
+    target->level(msg);                                              \
+  }                                                                  \
 }
 
 void LogSource::debug(const char* fmt, ...) {
