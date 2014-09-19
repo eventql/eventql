@@ -7,6 +7,11 @@ set(libxzero_SRC
   TimeSpan.cpp
   Tokenizer.cpp
 
+  logging/LogAggregator.cpp
+  logging/LogLevel.cpp
+  logging/LogSource.cpp
+  logging/LogTarget.cpp
+
   executor/DirectExecutor.cpp
   executor/DirectLoopExecutor.cpp
   executor/Scheduler.cpp
