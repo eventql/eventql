@@ -9,11 +9,9 @@ namespace xzero {
 LogSource::LogSource(const std::string& className)
     : className_(className) {
   LogAggregator::get().registerSource(this);
-  debug("LogSource/%s", className.c_str());
 }
 
 LogSource::~LogSource() {
-  debug("~LogSource/%s", className_.c_str());
   LogAggregator::get().unregisterSource(this);
 }
 
