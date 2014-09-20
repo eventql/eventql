@@ -1,6 +1,14 @@
 #include <xzero/http/HttpRequest.h>
+#include <xzero/logging/LogSource.h>
 
 namespace xzero {
+
+static LogSource requestLogger("http1.HttpRequest");
+#ifndef NDEBUG
+#define TRACE(msg...) do { requestLogger.trace(msg); } while (0)
+#else
+#define TRACE(msg...) do {} while (0)
+#endif
 
 HttpRequest::HttpRequest()
     : HttpRequest("", "", HttpVersion::UNKNOWN, false, {}, nullptr) {
@@ -27,12 +35,13 @@ HttpRequest::HttpRequest(const std::string& method, const std::string& path,
 }
 
 void HttpRequest::recycle() {
+  TRACE("%p recycle", this);
   method_.clear();
   path_.clear();
   version_ = HttpVersion::UNKNOWN;
   secure_ = false;
   headers_.reset();
-  input_ = nullptr;
+  input_->recycle();
 }
 
 }  // namespace xzero

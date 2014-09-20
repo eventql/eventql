@@ -8,6 +8,7 @@
 #include <xzero/net/Connection.h>
 #include <xzero/net/EndPoint.h>
 #include <xzero/net/EndPointWriter.h>
+#include <xzero/logging/LogSource.h>
 #include <xzero/WallClock.h>
 #include <xzero/sysconfig.h>
 #include <cassert>
@@ -15,6 +16,13 @@
 
 namespace xzero {
 namespace http1 {
+
+static LogSource connectionLogger("http1.HttpConnection");
+#ifndef NDEBUG
+#define TRACE(msg...) do { connectionLogger.trace(msg); } while (0)
+#else
+#define TRACE(msg...) do {} while (0)
+#endif
 
 HttpConnection::HttpConnection(std::shared_ptr<EndPoint> endpoint,
                                const HttpHandler& handler,
@@ -33,13 +41,15 @@ HttpConnection::HttpConnection(std::shared_ptr<EndPoint> endpoint,
       requestMax_(100) {
 
   parser_.setListener(channel_.get());
+  TRACE("%p ctor", this);
 }
 
 HttpConnection::~HttpConnection() {
-  /* printf("~HttpConnection\n"); */
+  TRACE("%p dtor", this);
 }
 
 void HttpConnection::onOpen() {
+  TRACE("%p onOpen", this);
   HttpTransport::onOpen();
 
 #if 0
@@ -53,14 +63,18 @@ void HttpConnection::onOpen() {
 }
 
 void HttpConnection::onClose() {
+  TRACE("%p onClose", this);
   HttpTransport::onClose();
 }
 
 void HttpConnection::abort() {
+  TRACE("%p abort", this);
   endpoint()->close();
 }
 
 void HttpConnection::completed() {
+  TRACE("%p completed", this);
+
   if (onComplete_)
     throw std::runtime_error("there is still another completion hook.");
 
@@ -68,15 +82,18 @@ void HttpConnection::completed() {
 
   onComplete_ = [this](bool) {
     if (channel_->isPersistent()) {
+      TRACE("%p completed.onComplete", this);
       // re-use on keep-alive
       channel_->reset();
 
       if (endpoint()->isCorking()) endpoint()->setCorking(false);
 
       if (inputOffset_ < inputBuffer_.size()) {
+        TRACE("%p completed.onComplete: pipelined read", this);
         // have some request pipelined
         onFillable();
       } else {
+        TRACE("%p completed.onComplete: keep-alive read", this);
         // wait for next request
         wantFill();
       }
@@ -172,6 +189,9 @@ void HttpConnection::onFlushable() {
 
 void HttpConnection::onInterestFailure(const std::exception& error) {
   if (!channel_->response()->isCommitted()) {
+    // channel_->response()->sendError(HttpStatus::InternalServerError,
+    //                                 error.what());
+
     channel_->setPersistent(false);
     channel_->response()->setStatus(HttpStatus::InternalServerError);
     channel_->response()->setReason(error.what());
@@ -179,9 +199,6 @@ void HttpConnection::onInterestFailure(const std::exception& error) {
     channel_->response()->addHeader("Cache-Control",
                                     "no-cache,no-store,must-revalidate");
     channel_->response()->completed();
-
-    // channel_->response()->sendError(HttpStatus::InternalServerError,
-    //                                 error.what());
 
     // TODO: add some nice body and some special heades, such as cache-control
   } else {

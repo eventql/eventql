@@ -7,6 +7,10 @@ namespace xzero {
 // {{{ ConsoleLogger
 class ConsoleLogger : public LogTarget {
  public:
+  void trace(const std::string& msg) override {
+    fprintf(stderr, "[trace] %s\n", msg.c_str());
+  }
+
   void debug(const std::string& msg) override {
     fprintf(stderr, "[debug] %s\n", msg.c_str());
   }

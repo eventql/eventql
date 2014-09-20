@@ -16,6 +16,8 @@ std::string to_string(LogLevel value) {
       return "info";
     case LogLevel::Debug:
       return "debug";
+    case LogLevel::Trace:
+      return "trace";
     default:
       throw std::runtime_error("Invalid State. Unknown LogLevel.");
   }
@@ -36,6 +38,9 @@ LogLevel to_loglevel(const std::string& value) {
 
   if (value == "debug")
     return LogLevel::Debug;
+
+  if (value == "trace")
+    return LogLevel::Trace;
 
   throw std::runtime_error("Invalid State. Unknown LogLevel.");
 }

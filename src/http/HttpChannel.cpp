@@ -129,6 +129,9 @@ bool HttpChannel::onMessageContent(const BufferRef& chunk) {
 }
 
 bool HttpChannel::onMessageEnd() {
+  if (!request_->input())
+    throw std::runtime_error("Internal Error. No HttpInput available?");
+
   if (request_->input()->listener())
     request_->input()->listener()->onAllDataRead();
 
@@ -143,7 +146,9 @@ void HttpChannel::onProtocolError(const BufferRef& chunk, size_t offset) {
 
 void HttpChannel::completed() {
   if (!response_->isCommitted()) {
-    send(BufferRef(), nullptr); // commit headers with empty body
+    // commit headers with empty body
+    response_->setContentLength(0);
+    send(BufferRef(), nullptr);
   }
 
   transport_->completed();

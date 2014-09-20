@@ -43,6 +43,7 @@ set(libxzero_SRC
   http/HttpOutput.cpp
   http/HttpRequest.cpp
   http/HttpResponse.cpp
+  http/HttpStatus.cpp
   http/HttpTransport.cpp
 
   # http support

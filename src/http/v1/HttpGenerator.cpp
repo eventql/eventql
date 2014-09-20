@@ -2,6 +2,7 @@
 #include <xzero/http/HttpDateGenerator.h>
 #include <xzero/http/HttpRequestInfo.h>
 #include <xzero/http/HttpResponseInfo.h>
+#include <xzero/http/HttpStatus.h>
 #include <xzero/net/EndPointWriter.h>
 #include <xzero/io/FileRef.h>
 #include <xzero/sysconfig.h>
@@ -141,10 +142,11 @@ void HttpGenerator::generateResponseLine(const HttpResponseInfo& info) {
 
   buffer_.push_back(static_cast<int>(info.status()));
 
-  if (info.reason().size() > 0) {
-    buffer_.push_back(' ');
+  buffer_.push_back(' ');
+  if (info.reason().size() > 0)
     buffer_.push_back(info.reason());
-  }
+  else
+    buffer_.push_back(to_string(info.status()));
 
   buffer_.push_back("\r\n");
 }

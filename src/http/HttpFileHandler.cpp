@@ -187,6 +187,9 @@ bool HttpFileHandler::handle(HttpRequest* request, HttpResponse* response,
   HttpFile transferFile(path, mimetype, etagConsiderMTime_, etagConsiderSize_,
                         etagConsiderINode_);
 
+  if (!transferFile.isRegular())
+    return false;
+
   if (handleClientCache(transferFile, request, response))
     return true;
 

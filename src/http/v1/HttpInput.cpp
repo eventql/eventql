@@ -1,23 +1,39 @@
 #include <xzero/http/v1/HttpInput.h>
 #include <xzero/http/HttpInputListener.h>
+#include <xzero/logging/LogSource.h>
 
 namespace xzero {
 namespace http1 {
+
+static LogSource inputLogger("http1.HttpInput");
+#ifndef NDEBUG
+#define TRACE(msg...) do { inputLogger.trace(msg); } while (0)
+#else
+#define TRACE(msg...) do {} while (0)
+#endif
 
 HttpInput::HttpInput(HttpConnection* connection)
     : xzero::HttpInput(),
       connection_(connection),
       content_(),
       offset_(0) {
+  TRACE("%p ctor", this);
 }
 
 HttpInput::~HttpInput() {
+  TRACE("%p dtor", this);
+}
+
+void HttpInput::recycle() {
+  TRACE("%p recycle", this);
+  content_.clear();
+  offset_ = 0;
 }
 
 int HttpInput::read(Buffer* result) {
   const size_t len = content_.size() - offset_;
   result->push_back(content_.ref(offset_));
-  printf("HttpInput.read: %zu bytes\n", len);
+  TRACE("%p read: %zu bytes\n", this, len);
 
   content_.clear();
   offset_ = 0;
@@ -27,7 +43,7 @@ int HttpInput::read(Buffer* result) {
 
 size_t HttpInput::readLine(Buffer* result) {
   const size_t len = content_.size() - offset_;
-  printf("HttpInput.readLine: %zu bytes\n", len);
+  TRACE("%p readLine: %zu bytes\n", this, len);
 
   const size_t n = content_.find('\n', offset_);
   if (n == Buffer::npos) {
