@@ -45,6 +45,7 @@ set(libxzero_SRC
   http/HttpResponse.cpp
   http/HttpStatus.cpp
   http/HttpTransport.cpp
+  http/HttpVersion.cpp
 
   # http support
   http/HttpFileHandler.cpp
