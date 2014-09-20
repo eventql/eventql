@@ -1,16 +1,25 @@
 #include <xzero/net/LocalConnector.h>
 #include <xzero/net/ConnectionFactory.h>
 #include <xzero/net/Connection.h>
+#include <xzero/logging/LogSource.h>
 #include <xzero/executor/Executor.h>
 #include <algorithm>
 
 namespace xzero {
 
+static LogSource localConnectorLogger("net.LocalConnector");
+#ifndef NDEBUG
+#define TRACE(msg...) do { localConnectorLogger.trace(msg); } while (0)
+#else
+#define TRACE(msg...) do {} while (0)
+#endif
+
 // {{{ LocalEndPoint impl
 LocalEndPoint::LocalEndPoint(LocalConnector* connector)
-    : ByteArrayEndPoint(), connector_(connector) {}
+    : ByteArrayEndPoint(connector), connector_(connector) {}
 
-LocalEndPoint::~LocalEndPoint() {}
+LocalEndPoint::~LocalEndPoint() {
+}
 
 void LocalEndPoint::close() {
   ByteArrayEndPoint::close();
@@ -29,9 +38,13 @@ LocalConnector::~LocalConnector() {
   //.
 }
 
-void LocalConnector::start() { isStarted_ = true; }
+void LocalConnector::start() {
+  isStarted_ = true;
+}
 
-void LocalConnector::stop() { isStarted_ = false; }
+void LocalConnector::stop() {
+  isStarted_ = false;
+}
 
 std::list<EndPoint*> LocalConnector::connectedEndPoints() {
   std::list<EndPoint*> result;
@@ -73,6 +86,9 @@ bool LocalConnector::acceptOne() {
 }
 
 void LocalConnector::onEndPointClosed(LocalEndPoint* endpoint) {
+  TRACE("%p onEndPointClosed: connection=%p, endpoint=%p", this,
+        endpoint->connection(), endpoint);
+
   // try connected endpoints
   auto i = std::find_if(connectedEndPoints_.begin(), connectedEndPoints_.end(),
                         [endpoint](const std::shared_ptr<LocalEndPoint>& ep) {
@@ -80,8 +96,12 @@ void LocalConnector::onEndPointClosed(LocalEndPoint* endpoint) {
   });
 
   if (i != connectedEndPoints_.end()) {
+    endpoint->connection()->onClose();
     connectedEndPoints_.erase(i);
-    delete endpoint->connection();
+    if (!endpoint->isBusy()) {
+      // do only actually delete if not currently inside an io handler
+      release(endpoint->connection());
+    }
     return;
   }
 
@@ -93,9 +113,19 @@ void LocalConnector::onEndPointClosed(LocalEndPoint* endpoint) {
 
   if (k != pendingConnects_.end()) {
     pendingConnects_.erase(k);
-    delete endpoint->connection();
-    return;
+    release(endpoint->connection());
   }
+}
+
+void LocalConnector::release(Connection* connection) {
+  assert(connection != nullptr);
+  assert(dynamic_cast<LocalEndPoint*>(connection->endpoint()) != nullptr);
+  assert(!static_cast<LocalEndPoint*>(connection->endpoint())->isBusy());
+
+  TRACE("%p release: connection=%p, endpoint=%p", this, connection,
+        connection->endpoint());
+
+  delete connection;
 }
 
 }  // namespace xzero

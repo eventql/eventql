@@ -1,16 +1,28 @@
 #include <xzero/net/ByteArrayEndPoint.h>
 #include <xzero/net/Connection.h>
+#include <xzero/net/LocalConnector.h>
+#include <xzero/executor/Executor.h>
+#include <xzero/logging/LogSource.h>
 #include <system_error>
 #include <stdio.h>
 #include <unistd.h>
 
 namespace xzero {
 
-ByteArrayEndPoint::ByteArrayEndPoint() :
-    input_(),
-    readPos_(0),
-    output_(),
-    closed_(false) {
+static LogSource localEndPointLogger("net.ByteArrayEndPoint");
+#ifndef NDEBUG
+#define TRACE(msg...) do { localEndPointLogger.trace(msg); } while (0)
+#else
+#define TRACE(msg...) do {} while (0)
+#endif
+
+ByteArrayEndPoint::ByteArrayEndPoint(LocalConnector* connector)
+    : connector_(connector),
+      isBusy_(false),
+      input_(),
+      readPos_(0),
+      output_(),
+      closed_(false) {
 }
 
 ByteArrayEndPoint::~ByteArrayEndPoint() {
@@ -36,7 +48,7 @@ const Buffer& ByteArrayEndPoint::output() const {
 }
 
 void ByteArrayEndPoint::close() {
-  closed_ = true;
+  //closed_ = true;
 }
 
 bool ByteArrayEndPoint::isOpen() const {
@@ -61,10 +73,13 @@ size_t ByteArrayEndPoint::fill(Buffer* sink) {
   sink->push_back(input_.ref(readPos_));
   n = sink->size() - n;
   readPos_ += n;
+  TRACE("%p fill: %zu bytes", this, n);
   return n;
 }
 
 size_t ByteArrayEndPoint::flush(const BufferRef& source) {
+  TRACE("%p flush: %zu bytes", this, source.size());
+
   if (closed_) {
     return 0;
   }
@@ -88,13 +103,41 @@ size_t ByteArrayEndPoint::flush(int fd, off_t offset, size_t size) {
 
 void ByteArrayEndPoint::wantFill() {
   if (connection()) {
-    connection()->onFillable();
+    TRACE("%p wantFill.", this);
+    isBusy_ = true;
+    connector_->executor()->execute([this] {
+      TRACE("%p wantFill: fillable.", this);
+      try {
+        connection()->onFillable();
+        isBusy_ = false;
+      } catch (std::exception& e) {
+        connection()->onInterestFailure(e);
+        isBusy_ = false;
+      }
+      if (isClosed()) {
+        connector_->release(connection());
+      }
+    });
   }
 }
 
 void ByteArrayEndPoint::wantFlush() {
   if (connection()) {
-    connection()->onFlushable();
+    TRACE("%p wantFlush.", this);
+    isBusy_ = true;
+    connector_->executor()->execute([this] {
+      TRACE("%p wantFlush: flushable.", this);
+      try {
+        connection()->onFlushable();
+        isBusy_ = false;
+      } catch (std::exception& e) {
+        connection()->onInterestFailure(e);
+        isBusy_ = false;
+      }
+      if (isClosed()) {
+        connector_->release(connection());
+      }
+    });
   }
 }
 

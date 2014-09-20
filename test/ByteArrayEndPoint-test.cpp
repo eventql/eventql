@@ -4,7 +4,7 @@
 using namespace xzero;
 
 TEST(ByteArrayEndPoint, setInput_cstr) {
-  ByteArrayEndPoint ep;
+  ByteArrayEndPoint ep(nullptr);
   ep.setInput("foo bar");
 
   ASSERT_EQ("foo bar", ep.input());
@@ -12,14 +12,14 @@ TEST(ByteArrayEndPoint, setInput_cstr) {
 
 TEST(ByteArrayEndPoint, setInput_buf_moved) {
   Buffer input = "foo bar";
-  ByteArrayEndPoint ep;
+  ByteArrayEndPoint ep(nullptr);
   ep.setInput(std::move(input));
 
   ASSERT_EQ("foo bar", ep.input());
 }
 
 TEST(ByteArrayEndPoint, flush) {
-  ByteArrayEndPoint ep;
+  ByteArrayEndPoint ep(nullptr);
 
   ep.flush("foo");
   ASSERT_EQ("foo", ep.output());
@@ -29,7 +29,7 @@ TEST(ByteArrayEndPoint, flush) {
 }
 
 TEST(ByteArrayEndPoint, fill) {
-  ByteArrayEndPoint ep;
+  ByteArrayEndPoint ep(nullptr);
   Buffer input = "foo ";
 
   ep.setInput("bar");
@@ -38,7 +38,7 @@ TEST(ByteArrayEndPoint, fill) {
 }
 
 TEST(ByteArrayEndPoint, close) {
-  ByteArrayEndPoint ep;
+  ByteArrayEndPoint ep(nullptr);
   Buffer output;
 
   ep.setInput("foo");

@@ -3,6 +3,7 @@
 #include <xzero/net/Connection.h>
 #include <xzero/executor/Executor.h>
 #include <xzero/io/SelectionKey.h>
+#include <xzero/logging/LogSource.h>
 #include <xzero/Buffer.h>
 #include <xzero/sysconfig.h>
 #include <system_error>
@@ -13,6 +14,13 @@
 #include <fcntl.h>
 
 namespace xzero {
+
+static LogSource inetEndPointLogger("net.InetEndPoint");
+#ifndef NDEBUG
+#define TRACE(msg...) do { inetEndPointLogger.trace(msg); } while (0)
+#else
+#define TRACE(msg...) do {} while (0)
+#endif
 
 InetEndPoint::InetEndPoint(int socket, InetConnector* connector)
     : EndPoint(),
@@ -227,6 +235,8 @@ void InetEndPoint::onSelectable() noexcept {
 
     isBusy_ = false;
   } catch (const std::exception& e) {
+    TRACE("%p onSelectable: unhandled exception caught. %s %s", this,
+          typeid(e).name(), e.what());
     connection()->onInterestFailure(e);
     isBusy_ = false;
   }

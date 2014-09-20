@@ -12,6 +12,7 @@ if(ENABLE_TESTS)
     # http common
     HeaderFieldList-test.cpp
     HttpRangeDef-test.cpp
+    HttpChannel-test.cpp
     # http1
     HttpParser-test.cpp
   )

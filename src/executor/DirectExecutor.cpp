@@ -1,7 +1,15 @@
 #include <xzero/executor/DirectExecutor.h>
+#include <xzero/logging/LogSource.h>
 #include <stdio.h>
 
 namespace xzero {
+
+static LogSource directExecutorLogger("executor.DirectExecutor");
+#ifndef NDEBUG
+#define TRACE(msg...) do { directExecutorLogger.trace(msg); } while (0)
+#else
+#define TRACE(msg...) do {} while (0)
+#endif
 
 DirectExecutor::DirectExecutor(bool recursive)
     : recursive_(recursive),
@@ -12,14 +20,17 @@ DirectExecutor::DirectExecutor(bool recursive)
 void DirectExecutor::execute(Task&& task) {
   if (isRunning() && !isRecursive()) {
     deferred_.push_back(std::move(task));
+    TRACE("%p execute: enqueue task (%zu)", this, deferred_.size());
     return;
   }
 
   running_++;
 
+  TRACE("%p execute: run top-level task", this);
   task();
 
   while (!deferred_.empty()) {
+    TRACE("%p execute: run deferred task (-%zu)", this, deferred_.size());
     deferred_.front()();
     deferred_.pop_front();
   }

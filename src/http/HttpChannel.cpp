@@ -42,7 +42,7 @@ void HttpChannel::send(const BufferRef& data, CompletionHandler&& onComplete) {
     }
 
     const bool isHeadReq = request_->method() == "HEAD";
-    HttpResponseInfo info(request_->version(), response_->status(),
+    HttpResponseInfo info(response_->version(), response_->status(),
                           response_->reason(), isHeadReq,
                           response_->contentLength(), response_->headers());
 
@@ -139,8 +139,6 @@ bool HttpChannel::onMessageEnd() {
 }
 
 void HttpChannel::onProtocolError(const BufferRef& chunk, size_t offset) {
-  // TODO: make this an exception to be catched and respond as 400 Bad Request.
-  /* printf("protocol error at offset %zu in chunk %p\n", offset, chunk.data()); */
   transport_->abort();
 }
 

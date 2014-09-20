@@ -1,4 +1,6 @@
 #include <xzero/http/v1/HttpChannel.h>
+#include <xzero/http/HttpResponse.h>
+#include <xzero/http/HttpRequest.h>
 
 namespace xzero {
 namespace http1 {
@@ -47,6 +49,23 @@ bool HttpChannel::onMessageBegin(const BufferRef& method,
 
   return xzero::HttpChannel::onMessageBegin(method, entity, versionMajor,
                                             versionMinor);
+}
+
+void HttpChannel::onProtocolError(const BufferRef& chunk, size_t offset) {
+  printf("**** onProtocolError at %zu (%d)\n", offset, response_->isCommitted());
+  if (!response_->isCommitted()) {
+    persistent_ = false;
+
+    if (request_->version() != HttpVersion::UNKNOWN)
+      response_->setVersion(request_->version());
+    else
+      response_->setVersion(HttpVersion::VERSION_0_9);
+
+    response_->setStatus(HttpStatus::BadRequest);
+    response_->completed();
+  } else {
+    abort();
+  }
 }
 
 } // namespace http1
