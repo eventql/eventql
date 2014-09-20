@@ -65,17 +65,7 @@ void Connection::wantFlush() {
 }
 
 void Connection::onInterestFailure(const std::exception& error) {
-  if (endpoint()->isOpen()) {
-    //TODO proper handling / logging
-    fprintf(stderr, "onInterestFailure. %s\n", error.what());
-    // if (!dynamic_cast<const ReadTimeout&>(error) || onReadTimeout()) {
-    //   endpoint()->close();
-    // }
-  }
-
-  if (endpoint()->isOpen()) {
-    onFillable();
-  }
+  abort();
 }
 
 bool Connection::onReadTimeout() {
