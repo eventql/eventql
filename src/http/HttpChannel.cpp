@@ -118,13 +118,13 @@ bool HttpChannel::onMessageHeader(const BufferRef& name,
 }
 
 bool HttpChannel::onMessageHeaderEnd() {
-  state_ = HttpChannelState::READY;
+  state_ = HttpChannelState::HANDLING;
+  handler_(request(), response());
   return true;
 }
 
 bool HttpChannel::onMessageContent(const BufferRef& chunk) {
   request_->input()->onContent(chunk);
-
   return true;
 }
 
@@ -150,19 +150,6 @@ void HttpChannel::completed() {
   }
 
   transport_->completed();
-}
-
-// TODO: clear out wheather we need run() and HttpChannelState
-void HttpChannel::run() {
-  switch (state_) {
-    case HttpChannelState::READY:
-      state_ = HttpChannelState::HANDLING;
-      handler_(request(), response());
-      break;
-    case HttpChannelState::HANDLING:
-    default:
-      break;
-  }
 }
 
 }  // namespace xzero

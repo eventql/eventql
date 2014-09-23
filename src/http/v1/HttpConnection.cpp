@@ -180,8 +180,6 @@ void HttpConnection::onFillable() {
 
   size_t n = parser_.parseFragment(inputBuffer_.ref(inputOffset_));
   inputOffset_ += n;
-
-  channel_->run();
 }
 
 void HttpConnection::onFlushable() {
