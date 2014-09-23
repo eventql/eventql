@@ -1,9 +1,12 @@
 #include <xzero/http/v1/HttpInput.h>
 #include <xzero/http/HttpInputListener.h>
 #include <xzero/logging/LogSource.h>
+#include <xzero/sysconfig.h>
 
 namespace xzero {
 namespace http1 {
+
+// TODO support buffering input into a temp file (via O_TMPFILE if available)
 
 static LogSource inputLogger("http1.HttpInput");
 #ifndef NDEBUG
@@ -33,7 +36,7 @@ void HttpInput::recycle() {
 int HttpInput::read(Buffer* result) {
   const size_t len = content_.size() - offset_;
   result->push_back(content_.ref(offset_));
-  TRACE("%p read: %zu bytes\n", this, len);
+  TRACE("%p read: %zu bytes", this, len);
 
   content_.clear();
   offset_ = 0;
@@ -43,7 +46,7 @@ int HttpInput::read(Buffer* result) {
 
 size_t HttpInput::readLine(Buffer* result) {
   const size_t len = content_.size() - offset_;
-  TRACE("%p readLine: %zu bytes\n", this, len);
+  TRACE("%p readLine: %zu bytes", this, len);
 
   const size_t n = content_.find('\n', offset_);
   if (n == Buffer::npos) {
@@ -65,9 +68,7 @@ size_t HttpInput::readLine(Buffer* result) {
 }
 
 void HttpInput::onContent(const BufferRef& chunk) {
-  if (!content_.empty())
-    throw std::runtime_error("Illegal State. HttpInput received data but still has (unhandled) data.");
-
+  TRACE("%p onContent: %zu bytes", this, chunk.size());
   content_ += chunk;
 
   if (listener())
