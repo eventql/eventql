@@ -18,8 +18,10 @@ namespace xzero {
 static LogSource inetEndPointLogger("net.InetEndPoint");
 #ifndef NDEBUG
 #define TRACE(msg...) do { inetEndPointLogger.trace(msg); } while (0)
+#define ERROR(msg...) do { inetEndPointLogger.error(msg); } while (0)
 #else
 #define TRACE(msg...) do {} while (0)
+#define ERROR(msg...) do {} while (0)
 #endif
 
 InetEndPoint::InetEndPoint(int socket, InetConnector* connector)
@@ -235,7 +237,7 @@ void InetEndPoint::onSelectable() noexcept {
 
     isBusy_ = false;
   } catch (const std::exception& e) {
-    TRACE("%p onSelectable: unhandled exception caught. %s %s", this,
+    ERROR("%p onSelectable: unhandled exception caught. %s %s", this,
           typeid(e).name(), e.what());
     connection()->onInterestFailure(e);
     isBusy_ = false;
