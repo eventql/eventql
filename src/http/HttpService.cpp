@@ -1,6 +1,7 @@
 #include <xzero/http/HttpService.h>
 #include <xzero/http/HttpRequest.h>
 #include <xzero/http/HttpResponse.h>
+#include <xzero/http/HttpInputListener.h>
 #include <xzero/http/v1/HttpConnectionFactory.h>
 #include <xzero/net/LocalConnector.h>
 #include <xzero/net/InetConnector.h>
@@ -9,6 +10,42 @@
 #include <stdexcept>
 
 namespace xzero {
+
+class HttpService::InputListener : public HttpInputListener { // {{{
+ public:
+   InputListener(HttpRequest* request, HttpResponse* response,
+                       HttpService* service);
+  void onContentAvailable() override;
+  void onAllDataRead() override;
+  void onError(const std::string& errorMessage) override;
+
+ private:
+  HttpRequest* request_;
+  HttpResponse* response_;
+  HttpService* service_;
+};
+
+HttpService::InputListener::InputListener(HttpRequest* request,
+                                          HttpResponse* response,
+                                          HttpService* service)
+    : request_(request),
+      response_(response),
+      service_(service) {
+}
+
+void HttpService::InputListener::onContentAvailable() {
+  /* request_->input()->fill(); */
+}
+
+void HttpService::InputListener::onAllDataRead() {
+  service_->onAllDataRead(request_, response_);
+  delete this;
+}
+
+void HttpService::InputListener::onError(const std::string& errorMessage) {
+  delete this;
+}
+// }}}
 
 HttpService::HttpService()
     : server_(new Server()),
@@ -74,10 +111,13 @@ void HttpService::stop() {
 }
 
 void HttpService::handleRequest(HttpRequest* request, HttpResponse* response) {
-  // TODO: if request contains a body, make sure we have it all available
-  // already.
-  // XXX maybe wrap request/response objects ? (any *real* use for this?)
+  if (request->expect100Continue())
+    response->send100Continue();
 
+  request->input()->setListener(new InputListener(request, response, this));
+}
+
+void HttpService::onAllDataRead(HttpRequest* request, HttpResponse* response) {
   for (Handler* handler: handlers_) {
     if (handler->handleRequest(request, response)) {
       return;
