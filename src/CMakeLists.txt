@@ -49,6 +49,7 @@ set(libxzero_SRC
 
   # http support
   http/HttpFileHandler.cpp
+  http/HttpService.cpp
 
   # http/1
   http/v1/HttpConnection.cpp

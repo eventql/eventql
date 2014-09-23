@@ -52,6 +52,7 @@ void HttpConnection::onOpen() {
   TRACE("%p onOpen", this);
   HttpTransport::onOpen();
 
+  // TODO support TCP_DEFER_ACCEPT here
 #if 0
   if (connector()->deferAccept())
     onFillable();
@@ -111,8 +112,9 @@ void HttpConnection::send(HttpResponseInfo&& responseInfo,
   if (onComplete && onComplete_)
     throw std::runtime_error("there is still another completion hook.");
 
-  // printf("HttpConnection.send(status=%d, chunkSize=%zu)\n",
-  //        responseInfo.status(), chunk.size());
+  TRACE("%p send(status=%d, persistent=%s, chunkSize=%zu)",
+        this, responseInfo.status(), channel_->isPersistent() ? "yes" : "no",
+        chunk.size());
 
   if (static_cast<int>(responseInfo.status()) >= 200) {
     // patch in HTTP transport-layer headers
@@ -135,7 +137,8 @@ void HttpConnection::send(HttpResponseInfo&& responseInfo,
   onComplete_ = onComplete;
 
   const bool corking_ = true;  // TODO(TCP_CORK): part of HttpResponseInfo?
-  if (corking_) endpoint()->setCorking(true);
+  if (corking_)
+    endpoint()->setCorking(true);
 
   wantFlush();
 }
@@ -144,6 +147,8 @@ void HttpConnection::send(const BufferRef& chunk,
                           CompletionHandler&& onComplete) {
   if (onComplete && onComplete_)
     throw std::runtime_error("there is still another completion hook.");
+
+  TRACE("%p send(chunkSize=%zu)", this, chunk.size());
 
   generator_.generateBody(chunk, false, &writer_);
   onComplete_ = std::move(onComplete);
@@ -155,6 +160,8 @@ void HttpConnection::send(FileRef&& chunk, CompletionHandler&& onComplete) {
   if (onComplete && onComplete_)
     throw std::runtime_error("there is still another completion hook.");
 
+  TRACE("%p send(chunkSize=%zu)", this, chunk.size());
+
   generator_.generateBody(std::forward<FileRef>(chunk), false, &writer_);
   onComplete_ = std::move(onComplete);
   wantFlush();
@@ -165,6 +172,8 @@ void HttpConnection::setInputBufferSize(size_t size) {
 }
 
 void HttpConnection::onFillable() {
+  TRACE("%p onFillable", this);
+
   if (endpoint()->fill(&inputBuffer_) == 0) {
     abort();  // throw std::runtime_error("client EOF");
   }
@@ -176,6 +185,8 @@ void HttpConnection::onFillable() {
 }
 
 void HttpConnection::onFlushable() {
+  TRACE("%p onFlushable", this);
+
   const bool complete = writer_.flush(endpoint());
   if (complete) {
     wantFill(); // restore interest to NONE or READ

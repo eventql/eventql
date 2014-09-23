@@ -49,7 +49,9 @@ void Server::removeConnector(Connector* connector) {
   }
 }
 
-std::list<Connector*> Server::getConnectors() const { return connectors_; }
+std::list<Connector*> Server::getConnectors() const {
+  return connectors_;
+}
 
 void Server::getDate(char* buf, size_t size) {
   if (size) {

@@ -1,6 +1,7 @@
 #include <xzero/http/v1/HttpChannel.h>
 #include <xzero/http/HttpResponse.h>
 #include <xzero/http/HttpRequest.h>
+#include <xzero/Tokenizer.h>
 
 namespace xzero {
 namespace http1 {
@@ -13,19 +14,6 @@ HttpChannel::HttpChannel(HttpTransport* transport, const HttpHandler& handler,
 }
 
 HttpChannel::~HttpChannel() {
-}
-
-bool HttpChannel::onMessageHeader(const BufferRef& name,
-                                  const BufferRef& value) {
-  if (iequals(name, "Connection")) {
-    if (iequals(value, "keep-alive")) {
-      persistent_ = true;
-    } else if (iequals(value, "close")) {
-      persistent_ = false;
-    }
-  }
-
-  return xzero::HttpChannel::onMessageHeader(name, value);
 }
 
 bool HttpChannel::onMessageBegin(const BufferRef& method,
@@ -51,8 +39,24 @@ bool HttpChannel::onMessageBegin(const BufferRef& method,
                                             versionMinor);
 }
 
+bool HttpChannel::onMessageHeader(const BufferRef& name,
+                                  const BufferRef& value) {
+  if (iequals(name, "Connection")) {
+    std::vector<BufferRef> options =
+        Tokenizer<BufferRef>::tokenize(value, ", ");
+
+    for (const BufferRef& option: options) {
+      if (iequals(option, "Keep-Alive"))
+        persistent_ = true;
+      else if (iequals(option, "close"))
+        persistent_ = false;
+    }
+  }
+
+  return xzero::HttpChannel::onMessageHeader(name, value);
+}
+
 void HttpChannel::onProtocolError(const BufferRef& chunk, size_t offset) {
-  printf("**** onProtocolError at %zu (%d)\n", offset, response_->isCommitted());
   if (!response_->isCommitted()) {
     persistent_ = false;
 
