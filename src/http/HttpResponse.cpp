@@ -29,7 +29,9 @@ void HttpResponse::recycle() {
 }
 
 void HttpResponse::setCommitted(bool value) {
-  assert(isCommitted() == false && "Cannot be modified after commit.");
+  if (isCommitted())
+    throw std::runtime_error("Invalid State. Cannot be modified after commit.");
+
   committed_ = value;
 }
 
@@ -38,39 +40,53 @@ HttpVersion HttpResponse::version() const noexcept {
 }
 
 void HttpResponse::setVersion(HttpVersion version) {
-  assert(isCommitted() == false && "Cannot be modified after commit.");
+  if (isCommitted())
+    throw std::runtime_error("Invalid State. Cannot be modified after commit.");
+
   version_ = version;
 }
 
 void HttpResponse::setStatus(HttpStatus status) {
-  assert(isCommitted() == false && "Cannot be modified after commit.");
+  if (isCommitted())
+    throw std::runtime_error("Invalid State. Cannot be modified after commit.");
+
   status_ = status;
 }
 
 void HttpResponse::setContentType(const std::string& value) {
-  assert(isCommitted() == false && "Cannot be modified after commit.");
+  if (isCommitted())
+    throw std::runtime_error("Invalid State. Cannot be modified after commit.");
+
   //TODO
 }
 
 void HttpResponse::setContentLength(size_t size) {
-  assert(isCommitted() == false && "Cannot be modified after commit.");
+  if (isCommitted())
+    throw std::runtime_error("Invalid State. Cannot be modified after commit.");
+
   contentLength_ = size;
 }
 
 void HttpResponse::addHeader(const std::string& name,
                              const std::string& value) {
-  assert(isCommitted() == false && "Cannot be modified after commit.");
+  if (isCommitted())
+    throw std::runtime_error("Invalid State. Cannot be modified after commit.");
+
   headers_.push_back(name, value);
 }
 
 void HttpResponse::setHeader(const std::string& name,
                              const std::string& value) {
-  assert(isCommitted() == false && "Cannot be modified after commit.");
+  if (isCommitted())
+    throw std::runtime_error("Invalid State. Cannot be modified after commit.");
+
   headers_.overwrite(name, value);
 }
 
 void HttpResponse::removeHeader(const std::string& name) {
-  assert(isCommitted() == false && "Cannot be modified after commit.");
+  if (isCommitted())
+    throw std::runtime_error("Invalid State. Cannot be modified after commit.");
+
   headers_.remove(name);
 }
 
