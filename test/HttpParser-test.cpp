@@ -1,5 +1,6 @@
 #include <xzero/http/v1/HttpParser.h>
 #include <xzero/http/HttpListener.h>
+#include <xzero/http/HttpStatus.h>
 #include <xzero/Buffer.h>
 #include <vector>
 #include <gtest/gtest.h>
@@ -20,7 +21,7 @@ class HttpParserCallbacks : public xzero::HttpListener {  // {{{
   bool onMessageHeaderEnd() override;
   bool onMessageContent(const BufferRef& chunk) override;
   bool onMessageEnd() override;
-  void onProtocolError(const BufferRef& chunk, size_t offset) override;
+  void onProtocolError(xzero::HttpStatus code, const std::string& msg) override;
 
  public:
   std::function<bool(const BufferRef& method, const BufferRef& entity,
@@ -32,7 +33,7 @@ class HttpParserCallbacks : public xzero::HttpListener {  // {{{
   std::function<bool()> headerEnd;
   std::function<bool(const BufferRef& chunk)> content;
   std::function<bool()> end;
-  std::function<void(const BufferRef& chunk, size_t offset)> protocolError;
+  std::function<void(xzero::HttpStatus, const std::string&)> protocolError;
 };
 
 bool HttpParserCallbacks::onMessageBegin(const BufferRef& method,
@@ -88,9 +89,10 @@ bool HttpParserCallbacks::onMessageEnd() {
     return true;
 }
 
-void HttpParserCallbacks::onProtocolError(const BufferRef& chunk,
-                                          size_t offset) {
-  if (protocolError) protocolError(chunk, offset);
+void HttpParserCallbacks::onProtocolError(HttpStatus code,
+                                          const std::string& msg) {
+  if (protocolError)
+    protocolError(code, msg);
 }
 // }}}
 class HttpParserListener : public xzero::HttpListener {  // {{{
@@ -106,7 +108,7 @@ class HttpParserListener : public xzero::HttpListener {  // {{{
   bool onMessageHeaderEnd() override;
   bool onMessageContent(const BufferRef& chunk) override;
   bool onMessageEnd() override;
-  void onProtocolError(const BufferRef& chunk, size_t offset) override;
+  void onProtocolError(xzero::HttpStatus code, const std::string& msg) override;
 
  public:
   std::string method;
@@ -117,8 +119,8 @@ class HttpParserListener : public xzero::HttpListener {  // {{{
   std::string statusReason;
   std::vector<std::pair<std::string, std::string>> headers;
   Buffer body;
+  xzero::HttpStatus errorCode;
   std::string errorMessage;
-  int errorOffset;
 
   bool messageBegin;
   bool headerEnd;
@@ -133,8 +135,8 @@ HttpParserListener::HttpParserListener()
       statusCode(-1),
       statusReason(),
       headers(),
+      errorCode(xzero::HttpStatus::Undefined),
       errorMessage(),
-      errorOffset(-1),
       messageBegin(false),
       headerEnd(false),
       messageEnd(false) {}
@@ -186,10 +188,10 @@ bool HttpParserListener::onMessageEnd() {
   return true;
 }
 
-void HttpParserListener::onProtocolError(const BufferRef& chunk,
-                                         size_t offset) {
-  errorMessage = chunk;
-  errorOffset = offset;
+void HttpParserListener::onProtocolError(xzero::HttpStatus code,
+                                         const std::string& msg) {
+  errorCode = code;
+  errorMessage = msg;
 }
 // }}}
 
@@ -329,7 +331,7 @@ TEST(HttpParser, requestWithHeadersAndBodyChunked_invalid1) {
       "\r\n");
 
   ASSERT_EQ(55, n);
-  ASSERT_EQ(55, listener.errorOffset);
+  ASSERT_EQ(xzero::HttpStatus::BadRequest, listener.errorCode);
 }
 
 TEST(HttpParser, pipelined1) {

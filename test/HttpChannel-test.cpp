@@ -68,10 +68,6 @@ TEST(HttpChannel, http1_ConnectionClosed) {
 // sends 3 requests pipelined all at once. receives responses in order
 TEST(HttpChannel, http1_ConnectionKeepAlive3_pipelined) {
   MOCK_HTTP1_SERVER(server, connector, executor);
-
-  // XXX assume keep-alive timeout 60
-  // XXX assume max-request-count 100
-
   std::shared_ptr<LocalEndPoint> ep;
   executor.execute([&] {
     ep = connector->createClient("GET /one HTTP/1.1\r\n\r\n"
@@ -79,24 +75,26 @@ TEST(HttpChannel, http1_ConnectionKeepAlive3_pipelined) {
                                  "GET /three HTTP/1.1\r\n\r\n");
   });
 
+  // XXX assume keep-alive timeout 60
+  // XXX assume max-request-count 100
   ASSERT_EQ(
     "HTTP/1.1 200 Ok\r\n"
     "Server: xzero/0.11.0-dev\r\n"
-    "Connection: keep-alive\r\n"
+    "Connection: Keep-Alive\r\n"
     "Keep-Alive: timeout=60, max=99\r\n"
     "Content-Length: 5\r\n"
     "\r\n"
     "/one\n"
     "HTTP/1.1 200 Ok\r\n"
     "Server: xzero/0.11.0-dev\r\n"
-    "Connection: keep-alive\r\n"
+    "Connection: Keep-Alive\r\n"
     "Keep-Alive: timeout=60, max=98\r\n"
     "Content-Length: 5\r\n"
     "\r\n"
     "/two\n"
     "HTTP/1.1 200 Ok\r\n"
     "Server: xzero/0.11.0-dev\r\n"
-    "Connection: keep-alive\r\n"
+    "Connection: Keep-Alive\r\n"
     "Keep-Alive: timeout=60, max=97\r\n"
     "Content-Length: 7\r\n"
     "\r\n"
@@ -108,7 +106,6 @@ TEST(HttpChannel, http1_ConnectionKeepAlive3_pipelined) {
 TEST(HttpChannel, protocolErrorShouldRaise400) {
   // SCOPED_LOGGER();
   MOCK_HTTP1_SERVER(server, connector, executor);
-
   std::shared_ptr<LocalEndPoint> ep;
   executor.execute([&] {
     // FIXME HTTP/1.1 (due to keep-alive) SEGV's on LocalEndPoint.
@@ -116,4 +113,34 @@ TEST(HttpChannel, protocolErrorShouldRaise400) {
   });
   xzero::Buffer output = ep->output();
   ASSERT_TRUE(output.contains("400 Bad Request"));
+}
+
+TEST(HttpChannel, invalidRequestPath_escapeDocumentRoot1) {
+  MOCK_HTTP1_SERVER(server, connector, executor);
+  std::shared_ptr<LocalEndPoint> ep;
+  executor.execute([&] {
+    ep = connector->createClient("GET /foo/../../bar HTTP/1.0\r\n\r\n");
+  });
+  xzero::Buffer output = ep->output();
+  ASSERT_TRUE(output.begins("HTTP/1.0 400 Bad Request\r\n"));
+}
+
+TEST(HttpChannel, invalidRequestPath_injectNullByte1) {
+  MOCK_HTTP1_SERVER(server, connector, executor);
+  std::shared_ptr<LocalEndPoint> ep;
+  executor.execute([&] {
+    ep = connector->createClient("GET /foo%00 HTTP/1.0\r\n\r\n");
+  });
+  xzero::Buffer output = ep->output();
+  ASSERT_TRUE(output.begins("HTTP/1.0 400 Bad Request\r\n"));
+}
+
+TEST(HttpChannel, invalidRequestPath_injectNullByte2) {
+  MOCK_HTTP1_SERVER(server, connector, executor);
+  std::shared_ptr<LocalEndPoint> ep;
+  executor.execute([&] {
+    ep = connector->createClient("GET /foo%00/bar HTTP/1.0\r\n\r\n");
+  });
+  xzero::Buffer output = ep->output();
+  ASSERT_TRUE(output.begins("HTTP/1.0 400 Bad Request\r\n"));
 }

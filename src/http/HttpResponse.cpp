@@ -1,6 +1,8 @@
 #include <xzero/http/HttpResponse.h>
 #include <xzero/http/HttpRequest.h>
 #include <xzero/http/HttpChannel.h>
+#include <vector>
+#include <string>
 
 namespace xzero {
 
@@ -67,10 +69,21 @@ void HttpResponse::setContentLength(size_t size) {
   contentLength_ = size;
 }
 
+static const std::vector<std::string> connectionHeaderFields = {
+  "Connection",
+  "Keep-Alive",
+  "Transfer-Encoding"
+  "Close",
+};
+
 void HttpResponse::addHeader(const std::string& name,
                              const std::string& value) {
   if (isCommitted())
     throw std::runtime_error("Invalid State. Cannot be modified after commit.");
+
+  for (const auto& test: connectionHeaderFields)
+    if (iequals(name, test))
+      throw std::runtime_error("Invalid argument. Harmful response header.");
 
   headers_.push_back(name, value);
 }
@@ -79,6 +92,10 @@ void HttpResponse::setHeader(const std::string& name,
                              const std::string& value) {
   if (isCommitted())
     throw std::runtime_error("Invalid State. Cannot be modified after commit.");
+
+  for (const auto& test: connectionHeaderFields)
+    if (iequals(name, test))
+      throw std::runtime_error("Invalid argument. Harmful response header.");
 
   headers_.overwrite(name, value);
 }
@@ -90,12 +107,52 @@ void HttpResponse::removeHeader(const std::string& name) {
   headers_.remove(name);
 }
 
+void HttpResponse::removeAllHeaders() {
+  if (isCommitted())
+    throw std::runtime_error("Invalid State. Cannot be modified after commit.");
+
+  headers_.reset();
+}
+
 const std::string& HttpResponse::getHeader(const std::string& name) const {
   return headers_.get(name);
 }
 
 void HttpResponse::send100Continue() {
   channel_->send100Continue();
+}
+
+void HttpResponse::sendError(HttpStatus code, const std::string& message) {
+  setStatus(code);
+  setReason(message);
+  removeAllHeaders();
+
+  if (!isContentForbidden(code)) {
+    Buffer body(2048);
+
+    Buffer htmlMessage = message.empty() ? to_string(code) : message;
+
+    htmlMessage.replaceAll("<", "&lt;");
+    htmlMessage.replaceAll(">", "&gt;");
+    htmlMessage.replaceAll("&", "&amp;");
+
+    body << "<DOCTYPE html>\n"
+            "<html>\n"
+            "  <head>\n"
+            "    <title> Error. " << htmlMessage << " </title>\n"
+            "  </head>\n"
+            "  <body>\n"
+            "    <h1> Error. " << htmlMessage << " </h1>\n"
+            "  </body>\n"
+            "</html>\n";
+
+    setHeader("Cache-Control", "must-revalidate,no-cache,no-store");
+    setHeader("Content-Type", "text/html");
+    setContentLength(body.size());
+    output()->write(std::move(body));
+  }
+
+  completed();
 }
 
 void HttpResponse::completed() {

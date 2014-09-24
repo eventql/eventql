@@ -125,7 +125,7 @@ void HttpConnection::send(HttpResponseInfo&& responseInfo,
       snprintf(keepAlive, sizeof(keepAlive), "timeout=%lu, max=%zu",
                maxKeepAlive_.totalSeconds(), requestMax_ - requestCount_);
 
-      responseInfo.headers().push_back("Connection", "keep-alive");
+      responseInfo.headers().push_back("Connection", "Keep-Alive");
       responseInfo.headers().push_back("Keep-Alive", keepAlive);
     } else {
       channel_->setPersistent(false);

@@ -37,7 +37,8 @@ bool HttpListener::onMessageEnd() {
   return true;
 }
 
-void HttpListener::onProtocolError(const BufferRef& chunk, size_t offset) {
+void HttpListener::onProtocolError(HttpStatus code,
+                                   const std::string& message) {
   //.
 }
 

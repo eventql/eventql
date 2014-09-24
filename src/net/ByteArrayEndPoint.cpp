@@ -48,6 +48,7 @@ const Buffer& ByteArrayEndPoint::output() const {
 }
 
 void ByteArrayEndPoint::close() {
+  // FIXME maybe we need closedInput | closedOutput distinction
   //closed_ = true;
 }
 

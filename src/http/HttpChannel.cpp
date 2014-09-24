@@ -35,6 +35,9 @@ std::unique_ptr<HttpOutput> HttpChannel::createOutput() {
 
 void HttpChannel::send(const BufferRef& data, CompletionHandler&& onComplete) {
   if (!response_->isCommitted()) {
+    if (!response_->status())
+      throw std::runtime_error("No HTTP response status set yet.");
+
     response_->setCommitted(true);
 
     if (request_->expect100Continue()) {
@@ -80,9 +83,6 @@ void HttpChannel::send100Continue() {
 bool HttpChannel::onMessageBegin(const BufferRef& method,
                                  const BufferRef& entity, int versionMajor,
                                  int versionMinor) {
-  request_->setMethod(method.str());
-  request_->setPath(entity.str());
-
   HttpVersion version = HttpVersion::UNKNOWN;
   switch (versionMajor * 10 + versionMinor) {
     case 20:
@@ -101,8 +101,14 @@ bool HttpChannel::onMessageBegin(const BufferRef& method,
       break;
   }
 
-  request_->setVersion(version);
   response_->setVersion(version);
+  request_->setVersion(version);
+  request_->setMethod(method.str());
+  if (!request_->setUri(entity.str())) {
+    state_ = HttpChannelState::HANDLING;
+    response_->sendError(HttpStatus::BadRequest);
+    return false;
+  }
 
   return true;
 }
@@ -118,8 +124,10 @@ bool HttpChannel::onMessageHeader(const BufferRef& name,
 }
 
 bool HttpChannel::onMessageHeaderEnd() {
-  state_ = HttpChannelState::HANDLING;
-  handler_(request(), response());
+  if (state_ != HttpChannelState::HANDLING) {
+    state_ = HttpChannelState::HANDLING;
+    handler_(request(), response());
+  }
   return true;
 }
 
@@ -138,8 +146,8 @@ bool HttpChannel::onMessageEnd() {
   return false;
 }
 
-void HttpChannel::onProtocolError(const BufferRef& chunk, size_t offset) {
-  transport_->abort();
+void HttpChannel::onProtocolError(HttpStatus code, const std::string& message) {
+  response_->sendError(code, message);
 }
 
 void HttpChannel::completed() {
