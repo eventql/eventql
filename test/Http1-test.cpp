@@ -73,9 +73,9 @@ TEST(Http1, ConnectionKeepAlive3_pipelined) {
   MOCK_HTTP1_SERVER(server, connector, executor);
   std::shared_ptr<LocalEndPoint> ep;
   executor.execute([&] {
-    ep = connector->createClient("GET /one HTTP/1.1\r\n\r\n"
-                                 "GET /two HTTP/1.1\r\n\r\n"
-                                 "GET /three HTTP/1.1\r\n\r\n");
+    ep = connector->createClient("GET /one HTTP/1.1\r\nHost: test\r\n\r\n"
+                                 "GET /two HTTP/1.1\r\nHost: test\r\n\r\n"
+                                 "GET /three HTTP/1.1\r\nHost: test\r\n\r\n");
   });
 
   // XXX assume keep-alive timeout 60

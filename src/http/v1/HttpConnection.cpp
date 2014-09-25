@@ -5,6 +5,7 @@
 #include <xzero/http/HttpResponseInfo.h>
 #include <xzero/http/HttpResponse.h>
 #include <xzero/http/HttpRequest.h>
+#include <xzero/http/BadMessage.h>
 #include <xzero/net/Connection.h>
 #include <xzero/net/EndPoint.h>
 #include <xzero/net/EndPointWriter.h>
@@ -178,8 +179,12 @@ void HttpConnection::onFillable() {
     abort();  // throw std::runtime_error("client EOF");
   }
 
-  size_t n = parser_.parseFragment(inputBuffer_.ref(inputOffset_));
-  inputOffset_ += n;
+  try {
+    size_t n = parser_.parseFragment(inputBuffer_.ref(inputOffset_));
+    inputOffset_ += n;
+  } catch (const BadMessage& e) {
+    channel_->response()->sendError(e.code(), e.what());
+  }
 }
 
 void HttpConnection::onFlushable() {
@@ -198,18 +203,9 @@ void HttpConnection::onFlushable() {
 
 void HttpConnection::onInterestFailure(const std::exception& error) {
   if (!channel_->response()->isCommitted()) {
-    // channel_->response()->sendError(HttpStatus::InternalServerError,
-    //                                 error.what());
-
     channel_->setPersistent(false);
-    channel_->response()->setStatus(HttpStatus::InternalServerError);
-    channel_->response()->setReason(error.what());
-    channel_->response()->headers().reset();
-    channel_->response()->addHeader("Cache-Control",
-                                    "no-cache,no-store,must-revalidate");
-    channel_->response()->completed();
-
-    // TODO: add some nice body and some special heades, such as cache-control
+    channel_->response()->sendError(HttpStatus::InternalServerError,
+                                    error.what());
   } else {
     abort();
   }

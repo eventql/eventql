@@ -43,6 +43,7 @@ void HttpRequest::recycle() {
   version_ = HttpVersion::UNKNOWN;
   secure_ = false;
   headers_.reset();
+  host_.clear();
   input_->recycle();
 }
 
@@ -314,6 +315,10 @@ done:
   }
 
   return true;
+}
+
+void HttpRequest::setHost(const std::string& value) {
+  host_ = value;
 }
 
 }  // namespace xzero

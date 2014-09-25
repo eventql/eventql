@@ -226,6 +226,7 @@ bool HttpFileHandler::handle(HttpRequest* request, HttpResponse* response,
     return true;
   }
 
+  response->addHeader("Allow", "GET, HEAD");
   response->addHeader("Last-Modified", transferFile.lastModified());
   response->addHeader("ETag", transferFile.etag());
 

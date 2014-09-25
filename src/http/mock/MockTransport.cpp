@@ -1,8 +1,10 @@
 #include <xzero/http/mock/MockTransport.h>
 #include <xzero/http/HttpHandler.h>
 #include <xzero/http/HttpResponseInfo.h>
+#include <xzero/http/HttpResponse.h>
 #include <xzero/http/HttpInput.h>
 #include <xzero/http/HttpChannel.h>
+#include <xzero/http/BadMessage.h>
 #include <xzero/executor/Executor.h>
 #include <xzero/Buffer.h>
 #include <xzero/io/FileRef.h>
@@ -91,13 +93,17 @@ void MockTransport::run(HttpVersion version, const std::string& method,
       throw std::runtime_error("Invalid argument");
   }
 
-  channel_->onMessageBegin(method, entity, versionMajor, versionMinor);
-  for (const auto& header: headers) {
-    channel_->onMessageHeader(header.name(), header.value());
+  try {
+    channel_->onMessageBegin(method, entity, versionMajor, versionMinor);
+    for (const auto& header: headers) {
+      channel_->onMessageHeader(header.name(), header.value());
+    }
+    channel_->onMessageHeaderEnd();
+    channel_->onMessageContent(BufferRef(body.data(), body.size()));
+    channel_->onMessageEnd();
+  } catch (const BadMessage& e) {
+    channel_->response()->sendError(e.code(), e.what());
   }
-  channel_->onMessageHeaderEnd();
-  channel_->onMessageContent(BufferRef(body.data(), body.size()));
-  channel_->onMessageEnd();
 }
 
 void MockTransport::abort() {

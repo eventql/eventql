@@ -5,6 +5,7 @@
 #include <xzero/http/HttpResponseInfo.h>
 #include <xzero/http/HttpVersion.h>
 #include <xzero/http/HttpInputListener.h>
+#include <xzero/http/BadMessage.h>
 #include <xzero/sysconfig.h>
 
 namespace xzero {
@@ -120,15 +121,42 @@ bool HttpChannel::onMessageHeader(const BufferRef& name,
   if (iequals(name, "Expect") && iequals(value, "100-continue"))
     request_->setExpect100Continue(true);
 
+  // rfc7230, Section 5.4, p2
+  if (iequals(name, "Host")) {
+    if (request_->host().empty())
+      request_->setHost(value.str());
+    else
+      throw BadMessage(HttpStatus::BadRequest, "Multiple host headers are illegal.");
+  }
+
   return true;
 }
 
 bool HttpChannel::onMessageHeaderEnd() {
   if (state_ != HttpChannelState::HANDLING) {
     state_ = HttpChannelState::HANDLING;
-    handler_(request(), response());
+
+    // rfc7230, Section 5.4, p2
+    if (request_->version() == HttpVersion::VERSION_1_1) {
+      if (!request_->headers().contains("Host")) {
+        throw BadMessage(HttpStatus::BadRequest, "No Host header given.");
+      }
+    }
+
+    handleRequest();
   }
   return true;
+}
+
+void HttpChannel::handleRequest() {
+  try {
+    handler_(request(), response());
+  } catch (std::exception& e) {
+    response()->sendError(HttpStatus::InternalServerError, e.what());
+  } catch (...) {
+    response()->sendError(HttpStatus::InternalServerError,
+                          "unhandled unknown exception");
+  }
 }
 
 bool HttpChannel::onMessageContent(const BufferRef& chunk) {
