@@ -14,6 +14,7 @@ if(ENABLE_TESTS)
     HttpRangeDef-test.cpp
     HttpChannel-test.cpp
     # http1
+    Http1-test.cpp
     HttpParser-test.cpp
   )
   target_link_libraries(libxzero-test gtest xzero)
