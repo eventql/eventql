@@ -51,6 +51,9 @@ set(libxzero_SRC
   http/HttpFileHandler.cpp
   http/HttpService.cpp
 
+  # http/mock
+  http/mock/MockTransport.cpp
+
   # http/1
   http/v1/HttpConnection.cpp
   http/v1/HttpConnectionFactory.cpp
