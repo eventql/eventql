@@ -1,6 +1,7 @@
 #include <xzero/http/v1/HttpChannel.h>
 #include <xzero/http/HttpResponse.h>
 #include <xzero/http/HttpRequest.h>
+#include <xzero/http/HttpTransport.h>
 #include <xzero/Tokenizer.h>
 
 namespace xzero {
@@ -84,7 +85,7 @@ void HttpChannel::onProtocolError(HttpStatus code, const std::string& message) {
 
     response_->sendError(code, message);
   } else {
-    abort();
+    transport_->abort();
   }
 }
 
