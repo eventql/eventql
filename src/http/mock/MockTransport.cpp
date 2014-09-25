@@ -5,6 +5,9 @@
 #include <xzero/http/HttpChannel.h>
 #include <xzero/executor/Executor.h>
 #include <xzero/Buffer.h>
+#include <xzero/io/FileRef.h>
+#include <stdexcept>
+#include <system_error>
 
 namespace xzero {
 
@@ -49,6 +52,8 @@ MockTransport::MockTransport(Executor* executor, const HttpHandler& handler)
     : HttpTransport(nullptr /*endpoint*/),
       executor_(executor),
       handler_(handler),
+      isAborted_(false),
+      isCompleted_(false),
       channel_(),
       responseInfo_(),
       responseBody_() {
@@ -61,6 +66,9 @@ void MockTransport::run(HttpVersion version, const std::string& method,
                         const std::string& entity,
                         const HeaderFieldList& headers,
                         const std::string& body) {
+  isCompleted_ = false;
+  isAborted_ = false;
+
   std::unique_ptr<MockInput> input(new MockInput());
   channel_.reset(new HttpChannel(this, handler_, std::move(input)));
 
@@ -93,9 +101,11 @@ void MockTransport::run(HttpVersion version, const std::string& method,
 }
 
 void MockTransport::abort() {
+  isAborted_ = true;
 }
 
 void MockTransport::completed() {
+  isCompleted_ = true;
 }
 
 void MockTransport::send(HttpResponseInfo&& responseInfo,
@@ -104,23 +114,50 @@ void MockTransport::send(HttpResponseInfo&& responseInfo,
   responseInfo_ = std::move(responseInfo);
   responseBody_ += chunk;
 
-  executor_->execute([onComplete]() {
-    if (onComplete) {
+  if (onComplete) {
+    executor_->execute([onComplete]() {
       onComplete(true);
-    }
-  });
+    });
+  }
 }
 
 void MockTransport::send(const BufferRef& chunk, CompletionHandler&& onComplete) {
+  responseBody_ += chunk;
+
+  if (onComplete) {
+    executor_->execute([onComplete]() {
+      onComplete(true);
+    });
+  }
 }
 
 void MockTransport::send(FileRef&& chunk, CompletionHandler&& onComplete) {
+  responseBody_.reserve(chunk.size());
+
+  ssize_t n = pread(chunk.handle(), responseBody_.end(), chunk.size(),
+                    chunk.offset());
+
+  if (n < 0)
+    std::system_error(errno, std::system_category());
+
+  if (n != chunk.size())
+    std::runtime_error("Unexpected read count.");
+
+  responseBody_.resize(responseBody_.size() + n);
+
+  if (onComplete) {
+    executor_->execute([onComplete]() {
+      onComplete(true);
+    });
+  }
 }
 
 void MockTransport::onOpen() {
+  HttpTransport::onOpen();
 }
 
 void MockTransport::onClose() {
+  HttpTransport::onClose();
 }
 
 void MockTransport::onFillable() {
