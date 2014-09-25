@@ -6,7 +6,10 @@ namespace xzero {
 
 Connection::Connection(std::shared_ptr<EndPoint> endpoint)
     : endpoint_(endpoint), creationTime_(0), listeners_() {
-  endpoint_->setConnection(this);
+
+  if (endpoint_) {
+    endpoint_->setConnection(this);
+  }
 }
 
 Connection::~Connection() {
@@ -31,7 +34,9 @@ void Connection::addListener(ConnectionListener* listener) {
 }
 
 void Connection::close() {
-  endpoint_->close();
+  if (endpoint_) {
+    endpoint_->close();
+  }
 }
 
 size_t Connection::getMessagesIn() const {
