@@ -7,6 +7,7 @@ if(ENABLE_TESTS)
     # base
     IdleTimeout-test.cpp
     ByteArrayEndPoint-test.cpp
+    ThreadPool-test.cpp
     # support
     LibevScheduler-test.cpp
     # http common
