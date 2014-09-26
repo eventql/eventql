@@ -1,4 +1,4 @@
-#include <xzero/http/v1/HttpChannel.h>
+#include <xzero/http/v1/Http1Channel.h>
 #include <xzero/http/HttpResponse.h>
 #include <xzero/http/HttpRequest.h>
 #include <xzero/http/HttpTransport.h>
@@ -7,23 +7,26 @@
 namespace xzero {
 namespace http1 {
 
-HttpChannel::HttpChannel(HttpTransport* transport, const HttpHandler& handler,
-                         std::unique_ptr<xzero::HttpInput>&& input)
-    : xzero::HttpChannel(transport, handler,
-                         std::move(input)),
+Http1Channel::Http1Channel(HttpTransport* transport,
+                         const HttpHandler& handler,
+                         std::unique_ptr<HttpInput>&& input,
+                         size_t maxRequestUriLength,
+                         size_t maxRequestBodyLength)
+    : xzero::HttpChannel(transport, handler, std::move(input),
+                         maxRequestUriLength, maxRequestBodyLength),
       persistent_(false),
       connectionOptions_() {
 }
 
-HttpChannel::~HttpChannel() {
+Http1Channel::~Http1Channel() {
 }
 
-void HttpChannel::reset() {
+void Http1Channel::reset() {
   connectionOptions_.clear();
   xzero::HttpChannel::reset();
 }
 
-bool HttpChannel::onMessageBegin(const BufferRef& method,
+bool Http1Channel::onMessageBegin(const BufferRef& method,
                                  const BufferRef& entity, int versionMajor,
                                  int versionMinor) {
 
@@ -46,7 +49,7 @@ bool HttpChannel::onMessageBegin(const BufferRef& method,
                                             versionMinor);
 }
 
-bool HttpChannel::onMessageHeader(const BufferRef& name,
+bool Http1Channel::onMessageHeader(const BufferRef& name,
                                   const BufferRef& value) {
   if (!iequals(name, "Connection"))
     return xzero::HttpChannel::onMessageHeader(name, value);
@@ -65,7 +68,7 @@ bool HttpChannel::onMessageHeader(const BufferRef& name,
   return true;
 }
 
-bool HttpChannel::onMessageHeaderEnd() {
+bool Http1Channel::onMessageHeaderEnd() {
   // hide transport-level header fields
   request_->headers().remove("Connection");
   for (const auto& name: connectionOptions_)
@@ -74,7 +77,7 @@ bool HttpChannel::onMessageHeaderEnd() {
   return xzero::HttpChannel::onMessageHeaderEnd();
 }
 
-void HttpChannel::onProtocolError(HttpStatus code, const std::string& message) {
+void Http1Channel::onProtocolError(HttpStatus code, const std::string& message) {
   if (!response_->isCommitted()) {
     persistent_ = false;
 

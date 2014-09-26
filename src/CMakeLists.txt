@@ -56,11 +56,11 @@ set(libxzero_SRC
 
   # http/1
   http/v1/HttpConnection.cpp
-  http/v1/HttpConnectionFactory.cpp
+  http/v1/Http1ConnectionFactory.cpp
   http/v1/HttpGenerator.cpp
-  http/v1/HttpInput.cpp
   http/v1/HttpParser.cpp
-  http/v1/HttpChannel.cpp
+  http/v1/Http1Input.cpp
+  http/v1/Http1Channel.cpp
 
   # http/2
   #...

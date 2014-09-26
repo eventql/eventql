@@ -11,8 +11,12 @@
 namespace xzero {
 
 HttpChannel::HttpChannel(HttpTransport* transport, const HttpHandler& handler,
-                         std::unique_ptr<HttpInput>&& input)
-    : state_(HttpChannelState::IDLE),
+                         std::unique_ptr<HttpInput>&& input,
+                         size_t maxRequestUriLength,
+                         size_t maxRequestBodyLength)
+    : maxRequestUriLength_(maxRequestUriLength),
+      maxRequestBodyLength_(maxRequestBodyLength),
+      state_(HttpChannelState::IDLE),
       transport_(transport),
       request_(new HttpRequest(std::move(input))),
       response_(new HttpResponse(this, createOutput())),

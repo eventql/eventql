@@ -2,7 +2,7 @@
 #include <xzero/http/HttpRequest.h>
 #include <xzero/http/HttpResponse.h>
 #include <xzero/http/HttpInputListener.h>
-#include <xzero/http/v1/HttpConnectionFactory.h>
+#include <xzero/http/v1/Http1ConnectionFactory.h>
 #include <xzero/net/LocalConnector.h>
 #include <xzero/net/InetConnector.h>
 #include <xzero/net/Server.h>
@@ -86,7 +86,16 @@ InetConnector* HttpService::configureInet(Executor* executor,
 }
 
 void HttpService::enableHttp1(Connector* connector) {
-  auto http = connector->addConnectionFactory<xzero::http1::HttpConnectionFactory>();
+  size_t maxRequestUriLength = 1024;
+  size_t maxRequestBodyLength = 64 * 1024 * 1024;
+  size_t maxRequestCount = 100;
+  TimeSpan maxKeepAlive = TimeSpan::fromSeconds(120);
+
+  auto http = connector->addConnectionFactory<xzero::http1::Http1ConnectionFactory>(
+      maxRequestUriLength,
+      maxRequestBodyLength,
+      maxRequestCount,
+      maxKeepAlive);
 
   http->setHandler(std::bind(&HttpService::handleRequest, this,
                    std::placeholders::_1, std::placeholders::_2));

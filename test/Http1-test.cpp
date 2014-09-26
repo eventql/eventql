@@ -1,6 +1,6 @@
 // HTTP/1 transport protocol tests
 
-#include <xzero/http/v1/HttpConnectionFactory.h>
+#include <xzero/http/v1/Http1ConnectionFactory.h>
 #include <xzero/http/HttpRequest.h>
 #include <xzero/http/HttpResponse.h>
 #include <xzero/http/HttpOutput.h>
@@ -38,7 +38,8 @@ class ScopedLogger { // {{{
   xzero::Server server;                                                        \
   xzero::DirectExecutor executor(false);                                       \
   auto localConnector = server.addConnector<xzero::LocalConnector>(&executor); \
-  auto http = localConnector->addConnectionFactory<xzero::http1::HttpConnectionFactory>(); \
+  auto http = localConnector->addConnectionFactory<xzero::http1::Http1ConnectionFactory>( \
+      64, 128, 5, TimeSpan::fromSeconds(30));                                  \
   http->setHandler([&](HttpRequest* request, HttpResponse* response) {         \
       response->setStatus(HttpStatus::Ok);                                     \
       response->setContentLength(request->path().size() + 1);                  \

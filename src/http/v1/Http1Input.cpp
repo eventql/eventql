@@ -1,4 +1,4 @@
-#include <xzero/http/v1/HttpInput.h>
+#include <xzero/http/v1/Http1Input.h>
 #include <xzero/http/HttpInputListener.h>
 #include <xzero/logging/LogSource.h>
 #include <xzero/sysconfig.h>
@@ -15,7 +15,7 @@ static LogSource inputLogger("http1.HttpInput");
 #define TRACE(msg...) do {} while (0)
 #endif
 
-HttpInput::HttpInput(HttpConnection* connection)
+Http1Input::Http1Input(HttpConnection* connection)
     : xzero::HttpInput(),
       connection_(connection),
       content_(),
@@ -23,17 +23,17 @@ HttpInput::HttpInput(HttpConnection* connection)
   TRACE("%p ctor", this);
 }
 
-HttpInput::~HttpInput() {
+Http1Input::~Http1Input() {
   TRACE("%p dtor", this);
 }
 
-void HttpInput::recycle() {
+void Http1Input::recycle() {
   TRACE("%p recycle", this);
   content_.clear();
   offset_ = 0;
 }
 
-int HttpInput::read(Buffer* result) {
+int Http1Input::read(Buffer* result) {
   const size_t len = content_.size() - offset_;
   result->push_back(content_.ref(offset_));
   TRACE("%p read: %zu bytes", this, len);
@@ -44,7 +44,7 @@ int HttpInput::read(Buffer* result) {
   return len;
 }
 
-size_t HttpInput::readLine(Buffer* result) {
+size_t Http1Input::readLine(Buffer* result) {
   const size_t len = content_.size() - offset_;
   TRACE("%p readLine: %zu bytes", this, len);
 
@@ -67,7 +67,7 @@ size_t HttpInput::readLine(Buffer* result) {
   return 0;
 }
 
-void HttpInput::onContent(const BufferRef& chunk) {
+void Http1Input::onContent(const BufferRef& chunk) {
   TRACE("%p onContent: %zu bytes", this, chunk.size());
   content_ += chunk;
 

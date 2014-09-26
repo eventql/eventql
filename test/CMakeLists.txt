@@ -1,7 +1,7 @@
 if(ENABLE_TESTS)
 
-  add_executable(itest lifecycle-test.cpp)
-  target_link_libraries(itest xzero)
+  # add_executable(itest lifecycle-test.cpp)
+  # target_link_libraries(itest xzero)
 
   add_executable(libxzero-test xzero-test.cpp
     # base

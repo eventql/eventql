@@ -1,6 +1,6 @@
 #include <xzero/http/v1/HttpConnection.h>
-#include <xzero/http/v1/HttpChannel.h>
-#include <xzero/http/v1/HttpInput.h>
+#include <xzero/http/v1/Http1Channel.h>
+#include <xzero/http/v1/Http1Input.h>
 #include <xzero/http/HttpDateGenerator.h>
 #include <xzero/http/HttpResponseInfo.h>
 #include <xzero/http/HttpResponse.h>
@@ -27,7 +27,11 @@ static LogSource connectionLogger("http1.HttpConnection");
 
 HttpConnection::HttpConnection(std::shared_ptr<EndPoint> endpoint,
                                const HttpHandler& handler,
-                               HttpDateGenerator* dateGenerator)
+                               HttpDateGenerator* dateGenerator,
+                               size_t maxRequestUriLength,
+                               size_t maxRequestBodyLength,
+                               size_t maxRequestCount,
+                               TimeSpan maxKeepAlive)
     : HttpTransport(endpoint),
       parser_(HttpParser::REQUEST),
       generator_(dateGenerator),
@@ -35,11 +39,12 @@ HttpConnection::HttpConnection(std::shared_ptr<EndPoint> endpoint,
       inputOffset_(0),
       writer_(),
       onComplete_(),
-      channel_(new HttpChannel(
-          this, handler, std::unique_ptr<HttpInput>(new HttpInput(this)))),
-      maxKeepAlive_(TimeSpan::fromSeconds(60)),  // TODO: parametrize me
+      channel_(new Http1Channel(
+          this, handler, std::unique_ptr<HttpInput>(new Http1Input(this)),
+          maxRequestUriLength, maxRequestBodyLength)),
+      maxKeepAlive_(maxKeepAlive),
       requestCount_(0),
-      requestMax_(100) {
+      requestMax_(maxRequestCount) {
 
   parser_.setListener(channel_.get());
   TRACE("%p ctor", this);

@@ -4,8 +4,13 @@
 
 namespace xzero {
 
-HttpConnectionFactory::HttpConnectionFactory(const std::string& protocolName)
+HttpConnectionFactory::HttpConnectionFactory(
+      const std::string& protocolName,
+      size_t maxRequestUriLength,
+      size_t maxRequestBodyLength)
     : ConnectionFactory(protocolName),
+      maxRequestUriLength_(maxRequestUriLength),
+      maxRequestBodyLength_(maxRequestBodyLength),
       clock_(nullptr),
       dateGenerator_(nullptr) {
   //.
