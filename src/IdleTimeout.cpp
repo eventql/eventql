@@ -21,7 +21,7 @@ void IdleTimeout::setTimeout(TimeSpan value) {
   timeout_ = value;
 }
 
-TimeSpan IdleTimeout::getTimeout() const {
+TimeSpan IdleTimeout::timeout() const {
   return timeout_;
 }
 

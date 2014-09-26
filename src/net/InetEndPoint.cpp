@@ -27,6 +27,7 @@ static LogSource inetEndPointLogger("net.InetEndPoint");
 InetEndPoint::InetEndPoint(int socket, InetConnector* connector)
     : EndPoint(),
       connector_(connector),
+      idleTimeout_(connector->clock(), connector->scheduler()),
       handle_(socket),
       isCorking_(false),
       isBusy_(false) {
@@ -262,11 +263,11 @@ void InetEndPoint::wantFlush() {
 }
 
 TimeSpan InetEndPoint::idleTimeout() {
-  return TimeSpan::Zero; // TODO
+  return idleTimeout_.timeout();
 }
 
 void InetEndPoint::setIdleTimeout(TimeSpan timeout) {
-  // TODO
+  idleTimeout_.setTimeout(timeout);
 }
 
 } // namespace xzero

@@ -5,11 +5,13 @@ namespace xzero {
 namespace http1 {
 
 Http1ConnectionFactory::Http1ConnectionFactory(
+    WallClock* clock,
     size_t maxRequestUriLength,
     size_t maxRequestBodyLength,
     size_t maxRequestCount,
     TimeSpan maxKeepAlive)
-    : HttpConnectionFactory("http", maxRequestUriLength, maxRequestBodyLength),
+    : HttpConnectionFactory("http", clock, maxRequestUriLength,
+                            maxRequestBodyLength),
       maxRequestCount_(maxRequestCount),
       maxKeepAlive_(maxKeepAlive) {
   setInputBufferSize(16 * 1024);

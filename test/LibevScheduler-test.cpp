@@ -9,6 +9,8 @@ TEST(LibevScheduler, scheduleNow) {
   ev::loop_ref loop = ev::default_loop(0);
   LibevScheduler scheduler(loop);
 
+  ev_now_update(loop);
+
   DateTime fired;
   DateTime now(ev_now(loop));
 
@@ -25,6 +27,8 @@ TEST(LibevScheduler, scheduleNow) {
 TEST(LibevScheduler, test1) {
   ev::loop_ref loop = ev::default_loop(0);
   LibevScheduler scheduler(loop);
+
+  ev_now_update(loop);
 
   DateTime fired;
   DateTime now(ev_now(loop));
@@ -43,6 +47,8 @@ TEST(LibevScheduler, testMilliseconds) {
   ev::loop_ref loop = ev::default_loop(0);
   LibevScheduler scheduler(loop);
 
+  ev_now_update(loop);
+
   DateTime now(ev_now(loop));
   DateTime fired;
 
@@ -60,6 +66,8 @@ TEST(LibevScheduler, testMilliseconds) {
 TEST(LibevScheduler, test2) {
   ev::loop_ref loop = ev::default_loop(0);
   LibevScheduler scheduler(loop);
+
+  ev_now_update(loop);
 
   DateTime now(ev_now(loop));
   DateTime fired1;

@@ -5,14 +5,15 @@
 namespace xzero {
 
 HttpConnectionFactory::HttpConnectionFactory(
-      const std::string& protocolName,
-      size_t maxRequestUriLength,
-      size_t maxRequestBodyLength)
+    const std::string& protocolName,
+    WallClock* clock,
+    size_t maxRequestUriLength,
+    size_t maxRequestBodyLength)
     : ConnectionFactory(protocolName),
       maxRequestUriLength_(maxRequestUriLength),
       maxRequestBodyLength_(maxRequestBodyLength),
-      clock_(nullptr),
-      dateGenerator_(nullptr) {
+      clock_(clock),
+      dateGenerator_(clock ? new HttpDateGenerator(clock) : nullptr) {
   //.
 }
 
@@ -22,15 +23,6 @@ HttpConnectionFactory::~HttpConnectionFactory() {
 
 void HttpConnectionFactory::setHandler(HttpHandler&& handler) {
   handler_ = std::move(handler);
-}
-
-void HttpConnectionFactory::setClock(WallClock* clock) {
-  if (clock != nullptr) {
-    dateGenerator_.reset(new HttpDateGenerator(clock));
-  } else {
-    dateGenerator_.reset(nullptr);
-  }
-  clock_ = clock;
 }
 
 Connection* HttpConnectionFactory::configure(Connection* connection,

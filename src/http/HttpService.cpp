@@ -6,6 +6,7 @@
 #include <xzero/net/LocalConnector.h>
 #include <xzero/net/InetConnector.h>
 #include <xzero/net/Server.h>
+#include <xzero/WallClock.h>
 #include <algorithm>
 #include <stdexcept>
 
@@ -72,13 +73,15 @@ LocalConnector* HttpService::configureLocal() {
 InetConnector* HttpService::configureInet(Executor* executor,
                                           Scheduler* scheduler,
                                           Selector* selector,
+                                          WallClock* clock,
                                           const IPAddress& ipaddress,
                                           int port, int backlog) {
   if (inetConnector_ != nullptr)
     throw std::runtime_error("Multiple inet connectors not yet supported.");
 
-  inetConnector_ = server_->addConnector<InetConnector>("http",
-      executor, scheduler, selector, ipaddress, port, backlog, true, false);
+  inetConnector_ = server_->addConnector<InetConnector>(
+      "http", executor, scheduler, selector, clock, ipaddress, port, backlog,
+      true, false);
 
   enableHttp1(inetConnector_);
 
@@ -87,12 +90,14 @@ InetConnector* HttpService::configureInet(Executor* executor,
 
 void HttpService::enableHttp1(Connector* connector) {
   // TODO: make them configurable via ctor
+  WallClock* clock = WallClock::system();
   size_t maxRequestUriLength = 1024;
   size_t maxRequestBodyLength = 64 * 1024 * 1024;
   size_t maxRequestCount = 100;
   TimeSpan maxKeepAlive = TimeSpan::fromSeconds(120);
 
   auto http = connector->addConnectionFactory<xzero::http1::Http1ConnectionFactory>(
+      clock,
       maxRequestUriLength,
       maxRequestBodyLength,
       maxRequestCount,

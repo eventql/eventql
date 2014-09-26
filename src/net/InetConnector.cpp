@@ -44,8 +44,9 @@ static std::mutex m;
 namespace xzero {
 
 InetConnector::InetConnector(const std::string& name, Executor* executor,
-                             Scheduler* scheduler, Selector* selector)
-    : Connector(name, executor),
+                             Scheduler* scheduler, Selector* selector,
+                             WallClock* clock)
+    : Connector(name, executor, clock),
       selector_(selector),
       scheduler_(scheduler),
       connectedEndPoints_(),
@@ -60,9 +61,10 @@ InetConnector::InetConnector(const std::string& name, Executor* executor,
 
 InetConnector::InetConnector(const std::string& name, Executor* executor,
                              Scheduler* scheduler, Selector* selector,
+                             WallClock* clock,
                              const IPAddress& ipaddress, int port, int backlog,
                              bool reuseAddr, bool reusePort)
-    : InetConnector(name, executor, scheduler, selector) {
+    : InetConnector(name, executor, scheduler, selector, clock) {
 
   open(ipaddress, port, backlog, reuseAddr, reusePort);
 }

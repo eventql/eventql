@@ -37,9 +37,10 @@ class ScopedLogger { // {{{
 #define MOCK_HTTP1_SERVER(server, localConnector, executor)                    \
   xzero::Server server;                                                        \
   xzero::DirectExecutor executor(false);                                       \
+  xzero::WallClock* clock = nullptr;                                           \
   auto localConnector = server.addConnector<xzero::LocalConnector>(&executor); \
   auto http = localConnector->addConnectionFactory<xzero::http1::Http1ConnectionFactory>( \
-      64, 128, 5, TimeSpan::fromSeconds(30));                                  \
+      clock, 64, 128, 5, TimeSpan::fromSeconds(30));                                  \
   http->setHandler([&](HttpRequest* request, HttpResponse* response) {         \
       response->setStatus(HttpStatus::Ok);                                     \
       response->setContentLength(request->path().size() + 1);                  \
@@ -79,27 +80,27 @@ TEST(Http1, ConnectionKeepAlive3_pipelined) {
                                  "GET /three HTTP/1.1\r\nHost: test\r\n\r\n");
   });
 
-  // XXX assume keep-alive timeout 60
-  // XXX assume max-request-count 100
+  // XXX assume keep-alive timeout 30
+  // XXX assume max-request-count 5
   ASSERT_EQ(
     "HTTP/1.1 200 Ok\r\n"
     "Server: xzero/0.11.0-dev\r\n"
     "Connection: Keep-Alive\r\n"
-    "Keep-Alive: timeout=60, max=99\r\n"
+    "Keep-Alive: timeout=30, max=4\r\n"
     "Content-Length: 5\r\n"
     "\r\n"
     "/one\n"
     "HTTP/1.1 200 Ok\r\n"
     "Server: xzero/0.11.0-dev\r\n"
     "Connection: Keep-Alive\r\n"
-    "Keep-Alive: timeout=60, max=98\r\n"
+    "Keep-Alive: timeout=30, max=3\r\n"
     "Content-Length: 5\r\n"
     "\r\n"
     "/two\n"
     "HTTP/1.1 200 Ok\r\n"
     "Server: xzero/0.11.0-dev\r\n"
     "Connection: Keep-Alive\r\n"
-    "Keep-Alive: timeout=60, max=97\r\n"
+    "Keep-Alive: timeout=30, max=2\r\n"
     "Content-Length: 7\r\n"
     "\r\n"
     "/three\n",

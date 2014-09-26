@@ -1,6 +1,7 @@
 #include <xzero/net/LocalConnector.h>
 #include <xzero/net/ConnectionFactory.h>
 #include <xzero/net/Connection.h>
+#include <xzero/WallClock.h>
 #include <xzero/logging/LogSource.h>
 #include <xzero/executor/Executor.h>
 #include <algorithm>
@@ -28,7 +29,7 @@ void LocalEndPoint::close() {
 // }}}
 
 LocalConnector::LocalConnector(Executor* executor)
-    : Connector("local", executor),
+    : Connector("local", executor, WallClock::system()),
       isStarted_(false),
       pendingConnects_(),
       connectedEndPoints_() {

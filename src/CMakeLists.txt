@@ -4,6 +4,7 @@ set(libxzero_SRC
   Buffer.cpp
   DateTime.cpp
   IdleTimeout.cpp
+  WallClock.cpp
   TimeSpan.cpp
   Tokenizer.cpp
 

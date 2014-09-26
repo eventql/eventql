@@ -5,10 +5,12 @@
 
 namespace xzero {
 
-Connector::Connector(const std::string& name, Executor* executor)
+Connector::Connector(const std::string& name, Executor* executor,
+                     WallClock* clock)
   : name_(name),
     server_(nullptr),
     executor_(executor),
+    clock_(clock),
     connectionFactories_(),
     defaultConnectionFactory_(),
     listeners_() {
