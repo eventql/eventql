@@ -23,7 +23,7 @@ namespace http1 {
 //! which is not HTTP conform.
 #define X0_HTTP_SUPPORT_SHORT_LF 1
 
-std::string tos(HttpParser::State state) {
+std::string to_string(HttpParser::State state) {
   switch (state) {
     // artificial
     case HttpParser::PROTOCOL_ERROR:
@@ -256,9 +256,9 @@ std::size_t HttpParser::parseFragment(const BufferRef& chunk) {
   size_t result = initialOutOffset;
   size_t* nparsed = &result;
 
-  // TRACE(2, "process(curState:%s): size: %ld: '%s'", tos(state()).c_str(),
+  // TRACE(2, "process(curState:%s): size: %ld: '%s'", to_string(state()).c_str(),
   // chunk.size(), chunk.str().c_str());
-  TRACE(2, "process(curState:%s): size: %ld", tos(state()).c_str(),
+  TRACE(2, "process(curState:%s): size: %ld", to_string(state()).c_str(),
         chunk.size());
 
 #if 0
@@ -285,10 +285,10 @@ std::size_t HttpParser::parseFragment(const BufferRef& chunk) {
 #if !defined(NDEBUG)
     if (std::isprint(*i)) {
       TRACE(3, "parse: %4ld, 0x%02X (%c),  %s", *nparsed, *i, *i,
-            tos(state()).c_str());
+            to_string(state()).c_str());
     } else {
       TRACE(3, "parse: %4ld, 0x%02X,     %s", *nparsed, *i,
-            tos(state()).c_str());
+            to_string(state()).c_str());
     }
 #endif
 
