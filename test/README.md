@@ -6,8 +6,8 @@
 - [ ] Base64
 - [ ] Buffer
 - [ ] DateTime
-- [ ] IdleTimeout
-- [ ] SystemWallClock
+- [x] IdleTimeout
+- [ ] WallClock
 - [ ] TimeSpan
 - [ ] Tokenizer
 - [ ] executor/DirectLoopExecutor
@@ -26,9 +26,9 @@
 
 ### HTTP/1 (rfc7230)
 
-- [ ] Pipelined requests
-- [ ] HTTP/1.1 closed
-- [ ] HTTP/1.1 keep-alive
+- [x] Pipelined requests
+- [x] HTTP/1.1 closed
+- [x] HTTP/1.1 keep-alive
 - [ ] automatic chunked response when no response content length was given
 - [ ] "Connection" header management (custom values)
 - [ ] "GET /path HTTP/1.2\r\n" should respond with 505 (http version not supported)

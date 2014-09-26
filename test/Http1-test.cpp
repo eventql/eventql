@@ -59,12 +59,40 @@ TEST(Http1, ConnectionClosed) {
                                  "Connection: close\r\n"
                                  "\r\n");
   });
-  // TODO
+  ASSERT_TRUE(ep->output().contains("Connection: close"));
+
+  executor.execute([&] {
+    ep = connector->createClient("GET / HTTP/1.0\r\n"
+                                 "\r\n");
+  });
+  ASSERT_TRUE(ep->output().contains("Connection: close"));
 }
 
 // sends one single request
-// TEST(Http1, ConnectionKeepAlive1) { TODO
-// }
+TEST(Http1, DISABLED_ConnectionKeepAlive_1_0) {
+  MOCK_HTTP1_SERVER(server, connector, executor);
+
+  std::shared_ptr<LocalEndPoint> ep;
+  executor.execute([&] {
+    ep = connector->createClient("GET / HTTP/1.0\r\n"
+                                 "Connection: Keep-Alive\r\n"
+                                 "\r\n");
+  });
+  // FIXME: SEGV
+  ASSERT_TRUE(ep->output().contains("\r\nKeep-Alive:"));
+}
+
+// sends one single request
+TEST(Http1, ConnectionKeepAlive_1_1) {
+  MOCK_HTTP1_SERVER(server, connector, executor);
+
+  std::shared_ptr<LocalEndPoint> ep;
+  executor.execute([&] {
+    ep = connector->createClient("GET / HTTP/1.1\r\n"
+                                 "\r\n");
+  });
+  ASSERT_TRUE(ep->output().contains("\r\nKeep-Alive:"));
+}
 
 // sends single request, gets response, sends another one on the same line.
 // TEST(Http1, ConnectionKeepAlive2) { TODO
