@@ -86,6 +86,7 @@ InetConnector* HttpService::configureInet(Executor* executor,
 }
 
 void HttpService::enableHttp1(Connector* connector) {
+  // TODO: make them configurable via ctor
   size_t maxRequestUriLength = 1024;
   size_t maxRequestBodyLength = 64 * 1024 * 1024;
   size_t maxRequestCount = 100;
