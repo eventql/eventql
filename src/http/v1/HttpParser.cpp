@@ -1088,9 +1088,15 @@ inline bool HttpParser::isText(char value) {
 bool HttpParser::onMessageBegin(const BufferRef& method,
                                        const BufferRef& entity,
                                        int versionMajor, int versionMinor) {
-  return listener_ ? listener_->onMessageBegin(method, entity, versionMajor,
-                                               versionMinor)
-                   : true;
+  if ((versionMajor == 0 && versionMinor == 9)
+      || (versionMajor == 1 && (versionMinor == 0 || versionMinor == 1))) {
+    return listener_ ? listener_->onMessageBegin(method, entity, versionMajor,
+                                                 versionMinor)
+                     : true;
+  }
+
+  onProtocolError(HttpStatus::HttpVersionNotSupported);
+  return false;
 }
 
 bool HttpParser::onMessageBegin(int versionMajor, int versionMinor,
