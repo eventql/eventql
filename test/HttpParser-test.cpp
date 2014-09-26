@@ -221,6 +221,84 @@ TEST(HttpParser, requestLine2) {
   ASSERT_EQ(0, listener.body.size());
 }
 
+TEST(HttpParser, requestLine_invalid1_MissingPathAndProtoVersion) {
+  HttpParserListener listener;
+  HttpParser parser(HttpParser::REQUEST, &listener);
+  parser.parseFragment("GET\r\n\r\n");
+  ASSERT_EQ(HttpStatus::BadRequest, listener.errorCode);
+}
+
+TEST(HttpParser, requestLine_invalid2_MissingProtoAndVersion) {
+  HttpParserListener listener;
+  HttpParser parser(HttpParser::REQUEST, &listener);
+  parser.parseFragment("GET /\r\n\r\n");
+  ASSERT_EQ(HttpStatus::BadRequest, listener.errorCode);
+}
+
+TEST(HttpParser, requestLine_invalid3_InvalidVersion) {
+  HttpParserListener listener;
+  HttpParser parser(HttpParser::REQUEST, &listener);
+  parser.parseFragment("GET / HTTP/0\r\n\r\n");
+  ASSERT_EQ((int)HttpStatus::BadRequest, (int)listener.errorCode);
+}
+
+TEST(HttpParser, requestLine_invalid3_CharsAfterVersion) {
+  HttpParserListener listener;
+  HttpParser parser(HttpParser::REQUEST, &listener);
+  parser.parseFragment("GET / HTTP/1.1b\r\n\r\n");
+  ASSERT_EQ((int)HttpStatus::BadRequest, (int)listener.errorCode);
+}
+
+TEST(HttpParser, requestLine_invalid5_SpaceAfterVersion) {
+  HttpParserListener listener;
+  HttpParser parser(HttpParser::REQUEST, &listener);
+  parser.parseFragment("GET / HTTP/1.1 \r\n\r\n");
+  ASSERT_EQ((int)HttpStatus::BadRequest, (int)listener.errorCode);
+}
+
+TEST(HttpParser, requestLine_invalid6_UnsupportedVersion) {
+  HttpParserListener listener;
+  HttpParser parser(HttpParser::REQUEST, &listener);
+  parser.parseFragment("GET / HTTP/1.2\r\n\r\n");
+  ASSERT_EQ((int)HttpStatus::HttpVersionNotSupported, (int)listener.errorCode);
+}
+
+TEST(HttpParser, headers1) {
+  HttpParserListener listener;
+  HttpParser parser(HttpParser::MESSAGE, &listener);
+  parser.parseFragment(
+      "Foo: the foo\r\n"
+      "Content-Length: 6\r\n"
+      "\r\n"
+      "123456");
+
+  ASSERT_EQ("Foo", listener.headers[0].first);
+  ASSERT_EQ("the foo", listener.headers[0].second);
+  ASSERT_EQ("123456", listener.body);
+}
+
+TEST(HttpParser, invalidHeader1) {
+  HttpParserListener listener;
+  HttpParser parser(HttpParser::MESSAGE, &listener);
+  size_t n = parser.parseFragment("Foo : the foo\r\n"
+                                  "\r\n");
+
+  ASSERT_EQ(HttpStatus::BadRequest, listener.errorCode);
+  ASSERT_EQ(3, n);
+  ASSERT_EQ(0, listener.headers.size());
+}
+
+TEST(HttpParser, invalidHeader2) {
+  HttpParserListener listener;
+  HttpParser parser(HttpParser::MESSAGE, &listener);
+  size_t n = parser.parseFragment("Foo\r\n"
+                                  "\r\n");
+
+  ASSERT_EQ(HttpStatus::BadRequest, listener.errorCode);
+  ASSERT_EQ(5, n);
+  ASSERT_EQ(0, listener.headers.size());
+}
+
 TEST(HttpParser, requestWithHeaders) {
   HttpParserListener listener;
   HttpParser parser(HttpParser::REQUEST, &listener);

@@ -31,17 +31,16 @@
 - [x] HTTP/1.1 keep-alive
 - [ ] automatic chunked response when no response content length was given
 - [ ] "Connection" header management (custom values)
-- [ ] "GET /path HTTP/1.2\r\n" should respond with 505 (http version not supported)
-- [ ] "GET /path\r\n" should return 400
-- [ ] "GET /path\r\nFoo : Bar\r\n\r\n" should respond 400 (header with space before colon)
 - [ ] read timeouts should respond 408
 - [ ] write timeouts should abort() the connection
 - [ ] keepalive timeouts should close() the connection
-- [ ] HttpParser: request line
+- [x] HttpParser: request line "GET /path HTTP/1.2\r\n" => 505
+- [x] HttpParser: request line "GET /path\r\n" => 400
 - [ ] HttpParser: response line
-- [ ] HttpParser: headers
-- [ ] HttpParser: body with content-length given
-- [ ] HttpParser: body with chunked body
+- [x] HttpParser: headers
+- [x] HttpParser: body with content-length given
+- [x] HttpParser: body with chunked body
+- [x] HttpParser: "Foo : Bar\r\n\r\n" => 400 (header with space before colon)
 - [ ] HttpGenerator: generate response with content-length given
 - [ ] HttpGenerator: generate response with chunked body
 - [ ] 6.6.6: HTTP version not supported
