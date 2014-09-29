@@ -84,27 +84,9 @@ void MockTransport::run(HttpVersion version, const std::string& method,
   channel_.reset(new HttpChannel(this, handler_, std::move(input),
                                  maxRequestUriLength_, maxRequestBodyLength_));
 
-  int versionMajor = 0;
-  int versionMinor = 0;
-  switch (version) {
-    case HttpVersion::VERSION_1_1:
-      versionMajor = 1;
-      versionMinor = 1;
-      break;
-    case HttpVersion::VERSION_1_0:
-      versionMajor = 1;
-      versionMinor = 0;
-      break;
-    case HttpVersion::VERSION_0_9:
-      versionMajor = 0;
-      versionMinor = 9;
-      break;
-    default:
-      throw std::runtime_error("Invalid argument");
-  }
 
   try {
-    channel_->onMessageBegin(method, entity, versionMajor, versionMinor);
+    channel_->onMessageBegin(method, entity, version);
     for (const auto& header: headers) {
       channel_->onMessageHeader(header.name(), header.value());
     }

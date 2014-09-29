@@ -3,11 +3,11 @@
 namespace xzero {
 
 bool HttpListener::onMessageBegin(const BufferRef& method, const BufferRef& uri,
-                                  int versionMajor, int versionMinor) {
+                                  HttpVersion version) {
   return true;
 }
 
-bool HttpListener::onMessageBegin(int versionMajor, int versionMinor, int code,
+bool HttpListener::onMessageBegin(HttpVersion version, HttpStatus code,
                                   const BufferRef& text) {
   return true;
 }

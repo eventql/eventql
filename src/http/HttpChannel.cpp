@@ -86,26 +86,8 @@ void HttpChannel::send100Continue() {
 }
 
 bool HttpChannel::onMessageBegin(const BufferRef& method,
-                                 const BufferRef& entity, int versionMajor,
-                                 int versionMinor) {
-  HttpVersion version = HttpVersion::UNKNOWN;
-  switch (versionMajor * 10 + versionMinor) {
-    case 20:
-      version = HttpVersion::VERSION_2_0;
-      break;
-    case 11:
-      version = HttpVersion::VERSION_1_1;
-      break;
-    case 10:
-      version = HttpVersion::VERSION_1_0;
-      break;
-    case 9:
-      version = HttpVersion::VERSION_0_9;
-      break;
-    default:
-      break;
-  }
-
+                                 const BufferRef& entity,
+                                 HttpVersion version) {
   response_->setVersion(version);
   request_->setVersion(version);
   request_->setMethod(method.str());

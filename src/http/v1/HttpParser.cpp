@@ -1040,25 +1040,53 @@ inline bool HttpParser::isText(char value) {
   return !isControl(value) || value == SP || value == HT;
 }
 
+inline HttpVersion make_version(int versionMajor, int versionMinor) {
+  if (versionMajor == 0) {
+    if (versionMinor == 9)
+      return HttpVersion::VERSION_0_9;
+    else
+      return HttpVersion::UNKNOWN;
+  }
+
+  if (versionMajor == 1) {
+    if (versionMinor == 0)
+      return HttpVersion::VERSION_1_0;
+    else if (versionMinor == 1)
+      return HttpVersion::VERSION_1_1;
+  }
+
+  return HttpVersion::UNKNOWN;
+}
+
 bool HttpParser::onMessageBegin(const BufferRef& method,
                                        const BufferRef& entity,
                                        int versionMajor, int versionMinor) {
-  if ((versionMajor == 0 && versionMinor == 9)
-      || (versionMajor == 1 && (versionMinor == 0 || versionMinor == 1))) {
-    return listener_ ? listener_->onMessageBegin(method, entity, versionMajor,
-                                                 versionMinor)
-                     : true;
+  HttpVersion version = make_version(versionMajor, versionMinor);
+
+  if (version == HttpVersion::UNKNOWN) {
+    onProtocolError(HttpStatus::HttpVersionNotSupported);
+    return false;
   }
 
-  onProtocolError(HttpStatus::HttpVersionNotSupported);
-  return false;
+  if (!listener_)
+    return true;
+
+  return listener_->onMessageBegin(method, entity, version);
 }
 
 bool HttpParser::onMessageBegin(int versionMajor, int versionMinor,
-                                       int code, const BufferRef& text) {
-  return listener_
-             ? listener_->onMessageBegin(versionMajor, versionMinor, code, text)
-             : true;
+                                int status, const BufferRef& text) {
+  HttpVersion version = make_version(versionMajor, versionMinor);
+  if (version == HttpVersion::UNKNOWN) {
+    onProtocolError(HttpStatus::HttpVersionNotSupported);
+    return false;
+  }
+
+  if (!listener_)
+    return true;
+
+  return listener_->onMessageBegin(version,
+                                   static_cast<HttpStatus>(code_), text);
 }
 
 bool HttpParser::onMessageBegin() {

@@ -27,26 +27,22 @@ void Http1Channel::reset() {
 }
 
 bool Http1Channel::onMessageBegin(const BufferRef& method,
-                                 const BufferRef& entity, int versionMajor,
-                                 int versionMinor) {
+                                 const BufferRef& entity,
+                                 HttpVersion version) {
 
-  switch (versionMajor * 10 + versionMinor) {
-    case 11:
+  switch (version) {
+    case HttpVersion::VERSION_1_1:
       persistent_ = true;
       break;
-    case 10:
-      // no persist. unless explicitely specified via "Connection: keep-alive"
-      persistent_ = false;
-      break;
-    case 9:
+    case HttpVersion::VERSION_1_0:
+    case HttpVersion::VERSION_0_9:
       persistent_ = false;
       break;
     default:
-      break;
+      throw std::runtime_error("Invalid State. Illegal version passed.");
   }
 
-  return xzero::HttpChannel::onMessageBegin(method, entity, versionMajor,
-                                            versionMinor);
+  return xzero::HttpChannel::onMessageBegin(method, entity, version);
 }
 
 bool Http1Channel::onMessageHeader(const BufferRef& name,

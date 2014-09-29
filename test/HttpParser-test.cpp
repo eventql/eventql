@@ -13,8 +13,8 @@ class HttpParserCallbacks : public xzero::HttpListener {  // {{{
   HttpParserCallbacks() = default;
 
   bool onMessageBegin(const BufferRef& method, const BufferRef& entity,
-                      int versionMajor, int versionMinor) override;
-  bool onMessageBegin(int versionMajor, int versionMinor, int code,
+                      HttpVersion version) override;
+  bool onMessageBegin(HttpVersion version, HttpStatus code,
                       const BufferRef& text) override;
   bool onMessageBegin() override;
   bool onMessageHeader(const BufferRef& name, const BufferRef& value) override;
@@ -25,8 +25,8 @@ class HttpParserCallbacks : public xzero::HttpListener {  // {{{
 
  public:
   std::function<bool(const BufferRef& method, const BufferRef& entity,
-                     int versionMajor, int versionMinor)> requestStart;
-  std::function<bool(int versionMajor, int versionMinor, int code,
+                     HttpVersion version)> requestStart;
+  std::function<bool(HttpVersion version, HttpStatus code,
                      const BufferRef& text)> responseStart;
   std::function<bool()> messageStart;
   std::function<bool(const BufferRef& name, const BufferRef& value)> header;
@@ -38,17 +38,17 @@ class HttpParserCallbacks : public xzero::HttpListener {  // {{{
 
 bool HttpParserCallbacks::onMessageBegin(const BufferRef& method,
                                          const BufferRef& entity,
-                                         int versionMajor, int versionMinor) {
+                                         HttpVersion version) {
   if (requestStart)
-    return requestStart(method, entity, versionMajor, versionMinor);
+    return requestStart(method, entity, version);
   else
     return true;
 }
 
-bool HttpParserCallbacks::onMessageBegin(int versionMajor, int versionMinor,
-                                         int code, const BufferRef& text) {
+bool HttpParserCallbacks::onMessageBegin(HttpVersion version, HttpStatus code,
+                                         const BufferRef& text) {
   if (responseStart)
-    return responseStart(versionMajor, versionMinor, code, text);
+    return responseStart(version, code, text);
   else
     return true;
 }
@@ -100,8 +100,8 @@ class HttpParserListener : public xzero::HttpListener {  // {{{
   HttpParserListener();
 
   bool onMessageBegin(const BufferRef& method, const BufferRef& entity,
-                      int versionMajor, int versionMinor) override;
-  bool onMessageBegin(int versionMajor, int versionMinor, int code,
+                      HttpVersion version) override;
+  bool onMessageBegin(HttpVersion version, HttpStatus code,
                       const BufferRef& text) override;
   bool onMessageBegin() override;
   bool onMessageHeader(const BufferRef& name, const BufferRef& value) override;
@@ -113,9 +113,8 @@ class HttpParserListener : public xzero::HttpListener {  // {{{
  public:
   std::string method;
   std::string entity;
-  int versionMajor;
-  int versionMinor;
-  int statusCode;
+  HttpVersion version;
+  HttpStatus statusCode;
   std::string statusReason;
   std::vector<std::pair<std::string, std::string>> headers;
   Buffer body;
@@ -130,9 +129,8 @@ class HttpParserListener : public xzero::HttpListener {  // {{{
 HttpParserListener::HttpParserListener()
     : method(),
       entity(),
-      versionMajor(-1),
-      versionMinor(-1),
-      statusCode(-1),
+      version(HttpVersion::UNKNOWN),
+      statusCode(HttpStatus::Undefined),
       statusReason(),
       headers(),
       errorCode(xzero::HttpStatus::Undefined),
@@ -143,19 +141,17 @@ HttpParserListener::HttpParserListener()
 
 bool HttpParserListener::onMessageBegin(const BufferRef& method,
                                         const BufferRef& entity,
-                                        int versionMajor, int versionMinor) {
+                                        HttpVersion version) {
   this->method = method.str();
   this->entity = entity.str();
-  this->versionMajor = versionMajor;
-  this->versionMinor = versionMinor;
+  this->version = version;
 
   return true;
 }
 
-bool HttpParserListener::onMessageBegin(int versionMajor, int versionMinor,
-                                        int code, const BufferRef& text) {
-  this->versionMajor = versionMajor;
-  this->versionMinor = versionMinor;
+bool HttpParserListener::onMessageBegin(HttpVersion version, HttpStatus code,
+                                        const BufferRef& text) {
+  this->version = version;
   this->statusCode = code;
   this->statusReason = text.str();
 
@@ -202,8 +198,7 @@ TEST(HttpParser, requestLine1) {
 
   ASSERT_EQ("GET", listener.method);
   ASSERT_EQ("/", listener.entity);
-  ASSERT_EQ(0, listener.versionMajor);
-  ASSERT_EQ(9, listener.versionMinor);
+  ASSERT_EQ(HttpVersion::VERSION_0_9, listener.version);
   ASSERT_EQ(0, listener.headers.size());
   ASSERT_EQ(0, listener.body.size());
 }
@@ -215,8 +210,7 @@ TEST(HttpParser, requestLine2) {
 
   ASSERT_EQ("HEAD", listener.method);
   ASSERT_EQ("/foo?bar", listener.entity);
-  ASSERT_EQ(1, listener.versionMajor);
-  ASSERT_EQ(0, listener.versionMinor);
+  ASSERT_EQ(HttpVersion::VERSION_1_0, listener.version);
   ASSERT_EQ(0, listener.headers.size());
   ASSERT_EQ(0, listener.body.size());
 }
@@ -310,8 +304,7 @@ TEST(HttpParser, requestWithHeaders) {
 
   ASSERT_EQ("GET", listener.method);
   ASSERT_EQ("/", listener.entity);
-  ASSERT_EQ(0, listener.versionMajor);
-  ASSERT_EQ(9, listener.versionMinor);
+  ASSERT_EQ(HttpVersion::VERSION_0_9, listener.version);
   ASSERT_EQ(2, listener.headers.size());
   ASSERT_EQ(0, listener.body.size());
 
@@ -420,7 +413,6 @@ TEST(HttpParser, pipelined1) {
 
   ASSERT_EQ("HEAD", listener.method);
   ASSERT_EQ("/bar", listener.entity);
-  ASSERT_EQ(0, listener.versionMajor);
-  ASSERT_EQ(9, listener.versionMinor);
+  ASSERT_EQ(HttpVersion::VERSION_0_9, listener.version);
 }
 
