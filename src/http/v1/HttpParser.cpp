@@ -19,10 +19,6 @@ namespace http1 {
   } while (0)
 #endif
 
-//! Support messages using LF-only as linefeed instead of CRLF,
-//! which is not HTTP conform.
-#define X0_HTTP_SUPPORT_SHORT_LF 1
-
 std::string to_string(HttpParser::State state) {
   switch (state) {
     // artificial
@@ -439,21 +435,6 @@ std::size_t HttpParser::parseFragment(const BufferRef& chunk) {
           ++*nparsed;
           ++i;
         }
-#if defined(X0_HTTP_SUPPORT_SHORT_LF)
-        else if (*i == LF) {
-          state_ = HEADER_NAME_BEGIN;
-          ++*nparsed;
-          ++i;
-
-          TRACE(2, "request-line: method=%s, entity=%s, vmaj=%d, vmin=%d",
-                method_.str().c_str(), entity_.str().c_str(), versionMajor_,
-                versionMinor_);
-
-          if (!onMessageBegin(method_, entity_, versionMajor_, versionMinor_)) {
-            goto done;
-          }
-        }
-#endif
         else if (!std::isdigit(*i)) {
           onProtocolError(HttpStatus::BadRequest);
           state_ = PROTOCOL_ERROR;
@@ -638,11 +619,6 @@ std::size_t HttpParser::parseFragment(const BufferRef& chunk) {
           ++*nparsed;
           ++i;
         }
-#if defined(X0_HTTP_SUPPORT_SHORT_LF)
-        else if (*i == LF) {
-          state_ = HEADER_END_LF;
-        }
-#endif
         else {
           onProtocolError(HttpStatus::BadRequest);
           state_ = PROTOCOL_ERROR;
@@ -688,12 +664,6 @@ std::size_t HttpParser::parseFragment(const BufferRef& chunk) {
           state_ = LWS_LF;
           ++*nparsed;
           ++i;
-#if defined(X0_HTTP_SUPPORT_SHORT_LF)
-        } else if (*i == LF) {
-          state_ = LWS_SP_HT_BEGIN;
-          ++*nparsed;
-          ++i;
-#endif
         } else if (*i == SP || *i == HT) {
           state_ = LWS_SP_HT;
           ++*nparsed;
@@ -750,12 +720,6 @@ std::size_t HttpParser::parseFragment(const BufferRef& chunk) {
           state_ = HEADER_VALUE_LF;
           ++*nparsed;
           ++i;
-#if defined(X0_HTTP_SUPPORT_SHORT_LF)
-        } else if (*i == LF) {
-          state_ = HEADER_VALUE_END;
-          ++*nparsed;
-          ++i;
-#endif
         } else {
           onProtocolError(HttpStatus::BadRequest);
           state_ = PROTOCOL_ERROR;
@@ -769,15 +733,6 @@ std::size_t HttpParser::parseFragment(const BufferRef& chunk) {
           ++*nparsed;
           ++i;
         }
-#if defined(X0_HTTP_SUPPORT_SHORT_LF)
-        else if (*i == LF) {
-          state_ = LWS_SP_HT_BEGIN;
-          lwsNext_ = HEADER_VALUE;
-          lwsNull_ = HEADER_VALUE_END;
-          ++*nparsed;
-          ++i;
-        }
-#endif
         else if (isText(*i)) {
           value_.shr();
           ++*nparsed;
