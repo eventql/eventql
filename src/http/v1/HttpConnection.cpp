@@ -19,6 +19,7 @@ namespace xzero {
 namespace http1 {
 
 static LogSource connectionLogger("http1.HttpConnection");
+#define ERROR(msg...) do { connectionLogger.error(msg); } while (0)
 #ifndef NDEBUG
 #define TRACE(msg...) do { connectionLogger.trace(msg); } while (0)
 #else
@@ -85,6 +86,10 @@ void HttpConnection::completed() {
   if (onComplete_)
     throw std::runtime_error("there is still another completion hook.");
 
+  if (!generator_.isChunked() && generator_.pendingContentLength() > 0)
+    throw std::runtime_error(
+        "Invalid State. Response not fully written but completed() invoked.");
+
   generator_.generateBody(BufferRef(), true, &writer_);  // EOS
 
   onComplete_ = [this](bool) {
@@ -118,11 +123,11 @@ void HttpConnection::send(HttpResponseInfo&& responseInfo,
   if (onComplete && onComplete_)
     throw std::runtime_error("there is still another completion hook.");
 
-  patchResponseInfo(responseInfo);
-
   TRACE("%p send(status=%d, persistent=%s, chunkSize=%zu)",
         this, responseInfo.status(), channel_->isPersistent() ? "yes" : "no",
         chunk.size());
+
+  patchResponseInfo(responseInfo);
 
   generator_.generateResponse(responseInfo, chunk, false, &writer_);
   onComplete_ = onComplete;
@@ -140,11 +145,11 @@ void HttpConnection::send(HttpResponseInfo&& responseInfo,
   if (onComplete && onComplete_)
     throw std::runtime_error("there is still another completion hook.");
 
-  patchResponseInfo(responseInfo);
-
   TRACE("%p send(status=%d, persistent=%s, chunkSize=%zu)",
         this, responseInfo.status(), channel_->isPersistent() ? "yes" : "no",
         chunk.size());
+
+  patchResponseInfo(responseInfo);
 
   generator_.generateResponse(responseInfo, std::move(chunk), false, &writer_);
   onComplete_ = onComplete;
@@ -246,11 +251,16 @@ void HttpConnection::onFlushable() {
 }
 
 void HttpConnection::onInterestFailure(const std::exception& error) {
+  ERROR("onInterestFailure. %s", error.what());
+  //printf("onInterestFailure. %s\n", error.what());
+
   if (!channel_->response()->isCommitted()) {
     channel_->setPersistent(false);
     channel_->response()->sendError(HttpStatus::InternalServerError,
                                     error.what());
   } else {
+    // TODO: improve logging here, as this eats our exception here.
+    // e.g. via (factory or connector)->report(this, error);
     abort();
   }
 }

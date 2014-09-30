@@ -20,14 +20,14 @@ HttpResponse::HttpResponse(HttpChannel* channel,
 }
 
 void HttpResponse::recycle() {
-  output_->recycle();
+  committed_ = false;
   version_ = HttpVersion::UNKNOWN;
   status_ = HttpStatus::Undefined;
   reason_.clear();
   contentType_.clear();
   contentLength_ = static_cast<size_t>(-1);
   headers_.reset();
-  committed_ = false;
+  output_->recycle();
 }
 
 void HttpResponse::setCommitted(bool value) {
@@ -133,6 +133,7 @@ void HttpResponse::sendError(HttpStatus code, const std::string& message) {
   setStatus(code);
   setReason(message);
   removeAllHeaders();
+  output()->removeAllFilters();
 
   if (!isContentForbidden(code)) {
     Buffer body(2048);

@@ -151,6 +151,7 @@ void HttpChannel::handleRequest() {
   try {
     handler_(request(), response());
   } catch (std::exception& e) {
+    printf("exception caught: %s\n", e.what());
     response()->sendError(HttpStatus::InternalServerError, e.what());
   } catch (...) {
     response()->sendError(HttpStatus::InternalServerError,

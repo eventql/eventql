@@ -75,19 +75,16 @@ void HttpGenerator::generateResponseInfo(const HttpResponseInfo& info,
 void HttpGenerator::generateBody(const BufferRef& chunk, bool last,
                                  EndPointWriter* output) {
   if (chunked_) {
-    int n;
-    char buf[12];
-
     if (chunk.size() > 0) {
-      n = snprintf(buf, sizeof(buf), "%zx\r\n", chunk.size());
-      output->write(BufferRef(buf, static_cast<size_t>(n)));
+      Buffer buf(12);
+      buf.printf("%zx\r\n", chunk.size());
+      output->write(std::move(buf));
       output->write(chunk);
       output->write(BufferRef("\r\n"));
     }
 
     if (last) {
-      n = snprintf(buf, sizeof(buf), "0\r\n\r\n");
-      output->write(BufferRef(buf, n));
+      output->write(BufferRef("0\r\n\r\n"));
     }
   } else {
     if (chunk.size() <= contentLength_) {
@@ -102,19 +99,16 @@ void HttpGenerator::generateBody(const BufferRef& chunk, bool last,
 void HttpGenerator::generateBody(Buffer&& chunk, bool last,
                                  EndPointWriter* output) {
   if (chunked_) {
-    int n;
-    char buf[12];
-
     if (chunk.size() > 0) {
-      n = snprintf(buf, sizeof(buf), "%zx\r\n", chunk.size());
-      output->write(BufferRef(buf, static_cast<size_t>(n)));
+      Buffer buf(12);
+      buf.printf("%zx\r\n", chunk.size());
+      output->write(std::move(buf));
       output->write(std::move(chunk));
       output->write(BufferRef("\r\n"));
     }
 
     if (last) {
-      n = snprintf(buf, sizeof(buf), "0\r\n\r\n");
-      output->write(BufferRef(buf, n));
+      output->write(BufferRef("0\r\n\r\n"));
     }
   } else {
     if (chunk.size() <= contentLength_) {
