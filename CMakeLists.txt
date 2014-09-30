@@ -86,6 +86,28 @@ endif()
 
 add_definitions(-DHAVE_SYSCONFIG_H)
 
+add_custom_target(ctags
+    COMMAND ctags -R --c++-kinds=+p --fields=+iaS --extra=+q ${CMAKE_SOURCE_DIR}/src ${CMAKE_SOURCE_DIR}/include
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+
+add_custom_target(cscope
+    COMMAND echo -n > ${CMAKE_SOURCE_DIR}/cscope.files
+            && find ${CMAKE_SOURCE_DIR}/src -name '*.h' -o -name '*.cc' -o -name '*.cpp' >> ${CMAKE_SOURCE_DIR}/cscope.files
+            && find ${CMAKE_SOURCE_DIR}/include -name '*.h' -o -name '*.cc' -o -name '*.hpp' >> ${CMAKE_SOURCE_DIR}/cscope.files
+            && cscope -q -R -b -i cscope.files
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+)
+
+add_custom_target(release
+    COMMAND ${CMAKE_SOURCE_DIR}/contrib/ppa-release.sh
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+)
+
+add_custom_target(test
+    COMMAND ${CMAKE_BINARY_DIR}/test/libxzero-test --gtest_color=yes
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+)
+
 configure_file(
     ${CMAKE_CURRENT_SOURCE_DIR}/include/xzero/sysconfig.h.cmake
     ${CMAKE_CURRENT_BINARY_DIR}/include/xzero/sysconfig.h)
