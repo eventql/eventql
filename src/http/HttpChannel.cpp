@@ -40,28 +40,41 @@ std::unique_ptr<HttpOutput> HttpChannel::createOutput() {
 
 void HttpChannel::send(const BufferRef& data, CompletionHandler&& onComplete) {
   if (!response_->isCommitted()) {
-    if (!response_->status())
-      throw std::runtime_error("No HTTP response status set yet.");
-
-    response_->setCommitted(true);
-
-    if (request_->expect100Continue()) {
-      response_->send100Continue();
-    }
-
-    const bool isHeadReq = request_->method() == "HEAD";
-    HttpResponseInfo info(response_->version(), response_->status(),
-                          response_->reason(), isHeadReq,
-                          response_->contentLength(), response_->headers());
-
-    if (!info.headers().contains("Server"))
-      info.headers().push_back("Server", "xzero/" LIBXZERO_VERSION);
-
-    transport_->send(std::move(info), data,
-                     std::forward<CompletionHandler>(onComplete));
+    HttpResponseInfo info(commit());
+    transport_->send(std::move(info), data, std::move(onComplete));
   } else {
-    transport_->send(data, std::forward<CompletionHandler>(onComplete));
+    transport_->send(data, std::move(onComplete));
   }
+}
+
+void HttpChannel::send(Buffer&& data, CompletionHandler&& onComplete) {
+  if (!response_->isCommitted()) {
+    HttpResponseInfo info(commit());
+    transport_->send(std::move(info), std::move(data), std::move(onComplete));
+  } else {
+    transport_->send(std::move(data), std::move(onComplete));
+  }
+}
+
+HttpResponseInfo HttpChannel::commit() {
+  if (!response_->status())
+    throw std::runtime_error("No HTTP response status set yet.");
+
+  response_->setCommitted(true);
+
+  if (request_->expect100Continue()) {
+    response_->send100Continue();
+  }
+
+  const bool isHeadReq = request_->method() == "HEAD";
+  HttpResponseInfo info(response_->version(), response_->status(),
+                        response_->reason(), isHeadReq,
+                        response_->contentLength(), response_->headers());
+
+  if (!info.headers().contains("Server"))
+    info.headers().push_back("Server", "xzero/" LIBXZERO_VERSION);
+
+  return info;
 }
 
 void HttpChannel::send(FileRef&& file, CompletionHandler&& completed) {

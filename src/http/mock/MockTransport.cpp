@@ -86,9 +86,10 @@ void MockTransport::run(HttpVersion version, const std::string& method,
 
 
   try {
-    channel_->onMessageBegin(method, entity, version);
-    for (const auto& header: headers) {
-      channel_->onMessageHeader(header.name(), header.value());
+    channel_->onMessageBegin(BufferRef(method), BufferRef(entity), version);
+    for (const HeaderField& header: headers) {
+      channel_->onMessageHeader(BufferRef(header.name()),
+                                BufferRef(header.value()));
     }
     channel_->onMessageHeaderEnd();
     channel_->onMessageContent(BufferRef(body.data(), body.size()));
@@ -119,7 +120,30 @@ void MockTransport::send(HttpResponseInfo&& responseInfo,
   }
 }
 
+void MockTransport::send(HttpResponseInfo&& responseInfo,
+                         Buffer&& chunk,
+                         CompletionHandler&& onComplete) {
+  responseInfo_ = std::move(responseInfo);
+  responseBody_ += chunk;
+
+  if (onComplete) {
+    executor_->execute([onComplete]() {
+      onComplete(true);
+    });
+  }
+}
+
 void MockTransport::send(const BufferRef& chunk, CompletionHandler&& onComplete) {
+  responseBody_ += chunk;
+
+  if (onComplete) {
+    executor_->execute([onComplete]() {
+      onComplete(true);
+    });
+  }
+}
+
+void MockTransport::send(Buffer&& chunk, CompletionHandler&& onComplete) {
   responseBody_ += chunk;
 
   if (onComplete) {

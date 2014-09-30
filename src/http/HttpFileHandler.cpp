@@ -255,7 +255,7 @@ bool HttpFileHandler::handleClientCache(const HttpFile& transferFile,
                                         HttpResponse* response) {
   // If-None-Match
   do {
-    std::string value = request->headers().get("If-None-Match");
+    const std::string& value = request->headers().get("If-None-Match");
     if (value.empty()) continue;
 
     // XXX: on static files we probably don't need the token-list support
@@ -268,7 +268,7 @@ bool HttpFileHandler::handleClientCache(const HttpFile& transferFile,
 
   // If-Modified-Since
   do {
-    std::string value = request->headers().get("If-Modified-Since");
+    const std::string& value = request->headers().get("If-Modified-Since");
     if (value.empty()) continue;
 
     DateTime dt(value);
@@ -283,7 +283,7 @@ bool HttpFileHandler::handleClientCache(const HttpFile& transferFile,
 
   // If-Match
   do {
-    BufferRef value = request->headers().get("If-Match");
+    const std::string& value = request->headers().get("If-Match");
     if (value.empty()) continue;
 
     if (value == "*") continue;
@@ -298,7 +298,7 @@ bool HttpFileHandler::handleClientCache(const HttpFile& transferFile,
 
   // If-Unmodified-Since
   do {
-    BufferRef value = request->headers().get("If-Unmodified-Since");
+    const std::string& value = request->headers().get("If-Unmodified-Since");
     if (value.empty()) continue;
 
     DateTime dt(value);

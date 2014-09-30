@@ -22,6 +22,15 @@ void HttpGenerator::recycle() {
 }
 
 void HttpGenerator::generateRequest(const HttpRequestInfo& info,
+                                    Buffer&& chunk, bool last,
+                                    EndPointWriter* output) {
+  generateRequestLine(info);
+  generateHeaders(info);
+  flushBuffer(output);
+  generateBody(std::move(chunk), last, output);
+}
+
+void HttpGenerator::generateRequest(const HttpRequestInfo& info,
                                     const BufferRef& chunk, bool last,
                                     EndPointWriter* output) {
   generateRequestLine(info);
@@ -31,8 +40,21 @@ void HttpGenerator::generateRequest(const HttpRequestInfo& info,
 }
 
 void HttpGenerator::generateResponse(const HttpResponseInfo& info,
+                                     Buffer&& chunk, bool last,
+                                     EndPointWriter* output) {
+  generateResponseInfo(info, output);
+  generateBody(std::move(chunk), last, output);
+}
+
+void HttpGenerator::generateResponse(const HttpResponseInfo& info,
                                      const BufferRef& chunk, bool last,
                                      EndPointWriter* output) {
+  generateResponseInfo(info, output);
+  generateBody(chunk, last, output);
+}
+
+void HttpGenerator::generateResponseInfo(const HttpResponseInfo& info,
+                                         EndPointWriter* output) {
   generateResponseLine(info);
 
   if (static_cast<int>(info.status()) >= 200) {
@@ -48,7 +70,6 @@ void HttpGenerator::generateResponse(const HttpResponseInfo& info,
   }
 
   flushBuffer(output);
-  generateBody(chunk, last, output);
 }
 
 void HttpGenerator::generateBody(const BufferRef& chunk, bool last,
@@ -72,6 +93,33 @@ void HttpGenerator::generateBody(const BufferRef& chunk, bool last,
     if (chunk.size() <= contentLength_) {
       contentLength_ -= chunk.size();
       output->write(chunk);
+    } else {
+      throw std::runtime_error("HTTP body chunk exceeds content length.");
+    }
+  }
+}
+
+void HttpGenerator::generateBody(Buffer&& chunk, bool last,
+                                 EndPointWriter* output) {
+  if (chunked_) {
+    int n;
+    char buf[12];
+
+    if (chunk.size() > 0) {
+      n = snprintf(buf, sizeof(buf), "%zx\r\n", chunk.size());
+      output->write(BufferRef(buf, static_cast<size_t>(n)));
+      output->write(std::move(chunk));
+      output->write(BufferRef("\r\n"));
+    }
+
+    if (last) {
+      n = snprintf(buf, sizeof(buf), "0\r\n\r\n");
+      output->write(BufferRef(buf, n));
+    }
+  } else {
+    if (chunk.size() <= contentLength_) {
+      contentLength_ -= chunk.size();
+      output->write(std::move(chunk));
     } else {
       throw std::runtime_error("HTTP body chunk exceeds content length.");
     }

@@ -118,10 +118,45 @@ void HttpConnection::send(HttpResponseInfo&& responseInfo,
   if (onComplete && onComplete_)
     throw std::runtime_error("there is still another completion hook.");
 
+  patchResponseInfo(responseInfo);
+
   TRACE("%p send(status=%d, persistent=%s, chunkSize=%zu)",
         this, responseInfo.status(), channel_->isPersistent() ? "yes" : "no",
         chunk.size());
 
+  generator_.generateResponse(responseInfo, chunk, false, &writer_);
+  onComplete_ = onComplete;
+
+  const bool corking_ = true;  // TODO(TCP_CORK): part of HttpResponseInfo?
+  if (corking_)
+    endpoint()->setCorking(true);
+
+  wantFlush();
+}
+
+void HttpConnection::send(HttpResponseInfo&& responseInfo,
+                          Buffer&& chunk,
+                          CompletionHandler&& onComplete) {
+  if (onComplete && onComplete_)
+    throw std::runtime_error("there is still another completion hook.");
+
+  patchResponseInfo(responseInfo);
+
+  TRACE("%p send(status=%d, persistent=%s, chunkSize=%zu)",
+        this, responseInfo.status(), channel_->isPersistent() ? "yes" : "no",
+        chunk.size());
+
+  generator_.generateResponse(responseInfo, std::move(chunk), false, &writer_);
+  onComplete_ = onComplete;
+
+  const bool corking_ = true;  // TODO(TCP_CORK): part of HttpResponseInfo?
+  if (corking_)
+    endpoint()->setCorking(true);
+
+  wantFlush();
+}
+
+void HttpConnection::patchResponseInfo(HttpResponseInfo& responseInfo) {
   if (static_cast<int>(responseInfo.status()) >= 200) {
     // patch in HTTP transport-layer headers
     if (channel_->isPersistent() && requestCount_ < requestMax_) {
@@ -138,13 +173,17 @@ void HttpConnection::send(HttpResponseInfo&& responseInfo,
       responseInfo.headers().push_back("Connection", "closed");
     }
   }
+}
 
-  generator_.generateResponse(responseInfo, chunk, false, &writer_);
-  onComplete_ = onComplete;
+void HttpConnection::send(Buffer&& chunk,
+                          CompletionHandler&& onComplete) {
+  if (onComplete && onComplete_)
+    throw std::runtime_error("there is still another completion hook.");
 
-  const bool corking_ = true;  // TODO(TCP_CORK): part of HttpResponseInfo?
-  if (corking_)
-    endpoint()->setCorking(true);
+  TRACE("%p send(chunkSize=%zu)", this, chunk.size());
+
+  generator_.generateBody(std::move(chunk), false, &writer_);
+  onComplete_ = std::move(onComplete);
 
   wantFlush();
 }

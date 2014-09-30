@@ -25,15 +25,14 @@ void HttpOutput::write(const char* cstr, CompletionHandler&& completed) {
 }
 
 void HttpOutput::write(const std::string& str, CompletionHandler&& completed) {
-  write(BufferRef(str.data(), str.size()),
-        std::forward<CompletionHandler>(completed));
-}
-
-void HttpOutput::write(const BufferRef& data, CompletionHandler&& completed) {
-  channel_->send(data, std::forward<CompletionHandler>(completed));
+  write(Buffer(str), std::forward<CompletionHandler>(completed));
 }
 
 void HttpOutput::write(Buffer&& data, CompletionHandler&& completed) {
+  channel_->send(std::move(data), std::forward<CompletionHandler>(completed));
+}
+
+void HttpOutput::write(const BufferRef& data, CompletionHandler&& completed) {
   channel_->send(data, std::forward<CompletionHandler>(completed));
 }
 
