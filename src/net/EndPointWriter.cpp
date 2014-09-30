@@ -12,7 +12,7 @@ EndPointWriter::~EndPointWriter() {
 }
 
 void EndPointWriter::write(const BufferRef& data) {
-  chunks_.emplace_back(std::unique_ptr<Chunk>(new BufferChunk(data)));
+  chunks_.emplace_back(std::unique_ptr<Chunk>(new BufferRefChunk(data)));
 }
 
 void EndPointWriter::write(Buffer&& chunk) {
@@ -44,6 +44,15 @@ bool EndPointWriter::BufferChunk::transferTo(EndPoint* sink) {
 
   offset_ += n;
 
+  return offset_ == data_.size();
+}
+// }}}
+// {{{ EndPointWriter::BufferRefChunk
+bool EndPointWriter::BufferRefChunk::transferTo(EndPoint* sink) {
+  size_t n = sink->flush(data_.ref(offset_));
+  // printf("BufferRefChunk.transferTo: %zu bytes\n", n);
+
+  offset_ += n;
   return offset_ == data_.size();
 }
 // }}}
