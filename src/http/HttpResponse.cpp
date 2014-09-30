@@ -55,6 +55,13 @@ void HttpResponse::setStatus(HttpStatus status) {
   status_ = status;
 }
 
+void HttpResponse::setReason(const std::string& val) {
+  if (isCommitted())
+    throw std::runtime_error("Invalid State. Cannot be modified after commit.");
+
+  reason_ = val;
+}
+
 void HttpResponse::setContentType(const std::string& value) {
   if (isCommitted())
     throw std::runtime_error("Invalid State. Cannot be modified after commit.");
