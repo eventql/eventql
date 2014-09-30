@@ -37,7 +37,7 @@ TEST(ByteArrayEndPoint, fill) {
   ASSERT_EQ("foo bar", input);
 }
 
-TEST(ByteArrayEndPoint, close) {
+TEST(ByteArrayEndPoint, DISABLED_close) {
   ByteArrayEndPoint ep(nullptr);
   Buffer output;
 
