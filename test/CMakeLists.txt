@@ -5,9 +5,13 @@ if(ENABLE_TESTS)
 
   add_executable(libxzero-test xzero-test.cpp
     # base
-    IdleTimeout-test.cpp
+    Base64-test.cpp
+    Buffer-test.cpp
     ByteArrayEndPoint-test.cpp
+    Cidr-test.cpp
+    IdleTimeout-test.cpp
     ThreadPool-test.cpp
+    Tokenizer-test.cpp
     # support
     LibevScheduler-test.cpp
     # http common
