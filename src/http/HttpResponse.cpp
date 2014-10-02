@@ -83,6 +83,12 @@ static const std::vector<std::string> connectionHeaderFields = {
   "Close",
 };
 
+inline void checkInvalidHeader(const std::string& name) {
+  for (const auto& test: connectionHeaderFields)
+    if (iequals(name, test))
+      throw std::runtime_error("Invalid argument. Harmful response header.");
+}
+
 void HttpResponse::addHeader(const std::string& name,
                              const std::string& value) {
   if (isCommitted())
@@ -93,6 +99,17 @@ void HttpResponse::addHeader(const std::string& name,
       throw std::runtime_error("Invalid argument. Harmful response header.");
 
   headers_.push_back(name, value);
+}
+
+void HttpResponse::appendHeader(const std::string& name,
+                                const std::string& value,
+                                const std::string& delim) {
+  checkInvalidHeader(name);
+
+  if (isCommitted())
+    throw std::runtime_error("Invalid State. Cannot be modified after commit.");
+
+  headers_.append(name, value, delim);
 }
 
 void HttpResponse::setHeader(const std::string& name,

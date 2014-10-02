@@ -24,10 +24,11 @@ void HeaderFieldList::overwrite(const std::string& name,
 }
 
 void HeaderFieldList::append(const std::string& name,
-                             const std::string& value) {
+                             const std::string& value,
+                             const std::string& delim) {
   for (HeaderField& field : entries_) {
     if (iequals(field.name(), name)) {
-      field.setValue(field.value() + value);
+      field.appendValue(value, delim);
       return;
     }
   }
