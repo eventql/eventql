@@ -48,6 +48,19 @@ set(CMAKE_CXX_FLAGS "-std=c++0x")                   # C++11
 #set(CMAKE_CXX_FLAGS "-std=c++1y -stdlib=libc++")   # C++14 + libc++
 #set(CMAKE_CXX_FLAGS "-std=c++1z -stdlib=libc++")   # C++17 + libc++
 
+CHECK_INCLUDE_FILES(zlib.h HAVE_ZLIB_H)
+if(HAVE_ZLIB_H)
+  CHECK_LIBRARY_EXISTS(z deflate "" HAVE_LIBZ)
+  set(ZLIB_LIBRARIES z)
+endif(HAVE_ZLIB_H)
+
+CHECK_INCLUDE_FILES(bzlib.h HAVE_BZLIB_H)
+if(HAVE_BZLIB_H)
+  CHECK_LIBRARY_EXISTS(bz2 BZ2_bzCompressInit "" HAVE_LIBBZ2)
+  set(BZIP2_LIBRARIES bz2)
+endif(HAVE_BZLIB_H)
+
+
 CHECK_INCLUDE_FILES(sys/sendfile.h HAVE_SYS_SENDFILE_H)
 CHECK_FUNCTION_EXISTS(sendfile HAVE_SENDFILE)
 CHECK_FUNCTION_EXISTS(posix_fadvise HAVE_POSIX_FADVISE)
