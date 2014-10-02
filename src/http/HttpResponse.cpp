@@ -12,7 +12,6 @@ HttpResponse::HttpResponse(HttpChannel* channel,
       output_(std::move(output)),
       version_(HttpVersion::UNKNOWN),
       status_(HttpStatus::Undefined),
-      contentType_(),
       contentLength_(static_cast<size_t>(-1)),
       headers_(),
       committed_(false) {
@@ -24,7 +23,6 @@ void HttpResponse::recycle() {
   version_ = HttpVersion::UNKNOWN;
   status_ = HttpStatus::Undefined;
   reason_.clear();
-  contentType_.clear();
   contentLength_ = static_cast<size_t>(-1);
   headers_.reset();
   output_->recycle();
@@ -60,13 +58,6 @@ void HttpResponse::setReason(const std::string& val) {
     throw std::runtime_error("Invalid State. Cannot be modified after commit.");
 
   reason_ = val;
-}
-
-void HttpResponse::setContentType(const std::string& value) {
-  if (isCommitted())
-    throw std::runtime_error("Invalid State. Cannot be modified after commit.");
-
-  //TODO
 }
 
 void HttpResponse::setContentLength(size_t size) {
