@@ -78,6 +78,141 @@ TEST(BufferBase, toBool) {
   // invalid cast results into false
   ASSERT_TRUE(!BufferRef("BLAH").toBool());
 }
+
+TEST(BufferBase, iterator) {
+  BufferRef b("Hello");
+  BufferRef::iterator i = b.begin();
+  BufferRef::iterator e = b.end();
+
+  ASSERT_EQ('H', *i);
+
+  ++i;
+  ASSERT_TRUE(i != e);
+  ASSERT_EQ('e', *i);
+
+  ++i;
+  ASSERT_TRUE(i != e);
+  ASSERT_EQ('l', *i);
+
+  ++i;
+  ASSERT_TRUE(i != e);
+  ASSERT_EQ('l', *i);
+
+  ++i;
+  ASSERT_TRUE(i != e);
+  ASSERT_EQ('o', *i);
+
+  ++i;
+  ASSERT_TRUE(i == e);
+}
+
+// }}}
+// {{{ BufferRef
+TEST(BufferRef, ctor_empty) {
+  BufferRef b;
+  ASSERT_EQ(0, b.size());
+  ASSERT_TRUE(b.empty());
+  ASSERT_TRUE(b.begin() == b.end());
+}
+
+TEST(BufferRef, ctor_str_len) {
+  BufferRef b("Hello", 5);
+
+  ASSERT_EQ(5, b.size());
+  ASSERT_EQ("Hello", b);
+}
+
+TEST(BufferRef, ctor_stdstring) {
+  std::string s = "Hello";
+  BufferRef b(s);
+
+  ASSERT_TRUE(b.data() == s.data());
+  ASSERT_TRUE(b.size() == s.size());
+}
+
+TEST(BufferRef, ctor_BufferRef) {
+  BufferRef a("Hello", 5);
+  BufferRef b(a);
+
+  ASSERT_TRUE(a.data() == b.data());
+  ASSERT_TRUE(a.size() == b.size());
+}
+
+TEST(BufferRef, ctor_POD) {
+  BufferRef b("Hello");
+
+  ASSERT_EQ(5, b.size());
+  ASSERT_EQ("Hello", b);
+}
+
+TEST(BufferRef, operator_assign) {
+  BufferRef a("Hello");
+  BufferRef b;
+
+  b = a;
+
+  ASSERT_TRUE(a.data() == b.data());
+  ASSERT_TRUE(a.size() == b.size());
+}
+
+TEST(BufferRef, operator_rndaccess) {
+  BufferRef b("Hello");
+
+  ASSERT_EQ('H', b[0]);
+  ASSERT_EQ('e', b[1]);
+  ASSERT_EQ('l', b[2]);
+  ASSERT_EQ('l', b[3]);
+  ASSERT_EQ('o', b[4]);
+}
+
+TEST(BufferRef, shl) {
+  BufferRef b("Hello");
+
+  b.shl(-1);
+  ASSERT_EQ("ello", b);
+
+  b.shl(1);
+  ASSERT_EQ("Hello", b);
+}
+
+TEST(BufferRef, shr) {
+  BufferRef b("Hello");
+
+  b.shr(-1);
+  ASSERT_EQ("Hell", b);
+
+  b.shr(1);
+  ASSERT_EQ("Hello", b);
+}
+
+TEST(BufferRef, reverse_iterator) {
+  BufferRef b("Hello");
+
+  BufferRef::reverse_iterator i = b.rbegin();
+  BufferRef::reverse_iterator e = b.rend();
+
+  ASSERT_TRUE(i != e);
+  ASSERT_EQ('o', *i);
+
+  ++i;
+  ASSERT_TRUE(i != e);
+  ASSERT_EQ('l', *i);
+
+  ++i;
+  ASSERT_TRUE(i != e);
+  ASSERT_EQ('l', *i);
+
+  ++i;
+  ASSERT_TRUE(i != e);
+  ASSERT_EQ('e', *i);
+
+  ++i;
+  ASSERT_TRUE(i != e);
+  ASSERT_EQ('H', *i);
+
+  ++i;
+  ASSERT_TRUE(i == e);
+}
 // }}}
 // {{{ MutableBuffer<>
 TEST(MutableBuffer, resize) {
