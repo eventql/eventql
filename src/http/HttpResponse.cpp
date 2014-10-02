@@ -67,6 +67,13 @@ void HttpResponse::setContentLength(size_t size) {
   contentLength_ = size;
 }
 
+void HttpResponse::resetContentLength() {
+  if (isCommitted())
+    throw std::runtime_error("Invalid State. Cannot be modified after commit.");
+
+  contentLength_ = static_cast<size_t>(-1);
+}
+
 static const std::vector<std::string> connectionHeaderFields = {
   "Connection",
   "Keep-Alive",
