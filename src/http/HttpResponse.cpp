@@ -82,12 +82,10 @@ inline void checkInvalidHeader(const std::string& name) {
 
 void HttpResponse::addHeader(const std::string& name,
                              const std::string& value) {
+  checkInvalidHeader(name);
+
   if (isCommitted())
     throw std::runtime_error("Invalid State. Cannot be modified after commit.");
-
-  for (const auto& test: connectionHeaderFields)
-    if (iequals(name, test))
-      throw std::runtime_error("Invalid argument. Harmful response header.");
 
   headers_.push_back(name, value);
 }
@@ -105,12 +103,10 @@ void HttpResponse::appendHeader(const std::string& name,
 
 void HttpResponse::setHeader(const std::string& name,
                              const std::string& value) {
+  checkInvalidHeader(name);
+
   if (isCommitted())
     throw std::runtime_error("Invalid State. Cannot be modified after commit.");
-
-  for (const auto& test: connectionHeaderFields)
-    if (iequals(name, test))
-      throw std::runtime_error("Invalid argument. Harmful response header.");
 
   headers_.overwrite(name, value);
 }
