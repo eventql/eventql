@@ -43,6 +43,7 @@ set(libxzero_SRC
   http/HttpListener.cpp
   http/HttpOutput.cpp
   http/HttpOutputFilter.cpp
+  http/HttpOutputCompressor.cpp
   http/HttpRequest.cpp
   http/HttpResponse.cpp
   http/HttpStatus.cpp
