@@ -3,6 +3,9 @@
 #include <xzero/http/HttpRequest.h>
 #include <xzero/http/HttpResponse.h>
 #include <xzero/http/HttpResponseInfo.h>
+#include <xzero/http/HttpOutput.h>
+#include <xzero/http/HttpOutputFilter.h>
+#include <xzero/http/HttpOutputCompressor.h>
 #include <xzero/http/HttpVersion.h>
 #include <xzero/http/HttpInputListener.h>
 #include <xzero/http/BadMessage.h>
@@ -13,13 +16,15 @@ namespace xzero {
 HttpChannel::HttpChannel(HttpTransport* transport, const HttpHandler& handler,
                          std::unique_ptr<HttpInput>&& input,
                          size_t maxRequestUriLength,
-                         size_t maxRequestBodyLength)
+                         size_t maxRequestBodyLength,
+                         HttpOutputCompressor* outputCompressor)
     : maxRequestUriLength_(maxRequestUriLength),
       maxRequestBodyLength_(maxRequestBodyLength),
       state_(HttpChannelState::IDLE),
       transport_(transport),
       request_(new HttpRequest(std::move(input))),
       response_(new HttpResponse(this, createOutput())),
+      outputCompressor_(outputCompressor),
       handler_(handler) {
   //.
 }
@@ -40,7 +45,7 @@ std::unique_ptr<HttpOutput> HttpChannel::createOutput() {
 
 void HttpChannel::send(const BufferRef& data, CompletionHandler&& onComplete) {
   if (!response_->isCommitted()) {
-    HttpResponseInfo info(commit());
+    HttpResponseInfo info(commitInline());
     transport_->send(std::move(info), data, std::move(onComplete));
   } else {
     transport_->send(data, std::move(onComplete));
@@ -49,22 +54,35 @@ void HttpChannel::send(const BufferRef& data, CompletionHandler&& onComplete) {
 
 void HttpChannel::send(Buffer&& data, CompletionHandler&& onComplete) {
   if (!response_->isCommitted()) {
-    HttpResponseInfo info(commit());
+    HttpResponseInfo info(commitInline());
     transport_->send(std::move(info), std::move(data), std::move(onComplete));
   } else {
     transport_->send(std::move(data), std::move(onComplete));
   }
 }
 
-HttpResponseInfo HttpChannel::commit() {
+void HttpChannel::send(FileRef&& file, CompletionHandler&& completed) {
+  if (!response_->isCommitted()) {
+    send(BufferRef(), nullptr); // commit headers with empty body
+  }
+
+  transport_->send(std::move(file), std::move(completed));
+}
+
+HttpResponseInfo HttpChannel::commitInline() {
   if (!response_->status())
     throw std::runtime_error("No HTTP response status set yet.");
 
-  response_->setCommitted(true);
+  // for (HttpChannelListener* listener: listeners_)
+  //   listener->onBeforeCommit(request(), response());
 
-  if (request_->expect100Continue()) {
+  if (outputCompressor_)
+    outputCompressor_->postProcess(request(), response());
+
+  if (request_->expect100Continue())
     response_->send100Continue();
-  }
+
+  response_->setCommitted(true);
 
   const bool isHeadReq = request_->method() == "HEAD";
   HttpResponseInfo info(response_->version(), response_->status(),
@@ -77,13 +95,9 @@ HttpResponseInfo HttpChannel::commit() {
   return info;
 }
 
-void HttpChannel::send(FileRef&& file, CompletionHandler&& completed) {
-  if (!response_->isCommitted()) {
-    send(BufferRef(), nullptr); // commit headers with empty body
-  }
-
-  transport_->send(std::forward<FileRef>(file),
-                   std::forward<CompletionHandler>(completed));
+void HttpChannel::commit() {
+  HttpResponseInfo info(commitInline());
+  transport_->send(std::move(info), BufferRef(), nullptr);
 }
 
 void HttpChannel::send100Continue() {

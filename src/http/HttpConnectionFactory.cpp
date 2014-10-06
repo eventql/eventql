@@ -13,6 +13,7 @@ HttpConnectionFactory::HttpConnectionFactory(
       maxRequestUriLength_(maxRequestUriLength),
       maxRequestBodyLength_(maxRequestBodyLength),
       clock_(clock),
+      outputCompressor_(new HttpOutputCompressor()),
       dateGenerator_(clock ? new HttpDateGenerator(clock) : nullptr) {
   //.
 }

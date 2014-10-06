@@ -29,6 +29,7 @@ static LogSource connectionLogger("http1.HttpConnection");
 HttpConnection::HttpConnection(std::shared_ptr<EndPoint> endpoint,
                                const HttpHandler& handler,
                                HttpDateGenerator* dateGenerator,
+                               HttpOutputCompressor* outputCompressor,
                                size_t maxRequestUriLength,
                                size_t maxRequestBodyLength,
                                size_t maxRequestCount,
@@ -42,7 +43,7 @@ HttpConnection::HttpConnection(std::shared_ptr<EndPoint> endpoint,
       onComplete_(),
       channel_(new Http1Channel(
           this, handler, std::unique_ptr<HttpInput>(new Http1Input(this)),
-          maxRequestUriLength, maxRequestBodyLength)),
+          maxRequestUriLength, maxRequestBodyLength, outputCompressor)),
       maxKeepAlive_(maxKeepAlive),
       requestCount_(0),
       requestMax_(maxRequestCount) {

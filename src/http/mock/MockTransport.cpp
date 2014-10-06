@@ -51,18 +51,20 @@ void MockInput::recycle() {
 // }}}
 
 MockTransport::MockTransport(Executor* executor, const HttpHandler& handler)
-    : MockTransport(executor, handler, 32, 64) {
+    : MockTransport(executor, handler, 32, 64, nullptr) {
 }
 
 MockTransport::MockTransport(Executor* executor,
                              const HttpHandler& handler,
                              size_t maxRequestUriLength,
-                             size_t maxRequestBodyLength)
+                             size_t maxRequestBodyLength,
+                             HttpOutputCompressor* outputCompressor)
     : HttpTransport(nullptr /*endpoint*/),
       executor_(executor),
       handler_(handler),
       maxRequestUriLength_(maxRequestUriLength),
       maxRequestBodyLength_(maxRequestBodyLength),
+      outputCompressor_(outputCompressor),
       isAborted_(false),
       isCompleted_(false),
       channel_(),
@@ -82,7 +84,8 @@ void MockTransport::run(HttpVersion version, const std::string& method,
 
   std::unique_ptr<MockInput> input(new MockInput());
   channel_.reset(new HttpChannel(this, handler_, std::move(input),
-                                 maxRequestUriLength_, maxRequestBodyLength_));
+                                 maxRequestUriLength_, maxRequestBodyLength_,
+                                 outputCompressor_));
 
 
   try {

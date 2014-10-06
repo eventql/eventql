@@ -24,6 +24,7 @@ Connection* Http1ConnectionFactory::create(Connector* connector,
                                            std::shared_ptr<EndPoint> endpoint) {
   return configure(new http1::HttpConnection(endpoint, handler(),
                                              dateGenerator(),
+                                             outputCompressor(),
                                              maxRequestUriLength(),
                                              maxRequestBodyLength(),
                                              maxRequestCount(),

@@ -3,9 +3,9 @@
 
 namespace xzero {
 
-void HttpOutputFilter::applyFilters(const std::list<HttpOutputFilter*>& filters,
-                                    const BufferRef& input,
-                                    Buffer* output) {
+void HttpOutputFilter::applyFilters(
+    const std::list<std::shared_ptr<HttpOutputFilter>>& filters,
+    const BufferRef& input, Buffer* output) {
   auto i = filters.begin();
   auto e = filters.end();
   (*i)->filter(input, output);

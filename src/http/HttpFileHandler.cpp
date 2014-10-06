@@ -6,6 +6,7 @@
 #include <xzero/http/HeaderFieldList.h>
 #include <xzero/io/FileRef.h>
 #include <xzero/DateTime.h>
+#include <xzero/Tokenizer.h>
 #include <xzero/Buffer.h>
 #include <xzero/sysconfig.h>
 
@@ -166,9 +167,20 @@ inline std::string generateBoundaryID() {
 // }}}
 
 HttpFileHandler::HttpFileHandler(bool mtime, bool size, bool inode)
+    : HttpFileHandler(mtime, size, inode, "", "") {
+}
+
+HttpFileHandler::HttpFileHandler(bool mtime, bool size, bool inode,
+                                 const std::string& mimetypesPath,
+                                 const std::string& defaultMimeType)
     : etagConsiderMTime_(mtime),
       etagConsiderSize_(size),
-      etagConsiderINode_(inode) {
+      etagConsiderINode_(inode),
+      mimetypes_(),
+      defaultMimeType_(defaultMimeType) {
+
+  if (!mimetypesPath.empty())
+    loadMimeTypesFromLocal(mimetypesPath);
 }
 
 HttpFileHandler::~HttpFileHandler() {
@@ -183,7 +195,8 @@ void HttpFileHandler::configureETag(bool mtime, bool size, bool inode) {
 bool HttpFileHandler::handle(HttpRequest* request, HttpResponse* response,
                              const std::string& docroot) {
   std::string path = docroot + request->path(); //TODO:docroot-escape protection
-  std::string mimetype; // TODO fill
+  std::string mimetype = getMimeType(path);
+
   HttpFile transferFile(path, mimetype, etagConsiderMTime_, etagConsiderSize_,
                         etagConsiderINode_);
 
@@ -418,6 +431,83 @@ bool HttpFileHandler::handleRangeRequest(const HttpFile& transferFile, int fd,
 
   response->completed();
   return true;
+}
+
+static inline bool readFile(const std::string& path, Buffer* output) {
+  int fd = open(path.c_str(), O_RDONLY);
+  if (fd < 0)
+    throw std::system_error(errno, std::system_category());
+
+  struct stat st;
+  if (fstat(fd, &st) < 0) return false;
+
+  output->reserve(st.st_size + 1);
+  ssize_t nread = ::read(fd, output->data(), st.st_size);
+  if (nread < 0) {
+    ::close(fd);
+    throw std::system_error(errno, std::system_category());
+  }
+
+  output->data()[nread] = '\0';
+  output->resize(nread);
+  ::close(fd);
+
+  return true;
+}
+
+void HttpFileHandler::loadMimeTypesFromLocal(const std::string& path) {
+  Buffer input;
+  if (!readFile(path, &input))
+    return;
+
+  mimetypes_.clear();
+  auto lines = Tokenizer<BufferRef, Buffer>::tokenize(input, "\n");
+
+  for (auto line : lines) {
+    line = line.trim();
+    auto columns = Tokenizer<BufferRef, BufferRef>::tokenize(line, " \t");
+
+    auto ci = columns.begin(), ce = columns.end();
+    BufferRef mime = ci != ce ? *ci++ : BufferRef();
+
+    if (!mime.empty() && mime[0] != '#') {
+      for (; ci != ce; ++ci) {
+        mimetypes_[ci->str()] = mime.str();
+      }
+    }
+  }
+}
+
+std::string HttpFileHandler::getMimeType(const std::string& path) {
+  std::string result;
+
+  // query mimetype
+  const std::size_t ndot = path.find_last_of(".");
+  const std::size_t nslash = path.find_last_of("/");
+
+  if (ndot != std::string::npos && ndot > nslash) {
+    std::string ext(path.substr(ndot + 1));
+
+    while (ext.size()) {
+      auto i = mimetypes_.find(ext);
+
+      if (i != mimetypes_.end())
+        result = i->second;
+
+      if (ext[ext.size() - 1] != '~')
+        break;
+
+      ext.resize(ext.size() - 1);
+    }
+
+    if (result.empty()) {
+      result = defaultMimeType_;
+    }
+  } else {
+    result = defaultMimeType_;
+  }
+
+  return result;
 }
 
 } // namespace xzero

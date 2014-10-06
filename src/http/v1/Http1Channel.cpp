@@ -11,9 +11,11 @@ Http1Channel::Http1Channel(HttpTransport* transport,
                          const HttpHandler& handler,
                          std::unique_ptr<HttpInput>&& input,
                          size_t maxRequestUriLength,
-                         size_t maxRequestBodyLength)
+                         size_t maxRequestBodyLength,
+                         HttpOutputCompressor* outputCompressor)
     : xzero::HttpChannel(transport, handler, std::move(input),
-                         maxRequestUriLength, maxRequestBodyLength),
+                         maxRequestUriLength, maxRequestBodyLength,
+                         outputCompressor),
       persistent_(false),
       connectionOptions_() {
 }

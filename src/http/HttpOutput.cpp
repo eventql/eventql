@@ -26,7 +26,7 @@ void HttpOutput::recycle() {
   filters_.clear();
 }
 
-void HttpOutput::addFilter(HttpOutputFilter* filter) {
+void HttpOutput::addFilter(std::shared_ptr<HttpOutputFilter> filter) {
   if (channel_->response()->isCommitted())
     throw std::runtime_error("Invalid State. Cannot add output filters after commit.");
 
@@ -46,28 +46,17 @@ void HttpOutput::completed() {
 
 void HttpOutput::write(const char* cstr, CompletionHandler&& completed) {
   const size_t slen = strlen(cstr);
-
-  if (filters_.empty()) {
-    write(BufferRef(cstr, slen), std::move(completed));
-  } else {
-    Buffer output;
-    HttpOutputFilter::applyFilters(filters_, BufferRef(cstr, slen), &output);
-    channel_->send(std::move(output), std::move(completed));
-  }
+  write(BufferRef(cstr, slen), std::move(completed));
 }
 
 void HttpOutput::write(const std::string& str, CompletionHandler&& completed) {
-  if (filters_.empty()) {
-    write(Buffer(str), std::move(completed));
-  } else {
-    BufferRef input(str);
-    Buffer output;
-    HttpOutputFilter::applyFilters(filters_, input, &output);
-    channel_->send(std::move(output), std::move(completed));
-  }
+  write(Buffer(str), std::move(completed));
 }
 
 void HttpOutput::write(Buffer&& data, CompletionHandler&& completed) {
+  if (!channel_->response()->isCommitted())
+    channel_->commit();
+
   if (filters_.empty()) {
     channel_->send(std::move(data), std::move(completed));
   } else {
@@ -78,6 +67,9 @@ void HttpOutput::write(Buffer&& data, CompletionHandler&& completed) {
 }
 
 void HttpOutput::write(const BufferRef& data, CompletionHandler&& completed) {
+  if (!channel_->response()->isCommitted())
+    channel_->commit();
+
   if (filters_.empty()) {
     channel_->send(data, std::move(completed));
   } else {
@@ -88,6 +80,9 @@ void HttpOutput::write(const BufferRef& data, CompletionHandler&& completed) {
 }
 
 void HttpOutput::write(FileRef&& file, CompletionHandler&& completed) {
+  if (!channel_->response()->isCommitted())
+    channel_->commit();
+
   if (filters_.empty()) {
     channel_->send(std::move(file), std::move(completed));
   } else {
