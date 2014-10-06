@@ -12,7 +12,6 @@ HttpConnectionFactory::HttpConnectionFactory(
     : ConnectionFactory(protocolName),
       maxRequestUriLength_(maxRequestUriLength),
       maxRequestBodyLength_(maxRequestBodyLength),
-      clock_(clock),
       outputCompressor_(new HttpOutputCompressor()),
       dateGenerator_(clock ? new HttpDateGenerator(clock) : nullptr) {
   //.
@@ -28,10 +27,6 @@ void HttpConnectionFactory::setHandler(HttpHandler&& handler) {
 
 Connection* HttpConnectionFactory::configure(Connection* connection,
                                              Connector* connector) {
-  if (clock_ != nullptr) {
-    connection->setCreationTime(clock_->get());
-  }
-
   return ConnectionFactory::configure(connection, connector);
 }
 

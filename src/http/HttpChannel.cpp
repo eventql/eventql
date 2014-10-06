@@ -165,9 +165,10 @@ void HttpChannel::handleRequest() {
   try {
     handler_(request(), response());
   } catch (std::exception& e) {
-    printf("exception caught: %s\n", e.what());
+    // TODO: reportException(e);
     response()->sendError(HttpStatus::InternalServerError, e.what());
   } catch (...) {
+    // TODO: reportException(std::runtime_error("Unhandled unknown exception caught");
     response()->sendError(HttpStatus::InternalServerError,
                           "unhandled unknown exception");
   }

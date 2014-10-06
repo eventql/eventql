@@ -1,6 +1,7 @@
 #include <xzero/net/Connector.h>
 #include <xzero/net/ConnectionFactory.h>
 #include <xzero/net/Server.h>
+#include <algorithm>
 #include <cassert>
 
 namespace xzero {
@@ -17,9 +18,6 @@ Connector::Connector(const std::string& name, Executor* executor,
 }
 
 Connector::~Connector() {
-  for (auto& factory: connectionFactories_) {
-    /* delete factory.second; */
-  }
 }
 
 void Connector::setServer(Server* server) {
@@ -70,6 +68,13 @@ std::list<std::shared_ptr<ConnectionFactory>> Connector::connectionFactories() c
 }
 
 void Connector::setDefaultConnectionFactory(std::shared_ptr<ConnectionFactory> factory) {
+  auto i = connectionFactories_.find(factory->protocolName());
+  if (i == connectionFactories_.end())
+    throw std::runtime_error("Invalid argument.");
+
+  if (i->second != factory)
+    throw std::runtime_error("Invalid argument.");
+
   defaultConnectionFactory_ = factory;
 }
 

@@ -5,7 +5,7 @@
 namespace xzero {
 
 Connection::Connection(std::shared_ptr<EndPoint> endpoint)
-    : endpoint_(endpoint), creationTime_(0), listeners_() {
+    : endpoint_(endpoint), listeners_() {
 
   if (endpoint_) {
     endpoint_->setConnection(this);
@@ -22,8 +22,6 @@ void Connection::onOpen() {
 }
 
 void Connection::onClose() {
-  std::for_each(listeners_.begin(), listeners_.end(),
-                [this](ConnectionListener* obs) { obs->onClosed(this); });
   for (ConnectionListener* listener : listeners_) {
     listener->onClosed(this);
   }
