@@ -64,8 +64,11 @@ void ThreadPool::wait() {
   TRACE("%p wait()", this);
   std::unique_lock<std::mutex> lock(mutex_);
 
-  if (pendingTasks_.empty() && activeTasks_ == 0)
+  if (pendingTasks_.empty() && activeTasks_ == 0) {
+    TRACE("%p wait: pending=%zu, active=%zu (immediate return)", this,
+          pendingTasks_.size(), activeTasks_.load());
     return;
+  }
 
   condition_.wait(lock, [&]() -> bool {
     TRACE("%p wait: pending=%zu, active=%zu", this, pendingTasks_.size(),
