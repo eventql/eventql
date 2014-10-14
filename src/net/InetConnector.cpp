@@ -187,15 +187,15 @@ void InetConnector::setBlocking(bool enable) {
 
 #if defined(HAVE_ACCEPT4) && defined(ENABLE_ACCEPT4)
   if (enable) {
-    typeMask_ |= SOCK_NONBLOCK;
-  } else {
     typeMask_ &= ~SOCK_NONBLOCK;
+  } else {
+    typeMask_ |= SOCK_NONBLOCK;
   }
 #else
   if (enable) {
-    flags_ |= O_NONBLOCK;
-  } else {
     flags_ &= ~O_NONBLOCK;
+  } else {
+    flags_ |= O_NONBLOCK;
   }
 #endif
 }
