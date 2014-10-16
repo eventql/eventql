@@ -20,6 +20,7 @@ set(libxzero_SRC
   executor/ThreadPool.cpp
 
   io/Selectable.cpp
+  io/FileRef.cpp
 
   net/ByteArrayEndPoint.cpp
   net/Cidr.cpp
