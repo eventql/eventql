@@ -14,6 +14,7 @@ HttpResponse::HttpResponse(HttpChannel* channel,
       status_(HttpStatus::Undefined),
       contentLength_(static_cast<size_t>(-1)),
       headers_(),
+      trailers_(),
       committed_(false) {
   //.
 }
@@ -25,6 +26,7 @@ void HttpResponse::recycle() {
   reason_.clear();
   contentLength_ = static_cast<size_t>(-1);
   headers_.reset();
+  trailers_.reset();
   output_->recycle();
 }
 
@@ -180,31 +182,36 @@ void HttpResponse::sendError(HttpStatus code, const std::string& message) {
 }
 
 // {{{ trailers
-void HttpResponse::addTrailer(const std::string& name,
-                              const std::string& value) {
+void HttpResponse::registerTrailer(const std::string& name) {
   checkInvalidHeader(name);
-  trailers_.push_back(name, value);
+
+  if (isCommitted())
+    throw std::runtime_error("Invalid State. Cannot be modified after commit.");
+
+  if (trailers_.contains(name))
+    throw std::runtime_error("Trailer already registered.");
+
+  trailers_.push_back(name, "");
 }
 
 void HttpResponse::appendTrailer(const std::string& name,
                                  const std::string& value,
                                  const std::string& delim) {
   checkInvalidHeader(name);
+
+  if (!trailers_.contains(name))
+    throw std::runtime_error("Trailer not registered.");
+
   trailers_.append(name, value, delim);
 }
 
 void HttpResponse::setTrailer(const std::string& name, const std::string& value) {
   checkInvalidHeader(name);
+
+  if (!trailers_.contains(name))
+    throw std::runtime_error("Trailer not registered.");
+
   trailers_.overwrite(name, value);
-}
-
-void HttpResponse::removeTrailer(const std::string& name) {
-  checkInvalidHeader(name);
-  trailers_.remove(name);
-}
-
-void HttpResponse::removeAllTrailers() {
-  trailers_.reset();
 }
 // }}}
 

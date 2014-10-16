@@ -156,7 +156,9 @@ HttpResponseInfo HttpChannel::commitInline() {
   const bool isHeadReq = request_->method() == "HEAD";
   HttpResponseInfo info(response_->version(), response_->status(),
                         response_->reason(), isHeadReq,
-                        response_->contentLength(), response_->headers());
+                        response_->contentLength(),
+                        response_->headers(),
+                        response_->trailers());
 
   if (!info.headers().contains("Server"))
     info.headers().push_back("Server", "xzero/" LIBXZERO_VERSION);
@@ -176,7 +178,7 @@ void HttpChannel::send100Continue() {
   request()->setExpect100Continue(false);
 
   HttpResponseInfo info(request_->version(), HttpStatus::ContinueRequest,
-                        "Continue", false, 0, {});
+                        "Continue", false, 0, {}, {});
 
   TRACE("send100Continue(): sending it");
   transport_->send(std::move(info), BufferRef(), nullptr);

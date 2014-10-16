@@ -108,6 +108,8 @@ void MockTransport::abort() {
 
 void MockTransport::completed() {
   isCompleted_ = true;
+
+  responseInfo_.setTrailers(channel_->response()->trailers());
 }
 
 void MockTransport::send(HttpResponseInfo&& responseInfo,

@@ -24,39 +24,39 @@ void HttpGenerator::recycle() {
 }
 
 void HttpGenerator::generateRequest(const HttpRequestInfo& info,
-                                    Buffer&& chunk, bool last) {
+                                    Buffer&& chunk) {
   generateRequestLine(info);
   generateHeaders(info);
   flushBuffer();
-  generateBody(std::move(chunk), last);
+  generateBody(std::move(chunk));
 }
 
 void HttpGenerator::generateRequest(const HttpRequestInfo& info,
-                                    const BufferRef& chunk, bool last) {
+                                    const BufferRef& chunk) {
   generateRequestLine(info);
   generateHeaders(info);
   flushBuffer();
-  generateBody(chunk, last);
+  generateBody(chunk);
 }
 
 void HttpGenerator::generateResponse(const HttpResponseInfo& info,
-                                     const BufferRef& chunk, bool last) {
+                                     const BufferRef& chunk) {
   generateResponseInfo(info);
-  generateBody(chunk, last);
+  generateBody(chunk);
   flushBuffer();
 }
 
 void HttpGenerator::generateResponse(const HttpResponseInfo& info,
-                                     Buffer&& chunk, bool last) {
+                                     Buffer&& chunk) {
   generateResponseInfo(info);
-  generateBody(std::move(chunk), last);
+  generateBody(std::move(chunk));
   flushBuffer();
 }
 
 void HttpGenerator::generateResponse(const HttpResponseInfo& info,
-                                     FileRef&& chunk, bool last) {
+                                     FileRef&& chunk) {
   generateResponseInfo(info);
-  generateBody(std::move(chunk), last);
+  generateBody(std::move(chunk));
 }
 
 void HttpGenerator::generateResponseInfo(const HttpResponseInfo& info) {
@@ -77,7 +77,7 @@ void HttpGenerator::generateResponseInfo(const HttpResponseInfo& info) {
   flushBuffer();
 }
 
-void HttpGenerator::generateBody(const BufferRef& chunk, bool last) {
+void HttpGenerator::generateBody(const BufferRef& chunk) {
   if (chunked_) {
     if (chunk.size() > 0) {
       Buffer buf(12);
@@ -85,10 +85,6 @@ void HttpGenerator::generateBody(const BufferRef& chunk, bool last) {
       writer_->write(std::move(buf));
       writer_->write(chunk);
       writer_->write(BufferRef("\r\n"));
-    }
-
-    if (last) {
-      writer_->write(BufferRef("0\r\n\r\n"));
     }
   } else {
     if (chunk.size() <= contentLength_) {
@@ -100,13 +96,21 @@ void HttpGenerator::generateBody(const BufferRef& chunk, bool last) {
   }
 }
 
-void HttpGenerator::generateEnd() {
+void HttpGenerator::generateTrailer(const HeaderFieldList& trailers) {
   if (chunked_) {
-    writer_->write(BufferRef("0\r\n\r\n"));
+    buffer_.push_back("0\r\n");
+    for (const HeaderField& header: trailers) {
+      buffer_.push_back(header.name());
+      buffer_.push_back(": ");
+      buffer_.push_back(header.value());
+      buffer_.push_back("\r\n");
+    }
+    buffer_.push_back("\r\n");
   }
+  flushBuffer();
 }
 
-void HttpGenerator::generateBody(Buffer&& chunk, bool last) {
+void HttpGenerator::generateBody(Buffer&& chunk) {
   if (chunked_) {
     if (chunk.size() > 0) {
       Buffer buf(12);
@@ -114,10 +118,6 @@ void HttpGenerator::generateBody(Buffer&& chunk, bool last) {
       writer_->write(std::move(buf));
       writer_->write(std::move(chunk));
       writer_->write(BufferRef("\r\n"));
-    }
-
-    if (last) {
-      writer_->write(BufferRef("0\r\n\r\n"));
     }
   } else {
     if (chunk.size() <= contentLength_) {
@@ -129,7 +129,7 @@ void HttpGenerator::generateBody(Buffer&& chunk, bool last) {
   }
 }
 
-void HttpGenerator::generateBody(FileRef&& chunk, bool last) {
+void HttpGenerator::generateBody(FileRef&& chunk) {
   if (chunked_) {
     int n;
     char buf[12];
@@ -139,11 +139,6 @@ void HttpGenerator::generateBody(FileRef&& chunk, bool last) {
       writer_->write(BufferRef(buf, static_cast<size_t>(n)));
       writer_->write(std::move(chunk));
       writer_->write(BufferRef("\r\n"));
-    }
-
-    if (last) {
-      n = snprintf(buf, sizeof(buf), "0\r\n\r\n");
-      writer_->write(BufferRef(buf, n));
     }
   } else {
     if (chunk.size() <= contentLength_) {
@@ -202,13 +197,26 @@ void HttpGenerator::generateResponseLine(const HttpResponseInfo& info) {
 }
 
 void HttpGenerator::generateHeaders(const HttpInfo& info) {
-  chunked_ = info.hasContentLength() == false;
+  chunked_ = info.hasContentLength() == false || info.hasTrailers();
   contentLength_ = info.contentLength();
 
   for (const HeaderField& header: info.headers()) {
     buffer_.push_back(header.name());
     buffer_.push_back(": ");
     buffer_.push_back(header.value());
+    buffer_.push_back("\r\n");
+  }
+
+  if (!info.trailers().empty()) {
+    buffer_.push_back("Trailer: ");
+    size_t count = 0;
+    for (const HeaderField& trailer: info.trailers()) {
+      if (count)
+        buffer_.push_back(", ");
+
+      buffer_.push_back(trailer.name());
+      count++;
+    }
     buffer_.push_back("\r\n");
   }
 

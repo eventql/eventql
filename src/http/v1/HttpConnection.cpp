@@ -91,7 +91,7 @@ void HttpConnection::completed() {
     throw std::runtime_error(
         "Invalid State. Response not fully written but completed() invoked.");
 
-  generator_.generateBody(BufferRef(), true);  // EOS
+  generator_.generateTrailer(channel_->response()->trailers());
 
   onComplete_ = [this](bool) {
     if (channel_->isPersistent()) {
@@ -136,7 +136,7 @@ void HttpConnection::send(HttpResponseInfo&& responseInfo,
   if (corking_)
     endpoint()->setCorking(true);
 
-  generator_.generateResponse(responseInfo, chunk, false);
+  generator_.generateResponse(responseInfo, chunk);
   onComplete_ = onComplete;
   wantFlush();
 }
@@ -157,7 +157,7 @@ void HttpConnection::send(HttpResponseInfo&& responseInfo,
   if (corking_)
     endpoint()->setCorking(true);
 
-  generator_.generateResponse(responseInfo, std::move(chunk), false);
+  generator_.generateResponse(responseInfo, std::move(chunk));
   onComplete_ = onComplete;
   wantFlush();
 }
@@ -178,7 +178,7 @@ void HttpConnection::send(HttpResponseInfo&& responseInfo,
   if (corking_)
     endpoint()->setCorking(true);
 
-  generator_.generateResponse(responseInfo, std::move(chunk), false);
+  generator_.generateResponse(responseInfo, std::move(chunk));
   onComplete_ = onComplete;
   wantFlush();
 }
@@ -209,7 +209,7 @@ void HttpConnection::send(Buffer&& chunk,
 
   TRACE("%p send(chunkSize=%zu)", this, chunk.size());
 
-  generator_.generateBody(std::move(chunk), false);
+  generator_.generateBody(std::move(chunk));
   onComplete_ = std::move(onComplete);
 
   wantFlush();
@@ -222,7 +222,7 @@ void HttpConnection::send(const BufferRef& chunk,
 
   TRACE("%p send(chunkSize=%zu)", this, chunk.size());
 
-  generator_.generateBody(chunk, false);
+  generator_.generateBody(chunk);
   onComplete_ = std::move(onComplete);
 
   wantFlush();
@@ -234,7 +234,7 @@ void HttpConnection::send(FileRef&& chunk, CompletionHandler&& onComplete) {
 
   TRACE("%p send(chunkSize=%zu)", this, chunk.size());
 
-  generator_.generateBody(std::move(chunk), false);
+  generator_.generateBody(std::move(chunk));
   onComplete_ = std::move(onComplete);
   wantFlush();
 }
