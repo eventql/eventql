@@ -14,30 +14,21 @@
 
 namespace xzero {
 
-HttpOutput::HttpOutput(HttpChannel* channel)
-    : channel_(channel),
-      filters_() {
+HttpOutput::HttpOutput(HttpChannel* channel) : channel_(channel) {
 }
 
 HttpOutput::~HttpOutput() {
 }
 
 void HttpOutput::recycle() {
-  filters_.clear();
 }
 
 void HttpOutput::addFilter(std::shared_ptr<HttpOutputFilter> filter) {
-  if (channel_->response()->isCommitted())
-    throw std::runtime_error("Invalid State. Cannot add output filters after commit.");
-
-  filters_.push_back(filter);
+  channel_->addOutputFilter(filter);
 }
 
 void HttpOutput::removeAllFilters() {
-  if (channel_->response()->isCommitted())
-    throw std::runtime_error("Invalid State. Cannot clear output filters after commit.");
-
-  filters_.clear();
+  channel_->removeAllOutputFilters();
 }
 
 void HttpOutput::completed() {
@@ -54,57 +45,15 @@ void HttpOutput::write(const std::string& str, CompletionHandler&& completed) {
 }
 
 void HttpOutput::write(Buffer&& data, CompletionHandler&& completed) {
-  if (!channel_->response()->isCommitted())
-    channel_->commit();
-
-  if (filters_.empty()) {
-    channel_->send(std::move(data), std::move(completed));
-  } else {
-    Buffer output;
-    HttpOutputFilter::applyFilters(filters_, data.ref(), &output);
-    channel_->send(std::move(output), std::move(completed));
-  }
+  channel_->send(std::move(data), std::move(completed));
 }
 
 void HttpOutput::write(const BufferRef& data, CompletionHandler&& completed) {
-  if (!channel_->response()->isCommitted())
-    channel_->commit();
-
-  if (filters_.empty()) {
-    channel_->send(data, std::move(completed));
-  } else {
-    Buffer output;
-    HttpOutputFilter::applyFilters(filters_, data, &output);
-    channel_->send(std::move(output), std::move(completed));
-  }
+  channel_->send(data, std::move(completed));
 }
 
-void HttpOutput::write(FileRef&& file, CompletionHandler&& completed) {
-  if (!channel_->response()->isCommitted())
-    channel_->commit();
-
-  if (filters_.empty()) {
-    channel_->send(std::move(file), std::move(completed));
-  } else {
-#if defined(HAVE_PREAD)
-    Buffer input(file.size());
-    ssize_t n = pread(file.handle(), input.data(), file.size(), file.offset());
-    if (n < 0)
-      throw std::system_error(errno, std::system_category());
-
-    if (n != file.size())
-      throw std::runtime_error("Did not read all required bytes from file.");
-
-    input.resize(n);
-#else
-# error "Implementation missing"
-#endif
-
-    Buffer output;
-    HttpOutputFilter::applyFilters(filters_, input, &output);
-
-    channel_->send(std::move(output), std::move(completed));
-  }
+void HttpOutput::write(FileRef&& input, CompletionHandler&& completed) {
+  channel_->send(std::move(input), std::move(completed));
 }
 
 }  // namespace xzero

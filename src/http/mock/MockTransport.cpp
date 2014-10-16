@@ -136,6 +136,20 @@ void MockTransport::send(HttpResponseInfo&& responseInfo,
   }
 }
 
+void MockTransport::send(HttpResponseInfo&& responseInfo,
+                         FileRef&& chunk,
+                         CompletionHandler&& onComplete) {
+  responseInfo_ = std::move(responseInfo);
+
+  chunk.fill(&responseBody_);
+
+  if (onComplete) {
+    executor_->execute([onComplete]() {
+      onComplete(true);
+    });
+  }
+}
+
 void MockTransport::send(const BufferRef& chunk, CompletionHandler&& onComplete) {
   responseBody_ += chunk;
 
@@ -157,18 +171,7 @@ void MockTransport::send(Buffer&& chunk, CompletionHandler&& onComplete) {
 }
 
 void MockTransport::send(FileRef&& chunk, CompletionHandler&& onComplete) {
-  responseBody_.reserve(chunk.size());
-
-  ssize_t n = pread(chunk.handle(), responseBody_.end(), chunk.size(),
-                    chunk.offset());
-
-  if (n < 0)
-    std::system_error(errno, std::system_category());
-
-  if (n != chunk.size())
-    std::runtime_error("Unexpected read count.");
-
-  responseBody_.resize(responseBody_.size() + n);
+  chunk.fill(&responseBody_);
 
   if (onComplete) {
     executor_->execute([onComplete]() {

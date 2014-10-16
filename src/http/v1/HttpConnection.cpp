@@ -36,11 +36,11 @@ HttpConnection::HttpConnection(std::shared_ptr<EndPoint> endpoint,
                                TimeSpan maxKeepAlive)
     : HttpTransport(endpoint),
       parser_(HttpParser::REQUEST),
-      generator_(dateGenerator),
       inputBuffer_(),
       inputOffset_(0),
       writer_(),
       onComplete_(),
+      generator_(dateGenerator, &writer_),
       channel_(new Http1Channel(
           this, handler, std::unique_ptr<HttpInput>(new Http1Input(this)),
           maxRequestUriLength, maxRequestBodyLength, outputCompressor)),
@@ -91,7 +91,7 @@ void HttpConnection::completed() {
     throw std::runtime_error(
         "Invalid State. Response not fully written but completed() invoked.");
 
-  generator_.generateBody(BufferRef(), true, &writer_);  // EOS
+  generator_.generateBody(BufferRef(), true);  // EOS
 
   onComplete_ = [this](bool) {
     if (channel_->isPersistent()) {
@@ -99,7 +99,9 @@ void HttpConnection::completed() {
       // re-use on keep-alive
       channel_->reset();
 
-      if (endpoint()->isCorking()) endpoint()->setCorking(false);
+      if (endpoint()->isCorking()) {
+        endpoint()->setCorking(false);
+      }
 
       if (inputOffset_ < inputBuffer_.size()) {
         TRACE("%p completed.onComplete: pipelined read", this);
@@ -130,13 +132,12 @@ void HttpConnection::send(HttpResponseInfo&& responseInfo,
 
   patchResponseInfo(responseInfo);
 
-  generator_.generateResponse(responseInfo, chunk, false, &writer_);
-  onComplete_ = onComplete;
-
   const bool corking_ = true;  // TODO(TCP_CORK): part of HttpResponseInfo?
   if (corking_)
     endpoint()->setCorking(true);
 
+  generator_.generateResponse(responseInfo, chunk, false);
+  onComplete_ = onComplete;
   wantFlush();
 }
 
@@ -152,13 +153,33 @@ void HttpConnection::send(HttpResponseInfo&& responseInfo,
 
   patchResponseInfo(responseInfo);
 
-  generator_.generateResponse(responseInfo, std::move(chunk), false, &writer_);
+  const bool corking_ = true;  // TODO(TCP_CORK): part of HttpResponseInfo?
+  if (corking_)
+    endpoint()->setCorking(true);
+
+  generator_.generateResponse(responseInfo, std::move(chunk), false);
   onComplete_ = onComplete;
+  wantFlush();
+}
+
+void HttpConnection::send(HttpResponseInfo&& responseInfo,
+                          FileRef&& chunk,
+                          CompletionHandler&& onComplete) {
+  if (onComplete && onComplete_)
+    throw std::runtime_error("there is still another completion hook.");
+
+  TRACE("%p send(status=%d, persistent=%s, fileRef.fd=%d, chunkSize=%zu)",
+        this, responseInfo.status(), channel_->isPersistent() ? "yes" : "no",
+        chunk.handle(), chunk.size());
+
+  patchResponseInfo(responseInfo);
 
   const bool corking_ = true;  // TODO(TCP_CORK): part of HttpResponseInfo?
   if (corking_)
     endpoint()->setCorking(true);
 
+  generator_.generateResponse(responseInfo, std::move(chunk), false);
+  onComplete_ = onComplete;
   wantFlush();
 }
 
@@ -188,7 +209,7 @@ void HttpConnection::send(Buffer&& chunk,
 
   TRACE("%p send(chunkSize=%zu)", this, chunk.size());
 
-  generator_.generateBody(std::move(chunk), false, &writer_);
+  generator_.generateBody(std::move(chunk), false);
   onComplete_ = std::move(onComplete);
 
   wantFlush();
@@ -201,7 +222,7 @@ void HttpConnection::send(const BufferRef& chunk,
 
   TRACE("%p send(chunkSize=%zu)", this, chunk.size());
 
-  generator_.generateBody(chunk, false, &writer_);
+  generator_.generateBody(chunk, false);
   onComplete_ = std::move(onComplete);
 
   wantFlush();
@@ -213,7 +234,7 @@ void HttpConnection::send(FileRef&& chunk, CompletionHandler&& onComplete) {
 
   TRACE("%p send(chunkSize=%zu)", this, chunk.size());
 
-  generator_.generateBody(std::forward<FileRef>(chunk), false, &writer_);
+  generator_.generateBody(std::move(chunk), false);
   onComplete_ = std::move(onComplete);
   wantFlush();
 }
@@ -233,6 +254,7 @@ void HttpConnection::onFillable() {
     size_t n = parser_.parseFragment(inputBuffer_.ref(inputOffset_));
     inputOffset_ += n;
   } catch (const BadMessage& e) {
+    TRACE("%p onFillable: BadMessage caught. %s", this, e.what());
     channel_->response()->sendError(e.code(), e.what());
   }
 }
@@ -245,6 +267,7 @@ void HttpConnection::onFlushable() {
     wantFill(); // restore interest to NONE or READ
 
     if (onComplete_) {
+      TRACE("%p onFlushable: invoking completion callback", this);
       auto callback = std::move(onComplete_);
       callback(true);
     }
@@ -256,6 +279,7 @@ void HttpConnection::onInterestFailure(const std::exception& error) {
   //printf("onInterestFailure. %s\n", error.what());
 
   if (!channel_->response()->isCommitted()) {
+    ERROR("onInterestFailure. no response comitted yet, sending 500 then");
     channel_->setPersistent(false);
     channel_->response()->sendError(HttpStatus::InternalServerError,
                                     error.what());

@@ -9,9 +9,19 @@
 #include <xzero/http/HttpVersion.h>
 #include <xzero/http/HttpInputListener.h>
 #include <xzero/http/BadMessage.h>
+#include <xzero/logging/LogSource.h>
+#include <xzero/io/FileRef.h>
 #include <xzero/sysconfig.h>
 
 namespace xzero {
+
+static LogSource connectionLogger("http.HttpChannel");
+#define ERROR(msg...) do { connectionLogger.error(msg); } while (0)
+#ifndef NDEBUG
+#define TRACE(msg...) do { connectionLogger.trace(msg); } while (0)
+#else
+#define TRACE(msg...) do {} while (0)
+#endif
 
 HttpChannel::HttpChannel(HttpTransport* transport, const HttpHandler& handler,
                          std::unique_ptr<HttpInput>&& input,
@@ -24,6 +34,7 @@ HttpChannel::HttpChannel(HttpTransport* transport, const HttpHandler& handler,
       transport_(transport),
       request_(new HttpRequest(std::move(input))),
       response_(new HttpResponse(this, createOutput())),
+      outputFilters_(),
       outputCompressor_(outputCompressor),
       handler_(handler) {
   //.
@@ -43,16 +54,52 @@ std::unique_ptr<HttpOutput> HttpChannel::createOutput() {
   return std::unique_ptr<HttpOutput>(new HttpOutput(this));
 }
 
+void HttpChannel::addOutputFilter(std::shared_ptr<HttpOutputFilter> filter) {
+  if (response()->isCommitted())
+    throw std::runtime_error("Invalid State. Cannot add output filters after commit.");
+
+  outputFilters_.push_back(filter);
+}
+
+void HttpChannel::removeAllOutputFilters() {
+  if (response()->isCommitted())
+    throw std::runtime_error("Invalid State. Cannot clear output filters after commit.");
+
+  outputFilters_.clear();
+}
+
 void HttpChannel::send(const BufferRef& data, CompletionHandler&& onComplete) {
-  if (!response_->isCommitted()) {
-    HttpResponseInfo info(commitInline());
-    transport_->send(std::move(info), data, std::move(onComplete));
+  onBeforeSend();
+
+  if (outputFilters_.empty()) {
+    if (!response_->isCommitted()) {
+      HttpResponseInfo info(commitInline());
+      transport_->send(std::move(info), data, std::move(onComplete));
+    } else {
+      transport_->send(data, std::move(onComplete));
+    }
   } else {
-    transport_->send(data, std::move(onComplete));
+    Buffer filtered;
+    HttpOutputFilter::applyFilters(outputFilters_, data.ref(), &filtered);
+
+    if (!response_->isCommitted()) {
+      HttpResponseInfo info(commitInline());
+      transport_->send(std::move(info), std::move(filtered), std::move(onComplete));
+    } else {
+      transport_->send(std::move(filtered), std::move(onComplete));
+    }
   }
 }
 
 void HttpChannel::send(Buffer&& data, CompletionHandler&& onComplete) {
+  onBeforeSend();
+
+  if (!outputFilters_.empty()) {
+    Buffer output;
+    HttpOutputFilter::applyFilters(outputFilters_, data.ref(), &output);
+    data = std::move(output);
+  }
+
   if (!response_->isCommitted()) {
     HttpResponseInfo info(commitInline());
     transport_->send(std::move(info), std::move(data), std::move(onComplete));
@@ -61,23 +108,45 @@ void HttpChannel::send(Buffer&& data, CompletionHandler&& onComplete) {
   }
 }
 
-void HttpChannel::send(FileRef&& file, CompletionHandler&& completed) {
-  if (!response_->isCommitted()) {
-    send(BufferRef(), nullptr); // commit headers with empty body
-  }
+void HttpChannel::send(FileRef&& file, CompletionHandler&& onComplete) {
+  onBeforeSend();
 
-  transport_->send(std::move(file), std::move(completed));
+  if (outputFilters_.empty()) {
+    if (!response_->isCommitted()) {
+      HttpResponseInfo info(commitInline());
+      transport_->send(std::move(info), BufferRef(), nullptr);
+    }
+
+    transport_->send(std::move(file), std::move(onComplete));
+  } else {
+    Buffer filtered;
+    HttpOutputFilter::applyFilters(outputFilters_, file, &filtered);
+
+    if (!response_->isCommitted()) {
+      HttpResponseInfo info(commitInline());
+      transport_->send(std::move(info), std::move(filtered), std::move(onComplete));
+    } else {
+      transport_->send(std::move(filtered), std::move(onComplete));
+    }
+  }
 }
 
-HttpResponseInfo HttpChannel::commitInline() {
-  if (!response_->status())
-    throw std::runtime_error("No HTTP response status set yet.");
+void HttpChannel::onBeforeSend() {
+  // install some last-minute output filters before committing
+
+  if (response_->isCommitted())
+    return;
 
   // for (HttpChannelListener* listener: listeners_)
   //   listener->onBeforeCommit(request(), response());
 
   if (outputCompressor_)
     outputCompressor_->postProcess(request(), response());
+}
+
+HttpResponseInfo HttpChannel::commitInline() {
+  if (!response_->status())
+    throw std::runtime_error("No HTTP response status set yet.");
 
   if (request_->expect100Continue())
     response_->send100Continue();
@@ -95,9 +164,9 @@ HttpResponseInfo HttpChannel::commitInline() {
   return info;
 }
 
-void HttpChannel::commit() {
-  HttpResponseInfo info(commitInline());
-  transport_->send(std::move(info), BufferRef(), nullptr);
+void HttpChannel::commit(CompletionHandler&& onComplete) {
+  TRACE("commit()");
+  send(BufferRef(), std::move(onComplete));
 }
 
 void HttpChannel::send100Continue() {
@@ -109,6 +178,7 @@ void HttpChannel::send100Continue() {
   HttpResponseInfo info(request_->version(), HttpStatus::ContinueRequest,
                         "Continue", false, 0, {});
 
+  TRACE("send100Continue(): sending it");
   transport_->send(std::move(info), BufferRef(), nullptr);
 }
 
@@ -190,11 +260,13 @@ bool HttpChannel::onMessageEnd() {
 }
 
 void HttpChannel::onProtocolError(HttpStatus code, const std::string& message) {
+  TRACE("onProtocolError()");
   response_->sendError(code, message);
 }
 
 void HttpChannel::completed() {
   if (!response_->isCommitted()) {
+    TRACE("completed(): not committed yet. commit empty-body response");
     // commit headers with empty body
     response_->setContentLength(0);
     send(BufferRef(), nullptr);

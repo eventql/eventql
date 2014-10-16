@@ -76,9 +76,14 @@ void HttpResponse::resetContentLength() {
 
 static const std::vector<std::string> connectionHeaderFields = {
   "Connection",
-  "Keep-Alive",
-  "Transfer-Encoding"
+  "Content-Length",
   "Close",
+  "Keep-Alive",
+  "TE",
+  "Trailer",
+  "Transfer-Encoding",
+  "Upgrade",
+  "Via",
 };
 
 inline void checkInvalidHeader(const std::string& name) {
@@ -173,6 +178,35 @@ void HttpResponse::sendError(HttpStatus code, const std::string& message) {
 
   completed();
 }
+
+// {{{ trailers
+void HttpResponse::addTrailer(const std::string& name,
+                              const std::string& value) {
+  checkInvalidHeader(name);
+  trailers_.push_back(name, value);
+}
+
+void HttpResponse::appendTrailer(const std::string& name,
+                                 const std::string& value,
+                                 const std::string& delim) {
+  checkInvalidHeader(name);
+  trailers_.append(name, value, delim);
+}
+
+void HttpResponse::setTrailer(const std::string& name, const std::string& value) {
+  checkInvalidHeader(name);
+  trailers_.overwrite(name, value);
+}
+
+void HttpResponse::removeTrailer(const std::string& name) {
+  checkInvalidHeader(name);
+  trailers_.remove(name);
+}
+
+void HttpResponse::removeAllTrailers() {
+  trailers_.reset();
+}
+// }}}
 
 void HttpResponse::completed() {
   output_->completed();

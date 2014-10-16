@@ -6,6 +6,8 @@
 #include <xzero/Tokenizer.h>
 #include <xzero/Buffer.h>
 #include <algorithm>
+#include <system_error>
+#include <stdexcept>
 #include <cstdlib>
 
 #include <xzero/sysconfig.h>
@@ -43,7 +45,7 @@ HttpOutputCompressor::ZlibFilter::ZlibFilter(int flags, int level) {
                         Z_DEFLATED,   // method
                         flags,        // window bits (15=gzip compression,
                                       // 16=simple header, -15=raw deflate)
-                        9,            // memory level (1..9)
+                        level,        // memory level (1..9)
                         Z_FILTERED);  // strategy
 
   if (rv != Z_OK)
@@ -55,50 +57,48 @@ HttpOutputCompressor::ZlibFilter::~ZlibFilter() {
 }
 
 void HttpOutputCompressor::ZlibFilter::filter(const BufferRef& input,
-                                                 Buffer* output) {
-  bool eof = input.empty(); // FIXME
-
+                                              Buffer* output) {
   z_.total_out = 0;
   z_.next_in = (Bytef*)input.cbegin();
   z_.avail_in = input.size();
 
-  output->reserve(input.size() * 1.1 + 12 + 18);
+  output->reserve(output->size() + input.size() * 1.1 + 12 + 18);
   z_.next_out = (Bytef*)output->end();
-  z_.avail_out = output->capacity();
+  z_.avail_out = output->capacity() - output->size();
 
   do {
     if (output->size() > output->capacity() / 2) {
-      z_.avail_out = Buffer::CHUNK_SIZE;
-      output->reserve(output->capacity() + z_.avail_out);
+      output->reserve(output->capacity() + Buffer::CHUNK_SIZE);
+      z_.avail_out = output->capacity() - output->size();
     }
 
-    int flushMethod;
-    int expected;
+    const int rv = deflate(&z_, Z_SYNC_FLUSH); // or: Z_FINISH with Z_NO_FLUSH for non-last
 
-    if (!eof) {
-      flushMethod = Z_SYNC_FLUSH;  // Z_NO_FLUSH
-      expected = Z_OK;
-    } else {
-      flushMethod = Z_FINISH;
-      expected = Z_STREAM_END;
-    }
-
-    int rv = deflate(&z_, flushMethod);
-
-    // TRACE("deflate(): rv=%d, avail_in=%d, avail_out=%d, total_out=%ld", rv,
-    // z_.avail_in, z_.avail_out, z_.total_out);
-
-    if (rv != expected) {
-      // TRACE("process: deflate() error (%d)", rv);
-      throw std::runtime_error("deflate() error.");
+    if (rv != Z_OK) { // or: STREAM_END for last
+      switch (rv) {
+        case Z_NEED_DICT:
+          throw std::runtime_error("zlib dictionary needed.");
+        case Z_ERRNO:
+          throw std::system_error(errno, std::system_category());
+        case Z_STREAM_ERROR:
+          throw std::runtime_error("Invalid Zlib compression level.");
+        case Z_DATA_ERROR:
+          throw std::runtime_error("Invalid or incomplete deflate data.");
+        case Z_MEM_ERROR:
+          throw std::runtime_error("Zlib out of memory.");
+        case Z_BUF_ERROR:
+          throw std::runtime_error("Zlib buffer error.");
+        case Z_VERSION_ERROR:
+          throw std::runtime_error("Zlib version mismatch.");
+        default:
+          throw std::runtime_error("Unknown Zlib deflate() error.");
+      }
     }
   } while (z_.avail_out == 0);
 
   assert(z_.avail_in == 0);
 
   output->resize(z_.total_out);
-  // TRACE("process(%ld bytes, eof=%d) -> %ld", input.size(), eof,
-  // z_.total_out);
 }
 #endif
 // }}}
@@ -150,10 +150,6 @@ bool HttpOutputCompressor::containsMimeType(const std::string& value) const {
   return contentTypes_.find(value) != contentTypes_.end();
 }
 
-void HttpOutputCompressor::inject(HttpRequest* request, HttpResponse* response) {
-  // TODO: ensure postProcess() gets invoked right before response commit
-}
-
 template<typename Encoder>
 bool tryEncode(const std::string& encoding,
                int level,
@@ -170,23 +166,25 @@ bool tryEncode(const std::string& encoding,
   response->resetContentLength();
 
   response->addHeader("Content-Encoding", encoding);
-  //response->output()->addFilter(new Encoder(level));
   response->output()->addFilter(std::make_shared<Encoder>(level));
 
   return true;
 }
 
-void HttpOutputCompressor::postProcess(HttpRequest* request, HttpResponse* response) {
+void HttpOutputCompressor::inject(HttpRequest* request,
+                                  HttpResponse* response) {
+  // TODO: ensure postProcess() gets invoked right before response commit
+}
+
+void HttpOutputCompressor::postProcess(HttpRequest* request,
+                                       HttpResponse* response) {
   if (response->headers().contains("Content-Encoding"))
     return;  // do not double-encode content
 
   bool chunked = !response->hasContentLength();
   long long size = chunked ? 0 : response->contentLength();
 
-  if (size < minSize_ && !(size <= 0 && chunked))
-    return;
-
-  if (size > maxSize_)
+  if (!chunked && (size < minSize_ || size > maxSize_))
     return;
 
   if (!containsMimeType(response->headers().get("Content-Type")))

@@ -1,5 +1,9 @@
 #include <xzero/http/HttpOutputFilter.h>
+#include <xzero/io/FileRef.h>
 #include <xzero/Buffer.h>
+#include <xzero/sysconfig.h>
+#include <stdexcept>
+#include <system_error>
 
 namespace xzero {
 
@@ -16,6 +20,16 @@ void HttpOutputFilter::applyFilters(
     (*i)->filter(tmp.ref(), output);
     i++;
   }
+}
+
+void HttpOutputFilter::applyFilters(
+    const std::list<std::shared_ptr<HttpOutputFilter>>& filters,
+    const FileRef& file, Buffer* output) {
+
+  Buffer input;
+  file.fill(&input);
+
+  HttpOutputFilter::applyFilters(filters, input, output);
 }
 
 } // namespace xzero

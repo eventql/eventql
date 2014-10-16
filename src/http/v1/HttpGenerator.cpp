@@ -10,8 +10,10 @@
 namespace xzero {
 namespace http1 {
 
-HttpGenerator::HttpGenerator(HttpDateGenerator* dateGenerator)
+HttpGenerator::HttpGenerator(HttpDateGenerator* dateGenerator,
+                             EndPointWriter* output)
     : dateGenerator_(dateGenerator),
+      writer_(output),
       contentLength_(static_cast<size_t>(-1)),
       chunked_(false),
       buffer_() {
@@ -22,39 +24,42 @@ void HttpGenerator::recycle() {
 }
 
 void HttpGenerator::generateRequest(const HttpRequestInfo& info,
-                                    Buffer&& chunk, bool last,
-                                    EndPointWriter* output) {
+                                    Buffer&& chunk, bool last) {
   generateRequestLine(info);
   generateHeaders(info);
-  flushBuffer(output);
-  generateBody(std::move(chunk), last, output);
+  flushBuffer();
+  generateBody(std::move(chunk), last);
 }
 
 void HttpGenerator::generateRequest(const HttpRequestInfo& info,
-                                    const BufferRef& chunk, bool last,
-                                    EndPointWriter* output) {
+                                    const BufferRef& chunk, bool last) {
   generateRequestLine(info);
   generateHeaders(info);
-  flushBuffer(output);
-  generateBody(chunk, last, output);
+  flushBuffer();
+  generateBody(chunk, last);
 }
 
 void HttpGenerator::generateResponse(const HttpResponseInfo& info,
-                                     Buffer&& chunk, bool last,
-                                     EndPointWriter* output) {
-  generateResponseInfo(info, output);
-  generateBody(std::move(chunk), last, output);
+                                     const BufferRef& chunk, bool last) {
+  generateResponseInfo(info);
+  generateBody(chunk, last);
+  flushBuffer();
 }
 
 void HttpGenerator::generateResponse(const HttpResponseInfo& info,
-                                     const BufferRef& chunk, bool last,
-                                     EndPointWriter* output) {
-  generateResponseInfo(info, output);
-  generateBody(chunk, last, output);
+                                     Buffer&& chunk, bool last) {
+  generateResponseInfo(info);
+  generateBody(std::move(chunk), last);
+  flushBuffer();
 }
 
-void HttpGenerator::generateResponseInfo(const HttpResponseInfo& info,
-                                         EndPointWriter* output) {
+void HttpGenerator::generateResponse(const HttpResponseInfo& info,
+                                     FileRef&& chunk, bool last) {
+  generateResponseInfo(info);
+  generateBody(std::move(chunk), last);
+}
+
+void HttpGenerator::generateResponseInfo(const HttpResponseInfo& info) {
   generateResponseLine(info);
 
   if (static_cast<int>(info.status()) >= 200) {
@@ -69,78 +74,81 @@ void HttpGenerator::generateResponseInfo(const HttpResponseInfo& info,
     buffer_.push_back("\r\n");
   }
 
-  flushBuffer(output);
+  flushBuffer();
 }
 
-void HttpGenerator::generateBody(const BufferRef& chunk, bool last,
-                                 EndPointWriter* output) {
+void HttpGenerator::generateBody(const BufferRef& chunk, bool last) {
   if (chunked_) {
     if (chunk.size() > 0) {
       Buffer buf(12);
       buf.printf("%zx\r\n", chunk.size());
-      output->write(std::move(buf));
-      output->write(chunk);
-      output->write(BufferRef("\r\n"));
+      writer_->write(std::move(buf));
+      writer_->write(chunk);
+      writer_->write(BufferRef("\r\n"));
     }
 
     if (last) {
-      output->write(BufferRef("0\r\n\r\n"));
+      writer_->write(BufferRef("0\r\n\r\n"));
     }
   } else {
     if (chunk.size() <= contentLength_) {
       contentLength_ -= chunk.size();
-      output->write(chunk);
+      writer_->write(chunk);
     } else {
       throw std::runtime_error("HTTP body chunk exceeds content length.");
     }
   }
 }
 
-void HttpGenerator::generateBody(Buffer&& chunk, bool last,
-                                 EndPointWriter* output) {
+void HttpGenerator::generateEnd() {
+  if (chunked_) {
+    writer_->write(BufferRef("0\r\n\r\n"));
+  }
+}
+
+void HttpGenerator::generateBody(Buffer&& chunk, bool last) {
   if (chunked_) {
     if (chunk.size() > 0) {
       Buffer buf(12);
       buf.printf("%zx\r\n", chunk.size());
-      output->write(std::move(buf));
-      output->write(std::move(chunk));
-      output->write(BufferRef("\r\n"));
+      writer_->write(std::move(buf));
+      writer_->write(std::move(chunk));
+      writer_->write(BufferRef("\r\n"));
     }
 
     if (last) {
-      output->write(BufferRef("0\r\n\r\n"));
+      writer_->write(BufferRef("0\r\n\r\n"));
     }
   } else {
     if (chunk.size() <= contentLength_) {
       contentLength_ -= chunk.size();
-      output->write(std::move(chunk));
+      writer_->write(std::move(chunk));
     } else {
       throw std::runtime_error("HTTP body chunk exceeds content length.");
     }
   }
 }
 
-void HttpGenerator::generateBody(FileRef&& chunk, bool last,
-                                 EndPointWriter* output) {
+void HttpGenerator::generateBody(FileRef&& chunk, bool last) {
   if (chunked_) {
     int n;
     char buf[12];
 
     if (chunk.size() > 0) {
       n = snprintf(buf, sizeof(buf), "%zx\r\n", chunk.size());
-      output->write(BufferRef(buf, static_cast<size_t>(n)));
-      output->write(std::move(chunk));
-      output->write(BufferRef("\r\n"));
+      writer_->write(BufferRef(buf, static_cast<size_t>(n)));
+      writer_->write(std::move(chunk));
+      writer_->write(BufferRef("\r\n"));
     }
 
     if (last) {
       n = snprintf(buf, sizeof(buf), "0\r\n\r\n");
-      output->write(BufferRef(buf, n));
+      writer_->write(BufferRef(buf, n));
     }
   } else {
     if (chunk.size() <= contentLength_) {
       contentLength_ -= chunk.size();
-      output->write(std::move(chunk));
+      writer_->write(std::move(chunk));
     } else {
       throw std::runtime_error("HTTP body chunk exceeds content length.");
     }
@@ -215,8 +223,8 @@ void HttpGenerator::generateHeaders(const HttpInfo& info) {
   buffer_.push_back("\r\n");
 }
 
-void HttpGenerator::flushBuffer(EndPointWriter* output) {
-  output->write(std::move(buffer_));
+void HttpGenerator::flushBuffer() {
+  writer_->write(std::move(buffer_));
   buffer_.clear();
 }
 
