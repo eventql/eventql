@@ -24,7 +24,6 @@ void RowOffsetIndex::addRow(
     size_t key_size,
     void const* data,
     size_t data_size) const {
-  printf("addrow... %i\n", body_offset);
 }
 
 }
