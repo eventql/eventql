@@ -104,3 +104,45 @@ TEST(HttpChannel, unhandledException2) {
   transport.run(HttpVersion::VERSION_1_0, "GET", "/", {}, "");
   ASSERT_EQ(HttpStatus::InternalServerError, transport.responseInfo().status());
 }
+
+TEST(HttpChannel, completed_invoked_before_contentLength_satisfied) {
+  DirectExecutor executor;
+  MockTransport transport(&executor, [](HttpRequest* request,
+                                        HttpResponse* response) {
+    response->setStatus(xzero::HttpStatus::Ok);
+    response->addHeader("Content-Type", "text/plain");
+    response->setContentLength(10);
+    response->output()->write("12345");
+    response->completed();
+  });
+
+  // we expect the connection to terminate on invalid generated
+  // response messages
+
+  transport.run(HttpVersion::VERSION_1_1, "GET", "/", {{"Host", "test"}}, "");
+  ASSERT_EQ(true, transport.isAborted());
+  ASSERT_EQ(true, transport.isCompleted());
+  ASSERT_EQ(5, transport.responseBody().size());
+}
+
+TEST(HttpChannel, trailer1) {
+  DirectExecutor executor;
+  MockTransport transport(&executor, [](HttpRequest* request,
+                                        HttpResponse* response) {
+    response->setStatus(xzero::HttpStatus::Ok);
+    response->addHeader("Content-Type", "text/plain");
+    response->registerTrailer("Word-Count");
+    response->registerTrailer("Mood");
+    response->output()->write("Hello, World!\n");
+    response->setTrailer("Word-Count", "one");
+    response->setTrailer("Mood", "Happy");
+    response->completed();
+  });
+
+  transport.run(HttpVersion::VERSION_1_1, "GET", "/", {{"Host", "blah"}}, "");
+
+  ASSERT_EQ((int)HttpStatus::Ok, (int)transport.responseInfo().status());
+  ASSERT_EQ(2, transport.responseInfo().trailers().size());
+  ASSERT_EQ("one", transport.responseInfo().trailers().get("Word-Count"));
+  ASSERT_EQ("Happy", transport.responseInfo().trailers().get("Mood"));
+}
