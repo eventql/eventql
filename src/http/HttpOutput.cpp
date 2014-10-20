@@ -14,13 +14,14 @@
 
 namespace xzero {
 
-HttpOutput::HttpOutput(HttpChannel* channel) : channel_(channel) {
+HttpOutput::HttpOutput(HttpChannel* channel) : channel_(channel), size_(0) {
 }
 
 HttpOutput::~HttpOutput() {
 }
 
 void HttpOutput::recycle() {
+  size_ = 0;
 }
 
 void HttpOutput::addFilter(std::shared_ptr<HttpOutputFilter> filter) {
@@ -45,14 +46,17 @@ void HttpOutput::write(const std::string& str, CompletionHandler&& completed) {
 }
 
 void HttpOutput::write(Buffer&& data, CompletionHandler&& completed) {
+  size_ += data.size();
   channel_->send(std::move(data), std::move(completed));
 }
 
 void HttpOutput::write(const BufferRef& data, CompletionHandler&& completed) {
+  size_ += data.size();
   channel_->send(data, std::move(completed));
 }
 
 void HttpOutput::write(FileRef&& input, CompletionHandler&& completed) {
+  size_ += input.size();
   channel_->send(std::move(input), std::move(completed));
 }
 
