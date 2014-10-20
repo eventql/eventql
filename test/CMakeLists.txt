@@ -21,6 +21,7 @@ if(ENABLE_TESTS)
     # http1
     Http1-test.cpp
     HttpParser-test.cpp
+    HttpGenerator-test.cpp
   )
   target_link_libraries(libxzero-test gtest xzero)
 
