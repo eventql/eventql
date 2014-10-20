@@ -274,6 +274,11 @@ void HttpChannel::completed() {
     send(BufferRef(), nullptr);
   }
 
+  if (response_->hasContentLength() && response_->output()->size() < response_->contentLength()) {
+    transport_->abort();
+    return;
+  }
+
   transport_->completed();
 }
 
