@@ -14,7 +14,7 @@ HttpGenerator::HttpGenerator(HttpDateGenerator* dateGenerator,
                              EndPointWriter* output)
     : dateGenerator_(dateGenerator),
       writer_(output),
-      contentLength_(static_cast<size_t>(-1)),
+      contentLength_(Buffer::npos),
       chunked_(false),
       buffer_() {
 }
