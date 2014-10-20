@@ -232,8 +232,10 @@ void HttpGenerator::generateHeaders(const HttpInfo& info) {
 }
 
 void HttpGenerator::flushBuffer() {
-  writer_->write(std::move(buffer_));
-  buffer_.clear();
+  if (!buffer_.empty()) {
+    writer_->write(std::move(buffer_));
+    buffer_.clear();
+  }
 }
 
 }  // namespace http1
