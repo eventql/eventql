@@ -3,8 +3,8 @@
 
 ### Base
 
-- [ ] Base64
-- [ ] Buffer
+- [x] Base64
+- [x] Buffer
 - [ ] DateTime
 - [x] IdleTimeout
 - [ ] WallClock
@@ -41,8 +41,8 @@
 - [x] HttpParser: body with content-length given
 - [x] HttpParser: body with chunked body
 - [x] HttpParser: "Foo : Bar\r\n\r\n" => 400 (header with space before colon)
-- [ ] HttpGenerator: generate response with content-length given
-- [ ] HttpGenerator: generate response with chunked body
+- [x] HttpGenerator: generate response with content-length given
+- [x] HttpGenerator: generate response with chunked body
 - [ ] 6.6.6: HTTP version not supported
 - [ ] rfc7231, 6.5.7. 408 Request Timeout
 
