@@ -121,7 +121,6 @@ TEST(HttpChannel, completed_invoked_before_contentLength_satisfied) {
 
   transport.run(HttpVersion::VERSION_1_1, "GET", "/", {{"Host", "test"}}, "");
   ASSERT_EQ(true, transport.isAborted());
-  ASSERT_EQ(true, transport.isCompleted());
   ASSERT_EQ(5, transport.responseBody().size());
 }
 
