@@ -48,6 +48,7 @@ void HttpChannel::reset() {
   state_ = HttpChannelState::IDLE;
   request_->recycle();
   response_->recycle();
+  outputFilters_.clear();
 }
 
 std::unique_ptr<HttpOutput> HttpChannel::createOutput() {
