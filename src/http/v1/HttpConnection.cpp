@@ -247,7 +247,9 @@ void HttpConnection::onFillable() {
   TRACE("%p onFillable", this);
 
   if (endpoint()->fill(&inputBuffer_) == 0) {
-    abort();  // throw std::runtime_error("client EOF");
+    // throw std::runtime_error("client EOF");
+    abort();
+    return;
   }
 
   try {
@@ -264,7 +266,8 @@ void HttpConnection::onFlushable() {
 
   const bool complete = writer_.flush(endpoint());
   if (complete) {
-    wantFill(); // restore interest to NONE or READ
+    TRACE("%p onFlushable. calling wantFill", this);
+    wantFlush(false);
 
     if (onComplete_) {
       TRACE("%p onFlushable: invoking completion callback", this);
