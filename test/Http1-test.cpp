@@ -55,7 +55,7 @@ static const TimeSpan maxKeepAlive = TimeSpan::fromSeconds(30);
   });                                                                          \
   server.start();
 
-TEST(Http1, ConnectionClosed) {
+TEST(Http1, ConnectionClosed_1_1) {
   MOCK_HTTP1_SERVER(server, connector, executor);
 
   std::shared_ptr<LocalEndPoint> ep;
@@ -65,7 +65,12 @@ TEST(Http1, ConnectionClosed) {
                                  "\r\n");
   });
   ASSERT_TRUE(ep->output().contains("Connection: close"));
+}
 
+TEST(Http1, ConnectionClosed_1_0) {
+  MOCK_HTTP1_SERVER(server, connector, executor);
+
+  std::shared_ptr<LocalEndPoint> ep;
   executor.execute([&] {
     ep = connector->createClient("GET / HTTP/1.0\r\n"
                                  "\r\n");
