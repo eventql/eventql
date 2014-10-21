@@ -18,6 +18,7 @@ DirectLoopExecutor::DirectLoopExecutor()
 }
 
 DirectLoopExecutor::~DirectLoopExecutor() {
+  cancel();
 }
 
 void DirectLoopExecutor::run() {
@@ -58,6 +59,7 @@ bool DirectLoopExecutor::tryRunOne() {
 
 void DirectLoopExecutor::cancel() {
   isCancelled_ = true;
+  wakeup();
 }
 
 void DirectLoopExecutor::execute(Task&& task) {
