@@ -62,9 +62,9 @@ void Connection::wantFill() {
   endpoint()->wantFill();
 }
 
-void Connection::wantFlush() {
+void Connection::wantFlush(bool enable) {
   // register write-event
-  endpoint()->wantFlush();
+  endpoint()->wantFlush(enable);
 }
 
 void Connection::onInterestFailure(const std::exception& error) {

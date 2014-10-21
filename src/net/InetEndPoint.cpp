@@ -30,7 +30,7 @@ InetEndPoint::InetEndPoint(int socket, InetConnector* connector)
       idleTimeout_(connector->clock(), connector->scheduler()),
       handle_(socket),
       isCorking_(false),
-      isBusy_(false) {
+      isBusy_(0) {
 }
 
 InetEndPoint::~InetEndPoint() {
@@ -203,29 +203,27 @@ void InetEndPoint::wantFill() {
   if (selector()) {
     selectionKey_ = registerSelectable(READ);
   } else {
-    // XXX use executor here to flatten callstack on repeative wantFill()
-    connector_->executor()->execute([this]() {
-      isBusy_ = true;
-      try {
-        connection()->onFillable();
-        isBusy_ = false;
-      } catch (const std::exception& e) {
-        connection()->onInterestFailure(e);
-        isBusy_ = false;
-      }
-      if (isClosed()) {
-        connector_->release(connection());
-      }
-    });
+    isBusy_++;
+    try {
+      connection()->onFillable();
+      isBusy_--;
+    } catch (const std::exception& e) {
+      TRACE("wantFill: exception caught: %s", e.what()); connection()->onInterestFailure(e);
+      isBusy_--;
+    }
+    if (!isBusy_ && isClosed()) {
+      TRACE("wantFill: isClosed == true, releasing");
+      connector_->release(connection());
+    }
   }
 }
 
 void InetEndPoint::onSelectable() noexcept {
-  // printf("InetEndPoint.onSelectable()%s%s\n",
-  //     selectionKey_->isReadable() ? " read" : "",
-  //     selectionKey_->isWriteable() ? " write" : "");
+  TRACE("InetEndPoint.onSelectable()%s%s\n",
+        selectionKey_->isReadable() ? " read" : "",
+        selectionKey_->isWriteable() ? " write" : "");
 
-  isBusy_ = true;
+  isBusy_++;
 
   try {
     if (selectionKey_->isReadable()) {
@@ -236,29 +234,41 @@ void InetEndPoint::onSelectable() noexcept {
       connection()->onFlushable();
     }
 
-    isBusy_ = false;
+    isBusy_--;
   } catch (const std::exception& e) {
     ERROR("%p onSelectable: unhandled exception caught. %s %s", this,
           typeid(e).name(), e.what());
     connection()->onInterestFailure(e);
-    isBusy_ = false;
+    isBusy_--;
   }
 
-  if (isClosed()) {
+  if (!isBusy_ && isClosed()) {
     connector_->release(connection());
   }
 }
 
-void InetEndPoint::wantFlush() {
+void InetEndPoint::wantFlush(bool enable) {
   if (selector()) {
     if (selectionKey_) {
       int cur = selectionKey_->interest();
-      selectionKey_->change(cur | WRITE);
+      int newInterests = enable ? (cur | WRITE) : (cur & ~WRITE);
+      selectionKey_->change(newInterests);
     } else {
       selectionKey_ = registerSelectable(WRITE);
     }
-  } else {
-    connection()->onFlushable();
+  } else if (enable) {
+    isBusy_++;
+    try {
+      connection()->onFlushable();
+      isBusy_--;
+    } catch (const std::exception& e) {
+      TRACE("wantFlush: exception caught: %s", e.what()); connection()->onInterestFailure(e);
+      isBusy_--;
+    }
+    if (!isBusy_ && isClosed()) {
+      TRACE("wantFlush: isClosed == true, releasing");
+      connector_->release(connection());
+    }
   }
 }
 
