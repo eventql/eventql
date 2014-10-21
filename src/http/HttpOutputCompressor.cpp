@@ -129,6 +129,7 @@ HttpOutputCompressor::HttpOutputCompressor()
   addMimeType("text/css");
   addMimeType("application/xml");
   addMimeType("application/xhtml+xml");
+  addMimeType("application/javascript");
 }
 
 HttpOutputCompressor::~HttpOutputCompressor() {
