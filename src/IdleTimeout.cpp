@@ -50,8 +50,10 @@ void IdleTimeout::touch() {
 
 void IdleTimeout::activate() {
   assert(onTimeout_ && "No timeout callback defined");
-  active_ = true;
-  schedule();
+  if (!active_) {
+    active_ = true;
+    schedule();
+  }
 }
 
 void IdleTimeout::deactivate() {
