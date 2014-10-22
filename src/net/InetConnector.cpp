@@ -45,7 +45,7 @@ namespace xzero {
 
 InetConnector::InetConnector(const std::string& name, Executor* executor,
                              Scheduler* scheduler, Selector* selector,
-                             WallClock* clock)
+                             WallClock* clock, TimeSpan idleTimeout)
     : Connector(name, executor, clock),
       selector_(selector),
       scheduler_(scheduler),
@@ -56,15 +56,16 @@ InetConnector::InetConnector(const std::string& name, Executor* executor,
       flags_(0),
       backlog_(256),
       multiAcceptCount_(1),
+      idleTimeout_(idleTimeout),
       isStarted_(false) {
 }
 
 InetConnector::InetConnector(const std::string& name, Executor* executor,
                              Scheduler* scheduler, Selector* selector,
-                             WallClock* clock,
+                             WallClock* clock, TimeSpan idleTimeout,
                              const IPAddress& ipaddress, int port, int backlog,
                              bool reuseAddr, bool reusePort)
-    : InetConnector(name, executor, scheduler, selector, clock) {
+    : InetConnector(name, executor, scheduler, selector, clock, idleTimeout) {
 
   open(ipaddress, port, backlog, reuseAddr, reusePort);
 }

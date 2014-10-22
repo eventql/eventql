@@ -31,6 +31,17 @@ InetEndPoint::InetEndPoint(int socket, InetConnector* connector)
       handle_(socket),
       isCorking_(false),
       isBusy_(0) {
+
+  idleTimeout_.setCallback(std::bind(&InetEndPoint::onTimeout, this));
+  idleTimeout_.setTimeout(connector->idleTimeout());
+}
+
+void InetEndPoint::onTimeout() {
+  if (connection()) {
+    if (connection()->onReadTimeout()) {
+      close();
+    }
+  }
 }
 
 InetEndPoint::~InetEndPoint() {
@@ -202,6 +213,7 @@ void InetEndPoint::wantFill() {
 
   if (selector()) {
     selectionKey_ = registerSelectable(READ);
+    idleTimeout_.activate();
   } else {
     isBusy_++;
     try {
@@ -256,6 +268,7 @@ void InetEndPoint::wantFlush(bool enable) {
     } else {
       selectionKey_ = registerSelectable(WRITE);
     }
+    idleTimeout_.activate();
   } else if (enable) {
     isBusy_++;
     try {
