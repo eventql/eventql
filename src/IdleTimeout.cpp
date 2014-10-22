@@ -1,9 +1,18 @@
 #include <xzero/IdleTimeout.h>
 #include <xzero/WallClock.h>
+#include <xzero/logging/LogSource.h>
 #include <xzero/executor/Scheduler.h>
 #include <assert.h>
 
 namespace xzero {
+
+static LogSource idleTimeoutLogger("IdleTimeout");
+#define ERROR(msg...) do { idleTimeoutLogger.error(msg); } while (0)
+#ifndef NDEBUG
+#define TRACE(msg...) do { idleTimeoutLogger.trace(msg); } while (0)
+#else
+#define TRACE(msg...) do {} while (0)
+#endif
 
 IdleTimeout::IdleTimeout(WallClock* clock, Scheduler* scheduler) :
   clock_(clock),
@@ -70,6 +79,7 @@ void IdleTimeout::schedule() {
 }
 
 void IdleTimeout::onFired() {
+  TRACE("IdleTimeout(%p).onFired: active=%d", this, active_);
   if (!active_) {
     return;
   }
