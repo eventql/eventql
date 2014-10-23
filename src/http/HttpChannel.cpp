@@ -197,6 +197,9 @@ bool HttpChannel::onMessageBegin(const BufferRef& method,
     return false;
   }
 
+  TRACE("onMessageBegin(%s, %s)", request_->method().c_str(),
+        request_->path().c_str());
+
   return true;
 }
 
