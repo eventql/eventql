@@ -9,27 +9,36 @@ namespace xzero {
 
 void HttpOutputFilter::applyFilters(
     const std::list<std::shared_ptr<HttpOutputFilter>>& filters,
-    const BufferRef& input, Buffer* output) {
+    const BufferRef& input, Buffer* output, bool last) {
   auto i = filters.begin();
   auto e = filters.end();
-  (*i)->filter(input, output);
+
+  if (i == e) {
+    *output = input;
+    return;
+  }
+
+  (*i)->filter(input, output, last);
   i++;
   Buffer tmp;
   while (i != e) {
     tmp.swap(*output);
-    (*i)->filter(tmp.ref(), output);
+    (*i)->filter(tmp.ref(), output, last);
     i++;
   }
 }
 
 void HttpOutputFilter::applyFilters(
     const std::list<std::shared_ptr<HttpOutputFilter>>& filters,
-    const FileRef& file, Buffer* output) {
+    const FileRef& file, Buffer* output, bool last) {
 
   Buffer input;
   file.fill(&input);
 
-  HttpOutputFilter::applyFilters(filters, input, output);
+  if (input.size() != file.size())
+    throw std::runtime_error("Could not read full input file.");
+
+  HttpOutputFilter::applyFilters(filters, input, output, last);
 }
 
 } // namespace xzero

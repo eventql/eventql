@@ -29,7 +29,7 @@ class HttpOutputCompressor::ZlibFilter : public HttpOutputFilter {
   explicit ZlibFilter(int flags, int level);
   ~ZlibFilter();
 
-  void filter(const BufferRef& input, Buffer* output) override;
+  void filter(const BufferRef& input, Buffer* output, bool last) override;
 
   std::string z_code(int code) const;
 
@@ -38,6 +38,8 @@ class HttpOutputCompressor::ZlibFilter : public HttpOutputFilter {
 };
 
 HttpOutputCompressor::ZlibFilter::ZlibFilter(int flags, int level) {
+  z_.total_in = 0;
+  z_.total_out = 0;
   z_.zalloc = Z_NULL;
   z_.zfree = Z_NULL;
   z_.opaque = Z_NULL;
@@ -87,9 +89,18 @@ std::string HttpOutputCompressor::ZlibFilter::z_code(int code) const {
 }
 
 void HttpOutputCompressor::ZlibFilter::filter(const BufferRef& input,
-                                              Buffer* output) {
-  z_.total_in = 0;
-  z_.total_out = 0;
+                                              Buffer* output, bool last) {
+  int mode;
+  int expectedResult;
+
+  if (last) {
+    mode = Z_FINISH;
+    expectedResult = Z_STREAM_END;
+  } else {
+    mode = Z_SYNC_FLUSH; // or Z_NO_FLUSH
+    expectedResult = Z_OK;
+  }
+
   z_.next_in = (Bytef*)input.cbegin();
   z_.avail_in = input.size();
 
@@ -103,18 +114,6 @@ void HttpOutputCompressor::ZlibFilter::filter(const BufferRef& input,
       z_.next_out = (Bytef*)output->end();
       z_.avail_out = output->capacity() - output->size();
     }
-
-#if 1
-    const int mode = Z_SYNC_FLUSH; // or Z_NO_FLUSH
-    const char* mode_s = "Z_SYNC_FLUSH";
-    const int expectedResult = Z_OK;
-    const char* exp_s = "Z_OK";
-#else
-    const int mode = Z_FINISH;
-    const char* mode_s = "Z_FINISH";
-    const int expectedResult = Z_STREAM_END;
-    const char* exp_s = "Z_STREAM_END";
-#endif
 
     const int rv = deflate(&z_, mode);
 

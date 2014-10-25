@@ -81,7 +81,7 @@ void HttpChannel::send(const BufferRef& data, CompletionHandler&& onComplete) {
     }
   } else {
     Buffer filtered;
-    HttpOutputFilter::applyFilters(outputFilters_, data.ref(), &filtered);
+    HttpOutputFilter::applyFilters(outputFilters_, data, &filtered, false);
 
     if (!response_->isCommitted()) {
       HttpResponseInfo info(commitInline());
@@ -97,7 +97,7 @@ void HttpChannel::send(Buffer&& data, CompletionHandler&& onComplete) {
 
   if (!outputFilters_.empty()) {
     Buffer output;
-    HttpOutputFilter::applyFilters(outputFilters_, data.ref(), &output);
+    HttpOutputFilter::applyFilters(outputFilters_, data.ref(), &output, false);
     data = std::move(output);
   }
 
@@ -121,7 +121,7 @@ void HttpChannel::send(FileRef&& file, CompletionHandler&& onComplete) {
     transport_->send(std::move(file), std::move(onComplete));
   } else {
     Buffer filtered;
-    HttpOutputFilter::applyFilters(outputFilters_, file, &filtered);
+    HttpOutputFilter::applyFilters(outputFilters_, file, &filtered, false);
 
     if (!response_->isCommitted()) {
       HttpResponseInfo info(commitInline());
@@ -282,6 +282,14 @@ void HttpChannel::completed() {
 
   if (response_->hasContentLength() && response_->output()->size() < response_->contentLength()) {
     transport_->abort();
+    return;
+  }
+
+  if (!outputFilters_.empty()) {
+    Buffer filtered;
+    HttpOutputFilter::applyFilters(outputFilters_, "", &filtered, true);
+    transport_->send(std::move(filtered),
+                     std::bind(&HttpTransport::completed, transport_));
     return;
   }
 
