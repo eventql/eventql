@@ -88,8 +88,8 @@ bool HttpRequest::setUri(const std::string& uri) {
 #endif
 
   while (i != e) {
-    TRACE("parse-uri: ch:%c, i:%c, state:%s, depth:%d", ch, *i,
-          uriStateNames[(int)state], depth);
+    // TRACE("parse-uri: ch:%c, i:%c, state:%s, depth:%d", ch, *i,
+    //       uriStateNames[(int)state], depth);
 
     switch (state) {
       case UriState::Content:
