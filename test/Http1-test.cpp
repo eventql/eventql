@@ -112,9 +112,9 @@ TEST(Http1, ConnectionKeepAlive_1_1) {
 // TEST(Http1, ConnectionKeepAlive2) { TODO
 // }
 
-#if 0
 // sends 3 requests pipelined all at once. receives responses in order
 TEST(Http1, ConnectionKeepAlive3_pipelined) {
+  //SCOPED_LOGGER();
   MOCK_HTTP1_SERVER(server, connector, executor);
   std::shared_ptr<LocalEndPoint> ep;
   executor.execute([&] {
@@ -127,6 +127,7 @@ TEST(Http1, ConnectionKeepAlive3_pipelined) {
   // XXX assume max-request-count 5
   ASSERT_EQ(
     "HTTP/1.1 200 Ok\r\n"
+    "Content-Type: text/plain\r\n"
     "Server: xzero/0.11.0-dev\r\n"
     "Connection: Keep-Alive\r\n"
     "Keep-Alive: timeout=30, max=4\r\n"
@@ -134,6 +135,7 @@ TEST(Http1, ConnectionKeepAlive3_pipelined) {
     "\r\n"
     "/one\n"
     "HTTP/1.1 200 Ok\r\n"
+    "Content-Type: text/plain\r\n"
     "Server: xzero/0.11.0-dev\r\n"
     "Connection: Keep-Alive\r\n"
     "Keep-Alive: timeout=30, max=3\r\n"
@@ -141,6 +143,7 @@ TEST(Http1, ConnectionKeepAlive3_pipelined) {
     "\r\n"
     "/two\n"
     "HTTP/1.1 200 Ok\r\n"
+    "Content-Type: text/plain\r\n"
     "Server: xzero/0.11.0-dev\r\n"
     "Connection: Keep-Alive\r\n"
     "Keep-Alive: timeout=30, max=2\r\n"
@@ -149,7 +152,6 @@ TEST(Http1, ConnectionKeepAlive3_pipelined) {
     "/three\n",
     ep->output().str());
 }
-#endif
 
 // ensure proper error code on bad request line
 TEST(Http1, protocolErrorShouldRaise400) {
