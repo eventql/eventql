@@ -40,22 +40,6 @@ void Connection::close() {
   }
 }
 
-size_t Connection::getMessagesIn() const {
-  return 0;
-}
-
-size_t Connection::getMessagesOut() const {
-  return 0;
-}
-
-size_t Connection::getBytesIn() const {
-  return 0;
-}
-
-size_t Connection::getBytesOut() const {
-  return 0;
-}
-
 void Connection::setInputBufferSize(size_t size) {
   // default no-op
 }
