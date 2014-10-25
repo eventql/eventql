@@ -273,9 +273,11 @@ void HttpChannel::onProtocolError(HttpStatus code, const std::string& message) {
 void HttpChannel::completed() {
   if (!response_->isCommitted()) {
     TRACE("completed(): not committed yet. commit empty-body response");
-    // commit headers with empty body
-    response_->setContentLength(0);
-    send(BufferRef(), nullptr);
+    if (!response_->hasContentLength() && request_->method() != "HEAD") {
+      response_->setContentLength(0);
+    }
+    send(BufferRef(), std::bind(&HttpChannel::completed, this));
+    return;
   }
 
   if (response_->hasContentLength() && response_->output()->size() < response_->contentLength()) {

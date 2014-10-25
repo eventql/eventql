@@ -145,8 +145,15 @@ bool InetEndPoint::isBlocking() const {
 }
 
 void InetEndPoint::setBlocking(bool enable) {
+  TRACE("%p setBlocking(\"%s\")", this, enable ? "blocking" : "nonblocking");
+#if 1
+  unsigned current = fcntl(handle_, F_GETFL);
+  unsigned flags = enable ? (current & ~O_NONBLOCK)
+                          : (current | O_NONBLOCK);
+#else
   unsigned flags = enable ? fcntl(handle_, F_GETFL) & ~O_NONBLOCK
                           : fcntl(handle_, F_GETFL) | O_NONBLOCK;
+#endif
 
   if (fcntl(handle_, F_SETFL, flags) < 0) {
     throw std::system_error(errno, std::system_category());
@@ -179,10 +186,22 @@ size_t InetEndPoint::fill(Buffer* result) {
   result->reserve(result->size() + 1024);
   ssize_t n = read(handle(), result->end(), result->capacity() - result->size());
 
-  if (n < 0)
-    throw std::system_error(errno, std::system_category());
+  if (n < 0) {
+    // don't raise on soft errors, such as there is simply no more data to read.
+    switch (errno) {
+      case EBUSY:
+      case EAGAIN:
+#if defined(EWOULDBLOCK) && (EWOULDBLOCK != EAGAIN)
+      case EWOULDBLOCK:
+#endif
+        break;
+      default:
+        throw std::system_error(errno, std::system_category());
+    }
+  } else {
+    result->resize(result->size() + n);
+  }
 
-  result->resize(result->size() + n);
   return n;
 }
 
@@ -206,28 +225,6 @@ size_t InetEndPoint::flush(int fd, off_t offset, size_t size) {
   // EOF exception?
 
   return rv;
-}
-
-void InetEndPoint::wantFill() {
-  // TODO: abstract away the logic of TCP_DEFER_ACCEPT
-
-  if (selector()) {
-    selectionKey_ = registerSelectable(READ);
-    idleTimeout_.activate();
-  } else {
-    isBusy_++;
-    try {
-      connection()->onFillable();
-      isBusy_--;
-    } catch (const std::exception& e) {
-      TRACE("wantFill: exception caught: %s", e.what()); connection()->onInterestFailure(e);
-      isBusy_--;
-    }
-    if (!isBusy_ && isClosed()) {
-      TRACE("wantFill: isClosed == true, releasing");
-      connector_->release(connection());
-    }
-  }
 }
 
 void InetEndPoint::onSelectable() noexcept {
@@ -259,7 +256,38 @@ void InetEndPoint::onSelectable() noexcept {
   }
 }
 
+void InetEndPoint::wantFill() {
+  TRACE("%p wantFill()", this);
+  // TODO: abstract away the logic of TCP_DEFER_ACCEPT
+
+  if (selector()) {
+    selectionKey_ = registerSelectable(READ);
+    //idleTimeout_.activate();
+  } else {
+    fillable();
+  }
+}
+
+void InetEndPoint::fillable() {
+  connector_->executor()->execute([this]() {
+    isBusy_++;
+    try {
+      connection()->onFillable();
+      isBusy_--;
+    } catch (const std::exception& e) {
+      TRACE("wantFill: exception caught: %s", e.what());
+      connection()->onInterestFailure(e);
+      isBusy_--;
+    }
+    if (!isBusy_ && isClosed()) {
+      TRACE("wantFill: isClosed == true, releasing");
+      connector_->release(connection());
+    }
+  });
+}
+
 void InetEndPoint::wantFlush(bool enable) {
+  TRACE("%p wantFlush(%s)", this, enable ? "true" : "false");
   if (selector()) {
     if (selectionKey_) {
       int cur = selectionKey_->interest();
@@ -268,21 +296,28 @@ void InetEndPoint::wantFlush(bool enable) {
     } else {
       selectionKey_ = registerSelectable(WRITE);
     }
-    idleTimeout_.activate();
+    //idleTimeout_.activate();
   } else if (enable) {
+    flushable();
+  }
+}
+
+void InetEndPoint::flushable() {
+  connector_->executor()->execute([this]() {
     isBusy_++;
     try {
       connection()->onFlushable();
       isBusy_--;
     } catch (const std::exception& e) {
-      TRACE("wantFlush: exception caught: %s", e.what()); connection()->onInterestFailure(e);
+      TRACE("wantFlush: exception caught: %s", e.what());
+      connection()->onInterestFailure(e);
       isBusy_--;
     }
     if (!isBusy_ && isClosed()) {
       TRACE("wantFlush: isClosed == true, releasing");
       connector_->release(connection());
     }
-  }
+  });
 }
 
 TimeSpan InetEndPoint::idleTimeout() {

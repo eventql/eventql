@@ -4,8 +4,11 @@
 
 namespace xzero {
 
-Connection::Connection(std::shared_ptr<EndPoint> endpoint)
-    : endpoint_(endpoint), listeners_() {
+Connection::Connection(std::shared_ptr<EndPoint> endpoint,
+                       Executor* executor)
+    : endpoint_(endpoint),
+      executor_(executor),
+      listeners_() {
 
   if (endpoint_) {
     endpoint_->setConnection(this);

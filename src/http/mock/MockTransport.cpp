@@ -59,8 +59,7 @@ MockTransport::MockTransport(Executor* executor,
                              size_t maxRequestUriLength,
                              size_t maxRequestBodyLength,
                              HttpOutputCompressor* outputCompressor)
-    : HttpTransport(nullptr /*endpoint*/),
-      executor_(executor),
+    : HttpTransport(nullptr /*endpoint*/, executor),
       handler_(handler),
       maxRequestUriLength_(maxRequestUriLength),
       maxRequestBodyLength_(maxRequestBodyLength),
@@ -119,7 +118,7 @@ void MockTransport::send(HttpResponseInfo&& responseInfo,
   responseBody_ += chunk;
 
   if (onComplete) {
-    executor_->execute([onComplete]() {
+    executor()->execute([onComplete]() {
       onComplete(true);
     });
   }
@@ -132,7 +131,7 @@ void MockTransport::send(HttpResponseInfo&& responseInfo,
   responseBody_ += chunk;
 
   if (onComplete) {
-    executor_->execute([onComplete]() {
+    executor()->execute([onComplete]() {
       onComplete(true);
     });
   }
@@ -146,7 +145,7 @@ void MockTransport::send(HttpResponseInfo&& responseInfo,
   chunk.fill(&responseBody_);
 
   if (onComplete) {
-    executor_->execute([onComplete]() {
+    executor()->execute([onComplete]() {
       onComplete(true);
     });
   }
@@ -156,7 +155,7 @@ void MockTransport::send(const BufferRef& chunk, CompletionHandler&& onComplete)
   responseBody_ += chunk;
 
   if (onComplete) {
-    executor_->execute([onComplete]() {
+    executor()->execute([onComplete]() {
       onComplete(true);
     });
   }
@@ -166,7 +165,7 @@ void MockTransport::send(Buffer&& chunk, CompletionHandler&& onComplete) {
   responseBody_ += chunk;
 
   if (onComplete) {
-    executor_->execute([onComplete]() {
+    executor()->execute([onComplete]() {
       onComplete(true);
     });
   }
@@ -176,7 +175,7 @@ void MockTransport::send(FileRef&& chunk, CompletionHandler&& onComplete) {
   chunk.fill(&responseBody_);
 
   if (onComplete) {
-    executor_->execute([onComplete]() {
+    executor()->execute([onComplete]() {
       onComplete(true);
     });
   }

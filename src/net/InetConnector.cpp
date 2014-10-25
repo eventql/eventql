@@ -54,6 +54,7 @@ InetConnector::InetConnector(const std::string& name, Executor* executor,
       addressFamily_(IPAddress::V4),
       typeMask_(0),
       flags_(0),
+      blocking_(true),
       backlog_(256),
       multiAcceptCount_(1),
       idleTimeout_(idleTimeout),
@@ -199,6 +200,7 @@ void InetConnector::setBlocking(bool enable) {
     flags_ |= O_NONBLOCK;
   }
 #endif
+  blocking_ = enable;
 }
 
 bool InetConnector::closeOnExec() const {

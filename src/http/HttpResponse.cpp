@@ -175,10 +175,10 @@ void HttpResponse::sendError(HttpStatus code, const std::string& message) {
     setHeader("Cache-Control", "must-revalidate,no-cache,no-store");
     setHeader("Content-Type", "text/html");
     setContentLength(body.size());
-    output()->write(std::move(body));
+    output()->write(std::move(body), std::bind(&HttpResponse::completed, this));
+  } else {
+    completed();
   }
-
-  completed();
 }
 
 // {{{ trailers

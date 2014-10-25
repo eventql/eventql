@@ -9,6 +9,7 @@
 #include <xzero/net/Connection.h>
 #include <xzero/net/EndPoint.h>
 #include <xzero/net/EndPointWriter.h>
+#include <xzero/executor/Executor.h>
 #include <xzero/logging/LogSource.h>
 #include <xzero/WallClock.h>
 #include <xzero/sysconfig.h>
@@ -27,6 +28,7 @@ static LogSource connectionLogger("http1.HttpConnection");
 #endif
 
 HttpConnection::HttpConnection(std::shared_ptr<EndPoint> endpoint,
+                               Executor* executor,
                                const HttpHandler& handler,
                                HttpDateGenerator* dateGenerator,
                                HttpOutputCompressor* outputCompressor,
@@ -34,7 +36,7 @@ HttpConnection::HttpConnection(std::shared_ptr<EndPoint> endpoint,
                                size_t maxRequestBodyLength,
                                size_t maxRequestCount,
                                TimeSpan maxKeepAlive)
-    : HttpTransport(endpoint),
+    : HttpTransport(endpoint, executor),
       parser_(HttpParser::REQUEST),
       inputBuffer_(),
       inputOffset_(0),
@@ -91,33 +93,33 @@ void HttpConnection::completed() {
     throw std::runtime_error(
         "Invalid State. Response not fully written but completed() invoked.");
 
+  onComplete_ = std::bind(&HttpConnection::onResponseComplete, this);
   generator_.generateTrailer(channel_->response()->trailers());
-
-  onComplete_ = [this](bool) {
-    if (channel_->isPersistent()) {
-      TRACE("%p completed.onComplete", this);
-      // re-use on keep-alive
-      channel_->reset();
-
-      if (endpoint()->isCorking()) {
-        endpoint()->setCorking(false);
-      }
-
-      if (inputOffset_ < inputBuffer_.size()) {
-        TRACE("%p completed.onComplete: pipelined read", this);
-        // have some request pipelined
-        onFillable();
-      } else {
-        TRACE("%p completed.onComplete: keep-alive read", this);
-        // wait for next request
-        wantFill();
-      }
-    } else {
-      endpoint()->close();
-    }
-  };
-
   wantFlush();
+}
+
+void HttpConnection::onResponseComplete() {
+  if (channel_->isPersistent()) {
+    TRACE("%p completed.onComplete", this);
+    // re-use on keep-alive
+    channel_->reset();
+
+    if (endpoint()->isCorking()) {
+      endpoint()->setCorking(false);
+    }
+
+    if (inputOffset_ < inputBuffer_.size()) {
+      // have some request pipelined
+      TRACE("%p completed.onComplete: pipelined read", this);
+      executor()->execute(std::bind(&HttpConnection::parseFragment, this));
+    } else {
+      // wait for next request
+      TRACE("%p completed.onComplete: keep-alive read", this);
+      wantFill();
+    }
+  } else {
+    endpoint()->close();
+  }
 }
 
 void HttpConnection::send(HttpResponseInfo&& responseInfo,
@@ -240,23 +242,34 @@ void HttpConnection::send(FileRef&& chunk, CompletionHandler&& onComplete) {
 }
 
 void HttpConnection::setInputBufferSize(size_t size) {
+  TRACE("%p setInputBufferSize(%zu)", this, size);
   inputBuffer_.reserve(size);
 }
 
 void HttpConnection::onFillable() {
   TRACE("%p onFillable", this);
 
+  TRACE("%p onFillable: calling fill()", this);
   if (endpoint()->fill(&inputBuffer_) == 0) {
+    printf("onFillable: fill() returned 0");
     // throw std::runtime_error("client EOF");
     abort();
     return;
   }
 
+  parseFragment();
+}
+
+void HttpConnection::parseFragment() {
   try {
+    TRACE("parseFragment: calling parseFragment (%zu into %zu)",
+          inputOffset_, inputBuffer_.size());
     size_t n = parser_.parseFragment(inputBuffer_.ref(inputOffset_));
+    TRACE("parseFragment: called (%zu into %zu) => %zu",
+          inputOffset_, inputBuffer_.size(), n);
     inputOffset_ += n;
   } catch (const BadMessage& e) {
-    TRACE("%p onFillable: BadMessage caught. %s", this, e.what());
+    TRACE("%p parseFragment: BadMessage caught. %s", this, e.what());
     channel_->response()->sendError(e.code(), e.what());
   }
 }
@@ -266,7 +279,7 @@ void HttpConnection::onFlushable() {
 
   const bool complete = writer_.flush(endpoint());
   if (complete) {
-    TRACE("%p onFlushable. calling wantFill", this);
+    TRACE("%p onFlushable: completed.", this);
     wantFlush(false);
 
     if (onComplete_) {
