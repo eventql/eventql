@@ -228,7 +228,7 @@ size_t InetEndPoint::flush(int fd, off_t offset, size_t size) {
 }
 
 void InetEndPoint::onSelectable() noexcept {
-  TRACE("InetEndPoint.onSelectable()%s%s\n",
+  TRACE("InetEndPoint.onSelectable()%s%s",
         selectionKey_->isReadable() ? " read" : "",
         selectionKey_->isWriteable() ? " write" : "");
 
