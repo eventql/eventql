@@ -251,7 +251,7 @@ void HttpConnection::onFillable() {
 
   TRACE("%p onFillable: calling fill()", this);
   if (endpoint()->fill(&inputBuffer_) == 0) {
-    printf("onFillable: fill() returned 0");
+    TRACE("%p onFillable: fill() returned 0", this);
     // throw std::runtime_error("client EOF");
     abort();
     return;
