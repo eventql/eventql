@@ -61,8 +61,10 @@ class LibevIO : public SelectionKey { // {{{
 
     TRACE("LibevIO.change: fd=%d, ops=%d", selectable_->handle(), ops);
 
-    io_.set(selectable_->handle(), flags);
-    interest_ = flags;
+    if (interest_ != flags) {
+      io_.set(selectable_->handle(), flags);
+      interest_ = flags;
+    }
   }
 
   void io(ev::io&, int revents) {
