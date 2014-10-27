@@ -141,7 +141,7 @@ void HttpOutputCompressor::ZlibFilter::filter(const BufferRef& input,
 
   assert(z_.avail_in == 0);
 
-  output->resize(z_.total_out);
+  output->resize(output->capacity() - z_.avail_out);
 }
 #endif
 // }}}
