@@ -1,4 +1,5 @@
 #include <xzero/executor/DirectLoopExecutor.h>
+#include <xzero/sysconfig.h>
 #include <system_error>
 #include <sys/select.h>
 #include <fcntl.h>
@@ -12,9 +13,22 @@ DirectLoopExecutor::DirectLoopExecutor()
       isCancelled_(false),
       pipe_{-1, -1} {
 
+#if defined(HAVE_PIPE2)
   ssize_t rv = pipe2(pipe_, O_NONBLOCK | O_CLOEXEC);
   if (rv < 0)
     throw std::system_error(errno, std::system_category());
+#else
+  if (pipe(pipe_) < 0)
+    throw std::system_error(errno, std::system_category());
+
+  for (int i = 0; i < 2; ++i) {
+    if (fcntl(pipe_[i], F_SETFL, O_NONBLOCK) < 0)
+      throw std::system_error(errno, std::system_category());
+
+    if (fcntl(pipe_[i], F_SETFD, FD_CLOEXEC) < 0)
+      throw std::system_error(errno, std::system_category());
+  }
+#endif
 }
 
 DirectLoopExecutor::~DirectLoopExecutor() {
