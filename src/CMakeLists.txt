@@ -21,6 +21,7 @@ set(libxzero_SRC
 
   io/Selectable.cpp
   io/FileRef.cpp
+  io/Filter.cpp
 
   net/ByteArrayEndPoint.cpp
   net/Cidr.cpp
@@ -43,7 +44,6 @@ set(libxzero_SRC
   http/HttpInput.cpp
   http/HttpListener.cpp
   http/HttpOutput.cpp
-  http/HttpOutputFilter.cpp
   http/HttpOutputCompressor.cpp
   http/HttpRequest.cpp
   http/HttpResponse.cpp

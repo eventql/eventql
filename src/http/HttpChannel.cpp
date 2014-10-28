@@ -4,13 +4,13 @@
 #include <xzero/http/HttpResponse.h>
 #include <xzero/http/HttpResponseInfo.h>
 #include <xzero/http/HttpOutput.h>
-#include <xzero/http/HttpOutputFilter.h>
 #include <xzero/http/HttpOutputCompressor.h>
 #include <xzero/http/HttpVersion.h>
 #include <xzero/http/HttpInputListener.h>
 #include <xzero/http/BadMessage.h>
 #include <xzero/logging/LogSource.h>
 #include <xzero/io/FileRef.h>
+#include <xzero/io/Filter.h>
 #include <xzero/sysconfig.h>
 
 namespace xzero {
@@ -55,7 +55,7 @@ std::unique_ptr<HttpOutput> HttpChannel::createOutput() {
   return std::unique_ptr<HttpOutput>(new HttpOutput(this));
 }
 
-void HttpChannel::addOutputFilter(std::shared_ptr<HttpOutputFilter> filter) {
+void HttpChannel::addOutputFilter(std::shared_ptr<Filter> filter) {
   if (response()->isCommitted())
     throw std::runtime_error("Invalid State. Cannot add output filters after commit.");
 
@@ -81,7 +81,7 @@ void HttpChannel::send(const BufferRef& data, CompletionHandler&& onComplete) {
     }
   } else {
     Buffer filtered;
-    HttpOutputFilter::applyFilters(outputFilters_, data, &filtered, false);
+    Filter::applyFilters(outputFilters_, data, &filtered, false);
 
     if (!response_->isCommitted()) {
       HttpResponseInfo info(commitInline());
@@ -97,7 +97,7 @@ void HttpChannel::send(Buffer&& data, CompletionHandler&& onComplete) {
 
   if (!outputFilters_.empty()) {
     Buffer output;
-    HttpOutputFilter::applyFilters(outputFilters_, data.ref(), &output, false);
+    Filter::applyFilters(outputFilters_, data.ref(), &output, false);
     data = std::move(output);
   }
 
@@ -121,7 +121,7 @@ void HttpChannel::send(FileRef&& file, CompletionHandler&& onComplete) {
     transport_->send(std::move(file), std::move(onComplete));
   } else {
     Buffer filtered;
-    HttpOutputFilter::applyFilters(outputFilters_, file, &filtered, false);
+    Filter::applyFilters(outputFilters_, file, &filtered, false);
 
     if (!response_->isCommitted()) {
       HttpResponseInfo info(commitInline());
@@ -287,7 +287,7 @@ void HttpChannel::completed() {
 
   if (!outputFilters_.empty()) {
     Buffer filtered;
-    HttpOutputFilter::applyFilters(outputFilters_, "", &filtered, true);
+    Filter::applyFilters(outputFilters_, "", &filtered, true);
     transport_->send(std::move(filtered),
                      std::bind(&HttpTransport::completed, transport_));
     return;

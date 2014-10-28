@@ -1,8 +1,8 @@
 #include <xzero/http/HttpOutputCompressor.h>
-#include <xzero/http/HttpOutputFilter.h>
 #include <xzero/http/HttpOutput.h>
 #include <xzero/http/HttpRequest.h>
 #include <xzero/http/HttpResponse.h>
+#include <xzero/io/Filter.h>
 #include <xzero/Tokenizer.h>
 #include <xzero/Buffer.h>
 #include <algorithm>
@@ -24,7 +24,7 @@ namespace xzero {
 
 // {{{ HttpOutputCompressor::ZlibFilter
 #if defined(HAVE_ZLIB_H)
-class HttpOutputCompressor::ZlibFilter : public HttpOutputFilter {
+class HttpOutputCompressor::ZlibFilter : public Filter {
  public:
   explicit ZlibFilter(int flags, int level);
   ~ZlibFilter();

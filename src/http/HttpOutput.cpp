@@ -1,8 +1,8 @@
 #include <xzero/http/HttpOutput.h>
-#include <xzero/http/HttpOutputFilter.h>
 #include <xzero/http/HttpChannel.h>
 #include <xzero/http/HttpResponse.h>
 #include <xzero/io/FileRef.h>
+#include <xzero/io/Filter.h>
 #include <xzero/sysconfig.h>
 #include <cstring>
 #include <system_error>
@@ -24,7 +24,7 @@ void HttpOutput::recycle() {
   size_ = 0;
 }
 
-void HttpOutput::addFilter(std::shared_ptr<HttpOutputFilter> filter) {
+void HttpOutput::addFilter(std::shared_ptr<Filter> filter) {
   channel_->addOutputFilter(filter);
 }
 

@@ -1,4 +1,4 @@
-#include <xzero/http/HttpOutputFilter.h>
+#include <xzero/io/Filter.h>
 #include <xzero/io/FileRef.h>
 #include <xzero/Buffer.h>
 #include <xzero/sysconfig.h>
@@ -7,8 +7,8 @@
 
 namespace xzero {
 
-void HttpOutputFilter::applyFilters(
-    const std::list<std::shared_ptr<HttpOutputFilter>>& filters,
+void Filter::applyFilters(
+    const std::list<std::shared_ptr<Filter>>& filters,
     const BufferRef& input, Buffer* output, bool last) {
   auto i = filters.begin();
   auto e = filters.end();
@@ -28,8 +28,8 @@ void HttpOutputFilter::applyFilters(
   }
 }
 
-void HttpOutputFilter::applyFilters(
-    const std::list<std::shared_ptr<HttpOutputFilter>>& filters,
+void Filter::applyFilters(
+    const std::list<std::shared_ptr<Filter>>& filters,
     const FileRef& file, Buffer* output, bool last) {
 
   Buffer input;
@@ -38,7 +38,7 @@ void HttpOutputFilter::applyFilters(
   if (input.size() != file.size())
     throw std::runtime_error("Could not read full input file.");
 
-  HttpOutputFilter::applyFilters(filters, input, output, last);
+  Filter::applyFilters(filters, input, output, last);
 }
 
 } // namespace xzero
