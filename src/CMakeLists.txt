@@ -19,9 +19,10 @@ set(libxzero_SRC
   executor/ThreadedExecutor.cpp
   executor/ThreadPool.cpp
 
-  io/Selectable.cpp
+  io/GzipFilter.cpp
   io/FileRef.cpp
   io/Filter.cpp
+  io/Selectable.cpp
 
   net/ByteArrayEndPoint.cpp
   net/Cidr.cpp
