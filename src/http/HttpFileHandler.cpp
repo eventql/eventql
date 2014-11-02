@@ -223,7 +223,7 @@ bool HttpFileHandler::handle(HttpRequest* request, HttpResponse* response,
   }
 
   int fd = -1;
-  if (equals(request->method(), "GET")) {
+  if (request->method() == HttpMethod::GET) {
     fd = transferFile.tryCreateChannel();
     if (fd < 0) {
       if (errno != EPERM && errno != EACCES)
@@ -233,7 +233,7 @@ bool HttpFileHandler::handle(HttpRequest* request, HttpResponse* response,
       response->completed();
       return true;
     }
-  } else if (!equals(request->method(), "HEAD")) {
+  } else if (request->method() != HttpMethod::HEAD) {
     response->setStatus(HttpStatus::MethodNotAllowed);
     response->completed();
     return true;

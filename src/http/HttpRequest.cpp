@@ -26,7 +26,8 @@ HttpRequest::HttpRequest(const std::string& method, const std::string& path,
                          HttpVersion version, bool secure,
                          const HeaderFieldList& headers,
                          std::unique_ptr<HttpInput>&& input)
-    : method_(method),
+    : method_(to_method(method)),
+      unparsedMethod_(method),
       path_(path),
       version_(version),
       secure_(secure),
@@ -36,9 +37,16 @@ HttpRequest::HttpRequest(const std::string& method, const std::string& path,
   // .
 }
 
+void HttpRequest::setMethod(const std::string& value) {
+  unparsedMethod_ = value;
+  method_ = to_method(value);
+}
+
 void HttpRequest::recycle() {
   TRACE("%p recycle", this);
-  method_.clear();
+  method_ = HttpMethod::UNKNOWN_METHOD;
+  unparsedMethod_.clear();
+  unparsedUri_.clear();
   path_.clear();
   version_ = HttpVersion::UNKNOWN;
   secure_ = false;

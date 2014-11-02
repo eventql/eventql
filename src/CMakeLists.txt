@@ -44,6 +44,7 @@ set(libxzero_SRC
   http/HttpDateGenerator.cpp
   http/HttpInput.cpp
   http/HttpListener.cpp
+  http/HttpMethod.cpp
   http/HttpOutput.cpp
   http/HttpOutputCompressor.cpp
   http/HttpRequest.cpp

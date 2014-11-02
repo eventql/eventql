@@ -154,7 +154,7 @@ HttpResponseInfo HttpChannel::commitInline() {
 
   response_->setCommitted(true);
 
-  const bool isHeadReq = request_->method() == "HEAD";
+  const bool isHeadReq = request_->method() == HttpMethod::HEAD;
   HttpResponseInfo info(response_->version(), response_->status(),
                         response_->reason(), isHeadReq,
                         response_->contentLength(),
@@ -197,7 +197,7 @@ bool HttpChannel::onMessageBegin(const BufferRef& method,
     return false;
   }
 
-  TRACE("onMessageBegin(%s, %s, %s)", request_->method().c_str(),
+  TRACE("onMessageBegin(%s, %s, %s)", request_->unparsedMethod().c_str(),
         request_->path().c_str(), to_string(version).c_str());
 
   return true;
@@ -273,7 +273,7 @@ void HttpChannel::onProtocolError(HttpStatus code, const std::string& message) {
 void HttpChannel::completed() {
   if (!response_->isCommitted()) {
     TRACE("completed(): not committed yet. commit empty-body response");
-    if (!response_->hasContentLength() && request_->method() != "HEAD") {
+    if (!response_->hasContentLength() && request_->method() != HttpMethod::HEAD) {
       response_->setContentLength(0);
     }
     send(BufferRef(), std::bind(&HttpChannel::completed, this));
