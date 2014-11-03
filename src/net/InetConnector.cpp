@@ -231,11 +231,15 @@ void InetConnector::setCloseOnExec(bool enable) {
 }
 
 bool InetConnector::deferAccept() const {
+#if defined(TCP_DEFER_ACCEPT)
   int optval = 1;
   socklen_t optlen = sizeof(optval);
   return ::getsockopt(socket_, SOL_TCP, TCP_DEFER_ACCEPT, &optval, &optlen) == 0
              ? optval != 0
              : false;
+#else
+  return false;
+#endif
 }
 
 void InetConnector::setDeferAccept(bool enable) {
@@ -250,18 +254,26 @@ void InetConnector::setDeferAccept(bool enable) {
 }
 
 bool InetConnector::quickAck() const {
+#if defined(TCP_QUICKACK)
   int optval = 1;
   socklen_t optlen = sizeof(optval);
   return ::getsockopt(socket_, SOL_TCP, TCP_QUICKACK, &optval, &optlen) == 0
              ? optval != 0
              : false;
+#else
+  return false;
+#endif
 }
 
 void InetConnector::setQuickAck(bool enable) {
+#if defined(TCP_QUICKACK)
   int rc = enable ? 1 : 0;
   if (::setsockopt(socket_, SOL_TCP, TCP_QUICKACK, &rc, sizeof(rc)) < 0) {
     throw std::system_error(errno, std::system_category());
   }
+#else
+  // ignore
+#endif
 }
 
 bool InetConnector::reusePort() const {
