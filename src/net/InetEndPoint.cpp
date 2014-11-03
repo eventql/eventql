@@ -9,9 +9,12 @@
 #include <system_error>
 #include <stdexcept>
 #include <netinet/tcp.h>
-#include <sys/sendfile.h>
 #include <unistd.h>
 #include <fcntl.h>
+
+#if defined(HAVE_SYS_SENDFILE_H)
+#include <sys/sendfile.h>
+#endif
 
 namespace xzero {
 
@@ -217,14 +220,22 @@ size_t InetEndPoint::flush(const BufferRef& source) {
 }
 
 size_t InetEndPoint::flush(int fd, off_t offset, size_t size) {
-  ssize_t rv = sendfile(handle(), fd, &offset, size);
+#if defined(__APPLE__)
+  off_t len = 0;
+  int rv = sendfile(fd, handle(), offset, &len, nullptr, 0);
+  if (rv < 0)
+    throw std::system_error(errno, std::system_category());
 
+  return len;
+#else
+  ssize_t rv = sendfile(handle(), fd, &offset, size);
   if (rv < 0)
     throw std::system_error(errno, std::system_category());
 
   // EOF exception?
 
   return rv;
+#endif
 }
 
 void InetEndPoint::onSelectable() noexcept {
