@@ -62,7 +62,12 @@ void* ThreadedExecutor::launchme(void* ptr) {
 void ThreadedExecutor::execute(const std::string& name, Task&& task) {
   pthread_t tid;
   pthread_create(&tid, NULL, &launchme, new Task{std::move(task)});
+
+#if !defined(__APPLE__)
+  // OS/x doesn't support setting thread names for other threads
+  // TODO: pass thread name to target thread and set it inside
   pthread_setname_np(tid, name.c_str());
+#endif
 
   std::lock_guard<std::mutex> lock(mutex_);
   threads_.push_back(tid);
