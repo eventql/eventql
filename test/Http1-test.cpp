@@ -160,7 +160,7 @@ TEST(Http1, protocolErrorShouldRaise400) {
   std::shared_ptr<LocalEndPoint> ep;
   executor.execute([&] {
     // FIXME HTTP/1.1 (due to keep-alive) SEGV's on LocalEndPoint.
-    ep = connector->createClient("GET /\r\n\r\n");
+    ep = connector->createClient("GET\r\n\r\n");
   });
   xzero::Buffer output = ep->output();
   ASSERT_TRUE(output.contains("400 Bad Request"));
