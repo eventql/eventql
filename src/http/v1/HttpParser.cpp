@@ -332,13 +332,13 @@ std::size_t HttpParser::parseFragment(const BufferRef& chunk) {
           state_ = REQUEST_ENTITY_BEGIN;
           ++*nparsed;
           ++i;
-        } else if (!isToken(*i)) {
-          onProtocolError(HttpStatus::BadRequest);
-          state_ = PROTOCOL_ERROR;
-        } else {
+        } else if (isToken(*i)) {
           method_.shr();
           ++*nparsed;
           ++i;
+        } else {
+          onProtocolError(HttpStatus::BadRequest);
+          state_ = PROTOCOL_ERROR;
         }
         break;
       case REQUEST_ENTITY_BEGIN:
