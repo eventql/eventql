@@ -191,6 +191,23 @@ void HttpParserListener::onProtocolError(xzero::HttpStatus code,
 }
 // }}}
 
+TEST(HttpParser, requestLine0) {
+  /* Seems like in HTTP/0.9 it was possible to create
+   * very simple request messages.
+   */
+  HttpParserListener listener;
+  HttpParser parser(HttpParser::REQUEST, &listener);
+  parser.parseFragment("GET /\r\n");
+
+  ASSERT_EQ("GET", listener.method);
+  ASSERT_EQ("/", listener.entity);
+  ASSERT_EQ(HttpVersion::VERSION_0_9, listener.version);
+  ASSERT_TRUE(listener.headerEnd);
+  ASSERT_TRUE(listener.messageEnd);
+  ASSERT_EQ(0, listener.headers.size());
+  ASSERT_EQ(0, listener.body.size());
+}
+
 TEST(HttpParser, requestLine1) {
   HttpParserListener listener;
   HttpParser parser(HttpParser::REQUEST, &listener);
@@ -219,13 +236,6 @@ TEST(HttpParser, requestLine_invalid1_MissingPathAndProtoVersion) {
   HttpParserListener listener;
   HttpParser parser(HttpParser::REQUEST, &listener);
   parser.parseFragment("GET\r\n\r\n");
-  ASSERT_EQ(HttpStatus::BadRequest, listener.errorCode);
-}
-
-TEST(HttpParser, requestLine_invalid2_MissingProtoAndVersion) {
-  HttpParserListener listener;
-  HttpParser parser(HttpParser::REQUEST, &listener);
-  parser.parseFragment("GET /\r\n\r\n");
   ASSERT_EQ(HttpStatus::BadRequest, listener.errorCode);
 }
 

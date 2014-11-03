@@ -52,6 +52,8 @@ std::string to_string(HttpParser::State state) {
       return "request-protocol-version-minor";
     case HttpParser::REQUEST_LINE_LF:
       return "request-line-lf";
+    case HttpParser::REQUEST_0_9_LF:
+      return "request-0-9-lf";
 
     // Status-Line
     case HttpParser::STATUS_LINE_BEGIN:
@@ -360,6 +362,25 @@ std::size_t HttpParser::parseFragment(const BufferRef& chunk) {
           entity_.shr();
           ++*nparsed;
           ++i;
+        } else if (*i == CR) {
+          state_ = REQUEST_0_9_LF;
+          ++*nparsed;
+          ++i;
+        } else {
+          onProtocolError(HttpStatus::BadRequest);
+          state_ = PROTOCOL_ERROR;
+        }
+        break;
+      case REQUEST_0_9_LF:
+        if (*i == LF) {
+          if (!onMessageBegin(method_, entity_, 0, 9))
+            goto done;
+
+          if (!onMessageHeaderEnd())
+            goto done;
+
+          onMessageEnd();
+          goto done;
         } else {
           onProtocolError(HttpStatus::BadRequest);
           state_ = PROTOCOL_ERROR;
