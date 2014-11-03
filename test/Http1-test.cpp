@@ -14,7 +14,11 @@
 
 using namespace xzero;
 
+// TODO use the HttpParser to parse the responses into high level abstracts
+//      for better testing.
+//
 // FIXME HTTP/1.1 with keep-alive) SEGV's on LocalEndPoint.
+//
 // TODO test that userapp cannot add invalid headers
 //      (e.g. connection level headers, such as Connection, TE,
 //      Transfer-Encoding, Keep-Alive)
