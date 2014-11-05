@@ -54,6 +54,7 @@ set(libxzero_SRC
   http/HttpVersion.cpp
 
   # http support
+  http/HttpBufferedInput.cpp
   http/HttpFileHandler.cpp
   http/HttpService.cpp
 
@@ -65,7 +66,6 @@ set(libxzero_SRC
   http/v1/Http1ConnectionFactory.cpp
   http/v1/HttpGenerator.cpp
   http/v1/HttpParser.cpp
-  http/v1/Http1Input.cpp
   http/v1/Http1Channel.cpp
 
   # http/2

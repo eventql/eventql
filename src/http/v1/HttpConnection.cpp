@@ -7,7 +7,7 @@
 
 #include <xzero/http/v1/HttpConnection.h>
 #include <xzero/http/v1/Http1Channel.h>
-#include <xzero/http/v1/Http1Input.h>
+#include <xzero/http/HttpBufferedInput.h>
 #include <xzero/http/HttpDateGenerator.h>
 #include <xzero/http/HttpResponseInfo.h>
 #include <xzero/http/HttpResponse.h>
@@ -51,7 +51,7 @@ HttpConnection::HttpConnection(std::shared_ptr<EndPoint> endpoint,
       onComplete_(),
       generator_(dateGenerator, &writer_),
       channel_(new Http1Channel(
-          this, handler, std::unique_ptr<HttpInput>(new Http1Input(this)),
+          this, handler, std::unique_ptr<HttpInput>(new HttpBufferedInput()),
           maxRequestUriLength, maxRequestBodyLength, outputCompressor)),
       maxKeepAlive_(maxKeepAlive),
       requestCount_(0),
