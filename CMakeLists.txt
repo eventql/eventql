@@ -43,7 +43,11 @@ option(XZERO_WORKER_RR "Uses round-robin instead of lead-load for request schedu
 # option(XZERO_ENABLE_FCGI "Build FastCGI protocol support [default: off]" OFF)
 # option(XZERO_ENABLE_WEBSOCKETS "Build WebSockets protocol support [default: off]" OFF)
 
-set(CMAKE_CXX_FLAGS "-std=c++0x")                   # C++11
+if(APPLE)
+  set(CMAKE_CXX_FLAGS "-std=c++0x -stdlib=libc++")
+else()
+  set(CMAKE_CXX_FLAGS "-std=c++0x")
+endif()
 #set(CMAKE_CXX_FLAGS "-std=c++0x -stdlib=libc++")   # C++11 + libc++
 #set(CMAKE_CXX_FLAGS "-std=c++1y -stdlib=libc++")   # C++14 + libc++
 #set(CMAKE_CXX_FLAGS "-std=c++1z -stdlib=libc++")   # C++17 + libc++
