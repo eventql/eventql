@@ -83,10 +83,11 @@ void ThreadedExecutor::execute(const std::string& name, Task&& task) {
 void ThreadedExecutor::execute(Task&& task) {
   pthread_t tid = 0;
   //pthread_create(&tid, NULL, &launchme, new Task{std::move(task)});
-  pthread_create(&tid, NULL, &launchme, new Task([this, tid, task]{
+  pthread_create(&tid, NULL, &launchme, new Task([this, task]{
+    pthread_t tid = pthread_self();
     task();
     {
-      TRACE("task %s finished. getting lock for cleanup", getThreadName(pthread_self()).c_str());
+      TRACE("task %s finished. getting lock for cleanup", getThreadName(tid).c_str());
       std::lock_guard<std::mutex> lock(mutex_);
       pthread_detach(tid);
       auto i = std::find(threads_.begin(), threads_.end(), tid);
