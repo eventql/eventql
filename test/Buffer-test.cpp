@@ -42,17 +42,47 @@ TEST(BufferBase, begins) {
   ASSERT_TRUE(v.begins("hello"));
 }
 
-TEST(BufferBase, find_cstr) {
+TEST(BufferBase, find_char) {
   BufferRef buf("012345");
-  BufferRef ref = buf.ref(1);
 
-  int i = ref.find("34");
-  ASSERT_EQ(2, i);
+  ASSERT_EQ(0, buf.find('0'));
+  ASSERT_EQ(2, buf.find('2'));
+  ASSERT_EQ(5, buf.find('5'));
+  ASSERT_EQ(BufferRef::npos, buf.find('6'));
+  ASSERT_EQ(BufferRef::npos, buf.find('\0'));
 
-  ASSERT_EQ(0, ref.find("1"));
-  ASSERT_EQ(0, ref.find("12"));
-  ASSERT_EQ(0, ref.find("12345"));
+  ASSERT_EQ(BufferRef::npos, BufferRef().find('a'));
+}
+
+TEST(BufferBase, find_ref) {
+  BufferRef buf("012345");
+
+  ASSERT_EQ(0, buf.find(BufferRef("0")));
+  ASSERT_EQ(2, buf.find(BufferRef("2")));
+  ASSERT_EQ(5, buf.find(BufferRef("5")));
+
+  ASSERT_EQ(0, buf.find(BufferRef("01")));
+  ASSERT_EQ(2, buf.find(BufferRef("23")));
+  ASSERT_EQ(0, buf.find(BufferRef("012345")));
+  ASSERT_EQ(2, buf.find(BufferRef("2345")));
+
+  ASSERT_EQ(BufferRef::npos, buf.find(BufferRef("11")));
+  ASSERT_EQ(BufferRef::npos, buf.find(BufferRef("55")));
+}
+
+TEST(BufferBase, find_cstr) {
+  BufferRef ref("012345");
+
+  ASSERT_EQ(0, ref.find("0"));
+  ASSERT_EQ(2, ref.find('2'));
+  ASSERT_EQ(5, ref.find("5"));
+
+  ASSERT_EQ(0, ref.find("01"));
+  ASSERT_EQ(2, ref.find("23"));
+  ASSERT_EQ(0, ref.find("012345"));
+  ASSERT_EQ(2, ref.find("2345"));
   ASSERT_EQ(BufferRef::npos, ref.find("11"));
+  ASSERT_EQ(BufferRef::npos, ref.find("55"));
 }
 
 TEST(BufferBase, replaceAll1) {
