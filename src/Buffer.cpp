@@ -13,6 +13,7 @@
 // the License at: http://opensource.org/licenses/MIT
 
 #include <xzero/Buffer.h>
+#include <new>
 #include <cstdio>
 
 namespace xzero {
@@ -69,7 +70,8 @@ bool Buffer::setCapacity(std::size_t value) {
     return true;
   } else {
     // setting capacity failed, do not change anything.
-    return false;
+    throw std::bad_alloc();
+    //return false;
   }
 }
 
