@@ -57,6 +57,7 @@ InetConnector::InetConnector(const std::string& name, Executor* executor,
       selector_(selector),
       scheduler_(scheduler),
       connectedEndPoints_(),
+      mutex_(),
       socket_(-1),
       addressFamily_(IPAddress::V4),
       typeMask_(0),
@@ -406,7 +407,10 @@ bool InetConnector::acceptOne() {
   }
 
   std::unique_ptr<InetEndPoint> endpoint(new InetEndPoint(cfd, this));
-  connectedEndPoints_.push_back(endpoint.get());
+  {
+    std::lock_guard<std::mutex> _lk(mutex_);
+    connectedEndPoints_.push_back(endpoint.get());
+  }
 
   auto connection =
       defaultConnectionFactory()->create(this, std::move(endpoint));
@@ -417,6 +421,7 @@ bool InetConnector::acceptOne() {
 
 std::list<EndPoint*> InetConnector::connectedEndPoints() {
   std::list<EndPoint*> result;
+  std::lock_guard<std::mutex> _lk(mutex_);
   for (InetEndPoint* ep : connectedEndPoints_) {
     result.push_back(ep);
   }
@@ -426,6 +431,8 @@ std::list<EndPoint*> InetConnector::connectedEndPoints() {
 void InetConnector::onEndPointClosed(InetEndPoint* endpoint) {
   assert(endpoint != nullptr);
   assert(endpoint->connection() != nullptr);
+
+  std::lock_guard<std::mutex> _lk(mutex_);
 
   auto i = std::find(connectedEndPoints_.begin(), connectedEndPoints_.end(),
                      endpoint);
