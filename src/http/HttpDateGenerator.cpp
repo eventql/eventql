@@ -16,7 +16,8 @@ namespace xzero {
 HttpDateGenerator::HttpDateGenerator(WallClock* clock)
   : clock_(clock),
     current_(0),
-    buffer_() {
+    buffer_(),
+    mutex_() {
 }
 
 void HttpDateGenerator::update() {
@@ -24,6 +25,8 @@ void HttpDateGenerator::update() {
 
   DateTime now = clock_->get();
   if (current_ != now) {
+    std::lock_guard<std::mutex> _lock(mutex_);
+
     std::time_t ts = now.unixtime();
     if (struct tm* tm = std::gmtime(&ts)) {
       char buf[256];
@@ -42,6 +45,8 @@ void HttpDateGenerator::fill(Buffer* target) {
   assert(target != nullptr);
 
   update();
+
+  std::lock_guard<std::mutex> _lock(mutex_);
   target->push_back(buffer_);
 }
 
