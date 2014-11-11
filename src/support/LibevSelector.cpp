@@ -7,6 +7,7 @@
 
 #include <xzero/support/libev/LibevSelector.h>
 #include <xzero/io/SelectionKey.h>
+#include <xzero/RuntimeError.h>
 #include <cassert>
 #include <mutex>
 #include <ev++.h>
@@ -69,6 +70,7 @@ class LibevIO : public SelectionKey { // {{{
     TRACE("LibevIO.change: fd=%d, ops=%d", selectable_->handle(), ops);
 
     if (interest_ != flags) {
+      BUG_ON(selectable_->handle() < 0);
       io_.set(selectable_->handle(), flags);
       interest_ = flags;
     }
