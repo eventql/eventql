@@ -321,7 +321,8 @@ bool HttpRequest::setUri(const std::string& uri) {
   }
 
 done:
-  TRACE("parse-uri: success. path:%s, query:%s, depth:%d, mindepth:%d, state:%s",
+  TRACE("parse-uri(%s): success. path:%s, query:%s, depth:%d, mindepth:%d, state:%s",
+        unparsedUri_.c_str(),
         path_.c_str(), query_.c_str(), depth, minDepth, uriStateNames[(int)state]);
   directoryDepth_ = depth;
 
