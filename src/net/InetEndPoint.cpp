@@ -131,10 +131,6 @@ Selector* InetEndPoint::selector() const noexcept {
   return connector_->selector();
 }
 
-void InetEndPoint::setHandle(int handle) noexcept {
-  handle_ = handle;
-}
-
 bool InetEndPoint::isOpen() const noexcept {
   return handle_ >= 0;
 }
