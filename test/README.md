@@ -89,3 +89,11 @@ and client side cache.
 
 ... maybe some `HttpAuthHandler` API
 
+### Misc Tests
+
+- throw an exception in the handler while part of the response message is
+  already started (should terminate the exception)
+- an error between response generation and the completion handler
+  should still cause the completion handler to be invoked, but with `false`.
+- ...
+
