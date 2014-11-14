@@ -242,13 +242,13 @@ size_t InetEndPoint::flush(int fd, off_t offset, size_t size) {
 }
 
 void InetEndPoint::onSelectable() noexcept {
-  TRACE("InetEndPoint.onSelectable()%s%s",
-        selectionKey_->isReadable() ? " read" : "",
-        selectionKey_->isWriteable() ? " write" : "");
-
-  isBusy_++;
-
   try {
+    TRACE("InetEndPoint.onSelectable()%s%s",
+          selectionKey_->isReadable() ? " read" : "",
+          selectionKey_->isWriteable() ? " write" : "");
+
+    isBusy_++;
+
     if (selectionKey_->isReadable()) {
       connection()->onFillable();
     }
@@ -263,10 +263,17 @@ void InetEndPoint::onSelectable() noexcept {
           typeid(e).name(), e.what());
     connection()->onInterestFailure(e);
     isBusy_--;
+  } catch (...) {
+    ERROR("%p onSelectable: unhandled exception caught.", this);
+    isBusy_--;
   }
 
-  if (!isBusy_ && isClosed()) {
-    connector_->release(connection());
+  try {
+    if (!isBusy_ && isClosed()) {
+        connector_->release(connection());
+    }
+  } catch (...) {
+    ERROR("%p onSelectable: unhandled exception upon release.", this);
   }
 }
 
