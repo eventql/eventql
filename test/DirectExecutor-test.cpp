@@ -3,6 +3,8 @@
 
 using namespace xzero;
 
+// TODO: test recursive and flat execution
+
 TEST(DirectExecutor, executeMe) {
   DirectExecutor executor;
   int runCounter = 0;
