@@ -11,6 +11,7 @@
 #include <xzero/executor/Executor.h>
 #include <xzero/io/SelectionKey.h>
 #include <xzero/logging/LogSource.h>
+#include <xzero/RuntimeError.h>
 #include <xzero/Buffer.h>
 #include <xzero/sysconfig.h>
 #include <system_error>
@@ -243,37 +244,25 @@ size_t InetEndPoint::flush(int fd, off_t offset, size_t size) {
 
 void InetEndPoint::onSelectable() noexcept {
   try {
-    TRACE("InetEndPoint.onSelectable()%s%s",
-          selectionKey_->isReadable() ? " read" : "",
-          selectionKey_->isWriteable() ? " write" : "");
+    /*lock guard*/ {
+      BusyGuard _busyGuard(this);
 
-    isBusy_++;
+      if (selectionKey_->isReadable()) {
+        connection()->onFillable();
+      }
 
-    if (selectionKey_->isReadable()) {
-      connection()->onFillable();
+      if (selectionKey_->isWriteable()) {
+        connection()->onFlushable();
+      }
     }
 
-    if (selectionKey_->isWriteable()) {
-      connection()->onFlushable();
+    if (!isBusy() && isClosed()) {
+      connector_->release(connection());
     }
-
-    isBusy_--;
   } catch (const std::exception& e) {
-    ERROR("%p onSelectable: unhandled exception caught. %s %s", this,
-          typeid(e).name(), e.what());
     connection()->onInterestFailure(e);
-    isBusy_--;
   } catch (...) {
-    ERROR("%p onSelectable: unhandled exception caught.", this);
-    isBusy_--;
-  }
-
-  try {
-    if (!isBusy_ && isClosed()) {
-        connector_->release(connection());
-    }
-  } catch (...) {
-    ERROR("%p onSelectable: unhandled exception upon release.", this);
+    connection()->onInterestFailure(RUNTIME_ERROR("Unhandled unknown exception caught."));
   }
 }
 
@@ -291,17 +280,17 @@ void InetEndPoint::wantFill() {
 
 void InetEndPoint::fillable() {
   connector_->executor()->execute([this]() {
-    isBusy_++;
-    try {
-      connection()->onFillable();
-      isBusy_--;
-    } catch (const std::exception& e) {
-      TRACE("wantFill: exception caught: %s", e.what());
-      connection()->onInterestFailure(e);
-      isBusy_--;
+    {
+      BusyGuard _busyGuard(this);
+      try {
+        connection()->onFillable();
+      } catch (const std::exception& e) {
+        connection()->onInterestFailure(e);
+      } catch (...) {
+        connection()->onInterestFailure(RUNTIME_ERROR("Unhandled unknown exception caught."));
+      }
     }
-    if (!isBusy_ && isClosed()) {
-      TRACE("wantFill: isClosed == true, releasing");
+    if (!isBusy() && isClosed()) {
       connector_->release(connection());
     }
   });
@@ -325,17 +314,17 @@ void InetEndPoint::wantFlush(bool enable) {
 
 void InetEndPoint::flushable() {
   connector_->executor()->execute([this]() {
-    isBusy_++;
-    try {
-      connection()->onFlushable();
-      isBusy_--;
-    } catch (const std::exception& e) {
-      TRACE("wantFlush: exception caught: %s", e.what());
-      connection()->onInterestFailure(e);
-      isBusy_--;
+    /*lock guard*/ {
+      BusyGuard _busyGuard(this);
+      try {
+        connection()->onFlushable();
+      } catch (const std::exception& e) {
+        connection()->onInterestFailure(e);
+      } catch (...) {
+        connection()->onInterestFailure(RUNTIME_ERROR("Unhandled unknown exception caught."));
+      }
     }
-    if (!isBusy_ && isClosed()) {
-      TRACE("wantFlush: isClosed == true, releasing");
+    if (!isBusy() && isClosed()) {
       connector_->release(connection());
     }
   });

@@ -100,12 +100,19 @@ void HttpConnection::completed() {
     throw std::runtime_error(
         "Invalid State. Response not fully written but completed() invoked.");
 
-  onComplete_ = std::bind(&HttpConnection::onResponseComplete, this);
+  onComplete_ = std::bind(&HttpConnection::onResponseComplete, this,
+                          std::placeholders::_1);
+
   generator_.generateTrailer(channel_->response()->trailers());
   wantFlush();
 }
 
-void HttpConnection::onResponseComplete() {
+void HttpConnection::onResponseComplete(bool succeed) {
+  if (!succeed) {
+    // writing trailer failed. do not attempt to do anything on the wire.
+    return;
+  }
+
   if (channel_->isPersistent()) {
     TRACE("%p completed.onComplete", this);
     // re-use on keep-alive
@@ -146,7 +153,7 @@ void HttpConnection::send(HttpResponseInfo&& responseInfo,
     endpoint()->setCorking(true);
 
   generator_.generateResponse(responseInfo, chunk);
-  onComplete_ = onComplete;
+  onComplete_ = std::move(onComplete);
   wantFlush();
 }
 
@@ -167,7 +174,7 @@ void HttpConnection::send(HttpResponseInfo&& responseInfo,
     endpoint()->setCorking(true);
 
   generator_.generateResponse(responseInfo, std::move(chunk));
-  onComplete_ = onComplete;
+  onComplete_ = std::move(onComplete);
   wantFlush();
 }
 
@@ -188,7 +195,7 @@ void HttpConnection::send(HttpResponseInfo&& responseInfo,
     endpoint()->setCorking(true);
 
   generator_.generateResponse(responseInfo, std::move(chunk));
-  onComplete_ = onComplete;
+  onComplete_ = std::move(onComplete);
   wantFlush();
 }
 
@@ -298,11 +305,15 @@ void HttpConnection::onFlushable() {
 }
 
 void HttpConnection::onInterestFailure(const std::exception& error) {
-  ERROR("onInterestFailure. %s", error.what());
-  //printf("onInterestFailure. %s\n", error.what());
+  auto callback = std::move(onComplete_);
+
+  // notify the callback that we failed doing something wrt. I/O.
+  if (callback) {
+    TRACE("%p onInterestFailure: invoking onComplete(false)", this);
+    callback(false);
+  }
 
   if (!channel_->response()->isCommitted()) {
-    ERROR("onInterestFailure. no response comitted yet, sending 500 then");
     channel_->setPersistent(false);
     channel_->response()->sendError(HttpStatus::InternalServerError,
                                     error.what());
