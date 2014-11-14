@@ -31,6 +31,7 @@ option(ENABLE_INOTIFY "Build with inotify support [default: on]" ON)
 option(ENABLE_TCP_DEFER_ACCEPT "Builds with support for TCP_DEFER_ACCEPT, if found [default: on]" ON)
 
 # libxzero implementation feature flags
+option(XZERO_ENABLE_NOEXCEPT "Builds with C++ noexcept support enabled [default: ON]" ON)
 option(XZERO_OPPORTUNISTIC_WRITE "Builds with support for opportunistic write() calls to client sockets [default: off]." OFF)
 
 ### HTTP transport protocol support
