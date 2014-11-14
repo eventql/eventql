@@ -9,6 +9,7 @@ if(ENABLE_TESTS)
     Buffer-test.cpp
     ByteArrayEndPoint-test.cpp
     Cidr-test.cpp
+    DirectExecutor-test.cpp
     IdleTimeout-test.cpp
     ThreadPool-test.cpp
     Tokenizer-test.cpp
