@@ -44,7 +44,7 @@ void LogSource::error(const char* fmt, ...) { LOG_SOURCE_MSG(error, fmt); }
 
 void LogSource::enable() { enabled_ = true; }
 
-bool LogSource::isEnabled() const noexcept { return enabled_; }
+bool LogSource::isEnabled() const XZERO_NOEXCEPT { return enabled_; }
 
 void LogSource::disable() { enabled_ = false; }
 

@@ -143,7 +143,7 @@ void ThreadPool::execute(Task&& task) {
   condition_.notify_all();
 }
 
-size_t ThreadPool::maxConcurrency() const noexcept {
+size_t ThreadPool::maxConcurrency() const XZERO_NOEXCEPT {
   return threads_.size();
 }
 

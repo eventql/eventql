@@ -103,7 +103,7 @@ void ThreadedExecutor::execute(Task&& task) {
   threads_.push_back(tid);
 }
 
-size_t ThreadedExecutor::maxConcurrency() const noexcept {
+size_t ThreadedExecutor::maxConcurrency() const XZERO_NOEXCEPT {
   return std::numeric_limits<size_t>::max();
 }
 

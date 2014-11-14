@@ -45,7 +45,7 @@ void DirectExecutor::execute(Task&& task) {
   running_--;
 }
 
-size_t DirectExecutor::maxConcurrency() const noexcept {
+size_t DirectExecutor::maxConcurrency() const XZERO_NOEXCEPT {
   return 1;
 }
 

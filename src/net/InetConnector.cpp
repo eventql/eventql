@@ -144,7 +144,7 @@ void InetConnector::listen(int backlog) {
     throw std::system_error(errno, std::system_category());
 }
 
-bool InetConnector::isOpen() const noexcept {
+bool InetConnector::isOpen() const XZERO_NOEXCEPT {
   return socket_ >= 0;
 }
 
@@ -159,11 +159,11 @@ InetConnector::~InetConnector() {
   }
 }
 
-Selector* InetConnector::selector() const noexcept {
+Selector* InetConnector::selector() const XZERO_NOEXCEPT {
   return selector_;
 }
 
-int InetConnector::handle() const noexcept {
+int InetConnector::handle() const XZERO_NOEXCEPT {
   return socket_;
 }
 
@@ -171,7 +171,7 @@ void InetConnector::setSocket(int socket) {
   socket_ = socket;
 }
 
-size_t InetConnector::backlog() const noexcept {
+size_t InetConnector::backlog() const XZERO_NOEXCEPT {
   return backlog_;
 }
 
@@ -314,11 +314,11 @@ void InetConnector::setReuseAddr(bool enable) {
   }
 }
 
-size_t InetConnector::multiAcceptCount() const noexcept {
+size_t InetConnector::multiAcceptCount() const XZERO_NOEXCEPT {
   return multiAcceptCount_;
 }
 
-void InetConnector::setMultiAcceptCount(size_t value) noexcept {
+void InetConnector::setMultiAcceptCount(size_t value) XZERO_NOEXCEPT {
   multiAcceptCount_ = value;
 }
 
@@ -346,7 +346,7 @@ void InetConnector::start() {
   }
 }
 
-bool InetConnector::isStarted() const noexcept {
+bool InetConnector::isStarted() const XZERO_NOEXCEPT {
   return isStarted_;
 }
 
@@ -360,7 +360,7 @@ void InetConnector::stop() {
   isStarted_ = false;
 }
 
-void InetConnector::onSelectable() noexcept {
+void InetConnector::onSelectable() XZERO_NOEXCEPT {
   try {
     for (size_t i = 0; i < multiAcceptCount_; i++) {
       if (!acceptOne()) {

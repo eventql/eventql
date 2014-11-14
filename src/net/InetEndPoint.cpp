@@ -124,15 +124,15 @@ std::pair<IPAddress, int> InetEndPoint::localAddress() const {
   return result;
 }
 
-int InetEndPoint::handle() const noexcept {
+int InetEndPoint::handle() const XZERO_NOEXCEPT {
   return handle_;
 }
 
-Selector* InetEndPoint::selector() const noexcept {
+Selector* InetEndPoint::selector() const XZERO_NOEXCEPT {
   return connector_->selector();
 }
 
-bool InetEndPoint::isOpen() const noexcept {
+bool InetEndPoint::isOpen() const XZERO_NOEXCEPT {
   return handle_ >= 0;
 }
 
@@ -242,7 +242,7 @@ size_t InetEndPoint::flush(int fd, off_t offset, size_t size) {
 #endif
 }
 
-void InetEndPoint::onSelectable() noexcept {
+void InetEndPoint::onSelectable() XZERO_NOEXCEPT {
   try {
     /*lock guard*/ {
       BusyGuard _busyGuard(this);

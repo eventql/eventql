@@ -64,7 +64,7 @@ void LibevScheduler::schedule(TimeSpan delay, Task&& task) {
   new TaskInfo(loop_, delay, std::move(task));
 }
 
-size_t LibevScheduler::maxConcurrency() const noexcept {
+size_t LibevScheduler::maxConcurrency() const XZERO_NOEXCEPT {
   return 1;
 }
 

@@ -55,7 +55,7 @@ class LibevIO : public SelectionKey { // {{{
     TRACE("~LibevIO: fd=%d", io_.fd);
   }
 
-  int interest() const noexcept override {
+  int interest() const XZERO_NOEXCEPT override {
     return interest_;
   }
 

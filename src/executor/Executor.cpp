@@ -29,7 +29,7 @@ void Executor::setExceptionHandler(
   exceptionHandler_ = std::move(eh);
 }
 
-void Executor::safeCall(const Task& task) noexcept {
+void Executor::safeCall(const Task& task) XZERO_NOEXCEPT {
   try {
     task();
   } catch (const std::exception& e) {
@@ -38,7 +38,7 @@ void Executor::safeCall(const Task& task) noexcept {
   }
 }
 
-void Executor::handleException(const std::exception& e) noexcept {
+void Executor::handleException(const std::exception& e) XZERO_NOEXCEPT {
   if (exceptionHandler_) {
     try {
       exceptionHandler_(e);

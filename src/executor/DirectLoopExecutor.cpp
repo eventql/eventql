@@ -89,7 +89,7 @@ void DirectLoopExecutor::execute(Task&& task) {
   wakeup();
 }
 
-size_t DirectLoopExecutor::maxConcurrency() const noexcept {
+size_t DirectLoopExecutor::maxConcurrency() const XZERO_NOEXCEPT {
   return 1;
 }
 
