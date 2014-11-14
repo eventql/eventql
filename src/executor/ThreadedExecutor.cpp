@@ -68,7 +68,10 @@ void* ThreadedExecutor::launchme(void* ptr) {
 
 void ThreadedExecutor::execute(const std::string& name, Task&& task) {
   pthread_t tid;
-  pthread_create(&tid, NULL, &launchme, new Task{std::move(task)});
+  auto runner = [this, task]() {
+    safeCall(task);
+  };
+  pthread_create(&tid, NULL, &launchme, new Task{std::move(runner)});
 
 #if !defined(__APPLE__)
   // OS/x doesn't support setting thread names for other threads
@@ -85,7 +88,7 @@ void ThreadedExecutor::execute(Task&& task) {
   //pthread_create(&tid, NULL, &launchme, new Task{std::move(task)});
   pthread_create(&tid, NULL, &launchme, new Task([this, task]{
     pthread_t tid = pthread_self();
-    task();
+    safeCall(task);
     {
       TRACE("task %s finished. getting lock for cleanup", getThreadName(tid).c_str());
       std::lock_guard<std::mutex> lock(mutex_);

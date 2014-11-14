@@ -73,7 +73,7 @@ bool DirectLoopExecutor::tryRunOne() {
   if (pending_.empty())
     return false;
 
-  pending_.front()();
+  safeCall(pending_.front());
   pending_.pop_front();
   return true;
 }

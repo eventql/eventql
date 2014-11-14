@@ -13,6 +13,7 @@ set(libxzero_SRC
   logging/LogSource.cpp
   logging/LogTarget.cpp
 
+  executor/Executor.cpp
   executor/DirectExecutor.cpp
   executor/DirectLoopExecutor.cpp
   executor/Scheduler.cpp

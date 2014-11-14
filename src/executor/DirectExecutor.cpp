@@ -34,11 +34,11 @@ void DirectExecutor::execute(Task&& task) {
   running_++;
 
   TRACE("%p execute: run top-level task", this);
-  task();
+  safeCall(task);
 
   while (!deferred_.empty()) {
     TRACE("%p execute: run deferred task (-%zu)", this, deferred_.size());
-    deferred_.front()();
+    safeCall(deferred_.front());
     deferred_.pop_front();
   }
 

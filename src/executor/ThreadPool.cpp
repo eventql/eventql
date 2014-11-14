@@ -120,7 +120,7 @@ void ThreadPool::work(int workerId) {
 
     activeTasks_++;
     try {
-      task();
+      safeCall(task);
     } catch (std::exception& e) {
       ERROR("%p worker[%d] Unhandled exception %s caught. %s",
             this, workerId, typeid(e).name(), e.what());
