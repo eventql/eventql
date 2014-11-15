@@ -48,8 +48,12 @@ void LibevScheduler::TaskInfo::fire(ev::timer&, int) {
   delete this;
 }
 
-LibevScheduler::LibevScheduler(ev::loop_ref loop) : loop_(loop), pending_() {
-  //.
+LibevScheduler::LibevScheduler(ev::loop_ref loop)
+    : loop_(loop),
+      evWakeup_(loop_),
+      pending_() {
+  evWakeup_.set<LibevScheduler, &LibevScheduler::onWakeup>(this);
+  evWakeup_.start();
 }
 
 LibevScheduler::~LibevScheduler() {
@@ -57,11 +61,23 @@ LibevScheduler::~LibevScheduler() {
 }
 
 void LibevScheduler::execute(Task&& task) {
-  new TaskInfo(loop_, TimeSpan::Zero, std::move(task));
+  new TaskInfo(loop_, TimeSpan::Zero,
+               std::bind(&LibevScheduler::safeCall, this, task));
+  wakeup();
 }
 
 void LibevScheduler::schedule(TimeSpan delay, Task&& task) {
-  new TaskInfo(loop_, delay, std::move(task));
+  new TaskInfo(loop_, delay, std::bind(&LibevScheduler::safeCall, this, task));
+  wakeup();
+}
+
+void LibevScheduler::wakeup() {
+  evWakeup_.send();
+  loop_.break_loop(ev::ALL);
+}
+
+void LibevScheduler::onWakeup(ev::async&, int) {
+  loop_.break_loop(ev::ALL);
 }
 
 size_t LibevScheduler::maxConcurrency() const XZERO_NOEXCEPT {
