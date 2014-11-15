@@ -26,6 +26,7 @@ class MockInput : public HttpInput {
   MockInput();
   int read(Buffer* result) override;
   size_t readLine(Buffer* result) override;
+  bool empty() const noexcept override;
   void onContent(const BufferRef& chunk) override;
   void recycle() override;
 
@@ -50,6 +51,10 @@ size_t MockInput::readLine(Buffer* result) {
 
 void MockInput::onContent(const BufferRef& chunk) {
   buffer_ += chunk;
+}
+
+bool MockInput::empty() const noexcept {
+  return buffer_.empty();
 }
 
 void MockInput::recycle() {

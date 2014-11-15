@@ -72,6 +72,10 @@ size_t HttpBufferedInput::readLine(Buffer* result) {
   return 0;
 }
 
+bool HttpBufferedInput::empty() const noexcept {
+  return offset_ == content_.size();
+}
+
 void HttpBufferedInput::onContent(const BufferRef& chunk) {
   TRACE("%p onContent: %zu bytes", this, chunk.size());
   content_ += chunk;
