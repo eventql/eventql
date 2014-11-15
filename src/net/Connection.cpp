@@ -62,7 +62,7 @@ void Connection::wantFlush(bool enable) {
 }
 
 void Connection::onInterestFailure(const std::exception& error) {
-  abort();
+  close();
 }
 
 bool Connection::onReadTimeout() {
