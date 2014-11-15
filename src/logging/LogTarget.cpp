@@ -45,18 +45,10 @@ class ConsoleLogger : public LogTarget {
     pthread_t tid = pthread_self();
     auto i = threadMap_.find(tid);
     if (i != threadMap_.end()) {
-      indent(i->second);
       return i->second;
     }
     threadMap_[tid] = threadMap_.size() + 1;
-    indent(threadMap_.size());
     return threadMap_.size();
-  }
-
-  void indent(int t) {
-    for (int i = 1; i < t; ++i) {
-      fprintf(stderr, "  ");
-    }
   }
 
   std::mutex lock_;
