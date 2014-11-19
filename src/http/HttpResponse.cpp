@@ -8,6 +8,7 @@
 #include <xzero/http/HttpResponse.h>
 #include <xzero/http/HttpRequest.h>
 #include <xzero/http/HttpChannel.h>
+#include <xzero/RuntimeError.h>
 #include <vector>
 #include <string>
 
@@ -37,10 +38,24 @@ void HttpResponse::recycle() {
   output_->recycle();
 }
 
-void HttpResponse::setCommitted(bool value) {
+void HttpResponse::checkState() {
   if (isCommitted())
     throw std::runtime_error("Invalid State. Cannot be modified after commit.");
+}
 
+void HttpResponse::checkChannelState() {
+  switch (channel_->state()) {
+    case HttpChannelState::READING:
+    case HttpChannelState::HANDLING:
+      break;
+    case HttpChannelState::SENDING:
+    default:
+      throw RUNTIME_ERROR("Attempt to modify response while in wrong channel state.");
+  }
+}
+
+void HttpResponse::setCommitted(bool value) {
+  checkState();
   committed_ = value;
 }
 
@@ -49,36 +64,36 @@ HttpVersion HttpResponse::version() const XZERO_NOEXCEPT {
 }
 
 void HttpResponse::setVersion(HttpVersion version) {
-  if (isCommitted())
-    throw std::runtime_error("Invalid State. Cannot be modified after commit.");
+  checkState();
+  checkChannelState();
 
   version_ = version;
 }
 
 void HttpResponse::setStatus(HttpStatus status) {
-  if (isCommitted())
-    throw std::runtime_error("Invalid State. Cannot be modified after commit.");
+  checkState();
+  checkChannelState();
 
   status_ = status;
 }
 
 void HttpResponse::setReason(const std::string& val) {
-  if (isCommitted())
-    throw std::runtime_error("Invalid State. Cannot be modified after commit.");
+  checkState();
+  checkChannelState();
 
   reason_ = val;
 }
 
 void HttpResponse::setContentLength(size_t size) {
-  if (isCommitted())
-    throw std::runtime_error("Invalid State. Cannot be modified after commit.");
+  checkState();
+  checkChannelState();
 
   contentLength_ = size;
 }
 
 void HttpResponse::resetContentLength() {
-  if (isCommitted())
-    throw std::runtime_error("Invalid State. Cannot be modified after commit.");
+  checkState();
+  checkChannelState();
 
   contentLength_ = static_cast<size_t>(-1);
 }
@@ -103,10 +118,9 @@ inline void checkInvalidHeader(const std::string& name) {
 
 void HttpResponse::addHeader(const std::string& name,
                              const std::string& value) {
+  checkState();
+  checkChannelState();
   checkInvalidHeader(name);
-
-  if (isCommitted())
-    throw std::runtime_error("Invalid State. Cannot be modified after commit.");
 
   headers_.push_back(name, value);
 }
@@ -114,34 +128,32 @@ void HttpResponse::addHeader(const std::string& name,
 void HttpResponse::appendHeader(const std::string& name,
                                 const std::string& value,
                                 const std::string& delim) {
+  checkState();
+  checkChannelState();
   checkInvalidHeader(name);
-
-  if (isCommitted())
-    throw std::runtime_error("Invalid State. Cannot be modified after commit.");
 
   headers_.append(name, value, delim);
 }
 
 void HttpResponse::setHeader(const std::string& name,
                              const std::string& value) {
+  checkState();
+  checkChannelState();
   checkInvalidHeader(name);
-
-  if (isCommitted())
-    throw std::runtime_error("Invalid State. Cannot be modified after commit.");
 
   headers_.overwrite(name, value);
 }
 
 void HttpResponse::removeHeader(const std::string& name) {
-  if (isCommitted())
-    throw std::runtime_error("Invalid State. Cannot be modified after commit.");
+  checkState();
+  checkChannelState();
 
   headers_.remove(name);
 }
 
 void HttpResponse::removeAllHeaders() {
-  if (isCommitted())
-    throw std::runtime_error("Invalid State. Cannot be modified after commit.");
+  checkState();
+  checkChannelState();
 
   headers_.reset();
 }
@@ -155,6 +167,9 @@ void HttpResponse::send100Continue() {
 }
 
 void HttpResponse::sendError(HttpStatus code, const std::string& message) {
+  checkState();
+  checkChannelState();
+
   setStatus(code);
   setReason(message);
   removeAllHeaders();
@@ -190,10 +205,9 @@ void HttpResponse::sendError(HttpStatus code, const std::string& message) {
 
 // {{{ trailers
 void HttpResponse::registerTrailer(const std::string& name) {
+  checkState();
+  checkChannelState();
   checkInvalidHeader(name);
-
-  if (isCommitted())
-    throw std::runtime_error("Invalid State. Cannot be modified after commit.");
 
   if (trailers_.contains(name))
     throw std::runtime_error("Trailer already registered.");
@@ -204,6 +218,7 @@ void HttpResponse::registerTrailer(const std::string& name) {
 void HttpResponse::appendTrailer(const std::string& name,
                                  const std::string& value,
                                  const std::string& delim) {
+  checkChannelState();
   checkInvalidHeader(name);
 
   if (!trailers_.contains(name))
@@ -213,6 +228,7 @@ void HttpResponse::appendTrailer(const std::string& name,
 }
 
 void HttpResponse::setTrailer(const std::string& name, const std::string& value) {
+  checkChannelState();
   checkInvalidHeader(name);
 
   if (!trailers_.contains(name))
