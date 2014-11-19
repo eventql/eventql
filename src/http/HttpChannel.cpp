@@ -31,6 +31,20 @@ static LogSource connectionLogger("http.HttpChannel");
 #define TRACE(msg...) do {} while (0)
 #endif
 
+std::string to_string(HttpChannelState state) {
+  switch (state) {
+    case HttpChannelState::READING: return "READING";
+    case HttpChannelState::HANDLING: return "HANDLING";
+    case HttpChannelState::SENDING: return "SENDING";
+    case HttpChannelState::DONE: return "DONE";
+    default: {
+      char buf[128];
+      int n = snprintf(buf, sizeof(buf), "<%d>", static_cast<int>(state));
+      return std::string(buf, n);
+    }
+  }
+}
+
 HttpChannel::HttpChannel(HttpTransport* transport, const HttpHandler& handler,
                          std::unique_ptr<HttpInput>&& input,
                          size_t maxRequestUriLength,
@@ -38,7 +52,7 @@ HttpChannel::HttpChannel(HttpTransport* transport, const HttpHandler& handler,
                          HttpOutputCompressor* outputCompressor)
     : maxRequestUriLength_(maxRequestUriLength),
       maxRequestBodyLength_(maxRequestBodyLength),
-      state_(HttpChannelState::IDLE),
+      state_(HttpChannelState::READING),
       transport_(transport),
       request_(new HttpRequest(std::move(input))),
       response_(new HttpResponse(this, createOutput())),
@@ -53,10 +67,30 @@ HttpChannel::~HttpChannel() {
 }
 
 void HttpChannel::reset() {
-  state_ = HttpChannelState::IDLE;
+  setState(HttpChannelState::READING);
   request_->recycle();
   response_->recycle();
   outputFilters_.clear();
+}
+
+void HttpChannel::setState(HttpChannelState newState) {
+  TRACE("%p setState from %s to %s",
+        this,
+        to_string(state_).c_str(),
+        to_string(newState).c_str());
+
+  state_ = newState;
+}
+
+CompletionHandler HttpChannel::makeCompleter(CompletionHandler&& next) {
+  return [this, next](bool succeeded) {
+    BUG_ON(state() != HttpChannelState::SENDING);
+    setState(HttpChannelState::HANDLING);
+
+    if (next) {
+      next(succeeded);
+    }
+  };
 }
 
 std::unique_ptr<HttpOutput> HttpChannel::createOutput() {
@@ -80,12 +114,14 @@ void HttpChannel::removeAllOutputFilters() {
 void HttpChannel::send(const BufferRef& data, CompletionHandler&& onComplete) {
   onBeforeSend();
 
+  auto next = makeCompleter(std::move(onComplete));
+
   if (outputFilters_.empty()) {
     if (!response_->isCommitted()) {
       HttpResponseInfo info(commitInline());
-      transport_->send(std::move(info), data, std::move(onComplete));
+      transport_->send(std::move(info), data, std::move(next));
     } else {
-      transport_->send(data, std::move(onComplete));
+      transport_->send(data, std::move(next));
     }
   } else {
     Buffer filtered;
@@ -93,15 +129,17 @@ void HttpChannel::send(const BufferRef& data, CompletionHandler&& onComplete) {
 
     if (!response_->isCommitted()) {
       HttpResponseInfo info(commitInline());
-      transport_->send(std::move(info), std::move(filtered), std::move(onComplete));
+      transport_->send(std::move(info), std::move(filtered), std::move(next));
     } else {
-      transport_->send(std::move(filtered), std::move(onComplete));
+      transport_->send(std::move(filtered), std::move(next));
     }
   }
 }
 
 void HttpChannel::send(Buffer&& data, CompletionHandler&& onComplete) {
   onBeforeSend();
+
+  auto next = makeCompleter(std::move(onComplete));
 
   if (!outputFilters_.empty()) {
     Buffer output;
@@ -111,36 +149,49 @@ void HttpChannel::send(Buffer&& data, CompletionHandler&& onComplete) {
 
   if (!response_->isCommitted()) {
     HttpResponseInfo info(commitInline());
-    transport_->send(std::move(info), std::move(data), std::move(onComplete));
+    transport_->send(std::move(info), std::move(data), std::move(next));
   } else {
-    transport_->send(std::move(data), std::move(onComplete));
+    transport_->send(std::move(data), std::move(next));
   }
 }
 
 void HttpChannel::send(FileRef&& file, CompletionHandler&& onComplete) {
   onBeforeSend();
 
+  auto next = makeCompleter(std::move(onComplete));
+
   if (outputFilters_.empty()) {
     if (!response_->isCommitted()) {
       HttpResponseInfo info(commitInline());
       transport_->send(std::move(info), BufferRef(), nullptr);
+      transport_->send(std::move(file), std::move(next));
+      // transport_->send(std::move(info), BufferRef(),
+      //     std::bind(&HttpTransport::send, transport_, file, next));
+    } else {
+      transport_->send(std::move(file), std::move(next));
     }
-
-    transport_->send(std::move(file), std::move(onComplete));
   } else {
     Buffer filtered;
     Filter::applyFilters(outputFilters_, file, &filtered, false);
 
     if (!response_->isCommitted()) {
       HttpResponseInfo info(commitInline());
-      transport_->send(std::move(info), std::move(filtered), std::move(onComplete));
+      transport_->send(std::move(info), std::move(filtered), std::move(next));
     } else {
-      transport_->send(std::move(filtered), std::move(onComplete));
+      transport_->send(std::move(filtered), std::move(next));
     }
   }
 }
 
 void HttpChannel::onBeforeSend() {
+  if (state() != HttpChannelState::HANDLING) {
+    throw RUNTIME_ERROR("Invalid HTTP channel state " +
+        to_string(state_) + ". Expected " +
+        to_string(HttpChannelState::HANDLING) + ".");
+  }
+
+  setState(HttpChannelState::SENDING);
+
   // install some last-minute output filters before committing
 
   if (response_->isCommitted())
@@ -200,7 +251,7 @@ bool HttpChannel::onMessageBegin(const BufferRef& method,
   request_->setVersion(version);
   request_->setMethod(method.str());
   if (!request_->setUri(entity.str())) {
-    state_ = HttpChannelState::HANDLING;
+    setState(HttpChannelState::HANDLING);
     response_->sendError(HttpStatus::BadRequest);
     return false;
   }
@@ -230,8 +281,8 @@ bool HttpChannel::onMessageHeader(const BufferRef& name,
 }
 
 bool HttpChannel::onMessageHeaderEnd() {
-  if (state_ != HttpChannelState::HANDLING) {
-    state_ = HttpChannelState::HANDLING;
+  if (state() != HttpChannelState::HANDLING) {
+    setState(HttpChannelState::HANDLING);
 
     // rfc7230, Section 5.4, p2
     if (request_->version() == HttpVersion::VERSION_1_1) {
@@ -287,6 +338,14 @@ void HttpChannel::completed() {
     send(BufferRef(), std::bind(&HttpChannel::completed, this));
     return;
   }
+
+  if (state() != HttpChannelState::HANDLING) {
+    throw RUNTIME_ERROR("Invalid HTTP channel state " +
+        to_string(state_) + ". Expected " +
+        to_string(HttpChannelState::HANDLING) + ".");
+  }
+
+  setState(HttpChannelState::DONE);
 
   if (response_->hasContentLength() && response_->output()->size() < response_->contentLength()) {
     transport_->abort();
