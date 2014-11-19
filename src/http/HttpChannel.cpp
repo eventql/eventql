@@ -18,6 +18,7 @@
 #include <xzero/logging/LogSource.h>
 #include <xzero/io/FileRef.h>
 #include <xzero/io/Filter.h>
+#include <xzero/RuntimeError.h>
 #include <xzero/sysconfig.h>
 
 namespace xzero {
@@ -64,14 +65,14 @@ std::unique_ptr<HttpOutput> HttpChannel::createOutput() {
 
 void HttpChannel::addOutputFilter(std::shared_ptr<Filter> filter) {
   if (response()->isCommitted())
-    throw std::runtime_error("Invalid State. Cannot add output filters after commit.");
+    throw RUNTIME_ERROR("Invalid State. Cannot add output filters after commit.");
 
   outputFilters_.push_back(filter);
 }
 
 void HttpChannel::removeAllOutputFilters() {
   if (response()->isCommitted())
-    throw std::runtime_error("Invalid State. Cannot clear output filters after commit.");
+    throw RUNTIME_ERROR("Invalid State. Cannot clear output filters after commit.");
 
   outputFilters_.clear();
 }
@@ -154,7 +155,7 @@ void HttpChannel::onBeforeSend() {
 
 HttpResponseInfo HttpChannel::commitInline() {
   if (!response_->status())
-    throw std::runtime_error("No HTTP response status set yet.");
+    throw RUNTIME_ERROR("No HTTP response status set yet.");
 
   if (request_->expect100Continue())
     response_->send100Continue();
@@ -176,12 +177,12 @@ HttpResponseInfo HttpChannel::commitInline() {
 
 void HttpChannel::commit(CompletionHandler&& onComplete) {
   TRACE("commit()");
-  send(BufferRef(), std::move(onComplete));
+  send(BufferRef(), makeCompleter(std::move(onComplete)));
 }
 
 void HttpChannel::send100Continue() {
   if (!request()->expect100Continue())
-    throw std::runtime_error("Illegal State. no 100-continue expected.");
+    throw RUNTIME_ERROR("Illegal State. no 100-continue expected.");
 
   request()->setExpect100Continue(false);
 
@@ -251,7 +252,7 @@ void HttpChannel::handleRequest() {
     // TODO: reportException(e);
     response()->sendError(HttpStatus::InternalServerError, e.what());
   } catch (...) {
-    // TODO: reportException(std::runtime_error("Unhandled unknown exception caught");
+    // TODO: reportException(RUNTIME_ERROR("Unhandled unknown exception caught");
     response()->sendError(HttpStatus::InternalServerError,
                           "unhandled unknown exception");
   }
@@ -264,7 +265,7 @@ bool HttpChannel::onMessageContent(const BufferRef& chunk) {
 
 bool HttpChannel::onMessageEnd() {
   if (!request_->input())
-    throw std::runtime_error("Internal Error. No HttpInput available?");
+    throw RUNTIME_ERROR("Internal Error. No HttpInput available?");
 
   if (request_->input()->listener())
     request_->input()->listener()->onAllDataRead();

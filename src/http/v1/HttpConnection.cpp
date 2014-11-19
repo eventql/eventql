@@ -18,6 +18,7 @@
 #include <xzero/net/EndPointWriter.h>
 #include <xzero/executor/Executor.h>
 #include <xzero/logging/LogSource.h>
+#include <xzero/RuntimeError.h>
 #include <xzero/WallClock.h>
 #include <xzero/sysconfig.h>
 #include <cassert>
@@ -94,10 +95,10 @@ void HttpConnection::completed() {
   TRACE("%p completed", this);
 
   if (onComplete_)
-    throw std::runtime_error("there is still another completion hook.");
+    throw RUNTIME_ERROR("there is still another completion hook.");
 
   if (!generator_.isChunked() && generator_.pendingContentLength() > 0)
-    throw std::runtime_error(
+    throw RUNTIME_ERROR(
         "Invalid State. Response not fully written but completed() invoked.");
 
   onComplete_ = std::bind(&HttpConnection::onResponseComplete, this,
@@ -140,9 +141,9 @@ void HttpConnection::send(HttpResponseInfo&& responseInfo,
                           const BufferRef& chunk,
                           CompletionHandler&& onComplete) {
   if (onComplete && onComplete_)
-    throw std::runtime_error("there is still another completion hook.");
+    throw RUNTIME_ERROR("there is still another completion hook.");
 
-  TRACE("%p send(status=%d, persistent=%s, chunkSize=%zu)",
+  TRACE("%p send(BufferRef, status=%d, persistent=%s, chunkSize=%zu)",
         this, responseInfo.status(), channel_->isPersistent() ? "yes" : "no",
         chunk.size());
 
@@ -161,9 +162,9 @@ void HttpConnection::send(HttpResponseInfo&& responseInfo,
                           Buffer&& chunk,
                           CompletionHandler&& onComplete) {
   if (onComplete && onComplete_)
-    throw std::runtime_error("there is still another completion hook.");
+    throw RUNTIME_ERROR("there is still another completion hook.");
 
-  TRACE("%p send(status=%d, persistent=%s, chunkSize=%zu)",
+  TRACE("%p send(Buffer, status=%d, persistent=%s, chunkSize=%zu)",
         this, responseInfo.status(), channel_->isPersistent() ? "yes" : "no",
         chunk.size());
 
@@ -182,9 +183,9 @@ void HttpConnection::send(HttpResponseInfo&& responseInfo,
                           FileRef&& chunk,
                           CompletionHandler&& onComplete) {
   if (onComplete && onComplete_)
-    throw std::runtime_error("there is still another completion hook.");
+    throw RUNTIME_ERROR("there is still another completion hook.");
 
-  TRACE("%p send(status=%d, persistent=%s, fileRef.fd=%d, chunkSize=%zu)",
+  TRACE("%p send(FileRef, status=%d, persistent=%s, fileRef.fd=%d, chunkSize=%zu)",
         this, responseInfo.status(), channel_->isPersistent() ? "yes" : "no",
         chunk.handle(), chunk.size());
 
@@ -221,9 +222,9 @@ void HttpConnection::patchResponseInfo(HttpResponseInfo& responseInfo) {
 void HttpConnection::send(Buffer&& chunk,
                           CompletionHandler&& onComplete) {
   if (onComplete && onComplete_)
-    throw std::runtime_error("there is still another completion hook.");
+    throw RUNTIME_ERROR("there is still another completion hook.");
 
-  TRACE("%p send(chunkSize=%zu)", this, chunk.size());
+  TRACE("%p send(Buffer, chunkSize=%zu)", this, chunk.size());
 
   generator_.generateBody(std::move(chunk));
   onComplete_ = std::move(onComplete);
@@ -234,9 +235,9 @@ void HttpConnection::send(Buffer&& chunk,
 void HttpConnection::send(const BufferRef& chunk,
                           CompletionHandler&& onComplete) {
   if (onComplete && onComplete_)
-    throw std::runtime_error("there is still another completion hook.");
+    throw RUNTIME_ERROR("there is still another completion hook.");
 
-  TRACE("%p send(chunkSize=%zu)", this, chunk.size());
+  TRACE("%p send(BufferRef, chunkSize=%zu)", this, chunk.size());
 
   generator_.generateBody(chunk);
   onComplete_ = std::move(onComplete);
@@ -246,9 +247,9 @@ void HttpConnection::send(const BufferRef& chunk,
 
 void HttpConnection::send(FileRef&& chunk, CompletionHandler&& onComplete) {
   if (onComplete && onComplete_)
-    throw std::runtime_error("there is still another completion hook.");
+    throw RUNTIME_ERROR("there is still another completion hook.");
 
-  TRACE("%p send(chunkSize=%zu)", this, chunk.size());
+  TRACE("%p send(FileRef, chunkSize=%zu)", this, chunk.size());
 
   generator_.generateBody(std::move(chunk));
   onComplete_ = std::move(onComplete);
@@ -266,7 +267,7 @@ void HttpConnection::onFillable() {
   TRACE("%p onFillable: calling fill()", this);
   if (endpoint()->fill(&inputBuffer_) == 0) {
     TRACE("%p onFillable: fill() returned 0", this);
-    // throw std::runtime_error("client EOF");
+    // throw RUNTIME_ERROR("client EOF");
     abort();
     return;
   }
