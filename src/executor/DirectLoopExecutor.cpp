@@ -15,8 +15,10 @@
 
 namespace xzero {
 
-DirectLoopExecutor::DirectLoopExecutor()
-    : pending_(),
+DirectLoopExecutor::DirectLoopExecutor(
+    std::function<void(const std::exception&)>&& eh)
+    : LoopExecutor(std::move(eh)),
+      pending_(),
       isCancelled_(false),
       pipe_{-1, -1} {
 

@@ -30,12 +30,15 @@ static LogSource threadPoolLogger("ThreadPool");
 #define TRACE(msg...) do {} while (0)
 #endif
 
-ThreadPool::ThreadPool()
-    : ThreadPool(processorCount()) {
+ThreadPool::ThreadPool(std::function<void(const std::exception&)>&& eh)
+    : ThreadPool(processorCount(), std::move(eh)) {
 }
 
-ThreadPool::ThreadPool(size_t num_threads)
-    : active_(true),
+ThreadPool::ThreadPool(
+    size_t num_threads,
+    std::function<void(const std::exception&)>&& eh)
+    : Executor(std::move(eh)),
+      active_(true),
       threads_(),
       mutex_(),
       condition_(),
