@@ -25,6 +25,7 @@ set(libxzero_SRC
   io/FileRef.cpp
   io/Filter.cpp
   io/Selectable.cpp
+  io/Selector.cpp
 
   net/ByteArrayEndPoint.cpp
   net/Cidr.cpp
