@@ -48,8 +48,11 @@ void LibevScheduler::TaskInfo::fire(ev::timer&, int) {
   delete this;
 }
 
-LibevScheduler::LibevScheduler(ev::loop_ref loop)
-    : loop_(loop),
+LibevScheduler::LibevScheduler(
+    ev::loop_ref loop,
+    std::function<void(const std::exception&)>&& eh)
+    : Scheduler(std::move(eh)),
+      loop_(loop),
       evWakeup_(loop_),
       pending_() {
   evWakeup_.set<LibevScheduler, &LibevScheduler::onWakeup>(this);
