@@ -155,7 +155,13 @@ std::vector<std::string> RuntimeError::backtrace() const {
       int n = snprintf(buf, sizeof(buf), "%s %p", info.dli_fname, frames_[i]);
       rawFramesText.push_back(buf, n);
       rawFramesText.push_back('\n');
-      output.push_back(buf);
+
+      if (info.dli_sname)
+        n = snprintf(buf, sizeof(buf), "%s", info.dli_sname);
+      else
+        n = snprintf(buf, sizeof(buf), "%p %s", frames_[i], info.dli_fname);
+
+      output.push_back(std::string(buf, n));
     }
   }
 
