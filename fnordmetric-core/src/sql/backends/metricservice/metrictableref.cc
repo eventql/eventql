@@ -7,16 +7,16 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <fnordmetric/metricdb/metrictableref.h>
+#include <fnord/service/metric/metrictableref.h>
 #include <fnordmetric/sql/runtime/tablescan.h>
 #include <fnordmetric/sql/svalue.h>
 
-namespace fnordmetric {
+namespace fnord {
 namespace query {
 class TableScan;
 }
 
-namespace metricdb {
+namespace metric_service {
 
 MetricTableRef::MetricTableRef(IMetric* metric) : metric_(metric) {}
 

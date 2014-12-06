@@ -9,18 +9,18 @@
  */
 #ifndef _FNORDMETRIC_METRICDB_METRICTABLEREF_H
 #define _FNORDMETRIC_METRICDB_METRICTABLEREF_H
-#include <fnordmetric/metricdb/metric.h>
+#include <fnord/service/metric/metric.h>
 #include <fnordmetric/sql/backends/tableref.h>
 #include <stdlib.h>
 #include <string>
 #include <memory>
 
-namespace fnordmetric {
+namespace fnord {
 namespace query {
 class TableScan;
 }
 
-namespace metricdb {
+namespace metric_service {
 
 class MetricTableRef : public query::TableRef {
 public:

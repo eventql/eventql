@@ -9,16 +9,16 @@
  */
 #ifndef _FNORDMETRIC_METRICDB_METRICTABLEREPOSITORY_H
 #define _FNORDMETRIC_METRICDB_METRICTABLEREPOSITORY_H
-#include <fnordmetric/metricdb/metricrepository.h>
+#include <fnord/service/metric/metricrepository.h>
 #include <fnordmetric/sql/runtime/tablerepository.h>
 #include <memory>
 #include <mutex>
 #include <vector>
 
-namespace fnordmetric {
-namespace metricdb {
+namespace fnord {
+namespace metric_service {
 
-class MetricTableRepository : public fnordmetric::query::TableRepository {
+class MetricTableRepository : public fnord::query::TableRepository {
 public:
 
   MetricTableRepository(IMetricRepository* metric_repo);
