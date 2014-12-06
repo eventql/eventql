@@ -7,12 +7,12 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <fnordmetric/metricdb/metrictablerepository.h>
-#include <fnordmetric/metricdb/metrictableref.h>
+#include <fnord/service/metric/metrictablerepository.h>
+#include <fnord/service/metric/metrictableref.h>
 #include <fnord/base/exception.h>
 
-namespace fnordmetric {
-namespace metricdb {
+namespace fnord {
+namespace metric_service {
 
 MetricTableRepository::MetricTableRepository(
     IMetricRepository* metric_repo) :
