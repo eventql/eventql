@@ -6,8 +6,8 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-#ifndef _CM_TRACKER_H
-#define _CM_TRACKER_H
+#ifndef _CM_CUSTOMERNAMESPCE_H
+#define _CM_CUSTOMERNAMESPCE_H
 #include <mutex>
 #include <stdlib.h>
 #include <set>
@@ -17,24 +17,20 @@
 #include <fnord/net/http/httphandler.h>
 
 namespace cm {
-class CustomerNamespace;
 
-class Tracker : public fnord::http::HTTPHandler {
+class CustomerNamespace  {
 public:
-  static const char kUIDCookieKey[];
-  static const int kUIDCookieLifetimeDays;
 
-  Tracker();
+  CustomerNamespace();
+  const std::vector<std::string>& vhosts();
+  void addVHost(const std::string& hostname);
 
-  bool handleHTTPRequest(
-      fnord::http::HTTPRequest* request,
-      fnord::http::HTTPResponse* response) override;
-
-  void addCustomer(CustomerNamespace* customer);
+  const std::string& trackingJS();
+  void loadTrackingJS(const std::string& filename);
 
 protected:
-  std::unordered_map<std::string, CustomerNamespace*> vhosts_;
-  fnord::Random rnd_;
+  std::string tracking_js_;
+  std::vector<std::string> vhosts_;
 };
 
 } // namespace cm

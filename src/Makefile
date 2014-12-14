@@ -3,7 +3,7 @@ CXX            = clang++
 CXXFLAGS       = -stdlib=libc++ -I. -std=c++11
 LDFLAGS        = 
 TARGET         = cmapp
-SOURCES        = main.cc tracker/tracker.cc
+SOURCES        = main.cc customernamespace.cc tracker/tracker.cc
 
 $(TARGET): $(SOURCES)
 	cd fnord/base && make libfnord-base.a

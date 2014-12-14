@@ -6,10 +6,12 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-#include "tracker.h"
+#include "tracker/tracker.h"
+#include <fnord/base/exception.h>
 #include <fnord/base/inspect.h>
 #include <fnord/net/http/cookies.h>
 #include "fnord/base/random.h"
+#include "customernamespace.h"
 
 namespace cm {
 
@@ -21,6 +23,14 @@ Tracker::Tracker() {}
 bool Tracker::handleHTTPRequest(
     fnord::http::HTTPRequest* request,
     fnord::http::HTTPResponse* response) {
+  /* find namespace */
+  CustomerNamespace* ns = nullptr;
+  auto ns_iter = vhosts_.find(request->getHeader("host"));
+  if (ns_iter == vhosts_.end()) {
+    return false;
+  } else {
+    ns = ns_iter->second;
+  }
 
   /* get or assign uid */
   std::string uid;
@@ -33,10 +43,28 @@ bool Tracker::handleHTTPRequest(
         fnord::DateTime::daysFromNow(kUIDCookieLifetimeDays));
   }
 
-  fnord::iputs("uid: $0", uid);
+  fnord::URI uri(request->getUrl());
+  fnord::iputs("uid: $0, namespace $1, req $2", uid, ns, uri.path());
 
-  response->setStatus(fnord::http::kStatusOK);
+  if (uri.path() == "/report.js") {
+    response->setStatus(fnord::http::kStatusOK);
+    response->addHeader("Content-Type", "application/javascript");
+    response->addBody(ns->trackingJS());
+    return true;
+  }
+
+  response->setStatus(fnord::http::kStatusNotFound);
   return true;
+}
+
+void Tracker::addCustomer(CustomerNamespace* customer) {
+  for (const auto& vhost : customer->vhosts()) {
+    if (vhosts_.count(vhost) != 0) {
+      RAISEF(kRuntimeError, "hostname is already registered: $0", vhost);
+    }
+
+    vhosts_[vhost] = customer;
+  }
 }
 
 } // namespace cm
