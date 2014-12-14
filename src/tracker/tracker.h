@@ -13,12 +13,15 @@
 #include <set>
 #include <string>
 #include <unordered_map>
+#include <fnord/base/random.h>
 #include <fnord/net/http/httphandler.h>
 
 namespace cm {
 
 class Tracker : public fnord::http::HTTPHandler {
 public:
+  static const char kUIDCookieKey[];
+  static const int kUIDCookieLifetimeDays;
 
   Tracker();
 
@@ -26,6 +29,8 @@ public:
       fnord::http::HTTPRequest* request,
       fnord::http::HTTPResponse* response) override;
 
+protected:
+  fnord::Random rnd_;
 };
 
 } // namespace cm

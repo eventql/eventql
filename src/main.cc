@@ -7,6 +7,7 @@
  * permission is obtained.
  */
 #include <stdlib.h>
+#include "fnord/base/random.h"
 #include "fnord/net/http/httpserver.h"
 #include "fnord/thread/threadpool.h"
 #include "fnord/system/signalhandler.h"
