@@ -5,6 +5,11 @@ LDFLAGS        =
 TARGET         = cmapp
 SOURCES        = main.cc customernamespace.cc tracker/tracker.cc
 
+UNAME = $(shell uname)
+ifeq ($(UNAME), Darwin)
+CXXFLAGS += -stdlib=libc++
+endif
+
 $(TARGET): $(SOURCES)
 	cd fnord/base && make libfnord-base.a
 	cd fnord/io && make libfnord-io.a
