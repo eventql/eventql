@@ -14,6 +14,7 @@ $(TARGET): $(SOURCES)
 	$(CXX) $(CXXFLAGS) $(SOURCES) -o $(TARGET) $(LDFLAGS) -Lfnord/base -Lfnord/system -Lfnord/net/http -Lfnord/io -Lfnord/thread -lfnord-base -lfnord-system -lfnord-http -lfnord-io -lfnord-thread -lpthread
 
 clean:
+	cd fnord && make clean
 	rm -f $(TARGET)
 
 .PHONY: all $(TARGET)

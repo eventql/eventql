@@ -17,13 +17,12 @@
 int main() {
   fnord::system::SignalHandler::ignoreSIGHUP();
   fnord::system::SignalHandler::ignoreSIGPIPE();
+
   fnord::CatchAndAbortExceptionHandler ehandler;
   ehandler.installGlobalHandlers();
 
   auto dwn_ns = new cm::CustomerNamespace();
   dwn_ns->addVHost("dwnapps.net");
-  dwn_ns->addVHost("dwnapps.dev");
-  dwn_ns->addVHost("dwnapps.dev:8080");
   dwn_ns->loadTrackingJS("config/c_dwn/track.js");
 
   auto tracker = std::unique_ptr<cm::Tracker>(new cm::Tracker());

@@ -20,36 +20,53 @@ const int Tracker::kUIDCookieLifetimeDays = 365 * 5;
 
 Tracker::Tracker() {}
 
+const unsigned char pixel_gif[42] = {
+  0x47, 0x49, 0x46, 0x38, 0x39, 0x61, 0x01, 0x00, 0x01, 0x00, 0x80, 0x00,
+  0x00, 0x00, 0x00, 0x00, 0xff, 0xff, 0xff, 0x21, 0xf9, 0x04, 0x01, 0x00,
+  0x00, 0x00, 0x00, 0x2c, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x01, 0x00,
+  0x00, 0x02, 0x01, 0x44, 0x00, 0x3b
+};
+
 bool Tracker::handleHTTPRequest(
     fnord::http::HTTPRequest* request,
     fnord::http::HTTPResponse* response) {
   /* find namespace */
   CustomerNamespace* ns = nullptr;
-  auto ns_iter = vhosts_.find(request->getHeader("host"));
+  const auto hostname = request->getHeader("host");
+  auto ns_iter = vhosts_.find(hostname);
   if (ns_iter == vhosts_.end()) {
     return false;
   } else {
     ns = ns_iter->second;
   }
 
-  /* get or assign uid */
-  std::string uid;
-  auto cookies = request->cookies();
-  if (!fnord::http::Cookies::getCookie(cookies, kUIDCookieKey, &uid)) {
-    uid = rnd_.hex128();
-    response->addCookie(
-        kUIDCookieKey,
-        uid,
-        fnord::DateTime::daysFromNow(kUIDCookieLifetimeDays));
-  }
-
   fnord::URI uri(request->getUrl());
-  fnord::iputs("uid: $0, namespace $1, req $2", uid, ns, uri.path());
+  fnord::iputs("uid: namespace $0, req $1", ns, request->getUrl());
 
-  if (uri.path() == "/report.js") {
+  if (uri.path() == "/t.js") {
     response->setStatus(fnord::http::kStatusOK);
     response->addHeader("Content-Type", "application/javascript");
-    response->addBody(ns->trackingJS());
+    response->addHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+    response->addHeader("Pragma", "no-cache");
+    response->addHeader("Expires", "0");
+
+    response->addBody(fnord::StringUtil::format(
+        "__cmhost='$0'; __cmuid='$1'; __cmcid='$2'; $3",
+        hostname,
+        rnd_.hex128(),
+        rnd_.hex64(),
+        ns->trackingJS()));
+
+    return true;
+  }
+
+  if (uri.path() == "/t.gif") {
+    response->setStatus(fnord::http::kStatusOK);
+    response->addHeader("Content-Type", "image/gif");
+    response->addHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+    response->addHeader("Pragma", "no-cache");
+    response->addHeader("Expires", "0");
+    response->addBody((void *) &pixel_gif, sizeof(pixel_gif));
     return true;
   }
 

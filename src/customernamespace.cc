@@ -6,6 +6,7 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
+#include <fnord/base/stringutil.h>
 #include <fnord/io/fileutil.h>
 #include "customernamespace.h"
 
@@ -28,6 +29,14 @@ const std::string& CustomerNamespace::trackingJS() {
 
 void CustomerNamespace::loadTrackingJS(const std::string& filename) {
   tracking_js_ = fnord::io::FileUtil::read(filename);
+  fnord::StringUtil::replaceAll(&tracking_js_, "var ", "var\t");
+  fnord::StringUtil::replaceAll(&tracking_js_, "typeof ", "typeof\t");
+  fnord::StringUtil::replaceAll(&tracking_js_, "function ", "function\t");
+  fnord::StringUtil::replaceAll(&tracking_js_, "return ", "return\t");
+  fnord::StringUtil::replaceAll(&tracking_js_, "new ", "new\t");
+  fnord::StringUtil::replaceAll(&tracking_js_, "\n", "");
+  fnord::StringUtil::replaceAll(&tracking_js_, " ", "");
+  fnord::StringUtil::replaceAll(&tracking_js_, "\t", " ");
 }
 
 } // namespace cm
