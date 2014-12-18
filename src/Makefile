@@ -13,10 +13,12 @@ endif
 $(TARGET): $(SOURCES)
 	cd fnord/base && make libfnord-base.a
 	cd fnord/io && make libfnord-io.a
+	cd fnord/logging && make libfnord-logging.a
+	cd fnord/net && make libfnord-net.a
 	cd fnord/net/http && make libfnord-http.a
 	cd fnord/system && make libfnord-system.a
 	cd fnord/thread && make libfnord-thread.a
-	$(CXX) $(CXXFLAGS) -o $(TARGET) $(SOURCES) -Lfnord/base -Lfnord/system -Lfnord/net/http -Lfnord/io -Lfnord/thread -lfnord-system -lfnord-http -lfnord-io -lfnord-thread -lfnord-base -lpthread
+	$(CXX) $(CXXFLAGS) -o $(TARGET) $(SOURCES) -Lfnord/base -Lfnord/system -Lfnord/net/http -Lfnord/io -Lfnord/logging -Lfnord/net -Lfnord/thread -lfnord-system -lfnord-http -lfnord-io -lfnord-logging -lfnord-net -lfnord-thread -lfnord-base -lpthread
 
 clean:
 	cd fnord && make clean
