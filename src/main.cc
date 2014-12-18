@@ -7,10 +7,13 @@
  * permission is obtained.
  */
 #include <stdlib.h>
+#include <unistd.h>
 #include "fnord/base/random.h"
 #include "fnord/net/http/httpserver.h"
+#include "fnord/thread/eventloop.h"
 #include "fnord/thread/threadpool.h"
 #include "fnord/system/signalhandler.h"
+#include "fnord/logging/logoutputstream.h"
 #include "customernamespace.h"
 #include "tracker/tracker.h"
 
@@ -21,6 +24,10 @@ int main() {
   fnord::CatchAndAbortExceptionHandler ehandler;
   ehandler.installGlobalHandlers();
 
+  fnord::log::LogOutputStream logger(fnord::io::OutputStream::getStderr());
+  fnord::log::Logger::get()->setMinimumLogLevel(fnord::log::kDebug);
+  fnord::log::Logger::get()->listen(&logger);
+
   auto dwn_ns = new cm::CustomerNamespace();
   dwn_ns->addVHost("dwnapps.net");
   dwn_ns->loadTrackingJS("config/c_dwn/track.js");
@@ -29,9 +36,14 @@ int main() {
   tracker->addCustomer(dwn_ns);
 
   fnord::thread::ThreadPool thread_pool;
+  fnord::thread::EventLoop event_loop;
   fnord::http::HTTPServer http_server(&thread_pool, &thread_pool);
   http_server.addHandler(std::move(tracker));
   http_server.listen(8080);
+
+  for (;;) {
+    usleep(10000);
+  }
 
   return 0;
 }

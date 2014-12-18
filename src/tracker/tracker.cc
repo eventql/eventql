@@ -40,8 +40,8 @@ bool Tracker::handleHTTPRequest(
     ns = ns_iter->second;
   }
 
-  fnord::URI uri(request->getUrl());
-  fnord::iputs("uid: namespace $0, req $1", ns, request->getUrl());
+  fnord::URI uri(request->uri());
+  fnord::iputs("uid: namespace $0, req $1", ns, request->uri());
 
   if (uri.path() == "/t.js") {
     response->setStatus(fnord::http::kStatusOK);
