@@ -26,7 +26,7 @@ int main() {
   ehandler.installGlobalHandlers();
 
   fnord::log::LogOutputStream logger(fnord::io::OutputStream::getStderr());
-  fnord::log::Logger::get()->setMinimumLogLevel(fnord::log::kTrace);
+  fnord::log::Logger::get()->setMinimumLogLevel(fnord::log::kInfo);
   fnord::log::Logger::get()->listen(&logger);
 
   auto dwn_ns = new cm::CustomerNamespace();
@@ -42,7 +42,7 @@ int main() {
   fnord::http::HTTPRouter http_router;
   http_router.addRouteByPrefixMatch("/", tracker.get());
 
-  fnord::http::HTTPServer http_server(&http_router, &thread_pool, &thread_pool);
+  fnord::http::HTTPServer http_server(&http_router, &thread_pool);
   http_server.listen(8080);
 
   for (;;) {
