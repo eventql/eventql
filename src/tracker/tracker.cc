@@ -30,7 +30,7 @@ const unsigned char pixel_gif[42] = {
   0x00, 0x02, 0x01, 0x44, 0x00, 0x3b
 };
 
-bool Tracker::handleHTTPRequest(
+void Tracker::handleHTTPRequest(
     fnord::http::HTTPRequest* request,
     fnord::http::HTTPResponse* response) {
   /* find namespace */
@@ -39,7 +39,9 @@ bool Tracker::handleHTTPRequest(
   fnord::iputs("host: $0", hostname);
   auto ns_iter = vhosts_.find(hostname);
   if (ns_iter == vhosts_.end()) {
-    return false;
+    response->setStatus(fnord::http::kStatusNotFound);
+    response->addBody("not found");
+    return;
   } else {
     ns = ns_iter->second;
   }
@@ -61,7 +63,7 @@ bool Tracker::handleHTTPRequest(
         rnd_.hex64(),
         ns->trackingJS()));
 
-    return true;
+    return;
   }
 
   if (uri.path() == "/t.gif") {
@@ -71,11 +73,11 @@ bool Tracker::handleHTTPRequest(
     response->addHeader("Pragma", "no-cache");
     response->addHeader("Expires", "0");
     response->addBody((void *) &pixel_gif, sizeof(pixel_gif));
-    return true;
+    return;
   }
 
   response->setStatus(fnord::http::kStatusNotFound);
-  return true;
+  response->addBody("not found");
 }
 
 void Tracker::addCustomer(CustomerNamespace* customer) {

@@ -26,7 +26,7 @@ public:
 
   Tracker();
 
-  bool handleHTTPRequest(
+  void handleHTTPRequest(
       fnord::http::HTTPRequest* request,
       fnord::http::HTTPResponse* response) override;
 

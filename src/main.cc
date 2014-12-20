@@ -42,7 +42,7 @@ int main() {
   fnord::http::HTTPRouter http_router;
   http_router.addRouteByPrefixMatch("/", tracker.get());
 
-  fnord::http::HTTPServer http_server(&http_router, &thread_pool, &thread_pool);
+  fnord::http::HTTPServer http_server(&http_router, &thread_pool);
   http_server.listen(8080);
 
   for (;;) {
