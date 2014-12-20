@@ -14,12 +14,12 @@
 #include <string>
 #include <unordered_map>
 #include <fnord/base/random.h>
-#include <fnord/net/http/httphandler.h>
+#include <fnord/net/http/httpservice.h>
 
 namespace cm {
 class CustomerNamespace;
 
-class Tracker : public fnord::http::HTTPHandler {
+class Tracker : public fnord::http::HTTPService {
 public:
   static const char kUIDCookieKey[];
   static const int kUIDCookieLifetimeDays;
