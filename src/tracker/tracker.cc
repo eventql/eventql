@@ -10,6 +10,9 @@
 #include <fnord/base/exception.h>
 #include <fnord/base/inspect.h>
 #include <fnord/net/http/cookies.h>
+#include "fnord/net/http/httprequest.h"
+#include "fnord/net/http/httpresponse.h"
+#include "fnord/net/http/status.h"
 #include "fnord/base/random.h"
 #include "customernamespace.h"
 #include "tracker/logjoinservice.h"
@@ -50,6 +53,7 @@ void Tracker::handleHTTPRequest(
   /* find namespace */
   CustomerNamespace* ns = nullptr;
   const auto hostname = request->getHeader("host");
+  fnord::iputs("host: $0", hostname);
   auto ns_iter = vhosts_.find(hostname);
   if (ns_iter == vhosts_.end()) {
     response->setStatus(fnord::http::kStatusNotFound);
