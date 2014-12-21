@@ -17,6 +17,7 @@
 #include "fnord/logging/logoutputstream.h"
 #include "customernamespace.h"
 #include "tracker/tracker.h"
+#include "tracker/logjoinservice.h"
 
 int main() {
   fnord::system::SignalHandler::ignoreSIGHUP();
@@ -33,14 +34,15 @@ int main() {
   dwn_ns->addVHost("dwnapps.net");
   dwn_ns->loadTrackingJS("config/c_dwn/track.js");
 
-  std::unique_ptr<cm::Tracker> tracker(new cm::Tracker());
-  tracker->addCustomer(dwn_ns);
+  cm::LogJoinService logjoin_service;
+  cm::Tracker tracker(&logjoin_service);
+  tracker.addCustomer(dwn_ns);
 
   fnord::thread::ThreadPool thread_pool;
   fnord::thread::EventLoop event_loop;
 
   fnord::http::HTTPRouter http_router;
-  http_router.addRouteByPrefixMatch("/", tracker.get());
+  http_router.addRouteByPrefixMatch("/", &tracker);
 
   fnord::http::HTTPServer http_server(&http_router, &event_loop);
   http_server.listen(8080);

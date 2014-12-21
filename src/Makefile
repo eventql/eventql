@@ -3,7 +3,7 @@ CXX            = clang++
 CXXFLAGS       = -I. -std=c++11
 LDFLAGS        = 
 TARGET         = cmapp
-SOURCES        = main.cc customernamespace.cc tracker/tracker.cc
+SOURCES        = main.cc itemref.cc customernamespace.cc tracker/tracker.cc tracker/logjoinservice.cc tracker/trackedsession.cc # tracker/trackedquery.cc tracker/trackedsession.cc 
 
 UNAME = $(shell uname)
 ifeq ($(UNAME), Darwin)

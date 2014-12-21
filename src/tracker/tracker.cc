@@ -12,13 +12,30 @@
 #include <fnord/net/http/cookies.h>
 #include "fnord/base/random.h"
 #include "customernamespace.h"
+#include "tracker/logjoinservice.h"
+
+
+/**
+ * mandatory params:
+ *  c    -- clickid     -- format "<uid>~<eventid>", e.g. "f97650cb~b28c61d5c"
+ *  e    -- eventtype   -- format "{q,v}" (query, visit)
+ *
+ * params for eventtype=q (query):
+ *  is   -- item ids    -- format "<setid>~<itemid>~<pos>,..."
+ *
+ * params for eventtype=v (visit):
+ *  i    -- itemid      -- format "<setid>~<itemid>"
+ *
+ */
 
 namespace cm {
 
 const char Tracker::kUIDCookieKey[] = "_u";
 const int Tracker::kUIDCookieLifetimeDays = 365 * 5;
 
-Tracker::Tracker() {}
+Tracker::Tracker(
+    LogJoinService* logjoin_service) :
+    logjoin_service_(logjoin_service) {}
 
 const unsigned char pixel_gif[42] = {
   0x47, 0x49, 0x46, 0x38, 0x39, 0x61, 0x01, 0x00, 0x01, 0x00, 0x80, 0x00,
@@ -63,6 +80,8 @@ void Tracker::handleHTTPRequest(
   }
 
   if (uri.path() == "/t.gif") {
+    logjoin_service_->insertLogline(ns, uri.query());
+
     response->setStatus(fnord::http::kStatusOK);
     response->addHeader("Content-Type", "image/gif");
     response->addHeader("Cache-Control", "no-cache, no-store, must-revalidate");
@@ -75,6 +94,7 @@ void Tracker::handleHTTPRequest(
   response->setStatus(fnord::http::kStatusNotFound);
   response->addBody("not found");
 }
+
 
 void Tracker::addCustomer(CustomerNamespace* customer) {
   for (const auto& vhost : customer->vhosts()) {

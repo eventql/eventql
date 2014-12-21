@@ -1,0 +1,46 @@
+
+
+our product matrix:
+
+  [ for ecommerce sites | for publishers | for advertisers ]
+
+    - rtb engine // onsite cpc ads
+    - personalized product recommendations
+    - choose the best product picture (auto ab test)
+    - choose the best product title (auto ab test)
+    - "personalized catalog" (like youtube hp, items clustered by topic, topics selected via reco)
+    - personalize retargeting email
+    - semantic autocomplete
+    - keyword suggestion
+    - ecommerce search as a service
+    - personalized special offer popups
+    - cart abandonment popup (preis abrunden "let's call it ...")
+    - ecommerce analytics "hot products" etc
+    - product autotranslation
+    - ..
+    - ..
+
+
+
+"your products are really hot on dawanda? would you like to advertise them? + revproj."
+
+>> ItemMetadataService (memory cache + memcached backed)
+
+>> Keyword graph
+
+>> Item -> Keyword suggestion
+
+>> Query -> Keyword mapping
+
+>> PostingListService (postgres)
+  insertItem(item, keywords...)
+  getItems(keywords...)
+
+>> LogjoinService
+
+>> CampaignService
+
+>> CM Frontend
+  >> Tracker
+  >> QueryFrontend
+

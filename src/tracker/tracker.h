@@ -14,17 +14,19 @@
 #include <string>
 #include <unordered_map>
 #include <fnord/base/random.h>
+#include <fnord/base/uri.h>
 #include <fnord/net/http/httpservice.h>
 
 namespace cm {
 class CustomerNamespace;
+class LogJoinService;
 
 class Tracker : public fnord::http::HTTPService {
 public:
   static const char kUIDCookieKey[];
   static const int kUIDCookieLifetimeDays;
 
-  Tracker();
+  explicit Tracker(LogJoinService* logjoin_service);
 
   void handleHTTPRequest(
       fnord::http::HTTPRequest* request,
@@ -33,6 +35,9 @@ public:
   void addCustomer(CustomerNamespace* customer);
 
 protected:
+  void track(CustomerNamespace* customer, const fnord::URI& uri);
+
+  LogJoinService* logjoin_service_;
   std::unordered_map<std::string, CustomerNamespace*> vhosts_;
   fnord::Random rnd_;
 };
