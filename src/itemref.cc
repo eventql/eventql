@@ -9,6 +9,14 @@
 #include <fnord/base/inspect.h>
 #include "itemref.h"
 
+namespace cm {
+
+bool ItemRef::operator==(const ItemRef& other) const {
+  return set_id == other.set_id && item_id == other.item_id;
+}
+
+}
+
 namespace fnord {
 template <>
 std::string inspect(const cm::ItemRef& itemref) {

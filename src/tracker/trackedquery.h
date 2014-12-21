@@ -14,6 +14,7 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <fnord/base/datetime.h>
 #include "itemref.h"
 
 namespace cm {
@@ -30,12 +31,18 @@ struct TrackedQuery {
   std::vector<TrackedQueryItem> items;
   std::vector<std::string> attrs;
   bool flushed;
+
+  void merge(const TrackedQuery& other);
+
 };
 
 struct TrackedItemVisit {
   fnord::DateTime time;
   ItemRef item;
   std::vector<std::string> attrs;
+
+  void merge(const TrackedItemVisit& other);
+
 };
 
 }

@@ -20,6 +20,9 @@ struct ItemRef {
   std::string set_id;
   std::string item_id;
   int position;
+
+  bool operator==(const ItemRef& other) const;
+
 };
 
 } // namespace cm

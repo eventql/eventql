@@ -147,7 +147,12 @@ void LogJoinService::insertQuery(
   auto session = findOrCreateSession(customer, uid);
   std::lock_guard<std::mutex> lock_holder(session->mutex);
 
-  session->queries.emplace(eid, query);
+  auto iter = session->queries.find(eid);
+  if (iter == session->queries.end()) {
+    session->queries.emplace(eid, query);
+  } else {
+    iter->second.merge(query);
+  }
 
   if (query.time.unixMicros() > session->last_seen_unix_micros) {
     session->last_seen_unix_micros = query.time.unixMicros();
@@ -164,7 +169,12 @@ void LogJoinService::insertItemVisit(
   auto session = findOrCreateSession(customer, uid);
   std::lock_guard<std::mutex> lock_holder(session->mutex);
 
-  session->item_visits.emplace(eid, visit);
+  auto iter = session->item_visits.find(eid);
+  if (iter == session->item_visits.end()) {
+    session->item_visits.emplace(eid, visit);
+  } else {
+    iter->second.merge(visit);
+  }
 
   if (visit.time.unixMicros() > session->last_seen_unix_micros) {
     session->last_seen_unix_micros = visit.time.unixMicros();
