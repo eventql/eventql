@@ -6,6 +6,7 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
+#include <fnord/base/inspect.h>
 #include <fnord/base/stringutil.h>
 #include <fnord/base/uri.h>
 #include <fnord/base/wallclock.h>
@@ -19,9 +20,17 @@ LogJoinService::LogJoinService() {
 void LogJoinService::insertLogline(
     CustomerNamespace* customer,
     const std::string& log_line) {
+  insertLogline(customer, fnord::DateTime(), log_line);
+}
+
+void LogJoinService::insertLogline(
+    CustomerNamespace* customer,
+    const fnord::DateTime& time,
+    const std::string& log_line) {
   fnord::URI::ParamList params;
   fnord::URI::parseQueryString(log_line, &params);
 
+  /* extract uid (userid) and eid (eventid) */
   std::string c;
   if (!fnord::URI::getParam(params, "c", &c)) {
     return;
@@ -33,12 +42,18 @@ void LogJoinService::insertLogline(
   }
 
   std::string uid = c.substr(0, c_s);
-  std::string cid = c.substr(c_s + 1, c.length() - c_s - 1);
-
-  if (uid.length() == 0 || cid.length() == 0) {
+  std::string eid = c.substr(c_s + 1, c.length() - c_s - 1);
+  if (uid.length() == 0 || eid.length() == 0) {
     return;
   }
 
+  /* extract the event type */
+  std::string evtype;
+  if (!fnord::URI::getParam(params, "e", &evtype) || evtype.length() != 1) {
+    return;
+  }
+
+  /* extract all non-reserved params as event attributes */
   std::vector<std::string> attrs;
   for (const auto& p : params) {
     if (p.first != "c" && p.first != "e" && p.first != "i" && p.first != "is") {
@@ -46,37 +61,78 @@ void LogJoinService::insertLogline(
     }
   }
 
-
-  std::string evtype;
-  if (!fnord::URI::getParam(params, "e", &evtype) || evtype.length() != 1) {
-    return;
-  }
-
+  /* process event */
   switch (evtype[0]) {
+
+    /* query event */
     case 'q': {
-      std::vector<ItemRef> items;
+      TrackedQuery q;
+      q.time = time;
+      q.attrs = attrs;
+      q.flushed = false;
 
-      insertQuery(
-          customer,
-          fnord::DateTime(),
-          uid,
-          cid,
-          items,
-          attrs);
+      std::string items_str;
+      if (fnord::URI::getParam(params, "is", &items_str)) {
+        for (const auto& item_str : fnord::StringUtil::split(items_str, ",")) {
+          auto item_str_parts = fnord::StringUtil::split(item_str, "~");
+          if (item_str_parts.size() < 2) {
+            return;
+          }
 
+          TrackedQueryItem qitem;
+          qitem.item.set_id = item_str_parts[0];
+          qitem.item.item_id = item_str_parts[1];
+          qitem.clicked = false;
+          qitem.position = -1;
+          qitem.variant = -1;
+
+          for (int i = 2; i < item_str_parts.size(); ++i) {
+            const auto& iattr = item_str_parts[i];
+            if (iattr.length() < 1) {
+              continue;
+            }
+
+            switch (iattr[0]) {
+              case 'p':
+                qitem.position = std::stoi(iattr.substr(1, iattr.length() - 1));
+                break;
+              case 'v':
+                qitem.variant = std::stoi(iattr.substr(1, iattr.length() - 1));
+                break;
+            }
+          }
+
+          q.items.emplace_back(qitem);
+        }
+      }
+
+      insertQuery(customer, uid, eid, q);
       break;
     }
 
+    /* item visit event */
     case 'v': {
-      cm::ItemRef itemid;
+      std::string item_id_str;
+      if (!fnord::URI::getParam(params, "i", &item_id_str)) {
+        return;
+      }
+
+      auto item_id_parts = fnord::StringUtil::split(item_id_str, "~");
+      if (item_id_parts.size() < 2) {
+        return;
+      }
+
+      TrackedItemVisit visit;
+      visit.time = time;
+      visit.item.set_id = item_id_parts[0];
+      visit.item.item_id = item_id_parts[1];
+      visit.attrs = attrs;
 
       insertItemVisit(
           customer,
-          fnord::DateTime(),
           uid,
-          cid,
-          itemid,
-          attrs);
+          eid,
+          visit);
 
       break;
     }
@@ -85,34 +141,36 @@ void LogJoinService::insertLogline(
 }
 void LogJoinService::insertQuery(
     CustomerNamespace* customer,
-    const fnord::DateTime& time,
     const std::string& uid,
     const std::string& eid,
-    const std::vector<ItemRef>& items,
-    std::vector<std::string> attrs) {
+    const TrackedQuery& query) {
   auto session = findOrCreateSession(customer, uid);
   std::lock_guard<std::mutex> lock_holder(session->mutex);
 
-  TrackedQuery q;
-  q.time = fnord::WallClock::now();
-  q.attrs = attrs;
-  q.flushed = false;
+  session->queries.emplace(eid, query);
 
-  session->queries.emplace(eid, std::move(q));
+  if (query.time.unixMicros() > session->last_seen_unix_micros) {
+    session->last_seen_unix_micros = query.time.unixMicros();
+  }
 
   session->debugPrint(uid);
 }
 
 void LogJoinService::insertItemVisit(
     CustomerNamespace* customer,
-    const fnord::DateTime& time,
     const std::string& uid,
     const std::string& eid,
-    const ItemRef& item,
-    std::vector<std::string> attrs) {
+    const TrackedItemVisit& visit) {
   auto session = findOrCreateSession(customer, uid);
   std::lock_guard<std::mutex> lock_holder(session->mutex);
 
+  session->item_visits.emplace(eid, visit);
+
+  if (visit.time.unixMicros() > session->last_seen_unix_micros) {
+    session->last_seen_unix_micros = visit.time.unixMicros();
+  }
+
+  session->debugPrint(uid);
 }
 
 TrackedSession* LogJoinService::findOrCreateSession(

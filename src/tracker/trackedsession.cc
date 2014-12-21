@@ -13,44 +13,41 @@ namespace cm {
 
 void TrackedSession::debugPrint(const std::string& uid) {
   fnord::iputs(
-      ">> session uid=$0 last_access=$1",
+      ">> session uid=$0 last_seen=$1",
       uid,
-      fnord::DateTime(last_access_unix_micros));
+      fnord::DateTime(last_seen_unix_micros));
 
   fnord::iputs(" > queries: ", 1);
   for (const auto& pair : queries) {
     const auto& query = pair.second;
     fnord::iputs(
-        "    > query time=$0 flushed=$2\n        > attrs: $1",
+        "    > query time=$0 flushed=$2 eid=$3\n        > attrs: $1",
         query.time,
         query.attrs,
-        query.flushed);
+        query.flushed,
+        pair.first);
 
     for (const auto& item : query.items) {
       fnord::iputs(
-          "        > qitem: id=$0 clicked=$1 position=$2",
+          "        > qitem: id=$0 clicked=$1 position=$2 variant=$3",
           item.item,
           item.clicked,
-          item.position);
+          item.position,
+          item.variant);
     }
   }
 
-/*
-struct TrackedQueryItem {
-  ItemRef item;
-  bool clicked;
-  int position;
-  int variant;
-};
+  fnord::iputs(" > item visits: ", 1);
+  for (const auto& pair : item_visits) {
+    const auto& view = pair.second;
 
-struct TrackedQuery {
-  fnord::DateTime time;
-  std::vector<TrackedQueryItem> items;
-  std::vector<std::string> attrs;
-  bool flushed;
-};
-*/
-  fnord::iputs(" > item views: ", 1);
+    fnord::iputs(
+        "    > visit: item=$0 time=$1 eid=$3 attrs=$2",
+        view.item,
+        view.time,
+        view.attrs,
+        pair.first);
+  }
 
   fnord::iputs("", 1);
 }

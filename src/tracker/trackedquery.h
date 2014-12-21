@@ -35,6 +35,7 @@ struct TrackedQuery {
 struct TrackedItemVisit {
   fnord::DateTime time;
   ItemRef item;
+  std::vector<std::string> attrs;
 };
 
 }

@@ -24,7 +24,7 @@ namespace cm {
 struct TrackedSession {
   std::unordered_map<std::string, TrackedQuery> queries;
   std::unordered_map<std::string, TrackedItemVisit> item_visits;
-  uint64_t last_access_unix_micros;
+  uint64_t last_seen_unix_micros;
   std::mutex mutex;
   void debugPrint(const std::string& uid);
 };

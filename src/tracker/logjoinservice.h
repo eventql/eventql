@@ -30,23 +30,24 @@ public:
       CustomerNamespace* customer,
       const std::string& log_line);
 
-  void insertQuery(
+protected:
+
+  void insertLogline(
       CustomerNamespace* customer,
       const fnord::DateTime& time,
+      const std::string& log_line);
+
+  void insertQuery(
+      CustomerNamespace* customer,
       const std::string& uid,
       const std::string& eid,
-      const std::vector<ItemRef>& items,
-      std::vector<std::string> attrs);
+      const TrackedQuery& query);
 
   void insertItemVisit(
       CustomerNamespace* customer,
-      const fnord::DateTime& time,
       const std::string& uid,
       const std::string& eid,
-      const ItemRef& item,
-      std::vector<std::string> attrs);
-
-protected:
+      const TrackedItemVisit& visit);
 
   TrackedSession* findOrCreateSession(
       CustomerNamespace* customer,
