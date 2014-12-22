@@ -11,6 +11,35 @@
 
 namespace cm {
 
+void TrackedSession::update() {
+  // FIXPAUL slow slow slow
+  for (const auto& visit_pair : item_visits) {
+    const auto& visit = visit_pair.second;
+
+    for (auto& query_pair : queries) {
+      auto& query = query_pair.second;
+      if (query.flushed) {
+        continue;
+      }
+
+      auto tdiff =
+          static_cast<uint64_t>(visit.time) - static_cast<uint64_t>(query.time);
+      constexpr auto max_delay =
+          kMaxQueryClickDelaySeconds * fnord::DateTime::kMicrosPerSecond;
+      if (query.time > visit.time || tdiff > max_delay) {
+        continue;
+      }
+
+      for (auto& qitem : query.items) {
+        if (visit.item == qitem.item) {
+          qitem.clicked = true;
+          break;
+        }
+      }
+    }
+  }
+}
+
 void TrackedSession::debugPrint(const std::string& uid) {
   fnord::iputs(
       ">> session uid=$0 last_seen=$1",

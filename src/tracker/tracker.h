@@ -21,10 +21,13 @@ namespace cm {
 class CustomerNamespace;
 class LogJoinService;
 
+
 class Tracker : public fnord::http::HTTPService {
 public:
   static const char kUIDCookieKey[];
   static const int kUIDCookieLifetimeDays;
+
+
 
   explicit Tracker(LogJoinService* logjoin_service);
 

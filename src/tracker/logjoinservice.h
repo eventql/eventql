@@ -24,6 +24,7 @@ class CustomerNamespace;
 
 class LogJoinService {
 public:
+
   LogJoinService();
 
   void insertLogline(

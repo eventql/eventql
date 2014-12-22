@@ -180,6 +180,7 @@ void LogJoinService::insertItemVisit(
     session->last_seen_unix_micros = visit.time.unixMicros();
   }
 
+  session->update();
   session->debugPrint(uid);
 }
 
