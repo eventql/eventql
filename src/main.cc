@@ -27,7 +27,7 @@ int main() {
   ehandler.installGlobalHandlers();
 
   fnord::log::LogOutputStream logger(fnord::io::OutputStream::getStderr());
-  fnord::log::Logger::get()->setMinimumLogLevel(fnord::log::kInfo);
+  fnord::log::Logger::get()->setMinimumLogLevel(fnord::log::kDebug);
   fnord::log::Logger::get()->listen(&logger);
 
   fnord::thread::ThreadPool thread_pool;

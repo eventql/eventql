@@ -14,6 +14,7 @@
 #include "fnord/net/http/httpresponse.h"
 #include "fnord/net/http/status.h"
 #include "fnord/base/random.h"
+#include "fnord/logging/logger.h"
 #include "customernamespace.h"
 #include "tracker/logjoinservice.h"
 
@@ -45,7 +46,7 @@ const unsigned char pixel_gif[42] = {
 };
 
 bool Tracker::isReservedParam(const std::string p) {
-  return p != "c" && p != "e" && p != "i" && p != "is";
+  return p == "c" || p == "e" || p == "i" || p == "is";
 }
 
 void Tracker::handleHTTPRequest(
@@ -84,7 +85,15 @@ void Tracker::handleHTTPRequest(
   }
 
   if (uri.path() == "/t.gif") {
-    logjoin_service_->insertLogline(ns, uri.query());
+    try {
+      logjoin_service_->insertLogline(ns, uri.query());
+    } catch (const std::exception& e) {
+      auto msg = fnord::StringUtil::format(
+          "invalid tracking pixel url: $0",
+          uri.query());
+
+      fnord::log::Logger::get()->logException(fnord::log::kDebug, msg, e);
+    }
 
     response->setStatus(fnord::http::kStatusOK);
     response->addHeader("Content-Type", "image/gif");

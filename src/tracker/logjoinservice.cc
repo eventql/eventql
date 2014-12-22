@@ -6,6 +6,7 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
+#include <fnord/base/exception.h>
 #include <fnord/base/inspect.h>
 #include <fnord/base/stringutil.h>
 #include <fnord/base/uri.h>
@@ -41,24 +42,24 @@ void LogJoinService::insertLogline(
   /* extract uid (userid) and eid (eventid) */
   std::string c;
   if (!fnord::URI::getParam(params, "c", &c)) {
-    return;
+    RAISE(kParseError, "c param is missing");
   }
 
   auto c_s = c.find("~");
   if (c_s == std::string::npos) {
-    return;
+    RAISE(kParseError, "c param is invalid");
   }
 
   std::string uid = c.substr(0, c_s);
   std::string eid = c.substr(c_s + 1, c.length() - c_s - 1);
   if (uid.length() == 0 || eid.length() == 0) {
-    return;
+    RAISE(kParseError, "c param is invalid");
   }
 
   /* extract the event type */
   std::string evtype;
   if (!fnord::URI::getParam(params, "e", &evtype) || evtype.length() != 1) {
-    return;
+    RAISE(kParseError, "e param is missing");
   }
 
   /* process event */
@@ -82,6 +83,9 @@ void LogJoinService::insertLogline(
       insertItemVisit(customer, uid, eid, visit);
       break;
     }
+
+    default:
+      RAISE(kParseError, "invalid e param");
 
   }
 }

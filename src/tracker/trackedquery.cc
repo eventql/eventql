@@ -8,6 +8,7 @@
  */
 #include "tracker.h"
 #include "trackedquery.h"
+#include <fnord/base/exception.h>
 #include <fnord/base/stringutil.h>
 
 namespace cm {
@@ -19,7 +20,7 @@ void TrackedQuery::fromParams(const fnord::URI::ParamList& params) {
     for (const auto& item_str : fnord::StringUtil::split(items_str, ",")) {
       auto item_str_parts = fnord::StringUtil::split(item_str, "~");
       if (item_str_parts.size() < 2) {
-        return;
+        RAISE(kParseError, "invalid is param");
       }
 
       TrackedQueryItem qitem;
@@ -85,12 +86,12 @@ void TrackedQuery::merge(const TrackedQuery& other) {
 void TrackedItemVisit::fromParams(const fnord::URI::ParamList& params) {
   std::string item_id_str;
   if (!fnord::URI::getParam(params, "i", &item_id_str)) {
-    return;
+    RAISE(kParseError, "invalid i param");
   }
 
   auto item_id_parts = fnord::StringUtil::split(item_id_str, "~");
   if (item_id_parts.size() < 2) {
-    return;
+    RAISE(kParseError, "invalid i param");
   }
 
   item.set_id = item_id_parts[0];
