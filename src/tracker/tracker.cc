@@ -33,9 +33,6 @@
 
 namespace cm {
 
-const char Tracker::kUIDCookieKey[] = "_u";
-const int Tracker::kUIDCookieLifetimeDays = 365 * 5;
-
 Tracker::Tracker(
     LogJoinService* logjoin_service) :
     logjoin_service_(logjoin_service) {}
@@ -47,13 +44,17 @@ const unsigned char pixel_gif[42] = {
   0x00, 0x02, 0x01, 0x44, 0x00, 0x3b
 };
 
+bool Tracker::isReservedParam(const std::string p) {
+  return p != "c" && p != "e" && p != "i" && p != "is";
+}
+
 void Tracker::handleHTTPRequest(
     fnord::http::HTTPRequest* request,
     fnord::http::HTTPResponse* response) {
   /* find namespace */
   CustomerNamespace* ns = nullptr;
   const auto hostname = request->getHeader("host");
-  fnord::iputs("host: $0", hostname);
+
   auto ns_iter = vhosts_.find(hostname);
   if (ns_iter == vhosts_.end()) {
     response->setStatus(fnord::http::kStatusNotFound);
@@ -64,7 +65,6 @@ void Tracker::handleHTTPRequest(
   }
 
   fnord::URI uri(request->uri());
-  fnord::iputs("uid: namespace $0, req $1", ns, request->uri());
 
   if (uri.path() == "/t.js") {
     response->setStatus(fnord::http::kStatusOK);

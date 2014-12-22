@@ -6,9 +6,56 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
+#include "tracker.h"
 #include "trackedquery.h"
+#include <fnord/base/stringutil.h>
 
 namespace cm {
+
+void TrackedQuery::fromParams(const fnord::URI::ParamList& params) {
+
+  std::string items_str;
+  if (fnord::URI::getParam(params, "is", &items_str)) {
+    for (const auto& item_str : fnord::StringUtil::split(items_str, ",")) {
+      auto item_str_parts = fnord::StringUtil::split(item_str, "~");
+      if (item_str_parts.size() < 2) {
+        return;
+      }
+
+      TrackedQueryItem qitem;
+      qitem.item.set_id = item_str_parts[0];
+      qitem.item.item_id = item_str_parts[1];
+      qitem.clicked = false;
+      qitem.position = -1;
+      qitem.variant = -1;
+
+      for (int i = 2; i < item_str_parts.size(); ++i) {
+        const auto& iattr = item_str_parts[i];
+        if (iattr.length() < 1) {
+          continue;
+        }
+
+        switch (iattr[0]) {
+          case 'p':
+            qitem.position = std::stoi(iattr.substr(1, iattr.length() - 1));
+            break;
+          case 'v':
+            qitem.variant = std::stoi(iattr.substr(1, iattr.length() - 1));
+            break;
+        }
+      }
+
+      items.emplace_back(qitem);
+    }
+  }
+
+  /* extract all non-reserved params as event attributes */
+  for (const auto& p : params) {
+    if (!Tracker::isReservedParam(p.first)) {
+      attrs.emplace_back(fnord::StringUtil::format("$0:$1", p.first, p.second));
+    }
+  }
+}
 
 void TrackedQuery::merge(const TrackedQuery& other) {
   for (const auto& attr : other.attrs) {
@@ -31,6 +78,28 @@ void TrackedQuery::merge(const TrackedQuery& other) {
 
     if (found == false) {
       items.emplace_back(other_item);
+    }
+  }
+}
+
+void TrackedItemVisit::fromParams(const fnord::URI::ParamList& params) {
+  std::string item_id_str;
+  if (!fnord::URI::getParam(params, "i", &item_id_str)) {
+    return;
+  }
+
+  auto item_id_parts = fnord::StringUtil::split(item_id_str, "~");
+  if (item_id_parts.size() < 2) {
+    return;
+  }
+
+  item.set_id = item_id_parts[0];
+  item.item_id = item_id_parts[1];
+
+  /* extract all non-reserved params as event attributes */
+  for (const auto& p : params) {
+    if (!Tracker::isReservedParam(p.first)) {
+      attrs.emplace_back(fnord::StringUtil::format("$0:$1", p.first, p.second));
     }
   }
 }

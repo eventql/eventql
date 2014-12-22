@@ -37,7 +37,7 @@ void TrackedSession::update() {
   }
 }
 
-void TrackedSession::debugPrint(const std::string& uid) {
+void TrackedSession::debugPrint(const std::string& uid) const {
   fnord::iputs(
       ">> session uid=$0 last_seen=$1",
       uid,

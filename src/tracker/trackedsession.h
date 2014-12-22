@@ -51,7 +51,7 @@ struct TrackedSession {
    */
   void update();
 
-  void debugPrint(const std::string& uid);
+  void debugPrint(const std::string& uid) const;
 
 };
 

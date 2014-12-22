@@ -16,7 +16,6 @@ void LogJoinOutput::recordJoinedQuery(
     const std::string& uid,
     const std::string& eid,
     const TrackedQuery& query) {
-  fnord::iputs("joined query...", 1);
 }
 
 void LogJoinOutput::recordJoinedItemVisit(
@@ -24,14 +23,13 @@ void LogJoinOutput::recordJoinedItemVisit(
     const std::string& uid,
     const std::string& eid,
     const TrackedItemVisit& visit) {
-  fnord::iputs("joined item visit...", 1);
 }
 
 void LogJoinOutput::recordJoinedSession(
     CustomerNamespace* customer,
     const std::string& uid,
     const TrackedSession& session) {
-  fnord::iputs("joined session...", 1);
+  session.debugPrint(uid);
 }
 
 } // namespace cm

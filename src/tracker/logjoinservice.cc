@@ -16,20 +16,6 @@ namespace cm {
 
 LogJoinService::LogJoinService(LogJoinOutput output) : out_(output) {}
 
-void onFlushedQuery(
-    const std::string& uid,
-    const std::string& eid,
-    const TrackedQuery& query);
-
-void onFlushedItemVisit(
-    const std::string& uid,
-    const std::string& eid,
-    const TrackedItemVisit& visit);
-
-void onFlushedSession(
-    const std::string& uid,
-    const TrackedSession& session);
-
 void LogJoinService::insertLogline(
     CustomerNamespace* customer,
     const std::string& log_line) {
@@ -44,6 +30,7 @@ void LogJoinService::insertLogline(
   fnord::URI::parseQueryString(log_line, &params);
 
   flush(fnord::DateTime());
+
   /* extract uid (userid) and eid (eventid) */
   std::string c;
   if (!fnord::URI::getParam(params, "c", &c)) {
@@ -67,87 +54,25 @@ void LogJoinService::insertLogline(
     return;
   }
 
-  /* extract all non-reserved params as event attributes */
-  std::vector<std::string> attrs;
-  for (const auto& p : params) {
-    if (p.first != "c" && p.first != "e" && p.first != "i" && p.first != "is") {
-      attrs.emplace_back(fnord::StringUtil::format("$0:$1", p.first, p.second));
-    }
-  }
-
   /* process event */
   switch (evtype[0]) {
 
     /* query event */
     case 'q': {
-      TrackedQuery q;
-      q.time = time;
-      q.attrs = attrs;
-      q.flushed = false;
-
-      std::string items_str;
-      if (fnord::URI::getParam(params, "is", &items_str)) {
-        for (const auto& item_str : fnord::StringUtil::split(items_str, ",")) {
-          auto item_str_parts = fnord::StringUtil::split(item_str, "~");
-          if (item_str_parts.size() < 2) {
-            return;
-          }
-
-          TrackedQueryItem qitem;
-          qitem.item.set_id = item_str_parts[0];
-          qitem.item.item_id = item_str_parts[1];
-          qitem.clicked = false;
-          qitem.position = -1;
-          qitem.variant = -1;
-
-          for (int i = 2; i < item_str_parts.size(); ++i) {
-            const auto& iattr = item_str_parts[i];
-            if (iattr.length() < 1) {
-              continue;
-            }
-
-            switch (iattr[0]) {
-              case 'p':
-                qitem.position = std::stoi(iattr.substr(1, iattr.length() - 1));
-                break;
-              case 'v':
-                qitem.variant = std::stoi(iattr.substr(1, iattr.length() - 1));
-                break;
-            }
-          }
-
-          q.items.emplace_back(qitem);
-        }
-      }
-
-      insertQuery(customer, uid, eid, q);
+      TrackedQuery query;
+      query.time = time;
+      query.flushed = false;
+      query.fromParams(params);
+      insertQuery(customer, uid, eid, query);
       break;
     }
 
     /* item visit event */
     case 'v': {
-      std::string item_id_str;
-      if (!fnord::URI::getParam(params, "i", &item_id_str)) {
-        return;
-      }
-
-      auto item_id_parts = fnord::StringUtil::split(item_id_str, "~");
-      if (item_id_parts.size() < 2) {
-        return;
-      }
-
       TrackedItemVisit visit;
       visit.time = time;
-      visit.item.set_id = item_id_parts[0];
-      visit.item.item_id = item_id_parts[1];
-      visit.attrs = attrs;
-
-      insertItemVisit(
-          customer,
-          uid,
-          eid,
-          visit);
-
+      visit.fromParams(params);
+      insertItemVisit(customer, uid, eid, visit);
       break;
     }
 
@@ -215,9 +140,6 @@ bool LogJoinService::maybeFlushSession(
   bool do_flush =
       tdiff > kSessionIdleTimeoutSeconds * fnord::DateTime::kMicrosPerSecond;
   bool do_update = do_flush;
-
-  fnord::iputs("maybe flush, $0 <> $1 == $2", tdiff, kSessionIdleTimeoutSeconds * fnord::DateTime::kMicrosPerSecond, do_flush);
-  session->debugPrint(uid);
 
   std::vector<std::pair<std::string, TrackedQuery*>> flushed;
   for (auto& query_pair : session->queries) {

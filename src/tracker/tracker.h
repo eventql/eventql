@@ -24,12 +24,9 @@ class LogJoinService;
 
 class Tracker : public fnord::http::HTTPService {
 public:
-  static const char kUIDCookieKey[];
-  static const int kUIDCookieLifetimeDays;
-
-
-
   explicit Tracker(LogJoinService* logjoin_service);
+
+  static bool isReservedParam(const std::string param);
 
   void handleHTTPRequest(
       fnord::http::HTTPRequest* request,

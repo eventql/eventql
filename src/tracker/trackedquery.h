@@ -15,6 +15,7 @@
 #include <unordered_map>
 #include <vector>
 #include <fnord/base/datetime.h>
+#include <fnord/base/uri.h>
 #include "itemref.h"
 
 namespace cm {
@@ -33,7 +34,7 @@ struct TrackedQuery {
   bool flushed;
 
   void merge(const TrackedQuery& other);
-
+  void fromParams(const fnord::URI::ParamList& params);
 };
 
 struct TrackedItemVisit {
@@ -42,7 +43,7 @@ struct TrackedItemVisit {
   std::vector<std::string> attrs;
 
   void merge(const TrackedItemVisit& other);
-
+  void fromParams(const fnord::URI::ParamList& params);
 };
 
 }
