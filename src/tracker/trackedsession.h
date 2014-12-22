@@ -20,22 +20,24 @@
 #include "trackedquery.h"
 
 namespace cm {
+class CustomerNamespace;
 
 /**
  * The max time after which a click on a query result is considered a click
  */
-static const uint64_t kMaxQueryClickDelaySeconds = 60 * 5;
+static const uint64_t kMaxQueryClickDelaySeconds = 6 * 5;
 
 /**
  * Flush/expire a session after N seconds of inactivity
  */
-static const uint64_t kSessionIdleTimeoutSeconds = 60 * 60;
+static const uint64_t kSessionIdleTimeoutSeconds = 6 * 10;
 
 /**
  * A tracked session. Make sure to hold the mutex when updating or accessing
  * any of the fields.
  */
 struct TrackedSession {
+  CustomerNamespace* customer;
   std::unordered_map<std::string, TrackedQuery> queries;
   std::unordered_map<std::string, TrackedItemVisit> item_visits;
   uint64_t last_seen_unix_micros;

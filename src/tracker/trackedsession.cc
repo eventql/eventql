@@ -18,9 +18,6 @@ void TrackedSession::update() {
 
     for (auto& query_pair : queries) {
       auto& query = query_pair.second;
-      if (query.flushed) {
-        continue;
-      }
 
       auto tdiff =
           static_cast<uint64_t>(visit.time) - static_cast<uint64_t>(query.time);
