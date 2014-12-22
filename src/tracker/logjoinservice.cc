@@ -14,7 +14,12 @@
 
 namespace cm {
 
-LogJoinService::LogJoinService(LogJoinOutput output) : out_(output) {}
+LogJoinService::LogJoinService(
+    fnord::thread::TaskScheduler* scheduler,
+    LogJoinOutput output) :
+    scheduler_(scheduler),
+    out_(output),
+    stream_clock_(0) {}
 
 void LogJoinService::insertLogline(
     CustomerNamespace* customer,
@@ -26,10 +31,12 @@ void LogJoinService::insertLogline(
     CustomerNamespace* customer,
     const fnord::DateTime& time,
     const std::string& log_line) {
+  auto stream_time = streamTime(time);
+
   fnord::URI::ParamList params;
   fnord::URI::parseQueryString(log_line, &params);
 
-  flush(fnord::DateTime());
+  flush(stream_time);
 
   /* extract uid (userid) and eid (eventid) */
   std::string c;
@@ -126,17 +133,14 @@ void LogJoinService::insertItemVisit(
 bool LogJoinService::maybeFlushSession(
     const std::string uid,
     TrackedSession* session,
-    const fnord::DateTime& now) {
-
-  uint64_t tdiff;
-  if (static_cast<uint64_t>(now) < session->last_seen_unix_micros) {
-    tdiff = 0;
-  } else {
-    tdiff =
-        static_cast<uint64_t>(now) -
-        static_cast<uint64_t>(session->last_seen_unix_micros);
+    const fnord::DateTime& stream_time) {
+  if (static_cast<uint64_t>(stream_time) < session->last_seen_unix_micros) {
+    return false;
   }
 
+  auto tdiff =
+      static_cast<uint64_t>(stream_time) -
+      static_cast<uint64_t>(session->last_seen_unix_micros);
   bool do_flush =
       tdiff > kSessionIdleTimeoutSeconds * fnord::DateTime::kMicrosPerSecond;
   bool do_update = do_flush;
@@ -147,7 +151,7 @@ bool LogJoinService::maybeFlushSession(
     auto& query = query_pair.second;
 
     if (!query.flushed && (
-            static_cast<uint64_t>(now) -
+            static_cast<uint64_t>(stream_time) -
             static_cast<uint64_t>(query.time)) >
             kMaxQueryClickDelaySeconds * fnord::DateTime::kMicrosPerSecond) {
       query.flushed = true;
@@ -175,15 +179,16 @@ bool LogJoinService::maybeFlushSession(
   return do_flush;
 }
 
-void LogJoinService::flush(const fnord::DateTime& now) {
+void LogJoinService::flush(const fnord::DateTime& stream_time) {
   std::lock_guard<std::mutex> l1(sessions_mutex_);
+  fnord::iputs("stream_time=$0 active_sessions=$1", stream_time, sessions_.size());
 
   for (auto iter = sessions_.begin(); iter != sessions_.end(); ++iter) {
     const auto& uid = iter->first;
     const auto& session = iter->second;
 
     std::lock_guard<std::mutex> l2(session->mutex);
-    if (maybeFlushSession(uid, session.get(), now)) {
+    if (maybeFlushSession(uid, session.get(), stream_time)) {
       sessions_.erase(iter);
     }
   }
@@ -208,6 +213,16 @@ TrackedSession* LogJoinService::findOrCreateSession(
 
   session->mutex.lock();
   return session;
+}
+
+fnord::DateTime LogJoinService::streamTime(const fnord::DateTime& time) {
+  std::lock_guard<std::mutex> l(stream_clock_mutex_);
+
+  if (time > stream_clock_) {
+    stream_clock_ = time;
+  }
+
+  return stream_clock_;
 }
 
 } // namespace cm

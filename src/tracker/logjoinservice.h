@@ -15,6 +15,7 @@
 #include <unordered_map>
 #include <vector>
 #include <queue>
+#include <fnord/thread/taskscheduler.h>
 #include "itemref.h"
 #include "trackedsession.h"
 #include "trackedquery.h"
@@ -26,7 +27,9 @@ class CustomerNamespace;
 class LogJoinService {
 public:
 
-  LogJoinService(LogJoinOutput output = LogJoinOutput());
+  LogJoinService(
+      fnord::thread::TaskScheduler* scheduler,
+      LogJoinOutput output = LogJoinOutput());
 
   void insertLogline(
       CustomerNamespace* customer,
@@ -68,10 +71,11 @@ protected:
   bool maybeFlushSession(
       const std::string uid,
       TrackedSession* session,
-      const fnord::DateTime& now);
+      const fnord::DateTime& stream_time);
 
+  void flush(const fnord::DateTime& stream_time);
 
-  void flush(const fnord::DateTime& now);
+  fnord::DateTime streamTime(const fnord::DateTime& time);
 
   /**
    * Flush the session identified by the provided uid
@@ -80,9 +84,12 @@ protected:
   //    CustomerNamespace* customer,
   //    const std::string& uid);
 
+  fnord::thread::TaskScheduler* scheduler_;
   LogJoinOutput out_;
   std::unordered_map<std::string, std::unique_ptr<TrackedSession>> sessions_;
   std::mutex sessions_mutex_;
+  fnord::DateTime stream_clock_;
+  std::mutex stream_clock_mutex_;
 };
 
 } // namespace cm

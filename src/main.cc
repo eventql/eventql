@@ -30,16 +30,16 @@ int main() {
   fnord::log::Logger::get()->setMinimumLogLevel(fnord::log::kInfo);
   fnord::log::Logger::get()->listen(&logger);
 
+  fnord::thread::ThreadPool thread_pool;
+  fnord::thread::EventLoop event_loop;
+
   auto dwn_ns = new cm::CustomerNamespace();
   dwn_ns->addVHost("dwnapps.net");
   dwn_ns->loadTrackingJS("config/c_dwn/track.js");
 
-  cm::LogJoinService logjoin_service;
+  cm::LogJoinService logjoin_service(&thread_pool);
   cm::Tracker tracker(&logjoin_service);
   tracker.addCustomer(dwn_ns);
-
-  fnord::thread::ThreadPool thread_pool;
-  fnord::thread::EventLoop event_loop;
 
   fnord::http::HTTPRouter http_router;
   http_router.addRouteByPrefixMatch("/", &tracker);
