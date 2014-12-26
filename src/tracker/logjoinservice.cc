@@ -17,10 +17,11 @@ namespace cm {
 
 LogJoinService::LogJoinService(
     fnord::thread::TaskScheduler* scheduler,
-    LogJoinOutput output) :
+    fnord::comm::RPCServiceMap* service_map) :
     scheduler_(scheduler),
-    out_(output),
-    stream_clock_(0) {}
+    stream_clock_(0) {
+  logstream_channel_ = service_map->getChannel("cm.tracker.logstream_out");
+}
 
 void LogJoinService::insertLogline(
     CustomerNamespace* customer,
@@ -131,7 +132,7 @@ void LogJoinService::insertItemVisit(
     }
   }
 
-  out_.recordJoinedItemVisit(customer, uid, eid, visit);
+  recordJoinedItemVisit(customer, uid, eid, visit);
 }
 
 bool LogJoinService::maybeFlushSession(
@@ -169,7 +170,7 @@ bool LogJoinService::maybeFlushSession(
   }
 
   for (const auto flushed_query : flushed) {
-    out_.recordJoinedQuery(
+    recordJoinedQuery(
         session->customer,
         uid,
         flushed_query.first,
@@ -177,7 +178,7 @@ bool LogJoinService::maybeFlushSession(
   }
 
   if (do_flush) {
-    out_.recordJoinedSession(session->customer, uid, *session);
+    recordJoinedSession(session->customer, uid, *session);
   }
 
   return do_flush;
@@ -227,6 +228,26 @@ fnord::DateTime LogJoinService::streamTime(const fnord::DateTime& time) {
   }
 
   return stream_clock_;
+}
+
+void LogJoinService::recordJoinedQuery(
+    CustomerNamespace* customer,
+    const std::string& uid,
+    const std::string& eid,
+    const TrackedQuery& query) {
+}
+
+void LogJoinService::recordJoinedItemVisit(
+    CustomerNamespace* customer,
+    const std::string& uid,
+    const std::string& eid,
+    const TrackedItemVisit& visit) {
+}
+
+void LogJoinService::recordJoinedSession(
+    CustomerNamespace* customer,
+    const std::string& uid,
+    const TrackedSession& session) {
 }
 
 } // namespace cm

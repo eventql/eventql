@@ -37,12 +37,17 @@ int main() {
   dwn_ns->addVHost("dwnapps.net");
   dwn_ns->loadTrackingJS("config/c_dwn/track.js");
 
-  cm::LogJoinService logjoin_service(&thread_pool);
+  //LogStreamService logstream_service;
+
+  fnord::comm::RPCServiceMap service_map;
+
+  cm::LogJoinService logjoin_service(&thread_pool, &service_map);
   cm::Tracker tracker(&logjoin_service);
   tracker.addCustomer(dwn_ns);
 
   fnord::http::HTTPRouter http_router;
-  http_router.addRouteByPrefixMatch("/", &tracker);
+  //http_router.addRouteByPrefixMatch("/rpc", &tracker);
+  http_router.addRouteByPrefixMatch("/t", &tracker);
 
   fnord::http::HTTPServer http_server(&http_router, &event_loop);
   http_server.listen(8080);

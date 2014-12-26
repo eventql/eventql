@@ -15,11 +15,12 @@
 #include <unordered_map>
 #include <vector>
 #include <queue>
-#include <fnord/thread/taskscheduler.h>
+#include "fnord/comm/rpc.h"
+#include "fnord/comm/rpcservicemap.h"
+#include "fnord/thread/taskscheduler.h"
 #include "itemref.h"
 #include "trackedsession.h"
 #include "trackedquery.h"
-#include "logjoinoutput.h"
 
 namespace cm {
 class CustomerNamespace;
@@ -29,7 +30,7 @@ public:
 
   LogJoinService(
       fnord::thread::TaskScheduler* scheduler,
-      LogJoinOutput output = LogJoinOutput());
+      fnord::comm::RPCServiceMap* service_map);
 
   void insertLogline(
       CustomerNamespace* customer,
@@ -41,6 +42,23 @@ public:
       const std::string& log_line);
 
 protected:
+
+  void recordJoinedQuery(
+      CustomerNamespace* customer,
+      const std::string& uid,
+      const std::string& eid,
+      const TrackedQuery& query);
+
+  void recordJoinedItemVisit(
+      CustomerNamespace* customer,
+      const std::string& uid,
+      const std::string& eid,
+      const TrackedItemVisit& visit);
+
+  void recordJoinedSession(
+      CustomerNamespace* customer,
+      const std::string& uid,
+      const TrackedSession& session);
 
   void insertQuery(
       CustomerNamespace* customer,
@@ -85,7 +103,7 @@ protected:
   //    const std::string& uid);
 
   fnord::thread::TaskScheduler* scheduler_;
-  LogJoinOutput out_;
+  fnord::comm::RPCChannel* logstream_channel_;
   std::unordered_map<std::string, std::unique_ptr<TrackedSession>> sessions_;
   std::mutex sessions_mutex_;
   fnord::DateTime stream_clock_;
