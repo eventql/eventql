@@ -25,8 +25,10 @@ add_executable(cmapp
     $<TARGET_OBJECTS:fnord-io>
     $<TARGET_OBJECTS:fnord-json>
     $<TARGET_OBJECTS:fnord-system>
+    $<TARGET_OBJECTS:fnord-sstable>
     $<TARGET_OBJECTS:fnord-thread>
     $<TARGET_OBJECTS:fnord-logstream-service>
+    $<TARGET_OBJECTS:fnord-util>
     src/main.cc
     src/itemref.cc
     src/customernamespace.cc
