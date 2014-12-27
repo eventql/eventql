@@ -45,18 +45,14 @@ struct TrackedItemVisit {
 
   void merge(const TrackedItemVisit& other);
   void fromParams(const fnord::URI::ParamList& params);
-};
-}
 
-template<> struct fnord::reflect::is_reflected<cm::TrackedItemVisit> {
-  static const bool value = true;
+  template <typename T>
+  static void reflect(T* meta) {
+    meta->prop(&cm::TrackedItemVisit::time, 1, "time", false);
+    meta->prop(&cm::TrackedItemVisit::item, 2, "item", false);
+    meta->prop(&cm::TrackedItemVisit::attrs, 3, "attrs", false);
+  };
 };
 
-template <> template <class T>
-void fnord::reflect::MetaClass<
-    cm::TrackedItemVisit>::reflect(T* t) {
-  t->prop(&cm::TrackedItemVisit::time, 1, "time", false);
-  t->prop(&cm::TrackedItemVisit::item, 2, "item", false);
-  t->prop(&cm::TrackedItemVisit::attrs, 3, "attrs", false);
 }
 #endif
