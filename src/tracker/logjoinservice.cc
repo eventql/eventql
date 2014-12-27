@@ -264,13 +264,10 @@ void LogJoinService::recordJoinedItemVisit(
       "cm.tracker.joined_item_visits~$0",
       customer->key());
 
-  auto fu = fnord::json::toJSON(visit);
-  fnord::iputs("res: $0", fu);
-
   auto rpc = fnord::comm::mkRPC(
       &LogStreamService::append,
       log_key,
-      std::string("bar"));
+      fnord::json::toJSONString(visit));
 
   rpc.call(logstream_channel_);
   rpc.wait();

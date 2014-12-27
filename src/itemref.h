@@ -26,16 +26,11 @@ struct ItemRef {
 
   template <typename T>
   static void reflect(T* meta) {
-    meta->prop(&cm::ItemRef::set_id, 1, "set_id", false);
-    meta->prop(&cm::ItemRef::item_id, 2, "item_id", false);
-    meta->prop(&cm::ItemRef::position, 3, "position", false);
+    meta->prop(&ItemRef::set_id, 1, "set_id", false);
+    meta->prop(&ItemRef::item_id, 2, "item_id", false);
+    meta->prop(&ItemRef::position, 3, "position", false);
   }
 };
 
 } // namespace cm
-
-template<> struct fnord::reflect::is_reflected<cm::ItemRef> {
-  static const bool value = true;
-};
-
 #endif
