@@ -48,6 +48,10 @@ struct TrackedItemVisit {
 };
 }
 
+template<> struct fnord::reflect::is_reflected<cm::TrackedItemVisit> {
+  static const bool value = true;
+};
+
 template <> template <class T>
 void fnord::reflect::MetaClass<
     cm::TrackedItemVisit>::reflect(T* t) {

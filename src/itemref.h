@@ -24,20 +24,18 @@ struct ItemRef {
 
   bool operator==(const ItemRef& other) const;
 
+  template <typename T>
+  static void reflect(T* meta) {
+    meta->prop(&cm::ItemRef::set_id, 1, "set_id", false);
+    meta->prop(&cm::ItemRef::item_id, 2, "item_id", false);
+    meta->prop(&cm::ItemRef::position, 3, "position", false);
+  }
 };
 
 } // namespace cm
 
-template<> struct fnord::reflect::is_serializable<cm::ItemRef> {
+template<> struct fnord::reflect::is_reflected<cm::ItemRef> {
   static const bool value = true;
 };
-
-template <> template <class T>
-void fnord::reflect::MetaClass<
-    cm::ItemRef>::reflect(T* t) {
-  t->prop(&cm::ItemRef::set_id, 1, "set_id", false);
-  t->prop(&cm::ItemRef::item_id, 2, "item_id", false);
-  t->prop(&cm::ItemRef::position, 3, "position", false);
-}
 
 #endif

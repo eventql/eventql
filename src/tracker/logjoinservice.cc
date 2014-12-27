@@ -264,7 +264,8 @@ void LogJoinService::recordJoinedItemVisit(
       "cm.tracker.joined_item_visits~$0",
       customer->key());
 
-  //fnord::json::JSONOutputProxy proxy(visit);
+  auto fu = fnord::json::toJSON(visit);
+  fnord::iputs("res: $0", fu);
 
   auto rpc = fnord::comm::mkRPC(
       &LogStreamService::append,
