@@ -34,16 +34,16 @@
 
 namespace cm {
 
-Tracker::Tracker(
-    LogJoinService* logjoin_service) :
-    logjoin_service_(logjoin_service) {}
-
 const unsigned char pixel_gif[42] = {
   0x47, 0x49, 0x46, 0x38, 0x39, 0x61, 0x01, 0x00, 0x01, 0x00, 0x80, 0x00,
   0x00, 0x00, 0x00, 0x00, 0xff, 0xff, 0xff, 0x21, 0xf9, 0x04, 0x01, 0x00,
   0x00, 0x00, 0x00, 0x2c, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x01, 0x00,
   0x00, 0x02, 0x01, 0x44, 0x00, 0x3b
 };
+
+Tracker::Tracker(
+    fnord::comm::FeedFactory* feed_factory) :
+    feed_factory_(feed_factory) {}
 
 bool Tracker::isReservedParam(const std::string p) {
   return p == "c" || p == "e" || p == "i" || p == "is";
@@ -86,7 +86,7 @@ void Tracker::handleHTTPRequest(
 
   if (uri.path() == "/t.gif") {
     try {
-      logjoin_service_->insertLogline(ns, uri.query());
+      recordLogLine(ns, uri.query());
     } catch (const std::exception& e) {
       auto msg = fnord::StringUtil::format(
           "invalid tracking pixel url: $0",
@@ -117,6 +117,31 @@ void Tracker::addCustomer(CustomerNamespace* customer) {
 
     vhosts_[vhost] = customer;
   }
+}
+
+void Tracker::recordLogLine(
+    CustomerNamespace* customer,
+    const std::string& logline) {
+  auto feed_key = fnord::StringUtil::format(
+      "cm.tracker.log~$0",
+      customer->key());
+
+  fnord::comm::Feed* feed = nullptr;
+  {
+    std::unique_lock<std::mutex> l(feeds_mutex_);
+    auto feed_iter = feeds_.find(feed_key);
+
+    if (feed_iter == feeds_.end()) {
+      auto f = feed_factory_->getFeed(feed_key);
+      feed = f.get();
+      feeds_.emplace(feed_key, std::move(f));
+    } else {
+      feed = feed_iter->second.get();
+    }
+  }
+
+  auto pos = feed->append(logline);
+  fnord::iputs("write to feed @$0 => $1", pos, logline);
 }
 
 } // namespace cm

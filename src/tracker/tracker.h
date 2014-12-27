@@ -15,16 +15,15 @@
 #include <unordered_map>
 #include <fnord/base/random.h>
 #include <fnord/base/uri.h>
+#include <fnord/comm/feed.h>
 #include <fnord/net/http/httpservice.h>
 
 namespace cm {
 class CustomerNamespace;
-class LogJoinService;
-
 
 class Tracker : public fnord::http::HTTPService {
 public:
-  explicit Tracker(LogJoinService* logjoin_service);
+  explicit Tracker(fnord::comm::FeedFactory* feed_factory);
 
   static bool isReservedParam(const std::string param);
 
@@ -35,9 +34,14 @@ public:
   void addCustomer(CustomerNamespace* customer);
 
 protected:
-  void track(CustomerNamespace* customer, const fnord::URI& uri);
 
-  LogJoinService* logjoin_service_;
+  void track(CustomerNamespace* customer, const fnord::URI& uri);
+  void recordLogLine(CustomerNamespace* customer, const std::string& logline);
+
+  fnord::comm::FeedFactory* feed_factory_;
+  std::unordered_map<std::string, std::unique_ptr<fnord::comm::Feed>> feeds_;
+  std::mutex feeds_mutex_;
+
   std::unordered_map<std::string, CustomerNamespace*> vhosts_;
   fnord::Random rnd_;
 };
