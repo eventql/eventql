@@ -12,7 +12,12 @@
 
 namespace cm {
 
-CustomerNamespace::CustomerNamespace() {
+CustomerNamespace::CustomerNamespace(
+    const std::string& key) :
+    key_(key) {}
+
+const std::string& CustomerNamespace::key() const {
+  return key_;
 }
 
 const std::vector<std::string>& CustomerNamespace::vhosts() {

@@ -21,12 +21,12 @@ add_subdirectory(src/fnord)
 add_executable(cmapp
     $<TARGET_OBJECTS:fnord-base>
     $<TARGET_OBJECTS:fnord-comm>
-    $<TARGET_OBJECTS:fnord-ping-service>
     $<TARGET_OBJECTS:fnord-http>
     $<TARGET_OBJECTS:fnord-io>
     $<TARGET_OBJECTS:fnord-json>
     $<TARGET_OBJECTS:fnord-system>
     $<TARGET_OBJECTS:fnord-thread>
+    $<TARGET_OBJECTS:fnord-logstream-service>
     src/main.cc
     src/itemref.cc
     src/customernamespace.cc

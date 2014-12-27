@@ -109,6 +109,6 @@ protected:
   fnord::DateTime stream_clock_;
   std::mutex stream_clock_mutex_;
 };
-
 } // namespace cm
+
 #endif

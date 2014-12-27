@@ -9,15 +9,20 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include "fnord/base/random.h"
+#include "fnord/comm/rpc.h"
+#include "fnord/comm/rpcchannel.h"
 #include "fnord/net/http/httprouter.h"
 #include "fnord/net/http/httpserver.h"
 #include "fnord/thread/eventloop.h"
 #include "fnord/thread/threadpool.h"
+#include "fnord/service/logstream/logstreamservice.h"
 #include "fnord/system/signalhandler.h"
 #include "fnord/logging/logoutputstream.h"
 #include "customernamespace.h"
 #include "tracker/tracker.h"
 #include "tracker/logjoinservice.h"
+
+using fnord::comm::LocalRPCChannel;
 
 int main() {
   fnord::system::SignalHandler::ignoreSIGHUP();
@@ -33,13 +38,16 @@ int main() {
   fnord::thread::ThreadPool thread_pool;
   fnord::thread::EventLoop event_loop;
 
-  auto dwn_ns = new cm::CustomerNamespace();
+  fnord::comm::RPCServiceMap service_map;
+
+  auto dwn_ns = new cm::CustomerNamespace("dawanda");
   dwn_ns->addVHost("dwnapps.net");
   dwn_ns->loadTrackingJS("config/c_dwn/track.js");
 
-  //LogStreamService logstream_service;
-
-  fnord::comm::RPCServiceMap service_map;
+  fnord::logstream_service::LogStreamService logstream_service;
+  service_map.addChannel(
+      "cm.tracker.logstream_out",
+      LocalRPCChannel::forService(&logstream_service, &thread_pool));
 
   cm::LogJoinService logjoin_service(&thread_pool, &service_map);
   cm::Tracker tracker(&logjoin_service);

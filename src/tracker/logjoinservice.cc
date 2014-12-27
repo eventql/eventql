@@ -11,7 +11,13 @@
 #include <fnord/base/stringutil.h>
 #include <fnord/base/uri.h>
 #include <fnord/base/wallclock.h>
+#include <fnord/comm/rpc.h>
+#include <fnord/json/json.h>
+#include <fnord/service/logstream/logstreamservice.h>
+#include "customernamespace.h"
 #include "logjoinservice.h"
+
+using fnord::logstream_service::LogStreamService;
 
 namespace cm {
 
@@ -235,6 +241,17 @@ void LogJoinService::recordJoinedQuery(
     const std::string& uid,
     const std::string& eid,
     const TrackedQuery& query) {
+  auto log_key = fnord::StringUtil::format(
+      "cm.tracker.joined_queries~$0",
+      customer->key());
+
+  auto rpc = fnord::comm::mkRPC(
+      &LogStreamService::append,
+      log_key,
+      std::string("bar"));
+
+  rpc.call(logstream_channel_);
+  rpc.wait();
 }
 
 void LogJoinService::recordJoinedItemVisit(
@@ -242,12 +259,37 @@ void LogJoinService::recordJoinedItemVisit(
     const std::string& uid,
     const std::string& eid,
     const TrackedItemVisit& visit) {
+  auto log_key = fnord::StringUtil::format(
+      "cm.tracker.joined_item_visits~$0",
+      customer->key());
+
+  fnord::json::JSONOutputProxy proxy;
+  fnord::reflect::MetaClass<TrackedItemVisit>::serialize(visit, &proxy);
+
+  auto rpc = fnord::comm::mkRPC(
+      &LogStreamService::append,
+      log_key,
+      std::string("bar"));
+
+  rpc.call(logstream_channel_);
+  rpc.wait();
 }
 
 void LogJoinService::recordJoinedSession(
     CustomerNamespace* customer,
     const std::string& uid,
     const TrackedSession& session) {
+  auto log_key = fnord::StringUtil::format(
+      "cm.tracker.joined_sessions~$0",
+      customer->key());
+
+  auto rpc = fnord::comm::mkRPC(
+      &LogStreamService::append,
+      log_key,
+      std::string("bar"));
+
+  rpc.call(logstream_channel_);
+  rpc.wait();
 }
 
 } // namespace cm

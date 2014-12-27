@@ -16,6 +16,7 @@
 #include <vector>
 #include <fnord/base/datetime.h>
 #include <fnord/base/uri.h>
+#include <fnord/reflect/reflect.h>
 #include "itemref.h"
 
 namespace cm {
@@ -45,6 +46,13 @@ struct TrackedItemVisit {
   void merge(const TrackedItemVisit& other);
   void fromParams(const fnord::URI::ParamList& params);
 };
+}
 
+template <> template <class T>
+void fnord::reflect::MetaClass<
+    cm::TrackedItemVisit>::reflect(T* t) {
+  t->prop(&cm::TrackedItemVisit::time, 1, "time", false);
+  t->prop(&cm::TrackedItemVisit::item, 2, "item", false);
+  t->prop(&cm::TrackedItemVisit::attrs, 3, "attrs", false);
 }
 #endif
