@@ -14,6 +14,7 @@
 #include <fnord/comm/rpc.h>
 #include <fnord/json/json.h>
 #include <fnord/service/logstream/logstreamservice.h>
+#include "itemref.h"
 #include "customernamespace.h"
 #include "logjoinservice.h"
 
@@ -263,8 +264,7 @@ void LogJoinService::recordJoinedItemVisit(
       "cm.tracker.joined_item_visits~$0",
       customer->key());
 
-  fnord::json::JSONOutputProxy proxy;
-  fnord::reflect::MetaClass<TrackedItemVisit>::serialize(visit, &proxy);
+  //fnord::json::JSONOutputProxy proxy(visit);
 
   auto rpc = fnord::comm::mkRPC(
       &LogStreamService::append,

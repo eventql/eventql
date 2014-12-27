@@ -11,6 +11,7 @@
 #include "fnord/base/random.h"
 #include "fnord/comm/rpc.h"
 #include "fnord/comm/rpcchannel.h"
+#include "fnord/json/json.h"
 #include "fnord/net/http/httprouter.h"
 #include "fnord/net/http/httpserver.h"
 #include "fnord/thread/eventloop.h"
@@ -39,6 +40,13 @@ int main() {
   fnord::thread::EventLoop event_loop;
 
   fnord::comm::RPCServiceMap service_map;
+
+  fnord::iputs("is serializable: $0, $1",
+      fnord::reflect::is_serializable<cm::ItemRef>::value,
+      fnord::reflect::is_serializable<fnord::DateTime>::value);
+
+  cm::ItemRef i;
+  auto fu = fnord::json::toJSON(i);
 
   auto dwn_ns = new cm::CustomerNamespace("dawanda");
   dwn_ns->addVHost("dwnapps.net");

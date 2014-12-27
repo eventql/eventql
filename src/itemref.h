@@ -13,6 +13,7 @@
 #include <set>
 #include <string>
 #include <unordered_map>
+#include "fnord/reflect/reflect.h"
 
 namespace cm {
 
@@ -26,4 +27,17 @@ struct ItemRef {
 };
 
 } // namespace cm
+
+template<> struct fnord::reflect::is_serializable<cm::ItemRef> {
+  static const bool value = true;
+};
+
+template <> template <class T>
+void fnord::reflect::MetaClass<
+    cm::ItemRef>::reflect(T* t) {
+  t->prop(&cm::ItemRef::set_id, 1, "set_id", false);
+  t->prop(&cm::ItemRef::item_id, 2, "item_id", false);
+  t->prop(&cm::ItemRef::position, 3, "position", false);
+}
+
 #endif
