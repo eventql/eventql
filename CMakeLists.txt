@@ -16,6 +16,8 @@ else()
   set(CMAKE_CXX_FLAGS "-std=c++0x ${CMAKE_CXX_FLAGS}")
 endif()
 
+find_package(Threads)
+
 add_subdirectory(src/fnord)
 
 add_executable(cmapp
@@ -36,3 +38,5 @@ add_executable(cmapp
     src/tracker/logjoinservice.cc
     src/tracker/trackedsession.cc
     src/tracker/trackedquery.cc)
+
+target_link_libraries(cmapp ${CMAKE_THREAD_LIBS_INIT})
