@@ -218,7 +218,7 @@ TrackedSession* LogJoinService::findOrCreateSession(
     session = new TrackedSession();
     session->customer = customer;
     session->last_seen_unix_micros = 0;
-    sessions_.emplace(uid, session);
+    sessions_.emplace(uid, std::unique_ptr<TrackedSession>(session));
   } else {
     session = siter->second.get();
   }
