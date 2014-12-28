@@ -22,11 +22,11 @@ add_subdirectory(src/fnord)
 
 add_executable(cmapp
     $<TARGET_OBJECTS:fnord-base>
+    $<TARGET_OBJECTS:fnord-cli>
     $<TARGET_OBJECTS:fnord-comm>
     $<TARGET_OBJECTS:fnord-http>
     $<TARGET_OBJECTS:fnord-io>
     $<TARGET_OBJECTS:fnord-json>
-    $<TARGET_OBJECTS:fnord-system>
     $<TARGET_OBJECTS:fnord-sstable>
     $<TARGET_OBJECTS:fnord-thread>
     $<TARGET_OBJECTS:fnord-logstream-service>
