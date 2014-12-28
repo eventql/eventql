@@ -14,25 +14,34 @@
 #include <string>
 #include <unordered_map>
 #include <fnord/base/random.h>
-#include <fnord/net/http/httphandler.h>
+#include <fnord/base/uri.h>
+#include <fnord/comm/feed.h>
+#include <fnord/net/http/httpservice.h>
 
 namespace cm {
 class CustomerNamespace;
 
-class Tracker : public fnord::http::HTTPHandler {
+class Tracker : public fnord::http::HTTPService {
 public:
-  static const char kUIDCookieKey[];
-  static const int kUIDCookieLifetimeDays;
+  explicit Tracker(fnord::comm::FeedFactory* feed_factory);
 
-  Tracker();
+  static bool isReservedParam(const std::string param);
 
-  bool handleHTTPRequest(
+  void handleHTTPRequest(
       fnord::http::HTTPRequest* request,
       fnord::http::HTTPResponse* response) override;
 
   void addCustomer(CustomerNamespace* customer);
 
 protected:
+
+  void track(CustomerNamespace* customer, const fnord::URI& uri);
+  void recordLogLine(CustomerNamespace* customer, const std::string& logline);
+
+  fnord::comm::FeedFactory* feed_factory_;
+  std::unordered_map<std::string, std::unique_ptr<fnord::comm::Feed>> feeds_;
+  std::mutex feeds_mutex_;
+
   std::unordered_map<std::string, CustomerNamespace*> vhosts_;
   fnord::Random rnd_;
 };

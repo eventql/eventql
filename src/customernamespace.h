@@ -21,14 +21,17 @@ namespace cm {
 class CustomerNamespace  {
 public:
 
-  CustomerNamespace();
+  CustomerNamespace(const std::string& key);
   const std::vector<std::string>& vhosts();
   void addVHost(const std::string& hostname);
 
   const std::string& trackingJS();
   void loadTrackingJS(const std::string& filename);
 
+  const std::string& key() const;
+
 protected:
+  std::string key_;
   std::string tracking_js_;
   std::vector<std::string> vhosts_;
 };
