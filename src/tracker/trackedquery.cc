@@ -6,6 +6,7 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
+#include <algorithm>
 #include "tracker.h"
 #include "trackedquery.h"
 #include <fnord/base/exception.h>
