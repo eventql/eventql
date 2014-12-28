@@ -9,6 +9,7 @@
 #include "tracker/tracker.h"
 #include <fnord/base/exception.h>
 #include <fnord/base/inspect.h>
+#include <fnord/base/wallclock.h>
 #include <fnord/net/http/cookies.h>
 #include "fnord/net/http/httprequest.h"
 #include "fnord/net/http/httpresponse.h"
@@ -140,8 +141,14 @@ void Tracker::recordLogLine(
     RAISEF(kRuntimeError, "invalid pixel version: $0", pixel_ver);
   }
 
-  auto pos = feed_->append(logline);
-  fnord::iputs("write to feed @$0 => $1", pos, logline);
+  auto feedline = fnord::StringUtil::format(
+      "$0|$1|$2",
+      customer->key(),
+      fnord::WallClock::unixSeconds(),
+      logline);
+
+  auto pos = feed_->append(feedline);
+  fnord::iputs("write to feed @$0 => $1", pos, feedline);
 }
 
 } // namespace cm
