@@ -76,14 +76,7 @@ void Tracker::handleHTTPRequest(
     response->addHeader("Cache-Control", "no-cache, no-store, must-revalidate");
     response->addHeader("Pragma", "no-cache");
     response->addHeader("Expires", "0");
-
-    response->addBody(fnord::StringUtil::format(
-        "__cmhost='$0'; __cmuid='$1'; __cmcid='$2'; $3",
-        hostname,
-        rnd_.hex128(),
-        rnd_.hex64(),
-        ns->trackingJS()));
-
+    response->addBody(ns->trackingJS());
     return;
   }
 
