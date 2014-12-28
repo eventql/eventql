@@ -13,6 +13,7 @@
 #include "fnord/comm/rpcchannel.h"
 #include "fnord/io/filerepository.h"
 #include "fnord/json/json.h"
+#include "fnord/json/jsonrpc.h"
 #include "fnord/net/http/httprouter.h"
 #include "fnord/net/http/httpserver.h"
 #include "fnord/thread/eventloop.h"
@@ -42,6 +43,8 @@ int main() {
   fnord::thread::EventLoop event_loop;
   fnord::comm::RPCServiceMap service_map;
 
+  fnord::json::JSONRPC rpc;
+  fnord::json::JSONRPCHTTPAdapter rpc_http(&rpc);
 
   /* set up customers */
   auto dwn_ns = new cm::CustomerNamespace("dawanda");
@@ -62,7 +65,7 @@ int main() {
       "cm.tracker.logstream_out",
       LocalRPCChannel::forService(&logstream_service, &thread_pool));
 
-
+  rpc.registerService("LogStreamService", &logstream_service);
 
   /* set up tracker */
   fnord::logstream_service::LogStreamServiceFeedFactory feeds(
@@ -75,7 +78,7 @@ int main() {
 
   /* set up http server */
   fnord::http::HTTPRouter http_router;
-  //http_router.addRouteByPrefixMatch("/rpc", &tracker);
+  http_router.addRouteByPrefixMatch("/rpc", &rpc_http);
   http_router.addRouteByPrefixMatch("/t", &tracker);
   fnord::http::HTTPServer http_server(&http_router, &event_loop);
   http_server.listen(8080);
