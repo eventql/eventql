@@ -21,6 +21,7 @@
 
 /**
  * mandatory params:
+ *  v    -- pixel ver.  -- value: 1
  *  c    -- clickid     -- format "<uid>~<eventid>", e.g. "f97650cb~b28c61d5c"
  *  e    -- eventtype   -- format "{q,v}" (query, visit)
  *
@@ -42,8 +43,9 @@ const unsigned char pixel_gif[42] = {
 };
 
 Tracker::Tracker(
-    fnord::comm::FeedFactory* feed_factory) :
-    feed_factory_(feed_factory) {}
+    fnord::comm::FeedFactory* feed_factory) {
+  feed_ = feed_factory->getFeed("cm.tracker.log");
+}
 
 bool Tracker::isReservedParam(const std::string p) {
   return p == "c" || p == "e" || p == "i" || p == "is";
@@ -122,25 +124,23 @@ void Tracker::addCustomer(CustomerNamespace* customer) {
 void Tracker::recordLogLine(
     CustomerNamespace* customer,
     const std::string& logline) {
-  auto feed_key = fnord::StringUtil::format(
-      "cm.tracker.log~$0",
-      customer->key());
+  fnord::URI::ParamList params;
+  fnord::URI::parseQueryString(logline, &params);
 
-  fnord::comm::Feed* feed = nullptr;
-  {
-    std::unique_lock<std::mutex> l(feeds_mutex_);
-    auto feed_iter = feeds_.find(feed_key);
-
-    if (feed_iter == feeds_.end()) {
-      auto f = feed_factory_->getFeed(feed_key);
-      feed = f.get();
-      feeds_.emplace(feed_key, std::move(f));
-    } else {
-      feed = feed_iter->second.get();
-    }
+  std::string pixel_ver;
+  if (!fnord::URI::getParam(params, "v", &pixel_ver)) {
+    RAISE(kRuntimeError, "missing v parameter");
   }
 
-  auto pos = feed->append(logline);
+  try {
+    if (std::stoi(pixel_ver) < kMinPixelVersion) {
+      RAISEF(kRuntimeError, "pixel version too old: $0", pixel_ver);
+    }
+  } catch (const std::exception& e) {
+    RAISEF(kRuntimeError, "invalid pixel version: $0", pixel_ver);
+  }
+
+  auto pos = feed_->append(logline);
   fnord::iputs("write to feed @$0 => $1", pos, logline);
 }
 
