@@ -10,6 +10,7 @@
 #include <unistd.h>
 #include "fnord/base/application.h"
 #include "fnord/base/random.h"
+#include "fnord/comm/lbgroup.h"
 #include "fnord/comm/rpc.h"
 #include "fnord/cli/flagparser.h"
 #include "fnord/comm/rpcchannel.h"
@@ -17,6 +18,8 @@
 #include "fnord/io/fileutil.h"
 #include "fnord/json/json.h"
 #include "fnord/json/jsonrpc.h"
+#include "fnord/json/jsonrpchttpchannel.h"
+#include "fnord/net/http/httpchannel.h"
 #include "fnord/net/http/httprouter.h"
 #include "fnord/net/http/httpserver.h"
 #include "fnord/thread/eventloop.h"
@@ -57,36 +60,22 @@ int main(int argc, const char** argv) {
 
   fnord::thread::ThreadPool thread_pool;
   fnord::thread::EventLoop event_loop;
-  fnord::comm::RPCServiceMap service_map;
-
-  fnord::json::JSONRPC rpc;
-  fnord::json::JSONRPCHTTPAdapter rpc_http(&rpc);
 
   /* set up customers */
   auto dwn_ns = new cm::CustomerNamespace("dawanda");
   dwn_ns->addVHost("dwnapps.net");
   dwn_ns->loadTrackingJS("config/c_dwn/track.js");
 
-  /* set up cmdata */
-  auto cmdata_path = flags.getString("cmdata");
-  if (!fnord::io::FileUtil::isDirectory(cmdata_path)) {
-    RAISEF(kIOError, "no such directory: $0", cmdata_path);
-  }
+  /* set up feedserver channel */
+  fnord::comm::RoundRobinLBGroup feedserver_lbgroup;
+  fnord::json::JSONRPCHTTPChannel feedserver_chan(
+      &feedserver_lbgroup,
+      &event_loop);
 
-  /* set up logstream service */
-  auto feeds_dir_path = fnord::io::FileUtil::joinPaths(cmdata_path, "feeds");
-  fnord::io::FileUtil::mkdir_p(feeds_dir_path);
-
-  fnord::logstream_service::LogStreamService logstream_service{
-      fnord::io::FileRepository(feeds_dir_path)};
-
-  rpc.registerService("LogStreamService", &logstream_service);
+  feedserver_lbgroup.addServer(fnord::net::InetAddr::resolve("localhost:8000"));
 
   /* set up tracker */
-  auto logservice_chan =
-      LocalRPCChannel::forService(&logstream_service, &thread_pool);
-  fnord::logstream_service::LogStreamServiceFeedFactory feeds(
-      logservice_chan.get());
+  fnord::logstream_service::LogStreamServiceFeedFactory feeds(&feedserver_chan);
 
   cm::Tracker tracker(&feeds);
   tracker.addCustomer(dwn_ns);
@@ -98,13 +87,15 @@ int main(int argc, const char** argv) {
   public_http_server.listen(flags.getInt("public_http_port"));
 
   /* set up rpc http server */
+  fnord::json::JSONRPC rpc;
+  fnord::json::JSONRPCHTTPAdapter rpc_http(&rpc);
+
   fnord::http::HTTPRouter rpc_http_router;
   rpc_http_router.addRouteByPrefixMatch("/rpc", &rpc_http);
   fnord::http::HTTPServer rpc_http_server(&rpc_http_router, &event_loop);
   rpc_http_server.listen(flags.getInt("rpc_http_port"));
 
   event_loop.run();
-
   return 0;
 }
 
