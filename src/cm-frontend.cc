@@ -70,9 +70,10 @@ int main(int argc, const char** argv) {
   fnord::comm::RoundRobinLBGroup feedserver_lbgroup;
   fnord::json::JSONRPCHTTPChannel feedserver_chan(
       &feedserver_lbgroup,
-      &thread_pool);
+      &thread_pool,
+      "LogStreamService.");
 
-  feedserver_lbgroup.addServer(fnord::net::InetAddr::resolve("localhost:8000"));
+  feedserver_lbgroup.addServer(fnord::net::InetAddr::resolve("127.0.0.1:8001"));
 
   /* set up tracker */
   fnord::logstream_service::LogStreamServiceFeedFactory feeds(&feedserver_chan);
