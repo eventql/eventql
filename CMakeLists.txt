@@ -20,7 +20,14 @@ find_package(Threads)
 
 add_subdirectory(src/fnord)
 
-add_executable(cmapp
+add_library(cm-common OBJECT
+    src/itemref.cc
+    src/customernamespace.cc
+    src/tracker/trackedsession.cc
+    src/tracker/trackedquery.cc)
+
+add_executable(cm-frontend
+    $<TARGET_OBJECTS:cm-common>
     $<TARGET_OBJECTS:fnord-base>
     $<TARGET_OBJECTS:fnord-cli>
     $<TARGET_OBJECTS:fnord-comm>
@@ -31,12 +38,8 @@ add_executable(cmapp
     $<TARGET_OBJECTS:fnord-thread>
     $<TARGET_OBJECTS:fnord-logstream-service>
     $<TARGET_OBJECTS:fnord-util>
-    src/main.cc
-    src/itemref.cc
-    src/customernamespace.cc
+    src/cm-frontend.cc
     src/tracker/tracker.cc
-    src/tracker/logjoinservice.cc
-    src/tracker/trackedsession.cc
-    src/tracker/trackedquery.cc)
+    src/tracker/logjoinservice.cc)
 
-target_link_libraries(cmapp ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(cm-frontend ${CMAKE_THREAD_LIBS_INIT})
