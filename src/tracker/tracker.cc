@@ -140,8 +140,7 @@ void Tracker::recordLogLine(
       fnord::WallClock::unixSeconds(),
       logline);
 
-  auto pos = feed_->append(feedline);
-  fnord::iputs("write to feed @$0 => $1", pos, feedline);
+  feed_->append(feedline);
 }
 
 } // namespace cm
