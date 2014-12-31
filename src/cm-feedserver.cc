@@ -72,7 +72,7 @@ int main(int argc, const char** argv) {
   fnord::logstream_service::LogStreamService logstream_service{
       fnord::io::FileRepository(feeds_dir_path)};
 
-  rpc.registerService("LogStreamService", &logstream_service);
+  rpc.registerService(&logstream_service);
 
   /* set up rpc http server */
   fnord::http::HTTPRouter rpc_http_router;

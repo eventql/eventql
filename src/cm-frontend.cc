@@ -19,7 +19,6 @@
 #include "fnord/json/json.h"
 #include "fnord/json/jsonrpc.h"
 #include "fnord/json/jsonrpchttpchannel.h"
-#include "fnord/net/http/httpchannel.h"
 #include "fnord/net/http/httprouter.h"
 #include "fnord/net/http/httpserver.h"
 #include "fnord/thread/eventloop.h"
@@ -70,10 +69,9 @@ int main(int argc, const char** argv) {
   fnord::comm::RoundRobinLBGroup feedserver_lbgroup;
   fnord::json::JSONRPCHTTPChannel feedserver_chan(
       &feedserver_lbgroup,
-      &thread_pool,
-      "LogStreamService.");
+      &thread_pool);
 
-  feedserver_lbgroup.addServer(fnord::net::InetAddr::resolve("127.0.0.1:8001"));
+  feedserver_lbgroup.addServer("http://127.0.0.1:8001/rpc");
 
   /* set up tracker */
   fnord::logstream_service::LogStreamServiceFeedFactory feeds(&feedserver_chan);

@@ -42,6 +42,8 @@ add_executable(cm-frontend
     src/tracker/tracker.cc
     src/tracker/logjoinservice.cc)
 
+target_link_libraries(cm-frontend ${CMAKE_THREAD_LIBS_INIT})
+
 add_executable(cm-feedserver
     $<TARGET_OBJECTS:cm-common>
     $<TARGET_OBJECTS:fnord-base>
