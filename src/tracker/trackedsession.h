@@ -25,12 +25,12 @@ class CustomerNamespace;
 /**
  * The max time after which a click on a query result is considered a click
  */
-static const uint64_t kMaxQueryClickDelaySeconds = 6 * 5;
+static const uint64_t kMaxQueryClickDelaySeconds = 180;
 
 /**
  * Flush/expire a session after N seconds of inactivity
  */
-static const uint64_t kSessionIdleTimeoutSeconds = 6 * 10;
+static const uint64_t kSessionIdleTimeoutSeconds = 60 * 90;
 
 /**
  * A tracked session. Make sure to hold the mutex when updating or accessing
