@@ -53,7 +53,6 @@ int main(int argc, const char** argv) {
 
   flags.parseArgv(argc, argv);
 
-  fnord::thread::ThreadPool thread_pool;
   fnord::thread::EventLoop event_loop;
 
   fnord::json::JSONRPC rpc;
