@@ -17,8 +17,6 @@
 #include "fnord/base/random.h"
 #include "fnord/logging/logger.h"
 #include "customernamespace.h"
-#include "tracker/logjoinservice.h"
-
 
 /**
  * mandatory params:
