@@ -23,6 +23,8 @@ class CustomerNamespace;
 
 class Tracker : public fnord::http::HTTPService {
 public:
+  static const int kMinPixelVersion = 3;
+
   explicit Tracker(fnord::comm::FeedFactory* feed_factory);
 
   static bool isReservedParam(const std::string param);
@@ -38,7 +40,7 @@ protected:
   void track(CustomerNamespace* customer, const fnord::URI& uri);
   void recordLogLine(CustomerNamespace* customer, const std::string& logline);
 
-  fnord::comm::FeedFactory* feed_factory_;
+  std::unique_ptr<fnord::comm::Feed> feed_;
   std::unordered_map<std::string, std::unique_ptr<fnord::comm::Feed>> feeds_;
   std::mutex feeds_mutex_;
 

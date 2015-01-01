@@ -251,8 +251,8 @@ void LogJoinService::recordJoinedQuery(
       log_key,
       std::string("bar"));
 
-  rpc.call(logstream_channel_);
-  rpc.wait();
+  rpc->call(logstream_channel_);
+  rpc->wait();
 }
 
 void LogJoinService::recordJoinedItemVisit(
@@ -269,8 +269,8 @@ void LogJoinService::recordJoinedItemVisit(
       log_key,
       fnord::json::toJSONString(visit));
 
-  rpc.call(logstream_channel_);
-  rpc.wait();
+  rpc->call(logstream_channel_);
+  rpc->wait();
 }
 
 void LogJoinService::recordJoinedSession(
@@ -286,8 +286,8 @@ void LogJoinService::recordJoinedSession(
       log_key,
       std::string("bar"));
 
-  rpc.call(logstream_channel_);
-  rpc.wait();
+  rpc->call(logstream_channel_);
+  rpc->wait();
 }
 
 } // namespace cm
