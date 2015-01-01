@@ -45,13 +45,18 @@ int main(int argc, const char** argv) {
 
   flags.parseArgv(argc, argv);
 
-  fnord::thread::ThreadPool thread_pool;
+  /* start event loop */
+  fnord::thread::EventLoop ev;
+
+  auto evloop_thread = std::thread([&ev] {
+    ev.run();
+  });
 
   /* set up feedserver channel */
   fnord::comm::RoundRobinLBGroup feedserver_lbgroup;
   fnord::json::JSONRPCHTTPChannel feedserver_chan(
       &feedserver_lbgroup,
-      &thread_pool);
+      &ev);
 
   feedserver_lbgroup.addServer(flags.getString("feedserver_jsonrpc_url"));
   fnord::logstream_service::LogStreamServiceFeedFactory feeds(&feedserver_chan);
@@ -59,7 +64,7 @@ int main(int argc, const char** argv) {
   auto feed = feeds.getFeed("cm.tracker.log");
   feed->setOption("batch_size", "8192");
 
-  cm::LogJoin logjoin(&thread_pool);
+  cm::LogJoin logjoin(nullptr);
 
   std::string logline;
   while (feed->getNextEntry(&logline)) {
@@ -74,6 +79,8 @@ int main(int argc, const char** argv) {
   }
 
   fnord::iputs("end of stream reached", 1);
+
+  evloop_thread.join();
   return 0;
 }
 
