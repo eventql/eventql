@@ -74,4 +74,4 @@ add_executable(cm-logjoin
     src/cm-logjoin.cc
     src/tracker/logjoin.cc)
 
-target_link_libraries(cm-feedserver ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(cm-logjoin ${CMAKE_THREAD_LIBS_INIT})

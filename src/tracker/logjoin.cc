@@ -208,7 +208,6 @@ bool LogJoin::maybeFlushSession(
 
 void LogJoin::flush(const fnord::DateTime& stream_time) {
   std::lock_guard<std::mutex> l1(sessions_mutex_);
-  fnord::iputs("stream_time=$0 active_sessions=$1", stream_time, sessions_.size());
 
   for (auto iter = sessions_.begin(); iter != sessions_.end(); ) {
     const auto& uid = iter->first;
@@ -272,6 +271,7 @@ void LogJoin::recordJoinedSession(
     const std::string& customer_key,
     const std::string& uid,
     const TrackedSession& session) {
+  fnord::iputs("stream_time=$0 active_sessions=$1", stream_clock_, sessions_.size());
 }
 
 } // namespace cm
