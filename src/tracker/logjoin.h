@@ -29,45 +29,42 @@ class LogJoin {
 public:
 
   LogJoin(
-      fnord::thread::TaskScheduler* scheduler,
-      fnord::comm::RPCServiceMap* service_map);
+      fnord::thread::TaskScheduler* scheduler);
+
+  void insertLogline(const std::string& log_line);
 
   void insertLogline(
-      CustomerNamespace* customer,
-      const std::string& log_line);
-
-  void insertLogline(
-      CustomerNamespace* customer,
+      const std::string& customer_key,
       const fnord::DateTime& time,
       const std::string& log_line);
 
 protected:
 
   void recordJoinedQuery(
-      CustomerNamespace* customer,
+      const std::string& customer_key,
       const std::string& uid,
       const std::string& eid,
       const TrackedQuery& query);
 
   void recordJoinedItemVisit(
-      CustomerNamespace* customer,
+      const std::string& customer_key,
       const std::string& uid,
       const std::string& eid,
       const TrackedItemVisit& visit);
 
   void recordJoinedSession(
-      CustomerNamespace* customer,
+      const std::string& customer_key,
       const std::string& uid,
       const TrackedSession& session);
 
   void insertQuery(
-      CustomerNamespace* customer,
+      const std::string& customer_key,
       const std::string& uid,
       const std::string& eid,
       const TrackedQuery& query);
 
   void insertItemVisit(
-      CustomerNamespace* customer,
+      const std::string& customer_key,
       const std::string& uid,
       const std::string& eid,
       const TrackedItemVisit& visit);
@@ -78,7 +75,7 @@ protected:
    * postcondition: returns a tracked session with the mutex locked!
    */
   TrackedSession* findOrCreateSession(
-      CustomerNamespace* customer,
+      const std::string& customer_key,
       const std::string& uid);
 
   /**
@@ -99,7 +96,7 @@ protected:
    * Flush the session identified by the provided uid
    */
   //void flushSession(
-  //    CustomerNamespace* customer,
+  //    const std::string& customer_key,
   //    const std::string& uid);
 
   fnord::thread::TaskScheduler* scheduler_;

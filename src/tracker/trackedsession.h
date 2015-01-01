@@ -37,7 +37,7 @@ static const uint64_t kSessionIdleTimeoutSeconds = 6 * 10;
  * any of the fields.
  */
 struct TrackedSession {
-  CustomerNamespace* customer;
+  std::string customer_key;
   std::unordered_map<std::string, TrackedQuery> queries;
   std::unordered_map<std::string, TrackedItemVisit> item_visits;
   uint64_t last_seen_unix_micros;
