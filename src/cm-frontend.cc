@@ -57,7 +57,6 @@ int main(int argc, const char** argv) {
 
   flags.parseArgv(argc, argv);
 
-  fnord::thread::ThreadPool thread_pool;
   fnord::thread::EventLoop event_loop;
 
   /* set up customers */
@@ -69,7 +68,7 @@ int main(int argc, const char** argv) {
   fnord::comm::RoundRobinLBGroup feedserver_lbgroup;
   fnord::json::JSONRPCHTTPChannel feedserver_chan(
       &feedserver_lbgroup,
-      &thread_pool);
+      &event_loop);
 
   feedserver_lbgroup.addServer("http://127.0.0.1:8001/rpc");
 
@@ -82,7 +81,7 @@ int main(int argc, const char** argv) {
   /* set up public http server */
   fnord::http::HTTPRouter public_http_router;
   public_http_router.addRouteByPrefixMatch("/t", &tracker);
-  fnord::http::HTTPServer public_http_server(&public_http_router, &thread_pool);
+  fnord::http::HTTPServer public_http_server(&public_http_router, &event_loop);
   public_http_server.listen(flags.getInt("public_http_port"));
 
   /* set up rpc http server */
@@ -91,7 +90,7 @@ int main(int argc, const char** argv) {
 
   fnord::http::HTTPRouter rpc_http_router;
   rpc_http_router.addRouteByPrefixMatch("/rpc", &rpc_http);
-  fnord::http::HTTPServer rpc_http_server(&rpc_http_router, &thread_pool);
+  fnord::http::HTTPServer rpc_http_server(&rpc_http_router, &event_loop);
   rpc_http_server.listen(flags.getInt("rpc_http_port"));
 
   event_loop.run();
