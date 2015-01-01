@@ -63,7 +63,14 @@ int main(int argc, const char** argv) {
 
   std::string logline;
   while (feed->getNextEntry(&logline)) {
-    logjoin.insertLogline(logline);
+    try {
+      logjoin.insertLogline(logline);
+    } catch (const std::exception& e) {
+      fnord::log::Logger::get()->logException(
+          fnord::log::kInfo,
+          "invalid log line",
+          e);
+    }
   }
 
   fnord::iputs("end of stream reached", 1);
