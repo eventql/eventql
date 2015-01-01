@@ -25,7 +25,6 @@
 #include "fnord/service/logstream/feedfactory.h"
 #include "customernamespace.h"
 #include "tracker/tracker.h"
-#include "tracker/logjoinservice.h"
 
 int main(int argc, const char** argv) {
   fnord::Application::init();

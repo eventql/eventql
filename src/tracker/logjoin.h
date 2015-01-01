@@ -25,10 +25,10 @@
 namespace cm {
 class CustomerNamespace;
 
-class LogJoinService {
+class LogJoin {
 public:
 
-  LogJoinService(
+  LogJoin(
       fnord::thread::TaskScheduler* scheduler,
       fnord::comm::RPCServiceMap* service_map);
 

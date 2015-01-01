@@ -24,7 +24,8 @@ add_library(cm-common OBJECT
     src/itemref.cc
     src/customernamespace.cc
     src/tracker/trackedsession.cc
-    src/tracker/trackedquery.cc)
+    src/tracker/trackedquery.cc
+    src/tracker/tracker.cc)
 
 add_executable(cm-frontend
     $<TARGET_OBJECTS:cm-common>
@@ -38,9 +39,7 @@ add_executable(cm-frontend
     $<TARGET_OBJECTS:fnord-thread>
     $<TARGET_OBJECTS:fnord-logstream-service>
     $<TARGET_OBJECTS:fnord-util>
-    src/cm-frontend.cc
-    src/tracker/tracker.cc
-    src/tracker/logjoinservice.cc)
+    src/cm-frontend.cc)
 
 target_link_libraries(cm-frontend ${CMAKE_THREAD_LIBS_INIT})
 
@@ -56,8 +55,23 @@ add_executable(cm-feedserver
     $<TARGET_OBJECTS:fnord-thread>
     $<TARGET_OBJECTS:fnord-logstream-service>
     $<TARGET_OBJECTS:fnord-util>
-    src/cm-feedserver.cc
-    src/tracker/tracker.cc
-    src/tracker/logjoinservice.cc)
+    src/cm-feedserver.cc)
+
+target_link_libraries(cm-feedserver ${CMAKE_THREAD_LIBS_INIT})
+
+add_executable(cm-logjoin
+    $<TARGET_OBJECTS:cm-common>
+    $<TARGET_OBJECTS:fnord-base>
+    $<TARGET_OBJECTS:fnord-cli>
+    $<TARGET_OBJECTS:fnord-comm>
+    $<TARGET_OBJECTS:fnord-http>
+    $<TARGET_OBJECTS:fnord-io>
+    $<TARGET_OBJECTS:fnord-json>
+    $<TARGET_OBJECTS:fnord-sstable>
+    $<TARGET_OBJECTS:fnord-thread>
+    $<TARGET_OBJECTS:fnord-logstream-service>
+    $<TARGET_OBJECTS:fnord-util>
+    src/cm-logjoin.cc
+    src/tracker/logjoin.cc)
 
 target_link_libraries(cm-feedserver ${CMAKE_THREAD_LIBS_INIT})

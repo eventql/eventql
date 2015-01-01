@@ -16,13 +16,13 @@
 #include <fnord/service/logstream/logstreamservice.h>
 #include "itemref.h"
 #include "customernamespace.h"
-#include "logjoinservice.h"
+#include "logjoin.h"
 
 using fnord::logstream_service::LogStreamService;
 
 namespace cm {
 
-LogJoinService::LogJoinService(
+LogJoin::LogJoin(
     fnord::thread::TaskScheduler* scheduler,
     fnord::comm::RPCServiceMap* service_map) :
     scheduler_(scheduler),
@@ -30,13 +30,13 @@ LogJoinService::LogJoinService(
   logstream_channel_ = service_map->getChannel("cm.tracker.logstream_out");
 }
 
-void LogJoinService::insertLogline(
+void LogJoin::insertLogline(
     CustomerNamespace* customer,
     const std::string& log_line) {
   insertLogline(customer, fnord::DateTime(), log_line);
 }
 
-void LogJoinService::insertLogline(
+void LogJoin::insertLogline(
     CustomerNamespace* customer,
     const fnord::DateTime& time,
     const std::string& log_line) {
@@ -98,7 +98,7 @@ void LogJoinService::insertLogline(
   }
 }
 
-void LogJoinService::insertQuery(
+void LogJoin::insertQuery(
     CustomerNamespace* customer,
     const std::string& uid,
     const std::string& eid,
@@ -118,7 +118,7 @@ void LogJoinService::insertQuery(
   }
 }
 
-void LogJoinService::insertItemVisit(
+void LogJoin::insertItemVisit(
     CustomerNamespace* customer,
     const std::string& uid,
     const std::string& eid,
@@ -142,7 +142,7 @@ void LogJoinService::insertItemVisit(
   recordJoinedItemVisit(customer, uid, eid, visit);
 }
 
-bool LogJoinService::maybeFlushSession(
+bool LogJoin::maybeFlushSession(
     const std::string uid,
     TrackedSession* session,
     const fnord::DateTime& stream_time) {
@@ -191,7 +191,7 @@ bool LogJoinService::maybeFlushSession(
   return do_flush;
 }
 
-void LogJoinService::flush(const fnord::DateTime& stream_time) {
+void LogJoin::flush(const fnord::DateTime& stream_time) {
   std::lock_guard<std::mutex> l1(sessions_mutex_);
   fnord::iputs("stream_time=$0 active_sessions=$1", stream_time, sessions_.size());
 
@@ -206,7 +206,7 @@ void LogJoinService::flush(const fnord::DateTime& stream_time) {
   }
 }
 
-TrackedSession* LogJoinService::findOrCreateSession(
+TrackedSession* LogJoin::findOrCreateSession(
     CustomerNamespace* customer,
     const std::string& uid) {
   TrackedSession* session = nullptr;
@@ -227,7 +227,7 @@ TrackedSession* LogJoinService::findOrCreateSession(
   return session;
 }
 
-fnord::DateTime LogJoinService::streamTime(const fnord::DateTime& time) {
+fnord::DateTime LogJoin::streamTime(const fnord::DateTime& time) {
   std::lock_guard<std::mutex> l(stream_clock_mutex_);
 
   if (time > stream_clock_) {
@@ -237,7 +237,7 @@ fnord::DateTime LogJoinService::streamTime(const fnord::DateTime& time) {
   return stream_clock_;
 }
 
-void LogJoinService::recordJoinedQuery(
+void LogJoin::recordJoinedQuery(
     CustomerNamespace* customer,
     const std::string& uid,
     const std::string& eid,
@@ -255,7 +255,7 @@ void LogJoinService::recordJoinedQuery(
   rpc->wait();
 }
 
-void LogJoinService::recordJoinedItemVisit(
+void LogJoin::recordJoinedItemVisit(
     CustomerNamespace* customer,
     const std::string& uid,
     const std::string& eid,
@@ -273,7 +273,7 @@ void LogJoinService::recordJoinedItemVisit(
   rpc->wait();
 }
 
-void LogJoinService::recordJoinedSession(
+void LogJoin::recordJoinedSession(
     CustomerNamespace* customer,
     const std::string& uid,
     const TrackedSession& session) {
