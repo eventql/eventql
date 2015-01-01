@@ -19,6 +19,10 @@ void TrackedQuery::fromParams(const fnord::URI::ParamList& params) {
   std::string items_str;
   if (fnord::URI::getParam(params, "is", &items_str)) {
     for (const auto& item_str : fnord::StringUtil::split(items_str, ",")) {
+      if (item_str.length() == 0) {
+        continue;
+      }
+
       auto item_str_parts = fnord::StringUtil::split(item_str, "~");
       if (item_str_parts.size() < 2) {
         RAISE(kParseError, "invalid is param");

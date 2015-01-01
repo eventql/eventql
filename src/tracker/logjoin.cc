@@ -6,6 +6,7 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
+#include <assert.h>
 #include <fnord/base/exception.h>
 #include <fnord/base/inspect.h>
 #include <fnord/base/stringutil.h>
@@ -23,21 +24,32 @@ using fnord::logstream_service::LogStreamService;
 namespace cm {
 
 LogJoin::LogJoin(
-    fnord::thread::TaskScheduler* scheduler,
-    fnord::comm::RPCServiceMap* service_map) :
+    fnord::thread::TaskScheduler* scheduler) :
     scheduler_(scheduler),
     stream_clock_(0) {
-  logstream_channel_ = service_map->getChannel("cm.tracker.logstream_out");
+}
+
+void LogJoin::insertLogline(const std::string& log_line) {
+  auto c_end = log_line.find("|");
+  if (c_end == std::string::npos) {
+    RAISEF(kRuntimeError, "invalid logline: $0", log_line);
+  }
+
+  auto t_end = log_line.find("|", c_end + 1);
+  if (t_end == std::string::npos) {
+    RAISEF(kRuntimeError, "invalid logline: $0", log_line);
+  }
+
+  auto customer_key = log_line.substr(0, c_end);
+  auto body = log_line.substr(t_end + 1);
+  auto timestr = log_line.substr(c_end + 1, t_end - c_end - 1);
+  fnord::DateTime time(std::stoul(timestr) * fnord::DateTime::kMicrosPerSecond);
+
+  insertLogline(customer_key, time, body);
 }
 
 void LogJoin::insertLogline(
-    CustomerNamespace* customer,
-    const std::string& log_line) {
-  insertLogline(customer, fnord::DateTime(), log_line);
-}
-
-void LogJoin::insertLogline(
-    CustomerNamespace* customer,
+    const std::string& customer_key,
     const fnord::DateTime& time,
     const std::string& log_line) {
   auto stream_time = streamTime(time);
@@ -79,7 +91,7 @@ void LogJoin::insertLogline(
       query.time = time;
       query.flushed = false;
       query.fromParams(params);
-      insertQuery(customer, uid, eid, query);
+      insertQuery(customer_key, uid, eid, query);
       break;
     }
 
@@ -88,9 +100,12 @@ void LogJoin::insertLogline(
       TrackedItemVisit visit;
       visit.time = time;
       visit.fromParams(params);
-      insertItemVisit(customer, uid, eid, visit);
+      insertItemVisit(customer_key, uid, eid, visit);
       break;
     }
+
+    case 'u':
+      return;
 
     default:
       RAISE(kParseError, "invalid e param");
@@ -99,11 +114,11 @@ void LogJoin::insertLogline(
 }
 
 void LogJoin::insertQuery(
-    CustomerNamespace* customer,
+    const std::string& customer_key,
     const std::string& uid,
     const std::string& eid,
     const TrackedQuery& query) {
-  auto session = findOrCreateSession(customer, uid);
+  auto session = findOrCreateSession(customer_key, uid);
   std::lock_guard<std::mutex> l(session->mutex, std::adopt_lock_t {});
 
   auto iter = session->queries.find(eid);
@@ -119,12 +134,12 @@ void LogJoin::insertQuery(
 }
 
 void LogJoin::insertItemVisit(
-    CustomerNamespace* customer,
+    const std::string& customer_key,
     const std::string& uid,
     const std::string& eid,
     const TrackedItemVisit& visit) {
   {
-    auto session = findOrCreateSession(customer, uid);
+    auto session = findOrCreateSession(customer_key, uid);
     std::lock_guard<std::mutex> l(session->mutex, std::adopt_lock_t {});
 
     auto iter = session->item_visits.find(eid);
@@ -139,7 +154,7 @@ void LogJoin::insertItemVisit(
     }
   }
 
-  recordJoinedItemVisit(customer, uid, eid, visit);
+  recordJoinedItemVisit(customer_key, uid, eid, visit);
 }
 
 bool LogJoin::maybeFlushSession(
@@ -178,14 +193,14 @@ bool LogJoin::maybeFlushSession(
 
   for (const auto flushed_query : flushed) {
     recordJoinedQuery(
-        session->customer,
+        session->customer_key,
         uid,
         flushed_query.first,
         *flushed_query.second);
   }
 
   if (do_flush) {
-    recordJoinedSession(session->customer, uid, *session);
+    recordJoinedSession(session->customer_key, uid, *session);
   }
 
   return do_flush;
@@ -195,19 +210,21 @@ void LogJoin::flush(const fnord::DateTime& stream_time) {
   std::lock_guard<std::mutex> l1(sessions_mutex_);
   fnord::iputs("stream_time=$0 active_sessions=$1", stream_time, sessions_.size());
 
-  for (auto iter = sessions_.begin(); iter != sessions_.end(); ++iter) {
+  for (auto iter = sessions_.begin(); iter != sessions_.end(); ) {
     const auto& uid = iter->first;
     const auto& session = iter->second;
 
     std::lock_guard<std::mutex> l2(session->mutex);
     if (maybeFlushSession(uid, session.get(), stream_time)) {
-      sessions_.erase(iter);
+      iter = sessions_.erase(iter);
+    } else {
+      ++iter;
     }
   }
 }
 
 TrackedSession* LogJoin::findOrCreateSession(
-    CustomerNamespace* customer,
+    const std::string& customer_key,
     const std::string& uid) {
   TrackedSession* session = nullptr;
 
@@ -216,7 +233,7 @@ TrackedSession* LogJoin::findOrCreateSession(
   auto siter = sessions_.find(uid);
   if (siter == sessions_.end()) {
     session = new TrackedSession();
-    session->customer = customer;
+    session->customer_key = customer_key;
     session->last_seen_unix_micros = 0;
     sessions_.emplace(uid, std::unique_ptr<TrackedSession>(session));
   } else {
@@ -238,56 +255,23 @@ fnord::DateTime LogJoin::streamTime(const fnord::DateTime& time) {
 }
 
 void LogJoin::recordJoinedQuery(
-    CustomerNamespace* customer,
+    const std::string& customer_key,
     const std::string& uid,
     const std::string& eid,
     const TrackedQuery& query) {
-  auto log_key = fnord::StringUtil::format(
-      "cm.tracker.joined_queries~$0",
-      customer->key());
-
-  auto rpc = fnord::comm::mkRPC(
-      &LogStreamService::append,
-      log_key,
-      std::string("bar"));
-
-  rpc->call(logstream_channel_);
-  rpc->wait();
 }
 
 void LogJoin::recordJoinedItemVisit(
-    CustomerNamespace* customer,
+    const std::string& customer_key,
     const std::string& uid,
     const std::string& eid,
     const TrackedItemVisit& visit) {
-  auto log_key = fnord::StringUtil::format(
-      "cm.tracker.joined_item_visits~$0",
-      customer->key());
-
-  auto rpc = fnord::comm::mkRPC(
-      &LogStreamService::append,
-      log_key,
-      fnord::json::toJSONString(visit));
-
-  rpc->call(logstream_channel_);
-  rpc->wait();
 }
 
 void LogJoin::recordJoinedSession(
-    CustomerNamespace* customer,
+    const std::string& customer_key,
     const std::string& uid,
     const TrackedSession& session) {
-  auto log_key = fnord::StringUtil::format(
-      "cm.tracker.joined_sessions~$0",
-      customer->key());
-
-  auto rpc = fnord::comm::mkRPC(
-      &LogStreamService::append,
-      log_key,
-      std::string("bar"));
-
-  rpc->call(logstream_channel_);
-  rpc->wait();
 }
 
 } // namespace cm

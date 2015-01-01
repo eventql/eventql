@@ -37,7 +37,7 @@ int main(int argc, const char** argv) {
   flags.defineFlag(
       "feedserver_jsonrpc_url",
       fnord::cli::FlagParser::T_STRING,
-      false,
+      true,
       NULL,
       "8080",
       "feedserver jsonrpc url",
@@ -56,6 +56,17 @@ int main(int argc, const char** argv) {
   feedserver_lbgroup.addServer(flags.getString("feedserver_jsonrpc_url"));
   fnord::logstream_service::LogStreamServiceFeedFactory feeds(&feedserver_chan);
 
+  auto feed = feeds.getFeed("cm.tracker.log");
+  feed->setOption("batch_size", "8192");
+
+  cm::LogJoin logjoin(&thread_pool);
+
+  std::string logline;
+  while (feed->getNextEntry(&logline)) {
+    logjoin.insertLogline(logline);
+  }
+
+  fnord::iputs("end of stream reached", 1);
   return 0;
 }
 
