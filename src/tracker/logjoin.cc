@@ -211,8 +211,6 @@ bool LogJoin::maybeFlushSession(
 }
 
 void LogJoin::flush(const fnord::DateTime& stream_time) {
-  fnord::iputs("stream_time=$0 active_sessions=$1", stream_clock_, sessions_.size());
-
   for (auto iter = sessions_.begin(); iter != sessions_.end(); ) {
     const auto& uid = iter->first;
     const auto& session = iter->second;
@@ -250,6 +248,14 @@ fnord::DateTime LogJoin::streamTime(const fnord::DateTime& time) {
   }
 
   return stream_clock_;
+}
+
+fnord::DateTime LogJoin::streamTime() const {
+  return stream_clock_;
+}
+
+size_t LogJoin::numSessions() const {
+  return sessions_.size();
 }
 
 void LogJoin::recordJoinedQuery(

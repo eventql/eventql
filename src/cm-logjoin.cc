@@ -78,19 +78,32 @@ int main(int argc, const char** argv) {
 
   cm::LogJoin logjoin(nullptr);
 
-  std::string logline;
-  while (feed->getNextEntry(&logline)) {
-    try {
-      logjoin.insertLogline(logline);
-    } catch (const std::exception& e) {
-      fnord::log::Logger::get()->logException(
-          fnord::log::kInfo,
-          "invalid log line",
-          e);
+  for (;;) {
+    std::string logline;
+    int n = 0;
+
+    for (; feed->getNextEntry(&logline) && n < 10000; ++n) {
+      try {
+        logjoin.insertLogline(logline);
+      } catch (const std::exception& e) {
+        fnord::log::Logger::get()->logException(
+            fnord::log::kInfo,
+            "invalid log line",
+            e);
+      }
+    }
+
+    fnord::log::Logger::get()->logf(
+        fnord::log::kDebug,
+        "[cm-logjoin] stream_time=$0 active_sessions=$1 offset=$2",
+        logjoin.streamTime(),
+        logjoin.numSessions(),
+        feed->offset());
+
+    if (n == 0) {
+      usleep(1000000);
     }
   }
-
-  fnord::iputs("end of stream reached", 1);
 
   evloop_thread.join();
   return 0;
