@@ -62,7 +62,8 @@ int main(int argc, const char** argv) {
   fnord::logstream_service::LogStreamServiceFeedFactory feeds(&feedserver_chan);
 
   auto feed = feeds.getFeed("cm.tracker.log");
-  feed->setOption("batch_size", "65535");
+  feed->setOption("batch_size", "10000");
+  feed->setOption("buffer_size", "100000");
 
   cm::LogJoin logjoin(nullptr);
 
