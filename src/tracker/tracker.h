@@ -23,7 +23,7 @@ class CustomerNamespace;
 
 class Tracker : public fnord::http::HTTPService {
 public:
-  static const int kMinPixelVersion = 3;
+  static const int kMinPixelVersion = 4;
 
   explicit Tracker(fnord::comm::FeedFactory* feed_factory);
 
