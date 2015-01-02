@@ -43,6 +43,15 @@ int main(int argc, const char** argv) {
       "feedserver jsonrpc url",
       "<port>");
 
+  flags.defineFlag(
+      "cm_env",
+      fnord::cli::FlagParser::T_STRING,
+      true,
+      NULL,
+      "dev",
+      "cm env",
+      "<env>");
+
   flags.parseArgv(argc, argv);
 
   /* start event loop */
@@ -62,8 +71,10 @@ int main(int argc, const char** argv) {
   fnord::logstream_service::LogStreamServiceFeedFactory feeds(&feedserver_chan);
 
   auto feed = feeds.getFeed("cm.tracker.log");
-  feed->setOption("batch_size", "10000");
-  feed->setOption("buffer_size", "100000");
+  if (flags.getString("cm_env") == "production") {
+    feed->setOption("batch_size", "10000");
+    feed->setOption("buffer_size", "100000");
+  }
 
   cm::LogJoin logjoin(nullptr);
 
