@@ -10,6 +10,7 @@
 #include "tracker.h"
 #include "trackedquery.h"
 #include <fnord/base/exception.h>
+#include <fnord/base/inspect.h>
 #include <fnord/base/stringutil.h>
 
 namespace cm {
