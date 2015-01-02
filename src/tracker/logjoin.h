@@ -27,6 +27,8 @@ class CustomerNamespace;
 
 class LogJoin {
 public:
+  static const size_t kFlushIntervalMicros =
+      500 * fnord::DateTime::kMicrosPerSecond;
 
   LogJoin(
       fnord::thread::TaskScheduler* scheduler);
@@ -102,9 +104,8 @@ protected:
   fnord::thread::TaskScheduler* scheduler_;
   fnord::comm::RPCChannel* logstream_channel_;
   std::unordered_map<std::string, std::unique_ptr<TrackedSession>> sessions_;
-  std::mutex sessions_mutex_;
   fnord::DateTime stream_clock_;
-  std::mutex stream_clock_mutex_;
+  fnord::DateTime last_flush_time_;
 };
 } // namespace cm
 
