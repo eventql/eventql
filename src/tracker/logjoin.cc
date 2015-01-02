@@ -26,7 +26,9 @@ namespace cm {
 LogJoin::LogJoin(
     fnord::thread::TaskScheduler* scheduler) :
     scheduler_(scheduler),
-    stream_clock_(0) {
+    sessions_(1000000),
+    stream_clock_(0),
+    last_flush_time_(0) {
 }
 
 void LogJoin::insertLogline(const std::string& log_line) {
@@ -54,10 +56,14 @@ void LogJoin::insertLogline(
     const std::string& log_line) {
   auto stream_time = streamTime(time);
 
+  if (static_cast<uint64_t>(stream_time) >
+      static_cast<uint64_t>(last_flush_time_) + kFlushIntervalMicros) {
+    last_flush_time_ = stream_time;
+    flush(stream_time);
+  }
+
   fnord::URI::ParamList params;
   fnord::URI::parseQueryString(log_line, &params);
-
-  flush(stream_time);
 
   /* extract uid (userid) and eid (eventid) */
   std::string c;
@@ -119,7 +125,6 @@ void LogJoin::insertQuery(
     const std::string& eid,
     const TrackedQuery& query) {
   auto session = findOrCreateSession(customer_key, uid);
-  std::lock_guard<std::mutex> l(session->mutex, std::adopt_lock_t {});
 
   auto iter = session->queries.find(eid);
   if (iter == session->queries.end()) {
@@ -140,7 +145,6 @@ void LogJoin::insertItemVisit(
     const TrackedItemVisit& visit) {
   {
     auto session = findOrCreateSession(customer_key, uid);
-    std::lock_guard<std::mutex> l(session->mutex, std::adopt_lock_t {});
 
     auto iter = session->item_visits.find(eid);
     if (iter == session->item_visits.end()) {
@@ -207,13 +211,12 @@ bool LogJoin::maybeFlushSession(
 }
 
 void LogJoin::flush(const fnord::DateTime& stream_time) {
-  std::lock_guard<std::mutex> l1(sessions_mutex_);
+  fnord::iputs("stream_time=$0 active_sessions=$1", stream_clock_, sessions_.size());
 
   for (auto iter = sessions_.begin(); iter != sessions_.end(); ) {
     const auto& uid = iter->first;
     const auto& session = iter->second;
 
-    std::lock_guard<std::mutex> l2(session->mutex);
     if (maybeFlushSession(uid, session.get(), stream_time)) {
       iter = sessions_.erase(iter);
     } else {
@@ -227,7 +230,6 @@ TrackedSession* LogJoin::findOrCreateSession(
     const std::string& uid) {
   TrackedSession* session = nullptr;
 
-  std::lock_guard<std::mutex> lock_holder(sessions_mutex_);
 
   auto siter = sessions_.find(uid);
   if (siter == sessions_.end()) {
@@ -239,13 +241,10 @@ TrackedSession* LogJoin::findOrCreateSession(
     session = siter->second.get();
   }
 
-  session->mutex.lock();
   return session;
 }
 
 fnord::DateTime LogJoin::streamTime(const fnord::DateTime& time) {
-  std::lock_guard<std::mutex> l(stream_clock_mutex_);
-
   if (time > stream_clock_) {
     stream_clock_ = time;
   }
@@ -271,7 +270,6 @@ void LogJoin::recordJoinedSession(
     const std::string& customer_key,
     const std::string& uid,
     const TrackedSession& session) {
-  fnord::iputs("stream_time=$0 active_sessions=$1", stream_clock_, sessions_.size());
 }
 
 } // namespace cm
