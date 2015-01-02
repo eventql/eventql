@@ -40,6 +40,9 @@ public:
       const fnord::DateTime& time,
       const std::string& log_line);
 
+  fnord::DateTime streamTime() const;
+  size_t numSessions() const;
+
 protected:
 
   void recordJoinedQuery(
