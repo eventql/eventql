@@ -26,6 +26,14 @@ struct TrackedQueryItem {
   bool clicked;
   int position;
   int variant;
+
+  template <typename T>
+  static void reflect(T* meta) {
+    meta->prop(&cm::TrackedQueryItem::item, 1, "item", false);
+    meta->prop(&cm::TrackedQueryItem::clicked, 2, "clicked", false);
+    meta->prop(&cm::TrackedQueryItem::position, 3, "position", false);
+    meta->prop(&cm::TrackedQueryItem::variant, 4, "variant", false);
+  };
 };
 
 struct TrackedQuery {
@@ -36,6 +44,13 @@ struct TrackedQuery {
 
   void merge(const TrackedQuery& other);
   void fromParams(const fnord::URI::ParamList& params);
+
+  template <typename T>
+  static void reflect(T* meta) {
+    meta->prop(&cm::TrackedQuery::time, 1, "time", false);
+    meta->prop(&cm::TrackedQuery::items, 2, "items", false);
+    meta->prop(&cm::TrackedQuery::attrs, 3, "attrs", false);
+  };
 };
 
 struct TrackedItemVisit {

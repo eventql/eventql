@@ -15,6 +15,7 @@
 #include <unordered_map>
 #include <vector>
 #include <queue>
+#include "fnord/comm/feed.h"
 #include "fnord/comm/rpc.h"
 #include "fnord/comm/rpcservicemap.h"
 #include "fnord/thread/taskscheduler.h"
@@ -31,7 +32,8 @@ public:
       500 * fnord::DateTime::kMicrosPerSecond;
 
   LogJoin(
-      fnord::thread::TaskScheduler* scheduler);
+      fnord::comm::FeedFactory* feed_factory,
+      bool dry_run);
 
   void insertLogline(const std::string& log_line);
 
@@ -97,15 +99,17 @@ protected:
 
   fnord::DateTime streamTime(const fnord::DateTime& time);
 
-  /**
-   * Flush the session identified by the provided uid
-   */
-  //void flushSession(
-  //    const std::string& customer_key,
-  //    const std::string& uid);
+  fnord::comm::Feed* getFeedForCustomer(
+      const std::string& subfeed,
+      const std::string& customer_key);
 
-  fnord::thread::TaskScheduler* scheduler_;
-  fnord::comm::RPCChannel* logstream_channel_;
+  fnord::comm::FeedFactory* feed_factory_;
+  std::unordered_map<
+      std::string,
+      std::unique_ptr<fnord::comm::Feed>> feed_cache_;
+
+  bool dry_run_;
+
   std::unordered_map<std::string, std::unique_ptr<TrackedSession>> sessions_;
   fnord::DateTime stream_clock_;
   fnord::DateTime last_flush_time_;

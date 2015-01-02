@@ -32,6 +32,19 @@ static const uint64_t kMaxQueryClickDelaySeconds = 180;
  */
 static const uint64_t kSessionIdleTimeoutSeconds = 60 * 90;
 
+struct JoinedSession {
+  std::string customer_key;
+  std::vector<TrackedQuery> queries;
+  std::vector<TrackedItemVisit> item_visits;
+
+  template <typename T>
+  static void reflect(T* meta) {
+    meta->prop(&cm::JoinedSession::customer_key, 1, "time", false);
+    meta->prop(&cm::JoinedSession::queries, 2, "queries", false);
+    meta->prop(&cm::JoinedSession::item_visits, 3, "item_visits", false);
+  };
+};
+
 /**
  * A tracked session. Make sure to hold the mutex when updating or accessing
  * any of the fields.
@@ -41,7 +54,6 @@ struct TrackedSession {
   std::unordered_map<std::string, TrackedQuery> queries;
   std::unordered_map<std::string, TrackedItemVisit> item_visits;
   uint64_t last_seen_unix_micros;
-  std::mutex mutex;
 
   /**
    * Trigger an update to incorporate new information. This will e.g. mark
@@ -50,10 +62,11 @@ struct TrackedSession {
    * required precondition: must hold the session mutex
    */
   void update();
-
   void debugPrint(const std::string& uid) const;
 
+  JoinedSession toJoinedSession() const;
 };
+
 
 } // namespace cm
 #endif

@@ -52,6 +52,15 @@ int main(int argc, const char** argv) {
       "cm env",
       "<env>");
 
+  flags.defineFlag(
+      "no_dryrun",
+      fnord::cli::FlagParser::T_SWITCH,
+      false,
+      NULL,
+      NULL,
+      "no dryrun",
+      "<bool>");
+
   flags.parseArgv(argc, argv);
 
   /* start event loop */
@@ -76,7 +85,16 @@ int main(int argc, const char** argv) {
     feed->setOption("buffer_size", "100000");
   }
 
-  cm::LogJoin logjoin(nullptr);
+  auto dry_run = !flags.isSet("no_dryrun");
+  auto start_offset = 0;
+
+  fnord::log::Logger::get()->logf(
+      fnord::log::kInfo,
+      "[cm-logjoin] Starting cm-logjoin with dry_run=$0 start_offset=$1",
+      dry_run,
+      start_offset);
+
+  cm::LogJoin logjoin(&feeds, dry_run);
 
   for (;;) {
     std::string logline;
@@ -94,7 +112,7 @@ int main(int argc, const char** argv) {
     }
 
     fnord::log::Logger::get()->logf(
-        fnord::log::kDebug,
+        fnord::log::kInfo,
         "[cm-logjoin] stream_time=$0 active_sessions=$1 offset=$2",
         logjoin.streamTime(),
         logjoin.numSessions(),

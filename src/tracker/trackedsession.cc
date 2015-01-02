@@ -78,4 +78,19 @@ void TrackedSession::debugPrint(const std::string& uid) const {
   fnord::iputs("", 1);
 }
 
+JoinedSession TrackedSession::toJoinedSession() const {
+  JoinedSession sess;
+  sess.customer_key = customer_key;
+
+  for (const auto& p : queries) {
+    sess.queries.emplace_back(p.second);
+  }
+
+  for (const auto& p : item_visits) {
+    sess.item_visits.emplace_back(p.second);
+  }
+
+  return sess;
+}
+
 } // namespace cm

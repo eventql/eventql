@@ -24,12 +24,13 @@ using fnord::logstream_service::LogStreamService;
 namespace cm {
 
 LogJoin::LogJoin(
-    fnord::thread::TaskScheduler* scheduler) :
-    scheduler_(scheduler),
+    fnord::comm::FeedFactory* feed_factory,
+    bool dry_run) :
+    feed_factory_(feed_factory),
+    dry_run_(dry_run),
     sessions_(1000000),
     stream_clock_(0),
-    last_flush_time_(0) {
-}
+    last_flush_time_(0) {}
 
 void LogJoin::insertLogline(const std::string& log_line) {
   auto c_end = log_line.find("|");
@@ -276,6 +277,36 @@ void LogJoin::recordJoinedSession(
     const std::string& customer_key,
     const std::string& uid,
     const TrackedSession& session) {
+  auto session_json = fnord::json::toJSONString(session.toJoinedSession());
+
+  if (dry_run_) {
+    fnord::log::Logger::get()->logf(
+        fnord::log::kDebug,
+        "[cm-logjoin] [dry-run] flush session: $0",
+        session_json);
+  } else {
+    auto feed = getFeedForCustomer("joined_sessions", customer_key);
+    feed->append(session_json);
+  }
+}
+
+
+fnord::comm::Feed* LogJoin::getFeedForCustomer(
+    const std::string& subfeed,
+    const std::string& customer_key) {
+  auto cache_key = fnord::StringUtil::format("$0~$1", customer_key, subfeed);
+
+  auto feed_iter = feed_cache_.find(cache_key);
+  if (feed_iter == feed_cache_.end()) {
+    auto feed = feed_factory_->getFeed(
+        fnord::StringUtil::format("cm.tracker.$0~$1", subfeed, customer_key));
+    auto feedptr = feed.get();
+
+    feed_cache_.emplace(cache_key, std::move(feed));
+    return feedptr;
+  } else {
+    return feed_iter->second.get();
+  }
 }
 
 } // namespace cm
