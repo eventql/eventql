@@ -30,7 +30,10 @@
 #include "fnord/thread/threadpool.h"
 #include "fnord/service/logstream/logstreamservice.h"
 #include "fnord/service/logstream/feedfactory.h"
+
 #include "customernamespace.h"
+#include "crawler/crawlrequest.h"
+#include "crawler/crawler.h"
 
 int main(int argc, const char** argv) {
   fnord::Application::init();
@@ -65,6 +68,16 @@ int main(int argc, const char** argv) {
       "cm env",
       "<env>");
 
+  flags.defineFlag(
+      "concurrency",
+      fnord::cli::FlagParser::T_INTEGER,
+      false,
+      NULL,
+      "100",
+      "max number of http requests to run concurrently",
+      "<env>");
+
+
   flags.parseArgv(argc, argv);
 
   /* start event loop */
@@ -83,9 +96,10 @@ int main(int argc, const char** argv) {
   feedserver_lbgroup.addServer(flags.getString("feedserver_jsonrpc_url"));
   fnord::logstream_service::LogStreamServiceFeedFactory feeds(&feedserver_chan);
 
+  auto concurrency = flags.getInt("concurrency");
   fnord::log::Logger::get()->logf(
       fnord::log::kInfo,
-      "[cm-logjoin] Starting cm-crawlworker", 1);
+      "[cm-logjoin] Starting cm-crawlworker with concurrency=$0", concurrency);
 
   /* set up redis queue */
   auto redis_addr = fnord::net::InetAddr::resolve(
@@ -94,17 +108,15 @@ int main(int argc, const char** argv) {
   auto redis = fnord::redis::RedisConnection::connect(redis_addr, &ev);
   fnord::redis::RedisQueue queue("cm.crawler.workqueue", std::move(redis));
 
-/*
-  redis.set("fu", "barx", [&redis] (const fnord::Status& status) {
-    fnord::iputs("got reply! $0", status);
+  /* start the crawler */
+  cm::Crawler crawler(concurrency, &ev);
+  for (;;) {
+    auto job = queue.leaseJob();
+    auto req = fnord::json::fromJSON<cm::CrawlRequest>(job.job_data);
+    crawler.enqueue(req);
+    queue.commitJobSuccessAsyncUnsafe(job);
+  }
 
-    redis.get("fu", [] (
-        const fnord::Status& status,
-        const fnord::Option<std::string>& reply) {
-      fnord::iputs("got reply! $0 $1", status, reply.get());
-    });
-  });
-*/
   evloop_thread.join();
   return 0;
 }
