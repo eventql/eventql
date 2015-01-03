@@ -11,6 +11,8 @@
 
 namespace cm {
 
+const char Crawler::kUserAgent[] = "cm-crawler (http://fnrd.net/)";
+
 Crawler::Crawler(
     size_t max_concurrency,
     fnord::thread::TaskScheduler* scheduler) :
@@ -20,18 +22,34 @@ Crawler::Crawler(
     in_flight_(0) {}
 
 void Crawler::enqueue(const CrawlRequest& req) {
+  std::unique_lock<std::mutex> lk(enqueue_lock_);
+
   while (in_flight_.load() > max_concurrency_) {
     wakeup_.waitForNextWakeup();
   }
 
   auto http_req = fnord::http::HTTPRequest::mkGet(req.url);
-  auto res_future = http_.executeRequest(http_req);
-  auto res_future_ptr = res_future.get();
-  res_future.release();
+  http_req.setHeader("User-Agent", kUserAgent);
+
+  fnord::http::HTTPResponseFuture* res_future;
+  try {
+    auto f = http_.executeRequest(http_req);
+    res_future = f.get();
+    f.release();
+  } catch (const std::exception& e) {
+    fnord::log::Logger::get()->logException(
+        fnord::log::kError,
+        "[cm-crawlworker] error while executing request: $0",
+        e);
+
+    return;
+  }
+
+  fnord::iputs("enqueue called, in flight: $0 $1", in_flight_.load(), res_future);
 
   scheduler_->runOnFirstWakeup(
-      std::bind(&Crawler::requestReady, this, req, res_future_ptr),
-      res_future_ptr->onReady());
+      std::bind(&Crawler::requestReady, this, req, res_future),
+      res_future->onReady());
 
   in_flight_++;
 }
@@ -39,11 +57,21 @@ void Crawler::enqueue(const CrawlRequest& req) {
 void Crawler::requestReady(
     CrawlRequest req,
     fnord::http::HTTPResponseFuture* res_raw) {
-  std::unique_ptr<fnord::http::HTTPResponseFuture> res(res_raw);
+  std::unique_ptr<fnord::http::HTTPResponseFuture> res_holder(res_raw);
   in_flight_--;
   wakeup_.wakeup();
 
-  fnord::iputs("ready!", 1);
+  const auto& res = res_holder->get();
+  if (res.statusCode() != 200) {
+    fnord::log::Logger::get()->logf(
+        fnord::log::kError,
+        "[cm-crawlworker] received non-200 status code for: $0 => $1, $2",
+        req.url,
+        res.statusCode(),
+        res.body().toString());
+  }
+
+  fnord::iputs("ready! $0", res.statusCode());
 }
 
 } // namespace cm

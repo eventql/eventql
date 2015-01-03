@@ -24,6 +24,8 @@ namespace cm {
 
 class Crawler {
 public:
+  static const char kUserAgent[];
+
   explicit Crawler(
       size_t max_concurrency,
       fnord::thread::TaskScheduler* scheduler);
@@ -38,6 +40,7 @@ protected:
   fnord::thread::Wakeup wakeup_;
   fnord::http::HTTPConnectionPool http_;
   std::atomic<size_t> in_flight_;
+  std::mutex enqueue_lock_;
 };
 
 } // namespace cm
