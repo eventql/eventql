@@ -93,6 +93,7 @@ add_executable(cm-crawlworker
     $<TARGET_OBJECTS:fnord-thread>
     $<TARGET_OBJECTS:fnord-logstream-service>
     $<TARGET_OBJECTS:fnord-util>
+    src/crawler/crawler.cc
     src/cm-crawlworker.cc)
 
 target_link_libraries(cm-crawlworker ${CMAKE_THREAD_LIBS_INIT})
