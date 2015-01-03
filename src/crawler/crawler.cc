@@ -28,30 +28,31 @@ void Crawler::enqueue(const CrawlRequest& req) {
     wakeup_.waitForNextWakeup();
   }
 
-  auto http_req = fnord::http::HTTPRequest::mkGet(req.url);
-  http_req.setHeader("User-Agent", kUserAgent);
-
-  fnord::http::HTTPResponseFuture* res_future;
-  try {
-    auto f = http_.executeRequest(http_req);
-    res_future = f.get();
-    f.release();
-  } catch (const std::exception& e) {
-    fnord::log::Logger::get()->logException(
-        fnord::log::kError,
-        "[cm-crawlworker] error while executing request: $0",
-        e);
-
-    return;
-  }
-
-  fnord::iputs("enqueue called, in flight: $0 $1", in_flight_.load(), res_future);
-
-  scheduler_->runOnFirstWakeup(
-      std::bind(&Crawler::requestReady, this, req, res_future),
-      res_future->onReady());
-
   in_flight_++;
+  lk.unlock();
+
+  scheduler_->run([req, this] {
+    auto http_req = fnord::http::HTTPRequest::mkGet(req.url);
+    http_req.setHeader("User-Agent", kUserAgent);
+
+    fnord::http::HTTPResponseFuture* res_future;
+    try {
+      auto f = http_.executeRequest(http_req);
+      res_future = f.get();
+      f.release();
+    } catch (const std::exception& e) {
+      fnord::log::Logger::get()->logException(
+          fnord::log::kError,
+          "[cm-crawlworker] error while executing request: $0",
+          e);
+
+      return;
+    }
+
+    scheduler_->runOnFirstWakeup(
+        std::bind(&Crawler::requestReady, this, req, res_future),
+        res_future->onReady());
+  });
 }
 
 void Crawler::requestReady(
