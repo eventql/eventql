@@ -1,0 +1,111 @@
+/**
+ * Copyright (c) 2015 - The CM Authors <legal@clickmatcher.com>
+ *   All Rights Reserved.
+ *
+ * This file is CONFIDENTIAL -- Distribution or duplication of this material or
+ * the information contained herein is strictly forbidden unless prior written
+ * permission is obtained.
+ */
+#include <stdlib.h>
+#include <unistd.h>
+#include "fnord/base/application.h"
+#include "fnord/base/option.h"
+#include "fnord/base/random.h"
+#include "fnord/base/status.h"
+#include "fnord/comm/lbgroup.h"
+#include "fnord/comm/rpc.h"
+#include "fnord/comm/queue.h"
+#include "fnord/cli/flagparser.h"
+#include "fnord/comm/rpcchannel.h"
+#include "fnord/io/filerepository.h"
+#include "fnord/io/fileutil.h"
+#include "fnord/json/json.h"
+#include "fnord/json/jsonrpc.h"
+#include "fnord/json/jsonrpchttpchannel.h"
+#include "fnord/net/http/httprouter.h"
+#include "fnord/net/http/httpserver.h"
+#include "fnord/net/redis/redisconnection.h"
+#include "fnord/net/redis/redisqueue.h"
+#include "fnord/thread/eventloop.h"
+#include "fnord/thread/threadpool.h"
+#include "fnord/service/logstream/logstreamservice.h"
+#include "fnord/service/logstream/feedfactory.h"
+#include "customernamespace.h"
+
+int main(int argc, const char** argv) {
+  fnord::Application::init();
+  fnord::Application::logToStderr();
+
+  fnord::cli::FlagParser flags;
+
+  flags.defineFlag(
+      "feedserver_jsonrpc_url",
+      fnord::cli::FlagParser::T_STRING,
+      true,
+      NULL,
+      NULL,
+      "feedserver jsonrpc url",
+      "<url>");
+
+  flags.defineFlag(
+      "queue_redis_server",
+      fnord::cli::FlagParser::T_STRING,
+      true,
+      NULL,
+      NULL,
+      "queue redis server addr",
+      "<addr>");
+
+  flags.defineFlag(
+      "cm_env",
+      fnord::cli::FlagParser::T_STRING,
+      true,
+      NULL,
+      "dev",
+      "cm env",
+      "<env>");
+
+  flags.parseArgv(argc, argv);
+
+  /* start event loop */
+  fnord::thread::EventLoop ev;
+
+  auto evloop_thread = std::thread([&ev] {
+    ev.run();
+  });
+
+  /* set up feedserver channel */
+  fnord::comm::RoundRobinLBGroup feedserver_lbgroup;
+  fnord::json::JSONRPCHTTPChannel feedserver_chan(
+      &feedserver_lbgroup,
+      &ev);
+
+  feedserver_lbgroup.addServer(flags.getString("feedserver_jsonrpc_url"));
+  fnord::logstream_service::LogStreamServiceFeedFactory feeds(&feedserver_chan);
+
+  fnord::log::Logger::get()->logf(
+      fnord::log::kInfo,
+      "[cm-logjoin] Starting cm-crawlworker", 1);
+
+  /* set up redis queue */
+  auto redis_addr = fnord::net::InetAddr::resolve(
+      flags.getString("queue_redis_server"));
+
+  auto redis = fnord::redis::RedisConnection::connect(redis_addr, &ev);
+  fnord::redis::RedisQueue queue("cm.crawler.workqueue", std::move(redis));
+
+/*
+  redis.set("fu", "barx", [&redis] (const fnord::Status& status) {
+    fnord::iputs("got reply! $0", status);
+
+    redis.get("fu", [] (
+        const fnord::Status& status,
+        const fnord::Option<std::string>& reply) {
+      fnord::iputs("got reply! $0 $1", status, reply.get());
+    });
+  });
+*/
+  evloop_thread.join();
+  return 0;
+}
+

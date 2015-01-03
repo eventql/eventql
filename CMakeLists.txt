@@ -35,6 +35,7 @@ add_executable(cm-frontend
     $<TARGET_OBJECTS:fnord-http>
     $<TARGET_OBJECTS:fnord-io>
     $<TARGET_OBJECTS:fnord-json>
+    $<TARGET_OBJECTS:fnord-net>
     $<TARGET_OBJECTS:fnord-sstable>
     $<TARGET_OBJECTS:fnord-thread>
     $<TARGET_OBJECTS:fnord-logstream-service>
@@ -51,6 +52,7 @@ add_executable(cm-feedserver
     $<TARGET_OBJECTS:fnord-http>
     $<TARGET_OBJECTS:fnord-io>
     $<TARGET_OBJECTS:fnord-json>
+    $<TARGET_OBJECTS:fnord-net>
     $<TARGET_OBJECTS:fnord-sstable>
     $<TARGET_OBJECTS:fnord-thread>
     $<TARGET_OBJECTS:fnord-logstream-service>
@@ -67,6 +69,7 @@ add_executable(cm-logjoin
     $<TARGET_OBJECTS:fnord-http>
     $<TARGET_OBJECTS:fnord-io>
     $<TARGET_OBJECTS:fnord-json>
+    $<TARGET_OBJECTS:fnord-net>
     $<TARGET_OBJECTS:fnord-sstable>
     $<TARGET_OBJECTS:fnord-thread>
     $<TARGET_OBJECTS:fnord-logstream-service>
@@ -75,3 +78,21 @@ add_executable(cm-logjoin
     src/tracker/logjoin.cc)
 
 target_link_libraries(cm-logjoin ${CMAKE_THREAD_LIBS_INIT})
+
+add_executable(cm-crawlworker
+    $<TARGET_OBJECTS:cm-common>
+    $<TARGET_OBJECTS:fnord-base>
+    $<TARGET_OBJECTS:fnord-cli>
+    $<TARGET_OBJECTS:fnord-comm>
+    $<TARGET_OBJECTS:fnord-http>
+    $<TARGET_OBJECTS:fnord-io>
+    $<TARGET_OBJECTS:fnord-json>
+    $<TARGET_OBJECTS:fnord-net>
+    $<TARGET_OBJECTS:fnord-redis>
+    $<TARGET_OBJECTS:fnord-sstable>
+    $<TARGET_OBJECTS:fnord-thread>
+    $<TARGET_OBJECTS:fnord-logstream-service>
+    $<TARGET_OBJECTS:fnord-util>
+    src/cm-crawlworker.cc)
+
+target_link_libraries(cm-crawlworker ${CMAKE_THREAD_LIBS_INIT})
