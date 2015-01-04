@@ -26,16 +26,21 @@ Crawler::Crawler(
     in_flight_(0) {}
 
 void Crawler::enqueue(const CrawlRequest& req) {
-  auto http_req = fnord::http::HTTPRequest::mkGet(req.url);
-  http_req.setHeader("User-Agent", kUserAgent);
-
   std::unique_lock<std::mutex> lk(enqueue_lock_);
 
   while (in_flight_.load() > max_concurrency_) {
     wakeup_.waitForNextWakeup();
   }
 
-  enqueue(req, http_req);
+  in_flight_++;
+  lk.unlock();
+
+  scheduler_->run([req, this] {
+    auto http_req = fnord::http::HTTPRequest::mkGet(req.url);
+    http_req.setHeader("User-Agent", kUserAgent);
+
+    enqueue(req, http_req);
+  });
 }
 
 void Crawler::enqueue(
@@ -58,8 +63,6 @@ void Crawler::enqueue(
   scheduler_->runOnFirstWakeup(
       std::bind(&Crawler::requestReady, this, req, res_future),
       res_future->onReady());
-
-  in_flight_++;
 }
 
 void Crawler::requestReady(
@@ -86,7 +89,7 @@ void Crawler::requestReady(
     auto http_req = fnord::http::HTTPRequest::mkGet(new_url);
     http_req.setHeader("User-Agent", kUserAgent);
 
-    std::unique_lock<std::mutex> lk(enqueue_lock_);
+    in_flight_++;
     enqueue(req, http_req);
 
     return;
