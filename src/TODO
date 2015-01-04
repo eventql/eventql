@@ -1,4 +1,6 @@
 
+-> improved feed interface (err handling)
+
 -> cm-crawlworker
 -> cm-crawlmaster
 -> cm-indexserver

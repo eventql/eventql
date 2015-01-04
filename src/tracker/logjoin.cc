@@ -26,7 +26,7 @@ namespace cm {
 LogJoin::LogJoin(
     fnord::comm::FeedFactory* feed_factory,
     bool dry_run) :
-    feed_factory_(feed_factory),
+    feed_cache_(feed_factory),
     dry_run_(dry_run),
     sessions_(1000000),
     stream_clock_(0),
@@ -294,19 +294,8 @@ void LogJoin::recordJoinedSession(
 fnord::comm::Feed* LogJoin::getFeedForCustomer(
     const std::string& subfeed,
     const std::string& customer_key) {
-  auto cache_key = fnord::StringUtil::format("$0~$1", customer_key, subfeed);
-
-  auto feed_iter = feed_cache_.find(cache_key);
-  if (feed_iter == feed_cache_.end()) {
-    auto feed = feed_factory_->getFeed(
-        fnord::StringUtil::format("cm.tracker.$0~$1", subfeed, customer_key));
-    auto feedptr = feed.get();
-
-    feed_cache_.emplace(cache_key, std::move(feed));
-    return feedptr;
-  } else {
-    return feed_iter->second.get();
-  }
+  return feed_cache_.getFeed(
+      fnord::StringUtil::format("cm.tracker.$0~$1", subfeed, customer_key));
 }
 
 } // namespace cm

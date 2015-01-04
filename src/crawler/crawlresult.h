@@ -6,8 +6,8 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-#ifndef _CM_CRAWLREQUEST_H
-#define _CM_CRAWLREQUEST_H
+#ifndef _CM_CRAWLRESEULT_H
+#define _CM_CRAWLRESEULT_H
 #include <stdlib.h>
 #include <string>
 #include <fnord/base/datetime.h>
@@ -15,24 +15,16 @@
 
 namespace cm {
 
-struct CrawlRequest {
-  CrawlRequest() : follow_redirects(false) {}
-
+struct CrawlResult {
+  fnord::DateTime time;
   std::string url;
-  std::string target_feed;
   std::string userdata;
-  bool follow_redirects;
 
   template <typename T>
   static void reflect(T* meta) {
-    meta->prop(&cm::CrawlRequest::url, 1, "url", false);
-    meta->prop(&cm::CrawlRequest::target_feed, 2, "target_feed", false);
-    meta->prop(&cm::CrawlRequest::userdata, 3, "userdata", false);
-    meta->prop(
-        &cm::CrawlRequest::follow_redirects,
-        4,
-        "follow_redirects",
-        false);
+    meta->prop(&cm::CrawlResult::time, 1, "time", false);
+    meta->prop(&cm::CrawlResult::url, 2, "url", false);
+    meta->prop(&cm::CrawlResult::userdata, 3, "userdata", false);
   };
 };
 

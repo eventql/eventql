@@ -109,7 +109,7 @@ int main(int argc, const char** argv) {
   fnord::redis::RedisQueue queue("cm.crawler.workqueue", std::move(redis));
 
   /* start the crawler */
-  cm::Crawler crawler(concurrency, &ev);
+  cm::Crawler crawler(&feeds, concurrency, &ev);
   for (;;) {
     auto job = queue.leaseJob();
     auto req = fnord::json::fromJSON<cm::CrawlRequest>(job.job_data);
