@@ -38,7 +38,9 @@ protected:
       const CrawlRequest& req,
       const fnord::http::HTTPRequest http_req);
 
-  void requestReady(CrawlRequest req, fnord::http::HTTPResponseFuture* res);
+  void requestReady(
+      CrawlRequest req,
+      fnord::Future<fnord::http::HTTPResponse> res);
 
   fnord::comm::FeedCache feed_cache_;
   size_t max_concurrency_;

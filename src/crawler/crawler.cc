@@ -46,11 +46,11 @@ void Crawler::enqueue(const CrawlRequest& req) {
 void Crawler::enqueue(
     const CrawlRequest& req,
     const fnord::http::HTTPRequest http_req) {
-  fnord::http::HTTPResponseFuture* res_future;
   try {
-    auto f = http_.executeRequest(http_req);
-    res_future = f.get();
-    f.release();
+    auto future = http_.executeRequest(http_req);
+    scheduler_->runOnFirstWakeup(
+        std::bind(&Crawler::requestReady, this, req, future),
+        future.wakeup());
   } catch (const std::exception& e) {
     fnord::log::Logger::get()->logException(
         fnord::log::kError,
@@ -59,20 +59,15 @@ void Crawler::enqueue(
 
     return;
   }
-
-  scheduler_->runOnFirstWakeup(
-      std::bind(&Crawler::requestReady, this, req, res_future),
-      res_future->onReady());
 }
 
 void Crawler::requestReady(
     CrawlRequest req,
-    fnord::http::HTTPResponseFuture* res_raw) {
-  std::unique_ptr<fnord::http::HTTPResponseFuture> res_holder(res_raw);
+    fnord::Future<fnord::http::HTTPResponse> res_future) {
   in_flight_--;
   wakeup_.wakeup();
 
-  const auto& res = res_holder->get();
+  const auto& res = res_future.get();
   auto status = res.statusCode();
 
   /* follow redirects */
