@@ -28,8 +28,7 @@ class CustomerNamespace;
 
 class LogJoin {
 public:
-  static const size_t kFlushIntervalMicros =
-      500 * fnord::DateTime::kMicrosPerSecond;
+  static const size_t kFlushIntervalMicros = 500 * fnord::kMicrosPerSecond;
 
   LogJoin(
       fnord::comm::FeedFactory* feed_factory,

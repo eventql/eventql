@@ -46,7 +46,7 @@ void LogJoin::insertLogline(const std::string& log_line) {
   auto customer_key = log_line.substr(0, c_end);
   auto body = log_line.substr(t_end + 1);
   auto timestr = log_line.substr(c_end + 1, t_end - c_end - 1);
-  fnord::DateTime time(std::stoul(timestr) * fnord::DateTime::kMicrosPerSecond);
+  fnord::DateTime time(std::stoul(timestr) * fnord::kMicrosPerSecond);
 
   insertLogline(customer_key, time, body);
 }
@@ -170,11 +170,8 @@ bool LogJoin::maybeFlushSession(
     return false;
   }
 
-  auto tdiff =
-      static_cast<uint64_t>(stream_time) -
-      static_cast<uint64_t>(session->last_seen_unix_micros);
-  bool do_flush =
-      tdiff > kSessionIdleTimeoutSeconds * fnord::DateTime::kMicrosPerSecond;
+  auto tdiff = stream_time.unixMicros() - session->last_seen_unix_micros;
+  bool do_flush = tdiff > kSessionIdleTimeoutSeconds * fnord::kMicrosPerSecond;
   bool do_update = do_flush;
 
   std::vector<std::pair<std::string, TrackedQuery*>> flushed;
@@ -182,10 +179,9 @@ bool LogJoin::maybeFlushSession(
     const auto& eid = query_pair.first;
     auto& query = query_pair.second;
 
-    if (!query.flushed && (
-            static_cast<uint64_t>(stream_time) -
-            static_cast<uint64_t>(query.time)) >
-            kMaxQueryClickDelaySeconds * fnord::DateTime::kMicrosPerSecond) {
+    auto qtdiff = stream_time.unixMicros() - query.time.unixMicros();
+    if (!query.flushed &&
+        qtdiff > kMaxQueryClickDelaySeconds * fnord::kMicrosPerSecond) {
       query.flushed = true;
       do_update = true;
       flushed.emplace_back(eid, &query);

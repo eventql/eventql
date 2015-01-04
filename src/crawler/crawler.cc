@@ -18,7 +18,7 @@ const char Crawler::kUserAgent[] = "cm-crawler (http://fnrd.net/)";
 Crawler::Crawler(
     fnord::comm::FeedFactory* feed_factory,
     size_t max_concurrency,
-    fnord::thread::TaskScheduler* scheduler) :
+    fnord::TaskScheduler* scheduler) :
     feed_cache_(feed_factory),
     max_concurrency_(max_concurrency),
     scheduler_(scheduler),

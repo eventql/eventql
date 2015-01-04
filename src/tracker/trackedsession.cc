@@ -19,10 +19,8 @@ void TrackedSession::update() {
     for (auto& query_pair : queries) {
       auto& query = query_pair.second;
 
-      auto tdiff =
-          static_cast<uint64_t>(visit.time) - static_cast<uint64_t>(query.time);
-      constexpr auto max_delay =
-          kMaxQueryClickDelaySeconds * fnord::DateTime::kMicrosPerSecond;
+      auto tdiff = visit.time.unixMicros() - query.time.unixMicros();
+      auto max_delay = kMaxQueryClickDelaySeconds * fnord::kMicrosPerSecond;
       if (query.time > visit.time || tdiff > max_delay) {
         continue;
       }

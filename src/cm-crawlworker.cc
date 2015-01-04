@@ -111,10 +111,10 @@ int main(int argc, const char** argv) {
   /* start the crawler */
   cm::Crawler crawler(&feeds, concurrency, &ev);
   for (;;) {
-    auto job = queue.leaseJob();
+    auto job = queue.leaseJob().waitAndGet();
     auto req = fnord::json::fromJSON<cm::CrawlRequest>(job.job_data);
     crawler.enqueue(req);
-    queue.commitJobSuccessAsyncUnsafe(job);
+    queue.commitJob(job, fnord::Status::success());
   }
 
   evloop_thread.join();
