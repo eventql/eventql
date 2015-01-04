@@ -29,7 +29,7 @@ public:
   explicit Crawler(
       fnord::comm::FeedFactory* feed_factory,
       size_t max_concurrency,
-      fnord::thread::TaskScheduler* scheduler);
+      fnord::TaskScheduler* scheduler);
 
   void enqueue(const CrawlRequest& req);
 
@@ -42,8 +42,8 @@ protected:
 
   fnord::comm::FeedCache feed_cache_;
   size_t max_concurrency_;
-  fnord::thread::TaskScheduler* scheduler_;
-  fnord::thread::Wakeup wakeup_;
+  fnord::TaskScheduler* scheduler_;
+  fnord::Wakeup wakeup_;
   fnord::http::HTTPConnectionPool http_;
   std::atomic<size_t> in_flight_;
   std::mutex enqueue_lock_;
