@@ -95,7 +95,7 @@ int main(int argc, const char** argv) {
       start_offset);
 
   cm::LogJoin logjoin(&feeds, dry_run);
-
+/*
   for (;;) {
     std::string logline;
     int n = 0;
@@ -122,7 +122,7 @@ int main(int argc, const char** argv) {
       usleep(1000000);
     }
   }
-
+*/
   evloop_thread.join();
   return 0;
 }

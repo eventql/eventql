@@ -9,13 +9,13 @@
 #include "tracker/tracker.h"
 #include <fnord/base/exception.h>
 #include <fnord/base/inspect.h>
+#include "fnord/base/logging.h"
 #include <fnord/base/wallclock.h>
 #include <fnord/net/http/cookies.h>
 #include "fnord/net/http/httprequest.h"
 #include "fnord/net/http/httpresponse.h"
 #include "fnord/net/http/status.h"
 #include "fnord/base/random.h"
-#include "fnord/logging/logger.h"
 #include "customernamespace.h"
 
 /**
@@ -86,7 +86,7 @@ void Tracker::handleHTTPRequest(
           "invalid tracking pixel url: $0",
           uri.query());
 
-      fnord::log::Logger::get()->logException(fnord::log::kDebug, msg, e);
+      fnord::logDebug("cm.tracker", e, msg);
     }
 
     response->setStatus(fnord::http::kStatusOK);
@@ -138,7 +138,10 @@ void Tracker::recordLogLine(
       fnord::WallClock::unixSeconds(),
       logline);
 
-  feed_->append(feedline);
+  auto future = feed_->appendEntry(feedline);
+  future.onFailure([] (const fnord::Status& status) {
+    fnord::logError("cm.tracker", "could not write to feed: $0", status);
+  });
 }
 
 } // namespace cm

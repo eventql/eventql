@@ -105,16 +105,20 @@ void Crawler::requestReady(
   result.userdata = req.userdata;
 
   auto feed = feed_cache_.getFeed(req.target_feed);
-  feed->append(
+  auto future = feed->appendEntry(
       fnord::StringUtil::format(
           "$0\n$1",
           fnord::json::toJSONString(result),
           res.body().toString()));
 
-  fnord::log::Logger::get()->logf(
-      fnord::log::kDebug,
-      "[cm-crawlworker] successfully crawled $0",
-      req.url);
+  future.onFailure([] (const fnord::Status& status) {
+    fnord::log::Logger::get()->logf(
+        fnord::log::kDebug,
+        "[cm-crawlworker] error writing to feed: $0",
+        status);
+  });
+
+  fnord::logDebug("cm.crawlworker", "successfully crawled $0", req.url);
 }
 
 } // namespace cm
