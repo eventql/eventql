@@ -282,7 +282,14 @@ void LogJoin::recordJoinedSession(
         session_json);
   } else {
     auto feed = getFeedForCustomer("joined_sessions", customer_key);
-    feed->append(session_json);
+    auto future = feed->appendEntry(session_json);
+
+    future.onFailure([] (const fnord::Status& status) {
+      fnord::log::Logger::get()->logf(
+          fnord::log::kError,
+          "[cm-logjoin] error writing to feed: $0",
+          status);
+    });
   }
 }
 
