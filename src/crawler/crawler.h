@@ -27,14 +27,20 @@ public:
   static const char kUserAgent[];
 
   explicit Crawler(
+      fnord::comm::FeedFactory* feed_factory,
       size_t max_concurrency,
       fnord::thread::TaskScheduler* scheduler);
 
   void enqueue(const CrawlRequest& req);
 
 protected:
+  void enqueue(
+      const CrawlRequest& req,
+      const fnord::http::HTTPRequest http_req);
+
   void requestReady(CrawlRequest req, fnord::http::HTTPResponseFuture* res);
 
+  fnord::comm::FeedCache feed_cache_;
   size_t max_concurrency_;
   fnord::thread::TaskScheduler* scheduler_;
   fnord::thread::Wakeup wakeup_;

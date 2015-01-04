@@ -103,10 +103,7 @@ protected:
       const std::string& subfeed,
       const std::string& customer_key);
 
-  fnord::comm::FeedFactory* feed_factory_;
-  std::unordered_map<
-      std::string,
-      std::unique_ptr<fnord::comm::Feed>> feed_cache_;
+  fnord::comm::FeedCache feed_cache_;
 
   bool dry_run_;
 
