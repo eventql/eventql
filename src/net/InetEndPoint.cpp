@@ -14,11 +14,12 @@
 #include <xzero/RuntimeError.h>
 #include <xzero/Buffer.h>
 #include <xzero/sysconfig.h>
-#include <system_error>
+#include <xzero/RuntimeError.h>
 #include <stdexcept>
 #include <netinet/tcp.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <errno.h>
 
 #if defined(HAVE_SYS_SENDFILE_H)
 #include <sys/sendfile.h>
@@ -163,7 +164,7 @@ void InetEndPoint::setBlocking(bool enable) {
 #endif
 
   if (fcntl(handle_, F_SETFL, flags) < 0) {
-    throw std::system_error(errno, std::system_category());
+    throw SYSTEM_ERROR(errno);
   }
 }
 
@@ -176,7 +177,7 @@ void InetEndPoint::setCorking(bool enable) {
   if (isCorking_ != enable) {
     int flag = enable ? 1 : 0;
     if (setsockopt(handle_, IPPROTO_TCP, TCP_CORK, &flag, sizeof(flag)) < 0)
-      throw std::system_error(errno, std::system_category());
+      throw SYSTEM_ERROR(errno);
 
     isCorking_ = enable;
   }
@@ -203,7 +204,7 @@ size_t InetEndPoint::fill(Buffer* result) {
 #endif
         break;
       default:
-        throw std::system_error(errno, std::system_category());
+        throw SYSTEM_ERROR(errno);
     }
   } else {
     result->resize(result->size() + n);
@@ -216,7 +217,7 @@ size_t InetEndPoint::flush(const BufferRef& source) {
   ssize_t rv = write(handle(), source.data(), source.size());
 
   if (rv < 0)
-    throw std::system_error(errno, std::system_category());
+    throw SYSTEM_ERROR(errno);
 
   // EOF exception?
 
@@ -228,13 +229,13 @@ size_t InetEndPoint::flush(int fd, off_t offset, size_t size) {
   off_t len = 0;
   int rv = sendfile(fd, handle(), offset, &len, nullptr, 0);
   if (rv < 0)
-    throw std::system_error(errno, std::system_category());
+    throw SYSTEM_ERROR(errno);
 
   return len;
 #else
   ssize_t rv = sendfile(handle(), fd, &offset, size);
   if (rv < 0)
-    throw std::system_error(errno, std::system_category());
+    throw SYSTEM_ERROR(errno);
 
   // EOF exception?
 
