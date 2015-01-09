@@ -6,6 +6,7 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
+#include <fnord/base/logging.h>
 #include <fnord/net/http/httprequest.h>
 #include <fnord/json/json.h>
 #include "crawler/crawler.h"
@@ -52,11 +53,7 @@ void Crawler::enqueue(
         std::bind(&Crawler::requestReady, this, req, future),
         future.wakeup());
   } catch (const std::exception& e) {
-    fnord::log::Logger::get()->logException(
-        fnord::log::kError,
-        "[cm-crawlworker] error while executing request: $0",
-        e);
-
+    fnord::logError("cm.crawler", e, "error while executing request");
     return;
   }
 }
@@ -74,9 +71,9 @@ void Crawler::requestReady(
   if ((status == 301 || status == 302) && req.follow_redirects) {
     auto new_url = res.getHeader("Location");
 
-    fnord::log::Logger::get()->logf(
-        fnord::log::kDebug,
-        "[cm-crawlworker] following $1 redirect for: $0 => $2",
+    fnord::logDebug(
+        "cm.crawler",
+        "following $1 redirect for: $0 => $2",
         req.url,
         res.statusCode(),
         new_url);
@@ -92,9 +89,9 @@ void Crawler::requestReady(
 
   /* bail on error */
   if (status != 200) {
-    fnord::log::Logger::get()->logf(
-        fnord::log::kError,
-        "[cm-crawlworker] received non-200 status code for: $0 => $1, $2",
+    fnord::logError(
+        "cm.crawler",
+        "received non-200 status code for: $0 => $1, $2",
         req.url,
         res.statusCode(),
         res.body().toString());
@@ -112,13 +109,10 @@ void Crawler::requestReady(
           res.body().toString()));
 
   future.onFailure([] (const fnord::Status& status) {
-    fnord::log::Logger::get()->logf(
-        fnord::log::kDebug,
-        "[cm-crawlworker] error writing to feed: $0",
-        status);
+    fnord::logError("cm.crawler", "error writing to feed: $0", status);
   });
 
-  fnord::logDebug("cm.crawlworker", "successfully crawled $0", req.url);
+  fnord::logDebug("cm.crawler", "successfully crawled $0", req.url);
 }
 
 } // namespace cm
