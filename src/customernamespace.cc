@@ -7,7 +7,7 @@
  * permission is obtained.
  */
 #include <fnord/base/stringutil.h>
-#include <fnord/io/fileutil.h>
+#include <fnord/base/io/fileutil.h>
 #include "customernamespace.h"
 
 namespace cm {
@@ -33,7 +33,7 @@ const std::string& CustomerNamespace::trackingJS() {
 }
 
 void CustomerNamespace::loadTrackingJS(const std::string& filename) {
-  tracking_js_ = fnord::io::FileUtil::read(filename);
+  tracking_js_ = fnord::FileUtil::read(filename);
   /*fnord::StringUtil::replaceAll(&tracking_js_, "var ", "var\t");
   fnord::StringUtil::replaceAll(&tracking_js_, "typeof ", "typeof\t");
   fnord::StringUtil::replaceAll(&tracking_js_, "function ", "function\t");

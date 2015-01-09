@@ -9,18 +9,18 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include "fnord/base/application.h"
+#include "fnord/base/io/filerepository.h"
+#include "fnord/base/io/fileutil.h"
+#include "fnord/base/thread/eventloop.h"
+#include "fnord/base/thread/threadpool.h"
 #include "fnord/base/random.h"
 #include "fnord/comm/rpc.h"
 #include "fnord/cli/flagparser.h"
 #include "fnord/comm/rpcchannel.h"
-#include "fnord/io/filerepository.h"
-#include "fnord/io/fileutil.h"
 #include "fnord/json/json.h"
 #include "fnord/json/jsonrpc.h"
 #include "fnord/net/http/httprouter.h"
 #include "fnord/net/http/httpserver.h"
-#include "fnord/thread/eventloop.h"
-#include "fnord/thread/threadpool.h"
 #include "fnord/service/logstream/logstreamservice.h"
 #include "fnord/service/logstream/feedfactory.h"
 #include "customernamespace.h"
@@ -59,16 +59,16 @@ int main(int argc, const char** argv) {
 
   /* set up cmdata */
   auto cmdata_path = flags.getString("cmdata");
-  if (!fnord::io::FileUtil::isDirectory(cmdata_path)) {
+  if (!fnord::FileUtil::isDirectory(cmdata_path)) {
     RAISEF(kIOError, "no such directory: $0", cmdata_path);
   }
 
   /* set up logstream service */
-  auto feeds_dir_path = fnord::io::FileUtil::joinPaths(cmdata_path, "feeds");
-  fnord::io::FileUtil::mkdir_p(feeds_dir_path);
+  auto feeds_dir_path = fnord::FileUtil::joinPaths(cmdata_path, "feeds");
+  fnord::FileUtil::mkdir_p(feeds_dir_path);
 
   fnord::logstream_service::LogStreamService logstream_service{
-      fnord::io::FileRepository(feeds_dir_path)};
+      fnord::FileRepository(feeds_dir_path)};
 
   rpc.registerService(&logstream_service);
 
