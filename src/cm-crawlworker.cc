@@ -17,8 +17,8 @@
 #include "fnord/comm/queue.h"
 #include "fnord/cli/flagparser.h"
 #include "fnord/comm/rpcchannel.h"
-#include "fnord/io/filerepository.h"
-#include "fnord/io/fileutil.h"
+#include "fnord/base/io/filerepository.h"
+#include "fnord/base/io/fileutil.h"
 #include "fnord/json/json.h"
 #include "fnord/json/jsonrpc.h"
 #include "fnord/json/jsonrpchttpchannel.h"
@@ -26,8 +26,8 @@
 #include "fnord/net/http/httpserver.h"
 #include "fnord/net/redis/redisconnection.h"
 #include "fnord/net/redis/redisqueue.h"
-#include "fnord/thread/eventloop.h"
-#include "fnord/thread/threadpool.h"
+#include "fnord/base/thread/eventloop.h"
+#include "fnord/base/thread/threadpool.h"
 #include "fnord/service/logstream/logstreamservice.h"
 #include "fnord/service/logstream/feedfactory.h"
 
@@ -97,9 +97,10 @@ int main(int argc, const char** argv) {
   fnord::logstream_service::LogStreamServiceFeedFactory feeds(&feedserver_chan);
 
   auto concurrency = flags.getInt("concurrency");
-  fnord::log::Logger::get()->logf(
-      fnord::log::kInfo,
-      "[cm-logjoin] Starting cm-crawlworker with concurrency=$0", concurrency);
+  fnord::logInfo(
+      "cm.crawler",
+      "Starting cm-crawlworker with concurrency=$0",
+      concurrency);
 
   /* set up redis queue */
   auto redis_addr = fnord::net::InetAddr::resolve(

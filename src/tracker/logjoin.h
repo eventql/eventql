@@ -18,7 +18,7 @@
 #include "fnord/comm/feed.h"
 #include "fnord/comm/rpc.h"
 #include "fnord/comm/rpcservicemap.h"
-#include "fnord/thread/taskscheduler.h"
+#include "fnord/base/thread/taskscheduler.h"
 #include "itemref.h"
 #include "trackedsession.h"
 #include "trackedquery.h"

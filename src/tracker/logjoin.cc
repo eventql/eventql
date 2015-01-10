@@ -9,6 +9,7 @@
 #include <assert.h>
 #include <fnord/base/exception.h>
 #include <fnord/base/inspect.h>
+#include <fnord/base/logging.h>
 #include <fnord/base/stringutil.h>
 #include <fnord/base/uri.h>
 #include <fnord/base/wallclock.h>
@@ -275,14 +276,13 @@ void LogJoin::recordJoinedSession(
     const TrackedSession& session) {
   auto session_json = fnord::json::toJSONString(session.toJoinedSession());
 
-  if (dry_run_) {
-    fnord::log::Logger::get()->logf(
-        fnord::log::kDebug,
-        "[cm-logjoin] [dry-run] flush session: $0",
-        session_json);
-  } else {
+  if (!dry_run_) {
     auto feed = getFeedForCustomer("joined_sessions", customer_key);
-    feed->append(session_json);
+    auto future = feed->appendEntry(session_json);
+
+    future.onFailure([] (const fnord::Status& status) {
+      fnord::logError("cm.logjoing", "error writing to feed: $0", status);
+    });
   }
 }
 

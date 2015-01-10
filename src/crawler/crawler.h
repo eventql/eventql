@@ -15,8 +15,8 @@
 #include <unordered_map>
 #include <fnord/base/random.h>
 #include <fnord/base/uri.h>
+#include <fnord/base/thread/taskscheduler.h>
 #include <fnord/comm/feed.h>
-#include <fnord/thread/taskscheduler.h>
 #include <fnord/net/http/httpconnectionpool.h>
 #include "crawler/crawlrequest.h"
 
