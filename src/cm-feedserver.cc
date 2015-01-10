@@ -23,8 +23,11 @@
 #include "fnord/net/http/httpserver.h"
 #include "fnord/service/logstream/logstreamservice.h"
 #include "fnord/service/logstream/feedfactory.h"
+#include "fnord/stats/statshttpservlet.h"
 #include "customernamespace.h"
 #include "tracker/tracker.h"
+
+using fnord::StringUtil;
 
 int main(int argc, const char** argv) {
   fnord::Application::init();
@@ -68,7 +71,8 @@ int main(int argc, const char** argv) {
   fnord::FileUtil::mkdir_p(feeds_dir_path);
 
   fnord::logstream_service::LogStreamService logstream_service{
-      fnord::FileRepository(feeds_dir_path)};
+      fnord::FileRepository(feeds_dir_path),
+      "/cm-feedserver/global/feeds"};
 
   rpc.registerService(&logstream_service);
 
@@ -77,6 +81,14 @@ int main(int argc, const char** argv) {
   rpc_http_router.addRouteByPrefixMatch("/rpc", &rpc_http);
   fnord::http::HTTPServer rpc_http_server(&rpc_http_router, &event_loop);
   rpc_http_server.listen(flags.getInt("rpc_http_port"));
+
+  rpc_http_server.stats()->exportStats(
+      "/cm-feedserver/global/http/inbound");
+  rpc_http_server.stats()->exportStats(
+      StringUtil::format("/cm-feedserver/$0/http/inbound", cm::cmHostname()));
+
+  fnord::stats::StatsHTTPServlet stats_servlet;
+  rpc_http_router.addRouteByPrefixMatch("/stats", &stats_servlet);
 
   event_loop.run();
   return 0;
