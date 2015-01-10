@@ -17,6 +17,7 @@
 #include <fnord/base/uri.h>
 #include <fnord/comm/feed.h>
 #include <fnord/net/http/httpservice.h>
+#include "fnord/stats/stats.h"
 
 namespace cm {
 class CustomerNamespace;
@@ -46,6 +47,10 @@ protected:
 
   std::unordered_map<std::string, CustomerNamespace*> vhosts_;
   fnord::Random rnd_;
+
+  fnord::stats::Counter<uint64_t> stat_loglines_total_;
+  fnord::stats::Counter<uint64_t> stat_loglines_versiontooold_;
+  fnord::stats::Counter<uint64_t> stat_loglines_invalid_;
 };
 
 } // namespace cm

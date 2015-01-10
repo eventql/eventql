@@ -44,6 +44,21 @@ const unsigned char pixel_gif[42] = {
 Tracker::Tracker(
     fnord::comm::FeedFactory* feed_factory) {
   feed_ = feed_factory->getFeed("cm.tracker.log");
+
+  exportStat(
+      "/cm-frontend/tracker/loglines_total",
+      &stat_loglines_total_,
+      fnord::stats::ExportMode::EXPORT_DELTA);
+
+  exportStat(
+      "/cm-frontend/tracker/loglines_versiontooold",
+      &stat_loglines_versiontooold_,
+      fnord::stats::ExportMode::EXPORT_DELTA);
+
+  exportStat(
+      "/cm-frontend/tracker/loglines_invalid",
+      &stat_loglines_invalid_,
+      fnord::stats::ExportMode::EXPORT_DELTA);
 }
 
 bool Tracker::isReservedParam(const std::string p) {
@@ -119,16 +134,22 @@ void Tracker::recordLogLine(
   fnord::URI::ParamList params;
   fnord::URI::parseQueryString(logline, &params);
 
+  stat_loglines_total_.incr(1);
+
   std::string pixel_ver;
   if (!fnord::URI::getParam(params, "v", &pixel_ver)) {
+    stat_loglines_invalid_.incr(1);
     RAISE(kRuntimeError, "missing v parameter");
   }
 
   try {
     if (std::stoi(pixel_ver) < kMinPixelVersion) {
+      stat_loglines_versiontooold_.incr(1);
+      stat_loglines_invalid_.incr(1);
       RAISEF(kRuntimeError, "pixel version too old: $0", pixel_ver);
     }
   } catch (const std::exception& e) {
+    stat_loglines_invalid_.incr(1);
     RAISEF(kRuntimeError, "invalid pixel version: $0", pixel_ver);
   }
 
