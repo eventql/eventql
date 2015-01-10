@@ -13,7 +13,7 @@ include_directories(./src)
 if(APPLE)
   set(CMAKE_CXX_FLAGS "-std=c++0x -stdlib=libc++ ${CMAKE_CXX_FLAGS}")
 else()
-  set(CMAKE_CXX_FLAGS "-std=c++0x ${CMAKE_CXX_FLAGS} -lstdc++ -lm")
+  set(CMAKE_CXX_FLAGS "-std=c++0x -lstdc++ ${CMAKE_CXX_FLAGS}")
 endif()
 
 find_package(Threads)
@@ -43,6 +43,7 @@ add_executable(cm-frontend
     src/cm-frontend.cc)
 
 target_link_libraries(cm-frontend ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(cm-frontend m)
 
 add_executable(cm-feedserver
     $<TARGET_OBJECTS:cm-common>
