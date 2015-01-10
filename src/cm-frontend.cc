@@ -88,7 +88,6 @@ int main(int argc, const char** argv) {
   public_http_server.listen(flags.getInt("public_http_port"));
   public_http_server.stats()->exportStats("/cm/frontend/http/inbound");
 
-
   /* set up rpc http server */
   fnord::json::JSONRPC rpc;
   fnord::json::JSONRPCHTTPAdapter rpc_http(&rpc);

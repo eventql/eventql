@@ -59,6 +59,16 @@ Tracker::Tracker(
       "/cm-frontend/tracker/loglines_invalid",
       &stat_loglines_invalid_,
       fnord::stats::ExportMode::EXPORT_DELTA);
+
+  exportStat(
+      "/cm-frontend/tracker/loglines_written_success",
+      &stat_loglines_written_success_,
+      fnord::stats::ExportMode::EXPORT_DELTA);
+
+  exportStat(
+      "/cm-frontend/tracker/loglines_written_failure",
+      &stat_loglines_written_failure_,
+      fnord::stats::ExportMode::EXPORT_DELTA);
 }
 
 bool Tracker::isReservedParam(const std::string p) {
@@ -160,8 +170,13 @@ void Tracker::recordLogLine(
       logline);
 
   auto future = feed_->appendEntry(feedline);
-  future.onFailure([] (const fnord::Status& status) {
+  future.onFailure([this] (const fnord::Status& status) {
+    stat_loglines_written_failure_.incr(1);
     fnord::logError("cm.tracker", "could not write to feed: $0", status);
+  });
+
+  future.onSuccess([this] (const bool& ret) {
+    stat_loglines_written_success_.incr(1);
   });
 }
 

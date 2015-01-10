@@ -51,6 +51,8 @@ protected:
   fnord::stats::Counter<uint64_t> stat_loglines_total_;
   fnord::stats::Counter<uint64_t> stat_loglines_versiontooold_;
   fnord::stats::Counter<uint64_t> stat_loglines_invalid_;
+  fnord::stats::Counter<uint64_t> stat_loglines_written_success_;
+  fnord::stats::Counter<uint64_t> stat_loglines_written_failure_;
 };
 
 } // namespace cm
