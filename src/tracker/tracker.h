@@ -18,6 +18,7 @@
 #include <fnord/comm/feed.h>
 #include <fnord/net/http/httpservice.h>
 #include "fnord/stats/stats.h"
+#include "common.h"
 
 namespace cm {
 class CustomerNamespace;
@@ -37,6 +38,8 @@ public:
   void addCustomer(CustomerNamespace* customer);
 
 protected:
+
+  void exportStats(const std::string& path_prefix);
 
   void track(CustomerNamespace* customer, const fnord::URI& uri);
   void recordLogLine(CustomerNamespace* customer, const std::string& logline);

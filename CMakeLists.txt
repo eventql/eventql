@@ -21,6 +21,7 @@ find_package(Threads)
 add_subdirectory(src/fnord)
 
 add_library(cm-common OBJECT
+    src/common.cc
     src/itemref.cc
     src/customernamespace.cc
     src/tracker/trackedsession.cc
