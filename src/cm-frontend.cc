@@ -30,6 +30,7 @@
 #include "tracker/tracker.h"
 
 using fnord::comm::LocalRPCChannel;
+using fnord::StringUtil;
 
 int main(int argc, const char** argv) {
   fnord::Application::init();
@@ -71,7 +72,10 @@ int main(int argc, const char** argv) {
       &event_loop);
 
   feedserver_chan.httpConnectionPool()->stats()->exportStats(
-      "/cm-frontend/http/outbound");
+      "/cm-frontend/global/http/outbound");
+
+  feedserver_chan.httpConnectionPool()->stats()->exportStats(
+      StringUtil::format("/cm-frontend/$0/http/outbound", cm::cmHostname()));
 
   feedserver_lbgroup.addServer("http://127.0.0.1:8001/rpc");
 
@@ -86,7 +90,10 @@ int main(int argc, const char** argv) {
   public_http_router.addRouteByPrefixMatch("/t", &tracker);
   fnord::http::HTTPServer public_http_server(&public_http_router, &event_loop);
   public_http_server.listen(flags.getInt("public_http_port"));
-  public_http_server.stats()->exportStats("/cm/frontend/http/inbound");
+  public_http_server.stats()->exportStats(
+      "/cm-frontend/global/http/inbound");
+  public_http_server.stats()->exportStats(
+      StringUtil::format("/cm-frontend/$0/http/inbound", cm::cmHostname()));
 
   /* set up rpc http server */
   fnord::json::JSONRPC rpc;

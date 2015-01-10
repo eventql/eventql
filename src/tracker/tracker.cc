@@ -32,6 +32,8 @@
  *
  */
 
+using fnord::StringUtil;
+
 namespace cm {
 
 const unsigned char pixel_gif[42] = {
@@ -45,28 +47,33 @@ Tracker::Tracker(
     fnord::comm::FeedFactory* feed_factory) {
   feed_ = feed_factory->getFeed("cm.tracker.log");
 
+  exportStats("/cm-frontend/global");
+  exportStats(StringUtil::format("/cm-frontend/$0", cmHostname()));
+}
+
+void Tracker::exportStats(const std::string& prefix) {
   exportStat(
-      "/cm-frontend/tracker/loglines_total",
+      StringUtil::format("$0/$1", prefix, "tracker/loglines_total"),
       &stat_loglines_total_,
       fnord::stats::ExportMode::EXPORT_DELTA);
 
   exportStat(
-      "/cm-frontend/tracker/loglines_versiontooold",
+      StringUtil::format("$0/$1", prefix, "tracker/loglines_versiontooold"),
       &stat_loglines_versiontooold_,
       fnord::stats::ExportMode::EXPORT_DELTA);
 
   exportStat(
-      "/cm-frontend/tracker/loglines_invalid",
+      StringUtil::format("$0/$1", prefix, "tracker/loglines_invalid"),
       &stat_loglines_invalid_,
       fnord::stats::ExportMode::EXPORT_DELTA);
 
   exportStat(
-      "/cm-frontend/tracker/loglines_written_success",
+      StringUtil::format("$0/$1", prefix, "tracker/loglines_written_success"),
       &stat_loglines_written_success_,
       fnord::stats::ExportMode::EXPORT_DELTA);
 
   exportStat(
-      "/cm-frontend/tracker/loglines_written_failure",
+      StringUtil::format("$0/$1", prefix, "tracker/loglines_written_failure"),
       &stat_loglines_written_failure_,
       fnord::stats::ExportMode::EXPORT_DELTA);
 }
