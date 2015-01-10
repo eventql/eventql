@@ -8,21 +8,22 @@
  */
 #include <stdlib.h>
 #include <unistd.h>
+#include "fnord/base/io/filerepository.h"
+#include "fnord/base/io/fileutil.h"
 #include "fnord/base/application.h"
+#include "fnord/base/logging.h"
 #include "fnord/base/random.h"
+#include "fnord/base/thread/eventloop.h"
+#include "fnord/base/thread/threadpool.h"
 #include "fnord/comm/lbgroup.h"
 #include "fnord/comm/rpc.h"
 #include "fnord/cli/flagparser.h"
 #include "fnord/comm/rpcchannel.h"
-#include "fnord/io/filerepository.h"
-#include "fnord/io/fileutil.h"
 #include "fnord/json/json.h"
 #include "fnord/json/jsonrpc.h"
 #include "fnord/json/jsonrpchttpchannel.h"
 #include "fnord/net/http/httprouter.h"
 #include "fnord/net/http/httpserver.h"
-#include "fnord/thread/eventloop.h"
-#include "fnord/thread/threadpool.h"
 #include "fnord/service/logstream/logstreamservice.h"
 #include "fnord/service/logstream/feedfactory.h"
 #include "customernamespace.h"
@@ -88,14 +89,14 @@ int main(int argc, const char** argv) {
   auto dry_run = !flags.isSet("no_dryrun");
   auto start_offset = 0;
 
-  fnord::log::Logger::get()->logf(
-      fnord::log::kInfo,
-      "[cm-logjoin] Starting cm-logjoin with dry_run=$0 start_offset=$1",
+  fnord::logInfo(
+      "cm.logjoin",
+      "Starting cm-logjoin with dry_run=$0 start_offset=$1",
       dry_run,
       start_offset);
 
   cm::LogJoin logjoin(&feeds, dry_run);
-
+/*
   for (;;) {
     std::string logline;
     int n = 0;
@@ -122,7 +123,7 @@ int main(int argc, const char** argv) {
       usleep(1000000);
     }
   }
-
+*/
   evloop_thread.join();
   return 0;
 }
