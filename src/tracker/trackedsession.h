@@ -39,7 +39,7 @@ struct JoinedSession {
 
   template <typename T>
   static void reflect(T* meta) {
-    meta->prop(&cm::JoinedSession::customer_key, 1, "time", false);
+    meta->prop(&cm::JoinedSession::customer_key, 1, "customer", false);
     meta->prop(&cm::JoinedSession::queries, 2, "queries", false);
     meta->prop(&cm::JoinedSession::item_visits, 3, "item_visits", false);
   };
