@@ -26,6 +26,7 @@
 #include "fnord/service/logstream/logstreamservice.h"
 #include "fnord/service/logstream/feedfactory.h"
 #include "fnord/stats/statshttpservlet.h"
+#include "fnord/stats/statsdagent.h"
 #include "customernamespace.h"
 #include "tracker/tracker.h"
 
@@ -55,6 +56,15 @@ int main(int argc, const char** argv) {
       "8000",
       "Start the rpc http server on this port",
       "<port>");
+
+  flags.defineFlag(
+      "statsd_addr",
+      fnord::cli::FlagParser::T_STRING,
+      false,
+      NULL,
+      "127.0.0.1:8192",
+      "Statsd addr",
+      "<addr>");
 
   flags.parseArgv(argc, argv);
 
@@ -106,6 +116,12 @@ int main(int argc, const char** argv) {
 
   fnord::stats::StatsHTTPServlet stats_servlet;
   rpc_http_router.addRouteByPrefixMatch("/stats", &stats_servlet);
+
+  fnord::stats::StatsdAgent statsd_agent(
+      fnord::net::InetAddr::resolve(flags.getString("statsd_addr")),
+      10 * fnord::kMicrosPerSecond);
+
+  statsd_agent.start();
 
   event_loop.run();
   return 0;
