@@ -95,3 +95,19 @@ add_executable(cm-crawlworker
     src/cm-crawlworker.cc)
 
 target_link_libraries(cm-crawlworker ${CMAKE_THREAD_LIBS_INIT})
+
+add_executable(cm-stats
+    $<TARGET_OBJECTS:fnord-base>
+    $<TARGET_OBJECTS:fnord-chart>
+    $<TARGET_OBJECTS:fnord-cli>
+    $<TARGET_OBJECTS:fnord-comm>
+    $<TARGET_OBJECTS:fnord-http>
+    $<TARGET_OBJECTS:fnord-json>
+    $<TARGET_OBJECTS:fnord-net>
+    $<TARGET_OBJECTS:fnord-stats>
+    $<TARGET_OBJECTS:fnord-sstable>
+    $<TARGET_OBJECTS:fnord-util>
+    $<TARGET_OBJECTS:fnord-metric-service>
+    src/cm-stats.cc)
+
+target_link_libraries(cm-stats ${CMAKE_THREAD_LIBS_INIT})
