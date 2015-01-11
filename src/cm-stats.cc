@@ -62,6 +62,10 @@ int main(int argc, const char** argv) {
       "<path>");
 
   flags.parseArgv(argc, argv);
+
+  fnord::thread::ThreadPool thread_pool;
+  fnord::thread::EventLoop evloop;
+
   /* set up cmdata */
   auto cmdata_path = flags.getString("cmdata");
   if (!fnord::FileUtil::isDirectory(cmdata_path)) {
@@ -71,9 +75,10 @@ int main(int argc, const char** argv) {
   auto metrics_dir_path = fnord::FileUtil::joinPaths(cmdata_path, "metrics");
   fnord::FileUtil::mkdir_p(metrics_dir_path);
 
-  auto metric_service = MetricService::newWithInMemoryBackend();
+  auto metric_service = MetricService::newWithDiskBackend(
+      metrics_dir_path,
+      &thread_pool);
 
-  fnord::thread::EventLoop evloop;
   HTTPRouter http_router;
   HTTPServer http_server(&http_router, &evloop);
   http_server.listen(flags.getInt("rpc_http_port"));
