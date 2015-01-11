@@ -24,6 +24,7 @@
 #include "fnord/service/logstream/logstreamservice.h"
 #include "fnord/service/logstream/feedfactory.h"
 #include "fnord/stats/statshttpservlet.h"
+#include "fnord/stats/statsdagent.h"
 #include "customernamespace.h"
 #include "tracker/tracker.h"
 
@@ -89,6 +90,12 @@ int main(int argc, const char** argv) {
 
   fnord::stats::StatsHTTPServlet stats_servlet;
   rpc_http_router.addRouteByPrefixMatch("/stats", &stats_servlet);
+
+  fnord::stats::StatsdAgent statsd_agent(
+      fnord::net::InetAddr::resolve(flags.getString("statsd_addr")),
+      10 * fnord::kMicrosPerSecond);
+
+  statsd_agent.start();
 
   event_loop.run();
   return 0;
