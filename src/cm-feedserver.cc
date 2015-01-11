@@ -54,6 +54,15 @@ int main(int argc, const char** argv) {
       "clickmatcher app data dir",
       "<path>");
 
+  flags.defineFlag(
+      "statsd_addr",
+      fnord::cli::FlagParser::T_STRING,
+      false,
+      NULL,
+      "127.0.0.1:8192",
+      "Statsd addr",
+      "<addr>");
+
   flags.parseArgv(argc, argv);
 
   fnord::thread::EventLoop event_loop;
