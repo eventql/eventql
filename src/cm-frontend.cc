@@ -8,27 +8,30 @@
  */
 #include <stdlib.h>
 #include <unistd.h>
+#include "fnord/base/io/filerepository.h"
+#include "fnord/base/io/fileutil.h"
 #include "fnord/base/application.h"
 #include "fnord/base/random.h"
+#include "fnord/base/thread/eventloop.h"
+#include "fnord/base/thread/threadpool.h"
 #include "fnord/comm/lbgroup.h"
 #include "fnord/comm/rpc.h"
 #include "fnord/cli/flagparser.h"
 #include "fnord/comm/rpcchannel.h"
-#include "fnord/io/filerepository.h"
-#include "fnord/io/fileutil.h"
 #include "fnord/json/json.h"
 #include "fnord/json/jsonrpc.h"
 #include "fnord/json/jsonrpchttpchannel.h"
 #include "fnord/net/http/httprouter.h"
 #include "fnord/net/http/httpserver.h"
-#include "fnord/thread/eventloop.h"
-#include "fnord/thread/threadpool.h"
 #include "fnord/service/logstream/logstreamservice.h"
 #include "fnord/service/logstream/feedfactory.h"
+#include "fnord/stats/statshttpservlet.h"
+#include "fnord/stats/statsdagent.h"
 #include "customernamespace.h"
 #include "tracker/tracker.h"
 
 using fnord::comm::LocalRPCChannel;
+using fnord::StringUtil;
 
 int main(int argc, const char** argv) {
   fnord::Application::init();
@@ -54,6 +57,15 @@ int main(int argc, const char** argv) {
       "Start the rpc http server on this port",
       "<port>");
 
+  flags.defineFlag(
+      "statsd_addr",
+      fnord::cli::FlagParser::T_STRING,
+      false,
+      NULL,
+      "127.0.0.1:8192",
+      "Statsd addr",
+      "<addr>");
+
   flags.parseArgv(argc, argv);
 
   fnord::thread::EventLoop event_loop;
@@ -69,6 +81,12 @@ int main(int argc, const char** argv) {
       &feedserver_lbgroup,
       &event_loop);
 
+  feedserver_chan.httpConnectionPool()->stats()->exportStats(
+      "/cm-frontend/global/http/outbound");
+
+  feedserver_chan.httpConnectionPool()->stats()->exportStats(
+      StringUtil::format("/cm-frontend/$0/http/outbound", cm::cmHostname()));
+
   feedserver_lbgroup.addServer("http://127.0.0.1:8001/rpc");
 
   /* set up tracker */
@@ -82,6 +100,10 @@ int main(int argc, const char** argv) {
   public_http_router.addRouteByPrefixMatch("/t", &tracker);
   fnord::http::HTTPServer public_http_server(&public_http_router, &event_loop);
   public_http_server.listen(flags.getInt("public_http_port"));
+  public_http_server.stats()->exportStats(
+      "/cm-frontend/global/http/inbound");
+  public_http_server.stats()->exportStats(
+      StringUtil::format("/cm-frontend/$0/http/inbound", cm::cmHostname()));
 
   /* set up rpc http server */
   fnord::json::JSONRPC rpc;
@@ -91,6 +113,15 @@ int main(int argc, const char** argv) {
   rpc_http_router.addRouteByPrefixMatch("/rpc", &rpc_http);
   fnord::http::HTTPServer rpc_http_server(&rpc_http_router, &event_loop);
   rpc_http_server.listen(flags.getInt("rpc_http_port"));
+
+  fnord::stats::StatsHTTPServlet stats_servlet;
+  rpc_http_router.addRouteByPrefixMatch("/stats", &stats_servlet);
+
+  fnord::stats::StatsdAgent statsd_agent(
+      fnord::net::InetAddr::resolve(flags.getString("statsd_addr")),
+      10 * fnord::kMicrosPerSecond);
+
+  statsd_agent.start();
 
   event_loop.run();
   return 0;

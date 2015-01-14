@@ -1,4 +1,7 @@
 
+-> cm-crawlmaster
+-> cm-indexserver
+-> cm-featuredump
 
 rename Tracked* -> Joined*
 

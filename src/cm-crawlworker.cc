@@ -8,26 +8,32 @@
  */
 #include <stdlib.h>
 #include <unistd.h>
-#include "fnord/base/io/filerepository.h"
-#include "fnord/base/io/fileutil.h"
 #include "fnord/base/application.h"
-#include "fnord/base/logging.h"
+#include "fnord/base/option.h"
 #include "fnord/base/random.h"
-#include "fnord/base/thread/eventloop.h"
-#include "fnord/base/thread/threadpool.h"
+#include "fnord/base/status.h"
 #include "fnord/comm/lbgroup.h"
 #include "fnord/comm/rpc.h"
+#include "fnord/comm/queue.h"
 #include "fnord/cli/flagparser.h"
 #include "fnord/comm/rpcchannel.h"
+#include "fnord/base/io/filerepository.h"
+#include "fnord/base/io/fileutil.h"
 #include "fnord/json/json.h"
 #include "fnord/json/jsonrpc.h"
 #include "fnord/json/jsonrpchttpchannel.h"
 #include "fnord/net/http/httprouter.h"
 #include "fnord/net/http/httpserver.h"
+#include "fnord/net/redis/redisconnection.h"
+#include "fnord/net/redis/redisqueue.h"
+#include "fnord/base/thread/eventloop.h"
+#include "fnord/base/thread/threadpool.h"
 #include "fnord/service/logstream/logstreamservice.h"
 #include "fnord/service/logstream/feedfactory.h"
+
 #include "customernamespace.h"
-#include "tracker/logjoin.h"
+#include "crawler/crawlrequest.h"
+#include "crawler/crawler.h"
 
 int main(int argc, const char** argv) {
   fnord::Application::init();
@@ -40,9 +46,18 @@ int main(int argc, const char** argv) {
       fnord::cli::FlagParser::T_STRING,
       true,
       NULL,
-      "8080",
+      NULL,
       "feedserver jsonrpc url",
-      "<port>");
+      "<url>");
+
+  flags.defineFlag(
+      "queue_redis_server",
+      fnord::cli::FlagParser::T_STRING,
+      true,
+      NULL,
+      NULL,
+      "queue redis server addr",
+      "<addr>");
 
   flags.defineFlag(
       "cm_env",
@@ -54,13 +69,14 @@ int main(int argc, const char** argv) {
       "<env>");
 
   flags.defineFlag(
-      "no_dryrun",
-      fnord::cli::FlagParser::T_SWITCH,
+      "concurrency",
+      fnord::cli::FlagParser::T_INTEGER,
       false,
       NULL,
-      NULL,
-      "no dryrun",
-      "<bool>");
+      "100",
+      "max number of http requests to run concurrently",
+      "<env>");
+
 
   flags.parseArgv(argc, argv);
 
@@ -80,50 +96,28 @@ int main(int argc, const char** argv) {
   feedserver_lbgroup.addServer(flags.getString("feedserver_jsonrpc_url"));
   fnord::logstream_service::LogStreamServiceFeedFactory feeds(&feedserver_chan);
 
-  auto feed = feeds.getFeed("cm.tracker.log");
-  if (flags.getString("cm_env") == "production") {
-    feed->setOption("batch_size", "10000");
-    feed->setOption("buffer_size", "100000");
-  }
-
-  auto dry_run = !flags.isSet("no_dryrun");
-  auto start_offset = 0;
-
+  auto concurrency = flags.getInt("concurrency");
   fnord::logInfo(
-      "cm.logjoin",
-      "Starting cm-logjoin with dry_run=$0 start_offset=$1",
-      dry_run,
-      start_offset);
+      "cm.crawler",
+      "Starting cm-crawlworker with concurrency=$0",
+      concurrency);
 
-  cm::LogJoin logjoin(&feeds, dry_run);
-/*
+  /* set up redis queue */
+  auto redis_addr = fnord::net::InetAddr::resolve(
+      flags.getString("queue_redis_server"));
+
+  auto redis = fnord::redis::RedisConnection::connect(redis_addr, &ev);
+  fnord::redis::RedisQueue queue("cm.crawler.workqueue", std::move(redis));
+
+  /* start the crawler */
+  cm::Crawler crawler(&feeds, concurrency, &ev);
   for (;;) {
-    std::string logline;
-    int n = 0;
-
-    for (; feed->getNextEntry(&logline) && n < 10000; ++n) {
-      try {
-        logjoin.insertLogline(logline);
-      } catch (const std::exception& e) {
-        fnord::log::Logger::get()->logException(
-            fnord::log::kInfo,
-            "invalid log line",
-            e);
-      }
-    }
-
-    fnord::log::Logger::get()->logf(
-        fnord::log::kInfo,
-        "[cm-logjoin] stream_time=$0 active_sessions=$1 offset=$2",
-        logjoin.streamTime(),
-        logjoin.numSessions(),
-        feed->offset());
-
-    if (n == 0) {
-      usleep(1000000);
-    }
+    auto job = queue.leaseJob().waitAndGet();
+    auto req = fnord::json::fromJSON<cm::CrawlRequest>(job.job_data);
+    crawler.enqueue(req);
+    queue.commitJob(job, fnord::Status::success());
   }
-*/
+
   evloop_thread.join();
   return 0;
 }
