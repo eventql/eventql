@@ -80,6 +80,13 @@ int main(int argc, const char** argv) {
           true,
           fts::IndexWriter::MaxFieldLengthLIMITED);
 
+  auto doc = fts::newLucene<fts::Document>();
+  doc->add(fts::newLucene<fts::Field>(L"title", L"my fnordy document"));
+  index_writer->addDocument(doc);
+
+  index_writer->commit();
+  index_writer->close();
+
   return 0;
 }
 
