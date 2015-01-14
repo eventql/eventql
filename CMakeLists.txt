@@ -44,9 +44,9 @@ add_executable(cm-frontend
     cm-frontend/CMFrontend.cc
     cm-frontend/cm-frontend.cc)
 
-# target_link_libraries(cm-frontend ${CMAKE_THREAD_LIBS_INIT})
-# target_link_libraries(cm-frontend m)
-# 
+target_link_libraries(cm-frontend ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(cm-frontend m)
+
 # add_executable(cm-feedserver
 #     $<TARGET_OBJECTS:cm-common>
 #     $<TARGET_OBJECTS:fnord-base>
