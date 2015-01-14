@@ -13,10 +13,11 @@ include_directories(./src)
 if(APPLE)
   set(CMAKE_CXX_FLAGS "-std=c++0x -stdlib=libc++ ${CMAKE_CXX_FLAGS}")
 else()
-  set(CMAKE_CXX_FLAGS "-std=c++0x -lstdc++ ${CMAKE_CXX_FLAGS}")
+  set(CMAKE_CXX_FLAGS "-std=c++0x ${CMAKE_CXX_FLAGS}")
 endif()
 
 find_package(Threads)
+find_package(Boost COMPONENTS date_time filesystem iostreams regex system thread REQUIRED)
 
 add_subdirectory(src/fnord)
 add_subdirectory(src/fnord-fts)
@@ -112,3 +113,25 @@ add_executable(cm-stats
     src/cm-stats.cc)
 
 target_link_libraries(cm-stats ${CMAKE_THREAD_LIBS_INIT})
+
+add_executable(cm-indexbuild
+    $<TARGET_OBJECTS:fnord-base>
+    $<TARGET_OBJECTS:fnord-cli>
+    $<TARGET_OBJECTS:fnord-comm>
+    $<TARGET_OBJECTS:fnord-http>
+    $<TARGET_OBJECTS:fnord-json>
+    $<TARGET_OBJECTS:fnord-net>
+    $<TARGET_OBJECTS:fnord-stats>
+    $<TARGET_OBJECTS:fnord-sstable>
+    $<TARGET_OBJECTS:fnord-util>
+    $<TARGET_OBJECTS:fnord-fts>
+    src/cm-stats.cc)
+
+target_link_libraries(cm-indexbuild
+    ${CMAKE_THREAD_LIBS_INIT}
+    ${Boost_LIBRARIES}
+    ${Boost_SYSTEM_LIBRARIES}
+    ${Boost_FILESYSTEM_LIBRARIES}
+    ${Boost_IOSTREAMS_LIBRARIES}
+    ${Boost_REGEX_LIBRARIES}
+    ${Boost_THREAD_LIBRARIES})
