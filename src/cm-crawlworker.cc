@@ -60,7 +60,7 @@ int main(int argc, const char** argv) {
       "<addr>");
 
   flags.defineFlag(
-      "cm_env",
+      "cmenv",
       fnord::cli::FlagParser::T_STRING,
       true,
       NULL,
