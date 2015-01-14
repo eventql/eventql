@@ -114,18 +114,19 @@ target_link_libraries(cm-frontend m)
 # 
 # target_link_libraries(cm-stats ${CMAKE_THREAD_LIBS_INIT})
 # 
-# add_executable(cm-indexbuild
-#     $<TARGET_OBJECTS:fnord-base>
-#     $<TARGET_OBJECTS:fnord-cli>
-#     $<TARGET_OBJECTS:fnord-comm>
-#     $<TARGET_OBJECTS:fnord-http>
-#     $<TARGET_OBJECTS:fnord-json>
-#     $<TARGET_OBJECTS:fnord-net>
-#     $<TARGET_OBJECTS:fnord-stats>
-#     $<TARGET_OBJECTS:fnord-sstable>
-#     $<TARGET_OBJECTS:fnord-util>
-#     $<TARGET_OBJECTS:fnord-fts>
-#     cm-common/cm-indexbuild.cc)
-# 
-# target_link_libraries(cm-indexbuild ${CMAKE_THREAD_LIBS_INIT})
-# target_link_libraries(cm-indexbuild ${FNORD_FTS_LDFLAGS})
+add_executable(cm-indexbuild
+    $<TARGET_OBJECTS:fnord-base>
+    $<TARGET_OBJECTS:fnord-cli>
+    $<TARGET_OBJECTS:fnord-comm>
+    $<TARGET_OBJECTS:fnord-http>
+    $<TARGET_OBJECTS:fnord-json>
+    $<TARGET_OBJECTS:fnord-net>
+    $<TARGET_OBJECTS:fnord-stats>
+    $<TARGET_OBJECTS:fnord-sstable>
+    $<TARGET_OBJECTS:fnord-util>
+    $<TARGET_OBJECTS:fnord-fts>
+    $<TARGET_OBJECTS:fnord-logstream-service>
+    cm-query/cm-indexbuild.cc)
+
+target_link_libraries(cm-indexbuild ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(cm-indexbuild ${FNORD_FTS_LDFLAGS})
