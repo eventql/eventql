@@ -24,10 +24,10 @@ include_directories(3rdparty/libfnord/)
 
 add_library(cm-common OBJECT
     cm-common/common.cc
-    cm-common/itemref.cc
-    cm-common/customernamespace.cc
-    cm-common/joinedquery.cc
-    cm-common/joineditemvisit.cc)
+    cm-common/ItemRef.cc
+    cm-common/CustomerNamespace.cc
+    cm-common/JoinedQuery.cc
+    cm-common/JoinedItemVisit.cc)
 
 add_executable(cm-frontend
     $<TARGET_OBJECTS:cm-common>
