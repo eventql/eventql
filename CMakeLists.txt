@@ -125,7 +125,7 @@ add_executable(cm-indexbuild
     $<TARGET_OBJECTS:fnord-sstable>
     $<TARGET_OBJECTS:fnord-util>
     $<TARGET_OBJECTS:fnord-fts>
-    src/cm-stats.cc)
+    src/cm-indexbuild.cc)
 
 target_link_libraries(cm-indexbuild
     ${CMAKE_THREAD_LIBS_INIT}
