@@ -17,7 +17,6 @@ else()
 endif()
 
 find_package(Threads)
-find_package(Boost COMPONENTS date_time filesystem iostreams regex system thread REQUIRED)
 
 add_subdirectory(src/fnord)
 add_subdirectory(src/fnord-fts)
@@ -127,11 +126,5 @@ add_executable(cm-indexbuild
     $<TARGET_OBJECTS:fnord-fts>
     src/cm-indexbuild.cc)
 
-target_link_libraries(cm-indexbuild
-    ${CMAKE_THREAD_LIBS_INIT}
-    ${Boost_LIBRARIES}
-    ${Boost_SYSTEM_LIBRARIES}
-    ${Boost_FILESYSTEM_LIBRARIES}
-    ${Boost_IOSTREAMS_LIBRARIES}
-    ${Boost_REGEX_LIBRARIES}
-    ${Boost_THREAD_LIBRARIES})
+target_link_libraries(cm-indexbuild ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(cm-indexbuild ${FNORD_FTS_LDFLAGS})
