@@ -45,7 +45,7 @@ int main(int argc, const char** argv) {
       "<port>");
 
   flags.defineFlag(
-      "cm_env",
+      "cmenv",
       fnord::cli::FlagParser::T_STRING,
       true,
       NULL,
@@ -81,7 +81,7 @@ int main(int argc, const char** argv) {
   fnord::logstream_service::LogStreamServiceFeedFactory feeds(&feedserver_chan);
 
   auto feed = feeds.getFeed("cm.tracker.log");
-  if (flags.getString("cm_env") == "production") {
+  if (flags.getString("cmenv") == "production") {
     feed->setOption("batch_size", "10000");
     feed->setOption("buffer_size", "100000");
   }
