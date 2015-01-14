@@ -72,6 +72,7 @@ int main(int argc, const char** argv) {
       StringUtil::format("index/$0/fts", cmcustomer));
   FileUtil::mkdir_p(index_path);
 
+  // index document
   auto index_writer =
       fts::newLucene<fts::IndexWriter>(
           fts::FSDirectory::open(StringUtil::convertUTF8To16(index_path)),
@@ -81,11 +82,43 @@ int main(int argc, const char** argv) {
           fts::IndexWriter::MaxFieldLengthLIMITED);
 
   auto doc = fts::newLucene<fts::Document>();
-  doc->add(fts::newLucene<fts::Field>(L"title", L"my fnordy document"));
+  doc->add(
+      fts::newLucene<fts::Field>(
+          L"keywords",
+          L"my fnordy document",
+          fts::Field::STORE_NO,
+          fts::Field::INDEX_ANALYZED));
+
   index_writer->addDocument(doc);
 
   index_writer->commit();
   index_writer->close();
+
+
+  // simple search
+  auto index_reader = fts::IndexReader::open(
+      fts::FSDirectory::open(StringUtil::convertUTF8To16(index_path)),
+      true);
+
+
+  auto searcher = fts::newLucene<fts::IndexSearcher>(index_reader);
+
+  auto analyzer = fts::newLucene<fts::StandardAnalyzer>(
+      fts::LuceneVersion::LUCENE_CURRENT);
+
+  auto query_parser = fts::newLucene<fts::QueryParser>(
+      fts::LuceneVersion::LUCENE_CURRENT,
+      L"keywords",
+      analyzer);
+
+  auto collector = fts::TopScoreDocCollector::create(
+      500,
+      false);
+
+  auto query = query_parser->parse(L"fnordy");
+
+  searcher->search(query, collector);
+  fnord::iputs("found $0 documents", collector->getTotalHits());
 
   return 0;
 }
