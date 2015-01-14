@@ -9,22 +9,26 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include "fnord/base/application.h"
+#include "fnord/base/io/filerepository.h"
+#include "fnord/base/io/fileutil.h"
+#include "fnord/base/thread/eventloop.h"
+#include "fnord/base/thread/threadpool.h"
 #include "fnord/base/random.h"
 #include "fnord/comm/rpc.h"
 #include "fnord/cli/flagparser.h"
 #include "fnord/comm/rpcchannel.h"
-#include "fnord/io/filerepository.h"
-#include "fnord/io/fileutil.h"
 #include "fnord/json/json.h"
 #include "fnord/json/jsonrpc.h"
 #include "fnord/net/http/httprouter.h"
 #include "fnord/net/http/httpserver.h"
-#include "fnord/thread/eventloop.h"
-#include "fnord/thread/threadpool.h"
 #include "fnord/service/logstream/logstreamservice.h"
 #include "fnord/service/logstream/feedfactory.h"
+#include "fnord/stats/statshttpservlet.h"
+#include "fnord/stats/statsdagent.h"
 #include "customernamespace.h"
 #include "tracker/tracker.h"
+
+using fnord::StringUtil;
 
 int main(int argc, const char** argv) {
   fnord::Application::init();
@@ -50,6 +54,15 @@ int main(int argc, const char** argv) {
       "clickmatcher app data dir",
       "<path>");
 
+  flags.defineFlag(
+      "statsd_addr",
+      fnord::cli::FlagParser::T_STRING,
+      false,
+      NULL,
+      "127.0.0.1:8192",
+      "Statsd addr",
+      "<addr>");
+
   flags.parseArgv(argc, argv);
 
   fnord::thread::EventLoop event_loop;
@@ -59,16 +72,17 @@ int main(int argc, const char** argv) {
 
   /* set up cmdata */
   auto cmdata_path = flags.getString("cmdata");
-  if (!fnord::io::FileUtil::isDirectory(cmdata_path)) {
+  if (!fnord::FileUtil::isDirectory(cmdata_path)) {
     RAISEF(kIOError, "no such directory: $0", cmdata_path);
   }
 
   /* set up logstream service */
-  auto feeds_dir_path = fnord::io::FileUtil::joinPaths(cmdata_path, "feeds");
-  fnord::io::FileUtil::mkdir_p(feeds_dir_path);
+  auto feeds_dir_path = fnord::FileUtil::joinPaths(cmdata_path, "feeds");
+  fnord::FileUtil::mkdir_p(feeds_dir_path);
 
   fnord::logstream_service::LogStreamService logstream_service{
-      fnord::io::FileRepository(feeds_dir_path)};
+      fnord::FileRepository(feeds_dir_path),
+      "/cm-feedserver/global/feeds"};
 
   rpc.registerService(&logstream_service);
 
@@ -77,6 +91,20 @@ int main(int argc, const char** argv) {
   rpc_http_router.addRouteByPrefixMatch("/rpc", &rpc_http);
   fnord::http::HTTPServer rpc_http_server(&rpc_http_router, &event_loop);
   rpc_http_server.listen(flags.getInt("rpc_http_port"));
+
+  rpc_http_server.stats()->exportStats(
+      "/cm-feedserver/global/http/inbound");
+  rpc_http_server.stats()->exportStats(
+      StringUtil::format("/cm-feedserver/$0/http/inbound", cm::cmHostname()));
+
+  fnord::stats::StatsHTTPServlet stats_servlet;
+  rpc_http_router.addRouteByPrefixMatch("/stats", &stats_servlet);
+
+  fnord::stats::StatsdAgent statsd_agent(
+      fnord::net::InetAddr::resolve(flags.getString("statsd_addr")),
+      10 * fnord::kMicrosPerSecond);
+
+  statsd_agent.start();
 
   event_loop.run();
   return 0;

@@ -19,10 +19,8 @@ void TrackedSession::update() {
     for (auto& query_pair : queries) {
       auto& query = query_pair.second;
 
-      auto tdiff =
-          static_cast<uint64_t>(visit.time) - static_cast<uint64_t>(query.time);
-      constexpr auto max_delay =
-          kMaxQueryClickDelaySeconds * fnord::DateTime::kMicrosPerSecond;
+      auto tdiff = visit.time.unixMicros() - query.time.unixMicros();
+      auto max_delay = kMaxQueryClickDelaySeconds * fnord::kMicrosPerSecond;
       if (query.time > visit.time || tdiff > max_delay) {
         continue;
       }
@@ -76,6 +74,21 @@ void TrackedSession::debugPrint(const std::string& uid) const {
   }
 
   fnord::iputs("", 1);
+}
+
+JoinedSession TrackedSession::toJoinedSession() const {
+  JoinedSession sess;
+  sess.customer_key = customer_key;
+
+  for (const auto& p : queries) {
+    sess.queries.emplace_back(p.second);
+  }
+
+  for (const auto& p : item_visits) {
+    sess.item_visits.emplace_back(p.second);
+  }
+
+  return sess;
 }
 
 } // namespace cm

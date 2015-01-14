@@ -9,6 +9,7 @@
 #include <assert.h>
 #include <fnord/base/exception.h>
 #include <fnord/base/inspect.h>
+#include <fnord/base/logging.h>
 #include <fnord/base/stringutil.h>
 #include <fnord/base/uri.h>
 #include <fnord/base/wallclock.h>
@@ -24,12 +25,13 @@ using fnord::logstream_service::LogStreamService;
 namespace cm {
 
 LogJoin::LogJoin(
-    fnord::thread::TaskScheduler* scheduler) :
-    scheduler_(scheduler),
+    fnord::comm::FeedFactory* feed_factory,
+    bool dry_run) :
+    feed_cache_(feed_factory),
+    dry_run_(dry_run),
     sessions_(1000000),
     stream_clock_(0),
-    last_flush_time_(0) {
-}
+    last_flush_time_(0) {}
 
 void LogJoin::insertLogline(const std::string& log_line) {
   auto c_end = log_line.find("|");
@@ -45,7 +47,7 @@ void LogJoin::insertLogline(const std::string& log_line) {
   auto customer_key = log_line.substr(0, c_end);
   auto body = log_line.substr(t_end + 1);
   auto timestr = log_line.substr(c_end + 1, t_end - c_end - 1);
-  fnord::DateTime time(std::stoul(timestr) * fnord::DateTime::kMicrosPerSecond);
+  fnord::DateTime time(std::stoul(timestr) * fnord::kMicrosPerSecond);
 
   insertLogline(customer_key, time, body);
 }
@@ -169,11 +171,8 @@ bool LogJoin::maybeFlushSession(
     return false;
   }
 
-  auto tdiff =
-      static_cast<uint64_t>(stream_time) -
-      static_cast<uint64_t>(session->last_seen_unix_micros);
-  bool do_flush =
-      tdiff > kSessionIdleTimeoutSeconds * fnord::DateTime::kMicrosPerSecond;
+  auto tdiff = stream_time.unixMicros() - session->last_seen_unix_micros;
+  bool do_flush = tdiff > kSessionIdleTimeoutSeconds * fnord::kMicrosPerSecond;
   bool do_update = do_flush;
 
   std::vector<std::pair<std::string, TrackedQuery*>> flushed;
@@ -181,10 +180,9 @@ bool LogJoin::maybeFlushSession(
     const auto& eid = query_pair.first;
     auto& query = query_pair.second;
 
-    if (!query.flushed && (
-            static_cast<uint64_t>(stream_time) -
-            static_cast<uint64_t>(query.time)) >
-            kMaxQueryClickDelaySeconds * fnord::DateTime::kMicrosPerSecond) {
+    auto qtdiff = stream_time.unixMicros() - query.time.unixMicros();
+    if (!query.flushed &&
+        qtdiff > kMaxQueryClickDelaySeconds * fnord::kMicrosPerSecond) {
       query.flushed = true;
       do_update = true;
       flushed.emplace_back(eid, &query);
@@ -211,8 +209,6 @@ bool LogJoin::maybeFlushSession(
 }
 
 void LogJoin::flush(const fnord::DateTime& stream_time) {
-  fnord::iputs("stream_time=$0 active_sessions=$1", stream_clock_, sessions_.size());
-
   for (auto iter = sessions_.begin(); iter != sessions_.end(); ) {
     const auto& uid = iter->first;
     const auto& session = iter->second;
@@ -252,6 +248,14 @@ fnord::DateTime LogJoin::streamTime(const fnord::DateTime& time) {
   return stream_clock_;
 }
 
+fnord::DateTime LogJoin::streamTime() const {
+  return stream_clock_;
+}
+
+size_t LogJoin::numSessions() const {
+  return sessions_.size();
+}
+
 void LogJoin::recordJoinedQuery(
     const std::string& customer_key,
     const std::string& uid,
@@ -270,6 +274,24 @@ void LogJoin::recordJoinedSession(
     const std::string& customer_key,
     const std::string& uid,
     const TrackedSession& session) {
+  auto session_json = fnord::json::toJSONString(session.toJoinedSession());
+
+  if (!dry_run_) {
+    auto feed = getFeedForCustomer("joined_sessions", customer_key);
+    auto future = feed->appendEntry(session_json);
+
+    future.onFailure([] (const fnord::Status& status) {
+      fnord::logError("cm.logjoing", "error writing to feed: $0", status);
+    });
+  }
+}
+
+
+fnord::comm::Feed* LogJoin::getFeedForCustomer(
+    const std::string& subfeed,
+    const std::string& customer_key) {
+  return feed_cache_.getFeed(
+      fnord::StringUtil::format("cm.tracker.$0~$1", subfeed, customer_key));
 }
 
 } // namespace cm

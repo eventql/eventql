@@ -17,13 +17,15 @@
 #include <fnord/base/uri.h>
 #include <fnord/comm/feed.h>
 #include <fnord/net/http/httpservice.h>
+#include "fnord/stats/stats.h"
+#include "common.h"
 
 namespace cm {
 class CustomerNamespace;
 
 class Tracker : public fnord::http::HTTPService {
 public:
-  static const int kMinPixelVersion = 3;
+  static const int kMinPixelVersion = 4;
 
   explicit Tracker(fnord::comm::FeedFactory* feed_factory);
 
@@ -37,6 +39,8 @@ public:
 
 protected:
 
+  void exportStats(const std::string& path_prefix);
+
   void track(CustomerNamespace* customer, const fnord::URI& uri);
   void recordLogLine(CustomerNamespace* customer, const std::string& logline);
 
@@ -46,6 +50,12 @@ protected:
 
   std::unordered_map<std::string, CustomerNamespace*> vhosts_;
   fnord::Random rnd_;
+
+  fnord::stats::Counter<uint64_t> stat_loglines_total_;
+  fnord::stats::Counter<uint64_t> stat_loglines_versiontooold_;
+  fnord::stats::Counter<uint64_t> stat_loglines_invalid_;
+  fnord::stats::Counter<uint64_t> stat_loglines_written_success_;
+  fnord::stats::Counter<uint64_t> stat_loglines_written_failure_;
 };
 
 } // namespace cm
