@@ -18,8 +18,9 @@ endif()
 
 find_package(Threads)
 
-add_subdirectory(3rdparty/libfnord/libfnord)
+add_subdirectory(3rdparty/libfnord/fnord)
 add_subdirectory(3rdparty/libfnord/fnord-fts)
+include_directories(3rdparty/libfnord/)
 
 add_library(cm-common OBJECT
     src/common.cc
