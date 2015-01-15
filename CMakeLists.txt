@@ -78,6 +78,7 @@ add_executable(cm-logjoin
     $<TARGET_OBJECTS:fnord-mdb>
     cm-logjoin/TrackedQuery.cc
     cm-logjoin/TrackedItemVisit.cc
+    cm-logjoin/TrackedSession.cc
     cm-logjoin/cm-logjoin.cc
     cm-logjoin/LogJoin.cc)
 
