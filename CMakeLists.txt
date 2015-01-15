@@ -80,9 +80,9 @@ add_executable(cm-logjoin
     cm-logjoin/TrackedItemVisit.cc
     cm-logjoin/cm-logjoin.cc
     cm-logjoin/LogJoin.cc)
-# 
-# target_link_libraries(cm-logjoin ${CMAKE_THREAD_LIBS_INIT})
-# 
+
+target_link_libraries(cm-logjoin ${CMAKE_THREAD_LIBS_INIT})
+
 # add_executable(cm-crawlworker
 #     $<TARGET_OBJECTS:cm-common>
 #     $<TARGET_OBJECTS:fnord-base>
