@@ -20,7 +20,9 @@ find_package(Threads)
 
 add_subdirectory(3rdparty/libfnord/fnord)
 add_subdirectory(3rdparty/libfnord/fnord-fts)
+add_subdirectory(3rdparty/libfnord/fnord-mdb)
 include_directories(3rdparty/libfnord/)
+include_directories(3rdparty/libfnord/3rdparty/)
 
 add_library(cm-common OBJECT
     cm-common/common.cc
@@ -73,6 +75,7 @@ add_executable(cm-logjoin
     $<TARGET_OBJECTS:fnord-sstable>
     $<TARGET_OBJECTS:fnord-logstream-service>
     $<TARGET_OBJECTS:fnord-util>
+    $<TARGET_OBJECTS:fnord-mdb>
     cm-logjoin/TrackedQuery.cc
     cm-logjoin/TrackedItemVisit.cc
     cm-logjoin/cm-logjoin.cc
