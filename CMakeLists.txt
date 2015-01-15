@@ -25,9 +25,7 @@ include_directories(3rdparty/libfnord/)
 add_library(cm-common OBJECT
     cm-common/common.cc
     cm-common/ItemRef.cc
-    cm-common/CustomerNamespace.cc
-    cm-common/JoinedQuery.cc
-    cm-common/JoinedItemVisit.cc)
+    cm-common/CustomerNamespace.cc)
 
 add_executable(cm-frontend
     $<TARGET_OBJECTS:cm-common>
@@ -63,20 +61,22 @@ target_link_libraries(cm-frontend m)
 # 
 # target_link_libraries(cm-feedserver ${CMAKE_THREAD_LIBS_INIT})
 # 
-# add_executable(cm-logjoin
-#     $<TARGET_OBJECTS:cm-common>
-#     $<TARGET_OBJECTS:fnord-base>
-#     $<TARGET_OBJECTS:fnord-cli>
-#     $<TARGET_OBJECTS:fnord-comm>
-#     $<TARGET_OBJECTS:fnord-http>
-#     $<TARGET_OBJECTS:fnord-json>
-#     $<TARGET_OBJECTS:fnord-net>
-#     $<TARGET_OBJECTS:fnord-stats>
-#     $<TARGET_OBJECTS:fnord-sstable>
-#     $<TARGET_OBJECTS:fnord-logstream-service>
-#     $<TARGET_OBJECTS:fnord-util>
-#     cm-common/cm-logjoin.cc
-#     cm-common/tracker/logjoin.cc)
+add_executable(cm-logjoin
+    $<TARGET_OBJECTS:cm-common>
+    $<TARGET_OBJECTS:fnord-base>
+    $<TARGET_OBJECTS:fnord-cli>
+    $<TARGET_OBJECTS:fnord-comm>
+    $<TARGET_OBJECTS:fnord-http>
+    $<TARGET_OBJECTS:fnord-json>
+    $<TARGET_OBJECTS:fnord-net>
+    $<TARGET_OBJECTS:fnord-stats>
+    $<TARGET_OBJECTS:fnord-sstable>
+    $<TARGET_OBJECTS:fnord-logstream-service>
+    $<TARGET_OBJECTS:fnord-util>
+    cm-logjoin/TrackedQuery.cc
+    cm-logjoin/TrackedItemVisit.cc
+    cm-logjoin/cm-logjoin.cc
+    cm-logjoin/logjoin.cc)
 # 
 # target_link_libraries(cm-logjoin ${CMAKE_THREAD_LIBS_INIT})
 # 
