@@ -47,22 +47,22 @@ add_executable(cm-frontend
 target_link_libraries(cm-frontend ${CMAKE_THREAD_LIBS_INIT})
 target_link_libraries(cm-frontend m)
 
-# add_executable(cm-feedserver
-#     $<TARGET_OBJECTS:cm-common>
-#     $<TARGET_OBJECTS:fnord-base>
-#     $<TARGET_OBJECTS:fnord-cli>
-#     $<TARGET_OBJECTS:fnord-comm>
-#     $<TARGET_OBJECTS:fnord-http>
-#     $<TARGET_OBJECTS:fnord-json>
-#     $<TARGET_OBJECTS:fnord-net>
-#     $<TARGET_OBJECTS:fnord-stats>
-#     $<TARGET_OBJECTS:fnord-sstable>
-#     $<TARGET_OBJECTS:fnord-logstream-service>
-#     $<TARGET_OBJECTS:fnord-util>
-#     cm-common/cm-feedserver.cc)
-# 
-# target_link_libraries(cm-feedserver ${CMAKE_THREAD_LIBS_INIT})
-# 
+add_executable(cm-feedserver
+    $<TARGET_OBJECTS:cm-common>
+    $<TARGET_OBJECTS:fnord-base>
+    $<TARGET_OBJECTS:fnord-cli>
+    $<TARGET_OBJECTS:fnord-comm>
+    $<TARGET_OBJECTS:fnord-http>
+    $<TARGET_OBJECTS:fnord-json>
+    $<TARGET_OBJECTS:fnord-net>
+    $<TARGET_OBJECTS:fnord-stats>
+    $<TARGET_OBJECTS:fnord-sstable>
+    $<TARGET_OBJECTS:fnord-logstream-service>
+    $<TARGET_OBJECTS:fnord-util>
+    cm-common/cm-feedserver.cc)
+
+target_link_libraries(cm-feedserver ${CMAKE_THREAD_LIBS_INIT})
+
 add_executable(cm-logjoin
     $<TARGET_OBJECTS:cm-common>
     $<TARGET_OBJECTS:fnord-base>
@@ -102,21 +102,21 @@ target_link_libraries(cm-logjoin ${CMAKE_THREAD_LIBS_INIT})
 # 
 # target_link_libraries(cm-crawlworker ${CMAKE_THREAD_LIBS_INIT})
 # 
-# add_executable(cm-stats
-#     $<TARGET_OBJECTS:fnord-base>
-#     $<TARGET_OBJECTS:fnord-chart>
-#     $<TARGET_OBJECTS:fnord-cli>
-#     $<TARGET_OBJECTS:fnord-comm>
-#     $<TARGET_OBJECTS:fnord-http>
-#     $<TARGET_OBJECTS:fnord-json>
-#     $<TARGET_OBJECTS:fnord-net>
-#     $<TARGET_OBJECTS:fnord-stats>
-#     $<TARGET_OBJECTS:fnord-sstable>
-#     $<TARGET_OBJECTS:fnord-util>
-#     $<TARGET_OBJECTS:fnord-metric-service>
-#     cm-common/cm-stats.cc)
-# 
-# target_link_libraries(cm-stats ${CMAKE_THREAD_LIBS_INIT})
+add_executable(cm-stats
+    $<TARGET_OBJECTS:fnord-base>
+    $<TARGET_OBJECTS:fnord-chart>
+    $<TARGET_OBJECTS:fnord-cli>
+    $<TARGET_OBJECTS:fnord-comm>
+    $<TARGET_OBJECTS:fnord-http>
+    $<TARGET_OBJECTS:fnord-json>
+    $<TARGET_OBJECTS:fnord-net>
+    $<TARGET_OBJECTS:fnord-stats>
+    $<TARGET_OBJECTS:fnord-sstable>
+    $<TARGET_OBJECTS:fnord-util>
+    $<TARGET_OBJECTS:fnord-metric-service>
+    cm-stats/cm-stats.cc)
+
+target_link_libraries(cm-stats ${CMAKE_THREAD_LIBS_INIT})
 # 
 add_executable(cm-indexbuild
     $<TARGET_OBJECTS:fnord-base>
