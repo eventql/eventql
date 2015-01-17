@@ -19,6 +19,7 @@ endif()
 find_package(Threads)
 
 add_subdirectory(3rdparty/libfnord/fnord)
+add_subdirectory(3rdparty/libfnord/fnord-feeds)
 add_subdirectory(3rdparty/libfnord/fnord-fts)
 add_subdirectory(3rdparty/libfnord/fnord-mdb)
 include_directories(3rdparty/libfnord/)
@@ -39,7 +40,7 @@ add_executable(cm-frontend
     $<TARGET_OBJECTS:fnord-net>
     $<TARGET_OBJECTS:fnord-stats>
     $<TARGET_OBJECTS:fnord-sstable>
-    $<TARGET_OBJECTS:fnord-logstream-service>
+    $<TARGET_OBJECTS:fnord-feeds>
     $<TARGET_OBJECTS:fnord-util>
     cm-frontend/CMFrontend.cc
     cm-frontend/cm-frontend.cc)
@@ -57,7 +58,7 @@ add_executable(cm-feedserver
     $<TARGET_OBJECTS:fnord-net>
     $<TARGET_OBJECTS:fnord-stats>
     $<TARGET_OBJECTS:fnord-sstable>
-    $<TARGET_OBJECTS:fnord-logstream-service>
+    $<TARGET_OBJECTS:fnord-feeds>
     $<TARGET_OBJECTS:fnord-util>
     cm-common/cm-feedserver.cc)
 
@@ -73,7 +74,7 @@ add_executable(cm-logjoin
     $<TARGET_OBJECTS:fnord-net>
     $<TARGET_OBJECTS:fnord-stats>
     $<TARGET_OBJECTS:fnord-sstable>
-    $<TARGET_OBJECTS:fnord-logstream-service>
+    $<TARGET_OBJECTS:fnord-feeds>
     $<TARGET_OBJECTS:fnord-util>
     $<TARGET_OBJECTS:fnord-mdb>
     cm-logjoin/TrackedQuery.cc
@@ -129,7 +130,7 @@ add_executable(cm-indexbuild
     $<TARGET_OBJECTS:fnord-sstable>
     $<TARGET_OBJECTS:fnord-util>
     $<TARGET_OBJECTS:fnord-fts>
-    $<TARGET_OBJECTS:fnord-logstream-service>
+    $<TARGET_OBJECTS:fnord-feeds>
     cm-query/cm-indexbuild.cc)
 
 target_link_libraries(cm-indexbuild ${CMAKE_THREAD_LIBS_INIT})
