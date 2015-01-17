@@ -23,10 +23,10 @@ namespace feeds {
 
 class RemoteFeedFactory {
 public:
-  RemoteFeedFactory(comm::RPCChannel* rpc_channel);
+  RemoteFeedFactory(RPCChannel* rpc_channel);
   std::unique_ptr<RemoteFeed> getFeed(const std::string& name);
 protected:
-  comm::RPCChannel* rpc_channel_;
+  RPCChannel* rpc_channel_;
 };
 
 }
