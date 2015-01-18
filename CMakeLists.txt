@@ -19,8 +19,10 @@ endif()
 find_package(Threads)
 
 add_subdirectory(3rdparty/libfnord/fnord)
+add_subdirectory(3rdparty/libfnord/fnord-feeds)
 add_subdirectory(3rdparty/libfnord/fnord-fts)
 add_subdirectory(3rdparty/libfnord/fnord-mdb)
+add_subdirectory(3rdparty/libfnord/fnord-rpc)
 include_directories(3rdparty/libfnord/)
 include_directories(3rdparty/libfnord/3rdparty/)
 
@@ -39,8 +41,9 @@ add_executable(cm-frontend
     $<TARGET_OBJECTS:fnord-net>
     $<TARGET_OBJECTS:fnord-stats>
     $<TARGET_OBJECTS:fnord-sstable>
-    $<TARGET_OBJECTS:fnord-logstream-service>
+    $<TARGET_OBJECTS:fnord-feeds>
     $<TARGET_OBJECTS:fnord-util>
+    $<TARGET_OBJECTS:fnord-rpc>
     cm-frontend/CMFrontend.cc
     cm-frontend/cm-frontend.cc)
 
@@ -57,8 +60,9 @@ add_executable(cm-feedserver
     $<TARGET_OBJECTS:fnord-net>
     $<TARGET_OBJECTS:fnord-stats>
     $<TARGET_OBJECTS:fnord-sstable>
-    $<TARGET_OBJECTS:fnord-logstream-service>
+    $<TARGET_OBJECTS:fnord-feeds>
     $<TARGET_OBJECTS:fnord-util>
+    $<TARGET_OBJECTS:fnord-rpc>
     cm-common/cm-feedserver.cc)
 
 target_link_libraries(cm-feedserver ${CMAKE_THREAD_LIBS_INIT})
@@ -73,9 +77,10 @@ add_executable(cm-logjoin
     $<TARGET_OBJECTS:fnord-net>
     $<TARGET_OBJECTS:fnord-stats>
     $<TARGET_OBJECTS:fnord-sstable>
-    $<TARGET_OBJECTS:fnord-logstream-service>
+    $<TARGET_OBJECTS:fnord-feeds>
     $<TARGET_OBJECTS:fnord-util>
     $<TARGET_OBJECTS:fnord-mdb>
+    $<TARGET_OBJECTS:fnord-rpc>
     cm-logjoin/TrackedQuery.cc
     cm-logjoin/TrackedItemVisit.cc
     cm-logjoin/TrackedSession.cc
@@ -114,6 +119,7 @@ add_executable(cm-stats
     $<TARGET_OBJECTS:fnord-sstable>
     $<TARGET_OBJECTS:fnord-util>
     $<TARGET_OBJECTS:fnord-metric-service>
+    $<TARGET_OBJECTS:fnord-rpc>
     cm-stats/cm-stats.cc)
 
 target_link_libraries(cm-stats ${CMAKE_THREAD_LIBS_INIT})
@@ -129,7 +135,8 @@ add_executable(cm-indexbuild
     $<TARGET_OBJECTS:fnord-sstable>
     $<TARGET_OBJECTS:fnord-util>
     $<TARGET_OBJECTS:fnord-fts>
-    $<TARGET_OBJECTS:fnord-logstream-service>
+    $<TARGET_OBJECTS:fnord-feeds>
+    $<TARGET_OBJECTS:fnord-rpc>
     cm-query/cm-indexbuild.cc)
 
 target_link_libraries(cm-indexbuild ${CMAKE_THREAD_LIBS_INIT})
