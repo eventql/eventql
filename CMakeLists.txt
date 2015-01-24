@@ -85,7 +85,8 @@ add_executable(cm-logjoin
     cm-logjoin/TrackedItemVisit.cc
     cm-logjoin/TrackedSession.cc
     cm-logjoin/cm-logjoin.cc
-    cm-logjoin/LogJoin.cc)
+    cm-logjoin/LogJoin.cc
+    cm-logjoin/LogJoinShard.cc)
 
 target_link_libraries(cm-logjoin ${CMAKE_THREAD_LIBS_INIT})
 
