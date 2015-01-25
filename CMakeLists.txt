@@ -126,6 +126,7 @@ add_executable(cm-stats
 target_link_libraries(cm-stats ${CMAKE_THREAD_LIBS_INIT})
 # 
 add_executable(cm-indexbuild
+    $<TARGET_OBJECTS:cm-common>
     $<TARGET_OBJECTS:fnord-base>
     $<TARGET_OBJECTS:fnord-cli>
     $<TARGET_OBJECTS:fnord-comm>
