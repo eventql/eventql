@@ -85,7 +85,8 @@ add_executable(cm-logjoin
     cm-logjoin/TrackedItemVisit.cc
     cm-logjoin/TrackedSession.cc
     cm-logjoin/cm-logjoin.cc
-    cm-logjoin/LogJoin.cc)
+    cm-logjoin/LogJoin.cc
+    cm-logjoin/LogJoinShard.cc)
 
 target_link_libraries(cm-logjoin ${CMAKE_THREAD_LIBS_INIT})
 
@@ -125,6 +126,7 @@ add_executable(cm-stats
 target_link_libraries(cm-stats ${CMAKE_THREAD_LIBS_INIT})
 # 
 add_executable(cm-indexbuild
+    $<TARGET_OBJECTS:cm-common>
     $<TARGET_OBJECTS:fnord-base>
     $<TARGET_OBJECTS:fnord-cli>
     $<TARGET_OBJECTS:fnord-comm>
@@ -137,7 +139,9 @@ add_executable(cm-indexbuild
     $<TARGET_OBJECTS:fnord-fts>
     $<TARGET_OBJECTS:fnord-feeds>
     $<TARGET_OBJECTS:fnord-rpc>
-    cm-query/cm-indexbuild.cc)
+    $<TARGET_OBJECTS:fnord-mdb>
+    cm-index/cm-indexbuild.cc
+    cm-index/IndexBuilder.cc)
 
 target_link_libraries(cm-indexbuild ${CMAKE_THREAD_LIBS_INIT})
 target_link_libraries(cm-indexbuild ${FNORD_FTS_LDFLAGS})
