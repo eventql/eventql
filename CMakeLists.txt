@@ -24,7 +24,7 @@ find_package(Boost COMPONENTS date_time filesystem iostreams regex system thread
 include_directories(${Boost_INCLUDE_DIRS})
 include_directories(../)
 
-add_subdirectory(3rdparty/libfnord/fnord)
+add_subdirectory(3rdparty/libfnord/fnord-base)
 add_subdirectory(3rdparty/libfnord/fnord-feeds)
 add_subdirectory(3rdparty/libfnord/fnord-fts)
 add_subdirectory(3rdparty/libfnord/fnord-mdb)
