@@ -29,6 +29,11 @@ add_subdirectory(3rdparty/libfnord/fnord-feeds)
 add_subdirectory(3rdparty/libfnord/fnord-fts)
 add_subdirectory(3rdparty/libfnord/fnord-mdb)
 add_subdirectory(3rdparty/libfnord/fnord-rpc)
+add_subdirectory(3rdparty/libfnord/fnord-http)
+add_subdirectory(3rdparty/libfnord/fnord-json)
+add_subdirectory(3rdparty/libfnord/fnord-sstable)
+add_subdirectory(3rdparty/libfnord/fnord-chart)
+add_subdirectory(3rdparty/libfnord/fnord-metricdb)
 include_directories(3rdparty/libfnord/)
 include_directories(3rdparty/libfnord/3rdparty/)
 
@@ -40,15 +45,10 @@ add_library(cm-common OBJECT
 add_executable(cm-frontend
     $<TARGET_OBJECTS:cm-common>
     $<TARGET_OBJECTS:fnord-base>
-    $<TARGET_OBJECTS:fnord-cli>
-    $<TARGET_OBJECTS:fnord-comm>
     $<TARGET_OBJECTS:fnord-http>
     $<TARGET_OBJECTS:fnord-json>
-    $<TARGET_OBJECTS:fnord-net>
-    $<TARGET_OBJECTS:fnord-stats>
     $<TARGET_OBJECTS:fnord-sstable>
     $<TARGET_OBJECTS:fnord-feeds>
-    $<TARGET_OBJECTS:fnord-util>
     $<TARGET_OBJECTS:fnord-rpc>
     cm-frontend/CMFrontend.cc
     cm-frontend/cm-frontend.cc)
@@ -59,15 +59,10 @@ target_link_libraries(cm-frontend m)
 add_executable(cm-feedserver
     $<TARGET_OBJECTS:cm-common>
     $<TARGET_OBJECTS:fnord-base>
-    $<TARGET_OBJECTS:fnord-cli>
-    $<TARGET_OBJECTS:fnord-comm>
     $<TARGET_OBJECTS:fnord-http>
     $<TARGET_OBJECTS:fnord-json>
-    $<TARGET_OBJECTS:fnord-net>
-    $<TARGET_OBJECTS:fnord-stats>
     $<TARGET_OBJECTS:fnord-sstable>
     $<TARGET_OBJECTS:fnord-feeds>
-    $<TARGET_OBJECTS:fnord-util>
     $<TARGET_OBJECTS:fnord-rpc>
     cm-common/cm-feedserver.cc)
 
@@ -76,15 +71,10 @@ target_link_libraries(cm-feedserver ${CMAKE_THREAD_LIBS_INIT})
 add_executable(cm-logjoin
     $<TARGET_OBJECTS:cm-common>
     $<TARGET_OBJECTS:fnord-base>
-    $<TARGET_OBJECTS:fnord-cli>
-    $<TARGET_OBJECTS:fnord-comm>
     $<TARGET_OBJECTS:fnord-http>
     $<TARGET_OBJECTS:fnord-json>
-    $<TARGET_OBJECTS:fnord-net>
-    $<TARGET_OBJECTS:fnord-stats>
     $<TARGET_OBJECTS:fnord-sstable>
     $<TARGET_OBJECTS:fnord-feeds>
-    $<TARGET_OBJECTS:fnord-util>
     $<TARGET_OBJECTS:fnord-mdb>
     $<TARGET_OBJECTS:fnord-rpc>
     cm-logjoin/TrackedQuery.cc
@@ -99,16 +89,11 @@ target_link_libraries(cm-logjoin ${CMAKE_THREAD_LIBS_INIT})
 # add_executable(cm-crawlworker
 #     $<TARGET_OBJECTS:cm-common>
 #     $<TARGET_OBJECTS:fnord-base>
-#     $<TARGET_OBJECTS:fnord-cli>
-#     $<TARGET_OBJECTS:fnord-comm>
 #     $<TARGET_OBJECTS:fnord-http>
 #     $<TARGET_OBJECTS:fnord-json>
-#     $<TARGET_OBJECTS:fnord-net>
-#     $<TARGET_OBJECTS:fnord-stats>
 #     $<TARGET_OBJECTS:fnord-redis>
 #     $<TARGET_OBJECTS:fnord-sstable>
 #     $<TARGET_OBJECTS:fnord-logstream-service>
-#     $<TARGET_OBJECTS:fnord-util>
 #     cm-common/crawler/crawler.cc
 #     cm-common/cm-crawlworker.cc)
 # 
@@ -117,15 +102,10 @@ target_link_libraries(cm-logjoin ${CMAKE_THREAD_LIBS_INIT})
 add_executable(cm-stats
     $<TARGET_OBJECTS:fnord-base>
     $<TARGET_OBJECTS:fnord-chart>
-    $<TARGET_OBJECTS:fnord-cli>
-    $<TARGET_OBJECTS:fnord-comm>
     $<TARGET_OBJECTS:fnord-http>
     $<TARGET_OBJECTS:fnord-json>
-    $<TARGET_OBJECTS:fnord-net>
-    $<TARGET_OBJECTS:fnord-stats>
     $<TARGET_OBJECTS:fnord-sstable>
-    $<TARGET_OBJECTS:fnord-util>
-    $<TARGET_OBJECTS:fnord-metric-service>
+    $<TARGET_OBJECTS:fnord-metricdb>
     $<TARGET_OBJECTS:fnord-rpc>
     cm-stats/cm-stats.cc)
 
@@ -134,14 +114,9 @@ target_link_libraries(cm-stats ${CMAKE_THREAD_LIBS_INIT})
 add_executable(cm-indexbuild
     $<TARGET_OBJECTS:cm-common>
     $<TARGET_OBJECTS:fnord-base>
-    $<TARGET_OBJECTS:fnord-cli>
-    $<TARGET_OBJECTS:fnord-comm>
     $<TARGET_OBJECTS:fnord-http>
     $<TARGET_OBJECTS:fnord-json>
-    $<TARGET_OBJECTS:fnord-net>
-    $<TARGET_OBJECTS:fnord-stats>
     $<TARGET_OBJECTS:fnord-sstable>
-    $<TARGET_OBJECTS:fnord-util>
     $<TARGET_OBJECTS:fnord-fts>
     $<TARGET_OBJECTS:fnord-feeds>
     $<TARGET_OBJECTS:fnord-rpc>
