@@ -15,6 +15,7 @@
 #include "fnord-feeds/LocalFeed.h"
 #include "fnord-feeds/FeedService.h"
 #include "fnord-base/stats/stats.h"
+#include "fnord-base/wallclock.h"
 
 namespace fnord {
 namespace feeds {
@@ -37,8 +38,14 @@ uint64_t LogStream::append(const std::string& entry) {
     tables_.emplace_back(createTable());
   }
 
+  uint64_t time = WallClock::now().unixMicros();
+
   const auto& tbl = tables_.back();
-  auto row_offset = tbl->writer->appendRow("", entry);
+  auto row_offset = tbl->writer->appendRow(
+      (void *) &time,
+      sizeof(time),
+      entry.c_str(),
+      entry.length());
 
   if (row_offset > kMaxTableSize) {
     tbl->writer->finalize();
@@ -167,6 +174,14 @@ std::vector<FeedEntry> LogStream::fetch(uint64_t offset, int batch_size) {
     entry.next_offset = table->offset + cursor->nextPosition();
     entry.data = cursor->getDataString();
     entry.time = 0;
+
+    uint64_t* time;
+    size_t time_size;
+    cursor->getKey((void**) &time, &time_size);
+    if (time_size == sizeof(uint64_t)) {
+      entry.time = *time;
+    }
+
     entries.emplace_back(std::move(entry));
 
     if (!cursor->next()) {
