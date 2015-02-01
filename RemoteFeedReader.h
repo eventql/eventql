@@ -27,6 +27,7 @@ public:
 
   Option<FeedEntry> fetchNextEntry();
   void waitForNextEntry();
+  void fillBuffers();
 
   void addSourceFeed(
       URI rpc_url,
@@ -71,7 +72,6 @@ protected:
     DateTime stream_time;
   };
 
-  void fillBuffers();
   void fillBuffer(SourceFeed* source);
 
   RPCClient* rpc_client_;

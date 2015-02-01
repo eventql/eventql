@@ -45,10 +45,19 @@ int main(int argc, const char** argv) {
       "statefile",
       fnord::cli::FlagParser::T_STRING,
       false,
-      NULL,
+      "s",
       NULL,
       "statefile",
       "<filename>");
+
+  flags.defineFlag(
+      "time",
+      fnord::cli::FlagParser::T_SWITCH,
+      false,
+      "t",
+      NULL,
+      "show_time",
+      "");
 
   flags.defineFlag(
       "batch_size",
@@ -87,15 +96,6 @@ int main(int argc, const char** argv) {
       "<num>");
 
   flags.defineFlag(
-      "print_time",
-      fnord::cli::FlagParser::T_SWITCH,
-      false,
-      NULL,
-      NULL,
-      "print_time",
-      "");
-
-  flags.defineFlag(
       "loglevel",
       fnord::cli::FlagParser::T_STRING,
       false,
@@ -123,7 +123,7 @@ int main(int argc, const char** argv) {
   size_t buffer_size = flags.getInt("buffer_size");
   size_t commit_size = flags.getInt("commit_size");
   size_t max_spread_secs = flags.getInt("max_spread_secs");
-  size_t print_time = flags.isSet("print_time");
+  size_t print_time = flags.isSet("time");
 
   /* set up input feed reader */
   feeds::RemoteFeedReader feed_reader(&rpc_client);
@@ -178,7 +178,7 @@ int main(int argc, const char** argv) {
 
   for (;;) {
     last_iter = WallClock::now();
-    feed_reader.waitForNextEntry();
+    feed_reader.fillBuffers();
 
     for (int i = 0; i < commit_size; ++i) {
       auto entry = feed_reader.fetchNextEntry();
