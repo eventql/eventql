@@ -7,7 +7,7 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <environment.h>
+#include <fnordmetric/environment.h>
 #include <io/fileutil.h>
 #include <fnord-metricdb/metric.h>
 #include <util/unittest.h>
