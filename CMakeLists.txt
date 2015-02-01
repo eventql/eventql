@@ -30,6 +30,7 @@ add_subdirectory(3rdparty/libfnord/fnord-chart)
 add_subdirectory(3rdparty/libfnord/fnord-metricdb)
 include_directories(3rdparty/libfnord/)
 include_directories(3rdparty/libfnord/3rdparty/)
+include_directories(${FNORD_FTS_INCLUDE})
 
 add_library(cm-common OBJECT
     cm-common/common.cc
