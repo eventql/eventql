@@ -17,16 +17,10 @@ else()
 endif()
 
 find_package(Threads)
-add_definitions(-DBOOST_THREAD_DONT_USE_CHRONO)
-set(Boost_USE_MULTITHREADED ON)
-set(Boost_USE_STATIC_LIBS ON)
-find_package(Boost COMPONENTS date_time filesystem iostreams regex system thread REQUIRED)
-include_directories(${Boost_INCLUDE_DIRS})
-include_directories(../)
 
 add_subdirectory(3rdparty/libfnord/fnord-base)
 add_subdirectory(3rdparty/libfnord/fnord-feeds)
-#add_subdirectory(3rdparty/libfnord/fnord-fts)
+add_subdirectory(3rdparty/libfnord/fnord-fts)
 add_subdirectory(3rdparty/libfnord/fnord-mdb)
 add_subdirectory(3rdparty/libfnord/fnord-rpc)
 add_subdirectory(3rdparty/libfnord/fnord-http)
@@ -110,25 +104,20 @@ add_executable(cm-stats
     cm-stats/cm-stats.cc)
 
 target_link_libraries(cm-stats ${CMAKE_THREAD_LIBS_INIT})
-# 
-#add_executable(cm-indexbuild
-#    $<TARGET_OBJECTS:cm-common>
-#    $<TARGET_OBJECTS:fnord-base>
-#    $<TARGET_OBJECTS:fnord-http>
-#    $<TARGET_OBJECTS:fnord-json>
-#    $<TARGET_OBJECTS:fnord-sstable>
-#    $<TARGET_OBJECTS:fnord-fts>
-#    $<TARGET_OBJECTS:fnord-feeds>
-#    $<TARGET_OBJECTS:fnord-rpc>
-#    $<TARGET_OBJECTS:fnord-mdb>
-#    cm-index/cm-indexbuild.cc
-#    cm-index/IndexBuilder.cc)
-#
-#target_link_libraries(cm-indexbuild
-#    ${CMAKE_THREAD_LIBS_INIT}
-#    ${Boost_LIBRARIES}
-#    ${Boost_SYSTEM_LIBRARIES}
-#    ${Boost_FILESYSTEM_LIBRARIES}
-#    ${Boost_IOSTREAMS_LIBRARIES}
-#    ${Boost_REGEX_LIBRARIES}
-#    ${Boost_THREAD_LIBRARIES})
+
+add_executable(cm-indexbuild
+    $<TARGET_OBJECTS:cm-common>
+    $<TARGET_OBJECTS:fnord-base>
+    $<TARGET_OBJECTS:fnord-http>
+    $<TARGET_OBJECTS:fnord-json>
+    $<TARGET_OBJECTS:fnord-sstable>
+    $<TARGET_OBJECTS:fnord-fts>
+    $<TARGET_OBJECTS:fnord-feeds>
+    $<TARGET_OBJECTS:fnord-rpc>
+    $<TARGET_OBJECTS:fnord-mdb>
+    cm-index/cm-indexbuild.cc
+    cm-index/IndexBuilder.cc)
+
+target_link_libraries(cm-indexbuild
+    ${CMAKE_THREAD_LIBS_INIT}
+    ${FNORD_FTS_LIBS})
