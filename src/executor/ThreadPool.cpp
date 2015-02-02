@@ -146,14 +146,10 @@ void ThreadPool::execute(Task&& task) {
   condition_.notify_all();
 }
 
-size_t ThreadPool::maxConcurrency() const XZERO_NOEXCEPT {
-  return threads_.size();
-}
-
 std::string ThreadPool::toString() const {
   char buf[32];
 
-  int n = snprintf(buf, sizeof(buf), "ThreadPool(%zu)@%p", maxConcurrency(),
+  int n = snprintf(buf, sizeof(buf), "ThreadPool(%zu)@%p", threads_.size(),
                    this);
 
   return std::string(buf, n);

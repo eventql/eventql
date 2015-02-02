@@ -48,10 +48,6 @@ void DirectExecutor::execute(Task&& task) {
   running_--;
 }
 
-size_t DirectExecutor::maxConcurrency() const XZERO_NOEXCEPT {
-  return 1;
-}
-
 std::string DirectExecutor::toString() const {
   char buf[128];
   snprintf(buf, sizeof(buf), "DirectExecutor@%p", this);

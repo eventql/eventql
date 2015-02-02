@@ -65,10 +65,6 @@ void NativeScheduler::execute(Task&& task) {
   breakLoop();
 }
 
-size_t NativeScheduler::maxConcurrency() const XZERO_NOEXCEPT {
-  return 1;
-}
-
 std::string NativeScheduler::toString() const {
   return "NativeScheduler";
 }

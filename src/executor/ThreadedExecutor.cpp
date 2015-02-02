@@ -106,10 +106,6 @@ void ThreadedExecutor::execute(Task&& task) {
   threads_.push_back(tid);
 }
 
-size_t ThreadedExecutor::maxConcurrency() const XZERO_NOEXCEPT {
-  return std::numeric_limits<size_t>::max();
-}
-
 std::string ThreadedExecutor::toString() const {
   char buf[32];
   snprintf(buf, sizeof(buf), "ThreadedExecutor@%p", this);
