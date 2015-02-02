@@ -16,7 +16,7 @@ set(libxzero_SRC
 
   executor/Executor.cpp
   executor/DirectExecutor.cpp
-  executor/DirectLoopExecutor.cpp
+  executor/NativeScheduler.cpp
   executor/Scheduler.cpp
   executor/ThreadedExecutor.cpp
   executor/ThreadPool.cpp
@@ -24,8 +24,8 @@ set(libxzero_SRC
   io/GzipFilter.cpp
   io/FileRef.cpp
   io/Filter.cpp
-  io/Selectable.cpp
-  io/Selector.cpp
+  #io/Selectable.cpp
+  #io/Selector.cpp
 
   net/ByteArrayEndPoint.cpp
   net/Cidr.cpp
@@ -75,9 +75,9 @@ set(libxzero_SRC
   #...
 
   # support
-  support/LibevClock.cpp
-  support/LibevScheduler.cpp
-  support/LibevSelector.cpp
+  #support/LibevClock.cpp
+  #support/LibevScheduler.cpp
+  #support/LibevSelector.cpp
 )
 
 add_library(xzero SHARED ${libxzero_SRC})

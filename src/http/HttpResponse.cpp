@@ -38,12 +38,14 @@ void HttpResponse::recycle() {
   output_->recycle();
 }
 
-void HttpResponse::checkState() {
+void HttpResponse::requireMutableInfo() {
   if (isCommitted())
-    throw std::runtime_error("Invalid State. Cannot be modified after commit.");
+    throw RUNTIME_ERROR("Invalid State. Cannot be modified after commit.");
+
+  requireNotSendingAlready();
 }
 
-void HttpResponse::checkChannelState() {
+void HttpResponse::requireNotSendingAlready() {
   switch (channel_->state()) {
     case HttpChannelState::READING:
     case HttpChannelState::HANDLING:
@@ -55,7 +57,6 @@ void HttpResponse::checkChannelState() {
 }
 
 void HttpResponse::setCommitted(bool value) {
-  checkState();
   committed_ = value;
 }
 
@@ -64,36 +65,31 @@ HttpVersion HttpResponse::version() const XZERO_NOEXCEPT {
 }
 
 void HttpResponse::setVersion(HttpVersion version) {
-  checkState();
-  checkChannelState();
+  requireMutableInfo();
 
   version_ = version;
 }
 
 void HttpResponse::setStatus(HttpStatus status) {
-  checkState();
-  checkChannelState();
+  requireMutableInfo();
 
   status_ = status;
 }
 
 void HttpResponse::setReason(const std::string& val) {
-  checkState();
-  checkChannelState();
+  requireMutableInfo();
 
   reason_ = val;
 }
 
 void HttpResponse::setContentLength(size_t size) {
-  checkState();
-  checkChannelState();
+  requireMutableInfo();
 
   contentLength_ = size;
 }
 
 void HttpResponse::resetContentLength() {
-  checkState();
-  checkChannelState();
+  requireMutableInfo();
 
   contentLength_ = static_cast<size_t>(-1);
 }
@@ -110,17 +106,16 @@ static const std::vector<std::string> connectionHeaderFields = {
   "Via",
 };
 
-inline void checkInvalidHeader(const std::string& name) {
+inline void requireValidHeader(const std::string& name) {
   for (const auto& test: connectionHeaderFields)
     if (iequals(name, test))
-      throw std::runtime_error("Invalid argument. Harmful response header.");
+      throw RUNTIME_ERROR("Invalid argument. Harmful response header.");
 }
 
 void HttpResponse::addHeader(const std::string& name,
                              const std::string& value) {
-  checkState();
-  checkChannelState();
-  checkInvalidHeader(name);
+  requireMutableInfo();
+  requireValidHeader(name);
 
   headers_.push_back(name, value);
 }
@@ -128,32 +123,28 @@ void HttpResponse::addHeader(const std::string& name,
 void HttpResponse::appendHeader(const std::string& name,
                                 const std::string& value,
                                 const std::string& delim) {
-  checkState();
-  checkChannelState();
-  checkInvalidHeader(name);
+  requireMutableInfo();
+  requireValidHeader(name);
 
   headers_.append(name, value, delim);
 }
 
 void HttpResponse::setHeader(const std::string& name,
                              const std::string& value) {
-  checkState();
-  checkChannelState();
-  checkInvalidHeader(name);
+  requireMutableInfo();
+  requireValidHeader(name);
 
   headers_.overwrite(name, value);
 }
 
 void HttpResponse::removeHeader(const std::string& name) {
-  checkState();
-  checkChannelState();
+  requireMutableInfo();
 
   headers_.remove(name);
 }
 
 void HttpResponse::removeAllHeaders() {
-  checkState();
-  checkChannelState();
+  requireMutableInfo();
 
   headers_.reset();
 }
@@ -162,13 +153,12 @@ const std::string& HttpResponse::getHeader(const std::string& name) const {
   return headers_.get(name);
 }
 
-void HttpResponse::send100Continue() {
-  channel_->send100Continue();
+void HttpResponse::send100Continue(CompletionHandler&& onComplete) {
+  channel_->send100Continue(std::move(onComplete));
 }
 
 void HttpResponse::sendError(HttpStatus code, const std::string& message) {
-  checkState();
-  checkChannelState();
+  requireMutableInfo();
 
   setStatus(code);
   setReason(message);
@@ -205,12 +195,11 @@ void HttpResponse::sendError(HttpStatus code, const std::string& message) {
 
 // {{{ trailers
 void HttpResponse::registerTrailer(const std::string& name) {
-  checkState();
-  checkChannelState();
-  checkInvalidHeader(name);
+  requireMutableInfo();
+  requireValidHeader(name);
 
   if (trailers_.contains(name))
-    throw std::runtime_error("Trailer already registered.");
+    throw RUNTIME_ERROR("Trailer already registered.");
 
   trailers_.push_back(name, "");
 }
@@ -218,21 +207,21 @@ void HttpResponse::registerTrailer(const std::string& name) {
 void HttpResponse::appendTrailer(const std::string& name,
                                  const std::string& value,
                                  const std::string& delim) {
-  checkChannelState();
-  checkInvalidHeader(name);
+  requireNotSendingAlready();
+  requireValidHeader(name);
 
   if (!trailers_.contains(name))
-    throw std::runtime_error("Trailer not registered.");
+    throw RUNTIME_ERROR("Trailer not registered.");
 
   trailers_.append(name, value, delim);
 }
 
 void HttpResponse::setTrailer(const std::string& name, const std::string& value) {
-  checkChannelState();
-  checkInvalidHeader(name);
+  requireNotSendingAlready();
+  requireValidHeader(name);
 
   if (!trailers_.contains(name))
-    throw std::runtime_error("Trailer not registered.");
+    throw RUNTIME_ERROR("Trailer not registered.");
 
   trailers_.overwrite(name, value);
 }

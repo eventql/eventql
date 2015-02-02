@@ -100,13 +100,22 @@ void MockTransport::run(HttpVersion version, const std::string& method,
 
 
   try {
-    channel_->onMessageBegin(BufferRef(method), BufferRef(entity), version);
+    if (!channel_->onMessageBegin(BufferRef(method), BufferRef(entity), version))
+      return;
+
     for (const HeaderField& header: headers) {
-      channel_->onMessageHeader(BufferRef(header.name()),
-                                BufferRef(header.value()));
+      if (!channel_->onMessageHeader(BufferRef(header.name()),
+                                    BufferRef(header.value()))) {
+        return;
+      }
     }
-    channel_->onMessageHeaderEnd();
-    channel_->onMessageContent(BufferRef(body.data(), body.size()));
+
+    if (!channel_->onMessageHeaderEnd())
+      return;
+
+    if (!channel_->onMessageContent(BufferRef(body.data(), body.size())))
+      return;
+
     channel_->onMessageEnd();
   } catch (const BadMessage& e) {
     channel_->response()->sendError(e.code(), e.what());

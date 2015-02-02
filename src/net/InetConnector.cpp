@@ -11,7 +11,7 @@
 #include <xzero/net/ConnectionFactory.h>
 #include <xzero/net/Connection.h>
 #include <xzero/net/IPAddress.h>
-#include <xzero/io/SelectionKey.h>
+#include <xzero/RuntimeError.h>
 #include <xzero/sysconfig.h>
 #include <algorithm>
 #include <mutex>
@@ -51,10 +51,9 @@ static std::mutex m;
 namespace xzero {
 
 InetConnector::InetConnector(const std::string& name, Executor* executor,
-                             Scheduler* scheduler, Selector* selector,
-                             WallClock* clock, TimeSpan idleTimeout)
+                             Scheduler* scheduler, WallClock* clock,
+                             TimeSpan idleTimeout)
     : Connector(name, executor, clock),
-      selector_(selector),
       scheduler_(scheduler),
       connectedEndPoints_(),
       mutex_(),
@@ -70,11 +69,11 @@ InetConnector::InetConnector(const std::string& name, Executor* executor,
 }
 
 InetConnector::InetConnector(const std::string& name, Executor* executor,
-                             Scheduler* scheduler, Selector* selector,
-                             WallClock* clock, TimeSpan idleTimeout,
+                             Scheduler* scheduler, WallClock* clock,
+                             TimeSpan idleTimeout,
                              const IPAddress& ipaddress, int port, int backlog,
                              bool reuseAddr, bool reusePort)
-    : InetConnector(name, executor, scheduler, selector, clock, idleTimeout) {
+    : InetConnector(name, executor, scheduler, clock, idleTimeout) {
 
   open(ipaddress, port, backlog, reuseAddr, reusePort);
 }
@@ -82,7 +81,7 @@ InetConnector::InetConnector(const std::string& name, Executor* executor,
 void InetConnector::open(const IPAddress& ipaddress, int port, int backlog,
                          bool reuseAddr, bool reusePort) {
   if (isOpen())
-    throw std::runtime_error("InetConnector already opened");
+    throw RUNTIME_ERROR("InetConnector already opened");
 
   socket_ = ::socket(ipaddress.family(), SOCK_STREAM, 0);
   addressFamily_ = ipaddress.family();
@@ -157,10 +156,6 @@ InetConnector::~InetConnector() {
   if (socket_ >= 0) {
     ::close(socket_);
   }
-}
-
-Selector* InetConnector::selector() const XZERO_NOEXCEPT {
-  return selector_;
 }
 
 int InetConnector::handle() const XZERO_NOEXCEPT {
@@ -335,15 +330,12 @@ void InetConnector::start() {
 
   isStarted_ = true;
 
-  if (selector_)
-    selectionKey_ = selector_->createSelectable(this, READ);
-  else {
-    executor()->execute([this]() {
-      while (isStarted_) {
-        acceptOne();
-      }
-    });
-  }
+  notifyOnEvent();
+}
+
+void InetConnector::notifyOnEvent() {
+  scheduler_->executeOnReadable(handle(),
+                                std::bind(&InetConnector::onConnect, this));
 }
 
 bool InetConnector::isStarted() const XZERO_NOEXCEPT {
@@ -356,11 +348,10 @@ void InetConnector::stop() {
     return;
   }
 
-  selectionKey_.reset();
   isStarted_ = false;
 }
 
-void InetConnector::onSelectable() XZERO_NOEXCEPT {
+void InetConnector::onConnect() {
   try {
     for (size_t i = 0; i < multiAcceptCount_; i++) {
       if (!acceptOne()) {
@@ -371,6 +362,10 @@ void InetConnector::onSelectable() XZERO_NOEXCEPT {
     // TODO
   } catch (...) {
     // TODO
+  }
+
+  if (isStarted()) {
+    notifyOnEvent();
   }
 }
 
@@ -406,7 +401,7 @@ bool InetConnector::acceptOne() {
     throw std::system_error(errno, std::system_category());
   }
 
-  std::unique_ptr<InetEndPoint> endpoint(new InetEndPoint(cfd, this));
+  std::unique_ptr<InetEndPoint> endpoint(new InetEndPoint(cfd, this, scheduler_));
   {
     std::lock_guard<std::mutex> _lk(mutex_);
     connectedEndPoints_.push_back(endpoint.get());

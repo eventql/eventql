@@ -79,7 +79,6 @@ LocalConnector* HttpService::configureLocal() {
 
 InetConnector* HttpService::configureInet(Executor* executor,
                                           Scheduler* scheduler,
-                                          Selector* selector,
                                           WallClock* clock,
                                           TimeSpan idleTimeout,
                                           const IPAddress& ipaddress,
@@ -88,7 +87,7 @@ InetConnector* HttpService::configureInet(Executor* executor,
     throw std::runtime_error("Multiple inet connectors not yet supported.");
 
   inetConnector_ = server_->addConnector<InetConnector>(
-      "http", executor, scheduler, selector, clock, idleTimeout,
+      "http", executor, scheduler, clock, idleTimeout,
       ipaddress, port, backlog, true, false);
 
   enableHttp1(inetConnector_);
@@ -135,7 +134,7 @@ void HttpService::stop() {
 
 void HttpService::handleRequest(HttpRequest* request, HttpResponse* response) {
   if (request->expect100Continue())
-    response->send100Continue();
+    response->send100Continue(nullptr);
 
   request->input()->setListener(new InputListener(request, response, this));
 }

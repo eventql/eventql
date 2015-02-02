@@ -41,9 +41,9 @@ option(XZERO_OPPORTUNISTIC_WRITE "Builds with support for opportunistic write() 
 # option(XZERO_ENABLE_WEBSOCKETS "Build WebSockets protocol support [default: off]" OFF)
 
 if(APPLE)
-  set(CMAKE_CXX_FLAGS "-std=c++0x -stdlib=libc++")
+  set(CMAKE_CXX_FLAGS "-std=c++14 -stdlib=libc++")
 else()
-  set(CMAKE_CXX_FLAGS "-std=c++0x")
+  set(CMAKE_CXX_FLAGS "-std=c++14")
 endif()
 #set(CMAKE_CXX_FLAGS "-std=c++0x -stdlib=libc++")   # C++11 + libc++
 #set(CMAKE_CXX_FLAGS "-std=c++1y -stdlib=libc++")   # C++14 + libc++

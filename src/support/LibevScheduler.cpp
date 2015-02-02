@@ -6,6 +6,8 @@
 // the License at: http://opensource.org/licenses/MIT
 
 #include <xzero/support/libev/LibevScheduler.h>
+#include <xzero/io/SelectionKey.h>
+#include <xzero/io/Selectable.h>
 
 namespace xzero {
 namespace support {
@@ -15,7 +17,91 @@ namespace support {
  * - make use of pending_ member var to implement pending-task cancellation.
  */
 
-struct LibevScheduler::TaskInfo {
+#if 0
+/**
+ * Wrapper around @c ev::io.
+ */
+class LibevIO : public SelectionKey { // {{{
+ public:
+  LibevIO(LibevScheduler* selector, Selectable* selectable, unsigned ops);
+  ~LibevIO();
+  int interest() const XZERO_NOEXCEPT override;
+  void change(int ops) override;
+  void io(ev::io&, int revents);
+
+ private:
+  ev::io io_;
+  Selectable* selectable_;
+  int interest_;
+};
+
+LibevIO::LibevIO(LibevScheduler* selector, Selectable* selectable, unsigned ops)
+    : SelectionKey(selector),
+      io_(selector->loop()),
+      selectable_(selectable),
+      interest_(0) {
+
+  assert(selector != nullptr);
+  assert(selectable != nullptr);
+  assert(selectable->handle() >= 0);
+  assert((ops & Selectable::READ) || (ops & Selectable::WRITE));
+
+  TRACE("LibevIO: fd=%d, ops=%u", selectable->handle(), ops);
+
+  io_.set<LibevIO, &LibevIO::io>(this);
+  change(ops);
+
+  io_.start();
+}
+
+LibevIO::~LibevIO() {
+  TRACE("~LibevIO: fd=%d", io_.fd);
+}
+
+int LibevIO::interest() const XZERO_NOEXCEPT override {
+  return interest_;
+}
+
+void LibevIO::change(int ops) override {
+  unsigned flags = 0;
+  if (ops & Selectable::READ)
+    flags |= ev::READ;
+
+  if (ops & Selectable::WRITE)
+    flags |= ev::WRITE;
+
+  TRACE("LibevIO.change: fd=%d, ops=%d", selectable_->handle(), ops);
+
+  if (interest_ != flags) {
+    BUG_ON(selectable_->handle() < 0);
+    io_.set(selectable_->handle(), flags);
+    interest_ = flags;
+  }
+}
+
+void LibevIO::io(ev::io&, int revents) {
+  unsigned flags = 0;
+
+  if (revents & ev::READ)
+    flags |= Selectable::READ;
+
+  if (revents & ev::WRITE)
+    flags |= Selectable::WRITE;
+
+  setActivity(flags);
+
+  try {
+    selectable_->onSelectable();
+  } catch (const std::exception& e) {
+    static_cast<LibevScheduler*>(selector())->logError(e);
+  } catch (...) {
+    static_cast<LibevScheduler*>(selector())->logError(RUNTIME_ERROR(
+          "Unknown exception caught."));
+  }
+}
+// }}}
+#endif
+struct LibevScheduler::TaskInfo { // {{{
   Task task;
   ev::timer timer;
 
@@ -47,6 +133,7 @@ void LibevScheduler::TaskInfo::fire(ev::timer&, int) {
   }
   delete this;
 }
+// }}}
 
 LibevScheduler::LibevScheduler(
     ev::loop_ref loop,
@@ -76,11 +163,11 @@ void LibevScheduler::schedule(TimeSpan delay, Task&& task) {
 
 void LibevScheduler::wakeup() {
   evWakeup_.send();
-  loop_.break_loop(ev::ALL);
+  //loop_.break_loop(ev::ONE);
 }
 
 void LibevScheduler::onWakeup(ev::async&, int) {
-  loop_.break_loop(ev::ALL);
+  loop_.break_loop(ev::ONE);
 }
 
 size_t LibevScheduler::maxConcurrency() const XZERO_NOEXCEPT {
@@ -92,6 +179,11 @@ std::string LibevScheduler::toString() const {
   snprintf(buf, sizeof(buf), "LibevScheduler@%p", this);
   return buf;
 }
+
+// std::unique_ptr<SelectionKey> LibevScheduler::createSelectable(
+//     Selectable* handle, unsigned ops) {
+//   return std::unique_ptr<SelectionKey>(new LibevIO(this, handle, ops));
+// }
 
 }  // namespace support
 }  // namespace xzero

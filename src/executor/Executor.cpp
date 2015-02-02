@@ -19,7 +19,9 @@ void Executor::setExceptionHandler(
 
 void Executor::safeCall(const Task& task) XZERO_NOEXCEPT {
   try {
-    task();
+    if (task) {
+      task();
+    }
   } catch (const std::exception& e) {
     handleException(e);
   } catch (...) {
