@@ -30,12 +30,15 @@ static LogSource threadPoolLogger("ThreadPool");
 #define TRACE(msg...) do {} while (0)
 #endif
 
-ThreadPool::ThreadPool()
-    : ThreadPool(processorCount()) {
+ThreadPool::ThreadPool(std::function<void(const std::exception&)>&& eh)
+    : ThreadPool(processorCount(), std::move(eh)) {
 }
 
-ThreadPool::ThreadPool(size_t num_threads)
-    : active_(true),
+ThreadPool::ThreadPool(
+    size_t num_threads,
+    std::function<void(const std::exception&)>&& eh)
+    : Executor(std::move(eh)),
+      active_(true),
       threads_(),
       mutex_(),
       condition_(),
@@ -143,14 +146,10 @@ void ThreadPool::execute(Task&& task) {
   condition_.notify_all();
 }
 
-size_t ThreadPool::maxConcurrency() const XZERO_NOEXCEPT {
-  return threads_.size();
-}
-
 std::string ThreadPool::toString() const {
   char buf[32];
 
-  int n = snprintf(buf, sizeof(buf), "ThreadPool(%zu)@%p", maxConcurrency(),
+  int n = snprintf(buf, sizeof(buf), "ThreadPool(%zu)@%p", threads_.size(),
                    this);
 
   return std::string(buf, n);

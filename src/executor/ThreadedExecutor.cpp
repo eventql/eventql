@@ -26,7 +26,10 @@ static std::mutex m;
 #define TRACE(msg...) do { } while (0)
 #endif
 
-ThreadedExecutor::ThreadedExecutor() : threads_() {
+ThreadedExecutor::ThreadedExecutor(
+    std::function<void(const std::exception&)>&& eh)
+    : Executor(std::move(eh)),
+      threads_() {
 }
 
 ThreadedExecutor::~ThreadedExecutor() {
@@ -101,10 +104,6 @@ void ThreadedExecutor::execute(Task&& task) {
   }));
   std::lock_guard<std::mutex> lock(mutex_);
   threads_.push_back(tid);
-}
-
-size_t ThreadedExecutor::maxConcurrency() const XZERO_NOEXCEPT {
-  return std::numeric_limits<size_t>::max();
 }
 
 std::string ThreadedExecutor::toString() const {

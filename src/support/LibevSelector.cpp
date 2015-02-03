@@ -87,7 +87,14 @@ class LibevIO : public SelectionKey { // {{{
 
     setActivity(flags);
 
-    selectable_->onSelectable();
+    try {
+      selectable_->onSelectable();
+    } catch (const std::exception& e) {
+      static_cast<LibevSelector*>(selector())->logError(e);
+    } catch (...) {
+      static_cast<LibevSelector*>(selector())->logError(RUNTIME_ERROR(
+            "Unknown exception caught."));
+    }
   }
 
  private:
@@ -97,8 +104,11 @@ class LibevIO : public SelectionKey { // {{{
 };
 // }}}
 
-LibevSelector::LibevSelector(ev::loop_ref loop)
-    : loop_(loop),
+LibevSelector::LibevSelector(
+    ev::loop_ref loop,
+    std::function<void(const std::exception&)>&& logger)
+    : Selector(std::move(logger)),
+      loop_(loop),
       evWakeup_(loop_) {
   evWakeup_.set<LibevSelector, &LibevSelector::onWakeup>(this);
   evWakeup_.start();

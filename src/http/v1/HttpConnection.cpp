@@ -295,7 +295,7 @@ void HttpConnection::onFlushable() {
   const bool complete = writer_.flush(endpoint());
   if (complete) {
     TRACE("%p onFlushable: completed.", this);
-    wantFlush(false);
+    //XXX (not needed anymore) wantFlush(false);
 
     if (onComplete_) {
       TRACE("%p onFlushable: invoking completion callback", this);
@@ -306,6 +306,12 @@ void HttpConnection::onFlushable() {
 }
 
 void HttpConnection::onInterestFailure(const std::exception& error) {
+  TRACE("%p onInterestFailure(%s): %s", this, typeid(error).name(), error.what());
+
+  // TODO: improve logging here, as this eats our exception here.
+  // e.g. via (factory or connector)->error(error);
+  consoleLogger(error);
+
   auto callback = std::move(onComplete_);
 
   // notify the callback that we failed doing something wrt. I/O.
@@ -314,15 +320,7 @@ void HttpConnection::onInterestFailure(const std::exception& error) {
     callback(false);
   }
 
-  if (!channel_->response()->isCommitted()) {
-    channel_->setPersistent(false);
-    channel_->response()->sendError(HttpStatus::InternalServerError,
-                                    error.what());
-  } else {
-    // TODO: improve logging here, as this eats our exception here.
-    // e.g. via (factory or connector)->report(this, error);
-    abort();
-  }
+  abort();
 }
 
 }  // namespace http1

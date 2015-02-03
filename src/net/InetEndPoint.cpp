@@ -14,11 +14,12 @@
 #include <xzero/RuntimeError.h>
 #include <xzero/Buffer.h>
 #include <xzero/sysconfig.h>
-#include <system_error>
+#include <xzero/RuntimeError.h>
 #include <stdexcept>
 #include <netinet/tcp.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <errno.h>
 
 #if defined(HAVE_SYS_SENDFILE_H)
 #include <sys/sendfile.h>
@@ -35,9 +36,12 @@ static LogSource inetEndPointLogger("net.InetEndPoint");
 #define ERROR(msg...) do {} while (0)
 #endif
 
-InetEndPoint::InetEndPoint(int socket, InetConnector* connector)
+InetEndPoint::InetEndPoint(int socket,
+                           InetConnector* connector,
+                           Scheduler* scheduler)
     : EndPoint(),
       connector_(connector),
+      scheduler_(scheduler),
       idleTimeout_(connector->clock(), connector->scheduler()),
       handle_(socket),
       isCorking_(false),
@@ -63,7 +67,7 @@ InetEndPoint::~InetEndPoint() {
 
 std::pair<IPAddress, int> InetEndPoint::remoteAddress() const {
   if (handle_ < 0)
-    throw std::runtime_error("Illegal State. Socket is closed.");
+    throw RUNTIME_ERROR("Illegal State. Socket is closed.");
 
   std::pair<IPAddress, int> result;
   switch (connector_->addressFamily()) {
@@ -86,14 +90,14 @@ std::pair<IPAddress, int> InetEndPoint::remoteAddress() const {
       break;
     }
     default:
-      throw std::runtime_error("Illegal State. IPAddress.addressFamily?");
+      throw RUNTIME_ERROR("Illegal State. IPAddress.addressFamily?");
   }
   return result;
 }
 
 std::pair<IPAddress, int> InetEndPoint::localAddress() const {
   if (handle_ < 0)
-    throw std::runtime_error("Illegal State. Socket is closed.");
+    throw RUNTIME_ERROR("Illegal State. Socket is closed.");
 
   std::pair<IPAddress, int> result;
   switch (connector_->addressFamily()) {
@@ -122,14 +126,6 @@ std::pair<IPAddress, int> InetEndPoint::localAddress() const {
   }
 
   return result;
-}
-
-int InetEndPoint::handle() const XZERO_NOEXCEPT {
-  return handle_;
-}
-
-Selector* InetEndPoint::selector() const XZERO_NOEXCEPT {
-  return connector_->selector();
 }
 
 bool InetEndPoint::isOpen() const XZERO_NOEXCEPT {
@@ -163,7 +159,7 @@ void InetEndPoint::setBlocking(bool enable) {
 #endif
 
   if (fcntl(handle_, F_SETFL, flags) < 0) {
-    throw std::system_error(errno, std::system_category());
+    throw SYSTEM_ERROR(errno);
   }
 }
 
@@ -176,7 +172,7 @@ void InetEndPoint::setCorking(bool enable) {
   if (isCorking_ != enable) {
     int flag = enable ? 1 : 0;
     if (setsockopt(handle_, IPPROTO_TCP, TCP_CORK, &flag, sizeof(flag)) < 0)
-      throw std::system_error(errno, std::system_category());
+      throw SYSTEM_ERROR(errno);
 
     isCorking_ = enable;
   }
@@ -203,7 +199,7 @@ size_t InetEndPoint::fill(Buffer* result) {
 #endif
         break;
       default:
-        throw std::system_error(errno, std::system_category());
+        throw SYSTEM_ERROR(errno);
     }
   } else {
     result->resize(result->size() + n);
@@ -216,7 +212,7 @@ size_t InetEndPoint::flush(const BufferRef& source) {
   ssize_t rv = write(handle(), source.data(), source.size());
 
   if (rv < 0)
-    throw std::system_error(errno, std::system_category());
+    throw SYSTEM_ERROR(errno);
 
   // EOF exception?
 
@@ -228,13 +224,13 @@ size_t InetEndPoint::flush(int fd, off_t offset, size_t size) {
   off_t len = 0;
   int rv = sendfile(fd, handle(), offset, &len, nullptr, 0);
   if (rv < 0)
-    throw std::system_error(errno, std::system_category());
+    throw SYSTEM_ERROR(errno);
 
   return len;
 #else
   ssize_t rv = sendfile(handle(), fd, &offset, size);
   if (rv < 0)
-    throw std::system_error(errno, std::system_category());
+    throw SYSTEM_ERROR(errno);
 
   // EOF exception?
 
@@ -242,18 +238,28 @@ size_t InetEndPoint::flush(int fd, off_t offset, size_t size) {
 #endif
 }
 
-void InetEndPoint::onSelectable() XZERO_NOEXCEPT {
+void InetEndPoint::onReadable() {
   try {
     /*lock guard*/ {
       BusyGuard _busyGuard(this);
+      connection()->onFillable();
+    }
 
-      if (selectionKey_->isReadable()) {
-        connection()->onFillable();
-      }
+    if (!isBusy() && isClosed()) {
+      connector_->release(connection());
+    }
+  } catch (const std::exception& e) {
+    connection()->onInterestFailure(e);
+  } catch (...) {
+    connection()->onInterestFailure(RUNTIME_ERROR("Unhandled unknown exception caught."));
+  }
+}
 
-      if (selectionKey_->isWriteable()) {
-        connection()->onFlushable();
-      }
+void InetEndPoint::onWritable() XZERO_NOEXCEPT {
+  try {
+    /*lock guard*/ {
+      BusyGuard _busyGuard(this);
+      connection()->onFlushable();
     }
 
     if (!isBusy() && isClosed()) {
@@ -270,12 +276,9 @@ void InetEndPoint::wantFill() {
   TRACE("%p wantFill()", this);
   // TODO: abstract away the logic of TCP_DEFER_ACCEPT
 
-  if (selector()) {
-    selectionKey_ = registerSelectable(READ);
-    //idleTimeout_.activate();
-  } else {
-    fillable();
-  }
+  //idleTimeout_.activate();
+  scheduler_->executeOnReadable(handle(),
+                                std::bind(&InetEndPoint::fillable, this));
 }
 
 void InetEndPoint::fillable() {
@@ -296,20 +299,11 @@ void InetEndPoint::fillable() {
   });
 }
 
-void InetEndPoint::wantFlush(bool enable) {
-  TRACE("%p wantFlush(%s)", this, enable ? "true" : "false");
-  if (selector()) {
-    if (selectionKey_) {
-      int cur = selectionKey_->interest();
-      int newInterests = enable ? (cur | WRITE) : (cur & ~WRITE);
-      selectionKey_->change(newInterests);
-    } else {
-      selectionKey_ = registerSelectable(WRITE);
-    }
-    //idleTimeout_.activate();
-  } else if (enable) {
-    flushable();
-  }
+void InetEndPoint::wantFlush() {
+  TRACE("%p wantFlush()", this);
+  //idleTimeout_.activate();
+  scheduler_->executeOnWritable(handle(),
+                                std::bind(&InetEndPoint::flushable, this));
 }
 
 void InetEndPoint::flushable() {

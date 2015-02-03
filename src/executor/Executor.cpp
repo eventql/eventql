@@ -1,26 +1,14 @@
 #include <xzero/executor/Executor.h>
 #include <xzero/RuntimeError.h>
-#include <typeinfo>
 
 namespace xzero {
 
-Executor::Executor()
-    : exceptionHandler_(std::bind(&Executor::standardConsoleLogger,
-                                  std::placeholders::_1)) {
+Executor::Executor(
+    std::function<void(const std::exception&)>&& eh)
+    : exceptionHandler_(std::bind(&consoleLogger, std::placeholders::_1)) {
 }
 
 Executor::~Executor() {
-}
-
-void Executor::standardConsoleLogger(const std::exception& e) {
-  if (auto rt = dynamic_cast<const RuntimeError*>(&e)) {
-    fprintf(stderr, "Unhandled exception caught in executor [%s:%d] (%s): %s\n",
-            rt->sourceFile(), rt->sourceLine(), typeid(e).name(), rt->what());
-    return;
-  }
-
-  fprintf(stderr, "Unhandled exception caught in executor (%s): %s\n",
-          typeid(e).name(), e.what());
 }
 
 void Executor::setExceptionHandler(
@@ -31,7 +19,9 @@ void Executor::setExceptionHandler(
 
 void Executor::safeCall(const Task& task) XZERO_NOEXCEPT {
   try {
-    task();
+    if (task) {
+      task();
+    }
   } catch (const std::exception& e) {
     handleException(e);
   } catch (...) {

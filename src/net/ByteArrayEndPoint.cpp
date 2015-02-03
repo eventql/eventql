@@ -129,10 +129,7 @@ void ByteArrayEndPoint::wantFill() {
   }
 }
 
-void ByteArrayEndPoint::wantFlush(bool enable) {
-  if (!enable)
-    return;
-
+void ByteArrayEndPoint::wantFlush() {
   if (connection()) {
     TRACE("%p wantFlush.", this);
     isBusy_++;

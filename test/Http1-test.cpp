@@ -61,8 +61,8 @@ static const TimeSpan maxKeepAlive = TimeSpan::fromSeconds(30);
       response->setStatus(HttpStatus::Ok);                                     \
       response->setContentLength(request->path().size() + 1);                  \
       response->setHeader("Content-Type", "text/plain");                       \
-      response->output()->write(Buffer(request->path() + "\n"));               \
-      response->completed();                                                   \
+      response->output()->write(Buffer(request->path() + "\n"),                \
+          std::bind(&HttpResponse::completed, response));                      \
   });                                                                          \
   server.start();
 

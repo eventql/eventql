@@ -18,8 +18,11 @@ static LogSource directExecutorLogger("executor.DirectExecutor");
 #define TRACE(msg...) do {} while (0)
 #endif
 
-DirectExecutor::DirectExecutor(bool recursive)
-    : recursive_(recursive),
+DirectExecutor::DirectExecutor(
+    bool recursive,
+    std::function<void(const std::exception&)>&& eh)
+    : Executor(std::move(eh)),
+      recursive_(recursive),
       running_(0),
       deferred_() {
 }
@@ -43,10 +46,6 @@ void DirectExecutor::execute(Task&& task) {
   }
 
   running_--;
-}
-
-size_t DirectExecutor::maxConcurrency() const XZERO_NOEXCEPT {
-  return 1;
 }
 
 std::string DirectExecutor::toString() const {

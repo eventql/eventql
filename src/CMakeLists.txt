@@ -4,9 +4,10 @@ set(libxzero_SRC
   Buffer.cpp
   DateTime.cpp
   IdleTimeout.cpp
-  WallClock.cpp
+  RuntimeError.cpp
   TimeSpan.cpp
   Tokenizer.cpp
+  WallClock.cpp
 
   logging/LogAggregator.cpp
   logging/LogLevel.cpp
@@ -15,7 +16,7 @@ set(libxzero_SRC
 
   executor/Executor.cpp
   executor/DirectExecutor.cpp
-  executor/DirectLoopExecutor.cpp
+  executor/NativeScheduler.cpp
   executor/Scheduler.cpp
   executor/ThreadedExecutor.cpp
   executor/ThreadPool.cpp
@@ -23,7 +24,8 @@ set(libxzero_SRC
   io/GzipFilter.cpp
   io/FileRef.cpp
   io/Filter.cpp
-  io/Selectable.cpp
+  #io/Selectable.cpp
+  #io/Selector.cpp
 
   net/ByteArrayEndPoint.cpp
   net/Cidr.cpp
@@ -73,13 +75,13 @@ set(libxzero_SRC
   #...
 
   # support
-  support/LibevClock.cpp
-  support/LibevScheduler.cpp
-  support/LibevSelector.cpp
+  #support/LibevClock.cpp
+  #support/LibevScheduler.cpp
+  #support/LibevSelector.cpp
 )
 
 add_library(xzero SHARED ${libxzero_SRC})
-target_link_libraries(xzero ev pthread ${ZLIB_LIBRARIES})
+target_link_libraries(xzero ev pthread dl ${ZLIB_LIBRARIES})
 set_target_properties(xzero PROPERTIES VERSION ${LIBXZERO_VERSION})
 set_target_properties(xzero PROPERTIES COMPILE_FLAGS "-fvisibility=hidden -fvisibility-inlines-hidden -DBUILD_XZERO=1")
 #set_target_properties(xzero PROPERTIES LINK_FLAGS "${BASE_LDFLAGS}")

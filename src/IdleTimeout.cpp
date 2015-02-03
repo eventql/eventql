@@ -78,13 +78,21 @@ TimeSpan IdleTimeout::elapsed() const {
 void IdleTimeout::reschedule() {
   assert(isActive());
 
+  handle_->cancel();
+
   TimeSpan deltaTimeout = timeout_ - (clock_->get() - fired_);
-  scheduler_->schedule(deltaTimeout, std::bind(&IdleTimeout::onFired, this));
+  handle_ = scheduler_->executeAfter(deltaTimeout,
+                                     std::bind(&IdleTimeout::onFired, this));
 }
 
 void IdleTimeout::schedule() {
   fired_ = clock_->get();
-  scheduler_->schedule(timeout_, std::bind(&IdleTimeout::onFired, this));
+
+  if (handle_)
+    handle_->cancel();
+
+  handle_ = scheduler_->executeAfter(timeout_,
+                                     std::bind(&IdleTimeout::onFired, this));
 }
 
 void IdleTimeout::onFired() {

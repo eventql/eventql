@@ -184,10 +184,13 @@ void HttpChannel::send(FileRef&& file, CompletionHandler&& onComplete) {
 }
 
 void HttpChannel::onBeforeSend() {
-  if (state() != HttpChannelState::HANDLING) {
-    throw RUNTIME_ERROR("Invalid HTTP channel state " +
-        to_string(state_) + ". Expected " +
-        to_string(HttpChannelState::HANDLING) + ".");
+  // also accept READING as current state because you
+  // might want to sentError right away, due to protocol error at least.
+
+  if (state() != HttpChannelState::HANDLING &&
+      state() != HttpChannelState::READING) {
+    throw RUNTIME_ERROR("Invalid state (" +
+        to_string(state()) + ". Creating a new send object not allowed.");
   }
 
   setState(HttpChannelState::SENDING);
@@ -209,7 +212,7 @@ HttpResponseInfo HttpChannel::commitInline() {
     throw RUNTIME_ERROR("No HTTP response status set yet.");
 
   if (request_->expect100Continue())
-    response_->send100Continue();
+    response_->send100Continue(nullptr /* FIXME */);
 
   response_->setCommitted(true);
 
@@ -231,17 +234,19 @@ void HttpChannel::commit(CompletionHandler&& onComplete) {
   send(BufferRef(), makeCompleter(std::move(onComplete)));
 }
 
-void HttpChannel::send100Continue() {
+void HttpChannel::send100Continue(CompletionHandler&& onComplete) {
   if (!request()->expect100Continue())
     throw RUNTIME_ERROR("Illegal State. no 100-continue expected.");
 
   request()->setExpect100Continue(false);
 
+  auto next = makeCompleter(std::move(onComplete));
+
   HttpResponseInfo info(request_->version(), HttpStatus::ContinueRequest,
                         "Continue", false, 0, {}, {});
 
   TRACE("send100Continue(): sending it");
-  transport_->send(std::move(info), BufferRef(), nullptr);
+  transport_->send(std::move(info), BufferRef(), std::move(next));
 }
 
 bool HttpChannel::onMessageBegin(const BufferRef& method,
@@ -273,8 +278,10 @@ bool HttpChannel::onMessageHeader(const BufferRef& name,
   if (iequals(name, "Host")) {
     if (request_->host().empty())
       request_->setHost(value.str());
-    else
+    else {
+      setState(HttpChannelState::HANDLING);
       throw BadMessage(HttpStatus::BadRequest, "Multiple host headers are illegal.");
+    }
   }
 
   return true;
@@ -301,6 +308,7 @@ void HttpChannel::handleRequest() {
     handler_(request(), response());
   } catch (std::exception& e) {
     // TODO: reportException(e);
+    consoleLogger(e);
     response()->sendError(HttpStatus::InternalServerError, e.what());
   } catch (...) {
     // TODO: reportException(RUNTIME_ERROR("Unhandled unknown exception caught");
@@ -341,7 +349,7 @@ void HttpChannel::completed() {
 
   if (state() != HttpChannelState::HANDLING) {
     throw RUNTIME_ERROR("Invalid HTTP channel state " +
-        to_string(state_) + ". Expected " +
+        to_string(state()) + ". Expected " +
         to_string(HttpChannelState::HANDLING) + ".");
   }
 

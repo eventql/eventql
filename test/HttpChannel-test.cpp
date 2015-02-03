@@ -90,7 +90,7 @@ TEST(HttpChannel, multipleHostHeaders) {
   MockTransport transport(&executor, &handlerOk);
   transport.run(HttpVersion::VERSION_1_1, "GET", "/", {
       {"Host", "foo"}, {"Host", "bar"}}, "");
-  ASSERT_EQ(HttpStatus::BadRequest, transport.responseInfo().status());
+  ASSERT_EQ((int)HttpStatus::BadRequest, (int)transport.responseInfo().status());
 }
 
 TEST(HttpChannel, unhandledException1) {
