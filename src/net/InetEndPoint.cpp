@@ -9,7 +9,6 @@
 #include <xzero/net/InetConnector.h>
 #include <xzero/net/Connection.h>
 #include <xzero/executor/Executor.h>
-#include <xzero/io/SelectionKey.h>
 #include <xzero/logging/LogSource.h>
 #include <xzero/RuntimeError.h>
 #include <xzero/Buffer.h>
