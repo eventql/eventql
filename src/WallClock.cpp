@@ -7,6 +7,7 @@
 
 #include <xzero/WallClock.h>
 #include <xzero/DateTime.h>
+#include <xzero/sysconfig.h>
 #include <ctime>
 
 namespace xzero {
@@ -17,15 +18,17 @@ class SystemClock : public WallClock {
 };
 
 DateTime SystemClock::get() const {
-#if 0
-  return DateTime(std::time(nullptr));
-#else
+#ifdef HAVE_CLOCK_GETTIME
   timespec ts;
+  memset(&ts, 0, sizeof(ts));
   if (clock_gettime(CLOCK_REALTIME, &ts) < 0)
     return DateTime(std::time(nullptr));
 
-  float res = ts.tv_sec + TimeSpan::fromNanoseconds(ts.tv_nsec).value();
-  return DateTime(res);
+  return DateTime(
+      static_cast<double>(ts.tv_sec) +
+      TimeSpan::fromNanoseconds(ts.tv_nsec).value());
+#else
+  return DateTime(std::time(nullptr));
 #endif
 }
 

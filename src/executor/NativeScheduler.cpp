@@ -117,7 +117,7 @@ Scheduler::HandleRef NativeScheduler::insertIntoTimersList(DateTime dt,
                                                            HandleRef handle) {
   Timer t = { dt, handle };
 
-  printf("insertIntoTimersList: %s\n", dt.http_str().str().c_str());
+  printf("insertIntoTimersList: %f\n", dt.value());
   std::lock_guard<std::mutex> lk(lock_);
 
   auto i = timers_.end();
@@ -156,7 +156,7 @@ void NativeScheduler::removeFromTimersList(Handle* handle) {
 
 void NativeScheduler::collectTimeouts() {
   const DateTime now = clock_->get();
-  printf("collectTimeouts: test against: %s\n", now.http_str().c_str());
+  printf("collectTimeouts: test against: %f\n", now.value());
 
   std::lock_guard<std::mutex> lk(lock_);
 
@@ -164,9 +164,9 @@ void NativeScheduler::collectTimeouts() {
     if (timers_.empty())
       break;
 
-    const auto& job = timers_.front();
+    const Timer& job = timers_.front();
 
-    printf("collectTimeouts: test for job fired, %s\n", job.when.http_str().c_str());
+    printf("collectTimeouts: test for job fired, %f\n", job.when.value());
     if (job.when > now)
       break;
 

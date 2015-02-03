@@ -25,7 +25,7 @@ DateTime::DateTime(const BufferRef& v)
 DateTime::DateTime(const std::string& v)
     : value_(mktime(v.c_str())), http_(v), htlog_(v) {}
 
-DateTime::DateTime(ev::tstamp v) : value_(v), http_(), htlog_() {}
+DateTime::DateTime(double v) : value_(v), http_(), htlog_() {}
 
 DateTime::~DateTime() {}
 
@@ -61,6 +61,19 @@ const Buffer& DateTime::htlog_str() const {
   }
 
   return htlog_;
+}
+
+std::string DateTime::to_s() const {
+  std::time_t ts = unixtime();
+  struct tm* tm = gmtime(&ts);
+  if (!tm)
+    throw 0;
+
+  char buf[256];
+  if (strftime(buf, sizeof(buf), "%F %T GMT", tm) <= 0)
+    throw 0;
+
+  return buf;
 }
 
 }  // namespace xzero
