@@ -101,14 +101,22 @@ Scheduler::HandleRef NativeScheduler::executeAt(DateTime when, Task task) {
   return insertIntoTimersList(when, std::make_shared<Handle>(onFire, onCancel));
 }
 
+TimeSpan NativeScheduler::computeNextTimeout() {
+  std::lock_guard<std::mutex> lk(lock_);
+
+  return timers_.empty()
+    ? timers_.front().when - clock_->get()
+    : TimeSpan::fromSeconds(4);
+}
+
 Scheduler::HandleRef NativeScheduler::insertIntoTimersList(DateTime dt,
                                                            HandleRef handle) {
   Timer t = { dt, handle };
 
   std::lock_guard<std::mutex> lk(lock_);
 
-  std::list<Timer>::const_iterator i = timers_.cend();
-  std::list<Timer>::const_iterator e = timers_.cbegin();
+  auto i = timers_.end();
+  auto e = timers_.begin();
 
   while (i != e) {
     i--;
@@ -127,8 +135,18 @@ Scheduler::HandleRef NativeScheduler::insertIntoTimersList(DateTime dt,
 }
 
 void NativeScheduler::removeFromTimersList(Handle* handle) {
-  // TODO
   std::lock_guard<std::mutex> lk(lock_);
+
+  auto i = timers_.begin();
+  auto e = timers_.end();
+
+  while (i != e) {
+    if (i->handle.get() == handle) {
+      timers_.erase(i);
+      break;
+    }
+    i++;
+  }
 }
 
 void NativeScheduler::collectTimeouts() {
@@ -209,8 +227,6 @@ void NativeScheduler::runLoopOnce() {
 
   int wmark = 0;
   timeval tv;
-  tv.tv_sec = 16; // TODO compute timeout based on next timed job
-  tv.tv_usec = 0;
 
   {
     std::lock_guard<std::mutex> lk(lock_);
@@ -229,10 +245,14 @@ void NativeScheduler::runLoopOnce() {
       }
     }
 
-    std::deque<Task> activeTasks;
-    activeTasks = std::move(tasks_);
+    const TimeSpan nextTimeout = !tasks_.empty()
+                               ? TimeSpan::Zero
+                               : !timers_.empty()
+                                 ? timers_.front().when - clock_->get()
+                                 : TimeSpan::fromSeconds(4);
 
-    safeCallEach(activeTasks);
+    tv.tv_sec = static_cast<time_t>(nextTimeout.totalSeconds()),
+    tv.tv_usec = nextTimeout.microseconds();
   }
 
   FD_SET(wakeupPipe_[PIPE_READ_END], &input);
@@ -251,11 +271,10 @@ void NativeScheduler::runLoopOnce() {
     }
   }
 
-  std::deque<Task> activeTasks;
-
   std::vector<HandleRef> activeHandles;
   activeHandles.reserve(rv);
 
+  std::deque<Task> activeTasks;
   {
     std::lock_guard<std::mutex> lk(lock_);
 
