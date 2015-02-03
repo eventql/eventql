@@ -1,5 +1,6 @@
 #include <xzero/executor/NativeScheduler.h>
 #include <xzero/RuntimeError.h>
+#include <xzero/WallClock.h>
 #include <xzero/sysconfig.h>
 #include <algorithm>
 #include <vector>
@@ -31,9 +32,11 @@ namespace xzero {
 
 NativeScheduler::NativeScheduler(
     std::function<void(const std::exception&)> errorLogger,
+    WallClock* clock,
     std::function<void()> preInvoke,
     std::function<void()> postInvoke)
     : Scheduler(std::move(errorLogger)),
+      clock_(clock ? clock : WallClock::system()),
       onPreInvokePending_(preInvoke),
       onPostInvokePending_(postInvoke),
       keys_(),
@@ -47,12 +50,13 @@ NativeScheduler::NativeScheduler(
 }
 
 NativeScheduler::NativeScheduler(
-    std::function<void(const std::exception&)> errorLogger)
-    : NativeScheduler(errorLogger, nullptr, nullptr) {
+    std::function<void(const std::exception&)> errorLogger,
+    WallClock* clock)
+    : NativeScheduler(errorLogger, clock, nullptr, nullptr) {
 }
 
 NativeScheduler::NativeScheduler()
-    : NativeScheduler(nullptr) {
+    : NativeScheduler(nullptr, nullptr, nullptr, nullptr) {
 }
 
 NativeScheduler::~NativeScheduler() {
@@ -61,7 +65,10 @@ NativeScheduler::~NativeScheduler() {
 }
 
 void NativeScheduler::execute(Task&& task) {
-  tasks_.push_back(task);
+  {
+    std::lock_guard<std::mutex> lk(lock_);
+    tasks_.push_back(task);
+  }
   breakLoop();
 }
 
@@ -70,11 +77,76 @@ std::string NativeScheduler::toString() const {
 }
 
 Scheduler::HandleRef NativeScheduler::executeAfter(TimeSpan delay, Task task) {
-  // TODO
+  auto onFire = [task]() {
+    task();
+  };
+
+  auto onCancel = [this](Handle* handle) {
+    removeFromTimersList(handle);
+  };
+
+  return insertIntoTimersList(clock_->get() + delay,
+                              std::make_shared<Handle>(onFire, onCancel));
 }
 
-Scheduler::HandleRef NativeScheduler::executeAt(DateTime dt, Task task) {
+Scheduler::HandleRef NativeScheduler::executeAt(DateTime when, Task task) {
+  auto onFire = [task]() {
+    task();
+  };
+
+  auto onCancel = [this](Handle* handle) {
+    removeFromTimersList(handle);
+  };
+
+  return insertIntoTimersList(when, std::make_shared<Handle>(onFire, onCancel));
+}
+
+Scheduler::HandleRef NativeScheduler::insertIntoTimersList(DateTime dt,
+                                                           HandleRef handle) {
+  Timer t = { dt, handle };
+
+  std::lock_guard<std::mutex> lk(lock_);
+
+  std::list<Timer>::const_iterator i = timers_.cend();
+  std::list<Timer>::const_iterator e = timers_.cbegin();
+
+  while (i != e) {
+    i--;
+    const Timer& current = *i;
+    if (current.when >= t.when) {
+      timers_.insert(i, t);
+      return handle;
+    }
+  }
+
+  if (i == e) {
+    timers_.push_front(t);
+  }
+
+  return handle;
+}
+
+void NativeScheduler::removeFromTimersList(Handle* handle) {
   // TODO
+  std::lock_guard<std::mutex> lk(lock_);
+}
+
+void NativeScheduler::collectTimeouts() {
+  const DateTime now = clock_->get();
+
+  std::lock_guard<std::mutex> lk(lock_);
+
+  for (;;) {
+    if (timers_.empty())
+      break;
+
+    const auto& job = timers_.front();
+    if (job.when <= now)
+      break;
+
+    tasks_.push_back(std::bind(&Handle::fire, job.handle.get()));
+    timers_.pop_front();
+  }
 }
 
 inline Scheduler::HandleRef registerInterest(
@@ -109,7 +181,7 @@ Scheduler::HandleRef NativeScheduler::executeOnWritable(int fd, Task task) {
   return registerInterest(&lock_, &writers_, fd, task);
 }
 
-inline void gatherActiveHandles(
+inline void collectActiveHandles(
     std::list<std::pair<int, Scheduler::HandleRef>>* interests,
     fd_set* fdset,
     std::vector<Scheduler::HandleRef>* result) {
@@ -137,7 +209,7 @@ void NativeScheduler::runLoopOnce() {
 
   int wmark = 0;
   timeval tv;
-  tv.tv_sec = 16;
+  tv.tv_sec = 16; // TODO compute timeout based on next timed job
   tv.tv_usec = 0;
 
   {
@@ -169,6 +241,8 @@ void NativeScheduler::runLoopOnce() {
   if (rv < 0)
     throw SYSTEM_ERROR(errno);
 
+  collectTimeouts();
+
   if (FD_ISSET(wakeupPipe_[PIPE_READ_END], &input)) {
     bool consumeMore = true;
     while (consumeMore) {
@@ -185,8 +259,8 @@ void NativeScheduler::runLoopOnce() {
   {
     std::lock_guard<std::mutex> lk(lock_);
 
-    gatherActiveHandles(&readers_, &input, &activeHandles);
-    gatherActiveHandles(&writers_, &output, &activeHandles);
+    collectActiveHandles(&readers_, &input, &activeHandles);
+    collectActiveHandles(&writers_, &output, &activeHandles);
     activeTasks = std::move(tasks_);
   }
 
