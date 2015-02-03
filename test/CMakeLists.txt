@@ -10,7 +10,7 @@ if(ENABLE_TESTS)
     ByteArrayEndPoint-test.cpp
     Cidr-test.cpp
     DirectExecutor-test.cpp
-    #IdleTimeout-test.cpp
+    IdleTimeout-test.cpp
     ThreadPool-test.cpp
     Tokenizer-test.cpp
     # support

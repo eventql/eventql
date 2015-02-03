@@ -78,10 +78,12 @@ std::string NativeScheduler::toString() const {
 
 Scheduler::HandleRef NativeScheduler::executeAfter(TimeSpan delay, Task task) {
   auto onFire = [task]() {
+    printf("executeAfter.onFire\n");
     task();
   };
 
   auto onCancel = [this](Handle* handle) {
+    printf("executeAfter.onCancel\n");
     removeFromTimersList(handle);
   };
 
@@ -91,10 +93,12 @@ Scheduler::HandleRef NativeScheduler::executeAfter(TimeSpan delay, Task task) {
 
 Scheduler::HandleRef NativeScheduler::executeAt(DateTime when, Task task) {
   auto onFire = [task]() {
+    printf("executeAt.onFire\n");
     task();
   };
 
   auto onCancel = [this](Handle* handle) {
+    printf("executeAt.onCancel\n");
     removeFromTimersList(handle);
   };
 
@@ -113,6 +117,7 @@ Scheduler::HandleRef NativeScheduler::insertIntoTimersList(DateTime dt,
                                                            HandleRef handle) {
   Timer t = { dt, handle };
 
+  printf("insertIntoTimersList: %s\n", dt.http_str().str().c_str());
   std::lock_guard<std::mutex> lk(lock_);
 
   auto i = timers_.end();
@@ -151,6 +156,7 @@ void NativeScheduler::removeFromTimersList(Handle* handle) {
 
 void NativeScheduler::collectTimeouts() {
   const DateTime now = clock_->get();
+  printf("collectTimeouts: test against: %s\n", now.http_str().c_str());
 
   std::lock_guard<std::mutex> lk(lock_);
 
@@ -159,9 +165,12 @@ void NativeScheduler::collectTimeouts() {
       break;
 
     const auto& job = timers_.front();
-    if (job.when <= now)
+
+    printf("collectTimeouts: test for job fired, %s\n", job.when.http_str().c_str());
+    if (job.when > now)
       break;
 
+    printf("  collecting\n");
     tasks_.push_back(std::bind(&Handle::fire, job.handle.get()));
     timers_.pop_front();
   }
@@ -261,8 +270,6 @@ void NativeScheduler::runLoopOnce() {
   if (rv < 0)
     throw SYSTEM_ERROR(errno);
 
-  collectTimeouts();
-
   if (FD_ISSET(wakeupPipe_[PIPE_READ_END], &input)) {
     bool consumeMore = true;
     while (consumeMore) {
@@ -270,6 +277,8 @@ void NativeScheduler::runLoopOnce() {
       consumeMore = ::read(wakeupPipe_[PIPE_READ_END], buf, sizeof(buf)) > 0;
     }
   }
+
+  collectTimeouts();
 
   std::vector<HandleRef> activeHandles;
   activeHandles.reserve(rv);

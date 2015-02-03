@@ -7,13 +7,12 @@
 
 #include <xzero/IdleTimeout.h>
 #include <xzero/DateTime.h>
-#include <xzero/support/libev/LibevScheduler.h>
-#include <xzero/support/libev/LibevClock.h>
+#include <xzero/executor/NativeScheduler.h>
+#include <xzero/WallClock.h>
 #include <gtest/gtest.h>
 #include <memory>
 
 using namespace xzero;
-using namespace xzero::support;
 
 template<typename T> class Wrapper { // {{{
  public:
@@ -32,128 +31,43 @@ template<typename T> class Wrapper { // {{{
   T* value_;
 }; // }}}
 
-TEST(IdleTimeout, elapsed) {
-  ev::loop_ref loop = ev::default_loop(0);
-  ev_now_update(loop);
+TEST(NativeScheduler, executeAfter_with_handle) {
+  WallClock* clock = WallClock::system();
+  NativeScheduler scheduler;
+  DateTime firedAt, start;
+  int fireCount = 0;
 
-  std::unique_ptr<WallClock> clock(new LibevClock(loop));
-  //Wrapper<WallClock> clock = WallClock::system();
-  std::unique_ptr<Scheduler> scheduler(new LibevScheduler(loop));
+  start = clock->get();
 
-  DateTime beforeIdling = clock->get();
-  printf("before: %.4f\n", clock->get().value());
-
-  IdleTimeout idle(clock.get(), scheduler.get());
-  idle.setTimeout(TimeSpan::fromMilliseconds(50));
-  idle.setCallback([](){});
-  idle.activate();
-
-  loop.run();
-
-  DateTime afterIdling = clock->get();
-  printf("after: %.4f\n", clock->get().value());
-
-  TimeSpan idlingTime = afterIdling - beforeIdling;
-
-  ASSERT_EQ(0, idle.elapsed().totalMilliseconds());
-  ASSERT_NEAR(50, idlingTime.totalMilliseconds(), 10);
-}
-
-TEST(IdleTimeout, DISABLED_test1) {
-  ev::loop_ref loop = ev::default_loop(0);
-  std::unique_ptr<WallClock> clock(new LibevClock(loop));
-  std::unique_ptr<Scheduler> scheduler(new LibevScheduler(loop));
-  bool callbackInvoked = false;
-  DateTime beforeIdling = clock->get();
-  DateTime firedAt;
-
-  IdleTimeout idle(clock.get(), scheduler.get());
-  idle.setCallback([&]() {
-    callbackInvoked = true;
+  printf("before executeAfter(): %s\n", clock->get().http_str().str().c_str());
+  auto handle = scheduler.executeAfter(TimeSpan::fromMilliseconds(1000), [&](){
+    printf("fired at: %s\n", clock->get().http_str().str().c_str());
     firedAt = clock->get();
+    fireCount++;
   });
 
-  idle.setTimeout(TimeSpan::fromMilliseconds(150));
-  idle.activate();
+  TimeSpan diff = firedAt - start;
+  unsigned long diffms = diff.totalMilliseconds();
 
-  loop.run();
+  scheduler.runLoopOnce();
+  printf("diff: %lu\n", diffms);
+  printf("after runLoopOnce(): %s\n", clock->get().http_str().str().c_str());
 
-  ASSERT_EQ(true, callbackInvoked);
-  ASSERT_EQ(0, idle.elapsed().totalMilliseconds());
-  ASSERT_NEAR(150, (firedAt - beforeIdling).totalMilliseconds(), 10);
+  ASSERT_EQ(1, fireCount);
+  ASSERT_NEAR(1000, diffms, 10);
 }
 
-TEST(IdleTimeout, DISABLED_test2) {
-  ev::loop_ref loop = ev::default_loop(0);
-  std::unique_ptr<WallClock> clock(new LibevClock(loop));
-  std::unique_ptr<Scheduler> scheduler(new LibevScheduler(loop));
+TEST(NativeScheduler, cancelBeforeRun) {
+  WallClock* clock = WallClock::system();
+  NativeScheduler scheduler;
+  int fireCount = 0;
 
-  int callbackInvoked = 0;
-  DateTime beforeIdling = clock->get();
-  TimeSpan fired1;
-  TimeSpan fired2;
-
-  // idle1
-  IdleTimeout idle1(clock.get(), scheduler.get());
-  idle1.setCallback([&]() {
-    callbackInvoked++;
-    fired1 = clock->get() - beforeIdling;
+  auto handle = scheduler.executeAfter(TimeSpan::fromSeconds(1), [&](){
+    fireCount++;
   });
+  handle->cancel();
 
-  idle1.setTimeout(TimeSpan::fromMilliseconds(150));
-  idle1.activate();
+  scheduler.runLoopOnce();
 
-  // idle2
-  IdleTimeout idle2(clock.get(), scheduler.get());
-  idle2.setCallback([&]() {
-    callbackInvoked++;
-    fired2 = clock->get() - beforeIdling;
-  });
-
-  idle2.setTimeout(TimeSpan::fromMilliseconds(125));
-  idle2.activate();
-
-  loop.run();
-
-  ASSERT_EQ(2, callbackInvoked);
-  ASSERT_NEAR(150, fired1.totalMilliseconds(), 10);
-  ASSERT_NEAR(125, fired2.totalMilliseconds(), 10);
-}
-
-TEST(IdleTimeout, DISABLED_touch) {
-  ev::loop_ref loop = ev::default_loop(0);
-  std::unique_ptr<WallClock> clock(new LibevClock(loop));
-  std::unique_ptr<Scheduler> scheduler(new LibevScheduler(loop));
-
-  int callbackInvoked = 0;
-  DateTime beforeIdling = clock->get();
-  TimeSpan fired1;
-  TimeSpan fired2;
-
-  // idle1
-  IdleTimeout idle1(clock.get(), scheduler.get());
-  idle1.setCallback([&]() {
-    callbackInvoked++;
-    fired1 = clock->get() - beforeIdling;
-  });
-
-  idle1.setTimeout(TimeSpan::fromMilliseconds(150));
-  idle1.activate();
-
-  // idle2
-  IdleTimeout idle2(clock.get(), scheduler.get());
-  idle2.setCallback([&]() {
-    callbackInvoked++;
-    fired2 = clock->get() - beforeIdling;
-    idle1.touch();
-  });
-
-  idle2.setTimeout(TimeSpan::fromMilliseconds(100));
-  idle2.activate();
-
-  loop.run();
-
-  ASSERT_EQ(2, callbackInvoked);
-  ASSERT_NEAR(100, fired2.totalMilliseconds(), 10);
-  ASSERT_NEAR(250, fired1.totalMilliseconds(), 10);
+  ASSERT_EQ(0, fireCount);
 }

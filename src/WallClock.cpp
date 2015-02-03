@@ -17,7 +17,16 @@ class SystemClock : public WallClock {
 };
 
 DateTime SystemClock::get() const {
+#if 0
   return DateTime(std::time(nullptr));
+#else
+  timespec ts;
+  if (clock_gettime(CLOCK_REALTIME, &ts) < 0)
+    return DateTime(std::time(nullptr));
+
+  float res = ts.tv_sec + TimeSpan::fromNanoseconds(ts.tv_nsec).value();
+  return DateTime(res);
+#endif
 }
 
 WallClock* WallClock::system() {

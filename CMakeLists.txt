@@ -43,7 +43,7 @@ option(XZERO_OPPORTUNISTIC_WRITE "Builds with support for opportunistic write() 
 if(APPLE)
   set(CMAKE_CXX_FLAGS "-std=c++14 -stdlib=libc++")
 else()
-  set(CMAKE_CXX_FLAGS "-std=c++14")
+  set(CMAKE_CXX_FLAGS "-std=c++11")
 endif()
 #set(CMAKE_CXX_FLAGS "-std=c++0x -stdlib=libc++")   # C++11 + libc++
 #set(CMAKE_CXX_FLAGS "-std=c++1y -stdlib=libc++")   # C++14 + libc++
