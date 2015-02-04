@@ -37,10 +37,10 @@ NativeScheduler::NativeScheduler(
     std::function<void()> postInvoke)
     : Scheduler(std::move(errorLogger)),
       clock_(clock ? clock : WallClock::system()),
-      onPreInvokePending_(preInvoke),
-      onPostInvokePending_(postInvoke),
       lock_(),
-      wakeupPipe_() {
+      wakeupPipe_(),
+      onPreInvokePending_(preInvoke),
+      onPostInvokePending_(postInvoke) {
   if (pipe(wakeupPipe_) < 0) {
     throw SYSTEM_ERROR(errno);
   }
@@ -76,28 +76,22 @@ std::string NativeScheduler::toString() const {
 }
 
 Scheduler::HandleRef NativeScheduler::executeAfter(TimeSpan delay, Task task) {
-  auto onFire = [task]() {
-    task();
-  };
-
   auto onCancel = [this](Handle* handle) {
     removeFromTimersList(handle);
   };
 
   return insertIntoTimersList(clock_->get() + delay,
-                              std::make_shared<Handle>(onFire, onCancel));
+                              std::make_shared<Handle>(task, onCancel));
 }
 
 Scheduler::HandleRef NativeScheduler::executeAt(DateTime when, Task task) {
-  auto onFire = [task]() {
-    task();
-  };
-
   auto onCancel = [this](Handle* handle) {
     removeFromTimersList(handle);
   };
 
-  return insertIntoTimersList(when, std::make_shared<Handle>(onFire, onCancel));
+  //return insertIntoTimersList(when, std::make_shared<Handle>(task, onCancel));
+  return insertIntoTimersList(when, std::make_shared<Handle>(task,
+      std::bind(&NativeScheduler::removeFromTimersList, this, std::placeholders::_1)));
 }
 
 TimeSpan NativeScheduler::computeNextTimeout() {
