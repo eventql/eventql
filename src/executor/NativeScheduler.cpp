@@ -125,8 +125,6 @@ void NativeScheduler::removeFromTimersList(Handle* handle) {
 void NativeScheduler::collectTimeouts(std::vector<HandleRef>* result) {
   const DateTime now = clock_->get();
 
-  std::lock_guard<std::mutex> lk(lock_);
-
   for (;;) {
     if (timers_.empty())
       break;
@@ -281,12 +279,11 @@ void NativeScheduler::runLoopOnce() {
   std::vector<HandleRef> activeHandles;
   activeHandles.reserve(rv);
 
-  collectTimeouts(&activeHandles);
-
   std::deque<Task> activeTasks;
   {
     std::lock_guard<std::mutex> lk(lock_);
 
+    collectTimeouts(&activeHandles);
     collectActiveHandles(&readers_, &input, &activeHandles);
     collectActiveHandles(&writers_, &output, &activeHandles);
     activeTasks = std::move(tasks_);
