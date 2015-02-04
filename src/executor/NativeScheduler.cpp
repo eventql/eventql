@@ -85,13 +85,12 @@ Scheduler::HandleRef NativeScheduler::executeAfter(TimeSpan delay, Task task) {
 }
 
 Scheduler::HandleRef NativeScheduler::executeAt(DateTime when, Task task) {
-  auto onCancel = [this](Handle* handle) {
-    removeFromTimersList(handle);
-  };
-
-  //return insertIntoTimersList(when, std::make_shared<Handle>(task, onCancel));
-  return insertIntoTimersList(when, std::make_shared<Handle>(task,
-      std::bind(&NativeScheduler::removeFromTimersList, this, std::placeholders::_1)));
+  return insertIntoTimersList(
+      when,
+      std::make_shared<Handle>(task,
+                               std::bind(&NativeScheduler::removeFromTimersList,
+                                         this,
+                                         std::placeholders::_1)));
 }
 
 Scheduler::HandleRef NativeScheduler::insertIntoTimersList(DateTime dt,
