@@ -122,7 +122,7 @@ void NativeScheduler::removeFromTimersList(Handle* handle) {
   }
 }
 
-void NativeScheduler::collectTimeouts() {
+void NativeScheduler::collectTimeouts(std::vector<HandleRef>* result) {
   const DateTime now = clock_->get();
 
   std::lock_guard<std::mutex> lk(lock_);
@@ -136,7 +136,7 @@ void NativeScheduler::collectTimeouts() {
     if (job.when > now)
       break;
 
-    tasks_.push_back(job.handle->getAction());
+    result->push_back(job.handle);
     timers_.pop_front();
   }
 }
@@ -257,10 +257,10 @@ void NativeScheduler::runLoopOnce() {
     }
   }
 
-  collectTimeouts();
-
   std::vector<HandleRef> activeHandles;
   activeHandles.reserve(rv);
+
+  collectTimeouts(&activeHandles);
 
   std::deque<Task> activeTasks;
   {
