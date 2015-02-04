@@ -78,12 +78,10 @@ std::string NativeScheduler::toString() const {
 
 Scheduler::HandleRef NativeScheduler::executeAfter(TimeSpan delay, Task task) {
   auto onFire = [task]() {
-    printf("executeAfter.onFire\n");
     task();
   };
 
   auto onCancel = [this](Handle* handle) {
-    printf("executeAfter.onCancel\n");
     removeFromTimersList(handle);
   };
 
@@ -93,12 +91,10 @@ Scheduler::HandleRef NativeScheduler::executeAfter(TimeSpan delay, Task task) {
 
 Scheduler::HandleRef NativeScheduler::executeAt(DateTime when, Task task) {
   auto onFire = [task]() {
-    printf("executeAt.onFire\n");
     task();
   };
 
   auto onCancel = [this](Handle* handle) {
-    printf("executeAt.onCancel\n");
     removeFromTimersList(handle);
   };
 
@@ -117,7 +113,6 @@ Scheduler::HandleRef NativeScheduler::insertIntoTimersList(DateTime dt,
                                                            HandleRef handle) {
   Timer t = { dt, handle };
 
-  printf("insertIntoTimersList: %f\n", dt.value());
   std::lock_guard<std::mutex> lk(lock_);
 
   auto i = timers_.end();
@@ -156,7 +151,6 @@ void NativeScheduler::removeFromTimersList(Handle* handle) {
 
 void NativeScheduler::collectTimeouts() {
   const DateTime now = clock_->get();
-  printf("collectTimeouts: test against: %f\n", now.value());
 
   std::lock_guard<std::mutex> lk(lock_);
 
@@ -166,11 +160,9 @@ void NativeScheduler::collectTimeouts() {
 
     const Timer& job = timers_.front();
 
-    printf("collectTimeouts: test for job fired, %f\n", job.when.value());
     if (job.when > now)
       break;
 
-    printf("  collecting\n");
     tasks_.push_back(std::bind(&Handle::fire, job.handle.get()));
     timers_.pop_front();
   }
@@ -199,12 +191,10 @@ inline Scheduler::HandleRef registerInterest(
 }
 
 Scheduler::HandleRef NativeScheduler::executeOnReadable(int fd, Task task) {
-  printf("registerInterest(%d, READ)\n", fd);
   return registerInterest(&lock_, &readers_, fd, task);
 }
 
 Scheduler::HandleRef NativeScheduler::executeOnWritable(int fd, Task task) {
-  printf("registerInterest(%d, WRITE)\n", fd);
   return registerInterest(&lock_, &writers_, fd, task);
 }
 
@@ -301,6 +291,11 @@ void NativeScheduler::runLoopOnce() {
 void NativeScheduler::breakLoop() {
   int dummy = 42;
   ::write(wakeupPipe_[PIPE_WRITE_END], &dummy, sizeof(dummy));
+}
+
+size_t NativeScheduler::timerCount() {
+  std::lock_guard<std::mutex> lk(lock_);
+  return timers_.size();
 }
 
 } // namespace xzero

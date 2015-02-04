@@ -22,9 +22,7 @@ TEST(NativeScheduler, executeAfter_without_handle) {
 
   start = clock->get();
 
-  printf("before executeAfter(): %f\n", start.value());
-  auto handle = scheduler.executeAfter(TimeSpan::fromMilliseconds(3000), [&](){
-    printf("fired at: %f\n", clock->get().value());
+  auto handle = scheduler.executeAfter(TimeSpan::fromMilliseconds(500), [&](){
     firedAt = clock->get();
     fireCount++;
   });
@@ -32,14 +30,12 @@ TEST(NativeScheduler, executeAfter_without_handle) {
   scheduler.runLoopOnce();
 
   double diff = firedAt.value() - start.value();
-  printf("diff: %f\n", diff);
-  printf("after runLoopOnce(): %f\n", clock->get().value());
 
   ASSERT_EQ(1, fireCount);
-  ASSERT_NEAR(3, diff, 0.05);
+  ASSERT_NEAR(0.5, diff, 0.05);
 }
 
-TEST(NativeScheduler, DISABLED_cancelBeforeRun) {
+TEST(NativeScheduler, cancelBeforeRun) {
   WallClock* clock = WallClock::system();
   NativeScheduler scheduler;
   int fireCount = 0;
@@ -47,9 +43,8 @@ TEST(NativeScheduler, DISABLED_cancelBeforeRun) {
   auto handle = scheduler.executeAfter(TimeSpan::fromSeconds(1), [&](){
     fireCount++;
   });
+
+  ASSERT_EQ(1, scheduler.timerCount());
   handle->cancel();
-
-  scheduler.runLoopOnce();
-
-  ASSERT_EQ(0, fireCount);
+  ASSERT_EQ(0, scheduler.timerCount());
 }
