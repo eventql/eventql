@@ -39,7 +39,6 @@ NativeScheduler::NativeScheduler(
       clock_(clock ? clock : WallClock::system()),
       onPreInvokePending_(preInvoke),
       onPostInvokePending_(postInvoke),
-      keys_(),
       lock_(),
       wakeupPipe_() {
   if (pipe(wakeupPipe_) < 0) {
