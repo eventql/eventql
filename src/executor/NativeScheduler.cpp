@@ -119,15 +119,11 @@ Scheduler::HandleRef NativeScheduler::insertIntoTimersList(DateTime dt,
 void NativeScheduler::removeFromTimersList(Handle* handle) {
   std::lock_guard<std::mutex> lk(lock_);
 
-  auto i = timers_.begin();
-  auto e = timers_.end();
-
-  while (i != e) {
+  for (auto i = timers_.begin(), e = timers_.end(); i != e; ++i) {
     if (i->handle.get() == handle) {
       timers_.erase(i);
       break;
     }
-    i++;
   }
 }
 
