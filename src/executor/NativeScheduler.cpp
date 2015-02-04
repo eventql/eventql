@@ -94,14 +94,6 @@ Scheduler::HandleRef NativeScheduler::executeAt(DateTime when, Task task) {
       std::bind(&NativeScheduler::removeFromTimersList, this, std::placeholders::_1)));
 }
 
-TimeSpan NativeScheduler::computeNextTimeout() {
-  std::lock_guard<std::mutex> lk(lock_);
-
-  return timers_.empty()
-    ? timers_.front().when - clock_->get()
-    : TimeSpan::fromSeconds(4);
-}
-
 Scheduler::HandleRef NativeScheduler::insertIntoTimersList(DateTime dt,
                                                            HandleRef handle) {
   Timer t = { dt, handle };
