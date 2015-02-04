@@ -55,6 +55,7 @@ InetConnector::InetConnector(const std::string& name, Executor* executor,
                              TimeSpan idleTimeout)
     : Connector(name, executor, clock),
       scheduler_(scheduler),
+      schedulerHandle_(),
       connectedEndPoints_(),
       mutex_(),
       socket_(-1),
@@ -334,8 +335,9 @@ void InetConnector::start() {
 }
 
 void InetConnector::notifyOnEvent() {
-  scheduler_->executeOnReadable(handle(),
-                                std::bind(&InetConnector::onConnect, this));
+  schedulerHandle_ = scheduler_->executeOnReadable(
+      handle(),
+      std::bind(&InetConnector::onConnect, this));
 }
 
 bool InetConnector::isStarted() const XZERO_NOEXCEPT {
@@ -347,6 +349,9 @@ void InetConnector::stop() {
   if (!isStarted()) {
     return;
   }
+
+  if (schedulerHandle_)
+    schedulerHandle_->cancel();
 
   isStarted_ = false;
 }
