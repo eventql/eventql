@@ -21,7 +21,7 @@ TEST(NativeScheduler, executeAfter_without_handle) {
 
   start = clock->get();
 
-  auto handle = scheduler.executeAfter(TimeSpan::fromMilliseconds(500), [&](){
+  scheduler.executeAfter(TimeSpan::fromMilliseconds(500), [&](){
     firedAt = clock->get();
     fireCount++;
   });
@@ -58,11 +58,16 @@ TEST(NativeScheduler, cancel_beforeRun2) {
     fire1Count++;
   });
 
-  auto handle2 = scheduler.executeAfter(TimeSpan::fromSeconds(1), [&](){
+  auto handle2 = scheduler.executeAfter(TimeSpan::fromMilliseconds(10), [&](){
     fire2Count++;
   });
 
   ASSERT_EQ(2, scheduler.timerCount());
   handle1->cancel();
   ASSERT_EQ(1, scheduler.timerCount());
+
+  scheduler.runLoopOnce();
+
+  ASSERT_EQ(0, fire1Count);
+  ASSERT_EQ(1, fire2Count);
 }
