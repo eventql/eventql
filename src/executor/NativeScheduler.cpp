@@ -163,7 +163,7 @@ void NativeScheduler::collectTimeouts() {
     if (job.when > now)
       break;
 
-    tasks_.push_back(std::bind(&Handle::fire, job.handle.get()));
+    tasks_.push_back(job.handle->getAction());
     timers_.pop_front();
   }
 }
@@ -216,6 +216,21 @@ inline void collectActiveHandles(
       i++;
     }
   }
+}
+
+size_t NativeScheduler::timerCount() {
+  std::lock_guard<std::mutex> lk(lock_);
+  return timers_.size();
+}
+
+size_t NativeScheduler::readerCount() {
+  std::lock_guard<std::mutex> lk(lock_);
+  return readers_.size();
+}
+
+size_t NativeScheduler::writerCount() {
+  std::lock_guard<std::mutex> lk(lock_);
+  return writers_.size();
 }
 
 void NativeScheduler::runLoopOnce() {
@@ -291,11 +306,6 @@ void NativeScheduler::runLoopOnce() {
 void NativeScheduler::breakLoop() {
   int dummy = 42;
   ::write(wakeupPipe_[PIPE_WRITE_END], &dummy, sizeof(dummy));
-}
-
-size_t NativeScheduler::timerCount() {
-  std::lock_guard<std::mutex> lk(lock_);
-  return timers_.size();
 }
 
 } // namespace xzero
