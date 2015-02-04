@@ -112,10 +112,7 @@ Scheduler::HandleRef NativeScheduler::insertIntoTimersList(DateTime dt,
     }
   }
 
-  if (i == e) {
-    timers_.push_front(t);
-  }
-
+  timers_.push_front(t);
   return handle;
 }
 
