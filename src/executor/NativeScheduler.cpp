@@ -182,9 +182,7 @@ inline void collectActiveHandles(
   while (i != e) {
     if (FD_ISSET(i->first, fdset)) {
       result->push_back(i->second);
-      auto k = i;
-      ++i;
-      interests->erase(k);
+      i = interests->erase(i);
     } else {
       i++;
     }
