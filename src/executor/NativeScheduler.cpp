@@ -204,6 +204,27 @@ size_t NativeScheduler::writerCount() {
   return writers_.size();
 }
 
+size_t NativeScheduler::taskCount() {
+  std::lock_guard<std::mutex> lk(lock_);
+  return tasks_.size();
+}
+
+void NativeScheduler::runLoop() {
+  for (;;) {
+    lock_.lock();
+    bool cont = !tasks_.empty()
+             || !timers_.empty()
+             || !readers_.empty()
+             || !writers_.empty();
+    lock_.unlock();
+
+    if (!cont)
+      break;
+
+    runLoopOnce();
+  }
+}
+
 void NativeScheduler::runLoopOnce() {
   fd_set input, output, error;
   FD_ZERO(&input);
