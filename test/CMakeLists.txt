@@ -10,11 +10,9 @@ if(ENABLE_TESTS)
     ByteArrayEndPoint-test.cpp
     Cidr-test.cpp
     DirectExecutor-test.cpp
-    IdleTimeout-test.cpp
+    NativeScheduler-test.cpp
     ThreadPool-test.cpp
     Tokenizer-test.cpp
-    # support
-    #LibevScheduler-test.cpp
     # http common
     HeaderFieldList-test.cpp
     HttpRangeDef-test.cpp

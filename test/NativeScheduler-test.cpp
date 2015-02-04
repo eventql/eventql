@@ -5,10 +5,9 @@
 // file except in compliance with the License. You may obtain a copy of
 // the License at: http://opensource.org/licenses/MIT
 
-#include <xzero/IdleTimeout.h>
-#include <xzero/DateTime.h>
 #include <xzero/executor/NativeScheduler.h>
 #include <xzero/WallClock.h>
+#include <xzero/DateTime.h>
 #include <gtest/gtest.h>
 #include <memory>
 
@@ -35,7 +34,7 @@ TEST(NativeScheduler, executeAfter_without_handle) {
   ASSERT_NEAR(0.5, diff, 0.05);
 }
 
-TEST(NativeScheduler, cancelBeforeRun) {
+TEST(NativeScheduler, cancel_beforeRun) {
   WallClock* clock = WallClock::system();
   NativeScheduler scheduler;
   int fireCount = 0;
@@ -47,4 +46,23 @@ TEST(NativeScheduler, cancelBeforeRun) {
   ASSERT_EQ(1, scheduler.timerCount());
   handle->cancel();
   ASSERT_EQ(0, scheduler.timerCount());
+}
+
+TEST(NativeScheduler, cancel_beforeRun2) {
+  WallClock* clock = WallClock::system();
+  NativeScheduler scheduler;
+  int fire1Count = 0;
+  int fire2Count = 0;
+
+  auto handle1 = scheduler.executeAfter(TimeSpan::fromSeconds(1), [&](){
+    fire1Count++;
+  });
+
+  auto handle2 = scheduler.executeAfter(TimeSpan::fromSeconds(1), [&](){
+    fire2Count++;
+  });
+
+  ASSERT_EQ(2, scheduler.timerCount());
+  handle1->cancel();
+  ASSERT_EQ(1, scheduler.timerCount());
 }
