@@ -242,8 +242,11 @@ void NativeScheduler::runLoopOnce() {
 
   FD_SET(wakeupPipe_[PIPE_READ_END], &input);
 
-  int rv = ::select(wmark + 1, &input, &output, &error, &tv);
-  if (rv < 0 && errno != EINTR)
+  int rv;
+  do rv = ::select(wmark + 1, &input, &output, &error, &tv);
+  while (rv < 0 && errno == EINTR);
+
+  if (rv < 0)
     throw SYSTEM_ERROR(errno);
 
   if (FD_ISSET(wakeupPipe_[PIPE_READ_END], &input)) {
