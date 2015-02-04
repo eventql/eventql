@@ -18,16 +18,12 @@ namespace xzero {
 /**
  * XXX
  * - registering a key should be *ONESHOT* and *Edge Triggered*
- * - remove SelectionKey::change()
- * - add SelectionKey::cancel()
- * - do we need Selectable then (just use EndPoinit or `int fd`?)
- *   - endpoint: operator int() { return handle(); }
- * - maybe inherit from Executor
- * - add a way to add timed callbacks that can be cancelled
- * - actual implementations inheriting from: Selector < Scheduler < Executor
- * - select: SelectEventLoop (currently: NativeScheduler)
- * - epoll: LinuxEventLoop
+ * - rename NativeScheduler to SimpleScheduler
  *
+ * XXX LinuxScheduler
+ * - epoll fuer i/o notification
+ * - eventfd for wakeup implementation
+ * - timerfd_* for timer impl
  */
 
 NativeScheduler::NativeScheduler(
