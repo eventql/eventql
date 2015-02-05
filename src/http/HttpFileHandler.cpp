@@ -263,10 +263,12 @@ bool HttpFileHandler::handle(HttpRequest* request, HttpResponse* response,
 #if defined(HAVE_POSIX_FADVISE)
     posix_fadvise(fd, 0, transferFile.size(), POSIX_FADV_SEQUENTIAL);
 #endif
-    response->output()->write(FileRef(fd, 0, transferFile.size(), true));
+    response->output()->write(FileRef(fd, 0, transferFile.size(), true),
+        std::bind(&HttpResponse::completed, response));
+  } else {
+    response->completed();
   }
 
-  response->completed();
   return true;
 }
 

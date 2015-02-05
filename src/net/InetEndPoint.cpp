@@ -281,21 +281,19 @@ void InetEndPoint::wantFill() {
 }
 
 void InetEndPoint::fillable() {
-  connector_->executor()->execute([this]() {
-    {
-      BusyGuard _busyGuard(this);
-      try {
-        connection()->onFillable();
-      } catch (const std::exception& e) {
-        connection()->onInterestFailure(e);
-      } catch (...) {
-        connection()->onInterestFailure(RUNTIME_ERROR("Unhandled unknown exception caught."));
-      }
+  {
+    BusyGuard _busyGuard(this);
+    try {
+      connection()->onFillable();
+    } catch (const std::exception& e) {
+      connection()->onInterestFailure(e);
+    } catch (...) {
+      connection()->onInterestFailure(RUNTIME_ERROR("Unhandled unknown exception caught."));
     }
-    if (!isBusy() && isClosed()) {
-      connector_->release(connection());
-    }
-  });
+  }
+  if (!isBusy() && isClosed()) {
+    connector_->release(connection());
+  }
 }
 
 void InetEndPoint::wantFlush() {
