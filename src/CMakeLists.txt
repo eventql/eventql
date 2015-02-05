@@ -24,8 +24,6 @@ set(libxzero_SRC
   io/GzipFilter.cpp
   io/FileRef.cpp
   io/Filter.cpp
-  #io/Selectable.cpp
-  #io/Selector.cpp
 
   net/ByteArrayEndPoint.cpp
   net/Cidr.cpp
@@ -73,11 +71,6 @@ set(libxzero_SRC
 
   # http/2
   #...
-
-  # support
-  #support/LibevClock.cpp
-  #support/LibevScheduler.cpp
-  #support/LibevSelector.cpp
 )
 
 add_library(xzero SHARED ${libxzero_SRC})
