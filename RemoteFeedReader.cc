@@ -96,63 +96,6 @@ Option<FeedEntry> RemoteFeedReader::fetchNextEntry() {
   }
 }
 
-void RemoteFeedReader::fillBuffer(SourceFeed* source) {
-#ifndef NDEBUG
-  fnord::logTrace(
-      "fnord.feeds.remotefeedreader",
-      "Fetching from feed\n    name=$0\n    url=$1\n    offset=$2",
-      source->feed_name,
-      source->rpc_url.toString(),
-      source->next_offset);
-#endif
-
-  auto rpc = fnord::mkRPC<json::JSONRPCCodec>(
-      &FeedService::fetch,
-      source->feed_name,
-      source->next_offset,
-      (int) source->batch_size);
-
-  rpc_client_->call(source->rpc_url, rpc.get());
-
-  rpc->onSuccess([this, source] (const decltype(rpc)::ValueType& r) mutable {
-    ScopedLock<std::mutex> lk(mutex_);
-
-    for (const auto& e : r.result()) {
-      auto entry = e;
-
-      if (time_backfill_fn_) {
-        entry.time = time_backfill_fn_(entry);
-      }
-
-      source->read_buffer.emplace_back(std::move(entry));
-    }
-
-    source->is_fetching = false;
-
-    if (source->read_buffer.size() > 0) {
-      source->next_offset = source->read_buffer.back().next_offset;
-      lk.unlock();
-      data_available_wakeup_.wakeup();
-    }
-  });
-
-  rpc->onError([this, source] (const Status& status) {
-    ScopedLock<std::mutex> lk(mutex_);
-    source->is_fetching = false;
-    lk.unlock();
-
-    logError(
-        "fnord.feeds.remotefeedreader",
-        "Error while fetching from feed:\n" \
-        "    feed=$1\n    url=$0\n    error=$2",
-        source->rpc_url.toString(),
-        source->feed_name,
-        status);
-
-    data_available_wakeup_.wakeup();
-  });
-}
-
 void RemoteFeedReader::waitForNextEntry() {
   fillBuffers();
 
@@ -193,13 +136,79 @@ void RemoteFeedReader::fillBuffers() {
   for (const auto& source : sources) {
     if (source->is_fetching ||
         source->read_buffer.size() >= source->max_buffer_size) {
-      return;
+      continue;
     }
 
     source->is_fetching = true;
 
+#ifndef FNORD_NOTRACE
+    fnord::logTrace(
+        "fnord.feeds.remotefeedreader",
+        "Fetching from feed @$3\n    name=$0\n    url=$1\n    offset=$2",
+        source->feed_name,
+        source->rpc_url.toString(),
+        source->next_offset,
+        (void*) source.get());
+#endif
+
+    auto rpc = fnord::mkRPC<json::JSONRPCCodec>(
+        &FeedService::fetch,
+        source->feed_name,
+        source->next_offset,
+        (int) source->batch_size);
+
     lk.unlock();
-    fillBuffer(source.get());
+
+    rpc_client_->call(source->rpc_url, rpc.get());
+
+    rpc->onSuccess([this, source] (const decltype(rpc)::ValueType& r) mutable {
+      ScopedLock<std::mutex> lk(mutex_);
+
+      for (const auto& e : r.result()) {
+        auto entry = e;
+
+        if (time_backfill_fn_) {
+          entry.time = time_backfill_fn_(entry);
+        }
+
+        source->read_buffer.emplace_back(std::move(entry));
+      }
+
+      source->is_fetching = false;
+
+      if (source->read_buffer.size() > 0) {
+        source->next_offset = source->read_buffer.back().next_offset;
+      }
+
+#ifndef FNORD_NOTRACE
+    fnord::logTrace(
+        "fnord.feeds.remotefeedreader",
+        "Fetch from feed $0 returned $1 entries, new offset: $2",
+        (void*) source.get(),
+        r.result().size(),
+        source->next_offset);
+#endif
+
+      lk.unlock();
+      data_available_wakeup_.wakeup();
+    });
+
+    rpc->onError([this, source] (const Status& status) {
+      ScopedLock<std::mutex> lk(mutex_);
+      source->is_fetching = false;
+      lk.unlock();
+
+      logError(
+          "fnord.feeds.remotefeedreader",
+          "Error while fetching from feed:\n" \
+          "    feed=$1\n    url=$0\n    error=$2",
+          source->rpc_url.toString(),
+          source->feed_name,
+          status);
+
+      data_available_wakeup_.wakeup();
+    });
+
     lk.lock();
   }
 }

@@ -72,8 +72,6 @@ protected:
     DateTime stream_time;
   };
 
-  void fillBuffer(SourceFeed* source);
-
   RPCClient* rpc_client_;
   RefPtrVector<SourceFeed> sources_;
 
