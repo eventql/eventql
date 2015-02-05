@@ -58,7 +58,7 @@ HttpFile::~HttpFile() {
 }
 
 std::string HttpFile::filename() const {
-  std::size_t n = path_.rfind('/');
+  size_t n = path_.rfind('/');
   return n != std::string::npos ? path_.substr(n + 1) : path_;
 }
 
@@ -144,8 +144,8 @@ int HttpFile::tryCreateChannel() {
  * \todo Mark this fn as \c constexpr as soon Ubuntu's LTS default compiler
  *supports it (14.04)
  */
-inline /*constexpr*/ std::pair<std::size_t, std::size_t> makeOffsets(
-    const std::pair<std::size_t, std::size_t>& p, std::size_t actualSize) {
+inline /*constexpr*/ std::pair<size_t, size_t> makeOffsets(
+    const std::pair<size_t, size_t>& p, size_t actualSize) {
   return p.first == HttpRangeDef::npos
              ? std::make_pair(actualSize - p.second,
                               actualSize - 1)  // last N bytes
@@ -164,7 +164,7 @@ inline std::string generateBoundaryID() {
   static const char* map = "0123456789abcdef";
   char buf[16 + 1];
 
-  for (std::size_t i = 0; i < sizeof(buf) - 1; ++i)
+  for (size_t i = 0; i < sizeof(buf) - 1; ++i)
     buf[i] = map[random() % (sizeof(buf) - 1)];
 
   buf[sizeof(buf) - 1] = '\0';
@@ -339,8 +339,8 @@ bool HttpFileHandler::handleClientCache(const HttpFile& transferFile,
 /**
  * Retrieves the number of digits of a positive number.
  */
-static std::size_t numdigits(std::size_t number) {
-  std::size_t result = 0;
+static size_t numdigits(size_t number) {
+  size_t result = 0;
 
   do {
     result++;
@@ -370,22 +370,22 @@ bool HttpFileHandler::handleRangeRequest(const HttpFile& transferFile, int fd,
 
   response->setStatus(HttpStatus::PartialContent);
 
-  std::size_t numRanges = range.size();
+  size_t numRanges = range.size();
   if (numRanges > 1) {
     // generate a multipart/byteranged response, as we've more than one range to
     // serve
 
     std::string boundary(generateBoundaryID());
-    std::size_t contentLength = 0;
+    size_t contentLength = 0;
 
     // precompute final content-length
-    for (std::size_t i = 0; i < numRanges; ++i) {
+    for (size_t i = 0; i < numRanges; ++i) {
       // add ranged chunk length
-      const std::pair<std::size_t, std::size_t> offsets(
+      const std::pair<size_t, size_t> offsets(
           makeOffsets(range[i], transferFile.size()));
-      const std::size_t partLength = 1 + offsets.second - offsets.first;
+      const size_t partLength = 1 + offsets.second - offsets.first;
 
-      const std::size_t headerLen = sizeof("\r\n--") - 1
+      const size_t headerLen = sizeof("\r\n--") - 1
                              + boundary.size()
                              + sizeof("\r\nContent-Type: ") - 1
                              + transferFile.mimetype().size()
@@ -401,7 +401,7 @@ bool HttpFileHandler::handleRangeRequest(const HttpFile& transferFile, int fd,
     }
 
     // add trailer length
-    const std::size_t trailerLen = sizeof("\r\n--") - 1
+    const size_t trailerLen = sizeof("\r\n--") - 1
                             + boundary.size()
                             + sizeof("--\r\n") - 1;
     contentLength += trailerLen;
@@ -413,7 +413,7 @@ bool HttpFileHandler::handleRangeRequest(const HttpFile& transferFile, int fd,
 
     // populate body
     for (int i = 0; i != numRanges; ++i) {
-      const std::pair<std::size_t, std::size_t> offsets(
+      const std::pair<size_t, size_t> offsets(
           makeOffsets(range[i], transferFile.size()));
 
       if (offsets.second < offsets.first) { // FIXME why did I do this here?
@@ -422,7 +422,7 @@ bool HttpFileHandler::handleRangeRequest(const HttpFile& transferFile, int fd,
         return true;
       }
 
-      const std::size_t partLength = 1 + offsets.second - offsets.first;
+      const size_t partLength = 1 + offsets.second - offsets.first;
 
       Buffer buf;
       buf.push_back("\r\n--");
@@ -451,7 +451,7 @@ bool HttpFileHandler::handleRangeRequest(const HttpFile& transferFile, int fd,
     buf.push_back("--\r\n");
     response->output()->write(std::move(buf));
   } else {  // generate a simple (single) partial response
-    std::pair<std::size_t, std::size_t> offsets(
+    std::pair<size_t, size_t> offsets(
         makeOffsets(range[0], transferFile.size()));
 
     if (offsets.second < offsets.first) {
@@ -462,7 +462,7 @@ bool HttpFileHandler::handleRangeRequest(const HttpFile& transferFile, int fd,
 
     response->addHeader("Content-Type", transferFile.mimetype());
 
-    std::size_t length = 1 + offsets.second - offsets.first;
+    size_t length = 1 + offsets.second - offsets.first;
     response->setContentLength(length);
 
     char cr[128];
@@ -531,8 +531,8 @@ std::string HttpFileHandler::getMimeType(const std::string& path) {
   std::string result;
 
   // query mimetype
-  const std::size_t ndot = path.find_last_of(".");
-  const std::size_t nslash = path.find_last_of("/");
+  const size_t ndot = path.find_last_of(".");
+  const size_t nslash = path.find_last_of("/");
 
   if (ndot != std::string::npos && ndot > nslash) {
     std::string ext(path.substr(ndot + 1));
