@@ -292,10 +292,14 @@ void HttpConnection::parseFragment() {
 void HttpConnection::onFlushable() {
   TRACE("%p onFlushable", this);
 
+  if (channel_->state() != HttpChannelState::SENDING)
+    channel_->setState(HttpChannelState::SENDING);
+
   const bool complete = writer_.flush(endpoint());
+
   if (complete) {
     TRACE("%p onFlushable: completed.", this);
-    //XXX (not needed anymore) wantFlush(false);
+    channel_->setState(HttpChannelState::HANDLING);
 
     if (onComplete_) {
       TRACE("%p onFlushable: invoking completion callback", this);

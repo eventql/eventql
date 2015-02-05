@@ -42,6 +42,7 @@ InetEndPoint::InetEndPoint(int socket,
       connector_(connector),
       scheduler_(scheduler),
       idleTimeout_(connector->clock(), connector->scheduler()),
+      io_(),
       handle_(socket),
       isCorking_(false),
       isBusy_(0) {
@@ -284,6 +285,7 @@ void InetEndPoint::fillable() {
   {
     BusyGuard _busyGuard(this);
     try {
+      io_.reset();
       connection()->onFillable();
     } catch (const std::exception& e) {
       connection()->onInterestFailure(e);
@@ -297,28 +299,31 @@ void InetEndPoint::fillable() {
 }
 
 void InetEndPoint::wantFlush() {
-  TRACE("%p wantFlush()", this);
+  TRACE("%p wantFlush() %s", this, io_.get() ? "again" : "first time");
   //idleTimeout_.activate();
-  scheduler_->executeOnWritable(handle(),
-                                std::bind(&InetEndPoint::flushable, this));
+
+  if (!io_) {
+    io_ = scheduler_->executeOnWritable(
+        handle(),
+        std::bind(&InetEndPoint::flushable, this));
+  }
 }
 
 void InetEndPoint::flushable() {
-  connector_->executor()->execute([this]() {
-    /*lock guard*/ {
-      BusyGuard _busyGuard(this);
-      try {
-        connection()->onFlushable();
-      } catch (const std::exception& e) {
-        connection()->onInterestFailure(e);
-      } catch (...) {
-        connection()->onInterestFailure(RUNTIME_ERROR("Unhandled unknown exception caught."));
-      }
+  /*lock guard*/ {
+    BusyGuard _busyGuard(this);
+    try {
+      io_.reset();
+      connection()->onFlushable();
+    } catch (const std::exception& e) {
+      connection()->onInterestFailure(e);
+    } catch (...) {
+      connection()->onInterestFailure(RUNTIME_ERROR("Unhandled unknown exception caught."));
     }
-    if (!isBusy() && isClosed()) {
-      connector_->release(connection());
-    }
-  });
+  }
+  if (!isBusy() && isClosed()) {
+    connector_->release(connection());
+  }
 }
 
 TimeSpan InetEndPoint::idleTimeout() {

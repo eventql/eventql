@@ -82,15 +82,17 @@ void HttpChannel::setState(HttpChannelState newState) {
   state_ = newState;
 }
 
-CompletionHandler HttpChannel::makeCompleter(CompletionHandler&& next) {
-  return [this, next](bool succeeded) {
-    BUG_ON(state() != HttpChannelState::SENDING);
-    setState(HttpChannelState::HANDLING);
+CompletionHandler HttpChannel::makeCompleter(CompletionHandler next) {
+  return next;
 
-    if (next) {
-      next(succeeded);
-    }
-  };
+  // return [this, next](bool succeeded) {
+  //   BUG_ON(state() != HttpChannelState::SENDING);
+  //   setState(HttpChannelState::HANDLING);
+
+  //   if (next) {
+  //     next(succeeded);
+  //   }
+  // };
 }
 
 std::unique_ptr<HttpOutput> HttpChannel::createOutput() {
@@ -114,7 +116,7 @@ void HttpChannel::removeAllOutputFilters() {
 void HttpChannel::send(const BufferRef& data, CompletionHandler&& onComplete) {
   onBeforeSend();
 
-  auto next = makeCompleter(std::move(onComplete));
+  auto next = makeCompleter(onComplete);
 
   if (outputFilters_.empty()) {
     if (!response_->isCommitted()) {
@@ -139,7 +141,7 @@ void HttpChannel::send(const BufferRef& data, CompletionHandler&& onComplete) {
 void HttpChannel::send(Buffer&& data, CompletionHandler&& onComplete) {
   onBeforeSend();
 
-  auto next = makeCompleter(std::move(onComplete));
+  auto next = makeCompleter(onComplete);
 
   if (!outputFilters_.empty()) {
     Buffer output;
@@ -158,7 +160,7 @@ void HttpChannel::send(Buffer&& data, CompletionHandler&& onComplete) {
 void HttpChannel::send(FileRef&& file, CompletionHandler&& onComplete) {
   onBeforeSend();
 
-  auto next = makeCompleter(std::move(onComplete));
+  auto next = makeCompleter(onComplete);
 
   if (outputFilters_.empty()) {
     if (!response_->isCommitted()) {
@@ -193,7 +195,7 @@ void HttpChannel::onBeforeSend() {
         to_string(state()) + ". Creating a new send object not allowed.");
   }
 
-  setState(HttpChannelState::SENDING);
+  //XXX setState(HttpChannelState::SENDING);
 
   // install some last-minute output filters before committing
 
@@ -231,7 +233,7 @@ HttpResponseInfo HttpChannel::commitInline() {
 
 void HttpChannel::commit(CompletionHandler&& onComplete) {
   TRACE("commit()");
-  send(BufferRef(), makeCompleter(std::move(onComplete)));
+  send(BufferRef(), makeCompleter(onComplete));
 }
 
 void HttpChannel::send100Continue(CompletionHandler&& onComplete) {
@@ -240,7 +242,7 @@ void HttpChannel::send100Continue(CompletionHandler&& onComplete) {
 
   request()->setExpect100Continue(false);
 
-  auto next = makeCompleter(std::move(onComplete));
+  auto next = makeCompleter(onComplete);
 
   HttpResponseInfo info(request_->version(), HttpStatus::ContinueRequest,
                         "Continue", false, 0, {}, {});
