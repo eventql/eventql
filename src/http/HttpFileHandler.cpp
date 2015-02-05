@@ -336,6 +336,20 @@ bool HttpFileHandler::handleClientCache(const HttpFile& transferFile,
   return false;
 }
 
+/**
+ * Retrieves the number of digits of a positive number.
+ */
+static std::size_t numdigits(std::size_t number) {
+  std::size_t result = 0;
+
+  do {
+    result++;
+    number /= 10;
+  } while (number != 0);
+
+  return result;
+}
+
 bool HttpFileHandler::handleRangeRequest(const HttpFile& transferFile, int fd,
                                          HttpRequest* request,
                                          HttpResponse* response) {
@@ -356,26 +370,61 @@ bool HttpFileHandler::handleRangeRequest(const HttpFile& transferFile, int fd,
 
   response->setStatus(HttpStatus::PartialContent);
 
-  if (range.size() > 1) {
+  std::size_t numRanges = range.size();
+  if (numRanges > 1) {
     // generate a multipart/byteranged response, as we've more than one range to
     // serve
 
-    Buffer buf;
     std::string boundary(generateBoundaryID());
     std::size_t contentLength = 0;
 
-    for (int i = 0, e = range.size(); i != e; ++i) {
-      std::pair<std::size_t, std::size_t> offsets(
+    // precompute final content-length
+    for (std::size_t i = 0; i < numRanges; ++i) {
+      // add ranged chunk length
+      const std::pair<std::size_t, std::size_t> offsets(
           makeOffsets(range[i], transferFile.size()));
-      if (offsets.second < offsets.first) {
+      const std::size_t partLength = 1 + offsets.second - offsets.first;
+
+      const std::size_t headerLen = sizeof("\r\n--") - 1
+                             + boundary.size()
+                             + sizeof("\r\nContent-Type: ") - 1
+                             + transferFile.mimetype().size()
+                             + sizeof("\r\nContent-Range: bytes ") - 1
+                             + numdigits(offsets.first)
+                             + sizeof("-") - 1
+                             + numdigits(offsets.second)
+                             + sizeof("/") - 1
+                             + numdigits(transferFile.size())
+                             + sizeof("\r\n\r\n") - 1;
+
+      contentLength += headerLen + partLength;
+    }
+
+    // add trailer length
+    const std::size_t trailerLen = sizeof("\r\n--") - 1
+                            + boundary.size()
+                            + sizeof("--\r\n") - 1;
+    contentLength += trailerLen;
+
+    // populate response info
+    response->setContentLength(contentLength);
+    response->addHeader("Content-Type",
+                        "multipart/byteranges; boundary=" + boundary);
+
+    // populate body
+    for (int i = 0; i != numRanges; ++i) {
+      const std::pair<std::size_t, std::size_t> offsets(
+          makeOffsets(range[i], transferFile.size()));
+
+      if (offsets.second < offsets.first) { // FIXME why did I do this here?
         response->setStatus(HttpStatus::PartialContent);
         response->completed();
         return true;
       }
 
-      std::size_t partLength = 1 + offsets.second - offsets.first;
+      const std::size_t partLength = 1 + offsets.second - offsets.first;
 
-      buf.clear();
+      Buffer buf;
       buf.push_back("\r\n--");
       buf.push_back(boundary);
       buf.push_back("\r\nContent-Type: ");
@@ -389,27 +438,18 @@ bool HttpFileHandler::handleRangeRequest(const HttpFile& transferFile, int fd,
       buf.push_back(transferFile.size());
       buf.push_back("\r\n\r\n");
 
-      contentLength += buf.size() + partLength;
-
-      if (fd >= 0) {
-        bool last = i + 1 == e;
+      if (!isHeadReq) {
+        bool last = i + 1 == numRanges;
         response->output()->write(std::move(buf));
         response->output()->write(FileRef(fd, offsets.first, partLength, last));
       }
     }
 
-    buf.clear();
+    Buffer buf;
     buf.push_back("\r\n--");
     buf.push_back(boundary);
     buf.push_back("--\r\n");
-
-    contentLength += buf.size();
     response->output()->write(std::move(buf));
-
-    // push the prepared ranged response into the client
-    response->setContentLength(contentLength);
-    response->addHeader("Content-Type",
-                        "multipart/byteranges; boundary=" + boundary);
   } else {  // generate a simple (single) partial response
     std::pair<std::size_t, std::size_t> offsets(
         makeOffsets(range[0], transferFile.size()));
