@@ -157,10 +157,6 @@ void RemoteFeedReader::fillBuffers() {
         source->next_offset,
         (int) source->batch_size);
 
-    lk.unlock();
-
-    rpc_client_->call(source->rpc_url, rpc.get());
-
     rpc->onSuccess([this, source] (const decltype(rpc)::ValueType& r) mutable {
       ScopedLock<std::mutex> lk(mutex_);
 
@@ -209,7 +205,7 @@ void RemoteFeedReader::fillBuffers() {
       data_available_wakeup_.wakeup();
     });
 
-    lk.lock();
+    rpc_client_->call(source->rpc_url, rpc.get());
   }
 }
 
