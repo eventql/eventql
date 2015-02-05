@@ -40,6 +40,14 @@ DateTime SystemClock::get() const {
 #endif
 }
 
+#ifndef CLOCK_REALTIME
+#define CLOCK_REALTIME 0
+#endif
+
+#ifndef CLOCK_MONOTONIC
+#define CLOCK_MONOTONIC 0
+#endif
+
 WallClock* WallClock::system() {
   static SystemClock clock(CLOCK_REALTIME);
   return &clock;
