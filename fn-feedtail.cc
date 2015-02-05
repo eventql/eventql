@@ -180,7 +180,8 @@ int main(int argc, const char** argv) {
     last_iter = WallClock::now();
     feed_reader.fillBuffers();
 
-    for (int i = 0; i < commit_size; ++i) {
+    int i = 0;
+    for (; i < commit_size; ++i) {
       auto entry = feed_reader.fetchNextEntry();
 
       if (entry.isEmpty()) {
@@ -214,7 +215,7 @@ int main(int argc, const char** argv) {
     }
 
     auto etime = WallClock::now().unixMicros() - last_iter.unixMicros();
-    if (etime < rate_limit_micros) {
+    if (i < 1 && etime < rate_limit_micros) {
       usleep(rate_limit_micros - etime);
     }
   }
