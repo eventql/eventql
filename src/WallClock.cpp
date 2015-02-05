@@ -14,14 +14,22 @@ namespace xzero {
 
 class SystemClock : public WallClock {
  public:
+  explicit SystemClock(int clkid);
   DateTime get() const override;
+
+ private:
+  int clkid_;
 };
+
+SystemClock::SystemClock(int clkid)
+    : clkid_(clkid) {
+}
 
 DateTime SystemClock::get() const {
 #ifdef HAVE_CLOCK_GETTIME
   timespec ts;
   memset(&ts, 0, sizeof(ts));
-  if (clock_gettime(CLOCK_REALTIME, &ts) < 0)
+  if (clock_gettime(clkid_, &ts) < 0)
     return DateTime(std::time(nullptr));
 
   return DateTime(
@@ -33,7 +41,12 @@ DateTime SystemClock::get() const {
 }
 
 WallClock* WallClock::system() {
-  static SystemClock clock;
+  static SystemClock clock(CLOCK_REALTIME);
+  return &clock;
+}
+
+WallClock* WallClock::monotonic() {
+  static SystemClock clock(CLOCK_MONOTONIC);
   return &clock;
 }
 

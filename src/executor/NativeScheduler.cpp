@@ -32,7 +32,7 @@ NativeScheduler::NativeScheduler(
     std::function<void()> preInvoke,
     std::function<void()> postInvoke)
     : Scheduler(std::move(errorLogger)),
-      clock_(clock ? clock : WallClock::system()),
+      clock_(clock ? clock : WallClock::monotonic()),
       lock_(),
       wakeupPipe_(),
       onPreInvokePending_(preInvoke),
