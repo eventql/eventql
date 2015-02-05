@@ -20,10 +20,10 @@ namespace http1 {
 HttpGenerator::HttpGenerator(HttpDateGenerator* dateGenerator,
                              EndPointWriter* output)
     : dateGenerator_(dateGenerator),
-      writer_(output),
       contentLength_(Buffer::npos),
       chunked_(false),
-      buffer_() {
+      buffer_(),
+      writer_(output) {
 }
 
 void HttpGenerator::recycle() {
