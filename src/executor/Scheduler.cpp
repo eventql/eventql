@@ -9,4 +9,30 @@
 
 namespace xzero {
 
+Scheduler::Handle::Handle(Task onFire, std::function<void(Handle*)> onCancel)
+    : mutex_(),
+      onFire_(onFire),
+      onCancel_(onCancel),
+      isCancelled_(false) {
+}
+
+void Scheduler::Handle::cancel() {
+  std::lock_guard<std::mutex> lk(mutex_);
+
+  isCancelled_.store(true);
+
+  if (onCancel_) {
+    auto cancelThat = std::move(onCancel_);
+    cancelThat(this);
+  }
+}
+
+void Scheduler::Handle::fire() {
+  std::lock_guard<std::mutex> lk(mutex_);
+
+  if (!isCancelled_.load()) {
+    onFire_();
+  }
+}
+
 }  // namespace xzero
