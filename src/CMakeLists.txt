@@ -57,6 +57,7 @@ set(libxzero_SRC
   # http support
   http/HttpBufferedInput.cpp
   http/HttpFileHandler.cpp
+  http/HttpFile.cpp
   http/HttpService.cpp
 
   # http/mock
