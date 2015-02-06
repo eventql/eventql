@@ -139,7 +139,7 @@ void HttpConnection::onResponseComplete(bool succeed) {
 
 void HttpConnection::send(HttpResponseInfo&& responseInfo,
                           const BufferRef& chunk,
-                          CompletionHandler&& onComplete) {
+                          CompletionHandler onComplete) {
   if (onComplete && onComplete_)
     throw RUNTIME_ERROR("there is still another completion hook.");
 
@@ -160,7 +160,7 @@ void HttpConnection::send(HttpResponseInfo&& responseInfo,
 
 void HttpConnection::send(HttpResponseInfo&& responseInfo,
                           Buffer&& chunk,
-                          CompletionHandler&& onComplete) {
+                          CompletionHandler onComplete) {
   if (onComplete && onComplete_)
     throw RUNTIME_ERROR("there is still another completion hook.");
 
@@ -181,7 +181,7 @@ void HttpConnection::send(HttpResponseInfo&& responseInfo,
 
 void HttpConnection::send(HttpResponseInfo&& responseInfo,
                           FileRef&& chunk,
-                          CompletionHandler&& onComplete) {
+                          CompletionHandler onComplete) {
   if (onComplete && onComplete_)
     throw RUNTIME_ERROR("there is still another completion hook.");
 
@@ -219,8 +219,7 @@ void HttpConnection::patchResponseInfo(HttpResponseInfo& responseInfo) {
   }
 }
 
-void HttpConnection::send(Buffer&& chunk,
-                          CompletionHandler&& onComplete) {
+void HttpConnection::send(Buffer&& chunk, CompletionHandler onComplete) {
   if (onComplete && onComplete_)
     throw RUNTIME_ERROR("there is still another completion hook.");
 
@@ -233,7 +232,7 @@ void HttpConnection::send(Buffer&& chunk,
 }
 
 void HttpConnection::send(const BufferRef& chunk,
-                          CompletionHandler&& onComplete) {
+                          CompletionHandler onComplete) {
   if (onComplete && onComplete_)
     throw RUNTIME_ERROR("there is still another completion hook.");
 
@@ -245,7 +244,7 @@ void HttpConnection::send(const BufferRef& chunk,
   wantFlush();
 }
 
-void HttpConnection::send(FileRef&& chunk, CompletionHandler&& onComplete) {
+void HttpConnection::send(FileRef&& chunk, CompletionHandler onComplete) {
   if (onComplete && onComplete_)
     throw RUNTIME_ERROR("there is still another completion hook.");
 

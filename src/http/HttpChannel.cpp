@@ -100,15 +100,15 @@ void HttpChannel::removeAllOutputFilters() {
   outputFilters_.clear();
 }
 
-void HttpChannel::send(const BufferRef& data, CompletionHandler&& onComplete) {
+void HttpChannel::send(const BufferRef& data, CompletionHandler onComplete) {
   onBeforeSend();
 
   if (outputFilters_.empty()) {
     if (!response_->isCommitted()) {
       HttpResponseInfo info(commitInline());
-      transport_->send(std::move(info), data, std::move(onComplete));
+      transport_->send(std::move(info), data, onComplete);
     } else {
-      transport_->send(data, std::move(onComplete));
+      transport_->send(data, onComplete);
     }
   } else {
     Buffer filtered;
@@ -116,14 +116,14 @@ void HttpChannel::send(const BufferRef& data, CompletionHandler&& onComplete) {
 
     if (!response_->isCommitted()) {
       HttpResponseInfo info(commitInline());
-      transport_->send(std::move(info), std::move(filtered), std::move(onComplete));
+      transport_->send(std::move(info), std::move(filtered), onComplete);
     } else {
-      transport_->send(std::move(filtered), std::move(onComplete));
+      transport_->send(std::move(filtered), onComplete);
     }
   }
 }
 
-void HttpChannel::send(Buffer&& data, CompletionHandler&& onComplete) {
+void HttpChannel::send(Buffer&& data, CompletionHandler onComplete) {
   onBeforeSend();
 
   if (!outputFilters_.empty()) {
@@ -134,24 +134,24 @@ void HttpChannel::send(Buffer&& data, CompletionHandler&& onComplete) {
 
   if (!response_->isCommitted()) {
     HttpResponseInfo info(commitInline());
-    transport_->send(std::move(info), std::move(data), std::move(onComplete));
+    transport_->send(std::move(info), std::move(data), onComplete);
   } else {
-    transport_->send(std::move(data), std::move(onComplete));
+    transport_->send(std::move(data), onComplete);
   }
 }
 
-void HttpChannel::send(FileRef&& file, CompletionHandler&& onComplete) {
+void HttpChannel::send(FileRef&& file, CompletionHandler onComplete) {
   onBeforeSend();
 
   if (outputFilters_.empty()) {
     if (!response_->isCommitted()) {
       HttpResponseInfo info(commitInline());
       transport_->send(std::move(info), BufferRef(), nullptr);
-      transport_->send(std::move(file), std::move(onComplete));
+      transport_->send(std::move(file), onComplete);
       // transport_->send(std::move(info), BufferRef(),
       //     std::bind(&HttpTransport::send, transport_, file, onComplete));
     } else {
-      transport_->send(std::move(file), std::move(onComplete));
+      transport_->send(std::move(file), onComplete);
     }
   } else {
     Buffer filtered;
@@ -159,9 +159,9 @@ void HttpChannel::send(FileRef&& file, CompletionHandler&& onComplete) {
 
     if (!response_->isCommitted()) {
       HttpResponseInfo info(commitInline());
-      transport_->send(std::move(info), std::move(filtered), std::move(onComplete));
+      transport_->send(std::move(info), std::move(filtered), onComplete);
     } else {
-      transport_->send(std::move(filtered), std::move(onComplete));
+      transport_->send(std::move(filtered), onComplete);
     }
   }
 }
@@ -212,12 +212,12 @@ HttpResponseInfo HttpChannel::commitInline() {
   return info;
 }
 
-void HttpChannel::commit(CompletionHandler&& onComplete) {
+void HttpChannel::commit(CompletionHandler onComplete) {
   TRACE("commit()");
-  send(BufferRef(), std::move(onComplete));
+  send(BufferRef(), onComplete);
 }
 
-void HttpChannel::send100Continue(CompletionHandler&& onComplete) {
+void HttpChannel::send100Continue(CompletionHandler onComplete) {
   if (!request()->expect100Continue())
     throw RUNTIME_ERROR("Illegal State. no 100-continue expected.");
 
@@ -227,7 +227,7 @@ void HttpChannel::send100Continue(CompletionHandler&& onComplete) {
                         "Continue", false, 0, {}, {});
 
   TRACE("send100Continue(): sending it");
-  transport_->send(std::move(info), BufferRef(), std::move(onComplete));
+  transport_->send(std::move(info), BufferRef(), onComplete);
 }
 
 bool HttpChannel::onMessageBegin(const BufferRef& method,

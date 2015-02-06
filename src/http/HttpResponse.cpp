@@ -153,8 +153,8 @@ const std::string& HttpResponse::getHeader(const std::string& name) const {
   return headers_.get(name);
 }
 
-void HttpResponse::send100Continue(CompletionHandler&& onComplete) {
-  channel_->send100Continue(std::move(onComplete));
+void HttpResponse::send100Continue(CompletionHandler onComplete) {
+  channel_->send100Continue(onComplete);
 }
 
 void HttpResponse::sendError(HttpStatus code, const std::string& message) {

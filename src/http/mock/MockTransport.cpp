@@ -134,7 +134,7 @@ void MockTransport::completed() {
 
 void MockTransport::send(HttpResponseInfo&& responseInfo,
                          const BufferRef& chunk,
-                         CompletionHandler&& onComplete) {
+                         CompletionHandler onComplete) {
   responseInfo_ = std::move(responseInfo);
   responseBody_ += chunk;
 
@@ -147,7 +147,7 @@ void MockTransport::send(HttpResponseInfo&& responseInfo,
 
 void MockTransport::send(HttpResponseInfo&& responseInfo,
                          Buffer&& chunk,
-                         CompletionHandler&& onComplete) {
+                         CompletionHandler onComplete) {
   responseInfo_ = std::move(responseInfo);
   responseBody_ += chunk;
 
@@ -160,7 +160,7 @@ void MockTransport::send(HttpResponseInfo&& responseInfo,
 
 void MockTransport::send(HttpResponseInfo&& responseInfo,
                          FileRef&& chunk,
-                         CompletionHandler&& onComplete) {
+                         CompletionHandler onComplete) {
   responseInfo_ = std::move(responseInfo);
 
   chunk.fill(&responseBody_);
@@ -172,7 +172,7 @@ void MockTransport::send(HttpResponseInfo&& responseInfo,
   }
 }
 
-void MockTransport::send(const BufferRef& chunk, CompletionHandler&& onComplete) {
+void MockTransport::send(const BufferRef& chunk, CompletionHandler onComplete) {
   responseBody_ += chunk;
 
   if (onComplete) {
@@ -182,7 +182,7 @@ void MockTransport::send(const BufferRef& chunk, CompletionHandler&& onComplete)
   }
 }
 
-void MockTransport::send(Buffer&& chunk, CompletionHandler&& onComplete) {
+void MockTransport::send(Buffer&& chunk, CompletionHandler onComplete) {
   responseBody_ += chunk;
 
   if (onComplete) {
@@ -192,7 +192,7 @@ void MockTransport::send(Buffer&& chunk, CompletionHandler&& onComplete) {
   }
 }
 
-void MockTransport::send(FileRef&& chunk, CompletionHandler&& onComplete) {
+void MockTransport::send(FileRef&& chunk, CompletionHandler onComplete) {
   chunk.fill(&responseBody_);
 
   if (onComplete) {
