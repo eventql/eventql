@@ -12,6 +12,8 @@
 - [ ] executor/DirectLoopExecutor
 - [ ] executor/DirectExecutor
 - [ ] executor/ThreadedExecutor
+- [x] executor/SelectScheduler
+- [ ] executor/LinuxScheduler
 - [x] executor/ThreadPool
 - [ ] net/Cidr
 - [ ] net/EndPointWriter
@@ -20,8 +22,6 @@
 - [ ] net/IPAddress
 - [ ] net/LocalConnector
 - [ ] net/Server
-- [ ] support/LibevScheduler
-- [ ] support/LibevSelector
 
 ### HTTP/1 (rfc7230)
 
@@ -73,6 +73,7 @@
 Tests `HttpFileHandler` for conditional requests, ranged requests,
 and client side cache.
 
+- [ ] ranged requests rfc7233
 - [ ] ETag, rfc7232
 - [ ] Last-Modified, rfc7232
 - [ ] If-Match, rfc7232

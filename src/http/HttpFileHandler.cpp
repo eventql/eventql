@@ -142,7 +142,7 @@ int HttpFile::tryCreateChannel() {
  * converts a range-spec into real offsets.
  *
  * \todo Mark this fn as \c constexpr as soon Ubuntu's LTS default compiler
- *supports it (14.04)
+ * supports it (14.04)
  */
 inline /*constexpr*/ std::pair<size_t, size_t> makeOffsets(
     const std::pair<size_t, size_t>& p, size_t actualSize) {
@@ -160,7 +160,7 @@ inline /*constexpr*/ std::pair<size_t, size_t> makeOffsets(
  *
  * \return a value usable as boundary tag.
  */
-inline std::string generateBoundaryID() {
+static std::string generateDefaultBoundaryID() {
   static const char* map = "0123456789abcdef";
   char buf[16 + 1];
 
@@ -174,17 +174,30 @@ inline std::string generateBoundaryID() {
 // }}}
 
 HttpFileHandler::HttpFileHandler(bool mtime, bool size, bool inode)
-    : HttpFileHandler(mtime, size, inode, "", "") {
+    : HttpFileHandler(mtime, size, inode, "", "",
+                      std::bind(&generateDefaultBoundaryID)) {
 }
 
 HttpFileHandler::HttpFileHandler(bool mtime, bool size, bool inode,
-                                 const std::string& mimetypesPath,
+                                 const std::string& mimetypes,
                                  const std::string& defaultMimeType)
+    : HttpFileHandler(mtime, size, inode, mimetypes, defaultMimeType,
+                      std::bind(&generateDefaultBoundaryID)) {
+}
+
+HttpFileHandler::HttpFileHandler(
+    bool mtime,
+    bool size,
+    bool inode,
+    const std::string& mimetypesPath,
+    const std::string& defaultMimeType,
+    std::function<std::string()> generateBoundaryID)
     : etagConsiderMTime_(mtime),
       etagConsiderSize_(size),
       etagConsiderINode_(inode),
       mimetypes_(),
-      defaultMimeType_(defaultMimeType) {
+      defaultMimeType_(defaultMimeType),
+      generateBoundaryID_(generateBoundaryID) {
 
   if (!mimetypesPath.empty())
     loadMimeTypesFromLocal(mimetypesPath);
@@ -375,7 +388,7 @@ bool HttpFileHandler::handleRangeRequest(const HttpFile& transferFile, int fd,
     // generate a multipart/byteranged response, as we've more than one range to
     // serve
 
-    std::string boundary(generateBoundaryID());
+    std::string boundary(generateBoundaryID_());
     size_t contentLength = 0;
 
     // precompute final content-length
