@@ -82,19 +82,6 @@ void HttpChannel::setState(HttpChannelState newState) {
   state_ = newState;
 }
 
-CompletionHandler HttpChannel::makeCompleter(CompletionHandler next) {
-  return next;
-
-  // return [this, next](bool succeeded) {
-  //   BUG_ON(state() != HttpChannelState::SENDING);
-  //   setState(HttpChannelState::HANDLING);
-
-  //   if (next) {
-  //     next(succeeded);
-  //   }
-  // };
-}
-
 std::unique_ptr<HttpOutput> HttpChannel::createOutput() {
   return std::unique_ptr<HttpOutput>(new HttpOutput(this));
 }
@@ -116,14 +103,12 @@ void HttpChannel::removeAllOutputFilters() {
 void HttpChannel::send(const BufferRef& data, CompletionHandler&& onComplete) {
   onBeforeSend();
 
-  auto next = makeCompleter(onComplete);
-
   if (outputFilters_.empty()) {
     if (!response_->isCommitted()) {
       HttpResponseInfo info(commitInline());
-      transport_->send(std::move(info), data, std::move(next));
+      transport_->send(std::move(info), data, std::move(onComplete));
     } else {
-      transport_->send(data, std::move(next));
+      transport_->send(data, std::move(onComplete));
     }
   } else {
     Buffer filtered;
@@ -131,17 +116,15 @@ void HttpChannel::send(const BufferRef& data, CompletionHandler&& onComplete) {
 
     if (!response_->isCommitted()) {
       HttpResponseInfo info(commitInline());
-      transport_->send(std::move(info), std::move(filtered), std::move(next));
+      transport_->send(std::move(info), std::move(filtered), std::move(onComplete));
     } else {
-      transport_->send(std::move(filtered), std::move(next));
+      transport_->send(std::move(filtered), std::move(onComplete));
     }
   }
 }
 
 void HttpChannel::send(Buffer&& data, CompletionHandler&& onComplete) {
   onBeforeSend();
-
-  auto next = makeCompleter(onComplete);
 
   if (!outputFilters_.empty()) {
     Buffer output;
@@ -151,26 +134,24 @@ void HttpChannel::send(Buffer&& data, CompletionHandler&& onComplete) {
 
   if (!response_->isCommitted()) {
     HttpResponseInfo info(commitInline());
-    transport_->send(std::move(info), std::move(data), std::move(next));
+    transport_->send(std::move(info), std::move(data), std::move(onComplete));
   } else {
-    transport_->send(std::move(data), std::move(next));
+    transport_->send(std::move(data), std::move(onComplete));
   }
 }
 
 void HttpChannel::send(FileRef&& file, CompletionHandler&& onComplete) {
   onBeforeSend();
 
-  auto next = makeCompleter(onComplete);
-
   if (outputFilters_.empty()) {
     if (!response_->isCommitted()) {
       HttpResponseInfo info(commitInline());
       transport_->send(std::move(info), BufferRef(), nullptr);
-      transport_->send(std::move(file), std::move(next));
+      transport_->send(std::move(file), std::move(onComplete));
       // transport_->send(std::move(info), BufferRef(),
-      //     std::bind(&HttpTransport::send, transport_, file, next));
+      //     std::bind(&HttpTransport::send, transport_, file, onComplete));
     } else {
-      transport_->send(std::move(file), std::move(next));
+      transport_->send(std::move(file), std::move(onComplete));
     }
   } else {
     Buffer filtered;
@@ -178,9 +159,9 @@ void HttpChannel::send(FileRef&& file, CompletionHandler&& onComplete) {
 
     if (!response_->isCommitted()) {
       HttpResponseInfo info(commitInline());
-      transport_->send(std::move(info), std::move(filtered), std::move(next));
+      transport_->send(std::move(info), std::move(filtered), std::move(onComplete));
     } else {
-      transport_->send(std::move(filtered), std::move(next));
+      transport_->send(std::move(filtered), std::move(onComplete));
     }
   }
 }
@@ -233,7 +214,7 @@ HttpResponseInfo HttpChannel::commitInline() {
 
 void HttpChannel::commit(CompletionHandler&& onComplete) {
   TRACE("commit()");
-  send(BufferRef(), makeCompleter(onComplete));
+  send(BufferRef(), std::move(onComplete));
 }
 
 void HttpChannel::send100Continue(CompletionHandler&& onComplete) {
@@ -242,13 +223,11 @@ void HttpChannel::send100Continue(CompletionHandler&& onComplete) {
 
   request()->setExpect100Continue(false);
 
-  auto next = makeCompleter(onComplete);
-
   HttpResponseInfo info(request_->version(), HttpStatus::ContinueRequest,
                         "Continue", false, 0, {}, {});
 
   TRACE("send100Continue(): sending it");
-  transport_->send(std::move(info), BufferRef(), std::move(next));
+  transport_->send(std::move(info), BufferRef(), std::move(onComplete));
 }
 
 bool HttpChannel::onMessageBegin(const BufferRef& method,
