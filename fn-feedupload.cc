@@ -135,8 +135,8 @@ int main(int argc, const char** argv) {
   auto cur = begin;
   auto end = (char *) mmap.end();
   auto last = cur;
-  int total_entries = 0;
-  int total_bytes = 0;
+  uint64_t total_entries = 0;
+  uint64_t total_bytes = 0;
   auto start_time = WallClock::now().unixMicros();
   auto last_status_line = start_time;
 
@@ -158,7 +158,7 @@ int main(int argc, const char** argv) {
     last_status_line = now;
     auto runtime = (now - start_time) / 1000000;
     int percent = ((double) (cur - begin) / (double) (end - begin)) * 100;
-    int bandwidth = total_bytes / (double) (runtime + 1);
+    uint64_t bandwidth = total_bytes / (runtime + 1);
     auto queuelen = feed_writer.queueLength();
 
     auto str = StringUtil::format(
