@@ -2,7 +2,7 @@
 
 namespace xzero {
 
-Executor::Executor(std::function<void(const std::exception&)>&& eh)
+Executor::Executor(std::function<void(const std::exception&)> eh)
     : SafeCall(eh) {
 }
 

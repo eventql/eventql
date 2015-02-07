@@ -20,14 +20,14 @@ static LogSource directExecutorLogger("executor.DirectExecutor");
 
 DirectExecutor::DirectExecutor(
     bool recursive,
-    std::function<void(const std::exception&)>&& eh)
+    std::function<void(const std::exception&)> eh)
     : Executor(std::move(eh)),
       recursive_(recursive),
       running_(0),
       deferred_() {
 }
 
-void DirectExecutor::execute(Task&& task) {
+void DirectExecutor::execute(Task task) {
   if (isRunning() && !isRecursive()) {
     deferred_.push_back(std::move(task));
     TRACE("%p execute: enqueue task (%zu)", this, deferred_.size());

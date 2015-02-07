@@ -27,7 +27,7 @@ static std::mutex m;
 #endif
 
 ThreadedExecutor::ThreadedExecutor(
-    std::function<void(const std::exception&)>&& eh)
+    std::function<void(const std::exception&)> eh)
     : Executor(std::move(eh)),
       threads_() {
 }
@@ -69,7 +69,7 @@ void* ThreadedExecutor::launchme(void* ptr) {
   return nullptr;
 }
 
-void ThreadedExecutor::execute(const std::string& name, Task&& task) {
+void ThreadedExecutor::execute(const std::string& name, Task task) {
   pthread_t tid;
   auto runner = [this, task]() {
     safeCall(task);
@@ -86,7 +86,7 @@ void ThreadedExecutor::execute(const std::string& name, Task&& task) {
   threads_.push_back(tid);
 }
 
-void ThreadedExecutor::execute(Task&& task) {
+void ThreadedExecutor::execute(Task task) {
   pthread_t tid = 0;
   //pthread_create(&tid, NULL, &launchme, new Task{std::move(task)});
   pthread_create(&tid, NULL, &launchme, new Task([this, task]{

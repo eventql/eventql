@@ -30,13 +30,13 @@ static LogSource threadPoolLogger("ThreadPool");
 #define TRACE(msg...) do {} while (0)
 #endif
 
-ThreadPool::ThreadPool(std::function<void(const std::exception&)>&& eh)
+ThreadPool::ThreadPool(std::function<void(const std::exception&)> eh)
     : ThreadPool(processorCount(), std::move(eh)) {
 }
 
 ThreadPool::ThreadPool(
     size_t num_threads,
-    std::function<void(const std::exception&)>&& eh)
+    std::function<void(const std::exception&)> eh)
     : Executor(std::move(eh)),
       active_(true),
       threads_(),
@@ -137,7 +137,7 @@ void ThreadPool::work(int workerId) {
   TRACE("%p worker[%d] leave", this, workerId);
 }
 
-void ThreadPool::execute(Task&& task) {
+void ThreadPool::execute(Task task) {
   {
     std::unique_lock<std::mutex> lock(mutex_);
     TRACE("%p execute: enqueue task & notify_all", this);

@@ -59,7 +59,7 @@ NativeScheduler::~NativeScheduler() {
   ::close(wakeupPipe_[PIPE_WRITE_END]);
 }
 
-void NativeScheduler::execute(Task&& task) {
+void NativeScheduler::execute(Task task) {
   {
     std::lock_guard<std::mutex> lk(lock_);
     tasks_.push_back(task);
