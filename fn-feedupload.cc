@@ -61,6 +61,15 @@ int main(int argc, const char** argv) {
       "<char>");
 
   flags.defineFlag(
+      "concurrency",
+      fnord::cli::FlagParser::T_INTEGER,
+      false,
+      "c",
+      "10",
+      "concurrency",
+      "<num>");
+
+  flags.defineFlag(
       "loglevel",
       fnord::cli::FlagParser::T_STRING,
       false,
@@ -75,6 +84,7 @@ int main(int argc, const char** argv) {
       strToLogLevel(flags.getString("loglevel")));
 
   /* args */
+  auto concurrency = flags.getInt("concurrency");
   auto inputfile = flags.getString("input");
   auto separator_str = flags.getString("separator");
   if (separator_str.length() != 1) {
@@ -116,7 +126,7 @@ int main(int argc, const char** argv) {
     }
 
     auto rpc_url = uri_raw.substr(0, uri_raw.find("?"));
-    feed_writer.addTargetFeed(rpc_url, feed, 10);
+    feed_writer.addTargetFeed(rpc_url, feed, concurrency);
   }
 
   /* mmap input file */
