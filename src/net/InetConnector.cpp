@@ -418,7 +418,7 @@ bool InetConnector::acceptOne() {
   auto connection =
       defaultConnectionFactory()->create(this, std::move(endpoint));
 
-  safeCall_(std::bind(&Connection::onOpen, endpoint->connection()));
+  safeCall_(std::bind(&Connection::onOpen, connection));
 
   return true;
 }
