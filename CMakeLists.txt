@@ -34,6 +34,8 @@ include_directories(${FNORD_FTS_INCLUDE})
 
 add_library(cm-common OBJECT
     cm-common/common.cc
+    cm-common/FeatureID.cc
+    cm-common/FeatureSchema.cc
     cm-common/ItemRef.cc
     cm-common/CustomerNamespace.cc)
 
@@ -116,6 +118,7 @@ add_executable(cm-indexbuild
     $<TARGET_OBJECTS:fnord-feeds>
     $<TARGET_OBJECTS:fnord-rpc>
     $<TARGET_OBJECTS:fnord-mdb>
+    cm-common/FeatureIndex.cc
     cm-index/cm-indexbuild.cc
     cm-index/IndexBuilder.cc)
 
