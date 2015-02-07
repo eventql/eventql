@@ -71,7 +71,7 @@ std::shared_ptr<LocalEndPoint> LocalConnector::createClient(
   std::shared_ptr<LocalEndPoint> endpoint = pendingConnects_.back();
   endpoint->setInput(rawRequestMessage);
 
-  executor()->execute([this]() { acceptOne(); });
+  executor()->execute(std::bind(&LocalConnector::acceptOne, this));
 
   return endpoint;
 }

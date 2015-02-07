@@ -5,7 +5,7 @@
 // file except in compliance with the License. You may obtain a copy of
 // the License at: http://opensource.org/licenses/MIT
 
-#include <xzero/executor/Executor.h>
+#include <xzero/executor/Scheduler.h>
 #include <xzero/net/InetConnector.h>
 #include <xzero/net/InetEndPoint.h>
 #include <xzero/net/ConnectionFactory.h>
@@ -52,10 +52,12 @@ namespace xzero {
 
 InetConnector::InetConnector(const std::string& name, Executor* executor,
                              Scheduler* scheduler, WallClock* clock,
-                             TimeSpan idleTimeout)
+                             TimeSpan idleTimeout,
+                             std::function<void(const std::exception&)> eh)
     : Connector(name, executor, clock),
       scheduler_(scheduler),
       schedulerHandle_(),
+      safeCall_(eh),
       connectedEndPoints_(),
       mutex_(),
       socket_(-1),
@@ -72,9 +74,10 @@ InetConnector::InetConnector(const std::string& name, Executor* executor,
 InetConnector::InetConnector(const std::string& name, Executor* executor,
                              Scheduler* scheduler, WallClock* clock,
                              TimeSpan idleTimeout,
+                             std::function<void(const std::exception&)> eh,
                              const IPAddress& ipaddress, int port, int backlog,
                              bool reuseAddr, bool reusePort)
-    : InetConnector(name, executor, scheduler, clock, idleTimeout) {
+    : InetConnector(name, executor, scheduler, clock, idleTimeout, eh) {
 
   open(ipaddress, port, backlog, reuseAddr, reusePort);
 }
@@ -414,7 +417,8 @@ bool InetConnector::acceptOne() {
 
   auto connection =
       defaultConnectionFactory()->create(this, std::move(endpoint));
-  connection->onOpen();
+
+  safeCall_(std::bind(&Connection::onOpen, endpoint->connection()));
 
   return true;
 }
@@ -440,7 +444,7 @@ void InetConnector::onEndPointClosed(InetEndPoint* endpoint) {
   assert(i != connectedEndPoints_.end());
 
   if (i != connectedEndPoints_.end()) {
-    endpoint->connection()->onClose();
+    safeCall_(std::bind(&Connection::onClose, endpoint->connection()));
 
     connectedEndPoints_.erase(i);
 
