@@ -22,6 +22,17 @@ add_executable(fn-feedtail
 
 target_link_libraries(fn-feedtail ${CMAKE_THREAD_LIBS_INIT})
 
+add_executable(fn-feedupload
+    $<TARGET_OBJECTS:fnord-base>
+    $<TARGET_OBJECTS:fnord-http>
+    $<TARGET_OBJECTS:fnord-rpc>
+    $<TARGET_OBJECTS:fnord-json>
+    $<TARGET_OBJECTS:fnord-sstable>
+    $<TARGET_OBJECTS:fnord-feeds>
+    fn-feedupload.cc)
+
+target_link_libraries(fn-feedupload ${CMAKE_THREAD_LIBS_INIT})
+
 #add_executable(fnord-logstream-service-example
 #    $<TARGET_OBJECTS:fnord-base>
 #    $<TARGET_OBJECTS:fnord-feeds>

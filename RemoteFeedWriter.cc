@@ -20,9 +20,12 @@ RemoteFeedWriter::RemoteFeedWriter(
     size_t max_buffer_size /* = kDefaultBufferSize */) :
     rpc_client_(rpc_client),
     max_buffer_size_(max_buffer_size),
-    sequence_(0) {}
+    sequence_(0),
+    queue_length_(0) {}
 
 void RemoteFeedWriter::appendEntry(const String& entry_data) {
+  queue_length_++;
+
   ScopedLock<std::mutex> lk(write_queue_mutex_);
 
   if (write_queue_.size() > max_buffer_size_) {
@@ -99,6 +102,7 @@ void RemoteFeedWriter::flushBuffer(RefPtr<TargetFeed> target) {
 
   rpc->onSuccess([this, target] (const decltype(rpc)::ValueType& r) mutable {
     target->cur_requests--;
+    queue_length_--;
     stat_entries_written_success_.incr(1);
     flushBuffer();
   });
@@ -120,6 +124,14 @@ void RemoteFeedWriter::flushBuffer(RefPtr<TargetFeed> target) {
     stat_entries_written_retry_.incr(1);
     flushBuffer();
   });
+}
+
+size_t RemoteFeedWriter::queueLength() const {
+  return queue_length_.load();
+}
+
+size_t RemoteFeedWriter::maxQueueLength() const {
+  return max_buffer_size_;
 }
 
 void RemoteFeedWriter::exportStats(

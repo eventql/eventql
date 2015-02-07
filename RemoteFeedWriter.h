@@ -37,6 +37,9 @@ public:
       const String& path_prefix = "/fnord/feeds/writer/",
       stats::StatsRepository* stats_repo = nullptr);
 
+  size_t queueLength() const;
+  size_t maxQueueLength() const;
+
 protected:
 
   class TargetFeed : public RefCounted {
@@ -65,6 +68,7 @@ protected:
   fnord::stats::Counter<uint64_t> stat_entries_written_error_;
   fnord::stats::Counter<uint64_t> stat_entries_written_retry_;
 
+  std::atomic<size_t> queue_length_;
 };
 
 }
