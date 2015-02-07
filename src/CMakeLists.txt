@@ -14,6 +14,7 @@ set(libxzero_SRC
   logging/LogSource.cpp
   logging/LogTarget.cpp
 
+  executor/SafeCall.cpp
   executor/Executor.cpp
   executor/DirectExecutor.cpp
   executor/NativeScheduler.cpp
