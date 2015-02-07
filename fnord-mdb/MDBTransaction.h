@@ -43,7 +43,9 @@ public:
 
   void put(const String& key, const String& value);
   void put(const String& key, const Buffer& value);
+  void put(const String& key, const void* value, size_t value_size);
   void put(const Buffer& key, const Buffer& value);
+  void put(const Buffer& key, const void* value, size_t value_size);
   void put(
       const void* key,
       size_t key_size,

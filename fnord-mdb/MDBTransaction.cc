@@ -123,6 +123,20 @@ void MDBTransaction::put(const Buffer& key, const Buffer& value) {
 }
 
 void MDBTransaction::put(
+    const String& key,
+    const void* value,
+    size_t value_size) {
+  put(key.c_str(), key.length(), value, value_size);
+}
+
+void MDBTransaction::put(
+    const Buffer& key,
+    const void* value,
+    size_t value_size) {
+  put(key.data(), key.size(), value, value_size);
+}
+
+void MDBTransaction::put(
     const void* key,
     size_t key_size,
     const void* value,
