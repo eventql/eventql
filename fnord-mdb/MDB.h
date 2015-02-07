@@ -22,7 +22,7 @@ namespace mdb {
 class MDB : public RefCounted {
 public:
 
-  static RefPtr<MDB> open(const String& path);
+  static RefPtr<MDB> open(const String& path, bool readonly = false);
 
   MDB(const MDB& other) = delete;
   MDB& operator=(const MDB& other) = delete;

@@ -12,14 +12,19 @@
 namespace fnord {
 namespace mdb {
 
-RefPtr<MDB> MDB::open(const String& path) {
+RefPtr<MDB> MDB::open(const String& path, bool readonly /* = false */) {
   MDB_env* mdb_env;
 
   if (mdb_env_create(&mdb_env) != 0) {
     RAISE(kRuntimeError, "mdb_env_create() failed");
   }
 
-  auto rc = mdb_env_open(mdb_env, path.c_str(), 0, 0664);
+  int flags = 0;
+  if (readonly) {
+    flags |= MDB_RDONLY;
+  }
+
+  auto rc = mdb_env_open(mdb_env, path.c_str(), flags, 0664);
   if (rc != 0) {
     auto err = String(mdb_strerror(rc));
     RAISEF(kRuntimeError, "mdb_env_open($0) failed: $1", path, err);
@@ -57,15 +62,17 @@ RefPtr<MDBTransaction> MDB::startTransaction(bool readonly /* = false */) {
 void MDB::openDBHandle() {
   MDB_txn* txn;
 
-  if (mdb_txn_begin(mdb_env_, NULL, 0, &txn) != 0) {
-    RAISE(kRuntimeError, "mdb_txn_begin() failed");
+  int rc = mdb_txn_begin(mdb_env_, NULL, MDB_RDONLY, &txn);
+  if (rc != 0) {
+    auto err = String(mdb_strerror(rc));
+    RAISEF(kRuntimeError, "mdb_txn_begin() failed: $0", err);
   }
 
   if (mdb_dbi_open(txn, NULL, 0, &mdb_handle_) != 0) {
     RAISE(kRuntimeError, "mdb_dbi_open() failed");
   }
 
-  auto rc = mdb_txn_commit(txn);
+  rc = mdb_txn_commit(txn);
   if (rc != 0) {
     auto err = String(mdb_strerror(rc));
     RAISEF(kRuntimeError, "mdb_txn_commit() failed: $0", err);
