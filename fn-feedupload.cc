@@ -65,7 +65,7 @@ int main(int argc, const char** argv) {
       fnord::cli::FlagParser::T_STRING,
       false,
       NULL,
-      "INFO",
+      "CRITICAL",
       "loglevel",
       "<level>");
 
