@@ -5,6 +5,7 @@ set(libxzero_SRC
   DateTime.cpp
   IdleTimeout.cpp
   RuntimeError.cpp
+  StackTrace.cpp
   TimeSpan.cpp
   Tokenizer.cpp
   WallClock.cpp
