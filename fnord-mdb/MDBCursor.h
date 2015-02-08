@@ -34,6 +34,14 @@ public:
       const void* value,
       size_t value_size);
 
+  bool get(const String& key, Buffer* value);
+  bool get(const Buffer& key, Buffer* value);
+  bool get(
+      const void* key,
+      size_t key_size,
+      void** value,
+      size_t* value_size);
+
   bool getFirst(Buffer* key, Buffer* value);
   bool getFirst(
       void** key,
@@ -54,6 +62,14 @@ public:
       size_t* key_size,
       void** value,
       size_t* value_size);
+
+  bool getPrev(Buffer* key, Buffer* value);
+  bool getPrev(
+      void** key,
+      size_t* key_size,
+      void** value,
+      size_t* value_size);
+
 
   void close();
 
