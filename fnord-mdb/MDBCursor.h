@@ -26,6 +26,14 @@ public:
   MDBCursor(const MDBCursor& other) = delete;
   MDBCursor& operator=(const MDBCursor& other) = delete;
 
+  bool set(const void* key, size_t key_size);
+
+  void put(
+      const void* key,
+      size_t key_size,
+      const void* value,
+      size_t value_size);
+
   bool getFirst(Buffer* key, Buffer* value);
   bool getFirst(
       void** key,

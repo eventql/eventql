@@ -110,33 +110,33 @@ bool MDBTransaction::get(
   return true;
 }
 
-void MDBTransaction::put(const String& key, const String& value) {
-  put(key.c_str(), key.length(), value.c_str(), value.length());
+void MDBTransaction::insert(const String& key, const String& value) {
+  insert(key.c_str(), key.length(), value.c_str(), value.length());
 }
 
-void MDBTransaction::put(const String& key, const Buffer& value) {
-  put(key.c_str(), key.length(), value.data(), value.size());
+void MDBTransaction::insert(const String& key, const Buffer& value) {
+  insert(key.c_str(), key.length(), value.data(), value.size());
 }
 
-void MDBTransaction::put(const Buffer& key, const Buffer& value) {
-  put(key.data(), key.size(), value.data(), value.size());
+void MDBTransaction::insert(const Buffer& key, const Buffer& value) {
+  insert(key.data(), key.size(), value.data(), value.size());
 }
 
-void MDBTransaction::put(
+void MDBTransaction::insert(
     const String& key,
     const void* value,
     size_t value_size) {
-  put(key.c_str(), key.length(), value, value_size);
+  insert(key.c_str(), key.length(), value, value_size);
 }
 
-void MDBTransaction::put(
+void MDBTransaction::insert(
     const Buffer& key,
     const void* value,
     size_t value_size) {
-  put(key.data(), key.size(), value, value_size);
+  insert(key.data(), key.size(), value, value_size);
 }
 
-void MDBTransaction::put(
+void MDBTransaction::insert(
     const void* key,
     size_t key_size,
     const void* value,
@@ -151,6 +151,46 @@ void MDBTransaction::put(
   if (rc != 0) {
     auto err = String(mdb_strerror(rc));
     RAISEF(kRuntimeError, "mdb_put() failed: $0", err);
+  }
+}
+
+void MDBTransaction::update(const String& key, const String& value) {
+  update(key.c_str(), key.length(), value.c_str(), value.length());
+}
+
+void MDBTransaction::update(const String& key, const Buffer& value) {
+  update(key.c_str(), key.length(), value.data(), value.size());
+}
+
+void MDBTransaction::update(const Buffer& key, const Buffer& value) {
+  update(key.data(), key.size(), value.data(), value.size());
+}
+
+void MDBTransaction::update(
+    const String& key,
+    const void* value,
+    size_t value_size) {
+  update(key.c_str(), key.length(), value, value_size);
+}
+
+void MDBTransaction::update(
+    const Buffer& key,
+    const void* value,
+    size_t value_size) {
+  update(key.data(), key.size(), value, value_size);
+}
+
+void MDBTransaction::update(
+    const void* key,
+    size_t key_size,
+    const void* value,
+    size_t value_size) {
+  auto cur = getCursor();
+
+  if (cur->set(key, key_size)) {
+    cur->put(key, key_size, value, value_size);
+  } else {
+    insert(key, key_size, value, value_size);
   }
 }
 

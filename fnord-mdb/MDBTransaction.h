@@ -41,12 +41,23 @@ public:
       void** value,
       size_t* value_size);
 
-  void put(const String& key, const String& value);
-  void put(const String& key, const Buffer& value);
-  void put(const String& key, const void* value, size_t value_size);
-  void put(const Buffer& key, const Buffer& value);
-  void put(const Buffer& key, const void* value, size_t value_size);
-  void put(
+  void insert(const String& key, const String& value);
+  void insert(const String& key, const Buffer& value);
+  void insert(const String& key, const void* value, size_t value_size);
+  void insert(const Buffer& key, const Buffer& value);
+  void insert(const Buffer& key, const void* value, size_t value_size);
+  void insert(
+      const void* key,
+      size_t key_size,
+      const void* value,
+      size_t value_size);
+
+  void update(const String& key, const String& value);
+  void update(const String& key, const Buffer& value);
+  void update(const String& key, const void* value, size_t value_size);
+  void update(const Buffer& key, const Buffer& value);
+  void update(const Buffer& key, const void* value, size_t value_size);
+  void update(
       const void* key,
       size_t key_size,
       const void* value,
