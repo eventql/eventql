@@ -45,11 +45,16 @@ add_executable(cm-frontend
     $<TARGET_OBJECTS:fnord-base>
     $<TARGET_OBJECTS:fnord-http>
     $<TARGET_OBJECTS:fnord-json>
+    $<TARGET_OBJECTS:fnord-mdb>
     $<TARGET_OBJECTS:fnord-sstable>
     $<TARGET_OBJECTS:fnord-feeds>
     $<TARGET_OBJECTS:fnord-rpc>
+    cm-common/FeatureIndex.cc
     cm-frontend/CMFrontend.cc
-    cm-frontend/cm-frontend.cc)
+    cm-frontend/cm-frontend.cc
+    cm-frontend/LookupServlet.cc
+    cm-sellerstats/ActivityLog.cc
+    cm-sellerstats/SellerStatsLookup.cc)
 
 target_link_libraries(cm-frontend ${CMAKE_THREAD_LIBS_INIT})
 target_link_libraries(cm-frontend m)
