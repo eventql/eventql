@@ -172,7 +172,8 @@ add_executable(cm-sellerstatslookup
     $<TARGET_OBJECTS:fnord-mdb>
     cm-common/FeatureIndex.cc
     cm-sellerstats/ActivityLog.cc
-    cm-sellerstats/cm-sellerstatslookup.cc)
+    cm-sellerstats/cm-sellerstatslookup.cc
+    cm-sellerstats/SellerStatsLookup.cc)
 
 target_link_libraries(cm-sellerstatslookup
     ${CMAKE_THREAD_LIBS_INIT}
