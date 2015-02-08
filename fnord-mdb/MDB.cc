@@ -68,7 +68,7 @@ void MDB::openDBHandle() {
     RAISEF(kRuntimeError, "mdb_txn_begin() failed: $0", err);
   }
 
-  if (mdb_dbi_open(txn, NULL, 0, &mdb_handle_) != 0) {
+  if (mdb_dbi_open(txn, NULL, MDB_DUPSORT, &mdb_handle_) != 0) {
     RAISE(kRuntimeError, "mdb_dbi_open() failed");
   }
 

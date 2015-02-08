@@ -30,6 +30,43 @@ void MDBCursor::close() {
   decRef();
 }
 
+bool MDBCursor::set(const void* key, size_t key_size) {
+  MDB_val mkey;
+  mkey.mv_data = const_cast<void*>(key);
+  mkey.mv_size = key_size;
+
+  auto rc = mdb_cursor_get(mdb_cur_, &mkey, nullptr, MDB_SET);
+  if (rc == MDB_NOTFOUND) {
+    return false;
+  }
+
+  if (rc != 0) {
+    auto err = String(mdb_strerror(rc));
+    RAISEF(kRuntimeError, "mdb_cursor_get(FIRST) failed: $0", err);
+  }
+
+  return true;
+}
+
+void MDBCursor::put(
+    const void* key,
+    size_t key_size,
+    const void* value,
+    size_t value_size) {
+  MDB_val mkey, mval;
+  mkey.mv_data = const_cast<void*>(key);
+  mkey.mv_size = key_size;
+  mval.mv_data = const_cast<void*>(value);
+  mval.mv_size = value_size;
+
+  auto rc = mdb_cursor_put(mdb_cur_, &mkey, &mval, MDB_CURRENT);
+
+  if (rc != 0) {
+    auto err = String(mdb_strerror(rc));
+    RAISEF(kRuntimeError, "mdb_cursor_put() failed: $0", err);
+  }
+}
+
 bool MDBCursor::getFirst(Buffer* rkey, Buffer* rvalue) {
   void* key;
   size_t key_size;
