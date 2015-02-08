@@ -154,6 +154,7 @@ add_executable(cm-sellerstatsbuild
     $<TARGET_OBJECTS:fnord-rpc>
     $<TARGET_OBJECTS:fnord-mdb>
     cm-common/FeatureIndex.cc
+    cm-sellerstats/ActivityLog.cc
     cm-sellerstats/cm-sellerstatsbuild.cc
     cm-sellerstats/SellerStatsBuild.cc)
 
