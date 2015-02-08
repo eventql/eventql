@@ -74,21 +74,19 @@
     </fn-message>
     <div class="list ui">
       <div class="navigation">
-        <h1 class="small left">Metrics &rsaquo; </h1>
+        <h1 class="small left" style="float:left;" >Metrics &rsaquo; </h1>
         <fn-search data-size="small" data-placeholder="Search...">
           <fn-search-icon><i class="fa fa-search"></i></fn-search-icon>
         </fn-search>
       </div>
-      <div style="border-top: 1px solid #bbb; background: #fff;">
-        <fn-table data-per-page="25" data-page="0" data-clickable>
-          <fn-table-column data-sortable data-presort="asc">Metric</fn-table-column>
-          <fn-table-column>Labels</fn-table-column>
-          <fn-table-column data-sortable>Last Insert</fn-table-column>
-          <fn-table-column data-sortable>Total Stored Bytes</fn-table-column>
-          <table>
-          </table>
-        </fn-table>
-      </div>
+      <fn-table data-per-page="25" data-page="0" data-clickable>
+        <fn-table-column data-sortable data-presort="asc">Metric</fn-table-column>
+        <fn-table-column>Labels</fn-table-column>
+        <fn-table-column data-sortable>Last Insert</fn-table-column>
+        <fn-table-column data-sortable>Total Stored Bytes</fn-table-column>
+        <table>
+        </table>
+      </fn-table>
       <fn-pager data-for data-first-item="1" data-per-page="25" data-circling></fn-pager>
     </div>
   </fn-loader>
@@ -144,7 +142,7 @@
       var onSearchSubmit = (function(base) {
         return function(e) {
           var url = "search?q=" + encodeURIComponent(e.srcElement.getValue());
-          openUrl(url);
+          Fnord.openUrl(url);
         }
       })(this);
 
@@ -153,7 +151,7 @@
         return function(e) {
           var term = e.srcElement.getValue();
           var res = [];
-          var url = baseUrl + "/list?filter=" + term;
+          var url = "/metrics/list?filter=" + term;
           Fnord.httpGet(url, function(r) {
             if (r.status == 200) {
               var json = JSON.parse(r.response);
@@ -176,7 +174,7 @@
       var base = this;
       var loader = this.querySelector("fn-loader");
       var table = this.querySelector("fn-table table");
-      var url = baseUrl + "list" + url_query;
+      var url = "/metrics/list" + url_query;
 
       Fnord.httpGet(url, function(r) {
         if (r.status === 200) {
@@ -243,8 +241,7 @@
         "&aggr_fn=sum&&aggr_window=5&aggr_step=10&from=" + start +
         "&until=" + end +
         "&scale=0.8";
-      openUrl(raw_url, true)
-
+      Fnord.openUrl(raw_url);
     };
 
     this.renderServerError = function(text, statusCode) {

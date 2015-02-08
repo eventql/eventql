@@ -1,4 +1,16 @@
 <!--
+
+fn-metric-explorer-preview /deep/ #result_pane_loader {
+  background: #f6f6f8;
+}
+
+fn-metric-explorer-preview /deep/ .result_pane {
+  background: #fff;
+  padding: 10px 10px 10px 0px;
+  margin: 3px;
+  border: 1px solid #ddd;
+  text-align: center;
+}
   This file is part of the "FnordMetric" project
     Copyright (c) 2014 Laura Schlimmer
     Copyright (c) 2014 Paul Asmuth, Google Inc.
@@ -20,48 +32,11 @@
     .navigation .item {
       vertical-align: middle;
       margin-left: 0.8%;
+      float: left;
     }
 
     .navigation .item:first-child {
       margin-left: 0;
-    }
-
-    .navigation .item .text {
-      font-size: 0.95em;
-    }
-
-    .navigation .item fn-dropdown {
-      margin-top: 10px;
-    }
-
-
-
-    .group {
-      height: 100%;
-      float: left;
-      padding: 14px 20px 0 20px;
-    }
-
-    .group b {
-      font-weight: normal;
-      font-size: 80%;
-      line-height: 12px;
-      font-weight: 500;
-      display: block;
-      margin-bottom: 6px;
-      opacity: 0.7;
-    }
-
-    .group.timenav {
-      padding: 0;
-    }
-
-    .group.timenav * {
-      float:left;
-    }
-
-    .group.timenav fn-datepicker {
-      margin: 3px 10px 0 10px;
     }
 
     #result_pane_loader fn-message {
@@ -78,6 +53,7 @@
       padding: 10px 0 20px;
       background: #fff;
       display: none;
+      text-align: cente;
     }
 
     .result_pane.active {
@@ -115,11 +91,6 @@
       display:block;
     }
 
-    fn-metric-control {
-      border-bottom: 1px solid #ddd;
-      border-top: 1px solid #ddd;
-    }
-
     fn-modal-content code {
       word-wrap: break-word;
     }
@@ -128,19 +99,18 @@
       font-weight: 500;
       margin-bottom: 10px;
     }
-
-
   </style>
   <fn-loader>
     <div class="navigation">
       <div class="item left">
-        <span class="text">View</span>
+        <span class="text">Display: </span>
         <fn-dropdown data-style="inline small" id="view" >
           <fn-dropdown-header>Chart</fn-dropdown-header>
           <fn-dropdown-item data-value='svg'>Chart</fn-dropdown-item>
           <fn-dropdown-item data-value='csv'>Raw</fn-dropdown-item>
         </fn-dropdown>
       </div>
+
       <div class="item left">
         <span class="text">Chart Settings</span>
         <fn-dropdown data-style="inline small" id="chart_settings">
@@ -150,16 +120,17 @@
           <fn-dropdown-item data-value='inverted'>Inverted</fn-dropdown-item>
         </fn-dropdown>
       </div>
-      <fn-button id="embed_btn" class="item left" data-size='tiny'>
+
+      <fn-button id="embed_btn" class="item left" data-size='tiny' style="display:none;">
         <i class='fa fa-share'></i>Embed
       </fn-button>
-      <fn-button id="auto_refresh" class="item left" data-toggle data-size='tiny'>
+      <fn-button id="auto_refresh" class="item left" data-toggle data-size='tiny' style="display:none;">
         <i class='fa fa-refresh'></i>Auto Refresh
       </fn-button>
 
       <div class="item right">
         <fn-date-time-selector>
-          <fn-dropdown id='timerange' data-style="input small">
+          <fn-dropdown id='timerange' data-style="inline">
             <fn-dropdown-header>1 hour</fn-dropdown-header>
             <fn-dropdown-item data-value=300>5 minutes</fn-dropdown-item>
             <fn-dropdown-item data-value=900>15 minutes</fn-dropdown-item>
@@ -173,7 +144,9 @@
       </div>
     </div>
 
-    <fn-metric-control data-index="0"></fn-metric-control>
+    <div class="metric-controls">
+      <fn-metric-control data-index="0"></fn-metric-control>
+    </div>
 
     <fn-loader id="result_pane_loader" data-loading data-resolved="data-resolved" data-transparent>
       <fn-message>
@@ -257,7 +230,7 @@
 
     this.update = function() {
       var url_hash = "#metric?" + this.buildQueryUrl();
-      setUrlHash(url_hash);
+      Fnord.setUrlHash(url_hash);
       this.updateData(this.getAttribute('data-format'));
     };
 
@@ -317,7 +290,7 @@
     this.updateData = function(format) {
       var base = this;
       format = format ? format : "svg";
-      var url = baseUrl + "timeseries?" + this.buildQueryUrl(format);
+      var url = "/metrics/timeseries?" + this.buildQueryUrl(format);
 
       Fnord.httpGet(url, function(r) {
         if (r.status == 200) {
@@ -498,7 +471,7 @@
     };
 
     this.setMetricColumns = function(metric_control) {
-      var url = baseUrl + "list?filter=" + encodeURIComponent(metric_control.params.name);
+      var url = "/metrics/list?filter=" + encodeURIComponent(metric_control.params.name);
       metric_control.params.group_by = this.getMetricUrlParamOrDefault(
         "group_by", metric_control.params.index);
 
@@ -568,7 +541,6 @@
       var base = this;
       var controls = this.querySelectorAll("fn-metric-control");
       var new_control = document.createElement("fn-metric-control");
-      var ref_elem = this.querySelector("fn-controls[type='secondary']");
       var index = index;
 
       if (!index && controls) {
@@ -578,7 +550,8 @@
 
       new_control.setAttribute('data-state', 'select-metric');
       new_control.setAttribute('data-index', index);
-      ref_elem.parentNode.insertBefore(new_control, ref_elem);
+
+      this.querySelector(".metric-controls").appendChild(new_control);
 
       if (setEventListener) {
         new_control.addEventListener('fn-metric-control-new-metric', function(e) {
@@ -760,7 +733,7 @@
 
       embed_btn.addEventListener('fn-button-click', function() {
         modal.querySelector("span").innerHTML =
-          baseUrl + base.buildQueryUrl(base.getAttribute('data-format'));
+          "/metrics/" + base.buildQueryUrl(base.getAttribute('data-format'));
         modal.show();
       }, false);
     };
