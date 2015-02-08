@@ -160,3 +160,20 @@ add_executable(cm-sellerstatsbuild
 
 target_link_libraries(cm-sellerstatsbuild
     ${CMAKE_THREAD_LIBS_INIT})
+
+add_executable(cm-sellerstatslookup
+    $<TARGET_OBJECTS:cm-common>
+    $<TARGET_OBJECTS:fnord-base>
+    $<TARGET_OBJECTS:fnord-http>
+    $<TARGET_OBJECTS:fnord-json>
+    $<TARGET_OBJECTS:fnord-sstable>
+    $<TARGET_OBJECTS:fnord-feeds>
+    $<TARGET_OBJECTS:fnord-rpc>
+    $<TARGET_OBJECTS:fnord-mdb>
+    cm-common/FeatureIndex.cc
+    cm-sellerstats/ActivityLog.cc
+    cm-sellerstats/cm-sellerstatslookup.cc)
+
+target_link_libraries(cm-sellerstatslookup
+    ${CMAKE_THREAD_LIBS_INIT}
+    ${FNORD_FTS_LIBS})
