@@ -25,7 +25,6 @@ static LogSource localEndPointLogger("net.ByteArrayEndPoint");
 
 ByteArrayEndPoint::ByteArrayEndPoint(LocalConnector* connector)
     : connector_(connector),
-      isBusy_(false),
       input_(),
       readPos_(0),
       output_(),
@@ -112,19 +111,15 @@ size_t ByteArrayEndPoint::flush(int fd, off_t offset, size_t size) {
 void ByteArrayEndPoint::wantFill() {
   if (connection()) {
     TRACE("%p wantFill.", this);
-    isBusy_++;
+    ref();
     connector_->executor()->execute([this] {
       TRACE("%p wantFill: fillable.", this);
       try {
         connection()->onFillable();
-        isBusy_--;
       } catch (std::exception& e) {
         connection()->onInterestFailure(e);
-        isBusy_--;
       }
-      if (!isBusy_ && isClosed()) {
-        connector_->release(connection());
-      }
+      unref();
     });
   }
 }
@@ -132,19 +127,15 @@ void ByteArrayEndPoint::wantFill() {
 void ByteArrayEndPoint::wantFlush() {
   if (connection()) {
     TRACE("%p wantFlush.", this);
-    isBusy_++;
+    ref();
     connector_->executor()->execute([this] {
       TRACE("%p wantFlush: flushable.", this);
       try {
         connection()->onFlushable();
-        isBusy_--;
       } catch (std::exception& e) {
         connection()->onInterestFailure(e);
-        isBusy_--;
       }
-      if (!isBusy_ && isClosed()) {
-        connector_->release(connection());
-      }
+      unref();
     });
   }
 }

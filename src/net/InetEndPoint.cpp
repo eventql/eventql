@@ -14,6 +14,7 @@
 #include <xzero/Buffer.h>
 #include <xzero/sysconfig.h>
 #include <xzero/RuntimeError.h>
+#include <xzero/RefPtr.h>
 #include <stdexcept>
 #include <netinet/tcp.h>
 #include <unistd.h>
@@ -44,8 +45,7 @@ InetEndPoint::InetEndPoint(int socket,
       idleTimeout_(connector->clock(), connector->scheduler()),
       io_(),
       handle_(socket),
-      isCorking_(false),
-      isBusy_(0) {
+      isCorking_(false) {
 
   idleTimeout_.setCallback(std::bind(&InetEndPoint::onTimeout, this));
   idleTimeout_.setTimeout(connector->idleTimeout());
@@ -239,15 +239,10 @@ size_t InetEndPoint::flush(int fd, off_t offset, size_t size) {
 }
 
 void InetEndPoint::onReadable() {
-  try {
-    /*lock guard*/ {
-      BusyGuard _busyGuard(this);
-      connection()->onFillable();
-    }
+  RefPtr<EndPoint> _guard(this);
 
-    if (!isBusy() && isClosed()) {
-      connector_->release(connection());
-    }
+  try {
+    connection()->onFillable();
   } catch (const std::exception& e) {
     connection()->onInterestFailure(e);
   } catch (...) {
@@ -256,15 +251,10 @@ void InetEndPoint::onReadable() {
 }
 
 void InetEndPoint::onWritable() XZERO_NOEXCEPT {
-  try {
-    /*lock guard*/ {
-      BusyGuard _busyGuard(this);
-      connection()->onFlushable();
-    }
+  RefPtr<EndPoint> _guard(this);
 
-    if (!isBusy() && isClosed()) {
-      connector_->release(connection());
-    }
+  try {
+    connection()->onFlushable();
   } catch (const std::exception& e) {
     connection()->onInterestFailure(e);
   } catch (...) {
@@ -282,19 +272,15 @@ void InetEndPoint::wantFill() {
 }
 
 void InetEndPoint::fillable() {
-  {
-    BusyGuard _busyGuard(this);
-    try {
-      io_.reset();
-      connection()->onFillable();
-    } catch (const std::exception& e) {
-      connection()->onInterestFailure(e);
-    } catch (...) {
-      connection()->onInterestFailure(RUNTIME_ERROR("Unhandled unknown exception caught."));
-    }
-  }
-  if (!isBusy() && isClosed()) {
-    connector_->release(connection());
+  RefPtr<EndPoint> _guard(this);
+
+  try {
+    io_.reset();
+    connection()->onFillable();
+  } catch (const std::exception& e) {
+    connection()->onInterestFailure(e);
+  } catch (...) {
+    connection()->onInterestFailure(RUNTIME_ERROR("Unhandled unknown exception caught."));
   }
 }
 
@@ -310,19 +296,15 @@ void InetEndPoint::wantFlush() {
 }
 
 void InetEndPoint::flushable() {
-  /*lock guard*/ {
-    BusyGuard _busyGuard(this);
-    try {
-      io_.reset();
-      connection()->onFlushable();
-    } catch (const std::exception& e) {
-      connection()->onInterestFailure(e);
-    } catch (...) {
-      connection()->onInterestFailure(RUNTIME_ERROR("Unhandled unknown exception caught."));
-    }
-  }
-  if (!isBusy() && isClosed()) {
-    connector_->release(connection());
+  RefPtr<EndPoint> _guard(this);
+
+  try {
+    io_.reset();
+    connection()->onFlushable();
+  } catch (const std::exception& e) {
+    connection()->onInterestFailure(e);
+  } catch (...) {
+    connection()->onInterestFailure(RUNTIME_ERROR("Unhandled unknown exception caught."));
   }
 }
 

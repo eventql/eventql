@@ -27,6 +27,7 @@ LocalEndPoint::LocalEndPoint(LocalConnector* connector)
     : ByteArrayEndPoint(connector), connector_(connector) {}
 
 LocalEndPoint::~LocalEndPoint() {
+  TRACE("%p ~LocalEndPoint: connection=%p", this, connection());
 }
 
 void LocalEndPoint::close() {
@@ -54,21 +55,22 @@ void LocalConnector::stop() {
   isStarted_ = false;
 }
 
-std::list<EndPoint*> LocalConnector::connectedEndPoints() {
-  std::list<EndPoint*> result;
-  for (std::shared_ptr<LocalEndPoint>& ep : connectedEndPoints_) {
-    result.push_back(ep.get());
-  }
+std::list<RefPtr<EndPoint>> LocalConnector::connectedEndPoints() {
+  std::list<RefPtr<EndPoint>> result;
+
+  for (const auto& ep: connectedEndPoints_)
+    result.push_back(ep.as<EndPoint>());
+
   return result;
 }
 
-std::shared_ptr<LocalEndPoint> LocalConnector::createClient(
+RefPtr<LocalEndPoint> LocalConnector::createClient(
     const std::string& rawRequestMessage) {
 
   assert(isStarted());
 
   pendingConnects_.emplace_back(new LocalEndPoint(this));
-  std::shared_ptr<LocalEndPoint> endpoint = pendingConnects_.back();
+  RefPtr<LocalEndPoint> endpoint = pendingConnects_.back();
   endpoint->setInput(rawRequestMessage);
 
   executor()->execute(std::bind(&LocalConnector::acceptOne, this));
@@ -83,11 +85,11 @@ bool LocalConnector::acceptOne() {
     return false;
   }
 
-  std::shared_ptr<LocalEndPoint> endpoint = pendingConnects_.front();
+  RefPtr<LocalEndPoint> endpoint = pendingConnects_.front();
   pendingConnects_.pop_front();
   connectedEndPoints_.push_back(endpoint);
 
-  auto connection = defaultConnectionFactory()->create(this, endpoint);
+  auto connection = defaultConnectionFactory()->create(this, endpoint.get());
   connection->onOpen();
 
   return true;
@@ -99,41 +101,25 @@ void LocalConnector::onEndPointClosed(LocalEndPoint* endpoint) {
 
   // try connected endpoints
   auto i = std::find_if(connectedEndPoints_.begin(), connectedEndPoints_.end(),
-                        [endpoint](const std::shared_ptr<LocalEndPoint>& ep) {
+                        [endpoint](const RefPtr<LocalEndPoint>& ep) {
     return endpoint == ep.get();
   });
 
   if (i != connectedEndPoints_.end()) {
     endpoint->connection()->onClose();
     connectedEndPoints_.erase(i);
-    if (!endpoint->isBusy()) {
-      // do only actually delete if not currently inside an io handler
-      release(endpoint->connection());
-    }
     return;
   }
 
   // try pending endpoints
   auto k = std::find_if(pendingConnects_.begin(), pendingConnects_.end(),
-                        [endpoint](const std::shared_ptr<LocalEndPoint>& ep) {
+                        [endpoint](const RefPtr<LocalEndPoint>& ep) {
     return ep.get() == endpoint;
   });
 
   if (k != pendingConnects_.end()) {
     pendingConnects_.erase(k);
-    release(endpoint->connection());
   }
-}
-
-void LocalConnector::release(Connection* connection) {
-  assert(connection != nullptr);
-  assert(dynamic_cast<LocalEndPoint*>(connection->endpoint()) != nullptr);
-  assert(!static_cast<LocalEndPoint*>(connection->endpoint())->isBusy());
-
-  TRACE("%p release: connection=%p, endpoint=%p", this, connection,
-        connection->endpoint());
-
-  delete connection;
 }
 
 }  // namespace xzero

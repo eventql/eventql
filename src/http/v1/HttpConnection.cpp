@@ -35,7 +35,7 @@ static LogSource connectionLogger("http1.HttpConnection");
 #define TRACE(msg...) do {} while (0)
 #endif
 
-HttpConnection::HttpConnection(std::shared_ptr<EndPoint> endpoint,
+HttpConnection::HttpConnection(EndPoint* endpoint,
                                Executor* executor,
                                const HttpHandler& handler,
                                HttpDateGenerator* dateGenerator,

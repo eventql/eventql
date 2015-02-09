@@ -69,7 +69,7 @@ static const TimeSpan maxKeepAlive = TimeSpan::fromSeconds(30);
 TEST(Http1, ConnectionClosed_1_1) {
   MOCK_HTTP1_SERVER(server, connector, executor);
 
-  std::shared_ptr<LocalEndPoint> ep;
+  xzero::RefPtr<LocalEndPoint> ep;
   executor.execute([&] {
     ep = connector->createClient("GET / HTTP/1.1\r\n"
                                  "Connection: close\r\n"
@@ -81,7 +81,7 @@ TEST(Http1, ConnectionClosed_1_1) {
 TEST(Http1, ConnectionClosed_1_0) {
   MOCK_HTTP1_SERVER(server, connector, executor);
 
-  std::shared_ptr<LocalEndPoint> ep;
+  xzero::RefPtr<LocalEndPoint> ep;
   executor.execute([&] {
     ep = connector->createClient("GET / HTTP/1.0\r\n"
                                  "\r\n");
@@ -93,7 +93,7 @@ TEST(Http1, ConnectionClosed_1_0) {
 TEST(Http1, DISABLED_ConnectionKeepAlive_1_0) {
   MOCK_HTTP1_SERVER(server, connector, executor);
 
-  std::shared_ptr<LocalEndPoint> ep;
+  xzero::RefPtr<LocalEndPoint> ep;
   executor.execute([&] {
     ep = connector->createClient("GET / HTTP/1.0\r\n"
                                  "Connection: Keep-Alive\r\n"
@@ -108,7 +108,7 @@ TEST(Http1, DISABLED_ConnectionKeepAlive_1_0) {
 TEST(Http1, ConnectionKeepAlive_1_1) {
   MOCK_HTTP1_SERVER(server, connector, executor);
 
-  std::shared_ptr<LocalEndPoint> ep;
+  xzero::RefPtr<LocalEndPoint> ep;
   executor.execute([&] {
     ep = connector->createClient("GET / HTTP/1.1\r\n"
                                  "Host: test\r\n"
@@ -127,7 +127,7 @@ TEST(Http1, ConnectionKeepAlive_1_1) {
 TEST(Http1, ConnectionKeepAlive3_pipelined) {
   //SCOPED_LOGGER();
   MOCK_HTTP1_SERVER(server, connector, executor);
-  std::shared_ptr<LocalEndPoint> ep;
+  xzero::RefPtr<LocalEndPoint> ep;
   executor.execute([&] {
     ep = connector->createClient("GET /one HTTP/1.1\r\nHost: test\r\n\r\n"
                                  "GET /two HTTP/1.1\r\nHost: test\r\n\r\n"
@@ -168,7 +168,7 @@ TEST(Http1, ConnectionKeepAlive3_pipelined) {
 TEST(Http1, protocolErrorShouldRaise400) {
   // SCOPED_LOGGER();
   MOCK_HTTP1_SERVER(server, connector, executor);
-  std::shared_ptr<LocalEndPoint> ep;
+  xzero::RefPtr<LocalEndPoint> ep;
   executor.execute([&] {
     // FIXME HTTP/1.1 (due to keep-alive) SEGV's on LocalEndPoint.
     ep = connector->createClient("GET\r\n\r\n");

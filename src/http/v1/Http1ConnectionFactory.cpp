@@ -29,7 +29,7 @@ Http1ConnectionFactory::~Http1ConnectionFactory() {
 }
 
 Connection* Http1ConnectionFactory::create(Connector* connector,
-                                           std::shared_ptr<EndPoint> endpoint) {
+                                           EndPoint* endpoint) {
   return configure(new http1::HttpConnection(endpoint,
                                              connector->executor(),
                                              handler(),

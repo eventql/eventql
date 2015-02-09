@@ -11,7 +11,7 @@
 
 namespace xzero {
 
-Connection::Connection(std::shared_ptr<EndPoint> endpoint,
+Connection::Connection(EndPoint* endpoint,
                        Executor* executor)
     : endpoint_(endpoint),
       executor_(executor),

@@ -6,12 +6,17 @@
 // the License at: http://opensource.org/licenses/MIT
 
 #include <xzero/net/EndPoint.h>
+#include <xzero/net/Connection.h>
 #include <cassert>
 
 namespace xzero {
 
 EndPoint::EndPoint() XZERO_NOEXCEPT
     : connection_(nullptr) {
+}
+
+EndPoint::~EndPoint() {
+  delete connection_;
 }
 
 void EndPoint::setConnection(Connection* connection) {

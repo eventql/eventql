@@ -405,25 +405,25 @@ bool InetConnector::acceptOne() {
     throw std::system_error(errno, std::system_category());
   }
 
-  std::unique_ptr<InetEndPoint> endpoint(new InetEndPoint(cfd, this, scheduler_));
+  RefPtr<InetEndPoint> endpoint(new InetEndPoint(cfd, this, scheduler_));
   {
     std::lock_guard<std::mutex> _lk(mutex_);
-    connectedEndPoints_.push_back(endpoint.get());
+    connectedEndPoints_.push_back(endpoint);
   }
 
   Connection* connection =
-      defaultConnectionFactory()->create(this, std::move(endpoint));
+      defaultConnectionFactory()->create(this, endpoint.get());
 
   safeCall_(std::bind(&Connection::onOpen, connection));
 
   return true;
 }
 
-std::list<EndPoint*> InetConnector::connectedEndPoints() {
-  std::list<EndPoint*> result;
+std::list<RefPtr<EndPoint>> InetConnector::connectedEndPoints() {
+  std::list<RefPtr<EndPoint>> result;
   std::lock_guard<std::mutex> _lk(mutex_);
-  for (InetEndPoint* ep : connectedEndPoints_) {
-    result.push_back(ep);
+  for (const RefPtr<InetEndPoint>& ep : connectedEndPoints_) {
+    result.push_back(ep.as<EndPoint>());
   }
   return result;
 }
@@ -434,8 +434,10 @@ void InetConnector::onEndPointClosed(InetEndPoint* endpoint) {
 
   std::lock_guard<std::mutex> _lk(mutex_);
 
-  auto i = std::find(connectedEndPoints_.begin(), connectedEndPoints_.end(),
-                     endpoint);
+  auto i = std::find_if(
+      connectedEndPoints_.begin(),
+      connectedEndPoints_.end(),
+      [&](const RefPtr<InetEndPoint>& ep) {return ep.get() == endpoint;});
 
   assert(i != connectedEndPoints_.end());
 
@@ -443,20 +445,7 @@ void InetConnector::onEndPointClosed(InetEndPoint* endpoint) {
     safeCall_(std::bind(&Connection::onClose, endpoint->connection()));
 
     connectedEndPoints_.erase(i);
-
-    if (!endpoint->isBusy()) {
-      // do only actually delete if not currently inside an io handler
-      release(endpoint->connection());
-    }
   }
-}
-
-void InetConnector::release(Connection* inetConnection) {
-  assert(inetConnection != nullptr);
-  assert(dynamic_cast<InetEndPoint*>(inetConnection->endpoint()) != nullptr);
-  assert(!static_cast<InetEndPoint*>(inetConnection->endpoint())->isBusy());
-
-  delete inetConnection;
 }
 
 }  // namespace xzero
