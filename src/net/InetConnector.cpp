@@ -360,17 +360,13 @@ void InetConnector::stop() {
 }
 
 void InetConnector::onConnect() {
-  try {
+  safeCall_([&]() {
     for (size_t i = 0; i < multiAcceptCount_; i++) {
       if (!acceptOne()) {
         break;
       }
     }
-  } catch (const std::exception& e) {
-    // TODO
-  } catch (...) {
-    // TODO
-  }
+  });
 
   if (isStarted()) {
     notifyOnEvent();
