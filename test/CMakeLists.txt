@@ -10,7 +10,7 @@ if(ENABLE_TESTS)
     ByteArrayEndPoint-test.cpp
     Cidr-test.cpp
     DirectExecutor-test.cpp
-    NativeScheduler-test.cpp
+    PosixScheduler-test.cpp
     ThreadPool-test.cpp
     Tokenizer-test.cpp
     # http common

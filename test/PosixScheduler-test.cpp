@@ -5,7 +5,7 @@
 // file except in compliance with the License. You may obtain a copy of
 // the License at: http://opensource.org/licenses/MIT
 
-#include <xzero/executor/NativeScheduler.h>
+#include <xzero/executor/PosixScheduler.h>
 #include <xzero/WallClock.h>
 #include <xzero/DateTime.h>
 #include <gtest/gtest.h>
@@ -13,9 +13,9 @@
 
 using namespace xzero;
 
-TEST(NativeScheduler, executeAfter_without_handle) {
+TEST(PosixScheduler, executeAfter_without_handle) {
   WallClock* clock = WallClock::system();
-  NativeScheduler scheduler;
+  PosixScheduler scheduler;
   DateTime firedAt, start;
   int fireCount = 0;
 
@@ -34,9 +34,9 @@ TEST(NativeScheduler, executeAfter_without_handle) {
   ASSERT_NEAR(0.5, diff, 0.05);
 }
 
-TEST(NativeScheduler, cancel_beforeRun) {
+TEST(PosixScheduler, cancel_beforeRun) {
   WallClock* clock = WallClock::system();
-  NativeScheduler scheduler;
+  PosixScheduler scheduler;
   int fireCount = 0;
 
   auto handle = scheduler.executeAfter(TimeSpan::fromSeconds(1), [&](){
@@ -48,9 +48,9 @@ TEST(NativeScheduler, cancel_beforeRun) {
   ASSERT_EQ(0, scheduler.timerCount());
 }
 
-TEST(NativeScheduler, cancel_beforeRun2) {
+TEST(PosixScheduler, cancel_beforeRun2) {
   WallClock* clock = WallClock::system();
-  NativeScheduler scheduler;
+  PosixScheduler scheduler;
   int fire1Count = 0;
   int fire2Count = 0;
 

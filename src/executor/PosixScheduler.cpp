@@ -1,4 +1,4 @@
-#include <xzero/executor/NativeScheduler.h>
+#include <xzero/executor/PosixScheduler.h>
 #include <xzero/RuntimeError.h>
 #include <xzero/WallClock.h>
 #include <xzero/sysconfig.h>
@@ -15,18 +15,7 @@ namespace xzero {
 #define PIPE_READ_END  0
 #define PIPE_WRITE_END 1
 
-/**
- * XXX
- * - registering a key should be *ONESHOT* and *Edge Triggered*
- * - rename NativeScheduler to SimpleScheduler
- *
- * XXX LinuxScheduler
- * - epoll fuer i/o notification
- * - eventfd for wakeup implementation
- * - timerfd_* for timer impl
- */
-
-NativeScheduler::NativeScheduler(
+PosixScheduler::PosixScheduler(
     std::function<void(const std::exception&)> errorLogger,
     WallClock* clock,
     std::function<void()> preInvoke,
@@ -44,22 +33,22 @@ NativeScheduler::NativeScheduler(
   fcntl(wakeupPipe_[1], F_SETFL, O_NONBLOCK);
 }
 
-NativeScheduler::NativeScheduler(
+PosixScheduler::PosixScheduler(
     std::function<void(const std::exception&)> errorLogger,
     WallClock* clock)
-    : NativeScheduler(errorLogger, clock, nullptr, nullptr) {
+    : PosixScheduler(errorLogger, clock, nullptr, nullptr) {
 }
 
-NativeScheduler::NativeScheduler()
-    : NativeScheduler(nullptr, nullptr, nullptr, nullptr) {
+PosixScheduler::PosixScheduler()
+    : PosixScheduler(nullptr, nullptr, nullptr, nullptr) {
 }
 
-NativeScheduler::~NativeScheduler() {
+PosixScheduler::~PosixScheduler() {
   ::close(wakeupPipe_[PIPE_READ_END]);
   ::close(wakeupPipe_[PIPE_WRITE_END]);
 }
 
-void NativeScheduler::execute(Task task) {
+void PosixScheduler::execute(Task task) {
   {
     std::lock_guard<std::mutex> lk(lock_);
     tasks_.push_back(task);
@@ -67,11 +56,11 @@ void NativeScheduler::execute(Task task) {
   breakLoop();
 }
 
-std::string NativeScheduler::toString() const {
-  return "NativeScheduler";
+std::string PosixScheduler::toString() const {
+  return "PosixScheduler";
 }
 
-Scheduler::HandleRef NativeScheduler::executeAfter(TimeSpan delay, Task task) {
+Scheduler::HandleRef PosixScheduler::executeAfter(TimeSpan delay, Task task) {
   auto onCancel = [this](Handle* handle) {
     removeFromTimersList(handle);
   };
@@ -80,16 +69,16 @@ Scheduler::HandleRef NativeScheduler::executeAfter(TimeSpan delay, Task task) {
                               std::make_shared<Handle>(task, onCancel));
 }
 
-Scheduler::HandleRef NativeScheduler::executeAt(DateTime when, Task task) {
+Scheduler::HandleRef PosixScheduler::executeAt(DateTime when, Task task) {
   return insertIntoTimersList(
       when,
       std::make_shared<Handle>(task,
-                               std::bind(&NativeScheduler::removeFromTimersList,
+                               std::bind(&PosixScheduler::removeFromTimersList,
                                          this,
                                          std::placeholders::_1)));
 }
 
-Scheduler::HandleRef NativeScheduler::insertIntoTimersList(DateTime dt,
+Scheduler::HandleRef PosixScheduler::insertIntoTimersList(DateTime dt,
                                                            HandleRef handle) {
   Timer t = { dt, handle };
 
@@ -111,7 +100,7 @@ Scheduler::HandleRef NativeScheduler::insertIntoTimersList(DateTime dt,
   return handle;
 }
 
-void NativeScheduler::removeFromTimersList(Handle* handle) {
+void PosixScheduler::removeFromTimersList(Handle* handle) {
   std::lock_guard<std::mutex> lk(lock_);
 
   for (auto i = timers_.begin(), e = timers_.end(); i != e; ++i) {
@@ -122,7 +111,7 @@ void NativeScheduler::removeFromTimersList(Handle* handle) {
   }
 }
 
-void NativeScheduler::collectTimeouts(std::vector<HandleRef>* result) {
+void PosixScheduler::collectTimeouts(std::vector<HandleRef>* result) {
   const DateTime now = clock_->get();
 
   for (;;) {
@@ -161,11 +150,11 @@ inline Scheduler::HandleRef registerInterest(
   return handle;
 }
 
-Scheduler::HandleRef NativeScheduler::executeOnReadable(int fd, Task task) {
+Scheduler::HandleRef PosixScheduler::executeOnReadable(int fd, Task task) {
   return registerInterest(&lock_, &readers_, fd, task);
 }
 
-Scheduler::HandleRef NativeScheduler::executeOnWritable(int fd, Task task) {
+Scheduler::HandleRef PosixScheduler::executeOnWritable(int fd, Task task) {
   return registerInterest(&lock_, &writers_, fd, task);
 }
 
@@ -187,27 +176,27 @@ inline void collectActiveHandles(
   }
 }
 
-size_t NativeScheduler::timerCount() {
+size_t PosixScheduler::timerCount() {
   std::lock_guard<std::mutex> lk(lock_);
   return timers_.size();
 }
 
-size_t NativeScheduler::readerCount() {
+size_t PosixScheduler::readerCount() {
   std::lock_guard<std::mutex> lk(lock_);
   return readers_.size();
 }
 
-size_t NativeScheduler::writerCount() {
+size_t PosixScheduler::writerCount() {
   std::lock_guard<std::mutex> lk(lock_);
   return writers_.size();
 }
 
-size_t NativeScheduler::taskCount() {
+size_t PosixScheduler::taskCount() {
   std::lock_guard<std::mutex> lk(lock_);
   return tasks_.size();
 }
 
-void NativeScheduler::runLoop() {
+void PosixScheduler::runLoop() {
   for (;;) {
     lock_.lock();
     bool cont = !tasks_.empty()
@@ -223,7 +212,7 @@ void NativeScheduler::runLoop() {
   }
 }
 
-void NativeScheduler::runLoopOnce() {
+void PosixScheduler::runLoopOnce() {
   fd_set input, output, error;
   FD_ZERO(&input);
   FD_ZERO(&output);
@@ -295,7 +284,7 @@ void NativeScheduler::runLoopOnce() {
   safeCall(onPostInvokePending_);
 }
 
-void NativeScheduler::breakLoop() {
+void PosixScheduler::breakLoop() {
   int dummy = 42;
   ::write(wakeupPipe_[PIPE_WRITE_END], &dummy, sizeof(dummy));
 }

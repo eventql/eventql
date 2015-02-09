@@ -18,7 +18,7 @@ set(libxzero_SRC
   executor/SafeCall.cpp
   executor/Executor.cpp
   executor/DirectExecutor.cpp
-  executor/NativeScheduler.cpp
+  executor/PosixScheduler.cpp
   executor/Scheduler.cpp
   executor/ThreadedExecutor.cpp
   executor/ThreadPool.cpp
