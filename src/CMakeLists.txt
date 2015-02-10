@@ -38,6 +38,8 @@ set(libxzero_SRC
   net/InetEndPoint.cpp
   net/LocalConnector.cpp
   net/Server.cpp
+  net/SslConnector.cpp
+  net/SslEndPoint.cpp
 
   # http common
   http/HeaderField.cpp
