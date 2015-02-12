@@ -360,11 +360,18 @@ void InetConnector::stop() {
 }
 
 void InetConnector::onConnect() {
-  safeCall_([&]() {
+  safeCall_([this]() {
     for (size_t i = 0; i < multiAcceptCount_; i++) {
-      if (!acceptOne()) {
+      int cfd = acceptOne();
+      if (cfd < 0)
         break;
+
+      RefPtr<EndPoint> endpoint = createEndPoint(cfd);
+      {
+        std::lock_guard<std::mutex> _lk(mutex_);
+        connectedEndPoints_.push_back(endpoint);
       }
+      createConnection(endpoint);
     }
   });
 
@@ -373,7 +380,7 @@ void InetConnector::onConnect() {
   }
 }
 
-bool InetConnector::acceptOne() {
+int InetConnector::acceptOne() {
 #if defined(HAVE_ACCEPT4) && defined(ENABLE_ACCEPT4)
   bool flagged = true;
   int cfd = ::accept4(socket_, nullptr, 0, typeMask_);
@@ -393,7 +400,7 @@ bool InetConnector::acceptOne() {
 #if EAGAIN != EWOULDBLOCK
       case EWOULDBLOCK:
 #endif
-        return true;
+        return -1;
       default:
         throw std::system_error(errno, std::system_category());
     }
@@ -405,39 +412,38 @@ bool InetConnector::acceptOne() {
     throw std::system_error(errno, std::system_category());
   }
 
-  RefPtr<InetEndPoint> endpoint(new InetEndPoint(cfd, this, scheduler_));
-  {
-    std::lock_guard<std::mutex> _lk(mutex_);
-    connectedEndPoints_.push_back(endpoint);
-  }
+  return cfd;
+}
 
+RefPtr<EndPoint> InetConnector::createEndPoint(int cfd) {
+  RefPtr<EndPoint> endpoint(new InetEndPoint(cfd, this, scheduler_));
+  return endpoint;
+}
+
+void InetConnector::createConnection(const RefPtr<EndPoint>& endpoint) {
   Connection* connection =
       defaultConnectionFactory()->create(this, endpoint.get());
 
   safeCall_(std::bind(&Connection::onOpen, connection));
-
-  return true;
 }
 
 std::list<RefPtr<EndPoint>> InetConnector::connectedEndPoints() {
   std::list<RefPtr<EndPoint>> result;
   std::lock_guard<std::mutex> _lk(mutex_);
-  for (const RefPtr<InetEndPoint>& ep : connectedEndPoints_) {
-    result.push_back(ep.as<EndPoint>());
+  for (const RefPtr<EndPoint>& ep : connectedEndPoints_) {
+    result.push_back(ep);
   }
   return result;
 }
 
-void InetConnector::onEndPointClosed(InetEndPoint* endpoint) {
+void InetConnector::onEndPointClosed(EndPoint* endpoint) {
   assert(endpoint != nullptr);
   assert(endpoint->connection() != nullptr);
 
   std::lock_guard<std::mutex> _lk(mutex_);
 
-  auto i = std::find_if(
-      connectedEndPoints_.begin(),
-      connectedEndPoints_.end(),
-      [&](const RefPtr<InetEndPoint>& ep) {return ep.get() == endpoint;});
+  auto i = std::find(connectedEndPoints_.begin(), connectedEndPoints_.end(),
+                     endpoint);
 
   assert(i != connectedEndPoints_.end());
 

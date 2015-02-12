@@ -79,7 +79,7 @@ set(libxzero_SRC
 )
 
 add_library(xzero SHARED ${libxzero_SRC})
-target_link_libraries(xzero pthread dl ${ZLIB_LIBRARIES})
+target_link_libraries(xzero pthread dl ${ZLIB_LIBRARIES} ${SSL_LIBRARIES})
 set_target_properties(xzero PROPERTIES VERSION ${LIBXZERO_VERSION})
 set_target_properties(xzero PROPERTIES COMPILE_FLAGS "-fvisibility=hidden -fvisibility-inlines-hidden -DBUILD_XZERO=1")
 #set_target_properties(xzero PROPERTIES LINK_FLAGS "${BASE_LDFLAGS}")
