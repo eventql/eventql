@@ -23,10 +23,10 @@
 namespace xzero {
 
 HttpOutputCompressor::HttpOutputCompressor()
-    : contentTypes_(),              // no types
+    : minSize_(256),                // 256 byte
+      maxSize_(128 * 1024 * 1024),  // 128 MB
       level_(9),                    // best compression
-      minSize_(256),                // 256 byte
-      maxSize_(128 * 1024 * 1024) { // 128 MB
+      contentTypes_() {             // no types
   addMimeType("text/plain");
   addMimeType("text/html");
   addMimeType("text/css");

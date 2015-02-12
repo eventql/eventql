@@ -35,7 +35,6 @@ TEST(PosixScheduler, executeAfter_without_handle) {
 }
 
 TEST(PosixScheduler, cancel_beforeRun) {
-  WallClock* clock = WallClock::system();
   PosixScheduler scheduler;
   int fireCount = 0;
 
@@ -49,7 +48,6 @@ TEST(PosixScheduler, cancel_beforeRun) {
 }
 
 TEST(PosixScheduler, cancel_beforeRun2) {
-  WallClock* clock = WallClock::system();
   PosixScheduler scheduler;
   int fire1Count = 0;
   int fire2Count = 0;
