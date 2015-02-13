@@ -371,7 +371,11 @@ void InetConnector::onConnect() {
         std::lock_guard<std::mutex> _lk(mutex_);
         connectedEndPoints_.push_back(endpoint);
       }
-      createConnection(endpoint);
+
+      Connection* connection =
+          defaultConnectionFactory()->create(this, endpoint.get());
+
+      onEndPointCreated(endpoint);
     }
   });
 
@@ -420,11 +424,8 @@ RefPtr<EndPoint> InetConnector::createEndPoint(int cfd) {
   return endpoint;
 }
 
-void InetConnector::createConnection(const RefPtr<EndPoint>& endpoint) {
-  Connection* connection =
-      defaultConnectionFactory()->create(this, endpoint.get());
-
-  safeCall_(std::bind(&Connection::onOpen, connection));
+void InetConnector::onEndPointCreated(const RefPtr<EndPoint>& endpoint) {
+  safeCall_(std::bind(&Connection::onOpen, endpoint->connection()));
 }
 
 std::list<RefPtr<EndPoint>> InetConnector::connectedEndPoints() {

@@ -10,16 +10,35 @@
 #include <xzero/executor/Scheduler.h>
 #include <xzero/RuntimeError.h>
 #include <openssl/ssl.h>
+#include <openssl/bio.h>
+#include <unistd.h>
 
 namespace xzero {
+
+/* XXX brain dump XXX
+ *
+ * - wantFlush/flush/wantFill/fill has nothing to do with the actual
+ *   SSL write/read operations; they do just fill buffers and
+ *   trigger lower layer SSL I/O operations
+ *
+ * - when lower layer SSL I/O completes it checks if an wantFlush/wantFill
+ *   was issued and will then callback connection->onFlushable | onFillable.
+ *
+ * - SSL_write/SSL_read must either write everything or nothing at all.
+ *   The underlying BIO must manage partial writes transparently.
+ *
+ */
 
 SslEndPoint::SslEndPoint(
     int socket, SslConnector* connector, Scheduler* scheduler)
     : handle_(socket),
       connector_(connector),
       scheduler_(scheduler),
-      idleTimeout_(connector->clock(), scheduler),
       ssl_(),
+      writeBio_(),
+      readBio_(),
+      io_(),
+      idleTimeout_(connector->clock(), scheduler),
       readBuffer_(),
       writeBuffer_() {
 }
@@ -67,7 +86,8 @@ size_t SslEndPoint::flush(const BufferRef& source) {
       case SSL_ERROR_WANT_READ:
       case SSL_ERROR_WANT_WRITE:
         // write pending
-        return 0;
+        errno = EAGAIN;
+        return -1;
       default:
         throw RUNTIME_ERROR("SSL write error");
     }
@@ -82,11 +102,13 @@ size_t SslEndPoint::flush(int fd, off_t offset, size_t size) {
 }
 
 void SslEndPoint::wantFill() {
-  if (!readBuffer_.empty())
+  if (!readBuffer_.empty()) {
     connection()->onFillable();
-  else
-    scheduler_->executeOnReadable(handle(),
-                                  std::bind(&SslEndPoint::fillable, this));
+  } else {
+    io_ = scheduler_->executeOnReadable(
+        handle(),
+        std::bind(&SslEndPoint::fillable, this));
+  }
 }
 
 void SslEndPoint::fillable() {
@@ -104,11 +126,13 @@ void SslEndPoint::fillable() {
 
 
 void SslEndPoint::wantFlush() {
-  if (!writeBuffer_.empty())
+  if (!writeBuffer_.empty()) {
     connection()->onFlushable();
-  else
-    scheduler_->executeOnWritable(handle(),
-                                  std::bind(&SslEndPoint::onWrite, this));
+  } else {
+    io_ = scheduler_->executeOnWritable(
+        handle(),
+        std::bind(&SslEndPoint::onWrite, this));
+  }
 }
 
 TimeSpan SslEndPoint::idleTimeout() {
@@ -156,8 +180,8 @@ void SslEndPoint::onHandshake() {
         throw RUNTIME_ERROR("SSL handshake error");
     }
   } else {
-    // TODO notify connection layer that we're ready to rumble
-    // connection()->onOpen();
+    // notify connection layer that we're ready to rumble
+    connection()->onOpen();
   }
 }
 

@@ -267,8 +267,11 @@ void InetEndPoint::wantFill() {
   // TODO: abstract away the logic of TCP_DEFER_ACCEPT
 
   //idleTimeout_.activate();
-  scheduler_->executeOnReadable(handle(),
-                                std::bind(&InetEndPoint::fillable, this));
+  if (!io_) {
+    io_ = scheduler_->executeOnReadable(
+        handle(),
+        std::bind(&InetEndPoint::fillable, this));
+  }
 }
 
 void InetEndPoint::fillable() {

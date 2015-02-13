@@ -6,6 +6,7 @@
 // the License at: http://opensource.org/licenses/MIT
 
 #include <xzero/net/SslConnector.h>
+#include <xzero/net/Connection.h>
 #include <xzero/sysconfig.h>
 #include <xzero/RuntimeError.h>
 #include <openssl/bio.h>
@@ -82,6 +83,10 @@ void SslConnector::stop() {
 
 std::list<RefPtr<EndPoint>> SslConnector::connectedEndPoints() {
   return InetConnector::connectedEndPoints();
+}
+
+void SslConnector::onEndPointCreated(const RefPtr<EndPoint>& endpoint) {
+  endpoint.weak_as<SslEndPoint>()->onHandshake();
 }
 
 } // namespace xzero
