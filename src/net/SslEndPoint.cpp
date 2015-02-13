@@ -15,6 +15,11 @@
 
 namespace xzero {
 
+#define TRACE(msg...) { \
+  fprintf(stderr, "SslEndPoint: " msg); \
+  fprintf(stderr, "\n"); \
+}
+
 /* XXX brain dump XXX
  *
  * - wantFlush/flush/wantFill/fill has nothing to do with the actual
@@ -41,9 +46,11 @@ SslEndPoint::SslEndPoint(
       idleTimeout_(connector->clock(), scheduler),
       readBuffer_(),
       writeBuffer_() {
+  TRACE("%p SslEndPoint() ctor", this);
 }
 
 SslEndPoint::~SslEndPoint() {
+  TRACE("%p ~SslEndPoint() dtor", this);
   if (handle_ >= 0)
     ::close(handle_);
 }
@@ -54,6 +61,7 @@ bool SslEndPoint::isOpen() const {
 
 void SslEndPoint::close() {
   int rv = SSL_shutdown(ssl_);
+  TRACE("%p close() (SSL_shutdown() -> %d", this, rv);
   switch (rv) {
     case -1:
       // fatal
@@ -68,14 +76,23 @@ void SslEndPoint::close() {
 }
 
 size_t SslEndPoint::fill(Buffer* sink) {
-  // TODO: fill readBuffer_
-  return 0;
+  TRACE("%p fill(Buffer)", this);
+
+  if (readBuffer_.empty()) {
+    return 0;
+  }
+
+  size_t n = readBuffer_.size();
+  sink->push_back(readBuffer_);
+  readBuffer_.clear();
+
+  return n;
 }
 
 size_t SslEndPoint::flush(const BufferRef& source) {
+  TRACE("%p flush(BufferRef)", this);
+
   if (!writeBuffer_.empty()) {
-    // queue up
-    writeBuffer_.push_back(source);
     return 0;
   }
 

@@ -305,6 +305,9 @@ void HttpConnection::onFlushable() {
       auto callback = std::move(onComplete_);
       callback(true);
     }
+  } else {
+    // continue flushing as we still have data pending
+    wantFlush();
   }
 }
 
