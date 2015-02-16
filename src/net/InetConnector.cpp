@@ -420,8 +420,7 @@ int InetConnector::acceptOne() {
 }
 
 RefPtr<EndPoint> InetConnector::createEndPoint(int cfd) {
-  RefPtr<EndPoint> endpoint(new InetEndPoint(cfd, this, scheduler_));
-  return endpoint;
+  return make_ref<InetEndPoint>(cfd, this, scheduler_).as<EndPoint>();
 }
 
 void InetConnector::onEndPointCreated(const RefPtr<EndPoint>& endpoint) {
