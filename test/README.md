@@ -7,6 +7,7 @@
 - [x] Buffer
 - [ ] DateTime
 - [x] IdleTimeout
+- [x] RefPtr
 - [ ] TimeSpan
 - [ ] Tokenizer
 - [ ] executor/DirectLoopExecutor
@@ -22,6 +23,8 @@
 - [ ] net/IPAddress
 - [ ] net/LocalConnector
 - [ ] net/Server
+- [ ] net/SslConnector
+- [ ] net/SslEndPoint
 
 ### HTTP/1 (rfc7230)
 
