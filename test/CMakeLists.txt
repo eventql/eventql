@@ -11,6 +11,7 @@ if(ENABLE_TESTS)
     Cidr-test.cpp
     DirectExecutor-test.cpp
     PosixScheduler-test.cpp
+    RefPtr-test.cpp
     ThreadPool-test.cpp
     Tokenizer-test.cpp
     # http common
