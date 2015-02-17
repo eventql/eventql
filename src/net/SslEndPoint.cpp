@@ -4,7 +4,9 @@
 // Licensed under the MIT License (the "License"); you may not use this
 // file except in compliance with the License. You may obtain a copy of
 // the License at: http://opensource.org/licenses/MIT
+
 #include <xzero/net/SslEndPoint.h>
+#include <xzero/net/SslContext.h>
 #include <xzero/net/SslConnector.h>
 #include <xzero/net/Connection.h>
 #include <xzero/executor/Scheduler.h>
@@ -47,7 +49,7 @@ SslEndPoint::SslEndPoint(
   idleTimeout_.setCallback(std::bind(&SslEndPoint::onTimeout, this));
   idleTimeout_.setTimeout(connector->idleTimeout());
 
-  ssl_ = SSL_new(connector->defaultContext());
+  ssl_ = SSL_new(connector->defaultContext()->get());
   SSL_set_fd(ssl_, socket);
 
 #if !defined(NDEBUG)
@@ -142,7 +144,7 @@ size_t SslEndPoint::fill(Buffer* sink) {
     default:
       TRACE("%p fill(Buffer:%d): SSL_read() -> %d",
           this, space, SSL_get_error(ssl_, rv));
-      throw RUNTIME_ERROR("SSL write error. " + sslErrorString());
+      throw RUNTIME_ERROR("SSL read error. " + sslErrorString());
   }
   errno = EAGAIN;
   return 0;
@@ -338,6 +340,7 @@ void SslEndPoint::onHandshake() {
     TRACE("%p onHandshake (complete)", this);
     bioDesire_ = Desire::None;
     RefPtr<EndPoint> _guard(this);
+    TRACE("%p NEXTPROTO: \"%s\"", this, nextProtocolNegotiated().str().c_str());
     connection()->onOpen();
   }
 }
@@ -365,6 +368,15 @@ void SslEndPoint::onTimeout() {
       this->abort();
     }
   }
+}
+
+BufferRef SslEndPoint::nextProtocolNegotiated() const {
+  const unsigned char* data;
+  unsigned int len;
+
+  SSL_get0_next_proto_negotiated(ssl_, &data, &len);
+
+  return BufferRef((const char*) data, len);
 }
 
 #if !defined(NDEBUG)

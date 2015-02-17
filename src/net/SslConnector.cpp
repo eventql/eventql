@@ -6,12 +6,12 @@
 // the License at: http://opensource.org/licenses/MIT
 
 #include <xzero/net/SslConnector.h>
+#include <xzero/net/SslContext.h>
 #include <xzero/net/Connection.h>
 #include <xzero/sysconfig.h>
 #include <xzero/RuntimeError.h>
-#include <openssl/bio.h>
-#include <openssl/err.h>
-#include <openssl/tls1.h>
+#include <openssl/ssl.h>
+#include <algorithm>
 
 namespace xzero {
 
@@ -25,22 +25,6 @@ namespace xzero {
 #define TRACE(msg...) do {} while (0)
 #endif
 
-#define THROW_SSL_ERROR() { \
-  char buf[256]; \
-  ERR_error_string_n(ERR_get_error(), buf, sizeof(buf)); \
-  throw RUNTIME_ERROR(buf); \
-}
-
-static inline void initializeSslLibrary() {
-  static int initCounter = 0;
-  if (initCounter == 0) {
-    initCounter++;
-    SSL_library_init();
-    SSL_load_error_strings();
-    OpenSSL_add_all_algorithms();
-  }
-}
-
 SslConnector::SslConnector(const std::string& name, Executor* executor,
                            Scheduler* scheduler, WallClock* clock,
                            TimeSpan idleTimeout,
@@ -53,55 +37,42 @@ SslConnector::SslConnector(const std::string& name, Executor* executor,
 }
 
 SslConnector::~SslConnector() {
-  for (SSL_CTX* ctx: contexts_)
-    SSL_CTX_free(ctx);
 }
 
 void SslConnector::addContext(const std::string& crtFilePath,
                               const std::string& keyFilePath) {
-  initializeSslLibrary();
-
-  SSL_CTX* ctx = SSL_CTX_new(TLSv1_2_server_method());
-  if (ctx == NULL)
-    THROW_SSL_ERROR();
-
-  try {
-    if (SSL_CTX_use_certificate_file(ctx, crtFilePath.c_str(), SSL_FILETYPE_PEM) <= 0)
-      THROW_SSL_ERROR();
-
-    if (SSL_CTX_use_PrivateKey_file(ctx, keyFilePath.c_str(), SSL_FILETYPE_PEM) <= 0)
-      THROW_SSL_ERROR();
-
-    if (!SSL_CTX_check_private_key(ctx))
-      throw RUNTIME_ERROR("Private key does not match the public certificate");
-
-    // TODO: read CommonName & Alternative-Name (dnsname) fields
-
-    SSL_CTX_set_tlsext_servername_callback(ctx, &SslConnector::tls1_servername_cb);
-    SSL_CTX_set_tlsext_servername_arg(ctx, this);
-
-    contexts_.push_back(ctx);
-  } catch (...) {
-    SSL_CTX_free(ctx);
-    throw;
-  }
+  contexts_.emplace_back(new SslContext(this, crtFilePath, keyFilePath));
 }
 
-int SslConnector::tls1_servername_cb(
+SslContext* SslConnector::selectContext(const char* servername) const {
+  TRACE("%p selectContext: servername = '%s'", this, servername);
+  if (!servername)
+    return nullptr;
+
+  for (const auto& ctx: contexts_)
+    if (ctx->isValidDnsName(servername))
+      return ctx.get();
+
+  return nullptr;
+}
+
+int SslConnector::selectContext(
     SSL* ssl, int* ad, SslConnector* self) {
   const char * servername = SSL_get_servername(ssl, TLSEXT_NAMETYPE_host_name);
-  TRACE("%p tls1_servername_cb: servername = '%s'", self, servername);
+  TRACE("%p selectContext: servername = '%s'", self, servername);
 
   if (!servername)
     return SSL_TLSEXT_ERR_NOACK;
 
-  // TODO search for associated CTX by hostname
-  SSL_CTX* newctx = self->defaultContext();
-
-  if (newctx != SSL_get_SSL_CTX(ssl)) {
-    SSL_set_SSL_CTX(ssl, self->contexts_.front());
+  for (const auto& ctx: self->contexts_) {
+    if (ctx->isValidDnsName(servername)) {
+      TRACE("selecting context %p\n", ctx->get());
+      SSL_set_SSL_CTX(ssl, ctx->get());
+      return SSL_TLSEXT_ERR_OK;
+    }
   }
 
+  TRACE("using default context %p", SSL_get_SSL_CTX(ssl));
   return SSL_TLSEXT_ERR_OK;
 }
 

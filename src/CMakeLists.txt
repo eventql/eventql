@@ -39,6 +39,7 @@ set(libxzero_SRC
   net/LocalConnector.cpp
   net/Server.cpp
   net/SslConnector.cpp
+  net/SslContext.cpp
   net/SslEndPoint.cpp
 
   # http common
