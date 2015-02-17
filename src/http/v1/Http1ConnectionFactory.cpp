@@ -18,7 +18,7 @@ Http1ConnectionFactory::Http1ConnectionFactory(
     size_t maxRequestBodyLength,
     size_t maxRequestCount,
     TimeSpan maxKeepAlive)
-    : HttpConnectionFactory("http", clock, maxRequestUriLength,
+    : HttpConnectionFactory("http/1.1", clock, maxRequestUriLength,
                             maxRequestBodyLength),
       maxRequestCount_(maxRequestCount),
       maxKeepAlive_(maxKeepAlive) {

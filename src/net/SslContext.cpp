@@ -111,6 +111,7 @@ SslContext::SslContext(SslConnector* connector,
   connector_ = connector;
 
   initializeSslLibrary();
+
   ctx_ = SSL_CTX_new(TLSv1_2_server_method());
   if (!ctx_)
     THROW_SSL_ERROR();
@@ -127,16 +128,54 @@ SslContext::SslContext(SslConnector* connector,
   SSL_CTX_set_tlsext_servername_callback(ctx_, &SslContext::onServerName);
   SSL_CTX_set_tlsext_servername_arg(ctx_, this);
 
+#ifdef TLSEXT_TYPE_application_layer_protocol_negotiation
+  SSL_CTX_set_alpn_select_cb(ctx_, &SslContext::onAppLayerProtoNegotiation, this);
+#endif
+
+#ifdef TLSEXT_TYPE_next_proto_neg
   SSL_CTX_set_next_protos_advertised_cb(ctx_, &SslContext::onNextProtosAdvertised, this);
+#endif
 
   dnsNames_ = collectDnsNames(ctx_);
-  printf("loaded dnsNames (%zu):\n", dnsNames_.size());
-  for (const auto& name: dnsNames_)
-    printf("  %s\n", name.c_str());
+}
+
+SslContext::~SslContext() {
+  TRACE("%p ~SslContext()", this);
+  SSL_CTX_free(ctx_);
 }
 
 #define NPN_HTTP_1_1 "\x08http/1.1"
 #define NPN_BLAH_1_0 "\x08" "blah/1.0"
+
+int SslContext::onAppLayerProtoNegotiation(SSL* ssl,
+    const unsigned char **out, unsigned char *outlen,
+    const unsigned char *in, unsigned int inlen, void *pself) {
+#ifdef TLSEXT_TYPE_application_layer_protocol_negotiation
+  TRACE("SSL ALPN callback");
+
+  for (int i = 0; i < inlen; i += in[i] + 1) {
+    std::string proto((char*)&in[i + 1], in[i]);
+    printf("SSL ALPN client support [%d]: (%d) %s\n", i, in[i], proto.c_str());
+  }
+
+  const unsigned char* srv = (const unsigned char*) NPN_HTTP_1_1;
+  unsigned int srvlen = sizeof(NPN_HTTP_1_1) - 1;
+
+  int rv = SSL_select_next_proto(
+      (unsigned char**) out, outlen,
+      srv, srvlen,
+      in, inlen);
+
+  if (rv != OPENSSL_NPN_NEGOTIATED)
+    return SSL_TLSEXT_ERR_NOACK;
+
+  TRACE("SSL ALPN selected: \"%*s\"", *outlen, *out);
+
+  return SSL_TLSEXT_ERR_OK;
+#else
+  return SSL_TLSEXT_ERR_NOACK;
+#endif
+}
 
 /**
  * NPN-callback invoked to inform the client what next-protocols the
@@ -144,17 +183,16 @@ SslContext::SslContext(SslConnector* connector,
  */
 int SslContext::onNextProtosAdvertised(SSL* ssl,
     const unsigned char** out, unsigned int* outlen, void* pself) {
-  TRACE("%p onNextProtosAdvertised", pself);
+#ifdef TLSEXT_TYPE_next_proto_neg
+  TRACE("%p NPN callback", pself);
 
   *out = (const unsigned char*) NPN_BLAH_1_0 NPN_HTTP_1_1;
   *outlen = sizeof(NPN_BLAH_1_0 NPN_HTTP_1_1) - 1;
 
   return SSL_TLSEXT_ERR_OK;
-}
-
-SslContext::~SslContext() {
-  TRACE("%p ~SslContext()", this);
-  SSL_CTX_free(ctx_);
+#else
+  return SSL_TLSEXT_ERR_NOACK;
+#endif
 }
 
 int SslContext::onServerName(SSL* ssl, int* ad, SslContext* self) {

@@ -9,6 +9,7 @@
 #include <xzero/net/SslContext.h>
 #include <xzero/net/SslConnector.h>
 #include <xzero/net/Connection.h>
+#include <xzero/net/ConnectionFactory.h>
 #include <xzero/executor/Scheduler.h>
 #include <xzero/RuntimeError.h>
 #include <openssl/ssl.h>
@@ -336,11 +337,21 @@ void SslEndPoint::onHandshake() {
       }
     }
   } else {
-    // notify connection layer that we're ready to rumble
-    TRACE("%p onHandshake (complete)", this);
+    // create associated Connection object and run it
     bioDesire_ = Desire::None;
     RefPtr<EndPoint> _guard(this);
-    TRACE("%p NEXTPROTO: \"%s\"", this, nextProtocolNegotiated().str().c_str());
+    TRACE("%p handshake complete (next protocol: \"%s\")", this, nextProtocolNegotiated().str().c_str());
+
+    std::string protocol = nextProtocolNegotiated().str();
+    auto factory = connector_->connectionFactory(protocol);
+    if (!factory) {
+      TRACE("%p using connection factory: default (\"%s\")", this, factory->protocolName().c_str());
+      factory = connector_->defaultConnectionFactory();
+    } else {
+      TRACE("%p using connection factory: \"%s\"", this, factory->protocolName().c_str());
+    }
+    factory->create(connector_, this);
+
     connection()->onOpen();
   }
 }
@@ -371,12 +382,24 @@ void SslEndPoint::onTimeout() {
 }
 
 BufferRef SslEndPoint::nextProtocolNegotiated() const {
-  const unsigned char* data;
-  unsigned int len;
+  const unsigned char* data = nullptr;
+  unsigned int len = 0;
 
+#ifdef TLSEXT_TYPE_application_layer_protocol_negotiation // ALPN
+  SSL_get0_alpn_selected(ssl_, &data, &len);
+  if (len > 0) {
+    return BufferRef((const char*) data, len);
+  }
+#endif
+
+#ifdef TLSEXT_TYPE_next_proto_neg // NPN
   SSL_get0_next_proto_negotiated(ssl_, &data, &len);
+  if (len > 0) {
+    return BufferRef((const char*) data, len);
+  }
+#endif
 
-  return BufferRef((const char*) data, len);
+  return BufferRef();
 }
 
 #if !defined(NDEBUG)
@@ -403,8 +426,11 @@ static inline std::string tlsext_type_to_string(int type) {
 #if defined(TLSEXT_TYPE_opaque_prf_input)
     case TLSEXT_TYPE_opaque_prf_input: return "opaque PRF input";
 #endif
-#if defined(TLSEXT_TYPE_next_proto_neg)
+#if defined(TLSEXT_TYPE_next_proto_neg) // NPN
     case TLSEXT_TYPE_next_proto_neg: return "next protocol negotiation";
+#endif
+#ifdef TLSEXT_TYPE_application_layer_protocol_negotiation // ALPN
+    case TLSEXT_TYPE_application_layer_protocol_negotiation: return "Application Layer Protocol Negotiation";
 #endif
 #if defined(TLSEXT_TYPE_padding)
     case TLSEXT_TYPE_padding: return "padding";

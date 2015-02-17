@@ -372,9 +372,6 @@ void InetConnector::onConnect() {
         connectedEndPoints_.push_back(endpoint);
       }
 
-      Connection* connection =
-          defaultConnectionFactory()->create(this, endpoint.get());
-
       onEndPointCreated(endpoint);
     }
   });
@@ -424,6 +421,9 @@ RefPtr<EndPoint> InetConnector::createEndPoint(int cfd) {
 }
 
 void InetConnector::onEndPointCreated(const RefPtr<EndPoint>& endpoint) {
+  // create Connection object for given endpoint
+  defaultConnectionFactory()->create(this, endpoint.get());
+
   safeCall_(std::bind(&Connection::onOpen, endpoint->connection()));
 }
 
