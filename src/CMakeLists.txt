@@ -78,6 +78,43 @@ set(libxzero_SRC
 
   # http/2
   #...
+
+  # flow
+  flow/AST.cpp
+  flow/ASTPrinter.cpp
+  flow/FlowCallVisitor.cpp
+  flow/FlowLexer.cpp
+  flow/FlowLocation.cpp
+  flow/FlowParser.cpp
+  flow/FlowToken.cpp
+  flow/FlowType.cpp
+  flow/IRGenerator.cpp
+  flow/TargetCodeGenerator.cpp
+  flow/ir/BasicBlock.cpp
+  flow/ir/Constant.cpp
+  flow/ir/ConstantArray.cpp
+  flow/ir/ConstantValue.cpp
+  flow/ir/Instr.cpp
+  flow/ir/Instructions.cpp
+  flow/ir/InstructionVisitor.cpp
+  flow/ir/IRBuilder.cpp
+  flow/ir/IRHandler.cpp
+  flow/ir/IRProgram.cpp
+  flow/ir/PassManager.cpp
+  flow/ir/Value.cpp
+  flow/transform/EmptyBlockElimination.cpp
+  flow/transform/InstructionElimination.cpp
+  flow/transform/UnusedBlockPass.cpp
+  flow/vm/ConstantPool.cpp
+  flow/vm/Handler.cpp
+  flow/vm/Instruction.cpp
+  flow/vm/Match.cpp
+  flow/vm/MatchClass.cpp
+  flow/vm/NativeCallback.cpp
+  flow/vm/Program.cpp
+  flow/vm/Runner.cpp
+  flow/vm/Runtime.cpp
+  flow/vm/Signature.cpp
 )
 
 add_library(xzero SHARED ${libxzero_SRC})
