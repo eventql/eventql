@@ -26,7 +26,7 @@ option(XZERO_ENABLE_O_TMPFILE "Try to open temporary files with O_TMPFILE flag b
 # Xzero feature flags
 option(ENABLE_ACCEPT4 "Builds with support for accept4() system-call, if found [default: on]" ON)
 option(ENABLE_MULTI_ACCEPT "Builds listener acceptor with support for repeative accept() calls  [default: on]" ON)
-option(ENABLE_PCRE "With PCRE support [default: off]" ON)
+option(ENABLE_PCRE "With PCRE support [default: on]" ON)
 option(ENABLE_INOTIFY "Build with inotify support [default: on]" ON)
 option(ENABLE_TCP_DEFER_ACCEPT "Builds with support for TCP_DEFER_ACCEPT, if found [default: on]" ON)
 
@@ -60,6 +60,11 @@ if(HAVE_BZLIB_H)
   CHECK_LIBRARY_EXISTS(bz2 BZ2_bzCompressInit "" HAVE_LIBBZ2)
   set(BZIP2_LIBRARIES bz2)
 endif(HAVE_BZLIB_H)
+
+# PCRE
+if(ENABLE_PCRE)
+  pkg_check_modules(PCRE REQUIRED libpcre>=7.0)
+endif()
 
 # OpenSSL support
 set(SSL_LIBRARIES ssl)
