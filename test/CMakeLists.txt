@@ -10,6 +10,7 @@ if(ENABLE_TESTS)
     ByteArrayEndPoint-test.cpp
     Cidr-test.cpp
     DirectExecutor-test.cpp
+    Option-test.cpp
     PosixScheduler-test.cpp
     RefPtr-test.cpp
     ThreadPool-test.cpp
