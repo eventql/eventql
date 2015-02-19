@@ -7,15 +7,17 @@
 
 // HTTP semantic tests
 
-#include <xzero/http/mock/MockTransport.h>
-#include <xzero/http/HttpRequestInfo.h>
-#include <xzero/http/HttpResponseInfo.h>
-#include <xzero/http/HttpRequest.h>
-#include <xzero/http/HttpResponse.h>
-#include <xzero/http/HttpOutput.h>
-#include <xzero/http/BadMessage.h>
-#include <xzero/executor/DirectExecutor.h>
-#include <xzero/Buffer.h>
+#include <xzero-http/mock/MockTransport.h>
+#include <xzero-http/HttpRequestInfo.h>
+#include <xzero-http/HttpResponseInfo.h>
+#include <xzero-http/HttpRequest.h>
+#include <xzero-http/HttpResponse.h>
+#include <xzero-http/HttpOutput.h>
+#include <xzero-http/BadMessage.h>
+
+#include <xzero-base/executor/DirectExecutor.h>
+#include <xzero-base/Buffer.h>
+
 #include <gtest/gtest.h>
 
 using namespace xzero;
