@@ -116,6 +116,23 @@ public:
       const std::string& query,
       std::function<bool (const std::vector<std::string>&)> row_callback);
 
+  /**
+   * Execute a mysql query. The mysql query string must not include a terminal
+   * semicolon.
+   *
+   * The provided row callback will be called for every row in the result set.
+   * The row callback must return a boolean value; if it returns true it will
+   * be called again for the next row in the result set (if a next row exists),
+   * if it returns false it will not be called again and the remainder of the
+   * result set will be discarded.
+   *
+   * This method may throw an exception.
+   *
+   * @param query the mysql query string without a terminal semicolon
+   * @param row_callback the callback that should be called for every result row
+   */
+  std::list<std::vector<std::string>> executeQuery(const std::string& query);
+
 protected:
 #ifdef FNORD_ENABLE_MYSQL
    MYSQL* mysql_;
