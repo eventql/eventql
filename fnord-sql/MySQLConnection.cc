@@ -38,6 +38,8 @@ MySQLConnection::MySQLConnection() : mysql_(nullptr) {
   if (mysql_ == nullptr) {
     RAISE(kRuntimeError, "mysql_init() failed\n");
   }
+
+  mysql_options(mysql_, MYSQL_SET_CHARSET_NAME, "utf8");
 #else
   RAISE(kRuntimeError, "libfnord was compiled without libmysqlclient");
 #endif
