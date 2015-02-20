@@ -212,5 +212,52 @@ void MySQLConnection::executeQuery(
 #endif
 }
 
+std::list<std::vector<std::string>> MySQLConnection::executeQuery(
+    const std::string& query) {
+  std::list<std::vector<std::string>> result_rows;
+#ifdef FNORD_ENABLE_MYSQL
+
+#ifndef FNORD_NOTRACE
+    fnord::logTrace("fnord.mysql", "Executing MySQL query: $0", query);
+#endif
+
+  MYSQL_RES* result = nullptr;
+  if (mysql_real_query(mysql_, query.c_str(), query.size()) == 0) {
+    result = mysql_use_result(mysql_);
+  }
+
+  if (result == nullptr) {
+    RAISE(
+        kRuntimeError,
+        "mysql query failed: %s -- error: %s\n",
+        query.c_str(),
+        mysql_error(mysql_));
+  }
+
+
+  MYSQL_ROW row;
+  while ((row = mysql_fetch_row(result))) {
+    auto col_lens = mysql_fetch_lengths(result);
+    if (col_lens == nullptr) {
+      break;
+    }
+
+    std::vector<std::string> row_vec;
+    auto row_len = mysql_num_fields(result);
+    for (int i = 0; i < row_len; ++i) {
+      row_vec.emplace_back(row[i], col_lens[i]);
+    }
+
+    result_rows.emplace_back(std::move(row_vec));
+  }
+
+  mysql_free_result(result);
+#else
+  RAISE(kRuntimeError, "libfnord was compiled without libmysqlclient");
+#endif
+
+  return result_rows;
+}
+
 }
 }
