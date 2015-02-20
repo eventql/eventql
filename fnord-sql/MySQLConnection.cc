@@ -130,7 +130,6 @@ void MySQLConnection::connect(
 #endif
 }
 
-
 std::vector<std::string> MySQLConnection::describeTable(
     const std::string& table_name) {
   std::vector<std::string> columns;
