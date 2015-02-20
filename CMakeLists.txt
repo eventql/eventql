@@ -28,6 +28,7 @@ add_subdirectory(3rdparty/libfnord/fnord-json)
 add_subdirectory(3rdparty/libfnord/fnord-sstable)
 add_subdirectory(3rdparty/libfnord/fnord-chart)
 add_subdirectory(3rdparty/libfnord/fnord-metricdb)
+add_subdirectory(3rdparty/libfnord/fnord-sql)
 include_directories(3rdparty/libfnord/)
 include_directories(3rdparty/libfnord/3rdparty/)
 include_directories(${FNORD_FTS_INCLUDE})
@@ -183,3 +184,16 @@ add_executable(cm-sellerstatslookup
 target_link_libraries(cm-sellerstatslookup
     ${CMAKE_THREAD_LIBS_INIT}
     ${FNORD_FTS_LIBS})
+
+add_executable(cm-dawandaindexpush
+    $<TARGET_OBJECTS:cm-common>
+    $<TARGET_OBJECTS:fnord-base>
+    $<TARGET_OBJECTS:fnord-http>
+    $<TARGET_OBJECTS:fnord-json>
+    $<TARGET_OBJECTS:fnord-rpc>
+    $<TARGET_OBJECTS:fnord-sql>
+    cm-dawandaconnect/cm-dawandaindexpush.cc)
+
+target_link_libraries(cm-dawandaindexpush
+    ${CMAKE_THREAD_LIBS_INIT}
+    ${FNORD_SQL_LIBS})
