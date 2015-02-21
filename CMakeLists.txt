@@ -39,6 +39,7 @@ add_library(cm-common OBJECT
     cm-common/FeaturePack.cc
     cm-common/FeatureSchema.cc
     cm-common/ItemRef.cc
+    cm-common/JoinedQuery.cc
     cm-common/CustomerNamespace.cc
     cm-common/PackedExample.cc)
 
@@ -217,6 +218,7 @@ add_executable(cm-featureselect
     $<TARGET_OBJECTS:cm-common>
     $<TARGET_OBJECTS:fnord-base>
     $<TARGET_OBJECTS:fnord-feeds>
+    $<TARGET_OBJECTS:fnord-mdb>
     $<TARGET_OBJECTS:fnord-http>
     $<TARGET_OBJECTS:fnord-json>
     $<TARGET_OBJECTS:fnord-rpc>
