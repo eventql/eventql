@@ -39,7 +39,8 @@ add_library(cm-common OBJECT
     cm-common/FeaturePack.cc
     cm-common/FeatureSchema.cc
     cm-common/ItemRef.cc
-    cm-common/CustomerNamespace.cc)
+    cm-common/CustomerNamespace.cc
+    cm-common/PackedExample.cc)
 
 add_executable(cm-frontend
     $<TARGET_OBJECTS:cm-common>
