@@ -210,5 +210,18 @@ add_executable(cm-featuredump
     cm-logreg/cm-featuredump.cc
     cm-logreg/FeatureExport.cc)
 
-target_link_libraries(cm-dawandaindexpush
+target_link_libraries(cm-featuredump
+    ${CMAKE_THREAD_LIBS_INIT})
+
+add_executable(cm-featureselect
+    $<TARGET_OBJECTS:cm-common>
+    $<TARGET_OBJECTS:fnord-base>
+    $<TARGET_OBJECTS:fnord-feeds>
+    $<TARGET_OBJECTS:fnord-http>
+    $<TARGET_OBJECTS:fnord-json>
+    $<TARGET_OBJECTS:fnord-rpc>
+    $<TARGET_OBJECTS:fnord-sstable>
+    cm-logreg/cm-featureselect.cc)
+
+target_link_libraries(cm-featureselect
     ${CMAKE_THREAD_LIBS_INIT})
