@@ -23,11 +23,25 @@ RadixTree<T>::~RadixTree() {
 
 template <typename T>
 void RadixTree<T>::insert(const String& key, T value) {
+  art_insert(
+      &tree_,
+      (unsigned char *) key.c_str(),
+      key.length(),
+      (void*) value);
 }
 
 template <typename T>
 Option<T> RadixTree<T>::get(const String& key) const {
-  return None<T>();
+  auto res = art_search(
+      &tree_,
+      (unsigned char *) key.c_str(),
+      key.length());
+
+  if (res == nullptr) {
+    return None<T>();
+  } else {
+    return Some((T) res);
+  }
 }
 
 template <typename T>
