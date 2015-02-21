@@ -24,6 +24,8 @@ else()
   set(CMAKE_CXX_FLAGS "-std=c++0x -pthread ${CMAKE_CXX_FLAGS}")
 endif()
 
+set(CMAKE_C_FLAGS "-std=c11 ${CMAKE_CXX_FLAGS}")
+
 # base
 add_library(fnord-base OBJECT
     ../3rdparty/libart/art.c
