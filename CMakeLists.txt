@@ -197,3 +197,17 @@ add_executable(cm-dawandaindexpush
 target_link_libraries(cm-dawandaindexpush
     ${CMAKE_THREAD_LIBS_INIT}
     ${FNORD_SQL_LIBS})
+
+add_executable(cm-featuredump
+    $<TARGET_OBJECTS:cm-common>
+    $<TARGET_OBJECTS:fnord-base>
+    $<TARGET_OBJECTS:fnord-feeds>
+    $<TARGET_OBJECTS:fnord-http>
+    $<TARGET_OBJECTS:fnord-json>
+    $<TARGET_OBJECTS:fnord-rpc>
+    $<TARGET_OBJECTS:fnord-sstable>
+    cm-logreg/cm-featuredump.cc
+    cm-logreg/FeatureExport.cc)
+
+target_link_libraries(cm-dawandaindexpush
+    ${CMAKE_THREAD_LIBS_INIT})
