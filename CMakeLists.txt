@@ -38,6 +38,7 @@ add_library(cm-common OBJECT
     cm-common/FeatureID.cc
     cm-common/FeaturePack.cc
     cm-common/FeatureSchema.cc
+    cm-common/FeatureIndex.cc
     cm-common/ItemRef.cc
     cm-common/JoinedQuery.cc
     cm-common/CustomerNamespace.cc
@@ -52,7 +53,6 @@ add_executable(cm-frontend
     $<TARGET_OBJECTS:fnord-sstable>
     $<TARGET_OBJECTS:fnord-feeds>
     $<TARGET_OBJECTS:fnord-rpc>
-    cm-common/FeatureIndex.cc
     cm-frontend/CMFrontend.cc
     cm-frontend/cm-frontend.cc
     cm-frontend/LookupServlet.cc
@@ -66,6 +66,7 @@ add_executable(cm-feedserver
     $<TARGET_OBJECTS:cm-common>
     $<TARGET_OBJECTS:fnord-base>
     $<TARGET_OBJECTS:fnord-http>
+    $<TARGET_OBJECTS:fnord-mdb>
     $<TARGET_OBJECTS:fnord-json>
     $<TARGET_OBJECTS:fnord-sstable>
     $<TARGET_OBJECTS:fnord-feeds>
@@ -127,7 +128,6 @@ add_executable(cm-indexbuild
     $<TARGET_OBJECTS:fnord-feeds>
     $<TARGET_OBJECTS:fnord-rpc>
     $<TARGET_OBJECTS:fnord-mdb>
-    cm-common/FeatureIndex.cc
     cm-index/cm-indexbuild.cc
     cm-index/IndexBuilder.cc)
 
@@ -145,7 +145,6 @@ add_executable(cm-indexlookup
     $<TARGET_OBJECTS:fnord-feeds>
     $<TARGET_OBJECTS:fnord-rpc>
     $<TARGET_OBJECTS:fnord-mdb>
-    cm-common/FeatureIndex.cc
     cm-index/cm-indexlookup.cc)
 
 target_link_libraries(cm-indexlookup
@@ -161,7 +160,6 @@ add_executable(cm-sellerstatsbuild
     $<TARGET_OBJECTS:fnord-feeds>
     $<TARGET_OBJECTS:fnord-rpc>
     $<TARGET_OBJECTS:fnord-mdb>
-    cm-common/FeatureIndex.cc
     cm-sellerstats/ActivityLog.cc
     cm-sellerstats/cm-sellerstatsbuild.cc
     cm-sellerstats/SellerStatsBuild.cc)
@@ -178,7 +176,6 @@ add_executable(cm-sellerstatslookup
     $<TARGET_OBJECTS:fnord-feeds>
     $<TARGET_OBJECTS:fnord-rpc>
     $<TARGET_OBJECTS:fnord-mdb>
-    cm-common/FeatureIndex.cc
     cm-sellerstats/ActivityLog.cc
     cm-sellerstats/cm-sellerstatslookup.cc
     cm-sellerstats/SellerStatsLookup.cc)
@@ -193,6 +190,7 @@ add_executable(cm-dawandaindexpush
     $<TARGET_OBJECTS:fnord-http>
     $<TARGET_OBJECTS:fnord-json>
     $<TARGET_OBJECTS:fnord-rpc>
+    $<TARGET_OBJECTS:fnord-mdb>
     $<TARGET_OBJECTS:fnord-sql>
     cm-dawandaconnect/cm-dawandaindexpush.cc)
 
@@ -205,6 +203,7 @@ add_executable(cm-featuredump
     $<TARGET_OBJECTS:fnord-base>
     $<TARGET_OBJECTS:fnord-feeds>
     $<TARGET_OBJECTS:fnord-http>
+    $<TARGET_OBJECTS:fnord-mdb>
     $<TARGET_OBJECTS:fnord-json>
     $<TARGET_OBJECTS:fnord-rpc>
     $<TARGET_OBJECTS:fnord-sstable>
