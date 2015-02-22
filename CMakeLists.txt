@@ -207,8 +207,7 @@ add_executable(cm-featuredump
     $<TARGET_OBJECTS:fnord-json>
     $<TARGET_OBJECTS:fnord-rpc>
     $<TARGET_OBJECTS:fnord-sstable>
-    cm-logreg/cm-featuredump.cc
-    cm-logreg/FeatureExport.cc)
+    cm-logreg/cm-featuredump.cc)
 
 target_link_libraries(cm-featuredump
     ${CMAKE_THREAD_LIBS_INIT})
