@@ -18,6 +18,21 @@ void MDBUtil::increment(
     MDBTransaction* tx,
     const String& key,
     T value /* = 1 */) {
+  auto old = tx->get(key);
+
+  if (old.isEmpty()) {
+    tx->insert(key, (void *) &value, sizeof(T));
+  } else {
+    if (old.get().size() < sizeof(T)) {
+      RAISE(kRuntimeError, "old value is too small");
+    }
+
+    auto old_val = *((T*) (old.get().data()));
+    auto new_val = old_val + value;
+
+    tx->update(key, (void *) &new_val, sizeof(T));
+  }
+
   fnord::iputs("incr $0 => $1", key, value);
 }
 
