@@ -22,17 +22,29 @@ std::string URI::urlDecode(const std::string& str) {
   const char* end = begin + str.size();
 
   while (begin != end) {
-    if (*begin == '%') {
-      char hex[3];
-      if (++begin + 2 > end) {
-        RAISE(kIllegalArgumentError, "invalid URL encoding");
+    switch (*begin) {
+
+      case '%': {
+        char hex[3];
+        if (++begin + 2 > end) {
+          RAISE(kIllegalArgumentError, "invalid URL encoding");
+        }
+        hex[0] = *begin++;
+        hex[1] = *begin++;
+        hex[2] = 0;
+        decoded += static_cast<char>(std::stoul(hex, nullptr, 16));
+        break;
       }
-      hex[0] = *begin++;
-      hex[1] = *begin++;
-      hex[2] = 0;
-      decoded += static_cast<char>(std::stoul(hex, nullptr, 16));
-    } else {
-      decoded += *begin++;
+
+      case '+':
+        decoded += " ";
+        ++begin;
+        break;
+
+      default:
+        decoded += *begin++;
+        break;
+
     }
   }
 
