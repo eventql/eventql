@@ -23,6 +23,11 @@ public:
       const String& key,
       T value = 1);
 
+  template <typename T>
+  static Option<T> getAs(
+      MDBTransaction* tx,
+      const String& key);
+
 };
 
 }

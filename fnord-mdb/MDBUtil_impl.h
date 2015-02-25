@@ -34,6 +34,24 @@ void MDBUtil::increment(
   }
 }
 
+template <typename T>
+Option<T> MDBUtil::getAs(
+    MDBTransaction* tx,
+    const String& key) {
+  auto val = tx->get(key);
+
+  if (val.isEmpty()) {
+    return None<T>();
+  } else {
+    if (val.get().size() < sizeof(T)) {
+      RAISE(kRuntimeError, "old value is too small");
+    }
+
+    return Some(*((T*) (val.get().data())));
+  }
+}
+
+
 
 }
 }
