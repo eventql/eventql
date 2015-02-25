@@ -95,6 +95,20 @@ public:
   static String join(const Vector<String>& list, const String& join);
 
   /**
+   * Converts the provided string to all lowercase
+   *
+   * @param str the str that should be modified
+   */
+  static void toLower(std::string* str);
+
+  /**
+   * Converts the provided string to all uppercase
+   *
+   * @param str the str that should be modified
+   */
+  static void toUpper(std::string* str);
+
+  /**
    * Print the contents of the pointed to memory as a series of hexadecimal
    * bytes (hexdump):
    *

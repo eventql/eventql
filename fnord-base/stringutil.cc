@@ -168,6 +168,22 @@ bool StringUtil::endsWith(const std::string& str, const std::string& suffix) {
       suffix) == 0;
 }
 
+void StringUtil::toLower(std::string* str) {
+  auto& str_ref = *str;
+
+  for (int i = 0; i < str_ref.length(); ++i) {
+    str_ref[i] = std::tolower(str_ref[i]);
+  }
+}
+
+void StringUtil::toUpper(std::string* str) {
+  auto& str_ref = *str;
+
+  for (int i = 0; i < str_ref.length(); ++i) {
+    str_ref[i] = std::toupper(str_ref[i]);
+  }
+}
+
 std::string StringUtil::hexPrint(
     const void* data,
     size_t size,
