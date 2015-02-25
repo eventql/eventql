@@ -32,8 +32,6 @@ void MDBUtil::increment(
 
     tx->update(key, (void *) &new_val, sizeof(T));
   }
-
-  fnord::iputs("incr $0 => $1", key, value);
 }
 
 
