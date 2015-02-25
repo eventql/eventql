@@ -32,6 +32,7 @@ public:
 
   void commit();
   void abort();
+  void autoAbort();
 
   Option<Buffer> get(const Buffer& key);
   Option<Buffer> get(const String& key);
@@ -71,6 +72,7 @@ protected:
   MDB_txn* mdb_txn_;
   MDB_dbi mdb_handle_;
   bool is_commited_;
+  bool abort_on_free_;
 };
 
 }

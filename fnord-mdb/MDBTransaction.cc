@@ -18,11 +18,16 @@ MDBTransaction::MDBTransaction(
     MDB_dbi mdb_handle) :
     mdb_txn_(mdb_txn),
     mdb_handle_(mdb_handle),
-    is_commited_(false) {
+    is_commited_(false),
+    abort_on_free_(false) {
   incRef();
 }
 
-MDBTransaction::~MDBTransaction() {}
+MDBTransaction::~MDBTransaction() {
+  if (!is_commited_ && abort_on_free_) {
+    mdb_txn_abort(mdb_txn_);
+  }
+}
 
 RefPtr<MDBCursor> MDBTransaction::getCursor() {
   MDB_cursor* cursor;
@@ -60,6 +65,11 @@ void MDBTransaction::abort() {
   is_commited_ = true;
   mdb_txn_abort(mdb_txn_);
 
+  decRef();
+}
+
+void MDBTransaction::autoAbort() {
+  abort_on_free_ = true;
   decRef();
 }
 
