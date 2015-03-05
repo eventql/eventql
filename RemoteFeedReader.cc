@@ -163,8 +163,15 @@ void RemoteFeedReader::fillBuffers() {
       for (const auto& e : r.result()) {
         auto entry = e;
 
-        if (time_backfill_fn_) {
-          entry.time = time_backfill_fn_(entry);
+        if (entry.time == 0 && time_backfill_fn_) {
+          try {
+            entry.time = time_backfill_fn_(entry);
+          } catch (const Exception& e) {
+            fnord::logError(
+                "fnord.feeds.remotefeedreader",
+                e,
+                "time backfill function crashed");
+          }
         }
 
         source->read_buffer.emplace_back(std::move(entry));
