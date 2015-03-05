@@ -2,7 +2,7 @@
 # require a C++ compiler that at least the currently latest
 # Ubuntu LTS release is supporting
 if(APPLE)
-  set(CMAKE_CXX_FLAGS "-std=c++14 -stdlib=libc++")
+  set(CMAKE_CXX_FLAGS "-std=c++11 -stdlib=libc++")
 else()
   set(CMAKE_CXX_FLAGS "-std=c++11")
 endif()
