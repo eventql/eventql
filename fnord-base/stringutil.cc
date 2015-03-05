@@ -168,6 +168,20 @@ bool StringUtil::endsWith(const std::string& str, const std::string& suffix) {
       suffix) == 0;
 }
 
+bool StringUtil::isHexString(const std::string& str) {
+  for (const auto& c : str) {
+    if ((c >= '0' && c <= '9') ||
+        (c >= 'a' && c <= 'f') ||
+        (c >= 'A' && c <= 'F')) {
+      continue;
+    }
+
+    return false;
+  }
+
+  return true;
+}
+
 void StringUtil::toLower(std::string* str) {
   auto& str_ref = *str;
 

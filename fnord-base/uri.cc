@@ -25,25 +25,29 @@ std::string URI::urlDecode(const std::string& str) {
     switch (*begin) {
 
       case '%': {
-        char hex[3];
         if (++begin + 2 > end) {
           RAISE(kIllegalArgumentError, "invalid URL encoding");
         }
-        hex[0] = *begin++;
-        hex[1] = *begin++;
-        hex[2] = 0;
-        decoded += static_cast<char>(std::stoul(hex, nullptr, 16));
-        break;
+
+        String hstr(begin, 2);
+        if (!StringUtil::isHexString(hstr)) {
+          decoded += "%";
+          continue;
+        }
+
+        decoded += static_cast<char>(std::stoul(hstr, nullptr, 16));
+        begin += 2;
+        continue;
       }
 
       case '+':
         decoded += " ";
         ++begin;
-        break;
+        continue;
 
       default:
         decoded += *begin++;
-        break;
+        continue;
 
     }
   }
