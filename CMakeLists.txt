@@ -235,6 +235,7 @@ add_executable(cm-ctrstats
     $<TARGET_OBJECTS:fnord-json>
     $<TARGET_OBJECTS:fnord-rpc>
     $<TARGET_OBJECTS:fnord-sstable>
+    cm-stats/CTRCounterSchema.cc
     cm-stats/cm-ctrstats.cc)
 
 target_link_libraries(cm-ctrstats
