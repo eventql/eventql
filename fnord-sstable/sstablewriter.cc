@@ -23,7 +23,10 @@ std::unique_ptr<SSTableWriter> SSTableWriter::create(
     IndexProvider index_provider,
     void const* header,
     size_t header_size) {
-  auto file = File::openFile(filename, File::O_READ);
+  auto file = File::openFile(
+      filename,
+      File::O_READ | File::O_WRITE | File::O_CREATE);
+
   auto file_size = file.size();
   if (file_size > 0) {
     RAISE(kIllegalStateError, "file size must be 0");
