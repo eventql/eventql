@@ -71,6 +71,13 @@ public:
       const std::string& suffix);
 
   /**
+   * Check if the provided string contains only 0-9a-zA-Z
+   *
+   * @param str the string to check
+   */
+  static bool isHexString(const std::string& str);
+
+  /**
    * Replace all occurences of pattern with replacement in str
    *
    * @param str the str that should be modified
