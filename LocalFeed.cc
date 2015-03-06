@@ -218,10 +218,6 @@ std::shared_ptr<LogStream::TableRef> LogStream::createTable() {
   tbl_header.stream_name = name_;
   auto tbl_header_json = fnord::json::toJSONString(tbl_header);
 
-  File::openFile(
-      table->file_path,
-      File::O_READ | File::O_WRITE | File::O_CREATE);
-
   table->writer = sstable::SSTableWriter::create(
       table->file_path,
       sstable::IndexProvider{},
