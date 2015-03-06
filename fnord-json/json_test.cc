@@ -283,9 +283,6 @@ TEST_CASE(JSONTest, TestJSONReencoding1, [] () {
   TestJSONObject obj;
   obj.data = fnord::json::toJSONString(doc);
   auto obj_json = fnord::json::toJSONString(obj);
-  fnord::iputs("obj json_str: $0", obj_json);
-  fnord::iputs("obj json_str parts: $0", fnord::json::parseJSON(obj_json));
   auto obj2 = fnord::json::fromJSON<TestJSONObject>(obj_json);
-  fnord::iputs("json_str: $0", obj2.data);
   EXPECT_EQ(obj2.data, orig_str);
 });
