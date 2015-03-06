@@ -35,6 +35,7 @@ include_directories(${FNORD_FTS_INCLUDE})
 
 add_library(cm-common OBJECT
     cm-common/common.cc
+    cm-common/FeatureCache.cc
     cm-common/FeatureID.cc
     cm-common/FeaturePack.cc
     cm-common/FeatureSchema.cc
