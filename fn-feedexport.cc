@@ -249,6 +249,8 @@ int main(int argc, const char** argv) {
       generations_[entry_gen].emplace_back(entry.get());
     }
 
+    feed_reader.fillBuffers();
+
     auto etime = WallClock::now().unixMicros() - last_iter.unixMicros();
     if (i < 1 && etime < rate_limit_micros) {
       usleep(rate_limit_micros - etime);
