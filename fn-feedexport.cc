@@ -173,6 +173,11 @@ int main(int argc, const char** argv) {
         buffer_size);
   }
 
+  uint64_t total_rows = 0;
+  uint64_t total_bytes = 0;
+  auto start_time = WallClock::now().unixMicros();
+  auto last_status_line = start_time;
+
   DateTime last_iter;
   uint64_t rate_limit_micros = 1 * kMicrosPerSecond;
 
@@ -209,13 +214,40 @@ int main(int argc, const char** argv) {
           continue;
         }
 
-        fnord::logInfo(
+        fnord::logDebug(
             "fnord.feedexport",
             "Creating new generation #$0",
             entry_gen);
       }
 
       generations_[entry_gen].emplace_back(entry.get());
+
+      ++total_rows;
+      total_bytes += entry.get().data.size();
+
+      auto now = WallClock::now().unixMicros();
+      if (now - last_status_line > 10000) {
+        Set<uint64_t> active_gens;
+        for (const auto& g : generations_) {
+          active_gens.emplace(g.first);
+        }
+
+        auto runtime = (now - start_time) / 1000000;
+        uint64_t bandwidth = total_bytes / (runtime + 1);
+        auto str = StringUtil::format(
+            "\rrows=$0 bytes=$1B time=$2s bw=$3B active_gens=$4/s"
+            "          ",
+            total_rows,
+            total_bytes,
+            runtime,
+            bandwidth,
+            inspect(active_gens));
+
+        write(0, str.c_str(), str.length());
+        fflush(0);
+      }
+
+
     }
 
     auto etime = WallClock::now().unixMicros() - last_iter.unixMicros();
