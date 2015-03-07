@@ -176,15 +176,15 @@ int main(int argc, const char** argv) {
 
     feed_urls.emplace(feed, uri_raw.substr(0, uri_raw.find("?")));
 
-    //std::string offset_str;
+    std::string offset_str;
     uint64_t offset = 0;
-    //if (URI::getParam(params, "offset", &offset_str)) {
-    //  if (offset_str == "HEAD") {
-    //    offset = std::numeric_limits<uint64_t>::max();
-    //  } else {
-    //    offset = std::stoul(offset_str);
-    //  }
-    //}
+    if (URI::getParam(params, "offset", &offset_str)) {
+      if (offset_str == "HEAD") {
+        offset = std::numeric_limits<uint64_t>::max();
+      } else {
+        offset = std::stoul(offset_str);
+      }
+    }
 
     feed_reader.addSourceFeed(
         uri,
