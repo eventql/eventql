@@ -87,6 +87,15 @@ int main(int argc, const char** argv) {
       "<secs>");
 
   flags.defineFlag(
+      "generation_delay_secs",
+      fnord::cli::FlagParser::T_INTEGER,
+      false,
+      NULL,
+      "3600",
+      "generation_delay_secs",
+      "<secs>");
+
+  flags.defineFlag(
       "loglevel",
       fnord::cli::FlagParser::T_STRING,
       false,
@@ -112,6 +121,10 @@ int main(int argc, const char** argv) {
 
   size_t batch_size = flags.getInt("batch_size");
   size_t buffer_size = flags.getInt("buffer_size");
+  size_t generation_window_micros =
+      flags.getInt("generation_window_secs") * kMicrosPerSecond;
+  size_t generation_delay_micros =
+      flags.getInt("generation_delay_secs") * kMicrosPerSecond;
 
   /* set up input feed reader */
   feeds::RemoteFeedReader feed_reader(&rpc_client);
@@ -163,6 +176,9 @@ int main(int argc, const char** argv) {
   DateTime last_iter;
   uint64_t rate_limit_micros = 1 * kMicrosPerSecond;
 
+  HashMap<uint64_t, List<feeds::FeedEntry>> generations_;
+  uint64_t max_gen_;
+
   for (;;) {
     last_iter = WallClock::now();
     feed_reader.fillBuffers();
@@ -175,7 +191,31 @@ int main(int argc, const char** argv) {
         break;
       }
 
-      fnord::iputs("$0", entry.get().data);
+      auto entry_time = entry.get().time.unixMicros();
+      if (entry_time == 0) {
+        continue;
+      }
+
+      uint64_t entry_gen = entry_time / generation_window_micros;
+
+      auto iter = generations_.find(entry_gen);
+      if (iter == generations_.end()) {
+        if (max_gen_ >= entry_gen) {
+          fnord::logWarning(
+              "fnord.feedexport",
+              "Dropping late data for  generation #$0",
+              entry_gen);
+
+          continue;
+        }
+
+        fnord::logInfo(
+            "fnord.feedexport",
+            "Creating new generation #$0",
+            entry_gen);
+      }
+
+      generations_[entry_gen].emplace_back(entry.get());
     }
 
     auto etime = WallClock::now().unixMicros() - last_iter.unixMicros();
