@@ -173,6 +173,7 @@ int main(int argc, const char** argv) {
             "Deleting unfinished sstable $0",
             filepath);
 
+      FileUtil::rm(filepath);
       return true;
     }
 
@@ -232,6 +233,7 @@ int main(int argc, const char** argv) {
   }
 
   uint64_t total_rows = 0;
+  uint64_t total_rows_written = 0;
   uint64_t total_bytes = 0;
   auto start_time = WallClock::now().unixMicros();
   auto last_status_line = start_time;
@@ -289,10 +291,12 @@ int main(int argc, const char** argv) {
       auto iter = generations.find(entry_gen);
       if (iter == generations.end()) {
         if (max_gen >= entry_gen) {
-          fnord::logWarning(
-              "fnord.feedexport",
-              "Dropping late data for  generation #$0",
-              entry_gen);
+          if (total_rows_written > 0) {
+            fnord::logWarning(
+                "fnord.feedexport",
+                "Dropping late data for  generation #$0",
+                entry_gen);
+          }
 
           continue;
         }
@@ -340,6 +344,8 @@ int main(int argc, const char** argv) {
           sizeof(entry_time),
           entry_data.c_str(),
           entry_data.length());
+
+      ++total_rows_written;
     }
 
     feed_reader.fillBuffers();
