@@ -196,32 +196,6 @@ int main(int argc, const char** argv) {
         break;
       }
 
-      auto entry_time = entry.get().time.unixMicros();
-      if (entry_time == 0) {
-        continue;
-      }
-
-      uint64_t entry_gen = entry_time / generation_window_micros;
-
-      auto iter = generations_.find(entry_gen);
-      if (iter == generations_.end()) {
-        if (max_gen_ >= entry_gen) {
-          fnord::logWarning(
-              "fnord.feedexport",
-              "Dropping late data for  generation #$0",
-              entry_gen);
-
-          continue;
-        }
-
-        fnord::logDebug(
-            "fnord.feedexport",
-            "Creating new generation #$0",
-            entry_gen);
-      }
-
-      generations_[entry_gen].emplace_back(entry.get());
-
       ++total_rows;
       total_bytes += entry.get().data.size();
 
@@ -248,6 +222,31 @@ int main(int argc, const char** argv) {
       }
 
 
+      auto entry_time = entry.get().time.unixMicros();
+      if (entry_time == 0) {
+        continue;
+      }
+
+      uint64_t entry_gen = entry_time / generation_window_micros;
+
+      auto iter = generations_.find(entry_gen);
+      if (iter == generations_.end()) {
+        if (max_gen_ >= entry_gen) {
+          fnord::logWarning(
+              "fnord.feedexport",
+              "Dropping late data for  generation #$0",
+              entry_gen);
+
+          continue;
+        }
+
+        fnord::logDebug(
+            "fnord.feedexport",
+            "Creating new generation #$0",
+            entry_gen);
+      }
+
+      generations_[entry_gen].emplace_back(entry.get());
     }
 
     auto etime = WallClock::now().unixMicros() - last_iter.unixMicros();
