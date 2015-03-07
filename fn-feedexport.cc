@@ -35,6 +35,23 @@
 
 using namespace fnord;
 
+struct FeedChunkInfo {
+  uint64_t generation;
+  uint64_t generation_window;
+  uint64_t start_time;
+  uint64_t end_time;
+  HashMap<String, String> start_offsets;
+
+  template <typename T>
+  static void reflect(T* meta) {
+    meta->prop(&FeedChunkInfo::generation, 1, "generation", false);
+    meta->prop(&FeedChunkInfo::generation_window, 2, "generation_window", false);
+    meta->prop(&FeedChunkInfo::start_time, 3, "start_time", false);
+    meta->prop(&FeedChunkInfo::end_time, 4, "end_time", false);
+    meta->prop(&FeedChunkInfo::start_offsets, 5, "start_offsets", false);
+  };
+};
+
 int main(int argc, const char** argv) {
   fnord::Application::init();
   fnord::Application::logToStderr();
@@ -119,12 +136,16 @@ int main(int argc, const char** argv) {
   /* set up rpc client */
   HTTPRPCClient rpc_client(&ev);
 
+  auto output_path = flags.getString("output_path");
+  auto output_prefix = flags.getString("output_prefix");
   size_t batch_size = flags.getInt("batch_size");
   size_t buffer_size = flags.getInt("buffer_size");
   size_t generation_window_micros =
       flags.getInt("generation_window_secs") * kMicrosPerSecond;
   size_t generation_delay_micros =
       flags.getInt("generation_delay_secs") * kMicrosPerSecond;
+
+  FileUtil::mkdir_p(output_path);
 
   /* set up input feed reader */
   feeds::RemoteFeedReader feed_reader(&rpc_client);
@@ -182,13 +203,14 @@ int main(int argc, const char** argv) {
   uint64_t rate_limit_micros = 0.1 * kMicrosPerSecond;
 
   HashMap<uint64_t, List<feeds::FeedEntry>> generations_;
-  HashMap<uint64_t, Vector<Pair<String, String>>> generation_offsets_;
+  HashMap<uint64_t, HashMap<String, String>> generation_offsets_;
   uint64_t max_gen_;
 
   for (;;) {
     last_iter = WallClock::now();
     feed_reader.fillBuffers();
 
+    /* read feed and build generations */
     int i = 0;
     for (; i < batch_size; ++i) {
       auto entry = feed_reader.fetchNextEntry();
@@ -248,9 +270,13 @@ int main(int argc, const char** argv) {
 
         auto stream_offsets = feed_reader.streamOffsets();
         for (const auto& soff : stream_offsets) {
-          generation_offsets_[entry_gen].emplace_back(
+          generation_offsets_[entry_gen].emplace(
               soff.first,
               StringUtil::toString(soff.second));
+        }
+
+        if (entry_gen > max_gen_) {
+          max_gen_ = entry_gen;
         }
       }
 
@@ -258,6 +284,49 @@ int main(int argc, const char** argv) {
     }
 
     feed_reader.fillBuffers();
+
+
+    /* flush generations */
+    auto watermarks = feed_reader.watermarks();
+    auto stream_time_micros = watermarks.first.unixMicros();
+
+    if (stream_time_micros > generation_delay_micros) {
+      stream_time_micros -= generation_delay_micros;
+    }
+
+    for (auto iter = generations_.begin(); iter != generations_.end(); ) {
+      if (stream_time_micros < ((iter->first + 1) * generation_window_micros)) {
+        ++iter;
+        continue;
+      }
+
+      fnord::logDebug(
+          "cm.ctrstatsbuild",
+          "Flushing report generation #$0",
+          iter->first);
+
+      FeedChunkInfo fci;
+      fci.generation = iter->first;
+      fci.generation_window = generation_window_micros;
+      fci.start_time = iter->first * generation_window_micros;
+      fci.end_time = (iter->first + 1) * generation_window_micros;
+      fci.start_offsets = generation_offsets_[iter->first];
+
+      auto fci_json = json::toJSONString(fci);
+
+      auto sstable_file_path = FileUtil::joinPaths(
+          output_path,
+          StringUtil::format("$0.$1.sstable", output_prefix, iter->first));
+
+      auto sstable_writer = sstable::SSTableWriter::create(
+          sstable_file_path,
+          sstable::IndexProvider{},
+          fci_json.c_str(),
+          fci_json.length());
+
+      iter = generations_.erase(iter);
+      generation_offsets_.erase(iter->first);
+    }
 
     auto etime = WallClock::now().unixMicros() - last_iter.unixMicros();
     if (i < 1 && etime < rate_limit_micros) {
