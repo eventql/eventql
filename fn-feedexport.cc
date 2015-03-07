@@ -148,13 +148,16 @@ int main(int argc, const char** argv) {
 
   FileUtil::mkdir_p(output_path);
 
-  HashMap<uint64_t, std::unique_ptr<sstable::SSTableWriter>> generations_;
-  uint64_t max_gen_ = 0;
+  HashMap<String, uint64_t> feed_offsets;
+  HashMap<uint64_t, std::unique_ptr<sstable::SSTableWriter>> generations;
+  uint64_t max_gen = 0;
 
   /* check old sstables */
   FileUtil::ls(output_path, [
       output_path,
-      output_prefix] (const String& filename) -> bool {
+      output_prefix,
+      &max_gen,
+      &feed_offsets] (const String& filename) -> bool {
     if (!StringUtil::beginsWith(filename, output_prefix) ||
         !StringUtil::endsWith(filename, ".sstable")) {
       return true;
@@ -174,7 +177,19 @@ int main(int argc, const char** argv) {
     }
 
     auto hdr = reader.readHeader();
-    fnord::iputs("import sstable $0, hdr: $1", filepath, hdr.toString());
+    auto fci = json::fromJSON<FeedChunkInfo>(hdr);
+
+    for (const auto& fo : fci.start_offsets) {
+      auto foff = std::stoul(fo.second);
+      if (feed_offsets[fo.first] < foff) {
+        feed_offsets[fo.first] = foff;
+      }
+    }
+
+    if (fci.generation > max_gen) {
+      max_gen = fci.generation;
+    }
+
     return true;
   });
 
@@ -198,8 +213,8 @@ int main(int argc, const char** argv) {
 
     feed_urls.emplace(feed, uri_raw.substr(0, uri_raw.find("?")));
 
+    uint64_t offset = feed_offsets[feed];
     std::string offset_str;
-    uint64_t offset = 0;
     if (URI::getParam(params, "offset", &offset_str)) {
       if (offset_str == "HEAD") {
         offset = std::numeric_limits<uint64_t>::max();
@@ -243,7 +258,7 @@ int main(int argc, const char** argv) {
       auto now = WallClock::now().unixMicros();
       if (now - last_status_line > 10000) {
         Set<uint64_t> active_gens;
-        for (const auto& g : generations_) {
+        for (const auto& g : generations) {
           active_gens.emplace(g.first);
         }
 
@@ -271,9 +286,9 @@ int main(int argc, const char** argv) {
 
       uint64_t entry_gen = entry_time / generation_window_micros;
 
-      auto iter = generations_.find(entry_gen);
-      if (iter == generations_.end()) {
-        if (max_gen_ >= entry_gen) {
+      auto iter = generations.find(entry_gen);
+      if (iter == generations.end()) {
+        if (max_gen >= entry_gen) {
           fnord::logWarning(
               "fnord.feedexport",
               "Dropping late data for  generation #$0",
@@ -312,15 +327,15 @@ int main(int argc, const char** argv) {
             fci_json.c_str(),
             fci_json.length());
 
-        if (entry_gen > max_gen_) {
-          max_gen_ = entry_gen;
+        if (entry_gen > max_gen) {
+          max_gen = entry_gen;
         }
 
-        generations_.emplace(entry_gen, std::move(sstable_writer));
+        generations.emplace(entry_gen, std::move(sstable_writer));
       }
 
       const auto& entry_data = entry.get().data;
-      generations_[entry_gen]->appendRow(
+      generations[entry_gen]->appendRow(
           (void *) &entry_time,
           sizeof(entry_time),
           entry_data.c_str(),
@@ -337,7 +352,7 @@ int main(int argc, const char** argv) {
       stream_time_micros -= generation_delay_micros;
     }
 
-    for (auto iter = generations_.begin(); iter != generations_.end(); ) {
+    for (auto iter = generations.begin(); iter != generations.end(); ) {
       if (stream_time_micros < ((iter->first + 1) * generation_window_micros)) {
         ++iter;
         continue;
@@ -349,7 +364,7 @@ int main(int argc, const char** argv) {
           iter->first);
 
       iter->second->finalize();
-      iter = generations_.erase(iter);
+      iter = generations.erase(iter);
     }
 
     auto etime = WallClock::now().unixMicros() - last_iter.unixMicros();
