@@ -237,8 +237,6 @@ target_link_libraries(cm-featureselect
 #    $<TARGET_OBJECTS:fnord-rpc>
 #    $<TARGET_OBJECTS:fnord-sstable>
 #    cm-stats/QueryFeatureCTRReport.cc
-#    cm-stats/QueryFeatureCrossItemFeatureCTRReport.cc
-#    cm-stats/QueryFeatureCrossItemTermsCTRReport.cc
 #    cm-stats/CTRCounterSchema.cc
 #    cm-stats/CTRStatsBuild.cc
 #    cm-stats/cm-ctrstats.cc)
@@ -286,6 +284,8 @@ add_executable(cm-ctrstatsbuild
     $<TARGET_OBJECTS:fnord-rpc>
     $<TARGET_OBJECTS:fnord-sstable>
     cm-stats/QueryFeatureCTRReport.cc
+    cm-stats/QueryFeatureCrossItemFeatureCTRReport.cc
+    cm-stats/QueryFeatureCrossItemTermsCTRReport.cc
     cm-stats/CTRStatsBuild.cc
     cm-stats/cm-ctrstatsbuild.cc)
 
