@@ -202,8 +202,7 @@ int main(int argc, const char** argv) {
   DateTime last_iter;
   uint64_t rate_limit_micros = 0.1 * kMicrosPerSecond;
 
-  HashMap<uint64_t, List<feeds::FeedEntry>> generations_;
-  HashMap<uint64_t, HashMap<String, String>> generation_offsets_;
+  HashMap<uint64_t, std::unique_ptr<sstable::SSTableWriter>> generations_;
   uint64_t max_gen_ = 0;
 
   for (;;) {
@@ -246,7 +245,6 @@ int main(int argc, const char** argv) {
         fflush(0);
       }
 
-
       auto entry_time = entry.get().time.unixMicros();
       if (entry_time == 0) {
         continue;
@@ -270,19 +268,39 @@ int main(int argc, const char** argv) {
             "Creating new generation #$0",
             entry_gen);
 
+        FeedChunkInfo fci;
+        fci.generation = entry_gen;
+        fci.generation_window = generation_window_micros;
+        fci.start_time = entry_gen * generation_window_micros;
+        fci.end_time = (entry_gen + 1) * generation_window_micros;
+
         auto stream_offsets = feed_reader.streamOffsets();
         for (const auto& soff : stream_offsets) {
-          generation_offsets_[entry_gen].emplace(
+          fci.start_offsets.emplace(
               soff.first,
               StringUtil::toString(soff.second));
         }
 
+        auto fci_json = json::toJSONString(fci);
+
+        auto sstable_file_path = FileUtil::joinPaths(
+            output_path,
+            StringUtil::format("$0.$1.sstable", output_prefix, entry_gen));
+
+        auto sstable_writer = sstable::SSTableWriter::create(
+            sstable_file_path,
+            sstable::IndexProvider{},
+            fci_json.c_str(),
+            fci_json.length());
+
         if (entry_gen > max_gen_) {
           max_gen_ = entry_gen;
         }
+
+        generations_.emplace(entry_gen, std::move(sstable_writer));
       }
 
-      generations_[entry_gen].emplace_back(entry.get());
+      //generations_[entry_gen].emplace_back(entry.get());
     }
 
     feed_reader.fillBuffers();
@@ -306,27 +324,8 @@ int main(int argc, const char** argv) {
           "Flushing report generation #$0",
           iter->first);
 
-      FeedChunkInfo fci;
-      fci.generation = iter->first;
-      fci.generation_window = generation_window_micros;
-      fci.start_time = iter->first * generation_window_micros;
-      fci.end_time = (iter->first + 1) * generation_window_micros;
-      fci.start_offsets = generation_offsets_[iter->first];
-
-      auto fci_json = json::toJSONString(fci);
-
-      auto sstable_file_path = FileUtil::joinPaths(
-          output_path,
-          StringUtil::format("$0.$1.sstable", output_prefix, iter->first));
-
-      auto sstable_writer = sstable::SSTableWriter::create(
-          sstable_file_path,
-          sstable::IndexProvider{},
-          fci_json.c_str(),
-          fci_json.length());
-
+      iter->second->finalize();
       iter = generations_.erase(iter);
-      generation_offsets_.erase(iter->first);
     }
 
     auto etime = WallClock::now().unixMicros() - last_iter.unixMicros();
