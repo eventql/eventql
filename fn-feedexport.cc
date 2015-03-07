@@ -29,6 +29,7 @@
 #include "fnord-feeds/RemoteFeedFactory.h"
 #include "fnord-feeds/RemoteFeedReader.h"
 #include "fnord-base/stats/statsdagent.h"
+#include "fnord-sstable/sstablereader.h"
 #include "fnord-mdb/MDB.h"
 #include "cm-common/CustomerNamespace.h"
 #include "cm-logjoin/LogJoin.h"
@@ -147,20 +148,41 @@ int main(int argc, const char** argv) {
 
   FileUtil::mkdir_p(output_path);
 
+  HashMap<uint64_t, std::unique_ptr<sstable::SSTableWriter>> generations_;
+  uint64_t max_gen_ = 0;
+
+  /* check old sstables */
+  FileUtil::ls(output_path, [
+      output_path,
+      output_prefix] (const String& filename) -> bool {
+    if (!StringUtil::beginsWith(filename, output_prefix) ||
+        !StringUtil::endsWith(filename, ".sstable")) {
+      return true;
+    }
+
+    auto filepath = FileUtil::joinPaths(output_path, filename);
+    sstable::SSTableReader reader(
+        File::openFile(filepath, File::O_READ));
+
+    if (reader.bodySize() == 0) {
+        fnord::logWarning(
+            "fnord.feedexport",
+            "Deleting unfinished sstable $0",
+            filepath);
+
+      return true;
+    }
+
+    auto hdr = reader.readHeader();
+    fnord::iputs("import sstable $0, hdr: $1", filepath, hdr.toString());
+    return true;
+  });
+
   /* set up input feed reader */
   feeds::RemoteFeedReader feed_reader(&rpc_client);
 
   /* get source urls */
   Vector<String> uris = flags.getArgv();
-  //if (flags.isSet("statefile")) {
-  //  auto statefile = FileUtil::read(flags.getString("statefile")).toString();
-  //  for (const auto& uri : StringUtil::split(statefile, "\n")) {
-  //    if (uri.size() > 0) {
-  //      uris.emplace_back(uri);
-  //    }
-  //  }
-  //}
-
   HashMap<String, String> feed_urls;
   for (const auto& uri_raw : uris) {
     URI uri(uri_raw);
@@ -201,9 +223,6 @@ int main(int argc, const char** argv) {
 
   DateTime last_iter;
   uint64_t rate_limit_micros = 0.1 * kMicrosPerSecond;
-
-  HashMap<uint64_t, std::unique_ptr<sstable::SSTableWriter>> generations_;
-  uint64_t max_gen_ = 0;
 
   for (;;) {
     last_iter = WallClock::now();
