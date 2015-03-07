@@ -199,6 +199,7 @@ int main(int argc, const char** argv) {
 
   /* set up input feed reader */
   feeds::RemoteFeedReader feed_reader(&rpc_client);
+  feed_reader.setMaxSpread(generation_delay_micros / 2);
 
   /* get source urls */
   Vector<String> uris = flags.getArgv();
