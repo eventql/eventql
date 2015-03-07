@@ -182,6 +182,7 @@ int main(int argc, const char** argv) {
   uint64_t rate_limit_micros = 0.1 * kMicrosPerSecond;
 
   HashMap<uint64_t, List<feeds::FeedEntry>> generations_;
+  HashMap<uint64_t, Vector<Pair<String, String>>> generation_offsets_;
   uint64_t max_gen_;
 
   for (;;) {
@@ -244,6 +245,13 @@ int main(int argc, const char** argv) {
             "fnord.feedexport",
             "Creating new generation #$0",
             entry_gen);
+
+        auto stream_offsets = feed_reader.streamOffsets();
+        for (const auto& soff : stream_offsets) {
+          generation_offsets_[entry_gen].emplace_back(
+              soff.first,
+              StringUtil::toString(soff.second));
+        }
       }
 
       generations_[entry_gen].emplace_back(entry.get());
