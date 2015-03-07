@@ -204,7 +204,7 @@ int main(int argc, const char** argv) {
 
   HashMap<uint64_t, List<feeds::FeedEntry>> generations_;
   HashMap<uint64_t, HashMap<String, String>> generation_offsets_;
-  uint64_t max_gen_;
+  uint64_t max_gen_ = 0;
 
   for (;;) {
     last_iter = WallClock::now();
