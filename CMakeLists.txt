@@ -227,24 +227,24 @@ add_executable(cm-featureselect
 target_link_libraries(cm-featureselect
     ${CMAKE_THREAD_LIBS_INIT})
 
-add_executable(cm-ctrstats
-    $<TARGET_OBJECTS:cm-common>
-    $<TARGET_OBJECTS:fnord-base>
-    $<TARGET_OBJECTS:fnord-feeds>
-    $<TARGET_OBJECTS:fnord-mdb>
-    $<TARGET_OBJECTS:fnord-http>
-    $<TARGET_OBJECTS:fnord-json>
-    $<TARGET_OBJECTS:fnord-rpc>
-    $<TARGET_OBJECTS:fnord-sstable>
-    cm-stats/QueryFeatureCTRReport.cc
-    cm-stats/QueryFeatureCrossItemFeatureCTRReport.cc
-    cm-stats/QueryFeatureCrossItemTermsCTRReport.cc
-    cm-stats/CTRCounterSchema.cc
-    cm-stats/CTRStatsBuild.cc
-    cm-stats/cm-ctrstats.cc)
-
-target_link_libraries(cm-ctrstats
-    ${CMAKE_THREAD_LIBS_INIT})
+#add_executable(cm-ctrstats
+#    $<TARGET_OBJECTS:cm-common>
+#    $<TARGET_OBJECTS:fnord-base>
+#    $<TARGET_OBJECTS:fnord-feeds>
+#    $<TARGET_OBJECTS:fnord-mdb>
+#    $<TARGET_OBJECTS:fnord-http>
+#    $<TARGET_OBJECTS:fnord-json>
+#    $<TARGET_OBJECTS:fnord-rpc>
+#    $<TARGET_OBJECTS:fnord-sstable>
+#    cm-stats/QueryFeatureCTRReport.cc
+#    cm-stats/QueryFeatureCrossItemFeatureCTRReport.cc
+#    cm-stats/QueryFeatureCrossItemTermsCTRReport.cc
+#    cm-stats/CTRCounterSchema.cc
+#    cm-stats/CTRStatsBuild.cc
+#    cm-stats/cm-ctrstats.cc)
+#
+#target_link_libraries(cm-ctrstats
+#    ${CMAKE_THREAD_LIBS_INIT})
 
 add_executable(cm-ctrstatsserver
     $<TARGET_OBJECTS:cm-common>
@@ -274,4 +274,20 @@ add_executable(cm-ctrstatsexport
     cm-stats/cm-ctrstatsexport.cc)
 
 target_link_libraries(cm-ctrstatsexport
+    ${CMAKE_THREAD_LIBS_INIT})
+
+add_executable(cm-ctrstatsbuild
+    $<TARGET_OBJECTS:cm-common>
+    $<TARGET_OBJECTS:fnord-base>
+    $<TARGET_OBJECTS:fnord-feeds>
+    $<TARGET_OBJECTS:fnord-mdb>
+    $<TARGET_OBJECTS:fnord-http>
+    $<TARGET_OBJECTS:fnord-json>
+    $<TARGET_OBJECTS:fnord-rpc>
+    $<TARGET_OBJECTS:fnord-sstable>
+    cm-stats/QueryFeatureCTRReport.cc
+    cm-stats/CTRStatsBuild.cc
+    cm-stats/cm-ctrstatsbuild.cc)
+
+target_link_libraries(cm-ctrstatsbuild
     ${CMAKE_THREAD_LIBS_INIT})
