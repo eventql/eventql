@@ -179,7 +179,7 @@ int main(int argc, const char** argv) {
   auto last_status_line = start_time;
 
   DateTime last_iter;
-  uint64_t rate_limit_micros = 0.5 * kMicrosPerSecond;
+  uint64_t rate_limit_micros = 0.1 * kMicrosPerSecond;
 
   HashMap<uint64_t, List<feeds::FeedEntry>> generations_;
   uint64_t max_gen_;
