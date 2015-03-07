@@ -229,16 +229,18 @@ int main(int argc, const char** argv) {
           active_gens.emplace(g.first);
         }
 
+        auto watermarks = feed_reader.watermarks();
         auto runtime = (now - start_time) / 1000000;
         uint64_t bandwidth = total_bytes / (runtime + 1);
         auto str = StringUtil::format(
-            "\rrows=$0 bytes=$1B time=$2s bw=$3B/s active_gens=$4"
+            "\rrows=$0 bytes=$1B time=$2s bw=$3B/s active_gens=$4 streamtime=$5"
             "          ",
             total_rows,
             total_bytes,
             runtime,
             bandwidth,
-            inspect(active_gens));
+            inspect(active_gens),
+            watermarks.first);
 
         write(0, str.c_str(), str.length());
         fflush(0);
@@ -284,7 +286,6 @@ int main(int argc, const char** argv) {
     }
 
     feed_reader.fillBuffers();
-
 
     /* flush generations */
     auto watermarks = feed_reader.watermarks();
