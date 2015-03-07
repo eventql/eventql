@@ -179,7 +179,7 @@ int main(int argc, const char** argv) {
   auto last_status_line = start_time;
 
   DateTime last_iter;
-  uint64_t rate_limit_micros = 1 * kMicrosPerSecond;
+  uint64_t rate_limit_micros = 0.5 * kMicrosPerSecond;
 
   HashMap<uint64_t, List<feeds::FeedEntry>> generations_;
   uint64_t max_gen_;
@@ -189,7 +189,7 @@ int main(int argc, const char** argv) {
     feed_reader.fillBuffers();
 
     int i = 0;
-    for (;; ++i) {
+    for (; i < batch_size; ++i) {
       auto entry = feed_reader.fetchNextEntry();
 
       if (entry.isEmpty()) {
@@ -209,7 +209,7 @@ int main(int argc, const char** argv) {
         auto runtime = (now - start_time) / 1000000;
         uint64_t bandwidth = total_bytes / (runtime + 1);
         auto str = StringUtil::format(
-            "\rrows=$0 bytes=$1B time=$2s bw=$3B active_gens=$4/s"
+            "\rrows=$0 bytes=$1B time=$2s bw=$3B/s active_gens=$4"
             "          ",
             total_rows,
             total_bytes,
