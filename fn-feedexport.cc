@@ -300,7 +300,12 @@ int main(int argc, const char** argv) {
         generations_.emplace(entry_gen, std::move(sstable_writer));
       }
 
-      //generations_[entry_gen].emplace_back(entry.get());
+      const auto& entry_data = entry.get().data;
+      generations_[entry_gen]->appendRow(
+          (void *) &entry_time,
+          sizeof(entry_time),
+          entry_data.c_str(),
+          entry_data.length());
     }
 
     feed_reader.fillBuffers();
