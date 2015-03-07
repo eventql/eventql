@@ -150,6 +150,7 @@ int main(int argc, const char** argv) {
 
   HashMap<String, uint64_t> feed_offsets;
   HashMap<uint64_t, std::unique_ptr<sstable::SSTableWriter>> generations;
+  Set<uint64_t> finished_generations;
   uint64_t max_gen = 0;
 
   /* check old sstables */
@@ -157,7 +158,8 @@ int main(int argc, const char** argv) {
       output_path,
       output_prefix,
       &max_gen,
-      &feed_offsets] (const String& filename) -> bool {
+      &feed_offsets,
+      &finished_generations] (const String& filename) -> bool {
     if (!StringUtil::beginsWith(filename, output_prefix) ||
         !StringUtil::endsWith(filename, ".sstable")) {
       return true;
@@ -191,6 +193,7 @@ int main(int argc, const char** argv) {
       max_gen = fci.generation;
     }
 
+    finished_generations.emplace(fci.generation);
     return true;
   });
 
@@ -291,7 +294,7 @@ int main(int argc, const char** argv) {
       auto iter = generations.find(entry_gen);
       if (iter == generations.end()) {
         if (max_gen >= entry_gen) {
-          if (total_rows_written > 0) {
+          if (finished_generations.count(entry_gen) == 0) {
             fnord::logWarning(
                 "fnord.feedexport",
                 "Dropping late data for  generation #$0",
