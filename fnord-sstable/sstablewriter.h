@@ -23,6 +23,8 @@
 namespace fnord {
 namespace sstable {
 
+class SSTableColumnWriter;
+
 /**
  * A sstable that can written (appended) to and read from at the same time.
  *
@@ -91,6 +93,13 @@ public:
   uint64_t appendRow(
       const std::string& key,
       const std::string& value);
+
+  /**
+   * Append a row to the sstable
+   */
+  uint64_t appendRow(
+      const std::string& key,
+      const SSTableColumnWriter& columns);
 
   /**
    * Finalize the sstable (writes out the indexes to disk)
