@@ -103,18 +103,6 @@ void SSTableServlet::scan(
       buf.append("\n");
       break;
     case ResponseFormat::JSON:
-      json.beginObject();
-      json.addString("headers");
-      json.addColon();
-      json.beginArray();
-      for (int i = 0; i < headers.size(); ++i) {
-        if (i > 0) json.addComma();
-        json.addString(headers[i]);
-      }
-      json.endArray();
-      json.addComma();
-      json.addString("rows");
-      json.addColon();
       json.beginArray();
       break;
   }
@@ -123,7 +111,7 @@ void SSTableServlet::scan(
   int n = 0;
   sstable_scan.execute(
       cursor.get(),
-      [&buf, format, &n, &json] (const Vector<String> row) {
+      [&buf, format, &n, &json, &headers] (const Vector<String> row) {
     switch (format) {
       case ResponseFormat::CSV:
         buf.append(StringUtil::join(row, ";"));
@@ -131,12 +119,14 @@ void SSTableServlet::scan(
         break;
       case ResponseFormat::JSON:
         if (n++ > 0) json.addComma();
-        json.beginArray();
+        json.beginObject();
         for (int i = 0; i < row.size(); ++i) {
           if (i > 0) json.addComma();
+          json.addString(headers[i]);
+          json.addColon();
           json.addString(row[i]);
         }
-        json.endArray();
+        json.endObject();
         break;
     }
   });
@@ -147,7 +137,6 @@ void SSTableServlet::scan(
       break;
     case ResponseFormat::JSON:
       json.endArray();
-      json.endObject();
       res->addHeader("Content-Type", "application/json; charset=utf-8");
       break;
   }
