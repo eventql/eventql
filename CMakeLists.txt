@@ -291,3 +291,17 @@ add_executable(cm-ctrstatsbuild
 
 target_link_libraries(cm-ctrstatsbuild
     ${CMAKE_THREAD_LIBS_INIT})
+
+add_executable(cm-ctrstatsrollupflat
+    $<TARGET_OBJECTS:cm-common>
+    $<TARGET_OBJECTS:fnord-base>
+    $<TARGET_OBJECTS:fnord-feeds>
+    $<TARGET_OBJECTS:fnord-mdb>
+    $<TARGET_OBJECTS:fnord-http>
+    $<TARGET_OBJECTS:fnord-json>
+    $<TARGET_OBJECTS:fnord-rpc>
+    $<TARGET_OBJECTS:fnord-sstable>
+    cm-stats/cm-ctrstatsrollupflat.cc)
+
+target_link_libraries(cm-ctrstatsrollupflat
+    ${CMAKE_THREAD_LIBS_INIT})
