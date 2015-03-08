@@ -8,6 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <fnord-sstable/SSTableColumnSchema.h>
+#include <fnord-sstable/SSTableReader.h>
 #include <fnord-sstable/SSTableWriter.h>
 #include <fnord-base/util/BinaryMessageReader.h>
 #include <fnord-base/util/BinaryMessageWriter.h>
@@ -54,6 +55,25 @@ void SSTableColumnSchema::writeIndex(SSTableWriter* sstable_writer) {
   writeIndex(&buf);
 
   sstable_writer->writeIndex(SSTableColumnSchema::kSSTableIndexID, buf);
+}
+
+void SSTableColumnSchema::loadIndex(const Buffer& buf) {
+  util::BinaryMessageReader reader(buf.data(), buf.size());
+
+  while (reader.remaining() > 0) {
+    uint32_t col_id = *reader.readUInt32();
+    uint32_t col_type = *reader.readUInt32();
+    uint32_t col_name_len = *reader.readUInt32();
+    String col_name((char*) reader.read(col_name_len), col_name_len);
+
+    addColumn(col_name, col_id, (fnord::sstable::SSTableColumnType) col_type);
+  }
+}
+
+void SSTableColumnSchema::loadIndex(
+    SSTableReader* sstable_reader) {
+  auto index = sstable_reader->readFooter(kSSTableIndexID);
+  loadIndex(index);
 }
 
 } // namespace sstable

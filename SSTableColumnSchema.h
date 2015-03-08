@@ -26,6 +26,7 @@
 namespace fnord {
 namespace sstable {
 class SSTableWriter;
+class SSTableReader;
 
 enum class SSTableColumnType : uint8_t {
   UINT32 = 1
@@ -48,6 +49,9 @@ public:
 
   void writeIndex(Buffer* buf);
   void writeIndex(SSTableWriter* sstable_writer);
+
+  void loadIndex(const Buffer& buf);
+  void loadIndex(SSTableReader* sstable_reader);
 
 protected:
   struct SSTableColumnInfo {
