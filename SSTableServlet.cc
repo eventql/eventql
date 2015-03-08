@@ -48,6 +48,12 @@ void SSTableServlet::scan(
     const URI& uri) {
   fnord::URI::ParamList params = uri.queryParams();
 
+  auto format = ResponseFormat::CSV;
+  std::string format_param;
+  if (fnord::URI::getParam(params, "format", &format_param)) {
+    format = formatFromString(format_param);
+  }
+
   std::string file_path;
   if (!fnord::URI::getParam(params, "file", &file_path)) {
     res->addBody("error: missing ?file=... parameter");
@@ -65,8 +71,102 @@ void SSTableServlet::scan(
   sstable::SSTableColumnSchema schema;
   schema.loadIndex(&reader);
 
+  sstable::SSTableScan sstable_scan(&schema);
+
+  String limit_str;
+  if (fnord::URI::getParam(params, "limit", &limit_str)) {
+    sstable_scan.setLimit(std::stoul(limit_str));
+  }
+
+  String offset_str;
+  if (fnord::URI::getParam(params, "offset", &offset_str)) {
+    sstable_scan.setOffset(std::stoul(offset_str));
+  }
+
+  String order_by;
+  String order_fn = "STRASC";
+  if (fnord::URI::getParam(params, "order_by", &order_by)) {
+    fnord::URI::getParam(params, "order_fn", &order_fn);
+    sstable_scan.setOrderBy(order_by, order_fn);
+  }
+
+  Buffer buf;
+  json::JSONOutputStream json(
+      static_cast<std::shared_ptr<OutputStream>>(
+          BufferOutputStream::fromBuffer(&buf)));
+
+  auto headers = sstable_scan.columnNames();
+
+  switch (format) {
+    case ResponseFormat::CSV:
+      buf.append(StringUtil::join(headers, ";"));
+      buf.append("\n");
+      break;
+    case ResponseFormat::JSON:
+      json.beginObject();
+      json.addString("headers");
+      json.addColon();
+      json.beginArray();
+      for (int i = 0; i < headers.size(); ++i) {
+        if (i > 0) json.addComma();
+        json.addString(headers[i]);
+      }
+      json.endArray();
+      json.addComma();
+      json.addString("rows");
+      json.addColon();
+      json.beginArray();
+      break;
+  }
+
+  auto cursor = reader.getCursor();
+  int n = 0;
+  sstable_scan.execute(
+      cursor.get(),
+      [&buf, format, &n, &json] (const Vector<String> row) {
+    switch (format) {
+      case ResponseFormat::CSV:
+        buf.append(StringUtil::join(row, ";"));
+        buf.append("\n");
+        break;
+      case ResponseFormat::JSON:
+        if (n++ > 0) json.addComma();
+        json.beginArray();
+        for (int i = 0; i < row.size(); ++i) {
+          if (i > 0) json.addComma();
+          json.addString(row[i]);
+        }
+        json.endArray();
+        break;
+    }
+  });
+
+  switch (format) {
+    case ResponseFormat::CSV:
+      res->addHeader("Content-Type", "text/csv; charset=utf-8");
+      break;
+    case ResponseFormat::JSON:
+      json.endArray();
+      json.endObject();
+      res->addHeader("Content-Type", "application/json; charset=utf-8");
+      break;
+  }
+
   res->setStatus(fnord::http::kStatusOK);
-  res->addBody("blah xx");
+  res->addBody(buf);
+}
+
+SSTableServlet::ResponseFormat SSTableServlet::formatFromString(
+    const String& format) {
+  if (format == "csv") {
+    return ResponseFormat::CSV;
+  }
+
+  if (format == "json") {
+    return ResponseFormat::JSON;
+  }
+
+  RAISEF(kIllegalArgumentError, "invalid format: $0", format);
 }
 
 }

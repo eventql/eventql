@@ -19,8 +19,8 @@ namespace sstable {
 class SSTableServlet : public fnord::http::HTTPService {
 public:
   enum class ResponseFormat {
-    kJSON,
-    kCSV
+    JSON,
+    CSV
   };
 
   SSTableServlet(const String& base_path, VFS* vfs);
@@ -35,6 +35,8 @@ protected:
       fnord::http::HTTPRequest* req,
       fnord::http::HTTPResponse* res,
       const URI& uri);
+
+  ResponseFormat formatFromString(const String& format);
 
   String base_path_;
   VFS* vfs_;
