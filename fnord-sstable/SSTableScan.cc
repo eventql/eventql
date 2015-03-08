@@ -36,6 +36,63 @@ void SSTableScan::setOffset(long unsigned int offset) {
   offset_ = offset;
 }
 
+void SSTableScan::setOrderBy(const String& column, const String& order_fn) {
+  if (order_fn == "STRASC") {
+    setOrderBy(column, [] (const String& a, const String& b) {
+      return a < b;
+    });
+
+    return;
+  }
+
+  if (order_fn == "STRDSC") {
+    setOrderBy(column, [] (const String& a, const String& b) {
+      return b < a;
+    });
+
+    return;
+  }
+
+  if (order_fn == "NUMASC") {
+    setOrderBy(column, [] (const String& a, const String& b) {
+      return std::stod(a) < std::stod(b);
+    });
+
+    return;
+  }
+
+  if (order_fn == "NUMDSC") {
+    setOrderBy(column, [] (const String& a, const String& b) {
+      return std::stod(b) < std::stod(a);
+    });
+
+    return;
+  }
+
+  RAISEF(
+      kIllegalArgumentError,
+      "invalid order fn: $0, valid arguments: STRASC, STRDSC, NUMASC, NUMDSC",
+      order_fn);
+}
+
+void SSTableScan::setOrderBy(const String& column, OrderFn order_fn) {
+  has_order_by_ = true;
+  order_by_fn_ = order_fn;
+
+  auto colid = schema_->columnID(column);
+
+  for (int i = 0; i < select_list_.size(); ++i) {
+    if (select_list_[i] == colid) {
+      order_by_index_ = i;
+      return;
+    }
+  }
+
+  RAISE(
+      kIllegalArgumentError,
+      "the order_by column must be included in the select list");
+}
+
 Vector<String> SSTableScan::columnNames() const {
   Vector<String> cols;
 
@@ -90,7 +147,11 @@ void SSTableScan::execute(
   }
 
   if (has_order_by_) {
-    // sort
+    std::sort(rows.begin(), rows.end(), [this] (
+        const Vector<String>& a,
+        const Vector<String>& b) {
+      return order_by_fn_(a[order_by_index_], b[order_by_index_]);
+    });
 
     auto limit = rows.size();
     if (limit_ > 0) {
