@@ -301,6 +301,7 @@ add_executable(cm-ctrstatsrollupflat
     $<TARGET_OBJECTS:fnord-json>
     $<TARGET_OBJECTS:fnord-rpc>
     $<TARGET_OBJECTS:fnord-sstable>
+    cm-stats/CTRStatsBuild.cc
     cm-stats/cm-ctrstatsrollupflat.cc)
 
 target_link_libraries(cm-ctrstatsrollupflat
