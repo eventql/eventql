@@ -31,7 +31,7 @@
 #include "fnord-base/stats/statsdagent.h"
 #include "fnord-sstable/sstablereader.h"
 #include "fnord-mdb/MDB.h"
-#include "cm-common/CustomerNamespace.h"
+#include "CustomerNamespace.h"
 #include "cm-logjoin/LogJoin.h"
 
 using namespace fnord;
