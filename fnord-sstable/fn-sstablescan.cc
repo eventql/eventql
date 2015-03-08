@@ -52,6 +52,24 @@ int main(int argc, const char** argv) {
       "<num>");
 
   flags.defineFlag(
+      "order_by",
+      fnord::cli::FlagParser::T_STRING,
+      false,
+      NULL,
+      NULL,
+      "order by",
+      "<column>");
+
+  flags.defineFlag(
+      "order_fn",
+      fnord::cli::FlagParser::T_STRING,
+      false,
+      NULL,
+      "STRASC",
+      "one of: STRASC, STRDSC, NUMASC, NUMDSC",
+      "<fn>");
+
+  flags.defineFlag(
       "loglevel",
       fnord::cli::FlagParser::T_STRING,
       false,
@@ -65,6 +83,7 @@ int main(int argc, const char** argv) {
   Logger::get()->setMinimumLogLevel(
       strToLogLevel(flags.getString("loglevel")));
 
+  /* open input sstable */
   auto input_file = flags.getString("file");
   sstable::SSTableReader reader(File::openFile(input_file, File::O_READ));
   if (reader.bodySize() == 0) {
@@ -74,6 +93,7 @@ int main(int argc, const char** argv) {
   sstable::SSTableColumnSchema schema;
   schema.loadIndex(&reader);
 
+  /* set up scan */
   sstable::SSTableScan scan(&schema);
   if (flags.isSet("limit")) {
     scan.setLimit(flags.getInt("limit"));
@@ -83,6 +103,11 @@ int main(int argc, const char** argv) {
     scan.setOffset(flags.getInt("offset"));
   }
 
+  if (flags.isSet("order_by")) {
+    scan.setOrderBy(flags.getString("order_by"), flags.getString("order_fn"));
+  }
+
+  /* execute scan */
   auto headers = scan.columnNames();
   fnord::iputs("hdr: $0", headers);
 
