@@ -35,6 +35,7 @@ include_directories(${FNORD_FTS_INCLUDE})
 
 add_library(cm-common OBJECT
     cm-common/common.cc
+    cm-common/CTRCounter.cc
     cm-common/FeatureCache.cc
     cm-common/FeatureID.cc
     cm-common/FeaturePack.cc
@@ -93,31 +94,6 @@ add_executable(cm-logjoin
     cm-logjoin/LogJoinShard.cc)
 
 target_link_libraries(cm-logjoin ${CMAKE_THREAD_LIBS_INIT})
-
-# add_executable(cm-crawlworker
-#     $<TARGET_OBJECTS:cm-common>
-#     $<TARGET_OBJECTS:fnord-base>
-#     $<TARGET_OBJECTS:fnord-http>
-#     $<TARGET_OBJECTS:fnord-json>
-#     $<TARGET_OBJECTS:fnord-redis>
-#     $<TARGET_OBJECTS:fnord-sstable>
-#     $<TARGET_OBJECTS:fnord-logstream-service>
-#     cm-common/crawler/crawler.cc
-#     cm-common/cm-crawlworker.cc)
-# 
-# target_link_libraries(cm-crawlworker ${CMAKE_THREAD_LIBS_INIT})
-# 
-add_executable(cm-stats
-    $<TARGET_OBJECTS:fnord-base>
-    $<TARGET_OBJECTS:fnord-chart>
-    $<TARGET_OBJECTS:fnord-http>
-    $<TARGET_OBJECTS:fnord-json>
-    $<TARGET_OBJECTS:fnord-sstable>
-    $<TARGET_OBJECTS:fnord-metricdb>
-    $<TARGET_OBJECTS:fnord-rpc>
-    cm-stats/cm-stats.cc)
-
-target_link_libraries(cm-stats ${CMAKE_THREAD_LIBS_INIT})
 
 add_executable(cm-indexbuild
     $<TARGET_OBJECTS:cm-common>
@@ -227,71 +203,6 @@ add_executable(cm-featureselect
 target_link_libraries(cm-featureselect
     ${CMAKE_THREAD_LIBS_INIT})
 
-#add_executable(cm-ctrstats
-#    $<TARGET_OBJECTS:cm-common>
-#    $<TARGET_OBJECTS:fnord-base>
-#    $<TARGET_OBJECTS:fnord-feeds>
-#    $<TARGET_OBJECTS:fnord-mdb>
-#    $<TARGET_OBJECTS:fnord-http>
-#    $<TARGET_OBJECTS:fnord-json>
-#    $<TARGET_OBJECTS:fnord-rpc>
-#    $<TARGET_OBJECTS:fnord-sstable>
-#    cm-stats/QueryFeatureCTRReport.cc
-#    cm-stats/CTRCounterSchema.cc
-#    cm-stats/CTRStatsBuild.cc
-#    cm-stats/cm-ctrstats.cc)
-#
-#target_link_libraries(cm-ctrstats
-#    ${CMAKE_THREAD_LIBS_INIT})
-
-add_executable(cm-ctrstatsserver
-    $<TARGET_OBJECTS:cm-common>
-    $<TARGET_OBJECTS:fnord-base>
-    $<TARGET_OBJECTS:fnord-feeds>
-    $<TARGET_OBJECTS:fnord-mdb>
-    $<TARGET_OBJECTS:fnord-http>
-    $<TARGET_OBJECTS:fnord-json>
-    $<TARGET_OBJECTS:fnord-rpc>
-    $<TARGET_OBJECTS:fnord-sstable>
-    cm-stats/cm-ctrstatsserver.cc)
-
-target_link_libraries(cm-ctrstatsserver
-    ${CMAKE_THREAD_LIBS_INIT})
-
-add_executable(cm-ctrstatsexport
-    $<TARGET_OBJECTS:cm-common>
-    $<TARGET_OBJECTS:fnord-base>
-    $<TARGET_OBJECTS:fnord-feeds>
-    $<TARGET_OBJECTS:fnord-mdb>
-    $<TARGET_OBJECTS:fnord-http>
-    $<TARGET_OBJECTS:fnord-json>
-    $<TARGET_OBJECTS:fnord-rpc>
-    $<TARGET_OBJECTS:fnord-sstable>
-    cm-stats/CTRCounterSchema.cc
-    cm-stats/CTRStatsBuild.cc
-    cm-stats/cm-ctrstatsexport.cc)
-
-target_link_libraries(cm-ctrstatsexport
-    ${CMAKE_THREAD_LIBS_INIT})
-
-add_executable(cm-ctrstatsbuild
-    $<TARGET_OBJECTS:cm-common>
-    $<TARGET_OBJECTS:fnord-base>
-    $<TARGET_OBJECTS:fnord-feeds>
-    $<TARGET_OBJECTS:fnord-mdb>
-    $<TARGET_OBJECTS:fnord-http>
-    $<TARGET_OBJECTS:fnord-json>
-    $<TARGET_OBJECTS:fnord-rpc>
-    $<TARGET_OBJECTS:fnord-sstable>
-    cm-stats/QueryFeatureCTRReport.cc
-    cm-stats/QueryFeatureCrossItemFeatureCTRReport.cc
-    cm-stats/QueryFeatureCrossItemTermsCTRReport.cc
-    cm-stats/CTRStatsBuild.cc
-    cm-stats/cm-ctrstatsbuild.cc)
-
-target_link_libraries(cm-ctrstatsbuild
-    ${CMAKE_THREAD_LIBS_INIT})
-
 add_executable(cm-ctrstats-rollupflat
     $<TARGET_OBJECTS:cm-common>
     $<TARGET_OBJECTS:fnord-base>
@@ -301,7 +212,6 @@ add_executable(cm-ctrstats-rollupflat
     $<TARGET_OBJECTS:fnord-json>
     $<TARGET_OBJECTS:fnord-rpc>
     $<TARGET_OBJECTS:fnord-sstable>
-    cm-stats/CTRStatsBuild.cc
     cm-stats/cm-ctrstats-rollupflat.cc)
 
 target_link_libraries(cm-ctrstats-rollupflat
@@ -316,7 +226,6 @@ add_executable(cm-ctrstats-groupbyqueryfeature
     $<TARGET_OBJECTS:fnord-json>
     $<TARGET_OBJECTS:fnord-rpc>
     $<TARGET_OBJECTS:fnord-sstable>
-    cm-stats/CTRStatsBuild.cc
     cm-stats/cm-ctrstats-groupbyqueryfeature.cc)
 
 target_link_libraries(cm-ctrstats-groupbyqueryfeature
