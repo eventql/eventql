@@ -8,10 +8,10 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <fnord-sstable/SSTableColumnSchema.h>
-#include <fnord-sstable/SSTableReader.h>
-#include <fnord-sstable/SSTableWriter.h>
-#include <fnord-base/util/BinaryMessageReader.h>
-#include <fnord-base/util/BinaryMessageWriter.h>
+#include <fnord-sstable/sstablereader.h>
+#include <fnord-sstable/sstablewriter.h>
+#include <fnord-base/util/binarymessagereader.h>
+#include <fnord-base/util/binarymessagewriter.h>
 
 namespace fnord {
 namespace sstable {
