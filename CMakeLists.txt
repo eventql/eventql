@@ -316,6 +316,7 @@ add_executable(cm-reportserver
     $<TARGET_OBJECTS:fnord-json>
     $<TARGET_OBJECTS:fnord-rpc>
     $<TARGET_OBJECTS:fnord-sstable>
+    3rdparty/libfnord/fnord-sstable/SSTableServlet.cc
     cm-stats/cm-reportserver.cc)
 
 target_link_libraries(cm-reportserver
