@@ -149,6 +149,10 @@ void SSTableWriter::writeHeader(void const* userdata, size_t userdata_size) {
   page->sync();
 }
 
+void SSTableWriter::writeIndex(uint32_t index_type, const Buffer& buf) {
+  writeIndex(index_type, buf.data(), buf.size());
+}
+
 void SSTableWriter::writeIndex(uint32_t index_type, void* data, size_t size) {
   if (finalized_) {
     RAISE(kIllegalStateError, "table is immutable (alread finalized)");
