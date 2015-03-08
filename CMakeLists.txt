@@ -292,7 +292,7 @@ add_executable(cm-ctrstatsbuild
 target_link_libraries(cm-ctrstatsbuild
     ${CMAKE_THREAD_LIBS_INIT})
 
-add_executable(cm-ctrstatsrollupflat
+add_executable(cm-ctrstats-rollupflat
     $<TARGET_OBJECTS:cm-common>
     $<TARGET_OBJECTS:fnord-base>
     $<TARGET_OBJECTS:fnord-feeds>
@@ -302,9 +302,24 @@ add_executable(cm-ctrstatsrollupflat
     $<TARGET_OBJECTS:fnord-rpc>
     $<TARGET_OBJECTS:fnord-sstable>
     cm-stats/CTRStatsBuild.cc
-    cm-stats/cm-ctrstatsrollupflat.cc)
+    cm-stats/cm-ctrstats-rollupflat.cc)
 
-target_link_libraries(cm-ctrstatsrollupflat
+target_link_libraries(cm-ctrstats-rollupflat
+    ${CMAKE_THREAD_LIBS_INIT})
+
+add_executable(cm-ctrstats-groupbyqueryfeature
+    $<TARGET_OBJECTS:cm-common>
+    $<TARGET_OBJECTS:fnord-base>
+    $<TARGET_OBJECTS:fnord-feeds>
+    $<TARGET_OBJECTS:fnord-mdb>
+    $<TARGET_OBJECTS:fnord-http>
+    $<TARGET_OBJECTS:fnord-json>
+    $<TARGET_OBJECTS:fnord-rpc>
+    $<TARGET_OBJECTS:fnord-sstable>
+    cm-stats/CTRStatsBuild.cc
+    cm-stats/cm-ctrstats-groupbyqueryfeature.cc)
+
+target_link_libraries(cm-ctrstats-groupbyqueryfeature
     ${CMAKE_THREAD_LIBS_INIT})
 
 add_executable(cm-reportserver
