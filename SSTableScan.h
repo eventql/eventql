@@ -33,8 +33,19 @@ public:
 
   SSTableScan(SSTableColumnSchema* schema);
 
+  void setLimit(long int limit);
+  void setOffset(long unsigned int offset);
+
   void execute(Cursor* cursor, Function<void (const Vector<String> row)> fn);
 
+  Vector<String> columnNames() const;
+
+protected:
+  SSTableColumnSchema* schema_;
+  Vector<SSTableColumnID> select_list_;
+  bool has_order_by_;
+  long int limit_;
+  long unsigned int offset_;
 };
 
 } // namespace sstable

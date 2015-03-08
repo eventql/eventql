@@ -38,6 +38,15 @@ SSTableColumnType SSTableColumnSchema::columnType(SSTableColumnID id) const {
   return iter->second.type;
 }
 
+String SSTableColumnSchema::columnName(SSTableColumnID id) const {
+  auto iter = col_info_.find(id);
+  if (iter == col_info_.end()) {
+    RAISEF(kIndexError, "invalid column index: $0", id);
+  }
+
+  return iter->second.name;
+}
+
 SSTableColumnID SSTableColumnSchema::columnID(const String& column_name) const {
   auto iter = col_ids_.find(column_name);
   if (iter == col_ids_.end()) {
@@ -45,6 +54,16 @@ SSTableColumnID SSTableColumnSchema::columnID(const String& column_name) const {
   }
 
   return iter->second;
+}
+
+Set<SSTableColumnID> SSTableColumnSchema::columnIDs() const {
+  Set<SSTableColumnID> ids;
+
+  for (const auto& c : col_info_) {
+    ids.emplace(c.first);
+  }
+
+  return ids;
 }
 
 void SSTableColumnSchema::writeIndex(Buffer* buf) {
@@ -76,7 +95,6 @@ void SSTableColumnSchema::loadIndex(const Buffer& buf) {
     uint32_t col_name_len = *reader.readUInt32();
     String col_name((char*) reader.read(col_name_len), col_name_len);
 
-    fnord::iputs("load col from idx: $0, $1", col_name, col_id);
     addColumn(col_name, col_id, (fnord::sstable::SSTableColumnType) col_type);
   }
 }

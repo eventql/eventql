@@ -48,7 +48,9 @@ public:
       SSTableColumnType type);
 
   SSTableColumnType columnType(SSTableColumnID id) const;
+  String columnName(SSTableColumnID id) const;
   SSTableColumnID columnID(const String& column_name) const;
+  Set<SSTableColumnID> columnIDs() const;
 
   void writeIndex(Buffer* buf);
   void writeIndex(SSTableWriter* sstable_writer);

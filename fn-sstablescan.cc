@@ -34,6 +34,24 @@ int main(int argc, const char** argv) {
       "<file>");
 
   flags.defineFlag(
+      "limit",
+      fnord::cli::FlagParser::T_INTEGER,
+      false,
+      NULL,
+      NULL,
+      "limit",
+      "<num>");
+
+  flags.defineFlag(
+      "offset",
+      fnord::cli::FlagParser::T_INTEGER,
+      false,
+      NULL,
+      NULL,
+      "offset",
+      "<num>");
+
+  flags.defineFlag(
       "loglevel",
       fnord::cli::FlagParser::T_STRING,
       false,
@@ -57,6 +75,16 @@ int main(int argc, const char** argv) {
   schema.loadIndex(&reader);
 
   sstable::SSTableScan scan(&schema);
+  if (flags.isSet("limit")) {
+    scan.setLimit(flags.getInt("limit"));
+  }
+
+  if (flags.isSet("offset")) {
+    scan.setOffset(flags.getInt("offset"));
+  }
+
+  auto headers = scan.columnNames();
+  fnord::iputs("hdr: $0", headers);
 
   auto cursor = reader.getCursor();
   scan.execute(cursor.get(), [] (const Vector<String> row) {
