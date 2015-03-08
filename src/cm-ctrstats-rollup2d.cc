@@ -30,7 +30,15 @@
 
 using namespace fnord;
 
-typedef Tuple<String, uint64_t, uint64_t, double, double, double> OutputRow;
+typedef Tuple<
+    String,
+    uint64_t,
+    uint64_t,
+    double,
+    double,
+    double,
+    double> OutputRow;
+
 typedef HashMap<String, cm::CTRCounter> CounterMap;
 
 /* read all input sstables */
@@ -93,10 +101,11 @@ void writeOutputTable(const String& filename, const Vector<OutputRow>& rows) {
   sstable_schema.addColumn("num_views", 1, sstable::SSTableColumnType::UINT64);
   sstable_schema.addColumn("num_clicks", 2, sstable::SSTableColumnType::UINT64);
   sstable_schema.addColumn("p_view_base", 3, sstable::SSTableColumnType::FLOAT);
-  sstable_schema.addColumn("p_click", 4, sstable::SSTableColumnType::FLOAT);
+  sstable_schema.addColumn("p_view_dim1", 4, sstable::SSTableColumnType::FLOAT);
+  sstable_schema.addColumn("p_click", 5, sstable::SSTableColumnType::FLOAT);
   sstable_schema.addColumn(
       "p_click_normalized",
-      5,
+      6,
       sstable::SSTableColumnType::FLOAT);
 
   /* open output sstable */
@@ -116,6 +125,7 @@ void writeOutputTable(const String& filename, const Vector<OutputRow>& rows) {
     cols.addFloatColumn(3, std::get<3>(r));
     cols.addFloatColumn(4, std::get<4>(r));
     cols.addFloatColumn(5, std::get<5>(r));
+    cols.addFloatColumn(6, std::get<6>(r));
 
     sstable_writer->appendRow(std::get<0>(r), cols);
   }
@@ -126,28 +136,45 @@ void writeOutputTable(const String& filename, const Vector<OutputRow>& rows) {
 
 /* aggregate ctr counters (flat) */
 void aggregateCounters(CounterMap* counters, Vector<OutputRow>* rows) {
-  const auto& global_counter_iter = counters->find("__GLOBAL");
-  if (global_counter_iter == counters->end()) {
-    fnord::logCritical("cm.ctrstats", "missing global counter");
+  const auto& global_counter_iter = counters.find("__GLOBAL");
+  if (global_counter_iter == counters.end()) {
+    fnord::logCritical("cm.ctrstatsexport", "missing global counter");
     exit(1);
   }
   const auto& global_counter = global_counter_iter->second;
 
-  for (const auto& row : *counters) {
+  for (const auto& row : counters) {
     const auto& ctr = row.second;
-    if (row.first.length() == 0 || row.first == "__GLOBAL") {
+
+    auto sep = row.first.find("~");
+    if (sep == std::string::npos) {
+      continue;
+    }
+    auto dim1 = row.first.substr(0, sep);
+    auto dim2 = row.first.substr(sep + 1);
+
+    if (dim1.length() == 0 || dim2.length() == 0) {
       continue;
     }
 
+    const auto& group_counter_iter = counters.find(dim1);
+    if (group_counter_iter == counters.end()) {
+      fnord::logWarning("cm.ctrstatsexport", "missing row: $0", dim1);
+      continue;
+    }
+    const auto& group_counter = group_counter_iter->second;
+
     double p_base = ctr.num_views / (double) global_counter.num_views;
+    double p_base_dim2 = ctr.num_views / (double) group_counter.num_views;
     double p_click = ctr.num_clicks / (double) ctr.num_views;
-    double p_click_n = ctr.num_clicks / (double) global_counter.num_clicks;
+    double p_click_n = ctr.num_clicks / (double) group_counter.num_clicks;
 
     rows->emplace_back(
-        row.first,
+        StringUtil::format("$0~$1", dim1, dim2),
         row.second.num_views,
         row.second.num_clicks,
         p_base,
+        p_base_dim2,
         p_click,
         p_click_n);
   }
