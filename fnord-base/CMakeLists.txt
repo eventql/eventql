@@ -72,6 +72,7 @@ add_library(fnord-base OBJECT
     uri.cc
     util/binarymessagereader.cc
     util/binarymessagewriter.cc
+    util/SimpleRateLimit.cc
     wallclock.cc)
 
 add_executable(tests/test-inputstream
