@@ -32,7 +32,7 @@
 #include "fnord-base/stats/statsdagent.h"
 #include "fnord-mdb/MDB.h"
 #include "CustomerNamespace.h"
-#include "cm-logjoin/LogJoin.h"
+#include "logjoin/LogJoin.h"
 
 using namespace fnord;
 
