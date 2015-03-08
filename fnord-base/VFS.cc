@@ -13,8 +13,13 @@
 namespace fnord {
 
 RefPtr<VFSFile> WhitelistVFS::openFile(const String& filename) {
+  auto iter = whitelist_.find(filename);
+  if (iter == whitelist_.end()) {
+    RAISEF(kIndexError, "file not found in VFS: $0", filename);
+  }
+
   return RefPtr<VFSFile>(
-      new io::MmappedFile(File::openFile(filename, File::O_READ)));
+      new io::MmappedFile(File::openFile(iter->second, File::O_READ)));
 }
 
 void WhitelistVFS::registerFile(
