@@ -25,6 +25,7 @@
 
 namespace fnord {
 namespace sstable {
+class SSTableWriter;
 
 enum class SSTableColumnType : uint8_t {
   UINT32 = 1
@@ -34,6 +35,7 @@ typedef uint32_t SSTableColumnID;
 
 class SSTableColumnSchema {
 public:
+  static const uint32_t kSSTableIndexID = 0x34673;
 
   SSTableColumnSchema();
 
@@ -44,9 +46,16 @@ public:
 
   SSTableColumnType columnType(SSTableColumnID id) const;
 
-protected:
+  void writeIndex(Buffer* buf);
+  void writeIndex(SSTableWriter* sstable_writer);
 
-  HashMap<SSTableColumnID, SSTableColumnType> col_types_;
+protected:
+  struct SSTableColumnInfo {
+    String name;
+    SSTableColumnType type;
+  };
+
+  HashMap<SSTableColumnID, SSTableColumnInfo> col_info_;
 };
 
 } // namespace sstable

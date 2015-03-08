@@ -24,6 +24,7 @@ namespace fnord {
 namespace sstable {
 
 class SSTableColumnWriter;
+class SSTableColumnSchema;
 
 /**
  * A sstable that can written (appended) to and read from at the same time.
@@ -118,6 +119,7 @@ public:
   size_t headerSize() const;
 
   void writeIndex(uint32_t index_type, void* data, size_t size);
+  void writeIndex(uint32_t index_type, const Buffer& buf);
 
 protected:
 
