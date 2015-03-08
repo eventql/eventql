@@ -28,7 +28,7 @@ public:
   MmappedFile& operator=(const MmappedFile& copy) = delete;
   ~MmappedFile();
 
-  void* data() {
+  void* data() const {
     return data_;
   }
 
@@ -44,20 +44,8 @@ public:
     return data_;
   }
 
-  size_t size() {
+  size_t size() const {
     return size_;
-  }
-
-  template <typename T>
-  inline T* structAt(size_t pos) const {
-#ifndef NDEBUG
-    if (pos >= size_) {
-      abort();
-      RAISE(kIndexError, "position out of bounds");
-    }
-#endif
-
-    return (T*) (((char *) data_) + pos);
   }
 
   bool isWritable() const;
