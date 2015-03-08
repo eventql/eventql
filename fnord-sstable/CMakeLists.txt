@@ -36,4 +36,5 @@ add_library(fnord-sstable OBJECT
     sstablerepair.cc
     sstablewriter.cc
     SSTableColumnSchema.cc
+    SSTableColumnReader.cc
     SSTableColumnWriter.cc)

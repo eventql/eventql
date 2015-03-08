@@ -29,7 +29,9 @@ class SSTableWriter;
 class SSTableReader;
 
 enum class SSTableColumnType : uint8_t {
-  UINT32 = 1
+  UINT32 = 1,
+  UINT64 = 2,
+  FLOAT  = 3
 };
 
 typedef uint32_t SSTableColumnID;
@@ -46,6 +48,7 @@ public:
       SSTableColumnType type);
 
   SSTableColumnType columnType(SSTableColumnID id) const;
+  SSTableColumnID columnID(const String& column_name) const;
 
   void writeIndex(Buffer* buf);
   void writeIndex(SSTableWriter* sstable_writer);
@@ -60,6 +63,7 @@ protected:
   };
 
   HashMap<SSTableColumnID, SSTableColumnInfo> col_info_;
+  HashMap<String, SSTableColumnID> col_ids_;
 };
 
 } // namespace sstable
