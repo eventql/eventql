@@ -6,8 +6,8 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-#include <fnord-base/util/BinaryMessageReader.h>
-#include <fnord-base/util/BinaryMessageWriter.h>
+#include <fnord-base/util/binarymessagereader.h>
+#include <fnord-base/util/binarymessagewriter.h>
 #include "CTRCounter.h"
 
 using namespace fnord;
