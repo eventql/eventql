@@ -7,7 +7,7 @@
  * permission is obtained.
  */
 #include "frontend/LookupServlet.h"
-#include "cm-sellerstats/SellerStatsLookup.h"
+#include "sellerstats/SellerStatsLookup.h"
 
 using namespace fnord;
 
