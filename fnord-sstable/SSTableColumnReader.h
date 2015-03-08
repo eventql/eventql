@@ -7,8 +7,8 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#ifndef _FNORD_SSTABLE_SSTABLECOLUMNWRITER_H
-#define _FNORD_SSTABLE_SSTABLECOLUMNWRITER_H
+#ifndef _FNORD_SSTABLE_SSTABLECOLUMNREADER_H
+#define _FNORD_SSTABLE_SSTABLECOLUMNREADER_H
 #include <stdlib.h>
 #include <string>
 #include <vector>
@@ -28,21 +28,20 @@
 namespace fnord {
 namespace sstable {
 
-class SSTableColumnWriter {
+class SSTableColumnReader {
 public:
 
-  SSTableColumnWriter(SSTableColumnSchema* schema);
+  SSTableColumnReader(SSTableColumnSchema* schema, const Buffer& buf);
 
-  void addUInt32Column(SSTableColumnID id, uint32_t value);
-  void addUInt64Column(SSTableColumnID id, uint64_t value);
-  void addFloatColumn(SSTableColumnID id, double value);
-
-  void* data() const;
-  size_t size() const;
+  uint32_t getUInt32Column(SSTableColumnID id);
+  uint64_t getUInt64Column(SSTableColumnID id);
+  double getFloatColumn(SSTableColumnID id);
 
 protected:
   SSTableColumnSchema* schema_;
-  util::BinaryMessageWriter msg_writer_;
+  Buffer buf_;
+  util::BinaryMessageReader msg_reader_;
+  Vector<std::tuple<SSTableColumnID, uint64_t, uint32_t>> col_data_;
 };
 
 } // namespace sstable

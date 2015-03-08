@@ -26,6 +26,7 @@ void SSTableColumnSchema::addColumn(
   info.name = name;
   info.type = type;
   col_info_[id] = info;
+  col_ids_[name] = id;
 }
 
 SSTableColumnType SSTableColumnSchema::columnType(SSTableColumnID id) const {
@@ -35,6 +36,15 @@ SSTableColumnType SSTableColumnSchema::columnType(SSTableColumnID id) const {
   }
 
   return iter->second.type;
+}
+
+SSTableColumnID SSTableColumnSchema::columnID(const String& column_name) const {
+  auto iter = col_ids_.find(column_name);
+  if (iter == col_ids_.end()) {
+    RAISEF(kIndexError, "invalid column: $0", column_name);
+  }
+
+  return iter->second;
 }
 
 void SSTableColumnSchema::writeIndex(Buffer* buf) {
@@ -61,11 +71,12 @@ void SSTableColumnSchema::loadIndex(const Buffer& buf) {
   util::BinaryMessageReader reader(buf.data(), buf.size());
 
   while (reader.remaining() > 0) {
-    uint32_t col_id = *reader.readUInt32();
     uint32_t col_type = *reader.readUInt32();
+    uint32_t col_id = *reader.readUInt32();
     uint32_t col_name_len = *reader.readUInt32();
     String col_name((char*) reader.read(col_name_len), col_name_len);
 
+    fnord::iputs("load col from idx: $0, $1", col_name, col_id);
     addColumn(col_name, col_id, (fnord::sstable::SSTableColumnType) col_type);
   }
 }

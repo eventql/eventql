@@ -7,6 +7,7 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
+#include <fnord-base/ieee754.h>
 #include <fnord-sstable/SSTableColumnWriter.h>
 
 namespace fnord {
@@ -16,7 +17,7 @@ SSTableColumnWriter::SSTableColumnWriter(
     SSTableColumnSchema* schema) :
     schema_(schema) {}
 
-void SSTableColumnWriter::addUINT32Column(SSTableColumnID id, uint32_t value) {
+void SSTableColumnWriter::addUInt32Column(SSTableColumnID id, uint32_t value) {
 #ifndef FNORD_NODEBUG
   if (schema_->columnType(id) != SSTableColumnType::UINT32) {
     RAISEF(kIllegalArgumentError, "invalid column type for column_id: $0", id);
@@ -25,6 +26,28 @@ void SSTableColumnWriter::addUINT32Column(SSTableColumnID id, uint32_t value) {
 
   msg_writer_.appendUInt32(id);
   msg_writer_.appendUInt32(value);
+}
+
+void SSTableColumnWriter::addUInt64Column(SSTableColumnID id, uint64_t value) {
+#ifndef FNORD_NODEBUG
+  if (schema_->columnType(id) != SSTableColumnType::UINT64) {
+    RAISEF(kIllegalArgumentError, "invalid column type for column_id: $0", id);
+  }
+#endif
+
+  msg_writer_.appendUInt32(id);
+  msg_writer_.appendUInt64(value);
+}
+
+void SSTableColumnWriter::addFloatColumn(SSTableColumnID id, double value) {
+#ifndef FNORD_NODEBUG
+  if (schema_->columnType(id) != SSTableColumnType::FLOAT) {
+    RAISEF(kIllegalArgumentError, "invalid column type for column_id: $0", id);
+  }
+#endif
+
+  msg_writer_.appendUInt32(id);
+  msg_writer_.appendUInt64(IEEE754::toBytes(value));
 }
 
 void* SSTableColumnWriter::data() const {
