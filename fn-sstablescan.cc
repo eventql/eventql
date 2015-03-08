@@ -1,0 +1,68 @@
+/**
+ * This file is part of the "FnordMetric" project
+ *   Copyright (c) 2014 Paul Asmuth, Google Inc.
+ *
+ * FnordMetric is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License v3.0. You should have received a
+ * copy of the GNU General Public License along with this program. If not, see
+ * <http://www.gnu.org/licenses/>.
+ */
+#include <stdlib.h>
+#include <unistd.h>
+#include "fnord-base/application.h"
+#include "fnord-base/cli/flagparser.h"
+#include "fnord-base/logging.h"
+#include "fnord-base/inspect.h"
+#include "fnord-sstable/sstablereader.h"
+#include "fnord-sstable/SSTableScan.h"
+
+using namespace fnord;
+
+int main(int argc, const char** argv) {
+  fnord::Application::init();
+  fnord::Application::logToStderr();
+
+  fnord::cli::FlagParser flags;
+
+  flags.defineFlag(
+      "file",
+      fnord::cli::FlagParser::T_STRING,
+      true,
+      "f",
+      NULL,
+      "input sstable file",
+      "<file>");
+
+  flags.defineFlag(
+      "loglevel",
+      fnord::cli::FlagParser::T_STRING,
+      false,
+      NULL,
+      "INFO",
+      "loglevel",
+      "<level>");
+
+  flags.parseArgv(argc, argv);
+
+  Logger::get()->setMinimumLogLevel(
+      strToLogLevel(flags.getString("loglevel")));
+
+  auto input_file = flags.getString("file");
+  sstable::SSTableReader reader(File::openFile(input_file, File::O_READ));
+  if (reader.bodySize() == 0) {
+    fnord::logWarning("fnord.sstablescan", "sstable is unfinished");
+  }
+
+  sstable::SSTableColumnSchema schema;
+  schema.loadIndex(&reader);
+
+  sstable::SSTableScan scan(&schema);
+
+  auto cursor = reader.getCursor();
+  scan.execute(cursor.get(), [] (const Vector<String> row) {
+    fnord::iputs("row: $0", row);
+  });
+
+  return 0;
+}
+
