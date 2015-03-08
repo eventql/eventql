@@ -59,8 +59,8 @@ add_executable(cm-frontend
     src/frontend/CMFrontend.cc
     src/frontend/LookupServlet.cc
     src/cm-frontend.cc
-    cm-sellerstats/ActivityLog.cc
-    cm-sellerstats/SellerStatsLookup.cc)
+    src/sellerstats/ActivityLog.cc
+    src/sellerstats/SellerStatsLookup.cc)
 
 target_link_libraries(cm-frontend ${CMAKE_THREAD_LIBS_INIT})
 target_link_libraries(cm-frontend m)
@@ -87,12 +87,12 @@ add_executable(cm-logjoin
     $<TARGET_OBJECTS:fnord-feeds>
     $<TARGET_OBJECTS:fnord-mdb>
     $<TARGET_OBJECTS:fnord-rpc>
-    cm-logjoin/TrackedQuery.cc
-    cm-logjoin/TrackedItemVisit.cc
-    cm-logjoin/TrackedSession.cc
-    cm-logjoin/cm-logjoin.cc
-    cm-logjoin/LogJoin.cc
-    cm-logjoin/LogJoinShard.cc)
+    src/logjoin/TrackedQuery.cc
+    src/logjoin/TrackedItemVisit.cc
+    src/logjoin/TrackedSession.cc
+    src/cm-logjoin.cc
+    src/logjoin/LogJoin.cc
+    src/logjoin/LogJoinShard.cc)
 
 target_link_libraries(cm-logjoin ${CMAKE_THREAD_LIBS_INIT})
 
@@ -106,8 +106,8 @@ add_executable(cm-indexbuild
     $<TARGET_OBJECTS:fnord-feeds>
     $<TARGET_OBJECTS:fnord-rpc>
     $<TARGET_OBJECTS:fnord-mdb>
-    cm-index/cm-indexbuild.cc
-    cm-index/IndexBuilder.cc)
+    src/cm-indexbuild.cc
+    src/index/IndexBuilder.cc)
 
 target_link_libraries(cm-indexbuild
     ${CMAKE_THREAD_LIBS_INIT}
@@ -123,7 +123,7 @@ add_executable(cm-indexlookup
     $<TARGET_OBJECTS:fnord-feeds>
     $<TARGET_OBJECTS:fnord-rpc>
     $<TARGET_OBJECTS:fnord-mdb>
-    cm-index/cm-indexlookup.cc)
+    src/cm-indexlookup.cc)
 
 target_link_libraries(cm-indexlookup
     ${CMAKE_THREAD_LIBS_INIT}
@@ -138,9 +138,9 @@ add_executable(cm-sellerstatsbuild
     $<TARGET_OBJECTS:fnord-feeds>
     $<TARGET_OBJECTS:fnord-rpc>
     $<TARGET_OBJECTS:fnord-mdb>
-    cm-sellerstats/ActivityLog.cc
-    cm-sellerstats/cm-sellerstatsbuild.cc
-    cm-sellerstats/SellerStatsBuild.cc)
+    src/sellerstats/ActivityLog.cc
+    src/cm-sellerstatsbuild.cc
+    src/sellerstats/SellerStatsBuild.cc)
 
 target_link_libraries(cm-sellerstatsbuild
     ${CMAKE_THREAD_LIBS_INIT})
@@ -154,9 +154,9 @@ add_executable(cm-sellerstatslookup
     $<TARGET_OBJECTS:fnord-feeds>
     $<TARGET_OBJECTS:fnord-rpc>
     $<TARGET_OBJECTS:fnord-mdb>
-    cm-sellerstats/ActivityLog.cc
-    cm-sellerstats/cm-sellerstatslookup.cc
-    cm-sellerstats/SellerStatsLookup.cc)
+    src/sellerstats/ActivityLog.cc
+    src/cm-sellerstatslookup.cc
+    src/sellerstats/SellerStatsLookup.cc)
 
 target_link_libraries(cm-sellerstatslookup
     ${CMAKE_THREAD_LIBS_INIT}
@@ -170,7 +170,7 @@ add_executable(cm-dawandaindexpush
     $<TARGET_OBJECTS:fnord-rpc>
     $<TARGET_OBJECTS:fnord-mdb>
     $<TARGET_OBJECTS:fnord-sql>
-    cm-dawandaconnect/cm-dawandaindexpush.cc)
+    customers/dawanda/cm-dawandaindexpush.cc)
 
 target_link_libraries(cm-dawandaindexpush
     ${CMAKE_THREAD_LIBS_INIT}
@@ -185,7 +185,7 @@ add_executable(cm-featuredump
     $<TARGET_OBJECTS:fnord-json>
     $<TARGET_OBJECTS:fnord-rpc>
     $<TARGET_OBJECTS:fnord-sstable>
-    cm-logreg/cm-featuredump.cc)
+    src/cm-featuredump.cc)
 
 target_link_libraries(cm-featuredump
     ${CMAKE_THREAD_LIBS_INIT})
@@ -199,7 +199,7 @@ add_executable(cm-featureselect
     $<TARGET_OBJECTS:fnord-json>
     $<TARGET_OBJECTS:fnord-rpc>
     $<TARGET_OBJECTS:fnord-sstable>
-    cm-logreg/cm-featureselect.cc)
+    src/cm-featureselect.cc)
 
 target_link_libraries(cm-featureselect
     ${CMAKE_THREAD_LIBS_INIT})
@@ -213,7 +213,7 @@ add_executable(cm-ctrstats-rollupflat
     $<TARGET_OBJECTS:fnord-json>
     $<TARGET_OBJECTS:fnord-rpc>
     $<TARGET_OBJECTS:fnord-sstable>
-    cm-stats/cm-ctrstats-rollupflat.cc)
+    src/cm-ctrstats-rollupflat.cc)
 
 target_link_libraries(cm-ctrstats-rollupflat
     ${CMAKE_THREAD_LIBS_INIT})
@@ -227,7 +227,7 @@ add_executable(cm-ctrstats-groupbyqueryfeature
     $<TARGET_OBJECTS:fnord-json>
     $<TARGET_OBJECTS:fnord-rpc>
     $<TARGET_OBJECTS:fnord-sstable>
-    cm-stats/cm-ctrstats-groupbyqueryfeature.cc)
+    src/cm-ctrstats-groupbyqueryfeature.cc)
 
 target_link_libraries(cm-ctrstats-groupbyqueryfeature
     ${CMAKE_THREAD_LIBS_INIT})
@@ -242,7 +242,7 @@ add_executable(cm-reportserver
     $<TARGET_OBJECTS:fnord-rpc>
     $<TARGET_OBJECTS:fnord-sstable>
     3rdparty/libfnord/fnord-sstable/SSTableServlet.cc
-    cm-stats/cm-reportserver.cc)
+    src/cm-reportserver.cc)
 
 target_link_libraries(cm-reportserver
     ${CMAKE_THREAD_LIBS_INIT})
