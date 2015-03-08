@@ -36,6 +36,7 @@ public:
   uint32_t getUInt32Column(SSTableColumnID id);
   uint64_t getUInt64Column(SSTableColumnID id);
   double getFloatColumn(SSTableColumnID id);
+  String getStringColumn(SSTableColumnID id);
 
 protected:
   SSTableColumnSchema* schema_;
