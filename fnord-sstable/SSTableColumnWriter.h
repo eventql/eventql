@@ -17,11 +17,13 @@
 #include <fnord-base/exception.h>
 #include <fnord-base/io/file.h>
 #include <fnord-base/io/mmappedfile.h>
+#include <fnord-base/util/binarymessagewriter.h>
 #include <fnord-sstable/binaryformat.h>
 #include <fnord-sstable/fileheaderreader.h>
 #include <fnord-sstable/cursor.h>
 #include <fnord-sstable/index.h>
 #include <fnord-sstable/indexprovider.h>
+#include <fnord-sstable/SSTableColumnSchema.h>
 
 namespace fnord {
 namespace sstable {
@@ -32,6 +34,9 @@ public:
   SSTableColumnWriter(SSTableColumnSchema* schema);
 
   void addUINT32Column(SSTableColumnID id, uint32_t value);
+
+  void* data() const;
+  size_t size() const;
 
 protected:
   SSTableColumnSchema* schema_;
