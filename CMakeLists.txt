@@ -9,6 +9,7 @@ option(ENABLE_TESTS "Build unit tests [default: ON]" ON)
 include_directories(${PROJECT_BINARY_DIR})
 file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/tests)
 include_directories(./)
+include_directories(./src)
 
 if(APPLE)
   set(CMAKE_CXX_FLAGS "-std=c++0x -stdlib=libc++ ${CMAKE_CXX_FLAGS}")
@@ -34,17 +35,17 @@ include_directories(3rdparty/libfnord/3rdparty/)
 include_directories(${FNORD_FTS_INCLUDE})
 
 add_library(cm-common OBJECT
-    cm-common/common.cc
-    cm-common/CTRCounter.cc
-    cm-common/FeatureCache.cc
-    cm-common/FeatureID.cc
-    cm-common/FeaturePack.cc
-    cm-common/FeatureSchema.cc
-    cm-common/FeatureIndex.cc
-    cm-common/ItemRef.cc
-    cm-common/JoinedQuery.cc
-    cm-common/CustomerNamespace.cc
-    cm-common/PackedExample.cc)
+    src/common.cc
+    src/CTRCounter.cc
+    src/FeatureCache.cc
+    src/FeatureID.cc
+    src/FeaturePack.cc
+    src/FeatureSchema.cc
+    src/FeatureIndex.cc
+    src/ItemRef.cc
+    src/JoinedQuery.cc
+    src/CustomerNamespace.cc
+    src/PackedExample.cc)
 
 add_executable(cm-frontend
     $<TARGET_OBJECTS:cm-common>
@@ -73,7 +74,7 @@ add_executable(cm-feedserver
     $<TARGET_OBJECTS:fnord-sstable>
     $<TARGET_OBJECTS:fnord-feeds>
     $<TARGET_OBJECTS:fnord-rpc>
-    cm-common/cm-feedserver.cc)
+    src/cm-feedserver.cc)
 
 target_link_libraries(cm-feedserver ${CMAKE_THREAD_LIBS_INIT})
 
