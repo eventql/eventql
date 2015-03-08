@@ -26,8 +26,8 @@
 namespace fnord {
 namespace sstable {
 
-enum class SSTableColumnType {
-  UINT32
+enum class SSTableColumnType : uint8_t {
+  UINT32 = 1
 };
 
 typedef uint32_t SSTableColumnID;
@@ -35,14 +35,18 @@ typedef uint32_t SSTableColumnID;
 class SSTableColumnSchema {
 public:
 
-
   SSTableColumnSchema();
 
   void addColumn(
       const String& name,
-      uint32_t id,
+      SSTableColumnID id,
       SSTableColumnType type);
 
+  SSTableColumnType columnType(SSTableColumnID id) const;
+
+protected:
+
+  HashMap<SSTableColumnID, SSTableColumnType> col_types_;
 };
 
 } // namespace sstable

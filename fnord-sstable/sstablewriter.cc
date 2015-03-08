@@ -14,6 +14,7 @@
 #include <fnord-sstable/fileheaderwriter.h>
 #include <fnord-sstable/fileheaderreader.h>
 #include <fnord-sstable/sstablewriter.h>
+#include <fnord-sstable/SSTableColumnWriter.h>
 
 namespace fnord {
 namespace sstable {
@@ -115,6 +116,12 @@ uint64_t SSTableWriter::appendRow(
 uint64_t SSTableWriter::appendRow(
     const std::string& key,
     const std::string& value) {
+  return appendRow(key.data(), key.size(), value.data(), value.size());
+}
+
+uint64_t SSTableWriter::appendRow(
+    const std::string& key,
+    const SSTableColumnWriter& value) {
   return appendRow(key.data(), key.size(), value.data(), value.size());
 }
 
