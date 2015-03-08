@@ -17,8 +17,21 @@ namespace fnord {
 class VFSFile : public RefCounted {
 public:
   virtual ~VFSFile() {}
-  virtual size_t size() = 0;
-  virtual void* data() = 0;
+
+  virtual size_t size() const = 0;
+  virtual void* data() const = 0;
+
+  template <typename T>
+  inline T* structAt(size_t pos) const {
+#ifndef FNORD_NODEBUG
+    if (pos >= size()) {
+      RAISE(kIndexError, "position out of bounds");
+    }
+#endif
+
+    return (T*) (((char *) data()) + pos);
+  }
+
 };
 
 class VFS {
