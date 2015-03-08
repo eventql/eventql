@@ -34,4 +34,5 @@ add_library(fnord-sstable OBJECT
     rowoffsetindex.cc
     sstablereader.cc
     sstablerepair.cc
-    sstablewriter.cc)
+    sstablewriter.cc
+    SSTableColumnSchema.cc)
