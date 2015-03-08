@@ -30,11 +30,14 @@ namespace sstable {
 
 class SSTableScan {
 public:
+  typedef Function<bool (const String& a, const String& b)> OrderFn;
 
   SSTableScan(SSTableColumnSchema* schema);
 
   void setLimit(long int limit);
   void setOffset(long unsigned int offset);
+  void setOrderBy(const String& column, const String& order_fn);
+  void setOrderBy(const String& column, OrderFn order_fn);
 
   void execute(Cursor* cursor, Function<void (const Vector<String> row)> fn);
 
@@ -44,6 +47,8 @@ protected:
   SSTableColumnSchema* schema_;
   Vector<SSTableColumnID> select_list_;
   bool has_order_by_;
+  int order_by_index_;
+  OrderFn order_by_fn_;
   long int limit_;
   long unsigned int offset_;
 };
