@@ -218,6 +218,20 @@ add_executable(cm-ctrstats-rollupflat
 target_link_libraries(cm-ctrstats-rollupflat
     ${CMAKE_THREAD_LIBS_INIT})
 
+add_executable(cm-ctrstats-rollup2d
+    $<TARGET_OBJECTS:cm-common>
+    $<TARGET_OBJECTS:fnord-base>
+    $<TARGET_OBJECTS:fnord-feeds>
+    $<TARGET_OBJECTS:fnord-mdb>
+    $<TARGET_OBJECTS:fnord-http>
+    $<TARGET_OBJECTS:fnord-json>
+    $<TARGET_OBJECTS:fnord-rpc>
+    $<TARGET_OBJECTS:fnord-sstable>
+    src/cm-ctrstats-rollupflat.cc)
+
+target_link_libraries(cm-ctrstats-rollup2d
+    ${CMAKE_THREAD_LIBS_INIT})
+
 add_executable(cm-ctrstats-groupbyqueryfeature
     $<TARGET_OBJECTS:cm-common>
     $<TARGET_OBJECTS:fnord-base>
