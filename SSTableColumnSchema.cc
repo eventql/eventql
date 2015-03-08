@@ -17,7 +17,18 @@ SSTableColumnSchema::SSTableColumnSchema() {}
 void SSTableColumnSchema::addColumn(
     const String& name,
     uint32_t id,
-    SSTableColumnType type) {}
+    SSTableColumnType type) {
+  col_types_[id] = type;
+}
+
+SSTableColumnType SSTableColumnSchema::columnType(SSTableColumnID id) const {
+  auto iter = col_types_.find(id);
+  if (iter == col_types_.end()) {
+    RAISEF(kIndexError, "invalid column index: $0", id);
+  }
+
+  return iter->second;
+}
 
 } // namespace sstable
 } // namespace fnord
