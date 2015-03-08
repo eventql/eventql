@@ -14,7 +14,7 @@
 
 namespace fnord {
 
-class VFSFile {
+class VFSFile : public RefCounted {
 public:
   virtual ~VFSFile() {}
   virtual size_t size() = 0;
@@ -25,6 +25,14 @@ class VFS {
 public:
   virtual ~VFS() {}
   virtual RefPtr<VFSFile> openFile(const String& filename) = 0;
+};
+
+class WhitelistVFS : public VFS {
+public:
+  RefPtr<VFSFile> openFile(const String& filename) override;
+  void registerFile(const String vfs_path, const String& real_path);
+protected:
+  HashMap<String, String> whitelist_;
 };
 
 }
