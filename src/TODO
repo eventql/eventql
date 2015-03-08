@@ -1,0 +1,96 @@
+
+-> DocID -> PackedDocID
+-> ItemRef -> DocID
+
+-> move LogParser out of LogJoin
+
+-> cm-crawlmaster
+-> cm-indexserver
+-> cm-featuredump
+
+rename Tracked* -> Joined*
+
+we strive to deliver intelligent tech solutions to drive/boost revenue and user
+satisfaction at the same time. we achieve this by building a deep understanding
+of user interests and matching the right users to the right content.
+
+ (quote -> people love good ads, hate bad ads)
+
+
+tangents:
+   (at the core: CM technology)
+   ecommerce  -- convert vistors to happy buyers
+   ads -- convert traffic to clicks
+
+we take a highlt consultative approach. we deliver the technology, expertise and
+integration. buying a clickmatcher product is as easy as signing a contract, 
+you don't need any developer, we deliver a turnkey solution
+
+we do not employ enterprise-y moon prices or high pressure sales tactics. we don't
+need those since we want to earn money by {increasing our partners revenue.
+growing togher. kuchen vergroessern}. that's why we offer performance based
+contract where we only earn money when you earn money.
+
+optimized rtb:
+  marketplaces
+     soundcloud xing dawanda immoscout
+  networks
+
+  upsides
+    potentially sell to customers that don;t do onsite ads yet (huge potential)
+    potentially satisfy onsite ads with external traffic -> free inbound traffic scheme
+
+ctr optimization:
+   content sites
+
+
+our product matrix:
+
+  [ for ecommerce sites | for publishers | for advertisers ]
+
+    - rtb engine // onsite cpc ads
+
+    >> with same infra as onsite cpc ad targeting
+      - choose the best product picture/title (auto ab test)
+      - "personalized catalog" (like youtube hp, items clustered by topic, topics selected via reco)
+      - personalize retargeting email
+
+    >> other products we get for free (b/c they are part of the infra) and we might aswell sell too:
+      - keyword suggestion
+      - personalized product recommendations
+      - user keyword tagging
+
+    >> random ideas
+      - ecommerce search as a service
+      - semantic ecommerce autocomplete
+      - personalized special offer popups
+      - cart abandonment popup (preis abrunden "let's call it ...")
+      - ecommerce analytics "hot products" etc
+      - product autotranslation
+      - ..
+      - ..
+
+
+
+"your products are really hot on dawanda? would you like to advertise them? + revproj."
+
+>> ItemMetadataService (memory cache + memcached backed)
+
+>> Keyword graph
+
+>> Item -> Keyword suggestion
+
+>> Query -> Keyword mapping
+
+>> PostingListService (postgres)
+  insertItem(item, keywords...)
+  getItems(keywords...)
+
+>> LogjoinService
+
+>> CampaignService
+
+>> CM Frontend
+  >> Tracker
+  >> QueryFrontend
+
