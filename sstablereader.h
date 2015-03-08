@@ -51,6 +51,7 @@ public:
   };
 
   SSTableReader(File&& file);
+  SSTableReader(RefPtr<VFSFile> vfs_file);
   SSTableReader(const SSTableReader& other) = delete;
   SSTableReader& operator=(const SSTableReader& other) = delete;
   ~SSTableReader();
