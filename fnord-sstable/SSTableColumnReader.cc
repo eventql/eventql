@@ -86,6 +86,17 @@ double SSTableColumnReader::getFloatColumn(SSTableColumnID id) {
   RAISE(kIndexError, "no value for column: $0", id);
 }
 
+String SSTableColumnReader::getStringColumn(SSTableColumnID id) {
+  switch (schema_->columnType(id)) {
+    case SSTableColumnType::UINT32:
+      return StringUtil::toString(getUInt32Column(id));
+    case SSTableColumnType::UINT64:
+      return StringUtil::toString(getUInt64Column(id));
+    case SSTableColumnType::FLOAT:
+      return StringUtil::toString(getFloatColumn(id));
+  }
+}
+
 } // namespace sstable
 } // namespace fnord
 
