@@ -56,9 +56,9 @@ add_executable(cm-frontend
     $<TARGET_OBJECTS:fnord-sstable>
     $<TARGET_OBJECTS:fnord-feeds>
     $<TARGET_OBJECTS:fnord-rpc>
-    cm-frontend/CMFrontend.cc
-    cm-frontend/cm-frontend.cc
-    cm-frontend/LookupServlet.cc
+    src/frontend/CMFrontend.cc
+    src/frontend/LookupServlet.cc
+    src/cm-frontend.cc
     cm-sellerstats/ActivityLog.cc
     cm-sellerstats/SellerStatsLookup.cc)
 
