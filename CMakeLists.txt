@@ -227,7 +227,7 @@ add_executable(cm-ctrstats-rollup2d
     $<TARGET_OBJECTS:fnord-json>
     $<TARGET_OBJECTS:fnord-rpc>
     $<TARGET_OBJECTS:fnord-sstable>
-    src/cm-ctrstats-rollupflat.cc)
+    src/cm-ctrstats-rollup2d.cc)
 
 target_link_libraries(cm-ctrstats-rollup2d
     ${CMAKE_THREAD_LIBS_INIT})

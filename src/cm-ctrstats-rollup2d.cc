@@ -32,6 +32,7 @@ using namespace fnord;
 
 typedef Tuple<
     String,
+    String,
     uint64_t,
     uint64_t,
     double,
@@ -120,12 +121,13 @@ void writeOutputTable(const String& filename, const Vector<OutputRow>& rows) {
   for (const auto& r : rows) {
     sstable::SSTableColumnWriter cols(&sstable_schema);
 
-    cols.addUInt64Column(1, std::get<1>(r));
+    cols.addStringColumn(1, std::get<1>(r));
     cols.addUInt64Column(2, std::get<2>(r));
-    cols.addFloatColumn(3, std::get<3>(r));
+    cols.addUInt64Column(3, std::get<3>(r));
     cols.addFloatColumn(4, std::get<4>(r));
     cols.addFloatColumn(5, std::get<5>(r));
     cols.addFloatColumn(6, std::get<6>(r));
+    cols.addFloatColumn(7, std::get<7>(r));
 
     sstable_writer->appendRow(std::get<0>(r), cols);
   }
@@ -136,14 +138,14 @@ void writeOutputTable(const String& filename, const Vector<OutputRow>& rows) {
 
 /* aggregate ctr counters (flat) */
 void aggregateCounters(CounterMap* counters, Vector<OutputRow>* rows) {
-  const auto& global_counter_iter = counters.find("__GLOBAL");
-  if (global_counter_iter == counters.end()) {
+  const auto& global_counter_iter = counters->find("__GLOBAL");
+  if (global_counter_iter == counters->end()) {
     fnord::logCritical("cm.ctrstatsexport", "missing global counter");
     exit(1);
   }
   const auto& global_counter = global_counter_iter->second;
 
-  for (const auto& row : counters) {
+  for (const auto& row : *counters) {
     const auto& ctr = row.second;
 
     auto sep = row.first.find("~");
@@ -157,8 +159,8 @@ void aggregateCounters(CounterMap* counters, Vector<OutputRow>* rows) {
       continue;
     }
 
-    const auto& group_counter_iter = counters.find(dim1);
-    if (group_counter_iter == counters.end()) {
+    const auto& group_counter_iter = counters->find(dim1);
+    if (group_counter_iter == counters->end()) {
       fnord::logWarning("cm.ctrstatsexport", "missing row: $0", dim1);
       continue;
     }
@@ -170,7 +172,8 @@ void aggregateCounters(CounterMap* counters, Vector<OutputRow>* rows) {
     double p_click_n = ctr.num_clicks / (double) group_counter.num_clicks;
 
     rows->emplace_back(
-        StringUtil::format("$0~$1", dim1, dim2),
+        dim1,
+        dim2,
         row.second.num_views,
         row.second.num_clicks,
         p_base,
