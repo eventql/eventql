@@ -28,6 +28,14 @@ SSTableScan::SSTableScan(
   }
 }
 
+void SSTableScan::setKeyPrefix(const String& prefix) {
+  setKeyFilterRegex(prefix + ".*"); // FIXPAUL HACK !!! ;) :) ;)
+}
+
+void SSTableScan::setKeyFilterRegex(const String& regex) {
+  key_filter_regex_ = Some(std::regex(regex));
+}
+
 void SSTableScan::setLimit(long int limit) {
   limit_ = limit;
 }
@@ -111,7 +119,13 @@ void SSTableScan::execute(
   size_t offset_ctr = 0;
 
   for (; cursor->valid(); cursor->next()) {
-    // filter key...
+    auto key = cursor->getKeyString();
+
+    if (!key_filter_regex_.isEmpty()) {
+      if (!std::regex_match(key, key_filter_regex_.get())) {
+        continue;
+      }
+    }
 
     auto val = cursor->getDataBuffer();
     sstable::SSTableColumnReader cols(schema_, val);
