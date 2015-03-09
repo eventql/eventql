@@ -50,6 +50,21 @@ void SSTableColumnWriter::addFloatColumn(SSTableColumnID id, double value) {
   msg_writer_.appendUInt64(IEEE754::toBytes(value));
 }
 
+void SSTableColumnWriter::addStringColumn(
+    SSTableColumnID id,
+    const String& value) {
+#ifndef FNORD_NODEBUG
+  if (schema_->columnType(id) != SSTableColumnType::STRING) {
+    RAISEF(kIllegalArgumentError, "invalid column type for column_id: $0", id);
+  }
+#endif
+
+  uint32_t len = value.length();
+  msg_writer_.appendUInt32(id);
+  msg_writer_.appendUInt32(len);
+  msg_writer_.append(value.data(), len);
+}
+
 void* SSTableColumnWriter::data() const {
   return msg_writer_.data();
 }

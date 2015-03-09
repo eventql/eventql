@@ -34,6 +34,13 @@ SSTableColumnReader::SSTableColumnReader(
         col_data_.emplace_back(col_id, *msg_reader_.readUInt64(), 0);
         break;
 
+      case SSTableColumnType::STRING: {
+        uint32_t size = *msg_reader_.readUInt32();
+        uint64_t data = (uint64_t) msg_reader_.read(size);
+        col_data_.emplace_back(col_id, data, size);
+        break;
+      }
+
     }
   }
 }
@@ -94,7 +101,17 @@ String SSTableColumnReader::getStringColumn(SSTableColumnID id) {
       return StringUtil::toString(getUInt64Column(id));
     case SSTableColumnType::FLOAT:
       return StringUtil::toString(getFloatColumn(id));
+    case SSTableColumnType::STRING:
+      break;
   }
+
+  for (const auto& col : col_data_) {
+    if (std::get<0>(col) == id) {
+      return String((char*) std::get<1>(col), std::get<2>(col));
+    }
+  }
+
+  RAISE(kIndexError, "no value for column: $0", id);
 }
 
 } // namespace sstable

@@ -31,7 +31,8 @@ class SSTableReader;
 enum class SSTableColumnType : uint8_t {
   UINT32 = 1,
   UINT64 = 2,
-  FLOAT  = 3
+  FLOAT  = 3,
+  STRING = 4
 };
 
 typedef uint32_t SSTableColumnID;
