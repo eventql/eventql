@@ -99,14 +99,15 @@ void importInputTables(const Vector<String> sstables, CounterMap* counters) {
 void writeOutputTable(const String& filename, const Vector<OutputRow>& rows) {
   /* prepare output sstable schema */
   sstable::SSTableColumnSchema sstable_schema;
-  sstable_schema.addColumn("num_views", 1, sstable::SSTableColumnType::UINT64);
-  sstable_schema.addColumn("num_clicks", 2, sstable::SSTableColumnType::UINT64);
-  sstable_schema.addColumn("p_view_base", 3, sstable::SSTableColumnType::FLOAT);
-  sstable_schema.addColumn("p_view_dim1", 4, sstable::SSTableColumnType::FLOAT);
-  sstable_schema.addColumn("p_click", 5, sstable::SSTableColumnType::FLOAT);
+  sstable_schema.addColumn("dim1", 1, sstable::SSTableColumnType::STRING);
+  sstable_schema.addColumn("num_views", 2, sstable::SSTableColumnType::UINT64);
+  sstable_schema.addColumn("num_clicks", 3, sstable::SSTableColumnType::UINT64);
+  sstable_schema.addColumn("p_view_base", 4, sstable::SSTableColumnType::FLOAT);
+  sstable_schema.addColumn("p_view_dim1", 5, sstable::SSTableColumnType::FLOAT);
+  sstable_schema.addColumn("p_click", 6, sstable::SSTableColumnType::FLOAT);
   sstable_schema.addColumn(
       "p_click_normalized",
-      6,
+      7,
       sstable::SSTableColumnType::FLOAT);
 
   /* open output sstable */
