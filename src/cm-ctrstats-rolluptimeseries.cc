@@ -17,6 +17,7 @@
 #include "fnord-base/util/SimpleRateLimit.h"
 #include "fnord-mdb/MDB.h"
 #include "fnord-mdb/MDBUtil.h"
+#include "fnord-json/json.h"
 #include "fnord-sstable/sstablereader.h"
 #include "fnord-sstable/sstablewriter.h"
 #include "fnord-sstable/SSTableColumnSchema.h"
@@ -30,11 +31,14 @@
 
 using namespace fnord;
 
-typedef Tuple<String, uint64_t, uint64_t, double, double, double> OutputRow;
-typedef HashMap<String, cm::CTRCounter> CounterMap;
+typedef Tuple<String, uint64_t, double> OutputRow;
+typedef HashMap<String, HashMap<uint64_t, cm::CTRCounter>> CounterMap;
 
 /* read all input sstables */
-void importInputTables(const Vector<String> sstables, CounterMap* counters) {
+void importInputTables(
+    const Vector<String> sstables,
+    Duration aggr_period,
+    CounterMap* counters) {
   for (int tbl_idx = 0; tbl_idx < sstables.size(); ++tbl_idx) {
     const auto& sstable = sstables[tbl_idx];
     fnord::logInfo("cm.ctrstats", "Importing sstable: $0", sstable);
@@ -48,6 +52,22 @@ void importInputTables(const Vector<String> sstables, CounterMap* counters) {
       fnord::logCritical("cm.ctrstats", "unfinished sstable: $0", sstable);
       exit(1);
     }
+
+    /* read report header */
+    auto hdr = json::parseJSON(reader.readHeader());
+
+    auto tbl_start_time = json::JSONUtil::objectGetUInt64(
+        hdr.begin(),
+        hdr.end(),
+        "start_time").get();
+
+    auto tbl_end_time = json::JSONUtil::objectGetUInt64(
+        hdr.begin(),
+        hdr.end(),
+        "end_time").get();
+
+    auto tbl_time = tbl_start_time + (tbl_end_time - tbl_start_time) / 2;
+    auto tbl_window = tbl_time / aggr_period.microseconds();
 
     /* get sstable cursor */
     auto cursor = reader.getCursor();
@@ -71,11 +91,14 @@ void importInputTables(const Vector<String> sstables, CounterMap* counters) {
       auto val = cursor->getDataBuffer();
       sstable::SSTableColumnReader cols(&schema, val);
 
-      auto& counter = (*counters)[key];
       auto num_views = cols.getUInt64Column(schema.columnID("num_views"));
-      auto num_clicks= cols.getUInt64Column(schema.columnID("num_clicks"));
+      auto num_clicks = cols.getUInt64Column(schema.columnID("num_clicks"));
+      auto num_clicked = cols.getUInt64Column(schema.columnID("num_clicked"));
+
+      auto& counter = (*counters)[key][tbl_window];
       counter.num_views += num_views;
       counter.num_clicks += num_clicks;
+      counter.num_clicked += num_clicked;
 
       if (!cursor->next()) {
         break;
@@ -90,14 +113,8 @@ void importInputTables(const Vector<String> sstables, CounterMap* counters) {
 void writeOutputTable(const String& filename, const Vector<OutputRow>& rows) {
   /* prepare output sstable schema */
   sstable::SSTableColumnSchema sstable_schema;
-  sstable_schema.addColumn("num_views", 1, sstable::SSTableColumnType::UINT64);
-  sstable_schema.addColumn("num_clicks", 2, sstable::SSTableColumnType::UINT64);
-  sstable_schema.addColumn("p_view_base", 3, sstable::SSTableColumnType::FLOAT);
-  sstable_schema.addColumn("p_click", 4, sstable::SSTableColumnType::FLOAT);
-  sstable_schema.addColumn(
-      "p_click_normalized",
-      5,
-      sstable::SSTableColumnType::FLOAT);
+  sstable_schema.addColumn("time", 1, sstable::SSTableColumnType::UINT64);
+  sstable_schema.addColumn("value", 2, sstable::SSTableColumnType::FLOAT);
 
   /* open output sstable */
   fnord::logInfo("cm.ctrstats", "Writing results to: $0", filename);
@@ -110,13 +127,8 @@ void writeOutputTable(const String& filename, const Vector<OutputRow>& rows) {
   /* write output sstable */
   for (const auto& r : rows) {
     sstable::SSTableColumnWriter cols(&sstable_schema);
-
     cols.addUInt64Column(1, std::get<1>(r));
-    cols.addUInt64Column(2, std::get<2>(r));
-    cols.addFloatColumn(3, std::get<3>(r));
-    cols.addFloatColumn(4, std::get<4>(r));
-    cols.addFloatColumn(5, std::get<5>(r));
-
+    cols.addFloatColumn(2, std::get<2>(r));
     sstable_writer->appendRow(std::get<0>(r), cols);
   }
 
@@ -125,31 +137,113 @@ void writeOutputTable(const String& filename, const Vector<OutputRow>& rows) {
 }
 
 /* aggregate ctr counters (flat) */
-void aggregateCounters(CounterMap* counters, Vector<OutputRow>* rows) {
-  const auto& global_counter_iter = counters->find("__GLOBAL");
-  if (global_counter_iter == counters->end()) {
-    fnord::logCritical("cm.ctrstats", "missing global counter");
-    exit(1);
-  }
-  const auto& global_counter = global_counter_iter->second;
+void aggregateCounters(
+    CounterMap* counters,
+    Duration aggr_period,
+    Vector<OutputRow>* rows) {
 
   for (const auto& row : *counters) {
-    const auto& ctr = row.second;
-    if (row.first.length() == 0 || row.first == "__GLOBAL") {
-      continue;
+    const auto& key = row.first;
+
+    for (const auto& t : row.second) {
+      rows->emplace_back(
+          StringUtil::format("$0~num_views", key),
+          t.first * aggr_period.microseconds(),
+          t.second.num_views);
     }
 
-    double p_base = ctr.num_views / (double) global_counter.num_views;
-    double p_click = ctr.num_clicks / (double) ctr.num_views;
-    double p_click_n = ctr.num_clicks / (double) global_counter.num_clicks;
+    for (const auto& t : row.second) {
+      auto num = t.second.num_views;
+      auto den = 1;
 
-    rows->emplace_back(
-        row.first,
-        row.second.num_views,
-        row.second.num_clicks,
-        p_base,
-        p_click,
-        p_click_n);
+      for (int i = 0; i < 6; ++i) {
+        const auto& v = row.second.find(t.first - i);
+        if (v == row.second.end()) continue;
+        num += v->second.num_views;
+        ++den;
+      }
+
+      rows->emplace_back(
+          StringUtil::format("$0~num_views_7d", key),
+          t.first * aggr_period.microseconds(),
+          num / (double) den);
+    }
+
+    for (const auto& t : row.second) {
+      rows->emplace_back(
+          StringUtil::format("$0~num_clicks", key),
+          t.first * aggr_period.microseconds(),
+          t.second.num_clicks);
+    }
+
+    for (const auto& t : row.second) {
+      auto num = t.second.num_clicks;
+      auto den = 1;
+
+      for (int i = 0; i < 6; ++i) {
+        const auto& v = row.second.find(t.first - i);
+        if (v == row.second.end()) continue;
+        num += v->second.num_clicks;
+        ++den;
+      }
+
+      rows->emplace_back(
+          StringUtil::format("$0~num_clicks_7d", key),
+          t.first * aggr_period.microseconds(),
+          num / (double) den);
+    }
+
+    for (const auto& t : row.second) {
+      rows->emplace_back(
+          StringUtil::format("$0~ctr", key),
+          t.first * aggr_period.microseconds(),
+          t.second.num_clicked / (double) t.second.num_views);
+    }
+
+    for (const auto& t : row.second) {
+      auto num_v = t.second.num_views;
+      auto num_c = t.second.num_clicked;
+      auto den = 1;
+
+      for (int i = 0; i < 6; ++i) {
+        const auto& v = row.second.find(t.first - i);
+        if (v == row.second.end()) continue;
+        num_v += v->second.num_views;
+        num_c += v->second.num_clicked;
+        ++den;
+      }
+
+      rows->emplace_back(
+          StringUtil::format("$0~ctr_7d", key),
+          t.first * aggr_period.microseconds(),
+          (num_c / (double) den) / (num_v / (double) den));
+    }
+
+    for (const auto& t : row.second) {
+      rows->emplace_back(
+          StringUtil::format("$0~cpq", key),
+          t.first * aggr_period.microseconds(),
+          t.second.num_clicks / (double) t.second.num_views);
+    }
+
+    for (const auto& t : row.second) {
+      auto num_v = t.second.num_views;
+      auto num_c = t.second.num_clicks;
+      auto den = 1;
+
+      for (int i = 0; i < 6; ++i) {
+        const auto& v = row.second.find(t.first - i);
+        if (v == row.second.end()) continue;
+        num_v += v->second.num_views;
+        num_c += v->second.num_clicks;
+        ++den;
+      }
+
+      rows->emplace_back(
+          StringUtil::format("$0~cpq_7d", key),
+          t.first * aggr_period.microseconds(),
+          (num_c / (double) den) / (num_v / (double) den));
+    }
   }
 }
 
@@ -182,13 +276,15 @@ int main(int argc, const char** argv) {
   Logger::get()->setMinimumLogLevel(
       strToLogLevel(flags.getString("loglevel")));
 
+  Duration aggr_period(kMicrosPerDay);
+
   /* read input tables */
-  HashMap<String, cm::CTRCounter> counters;
-  importInputTables(flags.getArgv(), &counters);
+  CounterMap counters;
+  importInputTables(flags.getArgv(), aggr_period, &counters);
 
   /* aggregate counters */
   Vector<OutputRow> rows;
-  aggregateCounters(&counters, &rows);
+  aggregateCounters(&counters, aggr_period, &rows);
 
   /* write output table */
   writeOutputTable(flags.getString("output_file"), rows);
