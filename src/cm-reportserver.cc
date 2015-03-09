@@ -55,6 +55,14 @@ int main(int argc, const char** argv) {
       "Start the public http server on this port",
       "<port>");
 
+  flags.defineFlag(
+      "report_path",
+      cli::FlagParser::T_STRING,
+      true,
+      NULL,
+      NULL,
+      "report path",
+      "<path>");
 
   flags.defineFlag(
       "loglevel",
@@ -70,22 +78,27 @@ int main(int argc, const char** argv) {
   Logger::get()->setMinimumLogLevel(
       strToLogLevel(flags.getString("loglevel")));
 
-  /* start event loop */
-  fnord::thread::EventLoop ev;
-
   WhitelistVFS vfs;
-  vfs.registerFile("test.sstable", "/tmp/fu2");
-
-  sstable::SSTableServlet sstable_servlet("/sstable", &vfs);
 
   /* start http server */
+  fnord::thread::EventLoop ev;
   fnord::http::HTTPRouter http_router;
-  http_router.addRouteByPrefixMatch("/sstable", &sstable_servlet);
   fnord::http::HTTPServer http_server(&http_router, &ev);
   http_server.listen(flags.getInt("http_port"));
 
-  ev.run();
+  /* sstable servlet */
+  sstable::SSTableServlet sstable_servlet("/sstable", &vfs);
+  http_router.addRouteByPrefixMatch("/sstable", &sstable_servlet);
 
+  /* add all files to whitelist vfs */
+  auto report_path = flags.getString("report_path");
+  FileUtil::ls(report_path, [&vfs, &report_path] (const String& file) -> bool {
+    vfs.registerFile(file, FileUtil::joinPaths(report_path, file));
+    fnord::logInfo("cm.reportserver", "[VFS] Adding file: $0", file);
+    return true;
+  });
+
+  ev.run();
   return 0;
 }
 
