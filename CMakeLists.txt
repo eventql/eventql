@@ -246,6 +246,20 @@ add_executable(cm-ctrstats-groupbyqueryfeature
 target_link_libraries(cm-ctrstats-groupbyqueryfeature
     ${CMAKE_THREAD_LIBS_INIT})
 
+add_executable(cm-ctrstats-groupbyqueryfeaturecrossitemfeature
+    $<TARGET_OBJECTS:cm-common>
+    $<TARGET_OBJECTS:fnord-base>
+    $<TARGET_OBJECTS:fnord-feeds>
+    $<TARGET_OBJECTS:fnord-mdb>
+    $<TARGET_OBJECTS:fnord-http>
+    $<TARGET_OBJECTS:fnord-json>
+    $<TARGET_OBJECTS:fnord-rpc>
+    $<TARGET_OBJECTS:fnord-sstable>
+    src/cm-ctrstats-groupbyqueryfeaturecrossitemfeature.cc)
+
+target_link_libraries(cm-ctrstats-groupbyqueryfeature
+    ${CMAKE_THREAD_LIBS_INIT})
+
 add_executable(cm-reportserver
     $<TARGET_OBJECTS:cm-common>
     $<TARGET_OBJECTS:fnord-base>
