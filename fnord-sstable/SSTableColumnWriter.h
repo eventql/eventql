@@ -36,6 +36,7 @@ public:
   void addUInt32Column(SSTableColumnID id, uint32_t value);
   void addUInt64Column(SSTableColumnID id, uint64_t value);
   void addFloatColumn(SSTableColumnID id, double value);
+  void addStringColumn(SSTableColumnID id, const String& value);
 
   void* data() const;
   size_t size() const;
