@@ -78,6 +78,16 @@ void SSTableServlet::scan(
     sstable_scan.setLimit(std::stoul(limit_str));
   }
 
+  String key_prefix_str;
+  if (fnord::URI::getParam(params, "key_prefix", &key_prefix_str)) {
+    sstable_scan.setKeyPrefix(key_prefix_str);
+  }
+
+  String key_regex_str;
+  if (fnord::URI::getParam(params, "key_regex", &key_regex_str)) {
+    sstable_scan.setKeyFilterRegex(key_regex_str);
+  }
+
   String offset_str;
   if (fnord::URI::getParam(params, "offset", &offset_str)) {
     sstable_scan.setOffset(std::stoul(offset_str));
