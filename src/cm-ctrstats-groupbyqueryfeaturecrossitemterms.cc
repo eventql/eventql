@@ -31,25 +31,31 @@
 #include "CTRCounter.h"
 
 using namespace fnord;
+using namespace cm;
 
 typedef Tuple<String, uint64_t, uint64_t> OutputRow;
-typedef HashMap<void*, cm::CTRCounter> CounterMap;
+typedef HashMap<String, cm::CTRCounter> CounterMap;
 
 InternMap intern_map;
 
 void indexJoinedQuery(
     const cm::JoinedQuery& query,
-    const String& feature_name,
+    const String& query_feature_name,
+    mdb::MDB* featuredb,
+    FeatureIndex* feature_index,
+    FeatureID item_feature_id,
+    ItemEligibility item_eligibility,
     CounterMap* counters) {
-  auto fstr_opt = cm::extractAttr(query.attrs, feature_name);
+  auto fstr_opt = cm::extractAttr(query.attrs, query_feature_name);
   if (fstr_opt.isEmpty()) {
     return;
   }
 
   auto fstr = URI::urlDecode(fstr_opt.get());
+  auto& global_counter = (*counters)[""];
 
 /*
-  switch (feature_prep_) {
+  switch (query_feature_prep_) {
     case FeaturePrep::NONE:
       break;
 
@@ -66,22 +72,62 @@ void indexJoinedQuery(
   }
 */
 
-  auto& counter = (*counters)[intern_map.internString(fstr)];
-  auto& global_counter = (*counters)[nullptr];
-  counter.num_views++;
-  global_counter.num_views++;
-  bool any_clicked = false;
-
   for (const auto& item : query.items) {
-    if (item.clicked) {
-      if (!any_clicked) {
-        any_clicked = true;
-        counter.num_clicked++;
-        global_counter.num_clicked++;
-      }
+    if (!isItemEligible(item_eligibility, query, item)) {
+      continue;
+    }
 
-      counter.num_clicks++;
-      global_counter.num_clicks++;
+    Option<String> ifstr_opt;
+
+    try {
+      auto txn = featuredb->startTransaction(true);
+
+      ifstr_opt = feature_index->getFeature(
+          item.item.docID(),
+          item_feature_id,
+          txn.get());
+
+      txn->abort();
+    } catch (const Exception& e) {
+      fnord::logError("cm.ctrstatsbuild", e, "error");
+    }
+
+   if (ifstr_opt.isEmpty()) {
+      //fnord::logWarning(
+      //    "cm.ctrstatsbuild",
+      //    "item not found in featuredb: $0",
+      //    item.item.docID().docid);
+
+      continue;
+    }
+
+    Set<String> tokens;
+    cm::tokenizeAndStem(
+        cm::Language::GERMAN, // FIXPAUL
+        ifstr_opt.get(),
+        &tokens);
+
+    for (const auto& token : tokens) {
+      Buffer counter_key;
+      Buffer group_counter_key;
+      void* tmp = intern_map.internString(fstr);
+      counter_key.append(&tmp, sizeof(tmp));
+      group_counter_key.append(&tmp, sizeof(tmp));
+      tmp = intern_map.internString(token);
+      counter_key.append(&tmp, sizeof(tmp));
+
+      auto& counter = (*counters)[counter_key.toString()];
+      auto& group_counter = (*counters)[group_counter_key.toString()];
+
+      counter.num_views++;
+      group_counter.num_views++;
+      global_counter.num_views++;
+
+      if (item.clicked) {
+        counter.num_clicks++;
+        group_counter.num_clicks++;
+        global_counter.num_clicks++;
+      }
     }
   }
 }
@@ -111,15 +157,39 @@ void writeOutputTable(
       outhdr_json.data(),
       outhdr_json.length());
 
+
   for (const auto& p : counters) {
     sstable::SSTableColumnWriter cols(&sstable_schema);
     cols.addUInt64Column(1, p.second.num_views);
     cols.addUInt64Column(2, p.second.num_clicks);
     cols.addUInt64Column(3, p.second.num_clicked);
 
-    sstable_writer->appendRow(
-        p.first == nullptr ? "__GLOBAL" : intern_map.getString(p.first),
-        cols);
+    String key_str;
+    switch (p.first.length()) {
+
+      case 0: {
+        key_str = "__GLOBAL";
+        break;
+      }
+
+      case (sizeof(void*)): {
+        key_str = intern_map.getString(((void**) p.first.c_str())[0]);
+        break;
+      }
+
+      case (sizeof(void*) * 2): {
+        key_str = intern_map.getString(((void**) p.first.c_str())[0]);
+        key_str += "~";
+        key_str += intern_map.getString(((void**) p.first.c_str())[1]);
+        break;
+      }
+
+      default:
+        RAISE(kRuntimeError, "invalid counter key");
+
+    }
+
+    sstable_writer->appendRow(key_str, cols);
   }
 
   sstable_schema.writeIndex(sstable_writer.get());
@@ -151,6 +221,25 @@ int main(int argc, const char** argv) {
       "<feature>");
 
   flags.defineFlag(
+      "item_feature",
+      cli::FlagParser::T_STRING,
+      false,
+      NULL,
+      NULL,
+      "item feature",
+      "<feature>");
+
+  flags.defineFlag(
+      "featuredb_path",
+      cli::FlagParser::T_STRING,
+      true,
+      NULL,
+      NULL,
+      "feature db path",
+      "<path>");
+
+
+  flags.defineFlag(
       "loglevel",
       fnord::cli::FlagParser::T_STRING,
       false,
@@ -168,6 +257,19 @@ int main(int argc, const char** argv) {
   auto query_feature = flags.getString("query_feature");
   auto start_time = std::numeric_limits<uint64_t>::max();
   auto end_time = std::numeric_limits<uint64_t>::min();
+
+  /* set up feature schema */
+  cm::FeatureSchema feature_schema;
+  feature_schema.registerFeature("shop_id", 1, 1);
+  feature_schema.registerFeature("category1", 2, 1);
+  feature_schema.registerFeature("category2", 3, 1);
+  feature_schema.registerFeature("category3", 4, 1);
+  feature_schema.registerFeature("title~de", 5, 2);
+
+  /* open featuredb db */
+  auto featuredb_path = flags.getString("featuredb_path");
+  auto featuredb = mdb::MDB::open(featuredb_path, true);
+  cm::FeatureIndex feature_index(&feature_schema);
 
   /* read input tables */
   auto sstables = flags.getArgv();
@@ -228,6 +330,10 @@ int main(int argc, const char** argv) {
         indexJoinedQuery(
             json::fromJSON<cm::JoinedQuery>(val),
             query_feature,
+            featuredb.get(),
+            &feature_index,
+            feature_schema.featureID(flags.getString("item_feature")).get(),
+            cm::ItemEligibility::DAWANDA_FIRST_EIGHT,
             &counters);
       } catch (const Exception& e) {
         fnord::logWarning(

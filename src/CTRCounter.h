@@ -23,6 +23,7 @@ struct CTRCounter {
   void merge(const CTRCounter& other);
 
   uint64_t num_views;
+  uint64_t num_clicked;
   uint64_t num_clicks;
 };
 

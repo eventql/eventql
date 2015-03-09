@@ -227,9 +227,23 @@ add_executable(cm-ctrstats-rollup2d
     $<TARGET_OBJECTS:fnord-json>
     $<TARGET_OBJECTS:fnord-rpc>
     $<TARGET_OBJECTS:fnord-sstable>
-    src/cm-ctrstats-rollupflat.cc)
+    src/cm-ctrstats-rollup2d.cc)
 
 target_link_libraries(cm-ctrstats-rollup2d
+    ${CMAKE_THREAD_LIBS_INIT})
+
+add_executable(cm-ctrstats-rolluptimeseries
+    $<TARGET_OBJECTS:cm-common>
+    $<TARGET_OBJECTS:fnord-base>
+    $<TARGET_OBJECTS:fnord-feeds>
+    $<TARGET_OBJECTS:fnord-mdb>
+    $<TARGET_OBJECTS:fnord-http>
+    $<TARGET_OBJECTS:fnord-json>
+    $<TARGET_OBJECTS:fnord-rpc>
+    $<TARGET_OBJECTS:fnord-sstable>
+    src/cm-ctrstats-rolluptimeseries.cc)
+
+target_link_libraries(cm-ctrstats-rolluptimeseries
     ${CMAKE_THREAD_LIBS_INIT})
 
 add_executable(cm-ctrstats-groupbyqueryfeature
@@ -244,6 +258,34 @@ add_executable(cm-ctrstats-groupbyqueryfeature
     src/cm-ctrstats-groupbyqueryfeature.cc)
 
 target_link_libraries(cm-ctrstats-groupbyqueryfeature
+    ${CMAKE_THREAD_LIBS_INIT})
+
+add_executable(cm-ctrstats-groupbyqueryfeaturecrossitemfeature
+    $<TARGET_OBJECTS:cm-common>
+    $<TARGET_OBJECTS:fnord-base>
+    $<TARGET_OBJECTS:fnord-feeds>
+    $<TARGET_OBJECTS:fnord-mdb>
+    $<TARGET_OBJECTS:fnord-http>
+    $<TARGET_OBJECTS:fnord-json>
+    $<TARGET_OBJECTS:fnord-rpc>
+    $<TARGET_OBJECTS:fnord-sstable>
+    src/cm-ctrstats-groupbyqueryfeaturecrossitemfeature.cc)
+
+target_link_libraries(cm-ctrstats-groupbyqueryfeaturecrossitemfeature
+    ${CMAKE_THREAD_LIBS_INIT})
+
+add_executable(cm-ctrstats-groupbyqueryfeaturecrossitemterms
+    $<TARGET_OBJECTS:cm-common>
+    $<TARGET_OBJECTS:fnord-base>
+    $<TARGET_OBJECTS:fnord-feeds>
+    $<TARGET_OBJECTS:fnord-mdb>
+    $<TARGET_OBJECTS:fnord-http>
+    $<TARGET_OBJECTS:fnord-json>
+    $<TARGET_OBJECTS:fnord-rpc>
+    $<TARGET_OBJECTS:fnord-sstable>
+    src/cm-ctrstats-groupbyqueryfeaturecrossitemterms.cc)
+
+target_link_libraries(cm-ctrstats-groupbyqueryfeaturecrossitemterms
     ${CMAKE_THREAD_LIBS_INIT})
 
 add_executable(cm-reportserver
