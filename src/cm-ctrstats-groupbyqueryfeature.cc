@@ -70,12 +70,18 @@ void indexJoinedQuery(
   auto& global_counter = (*counters)[nullptr];
   counter.num_views++;
   global_counter.num_views++;
+  bool any_clicked = false;
 
   for (const auto& item : query.items) {
     if (item.clicked) {
+      if (!any_clicked) {
+        any_clicked = true;
+        counter.num_clicked++;
+        global_counter.num_clicked++;
+      }
+
       counter.num_clicks++;
       global_counter.num_clicks++;
-      break;
     }
   }
 }
@@ -90,6 +96,7 @@ void writeOutputTable(
   sstable::SSTableColumnSchema sstable_schema;
   sstable_schema.addColumn("num_views", 1, sstable::SSTableColumnType::UINT64);
   sstable_schema.addColumn("num_clicks", 2, sstable::SSTableColumnType::UINT64);
+  sstable_schema.addColumn("num_clicked", 3, sstable::SSTableColumnType::UINT64);
 
   HashMap<String, String> out_hdr;
   out_hdr["start_time"] = StringUtil::toString(start_time);
@@ -108,6 +115,7 @@ void writeOutputTable(
     sstable::SSTableColumnWriter cols(&sstable_schema);
     cols.addUInt64Column(1, p.second.num_views);
     cols.addUInt64Column(2, p.second.num_clicks);
+    cols.addUInt64Column(3, p.second.num_clicked);
 
     sstable_writer->appendRow(
         p.first == nullptr ? "__GLOBAL" : intern_map.getString(p.first),
