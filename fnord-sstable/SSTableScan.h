@@ -13,11 +13,13 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <regex>
 #include <fnord-base/buffer.h>
 #include <fnord-base/exception.h>
 #include <fnord-base/io/file.h>
 #include <fnord-base/io/mmappedfile.h>
 #include <fnord-base/util/binarymessagewriter.h>
+#include <fnord-base/option.h>
 #include <fnord-sstable/binaryformat.h>
 #include <fnord-sstable/fileheaderreader.h>
 #include <fnord-sstable/cursor.h>
@@ -34,6 +36,8 @@ public:
 
   SSTableScan(SSTableColumnSchema* schema);
 
+  void setKeyPrefix(const String& prefix);
+  void setKeyFilterRegex(const String& regex);
   void setLimit(long int limit);
   void setOffset(long unsigned int offset);
   void setOrderBy(const String& column, const String& order_fn);
@@ -51,6 +55,7 @@ protected:
   OrderFn order_by_fn_;
   long int limit_;
   long unsigned int offset_;
+  Option<std::regex> key_filter_regex_;
 };
 
 } // namespace sstable
