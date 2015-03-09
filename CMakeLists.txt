@@ -232,6 +232,20 @@ add_executable(cm-ctrstats-rollup2d
 target_link_libraries(cm-ctrstats-rollup2d
     ${CMAKE_THREAD_LIBS_INIT})
 
+add_executable(cm-ctrstats-rolluptimeseries
+    $<TARGET_OBJECTS:cm-common>
+    $<TARGET_OBJECTS:fnord-base>
+    $<TARGET_OBJECTS:fnord-feeds>
+    $<TARGET_OBJECTS:fnord-mdb>
+    $<TARGET_OBJECTS:fnord-http>
+    $<TARGET_OBJECTS:fnord-json>
+    $<TARGET_OBJECTS:fnord-rpc>
+    $<TARGET_OBJECTS:fnord-sstable>
+    src/cm-ctrstats-rolluptimeseries.cc)
+
+target_link_libraries(cm-ctrstats-rolluptimeseries
+    ${CMAKE_THREAD_LIBS_INIT})
+
 add_executable(cm-ctrstats-groupbyqueryfeature
     $<TARGET_OBJECTS:cm-common>
     $<TARGET_OBJECTS:fnord-base>
