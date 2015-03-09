@@ -257,7 +257,7 @@ add_executable(cm-ctrstats-groupbyqueryfeaturecrossitemfeature
     $<TARGET_OBJECTS:fnord-sstable>
     src/cm-ctrstats-groupbyqueryfeaturecrossitemfeature.cc)
 
-target_link_libraries(cm-ctrstats-groupbyqueryfeature
+target_link_libraries(cm-ctrstats-groupbyqueryfeaturecrossitemfeature
     ${CMAKE_THREAD_LIBS_INIT})
 
 add_executable(cm-reportserver
