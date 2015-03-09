@@ -15,6 +15,7 @@ using namespace fnord;
 namespace cm {
 
 CTRCounter CTRCounter::load(const Buffer& buf) {
+  abort(); // DEPRECATED
   CTRCounter counter;
 
   util::BinaryMessageReader reader(buf.data(), buf.size());
@@ -25,6 +26,7 @@ CTRCounter CTRCounter::load(const Buffer& buf) {
 }
 
 void CTRCounter::write(const CTRCounter& counter, Buffer* buf) {
+  abort(); // DEPRECATED
   util::BinaryMessageWriter writer(sizeof(CTRCounter));
   writer.appendUInt64(counter.num_views);
   writer.appendUInt64(counter.num_clicks);
@@ -33,9 +35,11 @@ void CTRCounter::write(const CTRCounter& counter, Buffer* buf) {
 
 CTRCounter::CTRCounter() :
     num_views(0),
-    num_clicks(0) {}
+    num_clicks(0),
+    num_clicked(0) {}
 
 void CTRCounter::merge(const CTRCounter& other) {
+  abort(); // DEPRECATED
   num_views += other.num_views;
   num_clicks += other.num_clicks;
 }
