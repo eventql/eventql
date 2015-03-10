@@ -26,6 +26,7 @@
 #include "fnord-json/jsonrpc.h"
 #include "fnord-http/httprouter.h"
 #include "fnord-http/httpserver.h"
+#include "fnord-http/VFSFileServlet.h"
 #include "fnord-feeds/FeedService.h"
 #include "fnord-feeds/RemoteFeedFactory.h"
 #include "fnord-feeds/RemoteFeedReader.h"
@@ -89,6 +90,10 @@ int main(int argc, const char** argv) {
   /* sstable servlet */
   sstable::SSTableServlet sstable_servlet("/sstable", &vfs);
   http_router.addRouteByPrefixMatch("/sstable", &sstable_servlet);
+
+  /* file servlet */
+  http::VFSFileServlet file_servlet("/file", &vfs);
+  http_router.addRouteByPrefixMatch("/file", &file_servlet);
 
   /* add all files to whitelist vfs */
   auto report_path = flags.getString("report_path");
