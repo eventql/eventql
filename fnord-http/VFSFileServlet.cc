@@ -27,18 +27,25 @@ void VFSFileServlet::handleHTTPRequest(
 
   res->addHeader("Access-Control-Allow-Origin", "*");
 
-  if (uri.path() == base_path_ + "/get") {
-    std::string file_path;
-    if (!fnord::URI::getParam(params, "file", &file_path)) {
-      res->addBody("error: missing ?file=... parameter");
-      res->setStatus(http::kStatusBadRequest);
-      return;
-    }
+  std::string file_path;
+  if (!fnord::URI::getParam(params, "file", &file_path)) {
+    res->addBody("error: missing ?file=... parameter");
+    res->setStatus(http::kStatusBadRequest);
+    return;
+  }
 
+  if (uri.path() == base_path_ + "/get") {
     auto file = vfs_->openFile(file_path);
     res->setStatus(fnord::http::kStatusOK);
     res->addHeader("Content-Type", contentTypeFromFilename(file_path));
     res->addBody(file->data(), file->size());
+    return;
+  }
+
+  if (uri.path() == base_path_ + "/size") {
+    auto file = vfs_->openFile(file_path);
+    res->setStatus(fnord::http::kStatusOK);
+    res->addBody(StringUtil::toString(file->size()));
     return;
   }
 
