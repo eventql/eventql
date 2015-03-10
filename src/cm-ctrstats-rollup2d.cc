@@ -35,6 +35,11 @@ typedef Tuple<
     String,
     uint64_t,
     uint64_t,
+    uint64_t,
+    double,
+    double,
+    double,
+    double,
     double,
     double,
     double,
@@ -82,9 +87,11 @@ void importInputTables(const Vector<String> sstables, CounterMap* counters) {
 
       auto& counter = (*counters)[key];
       auto num_views = cols.getUInt64Column(schema.columnID("num_views"));
-      auto num_clicks= cols.getUInt64Column(schema.columnID("num_clicks"));
+      auto num_clicks = cols.getUInt64Column(schema.columnID("num_clicks"));
+      auto num_clicked = cols.getUInt64Column(schema.columnID("num_clicked"));
       counter.num_views += num_views;
       counter.num_clicks += num_clicks;
+      counter.num_clicked += num_clicked;
 
       if (!cursor->next()) {
         break;
@@ -98,17 +105,19 @@ void importInputTables(const Vector<String> sstables, CounterMap* counters) {
 /* write output table */
 void writeOutputTable(const String& filename, const Vector<OutputRow>& rows) {
   /* prepare output sstable schema */
-  sstable::SSTableColumnSchema sstable_schema;
-  sstable_schema.addColumn("dim1", 1, sstable::SSTableColumnType::STRING);
-  sstable_schema.addColumn("num_views", 2, sstable::SSTableColumnType::UINT64);
-  sstable_schema.addColumn("num_clicks", 3, sstable::SSTableColumnType::UINT64);
-  sstable_schema.addColumn("p_view_base", 4, sstable::SSTableColumnType::FLOAT);
-  sstable_schema.addColumn("p_view_dim1", 5, sstable::SSTableColumnType::FLOAT);
-  sstable_schema.addColumn("p_click", 6, sstable::SSTableColumnType::FLOAT);
-  sstable_schema.addColumn(
-      "p_click_normalized",
-      7,
-      sstable::SSTableColumnType::FLOAT);
+  sstable::SSTableColumnSchema schema;
+  schema.addColumn("dim1", 1, sstable::SSTableColumnType::STRING);
+  schema.addColumn("num_views", 2, sstable::SSTableColumnType::UINT64);
+  schema.addColumn("num_clicks", 3, sstable::SSTableColumnType::UINT64);
+  schema.addColumn("num_clicked", 4, sstable::SSTableColumnType::UINT64);
+  schema.addColumn("ctr", 5, sstable::SSTableColumnType::FLOAT);
+  schema.addColumn("cpq", 6, sstable::SSTableColumnType::FLOAT);
+  schema.addColumn("p_view_base", 7, sstable::SSTableColumnType::FLOAT);
+  schema.addColumn("p_click_base", 8, sstable::SSTableColumnType::FLOAT);
+  schema.addColumn("p_clicked_base", 9, sstable::SSTableColumnType::FLOAT);
+  schema.addColumn("p_view_dim1", 10, sstable::SSTableColumnType::FLOAT);
+  schema.addColumn("p_click_dim1", 11, sstable::SSTableColumnType::FLOAT);
+  schema.addColumn("p_clicked_dim1", 12, sstable::SSTableColumnType::FLOAT);
 
   /* open output sstable */
   fnord::logInfo("cm.ctrstats", "Writing results to: $0", filename);
@@ -120,20 +129,25 @@ void writeOutputTable(const String& filename, const Vector<OutputRow>& rows) {
 
   /* write output sstable */
   for (const auto& r : rows) {
-    sstable::SSTableColumnWriter cols(&sstable_schema);
+    sstable::SSTableColumnWriter cols(&schema);
 
     cols.addStringColumn(1, std::get<1>(r));
     cols.addUInt64Column(2, std::get<2>(r));
     cols.addUInt64Column(3, std::get<3>(r));
-    cols.addFloatColumn(4, std::get<4>(r));
+    cols.addUInt64Column(4, std::get<4>(r));
     cols.addFloatColumn(5, std::get<5>(r));
     cols.addFloatColumn(6, std::get<6>(r));
     cols.addFloatColumn(7, std::get<7>(r));
+    cols.addFloatColumn(8, std::get<8>(r));
+    cols.addFloatColumn(9, std::get<9>(r));
+    cols.addFloatColumn(10, std::get<10>(r));
+    cols.addFloatColumn(11, std::get<11>(r));
+    cols.addFloatColumn(12, std::get<12>(r));
 
     sstable_writer->appendRow(std::get<0>(r), cols);
   }
 
-  sstable_schema.writeIndex(sstable_writer.get());
+  schema.writeIndex(sstable_writer.get());
   sstable_writer->finalize();
 }
 
@@ -147,7 +161,7 @@ void aggregateCounters(CounterMap* counters, Vector<OutputRow>* rows) {
   const auto& global_counter = global_counter_iter->second;
 
   for (const auto& row : *counters) {
-    const auto& ctr = row.second;
+    const auto& c = row.second;
 
     auto sep = row.first.find("~");
     if (sep == std::string::npos) {
@@ -167,20 +181,29 @@ void aggregateCounters(CounterMap* counters, Vector<OutputRow>* rows) {
     }
     const auto& group_counter = group_counter_iter->second;
 
-    double p_base = ctr.num_views / (double) global_counter.num_views;
-    double p_base_dim2 = ctr.num_views / (double) group_counter.num_views;
-    double p_click = ctr.num_clicks / (double) ctr.num_views;
-    double p_click_n = ctr.num_clicks / (double) group_counter.num_clicks;
+    double ctr = c.num_clicked / (double) c.num_views;
+    double cpq = c.num_clicks / (double) c.num_views;
+    double p_view_base = c.num_views / (double) global_counter.num_views;
+    double p_click_base = c.num_clicks / (double) global_counter.num_clicks;
+    double p_clicked_base = c.num_clicked / (double) global_counter.num_clicked;
+    double p_view_dim1 = c.num_views / (double) group_counter.num_views;
+    double p_click_dim1 = c.num_clicks / (double) group_counter.num_clicks;
+    double p_clicked_dim1 = c.num_clicked / (double) group_counter.num_clicked;
 
     rows->emplace_back(
         dim1,
         dim2,
         row.second.num_views,
         row.second.num_clicks,
-        p_base,
-        p_base_dim2,
-        p_click,
-        p_click_n);
+        row.second.num_clicked,
+        ctr,
+        cpq,
+        p_view_base,
+        p_click_base,
+        p_clicked_base,
+        p_view_dim1,
+        p_click_dim1,
+        p_clicked_dim1);
   }
 }
 
