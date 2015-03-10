@@ -58,7 +58,7 @@ uint32_t SSTableColumnReader::getUInt32Column(SSTableColumnID id) {
     }
   }
 
-  RAISE(kIndexError, "no value for column: $0", id);
+  RAISEF(kIndexError, "no value for column: $0", id);
 }
 
 uint64_t SSTableColumnReader::getUInt64Column(SSTableColumnID id) {
@@ -74,7 +74,7 @@ uint64_t SSTableColumnReader::getUInt64Column(SSTableColumnID id) {
     }
   }
 
-  RAISE(kIndexError, "no value for column: $0", id);
+  RAISEF(kIndexError, "no value for column: $0", id);
 }
 
 double SSTableColumnReader::getFloatColumn(SSTableColumnID id) {
@@ -90,7 +90,7 @@ double SSTableColumnReader::getFloatColumn(SSTableColumnID id) {
     }
   }
 
-  RAISE(kIndexError, "no value for column: $0", id);
+  RAISEF(kIndexError, "no value for column: $0", id);
 }
 
 String SSTableColumnReader::getStringColumn(SSTableColumnID id) {
@@ -111,7 +111,7 @@ String SSTableColumnReader::getStringColumn(SSTableColumnID id) {
     }
   }
 
-  RAISE(kIndexError, "no value for column: $0", id);
+  RAISEF(kIndexError, "no value for column: $0", id);
 }
 
 } // namespace sstable
