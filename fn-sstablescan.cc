@@ -109,11 +109,11 @@ int main(int argc, const char** argv) {
 
   /* execute scan */
   auto headers = scan.columnNames();
-  fnord::iputs("hdr: $0", headers);
+  fnord::iputs("$0", StringUtil::join(headers, ";"));
 
   auto cursor = reader.getCursor();
   scan.execute(cursor.get(), [] (const Vector<String> row) {
-    fnord::iputs("row: $0", row);
+    fnord::iputs("$0", StringUtil::join(row, ";"));
   });
 
   return 0;
