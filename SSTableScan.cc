@@ -37,7 +37,13 @@ void SSTableScan::setKeyFilterRegex(const String& regex) {
 }
 
 void SSTableScan::setKeyExactMatchFilter(const String& str) {
-  key_exact_match_ = Some(str);
+  Set<String> match_set;
+  match_set.emplace(str);
+  setKeyExactMatchFilter(match_set);
+}
+
+void SSTableScan::setKeyExactMatchFilter(const Set<String>& match_set) {
+  key_exact_match_ = match_set;
 }
 
 void SSTableScan::setLimit(long int limit) {
@@ -125,7 +131,7 @@ void SSTableScan::execute(
   for (; cursor->valid(); cursor->next()) {
     auto key = cursor->getKeyString();
 
-    if (!key_exact_match_.isEmpty() && key != key_exact_match_.get()) {
+    if (key_exact_match_.size() > 0 && key_exact_match_.count(key) == 0) {
       continue;
     }
 
