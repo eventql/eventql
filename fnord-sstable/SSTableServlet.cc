@@ -88,9 +88,14 @@ void SSTableServlet::scan(
     sstable_scan.setKeyFilterRegex(key_regex_str);
   }
 
-  String key_match_str;
-  if (fnord::URI::getParam(params, "key_match", &key_match_str)) {
-    sstable_scan.setKeyExactMatchFilter(key_match_str);
+  Set<String> key_match_set;
+  for (const auto& p : params) {
+    if (p.first == "key_match") {
+      key_match_set.emplace(p.second);
+    }
+  }
+  if (key_match_set.size() > 0) {
+    sstable_scan.setKeyExactMatchFilter(key_match_set);
   }
 
   String offset_str;

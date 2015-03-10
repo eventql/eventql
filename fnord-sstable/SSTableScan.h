@@ -39,6 +39,7 @@ public:
   void setKeyPrefix(const String& prefix);
   void setKeyFilterRegex(const String& regex);
   void setKeyExactMatchFilter(const String& str);
+  void setKeyExactMatchFilter(const Set<String>& str);
   void setLimit(long int limit);
   void setOffset(long unsigned int offset);
   void setOrderBy(const String& column, const String& order_fn);
@@ -57,7 +58,7 @@ protected:
   long int limit_;
   long unsigned int offset_;
   Option<std::regex> key_filter_regex_;
-  Option<String> key_exact_match_;
+  Set<String> key_exact_match_;
 };
 
 } // namespace sstable
