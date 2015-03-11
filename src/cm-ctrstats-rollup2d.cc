@@ -158,7 +158,13 @@ void writeOutputTable(const String& filename, const Vector<OutputRow>& rows) {
 }
 
 /* aggregate ctr counters (flat) */
-void aggregateCounters(CounterMap* counters, Vector<OutputRow>* rows) {
+void aggregateCounters(
+    const cli::FlagParser& flags,
+    CounterMap* counters,
+    Vector<OutputRow>* rows) {
+  long min_views = flags.isSet("min_views") ? flags.getInt("min_views") : -1;
+  long min_clicks = flags.isSet("min_clicks") ? flags.getInt("min_clicks") : -1;
+
   const auto& global_counter_iter = counters->find("__GLOBAL");
   if (global_counter_iter == counters->end()) {
     fnord::logCritical("cm.ctrstatsexport", "missing global counter");
@@ -168,6 +174,14 @@ void aggregateCounters(CounterMap* counters, Vector<OutputRow>* rows) {
 
   for (const auto& row : *counters) {
     const auto& c = row.second;
+
+    if (min_views > 0 && c.num_views < min_views) {
+      continue;
+    }
+
+    if (min_clicks > 0 && c.num_clicks < min_clicks) {
+      continue;
+    }
 
     auto sep = row.first.find("~");
     if (sep == std::string::npos) {
@@ -233,6 +247,24 @@ int main(int argc, const char** argv) {
       "<path>");
 
   flags.defineFlag(
+      "min_views",
+      cli::FlagParser::T_INTEGER,
+      false,
+      NULL,
+      NULL,
+      "min views",
+      "<num>");
+
+  flags.defineFlag(
+      "min_clicks",
+      cli::FlagParser::T_INTEGER,
+      false,
+      NULL,
+      NULL,
+      "min clicks",
+      "<num>");
+
+  flags.defineFlag(
       "loglevel",
       fnord::cli::FlagParser::T_STRING,
       false,
@@ -252,7 +284,7 @@ int main(int argc, const char** argv) {
 
   /* aggregate counters */
   Vector<OutputRow> rows;
-  aggregateCounters(&counters, &rows);
+  aggregateCounters(flags, &counters, &rows);
 
   /* write output table */
   writeOutputTable(flags.getString("output_file"), rows);
