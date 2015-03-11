@@ -132,6 +132,7 @@ void writeOutputTable(const String& filename, const Vector<OutputRow>& rows) {
     cols.addFloatColumn(6, std::get<6>(r));
     cols.addFloatColumn(7, std::get<7>(r));
     cols.addFloatColumn(8, std::get<8>(r));
+    cols.addFloatColumn(9, std::get<9>(r));
 
     sstable_writer->appendRow(std::get<0>(r), cols);
   }
