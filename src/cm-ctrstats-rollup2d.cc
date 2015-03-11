@@ -43,6 +43,8 @@ typedef Tuple<
     double,
     double,
     double,
+    double,
+    double,
     double> OutputRow;
 
 typedef HashMap<String, cm::CTRCounter> CounterMap;
@@ -118,6 +120,8 @@ void writeOutputTable(const String& filename, const Vector<OutputRow>& rows) {
   schema.addColumn("p_view_dim1", 10, sstable::SSTableColumnType::FLOAT);
   schema.addColumn("p_click_dim1", 11, sstable::SSTableColumnType::FLOAT);
   schema.addColumn("p_clicked_dim1", 12, sstable::SSTableColumnType::FLOAT);
+  schema.addColumn("perf_base", 13, sstable::SSTableColumnType::FLOAT);
+  schema.addColumn("perf_dim1", 14, sstable::SSTableColumnType::FLOAT);
 
   /* open output sstable */
   fnord::logInfo("cm.ctrstats", "Writing results to: $0", filename);
@@ -143,6 +147,8 @@ void writeOutputTable(const String& filename, const Vector<OutputRow>& rows) {
     cols.addFloatColumn(10, std::get<10>(r));
     cols.addFloatColumn(11, std::get<11>(r));
     cols.addFloatColumn(12, std::get<12>(r));
+    cols.addFloatColumn(13, std::get<13>(r));
+    cols.addFloatColumn(14, std::get<14>(r));
 
     sstable_writer->appendRow(std::get<0>(r), cols);
   }
@@ -186,9 +192,11 @@ void aggregateCounters(CounterMap* counters, Vector<OutputRow>* rows) {
     double p_view_base = c.num_views / (double) global_counter.num_views;
     double p_click_base = c.num_clicks / (double) global_counter.num_clicks;
     double p_clicked_base = c.num_clicked / (double) global_counter.num_clicked;
+    double perf_base = p_click_base / p_view_base;
     double p_view_dim1 = c.num_views / (double) group_counter.num_views;
     double p_click_dim1 = c.num_clicks / (double) group_counter.num_clicks;
     double p_clicked_dim1 = c.num_clicked / (double) group_counter.num_clicked;
+    double perf_dim1 = p_click_dim1 / p_view_dim1;
 
     rows->emplace_back(
         dim1,
@@ -203,7 +211,9 @@ void aggregateCounters(CounterMap* counters, Vector<OutputRow>* rows) {
         p_clicked_base,
         p_view_dim1,
         p_click_dim1,
-        p_clicked_dim1);
+        p_clicked_dim1,
+        perf_base,
+        perf_dim1);
   }
 }
 
