@@ -8,6 +8,7 @@
  */
 #include <algorithm>
 #include <unistd.h>
+#include <fnord-base/UTF8.h>
 #include "common.h"
 
 namespace cm {
@@ -50,14 +51,15 @@ Option<String> extractAttr(const Vector<String>& attrs, const String& attr) {
 
 void tokenizeAndStem(
     Language lang,
-    const WString& query,
-    Function<void (const WString& token)> fn) {
-  Vector<WString> parts(1);
+    const String& query,
+    Function<void (const String& token)> fn) {
+  Vector<String> parts(1);
 
-  auto begin = query.c_str();
-  auto end = begin + query.size();
-  for (auto cur = begin; cur < end; ++cur) {
-    switch (*cur) {
+  auto cur = query.c_str();
+  auto end = cur + query.size();
+  char32_t chr;
+  while ((chr = UTF8::nextCodepoint(&cur, end)) != 0) {
+    switch (chr) {
 
       /* token boundaries */
       case '!':
@@ -107,7 +109,7 @@ void tokenizeAndStem(
 
       /* valid chars */
       default:
-        parts.back() += std::tolower(*cur);
+        UTF8::encodeCodepoint(std::tolower(chr), &parts.back());
         break;
 
     }
@@ -125,9 +127,9 @@ void tokenizeAndStem(
 void tokenizeAndStem(Language lang, const String& query, Set<String>* tokens) {
   tokenizeAndStem(
       lang,
-      StringUtil::convertUTF8To16(query),
-      [tokens] (const WString& token) {
-        tokens->emplace(StringUtil::convertUTF16To8(token));
+      query,
+      [tokens] (const String& token) {
+        tokens->emplace(token);
       });
 }
 

@@ -31,8 +31,8 @@ void tokenizeAndStem(Language lang, const String& query, Set<String>* tokens);
 
 void tokenizeAndStem(
     Language lang,
-    const WString& query,
-    Function<void (const WString& token)> fn);
+    const String& query,
+    Function<void (const String& token)> fn);
 
 String joinBagOfWords(const Set<String>& words);
 
