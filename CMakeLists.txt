@@ -45,9 +45,7 @@ add_library(cm-common OBJECT
     src/ItemRef.cc
     src/JoinedQuery.cc
     src/CustomerNamespace.cc
-    src/PackedExample.cc
-    src/QueryAnalyzer.cc
-    src/StopwordDictionary.cc)
+    src/PackedExample.cc)
 
 add_executable(cm-frontend
     $<TARGET_OBJECTS:cm-common>
@@ -309,6 +307,7 @@ add_executable(cm-tokenize
     $<TARGET_OBJECTS:cm-common>
     $<TARGET_OBJECTS:fnord-base>
     $<TARGET_OBJECTS:fnord-mdb>
+    $<TARGET_OBJECTS:fnord-fts>
     src/cm-tokenize.cc)
 
 target_link_libraries(cm-tokenize

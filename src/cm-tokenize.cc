@@ -15,7 +15,7 @@
 #include "fnord-base/application.h"
 #include "fnord-base/logging.h"
 #include "fnord-base/cli/flagparser.h"
-#include "QueryAnalyzer.h"
+#include "fnord-fts/QueryAnalyzer.h"
 #include "common.h"
 
 using namespace fnord;
@@ -48,13 +48,12 @@ int main(int argc, const char** argv) {
   Logger::get()->setMinimumLogLevel(
       strToLogLevel(flags.getString("loglevel")));
 
-  cm::StopwordDictionary stopwords;
-
-  cm::QueryAnalyzer analyzer(&stopwords);
+  fts::StopwordDictionary stopwords;
+  fts::QueryAnalyzer analyzer(&stopwords);
 
   for (String line; std::getline(std::cin, line); ) {
     Set<String> tokens;
-    analyzer.analyze(cm::Language::GERMAN, line, &tokens);
+    analyzer.analyze(Language::GERMAN, line, &tokens);
     fnord::iputs("\ninput: $0\noutput: $1", line, tokens);
   }
 
