@@ -15,9 +15,8 @@
 #include "fnord-base/application.h"
 #include "fnord-base/logging.h"
 #include "fnord-base/cli/flagparser.h"
-#include "fnord-fts/QueryAnalyzer.h"
-#include "fnord-fts/GermanStemmer.h"
 #include "common.h"
+#include "Analyzer.h"
 
 using namespace fnord;
 
@@ -37,12 +36,12 @@ int main(int argc, const char** argv) {
       "<lang>");
 
   flags.defineFlag(
-      "stopwords",
+      "conf",
       cli::FlagParser::T_STRING,
       false,
       NULL,
-      NULL,
-      "stopwords",
+      "./conf",
+      "conf directory",
       "<path>");
 
   flags.defineFlag(
@@ -60,29 +59,11 @@ int main(int argc, const char** argv) {
       strToLogLevel(flags.getString("loglevel")));
 
   auto lang = languageFromString(flags.getString("lang"));
+  cm::Analyzer analyzer(flags.getString("conf"));
 
-  fts::StopwordDictionary stopwords;
-  if (flags.isSet("stopwords")) {
-    stopwords.loadStopwordFile(flags.getString("stopwords"));
-  } else {
-    fnord::logWarning("cm-tokenize", "no stopword file provided");
-  }
-
-  fnord::fts::SynonymDictionary synonyms;
-  synonyms.addSynonym(Language::DE, "mützen", "mütze");
-  synonyms.addSynonym(Language::DE, "bänder", "band");
-  synonyms.addSynonym(Language::DE, "girlanden", "girlande");
-
-  fnord::fts::GermanStemmer german_stemmer(
-      "conf/hunspell_de.aff",
-      "conf/hunspell_de.dic",
-      "conf/hunspell_de.hyphen",
-      &synonyms);
-
-  fts::QueryAnalyzer analyzer(&stopwords, &german_stemmer);
   for (String line; std::getline(std::cin, line); ) {
     Set<String> tokens;
-    analyzer.analyze(lang, line, &tokens);
+    analyzer.extractTerms(lang, line, &tokens);
     fnord::iputs("\ninput: $0\noutput: $1", line, tokens);
   }
 
