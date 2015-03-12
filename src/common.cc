@@ -48,14 +48,87 @@ Option<String> extractAttr(const Vector<String>& attrs, const String& attr) {
   return None<String>();
 }
 
-// FIXPAUL stub ;) ;) ;)
-void tokenizeAndStem(Language lang, const String& query, Set<String>* tokens) {
-  auto parts = StringUtil::split(query, " ");
+void tokenizeAndStem(
+    Language lang,
+    const WString& query,
+    Function<void (const WString& token)> fn) {
+  Vector<WString> parts(1);
+
+  auto begin = query.c_str();
+  auto end = begin + query.size();
+  for (auto cur = begin; cur < end; ++cur) {
+    switch (*cur) {
+
+      /* token boundaries */
+      case '!':
+      case '"':
+      case '#':
+      case '$':
+      case '%':
+      case '&':
+      case '\'':
+      case '(':
+      case ')':
+      case '*':
+      case '+':
+      case ',':
+      case '.':
+      case '-':
+      case '/':
+      case ':':
+      case ';':
+      case '<':
+      case '=':
+      case '>':
+      case '?':
+      case '@':
+      case '[':
+      case '\\':
+      case ']':
+      case '^':
+      case '_':
+      case '`':
+      case '{':
+      case '|':
+      case '}':
+      case '~':
+      case ' ':
+      case '\t':
+      case '\r':
+      case '\n':
+        if (parts.back().length() > 0) {
+          parts.emplace_back();
+        }
+        break;
+
+      /* ignore chars */
+      case L'✪':
+        continue;
+
+      /* valid chars */
+      default:
+        parts.back() += std::tolower(*cur);
+        break;
+
+    }
+  }
 
   for (auto& p : parts) {
-    StringUtil::toLower(&p);
-    tokens->emplace(p);
+    if (p.length() == 0) {
+      continue;
+    }
+
+    fn(p);
   }
+}
+
+void tokenizeAndStem(Language lang, const String& query, Set<String>* tokens) {
+  tokenizeAndStem(
+      lang,
+      StringUtil::convertUTF8To16(query),
+      [tokens] (const WString& token) {
+        tokens->emplace(StringUtil::convertUTF16To8(token));
+      });
 }
 
 String joinBagOfWords(const Set<String>& words) {
