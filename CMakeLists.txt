@@ -311,4 +311,4 @@ add_executable(cm-tokenize
     src/cm-tokenize.cc)
 
 target_link_libraries(cm-tokenize
-    ${CMAKE_THREAD_LIBS_INIT})
+    ${CMAKE_THREAD_LIBS_INIT} ${FNORD_FTS_LIBS})

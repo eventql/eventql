@@ -16,6 +16,7 @@
 #include "fnord-base/logging.h"
 #include "fnord-base/cli/flagparser.h"
 #include "fnord-fts/QueryAnalyzer.h"
+#include "fnord-fts/GermanStemmer.h"
 #include "common.h"
 
 using namespace fnord;
@@ -58,6 +59,10 @@ int main(int argc, const char** argv) {
   Logger::get()->setMinimumLogLevel(
       strToLogLevel(flags.getString("loglevel")));
 
+  fnord::fts::GermanStemmer german_stemmer(
+      "conf/hunspell_de.aff",
+      "conf/hunspell_de.dic");
+
   auto lang = languageFromString(flags.getString("lang"));
 
   fts::StopwordDictionary stopwords;
@@ -67,7 +72,7 @@ int main(int argc, const char** argv) {
     fnord::logWarning("cm-tokenize", "no stopword file provided");
   }
 
-  fts::QueryAnalyzer analyzer(&stopwords);
+  fts::QueryAnalyzer analyzer(&stopwords, &german_stemmer);
   for (String line; std::getline(std::cin, line); ) {
     Set<String> tokens;
     analyzer.analyze(lang, line, &tokens);
