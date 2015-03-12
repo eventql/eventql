@@ -7,20 +7,20 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#ifndef _FNORD_LANGUAGE_H
-#define _FNORD_LANGUAGE_H
-#include "fnord-base/stdtypes.h"
+#include "fnord-base/exception.h"
+#include "fnord-base/Language.h"
+#include "fnord-base/stringutil.h"
 
 namespace fnord {
 
-/* ISO 639-1 */
-enum class Language : uint16_t {
-  EN = 1,
-  DE = 2
-};
+Language languageFromString(const String& string) {
+  String s(string);
+  StringUtil::toLower(&s);
 
-Language languageFromString(const String& string);
+  if (s == "en") return Language::EN;
+  if (s == "de") return Language::DE;
+
+  RAISEF(kRuntimeError, "invalid language: $0", string);
+}
 
 } // namespace fnord
-
-#endif
