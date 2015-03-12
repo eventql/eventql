@@ -302,3 +302,12 @@ add_executable(cm-reportserver
 
 target_link_libraries(cm-reportserver
     ${CMAKE_THREAD_LIBS_INIT})
+
+add_executable(cm-tokenize
+    $<TARGET_OBJECTS:cm-common>
+    $<TARGET_OBJECTS:fnord-base>
+    $<TARGET_OBJECTS:fnord-mdb>
+    src/cm-tokenize.cc)
+
+target_link_libraries(cm-tokenize
+    ${CMAKE_THREAD_LIBS_INIT})
