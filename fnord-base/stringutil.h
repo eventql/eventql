@@ -14,6 +14,8 @@
 #include <stdint.h>
 #include <string>
 #include <vector>
+#include <locale>
+#include <codecvt>
 #include "fnord-base/stdtypes.h"
 
 namespace fnord {
