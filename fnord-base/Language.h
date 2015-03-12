@@ -15,11 +15,17 @@ namespace fnord {
 
 /* ISO 639-1 */
 enum class Language : uint16_t {
+  DE = 2,
   EN = 1,
-  DE = 2
+  ES = 3,
+  FR = 4,
+  IT = 5,
+  NL = 6,
+  PL = 7
 };
 
 Language languageFromString(const String& string);
+String languageToString(Language lang);
 
 } // namespace fnord
 
