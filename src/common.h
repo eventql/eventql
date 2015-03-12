@@ -28,6 +28,12 @@ bool isReservedPixelParam(const std::string param);
 Option<String> extractAttr(const Vector<String>& attrs, const String& attr);
 
 void tokenizeAndStem(Language lang, const String& query, Set<String>* tokens);
+
+void tokenizeAndStem(
+    Language lang,
+    const WString& query,
+    Function<void (const WString& token)> fn);
+
 String joinBagOfWords(const Set<String>& words);
 
 enum class FeaturePrep {

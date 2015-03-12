@@ -39,6 +39,7 @@ typedef Tuple<
     double,
     double,
     double,
+    double,
     double> OutputRow;
 typedef HashMap<String, cm::CTRCounter> CounterMap;
 
@@ -109,6 +110,7 @@ void writeOutputTable(const String& filename, const Vector<OutputRow>& rows) {
   schema.addColumn("p_view_base", 6, sstable::SSTableColumnType::FLOAT);
   schema.addColumn("p_click_base", 7, sstable::SSTableColumnType::FLOAT);
   schema.addColumn("p_clicked_base", 8, sstable::SSTableColumnType::FLOAT);
+  schema.addColumn("perf_base", 9, sstable::SSTableColumnType::FLOAT);
 
   /* open output sstable */
   fnord::logInfo("cm.ctrstats", "Writing results to: $0", filename);
@@ -130,6 +132,7 @@ void writeOutputTable(const String& filename, const Vector<OutputRow>& rows) {
     cols.addFloatColumn(6, std::get<6>(r));
     cols.addFloatColumn(7, std::get<7>(r));
     cols.addFloatColumn(8, std::get<8>(r));
+    cols.addFloatColumn(9, std::get<9>(r));
 
     sstable_writer->appendRow(std::get<0>(r), cols);
   }
@@ -158,6 +161,7 @@ void aggregateCounters(CounterMap* counters, Vector<OutputRow>* rows) {
     double p_view_base = c.num_views / (double) global_counter.num_views;
     double p_click_base = c.num_clicks / (double) global_counter.num_clicks;
     double p_clicked_base = c.num_clicked / (double) global_counter.num_clicked;
+    double perf_base = p_click_base / p_view_base;
 
     rows->emplace_back(
         row.first,
@@ -168,7 +172,8 @@ void aggregateCounters(CounterMap* counters, Vector<OutputRow>* rows) {
         cpq,
         p_view_base,
         p_click_base,
-        p_clicked_base);
+        p_clicked_base,
+        perf_base);
   }
 }
 
