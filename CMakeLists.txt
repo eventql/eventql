@@ -45,7 +45,9 @@ add_library(cm-common OBJECT
     src/ItemRef.cc
     src/JoinedQuery.cc
     src/CustomerNamespace.cc
-    src/PackedExample.cc)
+    src/PackedExample.cc
+    src/QueryAnalyzer.cc
+    src/StopwordDictionary.cc)
 
 add_executable(cm-frontend
     $<TARGET_OBJECTS:cm-common>
@@ -274,19 +276,19 @@ add_executable(cm-ctrstats-groupbyqueryfeaturecrossitemfeature
 target_link_libraries(cm-ctrstats-groupbyqueryfeaturecrossitemfeature
     ${CMAKE_THREAD_LIBS_INIT})
 
-add_executable(cm-ctrstats-groupbyqueryfeaturecrossitemterms
-    $<TARGET_OBJECTS:cm-common>
-    $<TARGET_OBJECTS:fnord-base>
-    $<TARGET_OBJECTS:fnord-feeds>
-    $<TARGET_OBJECTS:fnord-mdb>
-    $<TARGET_OBJECTS:fnord-http>
-    $<TARGET_OBJECTS:fnord-json>
-    $<TARGET_OBJECTS:fnord-rpc>
-    $<TARGET_OBJECTS:fnord-sstable>
-    src/cm-ctrstats-groupbyqueryfeaturecrossitemterms.cc)
-
-target_link_libraries(cm-ctrstats-groupbyqueryfeaturecrossitemterms
-    ${CMAKE_THREAD_LIBS_INIT})
+#add_executable(cm-ctrstats-groupbyqueryfeaturecrossitemterms
+#    $<TARGET_OBJECTS:cm-common>
+#    $<TARGET_OBJECTS:fnord-base>
+#    $<TARGET_OBJECTS:fnord-feeds>
+#    $<TARGET_OBJECTS:fnord-mdb>
+#    $<TARGET_OBJECTS:fnord-http>
+#    $<TARGET_OBJECTS:fnord-json>
+#    $<TARGET_OBJECTS:fnord-rpc>
+#    $<TARGET_OBJECTS:fnord-sstable>
+#    src/cm-ctrstats-groupbyqueryfeaturecrossitemterms.cc)
+#
+#target_link_libraries(cm-ctrstats-groupbyqueryfeaturecrossitemterms
+#    ${CMAKE_THREAD_LIBS_INIT})
 
 add_executable(cm-reportserver
     $<TARGET_OBJECTS:cm-common>
