@@ -17,10 +17,6 @@ using namespace fnord;
 
 namespace cm {
 
-enum class Language {
-  GERMAN
-};
-
 std::string cmHostname();
 
 bool isReservedPixelParam(const std::string param);
