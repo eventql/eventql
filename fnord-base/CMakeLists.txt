@@ -70,6 +70,7 @@ add_library(fnord-base OBJECT
     thread/threadpool.cc
     thread/wakeup.cc
     uri.cc
+    UTF8.cc
     util/binarymessagereader.cc
     util/binarymessagewriter.cc
     util/SimpleRateLimit.cc
