@@ -12,8 +12,9 @@
 
 namespace fnord {
 
-enum class Language {
-  GERMAN
+enum class Language : uint16_t {
+  ENGLISH = 1,
+  GERMAN = 2
 };
 
 } // namespace fnord
