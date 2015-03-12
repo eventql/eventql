@@ -73,6 +73,7 @@ int main(int argc, const char** argv) {
   fnord::fts::GermanStemmer german_stemmer(
       "conf/hunspell_de.aff",
       "conf/hunspell_de.dic",
+      "conf/hunspell_de.hyphen",
       &synonyms);
 
   fts::QueryAnalyzer analyzer(&stopwords, &german_stemmer);
