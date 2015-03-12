@@ -26,14 +26,24 @@ int main(int argc, const char** argv) {
 
   fnord::cli::FlagParser flags;
 
-  //flags.defineFlag(
-  //    "lang",
-  //    cli::FlagParser::T_STRING,
-  //    true,
-  //    NULL,
-  //    NULL,
-  //    "language",
-  //    "<lang>");
+  flags.defineFlag(
+      "lang",
+      cli::FlagParser::T_STRING,
+      true,
+      NULL,
+      NULL,
+      "language",
+      "<lang>");
+
+  flags.defineFlag(
+      "stopwords",
+      cli::FlagParser::T_STRING,
+      false,
+      NULL,
+      NULL,
+      "stopwords",
+      "<path>");
+
   flags.defineFlag(
       "loglevel",
       fnord::cli::FlagParser::T_STRING,
@@ -48,12 +58,19 @@ int main(int argc, const char** argv) {
   Logger::get()->setMinimumLogLevel(
       strToLogLevel(flags.getString("loglevel")));
 
-  fts::StopwordDictionary stopwords;
-  fts::QueryAnalyzer analyzer(&stopwords);
+  auto lang = languageFromString(flags.getString("lang"));
 
+  fts::StopwordDictionary stopwords;
+  if (flags.isSet("stopwords")) {
+    stopwords.loadStopwordFile(flags.getString("stopwords"));
+  } else {
+    fnord::logWarning("cm-tokenize", "no stopword file provided");
+  }
+
+  fts::QueryAnalyzer analyzer(&stopwords);
   for (String line; std::getline(std::cin, line); ) {
     Set<String> tokens;
-    analyzer.analyze(Language::GERMAN, line, &tokens);
+    analyzer.analyze(lang, line, &tokens);
     fnord::iputs("\ninput: $0\noutput: $1", line, tokens);
   }
 
