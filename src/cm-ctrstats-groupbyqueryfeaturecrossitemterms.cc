@@ -13,6 +13,7 @@
 #include "fnord-base/io/fileutil.h"
 #include "fnord-base/application.h"
 #include "fnord-base/logging.h"
+#include "fnord-base/language.h"
 #include "fnord-base/cli/flagparser.h"
 #include "fnord-base/util/SimpleRateLimit.h"
 #include "fnord-base/InternMap.h"
@@ -29,6 +30,7 @@
 #include "FeatureSchema.h"
 #include "JoinedQuery.h"
 #include "CTRCounter.h"
+#include "Analyzer.h"
 
 using namespace fnord;
 using namespace cm;
@@ -45,6 +47,8 @@ void indexJoinedQuery(
     FeatureIndex* feature_index,
     FeatureID item_feature_id,
     ItemEligibility item_eligibility,
+    Analyzer* analyzer,
+    Language lang,
     CounterMap* counters) {
   auto fstr_opt = cm::extractAttr(query.attrs, query_feature_name);
   if (fstr_opt.isEmpty()) {
@@ -53,24 +57,6 @@ void indexJoinedQuery(
 
   auto fstr = URI::urlDecode(fstr_opt.get());
   auto& global_counter = (*counters)[""];
-
-/*
-  switch (query_feature_prep_) {
-    case FeaturePrep::NONE:
-      break;
-
-    case FeaturePrep::BAGOFWORDS_DE: {
-      Set<String> tokens;
-      cm::tokenizeAndStem(
-          cm::Language::GERMAN,
-          fstr,
-          &tokens);
-
-      fstr = cm::joinBagOfWords(tokens);
-      break;
-    }
-  }
-*/
 
   for (const auto& item : query.items) {
     if (!isItemEligible(item_eligibility, query, item)) {
@@ -93,19 +79,11 @@ void indexJoinedQuery(
     }
 
    if (ifstr_opt.isEmpty()) {
-      //fnord::logWarning(
-      //    "cm.ctrstatsbuild",
-      //    "item not found in featuredb: $0",
-      //    item.item.docID().docid);
-
       continue;
     }
 
     Set<String> tokens;
-    cm::tokenizeAndStem(
-        cm::Language::GERMAN, // FIXPAUL
-        ifstr_opt.get(),
-        &tokens);
+    analyzer->extractTerms(lang, ifstr_opt.get(), &tokens);
 
     for (const auto& token : tokens) {
       Buffer counter_key;
@@ -203,6 +181,24 @@ int main(int argc, const char** argv) {
   fnord::cli::FlagParser flags;
 
   flags.defineFlag(
+      "lang",
+      cli::FlagParser::T_STRING,
+      true,
+      NULL,
+      NULL,
+      "language",
+      "<lang>");
+
+  flags.defineFlag(
+      "conf",
+      cli::FlagParser::T_STRING,
+      false,
+      NULL,
+      "./conf",
+      "conf directory",
+      "<path>");
+
+  flags.defineFlag(
       "output_file",
       cli::FlagParser::T_STRING,
       true,
@@ -238,7 +234,6 @@ int main(int argc, const char** argv) {
       "feature db path",
       "<path>");
 
-
   flags.defineFlag(
       "loglevel",
       fnord::cli::FlagParser::T_STRING,
@@ -257,6 +252,9 @@ int main(int argc, const char** argv) {
   auto query_feature = flags.getString("query_feature");
   auto start_time = std::numeric_limits<uint64_t>::max();
   auto end_time = std::numeric_limits<uint64_t>::min();
+
+  auto lang = languageFromString(flags.getString("lang"));
+  cm::Analyzer analyzer(flags.getString("conf"));
 
   /* set up feature schema */
   cm::FeatureSchema feature_schema;
@@ -334,6 +332,8 @@ int main(int argc, const char** argv) {
             &feature_index,
             feature_schema.featureID(flags.getString("item_feature")).get(),
             cm::ItemEligibility::DAWANDA_FIRST_EIGHT,
+            &analyzer,
+            lang,
             &counters);
       } catch (const Exception& e) {
         fnord::logWarning(
