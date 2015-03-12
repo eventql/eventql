@@ -59,10 +59,6 @@ int main(int argc, const char** argv) {
   Logger::get()->setMinimumLogLevel(
       strToLogLevel(flags.getString("loglevel")));
 
-  fnord::fts::GermanStemmer german_stemmer(
-      "conf/hunspell_de.aff",
-      "conf/hunspell_de.dic");
-
   auto lang = languageFromString(flags.getString("lang"));
 
   fts::StopwordDictionary stopwords;
@@ -71,6 +67,13 @@ int main(int argc, const char** argv) {
   } else {
     fnord::logWarning("cm-tokenize", "no stopword file provided");
   }
+
+  fnord::fts::SynonymDictionary synonyms;
+
+  fnord::fts::GermanStemmer german_stemmer(
+      "conf/hunspell_de.aff",
+      "conf/hunspell_de.dic",
+      &synonyms);
 
   fts::QueryAnalyzer analyzer(&stopwords, &german_stemmer);
   for (String line; std::getline(std::cin, line); ) {
