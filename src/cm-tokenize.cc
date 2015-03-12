@@ -71,6 +71,7 @@ int main(int argc, const char** argv) {
   fnord::fts::SynonymDictionary synonyms;
   synonyms.addSynonym(Language::DE, "mützen", "mütze");
   synonyms.addSynonym(Language::DE, "bänder", "band");
+  synonyms.addSynonym(Language::DE, "girlanden", "girlande");
 
   fnord::fts::GermanStemmer german_stemmer(
       "conf/hunspell_de.aff",
