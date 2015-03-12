@@ -17,10 +17,27 @@ Language languageFromString(const String& string) {
   String s(string);
   StringUtil::toLower(&s);
 
-  if (s == "en") return Language::EN;
   if (s == "de") return Language::DE;
+  if (s == "en") return Language::EN;
+  if (s == "es") return Language::ES;
+  if (s == "fr") return Language::FR;
+  if (s == "it") return Language::IT;
+  if (s == "nl") return Language::NL;
+  if (s == "pl") return Language::PL;
 
   RAISEF(kRuntimeError, "invalid language: $0", string);
+}
+
+String languageToString(Language lang) {
+  switch (lang) {
+    case Language::DE: return "de";
+    case Language::EN: return "en";
+    case Language::ES: return "es";
+    case Language::FR: return "fr";
+    case Language::IT: return "it";
+    case Language::NL: return "nl";
+    case Language::PL: return "pl";
+  }
 }
 
 } // namespace fnord
