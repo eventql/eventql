@@ -223,8 +223,9 @@ std::string StringUtil::formatv(
 }
 
 std::wstring StringUtil::convertUTF8To16(const std::string& str) {
-  std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;
-  return conv.from_bytes(str);
+  std::wstring out;
+  out.assign(str.begin(), str.end());
+  return out;
 }
 
 std::string StringUtil::convertUTF16To8(const std::wstring& str) {
