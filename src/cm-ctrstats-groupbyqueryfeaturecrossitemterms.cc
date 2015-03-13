@@ -13,7 +13,7 @@
 #include "fnord-base/io/fileutil.h"
 #include "fnord-base/application.h"
 #include "fnord-base/logging.h"
-#include "fnord-base/language.h"
+#include "fnord-base/Language.h"
 #include "fnord-base/cli/flagparser.h"
 #include "fnord-base/util/SimpleRateLimit.h"
 #include "fnord-base/InternMap.h"
