@@ -36,8 +36,8 @@
 #include "CustomerNamespace.h"
 #include "FeatureSchema.h"
 #include "FeaturePack.h"
+#include "FeatureIndex.h"
 #include "IndexRequest.h"
-#include "index/IndexBuilder.h"
 
 using namespace cm;
 using namespace fnord;

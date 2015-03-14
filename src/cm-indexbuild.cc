@@ -35,8 +35,8 @@
 #include "fnord-mdb/MDB.h"
 #include "CustomerNamespace.h"
 #include "FeatureSchema.h"
+#include "FeatureIndexWriter.h"
 #include "IndexRequest.h"
-#include "index/IndexBuilder.h"
 
 using namespace cm;
 using namespace fnord;
@@ -198,7 +198,7 @@ int main(int argc, const char** argv) {
       db_commit_interval,
       flags.getInt("dbsize"));
 
-  cm::IndexBuilder index_builder(&feature_schema);
+  cm::FeatureIndexWriter index_writer(&feature_schema);
 
   /* stats */
   fnord::stats::Counter<uint64_t> stat_documents_indexed_total_;
@@ -359,7 +359,7 @@ int main(int argc, const char** argv) {
         stat_documents_indexed_total_.incr(1);
         fnord::logTrace("cm.indexbuild", "Indexing: $0", entry.get().data);
         auto index_req = json::fromJSON<cm::IndexRequest>(entry.get().data);
-        index_builder.indexDocument(index_req, txn.get());
+        index_writer.updateDocument(index_req, txn.get());
         stat_documents_indexed_success_.incr(1);
       } catch (const std::exception& e) {
         stat_documents_indexed_error_.incr(1);

@@ -35,12 +35,12 @@ using namespace fnord;
 namespace cm {
 class CustomerNamespace;
 
-class IndexBuilder {
+class FeatureIndexWriter {
 public:
 
-  IndexBuilder(const FeatureSchema* schema);
+  FeatureIndexWriter(const FeatureSchema* schema);
 
-  void indexDocument(
+  void updateDocument(
       const IndexRequest& index_request,
       mdb::MDBTransaction* featuredb_txn);
 

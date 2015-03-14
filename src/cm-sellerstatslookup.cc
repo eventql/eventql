@@ -37,7 +37,7 @@
 #include "FeatureSchema.h"
 #include "FeaturePack.h"
 #include "IndexRequest.h"
-#include "index/IndexBuilder.h"
+#include "FeatureIndex.h"
 #include "sellerstats/ActivityLog.h"
 #include "sellerstats/SellerStatsLookup.h"
 
