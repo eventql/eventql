@@ -19,6 +19,7 @@
 #include "fnord-base/thread/eventloop.h"
 #include "fnord-base/thread/threadpool.h"
 #include "fnord-base/wallclock.h"
+#include "fnord-base/util/SimpleRateLimit.h"
 #include "fnord-rpc/ServerGroup.h"
 #include "fnord-rpc/RPC.h"
 #include "fnord-rpc/RPCClient.h"
@@ -38,6 +39,7 @@
 #include "FeatureSchema.h"
 #include "FeaturePack.h"
 #include "FeatureIndex.h"
+#include "FeatureSelector.h"
 #include "JoinedQuery.h"
 
 using namespace fnord;
@@ -49,7 +51,7 @@ int main(int argc, const char** argv) {
   fnord::cli::FlagParser flags;
 
   flags.defineFlag(
-      "input",
+      "input_file",
       fnord::cli::FlagParser::T_STRING,
       true,
       "i",
@@ -58,7 +60,7 @@ int main(int argc, const char** argv) {
       "<filename>");
 
   flags.defineFlag(
-      "output",
+      "output_file",
       fnord::cli::FlagParser::T_STRING,
       true,
       "o",
@@ -101,7 +103,9 @@ int main(int argc, const char** argv) {
   /* open featuredb */
   auto featuredb_path = flags.getString("featuredb_path");
   auto featuredb = mdb::MDB::open(featuredb_path, true);
-  auto featuredb_txn = featuredb->startTransaction(true);
+
+  /* feature selector */
+  cm::FeatureSelector feature_select(featuredb, &feature_schema);
 
   HashMap<String, uint64_t> feature_counts;
 
@@ -118,8 +122,50 @@ int main(int argc, const char** argv) {
     return 1;
   }
 
+  /* get sstable cursor */
+  auto cursor = reader.getCursor();
+  auto body_size = reader.bodySize();
+  int row_idx = 0;
+
+  /* status line */
+  util::SimpleRateLimitedFn status_line(kMicrosPerSecond, [&] () {
+    fnord::logInfo(
+        "cm.ctrstats",
+        "[$0%] Reading sstable... rows=$1",
+        (size_t) ((cursor->position() / (double) body_size) * 100),
+        row_idx);
+  });
+
+  /* read sstable rows */
+  for (; cursor->valid(); ++row_idx) {
+    status_line.runMaybe();
+
+    auto val = cursor->getDataBuffer();
+
+    try {
+      auto q = json::fromJSON<cm::JoinedQuery>(val);
+
+      for (const auto& item : q.items) {
+        Set<String> features;
+        feature_select.featuresFor(q, item, &features);
+        fnord::iputs("features: $0", features);
+      }
+    } catch (const Exception& e) {
+      fnord::logWarning(
+          "cm.ctrstats",
+          e,
+          "error while indexing query: $0",
+          val.toString());
+    }
+
+    if (!cursor->next()) {
+      break;
+    }
+  }
+
+  status_line.runForce();
+
   /* clean up */
-  featuredb_txn->abort();
 
   //for (const auto& f : feature_counts) {
   //  if (f.second < 100) continue;

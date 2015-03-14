@@ -199,6 +199,7 @@ add_executable(cm-featureselect
     $<TARGET_OBJECTS:fnord-json>
     $<TARGET_OBJECTS:fnord-rpc>
     $<TARGET_OBJECTS:fnord-sstable>
+    src/FeatureSelector.cc
     src/cm-featureselect.cc)
 
 target_link_libraries(cm-featureselect
