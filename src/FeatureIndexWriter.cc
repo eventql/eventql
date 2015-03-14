@@ -6,18 +6,18 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-#include "index/IndexBuilder.h"
+#include "FeatureIndexWriter.h"
 #include "IndexRequest.h"
 
 using namespace fnord;
 
 namespace cm {
 
-IndexBuilder::IndexBuilder(
+FeatureIndexWriter::FeatureIndexWriter(
     const FeatureSchema* schema) :
     feature_schema_(schema) {}
 
-void IndexBuilder::indexDocument(
+void FeatureIndexWriter::updateDocument(
     const IndexRequest& index_request,
     mdb::MDBTransaction* txn) {
   logDebug(
@@ -30,7 +30,7 @@ void IndexBuilder::indexDocument(
   updateFeatureIndex(index_request, txn);
 }
 
-void IndexBuilder::updateFeatureIndex(
+void FeatureIndexWriter::updateFeatureIndex(
     const IndexRequest& index_request,
     mdb::MDBTransaction* txn) {
   Vector<Pair<FeatureID, String>> features;
@@ -48,7 +48,7 @@ void IndexBuilder::updateFeatureIndex(
   updateFeatureIndex(docid, features, txn);
 }
 
-void IndexBuilder::updateFeatureIndex(
+void FeatureIndexWriter::updateFeatureIndex(
     const DocID& docid,
     const Vector<Pair<FeatureID, String>>& features,
     mdb::MDBTransaction* featuredb_txn) {

@@ -107,7 +107,7 @@ add_executable(cm-indexbuild
     $<TARGET_OBJECTS:fnord-rpc>
     $<TARGET_OBJECTS:fnord-mdb>
     src/cm-indexbuild.cc
-    src/index/IndexBuilder.cc)
+    src/FeatureIndexWriter.cc)
 
 target_link_libraries(cm-indexbuild
     ${CMAKE_THREAD_LIBS_INIT}
