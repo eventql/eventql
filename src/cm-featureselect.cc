@@ -104,7 +104,7 @@ int main(int argc, const char** argv) {
   cm::FeatureIndex feature_index(featuredb, &feature_schema);
 
   /* feature selector */
-  cm::FeatureSelector feature_select(featuredb, &feature_schema);
+  cm::FeatureSelector feature_select(&feature_index);
 
   HashMap<String, uint64_t> feature_counts;
 

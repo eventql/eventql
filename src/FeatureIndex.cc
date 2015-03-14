@@ -18,7 +18,12 @@ FeatureIndex::FeatureIndex(
     RefPtr<mdb::MDB> featuredb,
     const FeatureSchema* schema) :
     db_(featuredb),
-    schema_(schema) {}
+    schema_(schema),
+    txn_(db_->startTransaction(true)) {}
+
+FeatureIndex::~FeatureIndex() {
+  txn_->abort();
+}
 
 void FeatureIndex::getFeatures(
     const DocID& docid,
@@ -43,6 +48,23 @@ void FeatureIndex::getFeatures(
     FeaturePackReader pack(buf.get().data(), buf.get().size());
     pack.readFeatures(features);
   }
+}
+
+Option<String> FeatureIndex::getFeature(
+    const DocID& docid,
+    const String& feature) {
+  auto fid = schema_->featureID(feature);
+  if (fid.isEmpty()) {
+    RAISEF(kIndexError, "unknown feature: $0", feature);
+  }
+
+  return getFeature(docid, fid.get(), txn_.get());
+}
+
+Option<String> FeatureIndex::getFeature(
+    const DocID& docid,
+    const FeatureID& featureid) {
+  return getFeature(docid, featureid, txn_.get());
 }
 
 Option<String> FeatureIndex::getFeature(
