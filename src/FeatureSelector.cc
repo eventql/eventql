@@ -14,8 +14,10 @@ using namespace fnord;
 namespace cm {
 
 FeatureSelector::FeatureSelector(
-      FeatureIndex* feature_index) :
-      feature_index_(feature_index) {}
+      FeatureIndex* feature_index,
+      Analyzer* analyzer) :
+      feature_index_(feature_index),
+      analyzer_(analyzer) {}
 
 void FeatureSelector::featuresFor(
     const JoinedQuery& query,

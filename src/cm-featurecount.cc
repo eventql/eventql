@@ -55,21 +55,12 @@ int main(int argc, const char** argv) {
   fnord::cli::FlagParser flags;
 
   flags.defineFlag(
-      "input_file",
+      "file",
       fnord::cli::FlagParser::T_STRING,
       true,
       "i",
       NULL,
-      "input file",
-      "<filename>");
-
-  flags.defineFlag(
-      "output_file",
-      fnord::cli::FlagParser::T_STRING,
-      true,
-      "o",
-      NULL,
-      "output file",
+      "file",
       "<filename>");
 
   flags.defineFlag(
@@ -79,6 +70,15 @@ int main(int argc, const char** argv) {
       NULL,
       NULL,
       "feature db path",
+      "<path>");
+
+  flags.defineFlag(
+      "conf",
+      cli::FlagParser::T_STRING,
+      false,
+      NULL,
+      "./conf",
+      "conf directory",
       "<path>");
 
   flags.defineFlag(
@@ -95,6 +95,12 @@ int main(int argc, const char** argv) {
   Logger::get()->setMinimumLogLevel(
       strToLogLevel(flags.getString("loglevel")));
 
+  auto file = flags.getString("file");
+  auto file_prefix = file;
+  StringUtil::replaceAll(&file_prefix, ".sstable", "");
+  auto output_data_file = file_prefix + "_features.sstable";
+  auto output_meta_file = file_prefix + "_features_meta.sstable";
+
   /* set up feature schema */
   cm::FeatureSchema feature_schema;
   feature_schema.registerFeature("shop_id", 1, 1);
@@ -102,22 +108,49 @@ int main(int argc, const char** argv) {
   feature_schema.registerFeature("category2", 3, 1);
   feature_schema.registerFeature("category3", 4, 1);
 
+  /* set up output sstable schemas */
+  sstable::SSTableColumnSchema sstable_schema;
+  sstable_schema.addColumn("label", 1, sstable::SSTableColumnType::FLOAT);
+  sstable_schema.addColumn("feature", 2, sstable::SSTableColumnType::STRING);
+
+  sstable::SSTableColumnSchema meta_sstable_schema;
+  meta_sstable_schema.addColumn("count", 1, sstable::SSTableColumnType::UINT64);
+
   /* open featuredb */
-  auto input_file = flags.getString("input_file");
   auto featuredb_path = flags.getString("featuredb_path");
   auto featuredb = mdb::MDB::open(featuredb_path, true);
   cm::FeatureIndex feature_index(featuredb, &feature_schema);
 
+  /* set up analyzer */
+  cm::Analyzer analyzer(flags.getString("conf"));
+
   /* feature selector */
-  cm::FeatureSelector feature_select(&feature_index);
+  cm::FeatureSelector feature_select(&feature_index, &analyzer);
   HashMap<String, uint64_t> feature_counts;
 
+  /* open output sstable */
+  fnord::logInfo(
+      "cm.featurecount",
+      "Writing features to: $0",
+      output_data_file);
+
+  fnord::logInfo(
+      "cm.featurecount",
+      "Writing feature metadata to: $0",
+      output_meta_file);
+
+  auto sstable_writer = sstable::SSTableWriter::create(
+      output_data_file,
+      sstable::IndexProvider{},
+      NULL,
+      0);
+
   /* read input table */
-  fnord::logInfo("cm.featurecount", "Importing sstable: $0", input_file);
-  sstable::SSTableReader reader(File::openFile(input_file, File::O_READ));
+  fnord::logInfo("cm.featurecount", "Importing sstable: $0", file);
+  sstable::SSTableReader reader(File::openFile(file, File::O_READ));
 
   if (reader.bodySize() == 0) {
-    fnord::logCritical("cm.featurecount", "unfinished table: $0", input_file);
+    fnord::logCritical("cm.featurecount", "unfinished table: $0", file);
     return 1;
   }
 
@@ -147,9 +180,16 @@ int main(int argc, const char** argv) {
       for (const auto& item : q.items) {
         Set<String> features;
         feature_select.featuresFor(q, item, &features);
+
+        sstable::SSTableColumnWriter cols(&sstable_schema);
+        cols.addFloatColumn(1, 1.0);
+
         for (const auto& f : features) {
+          cols.addStringColumn(2, f);
           ++feature_counts[f];
         }
+
+        sstable_writer->appendRow("", cols);
       }
     } catch (const Exception& e) {
       fnord::logWarning(
@@ -166,26 +206,24 @@ int main(int argc, const char** argv) {
 
   status_line.runForce();
 
-  /* write output sstable */
-  sstable::SSTableColumnSchema sstable_schema;
-  sstable_schema.addColumn("count", 1, sstable::SSTableColumnType::UINT64);
+  sstable_schema.writeIndex(sstable_writer.get());
+  sstable_writer->finalize();
 
-  auto output_file = flags.getString("output_file");
-  fnord::logInfo("cm.featurecount", "Writing results to: $0", output_file);
-  auto sstable_writer = sstable::SSTableWriter::create(
-      output_file,
+  /* write meta sstable */
+  auto meta_sstable_writer = sstable::SSTableWriter::create(
+      output_meta_file,
       sstable::IndexProvider{},
       NULL,
       0);
 
   for (const auto& f : feature_counts) {
-    sstable::SSTableColumnWriter cols(&sstable_schema);
+    sstable::SSTableColumnWriter cols(&meta_sstable_schema);
     cols.addUInt64Column(1, f.second);
-    sstable_writer->appendRow(f.first, cols);
+    meta_sstable_writer->appendRow(f.first, cols);
   }
 
-  sstable_schema.writeIndex(sstable_writer.get());
-  sstable_writer->finalize();
+  meta_sstable_schema.writeIndex(meta_sstable_writer.get());
+  meta_sstable_writer->finalize();
 
   return 0;
 }
