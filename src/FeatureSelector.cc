@@ -70,6 +70,38 @@ void FeatureSelector::featuresFor(
         cat2_id.get(),
         shop_id.get()));
   }
+
+  /* cross title terms X cat id */
+  auto title_de = feature_index_->getFeature(docid, "title~de");
+  if (!title_de.isEmpty()) {
+    Set<String> terms;
+    analyzer_->extractTerms(Language::DE, title_de.get(), &terms);
+
+    for (const auto& term : terms) {
+      features->emplace(StringUtil::format("title_term~de:$0", term));
+
+      if (!cat1_id.isEmpty()) {
+        features->emplace(StringUtil::format(
+            "q_cat1:$0|title_term~de:$1",
+            cat1_id.get(),
+            term));
+      }
+
+      if (!cat2_id.isEmpty()) {
+        features->emplace(StringUtil::format(
+            "q_cat2:$0|title_term~de:$1",
+            cat2_id.get(),
+            term));
+      }
+
+      if (!cat3_id.isEmpty()) {
+        features->emplace(StringUtil::format(
+            "q_cat3:$0|title_term~de:$1",
+            cat3_id.get(),
+            term));
+      }
+    }
+  }
 }
 
 } // namespace cm
