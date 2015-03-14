@@ -113,11 +113,11 @@ int main(int argc, const char** argv) {
   HashMap<String, uint64_t> feature_counts;
 
   /* read input table */
-  fnord::logInfo("cm.featureselect", "Importing sstable: $0", input_file);
+  fnord::logInfo("cm.featurecount", "Importing sstable: $0", input_file);
   sstable::SSTableReader reader(File::openFile(input_file, File::O_READ));
 
   if (reader.bodySize() == 0) {
-    fnord::logCritical("cm.featureselect", "unfinished table: $0", input_file);
+    fnord::logCritical("cm.featurecount", "unfinished table: $0", input_file);
     return 1;
   }
 
@@ -129,7 +129,7 @@ int main(int argc, const char** argv) {
   /* status line */
   util::SimpleRateLimitedFn status_line(kMicrosPerSecond, [&] () {
     fnord::logInfo(
-        "cm.featureselect",
+        "cm.featurecount",
         "[$0%] Reading sstable... rows=$1",
         (size_t) ((cursor->position() / (double) body_size) * 100),
         row_idx);
@@ -153,7 +153,7 @@ int main(int argc, const char** argv) {
       }
     } catch (const Exception& e) {
       fnord::logWarning(
-          "cm.featureselect",
+          "cm.featurecount",
           e,
           "error while indexing query: $0",
           val.toString());
@@ -171,7 +171,7 @@ int main(int argc, const char** argv) {
   sstable_schema.addColumn("count", 1, sstable::SSTableColumnType::UINT64);
 
   auto output_file = flags.getString("output_file");
-  fnord::logInfo("cm.featureselect", "Writing results to: $0", output_file);
+  fnord::logInfo("cm.featurecount", "Writing results to: $0", output_file);
   auto sstable_writer = sstable::SSTableWriter::create(
       output_file,
       sstable::IndexProvider{},
