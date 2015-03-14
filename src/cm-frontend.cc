@@ -40,30 +40,12 @@ int main(int argc, const char** argv) {
   fnord::cli::FlagParser flags;
 
   flags.defineFlag(
-      "cmdata",
-      cli::FlagParser::T_STRING,
-      true,
-      NULL,
-      NULL,
-      "clickmatcher app data dir",
-      "<path>");
-
-  flags.defineFlag(
-      "public_http_port",
+      "http_port",
       fnord::cli::FlagParser::T_INTEGER,
       false,
       NULL,
       "8000",
       "Start the public http server on this port",
-      "<port>");
-
-  flags.defineFlag(
-      "internal_http_port",
-      fnord::cli::FlagParser::T_INTEGER,
-      false,
-      NULL,
-      "7000",
-      "Start the internal http server on this port",
       "<port>");
 
   flags.defineFlag(
@@ -91,12 +73,6 @@ int main(int argc, const char** argv) {
 
   fnord::thread::EventLoop event_loop;
   HTTPRPCClient rpc_client(&event_loop);
-
-  /* set up cmdata */
-  auto cmdata_path = flags.getString("cmdata");
-  if (!FileUtil::isDirectory(cmdata_path)) {
-    RAISEF(kIOError, "no such directory: $0", cmdata_path);
-  }
 
   /* set up tracker log feed writer */
   fnord::feeds::RemoteFeedWriter tracker_log_feed(&rpc_client);
@@ -150,19 +126,7 @@ int main(int argc, const char** argv) {
           "/cm-frontend/by-host/$0/http/inbound",
           cm::cmHostname()));
 
-  /* setup internal http server */
-  fnord::http::HTTPRouter rpc_http_router;
-  fnord::http::HTTPServer rpc_http_server(&rpc_http_router, &event_loop);
-  rpc_http_server.listen(flags.getInt("internal_http_port"));
-
-  /* lookup servlet */
-  cm::LookupServlet lookup_servlet(cmdata_path);
-  rpc_http_router.addRouteByPrefixMatch("/lookup", &lookup_servlet);
-
-  /* stats servlet and reporting */
-  fnord::stats::StatsHTTPServlet stats_servlet;
-  rpc_http_router.addRouteByPrefixMatch("/stats", &stats_servlet);
-
+  /* stats reporting */
   fnord::stats::StatsdAgent statsd_agent(
       fnord::net::InetAddr::resolve(flags.getString("statsd_addr")),
       10 * fnord::kMicrosPerSecond);
