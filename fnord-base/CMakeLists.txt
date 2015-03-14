@@ -28,7 +28,6 @@ set(CMAKE_C_FLAGS "-std=c11 ${CMAKE_C_FLAGS}")
 
 # base
 add_library(fnord-base OBJECT
-    ../3rdparty/libart/art.c
     application.cc
     autoref.cc
     assets.cc
