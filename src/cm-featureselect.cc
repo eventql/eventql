@@ -98,11 +98,10 @@ int main(int argc, const char** argv) {
   feature_schema.registerFeature("category2", 3, 1);
   feature_schema.registerFeature("category3", 4, 1);
 
-  cm::FeatureIndex feature_index(&feature_schema);
-
   /* open featuredb */
   auto featuredb_path = flags.getString("featuredb_path");
   auto featuredb = mdb::MDB::open(featuredb_path, true);
+  cm::FeatureIndex feature_index(featuredb, &feature_schema);
 
   /* feature selector */
   cm::FeatureSelector feature_select(featuredb, &feature_schema);

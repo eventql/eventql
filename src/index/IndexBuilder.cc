@@ -15,8 +15,7 @@ namespace cm {
 
 IndexBuilder::IndexBuilder(
     const FeatureSchema* schema) :
-    feature_schema_(schema),
-    feature_index_(schema) {}
+    feature_schema_(schema) {}
 
 void IndexBuilder::indexDocument(
     const IndexRequest& index_request,
@@ -46,7 +45,61 @@ void IndexBuilder::updateFeatureIndex(
   }
 
   auto docid = index_request.item.docID();
-  feature_index_.updateFeatures(docid, features, txn);
+  updateFeatureIndex(docid, features, txn);
+}
+
+void IndexBuilder::updateFeatureIndex(
+    const DocID& docid,
+    const Vector<Pair<FeatureID, String>>& features,
+    mdb::MDBTransaction* featuredb_txn) {
+  Set<uint64_t> groups;
+  for (const auto& p : features) {
+    groups.emplace(p.first.group);
+  }
+
+  for (const auto& group : groups) {
+    FeaturePack group_features;
+    auto db_key = featureDBKey(docid, group);
+
+    auto old_buf = featuredb_txn->get(db_key);
+    if (!old_buf.isEmpty()) {
+      FeaturePackReader old_pack(old_buf.get().data(), old_buf.get().size());
+      old_pack.readFeatures(&group_features);
+    }
+
+    for (const auto& p : features) {
+      if (p.first.group != group) {
+        continue;
+      }
+
+      bool found = false;
+      for (auto& gp : group_features) {
+        if (gp.first.feature == p.first.feature) {
+          gp.second = p.second;
+          found = true;
+          break;
+        }
+      }
+
+      if (!found) {
+        group_features.emplace_back(p.first, p.second);
+      }
+    }
+
+    sortFeaturePack(group_features);
+
+    FeaturePackWriter pack;
+    pack.writeFeatures(group_features);
+
+    /* fastpath for noop updates */
+    if (!old_buf.isEmpty() &&
+        pack.size() == old_buf.get().size() &&
+        memcmp(old_buf.get().data(), pack.data(), pack.size()) == 0) {
+      continue;
+    }
+
+    featuredb_txn->update(db_key, pack.data(), pack.size());
+  }
 }
 
 } // namespace cm

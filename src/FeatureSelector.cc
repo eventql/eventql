@@ -18,7 +18,7 @@ FeatureSelector::FeatureSelector(
       FeatureSchema* feature_schema) :
       featuredb_(featuredb),
       feature_schema_(feature_schema),
-      feature_index_(feature_schema) {}
+      feature_index_(featuredb, feature_schema) {}
 
 void FeatureSelector::featuresFor(
     const JoinedQuery& query,

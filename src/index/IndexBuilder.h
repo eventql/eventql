@@ -50,7 +50,11 @@ protected:
       const IndexRequest& index_request,
       mdb::MDBTransaction* featuredb_txn);
 
-  FeatureIndex feature_index_;
+  void updateFeatureIndex(
+      const DocID& docid,
+      const Vector<Pair<FeatureID, String>>& features,
+      mdb::MDBTransaction* featuredb_txn);
+
   const FeatureSchema* feature_schema_;
 
 };

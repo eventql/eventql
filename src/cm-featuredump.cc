@@ -141,8 +141,6 @@ int main(int argc, const char** argv) {
   featuredb_schema.registerFeature("category2", 3, 1);
   featuredb_schema.registerFeature("category3", 4, 1);
 
-  cm::FeatureIndex feature_index(&featuredb_schema);
-
   /* set up cmdata */
   auto cmdata_path = flags.getString("cmdata");
   if (!FileUtil::isDirectory(cmdata_path)) {
@@ -155,6 +153,7 @@ int main(int argc, const char** argv) {
       StringUtil::format("index/$0/db", cmcustomer));
 
   auto featuredb = mdb::MDB::open(featuredb_path, true);
+  cm::FeatureIndex feature_index(featuredb, &featuredb_schema);
   auto featuredb_txn = featuredb->startTransaction(true);
 
   /* open output file */
