@@ -10,6 +10,7 @@ include_directories(${PROJECT_BINARY_DIR})
 file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/tests)
 include_directories(./)
 include_directories(./src)
+add_definitions(-ftemplate-depth=500)
 
 if(APPLE)
   set(CMAKE_CXX_FLAGS "-std=c++0x -stdlib=libc++ ${CMAKE_CXX_FLAGS}")
