@@ -109,6 +109,7 @@ int main(int argc, const char** argv) {
   feature_schema.registerFeature("category1", 2, 1);
   feature_schema.registerFeature("category2", 3, 1);
   feature_schema.registerFeature("category3", 4, 1);
+  feature_schema.registerFeature("title~de", 5, 2);
 
   /* set up output sstable schemas */
   sstable::SSTableColumnSchema sstable_schema;
