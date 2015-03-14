@@ -20,9 +20,7 @@ namespace cm {
 class FeatureSelector {
 public:
 
-  FeatureSelector(
-      RefPtr<mdb::MDB> featuredb,
-      FeatureSchema* feature_schema);
+  FeatureSelector(FeatureIndex* feature_index);
 
   void featuresFor(
       const JoinedQuery& query,
@@ -30,9 +28,7 @@ public:
       Set<String>* features);
 
 protected:
-  RefPtr<mdb::MDB> featuredb_;
-  FeatureSchema* feature_schema_;
-  FeatureIndex feature_index_;
+  FeatureIndex* feature_index_;
 };
 
 } // namespace cm

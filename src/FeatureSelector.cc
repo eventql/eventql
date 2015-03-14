@@ -14,26 +14,17 @@ using namespace fnord;
 namespace cm {
 
 FeatureSelector::FeatureSelector(
-      RefPtr<mdb::MDB> featuredb,
-      FeatureSchema* feature_schema) :
-      featuredb_(featuredb),
-      feature_schema_(feature_schema),
-      feature_index_(featuredb, feature_schema) {}
+      FeatureIndex* feature_index) :
+      feature_index_(feature_index) {}
 
 void FeatureSelector::featuresFor(
     const JoinedQuery& query,
     const JoinedQueryItem& item,
     Set<String>* features) {
-  auto featuredb_txn = featuredb_->startTransaction(true);
-
-  /* item attributes */
   auto docid = item.item.docID();
 
-  auto shop_id = feature_index_.getFeature(
-      docid,
-      feature_schema_->featureID("shop_id").get(),
-      featuredb_txn.get());
-
+  /* item attributes */
+  auto shop_id = feature_index_->getFeature(docid, "shop_id");
   if (!shop_id.isEmpty()) {
     features->emplace(StringUtil::format("shop_id:$0", shop_id.get()));
   }
@@ -77,8 +68,6 @@ void FeatureSelector::featuresFor(
         cat2_id.get(),
         shop_id.get()));
   }
-
-  featuredb_txn->abort();
 }
 
 } // namespace cm

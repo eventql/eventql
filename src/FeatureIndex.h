@@ -31,20 +31,34 @@ public:
       RefPtr<mdb::MDB> featuredb,
       const FeatureSchema* schema);
 
-  void getFeatures(
+  ~FeatureIndex();
+
+  FeatureIndex(const FeatureIndex& other) = delete;
+  FeatureIndex& operator=(const FeatureIndex& other) = delete;
+
+  Option<String> getFeature(
       const DocID& docid,
-      mdb::MDBTransaction* featuredb_txn,
-      FeaturePack* features);
+      const String& feature);
+
+  Option<String> getFeature(
+      const DocID& docid,
+      const FeatureID& featureid);
 
   Option<String> getFeature(
       const DocID& docid,
       const FeatureID& featureid,
       mdb::MDBTransaction* featuredb_txn);
 
+  void getFeatures(
+      const DocID& docid,
+      mdb::MDBTransaction* featuredb_txn,
+      FeaturePack* features);
+
 protected:
 
   FeatureCache cache_;
   RefPtr<mdb::MDB> db_;
+  RefPtr<mdb::MDBTransaction> txn_;
   const FeatureSchema* schema_;
 };
 
