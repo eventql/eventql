@@ -12,6 +12,7 @@
 #include "fnord-base/option.h"
 #include "FeatureID.h"
 #include "JoinedQuery.h"
+#include "Analyzer.h"
 
 using namespace fnord;
 
@@ -20,7 +21,7 @@ namespace cm {
 class FeatureSelector {
 public:
 
-  FeatureSelector(FeatureIndex* feature_index);
+  FeatureSelector(FeatureIndex* feature_index, Analyzer* analyzer);
 
   void featuresFor(
       const JoinedQuery& query,
@@ -29,6 +30,7 @@ public:
 
 protected:
   FeatureIndex* feature_index_;
+  Analyzer* analyzer_;
 };
 
 } // namespace cm

@@ -199,6 +199,8 @@ add_executable(cm-featurecount
     $<TARGET_OBJECTS:fnord-json>
     $<TARGET_OBJECTS:fnord-rpc>
     $<TARGET_OBJECTS:fnord-sstable>
+    $<TARGET_OBJECTS:fnord-fts>
+    src/Analyzer.cc
     src/FeatureSelector.cc
     src/cm-featurecount.cc)
 
