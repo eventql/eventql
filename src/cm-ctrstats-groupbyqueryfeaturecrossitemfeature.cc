@@ -40,13 +40,12 @@ InternMap intern_map;
 
 void indexJoinedQuery(
     const cm::JoinedQuery& query,
-    const String& query_feature_name,
-    mdb::MDB* featuredb,
-    FeatureIndex* feature_index,
-    FeatureID item_feature_id,
+    const String& query_feature,
+    const String& item_feature,
     ItemEligibility item_eligibility,
+    FeatureIndex* feature_index,
     CounterMap* counters) {
-  auto fstr_opt = cm::extractAttr(query.attrs, query_feature_name);
+  auto fstr_opt = cm::extractAttr(query.attrs, query_feature);
   if (fstr_opt.isEmpty()) {
     return;
   }
@@ -80,14 +79,7 @@ void indexJoinedQuery(
     Option<String> ifstr_opt;
 
     try {
-      auto txn = featuredb->startTransaction(true);
-
-      ifstr_opt = feature_index->getFeature(
-          item.item.docID(),
-          item_feature_id,
-          txn.get());
-
-      txn->abort();
+      ifstr_opt = feature_index->getFeature(item.item.docID(), item_feature);
     } catch (const Exception& e) {
       fnord::logError("cm.ctrstatsbuild", e, "error");
     }
@@ -249,6 +241,7 @@ int main(int argc, const char** argv) {
 
   CounterMap counters;
   auto query_feature = flags.getString("query_feature");
+  auto item_feature = flags.getString("item_feature");
   auto start_time = std::numeric_limits<uint64_t>::max();
   auto end_time = std::numeric_limits<uint64_t>::min();
 
@@ -324,10 +317,9 @@ int main(int argc, const char** argv) {
         indexJoinedQuery(
             json::fromJSON<cm::JoinedQuery>(val),
             query_feature,
-            featuredb.get(),
-            &feature_index,
-            feature_schema.featureID(flags.getString("item_feature")).get(),
+            item_feature,
             cm::ItemEligibility::DAWANDA_FIRST_EIGHT,
+            &feature_index,
             &counters);
       } catch (const Exception& e) {
         fnord::logWarning(
