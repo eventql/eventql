@@ -117,7 +117,7 @@ int main(int argc, const char** argv) {
 
   /* get features */
   FeaturePack features;
-  FeatureIndex feature_index(&feature_schema);
+  FeatureIndex feature_index(featuredb, &feature_schema);
   feature_index.getFeatures(docid, featuredb_txn.get(), &features);
 
   /* dump document */

@@ -27,7 +27,9 @@ namespace cm {
 class FeatureIndex {
 public:
 
-  FeatureIndex(const FeatureSchema* schema);
+  FeatureIndex(
+      RefPtr<mdb::MDB> featuredb,
+      const FeatureSchema* schema);
 
   void getFeatures(
       const DocID& docid,
@@ -39,18 +41,15 @@ public:
       const FeatureID& featureid,
       mdb::MDBTransaction* featuredb_txn);
 
-  void updateFeatures(
-      const DocID& docid,
-      const Vector<Pair<FeatureID, String>>& features,
-      mdb::MDBTransaction* featuredb_txn);
-
 protected:
 
-  String dbKey(const DocID& docid, uint64_t group_id) const;
-
   FeatureCache cache_;
+  RefPtr<mdb::MDB> db_;
   const FeatureSchema* schema_;
 };
+
+String featureDBKey(const DocID& docid, uint64_t group_id);
+
 } // namespace cm
 
 #endif
