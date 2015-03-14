@@ -94,7 +94,7 @@ int main(int argc, const char** argv) {
   /* set up dawanda */
   auto dwn_ns = new cm::CustomerNamespace("dawanda");
   dwn_ns->addVHost("dwnapps.net");
-  dwn_ns->loadTrackingJS("cm-config/customer_dawanda/track.js");
+  dwn_ns->loadTrackingJS("customers/dawanda/track.js");
 
   RefPtr<feeds::RemoteFeedWriter> dwn_index_request_feed(
       new feeds::RemoteFeedWriter(&rpc_client));
@@ -115,13 +115,13 @@ int main(int argc, const char** argv) {
   frontend.addCustomer(dwn_ns, dwn_index_request_feed);
 
   /* set up public http server */
-  fnord::http::HTTPRouter public_http_router;
-  public_http_router.addRouteByPrefixMatch("/", &frontend);
-  fnord::http::HTTPServer public_http_server(&public_http_router, &event_loop);
-  public_http_server.listen(flags.getInt("public_http_port"));
-  public_http_server.stats()->exportStats(
+  fnord::http::HTTPRouter http_router;
+  http_router.addRouteByPrefixMatch("/", &frontend);
+  fnord::http::HTTPServer http_server(&http_router, &event_loop);
+  http_server.listen(flags.getInt("http_port"));
+  http_server.stats()->exportStats(
       "/cm-frontend/global/http/inbound");
-  public_http_server.stats()->exportStats(
+  http_server.stats()->exportStats(
       StringUtil::format(
           "/cm-frontend/by-host/$0/http/inbound",
           cm::cmHostname()));

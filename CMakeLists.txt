@@ -48,6 +48,13 @@ add_library(cm-common OBJECT
     src/CustomerNamespace.cc
     src/PackedExample.cc)
 
+# cm-frontend
+set_source_files_properties(${CMAKE_BINARY_DIR}/cm-frontend-assets.cc PROPERTIES GENERATED true)
+
+add_custom_target(cm-frontend-assets
+    COMMAND ./3rdparty/libfnord/fnord-base/assets.sh ${CMAKE_BINARY_DIR}/cm-frontend-assets.cc < ./src/cm-frontend.assets
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+
 add_executable(cm-frontend
     $<TARGET_OBJECTS:cm-common>
     $<TARGET_OBJECTS:fnord-base>
@@ -61,10 +68,12 @@ add_executable(cm-frontend
     src/frontend/LookupServlet.cc
     src/cm-frontend.cc
     src/sellerstats/ActivityLog.cc
-    src/sellerstats/SellerStatsLookup.cc)
+    src/sellerstats/SellerStatsLookup.cc
+    ${CMAKE_BINARY_DIR}/cm-frontend-assets.cc)
 
 target_link_libraries(cm-frontend ${CMAKE_THREAD_LIBS_INIT})
 target_link_libraries(cm-frontend m)
+add_dependencies(cm-frontend cm-frontend-assets)
 
 add_executable(cm-feedserver
     $<TARGET_OBJECTS:cm-common>
