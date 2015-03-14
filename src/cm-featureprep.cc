@@ -132,12 +132,12 @@ int main(int argc, const char** argv) {
 
   /* open output sstable */
   fnord::logInfo(
-      "cm.featurecount",
+      "cm.featureprep",
       "Writing features to: $0",
       output_data_file);
 
   fnord::logInfo(
-      "cm.featurecount",
+      "cm.featureprep",
       "Writing feature metadata to: $0",
       output_meta_file);
 
@@ -148,11 +148,11 @@ int main(int argc, const char** argv) {
       0);
 
   /* read input table */
-  fnord::logInfo("cm.featurecount", "Importing sstable: $0", file);
+  fnord::logInfo("cm.featureprep", "Importing sstable: $0", file);
   sstable::SSTableReader reader(File::openFile(file, File::O_READ));
 
   if (reader.bodySize() == 0) {
-    fnord::logCritical("cm.featurecount", "unfinished table: $0", file);
+    fnord::logCritical("cm.featureprep", "unfinished table: $0", file);
     return 1;
   }
 
@@ -164,7 +164,7 @@ int main(int argc, const char** argv) {
   /* status line */
   util::SimpleRateLimitedFn status_line(kMicrosPerSecond, [&] () {
     fnord::logInfo(
-        "cm.featurecount",
+        "cm.featureprep",
         "[$0%] Reading sstable... rows=$1",
         (size_t) ((cursor->position() / (double) body_size) * 100),
         row_idx);
@@ -201,7 +201,7 @@ int main(int argc, const char** argv) {
       }
     } catch (const Exception& e) {
       fnord::logWarning(
-          "cm.featurecount",
+          "cm.featureprep",
           e,
           "error while indexing query: $0",
           val.toString());
