@@ -39,6 +39,7 @@
 #include "fnord-base/stats/statsdagent.h"
 #include "fnord-base/RadixTree.h"
 #include "fnord-mdb/MDB.h"
+#include "common.h"
 #include "CustomerNamespace.h"
 #include "FeatureSchema.h"
 #include "FeaturePack.h"
@@ -100,6 +101,7 @@ int main(int argc, const char** argv) {
   StringUtil::replaceAll(&file_prefix, ".sstable", "");
   auto output_data_file = file_prefix + "_features.sstable";
   auto output_meta_file = file_prefix + "_features_meta.sstable";
+  auto item_eligibility = cm::ItemEligibility::DAWANDA_FIRST_EIGHT;
 
   /* set up feature schema */
   cm::FeatureSchema feature_schema;
@@ -178,11 +180,17 @@ int main(int argc, const char** argv) {
       auto q = json::fromJSON<cm::JoinedQuery>(val);
 
       for (const auto& item : q.items) {
+        if (!isItemEligible(item_eligibility, q, item)) {
+          continue;
+        }
+
+        double label = item.clicked ? 1.0 : -1.0;
+
         Set<String> features;
         feature_select.featuresFor(q, item, &features);
 
         sstable::SSTableColumnWriter cols(&sstable_schema);
-        cols.addFloatColumn(1, 1.0);
+        cols.addFloatColumn(1, label);
 
         for (const auto& f : features) {
           cols.addStringColumn(2, f);
