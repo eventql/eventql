@@ -190,7 +190,7 @@ add_executable(cm-featuredump
 target_link_libraries(cm-featuredump
     ${CMAKE_THREAD_LIBS_INIT})
 
-add_executable(cm-featurecount
+add_executable(cm-featureprep
     $<TARGET_OBJECTS:cm-common>
     $<TARGET_OBJECTS:fnord-base>
     $<TARGET_OBJECTS:fnord-feeds>
@@ -202,9 +202,9 @@ add_executable(cm-featurecount
     $<TARGET_OBJECTS:fnord-fts>
     src/Analyzer.cc
     src/FeatureSelector.cc
-    src/cm-featurecount.cc)
+    src/cm-featureprep.cc)
 
-target_link_libraries(cm-featurecount
+target_link_libraries(cm-featureprep
     ${CMAKE_THREAD_LIBS_INIT})
 
 add_executable(cm-ctrstats-rollupflat
