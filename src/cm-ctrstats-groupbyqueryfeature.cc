@@ -223,19 +223,19 @@ int main(int argc, const char** argv) {
       status_line.runMaybe();
 
       auto val = cursor->getDataBuffer();
+      cm::JoinedQuery q;
 
       try {
-        indexJoinedQuery(
-            json::fromJSON<cm::JoinedQuery>(val),
-            query_feature,
-            &counters);
+        q = json::fromJSON<cm::JoinedQuery>(val);
       } catch (const Exception& e) {
-        fnord::logWarning(
-            "cm.ctrstats",
-            e,
-            "error while indexing query: $0",
-            val.toString());
+        fnord::logWarning("cm.ctrstats", e, "invalid json: $0", val.toString());
+        continue;
       }
+
+      indexJoinedQuery(
+          q,
+          query_feature,
+          &counters);
 
       if (!cursor->next()) {
         break;
