@@ -114,6 +114,23 @@ String SSTableColumnReader::getStringColumn(SSTableColumnID id) {
   RAISEF(kIndexError, "no value for column: $0", id);
 }
 
+Vector<String> SSTableColumnReader::getStringColumns(SSTableColumnID id) {
+#ifndef FNORD_NODEBUG
+  if (schema_->columnType(id) != SSTableColumnType::STRING) {
+    RAISEF(kIllegalArgumentError, "invalid column type for column_id: $0", id);
+  }
+#endif
+
+  Vector<String> data;
+  for (const auto& col : col_data_) {
+    if (std::get<0>(col) == id) {
+      data.emplace_back((char*) std::get<1>(col), std::get<2>(col));
+    }
+  }
+
+  return data;
+}
+
 } // namespace sstable
 } // namespace fnord
 
