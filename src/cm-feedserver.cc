@@ -36,7 +36,7 @@ int main(int argc, const char** argv) {
   fnord::cli::FlagParser flags;
 
   flags.defineFlag(
-      "rpc_http_port",
+      "http_port",
       fnord::cli::FlagParser::T_INTEGER,
       false,
       NULL,
@@ -54,12 +54,12 @@ int main(int argc, const char** argv) {
       "<level>");
 
   flags.defineFlag(
-      "cmdata",
+      "datadir",
       fnord::cli::FlagParser::T_STRING,
       true,
       NULL,
       NULL,
-      "clickmatcher app data dir",
+      "data dir",
       "<path>");
 
   flags.defineFlag(
@@ -79,16 +79,10 @@ int main(int argc, const char** argv) {
   fnord::thread::EventLoop event_loop;
 
   fnord::json::JSONRPC rpc;
-  fnord::json::JSONRPCHTTPAdapter rpc_http(&rpc);
-
-  /* set up cmdata */
-  auto cmdata_path = flags.getString("cmdata");
-  if (!fnord::FileUtil::isDirectory(cmdata_path)) {
-    RAISEF(kIOError, "no such directory: $0", cmdata_path);
-  }
+  fnord::json::JSONRPCHTTPAdapter http(&rpc);
 
   /* set up logstream service */
-  auto feeds_dir_path = fnord::FileUtil::joinPaths(cmdata_path, "feeds");
+  auto feeds_dir_path = flags.getString("datadir");
   fnord::FileUtil::mkdir_p(feeds_dir_path);
 
   fnord::feeds::FeedService logstream_service{
@@ -98,18 +92,18 @@ int main(int argc, const char** argv) {
   rpc.registerService(&logstream_service);
 
   /* set up rpc http server */
-  fnord::http::HTTPRouter rpc_http_router;
-  rpc_http_router.addRouteByPrefixMatch("/rpc", &rpc_http);
-  fnord::http::HTTPServer rpc_http_server(&rpc_http_router, &event_loop);
-  rpc_http_server.listen(flags.getInt("rpc_http_port"));
+  fnord::http::HTTPRouter http_router;
+  http_router.addRouteByPrefixMatch("/rpc", &http);
+  fnord::http::HTTPServer http_server(&http_router, &event_loop);
+  http_server.listen(flags.getInt("http_port"));
 
-  rpc_http_server.stats()->exportStats(
+  http_server.stats()->exportStats(
       "/cm-feedserver/global/http/inbound");
-  rpc_http_server.stats()->exportStats(
+  http_server.stats()->exportStats(
       StringUtil::format("/cm-feedserver/$0/http/inbound", cm::cmHostname()));
 
   fnord::stats::StatsHTTPServlet stats_servlet;
-  rpc_http_router.addRouteByPrefixMatch("/stats", &stats_servlet);
+  http_router.addRouteByPrefixMatch("/stats", &stats_servlet);
 
   fnord::stats::StatsdAgent statsd_agent(
       fnord::net::InetAddr::resolve(flags.getString("statsd_addr")),
