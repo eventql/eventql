@@ -79,7 +79,7 @@ int main(int argc, const char** argv) {
   for (int tbl_idx = 0; tbl_idx < sstables.size(); ++tbl_idx) {
     String sstable = sstables[tbl_idx];
     StringUtil::replaceAll(&sstable, ".sstable", "_meta.sstable");
-    fnord::logInfo("cm.featuredump", "Importing sstable: $0", sstable);
+    fnord::logInfo("cm.featuredump", "Importing meta sstable: $0", sstable);
 
     /* read sstable heade r*/
     sstable::SSTableReader reader(File::openFile(sstable, File::O_READ));
@@ -102,8 +102,9 @@ int main(int argc, const char** argv) {
 
       fnord::logInfo(
           "cm.featuredump",
-          "[$0%] Reading sstables... rows=$3 features=$4",
-          (size_t) (p * 100), tbl_idx + 1, sstables.size(), row_idx,
+          "[$0%] Reading meta sstables... rows=$1 features=$2",
+          (size_t) (p * 100),
+          row_idx,
           feature_counts.size());
     });
 
@@ -146,6 +147,51 @@ int main(int argc, const char** argv) {
       "Exporting $1/$0 features",
       orig_count,
       features.size());
+
+  /* read input data tables */
+  int rows_read = 0;
+  for (int tbl_idx = 0; tbl_idx < sstables.size(); ++tbl_idx) {
+    const auto& sstable = sstables[tbl_idx];
+    fnord::logInfo("cm.featuredump", "Importing data sstable: $0", sstable);
+
+    /* read sstable heade r*/
+    sstable::SSTableReader reader(File::openFile(sstable, File::O_READ));
+    sstable::SSTableColumnSchema schema;
+    schema.loadIndex(&reader);
+
+    if (reader.bodySize() == 0) {
+      fnord::logCritical("cm.featuredump", "unfinished sstable: $0", sstable);
+      exit(1);
+    }
+
+    /* get sstable cursor */
+    auto cursor = reader.getCursor();
+    auto body_size = reader.bodySize();
+
+    /* status line */
+    util::SimpleRateLimitedFn status_line(kMicrosPerSecond, [&] () {
+      auto p = (tbl_idx / (double) tbl_cnt) +
+          ((cursor->position() / (double) body_size)) / (double) tbl_cnt;
+
+      fnord::logInfo(
+          "cm.featuredump",
+          "[$0%] Reading data sstables... rows_read=$1",
+          (size_t) (p * 100),
+          rows_read);
+    });
+
+    /* read sstable rows */
+    for (; cursor->valid(); ++rows_read) {
+      status_line.runMaybe();
+
+      if (!cursor->next()) {
+        break;
+      }
+    }
+
+    status_line.runForce();
+  }
+
 
   return 0;
 }
