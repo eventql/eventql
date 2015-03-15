@@ -25,6 +25,7 @@
 #include "fnord-sstable/SSTableColumnReader.h"
 #include "fnord-sstable/SSTableColumnWriter.h"
 #include "common.h"
+#include "PackedExample.h"
 
 using namespace fnord;
 
@@ -35,10 +36,19 @@ int main(int argc, const char** argv) {
   fnord::cli::FlagParser flags;
 
   flags.defineFlag(
-      "output_file",
+      "output_data_file",
       fnord::cli::FlagParser::T_STRING,
       true,
-      "o",
+      NULL,
+      NULL,
+      "output file",
+      "<filename>");
+
+  flags.defineFlag(
+      "output_meta_file",
+      fnord::cli::FlagParser::T_STRING,
+      true,
+      NULL,
       NULL,
       "output file",
       "<filename>");
@@ -72,6 +82,46 @@ int main(int argc, const char** argv) {
     fnord::logCritical("cm.featuredump", "No input tables, exiting");
     return 1;
   }
+
+  /* open output files */
+  auto output_data_file_path = flags.getString("output_data_file");
+  auto output_meta_file_path = flags.getString("output_meta_file");
+
+  fnord::logInfo(
+      "cm.featureprep",
+      "Writing features to: $0",
+      output_data_file_path);
+
+  fnord::logInfo(
+      "cm.featureprep",
+      "Writing feature metadata to: $0",
+      output_meta_file_path);
+
+  if (FileUtil::exists(output_meta_file_path + "~")) {
+    fnord::logInfo(
+        "cm.featuredump",
+        "Deleting orphaned tmp file: $0",
+        output_meta_file_path + "~");
+
+    FileUtil::rm(output_meta_file_path + "~");
+  }
+
+  if (FileUtil::exists(output_data_file_path + "~")) {
+    fnord::logInfo(
+        "cm.featuredump",
+        "Deleting orphaned tmp file: $0",
+        output_data_file_path + "~");
+
+    FileUtil::rm(output_data_file_path + "~");
+  }
+
+  auto output_data_file = File::openFile(
+      output_data_file_path + "~",
+      File::O_READ | File::O_WRITE | File::O_CREATE);
+
+  auto output_meta_file = File::openFile(
+      output_meta_file_path + "~",
+      File::O_READ | File::O_WRITE | File::O_CREATE);
 
   /* read input meta tables and count features */
   HashMap<String, uint64_t> feature_counts;
@@ -128,13 +178,14 @@ int main(int argc, const char** argv) {
     status_line.runForce();
   }
 
-  /* select features for export */
-  Set<String> features;
+  /* select features for export and assign indexes*/
+  HashMap<String, uint64_t> feature_idx;
+  uint64_t cur_idx = 0;
   auto orig_count = feature_counts.size();
   auto min_count = flags.getInt("min_observations");
   for (auto iter = feature_counts.begin(); iter != feature_counts.end(); ) {
     if (iter->second > min_count) {
-      features.emplace(iter->first);
+      feature_idx.emplace(iter->first, ++cur_idx);
     }
 
     iter = feature_counts.erase(iter);
@@ -146,10 +197,16 @@ int main(int argc, const char** argv) {
       "cm.featuredump",
       "Exporting $1/$0 features",
       orig_count,
-      features.size());
+      feature_idx.size());
+
+  /* write feature idx meta file */
+  for (const auto& f : feature_idx) {
+    output_meta_file.write(StringUtil::format("$1 $0\n", f.first, f.second));
+  }
 
   /* read input data tables */
   int rows_read = 0;
+  int rows_written = 0;
   for (int tbl_idx = 0; tbl_idx < sstables.size(); ++tbl_idx) {
     const auto& sstable = sstables[tbl_idx];
     fnord::logInfo("cm.featuredump", "Importing data sstable: $0", sstable);
@@ -175,14 +232,36 @@ int main(int argc, const char** argv) {
 
       fnord::logInfo(
           "cm.featuredump",
-          "[$0%] Reading data sstables... rows_read=$1",
+          "[$0%] Reading data sstables... rows_read=$1 rows_written=$2",
           (size_t) (p * 100),
-          rows_read);
+          rows_read,
+          rows_written);
     });
 
-    /* read sstable rows */
+    /* read data sstables and copy features */
     for (; cursor->valid(); ++rows_read) {
       status_line.runMaybe();
+
+      auto val = cursor->getDataBuffer();
+      sstable::SSTableColumnReader cols(&schema, val);
+
+      cm::Example ex;
+      ex.label = cols.getFloatColumn(schema.columnID("label"));
+      auto features = cols.getStringColumns(schema.columnID("feature"));
+      for (const auto& f : features) {
+        auto idx = feature_idx.find(f);
+        if (idx == feature_idx.end()) {
+          continue;
+        }
+
+        ex.features.emplace_back(idx->second, 1.0);
+      }
+
+      if (ex.features.size() > 0) {
+        auto ex_str = exampleToSVMLight(ex);
+        output_data_file.write(ex_str + "\n");
+        ++rows_written;
+      }
 
       if (!cursor->next()) {
         break;
@@ -192,6 +271,8 @@ int main(int argc, const char** argv) {
     status_line.runForce();
   }
 
+  FileUtil::mv(output_meta_file_path + "~", output_meta_file_path);
+  FileUtil::mv(output_data_file_path + "~", output_data_file_path);
 
   return 0;
 }
