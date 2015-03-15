@@ -102,8 +102,9 @@ int main(int argc, const char** argv) {
 
       fnord::logInfo(
           "cm.featuredump",
-          "[$0%] Reading sstables... rows=$3",
-          (size_t) (p * 100), tbl_idx + 1, sstables.size(), row_idx);
+          "[$0%] Reading sstables... rows=$3 features=$4",
+          (size_t) (p * 100), tbl_idx + 1, sstables.size(), row_idx,
+          feature_counts.size());
     });
 
     /* read sstable rows */
