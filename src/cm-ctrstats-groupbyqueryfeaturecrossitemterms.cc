@@ -318,25 +318,26 @@ int main(int argc, const char** argv) {
       status_line.runMaybe();
 
       auto val = cursor->getDataBuffer();
-      cm::JoinedQuery q;
+      Option<cm::JoinedQuery> q;
 
       try {
-        q = json::fromJSON<cm::JoinedQuery>(val);
+        q = Some(json::fromJSON<cm::JoinedQuery>(val));
       } catch (const Exception& e) {
-        fnord::logWarning("cm.ctrstats", e, "invalid json: $0", val.toString());
-        continue;
+        //fnord::logWarning("cm.ctrstats", e, "invalid json: $0", val.toString());
       }
 
-      indexJoinedQuery(
-          q,
-          query_feature,
-          featuredb.get(),
-          &feature_index,
-          feature_schema.featureID(flags.getString("item_feature")).get(),
-          cm::ItemEligibility::DAWANDA_FIRST_EIGHT,
-          &analyzer,
-          lang,
-          &counters);
+      if (!q.isEmpty()) {
+        indexJoinedQuery(
+            q.get(),
+            query_feature,
+            featuredb.get(),
+            &feature_index,
+            feature_schema.featureID(flags.getString("item_feature")).get(),
+            cm::ItemEligibility::DAWANDA_FIRST_EIGHT,
+            &analyzer,
+            lang,
+            &counters);
+      }
 
       if (!cursor->next()) {
         break;
