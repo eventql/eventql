@@ -142,8 +142,26 @@ int main(int argc, const char** argv) {
       "Writing feature metadata to: $0",
       output_meta_file);
 
+  if (FileUtil::exists(output_data_file + "~")) {
+    fnord::logInfo(
+        "cm.featureprep",
+        "Deleting orphaned tmp file: $0",
+        output_data_file + "~");
+
+    FileUtil::rm(output_data_file + "~");
+  }
+
+  if (FileUtil::exists(output_meta_file + "~")) {
+    fnord::logInfo(
+        "cm.featureprep",
+        "Deleting orphaned tmp file: $0",
+        output_meta_file + "~");
+
+    FileUtil::rm(output_meta_file + "~");
+  }
+
   auto sstable_writer = sstable::SSTableWriter::create(
-      output_data_file,
+      output_data_file + "~",
       sstable::IndexProvider{},
       NULL,
       0);
@@ -220,7 +238,7 @@ int main(int argc, const char** argv) {
 
   /* write meta sstable */
   auto meta_sstable_writer = sstable::SSTableWriter::create(
-      output_meta_file,
+      output_meta_file + "~",
       sstable::IndexProvider{},
       NULL,
       0);
@@ -233,6 +251,9 @@ int main(int argc, const char** argv) {
 
   meta_sstable_schema.writeIndex(meta_sstable_writer.get());
   meta_sstable_writer->finalize();
+
+  FileUtil::mv(output_meta_file + "~", output_meta_file);
+  FileUtil::mv(output_data_file + "~", output_data_file);
 
   return 0;
 }
