@@ -66,14 +66,9 @@ void indexJoinedQuery(
     Option<String> ifstr_opt;
 
     try {
-      auto txn = featuredb->startTransaction(true);
-
       ifstr_opt = feature_index->getFeature(
           item.item.docID(),
-          item_feature_id,
-          txn.get());
-
-      txn->abort();
+          item_feature_id);
     } catch (const Exception& e) {
       fnord::logError("cm.ctrstatsbuild", e, "error");
     }
@@ -323,25 +318,25 @@ int main(int argc, const char** argv) {
       status_line.runMaybe();
 
       auto val = cursor->getDataBuffer();
+      cm::JoinedQuery q;
 
       try {
-        indexJoinedQuery(
-            json::fromJSON<cm::JoinedQuery>(val),
-            query_feature,
-            featuredb.get(),
-            &feature_index,
-            feature_schema.featureID(flags.getString("item_feature")).get(),
-            cm::ItemEligibility::DAWANDA_FIRST_EIGHT,
-            &analyzer,
-            lang,
-            &counters);
+        q = json::fromJSON<cm::JoinedQuery>(val);
       } catch (const Exception& e) {
-        fnord::logWarning(
-            "cm.ctrstats",
-            e,
-            "error while indexing query: $0",
-            val.toString());
+        fnord::logWarning("cm.ctrstats", e, "invalid json: $0", val.toString());
+        continue;
       }
+
+      indexJoinedQuery(
+          q,
+          query_feature,
+          featuredb.get(),
+          &feature_index,
+          feature_schema.featureID(flags.getString("item_feature")).get(),
+          cm::ItemEligibility::DAWANDA_FIRST_EIGHT,
+          &analyzer,
+          lang,
+          &counters);
 
       if (!cursor->next()) {
         break;
