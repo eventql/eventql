@@ -75,6 +75,7 @@ int main(int argc, const char** argv) {
 
   /* read input meta tables and count features */
   HashMap<String, uint64_t> feature_counts;
+  int row_idx = 0;
   for (int tbl_idx = 0; tbl_idx < sstables.size(); ++tbl_idx) {
     String sstable = sstables[tbl_idx];
     StringUtil::replaceAll(&sstable, ".sstable", "_meta.sstable");
@@ -93,7 +94,6 @@ int main(int argc, const char** argv) {
     /* get sstable cursor */
     auto cursor = reader.getCursor();
     auto body_size = reader.bodySize();
-    int row_idx = 0;
 
     /* status line */
     util::SimpleRateLimitedFn status_line(kMicrosPerSecond, [&] () {
@@ -102,7 +102,7 @@ int main(int argc, const char** argv) {
 
       fnord::logInfo(
           "cm.featuredump",
-          "[$0%] Reading sstable... rows=$3",
+          "[$0%] Reading sstables... rows=$3",
           (size_t) (p * 100), tbl_idx + 1, sstables.size(), row_idx);
     });
 
