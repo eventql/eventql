@@ -67,7 +67,8 @@ int main(int argc, const char** argv) {
       strToLogLevel(flags.getString("loglevel")));
 
   auto sstables = flags.getArgv();
-  if (sstables.size() == 0) {
+  auto tbl_cnt = sstables.size();
+  if (tbl_cnt == 0) {
     fnord::logCritical("cm.featuredump", "No input tables, exiting");
     return 1;
   }
@@ -96,11 +97,13 @@ int main(int argc, const char** argv) {
 
     /* status line */
     util::SimpleRateLimitedFn status_line(kMicrosPerSecond, [&] () {
+      auto p = (tbl_idx / (double) tbl_cnt) +
+          ((cursor->position() / (double) body_size)) / (double) tbl_cnt;
+
       fnord::logInfo(
           "cm.featuredump",
-          "[$1/$2] [$0%] Reading sstable... rows=$3",
-          (size_t) ((cursor->position() / (double) body_size) * 100),
-          tbl_idx + 1, sstables.size(), row_idx);
+          "[$0%] Reading sstable... rows=$3",
+          (size_t) (p * 100), tbl_idx + 1, sstables.size(), row_idx);
     });
 
     /* read sstable rows */
