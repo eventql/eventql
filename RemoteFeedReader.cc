@@ -133,6 +133,7 @@ void RemoteFeedReader::fillBuffers() {
   ScopedLock<std::mutex> lk(mutex_);
   auto sources = sources_;
 
+  Vector<Function<void ()>> defer_after_lock;
   for (const auto& source : sources) {
     if (source->is_fetching ||
         source->read_buffer.size() >= source->max_buffer_size) {
@@ -212,7 +213,16 @@ void RemoteFeedReader::fillBuffers() {
       data_available_wakeup_.wakeup();
     });
 
-    rpc_client_->call(source->rpc_url, rpc.get());
+    auto rpc_url = source->rpc_url;
+    defer_after_lock.emplace_back([this, rpc_url, rpc] {
+      rpc_client_->call(rpc_url, rpc.get());
+    });
+  }
+
+  lk.unlock();
+
+  for (const auto& fn : defer_after_lock) {
+    fn();
   }
 }
 
