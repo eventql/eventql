@@ -117,7 +117,8 @@ int main(int argc, const char** argv) {
   sstable_schema.addColumn("feature", 2, sstable::SSTableColumnType::STRING);
 
   sstable::SSTableColumnSchema meta_sstable_schema;
-  meta_sstable_schema.addColumn("count", 1, sstable::SSTableColumnType::UINT64);
+  meta_sstable_schema.addColumn("views", 1, sstable::SSTableColumnType::UINT64);
+  meta_sstable_schema.addColumn("clicks", 1, sstable::SSTableColumnType::UINT64);
 
   /* open featuredb */
   auto featuredb_path = flags.getString("featuredb_path");
@@ -129,7 +130,7 @@ int main(int argc, const char** argv) {
 
   /* feature selector */
   cm::FeatureSelector feature_select(&feature_index, &analyzer);
-  HashMap<String, uint64_t> feature_counts;
+  HashMap<String, Pair<uint32_t, uint32_t>> feature_counts;
 
   /* open output sstable */
   fnord::logInfo(
@@ -213,7 +214,10 @@ int main(int argc, const char** argv) {
 
         for (const auto& f : features) {
           cols.addStringColumn(2, f);
-          ++feature_counts[f];
+          ++feature_counts[f].first;
+          if (item.clicked) {
+            ++feature_counts[f].second;
+          }
         }
 
         sstable_writer->appendRow("", cols);
@@ -245,7 +249,8 @@ int main(int argc, const char** argv) {
 
   for (const auto& f : feature_counts) {
     sstable::SSTableColumnWriter cols(&meta_sstable_schema);
-    cols.addUInt64Column(1, f.second);
+    cols.addUInt64Column(1, f.second.first);
+    cols.addUInt64Column(2, f.second.second);
     meta_sstable_writer->appendRow(f.first, cols);
   }
 
