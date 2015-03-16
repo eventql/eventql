@@ -85,7 +85,7 @@ Option<T>& Option<T>::operator=(Option<T>&& other) {
 }
 
 template <typename T>
-const T& Option<T>::get() const {
+T& Option<T>::get() const {
   if (value_ == nullptr) {
     RAISE(kRuntimeError, "get() called on empty option");
   }
