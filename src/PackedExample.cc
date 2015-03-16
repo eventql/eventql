@@ -6,12 +6,21 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
+#include <algorithm>
 #include "fnord-base/stringutil.h"
 #include "PackedExample.h"
 
 using namespace fnord;
 
 namespace cm {
+
+void Example::sortFeatures() {
+  std::sort(features.begin(), features.end(), [] (
+      const Pair<uint64_t, double>& a,
+      const Pair<uint64_t, double>& b) {
+    return a.first < b.first;
+  });
+}
 
 String exampleToSVMLight(const Example& ex) {
   auto str = StringUtil::toString(ex.label);
