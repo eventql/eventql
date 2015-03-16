@@ -69,6 +69,10 @@ bool isItemEligible(
     ItemEligibility eligibility,
     const cm::JoinedQuery& query,
     const cm::JoinedQueryItem& item) {
+  if (extractAttr(query.attrs, "q_cat2").isEmpty()) {
+    return false;
+  }
+
   if (eligibility == ItemEligibility::DAWANDA_FIRST_EIGHT) {
     if (item.position < 5 || item.position > 12) {
       return false;
