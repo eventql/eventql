@@ -181,8 +181,26 @@ void FileUtil::write(const std::string& filename, const Buffer& data) {
   file.write(data);
 }
 
-void FileUtil::cp(const std::string& src, const std::string& destination) {
-  RAISE(kNotYetImplementedError);
+void FileUtil::cp(const std::string& src, const std::string& dst) {
+  auto infile = File::openFile(src, File::O_READ);
+  auto outfile = File::openFile(dst, File::O_WRITE | File::O_CREATE);
+
+  Buffer buf(4096);
+  size_t bytes;
+  while ((bytes = infile.read(&buf)) > 0) {
+    outfile.write(buf.data(), bytes);
+  }
+}
+
+void FileUtil::cat(const std::string& src, const std::string& target) {
+  auto infile = File::openFile(src, File::O_READ);
+  auto outfile = File::openFile(target, File::O_WRITE | File::O_APPEND);
+
+  Buffer buf(4096);
+  size_t bytes;
+  while ((bytes = infile.read(&buf)) > 0) {
+    outfile.write(buf.data(), bytes);
+  }
 }
 
 size_t FileUtil::du_c(const std::string& path) {

@@ -85,6 +85,11 @@ public:
   static void cp(const std::string& src, const std::string& destination);
 
   /**
+   * Concat one file to another file
+   */
+  static void cat(const std::string& src, const std::string& target);
+
+  /**
    * Return the size of a directory (like du -c)
    */
   static size_t du_c(const std::string& path);
