@@ -45,6 +45,24 @@ int main(int argc, const char** argv) {
       "<filename>");
 
   flags.defineFlag(
+      "output_mm_labels",
+      fnord::cli::FlagParser::T_STRING,
+      false,
+      NULL,
+      NULL,
+      "output matrix market labels",
+      "<filename>");
+
+  flags.defineFlag(
+      "output_mm_features",
+      fnord::cli::FlagParser::T_STRING,
+      false,
+      NULL,
+      NULL,
+      "output matrix market features",
+      "<filename>");
+
+  flags.defineFlag(
       "output_meta",
       fnord::cli::FlagParser::T_STRING,
       false,
@@ -134,6 +152,60 @@ int main(int argc, const char** argv) {
     output_lightsvm_file = std::move(Option<File>(std::move(
         File::openFile(
             output_lightsvm_file_path + "~",
+            File::O_READ | File::O_WRITE | File::O_CREATE))));
+  }
+
+  /* open output: matrix market labels file */
+  Option<File> output_mm_labels_file;
+  String output_mm_labels_file_path;
+
+  if (flags.isSet("output_mm_labels")) {
+    output_mm_labels_file_path = flags.getString("output_mm_labels");
+
+    fnord::logInfo(
+        "cm.featureprep",
+        "Writing matrix market labels to $0",
+        output_mm_labels_file_path);
+
+    if (FileUtil::exists(output_mm_labels_file_path + "~")) {
+      fnord::logInfo(
+          "cm.featuredump",
+          "Deleting orphaned tmp file: $0",
+          output_mm_labels_file_path + "~");
+
+      FileUtil::rm(output_mm_labels_file_path + "~");
+    }
+
+    output_mm_labels_file = std::move(Option<File>(std::move(
+        File::openFile(
+            output_mm_labels_file_path + "~",
+            File::O_READ | File::O_WRITE | File::O_CREATE))));
+  }
+
+  /* open output: matrix market features file */
+  Option<File> output_mm_features_file;
+  String output_mm_features_file_path;
+
+  if (flags.isSet("output_mm_features")) {
+    output_mm_features_file_path = flags.getString("output_mm_features");
+
+    fnord::logInfo(
+        "cm.featureprep",
+        "Writing matrix market features to $0",
+        output_mm_features_file_path);
+
+    if (FileUtil::exists(output_mm_features_file_path + "~")) {
+      fnord::logInfo(
+          "cm.featuredump",
+          "Deleting orphaned tmp file: $0",
+          output_mm_features_file_path + "~");
+
+      FileUtil::rm(output_mm_features_file_path + "~");
+    }
+
+    output_mm_features_file = std::move(Option<File>(std::move(
+        File::openFile(
+            output_mm_features_file_path + "~",
             File::O_READ | File::O_WRITE | File::O_CREATE))));
   }
 
@@ -294,6 +366,14 @@ int main(int argc, const char** argv) {
 
   if (!output_lightsvm_file.isEmpty()) {
     FileUtil::mv(output_lightsvm_file_path + "~", output_lightsvm_file_path);
+  }
+
+  if (!output_mm_labels_file.isEmpty()) {
+    FileUtil::mv(output_mm_labels_file_path + "~", output_mm_labels_file_path);
+  }
+
+  if (!output_mm_features_file.isEmpty()) {
+    FileUtil::mv(output_mm_features_file_path + "~", output_mm_features_file_path);
   }
 
   return 0;
