@@ -68,6 +68,23 @@ Option<T>& Option<T>::operator=(const Option<T>& other) {
 }
 
 template <typename T>
+Option<T>& Option<T>::operator=(Option<T>&& other) {
+  if (value_ != nullptr) {
+    value_->~T();
+  }
+
+  if (other.value_ == nullptr) {
+    value_ = nullptr;
+  } else {
+    value_ = new (value_data_) T(std::move(*other.value_));
+    other.value_->~T();
+    other.value_ = nullptr;
+  }
+
+  return *this;
+}
+
+template <typename T>
 const T& Option<T>::get() const {
   if (value_ == nullptr) {
     RAISE(kRuntimeError, "get() called on empty option");
