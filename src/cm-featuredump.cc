@@ -113,19 +113,10 @@ int main(int argc, const char** argv) {
         "Writing feature metadata to: $0",
         output_meta_file_path);
 
-    if (FileUtil::exists(output_meta_file_path + "~")) {
-      fnord::logInfo(
-          "cm.featuredump",
-          "Deleting orphaned tmp file: $0",
-          output_meta_file_path + "~");
-
-      FileUtil::rm(output_meta_file_path + "~");
-    }
-
     output_meta_file = std::move(Option<File>(std::move(
         File::openFile(
             output_meta_file_path + "~",
-            File::O_READ | File::O_WRITE | File::O_CREATE))));
+            File::O_WRITE | File::O_CREATEOROPEN | File::O_TRUNCATE))));
   }
 
   /* open output: lightsvm file */
@@ -140,19 +131,10 @@ int main(int argc, const char** argv) {
         "Writing lightSVM features to: $0",
         output_lightsvm_file_path);
 
-    if (FileUtil::exists(output_lightsvm_file_path + "~")) {
-      fnord::logInfo(
-          "cm.featuredump",
-          "Deleting orphaned tmp file: $0",
-          output_lightsvm_file_path + "~");
-
-      FileUtil::rm(output_lightsvm_file_path + "~");
-    }
-
     output_lightsvm_file = std::move(Option<File>(std::move(
         File::openFile(
             output_lightsvm_file_path + "~",
-            File::O_READ | File::O_WRITE | File::O_CREATE))));
+            File::O_WRITE | File::O_CREATEOROPEN | File::O_TRUNCATE))));
   }
 
   /* open output: matrix market labels file */
@@ -167,19 +149,10 @@ int main(int argc, const char** argv) {
         "Writing matrix market labels to $0",
         output_mm_labels_file_path);
 
-    if (FileUtil::exists(output_mm_labels_file_path + "~")) {
-      fnord::logInfo(
-          "cm.featuredump",
-          "Deleting orphaned tmp file: $0",
-          output_mm_labels_file_path + "~");
-
-      FileUtil::rm(output_mm_labels_file_path + "~");
-    }
-
     output_mm_labels_file = std::move(Option<File>(std::move(
         File::openFile(
             output_mm_labels_file_path + "~",
-            File::O_READ | File::O_WRITE | File::O_CREATE))));
+            File::O_WRITE | File::O_CREATEOROPEN | File::O_TRUNCATE))));
   }
 
   /* open output: matrix market features file */
@@ -194,19 +167,10 @@ int main(int argc, const char** argv) {
         "Writing matrix market features to $0",
         output_mm_features_file_path);
 
-    if (FileUtil::exists(output_mm_features_file_path + "~")) {
-      fnord::logInfo(
-          "cm.featuredump",
-          "Deleting orphaned tmp file: $0",
-          output_mm_features_file_path + "~");
-
-      FileUtil::rm(output_mm_features_file_path + "~");
-    }
-
     output_mm_features_file = std::move(Option<File>(std::move(
         File::openFile(
             output_mm_features_file_path + "~",
-            File::O_READ | File::O_WRITE | File::O_CREATE))));
+            File::O_WRITE | File::O_CREATEOROPEN | File::O_TRUNCATE))));
   }
 
   /* read input meta tables and count features */
@@ -296,6 +260,7 @@ int main(int argc, const char** argv) {
   /* read input data tables */
   int rows_read = 0;
   int rows_written = 0;
+  int features_written = 0;
   for (int tbl_idx = 0; tbl_idx < sstables.size(); ++tbl_idx) {
     const auto& sstable = sstables[tbl_idx];
     fnord::logInfo("cm.featuredump", "Importing data sstable: $0", sstable);
@@ -321,7 +286,7 @@ int main(int argc, const char** argv) {
 
       fnord::logInfo(
           "cm.featuredump",
-          "[$0%] Reading data sstables... rows_read=$1 rows_written=$2",
+          "[$0%] Dumping features... rows_read=$1 rows_written=$2",
           (size_t) (p * 100),
           rows_read,
           rows_written);
@@ -346,10 +311,32 @@ int main(int argc, const char** argv) {
         ex.features.emplace_back(idx->second, 1.0);
       }
 
-      if (!output_lightsvm_file.isEmpty() && ex.features.size() > 0) {
-        auto ex_str = exampleToSVMLight(ex);
-        output_lightsvm_file.get().write(ex_str + "\n");
+      if (ex.features.size() > 0) {
         ++rows_written;
+        features_written += ex.features.size();
+
+        if (!output_lightsvm_file.isEmpty()) {
+          auto ex_str = exampleToSVMLight(ex);
+          output_lightsvm_file.get().write(ex_str + "\n");
+        }
+
+        if (!output_mm_labels_file.isEmpty()) {
+          auto line = StringUtil::format("$0\n", ex.label);
+          output_mm_labels_file.get().write(line);
+        }
+
+        if (!output_mm_features_file.isEmpty()) {
+          String lines;
+          ex.sortFeatures();
+          for (const auto& f : ex.features) {
+            lines += StringUtil::format(
+                "$0 $1 $2\n",
+                rows_written,
+                f.first,
+                f.second);
+          }
+          output_mm_features_file.get().write(lines);
+        }
       }
 
       if (!cursor->next()) {
@@ -369,11 +356,39 @@ int main(int argc, const char** argv) {
   }
 
   if (!output_mm_labels_file.isEmpty()) {
-    FileUtil::mv(output_mm_labels_file_path + "~", output_mm_labels_file_path);
+    auto tmpfile = File::openFile(
+        output_mm_labels_file_path + "~~",
+        File::O_READ | File::O_WRITE | File::O_CREATEOROPEN | File::O_TRUNCATE);
+
+    tmpfile.write(StringUtil::format(
+        "%%MatrixMarket matrix array real general\n$0 1\n",
+        rows_written));
+
+    FileUtil::cat(
+        output_mm_labels_file_path + "~",
+        output_mm_labels_file_path + "~~");
+
+    FileUtil::mv(output_mm_labels_file_path + "~~", output_mm_labels_file_path);
+    FileUtil::rm(output_mm_labels_file_path + "~");
   }
 
   if (!output_mm_features_file.isEmpty()) {
-    FileUtil::mv(output_mm_features_file_path + "~", output_mm_features_file_path);
+    auto tmpfile = File::openFile(
+        output_mm_features_file_path + "~~",
+        File::O_READ | File::O_WRITE | File::O_CREATEOROPEN | File::O_TRUNCATE);
+
+    tmpfile.write(StringUtil::format(
+        "%%MatrixMarket matrix coordinate real general\n$0 $1 $2\n",
+        rows_written,
+        feature_idx.size(),
+        features_written));
+
+    FileUtil::cat(
+        output_mm_features_file_path + "~",
+        output_mm_features_file_path + "~~");
+
+    FileUtil::mv(output_mm_features_file_path + "~~", output_mm_features_file_path);
+    FileUtil::rm(output_mm_features_file_path + "~");
   }
 
   return 0;

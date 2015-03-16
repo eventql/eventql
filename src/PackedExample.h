@@ -25,6 +25,8 @@ namespace cm {
 struct Example {
   double label;
   Vector<Pair<uint64_t, double>> features;
+
+  void sortFeatures();
 };
 
 String exampleToSVMLight(const Example& ex);
