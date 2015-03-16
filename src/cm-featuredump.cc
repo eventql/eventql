@@ -36,21 +36,21 @@ int main(int argc, const char** argv) {
   fnord::cli::FlagParser flags;
 
   flags.defineFlag(
-      "output_data_file",
+      "output_lightsvm",
       fnord::cli::FlagParser::T_STRING,
-      true,
+      false,
       NULL,
       NULL,
-      "output file",
+      "output lightsvm data",
       "<filename>");
 
   flags.defineFlag(
-      "output_meta_file",
+      "output_meta",
       fnord::cli::FlagParser::T_STRING,
-      true,
+      false,
       NULL,
       NULL,
-      "output file",
+      "output feature metadata",
       "<filename>");
 
   flags.defineFlag(
@@ -83,45 +83,59 @@ int main(int argc, const char** argv) {
     return 1;
   }
 
-  /* open output files */
-  auto output_data_file_path = flags.getString("output_data_file");
-  auto output_meta_file_path = flags.getString("output_meta_file");
+  /* open output: meta file */
+  Option<File> output_meta_file;
+  String output_meta_file_path;
 
-  fnord::logInfo(
-      "cm.featureprep",
-      "Writing features to: $0",
-      output_data_file_path);
+  if (flags.isSet("output_meta")) {
+    output_meta_file_path = flags.getString("output_meta");
 
-  fnord::logInfo(
-      "cm.featureprep",
-      "Writing feature metadata to: $0",
-      output_meta_file_path);
-
-  if (FileUtil::exists(output_meta_file_path + "~")) {
     fnord::logInfo(
-        "cm.featuredump",
-        "Deleting orphaned tmp file: $0",
-        output_meta_file_path + "~");
+        "cm.featureprep",
+        "Writing feature metadata to: $0",
+        output_meta_file_path);
 
-    FileUtil::rm(output_meta_file_path + "~");
+    if (FileUtil::exists(output_meta_file_path + "~")) {
+      fnord::logInfo(
+          "cm.featuredump",
+          "Deleting orphaned tmp file: $0",
+          output_meta_file_path + "~");
+
+      FileUtil::rm(output_meta_file_path + "~");
+    }
+
+    output_meta_file = std::move(Option<File>(std::move(
+        File::openFile(
+            output_meta_file_path + "~",
+            File::O_READ | File::O_WRITE | File::O_CREATE))));
   }
 
-  if (FileUtil::exists(output_data_file_path + "~")) {
+  /* open output: lightsvm file */
+  Option<File> output_lightsvm_file;
+  String output_lightsvm_file_path;
+
+  if (flags.isSet("output_lightsvm")) {
+    output_lightsvm_file_path = flags.getString("output_lightsvm");
+
     fnord::logInfo(
-        "cm.featuredump",
-        "Deleting orphaned tmp file: $0",
-        output_data_file_path + "~");
+        "cm.featureprep",
+        "Writing lightSVM features to: $0",
+        output_lightsvm_file_path);
 
-    FileUtil::rm(output_data_file_path + "~");
+    if (FileUtil::exists(output_lightsvm_file_path + "~")) {
+      fnord::logInfo(
+          "cm.featuredump",
+          "Deleting orphaned tmp file: $0",
+          output_lightsvm_file_path + "~");
+
+      FileUtil::rm(output_lightsvm_file_path + "~");
+    }
+
+    output_lightsvm_file = std::move(Option<File>(std::move(
+        File::openFile(
+            output_lightsvm_file_path + "~",
+            File::O_READ | File::O_WRITE | File::O_CREATE))));
   }
-
-  auto output_data_file = File::openFile(
-      output_data_file_path + "~",
-      File::O_READ | File::O_WRITE | File::O_CREATE);
-
-  auto output_meta_file = File::openFile(
-      output_meta_file_path + "~",
-      File::O_READ | File::O_WRITE | File::O_CREATE);
 
   /* read input meta tables and count features */
   HashMap<String, uint64_t> feature_counts;
@@ -200,8 +214,11 @@ int main(int argc, const char** argv) {
       feature_idx.size());
 
   /* write feature idx meta file */
-  for (const auto& f : feature_idx) {
-    output_meta_file.write(StringUtil::format("$1 $0\n", f.first, f.second));
+  if (!output_meta_file.isEmpty()) {
+    for (const auto& f : feature_idx) {
+      auto line = StringUtil::format("$1 $0\n", f.first, f.second);
+      output_meta_file.get().write(line);
+    }
   }
 
   /* read input data tables */
@@ -257,9 +274,9 @@ int main(int argc, const char** argv) {
         ex.features.emplace_back(idx->second, 1.0);
       }
 
-      if (ex.features.size() > 0) {
+      if (!output_lightsvm_file.isEmpty() && ex.features.size() > 0) {
         auto ex_str = exampleToSVMLight(ex);
-        output_data_file.write(ex_str + "\n");
+        output_lightsvm_file.get().write(ex_str + "\n");
         ++rows_written;
       }
 
@@ -271,8 +288,13 @@ int main(int argc, const char** argv) {
     status_line.runForce();
   }
 
-  FileUtil::mv(output_meta_file_path + "~", output_meta_file_path);
-  FileUtil::mv(output_data_file_path + "~", output_data_file_path);
+  if (!output_meta_file.isEmpty()) {
+    FileUtil::mv(output_meta_file_path + "~", output_meta_file_path);
+  }
+
+  if (!output_lightsvm_file.isEmpty()) {
+    FileUtil::mv(output_lightsvm_file_path + "~", output_lightsvm_file_path);
+  }
 
   return 0;
 }
