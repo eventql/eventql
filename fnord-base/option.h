@@ -29,6 +29,7 @@ public:
   ~Option();
 
   Option& operator=(const Option<T>& other);
+  Option& operator=(Option<T>&& other);
 
   bool isEmpty() const;
   const T& get() const;
