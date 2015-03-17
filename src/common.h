@@ -32,8 +32,10 @@ enum class FeaturePrep {
 
 enum class ItemEligibility {
   ALL = 0,
-  DAWANDA_FIRST_EIGHT = 1
+  DAWANDA_ALL_NOBOTS = 1
 };
+
+bool isQueryEligible(ItemEligibility eligibility, const cm::JoinedQuery& query);
 
 bool isItemEligible(
     ItemEligibility eligibility,

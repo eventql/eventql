@@ -40,7 +40,12 @@ InternMap intern_map;
 void indexJoinedQuery(
     const cm::JoinedQuery& query,
     const String& feature_name,
+    cm::ItemEligibility eligibility,
     CounterMap* counters) {
+  if (!isQueryEligible(eligibility, query)) {
+    return;
+  }
+
   auto fstr_opt = cm::extractAttr(query.attrs, feature_name);
   if (fstr_opt.isEmpty()) {
     return;
@@ -235,6 +240,7 @@ int main(int argc, const char** argv) {
         indexJoinedQuery(
             q.get(),
             query_feature,
+            cm::ItemEligibility::DAWANDA_ALL_NOBOTS,
             &counters);
       }
 
