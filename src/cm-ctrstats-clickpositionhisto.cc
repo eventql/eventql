@@ -56,6 +56,7 @@ int main(int argc, const char** argv) {
 
   auto start_time = std::numeric_limits<uint64_t>::max();
   auto end_time = std::numeric_limits<uint64_t>::min();
+  auto eligibility = cm::ItemEligibility::DAWANDA_ALL_NOBOTS;
 
   /* read input tables */
   auto sstables = flags.getArgv();
@@ -119,7 +120,7 @@ int main(int argc, const char** argv) {
         //fnord::logWarning("cm.ctrstats", e, "invalid json: $0", val.toString());
       }
 
-      if (!q.isEmpty()) {
+      if (!q.isEmpty() && isQueryEligible(eligibility, q.get())) {
         for (auto& item : q.get().items) {
           if (!item.clicked || item.position < 0) {
             continue;
