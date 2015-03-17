@@ -39,3 +39,29 @@ String exampleToSVMLight(const Example& ex) {
 }
 
 } // namespace cm
+
+namespace fnord {
+
+template <>
+std::string StringUtil::toString<cm::Example>(cm::Example ex) {
+  String fstr;
+
+  for (int i = 0; i < ex.features.size(); ++i) {
+    if (i > 0) {
+      fstr += ", ";
+    }
+
+    fstr += StringUtil::format(
+        "$0 => $1",
+        ex.features[i].first,
+        ex.features[i].second);
+  }
+
+  return StringUtil::format(
+      "<Example label=$0 features={$1}>",
+      ex.label,
+      fstr);
+}
+
+}
+
