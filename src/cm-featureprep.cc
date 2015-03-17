@@ -198,32 +198,31 @@ int main(int argc, const char** argv) {
 
     try {
       auto q = json::fromJSON<cm::JoinedQuery>(val);
-      if (!isQueryEligible(eligibility, q)) {
-        continue;
-      }
 
-      for (const auto& item : q.items) {
-        if (!isItemEligible(eligibility, q, item)) {
-          continue;
-        }
-
-        double label = item.clicked ? 1.0 : -1.0;
-
-        Set<String> features;
-        feature_select.featuresFor(q, item, &features);
-
-        sstable::SSTableColumnWriter cols(&sstable_schema);
-        cols.addFloatColumn(1, label);
-
-        for (const auto& f : features) {
-          cols.addStringColumn(2, f);
-          ++feature_counts[f].first;
-          if (item.clicked) {
-            ++feature_counts[f].second;
+      if (isQueryEligible(eligibility, q)) {
+        for (const auto& item : q.items) {
+          if (!isItemEligible(eligibility, q, item)) {
+            continue;
           }
-        }
 
-        sstable_writer->appendRow("", cols);
+          double label = item.clicked ? 1.0 : -1.0;
+
+          Set<String> features;
+          feature_select.featuresFor(q, item, &features);
+
+          sstable::SSTableColumnWriter cols(&sstable_schema);
+          cols.addFloatColumn(1, label);
+
+          for (const auto& f : features) {
+            cols.addStringColumn(2, f);
+            ++feature_counts[f].first;
+            if (item.clicked) {
+              ++feature_counts[f].second;
+            }
+          }
+
+          sstable_writer->appendRow("", cols);
+        }
       }
     } catch (const Exception& e) {
       fnord::logWarning(
