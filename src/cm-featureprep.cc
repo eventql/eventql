@@ -101,7 +101,7 @@ int main(int argc, const char** argv) {
   StringUtil::replaceAll(&file_prefix, ".sstable", "");
   auto output_data_file = file_prefix + "_features.sstable";
   auto output_meta_file = file_prefix + "_features_meta.sstable";
-  auto item_eligibility = cm::ItemEligibility::DAWANDA_FIRST_EIGHT;
+  auto eligibility = cm::ItemEligibility::DAWANDA_ALL_NOBOTS;
 
   /* set up feature schema */
   cm::FeatureSchema feature_schema;
@@ -198,9 +198,12 @@ int main(int argc, const char** argv) {
 
     try {
       auto q = json::fromJSON<cm::JoinedQuery>(val);
+      if (!isQueryEligible(eligibility, q)) {
+        continue;
+      }
 
       for (const auto& item : q.items) {
-        if (!isItemEligible(item_eligibility, q, item)) {
+        if (!isItemEligible(eligibility, q, item)) {
           continue;
         }
 

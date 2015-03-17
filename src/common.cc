@@ -65,16 +65,31 @@ String joinBagOfWords(const Set<String>& words) {
   return StringUtil::join(v, " ");
 }
 
+bool isQueryEligible(
+    ItemEligibility eligibility,
+    const cm::JoinedQuery& query) {
+  switch (eligibility) {
+
+    case ItemEligibility::DAWANDA_ALL_NOBOTS: {
+      auto pgs = extractAttr(query.attrs, "pg");
+      if (pgs.isEmpty()) {
+        return false;
+      }
+
+      auto pg = std::stoul(pgs.get());
+      return pg <= 3;
+    }
+
+    case ItemEligibility::ALL:
+      return true;
+
+  }
+}
+
 bool isItemEligible(
     ItemEligibility eligibility,
     const cm::JoinedQuery& query,
     const cm::JoinedQueryItem& item) {
-  if (eligibility == ItemEligibility::DAWANDA_FIRST_EIGHT) {
-    if (item.position < 5 || item.position > 12) {
-      return false;
-    }
-  }
-
   return true;
 }
 

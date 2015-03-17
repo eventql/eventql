@@ -42,9 +42,13 @@ void indexJoinedQuery(
     const cm::JoinedQuery& query,
     const String& query_feature,
     const String& item_feature,
-    ItemEligibility item_eligibility,
+    ItemEligibility eligibility,
     FeatureIndex* feature_index,
     CounterMap* counters) {
+  if (!isQueryEligible(eligibility, query)) {
+    return;
+  }
+
   auto fstr_opt = cm::extractAttr(query.attrs, query_feature);
   if (fstr_opt.isEmpty()) {
     return;
@@ -72,7 +76,7 @@ void indexJoinedQuery(
 */
 
   for (const auto& item : query.items) {
-    if (!isItemEligible(item_eligibility, query, item)) {
+    if (!isItemEligible(eligibility, query, item)) {
       continue;
     }
 
@@ -325,7 +329,7 @@ int main(int argc, const char** argv) {
             q.get(),
             query_feature,
             item_feature,
-            cm::ItemEligibility::DAWANDA_FIRST_EIGHT,
+            cm::ItemEligibility::DAWANDA_ALL_NOBOTS,
             &feature_index,
             &counters);
       }

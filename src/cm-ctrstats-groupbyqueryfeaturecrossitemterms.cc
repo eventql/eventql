@@ -46,10 +46,14 @@ void indexJoinedQuery(
     mdb::MDB* featuredb,
     FeatureIndex* feature_index,
     FeatureID item_feature_id,
-    ItemEligibility item_eligibility,
+    ItemEligibility eligibility,
     Analyzer* analyzer,
     Language lang,
     CounterMap* counters) {
+  if (!isQueryEligible(eligibility, query)) {
+    return;
+  }
+
   auto fstr_opt = cm::extractAttr(query.attrs, query_feature_name);
   if (fstr_opt.isEmpty()) {
     return;
@@ -59,7 +63,7 @@ void indexJoinedQuery(
   auto& global_counter = (*counters)[""];
 
   for (const auto& item : query.items) {
-    if (!isItemEligible(item_eligibility, query, item)) {
+    if (!isItemEligible(eligibility, query, item)) {
       continue;
     }
 
@@ -333,7 +337,7 @@ int main(int argc, const char** argv) {
             featuredb.get(),
             &feature_index,
             feature_schema.featureID(flags.getString("item_feature")).get(),
-            cm::ItemEligibility::DAWANDA_FIRST_EIGHT,
+            cm::ItemEligibility::DAWANDA_ALL_NOBOTS,
             &analyzer,
             lang,
             &counters);
