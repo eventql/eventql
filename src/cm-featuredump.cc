@@ -36,6 +36,15 @@ int main(int argc, const char** argv) {
   fnord::cli::FlagParser flags;
 
   flags.defineFlag(
+      "input_meta",
+      fnord::cli::FlagParser::T_STRING,
+      false,
+      NULL,
+      NULL,
+      "read selected features from file",
+      "<filename>");
+
+  flags.defineFlag(
       "output_lightsvm",
       fnord::cli::FlagParser::T_STRING,
       false,
@@ -173,75 +182,92 @@ int main(int argc, const char** argv) {
             File::O_WRITE | File::O_CREATEOROPEN | File::O_TRUNCATE))));
   }
 
-  /* read input meta tables and count features */
-  HashMap<String, uint64_t> feature_counts;
-  int row_idx = 0;
-  for (int tbl_idx = 0; tbl_idx < sstables.size(); ++tbl_idx) {
-    String sstable = sstables[tbl_idx];
-    StringUtil::replaceAll(&sstable, ".sstable", "_meta.sstable");
-    fnord::logInfo("cm.featuredump", "Importing meta sstable: $0", sstable);
 
-    /* read sstable heade r*/
-    sstable::SSTableReader reader(File::openFile(sstable, File::O_READ));
-    sstable::SSTableColumnSchema schema;
-    schema.loadIndex(&reader);
-
-    if (reader.bodySize() == 0) {
-      fnord::logCritical("cm.featuredump", "unfinished sstable: $0", sstable);
-      exit(1);
-    }
-
-    /* get sstable cursor */
-    auto cursor = reader.getCursor();
-    auto body_size = reader.bodySize();
-
-    /* status line */
-    util::SimpleRateLimitedFn status_line(kMicrosPerSecond, [&] () {
-      auto p = (tbl_idx / (double) tbl_cnt) +
-          ((cursor->position() / (double) body_size)) / (double) tbl_cnt;
-
-      fnord::logInfo(
-          "cm.featuredump",
-          "[$0%] Reading meta sstables... rows=$1 features=$2",
-          (size_t) (p * 100),
-          row_idx,
-          feature_counts.size());
-    });
-
-    /* read sstable rows */
-    for (; cursor->valid(); ++row_idx) {
-      status_line.runMaybe();
-
-      auto key = cursor->getKeyString();
-      auto val = cursor->getDataBuffer();
-
-      sstable::SSTableColumnReader cols(&schema, val);
-      auto cnt = cols.getUInt64Column(schema.columnID("views"));
-
-      feature_counts[key] += cnt;
-
-      if (!cursor->next()) {
-        break;
-      }
-    }
-
-    status_line.runForce();
-  }
-
-  /* select features for export and assign indexes*/
+  /* select features / build or load feature idx */
   HashMap<String, uint64_t> feature_idx;
-  uint64_t cur_idx = 0;
-  auto orig_count = feature_counts.size();
-  auto min_count = flags.getInt("min_observations");
-  for (auto iter = feature_counts.begin(); iter != feature_counts.end(); ) {
-    if (iter->second > min_count) {
-      feature_idx.emplace(iter->first, ++cur_idx);
+  size_t orig_count = 0;
+  if (flags.isSet("input_meta")) {
+    // FIXPAUL slow slow slow
+    auto buf = FileUtil::read(flags.getString("input_meta"));
+    auto lines = StringUtil::split(buf.toString(), "\n");
+
+    for (const auto& line : lines) {
+      auto parts = StringUtil::split(line, " ");
+
+      if (parts.size() != 2) {
+        RAISEF(kRuntimeError, "invalid feature meta file line: $0", line);
+      }
+
+      feature_idx[parts[1]] = std::stoul(parts[0]);
+    }
+  } else {
+    /* read input meta tables and count features */
+    HashMap<String, uint64_t> feature_counts;
+    int row_idx = 0;
+    for (int tbl_idx = 0; tbl_idx < sstables.size(); ++tbl_idx) {
+      String sstable = sstables[tbl_idx];
+      StringUtil::replaceAll(&sstable, ".sstable", "_meta.sstable");
+      fnord::logInfo("cm.featuredump", "Importing meta sstable: $0", sstable);
+
+      /* read sstable heade r*/
+      sstable::SSTableReader reader(File::openFile(sstable, File::O_READ));
+      sstable::SSTableColumnSchema schema;
+      schema.loadIndex(&reader);
+
+      if (reader.bodySize() == 0) {
+        fnord::logCritical("cm.featuredump", "unfinished sstable: $0", sstable);
+        exit(1);
+      }
+
+      /* get sstable cursor */
+      auto cursor = reader.getCursor();
+      auto body_size = reader.bodySize();
+
+      /* status line */
+      util::SimpleRateLimitedFn status_line(kMicrosPerSecond, [&] () {
+        auto p = (tbl_idx / (double) tbl_cnt) +
+            ((cursor->position() / (double) body_size)) / (double) tbl_cnt;
+
+        fnord::logInfo(
+            "cm.featuredump",
+            "[$0%] Reading meta sstables... rows=$1 features=$2",
+            (size_t) (p * 100),
+            row_idx,
+            feature_counts.size());
+      });
+
+      /* read sstable rows */
+      for (; cursor->valid(); ++row_idx) {
+        status_line.runMaybe();
+
+        auto key = cursor->getKeyString();
+        auto val = cursor->getDataBuffer();
+
+        sstable::SSTableColumnReader cols(&schema, val);
+        auto cnt = cols.getUInt64Column(schema.columnID("views"));
+
+        feature_counts[key] += cnt;
+
+        if (!cursor->next()) {
+          break;
+        }
+      }
+
+      status_line.runForce();
     }
 
-    iter = feature_counts.erase(iter);
-  }
+    /* select features for export and assign indexes*/
+    uint64_t cur_idx = 0;
+    orig_count = feature_counts.size();
+    auto min_count = flags.getInt("min_observations");
+    for (auto iter = feature_counts.begin(); iter != feature_counts.end(); ) {
+      if (iter->second > min_count) {
+        feature_idx.emplace(iter->first, ++cur_idx);
+      }
 
-  feature_counts.clear();
+      iter = feature_counts.erase(iter);
+    }
+  }
 
   fnord::logInfo(
       "cm.featuredump",
