@@ -118,7 +118,7 @@ int main(int argc, const char** argv) {
 
   sstable::SSTableColumnSchema meta_sstable_schema;
   meta_sstable_schema.addColumn("views", 1, sstable::SSTableColumnType::UINT64);
-  meta_sstable_schema.addColumn("clicks", 1, sstable::SSTableColumnType::UINT64);
+  meta_sstable_schema.addColumn("clicks", 2, sstable::SSTableColumnType::UINT64);
 
   /* open featuredb */
   auto featuredb_path = flags.getString("featuredb_path");
