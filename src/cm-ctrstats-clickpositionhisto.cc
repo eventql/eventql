@@ -59,6 +59,7 @@ int main(int argc, const char** argv) {
 
   /* read input tables */
   auto sstables = flags.getArgv();
+  int row_idx = 0;
   for (int tbl_idx = 0; tbl_idx < sstables.size(); ++tbl_idx) {
     const auto& sstable = sstables[tbl_idx];
     fnord::logInfo("cm.ctrstats", "Importing sstable: $0", sstable);
@@ -95,7 +96,6 @@ int main(int argc, const char** argv) {
     /* get sstable cursor */
     auto cursor = reader.getCursor();
     auto body_size = reader.bodySize();
-    int row_idx = 0;
 
     /* status line */
     util::SimpleRateLimitedFn status_line(kMicrosPerSecond, [&] () {
