@@ -216,7 +216,7 @@ int main(int argc, const char** argv) {
       auto val = cursor->getDataBuffer();
 
       sstable::SSTableColumnReader cols(&schema, val);
-      auto cnt = cols.getUInt64Column(schema.columnID("count"));
+      auto cnt = cols.getUInt64Column(schema.columnID("views"));
 
       feature_counts[key] += cnt;
 
@@ -300,6 +300,9 @@ int main(int argc, const char** argv) {
       sstable::SSTableColumnReader cols(&schema, val);
 
       cm::Example ex;
+#ifndef FNORD_NODEBUG
+      Set<String> dbg_features;
+#endif
       ex.label = cols.getFloatColumn(schema.columnID("label"));
       auto features = cols.getStringColumns(schema.columnID("feature"));
       for (const auto& f : features) {
@@ -308,12 +311,24 @@ int main(int argc, const char** argv) {
           continue;
         }
 
+#ifndef FNORD_NODEBUG
+        dbg_features.emplace(f);
+#endif
+
         ex.features.emplace_back(idx->second, 1.0);
       }
 
       if (ex.features.size() > 0) {
         ++rows_written;
         features_written += ex.features.size();
+
+#ifndef FNORD_NOTRACE
+        fnord::logTrace(
+            "cm.featuredump",
+            "Dumping example: label=$0 features=$1",
+            ex.label,
+            inspect(dbg_features));
+#endif
 
         if (!output_lightsvm_file.isEmpty()) {
           auto ex_str = exampleToSVMLight(ex);
