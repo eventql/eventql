@@ -48,6 +48,11 @@ public:
   static std::string joinPaths(const std::string& p1, const std::string p2);
 
   /**
+   * Base path
+   */
+  static std::string basePath(const std::string& path);
+
+  /**
    * List files in a directory
    */
   static void ls(
