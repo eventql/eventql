@@ -36,10 +36,10 @@ using namespace fnord;
 using namespace cm;
 
 struct ItemStats {
-  ItemStats() : views(0), clicks(0), clicks_norm(0) {}
+  ItemStats() : views(0), clicks(0), clicks_base(0) {}
   uint32_t views;
   uint32_t clicks;
-  uint32_t clicks_norm;
+  uint32_t clicks_base;
   HashMap<void*, uint32_t> term_counts;
 };
 
@@ -87,7 +87,7 @@ void indexJoinedQuery(
 
     if (item.clicked) {
       stats.clicks += 1;
-      stats.clicks_norm += posi_norm[item.position];
+      stats.clicks_base += posi_norm[item.position];
       global_counter->clicks += 1;
     }
 
@@ -104,13 +104,21 @@ void writeOutputTable(
     const CounterMap& counters,
     const GlobalCounter& global_counter,
     uint64_t start_time,
-    uint64_t end_time) {
+    uint64_t end_time,
+    bool rollup) {
   /* prepare output sstable schema */
   sstable::SSTableColumnSchema sstable_schema;
   sstable_schema.addColumn("views", 1, sstable::SSTableColumnType::UINT64);
-  sstable_schema.addColumn("clicks", 2, sstable::SSTableColumnType::FLOAT);
-  sstable_schema.addColumn("clicks_norm", 3, sstable::SSTableColumnType::FLOAT);
+  sstable_schema.addColumn("clicks", 2, sstable::SSTableColumnType::UINT64);
+  sstable_schema.addColumn("clicks_base", 3, sstable::SSTableColumnType::FLOAT);
   sstable_schema.addColumn("terms", 4, sstable::SSTableColumnType::STRING);
+
+  if (rollup) {
+    sstable_schema.addColumn("ctr", 5, sstable::SSTableColumnType::FLOAT);
+    sstable_schema.addColumn("ctr_base", 6, sstable::SSTableColumnType::FLOAT);
+    sstable_schema.addColumn("ctr_std", 7, sstable::SSTableColumnType::FLOAT);
+    sstable_schema.addColumn("ctr_base_std", 8, sstable::SSTableColumnType::FLOAT);
+  }
 
   HashMap<String, String> out_hdr;
   out_hdr["start_time"] = StringUtil::toString(start_time);
@@ -125,11 +133,17 @@ void writeOutputTable(
       outhdr_json.data(),
       outhdr_json.length());
 
+  auto m = posi_norm.size();
   for (const auto& c : counters) {
+    auto ctr = c.second.clicks / (double) c.second.views;
+    auto ctr_base =
+        (c.second.clicks_base / (double) m) /
+        (double) c.second.views;
+
     String terms_str;
     for (const auto t : c.second.term_counts) {
       terms_str += StringUtil::format(
-          "$0:$1,",
+          rollup ? "$0," : "$0:$1,",
           intern_map.getString(t.first),
           t.second);
     }
@@ -137,7 +151,13 @@ void writeOutputTable(
     sstable::SSTableColumnWriter cols(&sstable_schema);
     cols.addUInt64Column(1, c.second.views);
     cols.addUInt64Column(2, c.second.clicks);
-    cols.addFloatColumn(3, c.second.clicks_norm);
+    cols.addFloatColumn(3, c.second.clicks_base);
+
+    if (rollup) {
+      cols.addFloatColumn(5, ctr);
+      cols.addFloatColumn(6, ctr_base);
+    }
+
     cols.addStringColumn(4, terms_str);
 
     sstable_writer->appendRow(StringUtil::toString(c.first), cols);
@@ -188,6 +208,24 @@ int main(int argc, const char** argv) {
       NULL,
       "feature db path",
       "<path>");
+
+  flags.defineFlag(
+      "merge",
+      fnord::cli::FlagParser::T_SWITCH,
+      false,
+      NULL,
+      NULL,
+      "merge pre-processed tables",
+      "");
+
+  flags.defineFlag(
+      "rollup",
+      fnord::cli::FlagParser::T_SWITCH,
+      false,
+      NULL,
+      NULL,
+      "write aggregated output columns",
+      "");
 
   flags.defineFlag(
       "loglevel",
@@ -357,7 +395,8 @@ int main(int argc, const char** argv) {
       counters,
       global_counter,
       start_time,
-      end_time);
+      end_time,
+      flags.isSet("rollup"));
 
   return 0;
 }
