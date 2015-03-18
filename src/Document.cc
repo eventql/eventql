@@ -28,6 +28,10 @@ void Document::update(const IndexRequest& index_req) {
   }
 }
 
+void Document::setField(const String& field, const String& value) {
+  fields_[field] = value;
+}
+
 void Document::debugPrint() const {
   fnord::iputs("------ BEGIN DOC -------\n    id=$0", id_.docid);
   for (const auto& f : fields_) {

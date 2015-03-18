@@ -54,6 +54,10 @@ public:
       mdb::MDBTransaction* featuredb_txn,
       FeaturePack* features);
 
+  void getFeatures(
+      const DocID& docid,
+      FeaturePack* features);
+
 protected:
 
   FeatureCache cache_;

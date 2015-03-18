@@ -20,11 +20,9 @@ IndexBuild::IndexBuild(
 
 void IndexBuild::updateDocument(const IndexRequest& index_request) {
   auto doc = full_idx_->updateDocument(index_request);
-  doc->debugPrint();
 }
 
 void IndexBuild::commit() {
-  fnord::iputs("commit...", 1);
 }
 
 } // namespace cm

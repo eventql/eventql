@@ -30,6 +30,7 @@ public:
   const HashMap<String, String>& fields() const;
 
   void update(const IndexRequest& index_req);
+  void setField(const String& field, const String& value);
 
   void debugPrint() const;
 

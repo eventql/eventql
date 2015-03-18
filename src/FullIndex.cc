@@ -23,11 +23,16 @@ RefPtr<Document> FullIndex::updateDocument(const IndexRequest& index_request) {
   auto docid = index_request.item.docID();
   RefPtr<Document> doc(new Document(docid));
   loadDocument(doc);
-  doc->debugPrint();
 
   doc->update(index_request);
   commitDocument(doc);
 
+  return doc;
+}
+
+RefPtr<Document> FullIndex::findDocument(const DocID& docid) {
+  RefPtr<Document> doc(new Document(docid));
+  loadDocument(doc);
   return doc;
 }
 
@@ -37,7 +42,10 @@ void FullIndex::loadDocument(RefPtr<Document> doc) {
     return;
   }
 
-  abort();
+  auto doc_json = fnord::json::parseJSON(FileUtil::read(docpath));
+  for (int i = 1; i < doc_json.size() - 1; i += 2) {
+    doc->setField(doc_json[i].data, doc_json[i + 1].data);
+  }
 }
 
 void FullIndex::commitDocument(RefPtr<Document> doc) {
