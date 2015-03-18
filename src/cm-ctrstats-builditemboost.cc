@@ -35,7 +35,19 @@
 using namespace fnord;
 using namespace cm;
 
-typedef HashMap<String, cm::CTRCounter> CounterMap;
+struct ItemStats {
+  ItemStats() : views(0), clicks(0) {}
+  uint32_t views;
+  uint32_t clicks;
+  HashMap<void*, uint32_t> term_counts;
+};
+
+struct GlobalCounter {
+  uint32_t views;
+  uint32_t clicks;
+};
+
+typedef HashMap<uint64_t, ItemStats> CounterMap;
 
 InternMap intern_map;
 
@@ -45,64 +57,33 @@ void indexJoinedQuery(
     FeatureIndex* feature_index,
     Analyzer* analyzer,
     Language lang,
-    CounterMap* counters) {
-  //if (!isQueryEligible(eligibility, query)) {
-  //  return;
-  //}
+    CounterMap* counters,
+    GlobalCounter* global_counter) {
+  if (!isQueryEligible(eligibility, query)) {
+    return;
+  }
 
-  //auto fstr_opt = cm::extractAttr(query.attrs, query_feature_name);
-  //if (fstr_opt.isEmpty()) {
-  //  return;
-  //}
+  /* query string terms */
+  auto qstr_opt = cm::extractAttr(query.attrs, "qstr~de"); // FIXPAUL
+  if (qstr_opt.isEmpty()) {
+    return;
+  }
 
-  //auto fstr = URI::urlDecode(fstr_opt.get());
-  //auto& global_counter = (*counters)[""];
+  Set<String> qstr_terms;
+  analyzer->extractTerms(lang, qstr_opt.get(), &qstr_terms);
 
-  //for (const auto& item : query.items) {
-  //  if (!isItemEligible(eligibility, query, item)) {
-  //    continue;
-  //  }
+  for (const auto& item : query.items) {
+    if (!isItemEligible(eligibility, query, item)) {
+      continue;
+    }
 
-  //  Option<String> ifstr_opt;
+    auto& stats = (*counters)[std::stoul(item.item.item_id)];
+    ++stats.views;
+    stats.clicks += (int) item.clicked;
 
-  //  try {
-  //    ifstr_opt = feature_index->getFeature(
-  //        item.item.docID(),
-  //        item_feature_id);
-  //  } catch (const Exception& e) {
-  //    fnord::logError("cm.ctrstatsbuild", e, "error");
-  //  }
-
-  // if (ifstr_opt.isEmpty()) {
-  //    continue;
-  //  }
-
-  //  Set<String> tokens;
-  //  analyzer->extractTerms(lang, ifstr_opt.get(), &tokens);
-
-  //  for (const auto& token : tokens) {
-  //    Buffer counter_key;
-  //    Buffer group_counter_key;
-  //    void* tmp = intern_map.internString(fstr);
-  //    counter_key.append(&tmp, sizeof(tmp));
-  //    group_counter_key.append(&tmp, sizeof(tmp));
-  //    tmp = intern_map.internString(token);
-  //    counter_key.append(&tmp, sizeof(tmp));
-
-  //    auto& counter = (*counters)[counter_key.toString()];
-  //    auto& group_counter = (*counters)[group_counter_key.toString()];
-
-  //    counter.num_views++;
-  //    group_counter.num_views++;
-  //    global_counter.num_views++;
-
-  //    if (item.clicked) {
-  //      counter.num_clicks++;
-  //      group_counter.num_clicks++;
-  //      global_counter.num_clicks++;
-  //    }
-  //  }
-  //}
+    ++global_counter->views;
+    global_counter->clicks += (int) item.clicked;
+  }
 }
 
 /* write output table */
@@ -226,6 +207,7 @@ int main(int argc, const char** argv) {
       strToLogLevel(flags.getString("loglevel")));
 
   CounterMap counters;
+  GlobalCounter global_counter;
   auto start_time = std::numeric_limits<uint64_t>::max();
   auto end_time = std::numeric_limits<uint64_t>::min();
 
@@ -312,16 +294,14 @@ int main(int argc, const char** argv) {
       }
 
       if (!q.isEmpty()) {
-        //indexJoinedQuery(
-        //    q.get(),
-        //    query_feature,
-        //    featuredb.get(),
-        //    &feature_index,
-        //    feature_schema.featureID(flags.getString("item_feature")).get(),
-        //    cm::ItemEligibility::DAWANDA_ALL_NOBOTS,
-        //    &analyzer,
-        //    lang,
-        //    &counters);
+        indexJoinedQuery(
+            q.get(),
+            cm::ItemEligibility::DAWANDA_ALL_NOBOTS,
+            &feature_index,
+            &analyzer,
+            lang,
+            &counters,
+            &global_counter);
       }
 
       if (!cursor->next()) {
@@ -330,6 +310,21 @@ int main(int argc, const char** argv) {
     }
 
     status_line.runForce();
+  }
+
+  auto baseline_ctr = global_counter.clicks / (double) global_counter.views;
+
+  fnord::iputs("baseline ctr: $0", baseline_ctr);
+
+  for (const auto& c : counters) {
+    auto ctr = c.second.clicks / (double) c.second.views;
+
+    fnord::iputs("id=$0 views=$1 clicks=$2 ctr=$3 perf=$4",
+        c.first,
+        c.second.views,
+        c.second.clicks,
+        ctr,
+        ctr / baseline_ctr);
   }
 
   /* write output table */
