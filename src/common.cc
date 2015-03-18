@@ -90,7 +90,15 @@ bool isItemEligible(
     ItemEligibility eligibility,
     const cm::JoinedQuery& query,
     const cm::JoinedQueryItem& item) {
-  return true;
+  switch (eligibility) {
+
+    case ItemEligibility::DAWANDA_ALL_NOBOTS:
+      return item.position <= 40 && item.position > 0;
+
+    case ItemEligibility::ALL:
+      return true;
+
+  }
 }
 
 }
