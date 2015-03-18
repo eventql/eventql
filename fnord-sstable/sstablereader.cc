@@ -83,7 +83,7 @@ void SSTableReader::readFooter(
         RAISE(kIllegalStateError, "footer exceeds file boundary");
       }
 
-      hash::FNV<uint32_t> fnv;
+      FNV<uint32_t> fnv;
       auto checksum = fnv.hash(*data, *size);
 
       if (checksum != footer_header->footer_checksum) {

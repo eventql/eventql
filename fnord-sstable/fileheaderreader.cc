@@ -48,7 +48,7 @@ bool FileHeaderReader::verify() {
   size_t userdata_size;
   readUserdata(&userdata, &userdata_size);
 
-  hash::FNV<uint32_t> fnv;
+  FNV<uint32_t> fnv;
   uint32_t userdata_checksum = fnv.hash(userdata, userdata_size);
 
   return userdata_checksum == userdata_checksum_;
