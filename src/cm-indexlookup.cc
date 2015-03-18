@@ -36,6 +36,7 @@
 #include "CustomerNamespace.h"
 #include "FeatureSchema.h"
 #include "FeaturePack.h"
+#include "FullIndex.h"
 #include "FeatureIndex.h"
 #include "IndexRequest.h"
 
@@ -49,22 +50,13 @@ int main(int argc, const char** argv) {
   cli::FlagParser flags;
 
   flags.defineFlag(
-      "cmdata",
+      "index",
       cli::FlagParser::T_STRING,
       true,
       NULL,
       NULL,
-      "clickmatcher app data dir",
+      "index data dir",
       "<path>");
-
-  flags.defineFlag(
-      "cmcustomer",
-      cli::FlagParser::T_STRING,
-      true,
-      NULL,
-      NULL,
-      "clickmatcher customer",
-      "<key>");
 
   flags.defineFlag(
       "docid",
@@ -90,14 +82,7 @@ int main(int argc, const char** argv) {
       strToLogLevel(flags.getString("loglevel")));
 
   /* arguments */
-  auto cmcustomer = flags.getString("cmcustomer");
   DocID docid = { flags.getString("docid") };
-
-  /* set up cmdata */
-  auto cmdata_path = flags.getString("cmdata");
-  if (!FileUtil::isDirectory(cmdata_path)) {
-    RAISEF(kIOError, "no such directory: $0", cmdata_path);
-  }
 
   /* set up feature schema */
   FeatureSchema feature_schema;
@@ -108,31 +93,32 @@ int main(int argc, const char** argv) {
   feature_schema.registerFeature("title~de", 5, 2);
 
   /* open featuredb db */
-  auto featuredb_path = FileUtil::joinPaths(
-      cmdata_path,
-      StringUtil::format("index/$0/db", cmcustomer));
-
+  auto featuredb_path = StringUtil::format("$0/db", flags.getString("index"));
   auto featuredb = mdb::MDB::open(featuredb_path, true);
-  auto featuredb_txn = featuredb->startTransaction(true);
+
+  /* open full index  */
+  auto fullindex_path = StringUtil::format("$0/docs", flags.getString("index"));
+  cm::FullIndex full_index(fullindex_path);
 
   /* get features */
   FeaturePack features;
   FeatureIndex feature_index(featuredb, &feature_schema);
-  feature_index.getFeatures(docid, featuredb_txn.get(), &features);
+  feature_index.getFeatures(docid, &features);
+
+  /* get document */
+  auto doc = full_index.findDocument(docid);
 
   /* dump document */
-  fnord::iputs("[document]\n  docid=$0\n\n[features]", docid);
+  doc->debugPrint();
 
-  for (const auto& f : features) {
-    auto feature_key = feature_schema.featureKey(f.first);
-    fnord::iputs(
-        "  $0=$1",
-        feature_key.isEmpty() ? "unknown-feature": feature_key.get(),
-        f.second);
-  }
-
-  /* clean up */
-  featuredb_txn->abort();
+  //fnord::iputs("\n[features]")
+  //for (const auto& f : features) {
+  //  auto feature_key = feature_schema.featureKey(f.first);
+  //  fnord::iputs(
+  //      "  $0=$1",
+  //      feature_key.isEmpty() ? "unknown-feature": feature_key.get(),
+  //      f.second);
+  //}
 
   return 0;
 }

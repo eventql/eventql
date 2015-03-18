@@ -27,6 +27,12 @@ FeatureIndex::~FeatureIndex() {
 
 void FeatureIndex::getFeatures(
     const DocID& docid,
+    FeaturePack* features) {
+  getFeatures(docid, txn_.get(), features);
+}
+
+void FeatureIndex::getFeatures(
+    const DocID& docid,
     mdb::MDBTransaction* featuredb_txn,
     FeaturePack* features) {
   for (const auto& group : schema_->groupIDs()) {

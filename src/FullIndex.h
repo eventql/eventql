@@ -29,6 +29,7 @@ public:
   FullIndex(const String& path);
 
   RefPtr<Document> updateDocument(const IndexRequest& index_request);
+  RefPtr<Document> findDocument(const DocID& docid);
 
 protected:
 
