@@ -34,6 +34,9 @@ protected:
 
   String docPath(DocID docid) const;
 
+  void loadDocument(RefPtr<Document> doc);
+  void commitDocument(RefPtr<Document> doc);
+
   std::mutex update_lock_;
   String path_;
 };
