@@ -36,9 +36,10 @@ using namespace fnord;
 using namespace cm;
 
 struct ItemStats {
-  ItemStats() : views(0), clicks(0) {}
+  ItemStats() : views(0), clicks(0), clicks_norm(0) {}
   uint32_t views;
   uint32_t clicks;
+  uint32_t clicks_norm;
   HashMap<void*, uint32_t> term_counts;
 };
 
@@ -51,6 +52,8 @@ struct GlobalCounter {
 typedef HashMap<uint64_t, ItemStats> CounterMap;
 
 InternMap intern_map;
+
+HashMap<uint32_t, double> posi_norm;
 
 void indexJoinedQuery(
     const cm::JoinedQuery& query,
@@ -80,14 +83,18 @@ void indexJoinedQuery(
 
     auto& stats = (*counters)[std::stoul(item.item.item_id)];
     ++stats.views;
-    stats.clicks += (int) item.clicked;
+    ++global_counter->views;
+
+    if (item.clicked) {
+      stats.clicks += 1;
+      stats.clicks_norm += posi_norm[item.position];
+      global_counter->clicks += 1;
+    }
 
     for (const auto& term : qstr_terms) {
       ++stats.term_counts[intern_map.internString(term)];
     }
 
-    ++global_counter->views;
-    global_counter->clicks += (int) item.clicked;
   }
 }
 
@@ -101,8 +108,9 @@ void writeOutputTable(
   /* prepare output sstable schema */
   sstable::SSTableColumnSchema sstable_schema;
   sstable_schema.addColumn("views", 1, sstable::SSTableColumnType::UINT64);
-  sstable_schema.addColumn("clicks", 2, sstable::SSTableColumnType::UINT64);
-  sstable_schema.addColumn("terms", 3, sstable::SSTableColumnType::STRING);
+  sstable_schema.addColumn("clicks", 2, sstable::SSTableColumnType::FLOAT);
+  sstable_schema.addColumn("clicks_norm", 3, sstable::SSTableColumnType::FLOAT);
+  sstable_schema.addColumn("terms", 4, sstable::SSTableColumnType::STRING);
 
   HashMap<String, String> out_hdr;
   out_hdr["start_time"] = StringUtil::toString(start_time);
@@ -117,19 +125,7 @@ void writeOutputTable(
       outhdr_json.data(),
       outhdr_json.length());
 
-  auto baseline_ctr = global_counter.clicks / (double) global_counter.views;
-  fnord::iputs("baseline ctr: $0", baseline_ctr);
-
   for (const auto& c : counters) {
-    //auto ctr = c.second.clicks / (double) c.second.views;
-    //auto perf = ctr / baseline_ctr;
-
-    //fnord::iputs("id=$0 views=$1 clicks=$2 ctr=$3 perf=$4",
-    //    c.first,
-    //    c.second.views,
-    //    c.second.clicks,
-    //    ctr,
-    //    perf);
     String terms_str;
     for (const auto t : c.second.term_counts) {
       terms_str += StringUtil::format(
@@ -141,8 +137,8 @@ void writeOutputTable(
     sstable::SSTableColumnWriter cols(&sstable_schema);
     cols.addUInt64Column(1, c.second.views);
     cols.addUInt64Column(2, c.second.clicks);
-    //cols.addFloatColumn(3, ctr);
-    //cols.addFloatColumn(4, perf);
+    cols.addFloatColumn(3, c.second.clicks_norm);
+    cols.addStringColumn(4, terms_str);
 
     sstable_writer->appendRow(StringUtil::toString(c.first), cols);
   }
@@ -214,6 +210,48 @@ int main(int argc, const char** argv) {
 
   auto lang = languageFromString(flags.getString("lang"));
   cm::Analyzer analyzer(flags.getString("conf"));
+
+  /* set up posi norm */
+  posi_norm.emplace(1, 1.0 / 0.006728);
+  posi_norm.emplace(2, 1.0 / 0.006491);
+  posi_norm.emplace(3, 1.0 / 0.006345);
+  posi_norm.emplace(4, 1.0 / 0.004955);
+  posi_norm.emplace(5, 1.0 / 0.015407);
+  posi_norm.emplace(6, 1.0 / 0.010970);
+  posi_norm.emplace(7, 1.0 / 0.009629);
+  posi_norm.emplace(8, 1.0 / 0.009070);
+  posi_norm.emplace(9, 1.0 / 0.007370);
+  posi_norm.emplace(10, 1.0 / 0.007518);
+  posi_norm.emplace(11, 1.0 / 0.006699);
+  posi_norm.emplace(12, 1.0 / 0.006751);
+  posi_norm.emplace(13, 1.0 / 0.006243);
+  posi_norm.emplace(14, 1.0 / 0.006058);
+  posi_norm.emplace(15, 1.0 / 0.005885);
+  posi_norm.emplace(16, 1.0 / 0.005909);
+  posi_norm.emplace(17, 1.0 / 0.005453);
+  posi_norm.emplace(18, 1.0 / 0.005475);
+  posi_norm.emplace(19, 1.0 / 0.005424);
+  posi_norm.emplace(20, 1.0 / 0.005240);
+  posi_norm.emplace(21, 1.0 / 0.005058);
+  posi_norm.emplace(22, 1.0 / 0.005181);
+  posi_norm.emplace(23, 1.0 / 0.004913);
+  posi_norm.emplace(24, 1.0 / 0.004935);
+  posi_norm.emplace(25, 1.0 / 0.004856);
+  posi_norm.emplace(26, 1.0 / 0.004857);
+  posi_norm.emplace(27, 1.0 / 0.004649);
+  posi_norm.emplace(28, 1.0 / 0.004716);
+  posi_norm.emplace(29, 1.0 / 0.004446);
+  posi_norm.emplace(30, 1.0 / 0.004694);
+  posi_norm.emplace(31, 1.0 / 0.004542);
+  posi_norm.emplace(32, 1.0 / 0.004394);
+  posi_norm.emplace(33, 1.0 / 0.004469);
+  posi_norm.emplace(34, 1.0 / 0.004522);
+  posi_norm.emplace(35, 1.0 / 0.004416);
+  posi_norm.emplace(36, 1.0 / 0.004576);
+  posi_norm.emplace(37, 1.0 / 0.004984);
+  posi_norm.emplace(38, 1.0 / 0.005158);
+  posi_norm.emplace(39, 1.0 / 0.005268);
+  posi_norm.emplace(40, 1.0 / 0.005833);
 
   /* set up feature schema */
   cm::FeatureSchema feature_schema;
@@ -291,7 +329,7 @@ int main(int argc, const char** argv) {
       try {
         q = Some(json::fromJSON<cm::JoinedQuery>(val));
       } catch (const Exception& e) {
-        //fnord::logWarning("cm.ctrstats", e, "invalid json: $0", val.toString());
+        fnord::logWarning("cm.ctrstats", e, "invalid json: $0", val.toString());
       }
 
       if (!q.isEmpty()) {
