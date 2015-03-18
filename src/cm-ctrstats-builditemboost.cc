@@ -90,64 +90,54 @@ void indexJoinedQuery(
 void writeOutputTable(
     const String& filename,
     const CounterMap& counters,
+    const GlobalCounter& global_counter,
     uint64_t start_time,
     uint64_t end_time) {
   /* prepare output sstable schema */
-  //sstable::SSTableColumnSchema sstable_schema;
-  //sstable_schema.addColumn("num_views", 1, sstable::SSTableColumnType::UINT64);
-  //sstable_schema.addColumn("num_clicks", 2, sstable::SSTableColumnType::UINT64);
-  //sstable_schema.addColumn("num_clicked", 3, sstable::SSTableColumnType::UINT64);
+  sstable::SSTableColumnSchema sstable_schema;
+  sstable_schema.addColumn("views", 1, sstable::SSTableColumnType::UINT64);
+  sstable_schema.addColumn("clicks", 2, sstable::SSTableColumnType::UINT64);
+  sstable_schema.addColumn("ctr", 3, sstable::SSTableColumnType::FLOAT);
+  sstable_schema.addColumn("perf", 4, sstable::SSTableColumnType::FLOAT);
 
-  //HashMap<String, String> out_hdr;
-  //out_hdr["start_time"] = StringUtil::toString(start_time);
-  //out_hdr["end_time"] = StringUtil::toString(end_time);
-  //auto outhdr_json = json::toJSONString(out_hdr);
+  HashMap<String, String> out_hdr;
+  out_hdr["start_time"] = StringUtil::toString(start_time);
+  out_hdr["end_time"] = StringUtil::toString(end_time);
+  auto outhdr_json = json::toJSONString(out_hdr);
 
   ///* open output sstable */
-  //fnord::logInfo("cm.ctrstats", "Writing results to: $0", filename);
-  //auto sstable_writer = sstable::SSTableWriter::create(
-  //    filename,
-  //    sstable::IndexProvider{},
-  //    outhdr_json.data(),
-  //    outhdr_json.length());
+  fnord::logInfo("cm.ctrstats", "Writing results to: $0", filename);
+  auto sstable_writer = sstable::SSTableWriter::create(
+      filename,
+      sstable::IndexProvider{},
+      outhdr_json.data(),
+      outhdr_json.length());
 
+  auto baseline_ctr = global_counter.clicks / (double) global_counter.views;
+  fnord::iputs("baseline ctr: $0", baseline_ctr);
 
-  //for (const auto& p : counters) {
-  //  sstable::SSTableColumnWriter cols(&sstable_schema);
-  //  cols.addUInt64Column(1, p.second.num_views);
-  //  cols.addUInt64Column(2, p.second.num_clicks);
-  //  cols.addUInt64Column(3, p.second.num_clicked);
+  for (const auto& c : counters) {
+    auto ctr = c.second.clicks / (double) c.second.views;
+    auto perf = ctr / baseline_ctr;
 
-  //  String key_str;
-  //  switch (p.first.length()) {
+    fnord::iputs("id=$0 views=$1 clicks=$2 ctr=$3 perf=$4",
+        c.first,
+        c.second.views,
+        c.second.clicks,
+        ctr,
+        perf);
 
-  //    case 0: {
-  //      key_str = "__GLOBAL";
-  //      break;
-  //    }
+    sstable::SSTableColumnWriter cols(&sstable_schema);
+    cols.addUInt64Column(1, c.second.views);
+    cols.addUInt64Column(2, c.second.clicks);
+    cols.addFloatColumn(3, ctr);
+    cols.addFloatColumn(4, perf);
 
-  //    case (sizeof(void*)): {
-  //      key_str = intern_map.getString(((void**) p.first.c_str())[0]);
-  //      break;
-  //    }
+    sstable_writer->appendRow(StringUtil::toString(c.first), cols);
+  }
 
-  //    case (sizeof(void*) * 2): {
-  //      key_str = intern_map.getString(((void**) p.first.c_str())[0]);
-  //      key_str += "~";
-  //      key_str += intern_map.getString(((void**) p.first.c_str())[1]);
-  //      break;
-  //    }
-
-  //    default:
-  //      RAISE(kRuntimeError, "invalid counter key");
-
-  //  }
-
-  //  sstable_writer->appendRow(key_str, cols);
-  //}
-
-  //sstable_schema.writeIndex(sstable_writer.get());
-  //sstable_writer->finalize();
+  sstable_schema.writeIndex(sstable_writer.get());
+  sstable_writer->finalize();
 }
 
 int main(int argc, const char** argv) {
@@ -312,27 +302,13 @@ int main(int argc, const char** argv) {
     status_line.runForce();
   }
 
-  auto baseline_ctr = global_counter.clicks / (double) global_counter.views;
-
-  fnord::iputs("baseline ctr: $0", baseline_ctr);
-
-  for (const auto& c : counters) {
-    auto ctr = c.second.clicks / (double) c.second.views;
-
-    fnord::iputs("id=$0 views=$1 clicks=$2 ctr=$3 perf=$4",
-        c.first,
-        c.second.views,
-        c.second.clicks,
-        ctr,
-        ctr / baseline_ctr);
-  }
-
   /* write output table */
-  //writeOutputTable(
-  //    flags.getString("output_file"),
-  //    counters,
-  //    start_time,
-  //    end_time);
+  writeOutputTable(
+      flags.getString("output_file"),
+      counters,
+      global_counter,
+      start_time,
+      end_time);
 
   return 0;
 }
