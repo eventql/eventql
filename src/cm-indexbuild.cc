@@ -183,9 +183,6 @@ int main(int argc, const char** argv) {
       db_commit_interval,
       flags.getInt("dbsize"));
 
-  cm::FeatureIndexWriter feature_index_writer(&feature_schema);
-  cm::IndexBuild index_build(&feature_index_writer);
-
   /* stats */
   fnord::stats::Counter<uint64_t> stat_documents_indexed_total_;
   fnord::stats::Counter<uint64_t> stat_documents_indexed_success_;
@@ -211,9 +208,10 @@ int main(int argc, const char** argv) {
   FileUtil::mkdir_p(featuredb_path);
   auto featuredb = mdb::MDB::open(featuredb_path);
   featuredb->setMaxSize(1000000 * flags.getInt("dbsize"));
+  cm::FeatureIndexWriter feature_index_writer(&feature_schema);
 
   /* open full index */
-  auto fullindex_path = FileUtil::joinPaths(flags.getString("index"), "full");
+  auto fullindex_path = FileUtil::joinPaths(flags.getString("index"), "docs");
   FileUtil::mkdir_p(fullindex_path);
   cm::FullIndex full_index(fullindex_path);
 
@@ -232,6 +230,8 @@ int main(int argc, const char** argv) {
           true,
           fts::IndexWriter::MaxFieldLengthLIMITED);
   */
+
+  cm::IndexBuild index_build(&feature_index_writer, &full_index);
 
   /* set up input feed reader */
   feeds::RemoteFeedReader feed_reader(&rpc_client);
