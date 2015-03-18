@@ -102,7 +102,9 @@ void writeOutputTable(
     const GlobalCounter& global_counter,
     uint64_t start_time,
     uint64_t end_time,
-    bool rollup) {
+    bool rollup,
+    int min_views,
+    int min_clicks) {
   /* prepare output sstable schema */
   sstable::SSTableColumnSchema sstable_schema;
   sstable_schema.addColumn("views", 1, sstable::SSTableColumnType::UINT64);
@@ -130,6 +132,14 @@ void writeOutputTable(
   double ctr_base_stddev;
 
   if (rollup) {
+    for (auto iter = counters.begin(); iter != counters.end(); ) {
+      if (iter->views >= min_views && iter->clicks >= min_clicks) {
+        ++iter;
+      } else {
+        iter = counters.remove(iter);
+      }
+    }
+
     double ctr_mean_num = 0.0;
     double ctr_stddev_num = 0.0;
     double ctr_base_mean_num = 0.0;
@@ -262,6 +272,24 @@ int main(int argc, const char** argv) {
       NULL,
       "write aggregated output columns",
       "");
+
+  flags.defineFlag(
+      "min_views",
+      fnord::cli::FlagParser::T_INTEGER,
+      false,
+      NULL,
+      "100",
+      "minimum nuber of item views",
+      "<num>");
+
+  flags.defineFlag(
+      "min_clicks",
+      fnord::cli::FlagParser::T_INTEGER,
+      false,
+      NULL,
+      "10",
+      "minimum nuber of item views",
+      "<num>");
 
   flags.defineFlag(
       "loglevel",
@@ -463,6 +491,8 @@ int main(int argc, const char** argv) {
   }
 
   /* write output table */
+  auto min_views = flags.getInt("min_views");
+  auto min_clicks = flags.getInt("min_clicks");
   auto outfile = flags.getString("output_file");
   fnord::logInfo("cm.ctrstats", "Writing results to: $0", outfile);
 
@@ -481,7 +511,9 @@ int main(int argc, const char** argv) {
       global_counter,
       start_time,
       end_time,
-      flags.isSet("rollup"));
+      flags.isSet("rollup"),
+      min_views,
+      min_clicks);
 
   FileUtil::mv(outfile + "~", outfile);
 
