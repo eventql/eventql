@@ -124,6 +124,31 @@ void writeOutputTable(
   out_hdr["end_time"] = StringUtil::toString(end_time);
   auto outhdr_json = json::toJSONString(out_hdr);
 
+  auto m = posi_norm.size();
+  double ctr_mean;
+  double ctr_base_mean;
+
+  if (rollup) {
+    double ctr_mean_num;
+    double ctr_mean_den;
+    double ctr_base_mean_num;
+    double ctr_base_mean_den;
+
+    for (const auto& c : counters) {
+      auto ctr = c.second.clicks / (double) c.second.views;
+      auto ctr_base =
+          (c.second.clicks_base / (double) m) / (double) c.second.views;
+
+      ctr_mean_num += ctr;
+      ++ctr_mean_den;
+      ctr_base_mean_num += ctr_base;
+      ++ctr_base_mean_den;
+    }
+
+    ctr_mean = ctr_mean_num / ctr_mean_den;
+    ctr_base_mean = ctr_base_mean_num / ctr_base_mean_den;
+  }
+
   ///* open output sstable */
   fnord::logInfo("cm.ctrstats", "Writing results to: $0", filename);
   auto sstable_writer = sstable::SSTableWriter::create(
@@ -132,12 +157,12 @@ void writeOutputTable(
       outhdr_json.data(),
       outhdr_json.length());
 
-  auto m = posi_norm.size();
   for (const auto& c : counters) {
     auto ctr = c.second.clicks / (double) c.second.views;
     auto ctr_base =
-        (c.second.clicks_base / (double) m) /
-        (double) c.second.views;
+        (c.second.clicks_base / (double) m) / (double) c.second.views;
+    auto ctr_std = ctr - ctr_mean;
+    auto ctr_base_std = ctr - ctr_base_mean;
 
     String terms_str;
     for (const auto t : c.second.term_counts) {
@@ -155,6 +180,8 @@ void writeOutputTable(
     if (rollup) {
       cols.addFloatColumn(5, ctr);
       cols.addFloatColumn(6, ctr_base);
+      cols.addFloatColumn(7, ctr_std);
+      cols.addFloatColumn(8, ctr_base_std);
     }
 
     cols.addStringColumn(4, terms_str);
