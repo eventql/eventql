@@ -82,6 +82,10 @@ void indexJoinedQuery(
     ++stats.views;
     stats.clicks += (int) item.clicked;
 
+    for (const auto& term : qstr_terms) {
+      ++stats.term_counts[intern_map.internString(term)];
+    }
+
     ++global_counter->views;
     global_counter->clicks += (int) item.clicked;
   }
@@ -98,8 +102,7 @@ void writeOutputTable(
   sstable::SSTableColumnSchema sstable_schema;
   sstable_schema.addColumn("views", 1, sstable::SSTableColumnType::UINT64);
   sstable_schema.addColumn("clicks", 2, sstable::SSTableColumnType::UINT64);
-  sstable_schema.addColumn("ctr", 3, sstable::SSTableColumnType::FLOAT);
-  sstable_schema.addColumn("perf", 4, sstable::SSTableColumnType::FLOAT);
+  sstable_schema.addColumn("terms", 3, sstable::SSTableColumnType::STRING);
 
   HashMap<String, String> out_hdr;
   out_hdr["start_time"] = StringUtil::toString(start_time);
@@ -118,21 +121,28 @@ void writeOutputTable(
   fnord::iputs("baseline ctr: $0", baseline_ctr);
 
   for (const auto& c : counters) {
-    auto ctr = c.second.clicks / (double) c.second.views;
-    auto perf = ctr / baseline_ctr;
+    //auto ctr = c.second.clicks / (double) c.second.views;
+    //auto perf = ctr / baseline_ctr;
 
-    fnord::iputs("id=$0 views=$1 clicks=$2 ctr=$3 perf=$4",
-        c.first,
-        c.second.views,
-        c.second.clicks,
-        ctr,
-        perf);
+    //fnord::iputs("id=$0 views=$1 clicks=$2 ctr=$3 perf=$4",
+    //    c.first,
+    //    c.second.views,
+    //    c.second.clicks,
+    //    ctr,
+    //    perf);
+    String terms_str;
+    for (const auto t : c.second.term_counts) {
+      terms_str += StringUtil::format(
+          "$0:$1,",
+          intern_map.getString(t.first),
+          t.second);
+    }
 
     sstable::SSTableColumnWriter cols(&sstable_schema);
     cols.addUInt64Column(1, c.second.views);
     cols.addUInt64Column(2, c.second.clicks);
-    cols.addFloatColumn(3, ctr);
-    cols.addFloatColumn(4, perf);
+    //cols.addFloatColumn(3, ctr);
+    //cols.addFloatColumn(4, perf);
 
     sstable_writer->appendRow(StringUtil::toString(c.first), cols);
   }
