@@ -13,11 +13,14 @@ using namespace fnord;
 namespace cm {
 
 IndexBuild::IndexBuild(
-    FeatureIndexWriter* feature_idx) :
-    feature_idx_(feature_idx) {}
+    FeatureIndexWriter* feature_idx,
+    FullIndex* full_idx) :
+    feature_idx_(feature_idx),
+    full_idx_(full_idx) {}
 
 void IndexBuild::updateDocument(const IndexRequest& index_request) {
-  fnord::iputs("update...", 1);
+  auto doc = full_idx_->updateDocument(index_request);
+  doc->debugPrint();
 }
 
 void IndexBuild::commit() {

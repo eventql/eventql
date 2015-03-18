@@ -14,7 +14,10 @@
 #include "fnord-base/thread/taskscheduler.h"
 #include "fnord-mdb/MDB.h"
 #include "fnord-base/stats/stats.h"
+#include <fnord-base/autoref.h>
 #include "ItemRef.h"
+#include "Document.h"
+#include "IndexRequest.h"
 
 using namespace fnord;
 
@@ -25,7 +28,13 @@ public:
 
   FullIndex(const String& path);
 
+  RefPtr<Document> updateDocument(const IndexRequest& index_request);
+
 protected:
+
+  String docPath(DocID docid) const;
+
+  std::mutex update_lock_;
   String path_;
 };
 

@@ -36,14 +36,18 @@ namespace cm {
 class IndexBuild {
 public:
 
-  IndexBuild(FeatureIndexWriter* feature_idx);
+  IndexBuild(
+      FeatureIndexWriter* feature_idx,
+      FullIndex* full_idx);
 
   void updateDocument(const IndexRequest& index_request);
   void commit();
 
 protected:
   FeatureIndexWriter* feature_idx_;
+  FullIndex* full_idx_;
 };
+
 } // namespace cm
 
 #endif
