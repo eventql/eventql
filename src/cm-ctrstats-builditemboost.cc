@@ -89,12 +89,11 @@ void indexJoinedQuery(
       stats.clicks += 1;
       stats.clicks_base += posi_norm[item.position];
       global_counter->clicks += 1;
-    }
 
-    for (const auto& term : qstr_terms) {
-      ++stats.term_counts[intern_map.internString(term)];
+      for (const auto& term : qstr_terms) {
+        ++stats.term_counts[intern_map.internString(term)];
+      }
     }
-
   }
 }
 
@@ -250,15 +249,15 @@ int main(int argc, const char** argv) {
   cm::Analyzer analyzer(flags.getString("conf"));
 
   /* set up posi norm */
-  posi_norm.emplace(1, 1.0 / 0.006728);
-  posi_norm.emplace(2, 1.0 / 0.006491);
-  posi_norm.emplace(3, 1.0 / 0.006345);
-  posi_norm.emplace(4, 1.0 / 0.004955);
-  posi_norm.emplace(5, 1.0 / 0.015407);
-  posi_norm.emplace(6, 1.0 / 0.010970);
-  posi_norm.emplace(7, 1.0 / 0.009629);
-  posi_norm.emplace(8, 1.0 / 0.009070);
-  posi_norm.emplace(9, 1.0 / 0.007370);
+  posi_norm.emplace(1,  1.0 / 0.006728);
+  posi_norm.emplace(2,  1.0 / 0.006491);
+  posi_norm.emplace(3,  1.0 / 0.006345);
+  posi_norm.emplace(4,  1.0 / 0.004955);
+  posi_norm.emplace(5,  1.0 / 0.015407);
+  posi_norm.emplace(6,  1.0 / 0.010970);
+  posi_norm.emplace(7,  1.0 / 0.009629);
+  posi_norm.emplace(8,  1.0 / 0.009070);
+  posi_norm.emplace(9,  1.0 / 0.007370);
   posi_norm.emplace(10, 1.0 / 0.007518);
   posi_norm.emplace(11, 1.0 / 0.006699);
   posi_norm.emplace(12, 1.0 / 0.006751);
