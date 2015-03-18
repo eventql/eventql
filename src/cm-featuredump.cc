@@ -192,6 +192,10 @@ int main(int argc, const char** argv) {
     auto lines = StringUtil::split(buf.toString(), "\n");
 
     for (const auto& line : lines) {
+      if (line.length() < 3) {
+        continue;
+      }
+
       auto parts = StringUtil::split(line, " ");
 
       if (parts.size() != 2) {
@@ -200,6 +204,8 @@ int main(int argc, const char** argv) {
 
       feature_idx[parts[1]] = std::stoul(parts[0]);
     }
+
+    orig_count = feature_idx.size();
   } else {
     /* read input meta tables and count features */
     HashMap<String, uint64_t> feature_counts;
