@@ -73,7 +73,7 @@ bool isQueryEligible(
     case ItemEligibility::DAWANDA_ALL_NOBOTS: {
       auto pgs = extractAttr(query.attrs, "pg");
       if (pgs.isEmpty()) {
-        return return;
+        return true;
       } else {
         auto pg = std::stoul(pgs.get());
         return pg <= 3;
