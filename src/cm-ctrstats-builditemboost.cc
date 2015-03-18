@@ -58,7 +58,7 @@ HashMap<uint32_t, double> posi_norm;
 void indexJoinedQuery(
     const cm::JoinedQuery& query,
     ItemEligibility eligibility,
-    FeatureIndex* feature_index,
+    //FeatureIndex* feature_index,
     Analyzer* analyzer,
     Language lang,
     CounterMap* counters,
@@ -68,13 +68,11 @@ void indexJoinedQuery(
   }
 
   /* query string terms */
-  auto qstr_opt = cm::extractAttr(query.attrs, "qstr~de"); // FIXPAUL
-  if (qstr_opt.isEmpty()) {
-    return;
-  }
-
   Set<String> qstr_terms;
-  analyzer->extractTerms(lang, qstr_opt.get(), &qstr_terms);
+  auto qstr_opt = cm::extractAttr(query.attrs, "qstr~de"); // FIXPAUL
+  if (!qstr_opt.isEmpty()) {
+    analyzer->extractTerms(lang, qstr_opt.get(), &qstr_terms);
+  }
 
   for (const auto& item : query.items) {
     if (!isItemEligible(eligibility, query, item)) {
@@ -155,7 +153,7 @@ void writeOutputTable(
           (c.second.clicks_base / (double) m) / (double) c.second.views;
 
       ctr_stddev_num += pow(ctr - ctr_mean, 2.0);
-      ctr_base_stddev_num += pow(ctr - ctr_base_mean, 2.0);
+      ctr_base_stddev_num += pow(ctr_base - ctr_base_mean, 2.0);
     }
 
     ctr_stddev = sqrt(ctr_stddev_num / n);
@@ -175,7 +173,7 @@ void writeOutputTable(
     auto ctr_base =
         (c.second.clicks_base / (double) m) / (double) c.second.views;
     auto ctr_std = (ctr - ctr_mean) / ctr_stddev;
-    auto ctr_base_std = (ctr - ctr_base_mean) / ctr_base_stddev;
+    auto ctr_base_std = (ctr_base - ctr_base_mean) / ctr_base_stddev;
 
     String terms_str;
     for (const auto t : c.second.term_counts) {
@@ -239,14 +237,14 @@ int main(int argc, const char** argv) {
       "output file path",
       "<path>");
 
-  flags.defineFlag(
-      "featuredb_path",
-      cli::FlagParser::T_STRING,
-      true,
-      NULL,
-      NULL,
-      "feature db path",
-      "<path>");
+  //flags.defineFlag(
+  //    "featuredb_path",
+  //    cli::FlagParser::T_STRING,
+  //    true,
+  //    NULL,
+  //    NULL,
+  //    "feature db path",
+  //    "<path>");
 
   flags.defineFlag(
       "merge",
@@ -335,21 +333,22 @@ int main(int argc, const char** argv) {
   posi_norm.emplace(44, 1.0 / 0.007008);
 
   /* set up feature schema */
-  cm::FeatureSchema feature_schema;
-  feature_schema.registerFeature("shop_id", 1, 1);
-  feature_schema.registerFeature("category1", 2, 1);
-  feature_schema.registerFeature("category2", 3, 1);
-  feature_schema.registerFeature("category3", 4, 1);
-  feature_schema.registerFeature("title~de", 5, 2);
+  //cm::FeatureSchema feature_schema;
+  //feature_schema.registerFeature("shop_id", 1, 1);
+  //feature_schema.registerFeature("category1", 2, 1);
+  //feature_schema.registerFeature("category2", 3, 1);
+  //feature_schema.registerFeature("category3", 4, 1);
+  //feature_schema.registerFeature("title~de", 5, 2);
 
-  /* open featuredb db */
-  auto featuredb_path = flags.getString("featuredb_path");
-  auto featuredb = mdb::MDB::open(featuredb_path, true);
-  cm::FeatureIndex feature_index(featuredb, &feature_schema);
+  ///* open featuredb db */
+  //auto featuredb_path = flags.getString("featuredb_path");
+  //auto featuredb = mdb::MDB::open(featuredb_path, true);
+  //cm::FeatureIndex feature_index(featuredb, &feature_schema);
 
   /* read input tables */
   auto sstables = flags.getArgv();
   auto tbl_cnt = sstables.size();
+  auto merge = flags.isSet("merge");
   for (int tbl_idx = 0; tbl_idx < sstables.size(); ++tbl_idx) {
     const auto& sstable = sstables[tbl_idx];
     fnord::logInfo("cm.ctrstats", "Importing sstable: $0", sstable);
@@ -360,6 +359,11 @@ int main(int argc, const char** argv) {
     if (reader.bodySize() == 0) {
       fnord::logCritical("cm.ctrstats", "unfinished sstable: $0", sstable);
       exit(1);
+    }
+
+    sstable::SSTableColumnSchema schema;
+    if (merge) {
+      schema.loadIndex(&reader);
     }
 
     /* read report header */
@@ -404,24 +408,51 @@ int main(int argc, const char** argv) {
     for (; cursor->valid(); ++row_idx) {
       status_line.runMaybe();
 
-      auto val = cursor->getDataBuffer();
-      Option<cm::JoinedQuery> q;
+      if (merge) {
+        auto key = std::stoul(cursor->getKeyString());
+        auto val = cursor->getDataBuffer();
+        sstable::SSTableColumnReader cols(&schema, val);
 
-      try {
-        q = Some(json::fromJSON<cm::JoinedQuery>(val));
-      } catch (const Exception& e) {
-        fnord::logWarning("cm.ctrstats", e, "invalid json: $0", val.toString());
-      }
+        auto& c = counters[key];
+        c.views += cols.getUInt64Column(schema.columnID("views"));
+        c.clicks += cols.getUInt64Column(schema.columnID("clicks"));
+        c.clicks_base += cols.getFloatColumn(schema.columnID("clicks_base"));
 
-      if (!q.isEmpty()) {
-        indexJoinedQuery(
-            q.get(),
-            cm::ItemEligibility::DAWANDA_ALL_NOBOTS,
-            &feature_index,
-            &analyzer,
-            lang,
-            &counters,
-            &global_counter);
+        auto terms_str = cols.getStringColumn(schema.columnID("terms"));
+        for (const auto& term : StringUtil::split(terms_str, ",")) {
+          auto len = term.find(":");
+          if (len == std::string::npos) {
+            continue;
+          }
+
+          auto t_str = term.substr(0, len);
+          auto t_cnt = std::stoul(term.substr(len + 1));
+          c.term_counts[intern_map.internString(t_str)] += t_cnt;
+        }
+      } else {
+        auto val = cursor->getDataBuffer();
+        Option<cm::JoinedQuery> q;
+
+        try {
+          q = Some(json::fromJSON<cm::JoinedQuery>(val));
+        } catch (const Exception& e) {
+          fnord::logWarning(
+              "cm.ctrstats",
+              e,
+              "invalid json: $0",
+              val.toString());
+        }
+
+        if (!q.isEmpty()) {
+          indexJoinedQuery(
+              q.get(),
+              cm::ItemEligibility::DAWANDA_ALL_NOBOTS,
+              //&feature_index,
+              &analyzer,
+              lang,
+              &counters,
+              &global_counter);
+        }
       }
 
       if (!cursor->next()) {
@@ -433,13 +464,16 @@ int main(int argc, const char** argv) {
   }
 
   /* write output table */
+  auto outfile = flags.getString("output_file");
   writeOutputTable(
-      flags.getString("output_file"),
+      outfile + "~",
       counters,
       global_counter,
       start_time,
       end_time,
       flags.isSet("rollup"));
+
+  FileUtil::mv(outfile + "~", outfile);
 
   return 0;
 }
