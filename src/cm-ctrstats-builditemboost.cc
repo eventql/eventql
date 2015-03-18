@@ -129,10 +129,12 @@ void writeOutputTable(
   double ctr_base_mean;
 
   if (rollup) {
-    double ctr_mean_num;
-    double ctr_mean_den;
-    double ctr_base_mean_num;
-    double ctr_base_mean_den;
+    double ctr_mean_num = 0.0;
+    double ctr_mean_den = 0.0;
+    double ctr_stddev = 0.0;
+    double ctr_base_mean_num = 0.0;
+    double ctr_base_mean_den = 0.0;
+    double ctr_base_stddev = 0.0;
 
     for (const auto& c : counters) {
       auto ctr = c.second.clicks / (double) c.second.views;
@@ -147,6 +149,18 @@ void writeOutputTable(
 
     ctr_mean = ctr_mean_num / ctr_mean_den;
     ctr_base_mean = ctr_base_mean_num / ctr_base_mean_den;
+
+    for (const auto& c : counters) {
+      auto ctr = c.second.clicks / (double) c.second.views;
+      auto ctr_base =
+          (c.second.clicks_base / (double) m) / (double) c.second.views;
+
+      ctr_mean_num += ctr;
+      ++ctr_mean_den;
+      ctr_base_mean_num += ctr_base;
+      ++ctr_base_mean_den;
+    }
+
   }
 
   ///* open output sstable */
