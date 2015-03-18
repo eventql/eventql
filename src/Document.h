@@ -27,6 +27,7 @@ public:
   Document(const DocID& id);
 
   const DocID& docID() const;
+  const HashMap<String, String>& fields() const;
 
   void update(const IndexRequest& index_req);
 

@@ -7,6 +7,8 @@
  * permission is obtained.
  */
 #include <fnord-base/fnv.h>
+#include <fnord-base/io/file.h>
+#include <fnord-json/json.h>
 #include "FullIndex.h"
 
 using namespace fnord;
@@ -19,20 +21,42 @@ RefPtr<Document> FullIndex::updateDocument(const IndexRequest& index_request) {
   std::unique_lock<std::mutex> lk(update_lock_);
 
   auto docid = index_request.item.docID();
-  auto docpath = docPath(docid);
-
   RefPtr<Document> doc(new Document(docid));
-
-  if (FileUtil::exists(docpath)) {
-    fnord::iputs("loaddoc: $0", docpath);
-  } else {
-    fnord::iputs("newdoc: $0", docpath);
-  }
-
+  loadDocument(doc);
   doc->debugPrint();
+
   doc->update(index_request);
+  commitDocument(doc);
 
   return doc;
+}
+
+void FullIndex::loadDocument(RefPtr<Document> doc) {
+  auto docpath = docPath(doc->docID());
+  if (!FileUtil::exists(docpath)) {
+    return;
+  }
+
+  abort();
+}
+
+void FullIndex::commitDocument(RefPtr<Document> doc) {
+  auto docpath = docPath(doc->docID());
+  auto docpath_tmp = docpath + "~";
+
+  auto basepath = FileUtil::basePath(docpath);
+  if (!FileUtil::exists(basepath)) {
+    FileUtil::mkdir_p(basepath);
+  }
+
+  auto file = File::openFile(
+      docpath_tmp,
+      File::O_WRITE | File::O_CREATEOROPEN | File::O_TRUNCATE);
+
+  auto doc_json = json::toJSONString(doc->fields());
+  file.write(doc_json.data(), doc_json.size());
+
+  FileUtil::mv(docpath_tmp, docpath);
 }
 
 String FullIndex::docPath(DocID docid) const {

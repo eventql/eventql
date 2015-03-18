@@ -18,6 +18,10 @@ const DocID& Document::docID() const {
   return id_;
 }
 
+const HashMap<String, String>& Document::fields() const {
+  return fields_;
+}
+
 void Document::update(const IndexRequest& index_req) {
   for (const auto& a : index_req.attrs) {
     fields_[a.first] = a.second;
