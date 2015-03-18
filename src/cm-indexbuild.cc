@@ -37,6 +37,7 @@
 #include "FeatureSchema.h"
 #include "FeatureIndexWriter.h"
 #include "IndexRequest.h"
+#include "IndexBuild.h"
 
 using namespace cm;
 using namespace fnord;
@@ -63,22 +64,13 @@ int main(int argc, const char** argv) {
   cli::FlagParser flags;
 
   flags.defineFlag(
-      "cmdata",
+      "index",
       cli::FlagParser::T_STRING,
       true,
       NULL,
       NULL,
-      "clickmatcher app data dir",
+      "index dir",
       "<path>");
-
-  flags.defineFlag(
-      "cmcustomer",
-      cli::FlagParser::T_STRING,
-      true,
-      NULL,
-      NULL,
-      "clickmatcher customer",
-      "<key>");
 
   flags.defineFlag(
       "statsd_addr",
@@ -148,12 +140,6 @@ int main(int argc, const char** argv) {
   Logger::get()->setMinimumLogLevel(
       strToLogLevel(flags.getString("loglevel")));
 
-  /* set up cmdata */
-  auto cmdata_path = flags.getString("cmdata");
-  if (!FileUtil::isDirectory(cmdata_path)) {
-    RAISEF(kIOError, "no such directory: $0", cmdata_path);
-  }
-
   /* set up feature schema */
   FeatureSchema feature_schema;
   feature_schema.registerFeature("shop_id", 1, 1);
@@ -180,7 +166,6 @@ int main(int argc, const char** argv) {
   statsd_agent.start();
 
   /* set up indexbuild */
-  auto cmcustomer = flags.getString("cmcustomer");
   size_t batch_size = flags.getInt("batch_size");
   size_t buffer_size = flags.getInt("buffer_size");
   size_t db_commit_size = flags.getInt("db_commit_size");
@@ -188,17 +173,18 @@ int main(int argc, const char** argv) {
 
   fnord::logInfo(
       "cm.indexbuild",
-      "Starting cm-indexbuild with:\n    customer=$0\n    batch_size=$1\n" \
+      "Starting cm-indexbuild with:\n    index=$0\n    batch_size=$1\n" \
       "    buffer_size=$2\n    db_commit_size=$3\n    db_commit_interval=$4\n"
       "    max_dbsize=$5MB",
-      cmcustomer,
+      flags.getString("index"),
       batch_size,
       buffer_size,
       db_commit_size,
       db_commit_interval,
       flags.getInt("dbsize"));
 
-  cm::FeatureIndexWriter index_writer(&feature_schema);
+  cm::FeatureIndexWriter feature_index_writer(&feature_schema);
+  cm::IndexBuild index_build(&feature_index_writer);
 
   /* stats */
   fnord::stats::Counter<uint64_t> stat_documents_indexed_total_;
@@ -221,13 +207,15 @@ int main(int argc, const char** argv) {
       fnord::stats::ExportMode::EXPORT_DELTA);
 
   /* open featuredb db */
-  auto featuredb_path = FileUtil::joinPaths(
-      cmdata_path,
-      StringUtil::format("index/$0/db", cmcustomer));
-
+  auto featuredb_path = FileUtil::joinPaths(flags.getString("index"), "db");
   FileUtil::mkdir_p(featuredb_path);
   auto featuredb = mdb::MDB::open(featuredb_path);
   featuredb->setMaxSize(1000000 * flags.getInt("dbsize"));
+
+  /* open full index */
+  auto fullindex_path = FileUtil::joinPaths(flags.getString("index"), "full");
+  FileUtil::mkdir_p(fullindex_path);
+  cm::FullIndex full_index(fullindex_path);
 
   /* open lucene index */
   /*
@@ -250,6 +238,7 @@ int main(int argc, const char** argv) {
   feed_reader.setMaxSpread(3600 * 24 * 30 * kMicrosPerSecond);
 
   HashMap<String, URI> input_feeds;
+  auto cmcustomer = "dawanda";
   input_feeds.emplace(
       StringUtil::format(
           "$0.index_requests.feedserver01.nue01.production.fnrd.net",
@@ -345,8 +334,6 @@ int main(int argc, const char** argv) {
   for (;;) {
     last_iter = WallClock::now();
     feed_reader.fillBuffers();
-    auto txn = featuredb->startTransaction();
-
     int i = 0;
     for (; i < db_commit_size; ++i) {
       auto entry = feed_reader.fetchNextEntry();
@@ -359,7 +346,7 @@ int main(int argc, const char** argv) {
         stat_documents_indexed_total_.incr(1);
         fnord::logTrace("cm.indexbuild", "Indexing: $0", entry.get().data);
         auto index_req = json::fromJSON<cm::IndexRequest>(entry.get().data);
-        index_writer.updateDocument(index_req, txn.get());
+        index_build.updateDocument(index_req);
         stat_documents_indexed_success_.incr(1);
       } catch (const std::exception& e) {
         stat_documents_indexed_error_.incr(1);
@@ -373,6 +360,10 @@ int main(int argc, const char** argv) {
 
     auto stream_offsets = feed_reader.streamOffsets();
     String stream_offsets_str;
+
+    index_build.commit();
+
+    auto txn = featuredb->startTransaction();
 
     for (const auto& soff : stream_offsets) {
       txn->update(
