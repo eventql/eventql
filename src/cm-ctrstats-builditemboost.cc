@@ -161,7 +161,6 @@ void writeOutputTable(
   }
 
   ///* open output sstable */
-  fnord::logInfo("cm.ctrstats", "Writing results to: $0", filename);
   auto sstable_writer = sstable::SSTableWriter::create(
       filename,
       sstable::IndexProvider{},
@@ -465,6 +464,17 @@ int main(int argc, const char** argv) {
 
   /* write output table */
   auto outfile = flags.getString("output_file");
+  fnord::logInfo("cm.ctrstats", "Writing results to: $0", outfile);
+
+  if (FileUtil::exists(outfile + "~")) {
+    fnord::logInfo(
+        "cm.ctrstats",
+        "Deleting orphaned temp file: $0",
+        outfile + "~");
+
+    FileUtil::rm(outfile + "~");
+  }
+
   writeOutputTable(
       outfile + "~",
       counters,
