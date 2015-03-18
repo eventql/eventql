@@ -64,6 +64,35 @@ int main(int argc, const char** argv) {
   auto end_time = std::numeric_limits<uint64_t>::min();
   auto eligibility = cm::ItemEligibility::DAWANDA_ALL_NOBOTS;
 
+  util::SimpleRateLimitedFn print_results(kMicrosPerSecond * 10, [&] () {
+    uint64_t total_clicks = 0;
+    uint64_t total_views = 0;
+    Vector<Pair<uint64_t, PosiInfo>> posis;
+    for (const auto& p : click_posis) {
+      total_clicks += p.second.clicks;
+      total_views += p.second.views;
+      posis.emplace_back(p);
+    }
+
+    std::sort(posis.begin(), posis.end(), [] (
+        const Pair<uint64_t, PosiInfo>& a,
+        const Pair<uint64_t, PosiInfo>& b) {
+      return a.first < b.first;
+    });
+
+    for (const auto& p : posis) {
+      auto share = (p.second.clicks / (double) total_clicks) * 100;
+      auto ctr = p.second.clicks / (double) p.second.views;
+
+      fnord::iputs("  position $0 => views=$1 clicks=$2 share=$3 ctr=$4",
+          p.first,
+          p.second.views,
+          p.second.clicks,
+          share,
+          ctr);
+    }
+  });
+
   /* read input tables */
   auto sstables = flags.getArgv();
   int row_idx = 0;
@@ -116,6 +145,7 @@ int main(int argc, const char** argv) {
     /* read sstable rows */
     for (; cursor->valid(); ++row_idx) {
       status_line.runMaybe();
+      print_results.runMaybe();
 
       auto val = cursor->getDataBuffer();
       Option<cm::JoinedQuery> q;
@@ -147,33 +177,7 @@ int main(int argc, const char** argv) {
     status_line.runForce();
   }
 
-  uint64_t total_clicks = 0;
-  uint64_t total_views = 0;
-  Vector<Pair<uint64_t, PosiInfo>> posis;
-  for (const auto& p : click_posis) {
-    total_clicks += p.second.clicks;
-    total_views += p.second.views;
-    posis.emplace_back(p);
-  }
-
-  std::sort(posis.begin(), posis.end(), [] (
-      const Pair<uint64_t, PosiInfo>& a,
-      const Pair<uint64_t, PosiInfo>& b) {
-    return a.first < b.first;
-  });
-
-  for (const auto& p : posis) {
-    auto share = (p.second.clicks / (double) total_clicks) * 100;
-    auto ctr = p.second.clicks / (double) p.second.views;
-
-    fnord::iputs("  position $0 => views=$1 clicks=$2 share=$3 ctr=$4",
-        p.first,
-        p.second.views,
-        p.second.clicks,
-        share,
-        ctr);
-  }
-
+  print_results.runForce();
   return 0;
 }
 
