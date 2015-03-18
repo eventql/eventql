@@ -32,6 +32,12 @@
 
 using namespace fnord;
 
+struct PosiInfo {
+  PosiInfo() : views(0), clicks(0) {}
+  uint64_t views;
+  uint64_t clicks;
+};
+
 int main(int argc, const char** argv) {
   fnord::Application::init();
   fnord::Application::logToStderr();
@@ -52,7 +58,7 @@ int main(int argc, const char** argv) {
   Logger::get()->setMinimumLogLevel(
       strToLogLevel(flags.getString("loglevel")));
 
-  HashMap<uint32_t, uint64_t> click_posis;
+  HashMap<uint32_t, PosiInfo> click_posis;
 
   auto start_time = std::numeric_limits<uint64_t>::max();
   auto end_time = std::numeric_limits<uint64_t>::min();
@@ -122,11 +128,14 @@ int main(int argc, const char** argv) {
 
       if (!q.isEmpty() && isQueryEligible(eligibility, q.get())) {
         for (auto& item : q.get().items) {
-          if (!item.clicked || item.position < 0) {
+          if (!isItemEligible(eligibility, q.get(), item) ||
+              item.position < 1) {
             continue;
           }
 
-          click_posis[item.position]++;
+          auto& pi = click_posis[item.position];
+          ++pi.views;
+          pi.clicks += item.clicked;
         }
       }
 
@@ -138,24 +147,31 @@ int main(int argc, const char** argv) {
     status_line.runForce();
   }
 
-  uint64_t sum = 0;
-  Vector<Pair<uint64_t, uint64_t>> posis;
+  uint64_t total_clicks = 0;
+  uint64_t total_views = 0;
+  Vector<Pair<uint64_t, PosiInfo>> posis;
   for (const auto& p : click_posis) {
-    sum += p.second;
+    total_clicks += p.second.clicks;
+    total_views += p.second.views;
     posis.emplace_back(p);
   }
 
   std::sort(posis.begin(), posis.end(), [] (
-      const Pair<uint64_t, uint64_t>& a,
-      const Pair<uint64_t, uint64_t>& b) {
+      const Pair<uint64_t, PosiInfo>& a,
+      const Pair<uint64_t, PosiInfo>& b) {
     return a.first < b.first;
   });
 
   for (const auto& p : posis) {
-    fnord::iputs(" Clicks on item position $0 => $1 ($2)",
+    auto share = (p.second.clicks / (double) total_clicks) * 100;
+    auto ctr = p.second.clicks / (double) p.second.views;
+
+    fnord::iputs("  position $0 => views=$1 clicks=$2 share=$3 ctr=$4",
         p.first,
-        p.second,
-        ((p.second / (double) sum) * 100));
+        p.second.views,
+        p.second.clicks,
+        share,
+        ctr);
   }
 
   return 0;
