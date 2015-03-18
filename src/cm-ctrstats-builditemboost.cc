@@ -98,7 +98,7 @@ void indexJoinedQuery(
 /* write output table */
 void writeOutputTable(
     const String& filename,
-    const CounterMap& counters,
+    CounterMap& counters,
     const GlobalCounter& global_counter,
     uint64_t start_time,
     uint64_t end_time,
@@ -133,10 +133,10 @@ void writeOutputTable(
 
   if (rollup) {
     for (auto iter = counters.begin(); iter != counters.end(); ) {
-      if (iter->views >= min_views && iter->clicks >= min_clicks) {
+      if (iter->second.views >= min_views && iter->second.clicks >= min_clicks) {
         ++iter;
       } else {
-        iter = counters.remove(iter);
+        iter = counters.erase(iter);
       }
     }
 
