@@ -43,6 +43,7 @@ struct ItemStats {
 };
 
 struct GlobalCounter {
+  GlobalCounter() : views(0), clicks(0) {}
   uint32_t views;
   uint32_t clicks;
 };
