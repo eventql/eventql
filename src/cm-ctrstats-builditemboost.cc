@@ -128,13 +128,13 @@ void writeOutputTable(
   double m = posi_norm.size();
   double ctr_mean;
   double ctr_base_mean;
+  double ctr_stddev;
+  double ctr_base_stddev;
 
   if (rollup) {
     double ctr_mean_num = 0.0;
-    double ctr_stddev = 0.0;
     double ctr_stddev_num = 0.0;
     double ctr_base_mean_num = 0.0;
-    double ctr_base_stddev = 0.0;
     double ctr_base_stddev_num = 0.0;
 
     for (const auto& c : counters) {
@@ -154,7 +154,12 @@ void writeOutputTable(
       auto ctr_base =
           (c.second.clicks_base / (double) m) / (double) c.second.views;
 
+      ctr_stddev_num += pow(ctr - ctr_mean, 2.0);
+      ctr_base_stddev_num += pow(ctr - ctr_base_mean, 2.0);
     }
+
+    ctr_stddev = sqrt(ctr_stddev_num / n);
+    ctr_base_stddev = sqrt(ctr_base_stddev_num / n);
   }
 
   ///* open output sstable */
@@ -169,8 +174,8 @@ void writeOutputTable(
     auto ctr = c.second.clicks / (double) c.second.views;
     auto ctr_base =
         (c.second.clicks_base / (double) m) / (double) c.second.views;
-    auto ctr_std = ctr - ctr_mean;
-    auto ctr_base_std = ctr - ctr_base_mean;
+    auto ctr_std = (ctr - ctr_mean) / ctr_stddev;
+    auto ctr_base_std = (ctr - ctr_base_mean) / ctr_base_stddev;
 
     String terms_str;
     for (const auto t : c.second.term_counts) {
