@@ -317,6 +317,22 @@ add_executable(cm-ctrstats-clickpositionhisto
 target_link_libraries(cm-ctrstats-clickpositionhisto
     ${CMAKE_THREAD_LIBS_INIT})
 
+add_executable(cm-ctrstats-builditemboost
+    $<TARGET_OBJECTS:cm-common>
+    $<TARGET_OBJECTS:fnord-base>
+    $<TARGET_OBJECTS:fnord-feeds>
+    $<TARGET_OBJECTS:fnord-mdb>
+    $<TARGET_OBJECTS:fnord-http>
+    $<TARGET_OBJECTS:fnord-json>
+    $<TARGET_OBJECTS:fnord-rpc>
+    $<TARGET_OBJECTS:fnord-sstable>
+    $<TARGET_OBJECTS:fnord-fts>
+    src/Analyzer.cc
+    src/cm-ctrstats-builditemboost.cc)
+
+target_link_libraries(cm-ctrstats-builditemboost
+    ${CMAKE_THREAD_LIBS_INIT})
+
 add_executable(cm-reportserver
     $<TARGET_OBJECTS:cm-common>
     $<TARGET_OBJECTS:fnord-base>
