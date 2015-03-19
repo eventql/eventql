@@ -33,21 +33,29 @@ using namespace fnord;
 
 namespace cm {
 
-class IndexBuild {
+class IndexBuild : public RefCounted {
 public:
 
-  IndexBuild(
-      FeatureIndexWriter* feature_idx,
-      FullIndex* full_idx);
+  static RefPtr<IndexBuild> openIndex(const String& path);
 
   void updateDocument(const IndexRequest& index_request);
   void commit();
 
   void rebuildFTS();
 
+  RefPtr<mdb::MDB> featureDB();
+
 protected:
-  FeatureIndexWriter* feature_idx_;
-  FullIndex* full_idx_;
+
+  IndexBuild(
+      FeatureSchema schema,
+      RefPtr<mdb::MDB> db,
+      RefPtr<FullIndex> docs);
+
+  FeatureSchema schema_;
+  RefPtr<mdb::MDB> db_;
+  RefPtr<FullIndex> docs_;
+  RefPtr<FeatureIndexWriter> feature_idx_;
 };
 
 } // namespace cm
