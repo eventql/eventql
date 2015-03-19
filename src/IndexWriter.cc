@@ -7,8 +7,6 @@
  * permission is obtained.
  */
 #include "IndexWriter.h"
-#include <fnord-fts/fts.h>
-#include <fnord-fts/fts_common.h>
 
 using namespace fnord;
 
@@ -40,7 +38,7 @@ RefPtr<IndexWriter> IndexWriter::openIndex(const String& index_path) {
 
   /* open lucene */
   auto fts_path = FileUtil::joinPaths(index_path, "fts");
-  auto index_writer =
+  auto fts =
       fts::newLucene<fts::IndexWriter>(
           fts::FSDirectory::open(StringUtil::convertUTF8To16(fts_path)),
           fts::newLucene<fts::StandardAnalyzer>(
@@ -48,24 +46,45 @@ RefPtr<IndexWriter> IndexWriter::openIndex(const String& index_path) {
           true,
           fts::IndexWriter::MaxFieldLengthLIMITED);
 
-  return RefPtr<IndexWriter>(new IndexWriter(feature_schema, db, docs));
+  return RefPtr<IndexWriter>(new IndexWriter(feature_schema, db, docs, fts));
 }
-
 
 IndexWriter::IndexWriter(
     FeatureSchema schema,
     RefPtr<mdb::MDB> db,
-    RefPtr<DocStore> docs) :
+    RefPtr<DocStore> docs,
+    std::shared_ptr<fts::IndexWriter> fts) :
     schema_(schema),
     db_(db),
     feature_idx_(new FeatureIndexWriter(&schema_)),
-    docs_(docs) {}
+    docs_(docs),
+    fts_(fts) {}
+
+
+IndexWriter::~IndexWriter() {
+  fts_->close();
+}
 
 void IndexWriter::updateDocument(const IndexRequest& index_request) {
   auto doc = docs_->updateDocument(index_request);
+  updateDocumentFTS(doc);
 }
 
 void IndexWriter::commit() {
+  fts_->commit();
+}
+
+void IndexWriter::updateDocumentFTS(RefPtr<Document> doc) {
+
+  auto fts_doc = fts::newLucene<fts::Document>();
+  fts_doc->add(
+      fts::newLucene<fts::Field>(
+          L"keywords",
+          L"my fnordy document",
+          fts::Field::STORE_NO,
+          fts::Field::INDEX_ANALYZED));
+
+  fts_->addDocument(fts_);
 }
 
 void IndexWriter::rebuildFTS() {
