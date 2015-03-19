@@ -27,6 +27,11 @@ void IndexBuild::commit() {
 
 void IndexBuild::rebuildFTS() {
   fnord::iputs("rebuild fts...", 1);
+
+  full_idx_->listDocuments([this] (const DocID& docid) -> bool {
+    fnord::iputs("rebuild fts for $0", docid.docid);
+    return true;
+  });
 }
 
 } // namespace cm

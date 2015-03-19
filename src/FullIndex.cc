@@ -77,5 +77,28 @@ String FullIndex::docPath(DocID docid) const {
   return StringUtil::format("$0/$1/$2.json", path_, h, docid_str);
 }
 
+void FullIndex::listDocuments(Function<bool (const DocID& doc)> fn) const {
+  FileUtil::ls(path_, [this, fn] (const String& dirname) -> bool {
+    auto dirpath = FileUtil::joinPaths(path_, dirname);
+    auto ret = true;
+
+    FileUtil::ls(dirpath, [this, fn, &ret] (const String& filename) -> bool {
+      DocID docid = { .docid  = filename };
+
+      StringUtil::replaceAll(&docid.docid, "_", "~");
+      StringUtil::replaceAll(&docid.docid, ".json", "");
+
+      if (fn(docid)) {
+        return true;
+      } else {
+        ret = false;
+        return false;
+      }
+    });
+
+    return ret;
+  });
+}
+
 } // namespace cm
 
