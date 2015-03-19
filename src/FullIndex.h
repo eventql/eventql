@@ -31,6 +31,8 @@ public:
   RefPtr<Document> updateDocument(const IndexRequest& index_request);
   RefPtr<Document> findDocument(const DocID& docid);
 
+  void listDocuments(Function<bool (const DocID& doc)> fn) const;
+
 protected:
 
   String docPath(DocID docid) const;
