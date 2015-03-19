@@ -61,11 +61,20 @@ int main(int argc, const char** argv) {
   flags.defineFlag(
       "docid",
       cli::FlagParser::T_STRING,
-      true,
+      false,
       NULL,
       NULL,
       "docid",
       "<docid>");
+
+  flags.defineFlag(
+      "query",
+      cli::FlagParser::T_STRING,
+      false,
+      NULL,
+      NULL,
+      "query",
+      "<query>");
 
   flags.defineFlag(
       "loglevel",
@@ -81,35 +90,59 @@ int main(int argc, const char** argv) {
   Logger::get()->setMinimumLogLevel(
       strToLogLevel(flags.getString("loglevel")));
 
-  /* arguments */
-  DocID docid = { flags.getString("docid") };
+  auto index_path = flags.getString("index");
 
-  /* set up feature schema */
-  FeatureSchema feature_schema;
-  feature_schema.registerFeature("shop_id", 1, 1);
-  feature_schema.registerFeature("category1", 2, 1);
-  feature_schema.registerFeature("category2", 3, 1);
-  feature_schema.registerFeature("category3", 4, 1);
-  feature_schema.registerFeature("title~de", 5, 2);
+  if (flags.isSet("docid")) {
+    DocID docid = { flags.getString("docid") };
 
-  /* open featuredb db */
-  auto featuredb_path = StringUtil::format("$0/db", flags.getString("index"));
-  auto featuredb = mdb::MDB::open(featuredb_path, true);
+    /* set up feature schema */
+    FeatureSchema feature_schema;
+    feature_schema.registerFeature("shop_id", 1, 1);
+    feature_schema.registerFeature("category1", 2, 1);
+    feature_schema.registerFeature("category2", 3, 1);
+    feature_schema.registerFeature("category3", 4, 1);
+    feature_schema.registerFeature("title~de", 5, 2);
 
-  /* open full index  */
-  auto fullindex_path = StringUtil::format("$0/docs", flags.getString("index"));
-  cm::DocStore full_index(fullindex_path);
+    /* open featuredb db */
+    auto featuredb_path = StringUtil::format("$0/db", index_path);
+    auto featuredb = mdb::MDB::open(featuredb_path, true);
 
-  /* get features */
-  FeaturePack features;
-  FeatureIndex feature_index(featuredb, &feature_schema);
-  feature_index.getFeatures(docid, &features);
+    /* open full index  */
+    auto fullindex_path = StringUtil::format("$0/docs", index_path);
+    cm::DocStore full_index(fullindex_path);
 
-  /* get document */
-  auto doc = full_index.findDocument(docid);
+    auto doc = full_index.findDocument(docid);
+    doc->debugPrint();
+    return 0;
+  }
 
-  /* dump document */
-  doc->debugPrint();
+  if (flags.isSet("query")) {
+    auto ftsindex_path = StringUtil::format("$0/fts", index_path);
+    auto index_reader = fts::IndexReader::open(
+        fts::FSDirectory::open(StringUtil::convertUTF8To16(ftsindex_path)),
+        true);
+
+    auto searcher = fts::newLucene<fts::IndexSearcher>(index_reader);
+
+    RefPtr<fnord::fts::Analyzer> analyzer(new fnord::fts::Analyzer("./conf"));
+    auto adapter = std::make_shared<fnord::fts::AnalyzerAdapter>(analyzer);
+
+    auto query_parser = fts::newLucene<fts::QueryParser>(
+        fts::LuceneVersion::LUCENE_CURRENT,
+        L"text~de",
+        adapter);
+
+    auto collector = fts::TopScoreDocCollector::create(
+        500,
+        false);
+
+    auto query = query_parser->parse(
+        StringUtil::convertUTF8To16(flags.getString("query")));
+
+    searcher->search(query, collector);
+    fnord::iputs("found $0 documents", collector->getTotalHits());
+    return 0;
+  }
 
   //fnord::iputs("\n[features]")
   //for (const auto& f : features) {

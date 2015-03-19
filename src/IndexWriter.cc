@@ -98,6 +98,7 @@ void IndexWriter::rebuildFTS(RefPtr<Document> doc) {
     /* title~LANG */
     if (StringUtil::beginsWith(f.first, "title~")) {
       auto k = f.first;
+      StringUtil::replaceAll(&k, "title~","text~");
       fts_fields_anal[k] += " ";
       fts_fields_anal[k] += f.second;
     }
@@ -105,7 +106,7 @@ void IndexWriter::rebuildFTS(RefPtr<Document> doc) {
     /* description~LANG */
     if (StringUtil::beginsWith(f.first, "description~")) {
       auto k = f.first;
-      StringUtil::replaceAll(&k, "description~","body~");
+      StringUtil::replaceAll(&k, "description~","text~");
       fts_fields_anal[k] += " ";
       fts_fields_anal[k] += f.second;
     }
@@ -113,7 +114,7 @@ void IndexWriter::rebuildFTS(RefPtr<Document> doc) {
     /* tags_as_text~LANG */
     if (StringUtil::beginsWith(f.first, "tags_as_text~")) {
       auto k = f.first;
-      StringUtil::replaceAll(&k, "tags_as_text~","tags~");
+      StringUtil::replaceAll(&k, "tags_as_text~","text~");
       fts_fields_anal[k] += " ";
       fts_fields_anal[k] += f.second;
     }
