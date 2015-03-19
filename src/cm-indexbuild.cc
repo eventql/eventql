@@ -310,6 +310,7 @@ int main(int argc, const char** argv) {
     buildIndexFromFeed(index_writer, flags);
   }
 
+  index_writer->commit();
   fnord::logInfo("cm.indexbuild", "Exiting...");
   return 0;
 }
