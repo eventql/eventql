@@ -6,8 +6,8 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-#ifndef _CM_INDEXBUILD_H
-#define _CM_INDEXBUILD_H
+#ifndef _CM_INDEXWRITER_H
+#define _CM_INDEXWRITER_H
 #include <mutex>
 #include <stdlib.h>
 #include <set>
@@ -24,7 +24,7 @@
 #include "fnord-mdb/MDB.h"
 #include "fnord-base/stats/stats.h"
 #include "FeatureIndex.h"
-#include "FullIndex.h"
+#include "DocStore.h"
 #include "IndexRequest.h"
 #include "FeatureIndexWriter.h"
 #include "ItemRef.h"
@@ -33,10 +33,10 @@ using namespace fnord;
 
 namespace cm {
 
-class IndexBuild : public RefCounted {
+class IndexWriter : public RefCounted {
 public:
 
-  static RefPtr<IndexBuild> openIndex(const String& path);
+  static RefPtr<IndexWriter> openIndex(const String& path);
 
   void updateDocument(const IndexRequest& index_request);
   void commit();
@@ -47,14 +47,14 @@ public:
 
 protected:
 
-  IndexBuild(
+  IndexWriter(
       FeatureSchema schema,
       RefPtr<mdb::MDB> db,
-      RefPtr<FullIndex> docs);
+      RefPtr<DocStore> docs);
 
   FeatureSchema schema_;
   RefPtr<mdb::MDB> db_;
-  RefPtr<FullIndex> docs_;
+  RefPtr<DocStore> docs_;
   RefPtr<FeatureIndexWriter> feature_idx_;
 };
 

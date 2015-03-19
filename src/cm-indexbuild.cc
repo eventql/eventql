@@ -37,7 +37,7 @@
 #include "FeatureSchema.h"
 #include "FeatureIndexWriter.h"
 #include "IndexRequest.h"
-#include "IndexBuild.h"
+#include "IndexWriter.h"
 
 using namespace cm;
 using namespace fnord;
@@ -54,7 +54,7 @@ void quit(int n) {
 }
 
 void buildIndexFromFeed(
-    RefPtr<IndexBuild> index_build,
+    RefPtr<IndexWriter> index_writer,
     const cli::FlagParser& flags) {
   size_t batch_size = flags.getInt("batch_size");
   size_t buffer_size = flags.getInt("buffer_size");
@@ -88,7 +88,7 @@ void buildIndexFromFeed(
       URI("http://s02.nue01.production.fnrd.net:7001/rpc"));
 
   /* resume from last offset */
-  auto txn = index_build->featureDB()->startTransaction(true);
+  auto txn = index_writer->featureDB()->startTransaction(true);
   try {
     for (const auto& input_feed : input_feeds) {
       uint64_t offset = 0;
@@ -121,7 +121,7 @@ void buildIndexFromFeed(
     throw;
   }
 
-  fnord::logInfo("cm.indexbuild", "Resuming IndexBuild...");
+  fnord::logInfo("cm.indexbuild", "Resuming IndexWriter...");
 
   DateTime last_iter;
   uint64_t rate_limit_micros = db_commit_interval * kMicrosPerSecond;
@@ -141,7 +141,7 @@ void buildIndexFromFeed(
         stat_documents_indexed_total_.incr(1);
         fnord::logTrace("cm.indexbuild", "Indexing: $0", entry.get().data);
         auto index_req = json::fromJSON<cm::IndexRequest>(entry.get().data);
-        index_build->updateDocument(index_req);
+        index_writer->updateDocument(index_req);
         stat_documents_indexed_success_.incr(1);
       } catch (const std::exception& e) {
         stat_documents_indexed_error_.incr(1);
@@ -156,9 +156,9 @@ void buildIndexFromFeed(
     auto stream_offsets = feed_reader.streamOffsets();
     String stream_offsets_str;
 
-    index_build->commit();
+    index_writer->commit();
 
-    auto txn = index_build->featureDB()->startTransaction();
+    auto txn = index_writer->featureDB()->startTransaction();
 
     for (const auto& soff : stream_offsets) {
       txn->update(
@@ -171,7 +171,7 @@ void buildIndexFromFeed(
 
     fnord::logInfo(
         "cm.indexbuild",
-        "IndexBuild comitting...$0",
+        "IndexWriter comitting...$0",
         stream_offsets_str);
 
     txn->commit();
@@ -331,15 +331,15 @@ int main(int argc, const char** argv) {
       &stat_documents_indexed_error_,
       fnord::stats::ExportMode::EXPORT_DELTA);
 
-  auto index_build = cm::IndexBuild::openIndex(flags.getString("index"));
+  auto index_writer = cm::IndexWriter::openIndex(flags.getString("index"));
 
   if (flags.isSet("rebuild_fts")) {
-    index_build->rebuildFTS();
+    index_writer->rebuildFTS();
   } else {
-    buildIndexFromFeed(index_build, flags);
+    buildIndexFromFeed(index_writer, flags);
   }
 
-  fnord::logInfo("cm.indexbuild", "IndexBuild exiting...");
+  fnord::logInfo("cm.indexbuild", "IndexWriter exiting...");
   return 0;
 }
 

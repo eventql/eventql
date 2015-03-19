@@ -6,8 +6,8 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-#ifndef _CM_FULLINDEX_H
-#define _CM_FULLINDEX_H
+#ifndef _CM_DOCSTORE_H
+#define _CM_DOCSTORE_H
 #include "fnord-base/stdtypes.h"
 #include "fnord-rpc/RPC.h"
 #include "fnord-rpc/RPCClient.h"
@@ -23,10 +23,10 @@ using namespace fnord;
 
 namespace cm {
 
-class FullIndex : public RefCounted {
+class DocStore : public RefCounted {
 public:
 
-  FullIndex(const String& path);
+  DocStore(const String& path);
 
   RefPtr<Document> updateDocument(const IndexRequest& index_request);
   RefPtr<Document> findDocument(const DocID& docid);
