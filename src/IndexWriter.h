@@ -18,9 +18,9 @@
 #include "fnord-base/stdtypes.h"
 #include "fnord-feeds/RemoteFeed.h"
 #include "fnord-feeds/RemoteFeedWriter.h"
-#include "fnord-rpc/RPC.h"
-#include "fnord-rpc/RPCClient.h"
 #include "fnord-base/thread/taskscheduler.h"
+#include <fnord-fts/fts.h>
+#include <fnord-fts/fts_common.h>
 #include "fnord-mdb/MDB.h"
 #include "fnord-base/stats/stats.h"
 #include "FeatureIndex.h"
@@ -38,6 +38,8 @@ public:
 
   static RefPtr<IndexWriter> openIndex(const String& path);
 
+  ~IndexWriter();
+
   void updateDocument(const IndexRequest& index_request);
   void commit();
 
@@ -50,12 +52,16 @@ protected:
   IndexWriter(
       FeatureSchema schema,
       RefPtr<mdb::MDB> db,
-      RefPtr<DocStore> docs);
+      RefPtr<DocStore> docs,
+      std::shared_ptr<fts::IndexWriter> fts);
+
+  void updateDocumentFTS(RefPtr<Document> doc);
 
   FeatureSchema schema_;
   RefPtr<mdb::MDB> db_;
   RefPtr<DocStore> docs_;
   RefPtr<FeatureIndexWriter> feature_idx_;
+  std::shared_ptr<fts::IndexWriter> fts_;
 };
 
 } // namespace cm
