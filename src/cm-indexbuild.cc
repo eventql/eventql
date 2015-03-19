@@ -44,8 +44,151 @@ using namespace fnord;
 
 std::atomic<bool> cm_indexbuild_shutdown;
 
+/* stats */
+fnord::stats::Counter<uint64_t> stat_documents_indexed_total_;
+fnord::stats::Counter<uint64_t> stat_documents_indexed_success_;
+fnord::stats::Counter<uint64_t> stat_documents_indexed_error_;
+
 void quit(int n) {
   cm_indexbuild_shutdown = true;
+}
+
+void buildIndexFromFeed(
+    IndexBuild* index_build,
+    RefPtr<mdb::MDB> featuredb,
+    const cli::FlagParser& flags) {
+  size_t batch_size = flags.getInt("batch_size");
+  size_t buffer_size = flags.getInt("buffer_size");
+  size_t db_commit_size = flags.getInt("db_commit_size");
+  size_t db_commit_interval = flags.getInt("db_commit_interval");
+
+  /* start event loop */
+  fnord::thread::EventLoop ev;
+
+  auto evloop_thread = std::thread([&ev] {
+    ev.run();
+  });
+
+  /* set up rpc client */
+  HTTPRPCClient rpc_client(&ev);
+
+  feeds::RemoteFeedReader feed_reader(&rpc_client);
+  feed_reader.setMaxSpread(3600 * 24 * 30 * kMicrosPerSecond);
+
+  HashMap<String, URI> input_feeds;
+  auto cmcustomer = "dawanda";
+  input_feeds.emplace(
+      StringUtil::format(
+          "$0.index_requests.feedserver01.nue01.production.fnrd.net",
+          cmcustomer),
+      URI("http://s01.nue01.production.fnrd.net:7001/rpc"));
+  input_feeds.emplace(
+      StringUtil::format(
+          "$0.index_requests.feedserver02.nue01.production.fnrd.net",
+          cmcustomer),
+      URI("http://s02.nue01.production.fnrd.net:7001/rpc"));
+
+  /* resume from last offset */
+  auto txn = featuredb->startTransaction(true);
+  try {
+    for (const auto& input_feed : input_feeds) {
+      uint64_t offset = 0;
+
+      auto last_offset = txn->get(
+          StringUtil::format("__indexfeed_offset~$0", input_feed.first));
+
+      if (!last_offset.isEmpty()) {
+        offset = std::stoul(last_offset.get().toString());
+      }
+
+      fnord::logInfo(
+          "cm.indexbuild",
+          "Adding source feed:\n    feed=$0\n    url=$1\n    offset: $2",
+          input_feed.first,
+          input_feed.second.toString(),
+          offset);
+
+      feed_reader.addSourceFeed(
+          input_feed.second,
+          input_feed.first,
+          offset,
+          batch_size,
+          buffer_size);
+    }
+
+    txn->abort();
+  } catch (...) {
+    txn->abort();
+    throw;
+  }
+
+  fnord::logInfo("cm.indexbuild", "Resuming IndexBuild...");
+
+  DateTime last_iter;
+  uint64_t rate_limit_micros = db_commit_interval * kMicrosPerSecond;
+
+  for (;;) {
+    last_iter = WallClock::now();
+    feed_reader.fillBuffers();
+    int i = 0;
+    for (; i < db_commit_size; ++i) {
+      auto entry = feed_reader.fetchNextEntry();
+
+      if (entry.isEmpty()) {
+        break;
+      }
+
+      try {
+        stat_documents_indexed_total_.incr(1);
+        fnord::logTrace("cm.indexbuild", "Indexing: $0", entry.get().data);
+        auto index_req = json::fromJSON<cm::IndexRequest>(entry.get().data);
+        index_build->updateDocument(index_req);
+        stat_documents_indexed_success_.incr(1);
+      } catch (const std::exception& e) {
+        stat_documents_indexed_error_.incr(1);
+        fnord::logError(
+            "cm.indexbuild",
+            e,
+            "error while indexing document: $0",
+            entry.get().data);
+      }
+    }
+
+    auto stream_offsets = feed_reader.streamOffsets();
+    String stream_offsets_str;
+
+    index_build->commit();
+
+    auto txn = featuredb->startTransaction();
+
+    for (const auto& soff : stream_offsets) {
+      txn->update(
+          StringUtil::format("__indexfeed_offset~$0", soff.first),
+          StringUtil::toString(soff.second));
+
+      stream_offsets_str +=
+          StringUtil::format("\n    offset[$0]=$1", soff.first, soff.second);
+    }
+
+    fnord::logInfo(
+        "cm.indexbuild",
+        "IndexBuild comitting...$0",
+        stream_offsets_str);
+
+    txn->commit();
+
+    if (cm_indexbuild_shutdown.load() == true) {
+      break;
+    }
+
+    auto etime = WallClock::now().unixMicros() - last_iter.unixMicros();
+    if (i < 1 && etime < rate_limit_micros) {
+      usleep(rate_limit_micros - etime);
+    }
+  }
+
+  ev.shutdown();
+  evloop_thread.join();
 }
 
 int main(int argc, const char** argv) {
@@ -148,16 +291,6 @@ int main(int argc, const char** argv) {
   feature_schema.registerFeature("category3", 4, 1);
   feature_schema.registerFeature("title~de", 5, 2);
 
-  /* start event loop */
-  fnord::thread::EventLoop ev;
-
-  auto evloop_thread = std::thread([&ev] {
-    ev.run();
-  });
-
-  /* set up rpc client */
-  HTTPRPCClient rpc_client(&ev);
-
   /* start stats reporting */
   fnord::stats::StatsdAgent statsd_agent(
       fnord::net::InetAddr::resolve(flags.getString("statsd_addr")),
@@ -182,11 +315,6 @@ int main(int argc, const char** argv) {
       db_commit_size,
       db_commit_interval,
       flags.getInt("dbsize"));
-
-  /* stats */
-  fnord::stats::Counter<uint64_t> stat_documents_indexed_total_;
-  fnord::stats::Counter<uint64_t> stat_documents_indexed_success_;
-  fnord::stats::Counter<uint64_t> stat_documents_indexed_error_;
 
   exportStat(
       "/cm-indexbuild/global/documents_indexed_total",
@@ -215,7 +343,27 @@ int main(int argc, const char** argv) {
   FileUtil::mkdir_p(fullindex_path);
   cm::FullIndex full_index(fullindex_path);
 
-  /* open lucene index */
+  cm::IndexBuild index_build(&feature_index_writer, &full_index);
+
+  buildIndexFromFeed(&index_build, featuredb, flags);
+
+  fnord::logInfo("cm.indexbuild", "IndexBuild exiting...");
+  return 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* open lucene index */
   /*
   auto index_path = FileUtil::joinPaths(
       cmdata_path,
@@ -230,61 +378,6 @@ int main(int argc, const char** argv) {
           true,
           fts::IndexWriter::MaxFieldLengthLIMITED);
   */
-
-  cm::IndexBuild index_build(&feature_index_writer, &full_index);
-
-  /* set up input feed reader */
-  feeds::RemoteFeedReader feed_reader(&rpc_client);
-  feed_reader.setMaxSpread(3600 * 24 * 30 * kMicrosPerSecond);
-
-  HashMap<String, URI> input_feeds;
-  auto cmcustomer = "dawanda";
-  input_feeds.emplace(
-      StringUtil::format(
-          "$0.index_requests.feedserver01.nue01.production.fnrd.net",
-          cmcustomer),
-      URI("http://s01.nue01.production.fnrd.net:7001/rpc"));
-  input_feeds.emplace(
-      StringUtil::format(
-          "$0.index_requests.feedserver02.nue01.production.fnrd.net",
-          cmcustomer),
-      URI("http://s02.nue01.production.fnrd.net:7001/rpc"));
-
-  /* resume from last offset */
-  auto txn = featuredb->startTransaction(true);
-  try {
-    for (const auto& input_feed : input_feeds) {
-      uint64_t offset = 0;
-
-      auto last_offset = txn->get(
-          StringUtil::format("__indexfeed_offset~$0", input_feed.first));
-
-      if (!last_offset.isEmpty()) {
-        offset = std::stoul(last_offset.get().toString());
-      }
-
-      fnord::logInfo(
-          "cm.indexbuild",
-          "Adding source feed:\n    feed=$0\n    url=$1\n    offset: $2",
-          input_feed.first,
-          input_feed.second.toString(),
-          offset);
-
-      feed_reader.addSourceFeed(
-          input_feed.second,
-          input_feed.first,
-          offset,
-          batch_size,
-          buffer_size);
-    }
-
-    txn->abort();
-  } catch (...) {
-    txn->abort();
-    throw;
-  }
-
-  fnord::logInfo("cm.indexbuild", "Resuming IndexBuild...");
   // index document
 /*
   auto doc = fts::newLucene<fts::Document>();
@@ -328,75 +421,4 @@ int main(int argc, const char** argv) {
   fnord::iputs("found $0 documents", collector->getTotalHits());
   */
 
-  DateTime last_iter;
-  uint64_t rate_limit_micros = db_commit_interval * kMicrosPerSecond;
-
-  for (;;) {
-    last_iter = WallClock::now();
-    feed_reader.fillBuffers();
-    int i = 0;
-    for (; i < db_commit_size; ++i) {
-      auto entry = feed_reader.fetchNextEntry();
-
-      if (entry.isEmpty()) {
-        break;
-      }
-
-      try {
-        stat_documents_indexed_total_.incr(1);
-        fnord::logTrace("cm.indexbuild", "Indexing: $0", entry.get().data);
-        auto index_req = json::fromJSON<cm::IndexRequest>(entry.get().data);
-        index_build.updateDocument(index_req);
-        stat_documents_indexed_success_.incr(1);
-      } catch (const std::exception& e) {
-        stat_documents_indexed_error_.incr(1);
-        fnord::logError(
-            "cm.indexbuild",
-            e,
-            "error while indexing document: $0",
-            entry.get().data);
-      }
-    }
-
-    auto stream_offsets = feed_reader.streamOffsets();
-    String stream_offsets_str;
-
-    index_build.commit();
-
-    auto txn = featuredb->startTransaction();
-
-    for (const auto& soff : stream_offsets) {
-      txn->update(
-          StringUtil::format("__indexfeed_offset~$0", soff.first),
-          StringUtil::toString(soff.second));
-
-      stream_offsets_str +=
-          StringUtil::format("\n    offset[$0]=$1", soff.first, soff.second);
-    }
-
-    fnord::logInfo(
-        "cm.indexbuild",
-        "IndexBuild comitting...$0",
-        stream_offsets_str);
-
-    txn->commit();
-
-    if (cm_indexbuild_shutdown.load() == true) {
-      break;
-    }
-
-    auto etime = WallClock::now().unixMicros() - last_iter.unixMicros();
-    if (i < 1 && etime < rate_limit_micros) {
-      usleep(rate_limit_micros - etime);
-    }
-  }
-
-  ev.shutdown();
-  //evloop_thread.join();
-
-  fnord::logInfo("cm.indexbuild", "IndexBuild exiting...");
-  exit(0); // FIXPAUL
-
-  return 0;
-}
 
