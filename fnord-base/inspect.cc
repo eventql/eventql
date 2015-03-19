@@ -75,6 +75,13 @@ std::string inspect<std::string>(const std::string& value) {
 }
 
 template <>
+std::string inspect<std::wstring>(const std::wstring& value) {
+  std::string out;
+  out.assign(value.begin(), value.end());
+  return out;
+}
+
+template <>
 std::string inspect<char const*>(char const* const& value) {
   return std::string(value);
 }
