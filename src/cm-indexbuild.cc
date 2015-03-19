@@ -54,8 +54,7 @@ void quit(int n) {
 }
 
 void buildIndexFromFeed(
-    IndexBuild* index_build,
-    RefPtr<mdb::MDB> featuredb,
+    RefPtr<IndexBuild> index_build,
     const cli::FlagParser& flags) {
   size_t batch_size = flags.getInt("batch_size");
   size_t buffer_size = flags.getInt("buffer_size");
@@ -89,7 +88,7 @@ void buildIndexFromFeed(
       URI("http://s02.nue01.production.fnrd.net:7001/rpc"));
 
   /* resume from last offset */
-  auto txn = featuredb->startTransaction(true);
+  auto txn = index_build->featureDB()->startTransaction(true);
   try {
     for (const auto& input_feed : input_feeds) {
       uint64_t offset = 0;
@@ -159,7 +158,7 @@ void buildIndexFromFeed(
 
     index_build->commit();
 
-    auto txn = featuredb->startTransaction();
+    auto txn = index_build->featureDB()->startTransaction();
 
     for (const auto& soff : stream_offsets) {
       txn->update(
@@ -292,14 +291,6 @@ int main(int argc, const char** argv) {
   Logger::get()->setMinimumLogLevel(
       strToLogLevel(flags.getString("loglevel")));
 
-  /* set up feature schema */
-  FeatureSchema feature_schema;
-  feature_schema.registerFeature("shop_id", 1, 1);
-  feature_schema.registerFeature("category1", 2, 1);
-  feature_schema.registerFeature("category2", 3, 1);
-  feature_schema.registerFeature("category3", 4, 1);
-  feature_schema.registerFeature("title~de", 5, 2);
-
   /* start stats reporting */
   fnord::stats::StatsdAgent statsd_agent(
       fnord::net::InetAddr::resolve(flags.getString("statsd_addr")),
@@ -340,24 +331,12 @@ int main(int argc, const char** argv) {
       &stat_documents_indexed_error_,
       fnord::stats::ExportMode::EXPORT_DELTA);
 
-  /* open featuredb db */
-  auto featuredb_path = FileUtil::joinPaths(flags.getString("index"), "db");
-  FileUtil::mkdir_p(featuredb_path);
-  auto featuredb = mdb::MDB::open(featuredb_path);
-  featuredb->setMaxSize(1000000 * flags.getInt("dbsize"));
-  cm::FeatureIndexWriter feature_index_writer(&feature_schema);
-
-  /* open full index */
-  auto fullindex_path = FileUtil::joinPaths(flags.getString("index"), "docs");
-  FileUtil::mkdir_p(fullindex_path);
-  cm::FullIndex full_index(fullindex_path);
-
-  cm::IndexBuild index_build(&feature_index_writer, &full_index);
+  auto index_build = cm::IndexBuild::openIndex(flags.getString("index"));
 
   if (flags.isSet("rebuild_fts")) {
-    index_build.rebuildFTS();
+    index_build->rebuildFTS();
   } else {
-    buildIndexFromFeed(&index_build, featuredb, flags);
+    buildIndexFromFeed(index_build, flags);
   }
 
   fnord::logInfo("cm.indexbuild", "IndexBuild exiting...");

@@ -23,7 +23,7 @@ using namespace fnord;
 
 namespace cm {
 
-class FullIndex {
+class FullIndex : public RefCounted {
 public:
 
   FullIndex(const String& path);

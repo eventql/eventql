@@ -35,7 +35,7 @@ using namespace fnord;
 namespace cm {
 class CustomerNamespace;
 
-class FeatureIndexWriter {
+class FeatureIndexWriter : public RefCounted {
 public:
 
   FeatureIndexWriter(const FeatureSchema* schema);
