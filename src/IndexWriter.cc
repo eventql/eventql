@@ -136,10 +136,8 @@ void IndexWriter::rebuildFTS(RefPtr<Document> doc) {
 }
 
 void IndexWriter::rebuildFTS() {
-  fnord::iputs("rebuild fts...", 1);
-
   docs_->listDocuments([this] (const DocID& docid) -> bool {
-    fnord::iputs("rebuild fts for $0", docid.docid);
+    rebuildFTS(docid);
     return true;
   });
 }
