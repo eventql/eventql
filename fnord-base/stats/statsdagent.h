@@ -32,6 +32,8 @@ public:
       Duration report_interval,
       StatsRepository* stats_repo);
 
+  ~StatsdAgent();
+
   void start();
   void stop();
 

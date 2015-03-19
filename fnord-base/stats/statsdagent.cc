@@ -29,6 +29,12 @@ StatsdAgent::StatsdAgent(
     report_interval_(report_interval),
     running_(false) {}
 
+StatsdAgent::~StatsdAgent() {
+  if (running_) {
+    stop();
+  }
+}
+
 void StatsdAgent::start() {
   running_ = true;
 
