@@ -123,8 +123,7 @@ add_executable(cm-indexbuild
     src/FeatureIndexWriter.cc)
 
 target_link_libraries(cm-indexbuild
-    ${CMAKE_THREAD_LIBS_INIT}
-    ${FNORD_FTS_LIBS})
+    ${CMAKE_THREAD_LIBS_INIT} ${FNORD_FTS_LIBS})
 
 add_executable(cm-indexlookup
     $<TARGET_OBJECTS:cm-common>
@@ -219,7 +218,7 @@ add_executable(cm-featureprep
     src/cm-featureprep.cc)
 
 target_link_libraries(cm-featureprep
-    ${CMAKE_THREAD_LIBS_INIT})
+    ${CMAKE_THREAD_LIBS_INIT} ${FNORD_FTS_LIBS})
 
 add_executable(cm-ctrstats-rollupflat
     $<TARGET_OBJECTS:cm-common>
@@ -335,7 +334,7 @@ add_executable(cm-ctrstats-builditemboost
     src/cm-ctrstats-builditemboost.cc)
 
 target_link_libraries(cm-ctrstats-builditemboost
-    ${CMAKE_THREAD_LIBS_INIT})
+    ${CMAKE_THREAD_LIBS_INIT} ${FNORD_FTS_LIBS})
 
 add_executable(cm-reportserver
     $<TARGET_OBJECTS:cm-common>

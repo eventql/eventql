@@ -6,7 +6,6 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-#define BOOST_NO_CXX11_NUMERIC_LIMITS 1
 #include <stdlib.h>
 #include <unistd.h>
 #include <signal.h>
@@ -30,8 +29,6 @@
 #include "fnord-feeds/RemoteFeedFactory.h"
 #include "fnord-feeds/RemoteFeedReader.h"
 #include "fnord-base/stats/statsdagent.h"
-#include "fnord-fts/fts.h"
-#include "fnord-fts/fts_common.h"
 #include "fnord-mdb/MDB.h"
 #include "CustomerNamespace.h"
 #include "FeatureSchema.h"
@@ -362,13 +359,6 @@ int main(int argc, const char** argv) {
       StringUtil::format("index/$0/fts", cmcustomer));
   FileUtil::mkdir_p(index_path);
 
-  auto index_writer =
-      fts::newLucene<fts::IndexWriter>(
-          fts::FSDirectory::open(StringUtil::convertUTF8To16(index_path)),
-          fts::newLucene<fts::StandardAnalyzer>(
-              fts::LuceneVersion::LUCENE_CURRENT),
-          true,
-          fts::IndexWriter::MaxFieldLengthLIMITED);
   */
   // index document
 /*
