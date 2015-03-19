@@ -9,15 +9,15 @@
 #include <fnord-base/fnv.h>
 #include <fnord-base/io/file.h>
 #include <fnord-json/json.h>
-#include "FullIndex.h"
+#include "DocStore.h"
 
 using namespace fnord;
 
 namespace cm {
 
-FullIndex::FullIndex(const String& path) : path_(path) {}
+DocStore::DocStore(const String& path) : path_(path) {}
 
-RefPtr<Document> FullIndex::updateDocument(const IndexRequest& index_request) {
+RefPtr<Document> DocStore::updateDocument(const IndexRequest& index_request) {
   std::unique_lock<std::mutex> lk(update_lock_);
 
   auto docid = index_request.item.docID();
@@ -30,13 +30,13 @@ RefPtr<Document> FullIndex::updateDocument(const IndexRequest& index_request) {
   return doc;
 }
 
-RefPtr<Document> FullIndex::findDocument(const DocID& docid) {
+RefPtr<Document> DocStore::findDocument(const DocID& docid) {
   RefPtr<Document> doc(new Document(docid));
   loadDocument(doc);
   return doc;
 }
 
-void FullIndex::loadDocument(RefPtr<Document> doc) {
+void DocStore::loadDocument(RefPtr<Document> doc) {
   auto docpath = docPath(doc->docID());
   if (!FileUtil::exists(docpath)) {
     return;
@@ -48,7 +48,7 @@ void FullIndex::loadDocument(RefPtr<Document> doc) {
   }
 }
 
-void FullIndex::commitDocument(RefPtr<Document> doc) {
+void DocStore::commitDocument(RefPtr<Document> doc) {
   auto docpath = docPath(doc->docID());
   auto docpath_tmp = docpath + "~";
 
@@ -67,7 +67,7 @@ void FullIndex::commitDocument(RefPtr<Document> doc) {
   FileUtil::mv(docpath_tmp, docpath);
 }
 
-String FullIndex::docPath(DocID docid) const {
+String DocStore::docPath(DocID docid) const {
   fnord::FNV<uint64_t> fnv;
 
   auto docid_str = docid.docid;
@@ -77,7 +77,7 @@ String FullIndex::docPath(DocID docid) const {
   return StringUtil::format("$0/$1/$2.json", path_, h, docid_str);
 }
 
-void FullIndex::listDocuments(Function<bool (const DocID& doc)> fn) const {
+void DocStore::listDocuments(Function<bool (const DocID& doc)> fn) const {
   FileUtil::ls(path_, [this, fn] (const String& dirname) -> bool {
     auto dirpath = FileUtil::joinPaths(path_, dirname);
     auto ret = true;

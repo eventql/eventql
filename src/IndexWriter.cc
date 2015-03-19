@@ -6,13 +6,13 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-#include "IndexBuild.h"
+#include "IndexWriter.h"
 
 using namespace fnord;
 
 namespace cm {
 
-RefPtr<IndexBuild> IndexBuild::openIndex(const String& index_path) {
+RefPtr<IndexWriter> IndexWriter::openIndex(const String& index_path) {
   if (!FileUtil::exists(index_path) || !FileUtil::isDirectory(index_path)) {
     RAISEF(kIllegalArgumentError, "invalid index path: $0", index_path);
   }
@@ -34,29 +34,29 @@ RefPtr<IndexBuild> IndexBuild::openIndex(const String& index_path) {
   /* open docs store */
   auto docs_path = FileUtil::joinPaths(index_path, "docs");
   FileUtil::mkdir_p(docs_path);
-  RefPtr<FullIndex> docs(new FullIndex(docs_path));
+  RefPtr<DocStore> docs(new DocStore(docs_path));
 
-  return RefPtr<IndexBuild>(new IndexBuild(feature_schema, db, docs));
+  return RefPtr<IndexWriter>(new IndexWriter(feature_schema, db, docs));
 }
 
 
-IndexBuild::IndexBuild(
+IndexWriter::IndexWriter(
     FeatureSchema schema,
     RefPtr<mdb::MDB> db,
-    RefPtr<FullIndex> docs) :
+    RefPtr<DocStore> docs) :
     schema_(schema),
     db_(db),
     feature_idx_(new FeatureIndexWriter(&schema_)),
     docs_(docs) {}
 
-void IndexBuild::updateDocument(const IndexRequest& index_request) {
+void IndexWriter::updateDocument(const IndexRequest& index_request) {
   auto doc = docs_->updateDocument(index_request);
 }
 
-void IndexBuild::commit() {
+void IndexWriter::commit() {
 }
 
-void IndexBuild::rebuildFTS() {
+void IndexWriter::rebuildFTS() {
   fnord::iputs("rebuild fts...", 1);
 
   docs_->listDocuments([this] (const DocID& docid) -> bool {
@@ -65,7 +65,7 @@ void IndexBuild::rebuildFTS() {
   });
 }
 
-RefPtr<mdb::MDB> IndexBuild::featureDB() {
+RefPtr<mdb::MDB> IndexWriter::featureDB() {
   return db_;
 }
 

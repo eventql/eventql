@@ -118,8 +118,8 @@ add_executable(cm-indexbuild
     $<TARGET_OBJECTS:fnord-rpc>
     $<TARGET_OBJECTS:fnord-mdb>
     src/cm-indexbuild.cc
-    src/IndexBuild.cc
-    src/FullIndex.cc
+    src/IndexWriter.cc
+    src/DocStore.cc
     src/FeatureIndexWriter.cc)
 
 target_link_libraries(cm-indexbuild
@@ -136,7 +136,7 @@ add_executable(cm-indexlookup
     $<TARGET_OBJECTS:fnord-feeds>
     $<TARGET_OBJECTS:fnord-rpc>
     $<TARGET_OBJECTS:fnord-mdb>
-    src/FullIndex.cc
+    src/DocStore.cc
     src/cm-indexlookup.cc)
 
 target_link_libraries(cm-indexlookup

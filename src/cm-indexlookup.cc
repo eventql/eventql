@@ -36,7 +36,7 @@
 #include "CustomerNamespace.h"
 #include "FeatureSchema.h"
 #include "FeaturePack.h"
-#include "FullIndex.h"
+#include "DocStore.h"
 #include "FeatureIndex.h"
 #include "IndexRequest.h"
 
@@ -98,7 +98,7 @@ int main(int argc, const char** argv) {
 
   /* open full index  */
   auto fullindex_path = StringUtil::format("$0/docs", flags.getString("index"));
-  cm::FullIndex full_index(fullindex_path);
+  cm::DocStore full_index(fullindex_path);
 
   /* get features */
   FeaturePack features;
