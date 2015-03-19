@@ -289,23 +289,11 @@ int main(int argc, const char** argv) {
 
   statsd_agent.start();
 
-  /* set up indexbuild */
-  size_t batch_size = flags.getInt("batch_size");
-  size_t buffer_size = flags.getInt("buffer_size");
-  size_t db_commit_size = flags.getInt("db_commit_size");
-  size_t db_commit_interval = flags.getInt("db_commit_interval");
-
+  /* open index */
   fnord::logInfo(
       "cm.indexbuild",
-      "Starting cm-indexbuild with:\n    index=$0\n    batch_size=$1\n" \
-      "    buffer_size=$2\n    db_commit_size=$3\n    db_commit_interval=$4\n"
-      "    max_dbsize=$5MB",
-      flags.getString("index"),
-      batch_size,
-      buffer_size,
-      db_commit_size,
-      db_commit_interval,
-      flags.getInt("dbsize"));
+      "Opening index at $0",
+      flags.getString("index"));
 
   auto index_writer = cm::IndexWriter::openIndex(flags.getString("index"));
   index_writer->exportStats("/cm-indexbuild/global");
@@ -322,7 +310,7 @@ int main(int argc, const char** argv) {
     buildIndexFromFeed(index_writer, flags);
   }
 
-  fnord::logInfo("cm.indexbuild", "IndexWriter exiting...");
+  fnord::logInfo("cm.indexbuild", "Exiting...");
   return 0;
 }
 

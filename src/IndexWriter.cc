@@ -84,14 +84,49 @@ void IndexWriter::rebuildFTS(DocID docid) {
 void IndexWriter::rebuildFTS(RefPtr<Document> doc) {
   auto fts_doc = fts::newLucene<fts::Document>();
 
-  HashMap<WString, WString> fts_attrs;
+  fnord::logDebug(
+      "cm.indexwriter",
+      "Rebuilding FTS Index for docid=$0",
+      doc->docID().docid);
 
-  fts_doc->add(
-      fts::newLucene<fts::Field>(
-          L"keywords",
-          L"my fnordy document",
-          fts::Field::STORE_NO,
-          fts::Field::INDEX_ANALYZED));
+  HashMap<String, String> fts_fields_anal;
+  for (const auto& f : doc->fields()) {
+
+    /* title~LANG */
+    if (StringUtil::beginsWith(f.first, "title~")) {
+      auto k = f.first;
+      fts_fields_anal[k] += " ";
+      fts_fields_anal[k] += f.second;
+    }
+
+    /* description~LANG */
+    if (StringUtil::beginsWith(f.first, "description~")) {
+      auto k = f.first;
+      StringUtil::replaceAll(&k, "description~","body~");
+      fts_fields_anal[k] += " ";
+      fts_fields_anal[k] += f.second;
+    }
+
+    /* tags_as_text~LANG */
+    if (StringUtil::beginsWith(f.first, "tags_as_text~")) {
+      auto k = f.first;
+      StringUtil::replaceAll(&k, "tags_as_text~","tags~");
+      fts_fields_anal[k] += " ";
+      fts_fields_anal[k] += f.second;
+    }
+
+  }
+
+  for (const auto& f : fts_fields_anal) {
+    fnord::iputs("field $0 = $1", f.first, f.second);
+
+    fts_doc->add(
+        fts::newLucene<fts::Field>(
+            StringUtil::convertUTF8To16(f.first),
+            StringUtil::convertUTF8To16(f.second),
+            fts::Field::STORE_NO,
+            fts::Field::INDEX_ANALYZED));
+  }
 
   fts_->addDocument(fts_doc);
 }
