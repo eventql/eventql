@@ -270,6 +270,15 @@ int main(int argc, const char** argv) {
       "<MB>");
 
   flags.defineFlag(
+      "rebuild_fts",
+      fnord::cli::FlagParser::T_SWITCH,
+      false,
+      NULL,
+      NULL,
+      "rebuild fts index",
+      "");
+
+  flags.defineFlag(
       "loglevel",
       fnord::cli::FlagParser::T_STRING,
       false,
@@ -345,7 +354,11 @@ int main(int argc, const char** argv) {
 
   cm::IndexBuild index_build(&feature_index_writer, &full_index);
 
-  buildIndexFromFeed(&index_build, featuredb, flags);
+  if (flags.isSet("rebuild_fts")) {
+    index_build.rebuildFTS();
+  } else {
+    buildIndexFromFeed(&index_build, featuredb, flags);
+  }
 
   fnord::logInfo("cm.indexbuild", "IndexBuild exiting...");
   return 0;

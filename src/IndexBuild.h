@@ -43,6 +43,8 @@ public:
   void updateDocument(const IndexRequest& index_request);
   void commit();
 
+  void rebuildFTS();
+
 protected:
   FeatureIndexWriter* feature_idx_;
   FullIndex* full_idx_;

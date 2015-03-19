@@ -25,4 +25,8 @@ void IndexBuild::updateDocument(const IndexRequest& index_request) {
 void IndexBuild::commit() {
 }
 
+void IndexBuild::rebuildFTS() {
+  fnord::iputs("rebuild fts...", 1);
+}
+
 } // namespace cm
