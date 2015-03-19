@@ -44,8 +44,12 @@ public:
   void commit();
 
   void rebuildFTS();
+  void rebuildFTS(DocID doc);
+  void rebuildFTS(RefPtr<Document> doc);
 
   RefPtr<mdb::MDB> featureDB();
+
+  void exportStats(const String& prefix);
 
 protected:
 
@@ -55,13 +59,15 @@ protected:
       RefPtr<DocStore> docs,
       std::shared_ptr<fts::IndexWriter> fts);
 
-  void updateDocumentFTS(RefPtr<Document> doc);
-
   FeatureSchema schema_;
   RefPtr<mdb::MDB> db_;
   RefPtr<DocStore> docs_;
   RefPtr<FeatureIndexWriter> feature_idx_;
   std::shared_ptr<fts::IndexWriter> fts_;
+
+  fnord::stats::Counter<uint64_t> stat_documents_indexed_total_;
+  fnord::stats::Counter<uint64_t> stat_documents_indexed_success_;
+  fnord::stats::Counter<uint64_t> stat_documents_indexed_error_;
 };
 
 } // namespace cm

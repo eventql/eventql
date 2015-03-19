@@ -66,17 +66,26 @@ IndexWriter::~IndexWriter() {
 }
 
 void IndexWriter::updateDocument(const IndexRequest& index_request) {
+  stat_documents_indexed_total_.incr(1);
   auto doc = docs_->updateDocument(index_request);
-  updateDocumentFTS(doc);
+  rebuildFTS(doc);
+  stat_documents_indexed_success_.incr(1);
 }
 
 void IndexWriter::commit() {
   fts_->commit();
 }
 
-void IndexWriter::updateDocumentFTS(RefPtr<Document> doc) {
+void IndexWriter::rebuildFTS(DocID docid) {
+  auto doc = docs_->findDocument(docid);
+  rebuildFTS(doc);
+}
 
+void IndexWriter::rebuildFTS(RefPtr<Document> doc) {
   auto fts_doc = fts::newLucene<fts::Document>();
+
+  HashMap<WString, WString> fts_attrs;
+
   fts_doc->add(
       fts::newLucene<fts::Field>(
           L"keywords",
@@ -84,7 +93,7 @@ void IndexWriter::updateDocumentFTS(RefPtr<Document> doc) {
           fts::Field::STORE_NO,
           fts::Field::INDEX_ANALYZED));
 
-  fts_->addDocument(fts_);
+  fts_->addDocument(fts_doc);
 }
 
 void IndexWriter::rebuildFTS() {
@@ -99,5 +108,23 @@ void IndexWriter::rebuildFTS() {
 RefPtr<mdb::MDB> IndexWriter::featureDB() {
   return db_;
 }
+
+void IndexWriter::exportStats(const String& prefix) {
+  exportStat(
+      StringUtil::format("$0/documents_indexed_total", prefix),
+      &stat_documents_indexed_total_,
+      fnord::stats::ExportMode::EXPORT_DELTA);
+
+  exportStat(
+      StringUtil::format("$0/documents_indexed_success", prefix),
+      &stat_documents_indexed_success_,
+      fnord::stats::ExportMode::EXPORT_DELTA);
+
+  exportStat(
+      StringUtil::format("$0/documents_indexed_error", prefix),
+      &stat_documents_indexed_error_,
+      fnord::stats::ExportMode::EXPORT_DELTA);
+}
+
 
 } // namespace cm

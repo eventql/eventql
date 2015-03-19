@@ -42,9 +42,6 @@ using namespace fnord;
 std::atomic<bool> cm_indexbuild_shutdown;
 
 /* stats */
-fnord::stats::Counter<uint64_t> stat_documents_indexed_total_;
-fnord::stats::Counter<uint64_t> stat_documents_indexed_success_;
-fnord::stats::Counter<uint64_t> stat_documents_indexed_error_;
 
 void quit(int n) {
   cm_indexbuild_shutdown = true;
@@ -134,20 +131,17 @@ void buildIndexFromFeed(
         break;
       }
 
+      cm::IndexRequest index_req;
+      const auto& entry_str = entry.get().data;
       try {
-        stat_documents_indexed_total_.incr(1);
-        fnord::logTrace("cm.indexbuild", "Indexing: $0", entry.get().data);
-        auto index_req = json::fromJSON<cm::IndexRequest>(entry.get().data);
-        index_writer->updateDocument(index_req);
-        stat_documents_indexed_success_.incr(1);
+        index_req = json::fromJSON<cm::IndexRequest>(entry_str);
       } catch (const std::exception& e) {
-        stat_documents_indexed_error_.incr(1);
-        fnord::logError(
-            "cm.indexbuild",
-            e,
-            "error while indexing document: $0",
-            entry.get().data);
+        fnord::logError("cm.indexbuild", e, "invalid json: $0", entry_str);
+        continue;
       }
+
+      fnord::logTrace("cm.indexbuild", "Indexing: $0", entry.get().data);
+      index_writer->updateDocument(index_req);
     }
 
     auto stream_offsets = feed_reader.streamOffsets();
@@ -267,10 +261,10 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "rebuild_fts",
-      fnord::cli::FlagParser::T_SWITCH,
+      fnord::cli::FlagParser::T_STRING,
       false,
       NULL,
-      NULL,
+      "all",
       "rebuild fts index",
       "");
 
@@ -313,25 +307,17 @@ int main(int argc, const char** argv) {
       db_commit_interval,
       flags.getInt("dbsize"));
 
-  exportStat(
-      "/cm-indexbuild/global/documents_indexed_total",
-      &stat_documents_indexed_total_,
-      fnord::stats::ExportMode::EXPORT_DELTA);
-
-  exportStat(
-      "/cm-indexbuild/global/documents_indexed_success",
-      &stat_documents_indexed_success_,
-      fnord::stats::ExportMode::EXPORT_DELTA);
-
-  exportStat(
-      "/cm-indexbuild/global/documents_indexed_error",
-      &stat_documents_indexed_error_,
-      fnord::stats::ExportMode::EXPORT_DELTA);
-
   auto index_writer = cm::IndexWriter::openIndex(flags.getString("index"));
+  index_writer->exportStats("/cm-indexbuild/global");
 
   if (flags.isSet("rebuild_fts")) {
-    index_writer->rebuildFTS();
+    auto docid = flags.getString("rebuild_fts");
+
+    if (docid == "all") {
+      index_writer->rebuildFTS();
+    } else {
+      index_writer->rebuildFTS(cm::DocID { .docid = docid });
+    }
   } else {
     buildIndexFromFeed(index_writer, flags);
   }
@@ -362,15 +348,6 @@ int main(int argc, const char** argv) {
   */
   // index document
 /*
-  auto doc = fts::newLucene<fts::Document>();
-  doc->add(
-      fts::newLucene<fts::Field>(
-          L"keywords",
-          L"my fnordy document",
-          fts::Field::STORE_NO,
-          fts::Field::INDEX_ANALYZED));
-
-  index_writer->addDocument(doc);
 */
 
 
