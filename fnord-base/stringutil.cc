@@ -10,6 +10,7 @@
 #include <string>
 #include <fnord-base/bufferutil.h>
 #include <fnord-base/stringutil.h>
+#include <fnord-base/UTF8.h>
 
 namespace fnord {
 
@@ -223,14 +224,25 @@ std::string StringUtil::formatv(
 }
 
 std::wstring StringUtil::convertUTF8To16(const std::string& str) {
-  std::wstring out;
-  out.assign(str.begin(), str.end());
+  WString out;
+
+  const char* cur = str.data();
+  const char* end = cur + str.length();
+  char32_t chr;
+  while ((chr = UTF8::nextCodepoint(&cur, end)) > 0) {
+    out += (wchar_t) chr;
+  }
+
   return out;
 }
 
 std::string StringUtil::convertUTF16To8(const std::wstring& str) {
-  std::string out;
-  out.assign(str.begin(), str.end());
+  String out;
+
+  for (const auto& c : str) {
+    UTF8::encodeCodepoint(c, &out);
+  }
+
   return out;
 }
 
