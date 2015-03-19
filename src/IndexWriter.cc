@@ -7,6 +7,7 @@
  * permission is obtained.
  */
 #include "IndexWriter.h"
+#include <fnord-fts/AnalyzerAdapter.h>
 
 using namespace fnord;
 
@@ -37,12 +38,13 @@ RefPtr<IndexWriter> IndexWriter::openIndex(const String& index_path) {
   RefPtr<DocStore> docs(new DocStore(docs_path));
 
   /* open lucene */
+  auto adapter = std::make_shared<fnord::fts::AnalyzerAdapter>();
+
   auto fts_path = FileUtil::joinPaths(index_path, "fts");
   auto fts =
       fts::newLucene<fts::IndexWriter>(
           fts::FSDirectory::open(StringUtil::convertUTF8To16(fts_path)),
-          fts::newLucene<fts::StandardAnalyzer>(
-              fts::LuceneVersion::LUCENE_CURRENT),
+          adapter,
           true,
           fts::IndexWriter::MaxFieldLengthLIMITED);
 
