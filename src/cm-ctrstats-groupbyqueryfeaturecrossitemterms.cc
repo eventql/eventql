@@ -30,7 +30,8 @@
 #include "FeatureSchema.h"
 #include "JoinedQuery.h"
 #include "CTRCounter.h"
-#include "Analyzer.h"
+#include <fnord-fts/fts.h>
+#include <fnord-fts/fts_common.h>
 
 using namespace fnord;
 using namespace cm;
@@ -47,7 +48,7 @@ void indexJoinedQuery(
     FeatureIndex* feature_index,
     FeatureID item_feature_id,
     ItemEligibility eligibility,
-    Analyzer* analyzer,
+    fnord::fts::Analyzer* analyzer,
     Language lang,
     CounterMap* counters) {
   if (!isQueryEligible(eligibility, query)) {
@@ -253,7 +254,7 @@ int main(int argc, const char** argv) {
   auto end_time = std::numeric_limits<uint64_t>::min();
 
   auto lang = languageFromString(flags.getString("lang"));
-  cm::Analyzer analyzer(flags.getString("conf"));
+  fnord::fts::Analyzer analyzer(flags.getString("conf"));
 
   /* set up feature schema */
   cm::FeatureSchema feature_schema;

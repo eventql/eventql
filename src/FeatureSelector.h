@@ -12,7 +12,8 @@
 #include "fnord-base/option.h"
 #include "FeatureID.h"
 #include "JoinedQuery.h"
-#include "Analyzer.h"
+#include <fnord-fts/fts.h>
+#include <fnord-fts/fts_common.h>
 
 using namespace fnord;
 
@@ -21,7 +22,7 @@ namespace cm {
 class FeatureSelector {
 public:
 
-  FeatureSelector(FeatureIndex* feature_index, Analyzer* analyzer);
+  FeatureSelector(FeatureIndex* feature_index, fnord::fts::Analyzer* analyzer);
 
   void featuresFor(
       const JoinedQuery& query,
@@ -30,7 +31,7 @@ public:
 
 protected:
   FeatureIndex* feature_index_;
-  Analyzer* analyzer_;
+  fnord::fts::Analyzer* analyzer_;
 };
 
 } // namespace cm

@@ -38,7 +38,8 @@ RefPtr<IndexWriter> IndexWriter::openIndex(const String& index_path) {
   RefPtr<DocStore> docs(new DocStore(docs_path));
 
   /* open lucene */
-  auto adapter = std::make_shared<fnord::fts::AnalyzerAdapter>();
+  RefPtr<fnord::fts::Analyzer> analyzer(new fnord::fts::Analyzer("./conf"));
+  auto adapter = std::make_shared<fnord::fts::AnalyzerAdapter>(analyzer);
 
   auto fts_path = FileUtil::joinPaths(index_path, "fts");
   auto fts =
