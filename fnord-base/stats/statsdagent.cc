@@ -8,9 +8,9 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <unistd.h>
-#include "fnord-base/inspect.h"
 #include "fnord-base/logging.h"
 #include "fnord-base/stats/statsdagent.h"
+#include "fnord-base/wallclock.h"
 
 namespace fnord {
 namespace stats {
@@ -39,8 +39,15 @@ void StatsdAgent::start() {
   running_ = true;
 
   thread_ = std::thread([this] () {
+    auto last_report = WallClock::unixMicros();
+
     while (running_) {
-      usleep(report_interval_.microseconds());
+      auto next_report = last_report + report_interval_.microseconds();
+      while (running_ && WallClock::unixMicros() < next_report) {
+        usleep(100000);
+      }
+
+      last_report = WallClock::unixMicros();
 
       try {
         report();
