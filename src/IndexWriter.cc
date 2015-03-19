@@ -7,6 +7,8 @@
  * permission is obtained.
  */
 #include "IndexWriter.h"
+#include <fnord-fts/fts.h>
+#include <fnord-fts/fts_common.h>
 
 using namespace fnord;
 
@@ -35,6 +37,16 @@ RefPtr<IndexWriter> IndexWriter::openIndex(const String& index_path) {
   auto docs_path = FileUtil::joinPaths(index_path, "docs");
   FileUtil::mkdir_p(docs_path);
   RefPtr<DocStore> docs(new DocStore(docs_path));
+
+  /* open lucene */
+  auto fts_path = FileUtil::joinPaths(index_path, "fts");
+  auto index_writer =
+      fts::newLucene<fts::IndexWriter>(
+          fts::FSDirectory::open(StringUtil::convertUTF8To16(fts_path)),
+          fts::newLucene<fts::StandardAnalyzer>(
+              fts::LuceneVersion::LUCENE_CURRENT),
+          true,
+          fts::IndexWriter::MaxFieldLengthLIMITED);
 
   return RefPtr<IndexWriter>(new IndexWriter(feature_schema, db, docs));
 }
