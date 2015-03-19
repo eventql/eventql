@@ -39,6 +39,8 @@
 #include "fnord-base/stats/statsdagent.h"
 #include "fnord-base/RadixTree.h"
 #include "fnord-mdb/MDB.h"
+#include <fnord-fts/fts.h>
+#include <fnord-fts/fts_common.h>
 #include "common.h"
 #include "CustomerNamespace.h"
 #include "FeatureSchema.h"
@@ -126,7 +128,7 @@ int main(int argc, const char** argv) {
   cm::FeatureIndex feature_index(featuredb, &feature_schema);
 
   /* set up analyzer */
-  cm::Analyzer analyzer(flags.getString("conf"));
+  fnord::fts::Analyzer analyzer(flags.getString("conf"));
 
   /* feature selector */
   cm::FeatureSelector feature_select(&feature_index, &analyzer);

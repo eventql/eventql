@@ -16,7 +16,8 @@
 #include "fnord-base/logging.h"
 #include "fnord-base/cli/flagparser.h"
 #include "common.h"
-#include "Analyzer.h"
+#include <fnord-fts/fts.h>
+#include <fnord-fts/fts_common.h>
 
 using namespace fnord;
 
@@ -59,7 +60,7 @@ int main(int argc, const char** argv) {
       strToLogLevel(flags.getString("loglevel")));
 
   auto lang = languageFromString(flags.getString("lang"));
-  cm::Analyzer analyzer(flags.getString("conf"));
+  fnord::fts::Analyzer analyzer(flags.getString("conf"));
 
   for (String line; std::getline(std::cin, line); ) {
     Set<String> tokens;

@@ -20,6 +20,8 @@
 #include "fnord-json/json.h"
 #include "fnord-mdb/MDB.h"
 #include "fnord-mdb/MDBUtil.h"
+#include <fnord-fts/fts.h>
+#include <fnord-fts/fts_common.h>
 #include "fnord-sstable/sstablereader.h"
 #include "fnord-sstable/sstablewriter.h"
 #include "fnord-sstable/SSTableColumnSchema.h"
@@ -30,7 +32,6 @@
 #include "FeatureSchema.h"
 #include "JoinedQuery.h"
 #include "CTRCounter.h"
-#include "Analyzer.h"
 
 using namespace fnord;
 using namespace cm;
@@ -59,7 +60,7 @@ void indexJoinedQuery(
     const cm::JoinedQuery& query,
     ItemEligibility eligibility,
     //FeatureIndex* feature_index,
-    Analyzer* analyzer,
+    fnord::fts::Analyzer* analyzer,
     Language lang,
     CounterMap* counters,
     GlobalCounter* global_counter) {
@@ -311,7 +312,7 @@ int main(int argc, const char** argv) {
   auto end_time = std::numeric_limits<uint64_t>::min();
 
   auto lang = languageFromString(flags.getString("lang"));
-  cm::Analyzer analyzer(flags.getString("conf"));
+  fnord::fts::Analyzer analyzer(flags.getString("conf"));
 
   /* set up posi norm */
   posi_norm.emplace(1 , 1.0 / 0.006592);

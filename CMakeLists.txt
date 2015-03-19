@@ -213,7 +213,6 @@ add_executable(cm-featureprep
     $<TARGET_OBJECTS:fnord-rpc>
     $<TARGET_OBJECTS:fnord-sstable>
     $<TARGET_OBJECTS:fnord-fts>
-    src/Analyzer.cc
     src/FeatureSelector.cc
     src/cm-featureprep.cc)
 
@@ -300,7 +299,6 @@ add_executable(cm-ctrstats-groupbyqueryfeaturecrossitemterms
     $<TARGET_OBJECTS:fnord-rpc>
     $<TARGET_OBJECTS:fnord-sstable>
     $<TARGET_OBJECTS:fnord-fts>
-    src/Analyzer.cc
     src/cm-ctrstats-groupbyqueryfeaturecrossitemterms.cc)
 
 target_link_libraries(cm-ctrstats-groupbyqueryfeaturecrossitemterms
@@ -330,7 +328,6 @@ add_executable(cm-ctrstats-builditemboost
     $<TARGET_OBJECTS:fnord-rpc>
     $<TARGET_OBJECTS:fnord-sstable>
     $<TARGET_OBJECTS:fnord-fts>
-    src/Analyzer.cc
     src/cm-ctrstats-builditemboost.cc)
 
 target_link_libraries(cm-ctrstats-builditemboost
@@ -356,7 +353,6 @@ add_executable(cm-tokenize
     $<TARGET_OBJECTS:fnord-base>
     $<TARGET_OBJECTS:fnord-mdb>
     $<TARGET_OBJECTS:fnord-fts>
-    src/Analyzer.cc
     src/cm-tokenize.cc)
 
 target_link_libraries(cm-tokenize
