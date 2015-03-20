@@ -36,7 +36,9 @@ namespace cm {
 class IndexWriter : public RefCounted {
 public:
 
-  static RefPtr<IndexWriter> openIndex(const String& path);
+  static RefPtr<IndexWriter> openIndex(
+      const String& index_path,
+      const String& conf_path);
 
   ~IndexWriter();
 
