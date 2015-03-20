@@ -122,6 +122,13 @@ void IndexWriter::rebuildFTS(RefPtr<Document> doc) {
 
   }
 
+  fts_doc->add(
+        fts::newLucene<fts::Field>(
+            L"docid",
+            StringUtil::convertUTF8To16(doc->docID().docid),
+            fts::Field::STORE_YES,
+            fts::Field::INDEX_NO));
+
   for (const auto& f : fts_fields_anal) {
     fts_doc->add(
         fts::newLucene<fts::Field>(
