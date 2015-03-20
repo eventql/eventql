@@ -85,7 +85,7 @@ void IndexWriter::rebuildFTS(DocID docid) {
 }
 
 void IndexWriter::rebuildFTS(RefPtr<Document> doc) {
-  stat_documents_indexed_total_.incr(1);
+  stat_documents_indexed_fts_.incr(1);
   auto fts_doc = fts::newLucene<fts::Document>();
 
   fnord::logDebug(
