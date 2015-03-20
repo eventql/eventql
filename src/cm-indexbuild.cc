@@ -206,6 +206,15 @@ int main(int argc, const char** argv) {
       "<path>");
 
   flags.defineFlag(
+      "conf",
+      cli::FlagParser::T_STRING,
+      false,
+      NULL,
+      "./conf",
+      "conf dir",
+      "<path>");
+
+  flags.defineFlag(
       "statsd_addr",
       fnord::cli::FlagParser::T_STRING,
       false,
@@ -295,7 +304,10 @@ int main(int argc, const char** argv) {
       "Opening index at $0",
       flags.getString("index"));
 
-  auto index_writer = cm::IndexWriter::openIndex(flags.getString("index"));
+  auto index_writer = cm::IndexWriter::openIndex(
+      flags.getString("index"),
+      flags.getString("conf"));
+
   index_writer->exportStats("/cm-indexbuild/global");
 
   if (flags.isSet("rebuild_fts")) {

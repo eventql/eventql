@@ -13,7 +13,9 @@ using namespace fnord;
 
 namespace cm {
 
-RefPtr<IndexWriter> IndexWriter::openIndex(const String& index_path) {
+RefPtr<IndexWriter> IndexWriter::openIndex(
+    const String& index_path,
+    const String& conf_path) {
   if (!FileUtil::exists(index_path) || !FileUtil::isDirectory(index_path)) {
     RAISEF(kIllegalArgumentError, "invalid index path: $0", index_path);
   }
@@ -38,7 +40,7 @@ RefPtr<IndexWriter> IndexWriter::openIndex(const String& index_path) {
   RefPtr<DocStore> docs(new DocStore(docs_path));
 
   /* open lucene */
-  RefPtr<fnord::fts::Analyzer> analyzer(new fnord::fts::Analyzer("./conf"));
+  RefPtr<fnord::fts::Analyzer> analyzer(new fnord::fts::Analyzer(conf_path));
   auto adapter = std::make_shared<fnord::fts::AnalyzerAdapter>(analyzer);
 
   auto fts_path = FileUtil::joinPaths(index_path, "fts");
