@@ -32,6 +32,7 @@
 #include "fnord-base/stats/statsdagent.h"
 #include "fnord-fts/fts.h"
 #include "fnord-fts/fts_common.h"
+#include "fnord-fts/search/DisjunctionMaxQuery.h"
 #include "fnord-mdb/MDB.h"
 #include "CustomerNamespace.h"
 #include "FeatureSchema.h"
@@ -127,17 +128,19 @@ int main(int argc, const char** argv) {
     RefPtr<fnord::fts::Analyzer> analyzer(new fnord::fts::Analyzer("./conf"));
     auto adapter = std::make_shared<fnord::fts::AnalyzerAdapter>(analyzer);
 
-    auto query_parser = fts::newLucene<fts::QueryParser>(
-        fts::LuceneVersion::LUCENE_CURRENT,
-        L"text~de",
-        adapter);
+    auto query = fts::newLucene<fts::DisjunctionMaxQuery>();
+
+    //auto query_parser = fts::newLucene<fts::QueryParser>(
+    //    fts::LuceneVersion::LUCENE_CURRENT,
+    //    L"text~de",
+    //    adapter);
 
     auto collector = fts::TopScoreDocCollector::create(
         500,
         false);
 
-    auto query = query_parser->parse(
-        StringUtil::convertUTF8To16(flags.getString("query")));
+    //auto query = query_parser->parse(
+    //    StringUtil::convertUTF8To16(flags.getString("query")));
 
     searcher->search(query, collector);
     fnord::iputs("found $0 documents", collector->getTotalHits());
