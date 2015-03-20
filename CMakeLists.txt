@@ -136,6 +136,7 @@ add_executable(cm-indexlookup
     $<TARGET_OBJECTS:fnord-rpc>
     $<TARGET_OBJECTS:fnord-mdb>
     src/DocStore.cc
+    src/IndexReader.cc
     src/cm-indexlookup.cc)
 
 target_link_libraries(cm-indexlookup
