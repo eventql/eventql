@@ -99,7 +99,7 @@ void IndexWriter::rebuildFTS(RefPtr<Document> doc) {
     /* title~LANG */
     if (StringUtil::beginsWith(f.first, "title~")) {
       auto k = f.first;
-      StringUtil::replaceAll(&k, "title~","text~");
+      StringUtil::replaceAll(&k, "title~","title~");
       fts_fields_anal[k] += " ";
       fts_fields_anal[k] += f.second;
     }
