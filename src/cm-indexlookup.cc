@@ -123,6 +123,7 @@ int main(int argc, const char** argv) {
 
   if (flags.isSet("query")) {
     fnord::fts::FTSQuery fts_query;
+    fts_query.addField("title~de", 2.0);
     fts_query.addField("text~de", 1.0);
     fts_query.addQuery(flags.getString("query"), Language::DE, &analyzer);
 
