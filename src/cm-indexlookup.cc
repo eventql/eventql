@@ -131,17 +131,9 @@ int main(int argc, const char** argv) {
     auto query = fts::newLucene<fts::TermQuery>(
         fts::newLucene<fts::Term>(L"text~de", L"zubehoer"));
 
-    //auto query_parser = fts::newLucene<fts::QueryParser>(
-    //    fts::LuceneVersion::LUCENE_CURRENT,
-    //    L"text~de",
-    //    adapter);
-
     auto collector = fts::TopScoreDocCollector::create(
         500,
         false);
-
-    //auto query = query_parser->parse(
-    //    StringUtil::convertUTF8To16(flags.getString("query")));
 
     searcher->search(query, collector);
     fnord::iputs("found $0 documents", collector->getTotalHits());
