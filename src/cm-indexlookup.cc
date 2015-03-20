@@ -128,7 +128,8 @@ int main(int argc, const char** argv) {
     RefPtr<fnord::fts::Analyzer> analyzer(new fnord::fts::Analyzer("./conf"));
     auto adapter = std::make_shared<fnord::fts::AnalyzerAdapter>(analyzer);
 
-    auto query = fts::newLucene<fts::DisjunctionMaxQuery>();
+    auto query = fts::newLucene<fts::TermQuery>(
+        fts::newLucene<fts::Term>(L"text~de", L"zubehoer"));
 
     //auto query_parser = fts::newLucene<fts::QueryParser>(
     //    fts::LuceneVersion::LUCENE_CURRENT,
