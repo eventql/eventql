@@ -143,6 +143,24 @@ target_link_libraries(cm-indexlookup
     ${CMAKE_THREAD_LIBS_INIT}
     ${FNORD_FTS_LIBS})
 
+add_executable(cm-indexserver
+    $<TARGET_OBJECTS:cm-common>
+    $<TARGET_OBJECTS:fnord-base>
+    $<TARGET_OBJECTS:fnord-http>
+    $<TARGET_OBJECTS:fnord-json>
+    $<TARGET_OBJECTS:fnord-sstable>
+    $<TARGET_OBJECTS:fnord-fts>
+    $<TARGET_OBJECTS:fnord-feeds>
+    $<TARGET_OBJECTS:fnord-rpc>
+    $<TARGET_OBJECTS:fnord-mdb>
+    src/DocStore.cc
+    src/IndexReader.cc
+    src/cm-indexlookup.cc)
+
+target_link_libraries(cm-indexserver
+    ${CMAKE_THREAD_LIBS_INIT}
+    ${FNORD_FTS_LIBS})
+
 #add_executable(cm-sellerstatsbuild
 #    $<TARGET_OBJECTS:cm-common>
 #    $<TARGET_OBJECTS:fnord-base>
