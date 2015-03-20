@@ -32,7 +32,7 @@
 #include "fnord-base/stats/statsdagent.h"
 #include "fnord-fts/fts.h"
 #include "fnord-fts/fts_common.h"
-#include "fnord-fts/search/DisjunctionMaxQuery.h"
+#include "fnord-fts/FTSQuery.h"
 #include "fnord-mdb/MDB.h"
 #include "CustomerNamespace.h"
 #include "FeatureSchema.h"
@@ -40,6 +40,7 @@
 #include "DocStore.h"
 #include "FeatureIndex.h"
 #include "IndexRequest.h"
+#include "IndexReader.h"
 
 using namespace cm;
 using namespace fnord;
@@ -93,6 +94,9 @@ int main(int argc, const char** argv) {
 
   auto index_path = flags.getString("index");
 
+  auto index_reader = cm::IndexReader::openIndex(index_path);
+  fnord::fts::Analyzer analyzer("./conf");
+
   if (flags.isSet("docid")) {
     DocID docid = { flags.getString("docid") };
 
@@ -118,25 +122,14 @@ int main(int argc, const char** argv) {
   }
 
   if (flags.isSet("query")) {
-    auto ftsindex_path = StringUtil::format("$0/fts", index_path);
-    auto index_reader = fts::IndexReader::open(
-        fts::FSDirectory::open(StringUtil::convertUTF8To16(ftsindex_path)),
-        true);
+    fnord::fts::FTSQuery fts_query;
+    fts_query.addField("text~de", 1.0);
+    fts_query.addQuery(flags.getString("query"), Language::DE, &analyzer);
 
-    auto searcher = fts::newLucene<fts::IndexSearcher>(index_reader);
-
-    RefPtr<fnord::fts::Analyzer> analyzer(new fnord::fts::Analyzer("./conf"));
-    auto adapter = std::make_shared<fnord::fts::AnalyzerAdapter>(analyzer);
-
-    auto query = fts::newLucene<fts::TermQuery>(
-        fts::newLucene<fts::Term>(L"text~de", L"zubehoer"));
-
-    auto collector = fts::TopScoreDocCollector::create(
-        500,
-        false);
-
-    searcher->search(query, collector);
-    fnord::iputs("found $0 documents", collector->getTotalHits());
+    auto searcher = std::make_shared<fnord::fts::IndexSearcher>(
+        index_reader->fts_);
+    fts_query.execute(searcher.get());
+    //fnord::iputs("found $0 documents", collector->getTotalHits());
     return 0;
   }
 
