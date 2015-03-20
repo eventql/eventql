@@ -85,6 +85,7 @@ void IndexWriter::rebuildFTS(DocID docid) {
 }
 
 void IndexWriter::rebuildFTS(RefPtr<Document> doc) {
+  stat_documents_indexed_total_.incr(1);
   auto fts_doc = fts::newLucene<fts::Document>();
 
   fnord::logDebug(
@@ -122,8 +123,6 @@ void IndexWriter::rebuildFTS(RefPtr<Document> doc) {
   }
 
   for (const auto& f : fts_fields_anal) {
-    fnord::iputs("field $0 = $1", f.first, f.second);
-
     fts_doc->add(
         fts::newLucene<fts::Field>(
             StringUtil::convertUTF8To16(f.first),
@@ -160,6 +159,11 @@ void IndexWriter::exportStats(const String& prefix) {
   exportStat(
       StringUtil::format("$0/documents_indexed_error", prefix),
       &stat_documents_indexed_error_,
+      fnord::stats::ExportMode::EXPORT_DELTA);
+
+  exportStat(
+      StringUtil::format("$0/documents_indexed_fts", prefix),
+      &stat_documents_indexed_fts_,
       fnord::stats::ExportMode::EXPORT_DELTA);
 }
 

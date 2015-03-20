@@ -68,6 +68,7 @@ protected:
   fnord::stats::Counter<uint64_t> stat_documents_indexed_total_;
   fnord::stats::Counter<uint64_t> stat_documents_indexed_success_;
   fnord::stats::Counter<uint64_t> stat_documents_indexed_error_;
+  fnord::stats::Counter<uint64_t> stat_documents_indexed_fts_;
 };
 
 } // namespace cm
