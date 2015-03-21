@@ -57,7 +57,12 @@ RefPtr<Document> FeatureIndexWriter::findDocument(
   }
 
   for (const auto& f : features) {
-    doc->setField(feature_schema_->featureKey(f.first).get(), f.second);
+    auto fkey = feature_schema_->featureKey(f.first);
+    if (fkey.isEmpty()) {
+      continue;
+    }
+
+    doc->setField(fkey.get(), f.second);
   }
 
   return doc;
