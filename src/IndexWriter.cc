@@ -33,7 +33,7 @@ RefPtr<IndexWriter> IndexWriter::openIndex(
   feature_schema.registerFeature("size_description~de", 14, 2);
   feature_schema.registerFeature("material_description~de", 15, 2);
   feature_schema.registerFeature("basic_attributes~de", 16, 2);
-  feature_schema.registerFeature("tags_as_text~de", 17, 2);
+  feature_schema.registerFeature("tags_as_text~de", 7, 2);
   feature_schema.registerFeature("title~pl", 18, 2);
   feature_schema.registerFeature("description~pl", 19, 2);
   feature_schema.registerFeature("size_description~pl", 20, 2);
