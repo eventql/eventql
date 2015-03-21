@@ -69,16 +69,11 @@ void buildIndexFromFeed(
   feed_reader.setMaxSpread(3600 * 24 * 30 * kMicrosPerSecond);
 
   HashMap<String, URI> input_feeds;
-  auto cmcustomer = "dawanda";
   input_feeds.emplace(
-      StringUtil::format(
-          "$0.index_requests.feedserver01.nue01.production.fnrd.net",
-          cmcustomer),
+      "index_requests.feedserver01.nue01.production.fnrd.net",
       URI("http://s01.nue01.production.fnrd.net:7001/rpc"));
   input_feeds.emplace(
-      StringUtil::format(
-          "$0.index_requests.feedserver02.nue01.production.fnrd.net",
-          cmcustomer),
+      "index_requests.feedserver02.nue01.production.fnrd.net",
       URI("http://s02.nue01.production.fnrd.net:7001/rpc"));
 
   /* resume from last offset */
