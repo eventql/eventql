@@ -26,7 +26,17 @@ RefPtr<IndexWriter> IndexWriter::openIndex(
   feature_schema.registerFeature("category1", 2, 1);
   feature_schema.registerFeature("category2", 3, 1);
   feature_schema.registerFeature("category3", 4, 1);
+  feature_schema.registerFeature("price_cents", 8, 1);
+
   feature_schema.registerFeature("title~de", 5, 2);
+  feature_schema.registerFeature("description~de", 6, 2);
+  feature_schema.registerFeature("tags_as_text~de", 7, 2);
+
+  feature_schema.registerFeature("shop_rating_alt", 9, 3);
+  feature_schema.registerFeature("shop_products_count", 10, 3);
+  feature_schema.registerFeature("shop_orders_count", 11, 3);
+  feature_schema.registerFeature("shop_rating_count", 12, 3);
+  feature_schema.registerFeature("shop_rating_avg", 13, 3);
 
   /* open mdb */
   auto db_path = FileUtil::joinPaths(index_path, "db");
