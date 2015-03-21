@@ -110,6 +110,7 @@ void IndexWriter::commit() {
 
 void IndexWriter::rebuildFTS(DocID docid) {
   auto doc = feature_idx_->findDocument(docid, db_txn_.get());
+  doc->debugPrint();
   rebuildFTS(doc);
 }
 
