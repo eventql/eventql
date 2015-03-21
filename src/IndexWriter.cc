@@ -62,7 +62,7 @@ RefPtr<IndexWriter> IndexWriter::openIndex(
       fts::newLucene<fts::IndexWriter>(
           fts::FSDirectory::open(StringUtil::convertUTF8To16(fts_path)),
           adapter,
-          true,
+          false,
           fts::IndexWriter::MaxFieldLengthLIMITED);
 
   return RefPtr<IndexWriter>(new IndexWriter(feature_schema, db, fts));
