@@ -58,9 +58,7 @@ protected:
   IndexWriter(
       FeatureSchema schema,
       RefPtr<mdb::MDB> db,
-      RefPtr<DocStore> docs,
       std::shared_ptr<fts::IndexWriter> fts);
-
 
   FeatureSchema schema_;
   RefPtr<mdb::MDB> db_;

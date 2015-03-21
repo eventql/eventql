@@ -51,18 +51,14 @@ RefPtr<IndexWriter> IndexWriter::openIndex(
   auto db_path = FileUtil::joinPaths(index_path, "db");
   FileUtil::mkdir_p(db_path);
   auto db = mdb::MDB::open(db_path);
-  db->setMaxSize(1000000 * 512000);
-
-  /* open docs store */
-  auto docs_path = FileUtil::joinPaths(index_path, "docs");
-  FileUtil::mkdir_p(docs_path);
-  RefPtr<DocStore> docs(new DocStore(docs_path));
+  db->setMaxSize(1024 * 1024 * 1024 * 32); // 32GiB
 
   /* open lucene */
   RefPtr<fnord::fts::Analyzer> analyzer(new fnord::fts::Analyzer(conf_path));
   auto adapter = std::make_shared<fnord::fts::AnalyzerAdapter>(analyzer);
 
   auto fts_path = FileUtil::joinPaths(index_path, "fts");
+  FileUtil::mkdir_p(fts_path);
   auto fts =
       fts::newLucene<fts::IndexWriter>(
           fts::FSDirectory::open(StringUtil::convertUTF8To16(fts_path)),
@@ -70,13 +66,12 @@ RefPtr<IndexWriter> IndexWriter::openIndex(
           true,
           fts::IndexWriter::MaxFieldLengthLIMITED);
 
-  return RefPtr<IndexWriter>(new IndexWriter(feature_schema, db, docs, fts));
+  return RefPtr<IndexWriter>(new IndexWriter(feature_schema, db, fts));
 }
 
 IndexWriter::IndexWriter(
     FeatureSchema schema,
     RefPtr<mdb::MDB> db,
-    RefPtr<DocStore> docs,
     std::shared_ptr<fts::IndexWriter> fts) :
     schema_(schema),
     db_(db),
