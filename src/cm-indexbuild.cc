@@ -273,6 +273,15 @@ int main(int argc, const char** argv) {
       "");
 
   flags.defineFlag(
+      "docid",
+      fnord::cli::FlagParser::T_STRING,
+      false,
+      NULL,
+      NULL,
+      "docid",
+      "<docid>");
+
+  flags.defineFlag(
       "loglevel",
       fnord::cli::FlagParser::T_STRING,
       false,
