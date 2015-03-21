@@ -270,10 +270,10 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "rebuild_fts",
-      fnord::cli::FlagParser::T_STRING,
+      fnord::cli::FlagParser::T_SWITCH,
       false,
       NULL,
-      "all",
+      NULL,
       "rebuild fts index",
       "");
 
@@ -311,7 +311,7 @@ int main(int argc, const char** argv) {
   index_writer->exportStats("/cm-indexbuild/global");
 
   if (flags.isSet("rebuild_fts")) {
-    auto docid = flags.getString("rebuild_fts");
+    auto docid = flags.getString("docid");
 
     if (docid == "all") {
       index_writer->rebuildFTS();
