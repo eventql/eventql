@@ -34,6 +34,32 @@ RefPtr<Document> FeatureIndexWriter::findDocument(
     const DocID& docid,
     mdb::MDBTransaction* featuredb_txn) {
   RefPtr<Document> doc(new Document(docid));
+
+  FeaturePack features;
+  for (const auto& group : feature_schema_->groupIDs()) {
+    auto db_key = featureDBKey(docid, group);
+    auto buf = featuredb_txn->get(db_key);
+
+#ifndef FNORD_NOTRACE
+  fnord::logTrace(
+      "cm.featureindex",
+      "Read from featuredb with key=$0 returned $1 bytes",
+      db_key,
+      buf.isEmpty() ? 0 : buf.get().size());
+#endif
+
+    if (buf.isEmpty()) {
+      continue;
+    }
+
+    FeaturePackReader pack(buf.get().data(), buf.get().size());
+    pack.readFeatures(&features);
+  }
+
+  for (const auto& f : features) {
+    doc->setField(feature_schema_->featureKey(f.first).get(), f.second);
+  }
+
   return doc;
 }
 
