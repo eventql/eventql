@@ -57,12 +57,17 @@ RefPtr<IndexWriter> IndexWriter::openIndex(
   auto adapter = std::make_shared<fnord::fts::AnalyzerAdapter>(analyzer);
 
   auto fts_path = FileUtil::joinPaths(index_path, "fts");
-  FileUtil::mkdir_p(fts_path);
+  bool create = false;
+  if (FileUtil::exists(fts_path)) {
+    FileUtil::mkdir_p(fts_path);
+    create = true;
+  }
+
   auto fts =
       fts::newLucene<fts::IndexWriter>(
           fts::FSDirectory::open(StringUtil::convertUTF8To16(fts_path)),
           adapter,
-          false,
+          create,
           fts::IndexWriter::MaxFieldLengthLIMITED);
 
   return RefPtr<IndexWriter>(new IndexWriter(feature_schema, db, fts));
