@@ -61,28 +61,36 @@ IndexWriter::IndexWriter(
     std::shared_ptr<fts::IndexWriter> fts) :
     schema_(schema),
     db_(db),
+    db_txn_(db_->startTransaction()),
     feature_idx_(new FeatureIndexWriter(&schema_)),
-    docs_(docs),
     fts_(fts) {}
 
 
 IndexWriter::~IndexWriter() {
+  if (db_txn_.get()) {
+    db_txn_->commit();
+  }
+
   fts_->close();
 }
 
 void IndexWriter::updateDocument(const IndexRequest& index_request) {
   stat_documents_indexed_total_.incr(1);
-  auto doc = docs_->updateDocument(index_request);
+  auto docid = index_request.item.docID();
+  feature_idx_->updateDocument(index_request, db_txn_.get());
+  auto doc = feature_idx_->findDocument(docid, db_txn_.get());
   rebuildFTS(doc);
   stat_documents_indexed_success_.incr(1);
 }
 
 void IndexWriter::commit() {
+  db_txn_->commit();
+  db_txn_ = db_->startTransaction();
   fts_->commit();
 }
 
 void IndexWriter::rebuildFTS(DocID docid) {
-  auto doc = docs_->findDocument(docid);
+  auto doc = feature_idx_->findDocument(docid, db_txn_.get());
   rebuildFTS(doc);
 }
 
@@ -144,14 +152,14 @@ void IndexWriter::rebuildFTS(RefPtr<Document> doc) {
 }
 
 void IndexWriter::rebuildFTS() {
-  docs_->listDocuments([this] (const DocID& docid) -> bool {
-    rebuildFTS(docid);
-    return true;
-  });
+  //docs_->listDocuments([this] (const DocID& docid) -> bool {
+  //  rebuildFTS(docid);
+  //  return true;
+  //});
 }
 
-RefPtr<mdb::MDB> IndexWriter::featureDB() {
-  return db_;
+RefPtr<mdb::MDBTransaction> IndexWriter::dbTransaction() {
+  return db_txn_;
 }
 
 void IndexWriter::exportStats(const String& prefix) {

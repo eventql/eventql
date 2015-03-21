@@ -30,6 +30,13 @@ void FeatureIndexWriter::updateDocument(
   updateFeatureIndex(index_request, txn);
 }
 
+RefPtr<Document> FeatureIndexWriter::findDocument(
+    const DocID& docid,
+    mdb::MDBTransaction* featuredb_txn) {
+  RefPtr<Document> doc(new Document(docid));
+  return doc;
+}
+
 void FeatureIndexWriter::updateFeatureIndex(
     const IndexRequest& index_request,
     mdb::MDBTransaction* txn) {
