@@ -58,7 +58,7 @@ RefPtr<IndexWriter> IndexWriter::openIndex(
 
   auto fts_path = FileUtil::joinPaths(index_path, "fts");
   bool create = false;
-  if (FileUtil::exists(fts_path)) {
+  if (!FileUtil::exists(fts_path)) {
     FileUtil::mkdir_p(fts_path);
     create = true;
   }
