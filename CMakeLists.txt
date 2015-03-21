@@ -323,6 +323,20 @@ add_executable(cm-ctrstats-groupbyqueryfeaturecrossitemterms
 target_link_libraries(cm-ctrstats-groupbyqueryfeaturecrossitemterms
     ${CMAKE_THREAD_LIBS_INIT} ${FNORD_FTS_LIBS})
 
+add_executable(cm-ctrstats-clickpagehisto
+    $<TARGET_OBJECTS:cm-common>
+    $<TARGET_OBJECTS:fnord-base>
+    $<TARGET_OBJECTS:fnord-feeds>
+    $<TARGET_OBJECTS:fnord-mdb>
+    $<TARGET_OBJECTS:fnord-http>
+    $<TARGET_OBJECTS:fnord-json>
+    $<TARGET_OBJECTS:fnord-rpc>
+    $<TARGET_OBJECTS:fnord-sstable>
+    src/cm-ctrstats-clickpagehisto.cc)
+
+target_link_libraries(cm-ctrstats-clickpagehisto
+    ${CMAKE_THREAD_LIBS_INIT})
+
 add_executable(cm-ctrstats-clickpositionhisto
     $<TARGET_OBJECTS:cm-common>
     $<TARGET_OBJECTS:fnord-base>
