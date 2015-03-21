@@ -101,12 +101,12 @@ int main(int argc, const char** argv) {
 
   dwn_index_request_feed->addTargetFeed(
       URI("http://s01.nue01.production.fnrd.net:7001/rpc"),
-      "dawanda.index_requests.feedserver01.nue01.production.fnrd.net",
+      "index_requests.feedserver01.nue01.production.fnrd.net",
       16);
 
   dwn_index_request_feed->addTargetFeed(
       URI("http://s02.nue01.production.fnrd.net:7001/rpc"),
-      "dawanda.index_requests.feedserver02.nue01.production.fnrd.net",
+      "index_requests.feedserver02.nue01.production.fnrd.net",
       16);
 
   dwn_index_request_feed->exportStats(
