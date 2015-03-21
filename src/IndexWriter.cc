@@ -50,8 +50,7 @@ RefPtr<IndexWriter> IndexWriter::openIndex(
   /* open mdb */
   auto db_path = FileUtil::joinPaths(index_path, "db");
   FileUtil::mkdir_p(db_path);
-  auto db = mdb::MDB::open(db_path, 1024 * 1024 * 1024 * 32); // 32 GiB
-  //db->setMaxSize(1024 * 1024 * 1024 * 32); // 32GiB
+  auto db = mdb::MDB::open(db_path, false, 68719476736lu); // 64 GiB
 
   /* open lucene */
   RefPtr<fnord::fts::Analyzer> analyzer(new fnord::fts::Analyzer(conf_path));
