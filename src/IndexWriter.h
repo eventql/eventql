@@ -49,7 +49,7 @@ public:
   void rebuildFTS(DocID doc);
   void rebuildFTS(RefPtr<Document> doc);
 
-  RefPtr<mdb::MDB> featureDB();
+  RefPtr<mdb::MDBTransaction> dbTransaction();
 
   void exportStats(const String& prefix);
 
@@ -61,9 +61,10 @@ protected:
       RefPtr<DocStore> docs,
       std::shared_ptr<fts::IndexWriter> fts);
 
+
   FeatureSchema schema_;
   RefPtr<mdb::MDB> db_;
-  RefPtr<DocStore> docs_;
+  RefPtr<mdb::MDBTransaction> db_txn_;
   RefPtr<FeatureIndexWriter> feature_idx_;
   std::shared_ptr<fts::IndexWriter> fts_;
 

@@ -26,6 +26,7 @@
 #include "FeatureIndex.h"
 #include "IndexRequest.h"
 #include "ItemRef.h"
+#include "Document.h"
 #include "logjoin/TrackedSession.h"
 #include "logjoin/TrackedQuery.h"
 #include "logjoin/LogJoinShard.h"
@@ -42,6 +43,10 @@ public:
 
   void updateDocument(
       const IndexRequest& index_request,
+      mdb::MDBTransaction* featuredb_txn);
+
+  RefPtr<Document> findDocument(
+      const DocID& docid,
       mdb::MDBTransaction* featuredb_txn);
 
 protected:

@@ -82,8 +82,8 @@ void buildIndexFromFeed(
       URI("http://s02.nue01.production.fnrd.net:7001/rpc"));
 
   /* resume from last offset */
-  auto txn = index_writer->featureDB()->startTransaction(true);
-  try {
+  {
+    auto txn = index_writer->dbTransaction();
     for (const auto& input_feed : input_feeds) {
       uint64_t offset = 0;
 
@@ -108,11 +108,6 @@ void buildIndexFromFeed(
           batch_size,
           buffer_size);
     }
-
-    txn->abort();
-  } catch (...) {
-    txn->abort();
-    throw;
   }
 
   fnord::logInfo("cm.indexbuild", "Resuming IndexWriter...");
@@ -147,17 +142,17 @@ void buildIndexFromFeed(
     auto stream_offsets = feed_reader.streamOffsets();
     String stream_offsets_str;
 
-    index_writer->commit();
+    {
+      auto txn = index_writer->dbTransaction();
 
-    auto txn = index_writer->featureDB()->startTransaction();
+      for (const auto& soff : stream_offsets) {
+        txn->update(
+            StringUtil::format("__indexfeed_offset~$0", soff.first),
+            StringUtil::toString(soff.second));
 
-    for (const auto& soff : stream_offsets) {
-      txn->update(
-          StringUtil::format("__indexfeed_offset~$0", soff.first),
-          StringUtil::toString(soff.second));
-
-      stream_offsets_str +=
-          StringUtil::format("\n    offset[$0]=$1", soff.first, soff.second);
+        stream_offsets_str +=
+            StringUtil::format("\n    offset[$0]=$1", soff.first, soff.second);
+      }
     }
 
     fnord::logInfo(
@@ -165,7 +160,7 @@ void buildIndexFromFeed(
         "IndexWriter comitting...$0",
         stream_offsets_str);
 
-    txn->commit();
+    index_writer->commit();
 
     if (cm_indexbuild_shutdown.load() == true) {
       break;
