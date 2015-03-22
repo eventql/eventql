@@ -49,6 +49,24 @@ int main(int argc, const char** argv) {
   fnord::cli::FlagParser flags;
 
   flags.defineFlag(
+      "index",
+      cli::FlagParser::T_STRING,
+      true,
+      NULL,
+      NULL,
+      "index dir",
+      "<path>");
+
+  flags.defineFlag(
+      "conf",
+      cli::FlagParser::T_STRING,
+      false,
+      NULL,
+      "./conf",
+      "conf dir",
+      "<path>");
+
+  flags.defineFlag(
       "http_port",
       fnord::cli::FlagParser::T_INTEGER,
       false,
