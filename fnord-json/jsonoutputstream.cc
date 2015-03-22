@@ -173,7 +173,7 @@ void JSONOutputStream::addString(const std::string& string) {
   output_->write("\"");
 }
 
-void JSONOutputStream::addInteger(int value) {
+void JSONOutputStream::addInteger(int64_t value) {
   output_->write(StringUtil::toString(value));
 }
 
