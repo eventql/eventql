@@ -38,6 +38,8 @@ public:
 
   ~IndexReader();
 
+  std::shared_ptr<fts::IndexSearcher> ftsSearcher();
+
 protected:
 
   IndexReader(
