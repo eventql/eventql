@@ -45,7 +45,7 @@ public:
   void updateDocument(const IndexRequest& index_request);
   void commit();
 
-  void rebuildFTS();
+  void rebuildFTS(size_t commit_size = 8192);
   void rebuildFTS(DocID doc);
   void rebuildFTS(RefPtr<Document> doc);
 

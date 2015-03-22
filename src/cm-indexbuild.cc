@@ -54,7 +54,7 @@ void buildIndexFromFeed(
     const cli::FlagParser& flags) {
   size_t batch_size = flags.getInt("batch_size");
   size_t buffer_size = flags.getInt("buffer_size");
-  size_t db_commit_size = flags.getInt("db_commit_size");
+  size_t commit_size = flags.getInt("commit_size");
   size_t db_commit_interval = flags.getInt("db_commit_interval");
 
   /* start event loop */
@@ -116,7 +116,7 @@ void buildIndexFromFeed(
     last_iter = WallClock::now();
     feed_reader.fillBuffers();
     int i = 0;
-    for (; i < db_commit_size; ++i) {
+    for (; i < commit_size; ++i) {
       auto entry = feed_reader.fetchNextEntry();
 
       if (entry.isEmpty()) {
@@ -291,12 +291,12 @@ int main(int argc, const char** argv) {
       "<num>");
 
   flags.defineFlag(
-      "db_commit_size",
+      "commit_size",
       fnord::cli::FlagParser::T_INTEGER,
       false,
       NULL,
       "1024",
-      "db_commit_size",
+      "commit_size",
       "<num>");
 
   flags.defineFlag(
@@ -371,6 +371,7 @@ int main(int argc, const char** argv) {
       "Opening index at $0",
       flags.getString("index"));
 
+  auto commit_size = flags.getInt("commit_size");
   auto index_writer = cm::IndexWriter::openIndex(
       flags.getString("index"),
       flags.getString("conf"));
@@ -381,13 +382,12 @@ int main(int argc, const char** argv) {
     auto docid = flags.getString("docid");
 
     if (docid == "all") {
-      index_writer->rebuildFTS();
+      index_writer->rebuildFTS(commit_size);
     } else {
       index_writer->rebuildFTS(cm::DocID { .docid = docid });
     }
   } else if (flags.isSet("import_sstable")) {
     auto sstable_filename = flags.getString("import_sstable");
-    auto commit_size = flags.getInt("db_commit_size");
     importSSTable(index_writer, sstable_filename, commit_size);
   } else {
     buildIndexFromFeed(index_writer, flags);
