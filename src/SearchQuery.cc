@@ -6,16 +6,18 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-#include "SearchQuery.h"
 #include "fnord-fts/fts.h"
 #include "fnord-fts/fts_common.h"
 #include "fnord-fts/search/DisjunctionMaxQuery.h"
+#include "SearchQuery.h"
 
 using namespace fnord;
 
 namespace cm {
 
-SearchQuery::SearchQuery() {}
+SearchQuery::SearchQuery() {
+  results_ = fts::TopScoreDocCollector::create(500, false);
+}
 
 void SearchQuery::addField(const String& field_name, double boost) {
   FieldInfo fi;
@@ -55,15 +57,11 @@ void SearchQuery::execute(IndexReader* index) {
     query->add(dm_query, fts::BooleanClause::MUST);
   }
 
-  auto collector = fts::TopScoreDocCollector::create(
-      500,
-      false);
-
   auto searcher = index->ftsSearcher();
-  searcher->search(query, collector);
-  auto hits = collector->topDocs()->scoreDocs;
+  searcher->search(query, results_);
+  auto hits = results_->topDocs()->scoreDocs;
 
-  fnord::iputs("return $0 docs", collector->getTotalHits());
+  fnord::iputs("return $0 docs", results_->getTotalHits());
   for (int32_t i = 0; i < hits.size(); ++i) {
     auto doc = searcher->doc(hits[i]->doc);
     fnord::WString docid_w = doc->get(L"_docid");

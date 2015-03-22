@@ -8,6 +8,8 @@
  */
 #ifndef _CM_SEARCHQUERY_H
 #define _CM_SEARCHQUERY_H
+#include "fnord-fts/fts.h"
+#include "fnord-fts/fts_common.h"
 #include "fnord-fts/Analyzer.h"
 #include "IndexReader.h"
 
@@ -39,6 +41,7 @@ protected:
 
   Vector<FieldInfo> fields_;
   fnord::Set<String> terms_;
+  fnord::fts::TopScoreDocCollectorPtr results_;
 };
 
 }
