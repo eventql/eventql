@@ -8,6 +8,7 @@
  */
 #ifndef _CM_SEARCHQUERY_H
 #define _CM_SEARCHQUERY_H
+#include "fnord-json/json.h"
 #include "fnord-fts/fts.h"
 #include "fnord-fts/fts_common.h"
 #include "fnord-fts/Analyzer.h"
@@ -33,6 +34,8 @@ public:
 
   void execute(IndexReader* index);
 
+  void writeJSON(json::JSONOutputStream* target);
+
 protected:
   struct FieldInfo {
     fnord::WString field_name;
@@ -42,6 +45,8 @@ protected:
   Vector<FieldInfo> fields_;
   fnord::Set<String> terms_;
   fnord::fts::TopScoreDocCollectorPtr results_;
+  fnord::Vector<String> res_docids_;
+  size_t total_hits_;
 };
 
 }
