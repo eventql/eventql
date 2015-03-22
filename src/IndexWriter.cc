@@ -141,11 +141,14 @@ void IndexWriter::rebuildFTS(RefPtr<Document> doc) {
   double cm_views = 0;
   double cm_ctr_norm_std = 1.0;
 
+  bool is_active = false;
+
   HashMap<String, String> fts_fields_anal;
   for (const auto& f : doc->fields()) {
 
     /* title~LANG */
     if (StringUtil::beginsWith(f.first, "title~")) {
+      is_active = true;
       auto k = f.first;
       StringUtil::replaceAll(&k, "title~","title~");
       fts_fields_anal[k] += " " + f.second;
@@ -237,7 +240,11 @@ void IndexWriter::rebuildFTS(RefPtr<Document> doc) {
       L"_docid",
       StringUtil::convertUTF8To16(doc->docID().docid));
 
-  fts_->updateDocument(del_term, fts_doc);
+  if (is_active) {
+    fts_->updateDocument(del_term, fts_doc);
+  } else {
+    fts_->deleteDocuments(del_term);
+  }
 }
 
 void IndexWriter::rebuildFTS() {
