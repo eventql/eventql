@@ -40,7 +40,7 @@ public:
   void addColon();
   void addString(const std::string& string);
   void addFloat(double value);
-  void addInteger(int value);
+  void addInteger(int64_t value);
   void addNull();
   void addTrue();
   void addFalse();
