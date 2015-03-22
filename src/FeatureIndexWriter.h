@@ -6,8 +6,8 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-#ifndef _CM_INDEXBUILDER_H
-#define _CM_INDEXBUILDER_H
+#ifndef _CM_FEATUREINDEXWRITER_H
+#define _CM_FEATUREINDEXWRITER_H
 #include <mutex>
 #include <stdlib.h>
 #include <set>

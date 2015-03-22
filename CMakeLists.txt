@@ -137,6 +137,7 @@ add_executable(cm-indexlookup
     $<TARGET_OBJECTS:fnord-mdb>
     src/DocStore.cc
     src/IndexReader.cc
+    src/FeatureIndexWriter.cc
     src/cm-indexlookup.cc)
 
 target_link_libraries(cm-indexlookup
@@ -157,6 +158,7 @@ add_executable(cm-indexserver
     src/IndexReader.cc
     src/IndexServlet.cc
     src/SearchQuery.cc
+    src/FeatureIndexWriter.cc
     src/cm-indexserver.cc)
 
 target_link_libraries(cm-indexserver

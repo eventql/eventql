@@ -47,7 +47,8 @@ IndexReader::IndexReader(
     schema_(schema),
     db_(db),
     fts_(fts),
-    fts_searcher_(new fnord::fts::IndexSearcher(fts_)) {}
+    fts_searcher_(new fnord::fts::IndexSearcher(fts_)),
+    doc_idx_(new FeatureIndexWriter(&schema_)) {}
 
 
 IndexReader::~IndexReader() {
@@ -56,6 +57,10 @@ IndexReader::~IndexReader() {
 
 std::shared_ptr<fts::IndexSearcher> IndexReader::ftsSearcher() {
   return fts_searcher_;
+}
+
+RefPtr<FeatureIndexWriter> IndexReader::docIndex() {
+  return doc_idx_;
 }
 
 } // namespace cm
