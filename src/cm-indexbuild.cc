@@ -173,7 +173,10 @@ void buildIndexFromFeed(
   evloop_thread.join();
 }
 
-void importSSTable(RefPtr<IndexWriter> index_writer, const String& filename) {
+void importSSTable(
+    RefPtr<IndexWriter> index_writer,
+    const String& filename,
+    size_t commit_size) {
   fnord::logInfo("cm.indexbuild", "Importing sstable: $0", filename);
   sstable::SSTableReader reader(File::openFile(filename, File::O_READ));
 
@@ -197,6 +200,7 @@ void importSSTable(RefPtr<IndexWriter> index_writer, const String& filename) {
   });
 
   /* read sstable rows */
+  int n = 0;
   for (; cursor->valid(); ++row_idx) {
     status_line.runMaybe();
 
@@ -211,6 +215,11 @@ void importSSTable(RefPtr<IndexWriter> index_writer, const String& filename) {
 
     if (!idx_req.isEmpty()) {
       index_writer->updateDocument(idx_req.get());
+    }
+
+    if (++n > commit_size) {
+      index_writer->commit();
+      n = 0;
     }
 
     if (!cursor->next()) {
@@ -378,7 +387,8 @@ int main(int argc, const char** argv) {
     }
   } else if (flags.isSet("import_sstable")) {
     auto sstable_filename = flags.getString("import_sstable");
-    importSSTable(index_writer, sstable_filename);
+    auto commit_size = flags.getInt("db_commit_size");
+    importSSTable(index_writer, sstable_filename, commit_size);
   } else {
     buildIndexFromFeed(index_writer, flags);
   }
