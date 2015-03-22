@@ -129,11 +129,6 @@ void IndexWriter::rebuildFTS(RefPtr<Document> doc) {
   stat_documents_indexed_fts_.incr(1);
   auto fts_doc = fts::newLucene<fts::Document>();
 
-  fnord::logDebug(
-      "cm.indexwriter",
-      "Rebuilding FTS Index for docid=$0",
-      doc->docID().docid);
-
   fts_doc->add(
       fts::newLucene<fts::Field>(
           L"_docid",
@@ -142,6 +137,9 @@ void IndexWriter::rebuildFTS(RefPtr<Document> doc) {
           fts::Field::INDEX_NOT_ANALYZED_NO_NORMS));
 
   double boost = 1.0;
+  double cm_clicks = 0;
+  double cm_views = 0;
+  double cm_ctr_norm_std = 1.0;
 
   HashMap<String, String> fts_fields_anal;
   for (const auto& f : doc->fields()) {
@@ -202,13 +200,15 @@ void IndexWriter::rebuildFTS(RefPtr<Document> doc) {
     }
 
     else if (f.first == "cm_ctr_norm_std") {
-      boost = std::stod(f.second);
-      //fts_doc->add(
-      //    fts::newLucene<fts::Field>(
-      //        L"cm_ctr_norm_std",
-      //        StringUtil::convertUTF8To16(f.second),
-      //        fts::Field::STORE_YES,
-      //        fts::Field::INDEX_NOT_ANALYZED));
+      cm_ctr_norm_std = std::stod(f.second);
+    }
+
+    else if (f.first == "cm_clicks") {
+      cm_clicks = std::stod(f.second);
+    }
+
+    else if (f.first == "cm_views") {
+      cm_views = std::stod(f.second);
     }
   }
 
@@ -221,7 +221,17 @@ void IndexWriter::rebuildFTS(RefPtr<Document> doc) {
             fts::Field::INDEX_ANALYZED));
   }
 
+  if (cm_views > 2000) {
+    boost = cm_ctr_norm_std;
+  }
+
   fts_doc->setBoost(boost);
+
+  fnord::logDebug(
+      "cm.indexwriter",
+      "Rebuilding FTS Index for docid=$0 boost=$1",
+      doc->docID().docid,
+      boost);
 
   auto del_term = fts::newLucene<fts::Term>(
       L"_docid",
