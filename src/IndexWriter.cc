@@ -40,7 +40,7 @@ RefPtr<IndexWriter> IndexWriter::openIndex(
   feature_schema.registerFeature("material_description~pl", 21, 2);
   feature_schema.registerFeature("basic_attributes~pl", 22, 2);
   feature_schema.registerFeature("tags_as_text~pl", 23, 2);
-  feature_schema.registerFeature("image_filaename", 24, 2);
+  feature_schema.registerFeature("image_filename", 24, 2);
 
   feature_schema.registerFeature("shop_name", 26, 3);
   feature_schema.registerFeature("shop_platform", 27, 3);
