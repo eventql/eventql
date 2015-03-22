@@ -141,6 +141,8 @@ void IndexWriter::rebuildFTS(RefPtr<Document> doc) {
           fts::Field::STORE_YES,
           fts::Field::INDEX_NOT_ANALYZED_NO_NORMS));
 
+  double boost = 1.0;
+
   HashMap<String, String> fts_fields_anal;
   for (const auto& f : doc->fields()) {
 
@@ -200,12 +202,13 @@ void IndexWriter::rebuildFTS(RefPtr<Document> doc) {
     }
 
     else if (f.first == "cm_ctr_norm_std") {
-      fts_doc->add(
-          fts::newLucene<fts::Field>(
-              L"cm_ctr_norm_std",
-              StringUtil::convertUTF8To16(f.second),
-              fts::Field::STORE_YES,
-              fts::Field::INDEX_NOT_ANALYZED));
+      boost = std::stod(f.second);
+      //fts_doc->add(
+      //    fts::newLucene<fts::Field>(
+      //        L"cm_ctr_norm_std",
+      //        StringUtil::convertUTF8To16(f.second),
+      //        fts::Field::STORE_YES,
+      //        fts::Field::INDEX_NOT_ANALYZED));
     }
   }
 
@@ -217,6 +220,8 @@ void IndexWriter::rebuildFTS(RefPtr<Document> doc) {
             fts::Field::STORE_NO,
             fts::Field::INDEX_ANALYZED));
   }
+
+  fts_doc->setBoost(boost);
 
   auto del_term = fts::newLucene<fts::Term>(
       L"_docid",
