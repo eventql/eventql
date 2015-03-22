@@ -41,6 +41,7 @@ RefPtr<IndexWriter> IndexWriter::openIndex(
   feature_schema.registerFeature("basic_attributes~pl", 22, 2);
   feature_schema.registerFeature("tags_as_text~pl", 23, 2);
   feature_schema.registerFeature("image_filename", 24, 2);
+  feature_schema.registerFeature("cm_clicked_terms", 31, 2);
 
   feature_schema.registerFeature("shop_name", 26, 3);
   feature_schema.registerFeature("shop_platform", 27, 3);
@@ -51,6 +52,12 @@ RefPtr<IndexWriter> IndexWriter::openIndex(
   feature_schema.registerFeature("shop_orders_count", 11, 3);
   feature_schema.registerFeature("shop_rating_count", 12, 3);
   feature_schema.registerFeature("shop_rating_avg", 13, 3);
+  feature_schema.registerFeature("cm_views", 29, 3);
+  feature_schema.registerFeature("cm_clicks", 30, 3);
+  feature_schema.registerFeature("cm_ctr", 32, 3);
+  feature_schema.registerFeature("cm_ctr_norm", 33, 3);
+  feature_schema.registerFeature("cm_ctr_std", 34, 3);
+  feature_schema.registerFeature("cm_ctr_norm_std", 35, 3);
 
   /* open mdb */
   auto db_path = FileUtil::joinPaths(index_path, "db");
