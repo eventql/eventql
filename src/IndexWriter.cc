@@ -231,9 +231,10 @@ void IndexWriter::rebuildFTS(RefPtr<Document> doc) {
 
   fnord::logDebug(
       "cm.indexwriter",
-      "Rebuilding FTS Index for docid=$0 boost=$1",
+      "Rebuilding FTS Index for docid=$0 boost=$1 active=$2",
       doc->docID().docid,
-      boost);
+      boost,
+      is_active);
 
   auto del_term = fts::newLucene<fts::Term>(
       L"_docid",
