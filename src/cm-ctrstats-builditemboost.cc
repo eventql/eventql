@@ -30,6 +30,7 @@
 #include "common.h"
 #include "CustomerNamespace.h"
 #include "FeatureSchema.h"
+#include "IndexRequest.h"
 #include "JoinedQuery.h"
 #include "CTRCounter.h"
 
@@ -105,7 +106,8 @@ void writeOutputTable(
     uint64_t end_time,
     bool rollup,
     int min_views,
-    int min_clicks) {
+    int min_clicks,
+    int write_index_requests) {
   /* prepare output sstable schema */
   sstable::SSTableColumnSchema sstable_schema;
   sstable_schema.addColumn("views", 1, sstable::SSTableColumnType::UINT64);
@@ -193,21 +195,34 @@ void writeOutputTable(
           t.second);
     }
 
-    sstable::SSTableColumnWriter cols(&sstable_schema);
-    cols.addUInt64Column(1, c.second.views);
-    cols.addUInt64Column(2, c.second.clicks);
-    cols.addFloatColumn(3, c.second.clicks_base);
+    if (write_index_requests) {
+      cm::IndexRequest idx_req;
+      idx_req.item.item_id = StringUtil::toString(c.first);
+      idx_req.item.set_id = "p";
+      idx_req.attrs["cm_views"] = StringUtil::toString(c.second.views);
+      idx_req.attrs["cm_clicks"] = StringUtil::toString(c.second.clicks);
+      idx_req.attrs["cm_ctr"] = StringUtil::toString(ctr);
+      idx_req.attrs["cm_ctr_norm"] = StringUtil::toString(ctr_base);
+      idx_req.attrs["cm_ctr_std"] = StringUtil::toString(ctr_std);
+      idx_req.attrs["cm_ctr_norm_std"] = StringUtil::toString(ctr_base_std);
+      sstable_writer->appendRow("", json::toJSONString(idx_req));
+    } else {
+      sstable::SSTableColumnWriter cols(&sstable_schema);
+      cols.addUInt64Column(1, c.second.views);
+      cols.addUInt64Column(2, c.second.clicks);
+      cols.addFloatColumn(3, c.second.clicks_base);
 
-    if (rollup) {
-      cols.addFloatColumn(5, ctr);
-      cols.addFloatColumn(6, ctr_base);
-      cols.addFloatColumn(7, ctr_std);
-      cols.addFloatColumn(8, ctr_base_std);
+      if (rollup) {
+        cols.addFloatColumn(5, ctr);
+        cols.addFloatColumn(6, ctr_base);
+        cols.addFloatColumn(7, ctr_std);
+        cols.addFloatColumn(8, ctr_base_std);
+      }
+
+      cols.addStringColumn(4, terms_str);
+
+      sstable_writer->appendRow(StringUtil::toString(c.first), cols);
     }
-
-    cols.addStringColumn(4, terms_str);
-
-    sstable_writer->appendRow(StringUtil::toString(c.first), cols);
   }
 
   sstable_schema.writeIndex(sstable_writer.get());
@@ -272,6 +287,15 @@ int main(int argc, const char** argv) {
       NULL,
       NULL,
       "write aggregated output columns",
+      "");
+
+  flags.defineFlag(
+      "write_index_requests",
+      fnord::cli::FlagParser::T_SWITCH,
+      false,
+      NULL,
+      NULL,
+      "write index requests instead of raw table rows",
       "");
 
   flags.defineFlag(
@@ -514,7 +538,8 @@ int main(int argc, const char** argv) {
       end_time,
       flags.isSet("rollup"),
       min_views,
-      min_clicks);
+      min_clicks,
+      flags.isSet("write_index_requests"));
 
   FileUtil::mv(outfile + "~", outfile);
 
