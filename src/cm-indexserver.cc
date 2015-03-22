@@ -38,6 +38,7 @@
 #include "CustomerNamespace.h"
 #include "FeatureSchema.h"
 #include "JoinedQuery.h"
+#include "IndexServlet.h"
 
 using namespace fnord;
 
@@ -70,7 +71,12 @@ int main(int argc, const char** argv) {
   Logger::get()->setMinimumLogLevel(
       strToLogLevel(flags.getString("loglevel")));
 
-  WhitelistVFS vfs;
+  auto index_path = flags.getString("index");
+  auto conf_path = flags.getString("conf");
+
+  /* open index */
+  auto index_reader = cm::IndexReader::openIndex(index_path);
+  auto analyzer = RefPtr<fts::Analyzer>(new fts::Analyzer(conf_path));
 
   /* start http server */
   fnord::thread::EventLoop ev;
@@ -78,9 +84,9 @@ int main(int argc, const char** argv) {
   fnord::http::HTTPServer http_server(&http_router, &ev);
   http_server.listen(flags.getInt("http_port"));
 
-  /* sstable servlet */
-  //sstable::SSTableServlet sstable_servlet("/sstable", &vfs);
-  //http_router.addRouteByPrefixMatch("/sstable", &sstable_servlet);
+  /* index servlet */
+  cm::IndexServlet index_servlet(index_reader, analyzer);
+  http_router.addRouteByPrefixMatch("/index", &index_servlet);
 
   ev.run();
   return 0;

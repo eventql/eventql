@@ -155,7 +155,8 @@ add_executable(cm-indexserver
     $<TARGET_OBJECTS:fnord-mdb>
     src/DocStore.cc
     src/IndexReader.cc
-    src/cm-indexlookup.cc)
+    src/IndexServlet.cc
+    src/cm-indexserver.cc)
 
 target_link_libraries(cm-indexserver
     ${CMAKE_THREAD_LIBS_INIT}
