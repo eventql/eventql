@@ -10,7 +10,7 @@
 #define _CM_INDEXSERVLET_H
 #include "fnord-base/autoref.h"
 #include "fnord-http/httpservice.h"
-#include "fnord-fts/analyzer.h"
+#include "fnord-fts/Analyzer.h"
 #include "IndexReader.h"
 
 using namespace fnord;
