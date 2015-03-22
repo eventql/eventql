@@ -221,7 +221,7 @@ void IndexWriter::rebuildFTS(RefPtr<Document> doc) {
             fts::Field::INDEX_ANALYZED));
   }
 
-  if (cm_views > 2000) {
+  if (cm_views > 1000 && cm_clicks > 15) {
     boost = cm_ctr_norm_std;
   }
 
