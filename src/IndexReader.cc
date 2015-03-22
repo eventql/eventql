@@ -46,7 +46,8 @@ IndexReader::IndexReader(
     std::shared_ptr<fts::IndexReader> fts) :
     schema_(schema),
     db_(db),
-    fts_(fts) {}
+    fts_(fts),
+    fts_searcher_(new fnord::fts::IndexSearcher(fts_)) {}
 
 
 IndexReader::~IndexReader() {

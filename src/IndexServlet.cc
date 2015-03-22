@@ -7,6 +7,7 @@
  * permission is obtained.
  */
 #include "IndexServlet.h"
+#include "SearchQuery.h"
 
 using namespace fnord;
 
@@ -45,14 +46,21 @@ void IndexServlet::searchQuery(
   const auto& params = uri->queryParams();
   res->setStatus(fnord::http::kStatusOK);
 
-  String search_query;
-  if (!fnord::URI::getParam(params, "q", &search_query)) {
+  String query_str;
+  if (!fnord::URI::getParam(params, "q", &query_str)) {
     res->addBody("error: missing ?q=... parameter");
     res->setStatus(http::kStatusBadRequest);
     return;
   }
 
-  res->addBody("search!!! " + search_query);
+  SearchQuery query;
+  query.addField("title~de", 2.0);
+  query.addField("text~de", 1.0);
+  query.addQuery(query_str, Language::DE, analyzer_.get());
+
+  query.execute(index_.get());
+
+  res->addBody("search!!! " + query_str);
 }
 
 }

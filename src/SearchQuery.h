@@ -1,0 +1,47 @@
+/**
+ * Copyright (c) 2015 - The CM Authors <legal@clickmatcher.com>
+ *   All Rights Reserved.
+ *
+ * This file is CONFIDENTIAL -- Distribution or duplication of this material or
+ * the information contained herein is strictly forbidden unless prior written
+ * permission is obtained.
+ */
+#ifndef _FNORD_FTS_FTSQUERY_H
+#define _FNORD_FTS_FTSQUERY_H
+#include "fnord-fts/fts.h"
+#include "fnord-fts/fts_common.h"
+#include "fnord-fts/Analyzer.h"
+#include "fnord-fts/search/DisjunctionMaxQuery.h"
+
+using namespace fnord;
+
+namespace cm {
+
+class SearchQuery {
+public:
+
+  SearchQuery();
+
+  void addField(const String& field_name, double boost = 1.0);
+
+  void addTerm(const String& term);
+
+  void addQuery(
+      const String& query,
+      fnord::Language lang,
+      fnord::fts::Analyzer* analyzer);
+
+  void execute(IndexReader* index);
+
+protected:
+  struct FieldInfo {
+    fnord::WString field_name;
+    double boost;
+  };
+
+  Vector<FieldInfo> fields_;
+  fnord::Set<String> terms_;
+};
+
+}
+#endif
