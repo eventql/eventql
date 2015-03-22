@@ -49,6 +49,10 @@ public:
       const DocID& docid,
       mdb::MDBTransaction* featuredb_txn);
 
+  void listDocuments(
+      Function<bool (const DocID& id)> fn,
+      mdb::MDBTransaction* featuredb_txn);
+
 protected:
 
   void updateFeatureIndex(

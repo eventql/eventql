@@ -121,7 +121,6 @@ void IndexWriter::commit() {
 
 void IndexWriter::rebuildFTS(DocID docid) {
   auto doc = feature_idx_->findDocument(docid, db_txn_.get());
-  doc->debugPrint();
   rebuildFTS(doc);
 }
 
@@ -248,10 +247,10 @@ void IndexWriter::rebuildFTS(RefPtr<Document> doc) {
 }
 
 void IndexWriter::rebuildFTS() {
-  //docs_->listDocuments([this] (const DocID& docid) -> bool {
-  //  rebuildFTS(docid);
-  //  return true;
-  //});
+  feature_idx_->listDocuments([this] (const DocID& docid) -> bool {
+    rebuildFTS(docid);
+    return true;
+  }, db_txn_.get());
 }
 
 RefPtr<mdb::MDBTransaction> IndexWriter::dbTransaction() {
