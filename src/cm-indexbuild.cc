@@ -174,11 +174,11 @@ void buildIndexFromFeed(
 }
 
 void importSSTable(RefPtr<IndexWriter> index_writer, const String& filename) {
-  fnord::logInfo("cm.featureprep", "Importing sstable: $0", filename);
+  fnord::logInfo("cm.indexbuild", "Importing sstable: $0", filename);
   sstable::SSTableReader reader(File::openFile(filename, File::O_READ));
 
   if (reader.bodySize() == 0) {
-    fnord::logCritical("cm.featureprep", "unfinished table: $0", filename);
+    fnord::logCritical("cm.indexbuild", "unfinished table: $0", filename);
     return;
   }
 
