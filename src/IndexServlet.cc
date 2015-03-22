@@ -62,10 +62,10 @@ void IndexServlet::searchQuery(
   }
 
   SearchQuery query;
-  query.addField("cm_clicked_terms", 7.0);
-  query.addField("title~de", 5.0);
-  query.addField("tags", 3.0);
-  query.addField("text~de", 2.0);
+  query.addField("cm_clicked_terms", 2.5);
+  query.addField("title~de", 1.5);
+  query.addField("tags", 1.1);
+  query.addField("text~de", 1.0);
   query.addQuery(query_str, Language::DE, analyzer_.get());
   query.execute(index_.get());
 
