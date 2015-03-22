@@ -247,11 +247,23 @@ void IndexWriter::rebuildFTS(RefPtr<Document> doc) {
   }
 }
 
-void IndexWriter::rebuildFTS() {
-  feature_idx_->listDocuments([this] (const DocID& docid) -> bool {
-    rebuildFTS(docid);
+void IndexWriter::rebuildFTS(size_t csize) {
+  Vector<DocID> docids;
+
+  feature_idx_->listDocuments([&docids] (const DocID& docid) -> bool {
+    docids.emplace_back(docid);
     return true;
   }, db_txn_.get());
+
+  size_t n;
+  for (const auto& docid : docids) {
+    rebuildFTS(docid);
+
+    if (++n > csize) {
+      commit();
+      n = 0;
+    }
+  }
 }
 
 RefPtr<mdb::MDBTransaction> IndexWriter::dbTransaction() {
