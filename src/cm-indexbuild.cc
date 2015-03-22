@@ -17,6 +17,7 @@
 #include "fnord-base/thread/eventloop.h"
 #include "fnord-base/thread/threadpool.h"
 #include "fnord-base/wallclock.h"
+#include "fnord-base/util/SimpleRateLimit.h"
 #include "fnord-rpc/ServerGroup.h"
 #include "fnord-rpc/RPC.h"
 #include "fnord-rpc/RPCClient.h"
@@ -29,6 +30,7 @@
 #include "fnord-feeds/RemoteFeedFactory.h"
 #include "fnord-feeds/RemoteFeedReader.h"
 #include "fnord-base/stats/statsdagent.h"
+#include "fnord-sstable/sstablereader.h"
 #include "fnord-mdb/MDB.h"
 #include "CustomerNamespace.h"
 #include "FeatureSchema.h"
@@ -171,6 +173,54 @@ void buildIndexFromFeed(
   evloop_thread.join();
 }
 
+void importSSTable(RefPtr<IndexWriter> index_writer, const String& filename) {
+  fnord::logInfo("cm.featureprep", "Importing sstable: $0", filename);
+  sstable::SSTableReader reader(File::openFile(filename, File::O_READ));
+
+  if (reader.bodySize() == 0) {
+    fnord::logCritical("cm.featureprep", "unfinished table: $0", filename);
+    return;
+  }
+
+  /* get sstable cursor */
+  auto cursor = reader.getCursor();
+  auto body_size = reader.bodySize();
+  int row_idx = 0;
+
+  /* status line */
+  util::SimpleRateLimitedFn status_line(kMicrosPerSecond, [&] () {
+    fnord::logInfo(
+        "cm.indexbuild",
+        "[$0%] Reading sstable... rows=$1",
+        (size_t) ((cursor->position() / (double) body_size) * 100),
+        row_idx);
+  });
+
+  /* read sstable rows */
+  for (; cursor->valid(); ++row_idx) {
+    status_line.runMaybe();
+
+    auto val = cursor->getDataBuffer();
+
+    Option<cm::IndexRequest> idx_req;
+    try {
+      idx_req = Some(json::fromJSON<cm::IndexRequest>(val));
+    } catch (const Exception& e) {
+      fnord::logWarning("cm.indexbuld", e, "invalid json: $0", val.toString());
+    }
+
+    if (!idx_req.isEmpty()) {
+      index_writer->updateDocument(idx_req.get());
+    }
+
+    if (!cursor->next()) {
+      break;
+    }
+  }
+
+  status_line.runForce();
+}
+
 int main(int argc, const char** argv) {
   Application::init();
   Application::logToStderr();
@@ -277,6 +327,15 @@ int main(int argc, const char** argv) {
       "<docid>");
 
   flags.defineFlag(
+      "import_sstable",
+      fnord::cli::FlagParser::T_STRING,
+      false,
+      NULL,
+      NULL,
+      "import sstable",
+      "<file>");
+
+  flags.defineFlag(
       "loglevel",
       fnord::cli::FlagParser::T_STRING,
       false,
@@ -317,6 +376,9 @@ int main(int argc, const char** argv) {
     } else {
       index_writer->rebuildFTS(cm::DocID { .docid = docid });
     }
+  } else if (flags.isSet("import_sstable")) {
+    auto sstable_filename = flags.getString("import_sstable");
+    importSSTable(index_writer, sstable_filename);
   } else {
     buildIndexFromFeed(index_writer, flags);
   }
@@ -325,59 +387,4 @@ int main(int argc, const char** argv) {
   fnord::logInfo("cm.indexbuild", "Exiting...");
   return 0;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-/* open lucene index */
-  /*
-  auto index_path = FileUtil::joinPaths(
-      cmdata_path,
-      StringUtil::format("index/$0/fts", cmcustomer));
-  FileUtil::mkdir_p(index_path);
-
-  */
-  // index document
-/*
-*/
-
-
-  //index_writer->commit();
-  //index_writer->close();
-
-  // simple search
-  /*
-  auto index_reader = fts::IndexReader::open(
-      fts::FSDirectory::open(StringUtil::convertUTF8To16(index_path)),
-      true);
-
-  auto searcher = fts::newLucene<fts::IndexSearcher>(index_reader);
-
-  auto analyzer = fts::newLucene<fts::StandardAnalyzer>(
-      fts::LuceneVersion::LUCENE_CURRENT);
-
-  auto query_parser = fts::newLucene<fts::QueryParser>(
-      fts::LuceneVersion::LUCENE_CURRENT,
-      L"keywords",
-      analyzer);
-
-  auto collector = fts::TopScoreDocCollector::create(
-      500,
-      false);
-
-  auto query = query_parser->parse(L"fnordy");
-
-  searcher->search(query, collector);
-  fnord::iputs("found $0 documents", collector->getTotalHits());
-  */
-
 
