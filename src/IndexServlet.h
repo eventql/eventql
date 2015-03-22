@@ -40,6 +40,11 @@ protected:
       http::HTTPResponse* response,
       URI* uri);
 
+  void fetchDocs(
+      http::HTTPRequest* request,
+      http::HTTPResponse* response,
+      URI* uri);
+
   RefPtr<cm::IndexReader> index_;
   RefPtr<fts::Analyzer> analyzer_;
 };

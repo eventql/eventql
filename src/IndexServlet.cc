@@ -36,6 +36,10 @@ void IndexServlet::handleHTTPRequest(
       return fetchDoc(req, res, &uri);
     }
 
+    if (StringUtil::endsWith(uri.path(), "/doc")) {
+      return fetchDocs(req, res, &uri);
+    }
+
     res->setStatus(fnord::http::kStatusNotFound);
     res->addBody("not found");
   } catch (const Exception& e) {
@@ -96,5 +100,43 @@ void IndexServlet::fetchDoc(
   res->addBody(doc_json);
 }
 
+void IndexServlet::fetchDocs(
+    http::HTTPRequest* req,
+    http::HTTPResponse* res,
+    URI* uri) {
+  const auto& params = uri->queryParams();
+
+  String docids_str;
+  if (!fnord::URI::getParam(params, "ids", &docids_str)) {
+    res->addBody("error: missing ?ids=... parameter");
+    res->setStatus(http::kStatusBadRequest);
+    return;
+  }
+
+  auto docid_strs = StringUtil::split(docids_str, ",");
+
+  json::JSONObject json;
+  json.emplace_back(json::JSON_OBJECT_BEGIN);
+
+  for (const auto& docid_str : docid_strs) {
+    DocID docid = { .docid = docid_str };
+    auto txn = index_->db_->startTransaction(true);
+    auto doc = index_->docIndex()->findDocument(docid, txn.get());
+    txn->abort();
+
+    auto fields = doc->fields();
+    fields["docid"] = docid_str;
+
+    json.emplace_back(json::JSON_STRING, docid_str);
+    json::toJSON(fields, &json);
+  }
+
+  json.emplace_back(json::JSON_OBJECT_END);
+
+  auto doc_json = json::toJSONString(json);
+  res->setStatus(http::kStatusOK);
+  res->addHeader("Content-Type", "application/json; charset=utf-8");
+  res->addBody(doc_json);
+}
 
 }
