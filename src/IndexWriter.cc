@@ -134,6 +134,13 @@ void IndexWriter::rebuildFTS(RefPtr<Document> doc) {
       "Rebuilding FTS Index for docid=$0",
       doc->docID().docid);
 
+  fts_doc->add(
+      fts::newLucene<fts::Field>(
+          L"_docid",
+          StringUtil::convertUTF8To16(doc->docID().docid),
+          fts::Field::STORE_YES,
+          fts::Field::INDEX_NOT_ANALYZED_NO_NORMS));
+
   HashMap<String, String> fts_fields_anal;
   for (const auto& f : doc->fields()) {
 
@@ -141,34 +148,66 @@ void IndexWriter::rebuildFTS(RefPtr<Document> doc) {
     if (StringUtil::beginsWith(f.first, "title~")) {
       auto k = f.first;
       StringUtil::replaceAll(&k, "title~","title~");
-      fts_fields_anal[k] += " ";
-      fts_fields_anal[k] += f.second;
+      fts_fields_anal[k] += " " + f.second;
     }
 
     /* description~LANG */
-    if (StringUtil::beginsWith(f.first, "description~")) {
+    else if (StringUtil::beginsWith(f.first, "description~")) {
       auto k = f.first;
       StringUtil::replaceAll(&k, "description~","text~");
-      fts_fields_anal[k] += " ";
-      fts_fields_anal[k] += f.second;
+      fts_fields_anal[k] += " " + f.second;
+    }
+
+    /* size_description~LANG */
+    else if (StringUtil::beginsWith(f.first, "size_description~")) {
+      auto k = f.first;
+      StringUtil::replaceAll(&k, "size_description~","text~");
+      fts_fields_anal[k] += " " + f.second;
+    }
+
+    /* material_description~LANG */
+    else if (StringUtil::beginsWith(f.first, "material_description~")) {
+      auto k = f.first;
+      StringUtil::replaceAll(&k, "material_description~","text~");
+      fts_fields_anal[k] += " " + f.second;
+    }
+
+    /* manufacturing_description~LANG */
+    else if (StringUtil::beginsWith(f.first, "manufacturing_description~")) {
+      auto k = f.first;
+      StringUtil::replaceAll(&k, "manufacturing_description~","text~");
+      fts_fields_anal[k] += " " + f.second;
     }
 
     /* tags_as_text~LANG */
-    if (StringUtil::beginsWith(f.first, "tags_as_text~")) {
-      auto k = f.first;
-      StringUtil::replaceAll(&k, "tags_as_text~","text~");
-      fts_fields_anal[k] += " ";
-      fts_fields_anal[k] += f.second;
+    else if (StringUtil::beginsWith(f.first, "tags_as_text~")) {
+      fts_fields_anal["tags"] += " " + f.second;
     }
 
-  }
+    /* shop_name */
+    else if (f.first == "shop_name") {
+      fts_fields_anal["tags"] += " " + f.second;
+    }
 
-  fts_doc->add(
-      fts::newLucene<fts::Field>(
-          L"_docid",
-          StringUtil::convertUTF8To16(doc->docID().docid),
-          fts::Field::STORE_YES,
-          fts::Field::INDEX_NOT_ANALYZED_NO_NORMS));
+    /* cm_clicked_terms */
+    else if (f.first == "cm_clicked_terms") {
+      fts_doc->add(
+          fts::newLucene<fts::Field>(
+              L"cm_clicked_terms",
+              StringUtil::convertUTF8To16(f.second),
+              fts::Field::STORE_NO,
+              fts::Field::INDEX_ANALYZED));
+    }
+
+    else if (f.first == "cm_ctr_norm_std") {
+      fts_doc->add(
+          fts::newLucene<fts::Field>(
+              L"cm_ctr_norm_std",
+              StringUtil::convertUTF8To16(f.second),
+              fts::Field::STORE_YES,
+              fts::Field::INDEX_NOT_ANALYZED));
+    }
+  }
 
   for (const auto& f : fts_fields_anal) {
     fts_doc->add(
