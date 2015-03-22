@@ -140,5 +140,43 @@ void FeatureIndexWriter::updateFeatureIndex(
   }
 }
 
+void FeatureIndexWriter::listDocuments(
+    Function<bool (const DocID& id)> fn,
+    mdb::MDBTransaction* txn) {
+  Buffer key;
+  Buffer value;
+  String last_key;
+
+  auto cursor = txn->getCursor();
+  for (int n = 0; ; ) {
+    bool eof;
+    if (n++ == 0) {
+      eof = !cursor->getFirst(&key, &value);
+    } else {
+      eof = !cursor->getNext(&key, &value);
+    }
+
+    if (eof) {
+      break;
+    }
+
+    auto key_str = key.toString();
+    if (StringUtil::beginsWith(key_str, "__")) {
+      continue;
+    }
+
+    key_str.erase(key_str.find("~", 3), std::string::npos);
+    if (key_str == last_key) {
+      continue;
+    }
+
+    last_key = key_str;
+    if (!fn(DocID { .docid = key_str })) {
+      break;
+    }
+  }
+
+  cursor->close();
+}
 } // namespace cm
 
