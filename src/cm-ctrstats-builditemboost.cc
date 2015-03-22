@@ -496,15 +496,19 @@ int main(int argc, const char** argv) {
               val.toString());
         }
 
-        if (!q.isEmpty()) {
-          indexJoinedQuery(
-              q.get(),
-              cm::ItemEligibility::DAWANDA_ALL_NOBOTS,
-              //&feature_index,
-              &analyzer,
-              lang,
-              &counters,
-              &global_counter);
+        try {
+          if (!q.isEmpty()) {
+            indexJoinedQuery(
+                q.get(),
+                cm::ItemEligibility::DAWANDA_ALL_NOBOTS,
+                //&feature_index,
+                &analyzer,
+                lang,
+                &counters,
+                &global_counter);
+          }
+        } catch (const Exception& e) {
+          fnord::logError("cm.ctrstats", e, "error while indexing query");
         }
       }
 
