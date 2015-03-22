@@ -59,15 +59,16 @@ void SearchQuery::execute(IndexReader* index) {
 
   auto searcher = index->ftsSearcher();
   searcher->search(query, results_);
-  auto hits = results_->topDocs()->scoreDocs;
+
 
   fnord::iputs("return $0 docs", results_->getTotalHits());
-  for (int32_t i = 0; i < hits.size(); ++i) {
-    auto doc = searcher->doc(hits[i]->doc);
+  results_->topDocs()->forEach([&searcher] (fts::ScoreDoc* sdoc) -> bool {
+    auto doc = searcher->doc(sdoc->doc);
     fnord::WString docid_w = doc->get(L"_docid");
     String docid = StringUtil::convertUTF16To8(docid_w);
-    fnord::iputs("doc $0 -> $1, $2", i, hits[i]->doc, docid);
-  }
+    fnord::iputs("doc $1 -> $2", sdoc->doc, docid);
+    return true;
+  });
 }
 
 }
