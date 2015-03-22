@@ -135,7 +135,7 @@ void IndexWriter::rebuildFTS(RefPtr<Document> doc) {
           fts::Field::STORE_YES,
           fts::Field::INDEX_NOT_ANALYZED_NO_NORMS));
 
-  double boost = 1.0;
+  double boost = 0.7;
   double cm_clicks = 0;
   double cm_views = 0;
   double cm_ctr_norm_std = 1.0;
