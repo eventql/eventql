@@ -115,6 +115,14 @@ void IndexServlet::fetchDocs(
 
   auto docid_strs = StringUtil::split(docids_str, ",");
 
+  Set<String> field_list;
+  String fieldlist_str;
+  if (fnord::URI::getParam(params, "fields", &fieldlist_str)) {
+    for (const auto& f : StringUtil::split(fieldlist_str, ",")) {
+      field_list.emplace(f);
+    }
+  }
+
   json::JSONObject json;
   json.emplace_back(json::JSON_OBJECT_BEGIN);
 
@@ -126,6 +134,15 @@ void IndexServlet::fetchDocs(
 
     auto fields = doc->fields();
     fields["docid"] = docid_str;
+    if (field_list.size() > 0) {
+      for (auto iter = fields.begin(); iter != fields.end(); ) {
+        if (field_list.count(iter->first) == 0) {
+          iter = fields.erase(iter);
+        } else {
+          ++iter;
+        }
+      }
+    }
 
     json.emplace_back(json::JSON_STRING, docid_str);
     json::toJSON(fields, &json);
