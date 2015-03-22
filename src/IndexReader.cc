@@ -53,7 +53,7 @@ RefPtr<IndexReader> IndexReader::openIndex(const String& index_path) {
   /* open mdb */
   auto db_path = FileUtil::joinPaths(index_path, "db");
   FileUtil::mkdir_p(db_path);
-  auto db = mdb::MDB::open(db_path, true);
+  auto db = mdb::MDB::open(db_path, true, 68719476736lu); // 64 GiB
 
   /* open lucene */
   auto fts_path = FileUtil::joinPaths(index_path, "fts");
