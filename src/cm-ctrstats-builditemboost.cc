@@ -205,6 +205,7 @@ void writeOutputTable(
       idx_req.attrs["cm_ctr_norm"] = StringUtil::toString(ctr_base);
       idx_req.attrs["cm_ctr_std"] = StringUtil::toString(ctr_std);
       idx_req.attrs["cm_ctr_norm_std"] = StringUtil::toString(ctr_base_std);
+      idx_req.attrs["cm_clicked_terms"] = terms_str;
       sstable_writer->appendRow("", json::toJSONString(idx_req));
     } else {
       sstable::SSTableColumnWriter cols(&sstable_schema);
