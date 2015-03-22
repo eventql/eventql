@@ -40,8 +40,13 @@ RefPtr<IndexWriter> IndexWriter::openIndex(
   feature_schema.registerFeature("material_description~pl", 21, 2);
   feature_schema.registerFeature("basic_attributes~pl", 22, 2);
   feature_schema.registerFeature("tags_as_text~pl", 23, 2);
+  feature_schema.registerFeature("image_filaename", 24, 2);
 
+  feature_schema.registerFeature("shop_name", 26, 3);
+  feature_schema.registerFeature("shop_platform", 27, 3);
+  feature_schema.registerFeature("shop_country", 28, 3);
   feature_schema.registerFeature("shop_rating_alt", 9, 3);
+  feature_schema.registerFeature("shop_rating_alt2", 15, 3);
   feature_schema.registerFeature("shop_products_count", 10, 3);
   feature_schema.registerFeature("shop_orders_count", 11, 3);
   feature_schema.registerFeature("shop_rating_count", 12, 3);
