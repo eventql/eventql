@@ -54,4 +54,8 @@ IndexReader::~IndexReader() {
   fts_->close();
 }
 
+std::shared_ptr<fts::IndexSearcher> IndexReader::ftsSearcher() {
+  return fts_searcher_;
+}
+
 } // namespace cm

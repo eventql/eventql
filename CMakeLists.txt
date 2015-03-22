@@ -156,6 +156,7 @@ add_executable(cm-indexserver
     src/DocStore.cc
     src/IndexReader.cc
     src/IndexServlet.cc
+    src/SearchQuery.cc
     src/cm-indexserver.cc)
 
 target_link_libraries(cm-indexserver

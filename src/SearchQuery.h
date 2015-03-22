@@ -6,12 +6,10 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-#ifndef _FNORD_FTS_FTSQUERY_H
-#define _FNORD_FTS_FTSQUERY_H
-#include "fnord-fts/fts.h"
-#include "fnord-fts/fts_common.h"
+#ifndef _CM_SEARCHQUERY_H
+#define _CM_SEARCHQUERY_H
 #include "fnord-fts/Analyzer.h"
-#include "fnord-fts/search/DisjunctionMaxQuery.h"
+#include "IndexReader.h"
 
 using namespace fnord;
 
