@@ -36,7 +36,7 @@ void IndexServlet::handleHTTPRequest(
       return fetchDoc(req, res, &uri);
     }
 
-    if (StringUtil::endsWith(uri.path(), "/doc")) {
+    if (StringUtil::endsWith(uri.path(), "/docs")) {
       return fetchDocs(req, res, &uri);
     }
 
