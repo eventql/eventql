@@ -38,7 +38,6 @@ public:
 
   ~IndexReader();
 
-  std::shared_ptr<fts::IndexReader> fts_;
 protected:
 
   IndexReader(
@@ -48,6 +47,8 @@ protected:
 
   FeatureSchema schema_;
   RefPtr<mdb::MDB> db_;
+  std::shared_ptr<fts::IndexReader> fts_;
+  std::shared_ptr<fts::IndexSearcher> fts_searcher_;
 };
 
 } // namespace cm

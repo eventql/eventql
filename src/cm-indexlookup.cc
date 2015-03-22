@@ -122,14 +122,14 @@ int main(int argc, const char** argv) {
   }
 
   if (flags.isSet("query")) {
-    fnord::fts::FTSQuery fts_query;
-    fts_query.addField("title~de", 2.0);
-    fts_query.addField("text~de", 1.0);
-    fts_query.addQuery(flags.getString("query"), Language::DE, &analyzer);
+    //fnord::fts::FTSQuery fts_query;
+    //fts_query.addField("title~de", 2.0);
+    //fts_query.addField("text~de", 1.0);
+    //fts_query.addQuery(flags.getString("query"), Language::DE, &analyzer);
 
-    auto searcher = std::make_shared<fnord::fts::IndexSearcher>(
-        index_reader->fts_);
-    fts_query.execute(searcher.get());
+    //auto searcher = std::make_shared<fnord::fts::IndexSearcher>(
+    //    index_reader->fts_);
+    //fts_query.execute(searcher.get());
     //fnord::iputs("found $0 documents", collector->getTotalHits());
     return 0;
   }
