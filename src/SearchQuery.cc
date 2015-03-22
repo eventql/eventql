@@ -15,7 +15,7 @@ using namespace fnord;
 
 namespace cm {
 
-SearchQuery::SearchQuery() {
+SearchQuery::SearchQuery() : total_hits_(0) {
   results_ = fts::TopScoreDocCollector::create(500, false);
 }
 
@@ -60,15 +60,42 @@ void SearchQuery::execute(IndexReader* index) {
   auto searcher = index->ftsSearcher();
   searcher->search(query, results_);
 
-
-  fnord::iputs("return $0 docs", results_->getTotalHits());
-  results_->topDocs()->forEach([&searcher] (fts::ScoreDoc* sdoc) -> bool {
+  total_hits_ = results_->getTotalHits();
+  results_->topDocs()->forEach([&searcher, this] (fts::ScoreDoc* sdoc) -> bool {
     auto doc = searcher->doc(sdoc->doc);
-    fnord::WString docid_w = doc->get(L"_docid");
-    String docid = StringUtil::convertUTF16To8(docid_w);
-    fnord::iputs("doc $1 -> $2", sdoc->doc, docid);
+    res_docids_.emplace_back(StringUtil::convertUTF16To8(doc->get(L"_docid")));
     return true;
   });
+}
+
+void SearchQuery::writeJSON(json::JSONOutputStream* json) {
+  json->beginObject();
+
+  json->addObjectEntry("total_hits");
+  json->addInteger(total_hits_);
+  json->addComma();
+
+  json->addObjectEntry("result_groups");
+  json->beginArray();
+  json->beginObject();
+  json->addObjectEntry("group_title");
+  json->addString("default");
+  json->addComma();
+  json->addObjectEntry("ids");
+  json->beginArray();
+  for (int i = 0; i < res_docids_.size(); ++i) {
+    if (i > 0) {
+      json->addComma();
+    }
+
+    json->addString(res_docids_[i]);
+  }
+  json->endArray();
+
+  json->endObject();
+  json->endArray();
+
+  json->endObject();
 }
 
 }

@@ -8,6 +8,7 @@
  */
 #include "IndexServlet.h"
 #include "SearchQuery.h"
+#include "fnord-json/json.h"
 
 using namespace fnord;
 
@@ -57,10 +58,12 @@ void IndexServlet::searchQuery(
   query.addField("title~de", 2.0);
   query.addField("text~de", 1.0);
   query.addQuery(query_str, Language::DE, analyzer_.get());
-
   query.execute(index_.get());
 
-  res->addBody("search!!! " + query_str);
+  res->setStatus(http::kStatusOK);
+  res->addHeader("Content-Type", "application/json; charset=utf-8");
+  json::JSONOutputStream jsons(res->getBodyOutputStream());
+  query.writeJSON(&jsons);
 }
 
 }
