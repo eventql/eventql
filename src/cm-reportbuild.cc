@@ -32,7 +32,7 @@
 #include "CTRCounter.h"
 #include <fnord-fts/fts.h>
 #include <fnord-fts/fts_common.h>
-#include "reports/Report.h"
+#include "reports/ReportBuilder.h"
 #include "reports/JoinedQueryTableReport.h"
 
 using namespace fnord;
@@ -78,7 +78,14 @@ int main(int argc, const char** argv) {
 
   fnord::fts::Analyzer analyzer(flags.getString("conf"));
 
+  cm::ReportBuilder report_builder;
 
+  //RefPtr<Report>(
+  report_builder.addReport(
+      new JoinedQueryTableReport(
+          Set<String> { "/tmp/dawanda_joined_queries.99066.sstable" }));
+
+  report_builder.buildAll();
   return 0;
 }
 

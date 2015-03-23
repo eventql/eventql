@@ -8,7 +8,8 @@
  */
 #ifndef _CM_JOINEDQUERYTABLEREPORT_H
 #define _CM_JOINEDQUERYTABLEREPORT_H
-#include "Report.h"
+#include "reports/Report.h"
+#include "JoinedQuery.h"
 
 using namespace fnord;
 
@@ -17,14 +18,19 @@ namespace cm {
 class JoinedQueryTableReport : public Report {
 public:
 
-  void addReport(RefPtr<Report> report);
+  JoinedQueryTableReport(const Set<String>& sstable_filenames);
+
+  void addReport(
+      RefPtr<Report> report,
+      Function<void (const cm::JoinedQuery& q)> on_query);
+
+  void build() override;
 
   Set<String> inputFiles() override;
   Set<String> outputFiles() override;
 
 protected:
   Set<String> input_files_;
-  Set<String> output_files_;
 };
 
 } // namespace cm
