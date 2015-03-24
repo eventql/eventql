@@ -30,14 +30,14 @@ namespace cm {
 class ReportBuilder : public RefCounted {
 public:
 
-  void addReport(RefPtr<Report> report);
+  ReportBuilder();
 
+  void addReport(RefPtr<Report> report);
   void buildAll();
 
 protected:
-
   size_t buildOnce();
-
+  size_t max_threads_;
   List<RefPtr<Report>> reports_;
 };
 

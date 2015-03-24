@@ -7,10 +7,13 @@
  * permission is obtained.
  */
 #include "ReportBuilder.h"
+#include <thread>
 
 using namespace fnord;
 
 namespace cm {
+
+ReportBuilder::ReportBuilder() : max_threads_(8) {}
 
 void ReportBuilder::addReport(RefPtr<Report> report) {
   reports_.emplace_back(report);
@@ -70,8 +73,9 @@ size_t ReportBuilder::buildOnce() {
     if (already_completed) {
       ++reports_completed;
     } else {
-      ++reports_runnable;
-      runnables.emplace_back(r);
+      if (++reports_runnable <= max_threads_) {
+        runnables.emplace_back(r);
+      }
     }
   }
 
@@ -84,26 +88,31 @@ size_t ReportBuilder::buildOnce() {
       reports_completed);
 
   fnord::logInfo("cm.reportbuild", "Running $0 report(s)", runnables.size());
-  for (int i = 0; i < runnables.size(); ++i) {
-    fnord::logInfo(
-        "cm.reportbuild",
-        "Running report $0/$1: '$2'",
-        i + 1,
-        runnables.size(),
-        "FIXME");
 
-    runnables[i]->onEvent(ReportEventType::BEGIN, nullptr, nullptr);
+  List<std::thread> threads;
+  for (int i = 0; i < runnables.size(); ++i) {
+    threads.emplace_back([i, &runnables] () {
+      fnord::logInfo(
+          "cm.reportbuild",
+          "Running report $0/$1: '$2'",
+          i + 1,
+          runnables.size(),
+          "FIXME");
+
+      runnables[i]->onEvent(ReportEventType::BEGIN, nullptr, nullptr);
+      runnables[i]->onEvent(ReportEventType::END, nullptr, nullptr);
+
+      fnord::logInfo(
+          "cm.reportbuild",
+          "Finished report $0/$1: '$2'",
+          i + 1,
+          runnables.size(),
+          "FIXME");
+    });
   }
 
-  for (int i = 0; i < runnables.size(); ++i) {
-    runnables[i]->onEvent(ReportEventType::END, nullptr, nullptr);
-
-    fnord::logInfo(
-        "cm.reportbuild",
-        "Finished report $0/$1: '$2'",
-        i + 1,
-        runnables.size(),
-        "FIXME");
+  for (auto& t : threads) {
+    t.join();
   }
 
   return reports_runnable;
