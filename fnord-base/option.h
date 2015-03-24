@@ -22,6 +22,7 @@ template <typename T>
 class Option {
 public:
   Option();
+  Option(std::nullptr_t n);
   Option(const T& value);
   Option(T&& value);
   Option(const Option<T>& other);
