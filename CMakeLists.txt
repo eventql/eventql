@@ -382,6 +382,7 @@ add_executable(cm-reportbuild
     $<TARGET_OBJECTS:fnord-fts>
     src/reports/ReportBuilder.cc
     src/reports/JoinedQueryTableReport.cc
+    src/reports/CTRByPositionReport.cc
     src/cm-reportbuild.cc)
 
 target_link_libraries(cm-reportbuild

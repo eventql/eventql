@@ -34,6 +34,7 @@
 #include <fnord-fts/fts_common.h>
 #include "reports/ReportBuilder.h"
 #include "reports/JoinedQueryTableReport.h"
+#include "reports/CTRByPositionReport.h"
 
 using namespace fnord;
 using namespace cm;
@@ -81,9 +82,13 @@ int main(int argc, const char** argv) {
   cm::ReportBuilder report_builder;
 
   //RefPtr<Report>(
-  report_builder.addReport(
-      new JoinedQueryTableReport(
-          Set<String> { "/tmp/dawanda_joined_queries.99066.sstable" }));
+  auto jq_report = new JoinedQueryTableReport(
+      Set<String> { "/tmp/dawanda_joined_queries.99066.sstable" });
+
+  jq_report->addReport(
+      new CTRByPositionReport("/tmp/dawanda_ctrbyposi.99066.sstable"));
+
+  report_builder.addReport(jq_report);
 
   report_builder.buildAll();
   return 0;
