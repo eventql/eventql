@@ -12,6 +12,11 @@
 #include "CTRCounter.h"
 #include "ItemRef.h"
 #include "common.h"
+#include "fnord-sstable/sstablereader.h"
+#include "fnord-sstable/sstablewriter.h"
+#include "fnord-sstable/SSTableColumnSchema.h"
+#include "fnord-sstable/SSTableColumnReader.h"
+#include "fnord-sstable/SSTableColumnWriter.h"
 
 using namespace fnord;
 
@@ -28,6 +33,8 @@ public:
 
 protected:
   String output_file_;
+  std::unique_ptr<sstable::SSTableWriter> sstable_writer_;
+  sstable::SSTableColumnSchema sstable_schema_;
 };
 
 } // namespace cm

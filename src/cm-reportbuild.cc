@@ -65,6 +65,15 @@ int main(int argc, const char** argv) {
       "<path>");
 
   flags.defineFlag(
+      "artifacts",
+      cli::FlagParser::T_STRING,
+      false,
+      NULL,
+      NULL,
+      "artifact directory",
+      "<path>");
+
+  flags.defineFlag(
       "loglevel",
       fnord::cli::FlagParser::T_STRING,
       false,
@@ -82,16 +91,28 @@ int main(int argc, const char** argv) {
 
   cm::ReportBuilder report_builder;
 
-  //RefPtr<Report>(
-  auto jq_report = new JoinedQueryTableReport(
-      Set<String> { "/tmp/dawanda_joined_queries.99066.sstable" });
+  Set<uint64_t> generations { };
 
-  auto ctr_by_posi_report = new CTRByPositionReport(ItemEligibility::ALL);
-  ctr_by_posi_report->addReport(
-      new CTRCounterSSTableSink("/tmp/dawanda_ctrbyposi.99066.sstable"));
-  jq_report->addReport(ctr_by_posi_report);
+  /* find all generations */
+  auto dir = flags.getString("artifacts");
+  FileUtil::ls(dir, [&generations] (const String& file) -> bool {
+    String prefix = "dawanda_joined_queries.";
+    if (StringUtil::beginsWith(file, prefix)) {
+      generations.emplace(std::stoul(file.substr(prefix.length())));
+    }
+    return true;
+  });
 
-  report_builder.addReport(jq_report);
+  for (const auto& g : generations) {
+    auto jq_report = new JoinedQueryTableReport(Set<String> {
+        StringUtil::format("$0/dawanda_joined_queries.$1.sstable", dir, g) });
+    report_builder.addReport(jq_report);
+
+    auto ctr_by_posi_report = new CTRByPositionReport(ItemEligibility::ALL);
+    ctr_by_posi_report->addReport(new CTRCounterSSTableSink(
+        StringUtil::format("$0/dawanda_ctr_by_position.$1.sstable", dir, g)));
+    jq_report->addReport(ctr_by_posi_report);
+  }
 
   report_builder.buildAll();
   return 0;

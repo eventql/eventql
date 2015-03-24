@@ -18,15 +18,18 @@ CTRByPositionReport::CTRByPositionReport(
 
 void CTRByPositionReport::onEvent(ReportEventType type, void* ev) {
   switch (type) {
+
+    case ReportEventType::BEGIN:
+      emitEvent(type, ev);
+      return;
+
     case ReportEventType::JOINED_QUERY:
       onJoinedQuery(*((JoinedQuery*) ev));
       return;
 
-    case ReportEventType::BEGIN:
-      return;
-
     case ReportEventType::END:
       flushResults();
+      emitEvent(type, ev);
       return;
 
     default:
@@ -55,7 +58,6 @@ void CTRByPositionReport::onJoinedQuery(const JoinedQuery& q) {
         test_group,
         item.position);
 
-    fnord::iputs("key: $0 ---- $1", key, q.attrs);
     auto& ctr = counters_[key];
     ++ctr.num_views;
     ctr.num_clicks += item.clicked;

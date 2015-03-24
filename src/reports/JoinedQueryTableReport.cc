@@ -25,18 +25,12 @@ JoinedQueryTableReport::JoinedQueryTableReport(
 void JoinedQueryTableReport::onEvent(ReportEventType type, void* ev) {
   switch (type) {
     case ReportEventType::BEGIN:
-      for (const auto& cld : children_) {
-        cld->onEvent(ReportEventType::BEGIN, nullptr);
-      }
-
+      emitEvent(type, ev);
       readTables();
       return;
 
     case ReportEventType::END:
-      for (const auto& cld : children_) {
-        cld->onEvent(ReportEventType::END, nullptr);
-      }
-
+      emitEvent(type, ev);
       return;
 
     default:
@@ -103,9 +97,7 @@ void JoinedQueryTableReport::readTables() {
       }
 
       if (!q.isEmpty()) {
-        for (const auto& cld : children_) {
-          cld->onEvent(ReportEventType::JOINED_QUERY, &q.get());
-        }
+        emitEvent(ReportEventType::JOINED_QUERY, &q.get());
       }
 
       if (!cursor->next()) {
