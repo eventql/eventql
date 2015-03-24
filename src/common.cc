@@ -50,14 +50,43 @@ Option<String> extractAttr(const Vector<String>& attrs, const String& attr) {
 }
 
 String extractDeviceType(const Vector<String>& attrs) {
-  return "unknown";
+  auto x_str = extractAttr(attrs, "u_x");
+  auto y_str = extractAttr(attrs, "u_y");
+
+  if (x_str.isEmpty() || y_str.isEmpty()) {
+    return "unknown";
+  }
+
+  auto x = std::stod(x_str.get());
+  auto y = std::stod(x_str.get());
+
+  if (x < 10 || y < 10) {
+    return "unknown";
+  }
+
+  if (x < 800) {
+    return "phone";
+  }
+
+  if (x < 1250) {
+    return "tablet";
+  }
+
+  return "desktop";
 }
 
 String extractTestGroup(const Vector<String>& attrs) {
-  return "unknown";
+  auto test_group = extractAttr(attrs, "dw_ab");
+  return test_group.isEmpty() ? "unknown" : test_group.get();
 }
 
 Language extractLanguage(const Vector<String>& attrs) {
+  auto l = extractAttr(attrs, "l");
+
+  if (!l.isEmpty()) {
+    return languageFromString(l.get());
+  }
+
   // FIXPAUL hack!!!
   if (!extractAttr(attrs, "qstr~de").isEmpty()) {
     return Language::DE;
