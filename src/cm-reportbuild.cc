@@ -129,7 +129,7 @@ int main(int argc, const char** argv) {
         3 * kSecondsPerDay)) {
     Set<String> ctr_posi_sources;
     for (const auto& ig : mkGenerations(
-        1 * kSecondsPerDay,
+        4 * kSecondsPerHour,
         30 * kSecondsPerDay,
         og * kSecondsPerDay)) {
       ctr_posi_sources.emplace(
