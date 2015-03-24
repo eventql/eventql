@@ -63,7 +63,9 @@ void CTRByPositionReport::onJoinedQuery(const JoinedQuery& q) {
 }
 
 void CTRByPositionReport::flushResults() {
-
+  for (auto& ctr : counters_) {
+    emitEvent(ReportEventType::CTR_COUNTER, &ctr);
+  }
 }
 
 } // namespace cm

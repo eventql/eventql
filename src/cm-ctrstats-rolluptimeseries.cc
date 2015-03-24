@@ -32,7 +32,7 @@
 using namespace fnord;
 
 typedef Tuple<String, uint64_t, double> OutputRow;
-typedef HashMap<String, HashMap<uint64_t, cm::CTRCounter>> CounterMap;
+typedef HashMap<String, HashMap<uint64_t, cm::CTRCounterData>> CounterMap;
 
 /* read all input sstables */
 void importInputTables(

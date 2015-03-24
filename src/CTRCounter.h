@@ -15,18 +15,19 @@ using namespace fnord;
 
 namespace cm {
 
-struct CTRCounter {
-  static void write(const CTRCounter& counter, Buffer* buf);
-  static CTRCounter load(const Buffer& buf);
+struct CTRCounterData {
+  static void write(const CTRCounterData& counter, Buffer* buf);
+  static CTRCounterData load(const Buffer& buf);
 
-  CTRCounter();
-  void merge(const CTRCounter& other);
+  CTRCounterData();
+  void merge(const CTRCounterData& other);
 
   uint64_t num_views;
   uint64_t num_clicked;
   uint64_t num_clicks;
 };
 
+typedef Pair<String, CTRCounterData> CTRCounter;
 
 }
 #endif

@@ -34,7 +34,7 @@ using namespace fnord;
 using namespace cm;
 
 typedef Tuple<String, uint64_t, uint64_t> OutputRow;
-typedef HashMap<String, cm::CTRCounter> CounterMap;
+typedef HashMap<String, cm::CTRCounterData> CounterMap;
 
 InternMap intern_map;
 
