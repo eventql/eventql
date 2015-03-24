@@ -40,9 +40,12 @@ Set<String> Report::outputFiles() {
   return files;
 }
 
-void Report::emitEvent(ReportEventType type, void* ev) {
+void Report::emitEvent(
+      ReportEventType type,
+      ReportEventTime time,
+      void* ev) {
   for (const auto& cld : children_) {
-    cld->onEvent(type, ev);
+    cld->onEvent(type, time, ev);
   }
 }
 

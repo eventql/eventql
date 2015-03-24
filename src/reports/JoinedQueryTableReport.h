@@ -20,16 +20,18 @@ public:
 
   JoinedQueryTableReport(const Set<String>& sstable_filenames);
 
-  void onEvent(ReportEventType type, void* ev) override;
+  void onEvent(
+      ReportEventType type,
+      ReportEventTime time,
+      void* ev) override;
 
   Set<String> inputFiles() override;
 
 protected:
-
   void readTables();
-
   Set<String> input_files_;
 };
+
 
 } // namespace cm
 

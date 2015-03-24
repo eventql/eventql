@@ -9,7 +9,12 @@
 #ifndef _CM_CTRCONTERSSTABLESOURCE_H
 #define _CM_CTRCONTERSSTABLESOURCE_H
 #include "reports/Report.h"
-#include "CTRCounterSSTableSource.h"
+#include "fnord-sstable/sstablereader.h"
+#include "fnord-sstable/sstablewriter.h"
+#include "fnord-sstable/SSTableColumnSchema.h"
+#include "fnord-sstable/SSTableColumnReader.h"
+#include "fnord-sstable/SSTableColumnWriter.h"
+#include "CTRCounter.h"
 
 using namespace fnord;
 
@@ -20,7 +25,10 @@ public:
 
   CTRCounterSSTableSource(const Set<String>& sstable_filenames);
 
-  void onEvent(ReportEventType type, void* ev) override;
+  void onEvent(
+      ReportEventType type,
+      ReportEventTime time,
+      void* ev) override;
 
   Set<String> inputFiles() override;
 
@@ -29,6 +37,7 @@ protected:
   void readTables();
 
   Set<String> input_files_;
+  sstable::SSTableColumnSchema sstable_schema_;
 };
 
 } // namespace cm

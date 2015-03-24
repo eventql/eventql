@@ -7,6 +7,7 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
+#include <fnord-json/json.h>
 #include "reports/CTRCounterSSTableSink.h"
 
 using namespace fnord;
@@ -21,10 +22,13 @@ CTRCounterSSTableSink::CTRCounterSSTableSink(
   sstable_schema_.addColumn("num_clicked", 3, sstable::SSTableColumnType::UINT64);
 }
 
-void CTRCounterSSTableSink::onEvent(ReportEventType type, void* ev) {
+void CTRCounterSSTableSink::onEvent(
+    ReportEventType type,
+    ReportEventTime time,
+    void* ev) {
   switch (type) {
 
-    case ReportEventType::BEGIN:
+    case ReportEventType::BEGIN: {
       if (FileUtil::exists(output_file_ + "~")) {
         fnord::logInfo(
             "cm.ctrstats",
@@ -39,13 +43,21 @@ void CTRCounterSSTableSink::onEvent(ReportEventType type, void* ev) {
           "Opening output sstable: $0",
           output_file_);
 
+      HashMap<String, String> out_hdr;
+      out_hdr["start_time"] =
+          StringUtil::toString(time.get().first.unixMicros());
+      out_hdr["end_time"] =
+          StringUtil::toString(time.get().second.unixMicros());
+      auto outhdr_json = json::toJSONString(out_hdr);
+
       sstable_writer_ = sstable::SSTableWriter::create(
           output_file_ + "~",
           sstable::IndexProvider{},
-          NULL,
-          0);
+          outhdr_json.data(),
+          outhdr_json.length());
 
       return;
+    }
 
     case ReportEventType::CTR_COUNTER: {
       sstable::SSTableColumnWriter cols(&sstable_schema_);
@@ -56,7 +68,7 @@ void CTRCounterSSTableSink::onEvent(ReportEventType type, void* ev) {
       return;
     }
 
-    case ReportEventType::END:
+    case ReportEventType::END: {
       fnord::logInfo(
           "cm.ctrstats",
           "Finalizing output sstable: $0",
@@ -67,6 +79,7 @@ void CTRCounterSSTableSink::onEvent(ReportEventType type, void* ev) {
 
       FileUtil::mv(output_file_ + "~", output_file_);
       return;
+    }
 
     default:
       RAISE(kRuntimeError, "unknown event type");

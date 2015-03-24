@@ -16,11 +16,14 @@ CTRByPositionReport::CTRByPositionReport(
     ItemEligibility eligibility) :
     eligibility_(eligibility) {}
 
-void CTRByPositionReport::onEvent(ReportEventType type, void* ev) {
+void CTRByPositionReport::onEvent(
+    ReportEventType type,
+    ReportEventTime time,
+    void* ev) {
   switch (type) {
 
     case ReportEventType::BEGIN:
-      emitEvent(type, ev);
+      emitEvent(type, time, ev);
       return;
 
     case ReportEventType::JOINED_QUERY:
@@ -29,7 +32,7 @@ void CTRByPositionReport::onEvent(ReportEventType type, void* ev) {
 
     case ReportEventType::END:
       flushResults();
-      emitEvent(type, ev);
+      emitEvent(type, time, ev);
       return;
 
     default:
@@ -66,7 +69,7 @@ void CTRByPositionReport::onJoinedQuery(const JoinedQuery& q) {
 
 void CTRByPositionReport::flushResults() {
   for (auto& ctr : counters_) {
-    emitEvent(ReportEventType::CTR_COUNTER, &ctr);
+    emitEvent(ReportEventType::CTR_COUNTER, nullptr, &ctr);
   }
 }
 

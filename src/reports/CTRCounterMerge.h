@@ -24,7 +24,10 @@ namespace cm {
  */
 class CTRCounterMerge : public Report {
 public:
-  void onEvent(ReportEventType type, void* ev) override;
+  void onEvent(
+      ReportEventType type,
+      ReportEventTime time,
+      void* ev) override;
 protected:
   void onCounter(const CTRCounter& c);
   void flushResults();

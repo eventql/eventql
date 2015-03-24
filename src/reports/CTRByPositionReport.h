@@ -26,7 +26,11 @@ class CTRByPositionReport : public Report {
 public:
 
   CTRByPositionReport(ItemEligibility eligibility);
-  void onEvent(ReportEventType type, void* ev) override;
+
+  void onEvent(
+      ReportEventType type,
+      ReportEventTime time,
+      void* ev) override;
 
 protected:
 

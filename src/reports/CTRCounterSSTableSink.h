@@ -27,7 +27,10 @@ public:
 
   CTRCounterSSTableSink(const String& output_file);
 
-  void onEvent(ReportEventType type, void* ev) override;
+  void onEvent(
+      ReportEventType type,
+      ReportEventTime time,
+      void* ev) override;
 
   Set<String> outputFiles() override;
 

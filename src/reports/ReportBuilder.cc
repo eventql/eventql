@@ -17,6 +17,10 @@ void ReportBuilder::addReport(RefPtr<Report> report) {
 }
 
 void ReportBuilder::buildAll() {
+  while (buildOnce() > 0) {}
+}
+
+size_t ReportBuilder::buildOnce() {
   Set<String> existing_files;
   fnord::logInfo("cm.reportbuild", "Scanning dependencies...");
 
@@ -88,11 +92,11 @@ void ReportBuilder::buildAll() {
         runnables.size(),
         "FIXME");
 
-    runnables[i]->onEvent(ReportEventType::BEGIN, nullptr);
+    runnables[i]->onEvent(ReportEventType::BEGIN, nullptr, nullptr);
   }
 
   for (int i = 0; i < runnables.size(); ++i) {
-    runnables[i]->onEvent(ReportEventType::END, nullptr);
+    runnables[i]->onEvent(ReportEventType::END, nullptr, nullptr);
 
     fnord::logInfo(
         "cm.reportbuild",
@@ -101,6 +105,8 @@ void ReportBuilder::buildAll() {
         runnables.size(),
         "FIXME");
   }
+
+  return reports_runnable;
 }
 
 } // namespace cm
