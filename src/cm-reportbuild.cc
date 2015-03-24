@@ -86,7 +86,9 @@ int main(int argc, const char** argv) {
       Set<String> { "/tmp/dawanda_joined_queries.99066.sstable" });
 
   jq_report->addReport(
-      new CTRByPositionReport("/tmp/dawanda_ctrbyposi.99066.sstable"));
+      new CTRByPositionReport(
+          ItemEligibility::ALL,
+          "/tmp/dawanda_ctrbyposi.99066.sstable"));
 
   report_builder.addReport(jq_report);
 

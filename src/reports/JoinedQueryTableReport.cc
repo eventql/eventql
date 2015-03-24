@@ -22,10 +22,6 @@ JoinedQueryTableReport::JoinedQueryTableReport(
     const Set<String>& sstable_filenames) :
     input_files_(sstable_filenames) {}
 
-void JoinedQueryTableReport::addReport(RefPtr<Report> report) {
-  children_.emplace_back(report);
-}
-
 void JoinedQueryTableReport::onEvent(ReportEventType type, void* ev) {
   switch (type) {
     case ReportEventType::BEGIN:
@@ -121,18 +117,6 @@ void JoinedQueryTableReport::readTables() {
 
 Set<String> JoinedQueryTableReport::inputFiles() {
   return input_files_;
-}
-
-Set<String> JoinedQueryTableReport::outputFiles() {
-  Set<String> files;
-
-  for (const auto& cld : children_) {
-    for (const auto& f : cld->outputFiles()) {
-      files.emplace(f);
-    }
-  }
-
-  return files;
 }
 
 } // namespace cm

@@ -49,6 +49,28 @@ Option<String> extractAttr(const Vector<String>& attrs, const String& attr) {
   return None<String>();
 }
 
+String extractDeviceType(const Vector<String>& attrs) {
+  return "unknown";
+}
+
+String extractTestGroup(const Vector<String>& attrs) {
+  return "unknown";
+}
+
+Language extractLanguage(const Vector<String>& attrs) {
+  // FIXPAUL hack!!!
+  if (!extractAttr(attrs, "qstr~de").isEmpty()) {
+    return Language::DE;
+  }
+
+  if (!extractAttr(attrs, "qstr~pl").isEmpty()) {
+    return Language::PL;
+  }
+
+  return Language::UNKNOWN;
+}
+
+
 String joinBagOfWords(const Set<String>& words) {
   Vector<String> v;
 

@@ -380,6 +380,7 @@ add_executable(cm-reportbuild
     $<TARGET_OBJECTS:fnord-rpc>
     $<TARGET_OBJECTS:fnord-sstable>
     $<TARGET_OBJECTS:fnord-fts>
+    src/reports/Report.cc
     src/reports/ReportBuilder.cc
     src/reports/JoinedQueryTableReport.cc
     src/reports/CTRByPositionReport.cc

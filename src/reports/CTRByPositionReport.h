@@ -10,15 +10,28 @@
 #define _CM_CTRBYPOSITIONREPORT_H
 #include "reports/Report.h"
 #include "JoinedQuery.h"
+#include "CTRCounter.h"
+#include "ItemRef.h"
+#include "common.h"
 
 using namespace fnord;
 
 namespace cm {
 
+/**
+ * Output Table Format:
+ *
+ *   key: <lang>~<devicetype>~<testgroup>~<posi>
+ *   columns: views, clicks
+ *
+ */
+
 class CTRByPositionReport : public Report {
 public:
 
-  CTRByPositionReport(const String& output_file);
+  CTRByPositionReport(
+      ItemEligibility eligibility,
+      const String& output_file);
 
   void onEvent(ReportEventType type, void* ev) override;
 
@@ -26,7 +39,12 @@ public:
   Set<String> outputFiles() override;
 
 protected:
+
+  void onJoinedQuery(const JoinedQuery& q);
+
+  ItemEligibility eligibility_;
   String output_file_;
+  HashMap<String, CTRCounter> counters_;
 };
 
 } // namespace cm
