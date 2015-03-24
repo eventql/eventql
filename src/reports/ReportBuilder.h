@@ -35,6 +35,9 @@ public:
   void buildAll();
 
 protected:
+
+  size_t buildOnce();
+
   List<RefPtr<Report>> reports_;
 };
 

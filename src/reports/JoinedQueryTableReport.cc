@@ -22,15 +22,18 @@ JoinedQueryTableReport::JoinedQueryTableReport(
     const Set<String>& sstable_filenames) :
     input_files_(sstable_filenames) {}
 
-void JoinedQueryTableReport::onEvent(ReportEventType type, void* ev) {
+void JoinedQueryTableReport::onEvent(
+    ReportEventType type,
+    ReportEventTime time,
+    void* ev) {
   switch (type) {
-    case ReportEventType::BEGIN:
-      emitEvent(type, ev);
+    case ReportEventType::BEGIN: {
       readTables();
       return;
+    }
 
     case ReportEventType::END:
-      emitEvent(type, ev);
+      emitEvent(type, time, ev);
       return;
 
     default:
@@ -40,8 +43,9 @@ void JoinedQueryTableReport::onEvent(ReportEventType type, void* ev) {
 }
 
 void JoinedQueryTableReport::readTables() {
-  int row_idx = 0;
-  int tbl_idx = 0;
+  auto rep_start_time = std::numeric_limits<uint64_t>::max();
+  auto rep_end_time = std::numeric_limits<uint64_t>::min();
+
   for (const auto& sstable : input_files_) {
     fnord::logInfo("cm.ctrstats", "Importing sstable: $0", sstable);
 
@@ -52,38 +56,38 @@ void JoinedQueryTableReport::readTables() {
     }
 
     /* read report header */
-    //auto hdr = json::parseJSON(reader.readHeader());
+    auto hdr = json::parseJSON(reader.readHeader());
 
-    //auto tbl_start_time = json::JSONUtil::objectGetUInt64(
-    //    hdr.begin(),
-    //    hdr.end(),
-    //    "start_time").get();
+    auto tbl_start_time = json::JSONUtil::objectGetUInt64(
+        hdr.begin(),
+        hdr.end(),
+        "start_time").get();
 
-    //auto tbl_end_time = json::JSONUtil::objectGetUInt64(
-    //    hdr.begin(),
-    //    hdr.end(),
-    //    "end_time").get();
+    auto tbl_end_time = json::JSONUtil::objectGetUInt64(
+        hdr.begin(),
+        hdr.end(),
+        "end_time").get();
 
-    //if (tbl_start_time < start_time) {
-    //  start_time = tbl_start_time;
-    //}
+    if (tbl_start_time < rep_start_time) {
+      rep_start_time = tbl_start_time;
+    }
 
-    //if (tbl_end_time > end_time) {
-    //  end_time = tbl_end_time;
-    //}
+    if (tbl_end_time > rep_end_time) {
+      rep_end_time = tbl_end_time;
+    }
+  }
+
+  Pair<DateTime, DateTime> rep_time(rep_start_time, rep_end_time);
+  emitEvent(ReportEventType::BEGIN, Some(rep_time), nullptr);
+
+  int row_idx = 0;
+  int tbl_idx = 0;
+  for (const auto& sstable : input_files_) {
+    sstable::SSTableReader reader(File::openFile(sstable, File::O_READ));
 
     /* get sstable cursor */
     auto cursor = reader.getCursor();
     auto body_size = reader.bodySize();
-
-    /* status line */
-    //util::SimpleRateLimitedFn status_line(kMicrosPerSecond, [&] () {
-    //  fnord::logInfo(
-    //      "cm.ctrstats",
-    //      "[$1/$2] [$0%] Reading sstable... rows=$3",
-    //      (size_t) ((cursor->position() / (double) body_size) * 100),
-    //      tbl_idx + 1, sstables.size(), row_idx);
-    //});
 
     /* read sstable rows */
     for (; cursor->valid(); ++row_idx) {
@@ -97,7 +101,8 @@ void JoinedQueryTableReport::readTables() {
       }
 
       if (!q.isEmpty()) {
-        emitEvent(ReportEventType::JOINED_QUERY, &q.get());
+        auto ev_time = std::make_pair(q.get().time, q.get().time);
+        emitEvent(ReportEventType::JOINED_QUERY, Some(ev_time), &q.get());
       }
 
       if (!cursor->next()) {

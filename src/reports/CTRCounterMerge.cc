@@ -12,11 +12,14 @@ using namespace fnord;
 
 namespace cm {
 
-void CTRCounterMerge::onEvent(ReportEventType type, void* ev) {
+void CTRCounterMerge::onEvent(
+    ReportEventType type,
+    ReportEventTime time,
+    void* ev) {
   switch (type) {
 
     case ReportEventType::BEGIN:
-      emitEvent(type, ev);
+      emitEvent(type, time, ev);
       return;
 
     case ReportEventType::JOINED_QUERY:
@@ -25,7 +28,7 @@ void CTRCounterMerge::onEvent(ReportEventType type, void* ev) {
 
     case ReportEventType::END:
       flushResults();
-      emitEvent(type, ev);
+      emitEvent(type, time, ev);
       return;
 
     default:
@@ -36,6 +39,7 @@ void CTRCounterMerge::onEvent(ReportEventType type, void* ev) {
 
 void CTRCounterMerge::onCounter(const CTRCounter& c) {
   fnord::iputs("ctrcounter: $0", c.first);
+  //auto& ctr = counters_[key];
 }
 
 void CTRCounterMerge::flushResults() {

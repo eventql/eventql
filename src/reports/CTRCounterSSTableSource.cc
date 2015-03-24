@@ -8,11 +8,6 @@
  */
 #include "reports/CTRCounterSSTableSource.h"
 #include "fnord-json/json.h"
-#include "fnord-sstable/sstablereader.h"
-#include "fnord-sstable/sstablewriter.h"
-#include "fnord-sstable/SSTableColumnSchema.h"
-#include "fnord-sstable/SSTableColumnReader.h"
-#include "fnord-sstable/SSTableColumnWriter.h"
 
 using namespace fnord;
 
@@ -20,17 +15,23 @@ namespace cm {
 
 CTRCounterSSTableSource::CTRCounterSSTableSource(
     const Set<String>& sstable_filenames) :
-    input_files_(sstable_filenames) {}
+    input_files_(sstable_filenames) {
+  sstable_schema_.addColumn("num_views", 1, sstable::SSTableColumnType::UINT64);
+  sstable_schema_.addColumn("num_clicks", 2, sstable::SSTableColumnType::UINT64);
+  sstable_schema_.addColumn("num_clicked", 3, sstable::SSTableColumnType::UINT64);
+}
 
-void CTRCounterSSTableSource::onEvent(ReportEventType type, void* ev) {
+void CTRCounterSSTableSource::onEvent(
+    ReportEventType type,
+    ReportEventTime time,
+    void* ev) {
   switch (type) {
     case ReportEventType::BEGIN:
-      emitEvent(type, ev);
       readTables();
       return;
 
     case ReportEventType::END:
-      emitEvent(type, ev);
+      emitEvent(type, time, ev);
       return;
 
     default:
@@ -40,8 +41,9 @@ void CTRCounterSSTableSource::onEvent(ReportEventType type, void* ev) {
 }
 
 void CTRCounterSSTableSource::readTables() {
-  int row_idx = 0;
-  int tbl_idx = 0;
+  auto rep_start_time = std::numeric_limits<uint64_t>::max();
+  auto rep_end_time = std::numeric_limits<uint64_t>::min();
+
   for (const auto& sstable : input_files_) {
     fnord::logInfo("cm.ctrstats", "Importing sstable: $0", sstable);
 
@@ -52,25 +54,34 @@ void CTRCounterSSTableSource::readTables() {
     }
 
     /* read report header */
-    //auto hdr = json::parseJSON(reader.readHeader());
+    auto hdr = json::parseJSON(reader.readHeader());
 
-    //auto tbl_start_time = json::JSONUtil::objectGetUInt64(
-    //    hdr.begin(),
-    //    hdr.end(),
-    //    "start_time").get();
+    auto tbl_start_time = json::JSONUtil::objectGetUInt64(
+        hdr.begin(),
+        hdr.end(),
+        "start_time").get();
 
-    //auto tbl_end_time = json::JSONUtil::objectGetUInt64(
-    //    hdr.begin(),
-    //    hdr.end(),
-    //    "end_time").get();
+    auto tbl_end_time = json::JSONUtil::objectGetUInt64(
+        hdr.begin(),
+        hdr.end(),
+        "end_time").get();
 
-    //if (tbl_start_time < start_time) {
-    //  start_time = tbl_start_time;
-    //}
+    if (tbl_start_time < rep_start_time) {
+      rep_start_time = tbl_start_time;
+    }
 
-    //if (tbl_end_time > end_time) {
-    //  end_time = tbl_end_time;
-    //}
+    if (tbl_end_time > rep_end_time) {
+      rep_end_time = tbl_end_time;
+    }
+  }
+
+  Pair<DateTime, DateTime> rep_time(rep_start_time, rep_end_time);
+  emitEvent(ReportEventType::BEGIN, Some(rep_time), nullptr);
+
+  int row_idx = 0;
+  int tbl_idx = 0;
+  for (const auto& sstable : input_files_) {
+    sstable::SSTableReader reader(File::openFile(sstable, File::O_READ));
 
     /* get sstable cursor */
     auto cursor = reader.getCursor();
@@ -78,17 +89,19 @@ void CTRCounterSSTableSource::readTables() {
 
     /* read sstable rows */
     for (; cursor->valid(); ++row_idx) {
-      auto val = cursor->getDataBuffer();
+      CTRCounter c;
+      c.first = cursor->getKeyString();
 
-      //try {
-      //  q = Some(json::fromJSON<cm::JoinedQuery>(val));
-      //} catch (const Exception& e) {
-      //  fnord::logWarning("cm.ctrstats", e, "invalid json: $0", val.toString());
-      //}
+      auto cols_data = cursor->getDataBuffer();
+      sstable::SSTableColumnReader cols(&sstable_schema_, cols_data);
+      c.second.num_views = cols.getUInt64Column(
+          sstable_schema_.columnID("num_views"));
+      c.second.num_clicks = cols.getUInt64Column(
+          sstable_schema_.columnID("num_clicks"));
+      c.second.num_clicked = cols.getUInt64Column(
+          sstable_schema_.columnID("num_clicked"));
 
-      //if (!q.isEmpty()) {
-      //  emitEvent(ReportEventType::JOINED_QUERY, &q.get());
-      //}
+      emitEvent(ReportEventType::CTR_COUNTER, nullptr, &c);
 
       if (!cursor->next()) {
         break;

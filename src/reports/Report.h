@@ -38,19 +38,27 @@ enum class ReportEventType {
   CTR_COUNTER
 };
 
+typedef Option<Pair<DateTime, DateTime>> ReportEventTime;
+
 class Report : public RefCounted {
 public:
 
   void addReport(RefPtr<Report> report);
 
-  virtual void onEvent(ReportEventType type, void* ev) = 0;
+  virtual void onEvent(
+      ReportEventType type,
+      ReportEventTime time,
+      void* ev) = 0;
 
   virtual Set<String> inputFiles();
   virtual Set<String> outputFiles();
 
 protected:
 
-  void emitEvent(ReportEventType type, void* ev);
+  void emitEvent(
+      ReportEventType type,
+      ReportEventTime time,
+      void* ev);
 
   List<RefPtr<Report>> children_;
 };
