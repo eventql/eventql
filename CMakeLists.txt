@@ -416,3 +416,17 @@ add_executable(cm-tokenize
 
 target_link_libraries(cm-tokenize
     ${CMAKE_THREAD_LIBS_INIT} ${FNORD_FTS_LIBS})
+
+add_executable(cm-jqshuffle
+    $<TARGET_OBJECTS:cm-common>
+    $<TARGET_OBJECTS:fnord-base>
+    $<TARGET_OBJECTS:fnord-feeds>
+    $<TARGET_OBJECTS:fnord-mdb>
+    $<TARGET_OBJECTS:fnord-http>
+    $<TARGET_OBJECTS:fnord-json>
+    $<TARGET_OBJECTS:fnord-rpc>
+    $<TARGET_OBJECTS:fnord-sstable>
+    src/cm-jqshuffle.cc)
+
+target_link_libraries(cm-jqshuffle
+    ${CMAKE_THREAD_LIBS_INIT})
