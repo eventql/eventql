@@ -385,6 +385,8 @@ add_executable(cm-reportbuild
     src/reports/JoinedQueryTableReport.cc
     src/reports/CTRByPositionReport.cc
     src/reports/CTRCounterSSTableSink.cc
+    src/reports/CTRCounterSSTableSource.cc
+    src/reports/CTRCounterMerge.cc
     src/cm-reportbuild.cc)
 
 target_link_libraries(cm-reportbuild

@@ -26,6 +26,10 @@ class CTRCounterMerge : public Report {
 public:
   void onEvent(ReportEventType type, void* ev) override;
 protected:
+  void onCounter(const CTRCounter& c);
+  void flushResults();
+
+  CTRCounterData global_counter_;
   HashMap<String, CTRCounterData> counters_;
 };
 

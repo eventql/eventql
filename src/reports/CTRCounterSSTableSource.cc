@@ -79,7 +79,6 @@ void CTRCounterSSTableSource::readTables() {
     /* read sstable rows */
     for (; cursor->valid(); ++row_idx) {
       auto val = cursor->getDataBuffer();
-      Option<cm::JoinedQuery> q;
 
       //try {
       //  q = Some(json::fromJSON<cm::JoinedQuery>(val));

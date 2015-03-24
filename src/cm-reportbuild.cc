@@ -144,7 +144,8 @@ int main(int argc, const char** argv) {
     auto ctr_posi_rollup = new CTRCounterMerge();
     ctr_posi_rollup->addReport(new CTRCounterSSTableSink(
         StringUtil::format(
-            "$0/dawanda_ctr_by_position_merged.$0-$1.sstable",
+            "$0/dawanda_ctr_by_position_merged.$1-$1.sstable",
+            dir,
             min_gen,
             max_gen)));
     ctr_posi_rollup_in->addReport(ctr_posi_rollup);
