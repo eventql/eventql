@@ -87,8 +87,8 @@ int main(int argc, const char** argv) {
 
   jq_report->addReport(
       new CTRByPositionReport(
-          ItemEligibility::ALL,
-          "/tmp/dawanda_ctrbyposi.99066.sstable"));
+          ItemEligibility::ALL));
+          //"/tmp/dawanda_ctrbyposi.99066.sstable"));
 
   report_builder.addReport(jq_report);
 
