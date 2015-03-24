@@ -58,13 +58,13 @@ int main(int argc, const char** argv) {
   int row_idx = 0;
   for (int tbl_idx = 0; tbl_idx < sstables.size(); ++tbl_idx) {
     const auto& sstable = sstables[tbl_idx];
-    fnord::logInfo("cm.ctrstats", "Importing sstable: $0", sstable);
+    fnord::logInfo("cm.jqshuffle", "Importing sstable: $0", sstable);
 
     /* read sstable header */
     sstable::SSTableReader reader(File::openFile(sstable, File::O_READ));
 
     if (reader.bodySize() == 0) {
-      fnord::logCritical("cm.ctrstats", "unfinished sstable: $0", sstable);
+      fnord::logCritical("cm.jqshuffle", "unfinished sstable: $0", sstable);
       exit(1);
     }
 
@@ -75,27 +75,54 @@ int main(int argc, const char** argv) {
     /* status line */
     util::SimpleRateLimitedFn status_line(kMicrosPerSecond, [&] () {
       fnord::logInfo(
-          "cm.ctrstats",
+          "cm.jqshuffle",
           "[$1/$2] [$0%] Reading sstable... rows=$3",
           (size_t) ((cursor->position() / (double) body_size) * 100),
           tbl_idx + 1, sstables.size(), row_idx);
     });
 
+    HashMap<uint64_t, std::unique_ptr<sstable::SSTableWriter>> writers;
+
     /* read sstable rows */
     for (; cursor->valid(); ++row_idx) {
       status_line.runMaybe();
 
+      auto key = cursor->getKeyString();
       auto val = cursor->getDataBuffer();
       Option<cm::JoinedQuery> q;
 
       try {
         q = Some(json::fromJSON<cm::JoinedQuery>(val));
       } catch (const Exception& e) {
-        fnord::logWarning("cm.ctrstats", e, "invalid json: $0", val.toString());
+        fnord::logWarning("cm.jqshuffle", e, "invalid json: $0", val.toString());
       }
 
       if (!q.isEmpty()) {
-        fnord::iputs("q: t=$0 b=$1", q.get().time, q.get().time.unixMicros() / (1000000 * 3600 * 4));
+        auto win = (kMicrosPerSecond * 3600 * 4);
+        auto gen = q.get().time.unixMicros() / win;
+
+        if (writers.count(gen) == 0) {
+          auto output_file =
+              StringUtil::format("jqshuffle_out.$0.sstable", gen);
+
+          fnord::logInfo(
+              "cm.jqshuffle",
+              "Opening output sstable: $0",
+              output_file);
+
+          HashMap<String, String> out_hdr;
+          out_hdr["start_time"] = StringUtil::toString(gen * win);
+          out_hdr["end_time"] = StringUtil::toString((gen + 1) * win);
+          auto outhdr_json = json::toJSONString(out_hdr);
+
+          writers[gen] = sstable::SSTableWriter::create(
+              output_file,
+              sstable::IndexProvider{},
+              outhdr_json.data(),
+              outhdr_json.length());
+        }
+
+        writers[gen]->appendRow(key.data(), key.size(), val.data(), val.size());
       }
 
       if (!cursor->next()) {
