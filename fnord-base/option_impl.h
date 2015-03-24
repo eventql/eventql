@@ -16,6 +16,9 @@ template <typename T>
 Option<T>::Option() : value_(nullptr) {}
 
 template <typename T>
+Option<T>::Option(std::nullptr_t n) : value_(nullptr) {}
+
+template <typename T>
 Option<T>::Option(
     const T& value) :
     value_(new (value_data_) T(value)) {}
