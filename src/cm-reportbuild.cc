@@ -42,6 +42,21 @@
 using namespace fnord;
 using namespace cm;
 
+
+Set<uint64_t> mkGenerations(
+    uint64_t window_secs,
+    uint64_t range_secs,
+    uint64_t now_secs = 0) {
+  Set<uint64_t> generations;
+  auto now = now_secs == 0 ? WallClock::unixMicros() : now_secs * kMicrosPerSecond;
+  auto gen_window = kMicrosPerSecond * window_secs;
+  for (uint64_t i = 0; i < kMicrosPerSecond * range_secs; i += gen_window) {
+    generations.emplace((now - i) / gen_window);
+  }
+
+  return generations;
+}
+
 int main(int argc, const char** argv) {
   fnord::Application::init();
   fnord::Application::logToStderr();
@@ -94,27 +109,10 @@ int main(int argc, const char** argv) {
 
   auto dir = flags.getString("artifacts");
 
-  Set<uint64_t> generations;
-  auto now = WallClock::unixMicros();
-  auto gen_window = kMicrosPerSecond * 3600 * 4;
-  for (uint64_t i = 0; i < kMicrosPerDay * 32; i += gen_window) {
-    generations.emplace((now - i) / gen_window);
-  }
-
-  uint64_t min_gen = std::numeric_limits<uint64_t>::max();
-  uint64_t max_gen = std::numeric_limits<uint64_t>::min();
-  for (const auto g : generations) {
-    if (g < min_gen) {
-      min_gen = g;
-    }
-
-    if (g > max_gen) {
-      max_gen = g;
-    }
-  }
-
-  /* dawanda -- MAP: input joined queries */
-  for (const auto& g : generations) {
+  /* dawanda -- 4hourly: input joined queries */
+  for (const auto& g : mkGenerations(
+        4 * kSecondsPerHour,
+        60 * kSecondsPerDay)) {
     auto jq_report = new JoinedQueryTableReport(Set<String> {
         StringUtil::format("$0/dawanda_joined_queries.$1.sstable", dir, g) });
     report_builder.addReport(jq_report);
@@ -125,12 +123,17 @@ int main(int argc, const char** argv) {
     jq_report->addReport(ctr_by_posi_report);
   }
 
-  /* dawanda -- REDUCE: rollup ctr_by_position */
-  if (generations.size() > 0) {
+  /* dawanda -- daily: rollup ctr_by_position */
+  for (const auto& og : mkGenerations(
+        1 * kSecondsPerDay,
+        3 * kSecondsPerDay)) {
     Set<String> ctr_posi_sources;
-    for (const auto& g : generations) {
+    for (const auto& ig : mkGenerations(
+        1 * kSecondsPerDay,
+        30 * kSecondsPerDay,
+        og * kSecondsPerDay)) {
       ctr_posi_sources.emplace(
-          StringUtil::format("$0/dawanda_ctr_by_position.$1.sstable", dir, g));
+          StringUtil::format("$0/dawanda_ctr_by_position.$1.sstable", dir, ig));
     }
 
     auto ctr_posi_rollup_in = new CTRCounterSSTableSource(ctr_posi_sources);
@@ -139,10 +142,10 @@ int main(int argc, const char** argv) {
     auto ctr_posi_rollup = new CTRCounterMerge();
     ctr_posi_rollup->addReport(new CTRCounterSSTableSink(
         StringUtil::format(
-            "$0/dawanda_ctr_by_position_merged.$1-$1.sstable",
+            "$0/dawanda_ctr_by_position_merged.$1.sstable",
             dir,
-            min_gen,
-            max_gen)));
+            og)));
+
     ctr_posi_rollup_in->addReport(ctr_posi_rollup);
   }
 
