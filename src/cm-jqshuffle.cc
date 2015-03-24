@@ -54,6 +54,7 @@ int main(int argc, const char** argv) {
       strToLogLevel(flags.getString("loglevel")));
 
   /* read input tables */
+  HashMap<uint64_t, std::unique_ptr<sstable::SSTableWriter>> writers;
   auto sstables = flags.getArgv();
   int row_idx = 0;
   for (int tbl_idx = 0; tbl_idx < sstables.size(); ++tbl_idx) {
@@ -80,8 +81,6 @@ int main(int argc, const char** argv) {
           (size_t) ((cursor->position() / (double) body_size) * 100),
           tbl_idx + 1, sstables.size(), row_idx);
     });
-
-    HashMap<uint64_t, std::unique_ptr<sstable::SSTableWriter>> writers;
 
     /* read sstable rows */
     for (; cursor->valid(); ++row_idx) {
