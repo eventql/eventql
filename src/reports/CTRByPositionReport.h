@@ -19,8 +19,8 @@ using namespace fnord;
 namespace cm {
 
 /**
- * INPUT: JOINEDQUERY
- * OUTPUT: CTRCOUNTER (key=<lang>~<devicetype>~<testgroup>~<posi>)
+ * INPUT: JOINED_QUERY
+ * OUTPUT: CTR_COUNTER (key=<lang>~<devicetype>~<testgroup>~<posi>)
  */
 class CTRByPositionReport : public Report {
 public:
@@ -34,7 +34,7 @@ protected:
   void flushResults();
 
   ItemEligibility eligibility_;
-  HashMap<String, CTRCounter> counters_;
+  HashMap<String, CTRCounterData> counters_;
 };
 
 } // namespace cm

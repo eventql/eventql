@@ -33,8 +33,9 @@ namespace cm {
 
 enum class ReportEventType {
   BEGIN,
+  END,
   JOINED_QUERY,
-  END
+  CTR_COUNTER
 };
 
 class Report : public RefCounted {
