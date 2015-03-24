@@ -112,7 +112,7 @@ int main(int argc, const char** argv) {
   /* dawanda -- 4hourly: input joined queries */
   for (const auto& g : mkGenerations(
         4 * kSecondsPerHour,
-        40 * kSecondsPerDay)) {
+        50 * kSecondsPerDay)) {
     auto jq_report = new JoinedQueryTableReport(Set<String> {
         StringUtil::format("$0/dawanda_joined_queries.$1.sstable", dir, g) });
     report_builder.addReport(jq_report);
