@@ -90,21 +90,16 @@ int main(int argc, const char** argv) {
       strToLogLevel(flags.getString("loglevel")));
 
   fnord::fts::Analyzer analyzer(flags.getString("conf"));
-
   cm::ReportBuilder report_builder;
 
-  Set<uint64_t> generations { };
-
-  /* find all generations */
   auto dir = flags.getString("artifacts");
-  FileUtil::ls(dir, [&generations] (const String& file) -> bool {
-    String prefix = "dawanda_joined_queries.";
-    if (StringUtil::beginsWith(file, prefix)) {
-      generations.emplace(std::stoul(file.substr(prefix.length())));
-    }
-    return true;
-  });
 
+  Set<uint64_t> generations;
+  auto now = WallClock::unixMicros();
+  auto gen_window = kMicrosPerSecond * 3600 * 4;
+  for (uint64_t i = 0; i < kMicrosPerDay * 32; i += gen_window) {
+    generations.emplace((now - i) / gen_window);
+  }
 
   uint64_t min_gen = std::numeric_limits<uint64_t>::max();
   uint64_t max_gen = std::numeric_limits<uint64_t>::min();
