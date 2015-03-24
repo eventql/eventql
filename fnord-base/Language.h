@@ -15,6 +15,7 @@ namespace fnord {
 
 /* ISO 639-1 */
 enum class Language : uint16_t {
+  UNKNOWN = 0,
   DE = 2,
   EN = 1,
   ES = 3,

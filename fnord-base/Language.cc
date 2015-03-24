@@ -30,6 +30,7 @@ Language languageFromString(const String& string) {
 
 String languageToString(Language lang) {
   switch (lang) {
+    case Language::UNKNOWN: return "unknown";
     case Language::DE: return "de";
     case Language::EN: return "en";
     case Language::ES: return "es";
