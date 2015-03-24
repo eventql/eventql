@@ -11,6 +11,7 @@
 #include <string>
 #include <fnord-base/option.h>
 #include <fnord-base/stdtypes.h>
+#include <fnord-base/Language.h>
 #include "JoinedQuery.h"
 
 using namespace fnord;
@@ -22,6 +23,9 @@ std::string cmHostname();
 bool isReservedPixelParam(const std::string param);
 
 Option<String> extractAttr(const Vector<String>& attrs, const String& attr);
+String extractDeviceType(const Vector<String>& attrs);
+String extractTestGroup(const Vector<String>& attrs);
+Language extractLanguage(const Vector<String>& attrs);
 
 String joinBagOfWords(const Set<String>& words);
 

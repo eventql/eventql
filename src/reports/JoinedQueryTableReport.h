@@ -20,17 +20,14 @@ public:
 
   JoinedQueryTableReport(const Set<String>& sstable_filenames);
 
-  void addReport(RefPtr<Report> report);
   void onEvent(ReportEventType type, void* ev) override;
 
   Set<String> inputFiles() override;
-  Set<String> outputFiles() override;
 
 protected:
 
   void readTables();
 
-  List<RefPtr<Report>> children_;
   Set<String> input_files_;
 };
 

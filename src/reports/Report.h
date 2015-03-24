@@ -40,11 +40,18 @@ enum class ReportEventType {
 class Report : public RefCounted {
 public:
 
+  void addReport(RefPtr<Report> report);
+
   virtual void onEvent(ReportEventType type, void* ev) = 0;
 
-  virtual Set<String> inputFiles() = 0;
-  virtual Set<String> outputFiles() = 0;
+  virtual Set<String> inputFiles();
+  virtual Set<String> outputFiles();
 
+protected:
+
+  void emitEvent(ReportEventType type, void* ev);
+
+  List<RefPtr<Report>> children_;
 };
 
 } // namespace cm
