@@ -19,31 +19,21 @@ using namespace fnord;
 namespace cm {
 
 /**
- * Output Table Format:
- *
- *   key: <lang>~<devicetype>~<testgroup>~<posi>
- *   columns: views, clicks
- *
+ * INPUT: JOINEDQUERY
+ * OUTPUT: CTRCOUNTER (key=<lang>~<devicetype>~<testgroup>~<posi>)
  */
-
 class CTRByPositionReport : public Report {
 public:
 
-  CTRByPositionReport(
-      ItemEligibility eligibility,
-      const String& output_file);
-
+  CTRByPositionReport(ItemEligibility eligibility);
   void onEvent(ReportEventType type, void* ev) override;
-
-  Set<String> inputFiles() override;
-  Set<String> outputFiles() override;
 
 protected:
 
   void onJoinedQuery(const JoinedQuery& q);
+  void flushResults();
 
   ItemEligibility eligibility_;
-  String output_file_;
   HashMap<String, CTRCounter> counters_;
 };
 

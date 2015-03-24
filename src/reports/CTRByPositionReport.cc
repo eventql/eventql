@@ -13,10 +13,8 @@ using namespace fnord;
 namespace cm {
 
 CTRByPositionReport::CTRByPositionReport(
-    ItemEligibility eligibility,
-    const String& output_file) :
-    eligibility_(eligibility),
-    output_file_(output_file) {}
+    ItemEligibility eligibility) :
+    eligibility_(eligibility) {}
 
 void CTRByPositionReport::onEvent(ReportEventType type, void* ev) {
   switch (type) {
@@ -25,21 +23,16 @@ void CTRByPositionReport::onEvent(ReportEventType type, void* ev) {
       return;
 
     case ReportEventType::BEGIN:
+      return;
+
     case ReportEventType::END:
+      flushResults();
       return;
 
     default:
       RAISE(kRuntimeError, "unknown event type");
 
   }
-}
-
-Set<String> CTRByPositionReport::inputFiles() {
-  return Set<String>();
-}
-
-Set<String> CTRByPositionReport::outputFiles() {
-  return Set<String> { output_file_ };
 }
 
 void CTRByPositionReport::onJoinedQuery(const JoinedQuery& q) {
@@ -67,6 +60,10 @@ void CTRByPositionReport::onJoinedQuery(const JoinedQuery& q) {
     ++ctr.num_views;
     ctr.num_clicks += item.clicked;
   }
+}
+
+void CTRByPositionReport::flushResults() {
+
 }
 
 } // namespace cm
