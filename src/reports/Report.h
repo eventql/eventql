@@ -31,10 +31,16 @@ using namespace fnord;
 
 namespace cm {
 
+enum class ReportEventType {
+  BEGIN,
+  JOINED_QUERY,
+  END
+};
+
 class Report : public RefCounted {
 public:
 
-  virtual void build() = 0;
+  virtual void onEvent(ReportEventType type, void* ev) = 0;
 
   virtual Set<String> inputFiles() = 0;
   virtual Set<String> outputFiles() = 0;

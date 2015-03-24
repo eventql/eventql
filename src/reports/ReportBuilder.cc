@@ -67,6 +67,7 @@ void ReportBuilder::buildAll() {
       ++reports_completed;
     } else {
       ++reports_runnable;
+      runnables.emplace_back(r);
     }
   }
 
@@ -83,6 +84,19 @@ void ReportBuilder::buildAll() {
     fnord::logInfo(
         "cm.reportbuild",
         "Running report $0/$1: '$2'",
+        i + 1,
+        runnables.size(),
+        "FIXME");
+
+    runnables[i]->onEvent(ReportEventType::BEGIN, nullptr);
+  }
+
+  for (int i = 0; i < runnables.size(); ++i) {
+    runnables[i]->onEvent(ReportEventType::END, nullptr);
+
+    fnord::logInfo(
+        "cm.reportbuild",
+        "Finished report $0/$1: '$2'",
         i + 1,
         runnables.size(),
         "FIXME");

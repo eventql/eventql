@@ -6,8 +6,8 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-#ifndef _CM_JOINEDQUERYTABLEREPORT_H
-#define _CM_JOINEDQUERYTABLEREPORT_H
+#ifndef _CM_CTRBYPOSITIONREPORT_H
+#define _CM_CTRBYPOSITIONREPORT_H
 #include "reports/Report.h"
 #include "JoinedQuery.h"
 
@@ -15,23 +15,18 @@ using namespace fnord;
 
 namespace cm {
 
-class JoinedQueryTableReport : public Report {
+class CTRByPositionReport : public Report {
 public:
 
-  JoinedQueryTableReport(const Set<String>& sstable_filenames);
+  CTRByPositionReport(const String& output_file);
 
-  void addReport(RefPtr<Report> report);
   void onEvent(ReportEventType type, void* ev) override;
 
   Set<String> inputFiles() override;
   Set<String> outputFiles() override;
 
 protected:
-
-  void readTables();
-
-  List<RefPtr<Report>> children_;
-  Set<String> input_files_;
+  String output_file_;
 };
 
 } // namespace cm
