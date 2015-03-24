@@ -35,7 +35,9 @@
 #include "reports/ReportBuilder.h"
 #include "reports/JoinedQueryTableReport.h"
 #include "reports/CTRByPositionReport.h"
+#include "reports/CTRCounterMerge.h"
 #include "reports/CTRCounterSSTableSink.h"
+#include "reports/CTRCounterSSTableSource.h"
 
 using namespace fnord;
 using namespace cm;
@@ -103,6 +105,20 @@ int main(int argc, const char** argv) {
     return true;
   });
 
+
+  uint64_t min_gen = std::numeric_limits<uint64_t>::max();
+  uint64_t max_gen = std::numeric_limits<uint64_t>::min();
+  for (const auto g : generations) {
+    if (g < min_gen) {
+      min_gen = g;
+    }
+
+    if (g > max_gen) {
+      max_gen = g;
+    }
+  }
+
+  /* dawanda -- MAP: input joined queries */
   for (const auto& g : generations) {
     auto jq_report = new JoinedQueryTableReport(Set<String> {
         StringUtil::format("$0/dawanda_joined_queries.$1.sstable", dir, g) });
@@ -112,6 +128,26 @@ int main(int argc, const char** argv) {
     ctr_by_posi_report->addReport(new CTRCounterSSTableSink(
         StringUtil::format("$0/dawanda_ctr_by_position.$1.sstable", dir, g)));
     jq_report->addReport(ctr_by_posi_report);
+  }
+
+  /* dawanda -- REDUCE: rollup ctr_by_position */
+  if (generations.size() > 0) {
+    Set<String> ctr_posi_sources;
+    for (const auto& g : generations) {
+      ctr_posi_sources.emplace(
+          StringUtil::format("$0/dawanda_ctr_by_position.$1.sstable", dir, g));
+    }
+
+    auto ctr_posi_rollup_in = new CTRCounterSSTableSource(ctr_posi_sources);
+    report_builder.addReport(ctr_posi_rollup_in);
+
+    auto ctr_posi_rollup = new CTRCounterMerge();
+    ctr_posi_rollup->addReport(new CTRCounterSSTableSink(
+        StringUtil::format(
+            "$0/dawanda_ctr_by_position_merged.$0-$1.sstable",
+            min_gen,
+            max_gen)));
+    ctr_posi_rollup_in->addReport(ctr_posi_rollup);
   }
 
   report_builder.buildAll();
