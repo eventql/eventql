@@ -20,10 +20,10 @@ void ReportBuilder::addReport(RefPtr<Report> report) {
 }
 
 void ReportBuilder::buildAll() {
-  while (buildOnce() > 0) {}
+  while (buildSome() > 0) {}
 }
 
-size_t ReportBuilder::buildOnce() {
+size_t ReportBuilder::buildSome() {
   Set<String> existing_files;
   fnord::logInfo("cm.reportbuild", "Scanning dependencies...");
 
@@ -90,8 +90,21 @@ size_t ReportBuilder::buildOnce() {
       "cm.reportbuild",
       "Running $0 report pipeline(s)", runnables.size());
 
+  buildParallel(runnables);
+
+  return reports_runnable;
+}
+
+// FIXPAUL
+void ReportBuilder::buildParallel(
+    const HashMap<ReportSource*, List<RefPtr<Report>>>& runnables,
+    size_t max_threads /* = 8 */) {
   List<std::thread> threads;
   for (auto runnable : runnables) {
+    if (threads.size() > max_threads) {
+      break;
+    }
+
     threads.emplace_back([runnable] () {
       fnord::logInfo(
           "cm.reportbuild",
@@ -117,7 +130,6 @@ size_t ReportBuilder::buildOnce() {
     t.join();
   }
 
-  return reports_runnable;
 }
 
 } // namespace cm
