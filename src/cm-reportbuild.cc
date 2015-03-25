@@ -148,6 +148,22 @@ int main(int argc, const char** argv) {
         1 * kSecondsPerDay,
         og * kSecondsPerDay);
 
+    /* dawanda: roll up ctr stats */
+    Set<String> ctr_stats_sources;
+    for (const auto& ig : day_gens) {
+      ctr_stats_sources.emplace(
+          StringUtil::format("$0/dawanda_ctr_stats.$1.sstable", dir, ig));
+    }
+
+    report_builder.addReport(
+        new CTRCounterMerge(
+            new CTRCounterTableSource(ctr_stats_sources),
+            new CTRCounterTableSink(
+                StringUtil::format(
+                    "$0/dawanda_ctr_stats_daily.$1.sstable",
+                    dir,
+                    og))));
+
     /* dawanda: roll up ctr positions */
     Set<String> ctr_posi_sources;
     for (const auto& ig : day_gens) {
