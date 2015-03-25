@@ -117,6 +117,26 @@ public:
   static void toUpper(std::string* str);
 
   /**
+   * Finds the first occurence of the provided character in the string. Returns
+   * std::string::npos if the character does not occur in the string.
+   *
+   * @param str the str that should be searched
+   * @param chr the char to search for
+   * @return the position of the first occurence of chr or std::string::npos
+   */
+  static size_t find(const std::string& str, char chr);
+
+  /**
+   * Finds the last occurence of the provided character in the string. Returns
+   * std::string::npos if the character does not occur in the string.
+   *
+   * @param str the str that should be searched
+   * @param chr the char to search for
+   * @return the position of the last occurence of chr or std::string::npos
+   */
+  static size_t findLast(const std::string& str, char chr);
+
+  /**
    * Print the contents of the pointed to memory as a series of hexadecimal
    * bytes (hexdump):
    *
