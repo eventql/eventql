@@ -22,15 +22,15 @@ using namespace fnord;
 
 namespace cm {
 
-class CTRCounterSSTableSink : public Report {
+class CTRCounterSSTableSink : public ReportSink {
 public:
 
   CTRCounterSSTableSink(const String& output_file);
 
-  void onEvent(
-      ReportEventType type,
-      ReportEventTime time,
-      void* ev) override;
+  //void onEvent(
+  //    ReportEventType type,
+  //    ReportEventTime time,
+  //    void* ev) override;
 
   Set<String> outputFiles() override;
 

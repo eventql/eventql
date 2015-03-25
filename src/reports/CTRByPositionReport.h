@@ -11,6 +11,7 @@
 #include "reports/Report.h"
 #include "JoinedQuery.h"
 #include "JoinedQueryTableSource.h"
+#include "CTRCounterSSTableSink.h"
 #include "CTRCounter.h"
 #include "ItemRef.h"
 #include "common.h"
@@ -27,14 +28,16 @@ class CTRByPositionReport : public Report {
 public:
 
   CTRByPositionReport(
-      RefPtr<JoinedQueryTableSource> source,
+      RefPtr<JoinedQueryTableSource> input,
+      RefPtr<CTRCounterSSTableSink> output,
       ItemEligibility eligibility);
 
   void onJoinedQuery(const JoinedQuery& q);
   void flushResults();
 
 protected:
-  RefPtr<JoinedQueryTableSource> source_;
+  RefPtr<JoinedQueryTableSource> joined_queries_;
+  RefPtr<CTRCounterSSTableSink> ctr_table_;
   ItemEligibility eligibility_;
   HashMap<String, CTRCounterData> counters_;
 };

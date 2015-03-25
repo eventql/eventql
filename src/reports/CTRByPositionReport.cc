@@ -13,12 +13,13 @@ using namespace fnord;
 namespace cm {
 
 CTRByPositionReport::CTRByPositionReport(
-    RefPtr<JoinedQueryTableSource> source,
+    RefPtr<JoinedQueryTableSource> input,
+    RefPtr<CTRCounterSSTableSink> output,
     ItemEligibility eligibility) :
-    source_(source),
-    eligibility_(eligibility) {
-  addInput(source_.get());
-}
+    Report(input.get(), output.get()),
+    joined_queries_(input),
+    ctr_table_(output),
+    eligibility_(eligibility) {}
 
 //void CTRByPositionReport::onEvent(
 //    ReportEventType type,
