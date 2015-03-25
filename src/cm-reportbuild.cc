@@ -35,7 +35,7 @@
 #include "reports/ReportBuilder.h"
 #include "reports/JoinedQueryTableSource.h"
 #include "reports/CTRByPositionReport.h"
-//#include "reports/CTRCounterMerge.h"
+#include "reports/CTRCounterMerge.h"
 #include "reports/CTRCounterTableSink.h"
 #include "reports/CTRCounterTableSource.h"
 
@@ -144,18 +144,15 @@ int main(int argc, const char** argv) {
           StringUtil::format("$0/dawanda_ctr_by_position.$1.sstable", dir, ig));
     }
 
-    fnord::iputs("src: $0", ctr_posi_sources);
-    auto src = new CTRCounterTableSource(ctr_posi_sources);
-  //  report_builder.addReport(ctr_posi_rollup_in);
+    report_builder.addReport(
+        new CTRCounterMerge(
+            new CTRCounterTableSource(ctr_posi_sources),
+            new CTRCounterTableSink(
+                StringUtil::format(
+                    "$0/dawanda_ctr_by_position_daily.$1.sstable",
+                    dir,
+                    og))));
 
-  //  auto ctr_posi_rollup = new CTRCounterMerge();
-  //  ctr_posi_rollup->addReport(new CTRCounterSSTableSink(
-  //      StringUtil::format(
-  //          "$0/dawanda_ctr_by_position_merged.$1.sstable",
-  //          dir,
-  //          og)));
-
-  //  ctr_posi_rollup_in->addReport(ctr_posi_rollup);
   }
 
   report_builder.buildAll();
