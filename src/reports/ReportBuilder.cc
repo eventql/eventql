@@ -95,17 +95,20 @@ size_t ReportBuilder::buildSome() {
   return reports_runnable;
 }
 
-// FIXPAUL
 void ReportBuilder::buildParallel(
-    const HashMap<ReportSource*, List<RefPtr<Report>>>& runnables,
-    size_t max_threads /* = 8 */) {
-  List<std::thread> threads;
+    const HashMap<ReportSource*, List<RefPtr<Report>>>& runnables) {
+  std::mutex m;
+  std::unique_lock<std::mutex> lk(m);
+  std::condition_variable cv;
+  size_t num_threads = 0;
+
   for (auto runnable : runnables) {
-    if (threads.size() > max_threads) {
-      break;
+    while (num_threads >= max_threads_) {
+      cv.wait(lk);
     }
 
-    threads.emplace_back([runnable] () {
+    ++num_threads;
+    auto thread = std::thread([runnable, &m, &cv, &num_threads] () {
       fnord::logInfo(
           "cm.reportbuild",
           "Running report pipline with $1 report(s) for inputs: $0",
@@ -123,13 +126,19 @@ void ReportBuilder::buildParallel(
         r->onFinish();
         r->output()->close();
       }
+
+      std::unique_lock<std::mutex> wakeup_lk(m);
+      --num_threads;
+      wakeup_lk.unlock();
+      cv.notify_one();
     });
+
+    thread.detach();
   }
 
-  for (auto& t : threads) {
-    t.join();
+  while (num_threads > 0) {
+    cv.wait(lk);
   }
-
 }
 
 } // namespace cm
