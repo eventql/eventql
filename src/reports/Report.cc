@@ -12,20 +12,20 @@ using namespace fnord;
 
 namespace cm {
 
-List<RefPtr<ReportSource>> Report::inputs() {
-  return inputs_;
+Report::Report(
+    RefPtr<ReportSource> input,
+    RefPtr<ReportSink> output) :
+    input_(input),
+    output_(output) {}
+
+Report::~Report() {}
+
+RefPtr<ReportSource> Report::input() {
+  return input_;
 }
 
-List<RefPtr<ReportSink>> Report::outputs() {
-  return outputs_;
-}
-
-void Report::addInput(RefPtr<ReportSource> input) {
-  inputs_.emplace_back(input);
-}
-
-void Report::addOutput(RefPtr<ReportSink> output) {
-  outputs_.emplace_back(output);
+RefPtr<ReportSink> Report::output() {
+  return output_;
 }
 
 } // namespace cm

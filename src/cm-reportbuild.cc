@@ -36,7 +36,7 @@
 #include "reports/JoinedQueryTableSource.h"
 #include "reports/CTRByPositionReport.h"
 //#include "reports/CTRCounterMerge.h"
-//#include "reports/CTRCounterSSTableSink.h"
+#include "reports/CTRCounterSSTableSink.h"
 //#include "reports/CTRCounterSSTableSource.h"
 
 using namespace fnord;
@@ -119,10 +119,12 @@ int main(int argc, const char** argv) {
     report_builder.addReport(
         new CTRByPositionReport(
             jq_source,
+            new CTRCounterSSTableSink(
+                StringUtil::format(
+                    "$0/dawanda_ctr_by_position.$1.sstable",
+                    dir,
+                    g)),
             ItemEligibility::ALL));
-    //ctr_by_posi_report->addReport(new CTRCounterSSTableSink(
-    //    StringUtil::format("$0/dawanda_ctr_by_position.$1.sstable", dir, g)));
-    //jq_report->addReport(ctr_by_posi_report);
   }
 
   /* dawanda -- daily: rollup ctr_by_position */

@@ -55,17 +55,15 @@ public:
 class Report : public RefCounted {
 public:
 
-  virtual ~Report() {}
+  Report(RefPtr<ReportSource> input, RefPtr<ReportSink> output);
+  virtual ~Report();
 
-  List<RefPtr<ReportSource>> inputs();
-  List<RefPtr<ReportSink>> outputs();
-
-  void addInput(RefPtr<ReportSource> input);
-  void addOutput(RefPtr<ReportSink> output);
+  RefPtr<ReportSource> input();
+  RefPtr<ReportSink> output();
 
 protected:
-  List<RefPtr<ReportSource>> inputs_;
-  List<RefPtr<ReportSink>> outputs_;
+  RefPtr<ReportSource> input_;
+  RefPtr<ReportSink> output_;
 };
 
 } // namespace cm
