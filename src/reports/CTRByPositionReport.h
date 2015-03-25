@@ -11,7 +11,7 @@
 #include "reports/Report.h"
 #include "JoinedQuery.h"
 #include "JoinedQueryTableSource.h"
-#include "CTRCounterSSTableSink.h"
+#include "CTRCounterTableSink.h"
 #include "CTRCounter.h"
 #include "ItemRef.h"
 #include "common.h"
@@ -29,7 +29,7 @@ public:
 
   CTRByPositionReport(
       RefPtr<JoinedQueryTableSource> input,
-      RefPtr<CTRCounterSSTableSink> output,
+      RefPtr<CTRCounterTableSink> output,
       ItemEligibility eligibility);
 
   void onInit();
@@ -38,7 +38,7 @@ public:
 
 protected:
   RefPtr<JoinedQueryTableSource> joined_queries_;
-  RefPtr<CTRCounterSSTableSink> ctr_table_;
+  RefPtr<CTRCounterTableSink> ctr_table_;
   ItemEligibility eligibility_;
   HashMap<String, CTRCounterData> counters_;
 };

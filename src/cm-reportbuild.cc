@@ -36,8 +36,8 @@
 #include "reports/JoinedQueryTableSource.h"
 #include "reports/CTRByPositionReport.h"
 //#include "reports/CTRCounterMerge.h"
-#include "reports/CTRCounterSSTableSink.h"
-//#include "reports/CTRCounterSSTableSource.h"
+#include "reports/CTRCounterTableSink.h"
+#include "reports/CTRCounterTableSource.h"
 
 using namespace fnord;
 using namespace cm;
@@ -50,7 +50,7 @@ Set<uint64_t> mkGenerations(
   Set<uint64_t> generations;
   auto now = now_secs == 0 ? WallClock::unixMicros() : now_secs * kMicrosPerSecond;
   auto gen_window = kMicrosPerSecond * window_secs;
-  for (uint64_t i = 0; i < kMicrosPerSecond * range_secs; i += gen_window) {
+  for (uint64_t i = 1; i < kMicrosPerSecond * range_secs; i += gen_window) {
     generations.emplace((now - i) / gen_window);
   }
 
@@ -109,17 +109,18 @@ int main(int argc, const char** argv) {
 
   auto dir = flags.getString("artifacts");
 
-  /* dawanda -- 4hourly: input joined queries */
+  /* 4 hourly reports */
   for (const auto& g : mkGenerations(
         4 * kSecondsPerHour,
-        50 * kSecondsPerDay)) {
+        60 * kSecondsPerDay)) {
+    /* dawanda: map joined queries */
     auto jq_source = new JoinedQueryTableSource(
         StringUtil::format("$0/dawanda_joined_queries.$1.sstable", dir, g));
 
     report_builder.addReport(
         new CTRByPositionReport(
             jq_source,
-            new CTRCounterSSTableSink(
+            new CTRCounterTableSink(
                 StringUtil::format(
                     "$0/dawanda_ctr_by_position.$1.sstable",
                     dir,
@@ -127,20 +128,24 @@ int main(int argc, const char** argv) {
             ItemEligibility::ALL));
   }
 
-  /* dawanda -- daily: rollup ctr_by_position */
-  //for (const auto& og : mkGenerations(
-  //      1 * kSecondsPerDay,
-  //      3 * kSecondsPerDay)) {
-  //  Set<String> ctr_posi_sources;
-  //  for (const auto& ig : mkGenerations(
-  //      4 * kSecondsPerHour,
-  //      30 * kSecondsPerDay,
-  //      og * kSecondsPerDay)) {
-  //    ctr_posi_sources.emplace(
-  //        StringUtil::format("$0/dawanda_ctr_by_position.$1.sstable", dir, ig));
-  //  }
+  /* daily reports */
+  for (const auto& og : mkGenerations(
+        1 * kSecondsPerDay,
+        60 * kSecondsPerDay)) {
+    auto day_gens = mkGenerations(
+        4 * kSecondsPerHour,
+        1 * kSecondsPerDay,
+        og * kSecondsPerDay);
 
-  //  auto ctr_posi_rollup_in = new CTRCounterSSTableSource(ctr_posi_sources);
+    /* dawanda: roll up ctr positions */
+    Set<String> ctr_posi_sources;
+    for (const auto& ig : day_gens) {
+      ctr_posi_sources.emplace(
+          StringUtil::format("$0/dawanda_ctr_by_position.$1.sstable", dir, ig));
+    }
+
+    fnord::iputs("src: $0", ctr_posi_sources);
+    auto src = new CTRCounterTableSource(ctr_posi_sources);
   //  report_builder.addReport(ctr_posi_rollup_in);
 
   //  auto ctr_posi_rollup = new CTRCounterMerge();
@@ -151,7 +156,7 @@ int main(int argc, const char** argv) {
   //          og)));
 
   //  ctr_posi_rollup_in->addReport(ctr_posi_rollup);
-  //}
+  }
 
   report_builder.buildAll();
   return 0;
