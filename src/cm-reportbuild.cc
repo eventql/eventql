@@ -139,6 +139,8 @@ int main(int argc, const char** argv) {
         new CTRCounterMerge(
             new CTRCounterTableSource(ctr_stats_sources),
             new CTRCounterTableSink(
+                (og) * kMicrosPerDay,
+                (og + 1) * kMicrosPerDay,
                 StringUtil::format(
                     "$0/dawanda_ctr_stats_daily.$1.sstable",
                     dir,
@@ -155,6 +157,8 @@ int main(int argc, const char** argv) {
         new CTRCounterMerge(
             new CTRCounterTableSource(ctr_posi_sources),
             new CTRCounterTableSink(
+                (og) * kMicrosPerDay,
+                (og + 1) * kMicrosPerDay,
                 StringUtil::format(
                     "$0/dawanda_ctr_by_position_daily.$1.sstable",
                     dir,
@@ -174,6 +178,8 @@ int main(int argc, const char** argv) {
         new CTRByPositionReport(
             jq_source,
             new CTRCounterTableSink(
+                g * kMicrosPerHour * 4,
+                (g + 1) * kMicrosPerHour * 4,
                 StringUtil::format(
                     "$0/dawanda_ctr_by_position.$1.sstable",
                     dir,
@@ -184,6 +190,8 @@ int main(int argc, const char** argv) {
         new CTRReport(
             jq_source,
             new CTRCounterTableSink(
+                g * kMicrosPerHour * 4,
+                (g + 1) * kMicrosPerHour * 4,
                 StringUtil::format(
                     "$0/dawanda_ctr_stats.$1.sstable",
                     dir,
