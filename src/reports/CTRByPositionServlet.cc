@@ -126,13 +126,13 @@ void CTRByPositionServlet::handleHTTPRequest(
     json.addInteger(c.second.num_clicks);
     json.addComma();
     json.addObjectEntry("ctr");
-    json.addInteger(c.second.num_clicks / (double) c.second.num_views);
+    json.addFloat(c.second.num_clicks / (double) c.second.num_views);
     json.addComma();
     json.addObjectEntry("ctr_base");
-    json.addInteger(c.second.num_clicks / (double) total_views);
+    json.addFloat(c.second.num_clicks / (double) total_views);
     json.addComma();
     json.addObjectEntry("clickshare");
-    json.addInteger(c.second.num_clicks / (double) total_clicks);
+    json.addFloat(c.second.num_clicks / (double) total_clicks);
     json.endObject();
   }
 
