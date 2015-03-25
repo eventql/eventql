@@ -33,7 +33,9 @@ public:
   ReportBuilder();
 
   void addReport(RefPtr<Report> report);
+
   void buildAll();
+  void buildLoop(const Duration& interval = kMicrosPerSecond);
 
 protected:
   size_t buildSome();
@@ -41,6 +43,7 @@ protected:
 
   size_t max_threads_;
   size_t num_threads_;
+  bool running_;
   std::mutex m_;
   std::condition_variable cv_;
   List<RefPtr<Report>> reports_;

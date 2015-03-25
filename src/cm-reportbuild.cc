@@ -92,6 +92,15 @@ int main(int argc, const char** argv) {
       "<path>");
 
   flags.defineFlag(
+      "loop",
+      fnord::cli::FlagParser::T_SWITCH,
+      false,
+      NULL,
+      NULL,
+      "loop",
+      "<switch>");
+
+  flags.defineFlag(
       "loglevel",
       fnord::cli::FlagParser::T_STRING,
       false,
@@ -182,7 +191,11 @@ int main(int argc, const char** argv) {
 
   }
 
-  report_builder.buildAll();
+  if (flags.isSet("loop")) {
+    report_builder.buildLoop();
+  } else {
+    report_builder.buildAll();
+  }
   return 0;
 }
 
