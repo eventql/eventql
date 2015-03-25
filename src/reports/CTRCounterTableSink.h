@@ -6,37 +6,36 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-#ifndef _CM_CTRCONTERSSTABLESOURCE_H
-#define _CM_CTRCONTERSSTABLESOURCE_H
+#ifndef _CM_CTRCOUNTERSSTABLESINK_H
+#define _CM_CTRCOUNTERSSTABLESINK_H
 #include "reports/Report.h"
+#include "CTRCounter.h"
+#include "ItemRef.h"
+#include "common.h"
 #include "fnord-sstable/sstablereader.h"
 #include "fnord-sstable/sstablewriter.h"
 #include "fnord-sstable/SSTableColumnSchema.h"
 #include "fnord-sstable/SSTableColumnReader.h"
 #include "fnord-sstable/SSTableColumnWriter.h"
-#include "CTRCounter.h"
 
 using namespace fnord;
 
 namespace cm {
 
-class CTRCounterSSTableSource : public Report {
+class CTRCounterTableSink : public ReportSink {
 public:
 
-  CTRCounterSSTableSource(const Set<String>& sstable_filenames);
+  CTRCounterTableSink(const String& output_file);
 
-  void onEvent(
-      ReportEventType type,
-      ReportEventTime time,
-      void* ev) override;
+  void open();
+  void addRow(const String& key, CTRCounterData counter);
+  void close();
 
-  Set<String> inputFiles() override;
+  Set<String> outputFiles() override;
 
 protected:
-
-  void readTables();
-
-  Set<String> input_files_;
+  String output_file_;
+  std::unique_ptr<sstable::SSTableWriter> sstable_writer_;
   sstable::SSTableColumnSchema sstable_schema_;
 };
 

@@ -6,7 +6,7 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-#include "reports/CTRCounterSSTableSource.h"
+#include "reports/CTRCounterTableSource.h"
 #include <fnord-sstable/SSTableColumnReader.h>
 #include "fnord-json/json.h"
 
@@ -14,7 +14,7 @@ using namespace fnord;
 
 namespace cm {
 
-CTRCounterSSTableSource::CTRCounterSSTableSource(
+CTRCounterTableSource::CTRCounterTableSource(
     const Set<String>& sstable_filenames) :
     input_files_(sstable_filenames) {
   sstable_schema_.addColumn("num_views", 1, sstable::SSTableColumnType::UINT64);
@@ -22,26 +22,7 @@ CTRCounterSSTableSource::CTRCounterSSTableSource(
   sstable_schema_.addColumn("num_clicked", 3, sstable::SSTableColumnType::UINT64);
 }
 
-void CTRCounterSSTableSource::onEvent(
-    ReportEventType type,
-    ReportEventTime time,
-    void* ev) {
-  switch (type) {
-    case ReportEventType::BEGIN:
-      readTables();
-      return;
-
-    case ReportEventType::END:
-      emitEvent(type, time, ev);
-      return;
-
-    default:
-      RAISE(kRuntimeError, "unknown event type");
-
-  }
-}
-
-void CTRCounterSSTableSource::readTables() {
+void CTRCounterTableSource::read() {
   auto rep_start_time = std::numeric_limits<uint64_t>::max();
   auto rep_end_time = std::numeric_limits<uint64_t>::min();
 
@@ -81,7 +62,6 @@ void CTRCounterSSTableSource::readTables() {
   }
 
   Pair<DateTime, DateTime> rep_time(rep_start_time, rep_end_time);
-  emitEvent(ReportEventType::BEGIN, Some(rep_time), nullptr);
 
   int row_idx = 0;
   int tbl_idx = 0;
@@ -94,19 +74,21 @@ void CTRCounterSSTableSource::readTables() {
 
     /* read sstable rows */
     for (; cursor->valid(); ++row_idx) {
-      CTRCounter c;
-      c.first = cursor->getKeyString();
+      CTRCounterData c;
+      auto key = cursor->getKeyString();
 
       auto cols_data = cursor->getDataBuffer();
       sstable::SSTableColumnReader cols(&sstable_schema_, cols_data);
-      c.second.num_views = cols.getUInt64Column(
+      c.num_views = cols.getUInt64Column(
           sstable_schema_.columnID("num_views"));
-      c.second.num_clicks = cols.getUInt64Column(
+      c.num_clicks = cols.getUInt64Column(
           sstable_schema_.columnID("num_clicks"));
-      c.second.num_clicked = cols.getUInt64Column(
+      c.num_clicked = cols.getUInt64Column(
           sstable_schema_.columnID("num_clicked"));
 
-      emitEvent(ReportEventType::CTR_COUNTER, nullptr, &c);
+      for (const auto& cb : callbacks_) {
+        cb(key, c);
+      }
 
       if (!cursor->next()) {
         break;
@@ -115,7 +97,11 @@ void CTRCounterSSTableSource::readTables() {
   }
 }
 
-Set<String> CTRCounterSSTableSource::inputFiles() {
+void CTRCounterTableSource::forEach(CallbackFn fn) {
+  callbacks_.emplace_back(fn);
+}
+
+Set<String> CTRCounterTableSource::inputFiles() {
   return input_files_;
 }
 

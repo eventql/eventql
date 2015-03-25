@@ -6,37 +6,35 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-#ifndef _CM_CTRCOUNTERSSTABLESINK_H
-#define _CM_CTRCOUNTERSSTABLESINK_H
+#ifndef _CM_CTRCONTERSSTABLESOURCE_H
+#define _CM_CTRCONTERSSTABLESOURCE_H
 #include "reports/Report.h"
-#include "CTRCounter.h"
-#include "ItemRef.h"
-#include "common.h"
 #include "fnord-sstable/sstablereader.h"
 #include "fnord-sstable/sstablewriter.h"
 #include "fnord-sstable/SSTableColumnSchema.h"
 #include "fnord-sstable/SSTableColumnReader.h"
 #include "fnord-sstable/SSTableColumnWriter.h"
+#include "CTRCounter.h"
 
 using namespace fnord;
 
 namespace cm {
 
-class CTRCounterSSTableSink : public ReportSink {
+class CTRCounterTableSource : public ReportSource {
 public:
+  typedef Function<void (const String&, const CTRCounterData&)> CallbackFn;
 
-  CTRCounterSSTableSink(const String& output_file);
+  CTRCounterTableSource(const Set<String>& sstable_filenames);
 
-  void open();
-  void addRow(const String& key, CTRCounterData counter);
-  void close();
+  void forEach(CallbackFn fn);
 
-  Set<String> outputFiles() override;
+  void read();
+  Set<String> inputFiles() override;
 
 protected:
-  String output_file_;
-  std::unique_ptr<sstable::SSTableWriter> sstable_writer_;
+  Set<String> input_files_;
   sstable::SSTableColumnSchema sstable_schema_;
+  List<CallbackFn> callbacks_;
 };
 
 } // namespace cm

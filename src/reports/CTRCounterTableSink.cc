@@ -8,13 +8,13 @@
  * permission is obtained.
  */
 #include <fnord-json/json.h>
-#include "reports/CTRCounterSSTableSink.h"
+#include "reports/CTRCounterTableSink.h"
 
 using namespace fnord;
 
 namespace cm {
 
-CTRCounterSSTableSink::CTRCounterSSTableSink(
+CTRCounterTableSink::CTRCounterTableSink(
     const String& output_file) :
     output_file_(output_file) {
   sstable_schema_.addColumn("num_views", 1, sstable::SSTableColumnType::UINT64);
@@ -22,7 +22,7 @@ CTRCounterSSTableSink::CTRCounterSSTableSink(
   sstable_schema_.addColumn("num_clicked", 3, sstable::SSTableColumnType::UINT64);
 }
 
-void CTRCounterSSTableSink::open() {
+void CTRCounterTableSink::open() {
   if (FileUtil::exists(output_file_ + "~")) {
     fnord::logInfo(
         "cm.ctrstats",
@@ -51,7 +51,7 @@ void CTRCounterSSTableSink::open() {
       outhdr_json.length());
 }
 
-void CTRCounterSSTableSink::addRow(const String& key, CTRCounterData counter) {
+void CTRCounterTableSink::addRow(const String& key, CTRCounterData counter) {
   sstable::SSTableColumnWriter cols(&sstable_schema_);
   cols.addUInt64Column(1, counter.num_views);
   cols.addUInt64Column(2, counter.num_clicks);
@@ -59,7 +59,7 @@ void CTRCounterSSTableSink::addRow(const String& key, CTRCounterData counter) {
   sstable_writer_->appendRow(key, cols);
 }
 
-void CTRCounterSSTableSink::close() {
+void CTRCounterTableSink::close() {
   fnord::logInfo(
       "cm.ctrstats",
       "Finalizing output sstable: $0",
@@ -71,7 +71,7 @@ void CTRCounterSSTableSink::close() {
   FileUtil::mv(output_file_ + "~", output_file_);
 }
 
-Set<String> CTRCounterSSTableSink::outputFiles() {
+Set<String> CTRCounterTableSink::outputFiles() {
   return Set<String> { output_file_ };
 }
 

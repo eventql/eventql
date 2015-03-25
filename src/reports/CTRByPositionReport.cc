@@ -14,7 +14,7 @@ namespace cm {
 
 CTRByPositionReport::CTRByPositionReport(
     RefPtr<JoinedQueryTableSource> input,
-    RefPtr<CTRCounterSSTableSink> output,
+    RefPtr<CTRCounterTableSink> output,
     ItemEligibility eligibility) :
     Report(input.get(), output.get()),
     joined_queries_(input),
