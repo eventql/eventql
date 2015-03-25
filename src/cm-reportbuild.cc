@@ -119,35 +119,6 @@ int main(int argc, const char** argv) {
 
   auto dir = flags.getString("artifacts");
 
-  /* 4 hourly reports */
-  for (const auto& g : mkGenerations(
-        4 * kSecondsPerHour,
-        60 * kSecondsPerDay)) {
-    /* dawanda: map joined queries */
-    auto jq_source = new JoinedQueryTableSource(
-        StringUtil::format("$0/dawanda_joined_queries.$1.sstable", dir, g));
-
-    report_builder.addReport(
-        new CTRByPositionReport(
-            jq_source,
-            new CTRCounterTableSink(
-                StringUtil::format(
-                    "$0/dawanda_ctr_by_position.$1.sstable",
-                    dir,
-                    g)),
-            ItemEligibility::ALL));
-
-    report_builder.addReport(
-        new CTRReport(
-            jq_source,
-            new CTRCounterTableSink(
-                StringUtil::format(
-                    "$0/dawanda_ctr_stats.$1.sstable",
-                    dir,
-                    g)),
-            ItemEligibility::ALL));
-  }
-
   /* daily reports */
   for (const auto& og : mkGenerations(
         1 * kSecondsPerDay,
@@ -190,6 +161,36 @@ int main(int argc, const char** argv) {
                     og))));
 
   }
+
+  /* 4 hourly reports */
+  for (const auto& g : mkGenerations(
+        4 * kSecondsPerHour,
+        60 * kSecondsPerDay)) {
+    /* dawanda: map joined queries */
+    auto jq_source = new JoinedQueryTableSource(
+        StringUtil::format("$0/dawanda_joined_queries.$1.sstable", dir, g));
+
+    report_builder.addReport(
+        new CTRByPositionReport(
+            jq_source,
+            new CTRCounterTableSink(
+                StringUtil::format(
+                    "$0/dawanda_ctr_by_position.$1.sstable",
+                    dir,
+                    g)),
+            ItemEligibility::ALL));
+
+    report_builder.addReport(
+        new CTRReport(
+            jq_source,
+            new CTRCounterTableSink(
+                StringUtil::format(
+                    "$0/dawanda_ctr_stats.$1.sstable",
+                    dir,
+                    g)),
+            ItemEligibility::ALL));
+  }
+
 
   if (flags.isSet("loop")) {
     report_builder.buildLoop();

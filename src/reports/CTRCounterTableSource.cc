@@ -27,7 +27,7 @@ void CTRCounterTableSource::read() {
   auto rep_end_time = std::numeric_limits<uint64_t>::min();
 
   for (const auto& sstable : input_files_) {
-    fnord::logInfo("cm.ctrstats", "Importing sstable: $0", sstable);
+    fnord::logInfo("cm.reportbuild", "Importing sstable: $0", sstable);
 
     /* read sstable header */
     sstable::SSTableReader reader(File::openFile(sstable, File::O_READ));
@@ -36,7 +36,7 @@ void CTRCounterTableSource::read() {
     }
 
     if (reader.bodySize() == 0) {
-      fnord::logWarning("cm.ctrstats", "Warning: empty sstable: $0", sstable);
+      fnord::logWarning("cm.reportbuild", "Warning: empty sstable: $0", sstable);
     }
 
     /* read report header */
