@@ -13,7 +13,10 @@ using namespace fnord;
 
 namespace cm {
 
-ReportBuilder::ReportBuilder() : max_threads_(8), num_threads_(0) {}
+ReportBuilder::ReportBuilder() :
+    max_threads_(8),
+    num_threads_(0),
+    running_(true) {}
 
 void ReportBuilder::addReport(RefPtr<Report> report) {
   reports_.emplace_back(report);
@@ -21,6 +24,19 @@ void ReportBuilder::addReport(RefPtr<Report> report) {
 
 void ReportBuilder::buildAll() {
   while (buildSome() > 0) {}
+
+  std::unique_lock<std::mutex> lk(m_);
+  while (num_threads_ > 0) {
+    cv_.wait(lk);
+  }
+}
+
+void ReportBuilder::buildLoop(const Duration& interval) {
+  while (running_) {
+    if (buildSome() == 0) {
+      usleep(interval.microseconds());
+    }
+  }
 
   std::unique_lock<std::mutex> lk(m_);
   while (num_threads_ > 0) {
