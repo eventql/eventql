@@ -9,6 +9,8 @@
 #ifndef _CM_CTRCOUNTERMERGE_H
 #define _CM_CTRCOUNTERMERGE_H
 #include "reports/Report.h"
+#include "reports/CTRCounterTableSink.h"
+#include "reports/CTRCounterTableSource.h"
 #include "JoinedQuery.h"
 #include "CTRCounter.h"
 #include "ItemRef.h"
@@ -24,15 +26,18 @@ namespace cm {
  */
 class CTRCounterMerge : public Report {
 public:
-  void onEvent(
-      ReportEventType type,
-      ReportEventTime time,
-      void* ev) override;
-protected:
-  void onCounter(const CTRCounter& c);
-  void flushResults();
 
-  CTRCounterData global_counter_;
+  CTRCounterMerge(
+      RefPtr<CTRCounterTableSource> input,
+      RefPtr<CTRCounterTableSink> output);
+
+  void onInit();
+  void onCTRCounter(const String& key, const CTRCounterData& c);
+  void onFinish();
+
+protected:
+  RefPtr<CTRCounterTableSource> input_table_;
+  RefPtr<CTRCounterTableSink> output_table_;
   HashMap<String, CTRCounterData> counters_;
 };
 

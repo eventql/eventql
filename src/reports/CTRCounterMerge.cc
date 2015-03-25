@@ -12,40 +12,29 @@ using namespace fnord;
 
 namespace cm {
 
-void CTRCounterMerge::onEvent(
-    ReportEventType type,
-    ReportEventTime time,
-    void* ev) {
-  switch (type) {
+CTRCounterMerge::CTRCounterMerge(
+    RefPtr<CTRCounterTableSource> input,
+    RefPtr<CTRCounterTableSink> output) :
+    Report(input.get(), output.get()),
+    input_table_(input),
+    output_table_(output) {}
 
-    case ReportEventType::BEGIN:
-      emitEvent(type, time, ev);
-      return;
+void CTRCounterMerge::onInit() {
+  input_table_->forEach(std::bind(
+      &CTRCounterMerge::onCTRCounter,
+      this,
+      std::placeholders::_1,
+      std::placeholders::_2));
+}
 
-    case ReportEventType::JOINED_QUERY:
-      onCounter(*((CTRCounter*) ev));
-      return;
+void CTRCounterMerge::onCTRCounter(const String& key, const CTRCounterData& c) {
+  counters_[key].merge(c);
+}
 
-    case ReportEventType::END:
-      flushResults();
-      emitEvent(type, time, ev);
-      return;
-
-    default:
-      RAISE(kRuntimeError, "unknown event type");
-
+void CTRCounterMerge::onFinish() {
+  for (auto& ctr : counters_) {
+    output_table_->addRow(ctr.first, ctr.second);
   }
-}
-
-void CTRCounterMerge::onCounter(const CTRCounter& c) {
-  fnord::iputs("ctrcounter: $0", c.first);
-  //auto& ctr = counters_[key];
-}
-
-void CTRCounterMerge::flushResults() {
-  //for (auto& ctr : counters_) {
-  //  emitEvent(ReportEventType::CTR_COUNTER, &ctr);
-  //}
 }
 
 } // namespace cm
