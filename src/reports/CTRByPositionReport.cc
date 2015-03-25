@@ -66,8 +66,7 @@ void CTRByPositionReport::onJoinedQuery(const JoinedQuery& q) {
 
 void CTRByPositionReport::onFinish() {
   for (auto& ctr : counters_) {
-    fnord::iputs("ctr: $0", ctr.first);
-//    emitEvent(ReportEventType::CTR_COUNTER, nullptr, &ctr);
+    ctr_table_->addRow(ctr.first, ctr.second);
   }
 }
 
