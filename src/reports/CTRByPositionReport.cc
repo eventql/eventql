@@ -21,30 +21,12 @@ CTRByPositionReport::CTRByPositionReport(
     ctr_table_(output),
     eligibility_(eligibility) {}
 
-//void CTRByPositionReport::onEvent(
-//    ReportEventType type,
-//    ReportEventTime time,
-//    void* ev) {
-//  switch (type) {
-//
-//    case ReportEventType::BEGIN:
-//      emitEvent(type, time, ev);
-//      return;
-//
-//    case ReportEventType::JOINED_QUERY:
-//      onJoinedQuery(*((JoinedQuery*) ev));
-//      return;
-//
-//    case ReportEventType::END:
-//      flushResults();
-//      emitEvent(type, time, ev);
-//      return;
-//
-//    default:
-//      RAISE(kRuntimeError, "unknown event type");
-//
-//  }
-//}
+void CTRByPositionReport::onInit() {
+  joined_queries_->forEach(std::bind(
+      &CTRByPositionReport::onJoinedQuery,
+      this,
+      std::placeholders::_1));
+}
 
 void CTRByPositionReport::onJoinedQuery(const JoinedQuery& q) {
   if (!isQueryEligible(eligibility_, q)) {
@@ -82,11 +64,13 @@ void CTRByPositionReport::onJoinedQuery(const JoinedQuery& q) {
   }
 }
 
-//void CTRByPositionReport::flushResults() {
-//  for (auto& ctr : counters_) {
+void CTRByPositionReport::onFinish() {
+  for (auto& ctr : counters_) {
+    fnord::iputs("ctr: $0", ctr.first);
 //    emitEvent(ReportEventType::CTR_COUNTER, nullptr, &ctr);
-//  }
-//}
+  }
+}
+
 
 } // namespace cm
 
