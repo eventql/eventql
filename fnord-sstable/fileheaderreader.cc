@@ -25,14 +25,30 @@ FileHeaderReader::FileHeaderReader(
   }
 
   auto version = *readUInt16();
-  if (version != BinaryFormat::kVersion) {
-    RAISE(kIllegalStateError, "unsupported sstable version");
+  switch (version) {
+
+    case 0x1:
+      flags_ = 0;
+      break;
+
+    case 0x2:
+      flags_ = *readUInt64();
+      break;
+
+    default:
+      RAISE(kIllegalStateError, "unsupported sstable version");
+
   }
 
   body_size_ = *readUInt64();
   userdata_checksum_ = *readUInt32();
   userdata_size_ = *readUInt32();
   userdata_offset_ = pos_;
+
+  /* pre version 0x02 body_size > 0 implied that the table is finalized */
+  if (version == 0x01 && body_size_ > 0) {
+    flags_ |= (uint64_t) FileHeaderFlags::FINALIZED;
+  }
 }
 
 bool FileHeaderReader::verify() {
@@ -60,6 +76,10 @@ size_t FileHeaderReader::headerSize() const {
 
 size_t FileHeaderReader::bodySize() const {
   return body_size_;
+}
+
+bool FileHeaderReader::isFinalized() const {
+  return (flags_ & (uint64_t) FileHeaderFlags::FINALIZED) > 0;
 }
 
 size_t FileHeaderReader::userdataSize() const {
