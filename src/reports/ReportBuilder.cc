@@ -91,27 +91,26 @@ size_t ReportBuilder::buildOnce() {
       "Running $0 report pipeline(s)", runnables.size());
 
   List<std::thread> threads;
-//  for (int i = 0; i < runnables.size(); ++i) {
-//    threads.emplace_back([i, &runnables] () {
-//      fnord::logInfo(
-//          "cm.reportbuild",
-//          "Running report $0/$1: '$2'",
-//          i + 1,
-//          runnables.size(),
-//          "FIXME");
-//
-//      runnables[i]->onEvent(ReportEventType::BEGIN, nullptr, nullptr);
-//      runnables[i]->onEvent(ReportEventType::END, nullptr, nullptr);
-//
-//      fnord::logInfo(
-//          "cm.reportbuild",
-//          "Finished report $0/$1: '$2'",
-//          i + 1,
-//          runnables.size(),
-//          "FIXME");
-//    });
-//  }
-//
+  for (auto runnable : runnables) {
+    threads.emplace_back([runnable] () {
+      fnord::logInfo(
+          "cm.reportbuild",
+          "Running report pipline with $1 report(s) for inputs: $0",
+          inspect(runnable.first->inputFiles()),
+          runnable.second.size());
+
+      for (const auto& r : runnable.second) {
+        r->onInit();
+      }
+
+      runnable.first->read();
+
+      for (const auto& r : runnable.second) {
+        r->onFinish();
+      }
+    });
+  }
+
   for (auto& t : threads) {
     t.join();
   }

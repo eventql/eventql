@@ -20,6 +20,10 @@ Report::Report(
 
 Report::~Report() {}
 
+void Report::onInit() {}
+
+void Report::onFinish() {}
+
 RefPtr<ReportSource> Report::input() {
   return input_;
 }

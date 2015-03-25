@@ -21,6 +21,7 @@ public:
   JoinedQueryTableSource(const String& sstable_filename);
   JoinedQueryTableSource(const Set<String>& sstable_filenames);
 
+  void read() override;
   Set<String> inputFiles() override;
 
 protected:
