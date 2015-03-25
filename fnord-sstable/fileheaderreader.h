@@ -35,6 +35,11 @@ public:
   size_t headerSize() const;
 
   /**
+   * Returns true iff the table is finalized (immutable)
+   */
+  bool isFinalized() const;
+
+  /**
    * Returns the body size in bytes
    */
   size_t bodySize() const;
@@ -50,6 +55,7 @@ public:
   void readUserdata(const void** userdata, size_t* userdata_size);
 
 protected:
+  uint64_t flags_;
   uint64_t body_size_;
   uint32_t userdata_checksum_;
   uint32_t userdata_size_;

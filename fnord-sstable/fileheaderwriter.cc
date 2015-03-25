@@ -15,7 +15,7 @@ namespace fnord {
 namespace sstable {
 
 size_t FileHeaderWriter::calculateSize(size_t userdata_size) {
-  return 22 + userdata_size; // FIXPAUL
+  return 30 + userdata_size; // FIXPAUL
 }
 
 FileHeaderWriter::FileHeaderWriter(
@@ -25,8 +25,11 @@ FileHeaderWriter::FileHeaderWriter(
     const void* userdata,
     size_t userdata_size) :
     fnord::util::BinaryMessageWriter(buf, buf_size) {
+  uint64_t flags = 0;
+
   appendUInt32(BinaryFormat::kMagicBytes);
   appendUInt16(BinaryFormat::kVersion);
+  appendUInt64(flags);
   appendUInt64(body_size);
 
   if (userdata_size > 0) {
@@ -47,9 +50,14 @@ FileHeaderWriter::FileHeaderWriter(
     fnord::util::BinaryMessageWriter(buf, buf_size) {}
 
 void FileHeaderWriter::updateBodySize(size_t body_size) {
-  updateUInt64(6, body_size); // FIXPAUL
+  updateUInt64(14, body_size); // FIXPAUL
 }
 
+void FileHeaderWriter::setFlag(FileHeaderFlags flag) {
+  auto flags = *((uint64_t*) (((char*) ptr_) + 6));
+  flags |= (uint64_t) flag;
+  updateUInt64(6, flags);
+}
 
 }
 }

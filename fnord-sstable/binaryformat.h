@@ -23,9 +23,18 @@ namespace sstable {
  *       <body>
  *       *<footer>
  *
- *   <header> :=
+ *   <header v1> :=
  *       %x17 %x17 %x17 %x17"    // magic bytes
  *       %x00 %x01               // sstable file format version
+ *       <uint64_t>              // total body size in bytes
+ *       <uint32_t>              // userdata checksum
+ *       <uint32_t>              // userdata size in bytes
+ *       <bytes>                 // userdata
+ *
+ *   <header v2> :=
+ *       %x17 %x17 %x17 %x17"    // magic bytes
+ *       %x00 %x02               // sstable file format version
+ *       <uint64_t>              // flags (1=finalized)
  *       <uint64_t>              // total body size in bytes
  *       <uint32_t>              // userdata checksum
  *       <uint32_t>              // userdata size in bytes
@@ -48,9 +57,13 @@ namespace sstable {
  *       <bytes>                 // userdata
  *
  */
+enum class FileHeaderFlags : uint64_t {
+  FINALIZED = 1
+};
+
 class BinaryFormat {
 public:
-  static const uint16_t kVersion = 1;
+  static const uint16_t kVersion = 2;
   static const uint64_t kMagicBytes = 0x17171717;
 
   struct __attribute__((packed)) RowHeader {

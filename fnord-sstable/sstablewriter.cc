@@ -212,6 +212,7 @@ void SSTableWriter::finalize() {
 
   FileHeaderWriter header(page->ptr(), page->size());
   header.updateBodySize(body_size_);
+  header.setFlag(FileHeaderFlags::FINALIZED);
 
   page->sync();
   mmap_->shrinkFile();
