@@ -99,6 +99,19 @@ Language extractLanguage(const Vector<String>& attrs) {
   return Language::UNKNOWN;
 }
 
+String extractPageType(const Vector<String>& attrs) {
+  for (const auto& a : attrs) {
+    if (StringUtil::beginsWith(a, "qstr~")) {
+      return "search";
+    }
+
+    if (StringUtil::beginsWith(a, "q_cat")) {
+      return "catalog";
+    }
+  }
+
+  return "unknown";
+}
 
 String joinBagOfWords(const Set<String>& words) {
   Vector<String> v;
