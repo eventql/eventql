@@ -13,7 +13,7 @@ using namespace fnord;
 
 namespace cm {
 
-ReportBuilder::ReportBuilder() : max_threads_(8) {}
+ReportBuilder::ReportBuilder() : max_threads_(8), num_threads_(0) {}
 
 void ReportBuilder::addReport(RefPtr<Report> report) {
   reports_.emplace_back(report);
@@ -21,6 +21,11 @@ void ReportBuilder::addReport(RefPtr<Report> report) {
 
 void ReportBuilder::buildAll() {
   while (buildSome() > 0) {}
+
+  std::unique_lock<std::mutex> lk(m_);
+  while (num_threads_ > 0) {
+    cv_.wait(lk);
+  }
 }
 
 size_t ReportBuilder::buildSome() {
@@ -29,10 +34,16 @@ size_t ReportBuilder::buildSome() {
 
   uint64_t reports_waiting = 0;
   uint64_t reports_runnable = 0;
+  uint64_t reports_running = 0;
   uint64_t reports_completed = 0;
 
   HashMap<ReportSource*, List<RefPtr<Report>>> runnables;
   for (const auto& r : reports_) {
+    if (r->running) {
+      ++reports_running;
+      continue;
+    }
+
     bool inputs_ready = true;
     for (const auto& f : r->input()->inputFiles()) {
       if (existing_files.count(f) > 0 || FileUtil::exists(f)) {
@@ -74,16 +85,18 @@ size_t ReportBuilder::buildSome() {
       ++reports_completed;
     } else {
       ++reports_runnable;
+      r->running = true;
       runnables[r->input().get()].emplace_back(r);
     }
   }
 
   fnord::logInfo(
       "cm.reportbuild",
-      "Found $0 report(s) - $1 waiting, $2 runnable, $3 completed",
-      reports_waiting + reports_runnable + reports_completed,
+      "Found $0 report(s) - $1 waiting, $2 runnable, $3 running, $4 completed",
+      reports_.size(),
       reports_waiting,
       reports_runnable,
+      reports_running,
       reports_completed);
 
   fnord::logInfo(
@@ -91,24 +104,20 @@ size_t ReportBuilder::buildSome() {
       "Running $0 report pipeline(s)", runnables.size());
 
   buildParallel(runnables);
-
   return reports_runnable;
 }
 
 void ReportBuilder::buildParallel(
     const HashMap<ReportSource*, List<RefPtr<Report>>>& runnables) {
-  std::mutex m;
-  std::unique_lock<std::mutex> lk(m);
-  std::condition_variable cv;
-  size_t num_threads = 0;
+  std::unique_lock<std::mutex> lk(m_);
 
   for (auto runnable : runnables) {
-    while (num_threads >= max_threads_) {
-      cv.wait(lk);
+    while (num_threads_ >= max_threads_) {
+      cv_.wait(lk);
     }
 
-    ++num_threads;
-    auto thread = std::thread([runnable, &m, &cv, &num_threads] () {
+    ++num_threads_;
+    auto thread = std::thread([this, runnable] () {
       fnord::logInfo(
           "cm.reportbuild",
           "Running report pipline with $1 report(s) for inputs: $0",
@@ -127,17 +136,13 @@ void ReportBuilder::buildParallel(
         r->output()->close();
       }
 
-      std::unique_lock<std::mutex> wakeup_lk(m);
-      --num_threads;
+      std::unique_lock<std::mutex> wakeup_lk(m_);
+      --num_threads_;
       wakeup_lk.unlock();
-      cv.notify_one();
+      cv_.notify_one();
     });
 
     thread.detach();
-  }
-
-  while (num_threads > 0) {
-    cv.wait(lk);
   }
 }
 

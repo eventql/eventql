@@ -67,6 +67,8 @@ public:
   RefPtr<ReportSource> input();
   RefPtr<ReportSink> output();
 
+  bool running;
+
 protected:
   RefPtr<ReportSource> input_;
   RefPtr<ReportSink> output_;
