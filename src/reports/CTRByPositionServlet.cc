@@ -9,6 +9,7 @@
 #include "CTRByPositionServlet.h"
 #include "CTRCounter.h"
 #include "fnord-base/Language.h"
+#include "fnord-base/wallclock.h"
 #include "fnord-base/io/fileutil.h"
 #include "fnord-sstable/sstablereader.h"
 #include "fnord-sstable/SSTableScan.h"
@@ -34,14 +35,21 @@ void CTRByPositionServlet::handleHTTPRequest(
     return;
   }
 
+  String lang_str;
+  if (!URI::getParam(params, "lang", &lang_str)) {
+    res->addBody("error: missing ?lang=... parameter");
+    res->setStatus(http::kStatusBadRequest);
+    return;
+  }
+
+  auto end_time = WallClock::unixMicros();
+  auto start_time = end_time - 30 * kMicrosPerDay;
+
   Set<String> test_groups { "all" };
   Set<String> device_types { "unknown", "desktop", "tablet", "phone" };
 
-  Language lang = Language::DE;
-  auto lang_str = languageToString(lang);
-
   /* prepare prefix filters for scanning */
-  String scan_common_prefix = languageToString(lang) + "~";
+  String scan_common_prefix = lang_str + "~";
   if (test_groups.size() == 1) {
     scan_common_prefix += *test_groups.begin() + "~";
   }
@@ -50,11 +58,24 @@ void CTRByPositionServlet::handleHTTPRequest(
     scan_common_prefix += *device_types.begin() + "~";
   }
 
-  /* scan input tables */
-  Set<String> tables { "dawanda_ctr_by_position.99066.sstable" };
+  /* prepare input tables */
+  Set<String> tables;
+  for (uint64_t i = end_time; i >= start_time; i -= kMicrosPerDay) {
+    tables.emplace(StringUtil::format(
+        "$0_ctr_by_position.$1.sstable",
+        customer,
+        i / kMicrosPerDay));
+  }
 
+  fnord::iputs("tables: $0", tables);
+
+  /* scan input tables */
   HashMap<uint64_t, CTRCounterData> counters;
   for (const auto& tbl : tables) {
+    if (!vfs_->exists(tbl)) {
+      continue;
+    }
+
     sstable::SSTableReader reader(vfs_->openFile(tbl));
     if (reader.bodySize() == 0 || reader.isFinalized() == 0) {
       continue;
