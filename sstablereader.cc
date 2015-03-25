@@ -115,6 +115,10 @@ std::unique_ptr<SSTableReader::SSTableReaderCursor> SSTableReader::getCursor() {
   return std::unique_ptr<SSTableReaderCursor>(cursor);
 }
 
+bool SSTableReader::isFinalized() const {
+  return header_.isFinalized();
+}
+
 size_t SSTableReader::bodySize() const {
   return header_.bodySize();
 }
