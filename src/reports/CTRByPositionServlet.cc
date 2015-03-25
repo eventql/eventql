@@ -62,7 +62,7 @@ void CTRByPositionServlet::handleHTTPRequest(
   Set<String> tables;
   for (uint64_t i = end_time; i >= start_time; i -= kMicrosPerDay) {
     tables.emplace(StringUtil::format(
-        "$0_ctr_by_position.$1.sstable",
+        "$0_ctr_by_position_daily.$1.sstable",
         customer,
         i / kMicrosPerDay));
   }
