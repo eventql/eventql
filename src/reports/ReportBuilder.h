@@ -40,6 +40,9 @@ protected:
   void buildParallel(const HashMap<ReportSource*, List<RefPtr<Report>>>& reps);
 
   size_t max_threads_;
+  size_t num_threads_;
+  std::mutex m_;
+  std::condition_variable cv_;
   List<RefPtr<Report>> reports_;
 };
 

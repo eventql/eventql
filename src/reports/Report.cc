@@ -16,7 +16,8 @@ Report::Report(
     RefPtr<ReportSource> input,
     RefPtr<ReportSink> output) :
     input_(input),
-    output_(output) {}
+    output_(output),
+    running(false) {}
 
 Report::~Report() {}
 
