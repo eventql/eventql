@@ -25,7 +25,10 @@ namespace cm {
 class CTRCounterTableSink : public ReportSink {
 public:
 
-  CTRCounterTableSink(const String& output_file);
+  CTRCounterTableSink(
+      DateTime start_time,
+      DateTime end_time,
+      const String& output_file);
 
   void open();
   void addRow(const String& key, CTRCounterData counter);
@@ -34,6 +37,8 @@ public:
   Set<String> outputFiles() override;
 
 protected:
+  DateTime start_time_;
+  DateTime end_time_;
   String output_file_;
   std::unique_ptr<sstable::SSTableWriter> sstable_writer_;
   sstable::SSTableColumnSchema sstable_schema_;

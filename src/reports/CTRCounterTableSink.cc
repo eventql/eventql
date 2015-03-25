@@ -15,7 +15,11 @@ using namespace fnord;
 namespace cm {
 
 CTRCounterTableSink::CTRCounterTableSink(
+    DateTime start_time,
+    DateTime end_time,
     const String& output_file) :
+    start_time_(start_time),
+    end_time_(end_time),
     output_file_(output_file) {
   sstable_schema_.addColumn("num_views", 1, sstable::SSTableColumnType::UINT64);
   sstable_schema_.addColumn("num_clicks", 2, sstable::SSTableColumnType::UINT64);
@@ -38,10 +42,10 @@ void CTRCounterTableSink::open() {
       output_file_);
 
   HashMap<String, String> out_hdr;
-  //out_hdr["start_time"] =
-  //    StringUtil::toString(time.get().first.unixMicros());
-  //out_hdr["end_time"] =
-  //    StringUtil::toString(time.get().second.unixMicros());
+  out_hdr["start_time"] =
+      StringUtil::toString(start_time_.unixMicros());
+  out_hdr["end_time"] =
+      StringUtil::toString(end_time_.unixMicros());
   auto outhdr_json = json::toJSONString(out_hdr);
 
   sstable_writer_ = sstable::SSTableWriter::create(
