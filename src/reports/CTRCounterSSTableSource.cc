@@ -7,6 +7,7 @@
  * permission is obtained.
  */
 #include "reports/CTRCounterSSTableSource.h"
+#include <fnord-sstable/SSTableColumnReader.h>
 #include "fnord-json/json.h"
 
 using namespace fnord;

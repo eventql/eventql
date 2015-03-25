@@ -206,6 +206,7 @@ add_executable(cm-dawandaindexpush
     $<TARGET_OBJECTS:fnord-rpc>
     $<TARGET_OBJECTS:fnord-mdb>
     $<TARGET_OBJECTS:fnord-sql>
+    $<TARGET_OBJECTS:fnord-sstable>
     customers/dawanda/cm-dawandaindexpush.cc)
 
 target_link_libraries(cm-dawandaindexpush
@@ -402,6 +403,7 @@ add_executable(cm-reportserver
     $<TARGET_OBJECTS:fnord-rpc>
     $<TARGET_OBJECTS:fnord-sstable>
     3rdparty/libfnord/fnord-sstable/SSTableServlet.cc
+    src/reports/CTRByPositionServlet.cc
     src/cm-reportserver.cc)
 
 target_link_libraries(cm-reportserver
@@ -412,6 +414,7 @@ add_executable(cm-tokenize
     $<TARGET_OBJECTS:fnord-base>
     $<TARGET_OBJECTS:fnord-mdb>
     $<TARGET_OBJECTS:fnord-fts>
+    $<TARGET_OBJECTS:fnord-sstable>
     src/cm-tokenize.cc)
 
 target_link_libraries(cm-tokenize
