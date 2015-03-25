@@ -36,7 +36,11 @@ public:
   void buildAll();
 
 protected:
-  size_t buildOnce();
+  size_t buildSome();
+  void buildParallel(
+      const HashMap<ReportSource*, List<RefPtr<Report>>>& reps,
+      size_t max_threads = 8);
+
   size_t max_threads_;
   List<RefPtr<Report>> reports_;
 };
