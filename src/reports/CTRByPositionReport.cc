@@ -13,33 +13,37 @@ using namespace fnord;
 namespace cm {
 
 CTRByPositionReport::CTRByPositionReport(
+    RefPtr<JoinedQueryTableSource> source,
     ItemEligibility eligibility) :
-    eligibility_(eligibility) {}
-
-void CTRByPositionReport::onEvent(
-    ReportEventType type,
-    ReportEventTime time,
-    void* ev) {
-  switch (type) {
-
-    case ReportEventType::BEGIN:
-      emitEvent(type, time, ev);
-      return;
-
-    case ReportEventType::JOINED_QUERY:
-      onJoinedQuery(*((JoinedQuery*) ev));
-      return;
-
-    case ReportEventType::END:
-      flushResults();
-      emitEvent(type, time, ev);
-      return;
-
-    default:
-      RAISE(kRuntimeError, "unknown event type");
-
-  }
+    source_(source),
+    eligibility_(eligibility) {
+  addInput(source_.get());
 }
+
+//void CTRByPositionReport::onEvent(
+//    ReportEventType type,
+//    ReportEventTime time,
+//    void* ev) {
+//  switch (type) {
+//
+//    case ReportEventType::BEGIN:
+//      emitEvent(type, time, ev);
+//      return;
+//
+//    case ReportEventType::JOINED_QUERY:
+//      onJoinedQuery(*((JoinedQuery*) ev));
+//      return;
+//
+//    case ReportEventType::END:
+//      flushResults();
+//      emitEvent(type, time, ev);
+//      return;
+//
+//    default:
+//      RAISE(kRuntimeError, "unknown event type");
+//
+//  }
+//}
 
 void CTRByPositionReport::onJoinedQuery(const JoinedQuery& q) {
   if (!isQueryEligible(eligibility_, q)) {
@@ -77,11 +81,11 @@ void CTRByPositionReport::onJoinedQuery(const JoinedQuery& q) {
   }
 }
 
-void CTRByPositionReport::flushResults() {
-  for (auto& ctr : counters_) {
-    emitEvent(ReportEventType::CTR_COUNTER, nullptr, &ctr);
-  }
-}
+//void CTRByPositionReport::flushResults() {
+//  for (auto& ctr : counters_) {
+//    emitEvent(ReportEventType::CTR_COUNTER, nullptr, &ctr);
+//  }
+//}
 
 } // namespace cm
 
