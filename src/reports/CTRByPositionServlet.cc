@@ -55,8 +55,6 @@ void CTRByPositionServlet::handleHTTPRequest(
 
   HashMap<uint64_t, CTRCounterData> counters;
   for (const auto& tbl : tables) {
-    fnord::iputs("scan table $1, common_prefix: $0", scan_common_prefix, tbl);
-
     sstable::SSTableReader reader(vfs_->openFile(tbl));
     if (reader.bodySize() == 0 || reader.isFinalized() == 0) {
       continue;
@@ -94,6 +92,51 @@ void CTRByPositionServlet::handleHTTPRequest(
       counters[posi].merge(counter);
     });
   }
+
+
+  /* write response */
+  res->setStatus(http::kStatusOK);
+  res->addHeader("Content-Type", "application/json; charset=utf-8");
+  json::JSONOutputStream json(res->getBodyOutputStream());
+
+  json.beginArray();
+
+  uint64_t total_views = 0;
+  uint64_t total_clicks = 0;
+
+  for (const auto& c : counters) {
+    total_views += c.second.num_views;
+    total_clicks += c.second.num_clicks;
+  }
+
+  int n = 0;
+  for (const auto& c : counters) {
+    if (++n > 1) {
+      json.addComma();
+    }
+
+    json.beginObject();
+    json.addObjectEntry("position");
+    json.addInteger(c.first);
+    json.addComma();
+    json.addObjectEntry("views");
+    json.addInteger(c.second.num_views);
+    json.addComma();
+    json.addObjectEntry("clicks");
+    json.addInteger(c.second.num_clicks);
+    json.addComma();
+    json.addObjectEntry("ctr");
+    json.addInteger(c.second.num_clicks / (double) c.second.num_views);
+    json.addComma();
+    json.addObjectEntry("ctr_base");
+    json.addInteger(c.second.num_clicks / (double) total_views);
+    json.addComma();
+    json.addObjectEntry("clickshare");
+    json.addInteger(c.second.num_clicks / (double) total_clicks);
+    json.endObject();
+  }
+
+  json.endArray();
 }
 
 }
