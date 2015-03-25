@@ -50,7 +50,9 @@ public:
 class ReportSink : public RefCounted {
 public:
   virtual ~ReportSink() {}
+  virtual void open() = 0;
   virtual Set<String> outputFiles() = 0;
+  virtual void close() = 0;
 };
 
 class Report : public RefCounted {

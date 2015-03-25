@@ -100,6 +100,7 @@ size_t ReportBuilder::buildOnce() {
           runnable.second.size());
 
       for (const auto& r : runnable.second) {
+        r->output()->open();
         r->onInit();
       }
 
@@ -107,6 +108,7 @@ size_t ReportBuilder::buildOnce() {
 
       for (const auto& r : runnable.second) {
         r->onFinish();
+        r->output()->close();
       }
     });
   }
