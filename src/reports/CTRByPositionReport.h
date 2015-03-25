@@ -10,6 +10,7 @@
 #define _CM_CTRBYPOSITIONREPORT_H
 #include "reports/Report.h"
 #include "JoinedQuery.h"
+#include "JoinedQueryTableSource.h"
 #include "CTRCounter.h"
 #include "ItemRef.h"
 #include "common.h"
@@ -25,18 +26,15 @@ namespace cm {
 class CTRByPositionReport : public Report {
 public:
 
-  CTRByPositionReport(ItemEligibility eligibility);
-
-  void onEvent(
-      ReportEventType type,
-      ReportEventTime time,
-      void* ev) override;
-
-protected:
+  CTRByPositionReport(
+      RefPtr<JoinedQueryTableSource> source,
+      ItemEligibility eligibility);
 
   void onJoinedQuery(const JoinedQuery& q);
   void flushResults();
 
+protected:
+  RefPtr<JoinedQueryTableSource> source_;
   ItemEligibility eligibility_;
   HashMap<String, CTRCounterData> counters_;
 };

@@ -40,27 +40,32 @@ enum class ReportEventType {
 
 typedef Option<Pair<DateTime, DateTime>> ReportEventTime;
 
+class ReportSource : public RefCounted {
+public:
+  virtual ~ReportSource() {}
+  virtual Set<String> inputFiles() = 0;
+};
+
+class ReportSink : public RefCounted {
+public:
+  virtual ~ReportSink() {}
+  virtual Set<String> outputFiles() = 0;
+};
+
 class Report : public RefCounted {
 public:
 
-  void addReport(RefPtr<Report> report);
+  virtual ~Report() {}
 
-  virtual void onEvent(
-      ReportEventType type,
-      ReportEventTime time,
-      void* ev) = 0;
+  List<RefPtr<ReportSource>> inputs();
+  List<RefPtr<ReportSink>> outputs();
 
-  virtual Set<String> inputFiles();
-  virtual Set<String> outputFiles();
+  void addInput(RefPtr<ReportSource> input);
+  void addOutput(RefPtr<ReportSink> output);
 
 protected:
-
-  void emitEvent(
-      ReportEventType type,
-      ReportEventTime time,
-      void* ev);
-
-  List<RefPtr<Report>> children_;
+  List<RefPtr<ReportSource>> inputs_;
+  List<RefPtr<ReportSink>> outputs_;
 };
 
 } // namespace cm

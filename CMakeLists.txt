@@ -383,11 +383,11 @@ add_executable(cm-reportbuild
     $<TARGET_OBJECTS:fnord-fts>
     src/reports/Report.cc
     src/reports/ReportBuilder.cc
-    src/reports/JoinedQueryTableReport.cc
+    src/reports/JoinedQueryTableSource.cc
     src/reports/CTRByPositionReport.cc
-    src/reports/CTRCounterSSTableSink.cc
-    src/reports/CTRCounterSSTableSource.cc
-    src/reports/CTRCounterMerge.cc
+    #src/reports/CTRCounterSSTableSink.cc
+    #src/reports/CTRCounterSSTableSource.cc
+    #src/reports/CTRCounterMerge.cc
     src/cm-reportbuild.cc)
 
 target_link_libraries(cm-reportbuild

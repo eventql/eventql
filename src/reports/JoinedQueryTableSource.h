@@ -15,15 +15,11 @@ using namespace fnord;
 
 namespace cm {
 
-class JoinedQueryTableReport : public Report {
+class JoinedQueryTableSource : public ReportSource {
 public:
 
-  JoinedQueryTableReport(const Set<String>& sstable_filenames);
-
-  void onEvent(
-      ReportEventType type,
-      ReportEventTime time,
-      void* ev) override;
+  JoinedQueryTableSource(const String& sstable_filename);
+  JoinedQueryTableSource(const Set<String>& sstable_filenames);
 
   Set<String> inputFiles() override;
 

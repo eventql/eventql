@@ -12,41 +12,20 @@ using namespace fnord;
 
 namespace cm {
 
-void Report::addReport(RefPtr<Report> report) {
-  children_.emplace_back(report);
+List<RefPtr<ReportSource>> Report::inputs() {
+  return inputs_;
 }
 
-Set<String> Report::inputFiles() {
-  Set<String> files;
-
-  for (const auto& cld : children_) {
-    for (const auto& f : cld->inputFiles()) {
-      files.emplace(f);
-    }
-  }
-
-  return files;
+List<RefPtr<ReportSink>> Report::outputs() {
+  return outputs_;
 }
 
-Set<String> Report::outputFiles() {
-  Set<String> files;
-
-  for (const auto& cld : children_) {
-    for (const auto& f : cld->outputFiles()) {
-      files.emplace(f);
-    }
-  }
-
-  return files;
+void Report::addInput(RefPtr<ReportSource> input) {
+  inputs_.emplace_back(input);
 }
 
-void Report::emitEvent(
-      ReportEventType type,
-      ReportEventTime time,
-      void* ev) {
-  for (const auto& cld : children_) {
-    cld->onEvent(type, time, ev);
-  }
+void Report::addOutput(RefPtr<ReportSink> output) {
+  outputs_.emplace_back(output);
 }
 
 } // namespace cm
