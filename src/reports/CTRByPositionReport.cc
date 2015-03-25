@@ -54,16 +54,26 @@ void CTRByPositionReport::onJoinedQuery(const JoinedQuery& q) {
       continue;
     }
 
-    auto key = StringUtil::format(
+    Set<String> keys;
+
+    keys.emplace(StringUtil::format(
         "$0~$1~$2~$3",
         lang,
-        device_type,
         test_group,
-        item.position);
+        device_type,
+        item.position));
 
-    auto& ctr = counters_[key];
-    ++ctr.num_views;
-    ctr.num_clicks += item.clicked;
+    keys.emplace(StringUtil::format(
+        "$0~all~$1~$2",
+        lang,
+        device_type,
+        item.position));
+
+    for (const auto& key : keys) {
+      auto& ctr = counters_[key];
+      ++ctr.num_views;
+      ctr.num_clicks += item.clicked;
+    }
   }
 }
 

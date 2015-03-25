@@ -38,6 +38,7 @@
 #include "CustomerNamespace.h"
 #include "FeatureSchema.h"
 #include "JoinedQuery.h"
+#include "reports/CTRByPositionServlet.h"
 
 using namespace fnord;
 
@@ -57,12 +58,12 @@ int main(int argc, const char** argv) {
       "<port>");
 
   flags.defineFlag(
-      "report_path",
+      "artifacts",
       cli::FlagParser::T_STRING,
       true,
       NULL,
       NULL,
-      "report path",
+      "artifacts path",
       "<path>");
 
   flags.defineFlag(
@@ -96,12 +97,16 @@ int main(int argc, const char** argv) {
   http_router.addRouteByPrefixMatch("/file", &file_servlet);
 
   /* add all files to whitelist vfs */
-  auto report_path = flags.getString("report_path");
-  FileUtil::ls(report_path, [&vfs, &report_path] (const String& file) -> bool {
-    vfs.registerFile(file, FileUtil::joinPaths(report_path, file));
+  auto dir = flags.getString("artifacts");
+  FileUtil::ls(dir, [&vfs, &dir] (const String& file) -> bool {
+    vfs.registerFile(file, FileUtil::joinPaths(dir, file));
     fnord::logInfo("cm.reportserver", "[VFS] Adding file: $0", file);
     return true;
   });
+
+  /* ctr by position */
+  cm::CTRByPositionServlet ctr_by_pos(&vfs);
+  http_router.addRouteByPrefixMatch("/reports/ctr_by_position", &ctr_by_pos);
 
   ev.run();
   return 0;

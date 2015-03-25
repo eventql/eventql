@@ -20,7 +20,7 @@ namespace cm {
 
 /**
  * INPUT: JOINED_QUERY
- * OUTPUT: CTR_COUNTER (key=<lang>~<devicetype>~<testgroup>~<posi>)
+ * OUTPUT: CTR_COUNTER (key=<lang>~<testgroup>~<devicetype>~<posi>)
  */
 class CTRByPositionReport : public Report {
 public:
