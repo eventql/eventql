@@ -52,7 +52,7 @@ void JoinedQueryTableReport::readTables() {
     /* read sstable header */
     sstable::SSTableReader reader(File::openFile(sstable, File::O_READ));
     if (reader.bodySize() == 0) {
-      RAISEF(kRuntimeError, "unfinished sstable: $0", sstable);
+      fnord::logWarning("cm.ctrstats", "Warning: empty sstable: $0", sstable);
     }
 
     /* read report header */
