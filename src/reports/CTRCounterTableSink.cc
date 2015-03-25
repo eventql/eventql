@@ -25,7 +25,7 @@ CTRCounterTableSink::CTRCounterTableSink(
 void CTRCounterTableSink::open() {
   if (FileUtil::exists(output_file_ + "~")) {
     fnord::logInfo(
-        "cm.ctrstats",
+        "cm.reportbuild",
         "Deleting orphaned temp file: $0",
         output_file_ + "~");
 
@@ -33,7 +33,7 @@ void CTRCounterTableSink::open() {
   }
 
   fnord::logInfo(
-      "cm.ctrstats",
+      "cm.reportbuild",
       "Opening output sstable: $0",
       output_file_);
 
@@ -61,7 +61,7 @@ void CTRCounterTableSink::addRow(const String& key, CTRCounterData counter) {
 
 void CTRCounterTableSink::close() {
   fnord::logInfo(
-      "cm.ctrstats",
+      "cm.reportbuild",
       "Finalizing output sstable: $0",
       output_file_);
 
