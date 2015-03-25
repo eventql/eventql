@@ -67,8 +67,6 @@ void CTRByPositionServlet::handleHTTPRequest(
         i / kMicrosPerDay));
   }
 
-  fnord::iputs("tables: $0", tables);
-
   /* scan input tables */
   HashMap<uint64_t, CTRCounterData> counters;
   for (const auto& tbl : tables) {
