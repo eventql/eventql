@@ -17,9 +17,12 @@ namespace cm {
 
 class JoinedQueryTableSource : public ReportSource {
 public:
+  typedef Function<void (const JoinedQuery& query)> CallbackFn;
 
   JoinedQueryTableSource(const String& sstable_filename);
   JoinedQueryTableSource(const Set<String>& sstable_filenames);
+
+  void forEach(CallbackFn fn);
 
   void read() override;
   Set<String> inputFiles() override;
@@ -27,6 +30,7 @@ public:
 protected:
   void readTables();
   Set<String> input_files_;
+  List<CallbackFn> callbacks_;
 };
 
 

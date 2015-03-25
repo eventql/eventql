@@ -32,8 +32,9 @@ public:
       RefPtr<CTRCounterSSTableSink> output,
       ItemEligibility eligibility);
 
+  void onInit();
   void onJoinedQuery(const JoinedQuery& q);
-  void flushResults();
+  void onFinish();
 
 protected:
   RefPtr<JoinedQueryTableSource> joined_queries_;

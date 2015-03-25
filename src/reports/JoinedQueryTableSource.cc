@@ -88,8 +88,9 @@ void JoinedQueryTableSource::read() {
       }
 
       if (!q.isEmpty()) {
-        auto ev_time = std::make_pair(q.get().time, q.get().time);
-        //emitEvent(ReportEventType::JOINED_QUERY, Some(ev_time), &q.get());
+        for (const auto& cb : callbacks_) {
+          cb(q.get());
+        }
       }
 
       if (!cursor->next()) {
@@ -97,6 +98,10 @@ void JoinedQueryTableSource::read() {
       }
     }
   }
+}
+
+void JoinedQueryTableSource::forEach(CallbackFn fn) {
+  callbacks_.emplace_back(fn);
 }
 
 Set<String> JoinedQueryTableSource::inputFiles() {
