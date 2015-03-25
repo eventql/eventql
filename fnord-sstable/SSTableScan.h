@@ -34,7 +34,7 @@ class SSTableScan {
 public:
   typedef Function<bool (const String& a, const String& b)> OrderFn;
 
-  SSTableScan(SSTableColumnSchema* schema);
+  SSTableScan(SSTableColumnSchema* schema = nullptr);
 
   void setKeyPrefix(const String& prefix);
   void setKeyFilterRegex(const String& regex);

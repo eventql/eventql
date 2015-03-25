@@ -199,6 +199,26 @@ void StringUtil::toUpper(std::string* str) {
   }
 }
 
+size_t StringUtil::find(const std::string& str, char chr) {
+  for (int i = 0; i < str.length(); ++i) {
+    if (str[i] == chr) {
+      return i;
+    }
+  }
+
+  return -1;
+}
+
+size_t StringUtil::findLast(const std::string& str, char chr) {
+  for (int i = str.length() - 1; i >= 0; --i) {
+    if (str[i] == chr) {
+      return i;
+    }
+  }
+
+  return -1;
+}
+
 std::string StringUtil::hexPrint(
     const void* data,
     size_t size,
