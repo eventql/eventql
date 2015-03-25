@@ -26,6 +26,7 @@ Option<String> extractAttr(const Vector<String>& attrs, const String& attr);
 String extractDeviceType(const Vector<String>& attrs);
 String extractTestGroup(const Vector<String>& attrs);
 Language extractLanguage(const Vector<String>& attrs);
+String extractPageType(const Vector<String>& attrs);
 
 String joinBagOfWords(const Set<String>& words);
 
