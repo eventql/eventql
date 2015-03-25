@@ -35,6 +35,7 @@
 #include "reports/ReportBuilder.h"
 #include "reports/JoinedQueryTableSource.h"
 #include "reports/CTRByPositionReport.h"
+#include "reports/CTRReport.h"
 #include "reports/CTRCounterMerge.h"
 #include "reports/CTRCounterTableSink.h"
 #include "reports/CTRCounterTableSource.h"
@@ -123,6 +124,16 @@ int main(int argc, const char** argv) {
             new CTRCounterTableSink(
                 StringUtil::format(
                     "$0/dawanda_ctr_by_position.$1.sstable",
+                    dir,
+                    g)),
+            ItemEligibility::ALL));
+
+    report_builder.addReport(
+        new CTRReport(
+            jq_source,
+            new CTRCounterTableSink(
+                StringUtil::format(
+                    "$0/dawanda_ctr_stats.$1.sstable",
                     dir,
                     g)),
             ItemEligibility::ALL));
