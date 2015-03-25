@@ -132,6 +132,10 @@ int main(int argc, const char** argv) {
     status_line.runForce();
   }
 
+  for (const auto& w : writers) {
+    w.second->finalize();
+  }
+
   return 0;
 }
 
