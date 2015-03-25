@@ -43,6 +43,7 @@ typedef Option<Pair<DateTime, DateTime>> ReportEventTime;
 class ReportSource : public RefCounted {
 public:
   virtual ~ReportSource() {}
+  virtual void read() = 0;
   virtual Set<String> inputFiles() = 0;
 };
 
@@ -57,6 +58,9 @@ public:
 
   Report(RefPtr<ReportSource> input, RefPtr<ReportSink> output);
   virtual ~Report();
+
+  virtual void onInit();
+  virtual void onFinish();
 
   RefPtr<ReportSource> input();
   RefPtr<ReportSink> output();
