@@ -89,9 +89,7 @@ void IndexServlet::fetchDoc(
   }
 
   DocID docid = { .docid = docid_str };
-  auto txn = index_->db_->startTransaction(true);
-  auto doc = index_->docIndex()->findDocument(docid, txn.get());
-  txn->abort();
+  auto doc = index_->docIndex()->findDocument(docid);
 
   auto fields = doc->fields();
   fields["docid"] = docid_str;
@@ -130,9 +128,7 @@ void IndexServlet::fetchDocs(
 
   for (const auto& docid_str : docid_strs) {
     DocID docid = { .docid = docid_str };
-    auto txn = index_->db_->startTransaction(true);
-    auto doc = index_->docIndex()->findDocument(docid, txn.get());
-    txn->abort();
+    auto doc = index_->docIndex()->findDocument(docid);
 
     auto fields = doc->fields();
     fields["docid"] = docid_str;

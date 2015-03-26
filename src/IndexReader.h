@@ -41,15 +41,12 @@ public:
   RefPtr<FeatureIndexWriter> docIndex();
   std::shared_ptr<fts::IndexSearcher> ftsSearcher();
 
-  RefPtr<mdb::MDB> db_;
 protected:
 
   IndexReader(
-      FeatureSchema schema,
-      RefPtr<mdb::MDB> db,
+      RefPtr<FeatureIndexWriter> doc_idx,
       std::shared_ptr<fts::IndexReader> fts);
 
-  FeatureSchema schema_;
   RefPtr<FeatureIndexWriter> doc_idx_;
   std::shared_ptr<fts::IndexReader> fts_;
   std::shared_ptr<fts::IndexSearcher> fts_searcher_;

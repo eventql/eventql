@@ -39,34 +39,37 @@ class CustomerNamespace;
 class FeatureIndexWriter : public RefCounted {
 public:
 
-  FeatureIndexWriter(const FeatureSchema* schema);
+  FeatureIndexWriter(const String& db_path, bool readonly);
+  ~FeatureIndexWriter();
 
-  void updateDocument(
-      const IndexRequest& index_request,
-      mdb::MDBTransaction* featuredb_txn);
+  RefPtr<Document> findDocument(const DocID& docid);
 
-  RefPtr<Document> findDocument(
-      const DocID& docid,
-      mdb::MDBTransaction* featuredb_txn);
+  void listDocuments(Function<bool (const DocID& id)> fn);
 
-  void listDocuments(
-      Function<bool (const DocID& id)> fn,
-      mdb::MDBTransaction* featuredb_txn);
+  Option<String> getField(const DocID& docid, const String& feature);
+  Option<String> getField(const DocID& docid, const FeatureID& featureid);
+  void getFields(const DocID& docid, FeaturePack* features);
+
+  void updateDocument(const IndexRequest& index_request);
+
+  void commit();
+
+  RefPtr<mdb::MDBTransaction> dbTransaction();
 
 protected:
 
-  void updateFeatureIndex(
-      const IndexRequest& index_request,
-      mdb::MDBTransaction* featuredb_txn);
+  void updateIndex(const IndexRequest& index_request);
 
-  void updateFeatureIndex(
+  void updateIndex(
       const DocID& docid,
-      const Vector<Pair<FeatureID, String>>& features,
-      mdb::MDBTransaction* featuredb_txn);
+      const Vector<Pair<FeatureID, String>>& features);
 
-  const FeatureSchema* feature_schema_;
-
+  FeatureSchema schema_;
+  bool readonly_;
+  RefPtr<mdb::MDB> db_;
+  RefPtr<mdb::MDBTransaction> txn_;
 };
+
 } // namespace cm
 
 #endif
