@@ -183,7 +183,7 @@ int main(int argc, const char** argv) {
                     "$0/dawanda_ctr_by_searchterm_cross_e1.$1.sstable",
                     dir,
                     g)),
-            "q_cat1",
+            "category1",
             ItemEligibility::ALL,
             analyzer,
             index_reader));
