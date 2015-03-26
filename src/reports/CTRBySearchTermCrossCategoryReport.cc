@@ -49,7 +49,17 @@ void CTRBySearchTermCrossCategoryReport::onJoinedQuery(const JoinedQuery& q) {
   }
 
   Set<String> terms;
-  analyzer_->extractTerms(lang, qstr.get(), &terms);
+  try {
+    analyzer_->extractTerms(lang, qstr.get(), &terms);
+  } catch (const Exception& e) {
+    fnord::logWarning(
+        "cm.reportbuild",
+        e,
+        "error analyzing query: $0",
+        qstr.get());
+
+    return;
+  }
 
   HashMap<String, CTRCounterData> per_field;
   for (auto& item : q.items) {

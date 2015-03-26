@@ -52,7 +52,18 @@ void CTRBySearchQueryReport::onJoinedQuery(const JoinedQuery& q) {
     return;
   }
 
-  auto qstr_norm = analyzer_->normalize(lang, qstr.get());
+  String qstr_norm;
+  try {
+    qstr_norm = analyzer_->normalize(lang, qstr.get());
+  } catch (const Exception& e) {
+    fnord::logWarning(
+        "cm.reportbuild",
+        e,
+        "error analyzing query: $0",
+        qstr.get());
+
+    return;
+  }
 
   Set<String> keys;
   keys.emplace("all");
