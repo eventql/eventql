@@ -22,8 +22,10 @@ void ReportBuilder::addReport(RefPtr<Report> report) {
   reports_.emplace_back(report);
 }
 
-void ReportBuilder::buildAll() {
-  while (buildSome() > 0) {}
+void ReportBuilder::buildAll(const Duration& interval) {
+  while (buildSome() > 0) {
+    usleep(interval.microseconds());
+  }
 
   std::unique_lock<std::mutex> lk(m_);
   while (num_threads_ > 0) {
@@ -55,6 +57,27 @@ size_t ReportBuilder::buildSome() {
 
   HashMap<ReportSource*, List<RefPtr<Report>>> runnables;
   for (const auto& r : reports_) {
+    bool already_completed = true;
+    for (const auto& f : r->output()->outputFiles()) {
+      if (existing_files.count(f) > 0 || FileUtil::exists(f)) {
+        existing_files.emplace(f);
+      } else {
+        fnord::logDebug(
+            "cm.reportbuild",
+            "Marking report '$0' as runnable because output '$1' doesn't exist",
+            "FIXME",
+            f);
+
+        already_completed = false;
+        break;
+      }
+    }
+
+    if (already_completed) {
+      ++reports_completed;
+      continue;
+    }
+
     if (r->running) {
       ++reports_running;
       continue;
@@ -76,33 +99,12 @@ size_t ReportBuilder::buildSome() {
       }
     }
 
-    if (!inputs_ready) {
-      ++reports_waiting;
-      continue;
-    }
-
-    bool already_completed = true;
-    for (const auto& f : r->output()->outputFiles()) {
-      if (existing_files.count(f) > 0 || FileUtil::exists(f)) {
-        existing_files.emplace(f);
-      } else {
-        fnord::logDebug(
-            "cm.reportbuild",
-            "Marking report '$0' as runnable because output '$1' doesn't exist",
-            "FIXME",
-            f);
-
-        already_completed = false;
-        break;
-      }
-    }
-
-    if (already_completed) {
-      ++reports_completed;
-    } else {
+    if (inputs_ready) {
       ++reports_runnable;
       r->running = true;
       runnables[r->input().get()].emplace_back(r);
+    } else {
+      ++reports_waiting;
     }
   }
 
@@ -115,12 +117,15 @@ size_t ReportBuilder::buildSome() {
       reports_running,
       reports_completed);
 
-  fnord::logInfo(
-      "cm.reportbuild",
-      "Running $0 report pipeline(s)", runnables.size());
+  if (runnables.size() > 0) {
+    fnord::logInfo(
+        "cm.reportbuild",
+        "Running $0 report pipeline(s)", runnables.size());
 
-  buildParallel(runnables);
-  return reports_runnable;
+    buildParallel(runnables);
+  }
+
+  return reports_runnable + reports_running;
 }
 
 void ReportBuilder::buildParallel(

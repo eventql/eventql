@@ -389,6 +389,7 @@ add_executable(cm-reportbuild
     src/reports/CTRCounterTableSink.cc
     src/reports/CTRCounterTableSource.cc
     src/reports/CTRCounterMerge.cc
+    src/reports/CTRBySearchQueryReport.cc
     src/cm-reportbuild.cc)
 
 target_link_libraries(cm-reportbuild
