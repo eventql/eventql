@@ -76,7 +76,7 @@ void CTRBySearchTermCrossCategoryReport::onJoinedQuery(const JoinedQuery& q) {
   for (const auto& t : terms) {
     for (const auto& p : per_field) {
       auto key = StringUtil::format(
-          "$0~$1~2",
+          "$0~$1~$2",
           lang_str,
           t,
           p.first);
