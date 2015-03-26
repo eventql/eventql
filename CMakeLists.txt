@@ -381,6 +381,9 @@ add_executable(cm-reportbuild
     $<TARGET_OBJECTS:fnord-rpc>
     $<TARGET_OBJECTS:fnord-sstable>
     $<TARGET_OBJECTS:fnord-fts>
+    src/IndexReader.cc
+    src/IndexWriter.cc
+    src/FeatureIndexWriter.cc
     src/reports/Report.cc
     src/reports/ReportBuilder.cc
     src/reports/JoinedQueryTableSource.cc
@@ -390,6 +393,7 @@ add_executable(cm-reportbuild
     src/reports/CTRCounterTableSource.cc
     src/reports/CTRCounterMerge.cc
     src/reports/CTRBySearchQueryReport.cc
+    src/reports/CTRBySearchTermCrossCategoryReport.cc
     src/cm-reportbuild.cc)
 
 target_link_libraries(cm-reportbuild

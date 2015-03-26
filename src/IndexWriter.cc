@@ -20,49 +20,11 @@ RefPtr<IndexWriter> IndexWriter::openIndex(
     RAISEF(kIllegalArgumentError, "invalid index path: $0", index_path);
   }
 
-  /* set up feature schema */
-  FeatureSchema feature_schema;
-  feature_schema.registerFeature("shop_id", 1, 1);
-  feature_schema.registerFeature("category1", 2, 1);
-  feature_schema.registerFeature("category2", 3, 1);
-  feature_schema.registerFeature("category3", 4, 1);
-  feature_schema.registerFeature("price_cents", 8, 1);
-
-  feature_schema.registerFeature("title~de", 5, 2);
-  feature_schema.registerFeature("description~de", 6, 2);
-  feature_schema.registerFeature("size_description~de", 14, 2);
-  feature_schema.registerFeature("material_description~de", 15, 2);
-  feature_schema.registerFeature("basic_attributes~de", 16, 2);
-  feature_schema.registerFeature("tags_as_text~de", 7, 2);
-  feature_schema.registerFeature("title~pl", 18, 2);
-  feature_schema.registerFeature("description~pl", 19, 2);
-  feature_schema.registerFeature("size_description~pl", 20, 2);
-  feature_schema.registerFeature("material_description~pl", 21, 2);
-  feature_schema.registerFeature("basic_attributes~pl", 22, 2);
-  feature_schema.registerFeature("tags_as_text~pl", 23, 2);
-  feature_schema.registerFeature("image_filename", 24, 2);
-  feature_schema.registerFeature("cm_clicked_terms", 31, 2);
-
-  feature_schema.registerFeature("shop_name", 26, 3);
-  feature_schema.registerFeature("shop_platform", 27, 3);
-  feature_schema.registerFeature("shop_country", 28, 3);
-  feature_schema.registerFeature("shop_rating_alt", 9, 3);
-  feature_schema.registerFeature("shop_rating_alt2", 15, 3);
-  feature_schema.registerFeature("shop_products_count", 10, 3);
-  feature_schema.registerFeature("shop_orders_count", 11, 3);
-  feature_schema.registerFeature("shop_rating_count", 12, 3);
-  feature_schema.registerFeature("shop_rating_avg", 13, 3);
-  feature_schema.registerFeature("cm_views", 29, 3);
-  feature_schema.registerFeature("cm_clicks", 30, 3);
-  feature_schema.registerFeature("cm_ctr", 32, 3);
-  feature_schema.registerFeature("cm_ctr_norm", 33, 3);
-  feature_schema.registerFeature("cm_ctr_std", 34, 3);
-  feature_schema.registerFeature("cm_ctr_norm_std", 35, 3);
-
-  /* open mdb */
+  /* open doc idx */
   auto db_path = FileUtil::joinPaths(index_path, "db");
   FileUtil::mkdir_p(db_path);
-  auto db = mdb::MDB::open(db_path, false, 68719476736lu); // 64 GiB
+  auto doc_idx = RefPtr<FeatureIndexWriter>(
+      new FeatureIndexWriter(index_path, false));
 
   /* open lucene */
   RefPtr<fnord::fts::Analyzer> analyzer(new fnord::fts::Analyzer(conf_path));
@@ -82,45 +44,35 @@ RefPtr<IndexWriter> IndexWriter::openIndex(
           create,
           fts::IndexWriter::MaxFieldLengthLIMITED);
 
-  return RefPtr<IndexWriter>(new IndexWriter(feature_schema, db, fts));
+  return RefPtr<IndexWriter>(new IndexWriter(doc_idx, fts));
 }
 
 IndexWriter::IndexWriter(
-    FeatureSchema schema,
-    RefPtr<mdb::MDB> db,
-    std::shared_ptr<fts::IndexWriter> fts) :
-    schema_(schema),
-    db_(db),
-    db_txn_(db_->startTransaction()),
-    feature_idx_(new FeatureIndexWriter(&schema_)),
-    fts_(fts) {}
-
+    RefPtr<FeatureIndexWriter> doc_idx,
+    std::shared_ptr<fts::IndexWriter> fts_idx) :
+    doc_idx_(doc_idx),
+    fts_idx_(fts_idx) {}
 
 IndexWriter::~IndexWriter() {
-  if (db_txn_.get()) {
-    db_txn_->commit();
-  }
-
-  fts_->close();
+  fts_idx_->close();
 }
 
 void IndexWriter::updateDocument(const IndexRequest& index_request) {
   stat_documents_indexed_total_.incr(1);
   auto docid = index_request.item.docID();
-  feature_idx_->updateDocument(index_request, db_txn_.get());
-  auto doc = feature_idx_->findDocument(docid, db_txn_.get());
+  doc_idx_->updateDocument(index_request);
+  auto doc = doc_idx_->findDocument(docid);
   rebuildFTS(doc);
   stat_documents_indexed_success_.incr(1);
 }
 
 void IndexWriter::commit() {
-  db_txn_->commit();
-  db_txn_ = db_->startTransaction();
-  fts_->commit();
+  doc_idx_->commit();
+  fts_idx_->commit();
 }
 
 void IndexWriter::rebuildFTS(DocID docid) {
-  auto doc = feature_idx_->findDocument(docid, db_txn_.get());
+  auto doc = doc_idx_->findDocument(docid);
   rebuildFTS(doc);
 }
 
@@ -241,19 +193,19 @@ void IndexWriter::rebuildFTS(RefPtr<Document> doc) {
       StringUtil::convertUTF8To16(doc->docID().docid));
 
   if (is_active) {
-    fts_->updateDocument(del_term, fts_doc);
+    fts_idx_->updateDocument(del_term, fts_doc);
   } else {
-    fts_->deleteDocuments(del_term);
+    fts_idx_->deleteDocuments(del_term);
   }
 }
 
 void IndexWriter::rebuildFTS(size_t csize) {
   Vector<DocID> docids;
 
-  feature_idx_->listDocuments([&docids] (const DocID& docid) -> bool {
+  doc_idx_->listDocuments([&docids] (const DocID& docid) -> bool {
     docids.emplace_back(docid);
     return true;
-  }, db_txn_.get());
+  });
 
   size_t n;
   for (const auto& docid : docids) {
@@ -267,7 +219,7 @@ void IndexWriter::rebuildFTS(size_t csize) {
 }
 
 RefPtr<mdb::MDBTransaction> IndexWriter::dbTransaction() {
-  return db_txn_;
+  return doc_idx_->dbTransaction();
 }
 
 void IndexWriter::exportStats(const String& prefix) {

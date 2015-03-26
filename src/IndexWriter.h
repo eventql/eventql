@@ -56,15 +56,12 @@ public:
 protected:
 
   IndexWriter(
-      FeatureSchema schema,
-      RefPtr<mdb::MDB> db,
-      std::shared_ptr<fts::IndexWriter> fts);
+      RefPtr<FeatureIndexWriter> doc_idx,
+      std::shared_ptr<fts::IndexWriter> fts_idx);
 
   FeatureSchema schema_;
-  RefPtr<mdb::MDB> db_;
-  RefPtr<mdb::MDBTransaction> db_txn_;
-  RefPtr<FeatureIndexWriter> feature_idx_;
-  std::shared_ptr<fts::IndexWriter> fts_;
+  RefPtr<FeatureIndexWriter> doc_idx_;
+  std::shared_ptr<fts::IndexWriter> fts_idx_;
 
   fnord::stats::Counter<uint64_t> stat_documents_indexed_total_;
   fnord::stats::Counter<uint64_t> stat_documents_indexed_success_;

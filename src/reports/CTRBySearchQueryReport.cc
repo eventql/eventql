@@ -16,7 +16,7 @@ CTRBySearchQueryReport::CTRBySearchQueryReport(
     RefPtr<JoinedQueryTableSource> input,
     RefPtr<CTRCounterTableSink> output,
     ItemEligibility eligibility,
-    fts::Analyzer* analyzer) :
+    RefPtr<fts::Analyzer> analyzer) :
     Report(input.get(), output.get()),
     joined_queries_(input),
     ctr_table_(output),

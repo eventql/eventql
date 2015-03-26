@@ -18,49 +18,10 @@ RefPtr<IndexReader> IndexReader::openIndex(const String& index_path) {
     RAISEF(kIllegalArgumentError, "invalid index path: $0", index_path);
   }
 
-  /* set up feature schema */
-  FeatureSchema feature_schema;
-  feature_schema.registerFeature("shop_id", 1, 1);
-  feature_schema.registerFeature("category1", 2, 1);
-  feature_schema.registerFeature("category2", 3, 1);
-  feature_schema.registerFeature("category3", 4, 1);
-  feature_schema.registerFeature("price_cents", 8, 1);
-
-  feature_schema.registerFeature("title~de", 5, 2);
-  feature_schema.registerFeature("description~de", 6, 2);
-  feature_schema.registerFeature("size_description~de", 14, 2);
-  feature_schema.registerFeature("material_description~de", 15, 2);
-  feature_schema.registerFeature("basic_attributes~de", 16, 2);
-  feature_schema.registerFeature("tags_as_text~de", 7, 2);
-  feature_schema.registerFeature("title~pl", 18, 2);
-  feature_schema.registerFeature("description~pl", 19, 2);
-  feature_schema.registerFeature("size_description~pl", 20, 2);
-  feature_schema.registerFeature("material_description~pl", 21, 2);
-  feature_schema.registerFeature("basic_attributes~pl", 22, 2);
-  feature_schema.registerFeature("tags_as_text~pl", 23, 2);
-  feature_schema.registerFeature("image_filename", 24, 2);
-  feature_schema.registerFeature("cm_clicked_terms", 31, 2);
-
-  feature_schema.registerFeature("shop_name", 26, 3);
-  feature_schema.registerFeature("shop_platform", 27, 3);
-  feature_schema.registerFeature("shop_country", 28, 3);
-  feature_schema.registerFeature("shop_rating_alt", 9, 3);
-  feature_schema.registerFeature("shop_rating_alt2", 15, 3);
-  feature_schema.registerFeature("shop_products_count", 10, 3);
-  feature_schema.registerFeature("shop_orders_count", 11, 3);
-  feature_schema.registerFeature("shop_rating_count", 12, 3);
-  feature_schema.registerFeature("shop_rating_avg", 13, 3);
-  feature_schema.registerFeature("cm_views", 29, 3);
-  feature_schema.registerFeature("cm_clicks", 30, 3);
-  feature_schema.registerFeature("cm_ctr", 32, 3);
-  feature_schema.registerFeature("cm_ctr_norm", 33, 3);
-  feature_schema.registerFeature("cm_ctr_std", 34, 3);
-  feature_schema.registerFeature("cm_ctr_norm_std", 35, 3);
-
-  /* open mdb */
+  /* open doc index */
   auto db_path = FileUtil::joinPaths(index_path, "db");
-  FileUtil::mkdir_p(db_path);
-  auto db = mdb::MDB::open(db_path, true, 68719476736lu); // 64 GiB
+  auto doc_idx = RefPtr<FeatureIndexWriter>(
+      new FeatureIndexWriter(db_path, true));
 
   /* open lucene */
   auto fts_path = FileUtil::joinPaths(index_path, "fts");
@@ -68,19 +29,15 @@ RefPtr<IndexReader> IndexReader::openIndex(const String& index_path) {
       fts::FSDirectory::open(StringUtil::convertUTF8To16(fts_path)),
       true);
 
-  return RefPtr<IndexReader>(new IndexReader(feature_schema, db, fts));
+  return RefPtr<IndexReader>(new IndexReader(doc_idx, fts));
 }
 
 IndexReader::IndexReader(
-    FeatureSchema schema,
-    RefPtr<mdb::MDB> db,
+    RefPtr<FeatureIndexWriter> doc_idx,
     std::shared_ptr<fts::IndexReader> fts) :
-    schema_(schema),
-    db_(db),
+    doc_idx_(doc_idx),
     fts_(fts),
-    fts_searcher_(new fnord::fts::IndexSearcher(fts_)),
-    doc_idx_(new FeatureIndexWriter(&schema_)) {}
-
+    fts_searcher_(new fnord::fts::IndexSearcher(fts_)) {}
 
 IndexReader::~IndexReader() {
   fts_->close();

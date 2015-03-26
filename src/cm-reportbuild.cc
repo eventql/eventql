@@ -25,17 +25,19 @@
 #include "fnord-sstable/SSTableColumnSchema.h"
 #include "fnord-sstable/SSTableColumnReader.h"
 #include "fnord-sstable/SSTableColumnWriter.h"
+#include <fnord-fts/fts.h>
+#include <fnord-fts/fts_common.h>
 #include "common.h"
 #include "CustomerNamespace.h"
 #include "FeatureSchema.h"
 #include "JoinedQuery.h"
 #include "CTRCounter.h"
-#include <fnord-fts/fts.h>
-#include <fnord-fts/fts_common.h>
+#include "IndexReader.h"
 #include "reports/ReportBuilder.h"
 #include "reports/JoinedQueryTableSource.h"
 #include "reports/CTRByPositionReport.h"
 #include "reports/CTRBySearchQueryReport.h"
+#include "reports/CTRBySearchTermCrossCategoryReport.h"
 #include "reports/CTRReport.h"
 #include "reports/CTRCounterMerge.h"
 #include "reports/CTRCounterTableSink.h"
@@ -115,10 +117,16 @@ int main(int argc, const char** argv) {
   Logger::get()->setMinimumLogLevel(
       strToLogLevel(flags.getString("loglevel")));
 
-  fnord::fts::Analyzer analyzer(flags.getString("conf"));
-  cm::ReportBuilder report_builder;
-
+  auto index_path = flags.getString("index");
+  auto conf_path = flags.getString("conf");
   auto dir = flags.getString("artifacts");
+
+  /* open index */
+  auto index_reader = cm::IndexReader::openIndex(index_path);
+  auto analyzer = RefPtr<fts::Analyzer>(new fts::Analyzer(conf_path));
+
+  /* set up reportbuilder */
+  cm::ReportBuilder report_builder;
 
   /* 4 hourly reports */
   for (const auto& g : mkGenerations(
@@ -163,7 +171,22 @@ int main(int argc, const char** argv) {
                     dir,
                     g)),
             ItemEligibility::ALL,
-            &analyzer));
+            analyzer));
+
+    report_builder.addReport(
+        new CTRBySearchTermCrossCategoryReport(
+            jq_source,
+            new CTRCounterTableSink(
+                g * kMicrosPerHour * 4,
+                (g + 1) * kMicrosPerHour * 4,
+                StringUtil::format(
+                    "$0/dawanda_ctr_by_searchterm_cross_e1.$1.sstable",
+                    dir,
+                    g)),
+            "q_cat1",
+            ItemEligibility::ALL,
+            analyzer,
+            index_reader));
   }
 
   /* daily reports */
