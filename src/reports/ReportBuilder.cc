@@ -24,7 +24,10 @@ void ReportBuilder::addReport(RefPtr<Report> report) {
 
 void ReportBuilder::buildAll(const Duration& interval) {
   while (buildSome() > 0) {
-    usleep(interval.microseconds());
+    std::unique_lock<std::mutex> lk(m_);
+    while (num_threads_ >= max_threads_) {
+      cv_.wait(lk);
+    }
   }
 
   std::unique_lock<std::mutex> lk(m_);

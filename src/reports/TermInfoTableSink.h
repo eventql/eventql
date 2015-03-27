@@ -9,8 +9,9 @@
 #ifndef _CM_TERMINFOTABLESINK_H
 #define _CM_TERMINFOTABLESINK_H
 #include "reports/Report.h"
-#include "ItemRef.h"
 #include "common.h"
+#include "ItemRef.h"
+#include "TermInfo.h"
 #include "fnord-sstable/sstablereader.h"
 #include "fnord-sstable/sstablewriter.h"
 #include "fnord-sstable/SSTableColumnSchema.h"
@@ -27,12 +28,7 @@ public:
   TermInfoTableSink(const String& output_file);
 
   void open();
-
-  void addRow(
-      const String& lang,
-      const String& term,
-      const HashMap<String, uint64_t>& related_terms);
-
+  void addRow(const String& key, const TermInfo& term_info);
   void close();
 
   Set<String> outputFiles() override;

@@ -33,7 +33,7 @@ public:
 
 protected:
   Set<String> input_files_;
-  sstable::SSTableColumnSchema sstable_schema_;
+  sstable::SSTableColumnSchema schema_;
   List<CallbackFn> callbacks_;
 };
 

@@ -42,14 +42,14 @@ void RelatedTermsReport::onCTRCounter(
   auto terms = StringUtil::split(key.substr(t_begin + 1), " ");
 
   for (int j = 0; j < terms.size(); ++j) {
-    auto& t_map = l_map[terms[j]];
+    auto& t_info = l_map[terms[j]];
 
     for (int i = 0; i < terms.size(); ++i) {
       if (i == j) {
         continue;
       }
 
-      t_map[terms[i]] += c.num_clicks;
+      t_info.related_terms[terms[i]] += c.num_views;
     }
   }
 }
@@ -57,7 +57,7 @@ void RelatedTermsReport::onCTRCounter(
 void RelatedTermsReport::onFinish() {
   for (const auto& l : counters_) {
     for (const auto& t : l.second) {
-      output_table_->addRow(l.first, t.first, t.second);
+      output_table_->addRow(l.first + "~" + t.first, t.second);
     }
   }
 }
