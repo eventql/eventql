@@ -30,7 +30,6 @@ void RelatedTermsReport::onInit() {
 void RelatedTermsReport::onCTRCounter(
     const String& key,
     const CTRCounterData& c) {
-  fnord::iputs("key: $0 -> views $1, clicks $2", key, c.num_views, c.num_clicks);
   auto t_begin = StringUtil::find(key, '~');
   if (t_begin == String::npos) {
     return;
