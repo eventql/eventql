@@ -38,8 +38,6 @@ public:
   Set<String> outputFiles() override;
 
 protected:
-  DateTime start_time_;
-  DateTime end_time_;
   String output_file_;
   std::unique_ptr<sstable::SSTableWriter> sstable_writer_;
   sstable::SSTableColumnSchema sstable_schema_;
