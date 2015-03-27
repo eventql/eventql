@@ -31,7 +31,15 @@ void RelatedTermsReport::onCTRCounter(
     const String& key,
     const CTRCounterData& c) {
   fnord::iputs("key: $0 -> views $1, clicks $2", key, c.num_views, c.num_clicks);
-  counters_[key].merge(c);
+  auto t_begin = StringUtil::find(key, '~');
+  if (t_begin == String::npos) {
+    return;
+  }
+
+  fnord::iputs("lang: $0", key.substr(0, t_begin));
+  fnord::iputs("terms: $0", key.substr(t_begin));
+
+  //counters_[key].merge(c);
 }
 
 void RelatedTermsReport::onFinish() {
