@@ -7,25 +7,19 @@
  * permission is obtained.
  */
 #include <fnord-json/json.h>
-#include "reports/CTRCounterTableSink.h"
+#include "reports/TermInfoTableSink.h"
 
 using namespace fnord;
 
 namespace cm {
 
-CTRCounterTableSink::CTRCounterTableSink(
-    DateTime start_time,
-    DateTime end_time,
+TermInfoTableSink::TermInfoTableSink(
     const String& output_file) :
-    start_time_(start_time),
-    end_time_(end_time),
     output_file_(output_file) {
-  sstable_schema_.addColumn("num_views", 1, sstable::SSTableColumnType::UINT64);
-  sstable_schema_.addColumn("num_clicks", 2, sstable::SSTableColumnType::UINT64);
-  sstable_schema_.addColumn("num_clicked", 3, sstable::SSTableColumnType::UINT64);
+  sstable_schema_.addColumn("related_terms", 1, sstable::SSTableColumnType::STRING);
 }
 
-void CTRCounterTableSink::open() {
+void TermInfoTableSink::open() {
   if (FileUtil::exists(output_file_ + "~")) {
     fnord::logInfo(
         "cm.reportbuild",
@@ -40,29 +34,25 @@ void CTRCounterTableSink::open() {
       "Opening output sstable: $0",
       output_file_);
 
-  HashMap<String, String> out_hdr;
-  out_hdr["start_time"] =
-      StringUtil::toString(start_time_.unixMicros());
-  out_hdr["end_time"] =
-      StringUtil::toString(end_time_.unixMicros());
-  auto outhdr_json = json::toJSONString(out_hdr);
-
   sstable_writer_ = sstable::SSTableWriter::create(
       output_file_ + "~",
       sstable::IndexProvider{},
-      outhdr_json.data(),
-      outhdr_json.length());
+      nullptr,
+      0);
 }
 
-void CTRCounterTableSink::addRow(const String& key, CTRCounterData counter) {
+void TermInfoTableSink::addRow(
+      const String& lang,
+      const String& term,
+      const HashMap<String, uint64_t>& related_terms) {
+  auto key = lang + "~" + term;
+
   sstable::SSTableColumnWriter cols(&sstable_schema_);
-  cols.addUInt64Column(1, counter.num_views);
-  cols.addUInt64Column(2, counter.num_clicks);
-  cols.addUInt64Column(3, counter.num_clicked);
+  cols.addStringColumn(1, "fnord");
   sstable_writer_->appendRow(key, cols);
 }
 
-void CTRCounterTableSink::close() {
+void TermInfoTableSink::close() {
   fnord::logInfo(
       "cm.reportbuild",
       "Finalizing output sstable: $0",
@@ -74,7 +64,7 @@ void CTRCounterTableSink::close() {
   FileUtil::mv(output_file_ + "~", output_file_);
 }
 
-Set<String> CTRCounterTableSink::outputFiles() {
+Set<String> TermInfoTableSink::outputFiles() {
   return Set<String> { output_file_ };
 }
 
