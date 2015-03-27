@@ -396,6 +396,7 @@ add_executable(cm-reportbuild
     src/reports/CTRBySearchTermCrossCategoryReport.cc
     src/reports/RelatedTermsReport.cc
     src/reports/TermInfoTableSink.cc
+    src/reports/TermInfoTableSource.cc
     src/cm-reportbuild.cc)
 
 target_link_libraries(cm-reportbuild
