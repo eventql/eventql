@@ -13,6 +13,7 @@
 #include "TermInfoTableSink.h"
 #include "CTRCounter.h"
 #include "ItemRef.h"
+#include "TermInfo.h"
 #include "common.h"
 
 using namespace fnord;
@@ -37,7 +38,7 @@ public:
 protected:
   RefPtr<CTRCounterTableSource> input_table_;
   RefPtr<TermInfoTableSink> output_table_;
-  HashMap<String, HashMap<String, HashMap<String, uint64_t>>> counters_;
+  HashMap<String, HashMap<String, TermInfo>> counters_;
 };
 
 } // namespace cm

@@ -41,14 +41,9 @@ void TermInfoTableSink::open() {
       0);
 }
 
-void TermInfoTableSink::addRow(
-      const String& lang,
-      const String& term,
-      const HashMap<String, uint64_t>& related_terms) {
-  auto key = lang + "~" + term;
-
+void TermInfoTableSink::addRow(const String& key, const TermInfo& term_info) {
   String terms_str;
-  for (const auto t : related_terms) {
+  for (const auto t : term_info.related_terms) {
     terms_str += StringUtil::format("$0:$1,", t.first, t.second);
   }
 

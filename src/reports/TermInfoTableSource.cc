@@ -17,7 +17,7 @@ namespace cm {
 TermInfoTableSource::TermInfoTableSource(
     const Set<String>& sstable_filenames) :
     input_files_(sstable_filenames) {
-  sstable_schema_.addColumn("related_terms", 1, sstable::SSTableColumnType::STRING);
+  schema_.addColumn("related_terms", 1, sstable::SSTableColumnType::STRING);
 }
 
 void TermInfoTableSource::read() {
@@ -43,13 +43,16 @@ void TermInfoTableSource::read() {
       auto key = cursor->getKeyString();
 
       auto cols_data = cursor->getDataBuffer();
-      sstable::SSTableColumnReader cols(&sstable_schema_, cols_data);
-      //c.num_views = cols.getUInt64Column(
-      //    sstable_schema_.columnID("num_views"));
-      //c.num_clicks = cols.getUInt64Column(
-      //    sstable_schema_.columnID("num_clicks"));
-      //c.num_clicked = cols.getUInt64Column(
-      //    sstable_schema_.columnID("num_clicked"));
+      sstable::SSTableColumnReader cols(&schema_, cols_data);
+      auto terms_str = cols.getStringColumn(schema_.columnID("related_terms"));
+      for (const auto& t : StringUtil::split(terms_str, " ")) {
+        auto s = StringUtil::find(t, ':');
+        if (s == String::npos) {
+          continue;
+        }
+
+        ti.related_terms[t.substr(s)] += std::stoul(t.substr(0, s + 1));
+      }
 
       for (const auto& cb : callbacks_) {
         cb(key, ti);
