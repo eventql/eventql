@@ -43,6 +43,7 @@
 #include "reports/CTRCounterTableSink.h"
 #include "reports/CTRCounterTableSource.h"
 #include "reports/RelatedTermsReport.h"
+#include "reports/TermInfoMerge.h"
 
 using namespace fnord;
 using namespace cm;
