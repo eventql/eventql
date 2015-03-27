@@ -37,7 +37,7 @@ public:
 protected:
   RefPtr<CTRCounterTableSource> input_table_;
   RefPtr<CTRCounterTableSink> output_table_;
-  HashMap<String, CTRCounterData> counters_;
+  HashMap<String, HashMap<String, HashMap<String, uint64_t>>> counters_;
 };
 
 } // namespace cm
