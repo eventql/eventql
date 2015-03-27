@@ -42,6 +42,7 @@
 #include "reports/CTRCounterMerge.h"
 #include "reports/CTRCounterTableSink.h"
 #include "reports/CTRCounterTableSource.h"
+#include "reports/RelatedTermsReport.h"
 
 using namespace fnord;
 using namespace cm;
@@ -231,6 +232,26 @@ int main(int argc, const char** argv) {
                 (og + 1) * kMicrosPerDay,
                 StringUtil::format(
                     "$0/dawanda_ctr_by_position_daily.$1.sstable",
+                    dir,
+                    og))));
+
+    /* dawanda: roll up related search terms */
+    Set<String> related_terms_sources;
+    for (const auto& ig : day_gens) {
+      related_terms_sources.emplace(StringUtil::format(
+          "$0/dawanda_ctr_by_searchquery.$1.sstable",
+          dir,
+          ig));
+    }
+
+    report_builder.addReport(
+        new RelatedTermsReport(
+            new CTRCounterTableSource(related_terms_sources),
+            new CTRCounterTableSink(
+                (og) * kMicrosPerDay,
+                (og + 1) * kMicrosPerDay,
+                StringUtil::format(
+                    "$0/dawanda_related_terms.$1.sstable",
                     dir,
                     og))));
 
