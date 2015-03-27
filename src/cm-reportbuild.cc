@@ -200,6 +200,11 @@ int main(int argc, const char** argv) {
         1 * kSecondsPerDay,
         og * kSecondsPerDay);
 
+    auto month_gens = mkGenerations(
+        4 * kSecondsPerHour,
+        30 * kSecondsPerDay,
+        og * kSecondsPerDay);
+
     /* dawanda: roll up ctr stats */
     Set<String> ctr_stats_sources;
     for (const auto& ig : day_gens) {
@@ -251,6 +256,23 @@ int main(int argc, const char** argv) {
             new TermInfoTableSink(
                 StringUtil::format(
                     "$0/dawanda_related_terms.$1.sstable",
+                    dir,
+                    og))));
+
+    Set<String> related_terms_rollup_sources;
+    for (const auto& ig : month_gens) {
+      related_terms_rollup_sources.emplace(StringUtil::format(
+          "$0/dawanda_related_terms.$1.sstable",
+          dir,
+          ig));
+    }
+
+    report_builder.addReport(
+        new TermInfoMerge(
+            new TermInfoTableSource(related_terms_rollup_sources),
+            new TermInfoTableSink(
+                StringUtil::format(
+                    "$0/dawanda_related_terms_30d.$1.sstable",
                     dir,
                     og))));
 
