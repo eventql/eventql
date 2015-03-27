@@ -36,16 +36,30 @@ void RelatedTermsReport::onCTRCounter(
     return;
   }
 
-  fnord::iputs("lang: $0", key.substr(0, t_begin));
-  fnord::iputs("terms: $0", key.substr(t_begin));
+  auto lang = key.substr(0, t_begin);
+  auto& l_map = counters_[lang];
 
-  //counters_[key].merge(c);
+  // query was already normalized
+  auto terms = StringUtil::split(key.substr(t_begin + 1), " ");
+
+  for (int j = 0; j < terms.size(); ++j) {
+    auto& t_map = l_map[terms[j]];
+
+    for (int i = 0; i < terms.size(); ++i) {
+      if (i == j) {
+        continue;
+      }
+
+      t_map[terms[i]] += c.num_clicks;
+    }
+  }
 }
 
 void RelatedTermsReport::onFinish() {
-  //for (auto& ctr : counters_) {
-  //  output_table_->addRow(ctr.first, ctr.second);
-  //}
+  for (const auto& l : counters_) {
+    for (const auto& t : l.second) {
+    }
+  }
 }
 
 } // namespace cm
