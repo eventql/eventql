@@ -47,8 +47,13 @@ void TermInfoTableSink::addRow(
       const HashMap<String, uint64_t>& related_terms) {
   auto key = lang + "~" + term;
 
+  String terms_str;
+  for (const auto t : related_terms) {
+    terms_str += StringUtil::format("$0:$1,", t.first, t.second);
+  }
+
   sstable::SSTableColumnWriter cols(&sstable_schema_);
-  cols.addStringColumn(1, "fnord");
+  cols.addStringColumn(1, terms_str);
   sstable_writer_->appendRow(key, cols);
 }
 
