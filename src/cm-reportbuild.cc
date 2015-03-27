@@ -247,9 +247,7 @@ int main(int argc, const char** argv) {
     report_builder.addReport(
         new RelatedTermsReport(
             new CTRCounterTableSource(related_terms_sources),
-            new CTRCounterTableSink(
-                (og) * kMicrosPerDay,
-                (og + 1) * kMicrosPerDay,
+            new TermInfoTableSink(
                 StringUtil::format(
                     "$0/dawanda_related_terms.$1.sstable",
                     dir,
