@@ -10,7 +10,7 @@
 #define _CM_AUTOCOMPLETEREPORT_H
 #include "reports/Report.h"
 #include "CTRCounterTableSource.h"
-#include "CTRCounterTableSink.h"
+#include "TermInfoTableSink.h"
 #include "CTRCounter.h"
 #include "ItemRef.h"
 #include "common.h"
@@ -28,7 +28,7 @@ public:
 
   RelatedTermsReport(
       RefPtr<CTRCounterTableSource> input,
-      RefPtr<CTRCounterTableSink> output);
+      RefPtr<TermInfoTableSink> output);
 
   void onInit();
   void onCTRCounter(const String& key, const CTRCounterData& c);
@@ -36,7 +36,7 @@ public:
 
 protected:
   RefPtr<CTRCounterTableSource> input_table_;
-  RefPtr<CTRCounterTableSink> output_table_;
+  RefPtr<TermInfoTableSink> output_table_;
   HashMap<String, HashMap<String, HashMap<String, uint64_t>>> counters_;
 };
 

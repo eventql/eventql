@@ -14,7 +14,7 @@ namespace cm {
 
 RelatedTermsReport::RelatedTermsReport(
     RefPtr<CTRCounterTableSource> input,
-    RefPtr<CTRCounterTableSink> output) :
+    RefPtr<TermInfoTableSink> output) :
     Report(input.get(), output.get()),
     input_table_(input),
     output_table_(output) {}
@@ -57,6 +57,7 @@ void RelatedTermsReport::onCTRCounter(
 void RelatedTermsReport::onFinish() {
   for (const auto& l : counters_) {
     for (const auto& t : l.second) {
+      output_table_->addRow(l.first, t.first, t.second);
     }
   }
 }
