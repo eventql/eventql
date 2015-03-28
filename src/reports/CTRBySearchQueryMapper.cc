@@ -6,13 +6,13 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-#include "reports/CTRBySearchQueryReport.h"
+#include "reports/CTRBySearchQueryMapper.h"
 
 using namespace fnord;
 
 namespace cm {
 
-CTRBySearchQueryReport::CTRBySearchQueryReport(
+CTRBySearchQueryMapper::CTRBySearchQueryMapper(
     RefPtr<JoinedQueryTableSource> input,
     RefPtr<CTRCounterTableSink> output,
     ItemEligibility eligibility,
@@ -23,14 +23,14 @@ CTRBySearchQueryReport::CTRBySearchQueryReport(
     eligibility_(eligibility),
     analyzer_(analyzer) {}
 
-void CTRBySearchQueryReport::onInit() {
+void CTRBySearchQueryMapper::onInit() {
   joined_queries_->forEach(std::bind(
-      &CTRBySearchQueryReport::onJoinedQuery,
+      &CTRBySearchQueryMapper::onJoinedQuery,
       this,
       std::placeholders::_1));
 }
 
-void CTRBySearchQueryReport::onJoinedQuery(const JoinedQuery& q) {
+void CTRBySearchQueryMapper::onJoinedQuery(const JoinedQuery& q) {
   if (!isQueryEligible(eligibility_, q)) {
     return;
   }
@@ -81,7 +81,7 @@ void CTRBySearchQueryReport::onJoinedQuery(const JoinedQuery& q) {
   }
 }
 
-void CTRBySearchQueryReport::onFinish() {
+void CTRBySearchQueryMapper::onFinish() {
   for (auto& ctr : counters_) {
     ctr_table_->addRow(ctr.first, ctr.second);
   }

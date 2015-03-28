@@ -387,19 +387,19 @@ add_executable(cm-reportbuild
     src/reports/Report.cc
     src/reports/ReportBuilder.cc
     src/reports/JoinedQueryTableSource.cc
-    src/reports/CTRByPositionReport.cc
-    src/reports/CTRReport.cc
+    src/reports/CTRByPositionMapper.cc
+    src/reports/CTRStatsMapper.cc
     src/reports/CTRCounterTableSink.cc
     src/reports/CTRCounterTableSource.cc
-    src/reports/CTRCounterMerge.cc
-    src/reports/CTRBySearchQueryReport.cc
-    src/reports/CTRBySearchTermCrossCategoryReport.cc
-    src/reports/RelatedTermsReport.cc
+    src/reports/CTRCounterMergeReducer.cc
+    src/reports/CTRBySearchQueryMapper.cc
+    src/reports/CTRBySearchTermCrossCategoryMapper.cc
+    src/reports/RelatedTermsMapper.cc
     src/reports/TermInfoTableSink.cc
     src/reports/TermInfoTableSource.cc
-    src/reports/TermInfoMerge.cc
+    src/reports/TermInfoMergeReducer.cc
     src/reports/TermInfo.cc
-    src/reports/TopCategoriesByTermReport.cc
+    src/reports/TopCategoriesByTermMapper.cc
     src/cm-reportbuild.cc)
 
 target_link_libraries(cm-reportbuild

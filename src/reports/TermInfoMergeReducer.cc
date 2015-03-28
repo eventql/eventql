@@ -6,32 +6,32 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-#include "reports/CTRCounterMerge.h"
+#include "reports/TermInfoMergeReducer.h"
 
 using namespace fnord;
 
 namespace cm {
 
-CTRCounterMerge::CTRCounterMerge(
-    RefPtr<CTRCounterTableSource> input,
-    RefPtr<CTRCounterTableSink> output) :
+TermInfoMergeReducer::TermInfoMergeReducer(
+    RefPtr<TermInfoTableSource> input,
+    RefPtr<TermInfoTableSink> output) :
     Report(input.get(), output.get()),
     input_table_(input),
     output_table_(output) {}
 
-void CTRCounterMerge::onInit() {
+void TermInfoMergeReducer::onInit() {
   input_table_->forEach(std::bind(
-      &CTRCounterMerge::onCTRCounter,
+      &TermInfoMergeReducer::onTermInfo,
       this,
       std::placeholders::_1,
       std::placeholders::_2));
 }
 
-void CTRCounterMerge::onCTRCounter(const String& key, const CTRCounterData& c) {
-  counters_[key].merge(c);
+void TermInfoMergeReducer::onTermInfo(const String& key, const TermInfo& ti) {
+  counters_[key].merge(ti);
 }
 
-void CTRCounterMerge::onFinish() {
+void TermInfoMergeReducer::onFinish() {
   for (auto& ctr : counters_) {
     output_table_->addRow(ctr.first, ctr.second);
   }

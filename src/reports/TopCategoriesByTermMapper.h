@@ -6,8 +6,8 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-#ifndef _CM_AUTOCOMPLETEREPORT_H
-#define _CM_AUTOCOMPLETEREPORT_H
+#ifndef _CM_TopCategoriesByTermMapper_H
+#define _CM_TopCategoriesByTermMapper_H
 #include "reports/Report.h"
 #include "CTRCounterTableSource.h"
 #include "TermInfoTableSink.h"
@@ -21,15 +21,16 @@ using namespace fnord;
 namespace cm {
 
 /**
- * INPUT: CTR_COUNTER (key=<lang>~<search_query>)
+ * INPUT: CTR_COUNTER (key=<lang>~<term>~category)
  * OUTPUT: TERM_INFO (key=<lang>~<term>)
  */
-class RelatedTermsReport : public Report {
+class TopCategoriesByTermMapper : public Report {
 public:
 
-  RelatedTermsReport(
+  TopCategoriesByTermMapper(
       RefPtr<CTRCounterTableSource> input,
-      RefPtr<TermInfoTableSink> output);
+      RefPtr<TermInfoTableSink> output,
+      const String& cat_prefix = "");
 
   void onInit();
   void onCTRCounter(const String& key, const CTRCounterData& c);
@@ -38,7 +39,8 @@ public:
 protected:
   RefPtr<CTRCounterTableSource> input_table_;
   RefPtr<TermInfoTableSink> output_table_;
-  HashMap<String, HashMap<String, TermInfo>> counters_;
+  String cat_prefix_;
+  HashMap<String, TermInfo> counters_;
 };
 
 } // namespace cm

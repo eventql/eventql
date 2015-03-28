@@ -24,10 +24,10 @@ namespace cm {
  * INPUT: TERM_INFO (key=<lang>~<term>)
  * OUTPUT: TERM_INFO (key=<lang>~<term>)
  */
-class TermInfoMerge : public Report {
+class TermInfoMergeReducer : public Report {
 public:
 
-  TermInfoMerge(
+  TermInfoMergeReducer(
       RefPtr<TermInfoTableSource> input,
       RefPtr<TermInfoTableSink> output);
 

@@ -7,13 +7,13 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-#include "reports/CTRBySearchTermCrossCategoryReport.h"
+#include "reports/CTRBySearchTermCrossCategoryMapper.h"
 
 using namespace fnord;
 
 namespace cm {
 
-CTRBySearchTermCrossCategoryReport::CTRBySearchTermCrossCategoryReport(
+CTRBySearchTermCrossCategoryMapper::CTRBySearchTermCrossCategoryMapper(
     RefPtr<JoinedQueryTableSource> input,
     RefPtr<CTRCounterTableSink> output,
     const String& category_field,
@@ -28,14 +28,14 @@ CTRBySearchTermCrossCategoryReport::CTRBySearchTermCrossCategoryReport(
     analyzer_(analyzer),
     index_(index) {}
 
-void CTRBySearchTermCrossCategoryReport::onInit() {
+void CTRBySearchTermCrossCategoryMapper::onInit() {
   joined_queries_->forEach(std::bind(
-      &CTRBySearchTermCrossCategoryReport::onJoinedQuery,
+      &CTRBySearchTermCrossCategoryMapper::onJoinedQuery,
       this,
       std::placeholders::_1));
 }
 
-void CTRBySearchTermCrossCategoryReport::onJoinedQuery(const JoinedQuery& q) {
+void CTRBySearchTermCrossCategoryMapper::onJoinedQuery(const JoinedQuery& q) {
   if (!isQueryEligible(eligibility_, q)) {
     return;
   }
@@ -98,7 +98,7 @@ void CTRBySearchTermCrossCategoryReport::onJoinedQuery(const JoinedQuery& q) {
   }
 }
 
-void CTRBySearchTermCrossCategoryReport::onFinish() {
+void CTRBySearchTermCrossCategoryMapper::onFinish() {
   for (auto& ctr : counters_) {
     ctr_table_->addRow(ctr.first, ctr.second);
   }

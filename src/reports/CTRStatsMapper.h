@@ -6,8 +6,8 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-#ifndef _CM_CTRBYSEARCHQUERY_H
-#define _CM_CTRBYSEARCHQUERY_H
+#ifndef _CM_CTRREPORT_H
+#define _CM_CTRREPORT_H
 #include "reports/Report.h"
 #include "JoinedQuery.h"
 #include "JoinedQueryTableSource.h"
@@ -22,16 +22,15 @@ namespace cm {
 
 /**
  * INPUT: JOINED_QUERY
- * OUTPUT: CTR_COUNTER (key=<lang>~<search_query>)
+ * OUTPUT: CTR_COUNTER (key=<lang>~<testgroup>~<devicetype>~<page>)
  */
-class CTRBySearchQueryReport : public Report {
+class CTRStatsMapper : public Report {
 public:
 
-  CTRBySearchQueryReport(
+  CTRStatsMapper(
       RefPtr<JoinedQueryTableSource> input,
       RefPtr<CTRCounterTableSink> output,
-      ItemEligibility eligibility,
-      RefPtr<fts::Analyzer> analyzer);
+      ItemEligibility eligibility);
 
   void onInit();
   void onJoinedQuery(const JoinedQuery& q);
@@ -41,7 +40,6 @@ protected:
   RefPtr<JoinedQueryTableSource> joined_queries_;
   RefPtr<CTRCounterTableSink> ctr_table_;
   ItemEligibility eligibility_;
-  RefPtr<fts::Analyzer> analyzer_;
   HashMap<String, CTRCounterData> counters_;
 };
 

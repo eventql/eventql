@@ -6,13 +6,13 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-#include "reports/CTRReport.h"
+#include "reports/CTRByPositionMapper.h"
 
 using namespace fnord;
 
 namespace cm {
 
-CTRReport::CTRReport(
+CTRByPositionMapper::CTRByPositionMapper(
     RefPtr<JoinedQueryTableSource> input,
     RefPtr<CTRCounterTableSink> output,
     ItemEligibility eligibility) :
@@ -21,14 +21,14 @@ CTRReport::CTRReport(
     ctr_table_(output),
     eligibility_(eligibility) {}
 
-void CTRReport::onInit() {
+void CTRByPositionMapper::onInit() {
   joined_queries_->forEach(std::bind(
-      &CTRReport::onJoinedQuery,
+      &CTRByPositionMapper::onJoinedQuery,
       this,
       std::placeholders::_1));
 }
 
-void CTRReport::onJoinedQuery(const JoinedQuery& q) {
+void CTRByPositionMapper::onJoinedQuery(const JoinedQuery& q) {
   if (!isQueryEligible(eligibility_, q)) {
     return;
   }
@@ -36,52 +36,35 @@ void CTRReport::onJoinedQuery(const JoinedQuery& q) {
   auto lang = languageToString(extractLanguage(q.attrs));
   auto device_type = extractDeviceType(q.attrs);
   auto test_group = extractTestGroup(q.attrs);
-  auto page_type = extractPageType(q.attrs);
-
-  uint64_t num_clicks = 0;
   for (auto& item : q.items) {
-    if (!isItemEligible(eligibility_, q, item)) {
+    if (!isItemEligible(eligibility_, q, item) || item.position < 1) {
       continue;
     }
 
-    if (item.clicked) ++num_clicks;
-  }
+    Set<String> keys;
 
-  Set<String> keys;
+    keys.emplace(StringUtil::format(
+        "$0~$1~$2~$3",
+        lang,
+        test_group,
+        device_type,
+        item.position));
 
-  keys.emplace(StringUtil::format(
-      "$0~all~$1~all",
-      lang,
-      device_type));
+    keys.emplace(StringUtil::format(
+        "$0~all~$1~$2",
+        lang,
+        device_type,
+        item.position));
 
-  keys.emplace(StringUtil::format(
-      "$0~all~$1~$2",
-      lang,
-      device_type,
-      page_type));
-
-  keys.emplace(StringUtil::format(
-      "$0~$1~$2~all",
-      lang,
-      test_group,
-      device_type));
-
-  keys.emplace(StringUtil::format(
-      "$0~$1~$2~$3",
-      lang,
-      test_group,
-      device_type,
-      page_type));
-
-  for (const auto& key : keys) {
-    auto& ctr = counters_[key];
-    ++ctr.num_views;
-    if (num_clicks > 0) ++ctr.num_clicks;
-    ctr.num_clicked += num_clicks;
+    for (const auto& key : keys) {
+      auto& ctr = counters_[key];
+      ++ctr.num_views;
+      ctr.num_clicks += item.clicked;
+    }
   }
 }
 
-void CTRReport::onFinish() {
+void CTRByPositionMapper::onFinish() {
   for (auto& ctr : counters_) {
     ctr_table_->addRow(ctr.first, ctr.second);
   }
