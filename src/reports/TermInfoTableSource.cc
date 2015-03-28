@@ -18,6 +18,7 @@ TermInfoTableSource::TermInfoTableSource(
     const Set<String>& sstable_filenames) :
     input_files_(sstable_filenames) {
   schema_.addColumn("related_terms", 1, sstable::SSTableColumnType::STRING);
+  schema_.addColumn("top_categories", 2, sstable::SSTableColumnType::STRING);
 }
 
 void TermInfoTableSource::read() {
@@ -45,13 +46,24 @@ void TermInfoTableSource::read() {
       auto cols_data = cursor->getDataBuffer();
       sstable::SSTableColumnReader cols(&schema_, cols_data);
       auto terms_str = cols.getStringColumn(schema_.columnID("related_terms"));
-      for (const auto& t : StringUtil::split(terms_str, " ")) {
+      for (const auto& t : StringUtil::split(terms_str, ",")) {
         auto s = StringUtil::find(t, ':');
         if (s == String::npos) {
           continue;
         }
 
         ti.related_terms[t.substr(0, s)] += std::stoul(t.substr(s + 1));
+      }
+
+      auto topcats_str = cols.getStringColumn(
+          schema_.columnID("top_categories"));
+      for (const auto& c : StringUtil::split(topcats_str, ",")) {
+        auto s = StringUtil::find(c, ':');
+        if (s == String::npos) {
+          continue;
+        }
+
+        ti.top_categories[c.substr(0, s)] += std::stod(c.substr(s + 1));
       }
 
       for (const auto& cb : callbacks_) {
