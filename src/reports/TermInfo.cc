@@ -13,6 +13,8 @@ using namespace fnord;
 namespace cm {
 
 void TermInfo::merge(const TermInfo& other) {
+  score += other.score;
+
   for (const auto& r: other.related_terms) {
     related_terms[r.first] += r.second;
   }

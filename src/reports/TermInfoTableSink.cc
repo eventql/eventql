@@ -25,6 +25,8 @@ TermInfoTableSink::TermInfoTableSink(
       "top_categories",
       2,
       sstable::SSTableColumnType::STRING);
+
+  sstable_schema_.addColumn("score", 3, sstable::SSTableColumnType::FLOAT);
 }
 
 void TermInfoTableSink::open() {
@@ -63,6 +65,7 @@ void TermInfoTableSink::addRow(const String& key, const TermInfo& term_info) {
   sstable::SSTableColumnWriter cols(&sstable_schema_);
   cols.addStringColumn(1, terms_str);
   cols.addStringColumn(2, topcats_str);
+  cols.addFloatColumn(3, term_info.score);
   sstable_writer_->appendRow(key, cols);
 }
 

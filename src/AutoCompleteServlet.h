@@ -10,6 +10,7 @@
 #define _CM_AUTOCOMPLETESERVLET_H
 #include "fnord-http/httpservice.h"
 #include "fnord-json/json.h"
+#include "reports/TermInfo.h"
 
 using namespace fnord;
 
@@ -29,6 +30,7 @@ public:
       fnord::http::HTTPResponse* res);
 
 protected:
+  OrderedMap<String, TermInfo> term_info_;
 };
 
 }
