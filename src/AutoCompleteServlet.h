@@ -35,6 +35,25 @@ public:
   void addTermInfo(const String& term, const TermInfo& ti);
 
 protected:
+
+  typedef Vector<Tuple<String, uint64_t, String>> ResultListType;
+
+  void suggestSingleTerm(
+      Language lang,
+      Vector<String> terms,
+      ResultListType* results);
+
+  void suggestMultiTerm(
+      Language lang,
+      Vector<String> terms,
+      const Vector<String>& valid_terms,
+      ResultListType* results);
+
+  void suggestFuzzy(
+      Language lang,
+      Vector<String> terms,
+      ResultListType* results);
+
   RefPtr<fts::Analyzer> analyzer_;
   OrderedMap<String, SortedTermInfo> term_info_;
 };
