@@ -75,6 +75,7 @@ void CTRBySearchQueryReport::onJoinedQuery(const JoinedQuery& q) {
 
   for (const auto& key : keys) {
     auto& ctr = counters_[key];
+    ++ctr.num_views;
     if (num_clicks > 0) ++ctr.num_clicks;
     ctr.num_clicked += num_clicks;
   }
