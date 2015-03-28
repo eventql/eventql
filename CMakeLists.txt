@@ -397,6 +397,7 @@ add_executable(cm-reportbuild
     src/reports/RelatedTermsReport.cc
     src/reports/TermInfoTableSink.cc
     src/reports/TermInfoTableSource.cc
+    src/reports/TermInfoMerge.cc
     src/cm-reportbuild.cc)
 
 target_link_libraries(cm-reportbuild
