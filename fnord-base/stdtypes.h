@@ -20,6 +20,7 @@
 #include <stack>
 #include <string>
 #include <unordered_map>
+#include <map>
 #include <vector>
 
 namespace fnord {
@@ -57,6 +58,9 @@ using Tuple = std::tuple<T...>;
 
 template <typename T1, typename T2>
 using HashMap = std::unordered_map<T1, T2>;
+
+template <typename T1, typename T2>
+using OrderedMap = std::map<T1, T2>;
 
 template <typename T>
 using Stack = std::stack<T>;
