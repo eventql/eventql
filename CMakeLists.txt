@@ -421,6 +421,20 @@ add_executable(cm-reportserver
 target_link_libraries(cm-reportserver
     ${CMAKE_THREAD_LIBS_INIT})
 
+add_executable(cm-autocompleteserver
+    $<TARGET_OBJECTS:cm-common>
+    $<TARGET_OBJECTS:fnord-base>
+    $<TARGET_OBJECTS:fnord-feeds>
+    $<TARGET_OBJECTS:fnord-mdb>
+    $<TARGET_OBJECTS:fnord-http>
+    $<TARGET_OBJECTS:fnord-json>
+    $<TARGET_OBJECTS:fnord-rpc>
+    $<TARGET_OBJECTS:fnord-sstable>
+    src/cm-autocompleteserver.cc)
+
+target_link_libraries(cm-autocompleteserver
+    ${CMAKE_THREAD_LIBS_INIT})
+
 add_executable(cm-tokenize
     $<TARGET_OBJECTS:cm-common>
     $<TARGET_OBJECTS:fnord-base>
