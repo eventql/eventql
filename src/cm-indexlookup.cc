@@ -39,7 +39,7 @@
 #include "FeaturePack.h"
 #include "DocStore.h"
 #include "FeatureIndex.h"
-#include "IndexRequest.h"
+#include "IndexChangeRequest.h"
 #include "IndexReader.h"
 
 using namespace cm;

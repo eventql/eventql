@@ -25,7 +25,7 @@
 #include "fnord-base/stats/stats.h"
 #include "FeatureIndex.h"
 #include "DocStore.h"
-#include "IndexRequest.h"
+#include "IndexChangeRequest.h"
 #include "FeatureIndexWriter.h"
 #include "ItemRef.h"
 
@@ -42,7 +42,7 @@ public:
 
   ~IndexWriter();
 
-  void updateDocument(const IndexRequest& index_request);
+  void updateDocument(const IndexChangeRequest& index_request);
   void commit();
 
   void rebuildFTS(size_t commit_size = 8192);

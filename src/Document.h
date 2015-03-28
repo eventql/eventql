@@ -15,7 +15,7 @@
 #include <unordered_map>
 #include <fnord-base/autoref.h>
 #include "DocID.h"
-#include "IndexRequest.h"
+#include "IndexChangeRequest.h"
 
 using namespace fnord;
 
@@ -29,7 +29,7 @@ public:
   const DocID& docID() const;
   const HashMap<String, String>& fields() const;
 
-  void update(const IndexRequest& index_req);
+  void update(const IndexChangeRequest& index_req);
   void setField(const String& field, const String& value);
 
   void debugPrint() const;

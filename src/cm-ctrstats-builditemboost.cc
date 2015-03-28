@@ -30,7 +30,7 @@
 #include "common.h"
 #include "CustomerNamespace.h"
 #include "FeatureSchema.h"
-#include "IndexRequest.h"
+#include "IndexChangeRequest.h"
 #include "JoinedQuery.h"
 #include "CTRCounter.h"
 
@@ -196,7 +196,7 @@ void writeOutputTable(
     }
 
     if (write_index_requests) {
-      cm::IndexRequest idx_req;
+      cm::IndexChangeRequest idx_req;
       idx_req.item.item_id = StringUtil::toString(c.first);
       idx_req.item.set_id = "p";
       idx_req.attrs["cm_views"] = StringUtil::toString(c.second.views);

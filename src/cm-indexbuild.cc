@@ -35,7 +35,7 @@
 #include "CustomerNamespace.h"
 #include "FeatureSchema.h"
 #include "FeatureIndexWriter.h"
-#include "IndexRequest.h"
+#include "IndexChangeRequest.h"
 #include "IndexWriter.h"
 
 using namespace cm;
@@ -123,10 +123,10 @@ void buildIndexFromFeed(
         break;
       }
 
-      cm::IndexRequest index_req;
+      cm::IndexChangeRequest index_req;
       const auto& entry_str = entry.get().data;
       try {
-        index_req = json::fromJSON<cm::IndexRequest>(entry_str);
+        index_req = json::fromJSON<cm::IndexChangeRequest>(entry_str);
       } catch (const std::exception& e) {
         fnord::logError("cm.indexbuild", e, "invalid json: $0", entry_str);
         continue;
@@ -206,9 +206,9 @@ void importSSTable(
 
     auto val = cursor->getDataBuffer();
 
-    Option<cm::IndexRequest> idx_req;
+    Option<cm::IndexChangeRequest> idx_req;
     try {
-      idx_req = Some(json::fromJSON<cm::IndexRequest>(val));
+      idx_req = Some(json::fromJSON<cm::IndexChangeRequest>(val));
     } catch (const Exception& e) {
       fnord::logWarning("cm.indexbuld", e, "invalid json: $0", val.toString());
     }

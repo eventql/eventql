@@ -57,7 +57,7 @@ IndexWriter::~IndexWriter() {
   fts_idx_->close();
 }
 
-void IndexWriter::updateDocument(const IndexRequest& index_request) {
+void IndexWriter::updateDocument(const IndexChangeRequest& index_request) {
   stat_documents_indexed_total_.incr(1);
   auto docid = index_request.item.docID();
   doc_idx_->updateDocument(index_request);
