@@ -22,10 +22,11 @@ void ReportBuilder::addReport(RefPtr<Report> report) {
   reports_.emplace_back(report);
 }
 
-void ReportBuilder::buildAll(const Duration& interval) {
-  while (buildSome() > 0) {
+void ReportBuilder::buildAll() {
+  size_t r;
+  while ((r = buildSome()) > 0) {
     std::unique_lock<std::mutex> lk(m_);
-    while (num_threads_ >= max_threads_) {
+    while (num_threads_ >= (r > max_threads_ ? max_threads_ : r)) {
       cv_.wait(lk);
     }
   }

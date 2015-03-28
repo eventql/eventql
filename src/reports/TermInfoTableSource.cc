@@ -51,7 +51,7 @@ void TermInfoTableSource::read() {
           continue;
         }
 
-        ti.related_terms[t.substr(s)] += std::stoul(t.substr(0, s + 1));
+        ti.related_terms[t.substr(0, s)] += std::stoul(t.substr(s + 1));
       }
 
       for (const auto& cb : callbacks_) {
