@@ -64,10 +64,16 @@ void AutoCompleteServlet::handleHTTPRequest(
     }
   }
 
+  /* single term / no match yet case */
   if (terms.size() == 1 || valid_terms.size() == 0) {
     auto prefix = languageToString(lang) + "~" + terms.back();
     terms.pop_back();
-    auto qstr_prefix = StringUtil::join(terms, " ");
+    String qstr_prefix;
+
+    if (terms.size() > 0 ) {
+      qstr_prefix += StringUtil::join(terms, " ") + " ";
+    }
+
     Vector<Pair<String, double>> matches;
     double best_match = 0;
 
@@ -94,7 +100,7 @@ void AutoCompleteServlet::handleHTTPRequest(
         }
 
         auto label = StringUtil::format(
-            "$0 $1 in $2",
+            "$0$1 in $2",
             qstr_prefix,
             matches[0].first,
             c.first);
@@ -103,7 +109,6 @@ void AutoCompleteServlet::handleHTTPRequest(
       }
     }
 
-    int m = 0;
     for (int m = 0; m < matches.size(); ++m) {
       auto score = matches[m].second;
 
@@ -111,15 +116,15 @@ void AutoCompleteServlet::handleHTTPRequest(
         break;
       }
 
-      results.emplace_back(matches[m].first, score, "");
+      results.emplace_back(qstr_prefix + matches[m].first, score, "");
     }
 
-    if (m == 0 && matches.size() > 1) {
+    if (matches.size() > 1) {
       const auto& best_match_ti = term_info_.find(matches[0].first);
 
       for (const auto& r : best_match_ti->second.related_terms) {
         auto label = StringUtil::format(
-            "$0 $1 $2",
+            "$0$1 $2",
             qstr_prefix,
             matches[0].first,
             r.first);
@@ -127,11 +132,100 @@ void AutoCompleteServlet::handleHTTPRequest(
         results.emplace_back(label, r.second, "");
       }
     }
-  } else {
-    results.emplace_back("here be dragons: multi term complete", 1.0, "");
+  }
+
+  /* multi term case */
+  else {
+    auto last_term = terms.back();
+    terms.pop_back();
+    String qstr_prefix;
+
+    if (terms.size() > 0 ) {
+      qstr_prefix += StringUtil::join(terms, " ") + " ";
+    }
+
+    fnord::iputs("multi term search for: $0, valid: $1", last_term, valid_terms);
+    HashMap<String, double> matches_h;
+    double best_match = 0;
+    for (const auto& vt : valid_terms) {
+      if (last_term == vt) {
+        continue;
+      }
+
+      const auto& vtinfo = term_info_.find(lang_str + "~" + vt)->second;
+      for (const auto& related : vtinfo.related_terms) {
+        if (!StringUtil::beginsWith(related.first, last_term)) {
+          continue;
+        }
+
+        matches_h[related.first] += related.second;
+
+        if (matches_h[related.first] > best_match) {
+          best_match = matches_h[related.first];
+        }
+      }
+    }
+
+    Vector<Pair<String, double>> matches;
+    for (const auto& m : matches_h) {
+      matches.emplace_back(m);
+    }
+
+    std::sort(matches.begin(), matches.end(), [] (
+        const Pair<String, double>& a,
+        const Pair<String, double>& b) {
+      return b.second < a.second;
+    });
+
+    for (int m = 0; m < matches.size(); ++m) {
+      auto score = matches[m].second;
+
+      if ((score / best_match) < 0.1) {
+        break;
+      }
+
+      results.emplace_back(qstr_prefix + matches[m].first, score, "");
+    }
+
+    matches_h.clear();
+    matches.clear();
+    best_match = 0;
+
+    for (const auto& vt : valid_terms) {
+      const auto& vtinfo = term_info_.find(lang_str + "~" + vt)->second;
+      for (const auto& related : vtinfo.related_terms) {
+        matches_h[related.first] += related.second;
+
+        if (matches_h[related.first] > best_match) {
+          best_match = matches_h[related.first];
+        }
+      }
+    }
+
+    for (const auto& m : matches_h) {
+      matches.emplace_back(m);
+    }
+
+    std::sort(matches.begin(), matches.end(), [] (
+        const Pair<String, double>& a,
+        const Pair<String, double>& b) {
+      return b.second < a.second;
+    });
+
+    for (int m = 0; m < matches.size(); ++m) {
+      auto score = matches[m].second;
+
+      if ((score / best_match) < 0.1) {
+        break;
+      }
+
+      results.emplace_back(qstr_prefix + matches[m].first, score, "");
+    }
   }
 
   fnord::iputs("terms: $0, valid: $1, results: $2", terms, valid_terms, results.size());
+
+  /* spelling correction case */
   if (results.size() == 0 && qstr.length() > 2) {
     results.emplace_back("here be dragons: spelling correction", 1.0, "");
   }
