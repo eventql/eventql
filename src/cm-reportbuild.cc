@@ -312,6 +312,25 @@ int main(int argc, const char** argv) {
                     "$0/dawanda_top_cats_by_searchterm_e1_30d.$1.sstable",
                     dir,
                     og))));
+
+    /* merge all term info 30d reports */
+    report_builder.addReport(
+        new TermInfoMergeReducer(
+            new TermInfoTableSource(Set<String> {
+              StringUtil::format(
+                    "$0/dawanda_related_terms_30d.$1.sstable",
+                    dir,
+                    og),
+              StringUtil::format(
+                    "$0/dawanda_top_cats_by_searchterm_e1_30d.$1.sstable",
+                    dir,
+                    og)
+            }),
+            new TermInfoTableSink(
+                StringUtil::format(
+                    "$0/dawanda_termstats_30d.$1.sstable",
+                    dir,
+                    og))));
   }
 
   if (flags.isSet("loop")) {
