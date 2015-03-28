@@ -202,7 +202,6 @@ void AutoCompleteServlet::suggestMultiTerm(
     qstr_prefix += StringUtil::join(terms, " ") + " ";
   }
 
-  fnord::iputs("multi term search for: $0, valid: $1", last_term, valid_terms);
   HashMap<String, double> matches_h;
   double best_match = 0;
   for (const auto& vt : valid_terms) {
