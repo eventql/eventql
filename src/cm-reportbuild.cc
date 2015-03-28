@@ -35,16 +35,16 @@
 #include "IndexReader.h"
 #include "reports/ReportBuilder.h"
 #include "reports/JoinedQueryTableSource.h"
-#include "reports/CTRByPositionReport.h"
-#include "reports/CTRBySearchQueryReport.h"
-#include "reports/CTRBySearchTermCrossCategoryReport.h"
-#include "reports/CTRReport.h"
-#include "reports/CTRCounterMerge.h"
+#include "reports/CTRByPositionMapper.h"
+#include "reports/CTRBySearchQueryMapper.h"
+#include "reports/CTRBySearchTermCrossCategoryMapper.h"
+#include "reports/CTRStatsMapper.h"
+#include "reports/CTRCounterMergeReducer.h"
 #include "reports/CTRCounterTableSink.h"
 #include "reports/CTRCounterTableSource.h"
-#include "reports/RelatedTermsReport.h"
-#include "reports/TopCategoriesByTermReport.h"
-#include "reports/TermInfoMerge.h"
+#include "reports/RelatedTermsMapper.h"
+#include "reports/TopCategoriesByTermMapper.h"
+#include "reports/TermInfoMergeReducer.h"
 
 using namespace fnord;
 using namespace cm;
@@ -140,7 +140,7 @@ int main(int argc, const char** argv) {
         StringUtil::format("$0/dawanda_joined_queries.$1.sstable", dir, g));
 
     report_builder.addReport(
-        new CTRByPositionReport(
+        new CTRByPositionMapper(
             jq_source,
             new CTRCounterTableSink(
                 g * kMicrosPerHour * 4,
@@ -152,7 +152,7 @@ int main(int argc, const char** argv) {
             ItemEligibility::ALL));
 
     report_builder.addReport(
-        new CTRReport(
+        new CTRStatsMapper(
             jq_source,
             new CTRCounterTableSink(
                 g * kMicrosPerHour * 4,
@@ -164,7 +164,7 @@ int main(int argc, const char** argv) {
             ItemEligibility::ALL));
 
     report_builder.addReport(
-        new CTRBySearchQueryReport(
+        new CTRBySearchQueryMapper(
             jq_source,
             new CTRCounterTableSink(
                 g * kMicrosPerHour * 4,
@@ -177,7 +177,7 @@ int main(int argc, const char** argv) {
             analyzer));
 
     report_builder.addReport(
-        new CTRBySearchTermCrossCategoryReport(
+        new CTRBySearchTermCrossCategoryMapper(
             jq_source,
             new CTRCounterTableSink(
                 g * kMicrosPerHour * 4,
@@ -214,7 +214,7 @@ int main(int argc, const char** argv) {
     }
 
     report_builder.addReport(
-        new CTRCounterMerge(
+        new CTRCounterMergeReducer(
             new CTRCounterTableSource(ctr_stats_sources),
             new CTRCounterTableSink(
                 (og) * kMicrosPerDay,
@@ -232,7 +232,7 @@ int main(int argc, const char** argv) {
     }
 
     report_builder.addReport(
-        new CTRCounterMerge(
+        new CTRCounterMergeReducer(
             new CTRCounterTableSource(ctr_posi_sources),
             new CTRCounterTableSink(
                 (og) * kMicrosPerDay,
@@ -252,7 +252,7 @@ int main(int argc, const char** argv) {
     }
 
     report_builder.addReport(
-        new RelatedTermsReport(
+        new RelatedTermsMapper(
             new CTRCounterTableSource(related_terms_sources),
             new TermInfoTableSink(
                 StringUtil::format(
@@ -269,7 +269,7 @@ int main(int argc, const char** argv) {
     }
 
     report_builder.addReport(
-        new TermInfoMerge(
+        new TermInfoMergeReducer(
             new TermInfoTableSource(related_terms_rollup_sources),
             new TermInfoTableSink(
                 StringUtil::format(
@@ -287,7 +287,7 @@ int main(int argc, const char** argv) {
     }
 
     report_builder.addReport(
-        new TopCategoriesByTermReport(
+        new TopCategoriesByTermMapper(
             new CTRCounterTableSource(term_cross_e1_sources),
             new TermInfoTableSink(
                 StringUtil::format(
@@ -305,7 +305,7 @@ int main(int argc, const char** argv) {
     }
 
     report_builder.addReport(
-        new TermInfoMerge(
+        new TermInfoMergeReducer(
             new TermInfoTableSource(term_cross_e1_rollup_sources),
             new TermInfoTableSink(
                 StringUtil::format(

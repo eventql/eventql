@@ -24,10 +24,10 @@ namespace cm {
  * INPUT: JOINED_QUERY
  * OUTPUT: CTR_COUNTER (key=<lang>~<testgroup>~<devicetype>~<posi>)
  */
-class CTRByPositionReport : public Report {
+class CTRByPositionMapper : public Report {
 public:
 
-  CTRByPositionReport(
+  CTRByPositionMapper(
       RefPtr<JoinedQueryTableSource> input,
       RefPtr<CTRCounterTableSink> output,
       ItemEligibility eligibility);

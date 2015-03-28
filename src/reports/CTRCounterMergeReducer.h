@@ -6,12 +6,12 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-#ifndef _CM_CTRREPORT_H
-#define _CM_CTRREPORT_H
+#ifndef _CM_CTRCOUNTERMERGE_H
+#define _CM_CTRCOUNTERMERGE_H
 #include "reports/Report.h"
+#include "reports/CTRCounterTableSink.h"
+#include "reports/CTRCounterTableSource.h"
 #include "JoinedQuery.h"
-#include "JoinedQueryTableSource.h"
-#include "CTRCounterTableSink.h"
 #include "CTRCounter.h"
 #include "ItemRef.h"
 #include "common.h"
@@ -21,25 +21,23 @@ using namespace fnord;
 namespace cm {
 
 /**
- * INPUT: JOINED_QUERY
- * OUTPUT: CTR_COUNTER (key=<lang>~<testgroup>~<devicetype>~<page>)
+ * INPUT: CTR_COUNTER
+ * OUTPUT: CTR_COUNTER
  */
-class CTRReport : public Report {
+class CTRCounterMergeReducer : public Report {
 public:
 
-  CTRReport(
-      RefPtr<JoinedQueryTableSource> input,
-      RefPtr<CTRCounterTableSink> output,
-      ItemEligibility eligibility);
+  CTRCounterMergeReducer(
+      RefPtr<CTRCounterTableSource> input,
+      RefPtr<CTRCounterTableSink> output);
 
   void onInit();
-  void onJoinedQuery(const JoinedQuery& q);
+  void onCTRCounter(const String& key, const CTRCounterData& c);
   void onFinish();
 
 protected:
-  RefPtr<JoinedQueryTableSource> joined_queries_;
-  RefPtr<CTRCounterTableSink> ctr_table_;
-  ItemEligibility eligibility_;
+  RefPtr<CTRCounterTableSource> input_table_;
+  RefPtr<CTRCounterTableSink> output_table_;
   HashMap<String, CTRCounterData> counters_;
 };
 

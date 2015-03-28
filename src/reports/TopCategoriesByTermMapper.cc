@@ -6,13 +6,13 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-#include "reports/TopCategoriesByTermReport.h"
+#include "reports/TopCategoriesByTermMapper.h"
 
 using namespace fnord;
 
 namespace cm {
 
-TopCategoriesByTermReport::TopCategoriesByTermReport(
+TopCategoriesByTermMapper::TopCategoriesByTermMapper(
     RefPtr<CTRCounterTableSource> input,
     RefPtr<TermInfoTableSink> output,
     const String& cat_prefix) :
@@ -21,15 +21,15 @@ TopCategoriesByTermReport::TopCategoriesByTermReport(
     output_table_(output),
     cat_prefix_(cat_prefix) {}
 
-void TopCategoriesByTermReport::onInit() {
+void TopCategoriesByTermMapper::onInit() {
   input_table_->forEach(std::bind(
-      &TopCategoriesByTermReport::onCTRCounter,
+      &TopCategoriesByTermMapper::onCTRCounter,
       this,
       std::placeholders::_1,
       std::placeholders::_2));
 }
 
-void TopCategoriesByTermReport::onCTRCounter(
+void TopCategoriesByTermMapper::onCTRCounter(
     const String& key,
     const CTRCounterData& c) {
   auto t_end = StringUtil::findLast(key, '~');
@@ -43,7 +43,7 @@ void TopCategoriesByTermReport::onCTRCounter(
   counters_[term].top_categories[cat_id] += c.num_clicks;
 }
 
-void TopCategoriesByTermReport::onFinish() {
+void TopCategoriesByTermMapper::onFinish() {
   for (const auto& c : counters_) {
     output_table_->addRow(c.first , c.second);
   }

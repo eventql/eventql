@@ -6,28 +6,28 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-#include "reports/RelatedTermsReport.h"
+#include "reports/RelatedTermsMapper.h"
 
 using namespace fnord;
 
 namespace cm {
 
-RelatedTermsReport::RelatedTermsReport(
+RelatedTermsMapper::RelatedTermsMapper(
     RefPtr<CTRCounterTableSource> input,
     RefPtr<TermInfoTableSink> output) :
     Report(input.get(), output.get()),
     input_table_(input),
     output_table_(output) {}
 
-void RelatedTermsReport::onInit() {
+void RelatedTermsMapper::onInit() {
   input_table_->forEach(std::bind(
-      &RelatedTermsReport::onCTRCounter,
+      &RelatedTermsMapper::onCTRCounter,
       this,
       std::placeholders::_1,
       std::placeholders::_2));
 }
 
-void RelatedTermsReport::onCTRCounter(
+void RelatedTermsMapper::onCTRCounter(
     const String& key,
     const CTRCounterData& c) {
   auto t_begin = StringUtil::find(key, '~');
@@ -54,7 +54,7 @@ void RelatedTermsReport::onCTRCounter(
   }
 }
 
-void RelatedTermsReport::onFinish() {
+void RelatedTermsMapper::onFinish() {
   for (const auto& l : counters_) {
     for (const auto& t : l.second) {
       output_table_->addRow(l.first + "~" + t.first, t.second);
