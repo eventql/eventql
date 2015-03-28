@@ -6,22 +6,17 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-#ifndef _CM_TERMINFO_H
-#define _CM_TERMINFO_H
-#include "ItemRef.h"
-#include "common.h"
+#include "TermInfo.h"
 
 using namespace fnord;
 
 namespace cm {
 
-struct TermInfo {
-  HashMap<String, uint64_t> related_terms;
-
-  void merge(const TermInfo& other);
-
-};
+void TermInfo::merge(const TermInfo& other) {
+  for (const auto& r: other.related_terms) {
+    related_terms[r.first] += r.second;
+  }
+}
 
 } // namespace cm
 
-#endif
