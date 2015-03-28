@@ -16,7 +16,15 @@ namespace cm {
 TermInfoTableSink::TermInfoTableSink(
     const String& output_file) :
     output_file_(output_file) {
-  sstable_schema_.addColumn("related_terms", 1, sstable::SSTableColumnType::STRING);
+  sstable_schema_.addColumn(
+      "related_terms",
+      1,
+      sstable::SSTableColumnType::STRING);
+
+  sstable_schema_.addColumn(
+      "top_categories",
+      2,
+      sstable::SSTableColumnType::STRING);
 }
 
 void TermInfoTableSink::open() {
@@ -47,8 +55,14 @@ void TermInfoTableSink::addRow(const String& key, const TermInfo& term_info) {
     terms_str += StringUtil::format("$0:$1,", t.first, t.second);
   }
 
+  String topcats_str;
+  for (const auto t : term_info.top_categories) {
+    topcats_str += StringUtil::format("$0:$1,", t.first, t.second);
+  }
+
   sstable::SSTableColumnWriter cols(&sstable_schema_);
   cols.addStringColumn(1, terms_str);
+  cols.addStringColumn(2, topcats_str);
   sstable_writer_->appendRow(key, cols);
 }
 
