@@ -277,7 +277,7 @@ int main(int argc, const char** argv) {
                     dir,
                     og))));
 
-    /* dawanda: roll up search term x e1 id - daily */
+    /* dawanda: roll up search term x e1 id */
     Set<String> term_cross_e1_sources;
     for (const auto& ig : day_gens) {
       term_cross_e1_sources.emplace(StringUtil::format(
@@ -296,6 +296,22 @@ int main(int argc, const char** argv) {
                     og)),
             "e1-"));
 
+    Set<String> term_cross_e1_rollup_sources;
+    for (const auto& ig : month_gens) {
+      term_cross_e1_rollup_sources.emplace(StringUtil::format(
+          "$0/dawanda_top_cats_by_searchterm_e1.$1.sstable",
+          dir,
+          ig));
+    }
+
+    report_builder.addReport(
+        new TermInfoMerge(
+            new TermInfoTableSource(term_cross_e1_rollup_sources),
+            new TermInfoTableSink(
+                StringUtil::format(
+                    "$0/dawanda_top_cats_by_searchterm_e1_30d.$1.sstable",
+                    dir,
+                    og))));
   }
 
   if (flags.isSet("loop")) {
