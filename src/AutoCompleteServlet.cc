@@ -156,7 +156,7 @@ void AutoCompleteServlet::suggestSingleTerm(
       auto label = StringUtil::format(
           "$0$1 in $2",
           qstr_prefix,
-          matches[0].first,
+          matches[0].first.substr(3),
           c.first);
 
       results->emplace_back(label, c.second, "");
@@ -170,17 +170,17 @@ void AutoCompleteServlet::suggestSingleTerm(
       break;
     }
 
-    results->emplace_back(qstr_prefix + matches[m].first, score, "");
+    results->emplace_back(qstr_prefix + matches[m].first.substr(3), score, "");
   }
 
-  if (matches.size() > 1) {
+  if (matches.size() > 0) {
     const auto& best_match_ti = term_info_.find(matches[0].first);
 
     for (const auto& r : best_match_ti->second.related_terms) {
       auto label = StringUtil::format(
           "$0$1 $2",
           qstr_prefix,
-          matches[0].first,
+          matches[0].first.substr(3),
           r.first);
 
       results->emplace_back(label, r.second, "");
@@ -193,6 +193,7 @@ void AutoCompleteServlet::suggestMultiTerm(
     Vector<String> terms,
     const Vector<String>& valid_terms,
     ResultListType* results) {
+  Set<String> search_terms;
   auto lang_str = fnord::languageToString(lang);
   auto last_term = terms.back();
   terms.pop_back();
@@ -208,6 +209,7 @@ void AutoCompleteServlet::suggestMultiTerm(
   double best_match = 0;
   for (const auto& vt : valid_terms) {
     const auto& vtinfo = term_info_.find(lang_str + "~" + vt)->second;
+    search_terms.emplace(vt);
 
     for (const auto& topcat : vtinfo.top_categories) {
       topcats_h[topcat.first] += topcat.second;
@@ -218,17 +220,15 @@ void AutoCompleteServlet::suggestMultiTerm(
       }
     }
 
-    if (last_term != vt) {
-      for (const auto& related : vtinfo.related_terms) {
-        if (!StringUtil::beginsWith(related.first, last_term)) {
-          continue;
-        }
+    for (const auto& related : vtinfo.related_terms) {
+      if (!StringUtil::beginsWith(related.first, last_term)) {
+        continue;
+      }
 
-        matches_h[related.first] += related.second;
+      matches_h[related.first] += related.second;
 
-        if (matches_h[related.first] > best_match) {
-          best_match = matches_h[related.first];
-        }
+      if (matches_h[related.first] > best_match) {
+        best_match = matches_h[related.first];
       }
     }
   }
@@ -270,6 +270,10 @@ void AutoCompleteServlet::suggestMultiTerm(
     return b.second < a.second;
   });
 
+  if (matches.size() > 0) {
+    search_terms.emplace(matches[0].first);
+  }
+
   for (int m = 0; m < matches.size(); ++m) {
     auto score = matches[m].second;
 
@@ -284,7 +288,7 @@ void AutoCompleteServlet::suggestMultiTerm(
   matches.clear();
   best_match = 0;
 
-  for (const auto& vt : valid_terms) {
+  for (const auto& vt : search_terms) {
     const auto& vtinfo = term_info_.find(lang_str + "~" + vt)->second;
     for (const auto& related : vtinfo.related_terms) {
       matches_h[related.first] += related.second;
