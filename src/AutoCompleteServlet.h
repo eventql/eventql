@@ -32,7 +32,7 @@ public:
   void addTermInfo(const String& term, const TermInfo& ti);
 
 protected:
-  OrderedMap<String, TermInfo> term_info_;
+  OrderedMap<String, SortedTermInfo> term_info_;
 };
 
 }

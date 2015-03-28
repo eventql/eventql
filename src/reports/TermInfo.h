@@ -26,6 +26,13 @@ struct TermInfo {
 
 };
 
+struct SortedTermInfo {
+  SortedTermInfo(const TermInfo& ti);
+  double score;
+  Vector<Pair<String, uint64_t>> related_terms;
+  Vector<Pair<String, double>> top_categories;
+};
+
 } // namespace cm
 
 #endif
