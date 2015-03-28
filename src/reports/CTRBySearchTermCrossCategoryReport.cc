@@ -48,9 +48,9 @@ void CTRBySearchTermCrossCategoryReport::onJoinedQuery(const JoinedQuery& q) {
     return;
   }
 
-  Set<String> terms;
+  Vector<String> terms;
   try {
-    analyzer_->extractTerms(lang, qstr.get(), &terms);
+    analyzer_->normalize(lang, qstr.get(), &terms);
   } catch (const Exception& e) {
     fnord::logWarning(
         "cm.reportbuild",
