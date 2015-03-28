@@ -28,8 +28,7 @@ void TermInfoMerge::onInit() {
 }
 
 void TermInfoMerge::onTermInfo(const String& key, const TermInfo& ti) {
-  //counters_[key].merge(c);
-
+  counters_[key].merge(ti);
 }
 
 void TermInfoMerge::onFinish() {
