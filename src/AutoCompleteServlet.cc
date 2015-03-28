@@ -18,7 +18,22 @@ namespace cm {
 
 AutoCompleteServlet::AutoCompleteServlet(
     RefPtr<fts::Analyzer> analyzer) :
-    analyzer_(analyzer) {}
+    analyzer_(analyzer) {
+  cat_names_.emplace("de~e1-1",  "Mode");
+  cat_names_.emplace("de~e1-2",  "Accessoires");
+  cat_names_.emplace("de~e1-3",  "Taschen");
+  cat_names_.emplace("de~e1-4",  "Schmuck");
+  cat_names_.emplace("de~e1-5",  "Kinder");
+  cat_names_.emplace("de~e1-6",  "Wohnen");
+  cat_names_.emplace("de~e1-7",  "Kunst");
+  cat_names_.emplace("de~e1-8",  "Handarbeitsbedarf");
+  cat_names_.emplace("de~e1-9",  "Vintage");
+  cat_names_.emplace("de~e1-10", "Baby");
+  cat_names_.emplace("de~e1-11", "Anlass");
+  cat_names_.emplace("de~e1-12", "Sale");
+  cat_names_.emplace("de~e1-13", "Maenner");
+  cat_names_.emplace("de~e1-14", "Schreibwaren");
+}
 
 void AutoCompleteServlet::addTermInfo(const String& term, const TermInfo& ti) {
   if (ti.score < 1000) return;
@@ -120,7 +135,8 @@ void AutoCompleteServlet::suggestSingleTerm(
     Language lang,
     Vector<String> terms,
     ResultListType* results) {
-  auto prefix = languageToString(lang) + "~" + terms.back();
+  auto lang_str = fnord::languageToString(lang);
+  auto prefix = lang_str + "~" + terms.back();
   terms.pop_back();
   String qstr_prefix;
 
@@ -157,7 +173,7 @@ void AutoCompleteServlet::suggestSingleTerm(
           "$0$1 in $2",
           qstr_prefix,
           matches[0].first.substr(3),
-          c.first);
+          cat_names_[lang_str + "~" + c.first]);
 
       results->emplace_back(label, c.second, "");
     }
@@ -254,7 +270,7 @@ void AutoCompleteServlet::suggestMultiTerm(
     auto label = StringUtil::format(
         "$0 in $1",
         StringUtil::join(valid_terms, " "),
-        topcats[m].first);
+        cat_names_[lang_str + "~" + topcats[m].first]);
 
     results->emplace_back(label, score, "");
   }
