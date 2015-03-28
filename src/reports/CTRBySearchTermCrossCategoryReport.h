@@ -23,7 +23,7 @@ namespace cm {
 
 /**
  * INPUT: JOINED_QUERY
- * OUTPUT: CTR_COUNTER (key=<lang>~<search_query>)
+ * OUTPUT: CTR_COUNTER (key=<lang>~<term>~<category>)
  */
 class CTRBySearchTermCrossCategoryReport : public Report {
 public:
