@@ -201,7 +201,7 @@ int main(int argc, const char** argv) {
         og * kSecondsPerDay);
 
     auto month_gens = mkGenerations(
-        4 * kSecondsPerHour,
+        1 * kSecondsPerDay,
         30 * kSecondsPerDay,
         og * kSecondsPerDay);
 
