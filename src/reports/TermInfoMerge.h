@@ -38,7 +38,7 @@ public:
 protected:
   RefPtr<TermInfoTableSource> input_table_;
   RefPtr<TermInfoTableSink> output_table_;
-  HashMap<String, HashMap<String, TermInfo>> counters_;
+  HashMap<String, TermInfo> counters_;
 };
 
 } // namespace cm
