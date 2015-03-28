@@ -34,7 +34,7 @@ public:
 
   void addReport(RefPtr<Report> report);
 
-  void buildAll(const Duration& interval = kMicrosPerSecond * 5);
+  void buildAll();
   void buildLoop(const Duration& interval = kMicrosPerSecond * 5);
 
 protected:
