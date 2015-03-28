@@ -17,6 +17,7 @@ namespace cm {
 
 struct TermInfo {
   HashMap<String, uint64_t> related_terms;
+  HashMap<String, double> top_categories;
 
   void merge(const TermInfo& other);
 

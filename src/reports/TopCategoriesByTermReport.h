@@ -21,7 +21,7 @@ using namespace fnord;
 namespace cm {
 
 /**
- * INPUT: CTR_COUNTER (key=<lang>~<search_query>)
+ * INPUT: CTR_COUNTER (key=<lang>~<term>~category)
  * OUTPUT: TERM_INFO (key=<lang>~<term>)
  */
 class TopCategoriesByTermReport : public Report {
@@ -30,7 +30,7 @@ public:
   TopCategoriesByTermReport(
       RefPtr<CTRCounterTableSource> input,
       RefPtr<TermInfoTableSink> output,
-      const String cat_prefix = "");
+      const String& cat_prefix = "");
 
   void onInit();
   void onCTRCounter(const String& key, const CTRCounterData& c);
@@ -40,7 +40,7 @@ protected:
   RefPtr<CTRCounterTableSource> input_table_;
   RefPtr<TermInfoTableSink> output_table_;
   String cat_prefix_;
-  HashMap<String, HashMap<String, TermInfo>> counters_;
+  HashMap<String, TermInfo> counters_;
 };
 
 } // namespace cm

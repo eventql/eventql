@@ -16,6 +16,10 @@ void TermInfo::merge(const TermInfo& other) {
   for (const auto& r: other.related_terms) {
     related_terms[r.first] += r.second;
   }
+
+  for (const auto& r: other.top_categories) {
+    top_categories[r.first] += r.second;
+  }
 }
 
 } // namespace cm
