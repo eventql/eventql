@@ -19,6 +19,7 @@ TermInfoTableSource::TermInfoTableSource(
     input_files_(sstable_filenames) {
   schema_.addColumn("related_terms", 1, sstable::SSTableColumnType::STRING);
   schema_.addColumn("top_categories", 2, sstable::SSTableColumnType::STRING);
+  schema_.addColumn("score", 3, sstable::SSTableColumnType::FLOAT);
 }
 
 void TermInfoTableSource::read() {
@@ -45,6 +46,8 @@ void TermInfoTableSource::read() {
 
       auto cols_data = cursor->getDataBuffer();
       sstable::SSTableColumnReader cols(&schema_, cols_data);
+      ti.score = cols.getFloatColumn(schema_.columnID("score"));
+
       auto terms_str = cols.getStringColumn(schema_.columnID("related_terms"));
       for (const auto& t : StringUtil::split(terms_str, ",")) {
         auto s = StringUtil::find(t, ':');

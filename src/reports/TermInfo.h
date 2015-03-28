@@ -16,6 +16,9 @@ using namespace fnord;
 namespace cm {
 
 struct TermInfo {
+  TermInfo() : score(0.0f) {}
+
+  double score;
   HashMap<String, uint64_t> related_terms;
   HashMap<String, double> top_categories;
 

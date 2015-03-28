@@ -43,6 +43,7 @@ void RelatedTermsMapper::onCTRCounter(
 
   for (int j = 0; j < terms.size(); ++j) {
     auto& t_info = l_map[terms[j]];
+    t_info.score += c.num_views;
 
     for (int i = 0; i < terms.size(); ++i) {
       if (i == j) {
