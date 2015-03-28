@@ -29,6 +29,8 @@ public:
       fnord::http::HTTPRequest* req,
       fnord::http::HTTPResponse* res);
 
+  void addTermInfo(const String& term, const TermInfo& ti);
+
 protected:
   OrderedMap<String, TermInfo> term_info_;
 };

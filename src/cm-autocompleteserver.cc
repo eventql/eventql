@@ -85,9 +85,14 @@ int main(int argc, const char** argv) {
   cm::AutoCompleteServlet acservlet;
 
   /* read term infos */
+  fnord::logInfo("cm.autocompleteserver", "Reading TermInfo Table...");
   TermInfoTableSource tbl(Set<String> { flags.getString("terminfo_table") });
+  tbl.forEach(std::bind(
+      &AutoCompleteServlet::addTermInfo,
+      &acservlet,
+      std::placeholders::_1,
+      std::placeholders::_2));
   tbl.read();
-  return 0;
 
   /* start http server */
   fnord::thread::EventLoop ev;
