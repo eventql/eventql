@@ -43,6 +43,7 @@
 #include "reports/CTRCounterTableSink.h"
 #include "reports/CTRCounterTableSource.h"
 #include "reports/RelatedTermsReport.h"
+#include "reports/TopCategoriesByTermReport.h"
 #include "reports/TermInfoMerge.h"
 
 using namespace fnord;
@@ -275,6 +276,25 @@ int main(int argc, const char** argv) {
                     "$0/dawanda_related_terms_30d.$1.sstable",
                     dir,
                     og))));
+
+    /* dawanda: roll up search term x e1 id - daily */
+    Set<String> term_cross_e1_sources;
+    for (const auto& ig : day_gens) {
+      term_cross_e1_sources.emplace(StringUtil::format(
+          "$0/dawanda_ctr_by_searchterm_cross_e1.$1.sstable",
+          dir,
+          ig));
+    }
+
+    report_builder.addReport(
+        new TopCategoriesByTermReport(
+            new CTRCounterTableSource(term_cross_e1_sources),
+            new TermInfoTableSink(
+                StringUtil::format(
+                    "$0/dawanda_top_cats_by_searchterm_e1.$1.sstable",
+                    dir,
+                    og)),
+            "e1-"));
 
   }
 
