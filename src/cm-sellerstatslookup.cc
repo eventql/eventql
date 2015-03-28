@@ -36,7 +36,7 @@
 #include "CustomerNamespace.h"
 #include "FeatureSchema.h"
 #include "FeaturePack.h"
-#include "IndexRequest.h"
+#include "IndexChangeRequest.h"
 #include "FeatureIndex.h"
 #include "sellerstats/ActivityLog.h"
 #include "sellerstats/SellerStatsLookup.h"

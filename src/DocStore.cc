@@ -17,7 +17,7 @@ namespace cm {
 
 DocStore::DocStore(const String& path) : path_(path) {}
 
-RefPtr<Document> DocStore::updateDocument(const IndexRequest& index_request) {
+RefPtr<Document> DocStore::updateDocument(const IndexChangeRequest& index_request) {
   std::unique_lock<std::mutex> lk(update_lock_);
 
   auto docid = index_request.item.docID();

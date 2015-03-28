@@ -7,7 +7,7 @@
  * permission is obtained.
  */
 #include "FeatureIndexWriter.h"
-#include "IndexRequest.h"
+#include "IndexChangeRequest.h"
 
 using namespace fnord;
 
@@ -76,7 +76,7 @@ RefPtr<mdb::MDBTransaction> FeatureIndexWriter::dbTransaction() {
   return txn_;
 }
 
-void FeatureIndexWriter::updateDocument(const IndexRequest& index_request) {
+void FeatureIndexWriter::updateDocument(const IndexChangeRequest& index_request) {
   logDebug(
       "cm.indexbuild",
       "Indexing document: customer=$0 docid=$1 num_attrs=$2",
@@ -123,7 +123,7 @@ RefPtr<Document> FeatureIndexWriter::findDocument(const DocID& docid) {
   return doc;
 }
 
-void FeatureIndexWriter::updateIndex(const IndexRequest& index_request) {
+void FeatureIndexWriter::updateIndex(const IndexChangeRequest& index_request) {
   Vector<Pair<FeatureID, String>> features;
   for (const auto& p : index_request.attrs) {
     auto fid = schema_.featureID(p.first);

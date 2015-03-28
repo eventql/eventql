@@ -17,7 +17,7 @@
 #include <fnord-base/autoref.h>
 #include "ItemRef.h"
 #include "Document.h"
-#include "IndexRequest.h"
+#include "IndexChangeRequest.h"
 
 using namespace fnord;
 
@@ -28,7 +28,7 @@ public:
 
   DocStore(const String& path);
 
-  RefPtr<Document> updateDocument(const IndexRequest& index_request);
+  RefPtr<Document> updateDocument(const IndexChangeRequest& index_request);
   RefPtr<Document> findDocument(const DocID& docid);
 
   void listDocuments(Function<bool (const DocID& doc)> fn) const;

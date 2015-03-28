@@ -24,7 +24,7 @@
 #include "fnord-mdb/MDB.h"
 #include "fnord-base/stats/stats.h"
 #include "FeatureIndex.h"
-#include "IndexRequest.h"
+#include "IndexChangeRequest.h"
 #include "ItemRef.h"
 #include "Document.h"
 #include "logjoin/TrackedSession.h"
@@ -50,7 +50,7 @@ public:
   Option<String> getField(const DocID& docid, const FeatureID& featureid);
   void getFields(const DocID& docid, FeaturePack* features);
 
-  void updateDocument(const IndexRequest& index_request);
+  void updateDocument(const IndexChangeRequest& index_request);
 
   void commit();
 
@@ -58,7 +58,7 @@ public:
 
 protected:
 
-  void updateIndex(const IndexRequest& index_request);
+  void updateIndex(const IndexChangeRequest& index_request);
 
   void updateIndex(
       const DocID& docid,
