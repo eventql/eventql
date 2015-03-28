@@ -202,25 +202,61 @@ void AutoCompleteServlet::suggestMultiTerm(
     qstr_prefix += StringUtil::join(terms, " ") + " ";
   }
 
+  HashMap<String, double> topcats_h;
+  double best_topcat = 0;
   HashMap<String, double> matches_h;
   double best_match = 0;
   for (const auto& vt : valid_terms) {
-    if (last_term == vt) {
-      continue;
-    }
-
     const auto& vtinfo = term_info_.find(lang_str + "~" + vt)->second;
-    for (const auto& related : vtinfo.related_terms) {
-      if (!StringUtil::beginsWith(related.first, last_term)) {
-        continue;
-      }
 
-      matches_h[related.first] += related.second;
+    for (const auto& topcat : vtinfo.top_categories) {
+      topcats_h[topcat.first] += topcat.second;
+      topcats_h[topcat.first] *= 2;
 
-      if (matches_h[related.first] > best_match) {
-        best_match = matches_h[related.first];
+      if (topcats_h[topcat.first] > best_topcat) {
+        best_topcat = topcats_h[topcat.first];
       }
     }
+
+    if (last_term != vt) {
+      for (const auto& related : vtinfo.related_terms) {
+        if (!StringUtil::beginsWith(related.first, last_term)) {
+          continue;
+        }
+
+        matches_h[related.first] += related.second;
+
+        if (matches_h[related.first] > best_match) {
+          best_match = matches_h[related.first];
+        }
+      }
+    }
+  }
+
+  Vector<Pair<String, double>> topcats;
+  for (const auto& m : topcats_h) {
+    topcats.emplace_back(m);
+  }
+
+  std::sort(topcats.begin(), topcats.end(), [] (
+      const Pair<String, double>& a,
+      const Pair<String, double>& b) {
+    return b.second < a.second;
+  });
+
+  for (int m = 0; m < topcats.size() && m < 3; ++m) {
+    auto score = topcats[m].second;
+
+    if ((score / best_topcat) < 0.2) {
+      break;
+    }
+
+    auto label = StringUtil::format(
+        "$0 in $1",
+        StringUtil::join(valid_terms, " "),
+        topcats[m].first);
+
+    results->emplace_back(label, score, "");
   }
 
   Vector<Pair<String, double>> matches;
