@@ -18,6 +18,11 @@ namespace cm {
 
 AutoCompleteServlet::AutoCompleteServlet() {}
 
+void AutoCompleteServlet::addTermInfo(const String& term, const TermInfo& ti) {
+  //if (ti.score < 1000) return;
+  term_info_[term] = ti;
+}
+
 void AutoCompleteServlet::handleHTTPRequest(
     http::HTTPRequest* req,
     http::HTTPResponse* res) {
