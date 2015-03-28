@@ -51,6 +51,15 @@ int main(int argc, const char** argv) {
   fnord::cli::FlagParser flags;
 
   flags.defineFlag(
+      "conf",
+      cli::FlagParser::T_STRING,
+      false,
+      NULL,
+      "./conf",
+      "conf directory",
+      "<path>");
+
+  flags.defineFlag(
       "http_port",
       fnord::cli::FlagParser::T_INTEGER,
       false,
@@ -82,7 +91,10 @@ int main(int argc, const char** argv) {
   Logger::get()->setMinimumLogLevel(
       strToLogLevel(flags.getString("loglevel")));
 
-  cm::AutoCompleteServlet acservlet;
+  auto conf_path = flags.getString("conf");
+
+  auto analyzer = RefPtr<fts::Analyzer>(new fts::Analyzer(conf_path));
+  cm::AutoCompleteServlet acservlet(analyzer);
 
   /* read term infos */
   fnord::logInfo("cm.autocompleteserver", "Reading TermInfo Table...");

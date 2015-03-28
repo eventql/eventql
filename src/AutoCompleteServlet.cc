@@ -16,7 +16,9 @@ using namespace fnord;
 
 namespace cm {
 
-AutoCompleteServlet::AutoCompleteServlet() {}
+AutoCompleteServlet::AutoCompleteServlet(
+    RefPtr<fts::Analyzer> analyzer) :
+    analyzer_(analyzer) {}
 
 void AutoCompleteServlet::addTermInfo(const String& term, const TermInfo& ti) {
   if (ti.score < 1000) return;
@@ -47,7 +49,15 @@ void AutoCompleteServlet::handleHTTPRequest(
     return;
   }
 
-  auto prefix = languageToString(lang) + "~" + qstr;
+  Vector<String> terms;
+  analyzer_->tokenize(lang, qstr, &terms);
+  if (terms.size() == 0) {
+    res->addBody("error: invalid ?q=... parameter");
+    res->setStatus(http::kStatusBadRequest);
+    return;
+  }
+
+  auto prefix = languageToString(lang) + "~" + terms.back();
 
   Vector<Pair<String, double>> matches;
   double best_match = 0;
@@ -82,14 +92,32 @@ void AutoCompleteServlet::handleHTTPRequest(
     }
   }
 
-  for (int i = 0; i < matches.size(); ++i) {
-    auto score = matches[i].second;
+  int m = 0;
+  for (int m = 0; m < matches.size(); ++m) {
+    auto score = matches[m].second;
 
     if ((score / best_match) < 0.1) {
       break;
     }
 
-    results.emplace_back(matches[i].first, score, "");
+    results.emplace_back(matches[m].first, score, "");
+  }
+
+  if (m == 0 && matches.size() > 1) {
+    const auto& best_match_ti = term_info_.find(matches[0].first);
+
+    for (const auto& r : best_match_ti->second.related_terms) {
+      //if ((r.second / best_match_ti->second.related_terms[0].second) < 0.06) {
+      //  break;
+      //}
+
+      auto label = StringUtil::format(
+          "$0 $1",
+          matches[0].first,
+          r.first);
+
+      results.emplace_back(label, r.second, "");
+    }
   }
 
   /* write response */
@@ -104,7 +132,7 @@ void AutoCompleteServlet::handleHTTPRequest(
   json.addObjectEntry("suggestions");
   json.beginArray();
 
-  for (int i = 0; i < results.size(); ++i) {
+  for (int i = 0; i < results.size() && i < 12; ++i) {
     if (i > 0) {
       json.addComma();
     }
