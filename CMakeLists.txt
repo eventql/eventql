@@ -430,10 +430,14 @@ add_executable(cm-autocompleteserver
     $<TARGET_OBJECTS:fnord-json>
     $<TARGET_OBJECTS:fnord-rpc>
     $<TARGET_OBJECTS:fnord-sstable>
+    src/reports/Report.cc
+    src/reports/TermInfoTableSource.cc
+    src/reports/TermInfo.cc
+    src/AutoCompleteServlet.cc
     src/cm-autocompleteserver.cc)
 
 target_link_libraries(cm-autocompleteserver
-    ${CMAKE_THREAD_LIBS_INIT})
+    ${CMAKE_THREAD_LIBS_INIT} ${FNORD_FTS_LIBS})
 
 add_executable(cm-tokenize
     $<TARGET_OBJECTS:cm-common>
