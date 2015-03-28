@@ -11,6 +11,9 @@
 #include "fnord-http/httpservice.h"
 #include "fnord-json/json.h"
 #include "reports/TermInfo.h"
+#include <fnord-fts/fts.h>
+#include <fnord-fts/fts_common.h>
+#include <fnord-fts/Analyzer.h>
 
 using namespace fnord;
 
@@ -23,7 +26,7 @@ namespace cm {
 class AutoCompleteServlet : public fnord::http::HTTPService {
 public:
 
-  AutoCompleteServlet();
+  AutoCompleteServlet(RefPtr<fts::Analyzer> analyzer);
 
   void handleHTTPRequest(
       fnord::http::HTTPRequest* req,
@@ -32,6 +35,7 @@ public:
   void addTermInfo(const String& term, const TermInfo& ti);
 
 protected:
+  RefPtr<fts::Analyzer> analyzer_;
   OrderedMap<String, SortedTermInfo> term_info_;
 };
 

@@ -430,6 +430,7 @@ add_executable(cm-autocompleteserver
     $<TARGET_OBJECTS:fnord-json>
     $<TARGET_OBJECTS:fnord-rpc>
     $<TARGET_OBJECTS:fnord-sstable>
+    $<TARGET_OBJECTS:fnord-fts>
     src/reports/Report.cc
     src/reports/TermInfoTableSource.cc
     src/reports/TermInfo.cc
