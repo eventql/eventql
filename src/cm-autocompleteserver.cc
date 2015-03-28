@@ -38,8 +38,10 @@
 #include "CustomerNamespace.h"
 #include "FeatureSchema.h"
 #include "JoinedQuery.h"
-#include "reports/CTRByPositionServlet.h"
+#include "AutoCompleteServlet.h"
+#include "reports/TermInfoTableSource.h"
 
+using namespace cm;
 using namespace fnord;
 
 int main(int argc, const char** argv) {
@@ -80,15 +82,19 @@ int main(int argc, const char** argv) {
   Logger::get()->setMinimumLogLevel(
       strToLogLevel(flags.getString("loglevel")));
 
+  cm::AutoCompleteServlet acservlet;
+
+  /* read term infos */
+  TermInfoTableSource tbl(Set<String> { flags.getString("terminfo_table") });
+  tbl.read();
+  return 0;
+
   /* start http server */
   fnord::thread::EventLoop ev;
   fnord::http::HTTPRouter http_router;
+  http_router.addRouteByPrefixMatch("/autocomplete", &acservlet);
   fnord::http::HTTPServer http_server(&http_router, &ev);
   http_server.listen(flags.getInt("http_port"));
-
-  /* ctr by position */
-  //cm::CTRByPositionServlet ctr_by_pos(&vfs);
-  //http_router.addRouteByPrefixMatch("/reports/ctr_by_position", &ctr_by_pos);
 
   ev.run();
   return 0;
