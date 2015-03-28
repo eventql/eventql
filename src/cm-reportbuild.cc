@@ -190,6 +190,36 @@ int main(int argc, const char** argv) {
             ItemEligibility::ALL,
             analyzer,
             index_reader));
+
+    report_builder.addReport(
+        new CTRBySearchTermCrossCategoryMapper(
+            jq_source,
+            new CTRCounterTableSink(
+                g * kMicrosPerHour * 4,
+                (g + 1) * kMicrosPerHour * 4,
+                StringUtil::format(
+                    "$0/dawanda_ctr_by_searchterm_cross_e2.$1.sstable",
+                    dir,
+                    g)),
+            "category2",
+            ItemEligibility::ALL,
+            analyzer,
+            index_reader));
+
+    report_builder.addReport(
+        new CTRBySearchTermCrossCategoryMapper(
+            jq_source,
+            new CTRCounterTableSink(
+                g * kMicrosPerHour * 4,
+                (g + 1) * kMicrosPerHour * 4,
+                StringUtil::format(
+                    "$0/dawanda_ctr_by_searchterm_cross_e3.$1.sstable",
+                    dir,
+                    g)),
+            "category3",
+            ItemEligibility::ALL,
+            analyzer,
+            index_reader));
   }
 
   /* daily reports */
