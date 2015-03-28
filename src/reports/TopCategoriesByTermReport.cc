@@ -38,9 +38,9 @@ void TopCategoriesByTermReport::onCTRCounter(
   }
 
   auto term = key.substr(0, t_end);
-  auto cat_id = key.substr(t_end + 1);
+  auto cat_id = cat_prefix_ + key.substr(t_end + 1);
 
-  fnord::iputs("term: $0, cat: $1", term, cat_id);
+  counters_[term].top_categories[cat_id] += c.num_clicks;
 }
 
 void TopCategoriesByTermReport::onFinish() {
