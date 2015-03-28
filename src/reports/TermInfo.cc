@@ -6,6 +6,7 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
+#include <algorithm>
 #include "TermInfo.h"
 
 using namespace fnord;
