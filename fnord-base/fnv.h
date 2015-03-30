@@ -16,7 +16,6 @@
 #include <string>
 
 namespace fnord {
-namespace hash {
 
 /**
  * This implements the FNV1a (Fowler–Noll–Vo) hash function
@@ -53,7 +52,6 @@ protected:
   T prime_;
 };
 
-}
 }
 
 #endif

@@ -22,6 +22,7 @@ template <typename T>
 class Option {
 public:
   Option();
+  Option(std::nullptr_t n);
   Option(const T& value);
   Option(T&& value);
   Option(const Option<T>& other);
@@ -29,9 +30,10 @@ public:
   ~Option();
 
   Option& operator=(const Option<T>& other);
+  Option& operator=(Option<T>&& other);
 
   bool isEmpty() const;
-  const T& get() const;
+  T& get() const;
 
 protected:
   char value_data_[sizeof(T)];
@@ -40,6 +42,9 @@ protected:
 
 template <typename T>
 Option<T> Some(const T& value);
+
+//template <typename T>
+//Option<T> Some(T&& value);
 
 template <typename T>
 Option<T> None();

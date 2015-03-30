@@ -20,11 +20,12 @@ SSTableScan::SSTableScan(
     limit_(-1),
     offset_(0),
     has_order_by_(false) {
-  select_list_.emplace_back(0);
-
-  auto col_ids = schema->columnIDs();
-  for (const auto& c : col_ids) {
-    select_list_.emplace_back(c);
+  if (schema_) {
+    select_list_.emplace_back(0);
+    auto col_ids = schema->columnIDs();
+    for (const auto& c : col_ids) {
+      select_list_.emplace_back(c);
+    }
   }
 }
 
@@ -94,6 +95,10 @@ void SSTableScan::setOrderBy(const String& column, const String& order_fn) {
 }
 
 void SSTableScan::setOrderBy(const String& column, OrderFn order_fn) {
+  if (!schema_) {
+    RAISE(kIllegalStateError, "requires a sstable schema");
+  }
+
   has_order_by_ = true;
   order_by_fn_ = order_fn;
 
@@ -112,6 +117,10 @@ void SSTableScan::setOrderBy(const String& column, OrderFn order_fn) {
 }
 
 Vector<String> SSTableScan::columnNames() const {
+  if (!schema_) {
+    RAISE(kIllegalStateError, "requires a sstable schema");
+  }
+
   Vector<String> cols;
 
   for (const auto& s : select_list_) {
@@ -141,20 +150,25 @@ void SSTableScan::execute(
       }
     }
 
-    auto val = cursor->getDataBuffer();
-    sstable::SSTableColumnReader cols(schema_, val);
-
     Vector<String> row;
-    for (const auto& s : select_list_) {
-      switch (s) {
-        case 0:
-          row.emplace_back(cursor->getKeyString());
-          break;
+    if (schema_) {
+      auto val = cursor->getDataBuffer();
+      sstable::SSTableColumnReader cols(schema_, val);
 
-        default:
-          row.emplace_back(cols.getStringColumn(s));
-          break;
+      for (const auto& s : select_list_) {
+        switch (s) {
+          case 0:
+            row.emplace_back(cursor->getKeyString());
+            break;
+
+          default:
+            row.emplace_back(cols.getStringColumn(s));
+            break;
+        }
       }
+    } else {
+      row.emplace_back(cursor->getKeyString());
+      row.emplace_back(cursor->getDataString());
     }
 
     // filter cols...

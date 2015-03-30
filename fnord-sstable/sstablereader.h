@@ -72,6 +72,11 @@ public:
   size_t bodySize() const;
 
   /**
+   * Returns true iff the table is finalized
+   */
+  bool isFinalized() const;
+
+  /**
    * Returns the body offset (the position of the first body byte in the file)
    */
   size_t bodyOffset() const;

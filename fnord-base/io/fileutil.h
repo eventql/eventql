@@ -48,6 +48,11 @@ public:
   static std::string joinPaths(const std::string& p1, const std::string p2);
 
   /**
+   * Base path
+   */
+  static std::string basePath(const std::string& path);
+
+  /**
    * List files in a directory
    */
   static void ls(
@@ -83,6 +88,11 @@ public:
    * Copy a file
    */
   static void cp(const std::string& src, const std::string& destination);
+
+  /**
+   * Concat one file to another file
+   */
+  static void cat(const std::string& src, const std::string& target);
 
   /**
    * Return the size of a directory (like du -c)

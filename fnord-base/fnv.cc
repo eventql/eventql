@@ -13,7 +13,6 @@
 #include "fnv.h"
 
 namespace fnord {
-namespace hash {
 
 /**
  * Parameters for the 32bit version of the FNV hash function
@@ -38,5 +37,4 @@ template<> FNV<uint64_t>::FNV() :
     basis_(14695981039346656037llu),
     prime_(1099511628211llu) {}
 
-}
 }

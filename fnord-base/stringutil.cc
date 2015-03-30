@@ -10,6 +10,7 @@
 #include <string>
 #include <fnord-base/bufferutil.h>
 #include <fnord-base/stringutil.h>
+#include <fnord-base/UTF8.h>
 
 namespace fnord {
 
@@ -198,6 +199,26 @@ void StringUtil::toUpper(std::string* str) {
   }
 }
 
+size_t StringUtil::find(const std::string& str, char chr) {
+  for (int i = 0; i < str.length(); ++i) {
+    if (str[i] == chr) {
+      return i;
+    }
+  }
+
+  return -1;
+}
+
+size_t StringUtil::findLast(const std::string& str, char chr) {
+  for (int i = str.length() - 1; i >= 0; --i) {
+    if (str[i] == chr) {
+      return i;
+    }
+  }
+
+  return -1;
+}
+
 std::string StringUtil::hexPrint(
     const void* data,
     size_t size,
@@ -223,13 +244,25 @@ std::string StringUtil::formatv(
 }
 
 std::wstring StringUtil::convertUTF8To16(const std::string& str) {
-  std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;
-  return conv.from_bytes(str);
+  WString out;
+
+  const char* cur = str.data();
+  const char* end = cur + str.length();
+  char32_t chr;
+  while ((chr = UTF8::nextCodepoint(&cur, end)) > 0) {
+    out += (wchar_t) chr;
+  }
+
+  return out;
 }
 
 std::string StringUtil::convertUTF16To8(const std::wstring& str) {
-  std::string out;
-  out.assign(str.begin(), str.end());
+  String out;
+
+  for (const auto& c : str) {
+    UTF8::encodeCodepoint(c, &out);
+  }
+
   return out;
 }
 

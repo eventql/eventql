@@ -62,6 +62,10 @@ File File::openFile(
     unlink(filename.c_str());
   }
 
+  if ((flags & O_APPEND) > 0) {
+    lseek(fd, 0, SEEK_END);
+  }
+
   return File(fd, flags);
 }
 

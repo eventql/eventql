@@ -22,6 +22,10 @@ RefPtr<VFSFile> WhitelistVFS::openFile(const String& filename) {
       new io::MmappedFile(File::openFile(iter->second, File::O_READ)));
 }
 
+bool WhitelistVFS::exists(const String& filename) {
+  return whitelist_.count(filename) > 0;
+}
+
 void WhitelistVFS::registerFile(
     const String vfs_path,
     const String& real_path) {

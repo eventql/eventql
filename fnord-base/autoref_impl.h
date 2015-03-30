@@ -17,12 +17,12 @@ AutoRef<T>::AutoRef(std::nullptr_t) : ref_(nullptr) {}
 
 template <typename T>
 AutoRef<T>::AutoRef(T* ref) : ref_(ref) {
-  ref_->incRef();
+  if (ref_) ref_->incRef();
 }
 
 template <typename T>
 AutoRef<T>::AutoRef(const AutoRef<T>& other) : ref_(other.ref_) {
-  ref_->incRef();
+  if (ref_) ref_->incRef();
 }
 
 template <typename T>
@@ -37,7 +37,9 @@ AutoRef<T>& AutoRef<T>::operator=(const AutoRef<T>& other) {
   }
 
   ref_ = other.ref_;
-  ref_->incRef();
+  if (ref_) {
+    ref_->incRef();
+  }
 
   return *this;
 }

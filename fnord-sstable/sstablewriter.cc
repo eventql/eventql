@@ -96,7 +96,7 @@ uint64_t SSTableWriter::appendRow(
       sizeof(BinaryFormat::RowHeader) + key_size);
   memcpy(data_dst, data, data_size);
 
-  hash::FNV<uint32_t> fnv;
+  FNV<uint32_t> fnv;
   header->checksum = fnv.hash(
       page->structAt<void>(sizeof(uint32_t)),
       page_size - sizeof(uint32_t));
@@ -170,7 +170,7 @@ void SSTableWriter::writeIndex(uint32_t index_type, void* data, size_t size) {
   header->type = index_type;
   header->footer_size = size;
 
-  hash::FNV<uint32_t> fnv;
+  FNV<uint32_t> fnv;
   header->footer_checksum = fnv.hash(data, size);
 
   if (size > 0) {
@@ -212,6 +212,7 @@ void SSTableWriter::finalize() {
 
   FileHeaderWriter header(page->ptr(), page->size());
   header.updateBodySize(body_size_);
+  header.setFlag(FileHeaderFlags::FINALIZED);
 
   page->sync();
   mmap_->shrinkFile();

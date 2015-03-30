@@ -43,6 +43,11 @@ public:
    */
   void updateBodySize(size_t body_size);
 
+  /**
+   * Update/set a flag
+   */
+  void setFlag(FileHeaderFlags flag);
+
 };
 
 }
