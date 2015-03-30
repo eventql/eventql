@@ -36,6 +36,7 @@
 #include "reports/ReportBuilder.h"
 #include "reports/JoinedQueryTableSource.h"
 #include "reports/CTRByPositionMapper.h"
+#include "reports/CTRByPageMapper.h"
 #include "reports/CTRBySearchQueryMapper.h"
 #include "reports/CTRBySearchTermCrossCategoryMapper.h"
 #include "reports/CTRStatsMapper.h"
@@ -147,6 +148,18 @@ int main(int argc, const char** argv) {
                 (g + 1) * kMicrosPerHour * 4,
                 StringUtil::format(
                     "$0/dawanda_ctr_by_position.$1.sstable",
+                    dir,
+                    g)),
+            ItemEligibility::ALL));
+
+    report_builder.addReport(
+        new CTRByPageMapper(
+            jq_source,
+            new CTRCounterTableSink(
+                g * kMicrosPerHour * 4,
+                (g + 1) * kMicrosPerHour * 4,
+                StringUtil::format(
+                    "$0/dawanda_ctr_by_page.$1.sstable",
                     dir,
                     g)),
             ItemEligibility::ALL));
