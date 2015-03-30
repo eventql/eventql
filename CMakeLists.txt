@@ -388,6 +388,7 @@ add_executable(cm-reportbuild
     src/reports/ReportBuilder.cc
     src/reports/JoinedQueryTableSource.cc
     src/reports/CTRByPositionMapper.cc
+    src/reports/CTRByPageMapper.cc
     src/reports/CTRStatsMapper.cc
     src/reports/CTRCounterTableSink.cc
     src/reports/CTRCounterTableSource.cc
