@@ -47,7 +47,7 @@ void CTRStatsServlet::handleHTTPRequest(
 
   Set<String> test_groups { "all" };
   Set<String> device_types { "unknown", "desktop", "tablet", "phone" };
-  Set<String> pages { "all" };
+  Set<String> pages;
 
   /* prepare prefix filters for scanning */
   String scan_common_prefix = lang_str + "~";
@@ -111,7 +111,7 @@ void CTRStatsServlet::handleHTTPRequest(
         return;
       }
 
-      if (pages.count(dims[3]) == 0) {
+      if (pages.size() > 0 && pages.count(dims[3]) == 0) {
         return;
       }
 
