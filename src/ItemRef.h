@@ -14,14 +14,11 @@
 #include <string>
 #include <unordered_map>
 #include "fnord-base/reflect/reflect.h"
+#include "DocID.h"
 
 using namespace fnord;
 
 namespace cm {
-
-struct DocID {
-  String docid;
-};
 
 struct ItemRef {
   std::string set_id;

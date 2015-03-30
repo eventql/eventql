@@ -33,14 +33,19 @@
 using namespace fnord;
 
 typedef Tuple<String, uint64_t, uint64_t> OutputRow;
-typedef HashMap<void*, cm::CTRCounter> CounterMap;
+typedef HashMap<void*, cm::CTRCounterData> CounterMap;
 
 InternMap intern_map;
 
 void indexJoinedQuery(
     const cm::JoinedQuery& query,
     const String& feature_name,
+    cm::ItemEligibility eligibility,
     CounterMap* counters) {
+  if (!isQueryEligible(eligibility, query)) {
+    return;
+  }
+
   auto fstr_opt = cm::extractAttr(query.attrs, feature_name);
   if (fstr_opt.isEmpty()) {
     return;
@@ -223,18 +228,20 @@ int main(int argc, const char** argv) {
       status_line.runMaybe();
 
       auto val = cursor->getDataBuffer();
+      Option<cm::JoinedQuery> q;
 
       try {
-        indexJoinedQuery(
-            json::fromJSON<cm::JoinedQuery>(val),
-            query_feature,
-            &counters);
+        q = Some(json::fromJSON<cm::JoinedQuery>(val));
       } catch (const Exception& e) {
-        fnord::logWarning(
-            "cm.ctrstats",
-            e,
-            "error while indexing query: $0",
-            val.toString());
+        //fnord::logWarning("cm.ctrstats", e, "invalid json: $0", val.toString());
+      }
+
+      if (!q.isEmpty()) {
+        indexJoinedQuery(
+            q.get(),
+            query_feature,
+            cm::ItemEligibility::DAWANDA_ALL_NOBOTS,
+            &counters);
       }
 
       if (!cursor->next()) {

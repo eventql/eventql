@@ -19,7 +19,7 @@
 #include "fnord-json/jsonrpcrequest.h"
 #include "fnord-json/jsonrpcresponse.h"
 #include "CustomerNamespace.h"
-#include "IndexRequest.h"
+#include "IndexChangeRequest.h"
 #include "frontend/CMFrontend.h"
 
 using namespace fnord;
@@ -176,8 +176,8 @@ void CMFrontend::dispatchRPC(
     json::JSONRPCRequest* req,
     json::JSONRPCResponse* res) {
   if (req->method() == "index_document") {
-    auto index_req = req->getArg<IndexRequest>(0, "index_request");
-    recordIndexRequest(index_req);
+    auto index_req = req->getArg<IndexChangeRequest>(0, "index_request");
+    recordIndexChangeRequest(index_req);
 
     res->success([] (json::JSONOutputStream* jos) {
       jos->addTrue();
@@ -240,7 +240,7 @@ void CMFrontend::recordLogLine(
   tracker_log_feed_->appendEntry(feedline);
 }
 
-void CMFrontend::recordIndexRequest(const IndexRequest& index_request) {
+void CMFrontend::recordIndexChangeRequest(const IndexChangeRequest& index_request) {
   stat_index_requests_total_.incr(1);
 
   auto ir_feed_iter = index_request_feeds_.find(index_request.customer);

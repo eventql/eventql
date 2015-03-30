@@ -13,6 +13,7 @@
 #include "fnord-base/io/fileutil.h"
 #include "fnord-base/application.h"
 #include "fnord-base/logging.h"
+#include "fnord-base/Language.h"
 #include "fnord-base/cli/flagparser.h"
 #include "fnord-base/util/SimpleRateLimit.h"
 #include "fnord-base/InternMap.h"
@@ -29,12 +30,14 @@
 #include "FeatureSchema.h"
 #include "JoinedQuery.h"
 #include "CTRCounter.h"
+#include <fnord-fts/fts.h>
+#include <fnord-fts/fts_common.h>
 
 using namespace fnord;
 using namespace cm;
 
 typedef Tuple<String, uint64_t, uint64_t> OutputRow;
-typedef HashMap<String, cm::CTRCounter> CounterMap;
+typedef HashMap<String, cm::CTRCounterData> CounterMap;
 
 InternMap intern_map;
 
@@ -44,8 +47,14 @@ void indexJoinedQuery(
     mdb::MDB* featuredb,
     FeatureIndex* feature_index,
     FeatureID item_feature_id,
-    ItemEligibility item_eligibility,
+    ItemEligibility eligibility,
+    fnord::fts::Analyzer* analyzer,
+    Language lang,
     CounterMap* counters) {
+  if (!isQueryEligible(eligibility, query)) {
+    return;
+  }
+
   auto fstr_opt = cm::extractAttr(query.attrs, query_feature_name);
   if (fstr_opt.isEmpty()) {
     return;
@@ -54,58 +63,27 @@ void indexJoinedQuery(
   auto fstr = URI::urlDecode(fstr_opt.get());
   auto& global_counter = (*counters)[""];
 
-/*
-  switch (query_feature_prep_) {
-    case FeaturePrep::NONE:
-      break;
-
-    case FeaturePrep::BAGOFWORDS_DE: {
-      Set<String> tokens;
-      cm::tokenizeAndStem(
-          cm::Language::GERMAN,
-          fstr,
-          &tokens);
-
-      fstr = cm::joinBagOfWords(tokens);
-      break;
-    }
-  }
-*/
-
   for (const auto& item : query.items) {
-    if (!isItemEligible(item_eligibility, query, item)) {
+    if (!isItemEligible(eligibility, query, item)) {
       continue;
     }
 
     Option<String> ifstr_opt;
 
     try {
-      auto txn = featuredb->startTransaction(true);
-
       ifstr_opt = feature_index->getFeature(
           item.item.docID(),
-          item_feature_id,
-          txn.get());
-
-      txn->abort();
+          item_feature_id);
     } catch (const Exception& e) {
       fnord::logError("cm.ctrstatsbuild", e, "error");
     }
 
    if (ifstr_opt.isEmpty()) {
-      //fnord::logWarning(
-      //    "cm.ctrstatsbuild",
-      //    "item not found in featuredb: $0",
-      //    item.item.docID().docid);
-
       continue;
     }
 
     Set<String> tokens;
-    cm::tokenizeAndStem(
-        cm::Language::GERMAN, // FIXPAUL
-        ifstr_opt.get(),
-        &tokens);
+    analyzer->extractTerms(lang, ifstr_opt.get(), &tokens);
 
     for (const auto& token : tokens) {
       Buffer counter_key;
@@ -203,6 +181,24 @@ int main(int argc, const char** argv) {
   fnord::cli::FlagParser flags;
 
   flags.defineFlag(
+      "lang",
+      cli::FlagParser::T_STRING,
+      true,
+      NULL,
+      NULL,
+      "language",
+      "<lang>");
+
+  flags.defineFlag(
+      "conf",
+      cli::FlagParser::T_STRING,
+      false,
+      NULL,
+      "./conf",
+      "conf directory",
+      "<path>");
+
+  flags.defineFlag(
       "output_file",
       cli::FlagParser::T_STRING,
       true,
@@ -238,7 +234,6 @@ int main(int argc, const char** argv) {
       "feature db path",
       "<path>");
 
-
   flags.defineFlag(
       "loglevel",
       fnord::cli::FlagParser::T_STRING,
@@ -258,6 +253,9 @@ int main(int argc, const char** argv) {
   auto start_time = std::numeric_limits<uint64_t>::max();
   auto end_time = std::numeric_limits<uint64_t>::min();
 
+  auto lang = languageFromString(flags.getString("lang"));
+  fnord::fts::Analyzer analyzer(flags.getString("conf"));
+
   /* set up feature schema */
   cm::FeatureSchema feature_schema;
   feature_schema.registerFeature("shop_id", 1, 1);
@@ -269,7 +267,7 @@ int main(int argc, const char** argv) {
   /* open featuredb db */
   auto featuredb_path = flags.getString("featuredb_path");
   auto featuredb = mdb::MDB::open(featuredb_path, true);
-  cm::FeatureIndex feature_index(&feature_schema);
+  cm::FeatureIndex feature_index(featuredb, &feature_schema);
 
   /* read input tables */
   auto sstables = flags.getArgv();
@@ -325,22 +323,25 @@ int main(int argc, const char** argv) {
       status_line.runMaybe();
 
       auto val = cursor->getDataBuffer();
+      Option<cm::JoinedQuery> q;
 
       try {
+        q = Some(json::fromJSON<cm::JoinedQuery>(val));
+      } catch (const Exception& e) {
+        //fnord::logWarning("cm.ctrstats", e, "invalid json: $0", val.toString());
+      }
+
+      if (!q.isEmpty()) {
         indexJoinedQuery(
-            json::fromJSON<cm::JoinedQuery>(val),
+            q.get(),
             query_feature,
             featuredb.get(),
             &feature_index,
             feature_schema.featureID(flags.getString("item_feature")).get(),
-            cm::ItemEligibility::DAWANDA_FIRST_EIGHT,
+            cm::ItemEligibility::DAWANDA_ALL_NOBOTS,
+            &analyzer,
+            lang,
             &counters);
-      } catch (const Exception& e) {
-        fnord::logWarning(
-            "cm.ctrstats",
-            e,
-            "error while indexing query: $0",
-            val.toString());
       }
 
       if (!cursor->next()) {

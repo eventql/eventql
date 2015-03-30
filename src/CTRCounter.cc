@@ -14,34 +14,37 @@ using namespace fnord;
 
 namespace cm {
 
-CTRCounter CTRCounter::load(const Buffer& buf) {
-  abort(); // DEPRECATED
-  CTRCounter counter;
-
-  util::BinaryMessageReader reader(buf.data(), buf.size());
-  counter.num_views = *reader.readUInt64();
-  counter.num_clicks = *reader.readUInt64();
-
-  return counter;
+sstable::SSTableColumnSchema CTRCounterData::sstableSchema() {
+  sstable::SSTableColumnSchema schema;
+  schema.addColumn("num_views", 1, sstable::SSTableColumnType::UINT64);
+  schema.addColumn("num_clicks", 2, sstable::SSTableColumnType::UINT64);
+  schema.addColumn("num_clicked", 3, sstable::SSTableColumnType::UINT64);
+  return schema;
 }
 
-void CTRCounter::write(const CTRCounter& counter, Buffer* buf) {
-  abort(); // DEPRECATED
-  util::BinaryMessageWriter writer(sizeof(CTRCounter));
-  writer.appendUInt64(counter.num_views);
-  writer.appendUInt64(counter.num_clicks);
-  buf->append(writer.data(), writer.size());
+CTRCounterData CTRCounterData::load(const String& str) {
+  static auto schema = sstableSchema();
+
+  CTRCounterData c;
+
+  Buffer buf(str.data(), str.size());
+  sstable::SSTableColumnReader cols(&schema, buf);
+  c.num_views = cols.getUInt64Column(schema.columnID("num_views"));
+  c.num_clicks = cols.getUInt64Column(schema.columnID("num_clicks"));
+  c.num_clicked = cols.getUInt64Column(schema.columnID("num_clicked"));
+
+  return c;
 }
 
-CTRCounter::CTRCounter() :
+CTRCounterData::CTRCounterData() :
     num_views(0),
     num_clicks(0),
     num_clicked(0) {}
 
-void CTRCounter::merge(const CTRCounter& other) {
-  abort(); // DEPRECATED
+void CTRCounterData::merge(const CTRCounterData& other) {
   num_views += other.num_views;
   num_clicks += other.num_clicks;
+  num_clicked += other.num_clicked;
 }
 
 }

@@ -21,7 +21,7 @@
 #include <fnord-http/httpservice.h>
 #include "fnord-base/stats/stats.h"
 #include "common.h"
-#include "IndexRequest.h"
+#include "IndexChangeRequest.h"
 
 using namespace fnord;
 
@@ -48,7 +48,7 @@ protected:
 
   void dispatchRPC(json::JSONRPCRequest* req, json::JSONRPCResponse* res);
 
-  void recordIndexRequest(const IndexRequest& index_request);
+  void recordIndexChangeRequest(const IndexChangeRequest& index_request);
 
   void track(CustomerNamespace* customer, const fnord::URI& uri);
   void recordLogLine(CustomerNamespace* customer, const std::string& logline);

@@ -11,28 +11,22 @@
 #include <string>
 #include <fnord-base/option.h>
 #include <fnord-base/stdtypes.h>
+#include <fnord-base/Language.h>
 #include "JoinedQuery.h"
 
 using namespace fnord;
 
 namespace cm {
 
-enum class Language {
-  GERMAN
-};
-
 std::string cmHostname();
 
 bool isReservedPixelParam(const std::string param);
 
 Option<String> extractAttr(const Vector<String>& attrs, const String& attr);
-
-void tokenizeAndStem(Language lang, const String& query, Set<String>* tokens);
-
-void tokenizeAndStem(
-    Language lang,
-    const WString& query,
-    Function<void (const WString& token)> fn);
+String extractDeviceType(const Vector<String>& attrs);
+String extractTestGroup(const Vector<String>& attrs);
+Language extractLanguage(const Vector<String>& attrs);
+String extractPageType(const Vector<String>& attrs);
 
 String joinBagOfWords(const Set<String>& words);
 
@@ -43,8 +37,10 @@ enum class FeaturePrep {
 
 enum class ItemEligibility {
   ALL = 0,
-  DAWANDA_FIRST_EIGHT = 1
+  DAWANDA_ALL_NOBOTS = 1
 };
+
+bool isQueryEligible(ItemEligibility eligibility, const cm::JoinedQuery& query);
 
 bool isItemEligible(
     ItemEligibility eligibility,

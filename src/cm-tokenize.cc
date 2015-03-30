@@ -16,6 +16,8 @@
 #include "fnord-base/logging.h"
 #include "fnord-base/cli/flagparser.h"
 #include "common.h"
+#include <fnord-fts/fts.h>
+#include <fnord-fts/fts_common.h>
 
 using namespace fnord;
 
@@ -25,14 +27,24 @@ int main(int argc, const char** argv) {
 
   fnord::cli::FlagParser flags;
 
-  //flags.defineFlag(
-  //    "lang",
-  //    cli::FlagParser::T_STRING,
-  //    true,
-  //    NULL,
-  //    NULL,
-  //    "language",
-  //    "<lang>");
+  flags.defineFlag(
+      "lang",
+      cli::FlagParser::T_STRING,
+      true,
+      NULL,
+      NULL,
+      "language",
+      "<lang>");
+
+  flags.defineFlag(
+      "conf",
+      cli::FlagParser::T_STRING,
+      false,
+      NULL,
+      "./conf",
+      "conf directory",
+      "<path>");
+
   flags.defineFlag(
       "loglevel",
       fnord::cli::FlagParser::T_STRING,
@@ -47,9 +59,12 @@ int main(int argc, const char** argv) {
   Logger::get()->setMinimumLogLevel(
       strToLogLevel(flags.getString("loglevel")));
 
+  auto lang = languageFromString(flags.getString("lang"));
+  fnord::fts::Analyzer analyzer(flags.getString("conf"));
+
   for (String line; std::getline(std::cin, line); ) {
     Set<String> tokens;
-    cm::tokenizeAndStem(cm::Language::GERMAN, line, &tokens);
+    analyzer.extractTerms(lang, line, &tokens);
     fnord::iputs("\ninput: $0\noutput: $1", line, tokens);
   }
 

@@ -34,19 +34,22 @@ using namespace fnord;
 using namespace cm;
 
 typedef Tuple<String, uint64_t, uint64_t> OutputRow;
-typedef HashMap<String, cm::CTRCounter> CounterMap;
+typedef HashMap<String, cm::CTRCounterData> CounterMap;
 
 InternMap intern_map;
 
 void indexJoinedQuery(
     const cm::JoinedQuery& query,
-    const String& query_feature_name,
-    mdb::MDB* featuredb,
+    const String& query_feature,
+    const String& item_feature,
+    ItemEligibility eligibility,
     FeatureIndex* feature_index,
-    FeatureID item_feature_id,
-    ItemEligibility item_eligibility,
     CounterMap* counters) {
-  auto fstr_opt = cm::extractAttr(query.attrs, query_feature_name);
+  if (!isQueryEligible(eligibility, query)) {
+    return;
+  }
+
+  auto fstr_opt = cm::extractAttr(query.attrs, query_feature);
   if (fstr_opt.isEmpty()) {
     return;
   }
@@ -73,21 +76,14 @@ void indexJoinedQuery(
 */
 
   for (const auto& item : query.items) {
-    if (!isItemEligible(item_eligibility, query, item)) {
+    if (!isItemEligible(eligibility, query, item)) {
       continue;
     }
 
     Option<String> ifstr_opt;
 
     try {
-      auto txn = featuredb->startTransaction(true);
-
-      ifstr_opt = feature_index->getFeature(
-          item.item.docID(),
-          item_feature_id,
-          txn.get());
-
-      txn->abort();
+      ifstr_opt = feature_index->getFeature(item.item.docID(), item_feature);
     } catch (const Exception& e) {
       fnord::logError("cm.ctrstatsbuild", e, "error");
     }
@@ -249,6 +245,7 @@ int main(int argc, const char** argv) {
 
   CounterMap counters;
   auto query_feature = flags.getString("query_feature");
+  auto item_feature = flags.getString("item_feature");
   auto start_time = std::numeric_limits<uint64_t>::max();
   auto end_time = std::numeric_limits<uint64_t>::min();
 
@@ -263,7 +260,7 @@ int main(int argc, const char** argv) {
   /* open featuredb db */
   auto featuredb_path = flags.getString("featuredb_path");
   auto featuredb = mdb::MDB::open(featuredb_path, true);
-  cm::FeatureIndex feature_index(&feature_schema);
+  cm::FeatureIndex feature_index(featuredb, &feature_schema);
 
   /* read input tables */
   auto sstables = flags.getArgv();
@@ -319,22 +316,22 @@ int main(int argc, const char** argv) {
       status_line.runMaybe();
 
       auto val = cursor->getDataBuffer();
+      Option<cm::JoinedQuery> q;
 
       try {
-        indexJoinedQuery(
-            json::fromJSON<cm::JoinedQuery>(val),
-            query_feature,
-            featuredb.get(),
-            &feature_index,
-            feature_schema.featureID(flags.getString("item_feature")).get(),
-            cm::ItemEligibility::DAWANDA_FIRST_EIGHT,
-            &counters);
+        q = Some(json::fromJSON<cm::JoinedQuery>(val));
       } catch (const Exception& e) {
-        fnord::logWarning(
-            "cm.ctrstats",
-            e,
-            "error while indexing query: $0",
-            val.toString());
+        //fnord::logWarning("cm.ctrstats", e, "invalid json: $0", val.toString());
+      }
+
+      if (!q.isEmpty()) {
+        indexJoinedQuery(
+            q.get(),
+            query_feature,
+            item_feature,
+            cm::ItemEligibility::DAWANDA_ALL_NOBOTS,
+            &feature_index,
+            &counters);
       }
 
       if (!cursor->next()) {

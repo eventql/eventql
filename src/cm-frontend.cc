@@ -40,30 +40,12 @@ int main(int argc, const char** argv) {
   fnord::cli::FlagParser flags;
 
   flags.defineFlag(
-      "cmdata",
-      cli::FlagParser::T_STRING,
-      true,
-      NULL,
-      NULL,
-      "clickmatcher app data dir",
-      "<path>");
-
-  flags.defineFlag(
-      "public_http_port",
+      "http_port",
       fnord::cli::FlagParser::T_INTEGER,
       false,
       NULL,
       "8000",
       "Start the public http server on this port",
-      "<port>");
-
-  flags.defineFlag(
-      "internal_http_port",
-      fnord::cli::FlagParser::T_INTEGER,
-      false,
-      NULL,
-      "7000",
-      "Start the internal http server on this port",
       "<port>");
 
   flags.defineFlag(
@@ -92,12 +74,6 @@ int main(int argc, const char** argv) {
   fnord::thread::EventLoop event_loop;
   HTTPRPCClient rpc_client(&event_loop);
 
-  /* set up cmdata */
-  auto cmdata_path = flags.getString("cmdata");
-  if (!FileUtil::isDirectory(cmdata_path)) {
-    RAISEF(kIOError, "no such directory: $0", cmdata_path);
-  }
-
   /* set up tracker log feed writer */
   fnord::feeds::RemoteFeedWriter tracker_log_feed(&rpc_client);
   tracker_log_feed.addTargetFeed(
@@ -118,19 +94,19 @@ int main(int argc, const char** argv) {
   /* set up dawanda */
   auto dwn_ns = new cm::CustomerNamespace("dawanda");
   dwn_ns->addVHost("dwnapps.net");
-  dwn_ns->loadTrackingJS("cm-config/customer_dawanda/track.js");
+  dwn_ns->loadTrackingJS("customers/dawanda/track.js");
 
   RefPtr<feeds::RemoteFeedWriter> dwn_index_request_feed(
       new feeds::RemoteFeedWriter(&rpc_client));
 
   dwn_index_request_feed->addTargetFeed(
       URI("http://s01.nue01.production.fnrd.net:7001/rpc"),
-      "dawanda.index_requests.feedserver01.nue01.production.fnrd.net",
+      "index_requests.feedserver01.nue01.production.fnrd.net",
       16);
 
   dwn_index_request_feed->addTargetFeed(
       URI("http://s02.nue01.production.fnrd.net:7001/rpc"),
-      "dawanda.index_requests.feedserver02.nue01.production.fnrd.net",
+      "index_requests.feedserver02.nue01.production.fnrd.net",
       16);
 
   dwn_index_request_feed->exportStats(
@@ -139,30 +115,18 @@ int main(int argc, const char** argv) {
   frontend.addCustomer(dwn_ns, dwn_index_request_feed);
 
   /* set up public http server */
-  fnord::http::HTTPRouter public_http_router;
-  public_http_router.addRouteByPrefixMatch("/", &frontend);
-  fnord::http::HTTPServer public_http_server(&public_http_router, &event_loop);
-  public_http_server.listen(flags.getInt("public_http_port"));
-  public_http_server.stats()->exportStats(
+  fnord::http::HTTPRouter http_router;
+  http_router.addRouteByPrefixMatch("/", &frontend);
+  fnord::http::HTTPServer http_server(&http_router, &event_loop);
+  http_server.listen(flags.getInt("http_port"));
+  http_server.stats()->exportStats(
       "/cm-frontend/global/http/inbound");
-  public_http_server.stats()->exportStats(
+  http_server.stats()->exportStats(
       StringUtil::format(
           "/cm-frontend/by-host/$0/http/inbound",
           cm::cmHostname()));
 
-  /* setup internal http server */
-  fnord::http::HTTPRouter rpc_http_router;
-  fnord::http::HTTPServer rpc_http_server(&rpc_http_router, &event_loop);
-  rpc_http_server.listen(flags.getInt("internal_http_port"));
-
-  /* lookup servlet */
-  cm::LookupServlet lookup_servlet(cmdata_path);
-  rpc_http_router.addRouteByPrefixMatch("/lookup", &lookup_servlet);
-
-  /* stats servlet and reporting */
-  fnord::stats::StatsHTTPServlet stats_servlet;
-  rpc_http_router.addRouteByPrefixMatch("/stats", &stats_servlet);
-
+  /* stats reporting */
   fnord::stats::StatsdAgent statsd_agent(
       fnord::net::InetAddr::resolve(flags.getString("statsd_addr")),
       10 * fnord::kMicrosPerSecond);
