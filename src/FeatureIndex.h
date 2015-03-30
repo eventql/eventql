@@ -27,30 +27,47 @@ namespace cm {
 class FeatureIndex {
 public:
 
-  FeatureIndex(const FeatureSchema* schema);
+  FeatureIndex(
+      RefPtr<mdb::MDB> featuredb,
+      const FeatureSchema* schema);
 
-  void getFeatures(
+  ~FeatureIndex();
+
+  FeatureIndex(const FeatureIndex& other) = delete;
+  FeatureIndex& operator=(const FeatureIndex& other) = delete;
+
+  Option<String> getFeature(
       const DocID& docid,
-      mdb::MDBTransaction* featuredb_txn,
-      FeaturePack* features);
+      const String& feature);
+
+  Option<String> getFeature(
+      const DocID& docid,
+      const FeatureID& featureid);
 
   Option<String> getFeature(
       const DocID& docid,
       const FeatureID& featureid,
       mdb::MDBTransaction* featuredb_txn);
 
-  void updateFeatures(
+  void getFeatures(
       const DocID& docid,
-      const Vector<Pair<FeatureID, String>>& features,
-      mdb::MDBTransaction* featuredb_txn);
+      mdb::MDBTransaction* featuredb_txn,
+      FeaturePack* features);
+
+  void getFeatures(
+      const DocID& docid,
+      FeaturePack* features);
 
 protected:
 
-  String dbKey(const DocID& docid, uint64_t group_id) const;
-
   FeatureCache cache_;
+  RefPtr<mdb::MDB> db_;
+  RefPtr<mdb::MDBTransaction> txn_;
   const FeatureSchema* schema_;
 };
+
+String featureDBKey(const DocID& docid, uint64_t group_id);
+
 } // namespace cm
 
 #endif

@@ -23,16 +23,16 @@ using namespace fnord;
 
 namespace cm {
 
-struct IndexRequest {
+struct IndexChangeRequest {
   String customer;
   ItemRef item;
   HashMap<String, String> attrs;
 
   template <typename T>
   static void reflect(T* meta) {
-    meta->prop(&IndexRequest::customer, 1, "customer", false);
-    meta->prop(&IndexRequest::item, 2, "docid", false);
-    meta->prop(&IndexRequest::attrs, 3, "attributes", false);
+    meta->prop(&IndexChangeRequest::customer, 1, "customer", false);
+    meta->prop(&IndexChangeRequest::item, 2, "docid", false);
+    meta->prop(&IndexChangeRequest::attrs, 3, "attributes", false);
   };
 };
 

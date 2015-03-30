@@ -10,23 +10,29 @@
 #define _CM_CTRCOUNTER_H
 #include "fnord-base/stdtypes.h"
 #include "fnord-base/option.h"
+#include "fnord-sstable/sstablereader.h"
+#include "fnord-sstable/sstablewriter.h"
+#include "fnord-sstable/SSTableColumnSchema.h"
+#include "fnord-sstable/SSTableColumnReader.h"
+#include "fnord-sstable/SSTableColumnWriter.h"
 
 using namespace fnord;
 
 namespace cm {
 
-struct CTRCounter {
-  static void write(const CTRCounter& counter, Buffer* buf);
-  static CTRCounter load(const Buffer& buf);
+struct CTRCounterData {
+  static CTRCounterData load(const String& buf);
+  static sstable::SSTableColumnSchema sstableSchema();
 
-  CTRCounter();
-  void merge(const CTRCounter& other);
+  CTRCounterData();
+  void merge(const CTRCounterData& other);
 
   uint64_t num_views;
   uint64_t num_clicked;
   uint64_t num_clicks;
 };
 
+typedef Pair<String, CTRCounterData> CTRCounter;
 
 }
 #endif

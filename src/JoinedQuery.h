@@ -58,12 +58,5 @@ struct JoinedQuery {
   };
 };
 
-Vector<Pair<String, double>> joinedQueryItemFeatures(
-    const JoinedQuery& query,
-    const JoinedQueryItem& item,
-    cm::FeatureSchema* feature_schema,
-    cm::FeatureIndex* feature_index,
-    mdb::MDBTransaction* featuredb_txn);
-
 }
 #endif

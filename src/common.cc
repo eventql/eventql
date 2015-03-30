@@ -8,6 +8,7 @@
  */
 #include <algorithm>
 #include <unistd.h>
+#include <fnord-base/UTF8.h>
 #include "common.h"
 
 namespace cm {
@@ -48,87 +49,68 @@ Option<String> extractAttr(const Vector<String>& attrs, const String& attr) {
   return None<String>();
 }
 
-void tokenizeAndStem(
-    Language lang,
-    const WString& query,
-    Function<void (const WString& token)> fn) {
-  Vector<WString> parts(1);
+String extractDeviceType(const Vector<String>& attrs) {
+  auto x_str = extractAttr(attrs, "u_x");
+  auto y_str = extractAttr(attrs, "u_y");
 
-  auto begin = query.c_str();
-  auto end = begin + query.size();
-  for (auto cur = begin; cur < end; ++cur) {
-    switch (*cur) {
-
-      /* token boundaries */
-      case '!':
-      case '"':
-      case '#':
-      case '$':
-      case '%':
-      case '&':
-      case '\'':
-      case '(':
-      case ')':
-      case '*':
-      case '+':
-      case ',':
-      case '.':
-      case '-':
-      case '/':
-      case ':':
-      case ';':
-      case '<':
-      case '=':
-      case '>':
-      case '?':
-      case '@':
-      case '[':
-      case '\\':
-      case ']':
-      case '^':
-      case '_':
-      case '`':
-      case '{':
-      case '|':
-      case '}':
-      case '~':
-      case ' ':
-      case '\t':
-      case '\r':
-      case '\n':
-        if (parts.back().length() > 0) {
-          parts.emplace_back();
-        }
-        break;
-
-      /* ignore chars */
-      case L'✪':
-        continue;
-
-      /* valid chars */
-      default:
-        parts.back() += std::tolower(*cur);
-        break;
-
-    }
+  if (x_str.isEmpty() || y_str.isEmpty()) {
+    return "unknown";
   }
 
-  for (auto& p : parts) {
-    if (p.length() == 0) {
-      continue;
-    }
+  auto x = std::stod(x_str.get());
+  auto y = std::stod(x_str.get());
 
-    fn(p);
+  if (x < 10 || y < 10) {
+    return "unknown";
   }
+
+  if (x < 800) {
+    return "phone";
+  }
+
+  if (x < 1250) {
+    return "tablet";
+  }
+
+  return "desktop";
 }
 
-void tokenizeAndStem(Language lang, const String& query, Set<String>* tokens) {
-  tokenizeAndStem(
-      lang,
-      StringUtil::convertUTF8To16(query),
-      [tokens] (const WString& token) {
-        tokens->emplace(StringUtil::convertUTF16To8(token));
-      });
+String extractTestGroup(const Vector<String>& attrs) {
+  auto test_group = extractAttr(attrs, "dw_ab");
+  return test_group.isEmpty() ? "unknown" : test_group.get();
+}
+
+Language extractLanguage(const Vector<String>& attrs) {
+  auto l = extractAttr(attrs, "l");
+
+  if (!l.isEmpty()) {
+    return languageFromString(l.get());
+  }
+
+  // FIXPAUL hack!!!
+  if (!extractAttr(attrs, "qstr~de").isEmpty()) {
+    return Language::DE;
+  }
+
+  if (!extractAttr(attrs, "qstr~pl").isEmpty()) {
+    return Language::PL;
+  }
+
+  return Language::UNKNOWN;
+}
+
+String extractPageType(const Vector<String>& attrs) {
+  for (const auto& a : attrs) {
+    if (StringUtil::beginsWith(a, "qstr~")) {
+      return "search";
+    }
+
+    if (StringUtil::beginsWith(a, "q_cat")) {
+      return "catalog";
+    }
+  }
+
+  return "unknown";
 }
 
 String joinBagOfWords(const Set<String>& words) {
@@ -147,17 +129,40 @@ String joinBagOfWords(const Set<String>& words) {
   return StringUtil::join(v, " ");
 }
 
+bool isQueryEligible(
+    ItemEligibility eligibility,
+    const cm::JoinedQuery& query) {
+  switch (eligibility) {
+
+    case ItemEligibility::DAWANDA_ALL_NOBOTS: {
+      auto pgs = extractAttr(query.attrs, "pg");
+      if (pgs.isEmpty()) {
+        return true;
+      } else {
+        auto pg = std::stoul(pgs.get());
+        return pg <= 3;
+      }
+    }
+
+    case ItemEligibility::ALL:
+      return true;
+
+  }
+}
+
 bool isItemEligible(
     ItemEligibility eligibility,
     const cm::JoinedQuery& query,
     const cm::JoinedQueryItem& item) {
-  if (eligibility == ItemEligibility::DAWANDA_FIRST_EIGHT) {
-    if (item.position < 5 || item.position > 12) {
-      return false;
-    }
-  }
+  switch (eligibility) {
 
-  return true;
+    case ItemEligibility::DAWANDA_ALL_NOBOTS:
+      return item.position <= 40 && item.position > 0;
+
+    case ItemEligibility::ALL:
+      return true;
+
+  }
 }
 
 }

@@ -32,12 +32,15 @@
 #include "fnord-base/stats/statsdagent.h"
 #include "fnord-fts/fts.h"
 #include "fnord-fts/fts_common.h"
+#include "fnord-fts/FTSQuery.h"
 #include "fnord-mdb/MDB.h"
 #include "CustomerNamespace.h"
 #include "FeatureSchema.h"
 #include "FeaturePack.h"
-#include "IndexRequest.h"
-#include "index/IndexBuilder.h"
+#include "DocStore.h"
+#include "FeatureIndex.h"
+#include "IndexChangeRequest.h"
+#include "IndexReader.h"
 
 using namespace cm;
 using namespace fnord;
@@ -49,31 +52,31 @@ int main(int argc, const char** argv) {
   cli::FlagParser flags;
 
   flags.defineFlag(
-      "cmdata",
+      "index",
       cli::FlagParser::T_STRING,
       true,
       NULL,
       NULL,
-      "clickmatcher app data dir",
+      "index data dir",
       "<path>");
-
-  flags.defineFlag(
-      "cmcustomer",
-      cli::FlagParser::T_STRING,
-      true,
-      NULL,
-      NULL,
-      "clickmatcher customer",
-      "<key>");
 
   flags.defineFlag(
       "docid",
       cli::FlagParser::T_STRING,
-      true,
+      false,
       NULL,
       NULL,
       "docid",
       "<docid>");
+
+  flags.defineFlag(
+      "query",
+      cli::FlagParser::T_STRING,
+      false,
+      NULL,
+      NULL,
+      "query",
+      "<query>");
 
   flags.defineFlag(
       "loglevel",
@@ -89,50 +92,56 @@ int main(int argc, const char** argv) {
   Logger::get()->setMinimumLogLevel(
       strToLogLevel(flags.getString("loglevel")));
 
-  /* arguments */
-  auto cmcustomer = flags.getString("cmcustomer");
-  DocID docid = { flags.getString("docid") };
+  auto index_path = flags.getString("index");
 
-  /* set up cmdata */
-  auto cmdata_path = flags.getString("cmdata");
-  if (!FileUtil::isDirectory(cmdata_path)) {
-    RAISEF(kIOError, "no such directory: $0", cmdata_path);
+  auto index_reader = cm::IndexReader::openIndex(index_path);
+  fnord::fts::Analyzer analyzer("./conf");
+
+  if (flags.isSet("docid")) {
+    DocID docid = { flags.getString("docid") };
+
+    /* set up feature schema */
+    FeatureSchema feature_schema;
+    feature_schema.registerFeature("shop_id", 1, 1);
+    feature_schema.registerFeature("category1", 2, 1);
+    feature_schema.registerFeature("category2", 3, 1);
+    feature_schema.registerFeature("category3", 4, 1);
+    feature_schema.registerFeature("title~de", 5, 2);
+
+    /* open featuredb db */
+    auto featuredb_path = StringUtil::format("$0/db", index_path);
+    auto featuredb = mdb::MDB::open(featuredb_path, true);
+
+    /* open full index  */
+    auto fullindex_path = StringUtil::format("$0/docs", index_path);
+    cm::DocStore full_index(fullindex_path);
+
+    auto doc = full_index.findDocument(docid);
+    doc->debugPrint();
+    return 0;
   }
 
-  /* set up feature schema */
-  FeatureSchema feature_schema;
-  feature_schema.registerFeature("shop_id", 1, 1);
-  feature_schema.registerFeature("category1", 2, 1);
-  feature_schema.registerFeature("category2", 3, 1);
-  feature_schema.registerFeature("category3", 4, 1);
-  feature_schema.registerFeature("title~de", 5, 2);
+  if (flags.isSet("query")) {
+    //fnord::fts::FTSQuery fts_query;
+    //fts_query.addField("title~de", 2.0);
+    //fts_query.addField("text~de", 1.0);
+    //fts_query.addQuery(flags.getString("query"), Language::DE, &analyzer);
 
-  /* open featuredb db */
-  auto featuredb_path = FileUtil::joinPaths(
-      cmdata_path,
-      StringUtil::format("index/$0/db", cmcustomer));
-
-  auto featuredb = mdb::MDB::open(featuredb_path, true);
-  auto featuredb_txn = featuredb->startTransaction(true);
-
-  /* get features */
-  FeaturePack features;
-  FeatureIndex feature_index(&feature_schema);
-  feature_index.getFeatures(docid, featuredb_txn.get(), &features);
-
-  /* dump document */
-  fnord::iputs("[document]\n  docid=$0\n\n[features]", docid);
-
-  for (const auto& f : features) {
-    auto feature_key = feature_schema.featureKey(f.first);
-    fnord::iputs(
-        "  $0=$1",
-        feature_key.isEmpty() ? "unknown-feature": feature_key.get(),
-        f.second);
+    //auto searcher = std::make_shared<fnord::fts::IndexSearcher>(
+    //    index_reader->fts_);
+    //fts_query.execute(searcher.get());
+    //fnord::iputs("found $0 documents", collector->getTotalHits());
+    return 0;
   }
 
-  /* clean up */
-  featuredb_txn->abort();
+  //fnord::iputs("\n[features]")
+  //for (const auto& f : features) {
+  //  auto feature_key = feature_schema.featureKey(f.first);
+  //  fnord::iputs(
+  //      "  $0=$1",
+  //      feature_key.isEmpty() ? "unknown-feature": feature_key.get(),
+  //      f.second);
+  //}
 
   return 0;
 }

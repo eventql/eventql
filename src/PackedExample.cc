@@ -6,6 +6,7 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
+#include <algorithm>
 #include "fnord-base/stringutil.h"
 #include "PackedExample.h"
 
@@ -13,18 +14,20 @@ using namespace fnord;
 
 namespace cm {
 
-String exampleToSVMLight(const Example& ex, cm::FeatureSchema* schema) {
+void Example::sortFeatures() {
+  std::sort(features.begin(), features.end(), [] (
+      const Pair<uint64_t, double>& a,
+      const Pair<uint64_t, double>& b) {
+    return a.first < b.first;
+  });
+}
+
+String exampleToSVMLight(const Example& ex) {
   auto str = StringUtil::toString(ex.label);
 
   int n = 0;
   for (const auto& f : ex.features) {
-    auto fid = schema->featureID(f.first);
-
-    if (fid.isEmpty()) {
-      continue;
-    }
-
-    str += StringUtil::format(" $0:$1", fid.get().feature, f.second);
+    str += StringUtil::format(" $0:$1", f.first, f.second);
     ++n;
   }
 
@@ -36,3 +39,29 @@ String exampleToSVMLight(const Example& ex, cm::FeatureSchema* schema) {
 }
 
 } // namespace cm
+
+namespace fnord {
+
+template <>
+std::string StringUtil::toString<cm::Example>(cm::Example ex) {
+  String fstr;
+
+  for (int i = 0; i < ex.features.size(); ++i) {
+    if (i > 0) {
+      fstr += ", ";
+    }
+
+    fstr += StringUtil::format(
+        "$0 => $1",
+        ex.features[i].first,
+        ex.features[i].second);
+  }
+
+  return StringUtil::format(
+      "<Example label=$0 features={$1}>",
+      ex.label,
+      fstr);
+}
+
+}
+
