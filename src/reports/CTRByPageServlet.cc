@@ -108,6 +108,10 @@ void CTRByPageServlet::handleHTTPRequest(
       auto counter = CTRCounterData::load(row[1]);
       auto page = std::stoul(dims[3]);
 
+      if (page > 100) {
+        return;
+      }
+
       counters[page].merge(counter);
     });
   }
