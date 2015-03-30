@@ -40,6 +40,7 @@
 #include "JoinedQuery.h"
 #include "reports/CTRByPositionServlet.h"
 #include "reports/CTRByPageServlet.h"
+#include "reports/CTRStatsServlet.h"
 
 using namespace fnord;
 
@@ -112,6 +113,10 @@ int main(int argc, const char** argv) {
   /* ctr by page */
   cm::CTRByPageServlet ctr_by_page(&vfs);
   http_router.addRouteByPrefixMatch("/reports/ctr_by_page", &ctr_by_page);
+
+  /* ctr stats */
+  cm::CTRStatsServlet ctr_stats(&vfs);
+  http_router.addRouteByPrefixMatch("/reports/ctr_stats", &ctr_stats);
 
   ev.run();
   return 0;
