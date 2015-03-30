@@ -53,14 +53,14 @@ void CTRStatsServlet::handleHTTPRequest(
   String scan_common_prefix = lang_str + "~";
   if (test_groups.size() == 1) {
     scan_common_prefix += *test_groups.begin() + "~";
-  }
 
-  if (device_types.size() == 1) {
-    scan_common_prefix += *device_types.begin() + "~";
-  }
+    if (device_types.size() == 1) {
+      scan_common_prefix += *device_types.begin() + "~";
 
-  if (pages.size() == 1) {
-    scan_common_prefix += *pages.begin();
+      if (pages.size() == 1) {
+        scan_common_prefix += *pages.begin();
+      }
+    }
   }
 
   /* prepare input tables */
