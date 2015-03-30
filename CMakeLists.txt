@@ -417,6 +417,7 @@ add_executable(cm-reportserver
     $<TARGET_OBJECTS:fnord-rpc>
     $<TARGET_OBJECTS:fnord-sstable>
     3rdparty/libfnord/fnord-sstable/SSTableServlet.cc
+    src/reports/CTRStatsServlet.cc
     src/reports/CTRByPositionServlet.cc
     src/reports/CTRByPageServlet.cc
     src/cm-reportserver.cc)
