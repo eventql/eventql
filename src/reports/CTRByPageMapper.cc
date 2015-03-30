@@ -33,7 +33,7 @@ void CTRByPageMapper::onJoinedQuery(const JoinedQuery& q) {
     return;
   }
 
-  auto pg_str = cm::extractAttr(query.attrs, "pg");
+  auto pg_str = cm::extractAttr(q.attrs, "pg");
   if (pg_str.isEmpty()) {
     return;
   }
