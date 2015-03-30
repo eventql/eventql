@@ -325,6 +325,24 @@ int main(int argc, const char** argv) {
                     dir,
                     og))));
 
+    /* dawanda: roll up ctr by page */
+    Set<String> ctr_by_page_sources;
+    for (const auto& ig : day_gens) {
+      ctr_by_page_sources.emplace(
+          StringUtil::format("$0/dawanda_ctr_by_page.$1.sstable", dir, ig));
+    }
+
+    report_builder.addReport(
+        new CTRCounterMergeReducer(
+            new CTRCounterTableSource(ctr_by_page_sources),
+            new CTRCounterTableSink(
+                (og) * kMicrosPerDay,
+                (og + 1) * kMicrosPerDay,
+                StringUtil::format(
+                    "$0/dawanda_ctr_by_page_daily.$1.sstable",
+                    dir,
+                    og))));
+
     /* dawanda: roll up related search terms */
     Set<String> related_terms_sources;
     for (const auto& ig : day_gens) {
