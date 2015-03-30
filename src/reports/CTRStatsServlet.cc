@@ -63,19 +63,15 @@ void CTRStatsServlet::handleHTTPRequest(
     }
   }
 
-  /* prepare input tables */
-  Set<String> tables;
-  for (uint64_t i = end_time; i >= start_time; i -= kMicrosPerDay) {
-    tables.emplace(StringUtil::format(
-        "$0_ctr_stats_daily.$1.sstable",
-        customer,
-        i / kMicrosPerDay));
-  }
-
   /* scan input tables */
   HashMap<uint64_t, CTRCounterData> counters;
   CTRCounterData aggr_counter;
-  for (const auto& tbl : tables) {
+  for (uint64_t i = end_time; i >= start_time; i -= kMicrosPerDay) {
+    auto tbl = StringUtil::format(
+        "$0_ctr_stats_daily.$1.sstable",
+        customer,
+        i / kMicrosPerDay);
+
     if (!vfs_->exists(tbl)) {
       continue;
     }
@@ -116,7 +112,7 @@ void CTRStatsServlet::handleHTTPRequest(
       }
 
       auto counter = CTRCounterData::load(row[1]);
-      counters[0].merge(counter);
+      counters[i].merge(counter);
       aggr_counter.merge(counter);
     });
   }
