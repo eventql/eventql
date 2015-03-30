@@ -47,6 +47,7 @@ void CTRStatsServlet::handleHTTPRequest(
 
   Set<String> test_groups { "all" };
   Set<String> device_types { "unknown", "desktop", "tablet", "phone" };
+  Set<String> pages { "all" };
 
   /* prepare prefix filters for scanning */
   String scan_common_prefix = lang_str + "~";
@@ -58,17 +59,22 @@ void CTRStatsServlet::handleHTTPRequest(
     scan_common_prefix += *device_types.begin() + "~";
   }
 
+  if (pages.size() == 1) {
+    scan_common_prefix += *pages.begin();
+  }
+
   /* prepare input tables */
   Set<String> tables;
   for (uint64_t i = end_time; i >= start_time; i -= kMicrosPerDay) {
     tables.emplace(StringUtil::format(
-        "$0_ctr_by_page_daily.$1.sstable",
+        "$0_ctr_stats_daily.$1.sstable",
         customer,
         i / kMicrosPerDay));
   }
 
   /* scan input tables */
   HashMap<uint64_t, CTRCounterData> counters;
+  CTRCounterData aggr_counter;
   for (const auto& tbl : tables) {
     if (!vfs_->exists(tbl)) {
       continue;
@@ -105,14 +111,13 @@ void CTRStatsServlet::handleHTTPRequest(
         return;
       }
 
-      auto counter = CTRCounterData::load(row[1]);
-      auto page = std::stoul(dims[3]);
-
-      if (page > 100) {
+      if (pages.count(dims[3]) == 0) {
         return;
       }
 
-      counters[page].merge(counter);
+      auto counter = CTRCounterData::load(row[1]);
+      counters[0].merge(counter);
+      aggr_counter.merge(counter);
     });
   }
 
@@ -121,16 +126,26 @@ void CTRStatsServlet::handleHTTPRequest(
   res->addHeader("Content-Type", "application/json; charset=utf-8");
   json::JSONOutputStream json(res->getBodyOutputStream());
 
+  json.beginObject();
+  json.addObjectEntry("aggregate");
+
+  json.beginObject();
+  json.addObjectEntry("views");
+  json.addInteger(aggr_counter.num_views);
+  json.addComma();
+  json.addObjectEntry("clicks");
+  json.addInteger(aggr_counter.num_clicks);
+  json.addComma();
+  json.addObjectEntry("ctr");
+  json.addFloat(aggr_counter.num_clicks / (double) aggr_counter.num_views);
+  json.addComma();
+  json.addObjectEntry("cpq");
+  json.addFloat(aggr_counter.num_clicked / (double) aggr_counter.num_views);
+  json.endObject();
+
+  json.addComma();
+  json.addObjectEntry("timeseries");
   json.beginArray();
-
-  uint64_t total_views = 0;
-  uint64_t total_clicks = 0;
-
-  for (const auto& c : counters) {
-    total_views += c.second.num_views;
-    total_clicks += c.second.num_clicks;
-  }
-
   int n = 0;
   for (const auto& c : counters) {
     if (++n > 1) {
@@ -138,7 +153,7 @@ void CTRStatsServlet::handleHTTPRequest(
     }
 
     json.beginObject();
-    json.addObjectEntry("page");
+    json.addObjectEntry("time");
     json.addInteger(c.first);
     json.addComma();
     json.addObjectEntry("views");
@@ -150,15 +165,13 @@ void CTRStatsServlet::handleHTTPRequest(
     json.addObjectEntry("ctr");
     json.addFloat(c.second.num_clicks / (double) c.second.num_views);
     json.addComma();
-    json.addObjectEntry("ctr_base");
-    json.addFloat(c.second.num_clicks / (double) total_views);
-    json.addComma();
-    json.addObjectEntry("clickshare");
-    json.addFloat(c.second.num_clicks / (double) total_clicks);
+    json.addObjectEntry("cpq");
+    json.addFloat(c.second.num_clicked / (double) c.second.num_views);
     json.endObject();
   }
 
   json.endArray();
+  json.endObject();
 }
 
 }
