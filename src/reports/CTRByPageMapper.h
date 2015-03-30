@@ -6,8 +6,8 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-#ifndef _CM_CTRBYPOSITIONREPORT_H
-#define _CM_CTRBYPOSITIONREPORT_H
+#ifndef _CM_CTRBYPAGEMAPPER_H
+#define _CM_CTRBYPAGEMAPPER_H
 #include "reports/Report.h"
 #include "JoinedQuery.h"
 #include "JoinedQueryTableSource.h"
