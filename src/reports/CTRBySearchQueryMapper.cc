@@ -54,7 +54,9 @@ void CTRBySearchQueryMapper::onJoinedQuery(const JoinedQuery& q) {
 
   String qstr_norm;
   try {
-    qstr_norm = analyzer_->normalize(lang, qstr.get());
+    Vector<String> terms;
+    analyzer_->tokenize(lang, qstr.get(), &terms);
+    qstr_norm = StringUtil::join(terms, " ");
   } catch (const Exception& e) {
     fnord::logWarning(
         "cm.reportbuild",
