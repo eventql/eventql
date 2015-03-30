@@ -108,6 +108,10 @@ int main(int argc, const char** argv) {
   cm::CTRByPositionServlet ctr_by_pos(&vfs);
   http_router.addRouteByPrefixMatch("/reports/ctr_by_position", &ctr_by_pos);
 
+  /* ctr by page */
+  cm::CTRByPositionServlet ctr_by_page(&vfs);
+  http_router.addRouteByPrefixMatch("/reports/ctr_by_page", &ctr_by_page);
+
   ev.run();
   return 0;
 }

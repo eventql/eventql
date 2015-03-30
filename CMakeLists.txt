@@ -418,6 +418,7 @@ add_executable(cm-reportserver
     $<TARGET_OBJECTS:fnord-sstable>
     3rdparty/libfnord/fnord-sstable/SSTableServlet.cc
     src/reports/CTRByPositionServlet.cc
+    src/reports/CTRByPageServlet.cc
     src/cm-reportserver.cc)
 
 target_link_libraries(cm-reportserver
