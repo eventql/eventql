@@ -38,6 +38,7 @@
 #include "reports/CTRByPositionMapper.h"
 #include "reports/CTRByPageMapper.h"
 #include "reports/CTRBySearchQueryMapper.h"
+#include "reports/CTRByQueryAttributeMapper.h"
 #include "reports/CTRBySearchTermCrossCategoryMapper.h"
 #include "reports/CTRStatsMapper.h"
 #include "reports/CTRCounterMergeReducer.h"
@@ -174,6 +175,45 @@ int main(int argc, const char** argv) {
                     "$0/dawanda_ctr_stats.$1.sstable",
                     dir,
                     g)),
+            ItemEligibility::ALL));
+
+    report_builder.addReport(
+        new CTRByQueryAttributeMapper(
+            jq_source,
+            new CTRCounterTableSink(
+                g * kMicrosPerHour * 4,
+                (g + 1) * kMicrosPerHour * 4,
+                StringUtil::format(
+                    "$0/dawanda_ctr_by_catalog_e1.$1.sstable",
+                    dir,
+                    g)),
+            "q_cat1",
+            ItemEligibility::ALL));
+
+    report_builder.addReport(
+        new CTRByQueryAttributeMapper(
+            jq_source,
+            new CTRCounterTableSink(
+                g * kMicrosPerHour * 4,
+                (g + 1) * kMicrosPerHour * 4,
+                StringUtil::format(
+                    "$0/dawanda_ctr_by_catalog_e2.$1.sstable",
+                    dir,
+                    g)),
+            "q_cat2",
+            ItemEligibility::ALL));
+
+    report_builder.addReport(
+        new CTRByQueryAttributeMapper(
+            jq_source,
+            new CTRCounterTableSink(
+                g * kMicrosPerHour * 4,
+                (g + 1) * kMicrosPerHour * 4,
+                StringUtil::format(
+                    "$0/dawanda_ctr_by_catalog_e3.$1.sstable",
+                    dir,
+                    g)),
+            "q_cat3",
             ItemEligibility::ALL));
 
     report_builder.addReport(

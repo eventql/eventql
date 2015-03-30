@@ -395,6 +395,7 @@ add_executable(cm-reportbuild
     src/reports/CTRCounterMergeReducer.cc
     src/reports/CTRBySearchQueryMapper.cc
     src/reports/CTRBySearchTermCrossCategoryMapper.cc
+    src/reports/CTRByQueryAttributeMapper.cc
     src/reports/RelatedTermsMapper.cc
     src/reports/TermInfoTableSink.cc
     src/reports/TermInfoTableSource.cc
