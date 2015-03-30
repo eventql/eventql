@@ -83,7 +83,7 @@ void SSTableReader::readFooter(
         RAISE(kIllegalStateError, "footer exceeds file boundary");
       }
 
-      hash::FNV<uint32_t> fnv;
+      FNV<uint32_t> fnv;
       auto checksum = fnv.hash(*data, *size);
 
       if (checksum != footer_header->footer_checksum) {
@@ -113,6 +113,10 @@ std::unique_ptr<SSTableReader::SSTableReaderCursor> SSTableReader::getCursor() {
       header_.headerSize() + header_.bodySize());
 
   return std::unique_ptr<SSTableReaderCursor>(cursor);
+}
+
+bool SSTableReader::isFinalized() const {
+  return header_.isFinalized();
 }
 
 size_t SSTableReader::bodySize() const {

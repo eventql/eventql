@@ -50,6 +50,7 @@ add_library(fnord-base OBJECT
     io/outputstream.cc
     io/mmappedfile.cc
     io/pagemanager.cc
+    Language.cc
     logging.cc
     logging/logoutputstream.cc
     net/dnscache.cc
@@ -70,6 +71,7 @@ add_library(fnord-base OBJECT
     thread/threadpool.cc
     thread/wakeup.cc
     uri.cc
+    UTF8.cc
     util/binarymessagereader.cc
     util/binarymessagewriter.cc
     util/SimpleRateLimit.cc

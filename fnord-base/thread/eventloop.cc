@@ -193,6 +193,7 @@ void EventLoop::run() {
 }
 
 void EventLoop::shutdown() {
+  usleep(10000); // FIXPAUL hack!!!!
   running_ = false;
   wakeup();
 }

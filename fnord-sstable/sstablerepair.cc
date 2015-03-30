@@ -89,7 +89,7 @@ bool SSTableRepair::checkAndRepairUnfinishedTable(bool repair) {
       break;
     }
 
-    hash::FNV<uint32_t> fnv;
+    FNV<uint32_t> fnv;
     auto checksum = fnv.hash(
         file.structAt<void>(pos + sizeof(uint32_t)),
         row_len - sizeof(uint32_t));

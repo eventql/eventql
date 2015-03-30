@@ -5,7 +5,7 @@ set -e
 
 ASSETS_FILE=$1
 
-if [[ -z $ASSETS_FILE ]]; then
+if test -z $ASSETS_FILE; then
   echo "usage: $0 [output_asset_pack.cc]"
   exit 1
 fi;

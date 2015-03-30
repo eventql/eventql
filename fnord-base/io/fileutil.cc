@@ -108,6 +108,20 @@ std::string FileUtil::joinPaths(const std::string& p1, const std::string p2) {
   return p1_stripped + "/" + p2_stripped;
 }
 
+std::string FileUtil::basePath(const std::string& path) {
+  String base_path = path;
+
+  while (base_path.length() > 0 && base_path.back() != '/') {
+    base_path.pop_back();
+  }
+
+  if (base_path.length() > 1) {
+    base_path.pop_back();
+  }
+
+  return base_path;
+}
+
 void FileUtil::ls(
     const std::string& dirname,
     std::function<bool(const std::string&)> callback) {
@@ -181,8 +195,26 @@ void FileUtil::write(const std::string& filename, const Buffer& data) {
   file.write(data);
 }
 
-void FileUtil::cp(const std::string& src, const std::string& destination) {
-  RAISE(kNotYetImplementedError);
+void FileUtil::cp(const std::string& src, const std::string& dst) {
+  auto infile = File::openFile(src, File::O_READ);
+  auto outfile = File::openFile(dst, File::O_WRITE | File::O_CREATE);
+
+  Buffer buf(4096);
+  size_t bytes;
+  while ((bytes = infile.read(&buf)) > 0) {
+    outfile.write(buf.data(), bytes);
+  }
+}
+
+void FileUtil::cat(const std::string& src, const std::string& target) {
+  auto infile = File::openFile(src, File::O_READ);
+  auto outfile = File::openFile(target, File::O_WRITE | File::O_APPEND);
+
+  Buffer buf(4096);
+  size_t bytes;
+  while ((bytes = infile.read(&buf)) > 0) {
+    outfile.write(buf.data(), bytes);
+  }
 }
 
 size_t FileUtil::du_c(const std::string& path) {

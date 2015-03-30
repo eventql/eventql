@@ -38,11 +38,13 @@ class VFS {
 public:
   virtual ~VFS() {}
   virtual RefPtr<VFSFile> openFile(const String& filename) = 0;
+  virtual bool exists(const String& filename) = 0;
 };
 
 class WhitelistVFS : public VFS {
 public:
   RefPtr<VFSFile> openFile(const String& filename) override;
+  bool exists(const String& filename) override;
   void registerFile(const String vfs_path, const String& real_path);
 protected:
   HashMap<String, String> whitelist_;
