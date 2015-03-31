@@ -24,11 +24,10 @@ void ReportBuilder::addReport(RefPtr<Report> report) {
 
 void ReportBuilder::buildAll() {
   size_t r;
+
   while ((r = buildSome()) > 0) {
     std::unique_lock<std::mutex> lk(m_);
-    while (num_threads_ >= (r > max_threads_ ? max_threads_ : r)) {
-      cv_.wait(lk);
-    }
+    cv_.wait(lk);
   }
 
   std::unique_lock<std::mutex> lk(m_);
@@ -164,7 +163,7 @@ void ReportBuilder::buildParallel(
       std::unique_lock<std::mutex> wakeup_lk(m_);
       --num_threads_;
       wakeup_lk.unlock();
-      cv_.notify_one();
+      cv_.notify_all();
     });
 
     thread.detach();
