@@ -13,6 +13,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <cmath>
 
 namespace fnord {
 namespace json {
