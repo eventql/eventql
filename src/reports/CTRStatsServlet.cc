@@ -24,8 +24,13 @@ void CTRStatsServlet::handleHTTPRequest(
     http::HTTPRequest* req,
     http::HTTPResponse* res) {
   URI uri(req->uri());
-
   const auto& params = uri.queryParams();
+
+  Set<String> test_groups;
+  Set<String> device_types;
+  Set<String> pages;
+  auto end_time = WallClock::unixMicros();
+  auto start_time = end_time - 30 * kMicrosPerDay;
 
   /* arguments */
   String customer;
@@ -42,12 +47,41 @@ void CTRStatsServlet::handleHTTPRequest(
     return;
   }
 
-  auto end_time = WallClock::unixMicros();
-  auto start_time = end_time - 30 * kMicrosPerDay;
+  for (const auto& p : params) {
+    if (p.first == "from") {
+      start_time = std::stoul(p.second) * kMicrosPerSecond;
+      continue;
+    }
 
-  Set<String> test_groups { "all" };
-  Set<String> device_types { "unknown", "desktop", "tablet", "phone" };
-  Set<String> pages;
+    if (p.first == "until") {
+      end_time = std::stoul(p.second) * kMicrosPerSecond;
+      continue;
+    }
+
+    if (p.first == "test_group") {
+      test_groups.emplace(p.second);
+      continue;
+    }
+
+    if (p.first == "device_type") {
+      device_types.emplace(p.second);
+      continue;
+    }
+
+    if (p.first == "page_type") {
+      pages.emplace(p.second);
+      continue;
+    }
+
+  }
+
+  if (test_groups.size() == 0) {
+    test_groups.emplace("all");
+  }
+
+  if (device_types.size() == 0) {
+    device_types = Set<String> { "unknown", "desktop", "tablet", "phone" };
+  }
 
   /* prepare prefix filters for scanning */
   String scan_common_prefix = lang_str + "~";
