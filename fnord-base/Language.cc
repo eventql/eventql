@@ -25,7 +25,7 @@ Language languageFromString(const String& string) {
   if (s == "nl") return Language::NL;
   if (s == "pl") return Language::PL;
 
-  RAISEF(kRuntimeError, "invalid language: $0", string);
+  return Language::UNKNOWN;
 }
 
 String languageToString(Language lang) {
