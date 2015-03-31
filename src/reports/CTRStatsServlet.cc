@@ -101,6 +101,7 @@ void CTRStatsServlet::handleHTTPRequest(
   HashMap<uint64_t, CTRCounterData> counters;
   CTRCounterData aggr_counter;
   for (uint64_t i = end_time; i >= start_time; i -= kMicrosPerDay) {
+    auto& ctr_ref = counters[i];
     auto tbl = StringUtil::format(
         "$0_ctr_stats_daily.$1.sstable",
         customer,
@@ -118,7 +119,6 @@ void CTRStatsServlet::handleHTTPRequest(
     sstable::SSTableScan scan;
     scan.setKeyPrefix(scan_common_prefix);
 
-    auto& ctr_ref = counters[i];
     auto cursor = reader.getCursor();
     scan.execute(cursor.get(), [&] (const Vector<String> row) {
       if (row.size() != 2) {
