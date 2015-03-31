@@ -6,7 +6,7 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-#include "CTRByPositionServlet.h"
+#include "CTRByPageServlet.h"
 #include "CTRCounter.h"
 #include "fnord-base/Language.h"
 #include "fnord-base/wallclock.h"
@@ -18,9 +18,9 @@ using namespace fnord;
 
 namespace cm {
 
-CTRByPositionServlet::CTRByPositionServlet(VFS* vfs) : vfs_(vfs) {}
+CTRByPageServlet::CTRByPageServlet(VFS* vfs) : vfs_(vfs) {}
 
-void CTRByPositionServlet::handleHTTPRequest(
+void CTRByPageServlet::handleHTTPRequest(
     http::HTTPRequest* req,
     http::HTTPResponse* res) {
   URI uri(req->uri());
@@ -62,7 +62,7 @@ void CTRByPositionServlet::handleHTTPRequest(
   Set<String> tables;
   for (uint64_t i = end_time; i >= start_time; i -= kMicrosPerDay) {
     tables.emplace(StringUtil::format(
-        "$0_ctr_by_position_daily.$1.sstable",
+        "$0_ctr_by_page_daily.$1.sstable",
         customer,
         i / kMicrosPerDay));
   }
@@ -106,12 +106,15 @@ void CTRByPositionServlet::handleHTTPRequest(
       }
 
       auto counter = CTRCounterData::load(row[1]);
-      auto posi = std::stoul(dims[3]);
+      auto page = std::stoul(dims[3]);
 
-      counters[posi].merge(counter);
+      if (page > 100) {
+        return;
+      }
+
+      counters[page].merge(counter);
     });
   }
-
 
   /* write response */
   res->setStatus(http::kStatusOK);
@@ -135,7 +138,7 @@ void CTRByPositionServlet::handleHTTPRequest(
     }
 
     json.beginObject();
-    json.addObjectEntry("position");
+    json.addObjectEntry("page");
     json.addInteger(c.first);
     json.addComma();
     json.addObjectEntry("views");

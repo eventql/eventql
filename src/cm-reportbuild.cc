@@ -38,6 +38,7 @@
 #include "reports/CTRByPositionMapper.h"
 #include "reports/CTRByPageMapper.h"
 #include "reports/CTRBySearchQueryMapper.h"
+#include "reports/CTRByQueryAttributeMapper.h"
 #include "reports/CTRBySearchTermCrossCategoryMapper.h"
 #include "reports/CTRStatsMapper.h"
 #include "reports/CTRCounterMergeReducer.h"
@@ -177,6 +178,45 @@ int main(int argc, const char** argv) {
             ItemEligibility::ALL));
 
     report_builder.addReport(
+        new CTRByQueryAttributeMapper(
+            jq_source,
+            new CTRCounterTableSink(
+                g * kMicrosPerHour * 4,
+                (g + 1) * kMicrosPerHour * 4,
+                StringUtil::format(
+                    "$0/dawanda_ctr_by_catalog_e1.$1.sstable",
+                    dir,
+                    g)),
+            "q_cat1",
+            ItemEligibility::ALL));
+
+    report_builder.addReport(
+        new CTRByQueryAttributeMapper(
+            jq_source,
+            new CTRCounterTableSink(
+                g * kMicrosPerHour * 4,
+                (g + 1) * kMicrosPerHour * 4,
+                StringUtil::format(
+                    "$0/dawanda_ctr_by_catalog_e2.$1.sstable",
+                    dir,
+                    g)),
+            "q_cat2",
+            ItemEligibility::ALL));
+
+    report_builder.addReport(
+        new CTRByQueryAttributeMapper(
+            jq_source,
+            new CTRCounterTableSink(
+                g * kMicrosPerHour * 4,
+                (g + 1) * kMicrosPerHour * 4,
+                StringUtil::format(
+                    "$0/dawanda_ctr_by_catalog_e3.$1.sstable",
+                    dir,
+                    g)),
+            "q_cat3",
+            ItemEligibility::ALL));
+
+    report_builder.addReport(
         new CTRBySearchQueryMapper(
             jq_source,
             new CTRCounterTableSink(
@@ -282,6 +322,24 @@ int main(int argc, const char** argv) {
                 (og + 1) * kMicrosPerDay,
                 StringUtil::format(
                     "$0/dawanda_ctr_by_position_daily.$1.sstable",
+                    dir,
+                    og))));
+
+    /* dawanda: roll up ctr by page */
+    Set<String> ctr_by_page_sources;
+    for (const auto& ig : day_gens) {
+      ctr_by_page_sources.emplace(
+          StringUtil::format("$0/dawanda_ctr_by_page.$1.sstable", dir, ig));
+    }
+
+    report_builder.addReport(
+        new CTRCounterMergeReducer(
+            new CTRCounterTableSource(ctr_by_page_sources),
+            new CTRCounterTableSink(
+                (og) * kMicrosPerDay,
+                (og + 1) * kMicrosPerDay,
+                StringUtil::format(
+                    "$0/dawanda_ctr_by_page_daily.$1.sstable",
                     dir,
                     og))));
 

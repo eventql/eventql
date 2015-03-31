@@ -395,6 +395,7 @@ add_executable(cm-reportbuild
     src/reports/CTRCounterMergeReducer.cc
     src/reports/CTRBySearchQueryMapper.cc
     src/reports/CTRBySearchTermCrossCategoryMapper.cc
+    src/reports/CTRByQueryAttributeMapper.cc
     src/reports/RelatedTermsMapper.cc
     src/reports/TermInfoTableSink.cc
     src/reports/TermInfoTableSource.cc
@@ -416,7 +417,9 @@ add_executable(cm-reportserver
     $<TARGET_OBJECTS:fnord-rpc>
     $<TARGET_OBJECTS:fnord-sstable>
     3rdparty/libfnord/fnord-sstable/SSTableServlet.cc
+    src/reports/CTRStatsServlet.cc
     src/reports/CTRByPositionServlet.cc
+    src/reports/CTRByPageServlet.cc
     src/cm-reportserver.cc)
 
 target_link_libraries(cm-reportserver
