@@ -6,7 +6,7 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-#include "CTRByPositionServlet.h"
+#include "CTRStatsServlet.h"
 #include "CTRCounter.h"
 #include "fnord-base/Language.h"
 #include "fnord-base/wallclock.h"
@@ -18,9 +18,9 @@ using namespace fnord;
 
 namespace cm {
 
-CTRByPositionServlet::CTRByPositionServlet(VFS* vfs) : vfs_(vfs) {}
+CTRStatsServlet::CTRStatsServlet(VFS* vfs) : vfs_(vfs) {}
 
-void CTRByPositionServlet::handleHTTPRequest(
+void CTRStatsServlet::handleHTTPRequest(
     http::HTTPRequest* req,
     http::HTTPResponse* res) {
   URI uri(req->uri());
@@ -47,6 +47,7 @@ void CTRByPositionServlet::handleHTTPRequest(
 
   Set<String> test_groups { "all" };
   Set<String> device_types { "unknown", "desktop", "tablet", "phone" };
+  Set<String> pages;
 
   /* prepare prefix filters for scanning */
   String scan_common_prefix = lang_str + "~";
@@ -55,21 +56,22 @@ void CTRByPositionServlet::handleHTTPRequest(
 
     if (device_types.size() == 1) {
       scan_common_prefix += *device_types.begin() + "~";
-    }
-  }
 
-  /* prepare input tables */
-  Set<String> tables;
-  for (uint64_t i = end_time; i >= start_time; i -= kMicrosPerDay) {
-    tables.emplace(StringUtil::format(
-        "$0_ctr_by_position_daily.$1.sstable",
-        customer,
-        i / kMicrosPerDay));
+      if (pages.size() == 1) {
+        scan_common_prefix += *pages.begin();
+      }
+    }
   }
 
   /* scan input tables */
   HashMap<uint64_t, CTRCounterData> counters;
-  for (const auto& tbl : tables) {
+  CTRCounterData aggr_counter;
+  for (uint64_t i = end_time; i >= start_time; i -= kMicrosPerDay) {
+    auto tbl = StringUtil::format(
+        "$0_ctr_stats_daily.$1.sstable",
+        customer,
+        i / kMicrosPerDay);
+
     if (!vfs_->exists(tbl)) {
       continue;
     }
@@ -105,29 +107,41 @@ void CTRByPositionServlet::handleHTTPRequest(
         return;
       }
 
-      auto counter = CTRCounterData::load(row[1]);
-      auto posi = std::stoul(dims[3]);
+      if (pages.size() > 0 && pages.count(dims[3]) == 0) {
+        return;
+      }
 
-      counters[posi].merge(counter);
+      auto counter = CTRCounterData::load(row[1]);
+      counters[i].merge(counter);
+      aggr_counter.merge(counter);
     });
   }
-
 
   /* write response */
   res->setStatus(http::kStatusOK);
   res->addHeader("Content-Type", "application/json; charset=utf-8");
   json::JSONOutputStream json(res->getBodyOutputStream());
 
+  json.beginObject();
+  json.addObjectEntry("aggregate");
+
+  json.beginObject();
+  json.addObjectEntry("views");
+  json.addInteger(aggr_counter.num_views);
+  json.addComma();
+  json.addObjectEntry("clicks");
+  json.addInteger(aggr_counter.num_clicks);
+  json.addComma();
+  json.addObjectEntry("ctr");
+  json.addFloat(aggr_counter.num_clicks / (double) aggr_counter.num_views);
+  json.addComma();
+  json.addObjectEntry("cpq");
+  json.addFloat(aggr_counter.num_clicked / (double) aggr_counter.num_views);
+  json.endObject();
+
+  json.addComma();
+  json.addObjectEntry("timeseries");
   json.beginArray();
-
-  uint64_t total_views = 0;
-  uint64_t total_clicks = 0;
-
-  for (const auto& c : counters) {
-    total_views += c.second.num_views;
-    total_clicks += c.second.num_clicks;
-  }
-
   int n = 0;
   for (const auto& c : counters) {
     if (++n > 1) {
@@ -135,7 +149,7 @@ void CTRByPositionServlet::handleHTTPRequest(
     }
 
     json.beginObject();
-    json.addObjectEntry("position");
+    json.addObjectEntry("time");
     json.addInteger(c.first);
     json.addComma();
     json.addObjectEntry("views");
@@ -147,15 +161,13 @@ void CTRByPositionServlet::handleHTTPRequest(
     json.addObjectEntry("ctr");
     json.addFloat(c.second.num_clicks / (double) c.second.num_views);
     json.addComma();
-    json.addObjectEntry("ctr_base");
-    json.addFloat(c.second.num_clicks / (double) total_views);
-    json.addComma();
-    json.addObjectEntry("clickshare");
-    json.addFloat(c.second.num_clicks / (double) total_clicks);
+    json.addObjectEntry("cpq");
+    json.addFloat(c.second.num_clicked / (double) c.second.num_views);
     json.endObject();
   }
 
   json.endArray();
+  json.endObject();
 }
 
 }
