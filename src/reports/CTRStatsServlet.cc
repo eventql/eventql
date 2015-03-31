@@ -118,6 +118,7 @@ void CTRStatsServlet::handleHTTPRequest(
     sstable::SSTableScan scan;
     scan.setKeyPrefix(scan_common_prefix);
 
+    auto& ctr_ref = counters[i];
     auto cursor = reader.getCursor();
     scan.execute(cursor.get(), [&] (const Vector<String> row) {
       if (row.size() != 2) {
@@ -146,7 +147,7 @@ void CTRStatsServlet::handleHTTPRequest(
       }
 
       auto counter = CTRCounterData::load(row[1]);
-      counters[i].merge(counter);
+      ctr_ref.merge(counter);
       aggr_counter.merge(counter);
     });
   }
