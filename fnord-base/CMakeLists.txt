@@ -79,6 +79,8 @@ add_library(fnord-base OBJECT
     util/binarymessagewriter.cc
     util/PFORDecoder.cc
     util/PFOREncoder.cc
+    util/RLEDecoder.cc
+    util/RLEEncoder.cc
     util/SimpleRateLimit.cc
     VFS.cc
     wallclock.cc)

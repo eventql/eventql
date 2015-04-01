@@ -11,16 +11,16 @@
 #define _FNORD_CSTABLE_UINT16COLUMNREADER_H
 #include <fnord-base/stdtypes.h>
 #include <fnord-base/util/binarymessagereader.h>
-#include <fnord-base/util/PFORDecoder.h>
+#include <fnord-base/util/RLEDecoder.h>
 #include <fnord-cstable/ColumnReader.h>
 
 namespace fnord {
 namespace cstable {
 
 class UInt16ColumnReader : public ColumnReader<
-    util::PFORDecoder,
-    util::PFORDecoder,
-    util::PFORDecoder> {
+    util::RLEDecoder,
+    util::RLEDecoder,
+    util::RLEDecoder> {
 public:
 
   UInt16ColumnReader(

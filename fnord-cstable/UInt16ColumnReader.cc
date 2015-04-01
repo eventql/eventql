@@ -18,9 +18,9 @@ UInt16ColumnReader::UInt16ColumnReader(
     void* data,
     size_t size) :
     ColumnReader<
-        util::PFORDecoder,
-        util::PFORDecoder,
-        util::PFORDecoder>(r_max, d_max, data, size) {}
+        util::RLEDecoder,
+        util::RLEDecoder,
+        util::RLEDecoder>(r_max, d_max, data, size) {}
 
 bool UInt16ColumnReader::next(
     uint64_t* rep_level,
