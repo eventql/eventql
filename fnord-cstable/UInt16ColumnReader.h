@@ -30,6 +30,12 @@ protected:
   uint64_t r_max_;
   uint64_t d_max_;
   util::BinaryMessageReader reader_;
+  uint64_t rlvl_size_;
+  uint64_t dlvl_size_;
+  uint64_t data_size_;
+  util::BinaryMessageReader rlvl_reader_;
+  util::BinaryMessageReader dlvl_reader_;
+  util::BinaryMessageReader data_reader_;
 };
 
 } // namespace cstable

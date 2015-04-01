@@ -21,21 +21,30 @@ void UInt16ColumnWriter::addDatum(
     uint64_t rep_level,
     uint64_t def_level,
     uint16_t value) {
-  writer_.appendUInt8(rep_level);
-  writer_.appendUInt8(def_level);
-  writer_.appendUInt16(value);
+  rlvl_writer_.appendUInt8(rep_level);
+  dlvl_writer_.appendUInt8(def_level);
+  data_writer_.appendUInt16(value);
 }
 
 void UInt16ColumnWriter::addNull(
     uint64_t rep_level,
     uint64_t def_level) {
-  writer_.appendUInt8(rep_level);
-  writer_.appendUInt8(def_level);
+  rlvl_writer_.appendUInt8(rep_level);
+  dlvl_writer_.appendUInt8(def_level);
 }
 
-void UInt16ColumnWriter::write(void** data, size_t* size) {
-  *data = writer_.data();
-  *size = writer_.size();
+void UInt16ColumnWriter::write(void* buf, size_t buf_len) {
+  util::BinaryMessageWriter writer(buf, buf_len);
+  writer.appendUInt64(rlvl_writer_.size());
+  writer.appendUInt64(dlvl_writer_.size());
+  writer.appendUInt64(data_writer_.size());
+  writer.append(rlvl_writer_.data(), rlvl_writer_.size());
+  writer.append(dlvl_writer_.data(), dlvl_writer_.size());
+  writer.append(data_writer_.data(), data_writer_.size());
+}
+
+size_t UInt16ColumnWriter::bodySize() const {
+  return 24 + data_writer_.size() + rlvl_writer_.size() + dlvl_writer_.size();
 }
 
 
