@@ -146,16 +146,18 @@ int main(int argc, const char** argv) {
 
   cstable::CSTableReader reader("fnord.cstable");
 
+  auto t0 = WallClock::unixMicros();
   cm::CTRByPositionQuery q;
   q.scanTable(&reader);
-
-  for (const auto& p : q.results()) {
-    fnord::iputs(
-       "pos: $0, views: $1, clicks: $2, ctr: $3", 
-        p.first, p.second.num_views,
-        p.second.num_clicks,
-        p.second.num_clicks / (double) p.second.num_views);
-  }
+  auto t1 = WallClock::unixMicros();
+  fnord::iputs("scanned $0 rows in $1 ms", q.rowsScanned(), (t1 - t0) / 1000.0f);
+  //for (const auto& p : q.results()) {
+  //  fnord::iputs(
+  //     "pos: $0, views: $1, clicks: $2, ctr: $3", 
+  //      p.first, p.second.num_views,
+  //      p.second.num_clicks,
+  //      p.second.num_clicks / (double) p.second.num_views);
+  //}
 
   return 0;
 }
