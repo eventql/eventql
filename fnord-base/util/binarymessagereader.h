@@ -21,6 +21,7 @@ public:
   BinaryMessageReader(void const* buf, size_t buf_len);
   virtual ~BinaryMessageReader() {};
 
+  uint8_t const* readUInt8();
   uint16_t const* readUInt16();
   uint32_t const* readUInt32();
   uint64_t const* readUInt64();
