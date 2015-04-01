@@ -24,10 +24,14 @@ public:
   void addDatum(uint64_t rep_level, uint64_t def_level, uint16_t value);
   void addNull(uint64_t rep_level, uint64_t def_level);
 
-  void write(void** data, size_t* size);
+  void write(void* buf, size_t buf_len);
+
+  size_t bodySize() const override;
 
 protected:
-  util::BinaryMessageWriter writer_;
+  util::BinaryMessageWriter rlvl_writer_;
+  util::BinaryMessageWriter dlvl_writer_;
+  util::BinaryMessageWriter data_writer_;
 };
 
 } // namespace cstable

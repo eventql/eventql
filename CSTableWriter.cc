@@ -7,8 +7,9 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <fnord-cstable/CSTableWriter.h>
+#include <fnord-base/Buffer.h>
 #include <fnord-cstable/BinaryFormat.h>
+#include <fnord-cstable/CSTableWriter.h>
 
 namespace fnord {
 namespace cstable {
@@ -31,14 +32,10 @@ CSTableWriter::CSTableWriter(
 void CSTableWriter::addColumn(
     const String& column_name,
     ColumnWriter* column_writer) {
-  void* col_data;
-  size_t col_data_size;
-  column_writer->write(&col_data, &col_data_size);
-
   ColumnInfo ci;
   ci.name = column_name;
   ci.body_offset = 0;
-  ci.size = col_data_size;
+  ci.size = column_writer->bodySize();
   ci.writer = column_writer;
 
   columns_.emplace_back(ci);
@@ -75,10 +72,9 @@ void CSTableWriter::commit() {
 
   /* write column data */
   for (auto& col : columns_) {
-    void* col_data;
-    size_t col_data_size;
-    col.writer->write(&col_data, &col_data_size);
-    file_.write(col_data, col_data_size);
+    Buffer buf(col.size);
+    col.writer->write(buf.data(), buf.size());
+    file_.write(buf.data(), buf.size());
   }
 }
 
