@@ -25,7 +25,7 @@ CSTableReader::CSTableReader(
 
   auto version = *header.readUInt16();
   if (version != BinaryFormat::kVersion) {
-    RAISE(kIllegalStateError, "unsupported sstable version: $0");
+    RAISEF(kIllegalStateError, "unsupported sstable version: $0", version);
   }
 
   auto flags = *header.readUInt64();
@@ -37,16 +37,33 @@ CSTableReader::CSTableReader(
   for (int i = 0; i < num_columns_; ++i) {
     auto name_len = *header.readUInt32();
     auto name_data = (char *) header.read(name_len);
-    String name(name_data, name_len);
 
     auto rep_bits = *header.readUInt32();
     auto def_bits = *header.readUInt32();
     auto body_offset = *header.readUInt64();
     auto size = *header.readUInt64();
 
-    fnord::iputs("col: $0, off: $1, size: $2", name, body_offset, size);
+    ColumnInfo ci;
+    ci.name = String(name_data, name_len);
+    ci.body_offset = body_offset;
+    ci.size = size;
+    columns_.emplace(ci.name, ci);
   }
 }
+
+void CSTableReader::getColumn(
+    const String& column_name,
+    void** data,
+    size_t* size) {
+  auto col = columns_.find(column_name);
+  if (col == columns_.end()) {
+    RAISEF(kIndexError, "unknown column: $0", column_name);
+  }
+
+  *data = ((char *) file_.data()) + col->second.body_offset;
+  *size = col->second.size;
+}
+
 
 } // namespace cstable
 } // namespace fnord

@@ -22,6 +22,11 @@ public:
 
   CSTableReader(const String& filename);
 
+  void getColumn(
+      const String& column_name,
+      void** data,
+      size_t* size);
+
 protected:
   io::MmappedFile file_;
   uint64_t num_records_;
@@ -33,7 +38,7 @@ protected:
     size_t size;
   };
 
-  List<ColumnInfo> columns_;
+  HashMap<String, ColumnInfo> columns_;
 };
 
 } // namespace cstable
