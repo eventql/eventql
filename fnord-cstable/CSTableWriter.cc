@@ -53,7 +53,7 @@ void CSTableWriter::commit() {
   /* calculate column start offsets */
   size_t col_offset = offset_;
   for (const auto& col : columns_) {
-    col_offset += 28 + col.name.length();
+    col_offset += 36 + col.name.length();
   }
 
   for (auto& col : columns_) {
@@ -66,8 +66,8 @@ void CSTableWriter::commit() {
     util::BinaryMessageWriter col_header;
     col_header.appendUInt32(col.name.length());
     col_header.append(col.name.data(), col.name.length());
-    col_header.appendUInt32(8);
-    col_header.appendUInt32(0);
+    col_header.appendUInt64(col.writer->maxRepetitionLevel());
+    col_header.appendUInt64(col.writer->maxDefinitionLevel());
     col_header.appendUInt64(col.body_offset);
     col_header.appendUInt64(col.size);
     file_.write(col_header.data(), col_header.size());

@@ -38,8 +38,8 @@ namespace cstable {
  *   <column_header> :=
  *       <uint32_t>              // length of the column name
  *       <char>*                 // column name
- *       <uint32_t>              // repetition level bits
- *       <uint32_t>              // definition level bits
+ *       <uint64_t>              // max repetition level
+ *       <uint64_t>              // max definition level
  *       <uint64_t>              // column data start offset
  *       <uint64_t>              // column data size
  *

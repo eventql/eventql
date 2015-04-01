@@ -28,5 +28,6 @@ endif()
 add_library(fnord-cstable OBJECT
     CSTableReader.cc
     CSTableWriter.cc
+    ColumnWriter.cc
     UInt16ColumnReader.cc
     UInt16ColumnWriter.cc)
