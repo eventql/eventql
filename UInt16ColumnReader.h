@@ -11,11 +11,15 @@
 #define _FNORD_CSTABLE_UINT16COLUMNREADER_H
 #include <fnord-base/stdtypes.h>
 #include <fnord-base/util/binarymessagereader.h>
+#include <fnord-cstable/ColumnReader.h>
 
 namespace fnord {
 namespace cstable {
 
-class UInt16ColumnReader {
+class UInt16ColumnReader : public ColumnReader<
+    util::BinaryMessageReader,
+    util::BinaryMessageReader,
+    util::BinaryMessageReader> {
 public:
 
   UInt16ColumnReader(
@@ -26,16 +30,6 @@ public:
 
   bool next(uint64_t* rep_level, uint64_t* def_level, uint16_t* data);
 
-protected:
-  uint64_t r_max_;
-  uint64_t d_max_;
-  util::BinaryMessageReader reader_;
-  uint64_t rlvl_size_;
-  uint64_t dlvl_size_;
-  uint64_t data_size_;
-  util::BinaryMessageReader rlvl_reader_;
-  util::BinaryMessageReader dlvl_reader_;
-  util::BinaryMessageReader data_reader_;
 };
 
 } // namespace cstable
