@@ -17,6 +17,15 @@ UInt16ColumnReader::UInt16ColumnReader(
     size_t size) :
     reader_(data, size) {}
 
+bool UInt16ColumnReader::next(
+    uint64_t* rep_level,
+    uint64_t* def_level,
+    uint16_t* data) {
+  *rep_level = *reader_.readUInt8();
+  *def_level = 0;
+  *data = *reader_.readUInt16();
+  return reader_.remaining() > 0;
+}
 
 } // namespace cstable
 } // namespace fnord
