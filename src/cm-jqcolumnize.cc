@@ -58,19 +58,31 @@ int main(int argc, const char** argv) {
   Logger::get()->setMinimumLogLevel(
       strToLogLevel(flags.getString("loglevel")));
 
+  size_t debug_n = 0;
+  size_t debug_z = 0;
 
-  cstable::UInt16ColumnWriter position_col;
-  cstable::UInt16ColumnWriter clicked_col;
+  cstable::UInt16ColumnWriter position_col(2, 2);
+  cstable::UInt16ColumnWriter clicked_col(2, 2);
 
   uint64_t r = 0;
   uint64_t n = 0;
 
   auto add_session = [&] (const cm::JoinedSession& sess) {
     ++n;
+
     for (const auto& q : sess.queries) {
+      if (q.items.size() == 0) {
+        if (r==0) ++debug_z;
+        position_col.addNull(r, 1);
+        clicked_col.addNull(r, 1);
+      }
+
       for (const auto& i : q.items) {
-        position_col.addDatum(r, 0, i.position);
-        clicked_col.addDatum(r, 0, i.clicked);
+        ++debug_n;
+        if (r==0) ++debug_z;
+
+        position_col.addDatum(r, 2, i.position);
+        clicked_col.addDatum(r, 2, i.clicked);
         r = 2;
       }
 
