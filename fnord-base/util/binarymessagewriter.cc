@@ -40,6 +40,10 @@ BinaryMessageWriter::~BinaryMessageWriter() {
   }
 }
 
+void BinaryMessageWriter::appendUInt8(uint8_t value) {
+  append(&value, sizeof(value));
+}
+
 void BinaryMessageWriter::appendUInt16(uint16_t value) {
   append(&value, sizeof(value));
 }
