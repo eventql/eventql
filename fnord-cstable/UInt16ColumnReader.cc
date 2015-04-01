@@ -17,16 +17,10 @@ UInt16ColumnReader::UInt16ColumnReader(
     uint64_t d_max,
     void* data,
     size_t size) :
-    r_max_(r_max),
-    d_max_(d_max),
-    reader_(data, size),
-    rlvl_size_(*reader_.readUInt64()),
-    dlvl_size_(*reader_.readUInt64()),
-    data_size_(*reader_.readUInt64()),
-    rlvl_reader_(((char *) data) + 24, rlvl_size_),
-    dlvl_reader_(((char *) data) + 24 + rlvl_size_, dlvl_size_),
-    data_reader_(((char *) data) + 24 + rlvl_size_ + dlvl_size_, data_size_) {
-}
+    ColumnReader<
+        util::BinaryMessageReader,
+        util::BinaryMessageReader,
+        util::BinaryMessageReader>(r_max, d_max, data, size) {}
 
 bool UInt16ColumnReader::next(
     uint64_t* rep_level,
