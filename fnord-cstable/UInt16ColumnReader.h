@@ -19,8 +19,8 @@ namespace cstable {
 
 class UInt16ColumnReader : public ColumnReader<
     util::PFORDecoder,
-    util::BinaryMessageReader,
-    util::BinaryMessageReader> {
+    util::PFORDecoder,
+    util::PFORDecoder> {
 public:
 
   UInt16ColumnReader(

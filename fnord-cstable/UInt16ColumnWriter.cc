@@ -22,15 +22,19 @@ void UInt16ColumnWriter::addDatum(
     uint64_t def_level,
     uint16_t value) {
   rlvl_writer_.encode(rep_level);
-  dlvl_writer_.appendUInt8(def_level);
-  data_writer_.appendUInt16(value);
+  dlvl_writer_.encode(def_level);
+  data_writer_.encode(value);
 }
 
 void UInt16ColumnWriter::addNull(
     uint64_t rep_level,
     uint64_t def_level) {
   rlvl_writer_.encode(rep_level);
-  dlvl_writer_.appendUInt8(def_level);
+  dlvl_writer_.encode(def_level);
+}
+
+void UInt16ColumnWriter::commit() {
+  rlvl_writer_.flush();
 }
 
 void UInt16ColumnWriter::write(void* buf, size_t buf_len) {

@@ -32,6 +32,8 @@ CSTableWriter::CSTableWriter(
 void CSTableWriter::addColumn(
     const String& column_name,
     ColumnWriter* column_writer) {
+  column_writer->commit();
+
   ColumnInfo ci;
   ci.name = column_name;
   ci.body_offset = 0;

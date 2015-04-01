@@ -19,21 +19,21 @@ UInt16ColumnReader::UInt16ColumnReader(
     size_t size) :
     ColumnReader<
         util::PFORDecoder,
-        util::BinaryMessageReader,
-        util::BinaryMessageReader>(r_max, d_max, data, size) {}
+        util::PFORDecoder,
+        util::PFORDecoder>(r_max, d_max, data, size) {}
 
 bool UInt16ColumnReader::next(
     uint64_t* rep_level,
     uint64_t* def_level,
     uint16_t* data) {
   auto r = rlvl_reader_.next();
-  auto d = *dlvl_reader_.readUInt8();
+  auto d = dlvl_reader_.next();
 
   *rep_level = r;
   *def_level = d;
 
   if (d == d_max_) {
-    *data = *data_reader_.readUInt16();
+    *data = data_reader_.next();
     return true;
   } else {
     return false;
