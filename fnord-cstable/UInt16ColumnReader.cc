@@ -18,7 +18,7 @@ UInt16ColumnReader::UInt16ColumnReader(
     void* data,
     size_t size) :
     ColumnReader<
-        util::BinaryMessageReader,
+        util::PFORDecoder,
         util::BinaryMessageReader,
         util::BinaryMessageReader>(r_max, d_max, data, size) {}
 
@@ -26,7 +26,7 @@ bool UInt16ColumnReader::next(
     uint64_t* rep_level,
     uint64_t* def_level,
     uint16_t* data) {
-  auto r = *rlvl_reader_.readUInt8();
+  auto r = rlvl_reader_.next();
   auto d = *dlvl_reader_.readUInt8();
 
   *rep_level = r;

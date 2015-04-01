@@ -21,7 +21,7 @@ void UInt16ColumnWriter::addDatum(
     uint64_t rep_level,
     uint64_t def_level,
     uint16_t value) {
-  rlvl_writer_.appendUInt8(rep_level);
+  rlvl_writer_.encode(rep_level);
   dlvl_writer_.appendUInt8(def_level);
   data_writer_.appendUInt16(value);
 }
@@ -29,7 +29,7 @@ void UInt16ColumnWriter::addDatum(
 void UInt16ColumnWriter::addNull(
     uint64_t rep_level,
     uint64_t def_level) {
-  rlvl_writer_.appendUInt8(rep_level);
+  rlvl_writer_.encode(rep_level);
   dlvl_writer_.appendUInt8(def_level);
 }
 

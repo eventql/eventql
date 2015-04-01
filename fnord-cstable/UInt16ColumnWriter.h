@@ -11,6 +11,7 @@
 #define _FNORD_CSTABLE_UINT16COLUMNWRITER_H
 #include <fnord-base/stdtypes.h>
 #include <fnord-base/util/binarymessagewriter.h>
+#include <fnord-base/util/PFOREncoder.h>
 #include <fnord-cstable/ColumnWriter.h>
 
 namespace fnord {
@@ -29,7 +30,7 @@ public:
   size_t bodySize() const override;
 
 protected:
-  util::BinaryMessageWriter rlvl_writer_;
+  util::PFOREncoder rlvl_writer_;
   util::BinaryMessageWriter dlvl_writer_;
   util::BinaryMessageWriter data_writer_;
 };
