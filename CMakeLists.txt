@@ -480,6 +480,7 @@ add_executable(cm-jqcolumnize
     $<TARGET_OBJECTS:fnord-rpc>
     $<TARGET_OBJECTS:fnord-cstable>
     $<TARGET_OBJECTS:fnord-sstable>
+    src/analytics/CTRByPositionQuery.cc
     src/cm-jqcolumnize.cc)
 
 target_link_libraries(cm-jqcolumnize
