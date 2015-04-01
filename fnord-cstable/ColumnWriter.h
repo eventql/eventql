@@ -19,10 +19,12 @@ public:
   ColumnWriter(size_t r_max, size_t d_max);
   virtual ~ColumnWriter() {}
 
-  virtual void write(void** data, size_t* size) = 0;
+  virtual void write(void* buf, size_t buf_len) = 0;
 
   size_t maxRepetitionLevel() const;
   size_t maxDefinitionLevel() const;
+
+  virtual size_t bodySize() const = 0;
 
 protected:
   size_t r_max_;

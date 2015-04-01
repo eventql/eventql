@@ -19,20 +19,27 @@ UInt16ColumnReader::UInt16ColumnReader(
     size_t size) :
     r_max_(r_max),
     d_max_(d_max),
-    reader_(data, size) {}
+    reader_(data, size),
+    rlvl_size_(*reader_.readUInt64()),
+    dlvl_size_(*reader_.readUInt64()),
+    data_size_(*reader_.readUInt64()),
+    rlvl_reader_(((char *) data) + 24, rlvl_size_),
+    dlvl_reader_(((char *) data) + 24 + rlvl_size_, dlvl_size_),
+    data_reader_(((char *) data) + 24 + rlvl_size_ + dlvl_size_, data_size_) {
+}
 
 bool UInt16ColumnReader::next(
     uint64_t* rep_level,
     uint64_t* def_level,
     uint16_t* data) {
-  auto r = *reader_.readUInt8();
-  auto d = *reader_.readUInt8();
+  auto r = *rlvl_reader_.readUInt8();
+  auto d = *dlvl_reader_.readUInt8();
 
   *rep_level = r;
   *def_level = d;
 
   if (d == d_max_) {
-    *data = *reader_.readUInt16();
+    *data = *data_reader_.readUInt16();
     return true;
   } else {
     return false;
