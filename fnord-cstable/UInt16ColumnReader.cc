@@ -13,18 +13,30 @@ namespace fnord {
 namespace cstable {
 
 UInt16ColumnReader::UInt16ColumnReader(
+    uint64_t r_max,
+    uint64_t d_max,
     void* data,
     size_t size) :
+    r_max_(r_max),
+    d_max_(d_max),
     reader_(data, size) {}
 
 bool UInt16ColumnReader::next(
     uint64_t* rep_level,
     uint64_t* def_level,
     uint16_t* data) {
-  *rep_level = *reader_.readUInt8();
-  *def_level = 0;
-  *data = *reader_.readUInt16();
-  return true;
+  auto r = *reader_.readUInt8();
+  auto d = *reader_.readUInt8();
+
+  *rep_level = r;
+  *def_level = d;
+
+  if (d == d_max_) {
+    *data = *reader_.readUInt16();
+    return true;
+  } else {
+    return false;
+  }
 }
 
 } // namespace cstable
