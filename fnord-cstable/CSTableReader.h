@@ -27,6 +27,8 @@ public:
       void** data,
       size_t* size);
 
+  size_t numRecords() const;
+
 protected:
   io::MmappedFile file_;
   uint64_t num_records_;
@@ -36,6 +38,8 @@ protected:
     String name;
     size_t body_offset;
     size_t size;
+    uint64_t r_max;
+    uint64_t d_max;
   };
 
   HashMap<String, ColumnInfo> columns_;

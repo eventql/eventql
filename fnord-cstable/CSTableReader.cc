@@ -38,8 +38,8 @@ CSTableReader::CSTableReader(
     auto name_len = *header.readUInt32();
     auto name_data = (char *) header.read(name_len);
 
-    auto rep_bits = *header.readUInt32();
-    auto def_bits = *header.readUInt32();
+    auto r_max = *header.readUInt64();
+    auto d_max = *header.readUInt64();
     auto body_offset = *header.readUInt64();
     auto size = *header.readUInt64();
 
@@ -47,6 +47,8 @@ CSTableReader::CSTableReader(
     ci.name = String(name_data, name_len);
     ci.body_offset = body_offset;
     ci.size = size;
+    ci.r_max = r_max;
+    ci.d_max = d_max;
     columns_.emplace(ci.name, ci);
   }
 }
@@ -64,6 +66,9 @@ void CSTableReader::getColumn(
   *size = col->second.size;
 }
 
+size_t CSTableReader::numRecords() const {
+  return num_records_;
+}
 
 } // namespace cstable
 } // namespace fnord

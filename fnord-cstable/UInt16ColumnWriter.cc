@@ -12,6 +12,11 @@
 namespace fnord {
 namespace cstable {
 
+UInt16ColumnWriter::UInt16ColumnWriter(
+    uint64_t r_max,
+    uint64_t d_max) :
+    ColumnWriter(r_max, d_max) {}
+
 void UInt16ColumnWriter::addDatum(
     uint64_t rep_level,
     uint64_t def_level,
