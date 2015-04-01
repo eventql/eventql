@@ -22,8 +22,15 @@ void UInt16ColumnWriter::addDatum(
     uint64_t def_level,
     uint16_t value) {
   writer_.appendUInt8(rep_level);
-  //writer_.appendUInt8(def_level);
+  writer_.appendUInt8(def_level);
   writer_.appendUInt16(value);
+}
+
+void UInt16ColumnWriter::addNull(
+    uint64_t rep_level,
+    uint64_t def_level) {
+  writer_.appendUInt8(rep_level);
+  writer_.appendUInt8(def_level);
 }
 
 void UInt16ColumnWriter::write(void** data, size_t* size) {

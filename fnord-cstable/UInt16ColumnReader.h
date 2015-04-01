@@ -18,11 +18,17 @@ namespace cstable {
 class UInt16ColumnReader {
 public:
 
-  UInt16ColumnReader(void* data, size_t size);
+  UInt16ColumnReader(
+      uint64_t r_max,
+      uint64_t d_max,
+      void* data,
+      size_t size);
 
   bool next(uint64_t* rep_level, uint64_t* def_level, uint16_t* data);
 
 protected:
+  uint64_t r_max_;
+  uint64_t d_max_;
   util::BinaryMessageReader reader_;
 };
 
