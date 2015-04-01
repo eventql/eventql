@@ -33,6 +33,7 @@
 #include "FeatureSchema.h"
 #include "JoinedQuery.h"
 #include "CTRCounter.h"
+#include "analytics/CTRByPositionQuery.h"
 
 using namespace fnord;
 
@@ -143,36 +144,17 @@ int main(int argc, const char** argv) {
     writer.commit();
   }
 
-  auto t0 = WallClock::unixMicros();
   cstable::CSTableReader reader("fnord.cstable");
-  void* poscoldata;
-  size_t poscolsize;
-  reader.getColumn("queries.items.position", &poscoldata, &poscolsize);
-  cstable::UInt16ColumnReader poscol_reader(poscoldata, poscolsize);
-  void* clickedcoldata;
-  size_t clickedcolsize;
-  reader.getColumn("queries.items.clicked", &clickedcoldata, &clickedcolsize);
-  cstable::UInt16ColumnReader clickedcol_reader(clickedcoldata, clickedcolsize);
 
-  auto t1 = WallClock::unixMicros();
-  HashMap<uint16_t, Pair<uint64_t, uint64_t>> posi_info;
+  cm::CTRByPositionQuery q;
+  q.scanTable(&reader);
 
-  uint64_t d;
-  uint16_t pos;
-  uint16_t clicked;
-
-  n = 0;
-  while (poscol_reader.next(&r, &d, &pos) && clickedcol_reader.next(&r, &d, &clicked)) {
-    ++posi_info[pos].first;
-    posi_info[pos].second += clicked;
-    ++n;
-  }
-
-  auto t2 = WallClock::unixMicros();
-  fnord::iputs("reading $2 rows took $0ms ($1ms)", (t2 - t0) / 1000.0f, (t2 - t1) / 1000.0f, n);
-
-  for (const auto& p : posi_info) {
-    fnord::iputs("pos: $0, views: $1, clicks: $2, ctr: $3", p.first, p.second.first, p.second.second, p.second.second / (double) p.second.first);
+  for (const auto& p : q.results()) {
+    fnord::iputs(
+       "pos: $0, views: $1, clicks: $2, ctr: $3", 
+        p.first, p.second.num_views,
+        p.second.num_clicks,
+        p.second.num_clicks / (double) p.second.num_views);
   }
 
   return 0;
