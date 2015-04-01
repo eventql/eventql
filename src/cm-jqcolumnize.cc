@@ -24,8 +24,10 @@
 #include "fnord-sstable/SSTableColumnSchema.h"
 #include "fnord-sstable/SSTableColumnReader.h"
 #include "fnord-sstable/SSTableColumnWriter.h"
+#include "fnord-cstable/UInt16ColumnReader.h"
 #include "fnord-cstable/UInt16ColumnWriter.h"
 #include "fnord-cstable/CSTableWriter.h"
+#include "fnord-cstable/CSTableReader.h"
 #include "common.h"
 #include "CustomerNamespace.h"
 #include "FeatureSchema.h"
@@ -58,8 +60,8 @@ int main(int argc, const char** argv) {
 
   cstable::UInt16ColumnWriter position_col;
 
-  int r = 0;
-  int n = 0;
+  uint64_t r = 0;
+  uint64_t n = 0;
 
   auto add_session = [&] (const cm::JoinedSession& sess) {
     ++n;
@@ -132,9 +134,31 @@ int main(int argc, const char** argv) {
     status_line.runForce();
   }
 
-  cstable::CSTableWriter writer("fnord.cstable", n);
-  writer.addColumn("queries.items.position", &position_col);
-  writer.commit();
+  if (sstables.size() > 0) {
+    cstable::CSTableWriter writer("fnord.cstable", n);
+    writer.addColumn("queries.items.position", &position_col);
+    writer.commit();
+  }
+
+  auto t0 = WallClock::unixMicros();
+  cstable::CSTableReader reader("fnord.cstable");
+  void* coldata;
+  size_t colsize;
+  reader.getColumn("queries.items.position", &coldata, &colsize);
+  cstable::UInt16ColumnReader poscol_reader(coldata, colsize);
+
+  auto t1 = WallClock::unixMicros();
+  HashMap<uint16_t, Pair<uint64_t, uint64_t>> posi_info;
+
+  uint64_t d;
+  uint16_t val;
+  while (poscol_reader.next(&r, &d, &val)) {
+    ++posi_info[val].first;
+    //fnord::iputs("val: $0", val);
+  }
+
+  auto t2 = WallClock::unixMicros();
+  fnord::iputs("reading took $0ms ($1ms)", (t2 - t0) / 1000.0f, (t2 - t1) / 1000.0f);
 
   return 0;
 }
