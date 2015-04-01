@@ -19,6 +19,7 @@ namespace util {
 
 class PFOREncoder {
 public:
+  PFOREncoder();
 
   void encode(uint32_t value);
   void flush();
@@ -28,6 +29,8 @@ public:
 
 protected:
   Buffer buf_;
+  Vector<uint32_t> stage_;
+  uint32_t offset_;
 };
 
 }
