@@ -24,6 +24,7 @@ public:
   BinaryMessageWriter(void* buf, size_t buf_len);
   ~BinaryMessageWriter();
 
+  void appendUInt8(uint8_t value);
   void appendUInt16(uint16_t value);
   void appendUInt32(uint32_t value);
   void appendUInt64(uint64_t value);
