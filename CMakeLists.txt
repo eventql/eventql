@@ -27,6 +27,7 @@ add_subdirectory(3rdparty/libfnord/fnord-mdb)
 add_subdirectory(3rdparty/libfnord/fnord-rpc)
 add_subdirectory(3rdparty/libfnord/fnord-http)
 add_subdirectory(3rdparty/libfnord/fnord-json)
+add_subdirectory(3rdparty/libfnord/fnord-cstable)
 add_subdirectory(3rdparty/libfnord/fnord-sstable)
 add_subdirectory(3rdparty/libfnord/fnord-chart)
 add_subdirectory(3rdparty/libfnord/fnord-metricdb)
@@ -467,4 +468,19 @@ add_executable(cm-jqshuffle
     src/cm-jqshuffle.cc)
 
 target_link_libraries(cm-jqshuffle
+    ${CMAKE_THREAD_LIBS_INIT})
+
+add_executable(cm-jqcolumnize
+    $<TARGET_OBJECTS:cm-common>
+    $<TARGET_OBJECTS:fnord-base>
+    $<TARGET_OBJECTS:fnord-feeds>
+    $<TARGET_OBJECTS:fnord-mdb>
+    $<TARGET_OBJECTS:fnord-http>
+    $<TARGET_OBJECTS:fnord-json>
+    $<TARGET_OBJECTS:fnord-rpc>
+    $<TARGET_OBJECTS:fnord-cstable>
+    $<TARGET_OBJECTS:fnord-sstable>
+    src/cm-jqcolumnize.cc)
+
+target_link_libraries(cm-jqcolumnize
     ${CMAKE_THREAD_LIBS_INIT})
