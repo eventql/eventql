@@ -26,5 +26,6 @@ endif()
 
 # sstable
 add_library(fnord-cstable OBJECT
+    CSTableReader.cc
     CSTableWriter.cc
     UInt16ColumnWriter.cc)
