@@ -59,6 +59,7 @@ int main(int argc, const char** argv) {
 
 
   cstable::UInt16ColumnWriter position_col;
+  cstable::UInt16ColumnWriter clicked_col;
 
   uint64_t r = 0;
   uint64_t n = 0;
@@ -68,6 +69,7 @@ int main(int argc, const char** argv) {
     for (const auto& q : sess.queries) {
       for (const auto& i : q.items) {
         position_col.addDatum(r, 0, i.position);
+        clicked_col.addDatum(r, 0, i.clicked);
         r = 2;
       }
 
@@ -137,28 +139,41 @@ int main(int argc, const char** argv) {
   if (sstables.size() > 0) {
     cstable::CSTableWriter writer("fnord.cstable", n);
     writer.addColumn("queries.items.position", &position_col);
+    writer.addColumn("queries.items.clicked", &clicked_col);
     writer.commit();
   }
 
   auto t0 = WallClock::unixMicros();
   cstable::CSTableReader reader("fnord.cstable");
-  void* coldata;
-  size_t colsize;
-  reader.getColumn("queries.items.position", &coldata, &colsize);
-  cstable::UInt16ColumnReader poscol_reader(coldata, colsize);
+  void* poscoldata;
+  size_t poscolsize;
+  reader.getColumn("queries.items.position", &poscoldata, &poscolsize);
+  cstable::UInt16ColumnReader poscol_reader(poscoldata, poscolsize);
+  void* clickedcoldata;
+  size_t clickedcolsize;
+  reader.getColumn("queries.items.clicked", &clickedcoldata, &clickedcolsize);
+  cstable::UInt16ColumnReader clickedcol_reader(clickedcoldata, clickedcolsize);
 
   auto t1 = WallClock::unixMicros();
   HashMap<uint16_t, Pair<uint64_t, uint64_t>> posi_info;
 
   uint64_t d;
-  uint16_t val;
-  while (poscol_reader.next(&r, &d, &val)) {
-    ++posi_info[val].first;
-    //fnord::iputs("val: $0", val);
+  uint16_t pos;
+  uint16_t clicked;
+
+  n = 0;
+  while (poscol_reader.next(&r, &d, &pos) && clickedcol_reader.next(&r, &d, &clicked)) {
+    ++posi_info[pos].first;
+    posi_info[pos].second += clicked;
+    ++n;
   }
 
   auto t2 = WallClock::unixMicros();
-  fnord::iputs("reading took $0ms ($1ms)", (t2 - t0) / 1000.0f, (t2 - t1) / 1000.0f);
+  fnord::iputs("reading $2 rows took $0ms ($1ms)", (t2 - t0) / 1000.0f, (t2 - t1) / 1000.0f, n);
+
+  for (const auto& p : posi_info) {
+    fnord::iputs("pos: $0, views: $1, clicks: $2, ctr: $3", p.first, p.second.first, p.second.second, p.second.second / (double) p.second.first);
+  }
 
   return 0;
 }
