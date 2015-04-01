@@ -20,6 +20,8 @@ public:
 
   UInt16ColumnReader(void* data, size_t size);
 
+  bool next(uint64_t* rep_level, uint64_t* def_level, uint16_t* data);
+
 protected:
   util::BinaryMessageReader reader_;
 };
