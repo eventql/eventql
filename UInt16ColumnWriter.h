@@ -19,6 +19,8 @@ namespace cstable {
 class UInt16ColumnWriter : public ColumnWriter {
 public:
 
+  UInt16ColumnWriter(uint64_t r_max, uint64_t d_max);
+
   void addDatum(uint64_t rep_level, uint64_t def_level, uint16_t value);
 
   void write(void** data, size_t* size);

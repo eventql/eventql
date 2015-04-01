@@ -7,25 +7,25 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <fnord-cstable/UInt16ColumnReader.h>
+#include <fnord-cstable/ColumnWriter.h>
 
 namespace fnord {
 namespace cstable {
 
-UInt16ColumnReader::UInt16ColumnReader(
-    void* data,
-    size_t size) :
-    reader_(data, size) {}
+ColumnWriter::ColumnWriter(
+    size_t r_max,
+    size_t d_max) :
+    r_max_(r_max),
+    d_max_(d_max) {}
 
-bool UInt16ColumnReader::next(
-    uint64_t* rep_level,
-    uint64_t* def_level,
-    uint16_t* data) {
-  *rep_level = *reader_.readUInt8();
-  *def_level = 0;
-  *data = *reader_.readUInt16();
-  return true;
+size_t ColumnWriter::maxRepetitionLevel() const {
+  return r_max_;
+}
+
+size_t ColumnWriter::maxDefinitionLevel() const {
+  return d_max_;
 }
 
 } // namespace cstable
 } // namespace fnord
+

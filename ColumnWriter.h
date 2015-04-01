@@ -16,8 +16,17 @@ namespace cstable {
 
 class ColumnWriter {
 public:
+  ColumnWriter(size_t r_max, size_t d_max);
   virtual ~ColumnWriter() {}
+
   virtual void write(void** data, size_t* size) = 0;
+
+  size_t maxRepetitionLevel() const;
+  size_t maxDefinitionLevel() const;
+
+protected:
+  size_t r_max_;
+  size_t d_max_;
 };
 
 } // namespace cstable
