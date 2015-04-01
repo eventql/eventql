@@ -20,6 +20,7 @@ public:
   virtual ~ColumnWriter() {}
 
   virtual void write(void* buf, size_t buf_len) = 0;
+  virtual void commit() = 0;
 
   size_t maxRepetitionLevel() const;
   size_t maxDefinitionLevel() const;
