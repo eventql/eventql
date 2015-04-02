@@ -17,9 +17,9 @@
 namespace fnord {
 namespace util {
 
-class RLEEncoder {
+class BitPackEncoder {
 public:
-  RLEEncoder(uint32_t max_val);
+  BitPackEncoder(uint32_t max_val);
 
   void encode(uint32_t value);
   void flush();

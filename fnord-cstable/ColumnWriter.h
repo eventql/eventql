@@ -10,7 +10,7 @@
 #ifndef _FNORD_CSTABLE_COLUMNWRITER_H
 #define _FNORD_CSTABLE_COLUMNWRITER_H
 #include <fnord-base/stdtypes.h>
-#include <fnord-base/util/RLEEncoder.h>
+#include <fnord-base/util/BitPackEncoder.h>
 
 namespace fnord {
 namespace cstable {
@@ -31,8 +31,8 @@ public:
 protected:
   size_t r_max_;
   size_t d_max_;
-  util::RLEEncoder rlvl_writer_;
-  util::RLEEncoder dlvl_writer_;
+  util::BitPackEncoder rlvl_writer_;
+  util::BitPackEncoder dlvl_writer_;
 };
 
 } // namespace cstable

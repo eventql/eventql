@@ -11,7 +11,7 @@
 #define _FNORD_CSTABLE_UINT16COLUMNWRITER_H
 #include <fnord-base/stdtypes.h>
 #include <fnord-base/util/binarymessagewriter.h>
-#include <fnord-base/util/RLEEncoder.h>
+#include <fnord-base/util/BitPackEncoder.h>
 #include <fnord-cstable/ColumnWriter.h>
 
 namespace fnord {
@@ -31,7 +31,7 @@ public:
   size_t bodySize() const override;
 
 protected:
-  util::RLEEncoder data_writer_;
+  util::BitPackEncoder data_writer_;
 };
 
 } // namespace cstable

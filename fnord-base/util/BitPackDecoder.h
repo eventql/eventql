@@ -7,8 +7,8 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#ifndef _FNORD_UTIL_PFORENCODER_H
-#define _FNORD_UTIL_PFORENCODER_H
+#ifndef _FNORD_UTIL_RLEDECODER_H
+#define _FNORD_UTIL_RLEDECODER_H
 #include <stdlib.h>
 #include <stdint.h>
 #include <string>
@@ -17,20 +17,20 @@
 namespace fnord {
 namespace util {
 
-class PFOREncoder {
+class BitPackDecoder {
 public:
-  PFOREncoder();
 
-  void encode(uint32_t value);
-  void flush();
+  BitPackDecoder(void* data, size_t size, uint32_t max_val);
 
-  void* data() const;
-  size_t size() const;
+  uint32_t next();
 
 protected:
-  Buffer buf_;
-  Vector<uint32_t> stage_;
-  uint32_t offset_;
+  void* data_;
+  size_t size_;
+  size_t maxbits_;
+  size_t pos_;
+  uint32_t outbuf_[128];
+  size_t outbuf_pos_;
 };
 
 }
