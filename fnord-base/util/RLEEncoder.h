@@ -12,7 +12,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <string>
-#include <fnord-base/Buffer.h>
+#include <fnord-base/buffer.h>
 
 namespace fnord {
 namespace util {
