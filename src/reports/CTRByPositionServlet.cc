@@ -11,8 +11,7 @@
 #include "fnord-base/Language.h"
 #include "fnord-base/wallclock.h"
 #include "fnord-base/io/fileutil.h"
-#include "fnord-sstable/sstablereader.h"
-#include "fnord-sstable/SSTableScan.h"
+#include "analytics/CTRByPositionQuery.h"
 
 using namespace fnord;
 
@@ -77,88 +76,50 @@ void CTRByPositionServlet::handleHTTPRequest(
     device_types = Set<String> { "unknown", "desktop", "tablet", "phone" };
   }
 
-  /* prepare prefix filters for scanning */
-  String scan_common_prefix = lang_str + "~";
-  if (test_groups.size() == 1) {
-    scan_common_prefix += *test_groups.begin() + "~";
 
-    if (device_types.size() == 1) {
-      scan_common_prefix += *device_types.begin() + "~";
-    }
-  }
+  /* execute query*/
+  auto t0 = WallClock::unixMicros();
 
-  /* prepare input tables */
-  Set<String> tables;
-  for (uint64_t i = end_time; i >= start_time; i -= kMicrosPerDay) {
-    tables.emplace(StringUtil::format(
-        "$0_ctr_by_position_daily.$1.sstable",
+  cm::CTRByPositionQueryResult result;
+  for (uint64_t i = end_time; i >= start_time; i -= kMicrosPerHour * 4) {
+    auto table_file = StringUtil::format(
+        "/srv/cmdata/artifacts/$0_joined_sessions.$1.cstable",
         customer,
-        i / kMicrosPerDay));
+        i / (kMicrosPerHour * 4));
+
+    cstable::CSTableReader reader(table_file);
+    cm::AnalyticsQuery aq;
+    cm::CTRByPositionQuery q(&aq, &result);
+    aq.scanTable(&reader);
   }
 
-  /* scan input tables */
-  HashMap<uint64_t, CTRCounterData> counters;
-  for (const auto& tbl : tables) {
-    if (!vfs_->exists(tbl)) {
-      continue;
-    }
+  uint64_t total_views = 0;
+  uint64_t total_clicks = 0;
 
-    sstable::SSTableReader reader(vfs_->openFile(tbl));
-    if (reader.bodySize() == 0 || reader.isFinalized() == 0) {
-      continue;
-    }
-
-    sstable::SSTableScan scan;
-    scan.setKeyPrefix(scan_common_prefix);
-
-    auto cursor = reader.getCursor();
-    scan.execute(cursor.get(), [&] (const Vector<String> row) {
-      if (row.size() != 2) {
-        RAISEF(kRuntimeError, "invalid row length: $0", row.size());
-      }
-
-      auto dims = StringUtil::split(row[0], "~");
-      if (dims.size() != 4) {
-        RAISEF(kRuntimeError, "invalid row key: $0", row[0]);
-      }
-
-      if (dims[0] != lang_str) {
-        return;
-      }
-
-      if (test_groups.count(dims[1]) == 0) {
-        return;
-      }
-
-      if (device_types.count(dims[2]) == 0) {
-        return;
-      }
-
-      auto counter = CTRCounterData::load(row[1]);
-      auto posi = std::stoul(dims[3]);
-
-      counters[posi].merge(counter);
-    });
+  for (const auto& c : result.counters) {
+    total_views += c.second.num_views;
+    total_clicks += c.second.num_clicks;
   }
 
+  auto t1 = WallClock::unixMicros();
 
   /* write response */
   res->setStatus(http::kStatusOK);
   res->addHeader("Content-Type", "application/json; charset=utf-8");
   json::JSONOutputStream json(res->getBodyOutputStream());
 
+  json.beginObject();
+  json.addObjectEntry("rows_scanned");
+  json.addInteger(result.rows_scanned);
+  json.addComma();
+  json.addObjectEntry("execution_time_ms");
+  json.addFloat((t1 - t0) / 1000.0f);
+  json.addComma();
+  json.addObjectEntry("results");
   json.beginArray();
 
-  uint64_t total_views = 0;
-  uint64_t total_clicks = 0;
-
-  for (const auto& c : counters) {
-    total_views += c.second.num_views;
-    total_clicks += c.second.num_clicks;
-  }
-
   int n = 0;
-  for (const auto& c : counters) {
+  for (const auto& c : result.counters) {
     if (++n > 1) {
       json.addComma();
     }
@@ -185,6 +146,7 @@ void CTRByPositionServlet::handleHTTPRequest(
   }
 
   json.endArray();
+  json.endObject();
 }
 
 }

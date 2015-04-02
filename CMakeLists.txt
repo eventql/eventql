@@ -417,7 +417,10 @@ add_executable(cm-reportserver
     $<TARGET_OBJECTS:fnord-json>
     $<TARGET_OBJECTS:fnord-rpc>
     $<TARGET_OBJECTS:fnord-sstable>
+    $<TARGET_OBJECTS:fnord-cstable>
     3rdparty/libfnord/fnord-sstable/SSTableServlet.cc
+    src/analytics/AnalyticsQuery.cc
+    src/analytics/CTRByPositionQuery.cc
     src/reports/CTRStatsServlet.cc
     src/reports/CTRByPositionServlet.cc
     src/reports/CTRByPageServlet.cc
