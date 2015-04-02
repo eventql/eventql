@@ -47,7 +47,7 @@ void UInt32ColumnWriter::write(void* buf, size_t buf_len) {
   writer.appendUInt64(data_writer_.size() + 24 + sizeof(uint32_t));
   writer.append(rlvl_writer_.data(), rlvl_writer_.size());
   writer.append(dlvl_writer_.data(), dlvl_writer_.size());
-  //writer.appendUInt32(max_value_);
+  writer.appendUInt32(max_value_);
   writer.append(data_writer_.data(), data_writer_.size());
 }
 
