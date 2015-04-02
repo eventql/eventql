@@ -14,9 +14,10 @@ namespace cstable {
 
 UInt32ColumnWriter::UInt32ColumnWriter(
     uint64_t r_max,
-    uint64_t d_max) :
+    uint64_t d_max,
+    uint32_t max_value /* = 0xffffffff */) :
     ColumnWriter(r_max, d_max),
-    data_writer_(0xffffffff) {}
+    data_writer_(max_value) {}
 
 void UInt32ColumnWriter::addDatum(
     uint64_t rep_level,

@@ -10,13 +10,14 @@
 #ifndef _FNORD_CSTABLE_COLUMNREADER_H
 #define _FNORD_CSTABLE_COLUMNREADER_H
 #include <fnord-base/stdtypes.h>
+#include <fnord-base/autoref.h>
 #include <fnord-base/util/binarymessagereader.h>
 #include <fnord-base/util/BitPackDecoder.h>
 
 namespace fnord {
 namespace cstable {
 
-class ColumnReader {
+class ColumnReader : public RefCounted {
 public:
 
   ColumnReader(
