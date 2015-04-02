@@ -30,8 +30,8 @@ public:
       rlvl_size_(*reader_.readUInt64()),
       dlvl_size_(*reader_.readUInt64()),
       data_size_(*reader_.readUInt64()),
-      rlvl_reader_(((char *) data) + 24, rlvl_size_),
-      dlvl_reader_(((char *) data) + 24 + rlvl_size_, dlvl_size_),
+      rlvl_reader_(((char *) data) + 24, rlvl_size_, r_max),
+      dlvl_reader_(((char *) data) + 24 + rlvl_size_, dlvl_size_, d_max),
       data_(((char *) data) + 24 + rlvl_size_ + dlvl_size_) {}
 
   virtual ~ColumnReader() {}

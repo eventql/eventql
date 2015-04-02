@@ -16,7 +16,9 @@ ColumnWriter::ColumnWriter(
     size_t r_max,
     size_t d_max) :
     r_max_(r_max),
-    d_max_(d_max) {}
+    d_max_(d_max),
+    rlvl_writer_(r_max),
+    dlvl_writer_(d_max) {}
 
 size_t ColumnWriter::maxRepetitionLevel() const {
   return r_max_;
