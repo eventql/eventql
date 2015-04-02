@@ -11,7 +11,7 @@
 #define _FNORD_CSTABLE_UINT16COLUMNREADER_H
 #include <fnord-base/stdtypes.h>
 #include <fnord-base/util/binarymessagereader.h>
-#include <fnord-base/util/RLEDecoder.h>
+#include <fnord-base/util/BitPackDecoder.h>
 #include <fnord-cstable/ColumnReader.h>
 
 namespace fnord {
@@ -35,7 +35,7 @@ public:
       size_t* data_len) override;
 
 protected:
-  util::RLEDecoder data_reader_;
+  util::BitPackDecoder data_reader_;
   uint16_t cur_val_;
 };
 
