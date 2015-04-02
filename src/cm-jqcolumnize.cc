@@ -24,8 +24,8 @@
 #include "fnord-sstable/SSTableColumnSchema.h"
 #include "fnord-sstable/SSTableColumnReader.h"
 #include "fnord-sstable/SSTableColumnWriter.h"
-#include "fnord-cstable/UInt16ColumnReader.h"
-#include "fnord-cstable/UInt16ColumnWriter.h"
+#include "fnord-cstable/UInt32ColumnReader.h"
+#include "fnord-cstable/UInt32ColumnWriter.h"
 #include "fnord-cstable/CSTableWriter.h"
 #include "fnord-cstable/CSTableReader.h"
 #include "common.h"
@@ -81,11 +81,11 @@ int main(int argc, const char** argv) {
   size_t debug_z = 0;
 
   /* query level */
-  cstable::UInt16ColumnWriter jq_page_col(1, 1);
+  cstable::UInt32ColumnWriter jq_page_col(1, 1);
 
   /* query item level */
-  cstable::UInt16ColumnWriter position_col(2, 2);
-  cstable::UInt16ColumnWriter clicked_col(2, 2);
+  cstable::UInt32ColumnWriter position_col(2, 2);
+  cstable::UInt32ColumnWriter clicked_col(2, 2);
 
   uint64_t r = 0;
   uint64_t n = 0;
