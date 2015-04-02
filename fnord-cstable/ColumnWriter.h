@@ -10,6 +10,7 @@
 #ifndef _FNORD_CSTABLE_COLUMNWRITER_H
 #define _FNORD_CSTABLE_COLUMNWRITER_H
 #include <fnord-base/stdtypes.h>
+#include <fnord-base/util/binarymessagewriter.h>
 #include <fnord-base/util/BitPackEncoder.h>
 #include <fnord-cstable/BinaryFormat.h>
 
@@ -21,16 +22,19 @@ public:
   ColumnWriter(size_t r_max, size_t d_max);
   virtual ~ColumnWriter() {}
 
-  virtual void write(void* buf, size_t buf_len) = 0;
+  void write(void* buf, size_t buf_len);
   virtual void commit() = 0;
+  virtual ColumnType type() const = 0;
 
   size_t maxRepetitionLevel() const;
   size_t maxDefinitionLevel() const;
 
-  virtual size_t bodySize() const = 0;
-  virtual ColumnType type() const = 0;
+  virtual size_t bodySize() const;
 
 protected:
+  virtual size_t size() const = 0;
+  virtual void write(util::BinaryMessageWriter* writer) = 0;
+
   size_t r_max_;
   size_t d_max_;
   util::BitPackEncoder rlvl_writer_;

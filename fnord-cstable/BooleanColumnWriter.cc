@@ -38,18 +38,12 @@ void BooleanColumnWriter::commit() {
   rlvl_writer_.flush();
 }
 
-void BooleanColumnWriter::write(void* buf, size_t buf_len) {
-  util::BinaryMessageWriter writer(buf, buf_len);
-  writer.appendUInt64(rlvl_writer_.size());
-  writer.appendUInt64(dlvl_writer_.size());
-  writer.appendUInt64(data_writer_.size());
-  writer.append(rlvl_writer_.data(), rlvl_writer_.size());
-  writer.append(dlvl_writer_.data(), dlvl_writer_.size());
-  writer.append(data_writer_.data(), data_writer_.size());
+void BooleanColumnWriter::write(util::BinaryMessageWriter* writer) {
+  writer->append(data_writer_.data(), data_writer_.size());
 }
 
-size_t BooleanColumnWriter::bodySize() const {
-  return 24 + data_writer_.size() + rlvl_writer_.size() + dlvl_writer_.size();
+size_t BooleanColumnWriter::size() const {
+  return data_writer_.size();
 }
 
 
