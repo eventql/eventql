@@ -23,6 +23,20 @@ UInt16ColumnReader::UInt16ColumnReader(
 bool UInt16ColumnReader::next(
     uint64_t* rep_level,
     uint64_t* def_level,
+    void** data,
+    size_t* data_len) {
+  if (next(rep_level, def_level, &cur_val_)) {
+    *data = &cur_val_;
+    *data_len = sizeof(cur_val_);
+    return true;
+  } else {
+    return false;
+  }
+}
+
+bool UInt16ColumnReader::next(
+    uint64_t* rep_level,
+    uint64_t* def_level,
     uint16_t* data) {
   auto r = rlvl_reader_.next();
   auto d = dlvl_reader_.next();

@@ -28,8 +28,15 @@ public:
 
   bool next(uint64_t* rep_level, uint64_t* def_level, uint16_t* data);
 
+  bool next(
+      uint64_t* rep_level,
+      uint64_t* def_level,
+      void** data,
+      size_t* data_len) override;
+
 protected:
   util::RLEDecoder data_reader_;
+  uint16_t cur_val_;
 };
 
 } // namespace cstable
