@@ -84,7 +84,7 @@ void CTRByPositionServlet::handleHTTPRequest(
 
   cm::CTRByPositionQueryResult result;
   std::mutex mutex;
-  size_t num_threads;
+  size_t num_threads = 0;
   std::condition_variable cv;
 
   for (uint64_t i = end_time; i >= start_time; i -= kMicrosPerHour * 4) {
