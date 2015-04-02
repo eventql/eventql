@@ -7,20 +7,20 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <fnord-cstable/UInt16ColumnReader.h>
+#include <fnord-cstable/UInt32ColumnReader.h>
 
 namespace fnord {
 namespace cstable {
 
-UInt16ColumnReader::UInt16ColumnReader(
+UInt32ColumnReader::UInt32ColumnReader(
     uint64_t r_max,
     uint64_t d_max,
     void* data,
     size_t size) :
     ColumnReader(r_max, d_max, data, size),
-    data_reader_(data_, data_size_, 0xffff) {}
+    data_reader_(data_, data_size_, 0xffffffff) {}
 
-bool UInt16ColumnReader::next(
+bool UInt32ColumnReader::next(
     uint64_t* rep_level,
     uint64_t* def_level,
     void** data,
@@ -34,7 +34,7 @@ bool UInt16ColumnReader::next(
   }
 }
 
-bool UInt16ColumnReader::next(
+bool UInt32ColumnReader::next(
     uint64_t* rep_level,
     uint64_t* def_level,
     uint16_t* data) {

@@ -7,18 +7,18 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <fnord-cstable/UInt16ColumnWriter.h>
+#include <fnord-cstable/UInt32ColumnWriter.h>
 
 namespace fnord {
 namespace cstable {
 
-UInt16ColumnWriter::UInt16ColumnWriter(
+UInt32ColumnWriter::UInt32ColumnWriter(
     uint64_t r_max,
     uint64_t d_max) :
     ColumnWriter(r_max, d_max),
-    data_writer_(0xffff) {}
+    data_writer_(0xffffffff) {}
 
-void UInt16ColumnWriter::addDatum(
+void UInt32ColumnWriter::addDatum(
     uint64_t rep_level,
     uint64_t def_level,
     uint16_t value) {
@@ -27,18 +27,18 @@ void UInt16ColumnWriter::addDatum(
   data_writer_.encode(value);
 }
 
-void UInt16ColumnWriter::addNull(
+void UInt32ColumnWriter::addNull(
     uint64_t rep_level,
     uint64_t def_level) {
   rlvl_writer_.encode(rep_level);
   dlvl_writer_.encode(def_level);
 }
 
-void UInt16ColumnWriter::commit() {
+void UInt32ColumnWriter::commit() {
   rlvl_writer_.flush();
 }
 
-void UInt16ColumnWriter::write(void* buf, size_t buf_len) {
+void UInt32ColumnWriter::write(void* buf, size_t buf_len) {
   util::BinaryMessageWriter writer(buf, buf_len);
   writer.appendUInt64(rlvl_writer_.size());
   writer.appendUInt64(dlvl_writer_.size());
@@ -48,7 +48,7 @@ void UInt16ColumnWriter::write(void* buf, size_t buf_len) {
   writer.append(data_writer_.data(), data_writer_.size());
 }
 
-size_t UInt16ColumnWriter::bodySize() const {
+size_t UInt32ColumnWriter::bodySize() const {
   return 24 + data_writer_.size() + rlvl_writer_.size() + dlvl_writer_.size();
 }
 
