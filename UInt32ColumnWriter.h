@@ -39,6 +39,7 @@ public:
   }
 
 protected:
+  uint32_t max_value_;
   util::BitPackEncoder data_writer_;
 };
 
