@@ -33,8 +33,6 @@ CSTableReader::CSTableReader(
   num_records_ = *header.readUInt64();
   num_columns_ = *header.readUInt32();
 
-  fnord::iputs("num cols: $0, num records: $1", num_columns_, num_records_);
-
   for (int i = 0; i < num_columns_; ++i) {
     auto type = *header.readUInt32();
     auto name_len = *header.readUInt32();
