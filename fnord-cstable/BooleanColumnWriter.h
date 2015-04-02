@@ -30,6 +30,10 @@ public:
 
   size_t bodySize() const override;
 
+  ColumnType type() const override {
+    return ColumnType::BOOLEAN;
+  }
+
 protected:
   util::BitPackEncoder data_writer_;
 };
