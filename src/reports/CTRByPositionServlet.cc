@@ -9,6 +9,7 @@
 #include "CTRByPositionServlet.h"
 #include "CTRCounter.h"
 #include "fnord-base/Language.h"
+#include "fnord-base/logging.h"
 #include "fnord-base/wallclock.h"
 #include "fnord-base/io/fileutil.h"
 #include "analytics/CTRByPositionQuery.h"
@@ -86,6 +87,13 @@ void CTRByPositionServlet::handleHTTPRequest(
         "/srv/cmdata/artifacts/$0_joined_sessions.$1.cstable",
         customer,
         i / (kMicrosPerHour * 4));
+
+    if (!FileUtil::exists(table_file)) {
+      fnord::logWarning(
+          "cm.ctrbypositionservlet",
+          "missing table: $0",
+          table_file);
+    }
 
     cstable::CSTableReader reader(table_file);
     cm::AnalyticsQuery aq;
