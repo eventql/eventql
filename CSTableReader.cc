@@ -35,11 +35,12 @@ CSTableReader::CSTableReader(
   fnord::iputs("num cols: $0, num records: $1", num_columns_, num_records_);
 
   for (int i = 0; i < num_columns_; ++i) {
+    auto type = *header.readUInt32();
     auto name_len = *header.readUInt32();
     auto name_data = (char *) header.read(name_len);
 
-    auto r_max = *header.readUInt64();
-    auto d_max = *header.readUInt64();
+    auto r_max = *header.readUInt32();
+    auto d_max = *header.readUInt32();
     auto body_offset = *header.readUInt64();
     auto size = *header.readUInt64();
 

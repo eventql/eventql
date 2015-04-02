@@ -11,6 +11,7 @@
 #define _FNORD_CSTABLE_COLUMNWRITER_H
 #include <fnord-base/stdtypes.h>
 #include <fnord-base/util/BitPackEncoder.h>
+#include <fnord-cstable/BinaryFormat.h>
 
 namespace fnord {
 namespace cstable {
@@ -27,6 +28,7 @@ public:
   size_t maxDefinitionLevel() const;
 
   virtual size_t bodySize() const = 0;
+  virtual ColumnType type() const = 0;
 
 protected:
   size_t r_max_;

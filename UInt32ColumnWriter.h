@@ -12,6 +12,7 @@
 #include <fnord-base/stdtypes.h>
 #include <fnord-base/util/binarymessagewriter.h>
 #include <fnord-base/util/BitPackEncoder.h>
+#include <fnord-cstable/BinaryFormat.h>
 #include <fnord-cstable/ColumnWriter.h>
 
 namespace fnord {
@@ -20,7 +21,10 @@ namespace cstable {
 class UInt32ColumnWriter : public ColumnWriter {
 public:
 
-  UInt32ColumnWriter(uint64_t r_max, uint64_t d_max);
+  UInt32ColumnWriter(
+      uint64_t r_max,
+      uint64_t d_max,
+      uint32_t max_value = 0xffffffff);
 
   void addDatum(uint64_t rep_level, uint64_t def_level, uint16_t value);
   void addNull(uint64_t rep_level, uint64_t def_level);
@@ -29,6 +33,10 @@ public:
   void commit();
 
   size_t bodySize() const override;
+
+  ColumnType type() const override {
+    return ColumnType::UINT32_BITPACKED;
+  }
 
 protected:
   util::BitPackEncoder data_writer_;

@@ -36,10 +36,11 @@ namespace cstable {
  *       <column_header>*        // column header for each column
  *
  *   <column_header> :=
+ *       <uint32_t>              // column type
  *       <uint32_t>              // length of the column name
  *       <char>*                 // column name
- *       <uint64_t>              // max repetition level
- *       <uint64_t>              // max definition level
+ *       <uint32_t>              // max repetition level
+ *       <uint32_t>              // max definition level
  *       <uint64_t>              // column data start offset
  *       <uint64_t>              // column data size
  *
@@ -48,6 +49,12 @@ class BinaryFormat {
 public:
   static const uint16_t kVersion = 1;
   static const uint32_t kMagicBytes = 0x17231723;
+};
+
+
+enum class ColumnType : uint32_t {
+  BOOLEAN,
+  UINT32_BITPACKED
 };
 
 }

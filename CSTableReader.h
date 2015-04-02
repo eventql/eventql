@@ -12,7 +12,7 @@
 #include <fnord-base/stdtypes.h>
 #include <fnord-base/io/file.h>
 #include <fnord-base/io/mmappedfile.h>
-#include <fnord-cstable/ColumnWriter.h>
+#include <fnord-cstable/ColumnReader.h>
 
 namespace fnord {
 namespace cstable {
@@ -26,6 +26,8 @@ public:
       const String& column_name,
       void** data,
       size_t* size);
+
+  RefPtr<ColumnReader> getColumnReader(const String& column_name);
 
   size_t numRecords() const;
 
@@ -43,6 +45,7 @@ protected:
   };
 
   HashMap<String, ColumnInfo> columns_;
+  HashMap<String, RefPtr<ColumnReader>> column_readers_;
 };
 
 } // namespace cstable

@@ -8,7 +8,6 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <fnord-base/buffer.h>
-#include <fnord-cstable/BinaryFormat.h>
 #include <fnord-cstable/CSTableWriter.h>
 
 namespace fnord {
@@ -63,10 +62,11 @@ void CSTableWriter::commit() {
   /* write column headers */
   for (auto& col : columns_) {
     util::BinaryMessageWriter col_header;
+    col_header.appendUInt32((uint32_t) col.writer->type());
     col_header.appendUInt32(col.name.length());
     col_header.append(col.name.data(), col.name.length());
-    col_header.appendUInt64(col.writer->maxRepetitionLevel());
-    col_header.appendUInt64(col.writer->maxDefinitionLevel());
+    col_header.appendUInt32(col.writer->maxRepetitionLevel());
+    col_header.appendUInt32(col.writer->maxDefinitionLevel());
     col_header.appendUInt64(col.body_offset);
     col_header.appendUInt64(col.size);
     file_.write(col_header.data(), col_header.size());
