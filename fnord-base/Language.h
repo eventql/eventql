@@ -25,6 +25,8 @@ enum class Language : uint16_t {
   PL = 7
 };
 
+const uint16_t kMaxLanguage = 7;
+
 Language languageFromString(const String& string);
 String languageToString(Language lang);
 
