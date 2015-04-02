@@ -105,7 +105,8 @@ int main(int argc, const char** argv) {
       }
 
       auto lang = cm::extractLanguage(q.attrs);
-      jq_lang_col.addDatum(r, 1, (uint16_t) lang);
+      uint32_t l = (uint16_t) lang;
+      jq_lang_col.addDatum(r, 1, l);
 
       if (q.items.size() == 0) {
         jqi_position_col.addNull(r, 1);
@@ -181,14 +182,13 @@ int main(int argc, const char** argv) {
 
   cstable::CSTableWriter writer(flags.getString("output_file"), n);
   writer.addColumn("queries.page", &jq_page_col);
-  writer.addColumn("queries.lang", &jq_lang_col);
+  writer.addColumn("queries.language", &jq_lang_col);
   writer.addColumn("queries.items.position", &jqi_position_col);
   writer.addColumn("queries.items.clicked", &jqi_clicked_col);
   writer.commit();
 
   {
     cstable::CSTableReader reader(flags.getString("output_file"));
-
     auto t0 = WallClock::unixMicros();
 
     cm::AnalyticsQuery aq;
