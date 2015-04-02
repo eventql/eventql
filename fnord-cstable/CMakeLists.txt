@@ -29,5 +29,7 @@ add_library(fnord-cstable OBJECT
     CSTableReader.cc
     CSTableWriter.cc
     ColumnWriter.cc
+    BooleanColumnReader.cc
+    BooleanColumnWriter.cc
     UInt32ColumnReader.cc
     UInt32ColumnWriter.cc)
