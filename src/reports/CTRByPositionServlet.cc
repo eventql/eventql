@@ -93,6 +93,8 @@ void CTRByPositionServlet::handleHTTPRequest(
           "cm.ctrbypositionservlet",
           "missing table: $0",
           table_file);
+
+      continue;
     }
 
     cstable::CSTableReader reader(table_file);
