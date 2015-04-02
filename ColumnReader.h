@@ -36,6 +36,12 @@ public:
 
   virtual ~ColumnReader() {}
 
+  virtual bool next(
+      uint64_t* rep_level,
+      uint64_t* def_level,
+      void** data,
+      size_t* data_len) = 0;
+
 protected:
   uint64_t r_max_;
   uint64_t d_max_;
