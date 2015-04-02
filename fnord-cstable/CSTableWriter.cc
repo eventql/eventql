@@ -7,7 +7,7 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <fnord-base/Buffer.h>
+#include <fnord-base/buffer.h>
 #include <fnord-cstable/BinaryFormat.h>
 #include <fnord-cstable/CSTableWriter.h>
 
