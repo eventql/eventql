@@ -26,6 +26,8 @@
 #include "fnord-sstable/SSTableColumnWriter.h"
 #include "fnord-cstable/UInt32ColumnReader.h"
 #include "fnord-cstable/UInt32ColumnWriter.h"
+#include "fnord-cstable/BooleanColumnReader.h"
+#include "fnord-cstable/BooleanColumnWriter.h"
 #include "fnord-cstable/CSTableWriter.h"
 #include "fnord-cstable/CSTableReader.h"
 #include "common.h"
@@ -85,7 +87,7 @@ int main(int argc, const char** argv) {
 
   /* query item level */
   cstable::UInt32ColumnWriter position_col(2, 2);
-  cstable::UInt32ColumnWriter clicked_col(2, 2);
+  cstable::BooleanColumnWriter clicked_col(2, 2);
 
   uint64_t r = 0;
   uint64_t n = 0;
