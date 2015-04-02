@@ -20,14 +20,17 @@ namespace util {
 class RLEDecoder {
 public:
 
-  RLEDecoder(void* data, size_t size);
+  RLEDecoder(void* data, size_t size, uint32_t max_val);
 
   uint32_t next();
 
 protected:
   void* data_;
   size_t size_;
+  size_t maxbits_;
   size_t pos_;
+  uint32_t outbuf_[128];
+  size_t outbuf_pos_;
 };
 
 }

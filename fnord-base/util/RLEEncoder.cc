@@ -14,11 +14,28 @@
 namespace fnord {
 namespace util {
 
+
+RLEEncoder::RLEEncoder(
+    uint32_t max_val) :
+    maxbits_(bits(max_val)),
+    inbuf_size_(0) {}
+
 void RLEEncoder::encode(uint32_t value) {
-  buf_.append(&value, sizeof(value));
+  inbuf_[inbuf_size_++] = value;
+
+  if (inbuf_size_ == 128) {
+    flush();
+  }
 }
 
 void RLEEncoder::flush() {
+  while (inbuf_size_ < 128) {
+    inbuf_[inbuf_size_++] = 0;
+  }
+
+  simdpackwithoutmask(inbuf_, (__m128i *) outbuf_, maxbits_);
+  buf_.append(outbuf_, 16 * maxbits_);
+  inbuf_size_ = 0;
 }
 
 void* RLEEncoder::data() const {

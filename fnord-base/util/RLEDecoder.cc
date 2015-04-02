@@ -8,21 +8,30 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <fnord-base/util/RLEDecoder.h>
+#include <3rdparty/simdcomp/simdcomp.h>
 
 namespace fnord {
 namespace util {
 
 RLEDecoder::RLEDecoder(
     void* data,
-    size_t size) :
+    size_t size,
+    uint32_t max_val) :
     data_(data),
     size_(size),
-    pos_(0) {}
+    maxbits_(bits(max_val)),
+    pos_(0),
+    outbuf_pos_(128) {}
 
 uint32_t RLEDecoder::next() {
-  uint32_t val = *((uint32_t*) (((char *) data_) + pos_));
-  pos_ += sizeof(uint32_t);
-  return val;
+  if (outbuf_pos_ == 128) {
+    simdunpack((__m128i*) (((char *) data_) + pos_), outbuf_, maxbits_);
+    pos_ += 16 * maxbits_;
+    outbuf_pos_ = 1;
+    return outbuf_[0];
+  } else {
+    return outbuf_[outbuf_pos_++];
+  }
 }
 
 }

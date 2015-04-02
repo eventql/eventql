@@ -18,7 +18,7 @@ UInt16ColumnReader::UInt16ColumnReader(
     void* data,
     size_t size) :
     ColumnReader(r_max, d_max, data, size),
-    data_reader_(data_, data_size_) {}
+    data_reader_(data_, data_size_, 0xffff) {}
 
 bool UInt16ColumnReader::next(
     uint64_t* rep_level,

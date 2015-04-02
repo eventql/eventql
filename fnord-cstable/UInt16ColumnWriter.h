@@ -31,8 +31,6 @@ public:
   size_t bodySize() const override;
 
 protected:
-  util::RLEEncoder rlvl_writer_;
-  util::RLEEncoder dlvl_writer_;
   util::RLEEncoder data_writer_;
 };
 

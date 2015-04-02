@@ -19,6 +19,8 @@ namespace util {
 
 class RLEEncoder {
 public:
+  RLEEncoder(uint32_t max_val);
+
   void encode(uint32_t value);
   void flush();
 
@@ -26,6 +28,10 @@ public:
   size_t size() const;
 
 protected:
+  uint32_t inbuf_[128];
+  uint32_t outbuf_[128];
+  size_t inbuf_size_;
+  size_t maxbits_;
   Buffer buf_;
 };
 
