@@ -82,6 +82,10 @@ void CTRByPositionServlet::handleHTTPRequest(
   auto t0 = WallClock::unixMicros();
 
   cm::CTRByPositionQueryResult result;
+  std::mutex mutex;
+  size_t num_threads;
+  std::condition_variable cv;
+
   for (uint64_t i = end_time; i >= start_time; i -= kMicrosPerHour * 4) {
     auto table_file = StringUtil::format(
         "/srv/cmdata/artifacts/$0_joined_sessions.$1.cstable",
@@ -99,8 +103,14 @@ void CTRByPositionServlet::handleHTTPRequest(
 
     cstable::CSTableReader reader(table_file);
     cm::AnalyticsQuery aq;
-    cm::CTRByPositionQuery q(&aq, &result);
+    cm::CTRByPositionQueryResult r;
+    cm::CTRByPositionQuery q(&aq, &r);
     aq.scanTable(&reader);
+
+    std::unique_lock<std::mutex> lk(mutex);
+    result.merge(r);
+    --num_threads;
+    lk.unlock();
   }
 
   uint64_t total_views = 0;
