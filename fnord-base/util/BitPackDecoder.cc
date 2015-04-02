@@ -7,13 +7,13 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <fnord-base/util/RLEDecoder.h>
+#include <fnord-base/util/BitPackDecoder.h>
 #include <3rdparty/simdcomp/simdcomp.h>
 
 namespace fnord {
 namespace util {
 
-RLEDecoder::RLEDecoder(
+BitPackDecoder::BitPackDecoder(
     void* data,
     size_t size,
     uint32_t max_val) :
@@ -23,14 +23,14 @@ RLEDecoder::RLEDecoder(
     pos_(0),
     outbuf_pos_(128) {}
 
-uint32_t RLEDecoder::next() {
+uint32_t BitPackDecoder::next() {
   if (outbuf_pos_ == 128) {
     simdunpack((__m128i*) (((char *) data_) + pos_), outbuf_, maxbits_);
     pos_ += 16 * maxbits_;
-    outbuf_pos_ = 1;
+    outbuf_pos_ = 0;
     return outbuf_[0];
   } else {
-    return outbuf_[outbuf_pos_++];
+    return outbuf_[++outbuf_pos_];
   }
 }
 

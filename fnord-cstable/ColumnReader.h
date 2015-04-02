@@ -11,7 +11,7 @@
 #define _FNORD_CSTABLE_COLUMNREADER_H
 #include <fnord-base/stdtypes.h>
 #include <fnord-base/util/binarymessagereader.h>
-#include <fnord-base/util/RLEDecoder.h>
+#include <fnord-base/util/BitPackDecoder.h>
 
 namespace fnord {
 namespace cstable {
@@ -49,8 +49,8 @@ protected:
   uint64_t rlvl_size_;
   uint64_t dlvl_size_;
   uint64_t data_size_;
-  util::RLEDecoder rlvl_reader_;
-  util::RLEDecoder dlvl_reader_;
+  util::BitPackDecoder rlvl_reader_;
+  util::BitPackDecoder dlvl_reader_;
   void* data_;
 };
 

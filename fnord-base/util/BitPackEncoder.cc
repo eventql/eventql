@@ -9,18 +9,18 @@
  */
 #include <3rdparty/simdcomp/simdcomp.h>
 #include <fnord-base/inspect.h>
-#include <fnord-base/util/RLEEncoder.h>
+#include <fnord-base/util/BitPackEncoder.h>
 
 namespace fnord {
 namespace util {
 
 
-RLEEncoder::RLEEncoder(
+BitPackEncoder::BitPackEncoder(
     uint32_t max_val) :
     maxbits_(bits(max_val)),
     inbuf_size_(0) {}
 
-void RLEEncoder::encode(uint32_t value) {
+void BitPackEncoder::encode(uint32_t value) {
   inbuf_[inbuf_size_++] = value;
 
   if (inbuf_size_ == 128) {
@@ -28,7 +28,7 @@ void RLEEncoder::encode(uint32_t value) {
   }
 }
 
-void RLEEncoder::flush() {
+void BitPackEncoder::flush() {
   while (inbuf_size_ < 128) {
     inbuf_[inbuf_size_++] = 0;
   }
@@ -38,11 +38,11 @@ void RLEEncoder::flush() {
   inbuf_size_ = 0;
 }
 
-void* RLEEncoder::data() const {
+void* BitPackEncoder::data() const {
   return buf_.data();
 }
 
-size_t RLEEncoder::size() const {
+size_t BitPackEncoder::size() const {
   return buf_.size();
 }
 
