@@ -53,8 +53,8 @@ public:
 
 
 enum class ColumnType : uint32_t {
-  BOOLEAN,
-  UINT32_BITPACKED
+  BOOLEAN = 1,
+  UINT32_BITPACKED = 10
 };
 
 }

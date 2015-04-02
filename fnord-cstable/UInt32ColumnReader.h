@@ -35,6 +35,7 @@ public:
       size_t* data_len) override;
 
 protected:
+  uint32_t max_value_;
   util::BitPackDecoder data_reader_;
   uint16_t cur_val_;
 };
