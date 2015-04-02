@@ -107,6 +107,7 @@ void CTRByPositionServlet::handleHTTPRequest(
       cv.wait(lk);
     }
 
+    ++num_threads;
     auto t = std::thread([table_file, &mutex, &result, &num_threads, &cv] () {
       cstable::CSTableReader reader(table_file);
       cm::AnalyticsQuery aq;
@@ -122,6 +123,10 @@ void CTRByPositionServlet::handleHTTPRequest(
     });
 
     t.detach();
+  }
+
+  while (num_threads > 0) {
+    cv.wait(lk);
   }
 
   uint64_t total_views = 0;
