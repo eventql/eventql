@@ -28,17 +28,16 @@ public:
 
   void addDatum(uint64_t rep_level, uint64_t def_level, uint16_t value);
   void addNull(uint64_t rep_level, uint64_t def_level);
-
-  void write(void* buf, size_t buf_len);
   void commit();
-
-  size_t bodySize() const override;
 
   ColumnType type() const override {
     return ColumnType::UINT32_BITPACKED;
   }
 
 protected:
+  size_t size() const override;
+  void write(util::BinaryMessageWriter* writer) override;
+
   uint32_t max_value_;
   util::BitPackEncoder data_writer_;
 };

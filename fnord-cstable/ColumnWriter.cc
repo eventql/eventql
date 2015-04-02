@@ -28,6 +28,22 @@ size_t ColumnWriter::maxDefinitionLevel() const {
   return d_max_;
 }
 
+void ColumnWriter::write(void* buf, size_t buf_len) {
+  util::BinaryMessageWriter writer(buf, buf_len);
+  writer.appendUInt64(rlvl_writer_.size());
+  writer.appendUInt64(dlvl_writer_.size());
+  writer.appendUInt64(size());
+  writer.append(rlvl_writer_.data(), rlvl_writer_.size());
+  writer.append(dlvl_writer_.data(), dlvl_writer_.size());
+  write(&writer);
+}
+
+size_t ColumnWriter::bodySize() const {
+  return 24 + rlvl_writer_.size() + dlvl_writer_.size() + size();
+}
+
+
+
 } // namespace cstable
 } // namespace fnord
 
