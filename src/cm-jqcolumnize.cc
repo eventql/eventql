@@ -86,7 +86,7 @@ int main(int argc, const char** argv) {
   cstable::UInt32ColumnWriter jq_page_col(1, 1);
 
   /* query item level */
-  cstable::UInt32ColumnWriter position_col(2, 2);
+  cstable::UInt32ColumnWriter position_col(2, 2, 64);
   cstable::BooleanColumnWriter clicked_col(2, 2);
 
   uint64_t r = 0;
