@@ -51,7 +51,7 @@ void CSTableWriter::commit() {
   /* calculate column start offsets */
   size_t col_offset = offset_;
   for (const auto& col : columns_) {
-    col_offset += 36 + col.name.length();
+    col_offset += 32 + col.name.length();
   }
 
   for (auto& col : columns_) {

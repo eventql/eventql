@@ -18,11 +18,8 @@ UInt32ColumnReader::UInt32ColumnReader(
     void* data,
     size_t size) :
     ColumnReader(r_max, d_max, data, size),
-    max_value_(*((uint32_t*) data_)),
-    data_reader_(
-        (char *) data_ + sizeof(uint32_t),
-        data_size_ - sizeof(uint32_t),
-        max_value_) {}
+    max_value_(0xffffffff),
+    data_reader_(data_, data_size_, max_value_) {}
 
 bool UInt32ColumnReader::next(
     uint64_t* rep_level,
