@@ -145,7 +145,7 @@ int main(int argc, const char** argv) {
   util::SimpleRateLimitedFn status_line(kMicrosPerSecond, [&] () {
     fnord::logInfo(
         "cm.jqcolumnize",
-        "[$0%] Reading sstable... rows=$3",
+        "[$0%] Reading sstable... rows=$1",
         (size_t) ((cursor->position() / (double) body_size) * 100),
         row_idx);
   });
