@@ -26,7 +26,7 @@ public:
       void* data,
       size_t size);
 
-  bool next(uint64_t* rep_level, uint64_t* def_level, uint16_t* data);
+  bool next(uint64_t* rep_level, uint64_t* def_level, uint32_t* data);
 
   bool next(
       uint64_t* rep_level,
@@ -37,7 +37,7 @@ public:
 protected:
   uint32_t max_value_;
   util::BitPackDecoder data_reader_;
-  uint16_t cur_val_;
+  uint32_t cur_val_;
 };
 
 } // namespace cstable
