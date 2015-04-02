@@ -9,7 +9,8 @@
  */
 #include <fnord-base/util/binarymessagereader.h>
 #include <fnord-cstable/CSTableReader.h>
-#include <fnord-cstable/BinaryFormat.h>
+#include <fnord-cstable/BooleanColumnReader.h>
+#include <fnord-cstable/UInt32ColumnReader.h>
 
 namespace fnord {
 namespace cstable {
@@ -45,12 +46,32 @@ CSTableReader::CSTableReader(
     auto size = *header.readUInt64();
 
     ColumnInfo ci;
+    ci.type = (ColumnType) type;
     ci.name = String(name_data, name_len);
     ci.body_offset = body_offset;
     ci.size = size;
     ci.r_max = r_max;
     ci.d_max = d_max;
     columns_.emplace(ci.name, ci);
+  }
+}
+
+RefPtr<ColumnReader> CSTableReader::getColumnReader(const String& column_name) {
+  auto col = columns_.find(column_name);
+  if (col == columns_.end()) {
+    RAISEF(kIndexError, "unknown column: $0", column_name);
+  }
+
+  const auto& c = col->second;
+  void* cdata = ((char *) file_.data()) + col->second.body_offset;
+
+  switch (c.type) {
+    case ColumnType::BOOLEAN:
+      return new BooleanColumnReader(c.r_max, c.d_max, cdata, c.size);
+    case ColumnType::UINT32_BITPACKED:
+      return new UInt32ColumnReader(c.r_max, c.d_max, cdata, c.size);
+    default:
+      RAISEF(kIllegalStateError, "invalid column type: $0", (uint32_t) c.type);
   }
 }
 

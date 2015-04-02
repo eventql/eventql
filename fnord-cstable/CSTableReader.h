@@ -12,6 +12,7 @@
 #include <fnord-base/stdtypes.h>
 #include <fnord-base/io/file.h>
 #include <fnord-base/io/mmappedfile.h>
+#include <fnord-cstable/BinaryFormat.h>
 #include <fnord-cstable/ColumnReader.h>
 
 namespace fnord {
@@ -37,6 +38,7 @@ protected:
   uint32_t num_columns_;
 
   struct ColumnInfo {
+    ColumnType type;
     String name;
     size_t body_offset;
     size_t size;
@@ -45,7 +47,6 @@ protected:
   };
 
   HashMap<String, ColumnInfo> columns_;
-  HashMap<String, RefPtr<ColumnReader>> column_readers_;
 };
 
 } // namespace cstable
