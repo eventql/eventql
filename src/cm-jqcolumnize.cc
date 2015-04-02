@@ -86,7 +86,7 @@ int main(int argc, const char** argv) {
   cstable::UInt32ColumnWriter jq_page_col(1, 1);
 
   /* query item level */
-  cstable::UInt32ColumnWriter position_col(2, 2);
+  cstable::UInt32ColumnWriter position_col(2, 2, 100);
   cstable::BooleanColumnWriter clicked_col(2, 2);
 
   uint64_t r = 0;
@@ -183,6 +183,26 @@ int main(int argc, const char** argv) {
   writer.addColumn("queries.items.position", &position_col);
   writer.addColumn("queries.items.clicked", &clicked_col);
   writer.commit();
+
+  {
+    cstable::CSTableReader reader(flags.getString("output_file"));
+
+    auto t0 = WallClock::unixMicros();
+
+    cm::AnalyticsQuery aq;
+    cm::CTRByPositionQueryResult res;
+    cm::CTRByPositionQuery q(&aq, &res);
+    aq.scanTable(&reader);
+    auto t1 = WallClock::unixMicros();
+    fnord::iputs("scanned $0 rows in $1 ms", res.rows_scanned, (t1 - t0) / 1000.0f);
+    for (const auto& p : res.counters) {
+      fnord::iputs(
+         "pos: $0, views: $1, clicks: $2, ctr: $3", 
+          p.first, p.second.num_views,
+          p.second.num_clicks,
+          p.second.num_clicks / (double) p.second.num_views);
+    }
+  }
 
   return 0;
 }
