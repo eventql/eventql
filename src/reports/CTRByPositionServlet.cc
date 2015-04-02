@@ -6,6 +6,7 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
+#include <thread>
 #include "CTRByPositionServlet.h"
 #include "CTRCounter.h"
 #include "fnord-base/Language.h"
@@ -101,16 +102,26 @@ void CTRByPositionServlet::handleHTTPRequest(
       continue;
     }
 
-    cstable::CSTableReader reader(table_file);
-    cm::AnalyticsQuery aq;
-    cm::CTRByPositionQueryResult r;
-    cm::CTRByPositionQuery q(&aq, &r);
-    aq.scanTable(&reader);
-
     std::unique_lock<std::mutex> lk(mutex);
-    result.merge(r);
-    --num_threads;
-    lk.unlock();
+    while (num_threads >= 8) {
+      cv.wait(lk);
+    }
+
+    auto t = std::thread([table_file, &mutex, &result, &num_threads, &cv] () {
+      cstable::CSTableReader reader(table_file);
+      cm::AnalyticsQuery aq;
+      cm::CTRByPositionQueryResult r;
+      cm::CTRByPositionQuery q(&aq, &r);
+      aq.scanTable(&reader);
+
+      std::unique_lock<std::mutex> lk(mutex);
+      result.merge(r);
+      --num_threads;
+      lk.unlock();
+      cv.notify_one();
+    });
+
+    t.detach();
   }
 
   uint64_t total_views = 0;
