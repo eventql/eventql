@@ -33,6 +33,7 @@
 #include "FeatureSchema.h"
 #include "JoinedQuery.h"
 #include "CTRCounter.h"
+#include "analytics/AnalyticsQuery.h"
 #include "analytics/CTRByPositionQuery.h"
 
 using namespace fnord;
@@ -61,6 +62,10 @@ int main(int argc, const char** argv) {
   size_t debug_n = 0;
   size_t debug_z = 0;
 
+  /* query level */
+  cstable::UInt16ColumnWriter jq_page_col(1, 1);
+
+  /* query item level */
   cstable::UInt16ColumnWriter position_col(2, 2);
   cstable::UInt16ColumnWriter clicked_col(2, 2);
 
@@ -71,6 +76,13 @@ int main(int argc, const char** argv) {
     ++n;
 
     for (const auto& q : sess.queries) {
+      auto pg_str = cm::extractAttr(q.attrs, "pg");
+      if (pg_str.isEmpty()) {
+        jq_page_col.addNull(r, 1);
+      } else {
+        jq_page_col.addDatum(r, 1, std::stoul(pg_str.get()));
+      }
+
       if (q.items.size() == 0) {
         if (r==0) ++debug_z;
         position_col.addNull(r, 1);
@@ -159,8 +171,10 @@ int main(int argc, const char** argv) {
   cstable::CSTableReader reader("fnord.cstable");
 
   auto t0 = WallClock::unixMicros();
-  cm::CTRByPositionQuery q;
-  q.scanTable(&reader);
+
+  cm::AnalyticsQuery aq;
+  cm::CTRByPositionQuery q(&aq);
+  aq.scanTable(&reader);
   auto t1 = WallClock::unixMicros();
   fnord::iputs("scanned $0 rows in $1 ms", q.rowsScanned(), (t1 - t0) / 1000.0f);
   for (const auto& p : q.results()) {
