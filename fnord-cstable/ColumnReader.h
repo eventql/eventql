@@ -11,11 +11,11 @@
 #define _FNORD_CSTABLE_COLUMNREADER_H
 #include <fnord-base/stdtypes.h>
 #include <fnord-base/util/binarymessagereader.h>
+#include <fnord-base/util/RLEDecoder.h>
 
 namespace fnord {
 namespace cstable {
 
-template <class RLevelCodec, class DLevelCodec, class DataCodec>
 class ColumnReader {
 public:
 
@@ -32,7 +32,7 @@ public:
       data_size_(*reader_.readUInt64()),
       rlvl_reader_(((char *) data) + 24, rlvl_size_),
       dlvl_reader_(((char *) data) + 24 + rlvl_size_, dlvl_size_),
-      data_reader_(((char *) data) + 24 + rlvl_size_ + dlvl_size_, data_size_) {}
+      data_(((char *) data) + 24 + rlvl_size_ + dlvl_size_) {}
 
   virtual ~ColumnReader() {}
 
@@ -43,9 +43,9 @@ protected:
   uint64_t rlvl_size_;
   uint64_t dlvl_size_;
   uint64_t data_size_;
-  RLevelCodec rlvl_reader_;
-  DLevelCodec dlvl_reader_;
-  DataCodec data_reader_;
+  util::RLEDecoder rlvl_reader_;
+  util::RLEDecoder dlvl_reader_;
+  void* data_;
 };
 
 } // namespace cstable
