@@ -125,6 +125,7 @@ void CTRByPositionServlet::handleHTTPRequest(
     t.detach();
   }
 
+  std::unique_lock<std::mutex> lk(mutex);
   while (num_threads > 0) {
     cv.wait(lk);
   }
