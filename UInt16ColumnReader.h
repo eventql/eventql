@@ -17,10 +17,7 @@
 namespace fnord {
 namespace cstable {
 
-class UInt16ColumnReader : public ColumnReader<
-    util::RLEDecoder,
-    util::RLEDecoder,
-    util::RLEDecoder> {
+class UInt16ColumnReader : public ColumnReader {
 public:
 
   UInt16ColumnReader(
@@ -31,6 +28,8 @@ public:
 
   bool next(uint64_t* rep_level, uint64_t* def_level, uint16_t* data);
 
+protected:
+  util::RLEDecoder data_reader_;
 };
 
 } // namespace cstable
