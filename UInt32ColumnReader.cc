@@ -41,7 +41,7 @@ bool UInt32ColumnReader::next(
 bool UInt32ColumnReader::next(
     uint64_t* rep_level,
     uint64_t* def_level,
-    uint16_t* data) {
+    uint32_t* data) {
   auto r = rlvl_reader_.next();
   auto d = dlvl_reader_.next();
 
