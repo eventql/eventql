@@ -69,22 +69,13 @@ void AnalyticsServlet::fetchQueryStatus(
   if (status.isEmpty()) {
     json.addString("unknown");
   } else {
-    auto progress =
-        status.get().completed_chunks / (double) status.get().total_chunks;
-
-    auto message = StringUtil::format(
-        "Running... $0% ($1/$2)",
-        progress * 100,
-        status.get().completed_chunks,
-        (double) status.get().total_chunks);
-
     json.addString("running");
     json.addComma();
     json.addObjectEntry("progress");
-    json.addFloat(progress);
+    json.addFloat(status.get().progress());
     json.addComma();
     json.addObjectEntry("message");
-    json.addString(message);
+    json.addString(status.get().message());
   }
 
   json.endObject();
