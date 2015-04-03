@@ -47,4 +47,16 @@ void CTRCounterData::merge(const CTRCounterData& other) {
   num_clicked += other.num_clicked;
 }
 
+void CTRCounterData::encode(util::BinaryMessageWriter* writer) const {
+  writer->appendUInt64(num_views);
+  writer->appendUInt64(num_clicks);
+  writer->appendUInt64(num_clicked);
+}
+
+void CTRCounterData::decode(util::BinaryMessageReader* reader) {
+  num_views = *reader->readUInt64();
+  num_clicks = *reader->readUInt64();
+  num_clicked = *reader->readUInt64();
+}
+
 }
