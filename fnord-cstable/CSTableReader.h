@@ -22,6 +22,7 @@ class CSTableReader {
 public:
 
   CSTableReader(const String& filename);
+  CSTableReader(const RefPtr<VFSFile> file);
 
   void getColumn(
       const String& column_name,
@@ -33,7 +34,7 @@ public:
   size_t numRecords() const;
 
 protected:
-  io::MmappedFile file_;
+  RefPtr<VFSFile> file_;
   uint64_t num_records_;
   uint32_t num_columns_;
 
