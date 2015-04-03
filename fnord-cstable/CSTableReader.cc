@@ -17,8 +17,11 @@ namespace cstable {
 
 CSTableReader::CSTableReader(
     const String& filename) :
-    file_(File::openFile(filename, File::O_READ)) {
-  util::BinaryMessageReader header(file_.data(), file_.size());
+    CSTableReader(
+        new io::MmappedFile(File::openFile(filename, File::O_READ))) {}
+
+CSTableReader::CSTableReader(const RefPtr<VFSFile> file) : file_(file) {
+  util::BinaryMessageReader header(file_->data(), file_->size());
   auto magic = *header.readUInt32();
   if (magic != BinaryFormat::kMagicBytes) {
     RAISE(kIllegalStateError, "not a valid cstable");
@@ -61,7 +64,7 @@ RefPtr<ColumnReader> CSTableReader::getColumnReader(const String& column_name) {
   }
 
   const auto& c = col->second;
-  void* cdata = ((char *) file_.data()) + col->second.body_offset;
+  void* cdata = ((char *) file_->data()) + col->second.body_offset;
 
   switch (c.type) {
     case ColumnType::BOOLEAN:
@@ -82,7 +85,7 @@ void CSTableReader::getColumn(
     RAISEF(kIndexError, "unknown column: $0", column_name);
   }
 
-  *data = ((char *) file_.data()) + col->second.body_offset;
+  *data = ((char *) file_->data()) + col->second.body_offset;
   *size = col->second.size;
 }
 
