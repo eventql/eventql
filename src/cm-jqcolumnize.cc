@@ -36,7 +36,7 @@
 #include "JoinedQuery.h"
 #include "CTRCounter.h"
 #include "analytics/AnalyticsQuery.h"
-#include "analytics/CTRByPositionQuery.h"
+#include "analytics/CTRByPositionRollup.h"
 
 using namespace fnord;
 
@@ -193,24 +193,24 @@ int main(int argc, const char** argv) {
       flags.getString("output_file") + "~",
       flags.getString("output_file"));
 
-  {
-    cstable::CSTableReader reader(flags.getString("output_file"));
-    auto t0 = WallClock::unixMicros();
+  //{
+  //  cstable::CSTableReader reader(flags.getString("output_file"));
+  //  auto t0 = WallClock::unixMicros();
 
-    cm::AnalyticsQuery aq;
-    cm::CTRByPositionQueryResult res;
-    cm::CTRByPositionQuery q(&aq, &res);
-    aq.scanTable(&reader);
-    auto t1 = WallClock::unixMicros();
-    fnord::iputs("scanned $0 rows in $1 ms", res.rows_scanned, (t1 - t0) / 1000.0f);
-    for (const auto& p : res.counters) {
-      fnord::iputs(
-         "pos: $0, views: $1, clicks: $2, ctr: $3", 
-          p.first, p.second.num_views,
-          p.second.num_clicks,
-          p.second.num_clicks / (double) p.second.num_views);
-    }
-  }
+  //  cm::AnalyticsQuery aq;
+  //  cm::CTRByPositionRollupResult res;
+  //  cm::CTRByPositionRollup q(&aq, &res);
+  //  aq.scanTable(&reader);
+  //  auto t1 = WallClock::unixMicros();
+  //  fnord::iputs("scanned $0 rows in $1 ms", res.rows_scanned, (t1 - t0) / 1000.0f);
+  //  for (const auto& p : res.counters) {
+  //    fnord::iputs(
+  //       "pos: $0, views: $1, clicks: $2, ctr: $3", 
+  //        p.first, p.second.num_views,
+  //        p.second.num_clicks,
+  //        p.second.num_clicks / (double) p.second.num_views);
+  //  }
+  //}
 
   return 0;
 }
