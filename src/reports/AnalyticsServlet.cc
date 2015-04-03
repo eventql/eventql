@@ -68,7 +68,10 @@ void AnalyticsServlet::handleHTTPRequest(
       .name = "PL Traffic"
   };
 
-  pl_traffic.rules.emplace_back("query.language", TrafficSegmentOp::MATCHES, "pl");
+  pl_traffic.rules.emplace_back(
+      "queries.language",
+      TrafficSegmentOp::MATCHES_UINT32,
+      StringUtil::toString((uint32_t) languageFromString("pl")));
 
   q.segments.emplace_back(all_traffic);
   q.segments.emplace_back(pl_traffic);
