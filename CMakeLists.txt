@@ -420,7 +420,8 @@ add_executable(cm-reportserver
     $<TARGET_OBJECTS:fnord-cstable>
     3rdparty/libfnord/fnord-sstable/SSTableServlet.cc
     src/analytics/AnalyticsQuery.cc
-    src/analytics/CTRByPositionQuery.cc
+    src/analytics/CTRByPositionRollup.cc
+    src/analytics/TrafficSegment.cc
     src/reports/CTRStatsServlet.cc
     src/reports/CTRByPositionServlet.cc
     src/reports/CTRByPageServlet.cc
@@ -484,7 +485,8 @@ add_executable(cm-jqcolumnize
     $<TARGET_OBJECTS:fnord-cstable>
     $<TARGET_OBJECTS:fnord-sstable>
     src/analytics/AnalyticsQuery.cc
-    src/analytics/CTRByPositionQuery.cc
+    src/analytics/TrafficSegment.cc
+    src/analytics/CTRByPositionRollup.cc
     src/cm-jqcolumnize.cc)
 
 target_link_libraries(cm-jqcolumnize

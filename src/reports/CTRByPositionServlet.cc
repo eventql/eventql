@@ -13,7 +13,8 @@
 #include "fnord-base/logging.h"
 #include "fnord-base/wallclock.h"
 #include "fnord-base/io/fileutil.h"
-#include "analytics/CTRByPositionQuery.h"
+#include "analytics/CTRByPositionRollup.h"
+#include "analytics/TrafficSegment.h"
 
 using namespace fnord;
 
@@ -82,10 +83,18 @@ void CTRByPositionServlet::handleHTTPRequest(
   /* execute query*/
   auto t0 = WallClock::unixMicros();
 
-  cm::CTRByPositionQueryResult result;
+  cm::CTRByPositionRollupResult result;
   std::mutex mutex;
   size_t num_threads = 0;
   std::condition_variable cv;
+
+  TrafficSegmentParams all_traffic {
+      .key  = "all_traffic",
+      .name = "All Traffic"
+  };
+
+  Vector<TrafficSegmentParams> segments;
+  segments.emplace_back(all_traffic);
 
   for (uint64_t i = end_time; i >= start_time; i -= kMicrosPerHour * 4) {
     auto table_file = StringUtil::format(
@@ -108,11 +117,17 @@ void CTRByPositionServlet::handleHTTPRequest(
     }
 
     ++num_threads;
-    auto t = std::thread([table_file, &mutex, &result, &num_threads, &cv] () {
+    auto t = std::thread([table_file, &mutex, &result, &num_threads, &cv, segments] () {
       cstable::CSTableReader reader(table_file);
       cm::AnalyticsQuery aq;
-      cm::CTRByPositionQueryResult r;
-      cm::CTRByPositionQuery q(&aq, &r);
+
+      Vector<RefPtr<cm::TrafficSegment>> segs;
+      for (const auto& s : segments) {
+        segs.emplace_back(new TrafficSegment(s));
+      }
+
+      cm::CTRByPositionRollupResult r;
+      cm::CTRByPositionRollup q(&aq, segs, &r);
       aq.scanTable(&reader);
 
       std::unique_lock<std::mutex> lk(mutex);
@@ -130,14 +145,6 @@ void CTRByPositionServlet::handleHTTPRequest(
     cv.wait(lk);
   }
 
-  uint64_t total_views = 0;
-  uint64_t total_clicks = 0;
-
-  for (const auto& c : result.counters) {
-    total_views += c.second.num_views;
-    total_clicks += c.second.num_clicks;
-  }
-
   auto t1 = WallClock::unixMicros();
 
   /* write response */
@@ -152,37 +159,24 @@ void CTRByPositionServlet::handleHTTPRequest(
   json.addObjectEntry("execution_time_ms");
   json.addFloat((t1 - t0) / 1000.0f);
   json.addComma();
-  json.addObjectEntry("results");
+
+  json.addObjectEntry("segments");
   json.beginArray();
-
-  int n = 0;
-  for (const auto& c : result.counters) {
-    if (++n > 1) {
-      json.addComma();
-    }
-
+  for (int i = 0; i < segments.size(); ++i) {
+    if (i > 0) json.addComma();
     json.beginObject();
-    json.addObjectEntry("position");
-    json.addInteger(c.first);
+    json.addObjectEntry("key");
+    json.addString(segments[i].key);
     json.addComma();
-    json.addObjectEntry("views");
-    json.addInteger(c.second.num_views);
-    json.addComma();
-    json.addObjectEntry("clicks");
-    json.addInteger(c.second.num_clicks);
-    json.addComma();
-    json.addObjectEntry("ctr");
-    json.addFloat(c.second.num_clicks / (double) c.second.num_views);
-    json.addComma();
-    json.addObjectEntry("ctr_base");
-    json.addFloat(c.second.num_clicks / (double) total_views);
-    json.addComma();
-    json.addObjectEntry("clickshare");
-    json.addFloat(c.second.num_clicks / (double) total_clicks);
+    json.addObjectEntry("name");
+    json.addString(segments[i].name);
     json.endObject();
   }
-
   json.endArray();
+  json.addComma();
+
+  json.addObjectEntry("results");
+  result.toJSON(&json);
   json.endObject();
 }
 
