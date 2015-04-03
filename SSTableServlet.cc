@@ -111,9 +111,7 @@ void SSTableServlet::scan(
   }
 
   Buffer buf;
-  json::JSONOutputStream json(
-      static_cast<std::shared_ptr<OutputStream>>(
-          BufferOutputStream::fromBuffer(&buf)));
+  json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
 
   auto headers = sstable_scan.columnNames();
 
