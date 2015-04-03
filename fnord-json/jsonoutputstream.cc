@@ -19,11 +19,6 @@ namespace fnord {
 namespace json {
 
 JSONOutputStream::JSONOutputStream(
-    std::shared_ptr<OutputStream> output_stream) :
-    output_(output_stream) {
-}
-
-JSONOutputStream::JSONOutputStream(
     std::unique_ptr<OutputStream> output_stream) {
   output_.reset(output_stream.release());
 }
