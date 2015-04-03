@@ -88,6 +88,7 @@ int main(int argc, const char** argv) {
 
   /* start http server */
   fnord::thread::EventLoop ev;
+  fnord::thread::ThreadPool tpool;
   fnord::http::HTTPRouter http_router;
   fnord::http::HTTPServer http_server(&http_router, &ev);
   http_server.listen(flags.getInt("http_port"));
@@ -111,7 +112,7 @@ int main(int argc, const char** argv) {
   /* analytics */
   cm::AnalyticsQueryEngine analytics(8, &vfs);
   cm::AnalyticsServlet analytics_servlet(&analytics);
-  http_router.addRouteByPrefixMatch("/analytics", &analytics_servlet);
+  http_router.addRouteByPrefixMatch("/analytics", &analytics_servlet, &tpool);
 
   analytics.registerQueryFactory("ctr_by_position", [] (
       const cm::AnalyticsQuery& query,
