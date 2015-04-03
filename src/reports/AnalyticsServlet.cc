@@ -31,6 +31,20 @@ void AnalyticsServlet::handleHTTPRequest(
     http::HTTPRequest* req,
     http::HTTPResponse* res) {
   URI uri(req->uri());
+
+  if (uri.path() == "/analytics/query") {
+    executeQuery(uri, req, res);
+    return;
+  }
+
+  res->setStatus(fnord::http::kStatusNotFound);
+  res->addBody("not found");
+}
+
+void AnalyticsServlet::executeQuery(
+    const URI& uri,
+    http::HTTPRequest* req,
+    http::HTTPResponse* res) {
   const auto& params = uri.queryParams();
 
   AnalyticsQuery q;

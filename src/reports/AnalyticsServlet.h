@@ -28,6 +28,12 @@ public:
       fnord::http::HTTPResponse* res);
 
 protected:
+
+  void executeQuery(
+      const URI& uri,
+      http::HTTPRequest* req,
+      http::HTTPResponse* res);
+
   AnalyticsQueryEngine* engine_;
 };
 
