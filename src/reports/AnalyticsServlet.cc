@@ -31,6 +31,69 @@ void AnalyticsServlet::handleHTTPRequest(
     http::HTTPRequest* req,
     http::HTTPResponse* res) {
   URI uri(req->uri());
+
+  if (uri.path() == "/analytics/query_status") {
+    fetchQueryStatus(uri, req, res);
+    return;
+  }
+
+  if (uri.path() == "/analytics/query") {
+    executeQuery(uri, req, res);
+    return;
+  }
+
+  res->setStatus(fnord::http::kStatusNotFound);
+  res->addBody("not found");
+}
+
+void AnalyticsServlet::fetchQueryStatus(
+    const URI& uri,
+    http::HTTPRequest* req,
+    http::HTTPResponse* res) {
+  const auto& params = uri.queryParams();
+
+  String txid;
+  if (!URI::getParam(params, "txid", &txid)) {
+    res->addBody("error: missing ?txid=... parameter");
+    res->setStatus(http::kStatusBadRequest);
+    return;
+  }
+
+  auto status = engine_->queryStatus(txid);
+
+  res->setStatus(http::kStatusOK);
+  res->addHeader("Content-Type", "application/json; charset=utf-8");
+  json::JSONOutputStream json(res->getBodyOutputStream());
+  json.beginObject();
+  json.addObjectEntry("status");
+  if (status.isEmpty()) {
+    json.addString("unknown");
+  } else {
+    auto progress =
+        status.get().completed_chunks / (double) status.get().total_chunks;
+
+    auto message = StringUtil::format(
+        "Running... $0% ($1/$2)",
+        progress * 100,
+        status.get().completed_chunks,
+        (double) status.get().total_chunks);
+
+    json.addString("running");
+    json.addComma();
+    json.addObjectEntry("progress");
+    json.addFloat(progress);
+    json.addComma();
+    json.addObjectEntry("message");
+    json.addString(message);
+  }
+
+  json.endObject();
+}
+
+void AnalyticsServlet::executeQuery(
+    const URI& uri,
+    http::HTTPRequest* req,
+    http::HTTPResponse* res) {
   const auto& params = uri.queryParams();
 
   AnalyticsQuery q;
@@ -53,31 +116,24 @@ void AnalyticsServlet::handleHTTPRequest(
       q.end_time = std::stoul(p.second) * kMicrosPerSecond;
       continue;
     }
+
+    if (p.first == "query") {
+      q.queries.emplace_back(AnalyticsQuery::SubQueryParams {
+          .query_type = p.second });
+      continue;
+    }
+
+    if (p.first == "txid") {
+      q.txid = p.second;
+      continue;
+    }
   }
 
-
-
-
-  TrafficSegmentParams all_traffic {
-      .key  = "all_traffic",
-      .name = "All Traffic"
-  };
-
-  TrafficSegmentParams pl_traffic {
-      .key  = "pl_traffic",
-      .name = "PL Traffic"
-  };
-
-  pl_traffic.rules.emplace_back("query.language", TrafficSegmentOp::MATCHES, "pl");
-
-  q.segments.emplace_back(all_traffic);
-  q.segments.emplace_back(pl_traffic);
-
-  AnalyticsQuery::SubQueryParams byposi;
-  byposi.query_type = "ctr_by_position";
-
-  q.queries.emplace_back(byposi);
-
+  if (q.segments.size() == 0) {
+    q.segments.emplace_back(TrafficSegmentParams {
+        .key  = "all_traffic",
+        .name = "All Traffic" });
+  }
 
   /* execute query */
   AnalyticsQueryResult result(q);
