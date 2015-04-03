@@ -108,7 +108,7 @@ int main(int argc, const char** argv) {
   });
 
   /* analytics */
-  cm::AnalyticsQueryEngine analytics(8);
+  cm::AnalyticsQueryEngine analytics(8, &vfs);
   cm::AnalyticsServlet analytics_servlet(&analytics);
   http_router.addRouteByPrefixMatch("/analytics", &analytics_servlet);
 
