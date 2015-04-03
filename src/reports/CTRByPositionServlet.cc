@@ -41,13 +41,6 @@ void CTRByPositionServlet::handleHTTPRequest(
     return;
   }
 
-  String lang_str;
-  if (!URI::getParam(params, "lang", &lang_str)) {
-    res->addBody("error: missing ?lang=... parameter");
-    res->setStatus(http::kStatusBadRequest);
-    return;
-  }
-
   for (const auto& p : params) {
     if (p.first == "from") {
       start_time = std::stoul(p.second) * kMicrosPerSecond;
