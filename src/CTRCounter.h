@@ -26,6 +26,8 @@ struct CTRCounterData {
 
   CTRCounterData();
   void merge(const CTRCounterData& other);
+  void encode(util::BinaryMessageWriter* writer) const;
+  void decode(util::BinaryMessageReader* reader);
 
   uint64_t num_views;
   uint64_t num_clicked;
