@@ -420,6 +420,9 @@ add_executable(cm-reportserver
     $<TARGET_OBJECTS:fnord-cstable>
     3rdparty/libfnord/fnord-sstable/SSTableServlet.cc
     src/analytics/AnalyticsTableScan.cc
+    src/analytics/AnalyticsQuery.cc
+    src/analytics/AnalyticsQueryEngine.cc
+    src/analytics/AnalyticsQueryResult.cc
     src/analytics/CTRByPositionRollup.cc
     src/analytics/TrafficSegment.cc
     src/reports/CTRStatsServlet.cc

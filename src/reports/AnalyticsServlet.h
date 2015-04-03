@@ -16,23 +16,19 @@ using namespace fnord;
 
 namespace cm {
 
-/**
- *  GET /reports/ctr_by_position
- *
- *    params: customer, language, start_time, end_time, device_type..., test_group...
- *
- */
+class AnalyticsQueryEngine;
+
 class AnalyticsServlet : public fnord::http::HTTPService {
 public:
 
-  AnalyticsServlet(VFS* vfs);
+  AnalyticsServlet(AnalyticsQueryEngine* vfs);
 
   void handleHTTPRequest(
       fnord::http::HTTPRequest* req,
       fnord::http::HTTPResponse* res);
 
 protected:
-  VFS* vfs_;
+  AnalyticsQueryEngine* engine_;
 };
 
 }
