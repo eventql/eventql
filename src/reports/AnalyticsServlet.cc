@@ -53,34 +53,19 @@ void AnalyticsServlet::handleHTTPRequest(
       q.end_time = std::stoul(p.second) * kMicrosPerSecond;
       continue;
     }
+
+    if (p.first == "query") {
+      q.queries.emplace_back(AnalyticsQuery::SubQueryParams {
+          .query_type = p.second });
+      continue;
+    }
   }
 
-
-
-
-  TrafficSegmentParams all_traffic {
-      .key  = "all_traffic",
-      .name = "All Traffic"
-  };
-
-  TrafficSegmentParams pl_traffic {
-      .key  = "pl_traffic",
-      .name = "PL Traffic"
-  };
-
-  pl_traffic.rules.emplace_back(
-      "queries.language",
-      TrafficSegmentOp::MATCHES_UINT32,
-      StringUtil::toString((uint32_t) languageFromString("pl")));
-
-  q.segments.emplace_back(all_traffic);
-  q.segments.emplace_back(pl_traffic);
-
-  AnalyticsQuery::SubQueryParams byposi;
-  byposi.query_type = "ctr_by_position";
-
-  q.queries.emplace_back(byposi);
-
+  if (q.segments.size() == 0) {
+    q.segments.emplace_back(TrafficSegmentParams {
+        .key  = "all_traffic",
+        .name = "All Traffic" });
+  }
 
   /* execute query */
   AnalyticsQueryResult result(q);
