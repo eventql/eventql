@@ -35,7 +35,7 @@
 #include "FeatureSchema.h"
 #include "JoinedQuery.h"
 #include "CTRCounter.h"
-#include "analytics/AnalyticsQuery.h"
+#include "analytics/AnalyticsTableScan.h"
 #include "analytics/CTRByPositionRollup.h"
 
 using namespace fnord;
@@ -197,7 +197,7 @@ int main(int argc, const char** argv) {
   //  cstable::CSTableReader reader(flags.getString("output_file"));
   //  auto t0 = WallClock::unixMicros();
 
-  //  cm::AnalyticsQuery aq;
+  //  cm::AnalyticsTableScan aq;
   //  cm::CTRByPositionRollupResult res;
   //  cm::CTRByPositionRollup q(&aq, &res);
   //  aq.scanTable(&reader);
