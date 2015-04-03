@@ -180,12 +180,18 @@ int main(int argc, const char** argv) {
 
   status_line.runForce();
 
-  cstable::CSTableWriter writer(flags.getString("output_file"), n);
-  writer.addColumn("queries.page", &jq_page_col);
-  writer.addColumn("queries.language", &jq_lang_col);
-  writer.addColumn("queries.items.position", &jqi_position_col);
-  writer.addColumn("queries.items.clicked", &jqi_clicked_col);
-  writer.commit();
+  {
+    cstable::CSTableWriter writer(flags.getString("output_file") + "~", n);
+    writer.addColumn("queries.page", &jq_page_col);
+    writer.addColumn("queries.language", &jq_lang_col);
+    writer.addColumn("queries.items.position", &jqi_position_col);
+    writer.addColumn("queries.items.clicked", &jqi_clicked_col);
+    writer.commit();
+  }
+
+  FileUtil::mv(
+      flags.getString("output_file") + "~",
+      flags.getString("output_file"));
 
   {
     cstable::CSTableReader reader(flags.getString("output_file"));
