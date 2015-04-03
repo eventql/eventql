@@ -73,6 +73,11 @@ void AnalyticsServlet::handleHTTPRequest(
   q.segments.emplace_back(all_traffic);
   q.segments.emplace_back(pl_traffic);
 
+  AnalyticsQuery::SubQueryParams byposi;
+  byposi.query_type = "ctr_by_position";
+
+  q.queries.emplace_back(byposi);
+
 
   /* execute query */
   AnalyticsQueryResult result(q);
