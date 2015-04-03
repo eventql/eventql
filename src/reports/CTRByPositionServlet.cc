@@ -93,8 +93,16 @@ void CTRByPositionServlet::handleHTTPRequest(
       .name = "All Traffic"
   };
 
+  TrafficSegmentParams pl_traffic {
+      .key  = "pl_traffic",
+      .name = "PL Traffic"
+  };
+
+  pl_traffic.rules.emplace_back("query.language", TrafficSegmentOp::MATCHES, "pl");
+
   Vector<TrafficSegmentParams> segments;
   segments.emplace_back(all_traffic);
+  segments.emplace_back(pl_traffic);
 
   for (uint64_t i = end_time; i >= start_time; i -= kMicrosPerHour * 4) {
     auto table_file = StringUtil::format(
@@ -164,13 +172,7 @@ void CTRByPositionServlet::handleHTTPRequest(
   json.beginArray();
   for (int i = 0; i < segments.size(); ++i) {
     if (i > 0) json.addComma();
-    json.beginObject();
-    json.addObjectEntry("key");
-    json.addString(segments[i].key);
-    json.addComma();
-    json.addObjectEntry("name");
-    json.addString(segments[i].name);
-    json.endObject();
+    segments[i].toJSON(&json);
   }
   json.endArray();
   json.addComma();
