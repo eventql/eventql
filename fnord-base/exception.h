@@ -93,6 +93,8 @@ public:
   bool ofType(const char* type_name);
   Exception setErrno(int posix_errno);
 
+  const char* what() const noexcept override;
+
 private:
   const char* type_name_;
   const char* file_;

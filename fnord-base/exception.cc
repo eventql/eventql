@@ -116,6 +116,10 @@ void Exception::debugPrint(OutputStream* os /* = nullptr */) const {
           line_));
 }
 
+const char* Exception::what() const noexcept {
+  return message_;
+}
+
 bool Exception::ofType(const char* type_name) {
   return strcmp(type_name_, type_name) == 0;
 }
