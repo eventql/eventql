@@ -41,6 +41,7 @@
 #include "reports/AnalyticsServlet.h"
 #include "reports/CTRByPageServlet.h"
 #include "reports/CTRStatsServlet.h"
+#include "analytics/CTRByPositionRollup.h"
 #include "analytics/AnalyticsQueryEngine.h"
 
 using namespace fnord;
@@ -111,6 +112,14 @@ int main(int argc, const char** argv) {
   cm::AnalyticsQueryEngine analytics(8, &vfs);
   cm::AnalyticsServlet analytics_servlet(&analytics);
   http_router.addRouteByPrefixMatch("/analytics", &analytics_servlet);
+
+  analytics.registerQueryFactory("ctr_by_position", [] (
+      const cm::AnalyticsQuery& query,
+      const cm::AnalyticsQuery::SubQueryParams params,
+      const Vector<RefPtr<cm::TrafficSegment>>& segments,
+      cm::AnalyticsTableScan* scan) {
+    return new cm::CTRByPositionRollup(scan, segments);
+  });
 
   ev.run();
   return 0;
