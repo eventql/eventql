@@ -74,10 +74,9 @@ void AnalyticsServlet::handleHTTPRequest(
   q.segments.emplace_back(pl_traffic);
 
 
-
   /* execute query */
-  AnalyticsQueryResult result;
-  engine_->executeQuery(q, &result);
+  AnalyticsQueryResult result(q);
+  engine_->executeQuery(&result);
 
   /* write response */
   res->setStatus(http::kStatusOK);
