@@ -22,7 +22,6 @@ namespace json {
 class JSONOutputStream {
 public:
 
-  JSONOutputStream(std::shared_ptr<OutputStream> output_stream);
   JSONOutputStream(std::unique_ptr<OutputStream> output_stream);
 
   void write(const JSONObject& obj);
