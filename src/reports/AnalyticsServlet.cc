@@ -32,6 +32,11 @@ void AnalyticsServlet::handleHTTPRequest(
     http::HTTPResponse* res) {
   URI uri(req->uri());
 
+  if (uri.path() == "/analytics/query_status") {
+    fetchQueryStatus(uri, req, res);
+    return;
+  }
+
   if (uri.path() == "/analytics/query") {
     executeQuery(uri, req, res);
     return;
@@ -41,12 +46,57 @@ void AnalyticsServlet::handleHTTPRequest(
   res->addBody("not found");
 }
 
+void AnalyticsServlet::fetchQueryStatus(
+    const URI& uri,
+    http::HTTPRequest* req,
+    http::HTTPResponse* res) {
+  const auto& params = uri.queryParams();
+
+  String txid;
+  if (!URI::getParam(params, "txid", &txid)) {
+    res->addBody("error: missing ?txid=... parameter");
+    res->setStatus(http::kStatusBadRequest);
+    return;
+  }
+
+  auto status = engine_->queryStatus(txid);
+
+  res->setStatus(http::kStatusOK);
+  res->addHeader("Content-Type", "application/json; charset=utf-8");
+  json::JSONOutputStream json(res->getBodyOutputStream());
+  json.beginObject();
+  json.addObjectEntry("status");
+  if (status.isEmpty()) {
+    json.addString("unknown");
+  } else {
+    auto progress =
+        status.get().completed_chunks / (double) status.get().total_chunks;
+
+    auto message = StringUtil::format(
+        "Running... $0% ($1/$2)",
+        progress * 100,
+        status.get().completed_chunks,
+        (double) status.get().total_chunks);
+
+    json.addString("running");
+    json.addComma();
+    json.addObjectEntry("progress");
+    json.addFloat(progress);
+    json.addComma();
+    json.addObjectEntry("message");
+    json.addString(message);
+  }
+
+  json.endObject();
+}
+
 void AnalyticsServlet::executeQuery(
     const URI& uri,
     http::HTTPRequest* req,
     http::HTTPResponse* res) {
   const auto& params = uri.queryParams();
 
+  String txid;
   AnalyticsQuery q;
   q.end_time = WallClock::unixMicros();
   q.start_time = q.end_time - 30 * kMicrosPerDay;
@@ -73,6 +123,11 @@ void AnalyticsServlet::executeQuery(
           .query_type = p.second });
       continue;
     }
+
+    if (p.first == "txid") {
+      txid = p.second;
+      continue;
+    }
   }
 
   if (q.segments.size() == 0) {
@@ -83,7 +138,7 @@ void AnalyticsServlet::executeQuery(
 
   /* execute query */
   AnalyticsQueryResult result(q);
-  engine_->executeQuery(&result);
+  engine_->executeQuery(&result, txid);
 
   /* write response */
   res->setStatus(http::kStatusOK);
