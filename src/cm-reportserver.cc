@@ -38,7 +38,7 @@
 #include "CustomerNamespace.h"
 #include "FeatureSchema.h"
 #include "JoinedQuery.h"
-#include "reports/CTRByPositionServlet.h"
+#include "reports/AnalyticsServlet.h"
 #include "reports/CTRByPageServlet.h"
 #include "reports/CTRStatsServlet.h"
 
@@ -107,7 +107,7 @@ int main(int argc, const char** argv) {
   });
 
   /* ctr by position */
-  cm::CTRByPositionServlet ctr_by_pos(&vfs);
+  cm::AnalyticsServlet ctr_by_pos(&vfs);
   http_router.addRouteByPrefixMatch("/reports/ctr_by_position", &ctr_by_pos);
 
   /* ctr by page */

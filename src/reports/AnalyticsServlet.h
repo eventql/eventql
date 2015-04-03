@@ -22,10 +22,10 @@ namespace cm {
  *    params: customer, language, start_time, end_time, device_type..., test_group...
  *
  */
-class CTRByPositionServlet : public fnord::http::HTTPService {
+class AnalyticsServlet : public fnord::http::HTTPService {
 public:
 
-  CTRByPositionServlet(VFS* vfs);
+  AnalyticsServlet(VFS* vfs);
 
   void handleHTTPRequest(
       fnord::http::HTTPRequest* req,

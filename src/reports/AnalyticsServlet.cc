@@ -7,7 +7,7 @@
  * permission is obtained.
  */
 #include <thread>
-#include "CTRByPositionServlet.h"
+#include "AnalyticsServlet.h"
 #include "CTRCounter.h"
 #include "fnord-base/Language.h"
 #include "fnord-base/logging.h"
@@ -20,9 +20,9 @@ using namespace fnord;
 
 namespace cm {
 
-CTRByPositionServlet::CTRByPositionServlet(VFS* vfs) : vfs_(vfs) {}
+AnalyticsServlet::AnalyticsServlet(VFS* vfs) : vfs_(vfs) {}
 
-void CTRByPositionServlet::handleHTTPRequest(
+void AnalyticsServlet::handleHTTPRequest(
     http::HTTPRequest* req,
     http::HTTPResponse* res) {
   URI uri(req->uri());
