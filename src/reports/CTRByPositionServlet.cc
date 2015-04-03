@@ -120,7 +120,7 @@ void CTRByPositionServlet::handleHTTPRequest(
     ++num_threads;
     auto t = std::thread([table_file, &mutex, &result, &num_threads, &cv, segments] () {
       cstable::CSTableReader reader(table_file);
-      cm::AnalyticsQuery aq;
+      cm::AnalyticsTableScan aq;
 
       Vector<RefPtr<cm::TrafficSegment>> segs;
       for (const auto& s : segments) {
