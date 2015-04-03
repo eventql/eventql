@@ -41,6 +41,7 @@
 #include "reports/AnalyticsServlet.h"
 #include "reports/CTRByPageServlet.h"
 #include "reports/CTRStatsServlet.h"
+#include "analytics/AnalyticsQueryEngine.h"
 
 using namespace fnord;
 
@@ -106,17 +107,10 @@ int main(int argc, const char** argv) {
     return true;
   });
 
-  /* ctr by position */
-  cm::AnalyticsServlet ctr_by_pos(&vfs);
-  http_router.addRouteByPrefixMatch("/reports/ctr_by_position", &ctr_by_pos);
-
-  /* ctr by page */
-  cm::CTRByPageServlet ctr_by_page(&vfs);
-  http_router.addRouteByPrefixMatch("/reports/ctr_by_page", &ctr_by_page);
-
-  /* ctr stats */
-  cm::CTRStatsServlet ctr_stats(&vfs);
-  http_router.addRouteByPrefixMatch("/reports/ctr_stats", &ctr_stats);
+  /* analytics */
+  cm::AnalyticsQueryEngine analytics(8);
+  cm::AnalyticsServlet analytics_servlet(&analytics);
+  http_router.addRouteByPrefixMatch("/analytics", &analytics_servlet);
 
   ev.run();
   return 0;
