@@ -96,7 +96,6 @@ void AnalyticsServlet::executeQuery(
     http::HTTPResponse* res) {
   const auto& params = uri.queryParams();
 
-  String txid;
   AnalyticsQuery q;
   q.end_time = WallClock::unixMicros();
   q.start_time = q.end_time - 30 * kMicrosPerDay;
@@ -125,7 +124,7 @@ void AnalyticsServlet::executeQuery(
     }
 
     if (p.first == "txid") {
-      txid = p.second;
+      q.txid = p.second;
       continue;
     }
   }
@@ -138,7 +137,7 @@ void AnalyticsServlet::executeQuery(
 
   /* execute query */
   AnalyticsQueryResult result(q);
-  engine_->executeQuery(&result, txid);
+  engine_->executeQuery(&result);
 
   /* write response */
   res->setStatus(http::kStatusOK);
