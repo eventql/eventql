@@ -40,6 +40,16 @@ void const* BinaryMessageReader::read(size_t size) {
   return static_cast<void const*>(readString(size));
 }
 
+template <>
+uint16_t const* BinaryMessageReader::readValue<uint16_t>() {
+  return readUInt16();
+}
+
+template <>
+uint32_t const* BinaryMessageReader::readValue<uint32_t>() {
+  return readUInt32();
+}
+
 char const* BinaryMessageReader::readString(size_t size) {
   if ((pos_ + size) > size_) {
     RAISE(kBufferOverflowError, "requested read exceeds message bounds");
@@ -65,7 +75,6 @@ void BinaryMessageReader::seekTo(size_t pos) {
 size_t BinaryMessageReader::remaining() const {
   return size_ - pos_;
 }
-
 
 }
 }

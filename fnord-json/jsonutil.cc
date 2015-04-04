@@ -120,6 +120,18 @@ JSONObject::const_iterator JSONUtil::arrayLookup(
   return end;
 }
 
+Option<String> JSONUtil::arrayGetString(
+    JSONObject::const_iterator begin,
+    JSONObject::const_iterator end,
+    size_t index) {
+  auto iter = arrayLookup(begin, end, index);
+
+  if (iter != end && iter->type == JSON_STRING) {
+    return Some(iter->data);
+  } else {
+    return None<String>();
+  }
+}
 
 }
 }
