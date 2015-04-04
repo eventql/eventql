@@ -38,8 +38,8 @@
 #include "analytics/AnalyticsTableScan.h"
 #include "analytics/CTRByPositionQuery.h"
 
+using namespace cm;
 using namespace fnord;
-
 
 int main(int argc, const char** argv) {
   fnord::Application::init();
@@ -83,11 +83,14 @@ int main(int argc, const char** argv) {
   size_t debug_z = 0;
 
   /* query level */
+  cstable::UInt32ColumnWriter jq_time_col(1, 1, 0xffffffff);
   cstable::UInt32ColumnWriter jq_page_col(1, 1, 100);
   cstable::UInt32ColumnWriter jq_lang_col(1, 1, kMaxLanguage);
   cstable::UInt32ColumnWriter jq_numitems_col(1, 1, 250);
   cstable::UInt32ColumnWriter jq_numitemclicks_col(1, 1, 250);
   cstable::UInt32ColumnWriter jq_abtestgroup_col(1, 1, 100);
+  cstable::UInt32ColumnWriter jq_devicetype_col(1, 1, kMaxDeviceType);
+  cstable::UInt32ColumnWriter jq_pagetype_col(1, 1, kMaxPageType);
 
   /* query item level */
   cstable::UInt32ColumnWriter jqi_position_col(2, 2, 64);
@@ -100,6 +103,9 @@ int main(int argc, const char** argv) {
     ++n;
 
     for (const auto& q : sess.queries) {
+      /* queries.time */
+      jq_time_col.addDatum(r, 1, q.time.unixMicros() / kMicrosPerSecond);
+
       /* queries.num_item_clicks, queries.num_items */
       size_t nitems = 0;
       size_t nclicks = 0;
@@ -125,6 +131,12 @@ int main(int argc, const char** argv) {
       } else {
         jq_abtestgroup_col.addDatum(r, 1, abgrp.get());
       }
+
+      /* queries.device_type */
+      jq_devicetype_col.addDatum(r, 1, (uint32_t) extractDeviceType(q.attrs));
+
+      /* queries.page_type */
+      jq_pagetype_col.addDatum(r, 1, (uint32_t) extractPageType(q.attrs));
 
       /* queries.language */
       auto lang = cm::extractLanguage(q.attrs);
@@ -205,11 +217,14 @@ int main(int argc, const char** argv) {
 
   {
     cstable::CSTableWriter writer(flags.getString("output_file") + "~", n);
+    writer.addColumn("queries.time", &jq_time_col);
     writer.addColumn("queries.page", &jq_page_col);
     writer.addColumn("queries.language", &jq_lang_col);
     writer.addColumn("queries.num_items", &jq_numitems_col);
     writer.addColumn("queries.num_items_clicked", &jq_numitemclicks_col);
     writer.addColumn("queries.ab_test_group", &jq_abtestgroup_col);
+    writer.addColumn("queries.device_type", &jq_devicetype_col);
+    writer.addColumn("queries.page_type", &jq_pagetype_col);
     writer.addColumn("queries.items.position", &jqi_position_col);
     writer.addColumn("queries.items.clicked", &jqi_clicked_col);
     writer.commit();
