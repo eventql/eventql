@@ -18,10 +18,10 @@
 namespace fnord {
 namespace cstable {
 
-class UInt32ColumnWriter : public ColumnWriter {
+class BitPackedIntColumnWriter : public ColumnWriter {
 public:
 
-  UInt32ColumnWriter(
+  BitPackedIntColumnWriter(
       uint64_t r_max,
       uint64_t d_max,
       uint32_t max_value = 0xffffffff);
