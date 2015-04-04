@@ -25,6 +25,7 @@ bool isReservedPixelParam(const std::string param);
 Option<String> extractAttr(const Vector<String>& attrs, const String& attr);
 String extractDeviceType(const Vector<String>& attrs);
 String extractTestGroup(const Vector<String>& attrs);
+Option<uint32_t> extractABTestGroup(const Vector<String>& attrs);
 Language extractLanguage(const Vector<String>& attrs);
 String extractPageType(const Vector<String>& attrs);
 

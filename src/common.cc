@@ -80,6 +80,16 @@ String extractTestGroup(const Vector<String>& attrs) {
   return test_group.isEmpty() ? "unknown" : test_group.get();
 }
 
+Option<uint32_t> extractABTestGroup(const Vector<String>& attrs) {
+  auto test_group = extractAttr(attrs, "dw_ab");
+
+  if (test_group.isEmpty()) {
+    return None<uint32_t>();
+  } else {
+    return Some<uint32_t>(std::stoul(test_group.get()));
+  }
+}
+
 Language extractLanguage(const Vector<String>& attrs) {
   auto l = extractAttr(attrs, "l");
 
