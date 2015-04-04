@@ -198,7 +198,7 @@ int main(int argc, const char** argv) {
   //  auto t0 = WallClock::unixMicros();
 
   //  cm::AnalyticsTableScan aq;
-  //  cm::CTRByPositionQueryResult res;
+  //  cm::CTRByGroupResult res;
   //  cm::CTRByPositionQuery q(&aq, &res);
   //  aq.scanTable(&reader);
   //  auto t1 = WallClock::unixMicros();
