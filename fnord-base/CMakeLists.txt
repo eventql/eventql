@@ -75,6 +75,7 @@ add_library(fnord-base OBJECT
     thread/wakeup.cc
     uri.cc
     UTF8.cc
+    util/Base64.cc
     util/binarymessagereader.cc
     util/binarymessagewriter.cc
     util/BitPackDecoder.cc
