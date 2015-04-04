@@ -43,6 +43,7 @@
 #include "analytics/CTRStatsServlet.h"
 #include "analytics/CTRByPositionQuery.h"
 #include "analytics/CTRByPageQuery.h"
+#include "analytics/DiscoveryKPIQuery.h"
 #include "analytics/AnalyticsQueryEngine.h"
 
 using namespace fnord;
@@ -130,6 +131,16 @@ int main(int argc, const char** argv) {
       cm::AnalyticsTableScan* scan) {
     return new cm::CTRByPageQuery(scan, segments);
   });
+
+  analytics.registerQueryFactory("discovery_kpis", [] (
+      const cm::AnalyticsQuery& query,
+      const cm::AnalyticsQuery::SubQueryParams params,
+      const Vector<RefPtr<cm::TrafficSegment>>& segments,
+      cm::AnalyticsTableScan* scan) {
+    return new cm::DiscoveryKPIQuery(scan, segments);
+  });
+
+
 
   ev.run();
   return 0;
