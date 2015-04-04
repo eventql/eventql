@@ -25,7 +25,7 @@ public:
       uint64_t r_max,
       uint64_t d_max);
 
-  void addDatum(uint64_t rep_level, uint64_t def_level, uint16_t value);
+  void addDatum(uint64_t rep_level, uint64_t def_level, uint32_t value);
   void addNull(uint64_t rep_level, uint64_t def_level);
   void commit();
 
