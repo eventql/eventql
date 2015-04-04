@@ -423,6 +423,7 @@ add_executable(cm-reportserver
     src/analytics/AnalyticsQuery.cc
     src/analytics/AnalyticsQueryEngine.cc
     src/analytics/AnalyticsQueryResult.cc
+    src/analytics/CTRByPageQuery.cc
     src/analytics/CTRByPositionQuery.cc
     src/analytics/TrafficSegment.cc
     src/reports/CTRStatsServlet.cc
