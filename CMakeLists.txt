@@ -385,24 +385,24 @@ add_executable(cm-reportbuild
     src/IndexReader.cc
     src/IndexWriter.cc
     src/FeatureIndexWriter.cc
-    src/reports/Report.cc
-    src/reports/ReportBuilder.cc
-    src/reports/JoinedQueryTableSource.cc
-    src/reports/CTRByPositionMapper.cc
-    src/reports/CTRByPageMapper.cc
-    src/reports/CTRStatsMapper.cc
-    src/reports/CTRCounterTableSink.cc
-    src/reports/CTRCounterTableSource.cc
-    src/reports/CTRCounterMergeReducer.cc
-    src/reports/CTRBySearchQueryMapper.cc
-    src/reports/CTRBySearchTermCrossCategoryMapper.cc
-    src/reports/CTRByQueryAttributeMapper.cc
-    src/reports/RelatedTermsMapper.cc
-    src/reports/TermInfoTableSink.cc
-    src/reports/TermInfoTableSource.cc
-    src/reports/TermInfoMergeReducer.cc
-    src/reports/TermInfo.cc
-    src/reports/TopCategoriesByTermMapper.cc
+    src/analytics/Report.cc
+    src/analytics/ReportBuilder.cc
+    src/analytics/JoinedQueryTableSource.cc
+    src/analytics/CTRByPositionMapper.cc
+    src/analytics/CTRByPageMapper.cc
+    src/analytics/CTRStatsMapper.cc
+    src/analytics/CTRCounterTableSink.cc
+    src/analytics/CTRCounterTableSource.cc
+    src/analytics/CTRCounterMergeReducer.cc
+    src/analytics/CTRBySearchQueryMapper.cc
+    src/analytics/CTRBySearchTermCrossCategoryMapper.cc
+    src/analytics/CTRByQueryAttributeMapper.cc
+    src/analytics/RelatedTermsMapper.cc
+    src/analytics/TermInfoTableSink.cc
+    src/analytics/TermInfoTableSource.cc
+    src/analytics/TermInfoMergeReducer.cc
+    src/analytics/TermInfo.cc
+    src/analytics/TopCategoriesByTermMapper.cc
     src/cm-reportbuild.cc)
 
 target_link_libraries(cm-reportbuild
@@ -426,9 +426,9 @@ add_executable(cm-reportserver
     src/analytics/CTRByPageQuery.cc
     src/analytics/CTRByPositionQuery.cc
     src/analytics/TrafficSegment.cc
-    src/reports/CTRStatsServlet.cc
-    src/reports/AnalyticsServlet.cc
-    src/reports/CTRByPageServlet.cc
+    src/analytics/CTRStatsServlet.cc
+    src/analytics/AnalyticsServlet.cc
+    src/analytics/CTRByPageServlet.cc
     src/cm-reportserver.cc)
 
 target_link_libraries(cm-reportserver
@@ -444,9 +444,9 @@ add_executable(cm-autocompleteserver
     $<TARGET_OBJECTS:fnord-rpc>
     $<TARGET_OBJECTS:fnord-sstable>
     $<TARGET_OBJECTS:fnord-fts>
-    src/reports/Report.cc
-    src/reports/TermInfoTableSource.cc
-    src/reports/TermInfo.cc
+    src/analytics/Report.cc
+    src/analytics/TermInfoTableSource.cc
+    src/analytics/TermInfo.cc
     src/AutoCompleteServlet.cc
     src/cm-autocompleteserver.cc)
 
