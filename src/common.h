@@ -18,18 +18,42 @@ using namespace fnord;
 
 namespace cm {
 
+enum class DeviceType : uint32_t {
+  UNKNOWN = 0,
+  DESKTOP = 1,
+  PHONE = 2,
+  TABLET = 3
+};
+
+const uint32_t kMaxDeviceType = 3;
+
+enum class PageType : uint32_t {
+  UNKNOWN = 0,
+  SEARCH_PAGE = 1,
+  CATALOG_PAGE = 2,
+  PRODUCT_PAGE = 3
+};
+
+const uint32_t kMaxPageType = 3;
+
 std::string cmHostname();
 
 bool isReservedPixelParam(const std::string param);
 
 Option<String> extractAttr(const Vector<String>& attrs, const String& attr);
-String extractDeviceType(const Vector<String>& attrs);
+String extractDeviceTypeString(const Vector<String>& attrs);
+DeviceType extractDeviceType(const Vector<String>& attrs);
 String extractTestGroup(const Vector<String>& attrs);
 Option<uint32_t> extractABTestGroup(const Vector<String>& attrs);
 Language extractLanguage(const Vector<String>& attrs);
-String extractPageType(const Vector<String>& attrs);
+String extractPageTypeString(const Vector<String>& attrs);
+PageType extractPageType(const Vector<String>& attrs);
 
 String joinBagOfWords(const Set<String>& words);
+
+String deviceTypeToString(DeviceType device_type);
+DeviceType deviceTypeFromString(const String& device_type);
+PageType pageTypeFromString(const String& page_type);
 
 enum class FeaturePrep {
   NONE,
@@ -40,6 +64,7 @@ enum class ItemEligibility {
   ALL = 0,
   DAWANDA_ALL_NOBOTS = 1
 };
+
 
 bool isQueryEligible(ItemEligibility eligibility, const cm::JoinedQuery& query);
 
