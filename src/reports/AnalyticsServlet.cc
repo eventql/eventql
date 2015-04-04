@@ -13,7 +13,7 @@
 #include "fnord-base/logging.h"
 #include "fnord-base/wallclock.h"
 #include "fnord-base/io/fileutil.h"
-#include "analytics/CTRByPositionRollup.h"
+#include "analytics/CTRByPositionQuery.h"
 #include "analytics/TrafficSegment.h"
 #include "analytics/AnalyticsQuery.h"
 #include "analytics/AnalyticsQueryEngine.h"

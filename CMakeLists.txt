@@ -423,7 +423,7 @@ add_executable(cm-reportserver
     src/analytics/AnalyticsQuery.cc
     src/analytics/AnalyticsQueryEngine.cc
     src/analytics/AnalyticsQueryResult.cc
-    src/analytics/CTRByPositionRollup.cc
+    src/analytics/CTRByPositionQuery.cc
     src/analytics/TrafficSegment.cc
     src/reports/CTRStatsServlet.cc
     src/reports/AnalyticsServlet.cc
@@ -489,7 +489,7 @@ add_executable(cm-jqcolumnize
     $<TARGET_OBJECTS:fnord-sstable>
     src/analytics/AnalyticsTableScan.cc
     src/analytics/TrafficSegment.cc
-    src/analytics/CTRByPositionRollup.cc
+    src/analytics/CTRByPositionQuery.cc
     src/cm-jqcolumnize.cc)
 
 target_link_libraries(cm-jqcolumnize

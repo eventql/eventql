@@ -41,7 +41,7 @@
 #include "reports/AnalyticsServlet.h"
 #include "reports/CTRByPageServlet.h"
 #include "reports/CTRStatsServlet.h"
-#include "analytics/CTRByPositionRollup.h"
+#include "analytics/CTRByPositionQuery.h"
 #include "analytics/AnalyticsQueryEngine.h"
 
 using namespace fnord;
@@ -119,7 +119,7 @@ int main(int argc, const char** argv) {
       const cm::AnalyticsQuery::SubQueryParams params,
       const Vector<RefPtr<cm::TrafficSegment>>& segments,
       cm::AnalyticsTableScan* scan) {
-    return new cm::CTRByPositionRollup(scan, segments);
+    return new cm::CTRByPositionQuery(scan, segments);
   });
 
   ev.run();
