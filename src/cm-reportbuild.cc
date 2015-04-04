@@ -154,69 +154,6 @@ int main(int argc, const char** argv) {
             ItemEligibility::ALL));
 
     report_builder.addReport(
-        new CTRByPageMapper(
-            jq_source,
-            new CTRCounterTableSink(
-                g * kMicrosPerHour * 4,
-                (g + 1) * kMicrosPerHour * 4,
-                StringUtil::format(
-                    "$0/dawanda_ctr_by_page.$1.sstable",
-                    dir,
-                    g)),
-            ItemEligibility::ALL));
-
-    report_builder.addReport(
-        new CTRStatsMapper(
-            jq_source,
-            new CTRCounterTableSink(
-                g * kMicrosPerHour * 4,
-                (g + 1) * kMicrosPerHour * 4,
-                StringUtil::format(
-                    "$0/dawanda_ctr_stats.$1.sstable",
-                    dir,
-                    g)),
-            ItemEligibility::ALL));
-
-    report_builder.addReport(
-        new CTRByQueryAttributeMapper(
-            jq_source,
-            new CTRCounterTableSink(
-                g * kMicrosPerHour * 4,
-                (g + 1) * kMicrosPerHour * 4,
-                StringUtil::format(
-                    "$0/dawanda_ctr_by_catalog_e1.$1.sstable",
-                    dir,
-                    g)),
-            "q_cat1",
-            ItemEligibility::ALL));
-
-    report_builder.addReport(
-        new CTRByQueryAttributeMapper(
-            jq_source,
-            new CTRCounterTableSink(
-                g * kMicrosPerHour * 4,
-                (g + 1) * kMicrosPerHour * 4,
-                StringUtil::format(
-                    "$0/dawanda_ctr_by_catalog_e2.$1.sstable",
-                    dir,
-                    g)),
-            "q_cat2",
-            ItemEligibility::ALL));
-
-    report_builder.addReport(
-        new CTRByQueryAttributeMapper(
-            jq_source,
-            new CTRCounterTableSink(
-                g * kMicrosPerHour * 4,
-                (g + 1) * kMicrosPerHour * 4,
-                StringUtil::format(
-                    "$0/dawanda_ctr_by_catalog_e3.$1.sstable",
-                    dir,
-                    g)),
-            "q_cat3",
-            ItemEligibility::ALL));
-
-    report_builder.addReport(
         new CTRBySearchQueryMapper(
             jq_source,
             new CTRCounterTableSink(
@@ -288,60 +225,6 @@ int main(int argc, const char** argv) {
         1 * kSecondsPerDay,
         30 * kSecondsPerDay,
         og * kSecondsPerDay);
-
-    /* dawanda: roll up ctr stats */
-    Set<String> ctr_stats_sources;
-    for (const auto& ig : day_gens) {
-      ctr_stats_sources.emplace(
-          StringUtil::format("$0/dawanda_ctr_stats.$1.sstable", dir, ig));
-    }
-
-    report_builder.addReport(
-        new CTRCounterMergeReducer(
-            new CTRCounterTableSource(ctr_stats_sources),
-            new CTRCounterTableSink(
-                (og) * kMicrosPerDay,
-                (og + 1) * kMicrosPerDay,
-                StringUtil::format(
-                    "$0/dawanda_ctr_stats_daily.$1.sstable",
-                    dir,
-                    og))));
-
-    /* dawanda: roll up ctr positions */
-    Set<String> ctr_posi_sources;
-    for (const auto& ig : day_gens) {
-      ctr_posi_sources.emplace(
-          StringUtil::format("$0/dawanda_ctr_by_position.$1.sstable", dir, ig));
-    }
-
-    report_builder.addReport(
-        new CTRCounterMergeReducer(
-            new CTRCounterTableSource(ctr_posi_sources),
-            new CTRCounterTableSink(
-                (og) * kMicrosPerDay,
-                (og + 1) * kMicrosPerDay,
-                StringUtil::format(
-                    "$0/dawanda_ctr_by_position_daily.$1.sstable",
-                    dir,
-                    og))));
-
-    /* dawanda: roll up ctr by page */
-    Set<String> ctr_by_page_sources;
-    for (const auto& ig : day_gens) {
-      ctr_by_page_sources.emplace(
-          StringUtil::format("$0/dawanda_ctr_by_page.$1.sstable", dir, ig));
-    }
-
-    report_builder.addReport(
-        new CTRCounterMergeReducer(
-            new CTRCounterTableSource(ctr_by_page_sources),
-            new CTRCounterTableSink(
-                (og) * kMicrosPerDay,
-                (og + 1) * kMicrosPerDay,
-                StringUtil::format(
-                    "$0/dawanda_ctr_by_page_daily.$1.sstable",
-                    dir,
-                    og))));
 
     /* dawanda: roll up related search terms */
     Set<String> related_terms_sources;
