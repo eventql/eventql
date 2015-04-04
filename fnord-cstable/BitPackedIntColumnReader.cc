@@ -7,12 +7,12 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <fnord-cstable/UInt32ColumnReader.h>
+#include <fnord-cstable/BitPackedIntColumnReader.h>
 
 namespace fnord {
 namespace cstable {
 
-UInt32ColumnReader::UInt32ColumnReader(
+BitPackedIntColumnReader::BitPackedIntColumnReader(
     uint64_t r_max,
     uint64_t d_max,
     void* data,
@@ -24,7 +24,7 @@ UInt32ColumnReader::UInt32ColumnReader(
         data_size_ - sizeof(uint32_t),
         max_value_) {}
 
-bool UInt32ColumnReader::next(
+bool BitPackedIntColumnReader::next(
     uint64_t* rep_level,
     uint64_t* def_level,
     void** data,
@@ -38,7 +38,7 @@ bool UInt32ColumnReader::next(
   }
 }
 
-bool UInt32ColumnReader::next(
+bool BitPackedIntColumnReader::next(
     uint64_t* rep_level,
     uint64_t* def_level,
     uint32_t* data) {

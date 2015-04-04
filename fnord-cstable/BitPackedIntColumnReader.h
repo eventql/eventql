@@ -17,10 +17,10 @@
 namespace fnord {
 namespace cstable {
 
-class UInt32ColumnReader : public ColumnReader {
+class BitPackedIntColumnReader : public ColumnReader {
 public:
 
-  UInt32ColumnReader(
+  BitPackedIntColumnReader(
       uint64_t r_max,
       uint64_t d_max,
       void* data,
