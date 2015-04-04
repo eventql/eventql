@@ -41,6 +41,12 @@ public:
       JSONObject::const_iterator begin,
       JSONObject::const_iterator end,
       size_t index);
+
+  static Option<String> arrayGetString(
+      JSONObject::const_iterator begin,
+      JSONObject::const_iterator end,
+      size_t index);
+
 };
 
 }
