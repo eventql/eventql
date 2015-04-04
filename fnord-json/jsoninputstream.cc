@@ -58,6 +58,7 @@ bool JSONInputStream::readNextToken(
       case ',':
       case ' ':
       case '\n':
+      case '\r':
         advanceCursor();
         break;
 
@@ -100,7 +101,7 @@ bool JSONInputStream::readNextToken(
         return false;
 
       default:
-        RAISE(kRuntimeError, "invalid json, unexpected char: %c", cur_);
+        RAISE(kRuntimeError, "invalid json, unexpected char: %i", cur_);
         return false;
 
     }
