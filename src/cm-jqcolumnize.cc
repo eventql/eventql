@@ -24,8 +24,8 @@
 #include "fnord-sstable/SSTableColumnSchema.h"
 #include "fnord-sstable/SSTableColumnReader.h"
 #include "fnord-sstable/SSTableColumnWriter.h"
-#include "fnord-cstable/UInt32ColumnReader.h"
-#include "fnord-cstable/UInt32ColumnWriter.h"
+#include "fnord-cstable/BitPackedIntColumnReader.h"
+#include "fnord-cstable/BitPackedIntColumnWriter.h"
 #include "fnord-cstable/BooleanColumnReader.h"
 #include "fnord-cstable/BooleanColumnWriter.h"
 #include "fnord-cstable/CSTableWriter.h"
@@ -83,17 +83,17 @@ int main(int argc, const char** argv) {
   size_t debug_z = 0;
 
   /* query level */
-  cstable::UInt32ColumnWriter jq_time_col(1, 1, 0xffffffff);
-  cstable::UInt32ColumnWriter jq_page_col(1, 1, 100);
-  cstable::UInt32ColumnWriter jq_lang_col(1, 1, kMaxLanguage);
-  cstable::UInt32ColumnWriter jq_numitems_col(1, 1, 250);
-  cstable::UInt32ColumnWriter jq_numitemclicks_col(1, 1, 250);
-  cstable::UInt32ColumnWriter jq_abtestgroup_col(1, 1, 100);
-  cstable::UInt32ColumnWriter jq_devicetype_col(1, 1, kMaxDeviceType);
-  cstable::UInt32ColumnWriter jq_pagetype_col(1, 1, kMaxPageType);
+  cstable::BitPackedIntColumnWriter jq_time_col(1, 1, 0xffffffff);
+  cstable::BitPackedIntColumnWriter jq_page_col(1, 1, 100);
+  cstable::BitPackedIntColumnWriter jq_lang_col(1, 1, kMaxLanguage);
+  cstable::BitPackedIntColumnWriter jq_numitems_col(1, 1, 250);
+  cstable::BitPackedIntColumnWriter jq_numitemclicks_col(1, 1, 250);
+  cstable::BitPackedIntColumnWriter jq_abtestgroup_col(1, 1, 100);
+  cstable::BitPackedIntColumnWriter jq_devicetype_col(1, 1, kMaxDeviceType);
+  cstable::BitPackedIntColumnWriter jq_pagetype_col(1, 1, kMaxPageType);
 
   /* query item level */
-  cstable::UInt32ColumnWriter jqi_position_col(2, 2, 64);
+  cstable::BitPackedIntColumnWriter jqi_position_col(2, 2, 64);
   cstable::BooleanColumnWriter jqi_clicked_col(2, 2);
 
   uint64_t r = 0;
