@@ -36,7 +36,7 @@
 #include "JoinedQuery.h"
 #include "CTRCounter.h"
 #include "analytics/AnalyticsTableScan.h"
-#include "analytics/CTRByPositionRollup.h"
+#include "analytics/CTRByPositionQuery.h"
 
 using namespace fnord;
 
@@ -198,8 +198,8 @@ int main(int argc, const char** argv) {
   //  auto t0 = WallClock::unixMicros();
 
   //  cm::AnalyticsTableScan aq;
-  //  cm::CTRByPositionRollupResult res;
-  //  cm::CTRByPositionRollup q(&aq, &res);
+  //  cm::CTRByPositionQueryResult res;
+  //  cm::CTRByPositionQuery q(&aq, &res);
   //  aq.scanTable(&reader);
   //  auto t1 = WallClock::unixMicros();
   //  fnord::iputs("scanned $0 rows in $1 ms", res.rows_scanned, (t1 - t0) / 1000.0f);
