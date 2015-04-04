@@ -31,6 +31,9 @@ public:
   void appendString(const std::string& string);
   void append(void const* data, size_t size);
 
+  template <typename T>
+  void appendValue(const T& val);
+
   void updateUInt16(size_t offset, uint16_t value);
   void updateUInt32(size_t offset, uint32_t value);
   void updateUInt64(size_t offset, uint64_t value);

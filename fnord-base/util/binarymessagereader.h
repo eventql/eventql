@@ -28,6 +28,9 @@ public:
   char const* readString(size_t size);
   void const* read(size_t size);
 
+  template <typename T>
+  T const* readValue();
+
   void rewind();
   void seekTo(size_t pos);
 
