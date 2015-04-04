@@ -7,12 +7,12 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <fnord-cstable/UInt32ColumnWriter.h>
+#include <fnord-cstable/BitPackedIntColumnWriter.h>
 
 namespace fnord {
 namespace cstable {
 
-UInt32ColumnWriter::UInt32ColumnWriter(
+BitPackedIntColumnWriter::BitPackedIntColumnWriter(
     uint64_t r_max,
     uint64_t d_max,
     uint32_t max_value /* = 0xffffffff */) :
@@ -20,7 +20,7 @@ UInt32ColumnWriter::UInt32ColumnWriter(
     max_value_(max_value),
     data_writer_(max_value) {}
 
-void UInt32ColumnWriter::addDatum(
+void BitPackedIntColumnWriter::addDatum(
     uint64_t rep_level,
     uint64_t def_level,
     uint16_t value) {
@@ -29,23 +29,23 @@ void UInt32ColumnWriter::addDatum(
   data_writer_.encode(value);
 }
 
-void UInt32ColumnWriter::addNull(
+void BitPackedIntColumnWriter::addNull(
     uint64_t rep_level,
     uint64_t def_level) {
   rlvl_writer_.encode(rep_level);
   dlvl_writer_.encode(def_level);
 }
 
-void UInt32ColumnWriter::commit() {
+void BitPackedIntColumnWriter::commit() {
   rlvl_writer_.flush();
 }
 
-void UInt32ColumnWriter::write(util::BinaryMessageWriter* writer) {
+void BitPackedIntColumnWriter::write(util::BinaryMessageWriter* writer) {
   writer->appendUInt32(max_value_);
   writer->append(data_writer_.data(), data_writer_.size());
 }
 
-size_t UInt32ColumnWriter::size() const {
+size_t BitPackedIntColumnWriter::size() const {
   return sizeof(uint32_t) + data_writer_.size();
 }
 

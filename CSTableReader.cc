@@ -10,7 +10,7 @@
 #include <fnord-base/util/binarymessagereader.h>
 #include <fnord-cstable/CSTableReader.h>
 #include <fnord-cstable/BooleanColumnReader.h>
-#include <fnord-cstable/UInt32ColumnReader.h>
+#include <fnord-cstable/BitPackedIntColumnReader.h>
 
 namespace fnord {
 namespace cstable {
@@ -70,7 +70,7 @@ RefPtr<ColumnReader> CSTableReader::getColumnReader(const String& column_name) {
     case ColumnType::BOOLEAN:
       return new BooleanColumnReader(c.r_max, c.d_max, cdata, c.size);
     case ColumnType::UINT32_BITPACKED:
-      return new UInt32ColumnReader(c.r_max, c.d_max, cdata, c.size);
+      return new BitPackedIntColumnReader(c.r_max, c.d_max, cdata, c.size);
     default:
       RAISEF(kIllegalStateError, "invalid column type: $0", (uint32_t) c.type);
   }
