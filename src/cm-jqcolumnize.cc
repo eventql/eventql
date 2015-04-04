@@ -36,7 +36,7 @@
 #include "JoinedQuery.h"
 #include "CTRCounter.h"
 #include "analytics/AnalyticsTableScan.h"
-#include "analytics/CTRByPositionRollup.h"
+#include "analytics/CTRByPositionQuery.h"
 
 using namespace fnord;
 
@@ -85,6 +85,8 @@ int main(int argc, const char** argv) {
   /* query level */
   cstable::UInt32ColumnWriter jq_page_col(1, 1, 100);
   cstable::UInt32ColumnWriter jq_lang_col(1, 1, kMaxLanguage);
+  cstable::UInt32ColumnWriter jq_numitems_col(1, 1, 250);
+  cstable::UInt32ColumnWriter jq_numitemclicks_col(1, 1, 250);
 
   /* query item level */
   cstable::UInt32ColumnWriter jqi_position_col(2, 2, 64);
@@ -97,6 +99,17 @@ int main(int argc, const char** argv) {
     ++n;
 
     for (const auto& q : sess.queries) {
+      /* queries.num_item_clicks, queries.num_items */
+      size_t nitems = 0;
+      size_t nclicks = 0;
+      for (const auto& i : q.items) {
+          ++nitems;
+          nclicks += i.clicked;
+      }
+      jq_numitems_col.addDatum(r, 1, nitems);
+      jq_numitemclicks_col.addDatum(r, 1, nclicks);
+
+      /* queries.page */
       auto pg_str = cm::extractAttr(q.attrs, "pg");
       if (pg_str.isEmpty()) {
         jq_page_col.addNull(r, 1);
@@ -104,6 +117,7 @@ int main(int argc, const char** argv) {
         jq_page_col.addDatum(r, 1, std::stoul(pg_str.get()));
       }
 
+      /* queries.language */
       auto lang = cm::extractLanguage(q.attrs);
       uint32_t l = (uint16_t) lang;
       jq_lang_col.addDatum(r, 1, l);
@@ -184,6 +198,8 @@ int main(int argc, const char** argv) {
     cstable::CSTableWriter writer(flags.getString("output_file") + "~", n);
     writer.addColumn("queries.page", &jq_page_col);
     writer.addColumn("queries.language", &jq_lang_col);
+    writer.addColumn("queries.num_items", &jq_numitems_col);
+    writer.addColumn("queries.num_items_clicked", &jq_numitemclicks_col);
     writer.addColumn("queries.items.position", &jqi_position_col);
     writer.addColumn("queries.items.clicked", &jqi_clicked_col);
     writer.commit();
@@ -198,8 +214,8 @@ int main(int argc, const char** argv) {
   //  auto t0 = WallClock::unixMicros();
 
   //  cm::AnalyticsTableScan aq;
-  //  cm::CTRByPositionRollupResult res;
-  //  cm::CTRByPositionRollup q(&aq, &res);
+  //  cm::CTRByGroupResult<uint16_t> res;
+  //  cm::CTRByPositionQuery q(&aq, &res);
   //  aq.scanTable(&reader);
   //  auto t1 = WallClock::unixMicros();
   //  fnord::iputs("scanned $0 rows in $1 ms", res.rows_scanned, (t1 - t0) / 1000.0f);
