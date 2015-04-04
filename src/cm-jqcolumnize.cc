@@ -26,6 +26,8 @@
 #include "fnord-sstable/SSTableColumnWriter.h"
 #include "fnord-cstable/BitPackedIntColumnReader.h"
 #include "fnord-cstable/BitPackedIntColumnWriter.h"
+#include "fnord-cstable/UInt32ColumnReader.h"
+#include "fnord-cstable/UInt32ColumnWriter.h"
 #include "fnord-cstable/BooleanColumnReader.h"
 #include "fnord-cstable/BooleanColumnWriter.h"
 #include "fnord-cstable/CSTableWriter.h"
@@ -83,7 +85,7 @@ int main(int argc, const char** argv) {
   size_t debug_z = 0;
 
   /* query level */
-  cstable::BitPackedIntColumnWriter jq_time_col(1, 1, 0xffffffff);
+  cstable::UInt32ColumnWriter jq_time_col(1, 1);
   cstable::BitPackedIntColumnWriter jq_page_col(1, 1, 100);
   cstable::BitPackedIntColumnWriter jq_lang_col(1, 1, kMaxLanguage);
   cstable::BitPackedIntColumnWriter jq_numitems_col(1, 1, 250);
