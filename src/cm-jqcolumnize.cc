@@ -87,6 +87,7 @@ int main(int argc, const char** argv) {
   cstable::UInt32ColumnWriter jq_lang_col(1, 1, kMaxLanguage);
   cstable::UInt32ColumnWriter jq_numitems_col(1, 1, 250);
   cstable::UInt32ColumnWriter jq_numitemclicks_col(1, 1, 250);
+  cstable::UInt32ColumnWriter jq_abtestgroup_col(1, 1, 100);
 
   /* query item level */
   cstable::UInt32ColumnWriter jqi_position_col(2, 2, 64);
@@ -115,6 +116,14 @@ int main(int argc, const char** argv) {
         jq_page_col.addNull(r, 1);
       } else {
         jq_page_col.addDatum(r, 1, std::stoul(pg_str.get()));
+      }
+
+      /* queries.ab_test_group */
+      auto abgrp = cm::extractABTestGroup(q.attrs);
+      if (abgrp.isEmpty()) {
+        jq_abtestgroup_col.addNull(r, 1);
+      } else {
+        jq_abtestgroup_col.addDatum(r, 1, abgrp.get());
       }
 
       /* queries.language */
@@ -200,6 +209,7 @@ int main(int argc, const char** argv) {
     writer.addColumn("queries.language", &jq_lang_col);
     writer.addColumn("queries.num_items", &jq_numitems_col);
     writer.addColumn("queries.num_items_clicked", &jq_numitemclicks_col);
+    writer.addColumn("queries.ab_test_group", &jq_abtestgroup_col);
     writer.addColumn("queries.items.position", &jqi_position_col);
     writer.addColumn("queries.items.clicked", &jqi_clicked_col);
     writer.commit();
