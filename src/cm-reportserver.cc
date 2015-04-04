@@ -42,6 +42,7 @@
 #include "reports/CTRByPageServlet.h"
 #include "reports/CTRStatsServlet.h"
 #include "analytics/CTRByPositionQuery.h"
+#include "analytics/CTRByPageQuery.h"
 #include "analytics/AnalyticsQueryEngine.h"
 
 using namespace fnord;
@@ -120,6 +121,14 @@ int main(int argc, const char** argv) {
       const Vector<RefPtr<cm::TrafficSegment>>& segments,
       cm::AnalyticsTableScan* scan) {
     return new cm::CTRByPositionQuery(scan, segments);
+  });
+
+  analytics.registerQueryFactory("ctr_by_page", [] (
+      const cm::AnalyticsQuery& query,
+      const cm::AnalyticsQuery::SubQueryParams params,
+      const Vector<RefPtr<cm::TrafficSegment>>& segments,
+      cm::AnalyticsTableScan* scan) {
+    return new cm::CTRByPageQuery(scan, segments);
   });
 
   ev.run();
