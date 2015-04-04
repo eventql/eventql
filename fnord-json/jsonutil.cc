@@ -79,6 +79,10 @@ JSONObject::const_iterator JSONUtil::objectLookup(
 size_t JSONUtil::arrayLength(
     JSONObject::const_iterator begin,
     JSONObject::const_iterator end) {
+  if (begin == end) {
+    return 0;
+  }
+
   if (begin->type != json::JSON_ARRAY_BEGIN) {
     RAISEF(kParseError, "expected JSON_OBJECT_BEGIN, got: $0", begin->type);
   }
@@ -100,6 +104,10 @@ JSONObject::const_iterator JSONUtil::arrayLookup(
     JSONObject::const_iterator begin,
     JSONObject::const_iterator end,
     size_t index) {
+  if (begin == end) {
+    return end;
+  }
+
   if (begin->type != json::JSON_ARRAY_BEGIN) {
     RAISEF(kParseError, "expected JSON_OBJECT_BEGIN, got: $0", begin->type);
   }
