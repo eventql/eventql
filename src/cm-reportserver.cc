@@ -141,6 +141,19 @@ int main(int argc, const char** argv) {
     return new cm::DiscoveryKPIQuery(scan, segments);
   });
 
+  analytics.registerQueryFactory("discovery_category0_kpis", [] (
+      const cm::AnalyticsQuery& query,
+      const cm::AnalyticsQuery::SubQueryParams params,
+      const Vector<RefPtr<cm::TrafficSegment>>& segments,
+      cm::AnalyticsTableScan* scan) {
+    return new cm::DiscoveryCategoryStatsQuery(
+        scan,
+        segments,
+        "queries.category1",
+        "queries.category1",
+        params);
+  });
+
   analytics.registerQueryFactory("discovery_category1_kpis", [] (
       const cm::AnalyticsQuery& query,
       const cm::AnalyticsQuery::SubQueryParams params,
@@ -150,6 +163,33 @@ int main(int argc, const char** argv) {
         scan,
         segments,
         "queries.category1",
+        "queries.category2",
+        params);
+  });
+
+  analytics.registerQueryFactory("discovery_category2_kpis", [] (
+      const cm::AnalyticsQuery& query,
+      const cm::AnalyticsQuery::SubQueryParams params,
+      const Vector<RefPtr<cm::TrafficSegment>>& segments,
+      cm::AnalyticsTableScan* scan) {
+    return new cm::DiscoveryCategoryStatsQuery(
+        scan,
+        segments,
+        "queries.category2",
+        "queries.category3",
+        params);
+  });
+
+  analytics.registerQueryFactory("discovery_category3_kpis", [] (
+      const cm::AnalyticsQuery& query,
+      const cm::AnalyticsQuery::SubQueryParams params,
+      const Vector<RefPtr<cm::TrafficSegment>>& segments,
+      cm::AnalyticsTableScan* scan) {
+    return new cm::DiscoveryCategoryStatsQuery(
+        scan,
+        segments,
+        "queries.category3",
+        "queries.category3",
         params);
   });
 
