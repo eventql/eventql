@@ -93,6 +93,9 @@ int main(int argc, const char** argv) {
   cstable::BitPackedIntColumnWriter jq_abtestgroup_col(1, 1, 100);
   cstable::BitPackedIntColumnWriter jq_devicetype_col(1, 1, kMaxDeviceType);
   cstable::BitPackedIntColumnWriter jq_pagetype_col(1, 1, kMaxPageType);
+  cstable::BitPackedIntColumnWriter jq_cat1_col(1, 1, 0xffff);
+  cstable::BitPackedIntColumnWriter jq_cat2_col(1, 1, 0xffff);
+  cstable::BitPackedIntColumnWriter jq_cat3_col(1, 1, 0xffff);
 
   /* query item level */
   cstable::BitPackedIntColumnWriter jqi_position_col(2, 2, 64);
@@ -132,6 +135,30 @@ int main(int argc, const char** argv) {
         jq_abtestgroup_col.addNull(r, 1);
       } else {
         jq_abtestgroup_col.addDatum(r, 1, abgrp.get());
+      }
+
+      /* queries.category1 */
+      auto qcat1 = cm::extractAttr(q.attrs, "q_cat1");
+      if (qcat1.isEmpty()) {
+        jq_cat1_col.addNull(r, 1);
+      } else {
+        jq_cat1_col.addDatum(r, 1, std::stoul(qcat1.get()));
+      }
+
+      /* queries.category2 */
+      auto qcat2 = cm::extractAttr(q.attrs, "q_cat2");
+      if (qcat2.isEmpty()) {
+        jq_cat2_col.addNull(r, 1);
+      } else {
+        jq_cat2_col.addDatum(r, 1, std::stoul(qcat2.get()));
+      }
+
+      /* queries.category3 */
+      auto qcat3 = cm::extractAttr(q.attrs, "q_cat3");
+      if (qcat3.isEmpty()) {
+        jq_cat3_col.addNull(r, 1);
+      } else {
+        jq_cat3_col.addDatum(r, 1, std::stoul(qcat3.get()));
       }
 
       /* queries.device_type */
@@ -227,6 +254,9 @@ int main(int argc, const char** argv) {
     writer.addColumn("queries.ab_test_group", &jq_abtestgroup_col);
     writer.addColumn("queries.device_type", &jq_devicetype_col);
     writer.addColumn("queries.page_type", &jq_pagetype_col);
+    writer.addColumn("queries.category1", &jq_cat1_col);
+    writer.addColumn("queries.category2", &jq_cat2_col);
+    writer.addColumn("queries.category3", &jq_cat3_col);
     writer.addColumn("queries.items.position", &jqi_position_col);
     writer.addColumn("queries.items.clicked", &jqi_clicked_col);
     writer.commit();
