@@ -138,7 +138,11 @@ int main(int argc, const char** argv) {
       const cm::AnalyticsQuery::SubQueryParams params,
       const Vector<RefPtr<cm::TrafficSegment>>& segments,
       cm::AnalyticsTableScan* scan) {
-    return new cm::DiscoveryKPIQuery(scan, segments);
+    return new cm::DiscoveryKPIQuery(
+        scan,
+        segments,
+        query.start_time,
+        query.end_time);
   });
 
   analytics.registerQueryFactory("discovery_category0_kpis", [] (
