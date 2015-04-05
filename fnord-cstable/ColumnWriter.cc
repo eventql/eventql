@@ -28,6 +28,11 @@ size_t ColumnWriter::maxDefinitionLevel() const {
   return d_max_;
 }
 
+void ColumnWriter::commit() {
+  rlvl_writer_.flush();
+  dlvl_writer_.flush();
+}
+
 void ColumnWriter::write(void* buf, size_t buf_len) {
   util::BinaryMessageWriter writer(buf, buf_len);
   writer.appendUInt64(rlvl_writer_.size());
