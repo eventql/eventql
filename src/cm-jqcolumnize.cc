@@ -135,10 +135,6 @@ int main(int argc, const char** argv) {
         nclicks += i.clicked;
       }
 
-      if (nadclicks > 0 && lang != Language::DE) {
-        abort();
-      }
-
       jq_numitems_col.addDatum(r, 1, nitems);
       jq_numitemclicks_col.addDatum(r, 1, nclicks);
       jq_numadimprs_col.addDatum(r, 1, nads);
