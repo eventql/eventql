@@ -8,6 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <fnord-base/util/BitPackDecoder.h>
+#include <fnord-base/exception.h>
 #include <3rdparty/simdcomp/simdcomp.h>
 
 namespace fnord {
@@ -25,8 +26,15 @@ BitPackDecoder::BitPackDecoder(
 
 uint32_t BitPackDecoder::next() {
   if (outbuf_pos_ == 128) {
+#ifndef FNORD_NODEBUG
+    auto new_pos = pos_ + 16 * maxbits_;
+    if (new_pos > size_) {
+      RAISE(kBufferOverflowError, "read exceeds buffer boundary");
+    }
+#endif
+
     simdunpack((__m128i*) (((char *) data_) + pos_), outbuf_, maxbits_);
-    pos_ += 16 * maxbits_;
+    pos_ = new_pos;
     outbuf_pos_ = 1;
     return outbuf_[0];
   } else {
