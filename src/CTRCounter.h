@@ -10,6 +10,7 @@
 #define _CM_CTRCOUNTER_H
 #include "fnord-base/stdtypes.h"
 #include "fnord-base/option.h"
+#include "fnord-json/json.h"
 #include "fnord-sstable/sstablereader.h"
 #include "fnord-sstable/sstablewriter.h"
 #include "fnord-sstable/SSTableColumnSchema.h"
@@ -28,6 +29,7 @@ struct CTRCounterData {
   void merge(const CTRCounterData& other);
   void encode(util::BinaryMessageWriter* writer) const;
   void decode(util::BinaryMessageReader* reader);
+  void toJSON(json::JSONOutputStream* json) const;
 
   uint64_t num_views;
   uint64_t num_clicked;
