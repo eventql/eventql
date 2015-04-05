@@ -90,6 +90,8 @@ int main(int argc, const char** argv) {
   cstable::BitPackedIntColumnWriter jq_lang_col(1, 1, kMaxLanguage);
   cstable::BitPackedIntColumnWriter jq_numitems_col(1, 1, 250);
   cstable::BitPackedIntColumnWriter jq_numitemclicks_col(1, 1, 250);
+  cstable::BitPackedIntColumnWriter jq_numadimprs_col(1, 1, 250);
+  cstable::BitPackedIntColumnWriter jq_numadclicks_col(1, 1, 250);
   cstable::BitPackedIntColumnWriter jq_abtestgroup_col(1, 1, 100);
   cstable::BitPackedIntColumnWriter jq_devicetype_col(1, 1, kMaxDeviceType);
   cstable::BitPackedIntColumnWriter jq_pagetype_col(1, 1, kMaxPageType);
@@ -114,12 +116,20 @@ int main(int argc, const char** argv) {
       /* queries.num_item_clicks, queries.num_items */
       size_t nitems = 0;
       size_t nclicks = 0;
+      size_t nads = 0;
+      size_t nadclicks = 0;
       for (const auto& i : q.items) {
-          ++nitems;
-          nclicks += i.clicked;
+        ++nitems;
+        nclicks += i.clicked;
+        if (i.position >= 1 && i.position <= 4) {
+          ++nads;
+          nadclicks += i.clicked;
+        }
       }
       jq_numitems_col.addDatum(r, 1, nitems);
       jq_numitemclicks_col.addDatum(r, 1, nclicks);
+      jq_numadimprs_col.addDatum(r, 1, nads);
+      jq_numadclicks_col.addDatum(r, 1, nadclicks);
 
       /* queries.page */
       auto pg_str = cm::extractAttr(q.attrs, "pg");
@@ -251,6 +261,8 @@ int main(int argc, const char** argv) {
     writer.addColumn("queries.language", &jq_lang_col);
     writer.addColumn("queries.num_items", &jq_numitems_col);
     writer.addColumn("queries.num_items_clicked", &jq_numitemclicks_col);
+    writer.addColumn("queries.num_ad_impressions", &jq_numadimprs_col);
+    writer.addColumn("queries.num_ad_clicks", &jq_numadclicks_col);
     writer.addColumn("queries.ab_test_group", &jq_abtestgroup_col);
     writer.addColumn("queries.device_type", &jq_devicetype_col);
     writer.addColumn("queries.page_type", &jq_pagetype_col);
