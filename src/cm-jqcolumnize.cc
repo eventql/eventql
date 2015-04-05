@@ -106,10 +106,10 @@ int main(int argc, const char** argv) {
   uint64_t r = 0;
   uint64_t n = 0;
 
-  auto add_session = [&] (cm::JoinedSession& sess) {
+  auto add_session = [&] (const cm::JoinedSession& sess) {
     ++n;
 
-    for (auto& q : sess.queries) {
+    for (const auto& q : sess.queries) {
       /* queries.time */
       jq_time_col.addDatum(r, 1, q.time.unixMicros() / kMicrosPerSecond);
 
@@ -123,13 +123,9 @@ int main(int argc, const char** argv) {
       size_t nclicks = 0;
       size_t nads = 0;
       size_t nadclicks = 0;
-      for (auto& i : q.items) {
+      for (const auto& i : q.items) {
         // DAWANDA HACK
         if (i.position >= 1 && i.position <= 4) {
-          if (lang != Language::DE) {
-            i.position = 0;
-            continue;
-          }
           ++nads;
           nadclicks += i.clicked;
         }
@@ -137,10 +133,6 @@ int main(int argc, const char** argv) {
 
         ++nitems;
         nclicks += i.clicked;
-      }
-
-      if (nadclicks > 0 && lang != Language::DE) {
-        abort();
       }
 
       jq_numitems_col.addDatum(r, 1, nitems);
@@ -151,7 +143,7 @@ int main(int argc, const char** argv) {
       /* queries.page */
       auto pg_str = cm::extractAttr(q.attrs, "pg");
       if (pg_str.isEmpty()) {
-        jq_page_col.addNull(r, 1);
+        jq_page_col.addNull(r, 0);
       } else {
         jq_page_col.addDatum(r, 1, std::stoul(pg_str.get()));
       }
@@ -159,7 +151,7 @@ int main(int argc, const char** argv) {
       /* queries.ab_test_group */
       auto abgrp = cm::extractABTestGroup(q.attrs);
       if (abgrp.isEmpty()) {
-        jq_abtestgroup_col.addNull(r, 1);
+        jq_abtestgroup_col.addNull(r, 0);
       } else {
         jq_abtestgroup_col.addDatum(r, 1, abgrp.get());
       }
@@ -167,7 +159,7 @@ int main(int argc, const char** argv) {
       /* queries.category1 */
       auto qcat1 = cm::extractAttr(q.attrs, "q_cat1");
       if (qcat1.isEmpty()) {
-        jq_cat1_col.addNull(r, 1);
+        jq_cat1_col.addNull(r, 0);
       } else {
         jq_cat1_col.addDatum(r, 1, std::stoul(qcat1.get()));
       }
@@ -175,7 +167,7 @@ int main(int argc, const char** argv) {
       /* queries.category2 */
       auto qcat2 = cm::extractAttr(q.attrs, "q_cat2");
       if (qcat2.isEmpty()) {
-        jq_cat2_col.addNull(r, 1);
+        jq_cat2_col.addNull(r, 0);
       } else {
         jq_cat2_col.addDatum(r, 1, std::stoul(qcat2.get()));
       }
@@ -183,7 +175,7 @@ int main(int argc, const char** argv) {
       /* queries.category3 */
       auto qcat3 = cm::extractAttr(q.attrs, "q_cat3");
       if (qcat3.isEmpty()) {
-        jq_cat3_col.addNull(r, 1);
+        jq_cat3_col.addNull(r, 0);
       } else {
         jq_cat3_col.addDatum(r, 1, std::stoul(qcat3.get()));
       }

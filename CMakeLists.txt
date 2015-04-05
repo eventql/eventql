@@ -426,6 +426,8 @@ add_executable(cm-reportserver
     src/analytics/CTRByPageQuery.cc
     src/analytics/CTRByPositionQuery.cc
     src/analytics/DiscoveryKPIQuery.cc
+    src/analytics/DiscoveryCategoryStatsQuery.cc
+    src/analytics/DiscoveryCategoryStatsResult.cc
     src/analytics/TrafficSegment.cc
     src/analytics/CTRStatsServlet.cc
     src/analytics/AnalyticsServlet.cc
@@ -459,6 +461,8 @@ add_executable(cm-tokenize
     $<TARGET_OBJECTS:fnord-base>
     $<TARGET_OBJECTS:fnord-mdb>
     $<TARGET_OBJECTS:fnord-fts>
+    $<TARGET_OBJECTS:fnord-json>
+    $<TARGET_OBJECTS:fnord-http>
     $<TARGET_OBJECTS:fnord-sstable>
     src/cm-tokenize.cc)
 
