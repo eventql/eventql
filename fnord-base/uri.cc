@@ -300,7 +300,8 @@ void URI::parseQueryString(
         params->emplace_back(URI::urlDecode(key_str), URI::urlDecode(val_str));
         begin = cur + 1;
       } else {
-        break;
+        params->emplace_back(URI::urlDecode(key_str), "");
+        begin = cur + 1;
       }
     } else {
       break;
