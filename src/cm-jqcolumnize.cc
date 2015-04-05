@@ -299,7 +299,7 @@ int main(int argc, const char** argv) {
   //  });
 
   //  aq.scanTable(&reader);
-  //  //cm::GroupResult<uint16_t, CTRCounterData> res;
+  //  //cm::CTRByGroupResult<uint16_t> res;
   //  //cm::CTRByPositionQuery q(&aq, &res);
   //  //auto t1 = WallClock::unixMicros();
   //  //fnord::iputs("scanned $0 rows in $1 ms", res.rows_scanned, (t1 - t0) / 1000.0f);
