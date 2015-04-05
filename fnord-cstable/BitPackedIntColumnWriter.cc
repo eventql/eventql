@@ -23,7 +23,7 @@ BitPackedIntColumnWriter::BitPackedIntColumnWriter(
 void BitPackedIntColumnWriter::addDatum(
     uint64_t rep_level,
     uint64_t def_level,
-    uint16_t value) {
+    uint32_t value) {
   rlvl_writer_.encode(rep_level);
   dlvl_writer_.encode(def_level);
   data_writer_.encode(value);
