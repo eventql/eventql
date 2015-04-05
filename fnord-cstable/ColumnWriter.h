@@ -23,7 +23,7 @@ public:
   virtual ~ColumnWriter() {}
 
   void write(void* buf, size_t buf_len);
-  virtual void commit() = 0;
+  virtual void commit();
   virtual ColumnType type() const = 0;
 
   size_t maxRepetitionLevel() const;

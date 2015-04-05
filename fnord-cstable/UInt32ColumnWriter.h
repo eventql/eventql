@@ -27,7 +27,6 @@ public:
 
   void addDatum(uint64_t rep_level, uint64_t def_level, uint32_t value);
   void addNull(uint64_t rep_level, uint64_t def_level);
-  void commit();
 
   ColumnType type() const override {
     return ColumnType::UINT32_PLAIN;

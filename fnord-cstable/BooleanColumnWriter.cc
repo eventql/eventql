@@ -35,7 +35,8 @@ void BooleanColumnWriter::addNull(
 }
 
 void BooleanColumnWriter::commit() {
-  rlvl_writer_.flush();
+  ColumnWriter::commit();
+  data_writer_.flush();
 }
 
 void BooleanColumnWriter::write(util::BinaryMessageWriter* writer) {
