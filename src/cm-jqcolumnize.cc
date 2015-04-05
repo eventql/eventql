@@ -138,6 +138,11 @@ int main(int argc, const char** argv) {
         ++nitems;
         nclicks += i.clicked;
       }
+
+      if (nadclicks > 0 && lang != Language::DE) {
+        abort();
+      }
+
       jq_numitems_col.addDatum(r, 1, nitems);
       jq_numitemclicks_col.addDatum(r, 1, nclicks);
       jq_numadimprs_col.addDatum(r, 1, nads);
@@ -287,24 +292,33 @@ int main(int argc, const char** argv) {
       flags.getString("output_file") + "~",
       flags.getString("output_file"));
 
-  //{
-  //  cstable::CSTableReader reader(flags.getString("output_file"));
-  //  auto t0 = WallClock::unixMicros();
+  {
+    cstable::CSTableReader reader(flags.getString("output_file"));
+    auto t0 = WallClock::unixMicros();
 
-  //  cm::AnalyticsTableScan aq;
-  //  cm::CTRByGroupResult<uint16_t> res;
-  //  cm::CTRByPositionQuery q(&aq, &res);
-  //  aq.scanTable(&reader);
-  //  auto t1 = WallClock::unixMicros();
-  //  fnord::iputs("scanned $0 rows in $1 ms", res.rows_scanned, (t1 - t0) / 1000.0f);
-  //  for (const auto& p : res.counters) {
-  //    fnord::iputs(
-  //       "pos: $0, views: $1, clicks: $2, ctr: $3", 
-  //        p.first, p.second.num_views,
-  //        p.second.num_clicks,
-  //        p.second.num_clicks / (double) p.second.num_views);
-  //  }
-  //}
+    cm::AnalyticsTableScan aq;
+    auto lcol = aq.fetchColumn("queries.language");
+    auto ccol = aq.fetchColumn("queries.num_ad_clicks");
+
+    aq.onQuery([&] () {
+      auto l = languageToString((Language) lcol->getUInt32());
+      auto c = ccol->getUInt32();
+      fnord::iputs("lang: $0 -> $1", l, c);
+    });
+
+    aq.scanTable(&reader);
+    //cm::CTRByGroupResult<uint16_t> res;
+    //cm::CTRByPositionQuery q(&aq, &res);
+    //auto t1 = WallClock::unixMicros();
+    //fnord::iputs("scanned $0 rows in $1 ms", res.rows_scanned, (t1 - t0) / 1000.0f);
+    //for (const auto& p : res.counters) {
+    //  fnord::iputs(
+    //     "pos: $0, views: $1, clicks: $2, ctr: $3", 
+    //      p.first, p.second.num_views,
+    //      p.second.num_clicks,
+    //      p.second.num_clicks / (double) p.second.num_views);
+    //}
+  }
 
   return 0;
 }
