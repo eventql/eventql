@@ -33,10 +33,6 @@ void UInt32ColumnWriter::addNull(
   dlvl_writer_.encode(def_level);
 }
 
-void UInt32ColumnWriter::commit() {
-  rlvl_writer_.flush();
-}
-
 void UInt32ColumnWriter::write(util::BinaryMessageWriter* writer) {
   writer->append(data_writer_.data(), data_writer_.size());
 }

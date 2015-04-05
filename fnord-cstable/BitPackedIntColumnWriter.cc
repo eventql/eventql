@@ -37,7 +37,8 @@ void BitPackedIntColumnWriter::addNull(
 }
 
 void BitPackedIntColumnWriter::commit() {
-  rlvl_writer_.flush();
+  ColumnWriter::commit();
+  data_writer_.flush();
 }
 
 void BitPackedIntColumnWriter::write(util::BinaryMessageWriter* writer) {
