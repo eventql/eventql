@@ -51,9 +51,11 @@ uint32_t const* BinaryMessageReader::readValue<uint32_t>() {
 }
 
 char const* BinaryMessageReader::readString(size_t size) {
+#ifndef FNORD_NODBEUG
   if ((pos_ + size) > size_) {
     RAISE(kBufferOverflowError, "requested read exceeds message bounds");
   }
+#endif
 
   auto ptr = static_cast<char const*>(ptr_) + pos_;
   pos_ += size;
@@ -65,9 +67,11 @@ void BinaryMessageReader::rewind() {
 }
 
 void BinaryMessageReader::seekTo(size_t pos) {
+#ifndef FNORD_NODBEUG
   if (pos > size_) {
     RAISE(kBufferOverflowError, "requested position exceeds message bounds");
   }
+#endif
 
   pos_ = pos;
 }
