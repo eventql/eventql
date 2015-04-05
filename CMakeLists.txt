@@ -461,6 +461,8 @@ add_executable(cm-tokenize
     $<TARGET_OBJECTS:fnord-base>
     $<TARGET_OBJECTS:fnord-mdb>
     $<TARGET_OBJECTS:fnord-fts>
+    $<TARGET_OBJECTS:fnord-json>
+    $<TARGET_OBJECTS:fnord-http>
     $<TARGET_OBJECTS:fnord-sstable>
     src/cm-tokenize.cc)
 
