@@ -147,7 +147,7 @@ int main(int argc, const char** argv) {
       /* queries.page */
       auto pg_str = cm::extractAttr(q.attrs, "pg");
       if (pg_str.isEmpty()) {
-        jq_page_col.addNull(r, 1);
+        jq_page_col.addNull(r, 0);
       } else {
         jq_page_col.addDatum(r, 1, std::stoul(pg_str.get()));
       }
