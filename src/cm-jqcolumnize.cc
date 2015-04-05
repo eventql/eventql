@@ -106,25 +106,37 @@ int main(int argc, const char** argv) {
   uint64_t r = 0;
   uint64_t n = 0;
 
-  auto add_session = [&] (const cm::JoinedSession& sess) {
+  auto add_session = [&] (cm::JoinedSession& sess) {
     ++n;
 
-    for (const auto& q : sess.queries) {
+    for (auto& q : sess.queries) {
       /* queries.time */
       jq_time_col.addDatum(r, 1, q.time.unixMicros() / kMicrosPerSecond);
+
+      /* queries.language */
+      auto lang = cm::extractLanguage(q.attrs);
+      uint32_t l = (uint16_t) lang;
+      jq_lang_col.addDatum(r, 1, l);
 
       /* queries.num_item_clicks, queries.num_items */
       size_t nitems = 0;
       size_t nclicks = 0;
       size_t nads = 0;
       size_t nadclicks = 0;
-      for (const auto& i : q.items) {
-        ++nitems;
-        nclicks += i.clicked;
+      for (auto& i : q.items) {
+        // DAWANDA HACK
         if (i.position >= 1 && i.position <= 4) {
+          if (lang != Language::DE) {
+            i.position = 0;
+            continue;
+          }
           ++nads;
           nadclicks += i.clicked;
         }
+        // EOF DAWANDA HACK
+
+        ++nitems;
+        nclicks += i.clicked;
       }
       jq_numitems_col.addDatum(r, 1, nitems);
       jq_numitemclicks_col.addDatum(r, 1, nclicks);
@@ -177,10 +189,7 @@ int main(int argc, const char** argv) {
       /* queries.page_type */
       jq_pagetype_col.addDatum(r, 1, (uint32_t) extractPageType(q.attrs));
 
-      /* queries.language */
-      auto lang = cm::extractLanguage(q.attrs);
-      uint32_t l = (uint16_t) lang;
-      jq_lang_col.addDatum(r, 1, l);
+
 
       if (q.items.size() == 0) {
         jqi_position_col.addNull(r, 1);
