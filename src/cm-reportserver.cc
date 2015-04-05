@@ -149,7 +149,8 @@ int main(int argc, const char** argv) {
     return new cm::DiscoveryCategoryStatsQuery(
         scan,
         segments,
-        "queries.category1");
+        "queries.category1",
+        params);
   });
 
   ev.run();
