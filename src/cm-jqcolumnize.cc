@@ -106,10 +106,10 @@ int main(int argc, const char** argv) {
   uint64_t r = 0;
   uint64_t n = 0;
 
-  auto add_session = [&] (cm::JoinedSession& sess) {
+  auto add_session = [&] (const cm::JoinedSession& sess) {
     ++n;
 
-    for (auto& q : sess.queries) {
+    for (const auto& q : sess.queries) {
       /* queries.time */
       jq_time_col.addDatum(r, 1, q.time.unixMicros() / kMicrosPerSecond);
 
@@ -123,13 +123,9 @@ int main(int argc, const char** argv) {
       size_t nclicks = 0;
       size_t nads = 0;
       size_t nadclicks = 0;
-      for (auto& i : q.items) {
+      for (const auto& i : q.items) {
         // DAWANDA HACK
         if (i.position >= 1 && i.position <= 4) {
-          if (lang != Language::DE) {
-            i.position = 0;
-            continue;
-          }
           ++nads;
           nadclicks += i.clicked;
         }
