@@ -235,6 +235,11 @@ void toJSONImpl(int const& val, O* target) {
 }
 
 template <typename O>
+void toJSONImpl(double const& val, O* target) {
+  target->emplace_back(json::JSON_NUMBER, StringUtil::toString(val));
+}
+
+template <typename O>
 void toJSONImpl(const fnord::DateTime& val, O* target) {
   toJSONImpl(static_cast<uint64_t>(val), target);
 }
@@ -255,17 +260,27 @@ void toJSONImpl(const JSONObject& obj, O* target) {
   }
 }
 
-template <typename O>
-void toJSONImpl(const HashMap<String, String>& val, O* target) {
+template <typename T1, typename T2, typename O>
+void toJSONImpl(const HashMap<T1, T2>& val, O* target) {
   target->emplace_back(json::JSON_OBJECT_BEGIN);
 
   for (const auto& pair : val) {
-    target->emplace_back(json::JSON_STRING, pair.first);
-    target->emplace_back(json::JSON_STRING, pair.second);
+    toJSON(pair.first, target);
+    toJSON(pair.second, target);
   }
 
   target->emplace_back(json::JSON_OBJECT_END);
 }
+
+template <typename T1, typename T2, typename O>
+void toJSONImpl(const Pair<T1, T2>& val, O* target) {
+  target->emplace_back(json::JSON_ARRAY_BEGIN);
+  toJSON(val.first, target);
+  toJSON(val.second, target);
+  target->emplace_back(json::JSON_ARRAY_END);
+}
+
+
 
 }
 }
