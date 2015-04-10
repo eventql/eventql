@@ -23,11 +23,6 @@ void StringColumnWriter::addDatum(
     uint64_t rep_level,
     uint64_t def_level,
     const String& value) {
-  if (value.length() == 0) {
-    addNull(rep_level, def_level);
-    return;
-  }
-
   rlvl_writer_.encode(rep_level);
   dlvl_writer_.encode(def_level);
   data_writer_.appendUInt32(value.size());
