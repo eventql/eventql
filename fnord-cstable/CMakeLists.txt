@@ -35,6 +35,6 @@ add_library(fnord-cstable OBJECT
     UInt32ColumnWriter.cc
     BitPackedIntColumnReader.cc
     BitPackedIntColumnWriter.cc
-    #StringColumnReader.cc
+    StringColumnReader.cc
     StringColumnWriter.cc)
 
