@@ -234,7 +234,11 @@ Option<String> extractQueryString(const Vector<String>& attrs) {
     if (StringUtil::beginsWith(a, "qstr~")) {
       auto o = StringUtil::find(a, ':');
       if (o != String::npos) {
-        return Some(URI::urlDecode(a.substr(o + 1)));
+        try {
+          return Some(URI::urlDecode(a.substr(o + 1)));
+        } catch (...) {
+          return None<String>();
+        }
       }
     }
   }
