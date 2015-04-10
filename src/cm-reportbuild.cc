@@ -142,31 +142,6 @@ int main(int argc, const char** argv) {
         StringUtil::format("$0/dawanda_joined_queries.$1.sstable", dir, g));
 
     report_builder.addReport(
-        new CTRByPositionMapper(
-            jq_source,
-            new CTRCounterTableSink(
-                g * kMicrosPerHour * 4,
-                (g + 1) * kMicrosPerHour * 4,
-                StringUtil::format(
-                    "$0/dawanda_ctr_by_position.$1.sstable",
-                    dir,
-                    g)),
-            ItemEligibility::ALL));
-
-    report_builder.addReport(
-        new CTRBySearchQueryMapper(
-            jq_source,
-            new CTRCounterTableSink(
-                g * kMicrosPerHour * 4,
-                (g + 1) * kMicrosPerHour * 4,
-                StringUtil::format(
-                    "$0/dawanda_ctr_by_searchquery.$1.sstable",
-                    dir,
-                    g)),
-            ItemEligibility::ALL,
-            analyzer));
-
-    report_builder.addReport(
         new CTRBySearchTermCrossCategoryMapper(
             jq_source,
             new CTRCounterTableSink(
@@ -221,51 +196,43 @@ int main(int argc, const char** argv) {
         1 * kSecondsPerDay,
         og * kSecondsPerDay);
 
-    auto month_gens = mkGenerations(
-        1 * kSecondsPerDay,
+    /* dawanda: related search terms */
+    Set<String> month_sources;
+    for (const auto& ig : mkGenerations(
+        4 * kSecondsPerHour,
         30 * kSecondsPerDay,
-        og * kSecondsPerDay);
-
-    /* dawanda: roll up related search terms */
-    Set<String> related_terms_sources;
-    for (const auto& ig : day_gens) {
-      related_terms_sources.emplace(StringUtil::format(
-          "$0/dawanda_ctr_by_searchquery.$1.sstable",
+        og * kSecondsPerDay)) {
+      month_sources.emplace(StringUtil::format(
+          "$0/dawanda_joined_sessions.$1.sstable",
           dir,
           ig));
     }
 
-    report_builder.addReport(
-        new RelatedTermsMapper(
-            new CTRCounterTableSource(related_terms_sources),
-            new TermInfoTableSink(
-                StringUtil::format(
-                    "$0/dawanda_related_terms.$1.sstable",
-                    dir,
-                    og))));
+    //report_builder.addReport(
+    //    new RelatedTermsMapper(
+    //        new CTRCounterTableSource(related_terms_sources),
+    //        new TermInfoTableSink(
+    //            StringUtil::format(
+    //                "$0/dawanda_related_terms_30d.$1.sstable",
+    //                dir,
+    //                og))));
 
-    Set<String> related_terms_rollup_sources;
-    for (const auto& ig : month_gens) {
-      related_terms_rollup_sources.emplace(StringUtil::format(
-          "$0/dawanda_related_terms.$1.sstable",
-          dir,
-          ig));
-    }
-
-    report_builder.addReport(
-        new TermInfoMergeReducer(
-            new TermInfoTableSource(related_terms_rollup_sources),
-            new TermInfoTableSink(
-                StringUtil::format(
-                    "$0/dawanda_related_terms_30d.$1.sstable",
-                    dir,
-                    og))));
-
-    /* dawanda: roll up search term x e1 id */
+    /* dawanda: search term x e{1,2,3} id */
     Set<String> term_cross_e1_sources;
     for (const auto& ig : day_gens) {
       term_cross_e1_sources.emplace(StringUtil::format(
           "$0/dawanda_ctr_by_searchterm_cross_e1.$1.sstable",
+          dir,
+          ig));
+    }
+
+    Set<String> term_cross_e1_rollup_sources;
+    for (const auto& ig : mkGenerations(
+        1 * kSecondsPerDay,
+        30 * kSecondsPerDay,
+        og * kSecondsPerDay)) {
+      term_cross_e1_rollup_sources.emplace(StringUtil::format(
+          "$0/dawanda_top_cats_by_searchterm_e1.$1.sstable",
           dir,
           ig));
     }
@@ -280,13 +247,6 @@ int main(int argc, const char** argv) {
                     og)),
             "e1-"));
 
-    Set<String> term_cross_e1_rollup_sources;
-    for (const auto& ig : month_gens) {
-      term_cross_e1_rollup_sources.emplace(StringUtil::format(
-          "$0/dawanda_top_cats_by_searchterm_e1.$1.sstable",
-          dir,
-          ig));
-    }
 
     report_builder.addReport(
         new TermInfoMergeReducer(
@@ -296,6 +256,7 @@ int main(int argc, const char** argv) {
                     "$0/dawanda_top_cats_by_searchterm_e1_30d.$1.sstable",
                     dir,
                     og))));
+
 
     /* merge all term info 30d reports */
     report_builder.addReport(
