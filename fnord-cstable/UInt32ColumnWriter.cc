@@ -26,13 +26,6 @@ void UInt32ColumnWriter::addDatum(
   data_writer_.appendUInt32(value);
 }
 
-void UInt32ColumnWriter::addNull(
-    uint64_t rep_level,
-    uint64_t def_level) {
-  rlvl_writer_.encode(rep_level);
-  dlvl_writer_.encode(def_level);
-}
-
 void UInt32ColumnWriter::write(util::BinaryMessageWriter* writer) {
   writer->append(data_writer_.data(), data_writer_.size());
 }

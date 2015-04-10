@@ -1,14 +1,14 @@
 /**
  * This file is part of the "libfnord" project
- *   Copyright (c) 2014 Paul Asmuth, Google Inc.
+ *   Copyright (c) 2015 Paul Asmuth
  *
  * FnordMetric is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License v3.0. You should have received a
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#ifndef _FNORD_CSTABLE_UINT16COLUMNWRITER_H
-#define _FNORD_CSTABLE_UINT16COLUMNWRITER_H
+#ifndef _FNORD_CSTABLE_STRINGCOLUMNWRITER_H
+#define _FNORD_CSTABLE_STRINGCOLUMNWRITER_H
 #include <fnord-base/stdtypes.h>
 #include <fnord-base/util/binarymessagewriter.h>
 #include <fnord-base/util/BitPackEncoder.h>
@@ -18,27 +18,26 @@
 namespace fnord {
 namespace cstable {
 
-class BitPackedIntColumnWriter : public ColumnWriter {
+class StringColumnWriter : public ColumnWriter {
 public:
 
-  BitPackedIntColumnWriter(
+  StringColumnWriter(
       uint64_t r_max,
       uint64_t d_max,
-      uint32_t max_value = 0xffffffff);
+      size_t max_strlen);
 
-  void addDatum(uint64_t rep_level, uint64_t def_level, uint32_t value);
-  void commit();
+  void addDatum(uint64_t rep_level, uint64_t def_level, const String& value);
 
   ColumnType type() const override {
-    return ColumnType::UINT32_BITPACKED;
+    return ColumnType::STRING_PLAIN;
   }
 
 protected:
   size_t size() const override;
   void write(util::BinaryMessageWriter* writer) override;
 
-  uint32_t max_value_;
-  util::BitPackEncoder data_writer_;
+  util::BinaryMessageWriter data_writer_;
+  size_t max_strlen_;
 };
 
 } // namespace cstable
