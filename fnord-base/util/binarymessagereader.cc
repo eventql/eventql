@@ -50,6 +50,13 @@ uint32_t const* BinaryMessageReader::readValue<uint32_t>() {
   return readUInt32();
 }
 
+template <>
+String const* BinaryMessageReader::readValue<String>() {
+  auto len = *readUInt32();
+  cur_str_ = String(reinterpret_cast<const char*>(read(len)), len);
+  return &cur_str_;
+}
+
 char const* BinaryMessageReader::readString(size_t size) {
 #ifndef FNORD_NODBEUG
   if ((pos_ + size) > size_) {

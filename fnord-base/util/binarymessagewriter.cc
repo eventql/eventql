@@ -129,6 +129,12 @@ void BinaryMessageWriter::appendValue<uint32_t>(const uint32_t& val) {
   appendUInt32(val);
 }
 
+template <>
+void BinaryMessageWriter::appendValue<String>(const String& val) {
+  appendUInt32(val.size());
+  append(val.data(), val.size());
+}
+
 }
 }
 
