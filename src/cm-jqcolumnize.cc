@@ -33,6 +33,8 @@
 #include "fnord-cstable/BooleanColumnWriter.h"
 #include "fnord-cstable/CSTableWriter.h"
 #include "fnord-cstable/CSTableReader.h"
+#include <fnord-fts/fts.h>
+#include <fnord-fts/fts_common.h>
 #include "common.h"
 #include "CustomerNamespace.h"
 #include "FeatureSchema.h"
@@ -49,6 +51,15 @@ int main(int argc, const char** argv) {
   fnord::Application::logToStderr();
 
   fnord::cli::FlagParser flags;
+
+  flags.defineFlag(
+      "conf",
+      cli::FlagParser::T_STRING,
+      false,
+      NULL,
+      "./conf",
+      "conf directory",
+      "<path>");
 
   flags.defineFlag(
       "input_file",
@@ -82,14 +93,14 @@ int main(int argc, const char** argv) {
   Logger::get()->setMinimumLogLevel(
       strToLogLevel(flags.getString("loglevel")));
 
-  size_t debug_n = 0;
-  size_t debug_z = 0;
+  fnord::fts::Analyzer analyzer(flags.getString("conf"));
 
   /* query level */
   cstable::UInt32ColumnWriter jq_time_col(1, 1);
   cstable::BitPackedIntColumnWriter jq_page_col(1, 1, 100);
   cstable::BitPackedIntColumnWriter jq_lang_col(1, 1, kMaxLanguage);
   cstable::StringColumnWriter jq_qstr_col(1, 1, 8192);
+  cstable::StringColumnWriter jq_qstrnorm_col(1, 1, 8192);
   cstable::BitPackedIntColumnWriter jq_numitems_col(1, 1, 250);
   cstable::BitPackedIntColumnWriter jq_numitemclicks_col(1, 1, 250);
   cstable::BitPackedIntColumnWriter jq_numadimprs_col(1, 1, 250);
@@ -124,8 +135,11 @@ int main(int argc, const char** argv) {
       auto qstr = cm::extractQueryString(q.attrs);
       if (qstr.isEmpty()) {
         jq_qstr_col.addNull(r, 0);
+        jq_qstrnorm_col.addNull(r, 0);
       } else {
+        auto qstr_norm = analyzer.normalize(lang, qstr.get());
         jq_qstr_col.addDatum(r, 1, qstr.get());
+        jq_qstrnorm_col.addDatum(r, 1, qstr_norm);
       }
 
       /* queries.num_item_clicks, queries.num_items */
@@ -276,6 +290,7 @@ int main(int argc, const char** argv) {
     writer.addColumn("queries.page", &jq_page_col);
     writer.addColumn("queries.language", &jq_lang_col);
     writer.addColumn("queries.query_string", &jq_qstr_col);
+    writer.addColumn("queries.query_string_normalized", &jq_qstrnorm_col);
     writer.addColumn("queries.num_items", &jq_numitems_col);
     writer.addColumn("queries.num_items_clicked", &jq_numitemclicks_col);
     writer.addColumn("queries.num_ad_impressions", &jq_numadimprs_col);
@@ -302,7 +317,7 @@ int main(int argc, const char** argv) {
     cm::AnalyticsTableScan aq;
     auto lcol = aq.fetchColumn("queries.language");
     auto ccol = aq.fetchColumn("queries.num_ad_clicks");
-    auto qcol = aq.fetchColumn("queries.query_string");
+    auto qcol = aq.fetchColumn("queries.query_string_normalized");
 
     aq.onQuery([&] () {
       auto l = languageToString((Language) lcol->getUInt32());
