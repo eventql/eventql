@@ -48,6 +48,7 @@ Option<uint32_t> extractABTestGroup(const Vector<String>& attrs);
 Language extractLanguage(const Vector<String>& attrs);
 String extractPageTypeString(const Vector<String>& attrs);
 PageType extractPageType(const Vector<String>& attrs);
+String extractQueryString(const Vector<String>& attrs);
 
 String joinBagOfWords(const Set<String>& words);
 
