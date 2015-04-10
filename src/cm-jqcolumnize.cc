@@ -28,6 +28,7 @@
 #include "fnord-cstable/BitPackedIntColumnWriter.h"
 #include "fnord-cstable/UInt32ColumnReader.h"
 #include "fnord-cstable/UInt32ColumnWriter.h"
+#include "fnord-cstable/StringColumnWriter.h"
 #include "fnord-cstable/BooleanColumnReader.h"
 #include "fnord-cstable/BooleanColumnWriter.h"
 #include "fnord-cstable/CSTableWriter.h"
@@ -88,6 +89,7 @@ int main(int argc, const char** argv) {
   cstable::UInt32ColumnWriter jq_time_col(1, 1);
   cstable::BitPackedIntColumnWriter jq_page_col(1, 1, 100);
   cstable::BitPackedIntColumnWriter jq_lang_col(1, 1, kMaxLanguage);
+  cstable::StringColumnWriter jq_qstr_col(1, 1, 8192);
   cstable::BitPackedIntColumnWriter jq_numitems_col(1, 1, 250);
   cstable::BitPackedIntColumnWriter jq_numitemclicks_col(1, 1, 250);
   cstable::BitPackedIntColumnWriter jq_numadimprs_col(1, 1, 250);
@@ -117,6 +119,10 @@ int main(int argc, const char** argv) {
       auto lang = cm::extractLanguage(q.attrs);
       uint32_t l = (uint16_t) lang;
       jq_lang_col.addDatum(r, 1, l);
+
+      /* queries.query_string */
+      auto qstr = cm::extractQueryString(q.attrs);
+      jq_qstr_col.addDatum(r, 1, qstr);
 
       /* queries.num_item_clicks, queries.num_items */
       size_t nitems = 0;
@@ -265,6 +271,7 @@ int main(int argc, const char** argv) {
     writer.addColumn("queries.time", &jq_time_col);
     writer.addColumn("queries.page", &jq_page_col);
     writer.addColumn("queries.language", &jq_lang_col);
+    writer.addColumn("queries.query_string", &jq_qstr_col);
     writer.addColumn("queries.num_items", &jq_numitems_col);
     writer.addColumn("queries.num_items_clicked", &jq_numitemclicks_col);
     writer.addColumn("queries.num_ad_impressions", &jq_numadimprs_col);
