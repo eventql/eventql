@@ -493,10 +493,11 @@ add_executable(cm-jqcolumnize
     $<TARGET_OBJECTS:fnord-rpc>
     $<TARGET_OBJECTS:fnord-cstable>
     $<TARGET_OBJECTS:fnord-sstable>
+    $<TARGET_OBJECTS:fnord-fts>
     src/analytics/AnalyticsTableScan.cc
     src/analytics/TrafficSegment.cc
     src/analytics/CTRByPositionQuery.cc
     src/cm-jqcolumnize.cc)
 
 target_link_libraries(cm-jqcolumnize
-    ${CMAKE_THREAD_LIBS_INIT})
+    ${CMAKE_THREAD_LIBS_INIT} ${FNORD_FTS_LIBS})
