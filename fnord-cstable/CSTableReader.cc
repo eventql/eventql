@@ -12,6 +12,7 @@
 #include <fnord-cstable/BooleanColumnReader.h>
 #include <fnord-cstable/BitPackedIntColumnReader.h>
 #include <fnord-cstable/UInt32ColumnReader.h>
+#include <fnord-cstable/StringColumnReader.h>
 
 namespace fnord {
 namespace cstable {
@@ -74,6 +75,8 @@ RefPtr<ColumnReader> CSTableReader::getColumnReader(const String& column_name) {
       return new BitPackedIntColumnReader(c.r_max, c.d_max, cdata, c.size);
     case ColumnType::UINT32_PLAIN:
       return new UInt32ColumnReader(c.r_max, c.d_max, cdata, c.size);
+    case ColumnType::STRING_PLAIN:
+      return new StringColumnReader(c.r_max, c.d_max, cdata, c.size);
     default:
       RAISEF(kIllegalStateError, "invalid column type: $0", (uint32_t) c.type);
   }
