@@ -18,9 +18,7 @@ StringColumnReader::StringColumnReader(
     void* data,
     size_t size) :
     ColumnReader(r_max, d_max, data, size),
-    data_reader_(data_, data_size_) {
-  fnord::iputs("open col with: $0 bytes", data_size_);
-}
+    data_reader_(data_, data_size_) {}
 
 bool StringColumnReader::next(
     uint64_t* rep_level,
