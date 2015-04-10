@@ -33,8 +33,8 @@ void CumulativeHistogram::addDatum(double value, double num_observations) {
     bins_.emplace_back(0);
   }
 
-  bins_[bin] += value;
-  cumul_ += value;
+  bins_[bin] += num_observations;
+  cumul_ += num_observations;
 }
 
 Vector<Pair<String, double>>
