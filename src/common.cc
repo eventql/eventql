@@ -229,4 +229,17 @@ bool isItemEligible(
   }
 }
 
+String extractQueryString(const Vector<String>& attrs) {
+  for (const auto& a : attrs) {
+    if (StringUtil::beginsWith(a, "qstr~")) {
+      auto o = StringUtil::find(a, ':');
+      if (o != String::npos) {
+        return a.substr(o);
+      }
+    }
+  }
+
+  return "";
+}
+
 }
