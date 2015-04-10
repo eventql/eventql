@@ -47,7 +47,12 @@ size_t ColumnWriter::bodySize() const {
   return 24 + rlvl_writer_.size() + dlvl_writer_.size() + size();
 }
 
-
+void ColumnWriter::addNull(
+    uint64_t rep_level,
+    uint64_t def_level) {
+  rlvl_writer_.encode(rep_level);
+  dlvl_writer_.encode(def_level);
+}
 
 } // namespace cstable
 } // namespace fnord
