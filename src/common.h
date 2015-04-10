@@ -12,6 +12,8 @@
 #include <fnord-base/option.h>
 #include <fnord-base/stdtypes.h>
 #include <fnord-base/Language.h>
+#include <fnord-base/util/CumulativeHistogram.h>
+#include <fnord-json/json.h>
 #include "JoinedQuery.h"
 
 using namespace fnord;
