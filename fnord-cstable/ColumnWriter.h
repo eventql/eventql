@@ -22,6 +22,8 @@ public:
   ColumnWriter(size_t r_max, size_t d_max);
   virtual ~ColumnWriter() {}
 
+  virtual void addNull(uint64_t rep_level, uint64_t def_level);
+
   void write(void* buf, size_t buf_len);
   virtual void commit();
   virtual ColumnType type() const = 0;

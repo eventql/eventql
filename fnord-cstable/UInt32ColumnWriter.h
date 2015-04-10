@@ -26,7 +26,6 @@ public:
       uint64_t d_max);
 
   void addDatum(uint64_t rep_level, uint64_t def_level, uint32_t value);
-  void addNull(uint64_t rep_level, uint64_t def_level);
 
   ColumnType type() const override {
     return ColumnType::UINT32_PLAIN;
