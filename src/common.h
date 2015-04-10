@@ -12,6 +12,8 @@
 #include <fnord-base/option.h>
 #include <fnord-base/stdtypes.h>
 #include <fnord-base/Language.h>
+#include <fnord-base/util/CumulativeHistogram.h>
+#include <fnord-json/json.h>
 #include "JoinedQuery.h"
 
 using namespace fnord;
@@ -48,6 +50,7 @@ Option<uint32_t> extractABTestGroup(const Vector<String>& attrs);
 Language extractLanguage(const Vector<String>& attrs);
 String extractPageTypeString(const Vector<String>& attrs);
 PageType extractPageType(const Vector<String>& attrs);
+Option<String> extractQueryString(const Vector<String>& attrs);
 
 String joinBagOfWords(const Set<String>& words);
 

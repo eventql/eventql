@@ -28,10 +28,13 @@
 #include "fnord-cstable/BitPackedIntColumnWriter.h"
 #include "fnord-cstable/UInt32ColumnReader.h"
 #include "fnord-cstable/UInt32ColumnWriter.h"
+#include "fnord-cstable/StringColumnWriter.h"
 #include "fnord-cstable/BooleanColumnReader.h"
 #include "fnord-cstable/BooleanColumnWriter.h"
 #include "fnord-cstable/CSTableWriter.h"
 #include "fnord-cstable/CSTableReader.h"
+#include <fnord-fts/fts.h>
+#include <fnord-fts/fts_common.h>
 #include "common.h"
 #include "CustomerNamespace.h"
 #include "FeatureSchema.h"
@@ -48,6 +51,15 @@ int main(int argc, const char** argv) {
   fnord::Application::logToStderr();
 
   fnord::cli::FlagParser flags;
+
+  flags.defineFlag(
+      "conf",
+      cli::FlagParser::T_STRING,
+      false,
+      NULL,
+      "./conf",
+      "conf directory",
+      "<path>");
 
   flags.defineFlag(
       "input_file",
@@ -81,13 +93,14 @@ int main(int argc, const char** argv) {
   Logger::get()->setMinimumLogLevel(
       strToLogLevel(flags.getString("loglevel")));
 
-  size_t debug_n = 0;
-  size_t debug_z = 0;
+  fnord::fts::Analyzer analyzer(flags.getString("conf"));
 
   /* query level */
   cstable::UInt32ColumnWriter jq_time_col(1, 1);
   cstable::BitPackedIntColumnWriter jq_page_col(1, 1, 100);
   cstable::BitPackedIntColumnWriter jq_lang_col(1, 1, kMaxLanguage);
+  cstable::StringColumnWriter jq_qstr_col(1, 1, 8192);
+  cstable::StringColumnWriter jq_qstrnorm_col(1, 1, 8192);
   cstable::BitPackedIntColumnWriter jq_numitems_col(1, 1, 250);
   cstable::BitPackedIntColumnWriter jq_numitemclicks_col(1, 1, 250);
   cstable::BitPackedIntColumnWriter jq_numadimprs_col(1, 1, 250);
@@ -117,6 +130,17 @@ int main(int argc, const char** argv) {
       auto lang = cm::extractLanguage(q.attrs);
       uint32_t l = (uint16_t) lang;
       jq_lang_col.addDatum(r, 1, l);
+
+      /* queries.query_string */
+      auto qstr = cm::extractQueryString(q.attrs);
+      if (qstr.isEmpty()) {
+        jq_qstr_col.addNull(r, 0);
+        jq_qstrnorm_col.addNull(r, 0);
+      } else {
+        auto qstr_norm = analyzer.normalize(lang, qstr.get());
+        jq_qstr_col.addDatum(r, 1, qstr.get());
+        jq_qstrnorm_col.addDatum(r, 1, qstr_norm);
+      }
 
       /* queries.num_item_clicks, queries.num_items */
       size_t nitems = 0;
@@ -265,6 +289,8 @@ int main(int argc, const char** argv) {
     writer.addColumn("queries.time", &jq_time_col);
     writer.addColumn("queries.page", &jq_page_col);
     writer.addColumn("queries.language", &jq_lang_col);
+    writer.addColumn("queries.query_string", &jq_qstr_col);
+    writer.addColumn("queries.query_string_normalized", &jq_qstrnorm_col);
     writer.addColumn("queries.num_items", &jq_numitems_col);
     writer.addColumn("queries.num_items_clicked", &jq_numitemclicks_col);
     writer.addColumn("queries.num_ad_impressions", &jq_numadimprs_col);
@@ -284,33 +310,35 @@ int main(int argc, const char** argv) {
       flags.getString("output_file") + "~",
       flags.getString("output_file"));
 
-  //{
-  //  cstable::CSTableReader reader(flags.getString("output_file"));
-  //  auto t0 = WallClock::unixMicros();
+  {
+    cstable::CSTableReader reader(flags.getString("output_file"));
+    auto t0 = WallClock::unixMicros();
 
-  //  cm::AnalyticsTableScan aq;
-  //  auto lcol = aq.fetchColumn("queries.language");
-  //  auto ccol = aq.fetchColumn("queries.num_ad_clicks");
+    cm::AnalyticsTableScan aq;
+    auto lcol = aq.fetchColumn("queries.language");
+    auto ccol = aq.fetchColumn("queries.num_ad_clicks");
+    auto qcol = aq.fetchColumn("queries.query_string_normalized");
 
-  //  aq.onQuery([&] () {
-  //    auto l = languageToString((Language) lcol->getUInt32());
-  //    auto c = ccol->getUInt32();
-  //    fnord::iputs("lang: $0 -> $1", l, c);
-  //  });
+    aq.onQuery([&] () {
+      auto l = languageToString((Language) lcol->getUInt32());
+      auto c = ccol->getUInt32();
+      auto q = qcol->getString();
+      fnord::iputs("lang: $0 -> $1 -- $2", l, c, q);
+    });
 
-  //  aq.scanTable(&reader);
-  //  //cm::CTRByGroupResult<uint16_t> res;
-  //  //cm::CTRByPositionQuery q(&aq, &res);
-  //  //auto t1 = WallClock::unixMicros();
-  //  //fnord::iputs("scanned $0 rows in $1 ms", res.rows_scanned, (t1 - t0) / 1000.0f);
-  //  //for (const auto& p : res.counters) {
-  //  //  fnord::iputs(
-  //  //     "pos: $0, views: $1, clicks: $2, ctr: $3", 
-  //  //      p.first, p.second.num_views,
-  //  //      p.second.num_clicks,
-  //  //      p.second.num_clicks / (double) p.second.num_views);
-  //  //}
-  //}
+    aq.scanTable(&reader);
+    //cm::CTRByGroupResult<uint16_t> res;
+    //cm::CTRByPositionQuery q(&aq, &res);
+    //auto t1 = WallClock::unixMicros();
+    //fnord::iputs("scanned $0 rows in $1 ms", res.rows_scanned, (t1 - t0) / 1000.0f);
+    //for (const auto& p : res.counters) {
+    //  fnord::iputs(
+    //     "pos: $0, views: $1, clicks: $2, ctr: $3", 
+    //      p.first, p.second.num_views,
+    //      p.second.num_clicks,
+    //      p.second.num_clicks / (double) p.second.num_views);
+    //}
+  }
 
   return 0;
 }
