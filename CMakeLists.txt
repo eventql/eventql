@@ -425,6 +425,7 @@ add_executable(cm-reportserver
     src/analytics/AnalyticsQueryResult.cc
     src/analytics/CTRByPageQuery.cc
     src/analytics/CTRByPositionQuery.cc
+    src/analytics/TopSearchQueriesQuery.cc
     src/analytics/DiscoveryKPIQuery.cc
     src/analytics/DiscoveryCategoryStatsQuery.cc
     src/analytics/DiscoveryCategoryStatsResult.cc
