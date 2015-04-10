@@ -40,6 +40,7 @@ protected:
   void const* ptr_;
   size_t size_;
   size_t pos_;
+  std::string cur_str_;
 };
 
 }
