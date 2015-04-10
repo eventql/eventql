@@ -122,7 +122,11 @@ int main(int argc, const char** argv) {
 
       /* queries.query_string */
       auto qstr = cm::extractQueryString(q.attrs);
-      jq_qstr_col.addDatum(r, 1, qstr);
+      if (qstr.isEmpty()) {
+        jq_qstr_col.addNull(r, 0);
+      } else {
+        jq_qstr_col.addDatum(r, 1, qstr.get());
+      }
 
       /* queries.num_item_clicks, queries.num_items */
       size_t nitems = 0;
