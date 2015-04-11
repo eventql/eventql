@@ -21,6 +21,14 @@ void MessageBuilder::setUInt32(const String path, uint32_t value) {
   fields_[path] = val;
 }
 
+void MessageBuilder::setBool(const String path, bool value) {
+  uint8_t v = value ? 1 : 0;
+  FieldValue val;
+  val.type = FieldType::BOOLEAN;
+  val.value = Buffer(&v, sizeof(v));
+  fields_[path] = val;
+}
+
 void MessageBuilder::setString(const String path, const String& value) {
   FieldValue val;
   val.type = FieldType::STRING;
@@ -105,7 +113,7 @@ void MessageBuilder::encodeSingleField(
   }
 }
 
-size_t MessageBuilder::countRepetitions(const String& prefix) {
+size_t MessageBuilder::countRepetitions(const String& prefix) const {
   auto rprefix = prefix + "[";
 
   Set<size_t> reps;
@@ -127,6 +135,10 @@ size_t MessageBuilder::countRepetitions(const String& prefix) {
   }
 
   return reps.size();
+}
+
+bool MessageBuilder::isSet(const String& path) const {
+  return fields_.count(path) > 0;
 }
 
 } // namespace msg

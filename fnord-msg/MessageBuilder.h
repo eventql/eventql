@@ -26,6 +26,9 @@ public:
 
   void encode(const MessageSchema& schema, Buffer* buf);
 
+  size_t countRepetitions(const String& path) const;
+  bool isSet(const String& path) const;
+
 protected:
   struct FieldValue {
     FieldType type;
@@ -42,7 +45,6 @@ protected:
       const MessageSchemaField& field,
       util::BinaryMessageWriter* buf);
 
-  size_t countRepetitions(const String& prefix);
 
   MessageSchema* schema_;
   HashMap<String, FieldValue> fields_;
