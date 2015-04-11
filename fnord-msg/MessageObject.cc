@@ -12,19 +12,19 @@
 namespace fnord {
 namespace msg {
 
-MessageObject::MessageObject(uint32_t id /* = 0 */) {
+MessageObject::MessageObject(uint32_t _id /* = 0 */) : id(_id) {
   new (&data_) Vector<MessageObject>();
 }
 
-MessageObject::MessageObject(uint32_t id, uint32_t value) {
+MessageObject::MessageObject(uint32_t _id, uint32_t value) : id(_id) {
   new (&data_) uint32_t(value);
 }
 
-MessageObject::MessageObject(uint32_t id, const String& value) {
+MessageObject::MessageObject(uint32_t _id, const String& value) : id(_id) {
   new (&data_) String(value);
 }
 
-MessageObject::MessageObject(uint32_t id, bool value) {
+MessageObject::MessageObject(uint32_t _id, bool value) : id(_id) {
   new (&data_) uint8_t(value ? 1 : 0);
 }
 
