@@ -113,7 +113,8 @@ int main(int argc, const char** argv) {
       msg::FieldType::UINT32,
       100,
       false,
-      true);
+      true,
+      msg::EncodingHint::BITPACK);
 
   queries.fields.emplace_back(
       2,
@@ -121,7 +122,8 @@ int main(int argc, const char** argv) {
       msg::FieldType::UINT32,
       kMaxLanguage,
       false,
-      false);
+      false,
+      msg::EncodingHint::BITPACK);
 
   queries.fields.emplace_back(
       3,
@@ -145,7 +147,8 @@ int main(int argc, const char** argv) {
       msg::FieldType::UINT32,
       250,
       false,
-      false);
+      false,
+      msg::EncodingHint::BITPACK);
 
   queries.fields.emplace_back(
       6,
@@ -153,7 +156,8 @@ int main(int argc, const char** argv) {
       msg::FieldType::UINT32,
       250,
       false,
-      false);
+      false,
+      msg::EncodingHint::BITPACK);
 
   queries.fields.emplace_back(
       7,
@@ -161,7 +165,8 @@ int main(int argc, const char** argv) {
       msg::FieldType::UINT32,
       250,
       false,
-      false);
+      false,
+      msg::EncodingHint::BITPACK);
 
   queries.fields.emplace_back(
       8,
@@ -169,7 +174,8 @@ int main(int argc, const char** argv) {
       msg::FieldType::UINT32,
       250,
       false,
-      false);
+      false,
+      msg::EncodingHint::BITPACK);
 
   queries.fields.emplace_back(
       9,
@@ -177,7 +183,8 @@ int main(int argc, const char** argv) {
       msg::FieldType::UINT32,
       100,
       false,
-      true);
+      true,
+      msg::EncodingHint::BITPACK);
 
   queries.fields.emplace_back(
       10,
@@ -185,7 +192,8 @@ int main(int argc, const char** argv) {
       msg::FieldType::UINT32,
       kMaxDeviceType,
       false,
-      false);
+      false,
+      msg::EncodingHint::BITPACK);
 
   queries.fields.emplace_back(
       11,
@@ -193,7 +201,8 @@ int main(int argc, const char** argv) {
       msg::FieldType::UINT32,
       kMaxPageType,
       false,
-      false);
+      false,
+      msg::EncodingHint::BITPACK);
 
   queries.fields.emplace_back(
       12,
@@ -201,7 +210,8 @@ int main(int argc, const char** argv) {
       msg::FieldType::UINT32,
       0xffff,
       false,
-      true);
+      true,
+      msg::EncodingHint::BITPACK);
 
   queries.fields.emplace_back(
       13,
@@ -209,7 +219,8 @@ int main(int argc, const char** argv) {
       msg::FieldType::UINT32,
       0xffff,
       false,
-      true);
+      true,
+      msg::EncodingHint::BITPACK);
 
   queries.fields.emplace_back(
       14,
@@ -217,7 +228,8 @@ int main(int argc, const char** argv) {
       msg::FieldType::UINT32,
       0xffff,
       false,
-      true);
+      true,
+      msg::EncodingHint::BITPACK);
 
   msg::MessageSchemaField query_items(
       17,
@@ -233,7 +245,8 @@ int main(int argc, const char** argv) {
       msg::FieldType::UINT32,
       64,
       false,
-      false);
+      false,
+      msg::EncodingHint::BITPACK);
 
   query_items.fields.emplace_back(
       15,
@@ -251,8 +264,6 @@ int main(int argc, const char** argv) {
 
 
   fnord::fts::Analyzer analyzer(flags.getString("conf"));
-  HashMap<String, RefPtr<cstable::ColumnWriter>> column_writers;
-  fnord::cstable::CSTableBuilder table(&schema, column_writers);
 
   /* query level */
   //cstable::UInt32ColumnWriter jq_time_col(1, 1);
@@ -276,6 +287,7 @@ int main(int argc, const char** argv) {
   //cstable::BooleanColumnWriter jqi_clicked_col(2, 2);
 
 
+  fnord::cstable::CSTableBuilder table(&schema);
   auto add_session = [&] (const cm::JoinedSession& sess) {
     msg::MessageObject obj;
 
@@ -433,32 +445,6 @@ int main(int argc, const char** argv) {
   status_line.runForce();
 
   table.write(flags.getString("output_file"));
-
-  //{
-  //  cstable::CSTableWriter writer(flags.getString("output_file") + "~", n);
-  //  writer.addColumn("queries.time", &jq_time_col);
-  //  writer.addColumn("queries.page", &jq_page_col);
-  //  writer.addColumn("queries.language", &jq_lang_col);
-  //  writer.addColumn("queries.query_string", &jq_qstr_col);
-  //  writer.addColumn("queries.query_string_normalized", &jq_qstrnorm_col);
-  //  writer.addColumn("queries.num_items", &jq_numitems_col);
-  //  writer.addColumn("queries.num_items_clicked", &jq_numitemclicks_col);
-  //  writer.addColumn("queries.num_ad_impressions", &jq_numadimprs_col);
-  //  writer.addColumn("queries.num_ad_clicks", &jq_numadclicks_col);
-  //  writer.addColumn("queries.ab_test_group", &jq_abtestgroup_col);
-  //  writer.addColumn("queries.device_type", &jq_devicetype_col);
-  //  writer.addColumn("queries.page_type", &jq_pagetype_col);
-  //  writer.addColumn("queries.category1", &jq_cat1_col);
-  //  writer.addColumn("queries.category2", &jq_cat2_col);
-  //  writer.addColumn("queries.category3", &jq_cat3_col);
-  //  writer.addColumn("queries.items.position", &jqi_position_col);
-  //  writer.addColumn("queries.items.clicked", &jqi_clicked_col);
-  //  writer.commit();
-  //}
-
-  //FileUtil::mv(
-  //    flags.getString("output_file") + "~",
-  //    flags.getString("output_file"));
 
   //{
   //  cstable::CSTableReader reader(flags.getString("output_file"));
