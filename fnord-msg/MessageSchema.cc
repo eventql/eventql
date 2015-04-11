@@ -92,27 +92,11 @@ static void schemaNodeToString(
       attrs));
 }
 
-static void sortSchemaFields(Vector<MessageSchemaField>* fields) {
-  std::sort(fields->begin(), fields->end(), [] (
-      const MessageSchemaField& a,
-      const MessageSchemaField& b) {
-    return a.id < b.id;
-  });
-
-  for (auto& f : *fields) {
-    if (!f.fields.empty()) {
-      sortSchemaFields(&f.fields);
-    }
-  }
-}
-
 MessageSchema::MessageSchema(
     const String& _name,
     Vector<MessageSchemaField> _fields) :
     name(_name),
-    fields(_fields) {
-  sortSchemaFields(&fields);
-}
+    fields(_fields) {}
 
 String MessageSchema::toString() const {
   String str = StringUtil::format("object $0 {\n", name);
