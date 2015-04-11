@@ -33,6 +33,7 @@
 #include "fnord-cstable/BooleanColumnWriter.h"
 #include "fnord-cstable/CSTableWriter.h"
 #include "fnord-cstable/CSTableReader.h"
+#include "fnord-cstable/CSTableBuilder.h"
 #include "fnord-msg/MessageSchema.h"
 #include "fnord-msg/MessageBuilder.h"
 #include <fnord-fts/fts.h>
@@ -249,6 +250,8 @@ int main(int argc, const char** argv) {
 
 
   fnord::fts::Analyzer analyzer(flags.getString("conf"));
+  HashMap<String, RefPtr<cstable::ColumnWriter>> column_writers;
+  fnord::cstable::CSTableBuilder table(&schema, column_writers);
 
   /* query level */
   //cstable::UInt32ColumnWriter jq_time_col(1, 1);
@@ -274,7 +277,7 @@ int main(int argc, const char** argv) {
   //uint64_t r = 0;
   //uint64_t n = 0;
 
-  auto add_session = [&schema, &analyzer] (const cm::JoinedSession& sess) {
+  auto add_session = [&] (const cm::JoinedSession& sess) {
     msg::MessageBuilder msg;
 
     for (int j = 0; j < sess.queries.size(); ++j) {
@@ -358,25 +361,16 @@ int main(int argc, const char** argv) {
           qprefix + "page_type",
           (uint32_t) extractPageType(q.attrs));
 
-
-      //if (q.items.size() == 0) {
-      //  jqi_position_col.addNull(r, 1);
-      //  jqi_clicked_col.addNull(r, 1);
-      //}
-
-      //for (const auto& i : q.items) {
-      //  jqi_position_col.addDatum(r, 2, i.position);
-      //  jqi_clicked_col.addDatum(r, 2, i.clicked);
-      //  r = 2;
-      //}
+      for (int i = 0; i < q.items.size(); ++i) {
+        const auto& item = q.items[i];
+        auto iprefix = StringUtil::format("$0items[$1].", qprefix, i);
+        msg.setUInt32(iprefix + "position", item.position);
+        msg.setBool(iprefix + "clicked", item.clicked);
+      }
     }
 
-    Buffer msg_buf;
-    msg.encode(schema, &msg_buf);
-
-    fnord::iputs("msg: $0", StringUtil::hexPrint(msg_buf.data(), msg_buf.size()));
+    table.addRecord(msg);
   };
-
 
   /* read input tables */
   int row_idx = 0;
@@ -422,6 +416,7 @@ int main(int argc, const char** argv) {
     if (!q.isEmpty()) {
       cm::JoinedSession s;
       s.queries.emplace_back(q.get());
+      s.queries.emplace_back(q.get());
       add_session(s);
     }
 
@@ -431,6 +426,8 @@ int main(int argc, const char** argv) {
   }
 
   status_line.runForce();
+
+  table.write(flags.getString("output_file"));
 
   //{
   //  cstable::CSTableWriter writer(flags.getString("output_file") + "~", n);
