@@ -33,6 +33,7 @@
 #include "fnord-cstable/BooleanColumnWriter.h"
 #include "fnord-cstable/CSTableWriter.h"
 #include "fnord-cstable/CSTableReader.h"
+#include "fnord-msg/MessageSchema.h"
 #include <fnord-fts/fts.h>
 #include <fnord-fts/fts_common.h>
 #include "common.h"
@@ -92,6 +93,159 @@ int main(int argc, const char** argv) {
 
   Logger::get()->setMinimumLogLevel(
       strToLogLevel(flags.getString("loglevel")));
+
+  msg::MessageSchema schema;
+  schema.name = "joined_session";
+
+  msg::MessageSchemaField queries(
+      0,
+      "queries",
+      msg::FieldType::OBJECT,
+      0,
+      true,
+      false);
+
+  queries.fields.emplace_back(
+      1,
+      "page",
+      msg::FieldType::UINT32,
+      100,
+      false,
+      false);
+
+  queries.fields.emplace_back(
+      2,
+      "language",
+      msg::FieldType::UINT32,
+      kMaxLanguage,
+      false,
+      false);
+
+  queries.fields.emplace_back(
+      3,
+      "query_string",
+      msg::FieldType::STRING,
+      8192,
+      false,
+      false);
+
+  queries.fields.emplace_back(
+      4,
+      "query_string_normalized",
+      msg::FieldType::STRING,
+      8192,
+      false,
+      false);
+
+  queries.fields.emplace_back(
+      5,
+      "num_items",
+      msg::FieldType::UINT32,
+      250,
+      false,
+      false);
+
+  queries.fields.emplace_back(
+      6,
+      "num_items_clicked",
+      msg::FieldType::UINT32,
+      250,
+      false,
+      false);
+
+  queries.fields.emplace_back(
+      7,
+      "num_ad_impressions",
+      msg::FieldType::UINT32,
+      250,
+      false,
+      false);
+
+  queries.fields.emplace_back(
+      8,
+      "num_ad_clicks",
+      msg::FieldType::UINT32,
+      250,
+      false,
+      false);
+
+  queries.fields.emplace_back(
+      9,
+      "ab_test_group",
+      msg::FieldType::UINT32,
+      100,
+      false,
+      false);
+
+  queries.fields.emplace_back(
+      10,
+      "device_type",
+      msg::FieldType::UINT32,
+      kMaxDeviceType,
+      false,
+      false);
+
+  queries.fields.emplace_back(
+      11,
+      "page_type",
+      msg::FieldType::UINT32,
+      kMaxPageType,
+      false,
+      false);
+
+  queries.fields.emplace_back(
+      12,
+      "category1",
+      msg::FieldType::UINT32,
+      0xffff,
+      false,
+      false);
+
+  queries.fields.emplace_back(
+      13,
+      "category2",
+      msg::FieldType::UINT32,
+      0xffff,
+      false,
+      false);
+
+  queries.fields.emplace_back(
+      14,
+      "category3",
+      msg::FieldType::UINT32,
+      0xffff,
+      false,
+      false);
+
+  msg::MessageSchemaField query_items(
+      0,
+      "items",
+      msg::FieldType::OBJECT,
+      0,
+      true,
+      false);
+
+  query_items.fields.emplace_back(
+      14,
+      "position",
+      msg::FieldType::UINT32,
+      64,
+      false,
+      false);
+
+  query_items.fields.emplace_back(
+      15,
+      "clicked",
+      msg::FieldType::BOOLEAN,
+      0,
+      false,
+      false);
+
+  queries.fields.emplace_back(query_items);
+  schema.fields.emplace_back(queries);
+
+  fnord::iputs("$0", schema.toString());
+  return 0;
 
   fnord::fts::Analyzer analyzer(flags.getString("conf"));
 

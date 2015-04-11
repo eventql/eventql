@@ -32,6 +32,7 @@ add_subdirectory(3rdparty/libfnord/fnord-sstable)
 add_subdirectory(3rdparty/libfnord/fnord-chart)
 add_subdirectory(3rdparty/libfnord/fnord-metricdb)
 add_subdirectory(3rdparty/libfnord/fnord-sql)
+add_subdirectory(3rdparty/libfnord/fnord-msg)
 include_directories(3rdparty/libfnord/)
 include_directories(3rdparty/libfnord/3rdparty/)
 include_directories(${FNORD_FTS_INCLUDE})
@@ -494,6 +495,7 @@ add_executable(cm-jqcolumnize
     $<TARGET_OBJECTS:fnord-rpc>
     $<TARGET_OBJECTS:fnord-cstable>
     $<TARGET_OBJECTS:fnord-sstable>
+    $<TARGET_OBJECTS:fnord-msg>
     $<TARGET_OBJECTS:fnord-fts>
     src/analytics/AnalyticsTableScan.cc
     src/analytics/TrafficSegment.cc
