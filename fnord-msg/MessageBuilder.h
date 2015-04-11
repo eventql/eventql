@@ -12,7 +12,7 @@
 #include <fnord-msg/MessageSchema.h>
 #include <fnord-base/stdtypes.h>
 #include <fnord-base/buffer.h>
-#include <fnord-base/util/BinaryMessageWriter.h>
+#include <fnord-base/util/binarymessagewriter.h>
 
 namespace fnord {
 namespace msg {
