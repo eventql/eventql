@@ -29,6 +29,9 @@ struct MessageObject {
   MessageObject(uint32_t id, bool value);
 
   Vector<MessageObject>& asObject() const;
+  const String& asString() const;
+  uint32_t asUInt32() const;
+  bool asBool() const;
 
   template <typename... ArgTypes>
   MessageObject& addChild(ArgTypes... args) {

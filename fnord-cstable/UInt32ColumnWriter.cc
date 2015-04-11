@@ -20,6 +20,18 @@ UInt32ColumnWriter::UInt32ColumnWriter(
 void UInt32ColumnWriter::addDatum(
     uint64_t rep_level,
     uint64_t def_level,
+    const void* data,
+    size_t size) {
+  if (size != sizeof(uint32_t)) {
+    RAISE(kIllegalArgumentError, "size != sizeof(uint32_t)");
+  }
+
+  addDatum(rep_level, def_level, *((const uint32_t*) data));
+}
+
+void UInt32ColumnWriter::addDatum(
+    uint64_t rep_level,
+    uint64_t def_level,
     uint32_t value) {
   rlvl_writer_.encode(rep_level);
   dlvl_writer_.encode(def_level);
