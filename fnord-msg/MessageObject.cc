@@ -16,6 +16,22 @@ MessageObject::MessageObject(uint32_t id /* = 0 */) {
   new (&data_) Vector<MessageObject>();
 }
 
+MessageObject::MessageObject(uint32_t id, uint32_t value) {
+  new (&data_) uint32_t(value);
+}
+
+MessageObject::MessageObject(uint32_t id, const String& value) {
+  new (&data_) String(value);
+}
+
+MessageObject::MessageObject(uint32_t id, bool value) {
+  new (&data_) uint8_t(value ? 1 : 0);
+}
+
+Vector<MessageObject>& MessageObject::asObject() const {
+  return *((Vector<MessageObject>*) &data_);
+}
+
 //MessageObject::MessageObject(uint32_t id, uint32_t value);
 //MessageObject::MessageObject(uint32_t id, String value);
 //MessageObject::MessageObject(uint32_t id, bool value);
