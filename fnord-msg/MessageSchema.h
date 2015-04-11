@@ -39,6 +39,11 @@ enum class FieldType : uint8_t {
   STRING = 3
 };
 
+enum class EncodingHint : uint8_t {
+  NONE = 0,
+  BITPACK = 1,
+};
+
 struct MessageSchemaField {
 
   MessageSchemaField(
@@ -47,13 +52,15 @@ struct MessageSchemaField {
     FieldType _type,
     uint64_t _type_size,
     bool _repeated,
-    bool _optional) :
+    bool _optional,
+    EncodingHint _encoding = EncodingHint::NONE) :
     id(_id),
     name(_name),
     type(_type),
     type_size(_type_size),
     repeated(_repeated),
-    optional(_optional) {}
+    optional(_optional),
+    encoding(_encoding) {}
 
   uint32_t id;
   String name;
@@ -61,6 +68,7 @@ struct MessageSchemaField {
   uint64_t type_size;
   bool repeated;
   bool optional;
+  EncodingHint encoding;
   Vector<MessageSchemaField> fields;
 };
 

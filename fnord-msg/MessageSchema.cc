@@ -59,25 +59,36 @@ static void schemaNodeToString(
 
     case FieldType::UINT32:
       type_name = "uint32";
-      attrs = StringUtil::format("[max=$0]", field.type_size);
+      attrs += StringUtil::format(" @maxval=$0", field.type_size);
       break;
 
     case FieldType::STRING:
       type_name = "string";
-      attrs = StringUtil::format("[maxlen=$0]", field.type_size);
+      attrs += StringUtil::format(" @maxlen=$0", field.type_size);
       break;
 
   }
 
+  switch (field.encoding) {
+
+    case EncodingHint::NONE:
+      break;
+
+    case EncodingHint::BITPACK:
+      attrs += " @encoding=BITPACK";
+      break;
+
+  }
+
+
   str->append(StringUtil::format(
-      "$0$1$2$3 $4 = $5$6$7;\n",
+      "$0$1$2$3 $4 = $5$6;\n",
       ws,
       type_prefix,
       type_name,
       type_suffix,
       field.name,
       field.id,
-      attrs.length() > 0 ? " " : "",
       attrs));
 }
 
