@@ -25,10 +25,17 @@ union MessageObjectValues {
 struct MessageObject {
   MessageObject(uint32_t id = 0);
   MessageObject(uint32_t id, uint32_t value);
-  MessageObject(uint32_t id, String value);
+  MessageObject(uint32_t id, const String& value);
   MessageObject(uint32_t id, bool value);
 
   Vector<MessageObject>& asObject() const;
+
+  template <typename... ArgTypes>
+  MessageObject& addChild(ArgTypes... args) {
+    auto& o = asObject();
+    o.emplace_back(args...);
+    return o.back();
+  }
 
   uint32_t id;
   char data_[sizeof(MessageObjectValues)];
