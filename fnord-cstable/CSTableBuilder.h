@@ -15,7 +15,7 @@
 #include <fnord-base/autoref.h>
 #include <fnord-cstable/ColumnWriter.h>
 #include <fnord-msg/MessageSchema.h>
-#include <fnord-msg/MessageBuilder.h>
+#include <fnord-msg/MessageObject.h>
 
 namespace fnord {
 namespace cstable {
@@ -26,7 +26,7 @@ public:
       msg::MessageSchema* schema,
       HashMap<String, RefPtr<ColumnWriter>> column_writers);
 
-  void addRecord(const msg::MessageBuilder& msg);
+  void addRecord(const msg::MessageObject& msg);
 
   void write(const String& filename);
 
@@ -36,9 +36,8 @@ protected:
       uint32_t r,
       uint32_t rmax,
       uint32_t d,
-      const msg::MessageBuilder& msg,
+      const msg::MessageObject& msg,
       const String& column,
-      const String& path,
       const msg::MessageSchemaField& field);
 
   void writeNull(
@@ -50,9 +49,8 @@ protected:
   void writeField(
       uint32_t r,
       uint32_t d,
-      const msg::MessageBuilder& msg,
+      const msg::MessageObject& msg,
       const String& column,
-      const String& path,
       const msg::MessageSchemaField& field);
 
   msg::MessageSchema* schema_;
