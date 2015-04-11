@@ -437,7 +437,7 @@ int main(int argc, const char** argv) {
 
     cm::AnalyticsTableScan aq;
     auto lcol = aq.fetchColumn("queries.language");
-    auto ccol = aq.fetchColumn("queries.num_ad_clicks");
+    auto ccol = aq.fetchColumn("queries.page");
     auto qcol = aq.fetchColumn("queries.query_string_normalized");
 
     aq.onQuery([&] () {
