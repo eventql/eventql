@@ -22,11 +22,16 @@ public:
 
   BooleanColumnWriter(uint64_t r_max, uint64_t d_max);
 
+  void addDatum(
+      uint64_t rep_level,
+      uint64_t def_level,
+      const void* data,
+      size_t size) override;
+
   void addDatum(uint64_t rep_level, uint64_t def_level, bool value);
   void addNull(uint64_t rep_level, uint64_t def_level);
 
   void commit();
-
 
   ColumnType type() const override {
     return ColumnType::BOOLEAN;

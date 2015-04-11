@@ -21,6 +21,18 @@ BooleanColumnWriter::BooleanColumnWriter(
 void BooleanColumnWriter::addDatum(
     uint64_t rep_level,
     uint64_t def_level,
+    const void* data,
+    size_t size) {
+  if (size != sizeof(uint8_t)) {
+    RAISE(kIllegalArgumentError, "size != sizeof(uint8_t)");
+  }
+
+  addDatum(rep_level, def_level, (*((const uint8_t*) data)) > 0);
+}
+
+void BooleanColumnWriter::addDatum(
+    uint64_t rep_level,
+    uint64_t def_level,
     bool value) {
   rlvl_writer_.encode(rep_level);
   dlvl_writer_.encode(def_level);
