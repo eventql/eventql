@@ -21,6 +21,13 @@ void MessageBuilder::setUInt32(const String path, uint32_t value) {
   fields_[path] = val;
 }
 
+void MessageBuilder::setString(const String path, const String& value) {
+  FieldValue val;
+  val.type = FieldType::STRING;
+  val.value = Buffer(value.data(), value.size());
+  fields_[path] = val;
+}
+
 void MessageBuilder::encode(const MessageSchema& schema, Buffer* buf) {
   util::BinaryMessageWriter writer;
 

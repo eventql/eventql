@@ -21,6 +21,8 @@ class MessageBuilder {
 public:
 
   void setUInt32(const String path, uint32_t value);
+  void setString(const String path, const String& value);
+  void setBool(const String path, bool value);
 
   void encode(const MessageSchema& schema, Buffer* buf);
 
