@@ -18,9 +18,9 @@ CSTableBuilder::CSTableBuilder(
     schema_(schema),
     columns_(column_writers) {}
 
-void CSTableBuilder::addRecord(const msg::MessageBuilder& msg) {
+void CSTableBuilder::addRecord(const msg::MessageObject& msg) {
   for (const auto& f : schema_->fields) {
-    addRecordField(0, 0, 0, msg, "", "", f);
+    addRecordField(0, 0, 0, msg, "", f);
   }
 
   abort();
@@ -30,55 +30,63 @@ void CSTableBuilder::addRecordField(
     uint32_t r,
     uint32_t rmax,
     uint32_t d,
-    const msg::MessageBuilder& msg,
+    const msg::MessageObject& msg,
     const String& column,
-    const String& path,
     const msg::MessageSchemaField& field) {
   auto this_r = r;
+  auto next_r = r;
+  auto next_d = d;
 
-  auto num_reps = 1;
-  if (field.optional && !msg.isSet(path + field.name)) {
-    num_reps = 0;
-  }
+  //auto num_reps = 1;
+  //if (field.optional && !msg.isSet(path + field.name)) {
+  //  num_reps = 0;
+  //}
 
   if (field.repeated) {
-    num_reps = msg.countRepetitions(path + field.name);
+    //num_reps = msg.countRepetitions(path + field.name);
     ++rmax;
   }
 
-  if (num_reps == 0) {
-    writeNull(r, d, column + field.name, field);
-    return;
-  }
-
   if (field.optional || field.repeated) {
-    ++d;
+    ++next_d;
   }
 
-  auto next_r = r;
-  for (int i = 0; i < num_reps; ++i) {
+  size_t n = 0;
+  for (const auto& o : msg.asObject()) {
+    if (o.id != field.id) {
+      continue;
+    }
+
+    ++n;
+
     switch (field.type) {
       case msg::FieldType::OBJECT:
         for (const auto& f : field.fields) {
           addRecordField(
               next_r,
               rmax,
-              d,
-              msg,
+              next_d,
+              o,
               column + field.name + ".",
-              field.repeated ?
-                  StringUtil::format("$0$1[$2].", path, field.name, i) :
-                  StringUtil::format("$0$1.", path, field.name),
               f);
         }
         break;
 
       default:
-        writeField(next_r, d, msg, column + field.name, path + field.name, field);
+        writeField(next_r, next_d, msg, column + field.name, field);
         break;
     }
 
     next_r = rmax;
+  }
+
+  if (n == 0) {
+    if (!(field.optional || field.repeated)) {
+      RAISEF(kIllegalArgumentError, "missing field: $0", column + field.name);
+    }
+
+    writeNull(r, d, column + field.name, field);
+    return;
   }
 }
 
@@ -104,11 +112,10 @@ void CSTableBuilder::writeNull(
 void CSTableBuilder::writeField(
     uint32_t r,
     uint32_t d,
-    const msg::MessageBuilder& msg,
+    const msg::MessageObject& msg,
     const String& column,
-    const String& path,
     const msg::MessageSchemaField& field) {
-  fnord::iputs("write field: $0 -- r=$1 d=$2 -- $3", column, r, d, path);
+  fnord::iputs("write field: $0 -- r=$1 d=$2", column, r, d);
 }
 
 
