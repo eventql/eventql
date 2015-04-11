@@ -247,63 +247,53 @@ int main(int argc, const char** argv) {
   msg::MessageSchema schema("joined_session", fields);
   fnord::iputs("$0", schema.toString());
 
-  msg::MessageBuilder msg;
-  msg.setUInt32("queries[0].page", 1);
-  msg.setUInt32("queries[0].language", 2);
-
-  Buffer msg_buf;
-  msg.encode(schema, &msg_buf);
-
-  fnord::iputs("msg: $0", StringUtil::hexPrint(msg_buf.data(), msg_buf.size()));
-  return 0;
 
   fnord::fts::Analyzer analyzer(flags.getString("conf"));
 
   /* query level */
-  cstable::UInt32ColumnWriter jq_time_col(1, 1);
-  cstable::BitPackedIntColumnWriter jq_page_col(1, 1, 100);
-  cstable::BitPackedIntColumnWriter jq_lang_col(1, 1, kMaxLanguage);
-  cstable::StringColumnWriter jq_qstr_col(1, 1, 8192);
-  cstable::StringColumnWriter jq_qstrnorm_col(1, 1, 8192);
-  cstable::BitPackedIntColumnWriter jq_numitems_col(1, 1, 250);
-  cstable::BitPackedIntColumnWriter jq_numitemclicks_col(1, 1, 250);
-  cstable::BitPackedIntColumnWriter jq_numadimprs_col(1, 1, 250);
-  cstable::BitPackedIntColumnWriter jq_numadclicks_col(1, 1, 250);
-  cstable::BitPackedIntColumnWriter jq_abtestgroup_col(1, 1, 100);
-  cstable::BitPackedIntColumnWriter jq_devicetype_col(1, 1, kMaxDeviceType);
-  cstable::BitPackedIntColumnWriter jq_pagetype_col(1, 1, kMaxPageType);
-  cstable::BitPackedIntColumnWriter jq_cat1_col(1, 1, 0xffff);
-  cstable::BitPackedIntColumnWriter jq_cat2_col(1, 1, 0xffff);
-  cstable::BitPackedIntColumnWriter jq_cat3_col(1, 1, 0xffff);
+  //cstable::UInt32ColumnWriter jq_time_col(1, 1);
+  //cstable::BitPackedIntColumnWriter jq_page_col(1, 1, 100);
+  //cstable::BitPackedIntColumnWriter jq_lang_col(1, 1, kMaxLanguage);
+  //cstable::StringColumnWriter jq_qstr_col(1, 1, 8192);
+  //cstable::StringColumnWriter jq_qstrnorm_col(1, 1, 8192);
+  //cstable::BitPackedIntColumnWriter jq_numitems_col(1, 1, 250);
+  //cstable::BitPackedIntColumnWriter jq_numitemclicks_col(1, 1, 250);
+  //cstable::BitPackedIntColumnWriter jq_numadimprs_col(1, 1, 250);
+  //cstable::BitPackedIntColumnWriter jq_numadclicks_col(1, 1, 250);
+  //cstable::BitPackedIntColumnWriter jq_abtestgroup_col(1, 1, 100);
+  //cstable::BitPackedIntColumnWriter jq_devicetype_col(1, 1, kMaxDeviceType);
+  //cstable::BitPackedIntColumnWriter jq_pagetype_col(1, 1, kMaxPageType);
+  //cstable::BitPackedIntColumnWriter jq_cat1_col(1, 1, 0xffff);
+  //cstable::BitPackedIntColumnWriter jq_cat2_col(1, 1, 0xffff);
+  //cstable::BitPackedIntColumnWriter jq_cat3_col(1, 1, 0xffff);
 
-  /* query item level */
-  cstable::BitPackedIntColumnWriter jqi_position_col(2, 2, 64);
-  cstable::BooleanColumnWriter jqi_clicked_col(2, 2);
+  ///* query item level */
+  //cstable::BitPackedIntColumnWriter jqi_position_col(2, 2, 64);
+  //cstable::BooleanColumnWriter jqi_clicked_col(2, 2);
 
-  uint64_t r = 0;
-  uint64_t n = 0;
+  //uint64_t r = 0;
+  //uint64_t n = 0;
 
-  auto add_session = [&] (const cm::JoinedSession& sess) {
-    ++n;
+  auto add_session = [&schema, &analyzer] (const cm::JoinedSession& sess) {
+    msg::MessageBuilder msg;
 
-    for (const auto& q : sess.queries) {
+    for (int j = 0; j < sess.queries.size(); ++j) {
+      auto q = sess.queries[j];
+      auto qprefix = StringUtil::format("queries[$0].", j);
+
       /* queries.time */
-      jq_time_col.addDatum(r, 1, q.time.unixMicros() / kMicrosPerSecond);
+      msg.setUInt32(qprefix + "time", q.time.unixMicros() / kMicrosPerSecond);
 
       /* queries.language */
       auto lang = cm::extractLanguage(q.attrs);
-      uint32_t l = (uint16_t) lang;
-      jq_lang_col.addDatum(r, 1, l);
+      msg.setUInt32(qprefix + "language", (uint16_t) lang);
 
       /* queries.query_string */
       auto qstr = cm::extractQueryString(q.attrs);
-      if (qstr.isEmpty()) {
-        jq_qstr_col.addNull(r, 0);
-        jq_qstrnorm_col.addNull(r, 0);
-      } else {
+      if (!qstr.isEmpty()) {
         auto qstr_norm = analyzer.normalize(lang, qstr.get());
-        jq_qstr_col.addDatum(r, 1, qstr.get());
-        jq_qstrnorm_col.addDatum(r, 1, qstr_norm);
+        msg.setString(qprefix + "query_string", qstr.get());
+        msg.setString(qprefix + "query_string_normalized", qstr_norm);
       }
 
       /* queries.num_item_clicks, queries.num_items */
@@ -323,74 +313,68 @@ int main(int argc, const char** argv) {
         nclicks += i.clicked;
       }
 
-      jq_numitems_col.addDatum(r, 1, nitems);
-      jq_numitemclicks_col.addDatum(r, 1, nclicks);
-      jq_numadimprs_col.addDatum(r, 1, nads);
-      jq_numadclicks_col.addDatum(r, 1, nadclicks);
+      msg.setUInt32(qprefix + "num_items", nitems);
+      msg.setUInt32(qprefix + "num_items_clicked", nclicks);
+      msg.setUInt32(qprefix + "num_ad_impressions", nads);
+      msg.setUInt32(qprefix + "num_ad_clicks", nadclicks);
 
       /* queries.page */
       auto pg_str = cm::extractAttr(q.attrs, "pg");
-      if (pg_str.isEmpty()) {
-        jq_page_col.addNull(r, 0);
-      } else {
-        jq_page_col.addDatum(r, 1, std::stoul(pg_str.get()));
+      if (!pg_str.isEmpty()) {
+        msg.setUInt32(qprefix + "page", std::stoul(pg_str.get()));
       }
 
       /* queries.ab_test_group */
       auto abgrp = cm::extractABTestGroup(q.attrs);
-      if (abgrp.isEmpty()) {
-        jq_abtestgroup_col.addNull(r, 0);
-      } else {
-        jq_abtestgroup_col.addDatum(r, 1, abgrp.get());
+      if (!abgrp.isEmpty()) {
+        msg.setUInt32(qprefix + "ab_test_group", abgrp.get());
       }
 
       /* queries.category1 */
       auto qcat1 = cm::extractAttr(q.attrs, "q_cat1");
-      if (qcat1.isEmpty()) {
-        jq_cat1_col.addNull(r, 0);
-      } else {
-        jq_cat1_col.addDatum(r, 1, std::stoul(qcat1.get()));
+      if (!qcat1.isEmpty()) {
+        msg.setUInt32(qprefix + "category1", std::stoul(qcat1.get()));
       }
 
       /* queries.category2 */
       auto qcat2 = cm::extractAttr(q.attrs, "q_cat2");
-      if (qcat2.isEmpty()) {
-        jq_cat2_col.addNull(r, 0);
-      } else {
-        jq_cat2_col.addDatum(r, 1, std::stoul(qcat2.get()));
+      if (!qcat2.isEmpty()) {
+        msg.setUInt32(qprefix + "category2", std::stoul(qcat2.get()));
       }
 
       /* queries.category3 */
       auto qcat3 = cm::extractAttr(q.attrs, "q_cat3");
-      if (qcat3.isEmpty()) {
-        jq_cat3_col.addNull(r, 0);
-      } else {
-        jq_cat3_col.addDatum(r, 1, std::stoul(qcat3.get()));
+      if (!qcat3.isEmpty()) {
+        msg.setUInt32(qprefix + "category3", std::stoul(qcat3.get()));
       }
 
       /* queries.device_type */
-      jq_devicetype_col.addDatum(r, 1, (uint32_t) extractDeviceType(q.attrs));
+      msg.setUInt32(
+          qprefix + "device_type",
+          (uint32_t) extractDeviceType(q.attrs));
 
       /* queries.page_type */
-      jq_pagetype_col.addDatum(r, 1, (uint32_t) extractPageType(q.attrs));
+      msg.setUInt32(
+          qprefix + "page_type",
+          (uint32_t) extractPageType(q.attrs));
 
 
+      //if (q.items.size() == 0) {
+      //  jqi_position_col.addNull(r, 1);
+      //  jqi_clicked_col.addNull(r, 1);
+      //}
 
-      if (q.items.size() == 0) {
-        jqi_position_col.addNull(r, 1);
-        jqi_clicked_col.addNull(r, 1);
-      }
-
-      for (const auto& i : q.items) {
-        jqi_position_col.addDatum(r, 2, i.position);
-        jqi_clicked_col.addDatum(r, 2, i.clicked);
-        r = 2;
-      }
-
-      r = 1;
+      //for (const auto& i : q.items) {
+      //  jqi_position_col.addDatum(r, 2, i.position);
+      //  jqi_clicked_col.addDatum(r, 2, i.clicked);
+      //  r = 2;
+      //}
     }
 
-    r = 0;
+    Buffer msg_buf;
+    msg.encode(schema, &msg_buf);
+
+    fnord::iputs("msg: $0", StringUtil::hexPrint(msg_buf.data(), msg_buf.size()));
   };
 
 
@@ -448,61 +432,61 @@ int main(int argc, const char** argv) {
 
   status_line.runForce();
 
-  {
-    cstable::CSTableWriter writer(flags.getString("output_file") + "~", n);
-    writer.addColumn("queries.time", &jq_time_col);
-    writer.addColumn("queries.page", &jq_page_col);
-    writer.addColumn("queries.language", &jq_lang_col);
-    writer.addColumn("queries.query_string", &jq_qstr_col);
-    writer.addColumn("queries.query_string_normalized", &jq_qstrnorm_col);
-    writer.addColumn("queries.num_items", &jq_numitems_col);
-    writer.addColumn("queries.num_items_clicked", &jq_numitemclicks_col);
-    writer.addColumn("queries.num_ad_impressions", &jq_numadimprs_col);
-    writer.addColumn("queries.num_ad_clicks", &jq_numadclicks_col);
-    writer.addColumn("queries.ab_test_group", &jq_abtestgroup_col);
-    writer.addColumn("queries.device_type", &jq_devicetype_col);
-    writer.addColumn("queries.page_type", &jq_pagetype_col);
-    writer.addColumn("queries.category1", &jq_cat1_col);
-    writer.addColumn("queries.category2", &jq_cat2_col);
-    writer.addColumn("queries.category3", &jq_cat3_col);
-    writer.addColumn("queries.items.position", &jqi_position_col);
-    writer.addColumn("queries.items.clicked", &jqi_clicked_col);
-    writer.commit();
-  }
+  //{
+  //  cstable::CSTableWriter writer(flags.getString("output_file") + "~", n);
+  //  writer.addColumn("queries.time", &jq_time_col);
+  //  writer.addColumn("queries.page", &jq_page_col);
+  //  writer.addColumn("queries.language", &jq_lang_col);
+  //  writer.addColumn("queries.query_string", &jq_qstr_col);
+  //  writer.addColumn("queries.query_string_normalized", &jq_qstrnorm_col);
+  //  writer.addColumn("queries.num_items", &jq_numitems_col);
+  //  writer.addColumn("queries.num_items_clicked", &jq_numitemclicks_col);
+  //  writer.addColumn("queries.num_ad_impressions", &jq_numadimprs_col);
+  //  writer.addColumn("queries.num_ad_clicks", &jq_numadclicks_col);
+  //  writer.addColumn("queries.ab_test_group", &jq_abtestgroup_col);
+  //  writer.addColumn("queries.device_type", &jq_devicetype_col);
+  //  writer.addColumn("queries.page_type", &jq_pagetype_col);
+  //  writer.addColumn("queries.category1", &jq_cat1_col);
+  //  writer.addColumn("queries.category2", &jq_cat2_col);
+  //  writer.addColumn("queries.category3", &jq_cat3_col);
+  //  writer.addColumn("queries.items.position", &jqi_position_col);
+  //  writer.addColumn("queries.items.clicked", &jqi_clicked_col);
+  //  writer.commit();
+  //}
 
-  FileUtil::mv(
-      flags.getString("output_file") + "~",
-      flags.getString("output_file"));
+  //FileUtil::mv(
+  //    flags.getString("output_file") + "~",
+  //    flags.getString("output_file"));
 
-  {
-    cstable::CSTableReader reader(flags.getString("output_file"));
-    auto t0 = WallClock::unixMicros();
+  //{
+  //  cstable::CSTableReader reader(flags.getString("output_file"));
+  //  auto t0 = WallClock::unixMicros();
 
-    cm::AnalyticsTableScan aq;
-    auto lcol = aq.fetchColumn("queries.language");
-    auto ccol = aq.fetchColumn("queries.num_ad_clicks");
-    auto qcol = aq.fetchColumn("queries.query_string_normalized");
+  //  cm::AnalyticsTableScan aq;
+  //  auto lcol = aq.fetchColumn("queries.language");
+  //  auto ccol = aq.fetchColumn("queries.num_ad_clicks");
+  //  auto qcol = aq.fetchColumn("queries.query_string_normalized");
 
-    aq.onQuery([&] () {
-      auto l = languageToString((Language) lcol->getUInt32());
-      auto c = ccol->getUInt32();
-      auto q = qcol->getString();
-      fnord::iputs("lang: $0 -> $1 -- $2", l, c, q);
-    });
+  //  aq.onQuery([&] () {
+  //    auto l = languageToString((Language) lcol->getUInt32());
+  //    auto c = ccol->getUInt32();
+  //    auto q = qcol->getString();
+  //    fnord::iputs("lang: $0 -> $1 -- $2", l, c, q);
+  //  });
 
-    aq.scanTable(&reader);
-    //cm::CTRByGroupResult<uint16_t> res;
-    //cm::CTRByPositionQuery q(&aq, &res);
-    //auto t1 = WallClock::unixMicros();
-    //fnord::iputs("scanned $0 rows in $1 ms", res.rows_scanned, (t1 - t0) / 1000.0f);
-    //for (const auto& p : res.counters) {
-    //  fnord::iputs(
-    //     "pos: $0, views: $1, clicks: $2, ctr: $3", 
-    //      p.first, p.second.num_views,
-    //      p.second.num_clicks,
-    //      p.second.num_clicks / (double) p.second.num_views);
-    //}
-  }
+  //  aq.scanTable(&reader);
+  //  //cm::CTRByGroupResult<uint16_t> res;
+  //  //cm::CTRByPositionQuery q(&aq, &res);
+  //  //auto t1 = WallClock::unixMicros();
+  //  //fnord::iputs("scanned $0 rows in $1 ms", res.rows_scanned, (t1 - t0) / 1000.0f);
+  //  //for (const auto& p : res.counters) {
+  //  //  fnord::iputs(
+  //  //     "pos: $0, views: $1, clicks: $2, ctr: $3", 
+  //  //      p.first, p.second.num_views,
+  //  //      p.second.num_clicks,
+  //  //      p.second.num_clicks / (double) p.second.num_views);
+  //  //}
+  //}
 
   return 0;
 }
