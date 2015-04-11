@@ -26,6 +26,12 @@ public:
       uint64_t d_max,
       size_t max_strlen);
 
+  void addDatum(
+      uint64_t rep_level,
+      uint64_t def_level,
+      const void* data,
+      size_t size) override;
+
   void addDatum(uint64_t rep_level, uint64_t def_level, const String& value);
 
   ColumnType type() const override {

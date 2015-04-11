@@ -24,6 +24,11 @@ public:
   virtual ~ColumnWriter() {}
 
   virtual void addNull(uint64_t rep_level, uint64_t def_level);
+  virtual void addDatum(
+      uint64_t rep_level,
+      uint64_t def_level,
+      const void* data,
+      size_t size) = 0;
 
   void write(void* buf, size_t buf_len);
   virtual void commit();

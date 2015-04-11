@@ -26,6 +26,12 @@ public:
       uint64_t d_max,
       uint32_t max_value = 0xffffffff);
 
+  void addDatum(
+      uint64_t rep_level,
+      uint64_t def_level,
+      const void* data,
+      size_t size) override;
+
   void addDatum(uint64_t rep_level, uint64_t def_level, uint32_t value);
   void commit();
 

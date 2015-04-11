@@ -22,6 +22,14 @@ StringColumnWriter::StringColumnWriter(
 void StringColumnWriter::addDatum(
     uint64_t rep_level,
     uint64_t def_level,
+    const void* data,
+    size_t size) {
+  addDatum(rep_level, def_level, String((const char*) data, size));
+}
+
+void StringColumnWriter::addDatum(
+    uint64_t rep_level,
+    uint64_t def_level,
     const String& value) {
   rlvl_writer_.encode(rep_level);
   dlvl_writer_.encode(def_level);

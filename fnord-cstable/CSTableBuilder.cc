@@ -8,15 +8,71 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <fnord-cstable/CSTableBuilder.h>
+#include "fnord-cstable/BitPackedIntColumnWriter.h"
+#include "fnord-cstable/UInt32ColumnWriter.h"
+#include "fnord-cstable/StringColumnWriter.h"
+#include "fnord-cstable/BooleanColumnWriter.h"
 
 namespace fnord {
 namespace cstable {
 
 CSTableBuilder::CSTableBuilder(
-    msg::MessageSchema* schema,
-    HashMap<String, RefPtr<ColumnWriter>> column_writers) :
-    schema_(schema),
-    columns_(column_writers) {}
+    msg::MessageSchema* schema) :
+    schema_(schema) {
+  for (const auto& f : schema_->fields) {
+    createColumns("", 0, 0, f);
+  }
+}
+
+void CSTableBuilder::createColumns(
+    const String& prefix,
+    uint32_t r_max,
+    uint32_t d_max,
+    const msg::MessageSchemaField& field) {
+  auto colname = prefix + field.name;
+  auto typesize = field.type_size;
+
+  if (field.repeated) {
+    ++r_max;
+  }
+
+  if (field.repeated || field.optional) {
+    ++d_max;
+  }
+
+  switch (field.type) {
+    case msg::FieldType::OBJECT:
+      for (const auto& f : field.fields) {
+        createColumns(colname + ".", r_max, d_max, f);
+      }
+      break;
+
+    case msg::FieldType::UINT32:
+      if (field.encoding == msg::EncodingHint::BITPACK) {
+        columns_.emplace(
+            colname,
+            new cstable::BitPackedIntColumnWriter(r_max, d_max, typesize));
+      } else {
+        columns_.emplace(
+            colname,
+            new cstable::UInt32ColumnWriter(r_max, d_max));
+      }
+      break;
+
+    case msg::FieldType::STRING:
+      columns_.emplace(
+          colname,
+          new cstable::StringColumnWriter(r_max, d_max, typesize));
+      break;
+
+    case msg::FieldType::BOOLEAN:
+      columns_.emplace(
+          colname,
+          new cstable::BooleanColumnWriter(r_max, d_max));
+      break;
+
+  }
+}
 
 void CSTableBuilder::addRecord(const msg::MessageObject& msg) {
   for (const auto& f : schema_->fields) {
@@ -37,13 +93,7 @@ void CSTableBuilder::addRecordField(
   auto next_r = r;
   auto next_d = d;
 
-  //auto num_reps = 1;
-  //if (field.optional && !msg.isSet(path + field.name)) {
-  //  num_reps = 0;
-  //}
-
   if (field.repeated) {
-    //num_reps = msg.countRepetitions(path + field.name);
     ++rmax;
   }
 
@@ -73,7 +123,7 @@ void CSTableBuilder::addRecordField(
         break;
 
       default:
-        writeField(next_r, next_d, msg, column + field.name, field);
+        writeField(next_r, next_d, o, column + field.name, field);
         break;
     }
 
@@ -101,10 +151,13 @@ void CSTableBuilder::writeNull(
       for (const auto& f : field.fields) {
         writeNull(r, d, column + "." + f.name, f);
       }
+
       break;
 
     default:
-      fnord::iputs("write null: $0 -- r=$1 d=$2", column, r, d);
+      auto col = columns_.find(column);
+      col->second->addNull(r, d);
+      break;
 
   }
 }
@@ -115,7 +168,32 @@ void CSTableBuilder::writeField(
     const msg::MessageObject& msg,
     const String& column,
     const msg::MessageSchemaField& field) {
-  fnord::iputs("write field: $0 -- r=$1 d=$2", column, r, d);
+  auto col = columns_.find(column);
+
+  switch (field.type) {
+
+    case msg::FieldType::STRING: {
+      auto& str = msg.asString();
+      col->second->addDatum(r, d, str.data(), str.size());
+      break;
+    }
+
+    case msg::FieldType::UINT32: {
+      uint32_t val = msg.asUInt32();
+      col->second->addDatum(r, d, &val, sizeof(val));
+      break;
+    }
+
+    case msg::FieldType::BOOLEAN: {
+      uint8_t val = msg.asBool() ? 1 : 0;
+      col->second->addDatum(r, d, &val, sizeof(val));
+      break;
+    }
+
+    case msg::FieldType::OBJECT:
+      RAISE(kIllegalStateError);
+
+  }
 }
 
 
