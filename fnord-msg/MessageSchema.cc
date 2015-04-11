@@ -9,6 +9,7 @@
  */
 #include <fnord-base/stringutil.h>
 #include <fnord-base/exception.h>
+#include <fnord-base/inspect.h>
 #include <fnord-msg/MessageSchema.h>
 
 namespace fnord {
@@ -92,11 +93,26 @@ static void schemaNodeToString(
       attrs));
 }
 
+static void addFieldToIDIndex(
+    const String& prefix,
+    const MessageSchemaField& field,
+    HashMap<String, uint32_t>* field_ids) {
+  auto colname = prefix + field.name;
+  field_ids->emplace(colname, field.id);
+  for (const auto& f : field.fields) {
+    addFieldToIDIndex(colname + ".", f, field_ids);
+  }
+}
+
 MessageSchema::MessageSchema(
     const String& _name,
     Vector<MessageSchemaField> _fields) :
     name(_name),
-    fields(_fields) {}
+    fields(_fields) {
+  for (const auto& f : fields) {
+    addFieldToIDIndex("", f, &field_ids);
+  }
+}
 
 String MessageSchema::toString() const {
   String str = StringUtil::format("object $0 {\n", name);
@@ -110,34 +126,12 @@ String MessageSchema::toString() const {
 }
 
 uint32_t MessageSchema::id(const String& path) {
-  String p = path;
-  String k;
-  size_t s = 0;
-
-  const Vector<MessageSchemaField>* fs = &fields;
-  while (s != String::npos) {
-    s = StringUtil::find(p, '.');
-    if (s == String::npos) {
-      k = p;
-    } else {
-      k = p.substr(0, s);
-      p = p.substr(s + 1);
-    }
-
-    for (const auto& f : *fs) {
-      if (f.name == k) {
-        if (s == String::npos) {
-          return f.id;
-        } else {
-          fs = &f.fields;
-        }
-
-        break;
-      }
-    }
+  auto id = field_ids.find(path);
+  if (id == field_ids.end()) {
+    RAISEF(kIndexError, "unknown field: $0", path);
+  } else {
+    return id->second;
   }
-
-  RAISEF(kIndexError, "unknown field: $0", path);
 }
 
 } // namespace msg
