@@ -72,6 +72,7 @@ struct MessageSchema {
   String name;
   Vector<MessageSchemaField> fields;
 
+  uint32_t id(const String& path);
   String toString() const;
 };
 

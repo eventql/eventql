@@ -8,6 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <fnord-base/StringUtil.h>
+#include <fnord-base/exception.h>
 #include <fnord-msg/MessageSchema.h>
 
 namespace fnord {
@@ -111,6 +112,37 @@ String MessageSchema::toString() const {
 
   str += "}";
   return str;
+}
+
+uint32_t MessageSchema::id(const String& path) {
+  String p = path;
+  String k;
+  size_t s = 0;
+
+  const Vector<MessageSchemaField>* fs = &fields;
+  while (s != String::npos) {
+    s = StringUtil::find(p, '.');
+    if (s == String::npos) {
+      k = p;
+    } else {
+      k = p.substr(0, s);
+      p = p.substr(s + 1);
+    }
+
+    for (const auto& f : *fs) {
+      if (f.name == k) {
+        if (s == String::npos) {
+          return f.id;
+        } else {
+          fs = &f.fields;
+        }
+
+        break;
+      }
+    }
+  }
+
+  RAISEF(kIndexError, "unknown field: $0", path);
 }
 
 } // namespace msg
