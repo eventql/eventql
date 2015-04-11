@@ -34,6 +34,7 @@
 #include "fnord-cstable/CSTableWriter.h"
 #include "fnord-cstable/CSTableReader.h"
 #include "fnord-msg/MessageSchema.h"
+#include "fnord-msg/MessageBuilder.h"
 #include <fnord-fts/fts.h>
 #include <fnord-fts/fts_common.h>
 #include "common.h"
@@ -94,11 +95,10 @@ int main(int argc, const char** argv) {
   Logger::get()->setMinimumLogLevel(
       strToLogLevel(flags.getString("loglevel")));
 
-  msg::MessageSchema schema;
-  schema.name = "joined_session";
+  Vector<msg::MessageSchemaField> fields;
 
   msg::MessageSchemaField queries(
-      0,
+      16,
       "queries",
       msg::FieldType::OBJECT,
       0,
@@ -111,7 +111,7 @@ int main(int argc, const char** argv) {
       msg::FieldType::UINT32,
       100,
       false,
-      false);
+      true);
 
   queries.fields.emplace_back(
       2,
@@ -127,7 +127,7 @@ int main(int argc, const char** argv) {
       msg::FieldType::STRING,
       8192,
       false,
-      false);
+      true);
 
   queries.fields.emplace_back(
       4,
@@ -135,7 +135,7 @@ int main(int argc, const char** argv) {
       msg::FieldType::STRING,
       8192,
       false,
-      false);
+      true);
 
   queries.fields.emplace_back(
       5,
@@ -175,7 +175,7 @@ int main(int argc, const char** argv) {
       msg::FieldType::UINT32,
       100,
       false,
-      false);
+      true);
 
   queries.fields.emplace_back(
       10,
@@ -199,7 +199,7 @@ int main(int argc, const char** argv) {
       msg::FieldType::UINT32,
       0xffff,
       false,
-      false);
+      true);
 
   queries.fields.emplace_back(
       13,
@@ -207,7 +207,7 @@ int main(int argc, const char** argv) {
       msg::FieldType::UINT32,
       0xffff,
       false,
-      false);
+      true);
 
   queries.fields.emplace_back(
       14,
@@ -215,10 +215,10 @@ int main(int argc, const char** argv) {
       msg::FieldType::UINT32,
       0xffff,
       false,
-      false);
+      true);
 
   msg::MessageSchemaField query_items(
-      0,
+      17,
       "items",
       msg::FieldType::OBJECT,
       0,
@@ -242,9 +242,19 @@ int main(int argc, const char** argv) {
       false);
 
   queries.fields.emplace_back(query_items);
-  schema.fields.emplace_back(queries);
+  fields.emplace_back(queries);
 
+  msg::MessageSchema schema("joined_session", fields);
   fnord::iputs("$0", schema.toString());
+
+  msg::MessageBuilder msg;
+  msg.setUInt32("queries[0].page", 1);
+  msg.setUInt32("queries[0].language", 2);
+
+  Buffer msg_buf;
+  msg.encode(schema, &msg_buf);
+
+  fnord::iputs("msg: $0", StringUtil::hexPrint(msg_buf.data(), msg_buf.size()));
   return 0;
 
   fnord::fts::Analyzer analyzer(flags.getString("conf"));
