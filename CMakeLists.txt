@@ -419,6 +419,7 @@ add_executable(cm-reportserver
     $<TARGET_OBJECTS:fnord-rpc>
     $<TARGET_OBJECTS:fnord-sstable>
     $<TARGET_OBJECTS:fnord-cstable>
+    $<TARGET_OBJECTS:fnord-msg>
     3rdparty/libfnord/fnord-sstable/SSTableServlet.cc
     src/analytics/AnalyticsTableScan.cc
     src/analytics/AnalyticsQuery.cc
