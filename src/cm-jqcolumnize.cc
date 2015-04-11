@@ -418,7 +418,6 @@ int main(int argc, const char** argv) {
     if (!q.isEmpty()) {
       cm::JoinedSession s;
       s.queries.emplace_back(q.get());
-      s.queries.emplace_back(q.get());
       add_session(s);
     }
 
@@ -431,24 +430,24 @@ int main(int argc, const char** argv) {
 
   table.write(flags.getString("output_file"));
 
-  {
-    cstable::CSTableReader reader(flags.getString("output_file"));
-    auto t0 = WallClock::unixMicros();
+  //{
+  //  cstable::CSTableReader reader(flags.getString("output_file"));
+  //  auto t0 = WallClock::unixMicros();
 
-    cm::AnalyticsTableScan aq;
-    auto lcol = aq.fetchColumn("queries.language");
-    auto ccol = aq.fetchColumn("queries.page");
-    auto qcol = aq.fetchColumn("queries.query_string_normalized");
+  //  cm::AnalyticsTableScan aq;
+  //  auto lcol = aq.fetchColumn("queries.language");
+  //  auto ccol = aq.fetchColumn("queries.page");
+  //  auto qcol = aq.fetchColumn("queries.query_string_normalized");
 
-    aq.onQuery([&] () {
-      auto l = languageToString((Language) lcol->getUInt32());
-      auto c = ccol->getUInt32();
-      auto q = qcol->getString();
-      fnord::iputs("lang: $0 -> $1 -- $2", l, c, q);
-    });
+  //  aq.onQuery([&] () {
+  //    auto l = languageToString((Language) lcol->getUInt32());
+  //    auto c = ccol->getUInt32();
+  //    auto q = qcol->getString();
+  //    fnord::iputs("lang: $0 -> $1 -- $2", l, c, q);
+  //  });
 
-    aq.scanTable(&reader);
-  }
+  //  aq.scanTable(&reader);
+  //}
 
   return 0;
 }
