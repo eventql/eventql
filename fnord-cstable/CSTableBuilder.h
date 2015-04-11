@@ -59,6 +59,7 @@ protected:
 
   msg::MessageSchema* schema_;
   HashMap<String, RefPtr<ColumnWriter>> columns_;
+  size_t num_records_;
 };
 
 } // namespace cstable

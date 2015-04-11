@@ -7,7 +7,9 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
+#include "fnord-base/io/fileutil.h"
 #include <fnord-cstable/CSTableBuilder.h>
+#include <fnord-cstable/CSTableWriter.h>
 #include "fnord-cstable/BitPackedIntColumnWriter.h"
 #include "fnord-cstable/UInt32ColumnWriter.h"
 #include "fnord-cstable/StringColumnWriter.h"
@@ -18,7 +20,8 @@ namespace cstable {
 
 CSTableBuilder::CSTableBuilder(
     msg::MessageSchema* schema) :
-    schema_(schema) {
+    schema_(schema),
+    num_records_(0) {
   for (const auto& f : schema_->fields) {
     createColumns("", 0, 0, f);
   }
@@ -79,7 +82,7 @@ void CSTableBuilder::addRecord(const msg::MessageObject& msg) {
     addRecordField(0, 0, 0, msg, "", f);
   }
 
-  abort();
+  ++num_records_;
 }
 
 void CSTableBuilder::addRecordField(
@@ -196,9 +199,15 @@ void CSTableBuilder::writeField(
   }
 }
 
-
-
 void CSTableBuilder::write(const String& filename) {
+  cstable::CSTableWriter writer(filename + "~", num_records_);
+
+  for (const auto& col : columns_) {
+    writer.addColumn(col.first, col.second.get());
+  }
+
+  writer.commit();
+  FileUtil::mv(filename + "~", filename);
 }
 
 
