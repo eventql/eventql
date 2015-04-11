@@ -10,6 +10,7 @@
 #ifndef _FNORD_CSTABLE_COLUMNWRITER_H
 #define _FNORD_CSTABLE_COLUMNWRITER_H
 #include <fnord-base/stdtypes.h>
+#include <fnord-base/autoref.h>
 #include <fnord-base/util/binarymessagewriter.h>
 #include <fnord-base/util/BitPackEncoder.h>
 #include <fnord-cstable/BinaryFormat.h>
@@ -17,7 +18,7 @@
 namespace fnord {
 namespace cstable {
 
-class ColumnWriter {
+class ColumnWriter : public RefCounted {
 public:
   ColumnWriter(size_t r_max, size_t d_max);
   virtual ~ColumnWriter() {}
