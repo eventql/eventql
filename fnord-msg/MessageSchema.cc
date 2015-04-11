@@ -18,43 +18,88 @@ static void schemaNodeToString(
     const MessageSchemaField& field,
     String* str) {
   String ws(level * 2, ' ');
+  String type_name;
+  String attrs;
+
+  String type_prefix = "";
+  String type_suffix = "";
+
+  if (field.optional) {
+    type_prefix += "optional[";
+    type_suffix += "]";
+  }
+
+  if (field.repeated) {
+    type_prefix += "list[";
+    type_suffix += "]";
+  }
+
   switch (field.type) {
 
     case FieldType::OBJECT:
-      str->append(StringUtil::format("$0object $1 {\n", ws, field.name));
+      str->append(StringUtil::format(
+          "$0$1object$2 $3 = $4 {\n",
+          ws,
+          type_prefix,
+          type_suffix,
+          field.name,
+          field.id));
+
       for (const auto& f : field.fields) {
         schemaNodeToString(level + 1, f, str);
       }
+
       str->append(ws + "}\n");
-      break;
+      return;
 
     case FieldType::BOOLEAN:
-      str->append(StringUtil::format(
-          "$0bool $1 = $2;\n",
-          ws,
-          field.name,
-          field.id));
+      type_name = "bool";
       break;
 
     case FieldType::UINT32:
-      str->append(StringUtil::format(
-          "$0uint32 $1 = $2 [max=$3];\n",
-          ws,
-          field.name,
-          field.id,
-          field.type_size));
+      type_name = "uint32";
+      attrs = StringUtil::format("[max=$0]", field.type_size);
       break;
 
     case FieldType::STRING:
-      str->append(StringUtil::format(
-          "$0string $1 = $2 [maxlen=$3];\n",
-          ws,
-          field.name,
-          field.id,
-          field.type_size));
+      type_name = "string";
+      attrs = StringUtil::format("[maxlen=$0]", field.type_size);
       break;
 
   }
+
+  str->append(StringUtil::format(
+      "$0$1$2$3 $4 = $5$6$7;\n",
+      ws,
+      type_prefix,
+      type_name,
+      type_suffix,
+      field.name,
+      field.id,
+      attrs.length() > 0 ? " " : "",
+      attrs));
+}
+
+static void sortSchemaFields(Vector<MessageSchemaField>* fields) {
+  std::sort(fields->begin(), fields->end(), [] (
+      const MessageSchemaField& a,
+      const MessageSchemaField& b) {
+    return a.id < b.id;
+  });
+
+  for (auto& f : *fields) {
+    if (!f.fields.empty()) {
+      sortSchemaFields(&f.fields);
+    }
+  }
+}
+
+MessageSchema::MessageSchema(
+    const String& _name,
+    Vector<MessageSchemaField> _fields) :
+    name(_name),
+    fields(_fields) {
+  sortSchemaFields(&fields);
 }
 
 String MessageSchema::toString() const {

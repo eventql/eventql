@@ -11,6 +11,24 @@
 #define _FNORD_MSG_MESSAGESCHEMA_H
 #include <fnord-base/stdtypes.h>
 
+/**
+ * // http://tools.ietf.org/html/rfc5234
+ *
+ *   <message> :=
+ *       <field>...
+ *
+ *   <field> :=
+ *       <varint>               // field type
+ *       [ <field_data> ]       // field data. known size depending on the type
+ *
+ *   <field_data_uint32> :=
+ *       <varint>                // value
+ *
+ *   <field_data_string> :=
+ *       <varint>                // len
+ *       <uint8_t>...            // data
+ *
+ */
 namespace fnord {
 namespace msg {
 
@@ -47,6 +65,10 @@ struct MessageSchemaField {
 };
 
 struct MessageSchema {
+  MessageSchema(
+      const String& _name,
+      Vector<MessageSchemaField> _fields);
+
   String name;
   Vector<MessageSchemaField> fields;
 

@@ -26,5 +26,6 @@ endif()
 
 # sstable
 add_library(fnord-msg OBJECT
+    MessageBuilder.cc
     MessageSchema.cc)
 
