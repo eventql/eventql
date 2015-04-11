@@ -275,11 +275,8 @@ int main(int argc, const char** argv) {
   //cstable::BitPackedIntColumnWriter jqi_position_col(2, 2, 64);
   //cstable::BooleanColumnWriter jqi_clicked_col(2, 2);
 
-  //uint64_t r = 0;
-  //uint64_t n = 0;
 
   auto add_session = [&] (const cm::JoinedSession& sess) {
-    msg::MessageBuilder msg;
     msg::MessageObject obj;
 
     for (const auto& q : sess.queries) {
@@ -377,7 +374,7 @@ int main(int argc, const char** argv) {
       }
     }
 
-    table.addRecord(msg);
+    table.addRecord(obj);
   };
 
   /* read input tables */
