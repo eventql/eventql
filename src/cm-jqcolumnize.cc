@@ -108,6 +108,14 @@ int main(int argc, const char** argv) {
       false);
 
   queries.fields.emplace_back(
+      18,
+      "time",
+      msg::FieldType::UINT32,
+      0xffffffff,
+      false,
+      false);
+
+  queries.fields.emplace_back(
       1,
       "page",
       msg::FieldType::UINT32,
@@ -262,30 +270,7 @@ int main(int argc, const char** argv) {
   msg::MessageSchema schema("joined_session", fields);
   fnord::iputs("$0", schema.toString());
 
-
   fnord::fts::Analyzer analyzer(flags.getString("conf"));
-
-  /* query level */
-  //cstable::UInt32ColumnWriter jq_time_col(1, 1);
-  //cstable::BitPackedIntColumnWriter jq_page_col(1, 1, 100);
-  //cstable::BitPackedIntColumnWriter jq_lang_col(1, 1, kMaxLanguage);
-  //cstable::StringColumnWriter jq_qstr_col(1, 1, 8192);
-  //cstable::StringColumnWriter jq_qstrnorm_col(1, 1, 8192);
-  //cstable::BitPackedIntColumnWriter jq_numitems_col(1, 1, 250);
-  //cstable::BitPackedIntColumnWriter jq_numitemclicks_col(1, 1, 250);
-  //cstable::BitPackedIntColumnWriter jq_numadimprs_col(1, 1, 250);
-  //cstable::BitPackedIntColumnWriter jq_numadclicks_col(1, 1, 250);
-  //cstable::BitPackedIntColumnWriter jq_abtestgroup_col(1, 1, 100);
-  //cstable::BitPackedIntColumnWriter jq_devicetype_col(1, 1, kMaxDeviceType);
-  //cstable::BitPackedIntColumnWriter jq_pagetype_col(1, 1, kMaxPageType);
-  //cstable::BitPackedIntColumnWriter jq_cat1_col(1, 1, 0xffff);
-  //cstable::BitPackedIntColumnWriter jq_cat2_col(1, 1, 0xffff);
-  //cstable::BitPackedIntColumnWriter jq_cat3_col(1, 1, 0xffff);
-
-  ///* query item level */
-  //cstable::BitPackedIntColumnWriter jqi_position_col(2, 2, 64);
-  //cstable::BooleanColumnWriter jqi_clicked_col(2, 2);
-
 
   fnord::cstable::CSTableBuilder table(&schema);
   auto add_session = [&] (const cm::JoinedSession& sess) {
@@ -295,9 +280,9 @@ int main(int argc, const char** argv) {
       auto& qry_obj = obj.addChild(schema.id("queries"));
 
       /* queries.time */
-      //qry_obj.addChild(
-      //    "time",
-      //    (uint32_t) (q.time.unixMicros() / kMicrosPerSecond));
+      qry_obj.addChild(
+          schema.id("queries.time"),
+          (uint32_t) (q.time.unixMicros() / kMicrosPerSecond));
 
       /* queries.language */
       auto lang = cm::extractLanguage(q.attrs);
@@ -446,35 +431,24 @@ int main(int argc, const char** argv) {
 
   table.write(flags.getString("output_file"));
 
-  //{
-  //  cstable::CSTableReader reader(flags.getString("output_file"));
-  //  auto t0 = WallClock::unixMicros();
+  {
+    cstable::CSTableReader reader(flags.getString("output_file"));
+    auto t0 = WallClock::unixMicros();
 
-  //  cm::AnalyticsTableScan aq;
-  //  auto lcol = aq.fetchColumn("queries.language");
-  //  auto ccol = aq.fetchColumn("queries.num_ad_clicks");
-  //  auto qcol = aq.fetchColumn("queries.query_string_normalized");
+    cm::AnalyticsTableScan aq;
+    auto lcol = aq.fetchColumn("queries.language");
+    auto ccol = aq.fetchColumn("queries.num_ad_clicks");
+    auto qcol = aq.fetchColumn("queries.query_string_normalized");
 
-  //  aq.onQuery([&] () {
-  //    auto l = languageToString((Language) lcol->getUInt32());
-  //    auto c = ccol->getUInt32();
-  //    auto q = qcol->getString();
-  //    fnord::iputs("lang: $0 -> $1 -- $2", l, c, q);
-  //  });
+    aq.onQuery([&] () {
+      auto l = languageToString((Language) lcol->getUInt32());
+      auto c = ccol->getUInt32();
+      auto q = qcol->getString();
+      fnord::iputs("lang: $0 -> $1 -- $2", l, c, q);
+    });
 
-  //  aq.scanTable(&reader);
-  //  //cm::CTRByGroupResult<uint16_t> res;
-  //  //cm::CTRByPositionQuery q(&aq, &res);
-  //  //auto t1 = WallClock::unixMicros();
-  //  //fnord::iputs("scanned $0 rows in $1 ms", res.rows_scanned, (t1 - t0) / 1000.0f);
-  //  //for (const auto& p : res.counters) {
-  //  //  fnord::iputs(
-  //  //     "pos: $0, views: $1, clicks: $2, ctr: $3", 
-  //  //      p.first, p.second.num_views,
-  //  //      p.second.num_clicks,
-  //  //      p.second.num_clicks / (double) p.second.num_views);
-  //  //}
-  //}
+    aq.scanTable(&reader);
+  }
 
   return 0;
 }
