@@ -36,6 +36,7 @@
 #include "fnord-cstable/CSTableBuilder.h"
 #include "fnord-msg/MessageSchema.h"
 #include "fnord-msg/MessageBuilder.h"
+#include "fnord-msg/MessageObject.h"
 #include <fnord-fts/fts.h>
 #include <fnord-fts/fts_common.h>
 #include "common.h"
@@ -279,31 +280,33 @@ int main(int argc, const char** argv) {
 
   auto add_session = [&] (const cm::JoinedSession& sess) {
     msg::MessageBuilder msg;
+    msg::MessageObject obj;
 
-    for (int j = 0; j < sess.queries.size(); ++j) {
-      auto q = sess.queries[j];
-      auto qprefix = StringUtil::format("queries[$0].", j);
+    for (const auto& q : sess.queries) {
+      auto& qry_obj = obj.addChild(schema.id("queries"));
 
       /* queries.time */
-      msg.setUInt32(qprefix + "time", q.time.unixMicros() / kMicrosPerSecond);
+      //qry_obj.addChild(
+      //    "time",
+      //    (uint32_t) (q.time.unixMicros() / kMicrosPerSecond));
 
       /* queries.language */
       auto lang = cm::extractLanguage(q.attrs);
-      msg.setUInt32(qprefix + "language", (uint16_t) lang);
+      qry_obj.addChild(schema.id("queries.language"), (uint32_t) lang);
 
       /* queries.query_string */
       auto qstr = cm::extractQueryString(q.attrs);
       if (!qstr.isEmpty()) {
         auto qstr_norm = analyzer.normalize(lang, qstr.get());
-        msg.setString(qprefix + "query_string", qstr.get());
-        msg.setString(qprefix + "query_string_normalized", qstr_norm);
+        qry_obj.addChild(schema.id("queries.query_string"), qstr.get());
+        qry_obj.addChild(schema.id("queries.query_string_normalized"), qstr_norm);
       }
 
       /* queries.num_item_clicks, queries.num_items */
-      size_t nitems = 0;
-      size_t nclicks = 0;
-      size_t nads = 0;
-      size_t nadclicks = 0;
+      uint32_t nitems = 0;
+      uint32_t nclicks = 0;
+      uint32_t nads = 0;
+      uint32_t nadclicks = 0;
       for (const auto& i : q.items) {
         // DAWANDA HACK
         if (i.position >= 1 && i.position <= 4) {
@@ -316,56 +319,61 @@ int main(int argc, const char** argv) {
         nclicks += i.clicked;
       }
 
-      msg.setUInt32(qprefix + "num_items", nitems);
-      msg.setUInt32(qprefix + "num_items_clicked", nclicks);
-      msg.setUInt32(qprefix + "num_ad_impressions", nads);
-      msg.setUInt32(qprefix + "num_ad_clicks", nadclicks);
+      qry_obj.addChild(schema.id("queries.num_items"), nitems);
+      qry_obj.addChild(schema.id("queries.num_items_clicked"), nclicks);
+      qry_obj.addChild(schema.id("queries.num_ad_impressions"), nads);
+      qry_obj.addChild(schema.id("queries.num_ad_clicks"), nadclicks);
 
       /* queries.page */
       auto pg_str = cm::extractAttr(q.attrs, "pg");
       if (!pg_str.isEmpty()) {
-        msg.setUInt32(qprefix + "page", std::stoul(pg_str.get()));
+        uint32_t pg = std::stoul(pg_str.get());
+        qry_obj.addChild(schema.id("queries.page"), pg);
       }
 
       /* queries.ab_test_group */
       auto abgrp = cm::extractABTestGroup(q.attrs);
       if (!abgrp.isEmpty()) {
-        msg.setUInt32(qprefix + "ab_test_group", abgrp.get());
+        qry_obj.addChild(schema.id("queries.ab_test_group"), abgrp.get());
       }
 
       /* queries.category1 */
       auto qcat1 = cm::extractAttr(q.attrs, "q_cat1");
       if (!qcat1.isEmpty()) {
-        msg.setUInt32(qprefix + "category1", std::stoul(qcat1.get()));
+        uint32_t c = std::stoul(qcat1.get());
+        qry_obj.addChild(schema.id("queries.category1"), c);
       }
 
-      /* queries.category2 */
+      /* queries.category1 */
       auto qcat2 = cm::extractAttr(q.attrs, "q_cat2");
       if (!qcat2.isEmpty()) {
-        msg.setUInt32(qprefix + "category2", std::stoul(qcat2.get()));
+        uint32_t c = std::stoul(qcat2.get());
+        qry_obj.addChild(schema.id("queries.category2"), c);
       }
 
-      /* queries.category3 */
+      /* queries.category1 */
       auto qcat3 = cm::extractAttr(q.attrs, "q_cat3");
       if (!qcat3.isEmpty()) {
-        msg.setUInt32(qprefix + "category3", std::stoul(qcat3.get()));
+        uint32_t c = std::stoul(qcat3.get());
+        qry_obj.addChild(schema.id("queries.category3"), c);
       }
 
       /* queries.device_type */
-      msg.setUInt32(
-          qprefix + "device_type",
+      qry_obj.addChild(
+          schema.id("queries.device_type"),
           (uint32_t) extractDeviceType(q.attrs));
 
       /* queries.page_type */
-      msg.setUInt32(
-          qprefix + "page_type",
+      qry_obj.addChild(
+          schema.id("queries.page_type"),
           (uint32_t) extractPageType(q.attrs));
 
-      for (int i = 0; i < q.items.size(); ++i) {
-        const auto& item = q.items[i];
-        auto iprefix = StringUtil::format("$0items[$1].", qprefix, i);
-        msg.setUInt32(iprefix + "position", item.position);
-        msg.setBool(iprefix + "clicked", item.clicked);
+      for (const auto& item : q.items) {
+        auto& item_obj = qry_obj.addChild(schema.id("queries.items"));
+        item_obj.addChild(
+            schema.id("queries.items.position"),
+            (uint32_t) item.position);
+        item_obj.addChild(schema.id("queries.items.clicked"), item.clicked);
       }
     }
 
