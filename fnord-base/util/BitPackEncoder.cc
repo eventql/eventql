@@ -17,10 +17,14 @@ namespace util {
 
 BitPackEncoder::BitPackEncoder(
     uint32_t max_val) :
-    maxbits_(bits(max_val)),
+    maxbits_(max_val > 0 ? bits(max_val) : 0),
     inbuf_size_(0) {}
 
 void BitPackEncoder::encode(uint32_t value) {
+  if (maxbits_ == 0) {
+    return;
+  }
+
   inbuf_[inbuf_size_++] = value;
 
   if (inbuf_size_ == 128) {
@@ -29,6 +33,10 @@ void BitPackEncoder::encode(uint32_t value) {
 }
 
 void BitPackEncoder::flush() {
+  if (inbuf_size_ == 0) {
+    return;
+  }
+
   while (inbuf_size_ < 128) {
     inbuf_[inbuf_size_++] = 0;
   }

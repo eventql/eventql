@@ -20,11 +20,15 @@ BitPackDecoder::BitPackDecoder(
     uint32_t max_val) :
     data_(data),
     size_(size),
-    maxbits_(bits(max_val)),
+    maxbits_(max_val > 0 ? bits(max_val) : 0),
     pos_(0),
     outbuf_pos_(128) {}
 
 uint32_t BitPackDecoder::next() {
+  if (maxbits_ == 0) {
+    return 0;
+  }
+
   if (outbuf_pos_ == 128) {
 #ifndef FNORD_NODEBUG
     auto new_pos = pos_ + 16 * maxbits_;
