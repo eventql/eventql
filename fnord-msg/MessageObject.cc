@@ -45,6 +45,7 @@ bool MessageObject::asBool() const {
   return val > 0;
 }
 
+
 //MessageObject::MessageObject(uint32_t id, uint32_t value);
 //MessageObject::MessageObject(uint32_t id, String value);
 //MessageObject::MessageObject(uint32_t id, bool value);

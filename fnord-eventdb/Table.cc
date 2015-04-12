@@ -8,6 +8,8 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <fnord-eventdb/Table.h>
+#include <fnord-msg/MessageDecoder.h>
+#include <fnord-msg/MessagePrinter.h>
 
 namespace fnord {
 namespace eventdb {
@@ -19,6 +21,9 @@ Table::Table(
     schema_(schema) {}
 
 void Table::addRecords(const Buffer& records) {
+  msg::MessageObject msg;
+  msg::MessageDecoder::decode(records, schema_, &msg);
+  fnord::iputs("msg: $0", msg::MessagePrinter::print(msg, schema_));
 }
 
 void Table::addRecord(const msg::MessageObject& record) {
