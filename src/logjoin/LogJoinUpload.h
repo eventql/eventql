@@ -23,6 +23,7 @@ public:
 
   LogJoinUpload(
       RefPtr<mdb::MDB> db,
+      const String& feedserver_url,
       http::HTTPConnectionPool* http);
 
   void upload();
@@ -33,6 +34,7 @@ protected:
   void uploadBatch(const String& queue_name, const Vector<Buffer>& batch);
 
   RefPtr<mdb::MDB> db_;
+  String feedserver_url_;
   http::HTTPConnectionPool* http_;
   size_t batch_size_;
 };
