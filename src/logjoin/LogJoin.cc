@@ -240,9 +240,9 @@ void LogJoin::flush(mdb::MDBTransaction* txn, DateTime stream_time_) {
       uint64_t next_flush = 0;
       const auto& uid = iter->first;
 
-      withSession("", uid, txn, [this, &uid, &next_flush, &stream_time_] (
+      withSession("", uid, txn, [this, &uid, &next_flush, &stream_time_, txn] (
           TrackedSession* s) {
-        maybeFlushSession(uid, s, stream_time_);
+        maybeFlushSession(txn, uid, s, stream_time_);
 
         if (!s->flushed) {
           next_flush = s->nextFlushTime().unixMicros();
@@ -262,6 +262,7 @@ void LogJoin::flush(mdb::MDBTransaction* txn, DateTime stream_time_) {
 }
 
 void LogJoin::maybeFlushSession(
+    mdb::MDBTransaction* txn,
     const std::string uid,
     TrackedSession* session,
     DateTime stream_time_) {
@@ -286,7 +287,7 @@ void LogJoin::maybeFlushSession(
             if (cur_visit->item == qitem.item) {
               qitem.clicked = true;
               joined = true;
-              target_->onItemVisit(*session, *cur_visit, *cur_query);
+              target_->onItemVisit(txn, *session, *cur_visit, *cur_query);
               break;
             }
           }
@@ -299,7 +300,7 @@ void LogJoin::maybeFlushSession(
         }
       }
 
-      target_->onQuery(*session, *cur_query);
+      target_->onQuery(txn, *session, *cur_query);
       cur_query = session->queries.erase(cur_query);
     } else {
       ++cur_query;
@@ -311,7 +312,7 @@ void LogJoin::maybeFlushSession(
   while (cur_visit != session->item_visits.end()) {
     if (stream_time > (cur_visit->time.unixMicros() +
         kMaxQueryClickDelaySeconds * fnord::kMicrosPerSecond)) {
-      target_->onItemVisit(*session, *cur_visit);
+      target_->onItemVisit(txn, *session, *cur_visit);
       cur_visit = session->item_visits.erase(cur_visit);
     } else {
       ++cur_visit;
@@ -322,7 +323,7 @@ void LogJoin::maybeFlushSession(
   if (stream_time > (session->last_seen_unix_micros +
       kSessionIdleTimeoutSeconds * fnord::kMicrosPerSecond)) {
     stat_joined_sessions_.incr(1);
-    target_->onSession(*session);
+    target_->onSession(txn, *session);
     session->flushed = true;
   }
 }

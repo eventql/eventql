@@ -21,17 +21,22 @@ namespace cm {
 class LogJoinTarget {
 public:
 
-  void onSession(const TrackedSession& query);
+  void onSession(
+      mdb::MDBTransaction* txn,
+      const TrackedSession& query);
 
   void onQuery(
+      mdb::MDBTransaction* txn,
       const TrackedSession& session,
       const TrackedQuery& query);
 
   void onItemVisit(
+      mdb::MDBTransaction* txn,
       const TrackedSession& session,
       const TrackedItemVisit& item_visit);
 
   void onItemVisit(
+      mdb::MDBTransaction* txn,
       const TrackedSession& session,
       const TrackedItemVisit& item_visit,
       const TrackedQuery& query);
