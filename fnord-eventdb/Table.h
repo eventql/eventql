@@ -81,8 +81,6 @@ protected:
 class Table : public RefCounted {
 public:
 
-  static const size_t kDefaultMaxChunkSize = 1024 * 1024 * 25; // 25MB
-
   static RefPtr<Table> open(
       const String& table_name,
       const String& replica_id,
@@ -112,6 +110,7 @@ protected:
   void writeTable(RefPtr<TableArena> arena);
   void addChunk(TableChunkRef chunk);
   void writeSnapshot();
+  void merge(size_t min_chunk_size, size_t max_chunk_size);
 
   String name_;
   String replica_id_;
@@ -123,7 +122,6 @@ protected:
   List<RefPtr<TableArena>> arenas_;
   Random rnd_;
   RefPtr<TableGeneration> head_;
-  size_t max_chunk_size_;
 };
 
 } // namespace eventdb
