@@ -32,10 +32,44 @@ RefPtr<Table> Table::open(
     const String& replica_id,
     const String& db_path,
     const msg::MessageSchema& schema) {
+  uint64_t head_gen = 0;
+  auto gen_prefix = StringUtil::format("$0.$1.", table_name, replica_id);
+  FileUtil::ls(db_path, [gen_prefix, &head_gen] (const String& file) -> bool {
+    if (StringUtil::beginsWith(file, gen_prefix) &&
+        StringUtil::endsWith(file, ".idx")) {
+      auto s = file.substr(gen_prefix.size());
+      auto gen = std::stoul(s.substr(0, s.size() - 4));
+
+      if (gen > head_gen) {
+        head_gen = gen;
+      }
+    }
+
+    return true;
+  });
+
   RefPtr<TableGeneration> head(new TableGeneration);
-  head->generation = 0;
   head->table_name = table_name;
+  head->generation = head_gen;
+
+  if (head_gen > 0) {
+    auto file = FileUtil::read(StringUtil::format(
+        "$0/$1.$2.$3.idx",
+        db_path,
+        table_name,
+        replica_id,
+        head_gen));
+
+    head->decode(file);
+  }
+
   uint64_t last_seq = 0;
+  for (const auto& c : head->chunks) {
+    auto l = c.start_sequence + c.num_records;
+    if (l > last_seq) {
+      last_seq = l;
+    }
+  }
 
   return new Table(table_name, replica_id, db_path, schema, last_seq, head);
 }
