@@ -10,23 +10,25 @@
 #ifndef _FNORD_EVENTDB_TABLEARENA_H
 #define _FNORD_EVENTDB_TABLEARENA_H
 #include <fnord-base/stdtypes.h>
+#include <fnord-base/autoref.h>
+#include <fnord-msg/MessageSchema.h>
+#include <fnord-msg/MessageObject.h>
 
 namespace fnord {
 namespace eventdb {
 
-class TableArena {
+class TableArena : public RefCounted {
 public:
 
-  TableArena(
-      const String& table_name,
-      uint64_t hostid,
-      uint64_t offset,
-      msg::MessageSchema* schema);
+  TableArena(uint64_t start_offset);
 
   void addRecord(const msg::MessageObject& record);
 
-  void commit();
+  const List<msg::MessageObject>& records() const;
 
+protected:
+  size_t start_offset_;
+  List<msg::MessageObject> records_;
 };
 
 } // namespace eventdb

@@ -13,6 +13,7 @@
 #include <fnord-base/autoref.h>
 #include <fnord-msg/MessageSchema.h>
 #include <fnord-msg/MessageObject.h>
+#include <fnord-eventdb/TableArena.h>
 
 namespace fnord {
 namespace eventdb {
@@ -22,6 +23,7 @@ public:
 
   Table(
       const String& table_name,
+      const String& replica_id,
       const msg::MessageSchema& schema);
 
   void addRecords(const Buffer& records);
@@ -29,9 +31,15 @@ public:
 
   const String& name() const;
 
+  size_t commit();
+
 protected:
-   String name_;
-   msg::MessageSchema schema_;
+  String name_;
+  String replica_id_;
+  msg::MessageSchema schema_;
+  std::mutex mutex_;
+  uint64_t seq_;
+  List<RefPtr<TableArena>> arenas_;
 };
 
 } // namespace eventdb
