@@ -42,6 +42,7 @@ struct TableGeneration : public RefCounted {
   uint64_t generation;
   Vector<TableChunkRef> chunks;
 
+  TableGeneration();
   RefPtr<TableGeneration> clone() const;
   void encode(Buffer* buf);
   void decode(const Buffer& buf);
@@ -117,6 +118,7 @@ public:
 
   size_t commit();
   void merge();
+  void gc(size_t keep_generations = 2);
 
   RefPtr<TableSnapshot> getSnapshot();
 
