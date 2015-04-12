@@ -70,6 +70,15 @@ int main(int argc, const char** argv) {
       "<port>");
 
   flags.defineFlag(
+      "replica",
+      cli::FlagParser::T_STRING,
+      true,
+      NULL,
+      NULL,
+      "replica id",
+      "<id>");
+
+  flags.defineFlag(
       "artifacts",
       cli::FlagParser::T_STRING,
       true,
@@ -119,11 +128,14 @@ int main(int argc, const char** argv) {
 
 
   /* eventdb */
+  auto replica = flags.getString("replica");
+
   eventdb::TableRepository table_repo;
   table_repo.addTable(
       new eventdb::Table(
           "dawanda_joined_sessions",
-          "local",
+          replica,
+          dir,
           joinedSessionsSchema()));
 
   eventdb::EventDBServlet eventdb_servlet(&table_repo);
