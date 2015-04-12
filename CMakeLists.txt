@@ -100,6 +100,8 @@ add_executable(cm-logjoin
     $<TARGET_OBJECTS:fnord-feeds>
     $<TARGET_OBJECTS:fnord-mdb>
     $<TARGET_OBJECTS:fnord-rpc>
+    $<TARGET_OBJECTS:fnord-msg>
+    $<TARGET_OBJECTS:fnord-fts>
     src/logjoin/TrackedQuery.cc
     src/logjoin/TrackedItemVisit.cc
     src/logjoin/TrackedSession.cc
@@ -108,7 +110,7 @@ add_executable(cm-logjoin
     src/logjoin/LogJoinTarget.cc
     src/logjoin/LogJoinShard.cc)
 
-target_link_libraries(cm-logjoin ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(cm-logjoin ${CMAKE_THREAD_LIBS_INIT} ${FNORD_FTS_LIBS})
 
 add_executable(cm-indexbuild
     $<TARGET_OBJECTS:cm-common>

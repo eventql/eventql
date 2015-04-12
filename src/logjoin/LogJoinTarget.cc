@@ -19,15 +19,20 @@ using namespace fnord;
 
 namespace cm {
 
+LogJoinTarget::LogJoinTarget(
+    const msg::MessageSchema& joined_sessions_schema,
+    fts::Analyzer* analyzer) :
+    joined_sessions_schema_(joined_sessions_schema),
+    analyzer_(analyzer) {}
+
 void LogJoinTarget::onSession(
     mdb::MDBTransaction* txn,
     const TrackedSession& session) {
-  fnord::iputs("on session... $0", session.flushed_queries.size());
   const auto& schema = joined_sessions_schema_;
   msg::MessageObject obj;
 
   for (const auto& tq : session.flushed_queries) {
-    auto q = trackedQueryToJoinedQuery(tq);
+    auto q = trackedQueryToJoinedQuery(session, tq);
     auto& qry_obj = obj.addChild(schema.id("queries"));
 
     /* queries.time */
@@ -122,6 +127,10 @@ void LogJoinTarget::onSession(
     }
   }
 
+  Buffer msg_buf;
+  msg::MessageEncoder::encode(obj, joined_sessions_schema_, &msg_buf);
+  auto key = StringUtil::format("uploadq-sessions-$0",  rnd_.hex128());
+  txn->update(key, msg_buf);
 }
 
 void LogJoinTarget::onQuery(
@@ -145,6 +154,31 @@ void LogJoinTarget::onItemVisit(
     const TrackedQuery& query) {
 
 }
+
+JoinedQuery LogJoinTarget::trackedQueryToJoinedQuery(
+    const TrackedSession& session,
+    const TrackedQuery& query) const {
+  JoinedQuery jq;
+  jq.customer = session.customer_key;
+  jq.uid = session.uid;
+  jq.time = query.time;
+  jq.attrs = query.attrs;
+  for (const auto& a : session.attrs) {
+    jq.attrs.emplace_back("s!" + a);
+  }
+
+  for (const auto& item : query.items) {
+    JoinedQueryItem jqi;
+    jqi.item = item.item;
+    jqi.clicked = item.clicked;
+    jqi.variant = item.variant;
+    jqi.position = item.position;
+    jq.items.emplace_back(jqi);
+  }
+
+  return jq;
+}
+
 
 } // namespace cm
 

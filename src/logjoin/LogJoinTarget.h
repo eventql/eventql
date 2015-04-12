@@ -14,6 +14,7 @@
 #include "ItemRef.h"
 #include "logjoin/TrackedSession.h"
 #include "logjoin/TrackedQuery.h"
+#include "JoinedQuery.h"
 
 using namespace fnord;
 
@@ -53,8 +54,14 @@ public:
       const TrackedQuery& query);
 
 protected:
+
+  JoinedQuery trackedQueryToJoinedQuery(
+      const TrackedSession& session,
+      const TrackedQuery& q) const;
+
   msg::MessageSchema joined_sessions_schema_;
   fts::Analyzer* analyzer_;
+  Random rnd_;
 };
 } // namespace cm
 

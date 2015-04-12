@@ -62,6 +62,15 @@ int main(int argc, const char** argv) {
   fnord::cli::FlagParser flags;
 
   flags.defineFlag(
+      "conf",
+      cli::FlagParser::T_STRING,
+      false,
+      NULL,
+      "./conf",
+      "conf directory",
+      "<path>");
+
+  flags.defineFlag(
       "cmdata",
       cli::FlagParser::T_STRING,
       true,
@@ -328,8 +337,7 @@ int main(int argc, const char** argv) {
   fields.emplace_back(queries);
 
   msg::MessageSchema joined_sessions_schema("joined_session", fields);
-  fnord::iputs("$0", joined_sessions_schema.toString());
-
+  //fnord::iputs("$0", joined_sessions_schema.toString());
 
   /* set up cmdata */
   auto cmdata_path = flags.getString("cmdata");
