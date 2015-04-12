@@ -11,6 +11,7 @@
 #include <fnord-eventdb/Table.h>
 #include <fnord-base/logging.h>
 #include <fnord-base/io/fileutil.h>
+#include <fnord-base/util/binarymessagewriter.h>
 #include <fnord-msg/MessageDecoder.h>
 #include <fnord-msg/MessageEncoder.h>
 #include <fnord-msg/MessagePrinter.h>
@@ -32,9 +33,11 @@ RefPtr<Table> Table::open(
     const String& db_path,
     const msg::MessageSchema& schema) {
   RefPtr<TableGeneration> head(new TableGeneration);
-  uint64_t seq = 0;
+  head->generation = 0;
+  head->table_name = table_name;
+  uint64_t last_seq = 0;
 
-  return new Table(table_name, replica_id, db_path, schema, seq, head);
+  return new Table(table_name, replica_id, db_path, schema, last_seq, head);
 }
 
 Table::Table(
@@ -176,7 +179,23 @@ RefPtr<TableGeneration> TableGeneration::clone() const {
 }
 
 void TableGeneration::encode(Buffer* buf) {
+  util::BinaryMessageWriter writer;
+  writer.appendUInt8(0x01);
+  writer.appendUInt64(generation);
+  writer.appendUInt32(table_name.size());
+  writer.append(table_name.data(), table_name.size());
+  writer.appendUInt32(chunks.size());
 
+  for (const auto& c : chunks) {
+    writer.appendUInt16(c.replica_id.size());
+    writer.append(c.replica_id.data(), c.replica_id.size());
+    writer.appendUInt16(c.chunk_id.size());
+    writer.append(c.chunk_id.data(), c.chunk_id.size());
+    writer.appendUInt64(c.start_sequence);
+    writer.appendUInt64(c.num_records);
+  }
+
+  buf->append(writer.data(), writer.size());
 }
 
 TableSnapshot::TableSnapshot(
