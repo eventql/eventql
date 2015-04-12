@@ -48,7 +48,7 @@ String MessagePrinter::printObject(
 
     case FieldType::STRING:
       return StringUtil::format(
-          "$0$1 = $2\n",
+          "$0$1 = \"$2\"\n",
           ws,
           schema.name(msg.id),
           msg.asString());
