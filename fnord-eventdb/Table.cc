@@ -200,6 +200,17 @@ void Table::merge(size_t min_chunk_size, size_t max_chunk_size) {
       inspect(input_chunk_ids),
       output_chunk.chunk_id);
 
+  {
+    TableChunkMerge mergeop(
+        db_path_,
+        name_,
+        &schema_,
+        input_chunks,
+        &output_chunk);
+
+    mergeop.merge();
+  }
+
 }
 
 void Table::writeTable(RefPtr<TableArena> arena) {
@@ -378,6 +389,58 @@ void TableChunkWriter::commit() {
 
   FileUtil::mv(chunk_filename_ + ".sst~", chunk_filename_ + ".sst");
   FileUtil::mv(chunk_filename_ + ".cst~", chunk_filename_ + ".cst");
+}
+
+TableChunkMerge::TableChunkMerge(
+    const String& db_path,
+    const String& table_name,
+    msg::MessageSchema* schema,
+    const Vector<TableChunkRef> input_chunks,
+    TableChunkRef* output_chunk) :
+    db_path_(db_path),
+    table_name_(table_name),
+    schema_(schema),
+    writer_(db_path, table_name, schema, output_chunk),
+    input_chunks_(input_chunks) {}
+
+void TableChunkMerge::merge() {
+  for (const auto& c : input_chunks_) {
+    readTable(StringUtil::format(
+        "$0/$1.$2.$3.sst",
+        db_path_,
+        table_name_,
+        c.replica_id,
+        c.chunk_id));
+  }
+}
+
+void TableChunkMerge::readTable(const String& filename) {
+  sstable::SSTableReader reader(File::openFile(filename, File::O_READ));
+
+  if (!reader.isFinalized()) {
+    RAISEF(kRuntimeError, "unfinished table chunk: $0", filename);
+  }
+
+  auto body_size = reader.bodySize();
+  if (body_size == 0) {
+    fnord::logWarning("fn.evdb", "empty table chunk: $0", filename);
+    return;
+  }
+
+  auto cursor = reader.getCursor();
+
+  while (cursor->valid()) {
+    auto buf = cursor->getDataBuffer();
+
+    msg::MessageObject record;
+    msg::MessageDecoder::decode(buf, *schema_, &record);
+
+    writer_.addRecord(record);
+
+    if (!cursor->next()) {
+      break;
+    }
+  }
 }
 
 } // namespace eventdb

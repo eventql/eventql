@@ -78,6 +78,29 @@ protected:
   std::unique_ptr<cstable::CSTableBuilder> cstable_;
 };
 
+class TableChunkMerge {
+public:
+
+  TableChunkMerge(
+      const String& db_path,
+      const String& table_name,
+      msg::MessageSchema* schema,
+      const Vector<TableChunkRef> input_chunks,
+      TableChunkRef* output_chunk);
+
+  void merge();
+
+protected:
+
+  void readTable(const String& filename);
+
+  String db_path_;
+  String table_name_;
+  msg::MessageSchema* schema_;
+  TableChunkWriter writer_;
+  Vector<TableChunkRef> input_chunks_;
+};
+
 class Table : public RefCounted {
 public:
 
