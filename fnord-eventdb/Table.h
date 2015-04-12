@@ -33,6 +33,7 @@ struct TableGeneration : public RefCounted {
 
   RefPtr<TableGeneration> clone() const;
   void encode(Buffer* buf);
+  void decode(const Buffer& buf);
 };
 
 struct TableSnapshot : public RefCounted {
