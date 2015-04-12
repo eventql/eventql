@@ -57,7 +57,7 @@ RefPtr<Table> Table::open(
     head->decode(file);
   }
 
-  uint64_t last_seq = 0;
+  uint64_t last_seq = 1;
   for (const auto& c : head->chunks) {
     if (c.replica_id != replica_id) {
       continue;
@@ -83,9 +83,8 @@ Table::Table(
     replica_id_(replica_id),
     db_path_(db_path),
     schema_(schema),
-    seq_(head_sequence + 1),
-    head_(snapshot),
-    max_chunk_size_(kDefaultMaxChunkSize) {
+    seq_(head_sequence),
+    head_(snapshot) {
   arenas_.emplace_front(new TableArena(seq_, rnd_.hex128()));
 }
 
@@ -124,10 +123,20 @@ size_t Table::commit() {
 }
 
 void Table::merge() {
+  merge(1024 * 1024 * 90, 1024 * 1024 * 100);
+  merge(1024 * 1024 * 1, 1024 * 1024 * 10);
+}
+
+void Table::merge(size_t min_chunk_size, size_t max_chunk_size) {
   std::unique_lock<std::mutex> lk(merge_mutex_);
 
   auto snap = getSnapshot();
-  auto chunks = snap->head->chunks;
+  Vector<TableChunkRef> chunks;
+  for (const auto& c : snap->head->chunks) {
+    if (c.replica_id == replica_id_) {
+      chunks.emplace_back(c);
+    }
+  }
 
   std::sort(chunks.begin(), chunks.end(), [] (
       const TableChunkRef& a,
@@ -139,7 +148,7 @@ void Table::merge() {
   Set<String> input_chunk_ids;
   size_t cumul_size = 0;
   size_t cumul_recs = 0;
-  for (int i = 0; cumul_size < max_chunk_size_ && i < chunks.size(); ++i) {
+  for (int i = 0; i < chunks.size(); ++i) {
     const auto& c = chunks[i];
     auto cfile = StringUtil::format(
         "$0/$1.$2.$3",
@@ -150,12 +159,16 @@ void Table::merge() {
 
     auto csize = FileUtil::size(cfile + ".sst");
 
-    if (csize > max_chunk_size_) {
+    if (csize > max_chunk_size) {
       if (input_chunks.empty()) {
         continue;
       } else {
         break;
       }
+    }
+
+    if ((cumul_size + csize) > max_chunk_size) {
+      break;
     }
 
     if (!input_chunks.empty() && c.start_sequence != (
@@ -170,7 +183,7 @@ void Table::merge() {
     cumul_recs += c.num_records;
   }
 
-  if (input_chunks.size() < 2) {
+  if (input_chunks.size() < 2 || cumul_size < min_chunk_size) {
     return;
   }
 
