@@ -131,7 +131,7 @@ int main(int argc, const char** argv) {
 
   eventdb::TableRepository table_repo;
   table_repo.addTable(
-      new eventdb::Table(
+      eventdb::Table::open(
           "dawanda_joined_sessions",
           replica,
           dir,
