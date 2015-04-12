@@ -17,7 +17,6 @@ void MessageDecoder::decode(
     const Buffer& buf,
     const MessageSchema& schema,
     MessageObject* msg) {
-  fnord::iputs("----------", 1);
   util::BinaryMessageReader reader(buf.data(), buf.size());
 
   auto num_fields = *reader.readUInt32();
@@ -47,12 +46,18 @@ void MessageDecoder::decodeObject(
   switch (schema.type(fid)) {
 
     case FieldType::OBJECT: {
-      fnord::iputs("load obj $2 ($0..$1)", fbegin, fend, schema.name(fid));
+      MessageObject* nxt;
+      if (fid == 0) {
+        nxt = msg;
+      } else {
+        nxt = &msg->addChild(fid);
+      }
+
       auto obegin = fbegin;
       for (int i = idx + 1; i < fields.size(); ++i) {
         auto oend = fields[i].second;
 
-        if (oend < obegin) {
+        if (oend <= obegin) {
           continue;
         }
 
@@ -60,7 +65,7 @@ void MessageDecoder::decodeObject(
           break;
         }
 
-        decodeObject(i, obegin, oend, fields, schema, reader, msg);
+        decodeObject(i, obegin, oend, fields, schema, reader, nxt);
 
         obegin = oend;
       }
@@ -68,12 +73,20 @@ void MessageDecoder::decodeObject(
     }
 
     case FieldType::UINT32: {
-      fnord::iputs("load uint32 $2 ($0..$1)", fbegin, fend, schema.name(fid));
+      uint32_t val = *reader->readUInt32();
+      msg->addChild(fid, val);
       break;
     }
 
     case FieldType::BOOLEAN: {
-      fnord::iputs("load bool $2 ($0..$1)", fbegin, fend, schema.name(fid));
+      uint8_t val = *reader->readUInt8();
+      msg->addChild(fid, val == 1);
+      break;
+    }
+
+    case FieldType::STRING: {
+      auto val = reader->read(fend - fbegin);
+      msg->addChild(fid, String((const char*) val, fend - fbegin));
       break;
     }
 
