@@ -27,6 +27,7 @@
 #include "logjoin/TrackedSession.h"
 #include "logjoin/TrackedQuery.h"
 #include "logjoin/LogJoinShard.h"
+#include "logjoin/LogJoinTarget.h"
 
 using namespace fnord;
 
@@ -39,7 +40,8 @@ public:
 
   LogJoin(
       LogJoinShard shard,
-      bool dry_run);
+      bool dry_run,
+      LogJoinTarget* target);
 
   void insertLogline(
       const std::string& log_line,
@@ -81,21 +83,6 @@ protected:
     RefPtr<feeds::RemoteFeedWriter> joined_sessions_feed_writer;
   };
 
-  void onSession(const TrackedSession& session);
-
-  void onQuery(
-      const TrackedSession& session,
-      const TrackedQuery& query);
-
-  void onItemVisit(
-      const TrackedSession& session,
-      const TrackedItemVisit& item_visit);
-
-  void onItemVisit(
-      const TrackedSession& session,
-      const TrackedItemVisit& item_visit,
-      const TrackedQuery& query);
-
   void insertQuery(
       const std::string& customer_key,
       const std::string& uid,
@@ -128,6 +115,7 @@ protected:
 
   bool dry_run_;
   LogJoinShard shard_;
+  LogJoinTarget* target_;
   HashMap<String, DateTime> sessions_flush_times_;
   HashMap<String, RefPtr<OutputFeeds>> customer_feeds_;
 

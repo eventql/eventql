@@ -29,122 +29,15 @@ namespace cm {
 
 LogJoin::LogJoin(
     LogJoinShard shard,
-    bool dry_run) :
+    bool dry_run,
+    LogJoinTarget* target) :
     shard_(shard),
     dry_run_(dry_run),
+    target_(target),
     sessions_flush_times_(1000000) {}
 
 size_t LogJoin::numSessions() const {
   return sessions_flush_times_.size();
-}
-
-void LogJoin::onSession(const TrackedSession& session) {
-  stat_joined_sessions_.incr(1);
-}
-
-void LogJoin::onQuery(
-    const TrackedSession& session,
-    const TrackedQuery& query) {
-  stat_joined_queries_.incr(1);
-
-  JoinedQuery jq;
-  jq.customer = session.customer_key;
-  jq.uid = session.uid;
-  jq.time = query.time;
-  jq.attrs = query.attrs;
-  for (const auto& a : session.attrs) {
-    jq.attrs.emplace_back("s!" + a);
-  }
-
-  for (const auto& item : query.items) {
-    JoinedQueryItem jqi;
-    jqi.item = item.item;
-    jqi.clicked = item.clicked;
-    jqi.variant = item.variant;
-    jqi.position = item.position;
-    jq.items.emplace_back(jqi);
-  }
-
-  auto jq_json = json::toJSONString(jq);
-  auto feeds = getFeedsForCustomer(jq.customer);
-
-  if (dry_run_) {
-#ifndef NDEBUG
-    fnord::logTrace(
-        "cm.logjoin",
-        "[dry-run] would write joined query: $0",
-        jq_json);
-#endif
-  } else {
-    feeds->joined_queries_feed_writer->appendEntry(jq_json);
-  }
-}
-
-void LogJoin::onItemVisit(
-    const TrackedSession& session,
-    const TrackedItemVisit& item_visit) {
-  stat_joined_item_visits_.incr(1);
-
-  JoinedItemVisit jiv;
-  jiv.customer = session.customer_key;
-  jiv.uid = session.uid;
-  jiv.time = item_visit.time;
-  jiv.item = item_visit.item;
-  jiv.attrs = item_visit.attrs;
-
-  for (const auto& a : session.attrs) {
-    jiv.attrs.emplace_back("s!" + a);
-  }
-
-  auto jiv_json = json::toJSONString(jiv);
-  auto feeds = getFeedsForCustomer(jiv.customer);
-
-  if (dry_run_) {
-#ifndef NDEBUG
-    fnord::logTrace(
-        "cm.logjoin",
-        "[dry-run] would write joined item visit: $0",
-        jiv_json);
-#endif
-  } else {
-    feeds->joined_item_visits_feed_writer->appendEntry(jiv_json);
-  }
-}
-
-void LogJoin::onItemVisit(
-    const TrackedSession& session,
-    const TrackedItemVisit& item_visit,
-    const TrackedQuery& query) {
-  stat_joined_item_visits_.incr(1);
-
-  JoinedItemVisit jiv;
-  jiv.customer = session.customer_key;
-  jiv.uid = session.uid;
-  jiv.time = item_visit.time;
-  jiv.item = item_visit.item;
-  jiv.attrs = item_visit.attrs;
-
-  for (const auto& a : session.attrs) {
-    jiv.attrs.emplace_back("s!" + a);
-  }
-
-  for (const auto& a : query.attrs) {
-    jiv.attrs.emplace_back("q!" + a);
-  }
-
-  auto jiv_json = json::toJSONString(jiv);
-  auto feeds = getFeedsForCustomer(jiv.customer);
-
-  if (dry_run_) {
-#ifndef NDEBUG
-    fnord::logTrace(
-        "cm.logjoin",
-        "[dry-run] would write joined item visit: $0",
-        jiv_json);
-#endif
-  } else {
-    feeds->joined_item_visits_feed_writer->appendEntry(jiv_json);
-  }
 }
 
 void LogJoin::insertLogline(
@@ -393,7 +286,7 @@ void LogJoin::maybeFlushSession(
             if (cur_visit->item == qitem.item) {
               qitem.clicked = true;
               joined = true;
-              onItemVisit(*session, *cur_visit, *cur_query);
+              target_->onItemVisit(*session, *cur_visit, *cur_query);
               break;
             }
           }
@@ -406,7 +299,7 @@ void LogJoin::maybeFlushSession(
         }
       }
 
-      onQuery(*session, *cur_query);
+      target_->onQuery(*session, *cur_query);
       cur_query = session->queries.erase(cur_query);
     } else {
       ++cur_query;
@@ -418,7 +311,7 @@ void LogJoin::maybeFlushSession(
   while (cur_visit != session->item_visits.end()) {
     if (stream_time > (cur_visit->time.unixMicros() +
         kMaxQueryClickDelaySeconds * fnord::kMicrosPerSecond)) {
-      onItemVisit(*session, *cur_visit);
+      target_->onItemVisit(*session, *cur_visit);
       cur_visit = session->item_visits.erase(cur_visit);
     } else {
       ++cur_visit;
@@ -428,7 +321,8 @@ void LogJoin::maybeFlushSession(
   /* flush session */
   if (stream_time > (session->last_seen_unix_micros +
       kSessionIdleTimeoutSeconds * fnord::kMicrosPerSecond)) {
-    onSession(*session);
+    stat_joined_sessions_.incr(1);
+    target_->onSession(*session);
     session->flushed = true;
   }
 }
