@@ -301,6 +301,7 @@ void LogJoin::maybeFlushSession(
       }
 
       target_->onQuery(txn, *session, *cur_query);
+      session->flushed_queries.emplace_back(*cur_query);
       cur_query = session->queries.erase(cur_query);
     } else {
       ++cur_query;

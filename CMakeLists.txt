@@ -105,6 +105,7 @@ add_executable(cm-logjoin
     src/logjoin/TrackedSession.cc
     src/cm-logjoin.cc
     src/logjoin/LogJoin.cc
+    src/logjoin/LogJoinTarget.cc
     src/logjoin/LogJoinShard.cc)
 
 target_link_libraries(cm-logjoin ${CMAKE_THREAD_LIBS_INIT})
