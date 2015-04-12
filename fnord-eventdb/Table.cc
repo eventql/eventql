@@ -29,9 +29,11 @@ namespace eventdb {
 Table::Table(
     const String& table_name,
     const String& replica_id,
+    const String& db_path,
     const msg::MessageSchema& schema) :
     name_(table_name),
     replica_id_(replica_id),
+    db_path_(db_path),
     schema_(schema),
     seq_(1) {
   arenas_.emplace_front(new TableArena(seq_, rnd_.hex128()));
@@ -71,7 +73,8 @@ size_t Table::commit() {
 
 void Table::commitTable(RefPtr<TableArena> arena) const {
   auto filename = StringUtil::format(
-      "$0.$1.$2",
+      "$0/$1.$2.$3",
+      db_path_,
       name_,
       replica_id_,
       arena->chunkID());
