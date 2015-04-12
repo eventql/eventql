@@ -29,6 +29,7 @@
 #include "fnord-feeds/RemoteFeedFactory.h"
 #include "fnord-feeds/RemoteFeedReader.h"
 #include "fnord-base/stats/statsdagent.h"
+#include "fnord-http/httpconnectionpool.h"
 #include "fnord-mdb/MDB.h"
 #include <fnord-fts/fts.h>
 #include <fnord-fts/fts_common.h>
@@ -355,6 +356,7 @@ int main(int argc, const char** argv) {
 
   /* set up rpc client */
   HTTPRPCClient rpc_client(&ev);
+  http::HTTPConnectionPool http(&ev);
 
   /* start stats reporting */
   fnord::stats::StatsdAgent statsd_agent(
@@ -430,7 +432,7 @@ int main(int argc, const char** argv) {
   cm::LogJoinTarget logjoin_target(joined_sessions_schema, &analyzer);
 
   /* set up logjoin upload */
-  cm::LogJoinUpload logjoin_upload;
+  cm::LogJoinUpload logjoin_upload(sessdb, &http);
 
   /* setup logjoin */
   cm::LogJoin logjoin(shard, dry_run, &logjoin_target);
@@ -461,6 +463,10 @@ int main(int argc, const char** argv) {
       StringUtil::format("/cm-logjoin/$0/dbsize", shard.shard_name),
       &stat_dbsize,
       fnord::stats::ExportMode::EXPORT_VALUE);
+
+
+  /* upload pending q */
+  logjoin_upload.upload();
 
   /* resume from last offset */
   auto txn = sessdb->startTransaction(true);
@@ -549,7 +555,7 @@ int main(int argc, const char** argv) {
 
     txn->commit();
 
-    logjoin_upload.upload(sessdb.get());
+    logjoin_upload.upload();
 
     stat_stream_time_low.set(watermarks.first.unixMicros());
     stat_stream_time_high.set(watermarks.second.unixMicros());
