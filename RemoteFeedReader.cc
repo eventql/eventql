@@ -164,7 +164,7 @@ void RemoteFeedReader::fillBuffers() {
       for (const auto& e : r.result()) {
         auto entry = e;
 
-        if (entry.time == 0 && time_backfill_fn_) {
+        if (entry.time.unixMicros() == 0 && time_backfill_fn_) {
           try {
             entry.time = time_backfill_fn_(entry);
           } catch (const Exception& e) {
