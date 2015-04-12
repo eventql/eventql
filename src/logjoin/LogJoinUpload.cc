@@ -89,8 +89,8 @@ void LogJoinUpload::uploadBatch(
   res.wait();
 
   const auto& r = res.get();
-  if (r.statusCode() != 200) {
-    RAISEF(kRuntimeError, "received non-200 response: $0", r.body().toString());
+  if (r.statusCode() != 201) {
+    RAISEF(kRuntimeError, "received non-201 response: $0", r.body().toString());
   }
 }
 
