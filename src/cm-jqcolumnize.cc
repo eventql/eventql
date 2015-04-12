@@ -37,6 +37,8 @@
 #include "fnord-msg/MessageSchema.h"
 #include "fnord-msg/MessageBuilder.h"
 #include "fnord-msg/MessageObject.h"
+#include "fnord-msg/MessageEncoder.h"
+#include "fnord-msg/MessageDecoder.h"
 #include <fnord-fts/fts.h>
 #include <fnord-fts/fts_common.h>
 #include "common.h"
@@ -371,7 +373,12 @@ int main(int argc, const char** argv) {
       }
     }
 
-    table.addRecord(obj);
+    Buffer msg_buf;
+    msg::MessageEncoder::encode(obj, schema, &msg_buf);
+    //fnord::iputs("buf: $0", StringUtil::hexPrint(msg_buf.data(), msg_buf.size()));
+    msg::MessageObject new_msg;
+    msg::MessageDecoder::decode(msg_buf, schema, &new_msg);
+    table.addRecord(new_msg);
   };
 
   /* read input tables */
@@ -430,24 +437,24 @@ int main(int argc, const char** argv) {
 
   table.write(flags.getString("output_file"));
 
-  //{
-  //  cstable::CSTableReader reader(flags.getString("output_file"));
-  //  auto t0 = WallClock::unixMicros();
+  {
+    cstable::CSTableReader reader(flags.getString("output_file"));
+    auto t0 = WallClock::unixMicros();
 
-  //  cm::AnalyticsTableScan aq;
-  //  auto lcol = aq.fetchColumn("queries.language");
-  //  auto ccol = aq.fetchColumn("queries.page");
-  //  auto qcol = aq.fetchColumn("queries.query_string_normalized");
+    cm::AnalyticsTableScan aq;
+    auto lcol = aq.fetchColumn("queries.language");
+    auto ccol = aq.fetchColumn("queries.page");
+    auto qcol = aq.fetchColumn("queries.query_string_normalized");
 
-  //  aq.onQuery([&] () {
-  //    auto l = languageToString((Language) lcol->getUInt32());
-  //    auto c = ccol->getUInt32();
-  //    auto q = qcol->getString();
-  //    fnord::iputs("lang: $0 -> $1 -- $2", l, c, q);
-  //  });
+    aq.onQuery([&] () {
+      auto l = languageToString((Language) lcol->getUInt32());
+      auto c = ccol->getUInt32();
+      auto q = qcol->getString();
+      fnord::iputs("lang: $0 -> $1 -- $2", l, c, q);
+    });
 
-  //  aq.scanTable(&reader);
-  //}
+    aq.scanTable(&reader);
+  }
 
   return 0;
 }
