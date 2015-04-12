@@ -106,6 +106,7 @@ protected:
       const DateTime& flush_at);
 
   void maybeFlushSession(
+      mdb::MDBTransaction* txn,
       const std::string uid,
       TrackedSession* session,
       DateTime stream_time);
