@@ -11,6 +11,7 @@
 #define _FNORD_EVENTDB_EVENTDBSERVLET_H
 #include "fnord-http/httpservice.h"
 #include "fnord-json/json.h"
+#include <fnord-eventdb/TableRepository.h>
 
 namespace fnord {
 namespace eventdb {
@@ -21,6 +22,8 @@ public:
     JSON,
     CSV
   };
+
+  EventDBServlet(TableRepository* tables);
 
   void handleHTTPRequest(
       http::HTTPRequest* req,
@@ -33,6 +36,7 @@ protected:
     http::HTTPResponse* res,
     URI* uri);
 
+  TableRepository* tables_;
   //ResponseFormat formatFromString(const String& format);
 };
 
