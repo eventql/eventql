@@ -66,6 +66,10 @@ RefPtr<Table> Table::open(
 
   uint64_t last_seq = 0;
   for (const auto& c : head->chunks) {
+    if (c.replica_id != replica_id) {
+      continue;
+    }
+
     auto l = c.start_sequence + c.num_records;
     if (l > last_seq) {
       last_seq = l;
