@@ -126,7 +126,6 @@ int main(int argc, const char** argv) {
     return true;
   });
 
-
   /* eventdb */
   auto replica = flags.getString("replica");
 
@@ -141,7 +140,7 @@ int main(int argc, const char** argv) {
   eventdb::EventDBServlet eventdb_servlet(&table_repo);
 
   /* analytics */
-  cm::AnalyticsQueryEngine analytics(8, &vfs);
+  cm::AnalyticsQueryEngine analytics(8, dir);
   cm::AnalyticsServlet analytics_servlet(&analytics);
   http_router.addRouteByPrefixMatch("/analytics", &analytics_servlet, &tpool);
   http_router.addRouteByPrefixMatch("/eventdb", &eventdb_servlet, &tpool);
