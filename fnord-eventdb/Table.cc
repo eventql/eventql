@@ -235,6 +235,75 @@ void Table::merge(size_t min_chunk_size, size_t max_chunk_size) {
   writeSnapshot();
 }
 
+void Table::gc(size_t keep_generations /* = 2 */) {
+  std::unique_lock<std::mutex> lk(mutex_);
+  auto head_gen = head_->generation;
+  lk.unlock();
+
+  if (head_gen < keep_generations) {
+    return;
+  }
+
+  Set<String> delete_chunk_ids;
+  Set<String> delete_files;
+
+  for (uint64_t gen = head_gen - keep_generations; gen > 0; --gen) {
+    auto genfile = StringUtil::format(
+        "$0/$1.$2.$3.idx",
+        db_path_,
+        name_,
+        replica_id_,
+        gen);
+
+    if (!FileUtil::exists(genfile)) {
+      break;
+    }
+
+    TableGeneration g;
+    g.decode(FileUtil::read(genfile));
+
+    for (const auto& c : g.chunks) {
+      delete_chunk_ids.emplace(c.chunk_id);
+    }
+
+    delete_files.emplace(genfile);
+  }
+
+  for (uint64_t gen = head_gen; gen > (head_gen - keep_generations); --gen) {
+    auto genfile = StringUtil::format(
+      "$0/$1.$2.$3.idx",
+      db_path_,
+      name_,
+      replica_id_,
+      gen);
+
+    TableGeneration g;
+    g.decode(FileUtil::read(genfile));
+
+    for (const auto& c : g.chunks) {
+      delete_chunk_ids.erase(c.chunk_id);
+    }
+  }
+
+  for (const auto& c : delete_chunk_ids) {
+    auto chunkfile = StringUtil::format(
+        "$0/$1.$2.$3",
+        db_path_,
+        name_,
+        replica_id_,
+        c);
+
+    delete_files.emplace(chunkfile + ".sst");
+    delete_files.emplace(chunkfile + ".cst");
+    delete_files.emplace(chunkfile + ".idx");
+  }
+
+  for (const auto& f : delete_files) {
+    fnord::logInfo("fnord.evdb", "Deleting file: $0", f);
+    FileUtil::rm(f);
+  }
+}
+
 void Table::writeTable(RefPtr<TableArena> arena) {
   TableChunkRef chunk;
   chunk.replica_id = replica_id_;
@@ -293,6 +362,8 @@ RefPtr<TableSnapshot> Table::getSnapshot() {
   std::unique_lock<std::mutex> lk(mutex_);
   return new TableSnapshot(head_, arenas_);
 }
+
+TableGeneration::TableGeneration() : generation(0) {}
 
 RefPtr<TableGeneration> TableGeneration::clone() const {
   RefPtr<TableGeneration> c(new TableGeneration);

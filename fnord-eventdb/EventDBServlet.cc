@@ -34,6 +34,10 @@ void EventDBServlet::handleHTTPRequest(
       return mergeTable(req, res, &uri);
     }
 
+    if (StringUtil::endsWith(uri.path(), "/gc")) {
+      return gcTable(req, res, &uri);
+    }
+
     res->setStatus(fnord::http::kStatusNotFound);
     res->addBody("not found");
   } catch (const Exception& e) {
@@ -96,6 +100,25 @@ void EventDBServlet::mergeTable(
 
   auto tbl = tables_->findTable(table);
   tbl->merge();
+
+  res->setStatus(http::kStatusOK);
+}
+
+void EventDBServlet::gcTable(
+    http::HTTPRequest* req,
+    http::HTTPResponse* res,
+    URI* uri) {
+  const auto& params = uri->queryParams();
+
+  String table;
+  if (!URI::getParam(params, "table", &table)) {
+    res->setStatus(fnord::http::kStatusBadRequest);
+    res->addBody("missing ?table=... parameter");
+    return;
+  }
+
+  auto tbl = tables_->findTable(table);
+  tbl->gc();
 
   res->setStatus(http::kStatusOK);
 }
