@@ -31,7 +31,7 @@ RefPtr<Table> Table::open(
     const String& replica_id,
     const String& db_path,
     const msg::MessageSchema& schema) {
-  RefPtr<TableSnapshot> head(new TableSnapshot);
+  RefPtr<TableGeneration> head(new TableGeneration);
   uint64_t seq = 0;
 
   return new Table(table_name, replica_id, db_path, schema, seq, head);
@@ -43,7 +43,7 @@ Table::Table(
     const String& db_path,
     const msg::MessageSchema& schema,
     uint64_t head_sequence,
-    RefPtr<TableSnapshot> snapshot) :
+    RefPtr<TableGeneration> snapshot) :
     name_(table_name),
     replica_id_(replica_id),
     db_path_(db_path),
@@ -148,13 +148,25 @@ const String& Table::name() const {
   return name_;
 }
 
-RefPtr<TableSnapshot> TableSnapshot::clone() const {
-  RefPtr<TableSnapshot> c(new TableSnapshot);
+RefPtr<TableSnapshot> Table::getSnapshot() {
+  std::unique_lock<std::mutex> lk(mutex_);
+  return new TableSnapshot(head_, arenas_);
+}
+
+RefPtr<TableGeneration> TableGeneration::clone() const {
+  RefPtr<TableGeneration> c(new TableGeneration);
   c->table_name = table_name;
   c->generation = generation;
   c->chunks = chunks;
   return c;
 }
+
+TableSnapshot::TableSnapshot(
+    RefPtr<TableGeneration> _head,
+    List<RefPtr<TableArena>> _arenas) :
+    head(_head),
+    arenas(_arenas) {}
+
 
 
 } // namespace eventdb
