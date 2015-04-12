@@ -35,6 +35,7 @@
 #include "CustomerNamespace.h"
 #include "logjoin/LogJoin.h"
 #include "logjoin/LogJoinTarget.h"
+#include "logjoin/LogJoinUpload.h"
 #include "common.h"
 
 using namespace cm;
@@ -428,6 +429,9 @@ int main(int argc, const char** argv) {
   fnord::fts::Analyzer analyzer(flags.getString("conf"));
   cm::LogJoinTarget logjoin_target(joined_sessions_schema, &analyzer);
 
+  /* set up logjoin upload */
+  cm::LogJoinUpload logjoin_upload;
+
   /* setup logjoin */
   cm::LogJoin logjoin(shard, dry_run, &logjoin_target);
   logjoin.exportStats("/cm-logjoin/global");
@@ -544,6 +548,8 @@ int main(int argc, const char** argv) {
         stream_offsets_str);
 
     txn->commit();
+
+    logjoin_upload.upload(sessdb.get());
 
     stat_stream_time_low.set(watermarks.first.unixMicros());
     stat_stream_time_high.set(watermarks.second.unixMicros());
