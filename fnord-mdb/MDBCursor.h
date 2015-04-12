@@ -42,6 +42,13 @@ public:
       void** value,
       size_t* value_size);
 
+  bool getFirstOrGreater(Buffer* key, Buffer* value);
+  bool getFirstOrGreater(
+      void** key,
+      size_t* key_size,
+      void** value,
+      size_t* value_size);
+
   bool getFirst(Buffer* key, Buffer* value);
   bool getFirst(
       void** key,
