@@ -11,7 +11,7 @@
 #define _FNORD_MSG_MESSAGEDECODER_H
 #include <fnord-base/stdtypes.h>
 #include <fnord-base/buffer.h>
-#include <fnord-base/util/binarymessagewriter.h>
+#include <fnord-base/util/binarymessagereader.h>
 #include <fnord-msg/MessageSchema.h>
 #include <fnord-msg/MessageObject.h>
 
@@ -25,6 +25,18 @@ public:
       const Buffer& buf,
       const MessageSchema& schema,
       MessageObject* msg);
+
+protected:
+
+  static void decodeObject(
+      size_t idx,
+      uint64_t begin,
+      uint64_t end,
+      const Vector<Pair<uint32_t, uint64_t>>& fields,
+      const MessageSchema& schema,
+      util::BinaryMessageReader* reader,
+      MessageObject* msg);
+
 
 };
 
