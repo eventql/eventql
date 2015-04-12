@@ -11,6 +11,7 @@
 #define _FNORD_EVENTDB_TABLE_H
 #include <fnord-base/stdtypes.h>
 #include <fnord-base/autoref.h>
+#include <fnord-base/random.h>
 #include <fnord-msg/MessageSchema.h>
 #include <fnord-msg/MessageObject.h>
 #include <fnord-eventdb/TableArena.h>
@@ -34,12 +35,16 @@ public:
   size_t commit();
 
 protected:
+
+  void commitTable(RefPtr<TableArena> arena) const;
+
   String name_;
   String replica_id_;
   msg::MessageSchema schema_;
   std::mutex mutex_;
   uint64_t seq_;
   List<RefPtr<TableArena>> arenas_;
+  Random rnd_;
 };
 
 } // namespace eventdb
