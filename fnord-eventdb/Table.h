@@ -30,7 +30,9 @@ struct TableGeneration : public RefCounted {
   String table_name;
   uint64_t generation;
   List<TableChunkRef> chunks;
+
   RefPtr<TableGeneration> clone() const;
+  void encode(Buffer* buf);
 };
 
 struct TableSnapshot : public RefCounted {
@@ -70,8 +72,9 @@ protected:
       uint64_t head_sequence,
       RefPtr<TableGeneration> snapshot);
 
-  void commitTable(RefPtr<TableArena> arena);
+  void writeTable(RefPtr<TableArena> arena);
   void addChunk(TableChunkRef chunk);
+  void writeSnapshot();
 
   String name_;
   String replica_id_;
