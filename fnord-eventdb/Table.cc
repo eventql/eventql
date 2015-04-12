@@ -92,42 +92,36 @@ void Table::commitTable(RefPtr<TableArena> arena) {
   chunk.start_sequence = arena->startSequence();
   chunk.num_records = arena->records().size();
 
-  auto filename = StringUtil::format(
-      "$0/$1.$2.$3",
+  auto chunkname  = StringUtil::format(
+      "$1.$2.$3",
       db_path_,
       name_,
       replica_id_,
       chunk.chunk_id);
 
-  fnord::logInfo(
-      "fnord.evdb",
-      "Writing output sstable: $0",
-      filename + ".sst");
+  fnord::logInfo( "fnord.evdb", "Writing chunk: $0", chunkname);
+  auto filename = FileUtil::joinPaths(db_path_, chunkname);
 
-  auto sstable = sstable::SSTableWriter::create(
-      filename + ".sst~",
-      sstable::IndexProvider{},
-      nullptr,
-      0);
+  {
+    cstable::CSTableBuilder cstable(&schema_);
+    auto sstable = sstable::SSTableWriter::create(
+        filename + ".sst~",
+        sstable::IndexProvider{},
+        nullptr,
+        0);
 
-  fnord::logInfo(
-      "fnord.evdb",
-      "Writing output cstable: $0",
-      filename + ".cst");
+    uint64_t seq = chunk.start_sequence;
+    for (const auto& r : arena->records()) {
+      cstable.addRecord(r);
+      Buffer buf;
+      msg::MessageEncoder::encode(r, schema_, &buf);
+      sstable->appendRow(&seq, sizeof(seq), buf.data(), buf.size());
+      ++seq;
+    }
 
-  cstable::CSTableBuilder cstable(&schema_);
-
-  uint64_t seq = chunk.start_sequence;
-  for (const auto& r : arena->records()) {
-    Buffer buf;
-    msg::MessageEncoder::encode(r, schema_, &buf);
-    sstable->appendRow(&seq, sizeof(seq), buf.data(), buf.size());
-    cstable.addRecord(r);
-    ++seq;
+    cstable.write(filename + ".cst~");
+    sstable->finalize();
   }
-
-  sstable->finalize();
-  cstable.write(filename + ".cst~");
 
   FileUtil::mv(filename + ".sst~", filename + ".sst");
   FileUtil::mv(filename + ".cst~", filename + ".cst");
