@@ -30,10 +30,14 @@
 #include "fnord-feeds/RemoteFeedReader.h"
 #include "fnord-base/stats/statsdagent.h"
 #include "fnord-mdb/MDB.h"
+#include <fnord-fts/fts.h>
+#include <fnord-fts/fts_common.h>
 #include "CustomerNamespace.h"
 #include "logjoin/LogJoin.h"
 #include "logjoin/LogJoinTarget.h"
+#include "common.h"
 
+using namespace cm;
 using namespace fnord;
 
 std::atomic<bool> cm_logjoin_shutdown;
@@ -152,6 +156,181 @@ int main(int argc, const char** argv) {
   Logger::get()->setMinimumLogLevel(
       strToLogLevel(flags.getString("loglevel")));
 
+  /* schema... */
+  Vector<msg::MessageSchemaField> fields;
+
+  msg::MessageSchemaField queries(
+      16,
+      "queries",
+      msg::FieldType::OBJECT,
+      0,
+      true,
+      false);
+
+  queries.fields.emplace_back(
+      18,
+      "time",
+      msg::FieldType::UINT32,
+      0xffffffff,
+      false,
+      false);
+
+  queries.fields.emplace_back(
+      1,
+      "page",
+      msg::FieldType::UINT32,
+      100,
+      false,
+      true,
+      msg::EncodingHint::BITPACK);
+
+  queries.fields.emplace_back(
+      2,
+      "language",
+      msg::FieldType::UINT32,
+      kMaxLanguage,
+      false,
+      false,
+      msg::EncodingHint::BITPACK);
+
+  queries.fields.emplace_back(
+      3,
+      "query_string",
+      msg::FieldType::STRING,
+      8192,
+      false,
+      true);
+
+  queries.fields.emplace_back(
+      4,
+      "query_string_normalized",
+      msg::FieldType::STRING,
+      8192,
+      false,
+      true);
+
+  queries.fields.emplace_back(
+      5,
+      "num_items",
+      msg::FieldType::UINT32,
+      250,
+      false,
+      false,
+      msg::EncodingHint::BITPACK);
+
+  queries.fields.emplace_back(
+      6,
+      "num_items_clicked",
+      msg::FieldType::UINT32,
+      250,
+      false,
+      false,
+      msg::EncodingHint::BITPACK);
+
+  queries.fields.emplace_back(
+      7,
+      "num_ad_impressions",
+      msg::FieldType::UINT32,
+      250,
+      false,
+      false,
+      msg::EncodingHint::BITPACK);
+
+  queries.fields.emplace_back(
+      8,
+      "num_ad_clicks",
+      msg::FieldType::UINT32,
+      250,
+      false,
+      false,
+      msg::EncodingHint::BITPACK);
+
+  queries.fields.emplace_back(
+      9,
+      "ab_test_group",
+      msg::FieldType::UINT32,
+      100,
+      false,
+      true,
+      msg::EncodingHint::BITPACK);
+
+  queries.fields.emplace_back(
+      10,
+      "device_type",
+      msg::FieldType::UINT32,
+      kMaxDeviceType,
+      false,
+      false,
+      msg::EncodingHint::BITPACK);
+
+  queries.fields.emplace_back(
+      11,
+      "page_type",
+      msg::FieldType::UINT32,
+      kMaxPageType,
+      false,
+      false,
+      msg::EncodingHint::BITPACK);
+
+  queries.fields.emplace_back(
+      12,
+      "category1",
+      msg::FieldType::UINT32,
+      0xffff,
+      false,
+      true,
+      msg::EncodingHint::BITPACK);
+
+  queries.fields.emplace_back(
+      13,
+      "category2",
+      msg::FieldType::UINT32,
+      0xffff,
+      false,
+      true,
+      msg::EncodingHint::BITPACK);
+
+  queries.fields.emplace_back(
+      14,
+      "category3",
+      msg::FieldType::UINT32,
+      0xffff,
+      false,
+      true,
+      msg::EncodingHint::BITPACK);
+
+  msg::MessageSchemaField query_items(
+      17,
+      "items",
+      msg::FieldType::OBJECT,
+      0,
+      true,
+      false);
+
+  query_items.fields.emplace_back(
+      19,
+      "position",
+      msg::FieldType::UINT32,
+      64,
+      false,
+      false,
+      msg::EncodingHint::BITPACK);
+
+  query_items.fields.emplace_back(
+      15,
+      "clicked",
+      msg::FieldType::BOOLEAN,
+      0,
+      false,
+      false);
+
+  queries.fields.emplace_back(query_items);
+  fields.emplace_back(queries);
+
+  msg::MessageSchema joined_sessions_schema("joined_session", fields);
+  fnord::iputs("$0", joined_sessions_schema.toString());
+
+
   /* set up cmdata */
   auto cmdata_path = flags.getString("cmdata");
   if (!FileUtil::isDirectory(cmdata_path)) {
@@ -238,7 +417,8 @@ int main(int argc, const char** argv) {
   });
 
   /* set up logjoin target */
-  cm::LogJoinTarget logjoin_target;
+  fnord::fts::Analyzer analyzer(flags.getString("conf"));
+  cm::LogJoinTarget logjoin_target(joined_sessions_schema, &analyzer);
 
   /* setup logjoin */
   cm::LogJoin logjoin(shard, dry_run, &logjoin_target);
