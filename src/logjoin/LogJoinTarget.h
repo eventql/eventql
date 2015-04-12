@@ -9,10 +9,10 @@
 #ifndef _CM_LOGJOINTARGET_H
 #define _CM_LOGJOINTARGET_H
 #include "fnord-base/stdtypes.h"
+#include "fnord-mdb/MDB.h"
 #include "ItemRef.h"
 #include "logjoin/TrackedSession.h"
 #include "logjoin/TrackedQuery.h"
-
 
 using namespace fnord;
 
@@ -23,7 +23,7 @@ public:
 
   void onSession(
       mdb::MDBTransaction* txn,
-      const TrackedSession& query);
+      const TrackedSession& session);
 
   void onQuery(
       mdb::MDBTransaction* txn,
@@ -40,6 +40,7 @@ public:
       const TrackedSession& session,
       const TrackedItemVisit& item_visit,
       const TrackedQuery& query);
+
 };
 } // namespace cm
 

@@ -217,9 +217,9 @@ int main(int argc, const char** argv) {
   feed_reader.setMaxSpread(10 * kMicrosPerSecond);
 
   HashMap<String, URI> input_feeds;
-  input_feeds.emplace(
-      "tracker_log.feedserver01.nue01.production.fnrd.net",
-      URI("http://s01.nue01.production.fnrd.net:7001/rpc"));
+  //input_feeds.emplace(
+  //    "tracker_log.feedserver01.nue01.production.fnrd.net",
+  //    URI("http://s01.nue01.production.fnrd.net:7001/rpc"));
   input_feeds.emplace(
       "tracker_log.feedserver02.nue01.production.fnrd.net",
       URI("http://s02.nue01.production.fnrd.net:7001/rpc"));
