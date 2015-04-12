@@ -87,6 +87,10 @@ size_t BinaryMessageReader::remaining() const {
   return size_ - pos_;
 }
 
+size_t BinaryMessageReader::position() const {
+  return pos_;
+}
+
 }
 }
 

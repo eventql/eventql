@@ -24,7 +24,8 @@ public:
   static void decode(
       const Buffer& buf,
       const MessageSchema& schema,
-      MessageObject* msg);
+      MessageObject* msg,
+      size_t* offset = nullptr);
 
 protected:
 
