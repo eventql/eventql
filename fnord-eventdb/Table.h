@@ -40,7 +40,7 @@ struct TableChunkRef {
 struct TableGeneration : public RefCounted {
   String table_name;
   uint64_t generation;
-  List<TableChunkRef> chunks;
+  Vector<TableChunkRef> chunks;
 
   RefPtr<TableGeneration> clone() const;
   void encode(Buffer* buf);
@@ -81,6 +81,8 @@ protected:
 class Table : public RefCounted {
 public:
 
+  static const size_t kDefaultMaxChunkSize = 1024 * 1024 * 25; // 25MB
+
   static RefPtr<Table> open(
       const String& table_name,
       const String& replica_id,
@@ -93,6 +95,7 @@ public:
   const String& name() const;
 
   size_t commit();
+  void merge();
 
   RefPtr<TableSnapshot> getSnapshot();
 
@@ -115,10 +118,12 @@ protected:
   String db_path_;
   msg::MessageSchema schema_;
   std::mutex mutex_;
+  std::mutex merge_mutex_;
   uint64_t seq_;
   List<RefPtr<TableArena>> arenas_;
   Random rnd_;
   RefPtr<TableGeneration> head_;
+  size_t max_chunk_size_;
 };
 
 } // namespace eventdb

@@ -84,7 +84,8 @@ Table::Table(
     db_path_(db_path),
     schema_(schema),
     seq_(head_sequence + 1),
-    head_(snapshot) {
+    head_(snapshot),
+    max_chunk_size_(kDefaultMaxChunkSize) {
   arenas_.emplace_front(new TableArena(seq_, rnd_.hex128()));
 }
 
@@ -111,6 +112,8 @@ size_t Table::commit() {
     return 0;
   }
 
+  fnord::logInfo("fnord.evdb", "Commiting table: $0", name_);
+
   arenas_.emplace_front(new TableArena(seq_, rnd_.hex128()));
   lk.unlock();
 
@@ -118,6 +121,72 @@ size_t Table::commit() {
   t.detach();
 
   return records.size();
+}
+
+void Table::merge() {
+  std::unique_lock<std::mutex> lk(merge_mutex_);
+
+  auto snap = getSnapshot();
+  auto chunks = snap->head->chunks;
+
+  std::sort(chunks.begin(), chunks.end(), [] (
+      const TableChunkRef& a,
+      const TableChunkRef& b) -> bool {
+    return a.start_sequence < b.start_sequence;
+  });
+
+  Vector<TableChunkRef> input_chunks;
+  Set<String> input_chunk_ids;
+  size_t cumul_size = 0;
+  size_t cumul_recs = 0;
+  for (int i = 0; cumul_size < max_chunk_size_ && i < chunks.size(); ++i) {
+    const auto& c = chunks[i];
+    auto cfile = StringUtil::format(
+        "$0/$1.$2.$3",
+        db_path_,
+        name_,
+        c.replica_id,
+        c.chunk_id);
+
+    auto csize = FileUtil::size(cfile + ".sst");
+
+    if (csize > max_chunk_size_) {
+      if (input_chunks.empty()) {
+        continue;
+      } else {
+        break;
+      }
+    }
+
+    if (!input_chunks.empty() && c.start_sequence != (
+          input_chunks.back().start_sequence +
+          input_chunks.back().num_records)) {
+      break;
+    }
+
+    input_chunks.emplace_back(c);
+    input_chunk_ids.emplace(c.chunk_id);
+    cumul_size += csize;
+    cumul_recs += c.num_records;
+  }
+
+  if (input_chunks.size() < 2) {
+    return;
+  }
+
+  TableChunkRef output_chunk;
+  output_chunk.replica_id = replica_id_;
+  output_chunk.chunk_id = rnd_.hex128();
+  output_chunk.start_sequence = input_chunks.front().start_sequence;
+  output_chunk.num_records = cumul_recs;
+
+  fnord::logInfo(
+      "fnord.evdb",
+      "Merging table '$0'\n    input_chunks=$1\n    ouput_chunk=$2",
+      name_,
+      inspect(input_chunk_ids),
+      output_chunk.chunk_id);
+
 }
 
 void Table::writeTable(RefPtr<TableArena> arena) {
