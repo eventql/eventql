@@ -14,19 +14,16 @@
 /**
  * // http://tools.ietf.org/html/rfc5234
  *
+ *   <message> := <object>
+ *
  *   <message> :=
- *       <field>...
+ *       <varint>               // num fields
+ *       { <field_ptr> }        // one field pointer for each field
+ *       { <uint8_t> }          // field data
  *
- *   <field> :=
- *       <varint>               // field type
- *       [ <field_data> ]       // field data. known size depending on the type
- *
- *   <field_data_uint32> :=
- *       <varint>                // value
- *
- *   <field_data_string> :=
- *       <varint>                // len
- *       <uint8_t>...            // data
+ *   <field_ptr> :=
+ *       <varint>               // field id
+ *       <varint>               // field data end offset
  *
  */
 namespace fnord {
@@ -80,8 +77,10 @@ struct MessageSchema {
   String name;
   Vector<MessageSchemaField> fields;
   HashMap<String, uint32_t> field_ids;
+  HashMap<uint32_t, FieldType> field_types;
 
-  uint32_t id(const String& path);
+  uint32_t id(const String& path) const;
+  FieldType type(uint32_t id) const;
   String toString() const;
 };
 
