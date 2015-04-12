@@ -12,6 +12,8 @@
 namespace fnord {
 namespace eventdb {
 
+EventDBServlet::EventDBServlet(TableRepository* tables) : tables_(tables) {}
+
 void EventDBServlet::handleHTTPRequest(
     fnord::http::HTTPRequest* req,
     fnord::http::HTTPResponse* res) {
@@ -45,8 +47,8 @@ void EventDBServlet::insertRecord(
     return;
   }
 
-  const auto& body = req->body();
-  fnord::iputs("req: $0 -> $1 bytes", table, body.size());
+  auto tbl = tables_->findTable(table);
+  tbl->addRecords(req->body());
 
   res->setStatus(http::kStatusCreated);
 }
