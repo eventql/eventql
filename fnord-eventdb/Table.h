@@ -15,6 +15,14 @@
 #include <fnord-msg/MessageSchema.h>
 #include <fnord-msg/MessageObject.h>
 #include <fnord-eventdb/TableArena.h>
+#include "fnord-sstable/sstablereader.h"
+#include "fnord-sstable/sstablewriter.h"
+#include "fnord-sstable/SSTableColumnSchema.h"
+#include "fnord-sstable/SSTableColumnReader.h"
+#include "fnord-sstable/SSTableColumnWriter.h"
+#include "fnord-cstable/CSTableWriter.h"
+#include "fnord-cstable/CSTableReader.h"
+#include "fnord-cstable/CSTableBuilder.h"
 
 namespace fnord {
 namespace eventdb {
@@ -43,6 +51,28 @@ struct TableSnapshot : public RefCounted {
 
   RefPtr<TableGeneration> head;
   List<RefPtr<TableArena>> arenas;
+};
+
+class TableChunkWriter {
+public:
+
+  TableChunkWriter(
+      const String& db_path,
+      const String& table_name,
+      msg::MessageSchema* schema,
+      TableChunkRef* chunk);
+
+  void addRecord(const msg::MessageObject& record);
+  void commit();
+
+protected:
+  msg::MessageSchema* schema_;
+  TableChunkRef* chunk_;
+  size_t seq_;
+  String chunk_name_;
+  String chunk_filename_;
+  std::unique_ptr<sstable::SSTableWriter> sstable_;
+  std::unique_ptr<cstable::CSTableBuilder> cstable_;
 };
 
 class Table : public RefCounted {

@@ -16,14 +16,7 @@
 #include <fnord-msg/MessageDecoder.h>
 #include <fnord-msg/MessageEncoder.h>
 #include <fnord-msg/MessagePrinter.h>
-#include "fnord-sstable/sstablereader.h"
-#include "fnord-sstable/sstablewriter.h"
-#include "fnord-sstable/SSTableColumnSchema.h"
-#include "fnord-sstable/SSTableColumnReader.h"
-#include "fnord-sstable/SSTableColumnWriter.h"
-#include "fnord-cstable/CSTableWriter.h"
-#include "fnord-cstable/CSTableReader.h"
-#include "fnord-cstable/CSTableBuilder.h"
+
 
 namespace fnord {
 namespace eventdb {
@@ -134,38 +127,15 @@ void Table::writeTable(RefPtr<TableArena> arena) {
   chunk.start_sequence = arena->startSequence();
   chunk.num_records = arena->records().size();
 
-  auto chunkname  = StringUtil::format(
-      "$0.$1.$2",
-      name_,
-      replica_id_,
-      chunk.chunk_id);
-
-  fnord::logInfo("fnord.evdb", "Writing chunk: $0", chunkname);
-  auto filename = FileUtil::joinPaths(db_path_, chunkname);
-
   {
-    cstable::CSTableBuilder cstable(&schema_);
-    auto sstable = sstable::SSTableWriter::create(
-        filename + ".sst~",
-        sstable::IndexProvider{},
-        nullptr,
-        0);
+    TableChunkWriter writer(db_path_, name_, &schema_, &chunk);
 
-    uint64_t seq = chunk.start_sequence;
     for (const auto& r : arena->records()) {
-      cstable.addRecord(r);
-      Buffer buf;
-      msg::MessageEncoder::encode(r, schema_, &buf);
-      sstable->appendRow(&seq, sizeof(seq), buf.data(), buf.size());
-      ++seq;
+      writer.addRecord(r);
     }
 
-    cstable.write(filename + ".cst~");
-    sstable->finalize();
+    writer.commit();
   }
-
-  FileUtil::mv(filename + ".sst~", filename + ".sst");
-  FileUtil::mv(filename + ".cst~", filename + ".cst");
 
   addChunk(chunk);
 }
@@ -277,6 +247,49 @@ TableSnapshot::TableSnapshot(
     head(_head),
     arenas(_arenas) {}
 
+
+TableChunkWriter::TableChunkWriter(
+    const String& db_path,
+    const String& table_name,
+    msg::MessageSchema* schema,
+    TableChunkRef* chunk) :
+    schema_(schema),
+    chunk_(chunk),
+    seq_(chunk->start_sequence),
+    chunk_name_(StringUtil::format(
+        "$0.$1.$2",
+        table_name,
+        chunk->replica_id,
+        chunk->chunk_id)),
+    chunk_filename_(FileUtil::joinPaths(db_path, chunk_name_)),
+    sstable_(sstable::SSTableWriter::create(
+        chunk_filename_ + ".sst~",
+        sstable::IndexProvider{},
+        nullptr,
+        0)),
+    cstable_(new cstable::CSTableBuilder(schema)) {}
+
+void TableChunkWriter::addRecord(const msg::MessageObject& record) {
+  Buffer buf;
+  msg::MessageEncoder::encode(record, *schema_, &buf);
+
+  cstable_->addRecord(record);
+  sstable_->appendRow(&seq_, sizeof(seq_), buf.data(), buf.size());
+
+  ++seq_;
+}
+
+void TableChunkWriter::commit() {
+  fnord::logInfo("fnord.evdb", "Writing chunk: $0", chunk_name_);
+
+  cstable_->write(chunk_filename_ + ".cst~");
+  sstable_->finalize();
+
+  FileUtil::mv(chunk_filename_ + ".sst~", chunk_filename_ + ".sst");
+  FileUtil::mv(chunk_filename_ + ".cst~", chunk_filename_ + ".cst");
+
+
+}
 
 } // namespace eventdb
 } // namespace fnord
