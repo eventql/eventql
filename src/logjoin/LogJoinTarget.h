@@ -10,16 +10,27 @@
 #define _CM_LOGJOINTARGET_H
 #include "fnord-base/stdtypes.h"
 #include "fnord-mdb/MDB.h"
+#include "fnord-msg/MessageSchema.h"
 #include "ItemRef.h"
 #include "logjoin/TrackedSession.h"
 #include "logjoin/TrackedQuery.h"
 
 using namespace fnord;
 
+namespace fnord {
+namespace fts {
+class Analyzer;
+}
+}
+
 namespace cm {
 
 class LogJoinTarget {
 public:
+
+  LogJoinTarget(
+      const msg::MessageSchema& joined_sessions_schema,
+      fts::Analyzer* analyzer);
 
   void onSession(
       mdb::MDBTransaction* txn,
@@ -41,6 +52,9 @@ public:
       const TrackedItemVisit& item_visit,
       const TrackedQuery& query);
 
+protected:
+  msg::MessageSchema joined_sessions_schema_;
+  fts::Analyzer* analyzer_;
 };
 } // namespace cm
 
