@@ -61,27 +61,7 @@ public:
 
   void exportStats(const std::string& path_prefix);
 
-  void addCustomer(
-        const String& customer_key,
-        const String& shard_name,
-        RPCClient* rpc_client);
-
 protected:
-
-  class OutputFeeds : public RefCounted {
-  public:
-    OutputFeeds(
-        RefPtr<feeds::RemoteFeedWriter> fw_item_visits,
-        RefPtr<feeds::RemoteFeedWriter> fw_queries,
-        RefPtr<feeds::RemoteFeedWriter> fw_sessions) :
-        joined_item_visits_feed_writer(fw_item_visits),
-        joined_queries_feed_writer(fw_queries),
-        joined_sessions_feed_writer(fw_sessions) {}
-
-    RefPtr<feeds::RemoteFeedWriter> joined_item_visits_feed_writer;
-    RefPtr<feeds::RemoteFeedWriter> joined_queries_feed_writer;
-    RefPtr<feeds::RemoteFeedWriter> joined_sessions_feed_writer;
-  };
 
   void insertQuery(
       const std::string& customer_key,
@@ -111,14 +91,10 @@ protected:
       TrackedSession* session,
       DateTime stream_time);
 
-  RefPtr<OutputFeeds> getFeedsForCustomer(
-      const std::string& customer_key);
-
   bool dry_run_;
   LogJoinShard shard_;
   LogJoinTarget* target_;
   HashMap<String, DateTime> sessions_flush_times_;
-  HashMap<String, RefPtr<OutputFeeds>> customer_feeds_;
 
   fnord::stats::Counter<uint64_t> stat_loglines_total_;
   fnord::stats::Counter<uint64_t> stat_loglines_invalid_;

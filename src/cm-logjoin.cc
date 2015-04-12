@@ -242,7 +242,6 @@ int main(int argc, const char** argv) {
 
   /* setup logjoin */
   cm::LogJoin logjoin(shard, dry_run, &logjoin_target);
-  logjoin.addCustomer("dawanda", shard.shard_name, &rpc_client);
   logjoin.exportStats("/cm-logjoin/global");
   logjoin.exportStats(StringUtil::format("/cm-logjoin/$0", shard.shard_name));
 
