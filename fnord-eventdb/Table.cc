@@ -16,14 +16,17 @@ namespace eventdb {
 
 Table::Table(
     const String& table_name,
+    const String& replica_id,
     const msg::MessageSchema& schema) :
     name_(table_name),
-    schema_(schema) {}
+    replica_id_(replica_id),
+    schema_(schema),
+    seq_(1) {
+  arenas_.emplace_front(new TableArena(seq_));
+}
 
 void Table::addRecords(const Buffer& records) {
-
-  int n = 0;
-  for (size_t offset = 0; offset < records.size(); ++n) {
+  for (size_t offset = 0; offset < records.size(); ) {
     msg::MessageObject msg;
     msg::MessageDecoder::decode(records, schema_, &msg, &offset);
     addRecord(msg);
@@ -31,7 +34,21 @@ void Table::addRecords(const Buffer& records) {
 }
 
 void Table::addRecord(const msg::MessageObject& record) {
-  fnord::iputs("add_record: $0", msg::MessagePrinter::print(record, schema_));
+  std::unique_lock<std::mutex> lk(mutex_);
+  arenas_.front()->addRecord(record);
+  ++seq_;
+}
+
+size_t Table::commit() {
+  std::unique_lock<std::mutex> lk(mutex_);
+  const auto& records = arenas_.front()->records();
+
+  if (records.size() == 0) {
+    return 0;
+  }
+
+  arenas_.emplace_front(new TableArena(seq_));
+  return records.size();
 }
 
 const String& Table::name() const {

@@ -26,6 +26,10 @@ void EventDBServlet::handleHTTPRequest(
       return insertRecord(req, res, &uri);
     }
 
+    if (StringUtil::endsWith(uri.path(), "/commit")) {
+      return commitTable(req, res, &uri);
+    }
+
     res->setStatus(fnord::http::kStatusNotFound);
     res->addBody("not found");
   } catch (const Exception& e) {
@@ -52,6 +56,28 @@ void EventDBServlet::insertRecord(
 
   res->setStatus(http::kStatusCreated);
 }
+
+void EventDBServlet::commitTable(
+    http::HTTPRequest* req,
+    http::HTTPResponse* res,
+    URI* uri) {
+  const auto& params = uri->queryParams();
+
+  String table;
+  if (!URI::getParam(params, "table", &table)) {
+    res->setStatus(fnord::http::kStatusBadRequest);
+    res->addBody("missing ?table=... parameter");
+    return;
+  }
+
+  auto tbl = tables_->findTable(table);
+  auto n = tbl->commit();
+
+  res->setStatus(http::kStatusOK);
+  res->addBody(StringUtil::toString(n));
+}
+
+
 
 }
 }
