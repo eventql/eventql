@@ -250,7 +250,7 @@ int main(int argc, const char** argv) {
       false);
 
   query_items.fields.emplace_back(
-      14,
+      19,
       "position",
       msg::FieldType::UINT32,
       64,
