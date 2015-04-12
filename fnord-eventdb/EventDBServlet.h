@@ -23,8 +23,15 @@ public:
   };
 
   void handleHTTPRequest(
-      fnord::http::HTTPRequest* req,
-      fnord::http::HTTPResponse* res);
+      http::HTTPRequest* req,
+      http::HTTPResponse* res);
+
+protected:
+
+  void insertRecord(
+    http::HTTPRequest* req,
+    http::HTTPResponse* res,
+    URI* uri);
 
   //ResponseFormat formatFromString(const String& format);
 };
