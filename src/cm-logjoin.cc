@@ -32,6 +32,7 @@
 #include "fnord-mdb/MDB.h"
 #include "CustomerNamespace.h"
 #include "logjoin/LogJoin.h"
+#include "logjoin/LogJoinTarget.h"
 
 using namespace fnord;
 
@@ -146,7 +147,6 @@ int main(int argc, const char** argv) {
       "shard",
       "<name>");
 
-
   flags.parseArgv(argc, argv);
 
   Logger::get()->setMinimumLogLevel(
@@ -237,8 +237,11 @@ int main(int argc, const char** argv) {
     return std::stoul(timestr) * fnord::kMicrosPerSecond;
   });
 
+  /* set up logjoin target */
+  cm::LogJoinTarget logjoin_target;
+
   /* setup logjoin */
-  cm::LogJoin logjoin(shard, dry_run);
+  cm::LogJoin logjoin(shard, dry_run, &logjoin_target);
   logjoin.addCustomer("dawanda", shard.shard_name, &rpc_client);
   logjoin.exportStats("/cm-logjoin/global");
   logjoin.exportStats(StringUtil::format("/cm-logjoin/$0", shard.shard_name));

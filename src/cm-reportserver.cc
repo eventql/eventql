@@ -32,6 +32,7 @@
 #include "fnord-feeds/RemoteFeedReader.h"
 #include "fnord-base/stats/statsdagent.h"
 #include "fnord-sstable/SSTableServlet.h"
+#include "fnord-eventdb/EventDBServlet.h"
 #include "fnord-mdb/MDB.h"
 #include "fnord-mdb/MDBUtil.h"
 #include "common.h"
@@ -46,6 +47,7 @@
 #include "analytics/TopSearchQueriesQuery.h"
 #include "analytics/DiscoveryKPIQuery.h"
 #include "analytics/DiscoveryCategoryStatsQuery.h"
+#include "analytics/AnalyticsQueryEngine.h"
 #include "analytics/AnalyticsQueryEngine.h"
 
 using namespace fnord;
@@ -116,7 +118,9 @@ int main(int argc, const char** argv) {
   /* analytics */
   cm::AnalyticsQueryEngine analytics(8, &vfs);
   cm::AnalyticsServlet analytics_servlet(&analytics);
+  eventdb::EventDBServlet eventdb_servlet;
   http_router.addRouteByPrefixMatch("/analytics", &analytics_servlet, &tpool);
+  http_router.addRouteByPrefixMatch("/eventdb", &eventdb_servlet, &tpool);
 
   analytics.registerQueryFactory("ctr_by_position", [] (
       const cm::AnalyticsQuery& query,
