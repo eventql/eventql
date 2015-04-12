@@ -128,7 +128,7 @@ void Table::merge() {
 }
 
 void Table::merge(size_t min_chunk_size, size_t max_chunk_size) {
-  std::unique_lock<std::mutex> lk(merge_mutex_);
+  std::unique_lock<std::mutex> merge_lk(merge_mutex_);
 
   auto snap = getSnapshot();
   Vector<TableChunkRef> chunks;
@@ -211,6 +211,28 @@ void Table::merge(size_t min_chunk_size, size_t max_chunk_size) {
     mergeop.merge();
   }
 
+  std::unique_lock<std::mutex> lk(mutex_);
+
+  auto next = head_->clone();
+  next->generation++;
+  next->chunks.emplace_back(output_chunk);
+  for (auto cur = next->chunks.begin(); cur != next->chunks.end(); ) {
+    if (input_chunk_ids.count(cur->chunk_id) > 0) {
+      input_chunk_ids.erase(cur->chunk_id);
+      cur = next->chunks.erase(cur);
+    } else {
+      ++cur;
+    }
+  }
+
+  if (input_chunk_ids.size() > 0) {
+    fnord::logInfo("fnord.evdb", "Aborting merging for table '$0'", name_);
+    // FIXPAUL delete orphaned files...
+    return;
+  }
+
+  head_ = next;
+  writeSnapshot();
 }
 
 void Table::writeTable(RefPtr<TableArena> arena) {
@@ -412,6 +434,8 @@ void TableChunkMerge::merge() {
         c.replica_id,
         c.chunk_id));
   }
+
+  writer_.commit();
 }
 
 void TableChunkMerge::readTable(const String& filename) {
