@@ -37,6 +37,7 @@
 #include "fnord-mdb/MDB.h"
 #include "fnord-mdb/MDBUtil.h"
 #include "common.h"
+#include "schemas.h"
 #include "CustomerNamespace.h"
 #include "FeatureSchema.h"
 #include "JoinedQuery.h"
@@ -119,6 +120,10 @@ int main(int argc, const char** argv) {
 
   /* eventdb */
   eventdb::TableRepository table_repo;
+  table_repo.addTable(
+      new eventdb::Table("dawanda_joined_sessions",
+      joinedSessionsSchema()));
+
   eventdb::EventDBServlet eventdb_servlet(&table_repo);
 
   /* analytics */

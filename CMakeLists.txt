@@ -106,6 +106,7 @@ add_executable(cm-logjoin
     src/logjoin/TrackedItemVisit.cc
     src/logjoin/TrackedSession.cc
     src/cm-logjoin.cc
+    src/schemas.cc
     src/logjoin/LogJoin.cc
     src/logjoin/LogJoinUpload.cc
     src/logjoin/LogJoinTarget.cc
@@ -442,6 +443,7 @@ add_executable(cm-reportserver
     src/analytics/CTRStatsServlet.cc
     src/analytics/AnalyticsServlet.cc
     src/analytics/CTRByPageServlet.cc
+    src/schemas.cc
     src/cm-reportserver.cc)
 
 target_link_libraries(cm-reportserver
