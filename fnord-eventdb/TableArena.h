@@ -17,7 +17,15 @@ namespace eventdb {
 class TableArena {
 public:
 
-  TableArena();
+  TableArena(
+      const String& table_name,
+      uint64_t hostid,
+      uint64_t offset,
+      msg::MessageSchema* schema);
+
+  void addRecord(const msg::MessageObject& record);
+
+  void commit();
 
 };
 
