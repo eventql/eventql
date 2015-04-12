@@ -19,10 +19,23 @@
 namespace fnord {
 namespace eventdb {
 
+struct ChunkRef {
+  String replica_id;
+  String chunk_id;
+  uint64_t start_sequence;
+  uint64_t num_rows;
+};
+
+struct TableSnapshot : public RefCounted {
+  String table_name;
+  uint64_t generation;
+  List<ChunkRef> chunks;
+};
+
 class Table : public RefCounted {
 public:
 
-  Table(
+  static RefPtr<Table> open(
       const String& table_name,
       const String& replica_id,
       const String& db_path,
@@ -35,7 +48,17 @@ public:
 
   size_t commit();
 
+  RefPtr<TableSnapshot> getSnapshot();
+
 protected:
+
+  Table(
+      const String& table_name,
+      const String& replica_id,
+      const String& db_path,
+      const msg::MessageSchema& schema,
+      uint64_t head_sequence,
+      RefPtr<TableSnapshot> snapshot);
 
   void commitTable(RefPtr<TableArena> arena) const;
 
@@ -47,6 +70,7 @@ protected:
   uint64_t seq_;
   List<RefPtr<TableArena>> arenas_;
   Random rnd_;
+  RefPtr<TableSnapshot> head_;
 };
 
 } // namespace eventdb

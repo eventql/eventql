@@ -26,16 +26,30 @@
 namespace fnord {
 namespace eventdb {
 
+RefPtr<Table> Table::open(
+    const String& table_name,
+    const String& replica_id,
+    const String& db_path,
+    const msg::MessageSchema& schema) {
+  RefPtr<TableSnapshot> head(new TableSnapshot);
+  uint64_t seq = 0;
+
+  return new Table(table_name, replica_id, db_path, schema, seq, head);
+}
+
 Table::Table(
     const String& table_name,
     const String& replica_id,
     const String& db_path,
-    const msg::MessageSchema& schema) :
+    const msg::MessageSchema& schema,
+    uint64_t head_sequence,
+    RefPtr<TableSnapshot> snapshot) :
     name_(table_name),
     replica_id_(replica_id),
     db_path_(db_path),
     schema_(schema),
-    seq_(1) {
+    seq_(head_sequence + 1),
+    head_(snapshot) {
   arenas_.emplace_front(new TableArena(seq_, rnd_.hex128()));
 }
 
