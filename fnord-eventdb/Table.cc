@@ -202,6 +202,9 @@ void TableGeneration::encode(Buffer* buf) {
     writer.append(c.chunk_id.data(), c.chunk_id.size());
     writer.appendUInt64(c.start_sequence);
     writer.appendUInt64(c.num_records);
+    writer.appendUInt64(c.sstable_checksum);
+    writer.appendUInt64(c.cstable_checksum);
+    writer.appendUInt64(c.index_checksum);
   }
 
   buf->append(writer.data(), writer.size());
@@ -236,6 +239,9 @@ void TableGeneration::decode(const Buffer& buf) {
 
     chunk.start_sequence = *reader.readUInt64();
     chunk.num_records = *reader.readUInt64();
+    chunk.sstable_checksum = *reader.readUInt64();
+    chunk.cstable_checksum = *reader.readUInt64();
+    chunk.index_checksum = *reader.readUInt64();
 
     chunks.emplace_back(chunk);
   }
@@ -246,7 +252,6 @@ TableSnapshot::TableSnapshot(
     List<RefPtr<TableArena>> _arenas) :
     head(_head),
     arenas(_arenas) {}
-
 
 TableChunkWriter::TableChunkWriter(
     const String& db_path,
@@ -285,10 +290,12 @@ void TableChunkWriter::commit() {
   cstable_->write(chunk_filename_ + ".cst~");
   sstable_->finalize();
 
+  chunk_->sstable_checksum = FileUtil::checksum(chunk_filename_ + ".sst~");
+  chunk_->cstable_checksum = FileUtil::checksum(chunk_filename_ + ".cst~");
+  chunk_->index_checksum = 0;
+
   FileUtil::mv(chunk_filename_ + ".sst~", chunk_filename_ + ".sst");
   FileUtil::mv(chunk_filename_ + ".cst~", chunk_filename_ + ".cst");
-
-
 }
 
 } // namespace eventdb

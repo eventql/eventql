@@ -80,6 +80,11 @@ public:
   static Buffer read(const std::string& filename);
 
   /**
+   * Checsum (FNV64) a file
+   */
+  static uint64_t checksum(const std::string& filename);
+
+  /**
    * Write a while file
    */
   static void write(const std::string& filename, const Buffer& data);
