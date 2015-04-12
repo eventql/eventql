@@ -129,7 +129,7 @@ void LogJoinTarget::onSession(
 
   Buffer msg_buf;
   msg::MessageEncoder::encode(obj, joined_sessions_schema_, &msg_buf);
-  auto key = StringUtil::format("uploadq-sessions-$0",  rnd_.hex128());
+  auto key = StringUtil::format("__uploadq-sessions-$0",  rnd_.hex128());
   txn->update(key, msg_buf);
 }
 
