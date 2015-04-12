@@ -25,6 +25,7 @@ public:
   Table(
       const String& table_name,
       const String& replica_id,
+      const String& db_path,
       const msg::MessageSchema& schema);
 
   void addRecords(const Buffer& records);
@@ -40,6 +41,7 @@ protected:
 
   String name_;
   String replica_id_;
+  String db_path_;
   msg::MessageSchema schema_;
   std::mutex mutex_;
   uint64_t seq_;
