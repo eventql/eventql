@@ -12,6 +12,7 @@
 #include <fnord-base/logging.h>
 #include <fnord-base/io/fileutil.h>
 #include <fnord-base/util/binarymessagewriter.h>
+#include <fnord-base/util/binarymessagereader.h>
 #include <fnord-msg/MessageDecoder.h>
 #include <fnord-msg/MessageEncoder.h>
 #include <fnord-msg/MessagePrinter.h>
@@ -216,7 +217,7 @@ void TableGeneration::encode(Buffer* buf) {
   util::BinaryMessageWriter writer;
   writer.appendUInt8(0x01);
   writer.appendUInt64(generation);
-  writer.appendUInt32(table_name.size());
+  writer.appendUInt16(table_name.size());
   writer.append(table_name.data(), table_name.size());
   writer.appendUInt32(chunks.size());
 
@@ -232,12 +233,45 @@ void TableGeneration::encode(Buffer* buf) {
   buf->append(writer.data(), writer.size());
 }
 
+void TableGeneration::decode(const Buffer& buf) {
+  util::BinaryMessageReader reader(buf.data(), buf.size());
+  auto v = *reader.readUInt8();
+
+  auto gen = *reader.readUInt64();
+  if (generation > 0 && generation != gen) {
+    RAISEF(kRuntimeError, "generation mismatch. $0 vs $1", gen, generation);
+  }
+
+  auto tblname_len = *reader.readUInt16();
+  String tblname((const char*) reader.read(tblname_len), tblname_len);
+  if (table_name.length() > 0 && tblname != table_name) {
+    RAISEF(kRuntimeError, "name mismatch. $0 vs $1", tblname, table_name);
+  }
+
+  auto nchunks = *reader.readUInt32();
+  for (int i = 0; i < nchunks; ++i) {
+    TableChunkRef chunk;
+
+    auto replicaid_len = *reader.readUInt16();
+    chunk.replica_id =
+        String((const char*) reader.read(replicaid_len), replicaid_len);
+
+    auto chunkid_len = *reader.readUInt16();
+    chunk.chunk_id =
+        String((const char*) reader.read(chunkid_len), chunkid_len);
+
+    chunk.start_sequence = *reader.readUInt64();
+    chunk.num_records = *reader.readUInt64();
+
+    chunks.emplace_back(chunk);
+  }
+}
+
 TableSnapshot::TableSnapshot(
     RefPtr<TableGeneration> _head,
     List<RefPtr<TableArena>> _arenas) :
     head(_head),
     arenas(_arenas) {}
-
 
 
 } // namespace eventdb
