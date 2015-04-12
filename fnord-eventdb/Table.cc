@@ -79,13 +79,13 @@ size_t Table::commit() {
   arenas_.emplace_front(new TableArena(seq_, rnd_.hex128()));
   lk.unlock();
 
-  auto t = std::thread(std::bind(&Table::commitTable, this, arena));
+  auto t = std::thread(std::bind(&Table::writeTable, this, arena));
   t.detach();
 
   return records.size();
 }
 
-void Table::commitTable(RefPtr<TableArena> arena) {
+void Table::writeTable(RefPtr<TableArena> arena) {
   TableChunkRef chunk;
   chunk.replica_id = replica_id_;
   chunk.chunk_id = arena->chunkID();
@@ -93,13 +93,12 @@ void Table::commitTable(RefPtr<TableArena> arena) {
   chunk.num_records = arena->records().size();
 
   auto chunkname  = StringUtil::format(
-      "$1.$2.$3",
-      db_path_,
+      "$0.$1.$2",
       name_,
       replica_id_,
       chunk.chunk_id);
 
-  fnord::logInfo( "fnord.evdb", "Writing chunk: $0", chunkname);
+  fnord::logInfo("fnord.evdb", "Writing chunk: $0", chunkname);
   auto filename = FileUtil::joinPaths(db_path_, chunkname);
 
   {
@@ -136,6 +135,27 @@ void Table::addChunk(TableChunkRef chunk) {
   next->generation++;
   next->chunks.emplace_back(chunk);
   head_ = next;
+
+  writeSnapshot();
+}
+
+// precondition: mutex_ must be locked
+void Table::writeSnapshot() {
+  auto snapname = StringUtil::format(
+    "$0.$1.$2",
+    name_,
+    replica_id_,
+    head_->generation);
+
+  fnord::logInfo("fnord.evdb", "Writing snapshot: $0", snapname);
+  auto filename = FileUtil::joinPaths(db_path_, snapname + ".idx");
+
+  auto file = File::openFile(filename + "~", File::O_CREATE | File::O_WRITE);
+  Buffer buf;
+  head_->encode(&buf);
+  file.write(buf);
+
+  FileUtil::mv(filename + "~", filename);
 }
 
 const String& Table::name() const {
@@ -153,6 +173,10 @@ RefPtr<TableGeneration> TableGeneration::clone() const {
   c->generation = generation;
   c->chunks = chunks;
   return c;
+}
+
+void TableGeneration::encode(Buffer* buf) {
+
 }
 
 TableSnapshot::TableSnapshot(
