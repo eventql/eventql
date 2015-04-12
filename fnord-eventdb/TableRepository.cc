@@ -7,26 +7,26 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#ifndef _FNORD_EVENTDB_TABLEREPOSITORY_H
-#define _FNORD_EVENTDB_TABLEREPOSITORY_H
-#include <fnord-base/stdtypes.h>
-#include <fnord-eventdb/Table.h>
+#include <fnord-eventdb/TableRepository.h>
 
 namespace fnord {
 namespace eventdb {
 
-class TableRepository {
-public:
+void TableRepository::addTable(RefPtr<Table> table) {
+  std::unique_lock<std::mutex> lk(mutex_);
+  tables_.emplace(table->name(), table);
+}
 
-  void addTable(RefPtr<Table> table);
-  RefPtr<Table> findTable(const String& name) const;
+RefPtr<Table> TableRepository::findTable(const String& name) const {
+  std::unique_lock<std::mutex> lk(mutex_);
+  auto table = tables_.find(name);
+  if (table == tables_.end()) {
+    RAISEF(kIndexError, "unknown table: '$0'", name);
+  }
 
-protected:
-  HashMap<String, RefPtr<Table>> tables_;
-  mutable std::mutex mutex_;
-};
+  return table->second;
+}
 
 } // namespace eventdb
 } // namespace fnord
 
-#endif

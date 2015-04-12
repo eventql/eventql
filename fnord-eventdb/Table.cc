@@ -7,26 +7,27 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#ifndef _FNORD_EVENTDB_TABLEREPOSITORY_H
-#define _FNORD_EVENTDB_TABLEREPOSITORY_H
-#include <fnord-base/stdtypes.h>
 #include <fnord-eventdb/Table.h>
 
 namespace fnord {
 namespace eventdb {
 
-class TableRepository {
-public:
+Table::Table(
+    const String& table_name,
+    const msg::MessageSchema& schema) :
+    name_(table_name),
+    schema_(schema) {}
 
-  void addTable(RefPtr<Table> table);
-  RefPtr<Table> findTable(const String& name) const;
+void Table::addRecords(const Buffer& records) {
+}
 
-protected:
-  HashMap<String, RefPtr<Table>> tables_;
-  mutable std::mutex mutex_;
-};
+void Table::addRecord(const msg::MessageObject& record) {
+}
+
+const String& Table::name() const {
+  return name_;
+}
 
 } // namespace eventdb
 } // namespace fnord
 
-#endif
