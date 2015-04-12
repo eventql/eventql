@@ -96,11 +96,13 @@ static void schemaNodeToString(
 static void addFieldToIDIndex(
     const String& prefix,
     const MessageSchemaField& field,
-    HashMap<String, uint32_t>* field_ids) {
+    HashMap<String, uint32_t>* field_ids,
+    HashMap<uint32_t, FieldType>* field_types) {
   auto colname = prefix + field.name;
   field_ids->emplace(colname, field.id);
+  field_types->emplace(field.id, field.type);
   for (const auto& f : field.fields) {
-    addFieldToIDIndex(colname + ".", f, field_ids);
+    addFieldToIDIndex(colname + ".", f, field_ids, field_types);
   }
 }
 
@@ -110,7 +112,7 @@ MessageSchema::MessageSchema(
     name(_name),
     fields(_fields) {
   for (const auto& f : fields) {
-    addFieldToIDIndex("", f, &field_ids);
+    addFieldToIDIndex("", f, &field_ids, &field_types);
   }
 }
 
@@ -125,12 +127,25 @@ String MessageSchema::toString() const {
   return str;
 }
 
-uint32_t MessageSchema::id(const String& path) {
+uint32_t MessageSchema::id(const String& path) const {
   auto id = field_ids.find(path);
   if (id == field_ids.end()) {
     RAISEF(kIndexError, "unknown field: $0", path);
   } else {
     return id->second;
+  }
+}
+
+FieldType MessageSchema::type(uint32_t id) const {
+  if (id == 0) {
+    return FieldType::OBJECT;
+  }
+
+  auto type = field_types.find(id);
+  if (type == field_types.end()) {
+    RAISEF(kIndexError, "unknown field: $0", id);
+  } else {
+    return type->second;
   }
 }
 
