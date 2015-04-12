@@ -15,8 +15,40 @@ namespace eventdb {
 void EventDBServlet::handleHTTPRequest(
     fnord::http::HTTPRequest* req,
     fnord::http::HTTPResponse* res) {
-  res->setStatus(http::kStatusOK);
-  res->addBody("fnord");
+  URI uri(req->uri());
+
+  res->addHeader("Access-Control-Allow-Origin", "*");
+
+  try {
+    if (StringUtil::endsWith(uri.path(), "/insert")) {
+      return insertRecord(req, res, &uri);
+    }
+
+    res->setStatus(fnord::http::kStatusNotFound);
+    res->addBody("not found");
+  } catch (const Exception& e) {
+    res->setStatus(http::kStatusInternalServerError);
+    res->addBody(StringUtil::format("error: $0", e.getMessage()));
+  }
+}
+
+void EventDBServlet::insertRecord(
+    http::HTTPRequest* req,
+    http::HTTPResponse* res,
+    URI* uri) {
+  const auto& params = uri->queryParams();
+
+  String table;
+  if (!URI::getParam(params, "table", &table)) {
+    res->setStatus(fnord::http::kStatusBadRequest);
+    res->addBody("missing ?table=... parameter");
+    return;
+  }
+
+  const auto& body = req->body();
+  fnord::iputs("req: $0 -> $1 bytes", table, body.size());
+
+  res->setStatus(http::kStatusCreated);
 }
 
 }
