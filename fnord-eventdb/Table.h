@@ -32,6 +32,9 @@ struct TableChunkRef {
   String chunk_id;
   uint64_t start_sequence;
   uint64_t num_records;
+  uint64_t sstable_checksum;
+  uint64_t cstable_checksum;
+  uint64_t index_checksum;
 };
 
 struct TableGeneration : public RefCounted {

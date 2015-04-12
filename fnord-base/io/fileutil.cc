@@ -14,10 +14,12 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include "fnord-base/buffer.h"
+#include "fnord-base/fnv.h"
 #include "fnord-base/exception.h"
 #include "fnord-base/stringutil.h"
 #include "fnord-base/io/fileutil.h"
 #include "fnord-base/io/file.h"
+#include "fnord-base/io/mmappedfile.h"
 
 namespace fnord {
 
@@ -185,6 +187,12 @@ Buffer FileUtil::read(const std::string& filename) {
   Buffer buf(file.size());
   file.read(&buf);
   return buf;
+}
+
+uint64_t FileUtil::checksum(const std::string& filename) {
+  io::MmappedFile mmap(File::openFile(filename, File::O_READ));
+  FNV<uint64_t> fnv;
+  return fnv.hash(mmap.data(), mmap.size());
 }
 
 void FileUtil::write(const std::string& filename, const Buffer& data) {
