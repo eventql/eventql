@@ -567,7 +567,11 @@ int main(int argc, const char** argv) {
 
     txn->commit();
 
-    logjoin_upload.upload();
+    try {
+      logjoin_upload.upload();
+    } catch (const std::exception& e) {
+      fnord::logError("cm.logjoin", e, "upload failed");
+    }
 
     stat_stream_time_low.set(watermarks.first.unixMicros());
     stat_stream_time_high.set(watermarks.second.unixMicros());
