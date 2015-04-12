@@ -7,9 +7,21 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
+#include <thread>
 #include <fnord-eventdb/Table.h>
+#include <fnord-base/logging.h>
+#include <fnord-base/io/fileutil.h>
 #include <fnord-msg/MessageDecoder.h>
+#include <fnord-msg/MessageEncoder.h>
 #include <fnord-msg/MessagePrinter.h>
+#include "fnord-sstable/sstablereader.h"
+#include "fnord-sstable/sstablewriter.h"
+#include "fnord-sstable/SSTableColumnSchema.h"
+#include "fnord-sstable/SSTableColumnReader.h"
+#include "fnord-sstable/SSTableColumnWriter.h"
+#include "fnord-cstable/CSTableWriter.h"
+#include "fnord-cstable/CSTableReader.h"
+#include "fnord-cstable/CSTableBuilder.h"
 
 namespace fnord {
 namespace eventdb {
@@ -22,7 +34,7 @@ Table::Table(
     replica_id_(replica_id),
     schema_(schema),
     seq_(1) {
-  arenas_.emplace_front(new TableArena(seq_));
+  arenas_.emplace_front(new TableArena(seq_, rnd_.hex128()));
 }
 
 void Table::addRecords(const Buffer& records) {
@@ -41,14 +53,61 @@ void Table::addRecord(const msg::MessageObject& record) {
 
 size_t Table::commit() {
   std::unique_lock<std::mutex> lk(mutex_);
-  const auto& records = arenas_.front()->records();
+  auto arena = arenas_.front();
+  const auto& records = arena->records();
 
   if (records.size() == 0) {
     return 0;
   }
 
-  arenas_.emplace_front(new TableArena(seq_));
+  arenas_.emplace_front(new TableArena(seq_, rnd_.hex128()));
+  lk.unlock();
+
+  auto t = std::thread(std::bind(&Table::commitTable, this, arena));
+  t.detach();
+
   return records.size();
+}
+
+void Table::commitTable(RefPtr<TableArena> arena) const {
+  auto filename = StringUtil::format(
+      "$0.$1.$2",
+      name_,
+      replica_id_,
+      arena->chunkID());
+
+  fnord::logInfo(
+      "fnord.evdb",
+      "Writing output sstable: $0",
+      filename + ".sst");
+
+  auto sstable = sstable::SSTableWriter::create(
+      filename + ".sst~",
+      sstable::IndexProvider{},
+      nullptr,
+      0);
+
+  fnord::logInfo(
+      "fnord.evdb",
+      "Writing output cstable: $0",
+      filename + ".cst");
+
+  cstable::CSTableBuilder cstable(&schema_);
+
+  uint64_t seq = arena->startSequence();
+  for (const auto& r : arena->records()) {
+    Buffer buf;
+    msg::MessageEncoder::encode(r, schema_, &buf);
+    sstable->appendRow(&seq, sizeof(seq), buf.data(), buf.size());
+    cstable.addRecord(r);
+    ++seq;
+  }
+
+  sstable->finalize();
+  cstable.write(filename + ".cst~");
+
+  FileUtil::mv(filename + ".sst~", filename + ".sst");
+  FileUtil::mv(filename + ".cst~", filename + ".cst");
 }
 
 const String& Table::name() const {

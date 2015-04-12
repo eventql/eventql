@@ -13,8 +13,10 @@ namespace fnord {
 namespace eventdb {
 
 TableArena::TableArena(
-    uint64_t start_offset) :
-    start_offset_(start_offset) {}
+    uint64_t start_sequence,
+    const String& chunkid) :
+    start_sequence_(start_sequence),
+    chunkid_(chunkid) {}
 
 void TableArena::addRecord(const msg::MessageObject& record) {
   records_.emplace_back(record);
@@ -22,6 +24,14 @@ void TableArena::addRecord(const msg::MessageObject& record) {
 
 const List<msg::MessageObject>& TableArena::records() const {
   return records_;
+}
+
+size_t TableArena::startSequence() const {
+  return start_sequence_;
+}
+
+const String& TableArena::chunkID() const {
+  return chunkid_;
 }
 
 } // namespace eventdb

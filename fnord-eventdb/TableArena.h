@@ -20,14 +20,18 @@ namespace eventdb {
 class TableArena : public RefCounted {
 public:
 
-  TableArena(uint64_t start_offset);
+  TableArena(uint64_t start_sequence, const String& chunkid);
 
   void addRecord(const msg::MessageObject& record);
 
   const List<msg::MessageObject>& records() const;
 
+  size_t startSequence() const;
+  const String& chunkID() const;
+
 protected:
-  size_t start_offset_;
+  size_t start_sequence_;
+  String chunkid_;
   List<msg::MessageObject> records_;
 };
 

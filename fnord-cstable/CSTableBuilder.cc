@@ -19,7 +19,7 @@ namespace fnord {
 namespace cstable {
 
 CSTableBuilder::CSTableBuilder(
-    msg::MessageSchema* schema) :
+    const msg::MessageSchema* schema) :
     schema_(schema),
     num_records_(0) {
   for (const auto& f : schema_->fields) {
