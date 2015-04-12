@@ -85,13 +85,19 @@ size_t Table::commit() {
   return records.size();
 }
 
-void Table::commitTable(RefPtr<TableArena> arena) const {
+void Table::commitTable(RefPtr<TableArena> arena) {
+  TableChunkRef chunk;
+  chunk.replica_id = replica_id_;
+  chunk.chunk_id = arena->chunkID();
+  chunk.start_sequence = arena->startSequence();
+  chunk.num_records = arena->records().size();
+
   auto filename = StringUtil::format(
       "$0/$1.$2.$3",
       db_path_,
       name_,
       replica_id_,
-      arena->chunkID());
+      chunk.chunk_id);
 
   fnord::logInfo(
       "fnord.evdb",
@@ -111,7 +117,7 @@ void Table::commitTable(RefPtr<TableArena> arena) const {
 
   cstable::CSTableBuilder cstable(&schema_);
 
-  uint64_t seq = arena->startSequence();
+  uint64_t seq = chunk.start_sequence;
   for (const auto& r : arena->records()) {
     Buffer buf;
     msg::MessageEncoder::encode(r, schema_, &buf);
@@ -125,11 +131,31 @@ void Table::commitTable(RefPtr<TableArena> arena) const {
 
   FileUtil::mv(filename + ".sst~", filename + ".sst");
   FileUtil::mv(filename + ".cst~", filename + ".cst");
+
+  addChunk(chunk);
+}
+
+void Table::addChunk(TableChunkRef chunk) {
+  std::unique_lock<std::mutex> lk(mutex_);
+
+  auto next = head_->clone();
+  next->generation++;
+  next->chunks.emplace_back(chunk);
+  head_ = next;
 }
 
 const String& Table::name() const {
   return name_;
 }
+
+RefPtr<TableSnapshot> TableSnapshot::clone() const {
+  RefPtr<TableSnapshot> c(new TableSnapshot);
+  c->table_name = table_name;
+  c->generation = generation;
+  c->chunks = chunks;
+  return c;
+}
+
 
 } // namespace eventdb
 } // namespace fnord

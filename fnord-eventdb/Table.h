@@ -19,17 +19,20 @@
 namespace fnord {
 namespace eventdb {
 
-struct ChunkRef {
+struct TableChunkRef {
   String replica_id;
   String chunk_id;
   uint64_t start_sequence;
-  uint64_t num_rows;
+  uint64_t num_records;
 };
 
 struct TableSnapshot : public RefCounted {
   String table_name;
   uint64_t generation;
-  List<ChunkRef> chunks;
+  List<TableChunkRef> chunks;
+  List<RefPtr<TableArena>> arenas;
+
+  RefPtr<TableSnapshot> clone() const;
 };
 
 class Table : public RefCounted {
@@ -60,7 +63,8 @@ protected:
       uint64_t head_sequence,
       RefPtr<TableSnapshot> snapshot);
 
-  void commitTable(RefPtr<TableArena> arena) const;
+  void commitTable(RefPtr<TableArena> arena);
+  void addChunk(TableChunkRef chunk);
 
   String name_;
   String replica_id_;
