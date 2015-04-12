@@ -179,6 +179,93 @@ JoinedQuery LogJoinTarget::trackedQueryToJoinedQuery(
   return jq;
 }
 
+/*
+void LogJoin::onQuery(
+    const TrackedSession& session,
+    const TrackedQuery& query) {
+  stat_joined_queries_.incr(1);
+  auto jq_json = json::toJSONString(jq);
+  auto feeds = getFeedsForCustomer(jq.customer);
+
+  if (dry_run_) {
+#ifndef NDEBUG
+    fnord::logTrace(
+        "cm.logjoin",
+        "[dry-run] would write joined query: $0",
+        jq_json);
+#endif
+  } else {
+    feeds->joined_queries_feed_writer->appendEntry(jq_json);
+  }
+}
+
+void LogJoin::onItemVisit(
+    const TrackedSession& session,
+    const TrackedItemVisit& item_visit) {
+  stat_joined_item_visits_.incr(1);
+
+  JoinedItemVisit jiv;
+  jiv.customer = session.customer_key;
+  jiv.uid = session.uid;
+  jiv.time = item_visit.time;
+  jiv.item = item_visit.item;
+  jiv.attrs = item_visit.attrs;
+
+  for (const auto& a : session.attrs) {
+    jiv.attrs.emplace_back("s!" + a);
+  }
+
+  auto jiv_json = json::toJSONString(jiv);
+  auto feeds = getFeedsForCustomer(jiv.customer);
+
+  if (dry_run_) {
+#ifndef NDEBUG
+    fnord::logTrace(
+        "cm.logjoin",
+        "[dry-run] would write joined item visit: $0",
+        jiv_json);
+#endif
+  } else {
+    feeds->joined_item_visits_feed_writer->appendEntry(jiv_json);
+  }
+}
+
+void LogJoin::onItemVisit(
+    const TrackedSession& session,
+    const TrackedItemVisit& item_visit,
+    const TrackedQuery& query) {
+  stat_joined_item_visits_.incr(1);
+
+  JoinedItemVisit jiv;
+  jiv.customer = session.customer_key;
+  jiv.uid = session.uid;
+  jiv.time = item_visit.time;
+  jiv.item = item_visit.item;
+  jiv.attrs = item_visit.attrs;
+
+  for (const auto& a : session.attrs) {
+    jiv.attrs.emplace_back("s!" + a);
+  }
+
+  for (const auto& a : query.attrs) {
+    jiv.attrs.emplace_back("q!" + a);
+  }
+
+  auto jiv_json = json::toJSONString(jiv);
+  auto feeds = getFeedsForCustomer(jiv.customer);
+
+  if (dry_run_) {
+#ifndef NDEBUG
+    fnord::logTrace(
+        "cm.logjoin",
+        "[dry-run] would write joined item visit: $0",
+        jiv_json);
+#endif
+  } else {
+    feeds->joined_item_visits_feed_writer->appendEntry(jiv_json);
+  }
+}
+*/
 
 } // namespace cm
 

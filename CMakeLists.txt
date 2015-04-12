@@ -107,6 +107,7 @@ add_executable(cm-logjoin
     src/logjoin/TrackedSession.cc
     src/cm-logjoin.cc
     src/logjoin/LogJoin.cc
+    src/logjoin/LogJoinUpload.cc
     src/logjoin/LogJoinTarget.cc
     src/logjoin/LogJoinShard.cc)
 
