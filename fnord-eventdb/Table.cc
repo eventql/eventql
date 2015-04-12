@@ -21,12 +21,17 @@ Table::Table(
     schema_(schema) {}
 
 void Table::addRecords(const Buffer& records) {
-  msg::MessageObject msg;
-  msg::MessageDecoder::decode(records, schema_, &msg);
-  fnord::iputs("msg: $0", msg::MessagePrinter::print(msg, schema_));
+
+  int n = 0;
+  for (size_t offset = 0; offset < records.size(); ++n) {
+    msg::MessageObject msg;
+    msg::MessageDecoder::decode(records, schema_, &msg, &offset);
+    addRecord(msg);
+  }
 }
 
 void Table::addRecord(const msg::MessageObject& record) {
+  fnord::iputs("add_record: $0", msg::MessagePrinter::print(record, schema_));
 }
 
 const String& Table::name() const {

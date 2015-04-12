@@ -16,8 +16,13 @@ namespace msg {
 void MessageDecoder::decode(
     const Buffer& buf,
     const MessageSchema& schema,
-    MessageObject* msg) {
-  util::BinaryMessageReader reader(buf.data(), buf.size());
+    MessageObject* msg,
+    size_t* offset) {
+  size_t o = offset == nullptr ? 0 : *offset;
+
+  util::BinaryMessageReader reader(
+      ((const char *) buf.data()) + o,
+      buf.size() - o);
 
   auto num_fields = *reader.readUInt32();
   Vector<Pair<uint32_t, uint64_t>> fields;
@@ -29,6 +34,10 @@ void MessageDecoder::decode(
   }
 
   decodeObject(0, 0, reader.remaining(), fields, schema, &reader, msg);
+
+  if (offset != nullptr) {
+    *offset += reader.position();
+  }
 }
 
 void MessageDecoder::decodeObject(
@@ -48,6 +57,10 @@ void MessageDecoder::decodeObject(
     case FieldType::OBJECT: {
       MessageObject* nxt;
       if (fid == 0) {
+        if (idx != 0) {
+          return;
+        }
+
         nxt = msg;
       } else {
         nxt = &msg->addChild(fid);

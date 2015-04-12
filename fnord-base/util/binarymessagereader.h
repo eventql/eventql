@@ -35,6 +35,7 @@ public:
   void seekTo(size_t pos);
 
   size_t remaining() const;
+  size_t position() const;
 
 protected:
   void const* ptr_;
