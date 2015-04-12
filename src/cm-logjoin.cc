@@ -82,6 +82,15 @@ int main(int argc, const char** argv) {
       "<path>");
 
   flags.defineFlag(
+      "feedserver_addr",
+      fnord::cli::FlagParser::T_STRING,
+      false,
+      NULL,
+      "http://localhost:8000",
+      "feedserver addr",
+      "<addr>");
+
+  flags.defineFlag(
       "statsd_addr",
       fnord::cli::FlagParser::T_STRING,
       false,
@@ -432,7 +441,10 @@ int main(int argc, const char** argv) {
   cm::LogJoinTarget logjoin_target(joined_sessions_schema, &analyzer);
 
   /* set up logjoin upload */
-  cm::LogJoinUpload logjoin_upload(sessdb, &http);
+  cm::LogJoinUpload logjoin_upload(
+      sessdb,
+      flags.getString("feedserver_addr"),
+      &http);
 
   /* setup logjoin */
   cm::LogJoin logjoin(shard, dry_run, &logjoin_target);

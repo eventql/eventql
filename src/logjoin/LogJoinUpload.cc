@@ -16,8 +16,10 @@ namespace cm {
 
 LogJoinUpload::LogJoinUpload(
     RefPtr<mdb::MDB> db,
+    const String& feedserver_url,
     http::HTTPConnectionPool* http) :
     db_(db),
+    feedserver_url_(feedserver_url),
     http_(http),
     batch_size_(kDefaultBatchSize) {}
 
@@ -70,7 +72,7 @@ size_t LogJoinUpload::scanQueue(const String& queue_name) {
 void LogJoinUpload::uploadBatch(
     const String& queue_name,
     const Vector<Buffer>& batch) {
-  URI uri("http://localhost:8000/eventdb/insert?table=dawanda_joined_sessions");
+  URI uri(feedserver_url_ + "/eventdb/insert?table=dawanda_joined_sessions");
 
   http::HTTPRequest req(http::HTTPMessage::M_POST, uri.pathAndQuery());
   req.addHeader("Host", uri.hostAndPort());
