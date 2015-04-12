@@ -27,6 +27,8 @@ public:
   void addRecords(const Buffer& records);
   void addRecord(const msg::MessageObject& record);
 
+  const String& name() const;
+
 protected:
    String name_;
    msg::MessageSchema schema_;
