@@ -51,6 +51,11 @@ protected:
     http::HTTPResponse* res,
     URI* uri);
 
+  void tableInfo(
+    http::HTTPRequest* req,
+    http::HTTPResponse* res,
+    URI* uri);
+
   TableRepository* tables_;
   //ResponseFormat formatFromString(const String& format);
 };
