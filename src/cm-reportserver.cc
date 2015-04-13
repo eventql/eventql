@@ -55,9 +55,28 @@
 
 using namespace fnord;
 
+std::atomic<bool> shutdown_sig;
+fnord::thread::EventLoop ev;
+
+void quit(int n) {
+  shutdown_sig = true;
+  fnord::logInfo("cm.repotserver", "Shutting down...");
+  // FIXPAUL: wait for http server stop...
+  ev.shutdown();
+}
+
 int main(int argc, const char** argv) {
   fnord::Application::init();
   fnord::Application::logToStderr();
+
+  /* shutdown hook */
+  shutdown_sig = false;
+  struct sigaction sa;
+  memset(&sa, 0, sizeof(struct sigaction));
+  sa.sa_handler = quit;
+  sigaction(SIGTERM, &sa, NULL);
+  sigaction(SIGQUIT, &sa, NULL);
+  sigaction(SIGINT, &sa, NULL);
 
   fnord::cli::FlagParser flags;
 
@@ -105,7 +124,6 @@ int main(int argc, const char** argv) {
   WhitelistVFS vfs;
 
   /* start http server */
-  fnord::thread::EventLoop ev;
   fnord::thread::ThreadPool tpool;
   fnord::http::HTTPRouter http_router;
   fnord::http::HTTPServer http_server(&http_router, &ev);
@@ -240,6 +258,9 @@ int main(int argc, const char** argv) {
   ev.run();
 
   table_janitor.stop();
+  table_janitor.check();
+  fnord::logInfo("cm.repotserver", "Exiting...");
+
   return 0;
 }
 
