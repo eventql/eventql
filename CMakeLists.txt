@@ -414,7 +414,7 @@ add_executable(cm-reportbuild
 target_link_libraries(cm-reportbuild
     ${CMAKE_THREAD_LIBS_INIT} ${FNORD_FTS_LIBS})
 
-add_executable(cm-reportserver
+add_executable(cm-chunkserver
     $<TARGET_OBJECTS:cm-common>
     $<TARGET_OBJECTS:fnord-base>
     $<TARGET_OBJECTS:fnord-feeds>
@@ -446,9 +446,9 @@ add_executable(cm-reportserver
     src/analytics/AnalyticsServlet.cc
     src/analytics/CTRByPageServlet.cc
     src/schemas.cc
-    src/cm-reportserver.cc)
+    src/cm-chunkserver.cc)
 
-target_link_libraries(cm-reportserver
+target_link_libraries(cm-chunkserver
     ${CMAKE_THREAD_LIBS_INIT})
 
 add_executable(cm-autocompleteserver
