@@ -22,10 +22,10 @@ void MessageEncoder::encode(
 
   encodeObject(msg, schema, &fields, &body);
 
-  header.appendUInt32(fields.size());
+  header.appendVarUInt(fields.size());
   for (const auto& f : fields) {
-    header.appendUInt32(f.first);
-    header.appendUInt32(f.second);
+    header.appendVarUInt(f.first);
+    header.appendVarUInt(f.second);
   }
 
   buf->append(header.data(), header.size());
@@ -59,7 +59,7 @@ void MessageEncoder::encodeObject(
     }
 
     case FieldType::UINT32:
-      data->appendUInt32(msg.asUInt32());
+      data->appendVarUInt(msg.asUInt32());
       break;
 
     case FieldType::BOOLEAN:
