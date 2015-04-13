@@ -348,11 +348,10 @@ int main(int argc, const char** argv) {
 
   fnord::logInfo("cm.logjoin", "Resuming logjoin...");
 
-  DateTime last_iter;
+  DateTime last_flush;
   uint64_t rate_limit_micros = commit_interval * kMicrosPerSecond;
 
   for (;;) {
-    last_iter = WallClock::now();
     feed_reader.fillBuffers();
     auto txn = sessdb->startTransaction();
 
@@ -372,7 +371,12 @@ int main(int argc, const char** argv) {
     }
 
     auto watermarks = feed_reader.watermarks();
-    logjoin.flush(txn.get(), watermarks.first);
+
+    auto etime = WallClock::now().unixMicros() - last_flush.unixMicros();
+    if (etime > rate_limit_micros) {
+      last_flush = WallClock::now();
+      logjoin.flush(txn.get(), watermarks.first);
+    }
 
     auto stream_offsets = feed_reader.streamOffsets();
     String stream_offsets_str;
@@ -415,11 +419,6 @@ int main(int argc, const char** argv) {
     stat_stream_time_high.set(watermarks.second.unixMicros());
     stat_active_sessions.set(logjoin.numSessions());
     stat_dbsize.set(FileUtil::du_c(sessdb_path));
-
-    auto etime = WallClock::now().unixMicros() - last_iter.unixMicros();
-    if (i < 1 && etime < rate_limit_micros) {
-      usleep(rate_limit_micros - etime);
-    }
   }
 
   ev.shutdown();
