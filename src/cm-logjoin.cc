@@ -352,6 +352,9 @@ int main(int argc, const char** argv) {
   uint64_t rate_limit_micros = commit_interval * kMicrosPerSecond;
 
   for (;;) {
+    auto turbo = FileUtil::exists("/tmp/logjoin_turbo.enabled");
+    logjoin.setTurbo(turbo);
+
     feed_reader.fillBuffers();
     auto txn = sessdb->startTransaction();
 
@@ -394,13 +397,14 @@ int main(int argc, const char** argv) {
         "cm.logjoin",
         "LogJoin comitting...\n    stream_time=<$0 ... $1>\n" \
         "    active_sessions=$2\n    flushed_sessions=$3\n    " \
-        "flushed_queries=$4\n    flushed_item_visits=$5$6",
+        "flushed_queries=$4\n    flushed_item_visits=$5\n    turbo=$6$7",
         watermarks.first,
         watermarks.second,
         logjoin.numSessions(),
         logjoin_target.num_sessions,
         logjoin_target.num_queries,
         logjoin_target.num_item_visits,
+        turbo,
         stream_offsets_str);
 
     txn->commit();
