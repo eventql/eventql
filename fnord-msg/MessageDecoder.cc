@@ -27,13 +27,15 @@ void MessageDecoder::decode(
   auto num_fields = reader.readVarUInt();
   Vector<Pair<uint32_t, uint64_t>> fields;
 
-  for (int i = 0; i < num_fields; ++i) {
+  for (uint64_t i = 0; i < num_fields; ++i) {
     auto id = reader.readVarUInt();
     auto end = reader.readVarUInt();
     fields.emplace_back(id, end);
   }
 
-  decodeObject(0, 0, reader.remaining(), fields, schema, &reader, msg);
+  if (num_fields > 0) {
+    decodeObject(0, 0, reader.remaining(), fields, schema, &reader, msg);
+  }
 
   if (offset != nullptr) {
     *offset += reader.position();
