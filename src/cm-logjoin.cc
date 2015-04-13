@@ -410,9 +410,6 @@ int main(int argc, const char** argv) {
     stat_active_sessions.set(logjoin.numSessions());
     stat_dbsize.set(FileUtil::du_c(sessdb_path));
 
-    if (cm_logjoin_shutdown.load() == true) {
-      break;
-    }
 
     auto etime = WallClock::now().unixMicros() - last_iter.unixMicros();
     if (i < 1 && etime < rate_limit_micros) {
