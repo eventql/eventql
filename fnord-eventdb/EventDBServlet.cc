@@ -8,6 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include "fnord-eventdb/EventDBServlet.h"
+#include "fnord-json/json.h"
 
 namespace fnord {
 namespace eventdb {
@@ -36,6 +37,10 @@ void EventDBServlet::handleHTTPRequest(
 
     if (StringUtil::endsWith(uri.path(), "/gc")) {
       return gcTable(req, res, &uri);
+    }
+
+    if (StringUtil::endsWith(uri.path(), "/info")) {
+      return tableInfo(req, res, &uri);
     }
 
     res->setStatus(fnord::http::kStatusNotFound);
@@ -121,6 +126,66 @@ void EventDBServlet::gcTable(
   tbl->gc();
 
   res->setStatus(http::kStatusOK);
+}
+
+void EventDBServlet::tableInfo(
+    http::HTTPRequest* req,
+    http::HTTPResponse* res,
+    URI* uri) {
+  const auto& params = uri->queryParams();
+
+  String table;
+  if (!URI::getParam(params, "table", &table)) {
+    res->setStatus(fnord::http::kStatusBadRequest);
+    res->addBody("missing ?table=... parameter");
+    return;
+  }
+
+  auto tbl = tables_->findTable(table);
+  auto snap = tbl->getSnapshot();
+
+  uint64_t num_rows_commited = 0;
+  uint64_t num_rows_arena = 0;
+  uint64_t head_sequence = 0;
+
+  for (const auto& c : snap->head->chunks) {
+    num_rows_commited += c.num_records;
+
+    auto seq = (c.start_sequence + c.num_records) - 1;
+    if (seq > head_sequence) {
+      head_sequence = seq;
+    }
+  }
+
+  for (const auto& a : snap->arenas) {
+    if (a->startSequence() > head_sequence) {
+      num_rows_arena += a->size();
+    }
+  }
+
+  res->setStatus(http::kStatusOK);
+  res->addHeader("Content-Type", "application/json; charset=utf-8");
+  json::JSONOutputStream json(res->getBodyOutputStream());
+
+  json.beginObject();
+  json.addObjectEntry("table");
+  json.addString(tbl->name());
+  json.addComma();
+  json.addObjectEntry("num_chunks");
+  json.addInteger(snap->head->chunks.size());
+  json.addComma();
+  json.addObjectEntry("head_sequence");
+  json.addInteger(head_sequence);
+  json.addComma();
+  json.addObjectEntry("num_rows");
+  json.addInteger(num_rows_commited + num_rows_arena);
+  json.addComma();
+  json.addObjectEntry("num_rows_commited");
+  json.addInteger(num_rows_commited);
+  json.addComma();
+  json.addObjectEntry("num_rows_stage");
+  json.addInteger(num_rows_arena);
+  json.endObject();
 }
 
 }

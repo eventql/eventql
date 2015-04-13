@@ -16,9 +16,11 @@ TableArena::TableArena(
     uint64_t start_sequence,
     const String& chunkid) :
     start_sequence_(start_sequence),
-    chunkid_(chunkid) {}
+    chunkid_(chunkid),
+    size_(0) {}
 
 void TableArena::addRecord(const msg::MessageObject& record) {
+  ++size_;
   records_.emplace_back(record);
 }
 
@@ -32,6 +34,10 @@ size_t TableArena::startSequence() const {
 
 const String& TableArena::chunkID() const {
   return chunkid_;
+}
+
+size_t TableArena::size() const {
+  return size_;
 }
 
 } // namespace eventdb
