@@ -18,12 +18,12 @@ namespace eventdb {
 class TableRepository {
 public:
 
-  void addTable(RefPtr<Table> table);
-  RefPtr<Table> findTable(const String& name) const;
-  Vector<RefPtr<Table>> tables() const;
+  void addTable(RefPtr<TableWriter> table);
+  RefPtr<TableWriter> findTable(const String& name) const;
+  Vector<RefPtr<TableWriter>> tables() const;
 
 protected:
-  HashMap<String, RefPtr<Table>> tables_;
+  HashMap<String, RefPtr<TableWriter>> tables_;
   mutable std::mutex mutex_;
 };
 

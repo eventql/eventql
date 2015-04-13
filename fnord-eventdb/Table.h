@@ -132,10 +132,10 @@ protected:
   Random rnd_;
 };
 
-class Table : public RefCounted {
+class TableWriter : public RefCounted {
 public:
 
-  static RefPtr<Table> open(
+  static RefPtr<TableWriter> open(
       const String& table_name,
       const String& replica_id,
       const String& db_path,
@@ -148,13 +148,13 @@ public:
 
   size_t commit();
   void merge();
-  void gc(size_t keep_generations = 2, size_t keep_arenas = 2);
+  void gc(size_t keep_generations = 2, size_t keep_arenas = 0);
 
   RefPtr<TableSnapshot> getSnapshot();
 
 protected:
 
-  Table(
+  TableWriter(
       const String& table_name,
       const String& replica_id,
       const String& db_path,
