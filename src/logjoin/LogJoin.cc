@@ -303,7 +303,15 @@ void LogJoin::maybeFlushSession(
             if (cur_visit->item == qitem.item) {
               qitem.clicked = true;
               joined = true;
-              target_->onItemVisit(txn, *session, *cur_visit, *cur_query);
+
+              try {
+                target_->onItemVisit(txn, *session, *cur_visit, *cur_query);
+              } catch (const Exception& e) {
+                fnord::logError(
+                    "cm.logjoin",
+                    e,
+                    "LogJoinTarget::onItemVisit crashed");
+              }
               break;
             }
           }
@@ -316,7 +324,12 @@ void LogJoin::maybeFlushSession(
         }
       }
 
-      target_->onQuery(txn, *session, *cur_query);
+      try {
+        target_->onQuery(txn, *session, *cur_query);
+      } catch (const Exception& e) {
+        fnord::logError("cm.logjoin", e, "LogJoinTarget::onQuery crashed");
+      }
+
       session->flushed_queries.emplace_back(*cur_query);
       cur_query = session->queries.erase(cur_query);
     } else {
@@ -329,7 +342,11 @@ void LogJoin::maybeFlushSession(
   while (cur_visit != session->item_visits.end()) {
     if (stream_time > (cur_visit->time.unixMicros() +
         kMaxQueryClickDelaySeconds * fnord::kMicrosPerSecond)) {
-      target_->onItemVisit(txn, *session, *cur_visit);
+      try {
+        target_->onItemVisit(txn, *session, *cur_visit);
+      } catch (const Exception& e) {
+        fnord::logError("cm.logjoin", e, "LogJoinTarget::onItemVisit crashed");
+      }
       cur_visit = session->item_visits.erase(cur_visit);
     } else {
       ++cur_visit;
@@ -340,7 +357,13 @@ void LogJoin::maybeFlushSession(
   if (stream_time > (session->last_seen_unix_micros +
       kSessionIdleTimeoutSeconds * fnord::kMicrosPerSecond)) {
     stat_joined_sessions_.incr(1);
-    target_->onSession(txn, *session);
+
+    try {
+      target_->onSession(txn, *session);
+    } catch (const Exception& e) {
+      fnord::logError("cm.logjoin", e, "LogJoinTarget::onSession crashed");
+    }
+
     session->flushed = true;
   }
 }
