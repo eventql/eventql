@@ -29,122 +29,15 @@ namespace cm {
 
 LogJoin::LogJoin(
     LogJoinShard shard,
-    bool dry_run) :
+    bool dry_run,
+    LogJoinTarget* target) :
     shard_(shard),
     dry_run_(dry_run),
-    sessions_flush_times_(1000000) {}
+    target_(target),
+    turbo_(false) {}
 
 size_t LogJoin::numSessions() const {
   return sessions_flush_times_.size();
-}
-
-void LogJoin::onSession(const TrackedSession& session) {
-  stat_joined_sessions_.incr(1);
-}
-
-void LogJoin::onQuery(
-    const TrackedSession& session,
-    const TrackedQuery& query) {
-  stat_joined_queries_.incr(1);
-
-  JoinedQuery jq;
-  jq.customer = session.customer_key;
-  jq.uid = session.uid;
-  jq.time = query.time;
-  jq.attrs = query.attrs;
-  for (const auto& a : session.attrs) {
-    jq.attrs.emplace_back("s!" + a);
-  }
-
-  for (const auto& item : query.items) {
-    JoinedQueryItem jqi;
-    jqi.item = item.item;
-    jqi.clicked = item.clicked;
-    jqi.variant = item.variant;
-    jqi.position = item.position;
-    jq.items.emplace_back(jqi);
-  }
-
-  auto jq_json = json::toJSONString(jq);
-  auto feeds = getFeedsForCustomer(jq.customer);
-
-  if (dry_run_) {
-#ifndef NDEBUG
-    fnord::logTrace(
-        "cm.logjoin",
-        "[dry-run] would write joined query: $0",
-        jq_json);
-#endif
-  } else {
-    feeds->joined_queries_feed_writer->appendEntry(jq_json);
-  }
-}
-
-void LogJoin::onItemVisit(
-    const TrackedSession& session,
-    const TrackedItemVisit& item_visit) {
-  stat_joined_item_visits_.incr(1);
-
-  JoinedItemVisit jiv;
-  jiv.customer = session.customer_key;
-  jiv.uid = session.uid;
-  jiv.time = item_visit.time;
-  jiv.item = item_visit.item;
-  jiv.attrs = item_visit.attrs;
-
-  for (const auto& a : session.attrs) {
-    jiv.attrs.emplace_back("s!" + a);
-  }
-
-  auto jiv_json = json::toJSONString(jiv);
-  auto feeds = getFeedsForCustomer(jiv.customer);
-
-  if (dry_run_) {
-#ifndef NDEBUG
-    fnord::logTrace(
-        "cm.logjoin",
-        "[dry-run] would write joined item visit: $0",
-        jiv_json);
-#endif
-  } else {
-    feeds->joined_item_visits_feed_writer->appendEntry(jiv_json);
-  }
-}
-
-void LogJoin::onItemVisit(
-    const TrackedSession& session,
-    const TrackedItemVisit& item_visit,
-    const TrackedQuery& query) {
-  stat_joined_item_visits_.incr(1);
-
-  JoinedItemVisit jiv;
-  jiv.customer = session.customer_key;
-  jiv.uid = session.uid;
-  jiv.time = item_visit.time;
-  jiv.item = item_visit.item;
-  jiv.attrs = item_visit.attrs;
-
-  for (const auto& a : session.attrs) {
-    jiv.attrs.emplace_back("s!" + a);
-  }
-
-  for (const auto& a : query.attrs) {
-    jiv.attrs.emplace_back("q!" + a);
-  }
-
-  auto jiv_json = json::toJSONString(jiv);
-  auto feeds = getFeedsForCustomer(jiv.customer);
-
-  if (dry_run_) {
-#ifndef NDEBUG
-    fnord::logTrace(
-        "cm.logjoin",
-        "[dry-run] would write joined item visit: $0",
-        jiv_json);
-#endif
-  } else {
-    feeds->joined_item_visits_feed_writer->appendEntry(jiv_json);
-  }
 }
 
 void LogJoin::insertLogline(
@@ -312,23 +205,39 @@ void LogJoin::withSession(
     Function<void (TrackedSession* session)> fn) {
   TrackedSession session;
 
-  auto session_str = txn->get(uid);
-  if (session_str.isEmpty()) {
-    session.uid = uid;
-    session.customer_key = customer_key;
-    session.flushed = false;
-    session.last_seen_unix_micros = 0;
+  auto cached = session_cache_.find(uid);
+  if (cached == session_cache_.end()) {
+    auto session_str = txn->get(uid);
+    if (session_str.isEmpty()) {
+      session.uid = uid;
+      session.customer_key = customer_key;
+      session.flushed = false;
+      session.last_seen_unix_micros = 0;
+    } else {
+      session = json::fromJSON<TrackedSession>(session_str.get());
+    }
   } else {
-    session = json::fromJSON<TrackedSession>(session_str.get());
+    session = cached->second;
   }
 
   fn(&session);
 
   if (session.flushed) {
-    txn->del(uid);
+    try {
+      txn->del(uid);
+    } catch (const Exception& e) {
+      if (!turbo_) {
+        fnord::logWarning("cm.logjoin", e, "can't delete session: $0", uid);
+      }
+    }
+    session_cache_.erase(uid);
   } else {
-    auto serialized = json::toJSONString(session);
-    txn->update(uid, serialized);
+    if (!turbo_) {
+      auto serialized = json::toJSONString(session);
+      txn->update(uid, serialized);
+    }
+
+    session_cache_[uid] = session;
   }
 }
 
@@ -347,9 +256,9 @@ void LogJoin::flush(mdb::MDBTransaction* txn, DateTime stream_time_) {
       uint64_t next_flush = 0;
       const auto& uid = iter->first;
 
-      withSession("", uid, txn, [this, &uid, &next_flush, &stream_time_] (
+      withSession("", uid, txn, [this, &uid, &next_flush, &stream_time_, txn] (
           TrackedSession* s) {
-        maybeFlushSession(uid, s, stream_time_);
+        maybeFlushSession(txn, uid, s, stream_time_);
 
         if (!s->flushed) {
           next_flush = s->nextFlushTime().unixMicros();
@@ -369,6 +278,7 @@ void LogJoin::flush(mdb::MDBTransaction* txn, DateTime stream_time_) {
 }
 
 void LogJoin::maybeFlushSession(
+    mdb::MDBTransaction* txn,
     const std::string uid,
     TrackedSession* session,
     DateTime stream_time_) {
@@ -393,7 +303,7 @@ void LogJoin::maybeFlushSession(
             if (cur_visit->item == qitem.item) {
               qitem.clicked = true;
               joined = true;
-              onItemVisit(*session, *cur_visit, *cur_query);
+              target_->onItemVisit(txn, *session, *cur_visit, *cur_query);
               break;
             }
           }
@@ -406,7 +316,8 @@ void LogJoin::maybeFlushSession(
         }
       }
 
-      onQuery(*session, *cur_query);
+      target_->onQuery(txn, *session, *cur_query);
+      session->flushed_queries.emplace_back(*cur_query);
       cur_query = session->queries.erase(cur_query);
     } else {
       ++cur_query;
@@ -418,7 +329,7 @@ void LogJoin::maybeFlushSession(
   while (cur_visit != session->item_visits.end()) {
     if (stream_time > (cur_visit->time.unixMicros() +
         kMaxQueryClickDelaySeconds * fnord::kMicrosPerSecond)) {
-      onItemVisit(*session, *cur_visit);
+      target_->onItemVisit(txn, *session, *cur_visit);
       cur_visit = session->item_visits.erase(cur_visit);
     } else {
       ++cur_visit;
@@ -428,40 +339,10 @@ void LogJoin::maybeFlushSession(
   /* flush session */
   if (stream_time > (session->last_seen_unix_micros +
       kSessionIdleTimeoutSeconds * fnord::kMicrosPerSecond)) {
-    onSession(*session);
+    stat_joined_sessions_.incr(1);
+    target_->onSession(txn, *session);
     session->flushed = true;
   }
-}
-
-/*
-void LogJoin::writeToFeed(
-    const std::string& subfeed,
-    const std::string& customer_key,
-    const std::string& data) {
-
-  RAISE(kNotYetImplementedError);
-  auto feed = getFeedForCustomer(subfeed, customer_key);
-  auto future = feed->appendEntry(data);
-
-  future.onFailure([subfeed] (const fnord::Status& status) {
-    fnord::logError(
-        "cm.logjoing",
-        "error writing to feed '$0': $1",
-        subfeed,
-        status);
-  });
-}
-*/
-
-RefPtr<LogJoin::OutputFeeds> LogJoin::getFeedsForCustomer(
-    const std::string& customer_key) {
-  const auto iter = customer_feeds_.find(customer_key);
-
-  if (iter == customer_feeds_.end()) {
-    RAISEF(kIndexError, "customer not found: $0", customer_key);
-  }
-
-  return iter->second;
 }
 
 void LogJoin::importTimeoutList(mdb::MDBTransaction* txn) {
@@ -494,73 +375,6 @@ void LogJoin::importTimeoutList(mdb::MDBTransaction* txn) {
   cursor->close();
 }
 
-void LogJoin::addCustomer(
-      const String& customer_key,
-      const String& shard_name,
-      RPCClient* rpc_client) {
-  RefPtr<feeds::RemoteFeedWriter> joined_item_visits_feed_writer(
-      new feeds::RemoteFeedWriter(rpc_client));
-
-  RefPtr<feeds::RemoteFeedWriter> joined_queries_feed_writer(
-      new feeds::RemoteFeedWriter(rpc_client));
-
-  RefPtr<feeds::RemoteFeedWriter> joined_sessions_feed_writer(
-      new feeds::RemoteFeedWriter(rpc_client));
-
-  joined_item_visits_feed_writer->exportStats(
-      "/cm-logjoin/global/joined_item_visits_feed_writer");
-  joined_item_visits_feed_writer->exportStats(
-      StringUtil::format(
-          "/cm-logjoin/$0/joined_item_visits_feed_writer",
-          shard_name));
-
-  joined_queries_feed_writer->exportStats(
-      "/cm-logjoin/global/joined_queries_feed_writer");
-  joined_queries_feed_writer->exportStats(
-      StringUtil::format(
-          "/cm-logjoin/$0/joined_queries_feed_writer",
-          shard_name));
-
-  joined_sessions_feed_writer->exportStats(
-      "/cm-logjoin/global/joined_sessions_feed_writer");
-  joined_sessions_feed_writer->exportStats(
-      StringUtil::format(
-          "/cm-logjoin/$0/joined_sessions_feed_writer",
-          shard_name));
-
-  HashMap<String, URI> servers;
-  servers.emplace(
-      "feedserver01.nue01.production.fnrd.net",
-      URI("http://s01.nue01.production.fnrd.net:7001/rpc"));
-  servers.emplace(
-      "feedserver02.nue01.production.fnrd.net",
-      URI("http://s02.nue01.production.fnrd.net:7001/rpc"));
-
-  for (const auto& s : servers) {
-    joined_item_visits_feed_writer->addTargetFeed(
-        s.second,
-        StringUtil::format("$1.joined_item_visits.$0", s.first, customer_key),
-        16);
-
-    joined_queries_feed_writer->addTargetFeed(
-        s.second,
-        StringUtil::format("$1.joined_queries.$0", s.first, customer_key),
-        16);
-
-    joined_sessions_feed_writer->addTargetFeed(
-        s.second,
-        StringUtil::format("$1.joined_sessions.$0", s.first, customer_key),
-        16);
-  }
-
-  auto feeds = new OutputFeeds(
-      joined_item_visits_feed_writer,
-      joined_queries_feed_writer,
-      joined_sessions_feed_writer);
-
-  customer_feeds_.emplace(customer_key, RefPtr<OutputFeeds>(feeds));
-}
-
 void LogJoin::exportStats(const std::string& prefix) {
   exportStat(
       StringUtil::format("$0/$1", prefix, "loglines_total"),
@@ -586,6 +400,10 @@ void LogJoin::exportStats(const std::string& prefix) {
       StringUtil::format("$0/$1", prefix, "joined_item_visits"),
       &stat_joined_item_visits_,
       fnord::stats::ExportMode::EXPORT_DELTA);
+}
+
+void LogJoin::setTurbo(bool turbo) {
+  turbo_ = turbo;
 }
 
 } // namespace cm

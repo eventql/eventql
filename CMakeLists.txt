@@ -100,14 +100,19 @@ add_executable(cm-logjoin
     $<TARGET_OBJECTS:fnord-feeds>
     $<TARGET_OBJECTS:fnord-mdb>
     $<TARGET_OBJECTS:fnord-rpc>
+    $<TARGET_OBJECTS:fnord-msg>
+    $<TARGET_OBJECTS:fnord-fts>
     src/logjoin/TrackedQuery.cc
     src/logjoin/TrackedItemVisit.cc
     src/logjoin/TrackedSession.cc
     src/cm-logjoin.cc
+    src/schemas.cc
     src/logjoin/LogJoin.cc
+    src/logjoin/LogJoinUpload.cc
+    src/logjoin/LogJoinTarget.cc
     src/logjoin/LogJoinShard.cc)
 
-target_link_libraries(cm-logjoin ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(cm-logjoin ${CMAKE_THREAD_LIBS_INIT} ${FNORD_FTS_LIBS})
 
 add_executable(cm-indexbuild
     $<TARGET_OBJECTS:cm-common>
@@ -409,7 +414,7 @@ add_executable(cm-reportbuild
 target_link_libraries(cm-reportbuild
     ${CMAKE_THREAD_LIBS_INIT} ${FNORD_FTS_LIBS})
 
-add_executable(cm-reportserver
+add_executable(cm-chunkserver
     $<TARGET_OBJECTS:cm-common>
     $<TARGET_OBJECTS:fnord-base>
     $<TARGET_OBJECTS:fnord-feeds>
@@ -421,6 +426,11 @@ add_executable(cm-reportserver
     $<TARGET_OBJECTS:fnord-cstable>
     $<TARGET_OBJECTS:fnord-msg>
     3rdparty/libfnord/fnord-sstable/SSTableServlet.cc
+    3rdparty/libfnord/fnord-eventdb/EventDBServlet.cc
+    3rdparty/libfnord/fnord-eventdb/Table.cc
+    3rdparty/libfnord/fnord-eventdb/TableArena.cc
+    3rdparty/libfnord/fnord-eventdb/TableRepository.cc
+    3rdparty/libfnord/fnord-eventdb/TableJanitor.cc
     src/analytics/AnalyticsTableScan.cc
     src/analytics/AnalyticsQuery.cc
     src/analytics/AnalyticsQueryEngine.cc
@@ -435,9 +445,10 @@ add_executable(cm-reportserver
     src/analytics/CTRStatsServlet.cc
     src/analytics/AnalyticsServlet.cc
     src/analytics/CTRByPageServlet.cc
-    src/cm-reportserver.cc)
+    src/schemas.cc
+    src/cm-chunkserver.cc)
 
-target_link_libraries(cm-reportserver
+target_link_libraries(cm-chunkserver
     ${CMAKE_THREAD_LIBS_INIT})
 
 add_executable(cm-autocompleteserver
