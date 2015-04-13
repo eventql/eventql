@@ -49,35 +49,74 @@ Option<String> extractAttr(const Vector<String>& attrs, const String& attr) {
   return None<String>();
 }
 
-String extractDeviceType(const Vector<String>& attrs) {
+String extractDeviceTypeString(const Vector<String>& attrs) {
+  return deviceTypeToString(extractDeviceType(attrs));
+}
+
+DeviceType extractDeviceType(const Vector<String>& attrs) {
   auto x_str = extractAttr(attrs, "u_x");
   auto y_str = extractAttr(attrs, "u_y");
 
   if (x_str.isEmpty() || y_str.isEmpty()) {
-    return "unknown";
+    return DeviceType::UNKNOWN;
   }
 
   auto x = std::stod(x_str.get());
   auto y = std::stod(x_str.get());
 
   if (x < 10 || y < 10) {
-    return "unknown";
+    return DeviceType::UNKNOWN;
   }
 
-  if (x < 800) {
-    return "phone";
+  if (x < 1000) {
+    return DeviceType::PHONE;
   }
 
-  if (x < 1250) {
-    return "tablet";
+  if (x < 1400) {
+    return DeviceType::TABLET;
   }
 
-  return "desktop";
+  return DeviceType::DESKTOP;
+}
+
+String deviceTypeToString(DeviceType device_type) {
+  switch (device_type) {
+    case DeviceType::UNKNOWN: return "unknown";
+    case DeviceType::PHONE: return "phone";
+    case DeviceType::TABLET: return "tablet";
+    case DeviceType::DESKTOP: return "desktop";
+  }
+}
+
+DeviceType deviceTypeFromString(const String& device_type) {
+  if (device_type == "phone") {
+    return DeviceType::PHONE;
+  }
+
+  if (device_type == "tablet") {
+    return DeviceType::TABLET;
+  }
+
+  if (device_type == "desktop") {
+    return DeviceType::DESKTOP;
+  }
+
+  return DeviceType::UNKNOWN;
 }
 
 String extractTestGroup(const Vector<String>& attrs) {
   auto test_group = extractAttr(attrs, "dw_ab");
   return test_group.isEmpty() ? "unknown" : test_group.get();
+}
+
+Option<uint32_t> extractABTestGroup(const Vector<String>& attrs) {
+  auto test_group = extractAttr(attrs, "dw_ab");
+
+  if (test_group.isEmpty()) {
+    return None<uint32_t>();
+  } else {
+    return Some<uint32_t>(std::stoul(test_group.get()));
+  }
 }
 
 Language extractLanguage(const Vector<String>& attrs) {
@@ -99,7 +138,7 @@ Language extractLanguage(const Vector<String>& attrs) {
   return Language::UNKNOWN;
 }
 
-String extractPageType(const Vector<String>& attrs) {
+String extractPageTypeString(const Vector<String>& attrs) {
   for (const auto& a : attrs) {
     if (StringUtil::beginsWith(a, "qstr~")) {
       return "search";
@@ -111,6 +150,31 @@ String extractPageType(const Vector<String>& attrs) {
   }
 
   return "unknown";
+}
+
+PageType extractPageType(const Vector<String>& attrs) {
+  return pageTypeFromString(extractPageTypeString(attrs));
+}
+
+PageType pageTypeFromString(const String& page_type) {
+  if (page_type == "search") {
+    return PageType::SEARCH_PAGE;
+  }
+
+  if (page_type == "catalog") {
+    return PageType::CATALOG_PAGE;
+  }
+
+  return PageType::UNKNOWN;
+}
+
+String pageTypeToString(PageType page_type) {
+  switch (page_type) {
+    case PageType::UNKNOWN: return "unknown";
+    case PageType::SEARCH_PAGE: return "search_page";
+    case PageType::CATALOG_PAGE: return "catalog_page";
+    case PageType::PRODUCT_PAGE: return "product_page";
+  }
 }
 
 String joinBagOfWords(const Set<String>& words) {
@@ -163,6 +227,23 @@ bool isItemEligible(
       return true;
 
   }
+}
+
+Option<String> extractQueryString(const Vector<String>& attrs) {
+  for (const auto& a : attrs) {
+    if (StringUtil::beginsWith(a, "qstr~")) {
+      auto o = StringUtil::find(a, ':');
+      if (o != String::npos) {
+        try {
+          return Some(URI::urlDecode(a.substr(o + 1)));
+        } catch (...) {
+          return None<String>();
+        }
+      }
+    }
+  }
+
+  return None<String>();
 }
 
 }

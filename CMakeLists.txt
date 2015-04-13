@@ -27,10 +27,12 @@ add_subdirectory(3rdparty/libfnord/fnord-mdb)
 add_subdirectory(3rdparty/libfnord/fnord-rpc)
 add_subdirectory(3rdparty/libfnord/fnord-http)
 add_subdirectory(3rdparty/libfnord/fnord-json)
+add_subdirectory(3rdparty/libfnord/fnord-cstable)
 add_subdirectory(3rdparty/libfnord/fnord-sstable)
 add_subdirectory(3rdparty/libfnord/fnord-chart)
 add_subdirectory(3rdparty/libfnord/fnord-metricdb)
 add_subdirectory(3rdparty/libfnord/fnord-sql)
+add_subdirectory(3rdparty/libfnord/fnord-msg)
 include_directories(3rdparty/libfnord/)
 include_directories(3rdparty/libfnord/3rdparty/)
 include_directories(${FNORD_FTS_INCLUDE})
@@ -98,14 +100,19 @@ add_executable(cm-logjoin
     $<TARGET_OBJECTS:fnord-feeds>
     $<TARGET_OBJECTS:fnord-mdb>
     $<TARGET_OBJECTS:fnord-rpc>
+    $<TARGET_OBJECTS:fnord-msg>
+    $<TARGET_OBJECTS:fnord-fts>
     src/logjoin/TrackedQuery.cc
     src/logjoin/TrackedItemVisit.cc
     src/logjoin/TrackedSession.cc
     src/cm-logjoin.cc
+    src/schemas.cc
     src/logjoin/LogJoin.cc
+    src/logjoin/LogJoinUpload.cc
+    src/logjoin/LogJoinTarget.cc
     src/logjoin/LogJoinShard.cc)
 
-target_link_libraries(cm-logjoin ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(cm-logjoin ${CMAKE_THREAD_LIBS_INIT} ${FNORD_FTS_LIBS})
 
 add_executable(cm-indexbuild
     $<TARGET_OBJECTS:cm-common>
@@ -384,28 +391,30 @@ add_executable(cm-reportbuild
     src/IndexReader.cc
     src/IndexWriter.cc
     src/FeatureIndexWriter.cc
-    src/reports/Report.cc
-    src/reports/ReportBuilder.cc
-    src/reports/JoinedQueryTableSource.cc
-    src/reports/CTRByPositionMapper.cc
-    src/reports/CTRStatsMapper.cc
-    src/reports/CTRCounterTableSink.cc
-    src/reports/CTRCounterTableSource.cc
-    src/reports/CTRCounterMergeReducer.cc
-    src/reports/CTRBySearchQueryMapper.cc
-    src/reports/CTRBySearchTermCrossCategoryMapper.cc
-    src/reports/RelatedTermsMapper.cc
-    src/reports/TermInfoTableSink.cc
-    src/reports/TermInfoTableSource.cc
-    src/reports/TermInfoMergeReducer.cc
-    src/reports/TermInfo.cc
-    src/reports/TopCategoriesByTermMapper.cc
+    src/analytics/Report.cc
+    src/analytics/ReportBuilder.cc
+    src/analytics/JoinedQueryTableSource.cc
+    src/analytics/CTRByPositionMapper.cc
+    src/analytics/CTRByPageMapper.cc
+    src/analytics/CTRStatsMapper.cc
+    src/analytics/CTRCounterTableSink.cc
+    src/analytics/CTRCounterTableSource.cc
+    src/analytics/CTRCounterMergeReducer.cc
+    #src/analytics/CTRBySearchQueryMapper.cc
+    src/analytics/CTRBySearchTermCrossCategoryMapper.cc
+    src/analytics/CTRByQueryAttributeMapper.cc
+    src/analytics/RelatedTermsMapper.cc
+    src/analytics/TermInfoTableSink.cc
+    src/analytics/TermInfoTableSource.cc
+    src/analytics/TermInfoMergeReducer.cc
+    src/analytics/TermInfo.cc
+    src/analytics/TopCategoriesByTermMapper.cc
     src/cm-reportbuild.cc)
 
 target_link_libraries(cm-reportbuild
     ${CMAKE_THREAD_LIBS_INIT} ${FNORD_FTS_LIBS})
 
-add_executable(cm-reportserver
+add_executable(cm-chunkserver
     $<TARGET_OBJECTS:cm-common>
     $<TARGET_OBJECTS:fnord-base>
     $<TARGET_OBJECTS:fnord-feeds>
@@ -414,11 +423,32 @@ add_executable(cm-reportserver
     $<TARGET_OBJECTS:fnord-json>
     $<TARGET_OBJECTS:fnord-rpc>
     $<TARGET_OBJECTS:fnord-sstable>
+    $<TARGET_OBJECTS:fnord-cstable>
+    $<TARGET_OBJECTS:fnord-msg>
     3rdparty/libfnord/fnord-sstable/SSTableServlet.cc
-    src/reports/CTRByPositionServlet.cc
-    src/cm-reportserver.cc)
+    3rdparty/libfnord/fnord-eventdb/EventDBServlet.cc
+    3rdparty/libfnord/fnord-eventdb/Table.cc
+    3rdparty/libfnord/fnord-eventdb/TableArena.cc
+    3rdparty/libfnord/fnord-eventdb/TableRepository.cc
+    3rdparty/libfnord/fnord-eventdb/TableJanitor.cc
+    src/analytics/AnalyticsTableScan.cc
+    src/analytics/AnalyticsQuery.cc
+    src/analytics/AnalyticsQueryEngine.cc
+    src/analytics/AnalyticsQueryResult.cc
+    src/analytics/CTRByPageQuery.cc
+    src/analytics/CTRByPositionQuery.cc
+    src/analytics/TopSearchQueriesQuery.cc
+    src/analytics/DiscoveryKPIQuery.cc
+    src/analytics/DiscoveryCategoryStatsQuery.cc
+    src/analytics/DiscoveryCategoryStatsResult.cc
+    src/analytics/TrafficSegment.cc
+    src/analytics/CTRStatsServlet.cc
+    src/analytics/AnalyticsServlet.cc
+    src/analytics/CTRByPageServlet.cc
+    src/schemas.cc
+    src/cm-chunkserver.cc)
 
-target_link_libraries(cm-reportserver
+target_link_libraries(cm-chunkserver
     ${CMAKE_THREAD_LIBS_INIT})
 
 add_executable(cm-autocompleteserver
@@ -431,9 +461,9 @@ add_executable(cm-autocompleteserver
     $<TARGET_OBJECTS:fnord-rpc>
     $<TARGET_OBJECTS:fnord-sstable>
     $<TARGET_OBJECTS:fnord-fts>
-    src/reports/Report.cc
-    src/reports/TermInfoTableSource.cc
-    src/reports/TermInfo.cc
+    src/analytics/Report.cc
+    src/analytics/TermInfoTableSource.cc
+    src/analytics/TermInfo.cc
     src/AutoCompleteServlet.cc
     src/cm-autocompleteserver.cc)
 
@@ -445,6 +475,8 @@ add_executable(cm-tokenize
     $<TARGET_OBJECTS:fnord-base>
     $<TARGET_OBJECTS:fnord-mdb>
     $<TARGET_OBJECTS:fnord-fts>
+    $<TARGET_OBJECTS:fnord-json>
+    $<TARGET_OBJECTS:fnord-http>
     $<TARGET_OBJECTS:fnord-sstable>
     src/cm-tokenize.cc)
 
@@ -464,3 +496,23 @@ add_executable(cm-jqshuffle
 
 target_link_libraries(cm-jqshuffle
     ${CMAKE_THREAD_LIBS_INIT})
+
+add_executable(cm-jqcolumnize
+    $<TARGET_OBJECTS:cm-common>
+    $<TARGET_OBJECTS:fnord-base>
+    $<TARGET_OBJECTS:fnord-feeds>
+    $<TARGET_OBJECTS:fnord-mdb>
+    $<TARGET_OBJECTS:fnord-http>
+    $<TARGET_OBJECTS:fnord-json>
+    $<TARGET_OBJECTS:fnord-rpc>
+    $<TARGET_OBJECTS:fnord-cstable>
+    $<TARGET_OBJECTS:fnord-sstable>
+    $<TARGET_OBJECTS:fnord-msg>
+    $<TARGET_OBJECTS:fnord-fts>
+    src/analytics/AnalyticsTableScan.cc
+    src/analytics/TrafficSegment.cc
+    src/analytics/CTRByPositionQuery.cc
+    src/cm-jqcolumnize.cc)
+
+target_link_libraries(cm-jqcolumnize
+    ${CMAKE_THREAD_LIBS_INIT} ${FNORD_FTS_LIBS})
