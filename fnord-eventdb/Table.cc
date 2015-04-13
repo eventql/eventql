@@ -159,16 +159,10 @@ void Table::merge(size_t min_chunk_size, size_t max_chunk_size) {
 
     auto csize = FileUtil::size(cfile + ".sst");
 
-    if (csize > max_chunk_size) {
+    if ((cumul_size + csize) > max_chunk_size) {
       if (input_chunks.empty()) {
         continue;
-      } else {
-        break;
-      }
-    }
-
-    if ((cumul_size + csize) > max_chunk_size) {
-      if (input_chunks.size() == 1) {
+      } if (input_chunks.size() == 1) {
         input_chunks.clear();
         input_chunk_ids.clear();
         cumul_size = 0;
