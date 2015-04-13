@@ -223,7 +223,13 @@ void LogJoin::withSession(
   fn(&session);
 
   if (session.flushed) {
-    txn->del(uid);
+    try {
+      txn->del(uid);
+    } catch (const Exception& e) {
+      if (!turbo_) {
+        fnord::logWarning("cm.logjoin", e, "can't delete session: $0", uid);
+      }
+    }
     session_cache_.erase(uid);
   } else {
     if (!turbo_) {
