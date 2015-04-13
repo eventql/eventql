@@ -96,7 +96,7 @@ int main(int argc, const char** argv) {
 
   /* set up rpc http server */
   fnord::http::HTTPRouter http_router;
-  http_router.addRouteByPrefixMatch("/rpc", &http);
+  http_router.addRouteByPrefixMatch("/rpc", &http, &tp);
   fnord::http::HTTPServer http_server(&http_router, &event_loop);
   http_server.listen(flags.getInt("http_port"));
 
