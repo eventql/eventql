@@ -162,6 +162,7 @@ protected:
       uint64_t head_sequence,
       RefPtr<TableGeneration> snapshot);
 
+  size_t commitWithLock();
   void writeTable(RefPtr<TableArena> arena);
   void addChunk(TableChunkRef chunk);
   void writeSnapshot();

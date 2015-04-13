@@ -101,10 +101,18 @@ void Table::addRecord(const msg::MessageObject& record) {
   std::unique_lock<std::mutex> lk(mutex_);
   arenas_.front()->addRecord(record);
   ++seq_;
+
+  if (arenas_.front()->size() > 10000) { // FIXPAUL!
+    commitWithLock();
+  }
 }
 
 size_t Table::commit() {
   std::unique_lock<std::mutex> lk(mutex_);
+  return commitWithLock();
+}
+
+size_t Table::commitWithLock() {
   auto arena = arenas_.front();
   const auto& records = arena->records();
 
@@ -115,7 +123,6 @@ size_t Table::commit() {
   fnord::logInfo("fnord.evdb", "Commiting table: $0", name_);
 
   arenas_.emplace_front(new TableArena(seq_, rnd_.hex128()));
-  lk.unlock();
 
   auto t = std::thread(std::bind(&Table::writeTable, this, arena));
   t.detach();
