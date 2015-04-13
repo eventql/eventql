@@ -352,6 +352,7 @@ int main(int argc, const char** argv) {
   uint64_t rate_limit_micros = commit_interval * kMicrosPerSecond;
 
   for (;;) {
+    auto begin = WallClock::unixMicros();
     auto turbo = FileUtil::exists("/tmp/logjoin_turbo.enabled");
     logjoin.setTurbo(turbo);
 
@@ -423,10 +424,17 @@ int main(int argc, const char** argv) {
     stat_stream_time_high.set(watermarks.second.unixMicros());
     stat_active_sessions.set(logjoin.numSessions());
     stat_dbsize.set(FileUtil::du_c(sessdb_path));
+
+    auto rtime = WallClock::unixMicros() - begin;
+    if (rtime < kMicrosPerSecond) {
+      begin = WallClock::unixMicros();
+      usleep(kMicrosPerSecond - rtime);
+    }
   }
 
   ev.shutdown();
   //evloop_thread.join();
+
 
   fnord::logInfo("cm.logjoin", "LogJoin exiting...");
   exit(0); // FIXPAUL
