@@ -8,6 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include "fnord-base/inspect.h"
+#include "fnord-base/logging.h"
 #include "fnord-json/json.h"
 #include "fnord-sstable/sstablereader.h"
 #include "fnord-sstable/sstablerepair.h"
@@ -69,8 +70,20 @@ void FeedService::reopenTable(const std::string& file_path) {
   auto file = File::openFile(file_path, File::O_READ);
   sstable::SSTableReader reader(std::move(file));
 
-  auto table_header = fnord::json::fromJSON<LogStream::TableHeader>(
-      reader.readHeader());
+  LogStream::TableHeader table_header;
+
+  try {
+    table_header = fnord::json::fromJSON<LogStream::TableHeader>(
+        reader.readHeader());
+  } catch (const Exception& e) {
+    fnord::logError(
+        "fnord.feed",
+        e,
+        "error while reading table header of file: $0",
+        file_path);
+
+    throw e;
+  }
 
   if (reader.bodySize() == 0) {
     auto writer = sstable::SSTableWriter::reopen(
