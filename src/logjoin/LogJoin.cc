@@ -34,7 +34,7 @@ LogJoin::LogJoin(
     shard_(shard),
     dry_run_(dry_run),
     target_(target),
-    sessions_flush_times_(1000000) {}
+    sessions_flush_times_() {}
 
 size_t LogJoin::numSessions() const {
   return sessions_flush_times_.size();
