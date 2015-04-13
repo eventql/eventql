@@ -126,7 +126,11 @@ void LogJoinTarget::onSession(
       item_obj.addChild(
           schema.id("queries.items.position"),
           (uint32_t) item.position);
-      item_obj.addChild(schema.id("queries.items.clicked"), item.clicked);
+      if (item.clicked) {
+        item_obj.addChild(schema.id("queries.items.clicked"), msg::TRUE);
+      } else {
+        item_obj.addChild(schema.id("queries.items.clicked"), msg::FALSE);
+      }
     }
   }
 
