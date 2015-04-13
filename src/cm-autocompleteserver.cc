@@ -39,7 +39,7 @@
 #include "FeatureSchema.h"
 #include "JoinedQuery.h"
 #include "AutoCompleteServlet.h"
-#include "reports/TermInfoTableSource.h"
+#include "analytics/TermInfoTableSource.h"
 
 using namespace cm;
 using namespace fnord;

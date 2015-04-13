@@ -305,7 +305,12 @@ void AutoCompleteServlet::suggestMultiTerm(
   best_match = 0;
 
   for (const auto& vt : search_terms) {
-    const auto& vtinfo = term_info_.find(lang_str + "~" + vt)->second;
+    auto vtinfo_iter = term_info_.find(lang_str + "~" + vt);
+    if (vtinfo_iter == term_info_.end()) {
+      continue;
+    }
+
+    const auto& vtinfo = vtinfo_iter->second;
     for (const auto& related : vtinfo.related_terms) {
       matches_h[related.first] += related.second;
 

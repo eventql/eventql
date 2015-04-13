@@ -10,7 +10,7 @@
 #define _CM_AUTOCOMPLETESERVLET_H
 #include "fnord-http/httpservice.h"
 #include "fnord-json/json.h"
-#include "reports/TermInfo.h"
+#include "analytics/TermInfo.h"
 #include <fnord-fts/fts.h>
 #include <fnord-fts/fts_common.h>
 #include <fnord-fts/Analyzer.h>

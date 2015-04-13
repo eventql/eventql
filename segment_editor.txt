@@ -1,0 +1,80 @@
+
+
+    <fn-segment-option-dropdown data-key='lang' data-title='Language'>
+
+    </fn-segment-option-ropdown>
+
+
+
+<fn-segment-editor>
+  <template name="segment_options">
+
+    <fn-segment-option-dropdown data-key='lang' data-title='Language'>
+      <fn-dropdown-items>
+        <fn-dropdown-item>De</fn-dropdown-item>
+      </fn-dropdown>
+    </fn-segment-option-ropdown>
+
+    <fn-segment-option-dropdown data-key='lang' data-title='Language'>
+      <fn-dropdown-items>
+        <fn-dropdown-item>De</fn-dropdown-item>
+      </fn-dropdown>
+    </fn-segment-option-ropdown>
+
+
+  </template>
+</fn-segment-editor>
+
+
+rendered
+
+<fn-segment-editor>
+  <input />
+  <icon>
+
+  <fn dimmer>
+    <fn-segments>
+      <close-icon></close-icon>
+
+      <fn-segment-header>Segments</fn-segment-header>
+
+      <element>
+        <title>All Traffic</title>
+        <description></descripton>
+        <remove-icon></remove-icon>
+      </element>
+
+      ...
+
+      <fn-segment-footer>
+        <add-button></add-button>
+      </fn-segment-footer>
+    </fn-segments>
+
+    <fn-segment-options>
+      <fn-segment-header>
+        <title>Name</title>
+        <input>
+        <error-text></error-text>
+      </fn-segment-header>
+
+      <fn-segment-option>
+        <fn-checkbox></fn-checkbox>
+        <title>Language</title>
+        <fn-dropdown>
+         ...
+        </fn-dropdown>
+      </fn-segment-option>
+
+        ...
+
+      <fn-segment-footer>
+        <save-button></save-button>
+      </fn-segment-footer>
+    </fn-segment-options>
+  </fn-dimmer>
+</fn-segment-editor>
+
+
+
+

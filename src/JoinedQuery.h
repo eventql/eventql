@@ -58,5 +58,9 @@ struct JoinedQuery {
   };
 };
 
+struct JoinedSession {
+  std::vector<JoinedQuery> queries;
+};
+
 }
 #endif

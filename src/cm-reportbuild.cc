@@ -33,18 +33,20 @@
 #include "JoinedQuery.h"
 #include "CTRCounter.h"
 #include "IndexReader.h"
-#include "reports/ReportBuilder.h"
-#include "reports/JoinedQueryTableSource.h"
-#include "reports/CTRByPositionMapper.h"
-#include "reports/CTRBySearchQueryMapper.h"
-#include "reports/CTRBySearchTermCrossCategoryMapper.h"
-#include "reports/CTRStatsMapper.h"
-#include "reports/CTRCounterMergeReducer.h"
-#include "reports/CTRCounterTableSink.h"
-#include "reports/CTRCounterTableSource.h"
-#include "reports/RelatedTermsMapper.h"
-#include "reports/TopCategoriesByTermMapper.h"
-#include "reports/TermInfoMergeReducer.h"
+#include "analytics/ReportBuilder.h"
+#include "analytics/JoinedQueryTableSource.h"
+#include "analytics/CTRByPositionMapper.h"
+#include "analytics/CTRByPageMapper.h"
+#include "analytics/CTRBySearchQueryMapper.h"
+#include "analytics/CTRByQueryAttributeMapper.h"
+#include "analytics/CTRBySearchTermCrossCategoryMapper.h"
+#include "analytics/CTRStatsMapper.h"
+#include "analytics/CTRCounterMergeReducer.h"
+#include "analytics/CTRCounterTableSink.h"
+#include "analytics/CTRCounterTableSource.h"
+#include "analytics/RelatedTermsMapper.h"
+#include "analytics/TopCategoriesByTermMapper.h"
+#include "analytics/TermInfoMergeReducer.h"
 
 using namespace fnord;
 using namespace cm;
@@ -140,43 +142,6 @@ int main(int argc, const char** argv) {
         StringUtil::format("$0/dawanda_joined_queries.$1.sstable", dir, g));
 
     report_builder.addReport(
-        new CTRByPositionMapper(
-            jq_source,
-            new CTRCounterTableSink(
-                g * kMicrosPerHour * 4,
-                (g + 1) * kMicrosPerHour * 4,
-                StringUtil::format(
-                    "$0/dawanda_ctr_by_position.$1.sstable",
-                    dir,
-                    g)),
-            ItemEligibility::ALL));
-
-    report_builder.addReport(
-        new CTRStatsMapper(
-            jq_source,
-            new CTRCounterTableSink(
-                g * kMicrosPerHour * 4,
-                (g + 1) * kMicrosPerHour * 4,
-                StringUtil::format(
-                    "$0/dawanda_ctr_stats.$1.sstable",
-                    dir,
-                    g)),
-            ItemEligibility::ALL));
-
-    report_builder.addReport(
-        new CTRBySearchQueryMapper(
-            jq_source,
-            new CTRCounterTableSink(
-                g * kMicrosPerHour * 4,
-                (g + 1) * kMicrosPerHour * 4,
-                StringUtil::format(
-                    "$0/dawanda_ctr_by_searchquery.$1.sstable",
-                    dir,
-                    g)),
-            ItemEligibility::ALL,
-            analyzer));
-
-    report_builder.addReport(
         new CTRBySearchTermCrossCategoryMapper(
             jq_source,
             new CTRCounterTableSink(
@@ -231,87 +196,43 @@ int main(int argc, const char** argv) {
         1 * kSecondsPerDay,
         og * kSecondsPerDay);
 
-    auto month_gens = mkGenerations(
-        1 * kSecondsPerDay,
+    /* dawanda: related search terms */
+    Set<String> month_sources;
+    for (const auto& ig : mkGenerations(
+        4 * kSecondsPerHour,
         30 * kSecondsPerDay,
-        og * kSecondsPerDay);
-
-    /* dawanda: roll up ctr stats */
-    Set<String> ctr_stats_sources;
-    for (const auto& ig : day_gens) {
-      ctr_stats_sources.emplace(
-          StringUtil::format("$0/dawanda_ctr_stats.$1.sstable", dir, ig));
-    }
-
-    report_builder.addReport(
-        new CTRCounterMergeReducer(
-            new CTRCounterTableSource(ctr_stats_sources),
-            new CTRCounterTableSink(
-                (og) * kMicrosPerDay,
-                (og + 1) * kMicrosPerDay,
-                StringUtil::format(
-                    "$0/dawanda_ctr_stats_daily.$1.sstable",
-                    dir,
-                    og))));
-
-    /* dawanda: roll up ctr positions */
-    Set<String> ctr_posi_sources;
-    for (const auto& ig : day_gens) {
-      ctr_posi_sources.emplace(
-          StringUtil::format("$0/dawanda_ctr_by_position.$1.sstable", dir, ig));
-    }
-
-    report_builder.addReport(
-        new CTRCounterMergeReducer(
-            new CTRCounterTableSource(ctr_posi_sources),
-            new CTRCounterTableSink(
-                (og) * kMicrosPerDay,
-                (og + 1) * kMicrosPerDay,
-                StringUtil::format(
-                    "$0/dawanda_ctr_by_position_daily.$1.sstable",
-                    dir,
-                    og))));
-
-    /* dawanda: roll up related search terms */
-    Set<String> related_terms_sources;
-    for (const auto& ig : day_gens) {
-      related_terms_sources.emplace(StringUtil::format(
-          "$0/dawanda_ctr_by_searchquery.$1.sstable",
+        og * kSecondsPerDay)) {
+      month_sources.emplace(StringUtil::format(
+          "$0/dawanda_joined_sessions.$1.sstable",
           dir,
           ig));
     }
 
-    report_builder.addReport(
-        new RelatedTermsMapper(
-            new CTRCounterTableSource(related_terms_sources),
-            new TermInfoTableSink(
-                StringUtil::format(
-                    "$0/dawanda_related_terms.$1.sstable",
-                    dir,
-                    og))));
+    //report_builder.addReport(
+    //    new RelatedTermsMapper(
+    //        new CTRCounterTableSource(related_terms_sources),
+    //        new TermInfoTableSink(
+    //            StringUtil::format(
+    //                "$0/dawanda_related_terms_30d.$1.sstable",
+    //                dir,
+    //                og))));
 
-    Set<String> related_terms_rollup_sources;
-    for (const auto& ig : month_gens) {
-      related_terms_rollup_sources.emplace(StringUtil::format(
-          "$0/dawanda_related_terms.$1.sstable",
-          dir,
-          ig));
-    }
-
-    report_builder.addReport(
-        new TermInfoMergeReducer(
-            new TermInfoTableSource(related_terms_rollup_sources),
-            new TermInfoTableSink(
-                StringUtil::format(
-                    "$0/dawanda_related_terms_30d.$1.sstable",
-                    dir,
-                    og))));
-
-    /* dawanda: roll up search term x e1 id */
+    /* dawanda: search term x e{1,2,3} id */
     Set<String> term_cross_e1_sources;
     for (const auto& ig : day_gens) {
       term_cross_e1_sources.emplace(StringUtil::format(
           "$0/dawanda_ctr_by_searchterm_cross_e1.$1.sstable",
+          dir,
+          ig));
+    }
+
+    Set<String> term_cross_e1_rollup_sources;
+    for (const auto& ig : mkGenerations(
+        1 * kSecondsPerDay,
+        30 * kSecondsPerDay,
+        og * kSecondsPerDay)) {
+      term_cross_e1_rollup_sources.emplace(StringUtil::format(
+          "$0/dawanda_top_cats_by_searchterm_e1.$1.sstable",
           dir,
           ig));
     }
@@ -326,13 +247,6 @@ int main(int argc, const char** argv) {
                     og)),
             "e1-"));
 
-    Set<String> term_cross_e1_rollup_sources;
-    for (const auto& ig : month_gens) {
-      term_cross_e1_rollup_sources.emplace(StringUtil::format(
-          "$0/dawanda_top_cats_by_searchterm_e1.$1.sstable",
-          dir,
-          ig));
-    }
 
     report_builder.addReport(
         new TermInfoMergeReducer(
@@ -342,6 +256,7 @@ int main(int argc, const char** argv) {
                     "$0/dawanda_top_cats_by_searchterm_e1_30d.$1.sstable",
                     dir,
                     og))));
+
 
     /* merge all term info 30d reports */
     report_builder.addReport(
