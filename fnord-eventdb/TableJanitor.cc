@@ -35,18 +35,22 @@ void TableJanitor::stop() {
   thread_.join();
 }
 
+void TableJanitor::check() {
+  auto tables = repo_->tables();
+
+  for (auto& tbl : tables) {
+    tbl->commit();
+    tbl->merge();
+    tbl->gc();
+  }
+}
+
 void TableJanitor::run() {
   while (running_) {
     auto begin = WallClock::unixMicros();
 
     try {
-      auto tables = repo_->tables();
-
-      for (auto& tbl : tables) {
-        tbl->commit();
-        tbl->merge();
-        tbl->gc();
-      }
+      check();
     } catch (const Exception& e) {
       fnord::logError("fnord.evdb", e, "TableJanitor error");
     }
