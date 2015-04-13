@@ -102,6 +102,16 @@ protected:
   Vector<TableChunkRef> input_chunks_;
 };
 
+class TableMergePolicy {
+public:
+
+  static bool findNextMerge(
+      RefPtr<TableSnapshot> snapshot,
+      Vector<TableChunkRef>* input_chunks,
+      TableChunkRef* output_chunk);
+
+};
+
 class Table : public RefCounted {
 public:
 
