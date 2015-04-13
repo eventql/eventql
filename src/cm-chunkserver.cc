@@ -90,6 +90,15 @@ int main(int argc, const char** argv) {
       "<port>");
 
   flags.defineFlag(
+      "readonly",
+      cli::FlagParser::T_SWITCH,
+      false,
+      NULL,
+      NULL,
+      "readonly",
+      "readonly");
+
+  flags.defineFlag(
       "replica",
       cli::FlagParser::T_STRING,
       true,
@@ -146,11 +155,12 @@ int main(int argc, const char** argv) {
   });
 
   /* eventdb */
+  auto readonly = flags.isSet("readonly");
   auto replica = flags.getString("replica");
 
   eventdb::TableRepository table_repo;
   table_repo.addTable(
-      eventdb::Table::open(
+      eventdb::TableWriter::open(
           "dawanda_joined_sessions",
           replica,
           dir,
