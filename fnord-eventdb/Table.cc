@@ -586,7 +586,7 @@ bool TableMergePolicy::tryFoldIntoMerge(
     next_seq = c.start_sequence + c.num_records;
   }
 
-  if (begin == end) {
+  if (end < (begin + 2)) {
     return false;
   }
 
@@ -594,7 +594,7 @@ bool TableMergePolicy::tryFoldIntoMerge(
     return false;
   }
 
-  for (int i = begin; i <= end; ++i) {
+  for (int i = begin; i < end; ++i) {
     input_chunks->emplace_back(chunks[i]);
   }
 
