@@ -205,23 +205,30 @@ void LogJoin::withSession(
     Function<void (TrackedSession* session)> fn) {
   TrackedSession session;
 
-  auto session_str = txn->get(uid);
-  if (session_str.isEmpty()) {
-    session.uid = uid;
-    session.customer_key = customer_key;
-    session.flushed = false;
-    session.last_seen_unix_micros = 0;
+  auto cached = session_cache_.find(uid);
+  if (cached == session_cache_.end()) {
+    auto session_str = txn->get(uid);
+    if (session_str.isEmpty()) {
+      session.uid = uid;
+      session.customer_key = customer_key;
+      session.flushed = false;
+      session.last_seen_unix_micros = 0;
+    } else {
+      session = json::fromJSON<TrackedSession>(session_str.get());
+    }
   } else {
-    session = json::fromJSON<TrackedSession>(session_str.get());
+    session = cached->second;
   }
 
   fn(&session);
 
   if (session.flushed) {
     txn->del(uid);
+    session_cache_.erase(uid);
   } else {
     auto serialized = json::toJSONString(session);
     txn->update(uid, serialized);
+    session_cache_[uid] = session;
   }
 }
 
