@@ -22,6 +22,7 @@ public:
   TableJanitor(TableRepository* repo);
   void start();
   void stop();
+  void check();
 
 protected:
   void run();
