@@ -9,6 +9,7 @@
  */
 #include <fnord-base/util/binarymessagewriter.h>
 #include <fnord-base/exception.h>
+#include <fnord-base/inspect.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -70,6 +71,18 @@ void BinaryMessageWriter::updateUInt64(size_t offset, uint64_t value) {
 
 void BinaryMessageWriter::appendString(const std::string& string) {
   append(string.data(), string.size());
+}
+
+void BinaryMessageWriter::appendVarUInt(uint64_t value) {
+  unsigned char buf[10];
+  size_t bytes = 0;
+  do {
+    buf[bytes] = value & 0x7fU;
+    if (value >>= 7) buf[bytes] |= 0x80U;
+    ++bytes;
+  } while (value);
+
+  append(buf, bytes);
 }
 
 void BinaryMessageWriter::updateString(
