@@ -19,7 +19,7 @@ TableJanitor::TableJanitor(
     TableRepository* repo) :
     repo_(repo),
     interval_(10 * kMicrosPerSecond),
-    running_(false) {}
+    running_(true) {}
 
 void TableJanitor::start() {
   running_ = true;
@@ -48,7 +48,7 @@ void TableJanitor::check() {
 }
 
 void TableJanitor::run() {
-  while (running_) {
+  while (running_.load()) {
     auto begin = WallClock::unixMicros();
 
     try {
@@ -59,6 +59,11 @@ void TableJanitor::run() {
 
     auto elapsed = WallClock::unixMicros() - begin;
     if (elapsed < interval_) {
+      fnord::logDebug(
+          "fnord.evdb",
+          "Running next TableJanitor in $0s",
+          (interval_ - elapsed) / (double) kMicrosPerSecond);
+
       usleep(interval_ - elapsed);
     }
   }
