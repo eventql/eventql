@@ -60,7 +60,7 @@ fnord::thread::EventLoop ev;
 
 void quit(int n) {
   shutdown_sig = true;
-  fnord::logInfo("cm.reportserver", "Shutting down...");
+  fnord::logInfo("cm.chunkserver", "Shutting down...");
   // FIXPAUL: wait for http server stop...
   ev.shutdown();
 }
@@ -141,7 +141,7 @@ int main(int argc, const char** argv) {
   auto dir = flags.getString("artifacts");
   FileUtil::ls(dir, [&vfs, &dir] (const String& file) -> bool {
     vfs.registerFile(file, FileUtil::joinPaths(dir, file));
-    fnord::logInfo("cm.reportserver", "[VFS] Adding file: $0", file);
+    fnord::logInfo("cm.chunkserver", "[VFS] Adding file: $0", file);
     return true;
   });
 
@@ -259,7 +259,7 @@ int main(int argc, const char** argv) {
 
   table_janitor.stop();
   table_janitor.check();
-  fnord::logInfo("cm.reportserver", "Exiting...");
+  fnord::logInfo("cm.chunkserver", "Exiting...");
 
   return 0;
 }
