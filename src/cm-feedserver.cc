@@ -77,6 +77,9 @@ int main(int argc, const char** argv) {
       strToLogLevel(flags.getString("loglevel")));
 
   fnord::thread::EventLoop event_loop;
+  fnord::thread::ThreadPool tp(
+      std::unique_ptr<ExceptionHandler>(
+          new CatchAndLogExceptionHandler("cm.feedserver")));
 
   fnord::json::JSONRPC rpc;
   fnord::json::JSONRPCHTTPAdapter http(&rpc);
