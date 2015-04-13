@@ -32,9 +32,13 @@
 #include "fnord-feeds/RemoteFeedReader.h"
 #include "fnord-base/stats/statsdagent.h"
 #include "fnord-sstable/SSTableServlet.h"
+#include "fnord-eventdb/EventDBServlet.h"
+#include "fnord-eventdb/TableRepository.h"
+#include "fnord-eventdb/TableJanitor.h"
 #include "fnord-mdb/MDB.h"
 #include "fnord-mdb/MDBUtil.h"
 #include "common.h"
+#include "schemas.h"
 #include "CustomerNamespace.h"
 #include "FeatureSchema.h"
 #include "JoinedQuery.h"
@@ -47,12 +51,32 @@
 #include "analytics/DiscoveryKPIQuery.h"
 #include "analytics/DiscoveryCategoryStatsQuery.h"
 #include "analytics/AnalyticsQueryEngine.h"
+#include "analytics/AnalyticsQueryEngine.h"
 
 using namespace fnord;
+
+std::atomic<bool> shutdown_sig;
+fnord::thread::EventLoop ev;
+
+void quit(int n) {
+  shutdown_sig = true;
+  fnord::logInfo("cm.chunkserver", "Shutting down...");
+  // FIXPAUL: wait for http server stop...
+  ev.shutdown();
+}
 
 int main(int argc, const char** argv) {
   fnord::Application::init();
   fnord::Application::logToStderr();
+
+  /* shutdown hook */
+  shutdown_sig = false;
+  struct sigaction sa;
+  memset(&sa, 0, sizeof(struct sigaction));
+  sa.sa_handler = quit;
+  sigaction(SIGTERM, &sa, NULL);
+  sigaction(SIGQUIT, &sa, NULL);
+  sigaction(SIGINT, &sa, NULL);
 
   fnord::cli::FlagParser flags;
 
@@ -64,6 +88,15 @@ int main(int argc, const char** argv) {
       "8000",
       "Start the public http server on this port",
       "<port>");
+
+  flags.defineFlag(
+      "replica",
+      cli::FlagParser::T_STRING,
+      true,
+      NULL,
+      NULL,
+      "replica id",
+      "<id>");
 
   flags.defineFlag(
       "artifacts",
@@ -91,7 +124,6 @@ int main(int argc, const char** argv) {
   WhitelistVFS vfs;
 
   /* start http server */
-  fnord::thread::EventLoop ev;
   fnord::thread::ThreadPool tpool;
   fnord::http::HTTPRouter http_router;
   fnord::http::HTTPServer http_server(&http_router, &ev);
@@ -109,14 +141,31 @@ int main(int argc, const char** argv) {
   auto dir = flags.getString("artifacts");
   FileUtil::ls(dir, [&vfs, &dir] (const String& file) -> bool {
     vfs.registerFile(file, FileUtil::joinPaths(dir, file));
-    fnord::logInfo("cm.reportserver", "[VFS] Adding file: $0", file);
+    fnord::logInfo("cm.chunkserver", "[VFS] Adding file: $0", file);
     return true;
   });
 
+  /* eventdb */
+  auto replica = flags.getString("replica");
+
+  eventdb::TableRepository table_repo;
+  table_repo.addTable(
+      eventdb::Table::open(
+          "dawanda_joined_sessions",
+          replica,
+          dir,
+          joinedSessionsSchema()));
+
+  eventdb::TableJanitor table_janitor(&table_repo);
+  table_janitor.start();
+
+  eventdb::EventDBServlet eventdb_servlet(&table_repo);
+
   /* analytics */
-  cm::AnalyticsQueryEngine analytics(8, &vfs);
+  cm::AnalyticsQueryEngine analytics(8, dir);
   cm::AnalyticsServlet analytics_servlet(&analytics);
   http_router.addRouteByPrefixMatch("/analytics", &analytics_servlet, &tpool);
+  http_router.addRouteByPrefixMatch("/eventdb", &eventdb_servlet, &tpool);
 
   analytics.registerQueryFactory("ctr_by_position", [] (
       const cm::AnalyticsQuery& query,
@@ -207,6 +256,11 @@ int main(int argc, const char** argv) {
   });
 
   ev.run();
+
+  table_janitor.stop();
+  table_janitor.check();
+  fnord::logInfo("cm.chunkserver", "Exiting...");
+
   return 0;
 }
 
