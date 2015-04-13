@@ -95,6 +95,7 @@ protected:
   LogJoinShard shard_;
   LogJoinTarget* target_;
   HashMap<String, DateTime> sessions_flush_times_;
+  HashMap<String, TrackedSession> session_cache_;
 
   fnord::stats::Counter<uint64_t> stat_loglines_total_;
   fnord::stats::Counter<uint64_t> stat_loglines_invalid_;
