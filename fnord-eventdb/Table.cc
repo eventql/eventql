@@ -514,12 +514,15 @@ bool TableMergePolicy::findNextMerge(
     }
   }
 
+  if (chunks.size() < 2) {
+    return false;
+  }
+
   std::sort(chunks.begin(), chunks.end(), [] (
       const TableChunkRef& a,
       const TableChunkRef& b) -> bool {
     return a.start_sequence < b.start_sequence;
   });
-
 
   for (int i = 0; i < chunks.size() - 1; ++i) {
     for (const auto& s : steps_) {
