@@ -150,6 +150,11 @@ uint32_t MessageObject::asUInt32() const {
 }
 
 bool MessageObject::asBool() const {
+  if (type == FieldType::UINT32) {
+    uint32_t val = *((uint32_t*) &data_);
+    return val > 0;
+  }
+
 #ifndef FNORD_NODEBUG
   if (type != FieldType::BOOLEAN) {
     RAISE(kTypeError);
