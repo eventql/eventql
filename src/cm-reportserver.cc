@@ -60,7 +60,7 @@ fnord::thread::EventLoop ev;
 
 void quit(int n) {
   shutdown_sig = true;
-  fnord::logInfo("cm.repotserver", "Shutting down...");
+  fnord::logInfo("cm.reportserver", "Shutting down...");
   // FIXPAUL: wait for http server stop...
   ev.shutdown();
 }
@@ -259,7 +259,7 @@ int main(int argc, const char** argv) {
 
   table_janitor.stop();
   table_janitor.check();
-  fnord::logInfo("cm.repotserver", "Exiting...");
+  fnord::logInfo("cm.reportserver", "Exiting...");
 
   return 0;
 }
