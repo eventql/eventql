@@ -254,7 +254,7 @@ void Table::gc(size_t keep_generations, size_t keep_arenas) {
     return;
   }
 
-  Set<String> delete_chunk_ids;
+  Set<String> delete_chunks;
   Set<String> delete_files;
 
   for (uint64_t gen = head_gen - keep_generations; gen > 0; --gen) {
@@ -273,7 +273,7 @@ void Table::gc(size_t keep_generations, size_t keep_arenas) {
     g.decode(FileUtil::read(genfile));
 
     for (const auto& c : g.chunks) {
-      delete_chunk_ids.emplace(c.chunk_id);
+      delete_chunks.emplace(c.replica_id + "." + c.chunk_id);
     }
 
     delete_files.emplace(genfile);
@@ -291,16 +291,15 @@ void Table::gc(size_t keep_generations, size_t keep_arenas) {
     g.decode(FileUtil::read(genfile));
 
     for (const auto& c : g.chunks) {
-      delete_chunk_ids.erase(c.chunk_id);
+      delete_chunks.erase(c.replica_id + "." + c.chunk_id);
     }
   }
 
-  for (const auto& c : delete_chunk_ids) {
+  for (const auto& c : delete_chunks) {
     auto chunkfile = StringUtil::format(
-        "$0/$1.$2.$3",
+        "$0/$1.$2",
         db_path_,
         name_,
-        replica_id_,
         c);
 
     delete_files.emplace(chunkfile + ".sst");
