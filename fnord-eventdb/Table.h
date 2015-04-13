@@ -135,7 +135,7 @@ protected:
   void writeTable(RefPtr<TableArena> arena);
   void addChunk(TableChunkRef chunk);
   void writeSnapshot();
-  void merge(size_t min_chunk_size, size_t max_chunk_size);
+  bool merge(size_t min_chunk_size, size_t max_chunk_size);
 
   String name_;
   String replica_id_;
