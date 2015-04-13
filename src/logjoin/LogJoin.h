@@ -61,6 +61,8 @@ public:
 
   void exportStats(const std::string& path_prefix);
 
+  void setTurbo(bool turbo);
+
 protected:
 
   void insertQuery(
@@ -96,6 +98,7 @@ protected:
   LogJoinTarget* target_;
   HashMap<String, DateTime> sessions_flush_times_;
   HashMap<String, TrackedSession> session_cache_;
+  bool turbo_;
 
   fnord::stats::Counter<uint64_t> stat_loglines_total_;
   fnord::stats::Counter<uint64_t> stat_loglines_invalid_;

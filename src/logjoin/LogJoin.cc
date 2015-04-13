@@ -34,7 +34,7 @@ LogJoin::LogJoin(
     shard_(shard),
     dry_run_(dry_run),
     target_(target),
-    sessions_flush_times_() {}
+    turbo_(false) {}
 
 size_t LogJoin::numSessions() const {
   return sessions_flush_times_.size();
@@ -226,8 +226,11 @@ void LogJoin::withSession(
     txn->del(uid);
     session_cache_.erase(uid);
   } else {
-    auto serialized = json::toJSONString(session);
-    txn->update(uid, serialized);
+    if (!turbo_) {
+      auto serialized = json::toJSONString(session);
+      txn->update(uid, serialized);
+    }
+
     session_cache_[uid] = session;
   }
 }
@@ -391,6 +394,10 @@ void LogJoin::exportStats(const std::string& prefix) {
       StringUtil::format("$0/$1", prefix, "joined_item_visits"),
       &stat_joined_item_visits_,
       fnord::stats::ExportMode::EXPORT_DELTA);
+}
+
+void LogJoin::setTurbo(bool turbo) {
+  turbo_ = turbo;
 }
 
 } // namespace cm
