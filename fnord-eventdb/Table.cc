@@ -168,7 +168,12 @@ void Table::merge(size_t min_chunk_size, size_t max_chunk_size) {
     }
 
     if ((cumul_size + csize) > max_chunk_size) {
-      break;
+      if (input_chunks.size() == 1) {
+        input_chunks.clear();
+        cumul_size = 0;
+      } else {
+        break;
+      }
     }
 
     if (!input_chunks.empty() && c.start_sequence != (
