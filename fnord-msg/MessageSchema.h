@@ -10,6 +10,8 @@
 #ifndef _FNORD_MSG_MESSAGESCHEMA_H
 #define _FNORD_MSG_MESSAGESCHEMA_H
 #include <fnord-base/stdtypes.h>
+#include <fnord-base/exception.h>
+#include <fnord-msg/MessageObject.h>
 
 /**
  * // http://tools.ietf.org/html/rfc5234
@@ -28,13 +30,6 @@
  */
 namespace fnord {
 namespace msg {
-
-enum class FieldType : uint8_t {
-  OBJECT = 0,
-  BOOLEAN = 1,
-  UINT32 = 2,
-  STRING = 3
-};
 
 enum class EncodingHint : uint8_t {
   NONE = 0,
