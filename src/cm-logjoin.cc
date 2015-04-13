@@ -391,10 +391,14 @@ int main(int argc, const char** argv) {
     fnord::logInfo(
         "cm.logjoin",
         "LogJoin comitting...\n    stream_time=<$0 ... $1>\n" \
-        "    active_sessions=$2$3",
+        "    active_sessions=$2\n    flushed_sessions=$3\n    " \
+        "flushed_queries=$4\n    flushed_item_visits=$5$6",
         watermarks.first,
         watermarks.second,
         logjoin.numSessions(),
+        logjoin_target.num_sessions,
+        logjoin_target.num_queries,
+        logjoin_target.num_item_visits,
         stream_offsets_str);
 
     txn->commit();

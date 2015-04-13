@@ -53,6 +53,11 @@ public:
       const TrackedItemVisit& item_visit,
       const TrackedQuery& query);
 
+
+  size_t num_sessions;
+  size_t num_queries;
+  size_t num_item_visits;
+
 protected:
 
   JoinedQuery trackedQueryToJoinedQuery(

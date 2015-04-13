@@ -23,7 +23,10 @@ LogJoinTarget::LogJoinTarget(
     const msg::MessageSchema& joined_sessions_schema,
     fts::Analyzer* analyzer) :
     joined_sessions_schema_(joined_sessions_schema),
-    analyzer_(analyzer) {}
+    analyzer_(analyzer),
+    num_sessions(0),
+    num_queries(0),
+    num_item_visits(0) {}
 
 void LogJoinTarget::onSession(
     mdb::MDBTransaction* txn,
@@ -131,6 +134,7 @@ void LogJoinTarget::onSession(
   msg::MessageEncoder::encode(obj, joined_sessions_schema_, &msg_buf);
   auto key = StringUtil::format("__uploadq-sessions-$0",  rnd_.hex128());
   txn->update(key, msg_buf);
+  ++num_sessions;
 }
 
 void LogJoinTarget::onQuery(
@@ -138,6 +142,7 @@ void LogJoinTarget::onQuery(
     const TrackedSession& session,
     const TrackedQuery& query) {
   //fnord::iputs("on query... $0", query.items.size());
+  ++num_queries;
 }
 
 void LogJoinTarget::onItemVisit(
@@ -152,7 +157,7 @@ void LogJoinTarget::onItemVisit(
     const TrackedSession& session,
     const TrackedItemVisit& item_visit,
     const TrackedQuery& query) {
-
+  ++num_item_visits;
 }
 
 JoinedQuery LogJoinTarget::trackedQueryToJoinedQuery(
