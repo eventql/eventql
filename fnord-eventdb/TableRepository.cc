@@ -12,12 +12,12 @@
 namespace fnord {
 namespace eventdb {
 
-void TableRepository::addTable(RefPtr<Table> table) {
+void TableRepository::addTable(RefPtr<TableWriter> table) {
   std::unique_lock<std::mutex> lk(mutex_);
   tables_.emplace(table->name(), table);
 }
 
-RefPtr<Table> TableRepository::findTable(const String& name) const {
+RefPtr<TableWriter> TableRepository::findTable(const String& name) const {
   std::unique_lock<std::mutex> lk(mutex_);
   auto table = tables_.find(name);
   if (table == tables_.end()) {
@@ -27,8 +27,8 @@ RefPtr<Table> TableRepository::findTable(const String& name) const {
   return table->second;
 }
 
-Vector<RefPtr<Table>> TableRepository::tables() const {
-  Vector<RefPtr<Table>> tables;
+Vector<RefPtr<TableWriter>> TableRepository::tables() const {
+  Vector<RefPtr<TableWriter>> tables;
 
   std::unique_lock<std::mutex> lk(mutex_);
   for (auto& t : tables_) {

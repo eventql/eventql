@@ -22,7 +22,7 @@
 namespace fnord {
 namespace eventdb {
 
-RefPtr<Table> Table::open(
+RefPtr<TableWriter> TableWriter::open(
     const String& table_name,
     const String& replica_id,
     const String& db_path,
@@ -70,10 +70,16 @@ RefPtr<Table> Table::open(
     }
   }
 
-  return new Table(table_name, replica_id, db_path, schema, last_seq, head);
+  return new TableWriter(
+      table_name,
+      replica_id,
+      db_path,
+      schema,
+      last_seq,
+      head);
 }
 
-Table::Table(
+TableWriter::TableWriter(
     const String& table_name,
     const String& replica_id,
     const String& db_path,
@@ -89,7 +95,7 @@ Table::Table(
   arenas_.emplace_front(new TableArena(seq_, rnd_.hex128()));
 }
 
-void Table::addRecords(const Buffer& records) {
+void TableWriter::addRecords(const Buffer& records) {
   for (size_t offset = 0; offset < records.size(); ) {
     msg::MessageObject msg;
     msg::MessageDecoder::decode(records, schema_, &msg, &offset);
@@ -97,7 +103,7 @@ void Table::addRecords(const Buffer& records) {
   }
 }
 
-void Table::addRecord(const msg::MessageObject& record) {
+void TableWriter::addRecord(const msg::MessageObject& record) {
   std::unique_lock<std::mutex> lk(mutex_);
   arenas_.front()->addRecord(record);
   ++seq_;
@@ -107,12 +113,12 @@ void Table::addRecord(const msg::MessageObject& record) {
   }
 }
 
-size_t Table::commit() {
+size_t TableWriter::commit() {
   std::unique_lock<std::mutex> lk(mutex_);
   return commitWithLock();
 }
 
-size_t Table::commitWithLock() {
+size_t TableWriter::commitWithLock() {
   auto arena = arenas_.front();
   const auto& records = arena->records();
 
@@ -124,13 +130,13 @@ size_t Table::commitWithLock() {
 
   arenas_.emplace_front(new TableArena(seq_, rnd_.hex128()));
 
-  auto t = std::thread(std::bind(&Table::writeTable, this, arena));
+  auto t = std::thread(std::bind(&TableWriter::writeTable, this, arena));
   t.detach();
 
   return records.size();
 }
 
-void Table::merge() {
+void TableWriter::merge() {
   std::unique_lock<std::mutex> merge_lk(merge_mutex_);
 
   auto snap = getSnapshot();
@@ -195,7 +201,7 @@ void Table::merge() {
   writeSnapshot();
 }
 
-void Table::gc(size_t keep_generations, size_t keep_arenas) {
+void TableWriter::gc(size_t keep_generations, size_t keep_arenas) {
   std::unique_lock<std::mutex> lk(mutex_);
   auto head_gen = head_->generation;
 
@@ -267,7 +273,7 @@ void Table::gc(size_t keep_generations, size_t keep_arenas) {
   }
 }
 
-void Table::writeTable(RefPtr<TableArena> arena) {
+void TableWriter::writeTable(RefPtr<TableArena> arena) {
   TableChunkRef chunk;
   chunk.replica_id = replica_id_;
   chunk.chunk_id = arena->chunkID();
@@ -287,7 +293,7 @@ void Table::writeTable(RefPtr<TableArena> arena) {
   addChunk(chunk);
 }
 
-void Table::addChunk(TableChunkRef chunk) {
+void TableWriter::addChunk(TableChunkRef chunk) {
   std::unique_lock<std::mutex> lk(mutex_);
 
   auto next = head_->clone();
@@ -299,7 +305,7 @@ void Table::addChunk(TableChunkRef chunk) {
 }
 
 // precondition: mutex_ must be locked
-void Table::writeSnapshot() {
+void TableWriter::writeSnapshot() {
   auto snapname = StringUtil::format(
     "$0.$1.$2",
     name_,
@@ -317,11 +323,11 @@ void Table::writeSnapshot() {
   FileUtil::mv(filename + "~", filename);
 }
 
-const String& Table::name() const {
+const String& TableWriter::name() const {
   return name_;
 }
 
-RefPtr<TableSnapshot> Table::getSnapshot() {
+RefPtr<TableSnapshot> TableWriter::getSnapshot() {
   std::unique_lock<std::mutex> lk(mutex_);
   return new TableSnapshot(head_, arenas_);
 }
