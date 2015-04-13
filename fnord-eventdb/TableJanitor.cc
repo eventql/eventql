@@ -36,6 +36,8 @@ void TableJanitor::stop() {
 }
 
 void TableJanitor::check() {
+  fnord::logDebug("fnord.evdb", "Running TableJanitor...");
+
   auto tables = repo_->tables();
 
   for (auto& tbl : tables) {
