@@ -189,8 +189,6 @@ void Table::merge(size_t min_chunk_size, size_t max_chunk_size) {
     cumul_recs += c.num_records;
   }
 
-  fnord::iputs("ichunks: $0 $1", input_chunk_ids, cumul_size);
-
   if (input_chunks.size() < 2 || cumul_size < min_chunk_size) {
     return;
   }
