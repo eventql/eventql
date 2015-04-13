@@ -24,12 +24,12 @@ void MessageDecoder::decode(
       ((const char *) buf.data()) + o,
       buf.size() - o);
 
-  auto num_fields = *reader.readUInt32();
+  auto num_fields = reader.readVarUInt();
   Vector<Pair<uint32_t, uint64_t>> fields;
 
   for (int i = 0; i < num_fields; ++i) {
-    auto id = *reader.readUInt32();
-    auto end = *reader.readUInt32();
+    auto id = reader.readVarUInt();
+    auto end = reader.readVarUInt();
     fields.emplace_back(id, end);
   }
 
@@ -86,7 +86,7 @@ void MessageDecoder::decodeObject(
     }
 
     case FieldType::UINT32: {
-      uint32_t val = *reader->readUInt32();
+      uint32_t val = reader->readVarUInt();
       msg->addChild(fid, val);
       break;
     }
