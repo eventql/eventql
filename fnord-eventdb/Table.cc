@@ -133,6 +133,8 @@ void Table::merge() {
 
   if (!merge_policy_.findNextMerge(
         snap,
+        db_path_,
+        name_,
         replica_id_,
         &input_chunks,
         &output_chunk)) {
@@ -464,6 +466,7 @@ void TableChunkMerge::merge() {
 }
 
 TableMergePolicy::TableMergePolicy() {
+  steps_.emplace_back(1024 * 1024 * 200, 1024 * 1024 * 250);
   steps_.emplace_back(1024 * 1024 * 90, 1024 * 1024 * 100);
   steps_.emplace_back(1024 * 1024, 1024 * 1024 * 25);
 }
@@ -499,6 +502,8 @@ void TableChunkMerge::readTable(const String& filename) {
 
 bool TableMergePolicy::findNextMerge(
     RefPtr<TableSnapshot> snapshot,
+    const String& db_path,
+    const String& table_name,
     const String& replica_id,
     Vector<TableChunkRef>* input_chunks,
     TableChunkRef* output_chunk) {
@@ -516,12 +521,18 @@ bool TableMergePolicy::findNextMerge(
   });
 
 
-  for (int i = 0; i < chunks.size(); ++i) {
+  for (int i = 0; i < chunks.size() - 1; ++i) {
     for (const auto& s : steps_) {
-      auto min = s.first;
-      auto max = s.second;
-
-      if (tryFoldIntoMerge(min, max, chunks, i, input_chunks, output_chunk)) {
+      if (tryFoldIntoMerge(
+            db_path,
+            table_name,
+            replica_id,
+            s.first,
+            s.second,
+            chunks,
+            i,
+            input_chunks,
+            output_chunk)) {
         return true;
       }
     }
@@ -531,13 +542,67 @@ bool TableMergePolicy::findNextMerge(
 }
 
 bool TableMergePolicy::tryFoldIntoMerge(
+    const String& db_path,
+    const String& table_name,
+    const String& replica_id,
     size_t min_merged_size,
     size_t max_merged_size,
     const Vector<TableChunkRef>& chunks,
-    size_t idx,
+    size_t begin,
     Vector<TableChunkRef>* input_chunks,
     TableChunkRef* output_chunk) {
-  return false;
+  size_t cumul_size = 0;
+  size_t cumul_recs = 0;
+
+  auto end = begin;
+  size_t next_seq;
+  for (int i = begin; i < chunks.size(); ++i) {
+    const auto& c = chunks[i];
+    auto cfile = StringUtil::format(
+        "$0/$1.$2.$3",
+        db_path,
+        table_name,
+        c.replica_id,
+        c.chunk_id);
+
+    if (i > begin && c.start_sequence != next_seq) {
+      fnord::logWarning(
+          "fnord.evdb",
+          "found record sequence discontinuity at $0 <> $1. missing chunks?",
+          c.start_sequence,
+          next_seq);
+
+      break;
+    }
+
+    auto csize = FileUtil::size(cfile + ".sst");
+    if (cumul_size + csize > max_merged_size) {
+      break;
+    }
+
+    ++end;
+    cumul_size += csize;
+    cumul_recs += c.num_records;
+    next_seq = c.start_sequence + c.num_records;
+  }
+
+  if (begin == end) {
+    return false;
+  }
+
+  if (cumul_size < min_merged_size) {
+    return false;
+  }
+
+  for (int i = begin; i <= end; ++i) {
+    input_chunks->emplace_back(chunks[i]);
+  }
+
+  output_chunk->chunk_id = rnd_.hex128();
+  output_chunk->start_sequence = chunks[begin].start_sequence;
+  output_chunk->num_records = cumul_recs;
+  output_chunk->replica_id = replica_id;
+  return true;
 }
 
 } // namespace eventdb

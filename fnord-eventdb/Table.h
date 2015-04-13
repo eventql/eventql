@@ -109,6 +109,8 @@ public:
 
   bool findNextMerge(
       RefPtr<TableSnapshot> snapshot,
+      const String& db_path,
+      const String& table_name,
       const String& replica_id,
       Vector<TableChunkRef>* input_chunks,
       TableChunkRef* output_chunk);
@@ -116,6 +118,9 @@ public:
 protected:
 
   bool tryFoldIntoMerge(
+      const String& db_path,
+      const String& table_name,
+      const String& replica_id,
       size_t min_merged_size,
       size_t max_merged_size,
       const Vector<TableChunkRef>& chunks,
@@ -124,6 +129,7 @@ protected:
       TableChunkRef* output_chunk);
 
   Vector<Pair<uint64_t, uint64_t>> steps_;
+  Random rnd_;
 };
 
 class Table : public RefCounted {
