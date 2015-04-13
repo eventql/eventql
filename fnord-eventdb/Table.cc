@@ -124,7 +124,7 @@ size_t Table::commit() {
 }
 
 void Table::merge() {
-  while (merge(1024 * 1024 * 1, 1024 * 1024 * 250));
+  while (merge(1024 * 1024 * 200, 1024 * 1024 * 250));
   while (merge(1024 * 1024 * 1, 1024 * 1024 * 25));
 }
 
