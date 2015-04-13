@@ -131,7 +131,11 @@ void Table::merge() {
   Vector<TableChunkRef> input_chunks;
   TableChunkRef output_chunk;
 
-  if (!TableMergePolicy::findNextMerge(snap, &input_chunks, &output_chunk)) {
+  if (!merge_policy_.findNextMerge(
+        snap,
+        replica_id_,
+        &input_chunks,
+        &output_chunk)) {
     return;
   }
 
@@ -459,6 +463,11 @@ void TableChunkMerge::merge() {
   writer_.commit();
 }
 
+TableMergePolicy::TableMergePolicy() {
+  steps_.emplace_back(1024 * 1024 * 90, 1024 * 1024 * 100);
+  steps_.emplace_back(1024 * 1024, 1024 * 1024 * 25);
+}
+
 void TableChunkMerge::readTable(const String& filename) {
   sstable::SSTableReader reader(File::openFile(filename, File::O_READ));
 
@@ -486,6 +495,49 @@ void TableChunkMerge::readTable(const String& filename) {
       break;
     }
   }
+}
+
+bool TableMergePolicy::findNextMerge(
+    RefPtr<TableSnapshot> snapshot,
+    const String& replica_id,
+    Vector<TableChunkRef>* input_chunks,
+    TableChunkRef* output_chunk) {
+  Vector<TableChunkRef> chunks;
+  for (const auto& c : snapshot->head->chunks) {
+    if (c.replica_id == replica_id) {
+      chunks.emplace_back(c);
+    }
+  }
+
+  std::sort(chunks.begin(), chunks.end(), [] (
+      const TableChunkRef& a,
+      const TableChunkRef& b) -> bool {
+    return a.start_sequence < b.start_sequence;
+  });
+
+
+  for (int i = 0; i < chunks.size(); ++i) {
+    for (const auto& s : steps_) {
+      auto min = s.first;
+      auto max = s.second;
+
+      if (tryFoldIntoMerge(min, max, chunks, i, input_chunks, output_chunk)) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
+bool TableMergePolicy::tryFoldIntoMerge(
+    size_t min_merged_size,
+    size_t max_merged_size,
+    const Vector<TableChunkRef>& chunks,
+    size_t idx,
+    Vector<TableChunkRef>* input_chunks,
+    TableChunkRef* output_chunk) {
+  return false;
 }
 
 } // namespace eventdb

@@ -105,11 +105,25 @@ protected:
 class TableMergePolicy {
 public:
 
-  static bool findNextMerge(
+  TableMergePolicy();
+
+  bool findNextMerge(
       RefPtr<TableSnapshot> snapshot,
+      const String& replica_id,
       Vector<TableChunkRef>* input_chunks,
       TableChunkRef* output_chunk);
 
+protected:
+
+  bool tryFoldIntoMerge(
+      size_t min_merged_size,
+      size_t max_merged_size,
+      const Vector<TableChunkRef>& chunks,
+      size_t idx,
+      Vector<TableChunkRef>* input_chunks,
+      TableChunkRef* output_chunk);
+
+  Vector<Pair<uint64_t, uint64_t>> steps_;
 };
 
 class Table : public RefCounted {
@@ -157,6 +171,7 @@ protected:
   List<RefPtr<TableArena>> arenas_;
   Random rnd_;
   RefPtr<TableGeneration> head_;
+  TableMergePolicy merge_policy_;
 };
 
 } // namespace eventdb
