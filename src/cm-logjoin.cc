@@ -405,11 +405,14 @@ int main(int argc, const char** argv) {
       fnord::logError("cm.logjoin", e, "upload failed");
     }
 
+    if (cm_logjoin_shutdown.load()) {
+      break;
+    }
+
     stat_stream_time_low.set(watermarks.first.unixMicros());
     stat_stream_time_high.set(watermarks.second.unixMicros());
     stat_active_sessions.set(logjoin.numSessions());
     stat_dbsize.set(FileUtil::du_c(sessdb_path));
-
 
     auto etime = WallClock::now().unixMicros() - last_iter.unixMicros();
     if (i < 1 && etime < rate_limit_micros) {
