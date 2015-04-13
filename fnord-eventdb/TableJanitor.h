@@ -29,7 +29,7 @@ protected:
 
   TableRepository* repo_;
   uint64_t interval_;
-  bool running_;
+  std::atomic<bool> running_;
   std::thread thread_;
 };
 
