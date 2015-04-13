@@ -124,76 +124,21 @@ size_t Table::commit() {
 }
 
 void Table::merge() {
-  while (merge(1024 * 1024 * 200, 1024 * 1024 * 250));
-  while (merge(1024 * 1024 * 1, 1024 * 1024 * 25));
-}
-
-bool Table::merge(size_t min_chunk_size, size_t max_chunk_size) {
   std::unique_lock<std::mutex> merge_lk(merge_mutex_);
 
   auto snap = getSnapshot();
-  Vector<TableChunkRef> chunks;
-  for (const auto& c : snap->head->chunks) {
-    if (c.replica_id == replica_id_) {
-      chunks.emplace_back(c);
-    }
-  }
-
-  std::sort(chunks.begin(), chunks.end(), [] (
-      const TableChunkRef& a,
-      const TableChunkRef& b) -> bool {
-    return a.start_sequence < b.start_sequence;
-  });
 
   Vector<TableChunkRef> input_chunks;
-  Set<String> input_chunk_ids;
-  size_t cumul_size = 0;
-  size_t cumul_recs = 0;
-  for (int i = 0; i < chunks.size(); ++i) {
-    const auto& c = chunks[i];
-    auto cfile = StringUtil::format(
-        "$0/$1.$2.$3",
-        db_path_,
-        name_,
-        c.replica_id,
-        c.chunk_id);
-
-    auto csize = FileUtil::size(cfile + ".sst");
-
-    if ((cumul_size + csize) > max_chunk_size) {
-      if (input_chunks.empty()) {
-        continue;
-      } if (input_chunks.size() == 1) {
-        input_chunks.clear();
-        input_chunk_ids.clear();
-        cumul_size = 0;
-        cumul_recs = 0;
-      } else {
-        break;
-      }
-    }
-
-    if (!input_chunks.empty() && c.start_sequence != (
-          input_chunks.back().start_sequence +
-          input_chunks.back().num_records)) {
-      break;
-    }
-
-    input_chunks.emplace_back(c);
-    input_chunk_ids.emplace(c.chunk_id);
-    cumul_size += csize;
-    cumul_recs += c.num_records;
-  }
-
-  if (input_chunks.size() < 2 || cumul_size < min_chunk_size) {
-    return false;
-  }
-
   TableChunkRef output_chunk;
-  output_chunk.replica_id = replica_id_;
-  output_chunk.chunk_id = rnd_.hex128();
-  output_chunk.start_sequence = input_chunks.front().start_sequence;
-  output_chunk.num_records = cumul_recs;
+
+  if (!TableMergePolicy::findNextMerge(snap, &input_chunks, &output_chunk)) {
+    return;
+  }
+
+  Set<String> input_chunk_ids;
+  for (const auto& c : input_chunks) {
+    input_chunk_ids.emplace(c.chunk_id);
+  }
 
   fnord::logInfo(
       "fnord.evdb",
@@ -230,12 +175,11 @@ bool Table::merge(size_t min_chunk_size, size_t max_chunk_size) {
   if (input_chunk_ids.size() > 0) {
     fnord::logInfo("fnord.evdb", "Aborting merging for table '$0'", name_);
     // FIXPAUL delete orphaned files...
-    return true;
+    return;
   }
 
   head_ = next;
   writeSnapshot();
-  return true;
 }
 
 void Table::gc(size_t keep_generations, size_t keep_arenas) {
