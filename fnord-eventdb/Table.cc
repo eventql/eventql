@@ -124,10 +124,11 @@ size_t Table::commit() {
 }
 
 void Table::merge() {
-  merge(1024 * 1024 * 1, 1024 * 1024 * 25);
+  while (merge(1024 * 1024 * 1, 1024 * 1024 * 250));
+  while (merge(1024 * 1024 * 1, 1024 * 1024 * 25));
 }
 
-void Table::merge(size_t min_chunk_size, size_t max_chunk_size) {
+bool Table::merge(size_t min_chunk_size, size_t max_chunk_size) {
   std::unique_lock<std::mutex> merge_lk(merge_mutex_);
 
   auto snap = getSnapshot();
@@ -185,7 +186,7 @@ void Table::merge(size_t min_chunk_size, size_t max_chunk_size) {
   }
 
   if (input_chunks.size() < 2 || cumul_size < min_chunk_size) {
-    return;
+    return false;
   }
 
   TableChunkRef output_chunk;
@@ -229,11 +230,12 @@ void Table::merge(size_t min_chunk_size, size_t max_chunk_size) {
   if (input_chunk_ids.size() > 0) {
     fnord::logInfo("fnord.evdb", "Aborting merging for table '$0'", name_);
     // FIXPAUL delete orphaned files...
-    return;
+    return true;
   }
 
   head_ = next;
   writeSnapshot();
+  return true;
 }
 
 void Table::gc(size_t keep_generations, size_t keep_arenas) {
