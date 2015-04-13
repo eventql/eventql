@@ -27,6 +27,17 @@ RefPtr<Table> TableRepository::findTable(const String& name) const {
   return table->second;
 }
 
+Vector<RefPtr<Table>> TableRepository::tables() const {
+  Vector<RefPtr<Table>> tables;
+
+  std::unique_lock<std::mutex> lk(mutex_);
+  for (auto& t : tables_) {
+    tables.emplace_back(t.second);
+  }
+
+  return tables;
+}
+
 } // namespace eventdb
 } // namespace fnord
 

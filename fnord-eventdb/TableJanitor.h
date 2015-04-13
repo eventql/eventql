@@ -7,24 +7,29 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#ifndef _FNORD_EVENTDB_TABLEREPOSITORY_H
-#define _FNORD_EVENTDB_TABLEREPOSITORY_H
+#ifndef _FNORD_EVENTDB_TABLEREJANITOR_H
+#define _FNORD_EVENTDB_TABLEREJANITOR_H
+#include <thread>
 #include <fnord-base/stdtypes.h>
-#include <fnord-eventdb/Table.h>
+#include <fnord-eventdb/TableRepository.h>
 
 namespace fnord {
 namespace eventdb {
 
-class TableRepository {
+class TableJanitor {
 public:
 
-  void addTable(RefPtr<Table> table);
-  RefPtr<Table> findTable(const String& name) const;
-  Vector<RefPtr<Table>> tables() const;
+  TableJanitor(TableRepository* repo);
+  void start();
+  void stop();
 
 protected:
-  HashMap<String, RefPtr<Table>> tables_;
-  mutable std::mutex mutex_;
+  void run();
+
+  TableRepository* repo_;
+  uint64_t interval_;
+  bool running_;
+  std::thread thread_;
 };
 
 } // namespace eventdb
