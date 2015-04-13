@@ -235,9 +235,13 @@ void Table::merge(size_t min_chunk_size, size_t max_chunk_size) {
   writeSnapshot();
 }
 
-void Table::gc(size_t keep_generations /* = 2 */) {
+void Table::gc(size_t keep_generations, size_t keep_arenas) {
   std::unique_lock<std::mutex> lk(mutex_);
   auto head_gen = head_->generation;
+
+  while (arenas_.size() > (keep_arenas + 1)) {
+    arenas_.pop_back();
+  }
   lk.unlock();
 
   if (head_gen < keep_generations) {

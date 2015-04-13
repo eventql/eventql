@@ -118,7 +118,7 @@ public:
 
   size_t commit();
   void merge();
-  void gc(size_t keep_generations = 2);
+  void gc(size_t keep_generations = 2, size_t keep_arenas = 5);
 
   RefPtr<TableSnapshot> getSnapshot();
 
