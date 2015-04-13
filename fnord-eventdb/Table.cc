@@ -123,8 +123,7 @@ size_t Table::commit() {
 }
 
 void Table::merge() {
-  merge(1024 * 1024 * 90, 1024 * 1024 * 100);
-  merge(1024 * 1024 * 1, 1024 * 1024 * 10);
+  merge(1024 * 1024 * 1, 1024 * 1024 * 25);
 }
 
 void Table::merge(size_t min_chunk_size, size_t max_chunk_size) {
@@ -170,7 +169,9 @@ void Table::merge(size_t min_chunk_size, size_t max_chunk_size) {
     if ((cumul_size + csize) > max_chunk_size) {
       if (input_chunks.size() == 1) {
         input_chunks.clear();
+        input_chunk_ids.clear();
         cumul_size = 0;
+        cumul_recs = 0;
       } else {
         break;
       }
@@ -187,6 +188,8 @@ void Table::merge(size_t min_chunk_size, size_t max_chunk_size) {
     cumul_size += csize;
     cumul_recs += c.num_records;
   }
+
+  fnord::iputs("ichunks: $0 $1", input_chunk_ids, cumul_size);
 
   if (input_chunks.size() < 2 || cumul_size < min_chunk_size) {
     return;
