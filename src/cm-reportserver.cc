@@ -34,6 +34,7 @@
 #include "fnord-sstable/SSTableServlet.h"
 #include "fnord-eventdb/EventDBServlet.h"
 #include "fnord-eventdb/TableRepository.h"
+#include "fnord-eventdb/TableJanitor.h"
 #include "fnord-mdb/MDB.h"
 #include "fnord-mdb/MDBUtil.h"
 #include "common.h"
@@ -137,6 +138,9 @@ int main(int argc, const char** argv) {
           dir,
           joinedSessionsSchema()));
 
+  eventdb::TableJanitor table_janitor(&table_repo);
+  table_janitor.start();
+
   eventdb::EventDBServlet eventdb_servlet(&table_repo);
 
   /* analytics */
@@ -234,6 +238,8 @@ int main(int argc, const char** argv) {
   });
 
   ev.run();
+
+  table_janitor.stop();
   return 0;
 }
 
