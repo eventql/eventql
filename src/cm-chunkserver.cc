@@ -108,12 +108,12 @@ int main(int argc, const char** argv) {
       "<id>");
 
   flags.defineFlag(
-      "artifacts",
+      "datadir",
       cli::FlagParser::T_STRING,
       true,
       NULL,
       NULL,
-      "artifacts path",
+      "datadir path",
       "<path>");
 
   flags.defineFlag(
@@ -147,7 +147,7 @@ int main(int argc, const char** argv) {
   http_router.addRouteByPrefixMatch("/file", &file_servlet);
 
   /* add all files to whitelist vfs */
-  auto dir = flags.getString("artifacts");
+  auto dir = flags.getString("datadir");
   FileUtil::ls(dir, [&vfs, &dir] (const String& file) -> bool {
     vfs.registerFile(file, FileUtil::joinPaths(dir, file));
     fnord::logInfo("cm.chunkserver", "[VFS] Adding file: $0", file);
@@ -169,7 +169,7 @@ int main(int argc, const char** argv) {
   eventdb::EventDBServlet eventdb_servlet(&table_repo);
 
   /* analytics */
-  cm::AnalyticsQueryEngine analytics(8, dir);
+  cm::AnalyticsQueryEngine analytics(8, dir, &table_repo);
   cm::AnalyticsServlet analytics_servlet(&analytics);
   http_router.addRouteByPrefixMatch("/analytics", &analytics_servlet, &tpool);
   http_router.addRouteByPrefixMatch("/eventdb", &eventdb_servlet, &tpool);
@@ -264,8 +264,11 @@ int main(int argc, const char** argv) {
 
   ev.run();
 
-  table_janitor.stop();
-  table_janitor.check();
+  if (!readonly) {
+    table_janitor.stop();
+    table_janitor.check();
+  }
+
   fnord::logInfo("cm.chunkserver", "Exiting...");
 
   return 0;
