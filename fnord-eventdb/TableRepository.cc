@@ -12,27 +12,46 @@
 namespace fnord {
 namespace eventdb {
 
-void TableRepository::addTable(RefPtr<TableWriter> table) {
+TableRepository::TableRepository(
+    const String& db_path,
+    const String& replica_id,
+    bool readonly) :
+    db_path_(db_path),
+    replica_id_(replica_id),
+    readonly_(readonly) {}
+
+void TableRepository::addTable(
+    const String& table_name,
+    const msg::MessageSchema& schema) {
   std::unique_lock<std::mutex> lk(mutex_);
-  tables_.emplace(table->name(), table);
+
+  if (!readonly_) {
+    auto table_writer = TableWriter::open(
+          table_name,
+          replica_id_,
+          db_path_,
+          schema);
+
+    table_writers_.emplace(table_name, table_writer);
+  }
 }
 
-RefPtr<TableWriter> TableRepository::findTable(const String& name) const {
+RefPtr<TableWriter> TableRepository::findTableWriter(const String& name) const {
   std::unique_lock<std::mutex> lk(mutex_);
-  auto table = tables_.find(name);
-  if (table == tables_.end()) {
+  auto table = table_writers_.find(name);
+  if (table == table_writers_.end()) {
     RAISEF(kIndexError, "unknown table: '$0'", name);
   }
 
   return table->second;
 }
 
-Vector<RefPtr<TableWriter>> TableRepository::tables() const {
-  Vector<RefPtr<TableWriter>> tables;
+Set<String> TableRepository::tables() const {
+  Set<String> tables;
 
   std::unique_lock<std::mutex> lk(mutex_);
-  for (auto& t : tables_) {
-    tables.emplace_back(t.second);
+  for (auto& t : table_writers_) {
+    tables.emplace(t.first);
   }
 
   return tables;
