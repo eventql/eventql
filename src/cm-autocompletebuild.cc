@@ -121,7 +121,8 @@ int main(int argc, const char** argv) {
 
   //auto index_path = flags.getString("index");
   //auto conf_path = flags.getString("conf");
-  auto tmpdir = flags.getString("tempdir");
+  auto tempdir = flags.getString("tempdir");
+  auto datadir = flags.getString("datadir");
 
   /* open index */
   //auto index_reader = cm::IndexReader::openIndex(index_path);
@@ -138,22 +139,37 @@ int main(int argc, const char** argv) {
       flags.getString("datadir"),
       joinedSessionsSchema());
 
+  auto snap = table->getSnapshot();
+
+  //Vector<String> input_tables;
   Vector<String> searchterm_x_e1_tables;
 
-//  report_builder.addReport(
-//      new CTRBySearchTermCrossCategoryMapper(
-//          jq_source,
-//          new CTRCounterTableSink(
-//              0,
-//              0,
-//              StringUtil::format(
-//                  "$0/dawanda_ctr_by_searchterm_cross_e1.$1.sstable",
-//                  dir,
-//                  buildid)),
-//          "category1",
-//          ItemEligibility::ALL,
-//          index_reader));
-//
+  for (const auto& c : snap->head->chunks) {
+    auto input_table = StringUtil::format(
+        "$0/$1.$2.$3.cst",
+        datadir,
+        "dawanda_joined_sessions",
+        c.replica_id,
+        c.chunk_id);
+
+
+    /* map serchterm x e1 */
+    auto searchterm_x_e1_table = StringUtil::format(
+        "$0/dawanda_ctr_by_searchterm_cross_e1.$1.$2.sst",
+        tempdir,
+        c.replica_id,
+        c.chunk_id);
+
+    searchterm_x_e1_tables.emplace_back(searchterm_x_e1_table);
+    report_builder.addReport(
+        new CTRBySearchTermCrossCategoryMapper(
+            new AnalyticsTableScanSource(input_table),
+            new CTRCounterTableSink(0, 0, searchterm_x_e1_table),
+            "category1",
+            ItemEligibility::ALL,
+            nullptr));
+  }
+
 //  report_builder.addReport(
 //      new RelatedTermsMapper(
 //          new CTRCounterTableSource(related_terms_sources),
@@ -168,17 +184,17 @@ int main(int argc, const char** argv) {
           new TermInfoTableSource(Set<String> {
             StringUtil::format(
                   "$0/dawanda_related_terms.$1.sstable",
-                  tmpdir,
+                  tempdir,
                   buildid),
             StringUtil::format(
                   "$0/dawanda_top_cats_by_searchterm_e1.$1.sstable",
-                  tmpdir,
+                  tempdir,
                   buildid)
           }),
           new TermInfoTableSink(
               StringUtil::format(
                   "$0/dawanda_termstats.$1.sstable",
-                  tmpdir,
+                  tempdir,
                   buildid))));
 
 
