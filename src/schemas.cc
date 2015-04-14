@@ -181,6 +181,14 @@ msg::MessageSchema joinedSessionsSchema() {
       false,
       false);
 
+  query_items.fields.emplace_back(
+      20,
+      "item_id",
+      msg::FieldType::STRING,
+      1024,
+      false,
+      false);
+
   queries.fields.emplace_back(query_items);
   fields.emplace_back(queries);
 

@@ -123,9 +123,15 @@ void LogJoinTarget::onSession(
 
     for (const auto& item : q.items) {
       auto& item_obj = qry_obj.addChild(schema.id("queries.items"));
+
       item_obj.addChild(
           schema.id("queries.items.position"),
           (uint32_t) item.position);
+
+      item_obj.addChild(
+          schema.id("queries.items.item_id"),
+          item.item.docID().docid);
+
       if (item.clicked) {
         item_obj.addChild(schema.id("queries.items.clicked"), msg::TRUE);
       } else {
