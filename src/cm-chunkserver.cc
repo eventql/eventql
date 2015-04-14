@@ -158,16 +158,13 @@ int main(int argc, const char** argv) {
   auto readonly = flags.isSet("readonly");
   auto replica = flags.getString("replica");
 
-  eventdb::TableRepository table_repo;
-  table_repo.addTable(
-      eventdb::TableWriter::open(
-          "dawanda_joined_sessions",
-          replica,
-          dir,
-          joinedSessionsSchema()));
+  eventdb::TableRepository table_repo(dir, replica, readonly);
+  table_repo.addTable("dawanda_joined_sessions", joinedSessionsSchema());
 
   eventdb::TableJanitor table_janitor(&table_repo);
-  table_janitor.start();
+  if (!readonly) {
+    table_janitor.start();
+  }
 
   eventdb::EventDBServlet eventdb_servlet(&table_repo);
 
