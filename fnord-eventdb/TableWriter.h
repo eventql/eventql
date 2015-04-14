@@ -15,6 +15,7 @@
 #include <fnord-msg/MessageSchema.h>
 #include <fnord-msg/MessageObject.h>
 #include <fnord-eventdb/TableArena.h>
+#include <fnord-eventdb/TableSnapshot.h>
 #include "fnord-sstable/sstablereader.h"
 #include "fnord-sstable/sstablewriter.h"
 #include "fnord-sstable/SSTableColumnSchema.h"
@@ -26,36 +27,6 @@
 
 namespace fnord {
 namespace eventdb {
-
-struct TableChunkRef {
-  String replica_id;
-  String chunk_id;
-  uint64_t start_sequence;
-  uint64_t num_records;
-  uint64_t sstable_checksum;
-  uint64_t cstable_checksum;
-  uint64_t index_checksum;
-};
-
-struct TableGeneration : public RefCounted {
-  String table_name;
-  uint64_t generation;
-  Vector<TableChunkRef> chunks;
-
-  TableGeneration();
-  RefPtr<TableGeneration> clone() const;
-  void encode(Buffer* buf);
-  void decode(const Buffer& buf);
-};
-
-struct TableSnapshot : public RefCounted {
-  TableSnapshot(
-      RefPtr<TableGeneration> _head,
-      List<RefPtr<TableArena>> _arenas);
-
-  RefPtr<TableGeneration> head;
-  List<RefPtr<TableArena>> arenas;
-};
 
 class TableChunkWriter {
 public:
