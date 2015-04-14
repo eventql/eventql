@@ -27,13 +27,16 @@
 #include "fnord-sstable/SSTableColumnWriter.h"
 #include <fnord-fts/fts.h>
 #include <fnord-fts/fts_common.h>
+#include "fnord-eventdb/TableReader.h"
 #include "common.h"
+#include "schemas.h"
 #include "CustomerNamespace.h"
 #include "FeatureSchema.h"
 #include "JoinedQuery.h"
 #include "CTRCounter.h"
 #include "IndexReader.h"
 #include "analytics/ReportBuilder.h"
+#include "analytics/AnalyticsTableScanSource.h"
 #include "analytics/JoinedQueryTableSource.h"
 #include "analytics/CTRByPositionMapper.h"
 #include "analytics/CTRByPageMapper.h"
@@ -74,6 +77,15 @@ int main(int argc, const char** argv) {
   //    NULL,
   //    "index directory",
   //    "<path>");
+
+  flags.defineFlag(
+      "replica",
+      cli::FlagParser::T_STRING,
+      true,
+      NULL,
+      NULL,
+      "replica id",
+      "<id>");
 
   flags.defineFlag(
       "datadir",
@@ -120,19 +132,26 @@ int main(int argc, const char** argv) {
 
   auto buildid = 0;
 
+  auto table = eventdb::TableReader::open(
+      "dawanda_joined_sessions",
+      flags.getString("replica"),
+      flags.getString("datadir"),
+      joinedSessionsSchema());
+
+  Vector<String> searchterm_x_e1_tables;
+
 //  report_builder.addReport(
 //      new CTRBySearchTermCrossCategoryMapper(
 //          jq_source,
 //          new CTRCounterTableSink(
-//              g * kMicrosPerHour * 4,
-//              (g + 1) * kMicrosPerHour * 4,
+//              0,
+//              0,
 //              StringUtil::format(
 //                  "$0/dawanda_ctr_by_searchterm_cross_e1.$1.sstable",
 //                  dir,
-//                  g)),
+//                  buildid)),
 //          "category1",
 //          ItemEligibility::ALL,
-//          analyzer,
 //          index_reader));
 //
 //  report_builder.addReport(
