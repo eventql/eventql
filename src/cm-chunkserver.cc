@@ -130,31 +130,14 @@ int main(int argc, const char** argv) {
   Logger::get()->setMinimumLogLevel(
       strToLogLevel(flags.getString("loglevel")));
 
-  WhitelistVFS vfs;
-
   /* start http server */
   fnord::thread::ThreadPool tpool;
   fnord::http::HTTPRouter http_router;
   fnord::http::HTTPServer http_server(&http_router, &ev);
   http_server.listen(flags.getInt("http_port"));
 
-  /* sstable servlet */
-  sstable::SSTableServlet sstable_servlet("/sstable", &vfs);
-  http_router.addRouteByPrefixMatch("/sstable", &sstable_servlet);
-
-  /* file servlet */
-  http::VFSFileServlet file_servlet("/file", &vfs);
-  http_router.addRouteByPrefixMatch("/file", &file_servlet);
-
-  /* add all files to whitelist vfs */
-  auto dir = flags.getString("datadir");
-  FileUtil::ls(dir, [&vfs, &dir] (const String& file) -> bool {
-    vfs.registerFile(file, FileUtil::joinPaths(dir, file));
-    fnord::logInfo("cm.chunkserver", "[VFS] Adding file: $0", file);
-    return true;
-  });
-
   /* eventdb */
+  auto dir = flags.getString("datadir");
   auto readonly = flags.isSet("readonly");
   auto replica = flags.getString("replica");
 
