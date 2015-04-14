@@ -40,7 +40,9 @@ void TableJanitor::check() {
 
   auto tables = repo_->tables();
 
-  for (auto& tbl : tables) {
+  for (const auto& table_name : tables) {
+    auto tbl = repo_->findTableWriter(table_name);
+
     tbl->commit();
     tbl->merge();
     tbl->gc();

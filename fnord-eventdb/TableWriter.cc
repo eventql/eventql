@@ -9,7 +9,7 @@
  */
 #include <algorithm>
 #include <thread>
-#include <fnord-eventdb/Table.h>
+#include <fnord-eventdb/TableWriter.h>
 #include <fnord-base/logging.h>
 #include <fnord-base/io/fileutil.h>
 #include <fnord-base/util/binarymessagewriter.h>
@@ -17,7 +17,6 @@
 #include <fnord-msg/MessageDecoder.h>
 #include <fnord-msg/MessageEncoder.h>
 #include <fnord-msg/MessagePrinter.h>
-
 
 namespace fnord {
 namespace eventdb {

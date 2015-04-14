@@ -64,7 +64,7 @@ void EventDBServlet::insertRecord(
     return;
   }
 
-  auto tbl = tables_->findTable(table);
+  auto tbl = tables_->findTableWriter(table);
   tbl->addRecords(req->body());
 
   res->setStatus(http::kStatusCreated);
@@ -83,7 +83,7 @@ void EventDBServlet::commitTable(
     return;
   }
 
-  auto tbl = tables_->findTable(table);
+  auto tbl = tables_->findTableWriter(table);
   auto n = tbl->commit();
 
   res->setStatus(http::kStatusOK);
@@ -103,7 +103,7 @@ void EventDBServlet::mergeTable(
     return;
   }
 
-  auto tbl = tables_->findTable(table);
+  auto tbl = tables_->findTableWriter(table);
   tbl->merge();
 
   res->setStatus(http::kStatusOK);
@@ -122,7 +122,7 @@ void EventDBServlet::gcTable(
     return;
   }
 
-  auto tbl = tables_->findTable(table);
+  auto tbl = tables_->findTableWriter(table);
   tbl->gc();
 
   res->setStatus(http::kStatusOK);
@@ -141,7 +141,7 @@ void EventDBServlet::tableInfo(
     return;
   }
 
-  auto tbl = tables_->findTable(table);
+  auto tbl = tables_->findTableWriter(table);
   auto snap = tbl->getSnapshot();
 
   uint64_t num_rows_commited = 0;

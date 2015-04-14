@@ -10,7 +10,8 @@
 #ifndef _FNORD_EVENTDB_TABLEREPOSITORY_H
 #define _FNORD_EVENTDB_TABLEREPOSITORY_H
 #include <fnord-base/stdtypes.h>
-#include <fnord-eventdb/Table.h>
+#include <fnord-eventdb/TableWriter.h>
+#include <fnord-msg/MessageSchema.h>
 
 namespace fnord {
 namespace eventdb {
@@ -18,12 +19,21 @@ namespace eventdb {
 class TableRepository {
 public:
 
-  void addTable(RefPtr<TableWriter> table);
-  RefPtr<TableWriter> findTable(const String& name) const;
-  Vector<RefPtr<TableWriter>> tables() const;
+  TableRepository(
+      const String& db_path,
+      const String& replica_id,
+      bool readonly);
+
+  void addTable(const String& table_name, const msg::MessageSchema& schema);
+
+  RefPtr<TableWriter> findTableWriter(const String& name) const;
+  Set<String> tables() const;
 
 protected:
-  HashMap<String, RefPtr<TableWriter>> tables_;
+  String db_path_;
+  String replica_id_;
+  bool readonly_;
+  HashMap<String, RefPtr<TableWriter>> table_writers_;
   mutable std::mutex mutex_;
 };
 
