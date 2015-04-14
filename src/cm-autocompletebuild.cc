@@ -69,14 +69,14 @@ int main(int argc, const char** argv) {
   //    "conf directory",
   //    "<path>");
 
-  //flags.defineFlag(
-  //    "index",
-  //    cli::FlagParser::T_STRING,
-  //    false,
-  //    NULL,
-  //    NULL,
-  //    "index directory",
-  //    "<path>");
+  flags.defineFlag(
+      "index",
+      cli::FlagParser::T_STRING,
+      false,
+      NULL,
+      NULL,
+      "index directory",
+      "<path>");
 
   flags.defineFlag(
       "replica",
@@ -119,13 +119,13 @@ int main(int argc, const char** argv) {
   Logger::get()->setMinimumLogLevel(
       strToLogLevel(flags.getString("loglevel")));
 
-  //auto index_path = flags.getString("index");
+  auto index_path = flags.getString("index");
   //auto conf_path = flags.getString("conf");
   auto tempdir = flags.getString("tempdir");
   auto datadir = flags.getString("datadir");
 
   /* open index */
-  //auto index_reader = cm::IndexReader::openIndex(index_path);
+  auto index_reader = cm::IndexReader::openIndex(index_path);
   //auto analyzer = RefPtr<fts::Analyzer>(new fts::Analyzer(conf_path));
 
   /* set up reportbuilder */
@@ -165,8 +165,7 @@ int main(int argc, const char** argv) {
             new AnalyticsTableScanSource(input_table),
             new CTRCounterTableSink(0, 0, searchterm_x_e1_table),
             "category1",
-            ItemEligibility::ALL,
-            nullptr));
+            index_reader));
   }
 
 //  report_builder.addReport(
