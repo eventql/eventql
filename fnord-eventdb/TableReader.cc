@@ -18,11 +18,10 @@
 namespace fnord {
 namespace eventdb {
 
-RefPtr<TableReader> TableReader::open(
+static uint64_t findHeadGen(
     const String& table_name,
     const String& replica_id,
-    const String& db_path,
-    const msg::MessageSchema& schema) {
+    const String& db_path) {
   uint64_t head_gen = 0;
   auto gen_prefix = StringUtil::format("$0.$1.", table_name, replica_id);
   FileUtil::ls(db_path, [gen_prefix, &head_gen] (const String& file) -> bool {
@@ -39,12 +38,21 @@ RefPtr<TableReader> TableReader::open(
     return true;
   });
 
+  return head_gen;
+}
+
+RefPtr<TableReader> TableReader::open(
+    const String& table_name,
+    const String& replica_id,
+    const String& db_path,
+    const msg::MessageSchema& schema) {
+
   return new TableReader(
       table_name,
       replica_id,
       db_path,
       schema,
-      head_gen);
+      findHeadGen(table_name, replica_id, db_path));
 }
 
 TableReader::TableReader(
@@ -67,6 +75,25 @@ RefPtr<TableSnapshot> TableReader::getSnapshot() {
   std::unique_lock<std::mutex> lk(mutex_);
   auto g = head_gen_;
   lk.unlock();
+
+  auto maxg = g + 100;
+  while (g < maxg && !FileUtil::exists(
+      StringUtil::format(
+          "$0$1.$2.$3.idx",
+          db_path_,
+          name_,
+          replica_id_,
+          g + 1))) ++g;
+
+  if (!FileUtil::exists(
+      StringUtil::format(
+          "$0$1.$2.$3.idx",
+          db_path_,
+          name_,
+          replica_id_,
+          g ))) {
+    g = findHeadGen(name_, replica_id_, db_path_);
+  }
 
   while (FileUtil::exists(
       StringUtil::format(
