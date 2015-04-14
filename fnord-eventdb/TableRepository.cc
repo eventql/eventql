@@ -25,14 +25,22 @@ void TableRepository::addTable(
     const msg::MessageSchema& schema) {
   std::unique_lock<std::mutex> lk(mutex_);
 
-  if (!readonly_) {
-    auto table_writer = TableWriter::open(
+  table_readers_.emplace(
+      table_name,
+      TableReader::open(
           table_name,
           replica_id_,
           db_path_,
-          schema);
+          schema));
 
-    table_writers_.emplace(table_name, table_writer);
+  if (!readonly_) {
+    table_writers_.emplace(
+        table_name,
+        TableWriter::open(
+            table_name,
+            replica_id_,
+            db_path_,
+            schema));
   }
 }
 
@@ -47,12 +55,28 @@ RefPtr<TableWriter> TableRepository::findTableWriter(
   return table->second;
 }
 
+RefPtr<TableReader> TableRepository::findTableReader(
+    const String& table_name) const {
+  std::unique_lock<std::mutex> lk(mutex_);
+  auto table = table_readers_.find(table_name);
+  if (table == table_readers_.end()) {
+    RAISEF(kIndexError, "unknown table: '$0'", table_name);
+  }
+
+  return table->second;
+}
+
 RefPtr<TableSnapshot> TableRepository::getSnapshot(
     const String& table_name) const {
   std::unique_lock<std::mutex> lk(mutex_);
 
   if (readonly_) {
+    auto table = table_readers_.find(table_name);
+    if (table == table_readers_.end()) {
+      RAISEF(kIndexError, "unknown table: '$0'", table_name);
+    }
 
+    return table->second->getSnapshot();
   } else {
     auto table = table_writers_.find(table_name);
     if (table == table_writers_.end()) {

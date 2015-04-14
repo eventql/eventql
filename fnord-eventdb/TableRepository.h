@@ -10,6 +10,7 @@
 #ifndef _FNORD_EVENTDB_TABLEREPOSITORY_H
 #define _FNORD_EVENTDB_TABLEREPOSITORY_H
 #include <fnord-base/stdtypes.h>
+#include <fnord-eventdb/TableReader.h>
 #include <fnord-eventdb/TableWriter.h>
 #include <fnord-msg/MessageSchema.h>
 
@@ -29,6 +30,7 @@ public:
   RefPtr<TableSnapshot> getSnapshot(const String& table_name) const;
 
   RefPtr<TableWriter> findTableWriter(const String& table_name) const;
+  RefPtr<TableReader> findTableReader(const String& table_name) const;
   Set<String> tables() const;
 
 protected:
@@ -36,6 +38,7 @@ protected:
   String replica_id_;
   bool readonly_;
   HashMap<String, RefPtr<TableWriter>> table_writers_;
+  HashMap<String, RefPtr<TableReader>> table_readers_;
   mutable std::mutex mutex_;
 };
 
