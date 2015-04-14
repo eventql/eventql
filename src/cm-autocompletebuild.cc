@@ -163,7 +163,7 @@ int main(int argc, const char** argv) {
     report_builder.addReport(
         new RelatedTermsMapper(
             new AnalyticsTableScanSource(input_table),
-            new CTRCounterTableSink(0, 0, related_terms_table)));
+            new TermInfoTableSink(related_terms_table)));
 
     /* map serchterm x e1 */
     auto searchterm_x_e1_table = StringUtil::format(
@@ -191,13 +191,14 @@ int main(int argc, const char** argv) {
                   buildid))));
 
   report_builder.addReport(
-      new TermInfoMergeReducer(
-          new TermInfoTableSource(searchterm_x_e1_tables),
+      new TopCategoriesByTermMapper(
+          new CTRCounterTableSource(searchterm_x_e1_tables),
           new TermInfoTableSink(
               StringUtil::format(
                   "$0/dawanda_top_cats_by_searchterm_e1.$1.sstable",
                   tempdir,
-                  buildid))));
+                  buildid)),
+          "e1-"));
 
   report_builder.addReport(
       new TermInfoMergeReducer(
