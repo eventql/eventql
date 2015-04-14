@@ -36,14 +36,31 @@ void TableRepository::addTable(
   }
 }
 
-RefPtr<TableWriter> TableRepository::findTableWriter(const String& name) const {
+RefPtr<TableWriter> TableRepository::findTableWriter(
+    const String& table_name) const {
   std::unique_lock<std::mutex> lk(mutex_);
-  auto table = table_writers_.find(name);
+  auto table = table_writers_.find(table_name);
   if (table == table_writers_.end()) {
-    RAISEF(kIndexError, "unknown table: '$0'", name);
+    RAISEF(kIndexError, "unknown table: '$0'", table_name);
   }
 
   return table->second;
+}
+
+RefPtr<TableSnapshot> TableRepository::getSnapshot(
+    const String& table_name) const {
+  std::unique_lock<std::mutex> lk(mutex_);
+
+  if (readonly_) {
+
+  } else {
+    auto table = table_writers_.find(table_name);
+    if (table == table_writers_.end()) {
+      RAISEF(kIndexError, "unknown table: '$0'", table_name);
+    }
+
+    return table->second->getSnapshot();
+  }
 }
 
 Set<String> TableRepository::tables() const {

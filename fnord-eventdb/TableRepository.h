@@ -26,7 +26,9 @@ public:
 
   void addTable(const String& table_name, const msg::MessageSchema& schema);
 
-  RefPtr<TableWriter> findTableWriter(const String& name) const;
+  RefPtr<TableSnapshot> getSnapshot(const String& table_name) const;
+
+  RefPtr<TableWriter> findTableWriter(const String& table_name) const;
   Set<String> tables() const;
 
 protected:
