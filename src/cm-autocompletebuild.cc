@@ -152,7 +152,6 @@ int main(int argc, const char** argv) {
         c.replica_id,
         c.chunk_id);
 
-
     /* map serchterm x e1 */
     auto searchterm_x_e1_table = StringUtil::format(
         "$0/dawanda_ctr_by_searchterm_cross_e1.$1.$2.sst",

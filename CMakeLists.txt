@@ -429,6 +429,7 @@ add_executable(cm-autocompletebuild
     3rdparty/libfnord/fnord-eventdb/TableReader.cc
     3rdparty/libfnord/fnord-eventdb/TableArena.cc
     3rdparty/libfnord/fnord-eventdb/TableWriter.cc
+    3rdparty/libfnord/fnord-eventdb/TableRepository.cc
     src/schemas.cc
     src/IndexReader.cc
     src/IndexWriter.cc
@@ -443,8 +444,14 @@ add_executable(cm-autocompletebuild
     src/analytics/CTRCounterTableSource.cc
     src/analytics/CTRCounterMergeReducer.cc
     #src/analytics/CTRBySearchQueryMapper.cc
+    src/analytics/TrafficSegment.cc
+    src/analytics/AnalyticsTableScan.cc
+    src/analytics/AnalyticsQuery.cc
+    src/analytics/AnalyticsQueryEngine.cc
+    src/analytics/AnalyticsQueryResult.cc
     src/analytics/CTRBySearchTermCrossCategoryMapper.cc
     src/analytics/CTRByQueryAttributeMapper.cc
+    src/analytics/AnalyticsTableScanSource.cc
     src/analytics/RelatedTermsMapper.cc
     src/analytics/TermInfoTableSink.cc
     src/analytics/TermInfoTableSource.cc
