@@ -141,8 +141,7 @@ void EventDBServlet::tableInfo(
     return;
   }
 
-  auto tbl = tables_->findTableWriter(table);
-  auto snap = tbl->getSnapshot();
+  auto snap = tables_->getSnapshot(table);
 
   uint64_t num_rows_commited = 0;
   uint64_t num_rows_arena = 0;
@@ -169,7 +168,7 @@ void EventDBServlet::tableInfo(
 
   json.beginObject();
   json.addObjectEntry("table");
-  json.addString(tbl->name());
+  json.addString(table);
   json.addComma();
   json.addObjectEntry("num_chunks");
   json.addInteger(snap->head->chunks.size());
