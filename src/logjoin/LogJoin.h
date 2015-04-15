@@ -54,6 +54,7 @@ public:
       mdb::MDBTransaction* txn);
 
   size_t numSessions() const;
+  size_t cacheSize() const;
 
   void flush(mdb::MDBTransaction* txn, DateTime stream_time);
 
