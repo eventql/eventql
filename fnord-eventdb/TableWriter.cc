@@ -548,6 +548,62 @@ void TableChunkMerge::readTable(const String& filename) {
 }
 
 void TableWriter::replicateFrom(const TableGeneration& other_table) {
+  std::unique_lock<std::mutex> lk(mutex_);
+
+  auto next = head_->clone();
+  next->generation++;
+  auto& chunks = next->chunks;
+
+  Set<String> existing_chunks_;
+  for (const auto& c : chunks) {
+    existing_chunks_.emplace(c.replica_id + "." + c.chunk_id);
+  }
+
+  for (const auto& c : other_table.chunks) {
+    if (c.replica_id == replica_id_) {
+      continue;
+    }
+
+    auto chunkname = c.replica_id + "." + c.chunk_id;
+    if (existing_chunks_.count(chunkname) > 0) {
+      continue;
+    }
+
+    fnord::logDebug(
+        "fn.evdb",
+        "Adding foreign chunk '$0' to table '$1'",
+        chunkname,
+        name_);
+
+    auto cbegin = c.start_sequence;
+    auto cend = c.start_sequence + c.num_records;
+    for (auto cur = chunks.begin(); cur != chunks.end(); ) {
+      auto tbegin = cur->start_sequence;
+      auto tend = cur->start_sequence + cur->num_records;
+
+      if ((cur->replica_id == c.replica_id) &&
+          (tbegin >= cbegin) &&
+          (tend <= cend)) {
+        fnord::logDebug(
+            "fn.evdb",
+            "Dropping foreign chunk '$0.$1' from table '$2' because it is a " \
+            "strict subset of chunk '$3'",
+            cur->replica_id,
+            cur->chunk_id,
+            name_,
+            chunkname);
+
+        cur = chunks.erase(cur);
+      } else {
+        ++cur;
+      }
+    }
+
+    chunks.emplace_back(c);
+  }
+
+  head_ = next;
+  writeSnapshot();
 }
 
 bool TableMergePolicy::findNextMerge(
