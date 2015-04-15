@@ -15,7 +15,9 @@
 namespace fnord {
 namespace eventdb {
 
-TableReplication::TableReplication() :
+TableReplication::TableReplication(
+    http::HTTPConnectionPool* http) :
+    http_(http),
     interval_(10 * kMicrosPerSecond),
     running_(true) {}
 
@@ -47,6 +49,28 @@ void TableReplication::pull(
       "Replicating table '$0' from '$1'...",
       table->name(),
       uri.toString());
+
+  auto snapshot_path = StringUtil::format(
+      "$0/$1?table=$2",
+      uri.path(),
+      "snapshot",
+      table->name());
+
+  http::HTTPRequest req(http::HTTPMessage::M_GET, snapshot_path);
+  req.addHeader("Host", uri.hostAndPort());
+
+  auto res = http_->executeRequest(req);
+  res.wait();
+
+  const auto& r = res.get();
+  if (r.statusCode() != 201) {
+    RAISEF(
+        kRuntimeError,
+        "received non-200 response: $0 for $1 ($2)",
+        r.body().toString(),
+        snapshot_path,
+        uri.hostAndPort());
+  }
 }
 
 void TableReplication::run() {

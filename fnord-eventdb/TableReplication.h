@@ -13,6 +13,8 @@
 #include <fnord-base/stdtypes.h>
 #include <fnord-base/uri.h>
 #include <fnord-eventdb/TableRepository.h>
+#include "fnord-http/httprequest.h"
+#include "fnord-http/httpconnectionpool.h"
 
 namespace fnord {
 namespace eventdb {
@@ -20,7 +22,7 @@ namespace eventdb {
 class TableReplication {
 public:
 
-  TableReplication();
+  TableReplication(http::HTTPConnectionPool* http);
 
   void start();
   void stop();
@@ -42,6 +44,7 @@ protected:
   std::thread thread_;
 
   Vector<Pair<RefPtr<TableWriter>, URI>> targets_;
+  http::HTTPConnectionPool* http_;
 };
 
 } // namespace eventdb
