@@ -10,23 +10,21 @@
 #include "unistd.h"
 #include <fnord-base/logging.h>
 #include <fnord-base/wallclock.h>
-#include <fnord-eventdb/TableJanitor.h>
+#include <fnord-eventdb/TableReplication.h>
 
 namespace fnord {
 namespace eventdb {
 
-TableJanitor::TableJanitor(
-    TableRepository* repo) :
-    repo_(repo),
+TableReplication::TableReplication() :
     interval_(10 * kMicrosPerSecond),
     running_(true) {}
 
-void TableJanitor::start() {
+void TableReplication::start() {
   running_ = true;
-  thread_ = std::thread(std::bind(&TableJanitor::run, this));
+  thread_ = std::thread(std::bind(&TableReplication::run, this));
 }
 
-void TableJanitor::stop() {
+void TableReplication::stop() {
   if (!running_) {
     return;
   }
@@ -35,28 +33,19 @@ void TableJanitor::stop() {
   thread_.join();
 }
 
-void TableJanitor::check() {
-  fnord::logDebug("fnord.evdb", "Running TableJanitor...");
+void TableReplication::pullAll() {
+  fnord::logDebug("fnord.evdb", "Running TableReplication...");
 
-  auto tables = repo_->tables();
-
-  for (const auto& table_name : tables) {
-    auto tbl = repo_->findTableWriter(table_name);
-
-    tbl->commit();
-    tbl->merge();
-    tbl->gc();
-  }
 }
 
-void TableJanitor::run() {
+void TableReplication::run() {
   while (running_.load()) {
     auto begin = WallClock::unixMicros();
 
     try {
-      check();
+      pullAll();
     } catch (const Exception& e) {
-      fnord::logError("fnord.evdb", e, "TableJanitor error");
+      fnord::logError("fnord.evdb", e, "TableReplication error");
     }
 
     auto elapsed = WallClock::unixMicros() - begin;
