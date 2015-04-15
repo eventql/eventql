@@ -35,6 +35,7 @@
 #include "fnord-eventdb/EventDBServlet.h"
 #include "fnord-eventdb/TableRepository.h"
 #include "fnord-eventdb/TableJanitor.h"
+#include "fnord-eventdb/TableReplication.h"
 #include "fnord-mdb/MDB.h"
 #include "fnord-mdb/MDBUtil.h"
 #include "common.h"
@@ -145,9 +146,12 @@ int main(int argc, const char** argv) {
   eventdb::TableRepository table_repo(&artifacts, dir, replica, readonly);
   table_repo.addTable("dawanda_joined_sessions", joinedSessionsSchema());
 
+  eventdb::TableReplication table_replication;
+
   eventdb::TableJanitor table_janitor(&table_repo);
   if (!readonly) {
     table_janitor.start();
+    table_replication.start();
   }
 
   eventdb::EventDBServlet eventdb_servlet(&table_repo);
@@ -251,10 +255,11 @@ int main(int argc, const char** argv) {
   if (!readonly) {
     table_janitor.stop();
     table_janitor.check();
+    table_replication.stop();
   }
 
   fnord::logInfo("cm.chunkserver", "Exiting...");
 
-  return 0;
+  exit(0);
 }
 
