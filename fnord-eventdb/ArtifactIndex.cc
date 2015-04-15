@@ -27,7 +27,8 @@ ArtifactIndex::ArtifactIndex(
     readonly_(readonly),
     exists_(false),
     index_file_(StringUtil::format("$0/$1.idx", db_path_, index_name_)),
-    index_lockfile_(StringUtil::format("$0/$1.lck", db_path_, index_name_)) {}
+    index_lockfile_(StringUtil::format("$0/$1.lck", db_path_, index_name_)),
+    cached_mtime_(0) {}
 
 void ArtifactIndex::addArtifact(const ArtifactRef& artifact) {
   fnord::logDebug("fn.evdb", "Adding artifact: $0", artifact.name);
@@ -73,8 +74,6 @@ void ArtifactIndex::statusTransition(
 }
 
 List<ArtifactRef> ArtifactIndex::readIndex() {
-  // FIXPAUL cached read!
-
   List<ArtifactRef> index;
 
   if (!(exists_.load() || FileUtil::exists(index_file_))) {
@@ -82,6 +81,14 @@ List<ArtifactRef> ArtifactIndex::readIndex() {
   }
 
   exists_ = true;
+
+  {
+    std::unique_lock<std::mutex> lk(cached_mutex_);
+
+    if (FileUtil::mtime(index_file_) == cached_mtime_) {
+      return cached_;
+    }
+  }
 
   auto file = FileUtil::read(index_file_);
   util::BinaryMessageReader reader(file.data(), file.size());
@@ -138,6 +145,10 @@ void ArtifactIndex::writeIndex(const List<ArtifactRef>& index) {
 
   file.write(writer.data(), writer.size());
   FileUtil::mv(index_file_ + "~", index_file_);
+
+  std::unique_lock<std::mutex> lk(cached_mutex_);
+  cached_mtime_ = FileUtil::mtime(index_file_);
+  cached_ = index;
 }
 
 } // namespace eventdb

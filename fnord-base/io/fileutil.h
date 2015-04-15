@@ -43,6 +43,11 @@ public:
   static size_t size(const std::string& filename);
 
   /**
+   * Return the last modification time of the file
+   */
+  static uint64_t mtime(const std::string& filename);
+
+  /**
    * Join two paths
    */
   static std::string joinPaths(const std::string& p1, const std::string p2);

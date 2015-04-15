@@ -56,6 +56,9 @@ protected:
   const String index_file_;
   const String index_lockfile_;
   std::atomic<bool> exists_;
+  List<ArtifactRef> cached_;
+  uint64_t cached_mtime_;
+  std::mutex cached_mutex_;
 };
 
 } // namespace eventdb
