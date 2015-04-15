@@ -56,6 +56,14 @@ public:
   std::string getString(const char* longopt) const;
 
   /**
+   * Returns the string values of the flag or throws an exception if the value
+   * is invalid.
+   *
+   * @param longopt the longopt of the flag
+   */
+  Vector<std::string> getStrings(const char* longopt) const;
+
+  /**
    * Returns the integer value of the flag or throws an exception if the value
    * is invalid.
    *
