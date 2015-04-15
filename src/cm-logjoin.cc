@@ -399,7 +399,7 @@ int main(int argc, const char** argv) {
         "LogJoin comitting...\n    stream_time=<$0 ... $1>\n" \
         "    active_sessions=$2\n    flushed_sessions=$3\n    " \
         "flushed_queries=$4\n    flushed_item_visits=$5\n    turbo=$6\n    " \
-        "cach_size=$7$8",
+        "cache_size=$7$8",
         watermarks.first,
         watermarks.second,
         logjoin.numSessions(),
