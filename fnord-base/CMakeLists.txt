@@ -47,6 +47,7 @@ add_library(fnord-base OBJECT
     inspect.cc
     InternMap.cc
     io/file.cc
+    io/FileLock.cc
     io/fileutil.cc
     io/filerepository.cc
     io/inputstream.cc

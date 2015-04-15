@@ -12,6 +12,7 @@
 #include <fnord-eventdb/TableWriter.h>
 #include <fnord-base/logging.h>
 #include <fnord-base/io/fileutil.h>
+#include <fnord-base/io/FileLock.h>
 #include <fnord-base/util/binarymessagewriter.h>
 #include <fnord-base/util/binarymessagereader.h>
 #include <fnord-msg/MessageDecoder.h>
@@ -22,6 +23,7 @@ namespace fnord {
 namespace eventdb {
 
 RefPtr<TableWriter> TableWriter::open(
+    ArtifactIndex* artifacts,
     const String& table_name,
     const String& replica_id,
     const String& db_path,
@@ -70,6 +72,7 @@ RefPtr<TableWriter> TableWriter::open(
   }
 
   return new TableWriter(
+      artifacts,
       table_name,
       replica_id,
       db_path,
@@ -79,18 +82,22 @@ RefPtr<TableWriter> TableWriter::open(
 }
 
 TableWriter::TableWriter(
+    ArtifactIndex* artifacts,
     const String& table_name,
     const String& replica_id,
     const String& db_path,
     const msg::MessageSchema& schema,
     uint64_t head_sequence,
     RefPtr<TableGeneration> snapshot) :
+    artifacts_(artifacts),
     name_(table_name),
     replica_id_(replica_id),
     db_path_(db_path),
     schema_(schema),
     seq_(head_sequence),
-    head_(snapshot) {
+    head_(snapshot),
+    lock_(StringUtil::format("$0/$1.$2.lck", db_path_, name_, replica_id_)) {
+  lock_.lock();
   arenas_.emplace_front(new TableArena(seq_, rnd_.hex128()));
 }
 
@@ -175,6 +182,8 @@ void TableWriter::merge() {
 
     mergeop.merge();
   }
+
+  addChunk(&output_chunk);
 
   std::unique_lock<std::mutex> lk(mutex_);
 
@@ -289,10 +298,8 @@ void TableWriter::writeTable(RefPtr<TableArena> arena) {
     writer.commit();
   }
 
-  addChunk(chunk);
-}
+  addChunk(&chunk);
 
-void TableWriter::addChunk(TableChunkRef chunk) {
   std::unique_lock<std::mutex> lk(mutex_);
 
   auto next = head_->clone();
@@ -301,6 +308,34 @@ void TableWriter::addChunk(TableChunkRef chunk) {
   head_ = next;
 
   writeSnapshot();
+}
+
+void TableWriter::addChunk(TableChunkRef* chunk) {
+  auto chunkname = StringUtil::format(
+      "$0.$1.$2",
+      name_,
+      chunk->replica_id,
+      chunk->chunk_id);
+
+  auto chunkpath = StringUtil::format("$0/$1", db_path_, chunkname);
+
+  ArtifactRef artifact;
+  artifact.status = ArtifactStatus::PRESENT;
+  artifact.name = chunkname;
+
+  artifact.files.emplace_back(ArtifactFileRef {
+      .filename = chunkname + ".sst",
+      .size = FileUtil::size(chunkpath + ".sst"),
+      .checksum = chunk->sstable_checksum
+  });
+
+  artifact.files.emplace_back(ArtifactFileRef {
+      .filename = chunkname + ".cst",
+      .size = FileUtil::size(chunkpath + ".cst"),
+      .checksum = chunk->cstable_checksum
+  });
+
+  artifacts_->addArtifact(artifact);
 }
 
 // precondition: mutex_ must be locked
