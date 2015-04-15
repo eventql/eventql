@@ -36,6 +36,7 @@
 #include "fnord-eventdb/TableRepository.h"
 #include "fnord-eventdb/TableJanitor.h"
 #include "fnord-eventdb/TableReplication.h"
+#include "fnord-eventdb/ArtifactReplication.h"
 #include "fnord-mdb/MDB.h"
 #include "fnord-mdb/MDBUtil.h"
 #include "common.h"
@@ -164,10 +165,13 @@ int main(int argc, const char** argv) {
         URI(rep));
   }
 
+  eventdb::ArtifactReplication artifact_replication(&artifacts, &http);
+
   eventdb::TableJanitor table_janitor(&table_repo);
   if (!readonly) {
     table_janitor.start();
     table_replication.start();
+    artifact_replication.start();
   }
 
   eventdb::EventDBServlet eventdb_servlet(&table_repo);
@@ -272,6 +276,7 @@ int main(int argc, const char** argv) {
     table_janitor.stop();
     table_janitor.check();
     table_replication.stop();
+    artifact_replication.stop();
   }
 
   fnord::logInfo("cm.chunkserver", "Exiting...");
