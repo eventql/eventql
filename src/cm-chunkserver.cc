@@ -147,6 +147,9 @@ int main(int argc, const char** argv) {
   table_repo.addTable("dawanda_joined_sessions", joinedSessionsSchema());
 
   eventdb::TableReplication table_replication;
+  table_replication.replicateTableFrom(
+      table_repo.findTableWriter("dawanda_joined_sessions"),
+      URI("http://nue03.prod.fnrd.net:7003/eventdb"));
 
   eventdb::TableJanitor table_janitor(&table_repo);
   if (!readonly) {
