@@ -527,7 +527,7 @@ void TableChunkMerge::readTable(const String& filename) {
 
   auto body_size = reader.bodySize();
   if (body_size == 0) {
-    fnord::logWarning("fn.evdb", "empty table chunk: $0", filename);
+    fnord::logWarning("fnord.evdb", "empty table chunk: $0", filename);
     return;
   }
 
@@ -570,8 +570,8 @@ void TableWriter::replicateFrom(const TableGeneration& other_table) {
       continue;
     }
 
-    fnord::logDebug(
-        "fn.evdb",
+    fnord::logInfo(
+        "fnord.evdb",
         "Adding foreign chunk '$0' to table '$1'",
         chunkname,
         name_);
@@ -597,8 +597,8 @@ void TableWriter::replicateFrom(const TableGeneration& other_table) {
     }
 
     if (dropped_chunks.size() > 0) {
-        fnord::logDebug(
-            "fn.evdb",
+        fnord::logInfo(
+            "fnord.evdb",
             "Dropping foreign chunks $0 from table '$1' because they are " \
             "a strict subset of chunk '$2'",
             inspect(dropped_chunks),
