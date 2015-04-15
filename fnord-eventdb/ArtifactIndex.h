@@ -45,6 +45,11 @@ public:
   void updateStatus(const String& artifact_name, ArtifactStatus new_status);
 
 protected:
+  List<ArtifactRef> readIndex() const;
+  void writeIndex(const List<ArtifactRef>& index);
+
+  void statusTransition(ArtifactRef* artifact, ArtifactStatus new_status);
+
   String db_path_;
   String index_name_;
   bool readonly_;
