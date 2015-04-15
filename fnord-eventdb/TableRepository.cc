@@ -13,9 +13,11 @@ namespace fnord {
 namespace eventdb {
 
 TableRepository::TableRepository(
+    ArtifactIndex* artifacts,
     const String& db_path,
     const String& replica_id,
     bool readonly) :
+    artifacts_(artifacts),
     db_path_(db_path),
     replica_id_(replica_id),
     readonly_(readonly) {}
