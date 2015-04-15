@@ -9,7 +9,9 @@
  */
 #include <fnord-base/exception.h>
 #include <fnord-base/logging.h>
+#include <fnord-base/util/binarymessagewriter.h>
 #include <fnord-base/io/FileLock.h>
+#include <fnord-base/io/fileutil.h>
 #include <fnord-eventdb/ArtifactIndex.h>
 
 namespace fnord {
@@ -21,12 +23,14 @@ ArtifactIndex::ArtifactIndex(
     bool readonly) :
     db_path_(db_path),
     index_name_(index_name),
-    readonly_(readonly) {}
+    readonly_(readonly),
+    index_file_(StringUtil::format("$0/$1.idx", db_path_, index_name_)),
+    index_lockfile_(StringUtil::format("$0/$1.lck", db_path_, index_name_)) {}
 
 void ArtifactIndex::addArtifact(const ArtifactRef& artifact) {
   fnord::logDebug("fn.evdb", "Adding artifact: $0", artifact.name);
 
-  FileLock lk(StringUtil::format("$0/$1.idx.lck", db_path_, index_name_));
+  FileLock lk(index_lockfile_);
   lk.lock(true);
 
   auto index = readIndex();
@@ -44,7 +48,7 @@ void ArtifactIndex::addArtifact(const ArtifactRef& artifact) {
 void ArtifactIndex::updateStatus(
     const String& artifact_name,
     ArtifactStatus new_status) {
-  FileLock lk(StringUtil::format("$0/$1.idx.lck", db_path_, index_name_));
+  FileLock lk(index_lockfile_);
   lk.lock(true);
 
   auto index = readIndex();
@@ -73,6 +77,30 @@ List<ArtifactRef> ArtifactIndex::readIndex() const {
 }
 
 void ArtifactIndex::writeIndex(const List<ArtifactRef>& index) {
+  util::BinaryMessageWriter writer;
+  writer.appendUInt8(0x01);
+  writer.appendVarUInt(index.size());
+
+  for (const auto& a : index) {
+    writer.appendVarUInt(a.name.size());
+    writer.append(a.name.data(), a.name.size());
+    writer.appendVarUInt((uint8_t) a.status);
+    writer.appendVarUInt(0);
+    writer.appendVarUInt(a.files.size());
+    for (const auto& f : a.files) {
+      writer.appendVarUInt(f.filename.size());
+      writer.append(f.filename.data(), f.filename.size());
+      writer.appendUInt64(f.checksum);
+      writer.appendVarUInt(f.size);
+    }
+  }
+
+  auto file = File::openFile(
+      index_file_ + "~",
+      File::O_CREATEOROPEN | File::O_WRITE | File::O_TRUNCATE);
+
+  file.write(writer.data(), writer.size());
+  FileUtil::mv(index_file_ + "~", index_file_);
 }
 
 } // namespace eventdb

@@ -53,6 +53,8 @@ protected:
   String db_path_;
   String index_name_;
   bool readonly_;
+  String index_file_;
+  String index_lockfile_;
 };
 
 } // namespace eventdb
