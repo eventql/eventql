@@ -21,7 +21,28 @@ ArtifactReplication::ArtifactReplication(
     index_(index),
     http_(http),
     interval_(1 * kMicrosPerSecond),
+    cur_requests_(0),
+    max_concurrent_reqs_(4),
     running_(true) {}
+
+void ArtifactReplication::downloadPending() {
+  auto artifacts = index_->listArtifacts();
+
+  for (const auto& a : artifacts) {
+    if (a.status == ArtifactStatus::DOWNLOAD) {
+      enqueueArtifact(a);
+    }
+  }
+}
+
+void ArtifactReplication::downloadArtifact(const ArtifactRef& artifact) {
+  fnord::logInfo(
+      "fnord.evdb",
+      "Downloading artifact: $0",
+      artifact.name);
+
+  usleep(1000000);
+}
 
 void ArtifactReplication::start() {
   running_ = true;
@@ -37,8 +58,22 @@ void ArtifactReplication::stop() {
   thread_.join();
 }
 
-void ArtifactReplication::downloadPending() {
-  fnord::iputs("ArtifactReplication::downloadPending", 1);
+void ArtifactReplication::enqueueArtifact(const ArtifactRef& artifact) {
+  std::unique_lock<std::mutex> lk(mutex_);
+  while (cur_requests_ >= max_concurrent_reqs_) {
+    cv_.wait(lk);
+  }
+
+  ++cur_requests_;
+  auto thread = std::thread([this, artifact] () {
+    downloadArtifact(artifact);
+    std::unique_lock<std::mutex> wakeup_lk(mutex_);
+    --cur_requests_;
+    wakeup_lk.unlock();
+    cv_.notify_all();
+  });
+
+  thread.detach();
 }
 
 void ArtifactReplication::run() {

@@ -33,10 +33,16 @@ public:
 protected:
 
   void run();
+  void enqueueArtifact(const ArtifactRef& artifact);
+  void downloadArtifact(const ArtifactRef& artifact);
 
   uint64_t interval_;
+  size_t cur_requests_;
+  size_t max_concurrent_reqs_;
   std::atomic<bool> running_;
   std::thread thread_;
+  std::mutex mutex_;
+  std::condition_variable cv_;
 
   ArtifactIndex* index_;
   http::HTTPConnectionPool* http_;
