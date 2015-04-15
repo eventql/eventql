@@ -30,7 +30,11 @@ public:
       const URI& source_uri);
 
 protected:
-  void pullAll();
+
+  void pull(
+      RefPtr<TableWriter> table,
+      const URI& source_uri);
+
   void run();
 
   uint64_t interval_;

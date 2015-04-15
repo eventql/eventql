@@ -39,9 +39,14 @@ void TableReplication::stop() {
   thread_.join();
 }
 
-void TableReplication::pullAll() {
-  fnord::logDebug("fnord.evdb", "Running TableReplication...");
-
+void TableReplication::pull(
+      RefPtr<TableWriter> table,
+      const URI& uri) {
+  fnord::logDebug(
+      "fn.evdb",
+      "Replicating table '$0' from '$1'...",
+      table->name(),
+      uri.toString());
 }
 
 void TableReplication::run() {
@@ -49,7 +54,9 @@ void TableReplication::run() {
     auto begin = WallClock::unixMicros();
 
     try {
-      pullAll();
+      for (auto& t : targets_) {
+        pull(t.first, t.second);
+      }
     } catch (const Exception& e) {
       fnord::logError("fnord.evdb", e, "TableReplication error");
     }
