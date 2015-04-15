@@ -30,47 +30,60 @@ ArtifactIndex::ArtifactIndex(
     index_lockfile_(StringUtil::format("$0/$1.lck", db_path_, index_name_)),
     cached_mtime_(0) {}
 
+List<ArtifactRef> ArtifactIndex::listArtifacts() {
+  return readIndex();
+}
+
 void ArtifactIndex::addArtifact(const ArtifactRef& artifact) {
   fnord::logDebug("fn.evdb", "Adding artifact: $0", artifact.name);
 
-  FileLock lk(index_lockfile_);
-  lk.lock(true);
-
-  auto index = readIndex();
-
-  for (const auto& a : index) {
-    if (a.name == artifact.name) {
-      RAISEF(kIndexError, "artifact '$0' already exists in index", a.name);
+  withIndex(false, [&] (List<ArtifactRef>* index) {
+    for (const auto& a : *index) {
+      if (a.name == artifact.name) {
+        RAISEF(kIndexError, "artifact '$0' already exists in index", a.name);
+      }
     }
-  }
 
-  index.emplace_back(artifact);
-  writeIndex(index);
+    index->emplace_back(artifact);
+  });
 }
 
 void ArtifactIndex::updateStatus(
     const String& artifact_name,
     ArtifactStatus new_status) {
-  FileLock lk(index_lockfile_);
-  lk.lock(true);
-
-  auto index = readIndex();
-
-  for (auto& a : index) {
-    if (a.name == artifact_name) {
-      statusTransition(&a, new_status);
-      writeIndex(index);
-      return;
+  withIndex(false, [&] (List<ArtifactRef>* index) {
+    for (auto& a : *index) {
+      if (a.name == artifact_name) {
+        statusTransition(&a, new_status);
+        return;
+      }
     }
-  }
 
-  RAISEF(kIndexError, "artifact '$0' not found", artifact_name);
+    RAISEF(kIndexError, "artifact '$0' not found", artifact_name);
+  });
 }
 
 void ArtifactIndex::statusTransition(
     ArtifactRef* artifact,
     ArtifactStatus new_status) {
   artifact->status = new_status; // FIXPAUL proper transition
+}
+
+void ArtifactIndex::withIndex(
+    bool readonly,
+    Function<void (List<ArtifactRef>* index)> fn) {
+  FileLock lk(index_lockfile_);
+
+  if (!readonly) {
+    lk.lock(true);
+  }
+
+  auto index = readIndex();
+  fn(&index);
+
+  if (!readonly) {
+    writeIndex(index);
+  }
 }
 
 List<ArtifactRef> ArtifactIndex::readIndex() {
@@ -82,12 +95,11 @@ List<ArtifactRef> ArtifactIndex::readIndex() {
 
   exists_ = true;
 
-  {
-    std::unique_lock<std::mutex> lk(cached_mutex_);
+  std::unique_lock<std::mutex> lk(cached_mutex_);
+  auto mtime = FileUtil::mtime(index_file_);
 
-    if (FileUtil::mtime(index_file_) == cached_mtime_) {
-      return cached_;
-    }
+  if (mtime == cached_mtime_) {
+    return cached_;
   }
 
   auto file = FileUtil::read(index_file_);
@@ -115,6 +127,11 @@ List<ArtifactRef> ArtifactIndex::readIndex() {
     }
 
     index.emplace_back(artifact);
+  }
+
+  if (mtime > cached_mtime_) {
+    cached_mtime_ = mtime;
+    cached_ = index;
   }
 
   return index;
@@ -150,6 +167,7 @@ void ArtifactIndex::writeIndex(const List<ArtifactRef>& index) {
   cached_mtime_ = FileUtil::mtime(index_file_);
   cached_ = index;
 }
+
 
 } // namespace eventdb
 } // namespace fnord

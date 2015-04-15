@@ -41,6 +41,11 @@ public:
       const String& index_name,
       bool readonly);
 
+  void withIndex(
+      bool readonly,
+      Function<void (List<ArtifactRef>* index)> fn);
+
+  List<ArtifactRef> listArtifacts();
   void addArtifact(const ArtifactRef& artifact);
   void updateStatus(const String& artifact_name, ArtifactStatus new_status);
 
