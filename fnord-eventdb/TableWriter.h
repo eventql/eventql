@@ -118,13 +118,14 @@ public:
   void addRecords(const Buffer& records);
   void addRecord(const msg::MessageObject& record);
 
+  RefPtr<TableSnapshot> getSnapshot();
   const String& name() const;
 
   size_t commit();
   void merge();
   void gc(size_t keep_generations = 2, size_t keep_arenas = 0);
 
-  RefPtr<TableSnapshot> getSnapshot();
+  void replicateFrom(const TableGeneration& other_table);
 
 protected:
 

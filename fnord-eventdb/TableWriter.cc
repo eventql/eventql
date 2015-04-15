@@ -547,6 +547,9 @@ void TableChunkMerge::readTable(const String& filename) {
   }
 }
 
+void TableWriter::replicateFrom(const TableGeneration& other_table) {
+}
+
 bool TableMergePolicy::findNextMerge(
     RefPtr<TableSnapshot> snapshot,
     const String& db_path,
