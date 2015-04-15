@@ -11,6 +11,7 @@
 #define _FNORD_EVENTDB_TABLEREPLICATION_H
 #include <thread>
 #include <fnord-base/stdtypes.h>
+#include <fnord-base/uri.h>
 #include <fnord-eventdb/TableRepository.h>
 
 namespace fnord {
@@ -24,6 +25,10 @@ public:
   void start();
   void stop();
 
+  void replicateTableFrom(
+      RefPtr<TableWriter> table,
+      const URI& source_uri);
+
 protected:
   void pullAll();
   void run();
@@ -31,6 +36,8 @@ protected:
   uint64_t interval_;
   std::atomic<bool> running_;
   std::thread thread_;
+
+  Vector<Pair<RefPtr<TableWriter>, URI>> targets_;
 };
 
 } // namespace eventdb
