@@ -45,16 +45,17 @@ public:
   void updateStatus(const String& artifact_name, ArtifactStatus new_status);
 
 protected:
-  List<ArtifactRef> readIndex() const;
+  List<ArtifactRef> readIndex();
   void writeIndex(const List<ArtifactRef>& index);
 
   void statusTransition(ArtifactRef* artifact, ArtifactStatus new_status);
 
-  String db_path_;
-  String index_name_;
-  bool readonly_;
-  String index_file_;
-  String index_lockfile_;
+  const String db_path_;
+  const String index_name_;
+  const bool readonly_;
+  const String index_file_;
+  const String index_lockfile_;
+  std::atomic<bool> exists_;
 };
 
 } // namespace eventdb

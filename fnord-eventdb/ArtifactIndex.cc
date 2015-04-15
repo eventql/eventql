@@ -9,6 +9,7 @@
  */
 #include <fnord-base/exception.h>
 #include <fnord-base/logging.h>
+#include <fnord-base/util/binarymessagereader.h>
 #include <fnord-base/util/binarymessagewriter.h>
 #include <fnord-base/io/FileLock.h>
 #include <fnord-base/io/fileutil.h>
@@ -24,6 +25,7 @@ ArtifactIndex::ArtifactIndex(
     db_path_(db_path),
     index_name_(index_name),
     readonly_(readonly),
+    exists_(false),
     index_file_(StringUtil::format("$0/$1.idx", db_path_, index_name_)),
     index_lockfile_(StringUtil::format("$0/$1.lck", db_path_, index_name_)) {}
 
@@ -70,8 +72,43 @@ void ArtifactIndex::statusTransition(
   artifact->status = new_status; // FIXPAUL proper transition
 }
 
-List<ArtifactRef> ArtifactIndex::readIndex() const {
+List<ArtifactRef> ArtifactIndex::readIndex() {
+  // FIXPAUL cached read!
+
   List<ArtifactRef> index;
+
+  if (!(exists_.load() || FileUtil::exists(index_file_))) {
+    return index;
+  }
+
+  exists_ = true;
+
+  auto file = FileUtil::read(index_file_);
+  util::BinaryMessageReader reader(file.data(), file.size());
+  reader.readUInt8();
+  auto num_artifacts = reader.readVarUInt();
+
+  for (int j = 0; j < num_artifacts; ++j) {
+    ArtifactRef artifact;
+
+    auto name_len = reader.readVarUInt();
+    artifact.name = String((const char*) reader.read(name_len), name_len);
+    artifact.status = (ArtifactStatus) ((uint8_t) reader.readVarUInt());
+
+    auto num_attrs = reader.readVarUInt();
+
+    auto num_files = reader.readVarUInt();
+    for (int i = 0; i < num_files; ++i) {
+      ArtifactFileRef file;
+      auto fname_len = reader.readVarUInt();
+      file.filename = String((const char*) reader.read(fname_len), fname_len);
+      file.checksum = *reader.readUInt64();
+      file.size = reader.readVarUInt();
+      artifact.files.emplace_back(file);
+    }
+
+    index.emplace_back(artifact);
+  }
 
   return index;
 }
@@ -85,7 +122,7 @@ void ArtifactIndex::writeIndex(const List<ArtifactRef>& index) {
     writer.appendVarUInt(a.name.size());
     writer.append(a.name.data(), a.name.size());
     writer.appendVarUInt((uint8_t) a.status);
-    writer.appendVarUInt(0);
+    writer.appendVarUInt(0); // attributes size
     writer.appendVarUInt(a.files.size());
     for (const auto& f : a.files) {
       writer.appendVarUInt(f.filename.size());
