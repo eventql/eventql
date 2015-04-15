@@ -12,6 +12,7 @@
 #include <fnord-base/stdtypes.h>
 #include <fnord-eventdb/TableReader.h>
 #include <fnord-eventdb/TableWriter.h>
+#include <fnord-eventdb/ArtifactIndex.h>
 #include <fnord-msg/MessageSchema.h>
 
 namespace fnord {
@@ -21,6 +22,7 @@ class TableRepository {
 public:
 
   TableRepository(
+      ArtifactIndex* artifacts,
       const String& db_path,
       const String& replica_id,
       bool readonly);
@@ -34,6 +36,7 @@ public:
   Set<String> tables() const;
 
 protected:
+  ArtifactIndex* artifacts_;
   String db_path_;
   String replica_id_;
   bool readonly_;
