@@ -485,6 +485,7 @@ add_executable(cm-chunkserver
     3rdparty/libfnord/fnord-eventdb/TableRepository.cc
     3rdparty/libfnord/fnord-eventdb/TableJanitor.cc
     3rdparty/libfnord/fnord-eventdb/TableReplication.cc
+    3rdparty/libfnord/fnord-eventdb/ArtifactReplication.cc
     src/analytics/AnalyticsTableScan.cc
     src/analytics/AnalyticsQuery.cc
     src/analytics/AnalyticsQueryEngine.cc
