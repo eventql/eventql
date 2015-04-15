@@ -19,6 +19,12 @@ TableReplication::TableReplication() :
     interval_(10 * kMicrosPerSecond),
     running_(true) {}
 
+void TableReplication::replicateTableFrom(
+    RefPtr<TableWriter> table,
+    const URI& source_uri) {
+  targets_.emplace_back(table, source_uri);
+}
+
 void TableReplication::start() {
   running_ = true;
   thread_ = std::thread(std::bind(&TableReplication::run, this));
