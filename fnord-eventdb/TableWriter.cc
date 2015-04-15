@@ -183,7 +183,7 @@ void TableWriter::merge() {
     mergeop.merge();
   }
 
-  addChunk(&output_chunk);
+  addChunk(&output_chunk, ArtifactStatus::PRESENT);
 
   std::unique_lock<std::mutex> lk(mutex_);
 
@@ -298,7 +298,7 @@ void TableWriter::writeTable(RefPtr<TableArena> arena) {
     writer.commit();
   }
 
-  addChunk(&chunk);
+  addChunk(&chunk, ArtifactStatus::PRESENT);
 
   std::unique_lock<std::mutex> lk(mutex_);
 
@@ -310,17 +310,15 @@ void TableWriter::writeTable(RefPtr<TableArena> arena) {
   writeSnapshot();
 }
 
-void TableWriter::addChunk(TableChunkRef* chunk) {
+void TableWriter::addChunk(const TableChunkRef* chunk, ArtifactStatus status) {
   auto chunkname = StringUtil::format(
       "$0.$1.$2",
       name_,
       chunk->replica_id,
       chunk->chunk_id);
 
-  auto chunkpath = StringUtil::format("$0/$1", db_path_, chunkname);
-
   ArtifactRef artifact;
-  artifact.status = ArtifactStatus::PRESENT;
+  artifact.status = status;
   artifact.name = chunkname;
 
   artifact.files.emplace_back(ArtifactFileRef {
@@ -333,6 +331,12 @@ void TableWriter::addChunk(TableChunkRef* chunk) {
       .filename = chunkname + ".cst",
       .size = chunk->cstable_size,
       .checksum = chunk->cstable_checksum
+  });
+
+  artifact.files.emplace_back(ArtifactFileRef {
+      .filename = chunkname + ".idx",
+      .size = chunk->index_size,
+      .checksum = chunk->index_checksum
   });
 
   artifacts_->addArtifact(artifact);
@@ -621,6 +625,7 @@ void TableWriter::replicateFrom(const TableGeneration& other_table) {
             chunkname);
     }
 
+    addChunk(&c, ArtifactStatus::DOWNLOAD);
     chunks.emplace_back(c);
   }
 
