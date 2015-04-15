@@ -63,6 +63,16 @@ size_t FileUtil::size(const std::string& filename) {
   return fstat.st_size;
 }
 
+uint64_t FileUtil::mtime(const std::string& filename) {
+  struct stat fstat;
+
+  if (stat(filename.c_str(), &fstat) < 0) {
+    RAISE_ERRNO(kIOError, "fstat('%s') failed", filename.c_str());
+  }
+
+  return fstat.st_mtime;
+}
+
 /* The mkdir_p method was adapted from bash 4.1 */
 void FileUtil::mkdir_p(const std::string& dirname) {
   char const* begin = dirname.c_str();
