@@ -39,6 +39,7 @@ void TableRepository::addTable(
     table_writers_.emplace(
         table_name,
         TableWriter::open(
+            artifacts_,
             table_name,
             replica_id_,
             db_path_,
@@ -48,6 +49,10 @@ void TableRepository::addTable(
 
 RefPtr<TableWriter> TableRepository::findTableWriter(
     const String& table_name) const {
+  if (readonly_) {
+    RAISEF(kRuntimeError, "table is in read-only mode: '$0'", table_name);
+  }
+
   std::unique_lock<std::mutex> lk(mutex_);
   auto table = table_writers_.find(table_name);
   if (table == table_writers_.end()) {

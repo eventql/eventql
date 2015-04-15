@@ -7,6 +7,7 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
+#include <fnord-base/logging.h>
 #include <fnord-eventdb/ArtifactIndex.h>
 
 namespace fnord {
@@ -21,7 +22,7 @@ ArtifactIndex::ArtifactIndex(
     readonly_(readonly) {}
 
 void ArtifactIndex::addArtifact(const ArtifactRef& artifact) {
-
+  fnord::logDebug("fn.evdb", "Adding artifact: $0", artifact.name);
 }
 
 void ArtifactIndex::updateStatus(

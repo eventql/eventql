@@ -10,9 +10,6 @@
 #ifndef _FNORD_EVENTDB_ARTIFACTINDEX_H
 #define _FNORD_EVENTDB_ARTIFACTINDEX_H
 #include <fnord-base/stdtypes.h>
-#include <fnord-eventdb/TableReader.h>
-#include <fnord-eventdb/TableWriter.h>
-#include <fnord-msg/MessageSchema.h>
 
 namespace fnord {
 namespace eventdb {
@@ -32,8 +29,8 @@ struct ArtifactFileRef {
 struct ArtifactRef {
   String name;
   ArtifactStatus status;
-  Vector<ArtifactFileRef> files;
   Vector<Pair<String, String>> attributes;
+  Vector<ArtifactFileRef> files;
 };
 
 class ArtifactIndex {

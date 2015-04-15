@@ -12,8 +12,10 @@
 #include <fnord-base/stdtypes.h>
 #include <fnord-base/autoref.h>
 #include <fnord-base/random.h>
+#include <fnord-base/io/FileLock.h>
 #include <fnord-msg/MessageSchema.h>
 #include <fnord-msg/MessageObject.h>
+#include <fnord-eventdb/ArtifactIndex.h>
 #include <fnord-eventdb/TableArena.h>
 #include <fnord-eventdb/TableSnapshot.h>
 #include "fnord-sstable/sstablereader.h"
@@ -107,6 +109,7 @@ class TableWriter : public RefCounted {
 public:
 
   static RefPtr<TableWriter> open(
+      ArtifactIndex* artifacts,
       const String& table_name,
       const String& replica_id,
       const String& db_path,
@@ -126,6 +129,7 @@ public:
 protected:
 
   TableWriter(
+      ArtifactIndex* artifacts,
       const String& table_name,
       const String& replica_id,
       const String& db_path,
@@ -135,10 +139,11 @@ protected:
 
   size_t commitWithLock();
   void writeTable(RefPtr<TableArena> arena);
-  void addChunk(TableChunkRef chunk);
+  void addChunk(TableChunkRef* chunk);
   void writeSnapshot();
   bool merge(size_t min_chunk_size, size_t max_chunk_size);
 
+  ArtifactIndex* artifacts_;
   String name_;
   String replica_id_;
   String db_path_;
@@ -150,6 +155,7 @@ protected:
   Random rnd_;
   RefPtr<TableGeneration> head_;
   TableMergePolicy merge_policy_;
+  FileLock lock_;
 };
 
 } // namespace eventdb
