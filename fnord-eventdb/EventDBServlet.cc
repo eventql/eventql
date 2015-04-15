@@ -43,6 +43,10 @@ void EventDBServlet::handleHTTPRequest(
       return tableInfo(req, res, &uri);
     }
 
+    if (StringUtil::endsWith(uri.path(), "/snapshot")) {
+      return tableSnapshot(req, res, &uri);
+    }
+
     res->setStatus(fnord::http::kStatusNotFound);
     res->addBody("not found");
   } catch (const Exception& e) {
@@ -185,6 +189,29 @@ void EventDBServlet::tableInfo(
   json.addObjectEntry("num_rows_stage");
   json.addInteger(num_rows_arena);
   json.endObject();
+}
+
+void EventDBServlet::tableSnapshot(
+    http::HTTPRequest* req,
+    http::HTTPResponse* res,
+    URI* uri) {
+  const auto& params = uri->queryParams();
+
+  String table;
+  if (!URI::getParam(params, "table", &table)) {
+    res->setStatus(fnord::http::kStatusBadRequest);
+    res->addBody("missing ?table=... parameter");
+    return;
+  }
+
+  auto snap = tables_->getSnapshot(table);
+
+  Buffer buf;
+  snap->head->encode(&buf);
+
+  res->setStatus(http::kStatusOK);
+  res->addHeader("Content-Type", "application/octet-stream");
+  res->addBody(buf);
 }
 
 }
