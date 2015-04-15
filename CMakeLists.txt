@@ -430,6 +430,7 @@ add_executable(cm-autocompletebuild
     3rdparty/libfnord/fnord-eventdb/TableArena.cc
     3rdparty/libfnord/fnord-eventdb/TableWriter.cc
     3rdparty/libfnord/fnord-eventdb/TableRepository.cc
+    3rdparty/libfnord/fnord-eventdb/ArtifactIndex.cc
     src/schemas.cc
     src/IndexReader.cc
     src/IndexWriter.cc
