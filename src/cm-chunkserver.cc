@@ -141,7 +141,8 @@ int main(int argc, const char** argv) {
   auto readonly = flags.isSet("readonly");
   auto replica = flags.getString("replica");
 
-  eventdb::TableRepository table_repo(dir, replica, readonly);
+  eventdb::ArtifactIndex artifacts(dir, replica, readonly);
+  eventdb::TableRepository table_repo(&artifacts, dir, replica, readonly);
   table_repo.addTable("dawanda_joined_sessions", joinedSessionsSchema());
 
   eventdb::TableJanitor table_janitor(&table_repo);
