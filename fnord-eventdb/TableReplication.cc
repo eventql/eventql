@@ -18,7 +18,7 @@ namespace eventdb {
 TableReplication::TableReplication(
     http::HTTPConnectionPool* http) :
     http_(http),
-    interval_(10 * kMicrosPerSecond),
+    interval_(1 * kMicrosPerSecond),
     running_(true) {}
 
 void TableReplication::replicateTableFrom(
