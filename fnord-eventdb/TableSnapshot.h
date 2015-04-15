@@ -27,6 +27,9 @@ struct TableChunkRef {
   uint64_t sstable_checksum;
   uint64_t cstable_checksum;
   uint64_t index_checksum;
+  uint64_t sstable_size;
+  uint64_t cstable_size;
+  uint64_t index_size;
 };
 
 struct TableGeneration : public RefCounted {

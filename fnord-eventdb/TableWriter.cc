@@ -325,13 +325,13 @@ void TableWriter::addChunk(TableChunkRef* chunk) {
 
   artifact.files.emplace_back(ArtifactFileRef {
       .filename = chunkname + ".sst",
-      .size = FileUtil::size(chunkpath + ".sst"),
+      .size = chunk->sstable_size,
       .checksum = chunk->sstable_checksum
   });
 
   artifact.files.emplace_back(ArtifactFileRef {
       .filename = chunkname + ".cst",
-      .size = FileUtil::size(chunkpath + ".cst"),
+      .size = chunk->cstable_size,
       .checksum = chunk->cstable_checksum
   });
 
@@ -378,7 +378,7 @@ RefPtr<TableGeneration> TableGeneration::clone() const {
 
 void TableGeneration::encode(Buffer* buf) {
   util::BinaryMessageWriter writer;
-  writer.appendUInt8(0x01);
+  writer.appendUInt8(0x02);
   writer.appendUInt64(generation);
   writer.appendUInt16(table_name.size());
   writer.append(table_name.data(), table_name.size());
@@ -394,6 +394,9 @@ void TableGeneration::encode(Buffer* buf) {
     writer.appendUInt64(c.sstable_checksum);
     writer.appendUInt64(c.cstable_checksum);
     writer.appendUInt64(c.index_checksum);
+    writer.appendVarUInt(c.sstable_size);
+    writer.appendVarUInt(c.cstable_size);
+    writer.appendVarUInt(c.index_size);
   }
 
   buf->append(writer.data(), writer.size());
@@ -431,6 +434,15 @@ void TableGeneration::decode(const Buffer& buf) {
     chunk.sstable_checksum = *reader.readUInt64();
     chunk.cstable_checksum = *reader.readUInt64();
     chunk.index_checksum = *reader.readUInt64();
+    if (v < 0x02) {
+      chunk.sstable_size = 0;
+      chunk.cstable_size = 0;
+      chunk.index_size = 0;
+    } else {
+      chunk.sstable_size = reader.readVarUInt();
+      chunk.cstable_size = reader.readVarUInt();
+      chunk.index_size = reader.readVarUInt();
+    }
 
     chunks.emplace_back(chunk);
   }
@@ -480,8 +492,11 @@ void TableChunkWriter::commit() {
   sstable_->finalize();
 
   chunk_->sstable_checksum = FileUtil::checksum(chunk_filename_ + ".sst~");
+  chunk_->sstable_size = FileUtil::size(chunk_filename_ + ".sst~");
   chunk_->cstable_checksum = FileUtil::checksum(chunk_filename_ + ".cst~");
+  chunk_->cstable_size = FileUtil::size(chunk_filename_ + ".cst~");
   chunk_->index_checksum = 0;
+  chunk_->index_size = 0;
 
   FileUtil::mv(chunk_filename_ + ".sst~", chunk_filename_ + ".sst");
   FileUtil::mv(chunk_filename_ + ".cst~", chunk_filename_ + ".cst");
