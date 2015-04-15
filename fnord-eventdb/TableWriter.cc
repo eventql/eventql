@@ -549,6 +549,7 @@ void TableChunkMerge::readTable(const String& filename) {
 
 void TableWriter::replicateFrom(const TableGeneration& other_table) {
   std::unique_lock<std::mutex> lk(mutex_);
+  bool dirty = false;
 
   auto next = head_->clone();
   next->generation++;
@@ -575,6 +576,9 @@ void TableWriter::replicateFrom(const TableGeneration& other_table) {
         chunkname,
         name_);
 
+    dirty = true;
+
+    Set<String> dropped_chunks;
     auto cbegin = c.start_sequence;
     auto cend = c.start_sequence + c.num_records;
     for (auto cur = chunks.begin(); cur != chunks.end(); ) {
@@ -584,26 +588,31 @@ void TableWriter::replicateFrom(const TableGeneration& other_table) {
       if ((cur->replica_id == c.replica_id) &&
           (tbegin >= cbegin) &&
           (tend <= cend)) {
-        fnord::logDebug(
-            "fn.evdb",
-            "Dropping foreign chunk '$0.$1' from table '$2' because it is a " \
-            "strict subset of chunk '$3'",
-            cur->replica_id,
-            cur->chunk_id,
-            name_,
-            chunkname);
 
+        dropped_chunks.emplace(cur->replica_id + "." + cur->chunk_id);
         cur = chunks.erase(cur);
       } else {
         ++cur;
       }
     }
 
+    if (dropped_chunks.size() > 0) {
+        fnord::logDebug(
+            "fn.evdb",
+            "Dropping foreign chunks $0 from table '$1' because they are " \
+            "a strict subset of chunk '$2'",
+            inspect(dropped_chunks),
+            name_,
+            chunkname);
+    }
+
     chunks.emplace_back(c);
   }
 
-  head_ = next;
-  writeSnapshot();
+  if (dirty) {
+    head_ = next;
+    writeSnapshot();
+  }
 }
 
 bool TableMergePolicy::findNextMerge(
