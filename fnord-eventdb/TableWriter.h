@@ -140,7 +140,7 @@ protected:
 
   size_t commitWithLock();
   void writeTable(RefPtr<TableArena> arena);
-  void addChunk(TableChunkRef* chunk);
+  void addChunk(const TableChunkRef* chunk, ArtifactStatus status);
   void writeSnapshot();
   bool merge(size_t min_chunk_size, size_t max_chunk_size);
 
