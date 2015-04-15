@@ -63,7 +63,7 @@ void TableReplication::pull(
   res.wait();
 
   const auto& r = res.get();
-  if (r.statusCode() != 201) {
+  if (r.statusCode() != 200) {
     RAISEF(
         kRuntimeError,
         "received non-200 response: $0 for $1 ($2)",
@@ -71,6 +71,10 @@ void TableReplication::pull(
         snapshot_path,
         uri.hostAndPort());
   }
+
+  TableGeneration gen;
+  gen.decode(r.body());
+  table->replicateFrom(gen);
 }
 
 void TableReplication::run() {
