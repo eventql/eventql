@@ -40,6 +40,10 @@ size_t LogJoin::numSessions() const {
   return sessions_flush_times_.size();
 }
 
+size_t LogJoin::cacheSize() const {
+  return session_cache_.size();
+}
+
 void LogJoin::insertLogline(
       const std::string& log_line,
       mdb::MDBTransaction* txn) {

@@ -398,7 +398,8 @@ int main(int argc, const char** argv) {
         "cm.logjoin",
         "LogJoin comitting...\n    stream_time=<$0 ... $1>\n" \
         "    active_sessions=$2\n    flushed_sessions=$3\n    " \
-        "flushed_queries=$4\n    flushed_item_visits=$5\n    turbo=$6$7",
+        "flushed_queries=$4\n    flushed_item_visits=$5\n    turbo=$6\n    " \
+        "cach_size=$7$8",
         watermarks.first,
         watermarks.second,
         logjoin.numSessions(),
@@ -406,6 +407,7 @@ int main(int argc, const char** argv) {
         logjoin_target.num_queries,
         logjoin_target.num_item_visits,
         turbo,
+        logjoin.cacheSize(),
         stream_offsets_str);
 
     txn->commit();
