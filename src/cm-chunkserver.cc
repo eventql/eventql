@@ -118,6 +118,16 @@ int main(int argc, const char** argv) {
       "<path>");
 
   flags.defineFlag(
+      "replicate_from",
+      cli::FlagParser::T_STRING,
+      false,
+      NULL,
+      NULL,
+      "url",
+      "<url>");
+
+
+  flags.defineFlag(
       "loglevel",
       fnord::cli::FlagParser::T_STRING,
       false,
@@ -146,10 +156,13 @@ int main(int argc, const char** argv) {
   eventdb::TableRepository table_repo(&artifacts, dir, replica, readonly);
   table_repo.addTable("dawanda_joined_sessions", joinedSessionsSchema());
 
-  eventdb::TableReplication table_replication;
-  table_replication.replicateTableFrom(
-      table_repo.findTableWriter("dawanda_joined_sessions"),
-      URI("http://nue03.prod.fnrd.net:7003/eventdb"));
+  http::HTTPConnectionPool http(&ev);
+  eventdb::TableReplication table_replication(&http);
+  for (const auto& rep : flags.getStrings("replicate_from")) {
+    table_replication.replicateTableFrom(
+        table_repo.findTableWriter("dawanda_joined_sessions"),
+        URI(rep));
+  }
 
   eventdb::TableJanitor table_janitor(&table_repo);
   if (!readonly) {
