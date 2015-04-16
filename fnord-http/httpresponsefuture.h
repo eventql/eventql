@@ -30,14 +30,14 @@ public:
 
   void storeConnection(std::unique_ptr<HTTPClientConnection>&& conn);
 
-  void onError(const std::exception& e) override;
-  void onVersion(const std::string& version) override;
-  void onStatusCode(int status_code) override;
-  void onStatusName(const std::string& status) override;
-  void onHeader(const std::string& key, const std::string& value) override;
-  void onHeadersComplete() override;
-  void onBodyChunk(const char* data, size_t size) override;
-  void onResponseComplete() override;
+  virtual void onError(const std::exception& e) override;
+  virtual void onVersion(const std::string& version) override;
+  virtual void onStatusCode(int status_code) override;
+  virtual void onStatusName(const std::string& status) override;
+  virtual void onHeader(const std::string& key, const std::string& value) override;
+  virtual void onHeadersComplete() override;
+  virtual void onBodyChunk(const char* data, size_t size) override;
+  virtual void onResponseComplete() override;
 
 protected:
   HTTPResponse res_;
