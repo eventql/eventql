@@ -24,7 +24,8 @@ public:
 
   ArtifactReplication(
       ArtifactIndex* index,
-      http::HTTPConnectionPool* http);
+      http::HTTPConnectionPool* http,
+      size_t max_concurrent_reqs);
 
   void addSource(const URI& source);
 
@@ -37,6 +38,7 @@ protected:
   void run();
   void enqueueArtifact(const ArtifactRef& artifact);
   void downloadArtifact(const ArtifactRef& artifact);
+  void downloadFile(const ArtifactFileRef& file, const URI& uri);
 
   uint64_t interval_;
   size_t cur_requests_;

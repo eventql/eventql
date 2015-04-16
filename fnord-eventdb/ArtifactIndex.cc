@@ -168,6 +168,9 @@ void ArtifactIndex::writeIndex(const List<ArtifactRef>& index) {
   cached_ = index;
 }
 
+const String& ArtifactIndex::basePath() const {
+  return db_path_;
+}
 
 } // namespace eventdb
 } // namespace fnord

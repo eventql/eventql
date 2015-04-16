@@ -49,6 +49,8 @@ public:
   void addArtifact(const ArtifactRef& artifact);
   void updateStatus(const String& artifact_name, ArtifactStatus new_status);
 
+  const String& basePath() const;
+
 protected:
   List<ArtifactRef> readIndex();
   void writeIndex(const List<ArtifactRef>& index);

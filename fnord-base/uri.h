@@ -38,6 +38,8 @@ public:
   const std::string& fragment() const;
   std::string toString() const;
 
+  void setPath(const std::string& path);
+
   static void parseURI(
       const std::string& uri_str,
       std::string* scheme,
