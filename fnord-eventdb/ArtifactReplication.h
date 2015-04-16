@@ -26,6 +26,8 @@ public:
       ArtifactIndex* index,
       http::HTTPConnectionPool* http);
 
+  void addSource(const URI& source);
+
   void downloadPending();
   void start();
   void stop();
@@ -46,6 +48,7 @@ protected:
 
   ArtifactIndex* index_;
   http::HTTPConnectionPool* http_;
+  Vector<URI> sources_;
 };
 
 } // namespace eventdb

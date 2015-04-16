@@ -25,7 +25,22 @@ ArtifactReplication::ArtifactReplication(
     max_concurrent_reqs_(4),
     running_(true) {}
 
+void ArtifactReplication::addSource(const URI& source) {
+  sources_.emplace_back(source);
+}
+
 void ArtifactReplication::downloadPending() {
+
+ // 
+  URI uri("http://nue03.prod.fnrd.net:7005/chunks/dawanda_joined_sessions.nue03.db3203a33a8df903028d87658a5eb502.sst");
+  http::HTTPRequest req(http::HTTPMessage::M_HEAD, uri.pathAndQuery());
+  req.addHeader("Host", uri.hostAndPort());
+  auto res = http_->executeRequest(req);
+  res.wait();
+  fnord::iputs("status: $0", res.get().statusCode());
+
+  abort();
+
   auto artifacts = index_->listArtifacts();
 
   for (const auto& a : artifacts) {
@@ -42,6 +57,28 @@ void ArtifactReplication::downloadArtifact(const ArtifactRef& artifact) {
       artifact.name);
 
   // here be dragons...
+
+  //http://nue03.prod.fnrd.net:7005/chunks/
+
+  for (const auto& f : artifact.files) {
+
+    for (const auto& s : sources_) {
+      auto path = FileUtil::joinPaths(s.path(), f.filename);
+      http::HTTPRequest req(http::HTTPMessage::M_HEAD, path);
+      req.addHeader("Host", s.hostAndPort());
+
+      fnord::iputs("GET: $0, $1", s.hostAndPort(), path);
+      auto res = http_->executeRequest(req);
+      res.wait();
+
+      const auto& r = res.get();
+      fnord::iputs("response: $0", r.statusCode());
+      //if (r.statusCode() != 201) {
+      //  RAISEF(kRuntimeError, "received non-201 response: $0", r.body().toString());
+      //}
+
+    }
+  }
 
   index_->updateStatus(artifact.name, ArtifactStatus::PRESENT);
 }
