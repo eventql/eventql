@@ -16,8 +16,12 @@ namespace mdb {
 MDBCursor::MDBCursor(
     MDB_cursor* mdb_cur) :
     mdb_cur_(mdb_cur),
-    is_closed_(false) {
-  incRef();
+    is_closed_(false) {}
+
+MDBCursor::~MDBCursor() {
+  if (!is_closed_) {
+    close();
+  }
 }
 
 void MDBCursor::close() {
@@ -27,7 +31,6 @@ void MDBCursor::close() {
 
   is_closed_ = true;
   mdb_cursor_close(mdb_cur_);
-  decRef();
 }
 
 bool MDBCursor::get(const String& key, Buffer* value) {

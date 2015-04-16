@@ -25,6 +25,7 @@ public:
   MDBCursor(MDB_cursor* mdb_cur);
   MDBCursor(const MDBCursor& other) = delete;
   MDBCursor& operator=(const MDBCursor& other) = delete;
+  ~MDBCursor();
 
   bool set(const void* key, size_t key_size);
 
