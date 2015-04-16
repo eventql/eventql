@@ -79,6 +79,10 @@ Buffer::Buffer(
 }
 
 Buffer& Buffer::operator=(Buffer&& move) {
+  if (data_ != nullptr) {
+    free(data_);
+  }
+
   data_ = move.data_;
   size_ = move.size_;
   alloc_ = move.alloc_;
