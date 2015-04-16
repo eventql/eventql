@@ -166,14 +166,14 @@ int main(int argc, const char** argv) {
         URI(rep));
   }
 
-  eventdb::ArtifactReplication artifact_replication(&artifacts, &http);
+  eventdb::ArtifactReplication artifact_replication(&artifacts, &http, 8);
   artifact_replication.addSource(
       URI("http://nue03.prod.fnrd.net:7005/chunks/"));
 
   eventdb::TableJanitor table_janitor(&table_repo);
   if (!readonly) {
-    table_janitor.start();
-    table_replication.start();
+    //table_janitor.start();
+    //table_replication.start();
     artifact_replication.start();
   }
 
