@@ -19,6 +19,27 @@ HTTPConnectionPool::HTTPConnectionPool(
 
 Future<HTTPResponse> HTTPConnectionPool::executeRequest(
     const HTTPRequest& req) {
+  return executeRequest(
+      req,
+      [] (Promise<HTTPResponse> promise) {
+        return new HTTPResponseFuture(promise);
+      });
+}
+
+Future<HTTPResponse> HTTPConnectionPool::executeRequest(
+    const HTTPRequest& req,
+    const fnord::net::InetAddr& addr) {
+  return executeRequest(
+      req,
+      addr,
+      [] (Promise<HTTPResponse> promise) {
+        return new HTTPResponseFuture(promise);
+      });
+}
+
+Future<HTTPResponse> HTTPConnectionPool::executeRequest(
+    const HTTPRequest& req,
+    Function<HTTPResponseFuture* (Promise<HTTPResponse> promise)> factory) {
   if (!req.hasHeader("Host")) {
     RAISE(kRuntimeError, "missing Host header");
   }
@@ -28,19 +49,21 @@ Future<HTTPResponse> HTTPConnectionPool::executeRequest(
     addr.setPort(80);
   }
 
-  return executeRequest(req, addr);
+  return executeRequest(req, addr, factory);
 }
 
 Future<HTTPResponse> HTTPConnectionPool::executeRequest(
     const HTTPRequest& req,
-    const fnord::net::InetAddr& addr) {
+    const fnord::net::InetAddr& addr,
+    Function<HTTPResponseFuture* (Promise<HTTPResponse> promise)> factory) {
   Promise<HTTPResponse> promise;
 
   leaseConnection(
       addr,
       promise,
-      [this, req, promise] (HTTPClientConnection* conn) {
-    auto http_future = new HTTPResponseFuture(promise);
+      [this, req, promise, factory] (HTTPClientConnection* conn) {
+    auto http_future = factory(promise);
+
     try {
       conn->executeRequest(req, http_future);
     } catch (const std::exception& e) {
