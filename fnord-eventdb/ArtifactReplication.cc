@@ -18,12 +18,13 @@ namespace eventdb {
 
 ArtifactReplication::ArtifactReplication(
     ArtifactIndex* index,
-    http::HTTPConnectionPool* http) :
+    http::HTTPConnectionPool* http,
+    size_t max_concurrent_reqs) :
     index_(index),
     http_(http),
     interval_(1 * kMicrosPerSecond),
     cur_requests_(0),
-    max_concurrent_reqs_(4),
+    max_concurrent_reqs_(max_concurrent_reqs),
     running_(true) {}
 
 void ArtifactReplication::addSource(const URI& source) {
@@ -31,15 +32,6 @@ void ArtifactReplication::addSource(const URI& source) {
 }
 
 void ArtifactReplication::downloadPending() {
-  URI uri("http://nue03.prod.fnrd.net:7005/chunks/dawanda_joined_sessions.nue03.db3203a33a8df903028d87658a5eb502.sst");
-  http::HTTPRequest req(http::HTTPMessage::M_GET, uri.pathAndQuery());
-  req.addHeader("Host", uri.hostAndPort());
-  http::HTTPFileDownload download(req, "/tmp/fu.download");
-  auto res = download.download(http_);
-  res.wait();
-  fnord::iputs("status: $0", res.get().statusCode());
-  abort();
-
   auto artifacts = index_->listArtifacts();
 
   for (const auto& a : artifacts) {
@@ -55,31 +47,122 @@ void ArtifactReplication::downloadArtifact(const ArtifactRef& artifact) {
       "Downloading artifact: $0",
       artifact.name);
 
-  // here be dragons...
-
-  //http://nue03.prod.fnrd.net:7005/chunks/
-
   for (const auto& f : artifact.files) {
+    if (f.size == 0) {
+      fnord::logWarning(
+          "fn.evdb",
+          "Ignoring empty artifact file '$0'",
+          f.filename);
 
+      continue;
+    }
+
+    bool retrieved = false;
     for (const auto& s : sources_) {
-      auto path = FileUtil::joinPaths(s.path(), f.filename);
-      http::HTTPRequest req(http::HTTPMessage::M_HEAD, path);
-      req.addHeader("Host", s.hostAndPort());
+      auto uri = s;
+      uri.setPath(FileUtil::joinPaths(uri.path(), f.filename));
+      http::HTTPRequest req(http::HTTPMessage::M_HEAD, uri.path());
+      req.addHeader("Host", uri.hostAndPort());
 
-      fnord::iputs("GET: $0, $1", s.hostAndPort(), path);
       auto res = http_->executeRequest(req);
       res.wait();
 
       const auto& r = res.get();
-      fnord::iputs("response: $0", r.statusCode());
-      //if (r.statusCode() != 201) {
-      //  RAISEF(kRuntimeError, "received non-201 response: $0", r.body().toString());
-      //}
+      if (r.statusCode() != 200) {
+        continue;
+      }
 
+      size_t content_len = 0;
+      try {
+        content_len = std::stoul(r.getHeader("Content-Length"));
+      } catch (...) {}
+
+      if (content_len != f.size) {
+        fnord::logWarning(
+            "fn.evdb",
+            "Ignoring remote artifact '$0' because it has the wrong size "\
+            "($2 vs $3)",
+            uri.toString(),
+            content_len,
+            f.size);
+
+        continue;
+      }
+
+      downloadFile(f, uri);
+
+      retrieved = true;
+      break;
+    }
+
+    if (!retrieved) {
+      fnord::logWarning(
+          "fn.evdb",
+          "No source found for remote artifact file '$0'",
+          f.filename);
+
+      return;
     }
   }
 
   index_->updateStatus(artifact.name, ArtifactStatus::PRESENT);
+}
+
+
+void ArtifactReplication::downloadFile(
+    const ArtifactFileRef& file,
+    const URI& uri) {
+  auto target_file = FileUtil::joinPaths(index_->basePath(), file.filename);
+
+  if (FileUtil::exists(target_file)) {
+    return;
+  }
+
+  if (FileUtil::exists(target_file + "~")) {
+    fnord::logWarning(
+        "fn.evdb",
+        "Deleting orphaned temp file '$0'",
+        target_file + "~");
+
+    FileUtil::rm(target_file + "~");
+  }
+
+  http::HTTPRequest req(http::HTTPMessage::M_GET, uri.pathAndQuery());
+  req.addHeader("Host", uri.hostAndPort());
+  http::HTTPFileDownload download(req, target_file + "~");
+  auto res = download.download(http_);
+  res.wait();
+
+  if (res.get().statusCode() != 200) {
+    FileUtil::rm(target_file + "~");
+    RAISE(kRuntimeError, "received non-200 http reponse");
+  }
+
+  auto size = FileUtil::size(target_file + "~");
+  if (size != file.size) {
+    FileUtil::rm(target_file + "~");
+
+    RAISEF(
+        kRuntimeError,
+        "size mismatch for file: '$0' - $1 vs $2",
+        uri.toString(),
+        size,
+        file.size);
+  }
+
+  auto checksum = FileUtil::checksum(target_file + "~");
+  if (checksum != file.checksum) {
+    FileUtil::rm(target_file + "~");
+
+    RAISEF(
+        kRuntimeError,
+        "checksum mismatch for file: '$0' - $1 vs $2",
+        uri.toString(),
+        checksum,
+        file.checksum);
+  }
+
+  FileUtil::mv(target_file + "~", target_file);
 }
 
 void ArtifactReplication::start() {
