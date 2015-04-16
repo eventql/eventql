@@ -48,6 +48,7 @@ public:
   List<ArtifactRef> listArtifacts();
   void addArtifact(const ArtifactRef& artifact);
   void updateStatus(const String& artifact_name, ArtifactStatus new_status);
+  void deleteArtifact(const String& artifact_name);
 
   const String& basePath() const;
 

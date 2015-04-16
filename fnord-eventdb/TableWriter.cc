@@ -264,11 +264,10 @@ void TableWriter::gc(size_t keep_generations, size_t keep_arenas) {
   }
 
   for (const auto& c : delete_chunks) {
-    auto chunkfile = StringUtil::format(
-        "$0/$1.$2",
-        db_path_,
-        name_,
-        c);
+    auto chunkname = StringUtil::format("$1.$2", name_, c);
+    auto chunkfile = StringUtil::format("$0/$1", db_path_, chunkname);
+
+    artifacts_->deleteArtifact(chunkname);
 
     delete_files.emplace(chunkfile + ".sst");
     delete_files.emplace(chunkfile + ".cst");
