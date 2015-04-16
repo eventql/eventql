@@ -127,7 +127,6 @@ int main(int argc, const char** argv) {
       "url",
       "<url>");
 
-
   flags.defineFlag(
       "loglevel",
       fnord::cli::FlagParser::T_STRING,
@@ -160,15 +159,16 @@ int main(int argc, const char** argv) {
   table_repo.addTable("dawanda_joined_sessions", joinedSessionsSchema());
 
   eventdb::TableReplication table_replication(&http);
+  eventdb::ArtifactReplication artifact_replication(&artifacts, &http, 8);
   for (const auto& rep : flags.getStrings("replicate_from")) {
     table_replication.replicateTableFrom(
         table_repo.findTableWriter("dawanda_joined_sessions"),
-        URI(rep));
+        URI(StringUtil::format("http://$0:7003/eventdb", rep)));
+
+    artifact_replication.addSource(
+        URI(StringUtil::format("http://$0:7005/chunks", rep)));
   }
 
-  eventdb::ArtifactReplication artifact_replication(&artifacts, &http, 8);
-  artifact_replication.addSource(
-      URI("http://nue03.prod.fnrd.net:7005/chunks/"));
 
   eventdb::TableJanitor table_janitor(&table_repo);
   if (!readonly) {
