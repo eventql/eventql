@@ -41,7 +41,9 @@ void ArtifactReplication::downloadArtifact(const ArtifactRef& artifact) {
       "Downloading artifact: $0",
       artifact.name);
 
-  usleep(1000000);
+  // here be dragons...
+
+  index_->updateStatus(artifact.name, ArtifactStatus::PRESENT);
 }
 
 void ArtifactReplication::start() {
