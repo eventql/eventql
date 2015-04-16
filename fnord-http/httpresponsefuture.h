@@ -23,7 +23,7 @@ namespace http {
 class HTTPResponseFuture : public HTTPResponseHandler {
 public:
   HTTPResponseFuture(Promise<HTTPResponse> promise);
-  ~HTTPResponseFuture();
+  virtual ~HTTPResponseFuture();
 
   HTTPResponseFuture(const HTTPResponseFuture& other) = delete;
   HTTPResponseFuture& operator=(const HTTPResponseFuture& other) = delete;

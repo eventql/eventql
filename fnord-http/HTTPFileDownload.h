@@ -10,6 +10,7 @@
 #ifndef _FNORD_HTTP_FILEDOWNLOAD_H
 #define _FNORD_HTTP_FILEDOWNLOAD_H
 #include <fnord-base/uri.h>
+#include <fnord-base/io/file.h>
 #include <fnord-http/httpmessage.h>
 #include "fnord-http/httprequest.h"
 #include "fnord-http/httpresponse.h"
@@ -30,8 +31,16 @@ public:
   Future<HTTPResponse> download(HTTPConnectionPool* http);
 
 protected:
+  class ResponseFuture : public HTTPResponseFuture {
+  public:
+    ResponseFuture(Promise<HTTPResponse> promise, File&& file);
+    void onBodyChunk(const char* data, size_t size) override;
+    File file_;
+  };
+
   HTTPRequest http_req_;
   String output_file_;
+  File file_;
 };
 
 }
