@@ -23,7 +23,6 @@ ArtifactReplication::ArtifactReplication(
     index_(index),
     http_(http),
     interval_(1 * kMicrosPerSecond),
-    cur_requests_(0),
     max_concurrent_reqs_(max_concurrent_reqs),
     running_(true) {}
 
@@ -181,15 +180,20 @@ void ArtifactReplication::stop() {
 
 void ArtifactReplication::enqueueArtifact(const ArtifactRef& artifact) {
   std::unique_lock<std::mutex> lk(mutex_);
-  while (cur_requests_ >= max_concurrent_reqs_) {
+  if (cur_downloads_.count(artifact.name) > 0) {
+    return;
+  }
+
+  while (cur_downloads_.size() >= max_concurrent_reqs_) {
     cv_.wait(lk);
   }
 
-  ++cur_requests_;
+  cur_downloads_.emplace(artifact.name);
+
   auto thread = std::thread([this, artifact] () {
     downloadArtifact(artifact);
     std::unique_lock<std::mutex> wakeup_lk(mutex_);
-    --cur_requests_;
+    cur_downloads_.erase(artifact.name);
     wakeup_lk.unlock();
     cv_.notify_all();
   });
