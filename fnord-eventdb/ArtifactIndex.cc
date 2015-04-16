@@ -63,6 +63,21 @@ void ArtifactIndex::updateStatus(
   });
 }
 
+void ArtifactIndex::deleteArtifact(const String& artifact_name) {
+  withIndex(false, [&] (List<ArtifactRef>* index) {
+    for (auto a = index->begin(); a != index->end(); ) {
+      if (a->name == artifact_name) {
+        a = index->erase(a);
+        return;
+      } else {
+        ++a;
+      }
+    }
+
+    RAISEF(kIndexError, "artifact '$0' not found", artifact_name);
+  });
+}
+
 void ArtifactIndex::statusTransition(
     ArtifactRef* artifact,
     ArtifactStatus new_status) {
