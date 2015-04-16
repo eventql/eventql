@@ -10,6 +10,7 @@
 #include "unistd.h"
 #include <fnord-base/logging.h>
 #include <fnord-base/wallclock.h>
+#include <fnord-http/HTTPFileDownload.h>
 #include <fnord-eventdb/ArtifactReplication.h>
 
 namespace fnord {
@@ -30,15 +31,13 @@ void ArtifactReplication::addSource(const URI& source) {
 }
 
 void ArtifactReplication::downloadPending() {
-
- // 
   URI uri("http://nue03.prod.fnrd.net:7005/chunks/dawanda_joined_sessions.nue03.db3203a33a8df903028d87658a5eb502.sst");
-  http::HTTPRequest req(http::HTTPMessage::M_HEAD, uri.pathAndQuery());
+  http::HTTPRequest req(http::HTTPMessage::M_GET, uri.pathAndQuery());
   req.addHeader("Host", uri.hostAndPort());
-  auto res = http_->executeRequest(req);
+  http::HTTPFileDownload download(req, "/tmp/fu.download");
+  auto res = download.download(http_);
   res.wait();
   fnord::iputs("status: $0", res.get().statusCode());
-
   abort();
 
   auto artifacts = index_->listArtifacts();
