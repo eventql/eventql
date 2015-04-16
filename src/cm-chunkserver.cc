@@ -153,11 +153,12 @@ int main(int argc, const char** argv) {
   auto readonly = flags.isSet("readonly");
   auto replica = flags.getString("replica");
 
+  http::HTTPConnectionPool http(&ev);
+
   eventdb::ArtifactIndex artifacts(dir, replica, readonly);
   eventdb::TableRepository table_repo(&artifacts, dir, replica, readonly);
   table_repo.addTable("dawanda_joined_sessions", joinedSessionsSchema());
 
-  http::HTTPConnectionPool http(&ev);
   eventdb::TableReplication table_replication(&http);
   for (const auto& rep : flags.getStrings("replicate_from")) {
     table_replication.replicateTableFrom(
@@ -166,6 +167,8 @@ int main(int argc, const char** argv) {
   }
 
   eventdb::ArtifactReplication artifact_replication(&artifacts, &http);
+  artifact_replication.addSource(
+      URI("http://nue03.prod.fnrd.net:7005/chunks/"));
 
   eventdb::TableJanitor table_janitor(&table_repo);
   if (!readonly) {
