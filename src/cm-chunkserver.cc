@@ -172,8 +172,8 @@ int main(int argc, const char** argv) {
 
   eventdb::TableJanitor table_janitor(&table_repo);
   if (!readonly) {
-    //table_janitor.start();
-    //table_replication.start();
+    table_janitor.start();
+    table_replication.start();
     artifact_replication.start();
   }
 
