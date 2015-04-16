@@ -531,6 +531,7 @@ void TableChunkMerge::merge() {
 }
 
 TableMergePolicy::TableMergePolicy() {
+  steps_.emplace_back(1024 * 1024 * 490, 1024 * 1024 * 520);
   steps_.emplace_back(1024 * 1024 * 200, 1024 * 1024 * 250);
   steps_.emplace_back(1024 * 1024 * 90, 1024 * 1024 * 100);
   steps_.emplace_back(1024 * 1024, 1024 * 1024 * 25);
