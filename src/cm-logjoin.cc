@@ -44,6 +44,7 @@ using namespace cm;
 using namespace fnord;
 
 std::atomic<bool> cm_logjoin_shutdown;
+fnord::thread::EventLoop ev;
 
 void quit(int n) {
   cm_logjoin_shutdown = true;
@@ -187,9 +188,7 @@ int main(int argc, const char** argv) {
   }
 
   /* start event loop */
-  fnord::thread::EventLoop ev;
-
-  auto evloop_thread = std::thread([&ev] {
+  auto evloop_thread = std::thread([] {
     ev.run();
   });
 
@@ -435,11 +434,11 @@ int main(int argc, const char** argv) {
   }
 
   ev.shutdown();
-  //evloop_thread.join();
+  evloop_thread.join();
 
 
   fnord::logInfo("cm.logjoin", "LogJoin exiting...");
-  exit(0); // FIXPAUL
+  //exit(0); // FIXPAUL
 
   return 0;
 }
