@@ -15,6 +15,7 @@
 #include <fnord-base/random.h>
 #include <fnord-base/io/FileLock.h>
 #include <fnord-base/io/mmappedfile.h>
+#include <fnord-base/util/binarymessagereader.h>
 #include <fnord-base/util/binarymessagewriter.h>
 #include <fnord-msg/MessageSchema.h>
 #include <fnord-msg/MessageObject.h>
@@ -27,18 +28,37 @@ public:
 
   TableChunkSummaryReader(const String& filename);
 
-  Option<Buffer> getSummary(const String& summary_name);
+  Option<Buffer> getSummaryData(const String& summary_name) const;
 
-  bool getSummary(
+  template <typename T>
+  Option<T> getSummary(const String& summary_name) const;
+
+  bool getSummaryData(
       const String& summary_name,
       void** data,
-      size_t* size);
+      size_t* size) const;
 
 protected:
   HashMap<String, Pair<uint64_t, uint64_t>> offsets_;
   io::MmappedFile mmap_;
   size_t body_offset_;
 };
+
+template <typename T>
+Option<T> TableChunkSummaryReader::getSummary(
+    const String& summary_name) const {
+  auto data = getSummaryData(summary_name);
+
+  if (data.isEmpty()) {
+    return None<T>();
+  }
+
+  util::BinaryMessageReader reader(data.get().data(), data.get().size());
+  T summary;
+  summary.decode(&reader);
+  return Some(summary);
+}
+
 
 }
 }

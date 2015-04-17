@@ -18,6 +18,11 @@ void NumericBoundsSummary::encode(util::BinaryMessageWriter* writer) const {
   writer->appendVarUInt(max_value);
 }
 
+void NumericBoundsSummary::decode(util::BinaryMessageReader* reader) {
+  min_value = reader->readVarUInt();
+  max_value = reader->readVarUInt();
+}
+
 NumericBoundsSummaryBuilder::NumericBoundsSummaryBuilder(
     const String& summary_name,
     uint32_t field_id) :
