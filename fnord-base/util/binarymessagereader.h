@@ -25,6 +25,7 @@ public:
   uint16_t const* readUInt16();
   uint32_t const* readUInt32();
   uint64_t const* readUInt64();
+  uint64_t readVarUInt();
   char const* readString(size_t size);
   void const* read(size_t size);
 
@@ -35,6 +36,7 @@ public:
   void seekTo(size_t pos);
 
   size_t remaining() const;
+  size_t position() const;
 
 protected:
   void const* ptr_;

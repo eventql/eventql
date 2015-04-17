@@ -10,34 +10,26 @@
 #ifndef _FNORD_MSG_MESSAGESCHEMA_H
 #define _FNORD_MSG_MESSAGESCHEMA_H
 #include <fnord-base/stdtypes.h>
+#include <fnord-base/exception.h>
+#include <fnord-msg/MessageObject.h>
 
 /**
  * // http://tools.ietf.org/html/rfc5234
  *
+ *   <message> := <object>
+ *
  *   <message> :=
- *       <field>...
+ *       <varint>               // num fields
+ *       { <field_ptr> }        // one field pointer for each field
+ *       { <uint8_t> }          // field data
  *
- *   <field> :=
- *       <varint>               // field type
- *       [ <field_data> ]       // field data. known size depending on the type
- *
- *   <field_data_uint32> :=
- *       <varint>                // value
- *
- *   <field_data_string> :=
- *       <varint>                // len
- *       <uint8_t>...            // data
+ *   <field_ptr> :=
+ *       <varint>               // field id
+ *       <varint>               // field data end offset
  *
  */
 namespace fnord {
 namespace msg {
-
-enum class FieldType : uint8_t {
-  OBJECT = 0,
-  BOOLEAN = 1,
-  UINT32 = 2,
-  STRING = 3
-};
 
 enum class EncodingHint : uint8_t {
   NONE = 0,
@@ -77,11 +69,15 @@ struct MessageSchema {
       const String& _name,
       Vector<MessageSchemaField> _fields);
 
-  String name;
+  String name_;
   Vector<MessageSchemaField> fields;
   HashMap<String, uint32_t> field_ids;
+  HashMap<uint32_t, FieldType> field_types;
+  HashMap<uint32_t, String> field_names;
 
-  uint32_t id(const String& path);
+  uint32_t id(const String& path) const;
+  FieldType type(uint32_t id) const;
+  const String& name(uint32_t id) const;
   String toString() const;
 };
 

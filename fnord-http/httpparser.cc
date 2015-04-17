@@ -30,6 +30,7 @@ HTTPParser::HTTPParser(
     on_header_cb_(nullptr),
     on_headers_complete_cb_(nullptr),
     on_body_chunk_cb_(nullptr),
+    expect_body_(true),
     body_bytes_read_(0),
     body_bytes_expected_(0) {
   switch (mode) {
@@ -359,7 +360,8 @@ void HTTPParser::processHeader(
     size_t key_len,
     const char* val,
     size_t val_len) {
-  if (key_len == strlen(kContentLengthHeader) &&
+  if (expect_body_ &&
+      key_len == strlen(kContentLengthHeader) &&
       strncasecmp(key, kContentLengthHeader, key_len) == 0) {
     std::string content_length_str(val, val_len);
     try {
@@ -415,6 +417,11 @@ void HTTPParser::reset() {
   buf_.clear();
   body_bytes_read_ = 0;
   body_bytes_expected_ = 0;
+  expect_body_ = true;
+}
+
+void HTTPParser::ignoreBody() {
+  expect_body_ = false;
 }
 
 }

@@ -16,8 +16,12 @@ namespace mdb {
 MDBCursor::MDBCursor(
     MDB_cursor* mdb_cur) :
     mdb_cur_(mdb_cur),
-    is_closed_(false) {
-  incRef();
+    is_closed_(false) {}
+
+MDBCursor::~MDBCursor() {
+  if (!is_closed_) {
+    close();
+  }
 }
 
 void MDBCursor::close() {
@@ -27,7 +31,6 @@ void MDBCursor::close() {
 
   is_closed_ = true;
   mdb_cursor_close(mdb_cur_);
-  decRef();
 }
 
 bool MDBCursor::get(const String& key, Buffer* value) {
@@ -113,6 +116,47 @@ void MDBCursor::put(
     auto err = String(mdb_strerror(rc));
     RAISEF(kRuntimeError, "mdb_cursor_put() failed: $0", err);
   }
+}
+
+bool MDBCursor::getFirstOrGreater(Buffer* rkey, Buffer* rvalue) {
+  void* key = rkey->data();
+  size_t key_size = rkey->size();
+  void* val;
+  size_t val_size;
+
+  if (getFirstOrGreater(&key, &key_size, &val, &val_size)) {
+    *rkey = Buffer(key, key_size);
+    *rvalue = Buffer(val, val_size);
+    return true;
+  } else {
+    return false;
+  }
+}
+
+bool MDBCursor::getFirstOrGreater(
+    void** key,
+    size_t* key_size,
+    void** value,
+    size_t* value_size) {
+  MDB_val mkey, mval;
+  mkey.mv_data = *key;
+  mkey.mv_size = *key_size;
+
+  auto rc = mdb_cursor_get(mdb_cur_, &mkey, &mval, MDB_SET_RANGE);
+  if (rc == MDB_NOTFOUND) {
+    return false;
+  }
+
+  if (rc != 0) {
+    auto err = String(mdb_strerror(rc));
+    RAISEF(kRuntimeError, "mdb_cursor_get(FIRST) failed: $0", err);
+  }
+
+  *key = mkey.mv_data;
+  *key_size = mkey.mv_size;
+  *value = mval.mv_data;
+  *value_size = mval.mv_size;
+  return true;
 }
 
 bool MDBCursor::getFirst(Buffer* rkey, Buffer* rvalue) {

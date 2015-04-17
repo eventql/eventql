@@ -16,17 +16,36 @@ namespace msg {
 
 struct MessageObject;
 
+enum class FieldType : uint8_t {
+  OBJECT = 0,
+  BOOLEAN = 1,
+  UINT32 = 2,
+  STRING = 3
+};
+
 union MessageObjectValues {
   Vector<MessageObject> t_obj;
   String t_str;
   uint64_t t_uint;
 };
 
+struct TrueType {};
+struct FalseType {};
+static const TrueType TRUE {};
+static const FalseType FALSE {};
+
+
 struct MessageObject {
-  MessageObject(uint32_t id = 0);
-  MessageObject(uint32_t id, uint32_t value);
-  MessageObject(uint32_t id, const String& value);
-  MessageObject(uint32_t id, bool value);
+  explicit MessageObject(uint32_t id = 0);
+  explicit MessageObject(uint32_t id, const String& value);
+  explicit MessageObject(uint32_t id, uint32_t value);
+  explicit MessageObject(uint32_t id, TrueType t);
+  explicit MessageObject(uint32_t id, FalseType f);
+
+  MessageObject(const MessageObject& other);
+  MessageObject(MessageObject&& other) = delete;
+  MessageObject& operator=(const MessageObject& other);
+  ~MessageObject();
 
   Vector<MessageObject>& asObject() const;
   const String& asString() const;
@@ -41,6 +60,7 @@ struct MessageObject {
   }
 
   uint32_t id;
+  FieldType type;
   char data_[sizeof(MessageObjectValues)];
 };
 

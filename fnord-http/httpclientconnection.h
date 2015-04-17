@@ -26,7 +26,7 @@ class HTTPResponseHandler;
 
 class HTTPClientConnection {
 public:
-  static const size_t kMinBufferSize = 4096;
+  static const size_t kMinBufferSize = 8192;
 
   HTTPClientConnection(
       std::unique_ptr<net::TCPConnection> conn,

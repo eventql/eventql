@@ -27,6 +27,9 @@ constexpr const uint64_t kHoursPerDay = 24;
 constexpr const uint64_t kSecondsPerDay = kSecondsPerHour * kHoursPerDay;
 constexpr const uint64_t kMillisPerDay = kSecondsPerDay * kMillisPerSecond;
 constexpr const uint64_t kMicrosPerDay = kSecondsPerDay * kMicrosPerSecond;
+constexpr const uint64_t kDaysPerWeek = 7;
+constexpr const uint64_t kSecondsPerWeek = kSecondsPerDay * kDaysPerWeek;
+constexpr const uint64_t kMicrosPerWeek = kSecondsPerWeek * kMicrosPerSecond;
 
 } // namespace fnord
 #endif
