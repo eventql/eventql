@@ -432,6 +432,7 @@ add_executable(cm-autocompletebuild
     3rdparty/libfnord/fnord-eventdb/TableWriter.cc
     3rdparty/libfnord/fnord-eventdb/TableRepository.cc
     3rdparty/libfnord/fnord-eventdb/ArtifactIndex.cc
+    3rdparty/libfnord/fnord-eventdb/TableChunkSummaryWriter.cc
     src/schemas.cc
     src/IndexReader.cc
     src/IndexWriter.cc
@@ -487,6 +488,8 @@ add_executable(cm-chunkserver
     3rdparty/libfnord/fnord-eventdb/TableJanitor.cc
     3rdparty/libfnord/fnord-eventdb/TableReplication.cc
     3rdparty/libfnord/fnord-eventdb/ArtifactReplication.cc
+    3rdparty/libfnord/fnord-eventdb/NumericBoundsSummary.cc
+    3rdparty/libfnord/fnord-eventdb/TableChunkSummaryWriter.cc
     src/analytics/AnalyticsTableScan.cc
     src/analytics/AnalyticsQuery.cc
     src/analytics/AnalyticsQueryEngine.cc
