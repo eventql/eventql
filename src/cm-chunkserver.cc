@@ -158,15 +158,18 @@ int main(int argc, const char** argv) {
   eventdb::TableRepository table_repo(&artifacts, dir, replica, readonly);
   auto joined_sessions_schema = joinedSessionsSchema();
   table_repo.addTable("dawanda_joined_sessions", joined_sessions_schema);
-  auto joined_sessions_table =
-      table_repo.findTableWriter("dawanda_joined_sessions");
 
-  joined_sessions_table->addSummary(
-      [joined_sessions_schema] () -> RefPtr<eventdb::TableChunkSummaryBuilder> {
-        return new eventdb::NumericBoundsSummaryBuilder(
-            "queries.time-bounds",
-            joined_sessions_schema.id("queries.time"));
-      });
+  if (!readonly) {
+    auto joined_sessions_table =
+        table_repo.findTableWriter("dawanda_joined_sessions");
+
+    joined_sessions_table->addSummary(
+        [joined_sessions_schema] () -> RefPtr<eventdb::TableChunkSummaryBuilder> {
+          return new eventdb::NumericBoundsSummaryBuilder(
+              "queries.time-bounds",
+              joined_sessions_schema.id("queries.time"));
+        });
+  }
 
   eventdb::TableReplication table_replication(&http);
   eventdb::ArtifactReplication artifact_replication(&artifacts, &http, 8);
