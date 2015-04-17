@@ -27,6 +27,7 @@
 #include "logjoin/TrackedSession.h"
 #include "logjoin/TrackedQuery.h"
 #include "logjoin/LogJoinShard.h"
+#include "logjoin/LogJoinTarget.h"
 
 using namespace fnord;
 
@@ -39,7 +40,8 @@ public:
 
   LogJoin(
       LogJoinShard shard,
-      bool dry_run);
+      bool dry_run,
+      LogJoinTarget* target);
 
   void insertLogline(
       const std::string& log_line,
@@ -52,6 +54,7 @@ public:
       mdb::MDBTransaction* txn);
 
   size_t numSessions() const;
+  size_t cacheSize() const;
 
   void flush(mdb::MDBTransaction* txn, DateTime stream_time);
 
@@ -59,42 +62,9 @@ public:
 
   void exportStats(const std::string& path_prefix);
 
-  void addCustomer(
-        const String& customer_key,
-        const String& shard_name,
-        RPCClient* rpc_client);
+  void setTurbo(bool turbo);
 
 protected:
-
-  class OutputFeeds : public RefCounted {
-  public:
-    OutputFeeds(
-        RefPtr<feeds::RemoteFeedWriter> fw_item_visits,
-        RefPtr<feeds::RemoteFeedWriter> fw_queries,
-        RefPtr<feeds::RemoteFeedWriter> fw_sessions) :
-        joined_item_visits_feed_writer(fw_item_visits),
-        joined_queries_feed_writer(fw_queries),
-        joined_sessions_feed_writer(fw_sessions) {}
-
-    RefPtr<feeds::RemoteFeedWriter> joined_item_visits_feed_writer;
-    RefPtr<feeds::RemoteFeedWriter> joined_queries_feed_writer;
-    RefPtr<feeds::RemoteFeedWriter> joined_sessions_feed_writer;
-  };
-
-  void onSession(const TrackedSession& session);
-
-  void onQuery(
-      const TrackedSession& session,
-      const TrackedQuery& query);
-
-  void onItemVisit(
-      const TrackedSession& session,
-      const TrackedItemVisit& item_visit);
-
-  void onItemVisit(
-      const TrackedSession& session,
-      const TrackedItemVisit& item_visit,
-      const TrackedQuery& query);
 
   void insertQuery(
       const std::string& customer_key,
@@ -119,17 +89,17 @@ protected:
       const DateTime& flush_at);
 
   void maybeFlushSession(
+      mdb::MDBTransaction* txn,
       const std::string uid,
       TrackedSession* session,
       DateTime stream_time);
 
-  RefPtr<OutputFeeds> getFeedsForCustomer(
-      const std::string& customer_key);
-
   bool dry_run_;
   LogJoinShard shard_;
+  LogJoinTarget* target_;
   HashMap<String, DateTime> sessions_flush_times_;
-  HashMap<String, RefPtr<OutputFeeds>> customer_feeds_;
+  HashMap<String, TrackedSession> session_cache_;
+  bool turbo_;
 
   fnord::stats::Counter<uint64_t> stat_loglines_total_;
   fnord::stats::Counter<uint64_t> stat_loglines_invalid_;
