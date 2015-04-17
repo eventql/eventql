@@ -272,7 +272,7 @@ void TableWriter::gc(size_t keep_generations, size_t keep_arenas) {
 
     delete_files.emplace(chunkfile + ".sst");
     delete_files.emplace(chunkfile + ".cst");
-    delete_files.emplace(chunkfile + ".idx");
+    delete_files.emplace(chunkfile + ".smr");
   }
 
   for (const auto& f : delete_files) {
@@ -337,9 +337,9 @@ void TableWriter::addChunk(const TableChunkRef* chunk, ArtifactStatus status) {
   });
 
   artifact.files.emplace_back(ArtifactFileRef {
-      .filename = chunkname + ".idx",
-      .size = chunk->index_size,
-      .checksum = chunk->index_checksum
+      .filename = chunkname + ".smr",
+      .size = chunk->summary_size,
+      .checksum = chunk->summary_checksum
   });
 
   artifacts_->addArtifact(artifact);
@@ -400,10 +400,10 @@ void TableGeneration::encode(Buffer* buf) {
     writer.appendUInt64(c.num_records);
     writer.appendUInt64(c.sstable_checksum);
     writer.appendUInt64(c.cstable_checksum);
-    writer.appendUInt64(c.index_checksum);
+    writer.appendUInt64(c.summary_checksum);
     writer.appendVarUInt(c.sstable_size);
     writer.appendVarUInt(c.cstable_size);
-    writer.appendVarUInt(c.index_size);
+    writer.appendVarUInt(c.summary_size);
   }
 
   buf->append(writer.data(), writer.size());
@@ -440,15 +440,15 @@ void TableGeneration::decode(const Buffer& buf) {
     chunk.num_records = *reader.readUInt64();
     chunk.sstable_checksum = *reader.readUInt64();
     chunk.cstable_checksum = *reader.readUInt64();
-    chunk.index_checksum = *reader.readUInt64();
+    chunk.summary_checksum = *reader.readUInt64();
     if (v < 0x02) {
       chunk.sstable_size = 0;
       chunk.cstable_size = 0;
-      chunk.index_size = 0;
+      chunk.summary_size = 0;
     } else {
       chunk.sstable_size = reader.readVarUInt();
       chunk.cstable_size = reader.readVarUInt();
-      chunk.index_size = reader.readVarUInt();
+      chunk.summary_size = reader.readVarUInt();
     }
 
     chunks.emplace_back(chunk);
@@ -506,7 +506,7 @@ void TableChunkWriter::commit() {
   cstable_->write(chunk_filename_ + ".cst~");
   sstable_->finalize();
 
-  TableChunkSummaryWriter summary_writer(chunk_filename_ + ".idx~");
+  TableChunkSummaryWriter summary_writer(chunk_filename_ + ".smr~");
   for (auto& s : summaries_) {
     s->commit(&summary_writer);
   }
@@ -517,12 +517,12 @@ void TableChunkWriter::commit() {
   chunk_->sstable_size = FileUtil::size(chunk_filename_ + ".sst~");
   chunk_->cstable_checksum = FileUtil::checksum(chunk_filename_ + ".cst~");
   chunk_->cstable_size = FileUtil::size(chunk_filename_ + ".cst~");
-  chunk_->index_checksum = FileUtil::checksum(chunk_filename_ + ".idx~");
-  chunk_->index_size = FileUtil::size(chunk_filename_ + ".idx~");
+  chunk_->summary_checksum = FileUtil::checksum(chunk_filename_ + ".smr~");
+  chunk_->summary_size = FileUtil::size(chunk_filename_ + ".smr~");
 
   FileUtil::mv(chunk_filename_ + ".sst~", chunk_filename_ + ".sst");
   FileUtil::mv(chunk_filename_ + ".cst~", chunk_filename_ + ".cst");
-  FileUtil::mv(chunk_filename_ + ".idx~", chunk_filename_ + ".idx");
+  FileUtil::mv(chunk_filename_ + ".smr~", chunk_filename_ + ".smr");
 }
 
 TableChunkMerge::TableChunkMerge(
