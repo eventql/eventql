@@ -96,12 +96,13 @@ std::string StringUtil::toString<kStatusType>(kStatusType value) {
     case eUsageError: return "UsageError";
     case eVersionMismatchError: return "VersionMismatchError";
     case eWouldBlockError: return "WouldBlockError";
+    default: return "RuntimeError";
   }
 }
 
 void Status::raiseIfError() const {
   if (isError()) {
-    RAISE(StringUtil::toString(type_).c_str(), message_);
+    RAISE(kRuntimeError, message_);
   }
 }
 

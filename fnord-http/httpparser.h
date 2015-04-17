@@ -50,6 +50,7 @@ public:
   void parse(const char* data, size_t size);
   void eof();
   void reset();
+  void ignoreBody();
 
   void onMethod(std::function<void(HTTPMessage::kHTTPMethod)> callback);
   void onURI(std::function<void(const char* data, size_t size)> callback);
@@ -99,6 +100,7 @@ protected:
   Buffer buf_;
   size_t body_bytes_read_;
   size_t body_bytes_expected_;
+  bool expect_body_;
 };
 
 }

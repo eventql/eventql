@@ -95,6 +95,10 @@ void HTTPClientConnection::executeRequest(
     cur_handler_->onBodyChunk(data, size);
   });
 
+  if (request.method() == HTTPRequest::M_HEAD) {
+    parser_.ignoreBody();
+  }
+
   buf_.clear();
   BufferOutputStream os(&buf_);
   HTTPGenerator::generate(request, &os);

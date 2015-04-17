@@ -61,6 +61,28 @@ std::string FlagParser::getString(const char* longopt) const {
   RAISE(kFlagError, "flag '%s' is not set", longopt);
 }
 
+Vector<std::string> FlagParser::getStrings(const char* longopt) const {
+  for (auto& flag : flags_) {
+    if (flag.longopt == longopt) {
+      if (flag.type != T_STRING) {
+        RAISE(kFlagError, "flag '%s' is not a string", longopt);
+      }
+
+      if (flag.values.size() == 0) {
+        if (flag.default_value == nullptr) {
+          return Vector<String>();
+        } else {
+          return Vector<String> { flag.default_value };
+        }
+      }
+
+      return flag.values;
+    }
+  }
+
+  return Vector<String>();
+}
+
 int64_t FlagParser::getInt(const char* longopt) const {
   for (auto& flag : flags_) {
     if (flag.longopt == longopt) {
@@ -121,11 +143,13 @@ void FlagParser::parseArgv(const std::vector<std::string>& argv) {
       auto longopt = std::string("--") + flag.longopt;
       auto longopt_eq = std::string("--") + flag.longopt + "=";
 
-      if (arg.compare(0, longopt.size(), longopt) == 0) {
+      if (arg.size() == longopt.size() &&
+          arg.compare(0, longopt.size(), longopt) == 0) {
         flag_ptr = &flag;
       }
 
-      else if (arg.compare(0, longopt_eq.size(), longopt_eq) == 0) {
+      else if (arg.size() == longopt_eq.size() &&
+          arg.compare(0, longopt_eq.size(), longopt_eq) == 0) {
         flag_ptr = &flag;
         eq_len = longopt_eq.size();
       }

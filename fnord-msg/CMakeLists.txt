@@ -26,7 +26,10 @@ endif()
 
 # sstable
 add_library(fnord-msg OBJECT
+    MessageDecoder.cc
+    MessageEncoder.cc
     MessageBuilder.cc
+    MessagePrinter.cc
     MessageObject.cc
     MessageSchema.cc)
 

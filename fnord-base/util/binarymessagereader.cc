@@ -9,6 +9,7 @@
  */
 #include <fnord-base/util/binarymessagereader.h>
 #include <fnord-base/exception.h>
+#include <fnord-base/inspect.h>
 
 namespace fnord {
 namespace util {
@@ -38,6 +39,22 @@ uint64_t const* BinaryMessageReader::readUInt64() {
 
 void const* BinaryMessageReader::read(size_t size) {
   return static_cast<void const*>(readString(size));
+}
+
+uint64_t BinaryMessageReader::readVarUInt() {
+  uint64_t value = 0;
+
+  for (int i = 0; ; ++i) {
+    auto b = *((const unsigned char*) read(1));
+
+    value |= (b & 0x7fULL) << (7 * i);
+
+    if (!(b & 0x80U)) {
+      break;
+    }
+  }
+
+  return value;
 }
 
 template <>
@@ -85,6 +102,10 @@ void BinaryMessageReader::seekTo(size_t pos) {
 
 size_t BinaryMessageReader::remaining() const {
   return size_ - pos_;
+}
+
+size_t BinaryMessageReader::position() const {
+  return pos_;
 }
 
 }

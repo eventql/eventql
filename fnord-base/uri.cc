@@ -101,6 +101,10 @@ const std::string& URI::path() const {
   return path_;
 }
 
+void URI::setPath(const std::string& path) {
+  path_ = path;
+}
+
 std::string URI::pathAndQuery() const {
   if (query_.length() > 0) {
     return StringUtil::format("$0?$1", path_, query_);

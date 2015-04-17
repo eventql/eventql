@@ -25,6 +25,7 @@ public:
   MDBCursor(MDB_cursor* mdb_cur);
   MDBCursor(const MDBCursor& other) = delete;
   MDBCursor& operator=(const MDBCursor& other) = delete;
+  ~MDBCursor();
 
   bool set(const void* key, size_t key_size);
 
@@ -39,6 +40,13 @@ public:
   bool get(
       const void* key,
       size_t key_size,
+      void** value,
+      size_t* value_size);
+
+  bool getFirstOrGreater(Buffer* key, Buffer* value);
+  bool getFirstOrGreater(
+      void** key,
+      size_t* key_size,
       void** value,
       size_t* value_size);
 

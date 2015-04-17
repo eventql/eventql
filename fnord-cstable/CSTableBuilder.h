@@ -22,7 +22,7 @@ namespace cstable {
 
 class CSTableBuilder {
 public:
-  CSTableBuilder(msg::MessageSchema* schema);
+  CSTableBuilder(const msg::MessageSchema* schema);
 
   void addRecord(const msg::MessageObject& msg);
 
@@ -57,7 +57,7 @@ protected:
       uint32_t d_max,
       const msg::MessageSchemaField& field);
 
-  msg::MessageSchema* schema_;
+  const msg::MessageSchema* schema_;
   HashMap<String, RefPtr<ColumnWriter>> columns_;
   size_t num_records_;
 };

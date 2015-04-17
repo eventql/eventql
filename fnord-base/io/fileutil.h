@@ -43,6 +43,11 @@ public:
   static size_t size(const std::string& filename);
 
   /**
+   * Return the last modification time of the file
+   */
+  static uint64_t mtime(const std::string& filename);
+
+  /**
    * Join two paths
    */
   static std::string joinPaths(const std::string& p1, const std::string p2);
@@ -78,6 +83,11 @@ public:
    * Read a while file
    */
   static Buffer read(const std::string& filename);
+
+  /**
+   * Checsum (FNV64) a file
+   */
+  static uint64_t checksum(const std::string& filename);
 
   /**
    * Write a while file

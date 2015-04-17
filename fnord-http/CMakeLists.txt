@@ -29,6 +29,7 @@ add_library(fnord-http OBJECT
     httpclient.cc
     httpclientconnection.cc
     httpconnectionpool.cc
+    HTTPFileDownload.cc
     httpgenerator.cc
     httpmessage.cc
     httpparser.cc

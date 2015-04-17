@@ -33,6 +33,15 @@ public:
       const HTTPRequest& req,
       const fnord::net::InetAddr& addr);
 
+  Future<HTTPResponse> executeRequest(
+      const HTTPRequest& req,
+      Function<HTTPResponseFuture* (Promise<HTTPResponse> promise)> factory);
+
+  Future<HTTPResponse> executeRequest(
+      const HTTPRequest& req,
+      const fnord::net::InetAddr& addr,
+      Function<HTTPResponseFuture* (Promise<HTTPResponse> promise)> factory);
+
   HTTPClientStats* stats();
 
 protected:

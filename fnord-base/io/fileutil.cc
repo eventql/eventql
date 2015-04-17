@@ -14,10 +14,12 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include "fnord-base/buffer.h"
+#include "fnord-base/fnv.h"
 #include "fnord-base/exception.h"
 #include "fnord-base/stringutil.h"
 #include "fnord-base/io/fileutil.h"
 #include "fnord-base/io/file.h"
+#include "fnord-base/io/mmappedfile.h"
 
 namespace fnord {
 
@@ -59,6 +61,16 @@ size_t FileUtil::size(const std::string& filename) {
   }
 
   return fstat.st_size;
+}
+
+uint64_t FileUtil::mtime(const std::string& filename) {
+  struct stat fstat;
+
+  if (stat(filename.c_str(), &fstat) < 0) {
+    RAISE_ERRNO(kIOError, "fstat('%s') failed", filename.c_str());
+  }
+
+  return fstat.st_mtime;
 }
 
 /* The mkdir_p method was adapted from bash 4.1 */
@@ -185,6 +197,12 @@ Buffer FileUtil::read(const std::string& filename) {
   Buffer buf(file.size());
   file.read(&buf);
   return buf;
+}
+
+uint64_t FileUtil::checksum(const std::string& filename) {
+  io::MmappedFile mmap(File::openFile(filename, File::O_READ));
+  FNV<uint64_t> fnv;
+  return fnv.hash(mmap.data(), mmap.size());
 }
 
 void FileUtil::write(const std::string& filename, const Buffer& data) {
