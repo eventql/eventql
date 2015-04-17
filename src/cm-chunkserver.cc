@@ -32,9 +32,15 @@
 #include "fnord-feeds/RemoteFeedReader.h"
 #include "fnord-base/stats/statsdagent.h"
 #include "fnord-sstable/SSTableServlet.h"
+#include "fnord-eventdb/EventDBServlet.h"
+#include "fnord-eventdb/TableRepository.h"
+#include "fnord-eventdb/TableJanitor.h"
+#include "fnord-eventdb/TableReplication.h"
+#include "fnord-eventdb/ArtifactReplication.h"
 #include "fnord-mdb/MDB.h"
 #include "fnord-mdb/MDBUtil.h"
 #include "common.h"
+#include "schemas.h"
 #include "CustomerNamespace.h"
 #include "FeatureSchema.h"
 #include "JoinedQuery.h"
@@ -47,12 +53,32 @@
 #include "analytics/DiscoveryKPIQuery.h"
 #include "analytics/DiscoveryCategoryStatsQuery.h"
 #include "analytics/AnalyticsQueryEngine.h"
+#include "analytics/AnalyticsQueryEngine.h"
 
 using namespace fnord;
+
+std::atomic<bool> shutdown_sig;
+fnord::thread::EventLoop ev;
+
+void quit(int n) {
+  shutdown_sig = true;
+  fnord::logInfo("cm.chunkserver", "Shutting down...");
+  // FIXPAUL: wait for http server stop...
+  ev.shutdown();
+}
 
 int main(int argc, const char** argv) {
   fnord::Application::init();
   fnord::Application::logToStderr();
+
+  /* shutdown hook */
+  shutdown_sig = false;
+  struct sigaction sa;
+  memset(&sa, 0, sizeof(struct sigaction));
+  sa.sa_handler = quit;
+  sigaction(SIGTERM, &sa, NULL);
+  sigaction(SIGQUIT, &sa, NULL);
+  sigaction(SIGINT, &sa, NULL);
 
   fnord::cli::FlagParser flags;
 
@@ -66,13 +92,40 @@ int main(int argc, const char** argv) {
       "<port>");
 
   flags.defineFlag(
-      "artifacts",
+      "readonly",
+      cli::FlagParser::T_SWITCH,
+      false,
+      NULL,
+      NULL,
+      "readonly",
+      "readonly");
+
+  flags.defineFlag(
+      "replica",
       cli::FlagParser::T_STRING,
       true,
       NULL,
       NULL,
-      "artifacts path",
+      "replica id",
+      "<id>");
+
+  flags.defineFlag(
+      "datadir",
+      cli::FlagParser::T_STRING,
+      true,
+      NULL,
+      NULL,
+      "datadir path",
       "<path>");
+
+  flags.defineFlag(
+      "replicate_from",
+      cli::FlagParser::T_STRING,
+      false,
+      NULL,
+      NULL,
+      "url",
+      "<url>");
 
   flags.defineFlag(
       "loglevel",
@@ -88,35 +141,48 @@ int main(int argc, const char** argv) {
   Logger::get()->setMinimumLogLevel(
       strToLogLevel(flags.getString("loglevel")));
 
-  WhitelistVFS vfs;
-
   /* start http server */
-  fnord::thread::EventLoop ev;
   fnord::thread::ThreadPool tpool;
   fnord::http::HTTPRouter http_router;
   fnord::http::HTTPServer http_server(&http_router, &ev);
   http_server.listen(flags.getInt("http_port"));
 
-  /* sstable servlet */
-  sstable::SSTableServlet sstable_servlet("/sstable", &vfs);
-  http_router.addRouteByPrefixMatch("/sstable", &sstable_servlet);
+  /* eventdb */
+  auto dir = flags.getString("datadir");
+  auto readonly = flags.isSet("readonly");
+  auto replica = flags.getString("replica");
 
-  /* file servlet */
-  http::VFSFileServlet file_servlet("/file", &vfs);
-  http_router.addRouteByPrefixMatch("/file", &file_servlet);
+  http::HTTPConnectionPool http(&ev);
+  eventdb::ArtifactIndex artifacts(dir, replica, readonly);
+  eventdb::TableRepository table_repo(&artifacts, dir, replica, readonly);
+  table_repo.addTable("dawanda_joined_sessions", joinedSessionsSchema());
 
-  /* add all files to whitelist vfs */
-  auto dir = flags.getString("artifacts");
-  FileUtil::ls(dir, [&vfs, &dir] (const String& file) -> bool {
-    vfs.registerFile(file, FileUtil::joinPaths(dir, file));
-    fnord::logInfo("cm.reportserver", "[VFS] Adding file: $0", file);
-    return true;
-  });
+  eventdb::TableReplication table_replication(&http);
+  eventdb::ArtifactReplication artifact_replication(&artifacts, &http, 8);
+  for (const auto& rep : flags.getStrings("replicate_from")) {
+    table_replication.replicateTableFrom(
+        table_repo.findTableWriter("dawanda_joined_sessions"),
+        URI(StringUtil::format("http://$0:7003/eventdb", rep)));
+
+    artifact_replication.addSource(
+        URI(StringUtil::format("http://$0:7005/chunks", rep)));
+  }
+
+
+  eventdb::TableJanitor table_janitor(&table_repo);
+  if (!readonly) {
+    table_janitor.start();
+    table_replication.start();
+    artifact_replication.start();
+  }
+
+  eventdb::EventDBServlet eventdb_servlet(&table_repo);
 
   /* analytics */
-  cm::AnalyticsQueryEngine analytics(8, &vfs);
+  cm::AnalyticsQueryEngine analytics(32, dir, &table_repo);
   cm::AnalyticsServlet analytics_servlet(&analytics);
   http_router.addRouteByPrefixMatch("/analytics", &analytics_servlet, &tpool);
+  http_router.addRouteByPrefixMatch("/eventdb", &eventdb_servlet, &tpool);
 
   analytics.registerQueryFactory("ctr_by_position", [] (
       const cm::AnalyticsQuery& query,
@@ -154,6 +220,8 @@ int main(int argc, const char** argv) {
     return new cm::DiscoveryCategoryStatsQuery(
         scan,
         segments,
+        query.start_time,
+        query.end_time,
         "queries.category1",
         "queries.category1",
         params);
@@ -167,6 +235,8 @@ int main(int argc, const char** argv) {
     return new cm::DiscoveryCategoryStatsQuery(
         scan,
         segments,
+        query.start_time,
+        query.end_time,
         "queries.category1",
         "queries.category2",
         params);
@@ -180,6 +250,8 @@ int main(int argc, const char** argv) {
     return new cm::DiscoveryCategoryStatsQuery(
         scan,
         segments,
+        query.start_time,
+        query.end_time,
         "queries.category2",
         "queries.category3",
         params);
@@ -193,6 +265,8 @@ int main(int argc, const char** argv) {
     return new cm::DiscoveryCategoryStatsQuery(
         scan,
         segments,
+        query.start_time,
+        query.end_time,
         "queries.category3",
         "queries.category3",
         params);
@@ -207,6 +281,16 @@ int main(int argc, const char** argv) {
   });
 
   ev.run();
-  return 0;
+
+  if (!readonly) {
+    table_janitor.stop();
+    table_janitor.check();
+    table_replication.stop();
+    artifact_replication.stop();
+  }
+
+  fnord::logInfo("cm.chunkserver", "Exiting...");
+
+  exit(0);
 }
 

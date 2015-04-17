@@ -29,13 +29,22 @@
 #include "fnord-feeds/RemoteFeedFactory.h"
 #include "fnord-feeds/RemoteFeedReader.h"
 #include "fnord-base/stats/statsdagent.h"
+#include "fnord-http/httpconnectionpool.h"
 #include "fnord-mdb/MDB.h"
+#include <fnord-fts/fts.h>
+#include <fnord-fts/fts_common.h>
 #include "CustomerNamespace.h"
 #include "logjoin/LogJoin.h"
+#include "logjoin/LogJoinTarget.h"
+#include "logjoin/LogJoinUpload.h"
+#include "common.h"
+#include "schemas.h"
 
+using namespace cm;
 using namespace fnord;
 
 std::atomic<bool> cm_logjoin_shutdown;
+fnord::thread::EventLoop ev;
 
 void quit(int n) {
   cm_logjoin_shutdown = true;
@@ -57,6 +66,15 @@ int main(int argc, const char** argv) {
   fnord::cli::FlagParser flags;
 
   flags.defineFlag(
+      "conf",
+      cli::FlagParser::T_STRING,
+      false,
+      NULL,
+      "./conf",
+      "conf directory",
+      "<path>");
+
+  flags.defineFlag(
       "cmdata",
       cli::FlagParser::T_STRING,
       true,
@@ -64,6 +82,15 @@ int main(int argc, const char** argv) {
       NULL,
       "clickmatcher app data dir",
       "<path>");
+
+  flags.defineFlag(
+      "feedserver_addr",
+      fnord::cli::FlagParser::T_STRING,
+      false,
+      NULL,
+      "http://localhost:8000",
+      "feedserver addr",
+      "<addr>");
 
   flags.defineFlag(
       "statsd_addr",
@@ -146,11 +173,13 @@ int main(int argc, const char** argv) {
       "shard",
       "<name>");
 
-
   flags.parseArgv(argc, argv);
 
   Logger::get()->setMinimumLogLevel(
       strToLogLevel(flags.getString("loglevel")));
+
+  /* schema... */
+  auto joined_sessions_schema = joinedSessionsSchema();
 
   /* set up cmdata */
   auto cmdata_path = flags.getString("cmdata");
@@ -159,14 +188,13 @@ int main(int argc, const char** argv) {
   }
 
   /* start event loop */
-  fnord::thread::EventLoop ev;
-
-  auto evloop_thread = std::thread([&ev] {
+  auto evloop_thread = std::thread([] {
     ev.run();
   });
 
   /* set up rpc client */
   HTTPRPCClient rpc_client(&ev);
+  http::HTTPConnectionPool http(&ev);
 
   /* start stats reporting */
   fnord::stats::StatsdAgent statsd_agent(
@@ -237,9 +265,18 @@ int main(int argc, const char** argv) {
     return std::stoul(timestr) * fnord::kMicrosPerSecond;
   });
 
+  /* set up logjoin target */
+  fnord::fts::Analyzer analyzer(flags.getString("conf"));
+  cm::LogJoinTarget logjoin_target(joined_sessions_schema, &analyzer);
+
+  /* set up logjoin upload */
+  cm::LogJoinUpload logjoin_upload(
+      sessdb,
+      flags.getString("feedserver_addr"),
+      &http);
+
   /* setup logjoin */
-  cm::LogJoin logjoin(shard, dry_run);
-  logjoin.addCustomer("dawanda", shard.shard_name, &rpc_client);
+  cm::LogJoin logjoin(shard, dry_run, &logjoin_target);
   logjoin.exportStats("/cm-logjoin/global");
   logjoin.exportStats(StringUtil::format("/cm-logjoin/$0", shard.shard_name));
 
@@ -267,6 +304,10 @@ int main(int argc, const char** argv) {
       StringUtil::format("/cm-logjoin/$0/dbsize", shard.shard_name),
       &stat_dbsize,
       fnord::stats::ExportMode::EXPORT_VALUE);
+
+
+  /* upload pending q */
+  logjoin_upload.upload();
 
   /* resume from last offset */
   auto txn = sessdb->startTransaction(true);
@@ -306,11 +347,14 @@ int main(int argc, const char** argv) {
 
   fnord::logInfo("cm.logjoin", "Resuming logjoin...");
 
-  DateTime last_iter;
+  DateTime last_flush;
   uint64_t rate_limit_micros = commit_interval * kMicrosPerSecond;
 
   for (;;) {
-    last_iter = WallClock::now();
+    auto begin = WallClock::unixMicros();
+    auto turbo = FileUtil::exists("/tmp/logjoin_turbo.enabled");
+    logjoin.setTurbo(turbo);
+
     feed_reader.fillBuffers();
     auto txn = sessdb->startTransaction();
 
@@ -330,7 +374,12 @@ int main(int argc, const char** argv) {
     }
 
     auto watermarks = feed_reader.watermarks();
-    logjoin.flush(txn.get(), watermarks.first);
+
+    auto etime = WallClock::now().unixMicros() - last_flush.unixMicros();
+    if (etime > rate_limit_micros) {
+      last_flush = WallClock::now();
+      logjoin.flush(txn.get(), watermarks.first);
+    }
 
     auto stream_offsets = feed_reader.streamOffsets();
     String stream_offsets_str;
@@ -347,34 +396,49 @@ int main(int argc, const char** argv) {
     fnord::logInfo(
         "cm.logjoin",
         "LogJoin comitting...\n    stream_time=<$0 ... $1>\n" \
-        "    active_sessions=$2$3",
+        "    active_sessions=$2\n    flushed_sessions=$3\n    " \
+        "flushed_queries=$4\n    flushed_item_visits=$5\n    turbo=$6\n    " \
+        "cache_size=$7$8",
         watermarks.first,
         watermarks.second,
         logjoin.numSessions(),
+        logjoin_target.num_sessions,
+        logjoin_target.num_queries,
+        logjoin_target.num_item_visits,
+        turbo,
+        logjoin.cacheSize(),
         stream_offsets_str);
 
     txn->commit();
+
+    try {
+      logjoin_upload.upload();
+    } catch (const std::exception& e) {
+      fnord::logError("cm.logjoin", e, "upload failed");
+    }
+
+    if (cm_logjoin_shutdown.load()) {
+      break;
+    }
 
     stat_stream_time_low.set(watermarks.first.unixMicros());
     stat_stream_time_high.set(watermarks.second.unixMicros());
     stat_active_sessions.set(logjoin.numSessions());
     stat_dbsize.set(FileUtil::du_c(sessdb_path));
 
-    if (cm_logjoin_shutdown.load() == true) {
-      break;
-    }
-
-    auto etime = WallClock::now().unixMicros() - last_iter.unixMicros();
-    if (i < 1 && etime < rate_limit_micros) {
-      usleep(rate_limit_micros - etime);
+    auto rtime = WallClock::unixMicros() - begin;
+    if (rtime < kMicrosPerSecond) {
+      begin = WallClock::unixMicros();
+      usleep(kMicrosPerSecond - rtime);
     }
   }
 
   ev.shutdown();
-  //evloop_thread.join();
+  evloop_thread.join();
+
 
   fnord::logInfo("cm.logjoin", "LogJoin exiting...");
-  exit(0); // FIXPAUL
+  //exit(0); // FIXPAUL
 
   return 0;
 }

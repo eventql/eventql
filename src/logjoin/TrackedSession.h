@@ -43,6 +43,7 @@ struct TrackedSession {
   std::string customer_key;
   std::string uid;
   std::vector<TrackedQuery> queries;
+  std::vector<TrackedQuery> flushed_queries;
   std::vector<TrackedItemVisit> item_visits;
   uint64_t last_seen_unix_micros;
   bool flushed;
@@ -63,6 +64,7 @@ struct TrackedSession {
     meta->prop(&cm::TrackedSession::customer_key, 1, "c", false);
     meta->prop(&cm::TrackedSession::uid, 2, "u", false);
     meta->prop(&cm::TrackedSession::queries, 3, "q", false);
+    meta->prop(&cm::TrackedSession::flushed_queries, 8, "qf", false);
     meta->prop(&cm::TrackedSession::item_visits, 4, "v", false);
     meta->prop(&cm::TrackedSession::last_seen_unix_micros, 5, "t", false);
     meta->prop(&cm::TrackedSession::flushed, 6, "f", false);

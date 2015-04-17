@@ -16,6 +16,7 @@ if(APPLE)
   set(CMAKE_CXX_FLAGS "-std=c++0x -stdlib=libc++ ${CMAKE_CXX_FLAGS}")
 else()
   set(CMAKE_CXX_FLAGS "-std=c++0x ${CMAKE_CXX_FLAGS}")
+  #set(CMAKE_CXX_FLAGS "-std=c++0x ${CMAKE_CXX_FLAGS} -fsanitize=address -g")
 endif()
 
 find_package(Threads)
@@ -100,14 +101,19 @@ add_executable(cm-logjoin
     $<TARGET_OBJECTS:fnord-feeds>
     $<TARGET_OBJECTS:fnord-mdb>
     $<TARGET_OBJECTS:fnord-rpc>
+    $<TARGET_OBJECTS:fnord-msg>
+    $<TARGET_OBJECTS:fnord-fts>
     src/logjoin/TrackedQuery.cc
     src/logjoin/TrackedItemVisit.cc
     src/logjoin/TrackedSession.cc
     src/cm-logjoin.cc
+    src/schemas.cc
     src/logjoin/LogJoin.cc
+    src/logjoin/LogJoinUpload.cc
+    src/logjoin/LogJoinTarget.cc
     src/logjoin/LogJoinShard.cc)
 
-target_link_libraries(cm-logjoin ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(cm-logjoin ${CMAKE_THREAD_LIBS_INIT} ${FNORD_FTS_LIBS})
 
 add_executable(cm-indexbuild
     $<TARGET_OBJECTS:cm-common>
@@ -373,7 +379,43 @@ add_executable(cm-ctrstats-builditemboost
 target_link_libraries(cm-ctrstats-builditemboost
     ${CMAKE_THREAD_LIBS_INIT} ${FNORD_FTS_LIBS})
 
-add_executable(cm-reportbuild
+#add_executable(cm-reportbuild
+#    $<TARGET_OBJECTS:cm-common>
+#    $<TARGET_OBJECTS:fnord-base>
+#    $<TARGET_OBJECTS:fnord-feeds>
+#    $<TARGET_OBJECTS:fnord-mdb>
+#    $<TARGET_OBJECTS:fnord-http>
+#    $<TARGET_OBJECTS:fnord-json>
+#    $<TARGET_OBJECTS:fnord-rpc>
+#    $<TARGET_OBJECTS:fnord-sstable>
+#    $<TARGET_OBJECTS:fnord-fts>
+#    src/IndexReader.cc
+#    src/IndexWriter.cc
+#    src/FeatureIndexWriter.cc
+#    src/analytics/Report.cc
+#    src/analytics/ReportBuilder.cc
+#    src/analytics/JoinedQueryTableSource.cc
+#    src/analytics/CTRByPositionMapper.cc
+#    src/analytics/CTRByPageMapper.cc
+#    src/analytics/CTRStatsMapper.cc
+#    src/analytics/CTRCounterTableSink.cc
+#    src/analytics/CTRCounterTableSource.cc
+#    src/analytics/CTRCounterMergeReducer.cc
+#    #src/analytics/CTRBySearchQueryMapper.cc
+#    src/analytics/CTRBySearchTermCrossCategoryMapper.cc
+#    src/analytics/CTRByQueryAttributeMapper.cc
+#    src/analytics/RelatedTermsMapper.cc
+#    src/analytics/TermInfoTableSink.cc
+#    src/analytics/TermInfoTableSource.cc
+#    src/analytics/TermInfoMergeReducer.cc
+#    src/analytics/TermInfo.cc
+#    src/analytics/TopCategoriesByTermMapper.cc
+#    src/cm-reportbuild.cc)
+#
+#target_link_libraries(cm-reportbuild
+#    ${CMAKE_THREAD_LIBS_INIT} ${FNORD_FTS_LIBS})
+
+add_executable(cm-autocompletebuild
     $<TARGET_OBJECTS:cm-common>
     $<TARGET_OBJECTS:fnord-base>
     $<TARGET_OBJECTS:fnord-feeds>
@@ -381,8 +423,16 @@ add_executable(cm-reportbuild
     $<TARGET_OBJECTS:fnord-http>
     $<TARGET_OBJECTS:fnord-json>
     $<TARGET_OBJECTS:fnord-rpc>
+    $<TARGET_OBJECTS:fnord-cstable>
     $<TARGET_OBJECTS:fnord-sstable>
     $<TARGET_OBJECTS:fnord-fts>
+    $<TARGET_OBJECTS:fnord-msg>
+    3rdparty/libfnord/fnord-eventdb/TableReader.cc
+    3rdparty/libfnord/fnord-eventdb/TableArena.cc
+    3rdparty/libfnord/fnord-eventdb/TableWriter.cc
+    3rdparty/libfnord/fnord-eventdb/TableRepository.cc
+    3rdparty/libfnord/fnord-eventdb/ArtifactIndex.cc
+    src/schemas.cc
     src/IndexReader.cc
     src/IndexWriter.cc
     src/FeatureIndexWriter.cc
@@ -396,20 +446,27 @@ add_executable(cm-reportbuild
     src/analytics/CTRCounterTableSource.cc
     src/analytics/CTRCounterMergeReducer.cc
     #src/analytics/CTRBySearchQueryMapper.cc
+    src/analytics/TrafficSegment.cc
+    src/analytics/AnalyticsTableScan.cc
+    src/analytics/AnalyticsQuery.cc
+    src/analytics/AnalyticsQueryEngine.cc
+    src/analytics/AnalyticsQueryResult.cc
     src/analytics/CTRBySearchTermCrossCategoryMapper.cc
     src/analytics/CTRByQueryAttributeMapper.cc
+    src/analytics/AnalyticsTableScanSource.cc
     src/analytics/RelatedTermsMapper.cc
     src/analytics/TermInfoTableSink.cc
     src/analytics/TermInfoTableSource.cc
     src/analytics/TermInfoMergeReducer.cc
     src/analytics/TermInfo.cc
     src/analytics/TopCategoriesByTermMapper.cc
-    src/cm-reportbuild.cc)
+    src/cm-autocompletebuild.cc)
 
-target_link_libraries(cm-reportbuild
+target_link_libraries(cm-autocompletebuild
     ${CMAKE_THREAD_LIBS_INIT} ${FNORD_FTS_LIBS})
 
-add_executable(cm-reportserver
+
+add_executable(cm-chunkserver
     $<TARGET_OBJECTS:cm-common>
     $<TARGET_OBJECTS:fnord-base>
     $<TARGET_OBJECTS:fnord-feeds>
@@ -421,6 +478,15 @@ add_executable(cm-reportserver
     $<TARGET_OBJECTS:fnord-cstable>
     $<TARGET_OBJECTS:fnord-msg>
     3rdparty/libfnord/fnord-sstable/SSTableServlet.cc
+    3rdparty/libfnord/fnord-eventdb/ArtifactIndex.cc
+    3rdparty/libfnord/fnord-eventdb/EventDBServlet.cc
+    3rdparty/libfnord/fnord-eventdb/TableReader.cc
+    3rdparty/libfnord/fnord-eventdb/TableWriter.cc
+    3rdparty/libfnord/fnord-eventdb/TableArena.cc
+    3rdparty/libfnord/fnord-eventdb/TableRepository.cc
+    3rdparty/libfnord/fnord-eventdb/TableJanitor.cc
+    3rdparty/libfnord/fnord-eventdb/TableReplication.cc
+    3rdparty/libfnord/fnord-eventdb/ArtifactReplication.cc
     src/analytics/AnalyticsTableScan.cc
     src/analytics/AnalyticsQuery.cc
     src/analytics/AnalyticsQueryEngine.cc
@@ -435,9 +501,10 @@ add_executable(cm-reportserver
     src/analytics/CTRStatsServlet.cc
     src/analytics/AnalyticsServlet.cc
     src/analytics/CTRByPageServlet.cc
-    src/cm-reportserver.cc)
+    src/schemas.cc
+    src/cm-chunkserver.cc)
 
-target_link_libraries(cm-reportserver
+target_link_libraries(cm-chunkserver
     ${CMAKE_THREAD_LIBS_INIT})
 
 add_executable(cm-autocompleteserver
