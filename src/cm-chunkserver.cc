@@ -153,7 +153,6 @@ int main(int argc, const char** argv) {
   auto replica = flags.getString("replica");
 
   http::HTTPConnectionPool http(&ev);
-
   eventdb::ArtifactIndex artifacts(dir, replica, readonly);
   eventdb::TableRepository table_repo(&artifacts, dir, replica, readonly);
   table_repo.addTable("dawanda_joined_sessions", joinedSessionsSchema());
