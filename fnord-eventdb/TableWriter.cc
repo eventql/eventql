@@ -174,12 +174,20 @@ void TableWriter::merge() {
       output_chunk.chunk_id);
 
   {
+    RefPtr<TableChunkWriter> writer(
+        new TableChunkWriter(db_path_, name_, &schema_, &output_chunk));
+
+    for (const auto& summary_factory : summaries_) {
+      writer->addSummary(summary_factory());
+    }
+
     TableChunkMerge mergeop(
         db_path_,
         name_,
         &schema_,
         input_chunks,
-        &output_chunk);
+        &output_chunk,
+        writer);
 
     mergeop.merge();
   }
@@ -530,11 +538,12 @@ TableChunkMerge::TableChunkMerge(
     const String& table_name,
     msg::MessageSchema* schema,
     const Vector<TableChunkRef> input_chunks,
-    TableChunkRef* output_chunk) :
+    TableChunkRef* output_chunk,
+    RefPtr<TableChunkWriter> writer) :
     db_path_(db_path),
     table_name_(table_name),
     schema_(schema),
-    writer_(db_path, table_name, schema, output_chunk),
+    writer_(writer),
     input_chunks_(input_chunks) {}
 
 void TableChunkMerge::merge() {
@@ -547,7 +556,7 @@ void TableChunkMerge::merge() {
         c.chunk_id));
   }
 
-  writer_.commit();
+  writer_->commit();
 }
 
 TableMergePolicy::TableMergePolicy() {
@@ -578,7 +587,7 @@ void TableChunkMerge::readTable(const String& filename) {
     msg::MessageObject record;
     msg::MessageDecoder::decode(buf, *schema_, &record);
 
-    writer_.addRecord(record);
+    writer_->addRecord(record);
 
     if (!cursor->next()) {
       break;
