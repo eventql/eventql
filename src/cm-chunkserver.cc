@@ -164,7 +164,7 @@ int main(int argc, const char** argv) {
   joined_sessions_table->addSummary(
       [joined_sessions_schema] () -> RefPtr<eventdb::TableChunkSummaryBuilder> {
         return new eventdb::NumericBoundsSummaryBuilder(
-            "queries.time-index",
+            "queries.time-bounds",
             joined_sessions_schema.id("queries.time"));
       });
 
