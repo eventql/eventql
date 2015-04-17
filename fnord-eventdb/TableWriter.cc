@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <thread>
 #include <fnord-eventdb/TableWriter.h>
+#include <fnord-eventdb/TableChunkSummaryWriter.h>
 #include <fnord-base/logging.h>
 #include <fnord-base/io/fileutil.h>
 #include <fnord-base/io/FileLock.h>
@@ -289,6 +290,9 @@ void TableWriter::writeTable(RefPtr<TableArena> arena) {
 
   {
     TableChunkWriter writer(db_path_, name_, &schema_, &chunk);
+    for (const auto& summary_factory : summaries_) {
+      writer.addSummary(summary_factory());
+    }
 
     for (const auto& r : arena->records()) {
       writer.addRecord(r);
@@ -478,12 +482,20 @@ TableChunkWriter::TableChunkWriter(
         0)),
     cstable_(new cstable::CSTableBuilder(schema)) {}
 
+void TableChunkWriter::addSummary(RefPtr<TableChunkSummaryBuilder> summary) {
+  summaries_.emplace_back(summary);
+}
+
 void TableChunkWriter::addRecord(const msg::MessageObject& record) {
   Buffer buf;
   msg::MessageEncoder::encode(record, *schema_, &buf);
 
   cstable_->addRecord(record);
   sstable_->appendRow(&seq_, sizeof(seq_), buf.data(), buf.size());
+
+  for (auto& s : summaries_) {
+    s->addRecord(record);
+  }
 
   ++seq_;
 }
@@ -494,15 +506,23 @@ void TableChunkWriter::commit() {
   cstable_->write(chunk_filename_ + ".cst~");
   sstable_->finalize();
 
+  TableChunkSummaryWriter summary_writer(chunk_filename_ + ".idx~");
+  for (auto& s : summaries_) {
+    s->commit(&summary_writer);
+  }
+
+  summary_writer.commit();
+
   chunk_->sstable_checksum = FileUtil::checksum(chunk_filename_ + ".sst~");
   chunk_->sstable_size = FileUtil::size(chunk_filename_ + ".sst~");
   chunk_->cstable_checksum = FileUtil::checksum(chunk_filename_ + ".cst~");
   chunk_->cstable_size = FileUtil::size(chunk_filename_ + ".cst~");
-  chunk_->index_checksum = 0;
-  chunk_->index_size = 0;
+  chunk_->index_checksum = FileUtil::checksum(chunk_filename_ + ".idx~");
+  chunk_->index_size = FileUtil::size(chunk_filename_ + ".idx~");
 
   FileUtil::mv(chunk_filename_ + ".sst~", chunk_filename_ + ".sst");
   FileUtil::mv(chunk_filename_ + ".cst~", chunk_filename_ + ".cst");
+  FileUtil::mv(chunk_filename_ + ".idx~", chunk_filename_ + ".idx");
 }
 
 TableChunkMerge::TableChunkMerge(
@@ -741,6 +761,10 @@ bool TableMergePolicy::tryFoldIntoMerge(
   output_chunk->num_records = cumul_recs;
   output_chunk->replica_id = replica_id;
   return true;
+}
+
+void TableWriter::addSummary(SummaryFactoryFn summary) {
+  summaries_.emplace_back(summary);
 }
 
 } // namespace eventdb

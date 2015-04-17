@@ -18,6 +18,7 @@
 #include <fnord-eventdb/ArtifactIndex.h>
 #include <fnord-eventdb/TableArena.h>
 #include <fnord-eventdb/TableSnapshot.h>
+#include <fnord-eventdb/TableChunkSummaryBuilder.h>
 #include "fnord-sstable/sstablereader.h"
 #include "fnord-sstable/sstablewriter.h"
 #include "fnord-sstable/SSTableColumnSchema.h"
@@ -40,6 +41,7 @@ public:
       TableChunkRef* chunk);
 
   void addRecord(const msg::MessageObject& record);
+  void addSummary(RefPtr<TableChunkSummaryBuilder> summary);
   void commit();
 
 protected:
@@ -50,6 +52,7 @@ protected:
   String chunk_filename_;
   std::unique_ptr<sstable::SSTableWriter> sstable_;
   std::unique_ptr<cstable::CSTableBuilder> cstable_;
+  List<RefPtr<TableChunkSummaryBuilder>> summaries_;
 };
 
 class TableChunkMerge {
@@ -107,6 +110,7 @@ protected:
 
 class TableWriter : public RefCounted {
 public:
+  typedef Function<RefPtr<TableChunkSummaryBuilder> ()> SummaryFactoryFn;
 
   static RefPtr<TableWriter> open(
       ArtifactIndex* artifacts,
@@ -115,6 +119,7 @@ public:
       const String& db_path,
       const msg::MessageSchema& schema);
 
+  void addSummary(SummaryFactoryFn summary);
   void addRecords(const Buffer& records);
   void addRecord(const msg::MessageObject& record);
 
@@ -157,6 +162,7 @@ protected:
   RefPtr<TableGeneration> head_;
   TableMergePolicy merge_policy_;
   FileLock lock_;
+  List<SummaryFactoryFn> summaries_;
 };
 
 } // namespace eventdb
