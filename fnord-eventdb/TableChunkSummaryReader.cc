@@ -31,21 +31,22 @@ TableChunkSummaryReader::TableChunkSummaryReader(
   body_offset_ = reader.position();
 }
 
-Option<Buffer> TableChunkSummaryReader::getSummary(const String& summary_name) {
+Option<Buffer> TableChunkSummaryReader::getSummaryData(
+    const String& summary_name) const {
   void* data;
   size_t size;
 
-  if (getSummary(summary_name, &data, &size)) {
+  if (getSummaryData(summary_name, &data, &size)) {
     return Some(Buffer(data, size));
   } else {
     return None<Buffer>();
   }
 }
 
-bool TableChunkSummaryReader::getSummary(
+bool TableChunkSummaryReader::getSummaryData(
     const String& summary_name,
     void** data,
-    size_t* size) {
+    size_t* size) const {
   auto s = offsets_.find(summary_name);
   if (s == offsets_.end()) {
     return false;

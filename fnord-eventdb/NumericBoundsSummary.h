@@ -23,7 +23,7 @@ struct NumericBoundsSummary {
   double max_value;
 
   void encode(util::BinaryMessageWriter* writer) const;
-  void decode(util::BinaryMessageWriter* reader);
+  void decode(util::BinaryMessageReader* reader);
 };
 
 class NumericBoundsSummaryBuilder : public TableChunkSummaryBuilder {
