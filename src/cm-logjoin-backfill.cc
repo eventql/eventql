@@ -296,9 +296,6 @@ int main(int argc, const char** argv) {
         }
       }
     }
-
-    auto msg = msg::MessagePrinter::print(*record, schema);
-    fnord::iputs("backfill: $0", msg);
   };
 
 
