@@ -221,9 +221,9 @@ int main(int argc, const char** argv) {
       BackfillData data;
       data.shop_id = Some(cols[1]);
       data.shop_name = Some(cols[5]);
-      data.category3 = Some((uint64_t) std::stoul(cols[2]));
-      data.category2 = Some((uint64_t) std::stoul(cols[3]));
-      data.category1 = Some((uint64_t) std::stoul(cols[4]));
+      try { data.category3 = Some((uint64_t) std::stoul(cols[2])); } catch (...) {}
+      try { data.category2 = Some((uint64_t) std::stoul(cols[3])); } catch (...) {}
+      try { data.category1 = Some((uint64_t) std::stoul(cols[4])); } catch (...) {}
       cache.emplace("p~" + cols[0], data);
     }
   }
@@ -348,7 +348,7 @@ int main(int argc, const char** argv) {
   cm::LogJoinBackfill backfill(
       table,
       backfill_fn,
-      "/tmp/logjoin-backfill-state",
+      "logjoin-backfill-state",
       dry_run,
       target_uri,
       &http);
