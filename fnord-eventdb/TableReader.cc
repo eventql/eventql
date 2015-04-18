@@ -195,23 +195,21 @@ size_t TableReader::fetchRecords(
     return 0;
   }
 
-  size_t n = limit;
-/*
+  size_t n = 0;
   auto cursor = reader.getCursor();
-
   while (cursor->valid()) {
     auto buf = cursor->getDataBuffer();
 
     msg::MessageObject record;
-    msg::MessageDecoder::decode(buf, *schema_, &record);
+    msg::MessageDecoder::decode(buf, schema_, &record);
 
-    writer_->addRecord(record);
+    fn(record);
+    ++n;
 
     if (!cursor->next()) {
       break;
     }
   }
-*/
 
   return n;
 }
