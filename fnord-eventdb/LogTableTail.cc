@@ -57,9 +57,8 @@ bool LogTableTail::fetchNext(
         rlen = limit;
       }
 
-      readRowsFromTable(c, roff, rlen, fn);
-
-      offsets_[c.replica_id] += rlen;
+      auto actual_rlen = reader_->fetchRecords(c.replica_id, cur, rlen, fn);
+      offsets_[c.replica_id] += actual_rlen;
       return true;
     }
   }
@@ -79,30 +78,6 @@ LogTableTailCursor LogTableTail::getCursor() const {
 
   return cursor;
 }
-
-void LogTableTail::readRowsFromTable(
-    const TableChunkRef& table,
-    size_t offset,
-    size_t limit,
-    Function<bool (const msg::MessageObject& record)> fn) {
-  auto table_filename = StringUtil::format(
-      "$0.$1.sst",
-      table.replica_id,
-      table.chunk_id);
-
-#ifndef FNORD_NOTRACE
-  fnord::logTrace(
-      "fnord.evdb",
-      "Reading rows local=$0..$1 global=$2..$3 from table '$4'",
-      offset,
-      offset + limit,
-      table.start_sequence + offset,
-      table.start_sequence + offset + limit,
-      table_filename);
-#endif
-
-}
-
 
 } // namespace eventdb
 } // namespace fnord

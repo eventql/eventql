@@ -38,14 +38,6 @@ public:
   LogTableTailCursor getCursor() const;
 
 protected:
-
-  void readRowsFromTable(
-      const TableChunkRef& table,
-      size_t offset,
-      size_t limit,
-      Function<bool (const msg::MessageObject& record)> fn);
-
-
   RefPtr<TableReader> reader_;
   HashMap<String, uint64_t> offsets_;
 };

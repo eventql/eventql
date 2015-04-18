@@ -71,6 +71,10 @@ const String& TableReader::name() const {
   return name_;
 }
 
+const String& TableReader::basePath() const {
+  return db_path_;
+}
+
 RefPtr<TableSnapshot> TableReader::getSnapshot() {
   std::unique_lock<std::mutex> lk(mutex_);
   auto g = head_gen_;
@@ -127,6 +131,89 @@ RefPtr<TableSnapshot> TableReader::getSnapshot() {
   return new TableSnapshot(
       head,
       List<RefPtr<fnord::eventdb::TableArena>>{});
+}
+
+size_t TableReader::fetchRecords(
+    const String& replica_id,
+    uint64_t start_sequence,
+    size_t limit,
+    Function<bool (const msg::MessageObject& record)> fn) {
+  auto snap = getSnapshot();
+
+  for (const auto& c : snap->head->chunks) {
+    auto cbegin = c.start_sequence;
+    auto cend = cbegin + c.num_records;
+
+    if (cbegin <= start_sequence && cend > start_sequence) {
+      auto roff = start_sequence - cbegin;
+      auto rlen = c.num_records - roff;
+
+      if (limit != size_t(-1) && rlen > limit) {
+        rlen = limit;
+      }
+
+      return fetchRecords(c, roff, rlen, fn);
+    }
+  }
+
+  return 0;
+}
+
+size_t TableReader::fetchRecords(
+    const TableChunkRef& chunk,
+    size_t offset,
+    size_t limit,
+    Function<bool (const msg::MessageObject& record)> fn) {
+  auto filename = StringUtil::format(
+      "$0/$1.$2.$3.sst",
+      db_path_,
+      name_,
+      chunk.replica_id,
+      chunk.chunk_id);
+
+#ifndef FNORD_NOTRACE
+  fnord::logTrace(
+      "fnord.evdb",
+      "Reading rows local=$0..$1 global=$2..$3 from table=$4 chunk=$5",
+      offset,
+      offset + limit,
+      chunk.start_sequence + offset,
+      chunk.start_sequence + offset + limit,
+      name_,
+      chunk.replica_id + "." + chunk.chunk_id);
+#endif
+
+  sstable::SSTableReader reader(File::openFile(filename, File::O_READ));
+
+  if (!reader.isFinalized()) {
+    RAISEF(kRuntimeError, "unfinished table chunk: $0", filename);
+  }
+
+  auto body_size = reader.bodySize();
+  if (body_size == 0) {
+    fnord::logWarning("fnord.evdb", "empty table chunk: $0", filename);
+    return 0;
+  }
+
+  size_t n = limit;
+/*
+  auto cursor = reader.getCursor();
+
+  while (cursor->valid()) {
+    auto buf = cursor->getDataBuffer();
+
+    msg::MessageObject record;
+    msg::MessageDecoder::decode(buf, *schema_, &record);
+
+    writer_->addRecord(record);
+
+    if (!cursor->next()) {
+      break;
+    }
+  }
+*/
+
+  return n;
 }
 
 } // namespace eventdb
