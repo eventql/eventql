@@ -76,30 +76,48 @@ MessageObject::MessageObject(
   }
 }
 
-//MessageObject& MessageObject::operator=(const MessageObject& other) {
-//  free old.., copy type, id
-//  switch (other.type) {
-//
-//    case FieldType::OBJECT:
-//      new (&data_) Vector<MessageObject>(other.asObject());
-//      break;
-//
-//    case FieldType::STRING:
-//      new (&data_) String(other.asString());
-//      break;
-//
-//    case FieldType::UINT32:
-//      new (&data_) uint32_t(other.asUInt32());
-//      break;
-//
-//    case FieldType::BOOLEAN:
-//      new (&data_) uint8_t(other.asBool() ? 1 : 0);
-//      break;
-//
-//  }
-//
-//  return *this;
-//}
+MessageObject& MessageObject::operator=(const MessageObject& other) {
+  switch (type) {
+
+    case FieldType::OBJECT:
+      ((Vector<MessageObject>*) &data_)->~vector();
+      break;
+
+    case FieldType::STRING:
+      ((String*) &data_)->~String();
+      break;
+
+    case FieldType::UINT32:
+    case FieldType::BOOLEAN:
+      break;
+
+  }
+
+  id = other.id;
+  type = other.type;
+
+  switch (type) {
+
+    case FieldType::OBJECT:
+      new (&data_) Vector<MessageObject>(other.asObject());
+      break;
+
+    case FieldType::STRING:
+      new (&data_) String(other.asString());
+      break;
+
+    case FieldType::UINT32:
+      new (&data_) uint32_t(other.asUInt32());
+      break;
+
+    case FieldType::BOOLEAN:
+      new (&data_) uint8_t(other.asBool() ? 1 : 0);
+      break;
+
+  }
+
+  return *this;
+}
 
 MessageObject::~MessageObject() {
   switch (type) {
