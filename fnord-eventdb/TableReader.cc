@@ -204,7 +204,9 @@ size_t TableReader::fetchRecords(
     msg::MessageDecoder::decode(buf, schema_, &record);
 
     fn(record);
-    ++n;
+    if (++n == limit) {
+      break;
+    }
 
     if (!cursor->next()) {
       break;
