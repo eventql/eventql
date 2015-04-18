@@ -35,6 +35,8 @@ public:
   LogJoinBackfill(
       RefPtr<eventdb::TableReader> table,
       BackfillFnType backfill_fn,
+      const String& statefile,
+      bool dry_run,
       const URI& uri,
       http::HTTPConnectionPool* http);
 
@@ -47,9 +49,10 @@ protected:
   void runUpload();
 
   RefPtr<eventdb::TableReader> table_;
-  eventdb::LogTableTail tail_;
+  RefPtr<eventdb::LogTableTail> tail_;
   BackfillFnType backfill_fn_;
   bool dry_run_;
+  String statefile_;
   URI target_uri_;
   http::HTTPConnectionPool* http_;
   std::atomic<bool> shutdown_;
