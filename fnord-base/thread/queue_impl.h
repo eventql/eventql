@@ -11,11 +11,29 @@ namespace fnord {
 namespace thread {
 
 template <typename T>
-void Queue<T>::insert(const T& job) {
+Queue<T>::Queue(
+    size_t max_size /* = -1 */) :
+    max_size_(max_size),
+    length_(0) {}
+
+template <typename T>
+void Queue<T>::insert(const T& job, bool block /* = false */) {
   std::unique_lock<std::mutex> lk(mutex_);
+
+  if (max_size_ != size_t(-1)) {
+    while (length_ >= max_size_) {
+      if (!block) {
+        RAISE(kRuntimeError, "queue is full");
+      }
+
+      wakeup_.wait(lk);
+    }
+  }
+
   queue_.emplace_back(job);
+  ++length_;
   lk.unlock();
-  wakeup_.notify_one();
+  wakeup_.notify_all();
 }
 
 template <typename T>
@@ -28,6 +46,9 @@ T Queue<T>::pop() {
 
   auto job = queue_.front();
   queue_.pop_front();
+  --length_;
+  lk.unlock();
+  wakeup_.notify_all();
   return job;
 }
 
@@ -40,8 +61,17 @@ Option<T> Queue<T>::poll() {
   } else {
     auto job = Some(queue_.front());
     queue_.pop_front();
+    --length_;
+    lk.unlock();
+    wakeup_.notify_all();
     return job;
   }
+}
+
+template <typename T>
+size_t Queue<T>::length() const {
+  std::unique_lock<std::mutex> lk(mutex_);
+  return length_;
 }
 
 }
