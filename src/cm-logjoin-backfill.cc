@@ -116,6 +116,15 @@ int main(int argc, const char** argv) {
       "<bool>");
 
   flags.defineFlag(
+      "index",
+      cli::FlagParser::T_STRING,
+      false,
+      NULL,
+      NULL,
+      "index directory",
+      "<path>");
+
+  flags.defineFlag(
       "replica",
       cli::FlagParser::T_STRING,
       true,
