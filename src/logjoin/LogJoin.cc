@@ -30,11 +30,13 @@ namespace cm {
 LogJoin::LogJoin(
     LogJoinShard shard,
     bool dry_run,
+    bool enable_cache,
     LogJoinTarget* target) :
     shard_(shard),
     dry_run_(dry_run),
     target_(target),
-    turbo_(false) {}
+    turbo_(false),
+    enable_cache_(enable_cache) {}
 
 size_t LogJoin::numSessions() const {
   return sessions_flush_times_.size();
@@ -234,14 +236,19 @@ void LogJoin::withSession(
         fnord::logWarning("cm.logjoin", e, "can't delete session: $0", uid);
       }
     }
-    session_cache_.erase(uid);
+
+    if (session_cache_.count(uid) > 0) {
+      session_cache_.erase(uid);
+    }
   } else {
-    if (!turbo_) {
+    if (!enable_cache_ || !turbo_) {
       auto serialized = json::toJSONString(session);
       txn->update(uid, serialized);
     }
 
-    session_cache_[uid] = session;
+    if (enable_cache_) {
+      session_cache_[uid] = session;
+    }
   }
 }
 
