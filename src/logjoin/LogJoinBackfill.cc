@@ -49,8 +49,9 @@ void LogJoinBackfill::start() {
   for (int i = 8; i > 0; --i) {
     threads_.emplace_back([this] {
       while (inputq_.length() > 0 || !shutdown_.load()) {
-        runWorker();
-        usleep(10000);
+        if (runWorker() == 0) {
+          usleep(10000);
+        }
       }
     });
   }
@@ -58,8 +59,9 @@ void LogJoinBackfill::start() {
   for (int i = 2; i > 0; --i) {
     threads_.emplace_back([this] {
       while (uploadq_.length() > 0 || !shutdown_.load()) {
-        runUpload();
-        usleep(10000);
+        if (runUpload() == 0) {
+          usleep(10000);
+        }
       }
     });
   }
@@ -115,12 +117,16 @@ bool LogJoinBackfill::process(size_t batch_size) {
   return running;
 }
 
-void LogJoinBackfill::runWorker() {
+size_t LogJoinBackfill::runWorker() {
+  size_t n = 0;
+
   for (int i = 0; i < 8192; ++i) {
     auto rec = inputq_.poll();
     if (rec.isEmpty()) {
-      return;
+      break;
     }
+
+    ++n;
 
     try {
       backfill_fn_(rec.get().get());
@@ -135,39 +141,54 @@ void LogJoinBackfill::runWorker() {
       uploadq_.insert(msg_buf, true);
     }
   }
+
+  return n;
 }
 
-void LogJoinBackfill::runUpload() {
-  for (int i = 0; i < 8192; ++i) {
+size_t LogJoinBackfill::runUpload() {
+  size_t n = 0;
+
+  Buffer buf;
+
+  for (int i = 0; i < 10; ++i) {
     auto rec = uploadq_.poll();
     if (rec.isEmpty()) {
-      return;
+      break;
     }
 
-    for (auto delay = kMicrosPerSecond / 10;
-        true;
-        usleep((delay = std::min(delay * 2, kMicrosPerSecond * 30)))) {
-      try {
-        auto uri = target_uri_;
-        http::HTTPRequest req(http::HTTPMessage::M_POST, uri.pathAndQuery());
-        req.addHeader("Host", uri.hostAndPort());
-        req.addHeader("Content-Type", "application/fnord-msg");
-        req.addBody(rec.get());
+    buf.append(rec.get().data(), rec.get().size());
+    ++n;
+  }
 
-        auto res = http_->executeRequest(req);
-        res.wait();
+  if (n == 0) {
+    return 0;
+  }
 
-        const auto& r = res.get();
-        if (r.statusCode() != 201) {
-          RAISEF(kRuntimeError, "received non-201 response: $0", r.body().toString());
-        }
+  for (auto delay = kMicrosPerSecond / 10;
+      true;
+      usleep((delay = std::min(delay * 2, kMicrosPerSecond * 30)))) {
+    try {
+      auto uri = target_uri_;
+      http::HTTPRequest req(http::HTTPMessage::M_POST, uri.pathAndQuery());
+      req.addHeader("Host", uri.hostAndPort());
+      req.addHeader("Content-Type", "application/fnord-msg");
+      req.addBody(buf);
 
-        break;
-      } catch (const Exception& e) {
-        fnord::logError("cm.logjoin", e, "upload error");
+      auto res = http_->executeRequest(req);
+      res.wait();
+
+      const auto& r = res.get();
+      if (r.statusCode() != 201) {
+        RAISEF(kRuntimeError, "received non-201 response: $0", r.body().toString());
       }
+
+      break;
+    } catch (const Exception& e) {
+      fnord::logError("cm.logjoin", e, "upload error");
     }
   }
+
+  return n;
 }
 
 } // namespace cm
