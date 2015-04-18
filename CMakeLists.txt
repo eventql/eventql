@@ -135,14 +135,16 @@ add_executable(cm-logjoin-backfill
     3rdparty/libfnord/fnord-eventdb/NumericBoundsSummary.cc
     3rdparty/libfnord/fnord-eventdb/TableChunkSummaryReader.cc
     3rdparty/libfnord/fnord-eventdb/TableChunkSummaryWriter.cc
+    3rdparty/libfnord/fnord-eventdb/LogTableTail.cc
     src/schemas.cc
     src/IndexReader.cc
     src/IndexWriter.cc
     src/FeatureIndexWriter.cc
     src/cm-logjoin-backfill.cc)
 
-target_link_libraries(cm-autocompletebuild
+target_link_libraries(cm-logjoin-backfill
     ${CMAKE_THREAD_LIBS_INIT} ${FNORD_FTS_LIBS})
+
 add_executable(cm-indexbuild
     $<TARGET_OBJECTS:cm-common>
     $<TARGET_OBJECTS:fnord-base>
