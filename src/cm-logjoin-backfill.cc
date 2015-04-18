@@ -199,13 +199,16 @@ int main(int argc, const char** argv) {
   auto qi_c3_fid = schema.id("queries.items.category3");
 
   HashMap<String, BackfillData> cache;
+  std::mutex cache_mutex;
 
   /* backfill fn */
-  auto get_backfill_data = [&cache, &index] (const String& item_id) -> BackfillData {
+  auto get_backfill_data = [&cache, &index, &cache_mutex] (const String& item_id) -> BackfillData {
+    std::unique_lock<std::mutex> lk(cache_mutex);
     auto cached = cache.find(item_id);
     if (!(cached == cache.end())) {
       return cached->second;
     }
+    lk.unlock();
 
     BackfillData data;
 
@@ -228,7 +231,9 @@ int main(int argc, const char** argv) {
       data.category3 = Some((uint64_t) std::stoull(category3.get()));
     }
 
+    lk.lock();
     cache[item_id] = data;
+    lk.unlock();
     return data;
   };
 
