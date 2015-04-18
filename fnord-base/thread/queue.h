@@ -25,14 +25,20 @@ template <typename T>
 class Queue {
 public:
 
-  void insert(const T& job);
+  Queue(size_t max_size = -1);
+
+  void insert(const T& job, bool block = false);
   T pop();
   Option<T> poll();
 
+  size_t length() const;
+
 protected:
   std::deque<T> queue_;
-  std::mutex mutex_;
+  mutable std::mutex mutex_;
   std::condition_variable wakeup_;
+  size_t max_size_;
+  size_t length_;
 };
 
 }
