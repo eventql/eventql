@@ -17,7 +17,8 @@ namespace eventdb {
 enum class ArtifactStatus : uint8_t {
   DOWNLOAD,
   PRESENT,
-  IGNORE
+  MISSING,
+  IGNORE,
 };
 
 struct ArtifactFileRef {
