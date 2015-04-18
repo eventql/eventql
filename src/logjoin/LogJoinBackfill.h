@@ -37,7 +37,7 @@ public:
       BackfillFnType backfill_fn,
       const String& statefile,
       bool dry_run,
-      const URI& uri,
+      const Vector<URI>& uris,
       http::HTTPConnectionPool* http);
 
   void start();
@@ -53,13 +53,14 @@ protected:
   BackfillFnType backfill_fn_;
   bool dry_run_;
   String statefile_;
-  URI target_uri_;
+  Vector<URI> target_uris_;
   http::HTTPConnectionPool* http_;
   std::atomic<bool> shutdown_;
   thread::Queue<std::shared_ptr<msg::MessageObject>> inputq_;
   thread::Queue<Buffer> uploadq_;
   size_t num_records_;
   Vector<std::thread> threads_;
+  Random rnd_;
 };
 } // namespace cm
 
