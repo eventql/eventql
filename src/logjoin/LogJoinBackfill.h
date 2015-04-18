@@ -45,8 +45,8 @@ public:
   void shutdown();
 
 protected:
-  void runWorker();
-  void runUpload();
+  size_t runWorker();
+  size_t runUpload();
 
   RefPtr<eventdb::TableReader> table_;
   RefPtr<eventdb::LogTableTail> tail_;
