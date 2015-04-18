@@ -16,17 +16,32 @@ namespace cm {
 LogJoinBackfill::LogJoinBackfill(
     RefPtr<eventdb::TableReader> table,
     BackfillFnType backfill_fn,
+    const String& statefile,
+    bool dry_run,
     const URI& uri,
     http::HTTPConnectionPool* http) :
     table_(table),
-    tail_(table),
     backfill_fn_(backfill_fn),
+    statefile_(statefile),
+    dry_run_(dry_run),
     target_uri_(uri),
+    tail_(nullptr),
     http_(http),
     shutdown_(false),
     inputq_(64000),
     uploadq_(64000),
-    num_records_(0) {}
+    num_records_(0) {
+  if (FileUtil::exists(statefile_)) {
+    auto data = FileUtil::read(statefile_);
+    util::BinaryMessageReader reader(data.data(), data.size());
+    eventdb::LogTableTailCursor cursor;
+    cursor.decode(&reader);
+    tail_ = RefPtr<eventdb::LogTableTail>(
+        new eventdb::LogTableTail(table_, cursor));
+  } else {
+    tail_ = RefPtr<eventdb::LogTableTail>(new eventdb::LogTableTail(table_));
+  }
+}
 
 void LogJoinBackfill::start() {
   fnord::logInfo("cm.logjoin", "Starting LogJoin backfill");
@@ -78,7 +93,7 @@ bool LogJoinBackfill::process(size_t batch_size) {
       inputq_.length(),
       uploadq_.length());
 
-  auto running = tail_.fetchNext(
+  auto running = tail_->fetchNext(
       [this] (const msg::MessageObject& record) -> bool {
         std::shared_ptr<msg::MessageObject> r(new msg::MessageObject(record));
         inputq_.insert(r, true);
@@ -86,6 +101,16 @@ bool LogJoinBackfill::process(size_t batch_size) {
         return true;
       },
       batch_size);
+
+  auto file = File::openFile(
+      statefile_ + "~",
+      File::O_CREATEOROPEN | File::O_TRUNCATE | File::O_WRITE);
+
+  util::BinaryMessageWriter buf;
+  auto cursor = tail_->getCursor();
+  cursor.encode(&buf);
+  file.write(buf.data(), buf.size());
+  FileUtil::mv(statefile_ + "~", statefile_);
 
   return running;
 }

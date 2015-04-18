@@ -172,7 +172,14 @@ int main(int argc, const char** argv) {
 
 
   /* run backfill */
-  cm::LogJoinBackfill backfill(table, backfill_fn, target_uri, &http);
+  cm::LogJoinBackfill backfill(
+      table,
+      backfill_fn,
+      "/tmp/logjoin-backfill-state",
+      dry_run,
+      target_uri,
+      &http);
+
   backfill.start();
 
   while (backfill.process(batch_size)) {
