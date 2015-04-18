@@ -155,6 +155,15 @@ int main(int argc, const char** argv) {
       "no dryrun",
       "<bool>");
 
+   flags.defineFlag(
+      "nocache",
+      fnord::cli::FlagParser::T_SWITCH,
+      false,
+      NULL,
+      NULL,
+      "no cache",
+      "<bool>");
+
   flags.defineFlag(
       "loglevel",
       fnord::cli::FlagParser::T_STRING,
@@ -209,6 +218,7 @@ int main(int argc, const char** argv) {
 
   /* set up logjoin */
   auto dry_run = !flags.isSet("no_dryrun");
+  auto enable_cache = !flags.isSet("nocache");
   size_t batch_size = flags.getInt("batch_size");
   size_t buffer_size = flags.getInt("buffer_size");
   size_t commit_size = flags.getInt("commit_size");
@@ -219,7 +229,8 @@ int main(int argc, const char** argv) {
       "Starting cm-logjoin with:\n    dry_run=$0\n    batch_size=$1\n" \
       "    buffer_size=$2\n    commit_size=$3\n    commit_interval=$9\n"
       "    max_dbsize=$4MB\n" \
-      "    shard=$5\n    shard_range=[$6, $7)\n    shard_modulo=$8",
+      "    shard=$5\n    shard_range=[$6, $7)\n    shard_modulo=$8\n" \
+      "    cache=$9",
       dry_run,
       batch_size,
       buffer_size,
@@ -229,7 +240,8 @@ int main(int argc, const char** argv) {
       shard.begin,
       shard.end,
       cm::LogJoinShard::modulo,
-      commit_interval);
+      commit_interval,
+      enable_cache);
 
   /* open session db */
   auto sessdb_path = FileUtil::joinPaths(
@@ -276,7 +288,7 @@ int main(int argc, const char** argv) {
       &http);
 
   /* setup logjoin */
-  cm::LogJoin logjoin(shard, dry_run, &logjoin_target);
+  cm::LogJoin logjoin(shard, dry_run, enable_cache, &logjoin_target);
   logjoin.exportStats("/cm-logjoin/global");
   logjoin.exportStats(StringUtil::format("/cm-logjoin/$0", shard.shard_name));
 

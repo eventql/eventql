@@ -41,6 +41,7 @@ public:
   LogJoin(
       LogJoinShard shard,
       bool dry_run,
+      bool enable_cache,
       LogJoinTarget* target);
 
   void insertLogline(
@@ -95,6 +96,7 @@ protected:
       DateTime stream_time);
 
   bool dry_run_;
+  bool enable_cache_;
   LogJoinShard shard_;
   LogJoinTarget* target_;
   HashMap<String, DateTime> sessions_flush_times_;
