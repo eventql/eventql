@@ -35,6 +35,8 @@ public:
   RefPtr<TableReader> findTableReader(const String& table_name) const;
   Set<String> tables() const;
 
+  const String& replicaID() const;
+
 protected:
   ArtifactIndex* artifacts_;
   String db_path_;

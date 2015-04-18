@@ -105,6 +105,10 @@ Set<String> TableRepository::tables() const {
   return tables;
 }
 
+const String& TableRepository::replicaID() const {
+  return replica_id_;
+}
+
 } // namespace eventdb
 } // namespace fnord
 

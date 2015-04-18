@@ -147,48 +147,51 @@ void EventDBServlet::tableInfo(
 
   auto snap = tables_->getSnapshot(table);
 
+  HashMap<String, uint64_t> per_replica_head;
+  HashMap<String, HashMap<String, String>> per_replica;
   uint64_t num_rows_commited = 0;
   uint64_t num_rows_arena = 0;
-  uint64_t head_sequence = 0;
 
   for (const auto& c : snap->head->chunks) {
     num_rows_commited += c.num_records;
 
     auto seq = (c.start_sequence + c.num_records) - 1;
-    if (seq > head_sequence) {
-      head_sequence = seq;
+    if (seq > per_replica_head[c.replica_id]) {
+      per_replica_head[c.replica_id] = seq;
+      per_replica[c.replica_id]["head_sequence"] = seq;
     }
   }
 
+  auto my_head = per_replica_head[tables_->replicaID()];
   for (const auto& a : snap->arenas) {
-    if (a->startSequence() > head_sequence) {
+    if (a->startSequence() > my_head) {
       num_rows_arena += a->size();
     }
   }
 
   res->setStatus(http::kStatusOK);
   res->addHeader("Content-Type", "application/json; charset=utf-8");
-  json::JSONOutputStream json(res->getBodyOutputStream());
+  json::JSONOutputStream j(res->getBodyOutputStream());
 
-  json.beginObject();
-  json.addObjectEntry("table");
-  json.addString(table);
-  json.addComma();
-  json.addObjectEntry("num_chunks");
-  json.addInteger(snap->head->chunks.size());
-  json.addComma();
-  json.addObjectEntry("head_sequence");
-  json.addInteger(head_sequence);
-  json.addComma();
-  json.addObjectEntry("num_rows");
-  json.addInteger(num_rows_commited + num_rows_arena);
-  json.addComma();
-  json.addObjectEntry("num_rows_commited");
-  json.addInteger(num_rows_commited);
-  json.addComma();
-  json.addObjectEntry("num_rows_stage");
-  json.addInteger(num_rows_arena);
-  json.endObject();
+  j.beginObject();
+  j.addObjectEntry("table");
+  j.addString(table);
+  j.addComma();
+  j.addObjectEntry("num_chunks");
+  j.addInteger(snap->head->chunks.size());
+  j.addComma();
+  j.addObjectEntry("num_rows");
+  j.addInteger(num_rows_commited + num_rows_arena);
+  j.addComma();
+  j.addObjectEntry("num_rows_commited");
+  j.addInteger(num_rows_commited);
+  j.addComma();
+  j.addObjectEntry("num_rows_stage");
+  j.addInteger(num_rows_arena);
+  j.addComma();
+  j.addObjectEntry("replicas");
+  json::toJSON(per_replica, &j);
+  j.endObject();
 }
 
 void EventDBServlet::tableSnapshot(
