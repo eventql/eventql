@@ -618,6 +618,26 @@ void TableWriter::replicateFrom(const TableGeneration& other_table) {
       continue;
     }
 
+    auto cbegin = c.start_sequence;
+    auto cend = c.start_sequence + c.num_records;
+
+    bool is_subset = false;
+    for (const auto& e : chunks) {
+      auto ebegin = e.start_sequence;
+      auto eend = e.start_sequence + e.num_records;
+
+      if ((c.replica_id == e.replica_id) &&
+          (cbegin >= ebegin) &&
+          (cend <= eend)) {
+        is_subset = true;
+        break;
+      }
+    }
+
+    if (is_subset) {
+      continue;
+    }
+
     fnord::logInfo(
         "fnord.evdb",
         "Adding foreign chunk '$0' to table '$1'",
@@ -627,8 +647,6 @@ void TableWriter::replicateFrom(const TableGeneration& other_table) {
     dirty = true;
 
     Set<String> dropped_chunks;
-    auto cbegin = c.start_sequence;
-    auto cend = c.start_sequence + c.num_records;
     for (auto cur = chunks.begin(); cur != chunks.end(); ) {
       auto tbegin = cur->start_sequence;
       auto tend = cur->start_sequence + cur->num_records;
@@ -636,7 +654,6 @@ void TableWriter::replicateFrom(const TableGeneration& other_table) {
       if ((cur->replica_id == c.replica_id) &&
           (tbegin >= cbegin) &&
           (tend <= cend)) {
-
         dropped_chunks.emplace(cur->replica_id + "." + cur->chunk_id);
         cur = chunks.erase(cur);
       } else {
