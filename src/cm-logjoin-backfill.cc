@@ -134,6 +134,15 @@ int main(int argc, const char** argv) {
       "<id>");
 
   flags.defineFlag(
+     "pinfo_csv",
+      cli::FlagParser::T_STRING,
+      false,
+      NULL,
+      NULL,
+      "file",
+      "<file>");
+
+  flags.defineFlag(
       "no_dryrun",
       fnord::cli::FlagParser::T_SWITCH,
       false,
@@ -176,10 +185,6 @@ int main(int argc, const char** argv) {
   });
 
 
-  /* open index */
-  auto index = cm::IndexReader::openIndex(index_path);
-
-
   /* open table */
   auto schema = joinedSessionsSchema();
   auto table = eventdb::TableReader::open(
@@ -189,17 +194,44 @@ int main(int argc, const char** argv) {
       schema);
 
 
-  auto queries_fid = schema.id("queries");
-  auto queryitems_fid = schema.id("queries.items");
-  auto qi_id_fid = schema.id("queries.items.item_id");
-  auto qi_sid_fid = schema.id("queries.items.shop_id");
-  auto qi_sname_fid = schema.id("queries.items.shop_name");
-  auto qi_c1_fid = schema.id("queries.items.category1");
-  auto qi_c2_fid = schema.id("queries.items.category2");
-  auto qi_c3_fid = schema.id("queries.items.category3");
-
+  /* warmup cache */
   HashMap<String, BackfillData> cache;
   std::mutex cache_mutex;
+
+  if (flags.isSet("pinfo_csv")) {
+    io::MmappedFile mmap(File::openFile(flags.getString("pinfo_csv"), File::O_READ));
+
+    size_t begin = 0;
+    size_t end = mmap.size();
+    while (begin < end) {
+      size_t len = 0;
+      for (; *mmap.structAt<char>(begin + len) != '\n' && (begin + len) < end; ++len);
+      String line(mmap.structAt<char>(begin), len);
+      begin += len + 1;
+
+      if (len == 0) {
+        continue;
+      }
+
+      auto cols = StringUtil::split(line, ",");
+      if (cols.size() != 6) {
+        continue;
+      }
+
+      BackfillData data;
+      data.shop_id = Some(cols[1]);
+      data.shop_name = Some(cols[5]);
+      data.category3 = Some((uint64_t) std::stoul(cols[2]));
+      data.category2 = Some((uint64_t) std::stoul(cols[3]));
+      data.category1 = Some((uint64_t) std::stoul(cols[4]));
+      cache.emplace("p~" + cols[0], data);
+    }
+  }
+
+
+  /* open index */
+  auto index = cm::IndexReader::openIndex(index_path);
+
 
   /* backfill fn */
   auto get_backfill_data = [&cache, &index, &cache_mutex] (const String& item_id) -> BackfillData {
@@ -237,6 +269,14 @@ int main(int argc, const char** argv) {
     return data;
   };
 
+  auto queries_fid = schema.id("queries");
+  auto queryitems_fid = schema.id("queries.items");
+  auto qi_id_fid = schema.id("queries.items.item_id");
+  auto qi_sid_fid = schema.id("queries.items.shop_id");
+  auto qi_sname_fid = schema.id("queries.items.shop_name");
+  auto qi_c1_fid = schema.id("queries.items.category1");
+  auto qi_c2_fid = schema.id("queries.items.category2");
+  auto qi_c3_fid = schema.id("queries.items.category3");
   auto backfill_fn = [
     &schema,
     &queries_fid,
