@@ -106,7 +106,12 @@ void ArtifactReplication::downloadArtifact(const ArtifactRef& artifact) {
     }
   }
 
-  index_->updateStatus(artifact.name, ArtifactStatus::PRESENT);
+  try {
+    index_->updateStatus(artifact.name, ArtifactStatus::PRESENT);
+  } catch (const Exception& e) {
+    /* N.B. artifact may have been deleted (by a superseeding snapshot/merge)
+       before we got it, so we ignore "artifact not found" errors */
+  }
 }
 
 
