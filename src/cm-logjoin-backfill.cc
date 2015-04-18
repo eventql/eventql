@@ -244,8 +244,6 @@ int main(int argc, const char** argv) {
     &qi_c3_fid,
     &get_backfill_data
   ] (msg::MessageObject* record) {
-    auto msg = msg::MessagePrinter::print(*record, schema);
-
     for (auto& q : record->asObject()) {
       if (q.id != queries_fid) {
         continue;
@@ -299,6 +297,7 @@ int main(int argc, const char** argv) {
       }
     }
 
+    auto msg = msg::MessagePrinter::print(*record, schema);
     fnord::iputs("backfill: $0", msg);
   };
 
