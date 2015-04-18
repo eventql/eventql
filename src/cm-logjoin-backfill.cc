@@ -22,7 +22,9 @@
 #include "fnord-eventdb/TableRepository.h"
 #include "fnord-eventdb/LogTableTail.h"
 #include "fnord-msg/MessageEncoder.h"
+#include "fnord-msg/MessagePrinter.h"
 #include "logjoin/LogJoinBackfill.h"
+#include "IndexReader.h"
 
 #include "common.h"
 #include "schemas.h"
@@ -36,6 +38,14 @@ std::atomic<bool> cm_logjoin_shutdown;
 void quit(int n) {
   cm_logjoin_shutdown = true;
 }
+
+struct BackfillData {
+  Option<String> shop_name;
+  Option<String> shop_id;
+  Option<uint64_t> category1;
+  Option<uint64_t> category2;
+  Option<uint64_t> category3;
+};
 
 int main(int argc, const char** argv) {
   fnord::Application::init();
@@ -139,6 +149,7 @@ int main(int argc, const char** argv) {
 
 
   /* args */
+  auto index_path = flags.getString("index");
   auto batch_size = flags.getInt("batch_size");
   auto datadir = flags.getString("datadir");
   auto dry_run = !flags.isSet("no_dryrun");
@@ -156,10 +167,8 @@ int main(int argc, const char** argv) {
   });
 
 
-  /* backfill fn */
-  auto backfill_fn = [] (msg::MessageObject* record) {
-    //fnord::iputs("backfill...", 1);
-  };
+  /* open index */
+  auto index = cm::IndexReader::openIndex(index_path);
 
 
   /* open table */
@@ -169,6 +178,120 @@ int main(int argc, const char** argv) {
       flags.getString("replica"),
       datadir,
       schema);
+
+
+  auto queries_fid = schema.id("queries");
+  auto queryitems_fid = schema.id("queries.items");
+  auto qi_id_fid = schema.id("queries.items.item_id");
+  auto qi_sid_fid = schema.id("queries.items.shop_id");
+  auto qi_sname_fid = schema.id("queries.items.shop_name");
+  auto qi_c1_fid = schema.id("queries.items.category1");
+  auto qi_c2_fid = schema.id("queries.items.category2");
+  auto qi_c3_fid = schema.id("queries.items.category3");
+
+  HashMap<String, BackfillData> cache;
+
+  /* backfill fn */
+  auto get_backfill_data = [&cache, &index] (const String& item_id) -> BackfillData {
+    auto cached = cache.find(item_id);
+    if (!(cached == cache.end())) {
+      return cached->second;
+    }
+
+    BackfillData data;
+
+    DocID docid { .docid = item_id };
+    data.shop_id = index->docIndex()->getField(docid, "shop_id");
+    data.shop_name = index->docIndex()->getField(docid, "shop_name");
+
+    auto category1 = index->docIndex()->getField(docid, "category1");
+    if (!category1.isEmpty()) {
+      data.category1 = Some(std::stoull(category1.get()));
+    }
+
+    auto category2 = index->docIndex()->getField(docid, "category2");
+    if (!category2.isEmpty()) {
+      data.category2 = Some(std::stoull(category2.get()));
+    }
+
+    auto category3 = index->docIndex()->getField(docid, "category3");
+    if (!category3.isEmpty()) {
+      data.category3 = Some(std::stoull(category3.get()));
+    }
+
+    cache[item_id] = data;
+    return data;
+  };
+
+  auto backfill_fn = [
+    &schema,
+    &queries_fid,
+    &queryitems_fid,
+    &qi_id_fid,
+    &qi_sid_fid,
+    &qi_sname_fid,
+    &qi_c1_fid,
+    &qi_c2_fid,
+    &qi_c3_fid,
+    &get_backfill_data
+  ] (msg::MessageObject* record) {
+    auto msg = msg::MessagePrinter::print(*record, schema);
+
+    for (auto& q : record->asObject()) {
+      if (q.id != queries_fid) {
+        continue;
+      }
+
+      for (auto& qi : q.asObject()) {
+        if (qi.id != queryitems_fid) {
+          continue;
+        }
+
+        String item_id;
+        for (auto cur = qi.asObject().begin(); cur != qi.asObject().end(); ) {
+          auto id = cur->id;
+
+          if (id == qi_id_fid) {
+            item_id = cur->asString();
+            ++cur;
+          } else if (
+              id == qi_sid_fid ||
+              id == qi_sname_fid ||
+              id == qi_c1_fid ||
+              id == qi_c2_fid ||
+              id == qi_c3_fid) {
+            cur = qi.asObject().erase(cur);
+          } else {
+            ++cur;
+          }
+        }
+
+        auto bdata = get_backfill_data(item_id);
+
+        if (!bdata.shop_id.isEmpty()) {
+          qi.addChild(qi_sid_fid, bdata.shop_id.get());
+        }
+
+        if (!bdata.shop_name.isEmpty()) {
+          qi.addChild(qi_sname_fid, bdata.shop_name.get());
+        }
+
+        if (!bdata.category1.isEmpty()) {
+          qi.addChild(qi_c1_fid, bdata.category1.get());
+        }
+
+        if (!bdata.category2.isEmpty()) {
+          qi.addChild(qi_c2_fid, bdata.category2.get());
+        }
+
+        if (!bdata.category3.isEmpty()) {
+          qi.addChild(qi_c3_fid, bdata.category3.get());
+        }
+      }
+    }
+
+    fnord::iputs("backfill: $0", msg);
+  };
 
 
   /* run backfill */
