@@ -175,7 +175,10 @@ int main(int argc, const char** argv) {
     RAISEF(kIOError, "no such directory: $0", datadir);
   }
 
-  URI target_uri("http://localhost:8000/eventdb/insert?table=joined_sessions-dawanda");
+  Vector<URI> target_uris = {
+    URI("http://nue01.prod.fnrd.net:7003/eventdb/insert?table=joined_sessions-dawanda"),
+    URI("http://nue02.prod.fnrd.net:7003/eventdb/insert?table=joined_sessions-dawanda")
+  };
 
 
   /* event loop, http */
@@ -350,7 +353,7 @@ int main(int argc, const char** argv) {
       backfill_fn,
       "logjoin-backfill-state",
       dry_run,
-      target_uri,
+      target_uris,
       &http);
 
   backfill.start();

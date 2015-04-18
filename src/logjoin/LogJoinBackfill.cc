@@ -18,13 +18,13 @@ LogJoinBackfill::LogJoinBackfill(
     BackfillFnType backfill_fn,
     const String& statefile,
     bool dry_run,
-    const URI& uri,
+    const Vector<URI>& uris,
     http::HTTPConnectionPool* http) :
     table_(table),
     backfill_fn_(backfill_fn),
     statefile_(statefile),
     dry_run_(dry_run),
-    target_uri_(uri),
+    target_uris_(uris),
     tail_(nullptr),
     http_(http),
     shutdown_(false),
@@ -56,7 +56,7 @@ void LogJoinBackfill::start() {
     });
   }
 
-  for (int i = 2; i > 0; --i) {
+  for (int i = 4; i > 0; --i) {
     threads_.emplace_back([this] {
       while (uploadq_.length() > 0 || !shutdown_.load()) {
         if (runUpload() == 0) {
@@ -168,7 +168,7 @@ size_t LogJoinBackfill::runUpload() {
       true;
       usleep((delay = std::min(delay * 2, kMicrosPerSecond * 30)))) {
     try {
-      auto uri = target_uri_;
+      auto uri = target_uris_[rnd_.random64() % target_uris_.size()];
       http::HTTPRequest req(http::HTTPMessage::M_POST, uri.pathAndQuery());
       req.addHeader("Host", uri.hostAndPort());
       req.addHeader("Content-Type", "application/fnord-msg");
