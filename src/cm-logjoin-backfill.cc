@@ -206,17 +206,17 @@ int main(int argc, const char** argv) {
 
     auto category1 = index->docIndex()->getField(docid, "category1");
     if (!category1.isEmpty()) {
-      data.category1 = Some(std::stoull(category1.get()));
+      data.category1 = Some((uint64_t) std::stoull(category1.get()));
     }
 
     auto category2 = index->docIndex()->getField(docid, "category2");
     if (!category2.isEmpty()) {
-      data.category2 = Some(std::stoull(category2.get()));
+      data.category2 = Some((uint64_t) std::stoull(category2.get()));
     }
 
     auto category3 = index->docIndex()->getField(docid, "category3");
     if (!category3.isEmpty()) {
-      data.category3 = Some(std::stoull(category3.get()));
+      data.category3 = Some((uint64_t) std::stoull(category3.get()));
     }
 
     cache[item_id] = data;
