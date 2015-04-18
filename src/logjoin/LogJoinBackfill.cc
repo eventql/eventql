@@ -28,8 +28,8 @@ LogJoinBackfill::LogJoinBackfill(
     tail_(nullptr),
     http_(http),
     shutdown_(false),
-    inputq_(64000),
-    uploadq_(64000),
+    inputq_(8192),
+    uploadq_(8192),
     num_records_(0),
     rr_(0) {
   if (FileUtil::exists(statefile_)) {
