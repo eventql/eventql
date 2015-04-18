@@ -121,7 +121,11 @@ Option<uint32_t> extractABTestGroup(const Vector<String>& attrs) {
   if (test_group.isEmpty()) {
     return None<uint32_t>();
   } else {
-    return Some<uint32_t>(std::stoul(test_group.get()));
+    try {
+      return Some<uint32_t>(std::stoul(test_group.get()));
+    } catch (...) {
+      return None<uint32_t>();
+    }
   }
 }
 
