@@ -32,6 +32,7 @@ public:
 
   const String& name() const;
   const String& basePath() const;
+  const msg::MessageSchema& schema() const;
 
   RefPtr<TableSnapshot> getSnapshot();
 

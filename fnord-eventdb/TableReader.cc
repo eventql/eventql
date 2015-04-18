@@ -75,6 +75,10 @@ const String& TableReader::basePath() const {
   return db_path_;
 }
 
+const msg::MessageSchema& TableReader::schema() const {
+  return schema_;
+}
+
 RefPtr<TableSnapshot> TableReader::getSnapshot() {
   std::unique_lock<std::mutex> lk(mutex_);
   auto g = head_gen_;
