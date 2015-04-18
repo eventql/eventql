@@ -176,8 +176,12 @@ int main(int argc, const char** argv) {
   }
 
   Vector<URI> target_uris = {
-    URI("http://nue01.prod.fnrd.net:7003/eventdb/insert?table=joined_sessions-dawanda"),
-    URI("http://nue02.prod.fnrd.net:7003/eventdb/insert?table=joined_sessions-dawanda")
+    URI("http://nue03.prod.fnrd.net:7003/eventdb/insert?table=joined_sessions-dawanda"),
+    URI("http://nue03.prod.fnrd.net:7003/eventdb/insert?table=joined_sessions-dawanda"),
+    URI("http://nue02.prod.fnrd.net:7003/eventdb/insert?table=joined_sessions-dawanda"),
+    URI("http://nue02.prod.fnrd.net:7003/eventdb/insert?table=joined_sessions-dawanda"),
+    URI("http://nue02.prod.fnrd.net:7003/eventdb/insert?table=joined_sessions-dawanda"),
+    URI("http://nue01.prod.fnrd.net:7003/eventdb/insert?table=joined_sessions-dawanda")
   };
 
 

@@ -150,7 +150,7 @@ size_t LogJoinBackfill::runUpload() {
 
   Buffer buf;
 
-  for (int i = 0; i < 10; ++i) {
+  for (int i = 0; i < 50; ++i) {
     auto rec = uploadq_.poll();
     if (rec.isEmpty()) {
       break;
