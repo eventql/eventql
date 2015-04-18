@@ -158,7 +158,7 @@ int main(int argc, const char** argv) {
 
   /* backfill fn */
   auto backfill_fn = [] (msg::MessageObject* record) {
-    fnord::iputs("backfill...", 1);
+    //fnord::iputs("backfill...", 1);
   };
 
 

@@ -73,8 +73,7 @@ void LogJoinBackfill::shutdown() {
 bool LogJoinBackfill::process(size_t batch_size) {
   fnord::logInfo(
       "cm.logjoin",
-      "LogJoin backfill comitting\n    num_records=$0\n    " \
-      "inputq=$1\n    uploadq=$2",
+      "LogJoin backfill comitting; num_records=$0 inputq=$1 uploadq=$2",
       num_records_,
       inputq_.length(),
       uploadq_.length());
