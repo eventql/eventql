@@ -158,7 +158,7 @@ void EventDBServlet::tableInfo(
     auto seq = (c.start_sequence + c.num_records) - 1;
     if (seq > per_replica_head[c.replica_id]) {
       per_replica_head[c.replica_id] = seq;
-      per_replica[c.replica_id]["head_sequence"] = seq;
+      per_replica[c.replica_id]["head_sequence"] = StringUtil::toString(seq);
     }
   }
 
