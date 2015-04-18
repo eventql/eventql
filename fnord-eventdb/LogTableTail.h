@@ -7,16 +7,13 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#ifndef _FNORD_EVENTDB_TABLEREADER_H
-#define _FNORD_EVENTDB_TABLEREADER_H
+#ifndef _FNORD_EVENTDB_LOGTABLETAIL_H
+#define _FNORD_EVENTDB_LOGTABLETAIL_H
 #include <fnord-base/stdtypes.h>
 #include <fnord-base/autoref.h>
 #include <fnord-msg/MessageSchema.h>
 #include <fnord-msg/MessageObject.h>
-#include <fnord-eventdb/TableArena.h>
-#include <fnord-eventdb/TableSnapshot.h>
-#include "fnord-sstable/sstablereader.h"
-#include "fnord-cstable/CSTableReader.h"
+#include <fnord-eventdb/TableReader.h>
 
 namespace fnord {
 namespace eventdb {
@@ -41,6 +38,14 @@ public:
   LogTableTailCursor getCursor() const;
 
 protected:
+
+  void readRowsFromTable(
+      const TableChunkRef& table,
+      size_t offset,
+      size_t limit,
+      Function<bool (const msg::MessageObject& record)> fn);
+
+
   RefPtr<TableReader> reader_;
   HashMap<String, uint64_t> offsets_;
 };
