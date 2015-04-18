@@ -21,6 +21,7 @@
 #include "fnord-base/cli/flagparser.h"
 #include "fnord-eventdb/TableRepository.h"
 #include "fnord-eventdb/LogTableTail.h"
+#include "fnord-msg/MessageEncoder.h"
 
 #include "common.h"
 #include "schemas.h"
@@ -35,30 +36,64 @@ void quit(int n) {
   cm_logjoin_shutdown = true;
 }
 
+void backfillRecord(msg::MessageObject* record) {
+  //fnord::iputs("backfill $0", record);
+}
+
 void runWorker(
      thread::Queue<std::shared_ptr<msg::MessageObject>>* inputq,
-     thread::Queue<std::shared_ptr<msg::MessageObject>>* uploadq) {
+     thread::Queue<Buffer>* uploadq,
+     const msg::MessageSchema& schema,
+     bool dry_run) {
   for (int i = 0; i < 8192; ++i) {
     auto rec = inputq->poll();
     if (rec.isEmpty()) {
       return;
     }
 
-    std::shared_ptr<msg::MessageObject> new_rec(
-        new msg::MessageObject(*rec.get()));
+    backfillRecord(rec.get().get());
 
-    uploadq->insert(new_rec, true);
+    if (!dry_run) {
+      Buffer msg_buf;
+      msg::MessageEncoder::encode(*rec.get(), schema, &msg_buf);
+
+      uploadq->insert(msg_buf, true);
+    }
   }
 }
 
-void runUpload(thread::Queue<std::shared_ptr<msg::MessageObject>>* uploadq) {
+void runUpload(
+    thread::Queue<Buffer>* uploadq,
+    const URI& uri,
+    http::HTTPConnectionPool* http) {
   for (int i = 0; i < 8192; ++i) {
     auto rec = uploadq->poll();
     if (rec.isEmpty()) {
       return;
     }
 
-    //fnord::iputs("upload... $0", 1);
+    for (auto delay = kMicrosPerSecond / 10;
+        true;
+        usleep((delay = std::min(delay * 2, kMicrosPerSecond * 30)))) {
+      try {
+        http::HTTPRequest req(http::HTTPMessage::M_POST, uri.pathAndQuery());
+        req.addHeader("Host", uri.hostAndPort());
+        req.addHeader("Content-Type", "application/fnord-msg");
+        req.addBody(rec.get());
+
+        auto res = http->executeRequest(req);
+        res.wait();
+
+        const auto& r = res.get();
+        if (r.statusCode() != 201) {
+          RAISEF(kRuntimeError, "received non-201 response: $0", r.body().toString());
+        }
+
+        break;
+      } catch (const Exception& e) {
+        fnord::logError("cm.logjoin", e, "upload error");
+      }
+    }
   }
 }
 
@@ -140,6 +175,15 @@ int main(int argc, const char** argv) {
       "<id>");
 
   flags.defineFlag(
+      "no_dryrun",
+      fnord::cli::FlagParser::T_SWITCH,
+      false,
+      NULL,
+      NULL,
+      "no dryrun",
+      "<bool>");
+
+  flags.defineFlag(
       "loglevel",
       fnord::cli::FlagParser::T_STRING,
       false,
@@ -156,9 +200,12 @@ int main(int argc, const char** argv) {
   /* args */
   auto batch_size = flags.getInt("batch_size");
   auto datadir = flags.getString("datadir");
+  auto dry_run = !flags.isSet("no_dryrun");
   if (!FileUtil::isDirectory(datadir)) {
     RAISEF(kIOError, "no such directory: $0", datadir);
   }
+
+  URI target_uri("http://localhost:8000/eventdb/insert?table=joined_sessions-dawanda");
 
   /* start event loop */
   auto evloop_thread = std::thread([] {
@@ -179,24 +226,24 @@ int main(int argc, const char** argv) {
   eventdb::LogTableTail tail(table_reader);
 
   thread::Queue<std::shared_ptr<msg::MessageObject>> input_queue(64000);
-  thread::Queue<std::shared_ptr<msg::MessageObject>> upload_queue(64000);
+  thread::Queue<Buffer> upload_queue(64000);
 
   Vector<std::thread> threads;
 
   /* start workers */
   for (int i = flags.getInt("worker_threads"); i > 0; --i) {
-    threads.emplace_back([&input_queue, &upload_queue] {
+    threads.emplace_back([&input_queue, &upload_queue, &joined_sessions_schema, dry_run] {
       while (input_queue.length() > 0 || !cm_logjoin_shutdown.load()) {
-        runWorker(&input_queue, &upload_queue);
+        runWorker(&input_queue, &upload_queue, joined_sessions_schema, dry_run);
         usleep(10000);
       }
     });
   }
 
   for (int i = flags.getInt("upload_threads"); i > 0; --i) {
-    threads.emplace_back([&upload_queue] {
+    threads.emplace_back([&upload_queue, &http, &target_uri] {
       while (upload_queue.length() > 0 || !cm_logjoin_shutdown.load()) {
-        runUpload(&upload_queue);
+        runUpload(&upload_queue, target_uri, &http);
         usleep(10000);
       }
     });
