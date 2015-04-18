@@ -101,7 +101,12 @@ void ArtifactReplication::downloadArtifact(const ArtifactRef& artifact) {
           "No source found for remote artifact file '$0'",
           f.filename);
 
-      index_->updateStatus(artifact.name, ArtifactStatus::MISSING);
+      try {
+        index_->updateStatus(artifact.name, ArtifactStatus::MISSING);
+      } catch (const Exception& e) {
+        /* see comment below */
+      }
+
       return;
     }
   }
