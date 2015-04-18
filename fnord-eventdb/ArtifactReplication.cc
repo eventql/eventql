@@ -34,7 +34,8 @@ void ArtifactReplication::downloadPending() {
   auto artifacts = index_->listArtifacts();
 
   for (const auto& a : artifacts) {
-    if (a.status == ArtifactStatus::DOWNLOAD) {
+    if (a.status == ArtifactStatus::DOWNLOAD ||
+        a.status == ArtifactStatus::MISSING) {
       enqueueArtifact(a);
     }
   }
