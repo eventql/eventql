@@ -136,6 +136,7 @@ add_executable(cm-logjoin-backfill
     3rdparty/libfnord/fnord-eventdb/TableChunkSummaryReader.cc
     3rdparty/libfnord/fnord-eventdb/TableChunkSummaryWriter.cc
     3rdparty/libfnord/fnord-eventdb/LogTableTail.cc
+    src/logjoin/LogJoinBackfill.cc
     src/schemas.cc
     src/IndexReader.cc
     src/IndexWriter.cc
