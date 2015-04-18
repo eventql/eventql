@@ -189,6 +189,49 @@ msg::MessageSchema joinedSessionsSchema() {
       false,
       false);
 
+  query_items.fields.emplace_back(
+      21,
+      "shop_id",
+      msg::FieldType::STRING,
+      250,
+      false,
+      true);
+
+  query_items.fields.emplace_back(
+      21,
+      "shop_name",
+      msg::FieldType::STRING,
+      250,
+      false,
+      true);
+
+  query_items.fields.emplace_back(
+      22,
+      "category1",
+      msg::FieldType::UINT32,
+      0xffff,
+      false,
+      true,
+      msg::EncodingHint::BITPACK);
+
+  query_items.fields.emplace_back(
+      23,
+      "category2",
+      msg::FieldType::UINT32,
+      0xffff,
+      false,
+      true,
+      msg::EncodingHint::BITPACK);
+
+  query_items.fields.emplace_back(
+      24,
+      "category3",
+      msg::FieldType::UINT32,
+      0xffff,
+      false,
+      true,
+      msg::EncodingHint::BITPACK);
+
   queries.fields.emplace_back(query_items);
   fields.emplace_back(queries);
 
