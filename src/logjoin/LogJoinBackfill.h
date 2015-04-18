@@ -60,7 +60,7 @@ protected:
   thread::Queue<Buffer> uploadq_;
   size_t num_records_;
   Vector<std::thread> threads_;
-  Random rnd_;
+  std::atomic<uint64_t> rr_;
 };
 } // namespace cm
 

@@ -30,7 +30,8 @@ LogJoinBackfill::LogJoinBackfill(
     shutdown_(false),
     inputq_(64000),
     uploadq_(64000),
-    num_records_(0) {
+    num_records_(0),
+    rr_(0) {
   if (FileUtil::exists(statefile_)) {
     auto data = FileUtil::read(statefile_);
     util::BinaryMessageReader reader(data.data(), data.size());
@@ -168,7 +169,7 @@ size_t LogJoinBackfill::runUpload() {
       true;
       usleep((delay = std::min(delay * 2, kMicrosPerSecond * 30)))) {
     try {
-      auto uri = target_uris_[rnd_.random64() % target_uris_.size()];
+      auto uri = target_uris_[++rr_ % target_uris_.size()];
       http::HTTPRequest req(http::HTTPMessage::M_POST, uri.pathAndQuery());
       req.addHeader("Host", uri.hostAndPort());
       req.addHeader("Content-Type", "application/fnord-msg");
