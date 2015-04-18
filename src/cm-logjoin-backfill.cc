@@ -31,6 +31,7 @@ using namespace fnord;
 
 fnord::thread::EventLoop ev;
 std::atomic<bool> cm_logjoin_shutdown;
+std::atomic<bool> cm_logjoin_worker_shutdown;
 
 void quit(int n) {
   cm_logjoin_shutdown = true;
@@ -51,7 +52,11 @@ void runWorker(
       return;
     }
 
-    backfillRecord(rec.get().get());
+    try {
+      backfillRecord(rec.get().get());
+    } catch (const Exception& e) {
+      fnord::logError("cm.logjoin", e, "backfill error");
+    }
 
     if (!dry_run) {
       Buffer msg_buf;
@@ -102,6 +107,7 @@ int main(int argc, const char** argv) {
   fnord::Application::logToStderr();
 
   cm_logjoin_shutdown = false;
+  cm_logjoin_worker_shutdown = false;
   struct sigaction sa;
   memset(&sa, 0, sizeof(struct sigaction));
   sa.sa_handler = quit;
@@ -233,7 +239,7 @@ int main(int argc, const char** argv) {
   /* start workers */
   for (int i = flags.getInt("worker_threads"); i > 0; --i) {
     threads.emplace_back([&input_queue, &upload_queue, &joined_sessions_schema, dry_run] {
-      while (input_queue.length() > 0 || !cm_logjoin_shutdown.load()) {
+      while (input_queue.length() > 0 || !cm_logjoin_worker_shutdown.load()) {
         runWorker(&input_queue, &upload_queue, joined_sessions_schema, dry_run);
         usleep(10000);
       }
@@ -242,7 +248,7 @@ int main(int argc, const char** argv) {
 
   for (int i = flags.getInt("upload_threads"); i > 0; --i) {
     threads.emplace_back([&upload_queue, &http, &target_uri] {
-      while (upload_queue.length() > 0 || !cm_logjoin_shutdown.load()) {
+      while (upload_queue.length() > 0 || !cm_logjoin_worker_shutdown.load()) {
         runUpload(&upload_queue, target_uri, &http);
         usleep(10000);
       }
@@ -292,7 +298,7 @@ int main(int argc, const char** argv) {
     usleep(1000000);
   }
 
-  cm_logjoin_shutdown = true;
+  cm_logjoin_worker_shutdown = true;
 
   fnord::logInfo("cm.logjoin", "Waiting for jobs to finish...");
   for (auto& t : threads) {
