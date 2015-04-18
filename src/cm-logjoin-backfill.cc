@@ -124,7 +124,7 @@ int main(int argc, const char** argv) {
 
   /* on record callback */
   auto on_record = [] (const msg::MessageObject& record) -> bool {
-    fnord::iputs("on record...", 1);
+    //fnord::iputs("on record...", 1);
     return true;
   };
 
