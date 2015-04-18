@@ -11,6 +11,8 @@
 #define _FNORD_EVENTDB_LOGTABLETAIL_H
 #include <fnord-base/stdtypes.h>
 #include <fnord-base/autoref.h>
+#include <fnord-base/util/binarymessagereader.h>
+#include <fnord-base/util/binarymessagewriter.h>
 #include <fnord-msg/MessageSchema.h>
 #include <fnord-msg/MessageObject.h>
 #include <fnord-eventdb/TableReader.h>
@@ -23,7 +25,12 @@ struct LogTableTailOffset {
   uint64_t consumed_offset;
 };
 
-typedef Vector<LogTableTailOffset> LogTableTailCursor;
+struct LogTableTailCursor {
+  Vector<LogTableTailOffset> offsets;
+
+  void encode(util::BinaryMessageWriter* writer) const;
+  void decode(util::BinaryMessageReader* reader);
+};
 
 class LogTableTail : public RefCounted {
 public:

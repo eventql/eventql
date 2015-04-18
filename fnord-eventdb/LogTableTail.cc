@@ -13,6 +13,29 @@
 namespace fnord {
 namespace eventdb {
 
+void LogTableTailCursor::encode(util::BinaryMessageWriter* writer) const {
+  writer->appendVarUInt(offsets.size());
+  for (const auto& o : offsets) {
+    writer->appendVarUInt(o.replica_id.size());
+    writer->append(o.replica_id.data(), o.replica_id.size());
+    writer->appendVarUInt(o.consumed_offset);
+  }
+}
+
+void LogTableTailCursor::decode(util::BinaryMessageReader* reader) {
+  auto n = reader->readVarUInt();
+  for (int i = 0; i < n; ++i) {
+    auto rid_len = reader->readVarUInt();
+    String replica_id((char *) reader->read(rid_len), rid_len);
+    auto consumed_offset = reader->readVarUInt();
+
+    offsets.emplace_back(LogTableTailOffset {
+      .replica_id = replica_id,
+      .consumed_offset = consumed_offset
+    });
+  }
+}
+
 LogTableTail::LogTableTail(
     RefPtr<TableReader> reader) :
     reader_(reader) {
@@ -34,7 +57,7 @@ LogTableTail::LogTableTail(
     RefPtr<TableReader> reader,
     LogTableTailCursor cursor) :
     reader_(reader) {
-  for (const auto& o : cursor) {
+  for (const auto& o : cursor.offsets) {
     offsets_.emplace(o.replica_id, o.consumed_offset);
   }
 }
@@ -70,7 +93,7 @@ LogTableTailCursor LogTableTail::getCursor() const {
   LogTableTailCursor cursor;
 
   for (const auto& o : offsets_) {
-    cursor.emplace_back(LogTableTailOffset {
+    cursor.offsets.emplace_back(LogTableTailOffset {
       .replica_id = o.first,
       .consumed_offset = o.second
     });
