@@ -31,8 +31,15 @@ public:
       const msg::MessageSchema& schema);
 
   const String& name() const;
+  const String& basePath() const;
 
   RefPtr<TableSnapshot> getSnapshot();
+
+  size_t fetchRecords(
+      const String& replica,
+      uint64_t start_sequence,
+      size_t limit,
+      Function<bool (const msg::MessageObject& record)> fn);
 
 protected:
 
@@ -42,6 +49,12 @@ protected:
       const String& db_path,
       const msg::MessageSchema& schema,
       uint64_t head_generation);
+
+  size_t fetchRecords(
+      const TableChunkRef& chunk,
+      size_t offset,
+      size_t limit,
+      Function<bool (const msg::MessageObject& record)> fn);
 
   String name_;
   String replica_id_;
