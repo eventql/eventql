@@ -151,6 +151,9 @@ int main(int argc, const char** argv) {
   fnord::http::HTTPServer http_server(&http_router, &ev);
   http_server.listen(flags.getInt("http_port"));
 
+  wpool.start();
+  repl_wpool.start();
+
   /* eventdb */
   auto dir = flags.getString("datadir");
   auto readonly = flags.isSet("readonly");
