@@ -224,7 +224,7 @@ void TableWriter::gc(size_t keep_generations, size_t keep_arenas) {
   std::unique_lock<std::mutex> lk(mutex_);
   auto head_gen = head_->generation;
 
-  while (arenas_.size() > (keep_arenas + 1)) {
+  while (arenas_.size() > (keep_arenas + 1) && arenas_.back()->isCommmited()) {
     arenas_.pop_back();
   }
   lk.unlock();
@@ -337,6 +337,7 @@ void TableWriter::writeTable(RefPtr<TableArena> arena) {
   head_ = next;
 
   writeSnapshot();
+  arena->commit();
 }
 
 void TableWriter::addChunk(const TableChunkRef* chunk, ArtifactStatus status) {

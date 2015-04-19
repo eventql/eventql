@@ -17,7 +17,8 @@ TableArena::TableArena(
     const String& chunkid) :
     start_sequence_(start_sequence),
     chunkid_(chunkid),
-    size_(0) {}
+    size_(0),
+    is_committed_(false) {}
 
 void TableArena::addRecord(const msg::MessageObject& record) {
   ++size_;
@@ -38,6 +39,14 @@ const String& TableArena::chunkID() const {
 
 size_t TableArena::size() const {
   return size_;
+}
+
+bool TableArena::isCommmited() const {
+  return is_committed_.load();
+}
+
+void TableArena::commit() {
+  is_committed_ = true;
 }
 
 } // namespace eventdb

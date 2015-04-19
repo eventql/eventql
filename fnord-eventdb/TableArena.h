@@ -30,11 +30,15 @@ public:
   const String& chunkID() const;
   size_t size() const;
 
+  bool isCommmited() const;
+  void commit();
+
 protected:
   size_t start_sequence_;
   String chunkid_;
   List<msg::MessageObject> records_;
   std::atomic<size_t> size_;
+  std::atomic<size_t> is_committed_;
 };
 
 } // namespace eventdb
