@@ -16,6 +16,60 @@ namespace cm {
 msg::MessageSchema joinedSessionsSchema() {
   Vector<msg::MessageSchemaField> fields;
 
+  fields.emplace_back(
+      25,
+      "num_items",
+      msg::FieldType::UINT32,
+      250,
+      false,
+      false,
+      msg::EncodingHint::BITPACK);
+
+  fields.emplace_back(
+      26,
+      "num_items_clicked",
+      msg::FieldType::UINT32,
+      250,
+      false,
+      false,
+      msg::EncodingHint::BITPACK);
+
+  fields.emplace_back(
+      27,
+      "num_ad_impressions",
+      msg::FieldType::UINT32,
+      250,
+      false,
+      false,
+      msg::EncodingHint::BITPACK);
+
+  fields.emplace_back(
+      28,
+      "num_ad_clicks",
+      msg::FieldType::UINT32,
+      250,
+      false,
+      false,
+      msg::EncodingHint::BITPACK);
+
+  fields.emplace_back(
+      29,
+      "num_queries",
+      msg::FieldType::UINT32,
+      250,
+      false,
+      false,
+      msg::EncodingHint::BITPACK);
+
+  fields.emplace_back(
+      30,
+      "num_queries_clicked",
+      msg::FieldType::UINT32,
+      250,
+      false,
+      false,
+      msg::EncodingHint::BITPACK);
+
   msg::MessageSchemaField queries(
       16,
       "queries",
