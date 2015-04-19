@@ -25,7 +25,8 @@ public:
       ArtifactIndex* artifacts,
       const String& db_path,
       const String& replica_id,
-      bool readonly);
+      bool readonly,
+      TaskScheduler* scheduler);
 
   void addTable(const String& table_name, const msg::MessageSchema& schema);
 
@@ -46,6 +47,7 @@ protected:
   HashMap<String, RefPtr<TableWriter>> table_writers_;
   HashMap<String, RefPtr<TableReader>> table_readers_;
   mutable std::mutex mutex_;
+  TaskScheduler* scheduler_;
 };
 
 } // namespace eventdb

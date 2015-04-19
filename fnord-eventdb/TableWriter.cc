@@ -29,7 +29,8 @@ RefPtr<TableWriter> TableWriter::open(
     const String& table_name,
     const String& replica_id,
     const String& db_path,
-    const msg::MessageSchema& schema) {
+    const msg::MessageSchema& schema,
+    TaskScheduler* scheduler) {
   uint64_t head_gen = 0;
   auto gen_prefix = StringUtil::format("$0.$1.", table_name, replica_id);
   FileUtil::ls(db_path, [gen_prefix, &head_gen] (const String& file) -> bool {
@@ -80,7 +81,8 @@ RefPtr<TableWriter> TableWriter::open(
       db_path,
       schema,
       last_seq,
-      head);
+      head,
+      scheduler);
 }
 
 TableWriter::TableWriter(
@@ -90,12 +92,14 @@ TableWriter::TableWriter(
     const String& db_path,
     const msg::MessageSchema& schema,
     uint64_t head_sequence,
-    RefPtr<TableGeneration> snapshot) :
+    RefPtr<TableGeneration> snapshot,
+    TaskScheduler* scheduler) :
     artifacts_(artifacts),
     name_(table_name),
     replica_id_(replica_id),
     db_path_(db_path),
     schema_(schema),
+    scheduler_(scheduler),
     seq_(head_sequence),
     head_(snapshot),
     lock_(StringUtil::format("$0/$1.$2.lck", db_path_, name_, replica_id_)),
@@ -139,8 +143,7 @@ size_t TableWriter::commitWithLock() {
 
   arenas_.emplace_front(new TableArena(seq_, rnd_.hex128()));
 
-  auto t = std::thread(std::bind(&TableWriter::writeTable, this, arena));
-  t.detach();
+  scheduler_->run(std::bind(&TableWriter::writeTable, this, arena));
 
   return records.size();
 }

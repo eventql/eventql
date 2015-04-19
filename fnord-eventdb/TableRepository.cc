@@ -16,11 +16,13 @@ TableRepository::TableRepository(
     ArtifactIndex* artifacts,
     const String& db_path,
     const String& replica_id,
-    bool readonly) :
+    bool readonly,
+    TaskScheduler* scheduler) :
     artifacts_(artifacts),
     db_path_(db_path),
     replica_id_(replica_id),
-    readonly_(readonly) {}
+    readonly_(readonly),
+    scheduler_(scheduler) {}
 
 void TableRepository::addTable(
     const String& table_name,
@@ -43,7 +45,8 @@ void TableRepository::addTable(
             table_name,
             replica_id_,
             db_path_,
-            schema));
+            schema,
+            scheduler_));
   }
 }
 

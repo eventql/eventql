@@ -25,6 +25,7 @@ public:
   ArtifactReplication(
       ArtifactIndex* index,
       http::HTTPConnectionPool* http,
+      TaskScheduler* scheduler,
       size_t max_concurrent_reqs);
 
   void addSource(const URI& source);
@@ -40,16 +41,18 @@ protected:
   void downloadArtifact(const ArtifactRef& artifact);
   void downloadFile(const ArtifactFileRef& file, const URI& uri);
 
-  uint64_t interval_;
+  ArtifactIndex* index_;
+  http::HTTPConnectionPool* http_;
+  TaskScheduler* scheduler_;
   size_t max_concurrent_reqs_;
+
+  uint64_t interval_;
   std::atomic<bool> running_;
   std::thread thread_;
   std::mutex mutex_;
   std::condition_variable cv_;
   Set<String> cur_downloads_;
 
-  ArtifactIndex* index_;
-  http::HTTPConnectionPool* http_;
   Vector<URI> sources_;
   std::atomic<uint64_t> rr_;
 };
