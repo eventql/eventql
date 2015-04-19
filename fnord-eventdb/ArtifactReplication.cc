@@ -24,7 +24,8 @@ ArtifactReplication::ArtifactReplication(
     http_(http),
     interval_(1 * kMicrosPerSecond),
     max_concurrent_reqs_(max_concurrent_reqs),
-    running_(true) {}
+    running_(true),
+    rr_(0) {}
 
 void ArtifactReplication::addSource(const URI& source) {
   sources_.emplace_back(source);
