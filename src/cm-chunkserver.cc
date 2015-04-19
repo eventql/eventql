@@ -146,6 +146,7 @@ int main(int argc, const char** argv) {
   /* start http server */
   fnord::thread::ThreadPool tpool;
   fnord::thread::FixedSizeThreadPool wpool(8);
+  fnord::thread::FixedSizeThreadPool repl_wpool(8);
   fnord::http::HTTPRouter http_router;
   fnord::http::HTTPServer http_server(&http_router, &ev);
   http_server.listen(flags.getInt("http_port"));
@@ -187,7 +188,7 @@ int main(int argc, const char** argv) {
   eventdb::ArtifactReplication artifact_replication(
       &artifacts,
       &http,
-      &wpool,
+      &repl_wpool,
       8);
 
   for (const auto& rep : flags.getStrings("replicate_from")) {
