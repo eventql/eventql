@@ -40,8 +40,7 @@ void quit(int n) {
 }
 
 struct BackfillData {
-  Option<String> shop_name;
-  Option<String> shop_id;
+  Option<uint64_t> shop_id;
   Option<uint64_t> category1;
   Option<uint64_t> category2;
   Option<uint64_t> category3;
@@ -225,8 +224,7 @@ int main(int argc, const char** argv) {
       }
 
       BackfillData data;
-      data.shop_id = Some(cols[1]);
-      data.shop_name = Some(cols[5]);
+      try { data.shop_id =  Some((uint64_t) std::stoul(cols[1])); } catch (...) {}
       try { data.category3 = Some((uint64_t) std::stoul(cols[2])); } catch (...) {}
       try { data.category2 = Some((uint64_t) std::stoul(cols[3])); } catch (...) {}
       try { data.category1 = Some((uint64_t) std::stoul(cols[4])); } catch (...) {}
@@ -251,8 +249,10 @@ int main(int argc, const char** argv) {
     BackfillData data;
 
     DocID docid { .docid = item_id };
-    data.shop_id = index->docIndex()->getField(docid, "shop_id");
-    data.shop_name = index->docIndex()->getField(docid, "shop_name");
+    auto shopid = index->docIndex()->getField(docid, "shop_id");
+    if (!shopid.isEmpty()) {
+      data.shop_id = Some((uint64_t) std::stoull(shopid.get()));
+    }
 
     auto category1 = index->docIndex()->getField(docid, "category1");
     if (!category1.isEmpty()) {
@@ -279,7 +279,6 @@ int main(int argc, const char** argv) {
   auto queryitems_fid = schema.id("queries.items");
   auto qi_id_fid = schema.id("queries.items.item_id");
   auto qi_sid_fid = schema.id("queries.items.shop_id");
-  auto qi_sname_fid = schema.id("queries.items.shop_name");
   auto qi_c1_fid = schema.id("queries.items.category1");
   auto qi_c2_fid = schema.id("queries.items.category2");
   auto qi_c3_fid = schema.id("queries.items.category3");
@@ -289,7 +288,6 @@ int main(int argc, const char** argv) {
     &queryitems_fid,
     &qi_id_fid,
     &qi_sid_fid,
-    &qi_sname_fid,
     &qi_c1_fid,
     &qi_c2_fid,
     &qi_c3_fid,
@@ -314,7 +312,6 @@ int main(int argc, const char** argv) {
             ++cur;
           } else if (
               id == qi_sid_fid ||
-              id == qi_sname_fid ||
               id == qi_c1_fid ||
               id == qi_c2_fid ||
               id == qi_c3_fid) {
@@ -328,10 +325,6 @@ int main(int argc, const char** argv) {
 
         if (!bdata.shop_id.isEmpty()) {
           qi.addChild(qi_sid_fid, bdata.shop_id.get());
-        }
-
-        if (!bdata.shop_name.isEmpty()) {
-          qi.addChild(qi_sname_fid, bdata.shop_name.get());
         }
 
         if (!bdata.category1.isEmpty()) {
