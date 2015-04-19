@@ -79,6 +79,10 @@ static void schemaNodeToString(
       attrs += " @encoding=BITPACK";
       break;
 
+    case EncodingHint::LEB128:
+      attrs += " @encoding=LEB128";
+      break;
+
   }
 
 
