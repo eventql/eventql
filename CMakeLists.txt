@@ -115,6 +115,37 @@ add_executable(cm-logjoin
 
 target_link_libraries(cm-logjoin ${CMAKE_THREAD_LIBS_INIT} ${FNORD_FTS_LIBS})
 
+add_executable(cm-logjoin-backfill
+    $<TARGET_OBJECTS:cm-common>
+    $<TARGET_OBJECTS:fnord-base>
+    $<TARGET_OBJECTS:fnord-feeds>
+    $<TARGET_OBJECTS:fnord-mdb>
+    $<TARGET_OBJECTS:fnord-http>
+    $<TARGET_OBJECTS:fnord-json>
+    $<TARGET_OBJECTS:fnord-rpc>
+    $<TARGET_OBJECTS:fnord-cstable>
+    $<TARGET_OBJECTS:fnord-sstable>
+    $<TARGET_OBJECTS:fnord-fts>
+    $<TARGET_OBJECTS:fnord-msg>
+    3rdparty/libfnord/fnord-eventdb/TableReader.cc
+    3rdparty/libfnord/fnord-eventdb/TableArena.cc
+    3rdparty/libfnord/fnord-eventdb/TableWriter.cc
+    3rdparty/libfnord/fnord-eventdb/TableRepository.cc
+    3rdparty/libfnord/fnord-eventdb/ArtifactIndex.cc
+    3rdparty/libfnord/fnord-eventdb/NumericBoundsSummary.cc
+    3rdparty/libfnord/fnord-eventdb/TableChunkSummaryReader.cc
+    3rdparty/libfnord/fnord-eventdb/TableChunkSummaryWriter.cc
+    3rdparty/libfnord/fnord-eventdb/LogTableTail.cc
+    src/logjoin/LogJoinBackfill.cc
+    src/schemas.cc
+    src/IndexReader.cc
+    src/IndexWriter.cc
+    src/FeatureIndexWriter.cc
+    src/cm-logjoin-backfill.cc)
+
+target_link_libraries(cm-logjoin-backfill
+    ${CMAKE_THREAD_LIBS_INIT} ${FNORD_FTS_LIBS})
+
 add_executable(cm-indexbuild
     $<TARGET_OBJECTS:cm-common>
     $<TARGET_OBJECTS:fnord-base>
@@ -432,6 +463,9 @@ add_executable(cm-autocompletebuild
     3rdparty/libfnord/fnord-eventdb/TableWriter.cc
     3rdparty/libfnord/fnord-eventdb/TableRepository.cc
     3rdparty/libfnord/fnord-eventdb/ArtifactIndex.cc
+    3rdparty/libfnord/fnord-eventdb/NumericBoundsSummary.cc
+    3rdparty/libfnord/fnord-eventdb/TableChunkSummaryReader.cc
+    3rdparty/libfnord/fnord-eventdb/TableChunkSummaryWriter.cc
     src/schemas.cc
     src/IndexReader.cc
     src/IndexWriter.cc
@@ -487,6 +521,9 @@ add_executable(cm-chunkserver
     3rdparty/libfnord/fnord-eventdb/TableJanitor.cc
     3rdparty/libfnord/fnord-eventdb/TableReplication.cc
     3rdparty/libfnord/fnord-eventdb/ArtifactReplication.cc
+    3rdparty/libfnord/fnord-eventdb/NumericBoundsSummary.cc
+    3rdparty/libfnord/fnord-eventdb/TableChunkSummaryReader.cc
+    3rdparty/libfnord/fnord-eventdb/TableChunkSummaryWriter.cc
     src/analytics/AnalyticsTableScan.cc
     src/analytics/AnalyticsQuery.cc
     src/analytics/AnalyticsQueryEngine.cc
