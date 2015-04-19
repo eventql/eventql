@@ -36,6 +36,7 @@ public:
   Set<String> tables() const;
 
   const String& replicaID() const;
+  ArtifactIndex* artifactIndex() const;
 
 protected:
   ArtifactIndex* artifacts_;
