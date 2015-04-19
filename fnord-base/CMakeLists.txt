@@ -73,6 +73,7 @@ add_library(fnord-base OBJECT
     thread/eventloop.cc
     thread/signalhandler.cc
     thread/threadpool.cc
+    thread/FixedSizeThreadPool.cc
     thread/wakeup.cc
     uri.cc
     UTF8.cc
