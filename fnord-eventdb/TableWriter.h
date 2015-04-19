@@ -135,6 +135,8 @@ public:
 
   void replicateFrom(const TableGeneration& other_table);
 
+  size_t arenaSize() const;
+
 protected:
 
   TableWriter(
@@ -159,7 +161,7 @@ protected:
   String db_path_;
   msg::MessageSchema schema_;
   TaskScheduler* scheduler_;
-  std::mutex mutex_;
+  mutable std::mutex mutex_;
   std::mutex merge_mutex_;
   uint64_t seq_;
   List<RefPtr<TableArena>> arenas_;

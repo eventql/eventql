@@ -815,6 +815,17 @@ void TableWriter::addSummary(SummaryFactoryFn summary) {
   summaries_.emplace_back(summary);
 }
 
+size_t TableWriter::arenaSize() const {
+  std::unique_lock<std::mutex> lk(mutex_);
+  size_t size = 0;
+
+  for (const auto& a : arenas_) {
+    size += a->size();
+  }
+
+  return size;
+}
+
 } // namespace eventdb
 } // namespace fnord
 

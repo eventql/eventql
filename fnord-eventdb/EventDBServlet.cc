@@ -69,9 +69,14 @@ void EventDBServlet::insertRecord(
   }
 
   auto tbl = tables_->findTableWriter(table);
-  tbl->addRecords(req->body());
 
-  res->setStatus(http::kStatusCreated);
+  if (tbl->arenaSize() > 50000) {
+    res->setStatus(http::kStatusServiceUnavailable);
+    res->addBody("too many uncommitted records, retry in a few seconds");
+  } else {
+    tbl->addRecords(req->body());
+    res->setStatus(http::kStatusCreated);
+  }
 }
 
 void EventDBServlet::commitTable(
