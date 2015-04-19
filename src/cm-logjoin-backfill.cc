@@ -224,10 +224,10 @@ int main(int argc, const char** argv) {
       }
 
       BackfillData data;
-      try { data.shop_id =  Some((uint64_t) std::stoul(cols[1])); } catch (...) {}
-      try { data.category3 = Some((uint64_t) std::stoul(cols[2])); } catch (...) {}
-      try { data.category2 = Some((uint64_t) std::stoul(cols[3])); } catch (...) {}
-      try { data.category1 = Some((uint64_t) std::stoul(cols[4])); } catch (...) {}
+      try { data.shop_id =  Some((uint64_t) std::stoul(cols[4])); } catch (...) {}
+      try { data.category3 = Some((uint64_t) std::stoul(cols[1])); } catch (...) {}
+      try { data.category2 = Some((uint64_t) std::stoul(cols[2])); } catch (...) {}
+      try { data.category1 = Some((uint64_t) std::stoul(cols[3])); } catch (...) {}
       cache.emplace("p~" + cols[0], data);
     }
   }
