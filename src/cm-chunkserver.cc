@@ -16,6 +16,7 @@
 #include "fnord-base/random.h"
 #include "fnord-base/thread/eventloop.h"
 #include "fnord-base/thread/threadpool.h"
+#include "fnord-base/thread/FixedSizeThreadPool.h"
 #include "fnord-base/wallclock.h"
 #include "fnord-base/VFS.h"
 #include "fnord-rpc/ServerGroup.h"
@@ -144,6 +145,7 @@ int main(int argc, const char** argv) {
 
   /* start http server */
   fnord::thread::ThreadPool tpool;
+  fnord::thread::FixedSizeThreadPool wpool(8);
   fnord::http::HTTPRouter http_router;
   fnord::http::HTTPServer http_server(&http_router, &ev);
   http_server.listen(flags.getInt("http_port"));
@@ -161,7 +163,7 @@ int main(int argc, const char** argv) {
       dir,
       replica,
       readonly,
-      &tpool);
+      &wpool);
 
   auto joined_sessions_schema = joinedSessionsSchema();
   for (const auto& tbl : tbls) {
@@ -185,7 +187,7 @@ int main(int argc, const char** argv) {
   eventdb::ArtifactReplication artifact_replication(
       &artifacts,
       &http,
-      &tpool,
+      &wpool,
       8);
 
   for (const auto& rep : flags.getStrings("replicate_from")) {
