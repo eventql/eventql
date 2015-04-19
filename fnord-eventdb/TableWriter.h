@@ -13,7 +13,7 @@
 #include <fnord-base/autoref.h>
 #include <fnord-base/random.h>
 #include <fnord-base/io/FileLock.h>
-#include <fnord-base/thread/TaskScheduler.h>
+#include <fnord-base/thread/taskscheduler.h>
 #include <fnord-msg/MessageSchema.h>
 #include <fnord-msg/MessageObject.h>
 #include <fnord-eventdb/ArtifactIndex.h>
