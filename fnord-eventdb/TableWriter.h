@@ -164,6 +164,7 @@ protected:
   TableMergePolicy merge_policy_;
   FileLock lock_;
   List<SummaryFactoryFn> summaries_;
+  Duration gc_delay_;
 };
 
 } // namespace eventdb
