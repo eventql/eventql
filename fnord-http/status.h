@@ -27,6 +27,7 @@ const HTTPStatus kStatusMovedPermanently(301, "Moved permanently");
 const HTTPStatus kStatusFound(302, "Found");
 const HTTPStatus kStatusInternalServerError(500, "Internal Server Error");
 const HTTPStatus kStatusBadGateway(502, "Bad Gateway");
+const HTTPStatus kStatusServiceUnavailable(503, "Service unavailable");
 
 }
 }
