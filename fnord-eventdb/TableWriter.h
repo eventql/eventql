@@ -13,6 +13,7 @@
 #include <fnord-base/autoref.h>
 #include <fnord-base/random.h>
 #include <fnord-base/io/FileLock.h>
+#include <fnord-base/thread/TaskScheduler.h>
 #include <fnord-msg/MessageSchema.h>
 #include <fnord-msg/MessageObject.h>
 #include <fnord-eventdb/ArtifactIndex.h>
@@ -118,7 +119,8 @@ public:
       const String& table_name,
       const String& replica_id,
       const String& db_path,
-      const msg::MessageSchema& schema);
+      const msg::MessageSchema& schema,
+      TaskScheduler* scheduler);
 
   void addSummary(SummaryFactoryFn summary);
   void addRecords(const Buffer& records);
@@ -142,7 +144,8 @@ protected:
       const String& db_path,
       const msg::MessageSchema& schema,
       uint64_t head_sequence,
-      RefPtr<TableGeneration> snapshot);
+      RefPtr<TableGeneration> snapshot,
+      TaskScheduler* scheduler);
 
   size_t commitWithLock();
   void writeTable(RefPtr<TableArena> arena);
@@ -155,6 +158,7 @@ protected:
   String replica_id_;
   String db_path_;
   msg::MessageSchema schema_;
+  TaskScheduler* scheduler_;
   std::mutex mutex_;
   std::mutex merge_mutex_;
   uint64_t seq_;

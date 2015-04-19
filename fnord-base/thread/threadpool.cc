@@ -106,7 +106,7 @@ void ThreadPool::startThread() {
           free_threads_++;
 
           while (runq_.size() == 0) {
-            wakeup_.wait(lk);
+            wakeup_.wait(lk); // FIXPAUL wait with timeout and terminate thread if no jobs for N secs
           }
 
           assert(runq_.size() > 0);

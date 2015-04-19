@@ -19,9 +19,11 @@ namespace eventdb {
 ArtifactReplication::ArtifactReplication(
     ArtifactIndex* index,
     http::HTTPConnectionPool* http,
+    TaskScheduler* scheduler,
     size_t max_concurrent_reqs) :
     index_(index),
     http_(http),
+    scheduler_(scheduler),
     interval_(1 * kMicrosPerSecond),
     max_concurrent_reqs_(max_concurrent_reqs),
     running_(true),
@@ -209,7 +211,7 @@ void ArtifactReplication::enqueueArtifact(const ArtifactRef& artifact) {
 
   cur_downloads_.emplace(artifact.name);
 
-  auto thread = std::thread([this, artifact] () {
+  scheduler_->run([this, artifact] () {
     try {
       downloadArtifact(artifact);
     } catch (const Exception& e) {
@@ -221,8 +223,6 @@ void ArtifactReplication::enqueueArtifact(const ArtifactRef& artifact) {
     wakeup_lk.unlock();
     cv_.notify_all();
   });
-
-  thread.detach();
 }
 
 void ArtifactReplication::run() {
