@@ -81,12 +81,12 @@ void TableReplication::run() {
   while (running_.load()) {
     auto begin = WallClock::unixMicros();
 
-    try {
-      for (auto& t : targets_) {
-        pull(t.first, t.second);
+    for (auto& t : targets_) {
+      try {
+          pull(t.first, t.second);
+      } catch (const Exception& e) {
+        fnord::logError("fnord.evdb", e, "TableReplication error");
       }
-    } catch (const Exception& e) {
-      fnord::logError("fnord.evdb", e, "TableReplication error");
     }
 
     auto elapsed = WallClock::unixMicros() - begin;

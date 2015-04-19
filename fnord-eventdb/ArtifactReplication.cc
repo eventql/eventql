@@ -203,7 +203,12 @@ void ArtifactReplication::enqueueArtifact(const ArtifactRef& artifact) {
   cur_downloads_.emplace(artifact.name);
 
   auto thread = std::thread([this, artifact] () {
-    downloadArtifact(artifact);
+    try {
+      downloadArtifact(artifact);
+    } catch (const Exception& e) {
+      fnord::logError("fnord.evdb", e, "download error");
+    }
+
     std::unique_lock<std::mutex> wakeup_lk(mutex_);
     cur_downloads_.erase(artifact.name);
     wakeup_lk.unlock();
