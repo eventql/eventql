@@ -12,6 +12,7 @@
 #include <fnord-cstable/CSTableWriter.h>
 #include "fnord-cstable/BitPackedIntColumnWriter.h"
 #include "fnord-cstable/UInt32ColumnWriter.h"
+#include "fnord-cstable/LEB128ColumnWriter.h"
 #include "fnord-cstable/StringColumnWriter.h"
 #include "fnord-cstable/BooleanColumnWriter.h"
 
@@ -55,6 +56,10 @@ void CSTableBuilder::createColumns(
         columns_.emplace(
             colname,
             new cstable::BitPackedIntColumnWriter(r_max, d_max, typesize));
+      } else if (field.encoding == msg::EncodingHint::BITPACK) {
+        columns_.emplace(
+            colname,
+            new cstable::LEB128ColumnWriter(r_max, d_max));
       } else {
         columns_.emplace(
             colname,

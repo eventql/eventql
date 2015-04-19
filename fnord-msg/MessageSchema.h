@@ -34,6 +34,7 @@ namespace msg {
 enum class EncodingHint : uint8_t {
   NONE = 0,
   BITPACK = 1,
+  LEB128 = 2
 };
 
 struct MessageSchemaField {
