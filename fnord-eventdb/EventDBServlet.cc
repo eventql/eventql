@@ -176,14 +176,31 @@ void EventDBServlet::tableInfo(
   uint64_t num_chunks_present = 0;
   uint64_t num_chunks_downloading = 0;
   uint64_t num_chunks_missing = 0;
+  uint64_t num_recs_present = 0;
+  uint64_t num_recs_downloading = 0;
   uint64_t num_recs_missing = 0;
 
   auto artifactlist = tables_->artifactIndex()->listArtifacts();
   for (const auto& a : artifactlist) {
     if (artifacts.count(a.name) > 0) {
-      if (a.status != ArtifactStatus::PRESENT) {
-        ++num_chunks_missing;
-        num_recs_missing += artifacts[a.name];
+      switch (a.status) {
+
+        case ArtifactStatus::PRESENT:
+          ++num_chunks_present;
+          num_recs_present += artifacts[a.name];
+          break;
+
+        case ArtifactStatus::DOWNLOAD:
+          ++num_chunks_downloading;
+          num_recs_downloading += artifacts[a.name];
+          break;
+
+        default:
+        case ArtifactStatus::MISSING:
+          ++num_chunks_missing;
+          num_recs_missing += artifacts[a.name];
+          break;
+
       }
     }
   }
@@ -201,6 +218,12 @@ void EventDBServlet::tableInfo(
   j.addComma();
   j.addObjectEntry("num_records_commited");
   j.addInteger(num_recs_commited);
+  j.addComma();
+  j.addObjectEntry("num_records_present");
+  j.addInteger(num_recs_present);
+  j.addComma();
+  j.addObjectEntry("num_records_downloading");
+  j.addInteger(num_recs_downloading);
   j.addComma();
   j.addObjectEntry("num_records_stage");
   j.addInteger(num_recs_arena);
