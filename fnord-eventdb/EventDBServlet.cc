@@ -148,12 +148,16 @@ void EventDBServlet::tableInfo(
   auto snap = tables_->getSnapshot(table);
 
   HashMap<String, uint64_t> per_replica_head;
+  HashMap<String, uint64_t> artifacts;
   HashMap<String, HashMap<String, String>> per_replica;
-  uint64_t num_rows_commited = 0;
-  uint64_t num_rows_arena = 0;
+  uint64_t num_recs_commited = 0;
+  uint64_t num_recs_arena = 0;
 
   for (const auto& c : snap->head->chunks) {
-    num_rows_commited += c.num_records;
+    auto chunkname = table + "." + c.replica_id + "." + c.chunk_id;
+
+    num_recs_commited += c.num_records;
+    artifacts[chunkname] = c.num_records;
 
     auto seq = (c.start_sequence + c.num_records) - 1;
     if (seq > per_replica_head[c.replica_id]) {
@@ -165,7 +169,22 @@ void EventDBServlet::tableInfo(
   auto my_head = per_replica_head[tables_->replicaID()];
   for (const auto& a : snap->arenas) {
     if (a->startSequence() > my_head) {
-      num_rows_arena += a->size();
+      num_recs_arena += a->size();
+    }
+  }
+
+  uint64_t num_chunks_present = 0;
+  uint64_t num_chunks_downloading = 0;
+  uint64_t num_chunks_missing = 0;
+  uint64_t num_recs_missing = 0;
+
+  auto artifactlist = tables_->artifactIndex()->listArtifacts();
+  for (const auto& a : artifactlist) {
+    if (artifacts.count(a.name) > 0) {
+      if (a.status != ArtifactStatus::PRESENT) {
+        ++num_chunks_missing;
+        num_recs_missing += artifacts[a.name];
+      }
     }
   }
 
@@ -177,17 +196,29 @@ void EventDBServlet::tableInfo(
   j.addObjectEntry("table");
   j.addString(table);
   j.addComma();
+  j.addObjectEntry("num_records_total");
+  j.addInteger(num_recs_commited + num_recs_arena);
+  j.addComma();
+  j.addObjectEntry("num_records_commited");
+  j.addInteger(num_recs_commited);
+  j.addComma();
+  j.addObjectEntry("num_records_stage");
+  j.addInteger(num_recs_arena);
+  j.addComma();
+  j.addObjectEntry("num_records_missing");
+  j.addInteger(num_recs_missing);
+  j.addComma();
   j.addObjectEntry("num_chunks");
   j.addInteger(snap->head->chunks.size());
   j.addComma();
-  j.addObjectEntry("num_rows");
-  j.addInteger(num_rows_commited + num_rows_arena);
+  j.addObjectEntry("num_chunks_present");
+  j.addInteger(num_chunks_present);
   j.addComma();
-  j.addObjectEntry("num_rows_commited");
-  j.addInteger(num_rows_commited);
+  j.addObjectEntry("num_chunks_downloading");
+  j.addInteger(num_chunks_downloading);
   j.addComma();
-  j.addObjectEntry("num_rows_stage");
-  j.addInteger(num_rows_arena);
+  j.addObjectEntry("num_chunks_missing");
+  j.addInteger(num_chunks_missing);
   j.addComma();
   j.addObjectEntry("replicas");
   json::toJSON(per_replica, &j);

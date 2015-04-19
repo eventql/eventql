@@ -109,6 +109,10 @@ const String& TableRepository::replicaID() const {
   return replica_id_;
 }
 
+ArtifactIndex* TableRepository::artifactIndex() const {
+  return artifacts_;
+}
+
 } // namespace eventdb
 } // namespace fnord
 
