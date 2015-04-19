@@ -83,7 +83,7 @@ void TableReplication::run() {
 
     for (auto& t : targets_) {
       try {
-          pull(t.first, t.second);
+        pull(t.first, t.second);
       } catch (const Exception& e) {
         fnord::logError("fnord.evdb", e, "TableReplication error");
       }
