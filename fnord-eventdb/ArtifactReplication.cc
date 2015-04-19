@@ -58,8 +58,9 @@ void ArtifactReplication::downloadArtifact(const ArtifactRef& artifact) {
     }
 
     bool retrieved = false;
-    for (const auto& s : sources_) {
-      auto uri = s;
+    auto s = ++rr_;
+    for (int i = 0; i < sources_.size(); ++i) {
+      auto uri = sources_[(s + i) % sources_.size()];
       uri.setPath(FileUtil::joinPaths(uri.path(), f.filename));
       http::HTTPRequest req(http::HTTPMessage::M_HEAD, uri.path());
       req.addHeader("Host", uri.hostAndPort());

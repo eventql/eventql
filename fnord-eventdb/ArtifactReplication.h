@@ -51,6 +51,7 @@ protected:
   ArtifactIndex* index_;
   http::HTTPConnectionPool* http_;
   Vector<URI> sources_;
+  std::atomic<uint64_t> rr_;
 };
 
 } // namespace eventdb
