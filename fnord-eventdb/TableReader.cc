@@ -91,7 +91,7 @@ RefPtr<TableSnapshot> TableReader::getSnapshot() {
           db_path_,
           name_,
           replica_id_,
-          g + 1))) ++g;
+          g))) ++g;
 
   if (!FileUtil::exists(
       StringUtil::format(
