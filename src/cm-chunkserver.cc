@@ -37,6 +37,7 @@
 #include "fnord-eventdb/TableJanitor.h"
 #include "fnord-eventdb/TableReplication.h"
 #include "fnord-eventdb/ArtifactReplication.h"
+#include "fnord-eventdb/NumericBoundsSummary.h"
 #include "fnord-mdb/MDB.h"
 #include "fnord-mdb/MDBUtil.h"
 #include "common.h"
@@ -152,17 +153,36 @@ int main(int argc, const char** argv) {
   auto readonly = flags.isSet("readonly");
   auto replica = flags.getString("replica");
 
+  Set<String> tbls  = { "dawanda_joined_sessions", "joined_sessions-dawanda" };
   http::HTTPConnectionPool http(&ev);
   eventdb::ArtifactIndex artifacts(dir, replica, readonly);
   eventdb::TableRepository table_repo(&artifacts, dir, replica, readonly);
-  table_repo.addTable("dawanda_joined_sessions", joinedSessionsSchema());
+  auto joined_sessions_schema = joinedSessionsSchema();
+  for (const auto& tbl : tbls) {
+    table_repo.addTable(tbl, joined_sessions_schema);
+  }
+
+  if (!readonly) {
+    for (const auto& tbl : tbls) {
+      auto joined_sessions_table =table_repo.findTableWriter(tbl);
+
+      joined_sessions_table->addSummary(
+          [joined_sessions_schema] () -> RefPtr<eventdb::TableChunkSummaryBuilder> {
+            return new eventdb::NumericBoundsSummaryBuilder(
+                "queries.time-bounds",
+                joined_sessions_schema.id("queries.time"));
+          });
+    }
+  }
 
   eventdb::TableReplication table_replication(&http);
   eventdb::ArtifactReplication artifact_replication(&artifacts, &http, 8);
   for (const auto& rep : flags.getStrings("replicate_from")) {
-    table_replication.replicateTableFrom(
-        table_repo.findTableWriter("dawanda_joined_sessions"),
-        URI(StringUtil::format("http://$0:7003/eventdb", rep)));
+    for (const auto& tbl : tbls) {
+      table_replication.replicateTableFrom(
+          table_repo.findTableWriter(tbl),
+          URI(StringUtil::format("http://$0:7003/eventdb", rep)));
+    }
 
     artifact_replication.addSource(
         URI(StringUtil::format("http://$0:7005/chunks", rep)));
