@@ -192,18 +192,11 @@ msg::MessageSchema joinedSessionsSchema() {
   query_items.fields.emplace_back(
       21,
       "shop_id",
-      msg::FieldType::STRING,
-      250,
+      msg::FieldType::UINT32,
+      0xffffffff,
       false,
-      true);
-
-  query_items.fields.emplace_back(
-      21,
-      "shop_name",
-      msg::FieldType::STRING,
-      250,
-      false,
-      true);
+      true,
+      msg::EncodingHint::LEB128);
 
   query_items.fields.emplace_back(
       22,
