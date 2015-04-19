@@ -14,6 +14,7 @@
 #include <fnord-base/logging.h>
 #include <fnord-base/io/fileutil.h>
 #include <fnord-base/io/FileLock.h>
+#include <fnord-base/wallclock.h>
 #include <fnord-base/util/binarymessagewriter.h>
 #include <fnord-base/util/binarymessagereader.h>
 #include <fnord-msg/MessageDecoder.h>
@@ -97,7 +98,8 @@ TableWriter::TableWriter(
     schema_(schema),
     seq_(head_sequence),
     head_(snapshot),
-    lock_(StringUtil::format("$0/$1.$2.lck", db_path_, name_, replica_id_)) {
+    lock_(StringUtil::format("$0/$1.$2.lck", db_path_, name_, replica_id_)),
+    gc_delay_(kMicrosPerSecond * 500) {
   lock_.lock();
   arenas_.emplace_front(new TableArena(seq_, rnd_.hex128()));
 }
@@ -234,6 +236,8 @@ void TableWriter::gc(size_t keep_generations, size_t keep_arenas) {
   Set<String> delete_chunks;
   Set<String> delete_files;
 
+  auto cutoff = WallClock::unixMicros() - gc_delay_.microseconds();
+
   for (uint64_t gen = head_gen - keep_generations; gen > 0; --gen) {
     auto genfile = StringUtil::format(
         "$0/$1.$2.$3.idx",
@@ -244,6 +248,20 @@ void TableWriter::gc(size_t keep_generations, size_t keep_arenas) {
 
     if (!FileUtil::exists(genfile)) {
       break;
+    }
+
+    auto atime = FileUtil::atime(genfile);
+    if (atime > cutoff / kMicrosPerSecond) {
+#ifndef FNORD_NODEBUG
+      fnord::logDebug(
+          "fnord.evdb",
+          "Skipping garbage collection for table '$0' because generation $1 " \
+          "was accessed in the last $2 seconds",
+          name_,
+          gen,
+          gc_delay_.seconds());
+#endif
+      return;
     }
 
     TableGeneration g;
