@@ -223,13 +223,11 @@ void TableWriter::merge() {
   writeSnapshot();
 }
 
-void TableWriter::gc(size_t keep_generations, size_t keep_arenas) {
+void TableWriter::gc(size_t keep_generations) {
   std::unique_lock<std::mutex> lk(mutex_);
   auto head_gen = head_->generation;
 
-  while (arenas_.size() > (keep_arenas + 1) && arenas_.back()->isCommmited()) {
-    arenas_.pop_back();
-  }
+  gcArenasWithLock();
   lk.unlock();
 
   if (head_gen < keep_generations) {
@@ -310,6 +308,12 @@ void TableWriter::gc(size_t keep_generations, size_t keep_arenas) {
   }
 }
 
+void TableGeneration::gcArenasWithLock() {
+  while (arenas_.size() > 1 && arenas_.back()->isCommmited()) {
+    arenas_.pop_back();
+  }
+}
+
 void TableWriter::writeTable(RefPtr<TableArena> arena) {
   TableChunkRef chunk;
   chunk.replica_id = replica_id_;
@@ -341,6 +345,8 @@ void TableWriter::writeTable(RefPtr<TableArena> arena) {
 
   writeSnapshot();
   arena->commit();
+  gcArenasWithLock();
+  lk.unlock();
 }
 
 void TableWriter::addChunk(const TableChunkRef* chunk, ArtifactStatus status) {
