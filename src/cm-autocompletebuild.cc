@@ -17,6 +17,7 @@
 #include "fnord-base/cli/flagparser.h"
 #include "fnord-base/util/SimpleRateLimit.h"
 #include "fnord-base/InternMap.h"
+#include "fnord-base/thread/threadpool.h"
 #include "fnord-json/json.h"
 #include "fnord-mdb/MDB.h"
 #include "fnord-mdb/MDBUtil.h"
@@ -129,7 +130,8 @@ int main(int argc, const char** argv) {
   //auto analyzer = RefPtr<fts::Analyzer>(new fts::Analyzer(conf_path));
 
   /* set up reportbuilder */
-  cm::ReportBuilder report_builder;
+  thread::ThreadPool tpool;
+  cm::ReportBuilder report_builder(&tpool);
 
   auto buildid = 0;
 

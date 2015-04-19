@@ -156,7 +156,13 @@ int main(int argc, const char** argv) {
   Set<String> tbls  = { "dawanda_joined_sessions", "joined_sessions-dawanda" };
   http::HTTPConnectionPool http(&ev);
   eventdb::ArtifactIndex artifacts(dir, replica, readonly);
-  eventdb::TableRepository table_repo(&artifacts, dir, replica, readonly);
+  eventdb::TableRepository table_repo(
+      &artifacts,
+      dir,
+      replica,
+      readonly,
+      &tpool);
+
   auto joined_sessions_schema = joinedSessionsSchema();
   for (const auto& tbl : tbls) {
     table_repo.addTable(tbl, joined_sessions_schema);
@@ -176,7 +182,12 @@ int main(int argc, const char** argv) {
   }
 
   eventdb::TableReplication table_replication(&http);
-  eventdb::ArtifactReplication artifact_replication(&artifacts, &http, 8);
+  eventdb::ArtifactReplication artifact_replication(
+      &artifacts,
+      &http,
+      &tpool,
+      8);
+
   for (const auto& rep : flags.getStrings("replicate_from")) {
     for (const auto& tbl : tbls) {
       table_replication.replicateTableFrom(
