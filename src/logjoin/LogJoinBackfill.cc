@@ -8,6 +8,7 @@
  */
 #include "unistd.h"
 #include "logjoin/LogJoinBackfill.h"
+#include "fnord-msg/MessagePrinter.h"
 
 using namespace fnord;
 
@@ -135,7 +136,12 @@ size_t LogJoinBackfill::runWorker() {
       fnord::logError("cm.logjoin", e, "backfill error");
     }
 
-    if (!dry_run_) {
+    if (dry_run_) {
+      fnord::logInfo(
+          "cm.logjoin",
+          "[DRYRUN] not uploading record: $0",
+          msg::MessagePrinter::print(*rec.get(), table_->schema()));
+    } else {
       Buffer msg_buf;
       msg::MessageEncoder::encode(*rec.get(), table_->schema(), &msg_buf);
 
