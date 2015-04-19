@@ -90,6 +90,9 @@ int main(int argc, const char** argv) {
   auto qcol = aq.fetchColumn("queries.query_string_normalized");
   auto iicol = aq.fetchColumn("queries.items.item_id");
   auto iscol = aq.fetchColumn("queries.items.shop_id");
+  auto ic1col = aq.fetchColumn("queries.items.category1");
+  auto ic2col = aq.fetchColumn("queries.items.category2");
+  auto ic3col = aq.fetchColumn("queries.items.category3");
 
   aq.onQuery([&] () {
     auto l = languageToString((Language) lcol->getUInt32());
@@ -97,7 +100,11 @@ int main(int argc, const char** argv) {
     auto q = qcol->getString();
     auto ii = iicol->getString();
     auto is = iscol->getUInt32();
-    fnord::iputs("lang: $0 -> $1 -- $2 -- $3 -- $4", l, c, q, ii, is);
+    fnord::iputs("lang: $0 -> $1 -- $2 -- $3 -- $4 -- $5,$6,$7",
+        l, c, q, ii, is,
+        ic1col->getUInt32(),
+        ic2col->getUInt32(),
+        ic3col->getUInt32());
   });
 
   aq.scanTable(&reader);
