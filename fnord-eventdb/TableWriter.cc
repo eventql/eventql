@@ -308,7 +308,7 @@ void TableWriter::gc(size_t keep_generations) {
   }
 }
 
-void TableGeneration::gcArenasWithLock() {
+void TableWriter::gcArenasWithLock() {
   while (arenas_.size() > 1 && arenas_.back()->isCommmited()) {
     arenas_.pop_back();
   }
