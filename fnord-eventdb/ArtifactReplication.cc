@@ -89,9 +89,14 @@ void ArtifactReplication::downloadArtifact(const ArtifactRef& artifact) {
         continue;
       }
 
-      downloadFile(f, uri);
+      try {
+        downloadFile(f, uri);
+        retrieved = true;
+      } catch (const Exception& e) {
+        fnord::logError("fn.evdb", e, "download error");
+        continue;
+      }
 
-      retrieved = true;
       break;
     }
 
