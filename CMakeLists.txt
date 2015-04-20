@@ -545,6 +545,36 @@ add_executable(cm-chunkserver
     3rdparty/libfnord/fnord-eventdb/NumericBoundsSummary.cc
     3rdparty/libfnord/fnord-eventdb/TableChunkSummaryReader.cc
     3rdparty/libfnord/fnord-eventdb/TableChunkSummaryWriter.cc
+    src/schemas.cc
+    src/cm-chunkserver.cc)
+
+target_link_libraries(cm-chunkserver
+    ${CMAKE_THREAD_LIBS_INIT})
+
+add_executable(cm-analytics-backend
+    $<TARGET_OBJECTS:cm-common>
+    $<TARGET_OBJECTS:fnord-base>
+    $<TARGET_OBJECTS:fnord-feeds>
+    $<TARGET_OBJECTS:fnord-mdb>
+    $<TARGET_OBJECTS:fnord-http>
+    $<TARGET_OBJECTS:fnord-json>
+    $<TARGET_OBJECTS:fnord-rpc>
+    $<TARGET_OBJECTS:fnord-sstable>
+    $<TARGET_OBJECTS:fnord-cstable>
+    $<TARGET_OBJECTS:fnord-msg>
+    3rdparty/libfnord/fnord-sstable/SSTableServlet.cc
+    3rdparty/libfnord/fnord-eventdb/ArtifactIndex.cc
+    3rdparty/libfnord/fnord-eventdb/EventDBServlet.cc
+    3rdparty/libfnord/fnord-eventdb/TableReader.cc
+    3rdparty/libfnord/fnord-eventdb/TableWriter.cc
+    3rdparty/libfnord/fnord-eventdb/TableArena.cc
+    3rdparty/libfnord/fnord-eventdb/TableRepository.cc
+    3rdparty/libfnord/fnord-eventdb/TableJanitor.cc
+    3rdparty/libfnord/fnord-eventdb/TableReplication.cc
+    3rdparty/libfnord/fnord-eventdb/ArtifactReplication.cc
+    3rdparty/libfnord/fnord-eventdb/NumericBoundsSummary.cc
+    3rdparty/libfnord/fnord-eventdb/TableChunkSummaryReader.cc
+    3rdparty/libfnord/fnord-eventdb/TableChunkSummaryWriter.cc
     src/analytics/AnalyticsTableScan.cc
     src/analytics/AnalyticsQuery.cc
     src/analytics/AnalyticsQueryEngine.cc
@@ -560,10 +590,11 @@ add_executable(cm-chunkserver
     src/analytics/AnalyticsServlet.cc
     src/analytics/CTRByPageServlet.cc
     src/schemas.cc
-    src/cm-chunkserver.cc)
+    src/cm-analytics-backend.cc)
 
 target_link_libraries(cm-chunkserver
     ${CMAKE_THREAD_LIBS_INIT})
+
 
 add_executable(cm-autocompleteserver
     $<TARGET_OBJECTS:cm-common>
