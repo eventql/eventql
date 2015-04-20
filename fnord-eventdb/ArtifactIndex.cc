@@ -205,10 +205,20 @@ void ArtifactIndex::runConsistencyCheck(
             "fnord.evdb",
             "consistency error: file '$0' from artifact '$1' is marked as " \
             "PRESENT in index but is missing on disk",
-            a.name,
-            f.filename);
+            f.filename,
+            a.name);
 
-        fail = true;
+        if (repair) {
+          fnord::logError(
+              "fnord.evdb",
+              "repairing consistency error: in artifact '$0' by marking it " \
+              "MISSING",
+              a.name);
+
+          updateStatus(a.name, ArtifactStatus::MISSING);
+        } else {
+          fail = true;
+        }
         continue;
       }
 
