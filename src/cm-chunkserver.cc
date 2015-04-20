@@ -130,6 +130,24 @@ int main(int argc, const char** argv) {
       "<url>");
 
   flags.defineFlag(
+      "fsck",
+      cli::FlagParser::T_SWITCH,
+      false,
+      NULL,
+      NULL,
+      "fsck",
+      "fsck");
+
+  flags.defineFlag(
+      "repair",
+      cli::FlagParser::T_SWITCH,
+      false,
+      NULL,
+      NULL,
+      "repair",
+      "repair");
+
+  flags.defineFlag(
       "loglevel",
       fnord::cli::FlagParser::T_STRING,
       false,
@@ -162,6 +180,10 @@ int main(int argc, const char** argv) {
   Set<String> tbls  = { "dawanda_joined_sessions", "joined_sessions-dawanda" };
   http::HTTPConnectionPool http(&ev);
   eventdb::ArtifactIndex artifacts(dir, replica, readonly);
+  artifacts.runConsistencyCheck(
+      flags.isSet("fsck"),
+      flags.isSet("repair"));
+
   eventdb::TableRepository table_repo(
       &artifacts,
       dir,
