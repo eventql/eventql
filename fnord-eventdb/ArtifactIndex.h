@@ -70,6 +70,7 @@ protected:
   List<ArtifactRef> cached_;
   uint64_t cached_mtime_;
   std::mutex cached_mutex_;
+  std::mutex mutex_;
 };
 
 } // namespace eventdb
