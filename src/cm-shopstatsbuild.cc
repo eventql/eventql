@@ -127,9 +127,7 @@ int main(int argc, const char** argv) {
 
   auto snap = table->getSnapshot();
 
-/*
-  Set<String> searchterm_x_e1_tables;
-  Set<String> related_terms_tables;
+  Set<String> ctr_tables;
 
   for (const auto& c : snap->head->chunks) {
     auto input_table = StringUtil::format(
@@ -139,77 +137,25 @@ int main(int argc, const char** argv) {
         c.replica_id,
         c.chunk_id);
 
-    auto related_terms_table = StringUtil::format(
-        "$0/dawanda_related_terms.$1.$2.sst",
+    auto ctr_table = StringUtil::format(
+        "$0/shopstats-ctr-dawanda.$1.$2.sst",
         tempdir,
         c.replica_id,
         c.chunk_id);
 
-    related_terms_tables.emplace(related_terms_table);
+    ctr_tables.emplace(ctr_table);
     report_builder.addReport(
-        new RelatedTermsMapper(
+        new CTRByShopMapper(
             new AnalyticsTableScanSource(input_table),
-            new TermInfoTableSink(related_terms_table)));
-
-    auto searchterm_x_e1_table = StringUtil::format(
-        "$0/dawanda_ctr_by_searchterm_cross_e1.$1.$2.sst",
-        tempdir,
-        c.replica_id,
-        c.chunk_id);
-
-    searchterm_x_e1_tables.emplace(searchterm_x_e1_table);
-    report_builder.addReport(
-        new CTRBySearchTermCrossCategoryMapper(
-            new AnalyticsTableScanSource(input_table),
-            new CTRCounterTableSink(0, 0, searchterm_x_e1_table),
-            "category1"));
+            new CTRCounterTableSink(0, 0, ctr_table)));
   }
-
-  report_builder.addReport(
-      new TermInfoMergeReducer(
-          new TermInfoTableSource(related_terms_tables),
-          new TermInfoTableSink(
-              StringUtil::format(
-                  "$0/dawanda_related_terms.$1.sstable",
-                  tempdir,
-                  buildid))));
-
-  report_builder.addReport(
-      new TopCategoriesByTermMapper(
-          new CTRCounterTableSource(searchterm_x_e1_tables),
-          new TermInfoTableSink(
-              StringUtil::format(
-                  "$0/dawanda_top_cats_by_searchterm_e1.$1.sstable",
-                  tempdir,
-                  buildid)),
-          "e1-"));
-
-  report_builder.addReport(
-      new TermInfoMergeReducer(
-          new TermInfoTableSource(Set<String> {
-            StringUtil::format(
-                  "$0/dawanda_related_terms.$1.sstable",
-                  tempdir,
-                  buildid),
-            StringUtil::format(
-                  "$0/dawanda_top_cats_by_searchterm_e1.$1.sstable",
-                  tempdir,
-                  buildid)
-          }),
-          new TermInfoTableSink(
-              StringUtil::format(
-                  "$0/dawanda_termstats.$1.sstable",
-                  tempdir,
-                  buildid))));
 
   report_builder.buildAll();
 
   fnord::logInfo(
       "cm.reportbuild",
-      "Build completed: dawanda_termstats.$0.sstable",
+      "Build completed: shopstats-merged-dawanda.$0.sstable",
       buildid);
-
-*/
 
   return 0;
 }
