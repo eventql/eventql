@@ -56,6 +56,7 @@
 #include "analytics/DiscoveryCategoryStatsQuery.h"
 #include "analytics/AnalyticsQueryEngine.h"
 #include "analytics/AnalyticsQueryEngine.h"
+#include "analytics/ShopStatsServlet.h"
 
 using namespace fnord;
 
@@ -95,6 +96,15 @@ int main(int argc, const char** argv) {
       "<path>");
 
   flags.defineFlag(
+      "shopstats_table",
+      cli::FlagParser::T_STRING,
+      true,
+      NULL,
+      NULL,
+      "path",
+      "<file>");
+
+  flags.defineFlag(
       "loglevel",
       fnord::cli::FlagParser::T_STRING,
       false,
@@ -131,6 +141,11 @@ int main(int argc, const char** argv) {
       &wpool);
 
   table_repo.addTable("joined_sessions-dawanda", joinedSessionsSchema());
+
+  /* stop stats */
+  auto shopstats = cm::ShopStatsTable::open(flags.getString("shopstats_table"));
+  cm::ShopStatsServlet shopstats_servlet(shopstats);
+  http_router.addRouteByPrefixMatch("/shopstats", &shopstats_servlet, &tpool);
 
   /* analytics */
   cm::AnalyticsQueryEngine analytics(32, dir, &table_repo);
