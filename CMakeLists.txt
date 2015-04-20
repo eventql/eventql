@@ -499,6 +499,7 @@ add_executable(cm-shopstatsbuild
     src/analytics/CTRCounterTableSink.cc
     src/analytics/CTRCounterTableSource.cc
     src/analytics/CTRCounterMergeReducer.cc
+    src/analytics/CTRByShopMapper.cc
     #src/analytics/CTRBySearchQueryMapper.cc
     src/analytics/TrafficSegment.cc
     src/analytics/AnalyticsTableScan.cc
