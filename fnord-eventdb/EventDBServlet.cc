@@ -178,6 +178,11 @@ void EventDBServlet::tableInfo(
     }
   }
 
+
+  uint64_t bytes_total = 0;
+  uint64_t bytes_present = 0;
+  uint64_t bytes_downloading = 0;
+  uint64_t bytes_missing = 0;
   uint64_t num_chunks_present = 0;
   uint64_t num_chunks_downloading = 0;
   uint64_t num_chunks_missing = 0;
@@ -188,20 +193,25 @@ void EventDBServlet::tableInfo(
   auto artifactlist = tables_->artifactIndex()->listArtifacts();
   for (const auto& a : artifactlist) {
     if (artifacts.count(a.name) > 0) {
+      bytes_total += a.totalSize();
+
       switch (a.status) {
 
         case ArtifactStatus::PRESENT:
+          bytes_present += a.totalSize();
           ++num_chunks_present;
           num_recs_present += artifacts[a.name];
           break;
 
         case ArtifactStatus::DOWNLOAD:
+          bytes_downloading += a.totalSize();
           ++num_chunks_downloading;
           num_recs_downloading += artifacts[a.name];
           break;
 
         default:
         case ArtifactStatus::MISSING:
+          bytes_missing += a.totalSize();
           ++num_chunks_missing;
           num_recs_missing += artifacts[a.name];
           break;
@@ -235,6 +245,18 @@ void EventDBServlet::tableInfo(
   j.addComma();
   j.addObjectEntry("num_records_missing");
   j.addInteger(num_recs_missing);
+  j.addComma();
+  j.addObjectEntry("bytes_total");
+  j.addInteger(bytes_total);
+  j.addComma();
+  j.addObjectEntry("bytes_present");
+  j.addInteger(bytes_present);
+  j.addComma();
+  j.addObjectEntry("bytes_downloading");
+  j.addInteger(bytes_downloading);
+  j.addComma();
+  j.addObjectEntry("bytes_missing");
+  j.addInteger(bytes_missing);
   j.addComma();
   j.addObjectEntry("num_chunks");
   j.addInteger(snap->head->chunks.size());

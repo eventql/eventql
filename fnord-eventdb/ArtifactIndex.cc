@@ -264,6 +264,16 @@ void ArtifactIndex::runConsistencyCheck(
   }
 }
 
+size_t ArtifactRef::totalSize() const {
+  size_t total = 0;
+
+  for (const auto& f : files) {
+    total += f.size;
+  }
+
+  return total;
+}
+
 } // namespace eventdb
 } // namespace fnord
 

@@ -32,6 +32,8 @@ struct ArtifactRef {
   ArtifactStatus status;
   Vector<Pair<String, String>> attributes;
   Vector<ArtifactFileRef> files;
+
+  size_t totalSize() const;
 };
 
 class ArtifactIndex {
