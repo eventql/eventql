@@ -201,6 +201,10 @@ void ArtifactIndex::runConsistencyCheck(
     }
 
     for (const auto& f : a.files) {
+      if (f.size == 0) {
+        continue;
+      }
+
       auto file_path = FileUtil::joinPaths(db_path_, f.filename);
       if (!FileUtil::exists(file_path)) {
         fnord::logError(
