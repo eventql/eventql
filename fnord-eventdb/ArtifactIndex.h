@@ -46,6 +46,8 @@ public:
       bool readonly,
       Function<void (List<ArtifactRef>* index)> fn);
 
+  void runConsistencyCheck(bool check_checksums = false, bool repair = false);
+
   List<ArtifactRef> listArtifacts();
   void addArtifact(const ArtifactRef& artifact);
   void updateStatus(const String& artifact_name, ArtifactStatus new_status);
