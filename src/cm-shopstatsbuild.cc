@@ -127,7 +127,7 @@ int main(int argc, const char** argv) {
 
   auto snap = table->getSnapshot();
 
-  Set<String> ctr_tables;
+  Set<String> tables;
 
   for (const auto& c : snap->head->chunks) {
     auto input_table = StringUtil::format(
@@ -137,24 +137,33 @@ int main(int argc, const char** argv) {
         c.replica_id,
         c.chunk_id);
 
-    auto ctr_table = StringUtil::format(
+    auto table = StringUtil::format(
         "$0/shopstats-ctr-dawanda.$1.$2.sst",
         tempdir,
         c.replica_id,
         c.chunk_id);
 
-    ctr_tables.emplace(ctr_table);
+    tables.emplace(table);
     report_builder.addReport(
         new CTRByShopMapper(
             new AnalyticsTableScanSource(input_table),
-            new ShopStatsTableSink(ctr_table)));
+            new ShopStatsTableSink(table)));
   }
+
+  report_builder.addReport(
+      new ShopStatsMergeReducer(
+          new ShopStatsTableSource(tables),
+          new ShopStatsTableSink(
+              StringUtil::format(
+                  "$0/shopstats-full-dawanda.$1.sstable",
+                  tempdir,
+                  buildid))));
 
   report_builder.buildAll();
 
   fnord::logInfo(
       "cm.reportbuild",
-      "Build completed: shopstats-merged-dawanda.$0.sstable",
+      "Build completed: shopstats-full-dawanda.$0.sstable",
       buildid);
 
   return 0;
