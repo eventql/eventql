@@ -14,6 +14,7 @@
 #include "fnord-base/application.h"
 #include "fnord-base/logging.h"
 #include "fnord-base/Language.h"
+#include "fnord-base/random.h"
 #include "fnord-base/cli/flagparser.h"
 #include "fnord-base/util/SimpleRateLimit.h"
 #include "fnord-base/InternMap.h"
@@ -133,7 +134,8 @@ int main(int argc, const char** argv) {
   thread::ThreadPool tpool;
   cm::ReportBuilder report_builder(&tpool);
 
-  auto buildid = 0;
+  Random rnd;
+  auto buildid = rnd.hex128();
 
   auto table = eventdb::TableReader::open(
       "joined_sessions-dawanda",
