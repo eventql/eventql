@@ -197,9 +197,8 @@ void TableWriter::merge() {
     mergeop.merge();
   }
 
-  addChunk(&output_chunk, ArtifactStatus::PRESENT);
-
   std::unique_lock<std::mutex> lk(mutex_);
+  addChunk(&output_chunk, ArtifactStatus::PRESENT);
 
   auto next = head_->clone();
   next->generation++;
@@ -232,7 +231,6 @@ void TableWriter::gc(size_t keep_generations) {
   auto head_gen = head_->generation;
 
   gcArenasWithLock();
-  lk.unlock();
 
   if (head_gen < keep_generations) {
     return;
@@ -338,9 +336,9 @@ void TableWriter::writeTable(RefPtr<TableArena> arena) {
     writer.commit();
   }
 
-  addChunk(&chunk, ArtifactStatus::PRESENT);
-
   std::unique_lock<std::mutex> lk(mutex_);
+
+  addChunk(&chunk, ArtifactStatus::PRESENT);
 
   auto next = head_->clone();
   next->generation++;
