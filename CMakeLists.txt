@@ -515,6 +515,7 @@ add_executable(cm-shopstatsbuild
     src/analytics/TermInfoMergeReducer.cc
     src/analytics/TermInfo.cc
     src/analytics/TopCategoriesByTermMapper.cc
+    src/analytics/ShopStats.cc
     src/cm-shopstatsbuild.cc)
 
 target_link_libraries(cm-shopstatsbuild
