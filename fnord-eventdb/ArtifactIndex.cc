@@ -87,10 +87,12 @@ void ArtifactIndex::statusTransition(
 void ArtifactIndex::withIndex(
     bool readonly,
     Function<void (List<ArtifactRef>* index)> fn) {
-  FileLock lk(index_lockfile_);
+  std::unique_lock<std::mutex> lk(mutex_, std::defer_lock);
+  FileLock file_lk(index_lockfile_);
 
   if (!readonly) {
-    lk.lock(true);
+    lk.lock();
+    file_lk.lock(true);
   }
 
   auto index = readIndex();
