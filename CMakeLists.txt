@@ -592,9 +592,8 @@ add_executable(cm-analytics-backend
     src/schemas.cc
     src/cm-analytics-backend.cc)
 
-target_link_libraries(cm-chunkserver
+target_link_libraries(cm-analytics-backend
     ${CMAKE_THREAD_LIBS_INIT})
-
 
 add_executable(cm-autocompleteserver
     $<TARGET_OBJECTS:cm-common>
