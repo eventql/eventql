@@ -147,7 +147,7 @@ int main(int argc, const char** argv) {
     report_builder.addReport(
         new CTRByShopMapper(
             new AnalyticsTableScanSource(input_table),
-            new CTRCounterTableSink(0, 0, ctr_table)));
+            new ShopStatsTableSink(ctr_table)));
   }
 
   report_builder.buildAll();
