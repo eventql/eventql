@@ -204,39 +204,6 @@ target_link_libraries(cm-indexserver
     ${CMAKE_THREAD_LIBS_INIT}
     ${FNORD_FTS_LIBS})
 
-#add_executable(cm-sellerstatsbuild
-#    $<TARGET_OBJECTS:cm-common>
-#    $<TARGET_OBJECTS:fnord-base>
-#    $<TARGET_OBJECTS:fnord-http>
-#    $<TARGET_OBJECTS:fnord-json>
-#    $<TARGET_OBJECTS:fnord-sstable>
-#    $<TARGET_OBJECTS:fnord-feeds>
-#    $<TARGET_OBJECTS:fnord-rpc>
-#    $<TARGET_OBJECTS:fnord-mdb>
-#    src/sellerstats/ActivityLog.cc
-#    src/cm-sellerstatsbuild.cc
-#    src/sellerstats/SellerStatsBuild.cc)
-#
-#target_link_libraries(cm-sellerstatsbuild
-#    ${CMAKE_THREAD_LIBS_INIT})
-
-add_executable(cm-sellerstatslookup
-    $<TARGET_OBJECTS:cm-common>
-    $<TARGET_OBJECTS:fnord-base>
-    $<TARGET_OBJECTS:fnord-http>
-    $<TARGET_OBJECTS:fnord-json>
-    $<TARGET_OBJECTS:fnord-sstable>
-    $<TARGET_OBJECTS:fnord-feeds>
-    $<TARGET_OBJECTS:fnord-rpc>
-    $<TARGET_OBJECTS:fnord-mdb>
-    src/sellerstats/ActivityLog.cc
-    src/cm-sellerstatslookup.cc
-    src/sellerstats/SellerStatsLookup.cc)
-
-target_link_libraries(cm-sellerstatslookup
-    ${CMAKE_THREAD_LIBS_INIT}
-    ${FNORD_FTS_LIBS})
-
 add_executable(cm-dawandaindexpush
     $<TARGET_OBJECTS:cm-common>
     $<TARGET_OBJECTS:fnord-base>
@@ -499,6 +466,58 @@ add_executable(cm-autocompletebuild
 target_link_libraries(cm-autocompletebuild
     ${CMAKE_THREAD_LIBS_INIT} ${FNORD_FTS_LIBS})
 
+add_executable(cm-shopstatsbuild
+    $<TARGET_OBJECTS:cm-common>
+    $<TARGET_OBJECTS:fnord-base>
+    $<TARGET_OBJECTS:fnord-feeds>
+    $<TARGET_OBJECTS:fnord-mdb>
+    $<TARGET_OBJECTS:fnord-http>
+    $<TARGET_OBJECTS:fnord-json>
+    $<TARGET_OBJECTS:fnord-rpc>
+    $<TARGET_OBJECTS:fnord-cstable>
+    $<TARGET_OBJECTS:fnord-sstable>
+    $<TARGET_OBJECTS:fnord-fts>
+    $<TARGET_OBJECTS:fnord-msg>
+    3rdparty/libfnord/fnord-eventdb/TableReader.cc
+    3rdparty/libfnord/fnord-eventdb/TableArena.cc
+    3rdparty/libfnord/fnord-eventdb/TableWriter.cc
+    3rdparty/libfnord/fnord-eventdb/TableRepository.cc
+    3rdparty/libfnord/fnord-eventdb/ArtifactIndex.cc
+    3rdparty/libfnord/fnord-eventdb/NumericBoundsSummary.cc
+    3rdparty/libfnord/fnord-eventdb/TableChunkSummaryReader.cc
+    3rdparty/libfnord/fnord-eventdb/TableChunkSummaryWriter.cc
+    src/schemas.cc
+    src/IndexReader.cc
+    src/IndexWriter.cc
+    src/FeatureIndexWriter.cc
+    src/analytics/Report.cc
+    src/analytics/ReportBuilder.cc
+    src/analytics/JoinedQueryTableSource.cc
+    src/analytics/CTRByPositionMapper.cc
+    src/analytics/CTRByPageMapper.cc
+    src/analytics/CTRStatsMapper.cc
+    src/analytics/CTRCounterTableSink.cc
+    src/analytics/CTRCounterTableSource.cc
+    src/analytics/CTRCounterMergeReducer.cc
+    #src/analytics/CTRBySearchQueryMapper.cc
+    src/analytics/TrafficSegment.cc
+    src/analytics/AnalyticsTableScan.cc
+    src/analytics/AnalyticsQuery.cc
+    src/analytics/AnalyticsQueryEngine.cc
+    src/analytics/AnalyticsQueryResult.cc
+    src/analytics/CTRBySearchTermCrossCategoryMapper.cc
+    src/analytics/CTRByQueryAttributeMapper.cc
+    src/analytics/AnalyticsTableScanSource.cc
+    src/analytics/RelatedTermsMapper.cc
+    src/analytics/TermInfoTableSink.cc
+    src/analytics/TermInfoTableSource.cc
+    src/analytics/TermInfoMergeReducer.cc
+    src/analytics/TermInfo.cc
+    src/analytics/TopCategoriesByTermMapper.cc
+    src/cm-shopstatsbuild.cc)
+
+target_link_libraries(cm-shopstatsbuild
+    ${CMAKE_THREAD_LIBS_INIT} ${FNORD_FTS_LIBS})
 
 add_executable(cm-chunkserver
     $<TARGET_OBJECTS:cm-common>
