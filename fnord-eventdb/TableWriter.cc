@@ -224,6 +224,10 @@ void TableWriter::merge() {
 }
 
 void TableWriter::gc(size_t keep_generations) {
+  if (keep_generations < 1) {
+    RAISE(kIllegalArgumentError, "must keep at least one generation");
+  }
+
   std::unique_lock<std::mutex> lk(mutex_);
   auto head_gen = head_->generation;
 

@@ -187,6 +187,71 @@ const String& ArtifactIndex::basePath() const {
   return db_path_;
 }
 
+void ArtifactIndex::runConsistencyCheck(
+    bool check_checksums /* = false */,
+    bool repair /* = false */) {
+  bool fail = false;
+  auto artifacts = listArtifacts();
+
+  for (const auto& a : artifacts) {
+    if (a.status != ArtifactStatus::PRESENT) {
+      continue;
+    }
+
+    for (const auto& f : a.files) {
+      auto file_path = FileUtil::joinPaths(db_path_, f.filename);
+      if (!FileUtil::exists(file_path)) {
+        fnord::logError(
+            "fnord.evdb",
+            "consistency error: file '$0' from artifact '$1' is marked as " \
+            "PRESENT in index but is missing on disk",
+            a.name,
+            f.filename);
+
+        fail = true;
+        continue;
+      }
+
+      auto file_size = FileUtil::size(file_path);
+      if (file_size != f.size) {
+        fnord::logError(
+            "fnord.evdb",
+            "consistency error: file '$0' from artifact '$1' has the wrong" \
+            "size; index=$2 disk=$3",
+            a.name,
+            f.filename,
+            f.size,
+            file_size);
+
+        fail = true;
+        continue;
+      }
+
+      if (!check_checksums) {
+        continue;
+      }
+
+      fnord::logInfo("fnord.evdb", "fsck: checking file: $0", f.filename);
+      auto checksum = FileUtil::checksum(file_path);
+
+      if (checksum != f.checksum) {
+        fnord::logError(
+            "fnord.evdb",
+            "consistency error: checksum mismatch for file '$0' from " \
+            "artifact '$1'",
+            a.name,
+            f.filename);
+
+        fail = true;
+      }
+    }
+  }
+
+  if (fail) {
+    RAISE(kRuntimeError, "consistency check failed");
+  }
+}
+
 } // namespace eventdb
 } // namespace fnord
 
