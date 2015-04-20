@@ -35,14 +35,13 @@ void ArtifactReplication::addSource(const URI& source) {
 
 void ArtifactReplication::downloadPending() {
   auto artifacts = index_->listArtifacts();
-  auto retry_cutoff = WallClock::unixMicros() - kMicrosPerSecond * 60;
 
   for (const auto& a : artifacts) {
     switch (a.status) {
 
       case ArtifactStatus::MISSING: {
-        std::unique_lock<std::mutex> lk(last_try_mutex_);
-        if (last_try_map_[a.name] > retry_cutoff) {
+        std::unique_lock<std::mutex> lk(retry_mutex_);
+        if (retry_map_[a.name]++ > 5) {
           break;
         }
         /* fallthrough */
@@ -125,9 +124,6 @@ void ArtifactReplication::downloadArtifact(const ArtifactRef& artifact) {
           "No source found for remote artifact file '$0'",
           f.filename);
 
-      std::unique_lock<std::mutex> lk(last_try_mutex_);
-      last_try_map_[artifact.name] = WallClock::unixMicros();
-
       try {
         index_->updateStatus(artifact.name, ArtifactStatus::MISSING);
       } catch (const Exception& e) {
@@ -137,9 +133,6 @@ void ArtifactReplication::downloadArtifact(const ArtifactRef& artifact) {
       return;
     }
   }
-
-  std::unique_lock<std::mutex> lk(last_try_mutex_);
-  last_try_map_.erase(artifact.name);
 
   try {
     index_->updateStatus(artifact.name, ArtifactStatus::PRESENT);

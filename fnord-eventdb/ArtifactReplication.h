@@ -56,8 +56,8 @@ protected:
   Vector<URI> sources_;
   std::atomic<uint64_t> rr_;
 
-  std::mutex last_try_mutex_;
-  HashMap<String, uint64_t> last_try_map_;
+  std::mutex retry_mutex_;;
+  HashMap<String, uint64_t> retry_map_;
 };
 
 } // namespace eventdb
