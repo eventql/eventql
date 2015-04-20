@@ -589,11 +589,14 @@ add_executable(cm-analytics-backend
     src/analytics/CTRStatsServlet.cc
     src/analytics/AnalyticsServlet.cc
     src/analytics/CTRByPageServlet.cc
+    src/analytics/ShopStatsTable.cc
+    src/analytics/ShopStatsServlet.cc
+    src/analytics/ShopStats.cc
     src/schemas.cc
     src/cm-analytics-backend.cc)
 
-target_link_libraries(cm-chunkserver
-    ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(cm-analytics-backend
+    ${CMAKE_THREAD_LIBS_INIT} ${FNORD_FTS_LIBS})
 
 
 add_executable(cm-autocompleteserver
