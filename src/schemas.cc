@@ -136,7 +136,7 @@ msg::MessageSchema joinedSessionsSchema() {
       0xffff,
       false,
       true,
-      msg::EncodingHint::BITPACK);
+      msg::EncodingHint::LEB128);
 
   queries.fields.emplace_back(
       13,
@@ -145,7 +145,7 @@ msg::MessageSchema joinedSessionsSchema() {
       0xffff,
       false,
       true,
-      msg::EncodingHint::BITPACK);
+      msg::EncodingHint::LEB128);
 
   queries.fields.emplace_back(
       14,
@@ -154,7 +154,7 @@ msg::MessageSchema joinedSessionsSchema() {
       0xffff,
       false,
       true,
-      msg::EncodingHint::BITPACK);
+      msg::EncodingHint::LEB128);
 
   msg::MessageSchemaField query_items(
       17,
@@ -192,18 +192,11 @@ msg::MessageSchema joinedSessionsSchema() {
   query_items.fields.emplace_back(
       21,
       "shop_id",
-      msg::FieldType::STRING,
-      250,
+      msg::FieldType::UINT32,
+      0xffffffff,
       false,
-      true);
-
-  query_items.fields.emplace_back(
-      21,
-      "shop_name",
-      msg::FieldType::STRING,
-      250,
-      false,
-      true);
+      true,
+      msg::EncodingHint::LEB128);
 
   query_items.fields.emplace_back(
       22,
@@ -212,7 +205,7 @@ msg::MessageSchema joinedSessionsSchema() {
       0xffff,
       false,
       true,
-      msg::EncodingHint::BITPACK);
+      msg::EncodingHint::LEB128);
 
   query_items.fields.emplace_back(
       23,
@@ -221,7 +214,7 @@ msg::MessageSchema joinedSessionsSchema() {
       0xffff,
       false,
       true,
-      msg::EncodingHint::BITPACK);
+      msg::EncodingHint::LEB128);
 
   query_items.fields.emplace_back(
       24,
@@ -230,7 +223,7 @@ msg::MessageSchema joinedSessionsSchema() {
       0xffff,
       false,
       true,
-      msg::EncodingHint::BITPACK);
+      msg::EncodingHint::LEB128);
 
   queries.fields.emplace_back(query_items);
   fields.emplace_back(queries);

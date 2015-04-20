@@ -16,6 +16,7 @@
 #include "fnord-base/random.h"
 #include "fnord-base/thread/eventloop.h"
 #include "fnord-base/thread/threadpool.h"
+#include "fnord-base/thread/FixedSizeThreadPool.h"
 #include "fnord-base/wallclock.h"
 #include "fnord-base/VFS.h"
 #include "fnord-rpc/ServerGroup.h"
@@ -144,9 +145,14 @@ int main(int argc, const char** argv) {
 
   /* start http server */
   fnord::thread::ThreadPool tpool;
+  fnord::thread::FixedSizeThreadPool wpool(8);
+  fnord::thread::FixedSizeThreadPool repl_wpool(8);
   fnord::http::HTTPRouter http_router;
   fnord::http::HTTPServer http_server(&http_router, &ev);
   http_server.listen(flags.getInt("http_port"));
+
+  wpool.start();
+  repl_wpool.start();
 
   /* eventdb */
   auto dir = flags.getString("datadir");
@@ -156,7 +162,13 @@ int main(int argc, const char** argv) {
   Set<String> tbls  = { "dawanda_joined_sessions", "joined_sessions-dawanda" };
   http::HTTPConnectionPool http(&ev);
   eventdb::ArtifactIndex artifacts(dir, replica, readonly);
-  eventdb::TableRepository table_repo(&artifacts, dir, replica, readonly);
+  eventdb::TableRepository table_repo(
+      &artifacts,
+      dir,
+      replica,
+      readonly,
+      &wpool);
+
   auto joined_sessions_schema = joinedSessionsSchema();
   for (const auto& tbl : tbls) {
     table_repo.addTable(tbl, joined_sessions_schema);
@@ -176,7 +188,12 @@ int main(int argc, const char** argv) {
   }
 
   eventdb::TableReplication table_replication(&http);
-  eventdb::ArtifactReplication artifact_replication(&artifacts, &http, 8);
+  eventdb::ArtifactReplication artifact_replication(
+      &artifacts,
+      &http,
+      &repl_wpool,
+      8);
+
   for (const auto& rep : flags.getStrings("replicate_from")) {
     for (const auto& tbl : tbls) {
       table_replication.replicateTableFrom(
