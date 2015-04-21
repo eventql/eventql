@@ -23,12 +23,13 @@ class ArtifactReplication {
 public:
 
   ArtifactReplication(
-      ArtifactIndex* index,
       http::HTTPConnectionPool* http,
       TaskScheduler* scheduler,
       size_t max_concurrent_reqs);
 
-  void addSource(const URI& source);
+  void replicateArtifactsFrom(
+      ArtifactIndex* index,
+      const Vector<URI>& sources);
 
   void downloadPending();
   void start();
@@ -37,9 +38,21 @@ public:
 protected:
 
   void run();
-  void enqueueArtifact(const ArtifactRef& artifact);
-  void downloadArtifact(const ArtifactRef& artifact);
-  void downloadFile(const ArtifactFileRef& file, const URI& uri);
+
+  void enqueueArtifactDownload(
+      const ArtifactRef& artifact,
+      ArtifactIndex* index,
+      const Vector<URI>& sources);
+
+  void downloadArtifact(
+      const ArtifactRef& artifact,
+      ArtifactIndex* index,
+      const Vector<URI>& sources);
+
+  void downloadFile(
+      const ArtifactFileRef& file,
+      ArtifactIndex* index,
+      const URI& uri);
 
   ArtifactIndex* index_;
   http::HTTPConnectionPool* http_;
@@ -53,7 +66,7 @@ protected:
   std::condition_variable cv_;
   Set<String> cur_downloads_;
 
-  Vector<URI> sources_;
+  Vector<Pair<ArtifactIndex*, Vector<URI>>> indexes_;
   std::atomic<uint64_t> rr_;
 
   std::mutex retry_mutex_;;

@@ -26,8 +26,7 @@ ArtifactIndex::ArtifactIndex(
     index_name_(index_name),
     readonly_(readonly),
     exists_(false),
-    index_file_(StringUtil::format("$0/$1.idx", db_path_, index_name_)),
-    index_lockfile_(StringUtil::format("$0/$1.lck", db_path_, index_name_)),
+    index_file_(StringUtil::format("$0/$1.afx", db_path_, index_name_)),
     cached_mtime_(0) {}
 
 List<ArtifactRef> ArtifactIndex::listArtifacts() {
@@ -88,7 +87,7 @@ void ArtifactIndex::withIndex(
     bool readonly,
     Function<void (List<ArtifactRef>* index)> fn) {
   std::unique_lock<std::mutex> lk(mutex_, std::defer_lock);
-  FileLock file_lk(index_lockfile_);
+  FileLock file_lk(index_file_);
 
   if (!readonly) {
     lk.lock();
@@ -187,6 +186,10 @@ void ArtifactIndex::writeIndex(const List<ArtifactRef>& index) {
 
 const String& ArtifactIndex::basePath() const {
   return db_path_;
+}
+
+const String& ArtifactIndex::indexName() const {
+  return index_name_;
 }
 
 void ArtifactIndex::runConsistencyCheck(

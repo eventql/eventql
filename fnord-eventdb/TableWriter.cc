@@ -25,7 +25,6 @@ namespace fnord {
 namespace eventdb {
 
 RefPtr<TableWriter> TableWriter::open(
-    ArtifactIndex* artifacts,
     const String& table_name,
     const String& replica_id,
     const String& db_path,
@@ -75,7 +74,6 @@ RefPtr<TableWriter> TableWriter::open(
   }
 
   return new TableWriter(
-      artifacts,
       table_name,
       replica_id,
       db_path,
@@ -86,7 +84,6 @@ RefPtr<TableWriter> TableWriter::open(
 }
 
 TableWriter::TableWriter(
-    ArtifactIndex* artifacts,
     const String& table_name,
     const String& replica_id,
     const String& db_path,
@@ -94,7 +91,10 @@ TableWriter::TableWriter(
     uint64_t head_sequence,
     RefPtr<TableGeneration> snapshot,
     TaskScheduler* scheduler) :
-    artifacts_(artifacts),
+    artifacts_(
+        db_path,
+        StringUtil::format("$0.$1", table_name, replica_id_),
+        false),
     name_(table_name),
     replica_id_(replica_id),
     db_path_(db_path),
@@ -325,7 +325,7 @@ void TableWriter::gc(size_t keep_generations, size_t max_generations) {
     auto chunkfile = StringUtil::format("$0/$1", db_path_, chunkname);
 
     try {
-      artifacts_->deleteArtifact(chunkname);
+      artifacts_.deleteArtifact(chunkname);
     } catch (const Exception& e) {
       fnord::logError("fnord.evdb", e, "error while deleting artifact");
     }
@@ -411,7 +411,7 @@ void TableWriter::addChunk(const TableChunkRef* chunk, ArtifactStatus status) {
       .checksum = chunk->summary_checksum
   });
 
-  artifacts_->addArtifact(artifact);
+  artifacts_.addArtifact(artifact);
 }
 
 // precondition: mutex_ must be locked
@@ -863,6 +863,16 @@ size_t TableWriter::arenaSize() const {
   }
 
   return size;
+}
+
+ArtifactIndex* TableWriter::artifactIndex() {
+  return &artifacts_;
+}
+
+void TableWriter::runConsistencyCheck(
+    bool check_checksums /* = false */,
+    bool repair /* = false */) {
+  artifacts_.runConsistencyCheck(check_checksums, repair);
 }
 
 } // namespace eventdb

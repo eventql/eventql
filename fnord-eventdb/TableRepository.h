@@ -22,7 +22,6 @@ class TableRepository {
 public:
 
   TableRepository(
-      ArtifactIndex* artifacts,
       const String& db_path,
       const String& replica_id,
       bool readonly,
@@ -37,10 +36,8 @@ public:
   Set<String> tables() const;
 
   const String& replicaID() const;
-  ArtifactIndex* artifactIndex() const;
 
 protected:
-  ArtifactIndex* artifacts_;
   String db_path_;
   String replica_id_;
   bool readonly_;
