@@ -72,7 +72,7 @@ size_t LogJoinUpload::scanQueue(const String& queue_name) {
 void LogJoinUpload::uploadBatch(
     const String& queue_name,
     const Vector<Buffer>& batch) {
-  URI uri(feedserver_url_ + "/eventdb/insert?table=dawanda_joined_sessions");
+  URI uri(feedserver_url_ + "?table=dawanda_joined_sessions");
 
   http::HTTPRequest req(http::HTTPMessage::M_POST, uri.pathAndQuery());
   req.addHeader("Host", uri.hostAndPort());
