@@ -274,8 +274,8 @@ void EventDBServlet::tableInfo(
   j.addComma();
   j.addObjectEntry("replicas");
   json::toJSON(per_replica, &j);
-  j.addObjectEntry("missing_chunks");
   j.addComma();
+  j.addObjectEntry("missing_chunks");
   json::toJSON(missing_chunks, &j);
   j.endObject();
 }
