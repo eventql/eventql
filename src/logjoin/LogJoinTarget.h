@@ -15,6 +15,11 @@
 #include "logjoin/TrackedSession.h"
 #include "logjoin/TrackedQuery.h"
 #include "JoinedQuery.h"
+#include "FeatureIndex.h"
+#include "DocStore.h"
+#include "IndexChangeRequest.h"
+#include "FeatureIndexWriter.h"
+#include "ItemRef.h"
 
 using namespace fnord;
 
@@ -31,7 +36,8 @@ public:
 
   LogJoinTarget(
       const msg::MessageSchema& joined_sessions_schema,
-      fts::Analyzer* analyzer);
+      fts::Analyzer* analyzer,
+      RefPtr<FeatureIndexWriter> index);
 
   void onSession(
       mdb::MDBTransaction* txn,
@@ -66,6 +72,7 @@ protected:
 
   msg::MessageSchema joined_sessions_schema_;
   fts::Analyzer* analyzer_;
+  RefPtr<FeatureIndexWriter> index_;
   Random rnd_;
 };
 } // namespace cm
