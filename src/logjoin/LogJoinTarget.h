@@ -37,7 +37,8 @@ public:
   LogJoinTarget(
       const msg::MessageSchema& joined_sessions_schema,
       fts::Analyzer* analyzer,
-      RefPtr<FeatureIndexWriter> index);
+      RefPtr<FeatureIndexWriter> index,
+      bool dry_run);
 
   void onSession(
       mdb::MDBTransaction* txn,
@@ -73,6 +74,7 @@ protected:
   msg::MessageSchema joined_sessions_schema_;
   fts::Analyzer* analyzer_;
   RefPtr<FeatureIndexWriter> index_;
+  bool dry_run_;
   Random rnd_;
 };
 } // namespace cm

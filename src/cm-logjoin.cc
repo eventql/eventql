@@ -294,7 +294,8 @@ int main(int argc, const char** argv) {
   cm::LogJoinTarget logjoin_target(
       joined_sessions_schema,
       &analyzer,
-      index);
+      index,
+      dry_run);
 
   /* set up logjoin upload */
   cm::LogJoinUpload logjoin_upload(
@@ -334,7 +335,9 @@ int main(int argc, const char** argv) {
 
 
   /* upload pending q */
-  logjoin_upload.upload();
+  if (!dry_run) {
+    logjoin_upload.upload();
+  }
 
   /* resume from last offset */
   auto txn = sessdb->startTransaction(true);
@@ -436,12 +439,16 @@ int main(int argc, const char** argv) {
         logjoin.cacheSize(),
         stream_offsets_str);
 
-    txn->commit();
+    if (dry_run) {
+      txn->abort();
+    } else {
+      txn->commit();
 
-    try {
-      logjoin_upload.upload();
-    } catch (const std::exception& e) {
-      fnord::logError("cm.logjoin", e, "upload failed");
+      try {
+        logjoin_upload.upload();
+      } catch (const std::exception& e) {
+        fnord::logError("cm.logjoin", e, "upload failed");
+      }
     }
 
     if (cm_logjoin_shutdown.load()) {

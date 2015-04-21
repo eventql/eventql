@@ -23,10 +23,12 @@ namespace cm {
 LogJoinTarget::LogJoinTarget(
     const msg::MessageSchema& joined_sessions_schema,
     fts::Analyzer* analyzer,
-    RefPtr<FeatureIndexWriter> index) :
+    RefPtr<FeatureIndexWriter> index,
+    bool dry_run) :
     joined_sessions_schema_(joined_sessions_schema),
     analyzer_(analyzer),
     index_(index),
+    dry_run_(dry_run),
     num_sessions(0),
     num_queries(0),
     num_item_visits(0) {}
@@ -178,18 +180,19 @@ void LogJoinTarget::onSession(
     }
   }
 
-  Buffer msg_buf;
-  msg::MessageEncoder::encode(obj, joined_sessions_schema_, &msg_buf);
-  auto key = StringUtil::format("__uploadq-sessions-$0",  rnd_.hex128());
-  txn->update(key, msg_buf);
-  ++num_sessions;
+  if (dry_run_) {
+    fnord::logInfo(
+        "cm.logjoin",
+        "[DRYRUN] not upload session: $0",
+        msg::MessagePrinter::print(obj, joined_sessions_schema_));
+  } else {
+    Buffer msg_buf;
+    msg::MessageEncoder::encode(obj, joined_sessions_schema_, &msg_buf);
+    auto key = StringUtil::format("__uploadq-sessions-$0",  rnd_.hex128());
+    txn->update(key, msg_buf);
+  }
 
-#ifndef FNORD_NOTRACE
-  fnord::logTrace(
-      "cm.logjoin",
-      "uploading session: $0",
-      msg::MessagePrinter::print(obj, joined_sessions_schema_));
-#endif
+  ++num_sessions;
 }
 
 void LogJoinTarget::onQuery(
