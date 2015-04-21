@@ -22,7 +22,7 @@ using namespace fnord;
  * mandatory global params:
  *   v           -- pixel ver.  -- value: 1
  *   c           -- clickid     -- format "<uid>~<eventid>", e.g. "f97650cb~b28c61d5c"
- *   e           -- eventtype   -- format "{q,v}" (query, visit)
+ *   e           -- eventtype   -- format "{q,v,c,u}" (query, visit, cart, user)
  *
  * optional global params:
  *   dw_ab      -- dawanda a/b grp  -- format "0-100"
