@@ -100,9 +100,9 @@ int main(int argc, const char** argv) {
   flags.defineFlag(
       "publish_to",
       fnord::cli::FlagParser::T_STRING,
-      false,
+      true,
       NULL,
-      "http://localhost:8000",
+      NULL,
       "upload target url",
       "<addr>");
 
@@ -254,7 +254,7 @@ int main(int argc, const char** argv) {
   /* open session db */
   auto sessdb_path = FileUtil::joinPaths(
       flags.getString("datadir"),
-      StringUtil::format("logjoin/$0/sessions_db", shard.shard_name));
+      StringUtil::format("$0/sessions_db", shard.shard_name));
 
   FileUtil::mkdir_p(sessdb_path);
   auto sessdb = mdb::MDB::open(sessdb_path);
