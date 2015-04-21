@@ -43,6 +43,8 @@ void AutoCompleteServlet::addTermInfo(const String& term, const TermInfo& ti) {
 void AutoCompleteServlet::handleHTTPRequest(
     http::HTTPRequest* req,
     http::HTTPResponse* res) {
+  res->addHeader("Access-Control-Allow-Origin", "*");
+
   URI uri(req->uri());
   ResultListType results;
   const auto& params = uri.queryParams();
@@ -345,7 +347,7 @@ void AutoCompleteServlet::suggestFuzzy(
     Language lang,
     Vector<String> terms,
     ResultListType* results) {
-  results->emplace_back("here be dragons: fuzzy suggestion", 1.0, "");
+  //results->emplace_back("here be dragons: fuzzy suggestion", 1.0, "");
 }
 
 
