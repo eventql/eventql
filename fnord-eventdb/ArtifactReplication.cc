@@ -129,6 +129,12 @@ void ArtifactReplication::downloadArtifact(
           "No source found for remote artifact file '$0'",
           f.filename);
 
+      {
+        std::unique_lock<std::mutex> lk(retry_mutex_);
+        retry_map_[artifact.name] =
+            WallClock::unixMicros() + kMicrosPerSecond * 60;
+      }
+
       try {
         index->updateStatus(artifact.name, ArtifactStatus::MISSING);
       } catch (const Exception& e) {
