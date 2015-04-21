@@ -179,6 +179,7 @@ void EventDBServlet::tableInfo(
   }
 
 
+  Vector<String> missing_chunks;
   uint64_t bytes_total = 0;
   uint64_t bytes_present = 0;
   uint64_t bytes_downloading = 0;
@@ -211,6 +212,7 @@ void EventDBServlet::tableInfo(
 
         default:
         case ArtifactStatus::MISSING:
+          missing_chunks.emplace_back(a.name);
           bytes_missing += a.totalSize();
           ++num_chunks_missing;
           num_recs_missing += artifacts[a.name];
@@ -272,6 +274,9 @@ void EventDBServlet::tableInfo(
   j.addComma();
   j.addObjectEntry("replicas");
   json::toJSON(per_replica, &j);
+  j.addObjectEntry("missing_chunks");
+  j.addComma();
+  json::toJSON(missing_chunks, &j);
   j.endObject();
 }
 
