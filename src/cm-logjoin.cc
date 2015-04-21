@@ -98,12 +98,12 @@ int main(int argc, const char** argv) {
       "<path>");
 
   flags.defineFlag(
-      "feedserver_addr",
+      "publish_to",
       fnord::cli::FlagParser::T_STRING,
       false,
       NULL,
       "http://localhost:8000",
-      "feedserver addr",
+      "upload target url",
       "<addr>");
 
   flags.defineFlag(
@@ -300,7 +300,7 @@ int main(int argc, const char** argv) {
   /* set up logjoin upload */
   cm::LogJoinUpload logjoin_upload(
       sessdb,
-      flags.getString("feedserver_addr"),
+      flags.getString("publish_to"),
       &http);
 
   /* setup logjoin */
