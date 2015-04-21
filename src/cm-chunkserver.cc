@@ -130,6 +130,24 @@ int main(int argc, const char** argv) {
       "<url>");
 
   flags.defineFlag(
+      "fsck",
+      cli::FlagParser::T_SWITCH,
+      false,
+      NULL,
+      NULL,
+      "fsck",
+      "fsck");
+
+  flags.defineFlag(
+      "repair",
+      cli::FlagParser::T_SWITCH,
+      false,
+      NULL,
+      NULL,
+      "repair",
+      "repair");
+
+  flags.defineFlag(
       "loglevel",
       fnord::cli::FlagParser::T_STRING,
       false,
@@ -162,6 +180,10 @@ int main(int argc, const char** argv) {
   Set<String> tbls  = { "dawanda_joined_sessions", "joined_sessions-dawanda" };
   http::HTTPConnectionPool http(&ev);
   eventdb::ArtifactIndex artifacts(dir, replica, readonly);
+  artifacts.runConsistencyCheck(
+      flags.isSet("fsck"),
+      flags.isSet("repair"));
+
   eventdb::TableRepository table_repo(
       &artifacts,
       dir,
@@ -214,109 +236,7 @@ int main(int argc, const char** argv) {
   }
 
   eventdb::EventDBServlet eventdb_servlet(&table_repo);
-
-  /* analytics */
-  cm::AnalyticsQueryEngine analytics(32, dir, &table_repo);
-  cm::AnalyticsServlet analytics_servlet(&analytics);
-  http_router.addRouteByPrefixMatch("/analytics", &analytics_servlet, &tpool);
   http_router.addRouteByPrefixMatch("/eventdb", &eventdb_servlet, &tpool);
-
-  analytics.registerQueryFactory("ctr_by_position", [] (
-      const cm::AnalyticsQuery& query,
-      const cm::AnalyticsQuery::SubQueryParams params,
-      const Vector<RefPtr<cm::TrafficSegment>>& segments,
-      cm::AnalyticsTableScan* scan) {
-    return new cm::CTRByPositionQuery(scan, segments);
-  });
-
-  analytics.registerQueryFactory("ctr_by_page", [] (
-      const cm::AnalyticsQuery& query,
-      const cm::AnalyticsQuery::SubQueryParams params,
-      const Vector<RefPtr<cm::TrafficSegment>>& segments,
-      cm::AnalyticsTableScan* scan) {
-    return new cm::CTRByPageQuery(scan, segments);
-  });
-
-  analytics.registerQueryFactory("discovery_kpis", [] (
-      const cm::AnalyticsQuery& query,
-      const cm::AnalyticsQuery::SubQueryParams params,
-      const Vector<RefPtr<cm::TrafficSegment>>& segments,
-      cm::AnalyticsTableScan* scan) {
-    return new cm::DiscoveryKPIQuery(
-        scan,
-        segments,
-        query.start_time,
-        query.end_time);
-  });
-
-  analytics.registerQueryFactory("discovery_category0_kpis", [] (
-      const cm::AnalyticsQuery& query,
-      const cm::AnalyticsQuery::SubQueryParams params,
-      const Vector<RefPtr<cm::TrafficSegment>>& segments,
-      cm::AnalyticsTableScan* scan) {
-    return new cm::DiscoveryCategoryStatsQuery(
-        scan,
-        segments,
-        query.start_time,
-        query.end_time,
-        "queries.category1",
-        "queries.category1",
-        params);
-  });
-
-  analytics.registerQueryFactory("discovery_category1_kpis", [] (
-      const cm::AnalyticsQuery& query,
-      const cm::AnalyticsQuery::SubQueryParams params,
-      const Vector<RefPtr<cm::TrafficSegment>>& segments,
-      cm::AnalyticsTableScan* scan) {
-    return new cm::DiscoveryCategoryStatsQuery(
-        scan,
-        segments,
-        query.start_time,
-        query.end_time,
-        "queries.category1",
-        "queries.category2",
-        params);
-  });
-
-  analytics.registerQueryFactory("discovery_category2_kpis", [] (
-      const cm::AnalyticsQuery& query,
-      const cm::AnalyticsQuery::SubQueryParams params,
-      const Vector<RefPtr<cm::TrafficSegment>>& segments,
-      cm::AnalyticsTableScan* scan) {
-    return new cm::DiscoveryCategoryStatsQuery(
-        scan,
-        segments,
-        query.start_time,
-        query.end_time,
-        "queries.category2",
-        "queries.category3",
-        params);
-  });
-
-  analytics.registerQueryFactory("discovery_category3_kpis", [] (
-      const cm::AnalyticsQuery& query,
-      const cm::AnalyticsQuery::SubQueryParams params,
-      const Vector<RefPtr<cm::TrafficSegment>>& segments,
-      cm::AnalyticsTableScan* scan) {
-    return new cm::DiscoveryCategoryStatsQuery(
-        scan,
-        segments,
-        query.start_time,
-        query.end_time,
-        "queries.category3",
-        "queries.category3",
-        params);
-  });
-
-  analytics.registerQueryFactory("top_search_queries", [] (
-      const cm::AnalyticsQuery& query,
-      const cm::AnalyticsQuery::SubQueryParams params,
-      const Vector<RefPtr<cm::TrafficSegment>>& segments,
-      cm::AnalyticsTableScan* scan) {
-    return new cm::TopSearchQueriesQuery(scan, segments, params);
-  });
-
   ev.run();
 
   if (!readonly) {
