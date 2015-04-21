@@ -177,7 +177,7 @@ int main(int argc, const char** argv) {
   auto readonly = flags.isSet("readonly");
   auto replica = flags.getString("replica");
 
-  Set<String> tbls  = { "dawanda_joined_sessions", "joined_sessions-dawanda" };
+  Set<String> tbls  = { "joined_sessions-dawanda" };
   http::HTTPConnectionPool http(&ev);
 
   eventdb::TableRepository table_repo(
