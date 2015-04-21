@@ -310,17 +310,15 @@ void TableWriter::gc(size_t keep_generations, size_t max_generations) {
     }
   }
 
-#ifndef FNORD_NODEBUG
-      fnord::logDebug(
-          "fnord.evdb",
-          "Garbage collecting table '$0'; deleting generations $1..$2, " \
-          "chunks ($3): $4",
-          name_,
-          last_gen,
-          first_gen,
-          delete_chunks.size(),
-          inspect(delete_chunks));
-#endif
+  fnord::logDebug(
+      "fnord.evdb",
+      "Garbage collecting table '$0'; deleting generations $1..$2, " \
+      "chunks ($3): $4",
+      name_,
+      last_gen,
+      first_gen,
+      delete_chunks.size(),
+      inspect(delete_chunks));
 
   for (const auto& c : delete_chunks) {
     auto chunkname = StringUtil::format("$0.$1", name_, c);
