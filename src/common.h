@@ -26,7 +26,7 @@ using namespace fnord;
  *
  * optional global params:
  *   dw_ab      -- dawanda a/b grp  -- format "0-100"
- *   lang       -- page language    -- format "<lang>"
+ *   l          -- page language    -- format "<lang>"
  *   u_x        -- screen width     -- format "<num>"
  *   u_y        -- screen height    -- format "<num>"
  *
