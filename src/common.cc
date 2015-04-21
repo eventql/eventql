@@ -20,11 +20,13 @@ namespace cm {
  *  e    -- eventtype   -- format "{q,v}" (query, visit)
  *
  * params for eventtype=q (query):
- *  is   -- item ids    -- format "<setid>~<itemid>~<pos>,..."
+ *  is   -- item ids    -- format "<setid>~<itemid>~p<pos>,..."
  *
  * params for eventtype=v (visit):
  *  i    -- itemid      -- format "<setid>~<itemid>"
  *
+ * params for eventtype=u (user):
+ *  ml    -- email      -- format "<email>"
  */
 bool isReservedPixelParam(const std::string p) {
   return p == "c" || p == "e" || p == "i" || p == "is" || p == "v";

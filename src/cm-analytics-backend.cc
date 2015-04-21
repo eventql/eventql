@@ -131,10 +131,7 @@ int main(int argc, const char** argv) {
   /* logtables */
   auto dir = flags.getString("datadir");
   auto replica = flags.getString("replica");
-  eventdb::ArtifactIndex artifacts(dir, replica, true);
-  artifacts.runConsistencyCheck();
   eventdb::TableRepository table_repo(
-      &artifacts,
       dir,
       replica,
       true,
