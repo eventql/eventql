@@ -29,13 +29,27 @@
 #include "fnord-feeds/RemoteFeedFactory.h"
 #include "fnord-feeds/RemoteFeedReader.h"
 #include "fnord-base/stats/statsdagent.h"
+#include "fnord-http/httpconnectionpool.h"
 #include "fnord-mdb/MDB.h"
+#include <fnord-fts/fts.h>
+#include <fnord-fts/fts_common.h>
 #include "CustomerNamespace.h"
 #include "logjoin/LogJoin.h"
+#include "logjoin/LogJoinTarget.h"
+#include "logjoin/LogJoinUpload.h"
+#include "FeatureIndex.h"
+#include "DocStore.h"
+#include "IndexChangeRequest.h"
+#include "FeatureIndexWriter.h"
+#include "ItemRef.h"
+#include "common.h"
+#include "schemas.h"
 
+using namespace cm;
 using namespace fnord;
 
 std::atomic<bool> cm_logjoin_shutdown;
+fnord::thread::EventLoop ev;
 
 void quit(int n) {
   cm_logjoin_shutdown = true;
@@ -57,13 +71,40 @@ int main(int argc, const char** argv) {
   fnord::cli::FlagParser flags;
 
   flags.defineFlag(
-      "cmdata",
+      "conf",
+      cli::FlagParser::T_STRING,
+      false,
+      NULL,
+      "./conf",
+      "conf directory",
+      "<path>");
+
+  flags.defineFlag(
+      "datadir",
       cli::FlagParser::T_STRING,
       true,
       NULL,
       NULL,
-      "clickmatcher app data dir",
+      "data dir",
       "<path>");
+
+  flags.defineFlag(
+      "index",
+      cli::FlagParser::T_STRING,
+      false,
+      NULL,
+      NULL,
+      "index directory",
+      "<path>");
+
+  flags.defineFlag(
+      "publish_to",
+      fnord::cli::FlagParser::T_STRING,
+      true,
+      NULL,
+      NULL,
+      "upload target url",
+      "<addr>");
 
   flags.defineFlag(
       "statsd_addr",
@@ -128,14 +169,14 @@ int main(int argc, const char** argv) {
       "no dryrun",
       "<bool>");
 
-  flags.defineFlag(
-      "loglevel",
-      fnord::cli::FlagParser::T_STRING,
+   flags.defineFlag(
+      "nocache",
+      fnord::cli::FlagParser::T_SWITCH,
       false,
       NULL,
-      "INFO",
-      "loglevel",
-      "<level>");
+      NULL,
+      "no cache",
+      "<bool>");
 
   flags.defineFlag(
       "shard",
@@ -146,27 +187,31 @@ int main(int argc, const char** argv) {
       "shard",
       "<name>");
 
+  flags.defineFlag(
+      "loglevel",
+      fnord::cli::FlagParser::T_STRING,
+      false,
+      NULL,
+      "INFO",
+      "loglevel",
+      "<level>");
 
   flags.parseArgv(argc, argv);
 
   Logger::get()->setMinimumLogLevel(
       strToLogLevel(flags.getString("loglevel")));
 
-  /* set up cmdata */
-  auto cmdata_path = flags.getString("cmdata");
-  if (!FileUtil::isDirectory(cmdata_path)) {
-    RAISEF(kIOError, "no such directory: $0", cmdata_path);
-  }
+  /* schema... */
+  auto joined_sessions_schema = joinedSessionsSchema();
 
   /* start event loop */
-  fnord::thread::EventLoop ev;
-
-  auto evloop_thread = std::thread([&ev] {
+  auto evloop_thread = std::thread([] {
     ev.run();
   });
 
   /* set up rpc client */
   HTTPRPCClient rpc_client(&ev);
+  http::HTTPConnectionPool http(&ev);
 
   /* start stats reporting */
   fnord::stats::StatsdAgent statsd_agent(
@@ -181,6 +226,7 @@ int main(int argc, const char** argv) {
 
   /* set up logjoin */
   auto dry_run = !flags.isSet("no_dryrun");
+  auto enable_cache = !flags.isSet("nocache");
   size_t batch_size = flags.getInt("batch_size");
   size_t buffer_size = flags.getInt("buffer_size");
   size_t commit_size = flags.getInt("commit_size");
@@ -191,7 +237,8 @@ int main(int argc, const char** argv) {
       "Starting cm-logjoin with:\n    dry_run=$0\n    batch_size=$1\n" \
       "    buffer_size=$2\n    commit_size=$3\n    commit_interval=$9\n"
       "    max_dbsize=$4MB\n" \
-      "    shard=$5\n    shard_range=[$6, $7)\n    shard_modulo=$8",
+      "    shard=$5\n    shard_range=[$6, $7)\n    shard_modulo=$8\n" \
+      "    cache=$9",
       dry_run,
       batch_size,
       buffer_size,
@@ -201,12 +248,13 @@ int main(int argc, const char** argv) {
       shard.begin,
       shard.end,
       cm::LogJoinShard::modulo,
-      commit_interval);
+      commit_interval,
+      enable_cache);
 
   /* open session db */
   auto sessdb_path = FileUtil::joinPaths(
-      cmdata_path,
-      StringUtil::format("logjoin/$0/sessions_db", shard.shard_name));
+      flags.getString("datadir"),
+      StringUtil::format("$0/sessions_db", shard.shard_name));
 
   FileUtil::mkdir_p(sessdb_path);
   auto sessdb = mdb::MDB::open(sessdb_path);
@@ -237,9 +285,26 @@ int main(int argc, const char** argv) {
     return std::stoul(timestr) * fnord::kMicrosPerSecond;
   });
 
+  /* open index */
+  auto index_path = FileUtil::joinPaths(flags.getString("index"), "db");
+  RefPtr<FeatureIndexWriter> index(new FeatureIndexWriter(index_path, true));
+
+  /* set up logjoin target */
+  fnord::fts::Analyzer analyzer(flags.getString("conf"));
+  cm::LogJoinTarget logjoin_target(
+      joined_sessions_schema,
+      &analyzer,
+      index,
+      dry_run);
+
+  /* set up logjoin upload */
+  cm::LogJoinUpload logjoin_upload(
+      sessdb,
+      flags.getString("publish_to"),
+      &http);
+
   /* setup logjoin */
-  cm::LogJoin logjoin(shard, dry_run);
-  logjoin.addCustomer("dawanda", shard.shard_name, &rpc_client);
+  cm::LogJoin logjoin(shard, dry_run, enable_cache, &logjoin_target);
   logjoin.exportStats("/cm-logjoin/global");
   logjoin.exportStats(StringUtil::format("/cm-logjoin/$0", shard.shard_name));
 
@@ -267,6 +332,12 @@ int main(int argc, const char** argv) {
       StringUtil::format("/cm-logjoin/$0/dbsize", shard.shard_name),
       &stat_dbsize,
       fnord::stats::ExportMode::EXPORT_VALUE);
+
+
+  /* upload pending q */
+  if (!dry_run) {
+    logjoin_upload.upload();
+  }
 
   /* resume from last offset */
   auto txn = sessdb->startTransaction(true);
@@ -306,11 +377,14 @@ int main(int argc, const char** argv) {
 
   fnord::logInfo("cm.logjoin", "Resuming logjoin...");
 
-  DateTime last_iter;
+  DateTime last_flush;
   uint64_t rate_limit_micros = commit_interval * kMicrosPerSecond;
 
   for (;;) {
-    last_iter = WallClock::now();
+    auto begin = WallClock::unixMicros();
+    auto turbo = FileUtil::exists("/tmp/logjoin_turbo.enabled");
+    logjoin.setTurbo(turbo);
+
     feed_reader.fillBuffers();
     auto txn = sessdb->startTransaction();
 
@@ -330,7 +404,12 @@ int main(int argc, const char** argv) {
     }
 
     auto watermarks = feed_reader.watermarks();
-    logjoin.flush(txn.get(), watermarks.first);
+
+    auto etime = WallClock::now().unixMicros() - last_flush.unixMicros();
+    if (etime > rate_limit_micros) {
+      last_flush = WallClock::now();
+      logjoin.flush(txn.get(), watermarks.first);
+    }
 
     auto stream_offsets = feed_reader.streamOffsets();
     String stream_offsets_str;
@@ -347,34 +426,53 @@ int main(int argc, const char** argv) {
     fnord::logInfo(
         "cm.logjoin",
         "LogJoin comitting...\n    stream_time=<$0 ... $1>\n" \
-        "    active_sessions=$2$3",
+        "    active_sessions=$2\n    flushed_sessions=$3\n    " \
+        "flushed_queries=$4\n    flushed_item_visits=$5\n    turbo=$6\n    " \
+        "cache_size=$7$8",
         watermarks.first,
         watermarks.second,
         logjoin.numSessions(),
+        logjoin_target.num_sessions,
+        logjoin_target.num_queries,
+        logjoin_target.num_item_visits,
+        turbo,
+        logjoin.cacheSize(),
         stream_offsets_str);
 
-    txn->commit();
+    if (dry_run) {
+      txn->abort();
+    } else {
+      txn->commit();
+
+      try {
+        logjoin_upload.upload();
+      } catch (const std::exception& e) {
+        fnord::logError("cm.logjoin", e, "upload failed");
+      }
+    }
+
+    if (cm_logjoin_shutdown.load()) {
+      break;
+    }
 
     stat_stream_time_low.set(watermarks.first.unixMicros());
     stat_stream_time_high.set(watermarks.second.unixMicros());
     stat_active_sessions.set(logjoin.numSessions());
     stat_dbsize.set(FileUtil::du_c(sessdb_path));
 
-    if (cm_logjoin_shutdown.load() == true) {
-      break;
-    }
-
-    auto etime = WallClock::now().unixMicros() - last_iter.unixMicros();
-    if (i < 1 && etime < rate_limit_micros) {
-      usleep(rate_limit_micros - etime);
+    auto rtime = WallClock::unixMicros() - begin;
+    if (rtime < kMicrosPerSecond) {
+      begin = WallClock::unixMicros();
+      usleep(kMicrosPerSecond - rtime);
     }
   }
 
   ev.shutdown();
-  //evloop_thread.join();
+  evloop_thread.join();
+
 
   fnord::logInfo("cm.logjoin", "LogJoin exiting...");
-  exit(0); // FIXPAUL
+  //exit(0); // FIXPAUL
 
   return 0;
 }

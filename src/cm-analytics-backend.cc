@@ -16,6 +16,7 @@
 #include "fnord-base/random.h"
 #include "fnord-base/thread/eventloop.h"
 #include "fnord-base/thread/threadpool.h"
+#include "fnord-base/thread/FixedSizeThreadPool.h"
 #include "fnord-base/wallclock.h"
 #include "fnord-base/VFS.h"
 #include "fnord-rpc/ServerGroup.h"
@@ -32,9 +33,16 @@
 #include "fnord-feeds/RemoteFeedReader.h"
 #include "fnord-base/stats/statsdagent.h"
 #include "fnord-sstable/SSTableServlet.h"
+#include "fnord-eventdb/EventDBServlet.h"
+#include "fnord-eventdb/TableRepository.h"
+#include "fnord-eventdb/TableJanitor.h"
+#include "fnord-eventdb/TableReplication.h"
+#include "fnord-eventdb/ArtifactReplication.h"
+#include "fnord-eventdb/NumericBoundsSummary.h"
 #include "fnord-mdb/MDB.h"
 #include "fnord-mdb/MDBUtil.h"
 #include "common.h"
+#include "schemas.h"
 #include "CustomerNamespace.h"
 #include "FeatureSchema.h"
 #include "JoinedQuery.h"
@@ -47,8 +55,12 @@
 #include "analytics/DiscoveryKPIQuery.h"
 #include "analytics/DiscoveryCategoryStatsQuery.h"
 #include "analytics/AnalyticsQueryEngine.h"
+#include "analytics/AnalyticsQueryEngine.h"
+#include "analytics/ShopStatsServlet.h"
 
 using namespace fnord;
+
+fnord::thread::EventLoop ev;
 
 int main(int argc, const char** argv) {
   fnord::Application::init();
@@ -66,13 +78,31 @@ int main(int argc, const char** argv) {
       "<port>");
 
   flags.defineFlag(
-      "artifacts",
+      "replica",
       cli::FlagParser::T_STRING,
       true,
       NULL,
       NULL,
-      "artifacts path",
+      "replica id",
+      "<id>");
+
+  flags.defineFlag(
+      "datadir",
+      cli::FlagParser::T_STRING,
+      true,
+      NULL,
+      NULL,
+      "datadir path",
       "<path>");
+
+  flags.defineFlag(
+      "shopstats_table",
+      cli::FlagParser::T_STRING,
+      true,
+      NULL,
+      NULL,
+      "path",
+      "<file>");
 
   flags.defineFlag(
       "loglevel",
@@ -88,33 +118,37 @@ int main(int argc, const char** argv) {
   Logger::get()->setMinimumLogLevel(
       strToLogLevel(flags.getString("loglevel")));
 
-  WhitelistVFS vfs;
-
-  /* start http server */
-  fnord::thread::EventLoop ev;
   fnord::thread::ThreadPool tpool;
+  fnord::thread::FixedSizeThreadPool wpool(8);
+  wpool.start();
+
+  /* http  */
   fnord::http::HTTPRouter http_router;
   fnord::http::HTTPServer http_server(&http_router, &ev);
   http_server.listen(flags.getInt("http_port"));
+  http::HTTPConnectionPool http(&ev);
 
-  /* sstable servlet */
-  sstable::SSTableServlet sstable_servlet("/sstable", &vfs);
-  http_router.addRouteByPrefixMatch("/sstable", &sstable_servlet);
+  /* logtables */
+  auto dir = flags.getString("datadir");
+  auto replica = flags.getString("replica");
+  eventdb::ArtifactIndex artifacts(dir, replica, true);
+  artifacts.runConsistencyCheck();
+  eventdb::TableRepository table_repo(
+      &artifacts,
+      dir,
+      replica,
+      true,
+      &wpool);
 
-  /* file servlet */
-  http::VFSFileServlet file_servlet("/file", &vfs);
-  http_router.addRouteByPrefixMatch("/file", &file_servlet);
+  table_repo.addTable("joined_sessions-dawanda", joinedSessionsSchema());
 
-  /* add all files to whitelist vfs */
-  auto dir = flags.getString("artifacts");
-  FileUtil::ls(dir, [&vfs, &dir] (const String& file) -> bool {
-    vfs.registerFile(file, FileUtil::joinPaths(dir, file));
-    fnord::logInfo("cm.reportserver", "[VFS] Adding file: $0", file);
-    return true;
-  });
+  /* stop stats */
+  auto shopstats = cm::ShopStatsTable::open(flags.getString("shopstats_table"));
+  cm::ShopStatsServlet shopstats_servlet(shopstats);
+  http_router.addRouteByPrefixMatch("/shopstats", &shopstats_servlet, &tpool);
 
   /* analytics */
-  cm::AnalyticsQueryEngine analytics(8, &vfs);
+  cm::AnalyticsQueryEngine analytics(32, dir, &table_repo);
   cm::AnalyticsServlet analytics_servlet(&analytics);
   http_router.addRouteByPrefixMatch("/analytics", &analytics_servlet, &tpool);
 
@@ -154,6 +188,8 @@ int main(int argc, const char** argv) {
     return new cm::DiscoveryCategoryStatsQuery(
         scan,
         segments,
+        query.start_time,
+        query.end_time,
         "queries.category1",
         "queries.category1",
         params);
@@ -167,6 +203,8 @@ int main(int argc, const char** argv) {
     return new cm::DiscoveryCategoryStatsQuery(
         scan,
         segments,
+        query.start_time,
+        query.end_time,
         "queries.category1",
         "queries.category2",
         params);
@@ -180,6 +218,8 @@ int main(int argc, const char** argv) {
     return new cm::DiscoveryCategoryStatsQuery(
         scan,
         segments,
+        query.start_time,
+        query.end_time,
         "queries.category2",
         "queries.category3",
         params);
@@ -193,6 +233,8 @@ int main(int argc, const char** argv) {
     return new cm::DiscoveryCategoryStatsQuery(
         scan,
         segments,
+        query.start_time,
+        query.end_time,
         "queries.category3",
         "queries.category3",
         params);
@@ -207,6 +249,8 @@ int main(int argc, const char** argv) {
   });
 
   ev.run();
-  return 0;
+
+  fnord::logInfo("cm.analytics.backend", "Exiting...");
+  exit(0);
 }
 
