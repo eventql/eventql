@@ -87,7 +87,7 @@ void ArtifactIndex::withIndex(
     bool readonly,
     Function<void (List<ArtifactRef>* index)> fn) {
   std::unique_lock<std::mutex> lk(mutex_, std::defer_lock);
-  FileLock file_lk(index_file_);
+  FileLock file_lk(index_file_ + ".lck");
 
   if (!readonly) {
     lk.lock();
