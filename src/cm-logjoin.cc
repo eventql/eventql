@@ -37,6 +37,11 @@
 #include "logjoin/LogJoin.h"
 #include "logjoin/LogJoinTarget.h"
 #include "logjoin/LogJoinUpload.h"
+#include "FeatureIndex.h"
+#include "DocStore.h"
+#include "IndexChangeRequest.h"
+#include "FeatureIndexWriter.h"
+#include "ItemRef.h"
 #include "common.h"
 #include "schemas.h"
 
@@ -75,12 +80,21 @@ int main(int argc, const char** argv) {
       "<path>");
 
   flags.defineFlag(
-      "cmdata",
+      "datadir",
       cli::FlagParser::T_STRING,
       true,
       NULL,
       NULL,
-      "clickmatcher app data dir",
+      "data dir",
+      "<path>");
+
+  flags.defineFlag(
+      "index",
+      cli::FlagParser::T_STRING,
+      false,
+      NULL,
+      NULL,
+      "index directory",
       "<path>");
 
   flags.defineFlag(
@@ -165,15 +179,6 @@ int main(int argc, const char** argv) {
       "<bool>");
 
   flags.defineFlag(
-      "loglevel",
-      fnord::cli::FlagParser::T_STRING,
-      false,
-      NULL,
-      "INFO",
-      "loglevel",
-      "<level>");
-
-  flags.defineFlag(
       "shard",
       fnord::cli::FlagParser::T_STRING,
       false,
@@ -182,6 +187,15 @@ int main(int argc, const char** argv) {
       "shard",
       "<name>");
 
+  flags.defineFlag(
+      "loglevel",
+      fnord::cli::FlagParser::T_STRING,
+      false,
+      NULL,
+      "INFO",
+      "loglevel",
+      "<level>");
+
   flags.parseArgv(argc, argv);
 
   Logger::get()->setMinimumLogLevel(
@@ -189,12 +203,6 @@ int main(int argc, const char** argv) {
 
   /* schema... */
   auto joined_sessions_schema = joinedSessionsSchema();
-
-  /* set up cmdata */
-  auto cmdata_path = flags.getString("cmdata");
-  if (!FileUtil::isDirectory(cmdata_path)) {
-    RAISEF(kIOError, "no such directory: $0", cmdata_path);
-  }
 
   /* start event loop */
   auto evloop_thread = std::thread([] {
@@ -245,7 +253,7 @@ int main(int argc, const char** argv) {
 
   /* open session db */
   auto sessdb_path = FileUtil::joinPaths(
-      cmdata_path,
+      flags.getString("datadir"),
       StringUtil::format("logjoin/$0/sessions_db", shard.shard_name));
 
   FileUtil::mkdir_p(sessdb_path);
@@ -277,9 +285,16 @@ int main(int argc, const char** argv) {
     return std::stoul(timestr) * fnord::kMicrosPerSecond;
   });
 
+  /* open index */
+  auto index_path = FileUtil::joinPaths(flags.getString("index"), "db");
+  RefPtr<FeatureIndexWriter> index(new FeatureIndexWriter(index_path, true));
+
   /* set up logjoin target */
   fnord::fts::Analyzer analyzer(flags.getString("conf"));
-  cm::LogJoinTarget logjoin_target(joined_sessions_schema, &analyzer);
+  cm::LogJoinTarget logjoin_target(
+      joined_sessions_schema,
+      &analyzer,
+      index);
 
   /* set up logjoin upload */
   cm::LogJoinUpload logjoin_upload(
