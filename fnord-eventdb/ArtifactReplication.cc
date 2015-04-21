@@ -17,11 +17,9 @@ namespace fnord {
 namespace eventdb {
 
 ArtifactReplication::ArtifactReplication(
-    ArtifactIndex* index,
     http::HTTPConnectionPool* http,
     TaskScheduler* scheduler,
     size_t max_concurrent_reqs) :
-    index_(index),
     http_(http),
     scheduler_(scheduler),
     interval_(1 * kMicrosPerSecond),
@@ -29,36 +27,43 @@ ArtifactReplication::ArtifactReplication(
     running_(true),
     rr_(0) {}
 
-void ArtifactReplication::addSource(const URI& source) {
-  sources_.emplace_back(source);
+void ArtifactReplication::replicateArtifactsFrom(
+    ArtifactIndex* index,
+    const Vector<URI>& sources) {
+  indexes_.emplace_back(index, sources);
 }
 
 void ArtifactReplication::downloadPending() {
-  auto artifacts = index_->listArtifacts();
+  for (const auto& idx : indexes_) {
+    auto artifacts = idx.first->listArtifacts();
 
-  for (const auto& a : artifacts) {
-    switch (a.status) {
+    for (const auto& a : artifacts) {
+      switch (a.status) {
 
-      case ArtifactStatus::MISSING: {
-        std::unique_lock<std::mutex> lk(retry_mutex_);
-        if (retry_map_[a.name]++ > 5) {
-          break;
+        case ArtifactStatus::MISSING: {
+          std::unique_lock<std::mutex> lk(retry_mutex_);
+          if (retry_map_[a.name] > WallClock::unixMicros()) {
+            break;
+          }
+          /* fallthrough */
         }
-        /* fallthrough */
+
+        case ArtifactStatus::DOWNLOAD:
+          enqueueArtifactDownload(a, idx.first, idx.second);
+          break;
+
+        default:
+          break;
+
       }
-
-      case ArtifactStatus::DOWNLOAD:
-        enqueueArtifact(a);
-        break;
-
-      default:
-        break;
-
     }
   }
 }
 
-void ArtifactReplication::downloadArtifact(const ArtifactRef& artifact) {
+void ArtifactReplication::downloadArtifact(
+    const ArtifactRef& artifact,
+    ArtifactIndex* index,
+    const Vector<URI>& sources) {
   fnord::logInfo(
       "fnord.evdb",
       "Downloading artifact: $0",
@@ -76,8 +81,8 @@ void ArtifactReplication::downloadArtifact(const ArtifactRef& artifact) {
 
     bool retrieved = false;
     auto s = ++rr_;
-    for (int i = 0; i < sources_.size(); ++i) {
-      auto uri = sources_[(s + i) % sources_.size()];
+    for (int i = 0; i < sources.size(); ++i) {
+      auto uri = sources[(s + i) % sources.size()];
       uri.setPath(FileUtil::joinPaths(uri.path(), f.filename));
       http::HTTPRequest req(http::HTTPMessage::M_HEAD, uri.path());
       req.addHeader("Host", uri.hostAndPort());
@@ -108,7 +113,7 @@ void ArtifactReplication::downloadArtifact(const ArtifactRef& artifact) {
       }
 
       try {
-        downloadFile(f, uri);
+        downloadFile(f, index, uri);
         retrieved = true;
       } catch (const Exception& e) {
         fnord::logError("fn.evdb", e, "download error");
@@ -125,7 +130,7 @@ void ArtifactReplication::downloadArtifact(const ArtifactRef& artifact) {
           f.filename);
 
       try {
-        index_->updateStatus(artifact.name, ArtifactStatus::MISSING);
+        index->updateStatus(artifact.name, ArtifactStatus::MISSING);
       } catch (const Exception& e) {
         /* see comment below */
       }
@@ -135,7 +140,7 @@ void ArtifactReplication::downloadArtifact(const ArtifactRef& artifact) {
   }
 
   try {
-    index_->updateStatus(artifact.name, ArtifactStatus::PRESENT);
+    index->updateStatus(artifact.name, ArtifactStatus::PRESENT);
   } catch (const Exception& e) {
     /* N.B. artifact may have been deleted (by a superseeding snapshot/merge)
        before we got it, so we ignore "artifact not found" errors */
@@ -145,8 +150,9 @@ void ArtifactReplication::downloadArtifact(const ArtifactRef& artifact) {
 
 void ArtifactReplication::downloadFile(
     const ArtifactFileRef& file,
+    ArtifactIndex* index,
     const URI& uri) {
-  auto target_file = FileUtil::joinPaths(index_->basePath(), file.filename);
+  auto target_file = FileUtil::joinPaths(index->basePath(), file.filename);
 
   if (FileUtil::exists(target_file)) {
     return;
@@ -213,9 +219,14 @@ void ArtifactReplication::stop() {
   thread_.join();
 }
 
-void ArtifactReplication::enqueueArtifact(const ArtifactRef& artifact) {
+void ArtifactReplication::enqueueArtifactDownload(
+    const ArtifactRef& artifact,
+    ArtifactIndex* index,
+    const Vector<URI>& sources) {
+  auto akey = index->indexName() + "~" + artifact.name;
+
   std::unique_lock<std::mutex> lk(mutex_);
-  if (cur_downloads_.count(artifact.name) > 0) {
+  if (cur_downloads_.count(akey) > 0) {
     return;
   }
 
@@ -223,17 +234,17 @@ void ArtifactReplication::enqueueArtifact(const ArtifactRef& artifact) {
     cv_.wait(lk);
   }
 
-  cur_downloads_.emplace(artifact.name);
+  cur_downloads_.emplace(akey);
 
-  scheduler_->run([this, artifact] () {
+  scheduler_->run([this, artifact, akey, sources, index] () {
     try {
-      downloadArtifact(artifact);
+      downloadArtifact(artifact, index, sources);
     } catch (const Exception& e) {
       fnord::logError("fnord.evdb", e, "download error");
     }
 
     std::unique_lock<std::mutex> wakeup_lk(mutex_);
-    cur_downloads_.erase(artifact.name);
+    cur_downloads_.erase(akey);
     wakeup_lk.unlock();
     cv_.notify_all();
   });

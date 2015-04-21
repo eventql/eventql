@@ -150,6 +150,7 @@ void EventDBServlet::tableInfo(
     return;
   }
 
+  auto tbl = tables_->findTableWriter(table);
   auto snap = tables_->getSnapshot(table);
 
   HashMap<String, uint64_t> per_replica_head;
@@ -191,7 +192,7 @@ void EventDBServlet::tableInfo(
   uint64_t num_recs_downloading = 0;
   uint64_t num_recs_missing = 0;
 
-  auto artifactlist = tables_->artifactIndex()->listArtifacts();
+  auto artifactlist = tbl->artifactIndex()->listArtifacts();
   for (const auto& a : artifactlist) {
     if (artifacts.count(a.name) > 0) {
       bytes_total += a.totalSize();
