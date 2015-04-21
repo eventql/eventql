@@ -179,13 +179,8 @@ int main(int argc, const char** argv) {
 
   Set<String> tbls  = { "dawanda_joined_sessions", "joined_sessions-dawanda" };
   http::HTTPConnectionPool http(&ev);
-  eventdb::ArtifactIndex artifacts(dir, replica, readonly);
-  artifacts.runConsistencyCheck(
-      flags.isSet("fsck"),
-      flags.isSet("repair"));
 
   eventdb::TableRepository table_repo(
-      &artifacts,
       dir,
       replica,
       readonly,
@@ -196,37 +191,43 @@ int main(int argc, const char** argv) {
     table_repo.addTable(tbl, joined_sessions_schema);
   }
 
-  if (!readonly) {
-    for (const auto& tbl : tbls) {
-      auto joined_sessions_table =table_repo.findTableWriter(tbl);
-
-      joined_sessions_table->addSummary(
-          [joined_sessions_schema] () -> RefPtr<eventdb::TableChunkSummaryBuilder> {
-            return new eventdb::NumericBoundsSummaryBuilder(
-                "queries.time-bounds",
-                joined_sessions_schema.id("queries.time"));
-          });
-    }
-  }
-
   eventdb::TableReplication table_replication(&http);
   eventdb::ArtifactReplication artifact_replication(
-      &artifacts,
       &http,
       &repl_wpool,
       8);
 
-  for (const auto& rep : flags.getStrings("replicate_from")) {
+  if (!readonly) {
     for (const auto& tbl : tbls) {
-      table_replication.replicateTableFrom(
-          table_repo.findTableWriter(tbl),
-          URI(StringUtil::format("http://$0:7003/eventdb", rep)));
+      auto table = table_repo.findTableWriter(tbl);
+
+      table->addSummary([joined_sessions_schema] () {
+        return new eventdb::NumericBoundsSummaryBuilder(
+            "queries.time-bounds",
+            joined_sessions_schema.id("queries.time"));
+      });
+
+      table->runConsistencyCheck(
+          flags.isSet("fsck"),
+          flags.isSet("repair"));
+
+      Vector<URI> artifact_sources;
+      for (const auto& rep : flags.getStrings("replicate_from")) {
+        table_replication.replicateTableFrom(
+            table,
+            URI(StringUtil::format("http://$0:7003/eventdb", rep)));
+
+        artifact_sources.emplace_back(
+            URI(StringUtil::format("http://$0:7005/chunks", rep)));
+      }
+
+      if (artifact_sources.size() > 0) {
+        artifact_replication.replicateArtifactsFrom(
+            table->artifactIndex(),
+            artifact_sources);
+      }
     }
-
-    artifact_replication.addSource(
-        URI(StringUtil::format("http://$0:7005/chunks", rep)));
   }
-
 
   eventdb::TableJanitor table_janitor(&table_repo);
   if (!readonly) {
