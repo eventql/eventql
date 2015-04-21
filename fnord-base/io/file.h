@@ -68,7 +68,8 @@ public:
    */
   static File openFile(
       const std::string& filename,
-      int flags);
+      int flags,
+      int permissions = 0666);
 
 
   File(File&& move);
