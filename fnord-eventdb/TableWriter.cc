@@ -222,7 +222,7 @@ void TableWriter::merge() {
   writeSnapshot();
 }
 
-void TableWriter::gc(size_t keep_generations) {
+void TableWriter::gc(size_t keep_generations, size_t max_generations) {
   if (keep_generations < 1) {
     RAISE(kIllegalArgumentError, "must keep at least one generation");
   }
@@ -254,7 +254,7 @@ void TableWriter::gc(size_t keep_generations) {
     }
 
     auto atime = FileUtil::atime(genfile);
-    if (atime > cutoff / kMicrosPerSecond) {
+    if (atime > cutoff / kMicrosPerSecond && gen > head_gen - max_generations) {
 #ifndef FNORD_NODEBUG
       fnord::logDebug(
           "fnord.evdb",
