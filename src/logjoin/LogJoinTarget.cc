@@ -183,7 +183,7 @@ void LogJoinTarget::onSession(
   if (dry_run_) {
     fnord::logInfo(
         "cm.logjoin",
-        "[DRYRUN] not upload session: $0",
+        "[DRYRUN] not uploading session: $0",
         msg::MessagePrinter::print(obj, joined_sessions_schema_));
   } else {
     Buffer msg_buf;
