@@ -236,35 +236,52 @@ void TableWriter::gc(size_t keep_generations, size_t max_generations) {
     return;
   }
 
-  Set<String> delete_chunks;
-  Set<String> delete_files;
+  auto first_gen = head_gen - keep_generations;
 
   auto cutoff = WallClock::unixMicros() - gc_delay_.microseconds();
-
-  for (uint64_t gen = head_gen - keep_generations; gen > 0; --gen) {
+  while (first_gen > head_gen - max_generations) {
     auto genfile = StringUtil::format(
         "$0/$1.$2.$3.idx",
         db_path_,
         name_,
         replica_id_,
-        gen);
+        first_gen);
 
     if (!FileUtil::exists(genfile)) {
-      break;
+      return;
     }
 
     auto atime = FileUtil::atime(genfile);
-    if (atime > cutoff / kMicrosPerSecond && gen > head_gen - max_generations) {
+    if (atime > cutoff / kMicrosPerSecond) {
 #ifndef FNORD_NODEBUG
       fnord::logDebug(
           "fnord.evdb",
-          "Skipping garbage collection for table '$0' because generation $1 " \
+          "Skipping garbage collection for table '$0' generation $1 because " \
           "was accessed in the last $2 seconds",
           name_,
-          gen,
+          first_gen,
           gc_delay_.seconds());
 #endif
-      return;
+      --first_gen;
+    } else {
+      break;
+    }
+  }
+
+  Set<String> delete_chunks;
+  Set<String> delete_files;
+
+  auto last_gen = first_gen;
+  for (; last_gen > 0; --last_gen) {
+    auto genfile = StringUtil::format(
+        "$0/$1.$2.$3.idx",
+        db_path_,
+        name_,
+        replica_id_,
+        last_gen);
+
+    if (!FileUtil::exists(genfile)) {
+      break;
     }
 
     TableGeneration g;
@@ -277,7 +294,7 @@ void TableWriter::gc(size_t keep_generations, size_t max_generations) {
     delete_files.emplace(genfile);
   }
 
-  for (uint64_t gen = head_gen; gen > (head_gen - keep_generations); --gen) {
+  for (uint64_t gen = head_gen; gen > first_gen; --gen) {
     auto genfile = StringUtil::format(
       "$0/$1.$2.$3.idx",
       db_path_,
@@ -292,6 +309,18 @@ void TableWriter::gc(size_t keep_generations, size_t max_generations) {
       delete_chunks.erase(c.replica_id + "." + c.chunk_id);
     }
   }
+
+#ifndef FNORD_NODEBUG
+      fnord::logDebug(
+          "fnord.evdb",
+          "Garbage collecting table '$0'; deleting generations $1..$2, " \
+          "chunks ($3): $4",
+          name_,
+          last_gen,
+          first_gen,
+          delete_chunks.size(),
+          inspect(delete_chunks));
+#endif
 
   for (const auto& c : delete_chunks) {
     auto chunkname = StringUtil::format("$0.$1", name_, c);
