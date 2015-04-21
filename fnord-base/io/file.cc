@@ -53,7 +53,13 @@ File File::openFile(
     open_flags |= O_TRUNC;
   }
 
-  int fd = open(filename.c_str(), open_flags, S_IRUSR | S_IWUSR);
+  int fd;
+  if ((open_flags & O_CREAT) > 0) {
+    fd = open(filename.c_str(), open_flags, S_IRUSR | S_IWUSR, 0666);
+  } else {
+    fd = open(filename.c_str(), open_flags, S_IRUSR | S_IWUSR);
+  }
+
   if (fd < 0) {
     RAISE_ERRNO(kIOError, "openFile('%s'): open() failed", filename.c_str());
   }
