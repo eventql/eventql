@@ -297,7 +297,11 @@ void TableWriter::gc(size_t keep_generations) {
     auto chunkname = StringUtil::format("$0.$1", name_, c);
     auto chunkfile = StringUtil::format("$0/$1", db_path_, chunkname);
 
-    artifacts_->deleteArtifact(chunkname);
+    try {
+      artifacts_->deleteArtifact(chunkname);
+    } catch (const Exception& e) {
+      fnord::logError("fnord.evdb", e, "error while deleting artifact");
+    }
 
     delete_files.emplace(chunkfile + ".sst");
     delete_files.emplace(chunkfile + ".cst");
