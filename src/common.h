@@ -37,7 +37,7 @@ using namespace fnord;
  *   qcat1      -- query cat1       -- format "<catid>"
  *   qcat2      -- query cat2       -- format "<catid>"
  *   qcat3      -- query cat3       -- format "<catid>"
- *   shopid     -- shopid           -- format "<id>"
+ *   slrid      -- seller id        -- format "<id>"
  *
  * params for eventtype=v (visit):
  *   i          -- itemid           -- format "<setid>~<itemid>"
