@@ -236,7 +236,7 @@ msg::MessageSchema joinedSessionsSchema() {
       true,
       false);
 
-  queries.fields.emplace_back(
+  item_visits.fields.emplace_back(
       26,
       "time",
       msg::FieldType::UINT32,
@@ -261,7 +261,7 @@ msg::MessageSchema joinedSessionsSchema() {
       true,
       msg::EncodingHint::LEB128);
 
-  queries.fields.emplace_back(
+  item_visits.fields.emplace_back(
       29,
       "category1",
       msg::FieldType::UINT32,
@@ -270,7 +270,7 @@ msg::MessageSchema joinedSessionsSchema() {
       true,
       msg::EncodingHint::LEB128);
 
-  queries.fields.emplace_back(
+  item_visits.fields.emplace_back(
       30,
       "category2",
       msg::FieldType::UINT32,
@@ -279,7 +279,7 @@ msg::MessageSchema joinedSessionsSchema() {
       true,
       msg::EncodingHint::LEB128);
 
-  queries.fields.emplace_back(
+  item_visits.fields.emplace_back(
       31,
       "category3",
       msg::FieldType::UINT32,
@@ -287,7 +287,6 @@ msg::MessageSchema joinedSessionsSchema() {
       false,
       true,
       msg::EncodingHint::LEB128);
-
 
   fields.emplace_back(item_visits);
 
