@@ -251,6 +251,11 @@ int main(int argc, const char** argv) {
       commit_interval,
       enable_cache);
 
+  fnord::logInfo(
+      "cm.logjoin",
+      "Using session schema:\n$0",
+      joined_sessions_schema.toString());
+
   /* open session db */
   auto sessdb_path = FileUtil::joinPaths(
       flags.getString("datadir"),
