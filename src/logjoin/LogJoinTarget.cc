@@ -31,7 +31,8 @@ LogJoinTarget::LogJoinTarget(
     dry_run_(dry_run),
     num_sessions(0),
     num_queries(0),
-    num_item_visits(0) {}
+    num_item_visits(0),
+    cconv_(currencyConversionTable()) {}
 
 void LogJoinTarget::onSession(
     mdb::MDBTransaction* txn,
@@ -47,7 +48,8 @@ void LogJoinTarget::onSession(
   HashMap<String, uint64_t> gmv_eurcents_per_item;
   for (const auto& ci : session.cart_items) {
     auto currency = currencyFromString(ci.currency);
-    auto eurcents = cconv_.convert(ci.price_cents, currency, Currency::EUR);
+    auto eur = cconv_.convert(Money(ci.price_cents, currency), Currency::EUR);
+    auto eurcents = eur.cents;
     eurcents *= ci.quantity;
     cart_eurcents_per_item.emplace(ci.item.docID().docid, eurcents);
 
