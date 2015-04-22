@@ -106,6 +106,7 @@ add_executable(cm-logjoin
     src/logjoin/TrackedQuery.cc
     src/logjoin/TrackedItemVisit.cc
     src/logjoin/TrackedSession.cc
+    src/FeatureIndexWriter.cc
     src/cm-logjoin.cc
     src/schemas.cc
     src/logjoin/LogJoin.cc
