@@ -329,6 +329,7 @@ void LogJoin::maybeFlushSession(
         }
 
         if (joined) {
+          session->flushed_item_visits.emplace_back(*cur_visit);
           cur_visit = session->item_visits.erase(cur_visit);
         } else {
           ++cur_visit;

@@ -228,6 +228,69 @@ msg::MessageSchema joinedSessionsSchema() {
   queries.fields.emplace_back(query_items);
   fields.emplace_back(queries);
 
+  msg::MessageSchemaField item_visits(
+      25,
+      "item_visits",
+      msg::FieldType::OBJECT,
+      0,
+      true,
+      false);
+
+  queries.fields.emplace_back(
+      26,
+      "time",
+      msg::FieldType::UINT32,
+      0xffffffff,
+      false,
+      false);
+
+  item_visits.fields.emplace_back(
+      27,
+      "item_id",
+      msg::FieldType::STRING,
+      1024,
+      false,
+      false);
+
+  item_visits.fields.emplace_back(
+      28,
+      "shop_id",
+      msg::FieldType::UINT32,
+      0xffffffff,
+      false,
+      true,
+      msg::EncodingHint::LEB128);
+
+  queries.fields.emplace_back(
+      29,
+      "category1",
+      msg::FieldType::UINT32,
+      0xffff,
+      false,
+      true,
+      msg::EncodingHint::LEB128);
+
+  queries.fields.emplace_back(
+      30,
+      "category2",
+      msg::FieldType::UINT32,
+      0xffff,
+      false,
+      true,
+      msg::EncodingHint::LEB128);
+
+  queries.fields.emplace_back(
+      31,
+      "category3",
+      msg::FieldType::UINT32,
+      0xffff,
+      false,
+      true,
+      msg::EncodingHint::LEB128);
+
+
+  fields.emplace_back(item_visits);
+
   return msg::MessageSchema("joined_session", fields);
 }
 

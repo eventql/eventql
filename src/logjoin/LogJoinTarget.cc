@@ -180,6 +180,52 @@ void LogJoinTarget::onSession(
     }
   }
 
+  for (const auto& iv : session.flushed_item_visits) {
+    auto& iv_obj = obj.addChild(schema.id("item_visits"));
+
+    iv_obj.addChild(
+        schema.id("item_visits.time"),
+        (uint32_t) (iv.time.unixMicros() / kMicrosPerSecond));
+
+    iv_obj.addChild(
+        schema.id("item_visits.item_id"),
+        iv.item.docID().docid);
+
+    auto docid = iv.item.docID();
+    auto shopid = index_->getField(docid, "shop_id");
+    if (shopid.isEmpty()) {
+      fnord::logWarning(
+          "cm.logjoin",
+          "item not found in featureindex: $0",
+          docid.docid);
+    } else {
+      iv_obj.addChild(
+          schema.id("item_visits.shop_id"),
+          (uint32_t) std::stoull(shopid.get()));
+    }
+
+    auto category1 = index_->getField(docid, "category1");
+    if (!category1.isEmpty()) {
+      iv_obj.addChild(
+          schema.id("item_visits.category1"),
+          (uint32_t) std::stoull(category1.get()));
+    }
+
+    auto category2 = index_->getField(docid, "category2");
+    if (!category2.isEmpty()) {
+      iv_obj.addChild(
+          schema.id("item_visits.category2"),
+          (uint32_t) std::stoull(category2.get()));
+    }
+
+    auto category3 = index_->getField(docid, "category3");
+    if (!category3.isEmpty()) {
+      iv_obj.addChild(
+          schema.id("item_visits.category3"),
+          (uint32_t) std::stoull(category3.get()));
+    }
+  }
+
   if (dry_run_) {
     fnord::logInfo(
         "cm.logjoin",
