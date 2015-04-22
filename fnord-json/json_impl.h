@@ -148,6 +148,20 @@ PropertyType JSONInputProxy<T>::getProperty(
   return fromJSON<PropertyType>(iter, obj_end);
 }
 
+template <typename T>
+template <typename PropertyType>
+Option<PropertyType> JSONInputProxy<T>::getOptionalProperty(
+    uint32_t id,
+    const std::string& name) {
+  auto iter = JSONUtil::objectLookup(obj_begin, obj_end, name);
+
+  if (iter == obj_end) {
+    return None<PropertyType>();
+  }
+
+  return Some(fromJSON<PropertyType>(iter, obj_end));
+}
+
 template <typename OutputType>
 template <typename T>
 JSONOutputProxy<OutputType>::JSONOutputProxy(
