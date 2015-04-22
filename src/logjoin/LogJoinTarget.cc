@@ -10,6 +10,7 @@
 #include "fnord-msg/MessageObject.h"
 #include "fnord-msg/MessageEncoder.h"
 #include "fnord-msg/MessageDecoder.h"
+#include "fnord-msg/MessagePrinter.h"
 #include <fnord-fts/fts.h>
 #include <fnord-fts/fts_common.h>
 #include "logjoin/LogJoinTarget.h"
@@ -21,9 +22,13 @@ namespace cm {
 
 LogJoinTarget::LogJoinTarget(
     const msg::MessageSchema& joined_sessions_schema,
-    fts::Analyzer* analyzer) :
+    fts::Analyzer* analyzer,
+    RefPtr<FeatureIndexWriter> index,
+    bool dry_run) :
     joined_sessions_schema_(joined_sessions_schema),
     analyzer_(analyzer),
+    index_(index),
+    dry_run_(dry_run),
     num_sessions(0),
     num_queries(0),
     num_item_visits(0) {}
@@ -137,13 +142,56 @@ void LogJoinTarget::onSession(
       } else {
         item_obj.addChild(schema.id("queries.items.clicked"), msg::FALSE);
       }
+
+      auto docid = item.item.docID();
+
+      auto shopid = index_->getField(docid, "shop_id");
+      if (shopid.isEmpty()) {
+        fnord::logWarning(
+            "cm.logjoin",
+            "item not found in featureindex: $0",
+            docid.docid);
+      } else {
+        item_obj.addChild(
+            schema.id("queries.items.shop_id"),
+            (uint32_t) std::stoull(shopid.get()));
+      }
+
+      auto category1 = index_->getField(docid, "category1");
+      if (!category1.isEmpty()) {
+        item_obj.addChild(
+            schema.id("queries.items.category1"),
+            (uint32_t) std::stoull(category1.get()));
+      }
+
+      auto category2 = index_->getField(docid, "category2");
+      if (!category2.isEmpty()) {
+        item_obj.addChild(
+            schema.id("queries.items.category2"),
+            (uint32_t) std::stoull(category2.get()));
+      }
+
+      auto category3 = index_->getField(docid, "category3");
+      if (!category3.isEmpty()) {
+        item_obj.addChild(
+            schema.id("queries.items.category3"),
+            (uint32_t) std::stoull(category3.get()));
+      }
     }
   }
 
-  Buffer msg_buf;
-  msg::MessageEncoder::encode(obj, joined_sessions_schema_, &msg_buf);
-  auto key = StringUtil::format("__uploadq-sessions-$0",  rnd_.hex128());
-  txn->update(key, msg_buf);
+  if (dry_run_) {
+    fnord::logInfo(
+        "cm.logjoin",
+        "[DRYRUN] not uploading session: $0",
+        msg::MessagePrinter::print(obj, joined_sessions_schema_));
+  } else {
+    Buffer msg_buf;
+    msg::MessageEncoder::encode(obj, joined_sessions_schema_, &msg_buf);
+    auto key = StringUtil::format("__uploadq-sessions-$0",  rnd_.hex128());
+    txn->update(key, msg_buf);
+  }
+
   ++num_sessions;
 }
 

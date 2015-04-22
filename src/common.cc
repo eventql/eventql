@@ -13,19 +13,6 @@
 
 namespace cm {
 
-/**
- * mandatory params:
- *  v    -- pixel ver.  -- value: 1
- *  c    -- clickid     -- format "<uid>~<eventid>", e.g. "f97650cb~b28c61d5c"
- *  e    -- eventtype   -- format "{q,v}" (query, visit)
- *
- * params for eventtype=q (query):
- *  is   -- item ids    -- format "<setid>~<itemid>~<pos>,..."
- *
- * params for eventtype=v (visit):
- *  i    -- itemid      -- format "<setid>~<itemid>"
- *
- */
 bool isReservedPixelParam(const std::string p) {
   return p == "c" || p == "e" || p == "i" || p == "is" || p == "v";
 }

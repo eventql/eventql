@@ -18,6 +18,45 @@
 
 using namespace fnord;
 
+/**
+ * mandatory global params:
+ *   v           -- pixel ver.  -- value: 1
+ *   c           -- clickid     -- format "<uid>~<eventid>", e.g. "f97650cb~b28c61d5c"
+ *   e           -- eventtype   -- format "{q,v,c,u}" (query, visit, cart, user)
+ *
+ * optional global params:
+ *   dw_ab      -- dawanda a/b grp  -- format "0-100"
+ *   l          -- page language    -- format "<lang>"
+ *   u_x        -- screen width     -- format "<num>"
+ *   u_y        -- screen height    -- format "<num>"
+ *
+ * params for eventtype=q (query):
+ *   is         -- item ids         -- format "<setid>~<itemid>~p<pos>,..."
+ *   pg         -- page number      -- format "<num>"
+ *   qstr~<lc>  -- query string     -- format "<string>"
+ *   qcat1      -- query cat1       -- format "<catid>"
+ *   qcat2      -- query cat2       -- format "<catid>"
+ *   qcat3      -- query cat3       -- format "<catid>"
+ *   slrid      -- seller id        -- format "<id>"
+ *
+ * params for eventtype=v (visit):
+ *   i          -- itemid           -- format "<setid>~<itemid>"
+ *
+ * params for eventtype=c (cart):
+ *   s          -- step              -- format "<num>", step 1 is final/confirm step!
+ *   is         -- items             -- format "<setid>~<itemid>~<qty>~<cents>~<currency>,..."
+ *
+ * params for eventtype=u (user):
+ *   ml         -- email            -- format "<email>"
+ *   adm        -- is_admin         -- format "t/f"
+ *   lgn        -- is_logged_in     -- format "t/f"
+ *   slr        -- is_seller        -- format "t/f"
+ *   lng        -- language         -- format "<lang>"
+ *   dwnid      -- dawanda id       -- format "<id>"
+ *   fnm        -- first name       -- format "<name>"
+ *
+ */
+
 namespace cm {
 
 enum class DeviceType : uint32_t {
