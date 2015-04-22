@@ -9,6 +9,7 @@
 #ifndef _CM_LOGJOINTARGET_H
 #define _CM_LOGJOINTARGET_H
 #include "fnord-base/stdtypes.h"
+#include "fnord-base/Currency.h"
 #include "fnord-mdb/MDB.h"
 #include "fnord-msg/MessageSchema.h"
 #include "ItemRef.h"
@@ -76,6 +77,7 @@ protected:
   RefPtr<FeatureIndexWriter> index_;
   bool dry_run_;
   Random rnd_;
+  CurrencyConverter cconv_;
 };
 } // namespace cm
 

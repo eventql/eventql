@@ -39,6 +39,7 @@ void LogJoinTarget::onSession(
   const auto& schema = joined_sessions_schema_;
   msg::MessageObject obj;
 
+  uint32_t sess_abgrp = 0;
   for (const auto& tq : session.flushed_queries) {
     auto q = trackedQueryToJoinedQuery(session, tq);
     auto& qry_obj = obj.addChild(schema.id("queries"));
@@ -92,6 +93,7 @@ void LogJoinTarget::onSession(
     /* queries.ab_test_group */
     auto abgrp = cm::extractABTestGroup(q.attrs);
     if (!abgrp.isEmpty()) {
+      sess_abgrp = abgrp.get();
       qry_obj.addChild(schema.id("queries.ab_test_group"), abgrp.get());
     }
 
@@ -294,6 +296,11 @@ void LogJoinTarget::onSession(
           (uint32_t) std::stoull(category3.get()));
     }
   }
+
+  if (sess_abgrp > 0) {
+    qry_obj.addChild(schema.id("ab_test_group"), sess_abgrp);
+  }
+
 
   if (dry_run_) {
     fnord::logInfo(
