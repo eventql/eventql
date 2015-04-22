@@ -134,6 +134,16 @@ void LogJoin::insertLogline(
         break;
       }
 
+      /* cart event */
+      case 'c': {
+        auto cart_items = TrackedCartItem::fromParams(params);
+        for (auto& ci : cart_items) {
+          ci.time = time;
+        }
+        insertCartVisit(customer_key, uid, cart_items, time, txn);
+        break;
+      }
+
       case 'u':
         return;
 
@@ -198,6 +208,41 @@ void LogJoin::insertItemVisit(
 
     if (visit.time.unixMicros() > s->last_seen_unix_micros) {
       s->last_seen_unix_micros = visit.time.unixMicros();
+    }
+
+    enqueueFlush(uid, s->nextFlushTime());
+  });
+}
+
+void LogJoin::insertCartVisit(
+    const std::string& customer_key,
+    const std::string& uid,
+    const Vector<TrackedCartItem>& cart_items,
+    const DateTime& time,
+    mdb::MDBTransaction* txn) {
+  withSession(customer_key, uid, txn, [
+      this,
+      &cart_items,
+      &time,
+      &uid] (TrackedSession* s) {
+    for (const auto& cart_item : cart_items) {
+      bool merged = false;
+
+      for (auto& c : s->cart_items) {
+        if (c.item == cart_item.item) {
+          c.merge(cart_item);
+          merged = true;
+          break;
+        }
+      }
+
+      if (!merged) {
+        s->cart_items.emplace_back(cart_item);
+      }
+    }
+
+    if (time.unixMicros() > s->last_seen_unix_micros) {
+      s->last_seen_unix_micros = time.unixMicros();
     }
 
     enqueueFlush(uid, s->nextFlushTime());

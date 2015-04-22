@@ -79,6 +79,13 @@ protected:
       const TrackedItemVisit& visit,
       mdb::MDBTransaction* txn);
 
+  void insertCartVisit(
+      const std::string& customer_key,
+      const std::string& uid,
+      const Vector<TrackedCartItem>& cart_items,
+      const DateTime& time,
+      mdb::MDBTransaction* txn);
+
   void withSession(
       const std::string& customer_key,
       const std::string& uid,

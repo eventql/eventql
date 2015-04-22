@@ -28,17 +28,18 @@ struct TrackedCartItem {
       checkout_step(0) {}
 
   fnord::DateTime time;
-  fnord::String eid;
   ItemRef item;
   uint32_t quantity;
   uint32_t price_cents;
   String currency;
   uint32_t checkout_step;
 
+  static Vector<TrackedCartItem> fromParams(const URI::ParamList& params);
+  void merge(const TrackedCartItem& other);
+
   template <typename T>
   static void reflect(T* meta) {
     meta->prop(&cm::TrackedCartItem::time, 1, "t", false);
-    meta->prop(&cm::TrackedCartItem::eid, 2, "e", false);
     meta->prop(&cm::TrackedCartItem::item, 3, "i", false);
     meta->prop(&cm::TrackedCartItem::quantity, 4, "q", false);
     meta->prop(&cm::TrackedCartItem::price_cents, 5, "p", false);
