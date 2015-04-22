@@ -299,6 +299,104 @@ msg::MessageSchema joinedSessionsSchema() {
 
   fields.emplace_back(item_visits);
 
+  msg::MessageSchemaField cart_items(
+      32,
+      "cart_items",
+      msg::FieldType::OBJECT,
+      0,
+      true,
+      false);
+
+  cart_items.fields.emplace_back(
+      33,
+      "time",
+      msg::FieldType::UINT32,
+      0xffffffff,
+      false,
+      false);
+
+  cart_items.fields.emplace_back(
+      34,
+      "item_id",
+      msg::FieldType::STRING,
+      1024,
+      false,
+      false);
+
+  cart_items.fields.emplace_back(
+      35,
+      "shop_id",
+      msg::FieldType::UINT32,
+      0xffffffff,
+      false,
+      true,
+      msg::EncodingHint::LEB128);
+
+  cart_items.fields.emplace_back(
+      36,
+      "category1",
+      msg::FieldType::UINT32,
+      0xffff,
+      false,
+      true,
+      msg::EncodingHint::LEB128);
+
+  cart_items.fields.emplace_back(
+      37,
+      "category2",
+      msg::FieldType::UINT32,
+      0xffff,
+      false,
+      true,
+      msg::EncodingHint::LEB128);
+
+  cart_items.fields.emplace_back(
+      38,
+      "category3",
+      msg::FieldType::UINT32,
+      0xffff,
+      false,
+      true,
+      msg::EncodingHint::LEB128);
+
+  cart_items.fields.emplace_back(
+      39,
+      "quantity",
+      msg::FieldType::UINT32,
+      0xffff,
+      false,
+      false,
+      msg::EncodingHint::LEB128);
+
+  cart_items.fields.emplace_back(
+      40,
+      "price_cents",
+      msg::FieldType::UINT32,
+      0xffffffff,
+      false,
+      false,
+      msg::EncodingHint::LEB128);
+
+  cart_items.fields.emplace_back(
+      41,
+      "currency",
+      msg::FieldType::UINT32,
+      kMaxCurrency,
+      false,
+      false,
+      msg::EncodingHint::BITPACK);
+
+  cart_items.fields.emplace_back(
+      42,
+      "checkout_step",
+      msg::FieldType::UINT32,
+      32,
+      false,
+      false,
+      msg::EncodingHint::BITPACK);
+
+  fields.emplace_back(cart_items);
+
   return msg::MessageSchema("joined_session", fields);
 }
 

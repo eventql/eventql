@@ -19,6 +19,7 @@
 #include "ItemRef.h"
 #include "logjoin/TrackedQuery.h"
 #include "logjoin/TrackedItemVisit.h"
+#include "logjoin/TrackedCartItem.h"
 
 using namespace fnord;
 
@@ -46,6 +47,7 @@ struct TrackedSession {
   std::vector<TrackedQuery> flushed_queries;
   std::vector<TrackedItemVisit> item_visits;
   std::vector<TrackedItemVisit> flushed_item_visits;
+  std::vector<TrackedCartItem> cart_items;
   uint64_t last_seen_unix_micros;
   bool flushed;
   std::vector<std::string> attrs;
@@ -68,6 +70,7 @@ struct TrackedSession {
     meta->prop(&cm::TrackedSession::flushed_queries, 8, "qf", false);
     meta->prop(&cm::TrackedSession::item_visits, 4, "v", false);
     meta->prop(&cm::TrackedSession::flushed_item_visits, 9, "vf", true);
+    meta->prop(&cm::TrackedSession::cart_items, 10, "ci", true);
     meta->prop(&cm::TrackedSession::last_seen_unix_micros, 5, "t", false);
     meta->prop(&cm::TrackedSession::flushed, 6, "f", false);
     meta->prop(&cm::TrackedSession::attrs, 7, "a", false);
