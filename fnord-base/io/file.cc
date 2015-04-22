@@ -19,7 +19,8 @@ namespace fnord {
 
 File File::openFile(
     const std::string& filename,
-    int flags) {
+    int flags,
+    int permissions /* = 0666 */) {
   int open_flags = 0;
 
   switch (flags & (O_READ | O_WRITE)) {
@@ -53,7 +54,8 @@ File File::openFile(
     open_flags |= O_TRUNC;
   }
 
-  int fd = open(filename.c_str(), open_flags, S_IRUSR | S_IWUSR);
+  int fd = open(filename.c_str(), open_flags, permissions);
+
   if (fd < 0) {
     RAISE_ERRNO(kIOError, "openFile('%s'): open() failed", filename.c_str());
   }

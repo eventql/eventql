@@ -10,6 +10,7 @@
 #ifndef _FNORD_EVENTDB_ARTIFACTINDEX_H
 #define _FNORD_EVENTDB_ARTIFACTINDEX_H
 #include <fnord-base/stdtypes.h>
+#include <fnord-base/autoref.h>
 
 namespace fnord {
 namespace eventdb {
@@ -36,7 +37,7 @@ struct ArtifactRef {
   size_t totalSize() const;
 };
 
-class ArtifactIndex {
+class ArtifactIndex : public RefCounted {
 public:
 
   ArtifactIndex(
@@ -56,6 +57,7 @@ public:
   void deleteArtifact(const String& artifact_name);
 
   const String& basePath() const;
+  const String& indexName() const;
 
 protected:
   List<ArtifactRef> readIndex();
@@ -67,7 +69,6 @@ protected:
   const String index_name_;
   const bool readonly_;
   const String index_file_;
-  const String index_lockfile_;
   std::atomic<bool> exists_;
   List<ArtifactRef> cached_;
   uint64_t cached_mtime_;

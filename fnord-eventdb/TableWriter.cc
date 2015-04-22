@@ -25,7 +25,6 @@ namespace fnord {
 namespace eventdb {
 
 RefPtr<TableWriter> TableWriter::open(
-    ArtifactIndex* artifacts,
     const String& table_name,
     const String& replica_id,
     const String& db_path,
@@ -75,7 +74,6 @@ RefPtr<TableWriter> TableWriter::open(
   }
 
   return new TableWriter(
-      artifacts,
       table_name,
       replica_id,
       db_path,
@@ -86,7 +84,6 @@ RefPtr<TableWriter> TableWriter::open(
 }
 
 TableWriter::TableWriter(
-    ArtifactIndex* artifacts,
     const String& table_name,
     const String& replica_id,
     const String& db_path,
@@ -94,7 +91,10 @@ TableWriter::TableWriter(
     uint64_t head_sequence,
     RefPtr<TableGeneration> snapshot,
     TaskScheduler* scheduler) :
-    artifacts_(artifacts),
+    artifacts_(
+        db_path,
+        StringUtil::format("$0.$1", table_name, replica_id_),
+        false),
     name_(table_name),
     replica_id_(replica_id),
     db_path_(db_path),
@@ -222,7 +222,7 @@ void TableWriter::merge() {
   writeSnapshot();
 }
 
-void TableWriter::gc(size_t keep_generations) {
+void TableWriter::gc(size_t keep_generations, size_t max_generations) {
   if (keep_generations < 1) {
     RAISE(kIllegalArgumentError, "must keep at least one generation");
   }
@@ -236,21 +236,19 @@ void TableWriter::gc(size_t keep_generations) {
     return;
   }
 
-  Set<String> delete_chunks;
-  Set<String> delete_files;
+  auto first_gen = head_gen - keep_generations;
 
   auto cutoff = WallClock::unixMicros() - gc_delay_.microseconds();
-
-  for (uint64_t gen = head_gen - keep_generations; gen > 0; --gen) {
+  while (first_gen > head_gen - max_generations) {
     auto genfile = StringUtil::format(
         "$0/$1.$2.$3.idx",
         db_path_,
         name_,
         replica_id_,
-        gen);
+        first_gen);
 
     if (!FileUtil::exists(genfile)) {
-      break;
+      return;
     }
 
     auto atime = FileUtil::atime(genfile);
@@ -258,13 +256,32 @@ void TableWriter::gc(size_t keep_generations) {
 #ifndef FNORD_NODEBUG
       fnord::logDebug(
           "fnord.evdb",
-          "Skipping garbage collection for table '$0' because generation $1 " \
+          "Skipping garbage collection for table '$0' generation $1 because " \
           "was accessed in the last $2 seconds",
           name_,
-          gen,
+          first_gen,
           gc_delay_.seconds());
 #endif
-      return;
+      --first_gen;
+    } else {
+      break;
+    }
+  }
+
+  Set<String> delete_chunks;
+  Set<String> delete_files;
+
+  auto last_gen = first_gen;
+  for (; last_gen > 0; --last_gen) {
+    auto genfile = StringUtil::format(
+        "$0/$1.$2.$3.idx",
+        db_path_,
+        name_,
+        replica_id_,
+        last_gen);
+
+    if (!FileUtil::exists(genfile)) {
+      break;
     }
 
     TableGeneration g;
@@ -277,7 +294,7 @@ void TableWriter::gc(size_t keep_generations) {
     delete_files.emplace(genfile);
   }
 
-  for (uint64_t gen = head_gen; gen > (head_gen - keep_generations); --gen) {
+  for (uint64_t gen = head_gen; gen > first_gen; --gen) {
     auto genfile = StringUtil::format(
       "$0/$1.$2.$3.idx",
       db_path_,
@@ -293,11 +310,25 @@ void TableWriter::gc(size_t keep_generations) {
     }
   }
 
+  fnord::logDebug(
+      "fnord.evdb",
+      "Garbage collecting table '$0'; deleting generations $1..$2, " \
+      "chunks ($3): $4",
+      name_,
+      last_gen,
+      first_gen,
+      delete_chunks.size(),
+      inspect(delete_chunks));
+
   for (const auto& c : delete_chunks) {
     auto chunkname = StringUtil::format("$0.$1", name_, c);
     auto chunkfile = StringUtil::format("$0/$1", db_path_, chunkname);
 
-    artifacts_->deleteArtifact(chunkname);
+    try {
+      artifacts_.deleteArtifact(chunkname);
+    } catch (const Exception& e) {
+      fnord::logError("fnord.evdb", e, "error while deleting artifact");
+    }
 
     delete_files.emplace(chunkfile + ".sst");
     delete_files.emplace(chunkfile + ".cst");
@@ -380,7 +411,7 @@ void TableWriter::addChunk(const TableChunkRef* chunk, ArtifactStatus status) {
       .checksum = chunk->summary_checksum
   });
 
-  artifacts_->addArtifact(artifact);
+  artifacts_.addArtifact(artifact);
 }
 
 // precondition: mutex_ must be locked
@@ -832,6 +863,16 @@ size_t TableWriter::arenaSize() const {
   }
 
   return size;
+}
+
+ArtifactIndex* TableWriter::artifactIndex() {
+  return &artifacts_;
+}
+
+void TableWriter::runConsistencyCheck(
+    bool check_checksums /* = false */,
+    bool repair /* = false */) {
+  artifacts_.runConsistencyCheck(check_checksums, repair);
 }
 
 } // namespace eventdb
