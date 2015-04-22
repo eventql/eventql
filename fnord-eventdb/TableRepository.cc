@@ -13,12 +13,10 @@ namespace fnord {
 namespace eventdb {
 
 TableRepository::TableRepository(
-    ArtifactIndex* artifacts,
     const String& db_path,
     const String& replica_id,
     bool readonly,
     TaskScheduler* scheduler) :
-    artifacts_(artifacts),
     db_path_(db_path),
     replica_id_(replica_id),
     readonly_(readonly),
@@ -41,7 +39,6 @@ void TableRepository::addTable(
     table_writers_.emplace(
         table_name,
         TableWriter::open(
-            artifacts_,
             table_name,
             replica_id_,
             db_path_,
@@ -112,10 +109,5 @@ const String& TableRepository::replicaID() const {
   return replica_id_;
 }
 
-ArtifactIndex* TableRepository::artifactIndex() const {
-  return artifacts_;
-}
-
 } // namespace eventdb
 } // namespace fnord
-

@@ -115,7 +115,6 @@ public:
   typedef Function<RefPtr<TableChunkSummaryBuilder> ()> SummaryFactoryFn;
 
   static RefPtr<TableWriter> open(
-      ArtifactIndex* artifacts,
       const String& table_name,
       const String& replica_id,
       const String& db_path,
@@ -131,16 +130,18 @@ public:
 
   size_t commit();
   void merge();
-  void gc(size_t keep_generations = 2);
+  void gc(size_t keep_generations = 2, size_t max_generations = 10);
 
   void replicateFrom(const TableGeneration& other_table);
 
   size_t arenaSize() const;
+  ArtifactIndex* artifactIndex();
+
+  void runConsistencyCheck(bool check_checksums = false, bool repair = false);
 
 protected:
 
   TableWriter(
-      ArtifactIndex* artifacts,
       const String& table_name,
       const String& replica_id,
       const String& db_path,
@@ -156,12 +157,12 @@ protected:
   void writeSnapshot();
   bool merge(size_t min_chunk_size, size_t max_chunk_size);
 
-  ArtifactIndex* artifacts_;
   String name_;
   String replica_id_;
   String db_path_;
   msg::MessageSchema schema_;
   TaskScheduler* scheduler_;
+  ArtifactIndex artifacts_;
   mutable std::mutex mutex_;
   std::mutex merge_mutex_;
   uint64_t seq_;

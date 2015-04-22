@@ -203,10 +203,14 @@ void FileUtil::truncate(const std::string& filename, size_t new_size) {
 }
 
 Buffer FileUtil::read(const std::string& filename) {
-  auto file = File::openFile(filename, File::O_READ);
-  Buffer buf(file.size());
-  file.read(&buf);
-  return buf;
+  try {
+    auto file = File::openFile(filename, File::O_READ);
+    Buffer buf(file.size());
+    file.read(&buf);
+    return buf;
+  } catch (const std::exception& e) {
+    RAISEF(kIOError, "$0 while reading file '$1'", e.what(), filename);
+  }
 }
 
 uint64_t FileUtil::checksum(const std::string& filename) {
