@@ -41,24 +41,4 @@ String languageToString(Language lang) {
   }
 }
 
-Currency currencyFromString(const String& string) {
-  String s(string);
-  StringUtil::toLower(&s);
-
-  if (s == "eur") return Currency::EUR;
-  if (s == "pln") return Currency::PLN;
-  if (s == "usd") return Currency::USD;
-
-  return Currency::UNKNOWN;
-}
-
-String currencyToString(Currency lang) {
-  switch (lang) {
-    case Currency::UNKNOWN: return "unknown";
-    case Currency::EUR: return "EUR";
-    case Currency::PLN: return "PLN";
-    case Currency::USD: return "USD";
-  }
-}
-
 } // namespace fnord
