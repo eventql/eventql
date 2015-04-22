@@ -145,6 +145,35 @@ int fromJSONImpl(
 }
 
 template <>
+unsigned int fromJSONImpl(
+    std::vector<JSONToken>::const_iterator begin,
+    std::vector<JSONToken>::const_iterator end) {
+  if (begin == end) {
+    RAISE(kIndexError);
+  }
+
+  switch (begin->type) {
+    case JSON_STRING:
+    case JSON_NUMBER:
+      try {
+        return std::stoul(begin->data);
+      } catch (std::exception& e) {
+        /* fallthrough */
+      }
+
+    default:
+      RAISEF(
+          kParseError,
+          "can't convert $0 ($1) to integer",
+          begin->type,
+          begin->data);
+
+  }
+}
+
+
+
+template <>
 unsigned long long fromJSONImpl(
     std::vector<JSONToken>::const_iterator begin,
     std::vector<JSONToken>::const_iterator end) {
