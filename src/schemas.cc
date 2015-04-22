@@ -16,6 +16,51 @@ namespace cm {
 msg::MessageSchema joinedSessionsSchema() {
   Vector<msg::MessageSchemaField> fields;
 
+  fields.emplace_back(
+      47,
+      "num_cart_items",
+      msg::FieldType::UINT32,
+      250,
+      false,
+      false,
+      msg::EncodingHint::BITPACK);
+
+  fields.emplace_back(
+      48,
+      "num_order_items",
+      msg::FieldType::UINT32,
+      250,
+      false,
+      false,
+      msg::EncodingHint::BITPACK);
+
+  fields.emplace_back(
+      49,
+      "cart_value_eurcents",
+      msg::FieldType::UINT32,
+      0xffffff,
+      false,
+      false,
+      msg::EncodingHint::LEB128);
+
+  fields.emplace_back(
+      50,
+      "gmv_eurcents",
+      msg::FieldType::UINT32,
+      0xffffff,
+      false,
+      false,
+      msg::EncodingHint::LEB128);
+
+  fields.fields.emplace_back(
+      51,
+      "ab_test_group",
+      msg::FieldType::UINT32,
+      100,
+      false,
+      true,
+      msg::EncodingHint::BITPACK);
+
   msg::MessageSchemaField queries(
       16,
       "queries",
@@ -101,6 +146,42 @@ msg::MessageSchema joinedSessionsSchema() {
       false,
       false,
       msg::EncodingHint::BITPACK);
+
+  queries.fields.emplace_back(
+      43,
+      "num_cart_items",
+      msg::FieldType::UINT32,
+      250,
+      false,
+      false,
+      msg::EncodingHint::BITPACK);
+
+  queries.fields.emplace_back(
+      44,
+      "num_order_items",
+      msg::FieldType::UINT32,
+      250,
+      false,
+      false,
+      msg::EncodingHint::BITPACK);
+
+  queries.fields.emplace_back(
+      45,
+      "cart_value_eurcents",
+      msg::FieldType::UINT32,
+      0xffffff,
+      false,
+      false,
+      msg::EncodingHint::LEB128);
+
+  queries.fields.emplace_back(
+      46,
+      "gmv_eurcents",
+      msg::FieldType::UINT32,
+      0xffffff,
+      false,
+      false,
+      msg::EncodingHint::LEB128);
 
   queries.fields.emplace_back(
       9,
