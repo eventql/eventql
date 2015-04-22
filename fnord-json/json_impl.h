@@ -249,6 +249,11 @@ void toJSONImpl(int const& val, O* target) {
 }
 
 template <typename O>
+void toJSONImpl(unsigned int const& val, O* target) {
+  target->emplace_back(json::JSON_NUMBER, StringUtil::toString(val));
+}
+
+template <typename O>
 void toJSONImpl(double const& val, O* target) {
   target->emplace_back(json::JSON_NUMBER, StringUtil::toString(val));
 }
