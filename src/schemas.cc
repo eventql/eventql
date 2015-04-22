@@ -52,7 +52,7 @@ msg::MessageSchema joinedSessionsSchema() {
       false,
       msg::EncodingHint::LEB128);
 
-  fields.fields.emplace_back(
+  fields.emplace_back(
       51,
       "ab_test_group",
       msg::FieldType::UINT32,

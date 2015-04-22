@@ -39,6 +39,87 @@ void LogJoinTarget::onSession(
   const auto& schema = joined_sessions_schema_;
   msg::MessageObject obj;
 
+  uint32_t num_cart_items = 0;
+  uint32_t num_order_items = 0;
+  uint32_t gmv_eurcents = 0;
+  uint32_t cart_value_eurcents = 0;
+  HashMap<String, uint64_t> cart_eurcents_per_item;
+  HashMap<String, uint64_t> gmv_eurcents_per_item;
+  for (const auto& ci : session.cart_items) {
+    auto currency = currencyFromString(ci.currency);
+    auto eurcents = cconv_.convert(ci.price_cents, currency, Currency::EUR);
+    eurcents *= ci.quantity;
+    cart_eurcents_per_item.emplace(ci.item.docID().docid, eurcents);
+
+    ++num_cart_items;
+    cart_value_eurcents += eurcents;
+    if (ci.checkout_step == 1) {
+      gmv_eurcents_per_item.emplace(ci.item.docID().docid, eurcents);
+      ++num_order_items;
+      gmv_eurcents += eurcents;
+    }
+
+    auto& ci_obj = obj.addChild(schema.id("cart_items"));
+
+    ci_obj.addChild(
+        schema.id("cart_items.time"),
+        (uint32_t) (ci.time.unixMicros() / kMicrosPerSecond));
+
+    ci_obj.addChild(
+        schema.id("cart_items.item_id"),
+        ci.item.docID().docid);
+
+    ci_obj.addChild(
+        schema.id("cart_items.quantity"),
+        ci.quantity);
+
+    ci_obj.addChild(
+        schema.id("cart_items.price_cents"),
+        ci.quantity);
+
+    ci_obj.addChild(
+        schema.id("cart_items.currency"),
+        (uint32_t) currency);
+
+    ci_obj.addChild(
+        schema.id("cart_items.checkout_step"),
+        ci.checkout_step);
+
+    auto docid = ci.item.docID();
+    auto shopid = index_->getField(docid, "shop_id");
+    if (shopid.isEmpty()) {
+      fnord::logWarning(
+          "cm.logjoin",
+          "item not found in featureindex: $0",
+          docid.docid);
+    } else {
+      ci_obj.addChild(
+          schema.id("cart_items.shop_id"),
+          (uint32_t) std::stoull(shopid.get()));
+    }
+
+    auto category1 = index_->getField(docid, "category1");
+    if (!category1.isEmpty()) {
+      ci_obj.addChild(
+          schema.id("cart_items.category1"),
+          (uint32_t) std::stoull(category1.get()));
+    }
+
+    auto category2 = index_->getField(docid, "category2");
+    if (!category2.isEmpty()) {
+      ci_obj.addChild(
+          schema.id("cart_items.category2"),
+          (uint32_t) std::stoull(category2.get()));
+    }
+
+    auto category3 = index_->getField(docid, "category3");
+    if (!category3.isEmpty()) {
+      ci_obj.addChild(
+          schema.id("cart_items.category3"),
+          (uint32_t) std::stoull(category3.get()));
+    }
+  }
+
   uint32_t sess_abgrp = 0;
   for (const auto& tq : session.flushed_queries) {
     auto q = trackedQueryToJoinedQuery(session, tq);
@@ -66,6 +147,10 @@ void LogJoinTarget::onSession(
     uint32_t nclicks = 0;
     uint32_t nads = 0;
     uint32_t nadclicks = 0;
+    uint32_t qnum_cart_items = 0;
+    uint32_t qnum_order_items = 0;
+    uint32_t qgmv_eurcents = 0;
+    uint32_t qcart_value_eurcents = 0;
     for (const auto& i : q.items) {
       // DAWANDA HACK
       if (i.position >= 1 && i.position <= 4) {
@@ -75,13 +160,36 @@ void LogJoinTarget::onSession(
       // EOF DAWANDA HACK
 
       ++nitems;
-      nclicks += i.clicked;
+
+      if (i.clicked) {
+        ++nclicks;
+
+        {
+          auto ci = cart_eurcents_per_item.find(i.item.docID().docid);
+          if (ci != cart_eurcents_per_item.end()) {
+            ++qnum_cart_items;
+            qcart_value_eurcents += ci->second;
+          }
+        }
+
+        {
+          auto ci = gmv_eurcents_per_item.find(i.item.docID().docid);
+          if (ci != gmv_eurcents_per_item.end()) {
+            ++qnum_order_items;
+            qgmv_eurcents += ci->second;
+          }
+        }
+      }
     }
 
     qry_obj.addChild(schema.id("queries.num_items"), nitems);
     qry_obj.addChild(schema.id("queries.num_items_clicked"), nclicks);
     qry_obj.addChild(schema.id("queries.num_ad_impressions"), nads);
     qry_obj.addChild(schema.id("queries.num_ad_clicks"), nadclicks);
+    qry_obj.addChild(schema.id("queries.num_cart_items"), qnum_cart_items);
+    qry_obj.addChild(schema.id("queries.cart_value_eurcents"), qcart_value_eurcents);
+    qry_obj.addChild(schema.id("queries.num_order_items"), qnum_order_items);
+    qry_obj.addChild(schema.id("queries.gmv_eurcents"), qgmv_eurcents);
 
     /* queries.page */
     auto pg_str = cm::extractAttr(q.attrs, "pg");
@@ -235,72 +343,14 @@ void LogJoinTarget::onSession(
     }
   }
 
-  for (const auto& ci : session.cart_items) {
-    auto& ci_obj = obj.addChild(schema.id("cart_items"));
-
-    ci_obj.addChild(
-        schema.id("cart_items.time"),
-        (uint32_t) (ci.time.unixMicros() / kMicrosPerSecond));
-
-    ci_obj.addChild(
-        schema.id("cart_items.item_id"),
-        ci.item.docID().docid);
-
-    ci_obj.addChild(
-        schema.id("cart_items.quantity"),
-        ci.quantity);
-
-    ci_obj.addChild(
-        schema.id("cart_items.price_cents"),
-        ci.quantity);
-
-    ci_obj.addChild(
-        schema.id("cart_items.currency"),
-        (uint32_t) currencyFromString(ci.currency));
-
-    ci_obj.addChild(
-        schema.id("cart_items.checkout_step"),
-        ci.checkout_step);
-
-    auto docid = ci.item.docID();
-    auto shopid = index_->getField(docid, "shop_id");
-    if (shopid.isEmpty()) {
-      fnord::logWarning(
-          "cm.logjoin",
-          "item not found in featureindex: $0",
-          docid.docid);
-    } else {
-      ci_obj.addChild(
-          schema.id("cart_items.shop_id"),
-          (uint32_t) std::stoull(shopid.get()));
-    }
-
-    auto category1 = index_->getField(docid, "category1");
-    if (!category1.isEmpty()) {
-      ci_obj.addChild(
-          schema.id("cart_items.category1"),
-          (uint32_t) std::stoull(category1.get()));
-    }
-
-    auto category2 = index_->getField(docid, "category2");
-    if (!category2.isEmpty()) {
-      ci_obj.addChild(
-          schema.id("cart_items.category2"),
-          (uint32_t) std::stoull(category2.get()));
-    }
-
-    auto category3 = index_->getField(docid, "category3");
-    if (!category3.isEmpty()) {
-      ci_obj.addChild(
-          schema.id("cart_items.category3"),
-          (uint32_t) std::stoull(category3.get()));
-    }
-  }
-
   if (sess_abgrp > 0) {
-    qry_obj.addChild(schema.id("ab_test_group"), sess_abgrp);
+    obj.addChild(schema.id("ab_test_group"), sess_abgrp);
   }
 
+  obj.addChild(schema.id("num_cart_items"), num_cart_items);
+  obj.addChild(schema.id("cart_value_eurcents"), cart_value_eurcents);
+  obj.addChild(schema.id("num_order_items"), num_order_items);
+  obj.addChild(schema.id("gmv_eurcents"), gmv_eurcents);
 
   if (dry_run_) {
     fnord::logInfo(
