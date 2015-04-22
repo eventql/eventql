@@ -362,7 +362,7 @@ void LogJoin::maybeFlushSession(
 
               try {
                 target_->onItemVisit(txn, *session, *cur_visit, *cur_query);
-              } catch (const Exception& e) {
+              } catch (const std::exception& e) {
                 fnord::logError(
                     "cm.logjoin",
                     e,
@@ -383,7 +383,7 @@ void LogJoin::maybeFlushSession(
 
       try {
         target_->onQuery(txn, *session, *cur_query);
-      } catch (const Exception& e) {
+      } catch (const std::exception& e) {
         fnord::logError("cm.logjoin", e, "LogJoinTarget::onQuery crashed");
       }
 
@@ -401,7 +401,7 @@ void LogJoin::maybeFlushSession(
         kMaxQueryClickDelaySeconds * fnord::kMicrosPerSecond)) {
       try {
         target_->onItemVisit(txn, *session, *cur_visit);
-      } catch (const Exception& e) {
+      } catch (const std::exception& e) {
         fnord::logError("cm.logjoin", e, "LogJoinTarget::onItemVisit crashed");
       }
       cur_visit = session->item_visits.erase(cur_visit);
@@ -417,7 +417,7 @@ void LogJoin::maybeFlushSession(
 
     try {
       target_->onSession(txn, *session);
-    } catch (const Exception& e) {
+    } catch (const std::exception& e) {
       fnord::logError("cm.logjoin", e, "LogJoinTarget::onSession crashed");
     }
 
