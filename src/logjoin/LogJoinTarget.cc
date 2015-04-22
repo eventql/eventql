@@ -116,6 +116,13 @@ void LogJoinTarget::onSession(
       qry_obj.addChild(schema.id("queries.category3"), c);
     }
 
+    /* queries.shopid */
+    auto slrid = cm::extractAttr(q.attrs, "slrid");
+    if (!slrid.isEmpty()) {
+      uint32_t sid = std::stoul(slrid.get());
+      qry_obj.addChild(schema.id("queries.shop_id"), sid);
+    }
+
     /* queries.device_type */
     qry_obj.addChild(
         schema.id("queries.device_type"),

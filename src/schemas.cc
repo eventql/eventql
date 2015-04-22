@@ -156,6 +156,15 @@ msg::MessageSchema joinedSessionsSchema() {
       true,
       msg::EncodingHint::LEB128);
 
+  queries.fields.emplace_back(
+      32,
+      "shop_id",
+      msg::FieldType::UINT32,
+      0xffffffff,
+      false,
+      true,
+      msg::EncodingHint::LEB128);
+
   msg::MessageSchemaField query_items(
       17,
       "items",
