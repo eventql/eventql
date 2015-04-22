@@ -54,5 +54,16 @@ Vector<TrackedCartItem> TrackedCartItem::fromParams(
   return items;
 }
 
+void TrackedCartItem::merge(const TrackedCartItem& other) {
+  if (other.time > time) {
+    quantity = other.quantity;
+  }
+
+  if ((other.checkout_step > 0 && other.checkout_step < checkout_step) ||
+      checkout_step == 0) {
+    checkout_step = other.checkout_step;
+  }
+}
+
 }
 
