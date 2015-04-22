@@ -243,4 +243,11 @@ Option<String> extractQueryString(const Vector<String>& attrs) {
   return None<String>();
 }
 
+CurrencyConverter::ConversionTable currencyConversionTable() {
+  CurrencyConverter::ConversionTable tbl;
+  tbl.emplace_back(Currency::PLN, Currency::EUR, 0.25);
+  return tbl;
+}
+
+
 }

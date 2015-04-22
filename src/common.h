@@ -116,5 +116,7 @@ bool isItemEligible(
     const cm::JoinedQuery& query,
     const cm::JoinedQueryItem& item);
 
+CurrencyConverter::ConversionTable currencyConversionTable();
+
 }
 #endif
