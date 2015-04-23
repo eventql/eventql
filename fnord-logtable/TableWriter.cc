@@ -872,8 +872,6 @@ ArtifactIndex* TableWriter::artifactIndex() {
 void TableWriter::runConsistencyCheck(
     bool check_checksums /* = false */,
     bool repair /* = false */) {
-  artifacts_.runConsistencyCheck(check_checksums, repair);
-
   Set<String> existing_artifacts;
   auto artifactlist = artifacts_.listArtifacts();
   for (const auto& a : artifactlist) {
@@ -892,8 +890,14 @@ void TableWriter::runConsistencyCheck(
         "consistency error: chunk '$0' is missing from artifact index ",
         chunkname);
 
-    RAISE(kRuntimeError, "consistency check failed");
+    if (repair) {
+      addChunk(&c, ArtifactStatus::PRESENT);
+    } else {
+      RAISE(kRuntimeError, "consistency check failed");
+    }
   }
+
+  artifacts_.runConsistencyCheck(check_checksums, repair);
 }
 
 } // namespace logtable
