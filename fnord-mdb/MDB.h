@@ -25,7 +25,9 @@ public:
   static RefPtr<MDB> open(
       const String& path,
       bool readonly = false,
-      size_t maxsize = 1024 * 1024 * 1024); // 1 GiB
+      size_t maxsize = 1024 * 1024 * 1024, // 1 GiB
+      const String& data_filename = "/data.mdb",
+      const String& lock_filename = "/lock.mdb");
 
   MDB(const MDB& other) = delete;
   MDB& operator=(const MDB& other) = delete;
@@ -36,11 +38,20 @@ public:
   void setMaxSize(size_t size);
 
 protected:
-  MDB(MDB_env* mdb_env);
-  void openDBHandle();
+  MDB(
+      MDB_env* mdb_env,
+      const String& path,
+      const String& data_filename,
+      const String& lock_filename);
+
+  void openDBHandle(int flags);
 
   MDB_env* mdb_env_;
   MDB_dbi mdb_handle_;
+
+  const String path_;
+  const String data_filename_;
+  const String lock_filename_;
 };
 
 }
