@@ -15,7 +15,9 @@ namespace mdb {
 RefPtr<MDB> MDB::open(
     const String& path,
     bool readonly /* = false */,
-    size_t maxsize) {
+    size_t maxsize /* = ... */,
+    const String& data_filename /* = "/data.mdb" */,
+    const String& lock_filename /* = "/lock.mdb" */) {
   MDB_env* mdb_env;
 
   if (mdb_env_create(&mdb_env) != 0) {
@@ -33,19 +35,20 @@ RefPtr<MDB> MDB::open(
     flags |= MDB_RDONLY;
   }
 
-  rc = mdb_env_open(mdb_env, path.c_str(), flags, 0664);
-  if (rc != 0) {
-    auto err = String(mdb_strerror(rc));
-    RAISEF(kRuntimeError, "mdb_env_open($0) failed: $1", path, err);
-    mdb_env_close(mdb_env);
-  }
-
-  RefPtr<MDB> mdb(new MDB(mdb_env));
-  mdb->openDBHandle();
+  RefPtr<MDB> mdb(new MDB(mdb_env, path, data_filename, lock_filename));
+  mdb->openDBHandle(flags);
   return mdb;
 }
 
-MDB::MDB(MDB_env* mdb_env) : mdb_env_(mdb_env) {}
+MDB::MDB(
+    MDB_env* mdb_env,
+    const String& path,
+    const String& data_filename,
+    const String& lock_filename) :
+    mdb_env_(mdb_env),
+    path_(path),
+    data_filename_(data_filename),
+    lock_filename_(lock_filename) {}
 
 MDB::~MDB() {
   mdb_env_close(mdb_env_);
@@ -68,10 +71,22 @@ RefPtr<MDBTransaction> MDB::startTransaction(bool readonly /* = false */) {
   return RefPtr<MDBTransaction>(new MDBTransaction(txn, mdb_handle_));
 }
 
-void MDB::openDBHandle() {
-  MDB_txn* txn;
+void MDB::openDBHandle(int flags) {
+  int rc = mdb_env_open(
+      mdb_env_,
+      path_.c_str(),
+      flags,
+      0664,
+      data_filename_.c_str(),
+      lock_filename_.c_str());
 
-  int rc = mdb_txn_begin(mdb_env_, NULL, MDB_RDONLY, &txn);
+  if (rc != 0) {
+    auto err = String(mdb_strerror(rc));
+    RAISEF(kRuntimeError, "mdb_env_open($0) failed: $1", path_, err);
+  }
+
+  MDB_txn* txn;
+  rc = mdb_txn_begin(mdb_env_, NULL, MDB_RDONLY, &txn);
   if (rc != 0) {
     auto err = String(mdb_strerror(rc));
     RAISEF(kRuntimeError, "mdb_txn_begin() failed: $0", err);
