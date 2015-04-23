@@ -14,6 +14,7 @@
 #include "fnord-base/random.h"
 #include "fnord-base/thread/eventloop.h"
 #include "fnord-base/thread/threadpool.h"
+#include "fnord-base/thread/queue.h"
 #include "fnord-rpc/ServerGroup.h"
 #include "fnord-rpc/RPC.h"
 #include "fnord-base/cli/flagparser.h"
@@ -31,17 +32,18 @@
 #include "frontend/CMFrontend.h"
 #include "frontend/LookupServlet.h"
 
-using fnord::StringUtil;
+using namespace cm;
+using namespace fnord;
 
 int main(int argc, const char** argv) {
-  fnord::Application::init();
-  fnord::Application::logToStderr();
+  Application::init();
+  Application::logToStderr();
 
-  fnord::cli::FlagParser flags;
+  cli::FlagParser flags;
 
   flags.defineFlag(
       "http_port",
-      fnord::cli::FlagParser::T_INTEGER,
+      cli::FlagParser::T_INTEGER,
       false,
       NULL,
       "8000",
@@ -50,7 +52,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "loglevel",
-      fnord::cli::FlagParser::T_STRING,
+      cli::FlagParser::T_STRING,
       false,
       NULL,
       "INFO",
@@ -59,7 +61,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "statsd_addr",
-      fnord::cli::FlagParser::T_STRING,
+      cli::FlagParser::T_STRING,
       false,
       NULL,
       "127.0.0.1:8192",
@@ -71,11 +73,11 @@ int main(int argc, const char** argv) {
   Logger::get()->setMinimumLogLevel(
       strToLogLevel(flags.getString("loglevel")));
 
-  fnord::thread::EventLoop event_loop;
+  thread::EventLoop event_loop;
   HTTPRPCClient rpc_client(&event_loop);
 
   /* set up tracker log feed writer */
-  fnord::feeds::RemoteFeedWriter tracker_log_feed(&rpc_client);
+  feeds::RemoteFeedWriter tracker_log_feed(&rpc_client);
   tracker_log_feed.addTargetFeed(
       URI("http://s01.nue01.production.fnrd.net:7001/rpc"),
       "tracker_log.feedserver01.nue01.production.fnrd.net",
@@ -89,7 +91,8 @@ int main(int argc, const char** argv) {
   tracker_log_feed.exportStats("/cm-frontend/global/tracker_log_writer");
 
   /* set up frontend */
-  cm::CMFrontend frontend(&tracker_log_feed);
+  thread::Queue<IndexChangeRequest> indexfeed(1024);
+  cm::CMFrontend frontend(&tracker_log_feed, &indexfeed);
 
   /* set up dawanda */
   auto dwn_ns = new cm::CustomerNamespace("dawanda");
@@ -115,9 +118,9 @@ int main(int argc, const char** argv) {
   frontend.addCustomer(dwn_ns, dwn_index_request_feed);
 
   /* set up public http server */
-  fnord::http::HTTPRouter http_router;
+  http::HTTPRouter http_router;
   http_router.addRouteByPrefixMatch("/", &frontend);
-  fnord::http::HTTPServer http_server(&http_router, &event_loop);
+  http::HTTPServer http_server(&http_router, &event_loop);
   http_server.listen(flags.getInt("http_port"));
   http_server.stats()->exportStats(
       "/cm-frontend/global/http/inbound");
@@ -127,9 +130,9 @@ int main(int argc, const char** argv) {
           cm::cmHostname()));
 
   /* stats reporting */
-  fnord::stats::StatsdAgent statsd_agent(
-      fnord::net::InetAddr::resolve(flags.getString("statsd_addr")),
-      10 * fnord::kMicrosPerSecond);
+  stats::StatsdAgent statsd_agent(
+      net::InetAddr::resolve(flags.getString("statsd_addr")),
+      10 * kMicrosPerSecond);
 
   statsd_agent.start();
 

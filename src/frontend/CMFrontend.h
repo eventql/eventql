@@ -15,6 +15,7 @@
 #include <unordered_map>
 #include <fnord-base/random.h>
 #include <fnord-base/uri.h>
+#include <fnord-base/thread/queue.h>
 #include <fnord-feeds/RemoteFeed.h>
 #include <fnord-feeds/RemoteFeedFactory.h>
 #include "fnord-feeds/RemoteFeedWriter.h"
@@ -32,7 +33,9 @@ class CMFrontend : public fnord::http::HTTPService {
 public:
   static const int kMinPixelVersion = 5;
 
-  explicit CMFrontend(feeds::RemoteFeedWriter* tracker_log_feed);
+  explicit CMFrontend(
+      feeds::RemoteFeedWriter* tracker_log_feed,
+      thread::Queue<IndexChangeRequest>* indexfeed);
 
   void handleHTTPRequest(
       fnord::http::HTTPRequest* request,
@@ -48,12 +51,11 @@ protected:
 
   void dispatchRPC(json::JSONRPCRequest* req, json::JSONRPCResponse* res);
 
-  void recordIndexChangeRequest(const IndexChangeRequest& index_request);
-
   void track(CustomerNamespace* customer, const fnord::URI& uri);
   void recordLogLine(CustomerNamespace* customer, const std::string& logline);
 
   feeds::RemoteFeedWriter* tracker_log_feed_;
+  thread::Queue<IndexChangeRequest>* indexfeed_;
 
   HashMap<String, CustomerNamespace*> vhosts_;
   HashMap<String, RefPtr<feeds::RemoteFeedWriter>> index_request_feeds_;
