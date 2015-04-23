@@ -18,5 +18,7 @@ namespace cm {
 
 msg::MessageSchema joinedSessionsSchema();
 
+msg::MessageSchema indexChangeRequestSchema();
+
 }
 #endif

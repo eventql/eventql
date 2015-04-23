@@ -31,6 +31,7 @@
 #include "CustomerNamespace.h"
 #include "frontend/CMFrontend.h"
 #include "frontend/LookupServlet.h"
+#include "frontend/IndexFeedUpload.h"
 
 using namespace cm;
 using namespace fnord;
@@ -49,6 +50,15 @@ int main(int argc, const char** argv) {
       "8000",
       "Start the public http server on this port",
       "<port>");
+
+  flags.defineFlag(
+      "publish_to",
+      fnord::cli::FlagParser::T_STRING,
+      true,
+      NULL,
+      NULL,
+      "upload target url",
+      "<addr>");
 
   flags.defineFlag(
       "loglevel",
@@ -74,6 +84,7 @@ int main(int argc, const char** argv) {
       strToLogLevel(flags.getString("loglevel")));
 
   thread::EventLoop event_loop;
+  http::HTTPConnectionPool http_client(&event_loop);
   HTTPRPCClient rpc_client(&event_loop);
 
   /* set up tracker log feed writer */
@@ -129,14 +140,24 @@ int main(int argc, const char** argv) {
           "/cm-frontend/by-host/$0/http/inbound",
           cm::cmHostname()));
 
+
+  /* start index feed upload */
+  IndexFeedUpload indexfeed_upload(
+      flags.getString("publish_to"),
+      &indexfeed,
+      &http_client);
+  indexfeed_upload.start();
+
+
   /* stats reporting */
   stats::StatsdAgent statsd_agent(
       net::InetAddr::resolve(flags.getString("statsd_addr")),
       10 * kMicrosPerSecond);
 
   statsd_agent.start();
-
   event_loop.run();
+  indexfeed_upload.stop();
+
   return 0;
 }
 
