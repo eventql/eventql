@@ -30,6 +30,7 @@ public:
       size_t* size);
 
   RefPtr<ColumnReader> getColumnReader(const String& column_name);
+  bool hasColumn(const String& column_name) const;
 
   size_t numRecords() const;
 
