@@ -42,7 +42,7 @@ void MessageDecoder::decode(
   }
 }
 
-void MessageDecoder::decodeObject(
+int MessageDecoder::decodeObject(
     size_t idx,
     uint64_t begin,
     uint64_t end,
@@ -60,7 +60,7 @@ void MessageDecoder::decodeObject(
       MessageObject* nxt;
       if (fid == 0) {
         if (idx != 0) {
-          return;
+          return 0;
         }
 
         nxt = msg;
@@ -69,40 +69,37 @@ void MessageDecoder::decodeObject(
       }
 
       auto obegin = fbegin;
-      for (int i = idx + 1; i < fields.size(); ++i) {
+      int i = idx + 1;
+      while (i < fields.size()) {
         auto oend = fields[i].second;
-
-        if (oend <= obegin) {
-          continue;
-        }
 
         if (oend > fend) {
           break;
         }
 
-        decodeObject(i, obegin, oend, fields, schema, reader, nxt);
-
+        i += decodeObject(i, obegin, oend, fields, schema, reader, nxt);
         obegin = oend;
       }
-      break;
+
+      return i - idx;
     }
 
     case FieldType::UINT32: {
       uint32_t val = reader->readVarUInt();
       msg->addChild(fid, val);
-      break;
+      return 1;
     }
 
     case FieldType::BOOLEAN: {
       uint8_t val = *reader->readUInt8();
       msg->addChild(fid, val == 1);
-      break;
+      return 1;
     }
 
     case FieldType::STRING: {
       auto val = reader->read(fend - fbegin);
       msg->addChild(fid, String((const char*) val, fend - fbegin));
-      break;
+      return 1;
     }
 
   }
