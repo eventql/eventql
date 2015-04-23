@@ -873,6 +873,27 @@ void TableWriter::runConsistencyCheck(
     bool check_checksums /* = false */,
     bool repair /* = false */) {
   artifacts_.runConsistencyCheck(check_checksums, repair);
+
+  Set<String> existing_artifacts;
+  auto artifactlist = artifacts_.listArtifacts();
+  for (const auto& a : artifactlist) {
+    existing_artifacts.emplace(a.name);
+  }
+
+  auto snap = getSnapshot();
+  for (const auto& c : snap->head->chunks) {
+    auto chunkname = name_ + "." + c.replica_id + "." + c.chunk_id;
+    if (existing_artifacts.count(chunkname) > 0) {
+      continue;
+    }
+
+    fnord::logError(
+        "fnord.evdb",
+        "consistency error: chunk '$0' is missing from artifact index ",
+        chunkname);
+
+    RAISE(kRuntimeError, "consistency check failed");
+  }
 }
 
 } // namespace logtable
