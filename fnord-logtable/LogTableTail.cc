@@ -8,10 +8,10 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <fnord-base/logging.h>
-#include <fnord-eventdb/LogTableTail.h>
+#include <fnord-logtable/LogTableTail.h>
 
 namespace fnord {
-namespace eventdb {
+namespace logtable {
 
 void LogTableTailCursor::encode(util::BinaryMessageWriter* writer) const {
   writer->appendVarUInt(offsets.size());
@@ -102,6 +102,6 @@ LogTableTailCursor LogTableTail::getCursor() const {
   return cursor;
 }
 
-} // namespace eventdb
+} // namespace logtable
 } // namespace fnord
 

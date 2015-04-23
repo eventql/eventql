@@ -13,10 +13,10 @@
 #include <fnord-base/util/binarymessagewriter.h>
 #include <fnord-base/io/FileLock.h>
 #include <fnord-base/io/fileutil.h>
-#include <fnord-eventdb/ArtifactIndex.h>
+#include <fnord-logtable/ArtifactIndex.h>
 
 namespace fnord {
-namespace eventdb {
+namespace logtable {
 
 ArtifactIndex::ArtifactIndex(
     const String& db_path,
@@ -281,6 +281,6 @@ size_t ArtifactRef::totalSize() const {
   return total;
 }
 
-} // namespace eventdb
+} // namespace logtable
 } // namespace fnord
 

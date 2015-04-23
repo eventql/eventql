@@ -7,11 +7,11 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <fnord-eventdb/TableChunkSummaryReader.h>
+#include <fnord-logtable/TableChunkSummaryReader.h>
 #include <fnord-base/util/binarymessagereader.h>
 
 namespace fnord {
-namespace eventdb {
+namespace logtable {
 
 TableChunkSummaryReader::TableChunkSummaryReader(
     const String& filename) :

@@ -7,13 +7,13 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#ifndef _FNORD_EVENTDB_ARTIFACTINDEX_H
-#define _FNORD_EVENTDB_ARTIFACTINDEX_H
+#ifndef _FNORD_LOGTABLE_ARTIFACTINDEX_H
+#define _FNORD_LOGTABLE_ARTIFACTINDEX_H
 #include <fnord-base/stdtypes.h>
 #include <fnord-base/autoref.h>
 
 namespace fnord {
-namespace eventdb {
+namespace logtable {
 
 enum class ArtifactStatus : uint8_t {
   DOWNLOAD,
@@ -76,7 +76,7 @@ protected:
   std::mutex mutex_;
 };
 
-} // namespace eventdb
+} // namespace logtable
 } // namespace fnord
 
 #endif

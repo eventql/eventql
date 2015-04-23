@@ -10,10 +10,10 @@
 #include "unistd.h"
 #include <fnord-base/logging.h>
 #include <fnord-base/wallclock.h>
-#include <fnord-eventdb/TableReplication.h>
+#include <fnord-logtable/TableReplication.h>
 
 namespace fnord {
-namespace eventdb {
+namespace logtable {
 
 TableReplication::TableReplication(
     http::HTTPConnectionPool* http) :
@@ -96,6 +96,6 @@ void TableReplication::run() {
   }
 }
 
-} // namespace eventdb
+} // namespace logtable
 } // namespace fnord
 

@@ -7,17 +7,17 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#ifndef _FNORD_EVENTDB_TABLESNAPSHOT_H
-#define _FNORD_EVENTDB_TABLESNAPSHOT_H
+#ifndef _FNORD_LOGTABLE_TABLESNAPSHOT_H
+#define _FNORD_LOGTABLE_TABLESNAPSHOT_H
 #include <fnord-base/stdtypes.h>
 #include <fnord-base/autoref.h>
 #include <fnord-base/random.h>
 #include <fnord-msg/MessageSchema.h>
 #include <fnord-msg/MessageObject.h>
-#include <fnord-eventdb/TableArena.h>
+#include <fnord-logtable/TableArena.h>
 
 namespace fnord {
-namespace eventdb {
+namespace logtable {
 
 struct TableChunkRef {
   String replica_id;
@@ -52,7 +52,7 @@ struct TableSnapshot : public RefCounted {
   List<RefPtr<TableArena>> arenas;
 };
 
-} // namespace eventdb
+} // namespace logtable
 } // namespace fnord
 
 #endif

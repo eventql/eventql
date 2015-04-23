@@ -10,10 +10,10 @@
 #include "unistd.h"
 #include <fnord-base/logging.h>
 #include <fnord-base/wallclock.h>
-#include <fnord-eventdb/TableJanitor.h>
+#include <fnord-logtable/TableJanitor.h>
 
 namespace fnord {
-namespace eventdb {
+namespace logtable {
 
 TableJanitor::TableJanitor(
     TableRepository* repo) :
@@ -66,6 +66,6 @@ void TableJanitor::run() {
   }
 }
 
-} // namespace eventdb
+} // namespace logtable
 } // namespace fnord
 

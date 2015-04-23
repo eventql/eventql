@@ -7,8 +7,8 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#ifndef _FNORD_EVENTDB_TABLECHUNKSUMMARYREADER_H
-#define _FNORD_EVENTDB_TABLECHUNKSUMMARYREADER_H
+#ifndef _FNORD_LOGTABLE_TABLECHUNKSUMMARYREADER_H
+#define _FNORD_LOGTABLE_TABLECHUNKSUMMARYREADER_H
 #include <fnord-base/stdtypes.h>
 #include <fnord-base/option.h>
 #include <fnord-base/autoref.h>
@@ -21,7 +21,7 @@
 #include <fnord-msg/MessageObject.h>
 
 namespace fnord {
-namespace eventdb {
+namespace logtable {
 
 class TableChunkSummaryReader {
 public:

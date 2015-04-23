@@ -7,10 +7,10 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <fnord-eventdb/TableArena.h>
+#include <fnord-logtable/TableArena.h>
 
 namespace fnord {
-namespace eventdb {
+namespace logtable {
 
 TableArena::TableArena(
     uint64_t start_sequence,
@@ -49,6 +49,6 @@ void TableArena::commit() {
   is_committed_ = true;
 }
 
-} // namespace eventdb
+} // namespace logtable
 } // namespace fnord
 

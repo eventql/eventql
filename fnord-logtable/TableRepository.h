@@ -7,16 +7,16 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#ifndef _FNORD_EVENTDB_TABLEREPOSITORY_H
-#define _FNORD_EVENTDB_TABLEREPOSITORY_H
+#ifndef _FNORD_LOGTABLE_TABLEREPOSITORY_H
+#define _FNORD_LOGTABLE_TABLEREPOSITORY_H
 #include <fnord-base/stdtypes.h>
-#include <fnord-eventdb/TableReader.h>
-#include <fnord-eventdb/TableWriter.h>
-#include <fnord-eventdb/ArtifactIndex.h>
+#include <fnord-logtable/TableReader.h>
+#include <fnord-logtable/TableWriter.h>
+#include <fnord-logtable/ArtifactIndex.h>
 #include <fnord-msg/MessageSchema.h>
 
 namespace fnord {
-namespace eventdb {
+namespace logtable {
 
 class TableRepository {
 public:
@@ -47,7 +47,7 @@ protected:
   TaskScheduler* scheduler_;
 };
 
-} // namespace eventdb
+} // namespace logtable
 } // namespace fnord
 
 #endif

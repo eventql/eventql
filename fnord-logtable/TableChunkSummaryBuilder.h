@@ -7,8 +7,8 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#ifndef _FNORD_EVENTDB_TABLECHUNKSUMMARYBUILDER_H
-#define _FNORD_EVENTDB_TABLECHUNKSUMMARYBUILDER_H
+#ifndef _FNORD_LOGTABLE_TABLECHUNKSUMMARYBUILDER_H
+#define _FNORD_LOGTABLE_TABLECHUNKSUMMARYBUILDER_H
 #include <fnord-base/stdtypes.h>
 #include <fnord-base/autoref.h>
 #include <fnord-base/random.h>
@@ -17,7 +17,7 @@
 #include <fnord-msg/MessageObject.h>
 
 namespace fnord {
-namespace eventdb {
+namespace logtable {
 class TableChunkSummaryWriter;
 
 class TableChunkSummaryBuilder : public RefCounted {

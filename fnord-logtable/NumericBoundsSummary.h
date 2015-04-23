@@ -7,15 +7,15 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#ifndef _FNORD_EVENTDB_NUMERICBOUNDSSUMMARYBUILDER_H
-#define _FNORD_EVENTDB_NUMERICBOUNDSSUMMARYBUILDER_H
+#ifndef _FNORD_LOGTABLE_NUMERICBOUNDSSUMMARYBUILDER_H
+#define _FNORD_LOGTABLE_NUMERICBOUNDSSUMMARYBUILDER_H
 #include <fnord-base/stdtypes.h>
 #include <fnord-base/util/binarymessagewriter.h>
 #include <fnord-base/util/binarymessagereader.h>
-#include <fnord-eventdb/TableChunkSummaryBuilder.h>
+#include <fnord-logtable/TableChunkSummaryBuilder.h>
 
 namespace fnord {
-namespace eventdb {
+namespace logtable {
 class TableChunkSummaryWriter;
 
 struct NumericBoundsSummary {
