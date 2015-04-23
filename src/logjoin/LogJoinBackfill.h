@@ -19,8 +19,8 @@
 #include "fnord-base/thread/queue.h"
 #include "fnord-base/wallclock.h"
 #include "fnord-base/cli/flagparser.h"
-#include "fnord-eventdb/TableRepository.h"
-#include "fnord-eventdb/LogTableTail.h"
+#include "fnord-logtable/TableRepository.h"
+#include "fnord-logtable/LogTableTail.h"
 #include "fnord-msg/MessageEncoder.h"
 #include "fnord-http/httpconnectionpool.h"
 
@@ -33,7 +33,7 @@ public:
   typedef Function<void (msg::MessageObject* record)> BackfillFnType;
 
   LogJoinBackfill(
-      RefPtr<eventdb::TableReader> table,
+      RefPtr<logtable::TableReader> table,
       BackfillFnType backfill_fn,
       const String& statefile,
       bool dry_run,
@@ -48,8 +48,8 @@ protected:
   size_t runWorker();
   size_t runUpload();
 
-  RefPtr<eventdb::TableReader> table_;
-  RefPtr<eventdb::LogTableTail> tail_;
+  RefPtr<logtable::TableReader> table_;
+  RefPtr<logtable::LogTableTail> tail_;
   BackfillFnType backfill_fn_;
   bool dry_run_;
   String statefile_;

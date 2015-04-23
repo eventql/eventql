@@ -29,7 +29,7 @@
 #include "fnord-sstable/SSTableColumnWriter.h"
 #include <fnord-fts/fts.h>
 #include <fnord-fts/fts_common.h>
-#include "fnord-eventdb/TableReader.h"
+#include "fnord-logtable/TableReader.h"
 #include "common.h"
 #include "schemas.h"
 #include "CustomerNamespace.h"
@@ -119,7 +119,7 @@ int main(int argc, const char** argv) {
   Random rnd;
   auto buildid = rnd.hex128();
 
-  auto table = eventdb::TableReader::open(
+  auto table = logtable::TableReader::open(
       "joined_sessions-dawanda",
       flags.getString("replica"),
       flags.getString("datadir"),
