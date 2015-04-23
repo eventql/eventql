@@ -177,7 +177,6 @@ int main(int argc, const char** argv) {
   auto readonly = flags.isSet("readonly");
   auto replica = flags.getString("replica");
 
-  Set<String> tbls  = { "joined_sessions-dawanda" };
   http::HTTPConnectionPool http(&ev);
 
   logtable::TableRepository table_repo(
@@ -187,9 +186,10 @@ int main(int argc, const char** argv) {
       &wpool);
 
   auto joined_sessions_schema = joinedSessionsSchema();
-  for (const auto& tbl : tbls) {
-    table_repo.addTable(tbl, joined_sessions_schema);
-  }
+  table_repo.addTable("joined_sessions-dawanda", joined_sessions_schema);
+  table_repo.addTable("index_feed-dawanda", indexChangeRequestSchema());
+
+  Set<String> tbls  = { "joined_sessions-dawanda", "index_feed-dawanda" };
 
   logtable::TableReplication table_replication(&http);
   logtable::ArtifactReplication artifact_replication(
@@ -201,11 +201,13 @@ int main(int argc, const char** argv) {
     for (const auto& tbl : tbls) {
       auto table = table_repo.findTableWriter(tbl);
 
-      table->addSummary([joined_sessions_schema] () {
-        return new logtable::NumericBoundsSummaryBuilder(
-            "queries.time-bounds",
-            joined_sessions_schema.id("queries.time"));
-      });
+      if (StringUtil::beginsWith(tbl, "joined_sessions")) {
+        table->addSummary([joined_sessions_schema] () {
+          return new logtable::NumericBoundsSummaryBuilder(
+              "queries.time-bounds",
+              joined_sessions_schema.id("queries.time"));
+        });
+      }
 
       table->runConsistencyCheck(
           flags.isSet("fsck"),
