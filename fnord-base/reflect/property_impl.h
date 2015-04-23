@@ -27,10 +27,21 @@ void PropertyReader<ClassType, TargetType>::prop(
     uint32_t id,
     const std::string& prop_name,
     bool optional) {
-  instance_.*prop = target_->template getProperty<
-      typename std::decay<decltype(instance_.*prop)>::type>(
-          id,
-          prop_name);
+  if (optional) {
+    auto opt = target_->template getOptionalProperty<
+        typename std::decay<decltype(instance_.*prop)>::type>(
+            id,
+            prop_name);
+
+    if (!opt.isEmpty()) {
+      instance_.*prop = opt.get();
+    }
+  } else {
+    instance_.*prop = target_->template getProperty<
+        typename std::decay<decltype(instance_.*prop)>::type>(
+            id,
+            prop_name);
+  }
 }
 
 template <typename ClassType, typename TargetType>
