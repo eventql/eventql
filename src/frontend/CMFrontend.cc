@@ -34,8 +34,10 @@ const unsigned char pixel_gif[42] = {
 };
 
 CMFrontend::CMFrontend(
-    feeds::RemoteFeedWriter* tracker_log_feed) :
-    tracker_log_feed_(tracker_log_feed) {
+    feeds::RemoteFeedWriter* tracker_log_feed,
+    thread::Queue<IndexChangeRequest>* indexfeed) :
+    tracker_log_feed_(tracker_log_feed),
+    indexfeed_(indexfeed) {
   //pixel_log_feed_ = feed_factory->getFeed("cm.tracker.log");
   exportStats("/cm-frontend/global");
   exportStats(StringUtil::format("/cm-frontend/by-host/$0", cmHostname()));
@@ -177,7 +179,8 @@ void CMFrontend::dispatchRPC(
     json::JSONRPCResponse* res) {
   if (req->method() == "index_document") {
     auto index_req = req->getArg<IndexChangeRequest>(0, "index_request");
-    recordIndexChangeRequest(index_req);
+    stat_index_requests_total_.incr(1);
+    indexfeed_->insert(index_req);
 
     res->success([] (json::JSONOutputStream* jos) {
       jos->addTrue();
@@ -238,17 +241,6 @@ void CMFrontend::recordLogLine(
       logline);
 
   tracker_log_feed_->appendEntry(feedline);
-}
-
-void CMFrontend::recordIndexChangeRequest(const IndexChangeRequest& index_request) {
-  stat_index_requests_total_.incr(1);
-
-  auto ir_feed_iter = index_request_feeds_.find(index_request.customer);
-  if (ir_feed_iter == index_request_feeds_.end()) {
-    RAISEF(kIndexError, "unknown customer: $0", index_request.customer);
-  }
-
-  ir_feed_iter->second->appendEntry(json::toJSONString(index_request));
 }
 
 } // namespace cm
