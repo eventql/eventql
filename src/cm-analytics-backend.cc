@@ -33,12 +33,12 @@
 #include "fnord-feeds/RemoteFeedReader.h"
 #include "fnord-base/stats/statsdagent.h"
 #include "fnord-sstable/SSTableServlet.h"
-#include "fnord-eventdb/EventDBServlet.h"
-#include "fnord-eventdb/TableRepository.h"
-#include "fnord-eventdb/TableJanitor.h"
-#include "fnord-eventdb/TableReplication.h"
-#include "fnord-eventdb/ArtifactReplication.h"
-#include "fnord-eventdb/NumericBoundsSummary.h"
+#include "fnord-logtable/LogTableServlet.h"
+#include "fnord-logtable/TableRepository.h"
+#include "fnord-logtable/TableJanitor.h"
+#include "fnord-logtable/TableReplication.h"
+#include "fnord-logtable/ArtifactReplication.h"
+#include "fnord-logtable/NumericBoundsSummary.h"
 #include "fnord-mdb/MDB.h"
 #include "fnord-mdb/MDBUtil.h"
 #include "common.h"
@@ -131,7 +131,7 @@ int main(int argc, const char** argv) {
   /* logtables */
   auto dir = flags.getString("datadir");
   auto replica = flags.getString("replica");
-  eventdb::TableRepository table_repo(
+  logtable::TableRepository table_repo(
       dir,
       replica,
       true,

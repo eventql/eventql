@@ -19,8 +19,8 @@
 #include "fnord-base/thread/queue.h"
 #include "fnord-base/wallclock.h"
 #include "fnord-base/cli/flagparser.h"
-#include "fnord-eventdb/TableRepository.h"
-#include "fnord-eventdb/LogTableTail.h"
+#include "fnord-logtable/TableRepository.h"
+#include "fnord-logtable/LogTableTail.h"
 #include "fnord-msg/MessageEncoder.h"
 #include "fnord-msg/MessagePrinter.h"
 #include "logjoin/LogJoinBackfill.h"
@@ -175,11 +175,11 @@ int main(int argc, const char** argv) {
   }
 
   Vector<URI> target_uris = {
-    URI("http://nue03.prod.fnrd.net:7003/eventdb/insert?table=joined_sessions-dawanda"),
-    URI("http://nue03.prod.fnrd.net:7003/eventdb/insert?table=joined_sessions-dawanda"),
-    URI("http://nue02.prod.fnrd.net:7003/eventdb/insert?table=joined_sessions-dawanda"),
-    URI("http://nue02.prod.fnrd.net:7003/eventdb/insert?table=joined_sessions-dawanda"),
-    URI("http://nue02.prod.fnrd.net:7003/eventdb/insert?table=joined_sessions-dawanda")
+    URI("http://nue03.prod.fnrd.net:7003/logtable/insert?table=joined_sessions-dawanda"),
+    URI("http://nue03.prod.fnrd.net:7003/logtable/insert?table=joined_sessions-dawanda"),
+    URI("http://nue02.prod.fnrd.net:7003/logtable/insert?table=joined_sessions-dawanda"),
+    URI("http://nue02.prod.fnrd.net:7003/logtable/insert?table=joined_sessions-dawanda"),
+    URI("http://nue02.prod.fnrd.net:7003/logtable/insert?table=joined_sessions-dawanda")
   };
 
 
@@ -192,7 +192,7 @@ int main(int argc, const char** argv) {
 
   /* open table */
   auto schema = joinedSessionsSchema();
-  auto table = eventdb::TableReader::open(
+  auto table = logtable::TableReader::open(
       "dawanda_joined_sessions",
       flags.getString("replica"),
       datadir,
