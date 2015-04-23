@@ -13,6 +13,7 @@
 #include <unordered_map>
 #include <vector>
 #include "fnord-base/buffer.h"
+#include "fnord-base/option.h"
 #include "fnord-json/jsontypes.h"
 #include "fnord-base/reflect/reflect.h"
 
@@ -36,6 +37,11 @@ public:
 
   template <typename PropertyType>
   PropertyType getProperty(uint32_t id, const std::string& name);
+
+  template <typename PropertyType>
+  Option<PropertyType> getOptionalProperty(
+      uint32_t id,
+      const std::string& name);
 
   JSONObject::const_iterator obj_begin;
   JSONObject::const_iterator obj_end;
