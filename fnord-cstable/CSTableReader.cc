@@ -85,6 +85,11 @@ RefPtr<ColumnReader> CSTableReader::getColumnReader(const String& column_name) {
   RAISEF(kIllegalStateError, "invalid column type: $0", (uint32_t) c.type);
 }
 
+bool CSTableReader::hasColumn(const String& column_name) const {
+  auto col = columns_.find(column_name);
+  return col != columns_.end();
+}
+
 void CSTableReader::getColumn(
     const String& column_name,
     void** data,
