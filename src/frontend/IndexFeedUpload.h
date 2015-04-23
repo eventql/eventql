@@ -9,7 +9,7 @@
 #ifndef _CM_INDEXFEEDUPLOAD_H
 #define _CM_INDEXFEEDUPLOAD_H
 #include "fnord-base/stdtypes.h"
-#include "fnord-base/thread/Queue.h"
+#include "fnord-base/thread/queue.h"
 #include "fnord-http/httpconnectionpool.h"
 #include "fnord-msg/MessageSchema.h"
 #include "IndexChangeRequest.h"
