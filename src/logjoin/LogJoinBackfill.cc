@@ -15,7 +15,7 @@ using namespace fnord;
 namespace cm {
 
 LogJoinBackfill::LogJoinBackfill(
-    RefPtr<eventdb::TableReader> table,
+    RefPtr<logtable::TableReader> table,
     BackfillFnType backfill_fn,
     const String& statefile,
     bool dry_run,
@@ -36,12 +36,12 @@ LogJoinBackfill::LogJoinBackfill(
   if (FileUtil::exists(statefile_)) {
     auto data = FileUtil::read(statefile_);
     util::BinaryMessageReader reader(data.data(), data.size());
-    eventdb::LogTableTailCursor cursor;
+    logtable::LogTableTailCursor cursor;
     cursor.decode(&reader);
-    tail_ = RefPtr<eventdb::LogTableTail>(
-        new eventdb::LogTableTail(table_, cursor));
+    tail_ = RefPtr<logtable::LogTableTail>(
+        new logtable::LogTableTail(table_, cursor));
   } else {
-    tail_ = RefPtr<eventdb::LogTableTail>(new eventdb::LogTableTail(table_));
+    tail_ = RefPtr<logtable::LogTableTail>(new logtable::LogTableTail(table_));
   }
 }
 

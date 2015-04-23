@@ -144,6 +144,13 @@ void LogJoinTarget::onSession(
       qry_obj.addChild(schema.id("queries.query_string_normalized"), qstr_norm);
     }
 
+    /* queries.shopid */
+    auto slrid = cm::extractAttr(q.attrs, "slrid");
+    if (!slrid.isEmpty()) {
+      uint32_t sid = std::stoul(slrid.get());
+      qry_obj.addChild(schema.id("queries.shop_id"), sid);
+    }
+
     /* queries.num_item_clicks, queries.num_items */
     uint32_t nitems = 0;
     uint32_t nclicks = 0;
@@ -155,7 +162,7 @@ void LogJoinTarget::onSession(
     uint32_t qcart_value_eurcents = 0;
     for (const auto& i : q.items) {
       // DAWANDA HACK
-      if (i.position >= 1 && i.position <= 4) {
+      if (i.position >= 1 && i.position <= 4 && slrid.isEmpty()) {
         ++nads;
         nadclicks += i.clicked;
       }
@@ -226,13 +233,6 @@ void LogJoinTarget::onSession(
     if (!qcat3.isEmpty()) {
       uint32_t c = std::stoul(qcat3.get());
       qry_obj.addChild(schema.id("queries.category3"), c);
-    }
-
-    /* queries.shopid */
-    auto slrid = cm::extractAttr(q.attrs, "slrid");
-    if (!slrid.isEmpty()) {
-      uint32_t sid = std::stoul(slrid.get());
-      qry_obj.addChild(schema.id("queries.shop_id"), sid);
     }
 
     /* queries.device_type */

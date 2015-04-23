@@ -33,12 +33,12 @@
 #include "fnord-feeds/RemoteFeedReader.h"
 #include "fnord-base/stats/statsdagent.h"
 #include "fnord-sstable/SSTableServlet.h"
-#include "fnord-eventdb/EventDBServlet.h"
-#include "fnord-eventdb/TableRepository.h"
-#include "fnord-eventdb/TableJanitor.h"
-#include "fnord-eventdb/TableReplication.h"
-#include "fnord-eventdb/ArtifactReplication.h"
-#include "fnord-eventdb/NumericBoundsSummary.h"
+#include "fnord-logtable/LogTableServlet.h"
+#include "fnord-logtable/TableRepository.h"
+#include "fnord-logtable/TableJanitor.h"
+#include "fnord-logtable/TableReplication.h"
+#include "fnord-logtable/ArtifactReplication.h"
+#include "fnord-logtable/NumericBoundsSummary.h"
 #include "fnord-mdb/MDB.h"
 #include "fnord-mdb/MDBUtil.h"
 #include "common.h"
@@ -172,7 +172,7 @@ int main(int argc, const char** argv) {
   wpool.start();
   repl_wpool.start();
 
-  /* eventdb */
+  /* logtable */
   auto dir = flags.getString("datadir");
   auto readonly = flags.isSet("readonly");
   auto replica = flags.getString("replica");
@@ -180,7 +180,7 @@ int main(int argc, const char** argv) {
   Set<String> tbls  = { "joined_sessions-dawanda" };
   http::HTTPConnectionPool http(&ev);
 
-  eventdb::TableRepository table_repo(
+  logtable::TableRepository table_repo(
       dir,
       replica,
       readonly,
@@ -191,8 +191,8 @@ int main(int argc, const char** argv) {
     table_repo.addTable(tbl, joined_sessions_schema);
   }
 
-  eventdb::TableReplication table_replication(&http);
-  eventdb::ArtifactReplication artifact_replication(
+  logtable::TableReplication table_replication(&http);
+  logtable::ArtifactReplication artifact_replication(
       &http,
       &repl_wpool,
       8);
@@ -202,7 +202,7 @@ int main(int argc, const char** argv) {
       auto table = table_repo.findTableWriter(tbl);
 
       table->addSummary([joined_sessions_schema] () {
-        return new eventdb::NumericBoundsSummaryBuilder(
+        return new logtable::NumericBoundsSummaryBuilder(
             "queries.time-bounds",
             joined_sessions_schema.id("queries.time"));
       });
@@ -215,7 +215,7 @@ int main(int argc, const char** argv) {
       for (const auto& rep : flags.getStrings("replicate_from")) {
         table_replication.replicateTableFrom(
             table,
-            URI(StringUtil::format("http://$0:7003/eventdb", rep)));
+            URI(StringUtil::format("http://$0:7003/logtable", rep)));
 
         artifact_sources.emplace_back(
             URI(StringUtil::format("http://$0:7005/chunks", rep)));
@@ -229,15 +229,15 @@ int main(int argc, const char** argv) {
     }
   }
 
-  eventdb::TableJanitor table_janitor(&table_repo);
+  logtable::TableJanitor table_janitor(&table_repo);
   if (!readonly) {
     table_janitor.start();
     table_replication.start();
     artifact_replication.start();
   }
 
-  eventdb::EventDBServlet eventdb_servlet(&table_repo);
-  http_router.addRouteByPrefixMatch("/eventdb", &eventdb_servlet, &tpool);
+  logtable::LogTableServlet logtable_servlet(&table_repo);
+  http_router.addRouteByPrefixMatch("/logtable", &logtable_servlet, &tpool);
   ev.run();
 
   if (!readonly) {
