@@ -153,7 +153,7 @@ msg::MessageSchema joinedSessionsSchema() {
       msg::FieldType::UINT32,
       250,
       false,
-      false,
+      true,
       msg::EncodingHint::BITPACK);
 
   queries.fields.emplace_back(
@@ -162,7 +162,7 @@ msg::MessageSchema joinedSessionsSchema() {
       msg::FieldType::UINT32,
       250,
       false,
-      false,
+      true,
       msg::EncodingHint::BITPACK);
 
   queries.fields.emplace_back(
@@ -171,7 +171,7 @@ msg::MessageSchema joinedSessionsSchema() {
       msg::FieldType::UINT32,
       0xffffff,
       false,
-      false,
+      true,
       msg::EncodingHint::LEB128);
 
   queries.fields.emplace_back(
@@ -180,7 +180,7 @@ msg::MessageSchema joinedSessionsSchema() {
       msg::FieldType::UINT32,
       0xffffff,
       false,
-      false,
+      true,
       msg::EncodingHint::LEB128);
 
   queries.fields.emplace_back(
