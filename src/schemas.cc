@@ -16,6 +16,51 @@ namespace cm {
 msg::MessageSchema joinedSessionsSchema() {
   Vector<msg::MessageSchemaField> fields;
 
+  fields.emplace_back(
+      47,
+      "num_cart_items",
+      msg::FieldType::UINT32,
+      250,
+      false,
+      false,
+      msg::EncodingHint::BITPACK);
+
+  fields.emplace_back(
+      48,
+      "num_order_items",
+      msg::FieldType::UINT32,
+      250,
+      false,
+      false,
+      msg::EncodingHint::BITPACK);
+
+  fields.emplace_back(
+      49,
+      "cart_value_eurcents",
+      msg::FieldType::UINT32,
+      0xffffff,
+      false,
+      false,
+      msg::EncodingHint::LEB128);
+
+  fields.emplace_back(
+      50,
+      "gmv_eurcents",
+      msg::FieldType::UINT32,
+      0xffffff,
+      false,
+      false,
+      msg::EncodingHint::LEB128);
+
+  fields.emplace_back(
+      51,
+      "ab_test_group",
+      msg::FieldType::UINT32,
+      100,
+      false,
+      true,
+      msg::EncodingHint::BITPACK);
+
   msg::MessageSchemaField queries(
       16,
       "queries",
@@ -103,6 +148,42 @@ msg::MessageSchema joinedSessionsSchema() {
       msg::EncodingHint::BITPACK);
 
   queries.fields.emplace_back(
+      43,
+      "num_cart_items",
+      msg::FieldType::UINT32,
+      250,
+      false,
+      false,
+      msg::EncodingHint::BITPACK);
+
+  queries.fields.emplace_back(
+      44,
+      "num_order_items",
+      msg::FieldType::UINT32,
+      250,
+      false,
+      false,
+      msg::EncodingHint::BITPACK);
+
+  queries.fields.emplace_back(
+      45,
+      "cart_value_eurcents",
+      msg::FieldType::UINT32,
+      0xffffff,
+      false,
+      false,
+      msg::EncodingHint::LEB128);
+
+  queries.fields.emplace_back(
+      46,
+      "gmv_eurcents",
+      msg::FieldType::UINT32,
+      0xffffff,
+      false,
+      false,
+      msg::EncodingHint::LEB128);
+
+  queries.fields.emplace_back(
       9,
       "ab_test_group",
       msg::FieldType::UINT32,
@@ -152,6 +233,15 @@ msg::MessageSchema joinedSessionsSchema() {
       "category3",
       msg::FieldType::UINT32,
       0xffff,
+      false,
+      true,
+      msg::EncodingHint::LEB128);
+
+  queries.fields.emplace_back(
+      32,
+      "shop_id",
+      msg::FieldType::UINT32,
+      0xffffffff,
       false,
       true,
       msg::EncodingHint::LEB128);
@@ -227,6 +317,166 @@ msg::MessageSchema joinedSessionsSchema() {
 
   queries.fields.emplace_back(query_items);
   fields.emplace_back(queries);
+
+  msg::MessageSchemaField item_visits(
+      25,
+      "item_visits",
+      msg::FieldType::OBJECT,
+      0,
+      true,
+      false);
+
+  item_visits.fields.emplace_back(
+      26,
+      "time",
+      msg::FieldType::UINT32,
+      0xffffffff,
+      false,
+      false);
+
+  item_visits.fields.emplace_back(
+      27,
+      "item_id",
+      msg::FieldType::STRING,
+      1024,
+      false,
+      false);
+
+  item_visits.fields.emplace_back(
+      28,
+      "shop_id",
+      msg::FieldType::UINT32,
+      0xffffffff,
+      false,
+      true,
+      msg::EncodingHint::LEB128);
+
+  item_visits.fields.emplace_back(
+      29,
+      "category1",
+      msg::FieldType::UINT32,
+      0xffff,
+      false,
+      true,
+      msg::EncodingHint::LEB128);
+
+  item_visits.fields.emplace_back(
+      30,
+      "category2",
+      msg::FieldType::UINT32,
+      0xffff,
+      false,
+      true,
+      msg::EncodingHint::LEB128);
+
+  item_visits.fields.emplace_back(
+      31,
+      "category3",
+      msg::FieldType::UINT32,
+      0xffff,
+      false,
+      true,
+      msg::EncodingHint::LEB128);
+
+  fields.emplace_back(item_visits);
+
+  msg::MessageSchemaField cart_items(
+      32,
+      "cart_items",
+      msg::FieldType::OBJECT,
+      0,
+      true,
+      false);
+
+  cart_items.fields.emplace_back(
+      33,
+      "time",
+      msg::FieldType::UINT32,
+      0xffffffff,
+      false,
+      false);
+
+  cart_items.fields.emplace_back(
+      34,
+      "item_id",
+      msg::FieldType::STRING,
+      1024,
+      false,
+      false);
+
+  cart_items.fields.emplace_back(
+      35,
+      "shop_id",
+      msg::FieldType::UINT32,
+      0xffffffff,
+      false,
+      true,
+      msg::EncodingHint::LEB128);
+
+  cart_items.fields.emplace_back(
+      36,
+      "category1",
+      msg::FieldType::UINT32,
+      0xffff,
+      false,
+      true,
+      msg::EncodingHint::LEB128);
+
+  cart_items.fields.emplace_back(
+      37,
+      "category2",
+      msg::FieldType::UINT32,
+      0xffff,
+      false,
+      true,
+      msg::EncodingHint::LEB128);
+
+  cart_items.fields.emplace_back(
+      38,
+      "category3",
+      msg::FieldType::UINT32,
+      0xffff,
+      false,
+      true,
+      msg::EncodingHint::LEB128);
+
+  cart_items.fields.emplace_back(
+      39,
+      "quantity",
+      msg::FieldType::UINT32,
+      0xffff,
+      false,
+      false,
+      msg::EncodingHint::LEB128);
+
+  cart_items.fields.emplace_back(
+      40,
+      "price_cents",
+      msg::FieldType::UINT32,
+      0xffffffff,
+      false,
+      false,
+      msg::EncodingHint::LEB128);
+
+  cart_items.fields.emplace_back(
+      41,
+      "currency",
+      msg::FieldType::UINT32,
+      kMaxCurrency,
+      false,
+      false,
+      msg::EncodingHint::BITPACK);
+
+  cart_items.fields.emplace_back(
+      42,
+      "checkout_step",
+      msg::FieldType::UINT32,
+      32,
+      false,
+      false,
+      msg::EncodingHint::BITPACK);
+
+  fields.emplace_back(cart_items);
 
   return msg::MessageSchema("joined_session", fields);
 }
