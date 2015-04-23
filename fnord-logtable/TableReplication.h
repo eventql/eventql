@@ -7,17 +7,17 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#ifndef _FNORD_EVENTDB_TABLEREPLICATION_H
-#define _FNORD_EVENTDB_TABLEREPLICATION_H
+#ifndef _FNORD_LOGTABLE_TABLEREPLICATION_H
+#define _FNORD_LOGTABLE_TABLEREPLICATION_H
 #include <thread>
 #include <fnord-base/stdtypes.h>
 #include <fnord-base/uri.h>
-#include <fnord-eventdb/TableRepository.h>
+#include <fnord-logtable/TableRepository.h>
 #include "fnord-http/httprequest.h"
 #include "fnord-http/httpconnectionpool.h"
 
 namespace fnord {
-namespace eventdb {
+namespace logtable {
 
 class TableReplication {
 public:
@@ -47,7 +47,7 @@ protected:
   http::HTTPConnectionPool* http_;
 };
 
-} // namespace eventdb
+} // namespace logtable
 } // namespace fnord
 
 #endif

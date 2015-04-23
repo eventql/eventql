@@ -7,10 +7,10 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <fnord-eventdb/TableRepository.h>
+#include <fnord-logtable/TableRepository.h>
 
 namespace fnord {
-namespace eventdb {
+namespace logtable {
 
 TableRepository::TableRepository(
     const String& db_path,
@@ -109,5 +109,5 @@ const String& TableRepository::replicaID() const {
   return replica_id_;
 }
 
-} // namespace eventdb
+} // namespace logtable
 } // namespace fnord

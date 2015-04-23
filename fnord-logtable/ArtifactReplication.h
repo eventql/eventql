@@ -7,17 +7,17 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#ifndef _FNORD_EVENTDB_ARTIFACTREPLICATION_H
-#define _FNORD_EVENTDB_ARTIFACTREPLICATION_H
+#ifndef _FNORD_LOGTABLE_ARTIFACTREPLICATION_H
+#define _FNORD_LOGTABLE_ARTIFACTREPLICATION_H
 #include <thread>
 #include <fnord-base/stdtypes.h>
 #include <fnord-base/uri.h>
-#include <fnord-eventdb/ArtifactIndex.h>
+#include <fnord-logtable/ArtifactIndex.h>
 #include "fnord-http/httprequest.h"
 #include "fnord-http/httpconnectionpool.h"
 
 namespace fnord {
-namespace eventdb {
+namespace logtable {
 
 class ArtifactReplication {
 public:
@@ -73,7 +73,7 @@ protected:
   HashMap<String, uint64_t> retry_map_;
 };
 
-} // namespace eventdb
+} // namespace logtable
 } // namespace fnord
 
 #endif

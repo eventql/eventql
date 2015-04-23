@@ -7,15 +7,15 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include "fnord-eventdb/EventDBServlet.h"
+#include "fnord-logtable/LogTableServlet.h"
 #include "fnord-json/json.h"
 
 namespace fnord {
-namespace eventdb {
+namespace logtable {
 
-EventDBServlet::EventDBServlet(TableRepository* tables) : tables_(tables) {}
+LogTableServlet::LogTableServlet(TableRepository* tables) : tables_(tables) {}
 
-void EventDBServlet::handleHTTPRequest(
+void LogTableServlet::handleHTTPRequest(
     fnord::http::HTTPRequest* req,
     fnord::http::HTTPResponse* res) {
   URI uri(req->uri());
@@ -55,7 +55,7 @@ void EventDBServlet::handleHTTPRequest(
   }
 }
 
-void EventDBServlet::insertRecord(
+void LogTableServlet::insertRecord(
     http::HTTPRequest* req,
     http::HTTPResponse* res,
     URI* uri) {
@@ -79,7 +79,7 @@ void EventDBServlet::insertRecord(
   }
 }
 
-void EventDBServlet::commitTable(
+void LogTableServlet::commitTable(
     http::HTTPRequest* req,
     http::HTTPResponse* res,
     URI* uri) {
@@ -99,7 +99,7 @@ void EventDBServlet::commitTable(
   res->addBody(StringUtil::toString(n));
 }
 
-void EventDBServlet::mergeTable(
+void LogTableServlet::mergeTable(
     http::HTTPRequest* req,
     http::HTTPResponse* res,
     URI* uri) {
@@ -118,7 +118,7 @@ void EventDBServlet::mergeTable(
   res->setStatus(http::kStatusOK);
 }
 
-void EventDBServlet::gcTable(
+void LogTableServlet::gcTable(
     http::HTTPRequest* req,
     http::HTTPResponse* res,
     URI* uri) {
@@ -137,7 +137,7 @@ void EventDBServlet::gcTable(
   res->setStatus(http::kStatusOK);
 }
 
-void EventDBServlet::tableInfo(
+void LogTableServlet::tableInfo(
     http::HTTPRequest* req,
     http::HTTPResponse* res,
     URI* uri) {
@@ -281,7 +281,7 @@ void EventDBServlet::tableInfo(
   j.endObject();
 }
 
-void EventDBServlet::tableSnapshot(
+void LogTableServlet::tableSnapshot(
     http::HTTPRequest* req,
     http::HTTPResponse* res,
     URI* uri) {

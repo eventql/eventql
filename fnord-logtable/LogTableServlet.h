@@ -7,23 +7,23 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#ifndef _FNORD_EVENTDB_EVENTDBSERVLET_H
-#define _FNORD_EVENTDB_EVENTDBSERVLET_H
+#ifndef _FNORD_LOGTABLE_LOGTABLESERVLET_H
+#define _FNORD_LOGTABLE_LOGTABLESERVLET_H
 #include "fnord-http/httpservice.h"
 #include "fnord-json/json.h"
-#include <fnord-eventdb/TableRepository.h>
+#include <fnord-logtable/TableRepository.h>
 
 namespace fnord {
-namespace eventdb {
+namespace logtable {
 
-class EventDBServlet : public fnord::http::HTTPService {
+class LogTableServlet : public fnord::http::HTTPService {
 public:
   enum class ResponseFormat {
     JSON,
     CSV
   };
 
-  EventDBServlet(TableRepository* tables);
+  LogTableServlet(TableRepository* tables);
 
   void handleHTTPRequest(
       http::HTTPRequest* req,

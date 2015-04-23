@@ -7,22 +7,21 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#ifndef _FNORD_EVENTDB_TABLECHUNKSUMMARY_H
-#define _FNORD_EVENTDB_TABLECHUNKSUMMARY_H
+#ifndef _FNORD_LOGTABLE_CHUNKINDEXWRITER_H
+#define _FNORD_LOGTABLE_CHUNKINDEXWRITER_H
 #include <fnord-base/stdtypes.h>
-#include <fnord-base/autoref.h>
-#include <fnord-base/random.h>
-#include <fnord-base/io/FileLock.h>
-#include <fnord-msg/MessageSchema.h>
-#include <fnord-msg/MessageObject.h>
 
 namespace fnord {
-namespace eventdb {
+namespace cstable {
 
-enum class TableChunkSummaryType : uint16_t {
-  UINT_MINMAX
+class ChunkIndexWriter {
+public:
+
+  ChunkIndexWriter(const String& directory, bool create);
+
 };
 
-}
-}
+} // namespace logtable
+} // namespace fnord
+
 #endif

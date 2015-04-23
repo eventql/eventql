@@ -7,8 +7,8 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#ifndef _FNORD_EVENTDB_TABLE_H
-#define _FNORD_EVENTDB_TABLE_H
+#ifndef _FNORD_LOGTABLE_TABLE_H
+#define _FNORD_LOGTABLE_TABLE_H
 #include <fnord-base/stdtypes.h>
 #include <fnord-base/autoref.h>
 #include <fnord-base/random.h>
@@ -16,10 +16,10 @@
 #include <fnord-base/thread/taskscheduler.h>
 #include <fnord-msg/MessageSchema.h>
 #include <fnord-msg/MessageObject.h>
-#include <fnord-eventdb/ArtifactIndex.h>
-#include <fnord-eventdb/TableArena.h>
-#include <fnord-eventdb/TableSnapshot.h>
-#include <fnord-eventdb/TableChunkSummaryBuilder.h>
+#include <fnord-logtable/ArtifactIndex.h>
+#include <fnord-logtable/TableArena.h>
+#include <fnord-logtable/TableSnapshot.h>
+#include <fnord-logtable/TableChunkSummaryBuilder.h>
 #include "fnord-sstable/sstablereader.h"
 #include "fnord-sstable/sstablewriter.h"
 #include "fnord-sstable/SSTableColumnSchema.h"
@@ -30,7 +30,7 @@
 #include "fnord-cstable/CSTableBuilder.h"
 
 namespace fnord {
-namespace eventdb {
+namespace logtable {
 
 class TableChunkWriter : public RefCounted {
 public:
@@ -175,7 +175,7 @@ protected:
   Duration gc_delay_;
 };
 
-} // namespace eventdb
+} // namespace logtable
 } // namespace fnord
 
 #endif

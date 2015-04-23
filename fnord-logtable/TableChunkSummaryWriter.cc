@@ -7,10 +7,10 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <fnord-eventdb/TableChunkSummaryWriter.h>
+#include <fnord-logtable/TableChunkSummaryWriter.h>
 
 namespace fnord {
-namespace eventdb {
+namespace logtable {
 
 TableChunkSummaryWriter::TableChunkSummaryWriter(
     const String& output_filename) :

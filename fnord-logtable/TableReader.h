@@ -7,19 +7,19 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#ifndef _FNORD_EVENTDB_TABLEREADER_H
-#define _FNORD_EVENTDB_TABLEREADER_H
+#ifndef _FNORD_LOGTABLE_TABLEREADER_H
+#define _FNORD_LOGTABLE_TABLEREADER_H
 #include <fnord-base/stdtypes.h>
 #include <fnord-base/autoref.h>
 #include <fnord-msg/MessageSchema.h>
 #include <fnord-msg/MessageObject.h>
-#include <fnord-eventdb/TableArena.h>
-#include <fnord-eventdb/TableSnapshot.h>
+#include <fnord-logtable/TableArena.h>
+#include <fnord-logtable/TableSnapshot.h>
 #include "fnord-sstable/sstablereader.h"
 #include "fnord-cstable/CSTableReader.h"
 
 namespace fnord {
-namespace eventdb {
+namespace logtable {
 
 class TableReader : public RefCounted {
 public:
@@ -65,7 +65,7 @@ protected:
   uint64_t head_gen_;
 };
 
-} // namespace eventdb
+} // namespace logtable
 } // namespace fnord
 
 #endif

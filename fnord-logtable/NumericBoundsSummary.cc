@@ -7,11 +7,11 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <fnord-eventdb/NumericBoundsSummary.h>
-#include <fnord-eventdb/TableChunkSummaryWriter.h>
+#include <fnord-logtable/NumericBoundsSummary.h>
+#include <fnord-logtable/TableChunkSummaryWriter.h>
 
 namespace fnord {
-namespace eventdb {
+namespace logtable {
 
 void NumericBoundsSummary::encode(util::BinaryMessageWriter* writer) const {
   writer->appendVarUInt(min_value);

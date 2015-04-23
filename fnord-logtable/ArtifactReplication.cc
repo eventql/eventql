@@ -11,10 +11,10 @@
 #include <fnord-base/logging.h>
 #include <fnord-base/wallclock.h>
 #include <fnord-http/HTTPFileDownload.h>
-#include <fnord-eventdb/ArtifactReplication.h>
+#include <fnord-logtable/ArtifactReplication.h>
 
 namespace fnord {
-namespace eventdb {
+namespace logtable {
 
 ArtifactReplication::ArtifactReplication(
     http::HTTPConnectionPool* http,
@@ -273,6 +273,6 @@ void ArtifactReplication::run() {
   }
 }
 
-} // namespace eventdb
+} // namespace logtable
 } // namespace fnord
 

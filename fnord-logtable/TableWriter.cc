@@ -9,8 +9,8 @@
  */
 #include <algorithm>
 #include <thread>
-#include <fnord-eventdb/TableWriter.h>
-#include <fnord-eventdb/TableChunkSummaryWriter.h>
+#include <fnord-logtable/TableWriter.h>
+#include <fnord-logtable/TableChunkSummaryWriter.h>
 #include <fnord-base/logging.h>
 #include <fnord-base/io/fileutil.h>
 #include <fnord-base/io/FileLock.h>
@@ -22,7 +22,7 @@
 #include <fnord-msg/MessagePrinter.h>
 
 namespace fnord {
-namespace eventdb {
+namespace logtable {
 
 RefPtr<TableWriter> TableWriter::open(
     const String& table_name,
@@ -875,6 +875,6 @@ void TableWriter::runConsistencyCheck(
   artifacts_.runConsistencyCheck(check_checksums, repair);
 }
 
-} // namespace eventdb
+} // namespace logtable
 } // namespace fnord
 

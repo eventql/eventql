@@ -9,14 +9,14 @@
  */
 #include <algorithm>
 #include <thread>
-#include <fnord-eventdb/TableReader.h>
+#include <fnord-logtable/TableReader.h>
 #include <fnord-base/logging.h>
 #include <fnord-base/io/fileutil.h>
 #include <fnord-msg/MessageDecoder.h>
 #include <fnord-msg/MessageEncoder.h>
 
 namespace fnord {
-namespace eventdb {
+namespace logtable {
 
 static uint64_t findHeadGen(
     const String& table_name,
@@ -134,7 +134,7 @@ RefPtr<TableSnapshot> TableReader::getSnapshot() {
 
   return new TableSnapshot(
       head,
-      List<RefPtr<fnord::eventdb::TableArena>>{});
+      List<RefPtr<fnord::logtable::TableArena>>{});
 }
 
 size_t TableReader::fetchRecords(
@@ -220,6 +220,6 @@ size_t TableReader::fetchRecords(
   return n;
 }
 
-} // namespace eventdb
+} // namespace logtable
 } // namespace fnord
 

@@ -7,18 +7,18 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#ifndef _FNORD_EVENTDB_LOGTABLETAIL_H
-#define _FNORD_EVENTDB_LOGTABLETAIL_H
+#ifndef _FNORD_LOGTABLE_LOGTABLETAIL_H
+#define _FNORD_LOGTABLE_LOGTABLETAIL_H
 #include <fnord-base/stdtypes.h>
 #include <fnord-base/autoref.h>
 #include <fnord-base/util/binarymessagereader.h>
 #include <fnord-base/util/binarymessagewriter.h>
 #include <fnord-msg/MessageSchema.h>
 #include <fnord-msg/MessageObject.h>
-#include <fnord-eventdb/TableReader.h>
+#include <fnord-logtable/TableReader.h>
 
 namespace fnord {
-namespace eventdb {
+namespace logtable {
 
 struct LogTableTailOffset {
   String replica_id;
@@ -49,7 +49,7 @@ protected:
   HashMap<String, uint64_t> offsets_;
 };
 
-} // namespace eventdb
+} // namespace logtable
 } // namespace fnord
 
 #endif
