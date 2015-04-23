@@ -103,8 +103,9 @@ add_executable(cm-logjoin
     $<TARGET_OBJECTS:fnord-rpc>
     $<TARGET_OBJECTS:fnord-msg>
     $<TARGET_OBJECTS:fnord-fts>
-    src/logjoin/TrackedQuery.cc
+    src/logjoin/TrackedCartItem.cc
     src/logjoin/TrackedItemVisit.cc
+    src/logjoin/TrackedQuery.cc
     src/logjoin/TrackedSession.cc
     src/FeatureIndexWriter.cc
     src/cm-logjoin.cc
