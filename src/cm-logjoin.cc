@@ -257,13 +257,13 @@ int main(int argc, const char** argv) {
       joined_sessions_schema.toString());
 
   /* open session db */
-  auto sessdb_path = FileUtil::joinPaths(
+  auto sessdb = mdb::MDB::open(
       flags.getString("datadir"),
-      StringUtil::format("$0/sessions_db", shard.shard_name));
-
-  FileUtil::mkdir_p(sessdb_path);
-  auto sessdb = mdb::MDB::open(sessdb_path);
-  sessdb->setMaxSize(1000000 * flags.getInt("db_size"));
+      false,
+      1000000 * flags.getInt("db_size"),
+      shard.shard_name + ".db",
+      shard.shard_name + ".db.lck",
+      false);
 
   /* set up input feed reader */
   feeds::RemoteFeedReader feed_reader(&rpc_client);
@@ -467,7 +467,7 @@ int main(int argc, const char** argv) {
     stat_stream_time_low.set(watermarks.first.unixMicros());
     stat_stream_time_high.set(watermarks.second.unixMicros());
     stat_active_sessions.set(logjoin.numSessions());
-    stat_dbsize.set(FileUtil::du_c(sessdb_path));
+    //stat_dbsize.set(FileUtil::du_c(flags.getString("datadir"));
 
     auto rtime = WallClock::unixMicros() - begin;
     if (rtime < kMicrosPerSecond) {
@@ -479,10 +479,8 @@ int main(int argc, const char** argv) {
   ev.shutdown();
   evloop_thread.join();
 
-
+  sessdb->sync();
   fnord::logInfo("cm.logjoin", "LogJoin exiting...");
-  //exit(0); // FIXPAUL
-
   return 0;
 }
 
