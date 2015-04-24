@@ -161,8 +161,10 @@ add_executable(cm-indexbuild
     $<TARGET_OBJECTS:fnord-feeds>
     $<TARGET_OBJECTS:fnord-rpc>
     $<TARGET_OBJECTS:fnord-mdb>
+    $<TARGET_OBJECTS:fnord-msg>
     src/cm-indexbuild.cc
     src/IndexWriter.cc
+    src/schemas.cc
     src/DocStore.cc
     src/FeatureIndexWriter.cc)
 
