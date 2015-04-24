@@ -481,4 +481,53 @@ msg::MessageSchema joinedSessionsSchema() {
   return msg::MessageSchema("joined_session", fields);
 }
 
+msg::MessageSchema indexChangeRequestSchema() {
+  Vector<msg::MessageSchemaField> fields;
+
+  fields.emplace_back(
+      1,
+      "customer",
+      msg::FieldType::STRING,
+      250,
+      false,
+      false);
+
+  fields.emplace_back(
+      2,
+      "docid",
+      msg::FieldType::STRING,
+      1024,
+      false,
+      false);
+
+  msg::MessageSchemaField attributes(
+      3,
+      "attributes",
+      msg::FieldType::OBJECT,
+      0,
+      true,
+      false);
+
+  attributes.fields.emplace_back(
+      4,
+      "key",
+      msg::FieldType::STRING,
+      1024,
+      false,
+      false);
+
+  attributes.fields.emplace_back(
+      5,
+      "value",
+      msg::FieldType::STRING,
+      0xffffffff,
+      false,
+      false);
+
+  fields.emplace_back(attributes);
+  return msg::MessageSchema("IndexChangeRequest", fields);
+}
+
+
+
 }
