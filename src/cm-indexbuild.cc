@@ -90,6 +90,15 @@ int main(int argc, const char** argv) {
       "<num>");
 
   flags.defineFlag(
+      "commit_interval",
+      fnord::cli::FlagParser::T_INTEGER,
+      false,
+      NULL,
+      "5",
+      "commit_interval",
+      "<num>");
+
+  flags.defineFlag(
       "db_size",
       fnord::cli::FlagParser::T_INTEGER,
       false,
@@ -117,6 +126,10 @@ int main(int argc, const char** argv) {
   });
 
   http::HTTPConnectionPool http(&ev);
+
+  /* args */
+  auto batch_size = flags.getInt("batch_size");
+  uint64_t rate_limit_micros = flags.getInt("commit_interval") * kMicrosPerSecond;
 
   /* open index */
   fnord::logInfo(
@@ -186,8 +199,10 @@ int main(int argc, const char** argv) {
   };
 
   /* fetch from logtable in batches */
-  auto batch_size = flags.getInt("batch_size");
+  DateTime last_run;
   for (;;) {
+    auto t0 = WallClock::unixMicros();
+
     tail->fetchNext(on_record, batch_size);
 
     auto cursor = tail->getCursor();
@@ -201,6 +216,11 @@ int main(int argc, const char** argv) {
 
     index.saveCursor(cursor_buf.data(), cursor_buf.size());
     index.commit();
+
+    auto t1 = WallClock::unixMicros();
+    if ((t1 - t0) < rate_limit_micros) {
+      usleep(rate_limit_micros - (t1 - t0));
+    }
   }
 
   /* sthudown */
