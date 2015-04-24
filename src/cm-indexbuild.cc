@@ -63,6 +63,15 @@ int main(int argc, const char** argv) {
       "<path>");
 
   flags.defineFlag(
+      "fetch_from",
+      fnord::cli::FlagParser::T_STRING,
+      true,
+      NULL,
+      NULL,
+      "feed source",
+      "<addr>");
+
+  flags.defineFlag(
       "statsd_addr",
       fnord::cli::FlagParser::T_STRING,
       false,
@@ -124,7 +133,7 @@ int main(int argc, const char** argv) {
   RefPtr<logtable::RemoteTableReader> table(new logtable::RemoteTableReader(
       "index_feed-dawanda",
       indexChangeRequestSchema(),
-      URI("http://nue03.prod.fnrd.net:7009/logtable"),
+      URI(flags.getString("fetch_from")),
       &http));
 
   /* open logtable tail at last cursor */
