@@ -202,8 +202,7 @@ int main(int argc, const char** argv) {
   DateTime last_run;
   for (;;) {
     auto t0 = WallClock::unixMicros();
-
-    tail->fetchNext(on_record, batch_size);
+    auto eof_reached = !tail->fetchNext(on_record, batch_size);
 
     auto cursor = tail->getCursor();
     util::BinaryMessageWriter cursor_buf;
@@ -218,7 +217,7 @@ int main(int argc, const char** argv) {
     index.commit();
 
     auto t1 = WallClock::unixMicros();
-    if ((t1 - t0) < rate_limit_micros) {
+    if (eof_reached && t1 - t0 < rate_limit_micros) {
       usleep(rate_limit_micros - (t1 - t0));
     }
   }
