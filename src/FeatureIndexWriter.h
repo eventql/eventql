@@ -60,11 +60,22 @@ public:
   void commit(bool sync = false);
 
 protected:
+  uint32_t getOrCreateFieldID(const String& field_name);
 
-  HashMap<String, uint32_t> schema_;
+  void writeDocument(
+      const DocID& docid,
+      const HashMap<uint32_t, String>& fields);
+
+  void readDocument(
+      const DocID& docid,
+      HashMap<uint32_t, String>* fields,
+      const Set<uint32_t>& select = Set<uint32_t>{});
+
   bool readonly_;
   RefPtr<mdb::MDB> db_;
   RefPtr<mdb::MDBTransaction> txn_;
+  uint32_t max_field_id_;
+  HashMap<String, uint32_t> field_ids_;
 };
 
 } // namespace cm

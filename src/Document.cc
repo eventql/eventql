@@ -22,12 +22,6 @@ const HashMap<String, String>& Document::fields() const {
   return fields_;
 }
 
-void Document::update(const IndexChangeRequest& index_req) {
-  for (const auto& a : index_req.attrs) {
-    fields_[a.first] = a.second;
-  }
-}
-
 void Document::setField(const String& field, const String& value) {
   fields_[field] = value;
 }

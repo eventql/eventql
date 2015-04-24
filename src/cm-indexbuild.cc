@@ -121,6 +121,11 @@ int main(int argc, const char** argv) {
       "Opening index at $0",
       flags.getString("index"));
 
+  FeatureIndexWriter index(
+      flags.getString("index"),
+      "documents-dawanda",
+      false);
+
   logtable::RemoteTableReader table(
       "index_feed-dawanda",
       indexChangeRequestSchema(),
@@ -128,12 +133,10 @@ int main(int argc, const char** argv) {
       &http);
 
   auto schema = indexChangeRequestSchema();
-  auto on_record = [&schema] (const msg::MessageObject& rec) -> bool {
+  auto on_record = [&schema, &index] (const msg::MessageObject& rec) -> bool {
+    //auto customer = rec.getString(schema.id("customer"));
+
     Vector<Pair<String, String>> attrs;
-
-    auto docid = rec.getString(schema.id("docid"));
-    auto customer = rec.getString(schema.id("customer"));
-
     for (const auto& attr : rec.getObjects(schema.id("attributes"))) {
       auto key = attr->getString(schema.id("attributes.key"));
       auto value = attr->getString(schema.id("attributes.value"));
@@ -143,12 +146,14 @@ int main(int argc, const char** argv) {
       }
     }
 
-    fnord::iputs("$1: $0 => $2", docid, customer, attrs);
+    DocID docid { .docid = rec.getString(schema.id("docid")) };
+    index.updateDocument(docid, attrs);
 
     return true;
   };
 
   table.fetchRecords("nue03", 1, 10, on_record);
+  index.commit();
 
   ev.shutdown();
   evloop_thread.join();

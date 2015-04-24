@@ -19,9 +19,36 @@ FeatureIndexWriter::FeatureIndexWriter(
     bool readonly) :
     readonly_(readonly),
     db_(nullptr),
-    txn_(nullptr) {
+    txn_(nullptr),
+    max_field_id_(0) {
   db_ = mdb::MDB::open(db_path, false, 68719476736lu); // 64 GiB
   txn_ = db_->startTransaction(readonly_);
+
+  Buffer key;
+  Buffer value;
+  auto cursor = txn_->getCursor();
+  for (int i = 0; ; ++i) {
+    if (i == 0) {
+      key.append("__f_");
+      if (!cursor->getFirstOrGreater(&key, &value)) {
+        break;
+      }
+    } else {
+      if (!cursor->getNext(&key, &value)) {
+        break;
+      }
+    }
+
+    if (!StringUtil::beginsWith(key.toString(), "__f_")) {
+      break;
+    }
+
+    field_ids_.emplace(
+        key.toString().substr(4),
+        std::stoul(value.toString()));
+  }
+
+  cursor->close();
 }
 
 FeatureIndexWriter::~FeatureIndexWriter() {
@@ -35,19 +62,132 @@ void FeatureIndexWriter::commit(bool sync /* = false */) {
   txn_ = db_->startTransaction(readonly_);
 }
 
-//void FeatureIndexWriter::updateDocument(const IndexChangeRequest& index_request) {
-//  logDebug(
-//      "cm.indexbuild",
-//      "Indexing document: customer=$0 docid=$1 num_attrs=$2",
-//      index_request.customer,
-//      index_request.item.docID().docid,
-//      index_request.attrs.size());
-//
-//  updateIndex(index_request);
-//}
+Option<String> FeatureIndexWriter::getField(
+    const DocID& docid,
+    const String& field) {
+  auto fid = field_ids_.find(field);
+  if (fid == field_ids_.end()) {
+    RAISEF(kIndexError, "unknown field: $0", field);
+  }
 
-//RefPtr<Document> FeatureIndexWriter::findDocument(const DocID& docid) {
-//  RefPtr<Document> doc(new Document(docid));
+  HashMap<uint32_t, String> doc;
+  Set<uint32_t> fields = { fid->second };
+  readDocument(docid, &doc, fields);
+
+  auto res = doc.find(fid->second);
+  if (res == doc.end()) {
+    return None<String>();
+  } else {
+    return Some(res->second);
+  }
+}
+
+void FeatureIndexWriter::updateDocument(
+    const DocID& docid,
+    const Vector<Pair<String, String>>& fields) {
+  HashMap<uint32_t, String> doc;
+  readDocument(docid, &doc);
+
+  bool dirty = false;
+  for (const auto& f : fields) {
+    auto fid = getOrCreateFieldID(f.first);
+    auto& slot = doc[fid];
+
+    if (slot != f.second) {
+      dirty = true;
+      slot = f.second;
+    }
+  }
+
+  if (dirty) {
+    writeDocument(docid, doc);
+  }
+}
+
+uint32_t FeatureIndexWriter::getOrCreateFieldID(const String& field_name) {
+  auto id = field_ids_.find(field_name);
+  if (id == field_ids_.end()) {
+    auto new_id = ++max_field_id_;
+    txn_->insert("__f_" + field_name, StringUtil::toString(new_id));
+    field_ids_.emplace(field_name, new_id);
+    return new_id;
+  } else {
+    return id->second;
+  }
+}
+
+RefPtr<Document> FeatureIndexWriter::findDocument(const DocID& docid) {
+  RefPtr<Document> doc(new Document(docid));
+  return doc;
+}
+
+
+void FeatureIndexWriter::writeDocument(
+    const DocID& docid,
+    const HashMap<uint32_t, String>& fields) {
+  util::BinaryMessageWriter writer;
+
+  auto offset = 0;
+  for (const auto& f : fields) {
+    writer.appendVarUInt(f.first);
+    writer.appendVarUInt(offset);
+    offset += f.second.size();
+  }
+
+  writer.appendVarUInt(0);
+  writer.appendVarUInt(offset);
+
+  for (const auto& f : fields) {
+    writer.append(f.second.data(), f.second.size());
+  }
+
+  txn_->update(
+      docid.docid.data(),
+      docid.docid.size(),
+      writer.data(),
+      writer.size());
+}
+
+
+void FeatureIndexWriter::readDocument(
+    const DocID& docid,
+    HashMap<uint32_t, String>* fields,
+    const Set<uint32_t>& select /* = Set<uint32_t>{} */) {
+  void* val;
+  size_t val_size;
+
+  if (!txn_->get(docid.docid.data(), docid.docid.size(), &val, &val_size)) {
+    return;
+  }
+
+  Vector<Pair<uint32_t, uint32_t>> offsets;
+
+  util::BinaryMessageReader reader(val, val_size);
+  for (;;) {
+    auto fid = reader.readVarUInt();
+    auto off = reader.readVarUInt();
+    offsets.emplace_back(fid, off);
+
+    if (fid == 0) {
+      break;
+    }
+  }
+
+  auto begin = reader.position();
+
+  for (int i = 0; i < offsets.size() - 1; ++i) {
+    auto fid = offsets[i].first;
+
+    if (select.empty() || select.count(fid) > 0) {
+      fields->emplace(
+          fid,
+          String(
+              (char*) val + begin + offsets[i].second,
+              offsets[i + 1].second - offsets[i].second));
+    }
+  }
+}
+
 //
 //  FeaturePack features;
 //  for (const auto& group : schema_.groupIDs()) {
@@ -210,16 +350,7 @@ void FeatureIndexWriter::commit(bool sync /* = false */) {
 //  }
 //}
 //
-//Option<String> FeatureIndexWriter::getField(
-//    const DocID& docid,
-//    const String& feature) {
-//  auto fid = schema_.featureID(feature);
-//  if (fid.isEmpty()) {
-//    RAISEF(kIndexError, "unknown feature: $0", feature);
-//  }
-//
-//  return getField(docid, fid.get());
-//}
+
 //
 //Option<String> FeatureIndexWriter::getField(
 //    const DocID& docid,
