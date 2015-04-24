@@ -36,6 +36,11 @@ protected:
     http::HTTPResponse* res,
     URI* uri);
 
+  void fetchRecords(
+    http::HTTPRequest* req,
+    http::HTTPResponse* res,
+    URI* uri);
+
   void commitTable(
     http::HTTPRequest* req,
     http::HTTPResponse* res,
