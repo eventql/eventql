@@ -35,8 +35,8 @@ struct LogTableTailCursor {
 class LogTableTail : public RefCounted {
 public:
 
-  LogTableTail(RefPtr<TableReader> reader);
-  LogTableTail(RefPtr<TableReader> reader, LogTableTailCursor cursor);
+  LogTableTail(RefPtr<AbstractTableReader> reader);
+  LogTableTail(RefPtr<AbstractTableReader> reader, LogTableTailCursor cursor);
 
   bool fetchNext(
       Function<bool (const msg::MessageObject& record)> fn,
@@ -45,7 +45,7 @@ public:
   LogTableTailCursor getCursor() const;
 
 protected:
-  RefPtr<TableReader> reader_;
+  RefPtr<AbstractTableReader> reader_;
   HashMap<String, uint64_t> offsets_;
 };
 
