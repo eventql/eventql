@@ -144,7 +144,6 @@ add_executable(cm-logjoin-backfill
     src/logjoin/LogJoinBackfill.cc
     src/schemas.cc
     src/IndexReader.cc
-    src/IndexWriter.cc
     src/FeatureIndexWriter.cc
     src/cm-logjoin-backfill.cc)
 
@@ -163,7 +162,6 @@ add_executable(cm-indexbuild
     $<TARGET_OBJECTS:fnord-mdb>
     $<TARGET_OBJECTS:fnord-msg>
     src/cm-indexbuild.cc
-    src/IndexWriter.cc
     3rdparty/libfnord/fnord-logtable/RemoteTableReader.cc
     src/schemas.cc
     src/DocStore.cc
@@ -443,7 +441,6 @@ add_executable(cm-autocompletebuild
     3rdparty/libfnord/fnord-logtable/TableChunkSummaryWriter.cc
     src/schemas.cc
     src/IndexReader.cc
-    src/IndexWriter.cc
     src/FeatureIndexWriter.cc
     src/analytics/Report.cc
     src/analytics/ReportBuilder.cc
@@ -496,7 +493,6 @@ add_executable(cm-shopstatsbuild
     3rdparty/libfnord/fnord-logtable/TableChunkSummaryWriter.cc
     src/schemas.cc
     src/IndexReader.cc
-    src/IndexWriter.cc
     src/FeatureIndexWriter.cc
     src/analytics/Report.cc
     src/analytics/ReportBuilder.cc

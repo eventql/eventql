@@ -21,7 +21,7 @@ RefPtr<IndexReader> IndexReader::openIndex(const String& index_path) {
   /* open doc index */
   auto db_path = FileUtil::joinPaths(index_path, "db");
   auto doc_idx = RefPtr<FeatureIndexWriter>(
-      new FeatureIndexWriter(db_path, true));
+      new FeatureIndexWriter(db_path, "documents-dawanda", true));
 
   /* open lucene */
   auto fts_path = FileUtil::joinPaths(index_path, "fts");
