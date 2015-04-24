@@ -7,8 +7,8 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#ifndef _FNORD_LOGTABLE_TABLEREADER_H
-#define _FNORD_LOGTABLE_TABLEREADER_H
+#ifndef _FNORD_LOGTABLE_REMOTETABLEREADER_H
+#define _FNORD_LOGTABLE_REMOTETABLEREADER_H
 #include <fnord-base/stdtypes.h>
 #include <fnord-base/autoref.h>
 #include <fnord-msg/MessageSchema.h>
@@ -22,7 +22,7 @@ namespace logtable {
 class RemoteTableReader : public RefCounted {
 public:
 
-  static RefPtr<RemoteTableReader> open(
+  RemoteTableReader(
       const String& table_name,
       const msg::MessageSchema& schema,
       const URI& uri,
@@ -40,15 +40,9 @@ public:
       Function<bool (const msg::MessageObject& record)> fn);
 
 protected:
-
-  RemoteTableReader(
-      const String& table_name,
-      const msg::MessageSchema& schema,
-      const URI& uri);
-
   String name_;
-  URI uri_;
   msg::MessageSchema schema_;
+  URI uri_;
   http::HTTPConnectionPool* http_;
 };
 
