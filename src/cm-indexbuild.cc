@@ -153,7 +153,7 @@ int main(int argc, const char** argv) {
   };
 
   table.fetchRecords("nue03", 1, 10, on_record);
-  index.commit();
+  index.commit(true);
 
   ev.shutdown();
   evloop_thread.join();

@@ -21,7 +21,14 @@ FeatureIndexWriter::FeatureIndexWriter(
     db_(nullptr),
     txn_(nullptr),
     max_field_id_(0) {
-  db_ = mdb::MDB::open(db_path, false, 68719476736lu); // 64 GiB
+  db_ = mdb::MDB::open(
+      db_path,
+      false,
+      68719476736lu,
+      index_name + ".db",
+      index_name + ".db.lck",
+      false); // 64 GiB
+
   txn_ = db_->startTransaction(readonly_);
 
   Buffer key;
@@ -59,6 +66,10 @@ FeatureIndexWriter::~FeatureIndexWriter() {
 
 void FeatureIndexWriter::commit(bool sync /* = false */) {
   txn_->commit();
+  if (sync) {
+    db_->sync();
+  }
+
   txn_ = db_->startTransaction(readonly_);
 }
 
