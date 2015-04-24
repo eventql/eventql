@@ -16,8 +16,9 @@ RefPtr<MDB> MDB::open(
     const String& path,
     bool readonly /* = false */,
     size_t maxsize /* = ... */,
-    const String& data_filename /* = "/data.mdb" */,
-    const String& lock_filename /* = "/lock.mdb" */) {
+    const String& data_filename /* = "data.mdb" */,
+    const String& lock_filename /* = "lock.mdb" */,
+    bool sync /* = true */) {
   MDB_env* mdb_env;
 
   if (mdb_env_create(&mdb_env) != 0) {
@@ -35,6 +36,10 @@ RefPtr<MDB> MDB::open(
     flags |= MDB_RDONLY;
   }
 
+  if (!sync) {
+    flags |= MDB_NOSYNC;
+  }
+
   RefPtr<MDB> mdb(new MDB(mdb_env, path, data_filename, lock_filename));
   mdb->openDBHandle(flags);
   return mdb;
@@ -47,11 +52,15 @@ MDB::MDB(
     const String& lock_filename) :
     mdb_env_(mdb_env),
     path_(path),
-    data_filename_(data_filename),
-    lock_filename_(lock_filename) {}
+    data_filename_("/" + data_filename),
+    lock_filename_("/" + lock_filename) {}
 
 MDB::~MDB() {
   mdb_env_close(mdb_env_);
+}
+
+void MDB::sync() {
+  mdb_env_sync(mdb_env_, 1);
 }
 
 RefPtr<MDBTransaction> MDB::startTransaction(bool readonly /* = false */) {
