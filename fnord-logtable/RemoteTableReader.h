@@ -11,15 +11,13 @@
 #define _FNORD_LOGTABLE_REMOTETABLEREADER_H
 #include <fnord-base/stdtypes.h>
 #include <fnord-base/autoref.h>
-#include <fnord-msg/MessageSchema.h>
-#include <fnord-msg/MessageObject.h>
 #include <fnord-http/httpconnectionpool.h>
-#include <fnord-logtable/TableSnapshot.h>
+#include <fnord-logtable/AbstractTableReader.h>
 
 namespace fnord {
 namespace logtable {
 
-class RemoteTableReader : public RefCounted {
+class RemoteTableReader : public AbstractTableReader{
 public:
 
   RemoteTableReader(
@@ -28,16 +26,16 @@ public:
       const URI& uri,
       http::HTTPConnectionPool* http);
 
-  const String& name() const;
-  const msg::MessageSchema& schema() const;
+  const String& name() const override;
+  const msg::MessageSchema& schema() const override;
 
-  RefPtr<TableSnapshot> getSnapshot();
+  RefPtr<TableSnapshot> getSnapshot() override;
 
   size_t fetchRecords(
       const String& replica,
       uint64_t start_sequence,
       size_t limit,
-      Function<bool (const msg::MessageObject& record)> fn);
+      Function<bool (const msg::MessageObject& record)> fn) override;
 
 protected:
   String name_;

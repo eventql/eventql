@@ -11,17 +11,14 @@
 #define _FNORD_LOGTABLE_TABLEREADER_H
 #include <fnord-base/stdtypes.h>
 #include <fnord-base/autoref.h>
-#include <fnord-msg/MessageSchema.h>
-#include <fnord-msg/MessageObject.h>
-#include <fnord-logtable/TableArena.h>
-#include <fnord-logtable/TableSnapshot.h>
+#include <fnord-logtable/AbstractTableReader.h>
 #include "fnord-sstable/sstablereader.h"
 #include "fnord-cstable/CSTableReader.h"
 
 namespace fnord {
 namespace logtable {
 
-class TableReader : public RefCounted {
+class TableReader : public AbstractTableReader {
 public:
 
   static RefPtr<TableReader> open(
@@ -30,17 +27,17 @@ public:
       const String& db_path,
       const msg::MessageSchema& schema);
 
-  const String& name() const;
+  const String& name() const override;
   const String& basePath() const;
-  const msg::MessageSchema& schema() const;
+  const msg::MessageSchema& schema() const override;
 
-  RefPtr<TableSnapshot> getSnapshot();
+  RefPtr<TableSnapshot> getSnapshot() override;
 
   size_t fetchRecords(
       const String& replica,
       uint64_t start_sequence,
       size_t limit,
-      Function<bool (const msg::MessageObject& record)> fn);
+      Function<bool (const msg::MessageObject& record)> fn) override;
 
 protected:
 

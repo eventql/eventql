@@ -37,7 +37,7 @@ void LogTableTailCursor::decode(util::BinaryMessageReader* reader) {
 }
 
 LogTableTail::LogTableTail(
-    RefPtr<TableReader> reader) :
+    RefPtr<AbstractTableReader> reader) :
     reader_(reader) {
   auto snap = reader_->getSnapshot();
 
@@ -54,7 +54,7 @@ LogTableTail::LogTableTail(
 }
 
 LogTableTail::LogTableTail(
-    RefPtr<TableReader> reader,
+    RefPtr<AbstractTableReader> reader,
     LogTableTailCursor cursor) :
     reader_(reader) {
   for (const auto& o : cursor.offsets) {
