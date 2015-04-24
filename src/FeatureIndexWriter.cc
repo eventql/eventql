@@ -199,6 +199,15 @@ void FeatureIndexWriter::readDocument(
   }
 }
 
+void FeatureIndexWriter::saveCursor(const void* data, size_t size) {
+  String key = "__cursor";
+  txn_->update(key.data(), key.size(), data, size);
+}
+
+Option<Buffer> FeatureIndexWriter::getCursor() const {
+  return txn_->get("__cursor");
+}
+
 //
 //  FeaturePack features;
 //  for (const auto& group : schema_.groupIDs()) {

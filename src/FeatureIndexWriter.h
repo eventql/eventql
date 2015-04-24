@@ -59,6 +59,9 @@ public:
 
   void commit(bool sync = false);
 
+  void saveCursor(const void* data, size_t size);
+  Option<Buffer> getCursor() const;
+
 protected:
   uint32_t getOrCreateFieldID(const String& field_name);
 
