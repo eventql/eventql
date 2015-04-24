@@ -249,5 +249,12 @@ CurrencyConverter::ConversionTable currencyConversionTable() {
   return tbl;
 }
 
+bool isIndexAttributeWhitelisted(const String& attr) {
+  if (attr == "category1") return true;
+  if (attr == "category2") return true;
+  if (attr == "category3") return true;
+  if (attr == "shop_id") return true;
+  return false;
+}
 
 }

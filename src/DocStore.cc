@@ -24,7 +24,7 @@ RefPtr<Document> DocStore::updateDocument(const IndexChangeRequest& index_reques
   RefPtr<Document> doc(new Document(docid));
   loadDocument(doc);
 
-  doc->update(index_request);
+  //doc->update(index_request);
   commitDocument(doc);
 
   return doc;
