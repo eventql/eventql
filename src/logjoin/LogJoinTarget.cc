@@ -87,6 +87,7 @@ void LogJoinTarget::onSession(
         schema.id("cart_items.checkout_step"),
         ci.checkout_step);
 
+    // FIXPAUL use getFields...
     auto docid = ci.item.docID();
     auto shopid = index_->getField(docid, "shop_id");
     if (shopid.isEmpty()) {
