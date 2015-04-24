@@ -77,15 +77,19 @@ size_t RemoteTableReader::fetchRecords(
     RAISEF(kRuntimeError, "received non-200 response: $0", r.body().toString());
   }
 
+  size_t n = 0;
   const auto& buf = r.body();
   for (size_t offset = 0; offset < buf.size(); ) {
     msg::MessageObject msg;
     msg::MessageDecoder::decode(buf, schema_, &msg, &offset);
 
+    ++n;
     if (!fn(msg)) {
       break;
     }
   }
+
+  return n;
 }
 
 } // namespace logtable

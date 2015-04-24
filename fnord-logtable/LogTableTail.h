@@ -30,6 +30,8 @@ struct LogTableTailCursor {
 
   void encode(util::BinaryMessageWriter* writer) const;
   void decode(util::BinaryMessageReader* reader);
+
+  String debugPrint() const;
 };
 
 class LogTableTail : public RefCounted {
@@ -47,6 +49,8 @@ public:
 protected:
   RefPtr<AbstractTableReader> reader_;
   HashMap<String, uint64_t> offsets_;
+  std::atomic<size_t> rr_;
+  RefPtr<TableGeneration> cur_snap_;
 };
 
 } // namespace logtable
