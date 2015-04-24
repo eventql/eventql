@@ -31,8 +31,25 @@ const msg::MessageSchema& RemoteTableReader::schema() const {
   return schema_;
 }
 
-//RefPtr<TableSnapshot> RemoteTableReader::getSnapshot() {
-//}
+RefPtr<TableSnapshot> RemoteTableReader::getSnapshot() {
+  auto path = StringUtil::format("/snapshot?table=$0", name_);
+  URI uri(uri_.toString() + path);
+
+  http::HTTPRequest req(http::HTTPMessage::M_GET, uri.pathAndQuery());
+  req.addHeader("Host", uri.hostAndPort());
+
+  auto res = http_->executeRequest(req);
+  res.wait();
+
+  const auto& r = res.get();
+  if (r.statusCode() != 200) {
+    RAISEF(kRuntimeError, "received non-200 response: $0", r.body().toString());
+  }
+
+  RefPtr<TableSnapshot> snap(new TableSnapshot());
+  snap->head->decode(r.body());
+  return snap;
+}
 
 size_t RemoteTableReader::fetchRecords(
     const String& replica,

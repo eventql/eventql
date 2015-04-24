@@ -45,8 +45,8 @@ struct TableGeneration : public RefCounted {
 
 struct TableSnapshot : public RefCounted {
   TableSnapshot(
-      RefPtr<TableGeneration> _head,
-      List<RefPtr<TableArena>> _arenas);
+      RefPtr<TableGeneration> _head = new TableGeneration(),
+      List<RefPtr<TableArena>> _arenas = List<RefPtr<TableArena>>());
 
   RefPtr<TableGeneration> head;
   List<RefPtr<TableArena>> arenas;
