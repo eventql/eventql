@@ -13,7 +13,7 @@
 #include <fnord-base/autoref.h>
 #include <fnord-msg/MessageSchema.h>
 #include <fnord-msg/MessageObject.h>
-#include <fnord-http/HTTPConnectionPool.h>
+#include <fnord-http/httpconnectionpool.h>
 #include <fnord-logtable/TableSnapshot.h>
 
 namespace fnord {
