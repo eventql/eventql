@@ -164,6 +164,7 @@ add_executable(cm-indexbuild
     $<TARGET_OBJECTS:fnord-msg>
     src/cm-indexbuild.cc
     src/IndexWriter.cc
+    3rdparty/libfnord/fnord-logtable/RemoteTableReader.cc
     src/schemas.cc
     src/DocStore.cc
     src/FeatureIndexWriter.cc)

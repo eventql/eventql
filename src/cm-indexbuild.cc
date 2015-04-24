@@ -120,7 +120,7 @@ int main(int argc, const char** argv) {
       "Opening index at $0",
       flags.getString("index"));
 
-  auto table = logtable::RemoteTableReader::open(
+  logtable::RemoteTableReader table(
       "index_feed-dawanda",
       indexChangeRequestSchema(),
       URI("http://nue03.prod.fnrd.net:7003/logtable"),
