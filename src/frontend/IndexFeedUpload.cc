@@ -45,34 +45,66 @@ void IndexFeedUpload::stop() {
 }
 
 void IndexFeedUpload::uploadNext() {
-  auto job = queue_->pop();
+  Vector<IndexChangeRequest> reqs;
+  Set<String> customers;
 
-  fnord::iputs("upload...", 1);
-  URI uri(target_url_ + "?table=index_feed-" + job.customer);
+  reqs.emplace_back(queue_->pop());
+  customers.emplace(reqs.back().customer);
+
+  for (int i = 0; i < 100; ++i) {
+    auto nxt = queue_->poll();
+    if (nxt.isEmpty()) {
+      break;
+    } else {
+      reqs.emplace_back(nxt.get());
+      customers.emplace(nxt.get().customer);
+    }
+  }
+
+  for (const auto& customer : customers) {
+    Vector<IndexChangeRequest> batch;
+
+    for (const auto& r : reqs) {
+      if (r.customer == customer) {
+        batch.emplace_back(r);
+      }
+    }
+
+    uploadBatch(customer, batch);
+  }
+}
+
+void IndexFeedUpload::uploadBatch(
+    const String& customer,
+    const Vector<IndexChangeRequest>& batch) {
+  Buffer body;
+
+  for (const auto& job : batch) {
+    msg::MessageObject obj;
+    obj.addChild(schema_.id("customer"), customer);
+    obj.addChild(schema_.id("docid"), job.item.docID().docid);
+
+    for (const auto& attr : job.attrs) {
+      auto& attr_obj = obj.addChild(schema_.id("attributes"));
+      attr_obj.addChild(schema_.id("attributes.key"), attr.first);
+      attr_obj.addChild(schema_.id("attributes.value"), attr.second);
+    }
+
+#ifndef FNORD_NOTRACE
+    fnord::logTrace(
+        "cm.frontend",
+        "uploading change index request:\n$0",
+        msg::MessagePrinter::print(obj, schema_));
+#endif
+
+    msg::MessageEncoder::encode(obj, schema_, &body);
+  }
+
+  URI uri(target_url_ + "?table=index_feed-" + customer);
 
   http::HTTPRequest req(http::HTTPMessage::M_POST, uri.pathAndQuery());
   req.addHeader("Host", uri.hostAndPort());
   req.addHeader("Content-Type", "application/fnord-msg");
-
-  msg::MessageObject obj;
-  obj.addChild(schema_.id("customer"), job.customer);
-  obj.addChild(schema_.id("docid"), job.item.docID().docid);
-
-  for (const auto& attr : job.attrs) {
-    auto& attr_obj = obj.addChild(schema_.id("attributes"));
-    attr_obj.addChild(schema_.id("attributes.key"), attr.first);
-    attr_obj.addChild(schema_.id("attributes.value"), attr.second);
-  }
-
-#ifndef FNORD_NOTRACE
-  fnord::logTrace(
-      "cm.frontend",
-      "uploading change index request:\n$0",
-      msg::MessagePrinter::print(obj, schema_));
-#endif
-
-  Buffer body;
-  msg::MessageEncoder::encode(obj, schema_, &body);
   req.addBody(body);
 
   uploadWithRetries(req);

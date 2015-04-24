@@ -33,8 +33,13 @@ public:
   void stop();
 
 protected:
-  void uploadWithRetries(const http::HTTPRequest& req);
+
   void run();
+
+  void uploadWithRetries(const http::HTTPRequest& req);
+  void uploadBatch(
+      const String& customer,
+      const Vector<IndexChangeRequest>& batch);
 
   String target_url_;
   thread::Queue<IndexChangeRequest>* queue_;
