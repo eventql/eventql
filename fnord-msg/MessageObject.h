@@ -47,10 +47,16 @@ struct MessageObject {
   MessageObject& operator=(const MessageObject& other);
   ~MessageObject();
 
-  Vector<MessageObject>& asObject() const;
+  Vector<MessageObject>& asObject() const; // fixpaul rename to children..
   const String& asString() const;
   uint32_t asUInt32() const;
   bool asBool() const;
+
+  MessageObject& getObject(uint32_t id) const;
+  Vector<MessageObject*> getObjects(uint32_t id) const;
+  const String& getString(uint32_t id) const;
+  uint32_t getUInt32(uint32_t id) const;
+  bool getBool(uint32_t id) const;
 
   template <typename... ArgTypes>
   MessageObject& addChild(ArgTypes... args) {
