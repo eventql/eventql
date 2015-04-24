@@ -68,9 +68,12 @@ add_executable(cm-frontend
     $<TARGET_OBJECTS:fnord-sstable>
     $<TARGET_OBJECTS:fnord-feeds>
     $<TARGET_OBJECTS:fnord-rpc>
+    $<TARGET_OBJECTS:fnord-msg>
     src/frontend/CMFrontend.cc
     src/frontend/LookupServlet.cc
+    src/frontend/IndexFeedUpload.cc
     src/cm-frontend.cc
+    src/schemas.cc
     src/sellerstats/ActivityLog.cc
     src/sellerstats/SellerStatsLookup.cc
     ${CMAKE_BINARY_DIR}/cm-frontend-assets.cc)
