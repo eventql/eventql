@@ -39,9 +39,10 @@ LogJoinBackfill::LogJoinBackfill(
     logtable::LogTableTailCursor cursor;
     cursor.decode(&reader);
     tail_ = RefPtr<logtable::LogTableTail>(
-        new logtable::LogTableTail(table_, cursor));
+        new logtable::LogTableTail(table_.get(), cursor));
   } else {
-    tail_ = RefPtr<logtable::LogTableTail>(new logtable::LogTableTail(table_));
+    tail_ = RefPtr<logtable::LogTableTail>(
+        new logtable::LogTableTail(table_.get()));
   }
 }
 

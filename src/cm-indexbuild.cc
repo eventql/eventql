@@ -32,6 +32,7 @@
 #include "fnord-base/stats/statsdagent.h"
 #include "fnord-sstable/sstablereader.h"
 #include "fnord-logtable/RemoteTableReader.h"
+#include "fnord-logtable/LogTableTail.h"
 #include "fnord-mdb/MDB.h"
 #include "fnord-msg/MessagePrinter.h"
 #include "CustomerNamespace.h"
@@ -102,13 +103,6 @@ int main(int argc, const char** argv) {
   Logger::get()->setMinimumLogLevel(
       strToLogLevel(flags.getString("loglevel")));
 
-  /* start stats reporting */
-  fnord::stats::StatsdAgent statsd_agent(
-      fnord::net::InetAddr::resolve(flags.getString("statsd_addr")),
-      10 * fnord::kMicrosPerSecond);
-
-  statsd_agent.start();
-
   auto evloop_thread = std::thread([] {
     ev.run();
   });
@@ -126,16 +120,46 @@ int main(int argc, const char** argv) {
       "documents-dawanda",
       false);
 
-  logtable::RemoteTableReader table(
+  /* open logtable */
+  RefPtr<logtable::RemoteTableReader> table(new logtable::RemoteTableReader(
       "index_feed-dawanda",
       indexChangeRequestSchema(),
       URI("http://nue03.prod.fnrd.net:7009/logtable"),
-      &http);
+      &http));
 
+  /* open logtable tail at last cursor */
+  RefPtr<logtable::LogTableTail> tail(nullptr);
+  auto last_cursor = index.getCursor();
+  if (last_cursor.isEmpty()) {
+    tail = RefPtr<logtable::LogTableTail>(
+        new logtable::LogTableTail(table.get()));
+  } else {
+    util::BinaryMessageReader reader(
+        last_cursor.get().data(),
+        last_cursor.get().size());
+
+    logtable::LogTableTailCursor cursor;
+    cursor.decode(&reader);
+
+    fnord::logInfo(
+        "cm.indexbuild",
+        "Resuming from cursor: $0",
+        cursor.debugPrint());
+
+    tail = RefPtr<logtable::LogTableTail>(
+        new logtable::LogTableTail(table.get(), cursor));
+  }
+
+  /* start stats reporting */
+  fnord::stats::StatsdAgent statsd_agent(
+      fnord::net::InetAddr::resolve(flags.getString("statsd_addr")),
+      10 * fnord::kMicrosPerSecond);
+
+  statsd_agent.start();
+
+  /* on record callback fn */
   auto schema = indexChangeRequestSchema();
   auto on_record = [&schema, &index] (const msg::MessageObject& rec) -> bool {
-    //auto customer = rec.getString(schema.id("customer"));
-
     Vector<Pair<String, String>> attrs;
     for (const auto& attr : rec.getObjects(schema.id("attributes"))) {
       auto key = attr->getString(schema.id("attributes.key"));
@@ -152,9 +176,25 @@ int main(int argc, const char** argv) {
     return true;
   };
 
-  table.fetchRecords("nue03", 1, 10, on_record);
-  index.commit(true);
+  /* fetch from logtable in batches */
+  auto batch_size = flags.getInt("batch_size");
+  for (;;) {
+    tail->fetchNext(on_record, batch_size);
 
+    auto cursor = tail->getCursor();
+    util::BinaryMessageWriter cursor_buf;
+    cursor.encode(&cursor_buf);
+
+    fnord::logInfo(
+        "cm.indexbuild",
+        "Comitting with cursor: $0",
+        cursor.debugPrint());
+
+    index.saveCursor(cursor_buf.data(), cursor_buf.size());
+    index.commit();
+  }
+
+  /* sthudown */
   ev.shutdown();
   evloop_thread.join();
 

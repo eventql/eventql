@@ -161,8 +161,18 @@ add_executable(cm-indexbuild
     $<TARGET_OBJECTS:fnord-rpc>
     $<TARGET_OBJECTS:fnord-mdb>
     $<TARGET_OBJECTS:fnord-msg>
+    $<TARGET_OBJECTS:fnord-cstable>
     src/cm-indexbuild.cc
     3rdparty/libfnord/fnord-logtable/RemoteTableReader.cc
+    3rdparty/libfnord/fnord-logtable/TableReader.cc
+    3rdparty/libfnord/fnord-logtable/TableArena.cc
+    3rdparty/libfnord/fnord-logtable/TableWriter.cc
+    3rdparty/libfnord/fnord-logtable/TableRepository.cc
+    3rdparty/libfnord/fnord-logtable/ArtifactIndex.cc
+    3rdparty/libfnord/fnord-logtable/NumericBoundsSummary.cc
+    3rdparty/libfnord/fnord-logtable/TableChunkSummaryReader.cc
+    3rdparty/libfnord/fnord-logtable/TableChunkSummaryWriter.cc
+    3rdparty/libfnord/fnord-logtable/LogTableTail.cc
     src/schemas.cc
     src/DocStore.cc
     src/FeatureIndexWriter.cc)
