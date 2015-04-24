@@ -292,7 +292,11 @@ int main(int argc, const char** argv) {
 
   /* open index */
   auto index_path = FileUtil::joinPaths(flags.getString("index"), "db");
-  RefPtr<FeatureIndexWriter> index(new FeatureIndexWriter(index_path, true));
+  RefPtr<FeatureIndexWriter> index(
+      new FeatureIndexWriter(
+          index_path,
+          "documents-dawanda",
+          true));
 
   /* set up logjoin target */
   fnord::fts::Analyzer analyzer(flags.getString("conf"));

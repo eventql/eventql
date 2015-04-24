@@ -39,32 +39,29 @@ class CustomerNamespace;
 class FeatureIndexWriter : public RefCounted {
 public:
 
-  FeatureIndexWriter(const String& db_path, bool readonly);
+  FeatureIndexWriter(
+      const String& db_path,
+      const String& index_name,
+      bool readonly);
+
   ~FeatureIndexWriter();
 
   RefPtr<Document> findDocument(const DocID& docid);
-
   void listDocuments(Function<bool (const DocID& id)> fn);
 
   Option<String> getField(const DocID& docid, const String& feature);
-  Option<String> getField(const DocID& docid, const FeatureID& featureid);
-  void getFields(const DocID& docid, FeaturePack* features);
 
-  void updateDocument(const IndexChangeRequest& index_request);
+  //void updateDocument(const IndexChangeRequest& index_request);
 
-  void commit();
+  void updateDocument(
+      const DocID& docid,
+      const Vector<Pair<String, String>>& fields);
 
-  RefPtr<mdb::MDBTransaction> dbTransaction();
+  void commit(bool sync = false);
 
 protected:
 
-  void updateIndex(const IndexChangeRequest& index_request);
-
-  void updateIndex(
-      const DocID& docid,
-      const Vector<Pair<FeatureID, String>>& features);
-
-  FeatureSchema schema_;
+  HashMap<String, uint32_t> schema_;
   bool readonly_;
   RefPtr<mdb::MDB> db_;
   RefPtr<mdb::MDBTransaction> txn_;

@@ -33,6 +33,7 @@
 #include "fnord-sstable/sstablereader.h"
 #include "fnord-logtable/RemoteTableReader.h"
 #include "fnord-mdb/MDB.h"
+#include "fnord-msg/MessagePrinter.h"
 #include "CustomerNamespace.h"
 #include "FeatureSchema.h"
 #include "FeatureIndexWriter.h"
@@ -123,14 +124,31 @@ int main(int argc, const char** argv) {
   logtable::RemoteTableReader table(
       "index_feed-dawanda",
       indexChangeRequestSchema(),
-      URI("http://nue03.prod.fnrd.net:7003/logtable"),
+      URI("http://nue03.prod.fnrd.net:7009/logtable"),
       &http);
 
-  //auto table = logtable::TableReader::open(
-  //    "joined_sessions-dawanda",
-  //    flags.getString("replica"),
-  //    flags.getString("datadir"),
-  //    joinedSessionsSchema());
+  auto schema = indexChangeRequestSchema();
+  auto on_record = [&schema] (const msg::MessageObject& rec) -> bool {
+    Vector<Pair<String, String>> attrs;
+
+    auto docid = rec.getString(schema.id("docid"));
+    auto customer = rec.getString(schema.id("customer"));
+
+    for (const auto& attr : rec.getObjects(schema.id("attributes"))) {
+      auto key = attr->getString(schema.id("attributes.key"));
+      auto value = attr->getString(schema.id("attributes.value"));
+
+      if (isIndexAttributeWhitelisted(key)) {
+        attrs.emplace_back(key, value);
+      }
+    }
+
+    fnord::iputs("$1: $0 => $2", docid, customer, attrs);
+
+    return true;
+  };
+
+  table.fetchRecords("nue03", 1, 10, on_record);
 
   ev.shutdown();
   evloop_thread.join();
