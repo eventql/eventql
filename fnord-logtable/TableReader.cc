@@ -145,6 +145,10 @@ size_t TableReader::fetchRecords(
   auto snap = getSnapshot();
 
   for (const auto& c : snap->head->chunks) {
+    if (c.replica_id != replica_id) {
+      continue;
+    }
+
     auto cbegin = c.start_sequence;
     auto cend = cbegin + c.num_records;
 
