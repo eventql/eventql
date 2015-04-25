@@ -198,10 +198,7 @@ void LogJoin::appendToSession(
 
   auto evkey = uid + "~" + evtype;
   txn->insert(evkey.data(), evkey.size(), buf.data(), buf.size());
-
-  if (new_session) {
-    txn->insert(uid + "~cust", customer_key);
-  }
+  txn->update(uid + "~cust", customer_key);
 }
 
 void LogJoin::flush(mdb::MDBTransaction* txn, DateTime stream_time_) {
