@@ -15,6 +15,7 @@
 #include <unordered_map>
 #include <vector>
 #include <fnord-base/datetime.h>
+#include <fnord-base/Currency.h>
 
 #include "ItemRef.h"
 #include "logjoin/TrackedQuery.h"
@@ -68,7 +69,7 @@ struct TrackedSession {
    * Trigger an update to incorporate new information. This will e.g. mark
    * query items as clicked if a corresponding click was observed.
    */
-  void update();
+  void joinEvents(const CurrencyConverter& cconv);
 
   void debugPrint(const std::string& uid) const;
 

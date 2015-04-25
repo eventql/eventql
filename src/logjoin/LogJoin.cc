@@ -283,7 +283,6 @@ void LogJoin::flushSession(
   }
 
   try {
-    session.update();
     target_->onSession(txn, session);
   } catch (const std::exception& e) {
     fnord::logError("cm.logjoin", e, "LogJoinTarget::onSession crashed");

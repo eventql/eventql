@@ -7,7 +7,6 @@
  * permission is obtained.
  */
 #include <fnord-base/inspect.h>
-#include <fnord-base/Currency.h>
 #include "logjoin/TrackedSession.h"
 #include "common.h"
 
@@ -21,7 +20,7 @@ TrackedSession::TrackedSession() :
   gmv_eurcents(0),
   cart_value_eurcents(0) {}
 
-void TrackedSession::update() {
+void TrackedSession::joinEvents(const CurrencyConverter& cconv) {
   /* update queries (mark items as clicked) */
   for (auto& cur_query : queries) {
 
@@ -49,8 +48,7 @@ void TrackedSession::update() {
   HashMap<String, uint64_t> gmv_eurcents_per_item;
   for (const auto& ci : cart_items) {
     auto currency = currencyFromString(ci.currency);
-    auto eur = Money(100, Currency::EUR); // FIXPAUL!!
-    //auto eur = cconv_.convert(Money(ci.price_cents, currency), Currency::EUR);
+    auto eur = cconv.convert(Money(ci.price_cents, currency), Currency::EUR);
     auto eurcents = eur.cents;
     eurcents *= ci.quantity;
     cart_eurcents_per_item.emplace(ci.item.docID().docid, eurcents);
@@ -224,23 +222,5 @@ void TrackedSession::debugPrint(const std::string& uid) const {
 
   fnord::iputs("", 1);
 }
-
-
-/*
-JoinedSession TrackedSession::toJoinedSession() const {
-  JoinedSession sess;
-  sess.customer_key = customer_key;
-
-  for (const auto& p : queries) {
-    sess.queries.emplace_back(p.second);
-  }
-
-  for (const auto& p : item_visits) {
-    sess.item_visits.emplace_back(p.second);
-  }
-
-  return sess;
-}
-*/
 
 } // namespace cm
