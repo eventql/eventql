@@ -66,7 +66,7 @@ void LogTableServlet::handleHTTPRequest(
     res->addBody("not found");
   } catch (const Exception& e) {
     res->setStatus(http::kStatusInternalServerError);
-    res->addBody(StringUtil::format("error: $0", e.getMessage()));
+    res->addBody(StringUtil::format("error: $0: $1", e.getTypeName(), e.getMessage()));
   }
 }
 
@@ -116,12 +116,12 @@ void LogTableServlet::insertRecordsBatch(
     return;
   }
 
-
   auto& buf = req->body();
   util::BinaryMessageReader reader(buf.data(), buf.size());
   while (reader.remaining() > 0) {
     auto len = reader.readVarUInt();
-    tbl->addRecord(Buffer(reader.read(len), len));
+    auto data = reader.read(len);
+    tbl->addRecord(Buffer(data, len));
   }
 
   res->setStatus(http::kStatusCreated);
