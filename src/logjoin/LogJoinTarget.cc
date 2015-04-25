@@ -37,7 +37,7 @@ LogJoinTarget::LogJoinTarget(
 void LogJoinTarget::onSession(
     mdb::MDBTransaction* txn,
     const TrackedSession& session) {
-  fnord::iputs("flush session: $0", session.uid);
+  fnord::iputs("flush session: $0 w/ $1 queries", session.uid, session.queries.size());
   return;
 
   const auto& schema = joined_sessions_schema_;
