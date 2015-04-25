@@ -26,8 +26,9 @@ public:
       const String& path,
       bool readonly = false,
       size_t maxsize = 1024 * 1024 * 1024, // 1 GiB
-      const String& data_filename = "/data.mdb",
-      const String& lock_filename = "/lock.mdb");
+      const String& data_filename = "data.mdb",
+      const String& lock_filename = "lock.mdb",
+      bool sync = true);
 
   MDB(const MDB& other) = delete;
   MDB& operator=(const MDB& other) = delete;
@@ -36,6 +37,7 @@ public:
   RefPtr<MDBTransaction> startTransaction(bool readonly = false);
 
   void setMaxSize(size_t size);
+  void sync();
 
 protected:
   MDB(

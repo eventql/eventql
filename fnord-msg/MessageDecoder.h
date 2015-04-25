@@ -29,7 +29,7 @@ public:
 
 protected:
 
-  static void decodeObject(
+  static int decodeObject(
       size_t idx,
       uint64_t begin,
       uint64_t end,

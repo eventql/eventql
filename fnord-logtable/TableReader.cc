@@ -145,6 +145,10 @@ size_t TableReader::fetchRecords(
   auto snap = getSnapshot();
 
   for (const auto& c : snap->head->chunks) {
+    if (c.replica_id != replica_id) {
+      continue;
+    }
+
     auto cbegin = c.start_sequence;
     auto cend = cbegin + c.num_records;
 
@@ -202,13 +206,16 @@ size_t TableReader::fetchRecords(
   size_t n = 0;
   auto cursor = reader.getCursor();
   while (cursor->valid()) {
-    auto buf = cursor->getDataBuffer();
+    ++n;
 
-    msg::MessageObject record;
-    msg::MessageDecoder::decode(buf, schema_, &record);
+    if (n > offset) {
+      auto buf = cursor->getDataBuffer();
+      msg::MessageObject record;
+      msg::MessageDecoder::decode(buf, schema_, &record);
+      fn(record);
+    }
 
-    fn(record);
-    if (++n == limit) {
+    if (n == limit + offset) {
       break;
     }
 

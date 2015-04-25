@@ -9,6 +9,7 @@
  */
 #include "fnord-logtable/LogTableServlet.h"
 #include "fnord-json/json.h"
+#include "fnord-msg/MessageEncoder.h"
 
 namespace fnord {
 namespace logtable {
@@ -25,6 +26,10 @@ void LogTableServlet::handleHTTPRequest(
   try {
     if (StringUtil::endsWith(uri.path(), "/insert")) {
       return insertRecord(req, res, &uri);
+    }
+
+    if (StringUtil::endsWith(uri.path(), "/fetch")) {
+      return fetchRecords(req, res, &uri);
     }
 
     if (StringUtil::endsWith(uri.path(), "/commit")) {
@@ -302,6 +307,62 @@ void LogTableServlet::tableSnapshot(
   res->setStatus(http::kStatusOK);
   res->addHeader("Content-Type", "application/octet-stream");
   res->addBody(buf);
+}
+
+void LogTableServlet::fetchRecords(
+    http::HTTPRequest* req,
+    http::HTTPResponse* res,
+    URI* uri) {
+  const auto& params = uri->queryParams();
+
+  String table;
+  if (!URI::getParam(params, "table", &table)) {
+    res->setStatus(fnord::http::kStatusBadRequest);
+    res->addBody("missing ?table=... parameter");
+    return;
+  }
+
+  String replica;
+  if (!URI::getParam(params, "replica", &replica)) {
+    res->setStatus(fnord::http::kStatusBadRequest);
+    res->addBody("missing ?replica=... parameter");
+    return;
+  }
+
+  String seq_str;
+  uint64_t seq;
+  if (URI::getParam(params, "seq", &seq_str)) {
+    seq = std::stoull(seq_str);
+  } else {
+    res->setStatus(fnord::http::kStatusBadRequest);
+    res->addBody("missing ?seq=... parameter");
+    return;
+  }
+
+  String limit_str;
+  uint64_t limit;
+  if (URI::getParam(params, "limit", &limit_str)) {
+    limit = std::stoull(limit_str);
+  } else {
+    res->setStatus(fnord::http::kStatusBadRequest);
+    res->addBody("missing ?limit=... parameter");
+    return;
+  }
+
+  auto tbl = tables_->findTableReader(table);
+  const auto& schema = tbl->schema();
+
+  Buffer body;
+  auto on_record = [&body, &schema] (const msg::MessageObject& rec) -> bool {
+    msg::MessageEncoder::encode(rec, schema, &body);
+    return true;
+  };
+
+  tbl->fetchRecords(replica, seq, limit, on_record);
+
+  res->setStatus(http::kStatusOK);
+  res->addHeader("Content-Type", "application/octet-stream");
+  res->addBody(body);
 }
 
 }

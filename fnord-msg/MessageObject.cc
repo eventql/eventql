@@ -183,10 +183,40 @@ bool MessageObject::asBool() const {
   return val > 0;
 }
 
+MessageObject& MessageObject::getObject(uint32_t id) const {
+  for (auto& f : asObject()) {
+    if (f.id == id) {
+      return f;
+    }
+  }
 
-//MessageObject::MessageObject(uint32_t id, uint32_t value);
-//MessageObject::MessageObject(uint32_t id, String value);
-//MessageObject::MessageObject(uint32_t id, bool value);
+  RAISEF(kIndexError, "no such field: $0", id);
+}
+
+Vector<MessageObject*> MessageObject::getObjects(uint32_t id) const {
+  Vector<MessageObject*> lst;
+
+  for (auto& f : asObject()) {
+    if (f.id == id) {
+      lst.emplace_back(&f);
+    }
+  }
+
+  return lst;
+}
+
+//uint32_t MessageObject::getUInt32(uint32_t id) const;
+//bool MessageObject::getBool(uint32_t id) const;
+
+const String& MessageObject::getString(uint32_t id) const {
+  for (const auto& f : asObject()) {
+    if (f.id == id) {
+      return f.asString();
+    }
+  }
+
+  RAISEF(kIndexError, "no such field: $0", id);
+}
 
 } // namespace msg
 } // namespace fnord

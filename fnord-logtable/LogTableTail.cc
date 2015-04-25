@@ -37,8 +37,9 @@ void LogTableTailCursor::decode(util::BinaryMessageReader* reader) {
 }
 
 LogTableTail::LogTableTail(
-    RefPtr<TableReader> reader) :
-    reader_(reader) {
+    RefPtr<AbstractTableReader> reader) :
+    reader_(reader),
+    cur_snap_(nullptr) {
   auto snap = reader_->getSnapshot();
 
   for (const auto& c : snap->head->chunks) {
@@ -54,9 +55,10 @@ LogTableTail::LogTableTail(
 }
 
 LogTableTail::LogTableTail(
-    RefPtr<TableReader> reader,
+    RefPtr<AbstractTableReader> reader,
     LogTableTailCursor cursor) :
-    reader_(reader) {
+    reader_(reader),
+    cur_snap_(nullptr) {
   for (const auto& o : cursor.offsets) {
     offsets_.emplace(o.replica_id, o.consumed_offset);
   }
@@ -65,9 +67,15 @@ LogTableTail::LogTableTail(
 bool LogTableTail::fetchNext(
     Function<bool (const msg::MessageObject& record)> fn,
     size_t limit /* = -1 */) {
-  auto snap = reader_->getSnapshot();
+  if (cur_snap_.get() == nullptr) {
+    cur_snap_ = reader_->getSnapshot()->head.get();
+  }
 
-  for (const auto& c : snap->head->chunks) {
+  const auto& chunks = cur_snap_->chunks;
+
+  size_t rr = ++rr_;
+  for (size_t i = 0; i < chunks.size(); ++i) {
+    const auto& c = chunks[(i + rr) % chunks.size()];
     auto cbegin = c.start_sequence;
     auto cend = cbegin + c.num_records;
     auto cur = offsets_[c.replica_id];
@@ -86,6 +94,7 @@ bool LogTableTail::fetchNext(
     }
   }
 
+  cur_snap_ = RefPtr<logtable::TableGeneration>(nullptr);
   return false;
 }
 
@@ -100,6 +109,17 @@ LogTableTailCursor LogTableTail::getCursor() const {
   }
 
   return cursor;
+}
+
+String LogTableTailCursor::debugPrint() const {
+  Vector<String> str;
+
+  for (const auto& o : offsets) {
+    str.emplace_back(
+        StringUtil::format("$0=$1", o.replica_id, o.consumed_offset));
+  }
+
+  return StringUtil::join(str, ", ");
 }
 
 } // namespace logtable
