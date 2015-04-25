@@ -39,7 +39,7 @@ public:
 
   CurrencyConverter(const ConversionTable& conversion_table);
 
-  Money convert(Money amount, Currency target_currency);
+  Money convert(Money amount, Currency target_currency) const;
 
 protected:
   const ConversionTable conv_table_;

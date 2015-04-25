@@ -23,7 +23,7 @@ CurrencyConverter::CurrencyConverter(
     const ConversionTable& conversion_table) :
     conv_table_(conversion_table) {}
 
-Money CurrencyConverter::convert(Money amount, Currency target_currency) {
+Money CurrencyConverter::convert(Money amount, Currency target_currency) const {
   if (amount.currency == target_currency) {
     return amount;
   }
