@@ -7,6 +7,7 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
+#include "fnord-base/util/binarymessagewriter.h"
 #include "fnord-logtable/LogTableServlet.h"
 #include "fnord-json/json.h"
 #include "fnord-msg/MessageEncoder.h"
@@ -29,8 +30,16 @@ void LogTableServlet::handleHTTPRequest(
       return insertRecord(req, res, &uri);
     }
 
+    if (StringUtil::endsWith(uri.path(), "/insert_batch")) {
+      return insertRecordsBatch(req, res, &uri);
+    }
+
     if (StringUtil::endsWith(uri.path(), "/fetch")) {
-      return fetchRecords(req, res, &uri);
+      return fetchRecord(req, res, &uri);
+    }
+
+    if (StringUtil::endsWith(uri.path(), "/fetch_batch")) {
+      return fetchRecordsBatch(req, res, &uri);
     }
 
     if (StringUtil::endsWith(uri.path(), "/commit")) {
@@ -79,10 +88,43 @@ void LogTableServlet::insertRecord(
   if (tbl->arenaSize() > 50000) {
     res->setStatus(http::kStatusServiceUnavailable);
     res->addBody("too many uncommitted records, retry in a few seconds");
-  } else {
-    tbl->addRecords(req->body());
-    res->setStatus(http::kStatusCreated);
+    return;
   }
+
+  tbl->addRecord(req->body());
+  res->setStatus(http::kStatusCreated);
+}
+
+void LogTableServlet::insertRecordsBatch(
+    http::HTTPRequest* req,
+    http::HTTPResponse* res,
+    URI* uri) {
+  const auto& params = uri->queryParams();
+
+  String table;
+  if (!URI::getParam(params, "table", &table)) {
+    res->setStatus(fnord::http::kStatusBadRequest);
+    res->addBody("missing ?table=... parameter");
+    return;
+  }
+
+  auto tbl = tables_->findTableWriter(table);
+
+  if (tbl->arenaSize() > 50000) {
+    res->setStatus(http::kStatusServiceUnavailable);
+    res->addBody("too many uncommitted records, retry in a few seconds");
+    return;
+  }
+
+
+  auto& buf = req->body();
+  util::BinaryMessageReader reader(buf.data(), buf.size());
+  while (reader.remaining() > 0) {
+    auto len = reader.readVarUInt();
+    tbl->addRecord(Buffer(reader.read(len), len));
+  }
+
+  res->setStatus(http::kStatusCreated);
 }
 
 void LogTableServlet::commitTable(
@@ -310,7 +352,73 @@ void LogTableServlet::tableSnapshot(
   res->addBody(buf);
 }
 
-void LogTableServlet::fetchRecords(
+void LogTableServlet::fetchRecord(
+    http::HTTPRequest* req,
+    http::HTTPResponse* res,
+    URI* uri) {
+  const auto& params = uri->queryParams();
+
+  String table;
+  if (!URI::getParam(params, "table", &table)) {
+    res->setStatus(fnord::http::kStatusBadRequest);
+    res->addBody("missing ?table=... parameter");
+    return;
+  }
+
+  String replica;
+  if (!URI::getParam(params, "replica", &replica)) {
+    res->setStatus(fnord::http::kStatusBadRequest);
+    res->addBody("missing ?replica=... parameter");
+    return;
+  }
+
+  String seq_str;
+  uint64_t seq;
+  if (URI::getParam(params, "seq", &seq_str)) {
+    seq = std::stoull(seq_str);
+  } else {
+    res->setStatus(fnord::http::kStatusBadRequest);
+    res->addBody("missing ?seq=... parameter");
+    return;
+  }
+
+  String format = "binary";
+  URI::getParam(params, "format", &format);
+
+  auto tbl = tables_->findTableReader(table);
+  const auto& schema = tbl->schema();
+
+  Buffer body;
+
+  if (format == "human") {
+    tbl->fetchRecords(
+        replica,
+        seq,
+        1,
+        [&body, &schema] (const msg::MessageObject& rec) -> bool {
+          body.append(msg::MessagePrinter::print(rec, schema));
+          return true;
+        });
+
+    res->addHeader("Content-Type", "text/plain");
+  } else {
+    tbl->fetchRecords(
+        replica,
+        seq,
+        1,
+        [&body, &schema] (const msg::MessageObject& rec) -> bool {
+          msg::MessageEncoder::encode(rec, schema, &body);
+          return true;
+        });
+
+    res->addHeader("Content-Type", "application/octet-stream");
+  }
+
+  res->setStatus(http::kStatusOK);
+  res->addBody(body);
+}
+
+void LogTableServlet::fetchRecordsBatch(
     http::HTTPRequest* req,
     http::HTTPResponse* res,
     URI* uri) {
@@ -356,7 +464,7 @@ void LogTableServlet::fetchRecords(
   auto tbl = tables_->findTableReader(table);
   const auto& schema = tbl->schema();
 
-  Buffer body;
+  util::BinaryMessageWriter body;
 
   if (format == "human") {
     tbl->fetchRecords(
@@ -364,7 +472,8 @@ void LogTableServlet::fetchRecords(
         seq,
         limit,
         [&body, &schema] (const msg::MessageObject& rec) -> bool {
-          body.append(msg::MessagePrinter::print(rec, schema));
+          auto str = msg::MessagePrinter::print(rec, schema);
+          body.append(str.data(), str.size());
           return true;
         });
 
@@ -375,7 +484,10 @@ void LogTableServlet::fetchRecords(
         seq,
         limit,
         [&body, &schema] (const msg::MessageObject& rec) -> bool {
-          msg::MessageEncoder::encode(rec, schema, &body);
+          Buffer buf;
+          msg::MessageEncoder::encode(rec, schema, &buf);
+          body.appendVarUInt(buf.size());
+          body.append(buf.data(), buf.size());
           return true;
         });
 
@@ -383,7 +495,7 @@ void LogTableServlet::fetchRecords(
   }
 
   res->setStatus(http::kStatusOK);
-  res->addBody(body);
+  res->addBody(body.data(), body.size());
 }
 
 }

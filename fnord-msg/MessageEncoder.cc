@@ -16,60 +16,50 @@ void MessageEncoder::encode(
     const MessageObject& msg,
     const MessageSchema& schema,
     Buffer* buf) {
-  Vector<Pair<uint32_t, uint64_t>> fields;
-  util::BinaryMessageWriter header;
   util::BinaryMessageWriter body;
-
-  encodeObject(msg, schema, &fields, &body);
-
-  header.appendVarUInt(fields.size());
-  for (const auto& f : fields) {
-    header.appendVarUInt(f.first);
-    header.appendVarUInt(f.second);
-  }
-
-  buf->append(header.data(), header.size());
+  encodeObject(msg, schema, &body);
   buf->append(body.data(), body.size());
 }
 
 void MessageEncoder::encodeObject(
     const MessageObject& msg,
     const MessageSchema& schema,
-    Vector<Pair<uint32_t, uint64_t>>* fields,
     util::BinaryMessageWriter* data) {
   try {
     switch (schema.type(msg.id)) {
 
       case FieldType::OBJECT: {
+        util::BinaryMessageWriter cld;
         Vector<Pair<uint32_t, uint64_t>> obj_fields;
         for (const auto& o : msg.asObject()) {
-          encodeObject(o, schema, &obj_fields, data);
+          encodeObject(o, schema, &cld);
         }
 
-        fields->emplace_back(msg.id, data->size());
-        for (const auto& f : obj_fields) {
-          fields->emplace_back(f);
-        }
+        data->appendVarUInt((msg.id << 3) | 0x2);
+        data->appendVarUInt(cld.size());
+        data->append(cld.data(), cld.size());
         return;
       }
 
       case FieldType::STRING: {
         const auto& str = msg.asString();
+        data->appendVarUInt((msg.id << 3) | 0x2);
+        data->appendVarUInt(str.size());
         data->append(str.data(), str.size());
         break;
       }
 
       case FieldType::UINT32:
+        data->appendVarUInt((msg.id << 3) | 0x0);
         data->appendVarUInt(msg.asUInt32());
         break;
 
       case FieldType::BOOLEAN:
-        data->appendUInt8(msg.asBool() ? 1 : 0);
+        data->appendVarUInt((msg.id << 3) | 0x0);
+        data->appendVarUInt(msg.asBool() ? 1 : 0);
         break;
 
     }
-
-    fields->emplace_back(msg.id, data->size());
   } catch (const std::exception& e) {
     RAISEF(
         kRuntimeError,

@@ -57,7 +57,7 @@ size_t RemoteTableReader::fetchRecords(
     size_t limit,
     Function<bool (const msg::MessageObject& record)> fn) {
   auto path = StringUtil::format(
-      "/fetch?table=$0&replica=$1&seq=$2&limit=$3",
+      "/fetch_batch?table=$0&replica=$1&seq=$2&limit=$3",
       name_,
       replica,
       start_sequence,
@@ -79,9 +79,12 @@ size_t RemoteTableReader::fetchRecords(
 
   size_t n = 0;
   const auto& buf = r.body();
-  for (size_t offset = 0; offset < buf.size(); ) {
+  util::BinaryMessageReader reader(buf.data(), buf.size());
+  while (reader.remaining() > 0) {
+    auto len = reader.readVarUInt();
+
     msg::MessageObject msg;
-    msg::MessageDecoder::decode(buf, schema_, &msg, &offset);
+    msg::MessageDecoder::decode(reader.read(len), len, schema_, &msg);
 
     ++n;
     if (!fn(msg)) {

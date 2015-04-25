@@ -122,8 +122,8 @@ public:
       TaskScheduler* scheduler);
 
   void addSummary(SummaryFactoryFn summary);
-  void addRecords(const Buffer& records);
   void addRecord(const msg::MessageObject& record);
+  void addRecord(const Buffer& record);
 
   RefPtr<TableSnapshot> getSnapshot();
   const String& name() const;
