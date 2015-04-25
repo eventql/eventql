@@ -43,28 +43,9 @@ public:
 
   void onSession(
       mdb::MDBTransaction* txn,
-      const TrackedSession& session);
-
-  void onQuery(
-      mdb::MDBTransaction* txn,
-      const TrackedSession& session,
-      const TrackedQuery& query);
-
-  void onItemVisit(
-      mdb::MDBTransaction* txn,
-      const TrackedSession& session,
-      const TrackedItemVisit& item_visit);
-
-  void onItemVisit(
-      mdb::MDBTransaction* txn,
-      const TrackedSession& session,
-      const TrackedItemVisit& item_visit,
-      const TrackedQuery& query);
-
+      TrackedSession& session);
 
   size_t num_sessions;
-  size_t num_queries;
-  size_t num_item_visits;
 
 protected:
 
