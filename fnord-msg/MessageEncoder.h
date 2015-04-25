@@ -31,7 +31,6 @@ protected:
   static void encodeObject(
       const MessageObject& msg,
       const MessageSchema& schema,
-      Vector<Pair<uint32_t, uint64_t>>* fields,
       util::BinaryMessageWriter* data);
 
 };

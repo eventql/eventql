@@ -36,7 +36,17 @@ protected:
     http::HTTPResponse* res,
     URI* uri);
 
-  void fetchRecords(
+  void insertRecordsBatch(
+    http::HTTPRequest* req,
+    http::HTTPResponse* res,
+    URI* uri);
+
+  void fetchRecord(
+    http::HTTPRequest* req,
+    http::HTTPResponse* res,
+    URI* uri);
+
+  void fetchRecordsBatch(
     http::HTTPRequest* req,
     http::HTTPResponse* res,
     URI* uri);

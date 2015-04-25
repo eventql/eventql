@@ -108,12 +108,10 @@ TableWriter::TableWriter(
   arenas_.emplace_front(new TableArena(seq_, rnd_.hex128()));
 }
 
-void TableWriter::addRecords(const Buffer& records) {
-  for (size_t offset = 0; offset < records.size(); ) {
-    msg::MessageObject msg;
-    msg::MessageDecoder::decode(records, schema_, &msg, &offset);
-    addRecord(msg);
-  }
+void TableWriter::addRecord(const Buffer& record) {
+  msg::MessageObject msg;
+  msg::MessageDecoder::decode(record, schema_, &msg);
+  addRecord(msg);
 }
 
 void TableWriter::addRecord(const msg::MessageObject& record) {

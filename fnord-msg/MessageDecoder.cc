@@ -16,92 +16,52 @@ namespace msg {
 void MessageDecoder::decode(
     const Buffer& buf,
     const MessageSchema& schema,
-    MessageObject* msg,
-    size_t* offset) {
-  size_t o = offset == nullptr ? 0 : *offset;
-
-  util::BinaryMessageReader reader(
-      ((const char *) buf.data()) + o,
-      buf.size() - o);
-
-  auto num_fields = reader.readVarUInt();
-  Vector<Pair<uint32_t, uint64_t>> fields;
-
-  for (uint64_t i = 0; i < num_fields; ++i) {
-    auto id = reader.readVarUInt();
-    auto end = reader.readVarUInt();
-    fields.emplace_back(id, end);
-  }
-
-  if (num_fields > 0) {
-    decodeObject(0, 0, reader.remaining(), fields, schema, &reader, msg);
-  }
-
-  if (offset != nullptr) {
-    *offset += reader.position();
-  }
+    MessageObject* msg) {
+  decode(buf.data(), buf.size(), schema, msg);
 }
 
-int MessageDecoder::decodeObject(
-    size_t idx,
-    uint64_t begin,
-    uint64_t end,
-    const Vector<Pair<uint32_t, uint64_t>>& fields,
+void MessageDecoder::decode(
+    const void* data,
+    size_t size,
     const MessageSchema& schema,
-    util::BinaryMessageReader* reader,
     MessageObject* msg) {
-  auto fbegin = begin;
-  auto fid = fields[idx].first;
-  auto fend = fields[idx].second;
+  util::BinaryMessageReader reader(data, size);
 
-  switch (schema.type(fid)) {
+  while (reader.remaining() > 0) {
+    auto fkey = reader.readVarUInt();
+    auto fid = fkey >> 3;
 
-    case FieldType::OBJECT: {
-      MessageObject* nxt;
-      if (fid == 0) {
-        if (idx != 0) {
-          return 0;
+    switch (schema.type(fid)) {
+      case FieldType::OBJECT: {
+        auto len = reader.readVarUInt();
+        auto nxt = &msg->addChild(fid);
+        if (len > reader.remaining()) {
+          RAISE(kBufferOverflowError);
         }
 
-        nxt = msg;
-      } else {
-        nxt = &msg->addChild(fid);
+        decode((char *) data + reader.position(), len, schema, nxt);
       }
 
-      auto obegin = fbegin;
-      int i = idx + 1;
-      while (i < fields.size()) {
-        auto oend = fields[i].second;
-
-        if (oend > fend) {
-          break;
-        }
-
-        i += decodeObject(i, obegin, oend, fields, schema, reader, nxt);
-        obegin = oend;
+      case FieldType::UINT32: {
+        auto val = reader.readVarUInt();
+        msg->addChild(fid, (uint32_t) val);
+        break;
       }
 
-      return i - idx;
-    }
+      case FieldType::BOOLEAN: {
+        auto val = reader.readVarUInt();
+        msg->addChild(fid, val == 1);
+        break;
+      }
 
-    case FieldType::UINT32: {
-      uint32_t val = reader->readVarUInt();
-      msg->addChild(fid, val);
-      return 1;
-    }
+      case FieldType::STRING: {
+        auto len = reader.readVarUInt();
+        auto val = reader.read(len);
+        msg->addChild(fid, String((const char*) val, len));
+        break;
+      }
 
-    case FieldType::BOOLEAN: {
-      uint8_t val = *reader->readUInt8();
-      msg->addChild(fid, val == 1);
-      return 1;
     }
-
-    case FieldType::STRING: {
-      auto val = reader->read(fend - fbegin);
-      msg->addChild(fid, String((const char*) val, fend - fbegin));
-      return 1;
-    }
-
   }
 }
 
