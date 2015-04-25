@@ -269,7 +269,6 @@ void LogJoin::flushSession(
       } catch (const std::exception& e) {
         fnord::logError("cm.logjoin", e, "invalid logline");
         stat_loglines_invalid_.incr(1);
-        throw;
       }
     }
 
