@@ -16,6 +16,16 @@
 
 namespace cm {
 
+TrackedQuery::TrackedQuery() :
+    nitems(0),
+    nclicks(0),
+    nads(0),
+    nadclicks (0),
+    num_cart_items(0),
+    num_order_items(0),
+    gmv_eurcents(0),
+    cart_value_eurcents(0) {}
+
 void TrackedQuery::fromParams(const fnord::URI::ParamList& params) {
 
   std::string items_str;

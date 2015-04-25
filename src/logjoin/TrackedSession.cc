@@ -7,14 +7,22 @@
  * permission is obtained.
  */
 #include <fnord-base/inspect.h>
+#include <fnord-base/Currency.h>
 #include "logjoin/TrackedSession.h"
+#include "common.h"
 
 using namespace fnord;
 
 namespace cm {
 
+TrackedSession::TrackedSession() :
+  num_cart_items(0),
+  num_order_items(0),
+  gmv_eurcents(0),
+  cart_value_eurcents(0) {}
+
 void TrackedSession::update() {
-  /* update queries */
+  /* update queries (mark items as clicked) */
   for (auto& cur_query : queries) {
 
     /* search for matching item visits */
@@ -34,7 +42,62 @@ void TrackedSession::update() {
         }
       }
     }
+  }
 
+  /* calculate global gmv */
+  HashMap<String, uint64_t> cart_eurcents_per_item;
+  HashMap<String, uint64_t> gmv_eurcents_per_item;
+  for (const auto& ci : cart_items) {
+    auto currency = currencyFromString(ci.currency);
+    auto eur = Money(100, Currency::EUR); // FIXPAUL!!
+    //auto eur = cconv_.convert(Money(ci.price_cents, currency), Currency::EUR);
+    auto eurcents = eur.cents;
+    eurcents *= ci.quantity;
+    cart_eurcents_per_item.emplace(ci.item.docID().docid, eurcents);
+
+    ++num_cart_items;
+    cart_value_eurcents += eurcents;
+    if (ci.checkout_step == 1) {
+      gmv_eurcents_per_item.emplace(ci.item.docID().docid, eurcents);
+      ++num_order_items;
+      gmv_eurcents += eurcents;
+    }
+  }
+
+  /* calculate gmv and ctrs per query */
+  for (auto& q : queries) {
+    auto slrid = extractAttr(q.attrs, "slrid");
+
+    for (auto& i : q.items) {
+      // DAWANDA HACK
+      if (i.position >= 1 && i.position <= 4 && slrid.isEmpty()) {
+        ++q.nads;
+        q.nadclicks += i.clicked;
+      }
+      // EOF DAWANDA HACK
+
+      ++q.nitems;
+
+      if (i.clicked) {
+        ++q.nclicks;
+
+        {
+          auto ci = cart_eurcents_per_item.find(i.item.docID().docid);
+          if (ci != cart_eurcents_per_item.end()) {
+            ++q.num_cart_items;
+            q.cart_value_eurcents += ci->second;
+          }
+        }
+
+        {
+          auto ci = gmv_eurcents_per_item.find(i.item.docID().docid);
+          if (ci != gmv_eurcents_per_item.end()) {
+            ++q.num_order_items;
+            q.gmv_eurcents += ci->second;
+          }
+        }
+      }
+    }
   }
 }
 

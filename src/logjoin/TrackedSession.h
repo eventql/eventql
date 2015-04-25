@@ -47,6 +47,13 @@ struct TrackedSession {
   std::vector<TrackedCartItem> cart_items;
   std::vector<std::string> attrs;
 
+  uint32_t num_cart_items;
+  uint32_t num_order_items;
+  uint32_t gmv_eurcents;
+  uint32_t cart_value_eurcents;
+
+  TrackedSession();
+
   void insertLogline(
       const DateTime& time,
       const String& evtype,

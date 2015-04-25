@@ -43,27 +43,7 @@ void LogJoinTarget::onSession(
   const auto& schema = joined_sessions_schema_;
   msg::MessageObject obj;
 
-  uint32_t num_cart_items = 0;
-  uint32_t num_order_items = 0;
-  uint32_t gmv_eurcents = 0;
-  uint32_t cart_value_eurcents = 0;
-  HashMap<String, uint64_t> cart_eurcents_per_item;
-  HashMap<String, uint64_t> gmv_eurcents_per_item;
   for (const auto& ci : session.cart_items) {
-    auto currency = currencyFromString(ci.currency);
-    auto eur = cconv_.convert(Money(ci.price_cents, currency), Currency::EUR);
-    auto eurcents = eur.cents;
-    eurcents *= ci.quantity;
-    cart_eurcents_per_item.emplace(ci.item.docID().docid, eurcents);
-
-    ++num_cart_items;
-    cart_value_eurcents += eurcents;
-    if (ci.checkout_step == 1) {
-      gmv_eurcents_per_item.emplace(ci.item.docID().docid, eurcents);
-      ++num_order_items;
-      gmv_eurcents += eurcents;
-    }
-
     auto& ci_obj = obj.addChild(schema.id("cart_items"));
 
     ci_obj.addChild(
@@ -84,7 +64,7 @@ void LogJoinTarget::onSession(
 
     ci_obj.addChild(
         schema.id("cart_items.currency"),
-        (uint32_t) currency);
+        (uint32_t) currencyFromString(ci.currency));
 
     ci_obj.addChild(
         schema.id("cart_items.checkout_step"),
@@ -127,8 +107,7 @@ void LogJoinTarget::onSession(
   }
 
   uint32_t sess_abgrp = 0;
-  for (const auto& tq : session.queries) {
-    auto q = trackedQueryToJoinedQuery(session, tq);
+  for (const auto& q : session.queries) {
     auto& qry_obj = obj.addChild(schema.id("queries"));
 
     /* queries.time */
@@ -155,54 +134,14 @@ void LogJoinTarget::onSession(
       qry_obj.addChild(schema.id("queries.shop_id"), sid);
     }
 
-    /* queries.num_item_clicks, queries.num_items */
-    uint32_t nitems = 0;
-    uint32_t nclicks = 0;
-    uint32_t nads = 0;
-    uint32_t nadclicks = 0;
-    uint32_t qnum_cart_items = 0;
-    uint32_t qnum_order_items = 0;
-    uint32_t qgmv_eurcents = 0;
-    uint32_t qcart_value_eurcents = 0;
-    for (const auto& i : q.items) {
-      // DAWANDA HACK
-      if (i.position >= 1 && i.position <= 4 && slrid.isEmpty()) {
-        ++nads;
-        nadclicks += i.clicked;
-      }
-      // EOF DAWANDA HACK
-
-      ++nitems;
-
-      if (i.clicked) {
-        ++nclicks;
-
-        {
-          auto ci = cart_eurcents_per_item.find(i.item.docID().docid);
-          if (ci != cart_eurcents_per_item.end()) {
-            ++qnum_cart_items;
-            qcart_value_eurcents += ci->second;
-          }
-        }
-
-        {
-          auto ci = gmv_eurcents_per_item.find(i.item.docID().docid);
-          if (ci != gmv_eurcents_per_item.end()) {
-            ++qnum_order_items;
-            qgmv_eurcents += ci->second;
-          }
-        }
-      }
-    }
-
-    qry_obj.addChild(schema.id("queries.num_items"), nitems);
-    qry_obj.addChild(schema.id("queries.num_items_clicked"), nclicks);
-    qry_obj.addChild(schema.id("queries.num_ad_impressions"), nads);
-    qry_obj.addChild(schema.id("queries.num_ad_clicks"), nadclicks);
-    qry_obj.addChild(schema.id("queries.num_cart_items"), qnum_cart_items);
-    qry_obj.addChild(schema.id("queries.cart_value_eurcents"), qcart_value_eurcents);
-    qry_obj.addChild(schema.id("queries.num_order_items"), qnum_order_items);
-    qry_obj.addChild(schema.id("queries.gmv_eurcents"), qgmv_eurcents);
+    qry_obj.addChild(schema.id("queries.num_items"), q.nitems);
+    qry_obj.addChild(schema.id("queries.num_items_clicked"), q.nclicks);
+    qry_obj.addChild(schema.id("queries.num_ad_impressions"), q.nads);
+    qry_obj.addChild(schema.id("queries.num_ad_clicks"), q.nadclicks);
+    qry_obj.addChild(schema.id("queries.num_cart_items"), q.num_cart_items);
+    qry_obj.addChild(schema.id("queries.cart_value_eurcents"), q.cart_value_eurcents);
+    qry_obj.addChild(schema.id("queries.num_order_items"), q.num_order_items);
+    qry_obj.addChild(schema.id("queries.gmv_eurcents"), q.gmv_eurcents);
 
     /* queries.page */
     auto pg_str = cm::extractAttr(q.attrs, "pg");
@@ -353,10 +292,10 @@ void LogJoinTarget::onSession(
     obj.addChild(schema.id("ab_test_group"), sess_abgrp);
   }
 
-  obj.addChild(schema.id("num_cart_items"), num_cart_items);
-  obj.addChild(schema.id("cart_value_eurcents"), cart_value_eurcents);
-  obj.addChild(schema.id("num_order_items"), num_order_items);
-  obj.addChild(schema.id("gmv_eurcents"), gmv_eurcents);
+  obj.addChild(schema.id("num_cart_items"), session.num_cart_items);
+  obj.addChild(schema.id("cart_value_eurcents"), session.cart_value_eurcents);
+  obj.addChild(schema.id("num_order_items"), session.num_order_items);
+  obj.addChild(schema.id("gmv_eurcents"), session.gmv_eurcents);
 
   if (dry_run_) {
     fnord::logInfo(
