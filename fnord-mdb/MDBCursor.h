@@ -81,6 +81,8 @@ public:
 
   void close();
 
+  void del();
+
 protected:
   MDB_cursor* mdb_cur_;
   bool is_closed_;
