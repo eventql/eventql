@@ -1,0 +1,111 @@
+package cm;
+
+enum Language {
+  UNKNOWN_LANGUAGE = 0;
+  DE = 2;
+  EN = 1;
+  ES = 3;
+  FR = 4;
+  IT = 5;
+  NL = 6;
+  PL = 7;
+}
+
+enum PageType {
+  UNKNOWN_PAGE = 0;
+  SEARCH_PAGE = 1;
+  CATALOG_PAGE = 2;
+  PRODUCT_PAGE = 3;
+}
+
+enum DeviceType {
+  UNKNOWN_DEVICE = 0;
+  DESKTOP = 1;
+  PHONE = 2;
+  TABLET = 3;
+}
+
+enum Currency {
+  UNKNOWN_CURRENCY = 0;
+  EUR = 1;
+  PLN = 2;
+  USD = 3;
+}
+
+message JoinedSearchQueryResultItem {
+  required string item_id = 20;
+  required uint32 position = 19;
+  required bool clicked = 15;
+
+  optional uint32 category1 = 22;
+  optional uint32 category2 = 23;
+  optional uint32 category3 = 24;
+  optional uint32 shop_id = 21;
+}
+
+message JoinedSearchQuery {
+  required uint64 time = 18;
+  required Language language = 2;
+
+  required DeviceType device_type = 10;
+  required PageType page_type = 11;
+
+  optional uint32 page = 1;
+  optional string query_string = 3;
+  optional string query_string_normalized = 4;
+  optional uint32 category1 = 12;
+  optional uint32 category2 = 13;
+  optional uint32 category3 = 14;
+  optional uint32 shop_id = 32;
+
+  repeated JoinedSearchQueryResultItem result_items = 17;
+
+  required uint32 num_result_items = 5;
+  required uint32 num_result_items_clicked = 6;
+  required uint32 num_ad_impressions = 7;
+  required uint32 num_ad_clicks = 8;
+  optional uint32 num_cart_items = 43;
+  optional uint32 num_order_items = 44;
+  optional uint32 cart_value_eurcents = 45;
+  optional uint32 gmv_eurcents = 46;
+
+  optional uint32 ab_test_group = 9;
+}
+
+message JoinedItemVisit {
+  required uint64 time = 26;
+  required string item_id = 27;
+
+  optional uint32 shop_id = 28;
+  optional uint32 category1 = 29;
+  optional uint32 category2 = 30;
+  optional uint32 category3 = 31;
+}
+
+message JoinedCartItem {
+  required uint64 time = 33;
+  required string item_id = 34;
+
+  required uint32 quantity = 39;
+  required uint32 price_cents = 40;
+  required Currency currency = 41;
+  required uint32 checkout_step = 42;
+
+  optional uint32 shop_id = 35;
+  optional uint32 category1 = 36;
+  optional uint32 category2 = 37;
+  optional uint32 category3 = 38;
+}
+
+message JoinedSession {
+
+  optional uint32 num_cart_items = 47;
+  optional uint32 num_order_items = 48;
+  optional uint32 cart_value_eurcents = 49;
+  optional uint32 gmv_eurcents = 50;
+  optional uint32 ab_test_group = 51;
+
+  repeated JoinedSearchQuery search_queries = 16;
+  repeated JoinedItemVisit item_visits = 25;
+  repeated JoinedCartItem cart_items = 52;
+}
