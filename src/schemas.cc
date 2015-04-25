@@ -381,7 +381,7 @@ msg::MessageSchema joinedSessionsSchema() {
   fields.emplace_back(item_visits);
 
   msg::MessageSchemaField cart_items(
-      32,
+      52,
       "cart_items",
       msg::FieldType::OBJECT,
       0,
