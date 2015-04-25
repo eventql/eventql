@@ -183,8 +183,11 @@ void LogJoin::appendToSession(
   auto flush_at = time.unixMicros() +
       kSessionIdleTimeoutSeconds * fnord::kMicrosPerSecond;
 
-  bool new_session = sessions_flush_times_.count(uid) == 0;
-  sessions_flush_times_.emplace(uid, flush_at);
+  auto old_ftime = sessions_flush_times_.find(uid);
+  if (old_ftime == sessions_flush_times_.end() ||
+      old_ftime->second < flush_at) {
+    sessions_flush_times_.emplace(uid, flush_at);
+  }
 
   util::BinaryMessageWriter buf;
   buf.appendVarUInt(time.unixMicros() / kMicrosPerSecond);
@@ -196,7 +199,7 @@ void LogJoin::appendToSession(
     buf.append(p.second.data(), p.second.size());
   }
 
-  auto evkey = uid + "~" + evtype;
+  auto evkey = uid + "~" + evtype + "~" + rnd_.hex64();
   txn->insert(evkey.data(), evkey.size(), buf.data(), buf.size());
   txn->update(uid + "~cust", customer_key);
 }
@@ -247,7 +250,7 @@ void LogJoin::flushSession(
     if (StringUtil::endsWith(key_str, "~cust")) {
       session.customer_key = value.toString();
     } else {
-      auto evtype = key_str.substr(uid.length() + 1);
+      auto evtype = key_str.substr(uid.length() + 1).substr(0, 1);
 
       util::BinaryMessageReader reader(value.data(), value.size());
       auto time = reader.readVarUInt() * kMicrosPerSecond;
@@ -269,7 +272,7 @@ void LogJoin::flushSession(
       }
     }
 
-    txn->del(key);
+    cursor->del(key);
   }
 
   cursor->close();
@@ -316,8 +319,7 @@ void LogJoin::importTimeoutList(mdb::MDBTransaction* txn) {
       continue;
     }
 
-    auto evtype = sid.substr(sid.find("~") + 1);
-    sid.erase(sid.end() - evtype.size() - 1, sid.end());
+    sid.erase(sid.begin() + sid.find("~"), sid.end());
 
     util::BinaryMessageReader reader(value.data(), value.size());
     auto time = reader.readVarUInt();
