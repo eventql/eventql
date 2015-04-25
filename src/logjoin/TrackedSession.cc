@@ -39,7 +39,7 @@ void TrackedSession::insertLogline(
     const String& evtype,
     const String& evid,
     const URI::ParamList& logline) {
-  fnord::iputs("insert logline: $0 $1 $2 $3", time, evtype, evid, logline);
+  //fnord::iputs("insert logline: $0 $1 $2 $3", time, evtype, evid, logline);
 }
 
 void TrackedSession::debugPrint(const std::string& uid) const {
