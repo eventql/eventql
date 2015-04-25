@@ -273,5 +273,9 @@ bool MDBCursor::getPrev(
   return true;
 }
 
+void MDBCursor::del() {
+  mdb_cursor_del(mdb_cur_, 0);
+}
+
 }
 }
