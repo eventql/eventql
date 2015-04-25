@@ -134,21 +134,12 @@ int main(int argc, const char** argv) {
       "<num>");
 
   flags.defineFlag(
-      "commit_size",
-      fnord::cli::FlagParser::T_INTEGER,
-      false,
-      NULL,
-      "1024",
-      "commit_size",
-      "<num>");
-
-  flags.defineFlag(
-      "commit_interval",
+      "flush_interval",
       fnord::cli::FlagParser::T_INTEGER,
       false,
       NULL,
       "5",
-      "commit_interval",
+      "flush_interval",
       "<num>");
 
   flags.defineFlag(
@@ -229,26 +220,25 @@ int main(int argc, const char** argv) {
   auto enable_cache = !flags.isSet("nocache");
   size_t batch_size = flags.getInt("batch_size");
   size_t buffer_size = flags.getInt("buffer_size");
-  size_t commit_size = flags.getInt("commit_size");
-  size_t commit_interval = flags.getInt("commit_interval");
+  size_t flush_interval = flags.getInt("flush_interval");
 
   fnord::logInfo(
       "cm.logjoin",
       "Starting cm-logjoin with:\n    dry_run=$0\n    batch_size=$1\n" \
-      "    buffer_size=$2\n    commit_size=$3\n    commit_interval=$9\n"
+      "    buffer_size=$2\n    flush_interval=$9\n"
       "    max_dbsize=$4MB\n" \
       "    shard=$5\n    shard_range=[$6, $7)\n    shard_modulo=$8\n" \
       "    cache=$9",
       dry_run,
       batch_size,
       buffer_size,
-      commit_size,
+      0,
       flags.getInt("db_size"),
       shard.shard_name,
       shard.begin,
       shard.end,
       cm::LogJoinShard::modulo,
-      commit_interval,
+      flush_interval,
       enable_cache);
 
   fnord::logInfo(
@@ -386,7 +376,7 @@ int main(int argc, const char** argv) {
   fnord::logInfo("cm.logjoin", "Resuming logjoin...");
 
   DateTime last_flush;
-  uint64_t rate_limit_micros = commit_interval * kMicrosPerSecond;
+  uint64_t rate_limit_micros = flush_interval * kMicrosPerSecond;
 
   for (;;) {
     auto begin = WallClock::unixMicros();
@@ -397,7 +387,7 @@ int main(int argc, const char** argv) {
     auto txn = sessdb->startTransaction();
 
     int i = 0;
-    for (; i < commit_size; ++i) {
+    for (; i < batch_size; ++i) {
       auto entry = feed_reader.fetchNextEntry();
 
       if (entry.isEmpty()) {
@@ -469,9 +459,9 @@ int main(int argc, const char** argv) {
     //stat_dbsize.set(FileUtil::du_c(flags.getString("datadir"));
 
     auto rtime = WallClock::unixMicros() - begin;
-    if (rtime < kMicrosPerSecond) {
-      begin = WallClock::unixMicros();
-      usleep(kMicrosPerSecond - rtime);
+    auto rlimit = kMicrosPerSecond / 10;
+    if (i < 2 && rtime < rlimit) {
+      usleep(rlimit - rtime);
     }
   }
 
