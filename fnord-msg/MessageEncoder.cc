@@ -17,7 +17,9 @@ void MessageEncoder::encode(
     const MessageSchema& schema,
     Buffer* buf) {
   util::BinaryMessageWriter body;
-  encodeObject(msg, schema, &body);
+  for (const auto& o : msg.asObject()) {
+    encodeObject(o, schema, &body);
+  }
   buf->append(body.data(), body.size());
 }
 

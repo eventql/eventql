@@ -39,7 +39,8 @@ void MessageDecoder::decode(
           RAISE(kBufferOverflowError);
         }
 
-        decode((char *) data + reader.position(), len, schema, nxt);
+        decode(reader.read(len), len, schema, nxt);
+        break;
       }
 
       case FieldType::UINT32: {
