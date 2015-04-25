@@ -37,38 +37,47 @@ void MessageEncoder::encodeObject(
     const MessageSchema& schema,
     Vector<Pair<uint32_t, uint64_t>>* fields,
     util::BinaryMessageWriter* data) {
-  switch (schema.type(msg.id)) {
+  try {
+    switch (schema.type(msg.id)) {
 
-    case FieldType::OBJECT: {
-      Vector<Pair<uint32_t, uint64_t>> obj_fields;
-      for (const auto& o : msg.asObject()) {
-        encodeObject(o, schema, &obj_fields, data);
+      case FieldType::OBJECT: {
+        Vector<Pair<uint32_t, uint64_t>> obj_fields;
+        for (const auto& o : msg.asObject()) {
+          encodeObject(o, schema, &obj_fields, data);
+        }
+
+        fields->emplace_back(msg.id, data->size());
+        for (const auto& f : obj_fields) {
+          fields->emplace_back(f);
+        }
+        return;
       }
 
-      fields->emplace_back(msg.id, data->size());
-      for (const auto& f : obj_fields) {
-        fields->emplace_back(f);
+      case FieldType::STRING: {
+        const auto& str = msg.asString();
+        data->append(str.data(), str.size());
+        break;
       }
-      return;
+
+      case FieldType::UINT32:
+        data->appendVarUInt(msg.asUInt32());
+        break;
+
+      case FieldType::BOOLEAN:
+        data->appendUInt8(msg.asBool() ? 1 : 0);
+        break;
+
     }
 
-    case FieldType::STRING: {
-      const auto& str = msg.asString();
-      data->append(str.data(), str.size());
-      break;
-    }
-
-    case FieldType::UINT32:
-      data->appendVarUInt(msg.asUInt32());
-      break;
-
-    case FieldType::BOOLEAN:
-      data->appendUInt8(msg.asBool() ? 1 : 0);
-      break;
-
+    fields->emplace_back(msg.id, data->size());
+  } catch (const std::exception& e) {
+    RAISEF(
+        kRuntimeError,
+        "error while encoding field $0 ('$1'): $2",
+        msg.id,
+        schema.name(msg.id),
+        e.what());
   }
-
-  fields->emplace_back(msg.id, data->size());
 }
 
 
