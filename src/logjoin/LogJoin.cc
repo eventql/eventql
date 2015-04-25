@@ -250,7 +250,7 @@ void LogJoin::flushSession(
       auto evtype = key_str.substr(uid.length() + 1);
 
       util::BinaryMessageReader reader(value.data(), value.size());
-      auto time = reader.readVarUInt();
+      auto time = reader.readVarUInt() * kMicrosPerSecond;
       auto evid_len = reader.readVarUInt();
       auto evid = String((char*) reader.read(evid_len), evid_len);
 
