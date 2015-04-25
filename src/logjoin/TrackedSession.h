@@ -53,6 +53,10 @@ struct TrackedSession {
       const String& evid,
       const URI::ParamList& logline);
 
+  void insertQuery(const TrackedQuery& query);
+  void insertItemVisit(const TrackedItemVisit& visit);
+  void insertCartVisit(const Vector<TrackedCartItem>& new_cart_items);
+
   /**
    * Trigger an update to incorporate new information. This will e.g. mark
    * query items as clicked if a corresponding click was observed.

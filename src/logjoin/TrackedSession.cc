@@ -9,29 +9,33 @@
 #include <fnord-base/inspect.h>
 #include "logjoin/TrackedSession.h"
 
+using namespace fnord;
+
 namespace cm {
 
 void TrackedSession::update() {
-/*
-  // FIXPAUL slow slow slow
-  for (const auto& visit : item_visits) {
+  /* update queries */
+  for (auto& cur_query : queries) {
 
-    for (auto& query : queries) {
-      auto tdiff = visit.time.unixMicros() - query.time.unixMicros();
-      auto max_delay = kMaxQueryClickDelaySeconds * fnord::kMicrosPerSecond;
-      if (query.time > visit.time || tdiff > max_delay) {
+    /* search for matching item visits */
+    for (auto& cur_visit : item_visits) {
+      auto cutoff = cur_query.time.unixMicros() +
+          kMaxQueryClickDelaySeconds * kMicrosPerSecond;
+
+      if (cur_visit.time < cur_query.time ||
+          cur_visit.time.unixMicros() > cutoff) {
         continue;
       }
 
-      for (auto& qitem : query.items) {
-        if (visit.item == qitem.item) {
+      for (auto& qitem : cur_query.items) {
+        if (cur_visit.item == qitem.item) {
           qitem.clicked = true;
           break;
         }
       }
     }
+
   }
-*/
 }
 
 void TrackedSession::insertLogline(
@@ -39,7 +43,91 @@ void TrackedSession::insertLogline(
     const String& evtype,
     const String& evid,
     const URI::ParamList& logline) {
-  //fnord::iputs("insert logline: $0 $1 $2 $3", time, evtype, evid, logline);
+  if (evtype.length() != 1) {
+    RAISE(kParseError, "e param invalid");
+  }
+
+  switch (evtype[0]) {
+
+    /* query event */
+    case 'q': {
+      TrackedQuery query;
+      query.time = time;
+      query.eid = evid;
+      query.fromParams(logline);
+      insertQuery(query);
+      break;
+    }
+
+    /* item visit event */
+    case 'v': {
+      TrackedItemVisit visit;
+      visit.time = time;
+      visit.eid = evid;
+      visit.fromParams(logline);
+      insertItemVisit(visit);
+      break;
+    }
+
+    /* cart event */
+    case 'c': {
+      auto cart_items = TrackedCartItem::fromParams(logline);
+      for (auto& ci : cart_items) {
+        ci.time = time;
+      }
+
+      insertCartVisit(cart_items);
+      break;
+    }
+
+    case 'u':
+      return;
+
+    default:
+      RAISE(kParseError, "invalid e param");
+
+  }
+}
+
+void TrackedSession::insertQuery(const TrackedQuery& query) {
+  for (auto& q : queries) {
+    if (q.eid == query.eid) {
+      q.merge(query);
+      return;
+    }
+  }
+
+  queries.emplace_back(query);
+}
+
+void TrackedSession::insertItemVisit(const TrackedItemVisit& visit) {
+  for (auto& v : item_visits) {
+    if (v.eid == visit.eid) {
+      v.merge(visit);
+      return;
+    }
+  }
+
+  item_visits.emplace_back(visit);
+}
+
+void TrackedSession::insertCartVisit(
+    const Vector<TrackedCartItem>& new_cart_items) {
+  for (const auto& cart_item : new_cart_items) {
+    bool merged = false;
+
+    for (auto& c : cart_items) {
+      if (c.item == cart_item.item) {
+        c.merge(cart_item);
+        merged = true;
+        break;
+      }
+    }
+
+    if (!merged) {
+      cart_items.emplace_back(cart_item);
+    }
+  }
 }
 
 void TrackedSession::debugPrint(const std::string& uid) const {
