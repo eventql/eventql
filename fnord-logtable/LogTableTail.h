@@ -30,13 +30,15 @@ struct LogTableTailCursor {
 
   void encode(util::BinaryMessageWriter* writer) const;
   void decode(util::BinaryMessageReader* reader);
+
+  String debugPrint() const;
 };
 
 class LogTableTail : public RefCounted {
 public:
 
-  LogTableTail(RefPtr<TableReader> reader);
-  LogTableTail(RefPtr<TableReader> reader, LogTableTailCursor cursor);
+  LogTableTail(RefPtr<AbstractTableReader> reader);
+  LogTableTail(RefPtr<AbstractTableReader> reader, LogTableTailCursor cursor);
 
   bool fetchNext(
       Function<bool (const msg::MessageObject& record)> fn,
@@ -45,8 +47,10 @@ public:
   LogTableTailCursor getCursor() const;
 
 protected:
-  RefPtr<TableReader> reader_;
+  RefPtr<AbstractTableReader> reader_;
   HashMap<String, uint64_t> offsets_;
+  std::atomic<size_t> rr_;
+  RefPtr<TableGeneration> cur_snap_;
 };
 
 } // namespace logtable

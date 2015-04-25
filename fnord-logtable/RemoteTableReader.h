@@ -7,28 +7,26 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#ifndef _FNORD_LOGTABLE_TABLEREADER_H
-#define _FNORD_LOGTABLE_TABLEREADER_H
+#ifndef _FNORD_LOGTABLE_REMOTETABLEREADER_H
+#define _FNORD_LOGTABLE_REMOTETABLEREADER_H
 #include <fnord-base/stdtypes.h>
 #include <fnord-base/autoref.h>
+#include <fnord-http/httpconnectionpool.h>
 #include <fnord-logtable/AbstractTableReader.h>
-#include "fnord-sstable/sstablereader.h"
-#include "fnord-cstable/CSTableReader.h"
 
 namespace fnord {
 namespace logtable {
 
-class TableReader : public AbstractTableReader {
+class RemoteTableReader : public AbstractTableReader{
 public:
 
-  static RefPtr<TableReader> open(
+  RemoteTableReader(
       const String& table_name,
-      const String& replica_id,
-      const String& db_path,
-      const msg::MessageSchema& schema);
+      const msg::MessageSchema& schema,
+      const URI& uri,
+      http::HTTPConnectionPool* http);
 
   const String& name() const override;
-  const String& basePath() const;
   const msg::MessageSchema& schema() const override;
 
   RefPtr<TableSnapshot> getSnapshot() override;
@@ -40,29 +38,14 @@ public:
       Function<bool (const msg::MessageObject& record)> fn) override;
 
 protected:
-
-  TableReader(
-      const String& table_name,
-      const String& replica_id,
-      const String& db_path,
-      const msg::MessageSchema& schema,
-      uint64_t head_generation);
-
-  size_t fetchRecords(
-      const TableChunkRef& chunk,
-      size_t offset,
-      size_t limit,
-      Function<bool (const msg::MessageObject& record)> fn);
-
   String name_;
-  String replica_id_;
-  String db_path_;
   msg::MessageSchema schema_;
-  std::mutex mutex_;
-  uint64_t head_gen_;
+  URI uri_;
+  http::HTTPConnectionPool* http_;
 };
 
 } // namespace logtable
 } // namespace fnord
 
 #endif
+
