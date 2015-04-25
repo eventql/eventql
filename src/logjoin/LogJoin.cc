@@ -272,7 +272,7 @@ void LogJoin::flushSession(
       }
     }
 
-    cursor->del(key);
+    cursor->del();
   }
 
   cursor->close();
