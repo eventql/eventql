@@ -29,7 +29,6 @@ public:
   const DocID& docID() const;
   const HashMap<String, String>& fields() const;
 
-  void update(const IndexChangeRequest& index_req);
   void setField(const String& field, const String& value);
 
   void debugPrint() const;

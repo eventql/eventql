@@ -102,7 +102,7 @@ int main(int argc, const char** argv) {
   tracker_log_feed.exportStats("/cm-frontend/global/tracker_log_writer");
 
   /* set up frontend */
-  thread::Queue<IndexChangeRequest> indexfeed(1024);
+  thread::Queue<IndexChangeRequest> indexfeed(8192);
   cm::CMFrontend frontend(&tracker_log_feed, &indexfeed);
 
   /* set up dawanda */

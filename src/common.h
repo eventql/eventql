@@ -118,5 +118,7 @@ bool isItemEligible(
 
 CurrencyConverter::ConversionTable currencyConversionTable();
 
+bool isIndexAttributeWhitelisted(const String& attr);
+
 }
 #endif
