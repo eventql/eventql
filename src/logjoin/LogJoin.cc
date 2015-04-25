@@ -278,7 +278,8 @@ void LogJoin::flushSession(
   cursor->close();
 
   if (session.customer_key.length() == 0) {
-    RAISE(kRuntimeError, "missing customer key");
+    fnord::logError("cm.logjoin", "missing customer key for: $0", uid);
+    return;
   }
 
   try {
