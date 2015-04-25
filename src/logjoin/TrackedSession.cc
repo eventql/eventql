@@ -11,8 +11,8 @@
 
 namespace cm {
 
-/*
 void TrackedSession::update() {
+/*
   // FIXPAUL slow slow slow
   for (const auto& visit : item_visits) {
 
@@ -31,40 +31,18 @@ void TrackedSession::update() {
       }
     }
   }
-}
 */
+}
 
-DateTime TrackedSession::nextFlushTime() const {
-  uint64_t res = last_seen_unix_micros +
-      kSessionIdleTimeoutSeconds * fnord::kMicrosPerSecond;
-
-  for (auto& query : queries) {
-    auto qflush = query.time.unixMicros() +
-        kMaxQueryClickDelaySeconds * fnord::kMicrosPerSecond;
-
-    if (qflush < res) {
-      res = qflush;
-    }
-  }
-
-  for (auto& visit : item_visits) {
-    auto vflush = visit.time.unixMicros() +
-        kMaxQueryClickDelaySeconds * fnord::kMicrosPerSecond;
-
-    if (vflush < res) {
-      res = vflush;
-    }
-  }
-
-  return DateTime(res);
+void TrackedSession::insertLogline(
+    const DateTime& time,
+    const String& evtype,
+    const String& evid,
+    const URI::ParamList& logline) {
+  fnord::iputs("insert logline: $0 $1 $2 $3", time, evtype, evid, logline);
 }
 
 void TrackedSession::debugPrint(const std::string& uid) const {
-  fnord::iputs(
-      ">> session uid=$0 last_seen=$1",
-      uid,
-      fnord::DateTime(last_seen_unix_micros));
-
   fnord::iputs(" > queries: ", 1);
   for (const auto& query : queries) {
     fnord::iputs(

@@ -37,6 +37,9 @@ LogJoinTarget::LogJoinTarget(
 void LogJoinTarget::onSession(
     mdb::MDBTransaction* txn,
     const TrackedSession& session) {
+  fnord::iputs("flush session: $0", session.uid);
+  return;
+
   const auto& schema = joined_sessions_schema_;
   msg::MessageObject obj;
 
@@ -124,7 +127,7 @@ void LogJoinTarget::onSession(
   }
 
   uint32_t sess_abgrp = 0;
-  for (const auto& tq : session.flushed_queries) {
+  for (const auto& tq : session.queries) {
     auto q = trackedQueryToJoinedQuery(session, tq);
     auto& qry_obj = obj.addChild(schema.id("queries"));
 
@@ -300,7 +303,7 @@ void LogJoinTarget::onSession(
     }
   }
 
-  for (const auto& iv : session.flushed_item_visits) {
+  for (const auto& iv : session.item_visits) {
     auto& iv_obj = obj.addChild(schema.id("item_visits"));
 
     iv_obj.addChild(
