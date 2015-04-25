@@ -35,9 +35,9 @@ using namespace fnord;
  *   is         -- item ids         -- format "<setid>~<itemid>~p<pos>,..."
  *   pg         -- page number      -- format "<num>"
  *   qstr~<lc>  -- query string     -- format "<string>"
- *   qcat1      -- query cat1       -- format "<catid>"
- *   qcat2      -- query cat2       -- format "<catid>"
- *   qcat3      -- query cat3       -- format "<catid>"
+ *   q_cat1      -- query cat1       -- format "<catid>"
+ *   q_cat2      -- query cat2       -- format "<catid>"
+ *   q_cat3      -- query cat3       -- format "<catid>"
  *   slrid      -- seller id        -- format "<id>"
  *
  * params for eventtype=v (visit):

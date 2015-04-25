@@ -67,40 +67,42 @@ public:
 
 protected:
 
-  void insertQuery(
+  void addPixelParamID(const String& param, uint32_t id);
+  uint32_t getPixelParamID(const String& param) const;
+
+  //void insertQuery(
+  //    const std::string& customer_key,
+  //    const std::string& uid,
+  //    const TrackedQuery& query,
+  //    mdb::MDBTransaction* txn);
+
+  //void insertItemVisit(
+  //    const std::string& customer_key,
+  //    const std::string& uid,
+  //    const TrackedItemVisit& visit,
+  //    mdb::MDBTransaction* txn);
+
+  //void insertCartVisit(
+  //    const std::string& customer_key,
+  //    const std::string& uid,
+  //    const Vector<TrackedCartItem>& cart_items,
+  //    const DateTime& time,
+  //    mdb::MDBTransaction* txn);
+
+  void appendToSession(
       const std::string& customer_key,
+      const fnord::DateTime& time,
       const std::string& uid,
-      const TrackedQuery& query,
+      const std::string& evid,
+      const std::string& evtype,
+      const Vector<Pair<String, String>>& logline,
       mdb::MDBTransaction* txn);
 
-  void insertItemVisit(
-      const std::string& customer_key,
-      const std::string& uid,
-      const TrackedItemVisit& visit,
-      mdb::MDBTransaction* txn);
-
-  void insertCartVisit(
-      const std::string& customer_key,
-      const std::string& uid,
-      const Vector<TrackedCartItem>& cart_items,
-      const DateTime& time,
-      mdb::MDBTransaction* txn);
-
-  void withSession(
-      const std::string& customer_key,
-      const std::string& uid,
-      mdb::MDBTransaction* txn,
-      Function<void (TrackedSession* session)> fn);
-
-  void enqueueFlush(
-      const String& uid,
-      const DateTime& flush_at);
-
-  void maybeFlushSession(
-      mdb::MDBTransaction* txn,
-      const std::string uid,
-      TrackedSession* session,
-      DateTime stream_time);
+  //void maybeFlushSession(
+  //    mdb::MDBTransaction* txn,
+  //    const std::string uid,
+  //    TrackedSession* session,
+  //    DateTime stream_time);
 
   bool dry_run_;
   bool enable_cache_;
@@ -109,6 +111,9 @@ protected:
   HashMap<String, DateTime> sessions_flush_times_;
   HashMap<String, TrackedSession> session_cache_;
   bool turbo_;
+
+  HashMap<String, uint32_t> pixel_param_ids_;
+  HashMap<uint32_t, String> pixel_param_names_;
 
   fnord::stats::Counter<uint64_t> stat_loglines_total_;
   fnord::stats::Counter<uint64_t> stat_loglines_invalid_;
