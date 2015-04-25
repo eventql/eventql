@@ -294,7 +294,7 @@ void LogJoinTarget::onSession(
   obj.addChild(schema.id("num_order_items"), session.num_order_items);
   obj.addChild(schema.id("gmv_eurcents"), session.gmv_eurcents);
 
-  if (true || dry_run_) {
+  if (dry_run_) {
     fnord::logInfo(
         "cm.logjoin",
         "[DRYRUN] not uploading session: $0",
