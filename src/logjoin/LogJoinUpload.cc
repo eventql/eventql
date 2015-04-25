@@ -8,6 +8,7 @@
  */
 #include "logjoin/LogJoinUpload.h"
 #include "fnord-base/uri.h"
+#include "fnord-base/util/binarymessagewriter.h"
 #include "fnord-http/httprequest.h"
 
 using namespace fnord;
@@ -78,12 +79,13 @@ void LogJoinUpload::uploadBatch(
   req.addHeader("Host", uri.hostAndPort());
   req.addHeader("Content-Type", "application/fnord-msg");
 
-  Buffer body;
+  util::BinaryMessageWriter body;
   for (const auto& b : batch) {
+    body.appendVarUInt(b.size());
     body.append(b.data(), b.size());
   }
 
-  req.addBody(body);
+  req.addBody(body.data(), body.size());
 
   auto res = http_->executeRequest(req);
   res.wait();
