@@ -51,6 +51,7 @@ public:
       std::string* fragment);
 
   static void parseQueryString(const std::string& query, ParamList* params);
+  static std::string buildQueryString(const ParamList& params);
 
   static bool getParam(
       const ParamList&,
