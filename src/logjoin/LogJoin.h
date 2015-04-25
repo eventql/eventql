@@ -69,6 +69,7 @@ protected:
 
   void addPixelParamID(const String& param, uint32_t id);
   uint32_t getPixelParamID(const String& param) const;
+  const String& getPixelParamName(uint32_t id) const;
 
   //void insertQuery(
   //    const std::string& customer_key,
@@ -98,11 +99,10 @@ protected:
       const Vector<Pair<String, String>>& logline,
       mdb::MDBTransaction* txn);
 
-  //void maybeFlushSession(
-  //    mdb::MDBTransaction* txn,
-  //    const std::string uid,
-  //    TrackedSession* session,
-  //    DateTime stream_time);
+  void flushSession(
+      const std::string uid,
+      DateTime stream_time,
+      mdb::MDBTransaction* txn);
 
   bool dry_run_;
   bool enable_cache_;

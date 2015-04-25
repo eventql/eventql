@@ -27,9 +27,6 @@
 #include "IndexChangeRequest.h"
 #include "ItemRef.h"
 #include "Document.h"
-#include "logjoin/TrackedSession.h"
-#include "logjoin/TrackedQuery.h"
-#include "logjoin/LogJoinShard.h"
 
 using namespace fnord;
 
