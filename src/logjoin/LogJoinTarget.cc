@@ -37,9 +37,6 @@ void LogJoinTarget::onSession(
     TrackedSession& session) {
   session.joinEvents(cconv_);
 
-  fnord::iputs("flush session: $0 w/ $1 queries", session.uid, session.queries.size());
-  return;
-
   const auto& schema = joined_sessions_schema_;
   msg::MessageObject obj;
 
@@ -297,7 +294,7 @@ void LogJoinTarget::onSession(
   obj.addChild(schema.id("num_order_items"), session.num_order_items);
   obj.addChild(schema.id("gmv_eurcents"), session.gmv_eurcents);
 
-  if (dry_run_) {
+  if (true || dry_run_) {
     fnord::logInfo(
         "cm.logjoin",
         "[DRYRUN] not uploading session: $0",
