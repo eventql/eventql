@@ -10,6 +10,7 @@
 #include "fnord-logtable/LogTableServlet.h"
 #include "fnord-json/json.h"
 #include "fnord-msg/MessageEncoder.h"
+#include "fnord-msg/MessagePrinter.h"
 
 namespace fnord {
 namespace logtable {
@@ -349,19 +350,39 @@ void LogTableServlet::fetchRecords(
     return;
   }
 
+  String format = "binary";
+  URI::getParam(params, "format", &format);
+
   auto tbl = tables_->findTableReader(table);
   const auto& schema = tbl->schema();
 
   Buffer body;
-  auto on_record = [&body, &schema] (const msg::MessageObject& rec) -> bool {
-    msg::MessageEncoder::encode(rec, schema, &body);
-    return true;
-  };
 
-  tbl->fetchRecords(replica, seq, limit, on_record);
+  if (format == "human") {
+    tbl->fetchRecords(
+        replica,
+        seq,
+        limit,
+        [&body, &schema] (const msg::MessageObject& rec) -> bool {
+          body.append(msg::MessagePrinter::print(rec, schema));
+          return true;
+        });
+
+    res->addHeader("Content-Type", "text/plain");
+  } else {
+    tbl->fetchRecords(
+        replica,
+        seq,
+        limit,
+        [&body, &schema] (const msg::MessageObject& rec) -> bool {
+          msg::MessageEncoder::encode(rec, schema, &body);
+          return true;
+        });
+
+    res->addHeader("Content-Type", "application/octet-stream");
+  }
 
   res->setStatus(http::kStatusOK);
-  res->addHeader("Content-Type", "application/octet-stream");
   res->addBody(body);
 }
 
