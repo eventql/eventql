@@ -104,7 +104,7 @@ void IndexFeedUpload::uploadBatch(
     body.append(b.data(), b.size());
   }
 
-  URI uri(target_url_ + "?table=index_feed-" + customer);
+  URI uri(target_url_ + "/insert_batch?table=index_feed-" + customer);
 
   http::HTTPRequest req(http::HTTPMessage::M_POST, uri.pathAndQuery());
   req.addHeader("Host", uri.hostAndPort());
