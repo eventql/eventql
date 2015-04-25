@@ -144,7 +144,6 @@ add_executable(cm-logjoin-backfill
     src/logjoin/LogJoinBackfill.cc
     src/schemas.cc
     src/IndexReader.cc
-    src/IndexWriter.cc
     src/FeatureIndexWriter.cc
     src/cm-logjoin-backfill.cc)
 
@@ -161,8 +160,20 @@ add_executable(cm-indexbuild
     $<TARGET_OBJECTS:fnord-feeds>
     $<TARGET_OBJECTS:fnord-rpc>
     $<TARGET_OBJECTS:fnord-mdb>
+    $<TARGET_OBJECTS:fnord-msg>
+    $<TARGET_OBJECTS:fnord-cstable>
     src/cm-indexbuild.cc
-    src/IndexWriter.cc
+    3rdparty/libfnord/fnord-logtable/RemoteTableReader.cc
+    3rdparty/libfnord/fnord-logtable/TableReader.cc
+    3rdparty/libfnord/fnord-logtable/TableArena.cc
+    3rdparty/libfnord/fnord-logtable/TableWriter.cc
+    3rdparty/libfnord/fnord-logtable/TableRepository.cc
+    3rdparty/libfnord/fnord-logtable/ArtifactIndex.cc
+    3rdparty/libfnord/fnord-logtable/NumericBoundsSummary.cc
+    3rdparty/libfnord/fnord-logtable/TableChunkSummaryReader.cc
+    3rdparty/libfnord/fnord-logtable/TableChunkSummaryWriter.cc
+    3rdparty/libfnord/fnord-logtable/LogTableTail.cc
+    src/schemas.cc
     src/DocStore.cc
     src/FeatureIndexWriter.cc)
 
@@ -440,7 +451,6 @@ add_executable(cm-autocompletebuild
     3rdparty/libfnord/fnord-logtable/TableChunkSummaryWriter.cc
     src/schemas.cc
     src/IndexReader.cc
-    src/IndexWriter.cc
     src/FeatureIndexWriter.cc
     src/analytics/Report.cc
     src/analytics/ReportBuilder.cc
@@ -493,7 +503,6 @@ add_executable(cm-shopstatsbuild
     3rdparty/libfnord/fnord-logtable/TableChunkSummaryWriter.cc
     src/schemas.cc
     src/IndexReader.cc
-    src/IndexWriter.cc
     src/FeatureIndexWriter.cc
     src/analytics/Report.cc
     src/analytics/ReportBuilder.cc

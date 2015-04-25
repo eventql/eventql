@@ -24,7 +24,7 @@ RefPtr<IndexWriter> IndexWriter::openIndex(
   auto db_path = FileUtil::joinPaths(index_path, "db");
   FileUtil::mkdir_p(db_path);
   auto doc_idx = RefPtr<FeatureIndexWriter>(
-      new FeatureIndexWriter(index_path, false));
+      new FeatureIndexWriter(index_path, "documents-dawanda", false));
 
   /* open lucene */
   RefPtr<fnord::fts::Analyzer> analyzer(new fnord::fts::Analyzer(conf_path));
