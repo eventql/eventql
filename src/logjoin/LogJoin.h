@@ -120,6 +120,8 @@ protected:
   fnord::stats::Counter<uint64_t> stat_joined_sessions_;
   fnord::stats::Counter<uint64_t> stat_joined_queries_;
   fnord::stats::Counter<uint64_t> stat_joined_item_visits_;
+
+  Random rnd_;
 };
 } // namespace cm
 
