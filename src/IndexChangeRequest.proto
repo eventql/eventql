@@ -1,0 +1,12 @@
+package cm;
+
+message IndexChangeRequstAttribute {
+  required string key = 4;
+  required string value = 5;
+}
+
+message IndexChangeRequest {
+  required string customer = 1;
+  required string docid = 2;
+  repeated IndexChangeRequstAttribute attributes = 3;
+}
