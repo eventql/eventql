@@ -316,34 +316,48 @@ void LogJoin::flush(mdb::MDBTransaction* txn, DateTime stream_time_) {
 }
 
 void LogJoin::importTimeoutList(mdb::MDBTransaction* txn) {
-  //Buffer key;
-  //Buffer value;
-  //int n = 0;
+  Buffer key;
+  Buffer value;
+  int n = 0;
 
-  //auto cursor = txn->getCursor();
+  auto cursor = txn->getCursor();
 
-  //for (;;) {
-  //  bool eof;
-  //  if (n++ == 0) {
-  //    eof = !cursor->getFirst(&key, &value);
-  //  } else {
-  //    eof = !cursor->getNext(&key, &value);
-  //  }
+  for (;;) {
+    bool eof;
+    if (n++ == 0) {
+      eof = !cursor->getFirst(&key, &value);
+    } else {
+      eof = !cursor->getNext(&key, &value);
+    }
 
-  //  if (eof) {
-  //    break;
-  //  }
+    if (eof) {
+      break;
+    }
 
-  //  if (StringUtil::beginsWith(key.toString(), "__")) {
-  //    continue;
-  //  }
+    if (StringUtil::beginsWith(key.toString(), "__")) {
+      continue;
+    }
 
-  //  auto session = json::fromJSON<TrackedSession>(value);
-  //  enqueueFlush(session.uid, session.nextFlushTime());
-  //sessions_flush_times_[uid] = flush_at;
-  //}
+    auto sid = key.toString();
+    if (StringUtil::endsWith(sid, "~cust")) {
+      continue;
+    }
 
-  //cursor->close();
+    auto evtype = sid.substr(sid.find("~") + 1);
+    sid.erase(sid.end() - evtype.size() - 1, sid.end());
+
+    util::BinaryMessageReader reader(value.data(), value.size());
+    auto time = reader.readVarUInt();
+    auto ftime = (time + kSessionIdleTimeoutSeconds) * fnord::kMicrosPerSecond;
+
+    auto old_ftime = sessions_flush_times_.find(sid);
+    if (old_ftime == sessions_flush_times_.end() ||
+        old_ftime->second.unixMicros() < ftime) {
+      sessions_flush_times_.emplace(sid, ftime);
+    }
+  }
+
+  cursor->close();
 }
 
 void LogJoin::addPixelParamID(const String& param, uint32_t id) {
