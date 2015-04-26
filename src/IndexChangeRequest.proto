@@ -1,12 +1,43 @@
 package cm;
 
+/**
+ * A single document attribute/field
+ */
 message IndexChangeRequstAttribute {
+
+  /**
+   * The key of this attribute. Note that we only index a whitelisted subset
+   * if attribute keys
+   */
   required string key = 4;
+
+  /**
+   * The value for this attribute
+   */
   required string value = 5;
+
 }
 
+/**
+ * A schemaless request requesting some attributes to be changed or added
+ * for a particular document
+ */
 message IndexChangeRequest {
+
+  /**
+   * The customer key (i.e. "dawanda")
+   */
   required string customer = 1;
+
+  /**
+   * The document id (i.e. "p~1235634")
+   */
   required string docid = 2;
+
+  /**
+   * The attributes to be changed or added. Existing attributes will be updated,
+   * non existing attributes will be added
+   */
   repeated IndexChangeRequstAttribute attributes = 3;
+
 }
