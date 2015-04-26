@@ -16,14 +16,10 @@
 #include <vector>
 #include <queue>
 #include "fnord-base/stdtypes.h"
-#include "fnord-feeds/RemoteFeed.h"
-#include "fnord-feeds/RemoteFeedWriter.h"
-#include "fnord-rpc/RPC.h"
-#include "fnord-rpc/RPCClient.h"
-#include "fnord-base/thread/taskscheduler.h"
 #include "fnord-mdb/MDB.h"
 #include "fnord-base/stats/stats.h"
-#include "FeatureIndex.h"
+#include "fnord-base/util/binarymessagereader.h"
+#include "fnord-base/util/binarymessagewriter.h"
 #include "IndexChangeRequest.h"
 #include "ItemRef.h"
 #include "Document.h"

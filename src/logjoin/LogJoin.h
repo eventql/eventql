@@ -41,7 +41,6 @@ public:
   LogJoin(
       LogJoinShard shard,
       bool dry_run,
-      bool enable_cache,
       LogJoinTarget* target);
 
   void insertLogline(
@@ -62,8 +61,6 @@ public:
   void importTimeoutList(mdb::MDBTransaction* txn);
 
   void exportStats(const std::string& path_prefix);
-
-  void setTurbo(bool turbo);
 
 protected:
 
@@ -105,12 +102,10 @@ protected:
       mdb::MDBTransaction* txn);
 
   bool dry_run_;
-  bool enable_cache_;
   LogJoinShard shard_;
   LogJoinTarget* target_;
   HashMap<String, DateTime> sessions_flush_times_;
   HashMap<String, TrackedSession> session_cache_;
-  bool turbo_;
 
   HashMap<String, uint32_t> pixel_param_ids_;
   HashMap<uint32_t, String> pixel_param_names_;

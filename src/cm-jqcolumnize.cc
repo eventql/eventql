@@ -44,8 +44,8 @@
 #include <fnord-fts/fts_common.h>
 #include "common.h"
 #include "CustomerNamespace.h"
-#include "FeatureSchema.h"
-#include "JoinedQuery.h"
+
+#
 #include "CTRCounter.h"
 #include "analytics/AnalyticsTableScan.h"
 #include "analytics/CTRByPositionQuery.h"

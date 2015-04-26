@@ -23,7 +23,6 @@
 #include <fnord-fts/fts_common.h>
 #include "fnord-mdb/MDB.h"
 #include "fnord-base/stats/stats.h"
-#include "FeatureIndex.h"
 #include "DocStore.h"
 #include "IndexChangeRequest.h"
 #include "FeatureIndexWriter.h"

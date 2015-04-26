@@ -18,8 +18,6 @@
 #include <fnord-feeds/RemoteFeedFactory.h>
 #include <fnord-feeds/RemoteFeedWriter.h>
 #include "ItemRef.h"
-#include "JoinedQuery.h"
-#include "JoinedItemVisit.h"
 #include "CustomerNamespace.h"
 #include "logjoin/LogJoin.h"
 
@@ -30,13 +28,10 @@ namespace cm {
 LogJoin::LogJoin(
     LogJoinShard shard,
     bool dry_run,
-    bool enable_cache,
     LogJoinTarget* target) :
     shard_(shard),
     dry_run_(dry_run),
-    target_(target),
-    turbo_(false),
-    enable_cache_(enable_cache) {
+    target_(target) {
   addPixelParamID("dw_ab", 1);
   addPixelParamID("l", 2);
   addPixelParamID("u_x", 3);
@@ -385,10 +380,6 @@ void LogJoin::exportStats(const std::string& prefix) {
       StringUtil::format("$0/$1", prefix, "joined_item_visits"),
       &stat_joined_item_visits_,
       fnord::stats::ExportMode::EXPORT_DELTA);
-}
-
-void LogJoin::setTurbo(bool turbo) {
-  turbo_ = turbo;
 }
 
 } // namespace cm

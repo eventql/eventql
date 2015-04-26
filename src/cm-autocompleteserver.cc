@@ -36,8 +36,8 @@
 #include "fnord-mdb/MDBUtil.h"
 #include "common.h"
 #include "CustomerNamespace.h"
-#include "FeatureSchema.h"
-#include "JoinedQuery.h"
+
+#
 #include "AutoCompleteServlet.h"
 #include "analytics/TermInfoTableSource.h"
 

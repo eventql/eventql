@@ -8,6 +8,7 @@
  */
 #include "frontend/IndexFeedUpload.h"
 #include "fnord-base/uri.h"
+#include "fnord-base/logging.h"
 #include "fnord-base/util/binarymessagewriter.h"
 #include "fnord-http/httprequest.h"
 #include "fnord-msg/MessageSchema.h"

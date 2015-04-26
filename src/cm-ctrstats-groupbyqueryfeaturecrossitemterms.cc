@@ -27,8 +27,8 @@
 #include "fnord-sstable/SSTableColumnWriter.h"
 #include "common.h"
 #include "CustomerNamespace.h"
-#include "FeatureSchema.h"
-#include "JoinedQuery.h"
+
+#
 #include "CTRCounter.h"
 #include <fnord-fts/fts.h>
 #include <fnord-fts/fts_common.h>

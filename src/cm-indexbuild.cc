@@ -36,10 +36,9 @@
 #include "fnord-mdb/MDB.h"
 #include "fnord-msg/MessagePrinter.h"
 #include "CustomerNamespace.h"
-#include "FeatureSchema.h"
+
 #include "FeatureIndexWriter.h"
 #include "IndexChangeRequest.h"
-#include "IndexWriter.h"
 #include "schemas.h"
 
 using namespace cm;

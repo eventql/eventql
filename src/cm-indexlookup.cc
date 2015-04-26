@@ -35,8 +35,8 @@
 #include "fnord-fts/FTSQuery.h"
 #include "fnord-mdb/MDB.h"
 #include "CustomerNamespace.h"
-#include "FeatureSchema.h"
-#include "FeaturePack.h"
+
+
 #include "DocStore.h"
 #include "FeatureIndex.h"
 #include "IndexChangeRequest.h"

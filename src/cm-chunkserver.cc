@@ -43,19 +43,6 @@
 #include "fnord-mdb/MDBUtil.h"
 #include "common.h"
 #include "schemas.h"
-#include "CustomerNamespace.h"
-#include "FeatureSchema.h"
-#include "JoinedQuery.h"
-#include "analytics/AnalyticsServlet.h"
-#include "analytics/CTRByPageServlet.h"
-#include "analytics/CTRStatsServlet.h"
-#include "analytics/CTRByPositionQuery.h"
-#include "analytics/CTRByPageQuery.h"
-#include "analytics/TopSearchQueriesQuery.h"
-#include "analytics/DiscoveryKPIQuery.h"
-#include "analytics/DiscoveryCategoryStatsQuery.h"
-#include "analytics/AnalyticsQueryEngine.h"
-#include "analytics/AnalyticsQueryEngine.h"
 
 using namespace fnord;
 
