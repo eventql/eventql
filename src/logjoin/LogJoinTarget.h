@@ -18,7 +18,7 @@
 #include "logjoin/TrackedQuery.h"
 #include "DocStore.h"
 #include "IndexChangeRequest.h"
-#include "FeatureIndexWriter.h"
+#include "DocIndex.h"
 #include "ItemRef.h"
 
 using namespace fnord;
@@ -37,7 +37,7 @@ public:
   LogJoinTarget(
       const msg::MessageSchema& joined_sessions_schema,
       fts::Analyzer* analyzer,
-      RefPtr<FeatureIndexWriter> index,
+      RefPtr<DocIndex> index,
       bool dry_run);
 
   void onSession(
@@ -49,7 +49,7 @@ public:
 protected:
   msg::MessageSchema joined_sessions_schema_;
   fts::Analyzer* analyzer_;
-  RefPtr<FeatureIndexWriter> index_;
+  RefPtr<DocIndex> index_;
   bool dry_run_;
   Random rnd_;
   CurrencyConverter cconv_;

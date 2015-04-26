@@ -100,7 +100,7 @@ add_executable(cm-logjoin
     src/logjoin/TrackedItemVisit.cc
     src/logjoin/TrackedQuery.cc
     src/logjoin/TrackedSession.cc
-    src/FeatureIndexWriter.cc
+    src/DocIndex.cc
     src/cm-logjoin.cc
     src/schemas.cc
     src/logjoin/LogJoin.cc
@@ -133,7 +133,7 @@ target_link_libraries(cm-logjoin ${CMAKE_THREAD_LIBS_INIT} ${FNORD_FTS_LIBS})
 #    3rdparty/libfnord/fnord-logtable/LogTableTail.cc
 #    src/logjoin/LogJoinBackfill.cc
 #    src/schemas.cc
-#    src/FeatureIndexWriter.cc
+#    src/DocIndex.cc
 #    src/cm-logjoin-backfill.cc)
 #
 #target_link_libraries(cm-logjoin-backfill
@@ -164,7 +164,7 @@ add_executable(cm-indexbuild
     3rdparty/libfnord/fnord-logtable/LogTableTail.cc
     src/schemas.cc
     src/DocStore.cc
-    src/FeatureIndexWriter.cc)
+    src/DocIndex.cc)
 
 target_link_libraries(cm-indexbuild
     ${CMAKE_THREAD_LIBS_INIT} ${FNORD_FTS_LIBS})
@@ -180,7 +180,7 @@ target_link_libraries(cm-indexbuild
 #    $<TARGET_OBJECTS:fnord-rpc>
 #    $<TARGET_OBJECTS:fnord-mdb>
 #    src/DocStore.cc
-#    src/FeatureIndexWriter.cc
+#    src/DocIndex.cc
 #    src/cm-indexlookup.cc)
 #
 #target_link_libraries(cm-indexlookup
@@ -200,7 +200,7 @@ target_link_libraries(cm-indexbuild
 #    src/DocStore.cc
 #    src/IndexServlet.cc
 #    src/SearchQuery.cc
-#    src/FeatureIndexWriter.cc
+#    src/DocIndex.cc
 #    src/cm-indexserver.cc)
 #
 #target_link_libraries(cm-indexserver
@@ -279,7 +279,7 @@ target_link_libraries(cm-dawandaindexpush
 #    $<TARGET_OBJECTS:fnord-fts>
 #    src/IndexReader.cc
 #    src/IndexWriter.cc
-#    src/FeatureIndexWriter.cc
+#    src/DocIndex.cc
 #    src/analytics/Report.cc
 #    src/analytics/ReportBuilder.cc
 #    src/analytics/CTRByPageMapper.cc
@@ -321,7 +321,7 @@ add_executable(cm-autocompletebuild
     3rdparty/libfnord/fnord-logtable/TableChunkSummaryReader.cc
     3rdparty/libfnord/fnord-logtable/TableChunkSummaryWriter.cc
     src/schemas.cc
-    src/FeatureIndexWriter.cc
+    src/DocIndex.cc
     src/analytics/Report.cc
     src/analytics/ReportBuilder.cc
     src/analytics/CTRCounterTableSink.cc
@@ -366,7 +366,7 @@ add_executable(cm-shopstatsbuild
     3rdparty/libfnord/fnord-logtable/TableChunkSummaryReader.cc
     3rdparty/libfnord/fnord-logtable/TableChunkSummaryWriter.cc
     src/schemas.cc
-    src/FeatureIndexWriter.cc
+    src/DocIndex.cc
     src/analytics/Report.cc
     src/analytics/ReportBuilder.cc
     src/analytics/CTRCounterTableSink.cc

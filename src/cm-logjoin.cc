@@ -39,7 +39,7 @@
 #include "logjoin/LogJoinUpload.h"
 #include "DocStore.h"
 #include "IndexChangeRequest.h"
-#include "FeatureIndexWriter.h"
+#include "DocIndex.h"
 #include "ItemRef.h"
 #include "common.h"
 #include "schemas.h"
@@ -268,8 +268,8 @@ int main(int argc, const char** argv) {
   });
 
   /* open index */
-  RefPtr<FeatureIndexWriter> index(
-      new FeatureIndexWriter(
+  RefPtr<DocIndex> index(
+      new DocIndex(
           flags.getString("index"),
           "documents-dawanda",
           true));

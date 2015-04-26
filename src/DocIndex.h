@@ -29,15 +29,15 @@ using namespace fnord;
 namespace cm {
 class CustomerNamespace;
 
-class FeatureIndexWriter : public RefCounted {
+class DocIndex : public RefCounted {
 public:
 
-  FeatureIndexWriter(
+  DocIndex(
       const String& db_path,
       const String& index_name,
       bool readonly);
 
-  ~FeatureIndexWriter();
+  ~DocIndex();
 
   RefPtr<Document> findDocument(const DocID& docid);
   void listDocuments(Function<bool (const DocID& id)> fn);

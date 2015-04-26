@@ -37,7 +37,7 @@
 #include "fnord-msg/MessagePrinter.h"
 #include "CustomerNamespace.h"
 
-#include "FeatureIndexWriter.h"
+#include "DocIndex.h"
 #include "IndexChangeRequest.h"
 #include "schemas.h"
 
@@ -145,7 +145,7 @@ int main(int argc, const char** argv) {
       "Opening index at $0",
       flags.getString("index"));
 
-  FeatureIndexWriter index(
+  DocIndex index(
       flags.getString("index"),
       "documents-dawanda",
       false);

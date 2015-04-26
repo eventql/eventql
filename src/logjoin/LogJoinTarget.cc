@@ -23,7 +23,7 @@ namespace cm {
 LogJoinTarget::LogJoinTarget(
     const msg::MessageSchema& joined_sessions_schema,
     fts::Analyzer* analyzer,
-    RefPtr<FeatureIndexWriter> index,
+    RefPtr<DocIndex> index,
     bool dry_run) :
     joined_sessions_schema_(joined_sessions_schema),
     analyzer_(analyzer),
