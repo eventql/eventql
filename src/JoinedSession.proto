@@ -84,6 +84,7 @@ message JoinedSearchQuery {
   /**
    * The language of the search query (i.e. on which language page/subdomain
    * was the query executed)
+   */
   required Language language = 2;
 
   /**
