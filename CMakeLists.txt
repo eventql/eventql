@@ -42,15 +42,8 @@ add_library(cm-common OBJECT
     src/common.cc
     src/CTRCounter.cc
     src/Document.cc
-    src/FeatureCache.cc
-    src/FeatureID.cc
-    src/FeaturePack.cc
-    src/FeatureSchema.cc
-    src/FeatureIndex.cc
     src/ItemRef.cc
-    src/JoinedQuery.cc
-    src/CustomerNamespace.cc
-    src/PackedExample.cc)
+    src/CustomerNamespace.cc)
 
 # cm-frontend
 set_source_files_properties(${CMAKE_BINARY_DIR}/cm-frontend-assets.cc PROPERTIES GENERATED true)
@@ -70,12 +63,9 @@ add_executable(cm-frontend
     $<TARGET_OBJECTS:fnord-rpc>
     $<TARGET_OBJECTS:fnord-msg>
     src/frontend/CMFrontend.cc
-    src/frontend/LookupServlet.cc
     src/frontend/IndexFeedUpload.cc
     src/cm-frontend.cc
     src/schemas.cc
-    src/sellerstats/ActivityLog.cc
-    src/sellerstats/SellerStatsLookup.cc
     ${CMAKE_BINARY_DIR}/cm-frontend-assets.cc)
 
 target_link_libraries(cm-frontend ${CMAKE_THREAD_LIBS_INIT})
@@ -120,36 +110,35 @@ add_executable(cm-logjoin
 
 target_link_libraries(cm-logjoin ${CMAKE_THREAD_LIBS_INIT} ${FNORD_FTS_LIBS})
 
-add_executable(cm-logjoin-backfill
-    $<TARGET_OBJECTS:cm-common>
-    $<TARGET_OBJECTS:fnord-base>
-    $<TARGET_OBJECTS:fnord-feeds>
-    $<TARGET_OBJECTS:fnord-mdb>
-    $<TARGET_OBJECTS:fnord-http>
-    $<TARGET_OBJECTS:fnord-json>
-    $<TARGET_OBJECTS:fnord-rpc>
-    $<TARGET_OBJECTS:fnord-cstable>
-    $<TARGET_OBJECTS:fnord-sstable>
-    $<TARGET_OBJECTS:fnord-fts>
-    $<TARGET_OBJECTS:fnord-msg>
-    3rdparty/libfnord/fnord-logtable/TableReader.cc
-    3rdparty/libfnord/fnord-logtable/TableArena.cc
-    3rdparty/libfnord/fnord-logtable/TableWriter.cc
-    3rdparty/libfnord/fnord-logtable/TableRepository.cc
-    3rdparty/libfnord/fnord-logtable/ArtifactIndex.cc
-    3rdparty/libfnord/fnord-logtable/NumericBoundsSummary.cc
-    3rdparty/libfnord/fnord-logtable/TableChunkSummaryReader.cc
-    3rdparty/libfnord/fnord-logtable/TableChunkSummaryWriter.cc
-    3rdparty/libfnord/fnord-logtable/LogTableTail.cc
-    src/logjoin/LogJoinBackfill.cc
-    src/schemas.cc
-    src/IndexReader.cc
-    src/FeatureIndexWriter.cc
-    src/cm-logjoin-backfill.cc)
-
-target_link_libraries(cm-logjoin-backfill
-    ${CMAKE_THREAD_LIBS_INIT} ${FNORD_FTS_LIBS})
-
+#add_executable(cm-logjoin-backfill
+#    $<TARGET_OBJECTS:cm-common>
+#    $<TARGET_OBJECTS:fnord-base>
+#    $<TARGET_OBJECTS:fnord-feeds>
+#    $<TARGET_OBJECTS:fnord-mdb>
+#    $<TARGET_OBJECTS:fnord-http>
+#    $<TARGET_OBJECTS:fnord-json>
+#    $<TARGET_OBJECTS:fnord-rpc>
+#    $<TARGET_OBJECTS:fnord-cstable>
+#    $<TARGET_OBJECTS:fnord-sstable>
+#    $<TARGET_OBJECTS:fnord-fts>
+#    $<TARGET_OBJECTS:fnord-msg>
+#    3rdparty/libfnord/fnord-logtable/TableReader.cc
+#    3rdparty/libfnord/fnord-logtable/TableArena.cc
+#    3rdparty/libfnord/fnord-logtable/TableWriter.cc
+#    3rdparty/libfnord/fnord-logtable/TableRepository.cc
+#    3rdparty/libfnord/fnord-logtable/ArtifactIndex.cc
+#    3rdparty/libfnord/fnord-logtable/NumericBoundsSummary.cc
+#    3rdparty/libfnord/fnord-logtable/TableChunkSummaryReader.cc
+#    3rdparty/libfnord/fnord-logtable/TableChunkSummaryWriter.cc
+#    3rdparty/libfnord/fnord-logtable/LogTableTail.cc
+#    src/logjoin/LogJoinBackfill.cc
+#    src/schemas.cc
+#    src/FeatureIndexWriter.cc
+#    src/cm-logjoin-backfill.cc)
+#
+#target_link_libraries(cm-logjoin-backfill
+#    ${CMAKE_THREAD_LIBS_INIT} ${FNORD_FTS_LIBS})
+#
 add_executable(cm-indexbuild
     $<TARGET_OBJECTS:cm-common>
     $<TARGET_OBJECTS:fnord-base>
@@ -180,45 +169,43 @@ add_executable(cm-indexbuild
 target_link_libraries(cm-indexbuild
     ${CMAKE_THREAD_LIBS_INIT} ${FNORD_FTS_LIBS})
 
-add_executable(cm-indexlookup
-    $<TARGET_OBJECTS:cm-common>
-    $<TARGET_OBJECTS:fnord-base>
-    $<TARGET_OBJECTS:fnord-http>
-    $<TARGET_OBJECTS:fnord-json>
-    $<TARGET_OBJECTS:fnord-sstable>
-    $<TARGET_OBJECTS:fnord-fts>
-    $<TARGET_OBJECTS:fnord-feeds>
-    $<TARGET_OBJECTS:fnord-rpc>
-    $<TARGET_OBJECTS:fnord-mdb>
-    src/DocStore.cc
-    src/IndexReader.cc
-    src/FeatureIndexWriter.cc
-    src/cm-indexlookup.cc)
-
-target_link_libraries(cm-indexlookup
-    ${CMAKE_THREAD_LIBS_INIT}
-    ${FNORD_FTS_LIBS})
-
-add_executable(cm-indexserver
-    $<TARGET_OBJECTS:cm-common>
-    $<TARGET_OBJECTS:fnord-base>
-    $<TARGET_OBJECTS:fnord-http>
-    $<TARGET_OBJECTS:fnord-json>
-    $<TARGET_OBJECTS:fnord-sstable>
-    $<TARGET_OBJECTS:fnord-fts>
-    $<TARGET_OBJECTS:fnord-feeds>
-    $<TARGET_OBJECTS:fnord-rpc>
-    $<TARGET_OBJECTS:fnord-mdb>
-    src/DocStore.cc
-    src/IndexReader.cc
-    src/IndexServlet.cc
-    src/SearchQuery.cc
-    src/FeatureIndexWriter.cc
-    src/cm-indexserver.cc)
-
-target_link_libraries(cm-indexserver
-    ${CMAKE_THREAD_LIBS_INIT}
-    ${FNORD_FTS_LIBS})
+#add_executable(cm-indexlookup
+#    $<TARGET_OBJECTS:cm-common>
+#    $<TARGET_OBJECTS:fnord-base>
+#    $<TARGET_OBJECTS:fnord-http>
+#    $<TARGET_OBJECTS:fnord-json>
+#    $<TARGET_OBJECTS:fnord-sstable>
+#    $<TARGET_OBJECTS:fnord-fts>
+#    $<TARGET_OBJECTS:fnord-feeds>
+#    $<TARGET_OBJECTS:fnord-rpc>
+#    $<TARGET_OBJECTS:fnord-mdb>
+#    src/DocStore.cc
+#    src/FeatureIndexWriter.cc
+#    src/cm-indexlookup.cc)
+#
+#target_link_libraries(cm-indexlookup
+#    ${CMAKE_THREAD_LIBS_INIT}
+#    ${FNORD_FTS_LIBS})
+#
+#add_executable(cm-indexserver
+#    $<TARGET_OBJECTS:cm-common>
+#    $<TARGET_OBJECTS:fnord-base>
+#    $<TARGET_OBJECTS:fnord-http>
+#    $<TARGET_OBJECTS:fnord-json>
+#    $<TARGET_OBJECTS:fnord-sstable>
+#    $<TARGET_OBJECTS:fnord-fts>
+#    $<TARGET_OBJECTS:fnord-feeds>
+#    $<TARGET_OBJECTS:fnord-rpc>
+#    $<TARGET_OBJECTS:fnord-mdb>
+#    src/DocStore.cc
+#    src/IndexServlet.cc
+#    src/SearchQuery.cc
+#    src/FeatureIndexWriter.cc
+#    src/cm-indexserver.cc)
+#
+#target_link_libraries(cm-indexserver
+#    ${CMAKE_THREAD_LIBS_INIT}
+#    ${FNORD_FTS_LIBS})
 
 add_executable(cm-dawandaindexpush
     $<TARGET_OBJECTS:cm-common>
@@ -235,163 +222,50 @@ target_link_libraries(cm-dawandaindexpush
     ${CMAKE_THREAD_LIBS_INIT}
     ${FNORD_SQL_LIBS})
 
-add_executable(cm-featuredump
-    $<TARGET_OBJECTS:cm-common>
-    $<TARGET_OBJECTS:fnord-base>
-    $<TARGET_OBJECTS:fnord-feeds>
-    $<TARGET_OBJECTS:fnord-http>
-    $<TARGET_OBJECTS:fnord-mdb>
-    $<TARGET_OBJECTS:fnord-json>
-    $<TARGET_OBJECTS:fnord-rpc>
-    $<TARGET_OBJECTS:fnord-sstable>
-    src/cm-featuredump.cc)
+#add_executable(cm-featuredump
+#    $<TARGET_OBJECTS:cm-common>
+#    $<TARGET_OBJECTS:fnord-base>
+#    $<TARGET_OBJECTS:fnord-feeds>
+#    $<TARGET_OBJECTS:fnord-http>
+#    $<TARGET_OBJECTS:fnord-mdb>
+#    $<TARGET_OBJECTS:fnord-json>
+#    $<TARGET_OBJECTS:fnord-rpc>
+#    $<TARGET_OBJECTS:fnord-sstable>
+#    src/cm-featuredump.cc)
+#
+#target_link_libraries(cm-featuredump
+#    ${CMAKE_THREAD_LIBS_INIT})
+#
+#add_executable(cm-featureprep
+#    $<TARGET_OBJECTS:cm-common>
+#    $<TARGET_OBJECTS:fnord-base>
+#    $<TARGET_OBJECTS:fnord-feeds>
+#    $<TARGET_OBJECTS:fnord-mdb>
+#    $<TARGET_OBJECTS:fnord-http>
+#    $<TARGET_OBJECTS:fnord-json>
+#    $<TARGET_OBJECTS:fnord-rpc>
+#    $<TARGET_OBJECTS:fnord-sstable>
+#    $<TARGET_OBJECTS:fnord-fts>
+#    src/FeatureSelector.cc
+#    src/cm-featureprep.cc)
+#
+#target_link_libraries(cm-featureprep
+#    ${CMAKE_THREAD_LIBS_INIT} ${FNORD_FTS_LIBS})
 
-target_link_libraries(cm-featuredump
-    ${CMAKE_THREAD_LIBS_INIT})
-
-add_executable(cm-featureprep
-    $<TARGET_OBJECTS:cm-common>
-    $<TARGET_OBJECTS:fnord-base>
-    $<TARGET_OBJECTS:fnord-feeds>
-    $<TARGET_OBJECTS:fnord-mdb>
-    $<TARGET_OBJECTS:fnord-http>
-    $<TARGET_OBJECTS:fnord-json>
-    $<TARGET_OBJECTS:fnord-rpc>
-    $<TARGET_OBJECTS:fnord-sstable>
-    $<TARGET_OBJECTS:fnord-fts>
-    src/FeatureSelector.cc
-    src/cm-featureprep.cc)
-
-target_link_libraries(cm-featureprep
-    ${CMAKE_THREAD_LIBS_INIT} ${FNORD_FTS_LIBS})
-
-add_executable(cm-ctrstats-rollupflat
-    $<TARGET_OBJECTS:cm-common>
-    $<TARGET_OBJECTS:fnord-base>
-    $<TARGET_OBJECTS:fnord-feeds>
-    $<TARGET_OBJECTS:fnord-mdb>
-    $<TARGET_OBJECTS:fnord-http>
-    $<TARGET_OBJECTS:fnord-json>
-    $<TARGET_OBJECTS:fnord-rpc>
-    $<TARGET_OBJECTS:fnord-sstable>
-    src/cm-ctrstats-rollupflat.cc)
-
-target_link_libraries(cm-ctrstats-rollupflat
-    ${CMAKE_THREAD_LIBS_INIT})
-
-add_executable(cm-ctrstats-rollup2d
-    $<TARGET_OBJECTS:cm-common>
-    $<TARGET_OBJECTS:fnord-base>
-    $<TARGET_OBJECTS:fnord-feeds>
-    $<TARGET_OBJECTS:fnord-mdb>
-    $<TARGET_OBJECTS:fnord-http>
-    $<TARGET_OBJECTS:fnord-json>
-    $<TARGET_OBJECTS:fnord-rpc>
-    $<TARGET_OBJECTS:fnord-sstable>
-    src/cm-ctrstats-rollup2d.cc)
-
-target_link_libraries(cm-ctrstats-rollup2d
-    ${CMAKE_THREAD_LIBS_INIT})
-
-add_executable(cm-ctrstats-rolluptimeseries
-    $<TARGET_OBJECTS:cm-common>
-    $<TARGET_OBJECTS:fnord-base>
-    $<TARGET_OBJECTS:fnord-feeds>
-    $<TARGET_OBJECTS:fnord-mdb>
-    $<TARGET_OBJECTS:fnord-http>
-    $<TARGET_OBJECTS:fnord-json>
-    $<TARGET_OBJECTS:fnord-rpc>
-    $<TARGET_OBJECTS:fnord-sstable>
-    src/cm-ctrstats-rolluptimeseries.cc)
-
-target_link_libraries(cm-ctrstats-rolluptimeseries
-    ${CMAKE_THREAD_LIBS_INIT})
-
-add_executable(cm-ctrstats-groupbyqueryfeature
-    $<TARGET_OBJECTS:cm-common>
-    $<TARGET_OBJECTS:fnord-base>
-    $<TARGET_OBJECTS:fnord-feeds>
-    $<TARGET_OBJECTS:fnord-mdb>
-    $<TARGET_OBJECTS:fnord-http>
-    $<TARGET_OBJECTS:fnord-json>
-    $<TARGET_OBJECTS:fnord-rpc>
-    $<TARGET_OBJECTS:fnord-sstable>
-    src/cm-ctrstats-groupbyqueryfeature.cc)
-
-target_link_libraries(cm-ctrstats-groupbyqueryfeature
-    ${CMAKE_THREAD_LIBS_INIT})
-
-add_executable(cm-ctrstats-groupbyqueryfeaturecrossitemfeature
-    $<TARGET_OBJECTS:cm-common>
-    $<TARGET_OBJECTS:fnord-base>
-    $<TARGET_OBJECTS:fnord-feeds>
-    $<TARGET_OBJECTS:fnord-mdb>
-    $<TARGET_OBJECTS:fnord-http>
-    $<TARGET_OBJECTS:fnord-json>
-    $<TARGET_OBJECTS:fnord-rpc>
-    $<TARGET_OBJECTS:fnord-sstable>
-    src/cm-ctrstats-groupbyqueryfeaturecrossitemfeature.cc)
-
-target_link_libraries(cm-ctrstats-groupbyqueryfeaturecrossitemfeature
-    ${CMAKE_THREAD_LIBS_INIT})
-
-add_executable(cm-ctrstats-groupbyqueryfeaturecrossitemterms
-    $<TARGET_OBJECTS:cm-common>
-    $<TARGET_OBJECTS:fnord-base>
-    $<TARGET_OBJECTS:fnord-feeds>
-    $<TARGET_OBJECTS:fnord-mdb>
-    $<TARGET_OBJECTS:fnord-http>
-    $<TARGET_OBJECTS:fnord-json>
-    $<TARGET_OBJECTS:fnord-rpc>
-    $<TARGET_OBJECTS:fnord-sstable>
-    $<TARGET_OBJECTS:fnord-fts>
-    src/cm-ctrstats-groupbyqueryfeaturecrossitemterms.cc)
-
-target_link_libraries(cm-ctrstats-groupbyqueryfeaturecrossitemterms
-    ${CMAKE_THREAD_LIBS_INIT} ${FNORD_FTS_LIBS})
-
-add_executable(cm-ctrstats-clickpagehisto
-    $<TARGET_OBJECTS:cm-common>
-    $<TARGET_OBJECTS:fnord-base>
-    $<TARGET_OBJECTS:fnord-feeds>
-    $<TARGET_OBJECTS:fnord-mdb>
-    $<TARGET_OBJECTS:fnord-http>
-    $<TARGET_OBJECTS:fnord-json>
-    $<TARGET_OBJECTS:fnord-rpc>
-    $<TARGET_OBJECTS:fnord-sstable>
-    src/cm-ctrstats-clickpagehisto.cc)
-
-target_link_libraries(cm-ctrstats-clickpagehisto
-    ${CMAKE_THREAD_LIBS_INIT})
-
-add_executable(cm-ctrstats-clickpositionhisto
-    $<TARGET_OBJECTS:cm-common>
-    $<TARGET_OBJECTS:fnord-base>
-    $<TARGET_OBJECTS:fnord-feeds>
-    $<TARGET_OBJECTS:fnord-mdb>
-    $<TARGET_OBJECTS:fnord-http>
-    $<TARGET_OBJECTS:fnord-json>
-    $<TARGET_OBJECTS:fnord-rpc>
-    $<TARGET_OBJECTS:fnord-sstable>
-    src/cm-ctrstats-clickpositionhisto.cc)
-
-target_link_libraries(cm-ctrstats-clickpositionhisto
-    ${CMAKE_THREAD_LIBS_INIT})
-
-add_executable(cm-ctrstats-builditemboost
-    $<TARGET_OBJECTS:cm-common>
-    $<TARGET_OBJECTS:fnord-base>
-    $<TARGET_OBJECTS:fnord-feeds>
-    $<TARGET_OBJECTS:fnord-mdb>
-    $<TARGET_OBJECTS:fnord-http>
-    $<TARGET_OBJECTS:fnord-json>
-    $<TARGET_OBJECTS:fnord-rpc>
-    $<TARGET_OBJECTS:fnord-sstable>
-    $<TARGET_OBJECTS:fnord-fts>
-    src/cm-ctrstats-builditemboost.cc)
-
-target_link_libraries(cm-ctrstats-builditemboost
-    ${CMAKE_THREAD_LIBS_INIT} ${FNORD_FTS_LIBS})
+#add_executable(cm-ctrstats-builditemboost
+#    $<TARGET_OBJECTS:cm-common>
+#    $<TARGET_OBJECTS:fnord-base>
+#    $<TARGET_OBJECTS:fnord-feeds>
+#    $<TARGET_OBJECTS:fnord-mdb>
+#    $<TARGET_OBJECTS:fnord-http>
+#    $<TARGET_OBJECTS:fnord-json>
+#    $<TARGET_OBJECTS:fnord-rpc>
+#    $<TARGET_OBJECTS:fnord-sstable>
+#    $<TARGET_OBJECTS:fnord-fts>
+#    src/cm-ctrstats-builditemboost.cc)
+#
+#target_link_libraries(cm-ctrstats-builditemboost
+#    ${CMAKE_THREAD_LIBS_INIT} ${FNORD_FTS_LIBS})
 
 #add_executable(cm-reportbuild
 #    $<TARGET_OBJECTS:cm-common>
@@ -408,14 +282,11 @@ target_link_libraries(cm-ctrstats-builditemboost
 #    src/FeatureIndexWriter.cc
 #    src/analytics/Report.cc
 #    src/analytics/ReportBuilder.cc
-#    src/analytics/JoinedQueryTableSource.cc
-#    src/analytics/CTRByPositionMapper.cc
 #    src/analytics/CTRByPageMapper.cc
 #    src/analytics/CTRStatsMapper.cc
 #    src/analytics/CTRCounterTableSink.cc
 #    src/analytics/CTRCounterTableSource.cc
 #    src/analytics/CTRCounterMergeReducer.cc
-#    #src/analytics/CTRBySearchQueryMapper.cc
 #    src/analytics/CTRBySearchTermCrossCategoryMapper.cc
 #    src/analytics/CTRByQueryAttributeMapper.cc
 #    src/analytics/RelatedTermsMapper.cc
@@ -450,25 +321,18 @@ add_executable(cm-autocompletebuild
     3rdparty/libfnord/fnord-logtable/TableChunkSummaryReader.cc
     3rdparty/libfnord/fnord-logtable/TableChunkSummaryWriter.cc
     src/schemas.cc
-    src/IndexReader.cc
     src/FeatureIndexWriter.cc
     src/analytics/Report.cc
     src/analytics/ReportBuilder.cc
-    src/analytics/JoinedQueryTableSource.cc
-    src/analytics/CTRByPositionMapper.cc
-    src/analytics/CTRByPageMapper.cc
-    src/analytics/CTRStatsMapper.cc
     src/analytics/CTRCounterTableSink.cc
     src/analytics/CTRCounterTableSource.cc
     src/analytics/CTRCounterMergeReducer.cc
-    #src/analytics/CTRBySearchQueryMapper.cc
     src/analytics/TrafficSegment.cc
     src/analytics/AnalyticsTableScan.cc
     src/analytics/AnalyticsQuery.cc
     src/analytics/AnalyticsQueryEngine.cc
     src/analytics/AnalyticsQueryResult.cc
     src/analytics/CTRBySearchTermCrossCategoryMapper.cc
-    src/analytics/CTRByQueryAttributeMapper.cc
     src/analytics/AnalyticsTableScanSource.cc
     src/analytics/RelatedTermsMapper.cc
     src/analytics/TermInfoTableSink.cc
@@ -502,26 +366,19 @@ add_executable(cm-shopstatsbuild
     3rdparty/libfnord/fnord-logtable/TableChunkSummaryReader.cc
     3rdparty/libfnord/fnord-logtable/TableChunkSummaryWriter.cc
     src/schemas.cc
-    src/IndexReader.cc
     src/FeatureIndexWriter.cc
     src/analytics/Report.cc
     src/analytics/ReportBuilder.cc
-    src/analytics/JoinedQueryTableSource.cc
-    src/analytics/CTRByPositionMapper.cc
-    src/analytics/CTRByPageMapper.cc
-    src/analytics/CTRStatsMapper.cc
     src/analytics/CTRCounterTableSink.cc
     src/analytics/CTRCounterTableSource.cc
     src/analytics/CTRCounterMergeReducer.cc
     src/analytics/CTRByShopMapper.cc
-    #src/analytics/CTRBySearchQueryMapper.cc
     src/analytics/TrafficSegment.cc
     src/analytics/AnalyticsTableScan.cc
     src/analytics/AnalyticsQuery.cc
     src/analytics/AnalyticsQueryEngine.cc
     src/analytics/AnalyticsQueryResult.cc
     src/analytics/CTRBySearchTermCrossCategoryMapper.cc
-    src/analytics/CTRByQueryAttributeMapper.cc
     src/analytics/AnalyticsTableScanSource.cc
     src/analytics/RelatedTermsMapper.cc
     src/analytics/TermInfoTableSink.cc
@@ -602,7 +459,6 @@ add_executable(cm-analytics-backend
     src/analytics/TrafficSegment.cc
     src/analytics/CTRStatsServlet.cc
     src/analytics/AnalyticsServlet.cc
-    src/analytics/CTRByPageServlet.cc
     src/analytics/ShopStatsTable.cc
     src/analytics/ShopStatsServlet.cc
     src/analytics/ShopStats.cc
@@ -644,20 +500,6 @@ add_executable(cm-tokenize
 
 target_link_libraries(cm-tokenize
     ${CMAKE_THREAD_LIBS_INIT} ${FNORD_FTS_LIBS})
-
-add_executable(cm-jqshuffle
-    $<TARGET_OBJECTS:cm-common>
-    $<TARGET_OBJECTS:fnord-base>
-    $<TARGET_OBJECTS:fnord-feeds>
-    $<TARGET_OBJECTS:fnord-mdb>
-    $<TARGET_OBJECTS:fnord-http>
-    $<TARGET_OBJECTS:fnord-json>
-    $<TARGET_OBJECTS:fnord-rpc>
-    $<TARGET_OBJECTS:fnord-sstable>
-    src/cm-jqshuffle.cc)
-
-target_link_libraries(cm-jqshuffle
-    ${CMAKE_THREAD_LIBS_INIT})
 
 add_executable(cm-jqcolumnize
     $<TARGET_OBJECTS:cm-common>

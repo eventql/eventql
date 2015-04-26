@@ -15,7 +15,6 @@
 #include <fnord-base/Currency.h>
 #include <fnord-base/util/CumulativeHistogram.h>
 #include <fnord-json/json.h>
-#include "JoinedQuery.h"
 
 using namespace fnord;
 
@@ -97,24 +96,6 @@ String joinBagOfWords(const Set<String>& words);
 String deviceTypeToString(DeviceType device_type);
 DeviceType deviceTypeFromString(const String& device_type);
 PageType pageTypeFromString(const String& page_type);
-
-enum class FeaturePrep {
-  NONE,
-  BAGOFWORDS_DE
-};
-
-enum class ItemEligibility {
-  ALL = 0,
-  DAWANDA_ALL_NOBOTS = 1
-};
-
-
-bool isQueryEligible(ItemEligibility eligibility, const cm::JoinedQuery& query);
-
-bool isItemEligible(
-    ItemEligibility eligibility,
-    const cm::JoinedQuery& query,
-    const cm::JoinedQueryItem& item);
 
 CurrencyConverter::ConversionTable currencyConversionTable();
 

@@ -9,6 +9,7 @@
 #include "AutoCompleteServlet.h"
 #include "CTRCounter.h"
 #include "fnord-base/Language.h"
+#include "fnord-base/logging.h"
 #include "fnord-base/wallclock.h"
 #include "fnord-base/io/fileutil.h"
 

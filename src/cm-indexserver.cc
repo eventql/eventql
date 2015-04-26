@@ -36,8 +36,7 @@
 #include "fnord-mdb/MDBUtil.h"
 #include "common.h"
 #include "CustomerNamespace.h"
-#include "FeatureSchema.h"
-#include "JoinedQuery.h"
+
 #include "IndexServlet.h"
 
 using namespace fnord;

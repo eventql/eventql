@@ -37,7 +37,6 @@
 #include "logjoin/LogJoin.h"
 #include "logjoin/LogJoinTarget.h"
 #include "logjoin/LogJoinUpload.h"
-#include "FeatureIndex.h"
 #include "DocStore.h"
 #include "IndexChangeRequest.h"
 #include "FeatureIndexWriter.h"
@@ -160,15 +159,6 @@ int main(int argc, const char** argv) {
       "no dryrun",
       "<bool>");
 
-   flags.defineFlag(
-      "nocache",
-      fnord::cli::FlagParser::T_SWITCH,
-      false,
-      NULL,
-      NULL,
-      "no cache",
-      "<bool>");
-
   flags.defineFlag(
       "shard",
       fnord::cli::FlagParser::T_STRING,
@@ -217,7 +207,6 @@ int main(int argc, const char** argv) {
 
   /* set up logjoin */
   auto dry_run = !flags.isSet("no_dryrun");
-  auto enable_cache = !flags.isSet("nocache");
   size_t batch_size = flags.getInt("batch_size");
   size_t buffer_size = flags.getInt("buffer_size");
   size_t flush_interval = flags.getInt("flush_interval");
@@ -227,8 +216,7 @@ int main(int argc, const char** argv) {
       "Starting cm-logjoin with:\n    dry_run=$0\n    batch_size=$1\n" \
       "    buffer_size=$2\n    flush_interval=$9\n"
       "    max_dbsize=$4MB\n" \
-      "    shard=$5\n    shard_range=[$6, $7)\n    shard_modulo=$8\n" \
-      "    cache=$9",
+      "    shard=$5\n    shard_range=[$6, $7)\n    shard_modulo=$8",
       dry_run,
       batch_size,
       buffer_size,
@@ -238,8 +226,7 @@ int main(int argc, const char** argv) {
       shard.begin,
       shard.end,
       cm::LogJoinShard::modulo,
-      flush_interval,
-      enable_cache);
+      flush_interval);
 
   fnord::logInfo(
       "cm.logjoin",
@@ -302,7 +289,7 @@ int main(int argc, const char** argv) {
       &http);
 
   /* setup logjoin */
-  cm::LogJoin logjoin(shard, dry_run, enable_cache, &logjoin_target);
+  cm::LogJoin logjoin(shard, dry_run, &logjoin_target);
   logjoin.exportStats("/cm-logjoin/global");
   logjoin.exportStats(StringUtil::format("/cm-logjoin/$0", shard.shard_name));
 
@@ -380,8 +367,6 @@ int main(int argc, const char** argv) {
 
   for (;;) {
     auto begin = WallClock::unixMicros();
-    auto turbo = FileUtil::exists("/tmp/logjoin_turbo.enabled");
-    logjoin.setTurbo(turbo);
 
     feed_reader.fillBuffers();
     auto txn = sessdb->startTransaction();

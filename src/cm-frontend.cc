@@ -30,7 +30,6 @@
 #include "fnord-rpc/RPCClient.h"
 #include "CustomerNamespace.h"
 #include "frontend/CMFrontend.h"
-#include "frontend/LookupServlet.h"
 #include "frontend/IndexFeedUpload.h"
 
 using namespace cm;
