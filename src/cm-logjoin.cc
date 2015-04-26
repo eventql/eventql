@@ -438,7 +438,7 @@ int main(int argc, const char** argv) {
     //stat_dbsize.set(FileUtil::du_c(flags.getString("datadir"));
 
     auto rtime = WallClock::unixMicros() - begin;
-    auto rlimit = kMicrosPerSecond / 10;
+    auto rlimit = kMicrosPerSecond;
     if (i < 2 && rtime < rlimit) {
       usleep(rlimit - rtime);
     }
