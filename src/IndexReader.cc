@@ -20,8 +20,8 @@ RefPtr<IndexReader> IndexReader::openIndex(const String& index_path) {
 
   /* open doc index */
   auto db_path = FileUtil::joinPaths(index_path, "db");
-  auto doc_idx = RefPtr<FeatureIndexWriter>(
-      new FeatureIndexWriter(db_path, "documents-dawanda", true));
+  auto doc_idx = RefPtr<DocIndex>(
+      new DocIndex(db_path, "documents-dawanda", true));
 
   /* open lucene */
   auto fts_path = FileUtil::joinPaths(index_path, "fts");
@@ -33,7 +33,7 @@ RefPtr<IndexReader> IndexReader::openIndex(const String& index_path) {
 }
 
 IndexReader::IndexReader(
-    RefPtr<FeatureIndexWriter> doc_idx,
+    RefPtr<DocIndex> doc_idx,
     std::shared_ptr<fts::IndexReader> fts) :
     doc_idx_(doc_idx),
     fts_(fts),
@@ -47,7 +47,7 @@ std::shared_ptr<fts::IndexSearcher> IndexReader::ftsSearcher() {
   return fts_searcher_;
 }
 
-RefPtr<FeatureIndexWriter> IndexReader::docIndex() {
+RefPtr<DocIndex> IndexReader::docIndex() {
   return doc_idx_;
 }
 

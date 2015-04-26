@@ -25,7 +25,7 @@
 #include "fnord-base/stats/stats.h"
 #include "DocStore.h"
 #include "IndexChangeRequest.h"
-#include "FeatureIndexWriter.h"
+#include "DocIndex.h"
 #include "ItemRef.h"
 
 using namespace fnord;
@@ -55,11 +55,11 @@ public:
 protected:
 
   IndexWriter(
-      RefPtr<FeatureIndexWriter> doc_idx,
+      RefPtr<DocIndex> doc_idx,
       std::shared_ptr<fts::IndexWriter> fts_idx);
 
   FeatureSchema schema_;
-  RefPtr<FeatureIndexWriter> doc_idx_;
+  RefPtr<DocIndex> doc_idx_;
   std::shared_ptr<fts::IndexWriter> fts_idx_;
 
   fnord::stats::Counter<uint64_t> stat_documents_indexed_total_;
