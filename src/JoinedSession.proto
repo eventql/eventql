@@ -32,80 +32,290 @@ enum Currency {
   USD = 3;
 }
 
+
+/**
+ * A JoinedSearchQueryResultItem describes a single item in a search queries
+ * result list (i.e. a single "placement").
+ */
 message JoinedSearchQueryResultItem {
+
+  /**
+   * The item id of the result item/product
+   */
   required string item_id = 20;
+
+  /**
+   * The position at which this item was shown. Start from 1 and 1 is the first
+   * result item (i.e. the topmost lefmost one)
+   */
   required uint32 position = 19;
+
+  /**
+   * True if the result item was subsequently clicked
+   */
   required bool clicked = 15;
 
+  /**
+   * If applicable, the result item's shop id (DaWanda user id)
+   */
+  optional uint32 shop_id = 21;
+
+  /**
+   * If applicable, the item's category1/2/3 id (DaWanda e1/2/3)
+   */
   optional uint32 category1 = 22;
   optional uint32 category2 = 23;
   optional uint32 category3 = 24;
-  optional uint32 shop_id = 21;
+
 }
 
+
+/**
+ * A JoinedSearchQuery is added to the session for each search query that
+ * the user enters
+ */
 message JoinedSearchQuery {
+
+  /**
+   * The time at which this search query was observer
+   */
   required uint64 time = 18;
+
+  /**
+   * The language of the search query (i.e. on which language page/subdomain
+   * was the query executed)
   required Language language = 2;
 
+  /**
+   * The "device type" (mobile/table/desktop) for this query. N.B. that the
+   * classification is currently based upon screen dimensions which is very
+   * imprecise (to the point of being useless)
+   */
   required DeviceType device_type = 10;
+
+  /**
+   * The "page type" (catalog/search/shop/etc) on which this query was executed
+   */
   required PageType page_type = 11;
 
+  /**
+   * The page number of the query was paginated. Starts from 1 == first page
+   */
   optional uint32 page = 1;
+
+  /**
+   * The raw search query string (as it was submitted by the user)
+   */
   optional string query_string = 3;
+
+  /**
+   * The normalized search query string (tokenized, gargabe removed, lowercase)
+   */
   optional string query_string_normalized = 4;
+
+  /**
+   * The category1/2/3 filter if this was a fulltext search query with category
+   * filter or the catalog category 1/2/3 (DaWanda e1/e2/e3) if this was a
+   * catalog view. N.B  that more than one of these can be set at the same
+   * time (e.g. for a DaWanda e2 view we will set category1 and category2)
+   */
   optional uint32 category1 = 12;
   optional uint32 category2 = 13;
   optional uint32 category3 = 14;
+
+  /**
+   * If this was a shop page view / search within a shop the shop id of the
+   * shop
+   */
   optional uint32 shop_id = 32;
 
+  /**
+   * The full result list for this query
+   */
   repeated JoinedSearchQueryResultItem result_items = 17;
 
+  /**
+   * How many result items were returned for this query
+   */
   required uint32 num_result_items = 5;
+
+  /**
+   * How many of the query result items were subsequently clicked
+   */
   required uint32 num_result_items_clicked = 6;
+
+  /**
+   * How many of the shown result items were ads
+   */
   required uint32 num_ad_impressions = 7;
+
+  /**
+   * How many of the shown ads were clicked
+   */
   required uint32 num_ad_clicks = 8;
+
+  /**
+   * How many cart items resulted from this query (i.e. result items that have
+   * been subsequently clicked and added to the cart)
+   */
   optional uint32 num_cart_items = 43;
+
+  /**
+   * How many order items resulted from this query (i.e. result items that have
+   * been subsequently clicked and bought)
+   */
   optional uint32 num_order_items = 44;
+
+  /**
+   * The gross value of all cart items that resultes from this query
+   */
   optional uint32 cart_value_eurcents = 45;
+
+  /**
+   * The gross merchandise value / gross revenue that resulted from this query.
+   * N.B. that when attributing revenue to queries we attribute the revenue to
+   * all candidates in case of an ambiguity and some revenue can't be attributed
+   * to any query. So this particular field will not give the correct total
+   * revenue when summed up
+   */
   optional uint32 gmv_eurcents = 46;
 
+  /**
+   * A number indicating in which test group the user that submitted this query
+   * was. DaWanda sets this to (1..100]
+   */
   optional uint32 ab_test_group = 9;
+
 }
 
+
+/**
+ * A JoinedItemVIsit is added to the session for each single visit/click on
+ * an item page (via search or otherwise)
+ */
 message JoinedItemVisit {
+  /**
+   * The time at which the item was visited
+   */
   required uint64 time = 26;
+
+  /**
+   * The item id of the item that was visited
+   */
   required string item_id = 27;
 
+  /**
+   * If applicable, the item's shop id (DaWanda user id)
+   */
   optional uint32 shop_id = 28;
+
+  /**
+   * If applicable, the item's category1/2/3 id (DaWanda e1/2/3)
+   */
   optional uint32 category1 = 29;
   optional uint32 category2 = 30;
   optional uint32 category3 = 31;
+
 }
 
+
+/**
+ * A JoinedCartItem is added to the session for every single cart item that
+ * was observed (added/bought/etc)
+ */
 message JoinedCartItem {
+  /**
+   * The time at which this item was last seen in the users cart
+   */
   required uint64 time = 33;
+
+  /**
+   * The item id of the item (=product) that was added to the cart
+   */
   required string item_id = 34;
 
+  /**
+   * The quantity of this cart item. N.B. that we always store the largest
+   * quantity obeerved
+   */
   required uint32 quantity = 39;
+
+  /**
+   * The price in cents and currency for a single instance of the item
+   */
   required uint32 price_cents = 40;
   required Currency currency = 41;
+
+  /**
+   * The most advanced cart step we have seen this item in. Note that smaller
+   * value means more advanced -- step 1 means "transaction confirmed" and
+   * implied the item was bought
+   */
   required uint32 checkout_step = 42;
 
+  /**
+   * If applicable, the product's/item's shop id (DaWanda user id)
+   */
   optional uint32 shop_id = 35;
+
+  /**
+   * If applicable, the product's/item's category1/2/3 id (DaWanda e1/2/3)
+   */
   optional uint32 category1 = 36;
   optional uint32 category2 = 37;
   optional uint32 category3 = 38;
+
 }
 
+
+/**
+ * A JoinedSessions contains all information of a single user journey. I.e.
+ * all events that were submitted for a specific user id within a relatively
+ * short (~90m) timeframe.
+ */
 message JoinedSession {
 
+  /**
+   * How many unique cart items have we seen in this session
+   */
   optional uint32 num_cart_items = 47;
+
+  /**
+   * How many unique items have been bought in this session. value >1 implies
+   * that there was a transaction in this session
+   */
   optional uint32 num_order_items = 48;
+
+  /**
+   * The gross value of all cart items in this session in euro cents
+   */
   optional uint32 cart_value_eurcents = 49;
+
+  /**
+   * The gross merchandise value of all transactions/sales in this session in
+   * euro cents
+   */
   optional uint32 gmv_eurcents = 50;
+
+  /**
+   * A number indicating in which test group this session was. DaWanda sets this
+   * to (1..100]
+   */
   optional uint32 ab_test_group = 51;
 
+  /**
+   * A list of all search queries associated with this session
+   */
   repeated JoinedSearchQuery search_queries = 16;
+
+  /**
+   * A list of all item visits associated with this session
+   */
   repeated JoinedItemVisit item_visits = 25;
+
+  /**
+   * A list of all cart items associated with this session
+   */
   repeated JoinedCartItem cart_items = 52;
+
 }
