@@ -26,7 +26,9 @@ void AppendOnlyMergeStrategy::merge(
       continue;
     }
 
-    local->artifacts.emplace_back(a);
+    auto new_artifact = a;
+    new_artifact.status = ArtifactStatus::DOWNLOAD;
+    local->artifacts.emplace_back(new_artifact);
   }
 }
 

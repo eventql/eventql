@@ -20,7 +20,7 @@
 namespace fnord {
 namespace logtable {
 
-class ArtifactIndexReplication {
+class ArtifactIndexReplication : public RefCounted {
 public:
   ArtifactIndexReplication(
       RefPtr<ArtifactIndex> index,
