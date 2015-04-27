@@ -36,7 +36,14 @@ public:
 
 protected:
 
-  typedef Vector<Tuple<String, uint64_t, String>> ResultListType;
+  struct AutoCompleteResult {
+    String text;
+    String url;
+    double score;
+    HashMap<String, String> attrs;
+  };
+
+  typedef Vector<AutoCompleteResult> ResultListType;
 
   void suggestSingleTerm(
       Language lang,

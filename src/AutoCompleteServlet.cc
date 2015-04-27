@@ -120,13 +120,16 @@ void AutoCompleteServlet::handleHTTPRequest(
     }
     json.beginObject();
     json.addObjectEntry("text");
-    json.addString(std::get<0>(results[i]));
+    json.addString(results[i].text);
     json.addComma();
     json.addObjectEntry("score");
-    json.addFloat(std::get<1>(results[i]));
+    json.addFloat(results[i].score);
     json.addComma();
     json.addObjectEntry("url");
-    json.addString(std::get<2>(results[i]));
+    json.addString(results[i].url);
+    json.addComma();
+    json.addObjectEntry("attrs");
+    toJSON(results[i].attrs, &json);
     json.endObject();
   }
 
@@ -172,13 +175,18 @@ void AutoCompleteServlet::suggestSingleTerm(
         break;
       }
 
+      auto qstr = qstr_prefix + matches[0].first.substr(3);
       auto label = StringUtil::format(
-          "$0$1 in $2",
-          qstr_prefix,
-          matches[0].first.substr(3),
+          "$0 in $1",
+          qstr,
           cat_names_[lang_str + "~" + c.first]);
 
-      results->emplace_back(label, c.second, "");
+      AutoCompleteResult res;
+      res.text = label;
+      res.score = c.second;
+      res.attrs.emplace("query_string", qstr);
+      res.attrs.emplace("category_id", c.first);
+      results->emplace_back(res);
     }
   }
 
@@ -189,7 +197,11 @@ void AutoCompleteServlet::suggestSingleTerm(
       break;
     }
 
-    results->emplace_back(qstr_prefix + matches[m].first.substr(3), score, "");
+    AutoCompleteResult res;
+    res.text = qstr_prefix + matches[m].first.substr(3);
+    res.score = score;
+    res.attrs.emplace("query_string", res.text);
+    results->emplace_back(res);
   }
 
   if (matches.size() > 0) {
@@ -202,7 +214,11 @@ void AutoCompleteServlet::suggestSingleTerm(
           matches[0].first.substr(3),
           r.first);
 
-      results->emplace_back(label, r.second, "");
+      AutoCompleteResult res;
+      res.text = label;
+      res.score = r.second;
+      res.attrs.emplace("query_string", label);
+      results->emplace_back(res);
     }
   }
 }
@@ -270,12 +286,18 @@ void AutoCompleteServlet::suggestMultiTerm(
       break;
     }
 
+    auto qstr = StringUtil::join(valid_terms, " ");
     auto label = StringUtil::format(
         "$0 in $1",
-        StringUtil::join(valid_terms, " "),
+        qstr,
         cat_names_[lang_str + "~" + topcats[m].first]);
 
-    results->emplace_back(label, score, "");
+    AutoCompleteResult res;
+    res.text = label;
+    res.score = score;
+    res.attrs.emplace("query_string", qstr);
+    res.attrs.emplace("category_id", topcats[m].first);
+    results->emplace_back(res);
   }
 
   Vector<Pair<String, double>> matches;
@@ -300,7 +322,11 @@ void AutoCompleteServlet::suggestMultiTerm(
       break;
     }
 
-    results->emplace_back(qstr_prefix + matches[m].first, score, "");
+    AutoCompleteResult res;
+    res.text = qstr_prefix + matches[m].first;
+    res.score = score;
+    res.attrs.emplace("query_string", res.text);
+    results->emplace_back(res);
   }
 
   matches_h.clear();
@@ -340,7 +366,11 @@ void AutoCompleteServlet::suggestMultiTerm(
       break;
     }
 
-    results->emplace_back(qstr_prefix + matches[m].first, score, "");
+    AutoCompleteResult res;
+    res.text = qstr_prefix + matches[m].first;
+    res.score = score;
+    res.attrs.emplace("query_string", res.text);
+    results->emplace_back(res);
   }
 }
 
