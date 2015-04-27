@@ -33,9 +33,12 @@ public:
       Function<RefCounted* (const String& filename)> load_model);
 
 protected:
-  struct ModelRef {
-    RefCounted* ptr;
-  };
+
+  RefCounted* loadModel(
+      const String& index_name,
+      const String& prefix,
+      Function<RefCounted* (const String& filename)> load_model,
+      bool lock);
 
   String getLatestModelFilename(
       const String& index_name,
@@ -43,8 +46,9 @@ protected:
 
   RefPtr<logtable::ArtifactIndex> getArtifactIndex(const String& index_name);
 
+  std::mutex mutex_;
   String datadir_;
-  HashMap<String, ModelRef> models_;
+  HashMap<String, RefCounted*> models_;
   HashMap<String, RefPtr<logtable::ArtifactIndex>> artifacts_;
 };
 

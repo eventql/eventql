@@ -38,6 +38,7 @@
 #include "CustomerNamespace.h"
 #include "ModelCache.h"
 #include "AutoCompleteServlet.h"
+#include "AutoCompleteModel.h"
 #include "analytics/TermInfoTableSource.h"
 
 using namespace cm;
@@ -101,8 +102,8 @@ int main(int argc, const char** argv) {
       "termstats",
       "termstats-dawanda",
       [] (const String& filepath) -> RefCounted* {
-    fnord::logInfo("cm.autocompleteserver", "Reading TermInfo Table...");
-    return nullptr;
+    return new AutoCompleteModel(filepath);
+    //fnord::logInfo("cm.autocompleteserver", "Reading TermInfo Table...");
     //TermInfoTableSource tbl(Set<String> { flags.getString("terminfo_table") });
     //tbl.forEach(std::bind(
     //    &AutoCompleteServlet::addTermInfo,
