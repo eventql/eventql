@@ -32,6 +32,8 @@ void ModelReplication::addArtifactIndexReplication(
   RefPtr<logtable::ArtifactIndex> index(
       new logtable::ArtifactIndex(artifact_dir, index_name, false));
 
+  index->runConsistencyCheck(false, true);
+
   RefPtr<logtable::ArtifactIndexReplication> repl(
       new logtable::ArtifactIndexReplication(
           index,
