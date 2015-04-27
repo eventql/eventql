@@ -115,6 +115,8 @@ void AutoCompleteServlet::handleHTTPRequest(
   json.beginArray();
 
   for (int i = 0; i < results.size() && i < 12; ++i) {
+    generateURL(&results[i]);
+
     if (i > 0) {
       json.addComma();
     }
@@ -381,5 +383,15 @@ void AutoCompleteServlet::suggestFuzzy(
   //results->emplace_back("here be dragons: fuzzy suggestion", 1.0, "");
 }
 
+void AutoCompleteServlet::generateURL(AutoCompleteResult* result) {
+  result->url = "/search?q=" + URI::urlEncode(result->attrs["query_string"]);
+
+  auto cat_i = result->attrs.find("category_id");
+  if (cat_i != result->attrs.end()) {
+    String cat = cat_i->second;
+    cat.erase(cat.begin(), cat.begin() + cat.find("-") + 1);
+    result->url += "&category_id=" + cat;
+  }
+}
 
 }
