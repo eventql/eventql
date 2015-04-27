@@ -177,3 +177,24 @@ TEST_CASE(URITest, TestWeirdUrlDecode, [] () {
   EXPECT_EQ(URI::urlDecode("8%+elasthan"), "8% elasthan");
 });
 
+TEST_CASE(URITest, TestUrlDecode, [] () {
+  EXPECT_EQ(URI::urlDecode("filz%20tasche"), "filz tasche");
+  EXPECT_EQ(URI::urlDecode("fu%2Fbar%3F12%3Dasd"), "fu/bar?12=asd");
+  EXPECT_EQ(URI::urlDecode("%C3%B6"), "ö");
+  EXPECT_EQ(URI::urlDecode("fu%252Fbar%253F12%253Dasd"), "fu%2Fbar%3F12%3Dasd");
+  EXPECT_EQ(
+      URI::urlDecode("%40%22~.%2F%2F%3Bq6%5C%27%7B%7D42%25%7B"),
+      "@\"~.//;q6\\'{}42%{");
+});
+
+TEST_CASE(URITest, TestUrlEncode, [] () {
+  EXPECT_EQ(URI::urlEncode("filz tasche"), "filz%20tasche");
+  EXPECT_EQ(URI::urlEncode("ö"), "%C3%B6");
+  EXPECT_EQ(URI::urlEncode("fu/bar?12=asd"), "fu%2Fbar%3F12%3Dasd");
+  EXPECT_EQ(URI::urlEncode("fu%2Fbar%3F12%3Dasd"),"fu%252Fbar%253F12%253Dasd");
+  EXPECT_EQ(
+      URI::urlEncode("@\"~.//;q6\\'{}42%{"),
+      "%40%22~.%2F%2F%3Bq6%5C%27%7B%7D42%25%7B");
+});
+
+
