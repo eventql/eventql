@@ -405,6 +405,8 @@ add_executable(cm-chunkserver
     $<TARGET_OBJECTS:fnord-msg>
     3rdparty/libfnord/fnord-sstable/SSTableServlet.cc
     3rdparty/libfnord/fnord-logtable/ArtifactIndex.cc
+    3rdparty/libfnord/fnord-logtable/ArtifactIndexReplication.cc
+    3rdparty/libfnord/fnord-logtable/ArtifactIndexMergeStrategy.cc
     3rdparty/libfnord/fnord-logtable/LogTableServlet.cc
     3rdparty/libfnord/fnord-logtable/TableReader.cc
     3rdparty/libfnord/fnord-logtable/TableWriter.cc
@@ -416,6 +418,7 @@ add_executable(cm-chunkserver
     3rdparty/libfnord/fnord-logtable/NumericBoundsSummary.cc
     3rdparty/libfnord/fnord-logtable/TableChunkSummaryReader.cc
     3rdparty/libfnord/fnord-logtable/TableChunkSummaryWriter.cc
+    src/ModelReplication.cc
     src/schemas.cc
     src/cm-chunkserver.cc)
 
@@ -456,6 +459,7 @@ add_executable(cm-analytics-backend
     src/analytics/DiscoveryKPIQuery.cc
     src/analytics/DiscoveryCategoryStatsQuery.cc
     src/analytics/DiscoveryCategoryStatsResult.cc
+    src/analytics/ECommerceKPIQuery.cc
     src/analytics/TrafficSegment.cc
     src/analytics/CTRStatsServlet.cc
     src/analytics/AnalyticsServlet.cc

@@ -34,6 +34,90 @@ AutoCompleteServlet::AutoCompleteServlet(
   cat_names_.emplace("de~e1-12", "Sale");
   cat_names_.emplace("de~e1-13", "Maenner");
   cat_names_.emplace("de~e1-14", "Schreibwaren");
+  cat_names_.emplace("en~e1-1",  "Fashion");
+  cat_names_.emplace("en~e1-2",  "Accessoires");
+  cat_names_.emplace("en~e1-3",  "Bags");
+  cat_names_.emplace("en~e1-4",  "Jewellery");
+  cat_names_.emplace("en~e1-5",  "Children");
+  cat_names_.emplace("en~e1-6",  "Home");
+  cat_names_.emplace("en~e1-7",  "Art");
+  cat_names_.emplace("en~e1-8",  "Supplies");
+  cat_names_.emplace("en~e1-9",  "Vintage");
+  cat_names_.emplace("en~e1-10", "Baby");
+  cat_names_.emplace("en~e1-11", "Occasions");
+  cat_names_.emplace("en~e1-12", "Sale");
+  cat_names_.emplace("en~e1-13", "Men");
+  cat_names_.emplace("en~e1-14", "Stationery");
+  cat_names_.emplace("fr~e1-1",  "Mode");
+  cat_names_.emplace("fr~e1-2",  "Accessoires");
+  cat_names_.emplace("fr~e1-3",  "Sacs");
+  cat_names_.emplace("fr~e1-4",  "Bijoux");
+  cat_names_.emplace("fr~e1-5",  "Enfants");
+  cat_names_.emplace("fr~e1-6",  "Deco");
+  cat_names_.emplace("fr~e1-7",  "Art");
+  cat_names_.emplace("fr~e1-8",  "Materiel");
+  cat_names_.emplace("fr~e1-9",  "Vintage");
+  cat_names_.emplace("fr~e1-10", "Bebes");
+  cat_names_.emplace("fr~e1-11", "Occasion");
+  cat_names_.emplace("fr~e1-12", "Soldes");
+  cat_names_.emplace("fr~e1-13", "Hommes");
+  cat_names_.emplace("fr~e1-14", "Papeterie");
+  cat_names_.emplace("es~e1-1",  "Moda");
+  cat_names_.emplace("es~e1-2",  "Accesorios");
+  cat_names_.emplace("es~e1-3",  "Bolsos");
+  cat_names_.emplace("es~e1-4",  "Joyas y Bisutería");
+  cat_names_.emplace("es~e1-5",  "Niños");
+  cat_names_.emplace("es~e1-6",  "Hogar");
+  cat_names_.emplace("es~e1-7",  "Arte");
+  cat_names_.emplace("es~e1-8",  "Material");
+  cat_names_.emplace("es~e1-9",  "Vintage");
+  cat_names_.emplace("es~e1-10", "Bebés");
+  cat_names_.emplace("es~e1-11", "Oportunidades");
+  cat_names_.emplace("es~e1-12", "REBAJAS");
+  cat_names_.emplace("es~e1-13", "Hombre");
+  cat_names_.emplace("es~e1-14", "Papelería");
+  cat_names_.emplace("nl~e1-1",  "Mode");
+  cat_names_.emplace("nl~e1-2",  "Accessoires");
+  cat_names_.emplace("nl~e1-3",  "Tassen");
+  cat_names_.emplace("nl~e1-4",  "Sieraden");
+  cat_names_.emplace("nl~e1-5",  "Kinderen");
+  cat_names_.emplace("nl~e1-6",  "Wonen");
+  cat_names_.emplace("nl~e1-7",  "Kunst");
+  cat_names_.emplace("nl~e1-8",  "Materialen");
+  cat_names_.emplace("nl~e1-9",  "Vintage");
+  cat_names_.emplace("nl~e1-10", "Baby´s");
+  cat_names_.emplace("nl~e1-11", "Evenementen");
+  cat_names_.emplace("nl~e1-12", "Sale");
+  cat_names_.emplace("nl~e1-13", "Mannen");
+  cat_names_.emplace("nl~e1-14", "Schrijfwaren");
+  cat_names_.emplace("pl~e1-1",  "Moda");
+  cat_names_.emplace("pl~e1-2",  "Akcesoria");
+  cat_names_.emplace("pl~e1-3",  "Torebki");
+  cat_names_.emplace("pl~e1-4",  "Biżuteria");
+  cat_names_.emplace("pl~e1-5",  "Dzieci");
+  cat_names_.emplace("pl~e1-6",  "Dom i styl życia");
+  cat_names_.emplace("pl~e1-7",  "Sztuka");
+  cat_names_.emplace("pl~e1-8",  "Materiały");
+  cat_names_.emplace("pl~e1-9",  "Vintage");
+  cat_names_.emplace("pl~e1-10", "Niemowlaki");
+  cat_names_.emplace("pl~e1-11", "Specjalne okazje");
+  cat_names_.emplace("pl~e1-12", "Promocje");
+  cat_names_.emplace("pl~e1-13", "Mężczyźni");
+  cat_names_.emplace("pl~e1-14", "Artykuły papiernicze");
+  cat_names_.emplace("it~e1-1",  "Abbagliamento");
+  cat_names_.emplace("it~e1-2",  "Accessori");
+  cat_names_.emplace("it~e1-3",  "Borse");
+  cat_names_.emplace("it~e1-4",  "Gioielli");
+  cat_names_.emplace("it~e1-5",  "Bambini");
+  cat_names_.emplace("it~e1-6",  "Casa");
+  cat_names_.emplace("it~e1-7",  "Arte");
+  cat_names_.emplace("it~e1-8",  "Materiali");
+  cat_names_.emplace("it~e1-9",  "Vintage");
+  cat_names_.emplace("it~e1-10", "Neonati");
+  cat_names_.emplace("it~e1-11", "Eventi");
+  cat_names_.emplace("it~e1-12", "OFFERTE");
+  cat_names_.emplace("it~e1-13", "Uomo");
+  cat_names_.emplace("it~e1-14", "Cartoleria");
 }
 
 void AutoCompleteServlet::addTermInfo(const String& term, const TermInfo& ti) {
@@ -115,18 +199,23 @@ void AutoCompleteServlet::handleHTTPRequest(
   json.beginArray();
 
   for (int i = 0; i < results.size() && i < 12; ++i) {
+    generateURL(&results[i]);
+
     if (i > 0) {
       json.addComma();
     }
     json.beginObject();
     json.addObjectEntry("text");
-    json.addString(std::get<0>(results[i]));
+    json.addString(results[i].text);
     json.addComma();
     json.addObjectEntry("score");
-    json.addFloat(std::get<1>(results[i]));
+    json.addFloat(results[i].score);
     json.addComma();
     json.addObjectEntry("url");
-    json.addString(std::get<2>(results[i]));
+    json.addString(results[i].url);
+    json.addComma();
+    json.addObjectEntry("attrs");
+    toJSON(results[i].attrs, &json);
     json.endObject();
   }
 
@@ -172,13 +261,18 @@ void AutoCompleteServlet::suggestSingleTerm(
         break;
       }
 
+      auto qstr = qstr_prefix + matches[0].first.substr(3);
       auto label = StringUtil::format(
-          "$0$1 in $2",
-          qstr_prefix,
-          matches[0].first.substr(3),
+          "$0 in $1",
+          qstr,
           cat_names_[lang_str + "~" + c.first]);
 
-      results->emplace_back(label, c.second, "");
+      AutoCompleteResult res;
+      res.text = label;
+      res.score = c.second;
+      res.attrs.emplace("query_string", qstr);
+      res.attrs.emplace("category_id", c.first);
+      results->emplace_back(res);
     }
   }
 
@@ -189,7 +283,11 @@ void AutoCompleteServlet::suggestSingleTerm(
       break;
     }
 
-    results->emplace_back(qstr_prefix + matches[m].first.substr(3), score, "");
+    AutoCompleteResult res;
+    res.text = qstr_prefix + matches[m].first.substr(3);
+    res.score = score;
+    res.attrs.emplace("query_string", res.text);
+    results->emplace_back(res);
   }
 
   if (matches.size() > 0) {
@@ -202,7 +300,11 @@ void AutoCompleteServlet::suggestSingleTerm(
           matches[0].first.substr(3),
           r.first);
 
-      results->emplace_back(label, r.second, "");
+      AutoCompleteResult res;
+      res.text = label;
+      res.score = r.second;
+      res.attrs.emplace("query_string", label);
+      results->emplace_back(res);
     }
   }
 }
@@ -270,12 +372,18 @@ void AutoCompleteServlet::suggestMultiTerm(
       break;
     }
 
+    auto qstr = StringUtil::join(valid_terms, " ");
     auto label = StringUtil::format(
         "$0 in $1",
-        StringUtil::join(valid_terms, " "),
+        qstr,
         cat_names_[lang_str + "~" + topcats[m].first]);
 
-    results->emplace_back(label, score, "");
+    AutoCompleteResult res;
+    res.text = label;
+    res.score = score;
+    res.attrs.emplace("query_string", qstr);
+    res.attrs.emplace("category_id", topcats[m].first);
+    results->emplace_back(res);
   }
 
   Vector<Pair<String, double>> matches;
@@ -300,7 +408,11 @@ void AutoCompleteServlet::suggestMultiTerm(
       break;
     }
 
-    results->emplace_back(qstr_prefix + matches[m].first, score, "");
+    AutoCompleteResult res;
+    res.text = qstr_prefix + matches[m].first;
+    res.score = score;
+    res.attrs.emplace("query_string", res.text);
+    results->emplace_back(res);
   }
 
   matches_h.clear();
@@ -340,7 +452,11 @@ void AutoCompleteServlet::suggestMultiTerm(
       break;
     }
 
-    results->emplace_back(qstr_prefix + matches[m].first, score, "");
+    AutoCompleteResult res;
+    res.text = qstr_prefix + matches[m].first;
+    res.score = score;
+    res.attrs.emplace("query_string", res.text);
+    results->emplace_back(res);
   }
 }
 
@@ -351,5 +467,15 @@ void AutoCompleteServlet::suggestFuzzy(
   //results->emplace_back("here be dragons: fuzzy suggestion", 1.0, "");
 }
 
+void AutoCompleteServlet::generateURL(AutoCompleteResult* result) {
+  result->url = "/search?q=" + URI::urlEncode(result->attrs["query_string"]);
+
+  auto cat_i = result->attrs.find("category_id");
+  if (cat_i != result->attrs.end()) {
+    String cat = cat_i->second;
+    cat.erase(cat.begin(), cat.begin() + cat.find("-") + 1);
+    result->url += "&category_id=" + cat;
+  }
+}
 
 }

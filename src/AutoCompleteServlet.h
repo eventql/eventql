@@ -36,7 +36,14 @@ public:
 
 protected:
 
-  typedef Vector<Tuple<String, uint64_t, String>> ResultListType;
+  struct AutoCompleteResult {
+    String text;
+    String url;
+    double score;
+    HashMap<String, String> attrs;
+  };
+
+  typedef Vector<AutoCompleteResult> ResultListType;
 
   void suggestSingleTerm(
       Language lang,
@@ -53,6 +60,8 @@ protected:
       Language lang,
       Vector<String> terms,
       ResultListType* results);
+
+  void generateURL(AutoCompleteResult* result);
 
   RefPtr<fts::Analyzer> analyzer_;
   OrderedMap<String, SortedTermInfo> term_info_;

@@ -49,6 +49,7 @@
 #include "analytics/CTRByPageQuery.h"
 #include "analytics/TopSearchQueriesQuery.h"
 #include "analytics/DiscoveryKPIQuery.h"
+#include "analytics/ECommerceKPIQuery.h"
 #include "analytics/DiscoveryCategoryStatsQuery.h"
 #include "analytics/AnalyticsQueryEngine.h"
 #include "analytics/AnalyticsQueryEngine.h"
@@ -183,8 +184,8 @@ int main(int argc, const char** argv) {
         segments,
         query.start_time,
         query.end_time,
-        "queries.category1",
-        "queries.category1",
+        "search_queries.category1",
+        "search_queries.category1",
         params);
   });
 
@@ -198,8 +199,8 @@ int main(int argc, const char** argv) {
         segments,
         query.start_time,
         query.end_time,
-        "queries.category1",
-        "queries.category2",
+        "search_queries.category1",
+        "search_queries.category2",
         params);
   });
 
@@ -213,8 +214,8 @@ int main(int argc, const char** argv) {
         segments,
         query.start_time,
         query.end_time,
-        "queries.category2",
-        "queries.category3",
+        "search_queries.category2",
+        "search_queries.category3",
         params);
   });
 
@@ -228,8 +229,8 @@ int main(int argc, const char** argv) {
         segments,
         query.start_time,
         query.end_time,
-        "queries.category3",
-        "queries.category3",
+        "search_queries.category3",
+        "search_queries.category3",
         params);
   });
 
@@ -239,6 +240,18 @@ int main(int argc, const char** argv) {
       const Vector<RefPtr<cm::TrafficSegment>>& segments,
       cm::AnalyticsTableScan* scan) {
     return new cm::TopSearchQueriesQuery(scan, segments, params);
+  });
+
+  analytics.registerQueryFactory("ecommerce_kpis", [] (
+      const cm::AnalyticsQuery& query,
+      const cm::AnalyticsQuery::SubQueryParams params,
+      const Vector<RefPtr<cm::TrafficSegment>>& segments,
+      cm::AnalyticsTableScan* scan) {
+    return new cm::ECommerceKPIQuery(
+        scan,
+        segments,
+        query.start_time,
+        query.end_time);
   });
 
   ev.run();
