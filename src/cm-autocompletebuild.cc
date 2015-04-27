@@ -100,6 +100,15 @@ int main(int argc, const char** argv) {
       "<path>");
 
   flags.defineFlag(
+      "publish",
+      cli::FlagParser::T_SWITCH,
+      false,
+      NULL,
+      NULL,
+      "publish",
+      "<switch>");
+
+  flags.defineFlag(
       "loglevel",
       fnord::cli::FlagParser::T_STRING,
       false,
@@ -208,16 +217,20 @@ int main(int argc, const char** argv) {
 
   report_builder.buildAll();
 
-  fnord::logInfo(
-      "cm.reportbuild",
-      "Build completed: dawanda_termstats.$0.sst",
-      buildid);
-
-  logtable::ArtifactIndex artifacts(datadir, "termstats", false);
-
   auto outfile = StringUtil::format("termstats-dawanda.$0.sst", buildid);
   auto tempfile_path = FileUtil::joinPaths(tempdir, outfile);
   auto outfile_path = FileUtil::joinPaths(datadir, outfile);
+  fnord::logInfo("cm.reportbuild", "Build completed: $0", outfile);
+
+  if (flags.isSet("publish")) {
+    fnord::logInfo("cm.reportbuild", "Publishing artifact: $0", outfile);
+  } else {
+    fnord::logInfo(
+        "cm.reportbuild",
+        "Not publishing anything since you didn't pass the --publish flag");
+
+    return 0;
+  }
 
   FileUtil::mv(tempfile_path, outfile_path);
 
@@ -233,6 +246,7 @@ int main(int argc, const char** argv) {
     .checksum = FileUtil::checksum(outfile_path)
   });
 
+  logtable::ArtifactIndex artifacts(datadir, "termstats", false);
   artifacts.addArtifact(afx);
 
   return 0;
