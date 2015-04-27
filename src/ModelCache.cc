@@ -17,24 +17,35 @@ namespace cm {
 ModelCache::ModelCache(const String& datadir) : datadir_(datadir) {}
 
 RefCounted* ModelCache::getModel(
+    const String& factory_name,
     const String& index_name,
-    const String& prefix,
-    Function<RefCounted* (const String& filename)> load_model) {
+    const String& prefix) {
   std::unique_lock<std::mutex> lk(mutex_);
   auto key = index_name + "~" + prefix;
   auto cached = models_.find(key);
   if (cached == models_.end()) {
-    return loadModel(index_name, prefix, load_model, false);
+    return loadModel(factory_name, index_name, prefix, false);
   } else {
     return cached->second;
   }
 }
 
+void ModelCache::addModelFactory(
+    const String& factory_name,
+    Function<RefCounted* (const String& filename)> fn) {
+  factories_[factory_name] = fn;
+}
+
 RefCounted* ModelCache::loadModel(
+    const String& factory_name,
     const String& index_name,
     const String& prefix,
-    Function<RefCounted* (const String& filename)> load_model,
     bool lock) {
+  auto factory = factories_.find(factory_name);
+  if (factory == factories_.end()) {
+    RAISEF(kRuntimeError, "invalid model factory: '$0'", factory_name);
+  }
+
   auto filename = getLatestModelFilename(index_name, prefix);
 
   fnord::logInfo(
@@ -44,7 +55,7 @@ RefCounted* ModelCache::loadModel(
       prefix,
       filename);
 
-  auto model = load_model(filename);
+  auto model = factory->second(filename);
   model->incRef();
 
   std::unique_lock<std::mutex> lk(mutex_, std::defer_lock);

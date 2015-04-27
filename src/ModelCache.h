@@ -28,16 +28,20 @@ public:
   ModelCache(const String& datadir);
 
   RefCounted* getModel(
+      const String& factory_name,
       const String& index_name,
-      const String& prefix,
-      Function<RefCounted* (const String& filename)> load_model);
+      const String& prefix);
+
+  void addModelFactory(
+      const String& factory_name,
+      Function<RefCounted* (const String& filename)> fn);
 
 protected:
 
   RefCounted* loadModel(
+      const String& factory_name,
       const String& index_name,
       const String& prefix,
-      Function<RefCounted* (const String& filename)> load_model,
       bool lock);
 
   String getLatestModelFilename(
@@ -50,6 +54,7 @@ protected:
   String datadir_;
   HashMap<String, RefCounted*> models_;
   HashMap<String, RefPtr<logtable::ArtifactIndex>> artifacts_;
+  HashMap<String, Function<RefCounted* (const String& filename)>> factories_;
 };
 
 } // namespace cm

@@ -17,14 +17,11 @@ namespace cm {
 
 RefPtr<AutoCompleteModel> AutoCompleteModel::fromCache(
     const String& customer,
-    ModelCache* cache,
-    RefPtr<fts::Analyzer> analyzer) {
+    ModelCache* cache) {
   return dynamic_cast<AutoCompleteModel*>(cache->getModel(
+      "AutoCompleteModel",
       "termstats",
-      "termstats-" + customer,
-      [analyzer] (const String& filepath) -> RefCounted* {
-    return new AutoCompleteModel(filepath, analyzer);
-  }));
+      "termstats-" + customer));
 }
 
 AutoCompleteModel::AutoCompleteModel(

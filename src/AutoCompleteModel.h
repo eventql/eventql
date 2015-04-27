@@ -33,8 +33,7 @@ public:
 
   static RefPtr<AutoCompleteModel> fromCache(
       const String& customer,
-      ModelCache* cache,
-      RefPtr<fts::Analyzer> analyzer);
+      ModelCache* cache);
 
   AutoCompleteModel(
       const String& filename,

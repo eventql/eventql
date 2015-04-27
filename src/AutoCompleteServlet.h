@@ -10,12 +10,8 @@
 #define _CM_AUTOCOMPLETESERVLET_H
 #include "fnord-http/httpservice.h"
 #include "fnord-json/json.h"
-#include "analytics/TermInfo.h"
 #include "ModelCache.h"
 #include "AutoCompleteModel.h"
-#include <fnord-fts/fts.h>
-#include <fnord-fts/fts_common.h>
-#include <fnord-fts/Analyzer.h>
 
 using namespace fnord;
 
@@ -28,9 +24,7 @@ namespace cm {
 class AutoCompleteServlet : public fnord::http::HTTPService {
 public:
 
-  AutoCompleteServlet(
-      ModelCache* models,
-      RefPtr<fts::Analyzer> analyzer);
+  AutoCompleteServlet(ModelCache* models);
 
   void handleHTTPRequest(
       fnord::http::HTTPRequest* req,
@@ -41,7 +35,6 @@ protected:
   void generateURL(AutoCompleteResult* result);
 
   ModelCache* models_;
-  RefPtr<fts::Analyzer> analyzer_;
 };
 
 }
