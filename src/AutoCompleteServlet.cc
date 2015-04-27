@@ -18,10 +18,8 @@ using namespace fnord;
 namespace cm {
 
 AutoCompleteServlet::AutoCompleteServlet(
-    ModelCache* models,
-    RefPtr<fts::Analyzer> analyzer) :
-    models_(models),
-    analyzer_(analyzer) {}
+    ModelCache* models) :
+    models_(models) {}
 
 void AutoCompleteServlet::handleHTTPRequest(
     http::HTTPRequest* req,
@@ -53,7 +51,7 @@ void AutoCompleteServlet::handleHTTPRequest(
   }
 
   auto lang = languageFromString(lang_str);
-  auto model = AutoCompleteModel::fromCache("dawanda", models_, analyzer_);
+  auto model = AutoCompleteModel::fromCache("dawanda", models_);
   AutoCompleteModel::ResultListType results;
   model->suggest(lang, qstr, &results);
 

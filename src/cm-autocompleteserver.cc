@@ -92,11 +92,19 @@ int main(int argc, const char** argv) {
       strToLogLevel(flags.getString("loglevel")));
 
   auto conf_path = flags.getString("conf");
-
   auto analyzer = RefPtr<fts::Analyzer>(new fts::Analyzer(conf_path));
-  ModelCache models(flags.getString("datadir"));
 
-  cm::AutoCompleteServlet acservlet(&models, analyzer);
+  ModelCache models(flags.getString("datadir"));
+  models.addModelFactory(
+      "AutoCompleteModel", 
+      [analyzer] (const String& filepath) -> RefCounted* {
+        return new AutoCompleteModel(filepath, analyzer);
+      });
+
+  // preheat
+  models.getModel("AutoCompleteModel", "termstats", "termstats-dawanda");
+
+  cm::AutoCompleteServlet acservlet(&models);
 
   /* start http server */
   fnord::thread::EventLoop ev;
