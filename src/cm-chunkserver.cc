@@ -191,8 +191,8 @@ int main(int argc, const char** argv) {
       if (StringUtil::beginsWith(tbl, "joined_sessions")) {
         table->addSummary([joined_sessions_schema] () {
           return new logtable::NumericBoundsSummaryBuilder(
-              "queries.time-bounds",
-              joined_sessions_schema.id("queries.time"));
+              "search_queries.time-bounds",
+              joined_sessions_schema.id("search_queries.time"));
         });
       }
 
