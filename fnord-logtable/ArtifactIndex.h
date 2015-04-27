@@ -39,6 +39,9 @@ struct ArtifactRef {
 
 struct ArtifactIndexSnapshot {
   List<ArtifactRef> artifacts;
+
+  void encode(Buffer* buf) const;
+  void decode(const Buffer& buf);
 };
 
 class ArtifactIndex : public RefCounted {
