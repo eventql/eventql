@@ -18,8 +18,11 @@ ArtifactIndexReplication::ArtifactIndexReplication(
     index_(index),
     merge_strategy_(merge_strategy) {}
 
-void ArtifactIndexReplication::replicateFrom(const ArtifactIndex& other) {
-  fnord::iputs("merge indexes...", 1);
+void ArtifactIndexReplication::replicateFrom(
+    const ArtifactIndexSnapshot& other) {
+  index_->withIndex(false, [this, &other] (ArtifactIndexSnapshot* local) {
+    merge_strategy_->merge(local, &other);
+  });
 }
 
 void ArtifactIndexReplication::replicateFrom(
@@ -35,7 +38,9 @@ void ArtifactIndexReplication::replicateFrom(
     RAISEF(kRuntimeError, "received non-200 response: $0", r.body().toString());
   }
 
-  fnord::iputs("got $0 bytes", r.body().size());
+  ArtifactIndexSnapshot remote;
+  remote.decode(r.body());
+  replicateFrom(remote);
 }
 
 } // namespace logtable

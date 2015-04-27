@@ -22,7 +22,7 @@ public:
   /* both indexes will be locked while the mergeop is running */
   virtual void merge(
       ArtifactIndexSnapshot* local,
-      ArtifactIndexSnapshot* remote) const = 0;
+      const ArtifactIndexSnapshot* remote) const = 0;
 
 };
 
@@ -30,7 +30,7 @@ class AppendOnlyMergeStrategy : public ArtifactIndexMergeStrategy {
 public:
   void merge(
       ArtifactIndexSnapshot* local,
-      ArtifactIndexSnapshot* remote) const override;
+      const ArtifactIndexSnapshot* remote) const override;
 };
 
 } // namespace logtable

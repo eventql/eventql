@@ -26,7 +26,7 @@ public:
       RefPtr<ArtifactIndex> index,
       RefPtr<ArtifactIndexMergeStrategy> merge_strategy);
 
-  void replicateFrom(const ArtifactIndex& other);
+  void replicateFrom(const ArtifactIndexSnapshot& other);
   void replicateFrom(const URI& index_uri, http::HTTPConnectionPool* http);
 
 protected:
