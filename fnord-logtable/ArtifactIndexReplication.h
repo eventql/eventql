@@ -13,6 +13,7 @@
 #include <fnord-base/stdtypes.h>
 #include <fnord-base/uri.h>
 #include <fnord-logtable/ArtifactIndex.h>
+#include <fnord-logtable/ArtifactIndexMergeStrategy.h>
 #include "fnord-http/httprequest.h"
 #include "fnord-http/httpconnectionpool.h"
 
@@ -21,14 +22,16 @@ namespace logtable {
 
 class ArtifactIndexReplication {
 public:
-
-  ArtifactIndexReplication(ArtifactIndex* index);
+  ArtifactIndexReplication(
+      RefPtr<ArtifactIndex> index,
+      RefPtr<ArtifactIndexMergeStrategy> merge_strategy);
 
   void replicateFrom(const ArtifactIndex& other);
   void replicateFrom(const URI& index_uri, http::HTTPConnectionPool* http);
 
 protected:
-  ArtifactIndex* index_;
+  RefPtr<ArtifactIndex> index_;
+  RefPtr<ArtifactIndexMergeStrategy> merge_strategy_;
 };
 
 } // namespace logtable

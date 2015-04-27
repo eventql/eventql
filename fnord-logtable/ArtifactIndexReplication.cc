@@ -13,8 +13,10 @@ namespace fnord {
 namespace logtable {
 
 ArtifactIndexReplication::ArtifactIndexReplication(
-    ArtifactIndex* index) :
-    index_(index) {}
+    RefPtr<ArtifactIndex> index,
+    RefPtr<ArtifactIndexMergeStrategy> merge_strategy) :
+    index_(index),
+    merge_strategy_(merge_strategy) {}
 
 void ArtifactIndexReplication::replicateFrom(const ArtifactIndex& other) {
   fnord::iputs("merge indexes...", 1);
