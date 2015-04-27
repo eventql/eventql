@@ -223,4 +223,61 @@ void TrackedSession::debugPrint(const std::string& uid) const {
   fnord::iputs("", 1);
 }
 
+Option<DateTime> TrackedSession::firstSeenTime() const {
+  uint64_t t = std::numeric_limits<uint64_t>::max();
+
+  for (const auto& e : queries) {
+    if (e.time.unixMicros() < t) {
+      t = e.time.unixMicros();
+    }
+  }
+
+  for (const auto& e : item_visits) {
+    if (e.time.unixMicros() < t) {
+      t = e.time.unixMicros();
+    }
+  }
+
+  for (const auto& e : cart_items) {
+    if (e.time.unixMicros() < t) {
+      t = e.time.unixMicros();
+    }
+  }
+
+  if (t == std::numeric_limits<uint64_t>::max()) {
+    return None<DateTime>();
+  } else {
+    return Some(DateTime(t));
+  }
+}
+
+Option<DateTime> TrackedSession::lastSeenTime() const {
+  uint64_t t = std::numeric_limits<uint64_t>::min();
+
+  for (const auto& e : queries) {
+    if (e.time.unixMicros() > t) {
+      t = e.time.unixMicros();
+    }
+  }
+
+  for (const auto& e : item_visits) {
+    if (e.time.unixMicros() > t) {
+      t = e.time.unixMicros();
+    }
+  }
+
+  for (const auto& e : cart_items) {
+    if (e.time.unixMicros() > t) {
+      t = e.time.unixMicros();
+    }
+  }
+
+  if (t == std::numeric_limits<uint64_t>::min()) {
+    return None<DateTime>();
+  } else {
+    return Some(DateTime(t));
+  }
+}
+
+
 } // namespace cm
