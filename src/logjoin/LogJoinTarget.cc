@@ -57,7 +57,7 @@ void LogJoinTarget::onSession(
 
     ci_obj.addChild(
         schema.id("cart_items.price_cents"),
-        ci.quantity);
+        ci.price_cents);
 
     ci_obj.addChild(
         schema.id("cart_items.currency"),
