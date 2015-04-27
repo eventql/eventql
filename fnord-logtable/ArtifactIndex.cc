@@ -30,28 +30,28 @@ ArtifactIndex::ArtifactIndex(
     cached_mtime_(0) {}
 
 List<ArtifactRef> ArtifactIndex::listArtifacts() {
-  return readIndex();
+  return readIndex().artifacts;
 }
 
 void ArtifactIndex::addArtifact(const ArtifactRef& artifact) {
   fnord::logDebug("fn.evdb", "Adding artifact: $0", artifact.name);
 
-  withIndex(false, [&] (List<ArtifactRef>* index) {
-    for (const auto& a : *index) {
+  withIndex(false, [&] (ArtifactIndexSnapshot* index) {
+    for (const auto& a : index->artifacts) {
       if (a.name == artifact.name) {
         RAISEF(kIndexError, "artifact '$0' already exists in index", a.name);
       }
     }
 
-    index->emplace_back(artifact);
+    index->artifacts.emplace_back(artifact);
   });
 }
 
 void ArtifactIndex::updateStatus(
     const String& artifact_name,
     ArtifactStatus new_status) {
-  withIndex(false, [&] (List<ArtifactRef>* index) {
-    for (auto& a : *index) {
+  withIndex(false, [&] (ArtifactIndexSnapshot* index) {
+    for (auto& a : index->artifacts) {
       if (a.name == artifact_name) {
         statusTransition(&a, new_status);
         return;
@@ -63,10 +63,10 @@ void ArtifactIndex::updateStatus(
 }
 
 void ArtifactIndex::deleteArtifact(const String& artifact_name) {
-  withIndex(false, [&] (List<ArtifactRef>* index) {
-    for (auto a = index->begin(); a != index->end(); ) {
+  withIndex(false, [&] (ArtifactIndexSnapshot* index) {
+    for (auto a = index->artifacts.begin(); a != index->artifacts.end(); ) {
       if (a->name == artifact_name) {
-        a = index->erase(a);
+        a = index->artifacts.erase(a);
         return;
       } else {
         ++a;
@@ -85,7 +85,7 @@ void ArtifactIndex::statusTransition(
 
 void ArtifactIndex::withIndex(
     bool readonly,
-    Function<void (List<ArtifactRef>* index)> fn) {
+    Function<void (ArtifactIndexSnapshot* index)> fn) {
   std::unique_lock<std::mutex> lk(mutex_, std::defer_lock);
   FileLock file_lk(index_file_ + ".lck");
 
@@ -102,8 +102,8 @@ void ArtifactIndex::withIndex(
   }
 }
 
-List<ArtifactRef> ArtifactIndex::readIndex() {
-  List<ArtifactRef> index;
+ArtifactIndexSnapshot ArtifactIndex::readIndex() {
+  ArtifactIndexSnapshot index;
 
   if (!(exists_.load() || FileUtil::exists(index_file_))) {
     return index;
@@ -149,7 +149,7 @@ List<ArtifactRef> ArtifactIndex::readIndex() {
       artifact.files.emplace_back(file);
     }
 
-    index.emplace_back(artifact);
+    index.artifacts.emplace_back(artifact);
   }
 
   if (mtime > cached_mtime_) {
@@ -160,12 +160,12 @@ List<ArtifactRef> ArtifactIndex::readIndex() {
   return index;
 }
 
-void ArtifactIndex::writeIndex(const List<ArtifactRef>& index) {
+void ArtifactIndex::writeIndex(const ArtifactIndexSnapshot& index) {
   util::BinaryMessageWriter writer;
   writer.appendUInt8(0x01);
-  writer.appendVarUInt(index.size());
+  writer.appendVarUInt(index.artifacts.size());
 
-  for (const auto& a : index) {
+  for (const auto& a : index.artifacts) {
     writer.appendVarUInt(a.name.size());
     writer.append(a.name.data(), a.name.size());
     writer.appendVarUInt((uint8_t) a.status);

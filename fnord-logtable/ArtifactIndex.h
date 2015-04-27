@@ -37,6 +37,10 @@ struct ArtifactRef {
   size_t totalSize() const;
 };
 
+struct ArtifactIndexSnapshot {
+  List<ArtifactRef> artifacts;
+};
+
 class ArtifactIndex : public RefCounted {
 public:
 
@@ -47,7 +51,7 @@ public:
 
   void withIndex(
       bool readonly,
-      Function<void (List<ArtifactRef>* index)> fn);
+      Function<void (ArtifactIndexSnapshot* index)> fn);
 
   void runConsistencyCheck(bool check_checksums = false, bool repair = false);
 
@@ -60,8 +64,8 @@ public:
   const String& indexName() const;
 
 protected:
-  List<ArtifactRef> readIndex();
-  void writeIndex(const List<ArtifactRef>& index);
+  ArtifactIndexSnapshot readIndex();
+  void writeIndex(const ArtifactIndexSnapshot& index);
 
   void statusTransition(ArtifactRef* artifact, ArtifactStatus new_status);
 
@@ -70,7 +74,7 @@ protected:
   const bool readonly_;
   const String index_file_;
   std::atomic<bool> exists_;
-  List<ArtifactRef> cached_;
+  ArtifactIndexSnapshot cached_;
   uint64_t cached_mtime_;
   std::mutex cached_mutex_;
   std::mutex mutex_;
