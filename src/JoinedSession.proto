@@ -285,6 +285,12 @@ message JoinedCartItem {
 message JoinedSession {
 
   /**
+   * The time at which this search query was first/last seen
+   */
+  optional uint64 first_seen_time = 53;
+  optional uint64 first_last_time = 54;
+
+  /**
    * How many unique cart items have we seen in this session
    */
   optional uint32 num_cart_items = 47;

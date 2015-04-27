@@ -15,6 +15,7 @@
 #include <unordered_map>
 #include <vector>
 #include <fnord-base/datetime.h>
+#include <fnord-base/option.h>
 #include <fnord-base/Currency.h>
 
 #include "ItemRef.h"
@@ -70,6 +71,9 @@ struct TrackedSession {
    * query items as clicked if a corresponding click was observed.
    */
   void joinEvents(const CurrencyConverter& cconv);
+
+  Option<DateTime> firstSeenTime() const;
+  Option<DateTime> lastSeenTime() const;
 
   void debugPrint(const std::string& uid) const;
 
