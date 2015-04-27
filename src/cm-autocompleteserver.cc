@@ -94,25 +94,9 @@ int main(int argc, const char** argv) {
   auto conf_path = flags.getString("conf");
 
   auto analyzer = RefPtr<fts::Analyzer>(new fts::Analyzer(conf_path));
-  cm::AutoCompleteServlet acservlet(analyzer);
-
   ModelCache models(flags.getString("datadir"));
 
-  auto mdl = models.getModel(
-      "termstats",
-      "termstats-dawanda",
-      [] (const String& filepath) -> RefCounted* {
-    return new AutoCompleteModel(filepath);
-    //fnord::logInfo("cm.autocompleteserver", "Reading TermInfo Table...");
-    //TermInfoTableSource tbl(Set<String> { flags.getString("terminfo_table") });
-    //tbl.forEach(std::bind(
-    //    &AutoCompleteServlet::addTermInfo,
-    //    &acservlet,
-    //    std::placeholders::_1,
-    //    std::placeholders::_2));
-    //tbl.read();
-  });
-
+  cm::AutoCompleteServlet acservlet(&models, analyzer);
 
   /* start http server */
   fnord::thread::EventLoop ev;
