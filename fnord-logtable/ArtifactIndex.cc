@@ -30,28 +30,28 @@ ArtifactIndex::ArtifactIndex(
     cached_mtime_(0) {}
 
 List<ArtifactRef> ArtifactIndex::listArtifacts() {
-  return readIndex();
+  return readIndex().artifacts;
 }
 
 void ArtifactIndex::addArtifact(const ArtifactRef& artifact) {
   fnord::logDebug("fn.evdb", "Adding artifact: $0", artifact.name);
 
-  withIndex(false, [&] (List<ArtifactRef>* index) {
-    for (const auto& a : *index) {
+  withIndex(false, [&] (ArtifactIndexSnapshot* index) {
+    for (const auto& a : index->artifacts) {
       if (a.name == artifact.name) {
         RAISEF(kIndexError, "artifact '$0' already exists in index", a.name);
       }
     }
 
-    index->emplace_back(artifact);
+    index->artifacts.emplace_back(artifact);
   });
 }
 
 void ArtifactIndex::updateStatus(
     const String& artifact_name,
     ArtifactStatus new_status) {
-  withIndex(false, [&] (List<ArtifactRef>* index) {
-    for (auto& a : *index) {
+  withIndex(false, [&] (ArtifactIndexSnapshot* index) {
+    for (auto& a : index->artifacts) {
       if (a.name == artifact_name) {
         statusTransition(&a, new_status);
         return;
@@ -63,10 +63,10 @@ void ArtifactIndex::updateStatus(
 }
 
 void ArtifactIndex::deleteArtifact(const String& artifact_name) {
-  withIndex(false, [&] (List<ArtifactRef>* index) {
-    for (auto a = index->begin(); a != index->end(); ) {
+  withIndex(false, [&] (ArtifactIndexSnapshot* index) {
+    for (auto a = index->artifacts.begin(); a != index->artifacts.end(); ) {
       if (a->name == artifact_name) {
-        a = index->erase(a);
+        a = index->artifacts.erase(a);
         return;
       } else {
         ++a;
@@ -85,7 +85,7 @@ void ArtifactIndex::statusTransition(
 
 void ArtifactIndex::withIndex(
     bool readonly,
-    Function<void (List<ArtifactRef>* index)> fn) {
+    Function<void (ArtifactIndexSnapshot* index)> fn) {
   std::unique_lock<std::mutex> lk(mutex_, std::defer_lock);
   FileLock file_lk(index_file_ + ".lck");
 
@@ -102,9 +102,8 @@ void ArtifactIndex::withIndex(
   }
 }
 
-List<ArtifactRef> ArtifactIndex::readIndex() {
-  List<ArtifactRef> index;
-
+ArtifactIndexSnapshot ArtifactIndex::readIndex() {
+  ArtifactIndexSnapshot index;
   if (!(exists_.load() || FileUtil::exists(index_file_))) {
     return index;
   }
@@ -119,38 +118,7 @@ List<ArtifactRef> ArtifactIndex::readIndex() {
   }
 
   auto file = FileUtil::read(index_file_);
-  util::BinaryMessageReader reader(file.data(), file.size());
-  reader.readUInt8();
-  auto num_artifacts = reader.readVarUInt();
-
-  for (int j = 0; j < num_artifacts; ++j) {
-    ArtifactRef artifact;
-
-    auto name_len = reader.readVarUInt();
-    artifact.name = String((const char*) reader.read(name_len), name_len);
-    artifact.status = (ArtifactStatus) ((uint8_t) reader.readVarUInt());
-
-    auto num_attrs = reader.readVarUInt();
-    for (int i = 0; i < num_attrs; ++i) {
-      auto key_len = reader.readVarUInt();
-      String key((const char*) reader.read(key_len), key_len);
-      auto value_len = reader.readVarUInt();
-      String value((const char*) reader.read(value_len), value_len);
-      artifact.attributes.emplace_back(key, value);
-    }
-
-    auto num_files = reader.readVarUInt();
-    for (int i = 0; i < num_files; ++i) {
-      ArtifactFileRef file;
-      auto fname_len = reader.readVarUInt();
-      file.filename = String((const char*) reader.read(fname_len), fname_len);
-      file.checksum = *reader.readUInt64();
-      file.size = reader.readVarUInt();
-      artifact.files.emplace_back(file);
-    }
-
-    index.emplace_back(artifact);
-  }
+  index.decode(file);
 
   if (mtime > cached_mtime_) {
     cached_mtime_ = mtime;
@@ -160,38 +128,15 @@ List<ArtifactRef> ArtifactIndex::readIndex() {
   return index;
 }
 
-void ArtifactIndex::writeIndex(const List<ArtifactRef>& index) {
-  util::BinaryMessageWriter writer;
-  writer.appendUInt8(0x01);
-  writer.appendVarUInt(index.size());
-
-  for (const auto& a : index) {
-    writer.appendVarUInt(a.name.size());
-    writer.append(a.name.data(), a.name.size());
-    writer.appendVarUInt((uint8_t) a.status);
-
-    writer.appendVarUInt(a.attributes.size());
-    for (const auto& attr : a.attributes) {
-      writer.appendVarUInt(attr.first.size());
-      writer.append(attr.first.data(), attr.first.size());
-      writer.appendVarUInt(attr.second.size());
-      writer.append(attr.second.data(), attr.second.size());
-    }
-
-    writer.appendVarUInt(a.files.size());
-    for (const auto& f : a.files) {
-      writer.appendVarUInt(f.filename.size());
-      writer.append(f.filename.data(), f.filename.size());
-      writer.appendUInt64(f.checksum);
-      writer.appendVarUInt(f.size);
-    }
-  }
+void ArtifactIndex::writeIndex(const ArtifactIndexSnapshot& index) {
+  Buffer buf;
+  index.encode(&buf);
 
   auto file = File::openFile(
       index_file_ + "~",
       File::O_CREATEOROPEN | File::O_WRITE | File::O_TRUNCATE);
 
-  file.write(writer.data(), writer.size());
+  file.write(buf.data(), buf.size());
   FileUtil::mv(index_file_ + "~", index_file_);
 
   std::unique_lock<std::mutex> lk(cached_mutex_);
@@ -294,6 +239,71 @@ size_t ArtifactRef::totalSize() const {
   }
 
   return total;
+}
+
+void ArtifactIndexSnapshot::encode(Buffer* buf) const {
+  util::BinaryMessageWriter writer;
+  writer.appendUInt8(0x01);
+  writer.appendVarUInt(artifacts.size());
+
+  for (const auto& a : artifacts) {
+    writer.appendVarUInt(a.name.size());
+    writer.append(a.name.data(), a.name.size());
+    writer.appendVarUInt((uint8_t) a.status);
+
+    writer.appendVarUInt(a.attributes.size());
+    for (const auto& attr : a.attributes) {
+      writer.appendVarUInt(attr.first.size());
+      writer.append(attr.first.data(), attr.first.size());
+      writer.appendVarUInt(attr.second.size());
+      writer.append(attr.second.data(), attr.second.size());
+    }
+
+    writer.appendVarUInt(a.files.size());
+    for (const auto& f : a.files) {
+      writer.appendVarUInt(f.filename.size());
+      writer.append(f.filename.data(), f.filename.size());
+      writer.appendUInt64(f.checksum);
+      writer.appendVarUInt(f.size);
+    }
+  }
+
+  buf->append(writer.data(), writer.size());
+}
+
+void ArtifactIndexSnapshot::decode(const Buffer& buf) {
+  util::BinaryMessageReader reader(buf.data(), buf.size());
+  reader.readUInt8();
+  auto num_artifacts = reader.readVarUInt();
+
+  for (int j = 0; j < num_artifacts; ++j) {
+    ArtifactRef artifact;
+
+    auto name_len = reader.readVarUInt();
+    artifact.name = String((const char*) reader.read(name_len), name_len);
+    artifact.status = (ArtifactStatus) ((uint8_t) reader.readVarUInt());
+
+    auto num_attrs = reader.readVarUInt();
+    for (int i = 0; i < num_attrs; ++i) {
+      auto key_len = reader.readVarUInt();
+      String key((const char*) reader.read(key_len), key_len);
+      auto value_len = reader.readVarUInt();
+      String value((const char*) reader.read(value_len), value_len);
+      artifact.attributes.emplace_back(key, value);
+    }
+
+    auto num_files = reader.readVarUInt();
+    for (int i = 0; i < num_files; ++i) {
+      ArtifactFileRef file;
+      auto fname_len = reader.readVarUInt();
+      file.filename = String((const char*) reader.read(fname_len), fname_len);
+      file.checksum = *reader.readUInt64();
+      file.size = reader.readVarUInt();
+      artifact.files.emplace_back(file);
+    }
+
+    artifacts.emplace_back(artifact);
+  }
 }
 
 } // namespace logtable
