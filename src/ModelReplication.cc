@@ -23,6 +23,32 @@ void ModelReplication::addJob(const String& name, Function<void()> fn) {
   jobs_.emplace_back(name, fn);
 }
 
+void ModelReplication::addArtifactIndexReplication(
+    const String& index_name,
+    const String& artifact_dir,
+    Vector<URI> sources,
+    logtable::ArtifactReplication* replication,
+    http::HTTPConnectionPool* http) {
+  RefPtr<logtable::ArtifactIndex> index(
+      new logtable::ArtifactIndex(artifact_dir, index_name, false));
+
+  RefPtr<logtable::ArtifactIndexReplication> repl(
+      new logtable::ArtifactIndexReplication(
+          index,
+          new logtable::AppendOnlyMergeStrategy()));
+
+  replication->replicateArtifactsFrom(
+      index.get(),
+      sources);
+
+  addJob(index_name, [index, repl, sources, http, index_name] () {
+    for (const auto& s : sources) {
+      URI suri(StringUtil::format("$0/$1.afx", s.toString(), index_name));
+      repl->replicateFrom(suri, http);
+    }
+  });
+}
+
 void ModelReplication::start() {
   running_ = true;
   thread_ = std::thread(std::bind(&ModelReplication::run, this));

@@ -150,37 +150,46 @@ int main(int argc, const char** argv) {
   Logger::get()->setMinimumLogLevel(
       strToLogLevel(flags.getString("loglevel")));
 
-  /* start http server */
-  fnord::thread::ThreadPool tpool;
-  fnord::thread::FixedSizeThreadPool wpool(8);
-  fnord::thread::FixedSizeThreadPool repl_wpool(8);
-  fnord::http::HTTPRouter http_router;
-  fnord::http::HTTPServer http_server(&http_router, &ev);
-  http_server.listen(flags.getInt("http_port"));
-
-  wpool.start();
-  repl_wpool.start();
-
+  /* args */
   auto dir = flags.getString("datadir");
   auto readonly = flags.isSet("readonly");
   auto replica = flags.getString("replica");
   auto repl_sources = flags.getStrings("replicate_from");
 
+  Vector<URI> artifact_sources;
+  for (const auto& rep : repl_sources) {
+    artifact_sources.emplace_back(
+        URI(StringUtil::format("http://$0:7005/", rep)));
+  }
+
+  /* start http server and worker pools */
+  fnord::thread::ThreadPool tpool;
+  fnord::thread::FixedSizeThreadPool wpool(8);
+  fnord::thread::FixedSizeThreadPool repl_wpool(8);
   http::HTTPConnectionPool http(&ev);
+  fnord::http::HTTPRouter http_router;
+  fnord::http::HTTPServer http_server(&http_router, &ev);
+  http_server.listen(flags.getInt("http_port"));
+  wpool.start();
+  repl_wpool.start();
+
+  /* artifact replication */
+  logtable::ArtifactReplication artifact_replication(
+      &http,
+      &repl_wpool,
+      8);
 
   /* model replication */
   ModelReplication model_replication;
 
-  logtable::ArtifactIndexReplication termstats(
-      new logtable::ArtifactIndex(dir, "termstats", false),
-      new logtable::AppendOnlyMergeStrategy());
-
-  model_replication.addJob("termstats", [&termstats, &repl_sources, &http] () {
-    for (const auto& s : repl_sources) {
-      URI suri(StringUtil::format("http://$0:7005/termstats.afx", s));
-      termstats.replicateFrom(suri, &http);
-    }
-  });
+  if (!readonly) {
+    model_replication.addArtifactIndexReplication(
+        "termstats",
+        dir,
+        artifact_sources,
+        &artifact_replication,
+        &http);
+  }
 
   /* logtable */
   logtable::TableRepository table_repo(
@@ -192,15 +201,9 @@ int main(int argc, const char** argv) {
   auto joined_sessions_schema = joinedSessionsSchema();
   table_repo.addTable("joined_sessions-dawanda", joined_sessions_schema);
   table_repo.addTable("index_feed-dawanda", indexChangeRequestSchema());
-
   Set<String> tbls  = { "joined_sessions-dawanda", "index_feed-dawanda" };
 
   logtable::TableReplication table_replication(&http);
-  logtable::ArtifactReplication artifact_replication(
-      &http,
-      &repl_wpool,
-      8);
-
   if (!readonly) {
     for (const auto& tbl : tbls) {
       auto table = table_repo.findTableWriter(tbl);
@@ -217,14 +220,10 @@ int main(int argc, const char** argv) {
           flags.isSet("fsck"),
           flags.isSet("repair"));
 
-      Vector<URI> artifact_sources;
       for (const auto& rep : repl_sources) {
         table_replication.replicateTableFrom(
             table,
             URI(StringUtil::format("http://$0:7003/logtable", rep)));
-
-        artifact_sources.emplace_back(
-            URI(StringUtil::format("http://$0:7005/chunks", rep)));
       }
 
       if (artifact_sources.size() > 0) {
@@ -237,7 +236,7 @@ int main(int argc, const char** argv) {
 
   logtable::TableJanitor table_janitor(&table_repo);
   if (!readonly) {
-    //table_janitor.start();
+    table_janitor.start();
     //table_replication.start();
     artifact_replication.start();
     model_replication.start();
