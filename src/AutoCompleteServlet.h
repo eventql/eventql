@@ -61,6 +61,8 @@ protected:
       Vector<String> terms,
       ResultListType* results);
 
+  void generateURL(AutoCompleteResult* result);
+
   RefPtr<fts::Analyzer> analyzer_;
   OrderedMap<String, SortedTermInfo> term_info_;
   HashMap<String, String> cat_names_;
