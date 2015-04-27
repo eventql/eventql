@@ -416,6 +416,7 @@ add_executable(cm-chunkserver
     3rdparty/libfnord/fnord-logtable/NumericBoundsSummary.cc
     3rdparty/libfnord/fnord-logtable/TableChunkSummaryReader.cc
     3rdparty/libfnord/fnord-logtable/TableChunkSummaryWriter.cc
+    src/ModelReplication.cc
     src/schemas.cc
     src/cm-chunkserver.cc)
 
