@@ -171,10 +171,12 @@ int main(int argc, const char** argv) {
   /* model replication */
   ModelReplication model_replication;
 
-  model_replication.addJob("termstats", [&replication_sources] () {
+  logtable::ArtifactIndex termstats_afx(dir, "termstats", false);
+  logtable::ArtifactIndexReplication termstats_afx_repl(&termstats_afx);
+  model_replication.addJob("termstats", [&termstats_afx_repl, &replication_sources, &http] () {
     for (const auto& s : replication_sources) {
       URI suri(StringUtil::format("http://$0:7005/termstats.afx", s));
-      fnord::iputs("pull... $0", suri.toString());
+      termstats_afx_repl.replicateFrom(suri, &http);
     }
   });
 
