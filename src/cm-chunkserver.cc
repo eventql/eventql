@@ -38,11 +38,13 @@
 #include "fnord-logtable/TableJanitor.h"
 #include "fnord-logtable/TableReplication.h"
 #include "fnord-logtable/ArtifactReplication.h"
+#include "fnord-logtable/ArtifactIndexReplication.h"
 #include "fnord-logtable/NumericBoundsSummary.h"
 #include "fnord-mdb/MDB.h"
 #include "fnord-mdb/MDBUtil.h"
 #include "common.h"
 #include "schemas.h"
+#include "ModelReplication.h"
 
 using namespace fnord;
 
@@ -159,13 +161,28 @@ int main(int argc, const char** argv) {
   wpool.start();
   repl_wpool.start();
 
-  /* logtable */
   auto dir = flags.getString("datadir");
   auto readonly = flags.isSet("readonly");
   auto replica = flags.getString("replica");
+  auto replication_sources = flags.getStrings("replicate_from");
 
   http::HTTPConnectionPool http(&ev);
 
+  /* model replication */
+  ModelReplication model_replication;
+
+  logtable::ArtifactIndexReplication termstats_afx_repl(
+      new logtable::ArtifactIndex(dir, "termstats", false),
+      new logtable::AppendOnlyMergeStrategy());
+
+  model_replication.addJob("termstats", [&termstats_afx_repl, &replication_sources, &http] () {
+    for (const auto& s : replication_sources) {
+      URI suri(StringUtil::format("http://$0:7005/termstats.afx", s));
+      termstats_afx_repl.replicateFrom(suri, &http);
+    }
+  });
+
+  /* logtable */
   logtable::TableRepository table_repo(
       dir,
       replica,
@@ -191,8 +208,8 @@ int main(int argc, const char** argv) {
       if (StringUtil::beginsWith(tbl, "joined_sessions")) {
         table->addSummary([joined_sessions_schema] () {
           return new logtable::NumericBoundsSummaryBuilder(
-              "queries.time-bounds",
-              joined_sessions_schema.id("queries.time"));
+              "search_queries.time-bounds",
+              joined_sessions_schema.id("search_queries.time"));
         });
       }
 
@@ -201,7 +218,7 @@ int main(int argc, const char** argv) {
           flags.isSet("repair"));
 
       Vector<URI> artifact_sources;
-      for (const auto& rep : flags.getStrings("replicate_from")) {
+      for (const auto& rep : replication_sources) {
         table_replication.replicateTableFrom(
             table,
             URI(StringUtil::format("http://$0:7003/logtable", rep)));
@@ -220,9 +237,10 @@ int main(int argc, const char** argv) {
 
   logtable::TableJanitor table_janitor(&table_repo);
   if (!readonly) {
-    table_janitor.start();
-    table_replication.start();
+    //table_janitor.start();
+    //table_replication.start();
     artifact_replication.start();
+    model_replication.start();
   }
 
   logtable::LogTableServlet logtable_servlet(&table_repo);
@@ -234,6 +252,7 @@ int main(int argc, const char** argv) {
     table_janitor.check();
     table_replication.stop();
     artifact_replication.stop();
+    model_replication.stop();
   }
 
   fnord::logInfo("cm.chunkserver", "Exiting...");
