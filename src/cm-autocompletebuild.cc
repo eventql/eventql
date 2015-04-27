@@ -119,96 +119,94 @@ int main(int argc, const char** argv) {
   thread::ThreadPool tpool;
   cm::ReportBuilder report_builder(&tpool);
 
-  auto buildid = "golden";
+  Random rnd;
+  auto buildid = rnd.hex128();
 
-  //Random rnd;
-  //auto buildid = rnd.hex128();
+  auto table = logtable::TableReader::open(
+      "joined_sessions-dawanda",
+      flags.getString("replica"),
+      flags.getString("datadir"),
+      joinedSessionsSchema());
 
-  //auto table = logtable::TableReader::open(
-  //    "joined_sessions-dawanda",
-  //    flags.getString("replica"),
-  //    flags.getString("datadir"),
-  //    joinedSessionsSchema());
+  auto snap = table->getSnapshot();
 
-  //auto snap = table->getSnapshot();
+  Set<String> searchterm_x_e1_tables;
+  Set<String> related_terms_tables;
 
-  //Set<String> searchterm_x_e1_tables;
-  //Set<String> related_terms_tables;
+  for (const auto& c : snap->head->chunks) {
+    auto input_table = StringUtil::format(
+        "$0/$1.$2.$3.cst",
+        datadir,
+        "joined_sessions-dawanda",
+        c.replica_id,
+        c.chunk_id);
 
-  //for (const auto& c : snap->head->chunks) {
-  //  auto input_table = StringUtil::format(
-  //      "$0/$1.$2.$3.cst",
-  //      datadir,
-  //      "joined_sessions-dawanda",
-  //      c.replica_id,
-  //      c.chunk_id);
+    /* map related terms */
+    auto related_terms_table = StringUtil::format(
+        "$0/dawanda_related_terms.$1.$2.sst",
+        tempdir,
+        c.replica_id,
+        c.chunk_id);
 
-  //  /* map related terms */
-  //  auto related_terms_table = StringUtil::format(
-  //      "$0/dawanda_related_terms.$1.$2.sst",
-  //      tempdir,
-  //      c.replica_id,
-  //      c.chunk_id);
+    related_terms_tables.emplace(related_terms_table);
+    report_builder.addReport(
+        new RelatedTermsMapper(
+            new AnalyticsTableScanSource(input_table),
+            new TermInfoTableSink(related_terms_table)));
 
-  //  related_terms_tables.emplace(related_terms_table);
-  //  report_builder.addReport(
-  //      new RelatedTermsMapper(
-  //          new AnalyticsTableScanSource(input_table),
-  //          new TermInfoTableSink(related_terms_table)));
+    /* map serchterm x e1 */
+    auto searchterm_x_e1_table = StringUtil::format(
+        "$0/dawanda_ctr_by_searchterm_cross_e1.$1.$2.sst",
+        tempdir,
+        c.replica_id,
+        c.chunk_id);
 
-  //  /* map serchterm x e1 */
-  //  auto searchterm_x_e1_table = StringUtil::format(
-  //      "$0/dawanda_ctr_by_searchterm_cross_e1.$1.$2.sst",
-  //      tempdir,
-  //      c.replica_id,
-  //      c.chunk_id);
+    searchterm_x_e1_tables.emplace(searchterm_x_e1_table);
+    report_builder.addReport(
+        new CTRBySearchTermCrossCategoryMapper(
+            new AnalyticsTableScanSource(input_table),
+            new CTRCounterTableSink(0, 0, searchterm_x_e1_table),
+            "category1"));
+  }
 
-  //  searchterm_x_e1_tables.emplace(searchterm_x_e1_table);
-  //  report_builder.addReport(
-  //      new CTRBySearchTermCrossCategoryMapper(
-  //          new AnalyticsTableScanSource(input_table),
-  //          new CTRCounterTableSink(0, 0, searchterm_x_e1_table),
-  //          "category1"));
-  //}
+  report_builder.addReport(
+      new TermInfoMergeReducer(
+          new TermInfoTableSource(related_terms_tables),
+          new TermInfoTableSink(
+              StringUtil::format(
+                  "$0/dawanda_related_terms.$1.sst",
+                  tempdir,
+                  buildid))));
 
-  //report_builder.addReport(
-  //    new TermInfoMergeReducer(
-  //        new TermInfoTableSource(related_terms_tables),
-  //        new TermInfoTableSink(
-  //            StringUtil::format(
-  //                "$0/dawanda_related_terms.$1.sst",
-  //                tempdir,
-  //                buildid))));
+  report_builder.addReport(
+      new TopCategoriesByTermMapper(
+          new CTRCounterTableSource(searchterm_x_e1_tables),
+          new TermInfoTableSink(
+              StringUtil::format(
+                  "$0/dawanda_top_cats_by_searchterm_e1.$1.sst",
+                  tempdir,
+                  buildid)),
+          "e1-"));
 
-  //report_builder.addReport(
-  //    new TopCategoriesByTermMapper(
-  //        new CTRCounterTableSource(searchterm_x_e1_tables),
-  //        new TermInfoTableSink(
-  //            StringUtil::format(
-  //                "$0/dawanda_top_cats_by_searchterm_e1.$1.sst",
-  //                tempdir,
-  //                buildid)),
-  //        "e1-"));
+  report_builder.addReport(
+      new TermInfoMergeReducer(
+          new TermInfoTableSource(Set<String> {
+            StringUtil::format(
+                  "$0/dawanda_related_terms.$1.sst",
+                  tempdir,
+                  buildid),
+            StringUtil::format(
+                  "$0/dawanda_top_cats_by_searchterm_e1.$1.sst",
+                  tempdir,
+                  buildid)
+          }),
+          new TermInfoTableSink(
+              StringUtil::format(
+                  "$0/dawanda_termstats.$1.sst",
+                  tempdir,
+                  buildid))));
 
-  //report_builder.addReport(
-  //    new TermInfoMergeReducer(
-  //        new TermInfoTableSource(Set<String> {
-  //          StringUtil::format(
-  //                "$0/dawanda_related_terms.$1.sst",
-  //                tempdir,
-  //                buildid),
-  //          StringUtil::format(
-  //                "$0/dawanda_top_cats_by_searchterm_e1.$1.sst",
-  //                tempdir,
-  //                buildid)
-  //        }),
-  //        new TermInfoTableSink(
-  //            StringUtil::format(
-  //                "$0/dawanda_termstats.$1.sst",
-  //                tempdir,
-  //                buildid))));
-
-  //report_builder.buildAll();
+  report_builder.buildAll();
 
   fnord::logInfo(
       "cm.reportbuild",

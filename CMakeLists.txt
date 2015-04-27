@@ -483,10 +483,13 @@ add_executable(cm-autocompleteserver
     $<TARGET_OBJECTS:fnord-rpc>
     $<TARGET_OBJECTS:fnord-sstable>
     $<TARGET_OBJECTS:fnord-fts>
+    3rdparty/libfnord/fnord-logtable/ArtifactIndex.cc
     src/analytics/Report.cc
     src/analytics/TermInfoTableSource.cc
     src/analytics/TermInfo.cc
     src/AutoCompleteServlet.cc
+    src/AutoCompleteModel.cc
+    src/ModelCache.cc
     src/cm-autocompleteserver.cc)
 
 target_link_libraries(cm-autocompleteserver

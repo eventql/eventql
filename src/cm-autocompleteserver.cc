@@ -36,9 +36,9 @@
 #include "fnord-mdb/MDBUtil.h"
 #include "common.h"
 #include "CustomerNamespace.h"
-
-#
+#include "ModelCache.h"
 #include "AutoCompleteServlet.h"
+#include "AutoCompleteModel.h"
 #include "analytics/TermInfoTableSource.h"
 
 using namespace cm;
@@ -69,12 +69,12 @@ int main(int argc, const char** argv) {
       "<port>");
 
   flags.defineFlag(
-      "terminfo_table",
+      "datadir",
       cli::FlagParser::T_STRING,
       true,
       NULL,
       NULL,
-      "table path",
+      "datadir",
       "<path>");
 
   flags.defineFlag(
@@ -92,19 +92,19 @@ int main(int argc, const char** argv) {
       strToLogLevel(flags.getString("loglevel")));
 
   auto conf_path = flags.getString("conf");
-
   auto analyzer = RefPtr<fts::Analyzer>(new fts::Analyzer(conf_path));
-  cm::AutoCompleteServlet acservlet(analyzer);
 
-  /* read term infos */
-  fnord::logInfo("cm.autocompleteserver", "Reading TermInfo Table...");
-  TermInfoTableSource tbl(Set<String> { flags.getString("terminfo_table") });
-  tbl.forEach(std::bind(
-      &AutoCompleteServlet::addTermInfo,
-      &acservlet,
-      std::placeholders::_1,
-      std::placeholders::_2));
-  tbl.read();
+  ModelCache models(flags.getString("datadir"));
+  models.addModelFactory(
+      "AutoCompleteModel", 
+      [analyzer] (const String& filepath) -> RefCounted* {
+        return new AutoCompleteModel(filepath, analyzer);
+      });
+
+  // preheat
+  models.getModel("AutoCompleteModel", "termstats", "termstats-dawanda");
+
+  cm::AutoCompleteServlet acservlet(&models);
 
   /* start http server */
   fnord::thread::EventLoop ev;
