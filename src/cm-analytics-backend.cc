@@ -242,7 +242,7 @@ int main(int argc, const char** argv) {
     return new cm::TopSearchQueriesQuery(scan, segments, params);
   });
 
-  analytics.registerQueryFactory("ecommerce_", [] (
+  analytics.registerQueryFactory("ecommerce_kpis", [] (
       const cm::AnalyticsQuery& query,
       const cm::AnalyticsQuery::SubQueryParams params,
       const Vector<RefPtr<cm::TrafficSegment>>& segments,
