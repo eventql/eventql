@@ -18,12 +18,19 @@ namespace logtable {
 class ArtifactIndexMergeStrategy : public RefCounted {
 public:
   virtual ~ArtifactIndexMergeStrategy() {}
-  virtual void merge(ArtifactIndex* local, ArtifactIndex* remote) const = 0;
+
+  /* both indexes will be locked while the mergeop is running */
+  virtual void merge(
+      ArtifactIndexSnapshot* local,
+      const ArtifactIndexSnapshot* remote) const = 0;
+
 };
 
 class AppendOnlyMergeStrategy : public ArtifactIndexMergeStrategy {
 public:
-  void merge(ArtifactIndex* local, ArtifactIndex* remote) const override;
+  void merge(
+      ArtifactIndexSnapshot* local,
+      const ArtifactIndexSnapshot* remote) const override;
 };
 
 } // namespace logtable
