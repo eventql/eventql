@@ -171,8 +171,10 @@ int main(int argc, const char** argv) {
   /* model replication */
   ModelReplication model_replication;
 
-  logtable::ArtifactIndex termstats_afx(dir, "termstats", false);
-  logtable::ArtifactIndexReplication termstats_afx_repl(&termstats_afx);
+  logtable::ArtifactIndexReplication termstats_afx_repl(
+      new logtable::ArtifactIndex(dir, "termstats", false),
+      new logtable::AppendOnlyMergeStrategy());
+
   model_replication.addJob("termstats", [&termstats_afx_repl, &replication_sources, &http] () {
     for (const auto& s : replication_sources) {
       URI suri(StringUtil::format("http://$0:7005/termstats.afx", s));
