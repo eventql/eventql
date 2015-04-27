@@ -9,21 +9,63 @@
 #ifndef _CM_AUTOCOMPLETEMODEL_H
 #define _CM_AUTOCOMPLETEMODEL_H
 #include "fnord-json/json.h"
+#include "ModelCache.h"
 #include "analytics/TermInfo.h"
+#include <fnord-fts/fts.h>
+#include <fnord-fts/fts_common.h>
+#include <fnord-fts/Analyzer.h>
 
 using namespace fnord;
 
 namespace cm {
 
-/**
- *  GET /autocomplete
- *
- */
+struct AutoCompleteResult {
+  String text;
+  String url;
+  double score;
+  HashMap<String, String> attrs;
+};
+
+
 class AutoCompleteModel : public RefCounted {
 public:
+  typedef Vector<AutoCompleteResult> ResultListType;
 
-  AutoCompleteModel(const String& filename) {}
+  static RefPtr<AutoCompleteModel> fromCache(
+      const String& customer,
+      ModelCache* cache,
+      RefPtr<fts::Analyzer> analyzer);
 
+  AutoCompleteModel(
+      const String& filename,
+      RefPtr<fts::Analyzer> analyzer);
+
+  ~AutoCompleteModel();
+
+  void suggest(
+      Language lang,
+      const String& qstr,
+      ResultListType* results);
+
+protected:
+
+  void suggestSingleTerm(
+      Language lang,
+      Vector<String> terms,
+      ResultListType* results);
+
+  void suggestMultiTerm(
+      Language lang,
+      Vector<String> terms,
+      const Vector<String>& valid_terms,
+      ResultListType* results);
+
+  void loadModelFile(const String& filename);
+  void addTermInfo(const String& term, const TermInfo& ti);
+
+  RefPtr<fts::Analyzer> analyzer_;
+  OrderedMap<String, SortedTermInfo> term_info_;
+  HashMap<String, String> cat_names_;
 };
 
 }

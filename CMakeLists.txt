@@ -488,6 +488,7 @@ add_executable(cm-autocompleteserver
     src/analytics/TermInfoTableSource.cc
     src/analytics/TermInfo.cc
     src/AutoCompleteServlet.cc
+    src/AutoCompleteModel.cc
     src/ModelCache.cc
     src/cm-autocompleteserver.cc)
 
