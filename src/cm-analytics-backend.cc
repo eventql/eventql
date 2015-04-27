@@ -49,6 +49,7 @@
 #include "analytics/CTRByPageQuery.h"
 #include "analytics/TopSearchQueriesQuery.h"
 #include "analytics/DiscoveryKPIQuery.h"
+#include "analytics/ECommerceKPIQuery.h"
 #include "analytics/DiscoveryCategoryStatsQuery.h"
 #include "analytics/AnalyticsQueryEngine.h"
 #include "analytics/AnalyticsQueryEngine.h"
@@ -239,6 +240,18 @@ int main(int argc, const char** argv) {
       const Vector<RefPtr<cm::TrafficSegment>>& segments,
       cm::AnalyticsTableScan* scan) {
     return new cm::TopSearchQueriesQuery(scan, segments, params);
+  });
+
+  analytics.registerQueryFactory("ecommerce_", [] (
+      const cm::AnalyticsQuery& query,
+      const cm::AnalyticsQuery::SubQueryParams params,
+      const Vector<RefPtr<cm::TrafficSegment>>& segments,
+      cm::AnalyticsTableScan* scan) {
+    return new cm::ECommerceKPIQuery(
+        scan,
+        segments,
+        query.start_time,
+        query.end_time);
   });
 
   ev.run();

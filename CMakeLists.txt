@@ -456,6 +456,7 @@ add_executable(cm-analytics-backend
     src/analytics/DiscoveryKPIQuery.cc
     src/analytics/DiscoveryCategoryStatsQuery.cc
     src/analytics/DiscoveryCategoryStatsResult.cc
+    src/analytics/ECommerceKPIQuery.cc
     src/analytics/TrafficSegment.cc
     src/analytics/CTRStatsServlet.cc
     src/analytics/AnalyticsServlet.cc
