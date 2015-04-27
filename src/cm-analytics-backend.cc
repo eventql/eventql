@@ -184,8 +184,8 @@ int main(int argc, const char** argv) {
         segments,
         query.start_time,
         query.end_time,
-        "queries.category1",
-        "queries.category1",
+        "search_queries.category1",
+        "search_queries.category1",
         params);
   });
 
@@ -199,8 +199,8 @@ int main(int argc, const char** argv) {
         segments,
         query.start_time,
         query.end_time,
-        "queries.category1",
-        "queries.category2",
+        "search_queries.category1",
+        "search_queries.category2",
         params);
   });
 
@@ -214,8 +214,8 @@ int main(int argc, const char** argv) {
         segments,
         query.start_time,
         query.end_time,
-        "queries.category2",
-        "queries.category3",
+        "search_queries.category2",
+        "search_queries.category3",
         params);
   });
 
@@ -229,8 +229,8 @@ int main(int argc, const char** argv) {
         segments,
         query.start_time,
         query.end_time,
-        "queries.category3",
-        "queries.category3",
+        "search_queries.category3",
+        "search_queries.category3",
         params);
   });
 
