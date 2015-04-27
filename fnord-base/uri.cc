@@ -90,7 +90,7 @@ std::string URI::urlEncode(const std::string& str) {
 
       default:
         encoded += '%';
-        encoded += hextbl[c >> 4],
+        encoded += hextbl[(c >> 4) & 0xf],
         encoded += hextbl[c & 0xf];
         break;
 
