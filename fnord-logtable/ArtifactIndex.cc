@@ -131,6 +131,13 @@ List<ArtifactRef> ArtifactIndex::readIndex() {
     artifact.status = (ArtifactStatus) ((uint8_t) reader.readVarUInt());
 
     auto num_attrs = reader.readVarUInt();
+    for (int i = 0; i < num_attrs; ++i) {
+      auto key_len = reader.readVarUInt();
+      String key((const char*) reader.read(key_len), key_len);
+      auto value_len = reader.readVarUInt();
+      String value((const char*) reader.read(value_len), value_len);
+      artifact.attributes.emplace_back(key, value);
+    }
 
     auto num_files = reader.readVarUInt();
     for (int i = 0; i < num_files; ++i) {
@@ -162,7 +169,15 @@ void ArtifactIndex::writeIndex(const List<ArtifactRef>& index) {
     writer.appendVarUInt(a.name.size());
     writer.append(a.name.data(), a.name.size());
     writer.appendVarUInt((uint8_t) a.status);
-    writer.appendVarUInt(0); // attributes size
+
+    writer.appendVarUInt(a.attributes.size());
+    for (const auto& attr : a.attributes) {
+      writer.appendVarUInt(attr.first.size());
+      writer.append(attr.first.data(), attr.first.size());
+      writer.appendVarUInt(attr.second.size());
+      writer.append(attr.second.data(), attr.second.size());
+    }
+
     writer.appendVarUInt(a.files.size());
     for (const auto& f : a.files) {
       writer.appendVarUInt(f.filename.size());
