@@ -164,21 +164,21 @@ int main(int argc, const char** argv) {
   auto dir = flags.getString("datadir");
   auto readonly = flags.isSet("readonly");
   auto replica = flags.getString("replica");
-  auto replication_sources = flags.getStrings("replicate_from");
+  auto repl_sources = flags.getStrings("replicate_from");
 
   http::HTTPConnectionPool http(&ev);
 
   /* model replication */
   ModelReplication model_replication;
 
-  logtable::ArtifactIndexReplication termstats_afx_repl(
+  logtable::ArtifactIndexReplication termstats(
       new logtable::ArtifactIndex(dir, "termstats", false),
       new logtable::AppendOnlyMergeStrategy());
 
-  model_replication.addJob("termstats", [&termstats_afx_repl, &replication_sources, &http] () {
-    for (const auto& s : replication_sources) {
+  model_replication.addJob("termstats", [&termstats, &repl_sources, &http] () {
+    for (const auto& s : repl_sources) {
       URI suri(StringUtil::format("http://$0:7005/termstats.afx", s));
-      termstats_afx_repl.replicateFrom(suri, &http);
+      termstats.replicateFrom(suri, &http);
     }
   });
 
@@ -218,7 +218,7 @@ int main(int argc, const char** argv) {
           flags.isSet("repair"));
 
       Vector<URI> artifact_sources;
-      for (const auto& rep : replication_sources) {
+      for (const auto& rep : repl_sources) {
         table_replication.replicateTableFrom(
             table,
             URI(StringUtil::format("http://$0:7003/logtable", rep)));
