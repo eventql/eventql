@@ -14,7 +14,7 @@ namespace logtable {
 
 void AppendOnlyMergeStrategy::merge(
     ArtifactIndexSnapshot* local,
-    ArtifactIndexSnapshot* remote) const {
+    const ArtifactIndexSnapshot* remote) const {
   fnord::iputs("merge $0 <> $1", local, remote);
 }
 
