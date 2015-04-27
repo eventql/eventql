@@ -15,7 +15,19 @@ namespace logtable {
 void AppendOnlyMergeStrategy::merge(
     ArtifactIndexSnapshot* local,
     const ArtifactIndexSnapshot* remote) const {
-  fnord::iputs("merge $0 <> $1", local, remote);
+  Set<String> existing_artifacts;
+
+  for (const auto& a : local->artifacts) {
+    existing_artifacts.emplace(a.name);
+  }
+
+  for (const auto& a : remote->artifacts) {
+    if (existing_artifacts.count(a.name) > 0) {
+      continue;
+    }
+
+    local->artifacts.emplace_back(a);
+  }
 }
 
 } // namespace logtable
