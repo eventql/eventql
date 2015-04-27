@@ -226,6 +226,9 @@ int main(int argc, const char** argv) {
   logtable::ArtifactRef afx;
   afx.name = StringUtil::format("termstats-dawanda.$0", buildid);
   afx.status = logtable::ArtifactStatus::PRESENT;
+  afx.attributes.emplace_back(
+      "built_at",
+      StringUtil::toString(WallClock::unixMicros() / kMicrosPerSecond));
   afx.files.emplace_back(logtable::ArtifactFileRef {
     .filename = outfile,
     .size = FileUtil::size(outfile_path),
