@@ -184,7 +184,8 @@ int main(int argc, const char** argv) {
         scan,
         segments,
         query.start_time,
-        query.end_time);
+        query.end_time,
+        params);
   });
 
   analytics.registerQueryFactory("discovery_category0_stats", [] (
