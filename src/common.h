@@ -96,6 +96,7 @@ String joinBagOfWords(const Set<String>& words);
 String deviceTypeToString(DeviceType device_type);
 DeviceType deviceTypeFromString(const String& device_type);
 PageType pageTypeFromString(const String& page_type);
+String pageTypeToString(PageType device_type);
 
 CurrencyConverter::ConversionTable currencyConversionTable();
 
