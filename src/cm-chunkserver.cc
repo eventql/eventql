@@ -237,7 +237,7 @@ int main(int argc, const char** argv) {
   logtable::TableJanitor table_janitor(&table_repo);
   if (!readonly) {
     table_janitor.start();
-    //table_replication.start();
+    table_replication.start();
     artifact_replication.start();
     model_replication.start();
   }
