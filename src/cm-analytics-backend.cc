@@ -49,8 +49,9 @@
 #include "analytics/CTRByPageQuery.h"
 #include "analytics/TopSearchQueriesQuery.h"
 #include "analytics/DiscoveryKPIQuery.h"
-#include "analytics/ECommerceKPIQuery.h"
 #include "analytics/DiscoveryCategoryStatsQuery.h"
+#include "analytics/DiscoverySearchStatsQuery.h"
+#include "analytics/ECommerceKPIQuery.h"
 #include "analytics/AnalyticsQueryEngine.h"
 #include "analytics/AnalyticsQueryEngine.h"
 #include "analytics/ShopStatsServlet.h"
@@ -162,12 +163,24 @@ int main(int argc, const char** argv) {
     return new cm::CTRByPageQuery(scan, segments);
   });
 
-  analytics.registerQueryFactory("discovery_kpis", [] (
+  analytics.registerQueryFactory("discovery_dashboard", [] (
       const cm::AnalyticsQuery& query,
       const cm::AnalyticsQuery::SubQueryParams params,
       const Vector<RefPtr<cm::TrafficSegment>>& segments,
       cm::AnalyticsTableScan* scan) {
     return new cm::DiscoveryKPIQuery(
+        scan,
+        segments,
+        query.start_time,
+        query.end_time);
+  });
+
+  analytics.registerQueryFactory("discovery_search_stats", [] (
+      const cm::AnalyticsQuery& query,
+      const cm::AnalyticsQuery::SubQueryParams params,
+      const Vector<RefPtr<cm::TrafficSegment>>& segments,
+      cm::AnalyticsTableScan* scan) {
+    return new cm::DiscoverySearchStatsQuery(
         scan,
         segments,
         query.start_time,
