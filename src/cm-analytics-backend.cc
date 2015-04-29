@@ -49,6 +49,7 @@
 #include "analytics/CTRByPageQuery.h"
 #include "analytics/TopSearchQueriesQuery.h"
 #include "analytics/DiscoveryDashboardQuery.h"
+#include "analytics/DiscoveryCatalogStatsQuery.h"
 #include "analytics/DiscoveryCategoryStatsQuery.h"
 #include "analytics/DiscoverySearchStatsQuery.h"
 #include "analytics/ECommerceKPIQuery.h"
@@ -181,6 +182,19 @@ int main(int argc, const char** argv) {
       const Vector<RefPtr<cm::TrafficSegment>>& segments,
       cm::AnalyticsTableScan* scan) {
     return new cm::DiscoverySearchStatsQuery(
+        scan,
+        segments,
+        query.start_time,
+        query.end_time,
+        params);
+  });
+
+  analytics.registerQueryFactory("discovery_catalog_stats", [] (
+      const cm::AnalyticsQuery& query,
+      const cm::AnalyticsQuery::SubQueryParams params,
+      const Vector<RefPtr<cm::TrafficSegment>>& segments,
+      cm::AnalyticsTableScan* scan) {
+    return new cm::DiscoveryCatalogStatsQuery(
         scan,
         segments,
         query.start_time,
