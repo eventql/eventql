@@ -15,7 +15,6 @@
 #include <fnord-base/Currency.h>
 #include <fnord-base/util/CumulativeHistogram.h>
 #include <fnord-json/json.h>
-#include "JoinedQuery.h"
 
 using namespace fnord;
 
@@ -35,9 +34,9 @@ using namespace fnord;
  *   is         -- item ids         -- format "<setid>~<itemid>~p<pos>,..."
  *   pg         -- page number      -- format "<num>"
  *   qstr~<lc>  -- query string     -- format "<string>"
- *   qcat1      -- query cat1       -- format "<catid>"
- *   qcat2      -- query cat2       -- format "<catid>"
- *   qcat3      -- query cat3       -- format "<catid>"
+ *   q_cat1      -- query cat1       -- format "<catid>"
+ *   q_cat2      -- query cat2       -- format "<catid>"
+ *   q_cat3      -- query cat3       -- format "<catid>"
  *   slrid      -- seller id        -- format "<id>"
  *
  * params for eventtype=v (visit):
@@ -97,24 +96,7 @@ String joinBagOfWords(const Set<String>& words);
 String deviceTypeToString(DeviceType device_type);
 DeviceType deviceTypeFromString(const String& device_type);
 PageType pageTypeFromString(const String& page_type);
-
-enum class FeaturePrep {
-  NONE,
-  BAGOFWORDS_DE
-};
-
-enum class ItemEligibility {
-  ALL = 0,
-  DAWANDA_ALL_NOBOTS = 1
-};
-
-
-bool isQueryEligible(ItemEligibility eligibility, const cm::JoinedQuery& query);
-
-bool isItemEligible(
-    ItemEligibility eligibility,
-    const cm::JoinedQuery& query,
-    const cm::JoinedQueryItem& item);
+String pageTypeToString(PageType device_type);
 
 CurrencyConverter::ConversionTable currencyConversionTable();
 

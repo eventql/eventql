@@ -11,7 +11,7 @@
 #include "fnord-base/stdtypes.h"
 #include "fnord-base/option.h"
 #include "FeatureID.h"
-#include "JoinedQuery.h"
+#
 #include <fnord-fts/fts.h>
 #include <fnord-fts/fts_common.h>
 

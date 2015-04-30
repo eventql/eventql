@@ -43,11 +43,11 @@
 #include <fnord-fts/fts_common.h>
 #include "common.h"
 #include "CustomerNamespace.h"
-#include "FeatureSchema.h"
-#include "FeaturePack.h"
+
+
 #include "FeatureIndex.h"
 #include "FeatureSelector.h"
-#include "JoinedQuery.h"
+#
 
 using namespace fnord;
 

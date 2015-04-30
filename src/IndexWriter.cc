@@ -23,8 +23,8 @@ RefPtr<IndexWriter> IndexWriter::openIndex(
   /* open doc idx */
   auto db_path = FileUtil::joinPaths(index_path, "db");
   FileUtil::mkdir_p(db_path);
-  auto doc_idx = RefPtr<FeatureIndexWriter>(
-      new FeatureIndexWriter(index_path, "documents-dawanda", false));
+  auto doc_idx = RefPtr<DocIndex>(
+      new DocIndex(index_path, "documents-dawanda", false));
 
   /* open lucene */
   RefPtr<fnord::fts::Analyzer> analyzer(new fnord::fts::Analyzer(conf_path));
@@ -48,7 +48,7 @@ RefPtr<IndexWriter> IndexWriter::openIndex(
 }
 
 IndexWriter::IndexWriter(
-    RefPtr<FeatureIndexWriter> doc_idx,
+    RefPtr<DocIndex> doc_idx,
     std::shared_ptr<fts::IndexWriter> fts_idx) :
     doc_idx_(doc_idx),
     fts_idx_(fts_idx) {}

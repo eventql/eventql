@@ -10,16 +10,15 @@
 #define _CM_LOGJOINTARGET_H
 #include "fnord-base/stdtypes.h"
 #include "fnord-base/Currency.h"
+#include "fnord-base/random.h"
 #include "fnord-mdb/MDB.h"
 #include "fnord-msg/MessageSchema.h"
 #include "ItemRef.h"
 #include "logjoin/TrackedSession.h"
 #include "logjoin/TrackedQuery.h"
-#include "JoinedQuery.h"
-#include "FeatureIndex.h"
 #include "DocStore.h"
 #include "IndexChangeRequest.h"
-#include "FeatureIndexWriter.h"
+#include "DocIndex.h"
 #include "ItemRef.h"
 
 using namespace fnord;
@@ -38,43 +37,19 @@ public:
   LogJoinTarget(
       const msg::MessageSchema& joined_sessions_schema,
       fts::Analyzer* analyzer,
-      RefPtr<FeatureIndexWriter> index,
+      RefPtr<DocIndex> index,
       bool dry_run);
 
   void onSession(
       mdb::MDBTransaction* txn,
-      const TrackedSession& session);
-
-  void onQuery(
-      mdb::MDBTransaction* txn,
-      const TrackedSession& session,
-      const TrackedQuery& query);
-
-  void onItemVisit(
-      mdb::MDBTransaction* txn,
-      const TrackedSession& session,
-      const TrackedItemVisit& item_visit);
-
-  void onItemVisit(
-      mdb::MDBTransaction* txn,
-      const TrackedSession& session,
-      const TrackedItemVisit& item_visit,
-      const TrackedQuery& query);
-
+      TrackedSession& session);
 
   size_t num_sessions;
-  size_t num_queries;
-  size_t num_item_visits;
 
 protected:
-
-  JoinedQuery trackedQueryToJoinedQuery(
-      const TrackedSession& session,
-      const TrackedQuery& q) const;
-
   msg::MessageSchema joined_sessions_schema_;
   fts::Analyzer* analyzer_;
-  RefPtr<FeatureIndexWriter> index_;
+  RefPtr<DocIndex> index_;
   bool dry_run_;
   Random rnd_;
   CurrencyConverter cconv_;

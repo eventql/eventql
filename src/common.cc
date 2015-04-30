@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <unistd.h>
 #include <fnord-base/UTF8.h>
+#include <fnord-base/uri.h>
 #include "common.h"
 
 namespace cm {
@@ -188,42 +189,6 @@ String joinBagOfWords(const Set<String>& words) {
   std::sort(v.begin(), v.end());
 
   return StringUtil::join(v, " ");
-}
-
-bool isQueryEligible(
-    ItemEligibility eligibility,
-    const cm::JoinedQuery& query) {
-  switch (eligibility) {
-
-    case ItemEligibility::DAWANDA_ALL_NOBOTS: {
-      auto pgs = extractAttr(query.attrs, "pg");
-      if (pgs.isEmpty()) {
-        return true;
-      } else {
-        auto pg = std::stoul(pgs.get());
-        return pg <= 3;
-      }
-    }
-
-    case ItemEligibility::ALL:
-      return true;
-
-  }
-}
-
-bool isItemEligible(
-    ItemEligibility eligibility,
-    const cm::JoinedQuery& query,
-    const cm::JoinedQueryItem& item) {
-  switch (eligibility) {
-
-    case ItemEligibility::DAWANDA_ALL_NOBOTS:
-      return item.position <= 40 && item.position > 0;
-
-    case ItemEligibility::ALL:
-      return true;
-
-  }
 }
 
 Option<String> extractQueryString(const Vector<String>& attrs) {

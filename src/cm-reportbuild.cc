@@ -29,8 +29,8 @@
 #include <fnord-fts/fts_common.h>
 #include "common.h"
 #include "CustomerNamespace.h"
-#include "FeatureSchema.h"
-#include "JoinedQuery.h"
+
+#
 #include "CTRCounter.h"
 #include "IndexReader.h"
 #include "analytics/ReportBuilder.h"

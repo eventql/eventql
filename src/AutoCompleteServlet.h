@@ -10,10 +10,8 @@
 #define _CM_AUTOCOMPLETESERVLET_H
 #include "fnord-http/httpservice.h"
 #include "fnord-json/json.h"
-#include "analytics/TermInfo.h"
-#include <fnord-fts/fts.h>
-#include <fnord-fts/fts_common.h>
-#include <fnord-fts/Analyzer.h>
+#include "ModelCache.h"
+#include "AutoCompleteModel.h"
 
 using namespace fnord;
 
@@ -26,37 +24,17 @@ namespace cm {
 class AutoCompleteServlet : public fnord::http::HTTPService {
 public:
 
-  AutoCompleteServlet(RefPtr<fts::Analyzer> analyzer);
+  AutoCompleteServlet(ModelCache* models);
 
   void handleHTTPRequest(
       fnord::http::HTTPRequest* req,
       fnord::http::HTTPResponse* res);
 
-  void addTermInfo(const String& term, const TermInfo& ti);
-
 protected:
 
-  typedef Vector<Tuple<String, uint64_t, String>> ResultListType;
+  void generateURL(AutoCompleteResult* result);
 
-  void suggestSingleTerm(
-      Language lang,
-      Vector<String> terms,
-      ResultListType* results);
-
-  void suggestMultiTerm(
-      Language lang,
-      Vector<String> terms,
-      const Vector<String>& valid_terms,
-      ResultListType* results);
-
-  void suggestFuzzy(
-      Language lang,
-      Vector<String> terms,
-      ResultListType* results);
-
-  RefPtr<fts::Analyzer> analyzer_;
-  OrderedMap<String, SortedTermInfo> term_info_;
-  HashMap<String, String> cat_names_;
+  ModelCache* models_;
 };
 
 }

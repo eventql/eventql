@@ -24,7 +24,7 @@
 #include "FeatureIndex.h"
 #include "DocStore.h"
 #include "IndexChangeRequest.h"
-#include "FeatureIndexWriter.h"
+#include "DocIndex.h"
 #include "ItemRef.h"
 
 using namespace fnord;
@@ -38,16 +38,16 @@ public:
 
   ~IndexReader();
 
-  RefPtr<FeatureIndexWriter> docIndex();
+  RefPtr<DocIndex> docIndex();
   std::shared_ptr<fts::IndexSearcher> ftsSearcher();
 
 protected:
 
   IndexReader(
-      RefPtr<FeatureIndexWriter> doc_idx,
+      RefPtr<DocIndex> doc_idx,
       std::shared_ptr<fts::IndexReader> fts);
 
-  RefPtr<FeatureIndexWriter> doc_idx_;
+  RefPtr<DocIndex> doc_idx_;
   std::shared_ptr<fts::IndexReader> fts_;
   std::shared_ptr<fts::IndexSearcher> fts_searcher_;
 };

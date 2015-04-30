@@ -15,6 +15,8 @@
 #include <unordered_map>
 #include <vector>
 #include <fnord-base/datetime.h>
+#include <fnord-base/option.h>
+#include <fnord-base/Currency.h>
 
 #include "ItemRef.h"
 #include "logjoin/TrackedQuery.h"
@@ -24,7 +26,6 @@
 using namespace fnord;
 
 namespace cm {
-class CustomerNamespace;
 
 /**
  * The max time after which a click on a query result is considered a click
@@ -44,37 +45,38 @@ struct TrackedSession {
   std::string customer_key;
   std::string uid;
   std::vector<TrackedQuery> queries;
-  std::vector<TrackedQuery> flushed_queries;
   std::vector<TrackedItemVisit> item_visits;
-  std::vector<TrackedItemVisit> flushed_item_visits;
   std::vector<TrackedCartItem> cart_items;
-  uint64_t last_seen_unix_micros;
-  bool flushed;
   std::vector<std::string> attrs;
+
+  uint32_t num_cart_items;
+  uint32_t num_order_items;
+  uint32_t gmv_eurcents;
+  uint32_t cart_value_eurcents;
+
+  TrackedSession();
+
+  void insertLogline(
+      const DateTime& time,
+      const String& evtype,
+      const String& evid,
+      const URI::ParamList& logline);
+
+  void insertQuery(const TrackedQuery& query);
+  void insertItemVisit(const TrackedItemVisit& visit);
+  void insertCartVisit(const Vector<TrackedCartItem>& new_cart_items);
 
   /**
    * Trigger an update to incorporate new information. This will e.g. mark
    * query items as clicked if a corresponding click was observed.
-   *
-   * required precondition: must hold the session mutex
    */
+  void joinEvents(const CurrencyConverter& cconv);
+
+  Option<DateTime> firstSeenTime() const;
+  Option<DateTime> lastSeenTime() const;
+
   void debugPrint(const std::string& uid) const;
 
-  DateTime nextFlushTime() const;
-
-  template <typename T>
-  static void reflect(T* meta) {
-    meta->prop(&cm::TrackedSession::customer_key, 1, "c", false);
-    meta->prop(&cm::TrackedSession::uid, 2, "u", false);
-    meta->prop(&cm::TrackedSession::queries, 3, "q", false);
-    meta->prop(&cm::TrackedSession::flushed_queries, 8, "qf", false);
-    meta->prop(&cm::TrackedSession::item_visits, 4, "v", false);
-    meta->prop(&cm::TrackedSession::flushed_item_visits, 9, "vf", false);
-    meta->prop(&cm::TrackedSession::cart_items, 10, "ci", false);
-    meta->prop(&cm::TrackedSession::last_seen_unix_micros, 5, "t", false);
-    meta->prop(&cm::TrackedSession::flushed, 6, "f", false);
-    meta->prop(&cm::TrackedSession::attrs, 7, "a", false);
-  };
 };
 
 

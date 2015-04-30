@@ -37,10 +37,9 @@
 #include "logjoin/LogJoin.h"
 #include "logjoin/LogJoinTarget.h"
 #include "logjoin/LogJoinUpload.h"
-#include "FeatureIndex.h"
 #include "DocStore.h"
 #include "IndexChangeRequest.h"
-#include "FeatureIndexWriter.h"
+#include "DocIndex.h"
 #include "ItemRef.h"
 #include "common.h"
 #include "schemas.h"
@@ -134,21 +133,12 @@ int main(int argc, const char** argv) {
       "<num>");
 
   flags.defineFlag(
-      "commit_size",
-      fnord::cli::FlagParser::T_INTEGER,
-      false,
-      NULL,
-      "1024",
-      "commit_size",
-      "<num>");
-
-  flags.defineFlag(
-      "commit_interval",
+      "flush_interval",
       fnord::cli::FlagParser::T_INTEGER,
       false,
       NULL,
       "5",
-      "commit_interval",
+      "flush_interval",
       "<num>");
 
   flags.defineFlag(
@@ -167,15 +157,6 @@ int main(int argc, const char** argv) {
       NULL,
       NULL,
       "no dryrun",
-      "<bool>");
-
-   flags.defineFlag(
-      "nocache",
-      fnord::cli::FlagParser::T_SWITCH,
-      false,
-      NULL,
-      NULL,
-      "no cache",
       "<bool>");
 
   flags.defineFlag(
@@ -226,30 +207,26 @@ int main(int argc, const char** argv) {
 
   /* set up logjoin */
   auto dry_run = !flags.isSet("no_dryrun");
-  auto enable_cache = !flags.isSet("nocache");
   size_t batch_size = flags.getInt("batch_size");
   size_t buffer_size = flags.getInt("buffer_size");
-  size_t commit_size = flags.getInt("commit_size");
-  size_t commit_interval = flags.getInt("commit_interval");
+  size_t flush_interval = flags.getInt("flush_interval");
 
   fnord::logInfo(
       "cm.logjoin",
       "Starting cm-logjoin with:\n    dry_run=$0\n    batch_size=$1\n" \
-      "    buffer_size=$2\n    commit_size=$3\n    commit_interval=$9\n"
+      "    buffer_size=$2\n    flush_interval=$9\n"
       "    max_dbsize=$4MB\n" \
-      "    shard=$5\n    shard_range=[$6, $7)\n    shard_modulo=$8\n" \
-      "    cache=$9",
+      "    shard=$5\n    shard_range=[$6, $7)\n    shard_modulo=$8",
       dry_run,
       batch_size,
       buffer_size,
-      commit_size,
+      0,
       flags.getInt("db_size"),
       shard.shard_name,
       shard.begin,
       shard.end,
       cm::LogJoinShard::modulo,
-      commit_interval,
-      enable_cache);
+      flush_interval);
 
   fnord::logInfo(
       "cm.logjoin",
@@ -291,8 +268,8 @@ int main(int argc, const char** argv) {
   });
 
   /* open index */
-  RefPtr<FeatureIndexWriter> index(
-      new FeatureIndexWriter(
+  RefPtr<DocIndex> index(
+      new DocIndex(
           flags.getString("index"),
           "documents-dawanda",
           true));
@@ -312,7 +289,7 @@ int main(int argc, const char** argv) {
       &http);
 
   /* setup logjoin */
-  cm::LogJoin logjoin(shard, dry_run, enable_cache, &logjoin_target);
+  cm::LogJoin logjoin(shard, dry_run, &logjoin_target);
   logjoin.exportStats("/cm-logjoin/global");
   logjoin.exportStats(StringUtil::format("/cm-logjoin/$0", shard.shard_name));
 
@@ -386,18 +363,16 @@ int main(int argc, const char** argv) {
   fnord::logInfo("cm.logjoin", "Resuming logjoin...");
 
   DateTime last_flush;
-  uint64_t rate_limit_micros = commit_interval * kMicrosPerSecond;
+  uint64_t rate_limit_micros = flush_interval * kMicrosPerSecond;
 
   for (;;) {
     auto begin = WallClock::unixMicros();
-    auto turbo = FileUtil::exists("/tmp/logjoin_turbo.enabled");
-    logjoin.setTurbo(turbo);
 
     feed_reader.fillBuffers();
     auto txn = sessdb->startTransaction();
 
     int i = 0;
-    for (; i < commit_size; ++i) {
+    for (; i < batch_size; ++i) {
       auto entry = feed_reader.fetchNextEntry();
 
       if (entry.isEmpty()) {
@@ -434,17 +409,11 @@ int main(int argc, const char** argv) {
     fnord::logInfo(
         "cm.logjoin",
         "LogJoin comitting...\n    stream_time=<$0 ... $1>\n" \
-        "    active_sessions=$2\n    flushed_sessions=$3\n    " \
-        "flushed_queries=$4\n    flushed_item_visits=$5\n    turbo=$6\n    " \
-        "cache_size=$7$8",
+        "    active_sessions=$2\n    flushed_sessions=$3$4",
         watermarks.first,
         watermarks.second,
         logjoin.numSessions(),
         logjoin_target.num_sessions,
-        logjoin_target.num_queries,
-        logjoin_target.num_item_visits,
-        turbo,
-        logjoin.cacheSize(),
         stream_offsets_str);
 
     if (dry_run) {
@@ -469,9 +438,9 @@ int main(int argc, const char** argv) {
     //stat_dbsize.set(FileUtil::du_c(flags.getString("datadir"));
 
     auto rtime = WallClock::unixMicros() - begin;
-    if (rtime < kMicrosPerSecond) {
-      begin = WallClock::unixMicros();
-      usleep(kMicrosPerSecond - rtime);
+    auto rlimit = kMicrosPerSecond;
+    if (i < 2 && rtime < rlimit) {
+      usleep(rlimit - rtime);
     }
   }
 

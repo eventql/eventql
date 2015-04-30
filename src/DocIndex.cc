@@ -6,14 +6,14 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-#include "FeatureIndexWriter.h"
+#include "DocIndex.h"
 #include "IndexChangeRequest.h"
 
 using namespace fnord;
 
 namespace cm {
 
-FeatureIndexWriter::FeatureIndexWriter(
+DocIndex::DocIndex(
     const String& db_path,
     const String& index_name,
     bool readonly) :
@@ -58,13 +58,13 @@ FeatureIndexWriter::FeatureIndexWriter(
   cursor->close();
 }
 
-FeatureIndexWriter::~FeatureIndexWriter() {
+DocIndex::~DocIndex() {
   if (txn_.get()) {
     txn_->abort();
   }
 }
 
-void FeatureIndexWriter::commit(bool sync /* = false */) {
+void DocIndex::commit(bool sync /* = false */) {
   txn_->commit();
   if (sync) {
     db_->sync();
@@ -73,7 +73,7 @@ void FeatureIndexWriter::commit(bool sync /* = false */) {
   txn_ = db_->startTransaction(readonly_);
 }
 
-Option<String> FeatureIndexWriter::getField(
+Option<String> DocIndex::getField(
     const DocID& docid,
     const String& field) {
   auto fid = field_ids_.find(field);
@@ -93,7 +93,7 @@ Option<String> FeatureIndexWriter::getField(
   }
 }
 
-void FeatureIndexWriter::updateDocument(
+void DocIndex::updateDocument(
     const DocID& docid,
     const Vector<Pair<String, String>>& fields) {
   HashMap<uint32_t, String> doc;
@@ -115,7 +115,7 @@ void FeatureIndexWriter::updateDocument(
   }
 }
 
-uint32_t FeatureIndexWriter::getOrCreateFieldID(const String& field_name) {
+uint32_t DocIndex::getOrCreateFieldID(const String& field_name) {
   auto id = field_ids_.find(field_name);
   if (id == field_ids_.end()) {
     auto new_id = ++max_field_id_;
@@ -127,13 +127,13 @@ uint32_t FeatureIndexWriter::getOrCreateFieldID(const String& field_name) {
   }
 }
 
-RefPtr<Document> FeatureIndexWriter::findDocument(const DocID& docid) {
+RefPtr<Document> DocIndex::findDocument(const DocID& docid) {
   RefPtr<Document> doc(new Document(docid));
   return doc;
 }
 
 
-void FeatureIndexWriter::writeDocument(
+void DocIndex::writeDocument(
     const DocID& docid,
     const HashMap<uint32_t, String>& fields) {
   util::BinaryMessageWriter writer;
@@ -160,7 +160,7 @@ void FeatureIndexWriter::writeDocument(
 }
 
 
-void FeatureIndexWriter::readDocument(
+void DocIndex::readDocument(
     const DocID& docid,
     HashMap<uint32_t, String>* fields,
     const Set<uint32_t>& select /* = Set<uint32_t>{} */) {
@@ -199,12 +199,12 @@ void FeatureIndexWriter::readDocument(
   }
 }
 
-void FeatureIndexWriter::saveCursor(const void* data, size_t size) {
+void DocIndex::saveCursor(const void* data, size_t size) {
   String key = "__cursor";
   txn_->update(key.data(), key.size(), data, size);
 }
 
-Option<Buffer> FeatureIndexWriter::getCursor() const {
+Option<Buffer> DocIndex::getCursor() const {
   return txn_->get("__cursor");
 }
 
@@ -242,7 +242,7 @@ Option<Buffer> FeatureIndexWriter::getCursor() const {
 //  return doc;
 //}
 //
-//void FeatureIndexWriter::updateIndex(const IndexChangeRequest& index_request) {
+//void DocIndex::updateIndex(const IndexChangeRequest& index_request) {
 //  Vector<Pair<FeatureID, String>> features;
 //  for (const auto& p : index_request.attrs) {
 //    auto fid = schema_.featureID(p.first);
@@ -258,7 +258,7 @@ Option<Buffer> FeatureIndexWriter::getCursor() const {
 //  updateIndex(docid, features);
 //}
 //
-//void FeatureIndexWriter::updateIndex(
+//void DocIndex::updateIndex(
 //    const DocID& docid,
 //    const Vector<Pair<FeatureID, String>>& features) {
 //  Set<uint64_t> groups;
@@ -311,7 +311,7 @@ Option<Buffer> FeatureIndexWriter::getCursor() const {
 //  }
 //}
 //
-//void FeatureIndexWriter::listDocuments(Function<bool (const DocID& id)> fn) {
+//void DocIndex::listDocuments(Function<bool (const DocID& id)> fn) {
 //  Buffer key;
 //  Buffer value;
 //  String last_key;
@@ -348,7 +348,7 @@ Option<Buffer> FeatureIndexWriter::getCursor() const {
 //  cursor->close();
 //}
 //
-//void FeatureIndexWriter::getFields(const DocID& docid, FeaturePack* features) {
+//void DocIndex::getFields(const DocID& docid, FeaturePack* features) {
 //  for (const auto& group : schema_.groupIDs()) {
 //    auto db_key = featureDBKey(docid, group);
 //    auto buf = txn_->get(db_key);
@@ -372,7 +372,7 @@ Option<Buffer> FeatureIndexWriter::getCursor() const {
 //
 
 //
-//Option<String> FeatureIndexWriter::getField(
+//Option<String> DocIndex::getField(
 //    const DocID& docid,
 //    const FeatureID& featureid) {
 //  auto db_key = featureDBKey(docid, featureid.group);

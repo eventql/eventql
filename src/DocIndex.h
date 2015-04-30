@@ -16,35 +16,28 @@
 #include <vector>
 #include <queue>
 #include "fnord-base/stdtypes.h"
-#include "fnord-feeds/RemoteFeed.h"
-#include "fnord-feeds/RemoteFeedWriter.h"
-#include "fnord-rpc/RPC.h"
-#include "fnord-rpc/RPCClient.h"
-#include "fnord-base/thread/taskscheduler.h"
 #include "fnord-mdb/MDB.h"
 #include "fnord-base/stats/stats.h"
-#include "FeatureIndex.h"
+#include "fnord-base/util/binarymessagereader.h"
+#include "fnord-base/util/binarymessagewriter.h"
 #include "IndexChangeRequest.h"
 #include "ItemRef.h"
 #include "Document.h"
-#include "logjoin/TrackedSession.h"
-#include "logjoin/TrackedQuery.h"
-#include "logjoin/LogJoinShard.h"
 
 using namespace fnord;
 
 namespace cm {
 class CustomerNamespace;
 
-class FeatureIndexWriter : public RefCounted {
+class DocIndex : public RefCounted {
 public:
 
-  FeatureIndexWriter(
+  DocIndex(
       const String& db_path,
       const String& index_name,
       bool readonly);
 
-  ~FeatureIndexWriter();
+  ~DocIndex();
 
   RefPtr<Document> findDocument(const DocID& docid);
   void listDocuments(Function<bool (const DocID& id)> fn);
