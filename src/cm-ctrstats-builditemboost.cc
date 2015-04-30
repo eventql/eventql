@@ -29,9 +29,9 @@
 #include "fnord-sstable/SSTableColumnWriter.h"
 #include "common.h"
 #include "CustomerNamespace.h"
-#include "FeatureSchema.h"
+
 #include "IndexChangeRequest.h"
-#include "JoinedQuery.h"
+#
 #include "CTRCounter.h"
 
 using namespace fnord;

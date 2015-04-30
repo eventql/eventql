@@ -27,25 +27,17 @@
 #include "fnord-sstable/SSTableColumnSchema.h"
 #include "fnord-sstable/SSTableColumnReader.h"
 #include "fnord-sstable/SSTableColumnWriter.h"
+#include "fnord-logtable/ArtifactIndex.h"
 #include <fnord-fts/fts.h>
 #include <fnord-fts/fts_common.h>
 #include "fnord-logtable/TableReader.h"
 #include "common.h"
 #include "schemas.h"
 #include "CustomerNamespace.h"
-#include "FeatureSchema.h"
-#include "JoinedQuery.h"
 #include "CTRCounter.h"
-#include "IndexReader.h"
 #include "analytics/ReportBuilder.h"
 #include "analytics/AnalyticsTableScanSource.h"
-#include "analytics/JoinedQueryTableSource.h"
-#include "analytics/CTRByPositionMapper.h"
-#include "analytics/CTRByPageMapper.h"
-#include "analytics/CTRBySearchQueryMapper.h"
-#include "analytics/CTRByQueryAttributeMapper.h"
 #include "analytics/CTRBySearchTermCrossCategoryMapper.h"
-#include "analytics/CTRStatsMapper.h"
 #include "analytics/CTRCounterMergeReducer.h"
 #include "analytics/CTRCounterTableSink.h"
 #include "analytics/CTRCounterTableSource.h"
@@ -108,6 +100,15 @@ int main(int argc, const char** argv) {
       "<path>");
 
   flags.defineFlag(
+      "publish",
+      cli::FlagParser::T_SWITCH,
+      false,
+      NULL,
+      NULL,
+      "publish",
+      "<switch>");
+
+  flags.defineFlag(
       "loglevel",
       fnord::cli::FlagParser::T_STRING,
       false,
@@ -121,16 +122,9 @@ int main(int argc, const char** argv) {
   Logger::get()->setMinimumLogLevel(
       strToLogLevel(flags.getString("loglevel")));
 
-  //auto index_path = flags.getString("index");
-  //auto conf_path = flags.getString("conf");
   auto tempdir = flags.getString("tempdir");
   auto datadir = flags.getString("datadir");
 
-  /* open index */
-  //auto index_reader = cm::IndexReader::openIndex(index_path);
-  //auto analyzer = RefPtr<fts::Analyzer>(new fts::Analyzer(conf_path));
-
-  /* set up reportbuilder */
   thread::ThreadPool tpool;
   cm::ReportBuilder report_builder(&tpool);
 
@@ -189,7 +183,7 @@ int main(int argc, const char** argv) {
           new TermInfoTableSource(related_terms_tables),
           new TermInfoTableSink(
               StringUtil::format(
-                  "$0/dawanda_related_terms.$1.sstable",
+                  "$0/dawanda_related_terms.$1.sst",
                   tempdir,
                   buildid))));
 
@@ -198,7 +192,7 @@ int main(int argc, const char** argv) {
           new CTRCounterTableSource(searchterm_x_e1_tables),
           new TermInfoTableSink(
               StringUtil::format(
-                  "$0/dawanda_top_cats_by_searchterm_e1.$1.sstable",
+                  "$0/dawanda_top_cats_by_searchterm_e1.$1.sst",
                   tempdir,
                   buildid)),
           "e1-"));
@@ -207,26 +201,53 @@ int main(int argc, const char** argv) {
       new TermInfoMergeReducer(
           new TermInfoTableSource(Set<String> {
             StringUtil::format(
-                  "$0/dawanda_related_terms.$1.sstable",
+                  "$0/dawanda_related_terms.$1.sst",
                   tempdir,
                   buildid),
             StringUtil::format(
-                  "$0/dawanda_top_cats_by_searchterm_e1.$1.sstable",
+                  "$0/dawanda_top_cats_by_searchterm_e1.$1.sst",
                   tempdir,
                   buildid)
           }),
           new TermInfoTableSink(
               StringUtil::format(
-                  "$0/dawanda_termstats.$1.sstable",
+                  "$0/dawanda_termstats.$1.sst",
                   tempdir,
                   buildid))));
 
   report_builder.buildAll();
 
-  fnord::logInfo(
-      "cm.reportbuild",
-      "Build completed: dawanda_termstats.$0.sstable",
-      buildid);
+  auto outfile = StringUtil::format("termstats-dawanda.$0.sst", buildid);
+  auto tempfile_path = FileUtil::joinPaths(tempdir, outfile);
+  auto outfile_path = FileUtil::joinPaths(datadir, outfile);
+  fnord::logInfo("cm.reportbuild", "Build completed: $0", outfile);
+
+  if (flags.isSet("publish")) {
+    fnord::logInfo("cm.reportbuild", "Publishing artifact: $0", outfile);
+  } else {
+    fnord::logInfo(
+        "cm.reportbuild",
+        "Not publishing anything since you didn't pass the --publish flag");
+
+    return 0;
+  }
+
+  FileUtil::mv(tempfile_path, outfile_path);
+
+  logtable::ArtifactRef afx;
+  afx.name = StringUtil::format("termstats-dawanda.$0", buildid);
+  afx.status = logtable::ArtifactStatus::PRESENT;
+  afx.attributes.emplace_back(
+      "built_at",
+      StringUtil::toString(WallClock::unixMicros() / kMicrosPerSecond));
+  afx.files.emplace_back(logtable::ArtifactFileRef {
+    .filename = outfile,
+    .size = FileUtil::size(outfile_path),
+    .checksum = FileUtil::checksum(outfile_path)
+  });
+
+  logtable::ArtifactIndex artifacts(datadir, "termstats", false);
+  artifacts.addArtifact(afx);
 
   return 0;
 }

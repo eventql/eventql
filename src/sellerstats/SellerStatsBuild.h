@@ -18,7 +18,7 @@
 #include "ItemRef.h"
 #include "JoinedItemVisit.h"
 #include "FeatureIndex.h"
-#include "FeatureSchema.h"
+
 #include "sellerstats/ActivityLog.h"
 
 using namespace fnord;

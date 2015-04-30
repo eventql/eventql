@@ -8,6 +8,8 @@
  */
 #include "frontend/IndexFeedUpload.h"
 #include "fnord-base/uri.h"
+#include "fnord-base/logging.h"
+#include "fnord-base/util/binarymessagewriter.h"
 #include "fnord-http/httprequest.h"
 #include "fnord-msg/MessageSchema.h"
 #include "fnord-msg/MessagePrinter.h"
@@ -77,7 +79,7 @@ void IndexFeedUpload::uploadNext() {
 void IndexFeedUpload::uploadBatch(
     const String& customer,
     const Vector<IndexChangeRequest>& batch) {
-  Buffer body;
+  util::BinaryMessageWriter body;
 
   for (const auto& job : batch) {
     msg::MessageObject obj;
@@ -97,15 +99,18 @@ void IndexFeedUpload::uploadBatch(
         msg::MessagePrinter::print(obj, schema_));
 #endif
 
-    msg::MessageEncoder::encode(obj, schema_, &body);
+    Buffer b;
+    msg::MessageEncoder::encode(obj, schema_, &b);
+    body.appendVarUInt(b.size());
+    body.append(b.data(), b.size());
   }
 
-  URI uri(target_url_ + "?table=index_feed-" + customer);
+  URI uri(target_url_ + "/insert_batch?table=index_feed-" + customer);
 
   http::HTTPRequest req(http::HTTPMessage::M_POST, uri.pathAndQuery());
   req.addHeader("Host", uri.hostAndPort());
   req.addHeader("Content-Type", "application/fnord-msg");
-  req.addBody(body);
+  req.addBody(body.data(), body.size());
 
   uploadWithRetries(req);
 }

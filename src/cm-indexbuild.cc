@@ -36,10 +36,9 @@
 #include "fnord-mdb/MDB.h"
 #include "fnord-msg/MessagePrinter.h"
 #include "CustomerNamespace.h"
-#include "FeatureSchema.h"
-#include "FeatureIndexWriter.h"
+
+#include "DocIndex.h"
 #include "IndexChangeRequest.h"
-#include "IndexWriter.h"
 #include "schemas.h"
 
 using namespace cm;
@@ -108,6 +107,15 @@ int main(int argc, const char** argv) {
       "<MB>");
 
   flags.defineFlag(
+      "reset_cursor",
+      fnord::cli::FlagParser::T_SWITCH,
+      false,
+      NULL,
+      NULL,
+      "reset cursor",
+      "<switch>");
+
+  flags.defineFlag(
       "loglevel",
       fnord::cli::FlagParser::T_STRING,
       false,
@@ -137,7 +145,7 @@ int main(int argc, const char** argv) {
       "Opening index at $0",
       flags.getString("index"));
 
-  FeatureIndexWriter index(
+  DocIndex index(
       flags.getString("index"),
       "documents-dawanda",
       false);
@@ -152,7 +160,7 @@ int main(int argc, const char** argv) {
   /* open logtable tail at last cursor */
   RefPtr<logtable::LogTableTail> tail(nullptr);
   auto last_cursor = index.getCursor();
-  if (last_cursor.isEmpty()) {
+  if (last_cursor.isEmpty() || flags.isSet("reset_cursor")) {
     tail = RefPtr<logtable::LogTableTail>(
         new logtable::LogTableTail(table.get()));
   } else {

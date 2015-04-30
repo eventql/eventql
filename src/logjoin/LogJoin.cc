@@ -18,8 +18,6 @@
 #include <fnord-feeds/RemoteFeedFactory.h>
 #include <fnord-feeds/RemoteFeedWriter.h>
 #include "ItemRef.h"
-#include "JoinedQuery.h"
-#include "JoinedItemVisit.h"
 #include "CustomerNamespace.h"
 #include "logjoin/LogJoin.h"
 
@@ -30,13 +28,37 @@ namespace cm {
 LogJoin::LogJoin(
     LogJoinShard shard,
     bool dry_run,
-    bool enable_cache,
     LogJoinTarget* target) :
     shard_(shard),
     dry_run_(dry_run),
-    target_(target),
-    turbo_(false),
-    enable_cache_(enable_cache) {}
+    target_(target) {
+  addPixelParamID("dw_ab", 1);
+  addPixelParamID("l", 2);
+  addPixelParamID("u_x", 3);
+  addPixelParamID("u_y", 4);
+  addPixelParamID("is", 5);
+  addPixelParamID("pg", 6);
+  addPixelParamID("q_cat1", 7);
+  addPixelParamID("q_cat2", 8);
+  addPixelParamID("q_cat3", 9);
+  addPixelParamID("slrid", 10);
+  addPixelParamID("i", 11);
+  addPixelParamID("s", 12);
+  addPixelParamID("ml", 13);
+  addPixelParamID("adm", 14);
+  addPixelParamID("lgn", 15);
+  addPixelParamID("slr", 16);
+  addPixelParamID("lng", 17);
+  addPixelParamID("dwnid", 18);
+  addPixelParamID("fnm", 19);
+  addPixelParamID("qstr~de", 100);
+  addPixelParamID("qstr~pl", 101);
+  addPixelParamID("qstr~en", 102);
+  addPixelParamID("qstr~fr", 103);
+  addPixelParamID("qstr~it", 104);
+  addPixelParamID("qstr~nl", 105);
+  addPixelParamID("qstr~es", 106);
+}
 
 size_t LogJoin::numSessions() const {
   return sessions_flush_times_.size();
@@ -75,6 +97,8 @@ void LogJoin::insertLogline(
   fnord::URI::ParamList params;
   fnord::URI::parseQueryString(log_line, &params);
 
+  stat_loglines_total_.incr(1);
+
   try {
     /* extract uid (userid) and eid (eventid) */
     std::string c;
@@ -103,204 +127,76 @@ void LogJoin::insertLogline(
       return;
     }
 
-    stat_loglines_total_.incr(1);
-
-    /* extract the event type */
     std::string evtype;
     if (!fnord::URI::getParam(params, "e", &evtype) || evtype.length() != 1) {
       RAISE(kParseError, "e param is missing");
     }
 
+    if (evtype.length() != 1) {
+      RAISE(kParseError, "e param invalid");
+    }
+
     /* process event */
     switch (evtype[0]) {
 
-      /* query event */
-      case 'q': {
-        TrackedQuery query;
-        query.time = time;
-        query.eid = eid;
-        query.fromParams(params);
-        insertQuery(customer_key, uid, query, txn);
-        break;
-      }
-
-      /* item visit event */
-      case 'v': {
-        TrackedItemVisit visit;
-        visit.time = time;
-        visit.eid = eid;
-        visit.fromParams(params);
-        insertItemVisit(customer_key, uid, visit, txn);
-        break;
-      }
-
-      /* cart event */
-      case 'c': {
-        auto cart_items = TrackedCartItem::fromParams(params);
-        for (auto& ci : cart_items) {
-          ci.time = time;
-        }
-        insertCartVisit(customer_key, uid, cart_items, time, txn);
-        break;
-      }
-
+      case 'q':
+      case 'v':
+      case 'c':
       case 'u':
-        return;
+        break;
 
       default:
         RAISE(kParseError, "invalid e param");
 
+    };
+
+    URI::ParamList stored_params;
+    for (const auto& p : params) {
+      if (p.first == "c" || p.first == "e" || p.first == "v") {
+        continue;
+      }
+
+      stored_params.emplace_back(p);
     }
+
+    appendToSession(customer_key, time, uid, eid, evtype, stored_params, txn);
   } catch (...) {
     stat_loglines_invalid_.incr(1);
     throw;
   }
 }
 
-void LogJoin::insertQuery(
+void LogJoin::appendToSession(
     const std::string& customer_key,
+    const fnord::DateTime& time,
     const std::string& uid,
-    const TrackedQuery& query,
+    const std::string& evid,
+    const std::string& evtype,
+    const Vector<Pair<String, String>>& logline,
     mdb::MDBTransaction* txn) {
-  withSession(customer_key, uid, txn, [this, &uid, &query] (TrackedSession* s) {
-    bool merged = false;
 
-    for (auto& q : s->queries) {
-      if (q.eid == query.eid) {
-        q.merge(query);
-        merged = true;
-        break;
-      }
-    }
+  auto flush_at = time.unixMicros() +
+      kSessionIdleTimeoutSeconds * fnord::kMicrosPerSecond;
 
-    if (!merged) {
-      s->queries.emplace_back(query);
-    }
-
-    if (query.time.unixMicros() > s->last_seen_unix_micros) {
-      s->last_seen_unix_micros = query.time.unixMicros();
-    }
-
-    enqueueFlush(uid, s->nextFlushTime());
-  });
-
-}
-
-void LogJoin::insertItemVisit(
-    const std::string& customer_key,
-    const std::string& uid,
-    const TrackedItemVisit& visit,
-    mdb::MDBTransaction* txn) {
-  withSession(customer_key, uid, txn, [this, &visit, &uid] (TrackedSession* s) {
-    bool merged = false;
-
-    for (auto& v : s->item_visits) {
-      if (v.eid == visit.eid) {
-        v.merge(visit);
-        merged = true;
-        break;
-      }
-    }
-
-    if (!merged) {
-      s->item_visits.emplace_back(visit);
-    }
-
-    if (visit.time.unixMicros() > s->last_seen_unix_micros) {
-      s->last_seen_unix_micros = visit.time.unixMicros();
-    }
-
-    enqueueFlush(uid, s->nextFlushTime());
-  });
-}
-
-void LogJoin::insertCartVisit(
-    const std::string& customer_key,
-    const std::string& uid,
-    const Vector<TrackedCartItem>& cart_items,
-    const DateTime& time,
-    mdb::MDBTransaction* txn) {
-  withSession(customer_key, uid, txn, [
-      this,
-      &cart_items,
-      &time,
-      &uid] (TrackedSession* s) {
-    for (const auto& cart_item : cart_items) {
-      bool merged = false;
-
-      for (auto& c : s->cart_items) {
-        if (c.item == cart_item.item) {
-          c.merge(cart_item);
-          merged = true;
-          break;
-        }
-      }
-
-      if (!merged) {
-        s->cart_items.emplace_back(cart_item);
-      }
-    }
-
-    if (time.unixMicros() > s->last_seen_unix_micros) {
-      s->last_seen_unix_micros = time.unixMicros();
-    }
-
-    enqueueFlush(uid, s->nextFlushTime());
-  });
-}
-
-void LogJoin::withSession(
-    const std::string& customer_key,
-    const std::string& uid,
-    mdb::MDBTransaction* txn,
-    Function<void (TrackedSession* session)> fn) {
-  TrackedSession session;
-
-  auto cached = session_cache_.find(uid);
-  if (cached == session_cache_.end()) {
-    auto session_str = txn->get(uid);
-    if (session_str.isEmpty()) {
-      session.uid = uid;
-      session.customer_key = customer_key;
-      session.flushed = false;
-      session.last_seen_unix_micros = 0;
-    } else {
-      session = json::fromJSON<TrackedSession>(session_str.get());
-    }
-  } else {
-    session = cached->second;
+  auto old_ftime = sessions_flush_times_.find(uid);
+  if (old_ftime == sessions_flush_times_.end() ||
+      old_ftime->second < flush_at) {
+    sessions_flush_times_.emplace(uid, flush_at);
   }
 
-  fn(&session);
-
-  if (session.flushed) {
-    try {
-      txn->del(uid);
-    } catch (const Exception& e) {
-      if (!turbo_) {
-        fnord::logWarning("cm.logjoin", e, "can't delete session: $0", uid);
-      }
-    }
-
-    if (session_cache_.count(uid) > 0) {
-      session_cache_.erase(uid);
-    }
-  } else {
-    if (!enable_cache_ || !turbo_) {
-      auto serialized = json::toJSONString(session);
-      txn->update(uid, serialized);
-    }
-
-    if (enable_cache_) {
-      session_cache_[uid] = session;
-    }
+  util::BinaryMessageWriter buf;
+  buf.appendVarUInt(time.unixMicros() / kMicrosPerSecond);
+  buf.appendVarUInt(evid.length());
+  buf.append(evid.data(), evid.length());
+  for (const auto& p : logline) {
+    buf.appendVarUInt(getPixelParamID(p.first));
+    buf.appendVarUInt(p.second.size());
+    buf.append(p.second.data(), p.second.size());
   }
-}
 
-void LogJoin::enqueueFlush(
-    const String& uid,
-    const DateTime& flush_at) {
-  sessions_flush_times_[uid] = flush_at;
+  auto evkey = uid + "~" + evtype + "~" + rnd_.hex64();
+  txn->insert(evkey.data(), evkey.size(), buf.data(), buf.size());
+  txn->update(uid + "~cust", customer_key);
 }
 
 void LogJoin::flush(mdb::MDBTransaction* txn, DateTime stream_time_) {
@@ -309,120 +205,85 @@ void LogJoin::flush(mdb::MDBTransaction* txn, DateTime stream_time_) {
   for (auto iter = sessions_flush_times_.begin();
       iter != sessions_flush_times_.end();) {
     if (iter->second.unixMicros() < stream_time) {
-      uint64_t next_flush = 0;
-      const auto& uid = iter->first;
-
-      withSession("", uid, txn, [this, &uid, &next_flush, &stream_time_, txn] (
-          TrackedSession* s) {
-        maybeFlushSession(txn, uid, s, stream_time_);
-
-        if (!s->flushed) {
-          next_flush = s->nextFlushTime().unixMicros();
-        }
-      });
-
-      if (next_flush == 0) {
-        iter = sessions_flush_times_.erase(iter);
-        continue;
-      } else {
-        iter->second = DateTime(next_flush);
-      }
+      flushSession(iter->first, stream_time, txn);
+      iter = sessions_flush_times_.erase(iter);
+    } else {
+      ++iter;
     }
-
-    ++iter;
   }
 }
 
-void LogJoin::maybeFlushSession(
-    mdb::MDBTransaction* txn,
+void LogJoin::flushSession(
     const std::string uid,
-    TrackedSession* session,
-    DateTime stream_time_) {
-  auto stream_time = stream_time_.unixMicros();
+    DateTime stream_time,
+    mdb::MDBTransaction* txn) {
+  auto cursor = txn->getCursor();
 
-  /* flush queries */
-  auto cur_query = session->queries.begin();
-  while (cur_query != session->queries.end()) {
-    if (stream_time > (cur_query->time.unixMicros() +
-        kMaxQueryClickDelaySeconds * fnord::kMicrosPerSecond)) {
+  TrackedSession session;
+  session.uid = uid;
 
-      /* search for matching item visits */
-      auto cur_visit = session->item_visits.begin();
-      while (cur_visit != session->item_visits.end()) {
-        bool joined = false;
-
-        if (cur_visit->time >= cur_query->time &&
-            cur_visit->time.unixMicros() < (cur_query->time.unixMicros() +
-                kMaxQueryClickDelaySeconds * fnord::kMicrosPerSecond)) {
-
-          for (auto& qitem : cur_query->items) {
-            if (cur_visit->item == qitem.item) {
-              qitem.clicked = true;
-              joined = true;
-
-              try {
-                target_->onItemVisit(txn, *session, *cur_visit, *cur_query);
-              } catch (const std::exception& e) {
-                fnord::logError(
-                    "cm.logjoin",
-                    e,
-                    "LogJoinTarget::onItemVisit crashed");
-              }
-              break;
-            }
-          }
-        }
-
-        if (joined) {
-          session->flushed_item_visits.emplace_back(*cur_visit);
-          cur_visit = session->item_visits.erase(cur_visit);
-        } else {
-          ++cur_visit;
-        }
+  Buffer key;
+  Buffer value;
+  bool eof = false;
+  for (int i = 0; ; ++i) {
+    if (i == 0) {
+      key.append(uid);
+      if (!cursor->getFirstOrGreater(&key, &value)) {
+        break;
       }
+    } else {
+      if (!cursor->getNext(&key, &value)) {
+        break;
+      }
+    }
+
+    auto key_str = key.toString();
+    if (!StringUtil::beginsWith(key_str, uid)) {
+      break;
+    }
+
+    if (StringUtil::endsWith(key_str, "~cust")) {
+      session.customer_key = value.toString();
+    } else {
+      auto evtype = key_str.substr(uid.length() + 1).substr(0, 1);
+
+      util::BinaryMessageReader reader(value.data(), value.size());
+      auto time = reader.readVarUInt() * kMicrosPerSecond;
+      auto evid_len = reader.readVarUInt();
+      auto evid = String((char*) reader.read(evid_len), evid_len);
 
       try {
-        target_->onQuery(txn, *session, *cur_query);
+        URI::ParamList logline;
+        while (reader.remaining() > 0) {
+          auto key = getPixelParamName(reader.readVarUInt());
+          auto len = reader.readVarUInt();
+          logline.emplace_back(key, String((char*) reader.read(len), len));
+        }
+
+        session.insertLogline(time, evtype, evid, logline);
       } catch (const std::exception& e) {
-        fnord::logError("cm.logjoin", e, "LogJoinTarget::onQuery crashed");
+        fnord::logError("cm.logjoin", e, "invalid logline");
+        stat_loglines_invalid_.incr(1);
       }
-
-      session->flushed_queries.emplace_back(*cur_query);
-      cur_query = session->queries.erase(cur_query);
-    } else {
-      ++cur_query;
-    }
-  }
-
-  /* flush item visits without query */
-  auto cur_visit = session->item_visits.begin();
-  while (cur_visit != session->item_visits.end()) {
-    if (stream_time > (cur_visit->time.unixMicros() +
-        kMaxQueryClickDelaySeconds * fnord::kMicrosPerSecond)) {
-      try {
-        target_->onItemVisit(txn, *session, *cur_visit);
-      } catch (const std::exception& e) {
-        fnord::logError("cm.logjoin", e, "LogJoinTarget::onItemVisit crashed");
-      }
-      cur_visit = session->item_visits.erase(cur_visit);
-    } else {
-      ++cur_visit;
-    }
-  }
-
-  /* flush session */
-  if (stream_time > (session->last_seen_unix_micros +
-      kSessionIdleTimeoutSeconds * fnord::kMicrosPerSecond)) {
-    stat_joined_sessions_.incr(1);
-
-    try {
-      target_->onSession(txn, *session);
-    } catch (const std::exception& e) {
-      fnord::logError("cm.logjoin", e, "LogJoinTarget::onSession crashed");
     }
 
-    session->flushed = true;
+    cursor->del();
   }
+
+  cursor->close();
+
+  if (session.customer_key.length() == 0) {
+    fnord::logError("cm.logjoin", "missing customer key for: $0", uid);
+    return;
+  }
+
+  try {
+    target_->onSession(txn, session);
+  } catch (const std::exception& e) {
+    fnord::logError("cm.logjoin", e, "LogJoinTarget::onSession crashed");
+  }
+
+  stat_joined_sessions_.incr(1);
 }
 
 void LogJoin::importTimeoutList(mdb::MDBTransaction* txn) {
@@ -448,11 +309,50 @@ void LogJoin::importTimeoutList(mdb::MDBTransaction* txn) {
       continue;
     }
 
-    auto session = json::fromJSON<TrackedSession>(value);
-    enqueueFlush(session.uid, session.nextFlushTime());
+    auto sid = key.toString();
+    if (StringUtil::endsWith(sid, "~cust")) {
+      continue;
+    }
+
+    sid.erase(sid.begin() + sid.find("~"), sid.end());
+
+    util::BinaryMessageReader reader(value.data(), value.size());
+    auto time = reader.readVarUInt();
+    auto ftime = (time + kSessionIdleTimeoutSeconds) * fnord::kMicrosPerSecond;
+
+    auto old_ftime = sessions_flush_times_.find(sid);
+    if (old_ftime == sessions_flush_times_.end() ||
+        old_ftime->second.unixMicros() < ftime) {
+      sessions_flush_times_.emplace(sid, ftime);
+    }
   }
 
   cursor->close();
+}
+
+void LogJoin::addPixelParamID(const String& param, uint32_t id) {
+  pixel_param_ids_[param] = id;
+  pixel_param_names_[id] = param;
+}
+
+uint32_t LogJoin::getPixelParamID(const String& param) const {
+  auto p = pixel_param_ids_.find(param);
+
+  if (p == pixel_param_ids_.end()) {
+    RAISEF(kIndexError, "invalid pixel param: $0", param);
+  }
+
+  return p->second;
+}
+
+const String& LogJoin::getPixelParamName(uint32_t id) const {
+  auto p = pixel_param_names_.find(id);
+
+  if (p == pixel_param_names_.end()) {
+    RAISEF(kIndexError, "invalid pixel param: $0", id);
+  }
+
+  return p->second;
 }
 
 void LogJoin::exportStats(const std::string& prefix) {
@@ -480,10 +380,6 @@ void LogJoin::exportStats(const std::string& prefix) {
       StringUtil::format("$0/$1", prefix, "joined_item_visits"),
       &stat_joined_item_visits_,
       fnord::stats::ExportMode::EXPORT_DELTA);
-}
-
-void LogJoin::setTurbo(bool turbo) {
-  turbo_ = turbo;
 }
 
 } // namespace cm

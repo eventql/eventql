@@ -17,6 +17,22 @@ msg::MessageSchema joinedSessionsSchema() {
   Vector<msg::MessageSchemaField> fields;
 
   fields.emplace_back(
+      53,
+      "first_seen_time",
+      msg::FieldType::UINT32,
+      0xffffffff,
+      false,
+      true);
+
+  fields.emplace_back(
+      54,
+      "last_seen_time",
+      msg::FieldType::UINT32,
+      0xffffffff,
+      false,
+      true);
+
+  fields.emplace_back(
       47,
       "num_cart_items",
       msg::FieldType::UINT32,
@@ -63,7 +79,7 @@ msg::MessageSchema joinedSessionsSchema() {
 
   msg::MessageSchemaField queries(
       16,
-      "queries",
+      "search_queries",
       msg::FieldType::OBJECT,
       0,
       true,
@@ -113,7 +129,7 @@ msg::MessageSchema joinedSessionsSchema() {
 
   queries.fields.emplace_back(
       5,
-      "num_items",
+      "num_result_items",
       msg::FieldType::UINT32,
       250,
       false,
@@ -122,7 +138,7 @@ msg::MessageSchema joinedSessionsSchema() {
 
   queries.fields.emplace_back(
       6,
-      "num_items_clicked",
+      "num_result_items_clicked",
       msg::FieldType::UINT32,
       250,
       false,
@@ -248,7 +264,7 @@ msg::MessageSchema joinedSessionsSchema() {
 
   msg::MessageSchemaField query_items(
       17,
-      "items",
+      "result_items",
       msg::FieldType::OBJECT,
       0,
       true,
@@ -381,7 +397,7 @@ msg::MessageSchema joinedSessionsSchema() {
   fields.emplace_back(item_visits);
 
   msg::MessageSchemaField cart_items(
-      32,
+      52,
       "cart_items",
       msg::FieldType::OBJECT,
       0,
@@ -478,7 +494,7 @@ msg::MessageSchema joinedSessionsSchema() {
 
   fields.emplace_back(cart_items);
 
-  return msg::MessageSchema("joined_session", fields);
+  return msg::MessageSchema("JoinedSession", fields);
 }
 
 msg::MessageSchema indexChangeRequestSchema() {

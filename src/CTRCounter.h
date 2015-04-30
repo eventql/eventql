@@ -34,6 +34,8 @@ struct CTRCounterData {
   uint64_t num_views;
   uint64_t num_clicked;
   uint64_t num_clicks;
+  uint64_t gmv_eurcent;
+  uint64_t cart_value_eurcent;
 };
 
 typedef Pair<String, CTRCounterData> CTRCounter;
