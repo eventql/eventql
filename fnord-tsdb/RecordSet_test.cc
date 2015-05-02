@@ -13,6 +13,8 @@
 #include "fnord-base/test/unittest.h"
 #include "fnord-msg/MessageEncoder.h"
 #include "fnord-tsdb/RecordSet.h"
+#include "fnord-cstable/CSTableReader.h"
+#include "fnord-cstable/StringColumnReader.h"
 
 using namespace fnord;
 using namespace fnord::tsdb;
@@ -101,6 +103,23 @@ TEST_CASE(RecordSetTest, TestAddRowToEmptySet, [] () {
   EXPECT_FALSE(recset.getState().datafile.isEmpty());
   EXPECT_EQ(recset.getState().old_commitlogs.size(), 0);
   EXPECT_EQ(recset.commitlogSize(), 0);
+
+  cstable::CSTableReader reader(recset.getState().datafile.get());
+  void* data;
+  size_t size;
+  uint64_t r;
+  uint64_t d;
+  auto col = reader.getColumnReader("one");
+  Set<String> res;
+  for (int i = 0; i < 4; ++i) {
+    col->next(&r, &d, &data, &size);
+    res.emplace(String((char*) data, size));
+  }
+
+  EXPECT_EQ(res.count("1a"), 1);
+  EXPECT_EQ(res.count("2a"), 1);
+  EXPECT_EQ(res.count("3a"), 1);
+  EXPECT_EQ(res.count("4a"), 1);
 });
 
 TEST_CASE(RecordSetTest, TestCommitlogReopen, [] () {
