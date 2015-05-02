@@ -16,6 +16,7 @@
 #include <fnord-cstable/CSTableReader.h>
 #include <fnord-cstable/UInt64ColumnWriter.h>
 #include <fnord-cstable/UInt64ColumnReader.h>
+#include <fnord-cstable/RecordMaterializer.h>
 #include <fnord-msg/MessageDecoder.h>
 #include <fnord-tsdb/RecordSet.h>
 
@@ -119,6 +120,7 @@ void RecordSet::compact() {
 
   if (!snap.datafile.isEmpty()) {
     cstable::CSTableReader reader(snap.datafile.get());
+    cstable::RecordMaterializer record_reader(schema_, &reader);
 
     auto msgid_col_ref = reader.getColumnReader("__msgid");
     auto msgid_col = dynamic_cast<cstable::UInt64ColumnReader*>(msgid_col_ref.get());
@@ -132,7 +134,7 @@ void RecordSet::compact() {
       old_id_set.emplace(msgid);
 
       msg::MessageObject record;
-      // load old record;
+      record_reader.nextRecord(&record);
 
       outfile.addRecord(record);
       id_col.addDatum(0, 0, msgid);
