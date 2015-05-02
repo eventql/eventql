@@ -10,9 +10,11 @@
 #ifndef _FNORD_TSDB_MESSAGESET_H
 #define _FNORD_TSDB_MESSAGESET_H
 #include <fnord-base/stdtypes.h>
+#include <fnord-base/random.h>
 #include <fnord-base/option.h>
 #include <fnord-base/io/file.h>
 #include <fnord-base/io/mmappedfile.h>
+#include <fnord-base/util/binarymessagewriter.h>
 #include <fnord-msg/MessageSchema.h>
 
 namespace fnord {
@@ -27,25 +29,31 @@ public:
     Option<String> datafile;
     Option<String> commitlog;
     uint64_t commitlog_size;
+    Vector<String> old_commitlogs;
   };
 
   RecordSet(
       RefPtr<msg::MessageSchema> schema,
       const String& filename_prefix);
 
-  void addRecord(uint32_t record_id, const Buffer& message);
+  void addRecord(uint64_t record_id, const Buffer& message);
 
-  void fetchRecord(uint32_t record_id, Buffer* message);
+  void fetchRecord(uint64_t record_id, Buffer* message);
 
   Vector<uint32_t> listRecords();
 
-  RecordSetState getState();
+  RecordSetState getState() const;
+  size_t commitlogSize() const;
+
+  void rollCommitlog();
 
 protected:
   RefPtr<msg::MessageSchema> schema_;
   String filename_prefix_;
   RecordSetState state_;
-  std::mutex mutex_;
+  mutable std::mutex mutex_;
+  Random rnd_;
+  Set<uint64_t> commitlog_ids_;
 };
 
 } // namespace tdsb
