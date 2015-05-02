@@ -17,5 +17,6 @@ add_executable(tests/test-recordset
     $<TARGET_OBJECTS:fnord-base>
     $<TARGET_OBJECTS:fnord-msg>
     $<TARGET_OBJECTS:fnord-tsdb>
+    $<TARGET_OBJECTS:fnord-cstable>
     RecordSet_test.cc)
 
