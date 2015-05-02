@@ -15,6 +15,7 @@ add_library(fnord-tsdb OBJECT
 
 add_executable(tests/test-recordset
     $<TARGET_OBJECTS:fnord-base>
+    $<TARGET_OBJECTS:fnord-msg>
     $<TARGET_OBJECTS:fnord-tsdb>
     RecordSet_test.cc)
 
