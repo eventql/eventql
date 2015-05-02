@@ -10,6 +10,7 @@
 #ifndef _FNORD_TSDB_MESSAGESET_H
 #define _FNORD_TSDB_MESSAGESET_H
 #include <fnord-base/stdtypes.h>
+#include <fnord-base/option.h>
 #include <fnord-base/io/file.h>
 #include <fnord-base/io/mmappedfile.h>
 #include <fnord-msg/MessageSchema.h>
@@ -19,6 +20,14 @@ namespace tsdb {
 
 class RecordSet {
 public:
+
+  struct RecordSetState {
+    RecordSetState();
+
+    Option<String> datafile;
+    Option<String> commitlog;
+    uint64_t commitlog_size;
+  };
 
   RecordSet(
       RefPtr<msg::MessageSchema> schema,
@@ -30,9 +39,13 @@ public:
 
   Vector<uint32_t> listRecords();
 
+  RecordSetState getState();
+
 protected:
   RefPtr<msg::MessageSchema> schema_;
   String filename_prefix_;
+  RecordSetState state_;
+  std::mutex mutex_;
 };
 
 } // namespace tdsb
