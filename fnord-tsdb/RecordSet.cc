@@ -11,6 +11,8 @@
 #include <fnord-base/io/mmappedfile.h>
 #include <fnord-base/util/binarymessagereader.h>
 #include <fnord-base/util/binarymessagewriter.h>
+#include <fnord-cstable/CSTableBuilder.h>
+#include <fnord-msg/MessageDecoder.h>
 #include <fnord-tsdb/RecordSet.h>
 
 namespace fnord {
@@ -86,17 +88,67 @@ void RecordSet::rollCommitlog() {
 
   auto old_log = state_.commitlog.get();
   FileUtil::truncate(old_log, state_.commitlog_size);
-  state_.old_commitlogs.emplace_back(old_log);
+  state_.old_commitlogs.emplace(old_log);
   state_.commitlog = None<String>();
   state_.commitlog_size = 0;
 }
 
 void RecordSet::compact() {
+  std::unique_lock<std::mutex> compact_lk(compact_mutex_, std::defer_lock);
+  if (!compact_lk.try_lock()) {
+    return; // compaction is already running
+  }
+
   std::unique_lock<std::mutex> lk(mutex_);
   auto snap = state_;
   lk.unlock();
 
-  //auto new_datafile = commitlog = filename_prefix_ + rnd_.hex64() + ".log";
+  if (snap.old_commitlogs.size() == 0) {
+    return;
+  }
+
+  auto outfile_path = filename_prefix_ + rnd_.hex64() + ".cst";
+  cstable::CSTableBuilder outfile(schema_.get());
+
+  Set<uint64_t> old_id_set;
+  Set<uint64_t> new_id_set;
+
+  // load and copy old datafile
+
+  for (const auto& cl : snap.old_commitlogs) {
+    loadCommitlog(cl, [this, &outfile, &old_id_set, &new_id_set] (
+        uint64_t id,
+        const void* data,
+        size_t size) {
+      if (new_id_set.count(id) > 0) {
+        return;
+      }
+
+      new_id_set.emplace(id);
+
+      if (old_id_set.count(id) > 0) {
+        return;
+      }
+
+      msg::MessageObject record;
+      msg::MessageDecoder::decode(data, size, *schema_, &record);
+
+      outfile.addRecord(record);
+    });
+  }
+
+  outfile.write(outfile_path);
+
+  lk.lock();
+  state_.datafile = Some(outfile_path);
+
+  for (const auto& cl : snap.old_commitlogs) {
+    state_.old_commitlogs.erase(cl);
+  }
+
+  for (const auto& id : new_id_set) {
+    commitlog_ids_.erase(id);
+  }
 }
 
 void RecordSet::loadCommitlog(

@@ -96,6 +96,11 @@ TEST_CASE(RecordSetTest, TestAddRowToEmptySet, [] () {
   EXPECT_EQ(recset.commitlogSize(), 4);
 
   recset.compact();
+  EXPECT_TRUE(recset.getState().commitlog.isEmpty());
+  EXPECT_EQ(recset.getState().commitlog_size, 0);
+  EXPECT_FALSE(recset.getState().datafile.isEmpty());
+  EXPECT_EQ(recset.getState().old_commitlogs.size(), 0);
+  EXPECT_EQ(recset.commitlogSize(), 0);
 });
 
 TEST_CASE(RecordSetTest, TestCommitlogReopen, [] () {
