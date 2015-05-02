@@ -57,6 +57,41 @@ TEST_CASE(RecordSetTest, TestAddRowToEmptySet, [] () {
   auto schema = testSchema();
   RecordSet recset(schema, "/tmp/__fnord_testrecset");
   EXPECT_TRUE(recset.getState().commitlog.isEmpty());
+  EXPECT_EQ(recset.getState().commitlog_size, 0);
+  EXPECT_TRUE(recset.getState().datafile.isEmpty());
+  EXPECT_EQ(recset.getState().old_commitlogs.size(), 0);
 
-  recset.addRecord(0x424242, testObject(schema, "1a", "1b"));
+  recset.addRecord(0x42424242, testObject(schema, "1a", "1b"));
+  recset.addRecord(0x23232323, testObject(schema, "2a", "2b"));
+
+  EXPECT_FALSE(recset.getState().commitlog.isEmpty());
+  EXPECT_TRUE(recset.getState().commitlog_size > 0);
+  EXPECT_TRUE(recset.getState().datafile.isEmpty());
+  EXPECT_EQ(recset.getState().old_commitlogs.size(), 0);
+  EXPECT_EQ(recset.commitlogSize(), 2);
+
+  recset.rollCommitlog();
+
+  EXPECT_TRUE(recset.getState().commitlog.isEmpty());
+  EXPECT_EQ(recset.getState().commitlog_size, 0);
+  EXPECT_TRUE(recset.getState().datafile.isEmpty());
+  EXPECT_EQ(recset.getState().old_commitlogs.size(), 1);
+  EXPECT_EQ(recset.commitlogSize(), 2);
+
+  recset.addRecord(0x1211111, testObject(schema, "3a", "3b"));
+  recset.addRecord(0x2344444, testObject(schema, "4a", "4b"));
+
+  EXPECT_FALSE(recset.getState().commitlog.isEmpty());
+  EXPECT_TRUE(recset.getState().commitlog_size > 0);
+  EXPECT_TRUE(recset.getState().datafile.isEmpty());
+  EXPECT_EQ(recset.getState().old_commitlogs.size(), 1);
+  EXPECT_EQ(recset.commitlogSize(), 4);
+
+  recset.rollCommitlog();
+
+  EXPECT_TRUE(recset.getState().commitlog.isEmpty());
+  EXPECT_EQ(recset.getState().commitlog_size, 0);
+  EXPECT_TRUE(recset.getState().datafile.isEmpty());
+  EXPECT_EQ(recset.getState().old_commitlogs.size(), 2);
+  EXPECT_EQ(recset.commitlogSize(), 4);
 });
