@@ -43,6 +43,9 @@ public:
       void** data,
       size_t* data_len) = 0;
 
+  uint64_t maxRepetitionLevel() const { return r_max_; }
+  uint64_t maxDefinitionLevel() const { return d_max_; }
+
 protected:
   uint64_t r_max_;
   uint64_t d_max_;
