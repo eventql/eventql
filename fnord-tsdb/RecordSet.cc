@@ -12,6 +12,7 @@
 #include <fnord-base/util/binarymessagereader.h>
 #include <fnord-base/util/binarymessagewriter.h>
 #include <fnord-cstable/CSTableBuilder.h>
+#include <fnord-cstable/CSTableWriter.h>
 #include <fnord-msg/MessageDecoder.h>
 #include <fnord-tsdb/RecordSet.h>
 
@@ -107,7 +108,6 @@ void RecordSet::compact() {
     return;
   }
 
-  auto outfile_path = filename_prefix_ + rnd_.hex64() + ".cst";
   cstable::CSTableBuilder outfile(schema_.get());
 
   Set<uint64_t> old_id_set;
@@ -137,7 +137,13 @@ void RecordSet::compact() {
     });
   }
 
-  outfile.write(outfile_path);
+  auto outfile_path = filename_prefix_ + rnd_.hex64() + ".cst";
+  cstable::CSTableWriter outfile_writer(
+      outfile_path,
+      outfile.numRecords());
+
+  outfile.write(&outfile_writer);
+  outfile_writer.commit();
 
   lk.lock();
   state_.datafile = Some(outfile_path);
