@@ -204,17 +204,24 @@ void CSTableBuilder::writeField(
   }
 }
 
+void CSTableBuilder::write(CSTableWriter* writer) {
+  for (const auto& col : columns_) {
+    writer->addColumn(col.first, col.second.get());
+  }
+}
+
 void CSTableBuilder::write(const String& filename) {
   cstable::CSTableWriter writer(filename + "~", num_records_);
 
-  for (const auto& col : columns_) {
-    writer.addColumn(col.first, col.second.get());
-  }
+  write(&writer);
 
   writer.commit();
   FileUtil::mv(filename + "~", filename);
 }
 
+size_t CSTableBuilder::numRecords() const {
+  return num_records_;
+}
 
 } // namespace cstable
 } // namespace fnord
