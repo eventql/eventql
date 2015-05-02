@@ -13,6 +13,7 @@
 #include <fnord-base/util/binarymessagewriter.h>
 #include <fnord-cstable/CSTableBuilder.h>
 #include <fnord-cstable/CSTableWriter.h>
+#include <fnord-cstable/UInt64ColumnWriter.h>
 #include <fnord-msg/MessageDecoder.h>
 #include <fnord-tsdb/RecordSet.h>
 
@@ -109,6 +110,7 @@ void RecordSet::compact() {
   }
 
   cstable::CSTableBuilder outfile(schema_.get());
+  cstable::UInt64ColumnWriter id_col(0, 0);
 
   Set<uint64_t> old_id_set;
   Set<uint64_t> new_id_set;
@@ -116,7 +118,7 @@ void RecordSet::compact() {
   // load and copy old datafile
 
   for (const auto& cl : snap.old_commitlogs) {
-    loadCommitlog(cl, [this, &outfile, &old_id_set, &new_id_set] (
+    loadCommitlog(cl, [this, &outfile, &old_id_set, &new_id_set, &id_col] (
         uint64_t id,
         const void* data,
         size_t size) {
@@ -134,6 +136,7 @@ void RecordSet::compact() {
       msg::MessageDecoder::decode(data, size, *schema_, &record);
 
       outfile.addRecord(record);
+      id_col.addDatum(0, 0, id);
     });
   }
 
@@ -143,6 +146,7 @@ void RecordSet::compact() {
       outfile.numRecords());
 
   outfile.write(&outfile_writer);
+  outfile_writer.addColumn("__msgid", &id_col);
   outfile_writer.commit();
 
   lk.lock();
