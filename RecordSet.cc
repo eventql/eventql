@@ -120,7 +120,7 @@ void RecordSet::compact() {
 
   if (!snap.datafile.isEmpty()) {
     cstable::CSTableReader reader(snap.datafile.get());
-    cstable::RecordMaterializer record_reader(schema_, &reader);
+    cstable::RecordMaterializer record_reader(schema_.get(), &reader);
 
     auto msgid_col_ref = reader.getColumnReader("__msgid");
     auto msgid_col = dynamic_cast<cstable::UInt64ColumnReader*>(msgid_col_ref.get());
