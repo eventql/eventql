@@ -44,3 +44,9 @@ add_library(fnord-cstable OBJECT
     StringColumnReader.cc
     StringColumnWriter.cc)
 
+add_executable(tests/test-recordmaterializer
+    $<TARGET_OBJECTS:fnord-base>
+    $<TARGET_OBJECTS:fnord-msg>
+    $<TARGET_OBJECTS:fnord-cstable>
+    RecordMaterializer_test.cc)
+

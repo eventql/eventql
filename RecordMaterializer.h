@@ -24,7 +24,7 @@ class RecordMaterializer {
 public:
 
   RecordMaterializer(
-      RefPtr<msg::MessageSchema> schema,
+      msg::MessageSchema* schema,
       CSTableReader* reader);
 
   void nextRecord(msg::MessageObject* record);
@@ -65,12 +65,12 @@ protected:
   void insertValue(
       ColumnState* column,
       Vector<Pair<uint64_t, bool>> parents,
-      Vector<size_t>& indexes,
+      Vector<size_t> indexes,
       msg::MessageObject* record);
 
   void insertNull(
       ColumnState* column,
-      const Vector<size_t>& indexes,
+      const Vector<size_t> indexes,
       msg::MessageObject* record);
 
   void createColumns(
@@ -79,7 +79,6 @@ protected:
       const msg::MessageSchemaField& field,
       CSTableReader* reader);
 
-  RefPtr<msg::MessageSchema> schema_;
   HashMap<String, ColumnState> columns_;
 };
 

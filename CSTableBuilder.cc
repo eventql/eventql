@@ -178,6 +178,8 @@ void CSTableBuilder::writeField(
     const msg::MessageSchemaField& field) {
   auto col = columns_.find(column);
 
+  fnord::iputs("write field: $0", r);
+
   switch (field.type) {
 
     case msg::FieldType::STRING: {
