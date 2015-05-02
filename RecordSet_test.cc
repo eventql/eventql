@@ -117,5 +117,19 @@ TEST_CASE(RecordSetTest, TestCommitlogReopen, [] () {
   }
 });
 
+TEST_CASE(RecordSetTest, TestDuplicateRowsInCommitlog, [] () {
+  auto schema = testSchema();
+  RecordSet recset(schema, "/tmp/__fnord_testrecset");
+
+  recset.addRecord(0x42424242, testObject(schema, "1a", "1b"));
+  recset.addRecord(0x42424242, testObject(schema, "2a", "2b"));
+  EXPECT_EQ(recset.commitlogSize(), 1);
+
+  recset.rollCommitlog();
+  EXPECT_EQ(recset.commitlogSize(), 1);
+
+  recset.addRecord(0x42424242, testObject(schema, "3a", "3b"));
+  EXPECT_EQ(recset.commitlogSize(), 1);
+});
 
 
