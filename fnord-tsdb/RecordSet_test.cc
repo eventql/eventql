@@ -222,6 +222,7 @@ TEST_CASE(RecordSetTest, TestInsert10kRows, [] () {
     recset.rollCommitlog();
   }
 
+  EXPECT_EQ(recset.getState().old_commitlogs.size(), 10);
   recset.compact();
 
   cstable::CSTableReader reader(recset.getState().datafile.get());
