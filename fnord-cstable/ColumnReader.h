@@ -46,6 +46,8 @@ public:
   uint64_t maxRepetitionLevel() const { return r_max_; }
   uint64_t maxDefinitionLevel() const { return d_max_; }
 
+  virtual bool eofReached() const = 0;
+
 protected:
   uint64_t r_max_;
   uint64_t d_max_;

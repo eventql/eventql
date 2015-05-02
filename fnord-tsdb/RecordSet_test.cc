@@ -204,7 +204,7 @@ TEST_CASE(RecordSetTest, TestCompactionWithExistingTable, [] () {
 
   EXPECT_EQ(res.size(), 4);
   EXPECT_EQ(res.count(0x42424242), 1);
-  EXPECT_EQ(res.count(0x32323232), 1);
+  EXPECT_EQ(res.count(0x23232323), 1);
   EXPECT_EQ(res.count(0x52525252), 1);
   EXPECT_EQ(res.count(0x12121212), 1);
 });

@@ -38,6 +38,10 @@ public:
       void** data,
       size_t* data_len) override;
 
+  bool eofReached() const override {
+    return data_reader_.remaining() == 0;
+  }
+
 protected:
   util::BinaryMessageReader data_reader_;
 };
