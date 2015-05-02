@@ -94,4 +94,28 @@ TEST_CASE(RecordSetTest, TestAddRowToEmptySet, [] () {
   EXPECT_TRUE(recset.getState().datafile.isEmpty());
   EXPECT_EQ(recset.getState().old_commitlogs.size(), 2);
   EXPECT_EQ(recset.commitlogSize(), 4);
+
+  recset.compact();
 });
+
+TEST_CASE(RecordSetTest, TestCommitlogReopen, [] () {
+  auto schema = testSchema();
+  RecordSet::RecordSetState state;
+
+  {
+    RecordSet recset(schema, "/tmp/__fnord_testrecset");
+    recset.addRecord(0x42424242, testObject(schema, "1a", "1b"));
+    recset.addRecord(0x23232323, testObject(schema, "2a", "2b"));
+    state = recset.getState();
+  }
+
+  {
+    RecordSet recset(schema, "/tmp/__fnord_testrecset", state);
+    EXPECT_EQ(recset.getState().commitlog_size, state.commitlog_size);
+    EXPECT_EQ(recset.getState().old_commitlogs.size(), 0);
+    EXPECT_EQ(recset.commitlogSize(), 2);
+  }
+});
+
+
+

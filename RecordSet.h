@@ -14,7 +14,6 @@
 #include <fnord-base/option.h>
 #include <fnord-base/io/file.h>
 #include <fnord-base/io/mmappedfile.h>
-#include <fnord-base/util/binarymessagewriter.h>
 #include <fnord-msg/MessageSchema.h>
 
 namespace fnord {
@@ -34,7 +33,8 @@ public:
 
   RecordSet(
       RefPtr<msg::MessageSchema> schema,
-      const String& filename_prefix);
+      const String& filename_prefix,
+      RecordSetState state = RecordSetState{});
 
   void addRecord(uint64_t record_id, const Buffer& message);
 
@@ -46,8 +46,14 @@ public:
   size_t commitlogSize() const;
 
   void rollCommitlog();
+  void compact();
 
 protected:
+
+  void loadCommitlog(
+      const String& filename,
+      Function<void (uint64_t, const void*, size_t)> fn);
+
   RefPtr<msg::MessageSchema> schema_;
   String filename_prefix_;
   RecordSetState state_;
