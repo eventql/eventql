@@ -13,10 +13,9 @@ namespace fnord {
 namespace cstable {
 
 RecordMaterializer::RecordMaterializer(
-    RefPtr<msg::MessageSchema> schema,
-    CSTableReader* reader) :
-    schema_(schema) {
-  for (const auto& f : schema_->fields) {
+    msg::MessageSchema* schema,
+    CSTableReader* reader) {
+  for (const auto& f : schema->fields) {
     createColumns("", Vector<Pair<uint64_t, bool>>{}, f, reader);
   }
 }
@@ -38,6 +37,7 @@ void RecordMaterializer::loadColumn(
 
     if (column->r > 0) {
       ++indexes[column->r - 1];
+
       for (int x = column->r; x < indexes.size(); ++x) {
         indexes[x] = 0;
       }
@@ -94,8 +94,10 @@ void RecordMaterializer::createColumns(
 void RecordMaterializer::insertValue(
     ColumnState* column,
     Vector<Pair<uint64_t, bool>> parents,
-    Vector<size_t>& indexes,
+    Vector<size_t> indexes,
     msg::MessageObject* record) {
+  fnord::iputs("insert into col: $0, idx: $1, parents: $2", column->field_id, indexes, parents);
+
   if (parents.size() > 0) {
     auto parent = parents[0];
     parents.erase(parents.begin());
@@ -120,7 +122,7 @@ void RecordMaterializer::insertValue(
         record->addChild(parent.first);
       }
 
-      auto new_cld = record->addChild(parent.first);
+      auto& new_cld = record->addChild(parent.first);
       return insertValue(column, parents, indexes, &new_cld);
 
     // non repeated
@@ -131,12 +133,10 @@ void RecordMaterializer::insertValue(
         }
       }
 
-      auto new_cld = record->addChild(parent.first);
+      auto& new_cld = record->addChild(parent.first);
       return insertValue(column, parents, indexes, &new_cld);
     }
   }
-
-  fnord::iputs("insert into col: $0, idx: $1, parents: $2", column->field_id, indexes, parents);
 
   switch (column->field_type) {
     case msg::FieldType::OBJECT:
@@ -154,7 +154,7 @@ void RecordMaterializer::insertValue(
 
 void RecordMaterializer::insertNull(
     ColumnState* column,
-    const Vector<size_t>& indexes,
+    const Vector<size_t> indexes,
     msg::MessageObject* record) {
 }
 
