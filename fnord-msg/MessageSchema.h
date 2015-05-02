@@ -82,6 +82,7 @@ struct MessageSchema : public RefCounted {
   uint32_t id(const String& path) const;
   FieldType type(uint32_t id) const;
   const String& name(uint32_t id) const;
+  Set<String> columns() const;
   String toString() const;
 };
 

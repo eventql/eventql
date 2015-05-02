@@ -40,6 +40,7 @@ add_library(fnord-cstable OBJECT
     LEB128ColumnWriter.cc
     BitPackedIntColumnReader.cc
     BitPackedIntColumnWriter.cc
+    RecordMaterializer.cc
     StringColumnReader.cc
     StringColumnWriter.cc)
 
