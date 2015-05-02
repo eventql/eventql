@@ -18,7 +18,12 @@ BooleanColumnReader::BooleanColumnReader(
     void* data,
     size_t size) :
     ColumnReader(r_max, d_max, data, size),
-    data_reader_(data_, data_size_, 1) {}
+    vals_read_(0),
+    vals_total_(*((uint32_t*) data_)),
+    data_reader_(
+        (char *) data_ + sizeof(uint32_t),
+        data_size_ - sizeof(uint32_t),
+        1) {}
 
 bool BooleanColumnReader::next(
     uint64_t* rep_level,

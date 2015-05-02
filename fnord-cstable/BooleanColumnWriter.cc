@@ -16,7 +16,8 @@ BooleanColumnWriter::BooleanColumnWriter(
     uint64_t r_max,
     uint64_t d_max) :
     ColumnWriter(r_max, d_max),
-    data_writer_(1) {}
+    data_writer_(1),
+    num_vals_(0) {}
 
 void BooleanColumnWriter::addDatum(
     uint64_t rep_level,
@@ -37,6 +38,7 @@ void BooleanColumnWriter::addDatum(
   rlvl_writer_.encode(rep_level);
   dlvl_writer_.encode(def_level);
   data_writer_.encode(value);
+  ++num_vals_;
 }
 
 void BooleanColumnWriter::addNull(
@@ -44,6 +46,7 @@ void BooleanColumnWriter::addNull(
     uint64_t def_level) {
   rlvl_writer_.encode(rep_level);
   dlvl_writer_.encode(def_level);
+  ++num_vals_;
 }
 
 void BooleanColumnWriter::commit() {
@@ -52,6 +55,7 @@ void BooleanColumnWriter::commit() {
 }
 
 void BooleanColumnWriter::write(util::BinaryMessageWriter* writer) {
+  writer->appendUInt32(num_vals_);
   writer->append(data_writer_.data(), data_writer_.size());
 }
 

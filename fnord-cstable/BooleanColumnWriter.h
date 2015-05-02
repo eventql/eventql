@@ -40,7 +40,8 @@ public:
 protected:
   size_t size() const override;
   void write(util::BinaryMessageWriter* writer) override;
-  
+  size_t num_vals_;
+
   util::BitPackEncoder data_writer_;
 };
 
