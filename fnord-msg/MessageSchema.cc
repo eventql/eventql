@@ -175,5 +175,15 @@ const String& MessageSchema::name(uint32_t id) const {
   }
 }
 
+Set<String> MessageSchema::columns() const {
+  Set<String> columns;
+
+  for (const auto& c : field_names) {
+    columns.emplace(c.second);
+  }
+
+  return columns;
+}
+
 } // namespace msg
 } // namespace fnord
