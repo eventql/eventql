@@ -122,6 +122,13 @@ MessageSchema::MessageSchema(
   }
 }
 
+MessageSchema::MessageSchema(const MessageSchema& other) :
+    name_(other.name_),
+    fields(other.fields),
+    field_ids(other.field_ids),
+    field_types(other.field_types),
+    field_names(other.field_names) {}
+
 String MessageSchema::toString() const {
   String str = StringUtil::format("object $0 {\n", name_);
 

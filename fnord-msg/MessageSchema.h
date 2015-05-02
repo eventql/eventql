@@ -11,6 +11,7 @@
 #define _FNORD_MSG_MESSAGESCHEMA_H
 #include <fnord-base/stdtypes.h>
 #include <fnord-base/exception.h>
+#include <fnord-base/autoref.h>
 #include <fnord-msg/MessageObject.h>
 
 /**
@@ -65,10 +66,12 @@ struct MessageSchemaField {
   Vector<MessageSchemaField> fields;
 };
 
-struct MessageSchema {
+struct MessageSchema : public RefCounted {
   MessageSchema(
       const String& _name,
       Vector<MessageSchemaField> _fields);
+
+  MessageSchema(const MessageSchema& other);
 
   String name_;
   Vector<MessageSchemaField> fields;
