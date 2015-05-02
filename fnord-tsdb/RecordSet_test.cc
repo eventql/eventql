@@ -176,4 +176,37 @@ TEST_CASE(RecordSetTest, TestDuplicateRowsInCommitlog, [] () {
   EXPECT_EQ(res.count(0x32323232), 1);
 });
 
+TEST_CASE(RecordSetTest, TestCompactionWithExistingTable, [] () {
+  auto schema = testSchema();
+  RecordSet recset(schema, "/tmp/__fnord_testrecset");
+
+  recset.addRecord(0x42424242, testObject(schema, "1a", "1b"));
+  recset.addRecord(0x23232323, testObject(schema, "2a", "2b"));
+  recset.rollCommitlog();
+  recset.compact();
+
+  recset.addRecord(0x52525252, testObject(schema, "3a", "3b"));
+  recset.addRecord(0x12121212, testObject(schema, "4a", "4b"));
+  recset.rollCommitlog();
+  recset.compact();
+
+  cstable::CSTableReader reader(recset.getState().datafile.get());
+  void* data;
+  size_t size;
+  uint64_t r;
+  uint64_t d;
+  auto col = reader.getColumnReader("__msgid");
+  Set<uint64_t> res;
+  for (int i = 0; i < reader.numRecords(); ++i) {
+    col->next(&r, &d, &data, &size);
+    res.emplace(*((uint64_t*) data));
+  }
+
+  EXPECT_EQ(res.size(), 4);
+  EXPECT_EQ(res.count(0x42424242), 1);
+  EXPECT_EQ(res.count(0x32323232), 1);
+  EXPECT_EQ(res.count(0x52525252), 1);
+  EXPECT_EQ(res.count(0x12121212), 1);
+});
+
 
