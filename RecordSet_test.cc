@@ -111,7 +111,7 @@ TEST_CASE(RecordSetTest, TestAddRowToEmptySet, [] () {
   uint64_t d;
   auto col = reader.getColumnReader("one");
   Set<String> res;
-  for (int i = 0; i < 4; ++i) {
+  for (int i = 0; i < reader.numRecords(); ++i) {
     col->next(&r, &d, &data, &size);
     res.emplace(String((char*) data, size));
   }
@@ -156,6 +156,24 @@ TEST_CASE(RecordSetTest, TestDuplicateRowsInCommitlog, [] () {
   recset.addRecord(0x32323232, testObject(schema, "2a", "2b"));
   EXPECT_EQ(recset.commitlogSize(), 2);
 
+  recset.rollCommitlog();
+  recset.compact();
+
+  cstable::CSTableReader reader(recset.getState().datafile.get());
+  void* data;
+  size_t size;
+  uint64_t r;
+  uint64_t d;
+  auto col = reader.getColumnReader("__msgid");
+  Set<uint64_t> res;
+  for (int i = 0; i < reader.numRecords(); ++i) {
+    col->next(&r, &d, &data, &size);
+    res.emplace(*((uint64_t*) data));
+  }
+
+  EXPECT_EQ(res.size(), 2);
+  EXPECT_EQ(res.count(0x42424242), 1);
+  EXPECT_EQ(res.count(0x32323232), 1);
 });
 
 
