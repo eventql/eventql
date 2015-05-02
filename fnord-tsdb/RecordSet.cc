@@ -18,6 +18,15 @@ RecordSet::RecordSet(
     schema_(schema),
     filename_prefix_(filename_prefix) {}
 
+RecordSet::RecordSetState RecordSet::getState() {
+  return state_;
+}
+
+void RecordSet::addRecord(uint32_t record_id, const Buffer& message) {
+  
+}
+
+RecordSet::RecordSetState::RecordSetState() : commitlog_size(0) {}
 
 } // namespace tsdb
 } // namespace fnord
