@@ -153,7 +153,9 @@ TEST_CASE(RecordSetTest, TestDuplicateRowsInCommitlog, [] () {
   EXPECT_EQ(recset.commitlogSize(), 1);
 
   recset.addRecord(0x42424242, testObject(schema, "3a", "3b"));
-  EXPECT_EQ(recset.commitlogSize(), 1);
+  recset.addRecord(0x32323232, testObject(schema, "2a", "2b"));
+  EXPECT_EQ(recset.commitlogSize(), 2);
+
 });
 
 
