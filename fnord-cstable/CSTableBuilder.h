@@ -14,6 +14,7 @@
 #include <fnord-base/util/binarymessagewriter.h>
 #include <fnord-base/autoref.h>
 #include <fnord-cstable/ColumnWriter.h>
+#include <fnord-cstable/CSTableWriter.h>
 #include <fnord-msg/MessageSchema.h>
 #include <fnord-msg/MessageObject.h>
 
@@ -27,6 +28,9 @@ public:
   void addRecord(const msg::MessageObject& msg);
 
   void write(const String& filename);
+  void write(CSTableWriter* writer);
+
+  size_t numRecords() const;
 
 protected:
 
