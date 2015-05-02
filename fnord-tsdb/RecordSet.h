@@ -28,7 +28,7 @@ public:
     Option<String> datafile;
     Option<String> commitlog;
     uint64_t commitlog_size;
-    Vector<String> old_commitlogs;
+    Set<String> old_commitlogs;
   };
 
   RecordSet(
@@ -57,6 +57,7 @@ protected:
   RefPtr<msg::MessageSchema> schema_;
   String filename_prefix_;
   RecordSetState state_;
+  mutable std::mutex compact_mutex_;
   mutable std::mutex mutex_;
   Random rnd_;
   Set<uint64_t> commitlog_ids_;
