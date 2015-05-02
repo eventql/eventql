@@ -209,4 +209,24 @@ TEST_CASE(RecordSetTest, TestCompactionWithExistingTable, [] () {
   EXPECT_EQ(res.count(0x12121212), 1);
 });
 
+TEST_CASE(RecordSetTest, TestInsert10kRows, [] () {
+  Random rnd;
+  auto schema = testSchema();
+  RecordSet recset(schema, "/tmp/__fnord_testrecset");
+
+  for (int i = 0; i < 10; ++i) {
+    for (int i = 0; i < 1000; ++i) {
+      recset.addRecord(rnd.random64(), testObject(schema, "1a", "1b"));
+    }
+
+    recset.rollCommitlog();
+  }
+
+  recset.compact();
+
+  cstable::CSTableReader reader(recset.getState().datafile.get());
+  EXPECT_EQ(reader.numRecords(), 10000);
+});
+
+
 

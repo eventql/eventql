@@ -13,7 +13,9 @@
 #include <fnord-base/util/binarymessagewriter.h>
 #include <fnord-cstable/CSTableBuilder.h>
 #include <fnord-cstable/CSTableWriter.h>
+#include <fnord-cstable/CSTableReader.h>
 #include <fnord-cstable/UInt64ColumnWriter.h>
+#include <fnord-cstable/UInt64ColumnReader.h>
 #include <fnord-msg/MessageDecoder.h>
 #include <fnord-tsdb/RecordSet.h>
 
@@ -115,7 +117,27 @@ void RecordSet::compact() {
   Set<uint64_t> old_id_set;
   Set<uint64_t> new_id_set;
 
-  // load and copy old datafile
+  if (!snap.datafile.isEmpty()) {
+    cstable::CSTableReader reader(snap.datafile.get());
+
+    auto msgid_col_ref = reader.getColumnReader("__msgid");
+    auto msgid_col = dynamic_cast<cstable::UInt64ColumnReader*>(msgid_col_ref.get());
+
+    auto n = reader.numRecords();
+    for (int i = 0; i < n; ++i) {
+      uint64_t msgid;
+      uint64_t r;
+      uint64_t d;
+      msgid_col->next(&r, &d, &msgid);
+      old_id_set.emplace(msgid);
+
+      msg::MessageObject record;
+      // load old record;
+
+      outfile.addRecord(record);
+      id_col.addDatum(0, 0, msgid);
+    }
+  }
 
   for (const auto& cl : snap.old_commitlogs) {
     loadCommitlog(cl, [this, &outfile, &old_id_set, &new_id_set, &id_col] (
