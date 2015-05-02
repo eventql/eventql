@@ -54,6 +54,10 @@ void RecordSet::addRecord(uint64_t record_id, const Buffer& message) {
 
   std::unique_lock<std::mutex> lk(mutex_);
 
+  if (commitlog_ids_.count(record_id) > 0) {
+    return;
+  }
+
   String commitlog;
   uint64_t commitlog_size;
   if (state_.commitlog.isEmpty()) {
