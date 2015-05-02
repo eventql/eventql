@@ -50,8 +50,12 @@ void RecordMaterializer::loadColumn(
     }
 
     column->consume();
-    column->fetchIfNotPending();
 
+    if (column->reader->eofReached()) {
+      break;
+    }
+
+    column->fetchIfNotPending();
     if (column->r == 0) {
       return;
     }
