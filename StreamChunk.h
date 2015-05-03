@@ -14,6 +14,7 @@
 #include <fnord-base/datetime.h>
 #include <fnord-msg/MessageSchema.h>
 #include <fnord-tsdb/StreamProperties.h>
+#include <fnord-tsdb/RecordSet.h>
 
 namespace fnord {
 namespace tsdb {
@@ -21,14 +22,27 @@ namespace tsdb {
 class StreamChunk : public RefCounted {
 public:
 
+  static RefPtr<StreamChunk> create(
+      const String& stream_key,
+      RefPtr<StreamProperties> config);
+
   static String streamChunkKeyFor(
       const String& stream_key,
       DateTime time,
       const StreamProperties& properties);
 
-  StreamChunk(RefPtr<StreamProperties> config);
+  void insertRecord(
+      uint64_t record_id,
+      const Buffer& record,
+      DateTime time);
 
 protected:
+
+  StreamChunk(
+      RefPtr<StreamProperties> config,
+      const String& filename_prefix);
+
+  RecordSet records_;
   RefPtr<StreamProperties> config_;
 };
 

@@ -44,6 +44,8 @@ protected:
   String db_path_;
   RefPtr<mdb::MDB> db_;
   Vector<Pair<String, RefPtr<StreamProperties>>> configs_;
+  std::mutex mutex_;
+  HashMap<String, RefPtr<StreamChunk>> chunks_;
 };
 
 } // namespace tdsb
