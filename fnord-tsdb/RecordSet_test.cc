@@ -190,23 +190,13 @@ TEST_CASE(RecordSetTest, TestCompactionWithExistingTable, [] () {
   recset.rollCommitlog();
   recset.compact();
 
-  cstable::CSTableReader reader(recset.getState().datafile.get());
-  void* data;
-  size_t size;
-  uint64_t r;
-  uint64_t d;
-  auto col = reader.getColumnReader("__msgid");
-  Set<uint64_t> res;
-  for (int i = 0; i < reader.numRecords(); ++i) {
-    col->next(&r, &d, &data, &size);
-    res.emplace(*((uint64_t*) data));
-  }
+  auto msgids = recset.listRecords();
 
-  EXPECT_EQ(res.size(), 4);
-  EXPECT_EQ(res.count(0x42424242), 1);
-  EXPECT_EQ(res.count(0x23232323), 1);
-  EXPECT_EQ(res.count(0x52525252), 1);
-  EXPECT_EQ(res.count(0x12121212), 1);
+  EXPECT_EQ(msgids.size(), 4);
+  EXPECT_EQ(msgids.count(0x42424242), 1);
+  EXPECT_EQ(msgids.count(0x23232323), 1);
+  EXPECT_EQ(msgids.count(0x52525252), 1);
+  EXPECT_EQ(msgids.count(0x12121212), 1);
 });
 
 TEST_CASE(RecordSetTest, TestInsert10kRows, [] () {

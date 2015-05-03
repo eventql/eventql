@@ -200,6 +200,31 @@ void RecordSet::loadCommitlog(
   }
 }
 
+Set<uint64_t> RecordSet::listRecords() {
+  Set<uint64_t> res;
+
+  std::unique_lock<std::mutex> lk(mutex_);
+  if (state_.datafile.isEmpty()) {
+    return res;
+  }
+
+  auto datafile = state_.datafile.get();
+  lk.unlock();
+
+  cstable::CSTableReader reader(datafile);
+  auto col = reader.getColumnReader("__msgid");
+
+  void* data;
+  size_t size;
+  uint64_t r;
+  uint64_t d;
+  for (int i = 0; i < reader.numRecords(); ++i) {
+    col->next(&r, &d, &data, &size);
+    res.emplace(*((uint64_t*) data));
+  }
+
+  return res;
+}
 
 RecordSet::RecordSetState::RecordSetState() : commitlog_size(0) {}
 
