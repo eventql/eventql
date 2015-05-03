@@ -49,7 +49,6 @@ void BitPackedIntColumnWriter::commit() {
 
 void BitPackedIntColumnWriter::write(util::BinaryMessageWriter* writer) {
   writer->appendUInt32(max_value_);
-  writer->appendUInt32(num_vals_);
   writer->append(data_writer_.data(), data_writer_.size());
 }
 
