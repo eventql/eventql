@@ -43,6 +43,7 @@
 #include "fnord-mdb/MDB.h"
 #include "fnord-mdb/MDBUtil.h"
 #include "fnord-tsdb/TSDBNode.h"
+#include "fnord-tsdb/TSDBServlet.h"
 #include "common.h"
 #include "schemas.h"
 #include "ModelReplication.h"
@@ -247,6 +248,8 @@ int main(int argc, const char** argv) {
   http_router.addRouteByPrefixMatch("/logtable", &logtable_servlet, &tpool);
 
   tsdb::TSDBNode tsdb_node("xxx", "/tmp/tsdb");
+  tsdb::TSDBServlet tsdb_servlet(&tsdb_node);
+  http_router.addRouteByPrefixMatch("/tsdb", &tsdb_servlet, &tpool);
 
   ev.run();
 
