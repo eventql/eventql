@@ -117,9 +117,10 @@ void RecordSet::compact() {
 
   Set<uint64_t> old_id_set;
   Set<uint64_t> new_id_set;
+  bool pop_last = snap.datafiles.size() > 0;
 
-  if (!snap.datafile.isEmpty()) {
-    cstable::CSTableReader reader(snap.datafile.get());
+  for (int j = 0; j < snap.datafiles.size(); ++j) {
+    cstable::CSTableReader reader(snap.datafiles[j]);
     cstable::RecordMaterializer record_reader(schema_.get(), &reader);
 
     auto msgid_col_ref = reader.getColumnReader("__msgid");
@@ -132,6 +133,10 @@ void RecordSet::compact() {
       uint64_t d;
       msgid_col->next(&r, &d, &msgid);
       old_id_set.emplace(msgid);
+
+      if (!pop_last || j + 1 < snap.datafiles.size()) {
+        continue;
+      }
 
       msg::MessageObject record;
       record_reader.nextRecord(&record);
@@ -174,7 +179,11 @@ void RecordSet::compact() {
   outfile_writer.commit();
 
   lk.lock();
-  state_.datafile = Some(outfile_path);
+  if (pop_last) {
+    state_.datafiles.pop_back();
+  }
+
+  state_.datafiles.emplace_back(outfile_path);
 
   for (const auto& cl : snap.old_commitlogs) {
     state_.old_commitlogs.erase(cl);
@@ -204,23 +213,25 @@ Set<uint64_t> RecordSet::listRecords() {
   Set<uint64_t> res;
 
   std::unique_lock<std::mutex> lk(mutex_);
-  if (state_.datafile.isEmpty()) {
+  if (state_.datafiles.empty()) {
     return res;
   }
 
-  auto datafile = state_.datafile.get();
+  auto datafiles = state_.datafiles;
   lk.unlock();
 
-  cstable::CSTableReader reader(datafile);
-  auto col = reader.getColumnReader("__msgid");
+  for (const auto& datafile : datafiles) {
+    cstable::CSTableReader reader(datafile);
+    auto col = reader.getColumnReader("__msgid");
 
-  void* data;
-  size_t size;
-  uint64_t r;
-  uint64_t d;
-  for (int i = 0; i < reader.numRecords(); ++i) {
-    col->next(&r, &d, &data, &size);
-    res.emplace(*((uint64_t*) data));
+    void* data;
+    size_t size;
+    uint64_t r;
+    uint64_t d;
+    for (int i = 0; i < reader.numRecords(); ++i) {
+      col->next(&r, &d, &data, &size);
+      res.emplace(*((uint64_t*) data));
+    }
   }
 
   return res;

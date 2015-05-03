@@ -60,7 +60,7 @@ TEST_CASE(RecordSetTest, TestAddRowToEmptySet, [] () {
   RecordSet recset(schema, "/tmp/__fnord_testrecset");
   EXPECT_TRUE(recset.getState().commitlog.isEmpty());
   EXPECT_EQ(recset.getState().commitlog_size, 0);
-  EXPECT_TRUE(recset.getState().datafile.isEmpty());
+  EXPECT_TRUE(recset.getState().datafiles.empty());
   EXPECT_EQ(recset.getState().old_commitlogs.size(), 0);
 
   recset.addRecord(0x42424242, testObject(schema, "1a", "1b"));
@@ -68,7 +68,7 @@ TEST_CASE(RecordSetTest, TestAddRowToEmptySet, [] () {
 
   EXPECT_FALSE(recset.getState().commitlog.isEmpty());
   EXPECT_TRUE(recset.getState().commitlog_size > 0);
-  EXPECT_TRUE(recset.getState().datafile.isEmpty());
+  EXPECT_TRUE(recset.getState().datafiles.empty());
   EXPECT_EQ(recset.getState().old_commitlogs.size(), 0);
   EXPECT_EQ(recset.commitlogSize(), 2);
 
@@ -76,7 +76,7 @@ TEST_CASE(RecordSetTest, TestAddRowToEmptySet, [] () {
 
   EXPECT_TRUE(recset.getState().commitlog.isEmpty());
   EXPECT_EQ(recset.getState().commitlog_size, 0);
-  EXPECT_TRUE(recset.getState().datafile.isEmpty());
+  EXPECT_TRUE(recset.getState().datafiles.empty());
   EXPECT_EQ(recset.getState().old_commitlogs.size(), 1);
   EXPECT_EQ(recset.commitlogSize(), 2);
 
@@ -85,7 +85,7 @@ TEST_CASE(RecordSetTest, TestAddRowToEmptySet, [] () {
 
   EXPECT_FALSE(recset.getState().commitlog.isEmpty());
   EXPECT_TRUE(recset.getState().commitlog_size > 0);
-  EXPECT_TRUE(recset.getState().datafile.isEmpty());
+  EXPECT_TRUE(recset.getState().datafiles.empty());
   EXPECT_EQ(recset.getState().old_commitlogs.size(), 1);
   EXPECT_EQ(recset.commitlogSize(), 4);
 
@@ -93,18 +93,18 @@ TEST_CASE(RecordSetTest, TestAddRowToEmptySet, [] () {
 
   EXPECT_TRUE(recset.getState().commitlog.isEmpty());
   EXPECT_EQ(recset.getState().commitlog_size, 0);
-  EXPECT_TRUE(recset.getState().datafile.isEmpty());
+  EXPECT_TRUE(recset.getState().datafiles.empty());
   EXPECT_EQ(recset.getState().old_commitlogs.size(), 2);
   EXPECT_EQ(recset.commitlogSize(), 4);
 
   recset.compact();
   EXPECT_TRUE(recset.getState().commitlog.isEmpty());
   EXPECT_EQ(recset.getState().commitlog_size, 0);
-  EXPECT_FALSE(recset.getState().datafile.isEmpty());
+  EXPECT_EQ(recset.getState().datafiles.size(), 1);
   EXPECT_EQ(recset.getState().old_commitlogs.size(), 0);
   EXPECT_EQ(recset.commitlogSize(), 0);
 
-  cstable::CSTableReader reader(recset.getState().datafile.get());
+  cstable::CSTableReader reader(recset.getState().datafiles.back());
   void* data;
   size_t size;
   uint64_t r;
@@ -159,7 +159,7 @@ TEST_CASE(RecordSetTest, TestDuplicateRowsInCommitlog, [] () {
   recset.rollCommitlog();
   recset.compact();
 
-  cstable::CSTableReader reader(recset.getState().datafile.get());
+  cstable::CSTableReader reader(recset.getState().datafiles.back());
   void* data;
   size_t size;
   uint64_t r;
@@ -214,8 +214,9 @@ TEST_CASE(RecordSetTest, TestInsert10kRows, [] () {
 
   EXPECT_EQ(recset.getState().old_commitlogs.size(), 10);
   recset.compact();
+  EXPECT_EQ(recset.getState().datafiles.size(), 1);
 
-  cstable::CSTableReader reader(recset.getState().datafile.get());
+  cstable::CSTableReader reader(recset.getState().datafiles.back());
   EXPECT_EQ(reader.numRecords(), 10000);
 });
 

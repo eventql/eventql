@@ -25,7 +25,7 @@ public:
   struct RecordSetState {
     RecordSetState();
 
-    Option<String> datafile;
+    Vector<String> datafiles;
     Option<String> commitlog;
     uint64_t commitlog_size;
     Set<String> old_commitlogs;
