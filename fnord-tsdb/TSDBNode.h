@@ -13,14 +13,10 @@
 #include <fnord-base/random.h>
 #include <fnord-base/option.h>
 #include <fnord-mdb/MDB.h>
-#include <fnord-msg/MessageSchema.h>
+#include <fnord-tsdb/StreamProperties.h>
 
 namespace fnord {
 namespace tsdb {
-
-struct StreamProperties : public RefCounted {
-  RefPtr<msg::MessageSchema> schema;
-};
 
 class TSDBNode {
 public:
@@ -38,6 +34,11 @@ public:
       uint64_t record_id,
       const Buffer& record,
       DateTime time);
+
+  static String streamKeyFor(
+      const String& stream_key,
+      DateTime time,
+      const StreamProperties& properties);
 
 protected:
 
