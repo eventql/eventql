@@ -10,10 +10,12 @@
 #ifndef _FNORD_TSDB_MESSAGESET_H
 #define _FNORD_TSDB_MESSAGESET_H
 #include <fnord-base/stdtypes.h>
-#include <fnord-base/random.h>
-#include <fnord-base/option.h>
 #include <fnord-base/io/file.h>
 #include <fnord-base/io/mmappedfile.h>
+#include <fnord-base/option.h>
+#include <fnord-base/util/binarymessagereader.h>
+#include <fnord-base/util/binarymessagewriter.h>
+#include <fnord-base/random.h>
 #include <fnord-msg/MessageSchema.h>
 
 namespace fnord {
@@ -30,6 +32,9 @@ public:
     Option<String> commitlog;
     uint64_t commitlog_size;
     Set<String> old_commitlogs;
+
+    void encode(util::BinaryMessageWriter* writer) const;
+    void decode(util::BinaryMessageReader* reader);
   };
 
   RecordSet(
