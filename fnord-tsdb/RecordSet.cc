@@ -114,6 +114,11 @@ void RecordSet::rollCommitlog() {
 }
 
 void RecordSet::compact() {
+  Set<String> deleted_files;
+  compact(&deleted_files);
+}
+
+void RecordSet::compact(Set<String>* deleted_files) {
   std::unique_lock<std::mutex> compact_lk(compact_mutex_, std::defer_lock);
   if (!compact_lk.try_lock()) {
     return; // compaction is already running
@@ -200,6 +205,7 @@ void RecordSet::compact() {
   lk.lock();
 
   if (rewrite_last) {
+    deleted_files->emplace(state_.datafiles.back().first);
     state_.datafiles.pop_back();
   }
 
@@ -207,6 +213,7 @@ void RecordSet::compact() {
 
   for (const auto& cl : snap.old_commitlogs) {
     state_.old_commitlogs.erase(cl);
+    deleted_files->emplace(cl);
   }
 
   for (const auto& id : new_id_set) {
