@@ -10,6 +10,7 @@
 #include <fnord-tsdb/StreamChunk.h>
 #include <fnord-base/io/fileutil.h>
 #include <fnord-base/util/binarymessagewriter.h>
+#include <fnord-base/wallclock.h>
 
 namespace fnord {
 namespace tsdb {
@@ -64,13 +65,14 @@ void StreamChunk::insertRecord(
   }
 
   if (!compaction_scheduled_) {
-    node_->compactionq.insert(this);
+    node_->compactionq.insert(this, WallClock::unixMicros() + 10 * kMicrosPerSecond);
     compaction_scheduled_ = true;
   }
 }
 
 
 void StreamChunk::compact() {
+  fnord::iputs("compact...", 1);
   std::unique_lock<std::mutex> lk(mutex_);
   compaction_scheduled_ = false;
   lk.unlock();
