@@ -10,6 +10,7 @@
 #ifndef _FNORD_TSDB_TSDBSERVLET_H
 #define _FNORD_TSDB_TSDBSERVLET_H
 #include "fnord-http/httpservice.h"
+#include <fnord-base/random.h>
 #include <fnord-tsdb/TSDBNode.h>
 
 namespace fnord {
@@ -27,11 +28,12 @@ public:
 protected:
 
   void insertRecord(
-    http::HTTPRequest* req,
-    http::HTTPResponse* res,
-    URI* uri);
+      http::HTTPRequest* req,
+      http::HTTPResponse* res,
+      URI* uri);
 
   TSDBNode* node_;
+  Random rnd_;
 };
 
 }
