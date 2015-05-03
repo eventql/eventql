@@ -29,7 +29,8 @@ RecordSet::RecordSet(
     RecordSetState state /* = RecordSetState{} */) :
     schema_(schema),
     filename_prefix_(filename_prefix),
-    state_(state) {
+    state_(state),
+    max_datafile_size_(kDefaultMaxDatafileSize) {
   auto id_index_fn = [this] (uint64_t id, const void* data, size_t size) {
     commitlog_ids_.emplace(id);
   };
@@ -117,7 +118,10 @@ void RecordSet::compact() {
 
   Set<uint64_t> old_id_set;
   Set<uint64_t> new_id_set;
-  bool pop_last = snap.datafiles.size() > 0;
+
+  bool rewrite_last =
+      snap.datafiles.size() > 0 &&
+      FileUtil::size(snap.datafiles.back()) < max_datafile_size_;
 
   for (int j = 0; j < snap.datafiles.size(); ++j) {
     cstable::CSTableReader reader(snap.datafiles[j]);
@@ -134,7 +138,7 @@ void RecordSet::compact() {
       msgid_col->next(&r, &d, &msgid);
       old_id_set.emplace(msgid);
 
-      if (!pop_last || j + 1 < snap.datafiles.size()) {
+      if (!rewrite_last || j + 1 < snap.datafiles.size()) {
         continue;
       }
 
@@ -179,7 +183,8 @@ void RecordSet::compact() {
   outfile_writer.commit();
 
   lk.lock();
-  if (pop_last) {
+
+  if (rewrite_last) {
     state_.datafiles.pop_back();
   }
 
@@ -235,6 +240,10 @@ Set<uint64_t> RecordSet::listRecords() {
   }
 
   return res;
+}
+
+void RecordSet::setMaxDatafileSize(size_t size) {
+  max_datafile_size_ = size;
 }
 
 RecordSet::RecordSetState::RecordSetState() : commitlog_size(0) {}
