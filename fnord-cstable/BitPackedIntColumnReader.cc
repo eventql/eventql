@@ -20,11 +20,9 @@ BitPackedIntColumnReader::BitPackedIntColumnReader(
     ColumnReader(r_max, d_max, data, size),
     max_value_(*((uint32_t*) data_)),
     data_reader_(
-        (char *) data_ + sizeof(uint32_t) * 2,
-        data_size_ - sizeof(uint32_t) * 2,
-        max_value_),
-    vals_read_(0),
-    vals_total_(*((uint32_t*) ((char*) data_ + sizeof(uint32_t)))) {}
+        (char *) data_ + sizeof(uint32_t),
+        data_size_ - sizeof(uint32_t),
+        max_value_) {}
 
 bool BitPackedIntColumnReader::next(
     uint64_t* rep_level,
@@ -49,7 +47,7 @@ bool BitPackedIntColumnReader::next(
 
   *rep_level = r;
   *def_level = d;
-  ++vals_total_;
+  ++vals_read_;
 
   if (d == d_max_) {
     *data = data_reader_.next();

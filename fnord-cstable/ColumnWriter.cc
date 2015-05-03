@@ -18,7 +18,8 @@ ColumnWriter::ColumnWriter(
     r_max_(r_max),
     d_max_(d_max),
     rlvl_writer_(r_max),
-    dlvl_writer_(d_max) {}
+    dlvl_writer_(d_max),
+    num_vals_(0) {}
 
 size_t ColumnWriter::maxRepetitionLevel() const {
   return r_max_;
@@ -35,6 +36,7 @@ void ColumnWriter::commit() {
 
 void ColumnWriter::write(void* buf, size_t buf_len) {
   util::BinaryMessageWriter writer(buf, buf_len);
+  writer.appendUInt64(num_vals_);
   writer.appendUInt64(rlvl_writer_.size());
   writer.appendUInt64(dlvl_writer_.size());
   writer.appendUInt64(size());
@@ -44,7 +46,7 @@ void ColumnWriter::write(void* buf, size_t buf_len) {
 }
 
 size_t ColumnWriter::bodySize() const {
-  return 24 + rlvl_writer_.size() + dlvl_writer_.size() + size();
+  return 32 + rlvl_writer_.size() + dlvl_writer_.size() + size();
 }
 
 void ColumnWriter::addNull(
@@ -52,6 +54,7 @@ void ColumnWriter::addNull(
     uint64_t def_level) {
   rlvl_writer_.encode(rep_level);
   dlvl_writer_.encode(def_level);
+  ++num_vals_;
 }
 
 } // namespace cstable

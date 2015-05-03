@@ -33,7 +33,6 @@ public:
       size_t size) override;
 
   void addDatum(uint64_t rep_level, uint64_t def_level, uint32_t value);
-  void addNull(uint64_t rep_level, uint64_t def_level);
   void commit();
 
   ColumnType type() const override {
@@ -46,7 +45,6 @@ protected:
 
   uint32_t max_value_;
   util::BitPackEncoder data_writer_;
-  size_t num_vals_;
 };
 
 } // namespace cstable

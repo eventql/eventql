@@ -47,6 +47,7 @@ protected:
   size_t d_max_;
   util::BitPackEncoder rlvl_writer_;
   util::BitPackEncoder dlvl_writer_;
+  size_t num_vals_;
 };
 
 } // namespace cstable

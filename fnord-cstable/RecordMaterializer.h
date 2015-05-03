@@ -49,7 +49,7 @@ protected:
     uint64_t d;
     bool pending;
     bool defined;
-    Vector<Pair<uint64_t, bool>> parents;
+    Vector<Tuple<uint64_t, bool, uint32_t>> parents;
     uint32_t field_id;
     msg::FieldType field_type;
 
@@ -64,18 +64,20 @@ protected:
 
   void insertValue(
       ColumnState* column,
-      Vector<Pair<uint64_t, bool>> parents,
+      Vector<Tuple<uint64_t, bool, uint32_t>> parents,
       Vector<size_t> indexes,
       msg::MessageObject* record);
 
   void insertNull(
       ColumnState* column,
+      Vector<Tuple<uint64_t, bool, uint32_t>> parents,
       const Vector<size_t> indexes,
       msg::MessageObject* record);
 
   void createColumns(
       const String& prefix,
-      Vector<Pair<uint64_t, bool>> parents,
+      uint32_t dmax,
+      Vector<Tuple<uint64_t, bool, uint32_t>> parents,
       const msg::MessageSchemaField& field,
       CSTableReader* reader);
 
