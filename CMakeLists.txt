@@ -13,7 +13,8 @@ include_directories(../3rdparty)
 add_library(fnord-tsdb OBJECT
     TSDBNode.cc
     TSDBServlet.cc
-    RecordSet.cc)
+    RecordSet.cc
+    StreamChunk.cc)
 
 add_executable(tests/test-recordset
     $<TARGET_OBJECTS:fnord-base>
@@ -33,3 +34,11 @@ add_executable(tests/test-tsdbnode
     $<TARGET_OBJECTS:fnord-http>
     TSDBNode_test.cc)
 
+add_executable(tests/test-streamchunk
+    $<TARGET_OBJECTS:fnord-base>
+    $<TARGET_OBJECTS:fnord-msg>
+    $<TARGET_OBJECTS:fnord-mdb>
+    $<TARGET_OBJECTS:fnord-tsdb>
+    $<TARGET_OBJECTS:fnord-cstable>
+    $<TARGET_OBJECTS:fnord-http>
+    StreamChunk_test.cc)
