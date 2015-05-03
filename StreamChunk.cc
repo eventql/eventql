@@ -66,5 +66,14 @@ void StreamChunk::insertRecord(
 }
 
 
+void StreamChunk::compact() {
+  std::unique_lock<std::mutex> lk(mutex_);
+  compaction_scheduled_ = false;
+  lk.unlock();
+
+  records_.rollCommitlog();
+  records_.compact();
+}
+
 }
 }
