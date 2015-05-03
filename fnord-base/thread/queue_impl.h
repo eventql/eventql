@@ -53,6 +53,26 @@ T Queue<T>::pop() {
 }
 
 template <typename T>
+Option<T> Queue<T>::interruptiblePop() {
+  std::unique_lock<std::mutex> lk(mutex_);
+
+  if (queue_.size() == 0) {
+    wakeup_.wait(lk);
+  }
+
+  if (queue_.size() == 0) {
+    return None<T>();
+  } else {
+    auto job = Some(queue_.front());
+    queue_.pop_front();
+    --length_;
+    lk.unlock();
+    wakeup_.notify_all();
+    return job;
+  }
+}
+
+template <typename T>
 Option<T> Queue<T>::poll() {
   std::unique_lock<std::mutex> lk(mutex_);
 
@@ -72,6 +92,11 @@ template <typename T>
 size_t Queue<T>::length() const {
   std::unique_lock<std::mutex> lk(mutex_);
   return length_;
+}
+
+template <typename T>
+void Queue<T>::wakeup() {
+  wakeup_.notify_all();
 }
 
 }

@@ -29,9 +29,11 @@ public:
 
   void insert(const T& job, bool block = false);
   T pop();
+  Option<T> interruptiblePop();
   Option<T> poll();
 
   size_t length() const;
+  void wakeup();
 
 protected:
   std::deque<T> queue_;
