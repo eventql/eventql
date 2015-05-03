@@ -13,9 +13,14 @@
 #include <fnord-base/random.h>
 #include <fnord-base/option.h>
 #include <fnord-mdb/MDB.h>
+#include <fnord-msg/MessageSchema.h>
 
 namespace fnord {
 namespace tsdb {
+
+struct StreamProperties : public RefCounted {
+  RefPtr<msg::MessageSchema> schema;
+};
 
 class TSDBNode {
 public:
@@ -24,10 +29,24 @@ public:
       const String& nodeid,
       const String& db_path);
 
+  void configurePrefix(
+      const String& stream_key_prefix,
+      StreamProperties props);
+
+  void insertRecord(
+      const String& stream_key,
+      uint64_t record_id,
+      const Buffer& record,
+      DateTime time);
+
 protected:
+
+  const StreamProperties& getConfig(const String& stream_key) const;
+
   String nodeid_;
   String db_path_;
   RefPtr<mdb::MDB> db_;
+  Vector<Pair<String, RefPtr<StreamProperties>>> configs_;
 };
 
 } // namespace tdsb

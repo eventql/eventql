@@ -12,6 +12,7 @@ include_directories(../3rdparty)
 
 add_library(fnord-tsdb OBJECT
     TSDBNode.cc
+    TSDBServlet.cc
     RecordSet.cc)
 
 add_executable(tests/test-recordset
@@ -20,5 +21,6 @@ add_executable(tests/test-recordset
     $<TARGET_OBJECTS:fnord-mdb>
     $<TARGET_OBJECTS:fnord-tsdb>
     $<TARGET_OBJECTS:fnord-cstable>
+    $<TARGET_OBJECTS:fnord-http>
     RecordSet_test.cc)
 
