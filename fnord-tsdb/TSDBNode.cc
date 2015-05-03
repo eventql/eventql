@@ -16,14 +16,14 @@ TSDBNode::TSDBNode(
     const String& nodeid,
     const String& db_path) :
     nodeid_(nodeid),
-    noderef_{ .db_path = db_path },
-    db_(
-        mdb::MDB::open(
+    noderef_{
+        .db_path = db_path,
+        .db = mdb::MDB::open(
             db_path,
             false,
             1024 * 1024 * 1024, // 1 GiB
             nodeid + ".db",
-            nodeid + ".db.lck")) {}
+            nodeid + ".db.lck")} {}
 
 void TSDBNode::insertRecord(
     const String& stream_key,
@@ -38,7 +38,7 @@ void TSDBNode::insertRecord(
     std::unique_lock<std::mutex> lk(mutex_);
     auto chunk_iter = chunks_.find(chunk_key);
     if (chunk_iter == chunks_.end()) {
-      chunk = StreamChunk::create(stream_key, config, &noderef_);
+      chunk = StreamChunk::create(stream_key, chunk_key, config, &noderef_);
       chunks_.emplace(chunk_key, chunk);
     } else {
       chunk = chunk_iter->second;

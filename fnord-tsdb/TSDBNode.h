@@ -47,7 +47,6 @@ protected:
 
   String nodeid_;
   TSDBNodeRef noderef_;
-  RefPtr<mdb::MDB> db_;
   Vector<Pair<String, RefPtr<StreamProperties>>> configs_;
   std::mutex mutex_;
   HashMap<String, RefPtr<StreamChunk>> chunks_;
