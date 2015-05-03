@@ -16,7 +16,7 @@ RecordMaterializer::RecordMaterializer(
     msg::MessageSchema* schema,
     CSTableReader* reader) {
   for (const auto& f : schema->fields) {
-    createColumns("", Vector<Pair<uint64_t, bool>>{}, f, reader);
+    createColumns("", 0, Vector<Tuple<uint64_t, bool, uint32_t>>{}, f, reader);
   }
 }
 
@@ -46,7 +46,7 @@ void RecordMaterializer::loadColumn(
     if (column->defined) {
       insertValue(column, column->parents, indexes, record);
     } else {
-      insertNull(column, indexes, record);
+      insertNull(column, column->parents, indexes, record);
     }
 
     column->consume();
@@ -64,17 +64,22 @@ void RecordMaterializer::loadColumn(
 
 void RecordMaterializer::createColumns(
     const String& prefix,
-    Vector<Pair<uint64_t, bool>> parents,
+    uint32_t dmax,
+    Vector<Tuple<uint64_t, bool, uint32_t>> parents,
     const msg::MessageSchemaField& field,
     CSTableReader* reader) {
   auto colname = prefix + field.name;
 
+  if (field.repeated || field.optional) {
+    ++dmax;
+  }
+
   switch (field.type) {
     case msg::FieldType::OBJECT: {
-      parents.emplace_back(field.id, field.repeated);
+      parents.emplace_back(field.id, field.repeated, dmax);
 
       for (const auto& f : field.fields) {
-        createColumns(colname + ".", parents, f, reader);
+        createColumns(colname + ".", dmax, parents, f, reader);
       }
       break;
     }
@@ -93,23 +98,21 @@ void RecordMaterializer::createColumns(
 
 void RecordMaterializer::insertValue(
     ColumnState* column,
-    Vector<Pair<uint64_t, bool>> parents,
+    Vector<Tuple<uint64_t, bool, uint32_t>> parents,
     Vector<size_t> indexes,
     msg::MessageObject* record) {
-  fnord::iputs("insert into col: $0, idx: $1, parents: $2", column->field_id, indexes, parents);
-
   if (parents.size() > 0) {
     auto parent = parents[0];
     parents.erase(parents.begin());
 
     // repeated...
-    if (parent.second) {
+    if (std::get<1>(parent)) {
       auto target_idx = indexes[0];
       size_t this_index = 0;
       indexes.erase(indexes.begin());
 
       for (auto& cld : record->asObject()) {
-        if (cld.id == parent.first) {
+        if (cld.id == std::get<0>(parent)) {
           if (this_index == target_idx) {
             return insertValue(column, parents, indexes, &cld);
           }
@@ -119,21 +122,21 @@ void RecordMaterializer::insertValue(
       }
 
       for (; this_index < target_idx; ++this_index) {
-        record->addChild(parent.first);
+        record->addChild(std::get<0>(parent));
       }
 
-      auto& new_cld = record->addChild(parent.first);
+      auto& new_cld = record->addChild(std::get<0>(parent));
       return insertValue(column, parents, indexes, &new_cld);
 
     // non repeated
     } else {
       for (auto& cld : record->asObject()) {
-        if (cld.id == parent.first) {
+        if (cld.id == std::get<0>(parent)) {
           return insertValue(column, parents, indexes, &cld);
         }
       }
 
-      auto& new_cld = record->addChild(parent.first);
+      auto& new_cld = record->addChild(std::get<0>(parent));
       return insertValue(column, parents, indexes, &new_cld);
     }
   }
@@ -154,10 +157,54 @@ void RecordMaterializer::insertValue(
 
 void RecordMaterializer::insertNull(
     ColumnState* column,
-    const Vector<size_t> indexes,
+    Vector<Tuple<uint64_t, bool, uint32_t>> parents,
+    Vector<size_t> indexes,
     msg::MessageObject* record) {
-}
+  if (parents.size() > 0) {
+    auto parent = parents[0];
+    parents.erase(parents.begin());
 
+    // definition level
+    if (std::get<2>(parent) > column->d) {
+      return;
+    }
+
+    // repeated...
+    if (std::get<1>(parent)) {
+      auto target_idx = indexes[0];
+      size_t this_index = 0;
+      indexes.erase(indexes.begin());
+
+      for (auto& cld : record->asObject()) {
+        if (cld.id == std::get<0>(parent)) {
+          if (this_index == target_idx) {
+            return insertNull(column, parents, indexes, &cld);
+          }
+
+          ++this_index;
+        }
+      }
+
+      for (; this_index < target_idx; ++this_index) {
+        record->addChild(std::get<0>(parent));
+      }
+
+      auto& new_cld = record->addChild(std::get<0>(parent));
+      return insertNull(column, parents, indexes, &new_cld);
+
+    // non repeated
+    } else {
+      for (auto& cld : record->asObject()) {
+        if (cld.id == std::get<0>(parent)) {
+          return insertNull(column, parents, indexes, &cld);
+        }
+      }
+
+      auto& new_cld = record->addChild(std::get<0>(parent));
+      return insertNull(column, parents, indexes, &new_cld);
+    }
+  }
+}
 
 void RecordMaterializer::ColumnState::fetchIfNotPending() {
   if (pending) {

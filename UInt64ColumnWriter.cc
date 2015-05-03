@@ -36,6 +36,7 @@ void UInt64ColumnWriter::addDatum(
   rlvl_writer_.encode(rep_level);
   dlvl_writer_.encode(def_level);
   data_writer_.appendUInt64(value);
+  ++num_vals_;
 }
 
 void UInt64ColumnWriter::write(util::BinaryMessageWriter* writer) {

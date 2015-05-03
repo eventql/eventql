@@ -18,8 +18,7 @@ BitPackedIntColumnWriter::BitPackedIntColumnWriter(
     uint32_t max_value /* = 0xffffffff */) :
     ColumnWriter(r_max, d_max),
     max_value_(max_value),
-    data_writer_(max_value),
-    num_vals_(0) {}
+    data_writer_(max_value) {}
 
 void BitPackedIntColumnWriter::addDatum(
     uint64_t rep_level,
@@ -40,14 +39,6 @@ void BitPackedIntColumnWriter::addDatum(
   rlvl_writer_.encode(rep_level);
   dlvl_writer_.encode(def_level);
   data_writer_.encode(value);
-  ++num_vals_;
-}
-
-void BitPackedIntColumnWriter::addNull(
-    uint64_t rep_level,
-    uint64_t def_level) {
-  rlvl_writer_.encode(rep_level);
-  dlvl_writer_.encode(def_level);
   ++num_vals_;
 }
 

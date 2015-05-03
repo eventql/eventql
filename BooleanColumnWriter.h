@@ -29,7 +29,6 @@ public:
       size_t size) override;
 
   void addDatum(uint64_t rep_level, uint64_t def_level, bool value);
-  void addNull(uint64_t rep_level, uint64_t def_level);
 
   void commit();
 
@@ -40,7 +39,6 @@ public:
 protected:
   size_t size() const override;
   void write(util::BinaryMessageWriter* writer) override;
-  size_t num_vals_;
 
   util::BitPackEncoder data_writer_;
 };

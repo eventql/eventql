@@ -43,6 +43,7 @@ bool LEB128ColumnReader::next(
 
   *rep_level = r;
   *def_level = d;
+  ++vals_read_;
 
   if (d == d_max_) {
     *data = data_reader_.readVarUInt();

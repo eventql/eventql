@@ -34,15 +34,9 @@ public:
       void** data,
       size_t* data_len) override;
 
-  bool eofReached() const override {
-    return vals_read_ >= vals_total_;
-  }
-
 protected:
   util::BitPackDecoder data_reader_;
   uint8_t cur_val_;
-  size_t vals_read_;
-  size_t vals_total_;
 };
 
 } // namespace cstable

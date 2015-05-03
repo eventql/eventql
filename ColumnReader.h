@@ -28,12 +28,14 @@ public:
       r_max_(r_max),
       d_max_(d_max),
       reader_(data, size),
+      vals_read_(0),
+      vals_total_(*reader_.readUInt64()),
       rlvl_size_(*reader_.readUInt64()),
       dlvl_size_(*reader_.readUInt64()),
       data_size_(*reader_.readUInt64()),
-      rlvl_reader_(((char *) data) + 24, rlvl_size_, r_max),
-      dlvl_reader_(((char *) data) + 24 + rlvl_size_, dlvl_size_, d_max),
-      data_(((char *) data) + 24 + rlvl_size_ + dlvl_size_) {}
+      rlvl_reader_(((char *) data) + 32, rlvl_size_, r_max),
+      dlvl_reader_(((char *) data) + 32 + rlvl_size_, dlvl_size_, d_max),
+      data_(((char *) data) + 32 + rlvl_size_ + dlvl_size_) {}
 
   virtual ~ColumnReader() {}
 
@@ -46,18 +48,22 @@ public:
   uint64_t maxRepetitionLevel() const { return r_max_; }
   uint64_t maxDefinitionLevel() const { return d_max_; }
 
-  virtual bool eofReached() const = 0;
+  bool eofReached() const {
+    return vals_read_ >= vals_total_;
+  }
 
 protected:
   uint64_t r_max_;
   uint64_t d_max_;
   util::BinaryMessageReader reader_;
+  size_t vals_total_;
   uint64_t rlvl_size_;
   uint64_t dlvl_size_;
   uint64_t data_size_;
   util::BitPackDecoder rlvl_reader_;
   util::BitPackDecoder dlvl_reader_;
   void* data_;
+  size_t vals_read_;
 };
 
 } // namespace cstable

@@ -35,6 +35,7 @@ void StringColumnWriter::addDatum(
   dlvl_writer_.encode(def_level);
   data_writer_.appendUInt32(value.size());
   data_writer_.append(value.data(), value.size());
+  ++num_vals_;
 }
 
 void StringColumnWriter::write(util::BinaryMessageWriter* writer) {
