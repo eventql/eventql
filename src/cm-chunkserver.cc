@@ -247,10 +247,13 @@ int main(int argc, const char** argv) {
   logtable::LogTableServlet logtable_servlet(&table_repo);
   http_router.addRouteByPrefixMatch("/logtable", &logtable_servlet, &tpool);
 
+
   tsdb::TSDBNode tsdb_node("xxx", "/tmp/tsdb");
-  tsdb_node.configurePrefix(
-      "joined_sessions.",
-      tsdb::StreamProperties(new msg::MessageSchema(joinedSessionsSchema())));
+
+  tsdb::StreamProperties config(new msg::MessageSchema(joinedSessionsSchema()));
+  config.max_datafile_size= 1024 * 1024 * 512;
+  config.compaction_interval = Duration(300 * kMicrosPerSecond);
+  tsdb_node.configurePrefix("joined_sessions.", config);
 
   tsdb::TSDBServlet tsdb_servlet(&tsdb_node);
   http_router.addRouteByPrefixMatch("/tsdb", &tsdb_servlet, &tpool);
