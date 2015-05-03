@@ -28,6 +28,7 @@ public:
   uint64_t readVarUInt();
   char const* readString(size_t size);
   void const* read(size_t size);
+  std::string readLenencString();
 
   template <typename T>
   T const* readValue();

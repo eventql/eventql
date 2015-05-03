@@ -86,6 +86,11 @@ char const* BinaryMessageReader::readString(size_t size) {
   return ptr;
 }
 
+std::string BinaryMessageReader::readLenencString() {
+  auto len = readVarUInt();
+  return String((char*) read(len), len);
+}
+
 void BinaryMessageReader::rewind() {
   pos_ = 0;
 }

@@ -30,6 +30,7 @@ public:
   void appendUInt64(uint64_t value);
   void appendVarUInt(uint64_t value);
   void appendString(const std::string& string);
+  void appendLenencString(const std::string& string);
   void append(void const* data, size_t size);
 
   template <typename T>

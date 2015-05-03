@@ -73,6 +73,11 @@ void BinaryMessageWriter::appendString(const std::string& string) {
   append(string.data(), string.size());
 }
 
+void BinaryMessageWriter::appendLenencString(const std::string& string) {
+  appendVarUInt(string.size());
+  append(string.data(), string.size());
+}
+
 void BinaryMessageWriter::appendVarUInt(uint64_t value) {
   unsigned char buf[10];
   size_t bytes = 0;
