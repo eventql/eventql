@@ -77,10 +77,13 @@ void TSDBNode::configurePrefix(
   configs_.emplace_back(stream_key_prefix, new StreamProperties(props));
 }
 
-void TSDBNode::start() {
+void TSDBNode::start(size_t num_comaction_threads) {
   reopenStreamChunks();
-  compaction_workers_.emplace_back(new CompactionWorker(&noderef_));
-  compaction_workers_.back()->start();
+
+  for (int i = 0; i < num_comaction_threads; ++i) {
+    compaction_workers_.emplace_back(new CompactionWorker(&noderef_));
+    compaction_workers_.back()->start();
+  }
 }
 
 void TSDBNode::stop() {
