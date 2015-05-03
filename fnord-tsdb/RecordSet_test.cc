@@ -101,10 +101,11 @@ TEST_CASE(RecordSetTest, TestAddRowToEmptySet, [] () {
   EXPECT_TRUE(recset.getState().commitlog.isEmpty());
   EXPECT_EQ(recset.getState().commitlog_size, 0);
   EXPECT_EQ(recset.getState().datafiles.size(), 1);
+  EXPECT_EQ(recset.getState().datafiles.back().second, 4);
   EXPECT_EQ(recset.getState().old_commitlogs.size(), 0);
   EXPECT_EQ(recset.commitlogSize(), 0);
 
-  cstable::CSTableReader reader(recset.getState().datafiles.back());
+  cstable::CSTableReader reader(recset.getState().datafiles.back().first);
   void* data;
   size_t size;
   uint64_t r;
@@ -158,8 +159,9 @@ TEST_CASE(RecordSetTest, TestDuplicateRowsInCommitlog, [] () {
 
   recset.rollCommitlog();
   recset.compact();
+  EXPECT_EQ(recset.commitlogSize(), 0);
 
-  cstable::CSTableReader reader(recset.getState().datafiles.back());
+  cstable::CSTableReader reader(recset.getState().datafiles.back().first);
   void* data;
   size_t size;
   uint64_t r;
@@ -189,6 +191,7 @@ TEST_CASE(RecordSetTest, TestCompactionWithExistingTable, [] () {
   recset.addRecord(0x12121212, testObject(schema, "4a", "4b"));
   recset.rollCommitlog();
   recset.compact();
+  EXPECT_EQ(recset.commitlogSize(), 0);
 
   auto msgids = recset.listRecords();
 
@@ -214,9 +217,10 @@ TEST_CASE(RecordSetTest, TestInsert10kRows, [] () {
 
   EXPECT_EQ(recset.getState().old_commitlogs.size(), 10);
   recset.compact();
+  EXPECT_EQ(recset.commitlogSize(), 0);
   EXPECT_EQ(recset.getState().datafiles.size(), 1);
 
-  cstable::CSTableReader reader(recset.getState().datafiles.back());
+  cstable::CSTableReader reader(recset.getState().datafiles.back().first);
   EXPECT_EQ(reader.numRecords(), 10000);
 });
 
@@ -234,9 +238,14 @@ TEST_CASE(RecordSetTest, TestSplitIntoMultipleDatafiles, [] () {
 
     recset.rollCommitlog();
     recset.compact();
+    EXPECT_EQ(recset.commitlogSize(), 0);
   }
 
   EXPECT_EQ(recset.getState().datafiles.size(), 4);
+  EXPECT_EQ(recset.getState().datafiles[0].second, 3000);
+  EXPECT_EQ(recset.getState().datafiles[1].second, 3000);
+  EXPECT_EQ(recset.getState().datafiles[2].second, 3000);
+  EXPECT_EQ(recset.getState().datafiles[3].second, 1000);
 
   auto msgids = recset.listRecords();
   EXPECT_EQ(msgids.size(), 10000);
