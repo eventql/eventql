@@ -32,6 +32,11 @@ protected:
       http::HTTPResponse* res,
       URI* uri);
 
+  void insertRecordsBatch(
+      http::HTTPRequest* req,
+      http::HTTPResponse* res,
+      URI* uri);
+
   TSDBNode* node_;
   Random rnd_;
 };
