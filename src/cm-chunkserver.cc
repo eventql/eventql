@@ -42,6 +42,7 @@
 #include "fnord-logtable/NumericBoundsSummary.h"
 #include "fnord-mdb/MDB.h"
 #include "fnord-mdb/MDBUtil.h"
+#include "fnord-tsdb/TSDBNode.h"
 #include "common.h"
 #include "schemas.h"
 #include "ModelReplication.h"
@@ -235,24 +236,27 @@ int main(int argc, const char** argv) {
   }
 
   logtable::TableJanitor table_janitor(&table_repo);
-  if (!readonly) {
-    table_janitor.start();
-    table_replication.start();
-    artifact_replication.start();
-    model_replication.start();
-  }
+  //if (!readonly) {
+  //  table_janitor.start();
+  //  table_replication.start();
+  //  artifact_replication.start();
+  //  model_replication.start();
+  //}
 
   logtable::LogTableServlet logtable_servlet(&table_repo);
   http_router.addRouteByPrefixMatch("/logtable", &logtable_servlet, &tpool);
+
+  tsdb::TSDBNode tsdb_node("xxx", "/tmp/tsdb");
+
   ev.run();
 
-  if (!readonly) {
-    table_janitor.stop();
-    table_janitor.check();
-    table_replication.stop();
-    artifact_replication.stop();
-    model_replication.stop();
-  }
+  //if (!readonly) {
+  //  table_janitor.stop();
+  //  table_janitor.check();
+  //  table_replication.stop();
+  //  artifact_replication.stop();
+  //  model_replication.stop();
+  //}
 
   fnord::logInfo("cm.chunkserver", "Exiting...");
 

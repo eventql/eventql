@@ -404,6 +404,7 @@ add_executable(cm-chunkserver
     $<TARGET_OBJECTS:fnord-sstable>
     $<TARGET_OBJECTS:fnord-cstable>
     $<TARGET_OBJECTS:fnord-msg>
+    $<TARGET_OBJECTS:fnord-tsdb>
     3rdparty/libfnord/fnord-sstable/SSTableServlet.cc
     3rdparty/libfnord/fnord-logtable/ArtifactIndex.cc
     3rdparty/libfnord/fnord-logtable/ArtifactIndexReplication.cc
