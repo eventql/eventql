@@ -249,7 +249,7 @@ int main(int argc, const char** argv) {
 
   tsdb::TSDBNode tsdb_node("xxx", "/tmp/tsdb");
   tsdb_node.configurePrefix(
-      "b",
+      "joined_sessions.",
       tsdb::StreamProperties(new msg::MessageSchema(joinedSessionsSchema())));
 
   tsdb::TSDBServlet tsdb_servlet(&tsdb_node);
