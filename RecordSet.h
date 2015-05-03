@@ -44,6 +44,7 @@ public:
   Set<uint64_t> listRecords();
 
   RecordSetState getState() const;
+  size_t version() const;
   size_t commitlogSize() const;
 
   void rollCommitlog();
@@ -57,6 +58,7 @@ protected:
       const String& filename,
       Function<void (uint64_t, const void*, size_t)> fn);
 
+  size_t version_;
   RefPtr<msg::MessageSchema> schema_;
   String filename_prefix_;
   RecordSetState state_;

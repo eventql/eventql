@@ -57,7 +57,11 @@ void StreamChunk::insertRecord(
     DateTime time) {
   std::unique_lock<std::mutex> lk(mutex_);
 
+  auto old_ver = records_.version();
   records_.addRecord(record_id, record);
+  if (records_.version() != old_ver) {
+    fnord::iputs("commit recset state...", 1);
+  }
 
   if (!compaction_scheduled_) {
     node_->compactionq.insert(this);
