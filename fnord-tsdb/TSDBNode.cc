@@ -38,7 +38,7 @@ void TSDBNode::insertRecord(
     std::unique_lock<std::mutex> lk(mutex_);
     auto chunk_iter = chunks_.find(chunk_key);
     if (chunk_iter == chunks_.end()) {
-      chunk = StreamChunk::create(stream_key, chunk_key, config, &noderef_);
+      chunk = StreamChunk::create(chunk_key, stream_key, config, &noderef_);
       chunks_.emplace(chunk_key, chunk);
     } else {
       chunk = chunk_iter->second;
@@ -78,6 +78,7 @@ void TSDBNode::configurePrefix(
 }
 
 void TSDBNode::start() {
+  reopenStreamChunks();
   compaction_workers_.emplace_back(new CompactionWorker(&noderef_));
   compaction_workers_.back()->start();
 }
@@ -86,6 +87,41 @@ void TSDBNode::stop() {
   for (auto& w : compaction_workers_) {
     w->stop();
   }
+}
+
+void TSDBNode::reopenStreamChunks() {
+  auto txn = noderef_.db->startTransaction(false);
+  auto cursor = txn->getCursor();
+
+  for (int i = 0; ; ++i) {
+    Buffer key;
+    Buffer value;
+    if (i == 0) {
+      if (!cursor->getFirst(&key, &value)) {
+        break;
+      }
+    } else {
+      if (!cursor->getNext(&key, &value)) {
+        break;
+      }
+    }
+
+    auto chunk_key = key.toString();
+    util::BinaryMessageReader reader(value.data(), value.size());
+    StreamChunkState state;
+    state.decode(&reader);
+
+    auto chunk = StreamChunk::reopen(
+        chunk_key,
+        state,
+        configFor(state.stream_key),
+        &noderef_);
+
+    chunks_.emplace(chunk_key, chunk);
+  }
+
+  cursor->close();
+  txn->abort();
 }
 
 } // namespace tdsb
