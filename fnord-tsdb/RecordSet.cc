@@ -121,10 +121,10 @@ void RecordSet::compact() {
 
   bool rewrite_last =
       snap.datafiles.size() > 0 &&
-      FileUtil::size(snap.datafiles.back()) < max_datafile_size_;
+      FileUtil::size(snap.datafiles.back().first) < max_datafile_size_;
 
   for (int j = 0; j < snap.datafiles.size(); ++j) {
-    cstable::CSTableReader reader(snap.datafiles[j]);
+    cstable::CSTableReader reader(snap.datafiles[j].first);
     cstable::RecordMaterializer record_reader(schema_.get(), &reader);
 
     auto msgid_col_ref = reader.getColumnReader("__msgid");
@@ -174,9 +174,10 @@ void RecordSet::compact() {
   }
 
   auto outfile_path = filename_prefix_ + rnd_.hex64() + ".cst";
+  auto outfile_nrecords = outfile.numRecords();
   cstable::CSTableWriter outfile_writer(
       outfile_path,
-      outfile.numRecords());
+      outfile_nrecords);
 
   outfile.write(&outfile_writer);
   outfile_writer.addColumn("__msgid", &id_col);
@@ -188,7 +189,7 @@ void RecordSet::compact() {
     state_.datafiles.pop_back();
   }
 
-  state_.datafiles.emplace_back(outfile_path);
+  state_.datafiles.emplace_back(outfile_path, outfile_nrecords);
 
   for (const auto& cl : snap.old_commitlogs) {
     state_.old_commitlogs.erase(cl);
@@ -226,7 +227,7 @@ Set<uint64_t> RecordSet::listRecords() {
   lk.unlock();
 
   for (const auto& datafile : datafiles) {
-    cstable::CSTableReader reader(datafile);
+    cstable::CSTableReader reader(datafile.first);
     auto col = reader.getColumnReader("__msgid");
 
     void* data;
