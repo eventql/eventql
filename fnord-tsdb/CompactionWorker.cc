@@ -43,14 +43,11 @@ void CompactionWorker::run() {
       continue;
     }
 
-    fnord::iputs("got job...", 1);
-
-    //try {
-    //  
-    //} catch (const Exception& e) {
-    //  fnord::logError("fnord.evdb", e, "CompactionWorker error");
-    //}
-
+    try {
+      job.get()->compact();
+    } catch (const std::exception& e) {
+      fnord::logError("fnord.evdb", e, "CompactionWorker error");
+    }
   }
 }
 

@@ -38,6 +38,8 @@ public:
       const Buffer& record,
       DateTime time);
 
+  void compact();
+
 protected:
 
   StreamChunk(
