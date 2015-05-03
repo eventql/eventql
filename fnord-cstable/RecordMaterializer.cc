@@ -145,13 +145,25 @@ void RecordMaterializer::insertValue(
     case msg::FieldType::OBJECT:
       break;
 
+    case msg::FieldType::UINT32:
+      record->addChild(
+          column->field_id,
+          *((uint32_t*) column->data));
+      break;
+
     case msg::FieldType::STRING:
       record->addChild(
           column->field_id,
           String((char*) column->data, column->size));
       break;
 
-
+    case msg::FieldType::BOOLEAN:
+      if (*((uint8_t*) column->data) == 1) {
+        record->addChild(column->field_id, msg::TRUE);
+      } else {
+        record->addChild(column->field_id, msg::FALSE);
+      }
+      break;
   }
 }
 
