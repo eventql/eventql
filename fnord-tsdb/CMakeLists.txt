@@ -24,3 +24,12 @@ add_executable(tests/test-recordset
     $<TARGET_OBJECTS:fnord-http>
     RecordSet_test.cc)
 
+add_executable(tests/test-tsdbnode
+    $<TARGET_OBJECTS:fnord-base>
+    $<TARGET_OBJECTS:fnord-msg>
+    $<TARGET_OBJECTS:fnord-mdb>
+    $<TARGET_OBJECTS:fnord-tsdb>
+    $<TARGET_OBJECTS:fnord-cstable>
+    $<TARGET_OBJECTS:fnord-http>
+    TSDBNode_test.cc)
+

@@ -10,6 +10,7 @@
 #include "fnord-base/util/binarymessagewriter.h"
 #include "fnord-tsdb/TSDBServlet.h"
 #include "fnord-json/json.h"
+#include <fnord-base/wallclock.h>
 #include "fnord-msg/MessageEncoder.h"
 #include "fnord-msg/MessagePrinter.h"
 
@@ -51,6 +52,10 @@ void TSDBServlet::insertRecord(
     return;
   }
 
+  uint64_t record_id = rnd_.random64();
+  auto time = WallClock::now();
+
+  node_->insertRecord(stream, record_id, req->body(), time);
   res->setStatus(http::kStatusCreated);
 }
 
