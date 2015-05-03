@@ -251,7 +251,8 @@ int main(int argc, const char** argv) {
   tsdb::TSDBNode tsdb_node(replica, dir + "/tsdb");
 
   tsdb::StreamProperties config(new msg::MessageSchema(joinedSessionsSchema()));
-  config.max_datafile_size= 1024 * 1024 * 512;
+  config.max_datafile_size = 1024 * 1024 * 512;
+  config.chunk_size = Duration(3600 * 4 * kMicrosPerSecond);
   config.compaction_interval = Duration(120 * kMicrosPerSecond);
   tsdb_node.configurePrefix("joined_sessions.", config);
 
