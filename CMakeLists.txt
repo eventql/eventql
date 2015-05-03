@@ -525,6 +525,7 @@ add_executable(cm-jqcolumnize
     $<TARGET_OBJECTS:fnord-sstable>
     $<TARGET_OBJECTS:fnord-msg>
     $<TARGET_OBJECTS:fnord-fts>
+    src/schemas.cc
     src/analytics/AnalyticsTableScan.cc
     src/analytics/TrafficSegment.cc
     src/analytics/CTRByPositionQuery.cc
