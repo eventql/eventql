@@ -31,6 +31,10 @@ void TSDBServlet::handleHTTPRequest(
       return insertRecord(req, res, &uri);
     }
 
+    if (StringUtil::endsWith(uri.path(), "/insert_batch")) {
+      return insertRecordsBatch(req, res, &uri);
+    }
+
     res->setStatus(fnord::http::kStatusNotFound);
     res->addBody("not found");
   } catch (const Exception& e) {
@@ -56,6 +60,32 @@ void TSDBServlet::insertRecord(
   auto time = WallClock::now();
 
   node_->insertRecord(stream, record_id, req->body(), time);
+  res->setStatus(http::kStatusCreated);
+}
+
+void TSDBServlet::insertRecordsBatch(
+    http::HTTPRequest* req,
+    http::HTTPResponse* res,
+    URI* uri) {
+  const auto& params = uri->queryParams();
+
+  String stream;
+  if (!URI::getParam(params, "stream", &stream)) {
+    res->setStatus(fnord::http::kStatusBadRequest);
+    res->addBody("missing ?stream=... parameter");
+    return;
+  }
+
+  auto& buf = req->body();
+  util::BinaryMessageReader reader(buf.data(), buf.size());
+  while (reader.remaining() > 0) {
+    auto time = *reader.readUInt64();
+    auto record_id = *reader.readUInt64();
+    auto len = reader.readVarUInt();
+    auto data = reader.read(len);
+    node_->insertRecord(stream, record_id, Buffer(data, len), time);
+  }
+
   res->setStatus(http::kStatusCreated);
 }
 
