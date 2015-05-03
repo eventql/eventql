@@ -220,5 +220,29 @@ TEST_CASE(RecordSetTest, TestInsert10kRows, [] () {
   EXPECT_EQ(reader.numRecords(), 10000);
 });
 
+TEST_CASE(RecordSetTest, TestSplitIntoMultipleDatafiles, [] () {
+  Random rnd;
+  auto schema = testSchema();
+  RecordSet recset(schema, "/tmp/__fnord_testrecset");
+  recset.setMaxDatafileSize(1024 * 50);
+
+  int n = 0;
+  for (int j = 0; j < 10; ++j) {
+    for (int i = 0; i < 1000; ++i) {
+      recset.addRecord(++n, testObject(schema, "1a", "1b"));
+    }
+
+    recset.rollCommitlog();
+    recset.compact();
+  }
+
+  EXPECT_EQ(recset.getState().datafiles.size(), 4);
+
+  auto msgids = recset.listRecords();
+  EXPECT_EQ(msgids.size(), 10000);
+  for (int i = 1; i <= 10000; ++i) {
+    EXPECT_EQ(msgids.count(i), 1);
+  }
+});
 
 
