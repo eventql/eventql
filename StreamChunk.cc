@@ -8,6 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <fnord-tsdb/StreamChunk.h>
+#include <fnord-base/io/fileutil.h>
 #include <fnord-base/util/binarymessagewriter.h>
 
 namespace fnord {
@@ -15,8 +16,9 @@ namespace tsdb {
 
 RefPtr<StreamChunk> StreamChunk::create(
     const String& stream_key,
-    RefPtr<StreamProperties> config) {
-  return RefPtr<StreamChunk>(new StreamChunk(config, "/tmp/xxxx"));
+    RefPtr<StreamProperties> config,
+    TSDBNodeRef* node) {
+  return RefPtr<StreamChunk>(new StreamChunk(stream_key, config, node));
 }
 
 String StreamChunk::streamChunkKeyFor(
@@ -36,16 +38,34 @@ String StreamChunk::streamChunkKeyFor(
 }
 
 StreamChunk::StreamChunk(
+    const String& stream_key,
     RefPtr<StreamProperties> config,
-    const String& filename_prefix) :
+    TSDBNodeRef* node) :
     config_(config),
-    records_(config->schema, filename_prefix) {}
+    node_(node),
+    records_(
+        config->schema,
+        FileUtil::joinPaths(
+            node->db_path,
+            StringUtil::stripShell(stream_key) + ".")),
+    replication_scheduled_(false),
+    compaction_scheduled_(false) {}
 
 void StreamChunk::insertRecord(
     uint64_t record_id,
     const Buffer& record,
     DateTime time) {
+  std::unique_lock<std::mutex> lk(mutex_);
+
   records_.addRecord(record_id, record);
+
+  if (!compaction_scheduled_) {
+    compaction_scheduled_ = true;
+  }
+
+  if (!replication_scheduled_) {
+    replication_scheduled_ = true;
+  }
 }
 
 
