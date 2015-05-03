@@ -7,26 +7,31 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#ifndef _FNORD_TSDB_TSDBNODEREF_H
-#define _FNORD_TSDB_TSDBNODEREF_H
+#ifndef _FNORD_TSDB_COMPACTIONWORKER_H
+#define _FNORD_TSDB_COMPACTIONWORKER_H
+#include <thread>
 #include <fnord-base/stdtypes.h>
-#include <fnord-base/random.h>
-#include <fnord-base/option.h>
-#include <fnord-base/autoref.h>
-#include <fnord-base/thread/queue.h>
+#include <fnord-tsdb/TSDBNodeRef.h>
 
 namespace fnord {
 namespace tsdb {
 
-class StreamChunk;
+class CompactionWorker : public RefCounted {
+public:
 
-struct TSDBNodeRef {
-  const String db_path;
-  thread::Queue<RefPtr<StreamChunk>> compactionq;
-  thread::Queue<RefPtr<StreamChunk>> replicationq;
+  CompactionWorker(TSDBNodeRef* node);
+  void start();
+  void stop();
+
+protected:
+  void run();
+
+  thread::Queue<RefPtr<StreamChunk>>* queue_;
+  std::atomic<bool> running_;
+  std::thread thread_;
 };
 
-} // namespace tdsb
+} // namespace tsdb
 } // namespace fnord
 
 #endif

@@ -11,6 +11,7 @@ include_directories(../)
 include_directories(../3rdparty)
 
 add_library(fnord-tsdb OBJECT
+    CompactionWorker.cc
     TSDBNode.cc
     TSDBServlet.cc
     RecordSet.cc

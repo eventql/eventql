@@ -60,11 +60,8 @@ void StreamChunk::insertRecord(
   records_.addRecord(record_id, record);
 
   if (!compaction_scheduled_) {
+    node_->compactionq.insert(this);
     compaction_scheduled_ = true;
-  }
-
-  if (!replication_scheduled_) {
-    replication_scheduled_ = true;
   }
 }
 
