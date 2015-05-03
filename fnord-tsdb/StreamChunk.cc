@@ -115,12 +115,21 @@ void StreamChunk::compact() {
 void StreamChunk::commitState() {
   StreamChunkState state;
 
-  Buffer buf;
-  //state.encode(&buf);
+  util::BinaryMessageWriter buf;
+  state.encode(&buf);
 
   auto txn = node_->db->startTransaction(false);
-  txn->update(key_, buf);
+  txn->update(key_.data(), key_.size(), buf.data(), buf.size());
   txn->commit();
+}
+
+void StreamChunk::StreamChunkState::encode(
+    util::BinaryMessageWriter* writer) const {
+  record_state.encode(writer);
+}
+
+void StreamChunk::StreamChunkState::decode(util::BinaryMessageReader* reader) {
+  record_state.decode(reader);
 }
 
 }
