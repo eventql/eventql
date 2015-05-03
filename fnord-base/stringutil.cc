@@ -183,6 +183,15 @@ bool StringUtil::isHexString(const std::string& str) {
   return true;
 }
 
+bool StringUtil::isAlphanumeric(char chr) {
+  bool is_alphanum =
+      (chr >= '0' && chr <= '9') ||
+      (chr >= 'a' && chr <= 'z') ||
+      (chr >= 'A' && chr <= 'Z');
+
+  return is_alphanum;
+}
+
 void StringUtil::toLower(std::string* str) {
   auto& str_ref = *str;
 
@@ -261,6 +270,18 @@ std::string StringUtil::convertUTF16To8(const std::wstring& str) {
 
   for (const auto& c : str) {
     UTF8::encodeCodepoint(c, &out);
+  }
+
+  return out;
+}
+
+String StringUtil::stripShell(const std::string& str) {
+  String out;
+
+  for (const auto& c : str) {
+    if (isAlphanumeric(c) || c == '_' || c == '-' || c == '.') {
+      out += c;
+    }
   }
 
   return out;
