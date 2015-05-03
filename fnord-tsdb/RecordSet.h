@@ -21,6 +21,7 @@ namespace tsdb {
 
 class RecordSet {
 public:
+  static const size_t kDefaultMaxDatafileSize = 1024 * 1024 * 128;
 
   struct RecordSetState {
     RecordSetState();
@@ -48,6 +49,8 @@ public:
   void rollCommitlog();
   void compact();
 
+  void setMaxDatafileSize(size_t size);
+
 protected:
 
   void loadCommitlog(
@@ -61,6 +64,7 @@ protected:
   mutable std::mutex mutex_;
   Random rnd_;
   Set<uint64_t> commitlog_ids_;
+  size_t max_datafile_size_;
 };
 
 } // namespace tdsb
