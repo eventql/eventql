@@ -255,7 +255,11 @@ int main(int argc, const char** argv) {
   tsdb::TSDBServlet tsdb_servlet(&tsdb_node);
   http_router.addRouteByPrefixMatch("/tsdb", &tsdb_servlet, &tpool);
 
+  tsdb_node.start();
+
   ev.run();
+
+  tsdb_node.stop();
 
   //if (!readonly) {
   //  table_janitor.stop();
