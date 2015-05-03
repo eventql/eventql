@@ -47,12 +47,15 @@ protected:
       RefPtr<StreamProperties> config,
       TSDBNodeRef* node);
 
+  void scheduleCompaction();
+
   RecordSet records_;
   RefPtr<StreamProperties> config_;
   TSDBNodeRef* node_;
   std::mutex mutex_;
   bool replication_scheduled_;
   bool compaction_scheduled_;
+  DateTime last_compaction_;
 };
 
 }
