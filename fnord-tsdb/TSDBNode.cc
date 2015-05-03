@@ -71,6 +71,12 @@ RefPtr<StreamProperties> TSDBNode::configFor(const String& stream_key) const {
   return config;
 }
 
+void TSDBNode::configurePrefix(
+    const String& stream_key_prefix,
+    StreamProperties props) {
+  configs_.emplace_back(stream_key_prefix, new StreamProperties(props));
+}
+
 } // namespace tdsb
 } // namespace fnord
 

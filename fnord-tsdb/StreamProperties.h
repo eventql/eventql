@@ -23,6 +23,11 @@ struct StreamProperties : public RefCounted {
       chunk_size(kMicrosPerSecond * 3600),
       max_datafile_size(1024 * 1024 * 128) {}
 
+  StreamProperties(const StreamProperties& other) :
+      schema(other.schema),
+      chunk_size(other.chunk_size),
+      max_datafile_size(other.max_datafile_size) {}
+
   RefPtr<msg::MessageSchema> schema;
   Duration chunk_size;
   size_t max_datafile_size;
