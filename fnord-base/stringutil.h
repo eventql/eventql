@@ -50,6 +50,14 @@ public:
   static void stripTrailingSlashes(std::string* str);
 
   /**
+   * Remove all characters except [A-Za-z0-9_-.] from the string
+   *
+   * @param str the string to remove chars from
+   * @return the stripped string
+   */
+  static String stripShell(const std::string& str);
+
+  /**
    * Check if the provided string begins with the provided prefix
    *
    * @param str the string to check
@@ -72,11 +80,18 @@ public:
       const std::string& suffix);
 
   /**
-   * Check if the provided string contains only 0-9a-zA-Z
+   * Check if the provided string contains only 0-9a-fA-f
    *
    * @param str the string to check
    */
   static bool isHexString(const std::string& str);
+
+  /**
+   * Check if the provided char is one of 0-9a-zA-Z
+   *
+   * @param chr the char to check
+   */
+  static bool isAlphanumeric(char chr);
 
   /**
    * Replace all occurences of pattern with replacement in str
