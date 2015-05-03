@@ -92,7 +92,11 @@ StreamChunk::StreamChunk(
         state.record_state),
     replication_scheduled_(false),
     compaction_scheduled_(false),
-    last_compaction_(0) {}
+    last_compaction_(0) {
+  if (records_.commitlogSize() > 0) {
+    scheduleCompaction();
+  }
+}
 
 void StreamChunk::insertRecord(
     uint64_t record_id,
