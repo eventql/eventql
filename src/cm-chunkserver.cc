@@ -248,6 +248,10 @@ int main(int argc, const char** argv) {
   http_router.addRouteByPrefixMatch("/logtable", &logtable_servlet, &tpool);
 
   tsdb::TSDBNode tsdb_node("xxx", "/tmp/tsdb");
+  tsdb_node.configurePrefix(
+      "b",
+      tsdb::StreamProperties(new msg::MessageSchema(joinedSessionsSchema())));
+
   tsdb::TSDBServlet tsdb_servlet(&tsdb_node);
   http_router.addRouteByPrefixMatch("/tsdb", &tsdb_servlet, &tpool);
 
