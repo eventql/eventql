@@ -50,7 +50,8 @@ StreamChunk::StreamChunk(
             node->db_path,
             StringUtil::stripShell(stream_key) + ".")),
     replication_scheduled_(false),
-    compaction_scheduled_(false) {}
+    compaction_scheduled_(false),
+    last_compaction_(0) {}
 
 void StreamChunk::insertRecord(
     uint64_t record_id,
@@ -64,10 +65,25 @@ void StreamChunk::insertRecord(
     fnord::iputs("commit recset state...", 1);
   }
 
-  if (!compaction_scheduled_) {
-    node_->compactionq.insert(this, WallClock::unixMicros() + 10 * kMicrosPerSecond);
-    compaction_scheduled_ = true;
+  scheduleCompaction();
+}
+
+void StreamChunk::scheduleCompaction() {
+  if (compaction_scheduled_) {
+    return;
   }
+
+  auto now = WallClock::unixMicros();
+  auto interval = config_->compaction_interval.microseconds();
+  auto next = last_compaction_.unixMicros() + interval;
+
+  auto compaction_delay = 0;
+  if (next > now) {
+    compaction_delay = next - now;
+  }
+
+  node_->compactionq.insert(this, now + compaction_delay);
+  compaction_scheduled_ = true;
 }
 
 
@@ -75,6 +91,7 @@ void StreamChunk::compact() {
   fnord::iputs("compact...", 1);
   std::unique_lock<std::mutex> lk(mutex_);
   compaction_scheduled_ = false;
+  last_compaction_ = DateTime::now();
   lk.unlock();
 
   records_.rollCommitlog();
