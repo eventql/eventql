@@ -17,6 +17,7 @@
 #include <fnord-tsdb/StreamProperties.h>
 #include <fnord-tsdb/StreamChunk.h>
 #include <fnord-tsdb/TSDBNodeRef.h>
+#include <fnord-tsdb/CompactionWorker.h>
 
 namespace fnord {
 namespace tsdb {
@@ -37,6 +38,9 @@ public:
       const Buffer& record,
       DateTime time);
 
+  void start();
+  void stop();
+
 protected:
 
   RefPtr<StreamProperties> configFor(const String& stream_key) const;
@@ -47,6 +51,7 @@ protected:
   Vector<Pair<String, RefPtr<StreamProperties>>> configs_;
   std::mutex mutex_;
   HashMap<String, RefPtr<StreamChunk>> chunks_;
+  Vector<RefPtr<CompactionWorker>> compaction_workers_;
 };
 
 } // namespace tdsb

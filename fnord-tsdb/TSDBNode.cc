@@ -77,6 +77,17 @@ void TSDBNode::configurePrefix(
   configs_.emplace_back(stream_key_prefix, new StreamProperties(props));
 }
 
+void TSDBNode::start() {
+  compaction_workers_.emplace_back(new CompactionWorker(&noderef_));
+  compaction_workers_.back()->start();
+}
+
+void TSDBNode::stop() {
+  for (auto& w : compaction_workers_) {
+    w->stop();
+  }
+}
+
 } // namespace tdsb
 } // namespace fnord
 
