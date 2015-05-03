@@ -14,6 +14,7 @@
 #include <fnord-base/option.h>
 #include <fnord-mdb/MDB.h>
 #include <fnord-tsdb/StreamProperties.h>
+#include <fnord-tsdb/StreamChunk.h>
 
 namespace fnord {
 namespace tsdb {
@@ -35,14 +36,9 @@ public:
       const Buffer& record,
       DateTime time);
 
-  static String streamKeyFor(
-      const String& stream_key,
-      DateTime time,
-      const StreamProperties& properties);
-
 protected:
 
-  const StreamProperties& getConfig(const String& stream_key) const;
+  RefPtr<StreamProperties> configFor(const String& stream_key) const;
 
   String nodeid_;
   String db_path_;

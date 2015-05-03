@@ -7,7 +7,6 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <fnord-base/util/binarymessagewriter.h>
 #include <fnord-tsdb/TSDBNode.h>
 
 namespace fnord {
@@ -32,25 +31,32 @@ void TSDBNode::insertRecord(
     uint64_t record_id,
     const Buffer& record,
     DateTime time) {
-  
+  auto config = configFor(stream_key);
+  auto chunk_key = StreamChunk::streamChunkKeyFor(stream_key, time, *config);
 }
 
-String TSDBNode::streamKeyFor(
-    const String& stream_key,
-    DateTime time,
-    const StreamProperties& properties) {
-  util::BinaryMessageWriter buf(stream_key.size() + 32);
+// FIXPAUL proper longest prefix search ;)
+RefPtr<StreamProperties> TSDBNode::configFor(const String& stream_key) const {
+  RefPtr<StreamProperties> config(nullptr);
+  size_t match_len = 0;
 
-  auto cs = properties.chunk_size.microseconds();
-  auto ts = (time.unixMicros() / cs) * cs / kMicrosPerSecond;
+  for (const auto& cfg : configs_) {
+    if (!StringUtil::beginsWith(stream_key, cfg.first)) {
+      continue;
+    }
 
-  buf.append(stream_key.data(), stream_key.size());
-  buf.appendUInt8(27);
-  buf.appendVarUInt(ts);
+    if (cfg.first.length() > match_len) {
+      config = cfg.second;
+      match_len = cfg.first.length();
+    }
+  }
 
-  return String((char *) buf.data(), buf.size());
+  if (config.get() == nullptr) {
+    RAISEF(kIndexError, "no config found for stream key: '$0'", stream_key);
+  }
+
+  return config;
 }
-
 
 } // namespace tdsb
 } // namespace fnord
