@@ -48,6 +48,7 @@ protected:
       TSDBNodeRef* node);
 
   void scheduleCompaction();
+  void commitState();
 
   RecordSet records_;
   RefPtr<StreamProperties> config_;

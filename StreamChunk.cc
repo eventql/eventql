@@ -62,7 +62,7 @@ void StreamChunk::insertRecord(
   auto old_ver = records_.version();
   records_.addRecord(record_id, record);
   if (records_.version() != old_ver) {
-    fnord::iputs("commit recset state...", 1);
+    commitState();
   }
 
   scheduleCompaction();
@@ -86,16 +86,26 @@ void StreamChunk::scheduleCompaction() {
   compaction_scheduled_ = true;
 }
 
-
 void StreamChunk::compact() {
-  fnord::iputs("compact...", 1);
   std::unique_lock<std::mutex> lk(mutex_);
   compaction_scheduled_ = false;
   last_compaction_ = DateTime::now();
   lk.unlock();
 
   records_.rollCommitlog();
-  records_.compact();
+
+  Set<String> deleted_files;
+  records_.compact(&deleted_files);
+
+  commitState();
+
+  for (const auto& f : deleted_files) {
+    FileUtil::rm(f);
+  }
+}
+
+void StreamChunk::commitState() {
+  fnord::iputs("commit recset state...", 1);
 }
 
 }
