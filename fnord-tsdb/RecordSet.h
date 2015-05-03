@@ -49,6 +49,7 @@ public:
 
   void rollCommitlog();
   void compact();
+  void compact(Set<String>* deleted_files);
 
   void setMaxDatafileSize(size_t size);
 
