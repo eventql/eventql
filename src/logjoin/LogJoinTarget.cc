@@ -300,18 +300,20 @@ void LogJoinTarget::onSession(
   obj.addChild(schema.id("gmv_eurcents"), session.gmv_eurcents);
 
   auto first_seen = session.firstSeenTime();
-  if (!first_seen.isEmpty()) {
-    obj.addChild(
-        schema.id("first_seen_time"),
-        first_seen.get().unixMicros() / kMicrosPerSecond);
+  auto last_seen = session.lastSeenTime();
+  if (first_seen.isEmpty() || last_seen.isEmpty()) {
+    return;
   }
 
-  auto last_seen = session.lastSeenTime();
-  if (!last_seen.isEmpty()) {
-    obj.addChild(
-        schema.id("last_seen_time"),
-        last_seen.get().unixMicros() / kMicrosPerSecond);
-  }
+  obj.addChild(
+      schema.id("first_seen_time"),
+      first_seen.get().unixMicros() / kMicrosPerSecond);
+
+  obj.addChild(
+      schema.id("last_seen_time"),
+      last_seen.get().unixMicros() / kMicrosPerSecond);
+
+  auto time = first_seen.get().unixMicros() / kMicrosPerSecond;
 
   if (dry_run_) {
     fnord::logInfo(
@@ -321,8 +323,14 @@ void LogJoinTarget::onSession(
   } else {
     Buffer msg_buf;
     msg::MessageEncoder::encode(obj, joined_sessions_schema_, &msg_buf);
+    util::BinaryMessageWriter buf;
+    buf.appendUInt64(time);
+    buf.appendUInt64(rnd_.random64());
+    buf.appendVarUInt(msg_buf.size());
+    buf.append(msg_buf.data(), msg_buf.size());
+
     auto key = StringUtil::format("__uploadq-sessions-$0",  rnd_.hex128());
-    txn->update(key, msg_buf);
+    txn->update(key.data(), key.size(), buf.data(), buf.size());
   }
 
   ++num_sessions;
