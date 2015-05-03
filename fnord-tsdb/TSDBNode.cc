@@ -23,8 +23,7 @@ TSDBNode::TSDBNode(
             false,
             1024 * 1024 * 1024, // 1 GiB
             nodeid + ".db",
-            nodeid + ".db.lck"
-            )) {}
+            nodeid + ".db.lck")) {}
 
 void TSDBNode::insertRecord(
     const String& stream_key,
@@ -33,6 +32,20 @@ void TSDBNode::insertRecord(
     DateTime time) {
   auto config = configFor(stream_key);
   auto chunk_key = StreamChunk::streamChunkKeyFor(stream_key, time, *config);
+
+  RefPtr<StreamChunk> chunk(nullptr);
+  {
+    std::unique_lock<std::mutex> lk(mutex_);
+    auto chunk_iter = chunks_.find(chunk_key);
+    if (chunk_iter == chunks_.end()) {
+      chunk = StreamChunk::create(stream_key, config);
+      chunks_.emplace(chunk_key, chunk);
+    } else {
+      chunk = chunk_iter->second;
+    }
+  }
+
+  chunk->insertRecord(record_id, record, time);
 }
 
 // FIXPAUL proper longest prefix search ;)

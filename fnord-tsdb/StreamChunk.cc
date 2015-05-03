@@ -13,6 +13,12 @@
 namespace fnord {
 namespace tsdb {
 
+RefPtr<StreamChunk> StreamChunk::create(
+    const String& stream_key,
+    RefPtr<StreamProperties> config) {
+  return RefPtr<StreamChunk>(new StreamChunk(config, "/tmp/xxxx"));
+}
+
 String StreamChunk::streamChunkKeyFor(
     const String& stream_key,
     DateTime time,
@@ -28,6 +34,20 @@ String StreamChunk::streamChunkKeyFor(
 
   return String((char *) buf.data(), buf.size());
 }
+
+StreamChunk::StreamChunk(
+    RefPtr<StreamProperties> config,
+    const String& filename_prefix) :
+    config_(config),
+    records_(config->schema, filename_prefix) {}
+
+void StreamChunk::insertRecord(
+    uint64_t record_id,
+    const Buffer& record,
+    DateTime time) {
+  records_.addRecord(record_id, record);
+}
+
 
 }
 }
