@@ -30,7 +30,8 @@ RecordSet::RecordSet(
     schema_(schema),
     filename_prefix_(filename_prefix),
     state_(state),
-    max_datafile_size_(kDefaultMaxDatafileSize) {
+    max_datafile_size_(kDefaultMaxDatafileSize),
+    version_(0) {
   auto id_index_fn = [this] (uint64_t id, const void* data, size_t size) {
     commitlog_ids_.emplace(id);
   };
@@ -47,6 +48,11 @@ RecordSet::RecordSet(
 RecordSet::RecordSetState RecordSet::getState() const {
   std::unique_lock<std::mutex> lk(mutex_);
   return state_;
+}
+
+size_t RecordSet::version() const {
+  std::unique_lock<std::mutex> lk(mutex_);
+  return version_;
 }
 
 size_t RecordSet::commitlogSize() const {
@@ -71,18 +77,25 @@ void RecordSet::addRecord(uint64_t record_id, const Buffer& message) {
   if (state_.commitlog.isEmpty()) {
     commitlog = filename_prefix_ + rnd_.hex64() + ".log";
     commitlog_size = 0;
+    ++version_;
   } else {
     commitlog = state_.commitlog.get();
     commitlog_size = state_.commitlog_size;
   }
 
   auto file = File::openFile(commitlog, File::O_WRITE | File::O_CREATEOROPEN);
-  file.truncate(commitlog_size + buf.size());
-  file.seekTo(commitlog_size);
+  file.truncate(sizeof(uint64_t) + commitlog_size + buf.size());
+  file.seekTo(sizeof(uint64_t) + commitlog_size);
   file.write(buf.data(), buf.size());
 
+  // FIXPAUL fsync here for non order preserving storage?
+
+  commitlog_size += buf.size();
+  file.seekTo(0);
+  file.write(&commitlog_size, sizeof(commitlog_size));
+
   state_.commitlog = Some(commitlog);
-  state_.commitlog_size = commitlog_size + buf.size();
+  state_.commitlog_size = commitlog_size;
   commitlog_ids_.emplace(record_id);
 }
 
@@ -93,10 +106,11 @@ void RecordSet::rollCommitlog() {
   }
 
   auto old_log = state_.commitlog.get();
-  FileUtil::truncate(old_log, state_.commitlog_size);
+  FileUtil::truncate(old_log, state_.commitlog_size + sizeof(uint64_t));
   state_.old_commitlogs.emplace(old_log);
   state_.commitlog = None<String>();
   state_.commitlog_size = 0;
+  ++version_;
 }
 
 void RecordSet::compact() {
@@ -198,6 +212,8 @@ void RecordSet::compact() {
   for (const auto& id : new_id_set) {
     commitlog_ids_.erase(id);
   }
+
+  ++version_;
 }
 
 void RecordSet::loadCommitlog(
@@ -205,8 +221,9 @@ void RecordSet::loadCommitlog(
     Function<void (uint64_t, const void*, size_t)> fn) {
   io::MmappedFile mmap(File::openFile(filename, File::O_READ));
   util::BinaryMessageReader reader(mmap.data(), mmap.size());
+  auto limit = *reader.readUInt64() + sizeof(uint64_t);
 
-  while (reader.remaining() > 0) {
+  while (reader.position() < limit) {
     auto id = *reader.readUInt64();
     auto len = reader.readVarUInt();
     auto data = reader.read(len);
@@ -247,7 +264,8 @@ void RecordSet::setMaxDatafileSize(size_t size) {
   max_datafile_size_ = size;
 }
 
-RecordSet::RecordSetState::RecordSetState() : commitlog_size(0) {}
+RecordSet::RecordSetState::RecordSetState() :
+    commitlog_size(0) {}
 
 } // namespace tsdb
 } // namespace fnord
