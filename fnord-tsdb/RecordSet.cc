@@ -284,14 +284,12 @@ void RecordSet::RecordSetState::encode(
   writer->appendVarUInt(datafiles.size());
   for (const auto& d : datafiles) {
     writer->appendVarUInt(d.second);
-    writer->appendVarUInt(d.first.size());
-    writer->append(d.first.data(), d.first.size());
+    writer->appendLenencString(d.first);
   }
 
   writer->appendVarUInt(all_commitlogs.size());
   for (const auto& cl : all_commitlogs) {
-    writer->appendVarUInt(cl.size());
-    writer->append(cl.data(), cl.size());
+    writer->appendLenencString(cl);
   }
 }
 
@@ -299,15 +297,13 @@ void RecordSet::RecordSetState::decode(util::BinaryMessageReader* reader) {
   auto num_datafiles = reader->readVarUInt();
   for (size_t i = 0; i < num_datafiles; ++i) {
     auto num_records = reader->readVarUInt();
-    auto fname_len = reader->readVarUInt();
-    String fname((char*) reader->read(fname_len), fname_len);
+    auto fname = reader->readLenencString();
     datafiles.emplace_back(fname, num_records);
   }
 
   auto num_commitlogs = reader->readVarUInt();
   for (size_t i = 0; i < num_commitlogs; ++i) {
-    auto fname_len = reader->readVarUInt();
-    String fname((char*) reader->read(fname_len), fname_len);
+    auto fname = reader->readLenencString();
     old_commitlogs.emplace(fname);
   }
 }

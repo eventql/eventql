@@ -16,14 +16,27 @@ namespace fnord {
 namespace tsdb {
 
 RefPtr<StreamChunk> StreamChunk::create(
-    const String& stream_key,
     const String& streamchunk_key,
+    const String& stream_key,
+    RefPtr<StreamProperties> config,
+    TSDBNodeRef* node) {
+  return RefPtr<StreamChunk>(
+      new StreamChunk(
+          streamchunk_key,
+          stream_key,
+          config,
+          node));
+}
+
+RefPtr<StreamChunk> StreamChunk::reopen(
+    const String& stream_key,
+    const StreamChunkState& state,
     RefPtr<StreamProperties> config,
     TSDBNodeRef* node) {
   return RefPtr<StreamChunk>(
       new StreamChunk(
           stream_key,
-          streamchunk_key,
+          state,
           config,
           node));
 }
@@ -45,10 +58,11 @@ String StreamChunk::streamChunkKeyFor(
 }
 
 StreamChunk::StreamChunk(
-    const String& stream_key,
     const String& streamchunk_key,
+    const String& stream_key,
     RefPtr<StreamProperties> config,
     TSDBNodeRef* node) :
+    stream_key_(stream_key),
     key_(streamchunk_key),
     config_(config),
     node_(node),
@@ -57,6 +71,25 @@ StreamChunk::StreamChunk(
         FileUtil::joinPaths(
             node->db_path,
             StringUtil::stripShell(stream_key) + ".")),
+    replication_scheduled_(false),
+    compaction_scheduled_(false),
+    last_compaction_(0) {}
+
+StreamChunk::StreamChunk(
+    const String& streamchunk_key,
+    const StreamChunkState& state,
+    RefPtr<StreamProperties> config,
+    TSDBNodeRef* node) :
+    stream_key_(state.stream_key),
+    key_(streamchunk_key),
+    config_(config),
+    node_(node),
+    records_(
+        config->schema,
+        FileUtil::joinPaths(
+            node->db_path,
+            StringUtil::stripShell(state.stream_key) + "."),
+        state.record_state),
     replication_scheduled_(false),
     compaction_scheduled_(false),
     last_compaction_(0) {}
@@ -114,6 +147,8 @@ void StreamChunk::compact() {
 
 void StreamChunk::commitState() {
   StreamChunkState state;
+  state.record_state = records_.getState();
+  state.stream_key = stream_key_;
 
   util::BinaryMessageWriter buf;
   state.encode(&buf);
@@ -123,12 +158,14 @@ void StreamChunk::commitState() {
   txn->commit();
 }
 
-void StreamChunk::StreamChunkState::encode(
+void StreamChunkState::encode(
     util::BinaryMessageWriter* writer) const {
+  writer->appendLenencString(stream_key);
   record_state.encode(writer);
 }
 
-void StreamChunk::StreamChunkState::decode(util::BinaryMessageReader* reader) {
+void StreamChunkState::decode(util::BinaryMessageReader* reader) {
+  stream_key = reader->readLenencString();
   record_state.decode(reader);
 }
 

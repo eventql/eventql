@@ -22,12 +22,25 @@
 namespace fnord {
 namespace tsdb {
 
+struct StreamChunkState {
+  String stream_key;
+  RecordSet::RecordSetState record_state;
+  void encode(util::BinaryMessageWriter* writer) const;
+  void decode(util::BinaryMessageReader* reader);
+};
+
 class StreamChunk : public RefCounted {
 public:
 
   static RefPtr<StreamChunk> create(
-      const String& stream_key,
       const String& streamchunk_key,
+      const String& stream_key,
+      RefPtr<StreamProperties> config,
+      TSDBNodeRef* node);
+
+  static RefPtr<StreamChunk> reopen(
+      const String& streamchunk_key,
+      const StreamChunkState& state,
       RefPtr<StreamProperties> config,
       TSDBNodeRef* node);
 
@@ -45,15 +58,15 @@ public:
 
 protected:
 
-  struct StreamChunkState {
-    RecordSet::RecordSetState record_state;
-    void encode(util::BinaryMessageWriter* writer) const;
-    void decode(util::BinaryMessageReader* reader);
-  };
+  StreamChunk(
+      const String& streamchunk_key,
+      const String& stream_key,
+      RefPtr<StreamProperties> config,
+      TSDBNodeRef* node);
 
   StreamChunk(
-      const String& stream_key,
       const String& streamchunk_key,
+      const StreamChunkState& state,
       RefPtr<StreamProperties> config,
       TSDBNodeRef* node);
 
@@ -61,6 +74,7 @@ protected:
   void commitState();
 
   String key_;
+  String stream_key_;
   RecordSet records_;
   RefPtr<StreamProperties> config_;
   TSDBNodeRef* node_;

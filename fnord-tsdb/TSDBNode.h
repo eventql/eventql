@@ -44,6 +44,7 @@ public:
 protected:
 
   RefPtr<StreamProperties> configFor(const String& stream_key) const;
+  void reopenStreamChunks();
 
   String nodeid_;
   TSDBNodeRef noderef_;
