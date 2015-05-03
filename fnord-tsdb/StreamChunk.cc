@@ -137,8 +137,6 @@ void StreamChunk::compact() {
   last_compaction_ = DateTime::now();
   lk.unlock();
 
-  records_.rollCommitlog();
-
   Set<String> deleted_files;
   records_.compact(&deleted_files);
 

@@ -100,7 +100,6 @@ void RecordSet::addRecord(uint64_t record_id, const Buffer& message) {
 }
 
 void RecordSet::rollCommitlog() {
-  std::unique_lock<std::mutex> lk(mutex_);
   if (state_.commitlog.isEmpty()) {
     return;
   }
@@ -125,6 +124,7 @@ void RecordSet::compact(Set<String>* deleted_files) {
   }
 
   std::unique_lock<std::mutex> lk(mutex_);
+  rollCommitlog();
   auto snap = state_;
   lk.unlock();
 

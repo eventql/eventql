@@ -38,7 +38,7 @@ public:
       const Buffer& record,
       DateTime time);
 
-  void start();
+  void start(size_t num_comaction_threads = 4);
   void stop();
 
 protected:
