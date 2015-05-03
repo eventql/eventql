@@ -41,6 +41,7 @@ void LEB128ColumnWriter::addDatum(
   rlvl_writer_.encode(rep_level);
   dlvl_writer_.encode(def_level);
   data_writer_.appendVarUInt(value);
+  ++num_vals_;
 }
 
 void LEB128ColumnWriter::write(util::BinaryMessageWriter* writer) {
