@@ -313,7 +313,7 @@ void LogJoinTarget::onSession(
       schema.id("last_seen_time"),
       last_seen.get().unixMicros() / kMicrosPerSecond);
 
-  auto time = first_seen.get().unixMicros() / kMicrosPerSecond;
+  auto time = first_seen.get().unixMicros();
 
   if (dry_run_) {
     fnord::logInfo(
