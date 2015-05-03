@@ -15,6 +15,7 @@
 #include <fnord-msg/MessageSchema.h>
 #include <fnord-tsdb/StreamProperties.h>
 #include <fnord-tsdb/RecordSet.h>
+#include <fnord-tsdb/TSDBNodeRef.h>
 
 namespace fnord {
 namespace tsdb {
@@ -24,7 +25,8 @@ public:
 
   static RefPtr<StreamChunk> create(
       const String& stream_key,
-      RefPtr<StreamProperties> config);
+      RefPtr<StreamProperties> config,
+      TSDBNodeRef* node);
 
   static String streamChunkKeyFor(
       const String& stream_key,
@@ -39,11 +41,16 @@ public:
 protected:
 
   StreamChunk(
+      const String& stream_key,
       RefPtr<StreamProperties> config,
-      const String& filename_prefix);
+      TSDBNodeRef* node);
 
   RecordSet records_;
   RefPtr<StreamProperties> config_;
+  TSDBNodeRef* node_;
+  std::mutex mutex_;
+  bool replication_scheduled_;
+  bool compaction_scheduled_;
 };
 
 }
