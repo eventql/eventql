@@ -12,6 +12,8 @@
 #include <fnord-base/stdtypes.h>
 #include <fnord-base/option.h>
 #include <fnord-base/datetime.h>
+#include <fnord-base/util/binarymessagereader.h>
+#include <fnord-base/util/binarymessagewriter.h>
 #include <fnord-msg/MessageSchema.h>
 #include <fnord-tsdb/StreamProperties.h>
 #include <fnord-tsdb/RecordSet.h>
@@ -25,6 +27,7 @@ public:
 
   static RefPtr<StreamChunk> create(
       const String& stream_key,
+      const String& streamchunk_key,
       RefPtr<StreamProperties> config,
       TSDBNodeRef* node);
 
@@ -42,14 +45,22 @@ public:
 
 protected:
 
+  struct StreamChunkState {
+    RecordSet::RecordSetState record_state;
+    void encode(util::BinaryMessageWriter* writer) const;
+    void decode(util::BinaryMessageReader* reader);
+  };
+
   StreamChunk(
       const String& stream_key,
+      const String& streamchunk_key,
       RefPtr<StreamProperties> config,
       TSDBNodeRef* node);
 
   void scheduleCompaction();
   void commitState();
 
+  String key_;
   RecordSet records_;
   RefPtr<StreamProperties> config_;
   TSDBNodeRef* node_;

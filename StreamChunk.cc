@@ -17,9 +17,15 @@ namespace tsdb {
 
 RefPtr<StreamChunk> StreamChunk::create(
     const String& stream_key,
+    const String& streamchunk_key,
     RefPtr<StreamProperties> config,
     TSDBNodeRef* node) {
-  return RefPtr<StreamChunk>(new StreamChunk(stream_key, config, node));
+  return RefPtr<StreamChunk>(
+      new StreamChunk(
+          stream_key,
+          streamchunk_key,
+          config,
+          node));
 }
 
 String StreamChunk::streamChunkKeyFor(
@@ -40,8 +46,10 @@ String StreamChunk::streamChunkKeyFor(
 
 StreamChunk::StreamChunk(
     const String& stream_key,
+    const String& streamchunk_key,
     RefPtr<StreamProperties> config,
     TSDBNodeRef* node) :
+    key_(streamchunk_key),
     config_(config),
     node_(node),
     records_(
@@ -105,7 +113,14 @@ void StreamChunk::compact() {
 }
 
 void StreamChunk::commitState() {
-  fnord::iputs("commit recset state...", 1);
+  StreamChunkState state;
+
+  Buffer buf;
+  //state.encode(&buf);
+
+  auto txn = node_->db->startTransaction(false);
+  txn->update(key_, buf);
+  txn->commit();
 }
 
 }
