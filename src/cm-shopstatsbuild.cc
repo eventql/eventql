@@ -59,15 +59,6 @@ int main(int argc, const char** argv) {
   fnord::cli::FlagParser flags;
 
   flags.defineFlag(
-      "datadir",
-      cli::FlagParser::T_STRING,
-      false,
-      NULL,
-      NULL,
-      "artifact directory",
-      "<path>");
-
-  flags.defineFlag(
       "tempdir",
       cli::FlagParser::T_STRING,
       false,
@@ -98,7 +89,6 @@ int main(int argc, const char** argv) {
   //auto index_path = flags.getString("index");
   //auto conf_path = flags.getString("conf");
   auto tempdir = flags.getString("tempdir");
-  auto datadir = flags.getString("datadir");
 
   /* open index */
   //auto index_reader = cm::IndexReader::openIndex(index_path);
@@ -173,7 +163,7 @@ int main(int argc, const char** argv) {
     auto table = StringUtil::format(
         "$0/shopstats-ctr-dawanda.$1.sst",
         tempdir,
-        StringUtil::hexPrint(&h, sizeof(h)));
+        StringUtil::hexPrint(&h, sizeof(h), false));
 
     tables.emplace(table);
     report_builder.addReport(
