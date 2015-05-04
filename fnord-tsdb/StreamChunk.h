@@ -62,6 +62,8 @@ public:
 
   void compact();
 
+  Vector<String> listFiles() const;
+
 protected:
 
   StreamChunk(
