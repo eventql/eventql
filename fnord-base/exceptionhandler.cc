@@ -65,12 +65,12 @@ static void globalEHandler() {
     /* fallthrough */
   }
 
-  abort();
+  exit(EXIT_FAILURE);
 }
 
 void CatchAndAbortExceptionHandler::installGlobalHandlers() {
   globalEHandlerMessage = message_;
-  std::set_terminate(&globalEHandler);
+  //std::set_terminate(&globalEHandler);
   std::set_unexpected(&globalEHandler);
 }
 
