@@ -37,6 +37,11 @@ protected:
       http::HTTPResponse* res,
       URI* uri);
 
+  void listChunks(
+      http::HTTPRequest* req,
+      http::HTTPResponse* res,
+      URI* uri);
+
   TSDBNode* node_;
   Random rnd_;
 };

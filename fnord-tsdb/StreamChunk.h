@@ -49,6 +49,12 @@ public:
       DateTime time,
       const StreamProperties& properties);
 
+  static Vector<String> streamChunkKeysFor(
+      const String& stream_key,
+      DateTime from,
+      DateTime until,
+      const StreamProperties& properties);
+
   void insertRecord(
       uint64_t record_id,
       const Buffer& record,

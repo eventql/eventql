@@ -32,6 +32,8 @@ public:
       const String& stream_key_prefix,
       StreamProperties props);
 
+  RefPtr<StreamProperties> configFor(const String& stream_key) const;
+
   void insertRecord(
       const String& stream_key,
       uint64_t record_id,
@@ -43,7 +45,6 @@ public:
 
 protected:
 
-  RefPtr<StreamProperties> configFor(const String& stream_key) const;
   void reopenStreamChunks();
 
   String nodeid_;
