@@ -85,14 +85,14 @@ int main(int argc, const char** argv) {
       "datadir path",
       "<path>");
 
-  //flags.defineFlag(
-  //    "shopstats_table",
-  //    cli::FlagParser::T_STRING,
-  //    true,
-  //    NULL,
-  //    NULL,
-  //    "path",
-  //    "<file>");
+  flags.defineFlag(
+      "shopstats_table",
+      cli::FlagParser::T_STRING,
+      true,
+      NULL,
+      NULL,
+      "path",
+      "<file>");
 
   flags.defineFlag(
       "loglevel",
@@ -126,9 +126,9 @@ int main(int argc, const char** argv) {
   http_router.addRouteByPrefixMatch("/analytics", &analytics_servlet, &tpool);
 
   /* stop stats */
-  //auto shopstats = cm::ShopStatsTable::open(flags.getString("shopstats_table"));
-  //cm::ShopStatsServlet shopstats_servlet(shopstats);
-  //http_router.addRouteByPrefixMatch("/shopstats", &shopstats_servlet, &tpool);
+  auto shopstats = cm::ShopStatsTable::open(flags.getString("shopstats_table"));
+  cm::ShopStatsServlet shopstats_servlet(shopstats);
+  http_router.addRouteByPrefixMatch("/shopstats", &shopstats_servlet, &tpool);
 
 
   analytics.registerQueryFactory("ctr_by_position", [] (
