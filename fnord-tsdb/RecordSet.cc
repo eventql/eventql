@@ -239,7 +239,7 @@ void RecordSet::loadCommitlog(
   }
 }
 
-Set<uint64_t> RecordSet::listRecords() {
+Set<uint64_t> RecordSet::listRecords() const {
   Set<uint64_t> res;
 
   std::unique_lock<std::mutex> lk(mutex_);
@@ -265,6 +265,17 @@ Set<uint64_t> RecordSet::listRecords() {
   }
 
   return res;
+}
+
+Vector<String> RecordSet::listDatafiles() const {
+  std::unique_lock<std::mutex> lk(mutex_);
+  Vector<String> datafiles;
+
+  for (const auto& df : state_.datafiles) {
+    datafiles.emplace_back(df.first);
+  }
+
+  return datafiles;
 }
 
 void RecordSet::setMaxDatafileSize(size_t size) {

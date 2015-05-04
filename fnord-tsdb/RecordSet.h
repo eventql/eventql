@@ -46,9 +46,11 @@ public:
 
   void fetchRecord(uint64_t record_id, Buffer* message);
 
-  Set<uint64_t> listRecords();
+  Set<uint64_t> listRecords() const;
 
   RecordSetState getState() const;
+  Vector<String> listDatafiles() const;
+
   size_t version() const;
   size_t commitlogSize() const;
 
