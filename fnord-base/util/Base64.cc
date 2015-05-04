@@ -12,8 +12,6 @@
 namespace fnord {
 namespace util {
 
-// void Base64::encode(const String& in, String* out);
-
 /**
  * based on the BASE64 encoding/decoding routines from
  *   http://www.opensource.apple.com/source/QuickTimeStreamingServer/QuickTimeStreamingServer-452/CommonUtilitiesLib/base64.c
@@ -69,62 +67,35 @@ void Base64::decode(const String& in, String* out) {
   }
 }
 
-/*
-int Base64decode_len(const char *bufcoded)
-{
-    int nbytesdecoded;
-    register const unsigned char *bufin;
-    register int nprbytes;
+void Base64::encode(const String& in, String* out) {
+  static const char chrtbl[] =
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
-    bufin = (const unsigned char *) bufcoded;
-    while (pr2six[*(bufin++)] <= 63);
-
-    nprbytes = (bufin - (const unsigned char *) bufcoded) - 1;
-    nbytesdecoded = ((nprbytes + 3) / 4) * 3;
-
-    return nbytesdecoded + 1;
-}
-
-static const char basis_64[] =
-  "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-
-int Base64encode_len(int len)
-{
-  return ((len + 2) / 3 * 4) + 1;
-}
-
-int Base64encode(char *encoded, const char *string, int len)
-{
-  int i;
-  char *p;
-
-  p = encoded;
-  for (i = 0; i < len - 2; i += 3) {
-  *p++ = basis_64[(string[i] >> 2) & 0x3F];
-  *p++ = basis_64[((string[i] & 0x3) << 4) |
-                  ((int) (string[i + 1] & 0xF0) >> 4)];
-  *p++ = basis_64[((string[i + 1] & 0xF) << 2) |
-                  ((int) (string[i + 2] & 0xC0) >> 6)];
-  *p++ = basis_64[string[i + 2] & 0x3F];
+  auto len = in.length();
+  auto s = in.c_str();
+  size_t i = 0;
+  for (; i < len - 2; i += 3) {
+    *out += chrtbl[(s[i] >> 2) & 0x3F];
+    *out += chrtbl[((s[i] & 0x3) << 4) | ((int) (s[i + 1] & 0xF0) >> 4)];
+    *out += chrtbl[((s[i + 1] & 0xF) << 2) | ((int) (s[i + 2] & 0xC0) >> 6)];
+    *out += chrtbl[s[i + 2] & 0x3F];
   }
+
   if (i < len) {
-  *p++ = basis_64[(string[i] >> 2) & 0x3F];
-  if (i == (len - 1)) {
-      *p++ = basis_64[((string[i] & 0x3) << 4)];
-      *p++ = '=';
-  }
-  else {
-      *p++ = basis_64[((string[i] & 0x3) << 4) |
-                      ((int) (string[i + 1] & 0xF0) >> 4)];
-      *p++ = basis_64[((string[i + 1] & 0xF) << 2)];
-  }
-  *p++ = '=';
-  }
+    *out += chrtbl[(s[i] >> 2) & 0x3F];
 
-  *p++ = '\0';
-  return p - encoded;
+    if (i == (len - 1)) {
+      *out += chrtbl[((s[i] & 0x3) << 4)];
+      *out += '=';
+    } else {
+      *out += chrtbl[((s[i] & 0x3) << 4) |((int) (s[i + 1] & 0xF0) >> 4)];
+      *out += chrtbl[((s[i + 1] & 0xF) << 2)];
+    }
+
+    *out += '=';
+  }
 }
-*/
+
 }
 }
 
