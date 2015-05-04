@@ -40,6 +40,8 @@ public:
       const Buffer& record,
       DateTime time);
 
+  Vector<String> listFiles(const String& chunk_key);
+
   void start(size_t num_comaction_threads = 4);
   void stop();
 

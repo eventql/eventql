@@ -48,6 +48,16 @@ void TSDBNode::insertRecord(
   chunk->insertRecord(record_id, record, time);
 }
 
+Vector<String> TSDBNode::listFiles(const String& chunk_key) {
+  std::unique_lock<std::mutex> lk(mutex_);
+  auto chunk = chunks_.find(chunk_key);
+  if (chunk == chunks_.end()) {
+    return Vector<String>{};
+  }
+
+  return chunk->second->listFiles();
+}
+
 // FIXPAUL proper longest prefix search ;)
 RefPtr<StreamProperties> TSDBNode::configFor(const String& stream_key) const {
   RefPtr<StreamProperties> config(nullptr);

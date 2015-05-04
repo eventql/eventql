@@ -40,6 +40,10 @@ void TSDBServlet::handleHTTPRequest(
       return listChunks(req, res, &uri);
     }
 
+    if (StringUtil::endsWith(uri.path(), "/list_files")) {
+      return listFiles(req, res, &uri);
+    }
+
     res->setStatus(fnord::http::kStatusNotFound);
     res->addBody("not found");
   } catch (const Exception& e) {
@@ -137,6 +141,17 @@ void TSDBServlet::listChunks(
     chunks_encoded.emplace_back(encoded);
   }
 
+  util::BinaryMessageWriter buf;
+  for (const auto& c : chunks_encoded) {
+    buf.appendLenencString(c);
+  }
+
+  res->setStatus(http::kStatusOK);
+  res->addHeader("Content-Type", "application/octet-stream");
+  res->addBody(buf.data(), buf.size());
+/*
+
+
   res->setStatus(http::kStatusOK);
   res->addHeader("Content-Type", "application/json; charset=utf-8");
   json::JSONOutputStream j(res->getBodyOutputStream());
@@ -154,8 +169,61 @@ void TSDBServlet::listChunks(
   j.addObjectEntry("chunk_keys");
   json::toJSON(chunks_encoded, &j);
   j.endObject();
+*/
 }
 
+void TSDBServlet::listFiles(
+    http::HTTPRequest* req,
+    http::HTTPResponse* res,
+    URI* uri) {
+  const auto& params = uri->queryParams();
+
+  String chunk;
+  if (!URI::getParam(params, "chunk", &chunk)) {
+    res->setStatus(fnord::http::kStatusBadRequest);
+    res->addBody("missing ?chunk=... parameter");
+    return;
+  }
+
+  String chunk_key;
+  util::Base64::decode(chunk, &chunk_key);
+  auto files = node_->listFiles(chunk_key);
+
+  util::BinaryMessageWriter buf;
+  for (const auto& f : files) {
+    buf.appendLenencString(f);
+  }
+
+  res->setStatus(http::kStatusOK);
+  res->addHeader("Content-Type", "application/octet-stream");
+  res->addBody(buf.data(), buf.size());
+/*
+  Vector<String> chunks_encoded;
+  for (const auto& c : chunks) {
+    String encoded;
+    util::Base64::encode(c, &encoded);
+    chunks_encoded.emplace_back(encoded);
+  }
+
+  res->setStatus(http::kStatusOK);
+  res->addHeader("Content-Type", "application/json; charset=utf-8");
+  json::JSONOutputStream j(res->getBodyOutputStream());
+
+  j.beginObject();
+  j.addObjectEntry("stream");
+  j.addString(stream);
+  j.addComma();
+  j.addObjectEntry("from");
+  j.addInteger(from.unixMicros());
+  j.addComma();
+  j.addObjectEntry("until");
+  j.addInteger(until.unixMicros());
+  j.addComma();
+  j.addObjectEntry("chunk_keys");
+  json::toJSON(chunks_encoded, &j);
+  j.endObject();
+*/
+}
 
 }
 }

@@ -42,6 +42,11 @@ protected:
       http::HTTPResponse* res,
       URI* uri);
 
+  void listFiles(
+      http::HTTPRequest* req,
+      http::HTTPResponse* res,
+      URI* uri);
+
   TSDBNode* node_;
   Random rnd_;
 };

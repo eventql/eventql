@@ -164,6 +164,10 @@ void StreamChunk::compact() {
   }
 }
 
+Vector<String> StreamChunk::listFiles() const {
+  return records_.listDatafiles();
+}
+
 void StreamChunk::commitState() {
   StreamChunkState state;
   state.record_state = records_.getState();
