@@ -13,6 +13,7 @@
 #include <fnord-base/wallclock.h>
 #include "fnord-msg/MessageEncoder.h"
 #include "fnord-msg/MessagePrinter.h"
+#include <fnord-base/util/Base64.h>
 
 namespace fnord {
 namespace tsdb {
@@ -33,6 +34,10 @@ void TSDBServlet::handleHTTPRequest(
 
     if (StringUtil::endsWith(uri.path(), "/insert_batch")) {
       return insertRecordsBatch(req, res, &uri);
+    }
+
+    if (StringUtil::endsWith(uri.path(), "/list_chunks")) {
+      return listChunks(req, res, &uri);
     }
 
     res->setStatus(fnord::http::kStatusNotFound);
@@ -88,6 +93,69 @@ void TSDBServlet::insertRecordsBatch(
 
   res->setStatus(http::kStatusCreated);
 }
+
+void TSDBServlet::listChunks(
+    http::HTTPRequest* req,
+    http::HTTPResponse* res,
+    URI* uri) {
+  const auto& params = uri->queryParams();
+
+  String stream;
+  if (!URI::getParam(params, "stream", &stream)) {
+    res->setStatus(fnord::http::kStatusBadRequest);
+    res->addBody("missing ?stream=... parameter");
+    return;
+  }
+
+  DateTime from;
+  String from_str;
+  if (URI::getParam(params, "from", &from_str)) {
+    from = DateTime(std::stoul(from_str));
+  } else {
+    res->setStatus(fnord::http::kStatusBadRequest);
+    res->addBody("missing ?from=... parameter");
+    return;
+  }
+
+  DateTime until;
+  String until_str;
+  if (URI::getParam(params, "until", &until_str)) {
+    until = DateTime(std::stoul(until_str));
+  } else {
+    res->setStatus(fnord::http::kStatusBadRequest);
+    res->addBody("missing ?until=... parameter");
+    return;
+  }
+
+  auto cfg = node_->configFor(stream);
+  auto chunks = StreamChunk::streamChunkKeysFor(stream, from, until, *cfg);
+
+  Vector<String> chunks_encoded;
+  for (const auto& c : chunks) {
+    String encoded;
+    util::Base64::encode(c, &encoded);
+    chunks_encoded.emplace_back(encoded);
+  }
+
+  res->setStatus(http::kStatusOK);
+  res->addHeader("Content-Type", "application/json; charset=utf-8");
+  json::JSONOutputStream j(res->getBodyOutputStream());
+
+  j.beginObject();
+  j.addObjectEntry("stream");
+  j.addString(stream);
+  j.addComma();
+  j.addObjectEntry("from");
+  j.addInteger(from.unixMicros());
+  j.addComma();
+  j.addObjectEntry("until");
+  j.addInteger(until.unixMicros());
+  j.addComma();
+  j.addObjectEntry("chunk_keys");
+  json::toJSON(chunks_encoded, &j);
+  j.endObject();
+}
+
 
 }
 }
