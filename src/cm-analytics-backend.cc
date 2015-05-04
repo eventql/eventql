@@ -77,15 +77,6 @@ int main(int argc, const char** argv) {
       "<port>");
 
   flags.defineFlag(
-      "replica",
-      cli::FlagParser::T_STRING,
-      true,
-      NULL,
-      NULL,
-      "replica id",
-      "<id>");
-
-  flags.defineFlag(
       "datadir",
       cli::FlagParser::T_STRING,
       true,
@@ -121,32 +112,24 @@ int main(int argc, const char** argv) {
   fnord::thread::FixedSizeThreadPool wpool(8);
   wpool.start();
 
-  /* http  */
+  /* http */
   fnord::http::HTTPRouter http_router;
   fnord::http::HTTPServer http_server(&http_router, &ev);
   http_server.listen(flags.getInt("http_port"));
   http::HTTPConnectionPool http(&ev);
 
-  /* logtables */
   auto dir = flags.getString("datadir");
-  auto replica = flags.getString("replica");
-  logtable::TableRepository table_repo(
-      dir,
-      replica,
-      true,
-      &wpool);
 
-  table_repo.addTable("joined_sessions-dawanda", joinedSessionsSchema());
+  /* analytics */
+  cm::AnalyticsQueryEngine analytics(32, dir, &http);
+  cm::AnalyticsServlet analytics_servlet(&analytics);
+  http_router.addRouteByPrefixMatch("/analytics", &analytics_servlet, &tpool);
 
   /* stop stats */
   auto shopstats = cm::ShopStatsTable::open(flags.getString("shopstats_table"));
   cm::ShopStatsServlet shopstats_servlet(shopstats);
   http_router.addRouteByPrefixMatch("/shopstats", &shopstats_servlet, &tpool);
 
-  /* analytics */
-  cm::AnalyticsQueryEngine analytics(32, dir, &table_repo);
-  cm::AnalyticsServlet analytics_servlet(&analytics);
-  http_router.addRouteByPrefixMatch("/analytics", &analytics_servlet, &tpool);
 
   analytics.registerQueryFactory("ctr_by_position", [] (
       const cm::AnalyticsQuery& query,

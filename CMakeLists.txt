@@ -34,6 +34,7 @@ add_subdirectory(3rdparty/libfnord/fnord-chart)
 add_subdirectory(3rdparty/libfnord/fnord-metricdb)
 add_subdirectory(3rdparty/libfnord/fnord-sql)
 add_subdirectory(3rdparty/libfnord/fnord-msg)
+add_subdirectory(3rdparty/libfnord/fnord-tsdb)
 include_directories(3rdparty/libfnord/)
 include_directories(3rdparty/libfnord/3rdparty/)
 include_directories(${FNORD_FTS_INCLUDE})
@@ -403,6 +404,7 @@ add_executable(cm-chunkserver
     $<TARGET_OBJECTS:fnord-sstable>
     $<TARGET_OBJECTS:fnord-cstable>
     $<TARGET_OBJECTS:fnord-msg>
+    $<TARGET_OBJECTS:fnord-tsdb>
     3rdparty/libfnord/fnord-sstable/SSTableServlet.cc
     3rdparty/libfnord/fnord-logtable/ArtifactIndex.cc
     3rdparty/libfnord/fnord-logtable/ArtifactIndexReplication.cc
@@ -523,6 +525,7 @@ add_executable(cm-jqcolumnize
     $<TARGET_OBJECTS:fnord-sstable>
     $<TARGET_OBJECTS:fnord-msg>
     $<TARGET_OBJECTS:fnord-fts>
+    src/schemas.cc
     src/analytics/AnalyticsTableScan.cc
     src/analytics/TrafficSegment.cc
     src/analytics/CTRByPositionQuery.cc
