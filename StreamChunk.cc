@@ -57,6 +57,23 @@ String StreamChunk::streamChunkKeyFor(
   return String((char *) buf.data(), buf.size());
 }
 
+Vector<String> StreamChunk::streamChunkKeysFor(
+    const String& stream_key,
+    DateTime from,
+    DateTime until,
+    const StreamProperties& properties) {
+  auto cs = properties.chunk_size.microseconds();
+  auto first_chunk = (from.unixMicros() / cs) * cs;
+  auto last_chunk = (until.unixMicros() / cs) * cs;
+
+  Vector<String> res;
+  for (auto t = first_chunk; t <= last_chunk; t += cs) {
+    res.emplace_back(streamChunkKeyFor(stream_key, t, properties));
+  }
+
+  return res;
+}
+
 StreamChunk::StreamChunk(
     const String& streamchunk_key,
     const String& stream_key,
