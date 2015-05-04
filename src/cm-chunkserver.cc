@@ -237,15 +237,15 @@ int main(int argc, const char** argv) {
   }
 
   logtable::TableJanitor table_janitor(&table_repo);
-  if (!readonly) {
-    table_janitor.start();
-    table_replication.start();
-    artifact_replication.start();
-    model_replication.start();
-  }
+  //if (!readonly) {
+  //  table_janitor.start();
+  //  table_replication.start();
+  //  artifact_replication.start();
+  //  model_replication.start();
+  //}
 
-  logtable::LogTableServlet logtable_servlet(&table_repo);
-  http_router.addRouteByPrefixMatch("/logtable", &logtable_servlet, &tpool);
+  //logtable::LogTableServlet logtable_servlet(&table_repo);
+  //http_router.addRouteByPrefixMatch("/logtable", &logtable_servlet, &tpool);
 
 
   tsdb::TSDBNode tsdb_node(replica, dir + "/tsdb");
@@ -253,7 +253,7 @@ int main(int argc, const char** argv) {
   tsdb::StreamProperties config(new msg::MessageSchema(joinedSessionsSchema()));
   config.max_datafile_size = 1024 * 1024 * 512;
   config.chunk_size = Duration(3600 * 4 * kMicrosPerSecond);
-  config.compaction_interval = Duration(120 * kMicrosPerSecond);
+  config.compaction_interval = Duration(30 * kMicrosPerSecond);
   tsdb_node.configurePrefix("joined_sessions.", config);
 
   tsdb::TSDBServlet tsdb_servlet(&tsdb_node);
@@ -264,14 +264,6 @@ int main(int argc, const char** argv) {
   ev.run();
 
   tsdb_node.stop();
-
-  if (!readonly) {
-    table_janitor.stop();
-    table_janitor.check();
-    table_replication.stop();
-    artifact_replication.stop();
-    model_replication.stop();
-  }
 
   fnord::logInfo("cm.chunkserver", "Exiting...");
 
