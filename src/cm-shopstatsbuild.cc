@@ -11,10 +11,12 @@
 #include <unistd.h>
 #include <signal.h>
 #include "fnord-base/io/fileutil.h"
+#include "fnord-base/thread/eventloop.h"
 #include "fnord-base/application.h"
 #include "fnord-base/logging.h"
 #include "fnord-base/Language.h"
 #include "fnord-base/random.h"
+#include "fnord-base/fnv.h"
 #include "fnord-base/cli/flagparser.h"
 #include "fnord-base/util/SimpleRateLimit.h"
 #include "fnord-base/InternMap.h"
@@ -27,6 +29,7 @@
 #include "fnord-sstable/SSTableColumnSchema.h"
 #include "fnord-sstable/SSTableColumnReader.h"
 #include "fnord-sstable/SSTableColumnWriter.h"
+#include "fnord-http/httpconnectionpool.h"
 #include <fnord-fts/fts.h>
 #include <fnord-fts/fts_common.h>
 #include "fnord-logtable/TableReader.h"
@@ -47,29 +50,13 @@
 using namespace fnord;
 using namespace cm;
 
+fnord::thread::EventLoop ev;
+
 int main(int argc, const char** argv) {
   fnord::Application::init();
   fnord::Application::logToStderr();
 
   fnord::cli::FlagParser flags;
-
-  flags.defineFlag(
-      "replica",
-      cli::FlagParser::T_STRING,
-      true,
-      NULL,
-      NULL,
-      "replica id",
-      "<id>");
-
-  flags.defineFlag(
-      "datadir",
-      cli::FlagParser::T_STRING,
-      false,
-      NULL,
-      NULL,
-      "artifact directory",
-      "<path>");
 
   flags.defineFlag(
       "tempdir",
@@ -94,10 +81,14 @@ int main(int argc, const char** argv) {
   Logger::get()->setMinimumLogLevel(
       strToLogLevel(flags.getString("loglevel")));
 
+  /* start event loop */
+  auto evloop_thread = std::thread([] {
+    ev.run();
+  });
+
   //auto index_path = flags.getString("index");
   //auto conf_path = flags.getString("conf");
   auto tempdir = flags.getString("tempdir");
-  auto datadir = flags.getString("datadir");
 
   /* open index */
   //auto index_reader = cm::IndexReader::openIndex(index_path);
@@ -105,34 +96,74 @@ int main(int argc, const char** argv) {
 
   /* set up reportbuilder */
   thread::ThreadPool tpool;
+  http::HTTPConnectionPool http(&ev);
   cm::ReportBuilder report_builder(&tpool);
 
   Random rnd;
   auto buildid = rnd.hex128();
 
-  auto table = logtable::TableReader::open(
-      "joined_sessions-dawanda",
-      flags.getString("replica"),
-      flags.getString("datadir"),
-      joinedSessionsSchema());
+  Set<String> input_tables;
+  Set<String> input_table_files;
 
-  auto snap = table->getSnapshot();
+  {
+    URI uri(StringUtil::format(
+        "http://nue03.prod.fnrd.net:7003/tsdb/list_chunks?stream=$0&from=$1&until=$2",
+        "joined_sessions.dawanda",
+        WallClock::unixMicros() - 32 * kMicrosPerDay,
+        WallClock::unixMicros()));
+
+    http::HTTPRequest req(http::HTTPMessage::M_GET, uri.pathAndQuery());
+    req.addHeader("Host", uri.hostAndPort());
+    req.addHeader("Content-Type", "application/fnord-msg");
+
+    auto res = http.executeRequest(req);
+    res.wait();
+
+    const auto& r = res.get();
+    if (r.statusCode() != 200) {
+      RAISEF(kRuntimeError, "received non-200 response: $0", r.body().toString());
+    }
+
+    const auto& body = r.body();
+    util::BinaryMessageReader reader(body.data(), body.size());
+    while (reader.remaining() > 0) {
+      input_tables.emplace(reader.readLenencString());
+    }
+  }
+
+  for (const auto& tbl : input_tables) {
+    URI uri(StringUtil::format(
+        "http://nue03.prod.fnrd.net:7003/tsdb/list_files?chunk=$0",
+        tbl));
+
+    http::HTTPRequest req(http::HTTPMessage::M_GET, uri.pathAndQuery());
+    req.addHeader("Host", uri.hostAndPort());
+    req.addHeader("Content-Type", "application/fnord-msg");
+
+    auto res = http.executeRequest(req);
+    res.wait();
+
+    const auto& r = res.get();
+    if (r.statusCode() != 200) {
+      RAISEF(kRuntimeError, "received non-200 response: $0", r.body().toString());
+    }
+
+    const auto& body = r.body();
+    util::BinaryMessageReader reader(body.data(), body.size());
+    while (reader.remaining() > 0) {
+      input_table_files.emplace(reader.readLenencString());
+    }
+  }
 
   Set<String> tables;
-
-  for (const auto& c : snap->head->chunks) {
-    auto input_table = StringUtil::format(
-        "$0/$1.$2.$3.cst",
-        datadir,
-        "joined_sessions-dawanda",
-        c.replica_id,
-        c.chunk_id);
+  for (const auto& input_table : input_table_files) {
+    FNV<uint64_t> fnv;
+    auto h = fnv.hash(input_table);
 
     auto table = StringUtil::format(
-        "$0/shopstats-ctr-dawanda.$1.$2.sst",
+        "$0/shopstats-ctr-dawanda.$1.sst",
         tempdir,
-        c.replica_id,
-        c.chunk_id);
+        StringUtil::hexPrint(&h, sizeof(h), false));
 
     tables.emplace(table);
     report_builder.addReport(
@@ -156,6 +187,9 @@ int main(int argc, const char** argv) {
       "cm.reportbuild",
       "Build completed: shopstats-full-dawanda.$0.sstable",
       buildid);
+
+  ev.shutdown();
+  evloop_thread.join();
 
   return 0;
 }

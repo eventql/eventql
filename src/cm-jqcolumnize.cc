@@ -34,6 +34,7 @@
 #include "fnord-cstable/CSTableWriter.h"
 #include "fnord-cstable/CSTableReader.h"
 #include "fnord-cstable/CSTableBuilder.h"
+#include "fnord-cstable/RecordMaterializer.h"
 #include "fnord-msg/MessageSchema.h"
 #include "fnord-msg/MessageBuilder.h"
 #include "fnord-msg/MessageObject.h"
@@ -43,9 +44,8 @@
 #include <fnord-fts/fts.h>
 #include <fnord-fts/fts_common.h>
 #include "common.h"
+#include "schemas.h"
 #include "CustomerNamespace.h"
-
-#
 #include "CTRCounter.h"
 #include "analytics/AnalyticsTableScan.h"
 #include "analytics/CTRByPositionQuery.h"
@@ -82,32 +82,40 @@ int main(int argc, const char** argv) {
   Logger::get()->setMinimumLogLevel(
       strToLogLevel(flags.getString("loglevel")));
 
+  auto schema = joinedSessionsSchema();
+
   cstable::CSTableReader reader(flags.getString("file"));
+  cstable::RecordMaterializer record_reader(&schema, &reader);
 
-  cm::AnalyticsTableScan aq;
-  auto lcol = aq.fetchColumn("queries.language");
-  auto ccol = aq.fetchColumn("queries.page");
-  auto qcol = aq.fetchColumn("queries.query_string_normalized");
-  auto iicol = aq.fetchColumn("queries.items.item_id");
-  auto iscol = aq.fetchColumn("queries.items.shop_id");
-  auto ic1col = aq.fetchColumn("queries.items.category1");
-  auto ic2col = aq.fetchColumn("queries.items.category2");
-  auto ic3col = aq.fetchColumn("queries.items.category3");
+  for (int i = 0; i < reader.numRecords(); ++i) {
+    msg::MessageObject obj;
+    record_reader.nextRecord(&obj);
+    fnord::iputs("record: $0", msg::MessagePrinter::print(obj, schema));
+  }
+  //cm::AnalyticsTableScan aq;
+  //auto lcol = aq.fetchColumn("search_queries.language");
+  //auto ccol = aq.fetchColumn("search_queries.page");
+  //auto qcol = aq.fetchColumn("search_queries.query_string_normalized");
+  //auto iicol = aq.fetchColumn("search_queries.result_items.item_id");
+  //auto iscol = aq.fetchColumn("search_queries.result_items.shop_id");
+  //auto ic1col = aq.fetchColumn("search_queries.result_items.category1");
+  //auto ic2col = aq.fetchColumn("search_queries.result_items.category2");
+  //auto ic3col = aq.fetchColumn("search_queries.result_items.category3");
 
-  aq.onQuery([&] () {
-    auto l = languageToString((Language) lcol->getUInt32());
-    auto c = ccol->getUInt32();
-    auto q = qcol->getString();
-    auto ii = iicol->getString();
-    auto is = iscol->getUInt32();
-    fnord::iputs("lang: $0 -> $1 -- $2 -- $3 -- $4 -- $5,$6,$7",
-        l, c, q, ii, is,
-        ic1col->getUInt32(),
-        ic2col->getUInt32(),
-        ic3col->getUInt32());
-  });
+  //aq.onQuery([&] () {
+  //  auto l = languageToString((Language) lcol->getUInt32());
+  //  auto c = ccol->getUInt32();
+  //  auto q = qcol->getString();
+  //  auto ii = iicol->getString();
+  //  auto is = iscol->getUInt32();
+  //  fnord::iputs("lang: $0 -> $1 -- $2 -- $3 -- $4 -- $5,$6,$7",
+  //      l, c, q, ii, is,
+  //      ic1col->getUInt32(),
+  //      ic2col->getUInt32(),
+  //      ic3col->getUInt32());
+  //});
 
-  aq.scanTable(&reader);
+  //aq.scanTable(&reader);
 
   return 0;
 }
