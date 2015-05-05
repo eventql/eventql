@@ -148,7 +148,7 @@ int main(int argc, const char** argv) {
     return new cm::CTRByPageQuery(scan, segments);
   });
 
-  analytics.registerQueryFactory("ctr_by_result_item", [] (
+  analytics.registerQueryFactory("ctr_by_result_item_category", [] (
       const cm::AnalyticsQuery& query,
       const cm::AnalyticsQuery::SubQueryParams params,
       const Vector<RefPtr<cm::TrafficSegment>>& segments,
