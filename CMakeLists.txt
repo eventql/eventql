@@ -457,6 +457,7 @@ add_executable(cm-analytics-backend
     src/analytics/AnalyticsQueryResult.cc
     src/analytics/CTRByPageQuery.cc
     src/analytics/CTRByPositionQuery.cc
+    src/analytics/CTRByResultItemCategoryQuery.cc
     src/analytics/TopSearchQueriesQuery.cc
     src/analytics/DiscoveryStats.cc
     src/analytics/DiscoveryDashboardQuery.cc
