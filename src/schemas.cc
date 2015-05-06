@@ -77,6 +77,14 @@ msg::MessageSchema joinedSessionsSchema() {
       true,
       msg::EncodingHint::BITPACK);
 
+  fields.emplace_back(
+      56,
+      "experiments",
+      msg::FieldType::STRING,
+      8192,
+      false,
+      true);
+
   msg::MessageSchemaField queries(
       16,
       "search_queries",
@@ -207,6 +215,14 @@ msg::MessageSchema joinedSessionsSchema() {
       false,
       true,
       msg::EncodingHint::BITPACK);
+
+  queries.fields.emplace_back(
+      55,
+      "experiments",
+      msg::FieldType::STRING,
+      8192,
+      false,
+      true);
 
   queries.fields.emplace_back(
       10,

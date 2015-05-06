@@ -195,6 +195,11 @@ message JoinedSearchQuery {
    */
   optional uint32 ab_test_group = 9;
 
+  /**
+   * A semicolon-seperated string of all experiment tags for this query
+   */
+  optional String experiments = 55;
+
 }
 
 
@@ -317,6 +322,11 @@ message JoinedSession {
    * to (1..100]
    */
   optional uint32 ab_test_group = 51;
+
+  /**
+   * A semicolon-seperated string of all experiment tags for this session
+   */
+  optional String experiments = 56;
 
   /**
    * A list of all search queries associated with this session
