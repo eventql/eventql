@@ -138,10 +138,18 @@ Language extractLanguage(const Vector<String>& attrs) {
 
 String extractPageTypeString(const Vector<String>& attrs) {
   for (const auto& a : attrs) {
+    if (a == "slrd~") {
+      return "shop";
+    }
+  }
+
+  for (const auto& a : attrs) {
     if (StringUtil::beginsWith(a, "qstr~")) {
       return "search";
     }
+  }
 
+  for (const auto& a : attrs) {
     if (StringUtil::beginsWith(a, "q_cat")) {
       return "catalog";
     }
