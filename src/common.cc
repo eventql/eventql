@@ -155,12 +155,20 @@ PageType extractPageType(const Vector<String>& attrs) {
 }
 
 PageType pageTypeFromString(const String& page_type) {
-  if (page_type == "search") {
+  if (page_type == "search" || page_type == "search_page") {
     return PageType::SEARCH_PAGE;
   }
 
-  if (page_type == "catalog") {
+  if (page_type == "catalog" || page_type == "catalog_page") {
     return PageType::CATALOG_PAGE;
+  }
+
+  if (page_type == "product" || page_type == "product_page") {
+    return PageType::PRODUCT_PAGE;
+  }
+
+  if (page_type == "shop" || page_type == "shop_page") {
+    return PageType::SHOP_PAGE;
   }
 
   return PageType::UNKNOWN;
@@ -172,6 +180,7 @@ String pageTypeToString(PageType page_type) {
     case PageType::SEARCH_PAGE: return "search_page";
     case PageType::CATALOG_PAGE: return "catalog_page";
     case PageType::PRODUCT_PAGE: return "product_page";
+    case PageType::SHOP_PAGE: return "shop_page";
   }
 }
 
