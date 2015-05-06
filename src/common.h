@@ -72,7 +72,8 @@ enum class PageType : uint32_t {
   UNKNOWN = 0,
   SEARCH_PAGE = 1,
   CATALOG_PAGE = 2,
-  PRODUCT_PAGE = 3
+  PRODUCT_PAGE = 3,
+  SHOP_PAGE = 4
 };
 
 const uint32_t kMaxPageType = 3;
