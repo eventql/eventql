@@ -85,6 +85,30 @@ msg::MessageSchema joinedSessionsSchema() {
       false,
       true);
 
+  fields.emplace_back(
+      57,
+      "referrer_url",
+      msg::FieldType::STRING,
+      1024,
+      false,
+      true);
+
+  fields.emplace_back(
+      58,
+      "referrer_campaign",
+      msg::FieldType::STRING,
+      4096,
+      false,
+      true);
+
+  fields.emplace_back(
+      59,
+      "referrer_name",
+      msg::FieldType::STRING,
+      255,
+      false,
+      true);
+
   msg::MessageSchemaField queries(
       16,
       "search_queries",

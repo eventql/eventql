@@ -154,6 +154,12 @@ void LogJoinTarget::onSession(
       qry_obj.addChild(schema.id("search_queries.ab_test_group"), abgrp.get());
     }
 
+    /* queries.experiments */
+    auto qexps = q.joinedExperiments();
+    if (qexps.size() > 0) {
+      qry_obj.addChild(schema.id("search_queries.experiments"), qexps);
+    }
+
     /* queries.category1 */
     auto qcat1 = cm::extractAttr(q.attrs, "q_cat1");
     if (!qcat1.isEmpty()) {
@@ -292,6 +298,23 @@ void LogJoinTarget::onSession(
 
   if (sess_abgrp > 0) {
     obj.addChild(schema.id("ab_test_group"), sess_abgrp);
+  }
+
+  auto exps = session.joinedExperiments();
+  if (exps.size() > 0) {
+    obj.addChild(schema.id("experiments"), exps);
+  }
+
+  if (!session.referrer_url.isEmpty()) {
+    obj.addChild(schema.id("referrer_url"), session.referrer_url.get());
+  }
+
+  if (!session.referrer_campaign.isEmpty()) {
+    obj.addChild(schema.id("referrer_campaign"), session.referrer_campaign.get());
+  }
+
+  if (!session.referrer_name.isEmpty()) {
+    obj.addChild(schema.id("referrer_name"), session.referrer_name.get());
   }
 
   obj.addChild(schema.id("num_cart_items"), session.num_cart_items);

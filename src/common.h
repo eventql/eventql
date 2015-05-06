@@ -56,6 +56,9 @@ using namespace fnord;
  *   lng        -- language         -- format "<lang>"
  *   dwnid      -- dawanda id       -- format "<id>"
  *   fnm        -- first name       -- format "<name>"
+ *   r_url      -- referrer url
+ *   r_nm       -- referrer name
+ *   r_cpn      -- referrer campaign
  *
  */
 

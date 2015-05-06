@@ -53,7 +53,12 @@ struct TrackedSession {
   uint32_t num_order_items;
   uint32_t gmv_eurcents;
   uint32_t cart_value_eurcents;
+
   Set<String> experiments;
+  Option<String> referrer_url;
+  Option<String> referrer_campaign;
+  Option<String> referrer_name;
+
 
   TrackedSession();
 
@@ -71,6 +76,8 @@ struct TrackedSession {
       const DateTime& time,
       const String& evid,
       const URI::ParamList& logline);
+
+  String joinedExperiments() const;
 
   /**
    * Trigger an update to incorporate new information. This will e.g. mark
