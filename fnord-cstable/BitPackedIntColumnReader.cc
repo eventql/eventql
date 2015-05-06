@@ -34,6 +34,8 @@ bool BitPackedIntColumnReader::next(
     *data_len = sizeof(cur_val_);
     return true;
   } else {
+    *data = nullptr;
+    *data_len = 0;
     return false;
   }
 }
@@ -53,6 +55,7 @@ bool BitPackedIntColumnReader::next(
     *data = data_reader_.next();
     return true;
   } else {
+    *data = 0;
     return false;
   }
 }
