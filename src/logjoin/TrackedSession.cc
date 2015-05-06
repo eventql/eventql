@@ -196,10 +196,10 @@ void TrackedSession::updateSessionAttributes(
     const DateTime& time,
     const String& evid,
     const URI::ParamList& logline) {
-  std::string exp_str;
-  if (fnord::URI::getParam(logline, "x", &exp_str)) {
-    for (const auto& exp : StringUtil::split(exp_str, ";")) {
-      experiments.emplace(exp);
+  for (const auto& p : logline) {
+    if (p.first == "x") {
+      experiments.emplace(p.second);
+      continue;
     }
   }
 
