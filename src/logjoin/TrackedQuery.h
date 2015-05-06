@@ -14,6 +14,7 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <fnord-base/stdtypes.h>
 #include <fnord-base/datetime.h>
 #include <fnord-base/uri.h>
 
@@ -34,6 +35,7 @@ struct TrackedQuery {
   fnord::String eid;
   std::vector<TrackedQueryItem> items;
   std::vector<std::string> attrs;
+  Set<String> experiments;
 
   uint32_t nitems;
   uint32_t nclicks;

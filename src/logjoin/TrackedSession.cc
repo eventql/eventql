@@ -142,6 +142,7 @@ void TrackedSession::insertLogline(
     }
 
     case 'u':
+      updateSessionAttributes(time, evid, logline);
       return;
 
     default:
@@ -187,6 +188,18 @@ void TrackedSession::insertCartVisit(
 
     if (!merged) {
       cart_items.emplace_back(cart_item);
+    }
+  }
+}
+
+void TrackedSession::updateSessionAttributes(
+    const DateTime& time,
+    const String& evid,
+    const URI::ParamList& logline) {
+  std::string exp_str;
+  if (fnord::URI::getParam(logline, "x", &exp_str)) {
+    for (const auto& exp : StringUtil::split(exp_str, ";")) {
+      experiments.emplace(exp);
     }
   }
 }

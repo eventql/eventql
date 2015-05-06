@@ -29,15 +29,17 @@ using namespace fnord;
  *   l          -- page language    -- format "<lang>"
  *   u_x        -- screen width     -- format "<num>"
  *   u_y        -- screen height    -- format "<num>"
+ *   x          -- experiment       -- format "<exp1>;<exp2>"
  *
  * params for eventtype=q (query):
  *   is         -- item ids         -- format "<setid>~<itemid>~p<pos>,..."
  *   pg         -- page number      -- format "<num>"
  *   qstr~<lc>  -- query string     -- format "<string>"
- *   q_cat1      -- query cat1       -- format "<catid>"
- *   q_cat2      -- query cat2       -- format "<catid>"
- *   q_cat3      -- query cat3       -- format "<catid>"
+ *   q_cat1     -- query cat1       -- format "<catid>"
+ *   q_cat2     -- query cat2       -- format "<catid>"
+ *   q_cat3     -- query cat3       -- format "<catid>"
  *   slrid      -- seller id        -- format "<id>"
+ *   qx         -- experiment       -- format "<exp1>;<exp2>"
  *
  * params for eventtype=v (visit):
  *   i          -- itemid           -- format "<setid>~<itemid>"

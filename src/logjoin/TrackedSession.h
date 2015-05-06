@@ -53,6 +53,7 @@ struct TrackedSession {
   uint32_t num_order_items;
   uint32_t gmv_eurcents;
   uint32_t cart_value_eurcents;
+  Set<String> experiments;
 
   TrackedSession();
 
@@ -65,6 +66,11 @@ struct TrackedSession {
   void insertQuery(const TrackedQuery& query);
   void insertItemVisit(const TrackedItemVisit& visit);
   void insertCartVisit(const Vector<TrackedCartItem>& new_cart_items);
+
+  void updateSessionAttributes(
+      const DateTime& time,
+      const String& evid,
+      const URI::ParamList& logline);
 
   /**
    * Trigger an update to incorporate new information. This will e.g. mark

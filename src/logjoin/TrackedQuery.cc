@@ -67,9 +67,16 @@ void TrackedQuery::fromParams(const fnord::URI::ParamList& params) {
     }
   }
 
+  std::string exp_str;
+  if (fnord::URI::getParam(params, "qx", &exp_str)) {
+    for (const auto& exp : StringUtil::split(exp_str, ";")) {
+      experiments.emplace(exp);
+    }
+  }
+
   /* extract all non-reserved params as event attributes */
   for (const auto& p : params) {
-    if (!isReservedPixelParam(p.first)) {
+    if (!isReservedPixelParam(p.first) || p.first == "qx") {
       attrs.emplace_back(fnord::StringUtil::format("$0:$1", p.first, p.second));
     }
   }
@@ -80,6 +87,10 @@ void TrackedQuery::merge(const TrackedQuery& other) {
     if (std::find(attrs.begin(), attrs.end(), attr) == attrs.end()) {
       attrs.emplace_back(attr);
     }
+  }
+
+  for (const auto& exp : other.experiments) {
+    experiments.emplace(exp);
   }
 
   for (const auto& other_item : other.items) {
