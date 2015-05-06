@@ -67,16 +67,14 @@ void TrackedQuery::fromParams(const fnord::URI::ParamList& params) {
     }
   }
 
-  std::string exp_str;
-  if (fnord::URI::getParam(params, "qx", &exp_str)) {
-    for (const auto& exp : StringUtil::split(exp_str, ";")) {
-      experiments.emplace(exp);
-    }
-  }
-
   /* extract all non-reserved params as event attributes */
   for (const auto& p : params) {
-    if (!isReservedPixelParam(p.first) || p.first == "qx") {
+    if (p.first == "qx") {
+      experiments.emplace(p.second);
+      continue;
+    }
+
+    if (!isReservedPixelParam(p.first)) {
       attrs.emplace_back(fnord::StringUtil::format("$0:$1", p.first, p.second));
     }
   }
