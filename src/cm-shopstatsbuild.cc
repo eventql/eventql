@@ -41,6 +41,7 @@
 #include "analytics/AnalyticsTableScanSource.h"
 #include "analytics/CTRByShopMapper.h"
 #include "analytics/ECommerceStatsByShopMapper.h"
+#include "analytics/ProductStatsByShopMapper.h"
 #include "analytics/CTRCounterMergeReducer.h"
 #include "analytics/CTRCounterTableSink.h"
 #include "analytics/CTRCounterTableSource.h"
@@ -185,6 +186,22 @@ int main(int argc, const char** argv) {
     tables.emplace(table);
     report_builder.addReport(
         new ECommerceStatsByShopMapper(
+            new AnalyticsTableScanSource(input_table),
+            new ShopStatsTableSink(table)));
+  }
+
+  for (const auto& input_table : input_table_files) {
+    FNV<uint64_t> fnv;
+    auto h = fnv.hash(input_table);
+
+    auto table = StringUtil::format(
+        "$0/shopstats-products-dawanda.$1.sst",
+        tempdir,
+        StringUtil::hexPrint(&h, sizeof(h), false));
+
+    tables.emplace(table);
+    report_builder.addReport(
+        new ProductStatsByShopMapper(
             new AnalyticsTableScanSource(input_table),
             new ShopStatsTableSink(table)));
   }
