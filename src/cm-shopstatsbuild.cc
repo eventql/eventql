@@ -110,8 +110,8 @@ int main(int argc, const char** argv) {
     URI uri(StringUtil::format(
         "http://nue03.prod.fnrd.net:7003/tsdb/list_chunks?stream=$0&from=$1&until=$2",
         "joined_sessions.dawanda",
-        WallClock::unixMicros() - 32 * kMicrosPerDay,
-        WallClock::unixMicros()));
+        WallClock::unixMicros() - 90 * kMicrosPerDay,
+        WallClock::unixMicros() - 6 * kMicrosPerHour));
 
     http::HTTPRequest req(http::HTTPMessage::M_GET, uri.pathAndQuery());
     req.addHeader("Host", uri.hostAndPort());
