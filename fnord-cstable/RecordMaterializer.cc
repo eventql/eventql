@@ -85,11 +85,13 @@ void RecordMaterializer::createColumns(
     }
 
     default: {
-      ColumnState colstate(reader->getColumnReader(colname));
-      colstate.parents = parents;
-      colstate.field_id = field.id;
-      colstate.field_type = field.type;
-      columns_.emplace(colname, colstate);
+      if (reader->hasColumn(colname)) {
+        ColumnState colstate(reader->getColumnReader(colname));
+        colstate.parents = parents;
+        colstate.field_id = field.id;
+        colstate.field_type = field.type;
+        columns_.emplace(colname, colstate);
+      }
       break;
     }
 
