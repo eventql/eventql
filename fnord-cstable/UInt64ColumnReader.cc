@@ -30,6 +30,8 @@ bool UInt64ColumnReader::next(
     *data_len = sizeof(cur_val_);
     return true;
   } else {
+    *data = nullptr;
+    *data_len = 0;
     return false;
   }
 }
@@ -49,6 +51,7 @@ bool UInt64ColumnReader::next(
     *data = *data_reader_.readUInt64();
     return true;
   } else {
+    *data = 0;
     return false;
   }
 }

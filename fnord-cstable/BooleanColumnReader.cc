@@ -33,6 +33,8 @@ bool BooleanColumnReader::next(
     *data_len = sizeof(cur_val_);
     return true;
   } else {
+    *data = nullptr;
+    *data_len = 0;
     return false;
   }
 }
@@ -52,6 +54,7 @@ bool BooleanColumnReader::next(
     *data = data_reader_.next();
     return true;
   } else {
+    *data = false;
     return false;
   }
 }
