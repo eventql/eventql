@@ -50,6 +50,7 @@ struct TrackedQuery {
 
   void merge(const TrackedQuery& other);
   void fromParams(const fnord::URI::ParamList& params);
+  String joinedExperiments() const;
 };
 
 } // namespace cm

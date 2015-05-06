@@ -198,7 +198,7 @@ message JoinedSearchQuery {
   /**
    * A semicolon-seperated string of all experiment tags for this query
    */
-  optional String experiments = 55;
+  optional string experiments = 55;
 
 }
 
@@ -295,6 +295,10 @@ message JoinedSession {
   optional uint64 first_seen_time = 53;
   optional uint64 first_last_time = 54;
 
+  optional string referrer_url = 57;
+  optional string referrer_campaign = 58;
+  optional string referrer_name = 59;
+
   /**
    * How many unique cart items have we seen in this session
    */
@@ -326,7 +330,7 @@ message JoinedSession {
   /**
    * A semicolon-seperated string of all experiment tags for this session
    */
-  optional String experiments = 56;
+  optional string experiments = 56;
 
   /**
    * A list of all search queries associated with this session

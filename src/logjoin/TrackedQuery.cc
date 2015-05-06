@@ -111,6 +111,16 @@ void TrackedQuery::merge(const TrackedQuery& other) {
   }
 }
 
+String TrackedQuery::joinedExperiments() const {
+  String joined;
+
+  for (const auto& e : experiments) {
+    joined += e;
+    joined += ';';
+  }
+
+  return joined;
+}
 
 }
 

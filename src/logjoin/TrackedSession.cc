@@ -202,6 +202,21 @@ void TrackedSession::updateSessionAttributes(
       experiments.emplace(exp);
     }
   }
+
+  std::string r_url;
+  if (fnord::URI::getParam(logline, "r_url", &r_url)) {
+    referrer_url = Some(r_url);
+  }
+
+  std::string r_cpn;
+  if (fnord::URI::getParam(logline, "r_cpn", &r_cpn)) {
+    referrer_campaign = Some(r_cpn);
+  }
+
+  std::string r_nm;
+  if (fnord::URI::getParam(logline, "r_nm", &r_nm)) {
+    referrer_name = Some(r_nm);
+  }
 }
 
 void TrackedSession::debugPrint(const std::string& uid) const {
@@ -292,5 +307,15 @@ Option<DateTime> TrackedSession::lastSeenTime() const {
   }
 }
 
+String TrackedSession::joinedExperiments() const {
+  String joined;
+
+  for (const auto& e : experiments) {
+    joined += e;
+    joined += ';';
+  }
+
+  return joined;
+}
 
 } // namespace cm
