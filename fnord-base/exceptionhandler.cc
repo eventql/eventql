@@ -70,7 +70,7 @@ static void globalEHandler() {
 
 void CatchAndAbortExceptionHandler::installGlobalHandlers() {
   globalEHandlerMessage = message_;
-  //std::set_terminate(&globalEHandler);
+  std::set_terminate(&globalEHandler);
   std::set_unexpected(&globalEHandler);
 }
 
