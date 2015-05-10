@@ -224,7 +224,7 @@ void StreamChunk::replicate() {
 
 uint64_t StreamChunk::replicateTo(const String& addr, uint64_t offset) {
   util::BinaryMessageWriter batch;
-  size_t batch_size = 4096;
+  size_t batch_size = 8192;
   size_t n = 0;
 
   records_.fetchRecords(offset, batch_size, [this, &batch, &n] (
@@ -242,6 +242,15 @@ uint64_t StreamChunk::replicateTo(const String& addr, uint64_t offset) {
 
   String encoded_key;
   util::Base64::encode(key_, &encoded_key);
+
+  fnord::logDebug(
+      "tsdb.replication",
+      "Replicating to $0; stream='$1' chunk='$2' offset=$3",
+      addr,
+      stream_key_,
+      encoded_key,
+      offset);
+
   URI uri(StringUtil::format(
       "http://$0/tsdb/replicate?stream=$1&chunk=$2",
       addr,
