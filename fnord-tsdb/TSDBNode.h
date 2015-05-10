@@ -18,6 +18,7 @@
 #include <fnord-tsdb/StreamChunk.h>
 #include <fnord-tsdb/TSDBNodeRef.h>
 #include <fnord-tsdb/CompactionWorker.h>
+#include <fnord-tsdb/ReplicationWorker.h>
 
 namespace fnord {
 namespace tsdb {
@@ -44,7 +45,10 @@ public:
 
   Vector<String> listFiles(const String& chunk_key);
 
-  void start(size_t num_comaction_threads = 4);
+  void start(
+      size_t num_comaction_threads = 4,
+      size_t num_replication_threads = 4);
+
   void stop();
 
 protected:
@@ -57,6 +61,7 @@ protected:
   std::mutex mutex_;
   HashMap<String, RefPtr<StreamChunk>> chunks_;
   Vector<RefPtr<CompactionWorker>> compaction_workers_;
+  Vector<RefPtr<ReplicationWorker>> replication_workers_;
 };
 
 } // namespace tdsb
