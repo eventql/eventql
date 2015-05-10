@@ -85,24 +85,6 @@ int main(int argc, const char** argv) {
       "<port>");
 
   flags.defineFlag(
-      "readonly",
-      cli::FlagParser::T_SWITCH,
-      false,
-      NULL,
-      NULL,
-      "readonly",
-      "readonly");
-
-  flags.defineFlag(
-      "replica",
-      cli::FlagParser::T_STRING,
-      true,
-      NULL,
-      NULL,
-      "replica id",
-      "<id>");
-
-  flags.defineFlag(
       "datadir",
       cli::FlagParser::T_STRING,
       true,
@@ -112,31 +94,13 @@ int main(int argc, const char** argv) {
       "<path>");
 
   flags.defineFlag(
-      "replicate_from",
+      "replicate_to",
       cli::FlagParser::T_STRING,
       false,
       NULL,
       NULL,
       "url",
       "<url>");
-
-  flags.defineFlag(
-      "fsck",
-      cli::FlagParser::T_SWITCH,
-      false,
-      NULL,
-      NULL,
-      "fsck",
-      "fsck");
-
-  flags.defineFlag(
-      "repair",
-      cli::FlagParser::T_SWITCH,
-      false,
-      NULL,
-      NULL,
-      "repair",
-      "repair");
 
   flags.defineFlag(
       "loglevel",
@@ -154,103 +118,21 @@ int main(int argc, const char** argv) {
 
   /* args */
   auto dir = flags.getString("datadir");
-  auto readonly = flags.isSet("readonly");
-  auto replica = flags.getString("replica");
-  auto repl_sources = flags.getStrings("replicate_from");
-
-  Vector<URI> artifact_sources;
-  for (const auto& rep : repl_sources) {
-    artifact_sources.emplace_back(
-        URI(StringUtil::format("http://$0:7005/", rep)));
-  }
+  auto repl_targets = flags.getStrings("replicate_to");
 
   /* start http server and worker pools */
   fnord::thread::ThreadPool tpool;
-  fnord::thread::FixedSizeThreadPool wpool(8);
-  fnord::thread::FixedSizeThreadPool repl_wpool(8);
   http::HTTPConnectionPool http(&ev);
   fnord::http::HTTPRouter http_router;
   fnord::http::HTTPServer http_server(&http_router, &ev);
   http_server.listen(flags.getInt("http_port"));
-  wpool.start();
-  repl_wpool.start();
 
-  /* artifact replication */
-  logtable::ArtifactReplication artifact_replication(
-      &http,
-      &repl_wpool,
-      8);
-
-  /* model replication */
-  ModelReplication model_replication;
-
-  if (!readonly) {
-    model_replication.addArtifactIndexReplication(
-        "termstats",
-        dir,
-        artifact_sources,
-        &artifact_replication,
-        &http);
+  auto repl_scheme = mkRef(new dht::FixedReplicationScheme());
+  for (const auto& r : repl_targets) {
+    repl_scheme->addHost(r);
   }
 
-  /* logtable */
-  logtable::TableRepository table_repo(
-      dir,
-      replica,
-      readonly,
-      &wpool);
-
-  auto joined_sessions_schema = joinedSessionsSchema();
-  table_repo.addTable("joined_sessions-dawanda", joined_sessions_schema);
-  table_repo.addTable("index_feed-dawanda", indexChangeRequestSchema());
-  Set<String> tbls  = { "joined_sessions-dawanda", "index_feed-dawanda" };
-
-  logtable::TableReplication table_replication(&http);
-  if (!readonly) {
-    for (const auto& tbl : tbls) {
-      auto table = table_repo.findTableWriter(tbl);
-
-      if (StringUtil::beginsWith(tbl, "joined_sessions")) {
-        table->addSummary([joined_sessions_schema] () {
-          return new logtable::NumericBoundsSummaryBuilder(
-              "search_queries.time-bounds",
-              joined_sessions_schema.id("search_queries.time"));
-        });
-      }
-
-      table->runConsistencyCheck(
-          flags.isSet("fsck"),
-          flags.isSet("repair"));
-
-      for (const auto& rep : repl_sources) {
-        table_replication.replicateTableFrom(
-            table,
-            URI(StringUtil::format("http://$0:7003/logtable", rep)));
-      }
-
-      if (artifact_sources.size() > 0) {
-        artifact_replication.replicateArtifactsFrom(
-            table->artifactIndex(),
-            artifact_sources);
-      }
-    }
-  }
-
-  logtable::TableJanitor table_janitor(&table_repo);
-  //if (!readonly) {
-  //  table_janitor.start();
-  //  table_replication.start();
-  //  artifact_replication.start();
-  //  model_replication.start();
-  //}
-
-  //logtable::LogTableServlet logtable_servlet(&table_repo);
-  //http_router.addRouteByPrefixMatch("/logtable", &logtable_servlet, &tpool);
-
-  tsdb::TSDBNode tsdb_node(
-      replica,
-      dir + "/tsdb",
-      new dht::StandaloneReplicationScheme());
+  tsdb::TSDBNode tsdb_node(dir + "/tsdb", repl_scheme.get());
 
   tsdb::StreamProperties config(new msg::MessageSchema(joinedSessionsSchema()));
   config.max_datafile_size = 1024 * 1024 * 512;
@@ -262,11 +144,9 @@ int main(int argc, const char** argv) {
   http_router.addRouteByPrefixMatch("/tsdb", &tsdb_servlet, &tpool);
 
   tsdb_node.start();
-
   ev.run();
 
   tsdb_node.stop();
-
   fnord::logInfo("cm.chunkserver", "Exiting...");
 
   exit(0);
