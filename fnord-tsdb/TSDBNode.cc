@@ -14,7 +14,8 @@ namespace tsdb {
 
 TSDBNode::TSDBNode(
     const String& db_path,
-    RefPtr<dht::ReplicationScheme> replication_scheme) :
+    RefPtr<dht::ReplicationScheme> replication_scheme,
+    http::HTTPConnectionPool* http) :
     noderef_{
         .db_path = db_path,
         .db = mdb::MDB::open(
@@ -23,7 +24,8 @@ TSDBNode::TSDBNode(
             1024 * 1024 * 1024, // 1 GiB
             "index.db",
             "index.db.lck"),
-        .replication_scheme = replication_scheme} {}
+        .replication_scheme = replication_scheme,
+        .http = http} {}
 
 void TSDBNode::insertRecord(
     const String& stream_key,
@@ -45,7 +47,29 @@ void TSDBNode::insertRecord(
     }
   }
 
-  chunk->insertRecord(record_id, record, time);
+  chunk->insertRecord(record_id, record);
+}
+
+void TSDBNode::insertRecord(
+    const String& stream_key,
+    uint64_t record_id,
+    const Buffer& record,
+    const String& chunk_key) {
+  auto config = configFor(stream_key);
+
+  RefPtr<StreamChunk> chunk(nullptr);
+  {
+    std::unique_lock<std::mutex> lk(mutex_);
+    auto chunk_iter = chunks_.find(chunk_key);
+    if (chunk_iter == chunks_.end()) {
+      chunk = StreamChunk::create(chunk_key, stream_key, config, &noderef_);
+      chunks_.emplace(chunk_key, chunk);
+    } else {
+      chunk = chunk_iter->second;
+    }
+  }
+
+  chunk->insertRecord(record_id, record);
 }
 
 Vector<String> TSDBNode::listFiles(const String& chunk_key) {

@@ -9,8 +9,11 @@
  */
 #include <fnord-tsdb/StreamChunk.h>
 #include <fnord-base/io/fileutil.h>
+#include <fnord-base/uri.h>
+#include <fnord-base/util/Base64.h>
 #include <fnord-base/util/binarymessagewriter.h>
 #include <fnord-base/wallclock.h>
+#include <fnord-msg/MessageEncoder.h>
 
 namespace fnord {
 namespace tsdb {
@@ -90,7 +93,9 @@ StreamChunk::StreamChunk(
             StringUtil::stripShell(stream_key) + ".")),
     replication_scheduled_(false),
     compaction_scheduled_(false),
-    last_compaction_(0) {}
+    last_compaction_(0) {
+  records_.setMaxDatafileSize(config_->max_datafile_size);
+}
 
 StreamChunk::StreamChunk(
     const String& streamchunk_key,
@@ -115,12 +120,12 @@ StreamChunk::StreamChunk(
   }
 
   node_->replicationq.insert(this, WallClock::unixMicros());
+  records_.setMaxDatafileSize(config_->max_datafile_size);
 }
 
 void StreamChunk::insertRecord(
     uint64_t record_id,
-    const Buffer& record,
-    DateTime time) {
+    const Buffer& record) {
   std::unique_lock<std::mutex> lk(mutex_);
 
   auto old_ver = records_.version();
@@ -218,9 +223,45 @@ void StreamChunk::replicate() {
 }
 
 uint64_t StreamChunk::replicateTo(const String& addr, uint64_t offset) {
-  fnord::iputs("replicate to $0 -- $1", addr, offset);
-  RAISE(kRuntimeError, "fnord");
-  return 0;
+  util::BinaryMessageWriter batch;
+  size_t batch_size = 100;
+  size_t n = 0;
+
+  records_.fetchRecords(offset, batch_size, [this, &batch, &n] (
+      uint64_t record_id,
+      const msg::MessageObject& message) {
+    ++n;
+
+    Buffer msg_buf;
+    msg::MessageEncoder::encode(message, *config_->schema, &msg_buf);
+
+    batch.appendUInt64(record_id);
+    batch.appendVarUInt(msg_buf.size());
+    batch.append(msg_buf.data(), msg_buf.size());
+  });
+
+  String encoded_key;
+  util::Base64::encode(key_, &encoded_key);
+  URI uri(StringUtil::format(
+      "http://$0/tsdb/replicate?stream=$1&chunk=$2",
+      addr,
+      URI::urlEncode(stream_key_),
+      URI::urlEncode(encoded_key)));
+
+  http::HTTPRequest req(http::HTTPMessage::M_POST, uri.pathAndQuery());
+  req.addHeader("Host", uri.hostAndPort());
+  req.addHeader("Content-Type", "application/fnord-msg");
+  req.addBody(batch.data(), batch.size());
+
+  auto res = node_->http->executeRequest(req);
+  res.wait();
+
+  const auto& r = res.get();
+  if (r.statusCode() != 201) {
+    RAISEF(kRuntimeError, "received non-201 response: $0", r.body().toString());
+  }
+
+  return n;
 }
 
 Vector<String> StreamChunk::listFiles() const {

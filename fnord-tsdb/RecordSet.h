@@ -44,7 +44,10 @@ public:
 
   void addRecord(uint64_t record_id, const Buffer& message);
 
-  void fetchRecord(uint64_t record_id, Buffer* message);
+  void fetchRecords(
+      uint64_t offset,
+      uint64_t limit,
+      Function<void (uint64_t record_id, const msg::MessageObject& message)> fn);
 
   Set<uint64_t> listRecords() const;
   uint64_t numRecords() const;
