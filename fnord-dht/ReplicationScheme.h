@@ -53,7 +53,7 @@ protected:
 };
 
 
-} // namespace tdsb
+} // namespace dht
 } // namespace fnord
 
 #endif

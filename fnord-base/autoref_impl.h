@@ -73,5 +73,10 @@ T* AutoRef<T>::release() {
   return ref;
 }
 
+template <typename T>
+AutoRef<T> mkRef(T* ptr) {
+  return AutoRef<T>(ptr);
+}
+
 } // namespace fnord
 #endif
