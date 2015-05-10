@@ -61,6 +61,9 @@ using RefPtr = AutoRef<T>;
 template <typename T>
 using RefPtrVector = Vector<AutoRef<T>>;
 
+template <typename T>
+AutoRef<T> mkRef(T* ptr);
+
 } // namespace fnord
 
 #include "autoref_impl.h"

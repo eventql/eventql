@@ -24,9 +24,11 @@ namespace tsdb {
 
 class TSDBNode {
 public:
+
   TSDBNode(
       const String& nodeid,
-      const String& db_path);
+      const String& db_path,
+      RefPtr<dht::ReplicationScheme> replication_scheme);
 
   void configurePrefix(
       const String& stream_key_prefix,

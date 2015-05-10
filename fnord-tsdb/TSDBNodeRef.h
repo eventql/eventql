@@ -16,6 +16,7 @@
 #include <fnord-base/thread/queue.h>
 #include <fnord-base/thread/DelayedQueue.h>
 #include <fnord-mdb/MDB.h>
+#include <fnord-dht/ReplicationScheme.h>
 
 namespace fnord {
 namespace tsdb {
@@ -27,6 +28,7 @@ struct TSDBNodeRef {
   thread::DelayedQueue<RefPtr<StreamChunk>> compactionq;
   thread::Queue<RefPtr<StreamChunk>> replicationq;
   RefPtr<mdb::MDB> db;
+  RefPtr<dht::ReplicationScheme> replication_scheme;
 };
 
 } // namespace tdsb
