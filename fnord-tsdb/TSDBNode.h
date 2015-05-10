@@ -28,7 +28,8 @@ public:
 
   TSDBNode(
       const String& db_path,
-      RefPtr<dht::ReplicationScheme> replication_scheme);
+      RefPtr<dht::ReplicationScheme> replication_scheme,
+      http::HTTPConnectionPool* http);
 
   void configurePrefix(
       const String& stream_key_prefix,
@@ -41,6 +42,12 @@ public:
       uint64_t record_id,
       const Buffer& record,
       DateTime time);
+
+  void insertRecord(
+      const String& stream_key,
+      uint64_t record_id,
+      const Buffer& record,
+      const String& chunk_key);
 
   Vector<String> listFiles(const String& chunk_key);
 
