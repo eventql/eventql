@@ -13,18 +13,16 @@ namespace fnord {
 namespace tsdb {
 
 TSDBNode::TSDBNode(
-    const String& nodeid,
     const String& db_path,
     RefPtr<dht::ReplicationScheme> replication_scheme) :
-    nodeid_(nodeid),
     noderef_{
         .db_path = db_path,
         .db = mdb::MDB::open(
             db_path,
             false,
             1024 * 1024 * 1024, // 1 GiB
-            nodeid + ".db",
-            nodeid + ".db.lck"),
+            "index.db",
+            "index.db.lck"),
         .replication_scheme = replication_scheme} {}
 
 void TSDBNode::insertRecord(

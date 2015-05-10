@@ -44,6 +44,7 @@ class FixedReplicationScheme : public ReplicationScheme {
 public:
 
   void addHost(uint64_t unique_id, const String& addr);
+  void addHost(const String& addr);
 
   Vector<ReplicaRef> replicasFor(const String& key) override;
   bool keepLocalReplicaFor(const String& key) override;

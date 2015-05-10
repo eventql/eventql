@@ -239,6 +239,17 @@ void RecordSet::loadCommitlog(
   }
 }
 
+uint64_t RecordSet::numRecords() const {
+  uint64_t res = 0;
+
+  std::unique_lock<std::mutex> lk(mutex_);
+  for (const auto& df : state_.datafiles) {
+    res += df.second;
+  }
+
+  return res;
+}
+
 Set<uint64_t> RecordSet::listRecords() const {
   Set<uint64_t> res;
 
