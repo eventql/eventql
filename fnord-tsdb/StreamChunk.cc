@@ -224,7 +224,7 @@ void StreamChunk::replicate() {
 
 uint64_t StreamChunk::replicateTo(const String& addr, uint64_t offset) {
   util::BinaryMessageWriter batch;
-  size_t batch_size = 100;
+  size_t batch_size = 4096;
   size_t n = 0;
 
   records_.fetchRecords(offset, batch_size, [this, &batch, &n] (
