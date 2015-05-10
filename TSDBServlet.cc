@@ -36,6 +36,10 @@ void TSDBServlet::handleHTTPRequest(
       return insertRecordsBatch(req, res, &uri);
     }
 
+    if (StringUtil::endsWith(uri.path(), "/replicate")) {
+      return insertRecordsReplication(req, res, &uri);
+    }
+
     if (StringUtil::endsWith(uri.path(), "/list_chunks")) {
       return listChunks(req, res, &uri);
     }
@@ -93,6 +97,41 @@ void TSDBServlet::insertRecordsBatch(
     auto len = reader.readVarUInt();
     auto data = reader.read(len);
     node_->insertRecord(stream, record_id, Buffer(data, len), time);
+  }
+
+  res->setStatus(http::kStatusCreated);
+}
+
+void TSDBServlet::insertRecordsReplication(
+    http::HTTPRequest* req,
+    http::HTTPResponse* res,
+    URI* uri) {
+  const auto& params = uri->queryParams();
+
+  String stream;
+  if (!URI::getParam(params, "stream", &stream)) {
+    res->setStatus(fnord::http::kStatusBadRequest);
+    res->addBody("missing ?stream=... parameter");
+    return;
+  }
+
+  String chunk_base64;
+  if (!URI::getParam(params, "chunk", &chunk_base64)) {
+    res->setStatus(fnord::http::kStatusBadRequest);
+    res->addBody("missing ?chunk=... parameter");
+    return;
+  }
+
+  String chunk;
+  util::Base64::decode(chunk_base64, &chunk);
+
+  auto& buf = req->body();
+  util::BinaryMessageReader reader(buf.data(), buf.size());
+  while (reader.remaining() > 0) {
+    auto record_id = *reader.readUInt64();
+    auto len = reader.readVarUInt();
+    auto data = reader.read(len);
+    node_->insertRecord(stream, record_id, Buffer(data, len), chunk);
   }
 
   res->setStatus(http::kStatusCreated);

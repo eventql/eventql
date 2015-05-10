@@ -194,6 +194,11 @@ void RecordSet::compact(Set<String>* deleted_files) {
 
   auto outfile_path = filename_prefix_ + rnd_.hex64() + ".cst";
   auto outfile_nrecords = outfile.numRecords();
+
+  if (outfile_nrecords == 0) {
+    return;
+  }
+
   cstable::CSTableWriter outfile_writer(
       outfile_path,
       outfile_nrecords);
@@ -248,6 +253,54 @@ uint64_t RecordSet::numRecords() const {
   }
 
   return res;
+}
+
+void RecordSet::fetchRecords(
+      uint64_t offset,
+      uint64_t limit,
+      Function<void (uint64_t record_id, const msg::MessageObject& message)> fn) {
+  Set<uint64_t> res;
+
+  std::unique_lock<std::mutex> lk(mutex_);
+  auto datafiles = state_.datafiles;
+  lk.unlock();
+
+  size_t o = 0;
+  size_t l = 0;
+  for (const auto& datafile : datafiles) {
+    if (o + datafile.second <= offset) {
+      o += datafile.second;
+      continue;
+    }
+
+    cstable::CSTableReader reader(datafile.first);
+    cstable::RecordMaterializer record_reader(schema_.get(), &reader);
+
+    auto msgid_col_ref = reader.getColumnReader("__msgid");
+    auto msgid_col = dynamic_cast<cstable::UInt64ColumnReader*>(msgid_col_ref.get());
+
+    auto n = reader.numRecords();
+    for (int i = 0; i < n; ++i) {
+      uint64_t msgid;
+      uint64_t r;
+      uint64_t d;
+      msgid_col->next(&r, &d, &msgid);
+
+      if (++o <= offset) {
+        msg::MessageObject record;
+        record_reader.nextRecord(&record);
+        continue;
+      }
+
+      msg::MessageObject record;
+      record_reader.nextRecord(&record);
+      fn(msgid, record);
+
+      if (++l == limit) {
+        return;
+      }
+    }
+  }
 }
 
 Set<uint64_t> RecordSet::listRecords() const {

@@ -58,8 +58,7 @@ public:
 
   void insertRecord(
       uint64_t record_id,
-      const Buffer& record,
-      DateTime time);
+      const Buffer& record);
 
   void compact();
   void replicate();
