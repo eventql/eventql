@@ -26,6 +26,26 @@ void RecordMaterializer::nextRecord(msg::MessageObject* record) {
   }
 }
 
+void RecordMaterializer::skipRecord() {
+  for (auto& c : columns_) {
+    auto& column = c.second;
+
+    for (;;) {
+      column.fetchIfNotPending();
+      column.consume();
+
+      if (column.reader->eofReached()) {
+        break;
+      }
+
+      column.fetchIfNotPending();
+      if (column.r == 0) {
+        break;
+      }
+    }
+  }
+}
+
 void RecordMaterializer::loadColumn(
     const String& column_name,
     ColumnState* column,
