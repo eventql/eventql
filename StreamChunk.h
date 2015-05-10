@@ -61,6 +61,7 @@ public:
       DateTime time);
 
   void compact();
+  void replicate();
 
   Vector<String> listFiles() const;
 

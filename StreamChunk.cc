@@ -113,6 +113,8 @@ StreamChunk::StreamChunk(
   if (records_.commitlogSize() > 0) {
     scheduleCompaction();
   }
+
+  node_->replicationq.insert(this, WallClock::unixMicros());
 }
 
 void StreamChunk::insertRecord(
@@ -159,9 +161,17 @@ void StreamChunk::compact() {
 
   commitState();
 
+  node_->replicationq.insert(this, WallClock::unixMicros());
+
   for (const auto& f : deleted_files) {
     FileUtil::rm(f);
   }
+}
+
+void StreamChunk::replicate() {
+  node_->replicationq.insert(
+      this,
+      WallClock::unixMicros() + 30 * kMicrosPerSecond);
 }
 
 Vector<String> StreamChunk::listFiles() const {

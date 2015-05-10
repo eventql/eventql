@@ -15,6 +15,7 @@
 #include <fnord-base/autoref.h>
 #include <fnord-base/thread/queue.h>
 #include <fnord-base/thread/DelayedQueue.h>
+#include <fnord-base/thread/CoalescingDelayedQueue.h>
 #include <fnord-mdb/MDB.h>
 #include <fnord-dht/ReplicationScheme.h>
 
@@ -26,7 +27,7 @@ class StreamChunk;
 struct TSDBNodeRef {
   const String db_path;
   thread::DelayedQueue<RefPtr<StreamChunk>> compactionq;
-  thread::Queue<RefPtr<StreamChunk>> replicationq;
+  thread::CoalescingDelayedQueue<StreamChunk> replicationq;
   RefPtr<mdb::MDB> db;
   RefPtr<dht::ReplicationScheme> replication_scheme;
 };
