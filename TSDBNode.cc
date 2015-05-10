@@ -14,7 +14,8 @@ namespace tsdb {
 
 TSDBNode::TSDBNode(
     const String& nodeid,
-    const String& db_path) :
+    const String& db_path,
+    RefPtr<dht::ReplicationScheme> replication_scheme) :
     nodeid_(nodeid),
     noderef_{
         .db_path = db_path,
@@ -23,7 +24,8 @@ TSDBNode::TSDBNode(
             false,
             1024 * 1024 * 1024, // 1 GiB
             nodeid + ".db",
-            nodeid + ".db.lck")} {}
+            nodeid + ".db.lck"),
+        .replication_scheme = replication_scheme} {}
 
 void TSDBNode::insertRecord(
     const String& stream_key,
