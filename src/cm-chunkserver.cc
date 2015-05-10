@@ -132,7 +132,7 @@ int main(int argc, const char** argv) {
     repl_scheme->addHost(r);
   }
 
-  tsdb::TSDBNode tsdb_node(dir + "/tsdb", repl_scheme.get());
+  tsdb::TSDBNode tsdb_node(dir + "/tsdb", repl_scheme.get(), &http);
 
   tsdb::StreamProperties config(new msg::MessageSchema(joinedSessionsSchema()));
   config.max_datafile_size = 1024 * 1024 * 512;
