@@ -64,7 +64,7 @@ Option<RefPtr<T>> CoalescingDelayedQueue<T>::interruptiblePop() {
   }
 
   if (queue_.size() == 0) {
-    return None<T>();
+    return None<RefPtr<T>>();
   } else {
     auto now = WallClock::unixMicros();
     if (now < queue_.begin()->first) {
@@ -72,12 +72,12 @@ Option<RefPtr<T>> CoalescingDelayedQueue<T>::interruptiblePop() {
           lk,
           std::chrono::microseconds(queue_.begin()->first - now));
 
-      return None<T>();
+      return None<RefPtr<T>>();
     }
 
     auto job = Some(queue_.begin()->second);
     queue_.erase(queue_.begin());
-    map_.erase(job.get());
+    map_.erase(job.get().get());
     --length_;
     lk.unlock();
     wakeup_.notify_all();
