@@ -159,7 +159,9 @@ void StreamChunk::compact() {
   Set<String> deleted_files;
   records_.compact(&deleted_files);
 
+  lk.lock();
   commitState();
+  lk.unlock();
 
   node_->replicationq.insert(this, WallClock::unixMicros());
 
@@ -169,9 +171,56 @@ void StreamChunk::compact() {
 }
 
 void StreamChunk::replicate() {
-  node_->replicationq.insert(
-      this,
-      WallClock::unixMicros() + 30 * kMicrosPerSecond);
+  std::unique_lock<std::mutex> lk(replication_mutex_);
+
+  auto cur_offset = records_.numRecords();
+  auto replicas = node_->replication_scheme->replicasFor(key_);
+  bool dirty = false;
+  bool needs_replication = false;
+  bool has_error = false;
+
+  for (const auto& r : replicas) {
+    auto& off = replicated_offsets_[r.unique_id];
+
+    if (off < cur_offset) {
+      try {
+        auto num_replicated = replicateTo(r.addr, off);
+        dirty = true;
+        off += num_replicated;
+        if (off < cur_offset) {
+          needs_replication = true;
+        }
+      } catch (const std::exception& e) {
+        has_error = true;
+
+        fnord::logError(
+          "tsdb.replication",
+          e,
+          "Error while replicating stream '$0' to '$1'",
+          stream_key_,
+          r.addr);
+      }
+    }
+  }
+
+  if (dirty) {
+    std::unique_lock<std::mutex> lk(mutex_);
+    commitState();
+  }
+
+  if (needs_replication) {
+    node_->replicationq.insert(this, WallClock::unixMicros());
+  } else if (has_error) {
+    node_->replicationq.insert(
+        this,
+        WallClock::unixMicros() + 30 * kMicrosPerSecond);
+  }
+}
+
+uint64_t StreamChunk::replicateTo(const String& addr, uint64_t offset) {
+  fnord::iputs("replicate to $0 -- $1", addr, offset);
+  RAISE(kRuntimeError, "fnord");
+  return 0;
 }
 
 Vector<String> StreamChunk::listFiles() const {

@@ -25,6 +25,7 @@ namespace tsdb {
 struct StreamChunkState {
   String stream_key;
   RecordSet::RecordSetState record_state;
+  HashMap<uint64_t, uint64_t> replicated_offsets;
   void encode(util::BinaryMessageWriter* writer) const;
   void decode(util::BinaryMessageReader* reader);
 };
@@ -81,6 +82,7 @@ protected:
 
   void scheduleCompaction();
   void commitState();
+  uint64_t replicateTo(const String& addr, uint64_t offset);
 
   String key_;
   String stream_key_;
@@ -88,9 +90,11 @@ protected:
   RefPtr<StreamProperties> config_;
   TSDBNodeRef* node_;
   std::mutex mutex_;
+  std::mutex replication_mutex_;
   bool replication_scheduled_;
   bool compaction_scheduled_;
   DateTime last_compaction_;
+  HashMap<uint64_t, uint64_t> replicated_offsets_;
 };
 
 }

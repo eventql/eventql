@@ -27,7 +27,6 @@ class TSDBNode {
 public:
 
   TSDBNode(
-      const String& nodeid,
       const String& db_path,
       RefPtr<dht::ReplicationScheme> replication_scheme);
 
@@ -55,7 +54,6 @@ protected:
 
   void reopenStreamChunks();
 
-  String nodeid_;
   TSDBNodeRef noderef_;
   Vector<Pair<String, RefPtr<StreamProperties>>> configs_;
   std::mutex mutex_;
