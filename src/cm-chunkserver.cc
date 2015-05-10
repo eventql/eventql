@@ -247,8 +247,10 @@ int main(int argc, const char** argv) {
   //logtable::LogTableServlet logtable_servlet(&table_repo);
   //http_router.addRouteByPrefixMatch("/logtable", &logtable_servlet, &tpool);
 
-
-  tsdb::TSDBNode tsdb_node(replica, dir + "/tsdb");
+  tsdb::TSDBNode tsdb_node(
+      replica,
+      dir + "/tsdb",
+      new dht::StandaloneReplicationScheme());
 
   tsdb::StreamProperties config(new msg::MessageSchema(joinedSessionsSchema()));
   config.max_datafile_size = 1024 * 1024 * 512;
