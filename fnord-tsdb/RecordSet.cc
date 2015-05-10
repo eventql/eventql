@@ -287,8 +287,7 @@ void RecordSet::fetchRecords(
       msgid_col->next(&r, &d, &msgid);
 
       if (++o <= offset) {
-        msg::MessageObject record;
-        record_reader.nextRecord(&record);
+        record_reader.skipRecord();
         continue;
       }
 
