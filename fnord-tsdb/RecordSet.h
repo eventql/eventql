@@ -47,6 +47,7 @@ public:
   void fetchRecord(uint64_t record_id, Buffer* message);
 
   Set<uint64_t> listRecords() const;
+  uint64_t numRecords() const;
 
   RecordSetState getState() const;
   Vector<String> listDatafiles() const;

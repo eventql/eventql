@@ -8,6 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <fnord-dht/ReplicationScheme.h>
+#include <fnord-base/fnv.h>
 
 namespace fnord {
 namespace dht {
@@ -17,6 +18,27 @@ Vector<ReplicaRef> StandaloneReplicationScheme::replicasFor(const String& key) {
 }
 
 bool StandaloneReplicationScheme::keepLocalReplicaFor(const String& key) {
+  return true;
+}
+
+
+void FixedReplicationScheme::addHost(uint64_t unique_id, const String& addr) {
+  replicas_.emplace_back(ReplicaRef {
+    .unique_id = unique_id,
+    .addr = addr
+  });
+}
+
+void FixedReplicationScheme::addHost(const String& addr) {
+  FNV<uint64_t> fnv;
+  addHost(fnv.hash(addr.data(), addr.size()), addr);
+}
+
+Vector<ReplicaRef> FixedReplicationScheme::replicasFor(const String& key) {
+  return replicas_;
+}
+
+bool FixedReplicationScheme::keepLocalReplicaFor(const String& key) {
   return true;
 }
 
