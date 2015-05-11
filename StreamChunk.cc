@@ -119,6 +119,7 @@ StreamChunk::StreamChunk(
   }
 
   node_->replicationq.insert(this, WallClock::unixMicros());
+  node_->indexq.insert(this, WallClock::unixMicros());
   records_.setMaxDatafileSize(config_->max_datafile_size);
 }
 
@@ -180,6 +181,7 @@ void StreamChunk::compact() {
   lk.unlock();
 
   node_->replicationq.insert(this, WallClock::unixMicros());
+  node_->indexq.insert(this, WallClock::unixMicros());
 
   for (const auto& f : deleted_files) {
     FileUtil::rm(f);
@@ -302,6 +304,11 @@ uint64_t StreamChunk::replicateTo(const String& addr, uint64_t offset) {
   }
 
   return offset + n;
+}
+
+void StreamChunk::buildIndexes() {
+  std::unique_lock<std::mutex> lk(indexbuild_mutex_);
+  fnord::iputs("build indexes...", 1);
 }
 
 Vector<String> StreamChunk::listFiles() const {

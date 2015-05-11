@@ -64,6 +64,7 @@ public:
 
   void compact();
   void replicate();
+  void buildIndexes();
 
   Vector<String> listFiles() const;
 
@@ -92,6 +93,7 @@ protected:
   TSDBNodeRef* node_;
   std::mutex mutex_;
   std::mutex replication_mutex_;
+  std::mutex indexbuild_mutex_;
   bool replication_scheduled_;
   bool compaction_scheduled_;
   DateTime last_compaction_;
