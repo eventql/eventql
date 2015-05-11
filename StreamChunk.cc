@@ -308,7 +308,67 @@ uint64_t StreamChunk::replicateTo(const String& addr, uint64_t offset) {
 
 void StreamChunk::buildIndexes() {
   std::unique_lock<std::mutex> lk(indexbuild_mutex_);
-  fnord::iputs("build indexes...", 1);
+
+  for (const auto& dset : config_->derived_datasets) {
+    buildDerivedDataset(dset);
+  }
+}
+
+void StreamChunk::buildDerivedDataset(RefPtr<DerivedDataset> dset) {
+  String dset_key = "\x1b";
+  dset_key.append(key_);
+  dset_key.append("~" + dset->name());
+
+  DerivedDatasetState old_state;
+  {
+    auto txn = node_->db->startTransaction(true);
+    auto buf = txn->get(dset_key);
+    txn->abort();
+    if (!buf.isEmpty()) {
+      util::BinaryMessageReader reader(buf.get().data(), buf.get().size());
+      old_state.decode(&reader);
+    }
+  }
+
+  auto cur_offset = records_.lastOffset();
+  if (old_state.last_offset >= cur_offset) {
+    return;
+  }
+
+  DerivedDatasetState new_state;
+  new_state.last_offset = cur_offset;
+
+  Set<String> delete_after_commit;
+  try {
+    dset->update(
+        &records_,
+        old_state.last_offset,
+        cur_offset,
+        old_state.state,
+        &new_state.state,
+        &delete_after_commit);
+  } catch (const std::exception& e) {
+    fnord::logError(
+        "fnord.tsdb",
+        e,
+        "error while building derived dataset '$0'",
+        dset->name());
+
+    return;
+  }
+
+  {
+    util::BinaryMessageWriter buf;
+    new_state.encode(&buf);
+
+    auto txn = node_->db->startTransaction(false);
+    txn->update(dset_key.data(), dset_key.size(), buf.data(), buf.size());
+    txn->commit();
+  }
+
+  for (const auto& f : delete_after_commit) {
+    FileUtil::rm(f);
+  }
 }
 
 Vector<String> StreamChunk::listFiles() const {

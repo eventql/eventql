@@ -12,6 +12,8 @@ include_directories(../3rdparty)
 
 add_library(fnord-tsdb OBJECT
     CompactionWorker.cc
+    CSTableIndex.cc
+    DerivedDataset.cc
     ReplicationWorker.cc
     IndexWorker.cc
     TSDBNode.cc

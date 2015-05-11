@@ -202,6 +202,14 @@ void TSDBNode::reopenStreamChunks() {
     }
 
     auto chunk_key = key.toString();
+    if (chunk_key.size() == 0) {
+      continue;
+    }
+
+    if (chunk_key[0] == 0x1b) {
+      continue;
+    }
+
     util::BinaryMessageReader reader(value.data(), value.size());
     StreamChunkState state;
     state.decode(&reader);
