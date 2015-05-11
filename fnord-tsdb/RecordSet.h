@@ -78,6 +78,7 @@ public:
   void compact(Set<String>* deleted_files);
 
   void setMaxDatafileSize(size_t size);
+  const String& filenamePrefix() const;
 
 protected:
 

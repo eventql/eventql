@@ -423,6 +423,10 @@ void RecordSet::setMaxDatafileSize(size_t size) {
   max_datafile_size_ = size;
 }
 
+const String& RecordSet::filenamePrefix() const {
+ return filename_prefix_;
+}
+
 RecordSet::RecordSetState::RecordSetState() :
     commitlog_size(0) {}
 
