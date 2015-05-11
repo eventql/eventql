@@ -135,7 +135,7 @@ int main(int argc, const char** argv) {
 
   for (const auto& tbl : input_tables) {
     URI uri(StringUtil::format(
-        "http://nue03.prod.fnrd.net:7003/tsdb/list_files?chunk=$0",
+        "http://nue03.prod.fnrd.net:7003/tsdb/fetch_derived_dataset?chunk=$0&derived_dataset=cstable",
         tbl));
 
     http::HTTPRequest req(http::HTTPMessage::M_GET, uri.pathAndQuery());
@@ -150,11 +150,8 @@ int main(int argc, const char** argv) {
       RAISEF(kRuntimeError, "received non-200 response: $0", r.body().toString());
     }
 
-    const auto& body = r.body();
-    util::BinaryMessageReader reader(body.data(), body.size());
-    while (reader.remaining() > 0) {
-      input_table_files.emplace(reader.readLenencString());
-    }
+    fnord::iputs("src tbl: $0", r.body().toString());
+    input_table_files.emplace(r.body().toString());
   }
 
   Set<String> tables;
