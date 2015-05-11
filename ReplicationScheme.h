@@ -24,6 +24,7 @@ struct ReplicaRef {
 
 class ReplicationScheme : public RefCounted {
 public:
+  virtual ~ReplicationScheme() {}
   virtual Vector<ReplicaRef> replicasFor(const String& key) = 0;
   virtual bool keepLocalReplicaFor(const String& key) = 0;
 };
