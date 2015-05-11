@@ -12,6 +12,7 @@
 #include <fnord-base/stdtypes.h>
 #include <fnord-base/option.h>
 #include <fnord-msg/MessageSchema.h>
+#include <fnord-tsdb/DerivedDataset.h>
 
 namespace fnord {
 namespace tsdb {
@@ -29,12 +30,14 @@ struct StreamProperties : public RefCounted {
       schema(other.schema),
       chunk_size(other.chunk_size),
       max_datafile_size(other.max_datafile_size),
-      compaction_interval(other.compaction_interval) {}
+      compaction_interval(other.compaction_interval),
+      derived_datasets(other.derived_datasets) {}
 
   RefPtr<msg::MessageSchema> schema;
   Duration chunk_size;
   size_t max_datafile_size;
   Duration compaction_interval;
+  List<RefPtr<DerivedDataset>> derived_datasets;
 };
 
 }
