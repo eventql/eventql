@@ -44,6 +44,7 @@
 #include "fnord-mdb/MDBUtil.h"
 #include "fnord-tsdb/TSDBNode.h"
 #include "fnord-tsdb/TSDBServlet.h"
+#include "fnord-tsdb/CSTableIndex.h"
 #include "common.h"
 #include "schemas.h"
 #include "ModelReplication.h"
@@ -138,6 +139,7 @@ int main(int argc, const char** argv) {
   config.max_datafile_size = 1024 * 1024 * 512;
   config.chunk_size = Duration(3600 * 4 * kMicrosPerSecond);
   config.compaction_interval = Duration(30 * kMicrosPerSecond);
+  config.derived_datasets.emplace_back(new tsdb::CSTableIndex(config.schema));
   tsdb_node.configurePrefix("joined_sessions.", config);
 
   tsdb::TSDBServlet tsdb_servlet(&tsdb_node);
