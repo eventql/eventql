@@ -72,6 +72,10 @@ void TSDBServlet::insertRecord(
   uint64_t record_id = rnd_.random64();
   auto time = WallClock::now();
 
+  if (req->body().size() == 0) {
+    RAISEF(kRuntimeError, "empty record: $0", record_id);
+  }
+
   node_->insertRecord(stream, record_id, req->body(), time);
   res->setStatus(http::kStatusCreated);
 }
@@ -96,6 +100,11 @@ void TSDBServlet::insertRecordsBatch(
     auto record_id = *reader.readUInt64();
     auto len = reader.readVarUInt();
     auto data = reader.read(len);
+
+    if (len == 0) {
+      RAISEF(kRuntimeError, "empty record: $0", record_id);
+    }
+
     node_->insertRecord(stream, record_id, Buffer(data, len), time);
   }
 
@@ -131,6 +140,11 @@ void TSDBServlet::insertRecordsReplication(
     auto record_id = *reader.readUInt64();
     auto len = reader.readVarUInt();
     auto data = reader.read(len);
+
+    if (len == 0) {
+      RAISEF(kRuntimeError, "empty record: $0", record_id);
+    }
+
     node_->insertRecord(stream, record_id, Buffer(data, len), chunk);
   }
 

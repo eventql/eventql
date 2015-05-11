@@ -125,7 +125,7 @@ void RecordSet::compact(Set<String>* deleted_files) {
     return;
   }
 
-  auto outfile_path = filename_prefix_ + rnd_.hex64() + ".cst";
+  auto outfile_path = filename_prefix_ + rnd_.hex64() + ".sst";
   auto outfile = sstable::SSTableWriter::create(
       outfile_path + "~",
       sstable::IndexProvider{},
@@ -133,16 +133,25 @@ void RecordSet::compact(Set<String>* deleted_files) {
       0);
 
   size_t outfile_nrecords = 0;
+  size_t outfile_offset = 0;
 
   Set<uint64_t> old_id_set;
   Set<uint64_t> new_id_set;
 
   bool rewrite_last =
       snap.datafiles.size() > 0 &&
-      FileUtil::size(snap.datafiles.back().first) < max_datafile_size_;
+      FileUtil::size(snap.datafiles.back().filename) < max_datafile_size_;
+
+  if (rewrite_last) {
+    outfile_offset = snap.datafiles.back().offset;
+  } else {
+    outfile_offset = snap.datafiles.size() > 0 ?
+        snap.datafiles.back().offset + snap.datafiles.back().num_records :
+        0;
+  }
 
   for (int j = 0; j < snap.datafiles.size(); ++j) {
-    sstable::SSTableReader reader(snap.datafiles[j].first);
+    sstable::SSTableReader reader(snap.datafiles[j].filename);
     auto cursor = reader.getCursor();
 
     while (cursor->valid()) {
@@ -201,11 +210,15 @@ void RecordSet::compact(Set<String>* deleted_files) {
   lk.lock();
 
   if (rewrite_last) {
-    deleted_files->emplace(state_.datafiles.back().first);
+    deleted_files->emplace(state_.datafiles.back().filename);
     state_.datafiles.pop_back();
   }
 
-  state_.datafiles.emplace_back(outfile_path, outfile_nrecords);
+  state_.datafiles.emplace_back(DatafileRef {
+    .filename = outfile_path,
+    .num_records = outfile_nrecords,
+    .offset = outfile_offset
+  });
 
   for (const auto& cl : snap.old_commitlogs) {
     state_.old_commitlogs.erase(cl);
@@ -240,10 +253,30 @@ uint64_t RecordSet::numRecords() const {
 
   std::unique_lock<std::mutex> lk(mutex_);
   for (const auto& df : state_.datafiles) {
-    res += df.second;
+    res += df.num_records;
   }
 
   return res;
+}
+
+uint64_t RecordSet::firstOffset() const {
+  std::unique_lock<std::mutex> lk(mutex_);
+
+  if (state_.datafiles.size() == 0) {
+    return 0;
+  } else {
+    return state_.datafiles.front().offset;
+  }
+}
+
+uint64_t RecordSet::lastOffset() const {
+  std::unique_lock<std::mutex> lk(mutex_);
+
+  if (state_.datafiles.size() == 0) {
+    return 0;
+  } else {
+    return state_.datafiles.back().offset + state_.datafiles.back().num_records;
+  }
 }
 
 void RecordSet::fetchRecords(
@@ -256,15 +289,23 @@ void RecordSet::fetchRecords(
   auto datafiles = state_.datafiles;
   lk.unlock();
 
-  size_t o = 0;
+  if (datafiles.size() == 0) {
+    return;
+  }
+
+  size_t o = datafiles.front().offset;
+  if (o > offset) {
+    RAISEF(kRuntimeError, "offset was garbage collected: $0", offset);
+  }
+
   size_t l = 0;
   for (const auto& datafile : datafiles) {
-    if (o + datafile.second <= offset) {
-      o += datafile.second;
+    if (o + datafile.num_records <= offset) {
+      o += datafile.num_records;
       continue;
     }
 
-    sstable::SSTableReader reader(datafile.first);
+    sstable::SSTableReader reader(datafile.filename);
     auto cursor = reader.getCursor();
 
     while (cursor->valid()) {
@@ -307,7 +348,7 @@ Set<uint64_t> RecordSet::listRecords() const {
   lk.unlock();
 
   for (const auto& datafile : datafiles) {
-    sstable::SSTableReader reader(datafile.first);
+    sstable::SSTableReader reader(datafile.filename);
     auto cursor = reader.getCursor();
 
     while (cursor->valid()) {
@@ -334,7 +375,7 @@ Vector<String> RecordSet::listDatafiles() const {
   Vector<String> datafiles;
 
   for (const auto& df : state_.datafiles) {
-    datafiles.emplace_back(df.first);
+    datafiles.emplace_back(df.filename);
   }
 
   return datafiles;
@@ -356,8 +397,9 @@ void RecordSet::RecordSetState::encode(
 
   writer->appendVarUInt(datafiles.size());
   for (const auto& d : datafiles) {
-    writer->appendVarUInt(d.second);
-    writer->appendLenencString(d.first);
+    writer->appendVarUInt(d.num_records);
+    writer->appendVarUInt(d.offset);
+    writer->appendLenencString(d.filename);
   }
 
   writer->appendVarUInt(all_commitlogs.size());
@@ -370,8 +412,13 @@ void RecordSet::RecordSetState::decode(util::BinaryMessageReader* reader) {
   auto num_datafiles = reader->readVarUInt();
   for (size_t i = 0; i < num_datafiles; ++i) {
     auto num_records = reader->readVarUInt();
+    auto offset = reader->readVarUInt();
     auto fname = reader->readLenencString();
-    datafiles.emplace_back(fname, num_records);
+    datafiles.emplace_back(DatafileRef {
+      .filename = fname,
+      .num_records = num_records,
+      .offset = offset
+    });
   }
 
   auto num_commitlogs = reader->readVarUInt();
