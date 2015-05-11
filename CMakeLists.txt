@@ -35,6 +35,7 @@ add_subdirectory(3rdparty/libfnord/fnord-metricdb)
 add_subdirectory(3rdparty/libfnord/fnord-sql)
 add_subdirectory(3rdparty/libfnord/fnord-msg)
 add_subdirectory(3rdparty/libfnord/fnord-tsdb)
+add_subdirectory(3rdparty/libfnord/fnord-dht)
 include_directories(3rdparty/libfnord/)
 include_directories(3rdparty/libfnord/3rdparty/)
 include_directories(${FNORD_FTS_INCLUDE})
@@ -407,6 +408,7 @@ add_executable(cm-chunkserver
     $<TARGET_OBJECTS:fnord-cstable>
     $<TARGET_OBJECTS:fnord-msg>
     $<TARGET_OBJECTS:fnord-tsdb>
+    $<TARGET_OBJECTS:fnord-dht>
     3rdparty/libfnord/fnord-sstable/SSTableServlet.cc
     3rdparty/libfnord/fnord-logtable/ArtifactIndex.cc
     3rdparty/libfnord/fnord-logtable/ArtifactIndexReplication.cc
