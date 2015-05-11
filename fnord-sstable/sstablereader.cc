@@ -16,6 +16,11 @@
 namespace fnord {
 namespace sstable {
 
+
+SSTableReader::SSTableReader(
+    const String& filename) :
+    SSTableReader(File::openFile(filename, File::O_READ)) {}
+
 SSTableReader::SSTableReader(
     File&& file) :
     SSTableReader(new io::MmappedFile(std::move(file))) {}

@@ -87,7 +87,6 @@ StreamChunk::StreamChunk(
     config_(config),
     node_(node),
     records_(
-        config->schema,
         FileUtil::joinPaths(
             node->db_path,
             StringUtil::stripShell(stream_key) + ".")),
@@ -107,7 +106,6 @@ StreamChunk::StreamChunk(
     config_(config),
     node_(node),
     records_(
-        config->schema,
         FileUtil::joinPaths(
             node->db_path,
             StringUtil::stripShell(state.stream_key) + "."),
@@ -229,15 +227,13 @@ uint64_t StreamChunk::replicateTo(const String& addr, uint64_t offset) {
 
   records_.fetchRecords(offset, batch_size, [this, &batch, &n] (
       uint64_t record_id,
-      const msg::MessageObject& message) {
+      const void* record_data,
+      size_t record_size) {
     ++n;
 
-    Buffer msg_buf;
-    msg::MessageEncoder::encode(message, *config_->schema, &msg_buf);
-
     batch.appendUInt64(record_id);
-    batch.appendVarUInt(msg_buf.size());
-    batch.append(msg_buf.data(), msg_buf.size());
+    batch.appendVarUInt(record_size);
+    batch.append(record_data, record_size);
   });
 
   String encoded_key;
