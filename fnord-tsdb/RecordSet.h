@@ -11,12 +11,10 @@
 #define _FNORD_TSDB_MESSAGESET_H
 #include <fnord-base/stdtypes.h>
 #include <fnord-base/io/file.h>
-#include <fnord-base/io/mmappedfile.h>
 #include <fnord-base/option.h>
 #include <fnord-base/util/binarymessagereader.h>
 #include <fnord-base/util/binarymessagewriter.h>
 #include <fnord-base/random.h>
-#include <fnord-msg/MessageSchema.h>
 
 namespace fnord {
 namespace tsdb {
@@ -38,7 +36,6 @@ public:
   };
 
   RecordSet(
-      RefPtr<msg::MessageSchema> schema,
       const String& filename_prefix,
       RecordSetState state = RecordSetState{});
 
@@ -47,7 +44,7 @@ public:
   void fetchRecords(
       uint64_t offset,
       uint64_t limit,
-      Function<void (uint64_t record_id, const msg::MessageObject& message)> fn);
+      Function<void (uint64_t record_id, const void* record_data, size_t record_size)> fn);
 
   Set<uint64_t> listRecords() const;
   uint64_t numRecords() const;
@@ -71,7 +68,6 @@ protected:
       Function<void (uint64_t, const void*, size_t)> fn);
 
   size_t version_;
-  RefPtr<msg::MessageSchema> schema_;
   String filename_prefix_;
   RecordSetState state_;
   mutable std::mutex compact_mutex_;

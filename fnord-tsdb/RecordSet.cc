@@ -11,23 +11,16 @@
 #include <fnord-base/io/mmappedfile.h>
 #include <fnord-base/util/binarymessagereader.h>
 #include <fnord-base/util/binarymessagewriter.h>
-#include <fnord-cstable/CSTableBuilder.h>
-#include <fnord-cstable/CSTableWriter.h>
-#include <fnord-cstable/CSTableReader.h>
-#include <fnord-cstable/UInt64ColumnWriter.h>
-#include <fnord-cstable/UInt64ColumnReader.h>
-#include <fnord-cstable/RecordMaterializer.h>
-#include <fnord-msg/MessageDecoder.h>
+#include <fnord-sstable/sstablewriter.h>
+#include <fnord-sstable/sstablereader.h>
 #include <fnord-tsdb/RecordSet.h>
 
 namespace fnord {
 namespace tsdb {
 
 RecordSet::RecordSet(
-    RefPtr<msg::MessageSchema> schema,
     const String& filename_prefix,
     RecordSetState state /* = RecordSetState{} */) :
-    schema_(schema),
     filename_prefix_(filename_prefix),
     state_(state),
     max_datafile_size_(kDefaultMaxDatafileSize),
@@ -132,8 +125,14 @@ void RecordSet::compact(Set<String>* deleted_files) {
     return;
   }
 
-  cstable::CSTableBuilder outfile(schema_.get());
-  cstable::UInt64ColumnWriter id_col(0, 0);
+  auto outfile_path = filename_prefix_ + rnd_.hex64() + ".cst";
+  auto outfile = sstable::SSTableWriter::create(
+      outfile_path + "~",
+      sstable::IndexProvider{},
+      nullptr,
+      0);
+
+  size_t outfile_nrecords = 0;
 
   Set<uint64_t> old_id_set;
   Set<uint64_t> new_id_set;
@@ -143,34 +142,37 @@ void RecordSet::compact(Set<String>* deleted_files) {
       FileUtil::size(snap.datafiles.back().first) < max_datafile_size_;
 
   for (int j = 0; j < snap.datafiles.size(); ++j) {
-    cstable::CSTableReader reader(snap.datafiles[j].first);
-    cstable::RecordMaterializer record_reader(schema_.get(), &reader);
+    sstable::SSTableReader reader(snap.datafiles[j].first);
+    auto cursor = reader.getCursor();
 
-    auto msgid_col_ref = reader.getColumnReader("__msgid");
-    auto msgid_col = dynamic_cast<cstable::UInt64ColumnReader*>(msgid_col_ref.get());
-
-    auto n = reader.numRecords();
-    for (int i = 0; i < n; ++i) {
-      uint64_t msgid;
-      uint64_t r;
-      uint64_t d;
-      msgid_col->next(&r, &d, &msgid);
-      old_id_set.emplace(msgid);
-
-      if (!rewrite_last || j + 1 < snap.datafiles.size()) {
-        continue;
+    while (cursor->valid()) {
+      void* key;
+      size_t key_size;
+      cursor->getKey(&key, &key_size);
+      if (key_size != sizeof(uint64_t)) {
+        RAISE(kRuntimeError, "invalid row");
       }
 
-      msg::MessageObject record;
-      record_reader.nextRecord(&record);
+      uint64_t msgid = *((uint64_t*) key);
+      old_id_set.emplace(msgid);
 
-      outfile.addRecord(record);
-      id_col.addDatum(0, 0, msgid);
+      if (rewrite_last && j + 1 == snap.datafiles.size()) {
+        void* data;
+        size_t data_size;
+        cursor->getData(&data, &data_size);
+
+        outfile->appendRow(key, key_size, data, data_size);
+        ++outfile_nrecords;
+      }
+
+      if (!cursor->next()) {
+        break;
+      }
     }
   }
 
   for (const auto& cl : snap.old_commitlogs) {
-    loadCommitlog(cl, [this, &outfile, &old_id_set, &new_id_set, &id_col] (
+    loadCommitlog(cl, [this, &outfile, &old_id_set, &new_id_set, &outfile_nrecords] (
         uint64_t id,
         const void* data,
         size_t size) {
@@ -184,28 +186,17 @@ void RecordSet::compact(Set<String>* deleted_files) {
         return;
       }
 
-      msg::MessageObject record;
-      msg::MessageDecoder::decode(data, size, *schema_, &record);
-
-      outfile.addRecord(record);
-      id_col.addDatum(0, 0, id);
+      outfile->appendRow(&id, sizeof(id), data, size);
+      ++outfile_nrecords;
     });
   }
-
-  auto outfile_path = filename_prefix_ + rnd_.hex64() + ".cst";
-  auto outfile_nrecords = outfile.numRecords();
 
   if (outfile_nrecords == 0) {
     return;
   }
 
-  cstable::CSTableWriter outfile_writer(
-      outfile_path,
-      outfile_nrecords);
-
-  outfile.write(&outfile_writer);
-  outfile_writer.addColumn("__msgid", &id_col);
-  outfile_writer.commit();
+  outfile->finalize();
+  FileUtil::mv(outfile_path + "~", outfile_path);
 
   lk.lock();
 
@@ -258,7 +249,7 @@ uint64_t RecordSet::numRecords() const {
 void RecordSet::fetchRecords(
       uint64_t offset,
       uint64_t limit,
-      Function<void (uint64_t record_id, const msg::MessageObject& message)> fn) {
+      Function<void (uint64_t record_id, const void* record_data, size_t record_size)> fn) {
   Set<uint64_t> res;
 
   std::unique_lock<std::mutex> lk(mutex_);
@@ -273,30 +264,32 @@ void RecordSet::fetchRecords(
       continue;
     }
 
-    cstable::CSTableReader reader(datafile.first);
-    cstable::RecordMaterializer record_reader(schema_.get(), &reader);
+    sstable::SSTableReader reader(datafile.first);
+    auto cursor = reader.getCursor();
 
-    auto msgid_col_ref = reader.getColumnReader("__msgid");
-    auto msgid_col = dynamic_cast<cstable::UInt64ColumnReader*>(msgid_col_ref.get());
+    while (cursor->valid()) {
+      if (++o > offset) {
+        void* key;
+        size_t key_size;
+        cursor->getKey(&key, &key_size);
+        if (key_size != sizeof(uint64_t)) {
+          RAISE(kRuntimeError, "invalid row");
+        }
 
-    auto n = reader.numRecords();
-    for (int i = 0; i < n; ++i) {
-      uint64_t msgid;
-      uint64_t r;
-      uint64_t d;
-      msgid_col->next(&r, &d, &msgid);
+        uint64_t msgid = *((uint64_t*) key);
 
-      if (++o <= offset) {
-        record_reader.skipRecord();
-        continue;
+        void* data;
+        size_t data_size;
+        cursor->getData(&data, &data_size);
+        fn(msgid, data, data_size);
+
+        if (++l == limit) {
+          return;
+        }
       }
 
-      msg::MessageObject record;
-      record_reader.nextRecord(&record);
-      fn(msgid, record);
-
-      if (++l == limit) {
-        return;
+      if (!cursor->next()) {
+        break;
       }
     }
   }
@@ -314,16 +307,22 @@ Set<uint64_t> RecordSet::listRecords() const {
   lk.unlock();
 
   for (const auto& datafile : datafiles) {
-    cstable::CSTableReader reader(datafile.first);
-    auto col = reader.getColumnReader("__msgid");
+    sstable::SSTableReader reader(datafile.first);
+    auto cursor = reader.getCursor();
 
-    void* data;
-    size_t size;
-    uint64_t r;
-    uint64_t d;
-    for (int i = 0; i < reader.numRecords(); ++i) {
-      col->next(&r, &d, &data, &size);
-      res.emplace(*((uint64_t*) data));
+    while (cursor->valid()) {
+      void* key;
+      size_t key_size;
+      cursor->getKey(&key, &key_size);
+      if (key_size != sizeof(uint64_t)) {
+        RAISE(kRuntimeError, "invalid row");
+      }
+
+      res.emplace(*((uint64_t*) key));
+
+      if (!cursor->next()) {
+        break;
+      }
     }
   }
 

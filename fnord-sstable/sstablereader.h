@@ -50,6 +50,7 @@ public:
     size_t limit_;
   };
 
+  SSTableReader(const String& filename);
   SSTableReader(File&& file);
   SSTableReader(RefPtr<VFSFile> vfs_file);
   SSTableReader(const SSTableReader& other) = delete;

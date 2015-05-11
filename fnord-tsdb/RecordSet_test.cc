@@ -11,10 +11,9 @@
 #include <stdio.h>
 #include <string.h>
 #include "fnord-base/test/unittest.h"
+#include "fnord-msg/MessageDecoder.h"
 #include "fnord-msg/MessageEncoder.h"
 #include "fnord-tsdb/RecordSet.h"
-#include "fnord-cstable/CSTableReader.h"
-#include "fnord-cstable/StringColumnReader.h"
 
 using namespace fnord;
 using namespace fnord::tsdb;
@@ -57,7 +56,7 @@ Buffer testObject(RefPtr<msg::MessageSchema> schema, String one, String two) {
 
 TEST_CASE(RecordSetTest, TestAddRowToEmptySet, [] () {
   auto schema = testSchema();
-  RecordSet recset(schema, "/tmp/__fnord_testrecset");
+  RecordSet recset("/tmp/__fnord_testrecset");
   EXPECT_TRUE(recset.getState().commitlog.isEmpty());
   EXPECT_EQ(recset.getState().commitlog_size, 0);
   EXPECT_TRUE(recset.getState().datafiles.empty());
@@ -105,17 +104,12 @@ TEST_CASE(RecordSetTest, TestAddRowToEmptySet, [] () {
   EXPECT_EQ(recset.getState().old_commitlogs.size(), 0);
   EXPECT_EQ(recset.commitlogSize(), 0);
 
-  cstable::CSTableReader reader(recset.getState().datafiles.back().first);
-  void* data;
-  size_t size;
-  uint64_t r;
-  uint64_t d;
-  auto col = reader.getColumnReader("one");
   Set<String> res;
-  for (int i = 0; i < reader.numRecords(); ++i) {
-    col->next(&r, &d, &data, &size);
-    res.emplace(String((char*) data, size));
-  }
+  recset.fetchRecords(0, 100, [&] (uint64_t id, const void* data, size_t size) {
+    msg::MessageObject obj;
+    msg::MessageDecoder::decode(data, size, *schema, &obj);
+    res.emplace(obj.getString(1));
+  });
 
   EXPECT_EQ(res.count("1a"), 1);
   EXPECT_EQ(res.count("2a"), 1);
@@ -128,14 +122,14 @@ TEST_CASE(RecordSetTest, TestCommitlogReopen, [] () {
   RecordSet::RecordSetState state;
 
   {
-    RecordSet recset(schema, "/tmp/__fnord_testrecset");
+    RecordSet recset("/tmp/__fnord_testrecset");
     recset.addRecord(0x42424242, testObject(schema, "1a", "1b"));
     recset.addRecord(0x23232323, testObject(schema, "2a", "2b"));
     state = recset.getState();
   }
 
   {
-    RecordSet recset(schema, "/tmp/__fnord_testrecset", state);
+    RecordSet recset("/tmp/__fnord_testrecset", state);
     EXPECT_EQ(recset.getState().commitlog_size, state.commitlog_size);
     EXPECT_EQ(recset.getState().old_commitlogs.size(), 0);
     EXPECT_EQ(recset.commitlogSize(), 2);
@@ -144,7 +138,7 @@ TEST_CASE(RecordSetTest, TestCommitlogReopen, [] () {
 
 TEST_CASE(RecordSetTest, TestDuplicateRowsInCommitlog, [] () {
   auto schema = testSchema();
-  RecordSet recset(schema, "/tmp/__fnord_testrecset");
+  RecordSet recset("/tmp/__fnord_testrecset");
 
   recset.addRecord(0x42424242, testObject(schema, "1a", "1b"));
   recset.addRecord(0x42424242, testObject(schema, "2a", "2b"));
@@ -161,18 +155,7 @@ TEST_CASE(RecordSetTest, TestDuplicateRowsInCommitlog, [] () {
   recset.compact();
   EXPECT_EQ(recset.commitlogSize(), 0);
 
-  cstable::CSTableReader reader(recset.getState().datafiles.back().first);
-  void* data;
-  size_t size;
-  uint64_t r;
-  uint64_t d;
-  auto col = reader.getColumnReader("__msgid");
-  Set<uint64_t> res;
-  for (int i = 0; i < reader.numRecords(); ++i) {
-    col->next(&r, &d, &data, &size);
-    res.emplace(*((uint64_t*) data));
-  }
-
+  auto res = recset.listRecords();
   EXPECT_EQ(res.size(), 2);
   EXPECT_EQ(res.count(0x42424242), 1);
   EXPECT_EQ(res.count(0x32323232), 1);
@@ -180,7 +163,7 @@ TEST_CASE(RecordSetTest, TestDuplicateRowsInCommitlog, [] () {
 
 TEST_CASE(RecordSetTest, TestCompactionWithExistingTable, [] () {
   auto schema = testSchema();
-  RecordSet recset(schema, "/tmp/__fnord_testrecset");
+  RecordSet recset("/tmp/__fnord_testrecset");
 
   recset.addRecord(0x42424242, testObject(schema, "1a", "1b"));
   recset.addRecord(0x23232323, testObject(schema, "2a", "2b"));
@@ -205,7 +188,7 @@ TEST_CASE(RecordSetTest, TestCompactionWithExistingTable, [] () {
 TEST_CASE(RecordSetTest, TestInsert10kRows, [] () {
   Random rnd;
   auto schema = testSchema();
-  RecordSet recset(schema, "/tmp/__fnord_testrecset");
+  RecordSet recset("/tmp/__fnord_testrecset");
 
   for (int i = 0; i < 10; ++i) {
     for (int i = 0; i < 1000; ++i) {
@@ -219,16 +202,14 @@ TEST_CASE(RecordSetTest, TestInsert10kRows, [] () {
   recset.compact();
   EXPECT_EQ(recset.commitlogSize(), 0);
   EXPECT_EQ(recset.getState().datafiles.size(), 1);
-
-  cstable::CSTableReader reader(recset.getState().datafiles.back().first);
-  EXPECT_EQ(reader.numRecords(), 10000);
+  EXPECT_EQ(recset.listRecords().size(), 10000);
 });
 
 TEST_CASE(RecordSetTest, TestSplitIntoMultipleDatafiles, [] () {
   Random rnd;
   auto schema = testSchema();
-  RecordSet recset(schema, "/tmp/__fnord_testrecset");
-  recset.setMaxDatafileSize(1024 * 50);
+  RecordSet recset("/tmp/__fnord_testrecset");
+  recset.setMaxDatafileSize(1024 * 60);
 
   int n = 0;
   for (int j = 0; j < 10; ++j) {
