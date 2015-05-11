@@ -19,6 +19,7 @@
 #include <fnord-tsdb/TSDBNodeRef.h>
 #include <fnord-tsdb/CompactionWorker.h>
 #include <fnord-tsdb/ReplicationWorker.h>
+#include <fnord-tsdb/IndexWorker.h>
 
 namespace fnord {
 namespace tsdb {
@@ -62,7 +63,8 @@ public:
 
   void start(
       size_t num_comaction_threads = 4,
-      size_t num_replication_threads = 4);
+      size_t num_replication_threads = 4,
+      size_t num_index_threads = 2);
 
   void stop();
 
@@ -76,6 +78,7 @@ protected:
   HashMap<String, RefPtr<StreamChunk>> chunks_;
   Vector<RefPtr<CompactionWorker>> compaction_workers_;
   Vector<RefPtr<ReplicationWorker>> replication_workers_;
+  Vector<RefPtr<IndexWorker>> index_workers_;
 };
 
 } // namespace tdsb

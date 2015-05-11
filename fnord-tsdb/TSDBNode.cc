@@ -150,7 +150,8 @@ void TSDBNode::configurePrefix(
 
 void TSDBNode::start(
     size_t num_compaction_threads,
-    size_t num_replication_threads) {
+    size_t num_replication_threads,
+    size_t num_index_threads) {
   reopenStreamChunks();
 
   for (int i = 0; i < num_compaction_threads; ++i) {
@@ -162,6 +163,11 @@ void TSDBNode::start(
     replication_workers_.emplace_back(new ReplicationWorker(&noderef_));
     replication_workers_.back()->start();
   }
+
+  for (int i = 0; i < num_index_threads; ++i) {
+    index_workers_.emplace_back(new IndexWorker(&noderef_));
+    index_workers_.back()->start();
+  }
 }
 
 void TSDBNode::stop() {
@@ -170,6 +176,10 @@ void TSDBNode::stop() {
   }
 
   for (auto& w : replication_workers_) {
+    w->stop();
+  }
+
+  for (auto& w : index_workers_) {
     w->stop();
   }
 }
