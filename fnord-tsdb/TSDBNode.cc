@@ -72,6 +72,43 @@ void TSDBNode::insertRecord(
   chunk->insertRecord(record_id, record);
 }
 
+void TSDBNode::insertRecords(
+    const String& stream_key,
+    const Vector<RecordRef>& records) {
+  HashMap<String, Vector<RecordRef>> per_chunk;
+  auto config = configFor(stream_key);
+
+  for (const auto& r : records) {
+    auto ckey = StreamChunk::streamChunkKeyFor(stream_key, r.time, *config);
+    per_chunk[ckey].emplace_back(r);
+  }
+
+  for (const auto& c : per_chunk) {
+    insertRecords(stream_key, c.first, c.second);
+  }
+}
+
+void TSDBNode::insertRecords(
+    const String& stream_key,
+    const String& chunk_key,
+    const Vector<RecordRef>& records) {
+  auto config = configFor(stream_key);
+
+  RefPtr<StreamChunk> chunk(nullptr);
+  {
+    std::unique_lock<std::mutex> lk(mutex_);
+    auto chunk_iter = chunks_.find(chunk_key);
+    if (chunk_iter == chunks_.end()) {
+      chunk = StreamChunk::create(chunk_key, stream_key, config, &noderef_);
+      chunks_.emplace(chunk_key, chunk);
+    } else {
+      chunk = chunk_iter->second;
+    }
+  }
+
+  chunk->insertRecords(records);
+}
+
 Vector<String> TSDBNode::listFiles(const String& chunk_key) {
   std::unique_lock<std::mutex> lk(mutex_);
   auto chunk = chunks_.find(chunk_key);
