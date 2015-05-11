@@ -176,7 +176,7 @@ void StreamChunk::compact() {
 void StreamChunk::replicate() {
   std::unique_lock<std::mutex> lk(replication_mutex_);
 
-  auto cur_offset = records_.numRecords();
+  auto cur_offset = records_.lastOffset();
   auto replicas = node_->replication_scheme->replicasFor(key_);
   bool dirty = false;
   bool needs_replication = false;
@@ -187,9 +187,9 @@ void StreamChunk::replicate() {
 
     if (off < cur_offset) {
       try {
-        auto num_replicated = replicateTo(r.addr, off);
+        auto rep_offset = replicateTo(r.addr, off);
         dirty = true;
-        off += num_replicated;
+        off = rep_offset;
         if (off < cur_offset) {
           needs_replication = true;
         }
@@ -221,10 +221,15 @@ void StreamChunk::replicate() {
 }
 
 uint64_t StreamChunk::replicateTo(const String& addr, uint64_t offset) {
-  util::BinaryMessageWriter batch;
   size_t batch_size = 1024;
-  size_t n = 0;
+  util::BinaryMessageWriter batch;
 
+  auto start_offset = records_.firstOffset();
+  if (start_offset > offset) {
+    offset = start_offset;
+  }
+
+  size_t n = 0;
   records_.fetchRecords(offset, batch_size, [this, &batch, &n] (
       uint64_t record_id,
       const void* record_data,
@@ -266,7 +271,7 @@ uint64_t StreamChunk::replicateTo(const String& addr, uint64_t offset) {
     RAISEF(kRuntimeError, "received non-201 response: $0", r.body().toString());
   }
 
-  return n;
+  return offset + n;
 }
 
 Vector<String> StreamChunk::listFiles() const {
