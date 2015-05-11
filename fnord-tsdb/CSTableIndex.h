@@ -11,12 +11,16 @@
 #define _FNORD_TSDB_CSTABLEINDEX_H
 #include <fnord-base/stdtypes.h>
 #include <fnord-tsdb/DerivedDataset.h>
+#include <fnord-msg/MessageSchema.h>
+#include <fnord-base/random.h>
 
 namespace fnord {
 namespace tsdb {
 
 class CSTableIndex : public DerivedDataset {
 public:
+
+  CSTableIndex(RefPtr<msg::MessageSchema> schema);
 
   String name() override;
 
@@ -28,6 +32,9 @@ public:
       Buffer* new_state,
       Set<String>* delete_after_commit) override;
 
+protected:
+  RefPtr<msg::MessageSchema> schema_;
+  Random rnd_;
 };
 
 }
