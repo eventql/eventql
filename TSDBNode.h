@@ -61,6 +61,10 @@ public:
 
   Vector<String> listFiles(const String& chunk_key);
 
+  Buffer fetchDerivedDataset(
+      const String& chunk_key,
+      const String& derived_dataset);
+
   void start(
       size_t num_comaction_threads = 4,
       size_t num_replication_threads = 4,
