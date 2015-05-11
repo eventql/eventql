@@ -85,6 +85,7 @@ protected:
   void scheduleCompaction();
   void commitState();
   uint64_t replicateTo(const String& addr, uint64_t offset);
+  void buildDerivedDataset(RefPtr<DerivedDataset> dset);
 
   String key_;
   String stream_key_;
