@@ -10,12 +10,15 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <signal.h>
+#include <thread>
 #include "fnord-base/io/fileutil.h"
 #include "fnord-base/application.h"
 #include "fnord-base/logging.h"
 #include "fnord-base/cli/flagparser.h"
 #include "fnord-base/util/SimpleRateLimit.h"
 #include "fnord-base/InternMap.h"
+#include "fnord-base/thread/eventloop.h"
+#include "fnord-http/httpconnectionpool.h"
 #include "fnord-json/json.h"
 #include "fnord-mdb/MDB.h"
 #include "fnord-mdb/MDBUtil.h"
@@ -27,6 +30,7 @@
 #include "fnord-cstable/BitPackedIntColumnReader.h"
 #include "fnord-cstable/BitPackedIntColumnWriter.h"
 #include "fnord-cstable/UInt32ColumnReader.h"
+#include "fnord-cstable/UInt64ColumnReader.h"
 #include "fnord-cstable/UInt32ColumnWriter.h"
 #include "fnord-cstable/StringColumnWriter.h"
 #include "fnord-cstable/BooleanColumnReader.h"
@@ -53,6 +57,8 @@
 using namespace cm;
 using namespace fnord;
 
+fnord::thread::EventLoop ev;
+
 int main(int argc, const char** argv) {
   fnord::Application::init();
   fnord::Application::logToStderr();
@@ -69,6 +75,16 @@ int main(int argc, const char** argv) {
       "<filename>");
 
   flags.defineFlag(
+      "upload_to",
+      fnord::cli::FlagParser::T_STRING,
+      true,
+      NULL,
+      NULL,
+      "url",
+      "<url>");
+
+
+  flags.defineFlag(
       "loglevel",
       fnord::cli::FlagParser::T_STRING,
       false,
@@ -82,42 +98,73 @@ int main(int argc, const char** argv) {
   Logger::get()->setMinimumLogLevel(
       strToLogLevel(flags.getString("loglevel")));
 
+  http::HTTPConnectionPool http(&ev);
+  auto evloop_thread = std::thread([] {
+    ev.run();
+  });
+
+  auto upload_to = flags.getString("upload_to");
   auto schema = joinedSessionsSchema();
 
   cstable::CSTableReader reader(flags.getString("file"));
+  auto msgid_col_ref = reader.getColumnReader("__msgid");
+  auto msgid_col = dynamic_cast<cstable::UInt64ColumnReader*>(msgid_col_ref.get());
 
   cstable::RecordMaterializer record_reader(&schema, &reader);
 
-  for (int i = 0; i < reader.numRecords(); ++i) {
-    msg::MessageObject obj;
-    record_reader.nextRecord(&obj);
-    fnord::iputs("record: $0", msg::MessagePrinter::print(obj, schema));
+  util::BinaryMessageWriter batch;
+
+  auto n = reader.numRecords();
+  for (size_t i = 0; i < n; ) {
+    for (; i < n;) {
+      uint64_t msgid;
+      uint64_t r;
+      uint64_t d;
+      msgid_col->next(&r, &d, &msgid);
+      ++i;
+
+      msg::MessageObject obj;
+      record_reader.nextRecord(&obj);
+      Buffer msg_buf;
+      msg::MessageEncoder::encode(obj, schema, &msg_buf);
+      uint64_t time;
+      try {
+        time = obj.getUInt64(schema.id("first_seen_time")) * kMicrosPerSecond;
+      } catch (...) {
+        fnord::iputs("skipping row b/c it has no first_seen_time: $0", msgid);
+        continue;
+      }
+
+      batch.appendUInt64(time);
+      batch.appendUInt64(msgid);
+      batch.appendVarUInt(msg_buf.size());
+      batch.append(msg_buf.data(), msg_buf.size());
+
+      if (batch.size() > 1024 * 1024 * 8) {
+        break;
+      }
+    }
+
+    fnord::iputs("upload batch: $0 -- $1/$2", batch.size(), i, n);
+    URI uri(upload_to + "/tsdb/insert_batch?stream=joined_sessions.dawanda");
+
+    http::HTTPRequest req(http::HTTPMessage::M_POST, uri.pathAndQuery());
+    req.addHeader("Host", uri.hostAndPort());
+    req.addHeader("Content-Type", "application/fnord-msg");
+    req.addBody(batch.data(), batch.size());
+    auto res = http.executeRequest(req);
+    res.wait();
+
+    const auto& r = res.get();
+    if (r.statusCode() != 201) {
+      RAISEF(kRuntimeError, "received non-201 response: $0", r.body().toString());
+    }
+
+    batch.clear();
   }
-  //cm::AnalyticsTableScan aq;
-  //auto lcol = aq.fetchColumn("search_queries.language");
-  //auto ccol = aq.fetchColumn("search_queries.page");
-  //auto qcol = aq.fetchColumn("search_queries.query_string_normalized");
-  //auto iicol = aq.fetchColumn("search_queries.result_items.item_id");
-  //auto iscol = aq.fetchColumn("search_queries.result_items.shop_id");
-  //auto ic1col = aq.fetchColumn("search_queries.result_items.category1");
-  //auto ic2col = aq.fetchColumn("search_queries.result_items.category2");
-  //auto ic3col = aq.fetchColumn("search_queries.result_items.category3");
 
-  //aq.onQuery([&] () {
-  //  auto l = languageToString((Language) lcol->getUInt32());
-  //  auto c = ccol->getUInt32();
-  //  auto q = qcol->getString();
-  //  auto ii = iicol->getString();
-  //  auto is = iscol->getUInt32();
-  //  fnord::iputs("lang: $0 -> $1 -- $2 -- $3 -- $4 -- $5,$6,$7",
-  //      l, c, q, ii, is,
-  //      ic1col->getUInt32(),
-  //      ic2col->getUInt32(),
-  //      ic3col->getUInt32());
-  //});
-
-  //aq.scanTable(&reader);
-
+  ev.shutdown();
+  evloop_thread.join();
   return 0;
 }
 
