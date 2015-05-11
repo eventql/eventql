@@ -18,6 +18,14 @@
 namespace fnord {
 namespace tsdb {
 
+RecordRef::RecordRef(
+    uint64_t _record_id,
+    uint64_t _time,
+    const Buffer& _record) :
+    record_id(_record_id),
+    time(_time),
+    record(_record) {}
+
 RecordSet::RecordSet(
     const String& filename_prefix,
     RecordSetState state /* = RecordSetState{} */) :
@@ -65,6 +73,37 @@ void RecordSet::addRecord(uint64_t record_id, const Buffer& message) {
     return;
   }
 
+  addRecords(buf);
+
+  commitlog_ids_.emplace(record_id);
+}
+
+void RecordSet::addRecords(const Vector<RecordRef>& records) {
+  std::unique_lock<std::mutex> lk(mutex_);
+
+  util::BinaryMessageWriter buf;
+  for (const auto& rec : records) {
+    if (commitlog_ids_.count(rec.record_id) > 0) {
+      continue;
+    }
+
+    buf.appendUInt64(rec.record_id);
+    buf.appendVarUInt(rec.record.size());
+    buf.append(rec.record.data(), rec.record.size());
+  }
+
+  if (buf.size() == 0) {
+    return;
+  }
+
+  addRecords(buf);
+
+  for (const auto& rec : records) {
+    commitlog_ids_.emplace(rec.record_id);
+  }
+}
+
+void RecordSet::addRecords(const util::BinaryMessageWriter& buf) {
   String commitlog;
   uint64_t commitlog_size;
   if (state_.commitlog.isEmpty()) {
@@ -89,7 +128,6 @@ void RecordSet::addRecord(uint64_t record_id, const Buffer& message) {
 
   state_.commitlog = Some(commitlog);
   state_.commitlog_size = commitlog_size;
-  commitlog_ids_.emplace(record_id);
 }
 
 void RecordSet::rollCommitlog() {

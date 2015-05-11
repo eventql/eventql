@@ -49,6 +49,15 @@ public:
       const Buffer& record,
       const String& chunk_key);
 
+  void insertRecords(
+      const String& stream_key,
+      const Vector<RecordRef>& records);
+
+  void insertRecords(
+      const String& stream_key,
+      const String& chunk_key,
+      const Vector<RecordRef>& records);
+
   Vector<String> listFiles(const String& chunk_key);
 
   void start(
