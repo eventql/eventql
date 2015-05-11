@@ -95,6 +95,7 @@ void TSDBServlet::insertRecordsBatch(
 
   auto& buf = req->body();
   util::BinaryMessageReader reader(buf.data(), buf.size());
+  Vector<RecordRef> recs;
   while (reader.remaining() > 0) {
     auto time = *reader.readUInt64();
     auto record_id = *reader.readUInt64();
@@ -105,9 +106,10 @@ void TSDBServlet::insertRecordsBatch(
       RAISEF(kRuntimeError, "empty record: $0", record_id);
     }
 
-    node_->insertRecord(stream, record_id, Buffer(data, len), time);
+    recs.emplace_back(RecordRef(record_id, time, Buffer(data, len)));
   }
 
+  node_->insertRecords(stream, recs);
   res->setStatus(http::kStatusCreated);
 }
 
@@ -136,6 +138,7 @@ void TSDBServlet::insertRecordsReplication(
 
   auto& buf = req->body();
   util::BinaryMessageReader reader(buf.data(), buf.size());
+  Vector<RecordRef> recs;
   while (reader.remaining() > 0) {
     auto record_id = *reader.readUInt64();
     auto len = reader.readVarUInt();
@@ -145,9 +148,10 @@ void TSDBServlet::insertRecordsReplication(
       RAISEF(kRuntimeError, "empty record: $0", record_id);
     }
 
-    node_->insertRecord(stream, record_id, Buffer(data, len), chunk);
+    recs.emplace_back(RecordRef(record_id, 0, Buffer(data, len)));
   }
 
+  node_->insertRecords(stream, chunk, recs);
   res->setStatus(http::kStatusCreated);
 }
 

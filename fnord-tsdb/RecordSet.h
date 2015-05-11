@@ -19,6 +19,14 @@
 namespace fnord {
 namespace tsdb {
 
+struct RecordRef {
+  RecordRef(uint64_t _record_id, uint64_t _time, const Buffer& _record);
+
+  uint64_t record_id;
+  uint64_t time;
+  Buffer record;
+};
+
 class RecordSet {
 public:
   static const size_t kDefaultMaxDatafileSize = 1024 * 1024 * 128;
@@ -46,6 +54,7 @@ public:
       RecordSetState state = RecordSetState{});
 
   void addRecord(uint64_t record_id, const Buffer& message);
+  void addRecords(const Vector<RecordRef>& records);
 
   void fetchRecords(
       uint64_t offset,
@@ -71,6 +80,8 @@ public:
   void setMaxDatafileSize(size_t size);
 
 protected:
+
+  void addRecords(const util::BinaryMessageWriter& buf);
 
   void loadCommitlog(
       const String& filename,

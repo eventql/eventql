@@ -136,6 +136,18 @@ void StreamChunk::insertRecord(
   scheduleCompaction();
 }
 
+void StreamChunk::insertRecords(const Vector<RecordRef>& records) {
+  std::unique_lock<std::mutex> lk(mutex_);
+
+  auto old_ver = records_.version();
+  records_.addRecords(records);
+  if (records_.version() != old_ver) {
+    commitState();
+  }
+
+  scheduleCompaction();
+}
+
 void StreamChunk::scheduleCompaction() {
   if (compaction_scheduled_) {
     return;

@@ -60,6 +60,8 @@ public:
       uint64_t record_id,
       const Buffer& record);
 
+  void insertRecords(const Vector<RecordRef>& records);
+
   void compact();
   void replicate();
 
