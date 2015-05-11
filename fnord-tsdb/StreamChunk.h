@@ -68,6 +68,8 @@ public:
 
   Vector<String> listFiles() const;
 
+  Buffer fetchDerivedDataset(const String& dataset_name);
+
 protected:
 
   StreamChunk(
