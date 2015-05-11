@@ -137,6 +137,10 @@ void BinaryMessageWriter::update(size_t offset, void const* data, size_t size) {
   memcpy(((char*) ptr_) + offset, data, size);
 }
 
+void BinaryMessageWriter::clear() {
+  used_ = 0;
+}
+
 template <>
 void BinaryMessageWriter::appendValue<uint16_t>(const uint16_t& val) {
   appendUInt16(val);

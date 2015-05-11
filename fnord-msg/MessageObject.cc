@@ -167,6 +167,16 @@ uint32_t MessageObject::asUInt32() const {
   return *((uint32_t*) &data_);
 }
 
+uint64_t MessageObject::asUInt64() const {
+#ifndef FNORD_NODEBUG
+  if (type != FieldType::UINT32) {
+    RAISE(kTypeError);
+  }
+#endif
+
+  return *((uint32_t*) &data_);
+}
+
 bool MessageObject::asBool() const {
   if (type == FieldType::UINT32) {
     uint32_t val = *((uint32_t*) &data_);
@@ -205,8 +215,27 @@ Vector<MessageObject*> MessageObject::getObjects(uint32_t id) const {
   return lst;
 }
 
-//uint32_t MessageObject::getUInt32(uint32_t id) const;
 //bool MessageObject::getBool(uint32_t id) const;
+
+uint32_t MessageObject::getUInt32(uint32_t id) const {
+  for (const auto& f : asObject()) {
+    if (f.id == id) {
+      return f.asUInt32();
+    }
+  }
+
+  RAISEF(kIndexError, "no such field: $0", id);
+}
+
+uint64_t MessageObject::getUInt64(uint32_t id) const {
+  for (const auto& f : asObject()) {
+    if (f.id == id) {
+      return f.asUInt64();
+    }
+  }
+
+  RAISEF(kIndexError, "no such field: $0", id);
+}
 
 const String& MessageObject::getString(uint32_t id) const {
   for (const auto& f : asObject()) {

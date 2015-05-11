@@ -45,6 +45,8 @@ public:
   void* data() const;
   size_t size() const;
 
+  void clear();
+
 protected:
   void* ptr_;
   size_t size_;
