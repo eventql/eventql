@@ -86,8 +86,6 @@ int main(int argc, const char** argv) {
 
   cstable::CSTableReader reader(flags.getString("file"));
 
-  fnord::iputs("has col: $0", reader.hasColumn("referrer_campaign"));
-  exit(0);
   cstable::RecordMaterializer record_reader(&schema, &reader);
 
   for (int i = 0; i < reader.numRecords(); ++i) {
