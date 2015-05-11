@@ -371,6 +371,25 @@ void StreamChunk::buildDerivedDataset(RefPtr<DerivedDataset> dset) {
   }
 }
 
+Buffer StreamChunk::fetchDerivedDataset(const String& dataset_name) {
+  String dset_key = "\x1b";
+  dset_key.append(key_);
+  dset_key.append("~" + dataset_name);
+  DerivedDatasetState dset;
+
+  auto txn = node_->db->startTransaction(true);
+  auto buf = txn->get(dset_key);
+  txn->abort();
+
+  if (buf.isEmpty()) {
+    return Buffer{};
+  } else {
+    util::BinaryMessageReader reader(buf.get().data(), buf.get().size());
+    dset.decode(&reader);
+    return dset.state;
+  }
+}
+
 Vector<String> StreamChunk::listFiles() const {
   return records_.listDatafiles();
 }

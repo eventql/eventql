@@ -48,6 +48,10 @@ void TSDBServlet::handleHTTPRequest(
       return listFiles(req, res, &uri);
     }
 
+    if (StringUtil::endsWith(uri.path(), "/fetch_derived_dataset")) {
+      return fetchDerivedDataset(req, res, &uri);
+    }
+
     res->setStatus(fnord::http::kStatusNotFound);
     res->addBody("not found");
   } catch (const Exception& e) {
@@ -280,6 +284,35 @@ void TSDBServlet::listFiles(
   json::toJSON(chunks_encoded, &j);
   j.endObject();
 */
+}
+
+void TSDBServlet::fetchDerivedDataset(
+    http::HTTPRequest* req,
+    http::HTTPResponse* res,
+    URI* uri) {
+  const auto& params = uri->queryParams();
+
+  String chunk;
+  if (!URI::getParam(params, "chunk", &chunk)) {
+    res->setStatus(fnord::http::kStatusBadRequest);
+    res->addBody("missing ?chunk=... parameter");
+    return;
+  }
+
+  String derived;
+  if (!URI::getParam(params, "derived_dataset", &derived)) {
+    res->setStatus(fnord::http::kStatusBadRequest);
+    res->addBody("missing ?derived_dataset=... parameter");
+    return;
+  }
+
+  String chunk_key;
+  util::Base64::decode(chunk, &chunk_key);
+  auto buf = node_->fetchDerivedDataset(chunk_key, derived);
+
+  res->setStatus(http::kStatusOK);
+  res->addHeader("Content-Type", "application/octet-stream");
+  res->addBody(buf.data(), buf.size());
 }
 
 }

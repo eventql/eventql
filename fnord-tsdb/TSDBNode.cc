@@ -115,8 +115,22 @@ Vector<String> TSDBNode::listFiles(const String& chunk_key) {
   if (chunk == chunks_.end()) {
     return Vector<String>{};
   }
+  lk.unlock();
 
   return chunk->second->listFiles();
+}
+
+Buffer TSDBNode::fetchDerivedDataset(
+    const String& chunk_key,
+    const String& derived_dataset) {
+  std::unique_lock<std::mutex> lk(mutex_);
+  auto chunk = chunks_.find(chunk_key);
+  if (chunk == chunks_.end()) {
+    return Buffer{};
+  }
+  lk.unlock();
+
+  return chunk->second->fetchDerivedDataset(derived_dataset);
 }
 
 // FIXPAUL proper longest prefix search ;)
