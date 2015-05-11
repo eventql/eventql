@@ -23,10 +23,16 @@ class RecordSet {
 public:
   static const size_t kDefaultMaxDatafileSize = 1024 * 1024 * 128;
 
+  struct DatafileRef {
+    String filename;
+    uint64_t num_records;
+    uint64_t offset;
+  };
+
   struct RecordSetState {
     RecordSetState();
 
-    Vector<Pair<String, uint64_t>> datafiles;
+    Vector<DatafileRef> datafiles;
     Option<String> commitlog;
     uint64_t commitlog_size;
     Set<String> old_commitlogs;
@@ -48,6 +54,9 @@ public:
 
   Set<uint64_t> listRecords() const;
   uint64_t numRecords() const;
+
+  uint64_t firstOffset() const;
+  uint64_t lastOffset() const;
 
   RecordSetState getState() const;
   Vector<String> listDatafiles() const;
