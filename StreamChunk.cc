@@ -110,6 +110,7 @@ StreamChunk::StreamChunk(
             node->db_path,
             StringUtil::stripShell(state.stream_key) + "."),
         state.record_state),
+    repl_offsets_(state.repl_offsets),
     replication_scheduled_(false),
     compaction_scheduled_(false),
     last_compaction_(0) {
@@ -183,7 +184,7 @@ void StreamChunk::replicate() {
   bool has_error = false;
 
   for (const auto& r : replicas) {
-    auto& off = replicated_offsets_[r.unique_id];
+    auto& off = repl_offsets_[r.unique_id];
 
     if (off < cur_offset) {
       try {
@@ -203,6 +204,23 @@ void StreamChunk::replicate() {
           stream_key_,
           r.addr);
       }
+    }
+  }
+
+  for (auto cur = repl_offsets_.begin(); cur != repl_offsets_.end(); ) {
+    bool found;
+    for (const auto& r : replicas) {
+      if (r.unique_id == cur->first) {
+        found = true;
+        break;
+      }
+    }
+
+    if (found) {
+      ++cur;
+    } else {
+      cur = repl_offsets_.erase(cur);
+      dirty = true;
     }
   }
 
@@ -282,6 +300,7 @@ void StreamChunk::commitState() {
   StreamChunkState state;
   state.record_state = records_.getState();
   state.stream_key = stream_key_;
+  state.repl_offsets = repl_offsets_;
 
   util::BinaryMessageWriter buf;
   state.encode(&buf);
@@ -295,11 +314,30 @@ void StreamChunkState::encode(
     util::BinaryMessageWriter* writer) const {
   writer->appendLenencString(stream_key);
   record_state.encode(writer);
+
+  writer->appendVarUInt(repl_offsets.size());
+  for (const auto& ro : repl_offsets) {
+    writer->appendVarUInt(ro.first);
+    writer->appendVarUInt(ro.second);
+  }
+
+  writer->appendVarUInt(0);
 }
 
 void StreamChunkState::decode(util::BinaryMessageReader* reader) {
   stream_key = reader->readLenencString();
   record_state.decode(reader);
+
+  auto nrepl_offsets = reader->readVarUInt();
+  for (int i = 0; i < nrepl_offsets; ++i) {
+    auto id = reader->readVarUInt();
+    auto off = reader->readVarUInt();
+    repl_offsets.emplace(id, off);
+  }
+
+  auto nderived_ds = reader->readVarUInt();
+  for (int i = 0; i < nderived_ds; ++i) {
+  }
 }
 
 }
