@@ -239,11 +239,11 @@ void RecordSet::compact(Set<String>* deleted_files) {
   }
 
   if (outfile_nrecords == 0) {
-    return;
+    FileUtil::rm(outfile_path + "~");
+  } else {
+    outfile->finalize();
+    FileUtil::mv(outfile_path + "~", outfile_path);
   }
-
-  outfile->finalize();
-  FileUtil::mv(outfile_path + "~", outfile_path);
 
   lk.lock();
 
@@ -252,11 +252,13 @@ void RecordSet::compact(Set<String>* deleted_files) {
     state_.datafiles.pop_back();
   }
 
-  state_.datafiles.emplace_back(DatafileRef {
-    .filename = outfile_path,
-    .num_records = outfile_nrecords,
-    .offset = outfile_offset
-  });
+  if (outfile_nrecords > 0) {
+    state_.datafiles.emplace_back(DatafileRef {
+      .filename = outfile_path,
+      .num_records = outfile_nrecords,
+      .offset = outfile_offset
+    });
+  }
 
   for (const auto& cl : snap.old_commitlogs) {
     state_.old_commitlogs.erase(cl);
