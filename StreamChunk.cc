@@ -90,8 +90,6 @@ StreamChunk::StreamChunk(
         FileUtil::joinPaths(
             node->db_path,
             StringUtil::stripShell(stream_key) + ".")),
-    replication_scheduled_(false),
-    compaction_scheduled_(false),
     last_compaction_(0) {
   records_.setMaxDatafileSize(config_->max_datafile_size);
 }
@@ -111,13 +109,9 @@ StreamChunk::StreamChunk(
             StringUtil::stripShell(state.stream_key) + "."),
         state.record_state),
     repl_offsets_(state.repl_offsets),
-    replication_scheduled_(false),
-    compaction_scheduled_(false),
     last_compaction_(0) {
-  if (records_.commitlogSize() > 0) {
-    scheduleCompaction();
-  }
-
+  scheduleCompaction();
+  node_->compactionq.insert(this, WallClock::unixMicros());
   node_->replicationq.insert(this, WallClock::unixMicros());
   node_->indexq.insert(this, WallClock::unixMicros());
   records_.setMaxDatafileSize(config_->max_datafile_size);
@@ -150,26 +144,19 @@ void StreamChunk::insertRecords(const Vector<RecordRef>& records) {
 }
 
 void StreamChunk::scheduleCompaction() {
-  if (compaction_scheduled_) {
-    return;
-  }
-
   auto now = WallClock::unixMicros();
   auto interval = config_->compaction_interval.microseconds();
-  auto next = last_compaction_.unixMicros() + interval;
+  uint64_t compaction_delay = 0;
 
-  auto compaction_delay = 0;
-  if (next > now) {
-    compaction_delay = next - now;
+  if (last_compaction_.unixMicros() + interval > now) {
+    compaction_delay = (last_compaction_.unixMicros() + interval) - now;
   }
 
   node_->compactionq.insert(this, now + compaction_delay);
-  compaction_scheduled_ = true;
 }
 
 void StreamChunk::compact() {
   std::unique_lock<std::mutex> lk(mutex_);
-  compaction_scheduled_ = false;
   last_compaction_ = DateTime::now();
   lk.unlock();
 
