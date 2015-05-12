@@ -88,10 +88,10 @@ int main(int argc, const char** argv) {
 
   /* set up tracker log feed writer */
   feeds::RemoteFeedWriter tracker_log_feed(&rpc_client);
-  tracker_log_feed.addTargetFeed(
-      URI("http://s01.nue01.production.fnrd.net:7001/rpc"),
-      "tracker_log.feedserver01.nue01.production.fnrd.net",
-      16);
+//  tracker_log_feed.addTargetFeed(
+//      URI("http://s01.nue01.production.fnrd.net:7001/rpc"),
+//      "tracker_log.feedserver01.nue01.production.fnrd.net",
+//      16);
 
   tracker_log_feed.addTargetFeed(
       URI("http://s02.nue01.production.fnrd.net:7001/rpc"),
@@ -112,11 +112,11 @@ int main(int argc, const char** argv) {
   RefPtr<feeds::RemoteFeedWriter> dwn_index_request_feed(
       new feeds::RemoteFeedWriter(&rpc_client));
 
-  dwn_index_request_feed->addTargetFeed(
-      URI("http://s01.nue01.production.fnrd.net:7001/rpc"),
-      "index_requests.feedserver01.nue01.production.fnrd.net",
-      16);
-
+///  dwn_index_request_feed->addTargetFeed(
+///      URI("http://s01.nue01.production.fnrd.net:7001/rpc"),
+///      "index_requests.feedserver01.nue01.production.fnrd.net",
+///      16);
+///
   dwn_index_request_feed->addTargetFeed(
       URI("http://s02.nue01.production.fnrd.net:7001/rpc"),
       "index_requests.feedserver02.nue01.production.fnrd.net",
