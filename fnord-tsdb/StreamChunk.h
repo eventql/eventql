@@ -97,8 +97,6 @@ protected:
   std::mutex mutex_;
   std::mutex replication_mutex_;
   std::mutex indexbuild_mutex_;
-  bool replication_scheduled_;
-  bool compaction_scheduled_;
   DateTime last_compaction_;
   HashMap<uint64_t, uint64_t> repl_offsets_;
 };

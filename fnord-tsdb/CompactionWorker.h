@@ -26,7 +26,7 @@ public:
 protected:
   void run();
 
-  thread::DelayedQueue<RefPtr<StreamChunk>>* queue_;
+  thread::CoalescingDelayedQueue<StreamChunk>* queue_;
   std::atomic<bool> running_;
   std::thread thread_;
 };

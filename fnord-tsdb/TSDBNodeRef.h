@@ -27,7 +27,7 @@ class StreamChunk;
 
 struct TSDBNodeRef {
   const String db_path;
-  thread::DelayedQueue<RefPtr<StreamChunk>> compactionq;
+  thread::CoalescingDelayedQueue<StreamChunk> compactionq;
   thread::CoalescingDelayedQueue<StreamChunk> replicationq;
   thread::CoalescingDelayedQueue<StreamChunk> indexq;
   RefPtr<mdb::MDB> db;
