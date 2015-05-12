@@ -228,6 +228,10 @@ size_t StringUtil::findLast(const std::string& str, char chr) {
   return -1;
 }
 
+bool StringUtil::includes(const std::string& str, const std::string& subject) {
+  return str.find(subject) != std::string::npos;
+}
+
 std::string StringUtil::hexPrint(
     const void* data,
     size_t size,
