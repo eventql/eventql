@@ -152,6 +152,14 @@ public:
   static size_t findLast(const std::string& str, char chr);
 
   /**
+   * Returns true iff str contains the subject or is equal ot the subject
+   *
+   * @param str the str to be searched
+   * @param subject the substring to search for
+   */
+  static bool includes(const std::string& str, const std::string& subject);
+
+  /**
    * Print the contents of the pointed to memory as a series of hexadecimal
    * bytes (hexdump):
    *
