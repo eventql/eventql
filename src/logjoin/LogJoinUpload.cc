@@ -34,24 +34,26 @@ size_t LogJoinUpload::scanQueue(const String& queue_name) {
 
   Buffer key;
   Buffer value;
-  bool eof = false;
   Vector<Buffer> batch;
-  for (int i = 0; i < batch_size_ && !eof; ++i) {
+  for (int i = 0; i < batch_size_; ++i) {
     if (i == 0) {
       key.append(queue_name);
-      eof = !cursor->getFirstOrGreater(&key, &value);
+
+      if (!cursor->getFirstOrGreater(&key, &value)) {
+        break;
+      }
     } else {
-      eof = !cursor->getNext(&key, &value);
+      if (!cursor->getNext(&key, &value)) {
+        break;
+      }
     }
 
     if (!StringUtil::beginsWith(key.toString(), queue_name)) {
-      eof = true;
+      break;
     }
 
-    if (!eof) {
-      batch.emplace_back(value);
-      txn->del(key);
-    }
+    batch.emplace_back(value);
+    cursor->del();
   }
 
   cursor->close();
