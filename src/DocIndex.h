@@ -55,6 +55,8 @@ public:
   void saveCursor(const void* data, size_t size);
   Option<Buffer> getCursor() const;
 
+  RefPtr<mdb::MDB> getDBHanndle() const;
+
 protected:
   uint32_t getOrCreateFieldID(const String& field_name);
 
