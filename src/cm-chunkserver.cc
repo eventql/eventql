@@ -138,7 +138,7 @@ int main(int argc, const char** argv) {
   tsdb::StreamProperties config(new msg::MessageSchema(joinedSessionsSchema()));
   config.max_datafile_size = 1024 * 1024 * 512;
   config.chunk_size = Duration(3600 * 4 * kMicrosPerSecond);
-  config.compaction_interval = Duration(30 * kMicrosPerSecond);
+  config.compaction_interval = Duration(1800 * kMicrosPerSecond);
   config.derived_datasets.emplace_back(new tsdb::CSTableIndex(config.schema));
   tsdb_node.configurePrefix("joined_sessions.", config);
 
