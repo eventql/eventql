@@ -120,5 +120,15 @@ void MDB::setMaxSize(size_t size) {
   }
 }
 
+void MDB::removeStaleReaders() {
+  int dead;
+  int rc = mdb_reader_check(mdb_env_, &dead);
+
+  if (rc != 0) {
+    auto err = String(mdb_strerror(rc));
+    RAISEF(kRuntimeError, "mdb_reader_check() failed: $0", err);
+  }
+}
+
 }
 }

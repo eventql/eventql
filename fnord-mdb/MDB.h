@@ -39,6 +39,13 @@ public:
   void setMaxSize(size_t size);
   void sync();
 
+  /**
+   * Due to the way mdb transactions work (they may be left in a dangling state
+   * when a program exits without closing mdb properly, e.g. due to a bug) this
+   * method needs to be periodically called to clean up stale transactions.
+   */
+  void removeStaleReaders();
+
 protected:
   MDB(
       MDB_env* mdb_env,
