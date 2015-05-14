@@ -208,6 +208,10 @@ Option<Buffer> DocIndex::getCursor() const {
   return txn_->get("__cursor");
 }
 
+RefPtr<mdb::MDB> DocIndex::getDBHanndle() const {
+  return db_;
+}
+
 //
 //  FeaturePack features;
 //  for (const auto& group : schema_.groupIDs()) {

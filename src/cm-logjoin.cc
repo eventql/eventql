@@ -428,6 +428,9 @@ int main(int argc, const char** argv) {
       }
     }
 
+    sessdb->removeStaleReaders();
+    index->getDBHanndle()->removeStaleReaders();
+
     if (cm_logjoin_shutdown.load()) {
       break;
     }
