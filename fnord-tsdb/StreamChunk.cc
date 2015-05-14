@@ -146,10 +146,11 @@ void StreamChunk::insertRecords(const Vector<RecordRef>& records) {
 void StreamChunk::scheduleCompaction() {
   auto now = WallClock::unixMicros();
   auto interval = config_->compaction_interval.microseconds();
+  auto last = last_compaction_.unixMicros();
   uint64_t compaction_delay = 0;
 
-  if (last_compaction_.unixMicros() + interval > now) {
-    compaction_delay = (last_compaction_.unixMicros() + interval) - now;
+  if (last + interval > now) {
+    compaction_delay = (last + interval) - now;
   }
 
   node_->compactionq.insert(this, now + compaction_delay);
