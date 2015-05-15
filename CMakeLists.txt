@@ -548,6 +548,7 @@ add_executable(tests/test-joinedsessionviewer
     $<TARGET_OBJECTS:fnord-sstable>
     $<TARGET_OBJECTS:fnord-http>
     src/JoinedSessionViewer.cc
+    src/JoinedSession.pb.cc
     src/JoinedSessionViewer_test.cc)
 
-target_link_libraries(tests/test-chart ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(tests/test-joinedsessionviewer ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_LIBS})
