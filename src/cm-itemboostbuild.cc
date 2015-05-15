@@ -24,6 +24,7 @@
 #include "fnord-json/json.h"
 #include "fnord-mdb/MDB.h"
 #include "fnord-mdb/MDBUtil.h"
+#include "fnord-msg/msg.h"
 #include "fnord-sstable/sstablereader.h"
 #include "fnord-sstable/sstablewriter.h"
 #include "fnord-sstable/SSTableColumnSchema.h"
@@ -34,6 +35,7 @@
 #include <fnord-fts/fts_common.h>
 #include <fnord-tsdb/TSDBClient.h>
 #include "fnord-dproc/Application.h"
+#include "fnord-dproc/LocalScheduler.h"
 #include <fnord-dproc/Task.h>
 #include "fnord-logtable/TableReader.h"
 #include "common.h"
@@ -51,19 +53,62 @@
 #include "analytics/RelatedTermsMapper.h"
 #include "analytics/TopCategoriesByTermMapper.h"
 #include "analytics/TermInfoMergeReducer.h"
+#include "ItemBoost.pb.h"
 
 using namespace fnord;
 using namespace cm;
 
 fnord::thread::EventLoop ev;
 
-class ItemBoostMapper : public dproc::Task {
+class ItemBoostMapper : public dproc::ProtoTask<ItemBoostMapperParams, ItemBoostResult> {
 public:
-  RefPtr<VFSFile> run() override;
+  ItemBoostMapper(const ItemBoostMapperParams& params);
+  void run(ItemBoostResult* result) override;
 };
 
-RefPtr<VFSFile> ItemBoostMapper::run() {
+ItemBoostMapper::ItemBoostMapper(const ItemBoostMapperParams& params) {}
 
+void ItemBoostMapper::run(ItemBoostResult* result) {
+
+}
+
+class ItemBoostReducer : public dproc::ProtoTask<ItemBoostReducerParams, ItemBoostResult> {
+public:
+  ItemBoostReducer(const ItemBoostReducerParams& params, tsdb::TSDBClient* tsdb);
+  void run(ItemBoostResult* result) override;
+  List<dproc::TaskDependency> dependencies() override;
+protected:
+  tsdb::TSDBClient* tsdb_;
+};
+
+ItemBoostReducer::ItemBoostReducer(
+    const ItemBoostReducerParams& params,
+    tsdb::TSDBClient* tsdb) :
+    tsdb_(tsdb) {}
+
+void ItemBoostReducer::run(ItemBoostResult* result) {
+
+}
+
+List<dproc::TaskDependency> ItemBoostReducer::dependencies() {
+  auto input_partitions = tsdb_->listPartitions(
+      "joined_sessions.dawanda",
+      WallClock::unixMicros() - 90 * kMicrosPerDay,
+      WallClock::unixMicros() - 6 * kMicrosPerHour);
+
+  List<dproc::TaskDependency> deps;
+  for (const auto& partition : input_partitions) {
+    ItemBoostMapperParams dparams;
+    dparams.set_stream_key("joined_sessions.dawanda");
+    dparams.set_partition_key(partition);
+
+    deps.emplace_back(dproc::TaskDependency {
+      .task_name = "ItemBoostMapper",
+      .params = *msg::encode(dparams)
+    });
+  }
+
+  return deps;
 }
 
 int main(int argc, const char** argv) {
@@ -102,38 +147,24 @@ int main(int argc, const char** argv) {
 
   auto tempdir = flags.getString("tempdir");
 
-  ItemBoostMapper mapper_task;
-
-  dproc::Application app("cm.itemboost");
-
   http::HTTPConnectionPool http(&ev);
   tsdb::TSDBClient tsdb("http://nue03.prod.fnrd.net:7003/tsdb", &http);
 
-  auto input_partitions = tsdb.listPartitions(
-      "joined_sessions.dawanda",
-      WallClock::unixMicros() - 90 * kMicrosPerDay,
-      WallClock::unixMicros() - 6 * kMicrosPerHour);
+  dproc::Application app("cm.itemboost");
+  app.registerProtoTask<ItemBoostMapper>("ItemBoostMapper");
+  app.registerProtoTask<ItemBoostReducer>("ItemBoostReducer", &tsdb);
 
-  fnord::iputs("partitions: $0", input_partitions);
-/*
-  for (const auto& input_table : input_table_files) {
-    FNV<uint64_t> fnv;
-    auto h = fnv.hash(input_table);
+  dproc::LocalScheduler sched;
+  sched.start();
 
-    auto table = StringUtil::format(
-        "$0/shopstats-ctr-dawanda.$1.sst",
-        tempdir,
-        StringUtil::hexPrint(&h, sizeof(h), false));
+  ItemBoostReducerParams params;
+  params.set_customer("dawanda");
+  params.set_from_unixmicros(WallClock::unixMicros() - 30 * kMicrosPerDay);
+  params.set_until_unixmicros(WallClock::unixMicros() - 6 * kMicrosPerHour);
 
-    tables.emplace(table);
-    report_builder.addReport(
-        new CTRByShopMapper(
-            new AnalyticsTableScanSource(input_table),
-            new ShopStatsTableSink(table)));
-  }
+  auto res = sched.run(&app, "ItemBoostReducer", *msg::encode(params));
 
-*/
-
+  sched.stop();
   ev.shutdown();
   evloop_thread.join();
 
