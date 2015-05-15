@@ -36,6 +36,7 @@ add_subdirectory(3rdparty/libfnord/fnord-sql)
 add_subdirectory(3rdparty/libfnord/fnord-msg)
 add_subdirectory(3rdparty/libfnord/fnord-tsdb)
 add_subdirectory(3rdparty/libfnord/fnord-dht)
+add_subdirectory(3rdparty/libfnord/fnord-dproc)
 include_directories(3rdparty/libfnord/)
 include_directories(3rdparty/libfnord/3rdparty/)
 include_directories(${FNORD_FTS_INCLUDE})
@@ -409,6 +410,7 @@ add_executable(cm-itemboostbuild
     $<TARGET_OBJECTS:fnord-fts>
     $<TARGET_OBJECTS:fnord-msg>
     $<TARGET_OBJECTS:fnord-tsdb>
+    $<TARGET_OBJECTS:fnord-dproc>
     src/schemas.cc
     src/DocIndex.cc
     src/analytics/Report.cc

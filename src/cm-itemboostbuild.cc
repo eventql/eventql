@@ -33,6 +33,8 @@
 #include <fnord-fts/fts.h>
 #include <fnord-fts/fts_common.h>
 #include <fnord-tsdb/TSDBClient.h>
+#include "fnord-dproc/Application.h"
+#include <fnord-dproc/Task.h>
 #include "fnord-logtable/TableReader.h"
 #include "common.h"
 #include "schemas.h"
@@ -54,6 +56,15 @@ using namespace fnord;
 using namespace cm;
 
 fnord::thread::EventLoop ev;
+
+class ItemBoostMapper : public dproc::Task {
+public:
+  RefPtr<VFSFile> run() override;
+};
+
+RefPtr<VFSFile> ItemBoostMapper::run() {
+
+}
 
 int main(int argc, const char** argv) {
   fnord::Application::init();
@@ -90,6 +101,10 @@ int main(int argc, const char** argv) {
   });
 
   auto tempdir = flags.getString("tempdir");
+
+  ItemBoostMapper mapper_task;
+
+  dproc::Application app("cm.itemboost");
 
   http::HTTPConnectionPool http(&ev);
   tsdb::TSDBClient tsdb("http://nue03.prod.fnrd.net:7003/tsdb", &http);
