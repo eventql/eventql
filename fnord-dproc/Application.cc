@@ -7,29 +7,16 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#ifndef _FNORD_DPROC_APPLICATION_H
-#define _FNORD_DPROC_APPLICATION_H
-#include <fnord-base/stdtypes.h>
-#include <fnord-base/autoref.h>
-#include <fnord-dproc/Task.h>
+#include <fnord-dproc/Application.h>
 
 namespace fnord {
 namespace dproc {
 
-class Application {
-public:
+Application::Application(const String& name) : name_(name) {}
 
-  Application(const String& name);
-
-  void getTaskInstance(const String& name, const Buffer& params);
-
-  void registerTaskFactory(const String& name, TaskFactory factory);
-
-protected:
-  String name_;
-};
+//void Application::getTaskInstance(const String& name, const Buffer& params);
+//void Application::registerTaskFactory(const String& name, TaskFactory factory);
 
 } // namespace dproc
 } // namespace fnord
 
-#endif
