@@ -169,21 +169,23 @@ UNIT_TEST(JoinedSessionViewerTest);
 TEST_CASE(JoinedSessionViewerTest, POST, [] () {
   Buffer test_session(test_session_bin, sizeof(test_session_bin));
 
-  JoinedSession js;
+  /*JoinedSession js;
   js.ParseFromArray(test_session.data(), test_session.size());
 
+  fnord::iputs("has num cart items: $0", js.referrer_name());*/
+
   http::HTTPRequest request(http::HTTPMessage::M_POST, "/blah");
-  request.addBody("ab");
+  request.addBody(test_session);
   http::HTTPResponse response;
 
   JoinedSessionViewer viewer;
   viewer.handleHTTPRequest(&request, &response);
 
-  EXPECT_EQ(response.statusCode(), 302);
-  EXPECT_EQ(response.getHeader("Location"), "/view_session");
+  String session_param;
+  util::Base64::encode(test_session.toString(), &session_param);
 
-  Buffer body(response.body());
-  EXPECT_EQ(body.toString(), "ab");
+  EXPECT_EQ(response.statusCode(), 302);
+  EXPECT_EQ(response.getHeader("Location"), "/view_session" + session_param);
 });
 
 TEST_CASE(JoinedSessionViewerTest, MissingParam, [] () {
