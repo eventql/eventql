@@ -16,6 +16,9 @@ file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/tests)
 include_directories(../)
 include_directories(../3rdparty/)
 
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/")
+find_package(Protobuf)
+
 find_package(Threads)
 
 if(APPLE)
@@ -32,4 +35,10 @@ add_library(fnord-msg OBJECT
     MessagePrinter.cc
     MessageObject.cc
     MessageSchema.cc)
+
+set(FNORD_MSG_LIBS
+    ${CMAKE_THREAD_LIBS_INIT}
+    ${PROTOBUF_LIBRARIES}
+    PARENT_SCOPE)
+
 
