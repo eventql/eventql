@@ -16,6 +16,7 @@ add_library(fnord-tsdb OBJECT
     DerivedDataset.cc
     ReplicationWorker.cc
     IndexWorker.cc
+    TSDBClient.cc
     TSDBNode.cc
     TSDBServlet.cc
     RecordSet.cc
