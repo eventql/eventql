@@ -424,6 +424,7 @@ add_executable(cm-chunkserver
     3rdparty/libfnord/fnord-logtable/NumericBoundsSummary.cc
     3rdparty/libfnord/fnord-logtable/TableChunkSummaryReader.cc
     3rdparty/libfnord/fnord-logtable/TableChunkSummaryWriter.cc
+    src/JoinedSessionViewer.cc
     src/ModelReplication.cc
     src/schemas.cc
     src/cm-chunkserver.cc)
@@ -538,3 +539,15 @@ add_executable(cm-jqcolumnize
 
 target_link_libraries(cm-jqcolumnize
     ${CMAKE_THREAD_LIBS_INIT} ${FNORD_FTS_LIBS})
+
+
+add_executable(tests/test-joinedsessionviewer
+    $<TARGET_OBJECTS:cm-common>
+    $<TARGET_OBJECTS:fnord-base>
+    $<TARGET_OBJECTS:fnord-json>
+    $<TARGET_OBJECTS:fnord-sstable>
+    $<TARGET_OBJECTS:fnord-http>
+    src/JoinedSessionViewer.cc
+    src/JoinedSessionViewer_test.cc)
+
+target_link_libraries(tests/test-chart ${CMAKE_THREAD_LIBS_INIT})
