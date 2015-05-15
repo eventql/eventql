@@ -13,6 +13,7 @@
 #include <condition_variable>
 #include <functional>
 #include <list>
+#include <thread>
 #include "fnord-base/thread/task.h"
 #include "fnord-base/thread/queue.h"
 #include "fnord-base/thread/taskscheduler.h"

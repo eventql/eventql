@@ -9,30 +9,12 @@
  */
 #ifndef _FNORD_VFS_H_
 #define _FNORD_VFS_H_
+#include <fnord-base/VFSFile.h>
 #include <fnord-base/stdtypes.h>
+#include <fnord-base/exception.h>
 #include <fnord-base/autoref.h>
 
 namespace fnord {
-
-class VFSFile : public RefCounted {
-public:
-  virtual ~VFSFile() {}
-
-  virtual size_t size() const = 0;
-  virtual void* data() const = 0;
-
-  template <typename T>
-  inline T* structAt(size_t pos) const {
-#ifndef FNORD_NODEBUG
-    if (pos >= size()) {
-      RAISE(kIndexError, "position out of bounds");
-    }
-#endif
-
-    return (T*) (((char *) data()) + pos);
-  }
-
-};
 
 class VFS {
 public:

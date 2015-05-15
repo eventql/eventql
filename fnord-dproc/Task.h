@@ -11,7 +11,10 @@
 #define _FNORD_DPROC_TASK_H
 #include <fnord-base/stdtypes.h>
 #include <fnord-base/autoref.h>
-#include <fnord-base/vfs.h>
+#include <fnord-base/buffer.h>
+#include <fnord-base/exception.h>
+#include <fnord-base/VFSFile.h>
+#include <fnord-msg/msg.h>
 
 namespace fnord {
 namespace dproc {
@@ -20,12 +23,9 @@ class Task;
 
 typedef Function<RefPtr<Task> (const Buffer& params)> TaskFactory;
 
-class TaskDependency : public RefCounted {
-public:
-  TaskDependency(RefPtr<Task> task);
-  RefPtr<Task> task() const;
-protected:
-  RefPtr<Task> task_;
+struct TaskDependency {
+  String task_name;
+  Buffer params;
 };
 
 class Task : public RefCounted {
@@ -44,6 +44,34 @@ public:
   }
 
 };
+
+template <typename _ParamType, typename _ResultType>
+class ProtoTask : public Task {
+public:
+  typedef _ParamType ParamType;
+  typedef _ResultType ResultType;
+
+  virtual void run(ResultType* result) = 0;
+  RefPtr<VFSFile> run() override;
+};
+
+template <typename ParamType, typename ResultType>
+RefPtr<VFSFile> ProtoTask<ParamType, ResultType>::run() {
+  ResultType result;
+  run(&result);
+  return msg::encode(result).get();
+}
+
+//template <typename _ParamType, typename _ResultType>
+//ProtoTask<RefPtr<VFSFile> run() override;
+
+
+//template <typename ProtoType>
+//template <typename... ArgTypes>
+//ProtoTask<ProtoType>::ProtoTask(
+//    const Buffer& buf,
+//    ArgTypes... args) :
+//    ProtoTask<ProtoType>(ProtoType{}, args...) {}
 
 } // namespace dproc
 } // namespace fnord

@@ -10,6 +10,7 @@
 #ifndef _FNORD_CSTABLE_COLUMNWRITER_H
 #define _FNORD_CSTABLE_COLUMNWRITER_H
 #include <fnord-base/stdtypes.h>
+#include <fnord-base/exception.h>
 #include <fnord-base/autoref.h>
 #include <fnord-base/util/binarymessagewriter.h>
 #include <fnord-base/util/BitPackEncoder.h>

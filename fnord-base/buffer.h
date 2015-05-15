@@ -13,10 +13,12 @@
 #include <stdint.h>
 #include <string>
 #include "fnord-base/stdtypes.h"
+#include "fnord-base/autoref.h"
+#include "fnord-base/vfsfile.h"
 
 namespace fnord {
 
-class Buffer {
+class Buffer : public VFSFile {
 public:
   static const size_t npos = -1;
 
@@ -56,6 +58,8 @@ protected:
   size_t alloc_;
   size_t mark_;
 };
+
+typedef RefPtr<Buffer> BufferRef;
 
 }
 #endif
