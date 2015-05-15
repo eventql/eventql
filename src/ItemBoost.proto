@@ -9,7 +9,7 @@
 package cm;
 
 message ItemBoostParams {
-  required string stream_key = 1;
+  optional string blah = 1;
 }
 
 message ItemBoostResult {

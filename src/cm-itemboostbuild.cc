@@ -140,23 +140,18 @@ int main(int argc, const char** argv) {
   dproc::LocalScheduler sched;
   sched.start();
 
-  auto params = DistAnalyticsTableScan<ItemBoostScanlet>::getTaskSpec(
+  auto taskspec = DistAnalyticsTableScan<ItemBoostScanlet>::getTaskSpec(
       "dawanda",
       WallClock::unixMicros() - 30 * kMicrosPerDay,
       WallClock::unixMicros() - 6 * kMicrosPerHour,
       ItemBoostParams {});
 
-  //AnalyticsTableScanReducerParams params;
-  //params.set_customer("dawanda");
-  //params.set_from_unixmicros(WallClock::unixMicros() - 30 * kMicrosPerDay);
-  //params.set_until_unixmicros(WallClock::unixMicros() - 6 * kMicrosPerHour);
+  auto res = sched.run(&app, taskspec);
 
-  //auto res = sched.run(&app, "ItemBoost", *msg::encode(params));
-
+  fnord::iputs("exit...", 1);
   sched.stop();
   ev.shutdown();
   evloop_thread.join();
-
-  return 0;
+  exit(0);
 }
 
