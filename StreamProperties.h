@@ -11,6 +11,7 @@
 #define _FNORD_TSDB_STREAMPROPERTIES_H
 #include <fnord-base/stdtypes.h>
 #include <fnord-base/option.h>
+#include <fnord-base/duration.h>
 #include <fnord-msg/MessageSchema.h>
 #include <fnord-tsdb/DerivedDataset.h>
 
