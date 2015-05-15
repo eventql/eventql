@@ -14,8 +14,21 @@ namespace dproc {
 
 Application::Application(const String& name) : name_(name) {}
 
-//void Application::getTaskInstance(const String& name, const Buffer& params);
-//void Application::registerTaskFactory(const String& name, TaskFactory factory);
+RefPtr<Task> Application::getTaskInstance(
+    const String& name,
+    const Buffer& params) {
+  auto factory = factories_.find(name);
+
+  if (factory == factories_.end()) {
+    RAISEF(kIndexError, "unknown task: '$0'", name);
+  }
+
+  return factory->second(params);
+}
+
+void Application::registerTaskFactory(const String& name, TaskFactory factory) {
+  factories_.emplace(name, factory);
+}
 
 } // namespace dproc
 } // namespace fnord

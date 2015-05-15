@@ -12,6 +12,7 @@
 #include <fnord-base/stdtypes.h>
 #include <fnord-base/autoref.h>
 #include <fnord-dproc/Task.h>
+#include <fnord-msg/msg.h>
 
 namespace fnord {
 namespace dproc {
@@ -21,13 +22,34 @@ public:
 
   Application(const String& name);
 
-  void getTaskInstance(const String& name, const Buffer& params);
+  RefPtr<Task> getTaskInstance(const String& name, const Buffer& params);
 
   void registerTaskFactory(const String& name, TaskFactory factory);
 
+  template <typename TaskType, typename... ArgTypes>
+  void registerTask(const String& name, ArgTypes... args);
+
+  template <typename TaskType, typename... ArgTypes>
+  void registerProtoTask(const String& name, ArgTypes... args);
+
 protected:
   String name_;
+  HashMap<String, TaskFactory> factories_;
 };
+
+template <typename TaskType, typename... ArgTypes>
+void Application::registerTask(const String& name, ArgTypes... args) {
+  registerTaskFactory(name, [=] (const Buffer& params) -> RefPtr<Task> {
+    return new TaskType(params, args...);
+  });
+}
+
+template <typename TaskType, typename... ArgTypes>
+void Application::registerProtoTask(const String& name, ArgTypes... args) {
+  registerTaskFactory(name, [=] (const Buffer& params) -> RefPtr<Task> {
+    return new TaskType(msg::decode<typename TaskType::ParamType>(params), args...);
+  });
+}
 
 } // namespace dproc
 } // namespace fnord
