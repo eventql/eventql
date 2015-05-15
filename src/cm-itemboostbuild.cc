@@ -61,27 +61,35 @@ using namespace fnord;
 using namespace cm;
 
 
-class ItemBoostMapper :
-    public AnalyticsTableScanMaplet<ItemBoostMapperParams, ItemBoostResult> {
+class ItemBoostScanlet : public AnalyticsTableScanlet<ItemBoostParams, ItemBoostResult> {
 public:
-  ItemBoostMapper(const ItemBoostMapperParams& params);
-  void run(ItemBoostResult* result) override;
+
+  ItemBoostScanlet(const ItemBoostParams& params);
+
+  void onQueryItem();
+  void getResult(ItemBoostResult* result) override;
+
+  static String name() { return "ItemBoost"; }
+  static void mergeResult(ItemBoostResult* target, ItemBoostResult* other);
+
+protected:
+  RefPtr<AnalyticsTableScan::ColumnRef> itemid_col_;
 };
 
-ItemBoostMapper::ItemBoostMapper(const ItemBoostMapperParams& params) {}
-void ItemBoostMapper::run(ItemBoostResult* result) {}
+ItemBoostScanlet::ItemBoostScanlet(
+  const ItemBoostParams& params) :
+  itemid_col_(scan_.fetchColumn("search_queries.result_items.item_id")) {
+  scan_.onQueryItem(std::bind(&ItemBoostScanlet::onQueryItem, this));
+}
 
+void ItemBoostScanlet::onQueryItem() {
+  auto itemid = itemid_col_->getString();
+  fnord::iputs("item: $0", itemid);
+}
 
-
-class ItemBoostReducer :
-    public AnalyticsTableScanReducelet<ItemBoostReducerParams, ItemBoostResult> {
-public:
-  ItemBoostReducer(const ItemBoostReducerParams& params);
-  void run(ItemBoostResult* result) override;
-};
-
-ItemBoostReducer::ItemBoostReducer(const ItemBoostReducerParams& params) {}
-void ItemBoostReducer::run(ItemBoostResult* result) {}
+void ItemBoostScanlet::getResult(ItemBoostResult* result) {
+  
+}
 
 
 
@@ -127,20 +135,23 @@ int main(int argc, const char** argv) {
   tsdb::TSDBClient tsdb("http://nue03.prod.fnrd.net:7003/tsdb", &http);
 
   dproc::Application app("cm.itemboost");
-  app.registerProtoTask<
-      AnalyticsTableScanMapper<ItemBoostMapper>>("ItemBoostMapper", &tsdb);
-  app.registerProtoTask<
-      AnalyticsTableScanReducer<ItemBoostReducer>>("ItemBoostReducer", &tsdb);
+  DistAnalyticsTableScan<ItemBoostScanlet>::registerWithApp(&app, &tsdb);
 
   dproc::LocalScheduler sched;
   sched.start();
 
-  ItemBoostReducerParams params;
-  params.set_customer("dawanda");
-  params.set_from_unixmicros(WallClock::unixMicros() - 30 * kMicrosPerDay);
-  params.set_until_unixmicros(WallClock::unixMicros() - 6 * kMicrosPerHour);
+  auto params = DistAnalyticsTableScan<ItemBoostScanlet>::getTaskSpec(
+      "dawanda",
+      WallClock::unixMicros() - 30 * kMicrosPerDay,
+      WallClock::unixMicros() - 6 * kMicrosPerHour,
+      ItemBoostParams {});
 
-  auto res = sched.run(&app, "ItemBoostReducer", *msg::encode(params));
+  //AnalyticsTableScanReducerParams params;
+  //params.set_customer("dawanda");
+  //params.set_from_unixmicros(WallClock::unixMicros() - 30 * kMicrosPerDay);
+  //params.set_until_unixmicros(WallClock::unixMicros() - 6 * kMicrosPerHour);
+
+  //auto res = sched.run(&app, "ItemBoost", *msg::encode(params));
 
   sched.stop();
   ev.shutdown();

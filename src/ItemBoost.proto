@@ -8,15 +8,8 @@
  */
 package cm;
 
-message ItemBoostMapperParams {
+message ItemBoostParams {
   required string stream_key = 1;
-  required string partition_key = 2;
-}
-
-message ItemBoostReducerParams {
-  required string customer = 1;
-  required uint64 from_unixmicros = 2;
-  required uint64 until_unixmicros = 3;
 }
 
 message ItemBoostResult {
