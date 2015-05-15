@@ -48,6 +48,7 @@
 #include "common.h"
 #include "schemas.h"
 #include "ModelReplication.h"
+#include "JoinedSessionViewer.h"
 
 using namespace fnord;
 
@@ -127,6 +128,12 @@ int main(int argc, const char** argv) {
   fnord::http::HTTPRouter http_router;
   fnord::http::HTTPServer http_server(&http_router, &ev);
   http_server.listen(flags.getInt("http_port"));
+
+
+
+  JoinedSessionViewer jsessviewer;
+  http_router.addRouteByPrefixMatch("/sessviewer", &jsessviewer);
+
 
   auto repl_scheme = mkRef(new dht::FixedReplicationScheme());
   for (const auto& r : repl_targets) {
