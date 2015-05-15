@@ -14,6 +14,7 @@
 #include <fnord-base/random.h>
 #include <fnord-base/io/FileLock.h>
 #include <fnord-base/thread/taskscheduler.h>
+#include <fnord-base/inspect.h>
 #include <fnord-msg/MessageSchema.h>
 #include <fnord-msg/MessageObject.h>
 #include <fnord-logtable/ArtifactIndex.h>

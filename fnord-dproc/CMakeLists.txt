@@ -11,5 +11,6 @@ include_directories(../)
 include_directories(../3rdparty)
 
 add_library(fnord-dproc OBJECT
-    Application.cc)
+    Application.cc
+    LocalScheduler.cc)
 

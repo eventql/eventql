@@ -11,6 +11,8 @@
 #define _FNORD_STATS_STATSDAGENT_H_
 #include <thread>
 #include "fnord-base/stdtypes.h"
+#include "fnord-base/duration.h"
+#include "fnord-base/exception.h"
 #include "fnord-base/net/inetaddr.h"
 #include "fnord-base/net/udpsocket.h"
 #include "fnord-base/stats/stat.h"

@@ -10,6 +10,7 @@
 #ifndef _FNORD_LOGTABLE_ARTIFACTINDEX_H
 #define _FNORD_LOGTABLE_ARTIFACTINDEX_H
 #include <fnord-base/stdtypes.h>
+#include <fnord-base/buffer.h>
 #include <fnord-base/autoref.h>
 
 namespace fnord {

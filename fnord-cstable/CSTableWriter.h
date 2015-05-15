@@ -10,6 +10,8 @@
 #ifndef _FNORD_CSTABLE_CSTABLEWRITER_H
 #define _FNORD_CSTABLE_CSTABLEWRITER_H
 #include <fnord-base/stdtypes.h>
+#include <fnord-base/exception.h>
+#include <fnord-base/duration.h>
 #include <fnord-base/io/file.h>
 #include <fnord-base/util/binarymessagewriter.h>
 #include <fnord-cstable/ColumnWriter.h>
