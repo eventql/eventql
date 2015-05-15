@@ -22,11 +22,13 @@ void JoinedSessionViewer::handleHTTPRequest(
   }
 
   if (req->method() == http::HTTPMessage::M_POST) {
-    res->setStatus(fnord::http::kStatusFound);
-    res->addHeader("Location", "/view_session");
-
     Buffer body = req->body();
-    res->addBody(body);
+    String session_param;
+    util::Base64::encode(body.toString(), &session_param);
+
+    //redirect
+    res->setStatus(fnord::http::kStatusFound);
+    res->addHeader("Location", "/view_session" + session_param);
   }
 }
 
