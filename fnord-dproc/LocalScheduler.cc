@@ -70,12 +70,16 @@ void LocalScheduler::run(
       }
 
       if (!taskref->expanded) {
+        taskref->expanded = true;
+
+        auto parent_task = taskref;
         for (const auto& dep : taskref->task->dependencies()) {
-          pipeline->tasks.emplace_back(new LocalTaskRef(
+          RefPtr<LocalTaskRef> depref(new LocalTaskRef(
               app->getTaskInstance(dep.task_name, dep.params)));
+          parent_task->dependencies.emplace_back(depref);
+          pipeline->tasks.emplace_back(depref);
         }
 
-        taskref->expanded = true;
         waiting = false;
         break;
       }
@@ -125,6 +129,8 @@ void LocalScheduler::runTask(
     LocalTaskPipeline* pipeline,
     RefPtr<LocalTaskRef> task) {
   auto output_file = FileUtil::joinPaths(tempdir_, rnd_.hex128() + ".tmp");
+
+  auto res = task->task->run();
 
   std::unique_lock<std::mutex> lk(pipeline->mutex);
   task->output_filename = output_file;
