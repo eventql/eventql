@@ -15,10 +15,14 @@ using namespace cm;
 
 UNIT_TEST(JoinedSessionViewerTest);
 
-TEST_CASE(JoinedSessionViewerTest, Test, [] () {
-  http::HTTPRequest request(http::HTTPMessage::M_GET, "/blah");
+TEST_CASE(JoinedSessionViewerTest, POST, [] () {
+  http::HTTPRequest request(http::HTTPMessage::M_POST, "/blah");
+  request.addBody("ab");
   http::HTTPResponse response;
 
   JoinedSessionViewer viewer;
   viewer.handleHTTPRequest(&request, &response);
+
+  EXPECT_EQ(response.statusCode(), 302);
+  EXPECT_EQ(response.getHeader("Location"), "/view_session");
 });
