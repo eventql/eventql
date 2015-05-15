@@ -28,6 +28,13 @@ void LocalScheduler::stop() {
 
 RefPtr<VFSFile> LocalScheduler::run(
     Application* app,
+    TaskSpec task) {
+  const auto& params = task.params();
+  return run(app, task.task_name(), Buffer(params.data(), params.size()));
+}
+
+RefPtr<VFSFile> LocalScheduler::run(
+    Application* app,
     const String& task,
     const Buffer& params) {
   RefPtr<LocalTaskRef> head_task(
@@ -37,8 +44,8 @@ RefPtr<VFSFile> LocalScheduler::run(
   pipeline.tasks.push_back(head_task);
   run(app, &pipeline);
 
-  fnord::iputs("ret: $0", head_task->output_filename);
-  exit(0);
+  BufferRef buf(new Buffer());
+  return buf.get();
 }
 
 void LocalScheduler::run(
@@ -130,7 +137,11 @@ void LocalScheduler::runTask(
     RefPtr<LocalTaskRef> task) {
   auto output_file = FileUtil::joinPaths(tempdir_, rnd_.hex128() + ".tmp");
 
-  auto res = task->task->run();
+  try {
+    auto res = task->task->run();
+  } catch (const std::exception& e) {
+    fnord::logError("fnord.dproc", e, "error");
+  }
 
   std::unique_lock<std::mutex> lk(pipeline->mutex);
   task->output_filename = output_file;
