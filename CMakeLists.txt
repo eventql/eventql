@@ -396,6 +396,48 @@ add_executable(cm-shopstatsbuild
 target_link_libraries(cm-shopstatsbuild
     ${CMAKE_THREAD_LIBS_INIT} ${FNORD_FTS_LIBS})
 
+add_executable(cm-itemboostbuild
+    $<TARGET_OBJECTS:cm-common>
+    $<TARGET_OBJECTS:fnord-base>
+    $<TARGET_OBJECTS:fnord-feeds>
+    $<TARGET_OBJECTS:fnord-mdb>
+    $<TARGET_OBJECTS:fnord-http>
+    $<TARGET_OBJECTS:fnord-json>
+    $<TARGET_OBJECTS:fnord-rpc>
+    $<TARGET_OBJECTS:fnord-cstable>
+    $<TARGET_OBJECTS:fnord-sstable>
+    $<TARGET_OBJECTS:fnord-fts>
+    $<TARGET_OBJECTS:fnord-msg>
+    $<TARGET_OBJECTS:fnord-tsdb>
+    src/schemas.cc
+    src/DocIndex.cc
+    src/analytics/Report.cc
+    src/analytics/ReportBuilder.cc
+    src/analytics/CTRCounterTableSink.cc
+    src/analytics/CTRCounterTableSource.cc
+    src/analytics/CTRCounterMergeReducer.cc
+    src/analytics/CTRByShopMapper.cc
+    src/analytics/ECommerceStatsByShopMapper.cc
+    src/analytics/ProductStatsByShopMapper.cc
+    src/analytics/TrafficSegment.cc
+    src/analytics/AnalyticsTableScan.cc
+    src/analytics/AnalyticsQuery.cc
+    src/analytics/AnalyticsQueryEngine.cc
+    src/analytics/AnalyticsQueryResult.cc
+    src/analytics/CTRBySearchTermCrossCategoryMapper.cc
+    src/analytics/AnalyticsTableScanSource.cc
+    src/analytics/RelatedTermsMapper.cc
+    src/analytics/TermInfoTableSink.cc
+    src/analytics/TermInfoTableSource.cc
+    src/analytics/TermInfoMergeReducer.cc
+    src/analytics/TermInfo.cc
+    src/analytics/TopCategoriesByTermMapper.cc
+    src/analytics/ShopStats.cc
+    src/cm-itemboostbuild.cc)
+
+target_link_libraries(cm-itemboostbuild
+    ${CMAKE_THREAD_LIBS_INIT} ${FNORD_FTS_LIBS})
+
 add_executable(cm-chunkserver
     $<TARGET_OBJECTS:cm-common>
     $<TARGET_OBJECTS:fnord-base>
