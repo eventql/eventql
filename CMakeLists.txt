@@ -435,10 +435,11 @@ add_executable(cm-itemboostbuild
     src/analytics/TermInfo.cc
     src/analytics/TopCategoriesByTermMapper.cc
     src/analytics/ShopStats.cc
+    src/ItemBoost.pb.cc
     src/cm-itemboostbuild.cc)
 
 target_link_libraries(cm-itemboostbuild
-    ${CMAKE_THREAD_LIBS_INIT} ${FNORD_FTS_LIBS})
+    ${CMAKE_THREAD_LIBS_INIT} ${FNORD_FTS_LIBS} ${FNORD_MSG_LIBS})
 
 add_executable(cm-chunkserver
     $<TARGET_OBJECTS:cm-common>
@@ -585,14 +586,14 @@ target_link_libraries(cm-jqcolumnize
     ${CMAKE_THREAD_LIBS_INIT} ${FNORD_FTS_LIBS})
 
 
-add_executable(tests/test-joinedsessionviewer
-    $<TARGET_OBJECTS:cm-common>
-    $<TARGET_OBJECTS:fnord-base>
-    $<TARGET_OBJECTS:fnord-json>
-    $<TARGET_OBJECTS:fnord-sstable>
-    $<TARGET_OBJECTS:fnord-http>
-    src/JoinedSessionViewer.cc
-    src/JoinedSession.pb.cc
-    src/JoinedSessionViewer_test.cc)
-
-target_link_libraries(tests/test-joinedsessionviewer ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_LIBS})
+#add_executable(tests/test-joinedsessionviewer
+#    $<TARGET_OBJECTS:cm-common>
+#    $<TARGET_OBJECTS:fnord-base>
+#    $<TARGET_OBJECTS:fnord-json>
+#    $<TARGET_OBJECTS:fnord-sstable>
+#    $<TARGET_OBJECTS:fnord-http>
+#    src/JoinedSessionViewer.cc
+#    src/JoinedSession.pb.cc
+#    src/JoinedSessionViewer_test.cc)
+#
+#target_link_libraries(tests/test-joinedsessionviewer ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_LIBS})
