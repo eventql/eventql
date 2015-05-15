@@ -50,19 +50,23 @@ static std::string globalEHandlerMessage;
 static void globalEHandler() {
   fprintf(stderr, "%s\n", globalEHandlerMessage.c_str());
 
-  try {
-    throw;
-  } catch (const std::exception& e) {
+  if (std::uncaught_exception()) {
     try {
-      auto rte = dynamic_cast<const fnord::Exception&>(e);
-      rte.debugPrint();
-      exit(1);
+      throw;
+    } catch (const std::exception& e) {
+      try {
+        auto rte = dynamic_cast<const fnord::Exception&>(e);
+        rte.debugPrint();
+        exit(1);
+      } catch (...) {
+        fprintf(stderr, "foreign exception: %s\n", e.what());
+        /* fallthrough */
+      }
     } catch (...) {
-      fprintf(stderr, "foreign exception: %s\n", e.what());
       /* fallthrough */
     }
-  } catch (...) {
-    /* fallthrough */
+  } else {
+    fprintf(stderr, "terminate called without an active exception\n");
   }
 
   exit(EXIT_FAILURE);

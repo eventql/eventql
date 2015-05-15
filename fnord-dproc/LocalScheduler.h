@@ -14,6 +14,7 @@
 #include "fnord-base/thread/taskscheduler.h"
 #include "fnord-base/thread/FixedSizeThreadPool.h"
 #include <fnord-dproc/Application.h>
+#include <fnord-dproc/TaskSpec.pb.h>
 
 namespace fnord {
 namespace dproc {
@@ -22,6 +23,10 @@ class LocalScheduler {
 public:
 
   LocalScheduler();
+
+  RefPtr<VFSFile> run(
+      Application* app,
+      TaskSpec task);
 
   RefPtr<VFSFile> run(
       Application* app,
