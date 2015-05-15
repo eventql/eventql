@@ -8,36 +8,36 @@
  */
 package cm;
 
-enum Language {
-  UNKNOWN_LANGUAGE = 0;
-  DE = 2;
-  EN = 1;
-  ES = 3;
-  FR = 4;
-  IT = 5;
-  NL = 6;
-  PL = 7;
+enum ProtoLanguage {
+  LANGUAGE_UNKNOWN_LANGUAGE = 0;
+  LANGUAGE_DE = 2;
+  LANGUAGE_EN = 1;
+  LANGUAGE_ES = 3;
+  LANGUAGE_FR = 4;
+  LANGUAGE_IT = 5;
+  LANGUAGE_NL = 6;
+  LANGUAGE_PL = 7;
 }
 
-enum PageType {
-  UNKNOWN_PAGE = 0;
-  SEARCH_PAGE = 1;
-  CATALOG_PAGE = 2;
-  PRODUCT_PAGE = 3;
+enum ProtoPageType {
+  PAGETYPE_UNKNOWN_PAGE = 0;
+  PAGETYPE_SEARCH_PAGE = 1;
+  PAGETYPE_CATALOG_PAGE = 2;
+  PAGETYPE_PRODUCT_PAGE = 3;
 }
 
-enum DeviceType {
-  UNKNOWN_DEVICE = 0;
-  DESKTOP = 1;
-  PHONE = 2;
-  TABLET = 3;
+enum ProtoDeviceType {
+  DEVICETYPE_UNKNOWN_DEVICE = 0;
+  DEVICETYPE_DESKTOP = 1;
+  DEVICETYPE_PHONE = 2;
+  DEVICETYPE_TABLET = 3;
 }
 
-enum Currency {
-  UNKNOWN_CURRENCY = 0;
-  EUR = 1;
-  PLN = 2;
-  USD = 3;
+enum ProtoCurrency {
+  CURRENCY_UNKNOWN_CURRENCY = 0;
+  CURRENCY_EUR = 1;
+  CURRENCY_PLN = 2;
+  CURRENCY_USD = 3;
 }
 
 
@@ -93,19 +93,19 @@ message JoinedSearchQuery {
    * The language of the search query (i.e. on which language page/subdomain
    * was the query executed)
    */
-  required Language language = 2;
+  required ProtoLanguage language = 2;
 
   /**
    * The "device type" (mobile/table/desktop) for this query. N.B. that the
    * classification is currently based upon screen dimensions which is very
    * imprecise (to the point of being useless)
    */
-  required DeviceType device_type = 10;
+  required ProtoDeviceType device_type = 10;
 
   /**
    * The "page type" (catalog/search/shop/etc) on which this query was executed
    */
-  required PageType page_type = 11;
+  required ProtoPageType page_type = 11;
 
   /**
    * The page number of the query was paginated. Starts from 1 == first page
@@ -258,7 +258,7 @@ message JoinedCartItem {
    * The price in cents and currency for a single instance of the item
    */
   required uint32 price_cents = 40;
-  required Currency currency = 41;
+  required ProtoCurrency currency = 41;
 
   /**
    * The most advanced cart step we have seen this item in. Note that smaller
