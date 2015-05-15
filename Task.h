@@ -11,6 +11,7 @@
 #define _FNORD_DPROC_TASK_H
 #include <fnord-base/stdtypes.h>
 #include <fnord-base/autoref.h>
+#include <fnord-base/vfs.h>
 
 namespace fnord {
 namespace dproc {
@@ -30,17 +31,21 @@ protected:
 class Task : public RefCounted {
 public:
 
-  virtual List<TaskDependency> dependencies();
+  virtual ~Task() {}
 
-  virtual void run(const Buffer* output) = 0;
+  virtual List<TaskDependency> dependencies() {
+    return List<TaskDependency>{};
+  }
 
-  virtual Option<String> cacheKey();
+  virtual RefPtr<VFSFile> run() = 0;
 
-  virtual Vector<String> preferredLocations();
+  virtual Vector<String> preferredLocations() {
+    return Vector<String>{};
+  }
 
 };
 
-} // namespace cstable
+} // namespace dproc
 } // namespace fnord
 
 #endif
