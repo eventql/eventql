@@ -74,24 +74,34 @@ public:
 
 protected:
   RefPtr<AnalyticsTableScan::ColumnRef> itemid_col_;
+  RefPtr<AnalyticsTableScan::ColumnRef> clicked_col_;
+  HashMap<String, CTRCounterData> counters_;
 };
 
 ItemBoostScanlet::ItemBoostScanlet(
   const ItemBoostParams& params) :
-  itemid_col_(scan_.fetchColumn("search_queries.result_items.item_id")) {
+  itemid_col_(scan_.fetchColumn("search_queries.result_items.item_id")),
+  clicked_col_(scan_.fetchColumn("search_queries.result_items.clicked")) {
   scan_.onQueryItem(std::bind(&ItemBoostScanlet::onQueryItem, this));
 }
 
 void ItemBoostScanlet::onQueryItem() {
   auto itemid = itemid_col_->getString();
-  fnord::iputs("item: $0", itemid);
+  auto clicked = clicked_col_->getBool();
+
+  auto& ctr = counters_[itemid];
+  ++ctr.num_views;
+  if (clicked) ++ctr.num_clicks;
 }
 
 void ItemBoostScanlet::getResult(ItemBoostResult* result) {
-  
+  for (const auto& ctr : counters_) {
+    auto ires = result->add_items();
+    ires->set_item_id(ctr.first);
+    ires->set_num_impressions(ctr.second.num_views);
+    ires->set_num_clicks(ctr.second.num_clicks);
+  }
 }
-
-
 
 fnord::thread::EventLoop ev;
 

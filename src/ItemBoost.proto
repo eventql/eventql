@@ -13,5 +13,11 @@ message ItemBoostParams {
 }
 
 message ItemBoostResult {
-  optional string fu = 1;
+  message ItemBoostResultItem {
+    required string item_id = 2;
+    required uint32 num_impressions = 3;
+    required uint32 num_clicks = 4;
+  }
+
+  repeated ItemBoostResultItem items = 1;
 }
