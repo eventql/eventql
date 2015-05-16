@@ -26,7 +26,7 @@ Vector<String> TSDBClient::listPartitions(
   auto uri = StringUtil::format(
       "$0/list_chunks?stream=$1&from=$2&until=$3",
       uri_,
-      stream_key,
+      URI::urlEncode(stream_key),
       from.unixMicros(),
       until.unixMicros());
 
@@ -47,6 +47,28 @@ Vector<String> TSDBClient::listPartitions(
   }
 
   return partitions;
+}
+
+Buffer TSDBClient::fetchDerivedDataset(
+    const String& stream_key,
+    const String& partition,
+    const String& derived_dataset_name) {
+  auto uri = StringUtil::format(
+      "$0/fetch_derived_dataset?chunk=$1&derived_dataset=$2",
+      uri_,
+      URI::urlEncode(partition),
+      URI::urlEncode(derived_dataset_name));
+
+  auto req = http::HTTPRequest::mkGet(uri);
+  auto res = http_->executeRequest(req);
+  res.wait();
+
+  const auto& r = res.get();
+  if (r.statusCode() != 200) {
+    RAISEF(kRuntimeError, "received non-200 response: $0", r.body().toString());
+  }
+
+  return r.body();
 }
 
 } // namespace tdsb
