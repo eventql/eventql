@@ -10,6 +10,7 @@
 #ifndef _FNORD_MSG_MSG_H
 #define _FNORD_MSG_MSG_H
 #include <fnord-base/stdtypes.h>
+#include <fnord-base/buffer.h>
 
 namespace fnord {
 namespace msg {
