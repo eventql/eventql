@@ -7,7 +7,7 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <fnord-base/io/FileUtil.h>
+#include <fnord-base/io/fileutil.h>
 #include <fnord-base/logging.h>
 #include <fnord-dproc/LocalScheduler.h>
 

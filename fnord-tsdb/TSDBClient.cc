@@ -8,7 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <fnord-tsdb/TSDBClient.h>
-#include <fnord-base/util/BinaryMessageReader.h>
+#include <fnord-base/util/binarymessagereader.h>
 
 namespace fnord {
 namespace tsdb {
