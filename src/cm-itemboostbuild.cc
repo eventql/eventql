@@ -58,15 +58,13 @@ int main(int argc, const char** argv) {
     ev.run();
   });
 
-  auto tempdir = flags.getString("tempdir");
-
   http::HTTPConnectionPool http(&ev);
   tsdb::TSDBClient tsdb("http://nue03.prod.fnrd.net:7003/tsdb", &http);
 
   dproc::Application app("cm.itemboost");
   DistAnalyticsTableScan<ItemBoostScanlet>::registerWithApp(&app, &tsdb);
 
-  dproc::LocalScheduler sched;
+  dproc::LocalScheduler sched(flags.getString("tempdir"));
   sched.start();
 
   auto taskspec = DistAnalyticsTableScan<ItemBoostScanlet>::getTaskSpec(
