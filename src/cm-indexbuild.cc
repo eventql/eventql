@@ -150,6 +150,10 @@ int main(int argc, const char** argv) {
       "documents-dawanda",
       false);
 
+  index.commit();
+  exit(0);
+
+
   /* open logtable */
   RefPtr<logtable::RemoteTableReader> table(new logtable::RemoteTableReader(
       "index_feed-dawanda",
