@@ -48,6 +48,15 @@ add_library(cm-common OBJECT
     src/ItemRef.cc
     src/CustomerNamespace.cc)
 
+file(GLOB PROTO_FILES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.proto")
+
+add_custom_target(
+    cm-protos
+    ALL
+    COMMAND protoc --cpp_out=. -I ${CMAKE_CURRENT_SOURCE_DIR}/src ${PROTO_FILES}
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/src
+    DEPENDS ${PROTO_FILES})
+
 # cm-frontend
 set_source_files_properties(${CMAKE_BINARY_DIR}/cm-frontend-assets.cc PROPERTIES GENERATED true)
 
