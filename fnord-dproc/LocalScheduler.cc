@@ -16,9 +16,11 @@
 namespace fnord {
 namespace dproc {
 
-LocalScheduler::LocalScheduler() :
-    tempdir_("/tmp"),
-    tpool_(4) {}
+LocalScheduler::LocalScheduler(
+    const String& tempdir /* = "/tmp" */,
+    size_t max_threads /* = 8 */) :
+    tempdir_(tempdir),
+    tpool_(max_threads) {}
 
 void LocalScheduler::start() {
   tpool_.start();
