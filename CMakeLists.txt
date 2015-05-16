@@ -45,11 +45,11 @@ file(GLOB PROTO_FILES src/*.proto)
 
 foreach(PROTO_FILE ${PROTO_FILES})
   get_filename_component(PROTO_NAME ${PROTO_FILE} NAME_WE)
-  set(PROTO_SRCS ${PROTO_SRCS} ${CMAKE_CURRENT_SOURCE_DIR}/${PROTO_NAME}.pb.cc)
+  set(PROTO_SRCS ${PROTO_SRCS} ${CMAKE_CURRENT_SOURCE_DIR}/src/${PROTO_NAME}.pb.cc)
 endforeach()
 
 add_custom_target(cm-protos ALL
-    COMMAND protoc --cpp_out=. -I${CMAKE_CURRENT_SOURCE_DIR}/src ${PROTO_FILES}
+    COMMAND protoc --cpp_out=src/ -I${CMAKE_CURRENT_SOURCE_DIR}/src ${PROTO_FILES}
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     DEPENDS ${PROTO_FILES})
 
