@@ -40,8 +40,12 @@ public:
 
 protected:
 
-  struct LocalTaskRef : public RefCounted {
+  class LocalTaskRef : public TaskContext, public RefCounted {
+  public:
     LocalTaskRef(RefPtr<Task> _task);
+    RefPtr<VFSFile> getDependency(size_t index) override;
+    size_t numDependencies() const override;
+
     RefPtr<Task> task;
     String output_filename;
     bool running;
