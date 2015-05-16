@@ -14,7 +14,7 @@
 #include <string>
 #include "fnord-base/stdtypes.h"
 #include "fnord-base/autoref.h"
-#include "fnord-base/vfsfile.h"
+#include "fnord-base/VFSFile.h"
 
 namespace fnord {
 
