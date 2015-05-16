@@ -9,6 +9,7 @@
  */
 #include <fnord-base/io/file.h>
 #include <fnord-base/io/fileutil.h>
+#include <fnord-base/io/mmappedfile.h>
 #include <fnord-base/logging.h>
 #include <fnord-base/io/fileutil.h>
 #include <fnord-dproc/LocalScheduler.h>
@@ -142,7 +143,7 @@ void LocalScheduler::runTask(
   auto output_file = FileUtil::joinPaths(tempdir_, rnd_.hex128() + ".tmp");
 
   try {
-    auto res = task->task->run(nullptr);
+    auto res = task->task->run(task.get());
 
     auto file = File::openFile(
         output_file + "~",
@@ -166,6 +167,25 @@ LocalScheduler::LocalTaskRef::LocalTaskRef(RefPtr<Task> _task) :
     running(false),
     expanded(false),
     finished(false) {}
+
+RefPtr<VFSFile> LocalScheduler::LocalTaskRef::getDependency(size_t index) {
+  if (index >= dependencies.size()) {
+    RAISEF(kIndexError, "invalid dependecy index: $0", index);
+  }
+
+  const auto& dep = dependencies[index];
+  if (!FileUtil::exists(dep->output_filename)) {
+    RAISEF(kRuntimeError, "missing upstream output: $0", dep->output_filename);
+  }
+
+  return RefPtr<VFSFile>(
+      new io::MmappedFile(
+          File::openFile(dep->output_filename, File::O_READ)));
+}
+
+size_t LocalScheduler::LocalTaskRef::numDependencies() const {
+  return dependencies.size();
+}
 
 } // namespace dproc
 } // namespace fnord
