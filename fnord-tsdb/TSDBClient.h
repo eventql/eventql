@@ -29,6 +29,11 @@ public:
       const DateTime& from,
       const DateTime& until);
 
+  Buffer fetchDerivedDataset(
+      const String& stream_key,
+      const String& patition,
+      const String& derived_dataset_name);
+
 protected:
   String uri_;
   http::HTTPConnectionPool* http_;

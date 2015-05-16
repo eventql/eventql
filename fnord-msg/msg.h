@@ -27,6 +27,9 @@ template <typename ProtoType>
 void decode(const BufferRef& buffer, ProtoType* target);
 
 template <typename ProtoType>
+ProtoType decode(const String& buffer);
+
+template <typename ProtoType>
 ProtoType decode(const void* data, size_t size);
 
 template <typename ProtoType>
@@ -46,7 +49,7 @@ void encode(const ProtoType& proto, BufferRef target);
 template <typename ProtoType>
 ProtoType decode(const Buffer& buffer) {
   ProtoType proto;
-  decode<ProtoType>(buffer.data(), buffer.size());
+  decode<ProtoType>(buffer.data(), buffer.size(), &proto);
   return proto;
 }
 
@@ -58,13 +61,20 @@ void decode(const Buffer& buffer, ProtoType* target) {
 template <typename ProtoType>
 ProtoType decode(const BufferRef& buffer) {
   ProtoType proto;
-  decode<ProtoType>(buffer->data(), buffer->size());
+  decode<ProtoType>(buffer->data(), buffer->size(), &proto);
   return proto;
 }
 
 template <typename ProtoType>
 void decode(const BufferRef& buffer, ProtoType* target) {
   decode<ProtoType>(buffer->data(), buffer->size(), target);
+}
+
+template <typename ProtoType>
+ProtoType decode(const String& buffer) {
+  ProtoType proto;
+  decode<ProtoType>(buffer.data(), buffer.size(), &proto);
+  return proto;
 }
 
 template <typename ProtoType>
