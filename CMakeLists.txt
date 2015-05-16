@@ -450,6 +450,7 @@ add_executable(cm-itemboostbuild
     src/analytics/TermInfo.cc
     src/analytics/TopCategoriesByTermMapper.cc
     src/analytics/ShopStats.cc
+    src/ItemBoostScanlet.cc
     src/cm-itemboostbuild.cc)
 
 target_link_libraries(cm-itemboostbuild
