@@ -142,7 +142,7 @@ void LocalScheduler::runTask(
   auto output_file = FileUtil::joinPaths(tempdir_, rnd_.hex128() + ".tmp");
 
   try {
-    auto res = task->task->run();
+    auto res = task->task->run(nullptr);
 
     auto file = File::openFile(
         output_file + "~",
