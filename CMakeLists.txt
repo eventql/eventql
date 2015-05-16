@@ -30,4 +30,4 @@ add_library(fnord-dproc OBJECT
     LocalScheduler.cc
     ${PROTO_SRCS})
 
-
+add_dependencies(fnord-dproc fnord-dproc-protos)
