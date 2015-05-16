@@ -7,8 +7,10 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
+#include <fnord-base/io/file.h>
 #include <fnord-base/io/fileutil.h>
 #include <fnord-base/logging.h>
+#include <fnord-base/io/fileutil.h>
 #include <fnord-dproc/LocalScheduler.h>
 
 namespace fnord {
@@ -139,6 +141,13 @@ void LocalScheduler::runTask(
 
   try {
     auto res = task->task->run();
+
+    auto file = File::openFile(
+        output_file + "~",
+        File::O_CREATEOROPEN | File::O_WRITE);
+
+    file.write(res->data(), res->size());
+    FileUtil::mv(output_file + "~", output_file);
   } catch (const std::exception& e) {
     fnord::logError("fnord.dproc", e, "error");
   }
