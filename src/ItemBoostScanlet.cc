@@ -50,6 +50,7 @@ void ItemBoostScanlet::mergeResults(
     auto& dst_item = id_map[src_item.item_id()];
     if (dst_item == nullptr) {
       dst_item = dst->add_items();
+      dst_item->set_item_id(src_item.item_id());
     }
 
     dst_item->set_num_impressions(
