@@ -23,7 +23,7 @@ public:
     return "ItemBoost";
   }
 
-  static void mergeResult(ItemBoostResult* target, ItemBoostResult* other);
+  static void mergeResults(ItemBoostResult* dst, ItemBoostResult* src);
 
   ItemBoostScanlet(const ItemBoostParams& params);
 

@@ -37,5 +37,28 @@ void ItemBoostScanlet::getResult(ItemBoostResult* result) {
   }
 }
 
+void ItemBoostScanlet::mergeResults(
+    ItemBoostResult* dst,
+    ItemBoostResult* src) {
+  HashMap<String, ItemBoostResultItem*> id_map;
+
+  for (auto& item : *dst->mutable_items()) {
+    id_map.emplace(item.item_id(), &item);
+  }
+
+  for (const auto& src_item : src->items()) {
+    auto& dst_item = id_map[src_item.item_id()];
+    if (dst_item == nullptr) {
+      dst_item = dst->add_items();
+    }
+
+    dst_item->set_num_impressions(
+        dst_item->num_impressions() + src_item.num_impressions());
+
+    dst_item->set_num_clicks(
+        dst_item->num_clicks() + src_item.num_clicks());
+  }
+}
+
 }
 
