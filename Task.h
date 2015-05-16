@@ -28,6 +28,16 @@ struct TaskDependency {
   Buffer params;
 };
 
+class TaskContext {
+public:
+
+  virtual ~TaskContext() {}
+
+  virtual RefPtr<VFSFile> getDependency(size_t index) = 0;
+  virtual size_t numDependencies() const = 0;
+
+};
+
 class Task : public RefCounted {
 public:
 
@@ -37,7 +47,7 @@ public:
     return List<TaskDependency>{};
   }
 
-  virtual RefPtr<VFSFile> run() = 0;
+  virtual RefPtr<VFSFile> run(TaskContext* context) = 0;
 
   virtual Vector<String> preferredLocations() {
     return Vector<String>{};
@@ -51,14 +61,14 @@ public:
   typedef _ParamType ParamType;
   typedef _ResultType ResultType;
 
-  virtual void run(ResultType* result) = 0;
-  RefPtr<VFSFile> run() override;
+  virtual void run(TaskContext* context, ResultType* result) = 0;
+  RefPtr<VFSFile> run(TaskContext* context) override;
 };
 
 template <typename ParamType, typename ResultType>
-RefPtr<VFSFile> ProtoTask<ParamType, ResultType>::run() {
+RefPtr<VFSFile> ProtoTask<ParamType, ResultType>::run(TaskContext* context) {
   ResultType result;
-  run(&result);
+  run(context, &result);
   return msg::encode(result).get();
 }
 
