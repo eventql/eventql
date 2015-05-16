@@ -22,7 +22,9 @@ namespace dproc {
 class LocalScheduler {
 public:
 
-  LocalScheduler();
+  LocalScheduler(
+      const String& tempdir = "/tmp",
+      size_t max_threads = 8);
 
   RefPtr<VFSFile> run(
       Application* app,
