@@ -32,7 +32,7 @@ public:
 protected:
 
   void onCallbackCompleted();
-  void onStateChanged();
+  void onStateChanged(std::unique_lock<std::mutex>* lk);
 
   mutable std::mutex mutex_;
   HTTPServerConnection* conn_;

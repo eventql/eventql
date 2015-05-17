@@ -29,6 +29,7 @@ void HTTPResponseStream::startResponse(const HTTPResponse& resp) {
     RAISE(kRuntimeError, "headers already written");
   }
 
+  headers_written_ = true;
   callback_running_ = true;
   lk.unlock();
 
@@ -40,7 +41,7 @@ void HTTPResponseStream::startResponse(const HTTPResponse& resp) {
 void HTTPResponseStream::writeBodyChunk(const Buffer& buf) {
   std::unique_lock<std::mutex> lk(mutex_);
   buf_.append(buf.data(), buf.size());
-  onStateChanged();
+  onStateChanged(&lk);
 }
 
 void HTTPResponseStream::finishResponse() {
@@ -51,7 +52,7 @@ void HTTPResponseStream::finishResponse() {
   }
 
   response_finished_ = true;
-  onStateChanged();
+  onStateChanged(&lk);
 }
 
 bool HTTPResponseStream::isOutputStarted() const {
@@ -62,18 +63,38 @@ bool HTTPResponseStream::isOutputStarted() const {
 void HTTPResponseStream::onCallbackCompleted() {
   std::unique_lock<std::mutex> lk(mutex_);
   callback_running_ = false;
-  onStateChanged();
+  onStateChanged(&lk);
 }
 
-// precondition: hold mutex_
-void HTTPResponseStream::onStateChanged() {
+// precondition: lk must be locked
+void HTTPResponseStream::onStateChanged(std::unique_lock<std::mutex>* lk) {
   if (callback_running_) {
+    return;
+  }
+
+  if (!headers_written_) {
+    return; // should never happen!
+  }
+
+  if (buf_.size() > 0) {
+    Buffer write_buf = buf_;
+    buf_.clear();
+    callback_running_ = true;
+    lk->unlock();
+
+    conn_->writeResponseBody(
+        write_buf.data(),
+        write_buf.size(),
+        std::bind(&HTTPResponseStream::onCallbackCompleted, this));
+
     return;
   }
 
   if (response_finished_) {
     conn_->finishResponse();
     decRef();
+  } else {
+    // all chunks written
   }
 }
 
