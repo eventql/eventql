@@ -24,16 +24,22 @@ public:
   HTTPRequestStream(const HTTPRequest& req, HTTPServerConnection* conn);
 
   /**
-   * Retrieve the http request. The http request will usually not contain a
-   * request body
+   * Retrieve the http request. The http request will not contain a request body
+   * by default. Instead you must call one of the readBody(...) method to
+   * retrieve the request body
    */
   const HTTPRequest& request() const;
 
   /**
-   * Read the http request body in chunks. This method will return once all
-   * body chunks have been read
+   * Read the http request body in chunks. This method will call the provided
+   * callback for each chunk and return once all body chunks have been read
    */
   void readBody(Function<void (const void* data, size_t size)> fn);
+
+  /**
+   * Read the http request body into the contained HTTPRequest
+   */
+  void readBody();
 
 protected:
 

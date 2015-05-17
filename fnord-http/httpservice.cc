@@ -17,8 +17,8 @@ namespace fnord {
 namespace http {
 
 void HTTPService::handleHTTPRequest(
-      HTTPRequestStream* req_stream,
-      HTTPResponseStream* res_stream) {
+    RefPtr<HTTPRequestStream> req_stream,
+    RefPtr<HTTPResponseStream> res_stream) {
   const auto& req = req_stream->request();
 
   HTTPResponse res;
@@ -45,7 +45,7 @@ HTTPServiceHandler::HTTPServiceHandler(
     req_(req) {}
 
 void HTTPServiceHandler::handleHTTPRequest() {
-  if (service_->streamRequestBody()) {
+  if (service_->isStreaming()) {
     dispatchRequest();
   } else {
     conn_->readRequestBody([this] (

@@ -25,14 +25,10 @@ public:
   virtual ~StreamingHTTPService() {}
 
   virtual void handleHTTPRequest(
-      HTTPRequestStream* req,
-      HTTPResponseStream* res) = 0;
+      RefPtr<HTTPRequestStream> req,
+      RefPtr<HTTPResponseStream> res) = 0;
 
-  /**
-   * If true, the request body will not be read before calling handleHTTPRequest
-   * and must be manually read in the handler
-   */
-  virtual bool streamRequestBody() {
+  virtual bool isStreaming() {
     return false;
   }
 
@@ -48,8 +44,12 @@ public:
       HTTPResponse* res) = 0;
 
   void handleHTTPRequest(
-      HTTPRequestStream* req,
-      HTTPResponseStream* res) override;
+      RefPtr<HTTPRequestStream> req,
+      RefPtr<HTTPResponseStream> res) override;
+
+  bool isStreaming() override {
+    return true;
+  }
 
 };
 
