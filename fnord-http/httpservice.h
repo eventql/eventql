@@ -12,6 +12,7 @@
 #include <fnord-http/httphandler.h>
 #include <fnord-http/httprequest.h>
 #include <fnord-http/httpresponse.h>
+#include <fnord-http/HTTPRequestStream.h>
 #include <fnord-http/HTTPResponseStream.h>
 #include "fnord-base/thread/taskscheduler.h"
 
@@ -24,8 +25,16 @@ public:
   virtual ~StreamingHTTPService() {}
 
   virtual void handleHTTPRequest(
-      HTTPRequest* req,
+      HTTPRequestStream* req,
       HTTPResponseStream* res) = 0;
+
+  /**
+   * If true, the request body will not be read before calling handleHTTPRequest
+   * and must be manually read in the handler
+   */
+  virtual bool streamRequestBody() {
+    return false;
+  }
 
 };
 
@@ -39,7 +48,7 @@ public:
       HTTPResponse* res) = 0;
 
   void handleHTTPRequest(
-      HTTPRequest* req,
+      HTTPRequestStream* req,
       HTTPResponseStream* res) override;
 
 };
@@ -53,6 +62,7 @@ public:
       HTTPRequest* req);
 
   void handleHTTPRequest() override;
+
 protected:
   void dispatchRequest();
 

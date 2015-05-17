@@ -17,11 +17,14 @@ namespace fnord {
 namespace http {
 
 void HTTPService::handleHTTPRequest(
-      HTTPRequest* req,
+      HTTPRequestStream* req_stream,
       HTTPResponseStream* res_stream) {
+  const auto& req = req_stream->request();
+
   HTTPResponse res;
-  res.populateFromRequest(*req);
-  handleHTTPRequest(req, &res);
+  res.populateFromRequest(req);
+
+  handleHTTPRequest(const_cast<HTTPRequest*>(&req), &res);
 
   auto body_size = res.body().size();
   if (body_size > 0) {
@@ -42,33 +45,39 @@ HTTPServiceHandler::HTTPServiceHandler(
     req_(req) {}
 
 void HTTPServiceHandler::handleHTTPRequest() {
-  conn_->readRequestBody([this] (
-      const void* data,
-      size_t size,
-      bool last_chunk) {
-    req_->appendBody((char *) data, size);
+  if (service_->streamRequestBody()) {
+    dispatchRequest();
+  } else {
+    conn_->readRequestBody([this] (
+        const void* data,
+        size_t size,
+        bool last_chunk) {
+      req_->appendBody((char *) data, size);
 
-    if (last_chunk) {
-      dispatchRequest();
-    }
-  });
+      if (last_chunk) {
+        dispatchRequest();
+      }
+    });
+  }
 }
 
 void HTTPServiceHandler::dispatchRequest() {
   auto runnable = [this] () {
-    auto resp_stream = new HTTPResponseStream(conn_);
-    resp_stream->incRef();
+    auto res_stream = new HTTPResponseStream(conn_);
+    res_stream->incRef();
+
+    RefPtr<HTTPRequestStream> req_stream(new HTTPRequestStream(*req_, conn_));
 
     try {
-      service_->handleHTTPRequest(req_, resp_stream);
+      service_->handleHTTPRequest(req_stream.get(), res_stream);
     } catch (const std::exception& e) {
       logError("fnord.http.service", e, "Error while processing HTTP request");
 
-      if (!resp_stream->isOutputStarted()) {
+      if (!res_stream->isOutputStarted()) {
         http::HTTPResponse res;
         res.setStatus(http::kStatusInternalServerError);
         res.addBody("server error");
-        resp_stream->writeResponse(res);
+        res_stream->writeResponse(res);
       }
     }
   };
