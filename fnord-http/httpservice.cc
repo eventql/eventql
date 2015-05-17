@@ -29,6 +29,7 @@ void HTTPService::handleHTTPRequest(
   }
 
   res_stream->startResponse(res);
+  res_stream->finishResponse();
 }
 
 HTTPServiceHandler::HTTPServiceHandler(
@@ -69,10 +70,9 @@ void HTTPServiceHandler::dispatchRequest() {
         res.setStatus(http::kStatusInternalServerError);
         res.addBody("server error");
         resp_stream->startResponse(res);
+        resp_stream->finishResponse();
       }
     }
-
-    resp_stream->finishResponse();
   };
 
   if (scheduler_ == nullptr) {
