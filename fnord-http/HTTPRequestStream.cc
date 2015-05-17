@@ -23,8 +23,29 @@ const HTTPRequest& HTTPRequestStream::request() const {
   return req_;
 }
 
-//void HTTPRequestStream::readBody() {
-//}
+void HTTPRequestStream::readBody(Function<void (const void*, size_t)> fn) {
+  std::mutex m;
+  std::condition_variable cv;
+  bool all_read = false;
+
+  conn_->readRequestBody([this, &fn, &m, &cv, &all_read] (
+      const void* data,
+      size_t size,
+      bool last_chunk) {
+    fn(data, size);
+
+    if (last_chunk) {
+      std::unique_lock<std::mutex> lk(m);
+      all_read = true;
+      cv.notify_all();
+    }
+  });
+
+  std::unique_lock<std::mutex> lk(m);
+  while (!all_read) {
+    cv.wait(lk);
+  }
+}
 
 }
 }
