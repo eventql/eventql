@@ -18,12 +18,8 @@ class SSETestServlet : public http::StreamingHTTPService {
 public:
 
   void handleHTTPRequest(
-      http::HTTPRequestStream* req,
-      http::HTTPResponseStream* res);
-
-  bool streamRequestBody() override {
-    return "false";
-  }
+      RefPtr<http::HTTPRequestStream> req,
+      RefPtr<http::HTTPResponseStream> res);
 
 };
 
