@@ -28,8 +28,7 @@ void HTTPService::handleHTTPRequest(
     res.setHeader("Content-Length", StringUtil::toString(body_size));
   }
 
-  res_stream->startResponse(res);
-  res_stream->finishResponse();
+  res_stream->writeResponse(res);
 }
 
 HTTPServiceHandler::HTTPServiceHandler(
@@ -69,8 +68,7 @@ void HTTPServiceHandler::dispatchRequest() {
         http::HTTPResponse res;
         res.setStatus(http::kStatusInternalServerError);
         res.addBody("server error");
-        resp_stream->startResponse(res);
-        resp_stream->finishResponse();
+        resp_stream->writeResponse(res);
       }
     }
   };
