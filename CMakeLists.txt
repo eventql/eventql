@@ -60,8 +60,7 @@ add_library(cm-common OBJECT
     src/CTRCounter.cc
     src/Document.cc
     src/ItemRef.cc
-    src/CustomerNamespace.cc
-    ${PROTO_SRCS})
+    src/CustomerNamespace.cc)
 
 # cm-frontend
 set_source_files_properties(${CMAKE_BINARY_DIR}/cm-frontend-assets.cc PROPERTIES GENERATED true)
@@ -83,6 +82,7 @@ add_executable(cm-frontend
     src/frontend/CMFrontend.cc
     src/frontend/IndexFeedUpload.cc
     src/cm-frontend.cc
+    src/SSETestServlet.cc
     src/schemas.cc
     ${CMAKE_BINARY_DIR}/cm-frontend-assets.cc)
 
@@ -451,7 +451,8 @@ add_executable(cm-itemboostbuild
     src/analytics/TopCategoriesByTermMapper.cc
     src/analytics/ShopStats.cc
     src/ItemBoostScanlet.cc
-    src/cm-itemboostbuild.cc)
+    src/cm-itemboostbuild.cc
+    ${PROTO_SRCS})
 
 target_link_libraries(cm-itemboostbuild
     ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_LIBS} ${FNORD_FTS_LIBS} ${FNORD_MSG_LIBS})
@@ -487,7 +488,8 @@ add_executable(cm-chunkserver
     src/JoinedSessionViewer.cc
     src/ModelReplication.cc
     src/schemas.cc
-    src/cm-chunkserver.cc)
+    src/cm-chunkserver.cc
+    ${PROTO_SRCS})
 
 target_link_libraries(cm-chunkserver
     ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_LIBS})
