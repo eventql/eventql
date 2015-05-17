@@ -47,5 +47,11 @@ void HTTPRequestStream::readBody(Function<void (const void*, size_t)> fn) {
   }
 }
 
+void HTTPRequestStream::readBody() {
+  readBody([this] (const void* data, size_t size) {
+    req_.appendBody(data, size);
+  });
+}
+
 }
 }

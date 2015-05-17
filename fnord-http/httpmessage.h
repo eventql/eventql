@@ -50,8 +50,8 @@ public:
   const Buffer& body() const;
   void addBody(const std::string& body);
   void addBody(const Buffer& buf);
-  void addBody(void* data, size_t size);
-  void appendBody(void* data, size_t size);
+  void addBody(const void* data, size_t size);
+  void appendBody(const void* data, size_t size);
   void clearBody();
 
   std::unique_ptr<InputStream> getBodyInputStream() const;

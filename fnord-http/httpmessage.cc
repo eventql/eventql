@@ -90,26 +90,22 @@ const Buffer& HTTPMessage::body() const {
 
 void HTTPMessage::addBody(const std::string& body) {
   body_ = std::move(Buffer(body.c_str(), body.length()));
-  setHeader("Content-Length", std::to_string(body_.size()));
 }
 
-void HTTPMessage::addBody(void* data, size_t size) {
+void HTTPMessage::addBody(const void* data, size_t size) {
   body_ = std::move(Buffer(data, size));
-  setHeader("Content-Length", std::to_string(size));
 }
 
 void HTTPMessage::addBody(const Buffer& buf) {
   body_ = buf;
-  setHeader("Content-Length", std::to_string(body_.size()));
 }
 
-void HTTPMessage::appendBody(void* data, size_t size) {
+void HTTPMessage::appendBody(const void* data, size_t size) {
   body_.append(data, size);
 }
 
 void HTTPMessage::clearBody() {
   body_.clear();
-  // FIXPAUL remove Content-Length header
 }
 
 std::unique_ptr<InputStream> HTTPMessage::getBodyInputStream() const {
