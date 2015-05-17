@@ -23,7 +23,7 @@ public:
 
   HTTPResponseStream(HTTPServerConnection* conn);
 
-  void writeResponse(const HTTPResponse& resp);
+  void startResponse(const HTTPResponse& resp);
   void writeBodyChunk(const Buffer& buf);
   void finishResponse();
 

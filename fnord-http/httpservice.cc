@@ -55,13 +55,13 @@ void HTTPServiceHandler::dispatchRequest() {
       res_.addBody("server error");
     }
 
-    auto body_size = res_.body().size();
-    if (body_size > 0) {
-      res_.setHeader("Content-Length", StringUtil::toString(body_size));
-    }
-
     if (!resp_stream->isOutputStarted()) {
-      resp_stream->writeResponse(res_);
+      auto body_size = res_.body().size();
+      if (body_size > 0) {
+        res_.setHeader("Content-Length", StringUtil::toString(body_size));
+      }
+
+      resp_stream->startResponse(res_);
     }
 
     resp_stream->finishResponse();
