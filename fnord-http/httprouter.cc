@@ -18,13 +18,13 @@ namespace http {
 
 void HTTPRouter::addRoute(
     std::function<bool (HTTPRequest*)> predicate,
-    HTTPService* service) {
+    StreamingHTTPService* service) {
   addRoute(predicate, service, nullptr);
 }
 
 void HTTPRouter::addRoute(
     std::function<bool (HTTPRequest*)> predicate,
-    HTTPService* service,
+    StreamingHTTPService* service,
     TaskScheduler* scheduler) {
   auto factory = [service, scheduler] (
       HTTPServerConnection* conn,

@@ -17,7 +17,7 @@
 
 namespace fnord {
 namespace http {
-class HTTPService;
+class StreamingHTTPService;
 
 class HTTPRouter : public HTTPHandlerFactory {
 public:
@@ -35,11 +35,11 @@ public:
 
   void addRoute(
       PredicateFnType predicate,
-      HTTPService* service);
+      StreamingHTTPService* service);
 
   void addRoute(
       PredicateFnType predicate,
-      HTTPService* service,
+      StreamingHTTPService* service,
       TaskScheduler* scheduler);
 
   void addRoute(
