@@ -118,7 +118,11 @@ void Buffer::append(const void* data, size_t size) {
 }
 
 void Buffer::append(const String& string) {
-  append(string.data(), string.length());
+  append(string.data(), string.size());
+}
+
+void Buffer::append(const Buffer& buf) {
+  append(buf.data(), buf.size());
 }
 
 void Buffer::truncate(size_t size) {
