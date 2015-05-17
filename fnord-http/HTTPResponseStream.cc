@@ -22,7 +22,7 @@ HTTPResponseStream::HTTPResponseStream(
     response_finished_(false),
     headers_written_(false) {}
 
-void HTTPResponseStream::writeResponse(const HTTPResponse& resp) {
+void HTTPResponseStream::startResponse(const HTTPResponse& resp) {
   std::unique_lock<std::mutex> lk(mutex_);
 
   if (headers_written_) {
