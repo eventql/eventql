@@ -37,6 +37,7 @@ add_library(fnord-http OBJECT
     httpresponse.cc
     httpresponsefuture.cc
     httprouter.cc
+    HTTPResponseStream.cc
     httpserver.cc
     httpserverconnection.cc
     httpservice.cc

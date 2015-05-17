@@ -11,6 +11,7 @@
 #include <fnord-base/logging.h>
 #include "fnord-http/httpserverconnection.h"
 #include <fnord-http/httpservice.h>
+#include <fnord-http/httpresponsestream.h>
 
 namespace fnord {
 namespace http {
@@ -42,13 +43,11 @@ void HTTPServiceHandler::handleHTTPRequest() {
 
 void HTTPServiceHandler::dispatchRequest() {
   auto runnable = [this] () {
+    auto resp_stream = new HTTPResponseStream(conn_);
+    resp_stream->incRef();
+
     try {
       service_->handleHTTPRequest(req_, &res_);
-
-      auto body_size = res_.body().size();
-      if (body_size > 0) {
-        res_.setHeader("Content-Length", StringUtil::toString(body_size));
-      }
     } catch (const std::exception& e) {
       logError("fnord.http.service", e, "Error while processing HTTP request");
       res_.setStatus(http::kStatusInternalServerError);
@@ -56,9 +55,16 @@ void HTTPServiceHandler::dispatchRequest() {
       res_.addBody("server error");
     }
 
-    conn_->writeResponse(
-        res_,
-        std::bind(&HTTPServerConnection::finishResponse, conn_));
+    auto body_size = res_.body().size();
+    if (body_size > 0) {
+      res_.setHeader("Content-Length", StringUtil::toString(body_size));
+    }
+
+    if (!resp_stream->isOutputStarted()) {
+      resp_stream->writeResponse(res_);
+    }
+
+    resp_stream->finishResponse();
   };
 
   if (scheduler_ == nullptr) {
