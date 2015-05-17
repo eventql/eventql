@@ -15,13 +15,13 @@ using namespace fnord;
 namespace cm {
 
 void SSETestServlet::handleHTTPRequest(
-      http::HTTPRequestStream* req_stream,
-      http::HTTPResponseStream* res_stream) {
+      RefPtr<http::HTTPRequestStream> req_stream,
+      RefPtr<http::HTTPResponseStream> res_stream) {
+  req_stream->readBody();
+
   Buffer pong;
   pong.append("pong: ");
-  req_stream->readBody([&pong] (const void* data, size_t size) {
-    pong.append(data, size);
-  });
+  pong.append(req_stream->request().body());
   pong.append("\n");
 
   http::HTTPResponse res;
