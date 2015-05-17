@@ -12,24 +12,42 @@
 #include <fnord-http/httphandler.h>
 #include <fnord-http/httprequest.h>
 #include <fnord-http/httpresponse.h>
+#include <fnord-http/HTTPResponseStream.h>
 #include "fnord-base/thread/taskscheduler.h"
 
 namespace fnord {
 namespace http {
 
-class HTTPService {
+class StreamingHTTPService {
 public:
+
+  virtual ~StreamingHTTPService() {}
+
+  virtual void handleHTTPRequest(
+      HTTPRequest* req,
+      HTTPResponseStream* res) = 0;
+
+};
+
+class HTTPService : public StreamingHTTPService {
+public:
+
+  virtual ~HTTPService() {}
 
   virtual void handleHTTPRequest(
       HTTPRequest* req,
       HTTPResponse* res) = 0;
+
+  void handleHTTPRequest(
+      HTTPRequest* req,
+      HTTPResponseStream* res) override;
 
 };
 
 class HTTPServiceHandler : public HTTPHandler {
 public:
   HTTPServiceHandler(
-      HTTPService* service,
+      StreamingHTTPService* service,
       TaskScheduler* scheduler,
       HTTPServerConnection* conn,
       HTTPRequest* req);
@@ -38,11 +56,10 @@ public:
 protected:
   void dispatchRequest();
 
-  HTTPService* service_;
+  StreamingHTTPService* service_;
   TaskScheduler* scheduler_;
   HTTPServerConnection* conn_;
   HTTPRequest* req_;
-  HTTPResponse res_;
 };
 
 }

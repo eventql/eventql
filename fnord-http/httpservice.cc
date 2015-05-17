@@ -16,17 +16,30 @@
 namespace fnord {
 namespace http {
 
+void HTTPService::handleHTTPRequest(
+      HTTPRequest* req,
+      HTTPResponseStream* res_stream) {
+  HTTPResponse res;
+  res.populateFromRequest(*req);
+  handleHTTPRequest(req, &res);
+
+  auto body_size = res.body().size();
+  if (body_size > 0) {
+    res.setHeader("Content-Length", StringUtil::toString(body_size));
+  }
+
+  res_stream->startResponse(res);
+}
+
 HTTPServiceHandler::HTTPServiceHandler(
-    HTTPService* service,
+    StreamingHTTPService* service,
     TaskScheduler* scheduler,
     HTTPServerConnection* conn,
     HTTPRequest* req) :
     service_(service),
     scheduler_(scheduler),
     conn_(conn),
-    req_(req) {
-  res_.populateFromRequest(*req);
-}
+    req_(req) {}
 
 void HTTPServiceHandler::handleHTTPRequest() {
   conn_->readRequestBody([this] (
@@ -47,21 +60,16 @@ void HTTPServiceHandler::dispatchRequest() {
     resp_stream->incRef();
 
     try {
-      service_->handleHTTPRequest(req_, &res_);
+      service_->handleHTTPRequest(req_, resp_stream);
     } catch (const std::exception& e) {
       logError("fnord.http.service", e, "Error while processing HTTP request");
-      res_.setStatus(http::kStatusInternalServerError);
-      res_.clearBody();
-      res_.addBody("server error");
-    }
 
-    if (!resp_stream->isOutputStarted()) {
-      auto body_size = res_.body().size();
-      if (body_size > 0) {
-        res_.setHeader("Content-Length", StringUtil::toString(body_size));
+      if (!resp_stream->isOutputStarted()) {
+        http::HTTPResponse res;
+        res.setStatus(http::kStatusInternalServerError);
+        res.addBody("server error");
+        resp_stream->startResponse(res);
       }
-
-      resp_stream->startResponse(res_);
     }
 
     resp_stream->finishResponse();
