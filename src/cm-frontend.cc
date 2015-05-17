@@ -31,6 +31,7 @@
 #include "CustomerNamespace.h"
 #include "frontend/CMFrontend.h"
 #include "frontend/IndexFeedUpload.h"
+#include "SSETestServlet.h"
 
 using namespace cm;
 using namespace fnord;
@@ -83,6 +84,7 @@ int main(int argc, const char** argv) {
       strToLogLevel(flags.getString("loglevel")));
 
   thread::EventLoop event_loop;
+  thread::ThreadPool tpool;
   http::HTTPConnectionPool http_client(&event_loop);
   HTTPRPCClient rpc_client(&event_loop);
 
@@ -129,7 +131,11 @@ int main(int argc, const char** argv) {
 
   /* set up public http server */
   http::HTTPRouter http_router;
+  SSETestServlet sse_test;
+  http_router.addRouteByPrefixMatch("/ssetest", &sse_test, &tpool);
+
   http_router.addRouteByPrefixMatch("/", &frontend);
+
   http::HTTPServer http_server(&http_router, &event_loop);
   http_server.listen(flags.getInt("http_port"));
   http_server.stats()->exportStats(

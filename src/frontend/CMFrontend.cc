@@ -98,6 +98,8 @@ void CMFrontend::exportStats(const std::string& prefix) {
 void CMFrontend::handleHTTPRequest(
     fnord::http::HTTPRequest* request,
     fnord::http::HTTPResponse* response) {
+  fnord::URI uri(request->uri());
+
   /* find namespace */
   CustomerNamespace* ns = nullptr;
   const auto hostname = request->getHeader("host");
@@ -110,8 +112,6 @@ void CMFrontend::handleHTTPRequest(
   } else {
     ns = ns_iter->second;
   }
-
-  fnord::URI uri(request->uri());
 
   if (uri.path() == "/t.js") {
     response->setStatus(fnord::http::kStatusOK);
