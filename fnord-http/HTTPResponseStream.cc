@@ -66,6 +66,11 @@ void HTTPResponseStream::onCallbackCompleted() {
   onStateChanged(&lk);
 }
 
+void HTTPResponseStream::onBodyWritten(Function<void ()> callback) {
+  std::unique_lock<std::mutex> lk(mutex_);
+  on_body_written_ = callback;
+}
+
 // precondition: lk must be locked
 void HTTPResponseStream::onStateChanged(std::unique_lock<std::mutex>* lk) {
   if (callback_running_) {
@@ -94,7 +99,11 @@ void HTTPResponseStream::onStateChanged(std::unique_lock<std::mutex>* lk) {
     conn_->finishResponse();
     decRef();
   } else {
-    // all chunks written
+    lk->unlock();
+
+    if (on_body_written_) {
+      on_body_written_();
+    }
   }
 }
 
