@@ -35,6 +35,7 @@ protected:
   void generateURL(AutoCompleteResult* result);
 
   ModelCache* models_;
+  stats::Counter<uint64_t> stat_requests_total_;
 };
 
 }

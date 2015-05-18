@@ -19,11 +19,18 @@ namespace cm {
 
 AutoCompleteServlet::AutoCompleteServlet(
     ModelCache* models) :
-    models_(models) {}
+    models_(models) {
+  exportStat(
+      "/cm-autocompleteserver/global/requests_total",
+      &stat_requests_total_,
+      fnord::stats::ExportMode::EXPORT_DELTA);
+}
 
 void AutoCompleteServlet::handleHTTPRequest(
     http::HTTPRequest* req,
     http::HTTPResponse* res) {
+  stat_requests_total_.incr(1);
+
   res->addHeader("Access-Control-Allow-Origin", "*");
 
   URI uri(req->uri());
