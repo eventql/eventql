@@ -8,12 +8,12 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include "WriteStreamingServletExample.h"
+#include "WriteStreamServlet.h"
 
 namespace fnord {
 namespace http {
 
-void WriteStreamingServletExample::handleHTTPRequest(
+void WriteStreamServlet::handleHTTPRequest(
       RefPtr<http::HTTPRequestStream> req_stream,
       RefPtr<http::HTTPResponseStream> res_stream) {
 
