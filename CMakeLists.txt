@@ -82,7 +82,6 @@ add_executable(cm-frontend
     src/frontend/CMFrontend.cc
     src/frontend/IndexFeedUpload.cc
     src/cm-frontend.cc
-    src/SSETestServlet.cc
     src/schemas.cc
     ${CMAKE_BINARY_DIR}/cm-frontend-assets.cc)
 

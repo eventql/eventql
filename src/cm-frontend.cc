@@ -31,7 +31,6 @@
 #include "CustomerNamespace.h"
 #include "frontend/CMFrontend.h"
 #include "frontend/IndexFeedUpload.h"
-#include "SSETestServlet.h"
 
 using namespace cm;
 using namespace fnord;
@@ -131,8 +130,6 @@ int main(int argc, const char** argv) {
 
   /* set up public http server */
   http::HTTPRouter http_router;
-  SSETestServlet sse_test;
-  http_router.addRouteByPrefixMatch("/ssetest", &sse_test, &tpool);
 
   http_router.addRouteByPrefixMatch("/", &frontend);
 
