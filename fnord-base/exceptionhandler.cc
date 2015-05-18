@@ -83,7 +83,12 @@ void CatchAndAbortExceptionHandler::installGlobalHandlers() {
   globalEHandlerMessage = message_;
   std::set_terminate(&globalEHandler);
   std::set_unexpected(&globalEHandler);
+  signal(SIGILL, &globalSEGVHandler);
+  signal(SIGABRT, &globalSEGVHandler);
+  signal(SIGFPE, &globalSEGVHandler);
   signal(SIGSEGV, &globalSEGVHandler);
+  signal(SIGBUS, &globalSEGVHandler);
+  signal(SIGSYS, &globalSEGVHandler);
 }
 
 } // namespace fnord

@@ -135,14 +135,14 @@ std::vector<std::string> StackTrace::symbols() const {
           int n = snprintf(
               buf,
               sizeof(buf),
-              "%s %p",
+              "<%p> in %s",
               info.dli_fname,
               frames_[i]);
           output.push_back(std::string(buf, n));
         }
       } else {
         char buf[512];
-        int n = snprintf(buf, sizeof(buf), "%p", frames_[i]);
+        int n = snprintf(buf, sizeof(buf), "<%p>", frames_[i]);
         output.push_back(std::string(buf, n));
       }
     }
