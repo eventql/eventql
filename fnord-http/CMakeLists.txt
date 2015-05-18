@@ -43,7 +43,8 @@ add_library(fnord-http OBJECT
     httpserverconnection.cc
     httpservice.cc
     statshttpservlet.cc
-    VFSFileServlet.cc)
+    VFSFileServlet.cc
+    HTTPSSEStream.cc)
 
 add_executable(tests/test-http
     $<TARGET_OBJECTS:fnord-base>
