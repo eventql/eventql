@@ -22,7 +22,7 @@ void HTTPServlet::handleHTTPRequest(
 
   body.append("Ping Pong");
   req->readBody();
-  resp->populateFromRequest(req->request());
+  resp.populateFromRequest(req->request());
   resp.setStatus(kStatusOK);
   resp.addBody(body.data(), body.size());
   res->writeResponse(resp);
