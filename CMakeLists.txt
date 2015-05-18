@@ -318,50 +318,50 @@ target_link_libraries(cm-dawandaindexpush
 #target_link_libraries(cm-reportbuild
 #    ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_LIBS} ${FNORD_FTS_LIBS})
 
-add_executable(cm-autocompletebuild
-    $<TARGET_OBJECTS:cm-common>
-    $<TARGET_OBJECTS:fnord-base>
-    $<TARGET_OBJECTS:fnord-feeds>
-    $<TARGET_OBJECTS:fnord-mdb>
-    $<TARGET_OBJECTS:fnord-http>
-    $<TARGET_OBJECTS:fnord-json>
-    $<TARGET_OBJECTS:fnord-rpc>
-    $<TARGET_OBJECTS:fnord-cstable>
-    $<TARGET_OBJECTS:fnord-sstable>
-    $<TARGET_OBJECTS:fnord-fts>
-    $<TARGET_OBJECTS:fnord-msg>
-    3rdparty/libfnord/fnord-logtable/TableReader.cc
-    3rdparty/libfnord/fnord-logtable/TableArena.cc
-    3rdparty/libfnord/fnord-logtable/TableWriter.cc
-    3rdparty/libfnord/fnord-logtable/TableRepository.cc
-    3rdparty/libfnord/fnord-logtable/ArtifactIndex.cc
-    3rdparty/libfnord/fnord-logtable/NumericBoundsSummary.cc
-    3rdparty/libfnord/fnord-logtable/TableChunkSummaryReader.cc
-    3rdparty/libfnord/fnord-logtable/TableChunkSummaryWriter.cc
-    src/schemas.cc
-    src/DocIndex.cc
-    src/analytics/Report.cc
-    src/analytics/ReportBuilder.cc
-    src/analytics/CTRCounterTableSink.cc
-    src/analytics/CTRCounterTableSource.cc
-    src/analytics/CTRCounterMergeReducer.cc
-    src/analytics/TrafficSegment.cc
-    src/analytics/AnalyticsTableScan.cc
-    src/analytics/AnalyticsQuery.cc
-    src/analytics/AnalyticsQueryEngine.cc
-    src/analytics/AnalyticsQueryResult.cc
-    src/analytics/CTRBySearchTermCrossCategoryMapper.cc
-    src/analytics/AnalyticsTableScanSource.cc
-    src/analytics/RelatedTermsMapper.cc
-    src/analytics/TermInfoTableSink.cc
-    src/analytics/TermInfoTableSource.cc
-    src/analytics/TermInfoMergeReducer.cc
-    src/analytics/TermInfo.cc
-    src/analytics/TopCategoriesByTermMapper.cc
-    src/cm-autocompletebuild.cc)
-
-target_link_libraries(cm-autocompletebuild
-    ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_LIBS} ${FNORD_FTS_LIBS})
+#add_executable(cm-autocompletebuild
+#    $<TARGET_OBJECTS:cm-common>
+#    $<TARGET_OBJECTS:fnord-base>
+#    $<TARGET_OBJECTS:fnord-feeds>
+#    $<TARGET_OBJECTS:fnord-mdb>
+#    $<TARGET_OBJECTS:fnord-http>
+#    $<TARGET_OBJECTS:fnord-json>
+#    $<TARGET_OBJECTS:fnord-rpc>
+#    $<TARGET_OBJECTS:fnord-cstable>
+#    $<TARGET_OBJECTS:fnord-sstable>
+#    $<TARGET_OBJECTS:fnord-fts>
+#    $<TARGET_OBJECTS:fnord-msg>
+#    3rdparty/libfnord/fnord-logtable/TableReader.cc
+#    3rdparty/libfnord/fnord-logtable/TableArena.cc
+#    3rdparty/libfnord/fnord-logtable/TableWriter.cc
+#    3rdparty/libfnord/fnord-logtable/TableRepository.cc
+#    3rdparty/libfnord/fnord-logtable/ArtifactIndex.cc
+#    3rdparty/libfnord/fnord-logtable/NumericBoundsSummary.cc
+#    3rdparty/libfnord/fnord-logtable/TableChunkSummaryReader.cc
+#    3rdparty/libfnord/fnord-logtable/TableChunkSummaryWriter.cc
+#    src/schemas.cc
+#    src/DocIndex.cc
+#    src/analytics/Report.cc
+#    src/analytics/ReportBuilder.cc
+#    src/analytics/CTRCounterTableSink.cc
+#    src/analytics/CTRCounterTableSource.cc
+#    src/analytics/CTRCounterMergeReducer.cc
+#    src/analytics/TrafficSegment.cc
+#    src/analytics/AnalyticsTableScan.cc
+#    src/analytics/AnalyticsQuery.cc
+#    src/analytics/AnalyticsQueryEngine.cc
+#    src/analytics/AnalyticsQueryResult.cc
+#    src/analytics/CTRBySearchTermCrossCategoryMapper.cc
+#    src/analytics/AnalyticsTableScanSource.cc
+#    src/analytics/RelatedTermsMapper.cc
+#    src/analytics/TermInfoTableSink.cc
+#    src/analytics/TermInfoTableSource.cc
+#    src/analytics/TermInfoMergeReducer.cc
+#    src/analytics/TermInfo.cc
+#    src/analytics/TopCategoriesByTermMapper.cc
+#    src/cm-autocompletebuild.cc)
+#
+#target_link_libraries(cm-autocompletebuild
+#    ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_LIBS} ${FNORD_FTS_LIBS})
 
 add_executable(cm-shopstatsbuild
     $<TARGET_OBJECTS:cm-common>
@@ -375,6 +375,8 @@ add_executable(cm-shopstatsbuild
     $<TARGET_OBJECTS:fnord-sstable>
     $<TARGET_OBJECTS:fnord-fts>
     $<TARGET_OBJECTS:fnord-msg>
+    $<TARGET_OBJECTS:fnord-tsdb>
+    $<TARGET_OBJECTS:fnord-dproc>
     3rdparty/libfnord/fnord-logtable/TableReader.cc
     3rdparty/libfnord/fnord-logtable/TableArena.cc
     3rdparty/libfnord/fnord-logtable/TableWriter.cc
@@ -386,10 +388,6 @@ add_executable(cm-shopstatsbuild
     src/schemas.cc
     src/DocIndex.cc
     src/analytics/Report.cc
-    src/analytics/ReportBuilder.cc
-    src/analytics/CTRCounterTableSink.cc
-    src/analytics/CTRCounterTableSource.cc
-    src/analytics/CTRCounterMergeReducer.cc
     src/analytics/CTRByShopMapper.cc
     src/analytics/ECommerceStatsByShopMapper.cc
     src/analytics/ProductStatsByShopMapper.cc
@@ -398,14 +396,7 @@ add_executable(cm-shopstatsbuild
     src/analytics/AnalyticsQuery.cc
     src/analytics/AnalyticsQueryEngine.cc
     src/analytics/AnalyticsQueryResult.cc
-    src/analytics/CTRBySearchTermCrossCategoryMapper.cc
     src/analytics/AnalyticsTableScanSource.cc
-    src/analytics/RelatedTermsMapper.cc
-    src/analytics/TermInfoTableSink.cc
-    src/analytics/TermInfoTableSource.cc
-    src/analytics/TermInfoMergeReducer.cc
-    src/analytics/TermInfo.cc
-    src/analytics/TopCategoriesByTermMapper.cc
     src/analytics/ShopStats.cc
     src/cm-shopstatsbuild.cc)
 
@@ -429,10 +420,6 @@ add_executable(cm-itemboostbuild
     src/schemas.cc
     src/DocIndex.cc
     src/analytics/Report.cc
-    src/analytics/ReportBuilder.cc
-    src/analytics/CTRCounterTableSink.cc
-    src/analytics/CTRCounterTableSource.cc
-    src/analytics/CTRCounterMergeReducer.cc
     src/analytics/CTRByShopMapper.cc
     src/analytics/ECommerceStatsByShopMapper.cc
     src/analytics/ProductStatsByShopMapper.cc
@@ -441,14 +428,7 @@ add_executable(cm-itemboostbuild
     src/analytics/AnalyticsQuery.cc
     src/analytics/AnalyticsQueryEngine.cc
     src/analytics/AnalyticsQueryResult.cc
-    src/analytics/CTRBySearchTermCrossCategoryMapper.cc
     src/analytics/AnalyticsTableScanSource.cc
-    src/analytics/RelatedTermsMapper.cc
-    src/analytics/TermInfoTableSink.cc
-    src/analytics/TermInfoTableSource.cc
-    src/analytics/TermInfoMergeReducer.cc
-    src/analytics/TermInfo.cc
-    src/analytics/TopCategoriesByTermMapper.cc
     src/analytics/ShopStats.cc
     src/ItemBoostScanlet.cc
     src/cm-itemboostbuild.cc
@@ -546,27 +526,27 @@ target_link_libraries(cm-analytics-backend
     ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_LIBS} ${FNORD_FTS_LIBS})
 
 
-add_executable(cm-autocompleteserver
-    $<TARGET_OBJECTS:cm-common>
-    $<TARGET_OBJECTS:fnord-base>
-    $<TARGET_OBJECTS:fnord-feeds>
-    $<TARGET_OBJECTS:fnord-mdb>
-    $<TARGET_OBJECTS:fnord-http>
-    $<TARGET_OBJECTS:fnord-json>
-    $<TARGET_OBJECTS:fnord-rpc>
-    $<TARGET_OBJECTS:fnord-sstable>
-    $<TARGET_OBJECTS:fnord-fts>
-    3rdparty/libfnord/fnord-logtable/ArtifactIndex.cc
-    src/analytics/Report.cc
-    src/analytics/TermInfoTableSource.cc
-    src/analytics/TermInfo.cc
-    src/AutoCompleteServlet.cc
-    src/AutoCompleteModel.cc
-    src/ModelCache.cc
-    src/cm-autocompleteserver.cc)
-
-target_link_libraries(cm-autocompleteserver
-    ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_LIBS} ${FNORD_FTS_LIBS})
+# add_executable(cm-autocompleteserver
+#     $<TARGET_OBJECTS:cm-common>
+#     $<TARGET_OBJECTS:fnord-base>
+#     $<TARGET_OBJECTS:fnord-feeds>
+#     $<TARGET_OBJECTS:fnord-mdb>
+#     $<TARGET_OBJECTS:fnord-http>
+#     $<TARGET_OBJECTS:fnord-json>
+#     $<TARGET_OBJECTS:fnord-rpc>
+#     $<TARGET_OBJECTS:fnord-sstable>
+#     $<TARGET_OBJECTS:fnord-fts>
+#     3rdparty/libfnord/fnord-logtable/ArtifactIndex.cc
+#     src/analytics/Report.cc
+#     src/analytics/TermInfoTableSource.cc
+#     src/analytics/TermInfo.cc
+#     src/AutoCompleteServlet.cc
+#     src/AutoCompleteModel.cc
+#     src/ModelCache.cc
+#     src/cm-autocompleteserver.cc)
+# 
+# target_link_libraries(cm-autocompleteserver
+#     ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_LIBS} ${FNORD_FTS_LIBS})
 
 add_executable(cm-tokenize
     $<TARGET_OBJECTS:cm-common>
