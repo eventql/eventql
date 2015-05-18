@@ -47,23 +47,27 @@ void CatchAndAbortExceptionHandler::onException(
 }
 
 static std::string globalEHandlerMessage;
+
+static void globalSEGVHandler(int sig) {
+  fprintf(stderr, "%s\n", globalEHandlerMessage.c_str());
+  fprintf(stderr, "<SIGSEGV>\n");
+}
+
 static void globalEHandler() {
   fprintf(stderr, "%s\n", globalEHandlerMessage.c_str());
+
+  auto ex = std::current_exception();
+  if (ex == nullptr) {
+    fprintf(stderr, "<no active exception>\n");
+    return;
+  }
+
   try {
-    throw;
+    std::rethrow_exception(ex);
+  } catch (const fnord::Exception& e) {
+    e.debugPrint();
   } catch (const std::exception& e) {
-    if (std::uncaught_exception()) {
-      fprintf(stderr, "exception: %s\n", e.what());
-    } else {
-      try {
-        auto rte = dynamic_cast<const fnord::Exception&>(e);
-        rte.debugPrint();
-        exit(1);
-      } catch (...) {
-        fprintf(stderr, "foreign exception: %s\n", e.what());
-        /* fallthrough */
-      }
-    }
+    fprintf(stderr, "foreign exception: %s\n", e.what());
   }
 
   exit(EXIT_FAILURE);
@@ -73,6 +77,7 @@ void CatchAndAbortExceptionHandler::installGlobalHandlers() {
   globalEHandlerMessage = message_;
   std::set_terminate(&globalEHandler);
   std::set_unexpected(&globalEHandler);
+  signal(SIGSEGV, &globalSEGVHandler);
 }
 
 } // namespace fnord
