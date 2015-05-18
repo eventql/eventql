@@ -21,12 +21,13 @@ HTTPSSEStream::HTTPSSEStream(
   res_stream_(res_stream) {}
 
 void HTTPSSEStream::start() {
-  res_->setStatus(kStatusOK);
-  res_->addHeader("Content-Type", "text/event-stream");
-  res_->addHeader("Cache-Control", "no-cache");
-  res_stream_->startResponse(*res_);
+  req_stream_->readBody();
+  res_.populateFromRequest(req_stream_->request());
+  res_.setStatus(kStatusOK);
+  res_.addHeader("Content-Type", "text/event-stream");
+  res_.addHeader("Cache-Control", "no-cache");
+  res_stream_->startResponse(res_);
 }
-
 
 void HTTPSSEStream::sendEvent(const String& data) {
   Buffer chunk;
@@ -41,6 +42,21 @@ void HTTPSSEStream::sendEvent(
   const String& id) {
   Buffer chunk;
   chunk.append("id: ");
+  chunk.append(id);
+  chunk.append("\ndata: ");
+  chunk.append(data);
+  chunk.append("\n\n");
+  res_stream_->writeBodyChunk(chunk);
+}
+
+void HTTPSSEStream::sendEvent(
+  const String& data,
+  const String& id,
+  const String& event) {
+  Buffer chunk;
+  chunk.append("event: ");
+  chunk.append(event);
+  chunk.append("\nid: ");
   chunk.append(id);
   chunk.append("\ndata: ");
   chunk.append(data);

@@ -12,11 +12,12 @@
 #ifndef _FNORD_HTTP_HTTPSSESTREAM_H
 #define _FNORD_HTTP_HTTPSSESTREAM_H
 #include "fnord-http/httpservice.h"
+#include <fnord-base/inspect.h>
 
 namespace fnord {
 namespace http {
 
-class HTTPSSEStream : public StreamingHTTPService {
+class HTTPSSEStream {
 public:
 
   HTTPSSEStream(
@@ -39,7 +40,7 @@ private:
 
   RefPtr<http::HTTPResponseStream> res_stream_;
   RefPtr<http::HTTPRequestStream> req_stream_;
-  HTTPResponse* res_;
+  HTTPResponse res_;
 };
 
 }
