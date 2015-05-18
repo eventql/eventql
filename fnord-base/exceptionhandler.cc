@@ -13,6 +13,7 @@
 #include <fnord-base/exceptionhandler.h>
 #include <fnord-base/inspect.h>
 #include <fnord-base/logging.h>
+#include <fnord-base/StackTrace.h>
 
 namespace fnord {
 
@@ -50,7 +51,12 @@ static std::string globalEHandlerMessage;
 
 static void globalSEGVHandler(int sig) {
   fprintf(stderr, "%s\n", globalEHandlerMessage.c_str());
-  fprintf(stderr, "<SIGSEGV>\n");
+  fprintf(stderr, "signal: %s\n", strsignal(sig));
+
+  StackTrace strace;
+  strace.debugPrint(2);
+
+  exit(EXIT_FAILURE);
 }
 
 static void globalEHandler() {

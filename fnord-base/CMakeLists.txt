@@ -65,12 +65,13 @@ add_library(fnord-base OBJECT
     net/inetaddr.cc
     net/tcpconnection.cc
     random.cc
+    StackTrace.cc
     status.cc
-    stringutil.cc
     stats/statsdagent.cc
     stats/statsrepository.cc
     stats/statssink.cc
     stats/statsd.cc
+    stringutil.cc
     thread/eventloop.cc
     thread/signalhandler.cc
     thread/threadpool.cc
