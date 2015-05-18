@@ -108,8 +108,9 @@ int main(int argc, const char** argv) {
 
   /* start http server */
   fnord::thread::EventLoop ev;
+  fnord::thread::ThreadPool tpool;
   fnord::http::HTTPRouter http_router;
-  http_router.addRouteByPrefixMatch("/autocomplete", &acservlet);
+  http_router.addRouteByPrefixMatch("/autocomplete", &acservlet, &tpool);
   fnord::http::HTTPServer http_server(&http_router, &ev);
   http_server.listen(flags.getInt("http_port"));
 
