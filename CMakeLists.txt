@@ -10,14 +10,28 @@ include_directories(${PROJECT_BINARY_DIR})
 file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/tests)
 include_directories(./)
 include_directories(./src)
-add_definitions(-ftemplate-depth=500)
+
+set(CMAKE_CXX_FLAGS "-ftemplate-depth=500 -fPIC ${CMAKE_CXX_FLAGS}")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fsanitize=address -g")
 
 if(APPLE)
-  set(CMAKE_CXX_FLAGS "-std=c++0x -stdlib=libc++ ${CMAKE_CXX_FLAGS}")
+  set(CMAKE_CXX_FLAGS "-std=c++0x ${CMAKE_CXX_FLAGS} -stdlib=libc++ ")
 else()
   set(CMAKE_CXX_FLAGS "-std=c++0x ${CMAKE_CXX_FLAGS}")
-  #set(CMAKE_CXX_FLAGS "-std=c++0x ${CMAKE_CXX_FLAGS} -fsanitize=address -g")
 endif()
+
+set(CMAKE_EXE_LINKER_FLAGS "-static -pie")
+set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
+set(BUILD_SHARED_LIBRARIES OFF)
+set(CMAKE_EXE_LINK_DYNAMIC_C_FLAGS)       # remove -Wl,-Bdynamic
+set(CMAKE_EXE_LINK_DYNAMIC_CXX_FLAGS)
+set(CMAKE_SHARED_LIBRARY_C_FLAGS)         # remove -fPIC
+set(CMAKE_SHARED_LIBRARY_CXX_FLAGS)
+set(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS)    # remove -rdynamic
+set(CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS)
+
+# strip binaries
+#  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -s")
 
 find_package(Threads)
 
@@ -32,7 +46,6 @@ add_subdirectory(3rdparty/libfnord/fnord-cstable)
 add_subdirectory(3rdparty/libfnord/fnord-sstable)
 add_subdirectory(3rdparty/libfnord/fnord-chart)
 add_subdirectory(3rdparty/libfnord/fnord-metricdb)
-add_subdirectory(3rdparty/libfnord/fnord-sql)
 add_subdirectory(3rdparty/libfnord/fnord-msg)
 add_subdirectory(3rdparty/libfnord/fnord-tsdb)
 add_subdirectory(3rdparty/libfnord/fnord-dht)
@@ -225,20 +238,19 @@ target_link_libraries(cm-indexbuild
 #    ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_LIBS}
 #    ${FNORD_FTS_LIBS})
 
-add_executable(cm-dawandaindexpush
-    $<TARGET_OBJECTS:cm-common>
-    $<TARGET_OBJECTS:fnord-base>
-    $<TARGET_OBJECTS:fnord-http>
-    $<TARGET_OBJECTS:fnord-json>
-    $<TARGET_OBJECTS:fnord-rpc>
-    $<TARGET_OBJECTS:fnord-mdb>
-    $<TARGET_OBJECTS:fnord-sql>
-    $<TARGET_OBJECTS:fnord-sstable>
-    customers/dawanda/cm-dawandaindexpush.cc)
-
-target_link_libraries(cm-dawandaindexpush
-    ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_LIBS}
-    ${FNORD_SQL_LIBS})
+#add_executable(cm-dawandaindexpush
+#    $<TARGET_OBJECTS:cm-common>
+#    $<TARGET_OBJECTS:fnord-base>
+#    $<TARGET_OBJECTS:fnord-http>
+#    $<TARGET_OBJECTS:fnord-json>
+#    $<TARGET_OBJECTS:fnord-rpc>
+#    $<TARGET_OBJECTS:fnord-mdb>
+#    $<TARGET_OBJECTS:fnord-sql>
+#    $<TARGET_OBJECTS:fnord-sstable>
+#    customers/dawanda/cm-dawandaindexpush.cc)
+#
+#target_link_libraries(cm-dawandaindexpush
+#    ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_LIBS})
 
 #add_executable(cm-featuredump
 #    $<TARGET_OBJECTS:cm-common>
