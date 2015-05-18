@@ -21,6 +21,8 @@
 #include "fnord-base/util/SimpleRateLimit.h"
 #include "fnord-base/InternMap.h"
 #include "fnord-base/thread/threadpool.h"
+#include "fnord-dproc/Application.h"
+#include "fnord-dproc/LocalScheduler.h"
 #include "fnord-json/json.h"
 #include "fnord-mdb/MDB.h"
 #include "fnord-mdb/MDBUtil.h"
@@ -43,11 +45,6 @@
 #include "analytics/ECommerceStatsByShopMapper.h"
 #include "analytics/ProductStatsByShopMapper.h"
 #include "analytics/CTRCounterMergeReducer.h"
-#include "analytics/CTRCounterTableSink.h"
-#include "analytics/CTRCounterTableSource.h"
-#include "analytics/RelatedTermsMapper.h"
-#include "analytics/TopCategoriesByTermMapper.h"
-#include "analytics/TermInfoMergeReducer.h"
 
 using namespace fnord;
 using namespace cm;
@@ -99,10 +96,12 @@ int main(int argc, const char** argv) {
   /* set up reportbuilder */
   thread::ThreadPool tpool;
   http::HTTPConnectionPool http(&ev);
-  cm::ReportBuilder report_builder(&tpool);
+  tsdb::TSDBClient tsdb("http://nue03.prod.fnrd.net:7003/tsdb", &http);
 
   Random rnd;
   auto buildid = rnd.hex128();
+  /*
+  cm::ReportBuilder report_builder(&tpool);
 
   Set<String> input_tables;
   Set<String> input_table_files;
@@ -154,7 +153,6 @@ int main(int argc, const char** argv) {
     input_table_files.emplace(r.body().toString());
   }
 
-  Set<String> tables;
   for (const auto& input_table : input_table_files) {
     FNV<uint64_t> fnv;
     auto h = fnv.hash(input_table);
@@ -203,25 +201,47 @@ int main(int argc, const char** argv) {
             new ShopStatsTableSink(table)));
   }
 
-  report_builder.addReport(
-      new ShopStatsMergeReducer(
-          new ShopStatsTableSource(tables),
-          new ShopStatsTableSink(
-              StringUtil::format(
-                  "$0/shopstats-full-dawanda.$1.sstable",
-                  tempdir,
-                  buildid))));
+  */
 
-  report_builder.buildAll();
+
+//  auto map_chunks =
+//      AnalyticsTableScanSource::mapStream(
+//          &tsdb,
+//          "dawanda.joined_sessions",
+//          WallClock::unixMicros() - 7 * kMicrosPerDay,
+//          WallClock::unixMicros() - 6 * kMicrosPerHour);
+//
+
+  dproc::Application app("cm.shopstats");
+
+  app.registerTaskFactory(
+      "ShopStatsReducer",
+      [] (const Buffer& params) -> RefPtr<dproc::Task> {
+        List<dproc::TaskDependency> map_chunks;
+
+        auto res = new ShopStatsMergeReducer(
+            new ShopStatsTableSource(map_chunks),
+            new ShopStatsTableSink("fnord"));
+
+        return res;
+      });
+
+
+  dproc::LocalScheduler sched(flags.getString("tempdir"));
+  sched.start();
+  //report_builder.buildAll();
 
   fnord::logInfo(
       "cm.reportbuild",
       "Build completed: shopstats-full-dawanda.$0.sstable",
       buildid);
 
+  auto res = sched.run(&app, "ShopStatsReducer", Buffer{});
+
+  sched.stop();
   ev.shutdown();
   evloop_thread.join();
 
-  return 0;
+  exit(0);
 }
 
