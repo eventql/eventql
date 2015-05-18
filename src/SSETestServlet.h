@@ -9,6 +9,7 @@
 #ifndef _CM_SSETESTSERVLET_H
 #define _CM_SSETESTSERVLET_H
 #include "fnord-http/httpservice.h"
+#include "fnord-http/HTTPSSEStream.h"
 
 using namespace fnord;
 
