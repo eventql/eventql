@@ -20,7 +20,7 @@ else()
   set(CMAKE_CXX_FLAGS "-std=c++0x ${CMAKE_CXX_FLAGS}")
 endif()
 
-set(CMAKE_EXE_LINKER_FLAGS "-static-libstdc++ -static-libgcc")
+set(CMAKE_EXE_LINKER_FLAGS "-ldl -static-libstdc++ -static-libgcc ${CMAKE_EXE_LINKER_FLAGS}")
 set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
 #set(BUILD_SHARED_LIBRARIES OFF)
 #set(CMAKE_EXE_LINK_DYNAMIC_C_FLAGS)       # remove -Wl,-Bdynamic
