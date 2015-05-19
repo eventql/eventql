@@ -24,6 +24,11 @@ public:
 
   RefPtr<Task> getTaskInstance(const String& name, const Buffer& params);
 
+  template <typename ProtoType>
+  void registerProtoTaskFactory(
+      const String& name,
+      ProtoTaskFactory<ProtoType> factory);
+
   void registerTaskFactory(const String& name, TaskFactory factory);
 
   template <typename TaskType, typename... ArgTypes>
@@ -36,6 +41,15 @@ protected:
   String name_;
   HashMap<String, TaskFactory> factories_;
 };
+
+template <typename ProtoType>
+void Application::registerProtoTaskFactory(
+    const String& name,
+    ProtoTaskFactory<ProtoType> factory) {
+  registerTaskFactory(name, [factory] (const Buffer& params) -> RefPtr<Task> {
+    return factory(msg::decode<ProtoType>(params));
+  });
+}
 
 template <typename TaskType, typename... ArgTypes>
 void Application::registerTask(const String& name, ArgTypes... args) {

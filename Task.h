@@ -23,6 +23,9 @@ class Task;
 
 typedef Function<RefPtr<Task> (const Buffer& params)> TaskFactory;
 
+template <typename T>
+using ProtoTaskFactory = Function<RefPtr<Task> (const T& params)>;
+
 struct TaskDependency {
   String task_name;
   Buffer params;
