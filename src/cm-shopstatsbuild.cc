@@ -45,6 +45,7 @@
 #include "analytics/ECommerceStatsByShopMapper.h"
 #include "analytics/ProductStatsByShopMapper.h"
 #include "analytics/CTRCounterMergeReducer.h"
+#include "analytics/CTRBySearchTermCrossCategoryMapper.h"
 #include "AnalyticsTableScanParams.pb.h"
 
 using namespace fnord;
@@ -180,6 +181,47 @@ int main(int argc, const char** argv) {
             new ShopStatsTableSink());
       });
 
+  app.registerProtoTaskFactory<AnalyticsTableScanMapperParams>(
+      "TopTermsByCategoryMapper",
+      [&tsdb] (const AnalyticsTableScanMapperParams& params)
+          -> RefPtr<dproc::Task> {
+        auto report = new CTRBySearchTermCrossCategoryMapper(
+            new AnalyticsTableScanSource(params, &tsdb),
+            new CTRCounterTableSink(),
+            "category3");
+
+        report->setCacheKey(
+            "cm.toptermsbycategory~" + report->input()->cacheKey());
+
+        return report;
+      });
+
+  app.registerProtoTaskFactory<AnalyticsTableScanReducerParams>(
+      "TopTermsByCategoryReducer",
+      [&tsdb] (const AnalyticsTableScanReducerParams& params)
+          -> RefPtr<dproc::Task> {
+        auto stream = "joined_sessions." + params.customer();
+        auto partitions = tsdb.listPartitions(
+            stream,
+            params.from_unixmicros(),
+            params.until_unixmicros());
+
+        List<dproc::TaskDependency> map_chunks;
+        for (const auto& part : partitions) {
+          AnalyticsTableScanMapperParams map_chunk_params;
+          map_chunk_params.set_stream_key(stream);
+          map_chunk_params.set_partition_key(part);
+
+          map_chunks.emplace_back(dproc::TaskDependency {
+            .task_name = "TopTermsByCategoryMapper",
+            .params = *msg::encode(map_chunk_params)
+          });
+        }
+
+        return new CTRCounterMergeReducer(
+            new CTRCounterTableSource(map_chunks),
+            new CTRCounterTableSink());
+      });
 
   dproc::LocalScheduler sched(flags.getString("tempdir"));
   sched.start();
