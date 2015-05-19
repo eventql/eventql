@@ -129,6 +129,20 @@ int main(int argc, const char** argv) {
         return report;
       });
 
+  app.registerProtoTaskFactory<AnalyticsTableScanMapperParams>(
+      "ShopProductStatsMapper",
+      [&tsdb] (const AnalyticsTableScanMapperParams& params)
+          -> RefPtr<dproc::Task> {
+        auto report = new ProductStatsByShopMapper(
+            new AnalyticsTableScanSource(params, &tsdb),
+            new ShopStatsTableSink());
+
+        report->setCacheKey(
+            "cm.shopstats.products~" + report->input()->cacheKey());
+
+        return report;
+      });
+
   app.registerProtoTaskFactory<AnalyticsTableScanReducerParams>(
       "ShopStatsReducer",
       [&tsdb] (const AnalyticsTableScanReducerParams& params)
@@ -152,6 +166,11 @@ int main(int argc, const char** argv) {
 
           map_chunks.emplace_back(dproc::TaskDependency {
             .task_name = "EcommerceStatsByShopMapper",
+            .params = *msg::encode(map_chunk_params)
+          });
+
+          map_chunks.emplace_back(dproc::TaskDependency {
+            .task_name = "ShopProductStatsMapper",
             .params = *msg::encode(map_chunk_params)
           });
         }
