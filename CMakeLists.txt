@@ -409,6 +409,10 @@ add_executable(cm-shopstatsbuild
     src/analytics/AnalyticsQueryResult.cc
     src/analytics/AnalyticsTableScanSource.cc
     src/analytics/ShopStats.cc
+    src/analytics/CTRCounterTableSource.cc
+    src/analytics/CTRCounterTableSink.cc
+    src/analytics/CTRCounterMergeReducer.cc
+    src/analytics/CTRBySearchTermCrossCategoryMapper.cc
     src/cm-shopstatsbuild.cc
     ${PROTO_SRCS})
 
