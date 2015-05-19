@@ -9,6 +9,8 @@
  */
 #include <stdlib.h>
 #include <assert.h>
+#include <signal.h>
+#include <string.h>
 #include <fnord-base/exception.h>
 #include <fnord-base/exceptionhandler.h>
 #include <fnord-base/inspect.h>
