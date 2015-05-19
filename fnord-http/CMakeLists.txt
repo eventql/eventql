@@ -44,7 +44,7 @@ add_library(fnord-http OBJECT
     httpservice.cc
     statshttpservlet.cc
     VFSFileServlet.cc
-    HTTPSSEStream.cc
+    HTTPSSEStream.cc)
     #streaminghttpservice_example/HttpServlet.cc
     #streaminghttpservice_example/ReadStreamServlet.cc
     #streaminghttpservice_example/SSEStreamServlet.cc
