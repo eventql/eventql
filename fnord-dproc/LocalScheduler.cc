@@ -141,19 +141,34 @@ void LocalScheduler::run(
 void LocalScheduler::runTask(
     LocalTaskPipeline* pipeline,
     RefPtr<LocalTaskRef> task) {
-  auto output_file = FileUtil::joinPaths(tempdir_, rnd_.hex128() + ".tmp");
+  auto cache_key = task->task->cacheKey();
+  String output_file;
+  bool cached = false;
 
-  try {
-    auto res = task->task->run(task.get());
+  if (cache_key.isEmpty()) {
+    auto tmpid = Random::singleton()->hex128();
+    output_file = FileUtil::joinPaths(
+        tempdir_,
+        StringUtil::format("tmp_$0", tmpid));
+  } else {
+    output_file = FileUtil::joinPaths(
+        tempdir_,
+        StringUtil::format("cache_$0", cache_key.get()));
+  }
 
-    auto file = File::openFile(
-        output_file + "~",
-        File::O_CREATEOROPEN | File::O_WRITE);
+  if (cache_key.isEmpty() || !FileUtil::exists(output_file)) {
+    try {
+      auto res = task->task->run(task.get());
 
-    file.write(res->data(), res->size());
-    FileUtil::mv(output_file + "~", output_file);
-  } catch (const std::exception& e) {
-    fnord::logError("fnord.dproc", e, "error");
+      auto file = File::openFile(
+          output_file + "~",
+          File::O_CREATEOROPEN | File::O_WRITE);
+
+      file.write(res->data(), res->size());
+      FileUtil::mv(output_file + "~", output_file);
+    } catch (const std::exception& e) {
+      fnord::logError("fnord.dproc", e, "error");
+    }
   }
 
   std::unique_lock<std::mutex> lk(pipeline->mutex);
