@@ -83,6 +83,7 @@ add_executable(cm-frontend
     src/frontend/IndexFeedUpload.cc
     src/cm-frontend.cc
     src/schemas.cc
+    src/demoQueryServlet.cc
     ${CMAKE_BINARY_DIR}/cm-frontend-assets.cc)
 
 target_link_libraries(cm-frontend ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_LIBS})
