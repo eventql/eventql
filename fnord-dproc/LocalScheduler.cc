@@ -49,8 +49,9 @@ RefPtr<VFSFile> LocalScheduler::run(
   pipeline.tasks.push_back(head_task);
   run(app, &pipeline);
 
-  BufferRef buf(new Buffer());
-  return buf.get();
+  return RefPtr<VFSFile>(
+      new io::MmappedFile(
+          File::openFile(head_task->output_filename, File::O_READ)));
 }
 
 void LocalScheduler::run(
