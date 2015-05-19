@@ -59,6 +59,15 @@ int main(int argc, const char** argv) {
   fnord::cli::FlagParser flags;
 
   flags.defineFlag(
+      "output",
+      cli::FlagParser::T_STRING,
+      false,
+      NULL,
+      NULL,
+      "output file",
+      "<path>");
+
+  flags.defineFlag(
       "tempdir",
       cli::FlagParser::T_STRING,
       false,
@@ -86,105 +95,17 @@ int main(int argc, const char** argv) {
     ev.run();
   });
 
-  //auto index_path = flags.getString("index");
-  //auto conf_path = flags.getString("conf");
-  auto tempdir = flags.getString("tempdir");
 
-  /* open index */
-  //auto index_reader = cm::IndexReader::openIndex(index_path);
-  //auto analyzer = RefPtr<fts::Analyzer>(new fts::Analyzer(conf_path));
-
-  /* set up reportbuilder */
-  thread::ThreadPool tpool;
   http::HTTPConnectionPool http(&ev);
   tsdb::TSDBClient tsdb("http://nue03.prod.fnrd.net:7003/tsdb", &http);
 
-  Random rnd;
-  auto buildid = rnd.hex128();
   /*
-  cm::ReportBuilder report_builder(&tpool);
-
-  Set<String> input_tables;
-  Set<String> input_table_files;
-
-  {
-    URI uri(StringUtil::format(
-        "http://nue03.prod.fnrd.net:7003/tsdb/list_chunks?stream=$0&from=$1&until=$2",
-        "joined_sessions.dawanda",
-        WallClock::unixMicros() - 90 * kMicrosPerDay,
-        WallClock::unixMicros() - 6 * kMicrosPerHour));
-
-    http::HTTPRequest req(http::HTTPMessage::M_GET, uri.pathAndQuery());
-    req.addHeader("Host", uri.hostAndPort());
-    req.addHeader("Content-Type", "application/fnord-msg");
-
-    auto res = http.executeRequest(req);
-    res.wait();
-
-    const auto& r = res.get();
-    if (r.statusCode() != 200) {
-      RAISEF(kRuntimeError, "received non-200 response: $0", r.body().toString());
-    }
-
-    const auto& body = r.body();
-    util::BinaryMessageReader reader(body.data(), body.size());
-    while (reader.remaining() > 0) {
-      input_tables.emplace(reader.readLenencString());
-    }
-  }
-
-  for (const auto& tbl : input_tables) {
-    URI uri(StringUtil::format(
-        "http://nue03.prod.fnrd.net:7003/tsdb/fetch_derived_dataset?chunk=$0&derived_dataset=cstable",
-        tbl));
-
-    http::HTTPRequest req(http::HTTPMessage::M_GET, uri.pathAndQuery());
-    req.addHeader("Host", uri.hostAndPort());
-    req.addHeader("Content-Type", "application/fnord-msg");
-
-    auto res = http.executeRequest(req);
-    res.wait();
-
-    const auto& r = res.get();
-    if (r.statusCode() != 200) {
-      RAISEF(kRuntimeError, "received non-200 response: $0", r.body().toString());
-    }
-
-    fnord::iputs("src tbl: $0", r.body().toString());
-    input_table_files.emplace(r.body().toString());
-  }
-
-  for (const auto& input_table : input_table_files) {
-    FNV<uint64_t> fnv;
-    auto h = fnv.hash(input_table);
-
-  }
-
-  for (const auto& input_table : input_table_files) {
-    FNV<uint64_t> fnv;
-    auto h = fnv.hash(input_table);
-
-    auto table = StringUtil::format(
-        "$0/shopstats-ecommerce-dawanda.$1.sst",
-        tempdir,
-        StringUtil::hexPrint(&h, sizeof(h), false));
 
     tables.emplace(table);
     report_builder.addReport(
         new ECommerceStatsByShopMapper(
             new AnalyticsTableScanSource(input_table),
             new ShopStatsTableSink(table)));
-  }
-
-  for (const auto& input_table : input_table_files) {
-    FNV<uint64_t> fnv;
-    auto h = fnv.hash(input_table);
-
-    auto table = StringUtil::format(
-        "$0/shopstats-products-dawanda.$1.sst",
-        tempdir,
-        StringUtil::hexPrint(&h, sizeof(h), false));
-
     tables.emplace(table);
     report_builder.addReport(
         new ProductStatsByShopMapper(
@@ -244,6 +165,12 @@ int main(int argc, const char** argv) {
   params.set_until_unixmicros(WallClock::unixMicros() - 6 * kMicrosPerHour);
 
   auto res = sched.run(&app, "ShopStatsReducer", *msg::encode(params));
+
+  auto output_file = File::openFile(
+      flags.getString("output"),
+      File::O_CREATEOROPEN | File::O_WRITE);
+
+  output_file.write(res->data(), res->size());
 
   sched.stop();
   ev.shutdown();
