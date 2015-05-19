@@ -99,44 +99,33 @@ int main(int argc, const char** argv) {
   http::HTTPConnectionPool http(&ev);
   tsdb::TSDBClient tsdb("http://nue03.prod.fnrd.net:7003/tsdb", &http);
 
-  /*
-
-    tables.emplace(table);
-    report_builder.addReport(
-        new ECommerceStatsByShopMapper(
-            new AnalyticsTableScanSource(input_table),
-            new ShopStatsTableSink(table)));
-    tables.emplace(table);
-    report_builder.addReport(
-        new ProductStatsByShopMapper(
-            new AnalyticsTableScanSource(input_table),
-            new ShopStatsTableSink(table)));
-  }
-
-  */
-
   dproc::Application app("cm.shopstats");
 
-  app.registerTaskFactory(
+  app.registerProtoTaskFactory<AnalyticsTableScanMapperParams>(
       "CTRByShopMapper",
-      [&tsdb] (const Buffer& p) -> RefPtr<dproc::Task> {
-        auto params = msg::decode<AnalyticsTableScanMapperParams>(p);
-
+      [&tsdb] (const AnalyticsTableScanMapperParams& params) {
         return new CTRByShopMapper(
             new AnalyticsTableScanSource(params, &tsdb),
             new ShopStatsTableSink());
       });
 
-  app.registerTaskFactory(
-      "ShopStatsReducer",
-      [&tsdb] (const Buffer& p) -> RefPtr<dproc::Task> {
-        auto reducer_params = msg::decode<AnalyticsTableScanReducerParams>(p);
+  app.registerProtoTaskFactory<AnalyticsTableScanMapperParams>(
+      "EcommerceStatsByShopMapper",
+      [&tsdb] (const AnalyticsTableScanMapperParams& params) {
+        return new ECommerceStatsByShopMapper(
+            new AnalyticsTableScanSource(params, &tsdb),
+            new ShopStatsTableSink());
+      });
 
-        auto stream = "joined_sessions." + reducer_params.customer();
+  app.registerProtoTaskFactory<AnalyticsTableScanReducerParams>(
+      "ShopStatsReducer",
+      [&tsdb] (const AnalyticsTableScanReducerParams& params)
+          -> RefPtr<dproc::Task> {
+        auto stream = "joined_sessions." + params.customer();
         auto partitions = tsdb.listPartitions(
             stream,
-            reducer_params.from_unixmicros(),
-            reducer_params.until_unixmicros());
+            params.from_unixmicros(),
+            params.until_unixmicros());
 
         List<dproc::TaskDependency> map_chunks;
         for (const auto& part : partitions) {
@@ -146,6 +135,11 @@ int main(int argc, const char** argv) {
 
           map_chunks.emplace_back(dproc::TaskDependency {
             .task_name = "CTRByShopMapper",
+            .params = *msg::encode(map_chunk_params)
+          });
+
+          map_chunks.emplace_back(dproc::TaskDependency {
+            .task_name = "EcommerceStatsByShopMapper",
             .params = *msg::encode(map_chunk_params)
           });
         }
