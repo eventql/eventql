@@ -45,6 +45,7 @@
 #include "analytics/ECommerceStatsByShopMapper.h"
 #include "analytics/ProductStatsByShopMapper.h"
 #include "analytics/CTRCounterMergeReducer.h"
+#include "AnalyticsTableScanParams.pb.h"
 
 using namespace fnord;
 using namespace cm;
@@ -157,16 +158,6 @@ int main(int argc, const char** argv) {
     FNV<uint64_t> fnv;
     auto h = fnv.hash(input_table);
 
-    auto table = StringUtil::format(
-        "$0/shopstats-ctr-dawanda.$1.sst",
-        tempdir,
-        StringUtil::hexPrint(&h, sizeof(h), false));
-
-    tables.emplace(table);
-    report_builder.addReport(
-        new CTRByShopMapper(
-            new AnalyticsTableScanSource(input_table),
-            new ShopStatsTableSink(table)));
   }
 
   for (const auto& input_table : input_table_files) {
@@ -203,27 +194,44 @@ int main(int argc, const char** argv) {
 
   */
 
-
-//  auto map_chunks =
-//      AnalyticsTableScanSource::mapStream(
-//          &tsdb,
-//          "dawanda.joined_sessions",
-//          WallClock::unixMicros() - 7 * kMicrosPerDay,
-//          WallClock::unixMicros() - 6 * kMicrosPerHour);
-//
-
   dproc::Application app("cm.shopstats");
 
   app.registerTaskFactory(
-      "ShopStatsReducer",
-      [] (const Buffer& params) -> RefPtr<dproc::Task> {
-        List<dproc::TaskDependency> map_chunks;
+      "CTRByShopMapper",
+      [&tsdb] (const Buffer& p) -> RefPtr<dproc::Task> {
+        auto params = msg::decode<AnalyticsTableScanMapperParams>(p);
 
-        auto res = new ShopStatsMergeReducer(
+        return new CTRByShopMapper(
+            new AnalyticsTableScanSource(params, &tsdb),
+            new ShopStatsTableSink("fnord"));
+      });
+
+  app.registerTaskFactory(
+      "ShopStatsReducer",
+      [&tsdb] (const Buffer& p) -> RefPtr<dproc::Task> {
+        auto reducer_params = msg::decode<AnalyticsTableScanReducerParams>(p);
+
+        auto stream = "joined_sessions." + reducer_params.customer();
+        auto partitions = tsdb.listPartitions(
+            stream,
+            reducer_params.from_unixmicros(),
+            reducer_params.until_unixmicros());
+
+        List<dproc::TaskDependency> map_chunks;
+        for (const auto& part : partitions) {
+          AnalyticsTableScanMapperParams map_chunk_params;
+          map_chunk_params.set_stream_key(stream);
+          map_chunk_params.set_partition_key(part);
+
+          map_chunks.emplace_back(dproc::TaskDependency {
+            .task_name = "CTRByShopMapper",
+            .params = *msg::encode(map_chunk_params)
+          });
+        }
+
+        return new ShopStatsMergeReducer(
             new ShopStatsTableSource(map_chunks),
             new ShopStatsTableSink("fnord"));
-
-        return res;
       });
 
 
@@ -236,7 +244,12 @@ int main(int argc, const char** argv) {
       "Build completed: shopstats-full-dawanda.$0.sstable",
       buildid);
 
-  auto res = sched.run(&app, "ShopStatsReducer", Buffer{});
+  AnalyticsTableScanReducerParams params;
+  params.set_customer("dawanda");
+  params.set_from_unixmicros(WallClock::unixMicros() - 7 * kMicrosPerDay);
+  params.set_until_unixmicros(WallClock::unixMicros() - 6 * kMicrosPerHour);
+
+  auto res = sched.run(&app, "ShopStatsReducer", *msg::encode(params));
 
   sched.stop();
   ev.shutdown();

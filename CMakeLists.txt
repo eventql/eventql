@@ -398,7 +398,8 @@ add_executable(cm-shopstatsbuild
     src/analytics/AnalyticsQueryResult.cc
     src/analytics/AnalyticsTableScanSource.cc
     src/analytics/ShopStats.cc
-    src/cm-shopstatsbuild.cc)
+    src/cm-shopstatsbuild.cc
+    ${PROTO_SRCS})
 
 target_link_libraries(cm-shopstatsbuild
     ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_LIBS} ${FNORD_FTS_LIBS})
