@@ -11,8 +11,8 @@ file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/tests)
 include_directories(./)
 include_directories(./src)
 
-set(CMAKE_CXX_FLAGS "-ftemplate-depth=500 -fPIC ${CMAKE_CXX_FLAGS}")
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fsanitize=address -g")
+set(CMAKE_CXX_FLAGS "-ftemplate-depth=500 ${CMAKE_CXX_FLAGS}")
+# set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fsanitize=address -g")
 
 if(APPLE)
   set(CMAKE_CXX_FLAGS "-std=c++0x ${CMAKE_CXX_FLAGS} -stdlib=libc++ ")
@@ -20,15 +20,15 @@ else()
   set(CMAKE_CXX_FLAGS "-std=c++0x ${CMAKE_CXX_FLAGS}")
 endif()
 
-set(CMAKE_EXE_LINKER_FLAGS "-static -pie")
+set(CMAKE_EXE_LINKER_FLAGS "-static-libstdc++ -static-libgcc")
 set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
-set(BUILD_SHARED_LIBRARIES OFF)
-set(CMAKE_EXE_LINK_DYNAMIC_C_FLAGS)       # remove -Wl,-Bdynamic
-set(CMAKE_EXE_LINK_DYNAMIC_CXX_FLAGS)
-set(CMAKE_SHARED_LIBRARY_C_FLAGS)         # remove -fPIC
-set(CMAKE_SHARED_LIBRARY_CXX_FLAGS)
-set(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS)    # remove -rdynamic
-set(CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS)
+#set(BUILD_SHARED_LIBRARIES OFF)
+#set(CMAKE_EXE_LINK_DYNAMIC_C_FLAGS)       # remove -Wl,-Bdynamic
+#set(CMAKE_EXE_LINK_DYNAMIC_CXX_FLAGS)
+#set(CMAKE_SHARED_LIBRARY_C_FLAGS)         # remove -fPIC
+#set(CMAKE_SHARED_LIBRARY_CXX_FLAGS)
+#set(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS)    # remove -rdynamic
+#set(CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS)
 
 # strip binaries
 #  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -s")
