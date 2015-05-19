@@ -203,7 +203,7 @@ int main(int argc, const char** argv) {
 
         return new CTRByShopMapper(
             new AnalyticsTableScanSource(params, &tsdb),
-            new ShopStatsTableSink("fnord"));
+            new ShopStatsTableSink());
       });
 
   app.registerTaskFactory(
@@ -231,18 +231,12 @@ int main(int argc, const char** argv) {
 
         return new ShopStatsMergeReducer(
             new ShopStatsTableSource(map_chunks),
-            new ShopStatsTableSink("fnord"));
+            new ShopStatsTableSink());
       });
 
 
   dproc::LocalScheduler sched(flags.getString("tempdir"));
   sched.start();
-  //report_builder.buildAll();
-
-  fnord::logInfo(
-      "cm.reportbuild",
-      "Build completed: shopstats-full-dawanda.$0.sstable",
-      buildid);
 
   AnalyticsTableScanReducerParams params;
   params.set_customer("dawanda");
