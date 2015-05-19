@@ -103,18 +103,30 @@ int main(int argc, const char** argv) {
 
   app.registerProtoTaskFactory<AnalyticsTableScanMapperParams>(
       "CTRByShopMapper",
-      [&tsdb] (const AnalyticsTableScanMapperParams& params) {
-        return new CTRByShopMapper(
+      [&tsdb] (const AnalyticsTableScanMapperParams& params)
+          -> RefPtr<dproc::Task> {
+        auto report = new CTRByShopMapper(
             new AnalyticsTableScanSource(params, &tsdb),
             new ShopStatsTableSink());
+
+        report->setCacheKey(
+            "cm.shopstats.ctr~" + report->input()->cacheKey());
+
+        return report;
       });
 
   app.registerProtoTaskFactory<AnalyticsTableScanMapperParams>(
       "EcommerceStatsByShopMapper",
-      [&tsdb] (const AnalyticsTableScanMapperParams& params) {
-        return new ECommerceStatsByShopMapper(
+      [&tsdb] (const AnalyticsTableScanMapperParams& params)
+          -> RefPtr<dproc::Task> {
+        auto report = new ECommerceStatsByShopMapper(
             new AnalyticsTableScanSource(params, &tsdb),
             new ShopStatsTableSink());
+
+        report->setCacheKey(
+            "cm.shopstats.ecommerce~" + report->input()->cacheKey());
+
+        return report;
       });
 
   app.registerProtoTaskFactory<AnalyticsTableScanReducerParams>(
