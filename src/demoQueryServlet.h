@@ -11,6 +11,7 @@
 #include <unistd.h>
 #include "fnord-http/httpservice.h"
 #include "fnord-http/HTTPSSEStream.h"
+#include "fnord-json/json.h"
 
 using namespace fnord;
 namespace cm {
