@@ -75,4 +75,9 @@ std::string Random::alphanumericString(int nchars) {
   return str;
 }
 
+Random* Random::singleton() {
+  static Random rnd;
+  return &rnd;
+}
+
 }
