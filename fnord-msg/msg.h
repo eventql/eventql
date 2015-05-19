@@ -87,7 +87,9 @@ ProtoType decode(const void* data, size_t size) {
 
 template <typename ProtoType>
 void decode(const void* data, size_t size, ProtoType* target) {
-  target->ParseFromArray(data, size);
+  if (!target->ParseFromArray(data, size)) {
+    RAISE(kRuntimeError, "invalid protobuf message");
+  }
 }
 
 template <typename ProtoType>
