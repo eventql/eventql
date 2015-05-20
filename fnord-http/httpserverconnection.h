@@ -116,7 +116,8 @@ protected:
   TaskScheduler* scheduler_;
   HTTPParser parser_;
   Function<void ()> on_write_completed_cb_;
-  Buffer buf_;
+  Buffer read_buf_;
+  Buffer write_buf_;
   Buffer body_buf_;
   ScopedPtr<HTTPRequest> cur_request_;
   ScopedPtr<HTTPHandler> cur_handler_;

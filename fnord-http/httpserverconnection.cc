@@ -56,7 +56,7 @@ HTTPServerConnection::HTTPServerConnection(
   stats_->current_connections.incr(1);
 
   conn_->setNonblocking(true);
-  buf_.reserve(kMinBufferSize);
+  read_buf_.reserve(kMinBufferSize);
 
   parser_.onMethod([this] (HTTPMessage::kHTTPMethod method) {
     cur_request_->setMethod(method);
@@ -93,7 +93,7 @@ void HTTPServerConnection::read() {
 
   size_t len;
   try {
-    len = conn_->read(buf_.data(), buf_.allocSize());
+    len = conn_->read(read_buf_.data(), read_buf_.allocSize());
     stats_->received_bytes.incr(len);
   } catch (Exception& e) {
     if (e.ofType(kWouldBlockError)) {
@@ -115,7 +115,7 @@ void HTTPServerConnection::read() {
       close();
       return;
     } else {
-      parser_.parse((char *) buf_.data(), len);
+      parser_.parse((char *) read_buf_.data(), len);
     }
   } catch (Exception& e) {
     logDebug("fnord.http.server", e, "HTTP parse error, closing...");
@@ -131,13 +131,13 @@ void HTTPServerConnection::read() {
 void HTTPServerConnection::write() {
   std::unique_lock<std::mutex> lk(mutex_);
 
-  auto data = ((char *) buf_.data()) + buf_.mark();
-  auto size = buf_.size() - buf_.mark();
+  auto data = ((char *) write_buf_.data()) + write_buf_.mark();
+  auto size = write_buf_.size() - write_buf_.mark();
 
   size_t len;
   try {
     len = conn_->write(data, size);
-    buf_.setMark(buf_.mark() + len);
+    write_buf_.setMark(write_buf_.mark() + len);
     stats_->sent_bytes.incr(len);
   } catch (Exception& e) {
     if (e.ofType(kWouldBlockError)) {
@@ -150,10 +150,10 @@ void HTTPServerConnection::write() {
     return;
   }
 
-  if (buf_.mark() < buf_.size()) {
+  if (write_buf_.mark() < write_buf_.size()) {
     awaitWrite();
   } else {
-    buf_.clear();
+    write_buf_.clear();
     lk.unlock();
     if (on_write_completed_cb_) {
       on_write_completed_cb_();
@@ -254,8 +254,7 @@ void HTTPServerConnection::writeResponse(
     RAISE(kIllegalStateError, "can't write response before request is read");
   }
 
-  buf_.clear();
-  BufferOutputStream os(&buf_);
+  BufferOutputStream os(&write_buf_);
   HTTPGenerator::generate(resp, &os);
   on_write_completed_cb_ = ready_callback;
   awaitWrite();
@@ -271,8 +270,7 @@ void HTTPServerConnection::writeResponseBody(
     RAISE(kIllegalStateError, "can't write response before request is read");
   }
 
-  buf_.clear();
-  buf_.append(data, size);
+  write_buf_.append(data, size);
   on_write_completed_cb_ = ready_callback;
   awaitWrite();
 }
