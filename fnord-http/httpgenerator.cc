@@ -28,6 +28,10 @@ void HTTPGenerator::generate(const HTTPRequest& req, OutputStream* os) {
     os->write(StringUtil::format("$0: $1\r\n", header.first, header.second));
   }
 
+  if (req.body().size() > 0 && !req.hasHeader("Content-Length")) {
+    os->write(StringUtil::format("Content-Length: $0\r\n", req.body().size()));
+  }
+
   os->write("\r\n");
 
   const auto& body = req.body();
