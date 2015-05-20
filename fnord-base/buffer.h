@@ -44,11 +44,25 @@ public:
   void* data() const;
   char charAt(size_t pos) const;
   size_t find(char chr) const;
-  size_t size() const;
-  size_t allocSize() const;
-  std::string toString() const;
 
+  /**
+   * Return the logical size of the buffer
+   */
+  size_t size() const;
+
+  /**
+   * Return the actual size of the backing malloc, this may be larger than the
+   * value returned by size
+   */
+  size_t allocSize() const;
+
+  /**
+   * Reserve "size" new bytes of memory for future use. This method will not
+   * change the logical size of the buffer (as returned by a call to size).
+   */
   void reserve(size_t size);
+
+  std::string toString() const;
 
   void setMark(size_t mark);
   size_t mark() const;
