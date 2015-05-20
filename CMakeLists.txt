@@ -94,8 +94,8 @@ add_executable(cm-frontend
     src/frontend/CMFrontend.cc
     src/frontend/IndexFeedUpload.cc
     src/cm-frontend.cc
-    src/SSETestServlet.cc
     src/schemas.cc
+    src/demoQueryServlet.cc
     ${CMAKE_BINARY_DIR}/cm-frontend-assets.cc)
 
 target_link_libraries(cm-frontend ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_LIBS})
@@ -502,6 +502,7 @@ add_executable(cm-analytics-backend
     $<TARGET_OBJECTS:fnord-sstable>
     $<TARGET_OBJECTS:fnord-cstable>
     $<TARGET_OBJECTS:fnord-msg>
+    $<TARGET_OBJECTS:fnord-tsdb>
     3rdparty/libfnord/fnord-sstable/SSTableServlet.cc
     3rdparty/libfnord/fnord-logtable/ArtifactIndex.cc
     3rdparty/libfnord/fnord-logtable/LogTableServlet.cc

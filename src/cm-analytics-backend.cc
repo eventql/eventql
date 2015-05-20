@@ -118,11 +118,12 @@ int main(int argc, const char** argv) {
   fnord::http::HTTPServer http_server(&http_router, &ev);
   http_server.listen(flags.getInt("http_port"));
   http::HTTPConnectionPool http(&ev);
+  tsdb::TSDBClient tsdb("http://nue03.prod.fnrd.net:7003/tsdb", &http);
 
   auto dir = flags.getString("datadir");
 
   /* analytics */
-  cm::AnalyticsQueryEngine analytics(32, dir, &http);
+  cm::AnalyticsQueryEngine analytics(32, dir, &tsdb);
   cm::AnalyticsServlet analytics_servlet(&analytics);
   http_router.addRouteByPrefixMatch("/analytics", &analytics_servlet, &tpool);
 

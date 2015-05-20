@@ -6,22 +6,25 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-#ifndef _CM_SSETESTSERVLET_H
-#define _CM_SSETESTSERVLET_H
+#ifndef _CM_DEMOQUERYSERVLET_H
+#define _CM_DEMOQUERYSERVLET_H
+#include <unistd.h>
 #include "fnord-http/httpservice.h"
+#include "fnord-http/HTTPSSEStream.h"
+#include "fnord-json/json.h"
 
 using namespace fnord;
-
 namespace cm {
 
-class SSETestServlet : public http::StreamingHTTPService {
+class demoQueryServlet : public http::StreamingHTTPService {
 public:
 
   void handleHTTPRequest(
-      RefPtr<http::HTTPRequestStream> req,
-      RefPtr<http::HTTPResponseStream> res);
+      RefPtr<http::HTTPRequestStream> req_stream,
+      RefPtr<http::HTTPResponseStream> res_stream);
 
 };
 
 }
 #endif
+
