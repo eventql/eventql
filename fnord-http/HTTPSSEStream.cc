@@ -26,46 +26,48 @@ void HTTPSSEStream::start() {
   res_.setStatus(kStatusOK);
   res_.addHeader("Content-Type", "text/event-stream");
   res_.addHeader("Cache-Control", "no-cache");
+  res_.addHeader("Access-Control-Allow-Origin", "*");
   res_stream_->startResponse(res_);
 }
 
-void HTTPSSEStream::sendEvent(const String& data) {
-  Buffer chunk;
-  chunk.append("data: ");
-  chunk.append(data);
-  chunk.append("\n\n");
-  res_stream_->writeBodyChunk(chunk);
+void HTTPSSEStream::sendEvent(
+    const String& data,
+    const Option<String>& event_type) {
+  sendEvent(data.data(), data.size(), event_type);
 }
 
 void HTTPSSEStream::sendEvent(
-  const String& data,
-  const String& id) {
-  Buffer chunk;
-  chunk.append("id: ");
-  chunk.append(id);
-  chunk.append("\ndata: ");
-  chunk.append(data);
-  chunk.append("\n\n");
-  res_stream_->writeBodyChunk(chunk);
+    const Buffer& data,
+    const Option<String>& event_type) {
+  sendEvent(data.data(), data.size(), event_type);
 }
 
 void HTTPSSEStream::sendEvent(
-  const String& data,
-  const String& id,
-  const String& event) {
-  Buffer chunk;
-  chunk.append("event: ");
-  chunk.append(event);
-  chunk.append("\nid: ");
-  chunk.append(id);
-  chunk.append("\ndata: ");
-  chunk.append(data);
-  chunk.append("\n\n");
-  res_stream_->writeBodyChunk(chunk);
+    const void* event_data,
+    size_t event_size,
+    const Option<String>& event_type) {
+  Buffer buf;
+  buf.reserve(event_size + 1024);
+
+  if (!event_type.isEmpty()) {
+    buf.append("event: ");
+    buf.append(event_type.get());
+    buf.append("\n");
+  }
+
+  buf.append("data: ");
+  buf.append(event_data, event_size);
+  buf.append("\n\n");
+
+  res_stream_->writeBodyChunk(buf);
 }
 
 void HTTPSSEStream::finish() {
   res_stream_->finishResponse();
+}
+
+const HTTPResponse HTTPSSEStream::response() const {
+  return res_;
 }
 
 
