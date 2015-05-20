@@ -7,6 +7,7 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
+#include <fnord-base/exception.h>
 #include <fnord-base/stringutil.h>
 #include <fnord-http/httpgenerator.h>
 
@@ -36,6 +37,10 @@ void HTTPGenerator::generate(const HTTPRequest& req, OutputStream* os) {
 }
 
 void HTTPGenerator::generate(const HTTPResponse& res, OutputStream* os) {
+  if (res.version().length() < 4) {
+    RAISEF(kRuntimeError, "invalid http version: $0", res.version());
+  }
+
   os->write(
       StringUtil::format(
           "$0 $1 $2\r\n",
