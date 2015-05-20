@@ -46,6 +46,7 @@
 #include "analytics/ProductStatsByShopMapper.h"
 #include "analytics/CTRCounterMergeReducer.h"
 #include "analytics/CTRBySearchTermCrossCategoryMapper.h"
+#include "analytics/TopTermsByCategoryMapper.h"
 #include "AnalyticsTableScanParams.pb.h"
 
 using namespace fnord;
@@ -223,6 +224,22 @@ int main(int argc, const char** argv) {
             new CTRCounterTableSink());
       });
 
+  app.registerTaskFactory(
+      "TopTermsByCategory",
+      [&tsdb] (const Buffer& params)
+          -> RefPtr<dproc::Task> {
+        List<dproc::TaskDependency> deps;
+        deps.emplace_back(dproc::TaskDependency {
+          .task_name = "TopTermsByCategoryReducer",
+          .params = params
+        });
+
+        return new TopTermsByCategoryMapper(
+            new CTRCounterTableSource(deps),
+            new CTRCounterTableSink());
+      });
+
+
   dproc::LocalScheduler sched(flags.getString("tempdir"));
   sched.start();
 
@@ -231,7 +248,7 @@ int main(int argc, const char** argv) {
   params.set_from_unixmicros(WallClock::unixMicros() - 30 * kMicrosPerDay);
   params.set_until_unixmicros(WallClock::unixMicros() - 2 * kMicrosPerDay);
 
-  auto res = sched.run(&app, "TopTermsByCategoryReducer", *msg::encode(params));
+  auto res = sched.run(&app, "TopTermsByCategory", *msg::encode(params));
 
   auto output_file = File::openFile(
       flags.getString("output"),
