@@ -29,7 +29,7 @@ public:
       RefPtr<HTTPResponseStream> res) = 0;
 
   virtual bool isStreaming() {
-    return false;
+    return true;
   }
 
 };
@@ -48,7 +48,7 @@ public:
       RefPtr<HTTPResponseStream> res) override;
 
   bool isStreaming() override {
-    return true;
+    return false;
   }
 
 };

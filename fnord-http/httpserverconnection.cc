@@ -49,7 +49,8 @@ HTTPServerConnection::HTTPServerConnection(
     scheduler_(scheduler),
     on_write_completed_cb_(nullptr),
     stats_(stats),
-    parser_(HTTPParser::PARSE_HTTP_REQUEST) {
+    parser_(HTTPParser::PARSE_HTTP_REQUEST),
+    closed_(false) {
   logTrace("fnord.http.server", "New HTTP connection: $0", inspect(*this));
   stats_->total_connections.incr(1);
   stats_->current_connections.incr(1);
@@ -117,7 +118,7 @@ void HTTPServerConnection::read() {
       parser_.parse((char *) buf_.data(), len);
     }
   } catch (Exception& e) {
-    logDebug("fnord.http.server", e, "HTTP pase error, closing...");
+    logDebug("fnord.http.server", e, "HTTP parse error, closing...");
     close();
     return;
   }
@@ -161,12 +162,20 @@ void HTTPServerConnection::write() {
 }
 
 void HTTPServerConnection::awaitRead() {
+  if (closed_) {
+    RAISE(kIllegalStateError, "read() on closed HTTP connection");
+  }
+
   scheduler_->runOnReadable(
       std::bind(&HTTPServerConnection::read, this),
       *conn_);
 }
 
 void HTTPServerConnection::awaitWrite() {
+  if (closed_) {
+    RAISE(kIllegalStateError, "write() on closed HTTP connection");
+  }
+
   scheduler_->runOnWritable(
       std::bind(&HTTPServerConnection::write, this),
       *conn_);
@@ -241,6 +250,10 @@ void HTTPServerConnection::writeResponse(
     Function<void()> ready_callback) {
   std::lock_guard<std::mutex> lk(mutex_);
 
+  if (parser_.state() != HTTPParser::S_DONE) {
+    RAISE(kIllegalStateError, "can't write response before request is read");
+  }
+
   buf_.clear();
   BufferOutputStream os(&buf_);
   HTTPGenerator::generate(resp, &os);
@@ -253,6 +266,10 @@ void HTTPServerConnection::writeResponseBody(
     size_t size,
     Function<void()> ready_callback) {
   std::lock_guard<std::mutex> lk(mutex_);
+
+  if (parser_.state() != HTTPParser::S_DONE) {
+    RAISE(kIllegalStateError, "can't write response before request is read");
+  }
 
   buf_.clear();
   buf_.append(data, size);
@@ -277,6 +294,8 @@ void HTTPServerConnection::finishResponse() {
 
 void HTTPServerConnection::close() {
   logTrace("fnord.http.server", "HTTP connection close: $0", inspect(*this));
+  closed_ = true;
+  scheduler_->cancelFD(conn_->fd());
   conn_->close();
   decRef();
 }

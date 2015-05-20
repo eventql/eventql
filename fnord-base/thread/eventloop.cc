@@ -118,6 +118,21 @@ void EventLoop::runOnWritable(std::function<void()> task, int fd) {
   callbacks_[fd] = task;
 }
 
+void EventLoop::cancelFD(int fd) {
+  if (std::this_thread::get_id() != threadid_) {
+    appendToRunQ([this, fd] {
+      cancelFD(fd);
+    });
+
+    return;
+  }
+
+  FD_CLR(fd, &op_read_);
+  FD_CLR(fd, &op_write_);
+  FD_CLR(fd, &op_error_);
+  callbacks_[fd] = nullptr;
+}
+
 void EventLoop::poll() {
   fd_set op_read, op_write, op_error;
 
