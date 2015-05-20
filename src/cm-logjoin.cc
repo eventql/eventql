@@ -254,6 +254,10 @@ int main(int argc, const char** argv) {
       "tracker_log.feedserver02.nue01.production.fnrd.net",
       URI("http://s02.nue01.production.fnrd.net:7001/rpc"));
 
+  input_feeds.emplace(
+      "tracker_log.feedserver03.production.fnrd.net",
+      URI("http://nue03.prod.fnrd.net:7001/rpc"));
+
   /* setup time backfill */
   feed_reader.setTimeBackfill([] (const feeds::FeedEntry& entry) -> DateTime {
     const auto& log_line = entry.data;

@@ -100,6 +100,11 @@ int main(int argc, const char** argv) {
       "tracker_log.feedserver02.nue01.production.fnrd.net",
       16);
 
+  tracker_log_feed.addTargetFeed(
+      URI("http://nue03.prod.fnrd.net:7001/rpc"),
+      "tracker_log.feedserver03.production.fnrd.net",
+      16);
+
   tracker_log_feed.exportStats("/cm-frontend/global/tracker_log_writer");
 
   /* set up frontend */
