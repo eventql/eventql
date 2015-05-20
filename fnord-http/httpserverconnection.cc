@@ -124,7 +124,9 @@ void HTTPServerConnection::read() {
   }
 
   if (parser_.state() != HTTPParser::S_DONE) {
+    lk.lock();
     awaitRead();
+    lk.unlock();
   }
 }
 
@@ -161,6 +163,7 @@ void HTTPServerConnection::write() {
   }
 }
 
+// precondition: must hold mutex
 void HTTPServerConnection::awaitRead() {
   if (closed_) {
     RAISE(kIllegalStateError, "read() on closed HTTP connection");
@@ -171,6 +174,7 @@ void HTTPServerConnection::awaitRead() {
       *conn_);
 }
 
+// precondition: must hold mutex
 void HTTPServerConnection::awaitWrite() {
   if (closed_) {
     RAISE(kIllegalStateError, "write() on closed HTTP connection");
@@ -290,11 +294,21 @@ void HTTPServerConnection::finishResponse() {
   }
 }
 
+// precondition: must not hold mutex
 void HTTPServerConnection::close() {
+  std::unique_lock<std::mutex> lk(mutex_);
+
   logTrace("fnord.http.server", "HTTP connection close: $0", inspect(*this));
+
+  if (closed_) {
+    RAISE(kIllegalStateError, "HTTP connection is already closed");
+  }
+
   closed_ = true;
   scheduler_->cancelFD(conn_->fd());
   conn_->close();
+  lk.unlock();
+
   decRef();
 }
 

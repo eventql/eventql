@@ -53,8 +53,6 @@ void EventLoop::setupRunQWakeupPipe() {
   if (runq_wakeup_pipe_[0] > max_fd_) {
     max_fd_ = runq_wakeup_pipe_[0];
   }
-
-  callbacks_[runq_wakeup_pipe_[0]] = std::bind(&EventLoop::onRunQWakeup, this);
 }
 
 void EventLoop::run(std::function<void()> task) {
@@ -120,9 +118,21 @@ void EventLoop::runOnWritable(std::function<void()> task, int fd) {
 
 void EventLoop::cancelFD(int fd) {
   if (std::this_thread::get_id() != threadid_) {
-    appendToRunQ([this, fd] {
+    std::mutex m;
+    bool done = false;
+    std::condition_variable cv;
+
+    appendToRunQ([this, fd, &cv, &m, &done] {
       cancelFD(fd);
+      std::unique_lock<std::mutex> lk(m);
+      done = true;
+      cv.notify_all();
     });
+
+    std::unique_lock<std::mutex> lk(m);
+    while (!done) {
+      cv.wait(lk);
+    }
 
     return;
   }
@@ -154,17 +164,28 @@ void EventLoop::poll() {
     RAISE_ERRNO(kIOError, "select() failed");
   }
 
+  auto runq_fd = runq_wakeup_pipe_[0];
+  if (FD_ISSET(runq_fd, &op_read)) {
+    onRunQWakeup();
+  }
+
   for (int fd = 0; fd <= max_fd_; fd++) {
     if (FD_ISSET(fd, &op_read)) {
       FD_CLR(fd, &op_read_);
       FD_CLR(fd, &op_error_);
-      callbacks_[fd]();
+
+      if (callbacks_[fd]) {
+        callbacks_[fd]();
+      }
     }
 
     else if (FD_ISSET(fd, &op_write)) {
       FD_CLR(fd, &op_write_);
       FD_CLR(fd, &op_error_);
-      callbacks_[fd]();
+
+      if (callbacks_[fd]) {
+        callbacks_[fd]();
+      }
     }
   }
 }
@@ -183,8 +204,6 @@ void EventLoop::runOnWakeup(
 }
 
 void EventLoop::onRunQWakeup() {
-  FD_SET(runq_wakeup_pipe_[0], &op_read_);
-
   static char devnull[512];
   while (read(runq_wakeup_pipe_[0], devnull, sizeof(devnull)) > 0);
 
