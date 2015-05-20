@@ -9,10 +9,13 @@
  */
 #include <stdlib.h>
 #include <assert.h>
+#include <signal.h>
+#include <string.h>
 #include <fnord-base/exception.h>
 #include <fnord-base/exceptionhandler.h>
 #include <fnord-base/inspect.h>
 #include <fnord-base/logging.h>
+#include <fnord-base/StackTrace.h>
 
 namespace fnord {
 
@@ -47,23 +50,32 @@ void CatchAndAbortExceptionHandler::onException(
 }
 
 static std::string globalEHandlerMessage;
+
+static void globalSEGVHandler(int sig) {
+  fprintf(stderr, "%s\n", globalEHandlerMessage.c_str());
+  fprintf(stderr, "signal: %s\n", strsignal(sig));
+
+  StackTrace strace;
+  strace.debugPrint(2);
+
+  exit(EXIT_FAILURE);
+}
+
 static void globalEHandler() {
   fprintf(stderr, "%s\n", globalEHandlerMessage.c_str());
+
+  auto ex = std::current_exception();
+  if (ex == nullptr) {
+    fprintf(stderr, "<no active exception>\n");
+    return;
+  }
+
   try {
-    throw;
+    std::rethrow_exception(ex);
+  } catch (const fnord::Exception& e) {
+    e.debugPrint();
   } catch (const std::exception& e) {
-    if (std::uncaught_exception()) {
-      fprintf(stderr, "exception: %s\n", e.what());
-    } else {
-      try {
-        auto rte = dynamic_cast<const fnord::Exception&>(e);
-        rte.debugPrint();
-        exit(1);
-      } catch (...) {
-        fprintf(stderr, "foreign exception: %s\n", e.what());
-        /* fallthrough */
-      }
-    }
+    fprintf(stderr, "foreign exception: %s\n", e.what());
   }
 
   exit(EXIT_FAILURE);
@@ -73,6 +85,12 @@ void CatchAndAbortExceptionHandler::installGlobalHandlers() {
   globalEHandlerMessage = message_;
   std::set_terminate(&globalEHandler);
   std::set_unexpected(&globalEHandler);
+  signal(SIGILL, &globalSEGVHandler);
+  signal(SIGABRT, &globalSEGVHandler);
+  signal(SIGFPE, &globalSEGVHandler);
+  signal(SIGSEGV, &globalSEGVHandler);
+  signal(SIGBUS, &globalSEGVHandler);
+  signal(SIGSYS, &globalSEGVHandler);
 }
 
 } // namespace fnord

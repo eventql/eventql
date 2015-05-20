@@ -67,6 +67,8 @@ const char kFutureError[] = "FutureError";
               __VA_ARGS__).setTypeName(E).setErrno(e)); \
     }
 
+#define __brk raise(SIGTRAP); while (0) {}
+
 namespace fnord {
 
 using StandardException = std::exception;

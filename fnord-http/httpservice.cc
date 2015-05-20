@@ -11,7 +11,7 @@
 #include <fnord-base/logging.h>
 #include "fnord-http/httpserverconnection.h"
 #include <fnord-http/httpservice.h>
-#include <fnord-http/httpresponsestream.h>
+#include <fnord-http/HTTPResponseStream.h>
 
 namespace fnord {
 namespace http {
