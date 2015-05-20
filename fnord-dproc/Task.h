@@ -12,6 +12,7 @@
 #include <fnord-base/stdtypes.h>
 #include <fnord-base/autoref.h>
 #include <fnord-base/buffer.h>
+#include <fnord-base/option.h>
 #include <fnord-base/exception.h>
 #include <fnord-base/VFSFile.h>
 #include <fnord-msg/msg.h>
@@ -22,6 +23,9 @@ namespace dproc {
 class Task;
 
 typedef Function<RefPtr<Task> (const Buffer& params)> TaskFactory;
+
+template <typename T>
+using ProtoTaskFactory = Function<RefPtr<Task> (const T& params)>;
 
 struct TaskDependency {
   String task_name;
@@ -51,6 +55,10 @@ public:
 
   virtual Vector<String> preferredLocations() {
     return Vector<String>{};
+  }
+
+  virtual Option<String> cacheKey() {
+    return None<String>();
   }
 
 };

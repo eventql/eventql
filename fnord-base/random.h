@@ -21,6 +21,8 @@ public:
 
   Random();
 
+  static Random* singleton();
+
   /**
    * Return 64 bits of random data
    */
@@ -52,6 +54,7 @@ public:
   std::string alphanumericString(int nchars);
 
 protected:
+
   std::mt19937_64 prng_;
 };
 
