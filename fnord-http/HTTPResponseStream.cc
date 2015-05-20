@@ -102,6 +102,8 @@ void HTTPResponseStream::onStateChanged(std::unique_lock<std::mutex>* lk) {
 
   if (response_finished_) {
     conn_->finishResponse();
+    lk->unlock();
+
     decRef();
   } else {
     lk->unlock();
