@@ -34,13 +34,12 @@ void demoQueryServlet::handleHTTPRequest(
   }
 
   http::HTTPSSEStream sse_stream(req_stream, res_stream);
-  Buffer output;
 
   sse_stream.start();
 
   for (float status = 0.0; status < 100.0; status++) {
-    output.clear();
-    json::JSONOutputStream json(BufferOutputStream::fromBuffer(&output));
+    Buffer buf;
+    json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
     json.beginObject();
     json.addObjectEntry("status");
     json.addString("running");
@@ -52,20 +51,18 @@ void demoQueryServlet::handleHTTPRequest(
     json.addString("Running: x rows scanned");
     json.endObject();
 
-    sse_stream.sendEvent(output, txid, "status");
-    usleep(1000);
+    sse_stream.sendEvent(buf, Some(String("status")));
+    usleep(100000);
   }
 
-  output.clear();
-  json::JSONOutputStream json(BufferOutputStream::fromBuffer(&output));
+  Buffer buf;
+  json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
   json.beginObject();
   json.addObjectEntry("result");
   json.addString("query result");
   json.endObject();
 
-  sse_stream.sendEvent(output, txid, "result");
-
-
+  sse_stream.sendEvent(buf, Some(String("result")));
   sse_stream.finish();
 }
 
