@@ -12,6 +12,7 @@
 #ifndef _FNORD_HTTP_HTTPSSESTREAM_H
 #define _FNORD_HTTP_HTTPSSESTREAM_H
 #include "fnord-http/httpservice.h"
+#include "fnord-json/json.h"
 #include <fnord-base/inspect.h>
 
 namespace fnord {
@@ -25,15 +26,21 @@ public:
     RefPtr<http::HTTPResponseStream> res_stream);
 
   void start();
-  void sendEvent(
-    const String& data);
-  void sendEvent(
-    const String& data,
-    const String& id);
+
   void sendEvent(
     const String& data,
-    const String& id,
-    const String& event);
+    const Option<String>& event_type);
+
+  void sendEvent(
+    const Buffer& data,
+    const Option<String>& event_type);
+
+  void sendEvent(
+    const void* event_data,
+    size_t event_size,
+    const Option<String>& event_type);
+
+  const HTTPResponse response() const;
   void finish();
 
 private:
