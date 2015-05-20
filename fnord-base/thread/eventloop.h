@@ -28,6 +28,8 @@ public:
       Wakeup* wakeup,
       long wakeup_generation) override;
 
+  void cancelFD(int fd) override;
+
   EventLoop();
   ~EventLoop();
   void run();

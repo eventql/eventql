@@ -74,6 +74,10 @@ public:
       std::function<void()> task,
       Wakeup* wakeup,
       long wakeup_generation) = 0;
+
+
+  virtual void cancelFD(int fd) {};
+
 };
 
 }
