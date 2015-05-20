@@ -245,7 +245,7 @@ int main(int argc, const char** argv) {
 
   AnalyticsTableScanReducerParams params;
   params.set_customer("dawanda");
-  params.set_from_unixmicros(WallClock::unixMicros() - 30 * kMicrosPerDay);
+  params.set_from_unixmicros(WallClock::unixMicros() - 3 * kMicrosPerDay);
   params.set_until_unixmicros(WallClock::unixMicros() - 2 * kMicrosPerDay);
 
   auto res = sched.run(&app, "TopTermsByCategory", *msg::encode(params));
