@@ -1,101 +1,96 @@
+<style>
+  body, html {
+    padding: 0 0 10px 0;
+    margin: 0;
+    background: #e1e1e1;
+  }
 
-<iframe
-  src="https://rpc.fnrd.net/cm-stats/metrics/timeseries?metric=/cm-frontend/global/http/inbound/total_requests&aggr_window=10&aggr_step=10&aggr_fn=sum&format=svg&min=0&height=160&width=1200&axis_right=true&grid=both&legend=toprightinside&max=2500&scale=0.1&title=Frontend:%20HTTP%20QPS"
-  width="100%"
-  frameborder="0"
-  height="160"
-  scrolling="no"
-  style="margin-bottom: 20px;">
-  </iframe>
+  section {
+    border: 1px solid #ccc;
+    background: #fff;
+    width: 1400px;
+    padding: 0 40px 5px 0;
+    margin: 10px auto 0 auto;
+    border-radius: 4px;
+    box-shadow: 0 0 3px rgba(0,0,0,.1);
+  }
 
-<iframe
-  src="https://rpc.fnrd.net/cm-stats/metrics/timeseries?metric=/cm-frontend/global/http/inbound/sent_bytes&aggr_window=10&scale=0.8&aggr_step=10&aggr_fn=sum&metric=/cm-frontend/global/http/inbound/received_bytes&aggr_window=10&aggr_step=10&scale=0.8&aggr_fn=sum&format=svg&min=0&height=160&width=1200&axis_right=true&grid=both&legend=toprightinside&title=Frontend:%20HTTP%20Bandwith&max=50000000"
-  width="100%"
-  frameborder="0"
-  height="160"
-  scrolling="no"
-  style="margin-bottom: 20px;">
-  </iframe>
+  iframe {
+    margin: 10px 10px 20px 10px;
+    display: block;
+    width: 1400px;
+  }
+</style>
 
-<iframe
-  src="https://rpc.fnrd.net/cm-stats/metrics/timeseries?metric=/cm-frontend/global/tracker_log_writer/entries_written_success&aggr_window=60&aggr_step=10&aggr_fn=sum&format=svg&min=0&height=160&width=1200&axis_right=true&grid=both&legend=toprightinside&max=25000&title=Frontend:%20Pixel%20Loglines%20successfully%20written%20per%20Minute&draw=area&color=color3"
-  width="100%"
-  frameborder="0"
-  height="160"
-  scrolling="no"
-  style="margin-bottom: 20px;">
-  </iframe>
+<section>
+  <iframe
+    src="https://rpc.fnrd.net/cm-stats/metrics/timeseries?metric=/cm-frontend/global/http/inbound/total_requests&aggr_window=10&aggr_step=10&aggr_fn=sum&format=svg&min=0&height=160&width=1400&axis_right=true&grid=both&legend=toprightinside&max=2500&scale=0.1&title=Frontend:%20HTTP%20QPS"
+    width="100%"
+    frameborder="0"
+    height="160"
+    scrolling="no">
+    </iframe>
 
-<iframe
-  src="https://rpc.fnrd.net/cm-stats/metrics/timeseries?metric=/cm-frontend/global/tracker_log_writer/entries_written_error&aggr_window=60&aggr_step=10&aggr_fn=sum&draw=area&color=color6&metric=/cm-frontend/global/loglines_invalid&aggr_window=60&aggr_step=10&aggr_fn=sum&draw=area&color=color2&format=svg&min=0&height=160&width=1200&axis_right=true&grid=both&legend=toprightinside&title=Frontend:%20Invalid%20Pixel%20Loglines%20and%20Write%20Errors%20per%20Minute%20(Log%20Scale)&max=10000&logarithmic=true"
-  width="100%"
-  frameborder="0"
-  height="160"
-  scrolling="no"
-  style="margin-bottom: 20px;">
-  </iframe>
+  <iframe
+    src="https://rpc.fnrd.net/cm-stats/metrics/timeseries?metric=/cm-frontend/global/http/inbound/sent_bytes&aggr_window=10&scale=0.8&aggr_step=10&aggr_fn=sum&metric=/cm-frontend/global/http/inbound/received_bytes&aggr_window=10&aggr_step=10&scale=0.8&aggr_fn=sum&format=svg&min=0&height=160&width=1400&axis_right=true&grid=both&legend=toprightinside&title=Frontend:%20HTTP%20Bandwith&max=50000000"
+    frameborder="0"
+    height="160"
+    scrolling="no">
+    </iframe>
+</section>
 
-<iframe
-  src="https://rpc.fnrd.net/cm-stats/metrics/timeseries?metric=/cm-logjoin/global/loglines_total&aggr_window=120&aggr_step=10&scale=0.5&aggr_fn=sum&metric=/cm-logjoin/global/joined_sessions&color=color4&aggr_window=300&scale=0.2&aggr_step=10&aggr_fn=sum&format=svg&min=0&height=160&width=1200&axis_right=true&grid=both&legend=toprightinside&title=LogJoin:%20Processed%20Loglines%20And%20Sessions%20per%20Minute&color=color3"
-  width="100%"
-  frameborder="0"
-  height="160"
-  scrolling="no"
-  style="margin-bottom: 20px;">
-  </iframe>
+<section>
+  <iframe
+    src="https://rpc.fnrd.net/cm-stats/metrics/timeseries?metric=/cm-autocompleteserver/global/requests_total&aggr_window=10&aggr_step=10&aggr_fn=sum&format=svg&min=0&height=160&width=1400&axis_right=true&grid=both&legend=toprightinside&max=500&scale=0.1&title=Autocomplete%20QPS&color=color4"
+    width="100%"
+    frameborder="0"
+    height="160"
+    scrolling="no">
+    </iframe>
+</section>
 
-<iframe
-  src="https://rpc.fnrd.net/cm-stats/metrics/timeseries?metric=/cm-logjoin/global/joined_queries_feed_writer/entries_written_success&color=color5&aggr_window=300&scale=0.2&aggr_step=10&aggr_fn=sum&metric=/cm-logjoin/global/joined_item_visits_feed_writer/entries_written_success&aggr_window=300&scale=0.2&aggr_step=10&aggr_fn=sum&format=svg&min=0&height=160&width=1200&axis_right=true&grid=both&legend=toprightinside&title=LogJoin:%20Joined%20Queries%20And%20Clicks%20per%20Minute&draw=lines&color=color4"
-  width="100%"
-  frameborder="0"
-  height="160"
-  scrolling="no"
-  style="margin-bottom: 20px;">
-  </iframe>
+<section>
+  <iframe
+    src="https://rpc.fnrd.net/cm-stats/metrics/timeseries?metric=/cm-frontend/global/tracker_log_writer/entries_written_success&aggr_window=60&aggr_step=10&aggr_fn=sum&format=svg&min=0&height=160&width=1400&axis_right=true&grid=both&legend=toprightinside&max=25000&title=Frontend:%20Pixel%20Loglines%20successfully%20written%20per%20Minute&draw=area&color=color3"
+    width="100%"
+    frameborder="0"
+    height="160"
+    scrolling="no">
+    </iframe>
+
+  <iframe
+    src="https://rpc.fnrd.net/cm-stats/metrics/timeseries?metric=/cm-logjoin/global/loglines_total&aggr_window=120&aggr_step=10&scale=0.5&aggr_fn=sum&format=svg&min=0&height=160&width=1400&axis_right=true&grid=both&legend=toprightinside&title=LogJoin:%20Processed%20Loglines%20per%20Minute&color=color1"
+    width="100%"
+    frameborder="0"
+    height="160"
+    scrolling="no">
+    </iframe>
+
+  <iframe
+    src="https://rpc.fnrd.net/cm-stats/metrics/timeseries?metric=/cm-frontend/global/tracker_log_writer/entries_written_error&aggr_window=60&aggr_step=10&aggr_fn=sum&draw=area&color=color6&metric=/cm-frontend/global/loglines_invalid&aggr_window=60&aggr_step=10&aggr_fn=sum&draw=area&color=color2&format=svg&min=0&height=160&width=1400&axis_right=true&grid=both&legend=toprightinside&title=Frontend:%20Invalid%20Pixel%20Loglines%20and%20Write%20Errors%20per%20Minute%20(Log%20Scale)&max=10000&logarithmic=true"
+    width="100%"
+    frameborder="0"
+    height="160"
+    scrolling="no">
+    </iframe>
+</section>
 
 
-<iframe
-  src="https://rpc.fnrd.net/cm-stats/metrics/timeseries?metric=/cm-logjoin/global/joined_item_visits_feed_writer/entries_written_error&aggr_window=60&aggr_step=10&aggr_fn=sum&draw=area&color=color6&metric=/cm-logjoin/global/joined_queries_feed_writer/entries_written_error&aggr_window=60&aggr_step=10&aggr_fn=sum&draw=area&color=color6&format=svg&min=0&height=160&width=1200&axis_right=true&grid=both&legend=toprightinside&title=LogJoin:%20Write%20Errors%20per%20Minute%20(Log%20Scale)&max=10000&logarithmic=true"
-  width="100%"
-  frameborder="0"
-  height="160"
-  scrolling="no"
-  style="margin-bottom: 20px;">
-  </iframe>
+<section>
+  <iframe
+    src="https://rpc.fnrd.net/cm-stats/metrics/timeseries?metric=/cm-frontend/global/index_request_writer/entries_written_success&aggr_window=60&aggr_step=10&aggr_fn=sum&format=svg&min=0&height=160&width=1400&axis_right=true&grid=both&legend=toprightinside&max=200000&title=Frontend:%20Index%20Requests%20successfully%20written%20per%20Minute&draw=area&color=color3"
+    width="100%"
+    frameborder="0"
+    height="160"
+    scrolling="no">
+    </iframe>
 
-<iframe
-  src="https://rpc.fnrd.net/cm-stats/metrics/timeseries?metric=/cm-frontend/global/rpc_requests_total&aggr_window=10&aggr_step=10&aggr_fn=sum&format=svg&min=0&height=160&width=1200&axis_right=true&grid=both&legend=toprightinside&max=5000&scale=0.1&title=Frontend:%20JSONRPC%20QPS"
-  width="100%"
-  frameborder="0"
-  height="160"
-  scrolling="no"
-  style="margin-bottom: 20px;">
-  </iframe>
-
-<iframe
-  src="https://rpc.fnrd.net/cm-stats/metrics/timeseries?metric=/cm-frontend/global/rpc_errors_total&aggr_window=60&aggr_step=10&aggr_fn=sum&format=svg&min=0&height=160&width=1200&axis_right=true&grid=both&legend=toprightinside&max=100&title=Frontend:%20JSONRPC%20Errors%20per%20Minute&logarithmic=true&draw=area&color=color6"
-  width="100%"
-  frameborder="0"
-  height="160"
-  scrolling="no"
-  style="margin-bottom: 20px;">
-  </iframe>
-
-<iframe
-  src="https://rpc.fnrd.net/cm-stats/metrics/timeseries?metric=/cm-frontend/global/index_request_writer/entries_written_success&aggr_window=60&aggr_step=10&aggr_fn=sum&format=svg&min=0&height=160&width=1200&axis_right=true&grid=both&legend=toprightinside&max=200000&title=Frontend:%20Index%20Requests%20successfully%20written%20per%20Minute&draw=area&color=color3"
-  width="100%"
-  frameborder="0"
-  height="160"
-  scrolling="no"
-  style="margin-bottom: 20px;">
-  </iframe>
-
-<iframe
-  src="https://rpc.fnrd.net/cm-stats/metrics/timeseries?metric=/cm-frontend/global/index_request_writer/entries_written_error&aggr_window=60&aggr_step=10&aggr_fn=sum&draw=area&color=color6&format=svg&min=0&height=160&width=1200&axis_right=true&grid=both&legend=toprightinside&title=Frontend:%20Index%20Request%20Write%20Errors%20per%20Minute%20(Log%20Scale)&max=10000&logarithmic=true"
-  width="100%"
-  frameborder="0"
-  height="160"
-  scrolling="no"
-  style="margin-bottom: 20px;">
-  </iframe>
+  <iframe
+    src="https://rpc.fnrd.net/cm-stats/metrics/timeseries?metric=/cm-frontend/global/index_request_writer/entries_written_error&aggr_window=60&aggr_step=10&aggr_fn=sum&draw=area&color=color6&format=svg&min=0&height=160&width=1400&axis_right=true&grid=both&legend=toprightinside&title=Frontend:%20Index%20Request%20Write%20Errors%20per%20Minute%20(Log%20Scale)&max=10000&logarithmic=true"
+    width="100%"
+    frameborder="0"
+    height="160"
+    scrolling="no">
+    </iframe>
+</section>
 

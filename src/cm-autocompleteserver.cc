@@ -78,6 +78,15 @@ int main(int argc, const char** argv) {
       "<path>");
 
   flags.defineFlag(
+      "statsd",
+      cli::FlagParser::T_STRING,
+      false,
+      NULL,
+      "127.0.0.1:8192",
+      "Statsd addr",
+      "<addr>");
+
+  flags.defineFlag(
       "loglevel",
       fnord::cli::FlagParser::T_STRING,
       false,
@@ -108,10 +117,18 @@ int main(int argc, const char** argv) {
 
   /* start http server */
   fnord::thread::EventLoop ev;
+  fnord::thread::ThreadPool tpool;
   fnord::http::HTTPRouter http_router;
-  http_router.addRouteByPrefixMatch("/autocomplete", &acservlet);
+  http_router.addRouteByPrefixMatch("/autocomplete", &acservlet, &tpool);
   fnord::http::HTTPServer http_server(&http_router, &ev);
   http_server.listen(flags.getInt("http_port"));
+
+  /* stats reporting */
+  stats::StatsdAgent statsd_agent(
+      net::InetAddr::resolve(flags.getString("statsd")),
+      10 * kMicrosPerSecond);
+
+  statsd_agent.start();
 
   ev.run();
   return 0;

@@ -11,13 +11,13 @@ package cm;
 message AnalyticsTableScanMapperParams {
   required string stream_key = 1;
   required string partition_key = 2;
-  required string scanlet_params = 4;
+  optional string scanlet_params = 3;
 }
 
 message AnalyticsTableScanReducerParams {
   required string customer = 1;
   required uint64 from_unixmicros = 2;
   required uint64 until_unixmicros = 3;
-  required string scanlet_params = 4;
+  optional string scanlet_params = 4;
 }
 
