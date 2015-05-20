@@ -21,6 +21,8 @@
 #include "fnord-base/util/SimpleRateLimit.h"
 #include "fnord-base/InternMap.h"
 #include "fnord-base/thread/threadpool.h"
+#include "fnord-dproc/Application.h"
+#include "fnord-dproc/LocalScheduler.h"
 #include "fnord-json/json.h"
 #include "fnord-mdb/MDB.h"
 #include "fnord-mdb/MDBUtil.h"
@@ -43,11 +45,9 @@
 #include "analytics/ECommerceStatsByShopMapper.h"
 #include "analytics/ProductStatsByShopMapper.h"
 #include "analytics/CTRCounterMergeReducer.h"
-#include "analytics/CTRCounterTableSink.h"
-#include "analytics/CTRCounterTableSource.h"
-#include "analytics/RelatedTermsMapper.h"
-#include "analytics/TopCategoriesByTermMapper.h"
-#include "analytics/TermInfoMergeReducer.h"
+#include "analytics/CTRBySearchTermCrossCategoryMapper.h"
+#include "analytics/TopTermsByCategoryMapper.h"
+#include "AnalyticsTableScanParams.pb.h"
 
 using namespace fnord;
 using namespace cm;
@@ -59,6 +59,15 @@ int main(int argc, const char** argv) {
   fnord::Application::logToStderr();
 
   fnord::cli::FlagParser flags;
+
+  flags.defineFlag(
+      "output",
+      cli::FlagParser::T_STRING,
+      false,
+      NULL,
+      NULL,
+      "output file",
+      "<path>");
 
   flags.defineFlag(
       "tempdir",
@@ -88,140 +97,169 @@ int main(int argc, const char** argv) {
     ev.run();
   });
 
-  //auto index_path = flags.getString("index");
-  //auto conf_path = flags.getString("conf");
-  auto tempdir = flags.getString("tempdir");
 
-  /* open index */
-  //auto index_reader = cm::IndexReader::openIndex(index_path);
-  //auto analyzer = RefPtr<fts::Analyzer>(new fts::Analyzer(conf_path));
-
-  /* set up reportbuilder */
-  thread::ThreadPool tpool;
   http::HTTPConnectionPool http(&ev);
-  cm::ReportBuilder report_builder(&tpool);
+  tsdb::TSDBClient tsdb("http://nue03.prod.fnrd.net:7003/tsdb", &http);
 
-  Random rnd;
-  auto buildid = rnd.hex128();
+  dproc::Application app("cm.shopstats");
 
-  Set<String> input_tables;
-  Set<String> input_table_files;
+  app.registerProtoTaskFactory<AnalyticsTableScanMapperParams>(
+      "CTRByShopMapper",
+      [&tsdb] (const AnalyticsTableScanMapperParams& params)
+          -> RefPtr<dproc::Task> {
+        auto report = new CTRByShopMapper(
+            new AnalyticsTableScanSource(params, &tsdb),
+            new ShopStatsTableSink());
 
-  {
-    URI uri(StringUtil::format(
-        "http://nue03.prod.fnrd.net:7003/tsdb/list_chunks?stream=$0&from=$1&until=$2",
-        "joined_sessions.dawanda",
-        WallClock::unixMicros() - 90 * kMicrosPerDay,
-        WallClock::unixMicros() - 6 * kMicrosPerHour));
+        report->setCacheKey(
+            "cm.shopstats.ctr~" + report->input()->cacheKey());
 
-    http::HTTPRequest req(http::HTTPMessage::M_GET, uri.pathAndQuery());
-    req.addHeader("Host", uri.hostAndPort());
-    req.addHeader("Content-Type", "application/fnord-msg");
+        return report;
+      });
 
-    auto res = http.executeRequest(req);
-    res.wait();
+  app.registerProtoTaskFactory<AnalyticsTableScanMapperParams>(
+      "EcommerceStatsByShopMapper",
+      [&tsdb] (const AnalyticsTableScanMapperParams& params)
+          -> RefPtr<dproc::Task> {
+        auto report = new ECommerceStatsByShopMapper(
+            new AnalyticsTableScanSource(params, &tsdb),
+            new ShopStatsTableSink());
 
-    const auto& r = res.get();
-    if (r.statusCode() != 200) {
-      RAISEF(kRuntimeError, "received non-200 response: $0", r.body().toString());
-    }
+        report->setCacheKey(
+            "cm.shopstats.ecommerce~" + report->input()->cacheKey());
 
-    const auto& body = r.body();
-    util::BinaryMessageReader reader(body.data(), body.size());
-    while (reader.remaining() > 0) {
-      input_tables.emplace(reader.readLenencString());
-    }
-  }
+        return report;
+      });
 
-  for (const auto& tbl : input_tables) {
-    URI uri(StringUtil::format(
-        "http://nue03.prod.fnrd.net:7003/tsdb/fetch_derived_dataset?chunk=$0&derived_dataset=cstable",
-        tbl));
+  app.registerProtoTaskFactory<AnalyticsTableScanMapperParams>(
+      "ShopProductStatsMapper",
+      [&tsdb] (const AnalyticsTableScanMapperParams& params)
+          -> RefPtr<dproc::Task> {
+        auto report = new ProductStatsByShopMapper(
+            new AnalyticsTableScanSource(params, &tsdb),
+            new ShopStatsTableSink());
 
-    http::HTTPRequest req(http::HTTPMessage::M_GET, uri.pathAndQuery());
-    req.addHeader("Host", uri.hostAndPort());
-    req.addHeader("Content-Type", "application/fnord-msg");
+        report->setCacheKey(
+            "cm.shopstats.products~" + report->input()->cacheKey());
 
-    auto res = http.executeRequest(req);
-    res.wait();
+        return report;
+      });
 
-    const auto& r = res.get();
-    if (r.statusCode() != 200) {
-      RAISEF(kRuntimeError, "received non-200 response: $0", r.body().toString());
-    }
+  app.registerProtoTaskFactory<AnalyticsTableScanReducerParams>(
+      "ShopStatsReducer",
+      [&tsdb] (const AnalyticsTableScanReducerParams& params)
+          -> RefPtr<dproc::Task> {
+        auto stream = "joined_sessions." + params.customer();
+        auto partitions = tsdb.listPartitions(
+            stream,
+            params.from_unixmicros(),
+            params.until_unixmicros());
 
-    fnord::iputs("src tbl: $0", r.body().toString());
-    input_table_files.emplace(r.body().toString());
-  }
+        List<dproc::TaskDependency> map_chunks;
+        for (const auto& part : partitions) {
+          AnalyticsTableScanMapperParams map_chunk_params;
+          map_chunk_params.set_stream_key(stream);
+          map_chunk_params.set_partition_key(part);
 
-  Set<String> tables;
-  for (const auto& input_table : input_table_files) {
-    FNV<uint64_t> fnv;
-    auto h = fnv.hash(input_table);
+          map_chunks.emplace_back(dproc::TaskDependency {
+            .task_name = "CTRByShopMapper",
+            .params = *msg::encode(map_chunk_params)
+          });
 
-    auto table = StringUtil::format(
-        "$0/shopstats-ctr-dawanda.$1.sst",
-        tempdir,
-        StringUtil::hexPrint(&h, sizeof(h), false));
+          map_chunks.emplace_back(dproc::TaskDependency {
+            .task_name = "EcommerceStatsByShopMapper",
+            .params = *msg::encode(map_chunk_params)
+          });
 
-    tables.emplace(table);
-    report_builder.addReport(
-        new CTRByShopMapper(
-            new AnalyticsTableScanSource(input_table),
-            new ShopStatsTableSink(table)));
-  }
+          map_chunks.emplace_back(dproc::TaskDependency {
+            .task_name = "ShopProductStatsMapper",
+            .params = *msg::encode(map_chunk_params)
+          });
+        }
 
-  for (const auto& input_table : input_table_files) {
-    FNV<uint64_t> fnv;
-    auto h = fnv.hash(input_table);
+        return new ShopStatsMergeReducer(
+            new ShopStatsTableSource(map_chunks),
+            new ShopStatsTableSink());
+      });
 
-    auto table = StringUtil::format(
-        "$0/shopstats-ecommerce-dawanda.$1.sst",
-        tempdir,
-        StringUtil::hexPrint(&h, sizeof(h), false));
+  app.registerProtoTaskFactory<AnalyticsTableScanMapperParams>(
+      "TopTermsByCategoryMapper",
+      [&tsdb] (const AnalyticsTableScanMapperParams& params)
+          -> RefPtr<dproc::Task> {
+        auto report = new CTRBySearchTermCrossCategoryMapper(
+            new AnalyticsTableScanSource(params, &tsdb),
+            new CTRCounterTableSink(),
+            "category3");
 
-    tables.emplace(table);
-    report_builder.addReport(
-        new ECommerceStatsByShopMapper(
-            new AnalyticsTableScanSource(input_table),
-            new ShopStatsTableSink(table)));
-  }
+        report->setCacheKey(
+            "cm.toptermsbycategory~" + report->input()->cacheKey());
 
-  for (const auto& input_table : input_table_files) {
-    FNV<uint64_t> fnv;
-    auto h = fnv.hash(input_table);
+        return report;
+      });
 
-    auto table = StringUtil::format(
-        "$0/shopstats-products-dawanda.$1.sst",
-        tempdir,
-        StringUtil::hexPrint(&h, sizeof(h), false));
+  app.registerProtoTaskFactory<AnalyticsTableScanReducerParams>(
+      "TopTermsByCategoryReducer",
+      [&tsdb] (const AnalyticsTableScanReducerParams& params)
+          -> RefPtr<dproc::Task> {
+        auto stream = "joined_sessions." + params.customer();
+        auto partitions = tsdb.listPartitions(
+            stream,
+            params.from_unixmicros(),
+            params.until_unixmicros());
 
-    tables.emplace(table);
-    report_builder.addReport(
-        new ProductStatsByShopMapper(
-            new AnalyticsTableScanSource(input_table),
-            new ShopStatsTableSink(table)));
-  }
+        List<dproc::TaskDependency> map_chunks;
+        for (const auto& part : partitions) {
+          AnalyticsTableScanMapperParams map_chunk_params;
+          map_chunk_params.set_stream_key(stream);
+          map_chunk_params.set_partition_key(part);
 
-  report_builder.addReport(
-      new ShopStatsMergeReducer(
-          new ShopStatsTableSource(tables),
-          new ShopStatsTableSink(
-              StringUtil::format(
-                  "$0/shopstats-full-dawanda.$1.sstable",
-                  tempdir,
-                  buildid))));
+          map_chunks.emplace_back(dproc::TaskDependency {
+            .task_name = "TopTermsByCategoryMapper",
+            .params = *msg::encode(map_chunk_params)
+          });
+        }
 
-  report_builder.buildAll();
+        return new CTRCounterMergeReducer(
+            new CTRCounterTableSource(map_chunks),
+            new CTRCounterTableSink());
+      });
 
-  fnord::logInfo(
-      "cm.reportbuild",
-      "Build completed: shopstats-full-dawanda.$0.sstable",
-      buildid);
+  app.registerTaskFactory(
+      "TopTermsByCategory",
+      [&tsdb] (const Buffer& params)
+          -> RefPtr<dproc::Task> {
+        List<dproc::TaskDependency> deps;
+        deps.emplace_back(dproc::TaskDependency {
+          .task_name = "TopTermsByCategoryReducer",
+          .params = params
+        });
 
+        return new TopTermsByCategoryMapper(
+            new CTRCounterTableSource(deps),
+            new CTRCounterTableSink());
+      });
+
+
+  dproc::LocalScheduler sched(flags.getString("tempdir"));
+  sched.start();
+
+  AnalyticsTableScanReducerParams params;
+  params.set_customer("dawanda");
+  params.set_from_unixmicros(WallClock::unixMicros() - 30 * kMicrosPerDay);
+  params.set_until_unixmicros(WallClock::unixMicros() - 2 * kMicrosPerDay);
+
+  auto res = sched.run(&app, "TopTermsByCategory", *msg::encode(params));
+
+  auto output_file = File::openFile(
+      flags.getString("output"),
+      File::O_CREATEOROPEN | File::O_WRITE);
+
+  output_file.write(res->data(), res->size());
+
+  sched.stop();
   ev.shutdown();
   evloop_thread.join();
 
-  return 0;
+  exit(0);
 }
 
