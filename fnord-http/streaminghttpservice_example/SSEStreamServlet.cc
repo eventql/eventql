@@ -21,7 +21,7 @@ void SSEStreamServlet::handleHTTPRequest(
   sse.start();
 
   for (int i = 0; i < 10; ++i) {
-    sse.sendEvent(StringUtil::toString(i), "myid", "myevent");
+    sse.sendEvent(StringUtil::toString(i), Some(String("myevent")));
     usleep(100000);
   }
 
