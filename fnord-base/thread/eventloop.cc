@@ -170,6 +170,10 @@ void EventLoop::poll() {
   }
 
   for (int fd = 0; fd <= max_fd_; fd++) {
+    if (fd == runq_fd) {
+      continue;
+    }
+
     if (FD_ISSET(fd, &op_read)) {
       FD_CLR(fd, &op_read_);
       FD_CLR(fd, &op_error_);
