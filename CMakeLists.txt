@@ -437,6 +437,7 @@ add_executable(cm-itemboostbuild
     src/schemas.cc
     src/DocIndex.cc
     src/analytics/Report.cc
+    src/analytics/ItemBoostExport.cc
     src/analytics/ItemBoostMapper.cc
     src/analytics/ItemBoostMerge.cc
     src/analytics/TrafficSegment.cc
@@ -445,6 +446,7 @@ add_executable(cm-itemboostbuild
     src/analytics/AnalyticsQueryEngine.cc
     src/analytics/AnalyticsQueryResult.cc
     src/analytics/AnalyticsTableScanSource.cc
+    src/analytics/CSVSink.cc
     src/cm-itemboostbuild.cc
     ${PROTO_SRCS})
 

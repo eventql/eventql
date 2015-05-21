@@ -20,6 +20,7 @@
 #include <fnord-tsdb/TSDBClient.h>
 #include "analytics/ItemBoostMapper.h"
 #include "analytics/ItemBoostMerge.h"
+#include "analytics/ItemBoostExport.h"
 #include "analytics/ProtoSSTableMergeReducer.h"
 
 using namespace fnord;
@@ -111,6 +112,20 @@ int main(int argc, const char** argv) {
                 std::placeholders::_2));
       });
 
+  app.registerTaskFactory(
+      "ItemBoostExport",
+      [&tsdb] (const Buffer& params)
+          -> RefPtr<dproc::Task> {
+        List<dproc::TaskDependency> deps;
+        deps.emplace_back(dproc::TaskDependency {
+          .task_name = "ItemBoostReducer",
+          .params = params
+        });
+
+        return new ItemBoostExport(
+            new ProtoSSTableSource<ItemBoostRow>(deps),
+            new CSVSink());
+      });
 
   dproc::LocalScheduler sched(flags.getString("tempdir"));
   sched.start();
@@ -120,7 +135,7 @@ int main(int argc, const char** argv) {
   params.set_from_unixmicros(WallClock::unixMicros() - 30 * kMicrosPerDay);
   params.set_until_unixmicros(WallClock::unixMicros() - 2 * kMicrosPerDay);
 
-  auto res = sched.run(&app, "ItemBoostReducer", *msg::encode(params));
+  auto res = sched.run(&app, "ItemBoostExport", *msg::encode(params));
 
   auto output_file = File::openFile(
       flags.getString("output"),
