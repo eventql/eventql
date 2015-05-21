@@ -19,7 +19,8 @@
 #include <fnord-dproc/LocalScheduler.h>
 #include <fnord-tsdb/TSDBClient.h>
 #include "analytics/ItemBoostMapper.h"
-#include "analytics/SSTableMergeReducer.h"
+#include "analytics/ItemBoostMerge.h"
+#include "analytics/ProtoSSTableMergeReducer.h"
 
 using namespace fnord;
 using namespace cm;
@@ -71,7 +72,7 @@ int main(int argc, const char** argv) {
           -> RefPtr<dproc::Task> {
         auto report = new ItemBoostMapper(
             new AnalyticsTableScanSource(params, &tsdb),
-            new SSTableSink<ItemBoostRowCRDT>());
+            new ProtoSSTableSink<ItemBoostRow>());
 
         report->setCacheKey(
             "cm.itemboost~" + report->input()->cacheKey());
@@ -101,9 +102,13 @@ int main(int argc, const char** argv) {
           });
         }
 
-        return new SSTableMergeReducer<ItemBoostRowCRDT>(
-            new SSTableSource<ItemBoostRowCRDT>(map_chunks),
-            new SSTableSink<ItemBoostRowCRDT>());
+        return new ProtoSSTableMergeReducer<ItemBoostRow>(
+            new ProtoSSTableSource<ItemBoostRow>(map_chunks),
+            new ProtoSSTableSink<ItemBoostRow>(),
+            std::bind(
+                &ItemBoostMerge::merge,
+                std::placeholders::_1,
+                std::placeholders::_2));
       });
 
 

@@ -437,16 +437,14 @@ add_executable(cm-itemboostbuild
     src/schemas.cc
     src/DocIndex.cc
     src/analytics/Report.cc
-    src/analytics/CTRByShopMapper.cc
-    src/analytics/ECommerceStatsByShopMapper.cc
-    src/analytics/ProductStatsByShopMapper.cc
+    src/analytics/ItemBoostMapper.cc
+    src/analytics/ItemBoostMerge.cc
     src/analytics/TrafficSegment.cc
     src/analytics/AnalyticsTableScan.cc
     src/analytics/AnalyticsQuery.cc
     src/analytics/AnalyticsQueryEngine.cc
     src/analytics/AnalyticsQueryResult.cc
     src/analytics/AnalyticsTableScanSource.cc
-    src/analytics/ShopStats.cc
     src/cm-itemboostbuild.cc
     ${PROTO_SRCS})
 
