@@ -114,7 +114,7 @@ int main(int argc, const char** argv) {
   /* set up dawanda */
   auto dwn_ns = new cm::CustomerNamespace("dawanda");
   dwn_ns->addVHost("dwnapps.net");
-  dwn_ns->loadTrackingJS("customers/dawanda/track.min.js");
+  dwn_ns->loadTrackingJS("customers/dawanda/track.js");
 
   RefPtr<feeds::RemoteFeedWriter> dwn_index_request_feed(
       new feeds::RemoteFeedWriter(&rpc_client));
