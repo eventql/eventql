@@ -8,9 +8,15 @@
  */
 package cm;
 
+message ItemBoostTermInfo {
+  required string term = 5;
+  required uint32 score = 6;
+};
+
 message ItemBoostRow {
   required uint32 num_impressions = 3;
   required uint32 num_clicks = 4;
+  repeated ItemBoostTermInfo top_terms = 7;
 }
 
 
