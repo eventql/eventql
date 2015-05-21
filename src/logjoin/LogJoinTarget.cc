@@ -38,11 +38,7 @@ void LogJoinTarget::setGetField(
   getField = getFieldCb;
 }
 
-void LogJoinTarget::onSession(
-    mdb::MDBTransaction* txn,
-    TrackedSession& session) {
-  session.joinEvents(cconv_);
-
+Buffer LogJoinTarget::trackedSessionToJoinedSession(TrackedSession& session) {
   if (!getField) {
     RAISE(kRuntimeError, "getField has not been initialized");
   }
@@ -51,6 +47,7 @@ void LogJoinTarget::onSession(
     RAISE(kRuntimeError, "normalize has not been initialized");
   }
 
+  session.joinEvents(cconv_);
   const auto& schema = joined_sessions_schema_;
   msg::MessageObject obj;
 
@@ -117,7 +114,7 @@ void LogJoinTarget::onSession(
     }
   }
 
-  uint32_t sess_abgrp = 0;
+    uint32_t sess_abgrp = 0;
   for (const auto& q : session.queries) {
     auto& qry_obj = obj.addChild(schema.id("search_queries"));
 
@@ -336,10 +333,11 @@ void LogJoinTarget::onSession(
   obj.addChild(schema.id("num_order_items"), session.num_order_items);
   obj.addChild(schema.id("gmv_eurcents"), session.gmv_eurcents);
 
+  Buffer msg_buf;
   auto first_seen = session.firstSeenTime();
   auto last_seen = session.lastSeenTime();
   if (first_seen.isEmpty() || last_seen.isEmpty()) {
-    return;
+    return msg_buf;
   }
 
   obj.addChild(
@@ -350,16 +348,28 @@ void LogJoinTarget::onSession(
       schema.id("last_seen_time"),
       last_seen.get().unixMicros() / kMicrosPerSecond);
 
-  auto time = first_seen.get().unixMicros();
+  msg::MessageEncoder::encode(obj, joined_sessions_schema_, &msg_buf);
+  return msg_buf;
+}
+
+
+void LogJoinTarget::onSession(
+    mdb::MDBTransaction* txn,
+    TrackedSession& session) {
+
+  Buffer msg_buf = trackedSessionToJoinedSession(session);
+  if (msg_buf.size() == 0) {
+    return;
+  }
 
   if (dry_run_) {
     fnord::logInfo(
         "cm.logjoin",
-        "[DRYRUN] not uploading session: $0",
-        msg::MessagePrinter::print(obj, joined_sessions_schema_));
+        "[DRYRUN] not uploading session: ", 1);
+        //msg::MessagePrinter::print(obj, joined_sessions_schema_));
   } else {
-    Buffer msg_buf;
-    msg::MessageEncoder::encode(obj, joined_sessions_schema_, &msg_buf);
+    auto first_seen = session.firstSeenTime();
+    auto time = first_seen.get().unixMicros();
     util::BinaryMessageWriter buf;
     buf.appendUInt64(time);
     buf.appendUInt64(rnd_.random64());

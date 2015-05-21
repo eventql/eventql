@@ -45,6 +45,7 @@ public:
   void setGetField(
     Function<Option<String> (const DocID& docid, const String& feature)> getFieldCb);
 
+  Buffer trackedSessionToJoinedSession(TrackedSession& session);
   void onSession(
       mdb::MDBTransaction* txn,
       TrackedSession& session);
