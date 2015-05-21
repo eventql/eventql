@@ -53,6 +53,15 @@ int main(int argc, const char** argv) {
       "<path>");
 
   flags.defineFlag(
+      "threads",
+      cli::FlagParser::T_INTEGER,
+      true,
+      NULL,
+      "8",
+      "nthreads",
+      "<num>");
+
+  flags.defineFlag(
       "loglevel",
       fnord::cli::FlagParser::T_STRING,
       false,
@@ -136,7 +145,7 @@ int main(int argc, const char** argv) {
             new CSVSink());
       });
 
-  dproc::LocalScheduler sched(flags.getString("tempdir"));
+  dproc::LocalScheduler sched(flags.getString("tempdir"), flags.getInt("threads"));
   sched.start();
 
   AnalyticsTableScanReducerParams params;
