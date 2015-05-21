@@ -10,6 +10,7 @@
 #define _CM_LOGJOINTARGET_H
 #include "fnord-base/stdtypes.h"
 #include "fnord-base/Currency.h"
+#include "fnord-base/Language.h"
 #include "fnord-base/random.h"
 #include "fnord-mdb/MDB.h"
 #include "fnord-msg/MessageSchema.h"
@@ -36,9 +37,13 @@ public:
 
   LogJoinTarget(
       const msg::MessageSchema& joined_sessions_schema,
-      fts::Analyzer* analyzer,
-      RefPtr<DocIndex> index,
       bool dry_run);
+
+  void setNormalize(
+    Function<fnord::String (Language lang, const fnord::String& query)> normalize);
+
+  void setGetField(
+    Function<Option<String> (const DocID& docid, const String& feature)> getField);
 
   void onSession(
       mdb::MDBTransaction* txn,
@@ -48,8 +53,8 @@ public:
 
 protected:
   msg::MessageSchema joined_sessions_schema_;
-  fts::Analyzer* analyzer_;
-  RefPtr<DocIndex> index_;
+  Function<fnord::String (Language lang, const fnord::String& query)> normalize_;
+  Function<Option<String> (const DocID& docid, const String& feature)> getField_;
   bool dry_run_;
   Random rnd_;
   CurrencyConverter cconv_;
