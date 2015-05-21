@@ -35,6 +35,15 @@ int main(int argc, const char** argv) {
   fnord::cli::FlagParser flags;
 
   flags.defineFlag(
+      "output",
+      cli::FlagParser::T_STRING,
+      false,
+      NULL,
+      NULL,
+      "output file",
+      "<path>");
+
+  flags.defineFlag(
       "tempdir",
       cli::FlagParser::T_STRING,
       false,
