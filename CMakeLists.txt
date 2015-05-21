@@ -537,6 +537,7 @@ add_executable(cm-analytics-backend
     src/analytics/ShopStatsTable.cc
     src/analytics/ShopStatsServlet.cc
     src/analytics/ShopStats.cc
+    src/demoQueryServlet.cc
     src/schemas.cc
     src/cm-analytics-backend.cc)
 
