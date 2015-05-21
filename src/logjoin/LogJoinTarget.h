@@ -40,10 +40,10 @@ public:
       bool dry_run);
 
   void setNormalize(
-    Function<fnord::String (Language lang, const fnord::String& query)> normalize);
+    Function<fnord::String (Language lang, const fnord::String& query)> normalizeCb);
 
   void setGetField(
-    Function<Option<String> (const DocID& docid, const String& feature)> getField);
+    Function<Option<String> (const DocID& docid, const String& feature)> getFieldCb);
 
   void onSession(
       mdb::MDBTransaction* txn,
@@ -53,8 +53,8 @@ public:
 
 protected:
   msg::MessageSchema joined_sessions_schema_;
-  Function<fnord::String (Language lang, const fnord::String& query)> normalize_;
-  Function<Option<String> (const DocID& docid, const String& feature)> getField_;
+  Function<fnord::String (Language lang, const fnord::String& query)> normalize;
+  Function<Option<String> (const DocID& docid, const String& feature)> getField;
   bool dry_run_;
   Random rnd_;
   CurrencyConverter cconv_;
