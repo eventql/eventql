@@ -447,7 +447,6 @@ add_executable(cm-itemboostbuild
     src/analytics/AnalyticsQueryResult.cc
     src/analytics/AnalyticsTableScanSource.cc
     src/analytics/ShopStats.cc
-    src/ItemBoostScanlet.cc
     src/cm-itemboostbuild.cc
     ${PROTO_SRCS})
 
