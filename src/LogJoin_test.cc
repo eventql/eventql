@@ -41,12 +41,12 @@ void printBuf(const Buffer& buf) {
   fnord::iputs("joined session: $0", msg::MessagePrinter::print(msg, joinedSessionsSchema()));
 }
 
-// query with click
 // multiple queries
-// report items in multiple batches (logenplaetze, normal, etc)
-// cart // gmv matching
 // field expansion // joining
 
+/*
+ * Simple Search
+ */
 TEST_CASE(LogJoinTest, SimpleQuery, [] () {
   auto t = 1432311555 * kMicrosPerSecond;
   auto trgt = mkTestTarget();
@@ -93,6 +93,9 @@ TEST_CASE(LogJoinTest, SimpleQuery, [] () {
   EXPECT_FALSE(joined.search_queries().Get(0).result_items().Get(1).clicked());
 });
 
+/*
+ * Cart Item (checkout_step 1) and GMV
+ */
 TEST_CASE(LogJoinTest, ItemOrder, [] () {
   auto t = 1432311555 * kMicrosPerSecond;
   auto trgt = mkTestTarget();
@@ -163,7 +166,56 @@ TEST_CASE(LogJoinTest, ItemOrder, [] () {
 });
 
 
+/*
+ * Multiple Query Batches and Ad click
+ */
+TEST_CASE(LogJoinTest, MultipleQueryBatches, [] () {
+  auto t = 1432311555 * kMicrosPerSecond;
+  auto trgt = mkTestTarget();
+  TrackedSession sess;
+  sess.insertLogline(t + 0, "q", "E1", URI::ParamList {
+    { "q_cat", "1" },
+    { "pg", "1" },
+    { "is", "p~105~p5,p~106~p6,p~107~p7,p~108~p8" }
+  });
 
+  sess.insertLogline(t + 0, "q", "E1", URI::ParamList {
+    { "q_cat", "1" },
+    { "pg", "1" },
+    { "is", "p~101~p1,p~102~p2,p~103~p3,p~104~p4" }
+  });
+
+  sess.insertLogline(t + 10 * kMicrosPerSecond, "v", "E2", URI::ParamList {
+    { "i", "p~101"}
+  });
+
+  auto buf = trgt.trackedSessionToJoinedSession(sess);
+  auto joined = msg::decode<JoinedSession>(buf);
+
+  EXPECT_EQ(joined.num_cart_items(), 0);
+  EXPECT_EQ(joined.cart_value_eurcents(), 0);
+  EXPECT_EQ(joined.num_order_items(), 0);
+  EXPECT_EQ(joined.gmv_eurcents(), 0);
+  EXPECT_EQ(joined.first_seen_time(), 1432311555);
+  EXPECT_EQ(joined.first_last_time(), 1432311565);
+
+  EXPECT_EQ(joined.search_queries().size(), 1);
+  EXPECT_EQ(joined.search_queries().Get(0).num_result_items(), 8);
+  EXPECT_EQ(joined.search_queries().Get(0).num_result_items_clicked(), 1);
+  EXPECT_EQ(joined.search_queries().Get(0).num_ad_impressions(), 4);
+  EXPECT_EQ(joined.search_queries().Get(0).num_ad_clicks(), 1);
+  EXPECT_EQ(joined.search_queries().Get(0).num_cart_items(), 0);
+  EXPECT_EQ(joined.search_queries().Get(0).cart_value_eurcents(), 0);
+  EXPECT_EQ(joined.search_queries().Get(0).num_order_items(), 0);
+  EXPECT_EQ(joined.search_queries().Get(0).gmv_eurcents(), 0);
+  EXPECT_EQ(joined.search_queries().Get(0).page(), 1);
+  EXPECT_EQ(
+    ProtoLanguage_Name(joined.search_queries().Get(0).language()),
+    "LANGUAGE_UNKNOWN_LANGUAGE");
+  EXPECT_EQ(
+    ProtoPageType_Name(joined.search_queries().Get(0).page_type()),
+    "PAGETYPE_CATALOG_PAGE");
+});
 
 
 /*
