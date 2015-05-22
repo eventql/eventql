@@ -30,20 +30,20 @@ LogJoinTarget::LogJoinTarget(
 
 void LogJoinTarget::setNormalize(
     Function<fnord::String (Language lang, const fnord::String& query)> normalizeCb) {
-  normalize = normalizeCb;
+  normalize_ = normalizeCb;
 }
 
 void LogJoinTarget::setGetField(
     Function<Option<String> (const DocID& docid, const String& feature)> getFieldCb) {
-  getField = getFieldCb;
+  get_field_ = getFieldCb;
 }
 
 Buffer LogJoinTarget::trackedSessionToJoinedSession(TrackedSession& session) {
-  if (!getField) {
+  if (!get_field_) {
     RAISE(kRuntimeError, "getField has not been initialized");
   }
 
-  if (!normalize) {
+  if (!normalize_) {
     RAISE(kRuntimeError, "normalize has not been initialized");
   }
 
@@ -80,7 +80,7 @@ Buffer LogJoinTarget::trackedSessionToJoinedSession(TrackedSession& session) {
 
     // FIXPAUL use getFields...
     auto docid = ci.item.docID();
-    auto shopid = getField(docid, "shop_id");
+    auto shopid = get_field_(docid, "shop_id");
     if (shopid.isEmpty()) {
       fnord::logWarning(
           "cm.logjoin",
@@ -92,21 +92,21 @@ Buffer LogJoinTarget::trackedSessionToJoinedSession(TrackedSession& session) {
           (uint32_t) std::stoull(shopid.get()));
     }
 
-    auto category1 = getField(docid, "category1");
+    auto category1 = get_field_(docid, "category1");
     if (!category1.isEmpty()) {
       ci_obj.addChild(
           schema.id("cart_items.category1"),
           (uint32_t) std::stoull(category1.get()));
     }
 
-    auto category2 = getField(docid, "category2");
+    auto category2 = get_field_(docid, "category2");
     if (!category2.isEmpty()) {
       ci_obj.addChild(
           schema.id("cart_items.category2"),
           (uint32_t) std::stoull(category2.get()));
     }
 
-    auto category3 = getField(docid, "category3");
+    auto category3 = get_field_(docid, "category3");
     if (!category3.isEmpty()) {
       ci_obj.addChild(
           schema.id("cart_items.category3"),
@@ -130,7 +130,7 @@ Buffer LogJoinTarget::trackedSessionToJoinedSession(TrackedSession& session) {
     /* queries.query_string */
     auto qstr = cm::extractQueryString(q.attrs);
     if (!qstr.isEmpty()) {
-      auto qstr_norm = normalize(lang, qstr.get());
+      auto qstr_norm = normalize_(lang, qstr.get());
       qry_obj.addChild(schema.id("search_queries.query_string"), qstr.get());
       qry_obj.addChild(schema.id("search_queries.query_string_normalized"), qstr_norm);
     }
@@ -226,7 +226,7 @@ Buffer LogJoinTarget::trackedSessionToJoinedSession(TrackedSession& session) {
 
       auto docid = item.item.docID();
 
-      auto shopid = getField(docid, "shop_id");
+      auto shopid = get_field_(docid, "shop_id");
       if (shopid.isEmpty()) {
         fnord::logWarning(
             "cm.logjoin",
@@ -238,21 +238,21 @@ Buffer LogJoinTarget::trackedSessionToJoinedSession(TrackedSession& session) {
             (uint32_t) std::stoull(shopid.get()));
       }
 
-      auto category1 = getField(docid, "category1");
+      auto category1 = get_field_(docid, "category1");
       if (!category1.isEmpty()) {
         item_obj.addChild(
             schema.id("search_queries.result_items.category1"),
             (uint32_t) std::stoull(category1.get()));
       }
 
-      auto category2 = getField(docid, "category2");
+      auto category2 = get_field_(docid, "category2");
       if (!category2.isEmpty()) {
         item_obj.addChild(
             schema.id("search_queries.result_items.category2"),
             (uint32_t) std::stoull(category2.get()));
       }
 
-      auto category3 = getField(docid, "category3");
+      auto category3 = get_field_(docid, "category3");
       if (!category3.isEmpty()) {
         item_obj.addChild(
             schema.id("search_queries.result_items.category3"),
@@ -273,7 +273,7 @@ Buffer LogJoinTarget::trackedSessionToJoinedSession(TrackedSession& session) {
         iv.item.docID().docid);
 
     auto docid = iv.item.docID();
-    auto shopid = getField(docid, "shop_id");
+    auto shopid = get_field_(docid, "shop_id");
     if (shopid.isEmpty()) {
       fnord::logWarning(
           "cm.logjoin",
@@ -285,21 +285,21 @@ Buffer LogJoinTarget::trackedSessionToJoinedSession(TrackedSession& session) {
           (uint32_t) std::stoull(shopid.get()));
     }
 
-    auto category1 = getField(docid, "category1");
+    auto category1 = get_field_(docid, "category1");
     if (!category1.isEmpty()) {
       iv_obj.addChild(
           schema.id("item_visits.category1"),
           (uint32_t) std::stoull(category1.get()));
     }
 
-    auto category2 = getField(docid, "category2");
+    auto category2 = get_field_(docid, "category2");
     if (!category2.isEmpty()) {
       iv_obj.addChild(
           schema.id("item_visits.category2"),
           (uint32_t) std::stoull(category2.get()));
     }
 
-    auto category3 = getField(docid, "category3");
+    auto category3 = get_field_(docid, "category3");
     if (!category3.isEmpty()) {
       iv_obj.addChild(
           schema.id("item_visits.category3"),
