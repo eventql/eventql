@@ -41,7 +41,7 @@ void printBuf(const Buffer& buf) {
   fnord::iputs("joined session: $0", msg::MessagePrinter::print(msg, joinedSessionsSchema()));
 }
 
-// multiple queries
+
 // field expansion // joining
 
 /*
@@ -218,6 +218,81 @@ TEST_CASE(LogJoinTest, MultipleQueryBatches, [] () {
 });
 
 
+/*
+ * Multiple Queries (search, catalog, shop)
+ */
+TEST_CASE(LogJoinTest, MultipleQueries, [] () {
+  auto t = 1432311555 * kMicrosPerSecond;
+  auto trgt = mkTestTarget();
+  TrackedSession sess;
+  sess.insertLogline(t + 0, "q", "E1", URI::ParamList {
+    { "is", "p~101~p1,p~102~p2" },
+    { "qstr~de", "blah" }
+  });
+  sess.insertLogline(t + 30 * kMicrosPerSecond, "q", "E2", URI::ParamList {
+    { "q_cat", "1" },
+    { "pg", "1" },
+    { "is", "p~105~p5,p~106~p6,p~107~p7,p~108~p8" }
+  });
+  sess.insertLogline(t + 60 * kMicrosPerSecond, "q", "E3", URI::ParamList {
+    { "slrid", "123" },
+    { "pg", "1" },
+    { "is", "p~11~p1,p~12~p2,p~13~p3,p~14~p4" }
+  });
+  auto buf = trgt.trackedSessionToJoinedSession(sess);
+  auto joined = msg::decode<JoinedSession>(buf);
+  EXPECT_EQ(joined.search_queries().size(), 3);
+  EXPECT_EQ(joined.search_queries().Get(0).time(), 1432311555);
+  EXPECT_EQ(joined.search_queries().Get(0).num_result_items(), 2);
+  EXPECT_EQ(joined.search_queries().Get(0).num_result_items_clicked(), 0);
+  EXPECT_EQ(joined.search_queries().Get(0).num_ad_impressions(), 2);
+  EXPECT_EQ(joined.search_queries().Get(0).num_ad_clicks(), 0);
+  EXPECT_EQ(joined.search_queries().Get(0).num_cart_items(), 0);
+  EXPECT_EQ(joined.search_queries().Get(0).cart_value_eurcents(), 0);
+  EXPECT_EQ(joined.search_queries().Get(0).num_order_items(), 0);
+  EXPECT_EQ(joined.search_queries().Get(0).gmv_eurcents(), 0);
+  EXPECT_EQ(
+    ProtoLanguage_Name(joined.search_queries().Get(0).language()),
+    "LANGUAGE_DE");
+  EXPECT_EQ(
+    ProtoPageType_Name(joined.search_queries().Get(0).page_type()),
+    "PAGETYPE_SEARCH_PAGE");
+
+  EXPECT_EQ(joined.search_queries().Get(1).time(), 1432311585);
+  EXPECT_EQ(joined.search_queries().Get(1).num_result_items(), 4);
+  EXPECT_EQ(joined.search_queries().Get(1).num_result_items_clicked(), 0);
+  EXPECT_EQ(joined.search_queries().Get(1).num_ad_impressions(), 0);
+  EXPECT_EQ(joined.search_queries().Get(1).num_ad_clicks(), 0);
+  EXPECT_EQ(joined.search_queries().Get(1).num_cart_items(), 0);
+  EXPECT_EQ(joined.search_queries().Get(1).cart_value_eurcents(), 0);
+  EXPECT_EQ(joined.search_queries().Get(1).num_order_items(), 0);
+  EXPECT_EQ(joined.search_queries().Get(1).gmv_eurcents(), 0);
+  EXPECT_EQ(joined.search_queries().Get(1).page(), 1);
+  EXPECT_EQ(
+    ProtoLanguage_Name(joined.search_queries().Get(1).language()),
+    "LANGUAGE_UNKNOWN_LANGUAGE");
+  EXPECT_EQ(
+    ProtoPageType_Name(joined.search_queries().Get(1).page_type()),
+    "PAGETYPE_CATALOG_PAGE");
+
+  EXPECT_EQ(joined.search_queries().Get(2).time(), 1432311615);
+  EXPECT_EQ(joined.search_queries().Get(2).shop_id(), 123);
+  EXPECT_EQ(joined.search_queries().Get(2).num_result_items(), 4);
+  EXPECT_EQ(joined.search_queries().Get(2).num_result_items_clicked(), 0);
+  EXPECT_EQ(joined.search_queries().Get(2).num_ad_impressions(), 0);
+  EXPECT_EQ(joined.search_queries().Get(2).num_ad_clicks(), 0);
+  EXPECT_EQ(joined.search_queries().Get(2).num_cart_items(), 0);
+  EXPECT_EQ(joined.search_queries().Get(2).cart_value_eurcents(), 0);
+  EXPECT_EQ(joined.search_queries().Get(2).num_order_items(), 0);
+  EXPECT_EQ(joined.search_queries().Get(2).gmv_eurcents(), 0);
+  EXPECT_EQ(joined.search_queries().Get(2).page(), 1);
+  EXPECT_EQ(
+    ProtoLanguage_Name(joined.search_queries().Get(2).language()),
+    "LANGUAGE_UNKNOWN_LANGUAGE");
+  EXPECT_EQ(
+    ProtoPageType_Name(joined.search_queries().Get(2).page_type()),
+    "PAGETYPE_UNKNOWN_PAGE");
+});
 /*
 
 TEST_CASE(LogJoinTest, Test1, [] () {
