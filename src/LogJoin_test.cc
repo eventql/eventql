@@ -35,6 +35,38 @@ LogJoinTarget mkTestTarget() {
   return trgt;
 }
 
+LogJoinTarget mkTestTargetWithFieldExpansion() {
+  LogJoinTarget trgt(joinedSessionsSchema(), false);
+
+  trgt.setNormalize([] (Language l, const String& q) { return q; });
+
+  trgt.setGetField([] (const DocID& doc, const String& field) {
+    if (field == "category1") {
+      return Some(String("1"));
+    }
+    if (doc.docid == "p~101") {
+      if (field == "category2") {
+        return Some(String("21"));
+      }
+      if (field == "category3") {
+        return Some(String("31"));
+      }
+    }
+    if (doc.docid == "p~102") {
+      if (field == "category2") {
+        return Some(String("22"));
+      }
+      if (field == "category3") {
+        return Some(String("32"));
+      }
+    }
+
+    return None<String>();
+  });
+
+  return trgt;
+}
+
 void printBuf(const Buffer& buf) {
   msg::MessageObject msg;
   msg::MessageDecoder::decode(buf, joinedSessionsSchema(), &msg);
@@ -292,6 +324,46 @@ TEST_CASE(LogJoinTest, MultipleQueries, [] () {
   EXPECT_EQ(
     ProtoPageType_Name(joined.search_queries().Get(2).page_type()),
     "PAGETYPE_UNKNOWN_PAGE");
+});
+
+/*
+ * Field Expansion
+ */
+TEST_CASE(LogJoinTest, FieldExpansion, [] () {
+  auto t = 1432311555 * kMicrosPerSecond;
+  auto trgt = mkTestTargetWithFieldExpansion();
+  TrackedSession sess;
+  sess.insertLogline(t + 0, "q", "E1", URI::ParamList {
+    { "is", "p~101~p1,p~102~p2" },
+    { "qstr~de", "blah" }
+  });
+
+  auto buf = trgt.trackedSessionToJoinedSession(sess);
+  auto joined = msg::decode<JoinedSession>(buf);
+
+  EXPECT_EQ(joined.search_queries().Get(0).result_items().size(), 2);
+  EXPECT_EQ(
+    joined.search_queries().Get(0).result_items().Get(0).item_id(),
+    "p~101");
+  EXPECT_EQ(
+    joined.search_queries().Get(0).result_items().Get(0).category1(),
+    1);
+  EXPECT_EQ(
+    joined.search_queries().Get(0).result_items().Get(0).category2(),
+    21);
+  EXPECT_EQ(
+    joined.search_queries().Get(0).result_items().Get(0).category3(),
+    31);
+
+  EXPECT_EQ(
+    joined.search_queries().Get(0).result_items().Get(1).category1(),
+    1);
+  EXPECT_EQ(
+    joined.search_queries().Get(0).result_items().Get(1).category2(),
+    22);
+  EXPECT_EQ(
+    joined.search_queries().Get(0).result_items().Get(1).category3(),
+    32);
 });
 /*
 
