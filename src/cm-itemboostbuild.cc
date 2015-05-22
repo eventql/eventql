@@ -157,7 +157,7 @@ int main(int argc, const char** argv) {
 
   auto output_file = File::openFile(
       flags.getString("output"),
-      File::O_CREATEOROPEN | File::O_WRITE);
+      File::O_CREATEOROPEN | File::O_WRITE | File::O_TRUNCATE);
 
   output_file.write(res->data(), res->size());
 
