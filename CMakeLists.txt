@@ -140,6 +140,26 @@ add_executable(cm-logjoin
 
 target_link_libraries(cm-logjoin ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_LIBS} ${FNORD_FTS_LIBS})
 
+add_executable(tests/test-logjoin
+    $<TARGET_OBJECTS:cm-common>
+    $<TARGET_OBJECTS:fnord-base>
+    $<TARGET_OBJECTS:fnord-json>
+    $<TARGET_OBJECTS:fnord-sstable>
+    $<TARGET_OBJECTS:fnord-http>
+    $<TARGET_OBJECTS:fnord-feeds>
+    $<TARGET_OBJECTS:fnord-mdb>
+    $<TARGET_OBJECTS:fnord-rpc>
+    $<TARGET_OBJECTS:fnord-msg>
+    $<TARGET_OBJECTS:fnord-fts>
+    src/logjoin/TrackedCartItem.cc
+    src/logjoin/TrackedItemVisit.cc
+    src/logjoin/TrackedQuery.cc
+    src/logjoin/TrackedSession.cc
+    src/JoinedSession.pb.cc
+    src/Logjoin_test.cc)
+
+target_link_libraries(tests/test-logjoin ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_LIBS} ${FNORD_FTS_LIBS})
+
 #add_executable(cm-logjoin-backfill
 #    $<TARGET_OBJECTS:cm-common>
 #    $<TARGET_OBJECTS:fnord-base>
