@@ -11,6 +11,7 @@
 #include "fnord-base/stdtypes.h"
 #include "fnord-base/exception.h"
 #include "fnord-base/test/unittest.h"
+#include "fnord-msg/msg.h"
 #include "src/schemas.cc"
 #include "logjoin/LogJoinTarget.cc"
 #include "JoinedSession.pb.h"
@@ -20,12 +21,56 @@ using namespace cm;
 
 UNIT_TEST(LogJoinTest);
 
-
 typedef HashMap<String, HashMap<String, String>> StringMap;
 
+LogJoinTarget mkTestTarget() {
+  LogJoinTarget trgt(joinedSessionsSchema(), false);
+
+  trgt.setNormalize([] (Language l, const String& q) { return q; });
+
+  trgt.setGetField([] (const DocID& doc, const String& field) {
+    return None<String>();
+  });
+
+  return trgt;
+}
+
+void printBuf(const Buffer& buf) {
+  msg::MessageObject msg;
+  msg::MessageDecoder::decode(buf, joinedSessionsSchema(), &msg);
+  fnord::iputs("joined session: $0", msg::MessagePrinter::print(msg, joinedSessionsSchema()));
+}
+
+// query with click
+// multiple queries
+// report items in multiple batches (logenplaetze, normal, etc)
+// cart // gmv matching
+// field expansion // joining
+
+
+TEST_CASE(LogJoinTest, SimpleQuery, [] () {
+  auto t = 1432311555 * kMicrosPerSecond;
+  auto trgt = mkTestTarget();
+
+  TrackedSession sess;
+  sess.insertLogline(t + 0, "q", "E1", URI::ParamList {
+    { "is", "p~101~1,p~102~2" },
+    { "qstr~de", "blah" }
+  });
+
+  auto buf = trgt.trackedSessionToJoinedSession(sess);
+  auto joined = msg::decode<JoinedSession>(buf);
+
+  printBuf(buf);
+
+  EXPECT_EQ(joined.search_queries().size(), 1);
+  EXPECT_EQ(joined.search_queries().Get(0).query_string(), "blah");
+  EXPECT_EQ(joined.search_queries().Get(0).query_string_normalized(), "blah");
+});
+
+/*
 
 TEST_CASE(LogJoinTest, Test1, [] () {
-  TrackedSession tracked_session;
   auto loglines_txt = FileUtil::read("src/test_loglines.txt");
   auto loglines = StringUtil::split(loglines_txt.toString(), "\n");
 
@@ -78,12 +123,7 @@ TEST_CASE(LogJoinTest, Test1, [] () {
   fields["p~62797695"]["category1"] = "4";
 
   auto getField = [fields] (const DocID& docid, const String& feature) -> Option<String> {
-    /*
-    if (fields.find(docid.docid) != fields.end() &&
-        fields[docid.docid].find(feature) != fields[docid.docid].end()) {
 
-    }
-    */
     auto it = fields.find(docid.docid);
     if (it != fields.end()) {
       auto field = it->second;
@@ -108,3 +148,5 @@ TEST_CASE(LogJoinTest, Test1, [] () {
   JoinedSession joined_session;
   joined_session.ParseFromString(session.toString());
 });
+
+*/
