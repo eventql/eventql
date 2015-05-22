@@ -40,7 +40,9 @@ LogJoinTarget mkTestTargetWithFieldExpansion() {
 
   trgt.setNormalize([] (Language l, const String& q) { return q; });
 
-  trgt.setGetField([] (const DocID& doc, const String& field) {
+  trgt.setGetField([] (
+      const DocID& doc,
+      const String& field) -> Option<String> {
     if (field == "category1") {
       return Some(String("1"));
     }
