@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include "fnord-base/exception.h"
 #include "fnord-base/test/unittest.h"
+#include "src/schemas.cc"
 #include "logjoin/LogJoinTarget.cc"
 
 using namespace fnord;
@@ -57,11 +58,8 @@ TEST_CASE(LogJoinTest, Test1, [] () {
       p = params.erase(p);
     }
 
-
-
-    //FIXME String -> uint_64
     tracked_session.insertLogline(
-      DateTime(atoi(time.c_str())),
+      DateTime((uint64_t) std::stoull(time)),
       evtype,
       evid,
       params);
@@ -71,6 +69,20 @@ TEST_CASE(LogJoinTest, Test1, [] () {
   tbl.emplace_back(Currency::PLN, Currency::EUR, 0.25);
   CurrencyConverter cconv(tbl);
   tracked_session.joinEvents(cconv);
-  fnord::iputs("num queries: $0", tracked_session.queries.size());
-  //fnord::iputs("loglines: $0", loglines.toString());
+
+  auto joined_sessions_schema = joinedSessionsSchema();
+  LogJoinTarget logjoin_target(joined_sessions_schema, false);
+
+  auto getField = [] (const DocID& docid, const String& feature) -> Option<String> {
+    return None<String>();
+  };
+
+  auto normalize = [] (Language lang, const String& query) -> String {
+    return query;
+  };
+
+  logjoin_target.setGetField(getField);
+  logjoin_target.setNormalize(normalize);
+  Buffer joined_session = logjoin_target.trackedSessionToJoinedSession(
+    tracked_session);
 });
