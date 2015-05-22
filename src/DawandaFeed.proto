@@ -1,0 +1,40 @@
+
+
+
+message SessionFeed {
+
+  /**
+   * The session id
+   */
+  required string session_id = 1;
+
+  /**
+   * The list of products ids that this user visited in this session
+   */
+  repeated string visited_products = 2;
+
+  /**
+   * The list of products ids that this user bought in this session
+   */
+  repeated string bought_products = 3;
+
+}
+
+message QueryFeed {
+
+  /**
+   * The session id
+   */
+  required string session_id = 1;
+
+  /**
+   * The list of products ids that was displayed to the user
+   */
+  repeated string product_list = 2;
+
+  /**
+   * The list of products ids that the user clicked
+   */
+  repeated string clicked_products = 3;
+
+}
