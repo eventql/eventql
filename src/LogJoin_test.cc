@@ -54,18 +54,42 @@ TEST_CASE(LogJoinTest, SimpleQuery, [] () {
 
   TrackedSession sess;
   sess.insertLogline(t + 0, "q", "E1", URI::ParamList {
-    { "is", "p~101~1,p~102~2" },
+    { "is", "p~101~p1,p~102~p2" },
     { "qstr~de", "blah" }
   });
 
   auto buf = trgt.trackedSessionToJoinedSession(sess);
   auto joined = msg::decode<JoinedSession>(buf);
-
-  printBuf(buf);
+  EXPECT_EQ(joined.num_cart_items(), 0);
+  EXPECT_EQ(joined.cart_value_eurcents(), 0);
+  EXPECT_EQ(joined.num_order_items(), 0);
+  EXPECT_EQ(joined.gmv_eurcents(), 0);
+  EXPECT_EQ(joined.first_seen_time(), 1432311555);
 
   EXPECT_EQ(joined.search_queries().size(), 1);
+  EXPECT_EQ(joined.search_queries().Get(0).num_result_items(), 2);
+  EXPECT_EQ(joined.search_queries().Get(0).num_result_items_clicked(), 0);
+  EXPECT_EQ(joined.search_queries().Get(0).num_ad_clicks(), 0);
+  EXPECT_EQ(joined.search_queries().Get(0).num_cart_items(), 0);
+  EXPECT_EQ(joined.search_queries().Get(0).cart_value_eurcents(), 0);
+  EXPECT_EQ(joined.search_queries().Get(0).num_order_items(), 0);
+  EXPECT_EQ(joined.search_queries().Get(0).gmv_eurcents(), 0);
   EXPECT_EQ(joined.search_queries().Get(0).query_string(), "blah");
   EXPECT_EQ(joined.search_queries().Get(0).query_string_normalized(), "blah");
+  EXPECT_EQ(
+    ProtoLanguage_Name(joined.search_queries().Get(0).language()),
+    "LANGUAGE_DE");
+  //DaWanda Hack
+  EXPECT_EQ(joined.search_queries().Get(0).num_ad_impressions(), 2);
+
+  EXPECT_EQ(joined.search_queries().Get(0).result_items().size(), 2);
+  EXPECT_EQ(joined.search_queries().Get(0).result_items().Get(0).position(), 1);
+  EXPECT_EQ(joined.search_queries().Get(0).result_items().Get(0).item_id(), "p~101");
+  EXPECT_FALSE(joined.search_queries().Get(0).result_items().Get(0).clicked());
+
+  EXPECT_EQ(joined.search_queries().Get(0).result_items().Get(1).position(), 2);
+  EXPECT_EQ(joined.search_queries().Get(0).result_items().Get(1).item_id(), "p~102");
+  EXPECT_FALSE(joined.search_queries().Get(0).result_items().Get(1).clicked());
 });
 
 /*
