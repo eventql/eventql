@@ -114,7 +114,7 @@ Buffer LogJoinTarget::trackedSessionToJoinedSession(TrackedSession& session) {
     }
   }
 
-    uint32_t sess_abgrp = 0;
+  uint32_t sess_abgrp = 0;
   for (const auto& q : session.queries) {
     auto& qry_obj = obj.addChild(schema.id("search_queries"));
 
