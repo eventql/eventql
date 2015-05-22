@@ -282,9 +282,17 @@ int main(int argc, const char** argv) {
   fnord::fts::Analyzer analyzer(flags.getString("conf"));
   cm::LogJoinTarget logjoin_target(
       joined_sessions_schema,
-      &analyzer,
-      index,
       dry_run);
+
+  auto normalize = [&analyzer] (Language lang, const String& query) -> String {
+    return analyzer.normalize(lang, query);
+  };
+  logjoin_target.setNormalize(normalize);
+  logjoin_target.setGetField(std::bind(
+      &DocIndex::getField,
+      index.get(),
+      std::placeholders::_1,
+      std::placeholders::_2));
 
   /* set up logjoin upload */
   cm::LogJoinUpload logjoin_upload(
