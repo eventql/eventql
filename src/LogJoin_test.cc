@@ -8,15 +8,21 @@
  */
 #include <stdlib.h>
 #include <stdio.h>
+#include "fnord-base/stdtypes.h"
 #include "fnord-base/exception.h"
 #include "fnord-base/test/unittest.h"
 #include "src/schemas.cc"
 #include "logjoin/LogJoinTarget.cc"
+#include "JoinedSession.pb.h"
 
 using namespace fnord;
 using namespace cm;
 
 UNIT_TEST(LogJoinTest);
+
+
+typedef HashMap<String, HashMap<String, String>> StringMap;
+
 
 TEST_CASE(LogJoinTest, Test1, [] () {
   TrackedSession tracked_session;
@@ -59,21 +65,34 @@ TEST_CASE(LogJoinTest, Test1, [] () {
     }
 
     tracked_session.insertLogline(
-      DateTime((uint64_t) std::stoull(time)),
+      DateTime((uint64_t) std::stoull(time) * 1000000),
       evtype,
       evid,
       params);
   }
 
-  CurrencyConverter::ConversionTable tbl;
-  tbl.emplace_back(Currency::PLN, Currency::EUR, 0.25);
-  CurrencyConverter cconv(tbl);
-  tracked_session.joinEvents(cconv);
-
   auto joined_sessions_schema = joinedSessionsSchema();
   LogJoinTarget logjoin_target(joined_sessions_schema, false);
 
-  auto getField = [] (const DocID& docid, const String& feature) -> Option<String> {
+  StringMap fields;
+  fields["p~62797695"]["category1"] = "4";
+
+  auto getField = [fields] (const DocID& docid, const String& feature) -> Option<String> {
+    /*
+    if (fields.find(docid.docid) != fields.end() &&
+        fields[docid.docid].find(feature) != fields[docid.docid].end()) {
+
+    }
+    */
+    auto it = fields.find(docid.docid);
+    if (it != fields.end()) {
+      auto field = it->second;
+      auto it_ = field.find(feature);
+      if (it_ != field.end()) {
+        return Some(String(it_->second));
+      }
+    }
+
     return None<String>();
   };
 
@@ -83,6 +102,9 @@ TEST_CASE(LogJoinTest, Test1, [] () {
 
   logjoin_target.setGetField(getField);
   logjoin_target.setNormalize(normalize);
-  Buffer joined_session = logjoin_target.trackedSessionToJoinedSession(
+  Buffer session = logjoin_target.trackedSessionToJoinedSession(
     tracked_session);
+
+  JoinedSession joined_session;
+  joined_session.ParseFromString(session.toString());
 });
