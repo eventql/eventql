@@ -337,7 +337,7 @@ Buffer LogJoinTarget::trackedSessionToJoinedSession(TrackedSession& session) {
   auto first_seen = session.firstSeenTime();
   auto last_seen = session.lastSeenTime();
   if (first_seen.isEmpty() || last_seen.isEmpty()) {
-    return msg_buf;
+    RAISE(kRuntimeError, "session: time isn't set");
   }
 
   obj.addChild(
@@ -358,10 +358,6 @@ void LogJoinTarget::onSession(
     TrackedSession& session) {
 
   Buffer msg_buf = trackedSessionToJoinedSession(session);
-  if (msg_buf.size() == 0) {
-    return;
-  }
-
   if (dry_run_) {
     fnord::logInfo(
         "cm.logjoin",
