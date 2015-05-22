@@ -54,8 +54,8 @@ public:
 
 protected:
   msg::MessageSchema joined_sessions_schema_;
-  Function<fnord::String (Language lang, const fnord::String& query)> normalize;
-  Function<Option<String> (const DocID& docid, const String& feature)> getField;
+  Function<fnord::String (Language lang, const fnord::String& query)> normalize_;
+  Function<Option<String> (const DocID& docid, const String& feature)> get_field_;
   bool dry_run_;
   Random rnd_;
   CurrencyConverter cconv_;
