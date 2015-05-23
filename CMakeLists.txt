@@ -156,7 +156,7 @@ add_executable(tests/test-logjoin
     src/logjoin/TrackedQuery.cc
     src/logjoin/TrackedSession.cc
     src/JoinedSession.pb.cc
-    src/Logjoin_test.cc)
+    src/LogJoin_test.cc)
 
 target_link_libraries(tests/test-logjoin ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_LIBS} ${FNORD_FTS_LIBS})
 
