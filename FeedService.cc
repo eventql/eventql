@@ -19,7 +19,7 @@ namespace feeds {
 
 FeedService::FeedService(
     fnord::FileRepository file_repo,
-    const String& stats_path /* = "/feeds" */) :
+    const String& stats_path /* = "/brokerd" */) :
     file_repo_(file_repo),
     stats_path_(stats_path) {
   file_repo.listFiles([this] (const std::string& filename) -> bool {

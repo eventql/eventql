@@ -25,9 +25,10 @@ namespace feeds {
 class FeedService {
   friend class LogStream;
 public:
+
   FeedService(
       fnord::FileRepository file_repo,
-      const String& stats_path = "/feeds");
+      const String& stats_path = "/brokerd");
 
   /**
    * Append an entry to the stream referenced by `stream` and return the offset
