@@ -19,19 +19,6 @@ void demoQueryServlet::handleHTTPRequest(
   const http::HTTPRequest& req(req_stream->request());
   URI uri(req.uri());
   const URI::ParamList& params(uri.queryParams());
-  String txid;
-
-  if (!uri.getParam(params, "txid", &txid)) {
-    http::HTTPResponse res;
-    Buffer body;
-    body.append("error: missing ?txid=... parameter");
-    req_stream->readBody();
-    res.populateFromRequest(req);
-    res.setStatus(http::kStatusBadRequest);
-    res.addBody(body.data(), body.size());
-    res_stream->writeResponse(res);
-    return;
-  }
 
   http::HTTPSSEStream sse_stream(req_stream, res_stream);
 
@@ -45,7 +32,7 @@ void demoQueryServlet::handleHTTPRequest(
     json.addString("running");
     json.addComma();
     json.addObjectEntry("progress");
-    json.addFloat(status);
+    json.addFloat(status / 100);
     json.addComma();
     json.addObjectEntry("message");
     json.addString("Running: x rows scanned");
