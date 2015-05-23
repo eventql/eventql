@@ -38,12 +38,12 @@ int main(int argc, const char** argv) {
   cli::FlagParser flags;
 
   flags.defineFlag(
-      "http_port",
+      "http",
       cli::FlagParser::T_INTEGER,
       false,
       NULL,
       "8000",
-      "Start the rpc http server on this port",
+      "Start the http server on this port",
       "<port>");
 
   flags.defineFlag(
@@ -70,7 +70,7 @@ int main(int argc, const char** argv) {
       false,
       NULL,
       "127.0.0.1:8192",
-      "Statsd addr",
+      "Submit statsd stats to this host:port",
       "<addr>");
 
   flags.parseArgv(argc, argv);
@@ -100,7 +100,7 @@ int main(int argc, const char** argv) {
   http::HTTPRouter http_router;
   http_router.addRouteByPrefixMatch("/rpc", &http, &tp);
   http::HTTPServer http_server(&http_router, &event_loop);
-  http_server.listen(flags.getInt("http_port"));
+  http_server.listen(flags.getInt("http"));
   http_server.stats()->exportStats("/brokerd/http");
 
   stats::StatsHTTPServlet stats_servlet;
