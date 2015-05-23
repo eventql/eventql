@@ -102,18 +102,18 @@ target_link_libraries(cm-frontend ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_LIBS})
 target_link_libraries(cm-frontend m)
 add_dependencies(cm-frontend cm-frontend-assets)
 
-add_executable(cm-feedserver
-    $<TARGET_OBJECTS:cm-common>
-    $<TARGET_OBJECTS:fnord-base>
-    $<TARGET_OBJECTS:fnord-http>
-    $<TARGET_OBJECTS:fnord-mdb>
-    $<TARGET_OBJECTS:fnord-json>
-    $<TARGET_OBJECTS:fnord-sstable>
-    $<TARGET_OBJECTS:fnord-feeds>
-    $<TARGET_OBJECTS:fnord-rpc>
-    src/cm-feedserver.cc)
-
-target_link_libraries(cm-feedserver ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_LIBS})
+#add_executable(cm-feedserver
+#    $<TARGET_OBJECTS:cm-common>
+#    $<TARGET_OBJECTS:fnord-base>
+#    $<TARGET_OBJECTS:fnord-http>
+#    $<TARGET_OBJECTS:fnord-mdb>
+#    $<TARGET_OBJECTS:fnord-json>
+#    $<TARGET_OBJECTS:fnord-sstable>
+#    $<TARGET_OBJECTS:fnord-feeds>
+#    $<TARGET_OBJECTS:fnord-rpc>
+#    src/cm-feedserver.cc)
+#
+#target_link_libraries(cm-feedserver ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_LIBS})
 
 add_executable(cm-logjoin
     $<TARGET_OBJECTS:cm-common>
