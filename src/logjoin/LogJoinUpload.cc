@@ -8,6 +8,7 @@
  */
 #include "logjoin/LogJoinUpload.h"
 #include "fnord-base/uri.h"
+#include "fnord-base/util/binarymessagereader.h"
 #include "fnord-base/util/binarymessagewriter.h"
 #include "fnord-http/httprequest.h"
 
@@ -57,8 +58,14 @@ size_t LogJoinUpload::scanQueue(const String& queue_name) {
     }
 
     try {
+      util::BinaryMessageReader reader(value.data(), value.size());
+      reader.readUInt64();
+      reader.readUInt64();
+      auto ssize = reader.readVarUInt();
+      auto sdata = reader.read(ssize);
+
       JoinedSession session;
-      msg::decode<JoinedSession>(value.data(), value.size(), &session);
+      msg::decode<JoinedSession>(sdata, ssize, &session);
 
       for (const auto& cb : callbacks_) {
         cb(session);
