@@ -184,7 +184,18 @@ void JSONOutputProxy<OutputType>::putProperty(
 }
 
 template <typename T, typename O>
-void toJSONImpl(const std::vector<T>& value, O* target) {
+void toJSONImpl(const Vector<T>& value, O* target) {
+  target->emplace_back(json::JSON_ARRAY_BEGIN);
+
+  for (const auto& e : value) {
+    toJSON(e, target);
+  }
+
+  target->emplace_back(json::JSON_ARRAY_END);
+}
+
+template <typename T, typename O>
+void toJSONImpl(const Set<T>& value, O* target) {
   target->emplace_back(json::JSON_ARRAY_BEGIN);
 
   for (const auto& e : value) {

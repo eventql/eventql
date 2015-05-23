@@ -12,6 +12,7 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include "fnord-base/stdtypes.h"
 #include "fnord-base/buffer.h"
 #include "fnord-base/option.h"
 #include "fnord-json/jsontypes.h"
@@ -23,7 +24,10 @@ class JSONOutputStream;
 class JSONInputStream;
 
 template <typename T, typename O>
-void toJSONImpl(const std::vector<T>& value, O* target);
+void toJSONImpl(const Vector<T>& value, O* target);
+
+template <typename T, typename O>
+void toJSONImpl(const Set<T>& value, O* target);
 
 template <typename T, typename O>
 void toJSONImpl(const T& value, O* target);
