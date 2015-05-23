@@ -33,6 +33,11 @@ uint64_t FeedService::append(std::string stream_key, std::string entry) {
   return stream->append(entry);
 }
 
+uint64_t FeedService::insert(const String& topic, const Buffer& record) {
+  auto stream = openStream(topic, true);
+  return stream->append(record);
+}
+
 std::vector<FeedEntry> FeedService::fetch(
       std::string stream_key,
       uint64_t offset,

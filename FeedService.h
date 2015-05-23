@@ -14,6 +14,7 @@
 #include <set>
 #include <string>
 #include <unordered_map>
+#include "fnord-base/stdtypes.h"
 #include "fnord-base/io/filerepository.h"
 #include "fnord-feeds/LocalFeed.h"
 #include "fnord-feeds/FeedEntry.h"
@@ -31,6 +32,8 @@ public:
       const String& stats_path = "/brokerd");
 
   /**
+   * DEPRECATED
+   *
    * Append an entry to the stream referenced by `stream` and return the offset
    * at which the entry was written. Will create a new stream if the referenced
    * stream does not exist yet.
@@ -39,7 +42,18 @@ public:
    * @param entry the entry to append to the stream
    * @return the offset at which the entry was written
    */
-  uint64_t append(std::string stream, std::string entry);
+  uint64_t append(String stream, String entry); // FIXPAUL DEPRECATED
+
+  /**
+   * Insert a record into the topic referenced by `topic` and return the offset
+   * at which the record was written. Will create a new topic if the referenced
+   * topic does not exist yet.
+   *
+   * @param topic the name/key of the topic
+   * @param record the record to append to the topic
+   * @return the offset at which the record was written
+   */
+  uint64_t insert(const String& topic, const Buffer& record);
 
   /**
    * Read one or more entries from the stream at or after the provided start

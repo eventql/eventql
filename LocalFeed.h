@@ -33,6 +33,8 @@ public:
       FeedService* base);
 
   uint64_t append(const std::string& entry);
+  uint64_t append(const Buffer& entry);
+  uint64_t append(const void* data, size_t size);
 
   std::vector<FeedEntry> fetch(uint64_t offset, int batch_size);
 

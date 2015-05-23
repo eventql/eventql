@@ -52,6 +52,7 @@ add_executable(brokerd
     $<TARGET_OBJECTS:fnord-sstable>
     $<TARGET_OBJECTS:fnord-feeds>
     $<TARGET_OBJECTS:fnord-rpc>
+    BrokerServlet.cc
     brokerd.cc)
 
 target_link_libraries(brokerd ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_LIBS})

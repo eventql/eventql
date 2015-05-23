@@ -32,6 +32,14 @@ LogStream::LogStream(
 }
 
 uint64_t LogStream::append(const std::string& entry) {
+  return append(entry.data(), entry.size());
+}
+
+uint64_t LogStream::append(const Buffer& entry) {
+  return append(entry.data(), entry.size());
+}
+
+uint64_t LogStream::append(const void* data, size_t size) {
   std::unique_lock<std::mutex> l(tables_mutex_);
 
   if (tables_.size() == 0 || tables_.back()->writer.get() == nullptr) {
@@ -44,8 +52,8 @@ uint64_t LogStream::append(const std::string& entry) {
   auto row_offset = tbl->writer->appendRow(
       (void *) &time,
       sizeof(time),
-      entry.c_str(),
-      entry.length());
+      data,
+      size);
 
   if (row_offset > kMaxTableSize) {
     tbl->writer->finalize();

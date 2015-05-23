@@ -26,6 +26,12 @@ public:
       http::HTTPResponse* res);
 
 protected:
+
+  void insertRecord(
+      http::HTTPRequest* req,
+      http::HTTPResponse* res,
+      URI* uri);
+
   FeedService* service_;
 };
 
