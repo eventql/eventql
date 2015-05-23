@@ -37,6 +37,7 @@
 #include "logjoin/LogJoin.h"
 #include "logjoin/LogJoinTarget.h"
 #include "logjoin/LogJoinUpload.h"
+#include "logjoin/LogJoinExport.h"
 #include "DocStore.h"
 #include "IndexChangeRequest.h"
 #include "DocIndex.h"
@@ -299,6 +300,13 @@ int main(int argc, const char** argv) {
       sessdb,
       flags.getString("publish_to"),
       &http);
+
+  cm::LogJoinExport logjoin_export(&http);
+  logjoin_upload.onSession(
+      std::bind(
+          &cm::LogJoinExport::exportSession,
+          &logjoin_export,
+          std::placeholders::_1));
 
   /* setup logjoin */
   cm::LogJoin logjoin(shard, dry_run, &logjoin_target);

@@ -11,7 +11,9 @@
 #include "fnord-base/stdtypes.h"
 #include "fnord-mdb/MDB.h"
 #include "fnord-msg/MessageSchema.h"
+#include "fnord-msg/msg.h"
 #include "fnord-http/httpconnectionpool.h"
+#include "src/JoinedSession.pb.h"
 
 using namespace fnord;
 
@@ -28,6 +30,8 @@ public:
 
   void upload();
 
+  void onSession(Function<void (const JoinedSession&)> cb);
+
 protected:
 
   size_t scanQueue(const String& queue_name);
@@ -37,7 +41,8 @@ protected:
   String feedserver_url_;
   http::HTTPConnectionPool* http_;
   size_t batch_size_;
+  Vector<Function<void (const JoinedSession&)>> callbacks_;
 };
-} // namespace cm
 
+} // namespace cm
 #endif

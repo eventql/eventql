@@ -135,8 +135,10 @@ add_executable(cm-logjoin
     src/schemas.cc
     src/logjoin/LogJoin.cc
     src/logjoin/LogJoinUpload.cc
+    src/logjoin/LogJoinExport.cc
     src/logjoin/LogJoinTarget.cc
-    src/logjoin/LogJoinShard.cc)
+    src/logjoin/LogJoinShard.cc
+    ${PROTO_SRCS})
 
 target_link_libraries(cm-logjoin ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_LIBS} ${FNORD_FTS_LIBS})
 
