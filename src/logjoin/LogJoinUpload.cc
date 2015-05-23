@@ -28,6 +28,10 @@ void LogJoinUpload::upload() {
   while (scanQueue("__uploadq-sessions") > 0);
 }
 
+void LogJoinUpload::onSession(Function<void (const JoinedSession&)> cb) {
+  callbacks_.emplace_back(cb);
+}
+
 size_t LogJoinUpload::scanQueue(const String& queue_name) {
   auto txn = db_->startTransaction();
   auto cursor = txn->getCursor();
@@ -50,6 +54,18 @@ size_t LogJoinUpload::scanQueue(const String& queue_name) {
 
     if (!StringUtil::beginsWith(key.toString(), queue_name)) {
       break;
+    }
+
+    try {
+      JoinedSession session;
+      msg::decode<JoinedSession>(value.data(), value.size(), &session);
+
+      for (const auto& cb : callbacks_) {
+        cb(session);
+      }
+    } catch (...) {
+      txn->abort();
+      throw;
     }
 
     batch.emplace_back(value);
