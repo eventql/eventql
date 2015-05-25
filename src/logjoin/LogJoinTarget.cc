@@ -332,6 +332,7 @@ Buffer LogJoinTarget::trackedSessionToJoinedSession(TrackedSession& session) {
   obj.addChild(schema.id("cart_value_eurcents"), session.cart_value_eurcents);
   obj.addChild(schema.id("num_order_items"), session.num_order_items);
   obj.addChild(schema.id("gmv_eurcents"), session.gmv_eurcents);
+  obj.addChild(schema.id("customer"), session.customer_key);
 
   Buffer msg_buf;
   auto first_seen = session.firstSeenTime();
