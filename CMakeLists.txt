@@ -2,6 +2,19 @@ project(FNORD_FEEDS)
 
 include_directories(../)
 include_directories(../3rdparty)
+file(GLOB PROTO_FILES *.proto)
+
+foreach(PROTO_FILE ${PROTO_FILES})
+  get_filename_component(PROTO_NAME ${PROTO_FILE} NAME_WE)
+  set(PROTO_SRCS ${PROTO_SRCS} ${CMAKE_CURRENT_SOURCE_DIR}/${PROTO_NAME}.pb.cc)
+endforeach()
+
+add_custom_target(fnord-feeds-protos ALL
+    COMMAND protoc --cpp_out=. -I${CMAKE_CURRENT_SOURCE_DIR} ${PROTO_FILES}
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    DEPENDS ${PROTO_FILES})
+
+set_source_files_properties(${PROTO_SRCS} PROPERTIES GENERATED true)
 
 add_library(fnord-feeds OBJECT
     BrokerClient.cc
@@ -10,40 +23,10 @@ add_library(fnord-feeds OBJECT
     RemoteFeedFactory.cc
     RemoteFeedReader.cc
     RemoteFeedWriter.cc
-    FeedService.cc)
+    FeedService.cc
+    ${PROTO_SRCS})
 
-add_executable(fn-feedtail
-    $<TARGET_OBJECTS:fnord-base>
-    $<TARGET_OBJECTS:fnord-http>
-    $<TARGET_OBJECTS:fnord-rpc>
-    $<TARGET_OBJECTS:fnord-json>
-    $<TARGET_OBJECTS:fnord-sstable>
-    $<TARGET_OBJECTS:fnord-feeds>
-    fn-feedtail.cc)
-
-target_link_libraries(fn-feedtail ${CMAKE_THREAD_LIBS_INIT})
-
-add_executable(fn-feedupload
-    $<TARGET_OBJECTS:fnord-base>
-    $<TARGET_OBJECTS:fnord-http>
-    $<TARGET_OBJECTS:fnord-rpc>
-    $<TARGET_OBJECTS:fnord-json>
-    $<TARGET_OBJECTS:fnord-sstable>
-    $<TARGET_OBJECTS:fnord-feeds>
-    fn-feedupload.cc)
-
-target_link_libraries(fn-feedupload ${CMAKE_THREAD_LIBS_INIT})
-
-add_executable(fn-feedexport
-    $<TARGET_OBJECTS:fnord-base>
-    $<TARGET_OBJECTS:fnord-http>
-    $<TARGET_OBJECTS:fnord-rpc>
-    $<TARGET_OBJECTS:fnord-json>
-    $<TARGET_OBJECTS:fnord-sstable>
-    $<TARGET_OBJECTS:fnord-feeds>
-    fn-feedexport.cc)
-
-target_link_libraries(fn-feedexport ${CMAKE_THREAD_LIBS_INIT})
+add_dependencies(fnord-feeds fnord-feeds-protos)
 
 add_executable(brokerd
     $<TARGET_OBJECTS:fnord-base>

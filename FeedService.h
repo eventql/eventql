@@ -20,6 +20,7 @@
 #include "fnord-base/io/FileLock.h"
 #include "fnord-feeds/LocalFeed.h"
 #include "fnord-feeds/FeedEntry.h"
+#include "fnord-feeds/Message.pb.h"
 #include "fnord-base/reflect/reflect.h"
 
 namespace fnord {
@@ -64,16 +65,27 @@ public:
    * a start offset of zero to retrieve the first entry or entries from the
    * stream.
    *
-   * The provided callback must return a boolean. If the callback returns true,
-   * the next entry will be read (if there is a next entry). If the callback
-   * returns false the scan method will return.
-   *
    * @param start_offset the start offset to read from
    */
   std::vector<FeedEntry> fetch(
       std::string stream,
       uint64_t offset,
       int batch_size);
+
+  /**
+   * Read one or more entries from the stream at or after the provided start
+   * offset. If the start offset references a deleted/expired entry, the next
+   * valid entry will be returned. It is always valid to call this method with
+   * a start offset of zero to retrieve the first entry or entries from the
+   * stream.
+   *
+   * @param start_offset the start offset to read from
+   */
+  void fetchSome(
+      std::string stream,
+      uint64_t offset,
+      int batch_size,
+      Function<void (const Message& msg)> fn);
 
   String hostID();
 

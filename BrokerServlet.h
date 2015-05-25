@@ -37,6 +37,11 @@ protected:
       http::HTTPResponse* res,
       URI* uri);
 
+  void fetchRecords(
+      http::HTTPRequest* req,
+      http::HTTPResponse* res,
+      URI* uri);
+
   FeedService* service_;
 };
 

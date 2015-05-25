@@ -65,8 +65,28 @@ std::vector<FeedEntry> FeedService::fetch(
       std::string stream_key,
       uint64_t offset,
       int batch_size) {
+  Vector<FeedEntry> res;
+
   auto stream = openStream(stream_key, false);
-  return stream->fetch(offset, batch_size);
+  stream->fetch(offset, batch_size, [&res] (const Message& r) {
+    FeedEntry entry;
+    entry.offset = r.offset();
+    entry.next_offset = r.next_offset();
+    entry.time = r.time();
+    entry.data = r.data();
+    res.emplace_back(entry);
+  });
+
+  return res;
+}
+
+void FeedService::fetchSome(
+      std::string stream_key,
+      uint64_t offset,
+      int batch_size,
+      Function<void (const Message& msg)> fn) {
+  auto stream = openStream(stream_key, false);
+  return stream->fetch(offset, batch_size, fn);
 }
 
 LogStream* FeedService::openStream(const std::string& name, bool create) {

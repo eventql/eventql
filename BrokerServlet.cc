@@ -10,6 +10,7 @@
 #include "fnord-base/util/binarymessagewriter.h"
 #include "fnord-json/json.h"
 #include <fnord-base/wallclock.h>
+#include <fnord-msg/msg.h>
 #include "fnord-msg/MessageEncoder.h"
 #include "fnord-msg/MessagePrinter.h"
 #include <fnord-base/util/Base64.h>
@@ -30,6 +31,10 @@ void BrokerServlet::handleHTTPRequest(
   try {
     if (StringUtil::endsWith(uri.path(), "/insert")) {
       return insertRecord(req, res, &uri);
+    }
+
+    if (StringUtil::endsWith(uri.path(), "/fetch")) {
+      return fetchRecords(req, res, &uri);
     }
 
     if (StringUtil::endsWith(uri.path(), "/host_id")) {
@@ -63,14 +68,59 @@ void BrokerServlet::insertRecord(
   }
 
   auto offset = service_->insert(topic, req->body());
+  res->addHeader("X-Broker-HostID", service_->hostID());
   res->addHeader("X-Broker-Created-Offset", StringUtil::toString(offset));
   res->setStatus(http::kStatusCreated);
+}
+
+void BrokerServlet::fetchRecords(
+    http::HTTPRequest* req,
+    http::HTTPResponse* res,
+    URI* uri) {
+  const auto& params = uri->queryParams();
+
+  String topic;
+  if (!URI::getParam(params, "topic", &topic)) {
+    res->setStatus(fnord::http::kStatusBadRequest);
+    res->addBody("error: missing ?topic=... parameter");
+    return;
+  }
+
+  String offset;
+  if (!URI::getParam(params, "offset", &offset)) {
+    res->setStatus(fnord::http::kStatusBadRequest);
+    res->addBody("error: missing ?offset=... parameter");
+    return;
+  }
+
+  String limit;
+  if (!URI::getParam(params, "limit", &limit)) {
+    res->setStatus(fnord::http::kStatusBadRequest);
+    res->addBody("error: missing ?limit=... parameter");
+    return;
+  }
+
+  MessageList msg_list;
+  service_->fetchSome(
+      topic,
+      std::stoull(offset),
+      std::stoull(limit),
+      [&msg_list] (const Message& msg) {
+        *msg_list.add_messages() = msg;
+      });
+
+  res->setStatus(http::kStatusOK);
+  res->addHeader("X-Broker-HostID", service_->hostID());
+  res->addHeader("Content-Type", "application/x-protobuf");
+  res->addBody(*msg::encode(msg_list));
 }
 
 void BrokerServlet::getHostID(
     http::HTTPRequest* req,
     http::HTTPResponse* res,
     URI* uri) {
+  res->addHeader("X-Broker-HostID", service_->hostID());
+  res->addHeader("Content-Type", "text/plain");
   res->setStatus(http::kStatusOK);
   res->addBody(service_->hostID());
 }

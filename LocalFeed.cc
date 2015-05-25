@@ -65,8 +65,10 @@ uint64_t LogStream::append(const void* data, size_t size) {
   return head_offset_;
 }
 
-std::vector<FeedEntry> LogStream::fetch(uint64_t offset, int batch_size) {
-  std::vector<FeedEntry> entries;
+void LogStream::fetch(
+      uint64_t offset,
+      int batch_size,
+      Function<void (const Message&)> fn) {
 #ifndef FNORD_NOTRACE
   auto request_id = rnd_.hex64();
 #endif
@@ -93,7 +95,7 @@ std::vector<FeedEntry> LogStream::fetch(uint64_t offset, int batch_size) {
           request_id);
 #endif
 
-      return entries;
+      return;
     }
 
     if (offset == 0) {
@@ -147,14 +149,8 @@ std::vector<FeedEntry> LogStream::fetch(uint64_t offset, int batch_size) {
 #endif
 
     if (!cursor->trySeekTo(offset - table->offset)) {
-#ifndef FNORD_NOTRACE
-      fnord::logTrace(
-          "fnord.feeds.localfeed",
-          "request id=$0: seek to target offset failed",
-          request_id);
-#endif
-
-      return entries;
+      RAISE(kRuntimeError, "invalid offset");
+      return;
     }
   }
 
@@ -177,35 +173,24 @@ std::vector<FeedEntry> LogStream::fetch(uint64_t offset, int batch_size) {
       break;
     }
 
-    FeedEntry entry;
-    entry.offset = table->offset + cursor->position();
-    entry.next_offset = table->offset + cursor->nextPosition();
-    entry.data = cursor->getDataString();
-    entry.time = 0;
+    Message entry;
+    entry.set_offset(table->offset + cursor->position());
+    entry.set_next_offset(table->offset + cursor->nextPosition());
+    entry.set_data(cursor->getDataString());
 
     uint64_t* time;
     size_t time_size;
     cursor->getKey((void**) &time, &time_size);
     if (time_size == sizeof(uint64_t)) {
-      entry.time = *time;
+      entry.set_time(*time);
     }
 
-    entries.emplace_back(std::move(entry));
+    fn(entry);
 
     if (!cursor->next()) {
       break;
     }
   }
-
-#ifndef FNORD_NOTRACE
-  fnord::logTrace(
-      "fnord.feeds.localfeed",
-      "request id=$0: returning $1 entries",
-      request_id,
-      entries.size());
-#endif
-
-  return entries;
 }
 
 std::shared_ptr<LogStream::TableRef> LogStream::createTable() {

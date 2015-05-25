@@ -17,6 +17,7 @@
 #include "fnord-base/io/filerepository.h"
 #include "fnord-base/reflect/reflect.h"
 #include "fnord-feeds/FeedEntry.h"
+#include "fnord-feeds/Message.pb.h"
 #include "fnord-sstable/sstablewriter.h"
 #include "fnord-base/stats/counter.h"
 
@@ -36,7 +37,10 @@ public:
   uint64_t append(const Buffer& entry);
   uint64_t append(const void* data, size_t size);
 
-  std::vector<FeedEntry> fetch(uint64_t offset, int batch_size);
+  void fetch(
+      uint64_t offset,
+      int batch_size,
+      Function<void (const Message&)> fn);
 
   struct TableHeader {
     uint64_t offset;

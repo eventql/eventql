@@ -15,15 +15,38 @@
 #include "fnord-base/cli/flagparser.h"
 #include "fnord-base/cli/CLI.h"
 #include "fnord-base/thread/eventloop.h"
+#include "fnord-http/httpconnectionpool.h"
+#include "fnord-feeds/BrokerClient.h"
 
 using namespace fnord;
 
 void cmd_monitor(const cli::FlagParser& flags) {
   fnord::iputs("monitor", 1);
+
 }
 
 void cmd_export(const cli::FlagParser& flags) {
   fnord::iputs("export", 1);
+
+  fnord::thread::EventLoop ev;
+
+  auto evloop_thread = std::thread([&ev] {
+    ev.run();
+  });
+
+  http::HTTPConnectionPool http(&ev);
+  feeds::BrokerClient broker(&http);
+
+  broker.fetch(
+      URI("http://nue03.prod.fnrd.net:7001"),
+      flags.getString("topic"),
+      0,
+      100,
+      [] (const feeds::FeedEntry& msg) {
+        fnord::iputs("msg: $0", msg.data);
+      });
+
+  evloop_thread.join();
 }
 
 int main(int argc, const char** argv) {

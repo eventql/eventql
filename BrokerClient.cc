@@ -44,12 +44,14 @@ void BrokerClient::insert(
   }
 }
 
-//void BrokerClient::fetch(
-//    const URI& server,
-//    const String& feed,
-//    size_t offset,
-//    size_t limit,
-//    CallbackType cb);
+void BrokerClient::fetch(
+    const URI& server,
+    const String& feed,
+    size_t offset,
+    size_t limit,
+    CallbackType cb) {
+
+}
 
 //void BrokerClient::fetchCursor(
 //    BrokerCursor* cursor,
