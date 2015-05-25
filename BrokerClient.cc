@@ -52,7 +52,7 @@ MessageList BrokerClient::fetch(
     size_t limit) {
   URI uri(
       StringUtil::format(
-          "$0/broker/insert?topic=$1&offset=$2&limit=3",
+          "$0/broker/fetch?topic=$1&offset=$2&limit=$3",
           server.toString(),
           URI::urlEncode(topic),
           offset,
