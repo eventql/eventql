@@ -9,7 +9,7 @@
  */
 #include "fnord-base/inspect.h"
 #include "fnord-base/logging.h"
-#include "fnord-base/io/FileUtil.h"
+#include "fnord-base/io/fileutil.h"
 #include "fnord-json/json.h"
 #include "fnord-sstable/sstablereader.h"
 #include "fnord-sstable/sstablerepair.h"
