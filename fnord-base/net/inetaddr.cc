@@ -16,7 +16,6 @@
 #include "fnord-base/net/inetaddr.h"
 
 namespace fnord {
-namespace net {
 
 InetAddr InetAddr::resolve(const std::string& addr_str) {
   auto parts = StringUtil::split(addr_str, ":");
@@ -56,7 +55,18 @@ InetAddr::InetAddr(
     ip_(ip),
     port_(port) {}
 
+InetAddr::InetAddr(
+    const std::string& hostname,
+    unsigned port) :
+    hostname_(hostname),
+    port_(port) {}
+
+
 const std::string& InetAddr::ip() const {
+  if (ip_.length() == 0) {
+    RAISE(kRuntimeError, "not resolved");
+  }
+
   return ip_;
 }
 
@@ -65,7 +75,15 @@ const std::string& InetAddr::hostname() const {
 }
 
 std::string InetAddr::ipAndPort() const {
+  if (ip_.length() == 0) {
+    RAISE(kRuntimeError, "not resolved");
+  }
+
   return StringUtil::format("$0:$1", ip_, port_);
+}
+
+std::string InetAddr::hostAndPort() const {
+  return StringUtil::format("$0:$1", hostname_, port_);
 }
 
 bool InetAddr::hasPort() const {
@@ -80,5 +98,4 @@ void InetAddr::setPort(unsigned port) {
   port_ = port;
 }
 
-}
 }
