@@ -16,12 +16,12 @@ namespace fnord {
 namespace stats {
 
 StatsdAgent::StatsdAgent(
-    net::InetAddr addr,
+    InetAddr addr,
     Duration report_interval) :
     StatsdAgent(addr, report_interval, StatsRepository::get()) {}
 
 StatsdAgent::StatsdAgent(
-    net::InetAddr addr,
+    InetAddr addr,
     Duration report_interval,
     StatsRepository* stats_repo) :
     addr_(addr),

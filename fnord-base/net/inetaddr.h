@@ -12,12 +12,15 @@
 #include <string>
 
 namespace fnord {
-namespace net {
 
 class InetAddr {
 public:
 
   static InetAddr resolve(const std::string& addr_str);
+
+  InetAddr(
+      const std::string& hostname,
+      unsigned port);
 
   const std::string& ip() const;
   const std::string& hostname() const;
@@ -25,8 +28,10 @@ public:
   bool hasPort() const;
   void setPort(unsigned port);
   std::string ipAndPort() const;
+  std::string hostAndPort() const;
 
 protected:
+
   InetAddr(
       const std::string& hostname,
       const std::string& ip,
@@ -37,7 +42,6 @@ protected:
   unsigned port_;
 };
 
-}
 }
 
 #endif
