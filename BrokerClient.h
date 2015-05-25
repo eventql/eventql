@@ -11,15 +11,13 @@
 #define _FNORD_BROKER_BROKERCLIENT_H
 #include <fnord-base/stdtypes.h>
 #include <fnord-http/httpconnectionpool.h>
-#include <fnord-feeds/FeedEntry.h>
+#include <fnord-feeds/Message.pb.h>
 
 namespace fnord {
 namespace feeds {
 
 class BrokerClient {
 public:
-  typedef Function<void (const FeedEntry& record)> CallbackType;
-
   BrokerClient(http::HTTPConnectionPool* http);
 
   //void insert(
@@ -32,12 +30,11 @@ public:
       const String& topic,
       const Buffer& record);
 
-  void fetch(
+  MessageList fetch(
       const URI& server,
       const String& topic,
       size_t offset,
-      size_t limit,
-      CallbackType cb);
+      size_t limit);
 
   //void fetchCursor(
   //    BrokerCursor* cursor,
@@ -46,10 +43,10 @@ public:
   //    size_t limit,
   //    CallbackType cb);
 
-  void monitor(
-      const URI& server,
-      const String& feed,
-      CallbackType cb);
+  //void monitor(
+  //    const URI& server,
+  //    const String& feed,
+  //    CallbackType cb);
 
 protected:
   http::HTTPConnectionPool* http_;

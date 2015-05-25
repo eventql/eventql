@@ -8,6 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <fnord-feeds/BrokerClient.h>
+#include <fnord-msg/msg.h>
 
 namespace fnord {
 namespace feeds {
@@ -44,13 +45,36 @@ void BrokerClient::insert(
   }
 }
 
-void BrokerClient::fetch(
+MessageList BrokerClient::fetch(
     const URI& server,
-    const String& feed,
+    const String& topic,
     size_t offset,
-    size_t limit,
-    CallbackType cb) {
+    size_t limit) {
+  URI uri(
+      StringUtil::format(
+          "$0/broker/insert?topic=$1&offset=$2&limit=3",
+          server.toString(),
+          URI::urlEncode(topic),
+          offset,
+          limit));
 
+  auto req = http::HTTPRequest::mkGet(uri);
+  auto res = http_->executeRequest(req);
+  res.wait();
+
+  const auto& r = res.get();
+  if (r.statusCode() != 200) {
+    RAISEF(kRuntimeError, "received non-201 response: $0", r.body().toString());
+  }
+
+  auto host_id = r.getHeader("X-Broker-HostID");
+  auto msg_list = msg::decode<MessageList>(r.body());;
+
+  for (auto& msg : *msg_list.mutable_messages()) {
+    msg.set_host_id(host_id);
+  }
+
+  return msg_list;
 }
 
 //void BrokerClient::fetchCursor(

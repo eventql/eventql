@@ -149,7 +149,6 @@ void LogStream::fetch(
 #endif
 
     if (!cursor->trySeekTo(offset - table->offset)) {
-      RAISE(kRuntimeError, "invalid offset");
       return;
     }
   }

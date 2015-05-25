@@ -37,15 +37,13 @@ void cmd_export(const cli::FlagParser& flags) {
   http::HTTPConnectionPool http(&ev);
   feeds::BrokerClient broker(&http);
 
-  broker.fetch(
+  auto msgs = broker.fetch(
       URI("http://nue03.prod.fnrd.net:7001"),
       flags.getString("topic"),
       0,
-      100,
-      [] (const feeds::FeedEntry& msg) {
-        fnord::iputs("msg: $0", msg.data);
-      });
+      100);
 
+  fnord::iputs("res: $0", msgs.DebugString());
   evloop_thread.join();
 }
 
@@ -78,6 +76,15 @@ int main(int argc, const char** argv) {
   /* command: export */
   auto export_cmd = cli.defineCommand("export");
   export_cmd->onCall(std::bind(&cmd_export, std::placeholders::_1));
+
+  export_cmd->flags().defineFlag(
+      "topic",
+      fnord::cli::FlagParser::T_STRING,
+      true,
+      NULL,
+      NULL,
+      "topic",
+      "<topic>");
 
   export_cmd->flags().defineFlag(
       "output_path",
