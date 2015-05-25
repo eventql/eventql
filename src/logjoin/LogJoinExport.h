@@ -10,6 +10,7 @@
 #define _CM_LOGJOINEXPORT_H
 #include "fnord-base/stdtypes.h"
 #include "fnord-http/httpconnectionpool.h"
+#include "fnord-feeds/BrokerClient.h"
 #include "src/JoinedSession.pb.h"
 
 using namespace fnord;
@@ -28,6 +29,7 @@ protected:
   void exportPreferenceSetFeed(const JoinedSession& session);
   void exportQueryFeed(const JoinedSession& session);
 
+  feeds::BrokerClient broker_;
 };
 
 } // namespace cm

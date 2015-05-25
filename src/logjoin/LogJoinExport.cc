@@ -14,7 +14,8 @@ using namespace fnord;
 namespace cm {
 
 LogJoinExport::LogJoinExport(
-    http::HTTPConnectionPool* http) {}
+    http::HTTPConnectionPool* http) :
+    broker_(http) {}
 
 void LogJoinExport::exportSession(const JoinedSession& session) {
   exportPreferenceSetFeed(session);
