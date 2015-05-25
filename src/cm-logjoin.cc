@@ -97,7 +97,16 @@ int main(int argc, const char** argv) {
       "<path>");
 
   flags.defineFlag(
-      "publish_to",
+      "tsdb_addr",
+      fnord::cli::FlagParser::T_STRING,
+      true,
+      NULL,
+      NULL,
+      "upload target url",
+      "<addr>");
+
+  flags.defineFlag(
+      "broker_addr",
       fnord::cli::FlagParser::T_STRING,
       true,
       NULL,
@@ -297,7 +306,8 @@ int main(int argc, const char** argv) {
   /* set up logjoin upload */
   cm::LogJoinUpload logjoin_upload(
       sessdb,
-      flags.getString("publish_to"),
+      flags.getString("tsdb_addr"),
+      flags.getString("broker_addr"),
       &http);
 
   /* setup logjoin */
