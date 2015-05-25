@@ -46,17 +46,36 @@ int main(int argc, const char** argv) {
   Logger::get()->setMinimumLogLevel(
       strToLogLevel(flags.getString("loglevel")));
 
-  /* setup cli */
   cli::CLI cli;
 
+  /* command: monitor */
   auto monitor_cmd = cli.defineCommand("monitor");
   monitor_cmd->onCall(std::bind(&cmd_monitor, std::placeholders::_1));
 
-  auto monitor_cmd = cli.defineCommand("export");
-  monitor_cmd->onCall(std::bind(&cmd_export, std::placeholders::_1));
+  /* command: export */
+  auto export_cmd = cli.defineCommand("export");
+  export_cmd->onCall(std::bind(&cmd_export, std::placeholders::_1));
+
+  export_cmd->flags().defineFlag(
+      "output_path",
+      fnord::cli::FlagParser::T_STRING,
+      true,
+      NULL,
+      NULL,
+      "output file path",
+      "<path>");
+
+  export_cmd->flags().defineFlag(
+      "output_prefix",
+      fnord::cli::FlagParser::T_STRING,
+      false,
+      NULL,
+      NULL,
+      "output filename prefix",
+      "<prefix>");
+
 
   cli.call(flags.getArgv());
-
   return 0;
 }
 
