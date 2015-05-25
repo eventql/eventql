@@ -15,6 +15,7 @@
 #include <string>
 #include <unordered_map>
 #include "fnord-base/stdtypes.h"
+#include "fnord-base/random.h"
 #include "fnord-base/io/filerepository.h"
 #include "fnord-base/io/FileLock.h"
 #include "fnord-feeds/LocalFeed.h"
@@ -74,6 +75,8 @@ public:
       uint64_t offset,
       int batch_size);
 
+  String hostID();
+
 protected:
   String stats_path_;
 
@@ -84,6 +87,8 @@ protected:
   std::unordered_map<std::string, std::unique_ptr<LogStream>> streams_;
   std::mutex streams_mutex_;
   FileLock lock_;
+  String hostid_;
+  Random rnd_;
 };
 
 } // namespace logstream_service

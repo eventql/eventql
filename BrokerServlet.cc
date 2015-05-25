@@ -32,6 +32,10 @@ void BrokerServlet::handleHTTPRequest(
       return insertRecord(req, res, &uri);
     }
 
+    if (StringUtil::endsWith(uri.path(), "/host_id")) {
+      return getHostID(req, res, &uri);
+    }
+
     res->setStatus(fnord::http::kStatusNotFound);
     res->addBody("not found");
   } catch (const Exception& e) {
@@ -61,6 +65,14 @@ void BrokerServlet::insertRecord(
   auto offset = service_->insert(topic, req->body());
   res->addHeader("X-Broker-Created-Offset", StringUtil::toString(offset));
   res->setStatus(http::kStatusCreated);
+}
+
+void BrokerServlet::getHostID(
+    http::HTTPRequest* req,
+    http::HTTPResponse* res,
+    URI* uri) {
+  res->setStatus(http::kStatusOK);
+  res->addBody(service_->hostID());
 }
 
 }

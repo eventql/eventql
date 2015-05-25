@@ -27,6 +27,11 @@ public:
 
 protected:
 
+  void getHostID(
+      http::HTTPRequest* req,
+      http::HTTPResponse* res,
+      URI* uri);
+
   void insertRecord(
       http::HTTPRequest* req,
       http::HTTPResponse* res,

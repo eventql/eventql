@@ -23,11 +23,26 @@ FeedService::FeedService(
     const String& stats_path /* = "/brokerd" */) :
     file_repo_(data_dir),
     stats_path_(stats_path),
-    lock_(FileUtil::joinPaths(data_dir, "_index.lck")) {
+    lock_(FileUtil::joinPaths(data_dir, "index.lck")) {
   lock_.lock(false);
 
+  auto hostid_file = FileUtil::joinPaths(data_dir, "hostid.idx");
+  if (!FileUtil::exists(hostid_file)) {
+    hostid_ = rnd_.hex128();
+
+    {
+      auto f = File::openFile(hostid_file + "~", File::O_CREATE | File::O_WRITE);
+      f.write(hostid_.data(), hostid_.size());
+    }
+
+    FileUtil::mv(hostid_file + "~", hostid_file);
+  } else {
+    hostid_ = FileUtil::read(hostid_file).toString();
+  }
+
   file_repo_.listFiles([this] (const std::string& filename) -> bool {
-    if (StringUtil::beginsWith(filename, "_")) {
+    if (StringUtil::endsWith(filename, ".idx") ||
+        StringUtil::endsWith(filename, ".lck")) {
       return true;
     }
 
@@ -107,6 +122,10 @@ void FeedService::reopenTable(const std::string& file_path) {
 
   auto stream = openStream(table_header.stream_name, true);
   stream->reopenTable(file_path);
+}
+
+String FeedService::hostID() {
+  return hostid_;
 }
 
 } // namespace logstream_service
