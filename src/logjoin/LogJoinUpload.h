@@ -13,6 +13,7 @@
 #include "fnord-msg/MessageSchema.h"
 #include "fnord-msg/msg.h"
 #include "fnord-http/httpconnectionpool.h"
+#include "fnord-feeds/BrokerClient.h"
 #include "src/JoinedSession.pb.h"
 
 using namespace fnord;
@@ -30,18 +31,18 @@ public:
 
   void upload();
 
-  void onSession(Function<void (const JoinedSession&)> cb);
-
 protected:
 
   size_t scanQueue(const String& queue_name);
-  void uploadBatch(const String& queue_name, const Vector<Buffer>& batch);
+  void uploadTSDBBatch(const Vector<Buffer>& batch);
+  void uploadPreferenceSetFeed(const JoinedSession& session);
+  void uploadQueryFeed(const JoinedSession& session);
 
   RefPtr<mdb::MDB> db_;
   String feedserver_url_;
   http::HTTPConnectionPool* http_;
+  feeds::BrokerClient broker_client_;
   size_t batch_size_;
-  Vector<Function<void (const JoinedSession&)>> callbacks_;
 };
 
 } // namespace cm

@@ -11,6 +11,7 @@
 #include "fnord-base/util/binarymessagereader.h"
 #include "fnord-base/util/binarymessagewriter.h"
 #include "fnord-http/httprequest.h"
+#include "fnord-json/json.h"
 
 using namespace fnord;
 
@@ -23,14 +24,11 @@ LogJoinUpload::LogJoinUpload(
     db_(db),
     feedserver_url_(feedserver_url),
     http_(http),
-    batch_size_(kDefaultBatchSize) {}
+    batch_size_(kDefaultBatchSize),
+    broker_client_(http) {}
 
 void LogJoinUpload::upload() {
   while (scanQueue("__uploadq-sessions") > 0);
-}
-
-void LogJoinUpload::onSession(Function<void (const JoinedSession&)> cb) {
-  callbacks_.emplace_back(cb);
 }
 
 size_t LogJoinUpload::scanQueue(const String& queue_name) {
@@ -67,9 +65,7 @@ size_t LogJoinUpload::scanQueue(const String& queue_name) {
       JoinedSession session;
       msg::decode<JoinedSession>(sdata, ssize, &session);
 
-      for (const auto& cb : callbacks_) {
-        cb(session);
-      }
+      uploadPreferenceSetFeed(session);
     } catch (...) {
       txn->abort();
       throw;
@@ -83,7 +79,7 @@ size_t LogJoinUpload::scanQueue(const String& queue_name) {
 
   try {
     if (batch.size() > 0) {
-      uploadBatch(queue_name, batch);
+      uploadTSDBBatch(batch);
     }
   } catch (...) {
     txn->abort();
@@ -95,9 +91,7 @@ size_t LogJoinUpload::scanQueue(const String& queue_name) {
   return batch.size();
 }
 
-void LogJoinUpload::uploadBatch(
-    const String& queue_name,
-    const Vector<Buffer>& batch) {
+void LogJoinUpload::uploadTSDBBatch(const Vector<Buffer>& batch) {
   URI uri(feedserver_url_ + "/tsdb/insert_batch?stream=joined_sessions.dawanda");
 
   http::HTTPRequest req(http::HTTPMessage::M_POST, uri.pathAndQuery());
@@ -118,6 +112,41 @@ void LogJoinUpload::uploadBatch(
   if (r.statusCode() != 201) {
     RAISEF(kRuntimeError, "received non-201 response: $0", r.body().toString());
   }
+}
+
+void LogJoinUpload::uploadPreferenceSetFeed(const JoinedSession& session) {
+  Set<String> visited_products;
+  for (const auto& item_visit : session.item_visits()) {
+    visited_products.emplace(item_visit.item_id());
+  }
+
+  Set<String> bought_products;
+  for (const auto& cart_item : session.cart_items()) {
+    if (cart_item.checkout_step() != 1) {
+      continue;
+    }
+
+    bought_products.emplace(cart_item.item_id());
+  }
+
+  Buffer buf;
+  json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
+  json.beginObject();
+  json.addObjectEntry("visited_products");
+  json::toJSON(visited_products, &json);
+  json.addComma();
+  json.addObjectEntry("bought_products");
+  json::toJSON(bought_products, &json);
+  json.endObject();
+
+  auto topic = StringUtil::format(
+      "logjoin.ecommerce_preference_sets.$0",
+      session.customer());
+
+  broker_client_.insert(feedserver_url_, topic, buf);
+}
+
+void LogJoinUpload::uploadQueryFeed(const JoinedSession& session) {
 }
 
 } // namespace cm
