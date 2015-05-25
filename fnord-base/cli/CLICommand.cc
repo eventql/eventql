@@ -23,5 +23,9 @@ void CLICommand::call(const Vector<String>& argv) {
   on_call_(flags_);
 }
 
+FlagParser& CLICommand::flags() {
+  return flags_;
+}
+
 }
 }
