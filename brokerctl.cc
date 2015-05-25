@@ -18,6 +18,14 @@
 
 using namespace fnord;
 
+void cmd_monitor(const cli::FlagParser& flags) {
+  fnord::iputs("monitor", 1);
+}
+
+void cmd_export(const cli::FlagParser& flags) {
+  fnord::iputs("export", 1);
+}
+
 int main(int argc, const char** argv) {
   fnord::Application::init();
   fnord::Application::logToStderr();
@@ -42,9 +50,10 @@ int main(int argc, const char** argv) {
   cli::CLI cli;
 
   auto monitor_cmd = cli.defineCommand("monitor");
-  monitor_cmd->onCall([] (const cli::FlagParser& flags) {
-    fnord::iputs("monitor", 1);
-  });
+  monitor_cmd->onCall(std::bind(&cmd_monitor, std::placeholders::_1));
+
+  auto monitor_cmd = cli.defineCommand("export");
+  monitor_cmd->onCall(std::bind(&cmd_export, std::placeholders::_1));
 
   cli.call(flags.getArgv());
 
