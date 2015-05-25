@@ -26,7 +26,8 @@ public:
 
   LogJoinUpload(
       RefPtr<mdb::MDB> db,
-      const String& feedserver_url,
+      const String& tsdb_addr,
+      const String& brokerd_addr,
       http::HTTPConnectionPool* http);
 
   void upload();
@@ -39,7 +40,8 @@ protected:
   void uploadQueryFeed(const JoinedSession& session);
 
   RefPtr<mdb::MDB> db_;
-  String feedserver_url_;
+  String tsdb_addr_;
+  String broker_addr_;
   http::HTTPConnectionPool* http_;
   feeds::BrokerClient broker_client_;
   size_t batch_size_;

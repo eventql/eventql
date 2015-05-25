@@ -19,10 +19,12 @@ namespace cm {
 
 LogJoinUpload::LogJoinUpload(
     RefPtr<mdb::MDB> db,
-    const String& feedserver_url,
+    const String& tsdb_addr,
+    const String& broker_addr,
     http::HTTPConnectionPool* http) :
     db_(db),
-    feedserver_url_(feedserver_url),
+    tsdb_addr_(tsdb_addr),
+    broker_addr_(broker_addr),
     http_(http),
     batch_size_(kDefaultBatchSize),
     broker_client_(http) {}
@@ -92,7 +94,7 @@ size_t LogJoinUpload::scanQueue(const String& queue_name) {
 }
 
 void LogJoinUpload::uploadTSDBBatch(const Vector<Buffer>& batch) {
-  URI uri(feedserver_url_ + "/tsdb/insert_batch?stream=joined_sessions.dawanda");
+  URI uri(tsdb_addr_ + "/tsdb/insert_batch?stream=joined_sessions.dawanda");
 
   http::HTTPRequest req(http::HTTPMessage::M_POST, uri.pathAndQuery());
   req.addHeader("Host", uri.hostAndPort());
@@ -143,7 +145,7 @@ void LogJoinUpload::uploadPreferenceSetFeed(const JoinedSession& session) {
       "logjoin.ecommerce_preference_sets.$0",
       session.customer());
 
-  broker_client_.insert(feedserver_url_, topic, buf);
+  broker_client_.insert(broker_addr_, topic, buf);
 }
 
 void LogJoinUpload::uploadQueryFeed(const JoinedSession& session) {
