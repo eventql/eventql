@@ -103,7 +103,7 @@ int main(int argc, const char** argv) {
       concurrency);
 
   /* set up redis queue */
-  auto redis_addr = fnord::net::InetAddr::resolve(
+  auto redis_addr = fnord::InetAddr::resolve(
       flags.getString("queue_redis_server"));
 
   auto redis = fnord::redis::RedisConnection::connect(redis_addr, &ev);

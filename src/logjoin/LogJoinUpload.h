@@ -41,7 +41,7 @@ protected:
 
   RefPtr<mdb::MDB> db_;
   String tsdb_addr_;
-  String broker_addr_;
+  InetAddr broker_addr_;
   http::HTTPConnectionPool* http_;
   feeds::BrokerClient broker_client_;
   size_t batch_size_;

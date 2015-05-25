@@ -24,7 +24,7 @@ LogJoinUpload::LogJoinUpload(
     http::HTTPConnectionPool* http) :
     db_(db),
     tsdb_addr_(tsdb_addr),
-    broker_addr_(broker_addr),
+    broker_addr_(InetAddr::resolve(broker_addr)),
     http_(http),
     batch_size_(kDefaultBatchSize),
     broker_client_(http) {}
