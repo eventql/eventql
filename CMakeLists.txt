@@ -4,6 +4,7 @@ include_directories(../)
 include_directories(../3rdparty)
 
 add_library(fnord-feeds OBJECT
+    BrokerClient.cc
     LocalFeed.cc
     RemoteFeed.cc
     RemoteFeedFactory.cc

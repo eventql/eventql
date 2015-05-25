@@ -9,17 +9,22 @@
  */
 #ifndef _FNORD_BROKER_BROKERCLIENT_H
 #define _FNORD_BROKER_BROKERCLIENT_H
+#include <fnord-base/stdtypes.h>
+#include <fnord-http/httpconnectionpool.h>
 
 namespace fnord {
 namespace feeds {
 
 class BrokerClient {
 public:
+  typedef Function<void ()> CallbackType;
 
-  void insert(
-      const List<URI>& servers, // FIXPAUL serverlist class
-      const String& feed,
-      const Buffer& record);
+  BrokerClient(http::HTTPConnectionPool* http);
+
+  //void insert(
+  //    const List<URI>& servers,
+  //    const String& feed,
+  //    const Buffer& record);
 
   void insert(
       const URI& server,
@@ -33,18 +38,20 @@ public:
       size_t limit,
       CallbackType cb);
 
-  void fetchCursor(
-      BrokerCursor* cursor,
-      const String& feed,
-      size_t offset,
-      size_t limit,
-      CallbackType cb);
+  //void fetchCursor(
+  //    BrokerCursor* cursor,
+  //    const String& feed,
+  //    size_t offset,
+  //    size_t limit,
+  //    CallbackType cb);
 
   void monitor(
       const URI& server,
       const String& feed,
       CallbackType cb);
 
+protected:
+  http::HTTPConnectionPool* http_;
 };
 
 }
