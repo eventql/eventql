@@ -91,7 +91,7 @@ int main(int argc, const char** argv) {
   FileUtil::mkdir_p(feeds_dir_path);
 
   feeds::FeedService service{
-      FileRepository(feeds_dir_path),
+      feeds_dir_path,
       "/brokerd"};
 
   rpc.registerService(&service);

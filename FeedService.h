@@ -16,6 +16,7 @@
 #include <unordered_map>
 #include "fnord-base/stdtypes.h"
 #include "fnord-base/io/filerepository.h"
+#include "fnord-base/io/FileLock.h"
 #include "fnord-feeds/LocalFeed.h"
 #include "fnord-feeds/FeedEntry.h"
 #include "fnord-base/reflect/reflect.h"
@@ -28,7 +29,7 @@ class FeedService {
 public:
 
   FeedService(
-      fnord::FileRepository file_repo,
+      const String& data_dir,
       const String& stats_path = "/brokerd");
 
   /**
@@ -82,6 +83,7 @@ protected:
   fnord::FileRepository file_repo_;
   std::unordered_map<std::string, std::unique_ptr<LogStream>> streams_;
   std::mutex streams_mutex_;
+  FileLock lock_;
 };
 
 } // namespace logstream_service

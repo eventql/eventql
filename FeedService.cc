@@ -9,6 +9,7 @@
  */
 #include "fnord-base/inspect.h"
 #include "fnord-base/logging.h"
+#include "fnord-base/io/FileUtil.h"
 #include "fnord-json/json.h"
 #include "fnord-sstable/sstablereader.h"
 #include "fnord-sstable/sstablerepair.h"
@@ -18,11 +19,18 @@ namespace fnord {
 namespace feeds {
 
 FeedService::FeedService(
-    fnord::FileRepository file_repo,
+    const String& data_dir,
     const String& stats_path /* = "/brokerd" */) :
-    file_repo_(file_repo),
-    stats_path_(stats_path) {
-  file_repo.listFiles([this] (const std::string& filename) -> bool {
+    file_repo_(data_dir),
+    stats_path_(stats_path),
+    lock_(FileUtil::joinPaths(data_dir, "_index.lck")) {
+  lock_.lock(false);
+
+  file_repo_.listFiles([this] (const std::string& filename) -> bool {
+    if (StringUtil::beginsWith(filename, "_")) {
+      return true;
+    }
+
     reopenTable(filename);
     return true;
   });
