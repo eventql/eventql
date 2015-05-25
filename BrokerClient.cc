@@ -23,13 +23,13 @@ BrokerClient::BrokerClient(http::HTTPConnectionPool* http) : http_(http) {}
 //}
 
 void BrokerClient::insert(
-    const URI& server,
+    const InetAddr& server,
     const String& topic,
     const Buffer& record) {
   URI uri(
       StringUtil::format(
-          "$0/broker/insert?topic=$1",
-          server.toString(),
+          "http://$0/broker/insert?topic=$1",
+          server.hostAndPort(),
           URI::urlEncode(topic)));
 
   http::HTTPRequest req(http::HTTPMessage::M_POST, uri.pathAndQuery());
@@ -46,14 +46,14 @@ void BrokerClient::insert(
 }
 
 MessageList BrokerClient::fetch(
-    const URI& server,
+    const InetAddr& server,
     const String& topic,
     size_t offset,
     size_t limit) {
   URI uri(
       StringUtil::format(
-          "$0/broker/fetch?topic=$1&offset=$2&limit=$3",
-          server.toString(),
+          "http://$0/broker/fetch?topic=$1&offset=$2&limit=$3",
+          server.hostAndPort(),
           URI::urlEncode(topic),
           offset,
           limit));
@@ -64,7 +64,7 @@ MessageList BrokerClient::fetch(
 
   const auto& r = res.get();
   if (r.statusCode() != 200) {
-    RAISEF(kRuntimeError, "received non-201 response: $0", r.body().toString());
+    RAISEF(kRuntimeError, "received non-200 response: $0", r.body().toString());
   }
 
   auto host_id = r.getHeader("X-Broker-HostID");
@@ -75,6 +75,55 @@ MessageList BrokerClient::fetch(
   }
 
   return msg_list;
+}
+
+MessageList BrokerClient::fetchNext(
+    const InetAddr& server,
+    TopicCursor* cursor,
+    size_t batch_size) {
+  auto host_id = hostID(server);
+
+  TopicCursorOffset* offset = nullptr;
+  for (auto& o : *cursor->mutable_offsets()) {
+    if (o.host_id() == host_id) {
+      offset = &o;
+      break;
+    }
+  }
+
+  if (offset == nullptr) {
+    offset = cursor->add_offsets();
+    offset->set_host_id(host_id);
+  }
+
+  auto msg_list = fetch(
+      server,
+      cursor->topic(),
+      offset->next_offset(),
+      batch_size);
+
+  for (const auto& msg : msg_list.messages()) {
+    if (msg.next_offset() > offset->next_offset()) {
+      offset->set_next_offset(msg.next_offset());
+    }
+  }
+
+  return msg_list;
+}
+
+
+String BrokerClient::hostID(const InetAddr& server) {
+  auto uri = "http://" + server.hostAndPort() + "/broker/host_id";
+  auto req = http::HTTPRequest::mkGet(uri);
+  auto res = http_->executeRequest(req);
+  res.wait();
+
+  const auto& r = res.get();
+  if (r.statusCode() != 200) {
+    RAISEF(kRuntimeError, "received non-200 response: $0", r.body().toString());
+  }
+
+  return r.body().toString();
 }
 
 //void BrokerClient::fetchCursor(

@@ -110,7 +110,7 @@ int main(int argc, const char** argv) {
   http_router.addRouteByPrefixMatch("/broker", &broker_servlet);
 
   stats::StatsdAgent statsd_agent(
-      net::InetAddr::resolve(flags.getString("statsd")),
+      InetAddr::resolve(flags.getString("statsd")),
       10 * kMicrosPerSecond);
 
   statsd_agent.start();

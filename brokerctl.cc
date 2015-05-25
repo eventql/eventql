@@ -37,13 +37,29 @@ void cmd_export(const cli::FlagParser& flags) {
   http::HTTPConnectionPool http(&ev);
   feeds::BrokerClient broker(&http);
 
-  auto msgs = broker.fetch(
-      URI("http://nue03.prod.fnrd.net:7001"),
-      flags.getString("topic"),
-      0,
-      100);
+  feeds::TopicCursor cursor;
+  cursor.set_topic(flags.getString("topic"));
 
-  fnord::iputs("res: $0", msgs.DebugString());
+  Duration poll_interval(0.5 * kMicrosPerSecond);
+
+  Vector<InetAddr> servers;
+  servers.emplace_back(InetAddr::resolve("nue03.prod.fnrd.net:7001"));
+  servers.emplace_back(InetAddr::resolve("nue02.prod.fnrd.net:7001"));
+
+  for (;;) {
+    size_t n = 0;
+
+    for (const auto& server : servers) {
+      auto msgs = broker.fetchNext(server, &cursor, 100);
+      n += msgs.messages().size();
+      fnord::iputs("res: $0, $1", msgs.messages().size(), cursor.DebugString());
+    }
+
+    if (n == 0) {
+      usleep(poll_interval.microseconds());
+    }
+  }
+
   evloop_thread.join();
 }
 

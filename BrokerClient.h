@@ -12,6 +12,7 @@
 #include <fnord-base/stdtypes.h>
 #include <fnord-http/httpconnectionpool.h>
 #include <fnord-feeds/Message.pb.h>
+#include <fnord-feeds/TopicCursor.pb.h>
 
 namespace fnord {
 namespace feeds {
@@ -20,36 +21,34 @@ class BrokerClient {
 public:
   BrokerClient(http::HTTPConnectionPool* http);
 
-  //void insert(
-  //    const List<URI>& servers,
-  //    const String& feed,
-  //    const Buffer& record);
-
   void insert(
-      const URI& server,
+      const InetAddr& server,
       const String& topic,
       const Buffer& record);
 
   MessageList fetch(
-      const URI& server,
+      const InetAddr& server,
       const String& topic,
       size_t offset,
       size_t limit);
 
-  //void fetchCursor(
-  //    BrokerCursor* cursor,
-  //    const String& feed,
-  //    size_t offset,
-  //    size_t limit,
-  //    CallbackType cb);
+  MessageList fetchNext(
+      const InetAddr& server,
+      TopicCursor* cursor,
+      size_t batch_size);
+
+  void resolveCursor(TopicCursor* cursor);
+
+  String hostID(const InetAddr& server);
 
   //void monitor(
-  //    const URI& server,
+  //    const InetAddr& server,
   //    const String& feed,
   //    CallbackType cb);
 
 protected:
   http::HTTPConnectionPool* http_;
+  HashMap<String, String> host_ids_;
 };
 
 }
