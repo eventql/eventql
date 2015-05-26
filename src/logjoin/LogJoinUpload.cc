@@ -181,7 +181,7 @@ void LogJoinUpload::uploadQueryFeed(const JoinedSession& session) {
     json.addString(session.customer_session_id());
     json.addComma();
     json.addObjectEntry("ab_test_group");
-    json.addString(StringUtil::toString(q.ab_test_group()));
+    json.addString(StringUtil::toString(session.ab_test_group()));
     json.addComma();
     json.addObjectEntry("query_string");
     json.addString(q.query_string_normalized());
@@ -243,7 +243,7 @@ void LogJoinUpload::uploadRecoQueryFeed(const JoinedSession& session) {
     json.addString(session.customer_session_id());
     json.addComma();
     json.addObjectEntry("ab_test_group");
-    json.addString(StringUtil::toString(q.ab_test_group()));
+    json.addString(StringUtil::toString(session.ab_test_group()));
     json.addComma();
     json.addObjectEntry("product_list");
     json::toJSON(product_list, &json);
