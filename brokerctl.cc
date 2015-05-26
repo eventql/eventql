@@ -80,34 +80,25 @@ void cmd_export(const cli::FlagParser& flags) {
     fnord::logInfo("brokerctl", "Starting new export from epoch...");
   }
 
-  Option<String> tmpfile_path;
+  Vector<String> rows;
+  size_t rows_size = 0;
   for (;;) {
-    if (tmpfile_path.isEmpty()) {
-      tmpfile_path = Some("/tmp/" + rnd.hex128());
-    }
-
     size_t n = 0;
-    {
-      auto tmpfile = File::openFile(
-          tmpfile_path.get(),
-          File::O_WRITE | File::O_CREATEOROPEN | File::O_APPEND);
+    for (const auto& server : servers) {
+      auto msgs = broker.fetchNext(
+          server,
+          cursor.mutable_topic_cursor(),
+          batchsize);
 
-      for (const auto& server : servers) {
-        auto msgs = broker.fetchNext(
-            server,
-            cursor.mutable_topic_cursor(),
-            batchsize);
-
-        for (const auto& msg : msgs.messages()) {
-          tmpfile.write(msg.data() + "\n");
-        }
-
-        n += msgs.messages().size();
+      for (const auto& msg : msgs.messages()) {
+        rows.emplace_back(msg.data());
+        rows_size += msg.data().size();
       }
+
+      n += msgs.messages().size();
     }
 
-    auto tmpfile_size = FileUtil::size(tmpfile_path.get());
-    if (tmpfile_size >= maxsize) {
+    if (rows_size >= maxsize) {
       auto next_seq = cursor.head_sequence() + 1;
       fnord::logInfo("brokerctl", "Writing sequence $0", next_seq);
 
@@ -115,9 +106,23 @@ void cmd_export(const cli::FlagParser& flags) {
           path,
           StringUtil::format("$0.$1.$2", prefix, next_seq, "json"));
 
+      {
+        auto tmpfile = File::openFile(
+            dstpath + "~",
+            File::O_WRITE | File::O_CREATEOROPEN | File::O_TRUNCATE);
+
+        tmpfile.write("[");
+        for (int i = 0; i < rows.size(); ++i) {
+          if (i > 0) { tmpfile.write(", "); }
+          tmpfile.write(rows[i]);
+        }
+        tmpfile.write("]\n");
+      }
+
       cursor.set_head_sequence(next_seq);
-      FileUtil::mv(tmpfile_path.get(), dstpath);
-      tmpfile_path = None<String>();
+      FileUtil::mv(dstpath + "~", dstpath);
+      rows.clear();
+      rows_size = 0;
 
       {
         auto cursorfile = File::openFile(
