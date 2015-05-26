@@ -206,7 +206,7 @@ Buffer LogJoinTarget::trackedSessionToJoinedSession(TrackedSession& session) {
     /* queries.query_type */
     String query_type = pageTypeToString(page_type);
     auto qtype_attr = cm::extractAttr(q.attrs, "qt");
-    if (qtype_attr.isEmpty()) {
+    if (!qtype_attr.isEmpty()) {
       query_type = qtype_attr.get();
     }
     qry_obj.addChild(
