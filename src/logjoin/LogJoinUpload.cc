@@ -219,7 +219,7 @@ void LogJoinUpload::uploadRecoQueryFeed(const JoinedSession& session) {
     Set<String> clicked_products;
 
     for (const auto& item : q.result_items()) {
-      if (item.position() <= 40) {
+      if (!item.is_recommendation()) {
         continue;
       }
 
