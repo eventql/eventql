@@ -278,7 +278,7 @@ Buffer LogJoinTarget::trackedSessionToJoinedSession(TrackedSession& session) {
       }
 
       if ((item.position > 40 && slrid.isEmpty()) ||
-          (query_type == "reco")) {
+          StringUtil::beginsWith(query_type, "recos_")) {
         item_obj.addChild(
             schema.id("search_queries.result_items.is_recommendation"),
             msg::TRUE);
