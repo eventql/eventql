@@ -19,7 +19,6 @@
 #include "fnord-base/net/inetaddr.h"
 
 namespace fnord {
-namespace comm {
 
 class ServerGroup {
 public:
@@ -62,6 +61,5 @@ protected:
   unsigned last_index_;
 };
 
-}
 }
 #endif

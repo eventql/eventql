@@ -31,7 +31,7 @@ public:
 
   Future<HTTPResponse> executeRequest(
       const HTTPRequest& req,
-      const fnord::net::InetAddr& addr);
+      const fnord::InetAddr& addr);
 
   Future<HTTPResponse> executeRequest(
       const HTTPRequest& req,
@@ -39,17 +39,17 @@ public:
 
   Future<HTTPResponse> executeRequest(
       const HTTPRequest& req,
-      const fnord::net::InetAddr& addr,
+      const fnord::InetAddr& addr,
       Function<HTTPResponseFuture* (Promise<HTTPResponse> promise)> factory);
 
   HTTPClientStats* stats();
 
 protected:
 
-  void parkConnection(HTTPClientConnection* conn, net::InetAddr addr);
+  void parkConnection(HTTPClientConnection* conn, InetAddr addr);
 
   void leaseConnection(
-      const fnord::net::InetAddr& addr,
+      const fnord::InetAddr& addr,
       Promise<HTTPResponse> promise,
       Function<void (HTTPClientConnection* conn)> callback);
 

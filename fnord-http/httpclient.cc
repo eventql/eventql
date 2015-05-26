@@ -48,7 +48,7 @@ Future<HTTPResponse> HTTPClient::executeRequest(
     RAISE(kRuntimeError, "missing Host header");
   }
 
-  auto addr = fnord::net::InetAddr::resolve(req.getHeader("Host"));
+  auto addr = fnord::InetAddr::resolve(req.getHeader("Host"));
   if (!addr.hasPort()) {
     addr.setPort(80);
   }
@@ -58,7 +58,7 @@ Future<HTTPResponse> HTTPClient::executeRequest(
 
 Future<HTTPResponse> HTTPClient::executeRequest(
     const HTTPRequest& req,
-    const fnord::net::InetAddr& addr,
+    const fnord::InetAddr& addr,
     fnord::TaskScheduler* sched) {
   auto conn = std::unique_ptr<HTTPClientConnection>(
       new HTTPClientConnection(

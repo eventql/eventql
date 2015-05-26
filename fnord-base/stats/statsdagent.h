@@ -26,11 +26,11 @@ public:
   static const size_t kMaxPacketSize = 1024 * 48; // 48k
 
   StatsdAgent(
-      net::InetAddr addr,
+      InetAddr addr,
       Duration report_interval);
 
   StatsdAgent(
-      net::InetAddr addr,
+      InetAddr addr,
       Duration report_interval,
       StatsRepository* stats_repo);
 
@@ -48,7 +48,7 @@ protected:
   void sendToStatsd(const Buffer& packet);
 
   net::UDPSocket sock_;
-  net::InetAddr addr_;
+  InetAddr addr_;
   std::atomic<bool> running_;
   std::thread thread_;
   StatsRepository* stats_repo_;
