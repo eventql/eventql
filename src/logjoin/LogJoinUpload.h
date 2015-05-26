@@ -38,6 +38,8 @@ protected:
   void uploadTSDBBatch(const Vector<Buffer>& batch);
   void uploadPreferenceSetFeed(const JoinedSession& session);
   void uploadQueryFeed(const JoinedSession& session);
+  void uploadRecoQueryFeed(const JoinedSession& session);
+
 
   RefPtr<mdb::MDB> db_;
   String tsdb_addr_;

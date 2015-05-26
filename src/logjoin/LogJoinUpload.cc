@@ -70,6 +70,7 @@ size_t LogJoinUpload::scanQueue(const String& queue_name) {
 
       uploadPreferenceSetFeed(session);
       uploadQueryFeed(session);
+      uploadRecoQueryFeed(session);
     } catch (...) {
       txn->abort();
       throw;
@@ -202,6 +203,54 @@ void LogJoinUpload::uploadQueryFeed(const JoinedSession& session) {
     broker_client_.insert(broker_addr_, topic, buf);
   }
 }
+
+void LogJoinUpload::uploadRecoQueryFeed(const JoinedSession& session) {
+  for (const auto& q : session.search_queries()) {
+    Set<String> product_list;
+    Set<String> clicked_products;
+    for (const auto& item : q.result_items()) {
+      if (item.position() <= 40) {
+        continue;
+      }
+
+      product_list.emplace(item.item_id());
+      if (item.clicked()) {
+        clicked_products.emplace(item.item_id());
+      }
+    }
+
+    if (product_list.empty()){
+      continue;
+    }
+
+    Buffer buf;
+    json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
+    json.beginObject();
+    json.addObjectEntry("time");
+    json.addInteger(q.time() / kMicrosPerSecond);
+    json.addComma();
+    json.addObjectEntry("session_id");
+    json.addString(session.customer_session_id());
+    json.addComma();
+    json.addObjectEntry("ab_test_group");
+    json.addString(StringUtil::toString(q.ab_test_group()));
+    json.addComma();
+    json.addObjectEntry("product_list");
+    json::toJSON(product_list, &json);
+    json.addComma();
+    json.addObjectEntry("clicked_products");
+    json::toJSON(clicked_products, &json);
+    json.endObject();
+
+    auto topic = StringUtil::format(
+        "logjoin.ecommerce_reco_queries.$0",
+        session.customer());
+
+    broker_client_.insert(broker_addr_, topic, buf);
+  }
+}
+
+
 
 } // namespace cm
 
