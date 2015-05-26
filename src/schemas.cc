@@ -387,6 +387,22 @@ msg::MessageSchema joinedSessionsSchema() {
       true,
       msg::EncodingHint::LEB128);
 
+  query_items.fields.emplace_back(
+      62,
+      "is_paid_result",
+      msg::FieldType::BOOLEAN,
+      0,
+      false,
+      true);
+
+  query_items.fields.emplace_back(
+      63,
+      "is_recommendation",
+      msg::FieldType::BOOLEAN,
+      0,
+      false,
+      true);
+
   queries.fields.emplace_back(query_items);
   fields.emplace_back(queries);
 

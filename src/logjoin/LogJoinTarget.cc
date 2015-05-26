@@ -258,6 +258,20 @@ Buffer LogJoinTarget::trackedSessionToJoinedSession(TrackedSession& session) {
             schema.id("search_queries.result_items.category3"),
             (uint32_t) std::stoull(category3.get()));
       }
+
+      /* DAWANDA HACK */
+      if (item.position <= 4 && slrid.isEmpty()) {
+        item_obj.addChild(
+            schema.id("search_queries.result_items.is_paid_result"),
+            msg::TRUE);
+      }
+
+      if (item.position > 40 && slrid.isEmpty()) {
+        item_obj.addChild(
+            schema.id("search_queries.result_items.is_recommendation"),
+            msg::TRUE);
+      }
+      /* EOF DAWANDA HACK */
     }
   }
 
