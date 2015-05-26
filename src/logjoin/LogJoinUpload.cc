@@ -206,8 +206,18 @@ void LogJoinUpload::uploadQueryFeed(const JoinedSession& session) {
 
 void LogJoinUpload::uploadRecoQueryFeed(const JoinedSession& session) {
   for (const auto& q : session.search_queries()) {
+    switch (q.page_type()) {
+      case PAGETYPE_SEARCH_PAGE:
+      case PAGETYPE_CATALOG_PAGE:
+        break;
+
+      default:
+        continue;
+    }
+
     Set<String> product_list;
     Set<String> clicked_products;
+
     for (const auto& item : q.result_items()) {
       if (item.position() <= 40) {
         continue;
