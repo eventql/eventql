@@ -75,6 +75,17 @@ message JoinedSearchQueryResultItem {
   optional uint32 category2 = 23;
   optional uint32 category3 = 24;
 
+  /**
+   * True if this result item is a a paid result item (advertisment)
+   */
+  optional bool is_paid_result = 62;
+
+  /**
+   * True if this result item is a "recommendation" result (generated from
+   * a recommendation engine)
+   */
+  optional bool is_recommendation = 63;
+
 }
 
 
