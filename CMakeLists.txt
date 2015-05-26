@@ -35,6 +35,7 @@ endif()
 find_package(Threads)
 
 add_subdirectory(3rdparty/libfnord/fnord-base)
+add_subdirectory(3rdparty/libfnord/fnord-msg)
 add_subdirectory(3rdparty/libfnord/fnord-feeds)
 add_subdirectory(3rdparty/libfnord/fnord-fts)
 add_subdirectory(3rdparty/libfnord/fnord-mdb)
@@ -45,7 +46,6 @@ add_subdirectory(3rdparty/libfnord/fnord-cstable)
 add_subdirectory(3rdparty/libfnord/fnord-sstable)
 add_subdirectory(3rdparty/libfnord/fnord-chart)
 add_subdirectory(3rdparty/libfnord/fnord-metricdb)
-add_subdirectory(3rdparty/libfnord/fnord-msg)
 add_subdirectory(3rdparty/libfnord/fnord-tsdb)
 add_subdirectory(3rdparty/libfnord/fnord-dht)
 add_subdirectory(3rdparty/libfnord/fnord-dproc)
@@ -102,18 +102,18 @@ target_link_libraries(cm-frontend ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_LIBS})
 target_link_libraries(cm-frontend m)
 add_dependencies(cm-frontend cm-frontend-assets)
 
-add_executable(cm-feedserver
-    $<TARGET_OBJECTS:cm-common>
-    $<TARGET_OBJECTS:fnord-base>
-    $<TARGET_OBJECTS:fnord-http>
-    $<TARGET_OBJECTS:fnord-mdb>
-    $<TARGET_OBJECTS:fnord-json>
-    $<TARGET_OBJECTS:fnord-sstable>
-    $<TARGET_OBJECTS:fnord-feeds>
-    $<TARGET_OBJECTS:fnord-rpc>
-    src/cm-feedserver.cc)
-
-target_link_libraries(cm-feedserver ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_LIBS})
+#add_executable(cm-feedserver
+#    $<TARGET_OBJECTS:cm-common>
+#    $<TARGET_OBJECTS:fnord-base>
+#    $<TARGET_OBJECTS:fnord-http>
+#    $<TARGET_OBJECTS:fnord-mdb>
+#    $<TARGET_OBJECTS:fnord-json>
+#    $<TARGET_OBJECTS:fnord-sstable>
+#    $<TARGET_OBJECTS:fnord-feeds>
+#    $<TARGET_OBJECTS:fnord-rpc>
+#    src/cm-feedserver.cc)
+#
+#target_link_libraries(cm-feedserver ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_LIBS})
 
 add_executable(cm-logjoin
     $<TARGET_OBJECTS:cm-common>
@@ -135,10 +135,32 @@ add_executable(cm-logjoin
     src/schemas.cc
     src/logjoin/LogJoin.cc
     src/logjoin/LogJoinUpload.cc
+    src/logjoin/LogJoinExport.cc
     src/logjoin/LogJoinTarget.cc
-    src/logjoin/LogJoinShard.cc)
+    src/logjoin/LogJoinShard.cc
+    ${PROTO_SRCS})
 
 target_link_libraries(cm-logjoin ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_LIBS} ${FNORD_FTS_LIBS})
+
+add_executable(tests/test-logjoin
+    $<TARGET_OBJECTS:cm-common>
+    $<TARGET_OBJECTS:fnord-base>
+    $<TARGET_OBJECTS:fnord-json>
+    $<TARGET_OBJECTS:fnord-sstable>
+    $<TARGET_OBJECTS:fnord-http>
+    $<TARGET_OBJECTS:fnord-feeds>
+    $<TARGET_OBJECTS:fnord-mdb>
+    $<TARGET_OBJECTS:fnord-rpc>
+    $<TARGET_OBJECTS:fnord-msg>
+    $<TARGET_OBJECTS:fnord-fts>
+    src/logjoin/TrackedCartItem.cc
+    src/logjoin/TrackedItemVisit.cc
+    src/logjoin/TrackedQuery.cc
+    src/logjoin/TrackedSession.cc
+    src/JoinedSession.pb.cc
+    src/LogJoin_test.cc)
+
+target_link_libraries(tests/test-logjoin ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_LIBS} ${FNORD_FTS_LIBS})
 
 #add_executable(cm-logjoin-backfill
 #    $<TARGET_OBJECTS:cm-common>
@@ -536,6 +558,7 @@ add_executable(cm-analytics-backend
     src/analytics/ShopStatsTable.cc
     src/analytics/ShopStatsServlet.cc
     src/analytics/ShopStats.cc
+    src/demoQueryServlet.cc
     src/schemas.cc
     src/cm-analytics-backend.cc)
 

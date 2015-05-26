@@ -97,7 +97,16 @@ int main(int argc, const char** argv) {
       "<path>");
 
   flags.defineFlag(
-      "publish_to",
+      "tsdb_addr",
+      fnord::cli::FlagParser::T_STRING,
+      true,
+      NULL,
+      NULL,
+      "upload target url",
+      "<addr>");
+
+  flags.defineFlag(
+      "broker_addr",
       fnord::cli::FlagParser::T_STRING,
       true,
       NULL,
@@ -196,7 +205,7 @@ int main(int argc, const char** argv) {
 
   /* start stats reporting */
   fnord::stats::StatsdAgent statsd_agent(
-      fnord::net::InetAddr::resolve(flags.getString("statsd_addr")),
+      fnord::InetAddr::resolve(flags.getString("statsd_addr")),
       10 * fnord::kMicrosPerSecond);
 
   statsd_agent.start();
@@ -282,14 +291,23 @@ int main(int argc, const char** argv) {
   fnord::fts::Analyzer analyzer(flags.getString("conf"));
   cm::LogJoinTarget logjoin_target(
       joined_sessions_schema,
-      &analyzer,
-      index,
       dry_run);
+
+  auto normalize = [&analyzer] (Language lang, const String& query) -> String {
+    return analyzer.normalize(lang, query);
+  };
+  logjoin_target.setNormalize(normalize);
+  logjoin_target.setGetField(std::bind(
+      &DocIndex::getField,
+      index.get(),
+      std::placeholders::_1,
+      std::placeholders::_2));
 
   /* set up logjoin upload */
   cm::LogJoinUpload logjoin_upload(
       sessdb,
-      flags.getString("publish_to"),
+      flags.getString("tsdb_addr"),
+      flags.getString("broker_addr"),
       &http);
 
   /* setup logjoin */

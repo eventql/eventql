@@ -17,6 +17,14 @@ msg::MessageSchema joinedSessionsSchema() {
   Vector<msg::MessageSchemaField> fields;
 
   fields.emplace_back(
+      60,
+      "customer",
+      msg::FieldType::STRING,
+      250,
+      false,
+      true);
+
+  fields.emplace_back(
       53,
       "first_seen_time",
       msg::FieldType::UINT32,

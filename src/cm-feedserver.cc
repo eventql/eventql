@@ -109,7 +109,7 @@ int main(int argc, const char** argv) {
   http_router.addRouteByPrefixMatch("/stats", &stats_servlet);
 
   fnord::stats::StatsdAgent statsd_agent(
-      fnord::net::InetAddr::resolve(flags.getString("statsd_addr")),
+      fnord::InetAddr::resolve(flags.getString("statsd_addr")),
       10 * fnord::kMicrosPerSecond);
 
   statsd_agent.start();

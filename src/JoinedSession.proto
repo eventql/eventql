@@ -290,6 +290,11 @@ message JoinedCartItem {
 message JoinedSession {
 
   /**
+   * For which customer did we record this session?
+   */
+  optional string customer = 60;
+
+  /**
    * The time at which this search query was first/last seen
    */
   optional uint64 first_seen_time = 53;

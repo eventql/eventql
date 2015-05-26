@@ -11,7 +11,10 @@
 #include "fnord-base/stdtypes.h"
 #include "fnord-mdb/MDB.h"
 #include "fnord-msg/MessageSchema.h"
+#include "fnord-msg/msg.h"
 #include "fnord-http/httpconnectionpool.h"
+#include "fnord-feeds/BrokerClient.h"
+#include "src/JoinedSession.pb.h"
 
 using namespace fnord;
 
@@ -23,7 +26,8 @@ public:
 
   LogJoinUpload(
       RefPtr<mdb::MDB> db,
-      const String& feedserver_url,
+      const String& tsdb_addr,
+      const String& brokerd_addr,
       http::HTTPConnectionPool* http);
 
   void upload();
@@ -31,13 +35,17 @@ public:
 protected:
 
   size_t scanQueue(const String& queue_name);
-  void uploadBatch(const String& queue_name, const Vector<Buffer>& batch);
+  void uploadTSDBBatch(const Vector<Buffer>& batch);
+  void uploadPreferenceSetFeed(const JoinedSession& session);
+  void uploadQueryFeed(const JoinedSession& session);
 
   RefPtr<mdb::MDB> db_;
-  String feedserver_url_;
+  String tsdb_addr_;
+  InetAddr broker_addr_;
   http::HTTPConnectionPool* http_;
+  feeds::BrokerClient broker_client_;
   size_t batch_size_;
 };
-} // namespace cm
 
+} // namespace cm
 #endif
