@@ -15,10 +15,16 @@
 #include "fnord-base/cli/flagparser.h"
 #include "fnord-base/cli/CLI.h"
 #include "fnord-base/thread/eventloop.h"
+#include "fnord-base/io/file.h"
+#include "fnord-base/random.h"
+#include "fnord-base/option.h"
 #include "fnord-http/httpconnectionpool.h"
 #include "fnord-feeds/BrokerClient.h"
+#include "fnord-feeds/ExportCursor.pb.h"
+#include "fnord-msg/msg.h"
 
 using namespace fnord;
+using namespace fnord::feeds;
 
 void cmd_monitor(const cli::FlagParser& flags) {
   fnord::iputs("monitor", 1);
@@ -26,8 +32,7 @@ void cmd_monitor(const cli::FlagParser& flags) {
 }
 
 void cmd_export(const cli::FlagParser& flags) {
-  fnord::iputs("export", 1);
-
+  Random rnd;
   fnord::thread::EventLoop ev;
 
   auto evloop_thread = std::thread([&ev] {
@@ -35,24 +40,94 @@ void cmd_export(const cli::FlagParser& flags) {
   });
 
   http::HTTPConnectionPool http(&ev);
-  feeds::BrokerClient broker(&http);
-
-  feeds::TopicCursor cursor;
-  cursor.set_topic(flags.getString("topic"));
+  BrokerClient broker(&http);
 
   Duration poll_interval(0.5 * kMicrosPerSecond);
+  uint64_t maxsize = 4 * 1024 * 1024;
+  size_t batchsize = 1024;
+  auto topic = flags.getString("topic");
+  String prefix = StringUtil::stripShell(topic);
+  auto path = flags.getString("datadir");
+  auto cursorfile_path = FileUtil::joinPaths(path, prefix + ".cur");
 
   Vector<InetAddr> servers;
-  servers.emplace_back(InetAddr::resolve("nue03.prod.fnrd.net:7001"));
-  servers.emplace_back(InetAddr::resolve("nue02.prod.fnrd.net:7001"));
+  for (const auto& s : flags.getStrings("server")) {
+    servers.emplace_back(InetAddr::resolve(s));
+  }
 
+  if (servers.size() == 0) {
+    RAISE(kUsageError, "no servers specified");
+  }
+
+  fnord::logInfo("brokerctl", "Exporting topic '$0'", topic);
+
+  ExportCursor cursor;
+  if (FileUtil::exists(cursorfile_path)) {
+    auto buf = FileUtil::read(cursorfile_path);
+    msg::decode<ExportCursor>(buf.data(), buf.size(), &cursor);
+
+    auto cur_topic = cursor.topic_cursor().topic();
+    if (cur_topic != topic) {
+      RAISEF(kRuntimeError, "topic mismatch: '$0' vs '$1;", cur_topic, topic);
+    }
+
+    fnord::logInfo(
+        "brokerctl",
+        "Resuming export from sequence $0",
+        cursor.head_sequence());
+  } else {
+    cursor.mutable_topic_cursor()->set_topic(topic);
+    fnord::logInfo("brokerctl", "Starting new export from epoch...");
+  }
+
+  Option<String> tmpfile_path;
   for (;;) {
-    size_t n = 0;
+    if (tmpfile_path.isEmpty()) {
+      tmpfile_path = Some("/tmp/" + rnd.hex128());
+    }
 
-    for (const auto& server : servers) {
-      auto msgs = broker.fetchNext(server, &cursor, 100);
-      n += msgs.messages().size();
-      fnord::iputs("res: $0, $1", msgs.messages().size(), cursor.DebugString());
+    size_t n = 0;
+    {
+      auto tmpfile = File::openFile(
+          tmpfile_path.get(),
+          File::O_WRITE | File::O_CREATEOROPEN | File::O_APPEND);
+
+      for (const auto& server : servers) {
+        auto msgs = broker.fetchNext(
+            server,
+            cursor.mutable_topic_cursor(),
+            batchsize);
+
+        for (const auto& msg : msgs.messages()) {
+          tmpfile.write(msg.data() + "\n");
+        }
+
+        n += msgs.messages().size();
+      }
+    }
+
+    auto tmpfile_size = FileUtil::size(tmpfile_path.get());
+    if (tmpfile_size >= maxsize) {
+      auto next_seq = cursor.head_sequence() + 1;
+      fnord::logInfo("brokerctl", "Writing sequence $0", next_seq);
+
+      auto dstpath = FileUtil::joinPaths(
+          path,
+          StringUtil::format("$0.$1.$2", prefix, next_seq, "json"));
+
+      cursor.set_head_sequence(next_seq);
+      FileUtil::mv(tmpfile_path.get(), dstpath);
+      tmpfile_path = None<String>();
+
+      {
+        auto cursorfile = File::openFile(
+            cursorfile_path + "~",
+            File::O_WRITE | File::O_CREATEOROPEN | File::O_TRUNCATE);
+
+        cursorfile.write(*msg::encode(cursor));
+      }
+
+      FileUtil::mv(cursorfile_path + "~", cursorfile_path);
     }
 
     if (n == 0) {
@@ -103,7 +178,7 @@ int main(int argc, const char** argv) {
       "<topic>");
 
   export_cmd->flags().defineFlag(
-      "output_path",
+      "datadir",
       fnord::cli::FlagParser::T_STRING,
       true,
       NULL,
@@ -112,13 +187,13 @@ int main(int argc, const char** argv) {
       "<path>");
 
   export_cmd->flags().defineFlag(
-      "output_prefix",
+      "server",
       fnord::cli::FlagParser::T_STRING,
       false,
       NULL,
       NULL,
-      "output filename prefix",
-      "<prefix>");
+      "backend servers",
+      "<host>");
 
 
   cli.call(flags.getArgv());
