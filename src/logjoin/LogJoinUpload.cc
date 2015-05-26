@@ -253,7 +253,7 @@ void LogJoinUpload::uploadRecoQueryFeed(const JoinedSession& session) {
     json.endObject();
 
     auto topic = StringUtil::format(
-        "logjoin.ecommerce_reco_queries.$0",
+        "logjoin.ecommerce_recommendations.$0",
         session.customer());
 
     broker_client_.insert(broker_addr_, topic, buf);
