@@ -16,8 +16,8 @@
 #include <unordered_map>
 #include <fnord-base/autoref.h>
 #include <fnord-base/uri.h>
-#include "fnord-logtable/ArtifactReplication.h"
-#include "fnord-logtable/ArtifactIndexReplication.h"
+#include "fnord-afx/ArtifactReplication.h"
+#include "fnord-afx/ArtifactIndexReplication.h"
 
 using namespace fnord;
 

@@ -37,7 +37,7 @@
 #include "fnord-logtable/TableRepository.h"
 #include "fnord-logtable/TableJanitor.h"
 #include "fnord-logtable/TableReplication.h"
-#include "fnord-logtable/ArtifactReplication.h"
+#include "fnord-afx/ArtifactReplication.h"
 #include "fnord-logtable/NumericBoundsSummary.h"
 #include "fnord-mdb/MDB.h"
 #include "fnord-mdb/MDBUtil.h"
