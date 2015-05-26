@@ -58,6 +58,7 @@ struct TrackedSession {
   Option<String> referrer_url;
   Option<String> referrer_campaign;
   Option<String> referrer_name;
+  Option<String> customer_session_id;
 
 
   TrackedSession();

@@ -25,6 +25,14 @@ msg::MessageSchema joinedSessionsSchema() {
       true);
 
   fields.emplace_back(
+      61,
+      "customer_session_id",
+      msg::FieldType::STRING,
+      4096,
+      false,
+      true);
+
+  fields.emplace_back(
       53,
       "first_seen_time",
       msg::FieldType::UINT32,

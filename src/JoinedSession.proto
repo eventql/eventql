@@ -295,6 +295,11 @@ message JoinedSession {
   optional string customer = 60;
 
   /**
+   * The customer's session id
+   */
+  optional string customer_session_id = 61;
+
+  /**
    * The time at which this search query was first/last seen
    */
   optional uint64 first_seen_time = 53;

@@ -59,6 +59,7 @@ using namespace fnord;
  *   r_url      -- referrer url
  *   r_nm       -- referrer name
  *   r_cpn      -- referrer campaign
+ *   cs         -- customer session id
  *
  */
 
