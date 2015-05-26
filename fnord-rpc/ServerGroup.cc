@@ -11,7 +11,6 @@
 #include "fnord-rpc/ServerGroup.h"
 
 namespace fnord {
-namespace comm {
 
 ServerGroup::ServerGroup() {}
 
@@ -63,5 +62,4 @@ int RoundRobinServerGroup::pickServerForNextRequest(
   return -1;
 }
 
-}
 }

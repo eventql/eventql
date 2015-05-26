@@ -28,7 +28,7 @@ Future<HTTPResponse> HTTPConnectionPool::executeRequest(
 
 Future<HTTPResponse> HTTPConnectionPool::executeRequest(
     const HTTPRequest& req,
-    const fnord::net::InetAddr& addr) {
+    const fnord::InetAddr& addr) {
   return executeRequest(
       req,
       addr,
@@ -54,7 +54,7 @@ Future<HTTPResponse> HTTPConnectionPool::executeRequest(
 
 Future<HTTPResponse> HTTPConnectionPool::executeRequest(
     const HTTPRequest& req,
-    const fnord::net::InetAddr& addr,
+    const fnord::InetAddr& addr,
     Function<HTTPResponseFuture* (Promise<HTTPResponse> promise)> factory) {
   Promise<HTTPResponse> promise;
 
@@ -76,7 +76,7 @@ Future<HTTPResponse> HTTPConnectionPool::executeRequest(
 
 void HTTPConnectionPool::parkConnection(
     HTTPClientConnection* conn,
-    net::InetAddr addr) {
+    InetAddr addr) {
   if (conn->isIdle()) {
     std::unique_lock<std::mutex> l(connection_cache_mutex_);
     connection_cache_.emplace(addr.ipAndPort(), conn);
@@ -86,7 +86,7 @@ void HTTPConnectionPool::parkConnection(
 }
 
 void HTTPConnectionPool::leaseConnection(
-    const fnord::net::InetAddr& addr,
+    const fnord::InetAddr& addr,
     Promise<HTTPResponse> promise,
     Function<void (HTTPClientConnection* conn)> callback) {
   std::unique_lock<std::mutex> lk(connection_cache_mutex_);

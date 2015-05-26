@@ -43,7 +43,7 @@ public:
 
   static Future<HTTPResponse> executeRequest(
       const HTTPRequest& req,
-      const fnord::net::InetAddr& addr,
+      const fnord::InetAddr& addr,
       fnord::TaskScheduler* sched);
 
 };

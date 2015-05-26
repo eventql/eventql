@@ -7,7 +7,7 @@
 namespace fnord {
 namespace cli {
 
-FlagParser::FlagParser() {}
+FlagParser::FlagParser() : ignore_unknown_(false) {}
 
 void FlagParser::defineFlag(
     const char* longopt,
@@ -238,6 +238,10 @@ void FlagParser::printUsage(fnord::OutputStream* target) const {
       target->printf("\n");
     }
   }
+}
+
+void FlagParser::ignoreUnknownFlags() {
+  ignore_unknown_ = true;
 }
 
 }

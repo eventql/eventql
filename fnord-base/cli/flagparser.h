@@ -88,6 +88,8 @@ public:
 
   void printUsage(fnord::OutputStream* target) const;
 
+  void ignoreUnknownFlags();
+
 protected:
   struct FlagState {
     kFlagType type;
@@ -102,6 +104,7 @@ protected:
 
   std::vector<std::string> argv_;
   std::vector<FlagState> flags_;
+  bool ignore_unknown_;
 };
 
 }

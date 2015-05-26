@@ -38,6 +38,8 @@ add_library(fnord-base OBJECT
     buffer.cc
     bufferutil.cc
     cli/flagparser.cc
+    cli/CLI.cc
+    cli/CLICommand.cc
     datetime.cc
     duration.cc
     exception.cc
