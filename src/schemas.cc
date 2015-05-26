@@ -283,6 +283,14 @@ msg::MessageSchema joinedSessionsSchema() {
       msg::EncodingHint::BITPACK);
 
   queries.fields.emplace_back(
+      64,
+      "query_type",
+      msg::FieldType::STRING,
+      1024,
+      false,
+      true);
+
+  queries.fields.emplace_back(
       12,
       "category1",
       msg::FieldType::UINT32,
