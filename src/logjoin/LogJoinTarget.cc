@@ -198,9 +198,20 @@ Buffer LogJoinTarget::trackedSessionToJoinedSession(TrackedSession& session) {
         (uint32_t) extractDeviceType(q.attrs));
 
     /* queries.page_type */
+    auto page_type = extractPageType(q.attrs);
     qry_obj.addChild(
         schema.id("search_queries.page_type"),
-        (uint32_t) extractPageType(q.attrs));
+        (uint32_t) page_type);
+
+    /* queries.query_type */
+    String query_type = pageTypeToString(page_type);
+    auto qtype_attr = cm::extractAttr(q.attrs, "qt");
+    if (qtype_attr.isEmpty()) {
+      query_type = qtype_attr.get();
+    }
+    qry_obj.addChild(
+        schema.id("search_queries.query_type"),
+        query_type);
 
     for (const auto& item : q.items) {
       auto& item_obj = qry_obj.addChild(
@@ -266,7 +277,8 @@ Buffer LogJoinTarget::trackedSessionToJoinedSession(TrackedSession& session) {
             msg::TRUE);
       }
 
-      if (item.position > 40 && slrid.isEmpty()) {
+      if ((item.position > 40 && slrid.isEmpty()) ||
+          (query_type == "reco")) {
         item_obj.addChild(
             schema.id("search_queries.result_items.is_recommendation"),
             msg::TRUE);

@@ -119,6 +119,11 @@ message JoinedSearchQuery {
   required ProtoPageType page_type = 11;
 
   /**
+   * The "querty type" (catalog/search/shop/recommendation/etc) as a string
+   */
+  optional string query_type = 64;
+
+  /**
    * The page number of the query was paginated. Starts from 1 == first page
    */
   optional uint32 page = 1;
