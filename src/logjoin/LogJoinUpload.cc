@@ -134,6 +134,9 @@ void LogJoinUpload::uploadPreferenceSetFeed(const JoinedSession& session) {
   Buffer buf;
   json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
   json.beginObject();
+  json.addObjectEntry("time");
+  json.addInteger(WallClock::unixMicros() / kMicrosPerSecond);
+  json.addComma();
   json.addObjectEntry("visited_products");
   json::toJSON(visited_products, &json);
   json.addComma();
