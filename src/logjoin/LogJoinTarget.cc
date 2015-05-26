@@ -328,6 +328,10 @@ Buffer LogJoinTarget::trackedSessionToJoinedSession(TrackedSession& session) {
     obj.addChild(schema.id("referrer_name"), session.referrer_name.get());
   }
 
+  if (!session.customer_session_id.isEmpty()) {
+    obj.addChild(schema.id("customer_session_id"), session.customer_session_id.get());
+  }
+
   obj.addChild(schema.id("num_cart_items"), session.num_cart_items);
   obj.addChild(schema.id("cart_value_eurcents"), session.cart_value_eurcents);
   obj.addChild(schema.id("num_order_items"), session.num_order_items);

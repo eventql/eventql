@@ -217,6 +217,11 @@ void TrackedSession::updateSessionAttributes(
   if (fnord::URI::getParam(logline, "r_nm", &r_nm)) {
     referrer_name = Some(r_nm);
   }
+
+  std::string cs;
+  if (fnord::URI::getParam(logline, "cs", &cs)) {
+    customer_session_id = Some(cs);
+  }
 }
 
 void TrackedSession::debugPrint(const std::string& uid) const {

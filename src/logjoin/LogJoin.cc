@@ -56,6 +56,7 @@ LogJoin::LogJoin(
   addPixelParamID("r_cpn", 22);
   addPixelParamID("x", 23);
   addPixelParamID("qx", 24);
+  addPixelParamID("cs", 25);
   addPixelParamID("qstr~de", 100);
   addPixelParamID("qstr~pl", 101);
   addPixelParamID("qstr~en", 102);
