@@ -10,6 +10,7 @@
 #include "fnord-base/uri.h"
 #include "fnord-base/util/binarymessagereader.h"
 #include "fnord-base/util/binarymessagewriter.h"
+#include "fnord-base/wallclock.h"
 #include "fnord-http/httprequest.h"
 #include "fnord-json/json.h"
 
@@ -68,6 +69,7 @@ size_t LogJoinUpload::scanQueue(const String& queue_name) {
       msg::decode<JoinedSession>(sdata, ssize, &session);
 
       uploadPreferenceSetFeed(session);
+      uploadQueryFeed(session);
     } catch (...) {
       txn->abort();
       throw;
@@ -152,6 +154,35 @@ void LogJoinUpload::uploadPreferenceSetFeed(const JoinedSession& session) {
 }
 
 void LogJoinUpload::uploadQueryFeed(const JoinedSession& session) {
+  for (const auto& q : session.search_queries()) {
+    Set<String> product_list;
+    Set<String> clicked_products;
+    for (const auto& item : q.result_items()) {
+      product_list.emplace(item.item_id());
+      if (item.clicked()) {
+        clicked_products.emplace(item.item_id());
+      }
+    }
+
+    Buffer buf;
+    json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
+    json.beginObject();
+    json.addObjectEntry("time");
+    json.addInteger(WallClock::unixMicros() / kMicrosPerSecond);
+    json.addComma();
+    json.addObjectEntry("product_list");
+    json::toJSON(product_list, &json);
+    json.addComma();
+    json.addObjectEntry("clicked_products");
+    json::toJSON(clicked_products, &json);
+    json.endObject();
+
+    auto topic = StringUtil::format(
+        "logjoin.ecommerce_search_queries.$0",
+        session.customer());
+
+    broker_client_.insert(broker_addr_, topic, buf);
+  }
 }
 
 } // namespace cm
