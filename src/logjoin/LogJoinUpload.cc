@@ -206,13 +206,8 @@ void LogJoinUpload::uploadQueryFeed(const JoinedSession& session) {
 
 void LogJoinUpload::uploadRecoQueryFeed(const JoinedSession& session) {
   for (const auto& q : session.search_queries()) {
-    switch (q.page_type()) {
-      case PAGETYPE_SEARCH_PAGE:
-      case PAGETYPE_CATALOG_PAGE:
-        break;
-
-      default:
-        continue;
+    if (q.shop_id() > 0) {
+      continue;
     }
 
     Set<String> product_list;
@@ -237,7 +232,7 @@ void LogJoinUpload::uploadRecoQueryFeed(const JoinedSession& session) {
     json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
     json.beginObject();
     json.addObjectEntry("time");
-    json.addInteger(q.time() / kMicrosPerSecond);
+    json.addInteger(q.time());
     json.addComma();
     json.addObjectEntry("session_id");
     json.addString(session.customer_session_id());
