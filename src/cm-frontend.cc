@@ -161,7 +161,7 @@ int main(int argc, const char** argv) {
 
   /* stats reporting */
   stats::StatsdAgent statsd_agent(
-      net::InetAddr::resolve(flags.getString("statsd_addr")),
+      InetAddr::resolve(flags.getString("statsd_addr")),
       10 * kMicrosPerSecond);
 
   statsd_agent.start();

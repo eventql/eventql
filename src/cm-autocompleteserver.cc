@@ -125,7 +125,7 @@ int main(int argc, const char** argv) {
 
   /* stats reporting */
   stats::StatsdAgent statsd_agent(
-      net::InetAddr::resolve(flags.getString("statsd")),
+      InetAddr::resolve(flags.getString("statsd")),
       10 * kMicrosPerSecond);
 
   statsd_agent.start();
