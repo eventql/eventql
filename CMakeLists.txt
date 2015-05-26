@@ -49,6 +49,7 @@ add_subdirectory(3rdparty/libfnord/fnord-metricdb)
 add_subdirectory(3rdparty/libfnord/fnord-tsdb)
 add_subdirectory(3rdparty/libfnord/fnord-dht)
 add_subdirectory(3rdparty/libfnord/fnord-dproc)
+add_subdirectory(3rdparty/libfnord/fnord-afx)
 include_directories(3rdparty/libfnord/)
 include_directories(3rdparty/libfnord/3rdparty/)
 include_directories(${FNORD_FTS_INCLUDE})
@@ -203,13 +204,13 @@ add_executable(cm-indexbuild
     $<TARGET_OBJECTS:fnord-mdb>
     $<TARGET_OBJECTS:fnord-msg>
     $<TARGET_OBJECTS:fnord-cstable>
+    $<TARGET_OBJECTS:fnord-afx>
     src/cm-indexbuild.cc
     3rdparty/libfnord/fnord-logtable/RemoteTableReader.cc
     3rdparty/libfnord/fnord-logtable/TableReader.cc
     3rdparty/libfnord/fnord-logtable/TableArena.cc
     3rdparty/libfnord/fnord-logtable/TableWriter.cc
     3rdparty/libfnord/fnord-logtable/TableRepository.cc
-    3rdparty/libfnord/fnord-logtable/ArtifactIndex.cc
     3rdparty/libfnord/fnord-logtable/NumericBoundsSummary.cc
     3rdparty/libfnord/fnord-logtable/TableChunkSummaryReader.cc
     3rdparty/libfnord/fnord-logtable/TableChunkSummaryWriter.cc
@@ -410,11 +411,11 @@ add_executable(cm-shopstatsbuild
     $<TARGET_OBJECTS:fnord-msg>
     $<TARGET_OBJECTS:fnord-tsdb>
     $<TARGET_OBJECTS:fnord-dproc>
+    $<TARGET_OBJECTS:fnord-afx>
     3rdparty/libfnord/fnord-logtable/TableReader.cc
     3rdparty/libfnord/fnord-logtable/TableArena.cc
     3rdparty/libfnord/fnord-logtable/TableWriter.cc
     3rdparty/libfnord/fnord-logtable/TableRepository.cc
-    3rdparty/libfnord/fnord-logtable/ArtifactIndex.cc
     3rdparty/libfnord/fnord-logtable/NumericBoundsSummary.cc
     3rdparty/libfnord/fnord-logtable/TableChunkSummaryReader.cc
     3rdparty/libfnord/fnord-logtable/TableChunkSummaryWriter.cc
@@ -488,10 +489,8 @@ add_executable(cm-chunkserver
     $<TARGET_OBJECTS:fnord-msg>
     $<TARGET_OBJECTS:fnord-tsdb>
     $<TARGET_OBJECTS:fnord-dht>
+    $<TARGET_OBJECTS:fnord-afx>
     3rdparty/libfnord/fnord-sstable/SSTableServlet.cc
-    3rdparty/libfnord/fnord-logtable/ArtifactIndex.cc
-    3rdparty/libfnord/fnord-logtable/ArtifactIndexReplication.cc
-    3rdparty/libfnord/fnord-logtable/ArtifactIndexMergeStrategy.cc
     3rdparty/libfnord/fnord-logtable/LogTableServlet.cc
     3rdparty/libfnord/fnord-logtable/TableReader.cc
     3rdparty/libfnord/fnord-logtable/TableWriter.cc
@@ -499,7 +498,6 @@ add_executable(cm-chunkserver
     3rdparty/libfnord/fnord-logtable/TableRepository.cc
     3rdparty/libfnord/fnord-logtable/TableJanitor.cc
     3rdparty/libfnord/fnord-logtable/TableReplication.cc
-    3rdparty/libfnord/fnord-logtable/ArtifactReplication.cc
     3rdparty/libfnord/fnord-logtable/NumericBoundsSummary.cc
     3rdparty/libfnord/fnord-logtable/TableChunkSummaryReader.cc
     3rdparty/libfnord/fnord-logtable/TableChunkSummaryWriter.cc
@@ -524,8 +522,8 @@ add_executable(cm-analytics-backend
     $<TARGET_OBJECTS:fnord-cstable>
     $<TARGET_OBJECTS:fnord-msg>
     $<TARGET_OBJECTS:fnord-tsdb>
+    $<TARGET_OBJECTS:fnord-afx>
     3rdparty/libfnord/fnord-sstable/SSTableServlet.cc
-    3rdparty/libfnord/fnord-logtable/ArtifactIndex.cc
     3rdparty/libfnord/fnord-logtable/LogTableServlet.cc
     3rdparty/libfnord/fnord-logtable/TableReader.cc
     3rdparty/libfnord/fnord-logtable/TableWriter.cc
@@ -533,7 +531,6 @@ add_executable(cm-analytics-backend
     3rdparty/libfnord/fnord-logtable/TableRepository.cc
     3rdparty/libfnord/fnord-logtable/TableJanitor.cc
     3rdparty/libfnord/fnord-logtable/TableReplication.cc
-    3rdparty/libfnord/fnord-logtable/ArtifactReplication.cc
     3rdparty/libfnord/fnord-logtable/NumericBoundsSummary.cc
     3rdparty/libfnord/fnord-logtable/TableChunkSummaryReader.cc
     3rdparty/libfnord/fnord-logtable/TableChunkSummaryWriter.cc
