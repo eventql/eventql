@@ -242,6 +242,9 @@ void LogJoinUpload::uploadRecoQueryFeed(const JoinedSession& session) {
     json.addObjectEntry("session_id");
     json.addString(session.customer_session_id());
     json.addComma();
+    json.addObjectEntry("source");
+    json.addString(q.query_type());
+    json.addComma();
     json.addObjectEntry("ab_test_group");
     json.addString(StringUtil::toString(session.ab_test_group()));
     json.addComma();
