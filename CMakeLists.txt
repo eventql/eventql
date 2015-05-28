@@ -494,6 +494,7 @@ add_executable(cm-feedexport
     src/DocIndex.cc
     src/analytics/Report.cc
     src/analytics/ECommerceRecoQueriesFeed.cc
+    src/analytics/ECommerceSearchQueriesFeed.cc
     src/analytics/TrafficSegment.cc
     src/analytics/JSONSink.cc
     src/analytics/AnalyticsTableScan.cc
