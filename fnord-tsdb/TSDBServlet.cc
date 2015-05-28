@@ -14,6 +14,7 @@
 #include "fnord-msg/MessageEncoder.h"
 #include "fnord-msg/MessagePrinter.h"
 #include <fnord-base/util/Base64.h>
+#include <fnord-sstable/sstablereader.h>
 
 namespace fnord {
 namespace tsdb {
@@ -59,6 +60,11 @@ void TSDBServlet::handleHTTPRequest(
     if (StringUtil::endsWith(uri.path(), "/list_files")) {
       listFiles(&req, &res, &uri);
       res_stream->writeResponse(res);
+      return;
+    }
+
+    if (StringUtil::endsWith(uri.path(), "/fetch_chunk")) {
+      fetchChunk(&req, &res, res_stream, &uri);
       return;
     }
 
@@ -302,6 +308,59 @@ void TSDBServlet::listFiles(
   json::toJSON(chunks_encoded, &j);
   j.endObject();
 */
+}
+
+void TSDBServlet::fetchChunk(
+    const http::HTTPRequest* req,
+    http::HTTPResponse* res,
+    RefPtr<http::HTTPResponseStream> res_stream,
+    URI* uri) {
+  const auto& params = uri->queryParams();
+
+  String chunk;
+  if (!URI::getParam(params, "chunk", &chunk)) {
+    res->setStatus(fnord::http::kStatusBadRequest);
+    res->addBody("missing ?chunk=... parameter");
+    res_stream->writeResponse(*res);
+    return;
+  }
+
+  String chunk_key;
+  util::Base64::decode(chunk, &chunk_key);
+
+  res->setStatus(http::kStatusOK);
+  res->addHeader("Content-Type", "application/octet-stream");
+  res_stream->startResponse(*res);
+
+  auto files = node_->listFiles(chunk_key);
+  for (const auto& f : files) {
+    sstable::SSTableReader reader(f);
+    auto cursor = reader.getCursor();
+
+    while (cursor->valid()) {
+      void* key;
+      size_t key_size;
+      cursor->getKey(&key, &key_size);
+      if (key_size != sizeof(uint64_t)) {
+        continue;
+      }
+
+      void* data;
+      size_t data_size;
+      cursor->getData(&data, &data_size);
+
+      util::BinaryMessageWriter buf;
+      buf.appendVarUInt(*((uint64_t*) key));
+      buf.appendVarUInt(data_size);
+      buf.append(data, data_size);
+
+      if (!cursor->next()) {
+        break;
+      }
+    }
+  }
+
+  res_stream->finishResponse();
 }
 
 void TSDBServlet::fetchDerivedDataset(
