@@ -19,6 +19,7 @@
 #include <fnord-dproc/LocalScheduler.h>
 #include <fnord-tsdb/TSDBClient.h>
 #include "analytics/ECommerceRecoQueriesFeed.h"
+#include "analytics/ECommerceSearchQueriesFeed.h"
 #include "analytics/ProtoSSTableMergeReducer.h"
 
 using namespace fnord;
@@ -96,6 +97,20 @@ int main(int argc, const char** argv) {
         return report;
       });
 
+  app.registerProtoTaskFactory<AnalyticsTableScanMapperParams>(
+      "ECommerceSearchQueriesFeed",
+      [&tsdb] (const AnalyticsTableScanMapperParams& params)
+          -> RefPtr<dproc::Task> {
+        auto report = new ECommerceSearchQueriesFeed(
+            new TSDBTableScanSource<JoinedSession>(params, &tsdb),
+            new JSONSink());
+
+        report->setCacheKey("cm.ecommerce_search_queries~XXX");
+
+        return report;
+      });
+
+
   //app.registerTaskFactory(
   //    "ItemBoostExport",
   //    [&tsdb] (const Buffer& params)
@@ -118,7 +133,7 @@ int main(int argc, const char** argv) {
   params.set_stream_key("joined_sessions.dawanda");
   params.set_partition_key("am9pbmVkX3Nlc3Npb25zLmRhd2FuZGEbgK2LqwU=");
 
-  auto res = sched.run(&app, "ECommerceRecoQueriesFeed", *msg::encode(params));
+  auto res = sched.run(&app, "ECommerceSearchQueriesFeed", *msg::encode(params));
 
   auto output_file = File::openFile(
       flags.getString("output"),
