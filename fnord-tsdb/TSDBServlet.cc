@@ -339,20 +339,12 @@ void TSDBServlet::fetchChunk(
     auto cursor = reader.getCursor();
 
     while (cursor->valid()) {
-      void* key;
-      size_t key_size;
-      cursor->getKey(&key, &key_size);
-      if (key_size != sizeof(uint64_t)) {
-        continue;
-      }
-
       void* data;
       size_t data_size;
       cursor->getData(&data, &data_size);
 
       util::BinaryMessageWriter buf;
-      buf.appendVarUInt(*((uint64_t*) key));
-      buf.appendVarUInt(data_size);
+      buf.appendUInt64(data_size);
       buf.append(data, data_size);
       res_stream->writeBodyChunk(Buffer(buf.data(), buf.size()));
 
