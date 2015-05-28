@@ -476,6 +476,38 @@ add_executable(cm-itemboostbuild
 target_link_libraries(cm-itemboostbuild
     ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_LIBS} ${FNORD_FTS_LIBS} ${FNORD_MSG_LIBS})
 
+add_executable(cm-feedexport
+    $<TARGET_OBJECTS:cm-common>
+    $<TARGET_OBJECTS:fnord-base>
+    $<TARGET_OBJECTS:fnord-feeds>
+    $<TARGET_OBJECTS:fnord-mdb>
+    $<TARGET_OBJECTS:fnord-http>
+    $<TARGET_OBJECTS:fnord-json>
+    $<TARGET_OBJECTS:fnord-rpc>
+    $<TARGET_OBJECTS:fnord-cstable>
+    $<TARGET_OBJECTS:fnord-sstable>
+    $<TARGET_OBJECTS:fnord-fts>
+    $<TARGET_OBJECTS:fnord-msg>
+    $<TARGET_OBJECTS:fnord-tsdb>
+    $<TARGET_OBJECTS:fnord-dproc>
+    src/schemas.cc
+    src/DocIndex.cc
+    src/analytics/Report.cc
+    src/analytics/ECommerceRecoQueriesFeed.cc
+    src/analytics/TrafficSegment.cc
+    src/analytics/JSONSink.cc
+    src/analytics/AnalyticsTableScan.cc
+    src/analytics/AnalyticsQuery.cc
+    src/analytics/AnalyticsQueryEngine.cc
+    src/analytics/AnalyticsQueryResult.cc
+    src/analytics/AnalyticsTableScanSource.cc
+    src/cm-feedexport.cc
+    ${PROTO_SRCS})
+
+target_link_libraries(cm-feedexport
+    ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_LIBS} ${FNORD_FTS_LIBS} ${FNORD_MSG_LIBS})
+
+
 add_executable(cm-chunkserver
     $<TARGET_OBJECTS:cm-common>
     $<TARGET_OBJECTS:fnord-base>
