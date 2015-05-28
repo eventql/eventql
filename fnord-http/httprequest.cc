@@ -108,15 +108,19 @@ void HTTPRequest::setURI(const std::string& uri) {
 }
 
 const bool HTTPRequest::keepalive() const {
-  if (version() == "HTTP/1.1") {
-    return true;
-  }
-
   if (getHeader("Connection") == "keep-alive") {
     return true;
   }
 
-  return false;
+  if (getHeader("Connection") == "close") {
+    return false;
+  }
+
+  if (version() == "HTTP/1.1") {
+    return true;
+  } else {
+    return false;
+  }
 }
 
 std::vector<std::pair<std::string, std::string>> HTTPRequest::cookies() const {

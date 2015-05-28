@@ -26,6 +26,7 @@ public:
   static const size_t kMaxVersionSize = 16;
   static const size_t kMaxHeaderSize = 65535;
   static const char kContentLengthHeader[];
+  static const char kConnectionHeader[];
 
   enum kParserMode {
     PARSE_HTTP_REQUEST,
