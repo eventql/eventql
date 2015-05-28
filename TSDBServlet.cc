@@ -325,6 +325,23 @@ void TSDBServlet::fetchChunk(
     return;
   }
 
+  size_t sample_mod = 0;
+  size_t sample_idx = 0;
+  String sample_str;
+  if (URI::getParam(params, "sample", &sample_str)) {
+    auto parts = StringUtil::split(sample_str, ":");
+
+    if (parts.size() != 2) {
+      res->setStatus(fnord::http::kStatusBadRequest);
+      res->addBody("invalid ?sample=... parameter, format is <mod>:<idx>");
+      res_stream->writeResponse(*res);
+    }
+
+    sample_mod = std::stoull(parts[0]);
+    sample_idx = std::stoull(parts[1]);
+  }
+
+
   String chunk_key;
   util::Base64::decode(chunk, &chunk_key);
 
@@ -339,14 +356,23 @@ void TSDBServlet::fetchChunk(
     auto cursor = reader.getCursor();
 
     while (cursor->valid()) {
-      void* data;
-      size_t data_size;
-      cursor->getData(&data, &data_size);
+      uint64_t* key;
+      size_t key_size;
+      cursor->getKey((void**) &key, &key_size);
+      if (key_size != sizeof(uint64_t)) {
+        RAISE(kRuntimeError, "invalid row");
+      }
 
-      util::BinaryMessageWriter buf;
-      buf.appendUInt64(data_size);
-      buf.append(data, data_size);
-      res_stream->writeBodyChunk(Buffer(buf.data(), buf.size()));
+      if (sample_mod == 0 || (*key % sample_mod == sample_idx)) {
+        void* data;
+        size_t data_size;
+        cursor->getData(&data, &data_size);
+
+        util::BinaryMessageWriter buf;
+        buf.appendUInt64(data_size);
+        buf.append(data, data_size);
+        res_stream->writeBodyChunk(Buffer(buf.data(), buf.size()));
+      }
 
       if (!cursor->next()) {
         break;

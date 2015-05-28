@@ -95,7 +95,6 @@ void TSDBClient::fetchPartition(
   }
 
   handler(nullptr, 0);
-  fnord::iputs("body bytes: $0", r.body().size());
   return;
 }
 
