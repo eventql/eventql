@@ -49,6 +49,28 @@ Vector<String> TSDBClient::listPartitions(
   return partitions;
 }
 
+void TSDBClient::fetchPartition(
+    const String& stream_key,
+    const String& partition,
+    Function<void (const Buffer& record)> fn) {
+  auto uri = StringUtil::format(
+      "$0/fetch_chunk?chunk=$1",
+      uri_,
+      URI::urlEncode(partition));
+
+  auto req = http::HTTPRequest::mkGet(uri);
+  auto res = http_->executeRequest(req);
+  res.wait();
+
+  const auto& r = res.get();
+  if (r.statusCode() != 200) {
+    RAISEF(kRuntimeError, "received non-200 response: $0", r.body().toString());
+  }
+
+  fnord::iputs("body bytes: $0", r.body().size());
+  return;
+}
+
 Buffer TSDBClient::fetchDerivedDataset(
     const String& stream_key,
     const String& partition,
