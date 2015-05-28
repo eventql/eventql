@@ -84,9 +84,9 @@ int main(int argc, const char** argv) {
 
   dproc::Application app("cm.feedexport");
 
-  app.registerProtoTaskFactory<AnalyticsTableScanMapperParams>(
+  app.registerProtoTaskFactory<TSDBTableScanParams>(
       "ECommerceRecoQueriesFeed",
-      [&tsdb] (const AnalyticsTableScanMapperParams& params)
+      [&tsdb] (const TSDBTableScanParams& params)
           -> RefPtr<dproc::Task> {
         auto report = new ECommerceRecoQueriesFeed(
             new TSDBTableScanSource<JoinedSession>(params, &tsdb),
@@ -97,9 +97,9 @@ int main(int argc, const char** argv) {
         return report;
       });
 
-  app.registerProtoTaskFactory<AnalyticsTableScanMapperParams>(
+  app.registerProtoTaskFactory<TSDBTableScanParams>(
       "ECommerceSearchQueriesFeed",
-      [&tsdb] (const AnalyticsTableScanMapperParams& params)
+      [&tsdb] (const TSDBTableScanParams& params)
           -> RefPtr<dproc::Task> {
         auto report = new ECommerceSearchQueriesFeed(
             new TSDBTableScanSource<JoinedSession>(params, &tsdb),
@@ -129,9 +129,11 @@ int main(int argc, const char** argv) {
   dproc::LocalScheduler sched(flags.getString("tempdir"), flags.getInt("threads"));
   sched.start();
 
-  AnalyticsTableScanMapperParams params;
+  TSDBTableScanParams params;
   params.set_stream_key("joined_sessions.dawanda");
   params.set_partition_key("am9pbmVkX3Nlc3Npb25zLmRhd2FuZGEbgK2LqwU=");
+  params.set_sample_modulo(32);
+  params.set_sample_index(1);
 
   auto res = sched.run(&app, "ECommerceSearchQueriesFeed", *msg::encode(params));
 
