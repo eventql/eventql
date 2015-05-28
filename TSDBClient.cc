@@ -53,10 +53,23 @@ void TSDBClient::fetchPartition(
     const String& stream_key,
     const String& partition,
     Function<void (const Buffer& record)> fn) {
+  fetchPartitionWithSampling(stream_key, partition, 0, 0, fn);
+}
+
+void TSDBClient::fetchPartitionWithSampling(
+    const String& stream_key,
+    const String& partition,
+    size_t sample_modulo,
+    size_t sample_index,
+    Function<void (const Buffer& record)> fn) {
   auto uri = StringUtil::format(
       "$0/fetch_chunk?chunk=$1",
       uri_,
       URI::urlEncode(partition));
+
+  if (sample_modulo > 0) {
+    uri += StringUtil::format("&sample=$0:$1", sample_modulo, sample_index);
+  }
 
   Buffer buf;
   auto handler = [&buf, &fn] (const void* data, size_t size) {
