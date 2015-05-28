@@ -29,6 +29,11 @@ public:
       const DateTime& from,
       const DateTime& until);
 
+  void fetchPartition(
+      const String& stream_key,
+      const String& patition,
+      Function<void (const Buffer& record)> fn);
+
   Buffer fetchDerivedDataset(
       const String& stream_key,
       const String& patition,
