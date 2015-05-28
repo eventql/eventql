@@ -61,8 +61,8 @@ void TSDBClient::fetchPartition(
   Buffer buf;
   auto handler = [&buf, &fn] (const void* data, size_t size) {
     buf.append(data, size);
-    fnord::iputs("read...: $0", buf.size());
 
+    size_t consumed = 0;
     util::BinaryMessageReader reader(buf.data(), buf.size());
     while (reader.remaining() >= sizeof(uint64_t)) {
       auto rec_len = *reader.readUInt64();
@@ -71,12 +71,11 @@ void TSDBClient::fetchPartition(
         break;
       }
 
-      fnord::iputs("read record: $0", rec_len);
       fn(Buffer(reader.read(rec_len), rec_len));
+      consumed = reader.position();
     }
 
-    auto rem_bytes = reader.remaining();
-    Buffer remaining(reader.read(rem_bytes), rem_bytes);
+    Buffer remaining((char*) buf.data() + consumed, buf.size() - consumed);
     buf.clear();
     buf.append(remaining);
   };
