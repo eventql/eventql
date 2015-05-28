@@ -58,8 +58,36 @@ void TSDBClient::fetchPartition(
       uri_,
       URI::urlEncode(partition));
 
+  Buffer buf;
+  auto handler = [&buf, &fn] (const void* data, size_t size) {
+    buf.append(data, size);
+    fnord::iputs("read...: $0", buf.size());
+
+    util::BinaryMessageReader reader(buf.data(), buf.size());
+    while (reader.remaining() >= sizeof(uint64_t)) {
+      auto rec_len = *reader.readUInt64();
+
+      if (rec_len > reader.remaining()) {
+        break;
+      }
+
+      fnord::iputs("read record: $0", rec_len);
+      fn(Buffer(reader.read(rec_len), rec_len));
+    }
+
+    auto rem_bytes = reader.remaining();
+    Buffer remaining(reader.read(rem_bytes), rem_bytes);
+    buf.clear();
+    buf.append(remaining);
+  };
+
+  auto handler_factory = [&handler] (const Promise<http::HTTPResponse> promise)
+      -> http::HTTPResponseFuture* {
+    return new http::StreamingResponseFuture(promise, handler);
+  };
+
   auto req = http::HTTPRequest::mkGet(uri);
-  auto res = http_->executeRequest(req);
+  auto res = http_->executeRequest(req, handler_factory);
   res.wait();
 
   const auto& r = res.get();
@@ -67,6 +95,7 @@ void TSDBClient::fetchPartition(
     RAISEF(kRuntimeError, "received non-200 response: $0", r.body().toString());
   }
 
+  handler(nullptr, 0);
   fnord::iputs("body bytes: $0", r.body().size());
   return;
 }
