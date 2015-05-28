@@ -16,44 +16,44 @@
 namespace fnord {
 namespace tsdb {
 
-class TSDBServlet : public fnord::http::HTTPService {
+class TSDBServlet : public fnord::http::StreamingHTTPService {
 public:
 
   TSDBServlet(TSDBNode* node);
 
   void handleHTTPRequest(
-      http::HTTPRequest* req,
-      http::HTTPResponse* res);
+      RefPtr<http::HTTPRequestStream> req_stream,
+      RefPtr<http::HTTPResponseStream> res_stream);
 
 protected:
 
   void insertRecord(
-      http::HTTPRequest* req,
+      const http::HTTPRequest* req,
       http::HTTPResponse* res,
       URI* uri);
 
   void insertRecordsBatch(
-      http::HTTPRequest* req,
+      const http::HTTPRequest* req,
       http::HTTPResponse* res,
       URI* uri);
 
   void insertRecordsReplication(
-      http::HTTPRequest* req,
+      const http::HTTPRequest* req,
       http::HTTPResponse* res,
       URI* uri);
 
   void listChunks(
-      http::HTTPRequest* req,
+      const http::HTTPRequest* req,
       http::HTTPResponse* res,
       URI* uri);
 
   void listFiles(
-      http::HTTPRequest* req,
+      const http::HTTPRequest* req,
       http::HTTPResponse* res,
       URI* uri);
 
   void fetchDerivedDataset(
-      http::HTTPRequest* req,
+      const http::HTTPRequest* req,
       http::HTTPResponse* res,
       URI* uri);
 

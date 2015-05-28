@@ -21,47 +21,65 @@ namespace tsdb {
 TSDBServlet::TSDBServlet(TSDBNode* node) : node_(node) {}
 
 void TSDBServlet::handleHTTPRequest(
-    fnord::http::HTTPRequest* req,
-    fnord::http::HTTPResponse* res) {
-  URI uri(req->uri());
+    RefPtr<http::HTTPRequestStream> req_stream,
+    RefPtr<http::HTTPResponseStream> res_stream) {
+  req_stream->readBody();
+  const auto& req = req_stream->request();
+  URI uri(req.uri());
 
-  res->addHeader("Access-Control-Allow-Origin", "*");
+  http::HTTPResponse res;
+  res.populateFromRequest(req);
+  res.addHeader("Access-Control-Allow-Origin", "*");
 
   try {
     if (StringUtil::endsWith(uri.path(), "/insert")) {
-      return insertRecord(req, res, &uri);
+      insertRecord(&req, &res, &uri);
+      res_stream->writeResponse(res);
+      return;
     }
 
     if (StringUtil::endsWith(uri.path(), "/insert_batch")) {
-      return insertRecordsBatch(req, res, &uri);
+      insertRecordsBatch(&req, &res, &uri);
+      res_stream->writeResponse(res);
+      return;
     }
 
     if (StringUtil::endsWith(uri.path(), "/replicate")) {
-      return insertRecordsReplication(req, res, &uri);
+      insertRecordsReplication(&req, &res, &uri);
+      res_stream->writeResponse(res);
+      return;
     }
 
     if (StringUtil::endsWith(uri.path(), "/list_chunks")) {
-      return listChunks(req, res, &uri);
+      listChunks(&req, &res, &uri);
+      res_stream->writeResponse(res);
+      return;
     }
 
     if (StringUtil::endsWith(uri.path(), "/list_files")) {
-      return listFiles(req, res, &uri);
+      listFiles(&req, &res, &uri);
+      res_stream->writeResponse(res);
+      return;
     }
 
     if (StringUtil::endsWith(uri.path(), "/fetch_derived_dataset")) {
-      return fetchDerivedDataset(req, res, &uri);
+      fetchDerivedDataset(&req, &res, &uri);
+      res_stream->writeResponse(res);
+      return;
     }
 
-    res->setStatus(fnord::http::kStatusNotFound);
-    res->addBody("not found");
+    res.setStatus(fnord::http::kStatusNotFound);
+    res.addBody("not found");
+    res_stream->writeResponse(res);
   } catch (const Exception& e) {
-    res->setStatus(http::kStatusInternalServerError);
-    res->addBody(StringUtil::format("error: $0: $1", e.getTypeName(), e.getMessage()));
+    res.setStatus(http::kStatusInternalServerError);
+    res.addBody(StringUtil::format("error: $0: $1", e.getTypeName(), e.getMessage()));
+    res_stream->writeResponse(res);
   }
 }
 
 void TSDBServlet::insertRecord(
-    http::HTTPRequest* req,
+    const http::HTTPRequest* req,
     http::HTTPResponse* res,
     URI* uri) {
   const auto& params = uri->queryParams();
@@ -85,7 +103,7 @@ void TSDBServlet::insertRecord(
 }
 
 void TSDBServlet::insertRecordsBatch(
-    http::HTTPRequest* req,
+    const http::HTTPRequest* req,
     http::HTTPResponse* res,
     URI* uri) {
   const auto& params = uri->queryParams();
@@ -118,7 +136,7 @@ void TSDBServlet::insertRecordsBatch(
 }
 
 void TSDBServlet::insertRecordsReplication(
-    http::HTTPRequest* req,
+    const http::HTTPRequest* req,
     http::HTTPResponse* res,
     URI* uri) {
   const auto& params = uri->queryParams();
@@ -160,7 +178,7 @@ void TSDBServlet::insertRecordsReplication(
 }
 
 void TSDBServlet::listChunks(
-    http::HTTPRequest* req,
+    const http::HTTPRequest* req,
     http::HTTPResponse* res,
     URI* uri) {
   const auto& params = uri->queryParams();
@@ -234,7 +252,7 @@ void TSDBServlet::listChunks(
 }
 
 void TSDBServlet::listFiles(
-    http::HTTPRequest* req,
+    const http::HTTPRequest* req,
     http::HTTPResponse* res,
     URI* uri) {
   const auto& params = uri->queryParams();
@@ -287,7 +305,7 @@ void TSDBServlet::listFiles(
 }
 
 void TSDBServlet::fetchDerivedDataset(
-    http::HTTPRequest* req,
+    const http::HTTPRequest* req,
     http::HTTPResponse* res,
     URI* uri) {
   const auto& params = uri->queryParams();
