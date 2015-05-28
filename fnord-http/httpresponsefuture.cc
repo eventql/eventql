@@ -61,5 +61,17 @@ void HTTPResponseFuture::onResponseComplete() {
   delete this;
 }
 
+StreamingResponseFuture::StreamingResponseFuture(
+    Promise<HTTPResponse> promise,
+    CallbackType callback) :
+    HTTPResponseFuture(promise),
+    callback_(callback) {}
+
+void StreamingResponseFuture::onBodyChunk(
+    const char* data,
+    size_t size) {
+  callback_(data, size);
+}
+
 }
 }
