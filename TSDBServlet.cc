@@ -330,6 +330,7 @@ void TSDBServlet::fetchChunk(
 
   res->setStatus(http::kStatusOK);
   res->addHeader("Content-Type", "application/octet-stream");
+  res->addHeader("Connection", "close");
   res_stream->startResponse(*res);
 
   auto files = node_->listFiles(chunk_key);
