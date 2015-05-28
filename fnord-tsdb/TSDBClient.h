@@ -34,6 +34,13 @@ public:
       const String& patition,
       Function<void (const Buffer& record)> fn);
 
+  void fetchPartitionWithSampling(
+      const String& stream_key,
+      const String& patition,
+      size_t sample_modulo,
+      size_t sample_index,
+      Function<void (const Buffer& record)> fn);
+
   Buffer fetchDerivedDataset(
       const String& stream_key,
       const String& patition,
