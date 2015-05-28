@@ -353,6 +353,7 @@ void TSDBServlet::fetchChunk(
       buf.appendVarUInt(*((uint64_t*) key));
       buf.appendVarUInt(data_size);
       buf.append(data, data_size);
+      res_stream->writeBodyChunk(Buffer(buf.data(), buf.size()));
 
       if (!cursor->next()) {
         break;
