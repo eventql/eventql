@@ -12,9 +12,9 @@
 namespace fnord {
 namespace dproc {
 
-Application::Application(const String& name) : name_(name) {}
+DefaultApplication::DefaultApplication(const String& name) : name_(name) {}
 
-RefPtr<Task> Application::getTaskInstance(
+RefPtr<Task> DefaultApplication::getTaskInstance(
     const String& name,
     const Buffer& params) {
   auto factory = factories_.find(name);
@@ -26,7 +26,9 @@ RefPtr<Task> Application::getTaskInstance(
   return factory->second(params);
 }
 
-void Application::registerTaskFactory(const String& name, TaskFactory factory) {
+void DefaultApplication::registerTaskFactory(
+    const String& name,
+    TaskFactory factory) {
   factories_.emplace(name, factory);
 }
 
