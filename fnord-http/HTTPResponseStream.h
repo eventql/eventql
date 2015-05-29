@@ -28,7 +28,7 @@ public:
    * immediately finish the response. After calling this method you must not
    * call any of startResponse, writeBodyChunk or finishResponse
    */
-  void writeResponse(const HTTPResponse& resp);
+  void writeResponse(HTTPResponse res);
 
   /**
    * Start writing the HTTP response (i.e. write the headers). After calling
