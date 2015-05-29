@@ -101,7 +101,7 @@ int main(int argc, const char** argv) {
   http::HTTPConnectionPool http(&ev);
   tsdb::TSDBClient tsdb("http://nue03.prod.fnrd.net:7003/tsdb", &http);
 
-  dproc::Application app("cm.shopstats");
+  dproc::DefaultApplication app("cm.shopstats");
 
   app.registerProtoTaskFactory<AnalyticsTableScanMapperParams>(
       "CTRByShopMapper",
