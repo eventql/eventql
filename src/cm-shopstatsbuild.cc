@@ -248,7 +248,7 @@ int main(int argc, const char** argv) {
   params.set_from_unixmicros(WallClock::unixMicros() - 30 * kMicrosPerDay);
   params.set_until_unixmicros(WallClock::unixMicros() - 2 * kMicrosPerDay);
 
-  auto res = sched.run(&app, "TopTermsByCategory", *msg::encode(params));
+  auto res = sched.run(&app, "ShopStatsReducer", *msg::encode(params));
 
   auto output_file = File::openFile(
       flags.getString("output"),
