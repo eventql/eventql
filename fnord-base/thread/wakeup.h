@@ -13,10 +13,11 @@
 #include <condition_variable>
 #include <mutex>
 #include <list>
+#include <fnord-base/autoref.h>
 
 namespace fnord {
 
-class Wakeup {
+class Wakeup : public RefCounted {
 public:
   Wakeup();
 

@@ -24,28 +24,20 @@ const HTTPRequest& HTTPRequestStream::request() const {
 }
 
 void HTTPRequestStream::readBody(Function<void (const void*, size_t)> fn) {
-  std::mutex m;
-  std::condition_variable cv;
-  bool all_read = false;
+  RefPtr<Wakeup> wakeup(new Wakeup());
 
-  conn_->readRequestBody([this, &fn, &m, &cv, &all_read] (
+  conn_->readRequestBody([this, fn, wakeup] (
       const void* data,
       size_t size,
       bool last_chunk) {
     fn(data, size);
 
     if (last_chunk) {
-      std::unique_lock<std::mutex> lk(m);
-      all_read = true;
-      lk.unlock();
-      cv.notify_all();
+      wakeup->wakeup();
     }
   });
 
-  std::unique_lock<std::mutex> lk(m);
-  while (!all_read) {
-    cv.wait(lk);
-  }
+  wakeup->waitForFirstWakeup();
 }
 
 void HTTPRequestStream::readBody() {
