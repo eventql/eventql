@@ -229,16 +229,18 @@ void HTTPServerConnection::readRequestBody(
 
   auto read_body_chunk_fn = [this, callback] (const char* data, size_t size) {
     std::unique_lock<std::mutex> lk(mutex_);
-    body_buf_.append(data, size);
+    auto chunk = body_buf_;
+    chunk.append(data, size);
     auto last_chunk = parser_.state() == HTTPParser::S_DONE;
+    body_buf_.clear();
+    lk.unlock();
 
     if (last_chunk || body_buf_.size() > 0) {
       callback(
-          (const char*) body_buf_.data(),
-          body_buf_.size(),
+          (const char*) chunk.data(),
+          chunk.size(),
           last_chunk);
 
-      body_buf_.clear();
     }
   };
 
