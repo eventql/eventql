@@ -124,12 +124,12 @@ int main(int argc, const char** argv) {
   auto dir = flags.getString("datadir");
 
   /* analytics */
-  cm::demoQueryServlet demo_srv;
-  http_router.addRouteByPrefixMatch("/analytics/query_stream", &demo_srv, &tpool);
+  //cm::demoQueryServlet demo_srv;
+  //http_router.addRouteByPrefixMatch("/analytics/query_stream", &demo_srv, &tpool);
 
   cm::AnalyticsQueryEngine analytics(32, dir, &tsdb);
-  /*cm::AnalyticsServlet analytics_servlet(&analytics);
-  http_router.addRouteByPrefixMatch("/analytics", &analytics_servlet, &tpool);*/
+  cm::AnalyticsServlet analytics_servlet(&analytics);
+  http_router.addRouteByPrefixMatch("/analytics", &analytics_servlet, &tpool);
 
   /* stop stats */
   auto shopstats = cm::ShopStatsTable::open(flags.getString("shopstats_table"));
