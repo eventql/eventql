@@ -193,6 +193,7 @@ void HTTPServerConnection::nextRequest() {
   body_buf_.clear();
 
   parser_.onBodyChunk([this] (const char* data, size_t size) {
+    std::unique_lock<std::mutex> lk(mutex_);
     body_buf_.append(data, size);
   });
 
@@ -235,10 +236,10 @@ void HTTPServerConnection::readRequestBody(
     }
   };
 
-  lk.unlock();
-
-  read_body_chunk_fn((const char*) body_buf_.data(), body_buf_.size());
   parser_.onBodyChunk(read_body_chunk_fn);
+  Buffer body_buf_cpy = body_buf_;
+  lk.unlock();
+  read_body_chunk_fn((const char*) body_buf_cpy.data(), body_buf_cpy.size());
 }
 
 void HTTPServerConnection::discardRequestBody(Function<void ()> callback) {

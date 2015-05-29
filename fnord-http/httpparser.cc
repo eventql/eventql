@@ -255,7 +255,7 @@ void HTTPParser::parseRequestVersion(const char** begin, const char* end) {
 
 void HTTPParser::parseResponseVersion(const char** begin, const char* end) {
   if (readUntil(begin, end, ' ')) {
-    if (strncasecmp((char *) buf_.data(), "HTTP/1.0", buf_.size())) {
+    if (strncasecmp((char *) buf_.data(), "HTTP/1.0", buf_.size()) == 0) {
       body_bytes_expected_ = -1;
     }
 
