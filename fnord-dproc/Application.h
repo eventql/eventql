@@ -17,12 +17,23 @@
 namespace fnord {
 namespace dproc {
 
-class Application {
+class Application : public RefCounted {
 public:
 
-  Application(const String& name);
+  virtual RefPtr<Task> getTaskInstance(
+      const String& name,
+      const Buffer& params) = 0;
 
-  RefPtr<Task> getTaskInstance(const String& name, const Buffer& params);
+};
+
+class DefaultApplication : public Application {
+public:
+
+  DefaultApplication(const String& name);
+
+  RefPtr<Task> getTaskInstance(
+      const String& name,
+      const Buffer& params) override;
 
   template <typename ProtoType>
   void registerProtoTaskFactory(
@@ -43,7 +54,7 @@ protected:
 };
 
 template <typename ProtoType>
-void Application::registerProtoTaskFactory(
+void DefaultApplication::registerProtoTaskFactory(
     const String& name,
     ProtoTaskFactory<ProtoType> factory) {
   registerTaskFactory(name, [factory] (const Buffer& params) -> RefPtr<Task> {
@@ -52,14 +63,16 @@ void Application::registerProtoTaskFactory(
 }
 
 template <typename TaskType, typename... ArgTypes>
-void Application::registerTask(const String& name, ArgTypes... args) {
+void DefaultApplication::registerTask(const String& name, ArgTypes... args) {
   registerTaskFactory(name, [=] (const Buffer& params) -> RefPtr<Task> {
     return new TaskType(params, args...);
   });
 }
 
 template <typename TaskType, typename... ArgTypes>
-void Application::registerProtoTask(const String& name, ArgTypes... args) {
+void DefaultApplication::registerProtoTask(
+    const String& name,
+    ArgTypes... args) {
   registerTaskFactory(name, [=] (const Buffer& params) -> RefPtr<Task> {
     return new TaskType(msg::decode<typename TaskType::ParamType>(params), args...);
   });
