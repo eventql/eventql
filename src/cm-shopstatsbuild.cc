@@ -6,48 +6,22 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-#include <algorithm>
-#include <stdlib.h>
-#include <unistd.h>
-#include <signal.h>
-#include "fnord-base/io/fileutil.h"
-#include "fnord-base/thread/eventloop.h"
+#include "fnord-base/stdtypes.h"
 #include "fnord-base/application.h"
-#include "fnord-base/logging.h"
-#include "fnord-base/Language.h"
-#include "fnord-base/random.h"
-#include "fnord-base/fnv.h"
 #include "fnord-base/cli/flagparser.h"
-#include "fnord-base/util/SimpleRateLimit.h"
-#include "fnord-base/InternMap.h"
+#include "fnord-base/logging.h"
+#include "fnord-base/io/fileutil.h"
 #include "fnord-base/thread/threadpool.h"
+#include "fnord-base/thread/eventloop.h"
+#include "fnord-base/wallclock.h"
 #include "fnord-dproc/Application.h"
 #include "fnord-dproc/LocalScheduler.h"
-#include "fnord-json/json.h"
-#include "fnord-mdb/MDB.h"
-#include "fnord-mdb/MDBUtil.h"
-#include "fnord-sstable/sstablereader.h"
-#include "fnord-sstable/sstablewriter.h"
-#include "fnord-sstable/SSTableColumnSchema.h"
-#include "fnord-sstable/SSTableColumnReader.h"
-#include "fnord-sstable/SSTableColumnWriter.h"
 #include "fnord-http/httpconnectionpool.h"
-#include <fnord-fts/fts.h>
-#include <fnord-fts/fts_common.h>
-#include "fnord-logtable/TableReader.h"
 #include "common.h"
 #include "schemas.h"
 #include "CustomerNamespace.h"
 #include "CTRCounter.h"
-#include "analytics/ReportBuilder.h"
-#include "analytics/AnalyticsTableScanSource.h"
-#include "analytics/CTRByShopMapper.h"
-#include "analytics/ECommerceStatsByShopMapper.h"
-#include "analytics/ProductStatsByShopMapper.h"
-#include "analytics/CTRCounterMergeReducer.h"
-#include "analytics/CTRBySearchTermCrossCategoryMapper.h"
-#include "analytics/TopTermsByCategoryMapper.h"
-#include "AnalyticsTableScanParams.pb.h"
+#include "analytics/ShopStatsApp.h"
 
 using namespace fnord;
 using namespace cm;
@@ -101,145 +75,6 @@ int main(int argc, const char** argv) {
   http::HTTPConnectionPool http(&ev);
   tsdb::TSDBClient tsdb("http://nue03.prod.fnrd.net:7003/tsdb", &http);
 
-  dproc::DefaultApplication app("cm.shopstats");
-
-  app.registerProtoTaskFactory<AnalyticsTableScanMapperParams>(
-      "CTRByShopMapper",
-      [&tsdb] (const AnalyticsTableScanMapperParams& params)
-          -> RefPtr<dproc::Task> {
-        auto report = new CTRByShopMapper(
-            new AnalyticsTableScanSource(params, &tsdb),
-            new ShopStatsTableSink());
-
-        report->setCacheKey(
-            "cm.shopstats.ctr~" + report->input()->cacheKey());
-
-        return report;
-      });
-
-  app.registerProtoTaskFactory<AnalyticsTableScanMapperParams>(
-      "EcommerceStatsByShopMapper",
-      [&tsdb] (const AnalyticsTableScanMapperParams& params)
-          -> RefPtr<dproc::Task> {
-        auto report = new ECommerceStatsByShopMapper(
-            new AnalyticsTableScanSource(params, &tsdb),
-            new ShopStatsTableSink());
-
-        report->setCacheKey(
-            "cm.shopstats.ecommerce~" + report->input()->cacheKey());
-
-        return report;
-      });
-
-  app.registerProtoTaskFactory<AnalyticsTableScanMapperParams>(
-      "ShopProductStatsMapper",
-      [&tsdb] (const AnalyticsTableScanMapperParams& params)
-          -> RefPtr<dproc::Task> {
-        auto report = new ProductStatsByShopMapper(
-            new AnalyticsTableScanSource(params, &tsdb),
-            new ShopStatsTableSink());
-
-        report->setCacheKey(
-            "cm.shopstats.products~" + report->input()->cacheKey());
-
-        return report;
-      });
-
-  app.registerProtoTaskFactory<AnalyticsTableScanReducerParams>(
-      "ShopStatsReducer",
-      [&tsdb] (const AnalyticsTableScanReducerParams& params)
-          -> RefPtr<dproc::Task> {
-        auto stream = "joined_sessions." + params.customer();
-        auto partitions = tsdb.listPartitions(
-            stream,
-            params.from_unixmicros(),
-            params.until_unixmicros());
-
-        List<dproc::TaskDependency> map_chunks;
-        for (const auto& part : partitions) {
-          AnalyticsTableScanMapperParams map_chunk_params;
-          map_chunk_params.set_stream_key(stream);
-          map_chunk_params.set_partition_key(part);
-
-          map_chunks.emplace_back(dproc::TaskDependency {
-            .task_name = "CTRByShopMapper",
-            .params = *msg::encode(map_chunk_params)
-          });
-
-          map_chunks.emplace_back(dproc::TaskDependency {
-            .task_name = "EcommerceStatsByShopMapper",
-            .params = *msg::encode(map_chunk_params)
-          });
-
-          map_chunks.emplace_back(dproc::TaskDependency {
-            .task_name = "ShopProductStatsMapper",
-            .params = *msg::encode(map_chunk_params)
-          });
-        }
-
-        return new ShopStatsMergeReducer(
-            new ShopStatsTableSource(map_chunks),
-            new ShopStatsTableSink());
-      });
-
-  app.registerProtoTaskFactory<AnalyticsTableScanMapperParams>(
-      "TopTermsByCategoryMapper",
-      [&tsdb] (const AnalyticsTableScanMapperParams& params)
-          -> RefPtr<dproc::Task> {
-        auto report = new CTRBySearchTermCrossCategoryMapper(
-            new AnalyticsTableScanSource(params, &tsdb),
-            new CTRCounterTableSink(),
-            "category3");
-
-        report->setCacheKey(
-            "cm.toptermsbycategory~" + report->input()->cacheKey());
-
-        return report;
-      });
-
-  app.registerProtoTaskFactory<AnalyticsTableScanReducerParams>(
-      "TopTermsByCategoryReducer",
-      [&tsdb] (const AnalyticsTableScanReducerParams& params)
-          -> RefPtr<dproc::Task> {
-        auto stream = "joined_sessions." + params.customer();
-        auto partitions = tsdb.listPartitions(
-            stream,
-            params.from_unixmicros(),
-            params.until_unixmicros());
-
-        List<dproc::TaskDependency> map_chunks;
-        for (const auto& part : partitions) {
-          AnalyticsTableScanMapperParams map_chunk_params;
-          map_chunk_params.set_stream_key(stream);
-          map_chunk_params.set_partition_key(part);
-
-          map_chunks.emplace_back(dproc::TaskDependency {
-            .task_name = "TopTermsByCategoryMapper",
-            .params = *msg::encode(map_chunk_params)
-          });
-        }
-
-        return new CTRCounterMergeReducer(
-            new CTRCounterTableSource(map_chunks),
-            new CTRCounterTableSink());
-      });
-
-  app.registerTaskFactory(
-      "TopTermsByCategory",
-      [&tsdb] (const Buffer& params)
-          -> RefPtr<dproc::Task> {
-        List<dproc::TaskDependency> deps;
-        deps.emplace_back(dproc::TaskDependency {
-          .task_name = "TopTermsByCategoryReducer",
-          .params = params
-        });
-
-        return new TopTermsByCategoryMapper(
-            new CTRCounterTableSource(deps),
-            new CTRCounterTableSink());
-      });
-
-
   dproc::LocalScheduler sched(flags.getString("tempdir"));
   sched.start();
 
@@ -248,6 +83,7 @@ int main(int argc, const char** argv) {
   params.set_from_unixmicros(WallClock::unixMicros() - 30 * kMicrosPerDay);
   params.set_until_unixmicros(WallClock::unixMicros() - 2 * kMicrosPerDay);
 
+  ShopStatsApp app(&tsdb);
   auto res = sched.run(&app, "ShopStatsReducer", *msg::encode(params));
 
   auto output_file = File::openFile(

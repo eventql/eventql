@@ -432,6 +432,7 @@ add_executable(cm-shopstatsbuild
     src/analytics/AnalyticsQueryResult.cc
     src/analytics/AnalyticsTableScanSource.cc
     src/analytics/ShopStats.cc
+    src/analytics/ShopStatsApp.cc
     src/analytics/CTRCounterTableSource.cc
     src/analytics/CTRCounterTableSink.cc
     src/analytics/CTRCounterMergeReducer.cc
