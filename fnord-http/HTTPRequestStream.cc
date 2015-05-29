@@ -37,6 +37,7 @@ void HTTPRequestStream::readBody(Function<void (const void*, size_t)> fn) {
     if (last_chunk) {
       std::unique_lock<std::mutex> lk(m);
       all_read = true;
+      lk.unlock();
       cv.notify_all();
     }
   });
