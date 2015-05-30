@@ -2,19 +2,10 @@ project(FNORD_FEEDS)
 
 include_directories(../)
 include_directories(../3rdparty)
+include_directories(${CMAKE_CURRENT_BINARY_DIR}/../)
+
 file(GLOB PROTO_FILES *.proto)
-
-foreach(PROTO_FILE ${PROTO_FILES})
-  get_filename_component(PROTO_NAME ${PROTO_FILE} NAME_WE)
-  set(PROTO_SRCS ${PROTO_SRCS} ${CMAKE_CURRENT_SOURCE_DIR}/${PROTO_NAME}.pb.cc)
-endforeach()
-
-add_custom_target(fnord-feeds-protos ALL
-    COMMAND protoc --cpp_out=. -I${CMAKE_CURRENT_SOURCE_DIR} ${PROTO_FILES}
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-    DEPENDS ${PROTO_FILES})
-
-set_source_files_properties(${PROTO_SRCS} PROPERTIES GENERATED true)
+PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS ${PROTO_FILES})
 
 add_library(fnord-feeds OBJECT
     BrokerClient.cc
@@ -25,8 +16,6 @@ add_library(fnord-feeds OBJECT
     RemoteFeedWriter.cc
     FeedService.cc
     ${PROTO_SRCS})
-
-add_dependencies(fnord-feeds fnord-feeds-protos)
 
 add_executable(brokerd
     $<TARGET_OBJECTS:fnord-base>
