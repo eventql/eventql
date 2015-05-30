@@ -12,8 +12,20 @@ add_library(cm-common OBJECT
 # cm-frontend
 set_source_files_properties(${CMAKE_BINARY_DIR}/cm-frontend-assets.cc PROPERTIES GENERATED true)
 
-add_custom_target(cm-frontend-assets
+execute_process(
+    COMMAND bash -c "sed -e 's/.*://' < ${CMAKE_SOURCE_DIR}/src/cm-frontend.assets | tr '\n' ' '"
+    OUTPUT_VARIABLE FRONTEND_ASSETS_DEPS
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+
+separate_arguments(FRONTEND_ASSETS_DEPS)
+foreach(l ${FRONTEND_ASSETS_DEPS})
+  list(APPEND FRONTEND_ASSETS_DEPS_FULL ${CMAKE_SOURCE_DIR}/${l})
+endforeach()
+
+add_custom_command(
+    OUTPUT ${CMAKE_BINARY_DIR}/cm-frontend-assets.cc
     COMMAND ./3rdparty/libfnord/fnord-base/assets.sh ${CMAKE_BINARY_DIR}/cm-frontend-assets.cc < ./src/cm-frontend.assets
+    DEPENDS ${FRONTEND_ASSETS_DEPS_FULL}
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 
 add_executable(cm-frontend
