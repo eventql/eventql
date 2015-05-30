@@ -7,6 +7,7 @@ project(cmapp)
 option(ENABLE_TESTS "Build unit tests [default: ON]" ON)
 
 include_directories(${PROJECT_BINARY_DIR})
+include_directories(${PROJECT_BINARY_DIR}/3rdparty/libfnord/)
 file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/tests)
 include_directories(./)
 include_directories(./src)
