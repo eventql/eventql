@@ -12,7 +12,7 @@ add_library(cm-common OBJECT
 set_source_files_properties(${CMAKE_BINARY_DIR}/cm-frontend-assets.cc PROPERTIES GENERATED true)
 
 add_custom_target(cm-frontend-assets
-    COMMAND ../3rdparty/libfnord/fnord-base/assets.sh ${CMAKE_BINARY_DIR}/cm-frontend-assets.cc < ./cm-frontend.assets
+    COMMAND ./3rdparty/libfnord/fnord-base/assets.sh ${CMAKE_BINARY_DIR}/cm-frontend-assets.cc < ./src/cm-frontend.assets
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 
 add_executable(cm-frontend
