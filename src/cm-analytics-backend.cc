@@ -57,7 +57,6 @@
 #include "analytics/AnalyticsQueryEngine.h"
 #include "analytics/AnalyticsQueryEngine.h"
 #include "analytics/ShopStatsServlet.h"
-#include "demoQueryServlet.h"
 
 using namespace fnord;
 

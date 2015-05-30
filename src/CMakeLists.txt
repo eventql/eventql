@@ -42,7 +42,6 @@ add_executable(cm-frontend
     frontend/IndexFeedUpload.cc
     cm-frontend.cc
     schemas.cc
-    demoQueryServlet.cc
     ${CMAKE_BINARY_DIR}/cm-frontend-assets.cc)
 
 target_link_libraries(cm-frontend ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_LIBS})
@@ -535,7 +534,6 @@ add_executable(cm-analytics-backend
     analytics/ShopStatsTable.cc
     analytics/ShopStatsServlet.cc
     analytics/ShopStats.cc
-    demoQueryServlet.cc
     schemas.cc
     cm-analytics-backend.cc)
 

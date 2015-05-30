@@ -31,7 +31,6 @@
 #include "CustomerNamespace.h"
 #include "frontend/CMFrontend.h"
 #include "frontend/IndexFeedUpload.h"
-#include "demoQueryServlet.h"
 
 using namespace cm;
 using namespace fnord;
@@ -136,9 +135,6 @@ int main(int argc, const char** argv) {
 
   /* set up public http server */
   http::HTTPRouter http_router;
-  demoQueryServlet demo_query;
-  http_router.addRouteByPrefixMatch("/demo_query", &demo_query, &tpool);
-
   http_router.addRouteByPrefixMatch("/", &frontend);
 
   http::HTTPServer http_server(&http_router, &event_loop);
