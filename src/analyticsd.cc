@@ -151,7 +151,7 @@ int main(int argc, const char** argv) {
     fc.set_customer("dawanda");
     fc.set_feed("ECommerceRecoQueriesFeed");
     fc.set_partition_size(kMicrosPerHour * 4);
-    fc.set_first_partition(1431014400000000);
+    fc.set_first_partition(1432785600000000);
     fc.set_num_shards(32);
 
     feed_export_app->configureFeed(fc);
