@@ -25,11 +25,12 @@ public:
 
   LocalScheduler(
       const String& tempdir = "/tmp",
-      size_t max_threads = 8);
+      size_t max_threads = 8,
+      size_t max_requests = 32);
 
-  RefPtr<VFSFile> run(
-      Application* app,
-      TaskSpec task) override;
+  RefPtr<TaskResult> run(
+      RefPtr<Application> app,
+      const TaskSpec& task) override;
 
   void start();
   void stop();
@@ -64,6 +65,7 @@ protected:
   size_t num_threads_;
   Random rnd_;
   thread::FixedSizeThreadPool tpool_;
+  thread::FixedSizeThreadPool req_tpool_;
 };
 
 } // namespace dproc

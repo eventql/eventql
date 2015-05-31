@@ -7,24 +7,22 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#ifndef _FNORD_DPROC_DISPATCHSERVICE_H
-#define _FNORD_DPROC_DISPATCHSERVICE_H
-#include <fnord-base/stdtypes.h>
-#include <fnord-base/dproc/Task.h>
+#include <fnord-dproc/TaskResult.h>
 
 namespace fnord {
 namespace dproc {
 
-class DispatchService {
-public:
+Future<RefPtr<VFSFile>> TaskResult::result() const {
+  return promise_.future();
+}
 
-  void addApplication(
-      RefPtr<Application> app,
-      RefPtr<Scheduler> scheduler);
+void TaskResult::returnResult(RefPtr<VFSFile> result) {
+  promise_.success(result);
+}
 
-};
+void TaskResult::returnError(const StandardException& e) {
+  promise_.failure(e);
+}
 
 } // namespace dproc
 } // namespace fnord
-
-#endif
