@@ -7,6 +7,7 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
+#include <unistd.h>
 #include <fnord-base/io/file.h>
 #include <fnord-base/io/fileutil.h>
 #include <fnord-base/io/mmappedfile.h>
@@ -39,22 +40,28 @@ RefPtr<TaskResult> LocalScheduler::run(
     RefPtr<Application> app,
     const TaskSpec& task) {
   RefPtr<TaskResult> result(new TaskResult());
-  RefPtr<LocalTaskRef> instance(new LocalTaskRef(app->getTaskInstance(task)));
 
-  req_tpool_.run([this, app, result, instance] () {
-    try {
-      LocalTaskPipeline pipeline;
-      pipeline.tasks.push_back(instance);
-      run(app.get(), &pipeline);
-      result->returnResult(
-          new io::MmappedFile(
-              File::openFile(instance->output_filename, File::O_READ)));
+  try {
+    RefPtr<LocalTaskRef> instance(new LocalTaskRef(app->getTaskInstance(task)));
 
-    } catch (const StandardException& e) {
-      fnord::logError("dproc.scheduler", e, "task failed");
-      result->returnError(e);
-    }
-  });
+    req_tpool_.run([this, app, result, instance] () {
+      try {
+        LocalTaskPipeline pipeline;
+        pipeline.tasks.push_back(instance);
+        run(app.get(), &pipeline);
+
+        result->returnResult(
+            new io::MmappedFile(
+                File::openFile(instance->output_filename, File::O_READ)));
+      } catch (const StandardException& e) {
+        fnord::logError("dproc.scheduler", e, "task failed");
+        result->returnError(e);
+      }
+    });
+  } catch (const StandardException& e) {
+    fnord::logError("dproc.scheduler", e, "task failed");
+    result->returnError(e);
+  }
 
   return result;
 }
