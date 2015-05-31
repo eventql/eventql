@@ -146,6 +146,17 @@ int main(int argc, const char** argv) {
     feed_export_app->configureFeed(fc);
   }
 
+  {
+    FeedConfig fc;
+    fc.set_customer("dawanda");
+    fc.set_feed("ECommerceRecoQueriesFeed");
+    fc.set_partition_size(kMicrosPerHour * 4);
+    fc.set_first_partition(1431014400000000);
+    fc.set_num_shards(32);
+
+    feed_export_app->configureFeed(fc);
+  }
+
   /* stop stats */
   //auto shopstats = cm::ShopStatsTable::open(flags.getString("shopstats_table"));
   //cm::ShopStatsServlet shopstats_servlet(shopstats);
