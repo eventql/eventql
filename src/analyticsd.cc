@@ -129,6 +129,7 @@ int main(int argc, const char** argv) {
   /* dproc */
   dproc::DispatchService dproc;
   auto local_scheduler = mkRef(new dproc::LocalScheduler());
+  local_scheduler->start();
 
   /* feed export */
   dproc.registerApp(new FeedExportApp(&tsdb), local_scheduler.get());
@@ -288,6 +289,7 @@ int main(int argc, const char** argv) {
   });
 
   ev.run();
+  local_scheduler->stop();
 
   fnord::logInfo("cm.analytics.backend", "Exiting...");
   exit(0);
