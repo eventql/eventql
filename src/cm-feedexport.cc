@@ -18,9 +18,7 @@
 #include <fnord-dproc/Application.h>
 #include <fnord-dproc/LocalScheduler.h>
 #include <fnord-tsdb/TSDBClient.h>
-#include "analytics/ECommerceRecoQueriesFeed.h"
-#include "analytics/ECommerceSearchQueriesFeed.h"
-#include "analytics/ProtoSSTableMergeReducer.h"
+#include "analytics/FeedExportApp.h"
 
 using namespace fnord;
 using namespace cm;
@@ -82,50 +80,6 @@ int main(int argc, const char** argv) {
   http::HTTPConnectionPool http(&ev);
   tsdb::TSDBClient tsdb("http://nue03.prod.fnrd.net:7003/tsdb", &http);
 
-  dproc::DefaultApplication app("cm.feedexport");
-
-  app.registerProtoTaskFactory<TSDBTableScanParams>(
-      "ECommerceRecoQueriesFeed",
-      [&tsdb] (const TSDBTableScanParams& params)
-          -> RefPtr<dproc::Task> {
-        auto report = new ECommerceRecoQueriesFeed(
-            new TSDBTableScanSource<JoinedSession>(params, &tsdb),
-            new JSONSink());
-
-        report->setCacheKey("cm.ecommerce_reco_queries~XXX");
-
-        return report;
-      });
-
-  app.registerProtoTaskFactory<TSDBTableScanParams>(
-      "ECommerceSearchQueriesFeed",
-      [&tsdb] (const TSDBTableScanParams& params)
-          -> RefPtr<dproc::Task> {
-        auto report = new ECommerceSearchQueriesFeed(
-            new TSDBTableScanSource<JoinedSession>(params, &tsdb),
-            new JSONSink());
-
-        report->setCacheKey("cm.ecommerce_search_queries~XXX");
-
-        return report;
-      });
-
-
-  //app.registerTaskFactory(
-  //    "ItemBoostExport",
-  //    [&tsdb] (const Buffer& params)
-  //        -> RefPtr<dproc::Task> {
-  //      List<dproc::TaskDependency> deps;
-  //      deps.emplace_back(dproc::TaskDependency {
-  //        .task_name = "ItemBoostReducer",
-  //        .params = params
-  //      });
-
-  //      return new ItemBoostExport(
-  //          new ProtoSSTableSource<ItemBoostRow>(deps),
-  //          new CSVSink());
-  //    });
-
   dproc::LocalScheduler sched(flags.getString("tempdir"), flags.getInt("threads"));
   sched.start();
 
@@ -135,6 +89,7 @@ int main(int argc, const char** argv) {
   params.set_sample_modulo(32);
   params.set_sample_index(1);
 
+  FeedExportApp app(&tsdb);
   auto res = sched.run(&app, "ECommerceSearchQueriesFeed", *msg::encode(params));
 
   auto output_file = File::openFile(

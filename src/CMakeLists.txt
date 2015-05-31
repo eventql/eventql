@@ -448,6 +448,7 @@ add_executable(cm-feedexport
     analytics/AnalyticsQueryEngine.cc
     analytics/AnalyticsQueryResult.cc
     analytics/AnalyticsTableScanSource.cc
+    analytics/FeedExportApp.cc
     cm-feedexport.cc
     ${PROTO_SRCS})
 
