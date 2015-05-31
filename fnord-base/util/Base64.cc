@@ -40,9 +40,9 @@ static const unsigned char pr2six[256] = {
 
 void Base64::decode(const String& in, String* out) {
   auto bufcoded = in.c_str();
-  register const unsigned char* bufin = (const unsigned char *) bufcoded;
+  const unsigned char* bufin = (const unsigned char *) bufcoded;
   while (pr2six[*(bufin++)] <= 63);
-  register int nprbytes = (bufin - (const unsigned char *) bufcoded) - 1;
+  int nprbytes = (bufin - (const unsigned char *) bufcoded) - 1;
   bufin = (const unsigned char *) bufcoded;
 
   out->reserve(in.length());
@@ -67,12 +67,28 @@ void Base64::decode(const String& in, String* out) {
   }
 }
 
+String Base64::encode(const String& in) {
+  String out;
+  encode(in.data(), in.size(), &out);
+  return out;
+}
+
 void Base64::encode(const String& in, String* out) {
+  encode(in.data(), in.size(), out);
+}
+
+String Base64::encode(const void* data, size_t size) {
+  String out;
+  encode(data, size, &out);
+  return out;
+}
+
+void Base64::encode(const void* data, size_t size, String* out) {
   static const char chrtbl[] =
       "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
-  auto len = in.length();
-  auto s = in.c_str();
+  auto len = size;
+  auto s = (const char*) data;
   size_t i = 0;
   for (; i < len - 2; i += 3) {
     *out += chrtbl[(s[i] >> 2) & 0x3F];
@@ -96,6 +112,6 @@ void Base64::encode(const String& in, String* out) {
   }
 }
 
-}
-}
 
+}
+}
