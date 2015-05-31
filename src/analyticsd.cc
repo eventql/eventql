@@ -31,6 +31,8 @@
 #include "fnord-feeds/FeedService.h"
 #include "fnord-feeds/RemoteFeedFactory.h"
 #include "fnord-feeds/RemoteFeedReader.h"
+#include "fnord-dproc/LocalScheduler.h"
+#include "fnord-dproc/DispatchService.h"
 #include "fnord-base/stats/statsdagent.h"
 #include "fnord-sstable/SSTableServlet.h"
 #include "fnord-logtable/LogTableServlet.h"
@@ -110,6 +112,7 @@ int main(int argc, const char** argv) {
   Logger::get()->setMinimumLogLevel(
       strToLogLevel(flags.getString("loglevel")));
 
+  /* thread pools */
   fnord::thread::ThreadPool tpool;
   fnord::thread::FixedSizeThreadPool wpool(8);
   wpool.start();
@@ -119,12 +122,16 @@ int main(int argc, const char** argv) {
   fnord::http::HTTPServer http_server(&http_router, &ev);
   http_server.listen(flags.getInt("http_port"));
   http::HTTPConnectionPool http(&ev);
+
+  /* tsdb */
   tsdb::TSDBClient tsdb("http://nue03.prod.fnrd.net:7003/tsdb", &http);
 
-  auto dir = flags.getString("datadir");
+  /* dproc */
+  dproc::DispatchService dproc;
+  auto local_scheduler = mkRef(new dproc::LocalScheduler());
 
   /* feed export */
-  auto feed_export_app = mkRef(new FeedExportApp(&tsdb));
+  dproc.registerApp(new FeedExportApp(&tsdb), local_scheduler.get());
 
   /* stop stats */
   //auto shopstats = cm::ShopStatsTable::open(flags.getString("shopstats_table"));
@@ -132,6 +139,7 @@ int main(int argc, const char** argv) {
   //http_router.addRouteByPrefixMatch("/shopstats", &shopstats_servlet, &tpool);
 
   /* analytics core */
+  auto dir = flags.getString("datadir");
   cm::AnalyticsQueryEngine analytics(32, dir, &tsdb);
   cm::AnalyticsServlet analytics_servlet(&analytics);
   http_router.addRouteByPrefixMatch("/analytics", &analytics_servlet, &tpool);
