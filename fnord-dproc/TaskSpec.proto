@@ -11,6 +11,8 @@ package fnord.dproc;
 
 message TaskSpec {
 
+  optional string application = 3;
+
   required string task_name = 1;
 
   optional string params = 2;

@@ -21,6 +21,8 @@ namespace dproc {
 class Application : public RefCounted {
 public:
 
+  virtual String name() const = 0;
+
   virtual RefPtr<Task> getTaskInstance(const TaskSpec& spec) = 0;
 
   RefPtr<Task> getTaskInstance(const String& task_name, const Buffer& params);
@@ -29,6 +31,8 @@ public:
 
 class DefaultApplication : public Application {
 public:
+
+  String name() const override;
 
   DefaultApplication(const String& name);
 
