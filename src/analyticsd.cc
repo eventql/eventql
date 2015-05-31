@@ -132,7 +132,19 @@ int main(int argc, const char** argv) {
   local_scheduler->start();
 
   /* feed export */
-  dproc.registerApp(new FeedExportApp(&tsdb), local_scheduler.get());
+  auto feed_export_app = mkRef(new FeedExportApp(&tsdb));
+  dproc.registerApp(feed_export_app.get(), local_scheduler.get());
+
+  {
+    FeedConfig fc;
+    fc.set_customer("dawanda");
+    fc.set_feed("ECommerceSearchQueriesFeed");
+    fc.set_partition_size(kMicrosPerHour * 4);
+    fc.set_first_partition(1430438400000000); // 2015-05-01 00:00:00Z
+    fc.set_num_shards(128);
+
+    feed_export_app->configureFeed(fc);
+  }
 
   /* stop stats */
   //auto shopstats = cm::ShopStatsTable::open(flags.getString("shopstats_table"));
