@@ -124,7 +124,7 @@ int main(int argc, const char** argv) {
   auto dir = flags.getString("datadir");
 
   /* feed export */
-  FeedExportApp app(&tsdb);
+  auto feed_export_app = mkRef(new FeedExportApp(&tsdb));
 
   /* stop stats */
   //auto shopstats = cm::ShopStatsTable::open(flags.getString("shopstats_table"));
