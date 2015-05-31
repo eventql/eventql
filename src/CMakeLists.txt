@@ -456,7 +456,7 @@ add_executable(cm-chunkserver
 target_link_libraries(cm-chunkserver
     ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_LIBS})
 
-add_executable(cm-analytics-backend
+add_executable(analyticsd
     $<TARGET_OBJECTS:cm-common>
     $<TARGET_OBJECTS:fnord-base>
     $<TARGET_OBJECTS:fnord-feeds>
@@ -508,10 +508,10 @@ add_executable(cm-analytics-backend
     analytics/JSONSink.cc
     analytics/FeedExportApp.cc
     schemas.cc
-    cm-analytics-backend.cc
+    analyticsd.cc
     ${PROTO_SRCS})
 
-target_link_libraries(cm-analytics-backend
+target_link_libraries(analyticsd
     ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_LIBS} ${FNORD_FTS_LIBS})
 
 
