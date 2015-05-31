@@ -48,18 +48,8 @@
 #include "CustomerNamespace.h"
 #include "analytics/AnalyticsServlet.h"
 #include "analytics/FeedExportApp.h"
-#include "analytics/CTRByPositionQuery.h"
-#include "analytics/CTRByPageQuery.h"
-#include "analytics/CTRByResultItemCategoryQuery.h"
-#include "analytics/TopSearchQueriesQuery.h"
-#include "analytics/DiscoveryDashboardQuery.h"
-#include "analytics/DiscoveryCatalogStatsQuery.h"
-#include "analytics/DiscoveryCategoryStatsQuery.h"
-#include "analytics/DiscoverySearchStatsQuery.h"
-#include "analytics/ECommerceKPIQuery.h"
-#include "analytics/AnalyticsQueryEngine.h"
-#include "analytics/AnalyticsQueryEngine.h"
 #include "analytics/ShopStatsServlet.h"
+#include "analytics/AnalyticsApp.h"
 
 using namespace fnord;
 
@@ -79,24 +69,6 @@ int main(int argc, const char** argv) {
       "8000",
       "Start the public http server on this port",
       "<port>");
-
-  flags.defineFlag(
-      "datadir",
-      cli::FlagParser::T_STRING,
-      true,
-      NULL,
-      NULL,
-      "datadir path",
-      "<path>");
-
-  flags.defineFlag(
-      "shopstats_table",
-      cli::FlagParser::T_STRING,
-      true,
-      NULL,
-      NULL,
-      "path",
-      "<file>");
 
   flags.defineFlag(
       "loglevel",
@@ -130,6 +102,14 @@ int main(int argc, const char** argv) {
   dproc::DispatchService dproc;
   auto local_scheduler = mkRef(new dproc::LocalScheduler());
   local_scheduler->start();
+
+  /* analytics core */
+  auto analytics_app = mkRef(new AnalyticsApp(&tsdb));
+  dproc.registerApp(analytics_app.get(), local_scheduler.get());
+
+  //cm::AnalyticsQueryEngine analytics(32, dir, &tsdb);
+  //cm::AnalyticsServlet analytics_servlet(&analytics, &dproc);
+  //http_router.addRouteByPrefixMatch("/analytics", &analytics_servlet, &tpool);
 
   /* feed export */
   auto feed_export_app = mkRef(new FeedExportApp(&tsdb));
@@ -169,158 +149,9 @@ int main(int argc, const char** argv) {
   }
 
   /* stop stats */
-  auto shopstats = cm::ShopStatsTable::open(flags.getString("shopstats_table"));
-  cm::ShopStatsServlet shopstats_servlet(shopstats);
-  http_router.addRouteByPrefixMatch("/shopstats", &shopstats_servlet, &tpool);
-
-  /* analytics core */
-  auto dir = flags.getString("datadir");
-  cm::AnalyticsQueryEngine analytics(32, dir, &tsdb);
-  cm::AnalyticsServlet analytics_servlet(&analytics, &dproc);
-  http_router.addRouteByPrefixMatch("/analytics", &analytics_servlet, &tpool);
-
-  analytics.registerQueryFactory("ctr_by_position", [] (
-      const cm::AnalyticsQuery& query,
-      const cm::AnalyticsQuery::SubQueryParams params,
-      const Vector<RefPtr<cm::TrafficSegment>>& segments,
-      cm::AnalyticsTableScan* scan) {
-    return new cm::CTRByPositionQuery(scan, segments);
-  });
-
-  analytics.registerQueryFactory("ctr_by_page", [] (
-      const cm::AnalyticsQuery& query,
-      const cm::AnalyticsQuery::SubQueryParams params,
-      const Vector<RefPtr<cm::TrafficSegment>>& segments,
-      cm::AnalyticsTableScan* scan) {
-    return new cm::CTRByPageQuery(scan, segments);
-  });
-
-  analytics.registerQueryFactory("ctr_by_result_item_category", [] (
-      const cm::AnalyticsQuery& query,
-      const cm::AnalyticsQuery::SubQueryParams params,
-      const Vector<RefPtr<cm::TrafficSegment>>& segments,
-      cm::AnalyticsTableScan* scan) {
-    return new cm::CTRByResultItemCategoryQuery(scan, segments);
-  });
-
-  analytics.registerQueryFactory("discovery_dashboard", [] (
-      const cm::AnalyticsQuery& query,
-      const cm::AnalyticsQuery::SubQueryParams params,
-      const Vector<RefPtr<cm::TrafficSegment>>& segments,
-      cm::AnalyticsTableScan* scan) {
-    return new cm::DiscoveryDashboardQuery(
-        scan,
-        segments,
-        query.start_time,
-        query.end_time);
-  });
-
-  analytics.registerQueryFactory("discovery_search_stats", [] (
-      const cm::AnalyticsQuery& query,
-      const cm::AnalyticsQuery::SubQueryParams params,
-      const Vector<RefPtr<cm::TrafficSegment>>& segments,
-      cm::AnalyticsTableScan* scan) {
-    return new cm::DiscoverySearchStatsQuery(
-        scan,
-        segments,
-        query.start_time,
-        query.end_time,
-        params);
-  });
-
-  analytics.registerQueryFactory("discovery_catalog_stats", [] (
-      const cm::AnalyticsQuery& query,
-      const cm::AnalyticsQuery::SubQueryParams params,
-      const Vector<RefPtr<cm::TrafficSegment>>& segments,
-      cm::AnalyticsTableScan* scan) {
-    return new cm::DiscoveryCatalogStatsQuery(
-        scan,
-        segments,
-        query.start_time,
-        query.end_time,
-        params);
-  });
-
-  analytics.registerQueryFactory("discovery_category0_stats", [] (
-      const cm::AnalyticsQuery& query,
-      const cm::AnalyticsQuery::SubQueryParams params,
-      const Vector<RefPtr<cm::TrafficSegment>>& segments,
-      cm::AnalyticsTableScan* scan) {
-    return new cm::DiscoveryCategoryStatsQuery(
-        scan,
-        segments,
-        query.start_time,
-        query.end_time,
-        "search_queries.category1",
-        "search_queries.category1",
-        params);
-  });
-
-  analytics.registerQueryFactory("discovery_category1_stats", [] (
-      const cm::AnalyticsQuery& query,
-      const cm::AnalyticsQuery::SubQueryParams params,
-      const Vector<RefPtr<cm::TrafficSegment>>& segments,
-      cm::AnalyticsTableScan* scan) {
-    return new cm::DiscoveryCategoryStatsQuery(
-        scan,
-        segments,
-        query.start_time,
-        query.end_time,
-        "search_queries.category1",
-        "search_queries.category2",
-        params);
-  });
-
-  analytics.registerQueryFactory("discovery_category2_stats", [] (
-      const cm::AnalyticsQuery& query,
-      const cm::AnalyticsQuery::SubQueryParams params,
-      const Vector<RefPtr<cm::TrafficSegment>>& segments,
-      cm::AnalyticsTableScan* scan) {
-    return new cm::DiscoveryCategoryStatsQuery(
-        scan,
-        segments,
-        query.start_time,
-        query.end_time,
-        "search_queries.category2",
-        "search_queries.category3",
-        params);
-  });
-
-  analytics.registerQueryFactory("discovery_category3_stats", [] (
-      const cm::AnalyticsQuery& query,
-      const cm::AnalyticsQuery::SubQueryParams params,
-      const Vector<RefPtr<cm::TrafficSegment>>& segments,
-      cm::AnalyticsTableScan* scan) {
-    return new cm::DiscoveryCategoryStatsQuery(
-        scan,
-        segments,
-        query.start_time,
-        query.end_time,
-        "search_queries.category3",
-        "search_queries.category3",
-        params);
-  });
-
-  analytics.registerQueryFactory("top_search_queries", [] (
-      const cm::AnalyticsQuery& query,
-      const cm::AnalyticsQuery::SubQueryParams params,
-      const Vector<RefPtr<cm::TrafficSegment>>& segments,
-      cm::AnalyticsTableScan* scan) {
-    return new cm::TopSearchQueriesQuery(scan, segments, params);
-  });
-
-  analytics.registerQueryFactory("ecommerce_dashboard", [] (
-      const cm::AnalyticsQuery& query,
-      const cm::AnalyticsQuery::SubQueryParams params,
-      const Vector<RefPtr<cm::TrafficSegment>>& segments,
-      cm::AnalyticsTableScan* scan) {
-    return new cm::ECommerceKPIQuery(
-        scan,
-        segments,
-        query.start_time,
-        query.end_time,
-        params);
-  });
+  //auto shopstats = cm::ShopStatsTable::open(flags.getString("shopstats_table"));
+  //cm::ShopStatsServlet shopstats_servlet(shopstats);
+  //http_router.addRouteByPrefixMatch("/shopstats", &shopstats_servlet, &tpool);
 
   ev.run();
   local_scheduler->stop();
