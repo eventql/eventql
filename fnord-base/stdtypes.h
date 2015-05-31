@@ -65,5 +65,7 @@ using OrderedMap = std::map<T1, T2>;
 template <typename T>
 using Stack = std::stack<T>;
 
+using StandardException = std::exception;
+
 } // namespace fnord
 #endif
