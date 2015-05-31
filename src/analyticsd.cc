@@ -141,7 +141,7 @@ int main(int argc, const char** argv) {
   /* analytics core */
   auto dir = flags.getString("datadir");
   cm::AnalyticsQueryEngine analytics(32, dir, &tsdb);
-  cm::AnalyticsServlet analytics_servlet(&analytics);
+  cm::AnalyticsServlet analytics_servlet(&analytics, &dproc);
   http_router.addRouteByPrefixMatch("/analytics", &analytics_servlet, &tpool);
 
   analytics.registerQueryFactory("ctr_by_position", [] (
