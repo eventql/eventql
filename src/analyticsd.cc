@@ -106,10 +106,8 @@ int main(int argc, const char** argv) {
   /* analytics core */
   auto analytics_app = mkRef(new AnalyticsApp(&tsdb));
   dproc.registerApp(analytics_app.get(), local_scheduler.get());
-
-  //cm::AnalyticsQueryEngine analytics(32, dir, &tsdb);
-  //cm::AnalyticsServlet analytics_servlet(&analytics, &dproc);
-  //http_router.addRouteByPrefixMatch("/analytics", &analytics_servlet, &tpool);
+  cm::AnalyticsServlet analytics_servlet(&dproc);
+  http_router.addRouteByPrefixMatch("/analytics", &analytics_servlet, &tpool);
 
   /* feed export */
   auto feed_export_app = mkRef(new FeedExportApp(&tsdb));

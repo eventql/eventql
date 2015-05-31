@@ -509,6 +509,8 @@ add_executable(analyticsd
     analytics/JSONSink.cc
     analytics/FeedExportApp.cc
     analytics/AnalyticsApp.cc
+    analytics/AnalyticsQueryMapper.cc
+    analytics/AnalyticsQueryReducer.cc
     schemas.cc
     analyticsd.cc
     ${PROTO_SRCS})
