@@ -21,6 +21,10 @@ class Base64 {
 public:
 
   static void encode(const String& in, String* out);
+  static void encode(const void* data, size_t size, String* out);
+  static String encode(const String& in);
+  static String encode(const void* data, size_t size);
+
   static void decode(const String& in, String* out);
 
 };
