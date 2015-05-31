@@ -23,6 +23,10 @@ RefPtr<Task> Application::getTaskInstance(
 
 DefaultApplication::DefaultApplication(const String& name) : name_(name) {}
 
+String DefaultApplication::name() const {
+  return name_;
+}
+
 RefPtr<Task> DefaultApplication::getTaskInstance(const TaskSpec& spec) {
   auto factory = factories_.find(spec.task_name());
 
