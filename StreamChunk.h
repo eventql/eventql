@@ -47,7 +47,8 @@ public:
 
   static String streamChunkKeyFor(
       const String& stream_key,
-      DateTime time);
+      DateTime time,
+      Duration partition_size);
 
   static String streamChunkKeyFor(
       const String& stream_key,
