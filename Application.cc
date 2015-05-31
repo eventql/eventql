@@ -12,18 +12,25 @@
 namespace fnord {
 namespace dproc {
 
+RefPtr<Task> Application::getTaskInstance(
+    const String& task_name,
+    const Buffer& params) {
+  TaskSpec spec;
+  spec.set_task_name(task_name);
+  spec.set_params((char*) params.data(), params.size());
+  return getTaskInstance(spec);
+}
+
 DefaultApplication::DefaultApplication(const String& name) : name_(name) {}
 
-RefPtr<Task> DefaultApplication::getTaskInstance(
-    const String& name,
-    const Buffer& params) {
-  auto factory = factories_.find(name);
+RefPtr<Task> DefaultApplication::getTaskInstance(const TaskSpec& spec) {
+  auto factory = factories_.find(spec.task_name());
 
   if (factory == factories_.end()) {
-    RAISEF(kIndexError, "unknown task: '$0'", name);
+    RAISEF(kIndexError, "unknown task: '$0'", spec.task_name());
   }
 
-  return factory->second(params);
+  return factory->second(Buffer(spec.params().data(), spec.params().size()));
 }
 
 void DefaultApplication::registerTaskFactory(
