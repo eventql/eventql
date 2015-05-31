@@ -10,7 +10,10 @@
 #ifndef _FNORD_DPROC_DISPATCHSERVICE_H
 #define _FNORD_DPROC_DISPATCHSERVICE_H
 #include <fnord-base/stdtypes.h>
-#include <fnord-base/dproc/Task.h>
+#include <fnord-dproc/Application.h>
+#include <fnord-dproc/Scheduler.h>
+#include <fnord-dproc/TaskSpec.pb.h>
+#include <fnord-dproc/TaskResult.h>
 
 namespace fnord {
 namespace dproc {
@@ -18,10 +21,20 @@ namespace dproc {
 class DispatchService {
 public:
 
-  void addApplication(
+  void registerApp(
       RefPtr<Application> app,
       RefPtr<Scheduler> scheduler);
 
+  RefPtr<TaskResult> run(const TaskSpec& task);
+
+protected:
+
+  struct AppRef {
+    RefPtr<Application> app;
+    RefPtr<Scheduler> scheduler;
+  };
+
+  HashMap<String, AppRef> apps_;
 };
 
 } // namespace dproc

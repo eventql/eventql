@@ -16,6 +16,7 @@ PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS ${PROTO_FILES})
 
 add_library(fnord-dproc OBJECT
     Application.cc
+    DispatchService.cc
     TaskSpec.pb.cc
     LocalScheduler.cc
     TaskResult.cc
