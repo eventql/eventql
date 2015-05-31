@@ -7,21 +7,24 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#ifndef _FNORD_DPROC_DISPATCHSERVICE_H
-#define _FNORD_DPROC_DISPATCHSERVICE_H
+#ifndef _FNORD_DPROC_TASKRESULT_H
+#define _FNORD_DPROC_TASKRESULT_H
 #include <fnord-base/stdtypes.h>
-#include <fnord-base/dproc/Task.h>
+#include <fnord-dproc/Task.h>
 
 namespace fnord {
 namespace dproc {
 
-class DispatchService {
+class TaskResult : public RefCounted {
 public:
 
-  void addApplication(
-      RefPtr<Application> app,
-      RefPtr<Scheduler> scheduler);
+  Future<RefPtr<VFSFile>> result() const;
 
+  void returnResult(RefPtr<VFSFile> result);
+  void returnError(const StandardException& e);
+
+protected:
+  Promise<RefPtr<VFSFile>> promise_;
 };
 
 } // namespace dproc
