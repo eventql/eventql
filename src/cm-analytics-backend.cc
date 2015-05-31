@@ -45,6 +45,7 @@
 #include "schemas.h"
 #include "CustomerNamespace.h"
 #include "analytics/AnalyticsServlet.h"
+#include "analytics/FeedExportApp.h"
 #include "analytics/CTRByPositionQuery.h"
 #include "analytics/CTRByPageQuery.h"
 #include "analytics/CTRByResultItemCategoryQuery.h"
@@ -122,19 +123,18 @@ int main(int argc, const char** argv) {
 
   auto dir = flags.getString("datadir");
 
-  /* analytics */
-  //cm::demoQueryServlet demo_srv;
-  //http_router.addRouteByPrefixMatch("/analytics/query_stream", &demo_srv, &tpool);
+  /* feed export */
+  FeedExportApp app(&tsdb);
 
+  /* stop stats */
+  //auto shopstats = cm::ShopStatsTable::open(flags.getString("shopstats_table"));
+  //cm::ShopStatsServlet shopstats_servlet(shopstats);
+  //http_router.addRouteByPrefixMatch("/shopstats", &shopstats_servlet, &tpool);
+
+  /* analytics core */
   cm::AnalyticsQueryEngine analytics(32, dir, &tsdb);
   cm::AnalyticsServlet analytics_servlet(&analytics);
   http_router.addRouteByPrefixMatch("/analytics", &analytics_servlet, &tpool);
-
-  /* stop stats */
-  auto shopstats = cm::ShopStatsTable::open(flags.getString("shopstats_table"));
-  cm::ShopStatsServlet shopstats_servlet(shopstats);
-  http_router.addRouteByPrefixMatch("/shopstats", &shopstats_servlet, &tpool);
-
 
   analytics.registerQueryFactory("ctr_by_position", [] (
       const cm::AnalyticsQuery& query,
