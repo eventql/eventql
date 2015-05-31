@@ -12,6 +12,7 @@
 #include <fnord-base/stdtypes.h>
 #include <fnord-base/autoref.h>
 #include <fnord-dproc/Task.h>
+#include <fnord-dproc/TaskSpec.pb.h>
 #include <fnord-msg/msg.h>
 
 namespace fnord {
@@ -20,9 +21,9 @@ namespace dproc {
 class Application : public RefCounted {
 public:
 
-  virtual RefPtr<Task> getTaskInstance(
-      const String& name,
-      const Buffer& params) = 0;
+  virtual RefPtr<Task> getTaskInstance(const TaskSpec& spec) = 0;
+
+  RefPtr<Task> getTaskInstance(const String& task_name, const Buffer& params);
 
 };
 
@@ -31,9 +32,7 @@ public:
 
   DefaultApplication(const String& name);
 
-  RefPtr<Task> getTaskInstance(
-      const String& name,
-      const Buffer& params) override;
+  RefPtr<Task> getTaskInstance(const TaskSpec& spec) override;
 
   template <typename ProtoType>
   void registerProtoTaskFactory(
