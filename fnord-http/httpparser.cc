@@ -381,7 +381,7 @@ void HTTPParser::processHeader(
       key_len == strlen(kConnectionHeader) &&
       strncasecmp(key, kConnectionHeader, key_len) == 0 &&
       val_len == strlen("Close") &&
-      strncasecmp(val, "Close", key_len) == 0) {
+      strncasecmp(val, "Close", val_len) == 0) {
     body_bytes_expected_ = -1;
   }
 
