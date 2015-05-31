@@ -34,16 +34,7 @@ void LocalScheduler::stop() {
 RefPtr<VFSFile> LocalScheduler::run(
     Application* app,
     TaskSpec task) {
-  const auto& params = task.params();
-  return run(app, task.task_name(), Buffer(params.data(), params.size()));
-}
-
-RefPtr<VFSFile> LocalScheduler::run(
-    Application* app,
-    const String& task,
-    const Buffer& params) {
-  RefPtr<LocalTaskRef> head_task(
-      new LocalTaskRef(app->getTaskInstance(task, params)));
+  RefPtr<LocalTaskRef> head_task(new LocalTaskRef(app->getTaskInstance(task)));
 
   LocalTaskPipeline pipeline;
   pipeline.tasks.push_back(head_task);
@@ -53,7 +44,6 @@ RefPtr<VFSFile> LocalScheduler::run(
       new io::MmappedFile(
           File::openFile(head_task->output_filename, File::O_READ)));
 }
-
 void LocalScheduler::run(
     Application* app,
     LocalTaskPipeline* pipeline) {
