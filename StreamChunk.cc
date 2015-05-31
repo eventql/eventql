@@ -46,18 +46,25 @@ RefPtr<StreamChunk> StreamChunk::reopen(
 
 String StreamChunk::streamChunkKeyFor(
     const String& stream_key,
-    DateTime time,
-    const StreamProperties& properties) {
+    DateTime time) {
   util::BinaryMessageWriter buf(stream_key.size() + 32);
-
-  auto cs = properties.chunk_size.microseconds();
-  auto ts = (time.unixMicros() / cs) * cs / kMicrosPerSecond;
 
   buf.append(stream_key.data(), stream_key.size());
   buf.appendUInt8(27);
-  buf.appendVarUInt(ts);
+  buf.appendVarUInt(time.unixMicros());
 
   return String((char *) buf.data(), buf.size());
+}
+
+String StreamChunk::streamChunkKeyFor(
+    const String& stream_key,
+    DateTime time,
+    const StreamProperties& properties) {
+  auto cs = properties.chunk_size.microseconds();
+
+  return streamChunkKeyFor(
+      stream_key,
+      (time.unixMicros() / cs) * cs / kMicrosPerSecond);
 }
 
 Vector<String> StreamChunk::streamChunkKeysFor(

@@ -47,6 +47,10 @@ public:
 
   static String streamChunkKeyFor(
       const String& stream_key,
+      DateTime time);
+
+  static String streamChunkKeyFor(
+      const String& stream_key,
       DateTime time,
       const StreamProperties& properties);
 
