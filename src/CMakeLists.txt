@@ -422,40 +422,6 @@ add_executable(cm-itemboostbuild
 target_link_libraries(cm-itemboostbuild
     ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_LIBS} ${FNORD_FTS_LIBS} ${FNORD_MSG_LIBS})
 
-add_executable(cm-feedexport
-    $<TARGET_OBJECTS:cm-common>
-    $<TARGET_OBJECTS:fnord-base>
-    $<TARGET_OBJECTS:fnord-feeds>
-    $<TARGET_OBJECTS:fnord-mdb>
-    $<TARGET_OBJECTS:fnord-http>
-    $<TARGET_OBJECTS:fnord-json>
-    $<TARGET_OBJECTS:fnord-rpc>
-    $<TARGET_OBJECTS:fnord-cstable>
-    $<TARGET_OBJECTS:fnord-sstable>
-    $<TARGET_OBJECTS:fnord-fts>
-    $<TARGET_OBJECTS:fnord-msg>
-    $<TARGET_OBJECTS:fnord-tsdb>
-    $<TARGET_OBJECTS:fnord-dproc>
-    schemas.cc
-    DocIndex.cc
-    analytics/Report.cc
-    analytics/ECommerceRecoQueriesFeed.cc
-    analytics/ECommerceSearchQueriesFeed.cc
-    analytics/TrafficSegment.cc
-    analytics/JSONSink.cc
-    analytics/AnalyticsTableScan.cc
-    analytics/AnalyticsQuery.cc
-    analytics/AnalyticsQueryEngine.cc
-    analytics/AnalyticsQueryResult.cc
-    analytics/AnalyticsTableScanSource.cc
-    analytics/FeedExportApp.cc
-    cm-feedexport.cc
-    ${PROTO_SRCS})
-
-target_link_libraries(cm-feedexport
-    ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_LIBS} ${FNORD_FTS_LIBS} ${FNORD_MSG_LIBS})
-
-
 add_executable(cm-chunkserver
     $<TARGET_OBJECTS:cm-common>
     $<TARGET_OBJECTS:fnord-base>
@@ -503,6 +469,7 @@ add_executable(cm-analytics-backend
     $<TARGET_OBJECTS:fnord-msg>
     $<TARGET_OBJECTS:fnord-tsdb>
     $<TARGET_OBJECTS:fnord-afx>
+    $<TARGET_OBJECTS:fnord-dproc>
     ../3rdparty/libfnord/fnord-sstable/SSTableServlet.cc
     ../3rdparty/libfnord/fnord-logtable/LogTableServlet.cc
     ../3rdparty/libfnord/fnord-logtable/TableReader.cc
@@ -514,6 +481,7 @@ add_executable(cm-analytics-backend
     ../3rdparty/libfnord/fnord-logtable/NumericBoundsSummary.cc
     ../3rdparty/libfnord/fnord-logtable/TableChunkSummaryReader.cc
     ../3rdparty/libfnord/fnord-logtable/TableChunkSummaryWriter.cc
+    analytics/Report.cc
     analytics/AnalyticsTableScan.cc
     analytics/AnalyticsQuery.cc
     analytics/AnalyticsQueryEngine.cc
@@ -535,8 +503,13 @@ add_executable(cm-analytics-backend
     analytics/ShopStatsTable.cc
     analytics/ShopStatsServlet.cc
     analytics/ShopStats.cc
+    analytics/ECommerceRecoQueriesFeed.cc
+    analytics/ECommerceSearchQueriesFeed.cc
+    analytics/JSONSink.cc
+    analytics/FeedExportApp.cc
     schemas.cc
-    cm-analytics-backend.cc)
+    cm-analytics-backend.cc
+    ${PROTO_SRCS})
 
 target_link_libraries(cm-analytics-backend
     ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_LIBS} ${FNORD_FTS_LIBS})
