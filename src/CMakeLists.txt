@@ -342,85 +342,85 @@ target_link_libraries(cm-indexbuild
 #target_link_libraries(cm-autocompletebuild
 #    ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_LIBS} ${FNORD_FTS_LIBS})
 
-add_executable(cm-shopstatsbuild
-    $<TARGET_OBJECTS:cm-common>
-    $<TARGET_OBJECTS:fnord-base>
-    $<TARGET_OBJECTS:fnord-feeds>
-    $<TARGET_OBJECTS:fnord-mdb>
-    $<TARGET_OBJECTS:fnord-http>
-    $<TARGET_OBJECTS:fnord-json>
-    $<TARGET_OBJECTS:fnord-rpc>
-    $<TARGET_OBJECTS:fnord-cstable>
-    $<TARGET_OBJECTS:fnord-sstable>
-    $<TARGET_OBJECTS:fnord-fts>
-    $<TARGET_OBJECTS:fnord-msg>
-    $<TARGET_OBJECTS:fnord-tsdb>
-    $<TARGET_OBJECTS:fnord-dproc>
-    $<TARGET_OBJECTS:fnord-afx>
-    ../3rdparty/libfnord/fnord-logtable/TableReader.cc
-    ../3rdparty/libfnord/fnord-logtable/TableArena.cc
-    ../3rdparty/libfnord/fnord-logtable/TableWriter.cc
-    ../3rdparty/libfnord/fnord-logtable/TableRepository.cc
-    ../3rdparty/libfnord/fnord-logtable/NumericBoundsSummary.cc
-    ../3rdparty/libfnord/fnord-logtable/TableChunkSummaryReader.cc
-    ../3rdparty/libfnord/fnord-logtable/TableChunkSummaryWriter.cc
-    schemas.cc
-    DocIndex.cc
-    analytics/Report.cc
-    analytics/CTRByShopMapper.cc
-    analytics/ECommerceStatsByShopMapper.cc
-    analytics/ProductStatsByShopMapper.cc
-    analytics/TrafficSegment.cc
-    analytics/AnalyticsTableScan.cc
-    analytics/AnalyticsQuery.cc
-    analytics/AnalyticsQueryEngine.cc
-    analytics/AnalyticsQueryResult.cc
-    analytics/AnalyticsTableScanSource.cc
-    analytics/ShopStats.cc
-    analytics/ShopStatsApp.cc
-    analytics/CTRCounterTableSource.cc
-    analytics/CTRCounterTableSink.cc
-    analytics/CTRCounterMergeReducer.cc
-    analytics/CTRBySearchTermCrossCategoryMapper.cc
-    analytics/TopTermsByCategoryMapper.cc
-    cm-shopstatsbuild.cc
-    ${PROTO_SRCS})
+# add_executable(cm-shopstatsbuild
+#     $<TARGET_OBJECTS:cm-common>
+#     $<TARGET_OBJECTS:fnord-base>
+#     $<TARGET_OBJECTS:fnord-feeds>
+#     $<TARGET_OBJECTS:fnord-mdb>
+#     $<TARGET_OBJECTS:fnord-http>
+#     $<TARGET_OBJECTS:fnord-json>
+#     $<TARGET_OBJECTS:fnord-rpc>
+#     $<TARGET_OBJECTS:fnord-cstable>
+#     $<TARGET_OBJECTS:fnord-sstable>
+#     $<TARGET_OBJECTS:fnord-fts>
+#     $<TARGET_OBJECTS:fnord-msg>
+#     $<TARGET_OBJECTS:fnord-tsdb>
+#     $<TARGET_OBJECTS:fnord-dproc>
+#     $<TARGET_OBJECTS:fnord-afx>
+#     ../3rdparty/libfnord/fnord-logtable/TableReader.cc
+#     ../3rdparty/libfnord/fnord-logtable/TableArena.cc
+#     ../3rdparty/libfnord/fnord-logtable/TableWriter.cc
+#     ../3rdparty/libfnord/fnord-logtable/TableRepository.cc
+#     ../3rdparty/libfnord/fnord-logtable/NumericBoundsSummary.cc
+#     ../3rdparty/libfnord/fnord-logtable/TableChunkSummaryReader.cc
+#     ../3rdparty/libfnord/fnord-logtable/TableChunkSummaryWriter.cc
+#     schemas.cc
+#     DocIndex.cc
+#     analytics/Report.cc
+#     analytics/CTRByShopMapper.cc
+#     analytics/ECommerceStatsByShopMapper.cc
+#     analytics/ProductStatsByShopMapper.cc
+#     analytics/TrafficSegment.cc
+#     analytics/AnalyticsTableScan.cc
+#     analytics/AnalyticsQuery.cc
+#     analytics/AnalyticsQueryEngine.cc
+#     analytics/AnalyticsQueryResult.cc
+#     analytics/AnalyticsTableScanSource.cc
+#     analytics/ShopStats.cc
+#     analytics/ShopStatsApp.cc
+#     analytics/CTRCounterTableSource.cc
+#     analytics/CTRCounterTableSink.cc
+#     analytics/CTRCounterMergeReducer.cc
+#     analytics/CTRBySearchTermCrossCategoryMapper.cc
+#     analytics/TopTermsByCategoryMapper.cc
+#     cm-shopstatsbuild.cc
+#     ${PROTO_SRCS})
+# 
+# target_link_libraries(cm-shopstatsbuild
+#     ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_LIBS} ${FNORD_FTS_LIBS})
 
-target_link_libraries(cm-shopstatsbuild
-    ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_LIBS} ${FNORD_FTS_LIBS})
-
-add_executable(cm-itemboostbuild
-    $<TARGET_OBJECTS:cm-common>
-    $<TARGET_OBJECTS:fnord-base>
-    $<TARGET_OBJECTS:fnord-feeds>
-    $<TARGET_OBJECTS:fnord-mdb>
-    $<TARGET_OBJECTS:fnord-http>
-    $<TARGET_OBJECTS:fnord-json>
-    $<TARGET_OBJECTS:fnord-rpc>
-    $<TARGET_OBJECTS:fnord-cstable>
-    $<TARGET_OBJECTS:fnord-sstable>
-    $<TARGET_OBJECTS:fnord-fts>
-    $<TARGET_OBJECTS:fnord-msg>
-    $<TARGET_OBJECTS:fnord-tsdb>
-    $<TARGET_OBJECTS:fnord-dproc>
-    schemas.cc
-    DocIndex.cc
-    analytics/Report.cc
-    analytics/ItemBoostExport.cc
-    analytics/ItemBoostMapper.cc
-    analytics/ItemBoostMerge.cc
-    analytics/TrafficSegment.cc
-    analytics/AnalyticsTableScan.cc
-    analytics/AnalyticsQuery.cc
-    analytics/AnalyticsQueryEngine.cc
-    analytics/AnalyticsQueryResult.cc
-    analytics/AnalyticsTableScanSource.cc
-    analytics/CSVSink.cc
-    cm-itemboostbuild.cc
-    ${PROTO_SRCS})
-
-target_link_libraries(cm-itemboostbuild
-    ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_LIBS} ${FNORD_FTS_LIBS} ${FNORD_MSG_LIBS})
+# add_executable(cm-itemboostbuild
+#     $<TARGET_OBJECTS:cm-common>
+#     $<TARGET_OBJECTS:fnord-base>
+#     $<TARGET_OBJECTS:fnord-feeds>
+#     $<TARGET_OBJECTS:fnord-mdb>
+#     $<TARGET_OBJECTS:fnord-http>
+#     $<TARGET_OBJECTS:fnord-json>
+#     $<TARGET_OBJECTS:fnord-rpc>
+#     $<TARGET_OBJECTS:fnord-cstable>
+#     $<TARGET_OBJECTS:fnord-sstable>
+#     $<TARGET_OBJECTS:fnord-fts>
+#     $<TARGET_OBJECTS:fnord-msg>
+#     $<TARGET_OBJECTS:fnord-tsdb>
+#     $<TARGET_OBJECTS:fnord-dproc>
+#     schemas.cc
+#     DocIndex.cc
+#     analytics/Report.cc
+#     analytics/ItemBoostExport.cc
+#     analytics/ItemBoostMapper.cc
+#     analytics/ItemBoostMerge.cc
+#     analytics/TrafficSegment.cc
+#     analytics/AnalyticsTableScan.cc
+#     analytics/AnalyticsQuery.cc
+#     analytics/AnalyticsQueryEngine.cc
+#     analytics/AnalyticsQueryResult.cc
+#     analytics/AnalyticsTableScanSource.cc
+#     analytics/CSVSink.cc
+#     cm-itemboostbuild.cc
+#     ${PROTO_SRCS})
+# 
+# target_link_libraries(cm-itemboostbuild
+#     ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_LIBS} ${FNORD_FTS_LIBS} ${FNORD_MSG_LIBS})
 
 add_executable(cm-chunkserver
     $<TARGET_OBJECTS:cm-common>
