@@ -389,6 +389,13 @@ Vector<String> StreamChunk::listFiles() const {
   return records_.listDatafiles();
 }
 
+PartitionInfo StreamChunk::partitionInfo() const {
+  PartitionInfo pi;
+  pi.set_partition_key(key_);
+  pi.set_stream_key(stream_key_);
+  return pi;
+}
+
 void StreamChunk::commitState() {
   StreamChunkState state;
   state.record_state = records_.getState();
