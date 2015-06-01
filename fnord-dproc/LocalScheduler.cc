@@ -39,6 +39,12 @@ void LocalScheduler::stop() {
 RefPtr<TaskResult> LocalScheduler::run(
     RefPtr<Application> app,
     const TaskSpec& task) {
+  fnord::logDebug(
+      "fnord.dproc",
+      "Running task: $0#$1",
+      app->name(),
+      task.task_name());
+
   RefPtr<TaskResult> result(new TaskResult());
 
   try {
