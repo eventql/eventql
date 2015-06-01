@@ -31,8 +31,7 @@ RecordSet::RecordSet(
     RecordSetState state /* = RecordSetState{} */) :
     filename_prefix_(filename_prefix),
     state_(state),
-    max_datafile_size_(kDefaultMaxDatafileSize),
-    version_(0) {
+    max_datafile_size_(kDefaultMaxDatafileSize) {
   auto id_index_fn = [this] (uint64_t id, const void* data, size_t size) {
     commitlog_ids_.emplace(id);
   };
@@ -53,7 +52,7 @@ RecordSet::RecordSetState RecordSet::getState() const {
 
 size_t RecordSet::version() const {
   std::unique_lock<std::mutex> lk(mutex_);
-  return version_;
+  return state_.version;
 }
 
 size_t RecordSet::commitlogSize() const {
@@ -103,13 +102,14 @@ void RecordSet::addRecords(const Vector<RecordRef>& records) {
   }
 }
 
+// precondition: must hold lock
 void RecordSet::addRecords(const util::BinaryMessageWriter& buf) {
   String commitlog;
   uint64_t commitlog_size;
   if (state_.commitlog.isEmpty()) {
     commitlog = filename_prefix_ + rnd_.hex64() + ".log";
     commitlog_size = 0;
-    ++version_;
+    ++state_.version;
   } else {
     commitlog = state_.commitlog.get();
     commitlog_size = state_.commitlog_size;
@@ -131,6 +131,12 @@ void RecordSet::addRecords(const util::BinaryMessageWriter& buf) {
 }
 
 void RecordSet::rollCommitlog() {
+  std::unique_lock<std::mutex> lk(mutex_);
+  rollCommitlogWithLock();
+}
+
+// precondition: must hold lock
+void RecordSet::rollCommitlogWithLock() {
   if (state_.commitlog.isEmpty()) {
     return;
   }
@@ -140,7 +146,7 @@ void RecordSet::rollCommitlog() {
   state_.old_commitlogs.emplace(old_log);
   state_.commitlog = None<String>();
   state_.commitlog_size = 0;
-  ++version_;
+  ++state_.version;
 }
 
 void RecordSet::compact() {
@@ -155,7 +161,7 @@ void RecordSet::compact(Set<String>* deleted_files) {
   }
 
   std::unique_lock<std::mutex> lk(mutex_);
-  rollCommitlog();
+  rollCommitlogWithLock();
   auto snap = state_;
   lk.unlock();
 
@@ -269,7 +275,7 @@ void RecordSet::compact(Set<String>* deleted_files) {
     commitlog_ids_.erase(id);
   }
 
-  ++version_;
+  ++state_.version;
 }
 
 void RecordSet::loadCommitlog(
@@ -430,7 +436,8 @@ const String& RecordSet::filenamePrefix() const {
 }
 
 RecordSet::RecordSetState::RecordSetState() :
-    commitlog_size(0) {}
+    commitlog_size(0),
+    version(0) {}
 
 void RecordSet::RecordSetState::encode(
     util::BinaryMessageWriter* writer) const {
@@ -450,6 +457,8 @@ void RecordSet::RecordSetState::encode(
   for (const auto& cl : all_commitlogs) {
     writer->appendLenencString(cl);
   }
+
+  writer->appendVarUInt(version);
 }
 
 void RecordSet::RecordSetState::decode(util::BinaryMessageReader* reader) {
@@ -469,6 +478,10 @@ void RecordSet::RecordSetState::decode(util::BinaryMessageReader* reader) {
   for (size_t i = 0; i < num_commitlogs; ++i) {
     auto fname = reader->readLenencString();
     old_commitlogs.emplace(fname);
+  }
+
+  if (reader->remaining() > 0) {
+    version = reader->readVarUInt();
   }
 }
 
