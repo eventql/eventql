@@ -71,6 +71,15 @@ int main(int argc, const char** argv) {
       "<port>");
 
   flags.defineFlag(
+      "cachedir",
+      cli::FlagParser::T_STRING,
+      true,
+      NULL,
+      NULL,
+      "cachedir path",
+      "<path>");
+
+  flags.defineFlag(
       "loglevel",
       fnord::cli::FlagParser::T_STRING,
       false,
@@ -100,11 +109,18 @@ int main(int argc, const char** argv) {
 
   /* dproc */
   dproc::DispatchService dproc;
-  auto local_scheduler = mkRef(new dproc::LocalScheduler());
+  auto local_scheduler = mkRef(
+      new dproc::LocalScheduler(
+          flags.getString("cachedir")));
+
   local_scheduler->start();
 
   /* analytics core */
-  auto analytics_app = mkRef(new AnalyticsApp(&tsdb));
+  auto analytics_app = mkRef(
+      new AnalyticsApp(
+          &tsdb,
+          flags.getString("cachedir")));
+
   dproc.registerApp(analytics_app.get(), local_scheduler.get());
   cm::AnalyticsServlet analytics_servlet(&dproc);
   http_router.addRouteByPrefixMatch("/analytics", &analytics_servlet, &tpool);
