@@ -39,12 +39,17 @@ protected:
 
   class LocalTaskRef : public TaskContext, public RefCounted {
   public:
-    LocalTaskRef(RefPtr<Task> _task);
+    LocalTaskRef(
+        RefPtr<Application> app,
+        const String& task_name,
+        const Buffer& params);
+
     RefPtr<VFSFile> getDependency(size_t index) override;
     size_t numDependencies() const override;
 
     RefPtr<Task> task;
     String output_filename;
+    String debug_name;
     bool running;
     bool finished;
     bool expanded;

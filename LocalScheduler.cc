@@ -39,16 +39,14 @@ void LocalScheduler::stop() {
 RefPtr<TaskResult> LocalScheduler::run(
     RefPtr<Application> app,
     const TaskSpec& task) {
-  fnord::logDebug(
-      "fnord.dproc",
-      "Running task: $0#$1",
-      app->name(),
-      task.task_name());
-
   RefPtr<TaskResult> result(new TaskResult());
 
   try {
-    RefPtr<LocalTaskRef> instance(new LocalTaskRef(app->getTaskInstance(task)));
+    auto instance = mkRef(
+        new LocalTaskRef(
+            app,
+            task.task_name(),
+            Buffer(task.params().data(), task.params().size())));
 
     req_tpool_.run([this, app, result, instance] () {
       try {
@@ -105,8 +103,7 @@ void LocalScheduler::run(
 
         auto parent_task = taskref;
         for (const auto& dep : taskref->task->dependencies()) {
-          RefPtr<LocalTaskRef> depref(new LocalTaskRef(
-              app->getTaskInstance(dep.task_name, dep.params)));
+          RefPtr<LocalTaskRef> depref(new LocalTaskRef(app, dep.task_name, dep.params));
           parent_task->dependencies.emplace_back(depref);
           pipeline->tasks.emplace_back(depref);
         }
@@ -161,7 +158,6 @@ void LocalScheduler::runTask(
     RefPtr<LocalTaskRef> task) {
   auto cache_key = task->task->cacheKey();
   String output_file;
-  bool cached = false;
 
   if (cache_key.isEmpty()) {
     auto tmpid = Random::singleton()->hex128();
@@ -174,7 +170,15 @@ void LocalScheduler::runTask(
         StringUtil::format("cache_$0", cache_key.get()));
   }
 
-  if (cache_key.isEmpty() || !FileUtil::exists(output_file)) {
+  auto cached = !cache_key.isEmpty() && FileUtil::exists(output_file);
+
+  fnord::logDebug(
+      "fnord.dproc",
+      "Running task: $0 (cached=$1)",
+      task->debug_name,
+      cached);
+
+  if (!cached) {
     try {
       auto res = task->task->run(task.get());
 
@@ -196,8 +200,11 @@ void LocalScheduler::runTask(
   pipeline->wakeup.notify_all();
 }
 
-LocalScheduler::LocalTaskRef::LocalTaskRef(RefPtr<Task> _task) :
-    task(_task),
+LocalScheduler::LocalTaskRef::LocalTaskRef(
+    RefPtr<Application> app,
+    const String& task_name,
+    const Buffer& params) :
+    task(app->getTaskInstance(task_name, params)),
     running(false),
     expanded(false),
     finished(false) {}
