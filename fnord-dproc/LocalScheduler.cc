@@ -205,6 +205,7 @@ LocalScheduler::LocalTaskRef::LocalTaskRef(
     const String& task_name,
     const Buffer& params) :
     task(app->getTaskInstance(task_name, params)),
+    debug_name(StringUtil::format("$0#$1", app->name(), task_name)),
     running(false),
     expanded(false),
     finished(false) {}
