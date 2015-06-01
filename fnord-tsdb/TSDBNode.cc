@@ -128,7 +128,7 @@ PartitionInfo TSDBNode::fetchPartitionInfo(const String& chunk_key) {
   auto chunk = chunks_.find(chunk_key);
   if (chunk == chunks_.end()) {
     PartitionInfo pi;
-    pi.set_partition_key(chunk_key);
+    pi.set_partition_key(Base64::encode(chunk_key));
     return pi;
   }
 
