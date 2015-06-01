@@ -24,5 +24,32 @@ void TaskResult::returnError(const StandardException& e) {
   promise_.failure(e);
 }
 
+void TaskResult::updateStatus(Function<void (TaskStatus* status)> fn) {
+  std::unique_lock<std::mutex> lk(status_mutex_);
+  fn(&status_);
+  lk.unlock();
+  on_status_change_();
+}
+
+void TaskResult::onStatusChange(Function<void ()> fn) {
+  on_status_change_ = fn;
+}
+
+TaskStatus TaskResult::status() const {
+  std::unique_lock<std::mutex> lk(status_mutex_);
+  return status_;
+}
+
+TaskStatus::TaskStatus() :
+    num_subtasks_total(1),
+    num_subtasks_completed(0) {}
+
+String TaskStatus::toString() const {
+  return StringUtil::format(
+      "$0/$1",
+      num_subtasks_completed,
+      num_subtasks_total);
+}
+
 } // namespace dproc
 } // namespace fnord
