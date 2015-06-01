@@ -7,6 +7,7 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
+#include <fnord-base/util/Base64.h>
 #include <fnord-tsdb/TSDBNode.h>
 
 namespace fnord {
@@ -128,7 +129,7 @@ PartitionInfo TSDBNode::fetchPartitionInfo(const String& chunk_key) {
   auto chunk = chunks_.find(chunk_key);
   if (chunk == chunks_.end()) {
     PartitionInfo pi;
-    pi.set_partition_key(Base64::encode(chunk_key));
+    pi.set_partition_key(util::Base64::encode(chunk_key));
     return pi;
   }
 
