@@ -27,11 +27,16 @@ void TaskResult::returnError(const StandardException& e) {
 void TaskResult::updateStatus(Function<void (TaskStatus* status)> fn) {
   std::unique_lock<std::mutex> lk(status_mutex_);
   fn(&status_);
-  lk.unlock();
-  on_status_change_();
+
+  if (on_status_change_) {
+    auto cb = on_status_change_;
+    lk.unlock();
+    cb();
+  }
 }
 
 void TaskResult::onStatusChange(Function<void ()> fn) {
+  std::unique_lock<std::mutex> lk(status_mutex_);
   on_status_change_ = fn;
 }
 
@@ -46,10 +51,16 @@ TaskStatus::TaskStatus() :
 
 String TaskStatus::toString() const {
   return StringUtil::format(
-      "$0/$1",
+      "$0/$1 ($2%)",
       num_subtasks_completed,
-      num_subtasks_total);
+      num_subtasks_total,
+      progress() * 100);
 }
+
+double TaskStatus::progress() const {
+  return num_subtasks_completed / (double) num_subtasks_total;
+}
+
 
 } // namespace dproc
 } // namespace fnord
