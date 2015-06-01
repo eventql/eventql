@@ -508,6 +508,10 @@ add_executable(analyticsd
     analytics/ECommercePreferenceSetsFeed.cc
     analytics/JSONSink.cc
     analytics/FeedExportApp.cc
+    analytics/AnalyticsApp.cc
+    analytics/AnalyticsQueryMapper.cc
+    analytics/AnalyticsQueryReducer.cc
+    analytics/AnalyticsTableBuild.cc
     schemas.cc
     analyticsd.cc
     ${PROTO_SRCS})
@@ -538,39 +542,39 @@ target_link_libraries(analyticsd
 # target_link_libraries(cm-autocompleteserver
 #     ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_LIBS} ${FNORD_FTS_LIBS})
 
-add_executable(cm-tokenize
-    $<TARGET_OBJECTS:cm-common>
-    $<TARGET_OBJECTS:fnord-base>
-    $<TARGET_OBJECTS:fnord-mdb>
-    $<TARGET_OBJECTS:fnord-fts>
-    $<TARGET_OBJECTS:fnord-json>
-    $<TARGET_OBJECTS:fnord-http>
-    $<TARGET_OBJECTS:fnord-sstable>
-    cm-tokenize.cc)
-
-target_link_libraries(cm-tokenize
-    ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_LIBS} ${FNORD_FTS_LIBS})
-
-add_executable(cm-jqcolumnize
-    $<TARGET_OBJECTS:cm-common>
-    $<TARGET_OBJECTS:fnord-base>
-    $<TARGET_OBJECTS:fnord-feeds>
-    $<TARGET_OBJECTS:fnord-mdb>
-    $<TARGET_OBJECTS:fnord-http>
-    $<TARGET_OBJECTS:fnord-json>
-    $<TARGET_OBJECTS:fnord-rpc>
-    $<TARGET_OBJECTS:fnord-cstable>
-    $<TARGET_OBJECTS:fnord-sstable>
-    $<TARGET_OBJECTS:fnord-msg>
-    $<TARGET_OBJECTS:fnord-fts>
-    schemas.cc
-    analytics/AnalyticsTableScan.cc
-    analytics/TrafficSegment.cc
-    analytics/CTRByPositionQuery.cc
-    cm-jqcolumnize.cc)
-
-target_link_libraries(cm-jqcolumnize
-    ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_LIBS} ${FNORD_FTS_LIBS})
+#add_executable(cm-tokenize
+#    $<TARGET_OBJECTS:cm-common>
+#    $<TARGET_OBJECTS:fnord-base>
+#    $<TARGET_OBJECTS:fnord-mdb>
+#    $<TARGET_OBJECTS:fnord-fts>
+#    $<TARGET_OBJECTS:fnord-json>
+#    $<TARGET_OBJECTS:fnord-http>
+#    $<TARGET_OBJECTS:fnord-sstable>
+#    cm-tokenize.cc)
+#
+#target_link_libraries(cm-tokenize
+#    ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_LIBS} ${FNORD_FTS_LIBS})
+#
+#add_executable(cm-jqcolumnize
+#    $<TARGET_OBJECTS:cm-common>
+#    $<TARGET_OBJECTS:fnord-base>
+#    $<TARGET_OBJECTS:fnord-feeds>
+#    $<TARGET_OBJECTS:fnord-mdb>
+#    $<TARGET_OBJECTS:fnord-http>
+#    $<TARGET_OBJECTS:fnord-json>
+#    $<TARGET_OBJECTS:fnord-rpc>
+#    $<TARGET_OBJECTS:fnord-cstable>
+#    $<TARGET_OBJECTS:fnord-sstable>
+#    $<TARGET_OBJECTS:fnord-msg>
+#    $<TARGET_OBJECTS:fnord-fts>
+#    schemas.cc
+#    analytics/AnalyticsTableScan.cc
+#    analytics/TrafficSegment.cc
+#    analytics/CTRByPositionQuery.cc
+#    cm-jqcolumnize.cc)
+#
+#target_link_libraries(cm-jqcolumnize
+#    ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_LIBS} ${FNORD_FTS_LIBS})
 
 
 #add_executable(tests/test-joinedsessionviewer
