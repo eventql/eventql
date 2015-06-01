@@ -9,6 +9,7 @@
  */
 #include <fnord-tsdb/TSDBClient.h>
 #include <fnord-base/util/binarymessagereader.h>
+#include <fnord-msg/msg.h>
 
 namespace fnord {
 namespace tsdb {
@@ -109,6 +110,26 @@ void TSDBClient::fetchPartitionWithSampling(
 
   handler(nullptr, 0);
   return;
+}
+
+PartitionInfo TSDBClient::fetchPartitionInfo(
+    const String& stream_key,
+    const String& partition_key) {
+  auto uri = StringUtil::format(
+      "$0/fetch_partition_info?partition=$1",
+      uri_,
+      URI::urlEncode(partition_key));
+
+  auto req = http::HTTPRequest::mkGet(uri);
+  auto res = http_->executeRequest(req);
+  res.wait();
+
+  const auto& r = res.get();
+  if (r.statusCode() != 200) {
+    RAISEF(kRuntimeError, "received non-200 response: $0", r.body().toString());
+  }
+
+  return msg::decode<PartitionInfo>(r.body());
 }
 
 Buffer TSDBClient::fetchDerivedDataset(

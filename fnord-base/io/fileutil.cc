@@ -202,11 +202,20 @@ void FileUtil::truncate(const std::string& filename, size_t new_size) {
   }
 }
 
-Buffer FileUtil::read(const std::string& filename) {
+Buffer FileUtil::read(
+    const std::string& filename,
+    size_t offset /* = 0 */,
+    size_t limit /* = 0 */) {
   try {
     auto file = File::openFile(filename, File::O_READ);
-    Buffer buf(file.size());
-    file.read(&buf);
+    if (offset > 0) {
+      file.seekTo(offset);
+    }
+
+    Buffer buf(limit == 0 ? file.size() - offset : limit);
+    auto read_bytes = file.read(&buf);
+    buf.truncate(read_bytes);
+
     return buf;
   } catch (const std::exception& e) {
     RAISEF(kIOError, "$0 while reading file '$1'", e.what(), filename);

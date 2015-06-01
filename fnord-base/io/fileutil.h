@@ -85,9 +85,12 @@ public:
   static void truncate(const std::string& filename, size_t size);
 
   /**
-   * Read a while file
+   * Read a file
    */
-  static Buffer read(const std::string& filename);
+  static Buffer read(
+      const std::string& filename,
+      size_t offset = 0,
+      size_t limit = 0);
 
   /**
    * Checsum (FNV64) a file
