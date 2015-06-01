@@ -180,7 +180,7 @@ void LocalScheduler::runPipeline(
 
     fnord::logDebug(
         "fnord.dproc",
-        "Running local pipeline id=$0: $0",
+        "Running local pipeline id=$0: $1",
         (void*) pipeline,
         result->status().toString());
 
