@@ -422,7 +422,7 @@ void StreamChunkState::encode(
     writer->appendVarUInt(ro.second);
   }
 
-  writer->appendVarUInt(0);
+  writer->appendVarUInt(record_state.version);
 }
 
 void StreamChunkState::decode(util::BinaryMessageReader* reader) {
@@ -436,9 +436,7 @@ void StreamChunkState::decode(util::BinaryMessageReader* reader) {
     repl_offsets.emplace(id, off);
   }
 
-  auto nderived_ds = reader->readVarUInt();
-  for (int i = 0; i < nderived_ds; ++i) {
-  }
+  record_state.version = reader->readVarUInt();
 }
 
 }
