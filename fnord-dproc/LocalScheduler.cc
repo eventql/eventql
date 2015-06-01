@@ -52,7 +52,7 @@ RefPtr<TaskResult> LocalScheduler::run(
       try {
         LocalTaskPipeline pipeline;
         pipeline.tasks.push_back(instance);
-        run(app.get(), &pipeline);
+        runPipeline(app.get(), &pipeline, result);
 
         result->returnResult(
             new io::MmappedFile(
@@ -70,9 +70,10 @@ RefPtr<TaskResult> LocalScheduler::run(
   return result;
 }
 
-void LocalScheduler::run(
+void LocalScheduler::runPipeline(
     Application* app,
-    LocalTaskPipeline* pipeline) {
+    LocalTaskPipeline* pipeline,
+    RefPtr<TaskResult> result) {
   fnord::logInfo(
       "fnord.dproc",
       "Starting local pipeline id=$0 tasks=$1",
@@ -80,6 +81,9 @@ void LocalScheduler::run(
       pipeline->tasks.size());
 
   std::unique_lock<std::mutex> lk(pipeline->mutex);
+  result->updateStatus([&pipeline] (TaskStatus* status) {
+    status->num_subtasks_total = pipeline->tasks.size();
+  });
 
   while (pipeline->tasks.size() > 0) {
     bool waiting = true;
@@ -124,17 +128,27 @@ void LocalScheduler::run(
               "Running task [cached]: $0",
               taskref->debug_name);
 
+          result->updateStatus([&pipeline] (TaskStatus* status) {
+            ++status->num_subtasks_completed;
+          });
+
           taskref->finished = true;
           waiting = false;
           break;
         }
 
         auto parent_task = taskref;
+        size_t numdeps = 0;
         for (const auto& dep : taskref->task->dependencies()) {
           RefPtr<LocalTaskRef> depref(new LocalTaskRef(app, dep.task_name, dep.params));
           parent_task->dependencies.emplace_back(depref);
           pipeline->tasks.emplace_back(depref);
+          ++numdeps;
         }
+
+        result->updateStatus([numdeps] (TaskStatus* status) {
+          status->num_subtasks_total += numdeps;
+        });
 
         waiting = false;
         break;
@@ -154,18 +168,21 @@ void LocalScheduler::run(
 
       fnord::logDebug("fnord.dproc", "Running task: $0", taskref->debug_name);
       taskref->running = true;
-      tpool_.run(std::bind(&LocalScheduler::runTask, this, pipeline, taskref));
+      tpool_.run(std::bind(
+          &LocalScheduler::runTask,
+          this,
+          pipeline,
+          taskref,
+          result));
+
       waiting = false;
     }
 
-    fnord::logInfo(
+    fnord::logDebug(
         "fnord.dproc",
-        "Running local pipeline... id=$0 tasks=$1, running=$2, waiting=$3, completed=$4",
+        "Running local pipeline id=$0: $0",
         (void*) pipeline,
-        pipeline->tasks.size(),
-        num_running,
-        num_waiting,
-        num_completed);
+        result->status().toString());
 
     if (waiting) {
       pipeline->wakeup.wait(lk);
@@ -176,7 +193,7 @@ void LocalScheduler::run(
     }
   }
 
-  fnord::logInfo(
+  fnord::logDebug(
       "fnord.dproc",
       "Completed local pipeline id=$0",
       (void*) pipeline);
@@ -184,7 +201,8 @@ void LocalScheduler::run(
 
 void LocalScheduler::runTask(
     LocalTaskPipeline* pipeline,
-    RefPtr<LocalTaskRef> task) {
+    RefPtr<LocalTaskRef> task,
+    RefPtr<TaskResult> result) {
   auto output_file = task->output_filename;
 
   try {
@@ -199,6 +217,10 @@ void LocalScheduler::runTask(
   } catch (const std::exception& e) {
     fnord::logError("fnord.dproc", e, "error");
   }
+
+  result->updateStatus([&pipeline] (TaskStatus* status) {
+    ++status->num_subtasks_completed;
+  });
 
   std::unique_lock<std::mutex> lk(pipeline->mutex);
   task->finished = true;
