@@ -458,7 +458,7 @@ void RecordSet::RecordSetState::encode(
     writer->appendLenencString(cl);
   }
 
-  writer->appendVarUInt(version);
+  //writer->appendVarUInt(version);
 }
 
 void RecordSet::RecordSetState::decode(util::BinaryMessageReader* reader) {
@@ -480,9 +480,9 @@ void RecordSet::RecordSetState::decode(util::BinaryMessageReader* reader) {
     old_commitlogs.emplace(fname);
   }
 
-  if (reader->remaining() > 0) {
-    version = reader->readVarUInt();
-  }
+  //if (reader->remaining() > 0) {
+  //  version = reader->readVarUInt();
+  //}
 }
 
 } // namespace tsdb
