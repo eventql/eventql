@@ -111,13 +111,31 @@ void TSDBNode::insertRecords(
 
 Vector<String> TSDBNode::listFiles(const String& chunk_key) {
   std::unique_lock<std::mutex> lk(mutex_);
+
   auto chunk = chunks_.find(chunk_key);
   if (chunk == chunks_.end()) {
     return Vector<String>{};
   }
+
+  auto c = chunk->second;
   lk.unlock();
 
-  return chunk->second->listFiles();
+  return c->listFiles();
+}
+
+PartitionInfo TSDBNode::fetchPartitionInfo(const String& chunk_key) {
+  std::unique_lock<std::mutex> lk(mutex_);
+  auto chunk = chunks_.find(chunk_key);
+  if (chunk == chunks_.end()) {
+    PartitionInfo pi;
+    pi.set_partition_key(chunk_key);
+    return pi;
+  }
+
+  auto c = chunk->second;
+  lk.unlock();
+
+  return c->partitionInfo();
 }
 
 Buffer TSDBNode::fetchDerivedDataset(
