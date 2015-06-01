@@ -24,6 +24,7 @@ class MmappedFile : public VFSFile {
 public:
   MmappedFile() = delete;
   MmappedFile(File&& file);
+  MmappedFile(File&& file, size_t offset, size_t size);
   MmappedFile(const MmappedFile& copy) = delete;
   MmappedFile& operator=(const MmappedFile& copy) = delete;
   ~MmappedFile();
@@ -53,7 +54,9 @@ public:
 protected:
   bool is_writable_;
   void* data_;
+  void* mmap_;
   size_t size_;
+  size_t mmap_size_;
 };
 
 }
