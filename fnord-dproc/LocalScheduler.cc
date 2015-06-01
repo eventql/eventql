@@ -125,7 +125,8 @@ void LocalScheduler::run(
               taskref->debug_name);
 
           taskref->finished = true;
-          continue;
+          waiting = false;
+          break;
         }
 
         auto parent_task = taskref;
