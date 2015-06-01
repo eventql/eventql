@@ -146,9 +146,11 @@ void LocalScheduler::runPipeline(
           ++numdeps;
         }
 
-        result->updateStatus([numdeps] (TaskStatus* status) {
-          status->num_subtasks_total += numdeps;
-        });
+        if (numdeps > 0) {
+          result->updateStatus([numdeps] (TaskStatus* status) {
+            status->num_subtasks_total += numdeps;
+          });
+        }
 
         waiting = false;
         break;
