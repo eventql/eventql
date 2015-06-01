@@ -88,6 +88,7 @@ void LocalScheduler::run(
     size_t num_completed = 0;
 
     for (auto& taskref : pipeline->tasks) {
+
       if (taskref->finished) {
         ++num_completed;
         continue;
@@ -100,6 +101,32 @@ void LocalScheduler::run(
 
       if (!taskref->expanded) {
         taskref->expanded = true;
+
+        auto cache_key = taskref->task->cacheKey();
+        if (cache_key.isEmpty()) {
+          auto tmpid = Random::singleton()->hex128();
+          taskref->output_filename  = FileUtil::joinPaths(
+              tempdir_,
+              StringUtil::format("tmp_$0", tmpid));
+        } else {
+          taskref->output_filename = FileUtil::joinPaths(
+              tempdir_,
+              StringUtil::format("cache_$0", cache_key.get()));
+        }
+
+        auto cached =
+            !cache_key.isEmpty() &&
+            FileUtil::exists(taskref->output_filename);
+
+        if (cached) {
+          fnord::logDebug(
+              "fnord.dproc",
+              "Running task [cached]: $0",
+              taskref->debug_name);
+
+          taskref->finished = true;
+          continue;
+        }
 
         auto parent_task = taskref;
         for (const auto& dep : taskref->task->dependencies()) {
@@ -124,6 +151,7 @@ void LocalScheduler::run(
         continue;
       }
 
+      fnord::logDebug("fnord.dproc", "Running task: $0", taskref->debug_name);
       taskref->running = true;
       tpool_.run(std::bind(&LocalScheduler::runTask, this, pipeline, taskref));
       waiting = false;
@@ -156,45 +184,22 @@ void LocalScheduler::run(
 void LocalScheduler::runTask(
     LocalTaskPipeline* pipeline,
     RefPtr<LocalTaskRef> task) {
-  auto cache_key = task->task->cacheKey();
-  String output_file;
+  auto output_file = task->output_filename;
 
-  if (cache_key.isEmpty()) {
-    auto tmpid = Random::singleton()->hex128();
-    output_file = FileUtil::joinPaths(
-        tempdir_,
-        StringUtil::format("tmp_$0", tmpid));
-  } else {
-    output_file = FileUtil::joinPaths(
-        tempdir_,
-        StringUtil::format("cache_$0", cache_key.get()));
-  }
+  try {
+    auto res = task->task->run(task.get());
 
-  auto cached = !cache_key.isEmpty() && FileUtil::exists(output_file);
+    auto file = File::openFile(
+        output_file + "~",
+        File::O_CREATEOROPEN | File::O_WRITE);
 
-  fnord::logDebug(
-      "fnord.dproc",
-      "Running task: $0 (cached=$1)",
-      task->debug_name,
-      cached);
-
-  if (!cached) {
-    try {
-      auto res = task->task->run(task.get());
-
-      auto file = File::openFile(
-          output_file + "~",
-          File::O_CREATEOROPEN | File::O_WRITE);
-
-      file.write(res->data(), res->size());
-      FileUtil::mv(output_file + "~", output_file);
-    } catch (const std::exception& e) {
-      fnord::logError("fnord.dproc", e, "error");
-    }
+    file.write(res->data(), res->size());
+    FileUtil::mv(output_file + "~", output_file);
+  } catch (const std::exception& e) {
+    fnord::logError("fnord.dproc", e, "error");
   }
 
   std::unique_lock<std::mutex> lk(pipeline->mutex);
-  task->output_filename = output_file;
   task->finished = true;
   lk.unlock();
   pipeline->wakeup.notify_all();
