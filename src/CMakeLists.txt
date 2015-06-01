@@ -511,6 +511,7 @@ add_executable(analyticsd
     analytics/AnalyticsApp.cc
     analytics/AnalyticsQueryMapper.cc
     analytics/AnalyticsQueryReducer.cc
+    analytics/AnalyticsTableBuild.cc
     schemas.cc
     analyticsd.cc
     ${PROTO_SRCS})
