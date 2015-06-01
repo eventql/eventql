@@ -62,8 +62,15 @@ protected:
     std::condition_variable wakeup;
   };
 
-  void run(Application* app, LocalTaskPipeline* pipeline);
-  void runTask(LocalTaskPipeline* pipeline, RefPtr<LocalTaskRef> task);
+  void runPipeline(
+      Application* app,
+      LocalTaskPipeline* pipeline,
+      RefPtr<TaskResult> result);
+
+  void runTask(
+      LocalTaskPipeline* pipeline,
+      RefPtr<LocalTaskRef> task,
+      RefPtr<TaskResult> result);
 
   String tempdir_;
   size_t max_threads_;
