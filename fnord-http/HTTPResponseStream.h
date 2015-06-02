@@ -20,6 +20,7 @@ namespace http {
 
 class HTTPResponseStream : public RefCounted {
 public:
+  static const size_t kMaxWriteBufferSize = 4 * 1024 * 1024;
 
   HTTPResponseStream(HTTPServerConnection* conn);
 
@@ -57,6 +58,15 @@ public:
   void onBodyWritten(Function<void ()> callback);
 
   /**
+   * Wait for the reader to consume the outstanding write buffer (i.e. block
+   * until the write buffer size has fallen below a threshold.) This is an
+   * advisory facility and it is not required to call this method correctness.
+   * Should be used to apply "backpressure" to streaming writer to make sure
+   * we don't fill up write buffers faster than the reader is reading.
+   */
+  void waitForReader();
+
+  /**
    * Return the number of outstanding bytes in the write buffer
    */
   size_t bufferSize();
@@ -73,6 +83,7 @@ protected:
   void onStateChanged(std::unique_lock<std::mutex>* lk);
 
   mutable std::mutex mutex_;
+  mutable std::condition_variable cv_;
   HTTPServerConnection* conn_;
   bool callback_running_;
   bool headers_written_;
