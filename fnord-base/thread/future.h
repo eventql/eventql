@@ -55,12 +55,12 @@ public:
 
   void onFailure(std::function<void (const Status& status)> fn);
   void onSuccess(std::function<void (const T& value)> fn);
+  void onReady(std::function<void ()> fn);
 
   void wait() const;
   void wait(const Duration& timeout) const;
 
-  void onReady(std::function<void> fn);
-  void onReady(TaskScheduler* scheduler, std::function<void> fn);
+  void onReady(TaskScheduler* scheduler, std::function<void()> fn);
 
   const T& get() const;
   const T& waitAndGet() const;

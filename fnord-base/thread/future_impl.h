@@ -75,6 +75,20 @@ void Future<T>::onSuccess(std::function<void (const T& value)> fn) {
 }
 
 template <typename T>
+void Future<T>::onReady(std::function<void ()> fn) {
+  std::unique_lock<std::mutex> lk(state_->mutex);
+
+  if (state_->ready) {
+    fn();
+  } else {
+    state_->on_success = [fn] (const T& _) { fn(); };
+    state_->on_failure = [fn] (const Status& _) { fn(); };
+  }
+}
+
+
+
+template <typename T>
 const T& Future<T>::get() const {
   std::unique_lock<std::mutex> lk(state_->mutex);
 
