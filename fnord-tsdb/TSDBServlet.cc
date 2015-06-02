@@ -11,6 +11,7 @@
 #include "fnord-tsdb/TSDBServlet.h"
 #include "fnord-json/json.h"
 #include <fnord-base/wallclock.h>
+#include <fnord-base/thread/wakeup.h>
 #include "fnord-msg/MessageEncoder.h"
 #include "fnord-msg/MessagePrinter.h"
 #include "fnord-msg/msg.h"
@@ -357,6 +358,11 @@ void TSDBServlet::fetchChunk(
   res->addHeader("Connection", "close");
   res_stream->startResponse(*res);
 
+  Wakeup wakeup;
+  res_stream->onBodyWritten([&wakeup] {
+    wakeup.wakeup();
+  });
+
   auto files = node_->listFiles(chunk_key);
   for (const auto& f : files) {
     sstable::SSTableReader reader(f);
@@ -379,6 +385,10 @@ void TSDBServlet::fetchChunk(
         buf.appendUInt64(data_size);
         buf.append(data, data_size);
         res_stream->writeBodyChunk(Buffer(buf.data(), buf.size()));
+      }
+
+      while (res_stream->bufferSize() > 1024 * 1024 * 4) {
+        wakeup.waitForNextWakeup();
       }
 
       if (!cursor->next()) {
