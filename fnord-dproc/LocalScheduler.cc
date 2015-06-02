@@ -7,6 +7,7 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
+#include <unistd.h>
 #include <fnord-base/io/file.h>
 #include <fnord-base/io/fileutil.h>
 #include <fnord-base/io/mmappedfile.h>
@@ -19,44 +20,60 @@ namespace dproc {
 
 LocalScheduler::LocalScheduler(
     const String& tempdir /* = "/tmp" */,
-    size_t max_threads /* = 8 */) :
+    size_t max_threads /* = 8 */,
+    size_t max_requests /* = 32 */) :
     tempdir_(tempdir),
-    tpool_(max_threads) {}
+    tpool_(max_threads),
+    req_tpool_(max_requests) {}
 
 void LocalScheduler::start() {
+  req_tpool_.start();
   tpool_.start();
 }
 
 void LocalScheduler::stop() {
+  req_tpool_.stop();
   tpool_.stop();
 }
 
-RefPtr<VFSFile> LocalScheduler::run(
-    Application* app,
-    TaskSpec task) {
-  const auto& params = task.params();
-  return run(app, task.task_name(), Buffer(params.data(), params.size()));
+RefPtr<TaskResult> LocalScheduler::run(
+    RefPtr<Application> app,
+    const TaskSpec& task) {
+  RefPtr<TaskResult> result(new TaskResult());
+
+  try {
+    auto instance = mkRef(
+        new LocalTaskRef(
+            app,
+            task.task_name(),
+            Buffer(task.params().data(), task.params().size())));
+
+    req_tpool_.run([this, app, result, instance] () {
+      try {
+        LocalTaskPipeline pipeline;
+        pipeline.tasks.push_back(instance);
+        runPipeline(app.get(), &pipeline, result);
+
+        result->returnResult(
+            new io::MmappedFile(
+                File::openFile(instance->output_filename, File::O_READ)));
+      } catch (const StandardException& e) {
+        fnord::logError("dproc.scheduler", e, "task failed");
+        result->returnError(e);
+      }
+    });
+  } catch (const StandardException& e) {
+    fnord::logError("dproc.scheduler", e, "task failed");
+    result->returnError(e);
+  }
+
+  return result;
 }
 
-RefPtr<VFSFile> LocalScheduler::run(
+void LocalScheduler::runPipeline(
     Application* app,
-    const String& task,
-    const Buffer& params) {
-  RefPtr<LocalTaskRef> head_task(
-      new LocalTaskRef(app->getTaskInstance(task, params)));
-
-  LocalTaskPipeline pipeline;
-  pipeline.tasks.push_back(head_task);
-  run(app, &pipeline);
-
-  return RefPtr<VFSFile>(
-      new io::MmappedFile(
-          File::openFile(head_task->output_filename, File::O_READ)));
-}
-
-void LocalScheduler::run(
-    Application* app,
-    LocalTaskPipeline* pipeline) {
+    LocalTaskPipeline* pipeline,
+    RefPtr<TaskResult> result) {
   fnord::logInfo(
       "fnord.dproc",
       "Starting local pipeline id=$0 tasks=$1",
@@ -64,6 +81,9 @@ void LocalScheduler::run(
       pipeline->tasks.size());
 
   std::unique_lock<std::mutex> lk(pipeline->mutex);
+  result->updateStatus([&pipeline] (TaskStatus* status) {
+    status->num_subtasks_total = pipeline->tasks.size();
+  });
 
   while (pipeline->tasks.size() > 0) {
     bool waiting = true;
@@ -72,6 +92,7 @@ void LocalScheduler::run(
     size_t num_completed = 0;
 
     for (auto& taskref : pipeline->tasks) {
+
       if (taskref->finished) {
         ++num_completed;
         continue;
@@ -85,12 +106,50 @@ void LocalScheduler::run(
       if (!taskref->expanded) {
         taskref->expanded = true;
 
+        auto cache_key = taskref->task->cacheKey();
+        if (cache_key.isEmpty()) {
+          auto tmpid = Random::singleton()->hex128();
+          taskref->output_filename  = FileUtil::joinPaths(
+              tempdir_,
+              StringUtil::format("tmp_$0", tmpid));
+        } else {
+          taskref->output_filename = FileUtil::joinPaths(
+              tempdir_,
+              StringUtil::format("cache_$0", cache_key.get()));
+        }
+
+        auto cached =
+            !cache_key.isEmpty() &&
+            FileUtil::exists(taskref->output_filename);
+
+        if (cached) {
+          fnord::logDebug(
+              "fnord.dproc",
+              "Running task [cached]: $0",
+              taskref->debug_name);
+
+          result->updateStatus([&pipeline] (TaskStatus* status) {
+            ++status->num_subtasks_completed;
+          });
+
+          taskref->finished = true;
+          waiting = false;
+          break;
+        }
+
         auto parent_task = taskref;
+        size_t numdeps = 0;
         for (const auto& dep : taskref->task->dependencies()) {
-          RefPtr<LocalTaskRef> depref(new LocalTaskRef(
-              app->getTaskInstance(dep.task_name, dep.params)));
+          RefPtr<LocalTaskRef> depref(new LocalTaskRef(app, dep.task_name, dep.params));
           parent_task->dependencies.emplace_back(depref);
           pipeline->tasks.emplace_back(depref);
+          ++numdeps;
+        }
+
+        if (numdeps > 0) {
+          result->updateStatus([numdeps] (TaskStatus* status) {
+            status->num_subtasks_total += numdeps;
+          });
         }
 
         waiting = false;
@@ -109,19 +168,23 @@ void LocalScheduler::run(
         continue;
       }
 
+      fnord::logDebug("fnord.dproc", "Running task: $0", taskref->debug_name);
       taskref->running = true;
-      tpool_.run(std::bind(&LocalScheduler::runTask, this, pipeline, taskref));
+      tpool_.run(std::bind(
+          &LocalScheduler::runTask,
+          this,
+          pipeline,
+          taskref,
+          result));
+
       waiting = false;
     }
 
-    fnord::logInfo(
+    fnord::logDebug(
         "fnord.dproc",
-        "Running local pipeline... id=$0 tasks=$1, running=$2, waiting=$3, completed=$4",
+        "Running local pipeline id=$0: $1",
         (void*) pipeline,
-        pipeline->tasks.size(),
-        num_running,
-        num_waiting,
-        num_completed);
+        result->status().toString());
 
     if (waiting) {
       pipeline->wakeup.wait(lk);
@@ -132,7 +195,7 @@ void LocalScheduler::run(
     }
   }
 
-  fnord::logInfo(
+  fnord::logDebug(
       "fnord.dproc",
       "Completed local pipeline id=$0",
       (void*) pipeline);
@@ -140,46 +203,39 @@ void LocalScheduler::run(
 
 void LocalScheduler::runTask(
     LocalTaskPipeline* pipeline,
-    RefPtr<LocalTaskRef> task) {
-  auto cache_key = task->task->cacheKey();
-  String output_file;
-  bool cached = false;
+    RefPtr<LocalTaskRef> task,
+    RefPtr<TaskResult> result) {
+  auto output_file = task->output_filename;
 
-  if (cache_key.isEmpty()) {
-    auto tmpid = Random::singleton()->hex128();
-    output_file = FileUtil::joinPaths(
-        tempdir_,
-        StringUtil::format("tmp_$0", tmpid));
-  } else {
-    output_file = FileUtil::joinPaths(
-        tempdir_,
-        StringUtil::format("cache_$0", cache_key.get()));
+  try {
+    auto res = task->task->run(task.get());
+
+    auto file = File::openFile(
+        output_file + "~",
+        File::O_CREATEOROPEN | File::O_WRITE);
+
+    file.write(res->data(), res->size());
+    FileUtil::mv(output_file + "~", output_file);
+  } catch (const std::exception& e) {
+    fnord::logError("fnord.dproc", e, "error");
   }
 
-  if (cache_key.isEmpty() || !FileUtil::exists(output_file)) {
-    try {
-      auto res = task->task->run(task.get());
-
-      auto file = File::openFile(
-          output_file + "~",
-          File::O_CREATEOROPEN | File::O_WRITE);
-
-      file.write(res->data(), res->size());
-      FileUtil::mv(output_file + "~", output_file);
-    } catch (const std::exception& e) {
-      fnord::logError("fnord.dproc", e, "error");
-    }
-  }
+  result->updateStatus([&pipeline] (TaskStatus* status) {
+    ++status->num_subtasks_completed;
+  });
 
   std::unique_lock<std::mutex> lk(pipeline->mutex);
-  task->output_filename = output_file;
   task->finished = true;
   lk.unlock();
   pipeline->wakeup.notify_all();
 }
 
-LocalScheduler::LocalTaskRef::LocalTaskRef(RefPtr<Task> _task) :
-    task(_task),
+LocalScheduler::LocalTaskRef::LocalTaskRef(
+    RefPtr<Application> app,
+    const String& task_name,
+    const Buffer& params) :
+    task(app->getTaskInstance(task_name, params)),
+    debug_name(StringUtil::format("$0#$1", app->name(), task_name)),
     running(false),
     expanded(false),
     finished(false) {}

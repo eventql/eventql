@@ -61,6 +61,8 @@ public:
 
   Vector<String> listFiles(const String& chunk_key);
 
+  PartitionInfo fetchPartitionInfo(const String& chunk_key);
+
   Buffer fetchDerivedDataset(
       const String& chunk_key,
       const String& derived_dataset);

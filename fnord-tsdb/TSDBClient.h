@@ -13,6 +13,7 @@
 #include <fnord-base/random.h>
 #include <fnord-base/option.h>
 #include <fnord-http/httpconnectionpool.h>
+#include <fnord-tsdb/PartitionInfo.pb.h>
 
 namespace fnord {
 namespace tsdb {
@@ -29,9 +30,25 @@ public:
       const DateTime& from,
       const DateTime& until);
 
+  void fetchPartition(
+      const String& stream_key,
+      const String& partition_key,
+      Function<void (const Buffer& record)> fn);
+
+  PartitionInfo fetchPartitionInfo(
+      const String& stream_key,
+      const String& partition_key);
+
+  void fetchPartitionWithSampling(
+      const String& stream_key,
+      const String& partition,
+      size_t sample_modulo,
+      size_t sample_index,
+      Function<void (const Buffer& record)> fn);
+
   Buffer fetchDerivedDataset(
       const String& stream_key,
-      const String& patition,
+      const String& partition,
       const String& derived_dataset_name);
 
 protected:

@@ -7,14 +7,16 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-package fnord.dproc;
+package fnord.tsdb;
 
-message TaskSpec {
+message PartitionInfo {
 
-  optional string application = 3;
+  required string partition_key = 1;
 
-  required string task_name = 1;
+  required string stream_key = 2;
 
-  optional string params = 2;
+  optional uint64 version = 3;
+
+  optional uint64 mtime = 4;
 
 };

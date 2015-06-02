@@ -13,7 +13,7 @@
 #include <fnord-base/util/binarymessagewriter.h>
 #include <fnord-base/io/FileLock.h>
 #include <fnord-base/io/fileutil.h>
-#include <fnord-logtable/ArtifactIndex.h>
+#include <fnord-afx/ArtifactIndex.h>
 
 namespace fnord {
 namespace logtable {

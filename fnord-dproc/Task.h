@@ -15,6 +15,7 @@
 #include <fnord-base/option.h>
 #include <fnord-base/exception.h>
 #include <fnord-base/VFSFile.h>
+#include <fnord-base/thread/future.h>
 #include <fnord-msg/msg.h>
 
 namespace fnord {

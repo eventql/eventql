@@ -44,6 +44,7 @@ public:
     Option<String> commitlog;
     uint64_t commitlog_size;
     Set<String> old_commitlogs;
+    size_t version;
 
     void encode(util::BinaryMessageWriter* writer) const;
     void decode(util::BinaryMessageReader* reader);
@@ -73,22 +74,23 @@ public:
   size_t version() const;
   size_t commitlogSize() const;
 
-  void rollCommitlog();
   void compact();
   void compact(Set<String>* deleted_files);
 
   void setMaxDatafileSize(size_t size);
   const String& filenamePrefix() const;
 
+  void rollCommitlog();
+
 protected:
 
+  void rollCommitlogWithLock();
   void addRecords(const util::BinaryMessageWriter& buf);
 
   void loadCommitlog(
       const String& filename,
       Function<void (uint64_t, const void*, size_t)> fn);
 
-  size_t version_;
   String filename_prefix_;
   RecordSetState state_;
   mutable std::mutex compact_mutex_;

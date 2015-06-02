@@ -7,6 +7,7 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
+#include <fnord-base/util/Base64.h>
 #include <fnord-tsdb/TSDBNode.h>
 
 namespace fnord {
@@ -111,13 +112,31 @@ void TSDBNode::insertRecords(
 
 Vector<String> TSDBNode::listFiles(const String& chunk_key) {
   std::unique_lock<std::mutex> lk(mutex_);
+
   auto chunk = chunks_.find(chunk_key);
   if (chunk == chunks_.end()) {
     return Vector<String>{};
   }
+
+  auto c = chunk->second;
   lk.unlock();
 
-  return chunk->second->listFiles();
+  return c->listFiles();
+}
+
+PartitionInfo TSDBNode::fetchPartitionInfo(const String& chunk_key) {
+  std::unique_lock<std::mutex> lk(mutex_);
+  auto chunk = chunks_.find(chunk_key);
+  if (chunk == chunks_.end()) {
+    PartitionInfo pi;
+    pi.set_partition_key(util::Base64::encode(chunk_key));
+    return pi;
+  }
+
+  auto c = chunk->second;
+  lk.unlock();
+
+  return c->partitionInfo();
 }
 
 Buffer TSDBNode::fetchDerivedDataset(
