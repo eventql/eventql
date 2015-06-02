@@ -27,7 +27,7 @@
 #include "fnord-sstable/SSTableColumnSchema.h"
 #include "fnord-sstable/SSTableColumnReader.h"
 #include "fnord-sstable/SSTableColumnWriter.h"
-#include "fnord-logtable/ArtifactIndex.h"
+#include "fnord-afx/ArtifactIndex.h"
 #include <fnord-fts/fts.h>
 #include <fnord-fts/fts_common.h>
 #include "fnord-logtable/TableReader.h"

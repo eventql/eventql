@@ -40,6 +40,7 @@ using namespace fnord;
  *   q_cat3     -- query cat3       -- format "<catid>"
  *   slrid      -- seller id        -- format "<id>"
  *   qx         -- experiment       -- format "<exp1>;<exp2>"
+ *   qt         -- query type       -- e.g. "fts/catalog/reco"
  *
  * params for eventtype=v (visit):
  *   i          -- itemid           -- format "<setid>~<itemid>"
@@ -59,6 +60,7 @@ using namespace fnord;
  *   r_url      -- referrer url
  *   r_nm       -- referrer name
  *   r_cpn      -- referrer campaign
+ *   cs         -- customer session id
  *
  */
 
