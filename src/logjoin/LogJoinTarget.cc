@@ -198,9 +198,20 @@ Buffer LogJoinTarget::trackedSessionToJoinedSession(TrackedSession& session) {
         (uint32_t) extractDeviceType(q.attrs));
 
     /* queries.page_type */
+    auto page_type = extractPageType(q.attrs);
     qry_obj.addChild(
         schema.id("search_queries.page_type"),
-        (uint32_t) extractPageType(q.attrs));
+        (uint32_t) page_type);
+
+    /* queries.query_type */
+    String query_type = pageTypeToString(page_type);
+    auto qtype_attr = cm::extractAttr(q.attrs, "qt");
+    if (!qtype_attr.isEmpty()) {
+      query_type = qtype_attr.get();
+    }
+    qry_obj.addChild(
+        schema.id("search_queries.query_type"),
+        query_type);
 
     for (const auto& item : q.items) {
       auto& item_obj = qry_obj.addChild(
@@ -258,6 +269,21 @@ Buffer LogJoinTarget::trackedSessionToJoinedSession(TrackedSession& session) {
             schema.id("search_queries.result_items.category3"),
             (uint32_t) std::stoull(category3.get()));
       }
+
+      /* DAWANDA HACK */
+      if (item.position <= 4 && slrid.isEmpty()) {
+        item_obj.addChild(
+            schema.id("search_queries.result_items.is_paid_result"),
+            msg::TRUE);
+      }
+
+      if ((item.position > 40 && slrid.isEmpty()) ||
+          StringUtil::beginsWith(query_type, "recos_")) {
+        item_obj.addChild(
+            schema.id("search_queries.result_items.is_recommendation"),
+            msg::TRUE);
+      }
+      /* EOF DAWANDA HACK */
     }
   }
 
@@ -326,6 +352,10 @@ Buffer LogJoinTarget::trackedSessionToJoinedSession(TrackedSession& session) {
 
   if (!session.referrer_name.isEmpty()) {
     obj.addChild(schema.id("referrer_name"), session.referrer_name.get());
+  }
+
+  if (!session.customer_session_id.isEmpty()) {
+    obj.addChild(schema.id("customer_session_id"), session.customer_session_id.get());
   }
 
   obj.addChild(schema.id("num_cart_items"), session.num_cart_items);

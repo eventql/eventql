@@ -36,8 +36,6 @@ protected:
 
   size_t scanQueue(const String& queue_name);
   void uploadTSDBBatch(const Vector<Buffer>& batch);
-  void uploadPreferenceSetFeed(const JoinedSession& session);
-  void uploadQueryFeed(const JoinedSession& session);
 
   RefPtr<mdb::MDB> db_;
   String tsdb_addr_;

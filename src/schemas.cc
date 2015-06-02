@@ -25,6 +25,14 @@ msg::MessageSchema joinedSessionsSchema() {
       true);
 
   fields.emplace_back(
+      61,
+      "customer_session_id",
+      msg::FieldType::STRING,
+      4096,
+      false,
+      true);
+
+  fields.emplace_back(
       53,
       "first_seen_time",
       msg::FieldType::UINT32,
@@ -275,6 +283,14 @@ msg::MessageSchema joinedSessionsSchema() {
       msg::EncodingHint::BITPACK);
 
   queries.fields.emplace_back(
+      64,
+      "query_type",
+      msg::FieldType::STRING,
+      1024,
+      false,
+      true);
+
+  queries.fields.emplace_back(
       12,
       "category1",
       msg::FieldType::UINT32,
@@ -378,6 +394,22 @@ msg::MessageSchema joinedSessionsSchema() {
       false,
       true,
       msg::EncodingHint::LEB128);
+
+  query_items.fields.emplace_back(
+      62,
+      "is_paid_result",
+      msg::FieldType::BOOLEAN,
+      0,
+      false,
+      true);
+
+  query_items.fields.emplace_back(
+      63,
+      "is_recommendation",
+      msg::FieldType::BOOLEAN,
+      0,
+      false,
+      true);
 
   queries.fields.emplace_back(query_items);
   fields.emplace_back(queries);

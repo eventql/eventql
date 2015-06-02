@@ -75,6 +75,17 @@ message JoinedSearchQueryResultItem {
   optional uint32 category2 = 23;
   optional uint32 category3 = 24;
 
+  /**
+   * True if this result item is a a paid result item (advertisment)
+   */
+  optional bool is_paid_result = 62;
+
+  /**
+   * True if this result item is a "recommendation" result (generated from
+   * a recommendation engine)
+   */
+  optional bool is_recommendation = 63;
+
 }
 
 
@@ -106,6 +117,11 @@ message JoinedSearchQuery {
    * The "page type" (catalog/search/shop/etc) on which this query was executed
    */
   required ProtoPageType page_type = 11;
+
+  /**
+   * The "querty type" (catalog/search/shop/recommendation/etc) as a string
+   */
+  optional string query_type = 64;
 
   /**
    * The page number of the query was paginated. Starts from 1 == first page
@@ -293,6 +309,11 @@ message JoinedSession {
    * For which customer did we record this session?
    */
   optional string customer = 60;
+
+  /**
+   * The customer's session id
+   */
+  optional string customer_session_id = 61;
 
   /**
    * The time at which this search query was first/last seen

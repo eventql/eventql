@@ -6,22 +6,19 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-#include "fnord-base/stdtypes.h"
-#include "fnord-base/application.h"
-#include "fnord-base/cli/flagparser.h"
-#include "fnord-base/logging.h"
-#include "fnord-base/io/fileutil.h"
-#include "fnord-base/thread/threadpool.h"
-#include "fnord-base/thread/eventloop.h"
-#include "fnord-base/wallclock.h"
-#include "fnord-dproc/Application.h"
-#include "fnord-dproc/LocalScheduler.h"
-#include "fnord-http/httpconnectionpool.h"
-#include "common.h"
-#include "schemas.h"
-#include "CustomerNamespace.h"
-#include "CTRCounter.h"
-#include "analytics/ShopStatsApp.h"
+#include <fnord-base/stdtypes.h>
+#include <fnord-base/cli/flagparser.h>
+#include <fnord-base/application.h>
+#include <fnord-base/logging.h>
+#include <fnord-base/random.h>
+#include <fnord-base/wallclock.h>
+#include <fnord-base/thread/eventloop.h>
+#include <fnord-base/thread/threadpool.h>
+#include <fnord-http/httpconnectionpool.h>
+#include <fnord-dproc/Application.h>
+#include <fnord-dproc/LocalScheduler.h>
+#include <fnord-tsdb/TSDBClient.h>
+#include "analytics/FeedExportApp.h"
 
 using namespace fnord;
 using namespace cm;
@@ -53,6 +50,15 @@ int main(int argc, const char** argv) {
       "<path>");
 
   flags.defineFlag(
+      "threads",
+      cli::FlagParser::T_INTEGER,
+      true,
+      NULL,
+      "8",
+      "nthreads",
+      "<num>");
+
+  flags.defineFlag(
       "loglevel",
       fnord::cli::FlagParser::T_STRING,
       false,
@@ -71,31 +77,30 @@ int main(int argc, const char** argv) {
     ev.run();
   });
 
-
   http::HTTPConnectionPool http(&ev);
   tsdb::TSDBClient tsdb("http://nue03.prod.fnrd.net:7003/tsdb", &http);
 
-  dproc::LocalScheduler sched(flags.getString("tempdir"));
+  dproc::LocalScheduler sched(flags.getString("tempdir"), flags.getInt("threads"));
   sched.start();
 
-  AnalyticsTableScanReducerParams params;
-  params.set_customer("dawanda");
-  params.set_from_unixmicros(WallClock::unixMicros() - 30 * kMicrosPerDay);
-  params.set_until_unixmicros(WallClock::unixMicros() - 2 * kMicrosPerDay);
+  TSDBTableScanParams params;
+  params.set_stream_key("joined_sessions.dawanda");
+  params.set_partition_key("am9pbmVkX3Nlc3Npb25zLmRhd2FuZGEbgK2LqwU=");
+  params.set_sample_modulo(32);
+  params.set_sample_index(1);
 
-  ShopStatsApp app(&tsdb);
-  auto res = sched.run(&app, "ShopStatsReducer", *msg::encode(params));
+  FeedExportApp app(&tsdb);
+  auto res = sched.run(&app, "ECommerceSearchQueriesFeed", *msg::encode(params));
 
   auto output_file = File::openFile(
       flags.getString("output"),
-      File::O_CREATEOROPEN | File::O_WRITE);
+      File::O_CREATEOROPEN | File::O_WRITE | File::O_TRUNCATE);
 
   output_file.write(res->data(), res->size());
 
   sched.stop();
   ev.shutdown();
   evloop_thread.join();
-
   exit(0);
 }
 

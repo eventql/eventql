@@ -31,6 +31,8 @@
 #include "fnord-feeds/FeedService.h"
 #include "fnord-feeds/RemoteFeedFactory.h"
 #include "fnord-feeds/RemoteFeedReader.h"
+#include "fnord-dproc/LocalScheduler.h"
+#include "fnord-dproc/DispatchService.h"
 #include "fnord-base/stats/statsdagent.h"
 #include "fnord-sstable/SSTableServlet.h"
 #include "fnord-logtable/LogTableServlet.h"
@@ -38,42 +40,24 @@
 #include "fnord-logtable/TableJanitor.h"
 #include "fnord-logtable/TableReplication.h"
 #include "fnord-afx/ArtifactReplication.h"
-#include "fnord-afx/ArtifactIndexReplication.h"
 #include "fnord-logtable/NumericBoundsSummary.h"
 #include "fnord-mdb/MDB.h"
 #include "fnord-mdb/MDBUtil.h"
-#include "fnord-tsdb/TSDBNode.h"
-#include "fnord-tsdb/TSDBServlet.h"
-#include "fnord-tsdb/CSTableIndex.h"
 #include "common.h"
 #include "schemas.h"
-#include "ModelReplication.h"
-#include "JoinedSessionViewer.h"
+#include "CustomerNamespace.h"
+#include "analytics/AnalyticsServlet.h"
+#include "analytics/FeedExportApp.h"
+#include "analytics/ShopStatsServlet.h"
+#include "analytics/AnalyticsApp.h"
 
 using namespace fnord;
 
-std::atomic<bool> shutdown_sig;
 fnord::thread::EventLoop ev;
-
-void quit(int n) {
-  shutdown_sig = true;
-  fnord::logInfo("cm.chunkserver", "Shutting down...");
-  // FIXPAUL: wait for http server stop...
-  ev.shutdown();
-}
 
 int main(int argc, const char** argv) {
   fnord::Application::init();
   fnord::Application::logToStderr();
-
-  /* shutdown hook */
-  shutdown_sig = false;
-  struct sigaction sa;
-  memset(&sa, 0, sizeof(struct sigaction));
-  sa.sa_handler = quit;
-  sigaction(SIGTERM, &sa, NULL);
-  sigaction(SIGQUIT, &sa, NULL);
-  sigaction(SIGINT, &sa, NULL);
 
   fnord::cli::FlagParser flags;
 
@@ -87,22 +71,13 @@ int main(int argc, const char** argv) {
       "<port>");
 
   flags.defineFlag(
-      "datadir",
+      "cachedir",
       cli::FlagParser::T_STRING,
       true,
       NULL,
       NULL,
-      "datadir path",
+      "cachedir path",
       "<path>");
-
-  flags.defineFlag(
-      "replicate_to",
-      cli::FlagParser::T_STRING,
-      false,
-      NULL,
-      NULL,
-      "url",
-      "<url>");
 
   flags.defineFlag(
       "loglevel",
@@ -118,46 +93,84 @@ int main(int argc, const char** argv) {
   Logger::get()->setMinimumLogLevel(
       strToLogLevel(flags.getString("loglevel")));
 
-  /* args */
-  auto dir = flags.getString("datadir");
-  auto repl_targets = flags.getStrings("replicate_to");
-
-  /* start http server and worker pools */
+  /* thread pools */
   fnord::thread::ThreadPool tpool;
-  http::HTTPConnectionPool http(&ev);
+  fnord::thread::FixedSizeThreadPool wpool(8);
+  wpool.start();
+
+  /* http */
   fnord::http::HTTPRouter http_router;
   fnord::http::HTTPServer http_server(&http_router, &ev);
   http_server.listen(flags.getInt("http_port"));
+  http::HTTPConnectionPool http(&ev);
 
+  /* tsdb */
+  tsdb::TSDBClient tsdb("http://nue03.prod.fnrd.net:7003/tsdb", &http);
 
+  /* dproc */
+  dproc::DispatchService dproc;
+  auto local_scheduler = mkRef(
+      new dproc::LocalScheduler(
+          flags.getString("cachedir")));
 
-  JoinedSessionViewer jsessviewer;
-  http_router.addRouteByPrefixMatch("/sessviewer", &jsessviewer);
+  local_scheduler->start();
 
+  /* analytics core */
+  auto analytics_app = mkRef(
+      new AnalyticsApp(
+          &tsdb,
+          flags.getString("cachedir")));
 
-  auto repl_scheme = mkRef(new dht::FixedReplicationScheme());
-  for (const auto& r : repl_targets) {
-    repl_scheme->addHost(r);
+  dproc.registerApp(analytics_app.get(), local_scheduler.get());
+  cm::AnalyticsServlet analytics_servlet(&dproc);
+  http_router.addRouteByPrefixMatch("/analytics", &analytics_servlet, &tpool);
+
+  /* feed export */
+  auto feed_export_app = mkRef(new FeedExportApp(&tsdb));
+  dproc.registerApp(feed_export_app.get(), local_scheduler.get());
+
+  {
+    FeedConfig fc;
+    fc.set_customer("dawanda");
+    fc.set_feed("ECommerceSearchQueriesFeed");
+    fc.set_partition_size(kMicrosPerHour * 4);
+    fc.set_first_partition(1430438400000000); // 2015-05-01 00:00:00Z
+    fc.set_num_shards(128);
+
+    feed_export_app->configureFeed(fc);
   }
 
-  tsdb::TSDBNode tsdb_node(dir + "/tsdb", repl_scheme.get(), &http);
+  {
+    FeedConfig fc;
+    fc.set_customer("dawanda");
+    fc.set_feed("ECommerceRecoQueriesFeed");
+    fc.set_partition_size(kMicrosPerHour * 4);
+    fc.set_first_partition(1432785600000000);
+    fc.set_num_shards(32);
 
-  tsdb::StreamProperties config(new msg::MessageSchema(joinedSessionsSchema()));
-  config.max_datafile_size = 1024 * 1024 * 512;
-  config.chunk_size = Duration(3600 * 4 * kMicrosPerSecond);
-  config.compaction_interval = Duration(1800 * kMicrosPerSecond);
-  config.derived_datasets.emplace_back(new tsdb::CSTableIndex(config.schema));
-  tsdb_node.configurePrefix("joined_sessions.", config);
+    feed_export_app->configureFeed(fc);
+  }
 
-  tsdb::TSDBServlet tsdb_servlet(&tsdb_node);
-  http_router.addRouteByPrefixMatch("/tsdb", &tsdb_servlet, &tpool);
+  {
+    FeedConfig fc;
+    fc.set_customer("dawanda");
+    fc.set_feed("ECommercePreferenceSetsFeed");
+    fc.set_partition_size(kMicrosPerHour * 4);
+    fc.set_first_partition(1430438400000000); // 2015-05-01 00:00:00Z
+    fc.set_num_shards(32);
 
-  tsdb_node.start();
+    feed_export_app->configureFeed(fc);
+  }
+
+  /* stop stats */
+  //auto shopstats = cm::ShopStatsTable::open(flags.getString("shopstats_table"));
+  //cm::ShopStatsServlet shopstats_servlet(shopstats);
+  //http_router.addRouteByPrefixMatch("/shopstats", &shopstats_servlet, &tpool);
+
   ev.run();
+  local_scheduler->stop();
 
-  tsdb_node.stop();
-  fnord::logInfo("cm.chunkserver", "Exiting...");
-
+  fnord::logInfo("cm.analytics.backend", "Exiting...");
   exit(0);
 }
 
