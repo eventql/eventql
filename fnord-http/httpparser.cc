@@ -17,6 +17,7 @@ namespace fnord {
 namespace http {
 
 const char HTTPParser::kContentLengthHeader[] = "Content-Length";
+const char HTTPParser::kConnectionHeader[] = "Connection";
 
 HTTPParser::HTTPParser(
     kParserMode mode,
@@ -141,7 +142,8 @@ void HTTPParser::eof() {
     case S_RES_STATUS_NAME:
     case S_HEADER:
     case S_BODY:
-      if (body_bytes_read_ < body_bytes_expected_) {
+      if (body_bytes_expected_ != -1 &&
+          body_bytes_read_ < body_bytes_expected_) {
         RAISE(kParseError, "unexpected end of file");
       } else {
         state_ = S_DONE;
@@ -253,6 +255,10 @@ void HTTPParser::parseRequestVersion(const char** begin, const char* end) {
 
 void HTTPParser::parseResponseVersion(const char** begin, const char* end) {
   if (readUntil(begin, end, ' ')) {
+    if (strncasecmp((char *) buf_.data(), "HTTP/1.0", buf_.size()) == 0) {
+      body_bytes_expected_ = -1;
+    }
+
     if (on_version_cb_) {
       on_version_cb_((char *) buf_.data(), buf_.size());
     }
@@ -371,6 +377,14 @@ void HTTPParser::processHeader(
     }
   }
 
+  if (expect_body_ &&
+      key_len == strlen(kConnectionHeader) &&
+      strncasecmp(key, kConnectionHeader, key_len) == 0 &&
+      val_len == strlen("Close") &&
+      strncasecmp(val, "Close", val_len) == 0) {
+    body_bytes_expected_ = -1;
+  }
+
   if (on_header_cb_) {
     on_header_cb_(key, key_len, val, val_len);
   }
@@ -383,10 +397,10 @@ void HTTPParser::readBody(const char** begin, const char* end) {
     state_ = HTTPParser::S_DONE;
   }
 
-  if ((body_bytes_read_ > body_bytes_expected_) &&
-      !(body_bytes_expected_ == 0 && mode_ == PARSE_HTTP_RESPONSE)) {
-    RAISE(kParseError, "invalid trailing body bytes");
-  }
+  //if ((body_bytes_read_ > body_bytes_expected_) &&
+  //    !(body_bytes_expected_ == 0 && mode_ == PARSE_HTTP_RESPONSE)) {
+  //  RAISE(kParseError, "invalid trailing body bytes");
+  //}
 
   if (on_body_chunk_cb_) {
     on_body_chunk_cb_(*begin, end - *begin);

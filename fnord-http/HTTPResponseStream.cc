@@ -22,8 +22,13 @@ HTTPResponseStream::HTTPResponseStream(
     response_finished_(false),
     headers_written_(false) {}
 
-void HTTPResponseStream::writeResponse(const HTTPResponse& resp) {
-  startResponse(resp);
+void HTTPResponseStream::writeResponse(HTTPResponse res) {
+  auto body_size = res.body().size();
+  if (body_size > 0) {
+    res.setHeader("Content-Length", StringUtil::toString(body_size));
+  }
+
+  startResponse(res);
   finishResponse();
 }
 

@@ -14,31 +14,35 @@
 namespace fnord {
 namespace io {
 
-MmappedFile::MmappedFile(File&& file) {
+MmappedFile::MmappedFile(File&& file) : MmappedFile(std::move(file), 0, -1) {}
+
+MmappedFile::MmappedFile(File&& file, size_t offset, size_t size) {
   File local_file = std::move(file);
-
-  size_ = local_file.size();
   is_writable_ = local_file.isWritable();
+  mmap_size_ = local_file.size();
 
-  if (size_ == 0) {
+  if (mmap_size_ == 0) {
     RAISE(kIllegalArgumentError, "can't mmap() empty file");
   }
 
-  data_ = mmap(
+  mmap_ = mmap(
       nullptr,
-      size_,
+      mmap_size_,
       is_writable_ ? PROT_WRITE | PROT_READ : PROT_READ,
       MAP_SHARED,
       local_file.fd(),
       0);
 
-  if (data_ == MAP_FAILED) {
+  if (mmap_ == MAP_FAILED) {
     RAISE_ERRNO(kIOError, "mmap() failed");
   }
+
+  size_ = size == -1 ? mmap_size_ - offset : size;
+  data_ = (char*) mmap_ + offset;
 }
 
 MmappedFile::~MmappedFile() {
-  munmap(data_, size_);
+  munmap(mmap_, mmap_size_);
 }
 
 bool MmappedFile::isWritable() const {

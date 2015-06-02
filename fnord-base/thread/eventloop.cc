@@ -55,6 +55,10 @@ void EventLoop::setupRunQWakeupPipe() {
   }
 }
 
+void EventLoop::runAsync(std::function<void()> task) {
+   appendToRunQ(task);
+}
+
 void EventLoop::run(std::function<void()> task) {
   if (std::this_thread::get_id() == threadid_) {
     task();

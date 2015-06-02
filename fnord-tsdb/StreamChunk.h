@@ -18,6 +18,7 @@
 #include <fnord-tsdb/StreamProperties.h>
 #include <fnord-tsdb/RecordSet.h>
 #include <fnord-tsdb/TSDBNodeRef.h>
+#include <fnord-tsdb/PartitionInfo.pb.h>
 
 namespace fnord {
 namespace tsdb {
@@ -48,6 +49,11 @@ public:
   static String streamChunkKeyFor(
       const String& stream_key,
       DateTime time,
+      Duration partition_size);
+
+  static String streamChunkKeyFor(
+      const String& stream_key,
+      DateTime time,
       const StreamProperties& properties);
 
   static Vector<String> streamChunkKeysFor(
@@ -67,6 +73,8 @@ public:
   void buildIndexes();
 
   Vector<String> listFiles() const;
+
+  PartitionInfo partitionInfo() const;
 
   Buffer fetchDerivedDataset(const String& dataset_name);
 

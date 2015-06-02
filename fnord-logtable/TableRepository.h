@@ -12,7 +12,7 @@
 #include <fnord-base/stdtypes.h>
 #include <fnord-logtable/TableReader.h>
 #include <fnord-logtable/TableWriter.h>
-#include <fnord-logtable/ArtifactIndex.h>
+#include <fnord-afx/ArtifactIndex.h>
 #include <fnord-msg/MessageSchema.h>
 
 namespace fnord {

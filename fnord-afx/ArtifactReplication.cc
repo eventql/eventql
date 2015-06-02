@@ -11,7 +11,7 @@
 #include <fnord-base/logging.h>
 #include <fnord-base/wallclock.h>
 #include <fnord-http/HTTPFileDownload.h>
-#include <fnord-logtable/ArtifactReplication.h>
+#include <fnord-afx/ArtifactReplication.h>
 
 namespace fnord {
 namespace logtable {

@@ -9,6 +9,7 @@
  */
 #include <fnord-tsdb/TSDBClient.h>
 #include <fnord-base/util/binarymessagereader.h>
+#include <fnord-msg/msg.h>
 
 namespace fnord {
 namespace tsdb {
@@ -47,6 +48,88 @@ Vector<String> TSDBClient::listPartitions(
   }
 
   return partitions;
+}
+
+void TSDBClient::fetchPartition(
+    const String& stream_key,
+    const String& partition,
+    Function<void (const Buffer& record)> fn) {
+  fetchPartitionWithSampling(stream_key, partition, 0, 0, fn);
+}
+
+void TSDBClient::fetchPartitionWithSampling(
+    const String& stream_key,
+    const String& partition,
+    size_t sample_modulo,
+    size_t sample_index,
+    Function<void (const Buffer& record)> fn) {
+  auto uri = StringUtil::format(
+      "$0/fetch_chunk?chunk=$1",
+      uri_,
+      URI::urlEncode(partition));
+
+  if (sample_modulo > 0) {
+    uri += StringUtil::format("&sample=$0:$1", sample_modulo, sample_index);
+  }
+
+  Buffer buf;
+  auto handler = [&buf, &fn] (const void* data, size_t size) {
+    buf.append(data, size);
+
+    size_t consumed = 0;
+    util::BinaryMessageReader reader(buf.data(), buf.size());
+    while (reader.remaining() >= sizeof(uint64_t)) {
+      auto rec_len = *reader.readUInt64();
+
+      if (rec_len > reader.remaining()) {
+        break;
+      }
+
+      fn(Buffer(reader.read(rec_len), rec_len));
+      consumed = reader.position();
+    }
+
+    Buffer remaining((char*) buf.data() + consumed, buf.size() - consumed);
+    buf.clear();
+    buf.append(remaining);
+  };
+
+  auto handler_factory = [&handler] (const Promise<http::HTTPResponse> promise)
+      -> http::HTTPResponseFuture* {
+    return new http::StreamingResponseFuture(promise, handler);
+  };
+
+  auto req = http::HTTPRequest::mkGet(uri);
+  auto res = http_->executeRequest(req, handler_factory);
+  res.wait();
+
+  const auto& r = res.get();
+  if (r.statusCode() != 200) {
+    RAISEF(kRuntimeError, "received non-200 response: $0", r.body().toString());
+  }
+
+  handler(nullptr, 0);
+  return;
+}
+
+PartitionInfo TSDBClient::fetchPartitionInfo(
+    const String& stream_key,
+    const String& partition_key) {
+  auto uri = StringUtil::format(
+      "$0/fetch_partition_info?partition=$1",
+      uri_,
+      URI::urlEncode(partition_key));
+
+  auto req = http::HTTPRequest::mkGet(uri);
+  auto res = http_->executeRequest(req);
+  res.wait();
+
+  const auto& r = res.get();
+  if (r.statusCode() != 200) {
+    RAISEF(kRuntimeError, "received non-200 response: $0", r.body().toString());
+  }
+
+  return msg::decode<PartitionInfo>(r.body());
 }
 
 Buffer TSDBClient::fetchDerivedDataset(

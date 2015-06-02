@@ -265,11 +265,7 @@ bool SSTableWriter::SSTableWriterCursor::next() {
   size_t row_size = sizeof(BinaryFormat::RowHeader) + header->key_size +
       header->data_size;
 
-  if (row_size > page_size) {
-    RAISE(kIllegalStateError, "row exceeds page boundary");
-  }
-
-  if (row_size == page_size) {
+  if (row_size >= page_size) {
     return false;
   } else {
     pos_ += row_size;

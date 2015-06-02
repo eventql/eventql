@@ -24,6 +24,14 @@ public:
   virtual void run(std::function<void()> task) = 0;
 
   /**
+   * Run the provided task as soon as possible, but make sure not to run it
+   * immediately from the same stack (to prevent deadlocks)
+   */
+  virtual void runAsync(std::function<void()> task) {
+    run(task);
+  }
+
+  /**
    * Run the provided task when the provided filedescriptor becomes readable
    */
   virtual void runOnReadable(std::function<void()> task, int fd) = 0;

@@ -17,7 +17,7 @@
 #include <fnord-base/inspect.h>
 #include <fnord-msg/MessageSchema.h>
 #include <fnord-msg/MessageObject.h>
-#include <fnord-logtable/ArtifactIndex.h>
+#include <fnord-afx/ArtifactIndex.h>
 #include <fnord-logtable/TableArena.h>
 #include <fnord-logtable/TableSnapshot.h>
 #include <fnord-logtable/TableChunkSummaryBuilder.h>

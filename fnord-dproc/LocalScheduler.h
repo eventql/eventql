@@ -14,26 +14,23 @@
 #include "fnord-base/thread/taskscheduler.h"
 #include "fnord-base/thread/FixedSizeThreadPool.h"
 #include <fnord-dproc/Application.h>
+#include <fnord-dproc/Scheduler.h>
 #include <fnord-dproc/TaskSpec.pb.h>
 
 namespace fnord {
 namespace dproc {
 
-class LocalScheduler {
+class LocalScheduler : public Scheduler {
 public:
 
   LocalScheduler(
       const String& tempdir = "/tmp",
-      size_t max_threads = 8);
+      size_t max_threads = 8,
+      size_t max_requests = 32);
 
-  RefPtr<VFSFile> run(
-      Application* app,
-      TaskSpec task);
-
-  RefPtr<VFSFile> run(
-      Application* app,
-      const String& task,
-      const Buffer& params);
+  RefPtr<TaskResult> run(
+      RefPtr<Application> app,
+      const TaskSpec& task) override;
 
   void start();
   void stop();
@@ -42,12 +39,17 @@ protected:
 
   class LocalTaskRef : public TaskContext, public RefCounted {
   public:
-    LocalTaskRef(RefPtr<Task> _task);
+    LocalTaskRef(
+        RefPtr<Application> app,
+        const String& task_name,
+        const Buffer& params);
+
     RefPtr<VFSFile> getDependency(size_t index) override;
     size_t numDependencies() const override;
 
     RefPtr<Task> task;
     String output_filename;
+    String debug_name;
     bool running;
     bool finished;
     bool expanded;
@@ -60,14 +62,22 @@ protected:
     std::condition_variable wakeup;
   };
 
-  void run(Application* app, LocalTaskPipeline* pipeline);
-  void runTask(LocalTaskPipeline* pipeline, RefPtr<LocalTaskRef> task);
+  void runPipeline(
+      Application* app,
+      LocalTaskPipeline* pipeline,
+      RefPtr<TaskResult> result);
+
+  void runTask(
+      LocalTaskPipeline* pipeline,
+      RefPtr<LocalTaskRef> task,
+      RefPtr<TaskResult> result);
 
   String tempdir_;
   size_t max_threads_;
   size_t num_threads_;
   Random rnd_;
   thread::FixedSizeThreadPool tpool_;
+  thread::FixedSizeThreadPool req_tpool_;
 };
 
 } // namespace dproc

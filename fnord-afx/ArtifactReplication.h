@@ -12,7 +12,7 @@
 #include <thread>
 #include <fnord-base/stdtypes.h>
 #include <fnord-base/uri.h>
-#include <fnord-logtable/ArtifactIndex.h>
+#include <fnord-afx/ArtifactIndex.h>
 #include "fnord-http/httprequest.h"
 #include "fnord-http/httpconnectionpool.h"
 
