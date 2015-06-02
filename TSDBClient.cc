@@ -73,8 +73,30 @@ void TSDBClient::fetchPartitionWithSampling(
   }
 
   Buffer buf;
-  auto handler = [&buf, &fn] (const void* data, size_t size) {
+  std::mutex m;
+  std::condition_variable cv;
+  bool done = false;
+  auto handler = [&buf, &fn, &m, &cv] (const void* data, size_t size) {
+    std::unique_lock<std::mutex> lk(m);
     buf.append(data, size);
+    cv.notify_all();
+  };
+
+  auto handler_factory = [&handler] (const Promise<http::HTTPResponse> promise)
+      -> http::HTTPResponseFuture* {
+    return new http::StreamingResponseFuture(promise, handler);
+  };
+
+  auto req = http::HTTPRequest::mkGet(uri);
+  auto res = http_->executeRequest(req, handler_factory);
+  res.onReady([&cv, &m, &done] () {
+    std::unique_lock<std::mutex> lk(m);
+    done = true;
+    cv.notify_all();
+  });
+
+  for (;;) {
+    std::unique_lock<std::mutex> lk(m);
 
     size_t consumed = 0;
     util::BinaryMessageReader reader(buf.data(), buf.size());
@@ -92,23 +114,17 @@ void TSDBClient::fetchPartitionWithSampling(
     Buffer remaining((char*) buf.data() + consumed, buf.size() - consumed);
     buf.clear();
     buf.append(remaining);
-  };
 
-  auto handler_factory = [&handler] (const Promise<http::HTTPResponse> promise)
-      -> http::HTTPResponseFuture* {
-    return new http::StreamingResponseFuture(promise, handler);
-  };
-
-  auto req = http::HTTPRequest::mkGet(uri);
-  auto res = http_->executeRequest(req, handler_factory);
-  res.wait();
+    if (!done) {
+      cv.wait(lk);
+    }
+  }
 
   const auto& r = res.get();
   if (r.statusCode() != 200) {
     RAISEF(kRuntimeError, "received non-200 response: $0", r.body().toString());
   }
 
-  handler(nullptr, 0);
   return;
 }
 
