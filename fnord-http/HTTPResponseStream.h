@@ -57,6 +57,11 @@ public:
   void onBodyWritten(Function<void ()> callback);
 
   /**
+   * Return the number of outstanding bytes in the write buffer
+   */
+  size_t bufferSize();
+
+  /**
    * Returns true if the HTTP response was started (i.e. we started writing the
    * status line and some headers
    */

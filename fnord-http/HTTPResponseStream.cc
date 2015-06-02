@@ -81,6 +81,11 @@ void HTTPResponseStream::onBodyWritten(Function<void ()> callback) {
   on_body_written_ = callback;
 }
 
+size_t HTTPResponseStream::bufferSize() {
+  std::unique_lock<std::mutex> lk(mutex_);
+  return buf_.size();
+}
+
 // precondition: lk must be locked
 void HTTPResponseStream::onStateChanged(std::unique_lock<std::mutex>* lk) {
   if (callback_running_) {
