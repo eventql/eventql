@@ -12,7 +12,7 @@
 #include "fnord-base/stdtypes.h"
 #include <fnord-dproc/Application.h>
 #include <fnord-dproc/TaskSpec.pb.h>
-#include <fnord-dproc/TaskResult.h>
+#include <fnord-dproc/TaskResultFuture.h>
 
 namespace fnord {
 namespace dproc {
@@ -22,7 +22,7 @@ public:
 
   virtual ~Scheduler() {}
 
-  virtual RefPtr<TaskResult> run(
+  virtual RefPtr<TaskResultFuture> run(
       RefPtr<Application> app,
       const TaskSpec& task) = 0;
 

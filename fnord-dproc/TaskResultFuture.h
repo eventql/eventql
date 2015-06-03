@@ -25,7 +25,7 @@ struct TaskStatus {
   double progress() const;
 };
 
-class TaskResult : public RefCounted {
+class TaskResultFuture : public RefCounted {
 public:
 
   Future<RefPtr<VFSFile>> result() const;

@@ -28,7 +28,7 @@ public:
       size_t max_threads = 8,
       size_t max_requests = 32);
 
-  RefPtr<TaskResult> run(
+  RefPtr<TaskResultFuture> run(
       RefPtr<Application> app,
       const TaskSpec& task) override;
 
@@ -69,12 +69,12 @@ protected:
   void runPipeline(
       Application* app,
       LocalTaskPipeline* pipeline,
-      RefPtr<TaskResult> result);
+      RefPtr<TaskResultFuture> result);
 
   void runTask(
       LocalTaskPipeline* pipeline,
       RefPtr<LocalTaskRef> task,
-      RefPtr<TaskResult> result);
+      RefPtr<TaskResultFuture> result);
 
   String tempdir_;
   size_t max_threads_;

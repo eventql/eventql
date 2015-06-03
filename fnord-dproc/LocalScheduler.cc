@@ -36,10 +36,10 @@ void LocalScheduler::stop() {
   tpool_.stop();
 }
 
-RefPtr<TaskResult> LocalScheduler::run(
+RefPtr<TaskResultFuture> LocalScheduler::run(
     RefPtr<Application> app,
     const TaskSpec& task) {
-  RefPtr<TaskResult> result(new TaskResult());
+  RefPtr<TaskResultFuture> result(new TaskResultFuture());
 
   try {
     auto instance = mkRef(
@@ -75,7 +75,7 @@ RefPtr<TaskResult> LocalScheduler::run(
 void LocalScheduler::runPipeline(
     Application* app,
     LocalTaskPipeline* pipeline,
-    RefPtr<TaskResult> result) {
+    RefPtr<TaskResultFuture> result) {
   fnord::logInfo(
       "fnord.dproc",
       "Starting local pipeline id=$0 tasks=$1",
@@ -209,7 +209,7 @@ void LocalScheduler::runPipeline(
 void LocalScheduler::runTask(
     LocalTaskPipeline* pipeline,
     RefPtr<LocalTaskRef> task,
-    RefPtr<TaskResult> result) {
+    RefPtr<TaskResultFuture> result) {
   auto output_file = task->output_filename;
 
   try {

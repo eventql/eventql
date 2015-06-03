@@ -19,5 +19,5 @@ add_library(fnord-dproc OBJECT
     DispatchService.cc
     TaskSpec.pb.cc
     LocalScheduler.cc
-    TaskResult.cc
+    TaskResultFuture.cc
     ${PROTO_SRCS})
