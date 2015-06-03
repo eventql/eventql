@@ -51,10 +51,7 @@ public:
   virtual void compute(TaskContext* context) = 0;
 
   virtual RefPtr<VFSFile> encode() const = 0;
-  virtual void decode(RefPtr<VFSFile> data) const = 0;
-
-  virtual void persist(const String& filename) const;
-  virtual void unpersist(const String& filename);
+  virtual void decode(RefPtr<VFSFile> data) = 0;
 
   virtual List<TaskDependency> dependencies() {
     return List<TaskDependency>{};
@@ -81,7 +78,7 @@ public:
   typedef _ResultType ResultType;
 
   RefPtr<VFSFile> encode() const override;
-  void decode(RefPtr<VFSFile> data) const override;
+  void decode(RefPtr<VFSFile> data) override;
 
 protected:
   ResultType result_;
