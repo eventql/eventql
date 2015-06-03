@@ -78,7 +78,7 @@ void LocalScheduler::runPipeline(
     Application* app,
     LocalTaskPipeline* pipeline,
     RefPtr<TaskResultFuture> result) {
-  fnord::logInfo(
+  fnord::logDebug(
       "fnord.dproc",
       "Starting local pipeline id=$0 tasks=$1",
       (void*) pipeline,
