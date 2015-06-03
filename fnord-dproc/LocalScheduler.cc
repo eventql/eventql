@@ -13,6 +13,8 @@
 #include <fnord-base/io/mmappedfile.h>
 #include <fnord-base/logging.h>
 #include <fnord-base/io/fileutil.h>
+#include <fnord-base/util/binarymessagereader.h>
+#include <fnord-base/util/binarymessagewriter.h>
 #include <fnord-dproc/LocalScheduler.h>
 
 namespace fnord {
@@ -120,14 +122,27 @@ void LocalScheduler::runPipeline(
             FileUtil::exists(taskref->cache_filename);
 
         if (cached) {
+          auto cache_file = File::openFile(
+              taskref->cache_filename,
+              File::O_READ);
+
+          Buffer cache_hdr(sizeof(uint64_t));
+          cache_file.read(&cache_hdr);
+          util::BinaryMessageReader reader(cache_hdr.data(), cache_hdr.size());
+          auto cache_version = *reader.readUInt64();
+          auto cache_size = cache_file.size() - cache_hdr.size();
+
           fnord::logDebug(
               "fnord.dproc",
-              "Running task [cached]: $0",
-              taskref->debug_name);
+              "Reading RDD from cache: $0, version=$1",
+              taskref->debug_name,
+              cache_version);
 
           taskref->task->decode(
-              new io::MmappedFile(
-                  File::openFile(taskref->cache_filename, File::O_READ)));
+                new io::MmappedFile(
+                    std::move(cache_file),
+                    cache_hdr.size(),
+                    cache_size));
 
           result->updateStatus([&pipeline] (TaskStatus* status) {
             ++status->num_subtasks_completed;
@@ -176,7 +191,12 @@ void LocalScheduler::runPipeline(
           continue;
         }
 
-        fnord::logDebug("fnord.dproc", "Running task: $0", taskref->debug_name);
+        fnord::logDebug(
+            "fnord.dproc",
+            "Computing RDD: $0, version=$1",
+            taskref->debug_name,
+            taskref->task->cacheVersion());
+
         taskref->running = true;
         tpool_.run(std::bind(
             &LocalScheduler::runTask,
@@ -214,20 +234,27 @@ void LocalScheduler::runTask(
     LocalTaskPipeline* pipeline,
     RefPtr<LocalTaskRef> task,
     RefPtr<TaskResultFuture> result) {
-  auto output_file = task->cache_filename;
 
   try {
     task->task->compute(task.get());
 
     if (!task->cache_filename.empty()) {
-      auto res = task->task->encode();
+      auto cache_file = task->cache_filename;
 
-      auto file = File::openFile(
-          output_file + "~",
-          File::O_CREATEOROPEN | File::O_WRITE);
+      {
+        auto f = File::openFile(
+            cache_file + "~",
+            File::O_CREATEOROPEN | File::O_WRITE | File::O_TRUNCATE);
 
-      file.write(res->data(), res->size());
-      FileUtil::mv(output_file + "~", output_file);
+        util::BinaryMessageWriter hdr;
+        hdr.appendUInt64(task->task->cacheVersion());
+        f.write(hdr.data(), hdr.size());
+
+        auto res = task->task->encode();
+        f.write(res->data(), res->size());
+      }
+
+      FileUtil::mv(cache_file + "~", cache_file);
     }
   } catch (const std::exception& e) {
     task->failed = true;
