@@ -58,7 +58,7 @@ RefPtr<TaskResultFuture> LocalScheduler::run(
           RAISE(kRuntimeError, "task failed");
         }
 
-        result->returnResult(instance->getResult());
+        result->returnResult(instance->task);
       } catch (const StandardException& e) {
         fnord::logError("dproc.scheduler", e, "task failed");
         result->returnError(e);
@@ -110,20 +110,24 @@ void LocalScheduler::runPipeline(
 
         auto cache_key = taskref->task->cacheKey();
         if (!cache_key.isEmpty()) {
-          taskref->output_filename = FileUtil::joinPaths(
+          taskref->cache_filename = FileUtil::joinPaths(
               tempdir_,
               StringUtil::format("cache_$0", cache_key.get()));
         }
 
         auto cached =
             !cache_key.isEmpty() &&
-            FileUtil::exists(taskref->output_filename);
+            FileUtil::exists(taskref->cache_filename);
 
         if (cached) {
           fnord::logDebug(
               "fnord.dproc",
               "Running task [cached]: $0",
               taskref->debug_name);
+
+          taskref->task->decode(
+              new io::MmappedFile(
+                  File::openFile(taskref->cache_filename, File::O_READ)));
 
           result->updateStatus([&pipeline] (TaskStatus* status) {
             ++status->num_subtasks_completed;
@@ -210,12 +214,12 @@ void LocalScheduler::runTask(
     LocalTaskPipeline* pipeline,
     RefPtr<LocalTaskRef> task,
     RefPtr<TaskResultFuture> result) {
-  auto output_file = task->output_filename;
+  auto output_file = task->cache_filename;
 
   try {
     task->task->compute(task.get());
 
-    if (!task->output_filename.empty()) {
+    if (!task->cache_filename.empty()) {
       auto res = task->task->encode();
 
       auto file = File::openFile(
@@ -225,9 +229,6 @@ void LocalScheduler::runTask(
       file.write(res->data(), res->size());
       FileUtil::mv(output_file + "~", output_file);
     }
-
-      /*
-      */
   } catch (const std::exception& e) {
     task->failed = true;
     fnord::logError("fnord.dproc", e, "error");
@@ -252,31 +253,15 @@ LocalScheduler::LocalTaskRef::LocalTaskRef(
     running(false),
     expanded(false),
     finished(false),
-    failed(false),
-    result(nullptr) {}
+    failed(false) {}
 
-RefPtr<VFSFile> LocalScheduler::LocalTaskRef::getDependency(size_t index) {
+RefPtr<Task> LocalScheduler::LocalTaskRef::getDependency(size_t index) {
   if (index >= dependencies.size()) {
     RAISEF(kIndexError, "invalid dependecy index: $0", index);
   }
 
   const auto& dep = dependencies[index];
-
-  return dep->getResult();
-}
-
-RefPtr<VFSFile> LocalScheduler::LocalTaskRef::getResult() {
-  if (result.get() != nullptr) {
-    return result;
-  }
-
-  if (output_filename.empty() || !FileUtil::exists(output_filename)) {
-    RAISEF(kRuntimeError, "missing output: $0", output_filename);
-  }
-
-  return RefPtr<VFSFile>(
-      new io::MmappedFile(
-          File::openFile(output_filename, File::O_READ)));
+  return dep->task;
 }
 
 size_t LocalScheduler::LocalTaskRef::numDependencies() const {
