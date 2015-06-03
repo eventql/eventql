@@ -93,10 +93,6 @@ void LocalScheduler::runPipeline(
 
     for (auto& taskref : pipeline->tasks) {
 
-      if (taskref->failed) {
-        RAISE(kRuntimeError, "task failed");
-      }
-
       if (taskref->finished) {
         ++num_completed;
         continue;
@@ -163,7 +159,9 @@ void LocalScheduler::runPipeline(
       bool deps_finished = true;
       for (const auto& dep : taskref->dependencies) {
         if (dep->failed) {
-          RAISE(kRuntimeError, "task failed");
+          taskref->failed = true;
+          taskref->finished = true;
+          waiting = false;
         }
 
         if (!dep->finished) {
@@ -171,21 +169,23 @@ void LocalScheduler::runPipeline(
         }
       }
 
-      if (!deps_finished) {
-        ++num_waiting;
-        continue;
+      if (!taskref->finished) {
+        if (!deps_finished) {
+          ++num_waiting;
+          continue;
+        }
+
+        fnord::logDebug("fnord.dproc", "Running task: $0", taskref->debug_name);
+        taskref->running = true;
+        tpool_.run(std::bind(
+            &LocalScheduler::runTask,
+            this,
+            pipeline,
+            taskref,
+            result));
+
+        waiting = false;
       }
-
-      fnord::logDebug("fnord.dproc", "Running task: $0", taskref->debug_name);
-      taskref->running = true;
-      tpool_.run(std::bind(
-          &LocalScheduler::runTask,
-          this,
-          pipeline,
-          taskref,
-          result));
-
-      waiting = false;
     }
 
     fnord::logDebug(
