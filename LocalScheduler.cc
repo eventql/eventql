@@ -54,6 +54,10 @@ RefPtr<TaskResult> LocalScheduler::run(
         pipeline.tasks.push_back(instance);
         runPipeline(app.get(), &pipeline, result);
 
+        if (instance->failed) {
+          RAISE(kRuntimeError, "task failed");
+        }
+
         result->returnResult(
             new io::MmappedFile(
                 File::openFile(instance->output_filename, File::O_READ)));
