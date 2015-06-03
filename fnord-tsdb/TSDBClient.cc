@@ -79,6 +79,7 @@ void TSDBClient::fetchPartitionWithSampling(
   auto handler = [&buf, &fn, &m, &cv] (const void* data, size_t size) {
     std::unique_lock<std::mutex> lk(m);
     buf.append(data, size);
+    lk.unlock();
     cv.notify_all();
   };
 
@@ -92,6 +93,7 @@ void TSDBClient::fetchPartitionWithSampling(
   res.onReady([&cv, &m, &done] () {
     std::unique_lock<std::mutex> lk(m);
     done = true;
+    lk.unlock();
     cv.notify_all();
   });
 
