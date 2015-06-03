@@ -47,6 +47,8 @@ protected:
     RefPtr<VFSFile> getDependency(size_t index) override;
     size_t numDependencies() const override;
 
+    RefPtr<VFSFile> getResult();
+
     RefPtr<Task> task;
     String output_filename;
     String debug_name;
@@ -54,6 +56,7 @@ protected:
     bool finished;
     bool failed;
     bool expanded;
+    RefPtr<VFSFile> result;
     Vector<RefPtr<LocalTaskRef>> dependencies;
   };
 
