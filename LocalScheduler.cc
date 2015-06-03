@@ -114,7 +114,7 @@ void LocalScheduler::runPipeline(
         if (!cache_key.isEmpty()) {
           taskref->cache_filename = FileUtil::joinPaths(
               tempdir_,
-              StringUtil::format("cache_$0", cache_key.get()));
+              StringUtil::format("$0.rdd", cache_key.get()));
         }
 
         auto cached =
