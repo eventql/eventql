@@ -93,6 +93,10 @@ void LocalScheduler::runPipeline(
 
     for (auto& taskref : pipeline->tasks) {
 
+      if (taskref->failed) {
+        RAISE(kRuntimeError, "task failed");
+      }
+
       if (taskref->finished) {
         ++num_completed;
         continue;
@@ -158,6 +162,10 @@ void LocalScheduler::runPipeline(
 
       bool deps_finished = true;
       for (const auto& dep : taskref->dependencies) {
+        if (dep->failed) {
+          RAISE(kRuntimeError, "task failed");
+        }
+
         if (!dep->finished) {
           deps_finished = false;
         }
@@ -217,6 +225,7 @@ void LocalScheduler::runTask(
     file.write(res->data(), res->size());
     FileUtil::mv(output_file + "~", output_file);
   } catch (const std::exception& e) {
+    task->failed = true;
     fnord::logError("fnord.dproc", e, "error");
   }
 
@@ -238,7 +247,8 @@ LocalScheduler::LocalTaskRef::LocalTaskRef(
     debug_name(StringUtil::format("$0#$1", app->name(), task_name)),
     running(false),
     expanded(false),
-    finished(false) {}
+    finished(false),
+    failed(false) {}
 
 RefPtr<VFSFile> LocalScheduler::LocalTaskRef::getDependency(size_t index) {
   if (index >= dependencies.size()) {

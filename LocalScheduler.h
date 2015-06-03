@@ -52,6 +52,7 @@ protected:
     String debug_name;
     bool running;
     bool finished;
+    bool failed;
     bool expanded;
     Vector<RefPtr<LocalTaskRef>> dependencies;
   };
