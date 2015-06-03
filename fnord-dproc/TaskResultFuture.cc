@@ -12,11 +12,11 @@
 namespace fnord {
 namespace dproc {
 
-Future<RefPtr<VFSFile>> TaskResultFuture::result() const {
+Future<RefPtr<Task>> TaskResultFuture::result() const {
   return promise_.future();
 }
 
-void TaskResultFuture::returnResult(RefPtr<VFSFile> result) {
+void TaskResultFuture::returnResult(RefPtr<Task> result) {
   promise_.success(result);
 }
 

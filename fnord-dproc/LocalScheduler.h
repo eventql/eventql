@@ -44,19 +44,16 @@ protected:
         const String& task_name,
         const Buffer& params);
 
-    RefPtr<VFSFile> getDependency(size_t index) override;
+    RefPtr<Task> getDependency(size_t index) override;
     size_t numDependencies() const override;
 
-    RefPtr<VFSFile> getResult();
-
     RefPtr<Task> task;
-    String output_filename;
+    String cache_filename;
     String debug_name;
     bool running;
     bool finished;
     bool failed;
     bool expanded;
-    RefPtr<VFSFile> result;
     Vector<RefPtr<LocalTaskRef>> dependencies;
   };
 
