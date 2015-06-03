@@ -216,16 +216,17 @@ void LocalScheduler::runTask(
     task->task->compute(task.get());
 
     if (!task->output_filename.empty()) {
-      task->task->persist(task->output_filename);
-    }
+      auto res = task->task->encode();
 
-      /*
       auto file = File::openFile(
           output_file + "~",
           File::O_CREATEOROPEN | File::O_WRITE);
 
       file.write(res->data(), res->size());
       FileUtil::mv(output_file + "~", output_file);
+    }
+
+      /*
       */
   } catch (const std::exception& e) {
     task->failed = true;
