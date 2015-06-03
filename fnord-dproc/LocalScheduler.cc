@@ -110,7 +110,7 @@ void LocalScheduler::runPipeline(
       if (!taskref->expanded) {
         taskref->expanded = true;
 
-        auto cache_key = taskref->task->cacheKey();
+        auto cache_key = taskref->task->cacheKeySHA1();
         if (!cache_key.isEmpty()) {
           taskref->cache_filename = FileUtil::joinPaths(
               tempdir_,
@@ -132,12 +132,11 @@ void LocalScheduler::runPipeline(
           auto cache_version = *reader.readUInt64();
           auto cache_size = cache_file.size() - cache_hdr.size();
 
-          auto ckey = taskref->task->cacheKeySHA1();
           fnord::logDebug(
               "fnord.dproc",
               "Reading RDD from cache: $0, key=$1, version=$2",
               taskref->debug_name,
-              ckey.isEmpty() ? "<nil>" : ckey.get(),
+              cache_key.isEmpty() ? "<nil>" : cache_key.get(),
               cache_version);
 
           taskref->task->decode(
