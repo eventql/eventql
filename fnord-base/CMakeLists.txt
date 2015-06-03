@@ -67,6 +67,7 @@ add_library(fnord-base OBJECT
     net/inetaddr.cc
     net/tcpconnection.cc
     random.cc
+    SHA1.cc
     StackTrace.cc
     status.cc
     stats/statsdagent.cc
