@@ -126,7 +126,7 @@ void TSDBClient::fetchPartitionWithSampling(
     buffer.append(remaining);
 
     if (done) {
-      if (!eos) {
+      if (buffer.size() == 0 && !eos) {
         RAISE(kRuntimeError, "unexpected EOF");
       }
 
