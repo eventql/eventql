@@ -76,6 +76,7 @@ void TSDBClient::fetchPartitionWithSampling(
   std::mutex m;
   std::condition_variable cv;
   bool done = false;
+  bool eos = false;
   auto handler = [&buf, &fn, &m, &cv] (const void* data, size_t size) {
     std::unique_lock<std::mutex> lk(m);
     buf.append(data, size);
@@ -109,8 +110,12 @@ void TSDBClient::fetchPartitionWithSampling(
         break;
       }
 
-      fn(Buffer(reader.read(rec_len), rec_len));
-      consumed = reader.position();
+      if (rec_len == 0) {
+        eos = true;
+      } else {
+        fn(Buffer(reader.read(rec_len), rec_len));
+        consumed = reader.position();
+      }
     }
 
     Buffer remaining((char*) buf.data() + consumed, buf.size() - consumed);
@@ -118,6 +123,10 @@ void TSDBClient::fetchPartitionWithSampling(
     buf.append(remaining);
 
     if (done) {
+      if (!eos) {
+        RAISE(kRuntimeError, "unexpected EOF");
+      }
+
       break;
     } else {
       cv.wait(lk);

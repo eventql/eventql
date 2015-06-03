@@ -377,9 +377,11 @@ void TSDBServlet::fetchChunk(
         cursor->getData(&data, &data_size);
 
         util::BinaryMessageWriter buf;
-        buf.appendUInt64(data_size);
-        buf.append(data, data_size);
-        res_stream->writeBodyChunk(Buffer(buf.data(), buf.size()));
+        if (data_size > 0) {
+          buf.appendUInt64(data_size);
+          buf.append(data, data_size);
+          res_stream->writeBodyChunk(Buffer(buf.data(), buf.size()));
+        }
         res_stream->waitForReader();
       }
 
@@ -388,6 +390,10 @@ void TSDBServlet::fetchChunk(
       }
     }
   }
+
+  util::BinaryMessageWriter buf;
+  buf.appendUInt64(0);
+  res_stream->writeBodyChunk(Buffer(buf.data(), buf.size()));
 
   res_stream->finishResponse();
 }
