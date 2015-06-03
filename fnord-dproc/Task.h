@@ -22,6 +22,7 @@ namespace fnord {
 namespace dproc {
 
 class Task;
+class TaskContext;
 
 typedef Function<RefPtr<Task> (const Buffer& params)> TaskFactory;
 
@@ -31,16 +32,6 @@ using ProtoTaskFactory = Function<RefPtr<Task> (const T& params)>;
 struct TaskDependency {
   String task_name;
   Buffer params;
-};
-
-class TaskContext {
-public:
-
-  virtual ~TaskContext() {}
-
-  virtual RefPtr<VFSFile> getDependency(size_t index) = 0;
-  virtual size_t numDependencies() const = 0;
-
 };
 
 class Task : public RefCounted {
@@ -71,6 +62,20 @@ public:
 
 };
 
+class TaskContext {
+public:
+
+  virtual ~TaskContext() {}
+
+  template <typename TaskType>
+  RefPtr<TaskType> getDependencyAs(size_t index);
+
+  virtual RefPtr<Task> getDependency(size_t index) = 0;
+
+  virtual size_t numDependencies() const = 0;
+
+};
+
 template <typename _ParamType, typename _ResultType>
 class ProtoTask : public Task {
 public:
@@ -83,6 +88,11 @@ public:
 protected:
   ResultType result_;
 };
+
+template <typename TaskType>
+RefPtr<TaskType> TaskContext::getDependencyAs(size_t index) {
+  return getDependency(index).asInstanceOf<TaskType>();
+}
 
 //template <typename ParamType, typename ResultType>
 //RefPtr<VFSFile> ProtoTask<ParamType, ResultType>::run(TaskContext* context) {

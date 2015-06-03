@@ -38,6 +38,9 @@ public:
   T* get() const;
   T* release();
 
+  template <typename T_>
+  AutoRef<T_> asInstanceOf() const;
+
 protected:
   T* ref_;
 };
