@@ -72,14 +72,14 @@ void TSDBClient::fetchPartitionWithSampling(
     uri += StringUtil::format("&sample=$0:$1", sample_modulo, sample_index);
   }
 
-  Buffer buf;
+  Buffer buffer;
   std::mutex m;
   std::condition_variable cv;
   bool done = false;
   bool eos = false;
-  auto handler = [&buf, &fn, &m, &cv] (const void* data, size_t size) {
+  auto handler = [&buffer, &fn, &m, &cv] (const void* data, size_t size) {
     std::unique_lock<std::mutex> lk(m);
-    buf.append(data, size);
+    buffer.append(data, size);
     lk.unlock();
     cv.notify_all();
   };
@@ -100,6 +100,8 @@ void TSDBClient::fetchPartitionWithSampling(
 
   for (;;) {
     std::unique_lock<std::mutex> lk(m);
+    auto buf = buffer;
+    lk.unlock();
 
     size_t consumed = 0;
     util::BinaryMessageReader reader(buf.data(), buf.size());
@@ -118,9 +120,10 @@ void TSDBClient::fetchPartitionWithSampling(
       }
     }
 
-    Buffer remaining((char*) buf.data() + consumed, buf.size() - consumed);
-    buf.clear();
-    buf.append(remaining);
+    lk.lock();
+    Buffer remaining((char*) buffer.data() + consumed, buffer.size() - consumed);
+    buffer.clear();
+    buffer.append(remaining);
 
     if (done) {
       if (!eos) {
