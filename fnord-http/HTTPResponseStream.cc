@@ -81,6 +81,19 @@ void HTTPResponseStream::onBodyWritten(Function<void ()> callback) {
   on_body_written_ = callback;
 }
 
+size_t HTTPResponseStream::bufferSize() {
+  std::unique_lock<std::mutex> lk(mutex_);
+  return buf_.size();
+}
+
+void HTTPResponseStream::waitForReader() {
+  std::unique_lock<std::mutex> lk(mutex_);
+
+  while (buf_.size() > kMaxWriteBufferSize) {
+    cv_.wait(lk);
+  }
+}
+
 // precondition: lk must be locked
 void HTTPResponseStream::onStateChanged(std::unique_lock<std::mutex>* lk) {
   if (callback_running_) {
@@ -94,6 +107,16 @@ void HTTPResponseStream::onStateChanged(std::unique_lock<std::mutex>* lk) {
   if (buf_.size() > 0) {
     Buffer write_buf = buf_;
     buf_.clear();
+
+    if (write_buf.size() > kMaxWriteBufferSize) {
+      buf_.append(
+          (char*) write_buf.data() + kMaxWriteBufferSize,
+          write_buf.size() - kMaxWriteBufferSize);
+
+      write_buf.truncate(kMaxWriteBufferSize);
+    }
+
+    cv_.notify_all();
     callback_running_ = true;
     lk->unlock();
 

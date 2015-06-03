@@ -11,6 +11,7 @@
 #include "fnord-tsdb/TSDBServlet.h"
 #include "fnord-json/json.h"
 #include <fnord-base/wallclock.h>
+#include <fnord-base/thread/wakeup.h>
 #include "fnord-msg/MessageEncoder.h"
 #include "fnord-msg/MessagePrinter.h"
 #include "fnord-msg/msg.h"
@@ -379,6 +380,7 @@ void TSDBServlet::fetchChunk(
         buf.appendUInt64(data_size);
         buf.append(data, data_size);
         res_stream->writeBodyChunk(Buffer(buf.data(), buf.size()));
+        res_stream->waitForReader();
       }
 
       if (!cursor->next()) {
