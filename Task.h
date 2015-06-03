@@ -48,11 +48,17 @@ public:
 
   virtual ~Task() {}
 
+  virtual void compute(TaskContext* context) = 0;
+
+  virtual RefPtr<VFSFile> encode() const = 0;
+  virtual void decode(RefPtr<VFSFile> data) const = 0;
+
+  virtual void persist(const String& filename) const;
+  virtual void unpersist(const String& filename);
+
   virtual List<TaskDependency> dependencies() {
     return List<TaskDependency>{};
   }
-
-  virtual RefPtr<VFSFile> run(TaskContext* context) = 0;
 
   virtual Vector<String> preferredLocations() {
     return Vector<String>{};
@@ -60,6 +66,10 @@ public:
 
   virtual Option<String> cacheKey() {
     return None<String>();
+  }
+
+  virtual uint64_t cacheVersion() {
+    return 0;
   }
 
 };
@@ -70,16 +80,19 @@ public:
   typedef _ParamType ParamType;
   typedef _ResultType ResultType;
 
-  virtual void run(TaskContext* context, ResultType* result) = 0;
-  RefPtr<VFSFile> run(TaskContext* context) override;
+  RefPtr<VFSFile> encode() const override;
+  void decode(RefPtr<VFSFile> data) const override;
+
+protected:
+  ResultType result_;
 };
 
-template <typename ParamType, typename ResultType>
-RefPtr<VFSFile> ProtoTask<ParamType, ResultType>::run(TaskContext* context) {
-  ResultType result;
-  run(context, &result);
-  return msg::encode(result).get();
-}
+//template <typename ParamType, typename ResultType>
+//RefPtr<VFSFile> ProtoTask<ParamType, ResultType>::run(TaskContext* context) {
+//  ResultType result;
+//  run(context, &result);
+//  return msg::encode(result).get();
+//}
 
 //template <typename _ParamType, typename _ResultType>
 //ProtoTask<RefPtr<VFSFile> run() override;

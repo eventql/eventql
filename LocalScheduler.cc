@@ -213,18 +213,20 @@ void LocalScheduler::runTask(
   auto output_file = task->output_filename;
 
   try {
-    auto res = task->task->run(task.get());
+    task->task->compute(task.get());
 
     if (!task->output_filename.empty()) {
+      task->task->persist(task->output_filename);
+    }
+
+      /*
       auto file = File::openFile(
           output_file + "~",
           File::O_CREATEOROPEN | File::O_WRITE);
 
       file.write(res->data(), res->size());
       FileUtil::mv(output_file + "~", output_file);
-    } else {
-      task->result = res;
-    }
+      */
   } catch (const std::exception& e) {
     task->failed = true;
     fnord::logError("fnord.dproc", e, "error");
