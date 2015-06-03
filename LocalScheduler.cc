@@ -58,9 +58,7 @@ RefPtr<TaskResult> LocalScheduler::run(
           RAISE(kRuntimeError, "task failed");
         }
 
-        result->returnResult(
-            new io::MmappedFile(
-                File::openFile(instance->output_filename, File::O_READ)));
+        result->returnResult(instance->getResult());
       } catch (const StandardException& e) {
         fnord::logError("dproc.scheduler", e, "task failed");
         result->returnError(e);
@@ -111,12 +109,7 @@ void LocalScheduler::runPipeline(
         taskref->expanded = true;
 
         auto cache_key = taskref->task->cacheKey();
-        if (cache_key.isEmpty()) {
-          auto tmpid = Random::singleton()->hex128();
-          taskref->output_filename  = FileUtil::joinPaths(
-              tempdir_,
-              StringUtil::format("tmp_$0", tmpid));
-        } else {
+        if (!cache_key.isEmpty()) {
           taskref->output_filename = FileUtil::joinPaths(
               tempdir_,
               StringUtil::format("cache_$0", cache_key.get()));
@@ -222,12 +215,16 @@ void LocalScheduler::runTask(
   try {
     auto res = task->task->run(task.get());
 
-    auto file = File::openFile(
-        output_file + "~",
-        File::O_CREATEOROPEN | File::O_WRITE);
+    if (!task->output_filename.empty()) {
+      auto file = File::openFile(
+          output_file + "~",
+          File::O_CREATEOROPEN | File::O_WRITE);
 
-    file.write(res->data(), res->size());
-    FileUtil::mv(output_file + "~", output_file);
+      file.write(res->data(), res->size());
+      FileUtil::mv(output_file + "~", output_file);
+    } else {
+      task->result = res;
+    }
   } catch (const std::exception& e) {
     task->failed = true;
     fnord::logError("fnord.dproc", e, "error");
@@ -252,7 +249,8 @@ LocalScheduler::LocalTaskRef::LocalTaskRef(
     running(false),
     expanded(false),
     finished(false),
-    failed(false) {}
+    failed(false),
+    result(nullptr) {}
 
 RefPtr<VFSFile> LocalScheduler::LocalTaskRef::getDependency(size_t index) {
   if (index >= dependencies.size()) {
@@ -260,13 +258,22 @@ RefPtr<VFSFile> LocalScheduler::LocalTaskRef::getDependency(size_t index) {
   }
 
   const auto& dep = dependencies[index];
-  if (!FileUtil::exists(dep->output_filename)) {
-    RAISEF(kRuntimeError, "missing upstream output: $0", dep->output_filename);
+
+  return dep->getResult();
+}
+
+RefPtr<VFSFile> LocalScheduler::LocalTaskRef::getResult() {
+  if (result.get() != nullptr) {
+    return result;
+  }
+
+  if (output_filename.empty() || !FileUtil::exists(output_filename)) {
+    RAISEF(kRuntimeError, "missing output: $0", output_filename);
   }
 
   return RefPtr<VFSFile>(
       new io::MmappedFile(
-          File::openFile(dep->output_filename, File::O_READ)));
+          File::openFile(output_filename, File::O_READ)));
 }
 
 size_t LocalScheduler::LocalTaskRef::numDependencies() const {
