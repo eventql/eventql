@@ -7,24 +7,24 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <fnord-dproc/TaskResult.h>
+#include <fnord-dproc/TaskResultFuture.h>
 
 namespace fnord {
 namespace dproc {
 
-Future<RefPtr<VFSFile>> TaskResult::result() const {
+Future<RefPtr<VFSFile>> TaskResultFuture::result() const {
   return promise_.future();
 }
 
-void TaskResult::returnResult(RefPtr<VFSFile> result) {
+void TaskResultFuture::returnResult(RefPtr<VFSFile> result) {
   promise_.success(result);
 }
 
-void TaskResult::returnError(const StandardException& e) {
+void TaskResultFuture::returnError(const StandardException& e) {
   promise_.failure(e);
 }
 
-void TaskResult::updateStatus(Function<void (TaskStatus* status)> fn) {
+void TaskResultFuture::updateStatus(Function<void (TaskStatus* status)> fn) {
   std::unique_lock<std::mutex> lk(status_mutex_);
   fn(&status_);
 
@@ -35,12 +35,12 @@ void TaskResult::updateStatus(Function<void (TaskStatus* status)> fn) {
   }
 }
 
-void TaskResult::onStatusChange(Function<void ()> fn) {
+void TaskResultFuture::onStatusChange(Function<void ()> fn) {
   std::unique_lock<std::mutex> lk(status_mutex_);
   on_status_change_ = fn;
 }
 
-TaskStatus TaskResult::status() const {
+TaskStatus TaskResultFuture::status() const {
   std::unique_lock<std::mutex> lk(status_mutex_);
   return status_;
 }
