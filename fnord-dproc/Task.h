@@ -14,6 +14,7 @@
 #include <fnord-base/buffer.h>
 #include <fnord-base/option.h>
 #include <fnord-base/exception.h>
+#include <fnord-base/SHA1.h>
 #include <fnord-base/VFSFile.h>
 #include <fnord-base/thread/future.h>
 #include <fnord-msg/msg.h>
@@ -54,6 +55,16 @@ public:
 
   virtual Option<String> cacheKey() {
     return None<String>();
+  }
+
+  virtual Option<String> cacheKeySHA1() {
+    auto key = cacheKey();
+
+    if (key.isEmpty()) {
+      return key;
+    } else {
+      return Some(SHA1::compute(key.get()).toString());
+    }
   }
 
   virtual uint64_t cacheVersion() {

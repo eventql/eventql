@@ -132,10 +132,12 @@ void LocalScheduler::runPipeline(
           auto cache_version = *reader.readUInt64();
           auto cache_size = cache_file.size() - cache_hdr.size();
 
+          auto ckey = taskref->task->cacheKeySHA1();
           fnord::logDebug(
               "fnord.dproc",
-              "Reading RDD from cache: $0, version=$1",
+              "Reading RDD from cache: $0, key=$1, version=$2",
               taskref->debug_name,
+              ckey.isEmpty() ? "<nil>" : ckey.get(),
               cache_version);
 
           taskref->task->decode(
@@ -191,10 +193,12 @@ void LocalScheduler::runPipeline(
           continue;
         }
 
+        auto ckey = taskref->task->cacheKeySHA1();
         fnord::logDebug(
             "fnord.dproc",
-            "Computing RDD: $0, version=$1",
+            "Computing RDD: $0, key=$1, version=$2",
             taskref->debug_name,
+            ckey.isEmpty() ? "<nil>" : ckey.get(),
             taskref->task->cacheVersion());
 
         taskref->running = true;
