@@ -97,7 +97,7 @@ void TSDBClient::fetchPartitionWithSampling(
     cv.notify_all();
   });
 
-  while (!done) {
+  while (;;) {
     std::unique_lock<std::mutex> lk(m);
 
     size_t consumed = 0;
@@ -117,7 +117,9 @@ void TSDBClient::fetchPartitionWithSampling(
     buf.clear();
     buf.append(remaining);
 
-    if (!done) {
+    if (done) {
+      break;
+    } else {
       cv.wait(lk);
     }
   }
