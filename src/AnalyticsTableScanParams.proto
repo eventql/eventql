@@ -19,5 +19,6 @@ message AnalyticsTableScanReducerParams {
   required uint64 from_unixmicros = 2;
   required uint64 until_unixmicros = 3;
   optional string scanlet_params = 4;
+  optional string query = 5;
 }
 
