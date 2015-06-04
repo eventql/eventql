@@ -23,7 +23,7 @@ void DispatchService::registerApp(
       });
 }
 
-RefPtr<TaskResult> DispatchService::run(const TaskSpec& task) {
+RefPtr<TaskResultFuture> DispatchService::run(const TaskSpec& task) {
   auto iter = apps_.find(task.application());
   if (iter == apps_.end()) {
     RAISEF(kRuntimeError, "application not found: '$0'", task.application());

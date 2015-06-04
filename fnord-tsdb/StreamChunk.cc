@@ -389,6 +389,14 @@ Vector<String> StreamChunk::listFiles() const {
   return records_.listDatafiles();
 }
 
+PartitionInfo StreamChunk::partitionInfo() const {
+  PartitionInfo pi;
+  pi.set_partition_key(util::Base64::encode(key_));
+  pi.set_stream_key(stream_key_);
+  pi.set_version(records_.version());
+  return pi;
+}
+
 void StreamChunk::commitState() {
   StreamChunkState state;
   state.record_state = records_.getState();
@@ -414,7 +422,7 @@ void StreamChunkState::encode(
     writer->appendVarUInt(ro.second);
   }
 
-  writer->appendVarUInt(0);
+  writer->appendVarUInt(record_state.version);
 }
 
 void StreamChunkState::decode(util::BinaryMessageReader* reader) {
@@ -428,9 +436,7 @@ void StreamChunkState::decode(util::BinaryMessageReader* reader) {
     repl_offsets.emplace(id, off);
   }
 
-  auto nderived_ds = reader->readVarUInt();
-  for (int i = 0; i < nderived_ds; ++i) {
-  }
+  record_state.version = reader->readVarUInt();
 }
 
 }

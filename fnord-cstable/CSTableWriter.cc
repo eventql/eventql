@@ -16,9 +16,16 @@ namespace cstable {
 CSTableWriter::CSTableWriter(
     const String& filename,
     const uint64_t num_records) :
-    file_(File::openFile(
-        filename,
-        File::O_READ | File::O_WRITE | File::O_CREATE)) {
+    CSTableWriter(
+        File::openFile(
+            filename,
+            File::O_READ | File::O_WRITE | File::O_CREATE),
+        num_records) {}
+
+CSTableWriter::CSTableWriter(
+    File&& file,
+    const uint64_t num_records) :
+    file_(std::move(file)) {
   util::BinaryMessageWriter header;
   header.appendUInt32(BinaryFormat::kMagicBytes);
   header.appendUInt16(BinaryFormat::kVersion);

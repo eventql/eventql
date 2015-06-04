@@ -74,6 +74,12 @@ T* AutoRef<T>::release() {
 }
 
 template <typename T>
+template <typename T_>
+AutoRef<T_> AutoRef<T>::asInstanceOf() const {
+  return AutoRef<T_>(dynamic_cast<T_*>(ref_));
+}
+
+template <typename T>
 AutoRef<T> mkRef(T* ptr) {
   return AutoRef<T>(ptr);
 }

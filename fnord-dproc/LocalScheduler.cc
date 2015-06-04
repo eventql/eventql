@@ -13,6 +13,8 @@
 #include <fnord-base/io/mmappedfile.h>
 #include <fnord-base/logging.h>
 #include <fnord-base/io/fileutil.h>
+#include <fnord-base/util/binarymessagereader.h>
+#include <fnord-base/util/binarymessagewriter.h>
 #include <fnord-dproc/LocalScheduler.h>
 
 namespace fnord {
@@ -36,23 +38,29 @@ void LocalScheduler::stop() {
   tpool_.stop();
 }
 
-RefPtr<TaskResult> LocalScheduler::run(
+RefPtr<TaskResultFuture> LocalScheduler::run(
     RefPtr<Application> app,
     const TaskSpec& task) {
-  RefPtr<TaskResult> result(new TaskResult());
+  RefPtr<TaskResultFuture> result(new TaskResultFuture());
 
   try {
-    RefPtr<LocalTaskRef> instance(new LocalTaskRef(app->getTaskInstance(task)));
+    auto instance = mkRef(
+        new LocalTaskRef(
+            app,
+            task.task_name(),
+            Buffer(task.params().data(), task.params().size())));
 
     req_tpool_.run([this, app, result, instance] () {
       try {
         LocalTaskPipeline pipeline;
         pipeline.tasks.push_back(instance);
-        run(app.get(), &pipeline);
+        runPipeline(app.get(), &pipeline, result);
 
-        result->returnResult(
-            new io::MmappedFile(
-                File::openFile(instance->output_filename, File::O_READ)));
+        if (instance->failed) {
+          RAISE(kRuntimeError, "task failed");
+        }
+
+        result->returnResult(instance->task);
       } catch (const StandardException& e) {
         fnord::logError("dproc.scheduler", e, "task failed");
         result->returnError(e);
@@ -66,16 +74,20 @@ RefPtr<TaskResult> LocalScheduler::run(
   return result;
 }
 
-void LocalScheduler::run(
+void LocalScheduler::runPipeline(
     Application* app,
-    LocalTaskPipeline* pipeline) {
-  fnord::logInfo(
+    LocalTaskPipeline* pipeline,
+    RefPtr<TaskResultFuture> result) {
+  fnord::logDebug(
       "fnord.dproc",
       "Starting local pipeline id=$0 tasks=$1",
       (void*) pipeline,
       pipeline->tasks.size());
 
   std::unique_lock<std::mutex> lk(pipeline->mutex);
+  result->updateStatus([&pipeline] (TaskStatus* status) {
+    status->num_subtasks_total = pipeline->tasks.size();
+  });
 
   while (pipeline->tasks.size() > 0) {
     bool waiting = true;
@@ -84,6 +96,7 @@ void LocalScheduler::run(
     size_t num_completed = 0;
 
     for (auto& taskref : pipeline->tasks) {
+
       if (taskref->finished) {
         ++num_completed;
         continue;
@@ -97,12 +110,63 @@ void LocalScheduler::run(
       if (!taskref->expanded) {
         taskref->expanded = true;
 
+        auto cache_key = taskref->task->cacheKeySHA1();
+        if (!cache_key.isEmpty()) {
+          taskref->cache_filename = FileUtil::joinPaths(
+              tempdir_,
+              StringUtil::format("$0.rdd", cache_key.get()));
+        }
+
+        auto cached =
+            !cache_key.isEmpty() &&
+            FileUtil::exists(taskref->cache_filename);
+
+        if (cached) {
+          auto cache_file = File::openFile(
+              taskref->cache_filename,
+              File::O_READ);
+
+          Buffer cache_hdr(sizeof(uint64_t));
+          cache_file.read(&cache_hdr);
+          util::BinaryMessageReader reader(cache_hdr.data(), cache_hdr.size());
+          auto cache_version = *reader.readUInt64();
+          auto cache_size = cache_file.size() - cache_hdr.size();
+
+          fnord::logDebug(
+              "fnord.dproc",
+              "Reading RDD from cache: $0, key=$1, version=$2",
+              taskref->debug_name,
+              cache_key.isEmpty() ? "<nil>" : cache_key.get(),
+              cache_version);
+
+          taskref->task->decode(
+                new io::MmappedFile(
+                    std::move(cache_file),
+                    cache_hdr.size(),
+                    cache_size));
+
+          result->updateStatus([&pipeline] (TaskStatus* status) {
+            ++status->num_subtasks_completed;
+          });
+
+          taskref->finished = true;
+          waiting = false;
+          break;
+        }
+
         auto parent_task = taskref;
+        size_t numdeps = 0;
         for (const auto& dep : taskref->task->dependencies()) {
-          RefPtr<LocalTaskRef> depref(new LocalTaskRef(
-              app->getTaskInstance(dep.task_name, dep.params)));
+          RefPtr<LocalTaskRef> depref(new LocalTaskRef(app, dep.task_name, dep.params));
           parent_task->dependencies.emplace_back(depref);
           pipeline->tasks.emplace_back(depref);
+          ++numdeps;
+        }
+
+        if (numdeps > 0) {
+          result->updateStatus([numdeps] (TaskStatus* status) {
+            status->num_subtasks_total += numdeps;
+          });
         }
 
         waiting = false;
@@ -111,29 +175,48 @@ void LocalScheduler::run(
 
       bool deps_finished = true;
       for (const auto& dep : taskref->dependencies) {
+        if (dep->failed) {
+          taskref->failed = true;
+          taskref->finished = true;
+          waiting = false;
+        }
+
         if (!dep->finished) {
           deps_finished = false;
         }
       }
 
-      if (!deps_finished) {
-        ++num_waiting;
-        continue;
-      }
+      if (!taskref->finished) {
+        if (!deps_finished) {
+          ++num_waiting;
+          continue;
+        }
 
-      taskref->running = true;
-      tpool_.run(std::bind(&LocalScheduler::runTask, this, pipeline, taskref));
-      waiting = false;
+        auto ckey = taskref->task->cacheKeySHA1();
+        fnord::logDebug(
+            "fnord.dproc",
+            "Computing RDD: $0, key=$1, version=$2",
+            taskref->debug_name,
+            ckey.isEmpty() ? "<nil>" : ckey.get(),
+            taskref->task->cacheVersion());
+
+        taskref->running = true;
+        tpool_.run(std::bind(
+            &LocalScheduler::runTask,
+            this,
+            pipeline,
+            taskref,
+            result));
+
+        waiting = false;
+      }
     }
 
-    fnord::logInfo(
+    fnord::logDebug(
         "fnord.dproc",
-        "Running local pipeline... id=$0 tasks=$1, running=$2, waiting=$3, completed=$4",
+        "Running local pipeline id=$0: $1",
         (void*) pipeline,
-        pipeline->tasks.size(),
-        num_running,
-        num_waiting,
-        num_completed);
+        result->status().toString());
 
     if (waiting) {
       pipeline->wakeup.wait(lk);
@@ -144,7 +227,7 @@ void LocalScheduler::run(
     }
   }
 
-  fnord::logInfo(
+  fnord::logDebug(
       "fnord.dproc",
       "Completed local pipeline id=$0",
       (void*) pipeline);
@@ -152,63 +235,63 @@ void LocalScheduler::run(
 
 void LocalScheduler::runTask(
     LocalTaskPipeline* pipeline,
-    RefPtr<LocalTaskRef> task) {
-  auto cache_key = task->task->cacheKey();
-  String output_file;
-  bool cached = false;
+    RefPtr<LocalTaskRef> task,
+    RefPtr<TaskResultFuture> result) {
 
-  if (cache_key.isEmpty()) {
-    auto tmpid = Random::singleton()->hex128();
-    output_file = FileUtil::joinPaths(
-        tempdir_,
-        StringUtil::format("tmp_$0", tmpid));
-  } else {
-    output_file = FileUtil::joinPaths(
-        tempdir_,
-        StringUtil::format("cache_$0", cache_key.get()));
-  }
+  try {
+    task->task->compute(task.get());
 
-  if (cache_key.isEmpty() || !FileUtil::exists(output_file)) {
-    try {
-      auto res = task->task->run(task.get());
+    if (!task->cache_filename.empty()) {
+      auto cache_file = task->cache_filename;
 
-      auto file = File::openFile(
-          output_file + "~",
-          File::O_CREATEOROPEN | File::O_WRITE);
+      {
+        auto f = File::openFile(
+            cache_file + "~",
+            File::O_CREATEOROPEN | File::O_WRITE | File::O_TRUNCATE);
 
-      file.write(res->data(), res->size());
-      FileUtil::mv(output_file + "~", output_file);
-    } catch (const std::exception& e) {
-      fnord::logError("fnord.dproc", e, "error");
+        util::BinaryMessageWriter hdr;
+        hdr.appendUInt64(task->task->cacheVersion());
+        f.write(hdr.data(), hdr.size());
+
+        auto res = task->task->encode();
+        f.write(res->data(), res->size());
+      }
+
+      FileUtil::mv(cache_file + "~", cache_file);
     }
+  } catch (const std::exception& e) {
+    task->failed = true;
+    fnord::logError("fnord.dproc", e, "error");
   }
+
+  result->updateStatus([&pipeline] (TaskStatus* status) {
+    ++status->num_subtasks_completed;
+  });
 
   std::unique_lock<std::mutex> lk(pipeline->mutex);
-  task->output_filename = output_file;
   task->finished = true;
   lk.unlock();
   pipeline->wakeup.notify_all();
 }
 
-LocalScheduler::LocalTaskRef::LocalTaskRef(RefPtr<Task> _task) :
-    task(_task),
+LocalScheduler::LocalTaskRef::LocalTaskRef(
+    RefPtr<Application> app,
+    const String& task_name,
+    const Buffer& params) :
+    task(app->getTaskInstance(task_name, params)),
+    debug_name(StringUtil::format("$0#$1", app->name(), task_name)),
     running(false),
     expanded(false),
-    finished(false) {}
+    finished(false),
+    failed(false) {}
 
-RefPtr<VFSFile> LocalScheduler::LocalTaskRef::getDependency(size_t index) {
+RefPtr<Task> LocalScheduler::LocalTaskRef::getDependency(size_t index) {
   if (index >= dependencies.size()) {
     RAISEF(kIndexError, "invalid dependecy index: $0", index);
   }
 
   const auto& dep = dependencies[index];
-  if (!FileUtil::exists(dep->output_filename)) {
-    RAISEF(kRuntimeError, "missing upstream output: $0", dep->output_filename);
-  }
-
-  return RefPtr<VFSFile>(
-      new io::MmappedFile(
-          File::openFile(dep->output_filename, File::O_READ)));
+  return dep->task;
 }
 
 size_t LocalScheduler::LocalTaskRef::numDependencies() const {

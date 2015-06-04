@@ -28,7 +28,7 @@ public:
       size_t max_threads = 8,
       size_t max_requests = 32);
 
-  RefPtr<TaskResult> run(
+  RefPtr<TaskResultFuture> run(
       RefPtr<Application> app,
       const TaskSpec& task) override;
 
@@ -39,14 +39,20 @@ protected:
 
   class LocalTaskRef : public TaskContext, public RefCounted {
   public:
-    LocalTaskRef(RefPtr<Task> _task);
-    RefPtr<VFSFile> getDependency(size_t index) override;
+    LocalTaskRef(
+        RefPtr<Application> app,
+        const String& task_name,
+        const Buffer& params);
+
+    RefPtr<Task> getDependency(size_t index) override;
     size_t numDependencies() const override;
 
     RefPtr<Task> task;
-    String output_filename;
+    String cache_filename;
+    String debug_name;
     bool running;
     bool finished;
+    bool failed;
     bool expanded;
     Vector<RefPtr<LocalTaskRef>> dependencies;
   };
@@ -57,8 +63,15 @@ protected:
     std::condition_variable wakeup;
   };
 
-  void run(Application* app, LocalTaskPipeline* pipeline);
-  void runTask(LocalTaskPipeline* pipeline, RefPtr<LocalTaskRef> task);
+  void runPipeline(
+      Application* app,
+      LocalTaskPipeline* pipeline,
+      RefPtr<TaskResultFuture> result);
+
+  void runTask(
+      LocalTaskPipeline* pipeline,
+      RefPtr<LocalTaskRef> task,
+      RefPtr<TaskResultFuture> result);
 
   String tempdir_;
   size_t max_threads_;

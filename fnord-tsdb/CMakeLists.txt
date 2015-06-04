@@ -9,6 +9,10 @@ project(FNORD_TSDB)
 
 include_directories(../)
 include_directories(../3rdparty)
+include_directories(${CMAKE_CURRENT_BINARY_DIR}/../)
+
+file(GLOB PROTO_FILES *.proto)
+PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS ${PROTO_FILES})
 
 add_library(fnord-tsdb OBJECT
     CompactionWorker.cc
@@ -20,7 +24,8 @@ add_library(fnord-tsdb OBJECT
     TSDBNode.cc
     TSDBServlet.cc
     RecordSet.cc
-    StreamChunk.cc)
+    StreamChunk.cc
+    ${PROTO_SRCS})
 
 add_executable(tests/test-recordset
     $<TARGET_OBJECTS:fnord-base>
@@ -33,7 +38,7 @@ add_executable(tests/test-recordset
     $<TARGET_OBJECTS:fnord-json>
     RecordSet_test.cc)
 
-target_link_libraries(tests/test-recordset ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(tests/test-recordset ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_LIBS})
 
 add_executable(tests/test-tsdbnode
     $<TARGET_OBJECTS:fnord-base>
@@ -46,7 +51,7 @@ add_executable(tests/test-tsdbnode
     $<TARGET_OBJECTS:fnord-json>
     TSDBNode_test.cc)
 
-target_link_libraries(tests/test-tsdbnode ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(tests/test-tsdbnode ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_LIBS})
 
 add_executable(tests/test-streamchunk
     $<TARGET_OBJECTS:fnord-base>
@@ -59,4 +64,4 @@ add_executable(tests/test-streamchunk
     $<TARGET_OBJECTS:fnord-json>
     StreamChunk_test.cc)
 
-target_link_libraries(tests/test-streamchunk ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(tests/test-streamchunk ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_LIBS})

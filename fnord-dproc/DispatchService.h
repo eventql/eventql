@@ -13,7 +13,7 @@
 #include <fnord-dproc/Application.h>
 #include <fnord-dproc/Scheduler.h>
 #include <fnord-dproc/TaskSpec.pb.h>
-#include <fnord-dproc/TaskResult.h>
+#include <fnord-dproc/TaskResultFuture.h>
 
 namespace fnord {
 namespace dproc {
@@ -25,7 +25,7 @@ public:
       RefPtr<Application> app,
       RefPtr<Scheduler> scheduler);
 
-  RefPtr<TaskResult> run(const TaskSpec& task);
+  RefPtr<TaskResultFuture> run(const TaskSpec& task);
 
 protected:
 
