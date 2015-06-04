@@ -20,5 +20,5 @@ UNIT_TEST(HostStatsTest);
 TEST_CASE(HostStatsTest, TestOne, [] () {
   auto stats = get_hosts_stats();
 
-  iputs("host stats: $0", stats.DebugString());
+  iputs("\n==== host stats ====\n$0\n===============", stats.DebugString());
 });

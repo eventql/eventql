@@ -9,12 +9,36 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include "sensord.h"
+#include "fnord-base/exception.h"
+#include <unistd.h>
 
 namespace sensord {
 
+static std::string get_hostname() {
+  char buf[1024];
+
+  if (gethostname(buf, sizeof(buf)) != 0) {
+    RAISE(kRuntimeError, "gethostname() failed");
+  }
+
+  return std::string(buf, strlen(buf));
+}
+
 HostStats get_hosts_stats() {
   HostStats stats;
-  stats.set_hostname("blaah");
+  stats.set_hostname(get_hostname());
+
+  // -> DiskStats*
+  auto part1 = stats.add_disk_stats();
+  part1->set_mountpoint("/");
+  part1->set_bytes_available(1024 * 1024 * 1024 * 250);
+  part1->set_bytes_used(1024 * 1024 * 1024 * 30);
+
+  auto part2 = stats.add_disk_stats();
+  part2->set_mountpoint("/boot");
+  part2->set_bytes_available(1024 * 1024 * 512);
+  part2->set_bytes_used(1024 * 1024 * 80);
+
   return stats;
 }
 

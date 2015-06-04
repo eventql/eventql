@@ -10,6 +10,12 @@
  */
 package sensord;
 
+message DiskStats {
+  required string mountpoint = 1; // e.g. "/", "/boot"
+  required uint64 bytes_available = 2;
+  required uint64 bytes_used = 3;
+};
+
 message HostStats {
 
   required string hostname = 1;
@@ -17,5 +23,11 @@ message HostStats {
   optional string rack = 2;
 
   optional string datacenter = 3;
+
+  optional double load_avg_1m = 5;
+  optional double load_avg_5m = 6;
+  optional double load_avg_15m = 7;
+
+  repeated DiskStats disk_stats = 4;
 
 }
