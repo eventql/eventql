@@ -15,69 +15,59 @@
 namespace fnord {
 namespace http {
 
-Future<HTTPResponse> HTTPClient::get(
-    const std::string& uri,
-    fnord::TaskScheduler* sched) {
-  return executeRequest(HTTPRequest::mkGet(uri), sched);
+HTTPClient::HTTPClient() : http_(&ev_) {}
+
+HTTPResponse HTTPClient::executeRequest(
+    const HTTPRequest& req) {
+  return executeRequest(
+      req,
+      [] (Promise<HTTPResponse> promise) {
+        return new HTTPResponseFuture(promise);
+      });
 }
 
-Future<HTTPResponse> HTTPClient::get(
-    const std::string& uri,
-    const HTTPMessage::HeaderList& headers,
-    fnord::TaskScheduler* sched) {
-  return executeRequest(HTTPRequest::mkGet(uri, headers), sched);
-}
-
-Future<HTTPResponse> HTTPClient::get(
-    const URI& uri,
-    fnord::TaskScheduler* sched) {
-  return executeRequest(HTTPRequest::mkGet(uri), sched);
-}
-
-Future<HTTPResponse> HTTPClient::get(
-    const URI& uri,
-    const HTTPMessage::HeaderList& headers,
-    fnord::TaskScheduler* sched) {
-  return executeRequest(HTTPRequest::mkGet(uri, headers), sched);
-}
-
-Future<HTTPResponse> HTTPClient::executeRequest(
+HTTPResponse HTTPClient::executeRequest(
     const HTTPRequest& req,
-    fnord::TaskScheduler* sched) {
-  if (!req.hasHeader("Host")) {
-    RAISE(kRuntimeError, "missing Host header");
-  }
-
-  auto addr = fnord::InetAddr::resolve(req.getHeader("Host"));
-  if (!addr.hasPort()) {
-    addr.setPort(80);
-  }
-
-  return executeRequest(req, addr, sched);
+    const fnord::InetAddr& addr) {
+  return executeRequest(
+      req,
+      addr,
+      [] (Promise<HTTPResponse> promise) {
+        return new HTTPResponseFuture(promise);
+      });
 }
 
-Future<HTTPResponse> HTTPClient::executeRequest(
+HTTPResponse HTTPClient::executeRequest(
+    const HTTPRequest& req,
+    Function<HTTPResponseFuture* (Promise<HTTPResponse> promise)> factory) {
+  std::unique_lock<std::mutex> lk(mutex_);
+
+  auto future = http_.executeRequest(req, factory);
+
+  future.onReady([this] {
+    ev_.shutdown();
+  });
+
+  ev_.run();
+  return future.get();
+}
+
+HTTPResponse HTTPClient::executeRequest(
     const HTTPRequest& req,
     const fnord::InetAddr& addr,
-    fnord::TaskScheduler* sched) {
-  auto conn = std::unique_ptr<HTTPClientConnection>(
-      new HTTPClientConnection(
-          std::move(fnord::net::TCPConnection::connect(addr)),
-          sched,
-          nullptr));
+    Function<HTTPResponseFuture* (Promise<HTTPResponse> promise)> factory) {
+  std::unique_lock<std::mutex> lk(mutex_);
 
-  Promise<HTTPResponse> promise;
-  auto http_future = new HTTPResponseFuture(promise);
+  auto future = http_.executeRequest(req, addr, factory);
 
-  try {
-    conn->executeRequest(req, http_future);
-    http_future->storeConnection(std::move(conn));
-  } catch (const std::exception& e) {
-    http_future->onError(e);
-  }
+  future.onReady([this] {
+    ev_.shutdown();
+  });
 
-  return promise.future();
+  ev_.run();
+  return future.get();
 }
+
 
 }
 }
