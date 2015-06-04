@@ -10,7 +10,7 @@
 #include <fnord-tsdb/TSDBClient.h>
 #include <fnord-base/util/binarymessagereader.h>
 #include <fnord-msg/msg.h>
-#include <fnord-http/HTTPClient.h>
+#include <fnord-http/httpclient.h>
 
 namespace fnord {
 namespace tsdb {
@@ -111,7 +111,9 @@ void TSDBClient::fetchPartitionWithSampling(
   auto req = http::HTTPRequest::mkGet(uri);
   auto res = http.executeRequest(req, handler_factory);
 
-  if (buffer.size() != 0 || !eos) {
+  handler(nullptr, 0);
+
+  if (!eos) {
     RAISE(kRuntimeError, "unexpected EOF");
   }
 
