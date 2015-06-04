@@ -24,6 +24,7 @@
 #include <fnord-base/thread/eventloop.h>
 #include <fnord-base/thread/threadpool.h>
 
+using namespace fnord;
 using namespace fnord::http;
 using fnord::StringInputStream;
 using fnord::StringOutputStream;
@@ -242,24 +243,25 @@ TEST_CASE(HTTPTest, TestInvalidCookies, [] () {
   EXPECT_EQ(cookies[0].second, "fnord");
 });
 
-TEST_CASE(HTTPTest, TestHTTPRequestEnd2End, [] () {
-  fnord::thread::ThreadPool tp;
+//TEST_CASE(HTTPTest, TestHTTPConnectionPoolEnd2End, [] () {
+//  fnord::thread::ThreadPool tp;
+//  HTTPConnectionPool http_pool(&tp);
+//
+//  auto res = http_pool.executeRequest(
+//      fnord::http::HTTPRequest::mkGet("http://www.google.com/"));
+//  res.wait();
+//
+//  const auto& r = res.get();
+//  EXPECT_EQ(r.statusCode(), 200);
+//});
 
-  auto res = fnord::http::HTTPClient::get("http://localhost:8080/", &tp);
-  res.wait();
+TEST_CASE(HTTPTest, TestHTTPClient, [] () {
+  HTTPClient client;
 
-  const auto& r = res.get();
-  EXPECT_EQ(r.statusCode(), 200);
+  auto req = HTTPRequest::mkGet("http://www.heise.de/");
+  auto res = client.executeRequest(req);
+
+  EXPECT_EQ(res.statusCode(), 200);
 });
 
-TEST_CASE(HTTPTest, TestHTTPConnectionPoolEnd2End, [] () {
-  fnord::thread::ThreadPool tp;
-  HTTPConnectionPool http_pool(&tp);
 
-  auto res = http_pool.executeRequest(
-      fnord::http::HTTPRequest::mkGet("http://localhost:8080/"));
-  res.wait();
-
-  const auto& r = res.get();
-  EXPECT_EQ(r.statusCode(), 200);
-});

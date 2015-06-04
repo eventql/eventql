@@ -11,7 +11,8 @@
 #define _FNORDMETRIC_HTTPCLIENT_H
 #include "fnord-base/uri.h"
 #include "fnord-http/httpresponsefuture.h"
-#include "fnord-base/thread/taskscheduler.h"
+#include "fnord-http/httpconnectionpool.h"
+#include "fnord-base/thread/eventloop.h"
 
 namespace fnord {
 namespace http {
@@ -19,33 +20,27 @@ namespace http {
 class HTTPClient {
 public:
 
-  static Future<HTTPResponse> get(
-      const std::string& uri,
-      fnord::TaskScheduler* sched);
+  HTTPClient();
 
-  static Future<HTTPResponse> get(
-      const std::string& uri,
-      const HTTPMessage::HeaderList& headers,
-      fnord::TaskScheduler* sched);
+  HTTPResponse executeRequest(const HTTPRequest& req);
 
-  static Future<HTTPResponse> get(
-      const URI& uri,
-      fnord::TaskScheduler* sched);
-
-  static Future<HTTPResponse> get(
-      const URI& uri,
-      const HTTPMessage::HeaderList& headers,
-      fnord::TaskScheduler* sched);
-
-  static Future<HTTPResponse> executeRequest(
+  HTTPResponse executeRequest(
       const HTTPRequest& req,
-      fnord::TaskScheduler* sched);
+      const fnord::InetAddr& addr);
 
-  static Future<HTTPResponse> executeRequest(
+  HTTPResponse executeRequest(
+      const HTTPRequest& req,
+      Function<HTTPResponseFuture* (Promise<HTTPResponse> promise)> factory);
+
+  HTTPResponse executeRequest(
       const HTTPRequest& req,
       const fnord::InetAddr& addr,
-      fnord::TaskScheduler* sched);
+      Function<HTTPResponseFuture* (Promise<HTTPResponse> promise)> factory);
 
+protected:
+  thread::EventLoop ev_;
+  http::HTTPConnectionPool http_;
+  std::mutex mutex_;
 };
 
 }
