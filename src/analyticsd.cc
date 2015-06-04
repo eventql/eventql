@@ -111,7 +111,8 @@ int main(int argc, const char** argv) {
   dproc::DispatchService dproc;
   auto local_scheduler = mkRef(
       new dproc::LocalScheduler(
-          flags.getString("cachedir")));
+          flags.getString("cachedir"),
+          12));
 
   local_scheduler->start();
 
