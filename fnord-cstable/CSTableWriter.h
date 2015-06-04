@@ -23,6 +23,10 @@ class CSTableWriter {
 public:
 
   CSTableWriter(
+      File&& file,
+      const uint64_t num_records);
+
+  CSTableWriter(
       const String& filename,
       const uint64_t num_records);
 

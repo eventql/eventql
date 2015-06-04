@@ -11,8 +11,10 @@
 #include "fnord-tsdb/TSDBServlet.h"
 #include "fnord-json/json.h"
 #include <fnord-base/wallclock.h>
+#include <fnord-base/thread/wakeup.h>
 #include "fnord-msg/MessageEncoder.h"
 #include "fnord-msg/MessagePrinter.h"
+#include "fnord-msg/msg.h"
 #include <fnord-base/util/Base64.h>
 #include <fnord-sstable/sstablereader.h>
 
@@ -65,6 +67,12 @@ void TSDBServlet::handleHTTPRequest(
 
     if (StringUtil::endsWith(uri.path(), "/fetch_chunk")) {
       fetchChunk(&req, &res, res_stream, &uri);
+      return;
+    }
+
+    if (StringUtil::endsWith(uri.path(), "/fetch_partition_info")) {
+      fetchPartitionInfo(&req, &res, &uri);
+      res_stream->writeResponse(res);
       return;
     }
 
@@ -369,9 +377,12 @@ void TSDBServlet::fetchChunk(
         cursor->getData(&data, &data_size);
 
         util::BinaryMessageWriter buf;
-        buf.appendUInt64(data_size);
-        buf.append(data, data_size);
-        res_stream->writeBodyChunk(Buffer(buf.data(), buf.size()));
+        if (data_size > 0) {
+          buf.appendUInt64(data_size);
+          buf.append(data, data_size);
+          res_stream->writeBodyChunk(Buffer(buf.data(), buf.size()));
+        }
+        res_stream->waitForReader();
       }
 
       if (!cursor->next()) {
@@ -380,7 +391,33 @@ void TSDBServlet::fetchChunk(
     }
   }
 
+  util::BinaryMessageWriter buf;
+  buf.appendUInt64(0);
+  res_stream->writeBodyChunk(Buffer(buf.data(), buf.size()));
+
   res_stream->finishResponse();
+}
+
+void TSDBServlet::fetchPartitionInfo(
+    const http::HTTPRequest* req,
+    http::HTTPResponse* res,
+    URI* uri) {
+  const auto& params = uri->queryParams();
+
+  String partition;
+  if (!URI::getParam(params, "partition", &partition)) {
+    res->setStatus(fnord::http::kStatusBadRequest);
+    res->addBody("missing ?partition=... parameter");
+    return;
+  }
+
+  String partition_key;
+  util::Base64::decode(partition, &partition_key);
+
+  auto pinfo = node_->fetchPartitionInfo(partition_key);
+  res->setStatus(http::kStatusOK);
+  res->addHeader("Content-Type", "application/x-protobuf");
+  res->addBody(*msg::encode(pinfo));
 }
 
 void TSDBServlet::fetchDerivedDataset(

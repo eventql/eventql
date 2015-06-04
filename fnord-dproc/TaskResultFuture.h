@@ -15,16 +15,33 @@
 namespace fnord {
 namespace dproc {
 
-class TaskResult : public RefCounted {
+struct TaskStatus {
+  TaskStatus();
+
+  size_t num_subtasks_total;
+  size_t num_subtasks_completed;
+
+  String toString() const;
+  double progress() const;
+};
+
+class TaskResultFuture : public RefCounted {
 public:
 
-  Future<RefPtr<VFSFile>> result() const;
+  Future<RefPtr<Task>> result() const;
 
-  void returnResult(RefPtr<VFSFile> result);
+  void returnResult(RefPtr<Task> result);
   void returnError(const StandardException& e);
 
+  void updateStatus(Function<void (TaskStatus* status)> fn);
+  void onStatusChange(Function<void ()> fn);
+  TaskStatus status() const;
+
 protected:
-  Promise<RefPtr<VFSFile>> promise_;
+  TaskStatus status_;
+  mutable std::mutex status_mutex_;
+  Function<void ()> on_status_change_;
+  Promise<RefPtr<Task>> promise_;
 };
 
 } // namespace dproc

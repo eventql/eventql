@@ -7,22 +7,16 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <fnord-dproc/TaskResult.h>
+package fnord.tsdb;
 
-namespace fnord {
-namespace dproc {
+message PartitionInfo {
 
-Future<RefPtr<VFSFile>> TaskResult::result() const {
-  return promise_.future();
-}
+  required string partition_key = 1;
 
-void TaskResult::returnResult(RefPtr<VFSFile> result) {
-  promise_.success(result);
-}
+  required string stream_key = 2;
 
-void TaskResult::returnError(const StandardException& e) {
-  promise_.failure(e);
-}
+  optional uint64 version = 3;
 
-} // namespace dproc
-} // namespace fnord
+  optional uint64 mtime = 4;
+
+};

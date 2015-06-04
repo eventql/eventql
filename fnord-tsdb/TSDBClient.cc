@@ -9,6 +9,7 @@
  */
 #include <fnord-tsdb/TSDBClient.h>
 #include <fnord-base/util/binarymessagereader.h>
+#include <fnord-msg/msg.h>
 
 namespace fnord {
 namespace tsdb {
@@ -71,9 +72,36 @@ void TSDBClient::fetchPartitionWithSampling(
     uri += StringUtil::format("&sample=$0:$1", sample_modulo, sample_index);
   }
 
-  Buffer buf;
-  auto handler = [&buf, &fn] (const void* data, size_t size) {
-    buf.append(data, size);
+  Buffer buffer;
+  std::mutex m;
+  std::condition_variable cv;
+  bool done = false;
+  bool eos = false;
+  auto handler = [&buffer, &fn, &m, &cv] (const void* data, size_t size) {
+    std::unique_lock<std::mutex> lk(m);
+    buffer.append(data, size);
+    lk.unlock();
+    cv.notify_all();
+  };
+
+  auto handler_factory = [&handler] (const Promise<http::HTTPResponse> promise)
+      -> http::HTTPResponseFuture* {
+    return new http::StreamingResponseFuture(promise, handler);
+  };
+
+  auto req = http::HTTPRequest::mkGet(uri);
+  auto res = http_->executeRequest(req, handler_factory);
+  res.onReady([&cv, &m, &done] () {
+    std::unique_lock<std::mutex> lk(m);
+    done = true;
+    lk.unlock();
+    cv.notify_all();
+  });
+
+  for (;;) {
+    std::unique_lock<std::mutex> lk(m);
+    auto buf = buffer;
+    lk.unlock();
 
     size_t consumed = 0;
     util::BinaryMessageReader reader(buf.data(), buf.size());
@@ -84,22 +112,48 @@ void TSDBClient::fetchPartitionWithSampling(
         break;
       }
 
-      fn(Buffer(reader.read(rec_len), rec_len));
-      consumed = reader.position();
+      if (rec_len == 0) {
+        eos = true;
+      } else {
+        fn(Buffer(reader.read(rec_len), rec_len));
+        consumed = reader.position();
+      }
     }
 
-    Buffer remaining((char*) buf.data() + consumed, buf.size() - consumed);
-    buf.clear();
-    buf.append(remaining);
-  };
+    lk.lock();
+    Buffer remaining((char*) buffer.data() + consumed, buffer.size() - consumed);
+    buffer.clear();
+    buffer.append(remaining);
 
-  auto handler_factory = [&handler] (const Promise<http::HTTPResponse> promise)
-      -> http::HTTPResponseFuture* {
-    return new http::StreamingResponseFuture(promise, handler);
-  };
+    if (done) {
+      if (buffer.size() == 0 && !eos) {
+        RAISE(kRuntimeError, "unexpected EOF");
+      }
+
+      break;
+    } else {
+      cv.wait(lk);
+    }
+  }
+
+  const auto& r = res.get();
+  if (r.statusCode() != 200) {
+    RAISEF(kRuntimeError, "received non-200 response: $0", r.body().toString());
+  }
+
+  return;
+}
+
+PartitionInfo TSDBClient::fetchPartitionInfo(
+    const String& stream_key,
+    const String& partition_key) {
+  auto uri = StringUtil::format(
+      "$0/fetch_partition_info?partition=$1",
+      uri_,
+      URI::urlEncode(partition_key));
 
   auto req = http::HTTPRequest::mkGet(uri);
-  auto res = http_->executeRequest(req, handler_factory);
+  auto res = http_->executeRequest(req);
   res.wait();
 
   const auto& r = res.get();
@@ -107,8 +161,7 @@ void TSDBClient::fetchPartitionWithSampling(
     RAISEF(kRuntimeError, "received non-200 response: $0", r.body().toString());
   }
 
-  handler(nullptr, 0);
-  return;
+  return msg::decode<PartitionInfo>(r.body());
 }
 
 Buffer TSDBClient::fetchDerivedDataset(
