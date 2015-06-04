@@ -8,17 +8,12 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
+#pragma once
 #include "fnord-base/stdtypes.h"
-#include "fnord-base/test/unittest.h"
-#include "sensord.h"
+#include "HostStats.pb.h"
 
-using namespace fnord;
-using namespace sensord;
+namespace sensord {
 
-UNIT_TEST(HostStatsTest);
+HostStats get_hosts_stats();
 
-TEST_CASE(HostStatsTest, TestOne, [] () {
-  auto stats = get_hosts_stats();
-
-  iputs("host stats: $0", stats.DebugString());
-});
+};
