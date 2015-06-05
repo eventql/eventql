@@ -117,28 +117,9 @@ void LocalScheduler::runPipeline(
               StringUtil::format("$0.rdd", cache_key.get()));
         }
 
-        auto cached =
-            !cache_key.isEmpty() &&
-            FileUtil::exists(taskref->cache_filename);
-
-        if (cached) {
-          auto cache_file = File::openFile(
-              taskref->cache_filename,
-              File::O_READ);
-
-          Buffer cache_hdr(sizeof(uint64_t));
-          cache_file.read(&cache_hdr);
-          util::BinaryMessageReader reader(cache_hdr.data(), cache_hdr.size());
-          auto cache_version = *reader.readUInt64();
-          auto cache_size = cache_file.size() - cache_hdr.size();
-
-          CachedTask cache {
-            .version = cache_version,
-            .data = new io::MmappedFile(
-                  std::move(cache_file),
-                  cache_hdr.size(),
-                  cache_size)
-          };
+        if (!taskref->cache_filename.empty() &&
+            FileUtil::exists(taskref->cache_filename)) {
+          auto cache = taskref->readCache();
 
           if (taskref->task->unpersist(cache)) {
             fnord::logDebug(
@@ -146,7 +127,7 @@ void LocalScheduler::runPipeline(
                 "Read RDD from cache: $0, key=$1, version=$2",
                 taskref->debug_name,
                 cache_key.get(),
-                cache_version);
+                cache.version);
 
             result->updateStatus([&pipeline] (TaskStatus* status) {
               ++status->num_subtasks_completed;
@@ -286,6 +267,26 @@ LocalScheduler::LocalTaskRef::LocalTaskRef(
     expanded(false),
     finished(false),
     failed(false) {}
+
+CachedTask LocalScheduler::LocalTaskRef::readCache() const {
+  auto cache_file = File::openFile(
+      cache_filename,
+      File::O_READ);
+
+  Buffer cache_hdr(sizeof(uint64_t));
+  cache_file.read(&cache_hdr);
+  util::BinaryMessageReader reader(cache_hdr.data(), cache_hdr.size());
+  auto cache_version = *reader.readUInt64();
+  auto cache_size = cache_file.size() - cache_hdr.size();
+
+  return CachedTask {
+    .version = cache_version,
+    .data = new io::MmappedFile(
+          std::move(cache_file),
+          cache_hdr.size(),
+          cache_size)
+  };
+}
 
 RefPtr<Task> LocalScheduler::LocalTaskRef::getDependency(size_t index) {
   if (index >= dependencies.size()) {
