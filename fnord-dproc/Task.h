@@ -71,6 +71,10 @@ public:
     return 0;
   }
 
+  virtual uint64_t minCacheVersion() {
+    return cacheVersion();
+  }
+
 };
 
 class TaskContext {
