@@ -47,7 +47,7 @@ protected:
     RefPtr<Task> getDependency(size_t index) override;
     size_t numDependencies() const override;
 
-    CachedTask readCache() const;
+    void readCache();
 
     RefPtr<Task> task;
     String cache_filename;
