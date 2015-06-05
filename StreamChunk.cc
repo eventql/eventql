@@ -394,6 +394,7 @@ PartitionInfo StreamChunk::partitionInfo() const {
   pi.set_partition_key(util::Base64::encode(key_));
   pi.set_stream_key(stream_key_);
   pi.set_version(records_.version());
+  pi.set_exists(true);
   return pi;
 }
 
