@@ -35,15 +35,10 @@ struct TaskDependency {
   Buffer params;
 };
 
-struct CachedTask {
-  RefPtr<VFSFile> data;
-  uint64_t version;
-};
-
 class Task : public RefCounted {
 public:
 
-  Task() : cversion_(0) {}
+  Task() {}
   virtual ~Task() {}
 
   virtual void compute(TaskContext* context) = 0;
@@ -59,20 +54,6 @@ public:
     return Vector<String>{};
   }
 
-  virtual CachedTask persist() const {
-    return CachedTask {
-      .data = encode(),
-      .version = 0
-    };
-  }
-
-  /* return true if unpersisted, false if cache ignored */
-  virtual bool unpersist(const CachedTask& cached) {
-    decode(cached.data);
-    return true;
-  }
-
-  // rename to key() ?
   virtual Option<String> cacheKey() const {
     return None<String>();
   }
@@ -100,8 +81,6 @@ public:
   virtual RefPtr<Task> getDependency(size_t index) = 0;
 
   virtual size_t numDependencies() const = 0;
-
-  virtual CachedTask readCache() const = 0;
 
 };
 

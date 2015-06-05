@@ -119,24 +119,21 @@ void LocalScheduler::runPipeline(
 
         if (!taskref->cache_filename.empty() &&
             FileUtil::exists(taskref->cache_filename)) {
-          auto cache = taskref->readCache();
+          fnord::logDebug(
+              "fnord.dproc",
+              "Read RDD from cache: $0, key=$1",
+              taskref->debug_name,
+              cache_key.get());
 
-          if (taskref->task->unpersist(cache)) {
-            fnord::logDebug(
-                "fnord.dproc",
-                "Read RDD from cache: $0, key=$1, version=$2",
-                taskref->debug_name,
-                cache_key.get(),
-                cache.version);
+          taskref->readCache();
 
-            result->updateStatus([&pipeline] (TaskStatus* status) {
-              ++status->num_subtasks_completed;
-            });
+          result->updateStatus([&pipeline] (TaskStatus* status) {
+            ++status->num_subtasks_completed;
+          });
 
-            taskref->finished = true;
-            waiting = false;
-            break;
-          }
+          taskref->finished = true;
+          waiting = false;
+          break;
         }
 
         auto parent_task = taskref;
@@ -224,18 +221,15 @@ void LocalScheduler::runTask(
   bool from_cache = false;
 
   if (!task->cache_filename.empty() && FileUtil::exists(task->cache_filename)) {
-    auto cache = task->readCache();
+    fnord::logDebug(
+        "fnord.dproc",
+        "Read RDD from cache: $0, key=$1",
+        task->debug_name,
+        task->task->cacheKeySHA1().get());
 
-    if (task->task->unpersist(cache)) {
-      fnord::logDebug(
-          "fnord.dproc",
-          "Read RDD from cache: $0, key=$1, version=$2",
-          task->debug_name,
-          task->task->cacheKeySHA1().get(),
-          cache.version);
+    task->readCache();
 
-      from_cache = true;
-    }
+    from_cache = true;
   }
 
   if (!from_cache) {
@@ -243,18 +237,16 @@ void LocalScheduler::runTask(
       task->task->compute(task.get());
 
       if (!task->cache_filename.empty()) {
-        auto cache = task->task->persist();
         auto cache_file = task->cache_filename;
 
         {
+          auto cache = task->task->encode();
+
           auto f = File::openFile(
               cache_file + "~",
               File::O_CREATEOROPEN | File::O_WRITE | File::O_TRUNCATE);
 
-          util::BinaryMessageWriter hdr;
-          hdr.appendUInt64(cache.version);
-          f.write(hdr.data(), hdr.size());
-          f.write(cache.data->data(), cache.data->size());
+          f.write(cache->data(), cache->size());
         }
 
         FileUtil::mv(cache_file + "~", cache_file);
@@ -286,24 +278,12 @@ LocalScheduler::LocalTaskRef::LocalTaskRef(
     finished(false),
     failed(false) {}
 
-CachedTask LocalScheduler::LocalTaskRef::readCache() const {
-  auto cache_file = File::openFile(
-      cache_filename,
-      File::O_READ);
-
-  Buffer cache_hdr(sizeof(uint64_t));
-  cache_file.read(&cache_hdr);
-  util::BinaryMessageReader reader(cache_hdr.data(), cache_hdr.size());
-  auto cache_version = *reader.readUInt64();
-  auto cache_size = cache_file.size() - cache_hdr.size();
-
-  return CachedTask {
-    .version = cache_version,
-    .data = new io::MmappedFile(
-          std::move(cache_file),
-          cache_hdr.size(),
-          cache_size)
-  };
+void LocalScheduler::LocalTaskRef::readCache() {
+  task->decode(
+      new io::MmappedFile(
+          File::openFile(
+              cache_filename,
+              File::O_READ)));
 }
 
 RefPtr<Task> LocalScheduler::LocalTaskRef::getDependency(size_t index) {
