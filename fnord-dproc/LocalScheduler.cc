@@ -221,30 +221,48 @@ void LocalScheduler::runTask(
     LocalTaskPipeline* pipeline,
     RefPtr<LocalTaskRef> task,
     RefPtr<TaskResultFuture> result) {
+  bool from_cache = false;
 
-  try {
-    task->task->compute(task.get());
+  if (!task->cache_filename.empty() && FileUtil::exists(task->cache_filename)) {
+    auto cache = task->readCache();
 
-    if (!task->cache_filename.empty()) {
-      auto cache = task->task->persist();
-      auto cache_file = task->cache_filename;
+    if (task->task->unpersist(cache)) {
+      fnord::logDebug(
+          "fnord.dproc",
+          "Read RDD from cache: $0, key=$1, version=$2",
+          task->debug_name,
+          task->task->cacheKeySHA1().get(),
+          cache.version);
 
-      {
-        auto f = File::openFile(
-            cache_file + "~",
-            File::O_CREATEOROPEN | File::O_WRITE | File::O_TRUNCATE);
-
-        util::BinaryMessageWriter hdr;
-        hdr.appendUInt64(cache.version);
-        f.write(hdr.data(), hdr.size());
-        f.write(cache.data->data(), cache.data->size());
-      }
-
-      FileUtil::mv(cache_file + "~", cache_file);
+      from_cache = true;
     }
-  } catch (const std::exception& e) {
-    task->failed = true;
-    fnord::logError("fnord.dproc", e, "error");
+  }
+
+  if (!from_cache) {
+    try {
+      task->task->compute(task.get());
+
+      if (!task->cache_filename.empty()) {
+        auto cache = task->task->persist();
+        auto cache_file = task->cache_filename;
+
+        {
+          auto f = File::openFile(
+              cache_file + "~",
+              File::O_CREATEOROPEN | File::O_WRITE | File::O_TRUNCATE);
+
+          util::BinaryMessageWriter hdr;
+          hdr.appendUInt64(cache.version);
+          f.write(hdr.data(), hdr.size());
+          f.write(cache.data->data(), cache.data->size());
+        }
+
+        FileUtil::mv(cache_file + "~", cache_file);
+      }
+    } catch (const std::exception& e) {
+      task->failed = true;
+      fnord::logError("fnord.dproc", e, "error");
+    }
   }
 
   result->updateStatus([&pipeline] (TaskStatus* status) {
