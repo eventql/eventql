@@ -132,19 +132,21 @@ void LocalScheduler::runPipeline(
           auto cache_version = *reader.readUInt64();
           auto cache_size = cache_file.size() - cache_hdr.size();
 
-          if (cache_version >= taskref->task->minCacheVersion()) {
+          CachedTask cache {
+            .version = cache_version,
+            .data = new io::MmappedFile(
+                  std::move(cache_file),
+                  cache_hdr.size(),
+                  cache_size)
+          };
+
+          if (taskref->task->unpersist(cache)) {
             fnord::logDebug(
                 "fnord.dproc",
-                "Reading RDD from cache: $0, key=$1, version=$2",
+                "Read RDD from cache: $0, key=$1, version=$2",
                 taskref->debug_name,
-                cache_key.isEmpty() ? "<nil>" : cache_key.get(),
+                cache_key.get(),
                 cache_version);
-
-            taskref->task->decode(
-                  new io::MmappedFile(
-                      std::move(cache_file),
-                      cache_hdr.size(),
-                      cache_size));
 
             result->updateStatus([&pipeline] (TaskStatus* status) {
               ++status->num_subtasks_completed;
@@ -197,10 +199,9 @@ void LocalScheduler::runPipeline(
         auto ckey = taskref->task->cacheKeySHA1();
         fnord::logDebug(
             "fnord.dproc",
-            "Computing RDD: $0, key=$1, version=$2",
+            "Computing RDD: $0, key=$1",
             taskref->debug_name,
-            ckey.isEmpty() ? "<nil>" : ckey.get(),
-            taskref->task->cacheVersion());
+            ckey.isEmpty() ? "<nil>" : ckey.get());
 
         taskref->running = true;
         tpool_.run(std::bind(
@@ -244,6 +245,7 @@ void LocalScheduler::runTask(
     task->task->compute(task.get());
 
     if (!task->cache_filename.empty()) {
+      auto cache = task->task->persist();
       auto cache_file = task->cache_filename;
 
       {
@@ -252,11 +254,9 @@ void LocalScheduler::runTask(
             File::O_CREATEOROPEN | File::O_WRITE | File::O_TRUNCATE);
 
         util::BinaryMessageWriter hdr;
-        hdr.appendUInt64(task->task->cacheVersion());
+        hdr.appendUInt64(cache.version);
         f.write(hdr.data(), hdr.size());
-
-        auto res = task->task->encode();
-        f.write(res->data(), res->size());
+        f.write(cache.data->data(), cache.data->size());
       }
 
       FileUtil::mv(cache_file + "~", cache_file);
