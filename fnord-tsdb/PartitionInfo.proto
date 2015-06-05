@@ -13,7 +13,9 @@ message PartitionInfo {
 
   required string partition_key = 1;
 
-  required string stream_key = 2;
+  optional string stream_key = 2;
+
+  optional bool exists = 5;
 
   optional uint64 version = 3;
 
