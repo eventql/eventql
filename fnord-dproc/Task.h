@@ -35,9 +35,15 @@ struct TaskDependency {
   Buffer params;
 };
 
+struct CachedTask {
+  RefPtr<VFSFile> data;
+  uint64_t version;
+};
+
 class Task : public RefCounted {
 public:
 
+  Task() : cversion_(0) {}
   virtual ~Task() {}
 
   virtual void compute(TaskContext* context) = 0;
@@ -45,19 +51,33 @@ public:
   virtual RefPtr<VFSFile> encode() const = 0;
   virtual void decode(RefPtr<VFSFile> data) = 0;
 
-  virtual List<TaskDependency> dependencies() {
+  virtual List<TaskDependency> dependencies() const {
     return List<TaskDependency>{};
   }
 
-  virtual Vector<String> preferredLocations() {
+  virtual Vector<String> preferredLocations() const {
     return Vector<String>{};
   }
 
-  virtual Option<String> cacheKey() {
+  virtual CachedTask persist() const {
+    return CachedTask {
+      .data = encode(),
+      .version = 0
+    };
+  }
+
+  /* return true if unpersisted, false if cache ignored */
+  virtual bool unpersist(const CachedTask& cached) {
+    decode(cached.data);
+    return true;
+  }
+
+  // rename to key() ?
+  virtual Option<String> cacheKey() const {
     return None<String>();
   }
 
-  virtual Option<String> cacheKeySHA1() {
+  virtual Option<String> cacheKeySHA1() const {
     auto key = cacheKey();
 
     if (key.isEmpty()) {
@@ -67,14 +87,8 @@ public:
     }
   }
 
-  virtual uint64_t cacheVersion() {
-    return 0;
-  }
-
-  virtual uint64_t minCacheVersion() {
-    return cacheVersion();
-  }
-
+protected:
+  uint64_t cversion_;
 };
 
 class TaskContext {
