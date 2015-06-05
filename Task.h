@@ -87,8 +87,6 @@ public:
     }
   }
 
-protected:
-  uint64_t cversion_;
 };
 
 class TaskContext {
@@ -102,6 +100,8 @@ public:
   virtual RefPtr<Task> getDependency(size_t index) = 0;
 
   virtual size_t numDependencies() const = 0;
+
+  virtual CachedTask readCache() const = 0;
 
 };
 
