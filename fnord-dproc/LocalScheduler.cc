@@ -132,26 +132,28 @@ void LocalScheduler::runPipeline(
           auto cache_version = *reader.readUInt64();
           auto cache_size = cache_file.size() - cache_hdr.size();
 
-          fnord::logDebug(
-              "fnord.dproc",
-              "Reading RDD from cache: $0, key=$1, version=$2",
-              taskref->debug_name,
-              cache_key.isEmpty() ? "<nil>" : cache_key.get(),
-              cache_version);
+          if (cache_version >= taskref->task->minCacheVersion()) {
+            fnord::logDebug(
+                "fnord.dproc",
+                "Reading RDD from cache: $0, key=$1, version=$2",
+                taskref->debug_name,
+                cache_key.isEmpty() ? "<nil>" : cache_key.get(),
+                cache_version);
 
-          taskref->task->decode(
-                new io::MmappedFile(
-                    std::move(cache_file),
-                    cache_hdr.size(),
-                    cache_size));
+            taskref->task->decode(
+                  new io::MmappedFile(
+                      std::move(cache_file),
+                      cache_hdr.size(),
+                      cache_size));
 
-          result->updateStatus([&pipeline] (TaskStatus* status) {
-            ++status->num_subtasks_completed;
-          });
+            result->updateStatus([&pipeline] (TaskStatus* status) {
+              ++status->num_subtasks_completed;
+            });
 
-          taskref->finished = true;
-          waiting = false;
-          break;
+            taskref->finished = true;
+            waiting = false;
+            break;
+          }
         }
 
         auto parent_task = taskref;
