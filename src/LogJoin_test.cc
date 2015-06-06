@@ -396,9 +396,7 @@ TEST_CASE(LogJoinTest, SeenResultItems, [] () {
       joined.search_queries().Get(0).result_items().Get(0).position(),
       1);
 
-  EXPECT_EQ(
-      joined.search_queries().Get(0).result_items().Get(0).seen(),
-      false);
+  EXPECT_FALSE(joined.search_queries().Get(0).result_items().Get(0).seen());
 
   EXPECT_EQ(
       joined.search_queries().Get(0).result_items().Get(1).item_id(),
@@ -408,9 +406,7 @@ TEST_CASE(LogJoinTest, SeenResultItems, [] () {
       joined.search_queries().Get(0).result_items().Get(1).position(),
       2);
 
-  EXPECT_EQ(
-      joined.search_queries().Get(0).result_items().Get(1).seen(),
-      true);
+  EXPECT_TRUE(joined.search_queries().Get(0).result_items().Get(1).seen());
 
   EXPECT_EQ(
       joined.search_queries().Get(0).result_items().Get(2).item_id(),
@@ -420,9 +416,7 @@ TEST_CASE(LogJoinTest, SeenResultItems, [] () {
       joined.search_queries().Get(0).result_items().Get(2).position(),
       3);
 
-  EXPECT_EQ(
-      joined.search_queries().Get(0).result_items().Get(2).seen(),
-      true);
+  EXPECT_TRUE(joined.search_queries().Get(0).result_items().Get(2).seen());
 });
 /*
 
