@@ -80,6 +80,15 @@ int main(int argc, const char** argv) {
       "<path>");
 
   flags.defineFlag(
+      "shopstats_table",
+      cli::FlagParser::T_STRING,
+      true,
+      NULL,
+      NULL,
+      "shopstats_table",
+      "<path>");
+
+  flags.defineFlag(
       "loglevel",
       fnord::cli::FlagParser::T_STRING,
       false,
