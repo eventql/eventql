@@ -367,6 +367,63 @@ TEST_CASE(LogJoinTest, FieldExpansion, [] () {
     joined.search_queries().Get(0).result_items().Get(1).category3(),
     32);
 });
+
+TEST_CASE(LogJoinTest, SeenResultItems, [] () {
+  auto t = 1432311555 * kMicrosPerSecond;
+  auto trgt = mkTestTarget();
+
+  TrackedSession sess;
+  sess.insertLogline(t + 0, "q", "E1", URI::ParamList {
+    { "is", "p~101~p1,p~102~p2,p~103~p3" },
+    { "qstr~de", "blah" }
+  });
+
+  sess.insertLogline(t + 2, "q", "E1", URI::ParamList {
+    { "is", "p~102~p2~s,p~103~s" }
+  });
+
+  auto buf = trgt.trackedSessionToJoinedSession(sess);
+  auto joined = msg::decode<JoinedSession>(buf);
+
+  EXPECT_EQ(joined.search_queries().size(), 1);
+  EXPECT_EQ(joined.search_queries().Get(0).result_items().size(), 3);
+
+  EXPECT_EQ(
+      joined.search_queries().Get(0).result_items().Get(0).item_id(),
+      "p~101");
+
+  EXPECT_EQ(
+      joined.search_queries().Get(0).result_items().Get(0).position(),
+      1);
+
+  EXPECT_EQ(
+      joined.search_queries().Get(0).result_items().Get(0).seen(),
+      false);
+
+  EXPECT_EQ(
+      joined.search_queries().Get(0).result_items().Get(1).item_id(),
+      "p~102");
+
+  EXPECT_EQ(
+      joined.search_queries().Get(0).result_items().Get(1).position(),
+      2);
+
+  EXPECT_EQ(
+      joined.search_queries().Get(0).result_items().Get(1).seen(),
+      true);
+
+  EXPECT_EQ(
+      joined.search_queries().Get(0).result_items().Get(2).item_id(),
+      "p~103");
+
+  EXPECT_EQ(
+      joined.search_queries().Get(0).result_items().Get(2).position(),
+      3);
+
+  EXPECT_EQ(
+      joined.search_queries().Get(0).result_items().Get(2).seen(),
+      true);
+});
 /*
 
 TEST_CASE(LogJoinTest, Test1, [] () {
