@@ -507,6 +507,7 @@ add_executable(analyticsd
     analytics/ECommerceSearchQueriesFeed.cc
     analytics/ECommercePreferenceSetsFeed.cc
     analytics/RecoEngineStatsQuery.cc
+    analytics/RecoEngineStatsBreakdownQuery.cc
     analytics/JSONSink.cc
     analytics/FeedExportApp.cc
     analytics/AnalyticsApp.cc
