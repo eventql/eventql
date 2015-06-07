@@ -11,6 +11,7 @@
 #define _FNORD_MSG_MSG_H
 #include <fnord-base/stdtypes.h>
 #include <fnord-base/buffer.h>
+#include "fnord-base/exception.h"
 
 namespace fnord {
 namespace msg {
