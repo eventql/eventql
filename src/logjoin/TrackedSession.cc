@@ -37,6 +37,7 @@ void TrackedSession::joinEvents(const CurrencyConverter& cconv) {
       for (auto& qitem : cur_query.items) {
         if (cur_visit.item == qitem.item) {
           qitem.clicked = true;
+          qitem.seen = true;
           break;
         }
       }

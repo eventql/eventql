@@ -44,6 +44,7 @@ void TrackedQuery::fromParams(const fnord::URI::ParamList& params) {
       qitem.item.set_id = item_str_parts[0];
       qitem.item.item_id = item_str_parts[1];
       qitem.clicked = false;
+      qitem.seen = false;
       qitem.position = -1;
       qitem.variant = -1;
 
@@ -59,6 +60,9 @@ void TrackedQuery::fromParams(const fnord::URI::ParamList& params) {
             break;
           case 'v':
             qitem.variant = std::stoi(iattr.substr(1, iattr.length() - 1));
+            break;
+          case 's':
+            qitem.seen = true;
             break;
         }
       }
@@ -94,10 +98,15 @@ void TrackedQuery::merge(const TrackedQuery& other) {
   for (const auto& other_item : other.items) {
     bool found = false;
 
-    for (const auto& this_item : items) {
+    for (auto& this_item : items) {
       if (other_item.item == this_item.item &&
-          other_item.position == this_item.position &&
+          (
+              other_item.position == this_item.position ||
+              other_item.position == -1 ||
+              this_item.position == -1
+          ) &&
           other_item.variant == this_item.variant) {
+        this_item.seen = this_item.seen || other_item.seen;
         found = true;
         break;
       }
