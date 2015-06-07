@@ -17,13 +17,13 @@ namespace fnord {
 
 CSVOutputStream::CSVOutputStream(
     std::unique_ptr<OutputStream> output_stream,
-    char col_sep /* = ';' */,
-    char row_sep /* = '\n' */) :
+    String col_sep /* = ';' */,
+    String row_sep /* = '\n' */) :
     output_(std::move(output_stream)),
     col_sep_(col_sep),
     row_sep_(row_sep) {}
 
-void CSVOutputStream::appendRow(const Vector<String> row) {
+void CSVOutputStream::appendRow(const Vector<String>& row) {
   Buffer buf;
 
   for (int i = 0; i < row.size(); ++i) {

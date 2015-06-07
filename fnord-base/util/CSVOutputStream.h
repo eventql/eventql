@@ -19,15 +19,15 @@ public:
 
   CSVOutputStream(
       std::unique_ptr<OutputStream> output_stream,
-      char col_sep = ';',
-      char row_sep = '\n');
+      String col_sep = ";",
+      String row_sep = "\n");
 
-  void appendRow(const Vector<String> row);
+  void appendRow(const Vector<String>& row);
 
 protected:
   std::shared_ptr<OutputStream> output_;
-  char col_sep_;
-  char row_sep_;
+  String col_sep_;
+  String row_sep_;
 };
 
 } // namespace fnord
