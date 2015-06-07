@@ -85,7 +85,7 @@ int main(int argc, const char** argv) {
 
   dproc::DefaultApplication app("cm.itemboost");
 
-  app.registerProtoTaskFactory<AnalyticsTableScanMapperParams>(
+  app.registerProtoRDDFactory<AnalyticsTableScanMapperParams>(
       "ItemBoostMapper",
       [&tsdb] (const AnalyticsTableScanMapperParams& params)
           -> RefPtr<dproc::Task> {
@@ -99,7 +99,7 @@ int main(int argc, const char** argv) {
         return report;
       });
 
-  app.registerProtoTaskFactory<AnalyticsTableScanReducerParams>(
+  app.registerProtoRDDFactory<AnalyticsTableScanReducerParams>(
       "ItemBoostReducer",
       [&tsdb] (const AnalyticsTableScanReducerParams& params)
           -> RefPtr<dproc::Task> {
