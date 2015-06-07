@@ -47,6 +47,7 @@
 #include "schemas.h"
 #include "CustomerNamespace.h"
 #include "analytics/AnalyticsServlet.h"
+#include "analytics/ReportFactory.h"
 #include "analytics/FeedExportApp.h"
 #include "analytics/ShopStatsServlet.h"
 #include "analytics/AnalyticsApp.h"
@@ -132,7 +133,7 @@ int main(int argc, const char** argv) {
           flags.getString("cachedir")));
 
   dproc.registerApp(analytics_app.get(), local_scheduler.get());
-  cm::AnalyticsServlet analytics_servlet(&dproc);
+  cm::AnalyticsServlet analytics_servlet(analytics_app, &dproc);
   http_router.addRouteByPrefixMatch("/analytics", &analytics_servlet, &tpool);
 
   /* feed export */
