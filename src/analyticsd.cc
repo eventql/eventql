@@ -174,9 +174,9 @@ int main(int argc, const char** argv) {
   }
 
   /* stop stats */
-  auto shopstats = cm::ShopStatsTable::open(flags.getString("shopstats_table"));
-  cm::ShopStatsServlet shopstats_servlet(shopstats);
-  http_router.addRouteByPrefixMatch("/shopstats", &shopstats_servlet, &tpool);
+  //auto shopstats = cm::ShopStatsTable::open(flags.getString("shopstats_table"));
+  //cm::ShopStatsServlet shopstats_servlet(shopstats);
+  //http_router.addRouteByPrefixMatch("/shopstats", &shopstats_servlet, &tpool);
 
   ev.run();
   local_scheduler->stop();
