@@ -85,6 +85,7 @@ add_library(fnord-base OBJECT
     util/Base64.cc
     util/binarymessagereader.cc
     util/binarymessagewriter.cc
+    util/CSVOutputStream.cc
     util/CumulativeHistogram.cc
     util/BitPackDecoder.cc
     util/BitPackEncoder.cc
