@@ -516,6 +516,7 @@ add_executable(analyticsd
     analytics/RecoStats.cc
     analytics/ReportFactory.cc
     analytics/reports/TopSearchTermsReport.cc
+    analytics/reports/RecoEngineStatsReport.cc
     schemas.cc
     analyticsd.cc
     ${PROTO_SRCS})
