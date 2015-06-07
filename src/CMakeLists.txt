@@ -506,12 +506,14 @@ add_executable(analyticsd
     analytics/ECommerceRecoQueriesFeed.cc
     analytics/ECommerceSearchQueriesFeed.cc
     analytics/ECommercePreferenceSetsFeed.cc
+    analytics/RecoEngineStatsQuery.cc
     analytics/JSONSink.cc
     analytics/FeedExportApp.cc
     analytics/AnalyticsApp.cc
     analytics/AnalyticsQueryMapper.cc
     analytics/AnalyticsQueryReducer.cc
     analytics/AnalyticsTableBuild.cc
+    analytics/RecoStats.cc
     schemas.cc
     analyticsd.cc
     ${PROTO_SRCS})

@@ -26,6 +26,7 @@ class CustomerNamespace;
 struct TrackedQueryItem {
   ItemRef item;
   bool clicked;
+  bool seen;
   int position;
   int variant;
 };
