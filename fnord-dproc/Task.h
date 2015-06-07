@@ -28,7 +28,7 @@ class TaskContext;
 typedef Function<RefPtr<Task> (const Buffer& params)> TaskFactory;
 
 template <typename T>
-using ProtoTaskFactory = Function<RefPtr<Task> (const T& params)>;
+using ProtoRDDFactory = Function<RefPtr<Task> (const T& params)>;
 
 struct TaskDependency {
   String task_name;
@@ -43,9 +43,6 @@ public:
 
   virtual void compute(TaskContext* context) = 0;
 
-  virtual RefPtr<VFSFile> encode() const = 0;
-  virtual void decode(RefPtr<VFSFile> data) = 0;
-
   virtual List<TaskDependency> dependencies() const {
     return List<TaskDependency>{};
   }
@@ -53,6 +50,14 @@ public:
   virtual Vector<String> preferredLocations() const {
     return Vector<String>{};
   }
+
+};
+
+class RDD : public Task {
+public:
+
+  virtual RefPtr<VFSFile> encode() const = 0;
+  virtual void decode(RefPtr<VFSFile> data) = 0;
 
   virtual Option<String> cacheKey() const {
     return None<String>();
@@ -68,6 +73,7 @@ public:
     }
   }
 
+
 };
 
 class TaskContext {
@@ -78,14 +84,14 @@ public:
   template <typename TaskType>
   RefPtr<TaskType> getDependencyAs(size_t index);
 
-  virtual RefPtr<Task> getDependency(size_t index) = 0;
+  virtual RefPtr<RDD> getDependency(size_t index) = 0;
 
   virtual size_t numDependencies() const = 0;
 
 };
 
 template <typename _ParamType, typename _ResultType>
-class ProtoTask : public Task {
+class ProtoRDD : public RDD {
 public:
   typedef _ParamType ParamType;
   typedef _ResultType ResultType;
@@ -103,22 +109,22 @@ RefPtr<TaskType> TaskContext::getDependencyAs(size_t index) {
 }
 
 //template <typename ParamType, typename ResultType>
-//RefPtr<VFSFile> ProtoTask<ParamType, ResultType>::run(TaskContext* context) {
+//RefPtr<VFSFile> ProtoRDD<ParamType, ResultType>::run(TaskContext* context) {
 //  ResultType result;
 //  run(context, &result);
 //  return msg::encode(result).get();
 //}
 
 //template <typename _ParamType, typename _ResultType>
-//ProtoTask<RefPtr<VFSFile> run() override;
+//ProtoRDD<RefPtr<VFSFile> run() override;
 
 
 //template <typename ProtoType>
 //template <typename... ArgTypes>
-//ProtoTask<ProtoType>::ProtoTask(
+//ProtoRDD<ProtoType>::ProtoRDD(
 //    const Buffer& buf,
 //    ArgTypes... args) :
-//    ProtoTask<ProtoType>(ProtoType{}, args...) {}
+//    ProtoRDD<ProtoType>(ProtoType{}, args...) {}
 
 } // namespace dproc
 } // namespace fnord

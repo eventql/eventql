@@ -44,7 +44,7 @@ protected:
         const String& task_name,
         const Buffer& params);
 
-    RefPtr<Task> getDependency(size_t index) override;
+    RefPtr<dproc::RDD> getDependency(size_t index) override;
     size_t numDependencies() const override;
 
     void readCache();
