@@ -39,9 +39,9 @@ public:
   RefPtr<Task> getTaskInstance(const TaskSpec& spec) override;
 
   template <typename ProtoType>
-  void registerProtoTaskFactory(
+  void registerProtoRDDFactory(
       const String& name,
-      ProtoTaskFactory<ProtoType> factory);
+      ProtoRDDFactory<ProtoType> factory);
 
   void registerTaskFactory(const String& name, TaskFactory factory);
 
@@ -49,7 +49,7 @@ public:
   void registerTask(const String& name, ArgTypes... args);
 
   template <typename TaskType, typename... ArgTypes>
-  void registerProtoTask(const String& name, ArgTypes... args);
+  void registerProtoRDD(const String& name, ArgTypes... args);
 
 protected:
   String name_;
@@ -57,9 +57,9 @@ protected:
 };
 
 template <typename ProtoType>
-void DefaultApplication::registerProtoTaskFactory(
+void DefaultApplication::registerProtoRDDFactory(
     const String& name,
-    ProtoTaskFactory<ProtoType> factory) {
+    ProtoRDDFactory<ProtoType> factory) {
   registerTaskFactory(name, [factory] (const Buffer& params) -> RefPtr<Task> {
     return factory(msg::decode<ProtoType>(params));
   });
@@ -73,7 +73,7 @@ void DefaultApplication::registerTask(const String& name, ArgTypes... args) {
 }
 
 template <typename TaskType, typename... ArgTypes>
-void DefaultApplication::registerProtoTask(
+void DefaultApplication::registerProtoRDD(
     const String& name,
     ArgTypes... args) {
   registerTaskFactory(name, [=] (const Buffer& params) -> RefPtr<Task> {
