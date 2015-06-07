@@ -43,7 +43,7 @@ public:
    * previously started by calling "startResponse". You may call this method
    * zero or more times before calling finishResponse
    */
-  void writeBodyChunk(const Buffer& buf);
+  void writeBodyChunk(const VFSFile& buf);
 
   /**
    * Finish the http response. Must be called iff the HTTP response was started
