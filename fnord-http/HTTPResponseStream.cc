@@ -48,7 +48,7 @@ void HTTPResponseStream::startResponse(const HTTPResponse& resp) {
     std::bind(&HTTPResponseStream::onCallbackCompleted, this));
 }
 
-void HTTPResponseStream::writeBodyChunk(const Buffer& buf) {
+void HTTPResponseStream::writeBodyChunk(const VFSFile& buf) {
   std::unique_lock<std::mutex> lk(mutex_);
   buf_.append(buf.data(), buf.size());
   onStateChanged(&lk);
