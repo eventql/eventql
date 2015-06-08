@@ -24,9 +24,9 @@ UNIT_TEST(LogJoinTest);
 typedef HashMap<String, HashMap<String, String>> StringMap;
 
 LogJoinTarget mkTestTarget() {
-  msg::MessageSchemaRepository schemas;
-  loadDefaultSchemas(&schemas);
-  LogJoinTarget trgt(&schemas, false);
+  auto schemas = new msg::MessageSchemaRepository(); // FIXPAUL leak
+  loadDefaultSchemas(schemas);
+  LogJoinTarget trgt(schemas, false);
 
   trgt.setNormalize([] (Language l, const String& q) { return q; });
 
@@ -38,9 +38,9 @@ LogJoinTarget mkTestTarget() {
 }
 
 LogJoinTarget mkTestTargetWithFieldExpansion() {
-  msg::MessageSchemaRepository schemas;
-  loadDefaultSchemas(&schemas);
-  LogJoinTarget trgt(&schemas, false);
+  auto schemas = new msg::MessageSchemaRepository(); // FIXPAUL leak
+  loadDefaultSchemas(schemas);
+  LogJoinTarget trgt(schemas, false);
 
   trgt.setNormalize([] (Language l, const String& q) { return q; });
 

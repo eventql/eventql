@@ -7,7 +7,8 @@ add_library(cm-common OBJECT
     CTRCounter.cc
     Document.cc
     ItemRef.cc
-    CustomerNamespace.cc)
+    CustomerNamespace.cc
+    ${PROTO_SRCS})
 
 # cm-frontend
 set_source_files_properties(${CMAKE_BINARY_DIR}/cm-frontend-assets.cc PROPERTIES GENERATED true)
@@ -42,8 +43,7 @@ add_executable(cm-frontend
     frontend/IndexFeedUpload.cc
     cm-frontend.cc
     schemas.cc
-    ${CMAKE_BINARY_DIR}/cm-frontend-assets.cc
-    ${PROTO_SRCS})
+    ${CMAKE_BINARY_DIR}/cm-frontend-assets.cc)
 
 target_link_libraries(cm-frontend ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_LIBS})
 target_link_libraries(cm-frontend m)
@@ -84,8 +84,7 @@ add_executable(cm-logjoin
     logjoin/LogJoinUpload.cc
     logjoin/LogJoinExport.cc
     logjoin/LogJoinTarget.cc
-    logjoin/LogJoinShard.cc
-    ${PROTO_SRCS})
+    logjoin/LogJoinShard.cc)
 
 target_link_libraries(cm-logjoin ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_LIBS} ${FNORD_FTS_LIBS})
 
@@ -104,7 +103,6 @@ add_executable(tests/test-logjoin
     logjoin/TrackedItemVisit.cc
     logjoin/TrackedQuery.cc
     logjoin/TrackedSession.cc
-    JoinedSession.pb.cc
     LogJoin_test.cc)
 
 target_link_libraries(tests/test-logjoin ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_LIBS} ${FNORD_FTS_LIBS})
@@ -451,8 +449,7 @@ add_executable(cm-chunkserver
     JoinedSessionViewer.cc
     ModelReplication.cc
     schemas.cc
-    cm-chunkserver.cc
-    ${PROTO_SRCS})
+    cm-chunkserver.cc)
 
 target_link_libraries(cm-chunkserver
     ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_LIBS})
@@ -520,8 +517,7 @@ add_executable(analyticsd
     analytics/reports/TopSearchTermsReport.cc
     analytics/reports/RecoEngineStatsReport.cc
     schemas.cc
-    analyticsd.cc
-    ${PROTO_SRCS})
+    analyticsd.cc)
 
 target_link_libraries(analyticsd
     ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_LIBS} ${FNORD_FTS_LIBS})
