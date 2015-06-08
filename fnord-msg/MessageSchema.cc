@@ -17,7 +17,95 @@ namespace msg {
 
 RefPtr<MessageSchema> MessageSchema::fromProtobuf(
     const google::protobuf::Descriptor* dsc) {
-  RAISE(kNotYetImplementedError);
+  Vector<msg::MessageSchemaField> fields;
+
+  auto nfields = dsc->field_count();
+  for (size_t i = 0; i < nfields; ++i) {
+    auto field = dsc->field(i);
+
+    switch (field->type()) {
+
+      case google::protobuf::FieldDescriptor::TYPE_BOOL:
+        fields.emplace_back(
+            field->number(),
+            field->name(),
+            msg::FieldType::BOOLEAN,
+            0,
+            field->is_repeated(),
+            field->is_optional());
+        break;
+
+      case google::protobuf::FieldDescriptor::TYPE_STRING:
+        fields.emplace_back(
+            field->number(),
+            field->name(),
+            msg::FieldType::STRING,
+            0xffffffff,
+            field->is_repeated(),
+            field->is_optional());
+        break;
+
+      case google::protobuf::FieldDescriptor::TYPE_UINT64:
+        fields.emplace_back(
+            field->number(),
+            field->name(),
+            msg::FieldType::UINT64,
+            std::numeric_limits<uint64_t>::max(),
+            field->is_repeated(),
+            field->is_optional());
+        break;
+
+      case google::protobuf::FieldDescriptor::TYPE_UINT32:
+        fields.emplace_back(
+            field->number(),
+            field->name(),
+            msg::FieldType::UINT32,
+            std::numeric_limits<uint32_t>::max(),
+            field->is_repeated(),
+            field->is_optional());
+        break;
+
+      case google::protobuf::FieldDescriptor::TYPE_ENUM: {
+        size_t maxval = 0;
+        auto enum_dsc = field->enum_type();
+        auto nvals = enum_dsc->value_count();
+        for (int j = 0; j < nvals; ++j) {
+          auto enum_val = enum_dsc->value(j);
+          if (enum_val->number() > maxval) {
+            maxval = enum_val->number();
+          }
+        }
+
+        fields.emplace_back(
+            field->number(),
+            field->name(),
+            msg::FieldType::UINT64,
+            maxval,
+            field->is_repeated(),
+            field->is_optional());
+        break;
+      }
+
+      case google::protobuf::FieldDescriptor::TYPE_MESSAGE:
+        fields.emplace_back(
+            MessageSchemaField::mkObjectField(
+                field->number(),
+                field->name(),
+                field->is_repeated(),
+                field->is_optional(),
+                MessageSchema::fromProtobuf(field->message_type())));
+        break;
+
+      default:
+        RAISEF(
+            kNotImplementedError,
+            "field type not implemented: $0",
+            field->type_name());
+
+    }
+  }
+
+  return new msg::MessageSchema(dsc->full_name(), fields);
 }
 
 static void schemaNodeToString(
@@ -65,6 +153,11 @@ static void schemaNodeToString(
 
     case FieldType::UINT32:
       type_name = "uint32";
+      attrs += StringUtil::format(" @maxval=$0", field.type_size);
+      break;
+
+    case FieldType::UINT64:
+      type_name = "uint64";
       attrs += StringUtil::format(" @maxval=$0", field.type_size);
       break;
 

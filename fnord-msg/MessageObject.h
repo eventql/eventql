@@ -20,7 +20,8 @@ enum class FieldType : uint8_t {
   OBJECT = 0,
   BOOLEAN = 1,
   UINT32 = 2,
-  STRING = 3
+  STRING = 3,
+  UINT64 = 4
 };
 
 union MessageObjectValues {
