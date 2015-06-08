@@ -134,6 +134,14 @@ MessageSchema::MessageSchema(const MessageSchema& other) :
     field_types_(other.field_types_),
     field_names_(other.field_names_) {}
 
+const String& MessageSchema::name() const {
+  return name_;
+}
+
+const Vector<MessageSchemaField>& MessageSchema::fields() const {
+  return fields_;
+}
+
 String MessageSchema::toString() const {
   String str = StringUtil::format("object $0 {\n", name_);
 
@@ -148,7 +156,7 @@ String MessageSchema::toString() const {
 uint32_t MessageSchema::fieldId(const String& path) const {
   auto id = field_ids_.find(path);
   if (id == field_ids_.end()) {
-    RAISEF(kIndexError, "unknown field: $0", path);
+    RAISEF(kIndexError, "field not found: $0", path);
   } else {
     return id->second;
   }
@@ -161,7 +169,7 @@ FieldType MessageSchema::fieldType(uint32_t id) const {
 
   auto type = field_types_.find(id);
   if (type == field_types_.end()) {
-    RAISEF(kIndexError, "unknown field: $0", id);
+    RAISEF(kIndexError, "field not found: $0", id);
   } else {
     return type->second;
   }
@@ -174,10 +182,20 @@ const String& MessageSchema::fieldName(uint32_t id) const {
 
   auto name = field_names_.find(id);
   if (name == field_names_.end()) {
-    RAISEF(kIndexError, "unknown field: $0", id);
+    RAISEF(kIndexError, "field not found: $0", id);
   } else {
     return name->second;
   }
+}
+
+RefPtr<MessageSchema> MessageSchema::fieldSchema(uint32_t id) const {
+  for (const auto& field : fields_) {
+    if (field.id == id) {
+      return field.schema;
+    }
+  }
+
+  RAISEF(kIndexError, "field not found: $0", id);
 }
 
 Set<String> MessageSchema::columns() const {
