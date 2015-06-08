@@ -15,7 +15,7 @@ namespace cstable {
 RecordMaterializer::RecordMaterializer(
     msg::MessageSchema* schema,
     CSTableReader* reader) {
-  for (const auto& f : schema->fields) {
+  for (const auto& f : schema->fields()) {
     createColumns("", 0, Vector<Tuple<uint64_t, bool, uint32_t>>{}, f, reader);
   }
 }
@@ -98,7 +98,7 @@ void RecordMaterializer::createColumns(
     case msg::FieldType::OBJECT: {
       parents.emplace_back(field.id, field.repeated, dmax);
 
-      for (const auto& f : field.schema->fields) {
+      for (const auto& f : field.schema->fields()) {
         createColumns(colname + ".", dmax, parents, f, reader);
       }
       break;
