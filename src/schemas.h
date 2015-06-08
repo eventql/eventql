@@ -18,13 +18,5 @@ namespace cm {
 
 void loadDefaultSchemas(msg::MessageSchemaRepository* repo);
 
-RefPtr<msg::MessageSchema> JoinedSessionSchema();
-RefPtr<msg::MessageSchema> JoinedSearchQuerySchema();
-RefPtr<msg::MessageSchema> JoinedSearchQueryResultItemSchema();
-RefPtr<msg::MessageSchema> JoinedItemVisitSchema();
-RefPtr<msg::MessageSchema> JoinedCartItemSchema();
-RefPtr<msg::MessageSchema> IndexChangeRequestSchema();
-RefPtr<msg::MessageSchema> IndexChangeRequestAttributeSchema();
-
 }
 #endif
