@@ -52,7 +52,8 @@ message JoinedSearchQueryResultItem {
   /**
    * The item id of the result item/product
    */
-  required string item_id = 20;
+  required string item_id = 20
+      [(coding) = { maxval: 1024 }];
 
   /**
    * The position at which this item was shown. Start from 1 and 1 is the first
@@ -376,7 +377,7 @@ message JoinedSession {
    * The time at which this search query was first/last seen
    */
   optional uint64 first_seen_time = 53;
-  optional uint64 first_last_time = 54;
+  optional uint64 last_seen_time = 54;
 
   optional string referrer_url = 57
       [(coding) = { maxval: 1024 }];
