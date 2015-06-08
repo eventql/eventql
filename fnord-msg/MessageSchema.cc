@@ -25,16 +25,11 @@ RefPtr<MessageSchema> MessageSchema::fromProtobuf(
   for (size_t i = 0; i < nfields; ++i) {
     auto field = dsc->field(i);
 
-    CodingOptions coding;
-
-    auto fopts_str = field->options().SerializeAsString();
-    if (!fopts_str.empty()) {
-      coding = msg::decode<CodingOptions>(fopts_str.substr(2)); // FIXPAUL HACK!!! ;)
-    }
+    CodingOptions copts = field->options().GetExtension(coding);
 
     EncodingHint enc_hint = EncodingHint::NONE;
-    if (coding.encoding() == "BITPACK") enc_hint = EncodingHint::BITPACK;
-    if (coding.encoding() == "LEB128") enc_hint = EncodingHint::LEB128;
+    if (copts.encoding() == "BITPACK") enc_hint = EncodingHint::BITPACK;
+    if (copts.encoding() == "LEB128") enc_hint = EncodingHint::LEB128;
 
     switch (field->type()) {
 
@@ -54,7 +49,7 @@ RefPtr<MessageSchema> MessageSchema::fromProtobuf(
             field->number(),
             field->name(),
             msg::FieldType::STRING,
-            coding.has_maxval() ? coding.maxval() : 0xffffffff,
+            copts.has_maxval() ? copts.maxval() : 0xffffffff,
             field->is_repeated(),
             field->is_optional(),
             enc_hint);
@@ -65,8 +60,8 @@ RefPtr<MessageSchema> MessageSchema::fromProtobuf(
             field->number(),
             field->name(),
             msg::FieldType::UINT64,
-            coding.has_maxval() ?
-                coding.maxval() : std::numeric_limits<uint64_t>::max(),
+            copts.has_maxval() ?
+                copts.maxval() : std::numeric_limits<uint64_t>::max(),
             field->is_repeated(),
             field->is_optional(),
             enc_hint);
@@ -77,8 +72,8 @@ RefPtr<MessageSchema> MessageSchema::fromProtobuf(
             field->number(),
             field->name(),
             msg::FieldType::UINT32,
-            coding.has_maxval() ?
-                coding.maxval() : std::numeric_limits<uint32_t>::max(),
+            copts.has_maxval() ?
+                copts.maxval() : std::numeric_limits<uint32_t>::max(),
             field->is_repeated(),
             field->is_optional(),
             enc_hint);
