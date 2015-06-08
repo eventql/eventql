@@ -96,7 +96,8 @@ RefPtr<MessageSchema> MessageSchema::fromProtobuf(
             msg::FieldType::UINT64,
             maxval,
             field->is_repeated(),
-            field->is_optional());
+            field->is_optional(),
+            maxval < 250 ? EncodingHint::BITPACK : EncodingHint::LEB128);
         break;
       }
 
