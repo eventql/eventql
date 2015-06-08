@@ -92,9 +92,9 @@ struct MessageSchema : public RefCounted {
 class MessageSchemaRepository {
 public:
 
-  const MessageSchema& getSchema(const String& name);
+  RefPtr<MessageSchema> getSchema(const String& name) const;
 
-  void registerSchema(const String& name, MessageSchema schema);
+  void registerSchema(RefPtr<MessageSchema> schema);
 
 };
 
