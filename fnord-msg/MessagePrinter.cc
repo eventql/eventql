@@ -25,14 +25,14 @@ String MessagePrinter::printObject(
     const MessageSchema& schema) {
   String ws(level * 2, ' ');
 
-  switch (schema.type(msg.id)) {
+  switch (schema.fieldType(msg.id)) {
 
     case FieldType::OBJECT: {
       String str;
-      str.append(StringUtil::format("$0$1 {\n", ws, schema.name(msg.id)));
+      str.append(StringUtil::format("$0$1 {\n", ws, schema.fieldName(msg.id)));
 
       for (const auto& o : msg.asObject()) {
-        str.append(printObject(level + 1, o, schema));
+        str.append(printObject(level + 1, o, *schema.getField(msg.id).schema));
       }
 
       str.append(ws + "}\n");
@@ -43,21 +43,21 @@ String MessagePrinter::printObject(
       return StringUtil::format(
           "$0$1 = $2\n",
           ws,
-          schema.name(msg.id),
+          schema.fieldName(msg.id),
           msg.asBool());
 
     case FieldType::STRING:
       return StringUtil::format(
           "$0$1 = \"$2\"\n",
           ws,
-          schema.name(msg.id),
+          schema.fieldName(msg.id),
           msg.asString());
 
     case FieldType::UINT32:
       return StringUtil::format(
           "$0$1 = $2\n",
           ws,
-          schema.name(msg.id),
+          schema.fieldName(msg.id),
           msg.asUInt32());
 
   }

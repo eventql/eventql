@@ -23,7 +23,7 @@ CSTableBuilder::CSTableBuilder(
     const msg::MessageSchema* schema) :
     schema_(schema),
     num_records_(0) {
-  for (const auto& f : schema_->fields) {
+  for (const auto& f : schema_->fields()) {
     createColumns("", 0, 0, f);
   }
 }
@@ -46,7 +46,7 @@ void CSTableBuilder::createColumns(
 
   switch (field.type) {
     case msg::FieldType::OBJECT:
-      for (const auto& f : field.schema->fields) {
+      for (const auto& f : field.schema->fields()) {
         createColumns(colname + ".", r_max, d_max, f);
       }
       break;
@@ -83,7 +83,7 @@ void CSTableBuilder::createColumns(
 }
 
 void CSTableBuilder::addRecord(const msg::MessageObject& msg) {
-  for (const auto& f : schema_->fields) {
+  for (const auto& f : schema_->fields()) {
     addRecordField(0, 0, 0, msg, "", f);
   }
 
@@ -119,7 +119,7 @@ void CSTableBuilder::addRecordField(
 
     switch (field.type) {
       case msg::FieldType::OBJECT:
-        for (const auto& f : field.schema->fields) {
+        for (const auto& f : field.schema->fields()) {
           addRecordField(
               next_r,
               rmax,
@@ -156,7 +156,7 @@ void CSTableBuilder::writeNull(
   switch (field.type) {
 
     case msg::FieldType::OBJECT:
-      for (const auto& f : field.schema->fields) {
+      for (const auto& f : field.schema->fields()) {
         writeNull(r, d, column + "." + f.name, f);
       }
 
