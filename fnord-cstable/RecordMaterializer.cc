@@ -98,7 +98,7 @@ void RecordMaterializer::createColumns(
     case msg::FieldType::OBJECT: {
       parents.emplace_back(field.id, field.repeated, dmax);
 
-      for (const auto& f : field.fields) {
+      for (const auto& f : field.schema->fields) {
         createColumns(colname + ".", dmax, parents, f, reader);
       }
       break;

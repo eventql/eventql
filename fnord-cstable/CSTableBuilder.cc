@@ -46,7 +46,7 @@ void CSTableBuilder::createColumns(
 
   switch (field.type) {
     case msg::FieldType::OBJECT:
-      for (const auto& f : field.fields) {
+      for (const auto& f : field.schema->fields) {
         createColumns(colname + ".", r_max, d_max, f);
       }
       break;
@@ -119,7 +119,7 @@ void CSTableBuilder::addRecordField(
 
     switch (field.type) {
       case msg::FieldType::OBJECT:
-        for (const auto& f : field.fields) {
+        for (const auto& f : field.schema->fields) {
           addRecordField(
               next_r,
               rmax,
@@ -156,7 +156,7 @@ void CSTableBuilder::writeNull(
   switch (field.type) {
 
     case msg::FieldType::OBJECT:
-      for (const auto& f : field.fields) {
+      for (const auto& f : field.schema->fields) {
         writeNull(r, d, column + "." + f.name, f);
       }
 

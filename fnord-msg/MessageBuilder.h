@@ -7,8 +7,7 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#ifndef _FNORD_MSG_MESSAGEBUILDER_H
-#define _FNORD_MSG_MESSAGEBUILDER_H
+#ifdef TRASH
 #include <fnord-msg/MessageSchema.h>
 #include <fnord-base/stdtypes.h>
 #include <fnord-base/buffer.h>

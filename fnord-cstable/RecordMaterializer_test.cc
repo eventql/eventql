@@ -21,6 +21,7 @@
 
 using namespace fnord;
 using namespace fnord::cstable;
+using namespace fnord::msg;
 
 UNIT_TEST(RecordMaterializerTest);
 
@@ -35,13 +36,17 @@ TEST_CASE(RecordMaterializerTest, TestSimpleReMaterialization, [] () {
       true,
       false);
 
-  level1.fields.emplace_back(
+  msg::MessageSchemaField level1_str(
       2,
       "str",
       msg::FieldType::STRING,
       1024,
       true,
       false);
+
+  level1.schema = new MessageSchema(
+      "Level1",
+      Vector<msg::MessageSchemaField> { level1_str });
 
   msg::MessageSchema schema(
       "TestSchema",
@@ -87,13 +92,17 @@ TEST_CASE(RecordMaterializerTest, TestSimpleReMaterializationWithNull, [] () {
       true,
       false);
 
-  level1.fields.emplace_back(
+  msg::MessageSchemaField level1_str(
       2,
       "str",
       msg::FieldType::STRING,
       1024,
       true,
       false);
+
+  level1.schema = new MessageSchema(
+      "Level1",
+      Vector<msg::MessageSchemaField> { level1_str });
 
   msg::MessageSchema schema(
       "TestSchema",
@@ -150,7 +159,7 @@ TEST_CASE(RecordMaterializerTest, TestReMatWithNonRepeatedParent, [] () {
       true,
       false);
 
-  level2.fields.emplace_back(
+  msg::MessageSchemaField level2_str(
       3,
       "str",
       msg::FieldType::STRING,
@@ -158,7 +167,14 @@ TEST_CASE(RecordMaterializerTest, TestReMatWithNonRepeatedParent, [] () {
       true,
       false);
 
-  level1.fields.emplace_back(level2);
+  level2.schema = new MessageSchema(
+      "Level2",
+      Vector<msg::MessageSchemaField> { level2_str });
+
+  level1.schema = new MessageSchema(
+      "Level1",
+      Vector<msg::MessageSchemaField> { level2 });
+
   msg::MessageSchema schema(
       "TestSchema",
       Vector<msg::MessageSchemaField> { level1 });
