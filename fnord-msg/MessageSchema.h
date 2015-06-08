@@ -38,6 +38,8 @@ enum class EncodingHint : uint8_t {
   LEB128 = 2
 };
 
+class MessageSchema;
+
 struct MessageSchemaField {
 
   MessageSchemaField(
@@ -54,7 +56,8 @@ struct MessageSchemaField {
     type_size(_type_size),
     repeated(_repeated),
     optional(_optional),
-    encoding(_encoding) {}
+    encoding(_encoding),
+    schema(nullptr) {}
 
   uint32_t id;
   String name;
@@ -63,7 +66,7 @@ struct MessageSchemaField {
   bool repeated;
   bool optional;
   EncodingHint encoding;
-  Vector<MessageSchemaField> fields;
+  RefPtr<MessageSchema> schema;
 };
 
 struct MessageSchema : public RefCounted {
@@ -84,6 +87,15 @@ struct MessageSchema : public RefCounted {
   const String& name(uint32_t id) const;
   Set<String> columns() const;
   String toString() const;
+};
+
+class MessageSchemaRepository {
+public:
+
+  const MessageSchema& getSchema(const String& name);
+
+  void registerSchema(const String& name, MessageSchema schema);
+
 };
 
 } // namespace msg

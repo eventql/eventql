@@ -47,7 +47,7 @@ static void schemaNodeToString(
           field.name,
           field.id));
 
-      for (const auto& f : field.fields) {
+      for (const auto& f : field.schema->fields) {
         schemaNodeToString(level + 1, f, str);
       }
 
@@ -107,7 +107,7 @@ static void addFieldToIDIndex(
   field_ids->emplace(colname, field.id);
   field_types->emplace(field.id, field.type);
   field_names->emplace(field.id, field.name);
-  for (const auto& f : field.fields) {
+  for (const auto& f : field.schema->fields) {
     addFieldToIDIndex(colname + ".", f, field_ids, field_types, field_names);
   }
 }
