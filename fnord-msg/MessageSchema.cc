@@ -47,7 +47,7 @@ static void schemaNodeToString(
           field.name,
           field.id));
 
-      for (const auto& f : field.schema->fields) {
+      for (const auto& f : field.schema->fields()) {
         schemaNodeToString(level + 1, f, str);
       }
 
@@ -97,42 +97,47 @@ static void schemaNodeToString(
       attrs));
 }
 
-static void addFieldToIDIndex(
-    const String& prefix,
-    const MessageSchemaField& field,
-    HashMap<String, uint32_t>* field_ids,
-    HashMap<uint32_t, FieldType>* field_types,
-    HashMap<uint32_t, String>* field_names) {
-  auto colname = prefix + field.name;
-  field_ids->emplace(colname, field.id);
-  field_types->emplace(field.id, field.type);
-  field_names->emplace(field.id, field.name);
-  for (const auto& f : field.schema->fields) {
-    addFieldToIDIndex(colname + ".", f, field_ids, field_types, field_names);
-  }
+MessageSchemaField MessageSchemaField::mkObjectField(
+    uint32_t id,
+    String name,
+    bool repeated,
+    bool optional,
+    RefPtr<msg::MessageSchema> schema) {
+  MessageSchemaField field(
+      id,
+      name,
+      FieldType::OBJECT,
+      0,
+      repeated,
+      optional);
+
+  field.schema = schema;
+  return field;
 }
 
 MessageSchema::MessageSchema(
-    const String& _name,
-    Vector<MessageSchemaField> _fields) :
-    name_(_name),
-    fields(_fields) {
-  for (const auto& f : fields) {
-    addFieldToIDIndex("", f, &field_ids, &field_types, &field_names);
+    const String& name,
+    Vector<MessageSchemaField> fields) :
+    name_(name),
+    fields_(fields) {
+  for (const auto& field : fields_) {
+    field_ids_.emplace(field.name, field.id);
+    field_types_.emplace(field.id, field.type);
+    field_names_.emplace(field.id, field.name);
   }
 }
 
 MessageSchema::MessageSchema(const MessageSchema& other) :
     name_(other.name_),
-    fields(other.fields),
-    field_ids(other.field_ids),
-    field_types(other.field_types),
-    field_names(other.field_names) {}
+    fields_(other.fields_),
+    field_ids_(other.field_ids_),
+    field_types_(other.field_types_),
+    field_names_(other.field_names_) {}
 
 String MessageSchema::toString() const {
   String str = StringUtil::format("object $0 {\n", name_);
 
-  for (const auto& f : fields) {
+  for (const auto& f : fields_) {
     schemaNodeToString(1, f, &str);
   }
 
@@ -140,35 +145,35 @@ String MessageSchema::toString() const {
   return str;
 }
 
-uint32_t MessageSchema::id(const String& path) const {
-  auto id = field_ids.find(path);
-  if (id == field_ids.end()) {
+uint32_t MessageSchema::fieldId(const String& path) const {
+  auto id = field_ids_.find(path);
+  if (id == field_ids_.end()) {
     RAISEF(kIndexError, "unknown field: $0", path);
   } else {
     return id->second;
   }
 }
 
-FieldType MessageSchema::type(uint32_t id) const {
+FieldType MessageSchema::fieldType(uint32_t id) const {
   if (id == 0) {
     return FieldType::OBJECT;
   }
 
-  auto type = field_types.find(id);
-  if (type == field_types.end()) {
+  auto type = field_types_.find(id);
+  if (type == field_types_.end()) {
     RAISEF(kIndexError, "unknown field: $0", id);
   } else {
     return type->second;
   }
 }
 
-const String& MessageSchema::name(uint32_t id) const {
+const String& MessageSchema::fieldName(uint32_t id) const {
   if (id == 0) {
     return name_;
   }
 
-  auto name = field_names.find(id);
-  if (name == field_names.end()) {
+  auto name = field_names_.find(id);
+  if (name == field_names_.end()) {
     RAISEF(kIndexError, "unknown field: $0", id);
   } else {
     return name->second;
@@ -178,7 +183,7 @@ const String& MessageSchema::name(uint32_t id) const {
 Set<String> MessageSchema::columns() const {
   Set<String> columns;
 
-  for (const auto& c : field_names) {
+  for (const auto& c : field_names_) {
     columns.emplace(c.second);
   }
 
@@ -196,7 +201,7 @@ RefPtr<MessageSchema> MessageSchemaRepository::getSchema(
 }
 
 void MessageSchemaRepository::registerSchema(RefPtr<MessageSchema> schema) {
-  schemas_.emplace(schema->name_, schema);
+  schemas_.emplace(schema->name(), schema);
 }
 
 } // namespace msg

@@ -31,7 +31,7 @@ void MessageDecoder::decode(
     auto fkey = reader.readVarUInt();
     auto fid = fkey >> 3;
 
-    switch (schema.type(fid)) {
+    switch (schema.fieldType(fid)) {
       case FieldType::OBJECT: {
         auto len = reader.readVarUInt();
         auto nxt = &msg->addChild(fid);
@@ -39,7 +39,8 @@ void MessageDecoder::decode(
           RAISE(kBufferOverflowError);
         }
 
-        decode(reader.read(len), len, schema, nxt);
+        auto obj_schema = schema.getField(fid).schema;
+        decode(reader.read(len), len, *obj_schema, nxt);
         break;
       }
 

@@ -42,6 +42,13 @@ class MessageSchema;
 
 struct MessageSchemaField {
 
+  static MessageSchemaField mkObjectField(
+      uint32_t id,
+      String name,
+      bool repeated,
+      bool optional,
+      RefPtr<msg::MessageSchema> schema);
+
   MessageSchemaField(
     uint32_t _id,
     String _name,
@@ -69,24 +76,32 @@ struct MessageSchemaField {
   RefPtr<MessageSchema> schema;
 };
 
-struct MessageSchema : public RefCounted {
+class MessageSchema : public RefCounted {
+public:
+
   MessageSchema(
-      const String& _name,
-      Vector<MessageSchemaField> _fields);
+      const String& name,
+      Vector<MessageSchemaField> fields);
 
   MessageSchema(const MessageSchema& other);
 
-  String name_;
-  Vector<MessageSchemaField> fields;
-  HashMap<String, uint32_t> field_ids;
-  HashMap<uint32_t, FieldType> field_types;
-  HashMap<uint32_t, String> field_names;
+  const String& name() const;
 
-  uint32_t id(const String& path) const;
-  FieldType type(uint32_t id) const;
-  const String& name(uint32_t id) const;
+  const Vector<MessageSchemaField>& fields() const;
+  const MessageSchemaField& getField(uint32_t id) const;
+  uint32_t fieldId(const String& name) const;
+  FieldType fieldType(uint32_t id) const;
+  const String& fieldName(uint32_t id) const;
+
   Set<String> columns() const;
   String toString() const;
+
+protected:
+  String name_;
+  Vector<MessageSchemaField> fields_;
+  HashMap<String, uint32_t> field_ids_;
+  HashMap<uint32_t, FieldType> field_types_;
+  HashMap<uint32_t, String> field_names_;
 };
 
 class MessageSchemaRepository {

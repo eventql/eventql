@@ -28,13 +28,14 @@ void MessageEncoder::encodeObject(
     const MessageSchema& schema,
     util::BinaryMessageWriter* data) {
   try {
-    switch (schema.type(msg.id)) {
+    switch (schema.fieldType(msg.id)) {
 
       case FieldType::OBJECT: {
         util::BinaryMessageWriter cld;
         Vector<Pair<uint32_t, uint64_t>> obj_fields;
+        auto obj_schema = schema.getField(msg.id).schema;
         for (const auto& o : msg.asObject()) {
-          encodeObject(o, schema, &cld);
+          encodeObject(o, *obj_schema, &cld);
         }
 
         data->appendVarUInt((msg.id << 3) | 0x2);
@@ -67,7 +68,7 @@ void MessageEncoder::encodeObject(
         kRuntimeError,
         "error while encoding field $0 ('$1'): $2",
         msg.id,
-        schema.name(msg.id),
+        schema.fieldName(msg.id),
         e.what());
   }
 }
