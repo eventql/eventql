@@ -50,4 +50,7 @@ add_executable(tests/test-recordmaterializer
     $<TARGET_OBJECTS:fnord-cstable>
     RecordMaterializer_test.cc)
 
-target_link_libraries(tests/test-recordmaterializer ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(
+    tests/test-recordmaterializer
+    ${CMAKE_THREAD_LIBS_INIT}
+    ${FNORD_MSG_LIBS})
