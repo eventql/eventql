@@ -93,7 +93,7 @@ RefPtr<MessageSchema> MessageSchema::fromProtobuf(
         fields.emplace_back(
             field->number(),
             field->name(),
-            msg::FieldType::UINT64,
+            msg::FieldType::UINT32,
             maxval,
             field->is_repeated(),
             field->is_optional(),
