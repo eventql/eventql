@@ -185,5 +185,19 @@ Set<String> MessageSchema::columns() const {
   return columns;
 }
 
+RefPtr<MessageSchema> MessageSchemaRepository::getSchema(
+    const String& name) const {
+  auto iter = schemas_.find(name);
+  if (iter == schemas_.end()) {
+    RAISEF(kRuntimeError, "schema not found: '$0'", name);
+  }
+
+  return iter->second;
+}
+
+void MessageSchemaRepository::registerSchema(RefPtr<MessageSchema> schema) {
+  schemas_.emplace(schema->name_, schema);
+}
+
 } // namespace msg
 } // namespace fnord
