@@ -114,7 +114,7 @@ message JoinedSearchQuery {
   /**
    * The time at which this search query was observer
    */
-  required uint64 time = 18;
+  required uint32 time = 18;
 
   /**
    * The language of the search query (i.e. on which language page/subdomain
@@ -263,7 +263,7 @@ message JoinedItemVisit {
   /**
    * The time at which the item was visited
    */
-  required uint64 time = 26;
+  required uint32 time = 26;
 
   /**
    * The item id of the item that was visited
@@ -302,7 +302,7 @@ message JoinedCartItem {
   /**
    * The time at which this item was last seen in the users cart
    */
-  required uint64 time = 33;
+  required uint32 time = 33;
 
   /**
    * The item id of the item (=product) that was added to the cart
@@ -376,8 +376,8 @@ message JoinedSession {
   /**
    * The time at which this search query was first/last seen
    */
-  optional uint64 first_seen_time = 53;
-  optional uint64 last_seen_time = 54;
+  optional uint32 first_seen_time = 53;
+  optional uint32 last_seen_time = 54;
 
   optional string referrer_url = 57
       [(coding) = { maxval: 1024 }];
