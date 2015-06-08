@@ -80,6 +80,15 @@ int main(int argc, const char** argv) {
       "<path>");
 
   flags.defineFlag(
+      "shopstats_table",
+      cli::FlagParser::T_STRING,
+      true,
+      NULL,
+      NULL,
+      "shopstats_table",
+      "<path>");
+
+  flags.defineFlag(
       "loglevel",
       fnord::cli::FlagParser::T_STRING,
       false,
@@ -111,7 +120,8 @@ int main(int argc, const char** argv) {
   dproc::DispatchService dproc;
   auto local_scheduler = mkRef(
       new dproc::LocalScheduler(
-          flags.getString("cachedir")));
+          flags.getString("cachedir"),
+          12));
 
   local_scheduler->start();
 
@@ -163,9 +173,9 @@ int main(int argc, const char** argv) {
   }
 
   /* stop stats */
-  //auto shopstats = cm::ShopStatsTable::open(flags.getString("shopstats_table"));
-  //cm::ShopStatsServlet shopstats_servlet(shopstats);
-  //http_router.addRouteByPrefixMatch("/shopstats", &shopstats_servlet, &tpool);
+  auto shopstats = cm::ShopStatsTable::open(flags.getString("shopstats_table"));
+  cm::ShopStatsServlet shopstats_servlet(shopstats);
+  http_router.addRouteByPrefixMatch("/shopstats", &shopstats_servlet, &tpool);
 
   ev.run();
   local_scheduler->stop();

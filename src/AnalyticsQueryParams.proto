@@ -30,4 +30,5 @@ message AnalyticsQueryMapperParams {
   required AnalyticsQuerySpec query = 1;
   required string stream_key = 2;
   required string partition_key = 3;
+  optional uint64 version = 4;
 }
