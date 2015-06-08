@@ -12,6 +12,7 @@
 #include <fnord-base/inspect.h>
 #include <fnord-msg/MessageSchema.h>
 #include <fnord-msg/CodingOptions.pb.h>
+#include <fnord-msg/msg.h>
 
 namespace fnord {
 namespace msg {
@@ -23,8 +24,13 @@ RefPtr<MessageSchema> MessageSchema::fromProtobuf(
   auto nfields = dsc->field_count();
   for (size_t i = 0; i < nfields; ++i) {
     auto field = dsc->field(i);
-    auto fopts = field->options();
-    auto coding_opts = fopts.GetExtension(coding);
+
+    CodingOptions coding;
+
+    auto fopts_str = field->options().SerializeAsString();
+    if (!fopts_str.empty()) {
+      coding = msg::decode<CodingOptions>(fopts_str.substr(2)); // FIXPAUL HACK!!! ;)
+    }
 
     switch (field->type()) {
 
@@ -43,7 +49,7 @@ RefPtr<MessageSchema> MessageSchema::fromProtobuf(
             field->number(),
             field->name(),
             msg::FieldType::STRING,
-            coding_opts.has_maxval() ? coding_opts.maxval() : 0xffffffff,
+            coding.has_maxval() ? coding.maxval() : 0xffffffff,
             field->is_repeated(),
             field->is_optional());
         break;
@@ -53,8 +59,8 @@ RefPtr<MessageSchema> MessageSchema::fromProtobuf(
             field->number(),
             field->name(),
             msg::FieldType::UINT64,
-            coding_opts.has_maxval() ?
-                coding_opts.maxval() : std::numeric_limits<uint64_t>::max(),
+            coding.has_maxval() ?
+                coding.maxval() : std::numeric_limits<uint64_t>::max(),
             field->is_repeated(),
             field->is_optional());
         break;
@@ -64,8 +70,8 @@ RefPtr<MessageSchema> MessageSchema::fromProtobuf(
             field->number(),
             field->name(),
             msg::FieldType::UINT32,
-            coding_opts.has_maxval() ?
-                coding_opts.maxval() : std::numeric_limits<uint32_t>::max(),
+            coding.has_maxval() ?
+                coding.maxval() : std::numeric_limits<uint32_t>::max(),
             field->is_repeated(),
             field->is_optional());
         break;
