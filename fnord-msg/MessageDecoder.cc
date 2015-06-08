@@ -39,7 +39,7 @@ void MessageDecoder::decode(
           RAISE(kBufferOverflowError);
         }
 
-        auto obj_schema = schema.getField(fid).schema;
+        auto obj_schema = schema.fieldSchema(fid);
         decode(reader.read(len), len, *obj_schema, nxt);
         break;
       }

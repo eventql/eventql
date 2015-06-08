@@ -33,7 +33,7 @@ void MessageEncoder::encodeObject(
       case FieldType::OBJECT: {
         util::BinaryMessageWriter cld;
         Vector<Pair<uint32_t, uint64_t>> obj_fields;
-        auto obj_schema = schema.getField(msg.id).schema;
+        auto obj_schema = schema.fieldSchema(msg.id);
         for (const auto& o : msg.asObject()) {
           encodeObject(o, *obj_schema, &cld);
         }
