@@ -12,6 +12,7 @@ include(FindPkgConfig)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/")
 find_package(Protobuf)
 
+set(PROTOC_ARGS --proto_path ${CMAKE_CURRENT_SOURCE_DIR}/ PARENT_SCOPE)
 option(ENABLE_TESTS "Build unit tests [default: ON]" ON)
 
 include_directories(${PROJECT_BINARY_DIR})
@@ -19,9 +20,10 @@ file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/tests)
 include_directories(../)
 include_directories(../3rdparty/)
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/../)
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
-file(GLOB PROTO_FILES *.proto)
-PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS ${PROTO_FILES})
+file(GLOB META_PROTO_FILES *.proto)
+PROTOBUF_GENERATE_CPP(META_PROTO_SRCS META_PROTO_HDRS ${META_PROTO_FILES})
 
 find_package(Threads)
 
@@ -38,7 +40,7 @@ add_library(fnord-msg OBJECT
     MessagePrinter.cc
     MessageObject.cc
     MessageSchema.cc
-    ${PROTO_SRCS})
+    ${META_PROTO_SRCS})
 
 set(FNORD_MSG_LIBS
     ${CMAKE_THREAD_LIBS_INIT}
