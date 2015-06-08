@@ -178,9 +178,9 @@ void CMFrontend::dispatchRPC(
     json::JSONRPCRequest* req,
     json::JSONRPCResponse* res) {
   if (req->method() == "index_document") {
-    auto index_req = req->getArg<IndexChangeRequest>(0, "index_request");
+    auto index_req = req->getArg<IndexChangeRequestStruct>(0, "index_request");
     stat_index_requests_total_.incr(1);
-    indexfeed_->insert(index_req);
+    indexfeed_->insert(index_req.toIndexChangeRequest());
 
     res->success([] (json::JSONOutputStream* jos) {
       jos->addTrue();

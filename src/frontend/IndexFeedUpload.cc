@@ -14,6 +14,7 @@
 #include "fnord-msg/MessageSchema.h"
 #include "fnord-msg/MessagePrinter.h"
 #include "fnord-msg/MessageEncoder.h"
+#include "fnord-msg/msg.h"
 #include "schemas.h"
 #include "unistd.h"
 
@@ -52,7 +53,7 @@ void IndexFeedUpload::uploadNext() {
   Set<String> customers;
 
   reqs.emplace_back(queue_->pop());
-  customers.emplace(reqs.back().customer);
+  customers.emplace(reqs.back().customer());
 
   for (int i = 0; i < 100; ++i) {
     auto nxt = queue_->poll();
@@ -60,7 +61,7 @@ void IndexFeedUpload::uploadNext() {
       break;
     } else {
       reqs.emplace_back(nxt.get());
-      customers.emplace(nxt.get().customer);
+      customers.emplace(nxt.get().customer());
     }
   }
 
@@ -68,7 +69,7 @@ void IndexFeedUpload::uploadNext() {
     Vector<IndexChangeRequest> batch;
 
     for (const auto& r : reqs) {
-      if (r.customer == customer) {
+      if (r.customer() == customer) {
         batch.emplace_back(r);
       }
     }
@@ -83,17 +84,8 @@ void IndexFeedUpload::uploadBatch(
   util::BinaryMessageWriter body;
 
   for (const auto& job : batch) {
-    IndexChangeRequest change_req;
+    auto change_req = job;
     change_req.set_customer(customer);
-    change_req.set_docid(job.item.docID().docid);
-
-    for (const auto& attr : job.attrs) {
-      auto& attr_obj = obj.addChild(schema_->id("attributes"));
-      auto p = change_req.add_params();
-      p.set_key(attr.first);
-      p.set_value(attr.second);
-    }
-
     auto buf = msg::encode(change_req);
     body.appendVarUInt(buf->size());
     body.append(buf->data(), buf->size());
