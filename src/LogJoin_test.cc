@@ -26,7 +26,7 @@ typedef HashMap<String, HashMap<String, String>> StringMap;
 LogJoinTarget mkTestTarget() {
   msg::MessageSchemaRepository schemas;
   loadDefaultSchemas(&schemas);
-  LogJoinTarget trgt(*schemas.getSchema("cm.JoinedSession"), false);
+  LogJoinTarget trgt(&schemas, false);
 
   trgt.setNormalize([] (Language l, const String& q) { return q; });
 
@@ -40,7 +40,7 @@ LogJoinTarget mkTestTarget() {
 LogJoinTarget mkTestTargetWithFieldExpansion() {
   msg::MessageSchemaRepository schemas;
   loadDefaultSchemas(&schemas);
-  LogJoinTarget trgt(*schemas.getSchema("cm.JoinedSession"), false);
+  LogJoinTarget trgt(&schemas, false);
 
   trgt.setNormalize([] (Language l, const String& q) { return q; });
 

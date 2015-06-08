@@ -36,7 +36,7 @@ class LogJoinTarget {
 public:
 
   LogJoinTarget(
-      const msg::MessageSchema& joined_sessions_schema,
+      msg::MessageSchemaRepository* schemas,
       bool dry_run);
 
   void setNormalize(
@@ -53,7 +53,7 @@ public:
   size_t num_sessions;
 
 protected:
-  msg::MessageSchema joined_sessions_schema_;
+  msg::MessageSchemaRepository* schemas_;
   Function<fnord::String (Language lang, const fnord::String& query)> normalize_;
   Function<Option<String> (const DocID& docid, const String& feature)> get_field_;
   bool dry_run_;
