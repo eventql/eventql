@@ -83,27 +83,20 @@ void IndexFeedUpload::uploadBatch(
   util::BinaryMessageWriter body;
 
   for (const auto& job : batch) {
-    msg::MessageObject obj;
-    obj.addChild(schema_->id("customer"), customer);
-    obj.addChild(schema_->id("docid"), job.item.docID().docid);
+    IndexChangeRequest change_req;
+    change_req.set_customer(customer);
+    change_req.set_docid(job.item.docID().docid);
 
     for (const auto& attr : job.attrs) {
       auto& attr_obj = obj.addChild(schema_->id("attributes"));
-      attr_obj.addChild(schema_->id("attributes.key"), attr.first);
-      attr_obj.addChild(schema_->id("attributes.value"), attr.second);
+      auto p = change_req.add_params();
+      p.set_key(attr.first);
+      p.set_value(attr.second);
     }
 
-#ifndef FNORD_NOTRACE
-    fnord::logTrace(
-        "cm.frontend",
-        "uploading change index request:\n$0",
-        msg::MessagePrinter::print(obj, *schema_));
-#endif
-
-    Buffer b;
-    msg::MessageEncoder::encode(obj, *schema_, &b);
-    body.appendVarUInt(b.size());
-    body.append(b.data(), b.size());
+    auto buf = msg::encode(change_req);
+    body.appendVarUInt(buf->size());
+    body.append(buf->data(), buf->size());
   }
 
   URI uri(target_url_ + "/insert_batch?table=index_feed-" + customer);

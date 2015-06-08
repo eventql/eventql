@@ -131,28 +131,28 @@ RefPtr<msg::MessageSchema> JoinedSessionSchema() {
       true);
 
   fields.emplace_back(
-      16,
-      "search_queries",
-      msg::FieldType::OBJECT,
-      0,
-      true,
-      false);
+      msg::MessageSchemaField::mkObjectField(
+        16,
+        "search_queries",
+        true,
+        false,
+        JoinedSearchQuerySchema()));
 
   fields.emplace_back(
-      52,
-      "cart_items",
-      msg::FieldType::OBJECT,
-      0,
-      true,
-      false);
+      msg::MessageSchemaField::mkObjectField(
+          52,
+          "cart_items",
+          true,
+          false,
+          JoinedCartItemSchema()));
 
   fields.emplace_back(
-      25,
-      "item_visits",
-      msg::FieldType::OBJECT,
-      0,
-      true,
-      false);
+      msg::MessageSchemaField::mkObjectField(
+          25,
+          "item_visits",
+          true,
+          false,
+          JoinedItemVisitSchema()));
 
   return new msg::MessageSchema("cm.JoinedSession", fields);
 }
@@ -354,12 +354,12 @@ RefPtr<msg::MessageSchema> JoinedSearchQuerySchema() {
       msg::EncodingHint::LEB128);
 
   fields.emplace_back(
-      17,
-      "result_items",
-      msg::FieldType::OBJECT,
-      0,
-      true,
-      false);
+      msg::MessageSchemaField::mkObjectField(
+          17,
+          "result_items",
+          true,
+          false,
+          JoinedSearchQueryResultItemSchema()));
 
   return new msg::MessageSchema("cm.JoinedSearchQuery", fields);
 }
@@ -627,12 +627,12 @@ RefPtr<msg::MessageSchema> IndexChangeRequestSchema() {
       false);
 
   fields.emplace_back(
-      3,
-      "attributes",
-      msg::FieldType::OBJECT,
-      0,
-      true,
-      false);
+      msg::MessageSchemaField::mkObjectField(
+          3,
+          "attributes",
+          true,
+          false,
+          IndexChangeRequestAttributeSchema()));
 
   return new msg::MessageSchema("cm.IndexChangeRequest", fields);
 }
