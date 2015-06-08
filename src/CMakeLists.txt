@@ -137,35 +137,35 @@ target_link_libraries(tests/test-logjoin ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_L
 #target_link_libraries(cm-logjoin-backfill
 #    ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_LIBS} ${FNORD_FTS_LIBS})
 #
-add_executable(cm-indexbuild
-    $<TARGET_OBJECTS:cm-common>
-    $<TARGET_OBJECTS:fnord-base>
-    $<TARGET_OBJECTS:fnord-http>
-    $<TARGET_OBJECTS:fnord-json>
-    $<TARGET_OBJECTS:fnord-sstable>
-    $<TARGET_OBJECTS:fnord-fts>
-    $<TARGET_OBJECTS:fnord-feeds>
-    $<TARGET_OBJECTS:fnord-rpc>
-    $<TARGET_OBJECTS:fnord-mdb>
-    $<TARGET_OBJECTS:fnord-msg>
-    $<TARGET_OBJECTS:fnord-cstable>
-    $<TARGET_OBJECTS:fnord-afx>
-    cm-indexbuild.cc
-    ../3rdparty/libfnord/fnord-logtable/RemoteTableReader.cc
-    ../3rdparty/libfnord/fnord-logtable/TableReader.cc
-    ../3rdparty/libfnord/fnord-logtable/TableArena.cc
-    ../3rdparty/libfnord/fnord-logtable/TableWriter.cc
-    ../3rdparty/libfnord/fnord-logtable/TableRepository.cc
-    ../3rdparty/libfnord/fnord-logtable/NumericBoundsSummary.cc
-    ../3rdparty/libfnord/fnord-logtable/TableChunkSummaryReader.cc
-    ../3rdparty/libfnord/fnord-logtable/TableChunkSummaryWriter.cc
-    ../3rdparty/libfnord/fnord-logtable/LogTableTail.cc
-    schemas.cc
-    DocStore.cc
-    DocIndex.cc)
-
-target_link_libraries(cm-indexbuild
-    ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_LIBS} ${FNORD_FTS_LIBS})
+#add_executable(cm-indexbuild
+#    $<TARGET_OBJECTS:cm-common>
+#    $<TARGET_OBJECTS:fnord-base>
+#    $<TARGET_OBJECTS:fnord-http>
+#    $<TARGET_OBJECTS:fnord-json>
+#    $<TARGET_OBJECTS:fnord-sstable>
+#    $<TARGET_OBJECTS:fnord-fts>
+#    $<TARGET_OBJECTS:fnord-feeds>
+#    $<TARGET_OBJECTS:fnord-rpc>
+#    $<TARGET_OBJECTS:fnord-mdb>
+#    $<TARGET_OBJECTS:fnord-msg>
+#    $<TARGET_OBJECTS:fnord-cstable>
+#    $<TARGET_OBJECTS:fnord-afx>
+#    cm-indexbuild.cc
+#    ../3rdparty/libfnord/fnord-logtable/RemoteTableReader.cc
+#    ../3rdparty/libfnord/fnord-logtable/TableReader.cc
+#    ../3rdparty/libfnord/fnord-logtable/TableArena.cc
+#    ../3rdparty/libfnord/fnord-logtable/TableWriter.cc
+#    ../3rdparty/libfnord/fnord-logtable/TableRepository.cc
+#    ../3rdparty/libfnord/fnord-logtable/NumericBoundsSummary.cc
+#    ../3rdparty/libfnord/fnord-logtable/TableChunkSummaryReader.cc
+#    ../3rdparty/libfnord/fnord-logtable/TableChunkSummaryWriter.cc
+#    ../3rdparty/libfnord/fnord-logtable/LogTableTail.cc
+#    schemas.cc
+#    DocStore.cc
+#    DocIndex.cc)
+#
+#target_link_libraries(cm-indexbuild
+#    ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_LIBS} ${FNORD_FTS_LIBS})
 
 #add_executable(cm-indexlookup
 #    $<TARGET_OBJECTS:cm-common>

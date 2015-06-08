@@ -13,6 +13,7 @@ using namespace fnord;
 
 namespace cm {
 
+/*
 msg::MessageSchema joinedSessionsSchema() {
   Vector<msg::MessageSchemaField> fields;
 
@@ -632,6 +633,6 @@ msg::MessageSchema indexChangeRequestSchema() {
   return msg::MessageSchema("IndexChangeRequest", fields);
 }
 
-
+*/
 
 }

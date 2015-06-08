@@ -24,7 +24,9 @@ UNIT_TEST(LogJoinTest);
 typedef HashMap<String, HashMap<String, String>> StringMap;
 
 LogJoinTarget mkTestTarget() {
-  LogJoinTarget trgt(joinedSessionsSchema(), false);
+  msg::MessageSchemaRepository schemas;
+  loadDefaultSchemas(&schemas);
+  LogJoinTarget trgt(*schemas.getSchema("cm.JoinedSession"), false);
 
   trgt.setNormalize([] (Language l, const String& q) { return q; });
 
@@ -36,7 +38,9 @@ LogJoinTarget mkTestTarget() {
 }
 
 LogJoinTarget mkTestTargetWithFieldExpansion() {
-  LogJoinTarget trgt(joinedSessionsSchema(), false);
+  msg::MessageSchemaRepository schemas;
+  loadDefaultSchemas(&schemas);
+  LogJoinTarget trgt(*schemas.getSchema("cm.JoinedSession"), false);
 
   trgt.setNormalize([] (Language l, const String& q) { return q; });
 
@@ -68,13 +72,6 @@ LogJoinTarget mkTestTargetWithFieldExpansion() {
 
   return trgt;
 }
-
-void printBuf(const Buffer& buf) {
-  msg::MessageObject msg;
-  msg::MessageDecoder::decode(buf, joinedSessionsSchema(), &msg);
-  fnord::iputs("joined session: $0", msg::MessagePrinter::print(msg, joinedSessionsSchema()));
-}
-
 
 // field expansion // joining
 

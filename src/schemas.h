@@ -16,9 +16,11 @@ using namespace fnord;
 
 namespace cm {
 
-msg::MessageSchema joinedSessionsSchema();
+void loadDefaultSchemas(msg::MessageSchemaRepository* repo);
 
-msg::MessageSchema indexChangeRequestSchema();
+//msg::MessageSchema joinedSessionsSchema();
+//
+//msg::MessageSchema indexChangeRequestSchema();
 
 }
 #endif

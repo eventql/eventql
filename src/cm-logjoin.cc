@@ -191,8 +191,10 @@ int main(int argc, const char** argv) {
   Logger::get()->setMinimumLogLevel(
       strToLogLevel(flags.getString("loglevel")));
 
-  /* schema... */
-  auto joined_sessions_schema = joinedSessionsSchema();
+  /* load schemas */
+  msg::MessageSchemaRepository schemas;
+  loadDefaultSchemas(&schemas);
+  auto joined_sessions_schema = schemas.getSchema("cm.JoinedSession");
 
   /* start event loop */
   auto evloop_thread = std::thread([] {
@@ -240,7 +242,7 @@ int main(int argc, const char** argv) {
   fnord::logInfo(
       "cm.logjoin",
       "Using session schema:\n$0",
-      joined_sessions_schema.toString());
+      joined_sessions_schema->toString());
 
   /* open session db */
   auto sessdb = mdb::MDB::open(
@@ -290,7 +292,7 @@ int main(int argc, const char** argv) {
   /* set up logjoin target */
   fnord::fts::Analyzer analyzer(flags.getString("conf"));
   cm::LogJoinTarget logjoin_target(
-      joined_sessions_schema,
+      *joined_sessions_schema,
       dry_run);
 
   auto normalize = [&analyzer] (Language lang, const String& query) -> String {
