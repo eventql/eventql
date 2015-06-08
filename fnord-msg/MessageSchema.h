@@ -13,6 +13,7 @@
 #include <fnord-base/exception.h>
 #include <fnord-base/autoref.h>
 #include <fnord-msg/MessageObject.h>
+#include <google/protobuf/descriptor.h>
 
 /**
  * // http://tools.ietf.org/html/rfc5234
@@ -78,6 +79,9 @@ struct MessageSchemaField {
 
 class MessageSchema : public RefCounted {
 public:
+
+  static RefPtr<MessageSchema> fromProtobuf(
+      const google::protobuf::Descriptor* dsc);
 
   MessageSchema(
       const String& name,

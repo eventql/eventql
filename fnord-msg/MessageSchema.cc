@@ -15,6 +15,11 @@
 namespace fnord {
 namespace msg {
 
+RefPtr<MessageSchema> MessageSchema::fromProtobuf(
+    const google::protobuf::Descriptor* dsc) {
+  RAISE(kNotYetImplementedError);
+}
+
 static void schemaNodeToString(
     size_t level,
     const MessageSchemaField& field,
