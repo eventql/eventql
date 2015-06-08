@@ -32,6 +32,10 @@ RefPtr<MessageSchema> MessageSchema::fromProtobuf(
       coding = msg::decode<CodingOptions>(fopts_str.substr(2)); // FIXPAUL HACK!!! ;)
     }
 
+    EncodingHint enc_hint = EncodingHint::NONE;
+    if (coding.encoding() == "BITPACK") enc_hint = EncodingHint::BITPACK;
+    if (coding.encoding() == "LEB128") enc_hint = EncodingHint::LEB128;
+
     switch (field->type()) {
 
       case google::protobuf::FieldDescriptor::TYPE_BOOL:
@@ -41,7 +45,8 @@ RefPtr<MessageSchema> MessageSchema::fromProtobuf(
             msg::FieldType::BOOLEAN,
             0,
             field->is_repeated(),
-            field->is_optional());
+            field->is_optional(),
+            enc_hint);
         break;
 
       case google::protobuf::FieldDescriptor::TYPE_STRING:
@@ -51,7 +56,8 @@ RefPtr<MessageSchema> MessageSchema::fromProtobuf(
             msg::FieldType::STRING,
             coding.has_maxval() ? coding.maxval() : 0xffffffff,
             field->is_repeated(),
-            field->is_optional());
+            field->is_optional(),
+            enc_hint);
         break;
 
       case google::protobuf::FieldDescriptor::TYPE_UINT64:
@@ -62,7 +68,8 @@ RefPtr<MessageSchema> MessageSchema::fromProtobuf(
             coding.has_maxval() ?
                 coding.maxval() : std::numeric_limits<uint64_t>::max(),
             field->is_repeated(),
-            field->is_optional());
+            field->is_optional(),
+            enc_hint);
         break;
 
       case google::protobuf::FieldDescriptor::TYPE_UINT32:
@@ -73,7 +80,8 @@ RefPtr<MessageSchema> MessageSchema::fromProtobuf(
             coding.has_maxval() ?
                 coding.maxval() : std::numeric_limits<uint32_t>::max(),
             field->is_repeated(),
-            field->is_optional());
+            field->is_optional(),
+            enc_hint);
         break;
 
       case google::protobuf::FieldDescriptor::TYPE_ENUM: {
