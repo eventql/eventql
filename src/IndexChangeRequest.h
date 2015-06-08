@@ -29,7 +29,17 @@ struct IndexChangeRequestStruct {
   ItemRef item;
   HashMap<String, String> attrs;
 
-  IndexChangeRequest toIndexChangeRequest() const;
+  IndexChangeRequest toIndexChangeRequest() const {
+    IndexChangeRequest icr;
+    icr.set_customer(customer);
+    icr.set_docid(item.docID().docid);
+    for (const auto& a : attrs) {
+      auto icr_a = icr.add_attributes();
+      icr_a->set_key(a.first);
+      icr_a->set_value(a.second);
+    }
+    return icr;
+  }
 
   template <typename T>
   static void reflect(T* meta) {
