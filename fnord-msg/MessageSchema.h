@@ -88,10 +88,10 @@ public:
   const String& name() const;
 
   const Vector<MessageSchemaField>& fields() const;
-  const MessageSchemaField& getField(uint32_t id) const;
   uint32_t fieldId(const String& name) const;
   FieldType fieldType(uint32_t id) const;
   const String& fieldName(uint32_t id) const;
+  RefPtr<MessageSchema> fieldSchema(uint32_t id) const;
 
   Set<String> columns() const;
   String toString() const;

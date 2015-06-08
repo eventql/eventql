@@ -32,7 +32,7 @@ String MessagePrinter::printObject(
       str.append(StringUtil::format("$0$1 {\n", ws, schema.fieldName(msg.id)));
 
       for (const auto& o : msg.asObject()) {
-        str.append(printObject(level + 1, o, *schema.getField(msg.id).schema));
+        str.append(printObject(level + 1, o, *schema.fieldSchema(msg.id)));
       }
 
       str.append(ws + "}\n");
