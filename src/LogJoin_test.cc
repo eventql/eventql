@@ -153,7 +153,7 @@ TEST_CASE(LogJoinTest, ItemOrder, [] () {
   EXPECT_EQ(joined.num_order_items(), 1);
   EXPECT_EQ(joined.gmv_eurcents(), 1100);
   EXPECT_EQ(joined.first_seen_time(), 1432311555);
-  EXPECT_EQ(joined.first_last_time(), 1432311615);
+  EXPECT_EQ(joined.last_seen_time(), 1432311615);
 
   EXPECT_EQ(joined.cart_items().size(), 1);
   EXPECT_EQ(joined.cart_items().Get(0).time(), 1432311615);
@@ -228,7 +228,7 @@ TEST_CASE(LogJoinTest, MultipleQueryBatches, [] () {
   EXPECT_EQ(joined.num_order_items(), 0);
   EXPECT_EQ(joined.gmv_eurcents(), 0);
   EXPECT_EQ(joined.first_seen_time(), 1432311555);
-  EXPECT_EQ(joined.first_last_time(), 1432311565);
+  EXPECT_EQ(joined.last_seen_time(), 1432311565);
 
   EXPECT_EQ(joined.search_queries().size(), 1);
   EXPECT_EQ(joined.search_queries().Get(0).num_result_items(), 8);
