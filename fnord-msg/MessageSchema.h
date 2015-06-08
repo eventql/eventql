@@ -96,6 +96,8 @@ public:
 
   void registerSchema(RefPtr<MessageSchema> schema);
 
+protected:
+  HashMap<String, RefPtr<MessageSchema>> schemas_;
 };
 
 } // namespace msg
