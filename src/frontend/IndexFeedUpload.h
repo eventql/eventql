@@ -26,7 +26,8 @@ public:
   IndexFeedUpload(
       const String& target_url,
       thread::Queue<IndexChangeRequest>* queue,
-      http::HTTPConnectionPool* http);
+      http::HTTPConnectionPool* http,
+      RefPtr<msg::MessageSchema> schema);
 
   void start();
   void uploadNext();
@@ -47,7 +48,7 @@ protected:
   size_t batch_size_;
   bool running_;
   std::thread thread_;
-  msg::MessageSchema schema_;
+  RefPtr<msg::MessageSchema> schema_;
 };
 } // namespace cm
 

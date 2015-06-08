@@ -42,6 +42,7 @@
 #include "fnord-logtable/NumericBoundsSummary.h"
 #include "fnord-mdb/MDB.h"
 #include "fnord-mdb/MDBUtil.h"
+#include "fnord-msg/MessageSchema.h"
 #include "fnord-tsdb/TSDBNode.h"
 #include "fnord-tsdb/TSDBServlet.h"
 #include "common.h"
@@ -121,6 +122,10 @@ int main(int argc, const char** argv) {
   auto dir = flags.getString("datadir");
   auto repl_targets = flags.getStrings("replicate_to");
 
+  /* load schemas */
+  msg::MessageSchemaRepository schemas;
+  loadDefaultSchemas(&schemas);
+
   /* start http server and worker pools */
   fnord::thread::ThreadPool tpool;
   http::HTTPConnectionPool http(&ev);
@@ -141,7 +146,7 @@ int main(int argc, const char** argv) {
 
   tsdb::TSDBNode tsdb_node(dir + "/tsdb", repl_scheme.get(), &http);
 
-  tsdb::StreamProperties config(new msg::MessageSchema(joinedSessionsSchema()));
+  tsdb::StreamProperties config(schemas.getSchema("cm.JoinedSession"));
   config.max_datafile_size = 1024 * 1024 * 512;
   config.chunk_size = Duration(3600 * 4 * kMicrosPerSecond);
   config.compaction_interval = Duration(1800 * kMicrosPerSecond);

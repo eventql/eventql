@@ -103,6 +103,10 @@ int main(int argc, const char** argv) {
   Logger::get()->setMinimumLogLevel(
       strToLogLevel(flags.getString("loglevel")));
 
+  /* load schemas */
+  msg::MessageSchemaRepository schemas;
+  loadDefaultSchemas(&schemas);
+
   /* thread pools */
   fnord::thread::ThreadPool tpool;
   fnord::thread::FixedSizeThreadPool wpool(8);
@@ -130,7 +134,8 @@ int main(int argc, const char** argv) {
   auto analytics_app = mkRef(
       new AnalyticsApp(
           &tsdb,
-          flags.getString("cachedir")));
+          flags.getString("cachedir"),
+          &schemas));
 
   dproc.registerApp(analytics_app.get(), local_scheduler.get());
   cm::AnalyticsServlet analytics_servlet(analytics_app, &dproc);
