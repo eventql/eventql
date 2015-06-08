@@ -235,6 +235,16 @@ Buffer LogJoinTarget::trackedSessionToJoinedSession(TrackedSession& session) {
             msg::FALSE);
       }
 
+      if (item.seen) {
+        item_obj.addChild(
+            schema.id("search_queries.result_items.seen"),
+            msg::TRUE);
+      } else {
+        item_obj.addChild(
+            schema.id("search_queries.result_items.seen"),
+            msg::FALSE);
+      }
+
       auto docid = item.item.docID();
 
       auto shopid = get_field_(docid, "shop_id");

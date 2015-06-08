@@ -32,7 +32,7 @@ using namespace fnord;
  *   x          -- experiment       -- format "<exp1>;<exp2>"
  *
  * params for eventtype=q (query):
- *   is         -- item ids         -- format "<setid>~<itemid>~p<pos>,..."
+ *   is         -- item ids         -- format "<setid>~<itemid>[~p<pos>][~s],..."
  *   pg         -- page number      -- format "<num>"
  *   qstr~<lc>  -- query string     -- format "<string>"
  *   q_cat1     -- query cat1       -- format "<catid>"

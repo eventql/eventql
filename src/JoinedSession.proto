@@ -64,6 +64,12 @@ message JoinedSearchQueryResultItem {
   required bool clicked = 15;
 
   /**
+   * True if the result item was "seen" by the user (i.e. it was in the
+   * viewport)
+   */
+  optional bool seen = 65;
+
+  /**
    * If applicable, the result item's shop id (DaWanda user id)
    */
   optional uint32 shop_id = 21;

@@ -352,6 +352,14 @@ msg::MessageSchema joinedSessionsSchema() {
       false);
 
   query_items.fields.emplace_back(
+      65,
+      "seen",
+      msg::FieldType::BOOLEAN,
+      0,
+      false,
+      true);
+
+  query_items.fields.emplace_back(
       20,
       "item_id",
       msg::FieldType::STRING,
