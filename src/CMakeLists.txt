@@ -1,4 +1,6 @@
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
+include_directories(${CMAKE_BINARY_DIR}/3rdparty/libfnord/fnord-msg)
+
 file(GLOB PROTO_FILES *.proto)
 PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS ${PROTO_FILES})
 
@@ -8,7 +10,8 @@ add_library(cm-common OBJECT
     Document.cc
     ItemRef.cc
     CustomerNamespace.cc
-    ${PROTO_SRCS})
+    ${PROTO_SRCS}
+    ${PROTO_HDRS})
 
 # cm-frontend
 set_source_files_properties(${CMAKE_BINARY_DIR}/cm-frontend-assets.cc PROPERTIES GENERATED true)
