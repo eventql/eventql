@@ -51,7 +51,7 @@ Buffer LogJoinTarget::trackedSessionToJoinedSession(TrackedSession& session) {
   auto session_schema = schemas_->getSchema("cm.JoinedSession");
   auto searchq_schema = schemas_->getSchema("cm.JoinedSearchQuery");
   auto searchq_item_schema = schemas_->getSchema("cm.JoinedSearchQueryResultItem");
-  auto cart_item_schema = schemas_->getSchema("cm.JoinedSearchQueryResultItem");
+  auto cart_item_schema = schemas_->getSchema("cm.JoinedCartItem");
   auto item_visit_schema = schemas_->getSchema("cm.JoinedItemVisit");
   msg::MessageObject obj;
 
