@@ -168,6 +168,15 @@ void StreamChunk::compact() {
   last_compaction_ = DateTime::now();
   lk.unlock();
 
+  String encoded_key;
+  util::Base64::encode(key_, &encoded_key);
+
+  fnord::logDebug(
+      "tsdb.replication",
+      "Compacting partition; stream='$0' partition='$1'",
+      stream_key_,
+      encoded_key);
+
   Set<String> deleted_files;
   records_.compact(&deleted_files);
 
@@ -273,7 +282,7 @@ uint64_t StreamChunk::replicateTo(const String& addr, uint64_t offset) {
 
   fnord::logDebug(
       "tsdb.replication",
-      "Replicating to $0; stream='$1' chunk='$2' offset=$3",
+      "Replicating to $0; stream='$1' partition='$2' offset=$3",
       addr,
       stream_key_,
       encoded_key,
