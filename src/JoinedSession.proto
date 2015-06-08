@@ -6,6 +6,8 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
+import "CodingOptions.proto";
+
 package cm;
 
 enum ProtoLanguage {
@@ -314,12 +316,14 @@ message JoinedSession {
   /**
    * For which customer did we record this session?
    */
-  optional string customer = 60;
+  optional string customer = 60
+      [(coding) = { maxval: 250 }];
 
   /**
    * The customer's session id
    */
-  optional string customer_session_id = 61;
+  optional string customer_session_id = 61
+      [(coding) = { maxval: 4096 }];
 
   /**
    * The time at which this search query was first/last seen
@@ -327,42 +331,53 @@ message JoinedSession {
   optional uint64 first_seen_time = 53;
   optional uint64 first_last_time = 54;
 
-  optional string referrer_url = 57;
-  optional string referrer_campaign = 58;
-  optional string referrer_name = 59;
+  optional string referrer_url = 57
+      [(coding) = { maxval: 1024 }];
+
+  optional string referrer_campaign = 58
+      [(coding) = { maxval: 4096 }];
+
+  optional string referrer_name = 59
+      [(coding) = { maxval: 255 }];
 
   /**
    * How many unique cart items have we seen in this session
    */
-  optional uint32 num_cart_items = 47;
+  optional uint32 num_cart_items = 47
+      [(coding) = { maxval: 250 encoding: "BITPACK" }];
 
   /**
    * How many unique items have been bought in this session. value >1 implies
    * that there was a transaction in this session
    */
-  optional uint32 num_order_items = 48;
+  optional uint32 num_order_items = 48
+      [(coding) = { maxval: 250 encoding: "BITPACK" }];
 
   /**
    * The gross value of all cart items in this session in euro cents
    */
-  optional uint32 cart_value_eurcents = 49;
+  optional uint32 cart_value_eurcents = 49
+      [(coding) = { maxval: 16777215 encoding: "LEB128" }];
 
   /**
    * The gross merchandise value of all transactions/sales in this session in
    * euro cents
    */
-  optional uint32 gmv_eurcents = 50;
+  optional uint32 gmv_eurcents = 50
+      [(coding) = { maxval: 16777215 encoding: "LEB128" }];
 
   /**
    * A number indicating in which test group this session was. DaWanda sets this
    * to (1..100]
    */
-  optional uint32 ab_test_group = 51;
+  optional uint32 ab_test_group = 51
+      [(coding) = { maxval: 100 encoding: "BITPACK" }];
 
   /**
    * A semicolon-seperated string of all experiment tags for this session
    */
-  optional string experiments = 56;
+  optional string experiments = 56
+      [(coding) = { maxval: 8192 }];
 
   /**
    * A list of all search queries associated with this session
@@ -380,3 +395,4 @@ message JoinedSession {
   repeated JoinedCartItem cart_items = 52;
 
 }
+

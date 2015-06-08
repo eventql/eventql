@@ -107,6 +107,11 @@ int main(int argc, const char** argv) {
   msg::MessageSchemaRepository schemas;
   loadDefaultSchemas(&schemas);
 
+  fnord::logInfo(
+      "analyticsd",
+      "Using session schema:\n$0",
+      schemas.getSchema("cm.JoinedSession")->toString());
+
   /* thread pools */
   fnord::thread::ThreadPool tpool;
   fnord::thread::FixedSizeThreadPool wpool(8);
