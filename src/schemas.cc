@@ -15,6 +15,10 @@ namespace cm {
 
 void loadDefaultSchemas(msg::MessageSchemaRepository* repo) {
   repo->registerSchema(JoinedSessionSchema());
+  repo->registerSchema(JoinedSearchQuerySchema());
+  repo->registerSchema(JoinedSearchQueryResultItemSchema());
+  repo->registerSchema(JoinedCartItemSchema());
+  repo->registerSchema(JoinedItemVisitSchema());
   repo->registerSchema(IndexChangeRequestSchema());
 }
 
