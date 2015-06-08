@@ -42,7 +42,8 @@ add_executable(cm-frontend
     frontend/IndexFeedUpload.cc
     cm-frontend.cc
     schemas.cc
-    ${CMAKE_BINARY_DIR}/cm-frontend-assets.cc)
+    ${CMAKE_BINARY_DIR}/cm-frontend-assets.cc
+    ${PROTO_SRCS})
 
 target_link_libraries(cm-frontend ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_LIBS})
 target_link_libraries(cm-frontend m)
