@@ -14,6 +14,7 @@
 #include <fnord-base/autoref.h>
 #include <fnord-msg/MessageObject.h>
 #include <google/protobuf/descriptor.h>
+#include <google/protobuf/descriptor.pb.h>
 
 /**
  * // http://tools.ietf.org/html/rfc5234

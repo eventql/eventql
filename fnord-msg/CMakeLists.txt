@@ -9,15 +9,19 @@ cmake_minimum_required(VERSION 2.8.8)
 project(libfnord-sstable)
 include(FindPkgConfig)
 
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/")
+find_package(Protobuf)
+
 option(ENABLE_TESTS "Build unit tests [default: ON]" ON)
 
 include_directories(${PROJECT_BINARY_DIR})
 file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/tests)
 include_directories(../)
 include_directories(../3rdparty/)
+include_directories(${CMAKE_CURRENT_BINARY_DIR}/../)
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/")
-find_package(Protobuf)
+file(GLOB PROTO_FILES *.proto)
+PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS ${PROTO_FILES})
 
 find_package(Threads)
 
@@ -33,7 +37,8 @@ add_library(fnord-msg OBJECT
     MessageEncoder.cc
     MessagePrinter.cc
     MessageObject.cc
-    MessageSchema.cc)
+    MessageSchema.cc
+    ${PROTO_SRCS})
 
 set(FNORD_MSG_LIBS
     ${CMAKE_THREAD_LIBS_INIT}

@@ -15,7 +15,7 @@ message CodingOptions {
 }
 
 extend google.protobuf.FieldOptions {
-  optional CodingOptions coding = 50500;
+  optional CodingOptions coding = 70000;
 }
 
 
