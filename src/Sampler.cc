@@ -8,6 +8,7 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
+#include <fnord-base/wallclock.h>
 #include "Sampler.h"
 
 using namespace fnord;
@@ -18,10 +19,32 @@ Sampler::Sampler(
     SamplerConfig config,
     SensorRepository* sensors) :
     config_(config),
-    sensors_(sensors) {}
+    sensors_(sensors),
+    running_(true) {}
 
-SampleList Sampler::sample() {
-  RAISE(kNotYetImplementedError);
+void Sampler::run() {
+  auto now = WallClock::unixMicros();
+
+  for (auto& rule : *config_.mutable_rules()) {
+    queue_.insert(&rule, now);
+  }
+
+  while (running_) {
+    auto job = queue_.interruptiblePop();
+    if (job.isEmpty()) {
+      continue;
+    }
+
+    executeRule(job.get());
+  }
+}
+
+void Sampler::executeRule(SampleRule* rule) {
+  fnord::iputs("execute rule... $0", rule);
+
+  auto now = WallClock::unixMicros();
+  auto next = now + rule->sample_interval();
+  queue_.insert(rule, next);
 }
 
 };

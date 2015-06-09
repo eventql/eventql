@@ -51,12 +51,13 @@ int main(int argc, const char** argv) {
   }
 
   Sampler sampler(config, &sensors);
+  sampler.run();
 
-  for (;;) {
-    auto samples = sampler.sample();
-    fnord::iputs("got $0 samples", samples.samples().size());
-    usleep(1000000);
-  }
+  //for (;;) {
+  //  auto samples = sampler.sample();
+  //  fnord::iputs("got $0 samples", samples.samples().size());
+  //  usleep(1000000);
+  //}
 
   return 0;
 }
