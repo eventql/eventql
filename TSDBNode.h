@@ -14,11 +14,13 @@
 #include <fnord-base/option.h>
 #include <fnord-base/thread/queue.h>
 #include <fnord-mdb/MDB.h>
-#include <fnord-tsdb/StreamProperties.h>
+#include <fnord-tsdb/StreamConfig.pb.h>
 #include <fnord-tsdb/StreamChunk.h>
 #include <fnord-tsdb/TSDBNodeRef.h>
 #include <fnord-tsdb/CompactionWorker.h>
 #include <fnord-tsdb/ReplicationWorker.h>
+
+using namespace tsdb;
 
 namespace fnord {
 namespace tsdb {
@@ -33,9 +35,9 @@ public:
 
   void configurePrefix(
       const String& stream_key_prefix,
-      StreamProperties props);
+      StreamConfig props);
 
-  RefPtr<StreamProperties> configFor(const String& stream_key) const;
+  StreamConfig* configFor(const String& stream_key) const;
 
   void insertRecord(
       const String& stream_key,
@@ -73,7 +75,7 @@ protected:
   void reopenStreamChunks();
 
   TSDBNodeRef noderef_;
-  Vector<Pair<String, RefPtr<StreamProperties>>> configs_;
+  Vector<Pair<String, ScopedPtr<StreamConfig>>> configs_;
   std::mutex mutex_;
   HashMap<String, RefPtr<StreamChunk>> chunks_;
   Vector<RefPtr<CompactionWorker>> compaction_workers_;
