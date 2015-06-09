@@ -59,17 +59,6 @@ add_library(fnord-metricdb OBJECT
     sample.cc
     ${PROTO_SRCS})
 
-add_executable(fnord-metricdb-example
-    $<TARGET_OBJECTS:fnord-base>
-    $<TARGET_OBJECTS:fnord-chart>
-    $<TARGET_OBJECTS:fnord-metricdb>
-    $<TARGET_OBJECTS:fnord-http>
-    $<TARGET_OBJECTS:fnord-json>
-    $<TARGET_OBJECTS:fnord-sstable>
-    metricservice_example.cc)
-
-target_link_libraries(fnord-metricdb-example ${CMAKE_THREAD_LIBS_INIT})
-
 add_executable(metricd
     $<TARGET_OBJECTS:fnord-base>
     $<TARGET_OBJECTS:fnord-chart>
