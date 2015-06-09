@@ -5,6 +5,7 @@ PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS ${PROTO_FILES})
 add_library(sensord-common OBJECT
     sensord.cc
     HostStatsSensor.cc
+    SensorRepository.cc
     ${PROTO_SRCS})
 
 add_executable(tests/test-sensord
