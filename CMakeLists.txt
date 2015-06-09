@@ -40,4 +40,5 @@ find_package(Threads)
 
 add_subdirectory(3rdparty/libfnord/fnord-base)
 add_subdirectory(3rdparty/libfnord/fnord-msg)
+add_subdirectory(3rdparty/libfnord/fnord-http)
 add_subdirectory(src/)

@@ -14,6 +14,7 @@
 #include "fnord-base/inspect.h"
 #include "fnord-base/exception.h"
 #include "fnord-base/logging.h"
+#include "fnord-http/HTTPClient.h"
 #include "SensorRepository.h"
 #include "Sampler.h"
 #include "HostStatsSensor.h"
@@ -26,6 +27,15 @@ int main(int argc, const char** argv) {
   Application::logToStderr();
 
   cli::FlagParser flags;
+
+  flags.defineFlag(
+      "target-http",
+      cli::FlagParser::T_STRING,
+      false,
+      NULL,
+      "",
+      "url",
+      "<url>");
 
   flags.defineFlag(
       "namespace",
@@ -66,8 +76,10 @@ int main(int argc, const char** argv) {
   Sampler sampler(config, &sensors);
 
   /* set up sampe upload */
+  http::HTTPClient http;
   auto sample_namespace = flags.getString("namespace");
-  sampler.onSample([&sample_namespace] (const SampleEnvelope& s) {
+  auto target = URI(flags.getString("target-http"));
+  sampler.onSample([&] (const SampleEnvelope& s) {
     /* N.B. naive request per sample for now, optimize later ~paul */
     auto sample = s;
     sample.set_sample_namespace(sample_namespace);

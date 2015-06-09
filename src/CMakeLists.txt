@@ -14,6 +14,7 @@ add_executable(
     sensord
     $<TARGET_OBJECTS:fnord-base>
     $<TARGET_OBJECTS:fnord-msg>
+    $<TARGET_OBJECTS:fnord-http>
     $<TARGET_OBJECTS:sensord-common>
     sensord.cc)
 
