@@ -14,6 +14,7 @@
 #include "fnord-base/inspect.h"
 #include "fnord-base/exception.h"
 #include "SensorRepository.h"
+#include "Sampler.h"
 #include "HostStatsSensor.h"
 
 using namespace sensord;
