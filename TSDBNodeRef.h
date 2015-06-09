@@ -30,7 +30,6 @@ struct TSDBNodeRef {
   const String db_path;
   thread::CoalescingDelayedQueue<StreamChunk> compactionq;
   thread::CoalescingDelayedQueue<StreamChunk> replicationq;
-  thread::CoalescingDelayedQueue<StreamChunk> indexq;
   RefPtr<mdb::MDB> db;
   RefPtr<dht::ReplicationScheme> replication_scheme;
   http::HTTPConnectionPool* http;
