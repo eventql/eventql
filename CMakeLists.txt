@@ -38,6 +38,8 @@ endif()
 
 find_package(Threads)
 
+set(NO_BUNDLED_LIBFNORD true)
+
 add_subdirectory(3rdparty/libfnord/fnord-base)
 add_subdirectory(3rdparty/libfnord/fnord-msg)
 add_subdirectory(3rdparty/libfnord/fnord-feeds)
@@ -55,5 +57,6 @@ add_subdirectory(3rdparty/libfnord/fnord-tsdb)
 add_subdirectory(3rdparty/libfnord/fnord-dht)
 add_subdirectory(3rdparty/libfnord/fnord-dproc)
 add_subdirectory(3rdparty/libfnord/fnord-afx)
+add_subdirectory(3rdparty/sensord)
 add_subdirectory(src/)
 
