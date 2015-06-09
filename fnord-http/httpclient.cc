@@ -15,7 +15,7 @@
 namespace fnord {
 namespace http {
 
-HTTPClient::HTTPClient() : http_(&ev_) {}
+HTTPClient::HTTPClient() {}
 
 HTTPResponse HTTPClient::executeRequest(
     const HTTPRequest& req) {
@@ -40,16 +40,16 @@ HTTPResponse HTTPClient::executeRequest(
 HTTPResponse HTTPClient::executeRequest(
     const HTTPRequest& req,
     Function<HTTPResponseFuture* (Promise<HTTPResponse> promise)> factory) {
-  std::unique_lock<std::mutex> lk(mutex_);
+  if (!req.hasHeader("Host")) {
+    RAISE(kRuntimeError, "missing Host header");
+  }
 
-  auto future = http_.executeRequest(req, factory);
+  auto addr = dns_cache_.resolve(req.getHeader("Host"));
+  if (!addr.hasPort()) {
+    addr.setPort(80);
+  }
 
-  future.onReady([this] {
-    ev_.shutdown();
-  });
-
-  ev_.run();
-  return future.get();
+  return executeRequest(req, addr, factory);
 }
 
 HTTPResponse HTTPClient::executeRequest(
@@ -58,14 +58,26 @@ HTTPResponse HTTPClient::executeRequest(
     Function<HTTPResponseFuture* (Promise<HTTPResponse> promise)> factory) {
   std::unique_lock<std::mutex> lk(mutex_);
 
-  auto future = http_.executeRequest(req, addr, factory);
+  Promise<HTTPResponse> promise;
+  auto http_future = factory(promise);
 
-  future.onReady([this] {
-    ev_.shutdown();
-  });
+  try {
+    ScopedPtr<HTTPClientConnection> conn(
+        new HTTPClientConnection(
+            net::TCPConnection::connect(addr),
+            &ev_,
+            nullptr));
 
-  ev_.run();
-  return future.get();
+    conn->executeRequest(req, http_future);
+    http_future->storeConnection(std::move(conn));
+  } catch (const std::exception& e) {
+    http_future->onError(e);
+  }
+
+  auto future = promise.future();
+
+  ev_.runOnce();
+  return future.waitAndGet();
 }
 
 
