@@ -10,12 +10,10 @@
 package tsdb;
 
 message TimeWindowPartitionerConfig {
+};
 
-  /**
-   * The time window to partition the stream into in microseconds
-   */
-  required uint64 window = 1;
-
+enum StreamPartitioner {
+  TIME_WINDOW = 0;
 };
 
 message StreamConfig {
@@ -29,12 +27,13 @@ message StreamConfig {
    * The partitioner to be used to partition the stream. Default partitioners:
    * "TIME_WINDOW"
    */
-  required string partitioner = 2;
+  required StreamPartitioner partitioner = 2;
 
   /**
-   * The partitioner config
+   * The time window to partition the stream into in microseconds. Only
+   * applicable if partitioner == "TIME_WINDOW"
    */
-  required string partitioner_config = 3;
+  optional uint64 partition_window = 6;
 
   /**
    * The maximum sstable size in bytes

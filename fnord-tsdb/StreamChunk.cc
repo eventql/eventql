@@ -65,32 +65,22 @@ String StreamChunk::streamChunkKeyFor(
 String StreamChunk::streamChunkKeyFor(
     const String& stream_key,
     DateTime time,
-    const StreamConfig& properties) {
-  const auto& partconf_data = properties.partitioner_config();
-  auto partconf = msg::decode<TimeWindowPartitionerConfig>(
-      partconf_data.data(),
-      partconf_data.size());
-
-  return streamChunkKeyFor(stream_key, time, partconf.window());
+    const StreamConfig& config) {
+  return streamChunkKeyFor(stream_key, time, config.partition_window());
 }
 
 Vector<String> StreamChunk::streamChunkKeysFor(
     const String& stream_key,
     DateTime from,
     DateTime until,
-    const StreamConfig& properties) {
-  const auto& partconf_data = properties.partitioner_config();
-  auto partconf = msg::decode<TimeWindowPartitionerConfig>(
-      partconf_data.data(),
-      partconf_data.size());
-
-  auto cs = partconf.window();
+    const StreamConfig& config) {
+  auto cs = config.partition_window();
   auto first_chunk = (from.unixMicros() / cs) * cs;
   auto last_chunk = (until.unixMicros() / cs) * cs;
 
   Vector<String> res;
   for (auto t = first_chunk; t <= last_chunk; t += cs) {
-    res.emplace_back(streamChunkKeyFor(stream_key, t, properties));
+    res.emplace_back(streamChunkKeyFor(stream_key, t, config));
   }
 
   return res;
