@@ -12,12 +12,15 @@
 #include "fnord-http/httpservice.h"
 #include <fnord-base/random.h>
 #include <fnord-feeds/FeedService.h>
+#include <sensord/SensorSampleFeed.h>
 
 namespace fnord {
 namespace metricdb {
 
 class SensorServlet : public fnord::http::HTTPService {
 public:
+
+  SensorServlet(sensord::SensorSampleFeed* sensor_feed);
 
   void handleHTTPRequest(
       http::HTTPRequest* req,
@@ -30,6 +33,7 @@ protected:
       http::HTTPResponse* res,
       URI* uri);
 
+  sensord::SensorSampleFeed* sensor_feed_;
 };
 
 }
