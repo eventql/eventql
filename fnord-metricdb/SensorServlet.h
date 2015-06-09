@@ -7,8 +7,8 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#ifndef _FNORD_BROKER_BROKERSERVLET_H
-#define _FNORD_BROKER_BROKERSERVLET_H
+#ifndef _METRIC_SENSORSERVLET_H
+#define _METRIC_SENSORSERVLET_H
 #include "fnord-http/httpservice.h"
 #include <fnord-base/random.h>
 #include <fnord-feeds/FeedService.h>
