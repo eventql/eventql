@@ -9,13 +9,13 @@
  */
 package metricd;
 
-message Label {
+message MetricSampleLabel {
   required string key = 1;
   required string value = 2;
 };
 
-message Gauge {
+message MetricSample {
   required uint64 time = 1;
   required double value = 2;
-  repeated Label labels = 3;
+  repeated MetricSampleLabel labels = 3;
 }
