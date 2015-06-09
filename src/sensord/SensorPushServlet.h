@@ -11,7 +11,6 @@
 #define _METRIC_SENSORSERVLET_H
 #include "fnord-http/httpservice.h"
 #include <fnord-base/random.h>
-#include <fnord-feeds/FeedService.h>
 #include <sensord/SensorSampleFeed.h>
 
 namespace fnord {
