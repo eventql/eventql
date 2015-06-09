@@ -28,7 +28,7 @@ void TSDBClient::insertRecord(
     uint64_t msgid,
     const Buffer& record) {
   auto uri = URI(StringUtil::format(
-      "$0/list_chunks?stream=$1",
+      "$0/insert_batch?stream=$1",
       uri_,
       URI::urlEncode(stream_key)));
 
