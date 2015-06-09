@@ -29,6 +29,8 @@ public:
   template <typename T>
   T fetchSensorDataAs(const String& key) const;
 
+  size_t numSensors() const;
+
 protected:
   mutable std::mutex mutex_;
   HashMap<String, RefPtr<Sensor>> sensors_;

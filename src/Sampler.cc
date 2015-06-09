@@ -9,6 +9,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <fnord-base/wallclock.h>
+#include "fnord-base/logging.h"
 #include "Sampler.h"
 
 using namespace fnord;
@@ -40,15 +41,20 @@ void Sampler::run() {
 }
 
 void Sampler::executeRule(SampleRule* rule) {
-  fnord::iputs("execute rule... $0", rule);
   auto now = WallClock::unixMicros();
   auto sensor = sensors_->fetchSensor(rule->sensor_key());
+
+  fnord::logDebug("sensord", "Sampling sensor '$0'", sensor->key());
 
   SampleEnvelope sample;
   sample.set_sensor_key(sensor->key());
   sample.set_schema_name(sensor->schemaName());
   sample.set_data(sensor->fetchData()->toString());
   sample.set_time(now);
+
+  for (const auto& cb : callbacks_) {
+    cb(sample);
+  }
 
   auto next = now + rule->sample_interval();
   queue_.insert(rule, next);

@@ -13,6 +13,7 @@
 #include "fnord-base/cli/flagparser.h"
 #include "fnord-base/inspect.h"
 #include "fnord-base/exception.h"
+#include "fnord-base/logging.h"
 #include "SensorRepository.h"
 #include "Sampler.h"
 #include "HostStatsSensor.h"
@@ -49,6 +50,12 @@ int main(int argc, const char** argv) {
     rule->set_sensor_key("host");
     rule->set_sample_interval(kMicrosPerSecond);
   }
+
+  fnord::logInfo(
+      "sensord",
+      "Starting sensord; sensors=$0 rules=$1",
+      sensors.numSensors(),
+      config.rules().size());
 
   Sampler sampler(config, &sensors);
   sampler.run();

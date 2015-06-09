@@ -45,5 +45,10 @@ BufferRef SensorRepository::fetchSensorData(const String& key) const {
   return sensor->fetchData();
 }
 
+size_t SensorRepository::numSensors() const {
+  std::unique_lock<std::mutex> lk(mutex_);
+  return sensors_.size();
+}
+
 };
 
