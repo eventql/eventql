@@ -139,19 +139,6 @@ PartitionInfo TSDBNode::fetchPartitionInfo(const String& chunk_key) {
   return c->partitionInfo();
 }
 
-Buffer TSDBNode::fetchDerivedDataset(
-    const String& chunk_key,
-    const String& derived_dataset) {
-  std::unique_lock<std::mutex> lk(mutex_);
-  auto chunk = chunks_.find(chunk_key);
-  if (chunk == chunks_.end()) {
-    return Buffer{};
-  }
-  lk.unlock();
-
-  return chunk->second->fetchDerivedDataset(derived_dataset);
-}
-
 // FIXPAUL proper longest prefix search ;)
 RefPtr<StreamProperties> TSDBNode::configFor(const String& stream_key) const {
   RefPtr<StreamProperties> config(nullptr);
@@ -183,8 +170,7 @@ void TSDBNode::configurePrefix(
 
 void TSDBNode::start(
     size_t num_compaction_threads,
-    size_t num_replication_threads,
-    size_t num_index_threads) {
+    size_t num_replication_threads) {
   reopenStreamChunks();
 
   for (int i = 0; i < num_compaction_threads; ++i) {
@@ -196,11 +182,6 @@ void TSDBNode::start(
     replication_workers_.emplace_back(new ReplicationWorker(&noderef_));
     replication_workers_.back()->start();
   }
-
-  for (int i = 0; i < num_index_threads; ++i) {
-    index_workers_.emplace_back(new IndexWorker(&noderef_));
-    index_workers_.back()->start();
-  }
 }
 
 void TSDBNode::stop() {
@@ -209,10 +190,6 @@ void TSDBNode::stop() {
   }
 
   for (auto& w : replication_workers_) {
-    w->stop();
-  }
-
-  for (auto& w : index_workers_) {
     w->stop();
   }
 }

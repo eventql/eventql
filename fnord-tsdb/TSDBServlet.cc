@@ -59,12 +59,6 @@ void TSDBServlet::handleHTTPRequest(
       return;
     }
 
-    if (StringUtil::endsWith(uri.path(), "/list_files")) {
-      listFiles(&req, &res, &uri);
-      res_stream->writeResponse(res);
-      return;
-    }
-
     if (StringUtil::endsWith(uri.path(), "/fetch_chunk")) {
       fetchChunk(&req, &res, res_stream, &uri);
       return;
@@ -72,12 +66,6 @@ void TSDBServlet::handleHTTPRequest(
 
     if (StringUtil::endsWith(uri.path(), "/fetch_partition_info")) {
       fetchPartitionInfo(&req, &res, &uri);
-      res_stream->writeResponse(res);
-      return;
-    }
-
-    if (StringUtil::endsWith(uri.path(), "/fetch_derived_dataset")) {
-      fetchDerivedDataset(&req, &res, &uri);
       res_stream->writeResponse(res);
       return;
     }
@@ -242,80 +230,6 @@ void TSDBServlet::listChunks(
   res->setStatus(http::kStatusOK);
   res->addHeader("Content-Type", "application/octet-stream");
   res->addBody(buf.data(), buf.size());
-/*
-
-
-  res->setStatus(http::kStatusOK);
-  res->addHeader("Content-Type", "application/json; charset=utf-8");
-  json::JSONOutputStream j(res->getBodyOutputStream());
-
-  j.beginObject();
-  j.addObjectEntry("stream");
-  j.addString(stream);
-  j.addComma();
-  j.addObjectEntry("from");
-  j.addInteger(from.unixMicros());
-  j.addComma();
-  j.addObjectEntry("until");
-  j.addInteger(until.unixMicros());
-  j.addComma();
-  j.addObjectEntry("chunk_keys");
-  json::toJSON(chunks_encoded, &j);
-  j.endObject();
-*/
-}
-
-void TSDBServlet::listFiles(
-    const http::HTTPRequest* req,
-    http::HTTPResponse* res,
-    URI* uri) {
-  const auto& params = uri->queryParams();
-
-  String chunk;
-  if (!URI::getParam(params, "chunk", &chunk)) {
-    res->setStatus(fnord::http::kStatusBadRequest);
-    res->addBody("missing ?chunk=... parameter");
-    return;
-  }
-
-  String chunk_key;
-  util::Base64::decode(chunk, &chunk_key);
-  auto files = node_->listFiles(chunk_key);
-
-  util::BinaryMessageWriter buf;
-  for (const auto& f : files) {
-    buf.appendLenencString(f);
-  }
-
-  res->setStatus(http::kStatusOK);
-  res->addHeader("Content-Type", "application/octet-stream");
-  res->addBody(buf.data(), buf.size());
-/*
-  Vector<String> chunks_encoded;
-  for (const auto& c : chunks) {
-    String encoded;
-    util::Base64::encode(c, &encoded);
-    chunks_encoded.emplace_back(encoded);
-  }
-
-  res->setStatus(http::kStatusOK);
-  res->addHeader("Content-Type", "application/json; charset=utf-8");
-  json::JSONOutputStream j(res->getBodyOutputStream());
-
-  j.beginObject();
-  j.addObjectEntry("stream");
-  j.addString(stream);
-  j.addComma();
-  j.addObjectEntry("from");
-  j.addInteger(from.unixMicros());
-  j.addComma();
-  j.addObjectEntry("until");
-  j.addInteger(until.unixMicros());
-  j.addComma();
-  j.addObjectEntry("chunk_keys");
-  json::toJSON(chunks_encoded, &j);
-  j.endObject();
-*/
 }
 
 void TSDBServlet::fetchChunk(
@@ -418,35 +332,6 @@ void TSDBServlet::fetchPartitionInfo(
   res->setStatus(http::kStatusOK);
   res->addHeader("Content-Type", "application/x-protobuf");
   res->addBody(*msg::encode(pinfo));
-}
-
-void TSDBServlet::fetchDerivedDataset(
-    const http::HTTPRequest* req,
-    http::HTTPResponse* res,
-    URI* uri) {
-  const auto& params = uri->queryParams();
-
-  String chunk;
-  if (!URI::getParam(params, "chunk", &chunk)) {
-    res->setStatus(fnord::http::kStatusBadRequest);
-    res->addBody("missing ?chunk=... parameter");
-    return;
-  }
-
-  String derived;
-  if (!URI::getParam(params, "derived_dataset", &derived)) {
-    res->setStatus(fnord::http::kStatusBadRequest);
-    res->addBody("missing ?derived_dataset=... parameter");
-    return;
-  }
-
-  String chunk_key;
-  util::Base64::decode(chunk, &chunk_key);
-  auto buf = node_->fetchDerivedDataset(chunk_key, derived);
-
-  res->setStatus(http::kStatusOK);
-  res->addHeader("Content-Type", "application/octet-stream");
-  res->addBody(buf.data(), buf.size());
 }
 
 }
