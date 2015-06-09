@@ -9,6 +9,7 @@
  */
 #include <fnord-tsdb/TSDBClient.h>
 #include <fnord-base/util/binarymessagereader.h>
+#include <fnord-base/util/binarymessagewriter.h>
 #include <fnord-msg/msg.h>
 #include <fnord-http/httpclient.h>
 
@@ -20,6 +21,36 @@ TSDBClient::TSDBClient(
     http::HTTPConnectionPool* http) :
     uri_(uri),
     http_(http) {}
+
+void TSDBClient::insertRecord(
+    const String& stream_key,
+    const DateTime& time,
+    uint64_t msgid,
+    const Buffer& record) {
+  auto uri = URI(StringUtil::format(
+      "$0/list_chunks?stream=$1",
+      uri_,
+      URI::urlEncode(stream_key)));
+
+  util::BinaryMessageWriter buf;
+  buf.appendUInt64(time.unixMicros());
+  buf.appendUInt64(msgid);
+  buf.appendVarUInt(record.size());
+  buf.append(record.data(), record.size());
+
+  http::HTTPRequest req(http::HTTPMessage::M_POST, uri.pathAndQuery());
+  req.addHeader("Host", uri.hostAndPort());
+  req.addBody(buf.data(), buf.size());
+
+  auto res = http_->executeRequest(req);
+  res.wait();
+
+  const auto& r = res.get();
+  if (r.statusCode() != 201) {
+    RAISEF(kRuntimeError, "received non-201 response: $0", r.body().toString());
+  }
+}
+
 
 Vector<String> TSDBClient::listPartitions(
     const String& stream_key,
@@ -165,6 +196,10 @@ Buffer TSDBClient::fetchDerivedDataset(
   }
 
   return r.body();
+}
+
+uint64_t TSDBClient::mkMessageID() {
+  return rnd_.random64();
 }
 
 } // namespace tdsb
