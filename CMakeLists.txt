@@ -8,12 +8,14 @@ project(cmapp)
 option(ENABLE_TESTS "Build unit tests [default: ON]" ON)
 
 include_directories(${PROJECT_BINARY_DIR})
-include_directories(${PROJECT_BINARY_DIR}/3rdparty/libfnord/)
 file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/tests)
 include_directories(./)
 include_directories(./src)
-include_directories(3rdparty/libfnord/)
-include_directories(3rdparty/libfnord/3rdparty/)
+if(NOT DEFINED NO_BUNDLED_LIBFNORD)
+  include_directories(${PROJECT_BINARY_DIR}/3rdparty/libfnord/)
+  include_directories(3rdparty/libfnord/)
+  include_directories(3rdparty/libfnord/3rdparty/)
+endif()
 
 set(CMAKE_CXX_FLAGS "-ftemplate-depth=500 ${CMAKE_CXX_FLAGS}")
 # set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fsanitize=address -g")
@@ -33,12 +35,14 @@ else()
   set(CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS)
 endif()
 
-# strip binaries
-#  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -s")
-
 find_package(Threads)
 
-add_subdirectory(3rdparty/libfnord/fnord-base)
-add_subdirectory(3rdparty/libfnord/fnord-msg)
-add_subdirectory(3rdparty/libfnord/fnord-http)
+if(NOT DEFINED NO_BUNDLED_LIBFNORD)
+  add_subdirectory(3rdparty/libfnord/fnord-base)
+  add_subdirectory(3rdparty/libfnord/fnord-msg)
+  add_subdirectory(3rdparty/libfnord/fnord-http)
+endif()
+
 add_subdirectory(src/)
+
+
