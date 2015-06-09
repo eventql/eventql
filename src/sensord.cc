@@ -8,38 +8,39 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include "sensord.h"
-#include "fnord-base/exception.h"
 #include <unistd.h>
+#include "fnord-base/application.h"
+#include "fnord-base/cli/flagparser.h"
+#include "fnord-base/exception.h"
+#include "SensorRepository.h"
+#include "HostStatsSensor.h"
 
-namespace sensord {
+using namespace sensord;
+using namespace fnord;
 
-static std::string get_hostname() {
-  char buf[1024];
+int main(int argc, const char** argv) {
+  Application::init();
+  Application::logToStderr();
 
-  if (gethostname(buf, sizeof(buf)) != 0) {
-    RAISE(kRuntimeError, "gethostname() failed");
-  }
+  cli::FlagParser flags;
 
-  return std::string(buf, strlen(buf));
+  flags.defineFlag(
+      "loglevel",
+      cli::FlagParser::T_STRING,
+      false,
+      NULL,
+      "INFO",
+      "loglevel",
+      "<level>");
+
+  flags.parseArgv(argc, argv);
+
+  Logger::get()->setMinimumLogLevel(
+      strToLogLevel(flags.getString("loglevel")));
+
+  SensorRepository sensors;
+  sensors.addSensor(new HostStatsSensor());
+
+
+  return 0;
 }
-
-HostStats get_hosts_stats() {
-  HostStats stats;
-  stats.set_hostname(get_hostname());
-
-  // -> DiskStats*
-  auto part1 = stats.add_disk_stats();
-  part1->set_mountpoint("/");
-  part1->set_bytes_available(1024 * 1024 * 1024 * 250);
-  part1->set_bytes_used(1024 * 1024 * 1024 * 30);
-
-  auto part2 = stats.add_disk_stats();
-  part2->set_mountpoint("/boot");
-  part2->set_bytes_available(1024 * 1024 * 512);
-  part2->set_bytes_used(1024 * 1024 * 80);
-
-  return stats;
-}
-
-};
