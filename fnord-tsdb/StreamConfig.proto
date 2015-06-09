@@ -1,0 +1,49 @@
+/**
+ * This file is part of the "libfnord" project
+ *   Copyright (c) 2015 Paul Asmuth
+ *
+ * FnordMetric is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License v3.0. You should have received a
+ * copy of the GNU General Public License along with this program. If not, see
+ * <http://www.gnu.org/licenses/>.
+ */
+package tsdb;
+
+message TimeWindowPartitionerConfig {
+
+  /**
+   * The time window to partition the stream into in microseconds
+   */
+  required uint64 window = 1;
+
+};
+
+message StreamConfig {
+
+  /**
+   * The stream key prefix for which this config should be applied
+   */
+  required string stream_key_prefix = 1;
+
+  /**
+   * The partitioner to be used to partition the stream. Default partitioners:
+   * "TIME_WINDOW"
+   */
+  required string partitioner = 2;
+
+  /**
+   * The partitioner config
+   */
+  required string partitioner_config = 3;
+
+  /**
+   * The maximum sstable size in bytes
+   */
+  optional uint64 max_sstable_size = 4;
+
+  /**
+   * The compaction interval in microseconds
+   */
+  optional uint64 compaction_interval = 5;
+
+};
