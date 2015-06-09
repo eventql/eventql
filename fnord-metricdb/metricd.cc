@@ -26,6 +26,7 @@
 #include <sensord/SensorPushServlet.h>
 #include "fnord-metricdb/metricservice.h"
 #include "fnord-metricdb/httpapiservlet.h"
+#include "fnord-metricdb/backends/tsdb/metricrepository.h"
 #include "fnord-base/stats/statsd.h"
 
 using namespace fnord;
@@ -109,7 +110,11 @@ int main(int argc, const char** argv) {
   http_router.addRouteByPrefixMatch("/sensors", &sensor_servlet);
 
   /* metric service */
-  auto metric_service = fnord::metric_service::MetricService::newWithInMemoryBackend();
+  auto metric_service = fnord::metric_service::MetricService::newWithBackend(
+      new fnord::metric_service::tsdb_backend::MetricRepository(
+          "metricd.metrics.",
+          &tsdb));
+
   fnord::metric_service::HTTPAPIServlet metrics_api(&metric_service);
   http_router.addRouteByPrefixMatch("/metrics", &metrics_api);
 
