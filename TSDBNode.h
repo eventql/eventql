@@ -32,9 +32,7 @@ public:
       RefPtr<dht::ReplicationScheme> replication_scheme,
       http::HTTPConnectionPool* http);
 
-  void configurePrefix(
-      const String& stream_key_prefix,
-      StreamConfig props);
+  void configurePrefix(StreamConfig config);
 
   StreamConfig* configFor(const String& stream_key) const;
 
