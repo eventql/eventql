@@ -40,6 +40,7 @@ find_package(Threads)
 
 set(NO_BUNDLED_LIBFNORD true)
 
+
 add_subdirectory(3rdparty/libfnord/fnord-base)
 add_subdirectory(3rdparty/libfnord/fnord-msg)
 add_subdirectory(3rdparty/libfnord/fnord-feeds)
@@ -52,11 +53,15 @@ add_subdirectory(3rdparty/libfnord/fnord-json)
 add_subdirectory(3rdparty/libfnord/fnord-cstable)
 add_subdirectory(3rdparty/libfnord/fnord-sstable)
 add_subdirectory(3rdparty/libfnord/fnord-chart)
+
+add_subdirectory(3rdparty/sensord/src/sensord)
+include_directories(3rdparty/sensord/src)
+include_directories(${PROJECT_BINARY_DIR}/3rdparty/sensord/src)
+
 add_subdirectory(3rdparty/libfnord/fnord-metricdb)
 add_subdirectory(3rdparty/libfnord/fnord-tsdb)
 add_subdirectory(3rdparty/libfnord/fnord-dht)
 add_subdirectory(3rdparty/libfnord/fnord-dproc)
 add_subdirectory(3rdparty/libfnord/fnord-afx)
-add_subdirectory(3rdparty/sensord)
 add_subdirectory(src/)
 
