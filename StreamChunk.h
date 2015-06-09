@@ -68,15 +68,11 @@ public:
 
   void insertRecords(const Vector<RecordRef>& records);
 
-  void compact();
-  void replicate();
-  void buildIndexes();
-
+  PartitionInfo partitionInfo() const;
   Vector<String> listFiles() const;
 
-  PartitionInfo partitionInfo() const;
-
-  Buffer fetchDerivedDataset(const String& dataset_name);
+  void compact();
+  void replicate();
 
 protected:
 
@@ -95,7 +91,6 @@ protected:
   void scheduleCompaction();
   void commitState();
   uint64_t replicateTo(const String& addr, uint64_t offset);
-  void buildDerivedDataset(RefPtr<DerivedDataset> dset);
 
   String key_;
   String stream_key_;
@@ -104,7 +99,6 @@ protected:
   TSDBNodeRef* node_;
   std::mutex mutex_;
   std::mutex replication_mutex_;
-  std::mutex indexbuild_mutex_;
   DateTime last_compaction_;
   HashMap<uint64_t, uint64_t> repl_offsets_;
 };

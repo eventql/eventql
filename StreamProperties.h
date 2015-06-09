@@ -19,26 +19,20 @@ namespace fnord {
 namespace tsdb {
 
 struct StreamProperties : public RefCounted {
-  StreamProperties(
-      RefPtr<msg::MessageSchema> _schema) :
-      schema(_schema),
+  StreamProperties() :
       chunk_size(kMicrosPerSecond * 3600),
       max_datafile_size(1024 * 1024 * 128),
       compaction_interval(kMicrosPerSecond * 10) {}
 
   StreamProperties(
       const StreamProperties& other) :
-      schema(other.schema),
       chunk_size(other.chunk_size),
       max_datafile_size(other.max_datafile_size),
-      compaction_interval(other.compaction_interval),
-      derived_datasets(other.derived_datasets) {}
+      compaction_interval(other.compaction_interval) {}
 
-  RefPtr<msg::MessageSchema> schema;
   Duration chunk_size;
   size_t max_datafile_size;
   Duration compaction_interval;
-  List<RefPtr<DerivedDataset>> derived_datasets;
 };
 
 }
