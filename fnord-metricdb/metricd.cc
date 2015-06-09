@@ -21,6 +21,7 @@
 #include "fnord-http/httpconnectionpool.h"
 #include "fnord-tsdb/TSDBClient.h"
 #include "fnord-metricdb/SensorServlet.h"
+#include <sensord/SensorSampleFeed.h>
 
 using namespace fnord;
 
@@ -78,6 +79,7 @@ int main(int argc, const char** argv) {
   http_server.listen(flags.getInt("http"));
   http_server.stats()->exportStats("/metricd/http");
 
+  sensord::SensorSampleFeed sensor_feed;
   metricdb::SensorServlet sensor_servlet;
   http_router.addRouteByPrefixMatch("/sensors", &sensor_servlet);
 
