@@ -92,11 +92,14 @@ int main(int argc, const char** argv) {
         smpl.sample_namespace(),
         smpl.sensor_key());
 
+    auto sample_data = smpl.data();
+    auto sample_time = WallClock::unixMicros();
+
     tsdb.insertRecord(
         stream_key,
-        WallClock::unixMicros(),
+        sample_time,
         tsdb.mkMessageID(),
-        *msg::encode(smpl));
+        Buffer(sample_data.data(), sample_data.size()));
   });
 
   metricdb::SensorPushServlet sensor_servlet(&sensor_feed);
