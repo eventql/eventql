@@ -15,7 +15,8 @@
 #include <fnord-sstable/sstablereader.h>
 #include <fnord-tsdb/RecordSet.h>
 
-namespace fnord {
+using namespace fnord;
+
 namespace tsdb {
 
 RecordRef::RecordRef(
@@ -486,5 +487,4 @@ void RecordSet::RecordSetState::decode(util::BinaryMessageReader* reader) {
 }
 
 } // namespace tsdb
-} // namespace fnord
 

@@ -18,7 +18,8 @@
 #include <fnord-base/util/Base64.h>
 #include <fnord-sstable/sstablereader.h>
 
-namespace fnord {
+using namespace fnord;
+
 namespace tsdb {
 
 TSDBServlet::TSDBServlet(TSDBNode* node) : node_(node) {}
@@ -334,6 +335,5 @@ void TSDBServlet::fetchPartitionInfo(
   res->addBody(*msg::encode(pinfo));
 }
 
-}
 }
 

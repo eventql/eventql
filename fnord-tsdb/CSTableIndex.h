@@ -14,7 +14,8 @@
 #include <fnord-msg/MessageSchema.h>
 #include <fnord-base/random.h>
 
-namespace fnord {
+using namespace fnord;
+
 namespace tsdb {
 
 class CSTableIndex : public DerivedDataset {
@@ -37,6 +38,5 @@ protected:
   Random rnd_;
 };
 
-}
 }
 #endif

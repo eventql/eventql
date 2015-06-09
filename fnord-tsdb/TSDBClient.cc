@@ -13,7 +13,8 @@
 #include <fnord-msg/msg.h>
 #include <fnord-http/httpclient.h>
 
-namespace fnord {
+using namespace fnord;
+
 namespace tsdb {
 
 TSDBClient::TSDBClient(
@@ -203,4 +204,3 @@ uint64_t TSDBClient::mkMessageID() {
 }
 
 } // namespace tdsb
-} // namespace fnord

@@ -20,7 +20,8 @@
 #include <fnord-dht/ReplicationScheme.h>
 #include <fnord-http/httpconnectionpool.h>
 
-namespace fnord {
+using namespace fnord;
+
 namespace tsdb {
 
 class StreamChunk;
@@ -36,6 +37,5 @@ struct TSDBNodeRef {
 };
 
 } // namespace tdsb
-} // namespace fnord
 
 #endif

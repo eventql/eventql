@@ -13,7 +13,8 @@
 #include <fnord-base/stdtypes.h>
 #include <fnord-tsdb/TSDBNodeRef.h>
 
-namespace fnord {
+using namespace fnord;
+
 namespace tsdb {
 
 class CompactionWorker : public RefCounted {
@@ -32,6 +33,5 @@ protected:
 };
 
 } // namespace tsdb
-} // namespace fnord
 
 #endif
