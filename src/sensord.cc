@@ -11,6 +11,7 @@
 #include <unistd.h>
 #include "fnord-base/application.h"
 #include "fnord-base/cli/flagparser.h"
+#include "fnord-base/inspect.h"
 #include "fnord-base/exception.h"
 #include "SensorRepository.h"
 #include "HostStatsSensor.h"
@@ -41,6 +42,9 @@ int main(int argc, const char** argv) {
   SensorRepository sensors;
   sensors.addSensor(new HostStatsSensor());
 
+  iputs(
+      "host sensor: $0",
+      sensors.fetchSensorDataAs<HostStats>("host").DebugString());
 
   return 0;
 }

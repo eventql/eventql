@@ -9,31 +9,16 @@
  * <http://www.gnu.org/licenses/>.
  */
 #pragma once
-#include <fnord-base/stdtypes.h>
-#include <fnord-base/autoref.h>
-#include "Sensor.h"
 
 using namespace fnord;
 
 namespace sensord {
 
-class SensorRepository {
-public:
-
-  void addSensor(RefPtr<Sensor> sensor);
-
-  RefPtr<Sensor> fetchSensor(const String& key) const;
-
-  BufferRef fetchSensorData(const String& key) const;
-
-  template <typename T>
-  T fetchSensorDataAs(const String& key) const;
-
-protected:
-  mutable std::mutex mutex_;
-  HashMap<String, RefPtr<Sensor>> sensors_;
-};
+template <typename T>
+T SensorRepository::fetchSensorDataAs(const String& key) const {
+  auto data = fetchSensorData(key);
+  return msg::decode<T>(*data);
+}
 
 };
 
-#include "SensorRepository_impl.h"
