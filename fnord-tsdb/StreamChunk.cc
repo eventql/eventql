@@ -122,7 +122,6 @@ StreamChunk::StreamChunk(
   scheduleCompaction();
   node_->compactionq.insert(this, WallClock::unixMicros());
   node_->replicationq.insert(this, WallClock::unixMicros());
-  node_->indexq.insert(this, WallClock::unixMicros());
   records_.setMaxDatafileSize(config_->max_sstable_size());
 }
 
@@ -198,7 +197,6 @@ void StreamChunk::compact() {
   lk.unlock();
 
   node_->replicationq.insert(this, WallClock::unixMicros());
-  node_->indexq.insert(this, WallClock::unixMicros());
 
   for (const auto& f : deleted_files) {
     FileUtil::rm(f);
