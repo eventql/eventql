@@ -20,7 +20,7 @@ String HostStatsSensor::key() const {
 }
 
 void HostStatsSensor::fetchData(HostStats* stats) const {
-  stats->set_hostname(getHostname());
+  stats->mutable_host()->set_hostname(getHostname());
 
   // -> DiskStats*
   //auto part1 = stats.add_disk_stats();

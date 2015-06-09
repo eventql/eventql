@@ -16,13 +16,15 @@ message DiskStats {
   required uint64 bytes_used = 3;
 };
 
+message HostRef {
+  required string hostname = 1;
+  optional string rack = 2;
+  optional string datacenter = 3;
+}
+
 message HostStats {
 
-  required string hostname = 1;
-
-  optional string rack = 2;
-
-  optional string datacenter = 3;
+  required HostRef host = 8;
 
   optional uint64 load_avg_1m = 5;
   optional uint64 load_avg_5m = 6;
