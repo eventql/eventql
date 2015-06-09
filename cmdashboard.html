@@ -24,7 +24,7 @@
 
 <section>
   <iframe
-    src="http://nue03.prod.fnrd.net:7009/metrics/timeseries?metric=/cm-frontend/global/http/inbound/total_requests&aggr_window=10&aggr_step=10&aggr_fn=sum&format=svg&min=0&height=160&width=1400&axis_right=true&grid=both&legend=toprightinside&max=2500&scale=0.1&title=Frontend:%20HTTP%20QPS"
+    src="http://nue03.prod.fnrd.net:7009/metrics/timeseries?metric=/cm-frontend/global/http/inbound/total_requests&aggr_window=60&aggr_step=10&aggr_fn=sum&format=svg&min=0&height=160&width=1400&axis_right=true&grid=both&legend=toprightinside&scale=0.016&title=Frontend:%20HTTP%20QPS"
     width="100%"
     frameborder="0"
     height="160"
@@ -32,7 +32,7 @@
     </iframe>
 
   <iframe
-    src="http://nue03.prod.fnrd.net:7009/metrics/timeseries?metric=/cm-frontend/global/http/inbound/sent_bytes&aggr_window=10&scale=0.1&aggr_step=10&aggr_fn=sum&metric=/cm-frontend/global/http/inbound/received_bytes&aggr_window=10&aggr_step=10&scale=0.8&aggr_fn=sum&format=svg&min=0&height=160&width=1400&axis_right=true&grid=both&legend=toprightinside&title=Frontend:%20HTTP%20Bandwith&max=50000000"
+    src="http://nue03.prod.fnrd.net:7009/metrics/timeseries?metric=/cm-frontend/global/http/inbound/sent_bytes&aggr_window=60&scale=0.128&aggr_step=10&aggr_fn=sum&metric=/cm-frontend/global/http/inbound/received_bytes&aggr_window=60&aggr_step=10&scale=0.128&aggr_fn=sum&format=svg&min=0&height=160&width=1400&axis_right=true&grid=both&legend=toprightinside&title=Frontend:%20HTTP%20Bandwith"
     frameborder="0"
     height="160"
     scrolling="no">
@@ -41,7 +41,7 @@
 
 <section>
   <iframe
-    src="http://nue03.prod.fnrd.net:7009/metrics/timeseries?metric=/cm-autocompleteserver/global/requests_total&aggr_window=10&aggr_step=10&aggr_fn=sum&format=svg&min=0&height=160&width=1400&axis_right=true&grid=both&legend=toprightinside&max=500&scale=0.1&title=Autocomplete%20QPS&color=color4"
+    src="http://nue03.prod.fnrd.net:7009/metrics/timeseries?metric=/cm-autocompleteserver/global/requests_total&aggr_window=60&aggr_step=10&aggr_fn=sum&format=svg&min=0&height=160&width=1400&axis_right=true&grid=both&legend=toprightinside&scale=0.016&title=Autocomplete%20QPS&color=color4"
     width="100%"
     frameborder="0"
     height="160"
