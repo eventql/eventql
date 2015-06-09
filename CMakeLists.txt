@@ -43,6 +43,8 @@ add_library(fnord-metricdb OBJECT
     backends/disk/tokenindexwriter.cc
     backends/inmemory/metric.cc
     backends/inmemory/metricrepository.cc
+    backends/tsdb/metric.cc
+    backends/tsdb/metricrepository.cc
     backends/crate/crateconnection.cc
     backends/crate/metric.cc
     backends/crate/metricrepository.cc
