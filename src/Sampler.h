@@ -29,6 +29,8 @@ public:
 
   void run();
 
+  void onSample(Function<void (const SampleEnvelope& sample)> fn);
+
 protected:
 
   void executeRule(SampleRule* rule);
@@ -38,6 +40,7 @@ protected:
   SensorRepository* sensors_;
   bool running_;
   thread::DelayedQueue<SampleRule*> queue_;
+  Vector<Function<void (const SampleEnvelope& sample)>> callbacks_;
 };
 
 };

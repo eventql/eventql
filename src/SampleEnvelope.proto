@@ -18,6 +18,11 @@ message SampleEnvelope {
   optional string namespace = 1;
 
   /**
+   * The key of this ensor "host.load_average"
+   */
+  required string sensor_key = 5;
+
+  /**
    * The fully path to the used schema. e.g. "sensord.HostStats"
    */
   required string schema_name = 2;

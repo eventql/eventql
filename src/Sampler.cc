@@ -41,8 +41,15 @@ void Sampler::run() {
 
 void Sampler::executeRule(SampleRule* rule) {
   fnord::iputs("execute rule... $0", rule);
-
   auto now = WallClock::unixMicros();
+  auto sensor = sensors_->fetchSensor(rule->sensor_key());
+
+  SampleEnvelope sample;
+  sample.set_sensor_key(sensor->key());
+  sample.set_schema_name(sensor->schemaName());
+  sample.set_data(sensor->fetchData()->toString());
+  sample.set_time(now);
+
   auto next = now + rule->sample_interval();
   queue_.insert(rule, next);
 }
