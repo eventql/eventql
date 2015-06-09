@@ -14,7 +14,7 @@
 #include "fnord-base/inspect.h"
 #include "fnord-base/exception.h"
 #include "fnord-base/logging.h"
-#include "fnord-http/HTTPClient.h"
+#include "fnord-http/httpclient.h"
 #include "SensorRepository.h"
 #include "Sampler.h"
 #include "HostStatsSensor.h"

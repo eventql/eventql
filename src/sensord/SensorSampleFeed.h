@@ -11,7 +11,7 @@
 #pragma once
 #include <fnord-base/stdtypes.h>
 #include <fnord-base/autoref.h>
-#include <fnord-base/thread/TaskScheduler.h>
+#include <fnord-base/thread/taskscheduler.h>
 #include <sensord/SampleEnvelope.pb.h>
 
 using namespace fnord;
@@ -39,7 +39,7 @@ public:
 
 protected:
   struct PublishedSample : public RefCounted {
-    const PublishedSample(const SampleEnvelope& s) : sample(s) {}
+    PublishedSample(const SampleEnvelope& s) : sample(s) {}
     SampleEnvelope sample;
   };
 
