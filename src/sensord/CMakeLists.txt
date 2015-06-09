@@ -1,13 +1,10 @@
-include_directories(${CMAKE_CURRENT_BINARY_DIR})
 file(GLOB PROTO_FILES *.proto)
 PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS ${PROTO_FILES})
 
 add_library(
-    sensord-common OBJECT
-    HostStatsSensor.cc
-    Sensor.cc
-    SensorRepository.cc
-    Sampler.cc
+    sensord-client OBJECT
+    SensorPushServlet.cc
+    #SensorSampleFeed.cc
     ${PROTO_SRCS})
 
 add_executable(
@@ -15,7 +12,11 @@ add_executable(
     $<TARGET_OBJECTS:fnord-base>
     $<TARGET_OBJECTS:fnord-msg>
     $<TARGET_OBJECTS:fnord-http>
-    $<TARGET_OBJECTS:sensord-common>
+    HostStatsSensor.cc
+    Sensor.cc
+    SensorRepository.cc
+    Sampler.cc
+    ${PROTO_SRCS}
     sensord.cc)
 
 target_link_libraries(
