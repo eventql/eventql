@@ -37,6 +37,12 @@ public:
    */
   virtual RefPtr<msg::MessageSchema> schema() const = 0;
 
+  /**
+   * Return the name of the schema for the data returned by this sensor.
+   * e.g "sensord.HostStats"
+   */
+  const String& schemaName() const;
+
 };
 
 template <typename ProtoType>
