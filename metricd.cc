@@ -112,7 +112,7 @@ int main(int argc, const char** argv) {
   /* metric service */
   fnord::metric_service::MetricService metrics("metricd.metrics.", &tsdb);
   fnord::metric_service::HTTPAPIServlet metrics_api(&metrics);
-  http_router.addRouteByPrefixMatch("/metrics", &metrics_api);
+  http_router.addRouteByPrefixMatch("/metrics", &metrics_api, &tp);
 
   fnord::statsd::StatsdServer statsd_server(&evloop, &tp);
   statsd_server.onSample([&metrics] (
