@@ -11,6 +11,7 @@
 #pragma once
 #include "fnord-base/stdtypes.h"
 #include "fnord-base/autoref.h"
+#include "fnord-msg/MessageSchema.h"
 
 using namespace fnord;
 
@@ -33,9 +34,27 @@ class Sensor : public RefCounted {
   /**
    * Return the schema for the data snapshots returned by this sensor
    */
-  virtual msg::MessageSchema schema() const = 0;
+  virtual RefPtr<msg::MessageSchema> schema() const = 0;
 
+};
+
+template <typename ProtoType>
+class ProtoSensor : public Sensor {
+
+  ProtoSensor(const String& key);
+
+  const String& key() const override;
+
+  BufferRef fetchData() const override;
+  virtual void fetchData(ProtoType*) const = 0;
+
+  RefPtr<msg::MessageSchema> schema() const override;
+
+protected:
+  String key_;
+  RefPtr<msg::MessageSchema> schema_;
 };
 
 };
 
+#include "Sensor_impl.h"

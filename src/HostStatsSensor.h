@@ -10,14 +10,16 @@
  */
 #pragma once
 #include "fnord-base/stdtypes.h"
+#include "HostStats.pb.h"
 
 using namespace fnord;
 
 namespace sensord {
 
-class HostStatsSensor : public Sensor {
-
-
+class HostStatsSensor : public ProtoSensor<HostStats> {
+public:
+  HostStatsSensor();
+  void fetchData(HostStats* stats) const override;
 };
 
 };
