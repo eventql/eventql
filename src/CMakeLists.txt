@@ -6,6 +6,7 @@ add_library(
     sensord-common OBJECT
     HostStatsSensor.cc
     SensorRepository.cc
+    Sampler.cc
     ${PROTO_SRCS})
 
 add_executable(
