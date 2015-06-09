@@ -15,11 +15,13 @@
 #include "fnord-base/thread/eventloop.h"
 #include "fnord-base/thread/threadpool.h"
 #include "fnord-base/random.h"
+#include "fnord-base/wallclock.h"
 #include "fnord-base/cli/flagparser.h"
 #include "fnord-http/httprouter.h"
 #include "fnord-http/httpserver.h"
 #include "fnord-http/httpconnectionpool.h"
 #include "fnord-tsdb/TSDBClient.h"
+#include "fnord-msg/msg.h"
 #include <sensord/SensorSampleFeed.h>
 #include <sensord/SensorPushServlet.h>
 
@@ -80,8 +82,21 @@ int main(int argc, const char** argv) {
   http_server.stats()->exportStats("/metricd/http");
 
   sensord::SensorSampleFeed sensor_feed;
-  sensor_feed.subscribe(&tp, [] (const sensord::SampleEnvelope& smpl) {
-    fnord::iputs("got sample: $0", smpl.DebugString());
+  sensor_feed.subscribe(&tp, [&tsdb] (const sensord::SampleEnvelope& smpl) {
+    if (smpl.sample_namespace().empty()) {
+      fnord::logWarning("metricd", "discarding sample without namespace");
+    }
+
+    auto stream_key = StringUtil::format(
+        "metricd.sensors.$0.$1",
+        smpl.sample_namespace(),
+        smpl.sensor_key());
+
+    tsdb.insertRecord(
+        stream_key,
+        WallClock::unixMicros(),
+        tsdb.mkMessageID(),
+        *msg::encode(smpl));
   });
 
   metricdb::SensorPushServlet sensor_servlet(&sensor_feed);
