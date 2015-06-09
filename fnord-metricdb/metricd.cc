@@ -80,6 +80,10 @@ int main(int argc, const char** argv) {
   http_server.stats()->exportStats("/metricd/http");
 
   sensord::SensorSampleFeed sensor_feed;
+  sensor_feed.subscribe(&tp, [] (const sensord::SampleEnvelope& smpl) {
+    fnord::iputs("got sample: $0", smpl.DebugString());
+  });
+
   metricdb::SensorPushServlet sensor_servlet(&sensor_feed);
   http_router.addRouteByPrefixMatch("/sensors", &sensor_servlet);
 
