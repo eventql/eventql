@@ -17,6 +17,7 @@
 #include "fnord-base/stats/counter.h"
 #include "fnord-base/thread/taskscheduler.h"
 #include "fnord-tsdb/TSDBClient.h"
+#include "fnord-metricdb/Sample.pb.h"
 
 namespace fnord {
 namespace metric_service {
@@ -46,9 +47,9 @@ public:
    */
   void scanSamples(
       const std::string& metric_key,
-      const fnord::DateTime& time_begin,
-      const fnord::DateTime& time_end,
-      std::function<bool (Sample* sample)> callback);
+      const DateTime& time_begin,
+      const DateTime& time_end,
+      Function<void (const metricd::MetricSample& sample)> callback);
 
   Sample getMostRecentSample(const std::string& metric_key);
 
