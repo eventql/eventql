@@ -9,9 +9,14 @@
  */
 #include <fnord-base/wallclock.h>
 #include "fnord-metricdb/SensorServlet.h"
+#include <fnord-msg/msg.h>
 
 namespace fnord {
 namespace metricdb {
+
+SensorServlet::SensorServlet(
+    sensord::SensorSampleFeed* sensor_feed) :
+    sensor_feed_(sensor_feed) {}
 
 void SensorServlet::handleHTTPRequest(
     fnord::http::HTTPRequest* req,
@@ -38,6 +43,13 @@ void SensorServlet::pushSample(
     http::HTTPResponse* res,
     URI* uri) {
   const auto& params = uri->queryParams();
+
+  sensord::SampleList samples;
+  msg::decode(req->body(), &samples);
+
+  for (const auto& sample : samples.samples()) {
+    sensor_feed_->publish(sample);
+  }
 
   res->setStatus(http::kStatusCreated);
 }
