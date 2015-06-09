@@ -80,7 +80,7 @@ int main(int argc, const char** argv) {
   http_server.stats()->exportStats("/metricd/http");
 
   sensord::SensorSampleFeed sensor_feed;
-  metricdb::SensorServlet sensor_servlet(&sensor_feed);
+  metricdb::SensorPushServlet sensor_servlet(&sensor_feed);
   http_router.addRouteByPrefixMatch("/sensors", &sensor_servlet);
 
   //stats::StatsHTTPServlet stats_servlet;
