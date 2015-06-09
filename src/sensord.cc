@@ -33,7 +33,7 @@ int main(int argc, const char** argv) {
       cli::FlagParser::T_STRING,
       false,
       NULL,
-      "",
+      NULL,
       "url",
       "<url>");
 
@@ -72,34 +72,45 @@ int main(int argc, const char** argv) {
     rule->set_sample_interval(kMicrosPerSecond);
   }
 
-  /* set up sampler */
-  Sampler sampler(config, &sensors);
-
-  /* set up sampe upload */
-  http::HTTPClient http;
-  auto sample_namespace = flags.getString("namespace");
-  auto target = URI(flags.getString("target-http"));
-  sampler.onSample([&] (const SampleEnvelope& s) {
-    /* N.B. naive request per sample for now, optimize later ~paul */
-    auto sample = s;
-    sample.set_sample_namespace(sample_namespace);
-
-    fnord::iputs("got sample: $0", sample.DebugString());
-  });
-
   fnord::logInfo(
       "sensord",
       "Starting sensord; sensors=$0 rules=$1",
       sensors.numSensors(),
       config.rules().size());
 
-  sampler.run();
+  /* set up sampler */
+  Sampler sampler(config, &sensors);
 
-  //for (;;) {
-  //  auto samples = sampler.sample();
-  //  fnord::iputs("got $0 samples", samples.samples().size());
-  //  usleep(1000000);
-  //}
+  /* set up http upload targets (--target-http) */
+  http::HTTPClient http;
+  auto sample_namespace = flags.getString("namespace");
+  for (const auto& trgt : flags.getStrings("target-http")) {
+    fnord::logInfo("sensord", "Uploading samples to '$0'", trgt);
+
+    sampler.onSample([&sample_namespace, &http, trgt] (const SampleEnvelope& s) {
+      fnord::logDebug("sensord", "Uploading sample to '$0'", trgt);
+
+      URI target(trgt);
+      SampleList list;
+
+      auto sample = list.add_samples();
+      *sample = s;
+      sample->set_sample_namespace(sample_namespace);
+
+      /* N.B. naive request per sample for now, batch/optimize later ~paul */
+      http::HTTPRequest req(http::HTTPMessage::M_POST, target.pathAndQuery());
+      req.addHeader("Host", target.hostAndPort());
+      req.addBody(*msg::encode(list));
+
+      auto res = http.executeRequest(req);
+      if (res.statusCode() != 200) {
+        RAISEF(kRuntimeError, "http error: $0", res.body().toString());
+      }
+    });
+  }
+
+  /* go! ;) */
+  sampler.run();
 
   return 0;
 }
