@@ -4,7 +4,7 @@ PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS ${PROTO_FILES})
 add_library(
     sensord-client OBJECT
     SensorPushServlet.cc
-    #SensorSampleFeed.cc
+    SensorSampleFeed.cc
     ${PROTO_SRCS})
 
 add_executable(

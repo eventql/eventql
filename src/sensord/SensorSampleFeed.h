@@ -39,6 +39,7 @@ public:
 
 protected:
   struct PublishedSample : public RefCounted {
+    const PublishedSample(const SampleEnvelope& s) : sample(s) {}
     SampleEnvelope sample;
   };
 
