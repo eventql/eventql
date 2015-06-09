@@ -18,13 +18,14 @@ using namespace fnord;
 namespace sensord {
 
 class Sensor : public RefCounted {
+public:
 
   virtual ~Sensor() {};
 
   /**
    * The key under which this sensor will be available. e.g. "host/load_average"
    */
-  virtual const String& key() const = 0;
+  virtual String key() const = 0;
 
   /**
    * Fetch this sensors most latest data snapshot
@@ -40,10 +41,9 @@ class Sensor : public RefCounted {
 
 template <typename ProtoType>
 class ProtoSensor : public Sensor {
+public:
 
-  ProtoSensor(const String& key);
-
-  const String& key() const override;
+  ProtoSensor();
 
   BufferRef fetchData() const override;
   virtual void fetchData(ProtoType*) const = 0;

@@ -14,12 +14,8 @@
 namespace sensord {
 
 template <typename ProtoType>
-ProtoSensor<ProtoType>::ProtoSensor(const String& key) : key_(key) {}
-
-template <typename ProtoType>
-const String& ProtoSensor<ProtoType>::key() const {
-  return key_;
-}
+ProtoSensor<ProtoType>::ProtoSensor() :
+    schema_(msg::MessageSchema::fromProtobuf(ProtoType::descriptor())) {}
 
 template <typename ProtoType>
 BufferRef ProtoSensor<ProtoType>::fetchData() const {
@@ -30,7 +26,7 @@ BufferRef ProtoSensor<ProtoType>::fetchData() const {
 
 template <typename ProtoType>
 RefPtr<msg::MessageSchema> ProtoSensor<ProtoType>::schema() const {
-  return msg::MessageSchema::fromProtobuf(ProtoType::descriptor());
+  return schema_;
 }
 
 };

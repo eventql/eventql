@@ -10,6 +10,7 @@
  */
 #pragma once
 #include "fnord-base/stdtypes.h"
+#include "Sensor.h"
 #include "HostStats.pb.h"
 
 using namespace fnord;
@@ -18,8 +19,15 @@ namespace sensord {
 
 class HostStatsSensor : public ProtoSensor<HostStats> {
 public:
-  HostStatsSensor();
+
+  String key() const override;
+
   void fetchData(HostStats* stats) const override;
+
+protected:
+
+  String getHostname() const;
+
 };
 
 };
