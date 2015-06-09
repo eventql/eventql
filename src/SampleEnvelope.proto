@@ -15,7 +15,7 @@ message SampleEnvelope {
   /**
    * The optional namespace in which to which this sample should be reported
    */
-  optional string namespace = 1;
+  optional string sample_namespace = 1;
 
   /**
    * The key of this ensor "host.load_average"

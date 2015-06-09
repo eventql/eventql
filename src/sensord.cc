@@ -28,6 +28,15 @@ int main(int argc, const char** argv) {
   cli::FlagParser flags;
 
   flags.defineFlag(
+      "namespace",
+      cli::FlagParser::T_STRING,
+      false,
+      NULL,
+      "",
+      "namespace",
+      "<namespace>");
+
+  flags.defineFlag(
       "loglevel",
       cli::FlagParser::T_STRING,
       false,
@@ -41,9 +50,11 @@ int main(int argc, const char** argv) {
   Logger::get()->setMinimumLogLevel(
       strToLogLevel(flags.getString("loglevel")));
 
+  /* set up sensors */
   SensorRepository sensors;
   sensors.addSensor(new HostStatsSensor());
 
+  /* set up sampler config */
   SamplerConfig config;
   {
     auto rule = config.add_rules();
@@ -51,17 +62,24 @@ int main(int argc, const char** argv) {
     rule->set_sample_interval(kMicrosPerSecond);
   }
 
+  /* set up sampler */
+  Sampler sampler(config, &sensors);
+
+  /* set up sampe upload */
+  auto sample_namespace = flags.getString("namespace");
+  sampler.onSample([&sample_namespace] (const SampleEnvelope& s) {
+    /* N.B. naive request per sample for now, optimize later ~paul */
+    auto sample = s;
+    sample.set_sample_namespace(sample_namespace);
+
+    fnord::iputs("got sample: $0", sample.DebugString());
+  });
+
   fnord::logInfo(
       "sensord",
       "Starting sensord; sensors=$0 rules=$1",
       sensors.numSensors(),
       config.rules().size());
-
-  Sampler sampler(config, &sensors);
-
-  sampler.onSample([] (const SampleEnvelope& sample) {
-    fnord::iputs("got sample: $0", sample.schema_name());
-  });
 
   sampler.run();
 
