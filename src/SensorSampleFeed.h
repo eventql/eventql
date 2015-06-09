@@ -11,7 +11,6 @@
 #pragma once
 #include <fnord-base/stdtypes.h>
 #include <fnord-base/autoref.h>
-#include <fnord-base/thread/TaskScheduler.h>
 #include <sensord/SampleEnvelope.pb.h>
 
 using namespace fnord;
@@ -20,16 +19,16 @@ namespace sensord {
 
 class SensorSampleFeed {
 public:
-  typedef Function<void (const SampleEnvelope& sample)> CallbackFn;
+  typedef Function<void (const SampleEnvelope& sample)> CabllbackFn;
   typedef Function<bool (const SampleEnvelope& sample)> PredicateFn;
   typedef size_t SubscriptionID;
 
   SubscriptionID subscribe(
-      TaskScheduler* scheduler,
+      thread::TaskScheduler* scheduler,
       CallbackFn callback);
 
   SubscriptionID subscribe(
-      TaskScheduler* scheduler,
+      thread::TaskScheduler* scheduler,
       CallbackFn callback,
       PredicateFn predicate);
 
@@ -43,9 +42,8 @@ protected:
   };
 
   struct Subscription {
-    CallbackFn callback;
-    PredicateFn predicate;
-    TaskScheduler* scheduler;
+    CallbackFn fn;
+    thread::TaskScheduler* scheduler;
   };
 
   mutable std::mutex mutex_;
