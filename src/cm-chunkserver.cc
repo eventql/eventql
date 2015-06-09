@@ -156,6 +156,16 @@ int main(int argc, const char** argv) {
     tsdb_node.configurePrefix(config);
   }
 
+  {
+    tsdb::StreamConfig config;
+    config.set_stream_key_prefix("metricd.sensors.");
+    config.set_max_sstable_size(1024 * 1024 * 512);
+    config.set_compaction_interval(10 * kMicrosPerSecond);
+    config.set_partitioner(tsdb::TIME_WINDOW);
+    config.set_partition_window(600 * kMicrosPerSecond);
+    tsdb_node.configurePrefix(config);
+  }
+
   tsdb::TSDBServlet tsdb_servlet(&tsdb_node);
   http_router.addRouteByPrefixMatch("/tsdb", &tsdb_servlet, &tpool);
 
