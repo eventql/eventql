@@ -18,6 +18,9 @@
 #include "fnord-base/cli/flagparser.h"
 #include "fnord-http/httprouter.h"
 #include "fnord-http/httpserver.h"
+#include "fnord-http/httpconnectionpool.h"
+#include "fnord-tsdb/TSDBClient.h"
+#include "fnord-metricdb/SensorServlet.h"
 
 using namespace fnord;
 
@@ -35,6 +38,15 @@ int main(int argc, const char** argv) {
       "8000",
       "Start the http server on this port",
       "<port>");
+
+  flags.defineFlag(
+      "tsdb",
+      cli::FlagParser::T_STRING,
+      false,
+      NULL,
+      NULL,
+      "tsdb addr",
+      "<host:port>");
 
   flags.defineFlag(
       "loglevel",
@@ -55,11 +67,19 @@ int main(int argc, const char** argv) {
       std::unique_ptr<ExceptionHandler>(
           new CatchAndLogExceptionHandler("metricd")));
 
+  http::HTTPConnectionPool http(&evloop);
+  tsdb::TSDBClient tsdb(
+      StringUtil::format("http://$0/tsdb", flags.getString("tsdb")),
+      &http);
+
   /* set up http server */
   http::HTTPRouter http_router;
   http::HTTPServer http_server(&http_router, &evloop);
   http_server.listen(flags.getInt("http"));
   http_server.stats()->exportStats("/metricd/http");
+
+  metricdb::SensorServlet sensor_servlet;
+  http_router.addRouteByPrefixMatch("/sensors", &sensor_servlet);
 
   //stats::StatsHTTPServlet stats_servlet;
   //http_router.addRouteByPrefixMatch("/stats", &stats_servlet);
