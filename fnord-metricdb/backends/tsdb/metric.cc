@@ -9,7 +9,9 @@
  */
 #include <fnord-base/exception.h>
 #include <fnord-base/wallclock.h>
+#include <fnord-msg/msg.h>
 #include <fnord-metricdb/backends/tsdb/metric.h>
+#include <fnord-metricdb/Sample.pb.h>
 
 namespace fnord {
 namespace metric_service {
@@ -31,7 +33,24 @@ Metric::Metric(
 void Metric::insertSampleImpl(
     double value,
     const std::vector<std::pair<std::string, std::string>>& labels) {
-  RAISE(kNotYetImplementedError);
+  auto stream_key = tsdb_prefix_ + key();
+
+  metricd::SampleData smpl;
+  smpl.set_value(value);
+
+  for (const auto& l : labels){
+    auto label = smpl.add_labels();
+    label->set_key(l.first);
+    label->set_value(l.second);
+  }
+
+  auto sample_time = WallClock::unixMicros();
+
+  tsdb_->insertRecord(
+      stream_key,
+      sample_time,
+      tsdb_->mkMessageID(),
+      *msg::encode(smpl));
 }
 
 void Metric::scanSamples(
