@@ -16,10 +16,7 @@ PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS ${PROTO_FILES})
 
 add_library(fnord-tsdb OBJECT
     CompactionWorker.cc
-    CSTableIndex.cc
-    DerivedDataset.cc
     ReplicationWorker.cc
-    IndexWorker.cc
     TSDBClient.cc
     TSDBNode.cc
     TSDBServlet.cc

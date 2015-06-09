@@ -47,16 +47,6 @@ protected:
       http::HTTPResponse* res,
       URI* uri);
 
-  void listFiles(
-      const http::HTTPRequest* req,
-      http::HTTPResponse* res,
-      URI* uri);
-
-  void fetchDerivedDataset(
-      const http::HTTPRequest* req,
-      http::HTTPResponse* res,
-      URI* uri);
-
   void fetchChunk(
       const http::HTTPRequest* req,
       http::HTTPResponse* res,
