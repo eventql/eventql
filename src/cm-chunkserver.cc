@@ -146,11 +146,13 @@ int main(int argc, const char** argv) {
 
   tsdb::TSDBNode tsdb_node(dir + "/tsdb", repl_scheme.get(), &http);
 
-  tsdb::StreamProperties config(schemas.getSchema("cm.JoinedSession"));
-  config.max_datafile_size = 1024 * 1024 * 512;
-  config.chunk_size = Duration(3600 * 4 * kMicrosPerSecond);
-  config.compaction_interval = Duration(1800 * kMicrosPerSecond);
-  tsdb_node.configurePrefix("joined_sessions.", config);
+  {
+    tsdb::StreamProperties config(schemas.getSchema("cm.JoinedSession"));
+    config.max_datafile_size = 1024 * 1024 * 512;
+    config.chunk_size = Duration(3600 * 4 * kMicrosPerSecond);
+    config.compaction_interval = Duration(1800 * kMicrosPerSecond);
+    tsdb_node.configurePrefix("joined_sessions.", config);
+  }
 
   tsdb::TSDBServlet tsdb_servlet(&tsdb_node);
   http_router.addRouteByPrefixMatch("/tsdb", &tsdb_servlet, &tpool);
