@@ -71,6 +71,11 @@ add_executable(metricd
     $<TARGET_OBJECTS:fnord-http>
     $<TARGET_OBJECTS:fnord-json>
     $<TARGET_OBJECTS:fnord-sstable>
+    $<TARGET_OBJECTS:fnord-tsdb>
+    $<TARGET_OBJECTS:fnord-mdb>
+    $<TARGET_OBJECTS:fnord-msg>
+    $<TARGET_OBJECTS:fnord-cstable>
+    SensorServlet.cc
     metricd.cc)
 
 target_link_libraries(metricd ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_LIBS})
