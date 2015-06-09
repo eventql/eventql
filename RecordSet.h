@@ -16,7 +16,8 @@
 #include <fnord-base/util/binarymessagewriter.h>
 #include <fnord-base/random.h>
 
-namespace fnord {
+using namespace fnord;
+
 namespace tsdb {
 
 struct RecordRef {
@@ -101,6 +102,5 @@ protected:
 };
 
 } // namespace tdsb
-} // namespace fnord
 
 #endif

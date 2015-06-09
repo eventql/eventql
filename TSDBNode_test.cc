@@ -14,7 +14,7 @@
 #include "fnord-tsdb/TSDBNode.h"
 
 using namespace fnord;
-using namespace fnord::tsdb;
+using namespace tsdb;
 
 UNIT_TEST(TSDBNodeTest);
 

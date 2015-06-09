@@ -14,7 +14,8 @@
 #include <fnord-msg/MessageDecoder.h>
 #include <fnord-cstable/CSTableBuilder.h>
 
-namespace fnord {
+using namespace fnord;
+
 namespace tsdb {
 
 CSTableIndex::CSTableIndex(
@@ -62,5 +63,4 @@ void CSTableIndex::update(
   }
 }
 
-}
 }

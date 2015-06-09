@@ -13,7 +13,8 @@
 #include <fnord-base/random.h>
 #include <fnord-tsdb/TSDBNode.h>
 
-namespace fnord {
+using namespace fnord;
+
 namespace tsdb {
 
 class TSDBServlet : public fnord::http::StreamingHTTPService {
@@ -62,6 +63,5 @@ protected:
   Random rnd_;
 };
 
-}
 }
 #endif

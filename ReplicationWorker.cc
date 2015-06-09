@@ -13,7 +13,8 @@
 #include <fnord-tsdb/ReplicationWorker.h>
 #include <fnord-tsdb/StreamChunk.h>
 
-namespace fnord {
+using namespace fnord;
+
 namespace tsdb {
 
 ReplicationWorker::ReplicationWorker(
@@ -52,4 +53,3 @@ void ReplicationWorker::run() {
 }
 
 } // namespace tsdb
-} // namespace fnord

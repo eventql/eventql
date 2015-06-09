@@ -15,7 +15,8 @@
 #include <fnord-http/httpconnectionpool.h>
 #include <fnord-tsdb/PartitionInfo.pb.h>
 
-namespace fnord {
+using namespace fnord;
+
 namespace tsdb {
 
 class TSDBClient {
@@ -66,6 +67,5 @@ protected:
 };
 
 } // namespace tdsb
-} // namespace fnord
 
 #endif
