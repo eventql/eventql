@@ -103,8 +103,8 @@ int main(int argc, const char** argv) {
       req.addBody(*msg::encode(list));
 
       auto res = http.executeRequest(req);
-      if (res.statusCode() != 200) {
-        RAISEF(kRuntimeError, "http error: $0", res.body().toString());
+      if (res.statusCode() != 201) {
+        RAISEF(kRuntimeError, "got non-201 response: $0", res.body().toString());
       }
     });
   }
