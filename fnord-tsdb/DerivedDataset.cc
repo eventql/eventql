@@ -9,7 +9,8 @@
  */
 #include <fnord-tsdb/DerivedDataset.h>
 
-namespace fnord {
+using namespace fnord;
+
 namespace tsdb {
 
 DerivedDatasetState::DerivedDatasetState() : last_offset(0) {}
@@ -30,5 +31,4 @@ void DerivedDatasetState::decode(util::BinaryMessageReader* reader) {
   }
 }
 
-}
 }

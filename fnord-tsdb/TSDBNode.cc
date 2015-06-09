@@ -10,7 +10,8 @@
 #include <fnord-base/util/Base64.h>
 #include <fnord-tsdb/TSDBNode.h>
 
-namespace fnord {
+using namespace fnord;
+
 namespace tsdb {
 
 TSDBNode::TSDBNode(
@@ -238,5 +239,4 @@ void TSDBNode::reopenStreamChunks() {
 }
 
 } // namespace tdsb
-} // namespace fnord
 

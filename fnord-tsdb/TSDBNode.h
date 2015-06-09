@@ -20,9 +20,8 @@
 #include <fnord-tsdb/CompactionWorker.h>
 #include <fnord-tsdb/ReplicationWorker.h>
 
-using namespace tsdb;
+using namespace fnord;
 
-namespace fnord {
 namespace tsdb {
 
 class TSDBNode {
@@ -83,6 +82,5 @@ protected:
 };
 
 } // namespace tdsb
-} // namespace fnord
 
 #endif
