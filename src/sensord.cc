@@ -43,9 +43,20 @@ int main(int argc, const char** argv) {
   SensorRepository sensors;
   sensors.addSensor(new HostStatsSensor());
 
-  iputs(
-      "host sensor: $0",
-      sensors.fetchSensorDataAs<HostStats>("host").DebugString());
+  SamplerConfig config;
+  {
+    auto rule = config.add_rules();
+    rule->set_sensor_key("host");
+    rule->set_sample_interval(kMicrosPerSecond);
+  }
+
+  Sampler sampler(config, &sensors);
+
+  for (;;) {
+    auto samples = sampler.sample();
+    fnord::iputs("got $0 samples", samples.samples().size());
+    usleep(1000000);
+  }
 
   return 0;
 }

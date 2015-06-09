@@ -35,5 +35,5 @@ message SampleEnvelope {
 }
 
 message SampleList {
-  repeated SampleEnvelope smaples = 1;
+  repeated SampleEnvelope samples = 1;
 }

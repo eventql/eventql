@@ -18,9 +18,9 @@ message SampleRule {
   required string sensor_key = 1;
 
   /**
-   * The sampling interval for this rule in milliseconds
+   * The sampling interval for this rule in microseconds
    */
-  required uint64 interval = 2;
+  required uint64 sample_interval = 2;
 
 }
 
