@@ -64,3 +64,14 @@ add_executable(fnord-metricdb-example
 
 target_link_libraries(fnord-metricdb-example ${CMAKE_THREAD_LIBS_INIT})
 
+add_executable(metricd
+    $<TARGET_OBJECTS:fnord-base>
+    $<TARGET_OBJECTS:fnord-chart>
+    $<TARGET_OBJECTS:fnord-metricdb>
+    $<TARGET_OBJECTS:fnord-http>
+    $<TARGET_OBJECTS:fnord-json>
+    $<TARGET_OBJECTS:fnord-sstable>
+    metricd.cc)
+
+target_link_libraries(metricd ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_LIBS})
+
