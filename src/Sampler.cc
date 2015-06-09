@@ -40,6 +40,10 @@ void Sampler::run() {
   }
 }
 
+void Sampler::onSample(Function<void (const SampleEnvelope& sample)> fn) {
+  callbacks_.emplace_back(fn);
+}
+
 void Sampler::executeRule(SampleRule* rule) {
   auto now = WallClock::unixMicros();
   auto sensor = sensors_->fetchSensor(rule->sensor_key());

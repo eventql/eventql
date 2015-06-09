@@ -58,6 +58,11 @@ int main(int argc, const char** argv) {
       config.rules().size());
 
   Sampler sampler(config, &sensors);
+
+  sampler.onSample([] (const SampleEnvelope& sample) {
+    fnord::iputs("got sample: $0", sample.schema_name());
+  });
+
   sampler.run();
 
   //for (;;) {
