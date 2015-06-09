@@ -147,7 +147,7 @@ int main(int argc, const char** argv) {
   tsdb::TSDBNode tsdb_node(dir + "/tsdb", repl_scheme.get(), &http);
 
   {
-    tsdb::StreamProperties config(schemas.getSchema("cm.JoinedSession"));
+    tsdb::StreamProperties config;
     config.max_datafile_size = 1024 * 1024 * 512;
     config.chunk_size = Duration(3600 * 4 * kMicrosPerSecond);
     config.compaction_interval = Duration(1800 * kMicrosPerSecond);
