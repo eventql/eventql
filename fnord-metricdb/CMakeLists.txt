@@ -24,6 +24,9 @@ else()
   set(CMAKE_CXX_FLAGS "-std=c++0x ${CMAKE_CXX_FLAGS}")
 endif()
 
+file(GLOB PROTO_FILES *.proto)
+PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS ${PROTO_FILES})
+
 add_library(fnord-metricdb OBJECT
     backends/disk/compactiontask.cc
     backends/disk/labelindex.cc
@@ -53,7 +56,8 @@ add_library(fnord-metricdb OBJECT
     metricrepository.cc
     metricservice.cc
     timeseriesquery.cc
-    sample.cc)
+    sample.cc
+    ${PROTO_SRCS})
 
 add_executable(fnord-metricdb-example
     $<TARGET_OBJECTS:fnord-base>
