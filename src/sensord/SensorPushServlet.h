@@ -17,10 +17,10 @@
 namespace fnord {
 namespace metricdb {
 
-class SensorServlet : public fnord::http::HTTPService {
+class SensorPushServlet : public fnord::http::HTTPService {
 public:
 
-  SensorServlet(sensord::SensorSampleFeed* sensor_feed);
+  SensorPushServlet(sensord::SensorSampleFeed* sensor_feed);
 
   void handleHTTPRequest(
       http::HTTPRequest* req,

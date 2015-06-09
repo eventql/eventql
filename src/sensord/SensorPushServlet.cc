@@ -14,11 +14,11 @@
 namespace fnord {
 namespace metricdb {
 
-SensorServlet::SensorServlet(
+SensorPushServlet::SensorPushServlet(
     sensord::SensorSampleFeed* sensor_feed) :
     sensor_feed_(sensor_feed) {}
 
-void SensorServlet::handleHTTPRequest(
+void SensorPushServlet::handleHTTPRequest(
     fnord::http::HTTPRequest* req,
     fnord::http::HTTPResponse* res) {
   URI uri(req->uri());
@@ -38,7 +38,7 @@ void SensorServlet::handleHTTPRequest(
   }
 }
 
-void SensorServlet::pushSample(
+void SensorPushServlet::pushSample(
     http::HTTPRequest* req,
     http::HTTPResponse* res,
     URI* uri) {
