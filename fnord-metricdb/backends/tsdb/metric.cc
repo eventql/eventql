@@ -34,23 +34,23 @@ void Metric::insertSampleImpl(
     double value,
     const std::vector<std::pair<std::string, std::string>>& labels) {
   auto stream_key = tsdb_prefix_ + key();
+  auto sample_time = WallClock::unixMicros();
 
-  metricd::SampleData smpl;
-  smpl.set_value(value);
+  metricd::Gauge gauge;
+  gauge.set_value(value);
+  gauge.set_time(sample_time);
 
   for (const auto& l : labels){
-    auto label = smpl.add_labels();
+    auto label = gauge.add_labels();
     label->set_key(l.first);
     label->set_value(l.second);
   }
-
-  auto sample_time = WallClock::unixMicros();
 
   tsdb_->insertRecord(
       stream_key,
       sample_time,
       tsdb_->mkMessageID(),
-      *msg::encode(smpl));
+      *msg::encode(gauge));
 }
 
 void Metric::scanSamples(
