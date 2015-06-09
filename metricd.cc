@@ -20,8 +20,8 @@
 #include "fnord-http/httpserver.h"
 #include "fnord-http/httpconnectionpool.h"
 #include "fnord-tsdb/TSDBClient.h"
-#include "fnord-metricdb/SensorServlet.h"
 #include <sensord/SensorSampleFeed.h>
+#include <sensord/SensorPushServlet.h>
 
 using namespace fnord;
 
