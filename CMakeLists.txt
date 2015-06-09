@@ -54,9 +54,8 @@ add_subdirectory(3rdparty/libfnord/fnord-cstable)
 add_subdirectory(3rdparty/libfnord/fnord-sstable)
 add_subdirectory(3rdparty/libfnord/fnord-chart)
 
-add_subdirectory(3rdparty/sensord/src/sensord)
-include_directories(3rdparty/sensord/src)
-include_directories(${PROJECT_BINARY_DIR}/3rdparty/sensord/src)
+add_subdirectory(3rdparty/sensord)
+include_directories(${SENSORD_INCLUDE})
 
 add_subdirectory(3rdparty/libfnord/fnord-metricdb)
 add_subdirectory(3rdparty/libfnord/fnord-tsdb)
