@@ -74,7 +74,7 @@ protected:
     Vector<Pair<DateTime, double>> joined_values;
   };
 
-  void processSample(Sample* sample, bool joined);
+  void processSample(const metricd::MetricSample sample, bool joined);
 
   void emitGroup(
       const String& group_name,

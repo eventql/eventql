@@ -72,9 +72,8 @@ void TimeseriesQuery::run(
       metric_key,
       DateTime(from_with_padding),
       until,
-      [this] (Sample* sample) -> bool {
+      [this] (const metricd::MetricSample& sample) {
         processSample(sample, false);
-        return true;
       });
 
   if (join_fn != JoinFunction::kNoJoin) {
@@ -82,9 +81,8 @@ void TimeseriesQuery::run(
         join_metric_key,
         from,
         until,
-        [this] (Sample* sample) -> bool {
+        [this] (const metricd::MetricSample& sample) {
           processSample(sample, true);
-          return true;
         });
   }
 
@@ -101,16 +99,18 @@ void TimeseriesQuery::run(
   groups_.clear();
 }
 
-void TimeseriesQuery::processSample(Sample* sample, bool joined) {
+void TimeseriesQuery::processSample(
+    const metricd::MetricSample sample,
+    bool joined) {
   Vector<String> group_keyv;
 
   for (const auto& group : group_by) {
     bool found = false;
 
-    for (const auto& label : sample->labels()) {
-      if (label.first == group) {
+    for (const auto& label : sample.labels()) {
+      if (label.key() == group) {
         found = true;
-        group_keyv.emplace_back(label.second);
+        group_keyv.emplace_back(label.value());
         break;
       }
     }
@@ -130,9 +130,9 @@ void TimeseriesQuery::processSample(Sample* sample, bool joined) {
   }
 
   if (joined) {
-    group->joined_values.emplace_back(sample->time(), sample->value());
+    group->joined_values.emplace_back(sample.time(), sample.value());
   } else {
-    group->values.emplace_back(sample->time(), sample->value());
+    group->values.emplace_back(sample.time(), sample.value());
   }
 }
 

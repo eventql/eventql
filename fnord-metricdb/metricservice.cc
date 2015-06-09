@@ -8,7 +8,6 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include "fnord-metricdb/metricservice.h"
-#include "fnord-metricdb/Sample.pb.h"
 #include "fnord-base/wallclock.h"
 #include "fnord-msg/msg.h"
 
@@ -53,8 +52,19 @@ void MetricService::scanSamples(
     const std::string& metric_key,
     const fnord::DateTime& time_begin,
     const fnord::DateTime& time_end,
-    std::function<bool (Sample* sample)> callback) {
-  RAISE(kNotYetImplementedError);
+    std::function<void (const metricd::MetricSample& sample)> callback) {
+  auto stream_key = tsdb_prefix_ + metric_key;
+
+  auto partitions = tsdb_->listPartitions(stream_key, time_begin, time_end);
+
+  for (const auto& partition_key : partitions) {
+    tsdb_->fetchPartition(
+        stream_key,
+        partition_key,
+        [callback] (const Buffer& buf) {
+      callback(msg::decode<metricd::MetricSample>(buf));
+    });
+  }
 }
 
 Sample MetricService::getMostRecentSample(const std::string& metric_key) {
