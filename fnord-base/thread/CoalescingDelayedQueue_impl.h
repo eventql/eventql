@@ -39,7 +39,9 @@ void CoalescingDelayedQueue<T>::insert(
   }
 
   auto old = map_.find(job.get());
-  if (old != map_.end()) {
+  if (old == map_.end()) {
+    map_.emplace(job.get(), when.unixMicros());
+  } else {
     if (old->second > when.unixMicros()) {
       queue_.erase(std::make_pair(old->second, job));
       old->second = when.unixMicros();
