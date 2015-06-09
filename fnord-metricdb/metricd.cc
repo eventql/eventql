@@ -110,20 +110,16 @@ int main(int argc, const char** argv) {
   http_router.addRouteByPrefixMatch("/sensors", &sensor_servlet);
 
   /* metric service */
-  auto metric_service = fnord::metric_service::MetricService::newWithBackend(
-      new fnord::metric_service::tsdb_backend::MetricRepository(
-          "metricd.metrics.",
-          &tsdb));
-
-  fnord::metric_service::HTTPAPIServlet metrics_api(&metric_service);
+  fnord::metric_service::MetricService metrics("metricd.metrics.", &tsdb);
+  fnord::metric_service::HTTPAPIServlet metrics_api(&metrics);
   http_router.addRouteByPrefixMatch("/metrics", &metrics_api);
 
   fnord::statsd::StatsdServer statsd_server(&evloop, &tp);
-  statsd_server.onSample([&metric_service] (
+  statsd_server.onSample([&metrics] (
       const std::string& key,
       double value,
       const std::vector<std::pair<std::string, std::string>>& labels) {
-    metric_service.insertSample(key, value, labels);
+    metrics.insertSample(key, value, labels);
   });
 
   statsd_server.listen(8192);

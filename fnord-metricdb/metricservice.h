@@ -16,6 +16,7 @@
 #include "fnord-metricdb/metricrepository.h"
 #include "fnord-base/stats/counter.h"
 #include "fnord-base/thread/taskscheduler.h"
+#include "fnord-tsdb/TSDBClient.h"
 
 namespace fnord {
 namespace metric_service {
@@ -23,18 +24,9 @@ namespace metric_service {
 class MetricService {
 public:
 
-  static MetricService newWithBackend(IMetricRepository* backend);
-
-  static MetricService newWithInMemoryBackend();
-
-  static MetricService newWithDiskBackend(
-      const std::string& datadir_path,
-      fnord::TaskScheduler* scheduler);
-
-  MetricService(std::unique_ptr<IMetricRepository> metric_repo);
-  MetricService(MetricService&& other);
-  MetricService(const MetricService& other) = delete;
-  MetricService& operator=(const MetricService& other) = delete;
+  MetricService(
+      const String& tsdb_prefix,
+      tsdb::TSDBClient* tsdb);
 
   /**
    * List all metrics
@@ -58,13 +50,12 @@ public:
       const fnord::DateTime& time_end,
       std::function<bool (Sample* sample)> callback);
 
-
   Sample getMostRecentSample(const std::string& metric_key);
 
-  IMetricRepository* metricRepository() const;
-
 protected:
-  std::unique_ptr<IMetricRepository> metric_repo_;
+
+  String tsdb_prefix_;
+  tsdb::TSDBClient* tsdb_;
 };
 
 } // namespace metric_service
