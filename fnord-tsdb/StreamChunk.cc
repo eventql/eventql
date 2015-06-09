@@ -129,6 +129,11 @@ void StreamChunk::insertRecord(
     const Buffer& record) {
   std::unique_lock<std::mutex> lk(mutex_);
 
+  fnord::logTrace(
+      "tsdb",
+      "Insert 1 record into stream='$0'",
+      stream_key_);
+
   auto old_ver = records_.version();
   records_.addRecord(record_id, record);
   if (records_.version() != old_ver) {
@@ -140,6 +145,12 @@ void StreamChunk::insertRecord(
 
 void StreamChunk::insertRecords(const Vector<RecordRef>& records) {
   std::unique_lock<std::mutex> lk(mutex_);
+
+  fnord::logTrace(
+      "tsdb",
+      "Insert $0 records into stream='$1'",
+      records.size(),
+      stream_key_);
 
   auto old_ver = records_.version();
   records_.addRecords(records);
