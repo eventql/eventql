@@ -14,14 +14,16 @@
 #include <fnord-base/util/binarymessagewriter.h>
 #include <fnord-base/wallclock.h>
 #include <fnord-msg/MessageEncoder.h>
+#include <fnord-msg/msg.h>
 
-namespace fnord {
+using namespace fnord;
+
 namespace tsdb {
 
 RefPtr<StreamChunk> StreamChunk::create(
     const String& streamchunk_key,
     const String& stream_key,
-    RefPtr<StreamProperties> config,
+    StreamConfig* config,
     TSDBNodeRef* node) {
   return RefPtr<StreamChunk>(
       new StreamChunk(
@@ -34,7 +36,7 @@ RefPtr<StreamChunk> StreamChunk::create(
 RefPtr<StreamChunk> StreamChunk::reopen(
     const String& stream_key,
     const StreamChunkState& state,
-    RefPtr<StreamProperties> config,
+    StreamConfig* config,
     TSDBNodeRef* node) {
   return RefPtr<StreamChunk>(
       new StreamChunk(
@@ -63,16 +65,26 @@ String StreamChunk::streamChunkKeyFor(
 String StreamChunk::streamChunkKeyFor(
     const String& stream_key,
     DateTime time,
-    const StreamProperties& properties) {
-  return streamChunkKeyFor(stream_key, time, properties.chunk_size);
+    const StreamConfig& properties) {
+  const auto& partconf_data = properties.partitioner_config();
+  auto partconf = msg::decode<TimeWindowPartitionerConfig>(
+      partconf_data.data(),
+      partconf_data.size());
+
+  return streamChunkKeyFor(stream_key, time, partconf.window());
 }
 
 Vector<String> StreamChunk::streamChunkKeysFor(
     const String& stream_key,
     DateTime from,
     DateTime until,
-    const StreamProperties& properties) {
-  auto cs = properties.chunk_size.microseconds();
+    const StreamConfig& properties) {
+  const auto& partconf_data = properties.partitioner_config();
+  auto partconf = msg::decode<TimeWindowPartitionerConfig>(
+      partconf_data.data(),
+      partconf_data.size());
+
+  auto cs = partconf.window();
   auto first_chunk = (from.unixMicros() / cs) * cs;
   auto last_chunk = (until.unixMicros() / cs) * cs;
 
@@ -87,7 +99,7 @@ Vector<String> StreamChunk::streamChunkKeysFor(
 StreamChunk::StreamChunk(
     const String& streamchunk_key,
     const String& stream_key,
-    RefPtr<StreamProperties> config,
+    StreamConfig* config,
     TSDBNodeRef* node) :
     stream_key_(stream_key),
     key_(streamchunk_key),
@@ -98,13 +110,13 @@ StreamChunk::StreamChunk(
             node->db_path,
             StringUtil::stripShell(stream_key) + ".")),
     last_compaction_(0) {
-  records_.setMaxDatafileSize(config_->max_datafile_size);
+  records_.setMaxDatafileSize(config_->max_sstable_size());
 }
 
 StreamChunk::StreamChunk(
     const String& streamchunk_key,
     const StreamChunkState& state,
-    RefPtr<StreamProperties> config,
+    StreamConfig* config,
     TSDBNodeRef* node) :
     stream_key_(state.stream_key),
     key_(streamchunk_key),
@@ -121,7 +133,7 @@ StreamChunk::StreamChunk(
   node_->compactionq.insert(this, WallClock::unixMicros());
   node_->replicationq.insert(this, WallClock::unixMicros());
   node_->indexq.insert(this, WallClock::unixMicros());
-  records_.setMaxDatafileSize(config_->max_datafile_size);
+  records_.setMaxDatafileSize(config_->max_sstable_size());
 }
 
 void StreamChunk::insertRecord(
@@ -163,7 +175,7 @@ void StreamChunk::insertRecords(const Vector<RecordRef>& records) {
 
 void StreamChunk::scheduleCompaction() {
   auto now = WallClock::unixMicros();
-  auto interval = config_->compaction_interval.microseconds();
+  auto interval = config_->compaction_interval();
   auto last = last_compaction_.unixMicros();
   uint64_t compaction_delay = 0;
 
@@ -376,5 +388,4 @@ void StreamChunkState::decode(util::BinaryMessageReader* reader) {
   record_state.version = reader->readVarUInt();
 }
 
-}
 }

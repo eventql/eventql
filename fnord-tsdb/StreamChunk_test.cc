@@ -42,7 +42,7 @@ RefPtr<msg::MessageSchema> testSchema() {
 
 TEST_CASE(StreamChunkTest, TestStreamKeyGeneration, [] () {
   auto schema = testSchema();
-  StreamProperties props(schema);
+  StreamConfig props(schema);
 
   auto key1 = StreamChunk::streamChunkKeyFor(
       "fnord-metric",

@@ -15,12 +15,13 @@
 #include <fnord-base/util/binarymessagereader.h>
 #include <fnord-base/util/binarymessagewriter.h>
 #include <fnord-msg/MessageSchema.h>
-#include <fnord-tsdb/StreamProperties.h>
+#include <fnord-tsdb/StreamConfig.pb.h>
 #include <fnord-tsdb/RecordSet.h>
 #include <fnord-tsdb/TSDBNodeRef.h>
 #include <fnord-tsdb/PartitionInfo.pb.h>
 
-namespace fnord {
+using namespace fnord;
+
 namespace tsdb {
 
 struct StreamChunkState {
@@ -37,13 +38,13 @@ public:
   static RefPtr<StreamChunk> create(
       const String& streamchunk_key,
       const String& stream_key,
-      RefPtr<StreamProperties> config,
+      StreamConfig* config,
       TSDBNodeRef* node);
 
   static RefPtr<StreamChunk> reopen(
       const String& streamchunk_key,
       const StreamChunkState& state,
-      RefPtr<StreamProperties> config,
+      StreamConfig* config,
       TSDBNodeRef* node);
 
   static String streamChunkKeyFor(
@@ -54,13 +55,13 @@ public:
   static String streamChunkKeyFor(
       const String& stream_key,
       DateTime time,
-      const StreamProperties& properties);
+      const StreamConfig& properties);
 
   static Vector<String> streamChunkKeysFor(
       const String& stream_key,
       DateTime from,
       DateTime until,
-      const StreamProperties& properties);
+      const StreamConfig& properties);
 
   void insertRecord(
       uint64_t record_id,
@@ -79,13 +80,13 @@ protected:
   StreamChunk(
       const String& streamchunk_key,
       const String& stream_key,
-      RefPtr<StreamProperties> config,
+      StreamConfig* config,
       TSDBNodeRef* node);
 
   StreamChunk(
       const String& streamchunk_key,
       const StreamChunkState& state,
-      RefPtr<StreamProperties> config,
+      StreamConfig* config,
       TSDBNodeRef* node);
 
   void scheduleCompaction();
@@ -95,7 +96,7 @@ protected:
   String key_;
   String stream_key_;
   RecordSet records_;
-  RefPtr<StreamProperties> config_;
+  StreamConfig* config_;
   TSDBNodeRef* node_;
   std::mutex mutex_;
   std::mutex replication_mutex_;
@@ -103,6 +104,5 @@ protected:
   HashMap<uint64_t, uint64_t> repl_offsets_;
 };
 
-}
 }
 #endif

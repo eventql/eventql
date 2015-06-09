@@ -140,8 +140,8 @@ PartitionInfo TSDBNode::fetchPartitionInfo(const String& chunk_key) {
 }
 
 // FIXPAUL proper longest prefix search ;)
-RefPtr<StreamProperties> TSDBNode::configFor(const String& stream_key) const {
-  RefPtr<StreamProperties> config(nullptr);
+StreamConfig* TSDBNode::configFor(const String& stream_key) const {
+  StreamConfig* config = nullptr;
   size_t match_len = 0;
 
   for (const auto& cfg : configs_) {
@@ -150,12 +150,12 @@ RefPtr<StreamProperties> TSDBNode::configFor(const String& stream_key) const {
     }
 
     if (cfg.first.length() > match_len) {
-      config = cfg.second;
+      config = cfg.second.get();
       match_len = cfg.first.length();
     }
   }
 
-  if (config.get() == nullptr) {
+  if (config == nullptr) {
     RAISEF(kIndexError, "no config found for stream key: '$0'", stream_key);
   }
 
@@ -164,8 +164,8 @@ RefPtr<StreamProperties> TSDBNode::configFor(const String& stream_key) const {
 
 void TSDBNode::configurePrefix(
     const String& stream_key_prefix,
-    StreamProperties props) {
-  configs_.emplace_back(stream_key_prefix, new StreamProperties(props));
+    StreamConfig props) {
+  configs_.emplace_back(stream_key_prefix, new StreamConfig(props));
 }
 
 void TSDBNode::start(
