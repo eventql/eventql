@@ -24,9 +24,9 @@ message HostStats {
 
   optional string datacenter = 3;
 
-  optional double load_avg_1m = 5;
-  optional double load_avg_5m = 6;
-  optional double load_avg_15m = 7;
+  optional uint64 load_avg_1m = 5;
+  optional uint64 load_avg_5m = 6;
+  optional uint64 load_avg_15m = 7;
 
   repeated DiskStats disk_stats = 4;
 
