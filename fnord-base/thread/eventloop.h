@@ -34,11 +34,11 @@ public:
   EventLoop();
   ~EventLoop();
   void run();
+  void runOnce();
   void shutdown();
+  void wakeup();
 
 protected:
-
-  void wakeup();
 
   void poll();
   void setupRunQWakeupPipe();
@@ -55,6 +55,7 @@ protected:
   std::mutex runq_mutex_;
   std::thread::id threadid_;
   std::vector<std::function<void()>> callbacks_;
+  size_t num_fds_;
 };
 
 }

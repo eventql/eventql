@@ -25,7 +25,8 @@ EventLoop::EventLoop() :
     max_fd_(1),
     running_(true),
     threadid_(std::this_thread::get_id()),
-    callbacks_(FD_SETSIZE + 1, nullptr) {
+    callbacks_(FD_SETSIZE + 1, nullptr),
+    num_fds_(0) {
   FD_ZERO(&op_read_);
   FD_ZERO(&op_write_);
   FD_ZERO(&op_error_);
@@ -93,6 +94,7 @@ void EventLoop::runOnReadable(std::function<void()> task, int fd) {
 
   FD_SET(fd, &op_read_);
   FD_SET(fd, &op_error_);
+  ++num_fds_;
 
   callbacks_[fd] = task;
 }
@@ -116,6 +118,7 @@ void EventLoop::runOnWritable(std::function<void()> task, int fd) {
 
   FD_SET(fd, &op_write_);
   FD_SET(fd, &op_error_);
+  ++num_fds_;
 
   callbacks_[fd] = task;
 }
@@ -145,6 +148,7 @@ void EventLoop::cancelFD(int fd) {
   FD_CLR(fd, &op_write_);
   FD_CLR(fd, &op_error_);
   callbacks_[fd] = nullptr;
+  --num_fds_;
 }
 
 void EventLoop::poll() {
@@ -181,6 +185,7 @@ void EventLoop::poll() {
     if (FD_ISSET(fd, &op_read)) {
       FD_CLR(fd, &op_read_);
       FD_CLR(fd, &op_error_);
+      --num_fds_;
 
       if (callbacks_[fd]) {
         callbacks_[fd]();
@@ -190,6 +195,7 @@ void EventLoop::poll() {
     else if (FD_ISSET(fd, &op_write)) {
       FD_CLR(fd, &op_write_);
       FD_CLR(fd, &op_error_);
+      --num_fds_;
 
       if (callbacks_[fd]) {
         callbacks_[fd]();
@@ -226,9 +232,19 @@ void EventLoop::onRunQWakeup() {
   }
 }
 
-void EventLoop::run() {
-  threadid_ = std::this_thread::get_id();
+void EventLoop::runOnce() {
+  while (running_.load()) {
+    std::unique_lock<std::mutex> lk(runq_mutex_);
+    if (runq_.empty() && num_fds_ == 0) {
+      return;
+    }
+    lk.unlock();
 
+    poll();
+  }
+}
+
+void EventLoop::run() {
   while (running_.load()) {
     poll();
   }

@@ -39,8 +39,8 @@ public:
 
 protected:
   thread::EventLoop ev_;
-  http::HTTPConnectionPool http_;
   std::mutex mutex_;
+  fnord::net::DNSCache dns_cache_;
 };
 
 }

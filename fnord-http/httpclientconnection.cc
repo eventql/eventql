@@ -29,14 +29,14 @@ HTTPClientConnection::HTTPClientConnection(
   buf_.reserve(kMinBufferSize);
   conn_->checkErrors();
 
-  if (stats_) {
+  if (stats_ != nullptr) {
     stats_->current_connections.incr(1);
     stats_->total_connections.incr(1);
   }
 }
 
 HTTPClientConnection::~HTTPClientConnection() {
-  if (stats_) {
+  if (stats_ != nullptr) {
     stats_->current_connections.decr(1);
   }
 
@@ -105,7 +105,7 @@ void HTTPClientConnection::executeRequest(
   state_ = S_CONN_BUSY;
   cur_handler_ = response_handler;
 
-  if (stats_) {
+  if (stats_ != nullptr) {
     stats_->current_requests.incr(1);
     stats_->total_requests.incr(1);
   }
@@ -143,7 +143,7 @@ void HTTPClientConnection::read() {
   size_t len;
   try {
     len = conn_->read(buf_.data(), buf_.allocSize());
-    if (stats_) {
+    if (stats_ != nullptr) {
       stats_->received_bytes.incr(len);
     }
   } catch (Exception& e) {
@@ -172,7 +172,7 @@ void HTTPClientConnection::read() {
   }
 
   if (parser_.state() == HTTPParser::S_DONE) {
-    if (stats_) {
+    if (stats_ != nullptr) {
       stats_->current_requests.decr(1);
     }
 
@@ -205,7 +205,7 @@ void HTTPClientConnection::write() {
   try {
     len = conn_->write(data, size);
     buf_.setMark(buf_.mark() + len);
-    if (stats_) {
+    if (stats_ != nullptr) {
       stats_->sent_bytes.incr(len);
     }
   } catch (Exception& e) {
@@ -233,7 +233,9 @@ void HTTPClientConnection::write() {
 
 void HTTPClientConnection::error(const std::exception& e) {
   if (cur_handler_) {
-    stats_->current_requests.decr(1);
+    if (stats_ != nullptr) {
+      stats_->current_requests.decr(1);
+    }
   }
 
   cur_handler_->onError(e);
