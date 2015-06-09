@@ -164,7 +164,9 @@ StreamConfig* TSDBNode::configFor(const String& stream_key) const {
 }
 
 void TSDBNode::configurePrefix(StreamConfig config) {
-  configs_.emplace_back(config.stream_key_prefix(), new StreamConfig(config));
+  configs_.emplace_back(
+      config.stream_key_prefix(),
+      ScopedPtr<StreamConfig>(new StreamConfig(config)));
 }
 
 void TSDBNode::start(
