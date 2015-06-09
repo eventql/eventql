@@ -10,8 +10,8 @@
  */
 #pragma once
 #include "fnord-base/stdtypes.h"
-#include "Sensor.h"
-#include "HostStats.pb.h"
+#include <sensord/Sensor.h>
+#include <sensord/HostStats.pb.h>
 
 using namespace fnord;
 

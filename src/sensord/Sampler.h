@@ -13,10 +13,10 @@
 #include <fnord-base/stdtypes.h>
 #include <fnord-base/autoref.h>
 #include <fnord-base/thread/DelayedQueue.h>
-#include "Sensor.h"
-#include "SensorRepository.h"
-#include "SamplerConfig.pb.h"
-#include "SampleEnvelope.pb.h"
+#include <sensord/Sensor.h>
+#include <sensord/SensorRepository.h>
+#include <sensord/SamplerConfig.pb.h>
+#include <sensord/SampleEnvelope.pb.h>
 
 using namespace fnord;
 
