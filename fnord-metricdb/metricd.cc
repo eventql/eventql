@@ -24,6 +24,9 @@
 #include "fnord-msg/msg.h"
 #include <sensord/SensorSampleFeed.h>
 #include <sensord/SensorPushServlet.h>
+#include "fnord-metricdb/metricservice.h"
+#include "fnord-metricdb/httpapiservlet.h"
+#include "fnord-base/stats/statsd.h"
 
 using namespace fnord;
 
@@ -105,6 +108,20 @@ int main(int argc, const char** argv) {
   metricdb::SensorPushServlet sensor_servlet(&sensor_feed);
   http_router.addRouteByPrefixMatch("/sensors", &sensor_servlet);
 
+  /* metric service */
+  auto metric_service = fnord::metric_service::MetricService::newWithInMemoryBackend();
+  fnord::metric_service::HTTPAPIServlet metrics_api(&metric_service);
+  http_router.addRouteByPrefixMatch("/metrics", &metrics_api);
+
+  fnord::statsd::StatsdServer statsd_server(&evloop, &tp);
+  statsd_server.onSample([&metric_service] (
+      const std::string& key,
+      double value,
+      const std::vector<std::pair<std::string, std::string>>& labels) {
+    metric_service.insertSample(key, value, labels);
+  });
+
+  statsd_server.listen(8192);
   //stats::StatsHTTPServlet stats_servlet;
   //http_router.addRouteByPrefixMatch("/stats", &stats_servlet);
 
