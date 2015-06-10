@@ -51,6 +51,7 @@
 #include "analytics/FeedExportApp.h"
 #include "analytics/ShopStatsServlet.h"
 #include "analytics/AnalyticsApp.h"
+#include "analytics/ShopStatsApp.h"
 
 using namespace fnord;
 
@@ -78,15 +79,6 @@ int main(int argc, const char** argv) {
       NULL,
       NULL,
       "cachedir path",
-      "<path>");
-
-  flags.defineFlag(
-      "shopstats_table",
-      cli::FlagParser::T_STRING,
-      true,
-      NULL,
-      NULL,
-      "shopstats_table",
       "<path>");
 
   flags.defineFlag(
@@ -127,7 +119,6 @@ int main(int argc, const char** argv) {
   tsdb::TSDBClient tsdb("http://nue03.prod.fnrd.net:7003/tsdb", &http);
 
   /* dproc */
-  dproc::DispatchService dproc;
   auto local_scheduler = mkRef(
       new dproc::LocalScheduler(
           flags.getString("cachedir"),
@@ -142,7 +133,12 @@ int main(int argc, const char** argv) {
           flags.getString("cachedir"),
           &schemas));
 
+  auto shopstats_app = mkRef(new ShopStatsApp(&tsdb));
+
+  dproc::DispatchService dproc;
   dproc.registerApp(analytics_app.get(), local_scheduler.get());
+  dproc.registerApp(shopstats_app.get(), local_scheduler.get());
+
   cm::AnalyticsServlet analytics_servlet(analytics_app, &dproc);
   http_router.addRouteByPrefixMatch("/analytics", &analytics_servlet, &tpool);
 
@@ -184,9 +180,8 @@ int main(int argc, const char** argv) {
   }
 
   /* stop stats */
-  auto shopstats = cm::ShopStatsTable::open(flags.getString("shopstats_table"));
-  cm::ShopStatsServlet shopstats_servlet(shopstats);
-  http_router.addRouteByPrefixMatch("/shopstats", &shopstats_servlet, &tpool);
+  //cm::ShopStatsServlet shopstats_servlet(shopstats);
+  //http_router.addRouteByPrefixMatch("/shopstats", &shopstats_servlet, &tpool);
 
   ev.run();
   local_scheduler->stop();
