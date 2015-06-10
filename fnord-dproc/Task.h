@@ -43,8 +43,6 @@ public:
 
   virtual void compute(TaskContext* context) = 0;
 
-  virtual RefPtr<VFSFile> result() const = 0;
-
   virtual List<TaskDependency> dependencies() const {
     return List<TaskDependency>{};
   }
@@ -57,17 +55,8 @@ public:
     return "application/octet-stream";
   }
 
-};
-
-class RDD : public Task {
-public:
-
   virtual RefPtr<VFSFile> encode() const = 0;
   virtual void decode(RefPtr<VFSFile> data) = 0;
-
-  RefPtr<VFSFile> result() const override {
-    return encode();
-  }
 
   virtual Option<String> cacheKey() const {
     return None<String>();
@@ -83,8 +72,9 @@ public:
     }
   }
 
-
 };
+
+using RDD = Task;
 
 class TaskContext {
 public:
