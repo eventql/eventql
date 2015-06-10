@@ -23,15 +23,11 @@ struct TSDBTableScan {
 
   static RefPtr<dproc::Task> mkTask(
       const String& name,
-      const DateTime& from,
-      const DateTime& until,
       const Buffer& params,
       TSDBClient* tsdb);
 
   static RefPtr<dproc::Task> mkTask(
       const String& name,
-      const DateTime& from,
-      const DateTime& until,
       const TSDBTableScanSpec& params,
       TSDBClient* tsdb);
 
