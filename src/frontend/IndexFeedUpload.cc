@@ -14,6 +14,7 @@
 #include "fnord-msg/MessageSchema.h"
 #include "fnord-msg/MessagePrinter.h"
 #include "fnord-msg/MessageEncoder.h"
+#include "fnord-msg/msg.h"
 #include "schemas.h"
 #include "unistd.h"
 
@@ -24,13 +25,14 @@ namespace cm {
 IndexFeedUpload::IndexFeedUpload(
     const String& target_url,
     thread::Queue<IndexChangeRequest>* queue,
-    http::HTTPConnectionPool* http) :
+    http::HTTPConnectionPool* http,
+    RefPtr<msg::MessageSchema> schema) :
     target_url_(target_url),
     queue_(queue),
     http_(http),
+    schema_(schema),
     batch_size_(kDefaultBatchSize),
-    running_(true),
-    schema_(indexChangeRequestSchema()) {}
+    running_(true) {}
 
 void IndexFeedUpload::start() {
   running_ = true;
@@ -51,7 +53,7 @@ void IndexFeedUpload::uploadNext() {
   Set<String> customers;
 
   reqs.emplace_back(queue_->pop());
-  customers.emplace(reqs.back().customer);
+  customers.emplace(reqs.back().customer());
 
   for (int i = 0; i < 100; ++i) {
     auto nxt = queue_->poll();
@@ -59,7 +61,7 @@ void IndexFeedUpload::uploadNext() {
       break;
     } else {
       reqs.emplace_back(nxt.get());
-      customers.emplace(nxt.get().customer);
+      customers.emplace(nxt.get().customer());
     }
   }
 
@@ -67,7 +69,7 @@ void IndexFeedUpload::uploadNext() {
     Vector<IndexChangeRequest> batch;
 
     for (const auto& r : reqs) {
-      if (r.customer == customer) {
+      if (r.customer() == customer) {
         batch.emplace_back(r);
       }
     }
@@ -82,27 +84,11 @@ void IndexFeedUpload::uploadBatch(
   util::BinaryMessageWriter body;
 
   for (const auto& job : batch) {
-    msg::MessageObject obj;
-    obj.addChild(schema_.id("customer"), customer);
-    obj.addChild(schema_.id("docid"), job.item.docID().docid);
-
-    for (const auto& attr : job.attrs) {
-      auto& attr_obj = obj.addChild(schema_.id("attributes"));
-      attr_obj.addChild(schema_.id("attributes.key"), attr.first);
-      attr_obj.addChild(schema_.id("attributes.value"), attr.second);
-    }
-
-#ifndef FNORD_NOTRACE
-    fnord::logTrace(
-        "cm.frontend",
-        "uploading change index request:\n$0",
-        msg::MessagePrinter::print(obj, schema_));
-#endif
-
-    Buffer b;
-    msg::MessageEncoder::encode(obj, schema_, &b);
-    body.appendVarUInt(b.size());
-    body.append(b.data(), b.size());
+    auto change_req = job;
+    change_req.set_customer(customer);
+    auto buf = msg::encode(change_req);
+    body.appendVarUInt(buf->size());
+    body.append(buf->data(), buf->size());
   }
 
   URI uri(target_url_ + "/insert_batch?table=index_feed-" + customer);

@@ -24,7 +24,9 @@ UNIT_TEST(LogJoinTest);
 typedef HashMap<String, HashMap<String, String>> StringMap;
 
 LogJoinTarget mkTestTarget() {
-  LogJoinTarget trgt(joinedSessionsSchema(), false);
+  auto schemas = new msg::MessageSchemaRepository(); // FIXPAUL leak
+  loadDefaultSchemas(schemas);
+  LogJoinTarget trgt(schemas, false);
 
   trgt.setNormalize([] (Language l, const String& q) { return q; });
 
@@ -36,7 +38,9 @@ LogJoinTarget mkTestTarget() {
 }
 
 LogJoinTarget mkTestTargetWithFieldExpansion() {
-  LogJoinTarget trgt(joinedSessionsSchema(), false);
+  auto schemas = new msg::MessageSchemaRepository(); // FIXPAUL leak
+  loadDefaultSchemas(schemas);
+  LogJoinTarget trgt(schemas, false);
 
   trgt.setNormalize([] (Language l, const String& q) { return q; });
 
@@ -68,13 +72,6 @@ LogJoinTarget mkTestTargetWithFieldExpansion() {
 
   return trgt;
 }
-
-void printBuf(const Buffer& buf) {
-  msg::MessageObject msg;
-  msg::MessageDecoder::decode(buf, joinedSessionsSchema(), &msg);
-  fnord::iputs("joined session: $0", msg::MessagePrinter::print(msg, joinedSessionsSchema()));
-}
-
 
 // field expansion // joining
 
@@ -156,7 +153,7 @@ TEST_CASE(LogJoinTest, ItemOrder, [] () {
   EXPECT_EQ(joined.num_order_items(), 1);
   EXPECT_EQ(joined.gmv_eurcents(), 1100);
   EXPECT_EQ(joined.first_seen_time(), 1432311555);
-  EXPECT_EQ(joined.first_last_time(), 1432311615);
+  EXPECT_EQ(joined.last_seen_time(), 1432311615);
 
   EXPECT_EQ(joined.cart_items().size(), 1);
   EXPECT_EQ(joined.cart_items().Get(0).time(), 1432311615);
@@ -231,7 +228,7 @@ TEST_CASE(LogJoinTest, MultipleQueryBatches, [] () {
   EXPECT_EQ(joined.num_order_items(), 0);
   EXPECT_EQ(joined.gmv_eurcents(), 0);
   EXPECT_EQ(joined.first_seen_time(), 1432311555);
-  EXPECT_EQ(joined.first_last_time(), 1432311565);
+  EXPECT_EQ(joined.last_seen_time(), 1432311565);
 
   EXPECT_EQ(joined.search_queries().size(), 1);
   EXPECT_EQ(joined.search_queries().Get(0).num_result_items(), 8);

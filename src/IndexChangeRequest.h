@@ -18,21 +18,34 @@
 #include <fnord-base/uri.h>
 #include <fnord-base/reflect/reflect.h>
 #include "ItemRef.h"
+#include "IndexChangeRequest.pb.h"
 
 using namespace fnord;
 
 namespace cm {
 
-struct IndexChangeRequest {
+struct IndexChangeRequestStruct {
   String customer;
   ItemRef item;
   HashMap<String, String> attrs;
 
+  IndexChangeRequest toIndexChangeRequest() const {
+    IndexChangeRequest icr;
+    icr.set_customer(customer);
+    icr.set_docid(item.docID().docid);
+    for (const auto& a : attrs) {
+      auto icr_a = icr.add_attributes();
+      icr_a->set_key(a.first);
+      icr_a->set_value(a.second);
+    }
+    return icr;
+  }
+
   template <typename T>
   static void reflect(T* meta) {
-    meta->prop(&IndexChangeRequest::customer, 1, "customer", false);
-    meta->prop(&IndexChangeRequest::item, 2, "docid", false);
-    meta->prop(&IndexChangeRequest::attrs, 3, "attributes", false);
+    meta->prop(&IndexChangeRequestStruct::customer, 1, "customer", false);
+    meta->prop(&IndexChangeRequestStruct::item, 2, "docid", false);
+    meta->prop(&IndexChangeRequestStruct::attrs, 3, "attributes", false);
   };
 };
 

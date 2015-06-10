@@ -6,17 +6,12 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-#ifndef _CM_SCHEMAS_H
-#define _CM_SCHEMAS_H
-#include "common.h"
-#include "fnord-msg/MessageSchema.h"
+package cm;
 
-using namespace cm;
-using namespace fnord;
-
-namespace cm {
-
-void loadDefaultSchemas(msg::MessageSchemaRepository* repo);
-
+message ReportParams {
+  required string customer = 1;
+  required string report = 2;
+  optional uint64 from_unixmicros = 3;
+  optional uint64 until_unixmicros = 4;
+  optional string params = 5;
 }
-#endif

@@ -11,7 +11,7 @@ package cm;
 /**
  * A single document attribute/field
  */
-message IndexChangeRequstAttribute {
+message IndexChangeRequestAttribute {
 
   /**
    * The key of this attribute. Note that we only index a whitelisted subset
@@ -46,6 +46,6 @@ message IndexChangeRequest {
    * The attributes to be changed or added. Existing attributes will be updated,
    * non existing attributes will be added
    */
-  repeated IndexChangeRequstAttribute attributes = 3;
+  repeated IndexChangeRequestAttribute attributes = 3;
 
 }

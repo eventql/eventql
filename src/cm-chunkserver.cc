@@ -42,9 +42,9 @@
 #include "fnord-logtable/NumericBoundsSummary.h"
 #include "fnord-mdb/MDB.h"
 #include "fnord-mdb/MDBUtil.h"
+#include "fnord-msg/MessageSchema.h"
 #include "fnord-tsdb/TSDBNode.h"
 #include "fnord-tsdb/TSDBServlet.h"
-#include "fnord-tsdb/CSTableIndex.h"
 #include "common.h"
 #include "schemas.h"
 #include "ModelReplication.h"
@@ -122,6 +122,10 @@ int main(int argc, const char** argv) {
   auto dir = flags.getString("datadir");
   auto repl_targets = flags.getStrings("replicate_to");
 
+  /* load schemas */
+  msg::MessageSchemaRepository schemas;
+  loadDefaultSchemas(&schemas);
+
   /* start http server and worker pools */
   fnord::thread::ThreadPool tpool;
   http::HTTPConnectionPool http(&ev);
@@ -142,12 +146,35 @@ int main(int argc, const char** argv) {
 
   tsdb::TSDBNode tsdb_node(dir + "/tsdb", repl_scheme.get(), &http);
 
-  tsdb::StreamProperties config(new msg::MessageSchema(joinedSessionsSchema()));
-  config.max_datafile_size = 1024 * 1024 * 512;
-  config.chunk_size = Duration(3600 * 4 * kMicrosPerSecond);
-  config.compaction_interval = Duration(1800 * kMicrosPerSecond);
-  config.derived_datasets.emplace_back(new tsdb::CSTableIndex(config.schema));
-  tsdb_node.configurePrefix("joined_sessions.", config);
+  {
+    tsdb::StreamConfig config;
+    config.set_stream_key_prefix("joined_sessions.");
+    config.set_max_sstable_size(1024 * 1024 * 512);
+    config.set_compaction_interval(1800 * kMicrosPerSecond);
+    config.set_partitioner(tsdb::TIME_WINDOW);
+    config.set_partition_window(3600 * 4 * kMicrosPerSecond);
+    tsdb_node.configurePrefix(config);
+  }
+
+  {
+    tsdb::StreamConfig config;
+    config.set_stream_key_prefix("metricd.sensors.");
+    config.set_max_sstable_size(1024 * 1024 * 512);
+    config.set_compaction_interval(10 * kMicrosPerSecond);
+    config.set_partitioner(tsdb::TIME_WINDOW);
+    config.set_partition_window(600 * kMicrosPerSecond);
+    tsdb_node.configurePrefix(config);
+  }
+
+  {
+    tsdb::StreamConfig config;
+    config.set_stream_key_prefix("metricd.metrics.");
+    config.set_max_sstable_size(1024 * 1024 * 512);
+    config.set_compaction_interval(10 * kMicrosPerSecond);
+    config.set_partitioner(tsdb::TIME_WINDOW);
+    config.set_partition_window(600 * kMicrosPerSecond);
+    tsdb_node.configurePrefix(config);
+  }
 
   tsdb::TSDBServlet tsdb_servlet(&tsdb_node);
   http_router.addRouteByPrefixMatch("/tsdb", &tsdb_servlet, &tpool);
