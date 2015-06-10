@@ -9,6 +9,7 @@
  */
 #pragma once
 #include "fnord-base/stdtypes.h"
+#include "fnord-base/autoref.h"
 
 using namespace fnord;
 

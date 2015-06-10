@@ -20,7 +20,8 @@ TSDBTableScanMapper<ScanletType>::TSDBTableScanMapper(
       RefPtr<ScanletType> scanlet,
       TSDBClient* tsdb) :
       params_(params),
-      scanlet_(scanlet) {}
+      scanlet_(scanlet),
+      tsdb_(tsdb) {}
 
 template <typename ScanletType>
 void TSDBTableScanMapper<ScanletType>::compute(dproc::TaskContext* context) {
