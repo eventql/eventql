@@ -43,12 +43,18 @@ public:
 
   virtual void compute(TaskContext* context) = 0;
 
+  virtual RefPtr<VFSFile> result() const = 0;
+
   virtual List<TaskDependency> dependencies() const {
     return List<TaskDependency>{};
   }
 
   virtual Vector<String> preferredLocations() const {
     return Vector<String>{};
+  }
+
+  virtual String contentType() const {
+    return "application/octet-stream";
   }
 
 };
@@ -58,6 +64,10 @@ public:
 
   virtual RefPtr<VFSFile> encode() const = 0;
   virtual void decode(RefPtr<VFSFile> data) = 0;
+
+  RefPtr<VFSFile> result() const override {
+    return encode();
+  }
 
   virtual Option<String> cacheKey() const {
     return None<String>();
