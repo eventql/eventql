@@ -8,10 +8,8 @@
  */
 package cm;
 
-message ShopProductStatsParams {
-}
-
 message ShopProductStats {
+  optional uint64 total_product_page_impressions = 1;
 }
 
 
