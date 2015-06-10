@@ -19,13 +19,26 @@ namespace tsdb {
 template <typename ScanletType>
 class TSDBTableScanMapper : public dproc::RDD {
 public:
+  typedef typename ScanletType::ResultType ResultType;
 
   TSDBTableScanMapper(
+      const String& name,
       const TSDBTableScanMapperParams& params,
-      RefPtr<ScanletType> scanlet);
+      RefPtr<ScanletType> scanlet,
+      TSDBClient* tsdb);
+
+  void compute(dproc::TaskContext* context);
+
+  RefPtr<VFSFile> encode() const override;
+  void decode(RefPtr<VFSFile> data) override;
+
+  ResultType* result();
 
 protected:
+  TSDBTableScanSpec params_;
   RefPtr<ScanletType> scanlet_;
+  ResultType result_;
+  TSDBClient* tsdb_;
 };
 
 } // namespace tsdb
