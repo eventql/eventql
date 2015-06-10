@@ -31,6 +31,7 @@
 #include "CustomerNamespace.h"
 #include "frontend/CMFrontend.h"
 #include "frontend/IndexFeedUpload.h"
+#include "schemas.h"
 
 using namespace cm;
 using namespace fnord;
@@ -81,6 +82,10 @@ int main(int argc, const char** argv) {
 
   Logger::get()->setMinimumLogLevel(
       strToLogLevel(flags.getString("loglevel")));
+
+  /* load schemas */
+  msg::MessageSchemaRepository schemas;
+  loadDefaultSchemas(&schemas);
 
   thread::EventLoop event_loop;
   thread::ThreadPool tpool;
@@ -151,7 +156,8 @@ int main(int argc, const char** argv) {
   IndexFeedUpload indexfeed_upload(
       flags.getString("publish_to"),
       &indexfeed,
-      &http_client);
+      &http_client,
+      schemas.getSchema("cm.IndexChangeRequest"));
   indexfeed_upload.start();
 
 
