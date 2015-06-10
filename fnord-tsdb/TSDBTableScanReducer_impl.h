@@ -21,7 +21,8 @@ TSDBTableScanReducer<ScanletType>::TSDBTableScanReducer(
       TSDBClient* tsdb) :
       name_(name),
       params_(params),
-      scanlet_(scanlet) {}
+      scanlet_(scanlet),
+      tsdb_(tsdb) {}
 
 template <typename ScanletType>
 void TSDBTableScanReducer<ScanletType>::compute(dproc::TaskContext* context) {
