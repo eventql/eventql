@@ -28,7 +28,7 @@ template <typename ScanletType>
 void TSDBTableScanReducer<ScanletType>::compute(dproc::TaskContext* context) {
   for (int i = 0; i < context->numDependencies(); ++i) {
     auto shard = context->getDependencyAs<TSDBTableScanMapper<ScanletType>>(i);
-    scanlet_->merge(shard->result(), result());
+    scanlet_->merge(*shard->result());
   }
 }
 

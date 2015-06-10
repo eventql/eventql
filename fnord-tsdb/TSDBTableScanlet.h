@@ -25,10 +25,14 @@ public:
 
   virtual ~TSDBTableScanlet() {};
 
-  virtual void scan(const RowType* row, ResultType* result) = 0;
-  virtual void merge(const ResultType* src, const ResultType* dst) = 0;
+  virtual void scan(const RowType& row) = 0;
+  virtual void merge(const ResultType& other) = 0;
   virtual String streamKey() const = 0;
 
+  ResultType* result();
+
+protected:
+  ResultType result_;
 };
 
 } // namespace tsdb
