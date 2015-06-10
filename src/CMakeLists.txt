@@ -516,6 +516,7 @@ add_executable(analyticsd
     analytics/AnalyticsQueryReducer.cc
     analytics/AnalyticsTableBuild.cc
     analytics/reports/ShopProductStatsQuery.cc
+    analytics/reports/ShopProductStatsReport.cc
     analytics/ShopStatsApp.cc
     analytics/CTRByShopMapper.cc
     analytics/AnalyticsTableScanSource.cc
