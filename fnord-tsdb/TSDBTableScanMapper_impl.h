@@ -38,7 +38,7 @@ template <typename ScanletType>
 void TSDBTableScanMapper<ScanletType>::onRow(const Buffer& buffer) {
   typename ScanletType::RowType row;
   msg::decode(buffer, &row);
-  scanlet_->scan(&row, &result_);
+  scanlet_->scan(row);
 }
 
 template <typename ScanletType>
