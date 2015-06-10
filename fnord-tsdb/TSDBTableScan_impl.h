@@ -15,20 +15,26 @@ namespace tsdb {
 
 template <typename ScanletType>
 RefPtr<dproc::Task> TSDBTableScan<ScanletType>::mkTask(
+    const String& name,
     const DateTime& from,
     const DateTime& until,
-    const Buffer& params) {
+    const Buffer& params,
+      TSDBClient* tsdb) {
   return mkTask(
+      name,
       from,
       until,
-      msg::decode<TSDBTableScanSpec>(params));
+      msg::decode<TSDBTableScanSpec>(params),
+      tsdb);
 }
 
 template <typename ScanletType>
 RefPtr<dproc::Task> TSDBTableScan<ScanletType>::mkTask(
+    const String& name,
     const DateTime& from,
     const DateTime& until,
-    const TSDBTableScanSpec& params) {
+    const TSDBTableScanSpec& params,
+      TSDBClient* tsdb) {
   auto scanlet_params = msg::decode<typename ScanletType::ParamType>(
       params.scanlet_params().data(),
       params.scanlet_params().size());
@@ -37,8 +43,10 @@ RefPtr<dproc::Task> TSDBTableScan<ScanletType>::mkTask(
 
     case TSDB_OP_MERGE:
       return new TSDBTableScanReducer<ScanletType>(
+          name,
           params,
-          new ScanletType(scanlet_params));
+          new ScanletType(scanlet_params),
+          tsdb);
 
   }
 }
