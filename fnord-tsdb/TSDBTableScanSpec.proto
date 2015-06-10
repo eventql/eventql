@@ -1,0 +1,24 @@
+/**
+ * This file is part of the "libfnord" project
+ *   Copyright (c) 2015 Paul Asmuth
+ *
+ * FnordMetric is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License v3.0. You should have received a
+ * copy of the GNU General Public License along with this program. If not, see
+ * <http://www.gnu.org/licenses/>.
+ */
+package tsdb;
+
+enum TSDBTableScanOperation {
+  TSDB_OP_MERGE = 0;
+  TSDB_OP_MAP = 1;
+};
+
+message TSDBTableScanSpec {
+  required TSDBTableScanOperation op = 1;
+  optional string partition_key = 2;
+  optional uint64 from = 3;
+  optional uint64 until = 4;
+  optional string scanlet_params = 5;
+}
+
