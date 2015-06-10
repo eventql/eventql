@@ -41,6 +41,13 @@ RefPtr<dproc::Task> TSDBTableScan<ScanletType>::mkTask(
 
   switch (params.op()) {
 
+    case TSDB_OP_MAP:
+      return new TSDBTableScanMapper<ScanletType>(
+          name,
+          params,
+          new ScanletType(scanlet_params),
+          tsdb);
+
     case TSDB_OP_MERGE:
       return new TSDBTableScanReducer<ScanletType>(
           name,
