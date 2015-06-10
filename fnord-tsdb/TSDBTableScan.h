@@ -22,14 +22,18 @@ template <typename ScanletType>
 struct TSDBTableScan {
 
   static RefPtr<dproc::Task> mkTask(
+      const String& name,
       const DateTime& from,
       const DateTime& until,
-      const Buffer& params);
+      const Buffer& params,
+      TSDBClient* tsdb);
 
   static RefPtr<dproc::Task> mkTask(
+      const String& name,
       const DateTime& from,
       const DateTime& until,
-      const TSDBTableScanSpec& params);
+      const TSDBTableScanSpec& params,
+      TSDBClient* tsdb);
 
 };
 

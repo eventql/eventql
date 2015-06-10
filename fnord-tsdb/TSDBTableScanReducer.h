@@ -19,13 +19,31 @@ namespace tsdb {
 template <typename ScanletType>
 class TSDBTableScanReducer : public dproc::RDD {
 public:
+  typedef typename ScanletType::ResultType ResultType;
 
   TSDBTableScanReducer(
-      const TSDBTableScanReducerParams& params,
-      RefPtr<ScanletType> scanlet);
+      const String& name,
+      const TSDBTableScanSpec& params,
+      RefPtr<ScanletType> scanlet,
+      TSDBClient* tsdb);
+
+  void compute(dproc::TaskContext* context);
+
+  List<dproc::TaskDependency> dependencies() const;
+
+  RefPtr<VFSFile> encode() const override;
+  void decode(RefPtr<VFSFile> data) override;
+
+  ResultType* result();
 
 protected:
+  String name_;
+  TSDBTableScanSpec params_;
   RefPtr<ScanletType> scanlet_;
+  ResultType result_;
+  TSDBClient* tsdb_;
 };
 
 } // namespace tsdb
+
+#include "TSDBTableScanReducer_impl.h"
