@@ -70,4 +70,10 @@ void TSDBTableScanReducer<ScanletType>::decode(RefPtr<VFSFile> data) {
   msg::decode(data->data(), data->size(), &result_);
 }
 
+template <typename ScanletType>
+typename TSDBTableScanReducer<ScanletType>::ResultType*
+    TSDBTableScanReducer<ScanletType>::result() {
+  return &result_;
+}
+
 } // namespace tsdb
