@@ -28,7 +28,6 @@ public:
       TSDBClient* tsdb);
 
   void compute(dproc::TaskContext* context);
-
   List<dproc::TaskDependency> dependencies() const;
 
   RefPtr<VFSFile> encode() const override;

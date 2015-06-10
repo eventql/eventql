@@ -23,11 +23,12 @@ public:
 
   TSDBTableScanMapper(
       const String& name,
-      const TSDBTableScanMapperParams& params,
+      const TSDBTableScanSpec& params,
       RefPtr<ScanletType> scanlet,
       TSDBClient* tsdb);
 
   void compute(dproc::TaskContext* context);
+  List<dproc::TaskDependency> dependencies() const;
 
   RefPtr<VFSFile> encode() const override;
   void decode(RefPtr<VFSFile> data) override;
@@ -35,6 +36,9 @@ public:
   ResultType* result();
 
 protected:
+
+  void onRow(const Buffer& row);
+
   TSDBTableScanSpec params_;
   RefPtr<ScanletType> scanlet_;
   ResultType result_;
@@ -42,3 +46,5 @@ protected:
 };
 
 } // namespace tsdb
+
+#include "TSDBTableScanMapper_impl.h"
