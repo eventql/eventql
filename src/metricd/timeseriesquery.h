@@ -11,6 +11,7 @@
 #define _FNORDMETRIC_METRICDB_TIMESERIESQUERY_H_
 #include <fnord-base/datetime.h>
 #include <fnord-base/stdtypes.h>
+#include <fnord-base/duration.h>
 #include <fnord-chart/series.h>
 #include <fnord-metricdb/sample.h>
 #include <fnord-metricdb/metricservice.h>
@@ -73,7 +74,7 @@ protected:
     Vector<Pair<DateTime, double>> joined_values;
   };
 
-  void processSample(Sample* sample, bool joined);
+  void processSample(const metricd::MetricSample sample, bool joined);
 
   void emitGroup(
       const String& group_name,

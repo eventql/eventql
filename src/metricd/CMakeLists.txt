@@ -24,6 +24,9 @@ else()
   set(CMAKE_CXX_FLAGS "-std=c++0x ${CMAKE_CXX_FLAGS}")
 endif()
 
+file(GLOB PROTO_FILES *.proto)
+PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS ${PROTO_FILES})
+
 add_library(fnord-metricdb OBJECT
     backends/disk/compactiontask.cc
     backends/disk/labelindex.cc
@@ -43,6 +46,8 @@ add_library(fnord-metricdb OBJECT
     backends/disk/tokenindexwriter.cc
     backends/inmemory/metric.cc
     backends/inmemory/metricrepository.cc
+    backends/tsdb/metric.cc
+    backends/tsdb/metricrepository.cc
     backends/crate/crateconnection.cc
     backends/crate/metric.cc
     backends/crate/metricrepository.cc
@@ -51,16 +56,23 @@ add_library(fnord-metricdb OBJECT
     metricrepository.cc
     metricservice.cc
     timeseriesquery.cc
-    sample.cc)
+    sample.cc
+    ${PROTO_SRCS})
 
-add_executable(fnord-metricdb-example
+add_executable(metricd
     $<TARGET_OBJECTS:fnord-base>
     $<TARGET_OBJECTS:fnord-chart>
     $<TARGET_OBJECTS:fnord-metricdb>
     $<TARGET_OBJECTS:fnord-http>
     $<TARGET_OBJECTS:fnord-json>
     $<TARGET_OBJECTS:fnord-sstable>
-    metricservice_example.cc)
+    $<TARGET_OBJECTS:fnord-tsdb>
+    $<TARGET_OBJECTS:fnord-mdb>
+    $<TARGET_OBJECTS:fnord-msg>
+    $<TARGET_OBJECTS:fnord-cstable>
+    $<TARGET_OBJECTS:fnord-dproc>
+    $<TARGET_OBJECTS:sensord-client>
+    metricd.cc)
 
-target_link_libraries(fnord-metricdb-example ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(metricd ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_LIBS})
 
