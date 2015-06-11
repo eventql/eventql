@@ -274,13 +274,13 @@ void HTTPAPIServlet::timeseriesQuery(
 
     // param: from
     if (param.first == "from") {
-      from = DateTime(std::stoul(param.second) * kMicrosPerSecond);
+      //from = DateTime::fromTimespec(param.second);
       continue;
     }
 
     // param: until
     if (param.first == "until") {
-      until = DateTime(std::stoul(param.second) * kMicrosPerSecond);
+      //until = DateTime::fromTimespec(param.second);
       continue;
     }
 

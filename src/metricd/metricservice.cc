@@ -8,72 +8,67 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include "fnord-metricdb/metricservice.h"
-#include "fnord-metricdb/backends/disk/metricrepository.h"
-#include "fnord-metricdb/backends/inmemory/metricrepository.h"
+#include "fnord-base/wallclock.h"
+#include "fnord-msg/msg.h"
 
 namespace fnord {
 namespace metric_service {
 
-MetricService MetricService::newWithInMemoryBackend() {
-  return newWithBackend(new inmemory_backend::MetricRepository());
-}
-
-MetricService MetricService::newWithDiskBackend(
-    const std::string& datadir_path,
-    fnord::TaskScheduler* scheduler) {
-  return newWithBackend(
-      new disk_backend::MetricRepository(datadir_path, scheduler));
-}
-
-MetricService MetricService::newWithBackend(IMetricRepository* metric_repo) {
-  return MetricService(
-      std::move(std::unique_ptr<IMetricRepository>(metric_repo)));
-}
-
 MetricService::MetricService(
-    std::unique_ptr<IMetricRepository> metric_repo) :
-    metric_repo_(std::move(metric_repo)) {}
-
-MetricService::MetricService(
-    MetricService&& other) :
-    metric_repo_(std::move(other.metric_repo_)) {}
+      const String& tsdb_prefix,
+      tsdb::TSDBClient* tsdb) :
+      tsdb_prefix_(tsdb_prefix),
+      tsdb_(tsdb) {}
 
 std::vector<IMetric*> MetricService::listMetrics() const {
-  return metric_repo_->listMetrics();
+  RAISE(kNotYetImplementedError);
 }
 
 void MetricService::insertSample(
     const std::string& metric_key,
     double value,
     const std::vector<std::pair<std::string, std::string>>& labels) {
-  auto metric = metric_repo_->findOrCreateMetric(metric_key);
-  metric->insertSample(value, labels);
+  auto stream_key = tsdb_prefix_ + metric_key;
+  auto sample_time = WallClock::unixMicros();
+
+  metricd::MetricSample smpl;
+  smpl.set_value(value);
+  smpl.set_time(sample_time);
+
+  for (const auto& l : labels){
+    auto label = smpl.add_labels();
+    label->set_key(l.first);
+    label->set_value(l.second);
+  }
+
+  tsdb_->insertRecord(
+      stream_key,
+      sample_time,
+      tsdb_->mkMessageID(),
+      *msg::encode(smpl));
 }
 
 void MetricService::scanSamples(
     const std::string& metric_key,
     const fnord::DateTime& time_begin,
     const fnord::DateTime& time_end,
-    std::function<bool (Sample* sample)> callback) {
-  auto metric = metric_repo_->findMetric(metric_key);
+    std::function<void (const metricd::MetricSample& sample)> callback) {
+  auto stream_key = tsdb_prefix_ + metric_key;
 
-  if (metric != nullptr) {
-    metric->scanSamples(time_begin, time_end, callback);
+  auto partitions = tsdb_->listPartitions(stream_key, time_begin, time_end);
+
+  for (const auto& partition_key : partitions) {
+    tsdb_->fetchPartition(
+        stream_key,
+        partition_key,
+        [callback] (const Buffer& buf) {
+      callback(msg::decode<metricd::MetricSample>(buf));
+    });
   }
 }
 
 Sample MetricService::getMostRecentSample(const std::string& metric_key) {
-  auto metric = metric_repo_->findMetric(metric_key);
-
-  if (metric == nullptr) {
-    RAISEF(kIndexError, "unknown metric: $0", metric_key);
-  }
-
-  return metric->getSample();
-}
-
-IMetricRepository* MetricService::metricRepository() const {
-  return metric_repo_.get();
+  RAISE(kNotYetImplementedError);
 }
 
 } // namespace metric_service
