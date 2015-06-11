@@ -30,6 +30,7 @@ endif()
 
 add_subdirectory(lib/libfnord)
 include_directories(${FNORD_INCLUDE})
+add_subdirectory(lib/libfnord/fnord-fts)
 
 add_subdirectory(lib/libcstable)
 include_directories(${CSTABLE_INCLUDE})
