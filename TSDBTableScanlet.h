@@ -18,7 +18,6 @@ namespace tsdb {
 template <typename _RowType, typename _ParamType, typename _ResultType>
 class TSDBTableScanlet : public RefCounted {
 public:
-
   typedef _RowType RowType;
   typedef _ParamType ParamType;
   typedef _ResultType ResultType;
@@ -28,7 +27,9 @@ public:
   virtual void scan(const RowType& row) = 0;
   virtual void merge(const ResultType& other) = 0;
 
-  ResultType* result();
+  virtual Set<String> requiredFields() const {
+    return Set<String>{};
+  }
 
 protected:
   ResultType result_;
