@@ -8,17 +8,17 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <stdlib.h>
-#include "fnord-base/application.h"
-#include "fnord-base/exceptionhandler.h"
-#include "fnord-base/thread/eventloop.h"
-#include "fnord-http/httpserver.h"
-#include "fnord-http/httprouter.h"
-#include "fnord-base/stats/statsd.h"
-#include "fnord-json/jsonrpc.h"
-#include "fnord-json/jsonrpchttpadapter.h"
+#include "fnord/application.h"
+#include "fnord/exceptionhandler.h"
+#include "fnord/thread/eventloop.h"
+#include "fnord/http/httpserver.h"
+#include "fnord/http/httprouter.h"
+#include "fnord/stats/statsd.h"
+#include "fnord/json/jsonrpc.h"
+#include "fnord/json/jsonrpchttpadapter.h"
 #include "fnord-metricdb/metricservice.h"
 #include "fnord-metricdb/httpapiservlet.h"
-#include "fnord-base/thread/threadpool.h"
+#include "fnord/thread/threadpool.h"
 
 using fnord::http::HTTPServer;
 using fnord::http::HTTPRouter;
