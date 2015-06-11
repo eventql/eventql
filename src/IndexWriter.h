@@ -26,7 +26,7 @@
 #include "DocStore.h"
 #include "IndexChangeRequest.h"
 #include "DocIndex.h"
-#include "ItemRef.h"
+#include <inventory/ItemRef.h>
 
 using namespace fnord;
 
