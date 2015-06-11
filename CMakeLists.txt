@@ -42,7 +42,6 @@ set(NO_BUNDLED_LIBFNORD true)
 
 add_subdirectory(lib/libfnord)
 include_directories(${FNORD_INCLUDE})
-message(STATUS FNORD LIVS parent:  ${FNORD_LIBS})
 
 add_subdirectory(lib/libcstable)
 include_directories(${CSTABLE_INCLUDE})
