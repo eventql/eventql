@@ -43,10 +43,9 @@ List<dproc::TaskDependency> TSDBTableScanReducer<ScanletType>::dependencies()
 
   List<dproc::TaskDependency> deps;
   for (const auto& partition : input_partitions) {
-    TSDBTableScanSpec dparams;
+    TSDBTableScanSpec dparams = params_;
     dparams.set_op(TSDB_OP_MAP);
     dparams.set_partition_key(partition);
-    dparams.set_scanlet_params(params_.scanlet_params());
 
     // FIXPAUL slow!!
     //auto pinfo = tsdb_->fetchPartitionInfo(stream_key, partition);
