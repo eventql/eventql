@@ -16,7 +16,7 @@
 #include "fnord-metricdb/metricrepository.h"
 #include "fnord/stats/counter.h"
 #include "fnord/thread/taskscheduler.h"
-#include "fnord-tsdb/TSDBClient.h"
+#include "tsdb/TSDBClient.h"
 #include "fnord-metricdb/Sample.pb.h"
 
 namespace fnord {
