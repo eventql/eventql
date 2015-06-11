@@ -13,7 +13,7 @@
 #include <fnord-tsdb/CSTableIndex.h>
 #include <fnord-tsdb/RecordSet.h>
 #include <fnord-msg/MessageDecoder.h>
-#include <fnord-cstable/CSTableBuilder.h>
+#include <cstable/CSTableBuilder.h>
 
 using namespace fnord;
 

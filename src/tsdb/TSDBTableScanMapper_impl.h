@@ -9,8 +9,8 @@
  */
 #pragma once
 #include <fnord-tsdb/CSTableIndex.h>
-#include <fnord-cstable/CSTableReader.h>
-#include <fnord-cstable/RecordMaterializer.h>
+#include <cstable/CSTableReader.h>
+#include <cstable/RecordMaterializer.h>
 #include <fnord-msg/MessageEncoder.h>
 
 using namespace fnord;
