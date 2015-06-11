@@ -43,7 +43,6 @@ set(NO_BUNDLED_LIBFNORD true)
 
 add_subdirectory(3rdparty/libfnord/fnord-base)
 add_subdirectory(3rdparty/libfnord/fnord-msg)
-add_subdirectory(3rdparty/libfnord/fnord-feeds)
 add_subdirectory(3rdparty/libfnord/fnord-fts)
 include_directories(${FNORD_FTS_INCLUDE})
 add_subdirectory(3rdparty/libfnord/fnord-mdb)
@@ -57,10 +56,15 @@ add_subdirectory(3rdparty/libfnord/fnord-chart)
 add_subdirectory(3rdparty/sensord)
 include_directories(${SENSORD_INCLUDE})
 
+add_subdirectory(3rdparty/tsdb)
+include_directories(${TSDB_INCLUDE})
+
+add_subdirectory(3rdparty/brokerd)
+include_directories(${BROKERD_INCLUDE})
+
 include_directories(3rdparty/chartsql/src/)
 
 add_subdirectory(3rdparty/libfnord/fnord-metricdb)
-add_subdirectory(3rdparty/libfnord/fnord-tsdb)
 add_subdirectory(3rdparty/libfnord/fnord-dht)
 add_subdirectory(3rdparty/libfnord/fnord-dproc)
 add_subdirectory(3rdparty/libfnord/fnord-afx)
