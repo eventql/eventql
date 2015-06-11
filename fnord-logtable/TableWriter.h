@@ -26,9 +26,9 @@
 #include "fnord-sstable/SSTableColumnSchema.h"
 #include "fnord-sstable/SSTableColumnReader.h"
 #include "fnord-sstable/SSTableColumnWriter.h"
-#include "fnord-cstable/CSTableWriter.h"
-#include "fnord-cstable/CSTableReader.h"
-#include "fnord-cstable/CSTableBuilder.h"
+#include "cstable/CSTableWriter.h"
+#include "cstable/CSTableReader.h"
+#include "cstable/CSTableBuilder.h"
 
 namespace fnord {
 namespace logtable {
