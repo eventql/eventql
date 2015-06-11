@@ -8,7 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include "fnord/exception.h"
-#include "fnord-rpc/ServerGroup.h"
+#include "fnord/rpc/ServerGroup.h"
 
 namespace fnord {
 

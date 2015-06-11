@@ -8,7 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include "fnord/logging.h"
-#include "fnord-rpc/RPCClient.h"
+#include "fnord/rpc/RPCClient.h"
 
 namespace fnord {
 
