@@ -9,9 +9,9 @@
  */
 #ifndef _FNORD_CSTABLE_CSTABLEREADER_H
 #define _FNORD_CSTABLE_CSTABLEREADER_H
-#include <fnord-base/stdtypes.h>
-#include <fnord-base/io/file.h>
-#include <fnord-base/io/mmappedfile.h>
+#include <fnord/stdtypes.h>
+#include <fnord/io/file.h>
+#include <fnord/io/mmappedfile.h>
 #include <cstable/BinaryFormat.h>
 #include <cstable/ColumnReader.h>
 
