@@ -20,7 +20,7 @@
 #include "fnord/http/httprouter.h"
 #include "fnord/http/httpserver.h"
 #include "fnord/http/httpconnectionpool.h"
-#include "fnord-tsdb/TSDBClient.h"
+#include "tsdb/TSDBClient.h"
 #include "fnord/protobuf/msg.h"
 #include <sensord/SensorSampleFeed.h>
 #include <sensord/SensorPushServlet.h>

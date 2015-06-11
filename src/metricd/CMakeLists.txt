@@ -66,7 +66,7 @@ add_executable(metricd
     $<TARGET_OBJECTS:fnord-http>
     $<TARGET_OBJECTS:fnord-json>
     $<TARGET_OBJECTS:sstable>
-    $<TARGET_OBJECTS:fnord-tsdb>
+    $<TARGET_OBJECTS:tsdb>
     $<TARGET_OBJECTS:fnord-mdb>
     $<TARGET_OBJECTS:fnord-protobuf>
     $<TARGET_OBJECTS:cstable>

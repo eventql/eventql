@@ -11,7 +11,7 @@
 #include <atomic>
 #include <mutex>
 #include <fnord-metricdb/metric.h>
-#include <fnord-tsdb/TSDBClient.h>
+#include <tsdb/TSDBClient.h>
 
 namespace fnord {
 namespace metric_service {
