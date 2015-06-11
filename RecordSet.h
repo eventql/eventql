@@ -12,6 +12,7 @@
 #include <fnord-base/stdtypes.h>
 #include <fnord-base/io/file.h>
 #include <fnord-base/option.h>
+#include <fnord-base/SHA1.h>
 #include <fnord-base/util/binarymessagereader.h>
 #include <fnord-base/util/binarymessagewriter.h>
 #include <fnord-base/random.h>
@@ -21,10 +22,9 @@ using namespace fnord;
 namespace tsdb {
 
 struct RecordRef {
-  RecordRef(uint64_t _record_id, uint64_t _time, const Buffer& _record);
+  RecordRef(const SHA1Hash& _record_id, const Buffer& _record);
 
-  uint64_t record_id;
-  uint64_t time;
+  SHA1Hash record_id;
   Buffer record;
 };
 
@@ -46,6 +46,7 @@ public:
     uint64_t commitlog_size;
     Set<String> old_commitlogs;
     size_t version;
+    SHA1Hash checksum;
 
     void encode(util::BinaryMessageWriter* writer) const;
     void decode(util::BinaryMessageReader* reader);
@@ -55,15 +56,19 @@ public:
       const String& filename_prefix,
       RecordSetState state = RecordSetState{});
 
-  void addRecord(uint64_t record_id, const Buffer& message);
+  void addRecord(const SHA1Hash& record_id, const Buffer& record);
+  void addRecords(const RecordRef& record);
   void addRecords(const Vector<RecordRef>& records);
 
   void fetchRecords(
       uint64_t offset,
       uint64_t limit,
-      Function<void (uint64_t record_id, const void* record_data, size_t record_size)> fn);
+      Function<void (
+          const SHA1Hash& record_id,
+          const void* record_data,
+          size_t record_size)> fn);
 
-  Set<uint64_t> listRecords() const;
+  Set<SHA1Hash> listRecords() const;
   uint64_t numRecords() const;
 
   uint64_t firstOffset() const;
@@ -90,14 +95,14 @@ protected:
 
   void loadCommitlog(
       const String& filename,
-      Function<void (uint64_t, const void*, size_t)> fn);
+      Function<void (const SHA1Hash&, const void*, size_t)> fn);
 
   String filename_prefix_;
   RecordSetState state_;
   mutable std::mutex compact_mutex_;
   mutable std::mutex mutex_;
   Random rnd_;
-  Set<uint64_t> commitlog_ids_;
+  Set<SHA1Hash> commitlog_ids_;
   size_t max_datafile_size_;
 };
 
