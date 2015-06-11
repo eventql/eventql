@@ -12,7 +12,7 @@
 #include <fnord/stdtypes.h>
 #include <fnord/autoref.h>
 #include <fnord-logtable/AbstractTableReader.h>
-#include "fnord-sstable/sstablereader.h"
+#include "sstable/sstablereader.h"
 #include "cstable/CSTableReader.h"
 
 namespace fnord {
