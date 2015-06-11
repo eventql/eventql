@@ -13,14 +13,14 @@
 #include <set>
 #include <string>
 #include <unordered_map>
-#include <fnord-base/random.h>
-#include <fnord-base/uri.h>
-#include <fnord-base/thread/queue.h>
+#include <fnord/random.h>
+#include <fnord/uri.h>
+#include <fnord/thread/queue.h>
 #include <fnord-feeds/RemoteFeed.h>
 #include <fnord-feeds/RemoteFeedFactory.h>
 #include "fnord-feeds/RemoteFeedWriter.h"
-#include <fnord-http/httpservice.h>
-#include "fnord-base/stats/stats.h"
+#include <fnord/http/httpservice.h>
+#include "fnord/stats/stats.h"
 #include "common.h"
 #include "IndexChangeRequest.h"
 

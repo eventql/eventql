@@ -6,8 +6,8 @@
  */
 #include <stdlib.h>
 #include <stdio.h>
-#include "fnord-base/exception.h"
-#include "fnord-base/test/unittest.h"
+#include "fnord/exception.h"
+#include "fnord/test/unittest.h"
 #include "JoinedSessionViewer.h"
 #include "JoinedSession.pb.h"
 

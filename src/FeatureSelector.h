@@ -8,8 +8,8 @@
  */
 #ifndef _CM_FEATURESELECTOR_H
 #define _CM_FEATURESELECTOR_H
-#include "fnord-base/stdtypes.h"
-#include "fnord-base/option.h"
+#include "fnord/stdtypes.h"
+#include "fnord/option.h"
 #include "FeatureID.h"
 #
 #include <fnord-fts/fts.h>

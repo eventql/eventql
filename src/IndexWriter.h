@@ -15,14 +15,14 @@
 #include <unordered_map>
 #include <vector>
 #include <queue>
-#include "fnord-base/stdtypes.h"
+#include "fnord/stdtypes.h"
 #include "fnord-feeds/RemoteFeed.h"
 #include "fnord-feeds/RemoteFeedWriter.h"
-#include "fnord-base/thread/taskscheduler.h"
+#include "fnord/thread/taskscheduler.h"
 #include <fnord-fts/fts.h>
 #include <fnord-fts/fts_common.h>
 #include "fnord-mdb/MDB.h"
-#include "fnord-base/stats/stats.h"
+#include "fnord/stats/stats.h"
 #include "DocStore.h"
 #include "IndexChangeRequest.h"
 #include "DocIndex.h"

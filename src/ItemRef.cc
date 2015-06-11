@@ -6,7 +6,7 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-#include <fnord-base/inspect.h>
+#include <fnord/inspect.h>
 #include "ItemRef.h"
 
 namespace cm {

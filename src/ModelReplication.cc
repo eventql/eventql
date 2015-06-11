@@ -7,8 +7,8 @@
  * permission is obtained.
  */
 #include "unistd.h"
-#include <fnord-base/wallclock.h>
-#include <fnord-base/logging.h>
+#include <fnord/wallclock.h>
+#include <fnord/logging.h>
 #include "ModelReplication.h"
 
 using namespace fnord;

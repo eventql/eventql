@@ -10,7 +10,7 @@
 #define _CM_DOCID_H
 #include <stdlib.h>
 #include <string>
-#include <fnord-base/stdtypes.h>
+#include <fnord/stdtypes.h>
 
 using namespace fnord;
 

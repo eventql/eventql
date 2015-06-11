@@ -14,8 +14,8 @@
 #include <string>
 #include <thread>
 #include <unordered_map>
-#include <fnord-base/autoref.h>
-#include <fnord-base/uri.h>
+#include <fnord/autoref.h>
+#include <fnord/uri.h>
 #include "fnord-afx/ArtifactReplication.h"
 #include "fnord-afx/ArtifactIndexReplication.h"
 
