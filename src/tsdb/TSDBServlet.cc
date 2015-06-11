@@ -17,7 +17,7 @@
 #include "fnord/protobuf/MessagePrinter.h"
 #include "fnord/protobuf/msg.h"
 #include <fnord/util/Base64.h>
-#include <fnord-sstable/sstablereader.h>
+#include <sstable/sstablereader.h>
 
 using namespace fnord;
 
