@@ -29,7 +29,7 @@ public:
 
   RefPtr<VFSFile> computeBlob(dproc::TaskContext* context) override;
 
-  //Option<String> cacheKey() const override;
+  Option<String> cacheKey() const override;
 
 protected:
   TSDBTableScanSpec params_;
