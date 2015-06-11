@@ -39,6 +39,7 @@ add_subdirectory(src/fnord/protobuf)
 add_subdirectory(src/fnord/mdb)
 add_subdirectory(src/fnord/http)
 add_subdirectory(src/fnord/json)
+add_subdirectory(src/fnord/rpc)
 
 set(FNORD_INCLUDE ${MODULE_INCLUDE} PARENT_SCOPE)
 set(FNORD_LIBS ${FNORD_PROTOBUF_LIBS} ${CMAKE_THREAD_LIBS_INIT} PARENT_SCOPE)
