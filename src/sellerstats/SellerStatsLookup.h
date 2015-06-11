@@ -9,8 +9,8 @@
 #ifndef _CM_SELLERSTATSLOOKUP_H
 #define _CM_SELLERSTATSLOOKUP_H
 #include "fnord/stdtypes.h"
-#include "fnord-rpc/RPC.h"
-#include "fnord-rpc/RPCClient.h"
+#include "fnord/rpc/RPC.h"
+#include "fnord/rpc/RPCClient.h"
 #include "fnord/thread/taskscheduler.h"
 #include "fnord/mdb/MDB.h"
 #include "fnord/stats/stats.h"
