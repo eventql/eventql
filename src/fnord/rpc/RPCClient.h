@@ -17,7 +17,7 @@
 #include "fnord/autoref.h"
 #include "fnord/thread/taskscheduler.h"
 #include "fnord/uri.h"
-#include "fnord-rpc/RPC.h"
+#include "fnord/rpc/RPC.h"
 #include "fnord/http/httpconnectionpool.h"
 
 namespace fnord {
