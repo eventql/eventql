@@ -28,7 +28,7 @@ add_library(fnord-tsdb OBJECT
 
 add_executable(tests/test-recordset
     $<TARGET_OBJECTS:fnord-base>
-    $<TARGET_OBJECTS:fnord-msg>
+    $<TARGET_OBJECTS:fnord-protobuf>
     $<TARGET_OBJECTS:fnord-mdb>
     $<TARGET_OBJECTS:fnord-tsdb>
     $<TARGET_OBJECTS:fnord-cstable>
@@ -42,7 +42,7 @@ target_link_libraries(tests/test-recordset ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG
 
 add_executable(tests/test-tsdbnode
     $<TARGET_OBJECTS:fnord-base>
-    $<TARGET_OBJECTS:fnord-msg>
+    $<TARGET_OBJECTS:fnord-protobuf>
     $<TARGET_OBJECTS:fnord-mdb>
     $<TARGET_OBJECTS:fnord-tsdb>
     $<TARGET_OBJECTS:fnord-cstable>
@@ -56,7 +56,7 @@ target_link_libraries(tests/test-tsdbnode ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_
 
 add_executable(tests/test-tsdb-timewindowpartitioner
     $<TARGET_OBJECTS:fnord-base>
-    $<TARGET_OBJECTS:fnord-msg>
+    $<TARGET_OBJECTS:fnord-protobuf>
     $<TARGET_OBJECTS:fnord-mdb>
     $<TARGET_OBJECTS:fnord-tsdb>
     $<TARGET_OBJECTS:fnord-cstable>
