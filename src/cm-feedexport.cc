@@ -6,15 +6,15 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-#include <fnord-base/stdtypes.h>
-#include <fnord-base/cli/flagparser.h>
-#include <fnord-base/application.h>
-#include <fnord-base/logging.h>
-#include <fnord-base/random.h>
-#include <fnord-base/wallclock.h>
-#include <fnord-base/thread/eventloop.h>
-#include <fnord-base/thread/threadpool.h>
-#include <fnord-http/httpconnectionpool.h>
+#include <fnord/stdtypes.h>
+#include <fnord/cli/flagparser.h>
+#include <fnord/application.h>
+#include <fnord/logging.h>
+#include <fnord/random.h>
+#include <fnord/wallclock.h>
+#include <fnord/thread/eventloop.h>
+#include <fnord/thread/threadpool.h>
+#include <fnord/http/httpconnectionpool.h>
 #include <dproc/Application.h>
 #include <dproc/LocalScheduler.h>
 #include <fnord-tsdb/TSDBClient.h>

@@ -13,8 +13,8 @@
 #include <set>
 #include <string>
 #include <unordered_map>
-#include <fnord-base/random.h>
-#include <fnord-http/httphandler.h>
+#include <fnord/random.h>
+#include <fnord/http/httphandler.h>
 
 namespace cm {
 

@@ -8,8 +8,8 @@
  */
 #include <algorithm>
 #include <unistd.h>
-#include <fnord-base/UTF8.h>
-#include <fnord-base/uri.h>
+#include <fnord/UTF8.h>
+#include <fnord/uri.h>
 #include "common.h"
 
 namespace cm {

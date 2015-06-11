@@ -8,9 +8,9 @@
  */
 #ifndef _CM_CTRCOUNTER_H
 #define _CM_CTRCOUNTER_H
-#include "fnord-base/stdtypes.h"
-#include "fnord-base/option.h"
-#include "fnord-json/json.h"
+#include "fnord/stdtypes.h"
+#include "fnord/option.h"
+#include "fnord/json/json.h"
 #include "fnord-sstable/sstablereader.h"
 #include "fnord-sstable/sstablewriter.h"
 #include "fnord-sstable/SSTableColumnSchema.h"

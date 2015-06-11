@@ -8,8 +8,8 @@
  */
 #ifndef _CM_PROTOCRDT_H
 #define _CM_PROTOCRDT_H
-#include <fnord-base/util/binarymessagereader.h>
-#include <fnord-base/util/binarymessagewriter.h>
+#include <fnord/util/binarymessagereader.h>
+#include <fnord/util/binarymessagewriter.h>
 
 using namespace fnord;
 

@@ -8,13 +8,13 @@
  */
 #ifndef _CM_SELLERSTATSBUILD_H
 #define _CM_SELLERSTATSBUILD_H
-#include "fnord-base/stdtypes.h"
+#include "fnord/stdtypes.h"
 #include "fnord-rpc/RPC.h"
 #include "fnord-rpc/RPCClient.h"
-#include "fnord-base/thread/taskscheduler.h"
+#include "fnord/thread/taskscheduler.h"
 #include "fnord-mdb/MDB.h"
-#include "fnord-base/stats/stats.h"
-#include "fnord-json/json.h"
+#include "fnord/stats/stats.h"
+#include "fnord/json/json.h"
 #include "ItemRef.h"
 #include "JoinedItemVisit.h"
 #include "FeatureIndex.h"

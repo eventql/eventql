@@ -13,7 +13,7 @@
 #include <set>
 #include <string>
 #include <unordered_map>
-#include "fnord-base/reflect/reflect.h"
+#include "fnord/reflect/reflect.h"
 #include "DocID.h"
 
 using namespace fnord;
