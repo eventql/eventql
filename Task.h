@@ -51,10 +51,9 @@ public:
     return Vector<String>{};
   }
 
-};
-
-class RDD : public Task {
-public:
+  virtual String contentType() const {
+    return "application/octet-stream";
+  }
 
   virtual RefPtr<VFSFile> encode() const = 0;
   virtual void decode(RefPtr<VFSFile> data) = 0;
@@ -73,8 +72,9 @@ public:
     }
   }
 
-
 };
+
+using RDD = Task;
 
 class TaskContext {
 public:
@@ -90,17 +90,18 @@ public:
 
 };
 
-template <typename _ParamType, typename _ResultType>
+template <typename _ProtoType>
 class ProtoRDD : public RDD {
 public:
-  typedef _ParamType ParamType;
-  typedef _ResultType ResultType;
+  typedef _ProtoType ProtoType;
 
   RefPtr<VFSFile> encode() const override;
   void decode(RefPtr<VFSFile> data) override;
 
+  ProtoType* data();
+
 protected:
-  ResultType result_;
+  ProtoType data_;
 };
 
 template <typename TaskType>
@@ -108,23 +109,15 @@ RefPtr<TaskType> TaskContext::getDependencyAs(size_t index) {
   return getDependency(index).asInstanceOf<TaskType>();
 }
 
-//template <typename ParamType, typename ResultType>
-//RefPtr<VFSFile> ProtoRDD<ParamType, ResultType>::run(TaskContext* context) {
-//  ResultType result;
-//  run(context, &result);
-//  return msg::encode(result).get();
-//}
+template <typename ProtoType>
+RefPtr<VFSFile> ProtoRDD<ProtoType>::encode() const {
+  return msg::encode(data_).get();
+}
 
-//template <typename _ParamType, typename _ResultType>
-//ProtoRDD<RefPtr<VFSFile> run() override;
-
-
-//template <typename ProtoType>
-//template <typename... ArgTypes>
-//ProtoRDD<ProtoType>::ProtoRDD(
-//    const Buffer& buf,
-//    ArgTypes... args) :
-//    ProtoRDD<ProtoType>(ProtoType{}, args...) {}
+template <typename ProtoType>
+void ProtoRDD<ProtoType>::decode(RefPtr<VFSFile> data) {
+  msg::decode(data->data(), data->size(), &data_);
+}
 
 } // namespace dproc
 } // namespace fnord

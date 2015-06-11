@@ -20,4 +20,5 @@ add_library(fnord-dproc OBJECT
     TaskSpec.pb.cc
     LocalScheduler.cc
     TaskResultFuture.cc
+    BlobRDD.cc
     ${PROTO_SRCS})
