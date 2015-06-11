@@ -18,9 +18,9 @@
 #include "fnord/random.h"
 #include "fnord/io/filerepository.h"
 #include "fnord/io/FileLock.h"
-#include "fnord-feeds/LocalFeed.h"
-#include "fnord-feeds/FeedEntry.h"
-#include "fnord-feeds/Message.pb.h"
+#include "brokerd/LocalFeed.h"
+#include "brokerd/FeedEntry.h"
+#include "brokerd/Message.pb.h"
 #include "fnord/reflect/reflect.h"
 
 namespace fnord {

@@ -9,8 +9,8 @@
  */
 #include "fnord/logging.h"
 #include "fnord/json/JSONRPCCodec.h"
-#include "fnord-feeds/FeedService.h"
-#include "fnord-feeds/RemoteFeedWriter.h"
+#include "brokerd/FeedService.h"
+#include "brokerd/RemoteFeedWriter.h"
 
 namespace fnord {
 namespace feeds {

@@ -16,8 +16,8 @@
 #include <unordered_map>
 #include "fnord/io/filerepository.h"
 #include "fnord/reflect/reflect.h"
-#include "fnord-feeds/FeedEntry.h"
-#include "fnord-feeds/Message.pb.h"
+#include "brokerd/FeedEntry.h"
+#include "brokerd/Message.pb.h"
 #include "sstable/sstablewriter.h"
 #include "fnord/stats/counter.h"
 

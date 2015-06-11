@@ -11,7 +11,7 @@
 #define _FNORD_BROKER_BROKERSERVLET_H
 #include "fnord/http/httpservice.h"
 #include <fnord/random.h>
-#include <fnord-feeds/FeedService.h>
+#include <brokerd/FeedService.h>
 
 namespace fnord {
 namespace feeds {

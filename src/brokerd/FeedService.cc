@@ -13,7 +13,7 @@
 #include "fnord/json/json.h"
 #include "sstable/sstablereader.h"
 #include "sstable/sstablerepair.h"
-#include "fnord-feeds/FeedService.h"
+#include "brokerd/FeedService.h"
 
 namespace fnord {
 namespace feeds {

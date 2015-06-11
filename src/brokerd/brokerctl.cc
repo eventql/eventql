@@ -19,8 +19,8 @@
 #include "fnord/random.h"
 #include "fnord/option.h"
 #include "fnord/http/httpconnectionpool.h"
-#include "fnord-feeds/BrokerClient.h"
-#include "fnord-feeds/ExportCursor.pb.h"
+#include "brokerd/BrokerClient.h"
+#include "brokerd/ExportCursor.pb.h"
 #include "fnord/protobuf/msg.h"
 
 using namespace fnord;
