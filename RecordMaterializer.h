@@ -25,7 +25,8 @@ public:
 
   RecordMaterializer(
       msg::MessageSchema* schema,
-      CSTableReader* reader);
+      CSTableReader* reader,
+      Set<String> columns = Set<String> {});
 
   void nextRecord(msg::MessageObject* record);
   void skipRecord();
@@ -79,7 +80,8 @@ protected:
       uint32_t dmax,
       Vector<Tuple<uint64_t, bool, uint32_t>> parents,
       const msg::MessageSchemaField& field,
-      CSTableReader* reader);
+      CSTableReader* reader,
+      const Set<String>& columns);
 
   HashMap<String, ColumnState> columns_;
 };

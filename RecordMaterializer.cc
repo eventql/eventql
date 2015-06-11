@@ -14,9 +14,16 @@ namespace cstable {
 
 RecordMaterializer::RecordMaterializer(
     msg::MessageSchema* schema,
-    CSTableReader* reader) {
+    CSTableReader* reader,
+    Set<String> columns /* = Set<String> {} */) {
   for (const auto& f : schema->fields()) {
-    createColumns("", 0, Vector<Tuple<uint64_t, bool, uint32_t>>{}, f, reader);
+    createColumns(
+        "",
+        0,
+        Vector<Tuple<uint64_t, bool, uint32_t>>{},
+        f,
+        reader,
+        columns);
   }
 }
 
@@ -87,7 +94,8 @@ void RecordMaterializer::createColumns(
     uint32_t dmax,
     Vector<Tuple<uint64_t, bool, uint32_t>> parents,
     const msg::MessageSchemaField& field,
-    CSTableReader* reader) {
+    CSTableReader* reader,
+    const Set<String>& columns) {
   auto colname = prefix + field.name;
 
   if (field.repeated || field.optional) {
@@ -99,13 +107,14 @@ void RecordMaterializer::createColumns(
       parents.emplace_back(field.id, field.repeated, dmax);
 
       for (const auto& f : field.schema->fields()) {
-        createColumns(colname + ".", dmax, parents, f, reader);
+        createColumns(colname + ".", dmax, parents, f, reader, columns);
       }
       break;
     }
 
     default: {
-      if (reader->hasColumn(colname)) {
+      if (reader->hasColumn(colname) &&
+          (columns.empty() || columns.count(colname) > 0)) {
         ColumnState colstate(reader->getColumnReader(colname));
         colstate.parents = parents;
         colstate.field_id = field.id;
@@ -171,6 +180,12 @@ void RecordMaterializer::insertValue(
       record->addChild(
           column->field_id,
           *((uint32_t*) column->data));
+      break;
+
+    case msg::FieldType::UINT64:
+      record->addChild(
+          column->field_id,
+          *((uint64_t*) column->data));
       break;
 
     case msg::FieldType::STRING:
