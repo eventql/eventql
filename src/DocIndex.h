@@ -16,7 +16,7 @@
 #include <vector>
 #include <queue>
 #include "fnord/stdtypes.h"
-#include "fnord-mdb/MDB.h"
+#include "fnord/mdb/MDB.h"
 #include "fnord/stats/stats.h"
 #include "fnord/util/binarymessagereader.h"
 #include "fnord/util/binarymessagewriter.h"

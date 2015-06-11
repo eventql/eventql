@@ -19,7 +19,7 @@
 #include "fnord/thread/taskscheduler.h"
 #include <fnord-fts/fts.h>
 #include <fnord-fts/fts_common.h>
-#include "fnord-mdb/MDB.h"
+#include "fnord/mdb/MDB.h"
 #include "fnord/stats/stats.h"
 #include "FeatureIndex.h"
 #include "DocStore.h"
