@@ -26,8 +26,6 @@
 #include "brokerd/BrokerServlet.h"
 #include "fnord/http/statshttpservlet.h"
 #include "fnord/stats/statsdagent.h"
-#include "common.h"
-#include "CustomerNamespace.h"
 
 using namespace fnord;
 
