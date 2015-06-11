@@ -436,6 +436,7 @@ add_executable(cm-chunkserver
     $<TARGET_OBJECTS:fnord-cstable>
     $<TARGET_OBJECTS:fnord-msg>
     $<TARGET_OBJECTS:fnord-tsdb>
+    $<TARGET_OBJECTS:fnord-dproc>
     $<TARGET_OBJECTS:fnord-dht>
     $<TARGET_OBJECTS:fnord-afx>
     ../3rdparty/libfnord/fnord-sstable/SSTableServlet.cc
