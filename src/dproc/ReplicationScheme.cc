@@ -7,11 +7,12 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <fnord-dht/ReplicationScheme.h>
-#include <fnord-base/fnv.h>
+#include <dproc/ReplicationScheme.h>
+#include <fnord/fnv.h>
 
-namespace fnord {
-namespace dht {
+using namespace fnord;
+
+namespace dproc {
 
 Vector<ReplicaRef> StandaloneReplicationScheme::replicasFor(const String& key) {
   return Vector<ReplicaRef>{};
@@ -42,6 +43,4 @@ bool FixedReplicationScheme::keepLocalReplicaFor(const String& key) {
   return true;
 }
 
-} // namespace dht
-} // namespace fnord
-
+} // namespace dproc
