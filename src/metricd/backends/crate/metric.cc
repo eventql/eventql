@@ -8,7 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <fnord-metricdb/backends/crate/metric.h>
-#include <fnord-base/wallclock.h>
+#include <fnord/wallclock.h>
 
 using namespace fnord;
 

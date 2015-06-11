@@ -8,7 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <fnord-metricdb/backends/disk/tokenindex.h>
-#include <fnord-base/exception.h>
+#include <fnord/exception.h>
 
 namespace fnord {
 namespace metric_service {

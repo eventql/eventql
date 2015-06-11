@@ -11,10 +11,10 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
-#include <fnord-base/wallclock.h>
-#include <fnord-base/io/fileutil.h>
+#include <fnord/wallclock.h>
+#include <fnord/io/fileutil.h>
 #include <fnord-metricdb/backends/disk/metric.h>
-#include <fnord-base/test/unittest.h>
+#include <fnord/test/unittest.h>
 
 using namespace fnord::metric_service::disk_backend;
 using namespace fnord::metric_service;
