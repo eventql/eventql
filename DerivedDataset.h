@@ -15,7 +15,8 @@
 #include <fnord-base/util/binarymessagereader.h>
 #include <fnord-base/util/binarymessagewriter.h>
 
-namespace fnord {
+using namespace fnord;
+
 namespace tsdb {
 class RecordSet;
 
@@ -45,6 +46,5 @@ public:
 
 };
 
-}
 }
 #endif

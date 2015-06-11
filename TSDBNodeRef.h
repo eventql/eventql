@@ -20,7 +20,8 @@
 #include <fnord-dht/ReplicationScheme.h>
 #include <fnord-http/httpconnectionpool.h>
 
-namespace fnord {
+using namespace fnord;
+
 namespace tsdb {
 
 class StreamChunk;
@@ -29,13 +30,11 @@ struct TSDBNodeRef {
   const String db_path;
   thread::CoalescingDelayedQueue<StreamChunk> compactionq;
   thread::CoalescingDelayedQueue<StreamChunk> replicationq;
-  thread::CoalescingDelayedQueue<StreamChunk> indexq;
   RefPtr<mdb::MDB> db;
   RefPtr<dht::ReplicationScheme> replication_scheme;
   http::HTTPConnectionPool* http;
 };
 
 } // namespace tdsb
-} // namespace fnord
 
 #endif

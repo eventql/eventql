@@ -10,87 +10,48 @@
 #include <fnord-tsdb/StreamChunk.h>
 #include <fnord-base/io/fileutil.h>
 #include <fnord-base/uri.h>
-#include <fnord-base/util/Base64.h>
 #include <fnord-base/util/binarymessagewriter.h>
 #include <fnord-base/wallclock.h>
 #include <fnord-msg/MessageEncoder.h>
+#include <fnord-msg/msg.h>
 
-namespace fnord {
+using namespace fnord;
+
 namespace tsdb {
 
 RefPtr<StreamChunk> StreamChunk::create(
-    const String& streamchunk_key,
+    const SHA1Hash& partition_key,
     const String& stream_key,
-    RefPtr<StreamProperties> config,
+    StreamConfig* config,
     TSDBNodeRef* node) {
   return RefPtr<StreamChunk>(
       new StreamChunk(
-          streamchunk_key,
+          partition_key,
           stream_key,
           config,
           node));
 }
 
 RefPtr<StreamChunk> StreamChunk::reopen(
-    const String& stream_key,
+    const SHA1Hash& partition_key,
     const StreamChunkState& state,
-    RefPtr<StreamProperties> config,
+    StreamConfig* config,
     TSDBNodeRef* node) {
   return RefPtr<StreamChunk>(
       new StreamChunk(
-          stream_key,
+          partition_key,
           state,
           config,
           node));
 }
 
-String StreamChunk::streamChunkKeyFor(
-    const String& stream_key,
-    DateTime time,
-    Duration partition_size) {
-  util::BinaryMessageWriter buf(stream_key.size() + 32);
-
-  auto cs = partition_size.microseconds();
-  auto ts = (time.unixMicros() / cs) * cs / kMicrosPerSecond;
-
-  buf.append(stream_key.data(), stream_key.size());
-  buf.appendUInt8(27);
-  buf.appendVarUInt(ts);
-
-  return String((char *) buf.data(), buf.size());
-}
-
-String StreamChunk::streamChunkKeyFor(
-    const String& stream_key,
-    DateTime time,
-    const StreamProperties& properties) {
-  return streamChunkKeyFor(stream_key, time, properties.chunk_size);
-}
-
-Vector<String> StreamChunk::streamChunkKeysFor(
-    const String& stream_key,
-    DateTime from,
-    DateTime until,
-    const StreamProperties& properties) {
-  auto cs = properties.chunk_size.microseconds();
-  auto first_chunk = (from.unixMicros() / cs) * cs;
-  auto last_chunk = (until.unixMicros() / cs) * cs;
-
-  Vector<String> res;
-  for (auto t = first_chunk; t <= last_chunk; t += cs) {
-    res.emplace_back(streamChunkKeyFor(stream_key, t, properties));
-  }
-
-  return res;
-}
-
 StreamChunk::StreamChunk(
-    const String& streamchunk_key,
+    const SHA1Hash& partition_key,
     const String& stream_key,
-    RefPtr<StreamProperties> config,
+    StreamConfig* config,
     TSDBNodeRef* node) :
     stream_key_(stream_key),
-    key_(streamchunk_key),
+    key_(partition_key),
     config_(config),
     node_(node),
     records_(
@@ -98,16 +59,16 @@ StreamChunk::StreamChunk(
             node->db_path,
             StringUtil::stripShell(stream_key) + ".")),
     last_compaction_(0) {
-  records_.setMaxDatafileSize(config_->max_datafile_size);
+  records_.setMaxDatafileSize(config_->max_sstable_size());
 }
 
 StreamChunk::StreamChunk(
-    const String& streamchunk_key,
+    const SHA1Hash& partition_key,
     const StreamChunkState& state,
-    RefPtr<StreamProperties> config,
+    StreamConfig* config,
     TSDBNodeRef* node) :
     stream_key_(state.stream_key),
-    key_(streamchunk_key),
+    key_(partition_key),
     config_(config),
     node_(node),
     records_(
@@ -120,14 +81,18 @@ StreamChunk::StreamChunk(
   scheduleCompaction();
   node_->compactionq.insert(this, WallClock::unixMicros());
   node_->replicationq.insert(this, WallClock::unixMicros());
-  node_->indexq.insert(this, WallClock::unixMicros());
-  records_.setMaxDatafileSize(config_->max_datafile_size);
+  records_.setMaxDatafileSize(config_->max_sstable_size());
 }
 
 void StreamChunk::insertRecord(
-    uint64_t record_id,
+    const SHA1Hash& record_id,
     const Buffer& record) {
   std::unique_lock<std::mutex> lk(mutex_);
+
+  fnord::logTrace(
+      "tsdb",
+      "Insert 1 record into stream='$0'",
+      stream_key_);
 
   auto old_ver = records_.version();
   records_.addRecord(record_id, record);
@@ -141,6 +106,12 @@ void StreamChunk::insertRecord(
 void StreamChunk::insertRecords(const Vector<RecordRef>& records) {
   std::unique_lock<std::mutex> lk(mutex_);
 
+  fnord::logTrace(
+      "tsdb",
+      "Insert $0 records into stream='$1'",
+      records.size(),
+      stream_key_);
+
   auto old_ver = records_.version();
   records_.addRecords(records);
   if (records_.version() != old_ver) {
@@ -152,7 +123,7 @@ void StreamChunk::insertRecords(const Vector<RecordRef>& records) {
 
 void StreamChunk::scheduleCompaction() {
   auto now = WallClock::unixMicros();
-  auto interval = config_->compaction_interval.microseconds();
+  auto interval = config_->compaction_interval();
   auto last = last_compaction_.unixMicros();
   uint64_t compaction_delay = 0;
 
@@ -168,14 +139,11 @@ void StreamChunk::compact() {
   last_compaction_ = DateTime::now();
   lk.unlock();
 
-  String encoded_key;
-  util::Base64::encode(key_, &encoded_key);
-
   fnord::logDebug(
       "tsdb.replication",
       "Compacting partition; stream='$0' partition='$1'",
       stream_key_,
-      encoded_key);
+      key_.toString());
 
   Set<String> deleted_files;
   records_.compact(&deleted_files);
@@ -185,7 +153,6 @@ void StreamChunk::compact() {
   lk.unlock();
 
   node_->replicationq.insert(this, WallClock::unixMicros());
-  node_->indexq.insert(this, WallClock::unixMicros());
 
   for (const auto& f : deleted_files) {
     FileUtil::rm(f);
@@ -196,7 +163,9 @@ void StreamChunk::replicate() {
   std::unique_lock<std::mutex> lk(replication_mutex_);
 
   auto cur_offset = records_.lastOffset();
-  auto replicas = node_->replication_scheme->replicasFor(key_);
+  auto replicas = node_->replication_scheme->replicasFor(
+      String((char*) key_.data(), key_.size()));
+
   bool dirty = false;
   bool needs_replication = false;
   bool has_error = false;
@@ -267,32 +236,29 @@ uint64_t StreamChunk::replicateTo(const String& addr, uint64_t offset) {
 
   size_t n = 0;
   records_.fetchRecords(offset, batch_size, [this, &batch, &n] (
-      uint64_t record_id,
+      const SHA1Hash& record_id,
       const void* record_data,
       size_t record_size) {
     ++n;
 
-    batch.appendUInt64(record_id);
+    batch.append(record_id.data(), record_id.size());
     batch.appendVarUInt(record_size);
     batch.append(record_data, record_size);
   });
-
-  String encoded_key;
-  util::Base64::encode(key_, &encoded_key);
 
   fnord::logDebug(
       "tsdb.replication",
       "Replicating to $0; stream='$1' partition='$2' offset=$3",
       addr,
       stream_key_,
-      encoded_key,
+      key_.toString(),
       offset);
 
   URI uri(StringUtil::format(
       "http://$0/tsdb/replicate?stream=$1&chunk=$2",
       addr,
       URI::urlEncode(stream_key_),
-      URI::urlEncode(encoded_key)));
+      URI::urlEncode(key_.toString())));
 
   http::HTTPRequest req(http::HTTPMessage::M_POST, uri.pathAndQuery());
   req.addHeader("Host", uri.hostAndPort());
@@ -310,97 +276,13 @@ uint64_t StreamChunk::replicateTo(const String& addr, uint64_t offset) {
   return offset + n;
 }
 
-void StreamChunk::buildIndexes() {
-  std::unique_lock<std::mutex> lk(indexbuild_mutex_);
-
-  for (const auto& dset : config_->derived_datasets) {
-    buildDerivedDataset(dset);
-  }
-}
-
-void StreamChunk::buildDerivedDataset(RefPtr<DerivedDataset> dset) {
-  String dset_key = "\x1b";
-  dset_key.append(key_);
-  dset_key.append("~" + dset->name());
-
-  DerivedDatasetState old_state;
-  {
-    auto txn = node_->db->startTransaction(true);
-    auto buf = txn->get(dset_key);
-    txn->abort();
-    if (!buf.isEmpty()) {
-      util::BinaryMessageReader reader(buf.get().data(), buf.get().size());
-      old_state.decode(&reader);
-    }
-  }
-
-  auto cur_offset = records_.lastOffset();
-  if (old_state.last_offset >= cur_offset) {
-    return;
-  }
-
-  DerivedDatasetState new_state;
-  new_state.last_offset = cur_offset;
-
-  Set<String> delete_after_commit;
-  try {
-    dset->update(
-        &records_,
-        old_state.last_offset,
-        cur_offset,
-        old_state.state,
-        &new_state.state,
-        &delete_after_commit);
-  } catch (const std::exception& e) {
-    fnord::logError(
-        "fnord.tsdb",
-        e,
-        "error while building derived dataset '$0'",
-        dset->name());
-
-    return;
-  }
-
-  {
-    util::BinaryMessageWriter buf;
-    new_state.encode(&buf);
-
-    auto txn = node_->db->startTransaction(false);
-    txn->update(dset_key.data(), dset_key.size(), buf.data(), buf.size());
-    txn->commit();
-  }
-
-  for (const auto& f : delete_after_commit) {
-    FileUtil::rm(f);
-  }
-}
-
-Buffer StreamChunk::fetchDerivedDataset(const String& dataset_name) {
-  String dset_key = "\x1b";
-  dset_key.append(key_);
-  dset_key.append("~" + dataset_name);
-  DerivedDatasetState dset;
-
-  auto txn = node_->db->startTransaction(true);
-  auto buf = txn->get(dset_key);
-  txn->abort();
-
-  if (buf.isEmpty()) {
-    return Buffer{};
-  } else {
-    util::BinaryMessageReader reader(buf.get().data(), buf.get().size());
-    dset.decode(&reader);
-    return dset.state;
-  }
-}
-
 Vector<String> StreamChunk::listFiles() const {
   return records_.listDatafiles();
 }
 
 PartitionInfo StreamChunk::partitionInfo() const {
   PartitionInfo pi;
-  pi.set_partition_key(util::Base64::encode(key_));
+  pi.set_partition_key(key_.toString());
   pi.set_stream_key(stream_key_);
   pi.set_version(records_.version());
   pi.set_exists(true);
@@ -449,5 +331,4 @@ void StreamChunkState::decode(util::BinaryMessageReader* reader) {
   record_state.version = reader->readVarUInt();
 }
 
-}
 }

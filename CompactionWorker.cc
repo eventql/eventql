@@ -13,7 +13,8 @@
 #include <fnord-tsdb/CompactionWorker.h>
 #include <fnord-tsdb/StreamChunk.h>
 
-namespace fnord {
+using namespace fnord;
+
 namespace tsdb {
 
 CompactionWorker::CompactionWorker(
@@ -52,5 +53,4 @@ void CompactionWorker::run() {
 }
 
 } // namespace tsdb
-} // namespace fnord
 

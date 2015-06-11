@@ -7,31 +7,31 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#ifndef _FNORD_TSDB_REPLICATIONWORKER_H
-#define _FNORD_TSDB_REPLICATIONWORKER_H
-#include <thread>
+#pragma once
 #include <fnord-base/stdtypes.h>
-#include <fnord-tsdb/TSDBNodeRef.h>
+#include <fnord-base/option.h>
+#include <fnord-base/datetime.h>
+#include <fnord-base/duration.h>
+#include <fnord-base/SHA1.h>
 
 using namespace fnord;
 
 namespace tsdb {
 
-class ReplicationWorker : public RefCounted {
+class TimeWindowPartitioner : public RefCounted {
 public:
 
-  ReplicationWorker(TSDBNodeRef* node);
-  void start();
-  void stop();
+  static SHA1Hash partitionKeyFor(
+      const String& stream_key,
+      DateTime time,
+      Duration window_size);
 
-protected:
-  void run();
+  static Vector<SHA1Hash> partitionKeysFor(
+      const String& stream_key,
+      DateTime from,
+      DateTime until,
+      Duration window_size);
 
-  thread::CoalescingDelayedQueue<StreamChunk>* queue_;
-  std::atomic<bool> running_;
-  std::thread thread_;
 };
 
-} // namespace tsdb
-
-#endif
+}

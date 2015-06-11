@@ -7,14 +7,21 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include "fnord-base/test/unittest.h"
-#include "fnord-tsdb/TSDBNode.h"
+package tsdb;
 
-using namespace fnord;
-using namespace tsdb;
+message RecordEnvelope {
 
-UNIT_TEST(TSDBNodeTest);
+  optional string stream_key = 1;
+
+  optional string partition_key = 2;
+
+  required string record_id = 3;
+
+  required bytes record = 4;
+
+};
+
+message RecordEnvelopeList {
+  repeated RecordEnvelope records = 1;
+}
 

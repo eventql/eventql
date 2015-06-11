@@ -7,14 +7,10 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include "fnord-base/test/unittest.h"
-#include "fnord-tsdb/TSDBNode.h"
+package tsdb;
 
-using namespace fnord;
-using namespace tsdb;
-
-UNIT_TEST(TSDBNodeTest);
+message TSDBTableScanMapperParams {
+  required string partition_key = 1;
+  optional string scanlet_params = 2;
+}
 

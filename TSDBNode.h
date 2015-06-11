@@ -14,14 +14,14 @@
 #include <fnord-base/option.h>
 #include <fnord-base/thread/queue.h>
 #include <fnord-mdb/MDB.h>
-#include <fnord-tsdb/StreamProperties.h>
+#include <fnord-tsdb/StreamConfig.pb.h>
 #include <fnord-tsdb/StreamChunk.h>
 #include <fnord-tsdb/TSDBNodeRef.h>
 #include <fnord-tsdb/CompactionWorker.h>
 #include <fnord-tsdb/ReplicationWorker.h>
-#include <fnord-tsdb/IndexWorker.h>
 
-namespace fnord {
+using namespace fnord;
+
 namespace tsdb {
 
 class TSDBNode {
@@ -33,61 +33,43 @@ public:
       http::HTTPConnectionPool* http);
 
   void configurePrefix(
-      const String& stream_key_prefix,
-      StreamProperties props);
+      const String& stream_namespace,
+      StreamConfig config);
 
-  RefPtr<StreamProperties> configFor(const String& stream_key) const;
+  StreamConfig* configFor(
+      const String& stream_namespace,
+      const String& stream_key) const;
 
-  void insertRecord(
+  StreamChunk* findPartition(
+      const String& stream_namespace,
       const String& stream_key,
-      uint64_t record_id,
-      const Buffer& record,
-      DateTime time);
+      const SHA1Hash& partition_key);
 
-  void insertRecord(
+  StreamChunk* findOrCreatePartition(
+      const String& stream_namespace,
       const String& stream_key,
-      uint64_t record_id,
-      const Buffer& record,
-      const String& chunk_key);
-
-  void insertRecords(
-      const String& stream_key,
-      const Vector<RecordRef>& records);
-
-  void insertRecords(
-      const String& stream_key,
-      const String& chunk_key,
-      const Vector<RecordRef>& records);
-
-  Vector<String> listFiles(const String& chunk_key);
-
-  PartitionInfo fetchPartitionInfo(const String& chunk_key);
-
-  Buffer fetchDerivedDataset(
-      const String& chunk_key,
-      const String& derived_dataset);
+      const SHA1Hash& partition_key);
 
   void start(
       size_t num_comaction_threads = 4,
-      size_t num_replication_threads = 4,
-      size_t num_index_threads = 2);
+      size_t num_replication_threads = 4);
 
   void stop();
 
 protected:
 
+
+
   void reopenStreamChunks();
 
   TSDBNodeRef noderef_;
-  Vector<Pair<String, RefPtr<StreamProperties>>> configs_;
+  Vector<Pair<String, ScopedPtr<StreamConfig>>> configs_;
   std::mutex mutex_;
   HashMap<String, RefPtr<StreamChunk>> chunks_;
   Vector<RefPtr<CompactionWorker>> compaction_workers_;
   Vector<RefPtr<ReplicationWorker>> replication_workers_;
-  Vector<RefPtr<IndexWorker>> index_workers_;
 };
 
 } // namespace tdsb
-} // namespace fnord
 
 #endif

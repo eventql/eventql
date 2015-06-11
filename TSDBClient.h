@@ -15,7 +15,8 @@
 #include <fnord-http/httpconnectionpool.h>
 #include <fnord-tsdb/PartitionInfo.pb.h>
 
-namespace fnord {
+using namespace fnord;
+
 namespace tsdb {
 
 class TSDBClient {
@@ -24,6 +25,12 @@ public:
   TSDBClient(
       const String& uri,
       http::HTTPConnectionPool* http);
+
+  void insertRecord(
+      const String& stream_key,
+      const DateTime& time,
+      uint64_t msgid,
+      const Buffer& record);
 
   Vector<String> listPartitions(
       const String& stream_key,
@@ -51,12 +58,14 @@ public:
       const String& partition,
       const String& derived_dataset_name);
 
+  uint64_t mkMessageID();
+
 protected:
   String uri_;
   http::HTTPConnectionPool* http_;
+  Random rnd_;
 };
 
 } // namespace tdsb
-} // namespace fnord
 
 #endif

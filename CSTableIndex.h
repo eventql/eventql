@@ -7,36 +7,35 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#ifndef _FNORD_TSDB_CSTABLEINDEX_H
-#define _FNORD_TSDB_CSTABLEINDEX_H
+#pragma once
 #include <fnord-base/stdtypes.h>
-#include <fnord-tsdb/DerivedDataset.h>
+#include <fnord-tsdb/TSDBTableScanSpec.pb.h>
+#include <fnord-tsdb/TSDBClient.h>
 #include <fnord-msg/MessageSchema.h>
 #include <fnord-base/random.h>
+#include <fnord-dproc/BlobRDD.h>
 
-namespace fnord {
+using namespace fnord;
+
 namespace tsdb {
 
-class CSTableIndex : public DerivedDataset {
+class CSTableIndex : public dproc::BlobRDD {
 public:
 
-  CSTableIndex(RefPtr<msg::MessageSchema> schema);
+  CSTableIndex(
+      const TSDBTableScanSpec params,
+      msg::MessageSchemaRepository* repo,
+      tsdb::TSDBClient* tsdb);
 
-  String name() override;
+  RefPtr<VFSFile> computeBlob(dproc::TaskContext* context) override;
 
-  void update(
-      RecordSet* records,
-      uint64_t last_offset,
-      uint64_t current_offset,
-      const Buffer& last_state,
-      Buffer* new_state,
-      Set<String>* delete_after_commit) override;
+  Option<String> cacheKey() const override;
 
 protected:
+  TSDBTableScanSpec params_;
+  tsdb::TSDBClient* tsdb_;
   RefPtr<msg::MessageSchema> schema_;
   Random rnd_;
 };
 
 }
-}
-#endif

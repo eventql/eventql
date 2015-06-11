@@ -10,7 +10,8 @@
 #include <fnord-base/util/Base64.h>
 #include <fnord-tsdb/TSDBNode.h>
 
-namespace fnord {
+using namespace fnord;
+
 namespace tsdb {
 
 TSDBNode::TSDBNode(
@@ -28,147 +29,26 @@ TSDBNode::TSDBNode(
         .replication_scheme = replication_scheme,
         .http = http} {}
 
-void TSDBNode::insertRecord(
-    const String& stream_key,
-    uint64_t record_id,
-    const Buffer& record,
-    DateTime time) {
-  auto config = configFor(stream_key);
-  auto chunk_key = StreamChunk::streamChunkKeyFor(stream_key, time, *config);
-
-  RefPtr<StreamChunk> chunk(nullptr);
-  {
-    std::unique_lock<std::mutex> lk(mutex_);
-    auto chunk_iter = chunks_.find(chunk_key);
-    if (chunk_iter == chunks_.end()) {
-      chunk = StreamChunk::create(chunk_key, stream_key, config, &noderef_);
-      chunks_.emplace(chunk_key, chunk);
-    } else {
-      chunk = chunk_iter->second;
-    }
-  }
-
-  chunk->insertRecord(record_id, record);
-}
-
-void TSDBNode::insertRecord(
-    const String& stream_key,
-    uint64_t record_id,
-    const Buffer& record,
-    const String& chunk_key) {
-  auto config = configFor(stream_key);
-
-  RefPtr<StreamChunk> chunk(nullptr);
-  {
-    std::unique_lock<std::mutex> lk(mutex_);
-    auto chunk_iter = chunks_.find(chunk_key);
-    if (chunk_iter == chunks_.end()) {
-      chunk = StreamChunk::create(chunk_key, stream_key, config, &noderef_);
-      chunks_.emplace(chunk_key, chunk);
-    } else {
-      chunk = chunk_iter->second;
-    }
-  }
-
-  chunk->insertRecord(record_id, record);
-}
-
-void TSDBNode::insertRecords(
-    const String& stream_key,
-    const Vector<RecordRef>& records) {
-  HashMap<String, Vector<RecordRef>> per_chunk;
-  auto config = configFor(stream_key);
-
-  for (const auto& r : records) {
-    auto ckey = StreamChunk::streamChunkKeyFor(stream_key, r.time, *config);
-    per_chunk[ckey].emplace_back(r);
-  }
-
-  for (const auto& c : per_chunk) {
-    insertRecords(stream_key, c.first, c.second);
-  }
-}
-
-void TSDBNode::insertRecords(
-    const String& stream_key,
-    const String& chunk_key,
-    const Vector<RecordRef>& records) {
-  auto config = configFor(stream_key);
-
-  RefPtr<StreamChunk> chunk(nullptr);
-  {
-    std::unique_lock<std::mutex> lk(mutex_);
-    auto chunk_iter = chunks_.find(chunk_key);
-    if (chunk_iter == chunks_.end()) {
-      chunk = StreamChunk::create(chunk_key, stream_key, config, &noderef_);
-      chunks_.emplace(chunk_key, chunk);
-    } else {
-      chunk = chunk_iter->second;
-    }
-  }
-
-  chunk->insertRecords(records);
-}
-
-Vector<String> TSDBNode::listFiles(const String& chunk_key) {
-  std::unique_lock<std::mutex> lk(mutex_);
-
-  auto chunk = chunks_.find(chunk_key);
-  if (chunk == chunks_.end()) {
-    return Vector<String>{};
-  }
-
-  auto c = chunk->second;
-  lk.unlock();
-
-  return c->listFiles();
-}
-
-PartitionInfo TSDBNode::fetchPartitionInfo(const String& chunk_key) {
-  std::unique_lock<std::mutex> lk(mutex_);
-  auto chunk = chunks_.find(chunk_key);
-  if (chunk == chunks_.end()) {
-    PartitionInfo pi;
-    pi.set_partition_key(util::Base64::encode(chunk_key));
-    return pi;
-  }
-
-  auto c = chunk->second;
-  lk.unlock();
-
-  return c->partitionInfo();
-}
-
-Buffer TSDBNode::fetchDerivedDataset(
-    const String& chunk_key,
-    const String& derived_dataset) {
-  std::unique_lock<std::mutex> lk(mutex_);
-  auto chunk = chunks_.find(chunk_key);
-  if (chunk == chunks_.end()) {
-    return Buffer{};
-  }
-  lk.unlock();
-
-  return chunk->second->fetchDerivedDataset(derived_dataset);
-}
-
 // FIXPAUL proper longest prefix search ;)
-RefPtr<StreamProperties> TSDBNode::configFor(const String& stream_key) const {
-  RefPtr<StreamProperties> config(nullptr);
+StreamConfig* TSDBNode::configFor(
+    const String& stream_ns,
+    const String& stream_key) const {
+  StreamConfig* config = nullptr;
   size_t match_len = 0;
 
+  auto stream_ns_key = stream_ns + "~" + stream_key;
   for (const auto& cfg : configs_) {
-    if (!StringUtil::beginsWith(stream_key, cfg.first)) {
+    if (!StringUtil::beginsWith(stream_ns_key, cfg.first)) {
       continue;
     }
 
     if (cfg.first.length() > match_len) {
-      config = cfg.second;
+      config = cfg.second.get();
       match_len = cfg.first.length();
     }
   }
 
-  if (config.get() == nullptr) {
+  if (config == nullptr) {
     RAISEF(kIndexError, "no config found for stream key: '$0'", stream_key);
   }
 
@@ -176,15 +56,18 @@ RefPtr<StreamProperties> TSDBNode::configFor(const String& stream_key) const {
 }
 
 void TSDBNode::configurePrefix(
-    const String& stream_key_prefix,
-    StreamProperties props) {
-  configs_.emplace_back(stream_key_prefix, new StreamProperties(props));
+    const String& stream_ns,
+    StreamConfig config) {
+  auto stream_ns_key = stream_ns + "~" + config.stream_key_prefix();
+
+  configs_.emplace_back(
+      stream_ns_key,
+      ScopedPtr<StreamConfig>(new StreamConfig(config)));
 }
 
 void TSDBNode::start(
     size_t num_compaction_threads,
-    size_t num_replication_threads,
-    size_t num_index_threads) {
+    size_t num_replication_threads) {
   reopenStreamChunks();
 
   for (int i = 0; i < num_compaction_threads; ++i) {
@@ -196,11 +79,6 @@ void TSDBNode::start(
     replication_workers_.emplace_back(new ReplicationWorker(&noderef_));
     replication_workers_.back()->start();
   }
-
-  for (int i = 0; i < num_index_threads; ++i) {
-    index_workers_.emplace_back(new IndexWorker(&noderef_));
-    index_workers_.back()->start();
-  }
 }
 
 void TSDBNode::stop() {
@@ -209,10 +87,6 @@ void TSDBNode::stop() {
   }
 
   for (auto& w : replication_workers_) {
-    w->stop();
-  }
-
-  for (auto& w : index_workers_) {
     w->stop();
   }
 }
@@ -234,26 +108,36 @@ void TSDBNode::reopenStreamChunks() {
       }
     }
 
-    auto chunk_key = key.toString();
-    if (chunk_key.size() == 0) {
+    auto partition_ns_key = key.toString();
+    if (partition_ns_key.size() == 0) {
       continue;
     }
 
-    if (chunk_key[0] == 0x1b) {
+    if (partition_ns_key[0] == 0x1b) {
       continue;
     }
+
+    auto partition_ns_off = StringUtil::find(partition_ns_key, '~');
+    if (partition_ns_off == String::npos) {
+      RAISEF(kRuntimeError, "invalid partition key: $0", partition_ns_key);
+    }
+
+    auto partition_ns = partition_ns_key.substr(0, partition_ns_off);
+    SHA1Hash partition_key(
+        partition_ns_key.data() + partition_ns_off + 1,
+        partition_ns_key.size() - partition_ns_off - 1);
 
     util::BinaryMessageReader reader(value.data(), value.size());
     StreamChunkState state;
     state.decode(&reader);
 
     auto chunk = StreamChunk::reopen(
-        chunk_key,
+        partition_key,
         state,
-        configFor(state.stream_key),
+        configFor(partition_ns, state.stream_key),
         &noderef_);
 
-    chunks_.emplace(chunk_key, chunk);
+    chunks_.emplace(partition_ns_key, chunk);
   }
 
   cursor->close();
@@ -261,5 +145,4 @@ void TSDBNode::reopenStreamChunks() {
 }
 
 } // namespace tdsb
-} // namespace fnord
 

@@ -15,15 +15,14 @@
 #include <fnord-sstable/sstablereader.h>
 #include <fnord-tsdb/RecordSet.h>
 
-namespace fnord {
+using namespace fnord;
+
 namespace tsdb {
 
 RecordRef::RecordRef(
-    uint64_t _record_id,
-    uint64_t _time,
+    const SHA1Hash& _record_id,
     const Buffer& _record) :
     record_id(_record_id),
-    time(_time),
     record(_record) {}
 
 RecordSet::RecordSet(
@@ -32,7 +31,7 @@ RecordSet::RecordSet(
     filename_prefix_(filename_prefix),
     state_(state),
     max_datafile_size_(kDefaultMaxDatafileSize) {
-  auto id_index_fn = [this] (uint64_t id, const void* data, size_t size) {
+  auto id_index_fn = [this] (const SHA1Hash& id, const void* data, size_t size) {
     commitlog_ids_.emplace(id);
   };
 
@@ -60,9 +59,10 @@ size_t RecordSet::commitlogSize() const {
   return commitlog_ids_.size();
 }
 
-void RecordSet::addRecord(uint64_t record_id, const Buffer& message) {
+void RecordSet::addRecord(const SHA1Hash& record_id, const Buffer& message) {
+
   util::BinaryMessageWriter buf;
-  buf.appendUInt64(record_id);
+  buf.append(record_id.data(), record_id.size());
   buf.appendVarUInt(message.size());
   buf.append(message.data(), message.size());
 
@@ -86,7 +86,7 @@ void RecordSet::addRecords(const Vector<RecordRef>& records) {
       continue;
     }
 
-    buf.appendUInt64(rec.record_id);
+    buf.append(rec.record_id.data(), rec.record_id.size());
     buf.appendVarUInt(rec.record.size());
     buf.append(rec.record.data(), rec.record.size());
   }
@@ -179,8 +179,8 @@ void RecordSet::compact(Set<String>* deleted_files) {
   size_t outfile_nrecords = 0;
   size_t outfile_offset = 0;
 
-  Set<uint64_t> old_id_set;
-  Set<uint64_t> new_id_set;
+  Set<SHA1Hash> old_id_set;
+  Set<SHA1Hash> new_id_set;
 
   bool rewrite_last =
       snap.datafiles.size() > 0 &&
@@ -202,11 +202,8 @@ void RecordSet::compact(Set<String>* deleted_files) {
       void* key;
       size_t key_size;
       cursor->getKey(&key, &key_size);
-      if (key_size != sizeof(uint64_t)) {
-        RAISE(kRuntimeError, "invalid row");
-      }
 
-      uint64_t msgid = *((uint64_t*) key);
+      SHA1Hash msgid(key, key_size);
       old_id_set.emplace(msgid);
 
       if (rewrite_last && j + 1 == snap.datafiles.size()) {
@@ -226,7 +223,7 @@ void RecordSet::compact(Set<String>* deleted_files) {
 
   for (const auto& cl : snap.old_commitlogs) {
     loadCommitlog(cl, [this, &outfile, &old_id_set, &new_id_set, &outfile_nrecords] (
-        uint64_t id,
+        const SHA1Hash& id,
         const void* data,
         size_t size) {
       if (new_id_set.count(id) > 0) {
@@ -239,7 +236,7 @@ void RecordSet::compact(Set<String>* deleted_files) {
         return;
       }
 
-      outfile->appendRow(&id, sizeof(id), data, size);
+      outfile->appendRow(id.data(), id.size(), data, size);
       ++outfile_nrecords;
     });
   }
@@ -280,13 +277,14 @@ void RecordSet::compact(Set<String>* deleted_files) {
 
 void RecordSet::loadCommitlog(
     const String& filename,
-    Function<void (uint64_t, const void*, size_t)> fn) {
+    Function<void (const SHA1Hash&, const void*, size_t)> fn) {
   io::MmappedFile mmap(File::openFile(filename, File::O_READ));
   util::BinaryMessageReader reader(mmap.data(), mmap.size());
   auto limit = *reader.readUInt64() + sizeof(uint64_t);
 
   while (reader.position() < limit) {
-    auto id = *reader.readUInt64();
+    auto id_data = reader.read(SHA1Hash::kSize);
+    SHA1Hash id(id_data, SHA1Hash::kSize);
     auto len = reader.readVarUInt();
     auto data = reader.read(len);
 
@@ -328,9 +326,10 @@ uint64_t RecordSet::lastOffset() const {
 void RecordSet::fetchRecords(
       uint64_t offset,
       uint64_t limit,
-      Function<void (uint64_t record_id, const void* record_data, size_t record_size)> fn) {
-  Set<uint64_t> res;
-
+      Function<void (
+          const SHA1Hash& record_id,
+          const void* record_data,
+          size_t record_size)> fn) {
   std::unique_lock<std::mutex> lk(mutex_);
   auto datafiles = state_.datafiles;
   lk.unlock();
@@ -359,11 +358,7 @@ void RecordSet::fetchRecords(
         void* key;
         size_t key_size;
         cursor->getKey(&key, &key_size);
-        if (key_size != sizeof(uint64_t)) {
-          RAISE(kRuntimeError, "invalid row");
-        }
-
-        uint64_t msgid = *((uint64_t*) key);
+        SHA1Hash msgid(key, key_size);
 
         void* data;
         size_t data_size;
@@ -382,8 +377,8 @@ void RecordSet::fetchRecords(
   }
 }
 
-Set<uint64_t> RecordSet::listRecords() const {
-  Set<uint64_t> res;
+Set<SHA1Hash> RecordSet::listRecords() const {
+  Set<SHA1Hash> res;
 
   std::unique_lock<std::mutex> lk(mutex_);
   if (state_.datafiles.empty()) {
@@ -401,11 +396,8 @@ Set<uint64_t> RecordSet::listRecords() const {
       void* key;
       size_t key_size;
       cursor->getKey(&key, &key_size);
-      if (key_size != sizeof(uint64_t)) {
-        RAISE(kRuntimeError, "invalid row");
-      }
 
-      res.emplace(*((uint64_t*) key));
+      res.emplace(key, key_size);
 
       if (!cursor->next()) {
         break;
@@ -486,5 +478,4 @@ void RecordSet::RecordSetState::decode(util::BinaryMessageReader* reader) {
 }
 
 } // namespace tsdb
-} // namespace fnord
 

@@ -15,12 +15,13 @@
 #include <fnord-base/util/binarymessagereader.h>
 #include <fnord-base/util/binarymessagewriter.h>
 #include <fnord-msg/MessageSchema.h>
-#include <fnord-tsdb/StreamProperties.h>
+#include <fnord-tsdb/StreamConfig.pb.h>
 #include <fnord-tsdb/RecordSet.h>
 #include <fnord-tsdb/TSDBNodeRef.h>
 #include <fnord-tsdb/PartitionInfo.pb.h>
 
-namespace fnord {
+using namespace fnord;
+
 namespace tsdb {
 
 struct StreamChunkState {
@@ -35,80 +36,73 @@ class StreamChunk : public RefCounted {
 public:
 
   static RefPtr<StreamChunk> create(
-      const String& streamchunk_key,
+      const SHA1Hash& partition_key,
       const String& stream_key,
-      RefPtr<StreamProperties> config,
+      StreamConfig* config,
       TSDBNodeRef* node);
 
   static RefPtr<StreamChunk> reopen(
-      const String& streamchunk_key,
+      const SHA1Hash& partition_key,
       const StreamChunkState& state,
-      RefPtr<StreamProperties> config,
+      StreamConfig* config,
       TSDBNodeRef* node);
 
-  static String streamChunkKeyFor(
-      const String& stream_key,
-      DateTime time,
-      Duration partition_size);
+  //static String streamChunkKeyFor(
+  //    const String& stream_key,
+  //    DateTime time,
+  //    Duration partition_size);
 
-  static String streamChunkKeyFor(
-      const String& stream_key,
-      DateTime time,
-      const StreamProperties& properties);
+  //static String streamChunkKeyFor(
+  //    const String& stream_key,
+  //    DateTime time,
+  //    const StreamConfig& properties);
 
-  static Vector<String> streamChunkKeysFor(
-      const String& stream_key,
-      DateTime from,
-      DateTime until,
-      const StreamProperties& properties);
+  //static Vector<String> streamChunkKeysFor(
+  //    const String& stream_key,
+  //    DateTime from,
+  //    DateTime until,
+  //    const StreamConfig& properties);
 
   void insertRecord(
-      uint64_t record_id,
+      const SHA1Hash& record_id,
       const Buffer& record);
 
   void insertRecords(const Vector<RecordRef>& records);
 
-  void compact();
-  void replicate();
-  void buildIndexes();
-
+  PartitionInfo partitionInfo() const;
   Vector<String> listFiles() const;
 
-  PartitionInfo partitionInfo() const;
-
-  Buffer fetchDerivedDataset(const String& dataset_name);
+  void compact();
+  void replicate();
 
 protected:
 
   StreamChunk(
-      const String& streamchunk_key,
+      const SHA1Hash& partition_key,
       const String& stream_key,
-      RefPtr<StreamProperties> config,
+      StreamConfig* config,
       TSDBNodeRef* node);
 
   StreamChunk(
-      const String& streamchunk_key,
+      const SHA1Hash& partition_key,
       const StreamChunkState& state,
-      RefPtr<StreamProperties> config,
+      StreamConfig* config,
       TSDBNodeRef* node);
 
   void scheduleCompaction();
   void commitState();
   uint64_t replicateTo(const String& addr, uint64_t offset);
-  void buildDerivedDataset(RefPtr<DerivedDataset> dset);
 
-  String key_;
+  SHA1Hash key_;
   String stream_key_;
   RecordSet records_;
-  RefPtr<StreamProperties> config_;
+  StreamConfig* config_;
   TSDBNodeRef* node_;
   std::mutex mutex_;
   std::mutex replication_mutex_;
-  std::mutex indexbuild_mutex_;
   DateTime last_compaction_;
   HashMap<uint64_t, uint64_t> repl_offsets_;
 };
 
-}
 }
 #endif
