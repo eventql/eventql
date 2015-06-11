@@ -12,7 +12,7 @@
 #include <fnord-tsdb/TSDBClient.h>
 #include <fnord-tsdb/TSDBTableScanlet.h>
 #include <fnord-tsdb/TSDBTableScanReducerParams.pb.h>
-#include <fnord-dproc/Task.h>
+#include <dproc/Task.h>
 
 using namespace fnord;
 
