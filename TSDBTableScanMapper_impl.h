@@ -87,9 +87,12 @@ List<dproc::TaskDependency> TSDBTableScanMapper<ScanletType>::dependencies()
   List<dproc::TaskDependency> deps;
 
   if (params_.use_cstable_index()) {
+    auto dparams = params_;
+    dparams.set_op(TSDB_OP_BUILDINDEX);
+
     deps.emplace_back(dproc::TaskDependency {
       .task_name = "CSTableIndex",
-      .params = *msg::encode(params_)
+      .params = *msg::encode(dparams)
     });
   }
 

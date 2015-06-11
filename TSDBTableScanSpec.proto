@@ -12,6 +12,7 @@ package tsdb;
 enum TSDBTableScanOperation {
   TSDB_OP_MERGE = 0;
   TSDB_OP_MAP = 1;
+  TSDB_OP_BUILDINDEX = 2;
 };
 
 message TSDBTableScanSpec {
