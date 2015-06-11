@@ -153,7 +153,7 @@ int main(int argc, const char** argv) {
     config.set_compaction_interval(1800 * kMicrosPerSecond);
     config.set_partitioner(tsdb::TIME_WINDOW);
     config.set_partition_window(3600 * 4 * kMicrosPerSecond);
-    tsdb_node.configurePrefix(config);
+    tsdb_node.configurePrefix("dawanda", config);
   }
 
   {
@@ -163,7 +163,7 @@ int main(int argc, const char** argv) {
     config.set_compaction_interval(10 * kMicrosPerSecond);
     config.set_partitioner(tsdb::TIME_WINDOW);
     config.set_partition_window(600 * kMicrosPerSecond);
-    tsdb_node.configurePrefix(config);
+    tsdb_node.configurePrefix("dawanda", config);
   }
 
   {
@@ -173,7 +173,7 @@ int main(int argc, const char** argv) {
     config.set_compaction_interval(10 * kMicrosPerSecond);
     config.set_partitioner(tsdb::TIME_WINDOW);
     config.set_partition_window(600 * kMicrosPerSecond);
-    tsdb_node.configurePrefix(config);
+    tsdb_node.configurePrefix("dawanda", config);
   }
 
   tsdb::TSDBServlet tsdb_servlet(&tsdb_node);
