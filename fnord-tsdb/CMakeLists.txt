@@ -23,6 +23,7 @@ add_library(fnord-tsdb OBJECT
     RecordSet.cc
     StreamChunk.cc
     CSTableIndex.cc
+    TimeWindowPartitioner.cc
     ${PROTO_SRCS})
 
 add_executable(tests/test-recordset
