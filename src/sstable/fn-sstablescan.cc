@@ -9,10 +9,10 @@
  */
 #include <stdlib.h>
 #include <unistd.h>
-#include "fnord-base/application.h"
-#include "fnord-base/cli/flagparser.h"
-#include "fnord-base/logging.h"
-#include "fnord-base/inspect.h"
+#include "fnord/application.h"
+#include "fnord/cli/flagparser.h"
+#include "fnord/logging.h"
+#include "fnord/inspect.h"
 #include "fnord-sstable/sstablereader.h"
 #include "fnord-sstable/SSTableScan.h"
 

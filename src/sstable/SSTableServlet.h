@@ -9,9 +9,9 @@
  */
 #ifndef _FNORD_SSTABLE_SSTABLESERVLET_H
 #define _FNORD_SSTABLE_SSTABLESERVLET_H
-#include "fnord-base/VFS.h"
-#include "fnord-http/httpservice.h"
-#include "fnord-json/json.h"
+#include "fnord/VFS.h"
+#include "fnord/http/httpservice.h"
+#include "fnord/json/json.h"
 
 namespace fnord {
 namespace sstable {

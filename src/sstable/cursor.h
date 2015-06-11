@@ -13,7 +13,7 @@
 #include <string>
 #include <vector>
 #include <memory>
-#include "fnord-base/buffer.h"
+#include "fnord/buffer.h"
 
 namespace fnord {
 namespace sstable {
