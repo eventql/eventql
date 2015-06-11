@@ -10,6 +10,7 @@
 #ifndef _FNORD_DHT_REPLICATIONSCHEME_H
 #define _FNORD_DHT_REPLICATIONSCHEME_H
 #include <fnord-base/stdtypes.h>
+#include <fnord-base/SHA1.h>
 #include <fnord-base/autoref.h>
 #include <fnord-base/random.h>
 #include <fnord-base/option.h>
@@ -26,6 +27,7 @@ class ReplicationScheme : public RefCounted {
 public:
   virtual ~ReplicationScheme() {}
   virtual Vector<ReplicaRef> replicasFor(const String& key) = 0;
+  virtual Vector<ReplicaRef> replicasFor(const SHA1Hash& key);
   virtual bool keepLocalReplicaFor(const String& key) = 0;
 };
 
