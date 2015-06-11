@@ -12,6 +12,7 @@
 #include <fnord-tsdb/TSDBClient.h>
 #include <fnord-tsdb/TSDBTableScanlet.h>
 #include <fnord-tsdb/TSDBTableScanMapperParams.pb.h>
+#include <fnord-msg/MessageSchema.h>
 #include <fnord-dproc/Task.h>
 
 using namespace fnord;
@@ -27,6 +28,7 @@ public:
       const String& name,
       const TSDBTableScanSpec& params,
       RefPtr<ScanletType> scanlet,
+      msg::MessageSchemaRepository* repo,
       TSDBClient* tsdb);
 
   void compute(dproc::TaskContext* context);
@@ -41,9 +43,13 @@ protected:
 
   void onRow(const Buffer& row);
 
+  void scanWithoutIndex(dproc::TaskContext* context);
+  void scanWithCSTableIndex(dproc::TaskContext* context);
+
   TSDBTableScanSpec params_;
   RefPtr<ScanletType> scanlet_;
   ResultType result_;
+  RefPtr<msg::MessageSchema> schema_;
   TSDBClient* tsdb_;
 };
 

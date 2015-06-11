@@ -17,10 +17,12 @@ template <typename ScanletType>
 RefPtr<dproc::Task> TSDBTableScan<ScanletType>::mkTask(
     const String& name,
     const Buffer& params,
-      TSDBClient* tsdb) {
+    msg::MessageSchemaRepository* repo,
+    TSDBClient* tsdb) {
   return mkTask(
       name,
       msg::decode<TSDBTableScanSpec>(params),
+      repo,
       tsdb);
 }
 
@@ -28,7 +30,8 @@ template <typename ScanletType>
 RefPtr<dproc::Task> TSDBTableScan<ScanletType>::mkTask(
     const String& name,
     const TSDBTableScanSpec& params,
-      TSDBClient* tsdb) {
+    msg::MessageSchemaRepository* repo,
+    TSDBClient* tsdb) {
   auto scanlet_params = msg::decode<typename ScanletType::ParamType>(
       params.scanlet_params().data(),
       params.scanlet_params().size());
@@ -40,6 +43,7 @@ RefPtr<dproc::Task> TSDBTableScan<ScanletType>::mkTask(
           name,
           params,
           new ScanletType(scanlet_params),
+          repo,
           tsdb);
 
     case TSDB_OP_MERGE:
