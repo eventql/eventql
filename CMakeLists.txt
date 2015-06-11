@@ -45,6 +45,12 @@ include_directories(${SENSORD_INCLUDE})
 
 add_subdirectory(app/tsdb)
 include_directories(${TSDB_INCLUDE})
+
+add_subdirectory(app/inventoryd)
+include_directories(${INVENTORYD_INCLUDE})
+
+add_subdirectory(app/logjoind)
+include_directories(${LOGJOIND_INCLUDE})
 #
 #add_subdirectory(3rdparty/brokerd)
 #include_directories(${BROKERD_INCLUDE})

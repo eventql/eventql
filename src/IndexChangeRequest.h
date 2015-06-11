@@ -17,7 +17,7 @@
 #include <fnord/datetime.h>
 #include <fnord/uri.h>
 #include <fnord/reflect/reflect.h>
-#include "ItemRef.h"
+#include <inventory/ItemRef.h>
 #include "IndexChangeRequest.pb.h"
 
 using namespace fnord;

@@ -15,7 +15,7 @@
 #include "fnord/mdb/MDB.h"
 #include "fnord/stats/stats.h"
 #include "fnord/json/json.h"
-#include "ItemRef.h"
+#include <inventory/ItemRef.h>
 #include "JoinedItemVisit.h"
 #include "FeatureIndex.h"
 
