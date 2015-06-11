@@ -11,8 +11,8 @@
 #include "fnord/logging.h"
 #include "fnord/io/fileutil.h"
 #include "fnord/json/json.h"
-#include "fnord-sstable/sstablereader.h"
-#include "fnord-sstable/sstablerepair.h"
+#include "sstable/sstablereader.h"
+#include "sstable/sstablerepair.h"
 #include "fnord-feeds/FeedService.h"
 
 namespace fnord {

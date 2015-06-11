@@ -22,7 +22,7 @@ add_executable(brokerd
     $<TARGET_OBJECTS:fnord-http>
     $<TARGET_OBJECTS:fnord-mdb>
     $<TARGET_OBJECTS:fnord-json>
-    $<TARGET_OBJECTS:fnord-sstable>
+    $<TARGET_OBJECTS:sstable>
     $<TARGET_OBJECTS:fnord-feeds>
     $<TARGET_OBJECTS:fnord-rpc>
     BrokerServlet.cc
@@ -35,7 +35,7 @@ add_executable(brokerctl
     $<TARGET_OBJECTS:fnord-http>
     $<TARGET_OBJECTS:fnord-mdb>
     $<TARGET_OBJECTS:fnord-json>
-    $<TARGET_OBJECTS:fnord-sstable>
+    $<TARGET_OBJECTS:sstable>
     $<TARGET_OBJECTS:fnord-feeds>
     $<TARGET_OBJECTS:fnord-rpc>
     brokerctl.cc)
@@ -47,7 +47,7 @@ target_link_libraries(brokerctl ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_LIBS})
 #    $<TARGET_OBJECTS:fnord-feeds>
 #    $<TARGET_OBJECTS:fnord-http>
 #    $<TARGET_OBJECTS:fnord-json>
-#    $<TARGET_OBJECTS:fnord-sstable>
+#    $<TARGET_OBJECTS:sstable>
 #    feeds_example.cc)
 #
 #add_executable(tests/test-logstream-service
@@ -55,6 +55,6 @@ target_link_libraries(brokerctl ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_LIBS})
 #    $<TARGET_OBJECTS:fnord-feeds>
 #    $<TARGET_OBJECTS:fnord-http>
 #    $<TARGET_OBJECTS:fnord-json>
-#    $<TARGET_OBJECTS:fnord-sstable>
+#    $<TARGET_OBJECTS:sstable>
 #    feeds_test.cc)
 #

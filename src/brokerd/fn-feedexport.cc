@@ -29,7 +29,7 @@
 #include "fnord-feeds/RemoteFeedFactory.h"
 #include "fnord-feeds/RemoteFeedReader.h"
 #include "fnord/stats/statsdagent.h"
-#include "fnord-sstable/sstablereader.h"
+#include "sstable/sstablereader.h"
 #include "fnord/mdb/MDB.h"
 #include "CustomerNamespace.h"
 #include "logjoin/LogJoin.h"
