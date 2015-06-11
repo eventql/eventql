@@ -1,0 +1,55 @@
+/**
+ * This file is part of the "libfnord" project
+ *   Copyright (c) 2015 Paul Asmuth
+ *
+ * FnordMetric is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License v3.0. You should have received a
+ * copy of the GNU General Public License along with this program. If not, see
+ * <http://www.gnu.org/licenses/>.
+ */
+#ifdef TRASH
+#include <fnord-msg/MessageSchema.h>
+#include <fnord-base/stdtypes.h>
+#include <fnord-base/buffer.h>
+#include <fnord-base/util/binarymessagewriter.h>
+
+namespace fnord {
+namespace msg {
+
+class MessageBuilder {
+public:
+
+  void setUInt32(const String path, uint32_t value);
+  void setString(const String path, const String& value);
+  void setBool(const String path, bool value);
+
+  void encode(const MessageSchema& schema, Buffer* buf);
+
+  size_t countRepetitions(const String& path) const;
+  bool isSet(const String& path) const;
+
+protected:
+  struct FieldValue {
+    FieldType type;
+    Buffer value;
+  };
+
+  void encodeField(
+      const String& prefix,
+      const MessageSchemaField& field,
+      util::BinaryMessageWriter* buf);
+
+  void encodeSingleField(
+      const String& path,
+      const MessageSchemaField& field,
+      util::BinaryMessageWriter* buf);
+
+
+  MessageSchema* schema_;
+  HashMap<String, FieldValue> fields_;
+};
+
+} // namespace msg
+} // namespace fnord
+
+#endif
