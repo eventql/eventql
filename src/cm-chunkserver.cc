@@ -32,7 +32,7 @@
 #include "fnord-feeds/RemoteFeedFactory.h"
 #include "fnord-feeds/RemoteFeedReader.h"
 #include "fnord/stats/statsdagent.h"
-#include "fnord-sstable/SSTableServlet.h"
+#include "sstable/SSTableServlet.h"
 #include "fnord-logtable/LogTableServlet.h"
 #include "fnord-logtable/TableRepository.h"
 #include "fnord-logtable/TableJanitor.h"

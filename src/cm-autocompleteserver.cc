@@ -31,7 +31,7 @@
 #include "fnord-feeds/RemoteFeedFactory.h"
 #include "fnord-feeds/RemoteFeedReader.h"
 #include "fnord/stats/statsdagent.h"
-#include "fnord-sstable/SSTableServlet.h"
+#include "sstable/SSTableServlet.h"
 #include "fnord/mdb/MDB.h"
 #include "fnord/mdb/MDBUtil.h"
 #include "common.h"
