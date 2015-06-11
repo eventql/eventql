@@ -8,8 +8,14 @@
  */
 package cm;
 
+message ShopProductStatsProduct {
+  required string product_id = 1;
+}
+
 message ShopProductStats {
   optional uint64 total_product_page_impressions = 1;
+
+  repeated ShopProductStatsProduct products = 2;
 }
 
 
