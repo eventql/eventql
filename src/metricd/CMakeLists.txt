@@ -74,5 +74,5 @@ add_executable(metricd
     $<TARGET_OBJECTS:sensord-client>
     metricd.cc)
 
-target_link_libraries(metricd ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_LIBS})
+target_link_libraries(metricd ${CMAKE_THREAD_LIBS_INIT} ${FNORD_LIBS})
 
