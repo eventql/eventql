@@ -12,7 +12,7 @@
 #include <fnord-base/stdtypes.h>
 #include <fnord-base/util/binarymessagewriter.h>
 #include <fnord-base/util/BitPackEncoder.h>
-#include <fnord-cstable/ColumnWriter.h>
+#include <cstable/ColumnWriter.h>
 
 namespace fnord {
 namespace cstable {

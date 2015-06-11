@@ -13,8 +13,8 @@
 #include <fnord-base/io/file.h>
 #include <fnord-base/util/binarymessagewriter.h>
 #include <fnord-base/autoref.h>
-#include <fnord-cstable/ColumnWriter.h>
-#include <fnord-cstable/CSTableWriter.h>
+#include <cstable/ColumnWriter.h>
+#include <cstable/CSTableWriter.h>
 #include <fnord-msg/MessageSchema.h>
 #include <fnord-msg/MessageObject.h>
 

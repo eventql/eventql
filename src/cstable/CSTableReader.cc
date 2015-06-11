@@ -8,13 +8,13 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <fnord-base/util/binarymessagereader.h>
-#include <fnord-cstable/CSTableReader.h>
-#include <fnord-cstable/BooleanColumnReader.h>
-#include <fnord-cstable/BitPackedIntColumnReader.h>
-#include <fnord-cstable/UInt32ColumnReader.h>
-#include <fnord-cstable/UInt64ColumnReader.h>
-#include <fnord-cstable/LEB128ColumnReader.h>
-#include <fnord-cstable/StringColumnReader.h>
+#include <cstable/CSTableReader.h>
+#include <cstable/BooleanColumnReader.h>
+#include <cstable/BitPackedIntColumnReader.h>
+#include <cstable/UInt32ColumnReader.h>
+#include <cstable/UInt64ColumnReader.h>
+#include <cstable/LEB128ColumnReader.h>
+#include <cstable/StringColumnReader.h>
 
 namespace fnord {
 namespace cstable {

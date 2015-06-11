@@ -12,8 +12,8 @@
 #include <fnord-base/stdtypes.h>
 #include <fnord-base/io/file.h>
 #include <fnord-base/io/mmappedfile.h>
-#include <fnord-cstable/BinaryFormat.h>
-#include <fnord-cstable/ColumnReader.h>
+#include <cstable/BinaryFormat.h>
+#include <cstable/ColumnReader.h>
 
 namespace fnord {
 namespace cstable {

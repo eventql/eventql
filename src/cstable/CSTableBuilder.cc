@@ -8,14 +8,14 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include "fnord-base/io/fileutil.h"
-#include <fnord-cstable/CSTableBuilder.h>
-#include <fnord-cstable/CSTableWriter.h>
-#include "fnord-cstable/BitPackedIntColumnWriter.h"
-#include "fnord-cstable/UInt32ColumnWriter.h"
-#include "fnord-cstable/UInt64ColumnWriter.h"
-#include "fnord-cstable/LEB128ColumnWriter.h"
-#include "fnord-cstable/StringColumnWriter.h"
-#include "fnord-cstable/BooleanColumnWriter.h"
+#include <cstable/CSTableBuilder.h>
+#include <cstable/CSTableWriter.h>
+#include "cstable/BitPackedIntColumnWriter.h"
+#include "cstable/UInt32ColumnWriter.h"
+#include "cstable/UInt64ColumnWriter.h"
+#include "cstable/LEB128ColumnWriter.h"
+#include "cstable/StringColumnWriter.h"
+#include "cstable/BooleanColumnWriter.h"
 
 namespace fnord {
 namespace cstable {

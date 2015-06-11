@@ -25,7 +25,7 @@ else()
 endif()
 
 # sstable
-add_library(fnord-cstable OBJECT
+add_library(cstable OBJECT
     CSTableBuilder.cc
     CSTableReader.cc
     CSTableWriter.cc
@@ -47,7 +47,7 @@ add_library(fnord-cstable OBJECT
 add_executable(tests/test-recordmaterializer
     $<TARGET_OBJECTS:fnord-base>
     $<TARGET_OBJECTS:fnord-protobuf>
-    $<TARGET_OBJECTS:fnord-cstable>
+    $<TARGET_OBJECTS:cstable>
     RecordMaterializer_test.cc)
 
 target_link_libraries(

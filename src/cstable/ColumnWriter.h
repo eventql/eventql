@@ -14,7 +14,7 @@
 #include <fnord-base/autoref.h>
 #include <fnord-base/util/binarymessagewriter.h>
 #include <fnord-base/util/BitPackEncoder.h>
-#include <fnord-cstable/BinaryFormat.h>
+#include <cstable/BinaryFormat.h>
 
 namespace fnord {
 namespace cstable {

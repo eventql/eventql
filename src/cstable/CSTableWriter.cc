@@ -8,7 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <fnord-base/buffer.h>
-#include <fnord-cstable/CSTableWriter.h>
+#include <cstable/CSTableWriter.h>
 
 namespace fnord {
 namespace cstable {
