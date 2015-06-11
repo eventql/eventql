@@ -12,6 +12,7 @@
 #include <fnord-cstable/CSTableWriter.h>
 #include "fnord-cstable/BitPackedIntColumnWriter.h"
 #include "fnord-cstable/UInt32ColumnWriter.h"
+#include "fnord-cstable/UInt64ColumnWriter.h"
 #include "fnord-cstable/LEB128ColumnWriter.h"
 #include "fnord-cstable/StringColumnWriter.h"
 #include "fnord-cstable/BooleanColumnWriter.h"
@@ -66,6 +67,24 @@ void CSTableBuilder::createColumns(
             new cstable::UInt32ColumnWriter(r_max, d_max));
       }
       break;
+
+    case msg::FieldType::UINT64:
+      if (field.encoding == msg::EncodingHint::BITPACK) {
+        columns_.emplace(
+            colname,
+            new cstable::BitPackedIntColumnWriter(r_max, d_max, typesize));
+      } else if (field.encoding == msg::EncodingHint::BITPACK) {
+        columns_.emplace(
+            colname,
+            new cstable::LEB128ColumnWriter(r_max, d_max));
+      } else {
+        columns_.emplace(
+            colname,
+            new cstable::UInt64ColumnWriter(r_max, d_max));
+      }
+      break;
+
+
 
     case msg::FieldType::STRING:
       columns_.emplace(
@@ -188,6 +207,12 @@ void CSTableBuilder::writeField(
 
     case msg::FieldType::UINT32: {
       uint32_t val = msg.asUInt32();
+      col->second->addDatum(r, d, &val, sizeof(val));
+      break;
+    }
+
+    case msg::FieldType::UINT64: {
+      uint64_t val = msg.asUInt64();
       col->second->addDatum(r, d, &val, sizeof(val));
       break;
     }
