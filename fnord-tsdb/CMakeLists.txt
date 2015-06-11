@@ -34,6 +34,7 @@ add_executable(tests/test-recordset
     $<TARGET_OBJECTS:fnord-sstable>
     $<TARGET_OBJECTS:fnord-http>
     $<TARGET_OBJECTS:fnord-json>
+    $<TARGET_OBJECTS:fnord-dproc>
     RecordSet_test.cc)
 
 target_link_libraries(tests/test-recordset ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_LIBS})
@@ -47,6 +48,7 @@ add_executable(tests/test-tsdbnode
     $<TARGET_OBJECTS:fnord-sstable>
     $<TARGET_OBJECTS:fnord-http>
     $<TARGET_OBJECTS:fnord-json>
+    $<TARGET_OBJECTS:fnord-dproc>
     TSDBNode_test.cc)
 
 target_link_libraries(tests/test-tsdbnode ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_LIBS})
@@ -60,6 +62,7 @@ add_executable(tests/test-streamchunk
     $<TARGET_OBJECTS:fnord-sstable>
     $<TARGET_OBJECTS:fnord-http>
     $<TARGET_OBJECTS:fnord-json>
+    $<TARGET_OBJECTS:fnord-dproc>
     StreamChunk_test.cc)
 
 target_link_libraries(tests/test-streamchunk ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_LIBS})
