@@ -11,8 +11,8 @@
 #include <fnord/io/mmappedfile.h>
 #include <fnord/util/binarymessagereader.h>
 #include <fnord/util/binarymessagewriter.h>
-#include <fnord-sstable/sstablewriter.h>
-#include <fnord-sstable/sstablereader.h>
+#include <sstable/sstablewriter.h>
+#include <sstable/sstablereader.h>
 #include <fnord-tsdb/RecordSet.h>
 
 using namespace fnord;
