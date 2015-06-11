@@ -45,46 +45,6 @@ RefPtr<StreamChunk> StreamChunk::reopen(
           node));
 }
 
-//String StreamChunk::streamChunkKeyFor(
-//    const String& stream_key,
-//    DateTime time,
-//    Duration partition_size) {
-//  util::BinaryMessageWriter buf(stream_key.size() + 32);
-//
-//  auto cs = partition_size.microseconds();
-//  auto ts = (time.unixMicros() / cs) * cs / kMicrosPerSecond;
-//
-//  buf.append(stream_key.data(), stream_key.size());
-//  buf.appendUInt8(27);
-//  buf.appendVarUInt(ts);
-//
-//  return String((char *) buf.data(), buf.size());
-//}
-//
-//String StreamChunk::streamChunkKeyFor(
-//    const String& stream_key,
-//    DateTime time,
-//    const StreamConfig& config) {
-//  return streamChunkKeyFor(stream_key, time, config.partition_window());
-//}
-//
-//Vector<String> StreamChunk::streamChunkKeysFor(
-//    const String& stream_key,
-//    DateTime from,
-//    DateTime until,
-//    const StreamConfig& config) {
-//  auto cs = config.partition_window();
-//  auto first_chunk = (from.unixMicros() / cs) * cs;
-//  auto last_chunk = (until.unixMicros() / cs) * cs;
-//
-//  Vector<String> res;
-//  for (auto t = first_chunk; t <= last_chunk; t += cs) {
-//    res.emplace_back(streamChunkKeyFor(stream_key, t, config));
-//  }
-//
-//  return res;
-//}
-
 StreamChunk::StreamChunk(
     const SHA1Hash& partition_key,
     const String& stream_key,

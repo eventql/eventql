@@ -11,6 +11,8 @@
 #include <fnord-base/stdtypes.h>
 #include <fnord-base/option.h>
 #include <fnord-base/datetime.h>
+#include <fnord-base/duration.h>
+#include <fnord-base/SHA1.h>
 
 using namespace fnord;
 
