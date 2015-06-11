@@ -7,7 +7,7 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR}/../)
 file(GLOB PROTO_FILES *.proto)
 PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS ${PROTO_FILES})
 
-add_library(fnord-feeds OBJECT
+add_library(brokerd-client OBJECT
     BrokerClient.cc
     LocalFeed.cc
     RemoteFeed.cc
@@ -22,9 +22,9 @@ add_executable(brokerd
     $<TARGET_OBJECTS:fnord-http>
     $<TARGET_OBJECTS:fnord-mdb>
     $<TARGET_OBJECTS:fnord-json>
-    $<TARGET_OBJECTS:sstable>
-    $<TARGET_OBJECTS:fnord-feeds>
     $<TARGET_OBJECTS:fnord-rpc>
+    $<TARGET_OBJECTS:sstable>
+    $<TARGET_OBJECTS:brokerd-client>
     BrokerServlet.cc
     brokerd.cc)
 
@@ -35,9 +35,9 @@ add_executable(brokerctl
     $<TARGET_OBJECTS:fnord-http>
     $<TARGET_OBJECTS:fnord-mdb>
     $<TARGET_OBJECTS:fnord-json>
-    $<TARGET_OBJECTS:sstable>
-    $<TARGET_OBJECTS:fnord-feeds>
     $<TARGET_OBJECTS:fnord-rpc>
+    $<TARGET_OBJECTS:sstable>
+    $<TARGET_OBJECTS:brokerd-client>
     brokerctl.cc)
 
 target_link_libraries(brokerctl ${CMAKE_THREAD_LIBS_INIT} ${FNORD_LIBS})
