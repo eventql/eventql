@@ -27,6 +27,7 @@ set(MODULE_INCLUDE
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty
     ${CMAKE_CURRENT_BINARY_DIR}/src
+    ${CMAKE_CURRENT_BINARY_DIR}/src/fnord/protobuf
     ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 include_directories(${MODULE_INCLUDE})
