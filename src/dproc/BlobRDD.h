@@ -9,7 +9,7 @@
  */
 #pragma once
 #include <fnord-base/stdtypes.h>
-#include <fnord-dproc/Task.h>
+#include <dproc/Task.h>
 
 namespace fnord {
 namespace dproc {

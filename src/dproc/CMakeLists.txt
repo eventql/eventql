@@ -14,7 +14,7 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR}/../)
 file(GLOB PROTO_FILES *.proto)
 PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS ${PROTO_FILES})
 
-add_library(fnord-dproc OBJECT
+add_library(dproc OBJECT
     Application.cc
     DispatchService.cc
     TaskSpec.pb.cc
