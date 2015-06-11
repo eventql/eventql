@@ -9,7 +9,7 @@
  */
 #ifndef _FNORD_SCHEDULER_H
 #define _FNORD_SCHEDULER_H
-#include "fnord-base/stdtypes.h"
+#include "fnord/stdtypes.h"
 #include <dproc/Application.h>
 #include <dproc/TaskSpec.pb.h>
 #include <dproc/TaskResultFuture.h>

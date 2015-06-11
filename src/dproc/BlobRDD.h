@@ -8,7 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #pragma once
-#include <fnord-base/stdtypes.h>
+#include <fnord/stdtypes.h>
 #include <dproc/Task.h>
 
 namespace fnord {

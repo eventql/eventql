@@ -8,13 +8,13 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <unistd.h>
-#include <fnord-base/io/file.h>
-#include <fnord-base/io/fileutil.h>
-#include <fnord-base/io/mmappedfile.h>
-#include <fnord-base/logging.h>
-#include <fnord-base/io/fileutil.h>
-#include <fnord-base/util/binarymessagereader.h>
-#include <fnord-base/util/binarymessagewriter.h>
+#include <fnord/io/file.h>
+#include <fnord/io/fileutil.h>
+#include <fnord/io/mmappedfile.h>
+#include <fnord/logging.h>
+#include <fnord/io/fileutil.h>
+#include <fnord/util/binarymessagereader.h>
+#include <fnord/util/binarymessagewriter.h>
 #include <dproc/LocalScheduler.h>
 
 namespace fnord {

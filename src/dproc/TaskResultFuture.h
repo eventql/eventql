@@ -9,7 +9,7 @@
  */
 #ifndef _FNORD_DPROC_TASKRESULT_H
 #define _FNORD_DPROC_TASKRESULT_H
-#include <fnord-base/stdtypes.h>
+#include <fnord/stdtypes.h>
 #include <dproc/Task.h>
 
 namespace fnord {
