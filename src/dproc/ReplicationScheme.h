@@ -9,14 +9,15 @@
  */
 #ifndef _FNORD_DHT_REPLICATIONSCHEME_H
 #define _FNORD_DHT_REPLICATIONSCHEME_H
-#include <fnord-base/stdtypes.h>
-#include <fnord-base/SHA1.h>
-#include <fnord-base/autoref.h>
-#include <fnord-base/random.h>
-#include <fnord-base/option.h>
+#include <fnord/stdtypes.h>
+#include <fnord/SHA1.h>
+#include <fnord/autoref.h>
+#include <fnord/random.h>
+#include <fnord/option.h>
 
-namespace fnord {
-namespace dht {
+using namespace fnord;
+
+namespace dproc {
 
 struct ReplicaRef {
   uint64_t unique_id;
@@ -56,7 +57,6 @@ protected:
 };
 
 
-} // namespace dht
-} // namespace fnord
+} // namespace dproc
 
 #endif
