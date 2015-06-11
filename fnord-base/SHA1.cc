@@ -12,12 +12,28 @@
 
 namespace fnord {
 
+SHA1Hash::SHA1Hash() {
+  memset(hash, 0,sizeof(hash));
+}
+
+SHA1Hash::SHA1Hash(DeferInitialization) {
+  /* initialize nothing, this ctor is private and can only be called by SHA1 */
+}
+
+SHA1Hash::SHA1Hash(const void* data, size_t size) {
+  if (size != sizeof(hash)) {
+    RAISE(kRuntimeError, "invalid SHA1Hash");
+  }
+
+  memcpy(&hash, data, sizeof(hash));
+}
+
 String SHA1Hash::toString() const {
   return StringUtil::hexPrint(hash, sizeof(hash), false);
 }
 
 SHA1Hash SHA1::compute(const Buffer& data) {
-  SHA1Hash hash;
+  SHA1Hash hash(SHA1Hash::DeferInitialization{});
   compute(data.data(), data.size(), &hash);
   return hash;
 }
@@ -27,7 +43,7 @@ void SHA1::compute(const Buffer& data, SHA1Hash* out) {
 }
 
 SHA1Hash SHA1::compute(const String& data) {
-  SHA1Hash hash;
+  SHA1Hash hash(SHA1Hash::DeferInitialization{});
   compute(data.data(), data.size(), &hash);
   return hash;
 }
@@ -37,7 +53,7 @@ void SHA1::compute(const String& data, SHA1Hash* out) {
 }
 
 SHA1Hash SHA1::compute(const void* data, size_t size) {
-  SHA1Hash hash;
+  SHA1Hash hash(SHA1Hash::DeferInitialization{});
   compute(data, size, &hash);
   return hash;
 }
