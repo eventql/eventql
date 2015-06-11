@@ -23,5 +23,6 @@ message TSDBTableScanSpec {
   optional uint64 until = 4;
   optional bytes scanlet_params = 5;
   optional bool use_cstable_index = 8;
+  optional string version = 9;
 }
 
