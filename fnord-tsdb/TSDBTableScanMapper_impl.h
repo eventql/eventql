@@ -8,6 +8,10 @@
  * <http://www.gnu.org/licenses/>.
  */
 #pragma once
+#include <fnord-tsdb/CSTableIndex.h>
+#include <fnord-cstable/CSTableReader.h>
+#include <fnord-cstable/RecordMaterializer.h>
+#include <fnord-msg/MessageEncoder.h>
 
 using namespace fnord;
 
@@ -18,13 +22,25 @@ TSDBTableScanMapper<ScanletType>::TSDBTableScanMapper(
       const String& name,
       const TSDBTableScanSpec& params,
       RefPtr<ScanletType> scanlet,
+      msg::MessageSchemaRepository* repo,
       TSDBClient* tsdb) :
       params_(params),
       scanlet_(scanlet),
+      schema_(repo->getSchema(params.schema_name())),
       tsdb_(tsdb) {}
 
 template <typename ScanletType>
 void TSDBTableScanMapper<ScanletType>::compute(dproc::TaskContext* context) {
+  if (params_.use_cstable_index()) {
+    scanWithCSTableIndex(context);
+  } else {
+    scanWithoutIndex(context);
+  }
+}
+
+template <typename ScanletType>
+void TSDBTableScanMapper<ScanletType>::scanWithoutIndex(
+    dproc::TaskContext* context) {
   tsdb_->fetchPartition(
       params_.stream_key(),
       params_.partition_key(),
@@ -32,6 +48,27 @@ void TSDBTableScanMapper<ScanletType>::compute(dproc::TaskContext* context) {
           &TSDBTableScanMapper<ScanletType>::onRow,
           this,
           std::placeholders::_1));
+}
+
+template <typename ScanletType>
+void TSDBTableScanMapper<ScanletType>::scanWithCSTableIndex(
+    dproc::TaskContext* context) {
+  // FIXPAUL use getDepedencyResult
+  auto dep = context->getDependency(0).asInstanceOf<CSTableIndex>();
+  auto data = dep->encode();
+
+  cstable::CSTableReader reader(data);
+  cstable::RecordMaterializer materializer(schema_.get(), &reader);
+
+  auto rec_count = reader.numRecords();
+  // FIXPAUL soooo sloooooowww
+  for (size_t i = 0; i < rec_count; ++i) {
+    msg::MessageObject robj;
+    materializer.nextRecord(&robj);
+    Buffer buf;
+    msg::MessageEncoder::encode(robj, *schema_, &buf);
+    onRow(buf);
+  }
 }
 
 template <typename ScanletType>
@@ -45,6 +82,14 @@ template <typename ScanletType>
 List<dproc::TaskDependency> TSDBTableScanMapper<ScanletType>::dependencies()
     const {
   List<dproc::TaskDependency> deps;
+
+  if (params_.use_cstable_index()) {
+    deps.emplace_back(dproc::TaskDependency {
+      .task_name = "CSTableIndex",
+      .params = *msg::encode(params_)
+    });
+  }
+
   return deps;
 }
 

@@ -24,11 +24,13 @@ struct TSDBTableScan {
   static RefPtr<dproc::Task> mkTask(
       const String& name,
       const Buffer& params,
+      msg::MessageSchemaRepository* repo,
       TSDBClient* tsdb);
 
   static RefPtr<dproc::Task> mkTask(
       const String& name,
       const TSDBTableScanSpec& params,
+      msg::MessageSchemaRepository* repo,
       TSDBClient* tsdb);
 
 };
