@@ -62,18 +62,18 @@ List<dproc::TaskDependency> TSDBTableScanReducer<ScanletType>::dependencies()
 
 template <typename ScanletType>
 RefPtr<VFSFile> TSDBTableScanReducer<ScanletType>::encode() const {
-  return msg::encode(result_).get();
+  return msg::encode(*scanlet_->result()).get();
 }
 
 template <typename ScanletType>
 void TSDBTableScanReducer<ScanletType>::decode(RefPtr<VFSFile> data) {
-  msg::decode(data->data(), data->size(), &result_);
+  msg::decode(data->data(), data->size(), scanlet_->result());
 }
 
 template <typename ScanletType>
 typename TSDBTableScanReducer<ScanletType>::ResultType*
     TSDBTableScanReducer<ScanletType>::result() {
-  return &result_;
+  return scanlet_->result();
 }
 
 } // namespace tsdb

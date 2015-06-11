@@ -48,7 +48,6 @@ protected:
 
   TSDBTableScanSpec params_;
   RefPtr<ScanletType> scanlet_;
-  ResultType result_;
   RefPtr<msg::MessageSchema> schema_;
   TSDBClient* tsdb_;
 };
