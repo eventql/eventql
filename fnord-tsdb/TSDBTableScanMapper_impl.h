@@ -98,18 +98,18 @@ List<dproc::TaskDependency> TSDBTableScanMapper<ScanletType>::dependencies()
 
 template <typename ScanletType>
 RefPtr<VFSFile> TSDBTableScanMapper<ScanletType>::encode() const {
-  return msg::encode(result_).get();
+  return msg::encode(*scanlet_->result()).get();
 }
 
 template <typename ScanletType>
 void TSDBTableScanMapper<ScanletType>::decode(RefPtr<VFSFile> data) {
-  msg::decode(data->data(), data->size(), &result_);
+  msg::decode(data->data(), data->size(), scanlet_->result());
 }
 
 template <typename ScanletType>
 typename TSDBTableScanMapper<ScanletType>::ResultType*
     TSDBTableScanMapper<ScanletType>::result() {
-  return &result_;
+  return scanlet_->result();
 }
 
 } // namespace tsdb

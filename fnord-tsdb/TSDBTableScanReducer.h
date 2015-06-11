@@ -41,7 +41,6 @@ protected:
   String name_;
   TSDBTableScanSpec params_;
   RefPtr<ScanletType> scanlet_;
-  ResultType result_;
   TSDBClient* tsdb_;
 };
 
