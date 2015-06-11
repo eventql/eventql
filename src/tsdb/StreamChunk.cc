@@ -8,12 +8,12 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <fnord-tsdb/StreamChunk.h>
-#include <fnord-base/io/fileutil.h>
-#include <fnord-base/uri.h>
-#include <fnord-base/util/binarymessagewriter.h>
-#include <fnord-base/wallclock.h>
-#include <fnord-msg/MessageEncoder.h>
-#include <fnord-msg/msg.h>
+#include <fnord/io/fileutil.h>
+#include <fnord/uri.h>
+#include <fnord/util/binarymessagewriter.h>
+#include <fnord/wallclock.h>
+#include <fnord/protobuf/MessageEncoder.h>
+#include <fnord/protobuf/msg.h>
 
 using namespace fnord;
 

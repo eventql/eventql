@@ -9,11 +9,11 @@
  */
 #ifndef _FNORD_TSDB_DERIVEDDATASET_H
 #define _FNORD_TSDB_DERIVEDDATASET_H
-#include <fnord-base/stdtypes.h>
-#include <fnord-base/option.h>
-#include <fnord-base/autoref.h>
-#include <fnord-base/util/binarymessagereader.h>
-#include <fnord-base/util/binarymessagewriter.h>
+#include <fnord/stdtypes.h>
+#include <fnord/option.h>
+#include <fnord/autoref.h>
+#include <fnord/util/binarymessagereader.h>
+#include <fnord/util/binarymessagewriter.h>
 
 using namespace fnord;
 

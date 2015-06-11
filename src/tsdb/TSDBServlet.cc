@@ -7,16 +7,16 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include "fnord-base/util/binarymessagewriter.h"
+#include "fnord/util/binarymessagewriter.h"
 #include "fnord-tsdb/TSDBServlet.h"
 #include "fnord-tsdb/RecordEnvelope.pb.h"
-#include "fnord-json/json.h"
-#include <fnord-base/wallclock.h>
-#include <fnord-base/thread/wakeup.h>
-#include "fnord-msg/MessageEncoder.h"
-#include "fnord-msg/MessagePrinter.h"
-#include "fnord-msg/msg.h"
-#include <fnord-base/util/Base64.h>
+#include "fnord/json/json.h"
+#include <fnord/wallclock.h>
+#include <fnord/thread/wakeup.h>
+#include "fnord/protobuf/MessageEncoder.h"
+#include "fnord/protobuf/MessagePrinter.h"
+#include "fnord/protobuf/msg.h"
+#include <fnord/util/Base64.h>
 #include <fnord-sstable/sstablereader.h>
 
 using namespace fnord;

@@ -9,16 +9,16 @@
  */
 #ifndef _FNORD_TSDB_TSDBNODEREF_H
 #define _FNORD_TSDB_TSDBNODEREF_H
-#include <fnord-base/stdtypes.h>
-#include <fnord-base/random.h>
-#include <fnord-base/option.h>
-#include <fnord-base/autoref.h>
-#include <fnord-base/thread/queue.h>
-#include <fnord-base/thread/DelayedQueue.h>
-#include <fnord-base/thread/CoalescingDelayedQueue.h>
+#include <fnord/stdtypes.h>
+#include <fnord/random.h>
+#include <fnord/option.h>
+#include <fnord/autoref.h>
+#include <fnord/thread/queue.h>
+#include <fnord/thread/DelayedQueue.h>
+#include <fnord/thread/CoalescingDelayedQueue.h>
 #include <fnord-mdb/MDB.h>
 #include <fnord-dht/ReplicationScheme.h>
-#include <fnord-http/httpconnectionpool.h>
+#include <fnord/http/httpconnectionpool.h>
 
 using namespace fnord;
 

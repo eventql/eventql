@@ -9,8 +9,8 @@
  */
 #ifndef _FNORD_TSDB_TSDBSERVLET_H
 #define _FNORD_TSDB_TSDBSERVLET_H
-#include "fnord-http/httpservice.h"
-#include <fnord-base/random.h>
+#include "fnord/http/httpservice.h"
+#include <fnord/random.h>
 #include <fnord-tsdb/TSDBNode.h>
 
 using namespace fnord;
