@@ -38,7 +38,6 @@ add_executable(tests/test-recordset
     $<TARGET_OBJECTS:dproc>
     RecordSet_test.cc)
 
-message(STATUS FNORD LIVS:  ${FNORD_LIBS})
 target_link_libraries(tests/test-recordset ${FNORD_LIBS})
 
 add_executable(tests/test-tsdbnode
