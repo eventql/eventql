@@ -14,7 +14,7 @@
 #include "fnord/protobuf/MessageEncoder.h"
 #include "fnord/protobuf/MessagePrinter.h"
 #include <fnord/util/Base64.h>
-#include "fnord-feeds/BrokerServlet.h"
+#include "brokerd/BrokerServlet.h"
 
 namespace fnord {
 namespace feeds {

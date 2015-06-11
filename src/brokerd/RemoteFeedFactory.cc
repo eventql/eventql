@@ -7,8 +7,8 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include "fnord-feeds/RemoteFeed.h"
-#include "fnord-feeds/RemoteFeedFactory.h"
+#include "brokerd/RemoteFeed.h"
+#include "brokerd/RemoteFeedFactory.h"
 
 namespace fnord {
 namespace feeds {

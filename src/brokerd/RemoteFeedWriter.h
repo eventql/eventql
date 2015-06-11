@@ -13,7 +13,7 @@
 #include "fnord/option.h"
 #include "fnord-rpc/RPC.h"
 #include "fnord-rpc/RPCClient.h"
-#include "fnord-feeds/FeedEntry.h"
+#include "brokerd/FeedEntry.h"
 
 namespace fnord {
 namespace feeds {

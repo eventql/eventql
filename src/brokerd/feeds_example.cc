@@ -15,7 +15,7 @@
 #include "fnord/io/fileutil.h"
 #include "fnord/json/jsonrpc.h"
 #include "fnord/json/jsonrpchttpadapter.h"
-#include "fnord-feeds/FeedService.h"
+#include "brokerd/FeedService.h"
 #include "fnord/thread/eventloop.h"
 #include "fnord/thread/threadpool.h"
 

@@ -7,10 +7,10 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include "fnord-feeds/RemoteFeedReader.h"
+#include "brokerd/RemoteFeedReader.h"
 #include "fnord/logging.h"
 #include "fnord/json/JSONRPCCodec.h"
-#include "fnord-feeds/FeedService.h"
+#include "brokerd/FeedService.h"
 
 namespace fnord {
 namespace feeds {

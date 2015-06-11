@@ -16,7 +16,7 @@
 #include <vector>
 #include <mutex>
 #include "fnord-rpc/RPC.h"
-#include "fnord-feeds/RemoteFeed.h"
+#include "brokerd/RemoteFeed.h"
 
 namespace fnord {
 namespace feeds {

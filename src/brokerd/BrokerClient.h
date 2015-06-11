@@ -11,8 +11,8 @@
 #define _FNORD_BROKER_BROKERCLIENT_H
 #include <fnord/stdtypes.h>
 #include <fnord/http/httpconnectionpool.h>
-#include <fnord-feeds/Message.pb.h>
-#include <fnord-feeds/TopicCursor.pb.h>
+#include <brokerd/Message.pb.h>
+#include <brokerd/TopicCursor.pb.h>
 
 namespace fnord {
 namespace feeds {

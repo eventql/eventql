@@ -7,7 +7,7 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <fnord-feeds/BrokerClient.h>
+#include <brokerd/BrokerClient.h>
 #include <fnord/protobuf/msg.h>
 
 namespace fnord {

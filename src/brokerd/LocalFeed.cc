@@ -12,8 +12,8 @@
 #include "fnord/logging.h"
 #include "fnord/json/json.h"
 #include "sstable/sstablereader.h"
-#include "fnord-feeds/LocalFeed.h"
-#include "fnord-feeds/FeedService.h"
+#include "brokerd/LocalFeed.h"
+#include "brokerd/FeedService.h"
 #include "fnord/stats/stats.h"
 #include "fnord/wallclock.h"
 
