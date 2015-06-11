@@ -17,7 +17,7 @@
 #include <fnord/http/httpconnectionpool.h>
 #include <dproc/Application.h>
 #include <dproc/LocalScheduler.h>
-#include <fnord-tsdb/TSDBClient.h>
+#include <tsdb/TSDBClient.h>
 #include "analytics/FeedExportApp.h"
 
 using namespace fnord;
