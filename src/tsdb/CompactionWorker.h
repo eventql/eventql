@@ -11,7 +11,7 @@
 #define _FNORD_TSDB_COMPACTIONWORKER_H
 #include <thread>
 #include <fnord/stdtypes.h>
-#include <fnord-tsdb/TSDBNodeRef.h>
+#include <tsdb/TSDBNodeRef.h>
 
 using namespace fnord;
 

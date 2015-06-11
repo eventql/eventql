@@ -11,8 +11,8 @@
 #include <stdio.h>
 #include <string.h>
 #include "fnord/test/unittest.h"
-#include "fnord-tsdb/StreamChunk.h"
-#include "fnord-tsdb/TimeWindowPartitioner.h"
+#include "tsdb/StreamChunk.h"
+#include "tsdb/TimeWindowPartitioner.h"
 
 using namespace fnord;
 using namespace tsdb;

@@ -9,8 +9,8 @@
  */
 #pragma once
 #include <fnord/stdtypes.h>
-#include <fnord-tsdb/TSDBTableScanSpec.pb.h>
-#include <fnord-tsdb/TSDBClient.h>
+#include <tsdb/TSDBTableScanSpec.pb.h>
+#include <tsdb/TSDBClient.h>
 #include <fnord/protobuf/MessageSchema.h>
 #include <fnord/random.h>
 #include <dproc/BlobRDD.h>

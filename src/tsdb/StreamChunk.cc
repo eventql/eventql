@@ -7,7 +7,7 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <fnord-tsdb/StreamChunk.h>
+#include <tsdb/StreamChunk.h>
 #include <fnord/io/fileutil.h>
 #include <fnord/uri.h>
 #include <fnord/util/binarymessagewriter.h>

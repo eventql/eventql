@@ -13,7 +13,7 @@
 #include <fnord/random.h>
 #include <fnord/option.h>
 #include <fnord/http/httpconnectionpool.h>
-#include <fnord-tsdb/PartitionInfo.pb.h>
+#include <tsdb/PartitionInfo.pb.h>
 
 using namespace fnord;
 

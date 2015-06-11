@@ -14,11 +14,11 @@
 #include <fnord/option.h>
 #include <fnord/thread/queue.h>
 #include <fnord/mdb/MDB.h>
-#include <fnord-tsdb/StreamConfig.pb.h>
-#include <fnord-tsdb/StreamChunk.h>
-#include <fnord-tsdb/TSDBNodeRef.h>
-#include <fnord-tsdb/CompactionWorker.h>
-#include <fnord-tsdb/ReplicationWorker.h>
+#include <tsdb/StreamConfig.pb.h>
+#include <tsdb/StreamChunk.h>
+#include <tsdb/TSDBNodeRef.h>
+#include <tsdb/CompactionWorker.h>
+#include <tsdb/ReplicationWorker.h>
 
 using namespace fnord;
 

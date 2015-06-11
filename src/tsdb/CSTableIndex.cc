@@ -10,8 +10,8 @@
 #include <fnord/stdtypes.h>
 #include <fnord/logging.h>
 #include <fnord/io/mmappedfile.h>
-#include <fnord-tsdb/CSTableIndex.h>
-#include <fnord-tsdb/RecordSet.h>
+#include <tsdb/CSTableIndex.h>
+#include <tsdb/RecordSet.h>
 #include <fnord/protobuf/MessageDecoder.h>
 #include <cstable/CSTableBuilder.h>
 

@@ -15,10 +15,10 @@
 #include <fnord/util/binarymessagereader.h>
 #include <fnord/util/binarymessagewriter.h>
 #include <fnord/protobuf/MessageSchema.h>
-#include <fnord-tsdb/StreamConfig.pb.h>
-#include <fnord-tsdb/RecordSet.h>
-#include <fnord-tsdb/TSDBNodeRef.h>
-#include <fnord-tsdb/PartitionInfo.pb.h>
+#include <tsdb/StreamConfig.pb.h>
+#include <tsdb/RecordSet.h>
+#include <tsdb/TSDBNodeRef.h>
+#include <tsdb/PartitionInfo.pb.h>
 
 using namespace fnord;
 

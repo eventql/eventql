@@ -8,7 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #pragma once
-#include <fnord-tsdb/CSTableIndex.h>
+#include <tsdb/CSTableIndex.h>
 #include <cstable/CSTableReader.h>
 #include <cstable/RecordMaterializer.h>
 #include <fnord/protobuf/MessageEncoder.h>
