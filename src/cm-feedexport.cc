@@ -15,8 +15,8 @@
 #include <fnord-base/thread/eventloop.h>
 #include <fnord-base/thread/threadpool.h>
 #include <fnord-http/httpconnectionpool.h>
-#include <fnord-dproc/Application.h>
-#include <fnord-dproc/LocalScheduler.h>
+#include <dproc/Application.h>
+#include <dproc/LocalScheduler.h>
 #include <fnord-tsdb/TSDBClient.h>
 #include "analytics/FeedExportApp.h"
 
