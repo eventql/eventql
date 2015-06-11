@@ -28,36 +28,21 @@ public:
 
 protected:
 
-  void insertRecord(
-      const http::HTTPRequest* req,
-      http::HTTPResponse* res,
-      URI* uri);
+  //void insertRecords(
+  //    const http::HTTPRequest* req,
+  //    http::HTTPResponse* res,
+  //    URI* uri);
 
-  void insertRecordsBatch(
-      const http::HTTPRequest* req,
-      http::HTTPResponse* res,
-      URI* uri);
+  //void fetchChunk(
+  //    const http::HTTPRequest* req,
+  //    http::HTTPResponse* res,
+  //    RefPtr<http::HTTPResponseStream> res_stream,
+  //    URI* uri);
 
-  void insertRecordsReplication(
-      const http::HTTPRequest* req,
-      http::HTTPResponse* res,
-      URI* uri);
-
-  void listChunks(
-      const http::HTTPRequest* req,
-      http::HTTPResponse* res,
-      URI* uri);
-
-  void fetchChunk(
-      const http::HTTPRequest* req,
-      http::HTTPResponse* res,
-      RefPtr<http::HTTPResponseStream> res_stream,
-      URI* uri);
-
-  void fetchPartitionInfo(
-      const http::HTTPRequest* req,
-      http::HTTPResponse* res,
-      URI* uri);
+  //void fetchPartitionInfo(
+  //    const http::HTTPRequest* req,
+  //    http::HTTPResponse* res,
+  //    URI* uri);
 
   TSDBNode* node_;
   Random rnd_;
