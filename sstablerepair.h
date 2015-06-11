@@ -7,29 +7,26 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <fnordmetric/sstable/cursor.h>
+#ifndef _FNORD_SSTABLE_SSTABLEREPAIR_H
+#define _FNORD_SSTABLE_SSTABLEREPAIR_H
+#include <string>
 
 namespace fnord {
 namespace sstable {
 
-Cursor::Cursor() {}
+class SSTableRepair {
+public:
 
-Cursor::~Cursor() {}
+  SSTableRepair(const std::string& filename);
 
-std::string Cursor::getKeyString() {
-  void* data;
-  size_t size;
-  getKey(&data, &size);
-  return std::string((char *) data, size);
-}
+  bool checkAndRepair(bool repair = false);
 
-std::string Cursor::getDataString() {
-  void* data;
-  size_t size;
-  getData(&data, &size);
-  return std::string((char *) data, size);
-}
+protected:
+  bool checkAndRepairUnfinishedTable(bool repair);
+  const std::string filename_;
+};
 
 }
 }
 
+#endif

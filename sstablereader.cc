@@ -9,6 +9,7 @@
  */
 #include <fnordmetric/sstable/binaryformat.h>
 #include <fnordmetric/sstable/sstablereader.h>
+#include <fnordmetric/util/fnv.h>
 #include <fnordmetric/util/runtimeexception.h>
 
 namespace fnord {
@@ -26,6 +27,9 @@ SSTableReader::SSTableReader(
   if (header_.headerSize() + header_.bodySize() > file_size_) {
     RAISE(kIllegalStateError, "file metadata offsets exceed file bounds");
   }
+}
+
+SSTableReader::~SSTableReader() {
 }
 
 void SSTableReader::readHeader(const void** userdata, size_t* userdata_size) {
@@ -47,6 +51,10 @@ void SSTableReader::readFooter(
   size_t pos = header_.headerSize() + header_.bodySize();
 
   while (pos < file_size_) {
+    if (pos + sizeof(BinaryFormat::FooterHeader) > mmap_->size()) {
+      RAISE(kIllegalStateError, "footer exceeds file boundary");
+    }
+
     auto footer_header = mmap_->structAt<BinaryFormat::FooterHeader>(pos);
     pos += sizeof(BinaryFormat::FooterHeader);
 
@@ -54,33 +62,52 @@ void SSTableReader::readFooter(
       RAISE(kIllegalStateError, "corrupt sstable footer");
     }
 
-    if (footer_header->type == type) {
+    if (footer_header->footer_size == 0) {
+      return;
+    }
+
+    if (footer_header->type == type || type == 0) {
+      if (pos >= mmap_->size()) {
+        RAISE(kIllegalStateError, "footer exceeds file boundary");
+      }
+
       *data = mmap_->structAt<void>(pos);
       *size = footer_header->footer_size;
-      return;
+
+      if (pos + *size > mmap_->size()) {
+        RAISE(kIllegalStateError, "footer exceeds file boundary");
+      }
+
+      util::FNV<uint32_t> fnv;
+      auto checksum = fnv.hash(*data, *size);
+
+      if (checksum != footer_header->footer_checksum) {
+        RAISE(kIllegalStateError, "footer checksum mismatch. corrupt sstable?");
+      }
+
+      if (type != 0) {
+        return;
+      }
     }
 
     pos += footer_header->footer_size;
   }
-
-  RAISE(kIndexError, "no such footer found");
 }
 
 util::Buffer SSTableReader::readFooter(uint32_t type) {
-  void* data;
-  size_t size;
+  void* data = nullptr;
+  size_t size = 0;
   readFooter(type, &data, &size);
-
   return util::Buffer(data, size);
 }
 
-std::unique_ptr<Cursor> SSTableReader::getCursor() {
-  auto cursor = new Cursor(
+std::unique_ptr<SSTableReader::SSTableReaderCursor> SSTableReader::getCursor() {
+  auto cursor = new SSTableReaderCursor(
       mmap_,
       header_.headerSize(),
       header_.headerSize() + header_.bodySize());
 
-  return std::unique_ptr<Cursor>(cursor);
+  return std::unique_ptr<SSTableReaderCursor>(cursor);
 }
 
 size_t SSTableReader::bodySize() const {
@@ -91,7 +118,7 @@ size_t SSTableReader::headerSize() const {
   return header_.userdataSize();
 }
 
-SSTableReader::Cursor::Cursor(
+SSTableReader::SSTableReaderCursor::SSTableReaderCursor(
     std::shared_ptr<io::MmappedFile> mmap,
     size_t begin,
     size_t limit) :
@@ -100,11 +127,15 @@ SSTableReader::Cursor::Cursor(
     limit_(limit),
     pos_(begin) {}
 
-void SSTableReader::Cursor::seekTo(size_t body_offset) {
+void SSTableReader::SSTableReaderCursor::seekTo(size_t body_offset) {
   pos_ = begin_ + body_offset;
 }
 
-bool SSTableReader::Cursor::next() {
+size_t SSTableReader::SSTableReaderCursor::position() const {
+  return pos_ - begin_;
+}
+
+bool SSTableReader::SSTableReaderCursor::next() {
   auto header = mmap_->structAt<BinaryFormat::RowHeader>(pos_);
 
   auto next_pos = pos_ += sizeof(BinaryFormat::RowHeader) +
@@ -120,7 +151,7 @@ bool SSTableReader::Cursor::next() {
   return valid();
 }
 
-bool SSTableReader::Cursor::valid() {
+bool SSTableReader::SSTableReaderCursor::valid() {
   auto header = mmap_->structAt<BinaryFormat::RowHeader>(pos_);
 
   auto row_limit = pos_ + sizeof(BinaryFormat::RowHeader) +
@@ -130,7 +161,7 @@ bool SSTableReader::Cursor::valid() {
   return header->key_size > 0 && row_limit <= limit_;
 }
 
-void SSTableReader::Cursor::getKey(void** data, size_t* size) {
+void SSTableReader::SSTableReaderCursor::getKey(void** data, size_t* size) {
   if (!valid()) {
     RAISE(kIllegalStateError, "invalid cursor");
   }
@@ -140,7 +171,7 @@ void SSTableReader::Cursor::getKey(void** data, size_t* size) {
   *size = header->key_size;
 }
 
-void SSTableReader::Cursor::getData(void** data, size_t* size) {
+void SSTableReader::SSTableReaderCursor::getData(void** data, size_t* size) {
   if (!valid()) {
     RAISE(kIllegalStateError, "invalid cursor");
   }
