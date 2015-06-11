@@ -1,11 +1,13 @@
-project(FNORD_MDB)
-
-include_directories(../)
-include_directories(../3rdparty)
-
+# This file is part of the "libfnord" project
+#   Copyright (c) 2015 Paul Asmuth
+#
+# FnordMetric is free software: you can redistribute it and/or modify it under
+# the terms of the GNU General Public License v3.0. You should have received a
+# copy of the GNU General Public License along with this program. If not, see
+# <http://www.gnu.org/licenses/>.
 add_library(fnord-mdb OBJECT
-    ../3rdparty/liblmdb/mdb.c
-    ../3rdparty/liblmdb/midl.c
+    ../../../3rdparty/liblmdb/mdb.c
+    ../../../3rdparty/liblmdb/midl.c
     MDB.cc
     MDBCursor.cc
     MDBTransaction.cc)

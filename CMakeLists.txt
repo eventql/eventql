@@ -35,3 +35,4 @@ find_package(Threads)
 
 add_subdirectory(src/fnord)
 add_subdirectory(src/fnord/protobuf)
+add_subdirectory(src/fnord/mdb)
