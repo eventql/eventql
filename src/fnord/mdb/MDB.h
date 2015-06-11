@@ -14,7 +14,7 @@
 #include <liblmdb/lmdb.h>
 #include "fnord/logging.h"
 #include "fnord/autoref.h"
-#include "fnord-mdb/MDBTransaction.h"
+#include "fnord/mdb/MDBTransaction.h"
 
 namespace fnord {
 namespace mdb {

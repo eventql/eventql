@@ -8,7 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <assert.h>
-#include "fnord-mdb/MDBCursor.h"
+#include "fnord/mdb/MDBCursor.h"
 
 namespace fnord {
 namespace mdb {
