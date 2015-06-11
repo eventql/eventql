@@ -1,8 +1,5 @@
 #!/bin/bash -e
 
-git subtree pull --prefix app/brokerd git@github.com:fnordcorp/brokerd.git master
-git subtree push --prefix app/brokerd git@github.com:fnordcorp/brokerd.git master
-
 git subtree pull --prefix app/metricd git@github.com:fnordcorp/metricd.git master
 git subtree push --prefix app/metricd git@github.com:fnordcorp/metricd.git master
 
@@ -23,3 +20,6 @@ git subtree push --prefix lib/libdproc git@github.com:fnordcorp/libdproc.git mas
 
 git subtree pull --prefix lib/libfnord git@github.com:fnordcorp/libfnord.git master
 git subtree push --prefix lib/libfnord git@github.com:fnordcorp/libfnord.git master
+
+git subtree pull --prefix app/brokerd git@github.com:fnordcorp/brokerd.git master
+git subtree push --prefix app/brokerd git@github.com:fnordcorp/brokerd.git master
