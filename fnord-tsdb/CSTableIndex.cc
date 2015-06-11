@@ -53,4 +53,13 @@ RefPtr<VFSFile> CSTableIndex::computeBlob(dproc::TaskContext* context) {
       File::openFile(tmpfile, File::O_READ | File::O_AUTODELETE));
 }
 
+Option<String> CSTableIndex::cacheKey() const {
+  return Some(
+      StringUtil::format(
+          "tsdb.cstableindex~$0~$1~$2",
+          params_.stream_key(),
+          params_.partition_key(),
+          params_.version()));
+}
+
 }
