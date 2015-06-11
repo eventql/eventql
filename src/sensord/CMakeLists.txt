@@ -22,6 +22,6 @@ add_executable(
 target_link_libraries(
     sensord
     ${CMAKE_THREAD_LIBS_INIT}
-    ${FNORD_MSG_LIBS})
+    ${FNORD_LIBS})
 
 
