@@ -43,6 +43,9 @@ include_directories(${DPROC_INCLUDE})
 add_subdirectory(app/sensord)
 include_directories(${SENSORD_INCLUDE})
 
+add_subdirectory(app/brokerd)
+include_directories(${BROKERD_INCLUDE})
+
 add_subdirectory(app/tsdb)
 include_directories(${TSDB_INCLUDE})
 

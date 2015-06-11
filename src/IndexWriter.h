@@ -16,8 +16,8 @@
 #include <vector>
 #include <queue>
 #include "fnord/stdtypes.h"
-#include "fnord-feeds/RemoteFeed.h"
-#include "fnord-feeds/RemoteFeedWriter.h"
+#include "brokerd/RemoteFeed.h"
+#include "brokerd/RemoteFeedWriter.h"
 #include "fnord/thread/taskscheduler.h"
 #include <fnord-fts/fts.h>
 #include <fnord-fts/fts_common.h>
