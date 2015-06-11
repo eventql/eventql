@@ -8,7 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <assert.h>
-#include "fnord-mdb/MDBTransaction.h"
+#include "fnord/mdb/MDBTransaction.h"
 
 namespace fnord {
 namespace mdb {
