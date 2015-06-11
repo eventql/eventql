@@ -26,7 +26,7 @@ TSDBTableScanMapper<ScanletType>::TSDBTableScanMapper(
 template <typename ScanletType>
 void TSDBTableScanMapper<ScanletType>::compute(dproc::TaskContext* context) {
   tsdb_->fetchPartition(
-      scanlet_->streamKey(),
+      params_.stream_key(),
       params_.partition_key(),
       std::bind(
           &TSDBTableScanMapper<ScanletType>::onRow,
