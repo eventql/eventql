@@ -14,14 +14,14 @@
 #include <set>
 #include <string>
 #include <unordered_map>
-#include "fnord-base/stdtypes.h"
-#include "fnord-base/random.h"
-#include "fnord-base/io/filerepository.h"
-#include "fnord-base/io/FileLock.h"
+#include "fnord/stdtypes.h"
+#include "fnord/random.h"
+#include "fnord/io/filerepository.h"
+#include "fnord/io/FileLock.h"
 #include "fnord-feeds/LocalFeed.h"
 #include "fnord-feeds/FeedEntry.h"
 #include "fnord-feeds/Message.pb.h"
-#include "fnord-base/reflect/reflect.h"
+#include "fnord/reflect/reflect.h"
 
 namespace fnord {
 namespace feeds {

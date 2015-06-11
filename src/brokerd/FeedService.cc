@@ -7,10 +7,10 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include "fnord-base/inspect.h"
-#include "fnord-base/logging.h"
-#include "fnord-base/io/fileutil.h"
-#include "fnord-json/json.h"
+#include "fnord/inspect.h"
+#include "fnord/logging.h"
+#include "fnord/io/fileutil.h"
+#include "fnord/json/json.h"
 #include "fnord-sstable/sstablereader.h"
 #include "fnord-sstable/sstablerepair.h"
 #include "fnord-feeds/FeedService.h"

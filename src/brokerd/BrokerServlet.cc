@@ -7,13 +7,13 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include "fnord-base/util/binarymessagewriter.h"
-#include "fnord-json/json.h"
-#include <fnord-base/wallclock.h>
-#include <fnord-msg/msg.h>
-#include "fnord-msg/MessageEncoder.h"
-#include "fnord-msg/MessagePrinter.h"
-#include <fnord-base/util/Base64.h>
+#include "fnord/util/binarymessagewriter.h"
+#include "fnord/json/json.h"
+#include <fnord/wallclock.h>
+#include <fnord/protobuf/msg.h>
+#include "fnord/protobuf/MessageEncoder.h"
+#include "fnord/protobuf/MessagePrinter.h"
+#include <fnord/util/Base64.h>
 #include "fnord-feeds/BrokerServlet.h"
 
 namespace fnord {
