@@ -13,7 +13,7 @@
 #include <fnord/random.h>
 #include <fnord/option.h>
 #include <fnord/thread/queue.h>
-#include <fnord-mdb/MDB.h>
+#include <fnord/mdb/MDB.h>
 #include <fnord-tsdb/StreamConfig.pb.h>
 #include <fnord-tsdb/StreamChunk.h>
 #include <fnord-tsdb/TSDBNodeRef.h>

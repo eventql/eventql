@@ -16,7 +16,7 @@
 #include <fnord/thread/queue.h>
 #include <fnord/thread/DelayedQueue.h>
 #include <fnord/thread/CoalescingDelayedQueue.h>
-#include <fnord-mdb/MDB.h>
+#include <fnord/mdb/MDB.h>
 #include <fnord-dht/ReplicationScheme.h>
 #include <fnord/http/httpconnectionpool.h>
 
