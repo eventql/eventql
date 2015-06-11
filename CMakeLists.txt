@@ -61,7 +61,7 @@ include_directories(${DPROC_INCLUDE})
 #add_subdirectory(3rdparty/libfnord/fnord-http)
 #add_subdirectory(3rdparty/libfnord/fnord-json)
 #add_subdirectory(3rdparty/libfnord/cstable)
-#add_subdirectory(3rdparty/libfnord/fnord-sstable)
+#add_subdirectory(3rdparty/libfnord/sstable)
 #add_subdirectory(3rdparty/libfnord/fnord-chart)
 #
 #add_subdirectory(3rdparty/sensord)

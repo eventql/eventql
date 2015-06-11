@@ -20,11 +20,11 @@
 #include "fnord/json/json.h"
 #include "fnord/mdb/MDB.h"
 #include "fnord/mdb/MDBUtil.h"
-#include "fnord-sstable/sstablereader.h"
-#include "fnord-sstable/sstablewriter.h"
-#include "fnord-sstable/SSTableColumnSchema.h"
-#include "fnord-sstable/SSTableColumnReader.h"
-#include "fnord-sstable/SSTableColumnWriter.h"
+#include "sstable/sstablereader.h"
+#include "sstable/sstablewriter.h"
+#include "sstable/SSTableColumnSchema.h"
+#include "sstable/SSTableColumnReader.h"
+#include "sstable/SSTableColumnWriter.h"
 #include <fnord-fts/fts.h>
 #include <fnord-fts/fts_common.h>
 #include "common.h"
