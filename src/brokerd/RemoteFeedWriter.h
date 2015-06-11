@@ -11,8 +11,8 @@
 #define _FNORD_FEEDS_REMOTEFEEDWRITER_H
 #include "fnord/stdtypes.h"
 #include "fnord/option.h"
-#include "fnord-rpc/RPC.h"
-#include "fnord-rpc/RPCClient.h"
+#include "fnord/rpc/RPC.h"
+#include "fnord/rpc/RPCClient.h"
 #include "brokerd/FeedEntry.h"
 
 namespace fnord {
