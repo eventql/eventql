@@ -49,6 +49,9 @@ include_directories(${CSTABLE_INCLUDE})
 add_subdirectory(lib/libsstable)
 include_directories(${SSTABLE_INCLUDE})
 
+add_subdirectory(lib/libdproc)
+include_directories(${DPROC_INCLUDE})
+
 #add_subdirectory(3rdparty/libfnord/fnord-base)
 #add_subdirectory(3rdparty/libfnord/fnord-msg)
 #add_subdirectory(3rdparty/libfnord/fnord-fts)
@@ -74,7 +77,7 @@ include_directories(${TSDB_INCLUDE})
 #
 #add_subdirectory(3rdparty/libfnord/fnord-metricdb)
 #add_subdirectory(3rdparty/libfnord/fnord-dht)
-#add_subdirectory(3rdparty/libfnord/fnord-dproc)
+#add_subdirectory(3rdparty/libfnord/dproc)
 #add_subdirectory(3rdparty/libfnord/fnord-afx)
 #add_subdirectory(src/)
 

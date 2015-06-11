@@ -357,7 +357,7 @@ target_link_libraries(tests/test-logjoin ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_L
 #     $<TARGET_OBJECTS:fnord-fts>
 #     $<TARGET_OBJECTS:fnord-protobuf>
 #     $<TARGET_OBJECTS:fnord-tsdb>
-#     $<TARGET_OBJECTS:fnord-dproc>
+#     $<TARGET_OBJECTS:dproc>
 #     $<TARGET_OBJECTS:fnord-afx>
 #     ../3rdparty/libfnord/fnord-logtable/TableReader.cc
 #     ../3rdparty/libfnord/fnord-logtable/TableArena.cc
@@ -404,7 +404,7 @@ target_link_libraries(tests/test-logjoin ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_L
 #     $<TARGET_OBJECTS:fnord-fts>
 #     $<TARGET_OBJECTS:fnord-protobuf>
 #     $<TARGET_OBJECTS:fnord-tsdb>
-#     $<TARGET_OBJECTS:fnord-dproc>
+#     $<TARGET_OBJECTS:dproc>
 #     schemas.cc
 #     DocIndex.cc
 #     analytics/Report.cc
@@ -436,7 +436,7 @@ add_executable(cm-chunkserver
     $<TARGET_OBJECTS:cstable>
     $<TARGET_OBJECTS:fnord-protobuf>
     $<TARGET_OBJECTS:fnord-tsdb>
-    $<TARGET_OBJECTS:fnord-dproc>
+    $<TARGET_OBJECTS:dproc>
     $<TARGET_OBJECTS:fnord-dht>
     $<TARGET_OBJECTS:fnord-afx>
     ../3rdparty/libfnord/fnord-sstable/SSTableServlet.cc
@@ -471,7 +471,7 @@ add_executable(analyticsd
     $<TARGET_OBJECTS:fnord-protobuf>
     $<TARGET_OBJECTS:fnord-tsdb>
     $<TARGET_OBJECTS:fnord-afx>
-    $<TARGET_OBJECTS:fnord-dproc>
+    $<TARGET_OBJECTS:dproc>
     ../3rdparty/libfnord/fnord-sstable/SSTableServlet.cc
     ../3rdparty/libfnord/fnord-logtable/LogTableServlet.cc
     ../3rdparty/libfnord/fnord-logtable/TableReader.cc
