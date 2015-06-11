@@ -16,9 +16,9 @@
 #include <fnord/random.h>
 #include <fnord/uri.h>
 #include <fnord/thread/queue.h>
-#include <fnord-feeds/RemoteFeed.h>
-#include <fnord-feeds/RemoteFeedFactory.h>
-#include "fnord-feeds/RemoteFeedWriter.h"
+#include <brokerd/RemoteFeed.h>
+#include <brokerd/RemoteFeedFactory.h>
+#include "brokerd/RemoteFeedWriter.h"
 #include <fnord/http/httpservice.h>
 #include "fnord/stats/stats.h"
 #include "common.h"

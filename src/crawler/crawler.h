@@ -16,7 +16,7 @@
 #include <fnord/random.h>
 #include <fnord/uri.h>
 #include <fnord/thread/taskscheduler.h>
-#include <fnord-feeds/RemoteFeed.h>
+#include <brokerd/RemoteFeed.h>
 #include <fnord/http/httpconnectionpool.h>
 #include "crawler/crawlrequest.h"
 

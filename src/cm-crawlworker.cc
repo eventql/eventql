@@ -28,8 +28,8 @@
 #include "fnord/net/redis/redisqueue.h"
 #include "fnord/thread/eventloop.h"
 #include "fnord/thread/threadpool.h"
-#include "fnord-feeds/FeedService.h"
-#include "fnord-feeds/RemoteFeedFactory.h"
+#include "brokerd/FeedService.h"
+#include "brokerd/RemoteFeedFactory.h"
 
 #include "CustomerNamespace.h"
 #include "crawler/crawlrequest.h"
