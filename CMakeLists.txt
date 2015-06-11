@@ -76,7 +76,7 @@ include_directories(${TSDB_INCLUDE})
 #include_directories(3rdparty/chartsql/src/)
 #
 #add_subdirectory(3rdparty/libfnord/fnord-metricdb)
-#add_subdirectory(3rdparty/libfnord/fnord-dht)
+#add_subdirectory(3rdparty/libfnord/dproc)
 #add_subdirectory(3rdparty/libfnord/dproc)
 #add_subdirectory(3rdparty/libfnord/fnord-afx)
 #add_subdirectory(src/)

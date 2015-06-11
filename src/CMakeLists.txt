@@ -437,7 +437,7 @@ add_executable(cm-chunkserver
     $<TARGET_OBJECTS:fnord-protobuf>
     $<TARGET_OBJECTS:tsdb>
     $<TARGET_OBJECTS:dproc>
-    $<TARGET_OBJECTS:fnord-dht>
+    $<TARGET_OBJECTS:dproc>
     $<TARGET_OBJECTS:fnord-afx>
     ../3rdparty/libfnord/sstable/SSTableServlet.cc
     ../3rdparty/libfnord/fnord-logtable/LogTableServlet.cc
