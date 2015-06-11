@@ -13,7 +13,7 @@
 #include <fnord-tsdb/TSDBClient.h>
 #include <fnord-msg/MessageSchema.h>
 #include <fnord-base/random.h>
-#include <fnord-dproc/BlobRDD.h>
+#include <dproc/BlobRDD.h>
 
 using namespace fnord;
 
