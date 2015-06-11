@@ -10,7 +10,7 @@ add_library(
 add_executable(
     sensord
     $<TARGET_OBJECTS:fnord-base>
-    $<TARGET_OBJECTS:fnord-msg>
+    $<TARGET_OBJECTS:fnord-protobuf>
     $<TARGET_OBJECTS:fnord-http>
     HostStatsSensor.cc
     Sensor.cc
