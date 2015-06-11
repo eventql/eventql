@@ -11,7 +11,7 @@
 #include "fnord/inspect.h"
 #include "fnord/logging.h"
 #include "fnord/json/json.h"
-#include "fnord-sstable/sstablereader.h"
+#include "sstable/sstablereader.h"
 #include "fnord-feeds/LocalFeed.h"
 #include "fnord-feeds/FeedService.h"
 #include "fnord/stats/stats.h"
