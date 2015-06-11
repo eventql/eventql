@@ -14,10 +14,10 @@
 #include "fnord-msg/MessageEncoder.h"
 #include "fnord-msg/MessagePrinter.h"
 #include "fnord-tsdb/RecordSet.h"
-#include "fnord-cstable/CSTableReader.h"
-#include "fnord-cstable/CSTableBuilder.h"
-#include "fnord-cstable/RecordMaterializer.h"
-#include "fnord-cstable/StringColumnReader.h"
+#include "cstable/CSTableReader.h"
+#include "cstable/CSTableBuilder.h"
+#include "cstable/RecordMaterializer.h"
+#include "cstable/StringColumnReader.h"
 
 using namespace fnord;
 using namespace fnord::cstable;

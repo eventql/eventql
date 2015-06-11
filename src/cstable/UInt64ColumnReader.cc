@@ -7,7 +7,7 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <fnord-cstable/UInt64ColumnReader.h>
+#include <cstable/UInt64ColumnReader.h>
 
 namespace fnord {
 namespace cstable {

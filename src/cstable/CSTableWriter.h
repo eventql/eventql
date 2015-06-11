@@ -14,7 +14,7 @@
 #include <fnord-base/duration.h>
 #include <fnord-base/io/file.h>
 #include <fnord-base/util/binarymessagewriter.h>
-#include <fnord-cstable/ColumnWriter.h>
+#include <cstable/ColumnWriter.h>
 
 namespace fnord {
 namespace cstable {

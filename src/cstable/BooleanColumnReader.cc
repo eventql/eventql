@@ -7,7 +7,7 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <fnord-cstable/BooleanColumnReader.h>
+#include <cstable/BooleanColumnReader.h>
 
 namespace fnord {
 namespace cstable {

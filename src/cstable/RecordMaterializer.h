@@ -12,9 +12,9 @@
 #include <fnord-base/stdtypes.h>
 #include <fnord-base/io/file.h>
 #include <fnord-base/io/mmappedfile.h>
-#include <fnord-cstable/BinaryFormat.h>
-#include <fnord-cstable/CSTableReader.h>
-#include <fnord-cstable/ColumnReader.h>
+#include <cstable/BinaryFormat.h>
+#include <cstable/CSTableReader.h>
+#include <cstable/ColumnReader.h>
 #include <fnord-msg/MessageSchema.h>
 
 namespace fnord {
