@@ -9,12 +9,12 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <unistd.h>
-#include "fnord-base/application.h"
-#include "fnord-base/cli/flagparser.h"
-#include "fnord-base/inspect.h"
-#include "fnord-base/exception.h"
-#include "fnord-base/logging.h"
-#include "fnord-http/httpclient.h"
+#include "fnord/application.h"
+#include "fnord/cli/flagparser.h"
+#include "fnord/inspect.h"
+#include "fnord/exception.h"
+#include "fnord/logging.h"
+#include "fnord/http/httpclient.h"
 #include "SensorRepository.h"
 #include "Sampler.h"
 #include "HostStatsSensor.h"

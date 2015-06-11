@@ -10,9 +10,9 @@
  */
 #pragma once
 #include <thread>
-#include <fnord-base/stdtypes.h>
-#include <fnord-base/autoref.h>
-#include <fnord-base/thread/DelayedQueue.h>
+#include <fnord/stdtypes.h>
+#include <fnord/autoref.h>
+#include <fnord/thread/DelayedQueue.h>
 #include <sensord/Sensor.h>
 #include <sensord/SensorRepository.h>
 #include <sensord/SamplerConfig.pb.h>

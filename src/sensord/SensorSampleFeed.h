@@ -9,9 +9,9 @@
  * <http://www.gnu.org/licenses/>.
  */
 #pragma once
-#include <fnord-base/stdtypes.h>
-#include <fnord-base/autoref.h>
-#include <fnord-base/thread/taskscheduler.h>
+#include <fnord/stdtypes.h>
+#include <fnord/autoref.h>
+#include <fnord/thread/taskscheduler.h>
 #include <sensord/SampleEnvelope.pb.h>
 
 using namespace fnord;

@@ -9,7 +9,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #pragma once
-#include "fnord-base/stdtypes.h"
+#include "fnord/stdtypes.h"
 #include <sensord/Sensor.h>
 #include <sensord/HostStats.pb.h>
 
