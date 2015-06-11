@@ -57,6 +57,8 @@ add_subdirectory(3rdparty/libfnord/fnord-chart)
 add_subdirectory(3rdparty/sensord)
 include_directories(${SENSORD_INCLUDE})
 
+include_directories(3rdparty/chartsql/src/)
+
 add_subdirectory(3rdparty/libfnord/fnord-metricdb)
 add_subdirectory(3rdparty/libfnord/fnord-tsdb)
 add_subdirectory(3rdparty/libfnord/fnord-dht)
