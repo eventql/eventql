@@ -7,9 +7,9 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <fnord-sstable/SSTableColumnSchema.h>
-#include <fnord-sstable/sstablereader.h>
-#include <fnord-sstable/sstablewriter.h>
+#include <sstable/SSTableColumnSchema.h>
+#include <sstable/sstablereader.h>
+#include <sstable/sstablewriter.h>
 #include <fnord/util/binarymessagereader.h>
 #include <fnord/util/binarymessagewriter.h>
 

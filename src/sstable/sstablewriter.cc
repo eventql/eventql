@@ -10,11 +10,11 @@
 #include <string.h>
 #include <fnord/exception.h>
 #include <fnord/fnv.h>
-#include <fnord-sstable/binaryformat.h>
-#include <fnord-sstable/fileheaderwriter.h>
-#include <fnord-sstable/fileheaderreader.h>
-#include <fnord-sstable/sstablewriter.h>
-#include <fnord-sstable/SSTableColumnWriter.h>
+#include <sstable/binaryformat.h>
+#include <sstable/fileheaderwriter.h>
+#include <sstable/fileheaderreader.h>
+#include <sstable/sstablewriter.h>
+#include <sstable/SSTableColumnWriter.h>
 
 namespace fnord {
 namespace sstable {

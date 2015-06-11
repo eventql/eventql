@@ -7,8 +7,8 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <fnord-sstable/binaryformat.h>
-#include <fnord-sstable/fileheaderreader.h>
+#include <sstable/binaryformat.h>
+#include <sstable/fileheaderreader.h>
 #include <fnord/exception.h>
 #include <fnord/fnv.h>
 

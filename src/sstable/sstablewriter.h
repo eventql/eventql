@@ -15,9 +15,9 @@
 #include <memory>
 #include <fnord/io/file.h>
 #include <fnord/io/pagemanager.h>
-#include <fnord-sstable/cursor.h>
-#include <fnord-sstable/index.h>
-#include <fnord-sstable/indexprovider.h>
+#include <sstable/cursor.h>
+#include <sstable/index.h>
+#include <sstable/indexprovider.h>
 #include <fnord/exception.h>
 
 namespace fnord {

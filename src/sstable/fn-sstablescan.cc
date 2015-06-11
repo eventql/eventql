@@ -13,8 +13,8 @@
 #include "fnord/cli/flagparser.h"
 #include "fnord/logging.h"
 #include "fnord/inspect.h"
-#include "fnord-sstable/sstablereader.h"
-#include "fnord-sstable/SSTableScan.h"
+#include "sstable/sstablereader.h"
+#include "sstable/SSTableScan.h"
 
 using namespace fnord;
 

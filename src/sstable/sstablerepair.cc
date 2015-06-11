@@ -9,8 +9,8 @@
  */
 #include <fnord/exception.h>
 #include <fnord/fnv.h>
-#include <fnord-sstable/sstablereader.h>
-#include <fnord-sstable/sstablerepair.h>
+#include <sstable/sstablereader.h>
+#include <sstable/sstablerepair.h>
 
 using fnord::Exception;
 

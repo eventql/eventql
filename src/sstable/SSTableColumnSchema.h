@@ -17,11 +17,11 @@
 #include <fnord/exception.h>
 #include <fnord/io/file.h>
 #include <fnord/io/mmappedfile.h>
-#include <fnord-sstable/binaryformat.h>
-#include <fnord-sstable/fileheaderreader.h>
-#include <fnord-sstable/cursor.h>
-#include <fnord-sstable/index.h>
-#include <fnord-sstable/indexprovider.h>
+#include <sstable/binaryformat.h>
+#include <sstable/fileheaderreader.h>
+#include <sstable/cursor.h>
+#include <sstable/index.h>
+#include <sstable/indexprovider.h>
 
 namespace fnord {
 namespace sstable {

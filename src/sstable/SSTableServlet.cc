@@ -7,9 +7,9 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include "fnord-sstable/SSTableServlet.h"
-#include "fnord-sstable/sstablereader.h"
-#include "fnord-sstable/SSTableScan.h"
+#include "sstable/SSTableServlet.h"
+#include "sstable/sstablereader.h"
+#include "sstable/SSTableScan.h"
 #include "fnord/io/fileutil.h"
 
 namespace fnord {

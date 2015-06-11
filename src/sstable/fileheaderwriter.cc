@@ -8,8 +8,8 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <fnord/fnv.h>
-#include <fnord-sstable/binaryformat.h>
-#include <fnord-sstable/fileheaderwriter.h>
+#include <sstable/binaryformat.h>
+#include <sstable/fileheaderwriter.h>
 
 namespace fnord {
 namespace sstable {

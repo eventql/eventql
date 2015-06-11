@@ -6,7 +6,7 @@
 # copy of the GNU General Public License along with this program. If not, see
 # <http://www.gnu.org/licenses/>.
 cmake_minimum_required(VERSION 2.8.8)
-project(libfnord-sstable)
+project(libsstable)
 include(FindPkgConfig)
 
 option(ENABLE_TESTS "Build unit tests [default: ON]" ON)
@@ -25,7 +25,7 @@ else()
 endif()
 
 # sstable
-add_library(fnord-sstable OBJECT
+add_library(sstable OBJECT
     cursor.cc
     fileheaderreader.cc
     fileheaderwriter.cc
@@ -42,7 +42,7 @@ add_library(fnord-sstable OBJECT
 
 add_executable(fn-sstablescan
     $<TARGET_OBJECTS:fnord-base>
-    $<TARGET_OBJECTS:fnord-sstable>
+    $<TARGET_OBJECTS:sstable>
     fn-sstablescan.cc)
 
 target_link_libraries(fn-sstablescan ${CMAKE_THREAD_LIBS_INIT})
