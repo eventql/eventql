@@ -10,7 +10,7 @@
 #define _CM_LOOKUPSERVLET_H
 #include "fnord/http/httpservice.h"
 #include "fnord/json/json.h"
-#include "fnord-mdb/MDB.h"
+#include "fnord/mdb/MDB.h"
 
 using namespace fnord;
 

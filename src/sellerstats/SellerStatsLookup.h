@@ -12,7 +12,7 @@
 #include "fnord-rpc/RPC.h"
 #include "fnord-rpc/RPCClient.h"
 #include "fnord/thread/taskscheduler.h"
-#include "fnord-mdb/MDB.h"
+#include "fnord/mdb/MDB.h"
 #include "fnord/stats/stats.h"
 #include "fnord/json/json.h"
 #include "ItemRef.h"

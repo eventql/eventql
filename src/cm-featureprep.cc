@@ -38,7 +38,7 @@
 #include "fnord-feeds/RemoteFeedReader.h"
 #include "fnord/stats/statsdagent.h"
 #include "fnord/RadixTree.h"
-#include "fnord-mdb/MDB.h"
+#include "fnord/mdb/MDB.h"
 #include <fnord-fts/fts.h>
 #include <fnord-fts/fts_common.h>
 #include "common.h"

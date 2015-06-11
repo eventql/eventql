@@ -33,7 +33,7 @@
 #include "fnord-sstable/sstablereader.h"
 #include "fnord-logtable/RemoteTableReader.h"
 #include "fnord-logtable/LogTableTail.h"
-#include "fnord-mdb/MDB.h"
+#include "fnord/mdb/MDB.h"
 #include "fnord/protobuf/MessagePrinter.h"
 #include "CustomerNamespace.h"
 

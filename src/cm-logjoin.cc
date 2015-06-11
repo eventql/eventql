@@ -30,7 +30,7 @@
 #include "fnord-feeds/RemoteFeedReader.h"
 #include "fnord/stats/statsdagent.h"
 #include "fnord/http/httpconnectionpool.h"
-#include "fnord-mdb/MDB.h"
+#include "fnord/mdb/MDB.h"
 #include <fnord-fts/fts.h>
 #include <fnord-fts/fts_common.h>
 #include "CustomerNamespace.h"

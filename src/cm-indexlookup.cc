@@ -33,7 +33,7 @@
 #include "fnord-fts/fts.h"
 #include "fnord-fts/fts_common.h"
 #include "fnord-fts/FTSQuery.h"
-#include "fnord-mdb/MDB.h"
+#include "fnord/mdb/MDB.h"
 #include "CustomerNamespace.h"
 
 

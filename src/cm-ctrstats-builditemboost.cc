@@ -18,8 +18,8 @@
 #include "fnord/util/SimpleRateLimit.h"
 #include "fnord/InternMap.h"
 #include "fnord/json/json.h"
-#include "fnord-mdb/MDB.h"
-#include "fnord-mdb/MDBUtil.h"
+#include "fnord/mdb/MDB.h"
+#include "fnord/mdb/MDBUtil.h"
 #include <fnord-fts/fts.h>
 #include <fnord-fts/fts_common.h>
 #include "fnord-sstable/sstablereader.h"
