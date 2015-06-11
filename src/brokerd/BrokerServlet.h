@@ -9,8 +9,8 @@
  */
 #ifndef _FNORD_BROKER_BROKERSERVLET_H
 #define _FNORD_BROKER_BROKERSERVLET_H
-#include "fnord-http/httpservice.h"
-#include <fnord-base/random.h>
+#include "fnord/http/httpservice.h"
+#include <fnord/random.h>
 #include <fnord-feeds/FeedService.h>
 
 namespace fnord {
