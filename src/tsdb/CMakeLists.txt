@@ -31,7 +31,7 @@ add_executable(tests/test-recordset
     $<TARGET_OBJECTS:fnord-protobuf>
     $<TARGET_OBJECTS:fnord-mdb>
     $<TARGET_OBJECTS:fnord-tsdb>
-    $<TARGET_OBJECTS:fnord-cstable>
+    $<TARGET_OBJECTS:cstable>
     $<TARGET_OBJECTS:fnord-sstable>
     $<TARGET_OBJECTS:fnord-http>
     $<TARGET_OBJECTS:fnord-json>
@@ -45,7 +45,7 @@ add_executable(tests/test-tsdbnode
     $<TARGET_OBJECTS:fnord-protobuf>
     $<TARGET_OBJECTS:fnord-mdb>
     $<TARGET_OBJECTS:fnord-tsdb>
-    $<TARGET_OBJECTS:fnord-cstable>
+    $<TARGET_OBJECTS:cstable>
     $<TARGET_OBJECTS:fnord-sstable>
     $<TARGET_OBJECTS:fnord-http>
     $<TARGET_OBJECTS:fnord-json>
@@ -59,7 +59,7 @@ add_executable(tests/test-tsdb-timewindowpartitioner
     $<TARGET_OBJECTS:fnord-protobuf>
     $<TARGET_OBJECTS:fnord-mdb>
     $<TARGET_OBJECTS:fnord-tsdb>
-    $<TARGET_OBJECTS:fnord-cstable>
+    $<TARGET_OBJECTS:cstable>
     $<TARGET_OBJECTS:fnord-sstable>
     $<TARGET_OBJECTS:fnord-http>
     $<TARGET_OBJECTS:fnord-json>
