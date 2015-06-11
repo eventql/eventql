@@ -7,10 +7,10 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <fnord-base/io/fileutil.h>
-#include <fnord-base/io/mmappedfile.h>
-#include <fnord-base/util/binarymessagereader.h>
-#include <fnord-base/util/binarymessagewriter.h>
+#include <fnord/io/fileutil.h>
+#include <fnord/io/mmappedfile.h>
+#include <fnord/util/binarymessagereader.h>
+#include <fnord/util/binarymessagewriter.h>
 #include <fnord-sstable/sstablewriter.h>
 #include <fnord-sstable/sstablereader.h>
 #include <fnord-tsdb/RecordSet.h>

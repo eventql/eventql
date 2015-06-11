@@ -9,10 +9,10 @@
  */
 #ifndef _FNORD_TSDB_TSDBNODE_H
 #define _FNORD_TSDB_TSDBNODE_H
-#include <fnord-base/stdtypes.h>
-#include <fnord-base/random.h>
-#include <fnord-base/option.h>
-#include <fnord-base/thread/queue.h>
+#include <fnord/stdtypes.h>
+#include <fnord/random.h>
+#include <fnord/option.h>
+#include <fnord/thread/queue.h>
 #include <fnord-mdb/MDB.h>
 #include <fnord-tsdb/StreamConfig.pb.h>
 #include <fnord-tsdb/StreamChunk.h>

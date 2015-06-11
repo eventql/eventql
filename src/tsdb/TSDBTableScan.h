@@ -8,7 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #pragma once
-#include "fnord-base/stdtypes.h"
+#include "fnord/stdtypes.h"
 #include <fnord-tsdb/TSDBTableScanSpec.pb.h>
 #include <fnord-tsdb/TSDBTableScanMapper.h>
 #include <fnord-tsdb/TSDBTableScanReducer.h>

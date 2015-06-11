@@ -10,7 +10,7 @@
 #ifndef _FNORD_TSDB_COMPACTIONWORKER_H
 #define _FNORD_TSDB_COMPACTIONWORKER_H
 #include <thread>
-#include <fnord-base/stdtypes.h>
+#include <fnord/stdtypes.h>
 #include <fnord-tsdb/TSDBNodeRef.h>
 
 using namespace fnord;

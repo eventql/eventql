@@ -9,12 +9,12 @@
  */
 #ifndef _FNORD_TSDB_STREAMCHUNK_H
 #define _FNORD_TSDB_STREAMCHUNK_H
-#include <fnord-base/stdtypes.h>
-#include <fnord-base/option.h>
-#include <fnord-base/datetime.h>
-#include <fnord-base/util/binarymessagereader.h>
-#include <fnord-base/util/binarymessagewriter.h>
-#include <fnord-msg/MessageSchema.h>
+#include <fnord/stdtypes.h>
+#include <fnord/option.h>
+#include <fnord/datetime.h>
+#include <fnord/util/binarymessagereader.h>
+#include <fnord/util/binarymessagewriter.h>
+#include <fnord/protobuf/MessageSchema.h>
 #include <fnord-tsdb/StreamConfig.pb.h>
 #include <fnord-tsdb/RecordSet.h>
 #include <fnord-tsdb/TSDBNodeRef.h>

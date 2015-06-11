@@ -8,11 +8,11 @@
  * <http://www.gnu.org/licenses/>.
  */
 #pragma once
-#include "fnord-base/stdtypes.h"
+#include "fnord/stdtypes.h"
 #include <fnord-tsdb/TSDBClient.h>
 #include <fnord-tsdb/TSDBTableScanlet.h>
 #include <fnord-tsdb/TSDBTableScanMapperParams.pb.h>
-#include <fnord-msg/MessageSchema.h>
+#include <fnord/protobuf/MessageSchema.h>
 #include <dproc/Task.h>
 
 using namespace fnord;

@@ -8,8 +8,8 @@
  * <http://www.gnu.org/licenses/>.
  */
 #pragma once
-#include "fnord-base/stdtypes.h"
-#include "fnord-base/autoref.h"
+#include "fnord/stdtypes.h"
+#include "fnord/autoref.h"
 
 using namespace fnord;
 

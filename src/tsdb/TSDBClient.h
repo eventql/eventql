@@ -9,10 +9,10 @@
  */
 #ifndef _FNORD_TSDB_TSDBCLIENT_H
 #define _FNORD_TSDB_TSDBCLIENT_H
-#include <fnord-base/stdtypes.h>
-#include <fnord-base/random.h>
-#include <fnord-base/option.h>
-#include <fnord-http/httpconnectionpool.h>
+#include <fnord/stdtypes.h>
+#include <fnord/random.h>
+#include <fnord/option.h>
+#include <fnord/http/httpconnectionpool.h>
 #include <fnord-tsdb/PartitionInfo.pb.h>
 
 using namespace fnord;

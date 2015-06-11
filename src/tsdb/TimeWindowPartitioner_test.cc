@@ -10,7 +10,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include "fnord-base/test/unittest.h"
+#include "fnord/test/unittest.h"
 #include "fnord-tsdb/StreamChunk.h"
 #include "fnord-tsdb/TimeWindowPartitioner.h"
 
