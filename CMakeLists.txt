@@ -34,6 +34,8 @@ include_directories(${MODULE_INCLUDE})
 # DEPENDENCIES
 find_package(Threads)
 
+set(FNORD_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
+
 add_subdirectory(src/fnord)
 add_subdirectory(src/fnord/protobuf)
 add_subdirectory(src/fnord/mdb)
@@ -43,3 +45,4 @@ add_subdirectory(src/fnord/rpc)
 
 set(FNORD_INCLUDE ${MODULE_INCLUDE} PARENT_SCOPE)
 set(FNORD_LIBS ${FNORD_PROTOBUF_LIBS} ${CMAKE_THREAD_LIBS_INIT} PARENT_SCOPE)
+set(FNORD_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src PARENT_SCOPE)
