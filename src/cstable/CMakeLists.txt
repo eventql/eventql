@@ -53,4 +53,4 @@ add_executable(tests/test-recordmaterializer
 target_link_libraries(
     tests/test-recordmaterializer
     ${CMAKE_THREAD_LIBS_INIT}
-    ${FNORD_MSG_LIBS})
+    ${FNORD_LIBS})
