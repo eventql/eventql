@@ -70,6 +70,7 @@ add_executable(metricd
     $<TARGET_OBJECTS:fnord-mdb>
     $<TARGET_OBJECTS:fnord-msg>
     $<TARGET_OBJECTS:fnord-cstable>
+    $<TARGET_OBJECTS:fnord-dproc>
     $<TARGET_OBJECTS:sensord-client>
     metricd.cc)
 
