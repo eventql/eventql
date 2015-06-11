@@ -9,7 +9,7 @@
  */
 #ifndef _FNORD_MDBUTIL_H
 #define _FNORD_MDBUTIL_H
-#include "fnord-mdb/MDBTransaction.h"
+#include "fnord/mdb/MDBTransaction.h"
 
 namespace fnord {
 namespace mdb {
