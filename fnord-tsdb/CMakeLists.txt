@@ -22,6 +22,7 @@ add_library(fnord-tsdb OBJECT
     TSDBServlet.cc
     RecordSet.cc
     StreamChunk.cc
+    CSTableIndex.cc
     ${PROTO_SRCS})
 
 add_executable(tests/test-recordset

@@ -35,7 +35,7 @@ void TSDBTableScanReducer<ScanletType>::compute(dproc::TaskContext* context) {
 template <typename ScanletType>
 List<dproc::TaskDependency> TSDBTableScanReducer<ScanletType>::dependencies()
     const {
-  auto stream_key = scanlet_->streamKey();
+  auto stream_key = params_.stream_key();
   auto input_partitions = tsdb_->listPartitions(
       stream_key,
       params_.from(),
