@@ -55,15 +55,7 @@ include_directories(${INVENTORYD_INCLUDE})
 
 add_subdirectory(app/logjoind)
 include_directories(${LOGJOIND_INCLUDE})
-#
-#add_subdirectory(3rdparty/brokerd)
-#include_directories(${BROKERD_INCLUDE})
-#
-#include_directories(3rdparty/chartsql/src/)
-#
-#add_subdirectory(3rdparty/libfnord/fnord-metricdb)
-#add_subdirectory(3rdparty/libfnord/dproc)
-#add_subdirectory(3rdparty/libfnord/dproc)
-#add_subdirectory(3rdparty/libfnord/fnord-afx)
-#add_subdirectory(src/)
+
+add_subdirectory(app/analyticsd)
+include_directories(${ANALYTICSD_INCLUDE})
 
