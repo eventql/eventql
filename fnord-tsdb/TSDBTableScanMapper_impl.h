@@ -58,7 +58,10 @@ void TSDBTableScanMapper<ScanletType>::scanWithCSTableIndex(
   auto data = dep->encode();
 
   cstable::CSTableReader reader(data);
-  cstable::RecordMaterializer materializer(schema_.get(), &reader);
+  cstable::RecordMaterializer materializer(
+      schema_.get(),
+      &reader,
+      scanlet_->requiredFields());
 
   auto rec_count = reader.numRecords();
   // FIXPAUL soooo sloooooowww
