@@ -9,10 +9,10 @@
  */
 #ifndef _FNORD_CSTABLE_COLUMNREADER_H
 #define _FNORD_CSTABLE_COLUMNREADER_H
-#include <fnord-base/stdtypes.h>
-#include <fnord-base/autoref.h>
-#include <fnord-base/util/binarymessagereader.h>
-#include <fnord-base/util/BitPackDecoder.h>
+#include <fnord/stdtypes.h>
+#include <fnord/autoref.h>
+#include <fnord/util/binarymessagereader.h>
+#include <fnord/util/BitPackDecoder.h>
 
 namespace fnord {
 namespace cstable {
