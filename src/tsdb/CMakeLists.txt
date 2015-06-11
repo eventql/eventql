@@ -38,7 +38,8 @@ add_executable(tests/test-recordset
     $<TARGET_OBJECTS:dproc>
     RecordSet_test.cc)
 
-target_link_libraries(tests/test-recordset ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_LIBS})
+message(STATUS FNORD LIVS:  ${FNORD_LIBS})
+target_link_libraries(tests/test-recordset ${FNORD_LIBS})
 
 add_executable(tests/test-tsdbnode
     $<TARGET_OBJECTS:fnord-base>
@@ -52,7 +53,7 @@ add_executable(tests/test-tsdbnode
     $<TARGET_OBJECTS:dproc>
     TSDBNode_test.cc)
 
-target_link_libraries(tests/test-tsdbnode ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_LIBS})
+target_link_libraries(tests/test-tsdbnode ${CMAKE_THREAD_LIBS_INIT} ${FNORD_LIBS})
 
 add_executable(tests/test-tsdb-timewindowpartitioner
     $<TARGET_OBJECTS:fnord-base>
@@ -66,4 +67,4 @@ add_executable(tests/test-tsdb-timewindowpartitioner
     $<TARGET_OBJECTS:dproc>
     TimeWindowPartitioner_test.cc)
 
-target_link_libraries(tests/test-tsdb-timewindowpartitioner ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_LIBS})
+target_link_libraries(tests/test-tsdb-timewindowpartitioner ${CMAKE_THREAD_LIBS_INIT} ${FNORD_LIBS})
