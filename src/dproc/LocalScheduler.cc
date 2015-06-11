@@ -15,7 +15,7 @@
 #include <fnord-base/io/fileutil.h>
 #include <fnord-base/util/binarymessagereader.h>
 #include <fnord-base/util/binarymessagewriter.h>
-#include <fnord-dproc/LocalScheduler.h>
+#include <dproc/LocalScheduler.h>
 
 namespace fnord {
 namespace dproc {

@@ -11,8 +11,8 @@
 #define _FNORD_DPROC_APPLICATION_H
 #include <fnord-base/stdtypes.h>
 #include <fnord-base/autoref.h>
-#include <fnord-dproc/Task.h>
-#include <fnord-dproc/TaskSpec.pb.h>
+#include <dproc/Task.h>
+#include <dproc/TaskSpec.pb.h>
 #include <fnord-msg/msg.h>
 
 namespace fnord {

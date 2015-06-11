@@ -13,9 +13,9 @@
 #include "fnord-base/random.h"
 #include "fnord-base/thread/taskscheduler.h"
 #include "fnord-base/thread/FixedSizeThreadPool.h"
-#include <fnord-dproc/Application.h>
-#include <fnord-dproc/Scheduler.h>
-#include <fnord-dproc/TaskSpec.pb.h>
+#include <dproc/Application.h>
+#include <dproc/Scheduler.h>
+#include <dproc/TaskSpec.pb.h>
 
 namespace fnord {
 namespace dproc {

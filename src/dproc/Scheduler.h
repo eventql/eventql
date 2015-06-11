@@ -10,9 +10,9 @@
 #ifndef _FNORD_SCHEDULER_H
 #define _FNORD_SCHEDULER_H
 #include "fnord-base/stdtypes.h"
-#include <fnord-dproc/Application.h>
-#include <fnord-dproc/TaskSpec.pb.h>
-#include <fnord-dproc/TaskResultFuture.h>
+#include <dproc/Application.h>
+#include <dproc/TaskSpec.pb.h>
+#include <dproc/TaskResultFuture.h>
 
 namespace fnord {
 namespace dproc {

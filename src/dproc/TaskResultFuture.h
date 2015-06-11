@@ -10,7 +10,7 @@
 #ifndef _FNORD_DPROC_TASKRESULT_H
 #define _FNORD_DPROC_TASKRESULT_H
 #include <fnord-base/stdtypes.h>
-#include <fnord-dproc/Task.h>
+#include <dproc/Task.h>
 
 namespace fnord {
 namespace dproc {
