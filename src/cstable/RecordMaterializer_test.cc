@@ -13,7 +13,6 @@
 #include "fnord/test/unittest.h"
 #include "fnord/protobuf/MessageEncoder.h"
 #include "fnord/protobuf/MessagePrinter.h"
-#include "tsdb/RecordSet.h"
 #include "cstable/CSTableReader.h"
 #include "cstable/CSTableBuilder.h"
 #include "cstable/RecordMaterializer.h"
