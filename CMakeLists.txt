@@ -7,13 +7,13 @@ project(cmapp)
 
 option(ENABLE_TESTS "Build unit tests [default: ON]" ON)
 
-include_directories(${PROJECT_BINARY_DIR})
-include_directories(${PROJECT_BINARY_DIR}/3rdparty/libfnord/)
-file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/tests)
-include_directories(./)
-include_directories(./src)
-include_directories(3rdparty/libfnord/)
-include_directories(3rdparty/libfnord/3rdparty/)
+#include_directories(${PROJECT_BINARY_DIR})
+#include_directories(${PROJECT_BINARY_DIR}/3rdparty/libfnord/)
+#file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/tests)
+#include_directories(./)
+#include_directories(./src)
+#include_directories(3rdparty/libfnord/)
+#include_directories(3rdparty/libfnord/3rdparty/)
 
 set(CMAKE_CXX_FLAGS "-ftemplate-depth=500 ${CMAKE_CXX_FLAGS}")
 # set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fsanitize=address -g")
@@ -40,33 +40,35 @@ find_package(Threads)
 
 set(NO_BUNDLED_LIBFNORD true)
 
+add_subdirectory(lib/libfnord)
+include_directories(${FNORD_INCLUDE})
 
-add_subdirectory(3rdparty/libfnord/fnord-base)
-add_subdirectory(3rdparty/libfnord/fnord-msg)
-add_subdirectory(3rdparty/libfnord/fnord-fts)
-include_directories(${FNORD_FTS_INCLUDE})
-add_subdirectory(3rdparty/libfnord/fnord-mdb)
-add_subdirectory(3rdparty/libfnord/fnord-rpc)
-add_subdirectory(3rdparty/libfnord/fnord-http)
-add_subdirectory(3rdparty/libfnord/fnord-json)
-add_subdirectory(3rdparty/libfnord/fnord-cstable)
-add_subdirectory(3rdparty/libfnord/fnord-sstable)
-add_subdirectory(3rdparty/libfnord/fnord-chart)
-
-add_subdirectory(3rdparty/sensord)
-include_directories(${SENSORD_INCLUDE})
-
-add_subdirectory(3rdparty/tsdb)
+#add_subdirectory(3rdparty/libfnord/fnord-base)
+#add_subdirectory(3rdparty/libfnord/fnord-msg)
+#add_subdirectory(3rdparty/libfnord/fnord-fts)
+#include_directories(${FNORD_FTS_INCLUDE})
+#add_subdirectory(3rdparty/libfnord/fnord-mdb)
+#add_subdirectory(3rdparty/libfnord/fnord-rpc)
+#add_subdirectory(3rdparty/libfnord/fnord-http)
+#add_subdirectory(3rdparty/libfnord/fnord-json)
+#add_subdirectory(3rdparty/libfnord/fnord-cstable)
+#add_subdirectory(3rdparty/libfnord/fnord-sstable)
+#add_subdirectory(3rdparty/libfnord/fnord-chart)
+#
+#add_subdirectory(3rdparty/sensord)
+#include_directories(${SENSORD_INCLUDE})
+#
+add_subdirectory(app/tsdb)
 include_directories(${TSDB_INCLUDE})
-
-add_subdirectory(3rdparty/brokerd)
-include_directories(${BROKERD_INCLUDE})
-
-include_directories(3rdparty/chartsql/src/)
-
-add_subdirectory(3rdparty/libfnord/fnord-metricdb)
-add_subdirectory(3rdparty/libfnord/fnord-dht)
-add_subdirectory(3rdparty/libfnord/fnord-dproc)
-add_subdirectory(3rdparty/libfnord/fnord-afx)
-add_subdirectory(src/)
+#
+#add_subdirectory(3rdparty/brokerd)
+#include_directories(${BROKERD_INCLUDE})
+#
+#include_directories(3rdparty/chartsql/src/)
+#
+#add_subdirectory(3rdparty/libfnord/fnord-metricdb)
+#add_subdirectory(3rdparty/libfnord/fnord-dht)
+#add_subdirectory(3rdparty/libfnord/fnord-dproc)
+#add_subdirectory(3rdparty/libfnord/fnord-afx)
+#add_subdirectory(src/)
 
