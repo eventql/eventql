@@ -7,7 +7,7 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <fnordmetric/sstable/cursor.h>
+#include <fnord-sstable/cursor.h>
 
 namespace fnord {
 namespace sstable {
@@ -23,11 +23,25 @@ std::string Cursor::getKeyString() {
   return std::string((char *) data, size);
 }
 
+Buffer Cursor::getKeyBuffer() {
+  void* data;
+  size_t size;
+  getKey(&data, &size);
+  return Buffer(data, size);
+}
+
 std::string Cursor::getDataString() {
   void* data;
   size_t size;
   getData(&data, &size);
   return std::string((char *) data, size);
+}
+
+Buffer Cursor::getDataBuffer() {
+  void* data;
+  size_t size;
+  getData(&data, &size);
+  return Buffer(data, size);
 }
 
 }

@@ -13,15 +13,18 @@
 #include <string>
 #include <vector>
 #include <memory>
-#include <fnordmetric/io/file.h>
-#include <fnordmetric/io/pagemanager.h>
-#include <fnordmetric/sstable/cursor.h>
-#include <fnordmetric/sstable/index.h>
-#include <fnordmetric/sstable/indexprovider.h>
-#include <fnordmetric/util/runtimeexception.h>
+#include <fnord-base/io/file.h>
+#include <fnord-base/io/pagemanager.h>
+#include <fnord-sstable/cursor.h>
+#include <fnord-sstable/index.h>
+#include <fnord-sstable/indexprovider.h>
+#include <fnord-base/exception.h>
 
 namespace fnord {
 namespace sstable {
+
+class SSTableColumnWriter;
+class SSTableColumnSchema;
 
 /**
  * A sstable that can written (appended) to and read from at the same time.
@@ -41,11 +44,13 @@ public:
         io::MmapPageManager* mmap);
 
     void seekTo(size_t body_offset) override;
+    bool trySeekTo(size_t body_offset) override;
     bool next() override;
     bool valid() override;
     void getKey(void** data, size_t* size) override;
     void getData(void** data, size_t* size) override;
     size_t position() const override;
+    size_t nextPosition() override;
   protected:
     std::unique_ptr<io::PageManager::PageRef> getPage();
     SSTableWriter* table_;
@@ -77,7 +82,7 @@ public:
   /**
    * Append a row to the sstable
    */
-  void appendRow(
+  uint64_t appendRow(
       void const* key,
       size_t key_size,
       void const* data,
@@ -86,9 +91,16 @@ public:
   /**
    * Append a row to the sstable
    */
-  void appendRow(
+  uint64_t appendRow(
       const std::string& key,
       const std::string& value);
+
+  /**
+   * Append a row to the sstable
+   */
+  uint64_t appendRow(
+      const std::string& key,
+      const SSTableColumnWriter& columns);
 
   /**
    * Finalize the sstable (writes out the indexes to disk)
@@ -107,6 +119,7 @@ public:
   size_t headerSize() const;
 
   void writeIndex(uint32_t index_type, void* data, size_t size);
+  void writeIndex(uint32_t index_type, const Buffer& buf);
 
 protected:
 

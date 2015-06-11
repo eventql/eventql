@@ -9,7 +9,7 @@
  */
 #ifndef _FNORDMETRIC_METRICDB_FILEHEADERWRITER_H
 #define _FNORDMETRIC_METRICDB_FILEHEADERWRITER_H
-#include <fnordmetric/util/binarymessagewriter.h>
+#include <fnord-base/util/binarymessagewriter.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <string>
@@ -42,6 +42,11 @@ public:
    * Update/rewrite the body size field
    */
   void updateBodySize(size_t body_size);
+
+  /**
+   * Update/set a flag
+   */
+  void setFlag(FileHeaderFlags flag);
 
 };
 

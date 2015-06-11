@@ -7,19 +7,29 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <fnordmetric/sstable/binaryformat.h>
-#include <fnordmetric/sstable/sstablereader.h>
-#include <fnordmetric/util/fnv.h>
-#include <fnordmetric/util/runtimeexception.h>
+#include <fnord-base/fnv.h>
+#include <fnord-base/exception.h>
+#include <fnord-base/inspect.h>
+#include <fnord-sstable/binaryformat.h>
+#include <fnord-sstable/sstablereader.h>
 
 namespace fnord {
 namespace sstable {
 
+
 SSTableReader::SSTableReader(
-    io::File&& file) :
-    mmap_(new io::MmappedFile(std::move(file))),
+    const String& filename) :
+    SSTableReader(File::openFile(filename, File::O_READ)) {}
+
+SSTableReader::SSTableReader(
+    File&& file) :
+    SSTableReader(new io::MmappedFile(std::move(file))) {}
+
+SSTableReader::SSTableReader(
+    RefPtr<VFSFile> vfs_file) :
+    mmap_(vfs_file),
     file_size_(mmap_->size()),
-    header_(mmap_->ptr(), file_size_) {
+    header_(mmap_->data(), file_size_) {
   if (!header_.verify()) {
     RAISE(kIllegalStateError, "corrupt sstable header");
   }
@@ -36,12 +46,12 @@ void SSTableReader::readHeader(const void** userdata, size_t* userdata_size) {
   header_.readUserdata(userdata, userdata_size);
 }
 
-util::Buffer SSTableReader::readHeader() {
+Buffer SSTableReader::readHeader() {
   const void* data;
   size_t size;
   readHeader(&data, &size);
 
-  return util::Buffer(data, size);
+  return Buffer(data, size);
 }
 
 void SSTableReader::readFooter(
@@ -78,7 +88,7 @@ void SSTableReader::readFooter(
         RAISE(kIllegalStateError, "footer exceeds file boundary");
       }
 
-      util::FNV<uint32_t> fnv;
+      FNV<uint32_t> fnv;
       auto checksum = fnv.hash(*data, *size);
 
       if (checksum != footer_header->footer_checksum) {
@@ -94,11 +104,11 @@ void SSTableReader::readFooter(
   }
 }
 
-util::Buffer SSTableReader::readFooter(uint32_t type) {
+Buffer SSTableReader::readFooter(uint32_t type) {
   void* data = nullptr;
   size_t size = 0;
   readFooter(type, &data, &size);
-  return util::Buffer(data, size);
+  return Buffer(data, size);
 }
 
 std::unique_ptr<SSTableReader::SSTableReaderCursor> SSTableReader::getCursor() {
@@ -110,8 +120,16 @@ std::unique_ptr<SSTableReader::SSTableReaderCursor> SSTableReader::getCursor() {
   return std::unique_ptr<SSTableReaderCursor>(cursor);
 }
 
+bool SSTableReader::isFinalized() const {
+  return header_.isFinalized();
+}
+
 size_t SSTableReader::bodySize() const {
   return header_.bodySize();
+}
+
+size_t SSTableReader::bodyOffset() const {
+  return header_.headerSize();
 }
 
 size_t SSTableReader::headerSize() const {
@@ -119,7 +137,7 @@ size_t SSTableReader::headerSize() const {
 }
 
 SSTableReader::SSTableReaderCursor::SSTableReaderCursor(
-    std::shared_ptr<io::MmappedFile> mmap,
+    RefPtr<VFSFile> mmap,
     size_t begin,
     size_t limit) :
     mmap_(std::move(mmap)),
@@ -131,8 +149,27 @@ void SSTableReader::SSTableReaderCursor::seekTo(size_t body_offset) {
   pos_ = begin_ + body_offset;
 }
 
+bool SSTableReader::SSTableReaderCursor::trySeekTo(size_t body_offset) {
+  if (begin_ + body_offset < limit_) {
+    pos_ = begin_ + body_offset;
+    return true;
+  } else {
+    return false;
+  }
+}
+
 size_t SSTableReader::SSTableReaderCursor::position() const {
   return pos_ - begin_;
+}
+
+size_t SSTableReader::SSTableReaderCursor::nextPosition() {
+  auto header = mmap_->structAt<BinaryFormat::RowHeader>(pos_);
+
+  auto next_pos = pos_ + sizeof(BinaryFormat::RowHeader) +
+      header->key_size +
+      header->data_size;
+
+  return next_pos - begin_;
 }
 
 bool SSTableReader::SSTableReaderCursor::next() {
@@ -158,7 +195,7 @@ bool SSTableReader::SSTableReaderCursor::valid() {
       header->key_size +
       header->data_size;
 
-  return header->key_size > 0 && row_limit <= limit_;
+  return row_limit <= limit_;
 }
 
 void SSTableReader::SSTableReaderCursor::getKey(void** data, size_t* size) {

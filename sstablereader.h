@@ -13,15 +13,15 @@
 #include <string>
 #include <vector>
 #include <memory>
-#include <fnordmetric/io/file.h>
-#include <fnordmetric/io/mmappedfile.h>
-#include <fnordmetric/sstable/binaryformat.h>
-#include <fnordmetric/sstable/fileheaderreader.h>
-#include <fnordmetric/sstable/cursor.h>
-#include <fnordmetric/sstable/index.h>
-#include <fnordmetric/sstable/indexprovider.h>
-#include <fnordmetric/util/buffer.h>
-#include <fnordmetric/util/runtimeexception.h>
+#include <fnord-base/buffer.h>
+#include <fnord-base/exception.h>
+#include <fnord-base/io/file.h>
+#include <fnord-base/io/mmappedfile.h>
+#include <fnord-sstable/binaryformat.h>
+#include <fnord-sstable/fileheaderreader.h>
+#include <fnord-sstable/cursor.h>
+#include <fnord-sstable/index.h>
+#include <fnord-sstable/indexprovider.h>
 
 namespace fnord {
 namespace sstable {
@@ -31,24 +31,28 @@ public:
   class SSTableReaderCursor : public sstable::Cursor {
   public:
     SSTableReaderCursor(
-        std::shared_ptr<io::MmappedFile> file,
+        RefPtr<VFSFile> file,
         size_t begin,
         size_t limit);
 
     void seekTo(size_t body_offset) override;
+    bool trySeekTo(size_t body_offset) override;
     bool next() override;
     bool valid() override;
     void getKey(void** data, size_t* size) override;
     void getData(void** data, size_t* size) override;
     size_t position() const override;
+    size_t nextPosition() override;
   protected:
-    std::shared_ptr<io::MmappedFile> mmap_;
+    RefPtr<VFSFile> mmap_;
     size_t pos_;
     size_t begin_;
     size_t limit_;
   };
 
-  SSTableReader(io::File&& file);
+  SSTableReader(const String& filename);
+  SSTableReader(File&& file);
+  SSTableReader(RefPtr<VFSFile> vfs_file);
   SSTableReader(const SSTableReader& other) = delete;
   SSTableReader& operator=(const SSTableReader& other) = delete;
   ~SSTableReader();
@@ -59,15 +63,32 @@ public:
   std::unique_ptr<SSTableReaderCursor> getCursor();
 
   void readHeader(const void** data, size_t* size);
-  util::Buffer readHeader();
+  Buffer readHeader();
   void readFooter(uint32_t type, void** data, size_t* size);
-  util::Buffer readFooter(uint32_t type);
+  Buffer readFooter(uint32_t type);
 
+  /**
+   * Returns the body size in bytes
+   */
   size_t bodySize() const;
+
+  /**
+   * Returns true iff the table is finalized
+   */
+  bool isFinalized() const;
+
+  /**
+   * Returns the body offset (the position of the first body byte in the file)
+   */
+  size_t bodyOffset() const;
+
+  /**
+   * Returns the size of the userdata blob stored in the sstable header in bytes
+   **/
   size_t headerSize() const;
 
 private:
-  std::shared_ptr<io::MmappedFile> mmap_;
+  RefPtr<VFSFile> mmap_;
   uint64_t file_size_;
   FileHeaderReader header_;
 };

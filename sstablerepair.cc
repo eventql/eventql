@@ -7,13 +7,12 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <fnordmetric/environment.h>
-#include <fnordmetric/sstable/sstablereader.h>
-#include <fnordmetric/sstable/sstablerepair.h>
-#include <fnordmetric/util/fnv.h>
-#include <fnordmetric/util/runtimeexception.h>
+#include <fnord-base/exception.h>
+#include <fnord-base/fnv.h>
+#include <fnord-sstable/sstablereader.h>
+#include <fnord-sstable/sstablerepair.h>
 
-using fnordmetric::util::RuntimeException;
+using fnord::Exception;
 
 namespace fnord {
 namespace sstable {
@@ -23,17 +22,19 @@ SSTableRepair::SSTableRepair(
     filename_(filename) {}
 
 bool SSTableRepair::checkAndRepair(bool repair /* = false */) {
-  auto file = io::File::openFile(filename_, io::File::O_READ);
+  auto file = File::openFile(filename_, File::O_READ);
   std::unique_ptr<fnord::sstable::SSTableReader> reader_;
 
   try {
     reader_.reset(new sstable::SSTableReader(std::move(file)));
-  } catch (RuntimeException& rte) {
+  } catch (fnord::Exception& rte) {
+    /*
     fnordmetric::env()->logger()->printf(
         "INFO",
         "SSTableRepair: sstable %s header is corrupt: %s",
         filename_.c_str(),
         rte.getMessage().c_str());
+    */
 
     /* the constructor raises if the checksum is invalid or if the file
      * metadata exceeds the file bounds. there is nothing we can do to recover
@@ -48,12 +49,14 @@ bool SSTableRepair::checkAndRepair(bool repair /* = false */) {
       void* dummy_data;
       size_t dummy_size;
       reader_->readFooter(0, &dummy_data, &dummy_size);
-    } catch (RuntimeException& rte) {
+    } catch (fnord::Exception& rte) {
+      /*
       fnordmetric::env()->logger()->printf(
           "INFO",
           "SSTableRepair: sstable %s footer is corrupt: %s",
           filename_.c_str(),
           rte.getMessage().c_str());
+      */
 
       return false;
     }
@@ -63,7 +66,7 @@ bool SSTableRepair::checkAndRepair(bool repair /* = false */) {
 }
 
 bool SSTableRepair::checkAndRepairUnfinishedTable(bool repair) {
-  io::MmappedFile file(io::File::openFile(filename_, io::File::O_READ));
+  io::MmappedFile file(File::openFile(filename_, File::O_READ));
   FileHeaderReader header_reader(file.data(), file.size());
 
   if (!header_reader.verify()) {
@@ -86,7 +89,7 @@ bool SSTableRepair::checkAndRepairUnfinishedTable(bool repair) {
       break;
     }
 
-    util::FNV<uint32_t> fnv;
+    FNV<uint32_t> fnv;
     auto checksum = fnv.hash(
         file.structAt<void>(pos + sizeof(uint32_t)),
         row_len - sizeof(uint32_t));
@@ -99,21 +102,25 @@ bool SSTableRepair::checkAndRepairUnfinishedTable(bool repair) {
   }
 
   if (pos < end) {
+    /*
     fnordmetric::env()->logger()->printf(
         "INFO",
         "SSTableRepair: found %i extraneous trailing bytes in sstable %s",
         (int) (end - pos),
         filename_.c_str());
+    */
 
     if (repair) {
+      /*
       fnordmetric::env()->logger()->printf(
           "INFO",
           "SSTableRepair: truncating sstable %s to %i bytes",
           filename_.c_str(),
           (int) pos);
+      */
 
-        auto writable_file = io::File::openFile(filename_, io::File::O_WRITE);
-        writable_file.truncate(pos);
+      auto writable_file = File::openFile(filename_, File::O_WRITE);
+      writable_file.truncate(pos);
     } else {
       return false;
     }

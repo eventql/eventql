@@ -10,13 +10,13 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <fnordmetric/io/file.h>
-#include <fnordmetric/util/unittest.h>
-#include <fnordmetric/sstable/sstablewriter.h>
-#include <fnordmetric/sstable/rowoffsetindex.h>
+#include <fnord-base/io/file.h>
+#include <util/unittest.h>
+#include <fnord-sstable/sstablewriter.h>
+#include <fnord-sstable/rowoffsetindex.h>
 
 using namespace fnord::sstable;
-using namespace fnord::io;
+using namespace fnord;
 UNIT_TEST(SSTableTest);
 
 TEST_CASE(SSTableTest, TestSSTableWriter, [] () {

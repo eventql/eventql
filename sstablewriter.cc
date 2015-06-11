@@ -7,13 +7,14 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <fnordmetric/sstable/binaryformat.h>
-#include <fnordmetric/sstable/fileheaderwriter.h>
-#include <fnordmetric/sstable/fileheaderreader.h>
-#include <fnordmetric/sstable/sstablewriter.h>
-#include <fnordmetric/util/fnv.h>
-#include <fnordmetric/util/runtimeexception.h>
 #include <string.h>
+#include <fnord-base/exception.h>
+#include <fnord-base/fnv.h>
+#include <fnord-sstable/binaryformat.h>
+#include <fnord-sstable/fileheaderwriter.h>
+#include <fnord-sstable/fileheaderreader.h>
+#include <fnord-sstable/sstablewriter.h>
+#include <fnord-sstable/SSTableColumnWriter.h>
 
 namespace fnord {
 namespace sstable {
@@ -23,7 +24,10 @@ std::unique_ptr<SSTableWriter> SSTableWriter::create(
     IndexProvider index_provider,
     void const* header,
     size_t header_size) {
-  auto file = io::File::openFile(filename, io::File::O_READ);
+  auto file = File::openFile(
+      filename,
+      File::O_READ | File::O_WRITE | File::O_CREATE);
+
   auto file_size = file.size();
   if (file_size > 0) {
     RAISE(kIllegalStateError, "file size must be 0");
@@ -41,7 +45,7 @@ std::unique_ptr<SSTableWriter> SSTableWriter::create(
 std::unique_ptr<SSTableWriter> SSTableWriter::reopen(
     const std::string& filename,
     IndexProvider index_provider) {
-  auto file = io::File::openFile(filename, io::File::O_READ);
+  auto file = File::openFile(filename, File::O_READ);
   auto file_size = file.size();
 
   auto sstable = new SSTableWriter(
@@ -67,7 +71,7 @@ SSTableWriter::~SSTableWriter() {
 }
 
 // FIXPAUL lock
-void SSTableWriter::appendRow(
+uint64_t SSTableWriter::appendRow(
     void const* key,
     size_t key_size,
     void const* data,
@@ -92,7 +96,7 @@ void SSTableWriter::appendRow(
       sizeof(BinaryFormat::RowHeader) + key_size);
   memcpy(data_dst, data, data_size);
 
-  util::FNV<uint32_t> fnv;
+  FNV<uint32_t> fnv;
   header->checksum = fnv.hash(
       page->structAt<void>(sizeof(uint32_t)),
       page_size - sizeof(uint32_t));
@@ -105,12 +109,20 @@ void SSTableWriter::appendRow(
   for (const auto& idx : indexes_) {
     idx->addRow(row_body_offset, key, key_size, data, data_size);
   }
+
+  return row_body_offset;
 }
 
-void SSTableWriter::appendRow(
+uint64_t SSTableWriter::appendRow(
     const std::string& key,
     const std::string& value) {
-  appendRow(key.data(), key.size(), value.data(), value.size());
+  return appendRow(key.data(), key.size(), value.data(), value.size());
+}
+
+uint64_t SSTableWriter::appendRow(
+    const std::string& key,
+    const SSTableColumnWriter& value) {
+  return appendRow(key.data(), key.size(), value.data(), value.size());
 }
 
 // FIXPAUL lock
@@ -137,6 +149,10 @@ void SSTableWriter::writeHeader(void const* userdata, size_t userdata_size) {
   page->sync();
 }
 
+void SSTableWriter::writeIndex(uint32_t index_type, const Buffer& buf) {
+  writeIndex(index_type, buf.data(), buf.size());
+}
+
 void SSTableWriter::writeIndex(uint32_t index_type, void* data, size_t size) {
   if (finalized_) {
     RAISE(kIllegalStateError, "table is immutable (alread finalized)");
@@ -154,7 +170,7 @@ void SSTableWriter::writeIndex(uint32_t index_type, void* data, size_t size) {
   header->type = index_type;
   header->footer_size = size;
 
-  util::FNV<uint32_t> fnv;
+  FNV<uint32_t> fnv;
   header->footer_checksum = fnv.hash(data, size);
 
   if (size > 0) {
@@ -196,6 +212,7 @@ void SSTableWriter::finalize() {
 
   FileHeaderWriter header(page->ptr(), page->size());
   header.updateBodySize(body_size_);
+  header.setFlag(FileHeaderFlags::FINALIZED);
 
   page->sync();
   mmap_->shrinkFile();
@@ -223,6 +240,15 @@ SSTableWriter::SSTableWriterCursor::SSTableWriterCursor(
     mmap_(mmap),
     pos_(0) {}
 
+bool SSTableWriter::SSTableWriterCursor::trySeekTo(size_t body_offset) {
+  if (body_offset >= table_->bodySize()) {
+    return false;
+  } else {
+    pos_ = body_offset;
+    return true;
+  }
+}
+
 void SSTableWriter::SSTableWriterCursor::seekTo(size_t body_offset) {
   if (body_offset >= table_->bodySize()) {
     RAISE(kIndexError, "seekTo() out of bounds position");
@@ -239,11 +265,7 @@ bool SSTableWriter::SSTableWriterCursor::next() {
   size_t row_size = sizeof(BinaryFormat::RowHeader) + header->key_size +
       header->data_size;
 
-  if (row_size > page_size) {
-    RAISE(kIllegalStateError, "row exceeds page boundary");
-  }
-
-  if (row_size == page_size) {
+  if (row_size >= page_size) {
     return false;
   } else {
     pos_ += row_size;
@@ -274,6 +296,15 @@ void SSTableWriter::SSTableWriterCursor::getKey(void** data, size_t* size) {
 
 size_t SSTableWriter::SSTableWriterCursor::position() const {
   return pos_;
+}
+
+size_t SSTableWriter::SSTableWriterCursor::nextPosition() {
+  auto page = getPage();
+  auto header = page->structAt<BinaryFormat::RowHeader>(0);
+  size_t row_size = sizeof(BinaryFormat::RowHeader) + header->key_size +
+      header->data_size;
+
+  return pos_ + row_size;
 }
 
 void SSTableWriter::SSTableWriterCursor::getData(void** data, size_t* size) {
