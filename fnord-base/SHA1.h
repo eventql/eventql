@@ -13,13 +13,50 @@
 #include <stdint.h>
 #include <string>
 #include <fnord-base/stdtypes.h>
+#include <fnord-base/exception.h>
 #include <fnord-base/buffer.h>
 
 namespace fnord {
 
-struct SHA1Hash {
-  uint8_t hash[20];
+class SHA1Hash {
+  friend class SHA1;
+public:
+  static const size_t kSize = 20;
+
+  struct DeferInitialization {};
+
+  /**
+   * Creates a new zero-initialized SHA1 hash
+   */
+  SHA1Hash();
+
+  /**
+   * Creates an unitialized SHA1 hash. The initial value is undefined.
+   */
+  SHA1Hash(DeferInitialization);
+
+  /**
+   * Creates a new SHA1 hash from an already computed hash. size must be 20
+   * bytes.
+   */
+  SHA1Hash(const void* data, size_t size);
+
+  bool operator==(const SHA1Hash& other) const;
+  bool operator<(const SHA1Hash& other) const;
+  bool operator>(const SHA1Hash& other) const;
+
+  inline const void* data() const {
+    return hash;
+  }
+
+  inline size_t size() const {
+    return sizeof(hash);
+  }
+
   String toString() const;
+
+protected:
+  uint8_t hash[kSize];
 };
 
 class SHA1 {
