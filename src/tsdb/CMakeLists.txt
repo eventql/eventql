@@ -5,12 +5,6 @@
 # the terms of the GNU General Public License v3.0. You should have received a
 # copy of the GNU General Public License along with this program. If not, see
 # <http://www.gnu.org/licenses/>.
-project(FNORD_TSDB)
-
-include_directories(../)
-include_directories(../3rdparty)
-include_directories(${CMAKE_CURRENT_BINARY_DIR}/../)
-
 file(GLOB PROTO_FILES *.proto)
 PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS ${PROTO_FILES})
 
