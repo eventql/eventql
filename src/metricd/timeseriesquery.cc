@@ -8,8 +8,8 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <algorithm>
-#include <fnord-base/exception.h>
-#include <fnord-base/inspect.h>
+#include <fnord/exception.h>
+#include <fnord/inspect.h>
 #include <fnord-metricdb/timeseriesquery.h>
 
 namespace fnord {

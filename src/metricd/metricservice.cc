@@ -8,8 +8,8 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include "fnord-metricdb/metricservice.h"
-#include "fnord-base/wallclock.h"
-#include "fnord-msg/msg.h"
+#include "fnord/wallclock.h"
+#include "fnord/protobuf/msg.h"
 
 namespace fnord {
 namespace metric_service {

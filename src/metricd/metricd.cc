@@ -9,25 +9,25 @@
  */
 #include <stdlib.h>
 #include <unistd.h>
-#include "fnord-base/application.h"
-#include "fnord-base/io/filerepository.h"
-#include "fnord-base/io/fileutil.h"
-#include "fnord-base/thread/eventloop.h"
-#include "fnord-base/thread/threadpool.h"
-#include "fnord-base/random.h"
-#include "fnord-base/wallclock.h"
-#include "fnord-base/cli/flagparser.h"
-#include "fnord-http/httprouter.h"
-#include "fnord-http/httpserver.h"
-#include "fnord-http/httpconnectionpool.h"
+#include "fnord/application.h"
+#include "fnord/io/filerepository.h"
+#include "fnord/io/fileutil.h"
+#include "fnord/thread/eventloop.h"
+#include "fnord/thread/threadpool.h"
+#include "fnord/random.h"
+#include "fnord/wallclock.h"
+#include "fnord/cli/flagparser.h"
+#include "fnord/http/httprouter.h"
+#include "fnord/http/httpserver.h"
+#include "fnord/http/httpconnectionpool.h"
 #include "fnord-tsdb/TSDBClient.h"
-#include "fnord-msg/msg.h"
+#include "fnord/protobuf/msg.h"
 #include <sensord/SensorSampleFeed.h>
 #include <sensord/SensorPushServlet.h>
 #include "fnord-metricdb/metricservice.h"
 #include "fnord-metricdb/httpapiservlet.h"
 #include "fnord-metricdb/backends/tsdb/metricrepository.h"
-#include "fnord-base/stats/statsd.h"
+#include "fnord/stats/statsd.h"
 
 using namespace fnord;
 

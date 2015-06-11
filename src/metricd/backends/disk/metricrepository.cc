@@ -8,7 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <fnord-sstable/sstablerepair.h>
-#include <fnord-base/thread/task.h>
+#include <fnord/thread/task.h>
 #include <fnord-metricdb/backends/disk/metricrepository.h>
 
 namespace fnord {

@@ -13,10 +13,10 @@
 #include "fnord-chart/canvas.h"
 #include "fnord-chart/linechart.h"
 #include "fnord-chart/svgtarget.h"
-#include "fnord-http/httpservice.h"
+#include "fnord/http/httpservice.h"
 #include "fnord-metricdb/metricservice.h"
 #include "fnord-metricdb/timeseriesquery.h"
-#include "fnord-json/json.h"
+#include "fnord/json/json.h"
 
 namespace fnord {
 namespace metric_service {
