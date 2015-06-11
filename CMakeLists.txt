@@ -43,6 +43,12 @@ set(NO_BUNDLED_LIBFNORD true)
 add_subdirectory(lib/libfnord)
 include_directories(${FNORD_INCLUDE})
 
+add_subdirectory(lib/libcstable)
+include_directories(${CSTABLE_INCLUDE})
+
+add_subdirectory(lib/libsstable)
+include_directories(${SSTABLE_INCLUDE})
+
 #add_subdirectory(3rdparty/libfnord/fnord-base)
 #add_subdirectory(3rdparty/libfnord/fnord-msg)
 #add_subdirectory(3rdparty/libfnord/fnord-fts)
