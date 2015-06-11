@@ -182,6 +182,12 @@ void RecordMaterializer::insertValue(
           *((uint32_t*) column->data));
       break;
 
+    case msg::FieldType::UINT64:
+      record->addChild(
+          column->field_id,
+          *((uint64_t*) column->data));
+      break;
+
     case msg::FieldType::STRING:
       record->addChild(
           column->field_id,
