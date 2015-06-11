@@ -10,8 +10,8 @@
 #ifndef _FNORDMETRIC_CRATEBACKEND_CRATECONNECTION_H
 #define _FNORDMETRIC_CRATEBACKEND_CRATECONNECTION_H
 #include <functional>
-#include <fnord-base/uri.h>
-#include <fnord-json/json.h>
+#include <fnord/uri.h>
+#include <fnord/json/json.h>
 
 using namespace fnord;
 

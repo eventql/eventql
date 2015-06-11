@@ -12,10 +12,10 @@
 #include <mutex>
 #include <stdlib.h>
 #include <string>
-#include "fnord-base/datetime.h"
+#include "fnord/datetime.h"
 #include "fnord-metricdb/metricrepository.h"
-#include "fnord-base/stats/counter.h"
-#include "fnord-base/thread/taskscheduler.h"
+#include "fnord/stats/counter.h"
+#include "fnord/thread/taskscheduler.h"
 #include "fnord-tsdb/TSDBClient.h"
 #include "fnord-metricdb/Sample.pb.h"
 

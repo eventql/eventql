@@ -9,7 +9,7 @@
  */
 #ifndef _FNORDMETRIC_METRICDB_LABELINDEXWRITER_H
 #define _FNORDMETRIC_METRICDB_LABELINDEXWRITER_H
-#include <fnord-base/util/binarymessagewriter.h>
+#include <fnord/util/binarymessagewriter.h>
 #include <fnord-metricdb/backends/disk/labelindex.h>
 #include <stdlib.h>
 #include <stdint.h>

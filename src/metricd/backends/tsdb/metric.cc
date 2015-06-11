@@ -7,9 +7,9 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <fnord-base/exception.h>
-#include <fnord-base/wallclock.h>
-#include <fnord-msg/msg.h>
+#include <fnord/exception.h>
+#include <fnord/wallclock.h>
+#include <fnord/protobuf/msg.h>
 #include <fnord-metricdb/backends/tsdb/metric.h>
 #include <fnord-metricdb/Sample.pb.h>
 
