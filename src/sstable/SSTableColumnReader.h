@@ -18,12 +18,12 @@
 #include <fnord/io/file.h>
 #include <fnord/io/mmappedfile.h>
 #include <fnord/util/binarymessagewriter.h>
-#include <fnord-sstable/binaryformat.h>
-#include <fnord-sstable/fileheaderreader.h>
-#include <fnord-sstable/cursor.h>
-#include <fnord-sstable/index.h>
-#include <fnord-sstable/indexprovider.h>
-#include <fnord-sstable/SSTableColumnSchema.h>
+#include <sstable/binaryformat.h>
+#include <sstable/fileheaderreader.h>
+#include <sstable/cursor.h>
+#include <sstable/index.h>
+#include <sstable/indexprovider.h>
+#include <sstable/SSTableColumnSchema.h>
 
 namespace fnord {
 namespace sstable {

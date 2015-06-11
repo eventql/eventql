@@ -8,7 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <fnord/ieee754.h>
-#include <fnord-sstable/SSTableColumnReader.h>
+#include <sstable/SSTableColumnReader.h>
 
 namespace fnord {
 namespace sstable {

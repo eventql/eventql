@@ -8,8 +8,8 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <algorithm>
-#include <fnord-sstable/SSTableScan.h>
-#include <fnord-sstable/SSTableColumnReader.h>
+#include <sstable/SSTableScan.h>
+#include <sstable/SSTableColumnReader.h>
 
 namespace fnord {
 namespace sstable {
