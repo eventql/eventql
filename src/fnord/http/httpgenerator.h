@@ -12,9 +12,9 @@
 #include <vector>
 #include <string>
 #include <utility>
-#include <fnord-base/io/outputstream.h>
-#include <fnord-http/httpresponse.h>
-#include <fnord-http/httprequest.h>
+#include <fnord/io/outputstream.h>
+#include <fnord/http/httpresponse.h>
+#include <fnord/http/httprequest.h>
 
 using fnord::OutputStream;
 

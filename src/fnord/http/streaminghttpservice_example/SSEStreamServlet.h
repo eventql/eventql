@@ -11,8 +11,8 @@
 #ifndef _CM_SSESTREAMSERVLET_H
 #define _CM_SSESTREAMSERVLET_H
 #include <unistd.h>
-#include "fnord-http/httpservice.h"
-#include "fnord-http/HTTPSSEStream.h"
+#include "fnord/http/httpservice.h"
+#include "fnord/http/HTTPSSEStream.h"
 
 namespace fnord {
 namespace http {

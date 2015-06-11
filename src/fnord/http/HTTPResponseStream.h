@@ -10,10 +10,10 @@
  */
 #ifndef _FNORD_HTTP_HTTPRESPONSESTREAM_H
 #define _FNORD_HTTP_HTTPRESPONSESTREAM_H
-#include <fnord-base/stdtypes.h>
-#include <fnord-base/autoref.h>
-#include <fnord-http/httpresponse.h>
-#include <fnord-http/httpserverconnection.h>
+#include <fnord/stdtypes.h>
+#include <fnord/autoref.h>
+#include <fnord/http/httpresponse.h>
+#include <fnord/http/httpserverconnection.h>
 
 namespace fnord {
 namespace http {

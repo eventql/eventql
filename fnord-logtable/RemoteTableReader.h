@@ -9,9 +9,9 @@
  */
 #ifndef _FNORD_LOGTABLE_REMOTETABLEREADER_H
 #define _FNORD_LOGTABLE_REMOTETABLEREADER_H
-#include <fnord-base/stdtypes.h>
-#include <fnord-base/autoref.h>
-#include <fnord-http/httpconnectionpool.h>
+#include <fnord/stdtypes.h>
+#include <fnord/autoref.h>
+#include <fnord/http/httpconnectionpool.h>
 #include <fnord-logtable/AbstractTableReader.h>
 
 namespace fnord {

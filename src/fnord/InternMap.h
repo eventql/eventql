@@ -10,7 +10,7 @@
 #ifndef _FNORD_BASE_INTERNAMP_H
 #define _FNORD_BASE_INTERNAMP_H
 #include <mutex>
-#include "fnord-base/stdtypes.h"
+#include "fnord/stdtypes.h"
 
 namespace fnord {
 

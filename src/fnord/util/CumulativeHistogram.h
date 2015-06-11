@@ -9,7 +9,7 @@
  */
 #ifndef _FNORD_UTIL_CUMULATIVEHISTOGRAM_H
 #define _FNORD_UTIL_CUMULATIVEHISTOGRAM_H
-#include "fnord-base/stdtypes.h"
+#include "fnord/stdtypes.h"
 
 namespace fnord {
 namespace util {

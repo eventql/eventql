@@ -7,8 +7,8 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <fnord-base/stringutil.h>
-#include <fnord-base/util/CSVOutputStream.h>
+#include <fnord/stringutil.h>
+#include <fnord/util/CSVOutputStream.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdio.h>

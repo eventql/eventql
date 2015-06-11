@@ -9,10 +9,10 @@
  */
 #include <string>
 #include <ctime>
-#include "fnord-base/datetime.h"
-#include "fnord-base/inspect.h"
-#include "fnord-base/wallclock.h"
-#include "fnord-base/stringutil.h"
+#include "fnord/datetime.h"
+#include "fnord/inspect.h"
+#include "fnord/wallclock.h"
+#include "fnord/stringutil.h"
 
 namespace fnord {
 

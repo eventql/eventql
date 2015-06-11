@@ -8,9 +8,9 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include "unistd.h"
-#include <fnord-base/logging.h>
-#include <fnord-base/wallclock.h>
-#include <fnord-http/HTTPFileDownload.h>
+#include <fnord/logging.h>
+#include <fnord/wallclock.h>
+#include <fnord/http/HTTPFileDownload.h>
 #include <fnord-afx/ArtifactReplication.h>
 
 namespace fnord {

@@ -9,7 +9,7 @@
  */
 #ifndef _FNORD_LOGTABLE_CHUNKINDEXWRITER_H
 #define _FNORD_LOGTABLE_CHUNKINDEXWRITER_H
-#include <fnord-base/stdtypes.h>
+#include <fnord/stdtypes.h>
 
 namespace fnord {
 namespace cstable {

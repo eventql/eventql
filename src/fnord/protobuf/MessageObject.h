@@ -9,7 +9,7 @@
  */
 #ifndef _FNORD_MSG_MESSAGEBOJECT_H
 #define _FNORD_MSG_MESSAGEBOJECT_H
-#include <fnord-base/stdtypes.h>
+#include <fnord/stdtypes.h>
 
 namespace fnord {
 namespace msg {

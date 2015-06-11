@@ -9,9 +9,9 @@
  */
 #ifndef _FNORD_MSG_MSG_H
 #define _FNORD_MSG_MSG_H
-#include <fnord-base/stdtypes.h>
-#include <fnord-base/buffer.h>
-#include "fnord-base/exception.h"
+#include <fnord/stdtypes.h>
+#include <fnord/buffer.h>
+#include "fnord/exception.h"
 
 namespace fnord {
 namespace msg {

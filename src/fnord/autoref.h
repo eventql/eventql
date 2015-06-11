@@ -14,7 +14,7 @@
 #include <mutex>
 #include <stdlib.h>
 #include <atomic>
-#include <fnord-base/stdtypes.h>
+#include <fnord/stdtypes.h>
 
 namespace fnord {
 

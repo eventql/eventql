@@ -7,8 +7,8 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include "fnord-http/statshttpservlet.h"
-#include "fnord-base/stats/statssink.h"
+#include "fnord/http/statshttpservlet.h"
+#include "fnord/stats/statssink.h"
 
 namespace fnord {
 namespace stats {

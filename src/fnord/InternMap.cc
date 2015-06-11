@@ -8,8 +8,8 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <string.h>
-#include "fnord-base/exception.h"
-#include "fnord-base/InternMap.h"
+#include "fnord/exception.h"
+#include "fnord/InternMap.h"
 
 namespace fnord {
 
