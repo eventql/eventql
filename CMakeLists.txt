@@ -30,16 +30,5 @@ set(MODULE_INCLUDE
 include_directories(${MODULE_INCLUDE})
 set(SENSORD_INCLUDE ${MODULE_INCLUDE} PARENT_SCOPE)
 
-# DEPENDENCIES
 find_package(Threads)
-
-if(NOT DEFINED NO_BUNDLED_LIBFNORD)
-  include_directories(${PROJECT_BINARY_DIR}/3rdparty/libfnord/)
-  include_directories(3rdparty/libfnord/)
-  include_directories(3rdparty/libfnord/3rdparty/)
-  add_subdirectory(3rdparty/libfnord/fnord-base)
-  add_subdirectory(3rdparty/libfnord/fnord-msg)
-  add_subdirectory(3rdparty/libfnord/fnord-http)
-endif()
-
 add_subdirectory(src/sensord)
