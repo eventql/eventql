@@ -7,17 +7,30 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
+#include <string.h>
 #include <fnord-base/SHA1.h>
 #include <fnord-base/stringutil.h>
 
 namespace fnord {
 
 SHA1Hash::SHA1Hash() {
-  memset(hash, 0,sizeof(hash));
+  memset(hash, 0, sizeof(hash));
 }
 
 SHA1Hash::SHA1Hash(DeferInitialization) {
   /* initialize nothing, this ctor is private and can only be called by SHA1 */
+}
+
+bool SHA1Hash::operator==(const SHA1Hash& other) const {
+  return strncmp((char*) hash, (char*) other.hash, sizeof(hash)) == 0;
+}
+
+bool SHA1Hash::operator<(const SHA1Hash& other) const {
+  return strncmp((char*) hash, (char*) other.hash, sizeof(hash)) < 0;
+}
+
+bool SHA1Hash::operator>(const SHA1Hash& other) const {
+  return strncmp((char*) hash, (char*) other.hash, sizeof(hash)) > 0;
 }
 
 SHA1Hash::SHA1Hash(const void* data, size_t size) {
