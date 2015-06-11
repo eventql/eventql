@@ -1,56 +1,36 @@
-# This file is part of the "FnordMetric" project
-#   Copyright (c) 2014 Paul Asmuth, Google Inc.
-#
-# FnordMetric is free software: you can redistribute it and/or modify it under
-# the terms of the GNU General Public License v3.0. You should have received a
-# copy of the GNU General Public License along with this program. If not, see
-# <http://www.gnu.org/licenses/>.
 cmake_minimum_required(VERSION 2.8.8)
-project(libfnord-sstable)
-include(FindPkgConfig)
+project(libcstable)
 
 option(ENABLE_TESTS "Build unit tests [default: ON]" ON)
 
-include_directories(${PROJECT_BINARY_DIR})
-file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/tests)
-include_directories(../)
-include_directories(../3rdparty/)
-
-find_package(Threads)
+# CFLAGS
+set(CMAKE_CXX_FLAGS "-ftemplate-depth=500 ${CMAKE_CXX_FLAGS}")
 
 if(APPLE)
-  set(CMAKE_CXX_FLAGS "-std=c++0x -stdlib=libc++ ${CMAKE_CXX_FLAGS}")
+  set(CMAKE_CXX_FLAGS "-std=c++0x ${CMAKE_CXX_FLAGS} -stdlib=libc++ ")
 else()
   set(CMAKE_CXX_FLAGS "-std=c++0x ${CMAKE_CXX_FLAGS}")
+  set(CMAKE_EXE_LINKER_FLAGS "-ldl -static-libstdc++ -static-libgcc")
+  set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
+  set(BUILD_SHARED_LIBRARIES OFF)
+  set(CMAKE_EXE_LINK_DYNAMIC_C_FLAGS)       # remove -Wl,-Bdynamic
+  set(CMAKE_EXE_LINK_DYNAMIC_CXX_FLAGS)
+  set(CMAKE_SHARED_LIBRARY_C_FLAGS)         # remove -fPIC
+  set(CMAKE_SHARED_LIBRARY_CXX_FLAGS)
+  set(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS)    # remove -rdynamic
+  set(CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS)
 endif()
 
-# sstable
-add_library(fnord-cstable OBJECT
-    CSTableBuilder.cc
-    CSTableReader.cc
-    CSTableWriter.cc
-    ColumnWriter.cc
-    BooleanColumnReader.cc
-    BooleanColumnWriter.cc
-    UInt32ColumnReader.cc
-    UInt32ColumnWriter.cc
-    UInt64ColumnReader.cc
-    UInt64ColumnWriter.cc
-    LEB128ColumnReader.cc
-    LEB128ColumnWriter.cc
-    BitPackedIntColumnReader.cc
-    BitPackedIntColumnWriter.cc
-    RecordMaterializer.cc
-    StringColumnReader.cc
-    StringColumnWriter.cc)
+# INCLUDES
+set(MODULE_INCLUDE
+    ${PROJECT_BINARY_DIR}
+    ${CMAKE_CURRENT_BINARY_DIR}/src
+    ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
-add_executable(tests/test-recordmaterializer
-    $<TARGET_OBJECTS:fnord-base>
-    $<TARGET_OBJECTS:fnord-protobuf>
-    $<TARGET_OBJECTS:fnord-cstable>
-    RecordMaterializer_test.cc)
+include_directories(${MODULE_INCLUDE})
+set(CSTABLE_INCLUDE ${MODULE_INCLUDE} PARENT_SCOPE)
 
-target_link_libraries(
-    tests/test-recordmaterializer
-    ${CMAKE_THREAD_LIBS_INIT}
-    ${FNORD_MSG_LIBS})
+# DEPENDENCIES
+find_package(Threads)
+
+add_subdirectory(src/cstable)
