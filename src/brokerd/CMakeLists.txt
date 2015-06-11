@@ -28,7 +28,7 @@ add_executable(brokerd
     BrokerServlet.cc
     brokerd.cc)
 
-target_link_libraries(brokerd ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_LIBS})
+target_link_libraries(brokerd ${CMAKE_THREAD_LIBS_INIT} ${FNORD_LIBS})
 
 add_executable(brokerctl
     $<TARGET_OBJECTS:fnord-base>
@@ -40,7 +40,7 @@ add_executable(brokerctl
     $<TARGET_OBJECTS:fnord-rpc>
     brokerctl.cc)
 
-target_link_libraries(brokerctl ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_LIBS})
+target_link_libraries(brokerctl ${CMAKE_THREAD_LIBS_INIT} ${FNORD_LIBS})
 
 #add_executable(fnord-logstream-service-example
 #    $<TARGET_OBJECTS:fnord-base>
