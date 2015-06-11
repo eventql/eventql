@@ -41,7 +41,7 @@ add_executable(cm-frontend
     $<TARGET_OBJECTS:fnord-sstable>
     $<TARGET_OBJECTS:fnord-feeds>
     $<TARGET_OBJECTS:fnord-rpc>
-    $<TARGET_OBJECTS:fnord-msg>
+    $<TARGET_OBJECTS:fnord-protobuf>
     frontend/CMFrontend.cc
     frontend/IndexFeedUpload.cc
     cm-frontend.cc
@@ -74,7 +74,7 @@ add_executable(cm-logjoin
     $<TARGET_OBJECTS:fnord-feeds>
     $<TARGET_OBJECTS:fnord-mdb>
     $<TARGET_OBJECTS:fnord-rpc>
-    $<TARGET_OBJECTS:fnord-msg>
+    $<TARGET_OBJECTS:fnord-protobuf>
     $<TARGET_OBJECTS:fnord-fts>
     logjoin/TrackedCartItem.cc
     logjoin/TrackedItemVisit.cc
@@ -100,7 +100,7 @@ add_executable(tests/test-logjoin
     $<TARGET_OBJECTS:fnord-feeds>
     $<TARGET_OBJECTS:fnord-mdb>
     $<TARGET_OBJECTS:fnord-rpc>
-    $<TARGET_OBJECTS:fnord-msg>
+    $<TARGET_OBJECTS:fnord-protobuf>
     $<TARGET_OBJECTS:fnord-fts>
     logjoin/TrackedCartItem.cc
     logjoin/TrackedItemVisit.cc
@@ -121,7 +121,7 @@ target_link_libraries(tests/test-logjoin ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_L
 #    $<TARGET_OBJECTS:fnord-cstable>
 #    $<TARGET_OBJECTS:fnord-sstable>
 #    $<TARGET_OBJECTS:fnord-fts>
-#    $<TARGET_OBJECTS:fnord-msg>
+#    $<TARGET_OBJECTS:fnord-protobuf>
 #    3rdparty/libfnord/fnord-logtable/TableReader.cc
 #    3rdparty/libfnord/fnord-logtable/TableArena.cc
 #    3rdparty/libfnord/fnord-logtable/TableWriter.cc
@@ -149,7 +149,7 @@ target_link_libraries(tests/test-logjoin ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_L
 #    $<TARGET_OBJECTS:fnord-feeds>
 #    $<TARGET_OBJECTS:fnord-rpc>
 #    $<TARGET_OBJECTS:fnord-mdb>
-#    $<TARGET_OBJECTS:fnord-msg>
+#    $<TARGET_OBJECTS:fnord-protobuf>
 #    $<TARGET_OBJECTS:fnord-cstable>
 #    $<TARGET_OBJECTS:fnord-afx>
 #    cm-indexbuild.cc
@@ -310,7 +310,7 @@ target_link_libraries(tests/test-logjoin ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_L
 #    $<TARGET_OBJECTS:fnord-cstable>
 #    $<TARGET_OBJECTS:fnord-sstable>
 #    $<TARGET_OBJECTS:fnord-fts>
-#    $<TARGET_OBJECTS:fnord-msg>
+#    $<TARGET_OBJECTS:fnord-protobuf>
 #    3rdparty/libfnord/fnord-logtable/TableReader.cc
 #    3rdparty/libfnord/fnord-logtable/TableArena.cc
 #    3rdparty/libfnord/fnord-logtable/TableWriter.cc
@@ -355,7 +355,7 @@ target_link_libraries(tests/test-logjoin ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_L
 #     $<TARGET_OBJECTS:fnord-cstable>
 #     $<TARGET_OBJECTS:fnord-sstable>
 #     $<TARGET_OBJECTS:fnord-fts>
-#     $<TARGET_OBJECTS:fnord-msg>
+#     $<TARGET_OBJECTS:fnord-protobuf>
 #     $<TARGET_OBJECTS:fnord-tsdb>
 #     $<TARGET_OBJECTS:fnord-dproc>
 #     $<TARGET_OBJECTS:fnord-afx>
@@ -402,7 +402,7 @@ target_link_libraries(tests/test-logjoin ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_L
 #     $<TARGET_OBJECTS:fnord-cstable>
 #     $<TARGET_OBJECTS:fnord-sstable>
 #     $<TARGET_OBJECTS:fnord-fts>
-#     $<TARGET_OBJECTS:fnord-msg>
+#     $<TARGET_OBJECTS:fnord-protobuf>
 #     $<TARGET_OBJECTS:fnord-tsdb>
 #     $<TARGET_OBJECTS:fnord-dproc>
 #     schemas.cc
@@ -434,7 +434,7 @@ add_executable(cm-chunkserver
     $<TARGET_OBJECTS:fnord-rpc>
     $<TARGET_OBJECTS:fnord-sstable>
     $<TARGET_OBJECTS:fnord-cstable>
-    $<TARGET_OBJECTS:fnord-msg>
+    $<TARGET_OBJECTS:fnord-protobuf>
     $<TARGET_OBJECTS:fnord-tsdb>
     $<TARGET_OBJECTS:fnord-dproc>
     $<TARGET_OBJECTS:fnord-dht>
@@ -468,7 +468,7 @@ add_executable(analyticsd
     $<TARGET_OBJECTS:fnord-rpc>
     $<TARGET_OBJECTS:fnord-sstable>
     $<TARGET_OBJECTS:fnord-cstable>
-    $<TARGET_OBJECTS:fnord-msg>
+    $<TARGET_OBJECTS:fnord-protobuf>
     $<TARGET_OBJECTS:fnord-tsdb>
     $<TARGET_OBJECTS:fnord-afx>
     $<TARGET_OBJECTS:fnord-dproc>
@@ -580,7 +580,7 @@ target_link_libraries(analyticsd
 #    $<TARGET_OBJECTS:fnord-rpc>
 #    $<TARGET_OBJECTS:fnord-cstable>
 #    $<TARGET_OBJECTS:fnord-sstable>
-#    $<TARGET_OBJECTS:fnord-msg>
+#    $<TARGET_OBJECTS:fnord-protobuf>
 #    $<TARGET_OBJECTS:fnord-fts>
 #    schemas.cc
 #    analytics/AnalyticsTableScan.cc
