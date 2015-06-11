@@ -13,7 +13,7 @@
 #include <fnord/util/binarymessagewriter.h>
 #include <sstable/sstablewriter.h>
 #include <sstable/sstablereader.h>
-#include <fnord-tsdb/RecordSet.h>
+#include <tsdb/RecordSet.h>
 
 using namespace fnord;
 

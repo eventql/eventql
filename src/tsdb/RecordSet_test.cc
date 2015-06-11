@@ -13,7 +13,7 @@
 #include "fnord/test/unittest.h"
 #include "fnord/protobuf/MessageDecoder.h"
 #include "fnord/protobuf/MessageEncoder.h"
-#include "fnord-tsdb/RecordSet.h"
+#include "tsdb/RecordSet.h"
 
 using namespace fnord;
 using namespace tsdb;

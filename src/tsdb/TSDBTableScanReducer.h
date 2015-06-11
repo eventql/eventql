@@ -9,9 +9,9 @@
  */
 #pragma once
 #include "fnord/stdtypes.h"
-#include <fnord-tsdb/TSDBClient.h>
-#include <fnord-tsdb/TSDBTableScanlet.h>
-#include <fnord-tsdb/TSDBTableScanReducerParams.pb.h>
+#include <tsdb/TSDBClient.h>
+#include <tsdb/TSDBTableScanlet.h>
+#include <tsdb/TSDBTableScanReducerParams.pb.h>
 #include <dproc/Task.h>
 
 using namespace fnord;

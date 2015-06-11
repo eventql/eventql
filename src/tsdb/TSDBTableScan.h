@@ -9,10 +9,10 @@
  */
 #pragma once
 #include "fnord/stdtypes.h"
-#include <fnord-tsdb/TSDBTableScanSpec.pb.h>
-#include <fnord-tsdb/TSDBTableScanMapper.h>
-#include <fnord-tsdb/TSDBTableScanReducer.h>
-#include <fnord-tsdb/TSDBTableScanlet.h>
+#include <tsdb/TSDBTableScanSpec.pb.h>
+#include <tsdb/TSDBTableScanMapper.h>
+#include <tsdb/TSDBTableScanReducer.h>
+#include <tsdb/TSDBTableScanlet.h>
 
 using namespace fnord;
 

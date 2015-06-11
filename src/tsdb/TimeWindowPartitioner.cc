@@ -9,7 +9,7 @@
  */
 #include <fnord/util/binarymessagereader.h>
 #include <fnord/util/binarymessagewriter.h>
-#include <fnord-tsdb/TimeWindowPartitioner.h>
+#include <tsdb/TimeWindowPartitioner.h>
 
 using namespace fnord;
 

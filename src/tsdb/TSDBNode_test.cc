@@ -11,7 +11,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "fnord/test/unittest.h"
-#include "fnord-tsdb/TSDBNode.h"
+#include "tsdb/TSDBNode.h"
 
 using namespace fnord;
 using namespace tsdb;

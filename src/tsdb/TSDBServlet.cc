@@ -8,8 +8,8 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include "fnord/util/binarymessagewriter.h"
-#include "fnord-tsdb/TSDBServlet.h"
-#include "fnord-tsdb/RecordEnvelope.pb.h"
+#include "tsdb/TSDBServlet.h"
+#include "tsdb/RecordEnvelope.pb.h"
 #include "fnord/json/json.h"
 #include <fnord/wallclock.h>
 #include <fnord/thread/wakeup.h>

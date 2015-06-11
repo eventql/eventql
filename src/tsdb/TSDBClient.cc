@@ -7,7 +7,7 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <fnord-tsdb/TSDBClient.h>
+#include <tsdb/TSDBClient.h>
 #include <fnord/util/binarymessagereader.h>
 #include <fnord/util/binarymessagewriter.h>
 #include <fnord/protobuf/msg.h>

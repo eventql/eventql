@@ -8,7 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <fnord/util/Base64.h>
-#include <fnord-tsdb/TSDBNode.h>
+#include <tsdb/TSDBNode.h>
 
 using namespace fnord;
 

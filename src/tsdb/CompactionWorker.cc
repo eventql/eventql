@@ -10,8 +10,8 @@
 #include "unistd.h"
 #include <fnord/logging.h>
 #include <fnord/wallclock.h>
-#include <fnord-tsdb/CompactionWorker.h>
-#include <fnord-tsdb/StreamChunk.h>
+#include <tsdb/CompactionWorker.h>
+#include <tsdb/StreamChunk.h>
 
 using namespace fnord;
 
