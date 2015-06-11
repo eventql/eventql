@@ -12,11 +12,11 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
-#include "fnord-base/stdtypes.h"
-#include "fnord-base/buffer.h"
-#include "fnord-base/option.h"
-#include "fnord-json/jsontypes.h"
-#include "fnord-base/reflect/reflect.h"
+#include "fnord/stdtypes.h"
+#include "fnord/buffer.h"
+#include "fnord/option.h"
+#include "fnord/json/jsontypes.h"
+#include "fnord/reflect/reflect.h"
 
 namespace fnord {
 namespace json {

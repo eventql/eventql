@@ -12,7 +12,7 @@
 #include <fcntl.h>
 #include <memory>
 #include <mutex>
-#include "fnord-base/buffer.h"
+#include "fnord/buffer.h"
 
 namespace fnord {
 

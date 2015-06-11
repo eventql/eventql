@@ -9,16 +9,16 @@
  */
 #ifndef _FNORD_LOGTABLE_TABLECHUNKSUMMARYREADER_H
 #define _FNORD_LOGTABLE_TABLECHUNKSUMMARYREADER_H
-#include <fnord-base/stdtypes.h>
-#include <fnord-base/option.h>
-#include <fnord-base/autoref.h>
-#include <fnord-base/random.h>
-#include <fnord-base/io/FileLock.h>
-#include <fnord-base/io/mmappedfile.h>
-#include <fnord-base/util/binarymessagereader.h>
-#include <fnord-base/util/binarymessagewriter.h>
-#include <fnord-msg/MessageSchema.h>
-#include <fnord-msg/MessageObject.h>
+#include <fnord/stdtypes.h>
+#include <fnord/option.h>
+#include <fnord/autoref.h>
+#include <fnord/random.h>
+#include <fnord/io/FileLock.h>
+#include <fnord/io/mmappedfile.h>
+#include <fnord/util/binarymessagereader.h>
+#include <fnord/util/binarymessagewriter.h>
+#include <fnord/protobuf/MessageSchema.h>
+#include <fnord/protobuf/MessageObject.h>
 
 namespace fnord {
 namespace logtable {

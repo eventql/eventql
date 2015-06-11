@@ -10,9 +10,9 @@
 #include <memory>
 #include <string.h>
 #include <type_traits>
-#include "fnord-base/exception.h"
-#include "fnord-base/stringutil.h"
-#include "fnord-base/reflect/metaclass.h"
+#include "fnord/exception.h"
+#include "fnord/stringutil.h"
+#include "fnord/reflect/metaclass.h"
 
 namespace fnord {
 namespace reflect {

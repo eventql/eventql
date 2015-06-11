@@ -7,12 +7,12 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <fnord-base/exception.h>
-#include <fnord-base/logging.h>
-#include <fnord-base/util/binarymessagereader.h>
-#include <fnord-base/util/binarymessagewriter.h>
-#include <fnord-base/io/FileLock.h>
-#include <fnord-base/io/fileutil.h>
+#include <fnord/exception.h>
+#include <fnord/logging.h>
+#include <fnord/util/binarymessagereader.h>
+#include <fnord/util/binarymessagewriter.h>
+#include <fnord/io/FileLock.h>
+#include <fnord/io/fileutil.h>
 #include <fnord-afx/ArtifactIndex.h>
 
 namespace fnord {

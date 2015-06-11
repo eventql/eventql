@@ -9,10 +9,10 @@
  */
 #ifndef _FNORD_IO_MMAPPED_FILE_H_
 #define _FNORD_IO_MMAPPED_FILE_H_
-#include <fnord-base/exception.h>
-#include <fnord-base/io/file.h>
-#include <fnord-base/VFS.h>
-#include <fnord-base/autoref.h>
+#include <fnord/exception.h>
+#include <fnord/io/file.h>
+#include <fnord/VFS.h>
+#include <fnord/autoref.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <string>

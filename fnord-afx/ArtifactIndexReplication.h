@@ -10,12 +10,12 @@
 #ifndef _FNORD_LOGTABLE_ARTIFACTINDEXREPLICATION_H
 #define _FNORD_LOGTABLE_ARTIFACTINDEXREPLICATION_H
 #include <thread>
-#include <fnord-base/stdtypes.h>
-#include <fnord-base/uri.h>
+#include <fnord/stdtypes.h>
+#include <fnord/uri.h>
 #include <fnord-afx/ArtifactIndex.h>
 #include <fnord-afx/ArtifactIndexMergeStrategy.h>
-#include "fnord-http/httprequest.h"
-#include "fnord-http/httpconnectionpool.h"
+#include "fnord/http/httprequest.h"
+#include "fnord/http/httpconnectionpool.h"
 
 namespace fnord {
 namespace logtable {

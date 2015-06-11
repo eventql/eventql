@@ -11,9 +11,9 @@
 #include <netdb.h>
 #include <netinet/in.h>
 #include <sys/socket.h>
-#include "fnord-base/exception.h"
-#include "fnord-base/stringutil.h"
-#include "fnord-base/net/inetaddr.h"
+#include "fnord/exception.h"
+#include "fnord/stringutil.h"
+#include "fnord/net/inetaddr.h"
 
 namespace fnord {
 

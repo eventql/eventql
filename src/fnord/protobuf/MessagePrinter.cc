@@ -7,8 +7,8 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <fnord-msg/MessagePrinter.h>
-#include <fnord-base/stringutil.h>
+#include <fnord/protobuf/MessagePrinter.h>
+#include <fnord/stringutil.h>
 
 namespace fnord {
 namespace msg {

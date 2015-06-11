@@ -10,8 +10,8 @@
 #ifndef _FNORD_SQL_MYSQLCONNECTION_H
 #define _FNORD_SQL_MYSQLCONNECTION_H
 #include <memory>
-#include <fnord-base/uri.h>
-#include <fnord-base/exception.h>
+#include <fnord/uri.h>
+#include <fnord/exception.h>
 #include <functional>
 #ifdef FNORD_ENABLE_MYSQL
 #include <mysql.h>

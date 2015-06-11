@@ -10,8 +10,8 @@
 #ifndef _FNORD_IO_FILELOCK_H_
 #define _FNORD_IO_FILELOCK_H_
 
-#include <fnord-base/stdtypes.h>
-#include <fnord-base/io/file.h>
+#include <fnord/stdtypes.h>
+#include <fnord/io/file.h>
 
 namespace fnord {
 

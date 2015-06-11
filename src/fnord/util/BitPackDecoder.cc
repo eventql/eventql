@@ -7,8 +7,8 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <fnord-base/util/BitPackDecoder.h>
-#include <fnord-base/exception.h>
+#include <fnord/util/BitPackDecoder.h>
+#include <fnord/exception.h>
 #include <3rdparty/simdcomp/simdcomp.h>
 
 namespace fnord {

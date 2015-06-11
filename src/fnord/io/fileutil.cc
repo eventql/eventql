@@ -13,13 +13,13 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
-#include "fnord-base/buffer.h"
-#include "fnord-base/fnv.h"
-#include "fnord-base/exception.h"
-#include "fnord-base/stringutil.h"
-#include "fnord-base/io/fileutil.h"
-#include "fnord-base/io/file.h"
-#include "fnord-base/io/mmappedfile.h"
+#include "fnord/buffer.h"
+#include "fnord/fnv.h"
+#include "fnord/exception.h"
+#include "fnord/stringutil.h"
+#include "fnord/io/fileutil.h"
+#include "fnord/io/file.h"
+#include "fnord/io/mmappedfile.h"
 
 namespace fnord {
 

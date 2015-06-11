@@ -12,7 +12,7 @@
 #include <vector>
 #include <string>
 #include <functional>
-#include "fnord-base/reflect/indexsequence.h"
+#include "fnord/reflect/indexsequence.h"
 
 namespace fnord {
 namespace reflect {

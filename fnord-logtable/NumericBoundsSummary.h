@@ -9,9 +9,9 @@
  */
 #ifndef _FNORD_LOGTABLE_NUMERICBOUNDSSUMMARYBUILDER_H
 #define _FNORD_LOGTABLE_NUMERICBOUNDSSUMMARYBUILDER_H
-#include <fnord-base/stdtypes.h>
-#include <fnord-base/util/binarymessagewriter.h>
-#include <fnord-base/util/binarymessagereader.h>
+#include <fnord/stdtypes.h>
+#include <fnord/util/binarymessagewriter.h>
+#include <fnord/util/binarymessagereader.h>
 #include <fnord-logtable/TableChunkSummaryBuilder.h>
 
 namespace fnord {

@@ -9,15 +9,15 @@
  */
 #include <stdlib.h>
 #include <unistd.h>
-#include "fnord-base/exception.h"
-#include "fnord-base/exceptionhandler.h"
-#include "fnord-http/httpserver.h"
-#include "fnord-http/httphandler.h"
-#include "fnord-http/httprouter.h"
-#include "fnord-http/httpservice.h"
+#include "fnord/exception.h"
+#include "fnord/exceptionhandler.h"
+#include "fnord/http/httpserver.h"
+#include "fnord/http/httphandler.h"
+#include "fnord/http/httprouter.h"
+#include "fnord/http/httpservice.h"
 #include "fnord/logging/logger.h"
 #include "fnord/logging/logoutputstream.h"
-#include "fnord-base/thread/threadpool.h"
+#include "fnord/thread/threadpool.h"
 #include "fnord/system/signalhandler.h"
 
 /**

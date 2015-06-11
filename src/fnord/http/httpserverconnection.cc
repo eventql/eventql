@@ -7,11 +7,11 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include "fnord-base/exception.h"
-#include "fnord-base/inspect.h"
-#include "fnord-base/logging.h"
-#include "fnord-http/httpserverconnection.h"
-#include "fnord-http/httpgenerator.h"
+#include "fnord/exception.h"
+#include "fnord/inspect.h"
+#include "fnord/logging.h"
+#include "fnord/http/httpserverconnection.h"
+#include "fnord/http/httpgenerator.h"
 
 namespace fnord {
 
