@@ -17,7 +17,7 @@
 #include <fnord/thread/DelayedQueue.h>
 #include <fnord/thread/CoalescingDelayedQueue.h>
 #include <fnord/mdb/MDB.h>
-#include <fnord-dht/ReplicationScheme.h>
+#include <dproc/ReplicationScheme.h>
 #include <fnord/http/httpconnectionpool.h>
 
 using namespace fnord;
@@ -31,7 +31,7 @@ struct TSDBNodeRef {
   thread::CoalescingDelayedQueue<StreamChunk> compactionq;
   thread::CoalescingDelayedQueue<StreamChunk> replicationq;
   RefPtr<mdb::MDB> db;
-  RefPtr<dht::ReplicationScheme> replication_scheme;
+  RefPtr<dproc::ReplicationScheme> replication_scheme;
   http::HTTPConnectionPool* http;
 };
 

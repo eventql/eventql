@@ -16,7 +16,7 @@ namespace tsdb {
 
 TSDBNode::TSDBNode(
     const String& db_path,
-    RefPtr<dht::ReplicationScheme> replication_scheme,
+    RefPtr<dproc::ReplicationScheme> replication_scheme,
     http::HTTPConnectionPool* http) :
     noderef_{
         .db_path = db_path,
