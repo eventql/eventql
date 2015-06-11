@@ -21,11 +21,11 @@
 #include <fnord-logtable/TableArena.h>
 #include <fnord-logtable/TableSnapshot.h>
 #include <fnord-logtable/TableChunkSummaryBuilder.h>
-#include "fnord-sstable/sstablereader.h"
-#include "fnord-sstable/sstablewriter.h"
-#include "fnord-sstable/SSTableColumnSchema.h"
-#include "fnord-sstable/SSTableColumnReader.h"
-#include "fnord-sstable/SSTableColumnWriter.h"
+#include "sstable/sstablereader.h"
+#include "sstable/sstablewriter.h"
+#include "sstable/SSTableColumnSchema.h"
+#include "sstable/SSTableColumnReader.h"
+#include "sstable/SSTableColumnWriter.h"
 #include "cstable/CSTableWriter.h"
 #include "cstable/CSTableReader.h"
 #include "cstable/CSTableBuilder.h"
