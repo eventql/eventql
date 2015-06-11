@@ -40,12 +40,12 @@ public:
       const String& stream_namespace,
       const String& stream_key) const;
 
-  StreamChunk* lookupPartition(
+  StreamChunk* findPartition(
       const String& stream_namespace,
       const String& stream_key,
       const SHA1Hash& partition_key);
 
-  StreamChunk* lookupOrCreatePartition(
+  StreamChunk* findOrCreatePartition(
       const String& stream_namespace,
       const String& stream_key,
       const SHA1Hash& partition_key);
