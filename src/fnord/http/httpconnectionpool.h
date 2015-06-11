@@ -12,13 +12,13 @@
 #include <map>
 #include <vector>
 #include <string>
-#include "fnord-base/stdtypes.h"
-#include "fnord-base/thread/taskscheduler.h"
-#include "fnord-base/net/dnscache.h"
-#include "fnord-http/httprequest.h"
-#include "fnord-http/httpresponsefuture.h"
-#include "fnord-http/httpstats.h"
-#include "fnord-base/stats/statsrepository.h"
+#include "fnord/stdtypes.h"
+#include "fnord/thread/taskscheduler.h"
+#include "fnord/net/dnscache.h"
+#include "fnord/http/httprequest.h"
+#include "fnord/http/httpresponsefuture.h"
+#include "fnord/http/httpstats.h"
+#include "fnord/stats/statsrepository.h"
 
 namespace fnord {
 namespace http {

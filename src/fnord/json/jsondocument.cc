@@ -8,13 +8,13 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <set>
-#include "fnord-base/datetime.h"
-#include "fnord-base/exception.h"
-#include "fnord-base/stringutil.h"
-#include "fnord-base/inspect.h"
-#include "fnord-json/flatjsonreader.h"
-#include "fnord-json/jsondocument.h"
-#include "fnord-json/jsonpointer.h"
+#include "fnord/datetime.h"
+#include "fnord/exception.h"
+#include "fnord/stringutil.h"
+#include "fnord/inspect.h"
+#include "fnord/json/flatjsonreader.h"
+#include "fnord/json/jsondocument.h"
+#include "fnord/json/jsonpointer.h"
 
 namespace fnord {
 namespace json {

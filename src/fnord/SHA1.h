@@ -12,9 +12,9 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <string>
-#include <fnord-base/stdtypes.h>
-#include <fnord-base/exception.h>
-#include <fnord-base/buffer.h>
+#include <fnord/stdtypes.h>
+#include <fnord/exception.h>
+#include <fnord/buffer.h>
 
 namespace fnord {
 

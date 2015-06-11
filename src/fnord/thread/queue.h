@@ -13,7 +13,7 @@
 #include <condition_variable>
 #include <functional>
 #include <list>
-#include "fnord-base/option.h"
+#include "fnord/option.h"
 
 namespace fnord {
 namespace thread {

@@ -12,9 +12,9 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <string>
-#include "fnord-base/stdtypes.h"
-#include "fnord-base/wallclock.h"
-#include "fnord-base/duration.h"
+#include "fnord/stdtypes.h"
+#include "fnord/wallclock.h"
+#include "fnord/duration.h"
 
 namespace fnord {
 namespace util {

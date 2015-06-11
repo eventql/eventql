@@ -11,18 +11,18 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
-#include <fnord-base/exception.h>
-#include <fnord-http/httpclient.h>
-#include <fnord-http/httpconnectionpool.h>
-#include <fnord-http/httpparser.h>
-#include <fnord-http/httprequest.h>
-#include <fnord-http/httpresponse.h>
-#include <fnord-http/httpresponsehandler.h>
-#include <fnord-http/httpclientconnection.h>
-#include <fnord-base/io/inputstream.h>
-#include <fnord-base/test/unittest.h>
-#include <fnord-base/thread/eventloop.h>
-#include <fnord-base/thread/threadpool.h>
+#include <fnord/exception.h>
+#include <fnord/http/httpclient.h>
+#include <fnord/http/httpconnectionpool.h>
+#include <fnord/http/httpparser.h>
+#include <fnord/http/httprequest.h>
+#include <fnord/http/httpresponse.h>
+#include <fnord/http/httpresponsehandler.h>
+#include <fnord/http/httpclientconnection.h>
+#include <fnord/io/inputstream.h>
+#include <fnord/test/unittest.h>
+#include <fnord/thread/eventloop.h>
+#include <fnord/thread/threadpool.h>
 
 using namespace fnord;
 using namespace fnord::http;

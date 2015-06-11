@@ -11,9 +11,9 @@
 #include <string.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include <fnord-base/buffer.h>
-#include <fnord-base/exception.h>
-#include <fnord-base/io/inputstream.h>
+#include <fnord/buffer.h>
+#include <fnord/exception.h>
+#include <fnord/io/inputstream.h>
 
 namespace fnord {
 

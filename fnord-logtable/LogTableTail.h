@@ -9,12 +9,12 @@
  */
 #ifndef _FNORD_LOGTABLE_LOGTABLETAIL_H
 #define _FNORD_LOGTABLE_LOGTABLETAIL_H
-#include <fnord-base/stdtypes.h>
-#include <fnord-base/autoref.h>
-#include <fnord-base/util/binarymessagereader.h>
-#include <fnord-base/util/binarymessagewriter.h>
-#include <fnord-msg/MessageSchema.h>
-#include <fnord-msg/MessageObject.h>
+#include <fnord/stdtypes.h>
+#include <fnord/autoref.h>
+#include <fnord/util/binarymessagereader.h>
+#include <fnord/util/binarymessagewriter.h>
+#include <fnord/protobuf/MessageSchema.h>
+#include <fnord/protobuf/MessageObject.h>
 #include <fnord-logtable/TableReader.h>
 
 namespace fnord {

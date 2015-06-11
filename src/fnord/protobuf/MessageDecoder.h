@@ -9,11 +9,11 @@
  */
 #ifndef _FNORD_MSG_MESSAGEDECODER_H
 #define _FNORD_MSG_MESSAGEDECODER_H
-#include <fnord-base/stdtypes.h>
-#include <fnord-base/buffer.h>
-#include <fnord-base/util/binarymessagereader.h>
-#include <fnord-msg/MessageSchema.h>
-#include <fnord-msg/MessageObject.h>
+#include <fnord/stdtypes.h>
+#include <fnord/buffer.h>
+#include <fnord/util/binarymessagereader.h>
+#include <fnord/protobuf/MessageSchema.h>
+#include <fnord/protobuf/MessageObject.h>
 
 namespace fnord {
 namespace msg {

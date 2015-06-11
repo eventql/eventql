@@ -13,7 +13,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <string>
-#include <fnord-base/stdtypes.h>
+#include <fnord/stdtypes.h>
 
 namespace fnord {
 class Buffer;

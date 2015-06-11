@@ -9,11 +9,11 @@
  */
 #ifndef _FNORD_LOGTABLE_TABLEREPOSITORY_H
 #define _FNORD_LOGTABLE_TABLEREPOSITORY_H
-#include <fnord-base/stdtypes.h>
+#include <fnord/stdtypes.h>
 #include <fnord-logtable/TableReader.h>
 #include <fnord-logtable/TableWriter.h>
 #include <fnord-afx/ArtifactIndex.h>
-#include <fnord-msg/MessageSchema.h>
+#include <fnord/protobuf/MessageSchema.h>
 
 namespace fnord {
 namespace logtable {

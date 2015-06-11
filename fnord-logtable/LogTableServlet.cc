@@ -7,11 +7,11 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include "fnord-base/util/binarymessagewriter.h"
+#include "fnord/util/binarymessagewriter.h"
 #include "fnord-logtable/LogTableServlet.h"
-#include "fnord-json/json.h"
-#include "fnord-msg/MessageEncoder.h"
-#include "fnord-msg/MessagePrinter.h"
+#include "fnord/json/json.h"
+#include "fnord/protobuf/MessageEncoder.h"
+#include "fnord/protobuf/MessagePrinter.h"
 
 namespace fnord {
 namespace logtable {

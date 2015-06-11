@@ -8,8 +8,8 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <algorithm>
-#include <fnord-base/inspect.h>
-#include <fnord-http/httprequest.h>
+#include <fnord/inspect.h>
+#include <fnord/http/httprequest.h>
 
 using fnord::InputStream;
 using fnord::OutputStream;

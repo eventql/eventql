@@ -14,9 +14,9 @@
 #include <sys/uio.h>
 #include <sys/socket.h>
 #include <unistd.h>
-#include "fnord-base/exception.h"
-#include "fnord-base/inspect.h"
-#include "fnord-base/net/tcpconnection.h"
+#include "fnord/exception.h"
+#include "fnord/inspect.h"
+#include "fnord/net/tcpconnection.h"
 
 namespace fnord {
 namespace net {

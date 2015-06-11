@@ -12,9 +12,9 @@
 #include <set>
 #include <stack>
 #include <vector>
-#include <fnord-json/jsontypes.h>
-#include <fnord-base/exception.h>
-#include <fnord-base/io/outputstream.h>
+#include <fnord/json/jsontypes.h>
+#include <fnord/exception.h>
+#include <fnord/io/outputstream.h>
 
 namespace fnord {
 namespace json {

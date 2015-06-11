@@ -7,13 +7,13 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <fnord-base/exception.h>
-#include <fnord-base/inspect.h>
-#include <fnord-base/stringutil.h>
-#include <fnord-base/uri.h>
-#include <fnord-http/cookies.h>
-#include <fnord-http/httpresponse.h>
-#include <fnord-http/httpparser.h>
+#include <fnord/exception.h>
+#include <fnord/inspect.h>
+#include <fnord/stringutil.h>
+#include <fnord/uri.h>
+#include <fnord/http/cookies.h>
+#include <fnord/http/httpresponse.h>
+#include <fnord/http/httpparser.h>
 
 namespace fnord {
 namespace http {

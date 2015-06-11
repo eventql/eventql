@@ -11,8 +11,8 @@
 #ifndef _CM_READSTREAMSERVLET_H
 #define _CM_READSTREAMSERVLET_H
 #include <unistd.h>
-#include <fnord-base/inspect.h>
-#include "fnord-http/httpservice.h"
+#include <fnord/inspect.h>
+#include "fnord/http/httpservice.h"
 
 
 namespace fnord {
