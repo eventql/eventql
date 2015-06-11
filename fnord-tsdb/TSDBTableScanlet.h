@@ -27,7 +27,6 @@ public:
 
   virtual void scan(const RowType& row) = 0;
   virtual void merge(const ResultType& other) = 0;
-  virtual String streamKey() const = 0;
 
   ResultType* result();
 

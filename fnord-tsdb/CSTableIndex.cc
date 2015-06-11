@@ -9,6 +9,7 @@
  */
 #include <fnord-base/stdtypes.h>
 #include <fnord-base/logging.h>
+#include <fnord-base/io/mmappedfile.h>
 #include <fnord-tsdb/CSTableIndex.h>
 #include <fnord-tsdb/RecordSet.h>
 #include <fnord-msg/MessageDecoder.h>
@@ -19,48 +20,37 @@ using namespace fnord;
 namespace tsdb {
 
 CSTableIndex::CSTableIndex(
-    RefPtr<msg::MessageSchema> schema) :
-    schema_(schema) {}
+    const TSDBTableScanSpec params,
+    msg::MessageSchemaRepository* repo,
+    tsdb::TSDBClient* tsdb) :
+    params_(params),
+    schema_(repo->getSchema(params.schema_name())),
+    tsdb_(tsdb) {}
 
-String CSTableIndex::name() {
-  return "cstable";
-}
-
-void CSTableIndex::update(
-    RecordSet* records,
-    uint64_t last_offset,
-    uint64_t cur_offset,
-    const Buffer& last_state,
-    Buffer* new_state,
-    Set<String>* delete_after_commit) {
-  auto filename = records->filenamePrefix() + rnd_.hex64() + ".cst";
-
+RefPtr<VFSFile> CSTableIndex::computeBlob(dproc::TaskContext* context) {
   fnord::logDebug(
       "fnord.tsdb",
-      "Building cstable: $0",
-      filename);
+      "Building cstable: stream=$0 partition=$1 schema=$2",
+      params_.stream_key(),
+      params_.partition_key(),
+      params_.schema_name());
 
   cstable::CSTableBuilder cstable(schema_.get());
-  auto cur = records->firstOffset();
-  auto end = records->lastOffset();
-  while (cur < end) {
-    records->fetchRecords(cur, 0xffffffff, [this, &cstable, &cur] (
-        uint64_t msgid,
-        const void* data,
-        size_t size) {
-      ++cur;
-      msg::MessageObject obj;
-      msg::MessageDecoder::decode(data, size, *schema_, &obj);
-      cstable.addRecord(obj);
-    });
-  }
 
-  cstable.write(filename);
-  new_state->append(filename.data(), filename.size());
+  tsdb_->fetchPartition(
+      params_.stream_key(),
+      params_.partition_key(),
+      [this, &cstable] (const Buffer& buf) {
+    msg::MessageObject obj;
+    msg::MessageDecoder::decode(buf, *schema_, &obj);
+    cstable.addRecord(obj);
+  });
 
-  if (last_state.size() > 0) {
-    delete_after_commit->emplace(last_state.toString());
-  }
+  auto tmpfile = "/tmp/__cstableindex_ "+ rnd_.hex64() + ".cst"; // FIXPAUL!
+  cstable.write(tmpfile);
+
+  return new io::MmappedFile(
+      File::openFile(tmpfile, File::O_READ | File::O_AUTODELETE));
 }
 
 }
