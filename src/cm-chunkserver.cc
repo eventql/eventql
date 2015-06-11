@@ -139,7 +139,7 @@ int main(int argc, const char** argv) {
   http_router.addRouteByPrefixMatch("/sessviewer", &jsessviewer);
 
 
-  auto repl_scheme = mkRef(new dht::FixedReplicationScheme());
+  auto repl_scheme = mkRef(new dproc::FixedReplicationScheme());
   for (const auto& r : repl_targets) {
     repl_scheme->addHost(r);
   }
