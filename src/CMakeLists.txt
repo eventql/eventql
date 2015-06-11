@@ -524,6 +524,7 @@ add_executable(analyticsd
     analytics/ECommerceStatsByShopMapper.cc
     analytics/RecoStats.cc
     analytics/ReportFactory.cc
+    analytics/CSVExportRDD.cc
     analytics/reports/TopSearchTermsReport.cc
     analytics/reports/RecoEngineStatsReport.cc
     ../3rdparty/chartsql/src/chartsql/svalue.cc
