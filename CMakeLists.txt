@@ -24,6 +24,7 @@ endif()
 # INCLUDES
 set(MODULE_INCLUDE
     ${PROJECT_BINARY_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_BINARY_DIR}/src
     ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
@@ -34,9 +35,3 @@ set(FNORD_INCLUDE ${MODULE_INCLUDE} PARENT_SCOPE)
 find_package(Threads)
 
 add_subdirectory(src/fnord)
-add_subdirectory(src/fnord/protobuf)
-add_subdirectory(src/fnord/mdb)
-add_subdirectory(src/fnord/http)
-add_subdirectory(src/fnord/json)
-
-
