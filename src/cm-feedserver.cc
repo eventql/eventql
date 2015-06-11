@@ -14,7 +14,7 @@
 #include "fnord/thread/eventloop.h"
 #include "fnord/thread/threadpool.h"
 #include "fnord/random.h"
-#include "fnord-rpc/RPC.h"
+#include "fnord/rpc/RPC.h"
 #include "fnord/cli/flagparser.h"
 #include "fnord/json/json.h"
 #include "fnord/json/jsonrpc.h"
