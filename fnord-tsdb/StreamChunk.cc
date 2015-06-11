@@ -163,7 +163,9 @@ void StreamChunk::replicate() {
   std::unique_lock<std::mutex> lk(replication_mutex_);
 
   auto cur_offset = records_.lastOffset();
-  auto replicas = node_->replication_scheme->replicasFor(key_);
+  auto replicas = node_->replication_scheme->replicasFor(
+      String((char*) key_.data(), key_.size()));
+
   bool dirty = false;
   bool needs_replication = false;
   bool has_error = false;

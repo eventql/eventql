@@ -9,6 +9,7 @@
  */
 #include <string.h>
 #include <fnord-base/SHA1.h>
+#include <fnord-base/inspect.h>
 #include <fnord-base/stringutil.h>
 
 namespace fnord {
@@ -69,6 +70,11 @@ SHA1Hash SHA1::compute(const void* data, size_t size) {
   SHA1Hash hash(SHA1Hash::DeferInitialization{});
   compute(data, size, &hash);
   return hash;
+}
+
+template <>
+String inspect<SHA1Hash>(const SHA1Hash& hash) {
+  return hash.toString();
 }
 
 /**
