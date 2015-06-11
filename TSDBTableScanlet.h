@@ -31,6 +31,10 @@ public:
     return Set<String>{};
   }
 
+  ResultType* result() {
+    return &result_;
+  }
+
 protected:
   ResultType result_;
 };
