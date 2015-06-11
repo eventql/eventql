@@ -48,7 +48,7 @@ add_executable(cm-frontend
     schemas.cc
     ${CMAKE_BINARY_DIR}/cm-frontend-assets.cc)
 
-target_link_libraries(cm-frontend ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_LIBS})
+target_link_libraries(cm-frontend ${CMAKE_THREAD_LIBS_INIT} ${FNORD_LIBS})
 target_link_libraries(cm-frontend m)
 add_dependencies(cm-frontend cm-frontend-assets)
 
@@ -63,7 +63,7 @@ add_dependencies(cm-frontend cm-frontend-assets)
 #    $<TARGET_OBJECTS:fnord-rpc>
 #    cm-feedserver.cc)
 #
-#target_link_libraries(cm-feedserver ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_LIBS})
+#target_link_libraries(cm-feedserver ${CMAKE_THREAD_LIBS_INIT} ${FNORD_LIBS})
 
 add_executable(cm-logjoin
     $<TARGET_OBJECTS:cm-common>
@@ -89,7 +89,7 @@ add_executable(cm-logjoin
     logjoin/LogJoinTarget.cc
     logjoin/LogJoinShard.cc)
 
-target_link_libraries(cm-logjoin ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_LIBS} ${FNORD_FTS_LIBS})
+target_link_libraries(cm-logjoin ${CMAKE_THREAD_LIBS_INIT} ${FNORD_LIBS} ${FNORD_FTS_LIBS})
 
 add_executable(tests/test-logjoin
     $<TARGET_OBJECTS:cm-common>
@@ -108,7 +108,7 @@ add_executable(tests/test-logjoin
     logjoin/TrackedSession.cc
     LogJoin_test.cc)
 
-target_link_libraries(tests/test-logjoin ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_LIBS} ${FNORD_FTS_LIBS})
+target_link_libraries(tests/test-logjoin ${CMAKE_THREAD_LIBS_INIT} ${FNORD_LIBS} ${FNORD_FTS_LIBS})
 
 #add_executable(cm-logjoin-backfill
 #    $<TARGET_OBJECTS:cm-common>
@@ -137,7 +137,7 @@ target_link_libraries(tests/test-logjoin ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_L
 #    cm-logjoin-backfill.cc)
 #
 #target_link_libraries(cm-logjoin-backfill
-#    ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_LIBS} ${FNORD_FTS_LIBS})
+#    ${CMAKE_THREAD_LIBS_INIT} ${FNORD_LIBS} ${FNORD_FTS_LIBS})
 #
 #add_executable(cm-indexbuild
 #    $<TARGET_OBJECTS:cm-common>
@@ -167,7 +167,7 @@ target_link_libraries(tests/test-logjoin ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_L
 #    DocIndex.cc)
 #
 #target_link_libraries(cm-indexbuild
-#    ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_LIBS} ${FNORD_FTS_LIBS})
+#    ${CMAKE_THREAD_LIBS_INIT} ${FNORD_LIBS} ${FNORD_FTS_LIBS})
 
 #add_executable(cm-indexlookup
 #    $<TARGET_OBJECTS:cm-common>
@@ -184,7 +184,7 @@ target_link_libraries(tests/test-logjoin ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_L
 #    cm-indexlookup.cc)
 #
 #target_link_libraries(cm-indexlookup
-#    ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_LIBS}
+#    ${CMAKE_THREAD_LIBS_INIT} ${FNORD_LIBS}
 #    ${FNORD_FTS_LIBS})
 #
 #add_executable(cm-indexserver
@@ -204,7 +204,7 @@ target_link_libraries(tests/test-logjoin ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_L
 #    cm-indexserver.cc)
 #
 #target_link_libraries(cm-indexserver
-#    ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_LIBS}
+#    ${CMAKE_THREAD_LIBS_INIT} ${FNORD_LIBS}
 #    ${FNORD_FTS_LIBS})
 
 #add_executable(cm-dawandaindexpush
@@ -219,7 +219,7 @@ target_link_libraries(tests/test-logjoin ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_L
 #    customers/dawanda/cm-dawandaindexpush.cc)
 #
 #target_link_libraries(cm-dawandaindexpush
-#    ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_LIBS})
+#    ${CMAKE_THREAD_LIBS_INIT} ${FNORD_LIBS})
 
 #add_executable(cm-featuredump
 #    $<TARGET_OBJECTS:cm-common>
@@ -233,7 +233,7 @@ target_link_libraries(tests/test-logjoin ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_L
 #    cm-featuredump.cc)
 #
 #target_link_libraries(cm-featuredump
-#    ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_LIBS})
+#    ${CMAKE_THREAD_LIBS_INIT} ${FNORD_LIBS})
 #
 #add_executable(cm-featureprep
 #    $<TARGET_OBJECTS:cm-common>
@@ -249,7 +249,7 @@ target_link_libraries(tests/test-logjoin ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_L
 #    cm-featureprep.cc)
 #
 #target_link_libraries(cm-featureprep
-#    ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_LIBS} ${FNORD_FTS_LIBS})
+#    ${CMAKE_THREAD_LIBS_INIT} ${FNORD_LIBS} ${FNORD_FTS_LIBS})
 
 #add_executable(cm-ctrstats-builditemboost
 #    $<TARGET_OBJECTS:cm-common>
@@ -264,7 +264,7 @@ target_link_libraries(tests/test-logjoin ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_L
 #    cm-ctrstats-builditemboost.cc)
 #
 #target_link_libraries(cm-ctrstats-builditemboost
-#    ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_LIBS} ${FNORD_FTS_LIBS})
+#    ${CMAKE_THREAD_LIBS_INIT} ${FNORD_LIBS} ${FNORD_FTS_LIBS})
 
 #add_executable(cm-reportbuild
 #    $<TARGET_OBJECTS:cm-common>
@@ -297,7 +297,7 @@ target_link_libraries(tests/test-logjoin ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_L
 #    cm-reportbuild.cc)
 #
 #target_link_libraries(cm-reportbuild
-#    ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_LIBS} ${FNORD_FTS_LIBS})
+#    ${CMAKE_THREAD_LIBS_INIT} ${FNORD_LIBS} ${FNORD_FTS_LIBS})
 
 #add_executable(cm-autocompletebuild
 #    $<TARGET_OBJECTS:cm-common>
@@ -342,7 +342,7 @@ target_link_libraries(tests/test-logjoin ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_L
 #    cm-autocompletebuild.cc)
 #
 #target_link_libraries(cm-autocompletebuild
-#    ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_LIBS} ${FNORD_FTS_LIBS})
+#    ${CMAKE_THREAD_LIBS_INIT} ${FNORD_LIBS} ${FNORD_FTS_LIBS})
 
 # add_executable(cm-shopstatsbuild
 #     $<TARGET_OBJECTS:cm-common>
@@ -389,7 +389,7 @@ target_link_libraries(tests/test-logjoin ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_L
 #     ${PROTO_SRCS})
 # 
 # target_link_libraries(cm-shopstatsbuild
-#     ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_LIBS} ${FNORD_FTS_LIBS})
+#     ${CMAKE_THREAD_LIBS_INIT} ${FNORD_LIBS} ${FNORD_FTS_LIBS})
 
 # add_executable(cm-itemboostbuild
 #     $<TARGET_OBJECTS:cm-common>
@@ -422,7 +422,7 @@ target_link_libraries(tests/test-logjoin ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_L
 #     ${PROTO_SRCS})
 # 
 # target_link_libraries(cm-itemboostbuild
-#     ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_LIBS} ${FNORD_FTS_LIBS} ${FNORD_MSG_LIBS})
+#     ${CMAKE_THREAD_LIBS_INIT} ${FNORD_LIBS} ${FNORD_FTS_LIBS} ${FNORD_LIBS})
 
 add_executable(cm-chunkserver
     $<TARGET_OBJECTS:cm-common>
@@ -456,7 +456,7 @@ add_executable(cm-chunkserver
     cm-chunkserver.cc)
 
 target_link_libraries(cm-chunkserver
-    ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_LIBS})
+    ${CMAKE_THREAD_LIBS_INIT} ${FNORD_LIBS})
 
 add_executable(analyticsd
     $<TARGET_OBJECTS:cm-common>
@@ -532,7 +532,7 @@ add_executable(analyticsd
     analyticsd.cc)
 
 target_link_libraries(analyticsd
-    ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_LIBS} ${FNORD_FTS_LIBS})
+    ${CMAKE_THREAD_LIBS_INIT} ${FNORD_LIBS} ${FNORD_FTS_LIBS})
 
 
 # add_executable(cm-autocompleteserver
@@ -555,7 +555,7 @@ target_link_libraries(analyticsd
 #     cm-autocompleteserver.cc)
 # 
 # target_link_libraries(cm-autocompleteserver
-#     ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_LIBS} ${FNORD_FTS_LIBS})
+#     ${CMAKE_THREAD_LIBS_INIT} ${FNORD_LIBS} ${FNORD_FTS_LIBS})
 
 #add_executable(cm-tokenize
 #    $<TARGET_OBJECTS:cm-common>
@@ -568,7 +568,7 @@ target_link_libraries(analyticsd
 #    cm-tokenize.cc)
 #
 #target_link_libraries(cm-tokenize
-#    ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_LIBS} ${FNORD_FTS_LIBS})
+#    ${CMAKE_THREAD_LIBS_INIT} ${FNORD_LIBS} ${FNORD_FTS_LIBS})
 #
 #add_executable(cm-jqcolumnize
 #    $<TARGET_OBJECTS:cm-common>
@@ -589,7 +589,7 @@ target_link_libraries(analyticsd
 #    cm-jqcolumnize.cc)
 #
 #target_link_libraries(cm-jqcolumnize
-#    ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_LIBS} ${FNORD_FTS_LIBS})
+#    ${CMAKE_THREAD_LIBS_INIT} ${FNORD_LIBS} ${FNORD_FTS_LIBS})
 
 
 #add_executable(tests/test-joinedsessionviewer
@@ -602,4 +602,4 @@ target_link_libraries(analyticsd
 #    JoinedSession.pb.cc
 #    JoinedSessionViewer_test.cc)
 #
-#target_link_libraries(tests/test-joinedsessionviewer ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_LIBS} ${FNORD_MSG_LIBS})
+#target_link_libraries(tests/test-joinedsessionviewer ${CMAKE_THREAD_LIBS_INIT} ${FNORD_LIBS} ${FNORD_LIBS})
