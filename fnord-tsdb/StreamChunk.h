@@ -36,35 +36,35 @@ class StreamChunk : public RefCounted {
 public:
 
   static RefPtr<StreamChunk> create(
-      const String& streamchunk_key,
+      const SHA1Hash& partition_key,
       const String& stream_key,
       StreamConfig* config,
       TSDBNodeRef* node);
 
   static RefPtr<StreamChunk> reopen(
-      const String& streamchunk_key,
+      const SHA1Hash& partition_key,
       const StreamChunkState& state,
       StreamConfig* config,
       TSDBNodeRef* node);
 
-  static String streamChunkKeyFor(
-      const String& stream_key,
-      DateTime time,
-      Duration partition_size);
+  //static String streamChunkKeyFor(
+  //    const String& stream_key,
+  //    DateTime time,
+  //    Duration partition_size);
 
-  static String streamChunkKeyFor(
-      const String& stream_key,
-      DateTime time,
-      const StreamConfig& properties);
+  //static String streamChunkKeyFor(
+  //    const String& stream_key,
+  //    DateTime time,
+  //    const StreamConfig& properties);
 
-  static Vector<String> streamChunkKeysFor(
-      const String& stream_key,
-      DateTime from,
-      DateTime until,
-      const StreamConfig& properties);
+  //static Vector<String> streamChunkKeysFor(
+  //    const String& stream_key,
+  //    DateTime from,
+  //    DateTime until,
+  //    const StreamConfig& properties);
 
   void insertRecord(
-      uint64_t record_id,
+      const SHA1Hash& record_id,
       const Buffer& record);
 
   void insertRecords(const Vector<RecordRef>& records);
@@ -78,13 +78,13 @@ public:
 protected:
 
   StreamChunk(
-      const String& streamchunk_key,
+      const SHA1Hash& partition_key,
       const String& stream_key,
       StreamConfig* config,
       TSDBNodeRef* node);
 
   StreamChunk(
-      const String& streamchunk_key,
+      const SHA1Hash& partition_key,
       const StreamChunkState& state,
       StreamConfig* config,
       TSDBNodeRef* node);
@@ -93,7 +93,7 @@ protected:
   void commitState();
   uint64_t replicateTo(const String& addr, uint64_t offset);
 
-  String key_;
+  SHA1Hash key_;
   String stream_key_;
   RecordSet records_;
   StreamConfig* config_;

@@ -10,7 +10,6 @@
 #include <fnord-tsdb/StreamChunk.h>
 #include <fnord-base/io/fileutil.h>
 #include <fnord-base/uri.h>
-#include <fnord-base/util/Base64.h>
 #include <fnord-base/util/binarymessagewriter.h>
 #include <fnord-base/wallclock.h>
 #include <fnord-msg/MessageEncoder.h>
@@ -21,78 +20,78 @@ using namespace fnord;
 namespace tsdb {
 
 RefPtr<StreamChunk> StreamChunk::create(
-    const String& streamchunk_key,
+    const SHA1Hash& partition_key,
     const String& stream_key,
     StreamConfig* config,
     TSDBNodeRef* node) {
   return RefPtr<StreamChunk>(
       new StreamChunk(
-          streamchunk_key,
+          partition_key,
           stream_key,
           config,
           node));
 }
 
 RefPtr<StreamChunk> StreamChunk::reopen(
-    const String& stream_key,
+    const SHA1Hash& partition_key,
     const StreamChunkState& state,
     StreamConfig* config,
     TSDBNodeRef* node) {
   return RefPtr<StreamChunk>(
       new StreamChunk(
-          stream_key,
+          partition_key,
           state,
           config,
           node));
 }
 
-String StreamChunk::streamChunkKeyFor(
-    const String& stream_key,
-    DateTime time,
-    Duration partition_size) {
-  util::BinaryMessageWriter buf(stream_key.size() + 32);
-
-  auto cs = partition_size.microseconds();
-  auto ts = (time.unixMicros() / cs) * cs / kMicrosPerSecond;
-
-  buf.append(stream_key.data(), stream_key.size());
-  buf.appendUInt8(27);
-  buf.appendVarUInt(ts);
-
-  return String((char *) buf.data(), buf.size());
-}
-
-String StreamChunk::streamChunkKeyFor(
-    const String& stream_key,
-    DateTime time,
-    const StreamConfig& config) {
-  return streamChunkKeyFor(stream_key, time, config.partition_window());
-}
-
-Vector<String> StreamChunk::streamChunkKeysFor(
-    const String& stream_key,
-    DateTime from,
-    DateTime until,
-    const StreamConfig& config) {
-  auto cs = config.partition_window();
-  auto first_chunk = (from.unixMicros() / cs) * cs;
-  auto last_chunk = (until.unixMicros() / cs) * cs;
-
-  Vector<String> res;
-  for (auto t = first_chunk; t <= last_chunk; t += cs) {
-    res.emplace_back(streamChunkKeyFor(stream_key, t, config));
-  }
-
-  return res;
-}
+//String StreamChunk::streamChunkKeyFor(
+//    const String& stream_key,
+//    DateTime time,
+//    Duration partition_size) {
+//  util::BinaryMessageWriter buf(stream_key.size() + 32);
+//
+//  auto cs = partition_size.microseconds();
+//  auto ts = (time.unixMicros() / cs) * cs / kMicrosPerSecond;
+//
+//  buf.append(stream_key.data(), stream_key.size());
+//  buf.appendUInt8(27);
+//  buf.appendVarUInt(ts);
+//
+//  return String((char *) buf.data(), buf.size());
+//}
+//
+//String StreamChunk::streamChunkKeyFor(
+//    const String& stream_key,
+//    DateTime time,
+//    const StreamConfig& config) {
+//  return streamChunkKeyFor(stream_key, time, config.partition_window());
+//}
+//
+//Vector<String> StreamChunk::streamChunkKeysFor(
+//    const String& stream_key,
+//    DateTime from,
+//    DateTime until,
+//    const StreamConfig& config) {
+//  auto cs = config.partition_window();
+//  auto first_chunk = (from.unixMicros() / cs) * cs;
+//  auto last_chunk = (until.unixMicros() / cs) * cs;
+//
+//  Vector<String> res;
+//  for (auto t = first_chunk; t <= last_chunk; t += cs) {
+//    res.emplace_back(streamChunkKeyFor(stream_key, t, config));
+//  }
+//
+//  return res;
+//}
 
 StreamChunk::StreamChunk(
-    const String& streamchunk_key,
+    const SHA1Hash& partition_key,
     const String& stream_key,
     StreamConfig* config,
     TSDBNodeRef* node) :
     stream_key_(stream_key),
-    key_(streamchunk_key),
+    key_(partition_key),
     config_(config),
     node_(node),
     records_(
@@ -104,12 +103,12 @@ StreamChunk::StreamChunk(
 }
 
 StreamChunk::StreamChunk(
-    const String& streamchunk_key,
+    const SHA1Hash& partition_key,
     const StreamChunkState& state,
     StreamConfig* config,
     TSDBNodeRef* node) :
     stream_key_(state.stream_key),
-    key_(streamchunk_key),
+    key_(partition_key),
     config_(config),
     node_(node),
     records_(
@@ -126,7 +125,7 @@ StreamChunk::StreamChunk(
 }
 
 void StreamChunk::insertRecord(
-    uint64_t record_id,
+    const SHA1Hash& record_id,
     const Buffer& record) {
   std::unique_lock<std::mutex> lk(mutex_);
 
@@ -180,14 +179,11 @@ void StreamChunk::compact() {
   last_compaction_ = DateTime::now();
   lk.unlock();
 
-  String encoded_key;
-  util::Base64::encode(key_, &encoded_key);
-
   fnord::logDebug(
       "tsdb.replication",
       "Compacting partition; stream='$0' partition='$1'",
       stream_key_,
-      encoded_key);
+      key_.toString());
 
   Set<String> deleted_files;
   records_.compact(&deleted_files);
@@ -278,32 +274,29 @@ uint64_t StreamChunk::replicateTo(const String& addr, uint64_t offset) {
 
   size_t n = 0;
   records_.fetchRecords(offset, batch_size, [this, &batch, &n] (
-      uint64_t record_id,
+      const SHA1Hash& record_id,
       const void* record_data,
       size_t record_size) {
     ++n;
 
-    batch.appendUInt64(record_id);
+    batch.append(record_id.data(), record_id.size());
     batch.appendVarUInt(record_size);
     batch.append(record_data, record_size);
   });
-
-  String encoded_key;
-  util::Base64::encode(key_, &encoded_key);
 
   fnord::logDebug(
       "tsdb.replication",
       "Replicating to $0; stream='$1' partition='$2' offset=$3",
       addr,
       stream_key_,
-      encoded_key,
+      key_.toString(),
       offset);
 
   URI uri(StringUtil::format(
       "http://$0/tsdb/replicate?stream=$1&chunk=$2",
       addr,
       URI::urlEncode(stream_key_),
-      URI::urlEncode(encoded_key)));
+      URI::urlEncode(key_.toString())));
 
   http::HTTPRequest req(http::HTTPMessage::M_POST, uri.pathAndQuery());
   req.addHeader("Host", uri.hostAndPort());
@@ -327,7 +320,7 @@ Vector<String> StreamChunk::listFiles() const {
 
 PartitionInfo StreamChunk::partitionInfo() const {
   PartitionInfo pi;
-  pi.set_partition_key(util::Base64::encode(key_));
+  pi.set_partition_key(key_.toString());
   pi.set_stream_key(stream_key_);
   pi.set_version(records_.version());
   pi.set_exists(true);

@@ -32,34 +32,23 @@ public:
       RefPtr<dht::ReplicationScheme> replication_scheme,
       http::HTTPConnectionPool* http);
 
-  void configurePrefix(StreamConfig config);
+  void configurePrefix(
+      const String& stream_namespace,
+      StreamConfig config);
 
-  StreamConfig* configFor(const String& stream_key) const;
+  StreamConfig* configFor(
+      const String& stream_namespace,
+      const String& stream_key) const;
 
-  void insertRecord(
+  StreamChunk* lookupPartition(
+      const String& stream_namespace,
       const String& stream_key,
-      uint64_t record_id,
-      const Buffer& record,
-      DateTime time);
+      const SHA1Hash& partition_key);
 
-  void insertRecord(
+  StreamChunk* lookupOrCreatePartition(
+      const String& stream_namespace,
       const String& stream_key,
-      uint64_t record_id,
-      const Buffer& record,
-      const String& chunk_key);
-
-  void insertRecords(
-      const String& stream_key,
-      const Vector<RecordRef>& records);
-
-  void insertRecords(
-      const String& stream_key,
-      const String& chunk_key,
-      const Vector<RecordRef>& records);
-
-  Vector<String> listFiles(const String& chunk_key);
-
-  PartitionInfo fetchPartitionInfo(const String& chunk_key);
+      const SHA1Hash& partition_key);
 
   void start(
       size_t num_comaction_threads = 4,
@@ -68,6 +57,8 @@ public:
   void stop();
 
 protected:
+
+
 
   void reopenStreamChunks();
 
