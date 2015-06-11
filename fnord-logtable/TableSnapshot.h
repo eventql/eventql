@@ -9,11 +9,11 @@
  */
 #ifndef _FNORD_LOGTABLE_TABLESNAPSHOT_H
 #define _FNORD_LOGTABLE_TABLESNAPSHOT_H
-#include <fnord-base/stdtypes.h>
-#include <fnord-base/autoref.h>
-#include <fnord-base/random.h>
-#include <fnord-msg/MessageSchema.h>
-#include <fnord-msg/MessageObject.h>
+#include <fnord/stdtypes.h>
+#include <fnord/autoref.h>
+#include <fnord/random.h>
+#include <fnord/protobuf/MessageSchema.h>
+#include <fnord/protobuf/MessageObject.h>
 #include <fnord-logtable/TableArena.h>
 
 namespace fnord {

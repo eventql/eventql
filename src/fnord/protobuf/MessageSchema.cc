@@ -7,12 +7,12 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <fnord-base/stringutil.h>
-#include <fnord-base/exception.h>
-#include <fnord-base/inspect.h>
-#include <fnord-msg/MessageSchema.h>
-#include <fnord-msg/CodingOptions.pb.h>
-#include <fnord-msg/msg.h>
+#include <fnord/stringutil.h>
+#include <fnord/exception.h>
+#include <fnord/inspect.h>
+#include <fnord/protobuf/MessageSchema.h>
+#include <fnord/protobuf/CodingOptions.pb.h>
+#include <fnord/protobuf/msg.h>
 
 namespace fnord {
 namespace msg {

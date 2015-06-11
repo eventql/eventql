@@ -8,8 +8,8 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <3rdparty/simdcomp/simdcomp.h>
-#include <fnord-base/inspect.h>
-#include <fnord-base/util/BitPackEncoder.h>
+#include <fnord/inspect.h>
+#include <fnord/util/BitPackEncoder.h>
 
 namespace fnord {
 namespace util {

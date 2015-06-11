@@ -14,7 +14,7 @@
 #include <functional>
 #include <unordered_map>
 #include <list>
-#include "fnord-base/option.h"
+#include "fnord/option.h"
 
 namespace fnord {
 namespace thread {

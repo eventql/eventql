@@ -7,8 +7,8 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <fnord-msg/MessageDecoder.h>
-#include <fnord-base/inspect.h>
+#include <fnord/protobuf/MessageDecoder.h>
+#include <fnord/inspect.h>
 
 namespace fnord {
 namespace msg {

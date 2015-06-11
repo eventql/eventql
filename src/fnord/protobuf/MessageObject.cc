@@ -7,8 +7,8 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <fnord-msg/MessageObject.h>
-#include <fnord-base/exception.h>
+#include <fnord/protobuf/MessageObject.h>
+#include <fnord/exception.h>
 
 namespace fnord {
 namespace msg {

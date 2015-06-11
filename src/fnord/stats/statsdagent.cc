@@ -8,9 +8,9 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <unistd.h>
-#include "fnord-base/logging.h"
-#include "fnord-base/stats/statsdagent.h"
-#include "fnord-base/wallclock.h"
+#include "fnord/logging.h"
+#include "fnord/stats/statsdagent.h"
+#include "fnord/wallclock.h"
 
 namespace fnord {
 namespace stats {

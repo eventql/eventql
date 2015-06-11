@@ -9,10 +9,10 @@
  */
 #ifndef _FNORD_MSG_MESSAGESCHEMA_H
 #define _FNORD_MSG_MESSAGESCHEMA_H
-#include <fnord-base/stdtypes.h>
-#include <fnord-base/exception.h>
-#include <fnord-base/autoref.h>
-#include <fnord-msg/MessageObject.h>
+#include <fnord/stdtypes.h>
+#include <fnord/exception.h>
+#include <fnord/autoref.h>
+#include <fnord/protobuf/MessageObject.h>
 #include <google/protobuf/descriptor.h>
 #include <google/protobuf/descriptor.pb.h>
 

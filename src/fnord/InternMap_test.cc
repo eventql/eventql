@@ -10,8 +10,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include "fnord-base/InternMap.h"
-#include "fnord-base/test/unittest.h"
+#include "fnord/InternMap.h"
+#include "fnord/test/unittest.h"
 
 UNIT_TEST(InternMapTest);
 

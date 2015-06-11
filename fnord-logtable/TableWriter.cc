@@ -11,15 +11,15 @@
 #include <thread>
 #include <fnord-logtable/TableWriter.h>
 #include <fnord-logtable/TableChunkSummaryWriter.h>
-#include <fnord-base/logging.h>
-#include <fnord-base/io/fileutil.h>
-#include <fnord-base/io/FileLock.h>
-#include <fnord-base/wallclock.h>
-#include <fnord-base/util/binarymessagewriter.h>
-#include <fnord-base/util/binarymessagereader.h>
-#include <fnord-msg/MessageDecoder.h>
-#include <fnord-msg/MessageEncoder.h>
-#include <fnord-msg/MessagePrinter.h>
+#include <fnord/logging.h>
+#include <fnord/io/fileutil.h>
+#include <fnord/io/FileLock.h>
+#include <fnord/wallclock.h>
+#include <fnord/util/binarymessagewriter.h>
+#include <fnord/util/binarymessagereader.h>
+#include <fnord/protobuf/MessageDecoder.h>
+#include <fnord/protobuf/MessageEncoder.h>
+#include <fnord/protobuf/MessagePrinter.h>
 
 namespace fnord {
 namespace logtable {

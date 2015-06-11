@@ -8,8 +8,8 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <sys/file.h>
-#include <fnord-base/exception.h>
-#include <fnord-base/io/FileLock.h>
+#include <fnord/exception.h>
+#include <fnord/io/FileLock.h>
 
 namespace fnord {
 

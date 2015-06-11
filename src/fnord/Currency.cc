@@ -7,9 +7,9 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include "fnord-base/exception.h"
-#include "fnord-base/Currency.h"
-#include "fnord-base/stringutil.h"
+#include "fnord/exception.h"
+#include "fnord/Currency.h"
+#include "fnord/stringutil.h"
 
 namespace fnord {
 

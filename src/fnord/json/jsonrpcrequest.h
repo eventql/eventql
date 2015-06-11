@@ -12,8 +12,8 @@
 #include <stdlib.h>
 #include <string>
 #include <vector>
-#include "fnord-base/inspect.h"
-#include "fnord-json/json.h"
+#include "fnord/inspect.h"
+#include "fnord/json/json.h"
 
 namespace fnord {
 namespace json {

@@ -11,9 +11,9 @@
 
 #ifndef _FNORD_HTTP_HTTPSSESTREAM_H
 #define _FNORD_HTTP_HTTPSSESTREAM_H
-#include "fnord-http/httpservice.h"
-#include "fnord-json/json.h"
-#include <fnord-base/inspect.h>
+#include "fnord/http/httpservice.h"
+#include "fnord/json/json.h"
+#include <fnord/inspect.h>
 
 namespace fnord {
 namespace http {

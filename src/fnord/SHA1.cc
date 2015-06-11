@@ -8,9 +8,9 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <string.h>
-#include <fnord-base/SHA1.h>
-#include <fnord-base/inspect.h>
-#include <fnord-base/stringutil.h>
+#include <fnord/SHA1.h>
+#include <fnord/inspect.h>
+#include <fnord/stringutil.h>
 
 namespace fnord {
 

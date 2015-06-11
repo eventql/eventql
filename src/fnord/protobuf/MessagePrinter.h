@@ -9,9 +9,9 @@
  */
 #ifndef _FNORD_MSG_MESSAGEPRINTER_H
 #define _FNORD_MSG_MESSAGEPRINTER_H
-#include <fnord-base/stdtypes.h>
-#include <fnord-msg/MessageSchema.h>
-#include <fnord-msg/MessageObject.h>
+#include <fnord/stdtypes.h>
+#include <fnord/protobuf/MessageSchema.h>
+#include <fnord/protobuf/MessageObject.h>
 
 namespace fnord {
 namespace msg {

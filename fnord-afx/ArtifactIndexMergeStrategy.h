@@ -9,7 +9,7 @@
  */
 #ifndef _FNORD_LOGTABLE_ARTIFACTINDEXMERGESTRATEGY_H
 #define _FNORD_LOGTABLE_ARTIFACTINDEXMERGESTRATEGY_H
-#include <fnord-base/stdtypes.h>
+#include <fnord/stdtypes.h>
 #include <fnord-afx/ArtifactIndex.h>
 
 namespace fnord {
