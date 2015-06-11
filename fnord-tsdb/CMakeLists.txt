@@ -54,7 +54,7 @@ add_executable(tests/test-tsdbnode
 
 target_link_libraries(tests/test-tsdbnode ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_LIBS})
 
-add_executable(tests/test-streamchunk
+add_executable(tests/test-tsdb-timewindowpartitioner
     $<TARGET_OBJECTS:fnord-base>
     $<TARGET_OBJECTS:fnord-msg>
     $<TARGET_OBJECTS:fnord-mdb>
@@ -64,6 +64,6 @@ add_executable(tests/test-streamchunk
     $<TARGET_OBJECTS:fnord-http>
     $<TARGET_OBJECTS:fnord-json>
     $<TARGET_OBJECTS:fnord-dproc>
-    StreamChunk_test.cc)
+    TimeWindowPartitioner_test.cc)
 
-target_link_libraries(tests/test-streamchunk ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_LIBS})
+target_link_libraries(tests/test-tsdb-timewindowpartitioner ${CMAKE_THREAD_LIBS_INIT} ${FNORD_MSG_LIBS})
