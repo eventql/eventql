@@ -12,49 +12,26 @@
 #include <string.h>
 #include "fnord-base/test/unittest.h"
 #include "fnord-tsdb/StreamChunk.h"
+#include "fnord-tsdb/TimeWindowPartitioner.h"
 
 using namespace fnord;
 using namespace tsdb;
 
-UNIT_TEST(StreamChunkTest);
+// FIXPAUL rename to TimeWindowPartitionerTest
+UNIT_TEST(TimeWindowPartitionerTest);
 
-RefPtr<msg::MessageSchema> testSchema() {
-  Vector<msg::MessageSchemaField> fields;
-
-  fields.emplace_back(
-      1,
-      "one",
-      msg::FieldType::STRING,
-      250,
-      false,
-      false);
-
-  fields.emplace_back(
-      2,
-      "two",
-      msg::FieldType::STRING,
-      1024,
-      false,
-      false);
-
-  return new msg::MessageSchema("TestSchema", fields);
-}
-
-TEST_CASE(StreamChunkTest, TestStreamKeyGeneration, [] () {
-  auto schema = testSchema();
-  StreamConfig props;
-
-  auto key1 = StreamChunk::streamChunkKeyFor(
+TEST_CASE(TimeWindowPartitionerTest, TestStreamKeyGeneration, [] () {
+  auto key1 = TimeWindowPartitioner::partitionKeyFor(
       "fnord-metric",
       DateTime(1430667887 * kMicrosPerSecond),
-      props);
+      3600 * 4 * kMicrosPerSecond);
 
-  auto key2 = StreamChunk::streamChunkKeyFor(
+  auto key2 = TimeWindowPartitioner::partitionKeyFor(
       "fnord-metric",
       DateTime(1430667880 * kMicrosPerSecond),
-      props);
+      3600 * 4 * kMicrosPerSecond);
 
-  EXPECT_EQ(key1, "fnord-metric\x1b\xf0\xef\x98\xaa\x05");
+  EXPECT_EQ(key1, SHA1::compute("fnord-metric\x1b\xf0\xef\x98\xaa\x05"));
   EXPECT_EQ(key1, key2);
 });
 
