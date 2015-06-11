@@ -9,8 +9,8 @@
  */
 #include <fnord-sstable/binaryformat.h>
 #include <fnord-sstable/fileheaderreader.h>
-#include <fnord-base/exception.h>
-#include <fnord-base/fnv.h>
+#include <fnord/exception.h>
+#include <fnord/fnv.h>
 
 namespace fnord {
 namespace sstable {

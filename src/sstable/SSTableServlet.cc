@@ -10,7 +10,7 @@
 #include "fnord-sstable/SSTableServlet.h"
 #include "fnord-sstable/sstablereader.h"
 #include "fnord-sstable/SSTableScan.h"
-#include "fnord-base/io/fileutil.h"
+#include "fnord/io/fileutil.h"
 
 namespace fnord {
 namespace sstable {
