@@ -9,7 +9,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #pragma once
-#include <fnord-msg/msg.h>
+#include <fnord/protobuf/msg.h>
 
 namespace sensord {
 

@@ -8,8 +8,8 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <fnord-base/wallclock.h>
-#include "fnord-base/logging.h"
+#include <fnord/wallclock.h>
+#include "fnord/logging.h"
 #include "Sampler.h"
 
 using namespace fnord;

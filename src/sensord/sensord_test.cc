@@ -8,8 +8,8 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include "fnord-base/stdtypes.h"
-#include "fnord-base/test/unittest.h"
+#include "fnord/stdtypes.h"
+#include "fnord/test/unittest.h"
 
 namespace sensord {};
 
