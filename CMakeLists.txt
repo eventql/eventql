@@ -57,7 +57,7 @@ include_directories(${SSTABLE_INCLUDE})
 #add_subdirectory(3rdparty/libfnord/fnord-rpc)
 #add_subdirectory(3rdparty/libfnord/fnord-http)
 #add_subdirectory(3rdparty/libfnord/fnord-json)
-#add_subdirectory(3rdparty/libfnord/fnord-cstable)
+#add_subdirectory(3rdparty/libfnord/cstable)
 #add_subdirectory(3rdparty/libfnord/fnord-sstable)
 #add_subdirectory(3rdparty/libfnord/fnord-chart)
 #
