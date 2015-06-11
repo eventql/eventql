@@ -125,8 +125,3 @@ add_executable(tests/test-internmap
 #    $<TARGET_OBJECTS:fnord-net>
 #    $<TARGET_OBJECTS:fnord-redis>
 #    net/redis/redis_test.cc)
-
-add_subdirectory(protobuf)
-add_subdirectory(mdb)
-add_subdirectory(http)
-add_subdirectory(json)
