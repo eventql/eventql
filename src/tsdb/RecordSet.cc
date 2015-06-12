@@ -445,16 +445,14 @@ void RecordSet::setMaxDatafileSize(size_t size) {
   max_datafile_size_ = size;
 }
 
-//const String& RecordSet::filenamePrefix() const {
-// return filename_prefix_;
-//}
-
 RecordSet::RecordSetState::RecordSetState() :
     commitlog_size(0),
     version(0) {}
 
 void RecordSet::RecordSetState::encode(
     util::BinaryMessageWriter* writer) const {
+  writer->appendVarUInt(0x01);
+
   Set<String> all_commitlogs = old_commitlogs;
   if (!commitlog.isEmpty()) {
     all_commitlogs.emplace(commitlog.get());
@@ -472,10 +470,12 @@ void RecordSet::RecordSetState::encode(
     writer->appendLenencString(cl);
   }
 
-  //writer->appendVarUInt(version);
+  writer->append(checksum.data(), checksum.size());
 }
 
 void RecordSet::RecordSetState::decode(util::BinaryMessageReader* reader) {
+  auto v = reader->readVarUInt();
+
   auto num_datafiles = reader->readVarUInt();
   for (size_t i = 0; i < num_datafiles; ++i) {
     auto num_records = reader->readVarUInt();
@@ -494,9 +494,7 @@ void RecordSet::RecordSetState::decode(util::BinaryMessageReader* reader) {
     old_commitlogs.emplace(fname);
   }
 
-  //if (reader->remaining() > 0) {
-  //  version = reader->readVarUInt();
-  //}
+  checksum = SHA1Hash(reader->read(SHA1Hash::kSize), SHA1Hash::kSize);
 }
 
 } // namespace tsdb
