@@ -51,7 +51,7 @@ HTTPServerConnection::HTTPServerConnection(
     stats_(stats),
     parser_(HTTPParser::PARSE_HTTP_REQUEST),
     closed_(false) {
-  logTrace("fnord.http.server", "New HTTP connection: $0", inspect(*this));
+  logTrace("http.server", "New HTTP connection: $0", inspect(*this));
   stats_->total_connections.incr(1);
   stats_->current_connections.incr(1);
 
@@ -101,7 +101,7 @@ void HTTPServerConnection::read() {
     }
 
     lk.unlock();
-    logDebug("fnord.http.server", e, "read() failed, closing...");
+    logDebug("http.server", e, "read() failed, closing...");
 
     close();
     return;
@@ -118,7 +118,7 @@ void HTTPServerConnection::read() {
       parser_.parse((char *) read_buf_.data(), len);
     }
   } catch (Exception& e) {
-    logDebug("fnord.http.server", e, "HTTP parse error, closing...");
+    logDebug("http.server", e, "HTTP parse error, closing...");
     close();
     return;
   }
@@ -147,7 +147,7 @@ void HTTPServerConnection::write() {
     }
 
     lk.unlock();
-    logDebug("fnord.http.server", e, "write() failed, closing...");
+    logDebug("http.server", e, "write() failed, closing...");
     close();
     return;
   }
@@ -308,7 +308,7 @@ void HTTPServerConnection::finishResponse() {
 void HTTPServerConnection::close() {
   std::unique_lock<std::mutex> lk(mutex_);
 
-  logTrace("fnord.http.server", "HTTP connection close: $0", inspect(*this));
+  logTrace("http.server", "HTTP connection close: $0", inspect(*this));
 
   if (closed_) {
     RAISE(kIllegalStateError, "HTTP connection is already closed");
