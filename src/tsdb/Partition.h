@@ -38,12 +38,14 @@ public:
   static RefPtr<Partition> create(
       const SHA1Hash& partition_key,
       const String& stream_key,
+      const String& db_key,
       StreamConfig* config,
       TSDBNodeRef* node);
 
   static RefPtr<Partition> reopen(
       const SHA1Hash& partition_key,
       const PartitionState& state,
+      const String& db_key,
       StreamConfig* config,
       TSDBNodeRef* node);
 
@@ -80,12 +82,14 @@ protected:
   Partition(
       const SHA1Hash& partition_key,
       const String& stream_key,
+      const String& db_key,
       StreamConfig* config,
       TSDBNodeRef* node);
 
   Partition(
       const SHA1Hash& partition_key,
       const PartitionState& state,
+      const String& db_key,
       StreamConfig* config,
       TSDBNodeRef* node);
 
@@ -95,6 +99,7 @@ protected:
 
   SHA1Hash key_;
   String stream_key_;
+  String db_key_;
   RecordSet records_;
   StreamConfig* config_;
   TSDBNodeRef* node_;

@@ -108,24 +108,24 @@ void TSDBNode::reopenPartitions() {
       }
     }
 
-    auto partition_key_ns = key.toString();
-    if (partition_key_ns.size() == 0) {
+    auto db_key = key.toString();
+    if (db_key.size() == 0) {
       continue;
     }
 
-    if (partition_key_ns[0] == 0x1b) {
+    if (db_key[0] == 0x1b) {
       continue;
     }
 
-    auto tsdb_namespace_off = StringUtil::find(partition_key_ns, '~');
+    auto tsdb_namespace_off = StringUtil::find(db_key, '~');
     if (tsdb_namespace_off == String::npos) {
-      RAISEF(kRuntimeError, "invalid partition key: $0", partition_key_ns);
+      RAISEF(kRuntimeError, "invalid partition key: $0", db_key);
     }
 
-    auto tsdb_namespace = partition_key_ns.substr(0, tsdb_namespace_off);
+    auto tsdb_namespace = db_key.substr(0, tsdb_namespace_off);
     SHA1Hash partition_key(
-        partition_key_ns.data() + tsdb_namespace_off + 1,
-        partition_key_ns.size() - tsdb_namespace_off - 1);
+        db_key.data() + tsdb_namespace_off + 1,
+        db_key.size() - tsdb_namespace_off - 1);
 
     util::BinaryMessageReader reader(value.data(), value.size());
     PartitionState state;
@@ -134,10 +134,11 @@ void TSDBNode::reopenPartitions() {
     auto partition = Partition::reopen(
         partition_key,
         state,
+        db_key,
         configFor(tsdb_namespace, state.stream_key),
         &noderef_);
 
-    partitions_.emplace(partition_key_ns, partition);
+    partitions_.emplace(db_key, partition);
   }
 
   cursor->close();
@@ -148,11 +149,11 @@ RefPtr<Partition> TSDBNode::findOrCreatePartition(
     const String& tsdb_namespace,
     const String& stream_key,
     const SHA1Hash& partition_key) {
-  auto partition_key_ns = tsdb_namespace + "~";
-  partition_key_ns.append((char*) partition_key.data(), partition_key.size());
+  auto db_key = tsdb_namespace + "~";
+  db_key.append((char*) partition_key.data(), partition_key.size());
 
   std::unique_lock<std::mutex> lk(mutex_);
-  auto iter = partitions_.find(partition_key_ns);
+  auto iter = partitions_.find(db_key);
   if (iter != partitions_.end()) {
     return iter->second;
   }
@@ -160,10 +161,11 @@ RefPtr<Partition> TSDBNode::findOrCreatePartition(
   auto partition = Partition::create(
       partition_key,
       stream_key,
+      db_key,
       configFor(tsdb_namespace, stream_key),
       &noderef_);
 
-  partitions_.emplace(partition_key_ns, partition);
+  partitions_.emplace(db_key, partition);
   return partition;
 }
 
