@@ -44,20 +44,23 @@ public:
       const DateTime& until);
 
   void fetchPartition(
+      const String& tsdb_namespace,
       const String& stream_key,
-      const String& partition_key,
+      const SHA1Hash& partition_key,
       Function<void (const Buffer& record)> fn);
 
-  PartitionInfo fetchPartitionInfo(
-      const String& stream_key,
-      const String& partition_key);
-
   void fetchPartitionWithSampling(
+      const String& tsdb_namespace,
       const String& stream_key,
-      const String& partition,
+      const SHA1Hash& partition_key,
       size_t sample_modulo,
       size_t sample_index,
       Function<void (const Buffer& record)> fn);
+
+  PartitionInfo fetchPartitionInfo(
+      const String& tsdb_namespace,
+      const String& stream_key,
+      const SHA1Hash& partition_key);
 
   Buffer fetchDerivedDataset(
       const String& stream_key,

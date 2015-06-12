@@ -38,8 +38,9 @@ RefPtr<VFSFile> CSTableIndex::computeBlob(dproc::TaskContext* context) {
   cstable::CSTableBuilder cstable(schema_.get());
 
   tsdb_->fetchPartition(
+      params_.tsdb_namespace(),
       params_.stream_key(),
-      params_.partition_key(),
+      SHA1Hash::fromHexString(params_.partition_key()),
       [this, &cstable] (const Buffer& buf) {
     msg::MessageObject obj;
     msg::MessageDecoder::decode(buf, *schema_, &obj);

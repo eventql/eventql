@@ -65,8 +65,9 @@ template <typename ScanletType>
 void TSDBTableScan<ScanletType>::scanWithoutIndex(
     dproc::TaskContext* context) {
   tsdb_->fetchPartition(
+      params_.tsdb_namespace(),
       params_.stream_key(),
-      params_.partition_key(),
+      SHA1Hash::fromHexString(params_.partition_key()),
       std::bind(
           &TSDBTableScan<ScanletType>::onRow,
           this,
