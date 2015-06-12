@@ -22,12 +22,21 @@ namespace tsdb {
 RefPtr<Partition> Partition::create(
     const SHA1Hash& partition_key,
     const String& stream_key,
+    const String& db_key,
     StreamConfig* config,
     TSDBNodeRef* node) {
+
+  fnord::logDebug(
+      "tsdb",
+      "Creating new partition; stream='$0' partition='$1'",
+      stream_key,
+      partition_key.toString());
+
   return RefPtr<Partition>(
       new Partition(
           partition_key,
           stream_key,
+          db_key,
           config,
           node));
 }
@@ -35,12 +44,21 @@ RefPtr<Partition> Partition::create(
 RefPtr<Partition> Partition::reopen(
     const SHA1Hash& partition_key,
     const PartitionState& state,
+    const String& db_key,
     StreamConfig* config,
     TSDBNodeRef* node) {
+
+  fnord::logDebug(
+      "tsdb",
+      "Loading partition; stream='$0' partition='$1'",
+      state.stream_key,
+      partition_key.toString());
+
   return RefPtr<Partition>(
       new Partition(
           partition_key,
           state,
+          db_key,
           config,
           node));
 }
@@ -48,10 +66,12 @@ RefPtr<Partition> Partition::reopen(
 Partition::Partition(
     const SHA1Hash& partition_key,
     const String& stream_key,
+    const String& db_key,
     StreamConfig* config,
     TSDBNodeRef* node) :
     stream_key_(stream_key),
     key_(partition_key),
+    db_key_(db_key),
     config_(config),
     node_(node),
     records_(
@@ -65,10 +85,12 @@ Partition::Partition(
 Partition::Partition(
     const SHA1Hash& partition_key,
     const PartitionState& state,
+    const String& db_key,
     StreamConfig* config,
     TSDBNodeRef* node) :
     stream_key_(state.stream_key),
     key_(partition_key),
+    db_key_(db_key),
     config_(config),
     node_(node),
     records_(
@@ -91,8 +113,9 @@ void Partition::insertRecord(
 
   fnord::logTrace(
       "tsdb",
-      "Insert 1 record into stream='$0'",
-      stream_key_);
+      "Insert 1 record into stream='$0' partition='$1'",
+      stream_key_,
+      key_.toString());
 
   auto old_ver = records_.version();
   records_.addRecord(record_id, record);
@@ -140,7 +163,7 @@ void Partition::compact() {
   lk.unlock();
 
   fnord::logDebug(
-      "tsdb.replication",
+      "tsdb",
       "Compacting partition; stream='$0' partition='$1'",
       stream_key_,
       key_.toString());
@@ -299,7 +322,7 @@ void Partition::commitState() {
   state.encode(&buf);
 
   auto txn = node_->db->startTransaction(false);
-  txn->update(key_.data(), key_.size(), buf.data(), buf.size());
+  txn->update(db_key_.data(), db_key_.size(), buf.data(), buf.size());
   txn->commit();
 }
 
