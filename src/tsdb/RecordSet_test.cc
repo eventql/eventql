@@ -56,7 +56,7 @@ Buffer testObject(RefPtr<msg::MessageSchema> schema, String one, String two) {
 
 TEST_CASE(RecordSetTest, TestAddRowToEmptySet, [] () {
   auto schema = testSchema();
-  RecordSet recset("/tmp/__fnord_testrecset");
+  RecordSet recset("/tmp", "_fnord_testrecset");
   EXPECT_TRUE(recset.getState().commitlog.isEmpty());
   EXPECT_EQ(recset.getState().commitlog_size, 0);
   EXPECT_TRUE(recset.getState().datafiles.empty());
@@ -125,14 +125,14 @@ TEST_CASE(RecordSetTest, TestCommitlogReopen, [] () {
   RecordSet::RecordSetState state;
 
   {
-    RecordSet recset("/tmp/__fnord_testrecset");
+    RecordSet recset("/tmp", "_fnord_testrecset");
     recset.addRecord(SHA1::compute("0x42424242"), testObject(schema, "1a", "1b"));
     recset.addRecord(SHA1::compute("0x23232323"), testObject(schema, "2a", "2b"));
     state = recset.getState();
   }
 
   {
-    RecordSet recset("/tmp/__fnord_testrecset", state);
+    RecordSet recset("/tmp", "_fnord_testrecset", state);
     EXPECT_EQ(recset.getState().commitlog_size, state.commitlog_size);
     EXPECT_EQ(recset.getState().old_commitlogs.size(), 0);
     EXPECT_EQ(recset.commitlogSize(), 2);
@@ -141,7 +141,7 @@ TEST_CASE(RecordSetTest, TestCommitlogReopen, [] () {
 
 TEST_CASE(RecordSetTest, TestDuplicateRowsInCommitlog, [] () {
   auto schema = testSchema();
-  RecordSet recset("/tmp/__fnord_testrecset");
+  RecordSet recset("/tmp", "_fnord_testrecset");
 
   recset.addRecord(SHA1::compute("0x42424242"), testObject(schema, "1a", "1b"));
   recset.addRecord(SHA1::compute("0x42424242"), testObject(schema, "2a", "2b"));
@@ -166,7 +166,7 @@ TEST_CASE(RecordSetTest, TestDuplicateRowsInCommitlog, [] () {
 
 TEST_CASE(RecordSetTest, TestCompactionWithExistingTable, [] () {
   auto schema = testSchema();
-  RecordSet recset("/tmp/__fnord_testrecset");
+  RecordSet recset("/tmp", "_fnord_testrecset");
 
   recset.addRecord(SHA1::compute("0x42424242"), testObject(schema, "1a", "1b"));
   recset.addRecord(SHA1::compute("0x23232323"), testObject(schema, "2a", "2b"));
@@ -191,7 +191,7 @@ TEST_CASE(RecordSetTest, TestCompactionWithExistingTable, [] () {
 TEST_CASE(RecordSetTest, TestInsert10kRows, [] () {
   Random rnd;
   auto schema = testSchema();
-  RecordSet recset("/tmp/__fnord_testrecset");
+  RecordSet recset("/tmp", "_fnord_testrecset");
 
   for (int i = 0; i < 10; ++i) {
     for (int i = 0; i < 1000; ++i) {
@@ -213,7 +213,7 @@ TEST_CASE(RecordSetTest, TestInsert10kRows, [] () {
 TEST_CASE(RecordSetTest, TestSplitIntoMultipleDatafiles, [] () {
   Random rnd;
   auto schema = testSchema();
-  RecordSet recset("/tmp/__fnord_testrecset");
+  RecordSet recset("/tmp", "_fnord_testrecset");
   recset.setMaxDatafileSize(1024 * 60);
 
   int n = 0;
