@@ -108,41 +108,65 @@ void TSDBNode::reopenStreamChunks() {
       }
     }
 
-    auto partition_ns_key = key.toString();
-    if (partition_ns_key.size() == 0) {
+    auto partition_key_ns = key.toString();
+    if (partition_key_ns.size() == 0) {
       continue;
     }
 
-    if (partition_ns_key[0] == 0x1b) {
+    if (partition_key_ns[0] == 0x1b) {
       continue;
     }
 
-    auto partition_ns_off = StringUtil::find(partition_ns_key, '~');
-    if (partition_ns_off == String::npos) {
-      RAISEF(kRuntimeError, "invalid partition key: $0", partition_ns_key);
+    auto tsdb_namespace_off = StringUtil::find(partition_key_ns, '~');
+    if (tsdb_namespace_off == String::npos) {
+      RAISEF(kRuntimeError, "invalid partition key: $0", partition_key_ns);
     }
 
-    auto partition_ns = partition_ns_key.substr(0, partition_ns_off);
+    auto tsdb_namespace = partition_key_ns.substr(0, tsdb_namespace_off);
     SHA1Hash partition_key(
-        partition_ns_key.data() + partition_ns_off + 1,
-        partition_ns_key.size() - partition_ns_off - 1);
+        partition_key_ns.data() + tsdb_namespace_off + 1,
+        partition_key_ns.size() - tsdb_namespace_off - 1);
 
     util::BinaryMessageReader reader(value.data(), value.size());
     StreamChunkState state;
     state.decode(&reader);
 
-    auto chunk = StreamChunk::reopen(
+    auto partition = StreamChunk::reopen(
         partition_key,
         state,
-        configFor(partition_ns, state.stream_key),
+        configFor(tsdb_namespace, state.stream_key),
         &noderef_);
 
-    chunks_.emplace(partition_ns_key, chunk);
+    partitions_.emplace(partition_key_ns, partition);
   }
 
   cursor->close();
   txn->abort();
 }
+
+RefPtr<StreamChunk> TSDBNode::findOrCreatePartition(
+    const String& tsdb_namespace,
+    const String& stream_key,
+    const SHA1Hash& partition_key) {
+  auto partition_key_ns = tsdb_namespace + "~";
+  partition_key_ns.append((char*) partition_key.data(), partition_key.size());
+
+  std::unique_lock<std::mutex> lk(mutex_);
+  auto iter = partitions_.find(partition_key_ns);
+  if (iter != partitions_.end()) {
+    return iter->second;
+  }
+
+  auto partition = StreamChunk::create(
+      partition_key,
+      stream_key,
+      configFor(tsdb_namespace, stream_key),
+      &noderef_);
+
+  partitions_.emplace(partition_key_ns, partition);
+  return partition;
+}
+
 
 } // namespace tdsb
 
