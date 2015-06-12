@@ -7,7 +7,7 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <tsdb/StreamChunk.h>
+#include <tsdb/Partition.h>
 #include <fnord/io/fileutil.h>
 #include <fnord/uri.h>
 #include <fnord/util/binarymessagewriter.h>
@@ -19,33 +19,33 @@ using namespace fnord;
 
 namespace tsdb {
 
-RefPtr<StreamChunk> StreamChunk::create(
+RefPtr<Partition> Partition::create(
     const SHA1Hash& partition_key,
     const String& stream_key,
     StreamConfig* config,
     TSDBNodeRef* node) {
-  return RefPtr<StreamChunk>(
-      new StreamChunk(
+  return RefPtr<Partition>(
+      new Partition(
           partition_key,
           stream_key,
           config,
           node));
 }
 
-RefPtr<StreamChunk> StreamChunk::reopen(
+RefPtr<Partition> Partition::reopen(
     const SHA1Hash& partition_key,
-    const StreamChunkState& state,
+    const PartitionState& state,
     StreamConfig* config,
     TSDBNodeRef* node) {
-  return RefPtr<StreamChunk>(
-      new StreamChunk(
+  return RefPtr<Partition>(
+      new Partition(
           partition_key,
           state,
           config,
           node));
 }
 
-StreamChunk::StreamChunk(
+Partition::Partition(
     const SHA1Hash& partition_key,
     const String& stream_key,
     StreamConfig* config,
@@ -62,9 +62,9 @@ StreamChunk::StreamChunk(
   records_.setMaxDatafileSize(config_->max_sstable_size());
 }
 
-StreamChunk::StreamChunk(
+Partition::Partition(
     const SHA1Hash& partition_key,
-    const StreamChunkState& state,
+    const PartitionState& state,
     StreamConfig* config,
     TSDBNodeRef* node) :
     stream_key_(state.stream_key),
@@ -84,7 +84,7 @@ StreamChunk::StreamChunk(
   records_.setMaxDatafileSize(config_->max_sstable_size());
 }
 
-void StreamChunk::insertRecord(
+void Partition::insertRecord(
     const SHA1Hash& record_id,
     const Buffer& record) {
   std::unique_lock<std::mutex> lk(mutex_);
@@ -103,7 +103,7 @@ void StreamChunk::insertRecord(
   scheduleCompaction();
 }
 
-void StreamChunk::insertRecords(const Vector<RecordRef>& records) {
+void Partition::insertRecords(const Vector<RecordRef>& records) {
   std::unique_lock<std::mutex> lk(mutex_);
 
   fnord::logTrace(
@@ -121,7 +121,7 @@ void StreamChunk::insertRecords(const Vector<RecordRef>& records) {
   scheduleCompaction();
 }
 
-void StreamChunk::scheduleCompaction() {
+void Partition::scheduleCompaction() {
   auto now = WallClock::unixMicros();
   auto interval = config_->compaction_interval();
   auto last = last_compaction_.unixMicros();
@@ -134,7 +134,7 @@ void StreamChunk::scheduleCompaction() {
   node_->compactionq.insert(this, now + compaction_delay);
 }
 
-void StreamChunk::compact() {
+void Partition::compact() {
   std::unique_lock<std::mutex> lk(mutex_);
   last_compaction_ = DateTime::now();
   lk.unlock();
@@ -159,7 +159,7 @@ void StreamChunk::compact() {
   }
 }
 
-void StreamChunk::replicate() {
+void Partition::replicate() {
   std::unique_lock<std::mutex> lk(replication_mutex_);
 
   auto cur_offset = records_.lastOffset();
@@ -225,7 +225,7 @@ void StreamChunk::replicate() {
   }
 }
 
-uint64_t StreamChunk::replicateTo(const String& addr, uint64_t offset) {
+uint64_t Partition::replicateTo(const String& addr, uint64_t offset) {
   size_t batch_size = 1024;
   util::BinaryMessageWriter batch;
 
@@ -276,11 +276,11 @@ uint64_t StreamChunk::replicateTo(const String& addr, uint64_t offset) {
   return offset + n;
 }
 
-Vector<String> StreamChunk::listFiles() const {
+Vector<String> Partition::listFiles() const {
   return records_.listDatafiles();
 }
 
-PartitionInfo StreamChunk::partitionInfo() const {
+PartitionInfo Partition::partitionInfo() const {
   PartitionInfo pi;
   pi.set_partition_key(key_.toString());
   pi.set_stream_key(stream_key_);
@@ -289,8 +289,8 @@ PartitionInfo StreamChunk::partitionInfo() const {
   return pi;
 }
 
-void StreamChunk::commitState() {
-  StreamChunkState state;
+void Partition::commitState() {
+  PartitionState state;
   state.record_state = records_.getState();
   state.stream_key = stream_key_;
   state.repl_offsets = repl_offsets_;
@@ -303,7 +303,7 @@ void StreamChunk::commitState() {
   txn->commit();
 }
 
-void StreamChunkState::encode(
+void PartitionState::encode(
     util::BinaryMessageWriter* writer) const {
   writer->appendLenencString(stream_key);
   record_state.encode(writer);
@@ -317,7 +317,7 @@ void StreamChunkState::encode(
   writer->appendVarUInt(record_state.version);
 }
 
-void StreamChunkState::decode(util::BinaryMessageReader* reader) {
+void PartitionState::decode(util::BinaryMessageReader* reader) {
   stream_key = reader->readLenencString();
   record_state.decode(reader);
 

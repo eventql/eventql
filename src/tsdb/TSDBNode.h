@@ -15,7 +15,7 @@
 #include <fnord/thread/queue.h>
 #include <fnord/mdb/MDB.h>
 #include <tsdb/StreamConfig.pb.h>
-#include <tsdb/StreamChunk.h>
+#include <tsdb/Partition.h>
 #include <tsdb/TSDBNodeRef.h>
 #include <tsdb/CompactionWorker.h>
 #include <tsdb/ReplicationWorker.h>
@@ -40,12 +40,12 @@ public:
       const String& tsdb_namespace,
       const String& stream_key) const;
 
-  StreamChunk* findPartition(
+  Partition* findPartition(
       const String& tsdb_namespace,
       const String& stream_key,
       const SHA1Hash& partition_key);
 
-  RefPtr<StreamChunk> findOrCreatePartition(
+  RefPtr<Partition> findOrCreatePartition(
       const String& tsdb_namespace,
       const String& stream_key,
       const SHA1Hash& partition_key);
@@ -58,12 +58,12 @@ public:
 
 protected:
 
-  void reopenStreamChunks();
+  void reopenPartitions();
 
   TSDBNodeRef noderef_;
   Vector<Pair<String, ScopedPtr<StreamConfig>>> configs_;
   std::mutex mutex_;
-  HashMap<String, RefPtr<StreamChunk>> partitions_;
+  HashMap<String, RefPtr<Partition>> partitions_;
   Vector<RefPtr<CompactionWorker>> compaction_workers_;
   Vector<RefPtr<ReplicationWorker>> replication_workers_;
 };
