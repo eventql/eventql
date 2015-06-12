@@ -12,6 +12,8 @@
 #include <fnord/stdtypes.h>
 #include <fnord/buffer.h>
 #include "fnord/exception.h"
+#include <google/protobuf/io/zero_copy_stream_impl_lite.h>
+#include <google/protobuf/text_format.h>
 
 namespace fnord {
 namespace msg {
@@ -45,6 +47,27 @@ void encode(const ProtoType& proto, Buffer* target);
 
 template <typename ProtoType>
 void encode(const ProtoType& proto, BufferRef target);
+
+template <typename ProtoType>
+ProtoType parseText(const Buffer& buffer);
+
+template <typename ProtoType>
+void parseText(const Buffer& buffer, ProtoType* target);
+
+template <typename ProtoType>
+ProtoType parseText(const BufferRef& buffer);
+
+template <typename ProtoType>
+void parseText(const BufferRef& buffer, ProtoType* target);
+
+template <typename ProtoType>
+ProtoType parseText(const String& buffer);
+
+template <typename ProtoType>
+ProtoType parseText(const void* data, size_t size);
+
+template <typename ProtoType>
+void parseText(const void* data, size_t size, ProtoType* target);
 
 // impl...
 
@@ -109,6 +132,53 @@ template <typename ProtoType>
 void encode(const ProtoType& proto, Buffer* target) {
   auto tmp = proto.SerializeAsString();
   target->append(tmp.data(), tmp.size());
+}
+
+template <typename ProtoType>
+ProtoType parseText(const Buffer& buffer) {
+  ProtoType proto;
+  parseText<ProtoType>(buffer.data(), buffer.size(), &proto);
+  return proto;
+}
+
+template <typename ProtoType>
+void parseText(const Buffer& buffer, ProtoType* target) {
+  parseText<ProtoType>(buffer.data(), buffer.size(), target);
+}
+
+template <typename ProtoType>
+ProtoType parseText(const BufferRef& buffer) {
+  ProtoType proto;
+  parseText<ProtoType>(buffer->data(), buffer->size(), &proto);
+  return proto;
+}
+
+template <typename ProtoType>
+void parseText(const BufferRef& buffer, ProtoType* target) {
+  parseText<ProtoType>(buffer->data(), buffer->size(), target);
+}
+
+template <typename ProtoType>
+ProtoType parseText(const String& buffer) {
+  ProtoType proto;
+  parseText<ProtoType>(buffer.data(), buffer.size(), &proto);
+  return proto;
+}
+
+template <typename ProtoType>
+ProtoType parseText(const void* data, size_t size) {
+  ProtoType proto;
+  parseText<ProtoType>(data, size, &proto);
+  return proto;
+}
+
+template <typename ProtoType>
+void parseText(const void* data, size_t size, ProtoType* target) {
+  google::protobuf::io::ArrayInputStream is(data, size);
+
+  if (!google::protobuf::TextFormat::Parse(&is, target)) {
+    RAISE(kRuntimeError, "invalid protobuf message");
+  }
 }
 
 } // namespace msg
