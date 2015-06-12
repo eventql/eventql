@@ -305,7 +305,7 @@ PartitionInfo Partition::partitionInfo() const {
   PartitionInfo pi;
   pi.set_partition_key(key_.toString());
   pi.set_stream_key(stream_key_);
-  pi.set_version(records_.version());
+  pi.set_checksum(records_.checksum().toString());
   pi.set_exists(true);
   return pi;
 }
