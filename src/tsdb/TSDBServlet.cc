@@ -43,20 +43,20 @@ void TSDBServlet::handleHTTPRequest(
       return;
     }
 
-    //if (StringUtil::endsWith(uri.path(), "/fetch_chunk")) {
+    //if (StringUtil::endsWith(uri.path(), "/fetch")) {
     //  fetchChunk(&req, &res, res_stream, &uri);
     //  return;
     //}
 
-    //if (StringUtil::endsWith(uri.path(), "/fetch_partition_info")) {
-    //  fetchPartitionInfo(&req, &res, &uri);
-    //  res_stream->writeResponse(res);
-    //  return;
-    //}
+    if (uri.path() == "/tsdb/partition_info") {
+      fetchPartitionInfo(&req, &res, &uri);
+      res_stream->writeResponse(res);
+      return;
+    }
 
-    //res.setStatus(fnord::http::kStatusNotFound);
-    //res.addBody("not found");
-    //res_stream->writeResponse(res);
+    res.setStatus(fnord::http::kStatusNotFound);
+    res.addBody("not found");
+    res_stream->writeResponse(res);
   } catch (const Exception& e) {
     res.setStatus(http::kStatusInternalServerError);
     res.addBody(StringUtil::format("error: $0: $1", e.getTypeName(), e.getMessage()));
@@ -208,27 +208,49 @@ void TSDBServlet::insertRecords(
 //  res_stream->finishResponse();
 //}
 //
-//void TSDBServlet::fetchPartitionInfo(
-//    const http::HTTPRequest* req,
-//    http::HTTPResponse* res,
-//    URI* uri) {
-//  const auto& params = uri->queryParams();
-//
-//  String partition;
-//  if (!URI::getParam(params, "partition", &partition)) {
-//    res->setStatus(fnord::http::kStatusBadRequest);
-//    res->addBody("missing ?partition=... parameter");
-//    return;
-//  }
-//
-//  String partition_key;
-//  util::Base64::decode(partition, &partition_key);
-//
-//  auto pinfo = node_->fetchPartitionInfo(partition_key);
-//  res->setStatus(http::kStatusOK);
-//  res->addHeader("Content-Type", "application/x-protobuf");
-//  res->addBody(*msg::encode(pinfo));
-//}
+
+void TSDBServlet::fetchPartitionInfo(
+    const http::HTTPRequest* req,
+    http::HTTPResponse* res,
+    URI* uri) {
+  const auto& params = uri->queryParams();
+
+  String tsdb_namespace;
+  if (!URI::getParam(params, "namespace", &tsdb_namespace)) {
+    res->setStatus(fnord::http::kStatusBadRequest);
+    res->addBody("missing ?namespace=... parameter");
+    return;
+  }
+
+  String stream_key;
+  if (!URI::getParam(params, "stream", &stream_key)) {
+    res->setStatus(fnord::http::kStatusBadRequest);
+    res->addBody("missing ?stream=... parameter");
+    return;
+  }
+
+  String partition_key;
+  if (!URI::getParam(params, "partition", &partition_key)) {
+    res->setStatus(fnord::http::kStatusBadRequest);
+    res->addBody("missing ?partition=... parameter");
+    return;
+  }
+
+  auto partition = node_->findPartition(
+      tsdb_namespace,
+      stream_key,
+      SHA1Hash::fromString(partition_key));
+
+  PartitionInfo pinfo;
+  pinfo.set_partition_key(partition_key);
+  if (!partition.isEmpty()) {
+    pinfo = partition.get()->partitionInfo();
+  }
+
+  res->setStatus(http::kStatusOK);
+  res->addHeader("Content-Type", "application/x-protobuf");
+  res->addBody(*msg::encode(pinfo));
+}
 
 }
 

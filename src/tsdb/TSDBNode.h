@@ -40,7 +40,7 @@ public:
       const String& tsdb_namespace,
       const String& stream_key) const;
 
-  Partition* findPartition(
+  Option<RefPtr<Partition>> findPartition(
       const String& tsdb_namespace,
       const String& stream_key,
       const SHA1Hash& partition_key);

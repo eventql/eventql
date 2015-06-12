@@ -49,7 +49,7 @@ List<dproc::TaskDependency> TSDBTableScanReducer<ScanletType>::dependencies()
 
     // FIXPAUL slow!!
     auto pinfo = tsdb_->fetchPartitionInfo(stream_key, partition);
-    dparams.set_version(StringUtil::toString(pinfo.version()));
+    dparams.set_version(pinfo.checksum());
 
     deps.emplace_back(dproc::TaskDependency {
       .task_name = name_,

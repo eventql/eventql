@@ -169,6 +169,22 @@ RefPtr<Partition> TSDBNode::findOrCreatePartition(
   return partition;
 }
 
+Option<RefPtr<Partition>> TSDBNode::findPartition(
+    const String& tsdb_namespace,
+    const String& stream_key,
+    const SHA1Hash& partition_key) {
+  auto db_key = tsdb_namespace + "~";
+  db_key.append((char*) partition_key.data(), partition_key.size());
+
+  std::unique_lock<std::mutex> lk(mutex_);
+  auto iter = partitions_.find(db_key);
+  if (iter == partitions_.end()) {
+    return None<RefPtr<Partition>>();
+  } else {
+    return Some(iter->second);
+  }
+}
+
 
 } // namespace tdsb
 
