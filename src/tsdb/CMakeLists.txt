@@ -61,3 +61,19 @@ add_executable(tests/test-tsdb-timewindowpartitioner
     TimeWindowPartitioner_test.cc)
 
 target_link_libraries(tests/test-tsdb-timewindowpartitioner ${CMAKE_THREAD_LIBS_INIT} ${FNORD_LIBS})
+
+add_executable(tsdbd
+    $<TARGET_OBJECTS:fnord-base>
+    $<TARGET_OBJECTS:fnord-protobuf>
+    $<TARGET_OBJECTS:fnord-mdb>
+    $<TARGET_OBJECTS:tsdb>
+    $<TARGET_OBJECTS:cstable>
+    $<TARGET_OBJECTS:sstable>
+    $<TARGET_OBJECTS:fnord-http>
+    $<TARGET_OBJECTS:fnord-json>
+    $<TARGET_OBJECTS:dproc>
+    tsdbd.cc)
+
+target_link_libraries(tsdbd ${FNORD_LIBS})
+
+

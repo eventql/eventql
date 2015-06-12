@@ -11,6 +11,8 @@ package tsdb;
 
 message RecordEnvelope {
 
+  optional string tsdb_namespace = 5;
+
   optional string stream_key = 1;
 
   optional string partition_key = 2;
