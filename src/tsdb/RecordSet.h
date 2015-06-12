@@ -79,6 +79,7 @@ public:
   Vector<String> listDatafiles() const;
 
   size_t version() const;
+  SHA1Hash checksum() const;
   size_t commitlogSize() const;
 
   void compact();
