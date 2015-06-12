@@ -7,21 +7,28 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#ifndef _FNORDMETRIC_QUERY_SVALUE_H
-#define _FNORDMETRIC_QUERY_SVALUE_H
+#pragma once
 #include <stdlib.h>
 #include <string>
 #include <string.h>
 #include <vector>
-#include <fnord-base/exception.h>
-#include <fnordmetric/types.h>
+#include <fnord/stdtypes.h>
+#include <fnord/datetime.h>
+#include <fnord/exception.h>
 
-namespace fnordmetric {
-namespace query {
+using namespace fnord;
+
+namespace csql {
 class Token;
 
 class SValue {
 public:
+  typedef String StringType;
+  typedef double FloatType;
+  typedef int64_t IntegerType;
+  typedef bool BoolType;
+  typedef fnord::DateTime TimeType;
+
   enum kSValueType {
     T_STRING,
     T_FLOAT,
@@ -35,12 +42,12 @@ public:
   const char* getTypeName() const;
 
   explicit SValue();
-  explicit SValue(const fnordmetric::StringType& string_value);
+  explicit SValue(const StringType& string_value);
   explicit SValue(char const* string_value); // FIXPAUL HACK!!!
-  explicit SValue(fnordmetric::IntegerType integer_value);
-  explicit SValue(fnordmetric::FloatType float_value);
-  explicit SValue(fnordmetric::BoolType bool_value);
-  explicit SValue(fnordmetric::TimeType time_value);
+  explicit SValue(IntegerType integer_value);
+  explicit SValue(FloatType float_value);
+  explicit SValue(BoolType bool_value);
+  explicit SValue(TimeType time_value);
   explicit SValue(const char* str_value, size_t len, bool copy);
 
   SValue(const SValue& copy);
@@ -54,11 +61,11 @@ public:
   template <typename T> bool testType() const;
   kSValueType getType() const;
   kSValueType testTypeWithNumericConversion() const;
-  fnordmetric::IntegerType getInteger() const;
-  fnordmetric::FloatType getFloat() const;
-  fnordmetric::BoolType getBool() const;
-  fnordmetric::TimeType getTimestamp() const;
-  fnordmetric::StringType getString() const;
+  IntegerType getInteger() const;
+  FloatType getFloat() const;
+  BoolType getBool() const;
+  TimeType getTimestamp() const;
+  StringType getString() const;
   std::string toString() const;
   bool tryNumericConversion();
   bool tryTimeConversion();
@@ -69,9 +76,9 @@ protected:
   struct {
     kSValueType type;
     union {
-      fnordmetric::IntegerType t_integer;
-      fnordmetric::FloatType t_float;
-      fnordmetric::BoolType t_bool;
+      IntegerType t_integer;
+      FloatType t_float;
+      BoolType t_bool;
       uint64_t t_timestamp;
       struct {
         char* ptr;
@@ -82,5 +89,3 @@ protected:
 };
 
 }
-}
-#endif
