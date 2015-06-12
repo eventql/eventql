@@ -59,10 +59,14 @@ void TSDBServlet::handleHTTPRequest(
     res.addBody("not found");
     res_stream->writeResponse(res);
   } catch (const Exception& e) {
+    fnord::logError("tsdb", e, "error while processing HTTP request");
+
     res.setStatus(http::kStatusInternalServerError);
     res.addBody(StringUtil::format("error: $0: $1", e.getTypeName(), e.getMessage()));
     res_stream->writeResponse(res);
   }
+
+  res_stream->finishResponse();
 }
 
 void TSDBServlet::insertRecords(
