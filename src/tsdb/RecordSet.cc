@@ -25,9 +25,11 @@ RecordRef::RecordRef(
     record_id(_record_id),
     record(_record) {}
 
-RecordSet::RecordSet(
+RecordSet::RecordSet(  
+    const String& datadir,
     const String& filename_prefix,
     RecordSetState state /* = RecordSetState{} */) :
+    datadir_(datadir),
     filename_prefix_(filename_prefix),
     state_(state),
     max_datafile_size_(kDefaultMaxDatafileSize) {
@@ -169,7 +171,8 @@ void RecordSet::compact(Set<String>* deleted_files) {
     return;
   }
 
-  auto outfile_path = filename_prefix_ + rnd_.hex64() + ".sst";
+  auto outfile_name = filename_prefix_ + rnd_.hex64() + ".sst";
+  auto outfile_path = FileUtil::joinPaths(datadir_, outfile_name);
   auto outfile = sstable::SSTableWriter::create(
       outfile_path + "~",
       sstable::IndexProvider{},
@@ -257,7 +260,7 @@ void RecordSet::compact(Set<String>* deleted_files) {
 
   if (outfile_nrecords > 0) {
     state_.datafiles.emplace_back(DatafileRef {
-      .filename = outfile_path,
+      .filename = outfile_name,
       .num_records = outfile_nrecords,
       .offset = outfile_offset
     });
@@ -423,9 +426,9 @@ void RecordSet::setMaxDatafileSize(size_t size) {
   max_datafile_size_ = size;
 }
 
-const String& RecordSet::filenamePrefix() const {
- return filename_prefix_;
-}
+//const String& RecordSet::filenamePrefix() const {
+// return filename_prefix_;
+//}
 
 RecordSet::RecordSetState::RecordSetState() :
     commitlog_size(0),

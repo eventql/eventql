@@ -53,6 +53,7 @@ public:
   };
 
   RecordSet(
+      const String& datadir,
       const String& filename_prefix,
       RecordSetState state = RecordSetState{});
 
@@ -84,7 +85,7 @@ public:
   void compact(Set<String>* deleted_files);
 
   void setMaxDatafileSize(size_t size);
-  const String& filenamePrefix() const;
+  //const String& filenamePrefix() const;
 
   void rollCommitlog();
 
@@ -97,6 +98,7 @@ protected:
       const String& filename,
       Function<void (const SHA1Hash&, const void*, size_t)> fn);
 
+  String datadir_;
   String filename_prefix_;
   RecordSetState state_;
   mutable std::mutex compact_mutex_;
