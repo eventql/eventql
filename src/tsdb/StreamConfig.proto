@@ -9,31 +9,18 @@
  */
 package tsdb;
 
-message TimeWindowPartitionerConfig {
-};
-
-enum StreamPartitioner {
-  TIME_WINDOW = 0;
-};
-
 message StreamConfig {
 
   /**
-   * The stream key prefix for which this config should be applied
+   * The tsdb namespace to be configured
    */
-  required string stream_key_prefix = 1;
+  required string tsdb_namespace = 6;
 
   /**
-   * The partitioner to be used to partition the stream. Default partitioners:
-   * "TIME_WINDOW"
+   * The stream key prefix for which this config should be applied/. (empty
+   * matches all streams, longest prefix wins)
    */
-  required StreamPartitioner partitioner = 2;
-
-  /**
-   * The time window to partition the stream into in microseconds. Only
-   * applicable if partitioner == "TIME_WINDOW"
-   */
-  optional uint64 partition_window = 6;
+  optional string stream_key_prefix = 1;
 
   /**
    * The maximum sstable size in bytes

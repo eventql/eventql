@@ -32,9 +32,11 @@
 #include "fnord/stats/statsdagent.h"
 #include "fnord/mdb/MDB.h"
 #include "fnord/mdb/MDBUtil.h"
+#include "fnord/protobuf/msg.h"
 #include "fnord/protobuf/MessageSchema.h"
 #include "tsdb/TSDBNode.h"
 #include "tsdb/TSDBServlet.h"
+#include "tsdb/TSDBNodeConfig.pb.h"
 
 using namespace fnord;
 
@@ -55,6 +57,15 @@ int main(int argc, const char** argv) {
       "8000",
       "Start the public http server on this port",
       "<port>");
+
+  flags.defineFlag(
+      "conf",
+      cli::FlagParser::T_STRING,
+      true,
+      NULL,
+      NULL,
+      "conf file path",
+      "<conf>");
 
   flags.defineFlag(
       "datadir",
@@ -92,6 +103,10 @@ int main(int argc, const char** argv) {
   auto dir = flags.getString("datadir");
   auto repl_targets = flags.getStrings("replicate_to");
 
+  /* conf */
+  auto conf_data = FileUtil::read(flags.getString("conf"));
+  auto conf = msg::parseText<tsdb::TSDBNodeConfig>(conf_data);
+
   /* start http server and worker pools */
   fnord::thread::ThreadPool tpool;
   http::HTTPConnectionPool http(&ev);
@@ -105,6 +120,9 @@ int main(int argc, const char** argv) {
   }
 
   tsdb::TSDBNode tsdb_node(dir, repl_scheme.get(), &http);
+  for (const auto& sc : conf.stream_config()) {
+    tsdb_node.configurePrefix(sc.tsdb_namespace(), sc);
+  }
 
   tsdb::TSDBServlet tsdb_servlet(&tsdb_node);
   http_router.addRouteByPrefixMatch("/tsdb", &tsdb_servlet, &tpool);
