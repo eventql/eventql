@@ -14,7 +14,7 @@
 
 namespace fnord {
 
-SHA1Hash SHA1Hash::fromString(const String& str) {
+SHA1Hash SHA1Hash::fromHexString(const String& str) {
   SHA1Hash hash(DeferInitialization{});
 
   static auto decode_char = [] (char c) -> uint8_t {
