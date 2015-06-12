@@ -17,7 +17,8 @@
 #include <dproc/Scheduler.h>
 #include <dproc/TaskSpec.pb.h>
 
-namespace fnord {
+using namespace fnord;
+
 namespace dproc {
 
 class LocalScheduler : public Scheduler {
@@ -84,6 +85,5 @@ protected:
 };
 
 } // namespace dproc
-} // namespace fnord
 
 #endif

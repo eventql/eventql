@@ -9,7 +9,8 @@
  */
 #include <dproc/DispatchService.h>
 
-namespace fnord {
+using namespace fnord;
+
 namespace dproc {
 
 void DispatchService::registerApp(
@@ -34,5 +35,4 @@ RefPtr<TaskResultFuture> DispatchService::run(const TaskSpec& task) {
 }
 
 } // namespace dproc
-} // namespace fnord
 

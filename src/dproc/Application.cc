@@ -9,7 +9,8 @@
  */
 #include <dproc/Application.h>
 
-namespace fnord {
+using namespace fnord;
+
 namespace dproc {
 
 RefPtr<Task> Application::getTaskInstance(
@@ -44,5 +45,4 @@ void DefaultApplication::registerTaskFactory(
 }
 
 } // namespace dproc
-} // namespace fnord
 

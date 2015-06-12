@@ -9,7 +9,8 @@
  */
 #include <dproc/TaskResultFuture.h>
 
-namespace fnord {
+using namespace fnord;
+
 namespace dproc {
 
 Future<RefPtr<Task>> TaskResultFuture::result() const {
@@ -63,4 +64,3 @@ double TaskStatus::progress() const {
 
 
 } // namespace dproc
-} // namespace fnord

@@ -15,7 +15,8 @@
 #include <dproc/TaskSpec.pb.h>
 #include <fnord/protobuf/msg.h>
 
-namespace fnord {
+using namespace fnord;
+
 namespace dproc {
 
 class Application : public RefCounted {
@@ -82,6 +83,5 @@ void DefaultApplication::registerProtoRDD(
 }
 
 } // namespace dproc
-} // namespace fnord
 
 #endif

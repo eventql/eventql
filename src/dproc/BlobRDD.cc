@@ -9,7 +9,8 @@
  */
 #include <dproc/BlobRDD.h>
 
-namespace fnord {
+using namespace fnord;
+
 namespace dproc {
 
 BlobRDD::BlobRDD() : blob_(nullptr) {}
@@ -27,5 +28,4 @@ void BlobRDD::decode(RefPtr<VFSFile> data) {
 }
 
 } // namespace dproc
-} // namespace fnord
 

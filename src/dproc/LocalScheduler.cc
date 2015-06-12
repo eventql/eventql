@@ -17,7 +17,8 @@
 #include <fnord/util/binarymessagewriter.h>
 #include <dproc/LocalScheduler.h>
 
-namespace fnord {
+using namespace fnord;
+
 namespace dproc {
 
 LocalScheduler::LocalScheduler(
@@ -306,4 +307,3 @@ size_t LocalScheduler::LocalTaskRef::numDependencies() const {
 }
 
 } // namespace dproc
-} // namespace fnord
