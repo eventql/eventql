@@ -56,6 +56,11 @@ size_t RecordSet::version() const {
   return state_.version;
 }
 
+SHA1Hash RecordSet::checksum() const {
+  std::unique_lock<std::mutex> lk(mutex_);
+  return state_.checksum;
+}
+
 size_t RecordSet::commitlogSize() const {
   std::unique_lock<std::mutex> lk(mutex_);
   return commitlog_ids_.size();
