@@ -14,10 +14,10 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
-#include <fnord-base/datetime.h>
-#include <fnord-base/uri.h>
-#include <fnord-base/reflect/reflect.h>
-#include "ItemRef.h"
+#include <fnord/datetime.h>
+#include <fnord/uri.h>
+#include <fnord/reflect/reflect.h>
+#include <inventory/ItemRef.h>
 
 using namespace fnord;
 

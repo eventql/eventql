@@ -6,18 +6,18 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-#include <fnord-base/exception.h>
-#include <fnord-base/inspect.h>
-#include "fnord-base/logging.h"
-#include <fnord-base/wallclock.h>
-#include <fnord-http/cookies.h>
-#include "fnord-http/httprequest.h"
-#include "fnord-http/httpresponse.h"
-#include "fnord-http/status.h"
-#include "fnord-base/random.h"
-#include "fnord-json/json.h"
-#include "fnord-json/jsonrpcrequest.h"
-#include "fnord-json/jsonrpcresponse.h"
+#include <fnord/exception.h>
+#include <fnord/inspect.h>
+#include "fnord/logging.h"
+#include <fnord/wallclock.h>
+#include <fnord/http/cookies.h>
+#include "fnord/http/httprequest.h"
+#include "fnord/http/httpresponse.h"
+#include "fnord/http/status.h"
+#include "fnord/random.h"
+#include "fnord/json/json.h"
+#include "fnord/json/jsonrpcrequest.h"
+#include "fnord/json/jsonrpcresponse.h"
 #include "CustomerNamespace.h"
 #include "IndexChangeRequest.h"
 #include "frontend/CMFrontend.h"
