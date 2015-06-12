@@ -13,6 +13,7 @@
 #include <fnord/util/binarymessagewriter.h>
 #include <fnord/protobuf/msg.h>
 #include <fnord/http/httpclient.h>
+#include <fnord/logging.h>
 
 using namespace fnord;
 
@@ -160,6 +161,8 @@ void TSDBClient::fetchPartitionWithSampling(
       -> http::HTTPResponseFuture* {
     return new http::StreamingResponseFuture(promise, handler);
   };
+
+  fnord::logTrace("tsdb.client", "Executing request: $0", uri);
 
   auto req = http::HTTPRequest::mkGet(uri);
   auto res = http.executeRequest(req, handler_factory);
