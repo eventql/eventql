@@ -11,7 +11,8 @@
 #include <fnord/stdtypes.h>
 #include <dproc/Task.h>
 
-namespace fnord {
+using namespace fnord;
+
 namespace dproc {
 
 class BlobRDD : public RDD {
@@ -30,5 +31,4 @@ protected:
 };
 
 } // namespace dproc
-} // namespace fnord
 

@@ -19,7 +19,8 @@
 #include <fnord/thread/future.h>
 #include <fnord/protobuf/msg.h>
 
-namespace fnord {
+using namespace fnord;
+
 namespace dproc {
 
 class Task;
@@ -120,6 +121,5 @@ void ProtoRDD<ProtoType>::decode(RefPtr<VFSFile> data) {
 }
 
 } // namespace dproc
-} // namespace fnord
 
 #endif

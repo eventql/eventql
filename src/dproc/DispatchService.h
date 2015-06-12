@@ -15,7 +15,8 @@
 #include <dproc/TaskSpec.pb.h>
 #include <dproc/TaskResultFuture.h>
 
-namespace fnord {
+using namespace fnord;
+
 namespace dproc {
 
 class DispatchService {
@@ -38,6 +39,5 @@ protected:
 };
 
 } // namespace dproc
-} // namespace fnord
 
 #endif

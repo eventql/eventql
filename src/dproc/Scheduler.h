@@ -14,7 +14,8 @@
 #include <dproc/TaskSpec.pb.h>
 #include <dproc/TaskResultFuture.h>
 
-namespace fnord {
+using namespace fnord;
+
 namespace dproc {
 
 class Scheduler : public RefCounted {
@@ -29,6 +30,5 @@ public:
 };
 
 } // namespace dproc
-} // namespace fnord
 
 #endif
