@@ -27,7 +27,7 @@ public:
   /**
    * Parse a SHA1Hash from a hex encoded string
    */
-  static SHA1Hash fromString(const String& str);
+  static SHA1Hash fromHexString(const String& str);
 
   /**
    * Creates a new zero-initialized SHA1 hash
