@@ -80,7 +80,7 @@ void TSDBServlet::insertRecords(
 
     partition->insertRecord(
         SHA1Hash::fromString(record.record_id()),
-        Buffer(record.record().data(), record.record().size()));
+        Buffer(record.record_data().data(), record.record_data().size()));
   }
 
   res->setStatus(http::kStatusCreated);
