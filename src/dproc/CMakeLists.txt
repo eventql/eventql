@@ -21,4 +21,5 @@ add_library(dproc OBJECT
     LocalScheduler.cc
     TaskResultFuture.cc
     BlobRDD.cc
+    ReplicationScheme.cc
     ${PROTO_SRCS})
