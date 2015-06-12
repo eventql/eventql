@@ -33,20 +33,20 @@ public:
       http::HTTPConnectionPool* http);
 
   void configurePrefix(
-      const String& stream_namespace,
+      const String& tsdb_namespace,
       StreamConfig config);
 
   StreamConfig* configFor(
-      const String& stream_namespace,
+      const String& tsdb_namespace,
       const String& stream_key) const;
 
   StreamChunk* findPartition(
-      const String& stream_namespace,
+      const String& tsdb_namespace,
       const String& stream_key,
       const SHA1Hash& partition_key);
 
-  StreamChunk* findOrCreatePartition(
-      const String& stream_namespace,
+  RefPtr<StreamChunk> findOrCreatePartition(
+      const String& tsdb_namespace,
       const String& stream_key,
       const SHA1Hash& partition_key);
 
@@ -58,14 +58,12 @@ public:
 
 protected:
 
-
-
   void reopenStreamChunks();
 
   TSDBNodeRef noderef_;
   Vector<Pair<String, ScopedPtr<StreamConfig>>> configs_;
   std::mutex mutex_;
-  HashMap<String, RefPtr<StreamChunk>> chunks_;
+  HashMap<String, RefPtr<StreamChunk>> partitions_;
   Vector<RefPtr<CompactionWorker>> compaction_workers_;
   Vector<RefPtr<ReplicationWorker>> replication_workers_;
 };
