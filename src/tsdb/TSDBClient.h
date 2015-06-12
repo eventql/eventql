@@ -12,8 +12,10 @@
 #include <fnord/stdtypes.h>
 #include <fnord/random.h>
 #include <fnord/option.h>
+#include <fnord/SHA1.h>
 #include <fnord/http/httpconnectionpool.h>
 #include <tsdb/PartitionInfo.pb.h>
+#include <tsdb/RecordEnvelope.pb.h>
 
 using namespace fnord;
 
@@ -26,11 +28,15 @@ public:
       const String& uri,
       http::HTTPConnectionPool* http);
 
+  void insertRecord(const RecordEnvelope& record);
+  void insertRecords(const RecordEnvelopeList& records);
+
   void insertRecord(
+      const String& tsdb_namespace,
       const String& stream_key,
-      const DateTime& time,
-      uint64_t msgid,
-      const Buffer& record);
+      const SHA1Hash& partition_key,
+      const SHA1Hash& record_id,
+      const Buffer& record_data);
 
   Vector<String> listPartitions(
       const String& stream_key,
