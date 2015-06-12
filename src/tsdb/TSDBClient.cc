@@ -118,7 +118,7 @@ void TSDBClient::fetchPartitionWithSampling(
   http::HTTPClient http;
 
   auto uri = StringUtil::format(
-      "$0/stream?namespace=$0&stream=$1&partition=$2",
+      "$0/stream?namespace=$1&stream=$2&partition=$3",
       uri_,
       URI::urlEncode(tsdb_namespace),
       URI::urlEncode(stream_key),
