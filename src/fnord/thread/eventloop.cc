@@ -233,6 +233,8 @@ void EventLoop::onRunQWakeup() {
 }
 
 void EventLoop::runOnce() {
+  threadid_ = std::this_thread::get_id();
+
   while (running_.load()) {
     std::unique_lock<std::mutex> lk(runq_mutex_);
     if (runq_.empty() && num_fds_ == 0) {
@@ -245,6 +247,8 @@ void EventLoop::runOnce() {
 }
 
 void EventLoop::run() {
+  threadid_ = std::this_thread::get_id();
+
   while (running_.load()) {
     poll();
   }
