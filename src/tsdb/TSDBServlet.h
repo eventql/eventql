@@ -28,10 +28,10 @@ public:
 
 protected:
 
-  //void insertRecords(
-  //    const http::HTTPRequest* req,
-  //    http::HTTPResponse* res,
-  //    URI* uri);
+  void insertRecords(
+      const http::HTTPRequest* req,
+      http::HTTPResponse* res,
+      URI* uri);
 
   //void fetchChunk(
   //    const http::HTTPRequest* req,

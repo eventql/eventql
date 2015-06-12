@@ -37,13 +37,11 @@ void TSDBServlet::handleHTTPRequest(
   res.addHeader("Access-Control-Allow-Origin", "*");
 
   try {
-    auto path_parts = StringUtil::split(uri.path(), "/");
-    fnord::iputs("parts: $0", path_parts);
-    //if (StringUtil::endsWith(uri.path(), "/insert")) {
-    //  insertRecords(&req, &res, &uri);
-    //  res_stream->writeResponse(res);
-    //  return;
-    //}
+    if (uri.path() == "/tsdb/insert") {
+      insertRecords(&req, &res, &uri);
+      res_stream->writeResponse(res);
+      return;
+    }
 
     //if (StringUtil::endsWith(uri.path(), "/fetch_chunk")) {
     //  fetchChunk(&req, &res, res_stream, &uri);
@@ -66,27 +64,27 @@ void TSDBServlet::handleHTTPRequest(
   }
 }
 
-//void TSDBServlet::insertRecords(
-//    const http::HTTPRequest* req,
-//    http::HTTPResponse* res,
-//    URI* uri) {
-//  auto record_list = msg::decode<RecordEnvelopeList>(req->body());
-//
-//  // FIXPAUL this is slow, we should group records by partition and then do a
-//  // batch insert per partition
-//  for (const auto& record : record_list.records()) {
-//    auto partition = node_->findOrCreatePartition(
-//        tsdb_namespace,
-//        record.stream_key(),
-//        SHA1Hash::fromString(record.partition_key()));
-//
-//    partition->insertRecord(
-//        SHA1Hash::fromString(record.record_id()),
-//        Buffer(record.record().data(), record.record().size());
-//  }
-//
-//  res->setStatus(http::kStatusCreated);
-//}
+void TSDBServlet::insertRecords(
+    const http::HTTPRequest* req,
+    http::HTTPResponse* res,
+    URI* uri) {
+  auto record_list = msg::decode<RecordEnvelopeList>(req->body());
+
+  // FIXPAUL this is slow, we should group records by partition and then do a
+  // batch insert per partition
+  for (const auto& record : record_list.records()) {
+    auto partition = node_->findOrCreatePartition(
+        record.tsdb_namespace(),
+        record.stream_key(),
+        SHA1Hash::fromString(record.partition_key()));
+
+    partition->insertRecord(
+        SHA1Hash::fromString(record.record_id()),
+        Buffer(record.record().data(), record.record().size()));
+  }
+
+  res->setStatus(http::kStatusCreated);
+}
 
 //void TSDBServlet::insertRecordsReplication(
 //    const http::HTTPRequest* req,
