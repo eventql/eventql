@@ -83,7 +83,7 @@ int main(int argc, const char** argv) {
   dproc::LocalScheduler sched(flags.getString("tempdir"), flags.getInt("threads"));
   sched.start();
 
-  TSDBTableScanParams params;
+  TSDBTableScanSpec params;
   params.set_stream_key("joined_sessions.dawanda");
   params.set_partition_key("am9pbmVkX3Nlc3Npb25zLmRhd2FuZGEbgK2LqwU=");
   params.set_sample_modulo(32);
