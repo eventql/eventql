@@ -8,6 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <tsdb/TSDBClient.h>
+#include <tsdb/RecordEnvelope.pb.h>
 #include <fnord/util/binarymessagereader.h>
 #include <fnord/util/binarymessagewriter.h>
 #include <fnord/protobuf/msg.h>
@@ -24,24 +25,35 @@ TSDBClient::TSDBClient(
     http_(http) {}
 
 void TSDBClient::insertRecord(
+    const String& tsdb_namespace,
     const String& stream_key,
-    const DateTime& time,
-    uint64_t msgid,
-    const Buffer& record) {
-  auto uri = URI(StringUtil::format(
-      "$0/insert_batch?stream=$1",
-      uri_,
-      URI::urlEncode(stream_key)));
+    const SHA1Hash& partition_key,
+    const SHA1Hash& record_id,
+    const Buffer& record_data) {
+  RecordEnvelopeList records;
 
-  util::BinaryMessageWriter buf;
-  buf.appendUInt64(time.unixMicros());
-  buf.appendUInt64(msgid);
-  buf.appendVarUInt(record.size());
-  buf.append(record.data(), record.size());
+  auto record = records.add_records();
+  record->set_tsdb_namespace(tsdb_namespace);
+  record->set_stream_key(stream_key);
+  record->set_partition_key(partition_key.toString());
+  record->set_record_id(record_id.toString());
+  record->set_record_data(record_data.toString());
+
+  insertRecords(records);
+}
+
+void TSDBClient::insertRecord(const RecordEnvelope& record) {
+  RecordEnvelopeList records;
+  *records.add_records() = record;
+  insertRecords(records);
+}
+
+void TSDBClient::insertRecords(const RecordEnvelopeList& records) {
+  auto uri = URI(StringUtil::format("$0/insert", uri_));
 
   http::HTTPRequest req(http::HTTPMessage::M_POST, uri.pathAndQuery());
   req.addHeader("Host", uri.hostAndPort());
-  req.addBody(buf.data(), buf.size());
+  req.addBody(*msg::encode(records));
 
   auto res = http_->executeRequest(req);
   res.wait();
@@ -51,7 +63,6 @@ void TSDBClient::insertRecord(
     RAISEF(kRuntimeError, "received non-201 response: $0", r.body().toString());
   }
 }
-
 
 Vector<String> TSDBClient::listPartitions(
     const String& stream_key,
