@@ -7,14 +7,6 @@ project(cmapp)
 
 option(ENABLE_TESTS "Build unit tests [default: ON]" ON)
 
-include_directories(${PROJECT_BINARY_DIR})
-include_directories(${PROJECT_BINARY_DIR}/3rdparty/libfnord/)
-file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/tests)
-include_directories(./)
-include_directories(./src)
-include_directories(3rdparty/libfnord/)
-include_directories(3rdparty/libfnord/3rdparty/)
-
 set(CMAKE_CXX_FLAGS "-ftemplate-depth=500 ${CMAKE_CXX_FLAGS}")
 # set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fsanitize=address -g")
 
@@ -36,31 +28,36 @@ endif()
 # strip binaries
 #  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -s")
 
-find_package(Threads)
+add_subdirectory(lib/libfnord)
+include_directories(${FNORD_INCLUDE})
+add_subdirectory(lib/libfnord/fnord-fts)
 
-set(NO_BUNDLED_LIBFNORD true)
+add_subdirectory(lib/libcstable)
+include_directories(${CSTABLE_INCLUDE})
 
+add_subdirectory(lib/libsstable)
+include_directories(${SSTABLE_INCLUDE})
 
-add_subdirectory(3rdparty/libfnord/fnord-base)
-add_subdirectory(3rdparty/libfnord/fnord-msg)
-add_subdirectory(3rdparty/libfnord/fnord-feeds)
-add_subdirectory(3rdparty/libfnord/fnord-fts)
-include_directories(${FNORD_FTS_INCLUDE})
-add_subdirectory(3rdparty/libfnord/fnord-mdb)
-add_subdirectory(3rdparty/libfnord/fnord-rpc)
-add_subdirectory(3rdparty/libfnord/fnord-http)
-add_subdirectory(3rdparty/libfnord/fnord-json)
-add_subdirectory(3rdparty/libfnord/fnord-cstable)
-add_subdirectory(3rdparty/libfnord/fnord-sstable)
-add_subdirectory(3rdparty/libfnord/fnord-chart)
+add_subdirectory(lib/libdproc)
+include_directories(${DPROC_INCLUDE})
 
-add_subdirectory(3rdparty/sensord)
+add_subdirectory(app/sensord)
 include_directories(${SENSORD_INCLUDE})
 
-add_subdirectory(3rdparty/libfnord/fnord-metricdb)
-add_subdirectory(3rdparty/libfnord/fnord-tsdb)
-add_subdirectory(3rdparty/libfnord/fnord-dht)
-add_subdirectory(3rdparty/libfnord/fnord-dproc)
-add_subdirectory(3rdparty/libfnord/fnord-afx)
-add_subdirectory(src/)
+add_subdirectory(app/brokerd)
+include_directories(${BROKERD_INCLUDE})
 
+add_subdirectory(app/tsdb)
+include_directories(${TSDB_INCLUDE})
+
+add_subdirectory(app/inventoryd)
+include_directories(${INVENTORYD_INCLUDE})
+
+add_subdirectory(app/logjoind)
+include_directories(${LOGJOIND_INCLUDE})
+
+add_subdirectory(app/chartsql)
+include_directories(${CHARTSQL_INCLUDE})
+
+add_subdirectory(app/analyticsd)
+include_directories(${ANALYTICSD_INCLUDE})

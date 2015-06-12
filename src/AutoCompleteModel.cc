@@ -6,7 +6,7 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-#include <fnord-base/logging.h>
+#include <fnord/logging.h>
 #include "analytics/TermInfo.h"
 #include "analytics/TermInfoTableSource.h"
 #include "AutoCompleteModel.h"

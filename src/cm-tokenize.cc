@@ -11,10 +11,10 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <signal.h>
-#include "fnord-base/io/fileutil.h"
-#include "fnord-base/application.h"
-#include "fnord-base/logging.h"
-#include "fnord-base/cli/flagparser.h"
+#include "fnord/io/fileutil.h"
+#include "fnord/application.h"
+#include "fnord/logging.h"
+#include "fnord/cli/flagparser.h"
 #include "common.h"
 #include <fnord-fts/fts.h>
 #include <fnord-fts/fts_common.h>

@@ -13,7 +13,7 @@
 #include <set>
 #include <string>
 #include <unordered_map>
-#include "ItemRef.h"
+#include <inventory/ItemRef.h>
 #include "trackedquery.h"
 
 namespace cm {

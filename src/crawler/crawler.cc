@@ -6,9 +6,9 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-#include <fnord-base/logging.h>
-#include <fnord-http/httprequest.h>
-#include <fnord-json/json.h>
+#include <fnord/logging.h>
+#include <fnord/http/httprequest.h>
+#include <fnord/json/json.h>
 #include "crawler/crawler.h"
 #include "crawler/crawlresult.h"
 

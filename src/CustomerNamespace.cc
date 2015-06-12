@@ -6,9 +6,9 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-#include <fnord-base/assets.h>
-#include <fnord-base/stringutil.h>
-#include <fnord-base/io/fileutil.h>
+#include <fnord/assets.h>
+#include <fnord/stringutil.h>
+#include <fnord/io/fileutil.h>
 #include "CustomerNamespace.h"
 
 namespace cm {

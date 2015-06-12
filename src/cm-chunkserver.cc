@@ -9,30 +9,30 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <signal.h>
-#include "fnord-base/io/filerepository.h"
-#include "fnord-base/io/fileutil.h"
-#include "fnord-base/application.h"
-#include "fnord-base/logging.h"
-#include "fnord-base/random.h"
-#include "fnord-base/thread/eventloop.h"
-#include "fnord-base/thread/threadpool.h"
-#include "fnord-base/thread/FixedSizeThreadPool.h"
-#include "fnord-base/wallclock.h"
-#include "fnord-base/VFS.h"
-#include "fnord-rpc/ServerGroup.h"
-#include "fnord-rpc/RPC.h"
-#include "fnord-rpc/RPCClient.h"
-#include "fnord-base/cli/flagparser.h"
-#include "fnord-json/json.h"
-#include "fnord-json/jsonrpc.h"
-#include "fnord-http/httprouter.h"
-#include "fnord-http/httpserver.h"
-#include "fnord-http/VFSFileServlet.h"
-#include "fnord-feeds/FeedService.h"
-#include "fnord-feeds/RemoteFeedFactory.h"
-#include "fnord-feeds/RemoteFeedReader.h"
-#include "fnord-base/stats/statsdagent.h"
-#include "fnord-sstable/SSTableServlet.h"
+#include "fnord/io/filerepository.h"
+#include "fnord/io/fileutil.h"
+#include "fnord/application.h"
+#include "fnord/logging.h"
+#include "fnord/random.h"
+#include "fnord/thread/eventloop.h"
+#include "fnord/thread/threadpool.h"
+#include "fnord/thread/FixedSizeThreadPool.h"
+#include "fnord/wallclock.h"
+#include "fnord/VFS.h"
+#include "fnord/rpc/ServerGroup.h"
+#include "fnord/rpc/RPC.h"
+#include "fnord/rpc/RPCClient.h"
+#include "fnord/cli/flagparser.h"
+#include "fnord/json/json.h"
+#include "fnord/json/jsonrpc.h"
+#include "fnord/http/httprouter.h"
+#include "fnord/http/httpserver.h"
+#include "fnord/http/VFSFileServlet.h"
+#include "brokerd/FeedService.h"
+#include "brokerd/RemoteFeedFactory.h"
+#include "brokerd/RemoteFeedReader.h"
+#include "fnord/stats/statsdagent.h"
+#include "sstable/SSTableServlet.h"
 #include "fnord-logtable/LogTableServlet.h"
 #include "fnord-logtable/TableRepository.h"
 #include "fnord-logtable/TableJanitor.h"
@@ -40,11 +40,11 @@
 #include "fnord-afx/ArtifactReplication.h"
 #include "fnord-afx/ArtifactIndexReplication.h"
 #include "fnord-logtable/NumericBoundsSummary.h"
-#include "fnord-mdb/MDB.h"
-#include "fnord-mdb/MDBUtil.h"
-#include "fnord-msg/MessageSchema.h"
-#include "fnord-tsdb/TSDBNode.h"
-#include "fnord-tsdb/TSDBServlet.h"
+#include "fnord/mdb/MDB.h"
+#include "fnord/mdb/MDBUtil.h"
+#include "fnord/protobuf/MessageSchema.h"
+#include "tsdb/TSDBNode.h"
+#include "tsdb/TSDBServlet.h"
 #include "common.h"
 #include "schemas.h"
 #include "ModelReplication.h"
@@ -139,7 +139,7 @@ int main(int argc, const char** argv) {
   http_router.addRouteByPrefixMatch("/sessviewer", &jsessviewer);
 
 
-  auto repl_scheme = mkRef(new dht::FixedReplicationScheme());
+  auto repl_scheme = mkRef(new dproc::FixedReplicationScheme());
   for (const auto& r : repl_targets) {
     repl_scheme->addHost(r);
   }
@@ -153,7 +153,7 @@ int main(int argc, const char** argv) {
     config.set_compaction_interval(1800 * kMicrosPerSecond);
     config.set_partitioner(tsdb::TIME_WINDOW);
     config.set_partition_window(3600 * 4 * kMicrosPerSecond);
-    tsdb_node.configurePrefix(config);
+    tsdb_node.configurePrefix("dawanda", config);
   }
 
   {
@@ -163,7 +163,7 @@ int main(int argc, const char** argv) {
     config.set_compaction_interval(10 * kMicrosPerSecond);
     config.set_partitioner(tsdb::TIME_WINDOW);
     config.set_partition_window(600 * kMicrosPerSecond);
-    tsdb_node.configurePrefix(config);
+    tsdb_node.configurePrefix("dawanda", config);
   }
 
   {
@@ -173,7 +173,7 @@ int main(int argc, const char** argv) {
     config.set_compaction_interval(10 * kMicrosPerSecond);
     config.set_partitioner(tsdb::TIME_WINDOW);
     config.set_partition_window(600 * kMicrosPerSecond);
-    tsdb_node.configurePrefix(config);
+    tsdb_node.configurePrefix("dawanda", config);
   }
 
   tsdb::TSDBServlet tsdb_servlet(&tsdb_node);

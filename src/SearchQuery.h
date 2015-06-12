@@ -8,7 +8,7 @@
  */
 #ifndef _CM_SEARCHQUERY_H
 #define _CM_SEARCHQUERY_H
-#include "fnord-json/json.h"
+#include "fnord/json/json.h"
 #include "fnord-fts/fts.h"
 #include "fnord-fts/fts_common.h"
 #include "fnord-fts/Analyzer.h"
