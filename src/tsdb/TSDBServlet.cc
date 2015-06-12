@@ -71,17 +71,28 @@ void TSDBServlet::insertRecords(
     URI* uri) {
   auto record_list = msg::decode<RecordEnvelopeList>(req->body());
 
-  // FIXPAUL this is slow, we should group records by partition and then do a
-  // batch insert per partition
+  Vector<RefPtr<Partition>> partition_refs;
+  HashMap<Partition*, Vector<RecordRef>> grouped;
   for (const auto& record : record_list.records()) {
     auto partition = node_->findOrCreatePartition(
         record.tsdb_namespace(),
         record.stream_key(),
         SHA1Hash::fromHexString(record.partition_key()));
 
-    partition->insertRecord(
+    auto record_data = record.record_data().data();
+    auto record_size = record.record_data().size();
+
+    if (grouped.count(partition.get()) == 0) {
+      partition_refs.emplace_back(partition);
+    }
+
+    grouped[partition.get()].emplace_back(
         SHA1Hash::fromHexString(record.record_id()),
-        Buffer(record.record_data().data(), record.record_data().size()));
+        Buffer(record_data, record_size));
+  }
+
+  for (const auto& group : grouped) {
+    group.first->insertRecords(group.second);
   }
 
   res->setStatus(http::kStatusCreated);
