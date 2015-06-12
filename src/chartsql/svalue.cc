@@ -13,13 +13,11 @@
 #include <string>
 #include <ctime>
 #include <stdint.h>
-#include <fnord-base/inspect.h>
-#include <fnordmetric/sql/parser/token.h>
-#include <fnordmetric/sql/svalue.h>
-#include <fnordmetric/format.h>
+#include <fnord/inspect.h>
+#include <chartsql/svalue.h>
+#include <chartsql/format.h>
 
-namespace fnordmetric {
-namespace query {
+namespace csql {
 
 SValue::SValue() {
   memset(&data_, 0, sizeof(data_));
@@ -30,7 +28,7 @@ SValue::~SValue() {
   // FIXPAUL free string!
 }
 
-SValue::SValue(const fnordmetric::StringType& string_value) {
+SValue::SValue(const SValue::StringType& string_value) {
   data_.type = T_STRING;
   data_.u.t_string.len = string_value.size();
   data_.u.t_string.ptr = static_cast<char *>(malloc(data_.u.t_string.len));
@@ -49,22 +47,22 @@ SValue::SValue(
     char const* string_value) :
     SValue(std::string(string_value)) {}
 
-SValue::SValue(fnordmetric::IntegerType integer_value) {
+SValue::SValue(SValue::IntegerType integer_value) {
   data_.type = T_INTEGER;
   data_.u.t_integer = integer_value;
 }
 
-SValue::SValue(fnordmetric::FloatType float_value) {
+SValue::SValue(SValue::FloatType float_value) {
   data_.type = T_FLOAT;
   data_.u.t_float = float_value;
 }
 
-SValue::SValue(fnordmetric::BoolType bool_value) {
+SValue::SValue(SValue::BoolType bool_value) {
   data_.type = T_BOOL;
   data_.u.t_bool = bool_value;
 }
 
-SValue::SValue(fnordmetric::TimeType time_value) {
+SValue::SValue(SValue::TimeType time_value) {
   data_.type = T_TIMESTAMP;
   data_.u.t_timestamp = static_cast<uint64_t>(time_value);
 }
@@ -144,7 +142,7 @@ SValue::kSValueType SValue::getType() const {
   return data_.type;
 }
 
-fnordmetric::IntegerType SValue::getInteger() const {
+SValue::IntegerType SValue::getInteger() const {
   switch (data_.type) {
 
     case T_INTEGER:
@@ -172,7 +170,7 @@ fnordmetric::IntegerType SValue::getInteger() const {
   return 0;
 }
 
-fnordmetric::FloatType SValue::getFloat() const {
+SValue::FloatType SValue::getFloat() const {
   switch (data_.type) {
 
     case T_INTEGER:
@@ -200,7 +198,7 @@ fnordmetric::FloatType SValue::getFloat() const {
   return 0;
 }
 
-fnordmetric::BoolType SValue::getBool() const {
+SValue::BoolType SValue::getBool() const {
   if (data_.type != T_BOOL) {
     RAISE(
        kTypeError,
@@ -212,7 +210,7 @@ fnordmetric::BoolType SValue::getBool() const {
   return data_.u.t_bool;
 }
 
-fnordmetric::TimeType SValue::getTimestamp() const {
+SValue::TimeType SValue::getTimestamp() const {
   switch (getType()) {
 
     case T_TIMESTAMP:
@@ -230,7 +228,7 @@ fnordmetric::TimeType SValue::getTimestamp() const {
   }
 }
 
-fnordmetric::StringType SValue::getString() const {
+SValue::StringType SValue::getString() const {
   if (data_.type == T_STRING) {
     return std::string(data_.u.t_string.ptr, data_.u.t_string.len);
   } else {
@@ -300,31 +298,6 @@ std::string SValue::toString() const {
   return std::string(str, len);
 }
 
-SValue* SValue::fromToken(const Token* token) {
-  switch (token->getType()) {
-
-    case Token::T_TRUE:
-      return new SValue(true);
-
-    case Token::T_FALSE:
-      return new SValue(false);
-
-    case Token::T_NUMERIC: {
-      auto sval = new SValue(token->getString());
-      sval->tryNumericConversion();
-      return sval;
-    }
-
-    case Token::T_STRING:
-      return new SValue(token->getString());
-
-    default:
-      RAISE(kRuntimeError, "can't cast Token to SValue");
-      return nullptr;
-
-  }
-}
-
 const char* SValue::getTypeName(kSValueType type) {
   switch (type) {
     case T_STRING:
@@ -346,36 +319,36 @@ const char* SValue::getTypeName() const {
   return SValue::getTypeName(data_.type);
 }
 
-template <> fnordmetric::BoolType SValue::getValue<fnordmetric::BoolType>() const {
+template <> SValue::BoolType SValue::getValue<SValue::BoolType>() const {
   return getBool();
 }
 
-template <> fnordmetric::IntegerType SValue::getValue<fnordmetric::IntegerType>() const {
+template <> SValue::IntegerType SValue::getValue<SValue::IntegerType>() const {
   return getInteger();
 }
 
-template <> fnordmetric::FloatType SValue::getValue<fnordmetric::FloatType>() const {
+template <> SValue::FloatType SValue::getValue<SValue::FloatType>() const {
   return getFloat();
 }
 
-template <> fnordmetric::StringType SValue::getValue<fnordmetric::StringType>() const {
+template <> SValue::StringType SValue::getValue<SValue::StringType>() const {
   return toString();
 }
 
-template <> fnordmetric::TimeType SValue::getValue<fnordmetric::TimeType>() const {
+template <> SValue::TimeType SValue::getValue<SValue::TimeType>() const {
   return getTimestamp();
 }
 
 // FIXPAUL: smarter type detection
-template <> bool SValue::testType<fnordmetric::BoolType>() const {
+template <> bool SValue::testType<SValue::BoolType>() const {
   return data_.type == T_BOOL;
 }
 
-template <> bool SValue::testType<fnordmetric::TimeType>() const {
+template <> bool SValue::testType<SValue::TimeType>() const {
   return data_.type == T_TIMESTAMP;
 }
 
-template <> bool SValue::testType<fnordmetric::IntegerType>() const {
+template <> bool SValue::testType<SValue::IntegerType>() const {
   if (data_.type == T_INTEGER) {
     return true;
   }
@@ -401,7 +374,7 @@ template <> bool SValue::testType<fnordmetric::IntegerType>() const {
   return true;
 }
 
-template <> bool SValue::testType<fnordmetric::FloatType>() const {
+template <> bool SValue::testType<SValue::FloatType>() const {
   if (data_.type == T_FLOAT) {
     return true;
   }
@@ -439,21 +412,21 @@ template <> bool SValue::testType<std::string>() const {
 }
 
 SValue::kSValueType SValue::testTypeWithNumericConversion() const {
-  if (testType<fnordmetric::IntegerType>()) return T_INTEGER;
-  if (testType<fnordmetric::FloatType>()) return T_FLOAT;
+  if (testType<SValue::IntegerType>()) return T_INTEGER;
+  if (testType<SValue::FloatType>()) return T_FLOAT;
   return getType();
 }
 
 bool SValue::tryNumericConversion() {
-  if (testType<fnordmetric::IntegerType>()) {
-    fnordmetric::IntegerType val = getValue<fnordmetric::IntegerType>();
+  if (testType<SValue::IntegerType>()) {
+    SValue::IntegerType val = getValue<SValue::IntegerType>();
     data_.type = T_INTEGER;
     data_.u.t_integer = val;
     return true;
   }
 
-  if (testType<fnordmetric::FloatType>()) {
-    fnordmetric::FloatType val = getValue<fnordmetric::FloatType>();
+  if (testType<SValue::FloatType>()) {
+    SValue::FloatType val = getValue<SValue::FloatType>();
     data_.type = T_FLOAT;
     data_.u.t_float = val;
     return true;
@@ -474,16 +447,14 @@ bool SValue::tryTimeConversion() {
   return true;
 }
 
-
-}
 }
 
 namespace fnord {
 
 template <>
-std::string inspect<fnordmetric::query::SValue::kSValueType>(
-    const fnordmetric::query::SValue::kSValueType& type) {
-  return fnordmetric::query::SValue::getTypeName(type);
+std::string inspect<csql::SValue::kSValueType>(
+    const csql::SValue::kSValueType& type) {
+  return csql::SValue::getTypeName(type);
 }
 
 }
