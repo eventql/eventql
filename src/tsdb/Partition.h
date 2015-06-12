@@ -24,7 +24,7 @@ using namespace fnord;
 
 namespace tsdb {
 
-struct StreamChunkState {
+struct PartitionState {
   String stream_key;
   RecordSet::RecordSetState record_state;
   HashMap<uint64_t, uint64_t> repl_offsets;
@@ -32,18 +32,18 @@ struct StreamChunkState {
   void decode(util::BinaryMessageReader* reader);
 };
 
-class StreamChunk : public RefCounted {
+class Partition : public RefCounted {
 public:
 
-  static RefPtr<StreamChunk> create(
+  static RefPtr<Partition> create(
       const SHA1Hash& partition_key,
       const String& stream_key,
       StreamConfig* config,
       TSDBNodeRef* node);
 
-  static RefPtr<StreamChunk> reopen(
+  static RefPtr<Partition> reopen(
       const SHA1Hash& partition_key,
-      const StreamChunkState& state,
+      const PartitionState& state,
       StreamConfig* config,
       TSDBNodeRef* node);
 
@@ -77,15 +77,15 @@ public:
 
 protected:
 
-  StreamChunk(
+  Partition(
       const SHA1Hash& partition_key,
       const String& stream_key,
       StreamConfig* config,
       TSDBNodeRef* node);
 
-  StreamChunk(
+  Partition(
       const SHA1Hash& partition_key,
-      const StreamChunkState& state,
+      const PartitionState& state,
       StreamConfig* config,
       TSDBNodeRef* node);
 

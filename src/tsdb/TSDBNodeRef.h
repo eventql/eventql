@@ -24,12 +24,12 @@ using namespace fnord;
 
 namespace tsdb {
 
-class StreamChunk;
+class Partition;
 
 struct TSDBNodeRef {
   const String db_path;
-  thread::CoalescingDelayedQueue<StreamChunk> compactionq;
-  thread::CoalescingDelayedQueue<StreamChunk> replicationq;
+  thread::CoalescingDelayedQueue<Partition> compactionq;
+  thread::CoalescingDelayedQueue<Partition> replicationq;
   RefPtr<mdb::MDB> db;
   RefPtr<dproc::ReplicationScheme> replication_scheme;
   http::HTTPConnectionPool* http;

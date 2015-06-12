@@ -68,7 +68,7 @@ void TSDBNode::configurePrefix(
 void TSDBNode::start(
     size_t num_compaction_threads,
     size_t num_replication_threads) {
-  reopenStreamChunks();
+  reopenPartitions();
 
   for (int i = 0; i < num_compaction_threads; ++i) {
     compaction_workers_.emplace_back(new CompactionWorker(&noderef_));
@@ -91,7 +91,7 @@ void TSDBNode::stop() {
   }
 }
 
-void TSDBNode::reopenStreamChunks() {
+void TSDBNode::reopenPartitions() {
   auto txn = noderef_.db->startTransaction(false);
   auto cursor = txn->getCursor();
 
@@ -128,10 +128,10 @@ void TSDBNode::reopenStreamChunks() {
         partition_key_ns.size() - tsdb_namespace_off - 1);
 
     util::BinaryMessageReader reader(value.data(), value.size());
-    StreamChunkState state;
+    PartitionState state;
     state.decode(&reader);
 
-    auto partition = StreamChunk::reopen(
+    auto partition = Partition::reopen(
         partition_key,
         state,
         configFor(tsdb_namespace, state.stream_key),
@@ -144,7 +144,7 @@ void TSDBNode::reopenStreamChunks() {
   txn->abort();
 }
 
-RefPtr<StreamChunk> TSDBNode::findOrCreatePartition(
+RefPtr<Partition> TSDBNode::findOrCreatePartition(
     const String& tsdb_namespace,
     const String& stream_key,
     const SHA1Hash& partition_key) {
@@ -157,7 +157,7 @@ RefPtr<StreamChunk> TSDBNode::findOrCreatePartition(
     return iter->second;
   }
 
-  auto partition = StreamChunk::create(
+  auto partition = Partition::create(
       partition_key,
       stream_key,
       configFor(tsdb_namespace, stream_key),

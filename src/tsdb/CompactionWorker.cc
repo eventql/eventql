@@ -11,7 +11,7 @@
 #include <fnord/logging.h>
 #include <fnord/wallclock.h>
 #include <tsdb/CompactionWorker.h>
-#include <tsdb/StreamChunk.h>
+#include <tsdb/Partition.h>
 
 using namespace fnord;
 

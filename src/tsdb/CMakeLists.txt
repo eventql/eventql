@@ -15,7 +15,7 @@ add_library(tsdb OBJECT
     TSDBNode.cc
     TSDBServlet.cc
     RecordSet.cc
-    StreamChunk.cc
+    Partition.cc
     CSTableIndex.cc
     TimeWindowPartitioner.cc
     ${PROTO_SRCS})
