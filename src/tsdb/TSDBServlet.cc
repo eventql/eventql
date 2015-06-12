@@ -17,6 +17,7 @@
 #include "fnord/protobuf/MessagePrinter.h"
 #include "fnord/protobuf/msg.h"
 #include <fnord/util/Base64.h>
+#include <fnord/fnv.h>
 #include <sstable/sstablereader.h>
 
 using namespace fnord;
@@ -43,10 +44,10 @@ void TSDBServlet::handleHTTPRequest(
       return;
     }
 
-    //if (StringUtil::endsWith(uri.path(), "/fetch")) {
-    //  fetchChunk(&req, &res, res_stream, &uri);
-    //  return;
-    //}
+    if (uri.path() == "/tsdb/stream") {
+      streamPartition(&req, &res, res_stream, &uri);
+      return;
+    }
 
     if (uri.path() == "/tsdb/partition_info") {
       fetchPartitionInfo(&req, &res, &uri);
@@ -86,128 +87,107 @@ void TSDBServlet::insertRecords(
   res->setStatus(http::kStatusCreated);
 }
 
-//void TSDBServlet::insertRecordsReplication(
-//    const http::HTTPRequest* req,
-//    http::HTTPResponse* res,
-//    URI* uri) {
-//  const auto& params = uri->queryParams();
-//
-//  String stream;
-//  if (!URI::getParam(params, "stream", &stream)) {
-//    res->setStatus(fnord::http::kStatusBadRequest);
-//    res->addBody("missing ?stream=... parameter");
-//    return;
-//  }
-//
-//  String chunk_base64;
-//  if (!URI::getParam(params, "chunk", &chunk_base64)) {
-//    res->setStatus(fnord::http::kStatusBadRequest);
-//    res->addBody("missing ?chunk=... parameter");
-//    return;
-//  }
-//
-//  String chunk;
-//  util::Base64::decode(chunk_base64, &chunk);
-//
-//  auto& buf = req->body();
-//  util::BinaryMessageReader reader(buf.data(), buf.size());
-//  Vector<RecordRef> recs;
-//  while (reader.remaining() > 0) {
-//    auto record_id = *reader.readUInt64();
-//    auto len = reader.readVarUInt();
-//    auto data = reader.read(len);
-//
-//    if (len == 0) {
-//      RAISEF(kRuntimeError, "empty record: $0", record_id);
-//    }
-//
-//    recs.emplace_back(RecordRef(record_id, 0, Buffer(data, len)));
-//  }
-//
-//  node_->insertRecords(stream, chunk, recs);
-//  res->setStatus(http::kStatusCreated);
-//}
+void TSDBServlet::streamPartition(
+    const http::HTTPRequest* req,
+    http::HTTPResponse* res,
+    RefPtr<http::HTTPResponseStream> res_stream,
+    URI* uri) {
+  const auto& params = uri->queryParams();
 
-//void TSDBServlet::fetchChunk(
-//    const http::HTTPRequest* req,
-//    http::HTTPResponse* res,
-//    RefPtr<http::HTTPResponseStream> res_stream,
-//    URI* uri) {
-//  const auto& params = uri->queryParams();
-//
-//  String chunk;
-//  if (!URI::getParam(params, "chunk", &chunk)) {
-//    res->setStatus(fnord::http::kStatusBadRequest);
-//    res->addBody("missing ?chunk=... parameter");
-//    res_stream->writeResponse(*res);
-//    return;
-//  }
-//
-//  size_t sample_mod = 0;
-//  size_t sample_idx = 0;
-//  String sample_str;
-//  if (URI::getParam(params, "sample", &sample_str)) {
-//    auto parts = StringUtil::split(sample_str, ":");
-//
-//    if (parts.size() != 2) {
-//      res->setStatus(fnord::http::kStatusBadRequest);
-//      res->addBody("invalid ?sample=... parameter, format is <mod>:<idx>");
-//      res_stream->writeResponse(*res);
-//    }
-//
-//    sample_mod = std::stoull(parts[0]);
-//    sample_idx = std::stoull(parts[1]);
-//  }
-//
-//
-//  String chunk_key;
-//  util::Base64::decode(chunk, &chunk_key);
-//
-//  res->setStatus(http::kStatusOK);
-//  res->addHeader("Content-Type", "application/octet-stream");
-//  res->addHeader("Connection", "close");
-//  res_stream->startResponse(*res);
-//
-//  auto files = node_->listFiles(chunk_key);
-//  for (const auto& f : files) {
-//    sstable::SSTableReader reader(f);
-//    auto cursor = reader.getCursor();
-//
-//    while (cursor->valid()) {
-//      uint64_t* key;
-//      size_t key_size;
-//      cursor->getKey((void**) &key, &key_size);
-//      if (key_size != sizeof(uint64_t)) {
-//        RAISE(kRuntimeError, "invalid row");
-//      }
-//
-//      if (sample_mod == 0 || (*key % sample_mod == sample_idx)) {
-//        void* data;
-//        size_t data_size;
-//        cursor->getData(&data, &data_size);
-//
-//        util::BinaryMessageWriter buf;
-//        if (data_size > 0) {
-//          buf.appendUInt64(data_size);
-//          buf.append(data, data_size);
-//          res_stream->writeBodyChunk(Buffer(buf.data(), buf.size()));
-//        }
-//        res_stream->waitForReader();
-//      }
-//
-//      if (!cursor->next()) {
-//        break;
-//      }
-//    }
-//  }
-//
-//  util::BinaryMessageWriter buf;
-//  buf.appendUInt64(0);
-//  res_stream->writeBodyChunk(Buffer(buf.data(), buf.size()));
-//
-//  res_stream->finishResponse();
-//}
-//
+  String tsdb_namespace;
+  if (!URI::getParam(params, "namespace", &tsdb_namespace)) {
+    res->setStatus(fnord::http::kStatusBadRequest);
+    res->addBody("missing ?namespace=... parameter");
+    return;
+  }
+
+  String stream_key;
+  if (!URI::getParam(params, "stream", &stream_key)) {
+    res->setStatus(fnord::http::kStatusBadRequest);
+    res->addBody("missing ?stream=... parameter");
+    return;
+  }
+
+  String partition_key;
+  if (!URI::getParam(params, "partition", &partition_key)) {
+    res->setStatus(fnord::http::kStatusBadRequest);
+    res->addBody("missing ?partition=... parameter");
+    return;
+  }
+
+  size_t sample_mod = 0;
+  size_t sample_idx = 0;
+  String sample_str;
+  if (URI::getParam(params, "sample", &sample_str)) {
+    auto parts = StringUtil::split(sample_str, ":");
+
+    if (parts.size() != 2) {
+      res->setStatus(fnord::http::kStatusBadRequest);
+      res->addBody("invalid ?sample=... parameter, format is <mod>:<idx>");
+      res_stream->writeResponse(*res);
+    }
+
+    sample_mod = std::stoull(parts[0]);
+    sample_idx = std::stoull(parts[1]);
+  }
+
+
+  res->setStatus(http::kStatusOK);
+  res->addHeader("Content-Type", "application/octet-stream");
+  res->addHeader("Connection", "close");
+  res_stream->startResponse(*res);
+
+  auto partition = node_->findPartition(
+      tsdb_namespace,
+      stream_key,
+      SHA1Hash::fromHexString(partition_key));
+
+  if (!partition.isEmpty()) {
+    FNV<uint64_t> fnv;
+    auto files = partition.get()->listFiles();
+
+    for (const auto& f : files) {
+      auto fpath = FileUtil::joinPaths(node_->dbPath(), f);
+      sstable::SSTableReader reader(fpath);
+      auto cursor = reader.getCursor();
+
+      while (cursor->valid()) {
+        uint64_t* key;
+        size_t key_size;
+        cursor->getKey((void**) &key, &key_size);
+        if (key_size != SHA1Hash::kSize) {
+          RAISE(kRuntimeError, "invalid row");
+        }
+
+        if (sample_mod == 0 ||
+            (fnv.hash(key, key_size) % sample_mod == sample_idx)) {
+          void* data;
+          size_t data_size;
+          cursor->getData(&data, &data_size);
+
+          util::BinaryMessageWriter buf;
+          if (data_size > 0) {
+            buf.appendUInt64(data_size);
+            buf.append(data, data_size);
+            res_stream->writeBodyChunk(Buffer(buf.data(), buf.size()));
+          }
+          res_stream->waitForReader();
+        }
+
+        if (!cursor->next()) {
+          break;
+        }
+      }
+    }
+  }
+
+  util::BinaryMessageWriter buf;
+  buf.appendUInt64(0);
+  res_stream->writeBodyChunk(Buffer(buf.data(), buf.size()));
+
+  res_stream->finishResponse();
+}
+
 
 void TSDBServlet::fetchPartitionInfo(
     const http::HTTPRequest* req,

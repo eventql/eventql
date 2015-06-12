@@ -50,6 +50,8 @@ public:
       const String& stream_key,
       const SHA1Hash& partition_key);
 
+  const String& dbPath() const;
+
   void start(
       size_t num_comaction_threads = 4,
       size_t num_replication_threads = 4);
