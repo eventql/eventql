@@ -9,18 +9,15 @@
  */
 package tsdb;
 
-enum TSDBTableScanOperation {
-  TSDB_OP_MERGE = 0;
-  TSDB_OP_MAP = 1;
-  TSDB_OP_BUILDINDEX = 2;
-};
-
 message TSDBTableScanSpec {
-  optional string stream_key = 6;
-  optional string partition_key = 2;
+  required string tsdb_namespace = 10;
+  required string stream_key = 6;
+  required string partition_key = 2;
   optional string schema_name = 7;
   optional bytes scanlet_params = 5;
   optional bool use_cstable_index = 8;
   optional string version = 9;
+  optional uint64 sample_modulo = 11;
+  optional uint64 sample_index = 12;
 }
 

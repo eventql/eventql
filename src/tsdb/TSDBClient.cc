@@ -95,24 +95,34 @@ Vector<String> TSDBClient::listPartitions(
 }
 
 void TSDBClient::fetchPartition(
+    const String& tsdb_namespace,
     const String& stream_key,
-    const String& partition,
+    const SHA1Hash& partition_key,
     Function<void (const Buffer& record)> fn) {
-  fetchPartitionWithSampling(stream_key, partition, 0, 0, fn);
+  fetchPartitionWithSampling(
+      tsdb_namespace,
+      stream_key,
+      partition_key,
+      0,
+      0,
+      fn);
 }
 
 void TSDBClient::fetchPartitionWithSampling(
+    const String& tsdb_namespace,
     const String& stream_key,
-    const String& partition,
+    const SHA1Hash& partition_key,
     size_t sample_modulo,
     size_t sample_index,
     Function<void (const Buffer& record)> fn) {
   http::HTTPClient http;
 
   auto uri = StringUtil::format(
-      "$0/fetch_chunk?chunk=$1",
+      "$0/stream?namespace=$0&stream=$1&partition=$2",
       uri_,
-      URI::urlEncode(partition));
+      URI::urlEncode(tsdb_namespace),
+      URI::urlEncode(stream_key),
+      partition_key.toString());
 
   if (sample_modulo > 0) {
     uri += StringUtil::format("&sample=$0:$1", sample_modulo, sample_index);
@@ -169,12 +179,15 @@ void TSDBClient::fetchPartitionWithSampling(
 }
 
 PartitionInfo TSDBClient::fetchPartitionInfo(
+    const String& tsdb_namespace,
     const String& stream_key,
-    const String& partition_key) {
+    const SHA1Hash& partition_key) {
   auto uri = StringUtil::format(
-      "$0/fetch_partition_info?partition=$1",
+      "$0/partition_info?namespace=$0&stream=$1&partition=$2",
       uri_,
-      URI::urlEncode(partition_key));
+      URI::urlEncode(tsdb_namespace),
+      URI::urlEncode(stream_key),
+      partition_key.toString());
 
   auto req = http::HTTPRequest::mkGet(uri);
   auto res = http_->executeRequest(req);
