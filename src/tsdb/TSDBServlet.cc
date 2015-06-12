@@ -76,10 +76,10 @@ void TSDBServlet::insertRecords(
     auto partition = node_->findOrCreatePartition(
         record.tsdb_namespace(),
         record.stream_key(),
-        SHA1Hash::fromString(record.partition_key()));
+        SHA1Hash::fromHexString(record.partition_key()));
 
     partition->insertRecord(
-        SHA1Hash::fromString(record.record_id()),
+        SHA1Hash::fromHexString(record.record_id()),
         Buffer(record.record_data().data(), record.record_data().size()));
   }
 
@@ -239,7 +239,7 @@ void TSDBServlet::fetchPartitionInfo(
   auto partition = node_->findPartition(
       tsdb_namespace,
       stream_key,
-      SHA1Hash::fromString(partition_key));
+      SHA1Hash::fromHexString(partition_key));
 
   PartitionInfo pinfo;
   pinfo.set_partition_key(partition_key);
