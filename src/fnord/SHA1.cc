@@ -14,6 +14,28 @@
 
 namespace fnord {
 
+SHA1Hash SHA1Hash::fromString(const String& str) {
+  SHA1Hash hash(DeferInitialization{});
+
+  static auto decode_char = [] (char c) -> uint8_t {
+    if (c >= '0' && c <= '9') return c - '0';
+    if (c >= 'A' && c <= 'F') return c - 'A' + 10;
+    if (c >= 'a' && c <= 'f') return c - 'a' + 10;
+    RAISE(kRuntimeError, "invalid hex SHA1 string");
+  };
+
+  size_t off = 0;
+  for (int i = 0; i < str.size() && off < SHA1Hash::kSize; i += 2) {
+    hash.hash[off++] = (decode_char(str[i]) << 4) + decode_char(str[i + 1]);
+  }
+
+  if (off != 20) {
+    RAISE(kRuntimeError, "invalid hex SHA1 string");
+  }
+
+  return hash;
+}
+
 SHA1Hash::SHA1Hash() {
   memset(hash, 0, sizeof(hash));
 }
