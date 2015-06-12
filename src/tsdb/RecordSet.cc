@@ -117,7 +117,11 @@ void RecordSet::addRecords(const util::BinaryMessageWriter& buf) {
     commitlog_size = state_.commitlog_size;
   }
 
-  auto file = File::openFile(commitlog, File::O_WRITE | File::O_CREATEOROPEN);
+  auto commitlog_path = FileUtil::joinPaths(datadir_, commitlog);
+  auto file = File::openFile(
+      commitlog_path,
+      File::O_WRITE | File::O_CREATEOROPEN);
+
   file.truncate(sizeof(uint64_t) + commitlog_size + buf.size());
   file.seekTo(sizeof(uint64_t) + commitlog_size);
   file.write(buf.data(), buf.size());
@@ -144,7 +148,9 @@ void RecordSet::rollCommitlogWithLock() {
   }
 
   auto old_log = state_.commitlog.get();
-  FileUtil::truncate(old_log, state_.commitlog_size + sizeof(uint64_t));
+  auto old_log_path = FileUtil::joinPaths(datadir_, old_log);
+  FileUtil::truncate(old_log_path, state_.commitlog_size + sizeof(uint64_t));
+
   state_.old_commitlogs.emplace(old_log);
   state_.commitlog = None<String>();
   state_.commitlog_size = 0;
@@ -185,9 +191,15 @@ void RecordSet::compact(Set<String>* deleted_files) {
   Set<SHA1Hash> old_id_set;
   Set<SHA1Hash> new_id_set;
 
-  bool rewrite_last =
-      snap.datafiles.size() > 0 &&
-      FileUtil::size(snap.datafiles.back().filename) < max_datafile_size_;
+  bool rewrite_last = false;
+  if (snap.datafiles.size() > 0) {
+    auto cur_datafile_size = FileUtil::size(
+        FileUtil::joinPaths(datadir_, snap.datafiles.back().filename));
+
+    if (cur_datafile_size < max_datafile_size_) {
+      rewrite_last = true;
+    }
+  }
 
   if (rewrite_last) {
     outfile_offset = snap.datafiles.back().offset;
@@ -198,7 +210,11 @@ void RecordSet::compact(Set<String>* deleted_files) {
   }
 
   for (int j = 0; j < snap.datafiles.size(); ++j) {
-    sstable::SSTableReader reader(snap.datafiles[j].filename);
+    auto sstable_path = FileUtil::joinPaths(
+        datadir_,
+        snap.datafiles[j].filename);
+
+    sstable::SSTableReader reader(sstable_path);
     auto cursor = reader.getCursor();
 
     while (cursor->valid()) {
@@ -281,7 +297,8 @@ void RecordSet::compact(Set<String>* deleted_files) {
 void RecordSet::loadCommitlog(
     const String& filename,
     Function<void (const SHA1Hash&, const void*, size_t)> fn) {
-  io::MmappedFile mmap(File::openFile(filename, File::O_READ));
+  auto filepath = FileUtil::joinPaths(datadir_, filename);
+  io::MmappedFile mmap(File::openFile(filepath, File::O_READ));
   util::BinaryMessageReader reader(mmap.data(), mmap.size());
   auto limit = *reader.readUInt64() + sizeof(uint64_t);
 
@@ -353,7 +370,8 @@ void RecordSet::fetchRecords(
       continue;
     }
 
-    sstable::SSTableReader reader(datafile.filename);
+    auto filepath = FileUtil::joinPaths(datadir_, datafile.filename);
+    sstable::SSTableReader reader(filepath);
     auto cursor = reader.getCursor();
 
     while (cursor->valid()) {
@@ -392,7 +410,8 @@ Set<SHA1Hash> RecordSet::listRecords() const {
   lk.unlock();
 
   for (const auto& datafile : datafiles) {
-    sstable::SSTableReader reader(datafile.filename);
+    auto filepath = FileUtil::joinPaths(datadir_, datafile.filename);
+    sstable::SSTableReader reader(filepath);
     auto cursor = reader.getCursor();
 
     while (cursor->valid()) {

@@ -176,7 +176,7 @@ void Partition::compact() {
   node_->replicationq.insert(this, WallClock::unixMicros());
 
   for (const auto& f : deleted_files) {
-    FileUtil::rm(f);
+    FileUtil::rm(FileUtil::joinPaths(node_->db_path, f));
   }
 }
 
