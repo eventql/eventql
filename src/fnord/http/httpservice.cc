@@ -71,7 +71,7 @@ void HTTPServiceHandler::dispatchRequest() {
     try {
       service_->handleHTTPRequest(req_stream.get(), res_stream);
     } catch (const std::exception& e) {
-      logError("fnord.http.service", e, "Error while processing HTTP request");
+      logError("http.server", e, "Error while processing HTTP request");
 
       if (res_stream->isOutputStarted()) {
         res_stream->finishResponse();

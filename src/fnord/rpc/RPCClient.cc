@@ -26,7 +26,7 @@ void HTTPRPCClient::call(const URI& uri, RefPtr<AnyRPC> rpc) {
 
 #ifndef FNORD_NOTRACE
   fnord::logTrace(
-      "fnord.http.rpcclient",
+      "http.rpcclient",
       "executing RPC via HTTP request\n    id=$2\n    method=$1\n    uri=$0",
       uri.toString(),
       rpc->method(),
@@ -41,7 +41,7 @@ void HTTPRPCClient::call(const URI& uri, RefPtr<AnyRPC> rpc) {
 
 #ifndef FNORD_NOTRACE
     fnord::logTrace(
-        "fnord.http.rpcclient",
+        "http.rpcclient",
         "RPC via HTTP request id=$0: Failed: $1",
         (void*) rpc.get(),
         errmsg);
@@ -53,7 +53,7 @@ void HTTPRPCClient::call(const URI& uri, RefPtr<AnyRPC> rpc) {
 
 #ifndef FNORD_NOTRACE
     fnord::logTrace(
-        "fnord.http.rpcclient",
+        "http.rpcclient",
         "RPC via HTTP request id=$0: Success, got $1 bytes response",
         (void*) rpc.get(),
         resp.body().size());
@@ -64,7 +64,7 @@ void HTTPRPCClient::call(const URI& uri, RefPtr<AnyRPC> rpc) {
   http_future.onFailure([uri, rpc] (const Status& status) mutable{
 #ifndef FNORD_NOTRACE
     fnord::logTrace(
-        "fnord.http.rpcclient",
+        "http.rpcclient",
         "RPC via HTTP request id=$0: Failed: $1",
         (void*) rpc.get(),
         status);
