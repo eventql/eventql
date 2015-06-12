@@ -9,7 +9,7 @@
 #include "fnord/exception.h"
 #include "fnord/test/unittest.h"
 #include "JoinedSessionViewer.h"
-#include "JoinedSession.pb.h"
+#include "logjoin/JoinedSession.pb.h"
 
 using namespace fnord;
 using namespace cm;
