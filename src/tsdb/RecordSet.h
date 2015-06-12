@@ -98,6 +98,8 @@ protected:
       const String& filename,
       Function<void (const SHA1Hash&, const void*, size_t)> fn);
 
+  SHA1Hash calculateChecksum(const Set<SHA1Hash>& id_set) const;
+
   String datadir_;
   String filename_prefix_;
   RecordSetState state_;

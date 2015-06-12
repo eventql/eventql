@@ -193,7 +193,7 @@ void RecordSet::compact(Set<String>* deleted_files) {
   size_t outfile_nrecords = 0;
   size_t outfile_offset = 0;
 
-  Set<SHA1Hash> old_id_set;
+  Set<SHA1Hash> id_set;
   Set<SHA1Hash> new_id_set;
 
   bool rewrite_last = false;
@@ -228,7 +228,7 @@ void RecordSet::compact(Set<String>* deleted_files) {
       cursor->getKey(&key, &key_size);
 
       SHA1Hash msgid(key, key_size);
-      old_id_set.emplace(msgid);
+      id_set.emplace(msgid);
 
       if (rewrite_last && j + 1 == snap.datafiles.size()) {
         void* data;
@@ -246,7 +246,7 @@ void RecordSet::compact(Set<String>* deleted_files) {
   }
 
   for (const auto& cl : snap.old_commitlogs) {
-    loadCommitlog(cl, [this, &outfile, &old_id_set, &new_id_set, &outfile_nrecords] (
+    loadCommitlog(cl, [this, &outfile, &id_set, &new_id_set, &outfile_nrecords] (
         const SHA1Hash& id,
         const void* data,
         size_t size) {
@@ -256,7 +256,7 @@ void RecordSet::compact(Set<String>* deleted_files) {
 
       new_id_set.emplace(id);
 
-      if (old_id_set.count(id) > 0) {
+      if (id_set.count(id) > 0) {
         return;
       }
 
@@ -264,6 +264,12 @@ void RecordSet::compact(Set<String>* deleted_files) {
       ++outfile_nrecords;
     });
   }
+
+  for (const auto& new_id : new_id_set) {
+    id_set.emplace(new_id);
+  }
+
+  auto new_checksum = calculateChecksum(id_set);
 
   if (outfile_nrecords == 0) {
     FileUtil::rm(outfile_path + "~");
@@ -296,6 +302,7 @@ void RecordSet::compact(Set<String>* deleted_files) {
     commitlog_ids_.erase(id);
   }
 
+  state_.checksum = new_checksum;
   ++state_.version;
 }
 
@@ -500,6 +507,18 @@ void RecordSet::RecordSetState::decode(util::BinaryMessageReader* reader) {
   }
 
   checksum = SHA1Hash(reader->read(SHA1Hash::kSize), SHA1Hash::kSize);
+}
+
+// FIXPAUL this should use an incremental algo and should be O(1) in space
+// instead of O(N)
+SHA1Hash RecordSet::calculateChecksum(const Set<SHA1Hash>& id_set) const {
+  Buffer id_set_concat;
+
+  for (const auto& id : id_set) {
+    id_set_concat.append(id.data(), id.size());
+  }
+
+  return SHA1::compute(id_set_concat);
 }
 
 } // namespace tsdb
