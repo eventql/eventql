@@ -186,7 +186,7 @@ PartitionInfo TSDBClient::fetchPartitionInfo(
     const String& stream_key,
     const SHA1Hash& partition_key) {
   auto uri = StringUtil::format(
-      "$0/partition_info?namespace=$0&stream=$1&partition=$2",
+      "$0/partition_info?namespace=$1&stream=$2&partition=$3",
       uri_,
       URI::urlEncode(tsdb_namespace),
       URI::urlEncode(stream_key),
