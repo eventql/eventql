@@ -22,8 +22,12 @@ class SHA1Hash {
   friend class SHA1;
 public:
   static const size_t kSize = 20;
-
   struct DeferInitialization {};
+
+  /**
+   * Parse a SHA1Hash from a hex encoded string
+   */
+  static SHA1Hash fromString(const String& str);
 
   /**
    * Creates a new zero-initialized SHA1 hash
