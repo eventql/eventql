@@ -76,7 +76,7 @@ Partition::Partition(
     node_(node),
     records_(
         node->db_path,
-        StringUtil::stripShell(stream_key) + "."),
+        key_.toString().substr(0, 12)  + "."),
     last_compaction_(0) {
   records_.setMaxDatafileSize(config_->max_sstable_size());
 }
@@ -94,7 +94,7 @@ Partition::Partition(
     node_(node),
     records_(
         node->db_path,
-        StringUtil::stripShell(state.stream_key) + ".",
+        key_.toString().substr(0, 12) + ".",
         state.record_state),
     repl_offsets_(state.repl_offsets),
     last_compaction_(0) {
