@@ -185,6 +185,10 @@ Option<RefPtr<Partition>> TSDBNode::findPartition(
   }
 }
 
+const String& TSDBNode::dbPath() const {
+  return noderef_.db_path;
+}
+
 
 } // namespace tdsb
 
