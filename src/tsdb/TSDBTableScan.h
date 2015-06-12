@@ -8,32 +8,59 @@
  * <http://www.gnu.org/licenses/>.
  */
 #pragma once
-#include "fnord/stdtypes.h"
+#include <fnord/stdtypes.h>
+#include <fnord/protobuf/MessageSchema.h>
+#include <dproc/Task.h>
 #include <tsdb/TSDBTableScanSpec.pb.h>
-#include <tsdb/TSDBTableScanMapper.h>
-#include <tsdb/TSDBTableScanReducer.h>
 #include <tsdb/TSDBTableScanlet.h>
+#include <tsdb/TSDBClient.h>
 
 using namespace fnord;
 
 namespace tsdb {
 
 template <typename ScanletType>
-struct TSDBTableScan {
+class TSDBTableScan : public dproc::RDD {
+public:
+  typedef typename ScanletType::ResultType ResultType;
 
-  static RefPtr<dproc::Task> mkTask(
-      const String& name,
+  static ResultType mergeResults(
+      dproc::TaskContext* context,
+      RefPtr<ScanletType> scanlet);
+
+  TSDBTableScan(
       const Buffer& params,
+      RefPtr<ScanletType> scanlet,
       msg::MessageSchemaRepository* repo,
       TSDBClient* tsdb);
 
-  static RefPtr<dproc::Task> mkTask(
-      const String& name,
+  TSDBTableScan(
       const TSDBTableScanSpec& params,
+      RefPtr<ScanletType> scanlet,
       msg::MessageSchemaRepository* repo,
       TSDBClient* tsdb);
 
+  void compute(dproc::TaskContext* context);
+  List<dproc::TaskDependency> dependencies() const;
+
+  RefPtr<VFSFile> encode() const override;
+  void decode(RefPtr<VFSFile> data) override;
+
+  ResultType* result();
+
+protected:
+
+  void onRow(const Buffer& row);
+
+  void scanWithoutIndex(dproc::TaskContext* context);
+  void scanWithCSTableIndex(dproc::TaskContext* context);
+
+  TSDBTableScanSpec params_;
+  RefPtr<ScanletType> scanlet_;
+  RefPtr<msg::MessageSchema> schema_;
+  TSDBClient* tsdb_;
 };
+
 
 } // namespace tsdb
 

@@ -16,12 +16,9 @@ enum TSDBTableScanOperation {
 };
 
 message TSDBTableScanSpec {
-  required TSDBTableScanOperation op = 1;
   optional string stream_key = 6;
   optional string partition_key = 2;
   optional string schema_name = 7;
-  optional uint64 from = 3;
-  optional uint64 until = 4;
   optional bytes scanlet_params = 5;
   optional bool use_cstable_index = 8;
   optional string version = 9;
