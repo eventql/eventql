@@ -19,7 +19,7 @@ message RecordEnvelope {
 
   required string record_id = 3;
 
-  required bytes record = 4;
+  required bytes record_data = 4;
 
 };
 
