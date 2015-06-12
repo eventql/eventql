@@ -49,22 +49,6 @@ public:
       StreamConfig* config,
       TSDBNodeRef* node);
 
-  //static String streamChunkKeyFor(
-  //    const String& stream_key,
-  //    DateTime time,
-  //    Duration partition_size);
-
-  //static String streamChunkKeyFor(
-  //    const String& stream_key,
-  //    DateTime time,
-  //    const StreamConfig& properties);
-
-  //static Vector<String> streamChunkKeysFor(
-  //    const String& stream_key,
-  //    DateTime from,
-  //    DateTime until,
-  //    const StreamConfig& properties);
-
   void insertRecord(
       const SHA1Hash& record_id,
       const Buffer& record);
