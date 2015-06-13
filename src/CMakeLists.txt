@@ -494,7 +494,7 @@ add_executable(analyticsd
     analytics/TopSearchQueriesQuery.cc
     analytics/DiscoveryStats.cc
     analytics/DiscoveryDashboardQuery.cc
-    analytics/DiscoveryCatalogStatsQuery.cc
+    analytics/CatalogDashboardQuery.cc
     analytics/DiscoveryCategoryStatsQuery.cc
     analytics/DiscoveryCategoryStatsResult.cc
     analytics/SearchDashboardQuery.cc
