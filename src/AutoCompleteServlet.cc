@@ -7,7 +7,7 @@
  * permission is obtained.
  */
 #include "AutoCompleteServlet.h"
-#include "CTRCounter.h"
+#include "analytics/CTRCounter.h"
 #include "fnord/Language.h"
 #include "fnord/logging.h"
 #include "fnord/wallclock.h"

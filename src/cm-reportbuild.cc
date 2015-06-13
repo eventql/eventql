@@ -31,7 +31,7 @@
 #include "CustomerNamespace.h"
 
 #
-#include "CTRCounter.h"
+#include "analytics/CTRCounter.h"
 #include "IndexReader.h"
 #include "analytics/ReportBuilder.h"
 #include "analytics/JoinedQueryTableSource.h"
