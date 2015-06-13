@@ -497,7 +497,7 @@ add_executable(analyticsd
     analytics/DiscoveryCatalogStatsQuery.cc
     analytics/DiscoveryCategoryStatsQuery.cc
     analytics/DiscoveryCategoryStatsResult.cc
-    analytics/DiscoverySearchStatsQuery.cc
+    analytics/SearchDashboardQuery.cc
     analytics/ECommerceKPIQuery.cc
     analytics/TrafficSegment.cc
     analytics/CTRStatsServlet.cc
