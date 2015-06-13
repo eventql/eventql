@@ -492,7 +492,7 @@ add_executable(analyticsd
     analytics/CTRByPositionQuery.cc
     analytics/CTRByResultItemCategoryQuery.cc
     analytics/TopSearchQueriesQuery.cc
-    analytics/DiscoveryStats.cc
+    analytics/SearchCTRStats.cc
     analytics/DiscoveryDashboardQuery.cc
     analytics/CatalogDashboardQuery.cc
     analytics/CatalogCategoryDashboardQuery.cc
