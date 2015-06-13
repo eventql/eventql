@@ -491,7 +491,7 @@ add_executable(analyticsd
     analytics/CTRByPageQuery.cc
     analytics/CTRByPositionQuery.cc
     analytics/CTRByResultItemCategoryQuery.cc
-    analytics/TopSearchQueriesQuery.cc
+    analytics/TopSearchTermsQuery.cc
     analytics/SearchCTRStats.cc
     analytics/DiscoveryDashboardQuery.cc
     analytics/CatalogDashboardQuery.cc
