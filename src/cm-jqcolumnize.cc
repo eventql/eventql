@@ -50,7 +50,7 @@
 #include "common.h"
 #include "schemas.h"
 #include "CustomerNamespace.h"
-#include "CTRCounter.h"
+#include "analytics/CTRCounter.h"
 #include "analytics/AnalyticsTableScan.h"
 #include "analytics/CTRByPositionQuery.h"
 
