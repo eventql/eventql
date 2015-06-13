@@ -491,13 +491,13 @@ add_executable(analyticsd
     analytics/CTRByPageQuery.cc
     analytics/CTRByPositionQuery.cc
     analytics/CTRByResultItemCategoryQuery.cc
-    analytics/TopSearchQueriesQuery.cc
-    analytics/DiscoveryStats.cc
+    analytics/TopSearchTermsQuery.cc
+    analytics/SearchCTRStats.cc
     analytics/DiscoveryDashboardQuery.cc
-    analytics/DiscoveryCatalogStatsQuery.cc
-    analytics/DiscoveryCategoryStatsQuery.cc
-    analytics/DiscoveryCategoryStatsResult.cc
-    analytics/DiscoverySearchStatsQuery.cc
+    analytics/CatalogDashboardQuery.cc
+    analytics/CatalogCategoryDashboardQuery.cc
+    analytics/CatalogCategoryDashboardResult.cc
+    analytics/SearchDashboardQuery.cc
     analytics/ECommerceKPIQuery.cc
     analytics/TrafficSegment.cc
     analytics/CTRStatsServlet.cc

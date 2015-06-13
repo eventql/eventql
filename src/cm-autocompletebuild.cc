@@ -34,7 +34,7 @@
 #include "common.h"
 #include "schemas.h"
 #include "CustomerNamespace.h"
-#include "CTRCounter.h"
+#include "analytics/CTRCounter.h"
 #include "analytics/ReportBuilder.h"
 #include "analytics/AnalyticsTableScanSource.h"
 #include "analytics/CTRBySearchTermCrossCategoryMapper.h"

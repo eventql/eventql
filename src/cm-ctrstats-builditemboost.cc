@@ -32,7 +32,7 @@
 
 #include "IndexChangeRequest.h"
 #
-#include "CTRCounter.h"
+#include "analytics/CTRCounter.h"
 
 using namespace fnord;
 using namespace cm;
