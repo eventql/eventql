@@ -29,7 +29,7 @@
 #include "CustomerNamespace.h"
 
 #
-#include "CTRCounter.h"
+#include "analytics/CTRCounter.h"
 #include <fnord-fts/fts.h>
 #include <fnord-fts/fts_common.h>
 

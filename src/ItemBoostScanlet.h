@@ -9,7 +9,7 @@
 #ifndef _CM_ITEMBOOSTSCANLET_H_
 #define _CM_ITEMBOOSTSCANLET_H_
 #include "analytics/AnalyticsTableScanlet.h"
-#include "CTRCounter.h"
+#include "analytics/CTRCounter.h"
 #include "ItemBoost.pb.h"
 
 namespace cm {

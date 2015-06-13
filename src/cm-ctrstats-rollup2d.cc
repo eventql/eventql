@@ -26,7 +26,7 @@
 #include "CustomerNamespace.h"
 
 #
-#include "CTRCounter.h"
+#include "analytics/CTRCounter.h"
 
 using namespace fnord;
 
