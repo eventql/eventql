@@ -9,7 +9,7 @@
  */
 #ifndef _FNORDMETRIC_METRICDB_METRICTABLEREF_H
 #define _FNORDMETRIC_METRICDB_METRICTABLEREF_H
-#include <fnord-metricdb/metric.h>
+#include <metricd/metric.h>
 #include <chartsql/backends/tableref.h>
 #include <stdlib.h>
 #include <string>

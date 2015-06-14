@@ -90,7 +90,4 @@ void MetricTableRef::executeScan(csql::TableScan* scan) {
       });
 }
 
-
 }
-}
-

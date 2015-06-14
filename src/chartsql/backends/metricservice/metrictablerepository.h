@@ -9,7 +9,7 @@
  */
 #ifndef _FNORDMETRIC_METRICDB_METRICTABLEREPOSITORY_H
 #define _FNORDMETRIC_METRICDB_METRICTABLEREPOSITORY_H
-#include <fnord-metricdb/metricrepository.h>
+#include <metricd/metricrepository.h>
 #include <chartsql/runtime/tablerepository.h>
 #include <memory>
 #include <mutex>

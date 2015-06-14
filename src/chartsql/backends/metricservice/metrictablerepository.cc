@@ -35,5 +35,4 @@ csql::TableRef* MetricTableRepository::getTableRef(
 }
 
 }
-}
 

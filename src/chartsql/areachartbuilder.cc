@@ -9,7 +9,7 @@
  */
 #include <chartsql/areachartbuilder.h>
 #include <chartsql/drawstatement.h>
-#include <fnord-chart/areachart.h>
+#include <fnord/charts/areachart.h>
 
 namespace csql {
 
