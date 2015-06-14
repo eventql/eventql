@@ -11,11 +11,11 @@
 #define _FNORDMETRIC_DRAWABLE_H
 #include <tuple>
 #include <functional>
-#include "fnord-chart/axisdefinition.h"
-#include "fnord-chart/griddefinition.h"
-#include "fnord-chart/legenddefinition.h"
-#include "fnord-chart/series.h"
-#include "fnord-chart/viewport.h"
+#include "fnord/charts/axisdefinition.h"
+#include "fnord/charts/griddefinition.h"
+#include "fnord/charts/legenddefinition.h"
+#include "fnord/charts/series.h"
+#include "fnord/charts/viewport.h"
 
 namespace fnord {
 namespace chart {

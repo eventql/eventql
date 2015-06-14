@@ -10,7 +10,7 @@
 #ifndef _FNORDMETRIC_DISCRETEDOMAIN_H
 #define _FNORDMETRIC_DISCRETEDOMAIN_H
 #include "fnord/stringutil.h"
-#include "fnord-chart/domain.h"
+#include "fnord/charts/domain.h"
 
 namespace fnord {
 namespace chart {
