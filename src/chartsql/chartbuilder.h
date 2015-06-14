@@ -13,9 +13,9 @@
 #include <assert.h>
 #include <unordered_map>
 #include <fnord/exception.h>
-#include <fnord-chart/canvas.h>
-#include <fnord-chart/barchart.h>
-#include <fnord-chart/series.h>
+#include <fnord/charts/canvas.h>
+#include <fnord/charts/barchart.h>
+#include <fnord/charts/series.h>
 #include <chartsql/runtime/compile.h>
 #include <chartsql/runtime/execute.h>
 #include <chartsql/runtime/rowsink.h>

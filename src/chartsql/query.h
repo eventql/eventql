@@ -17,7 +17,7 @@
 #include <chartsql/runtime/runtime.h>
 #include <chartsql/runtime/queryplannode.h>
 #include <chartsql/drawstatement.h>
-#include <fnord-chart/canvas.h>
+#include <fnord/charts/canvas.h>
 
 namespace csql {
 class TableRepository;
