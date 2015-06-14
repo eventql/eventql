@@ -49,4 +49,3 @@ void QueryPlanNode::finish() {
 }
 
 }
-}

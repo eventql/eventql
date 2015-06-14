@@ -196,5 +196,3 @@ const std::vector<std::string>& GroupOverTimewindow::getColumns() const {
 }
 
 }
-}
-

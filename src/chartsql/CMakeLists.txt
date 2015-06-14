@@ -5,7 +5,6 @@
 # the terms of the GNU General Public License v3.0. You should have received a
 # copy of the GNU General Public License along with this program. If not, see
 # <http://www.gnu.org/licenses/>.
-
 add_library(chartsql-lib OBJECT
     svalue.cc
     format.cc
@@ -36,6 +35,16 @@ add_library(chartsql-lib OBJECT
     parser/parser.cc
     parser/token.cc
     parser/tokenize.cc
+    runtime/runtime.cc
+    runtime/symboltable.cc
+    runtime/queryplannode.cc
     runtime/compile.cc
     runtime/defaultruntime.cc
+    runtime/importstatement.cc
+    runtime/tablerepository.cc
+    runtime/queryplanbuilder.cc
+    runtime/queryplan.cc
+    runtime/tablescan.cc
+    runtime/orderby.cc
+    runtime/groupovertimewindow.cc
     runtime/execute.cc)
