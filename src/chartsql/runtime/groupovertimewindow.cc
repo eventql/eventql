@@ -7,18 +7,17 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <fnordmetric/sql/runtime/groupovertimewindow.h>
-#include <fnordmetric/sql/runtime/compile.h>
-#include <fnordmetric/sql/runtime/execute.h>
+#include <chartsql/runtime/groupovertimewindow.h>
+#include <chartsql/runtime/compile.h>
+#include <chartsql/runtime/execute.h>
 
-namespace fnordmetric {
-namespace query {
+namespace csql {
 
 GroupOverTimewindow::GroupOverTimewindow(
     std::vector<std::string>&& columns,
     CompiledExpression* time_expr,
-    fnordmetric::IntegerType window,
-    fnordmetric::IntegerType step,
+    SValue::IntegerType window,
+    SValue::IntegerType step,
     size_t input_row_size,
     size_t input_row_time_index,
     CompiledExpression* select_expr,

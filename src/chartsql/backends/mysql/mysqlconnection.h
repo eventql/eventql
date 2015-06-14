@@ -10,15 +10,14 @@
 #ifndef _FNORDMETRIC_MYSQLBACKEND_MYSQLCONNECTION_H
 #define _FNORDMETRIC_MYSQLBACKEND_MYSQLCONNECTION_H
 #include <memory>
-#include <fnord-base/uri.h>
-#include <fnord-base/exception.h>
+#include <fnord/uri.h>
+#include <fnord/exception.h>
 #include <functional>
 #ifdef FNORD_ENABLE_MYSQL
 #include <mysql.h>
 #endif
 
-namespace fnordmetric {
-namespace query {
+namespace csql {
 namespace mysql_backend {
 
 class MySQLConnection {
@@ -112,7 +111,6 @@ protected:
 #endif
 };
 
-}
 }
 }
 #endif

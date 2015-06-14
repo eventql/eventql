@@ -11,10 +11,9 @@
 #include <assert.h>
 #include <math.h>
 #include <string.h>
-#include <fnordmetric/sql/expressions/math.h>
+#include <chartsql/expressions/math.h>
 
-namespace fnordmetric {
-namespace query {
+namespace csql {
 namespace expressions {
 
 void addExpr(void* scratchpad, int argc, SValue* argv, SValue* out) {
@@ -279,6 +278,5 @@ void powExpr(void* scratchpad, int argc, SValue* argv, SValue* out) {
       rhs->getTypeName());
 }
 
-}
 }
 }

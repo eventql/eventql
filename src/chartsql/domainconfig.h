@@ -14,10 +14,9 @@
 #include <assert.h>
 #include <fnord-chart/domain.h>
 #include <fnord-chart/drawable.h>
-#include <fnordmetric/sql/svalue.h>
+#include <chartsql/svalue.h>
 
-namespace fnordmetric {
-namespace query {
+namespace csql {
 
 class DomainConfig {
 public:
@@ -39,6 +38,5 @@ protected:
   char dimension_letter_;
 };
 
-}
 }
 #endif

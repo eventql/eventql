@@ -9,10 +9,9 @@
  */
 #ifndef _FNORDMETRIC_SQL_EXPRESSIONS_BOOLEAN_H
 #define _FNORDMETRIC_SQL_EXPRESSIONS_BOOLEAN_H
-#include <fnordmetric/sql/svalue.h>
+#include <chartsql/svalue.h>
 
-namespace fnordmetric {
-namespace query {
+namespace csql {
 namespace expressions {
 
 void eqExpr(void* scratchpad, int argc, SValue* argv, SValue* out);
@@ -25,7 +24,6 @@ void lteExpr(void* scratchpad, int argc, SValue* argv, SValue* out);
 void gtExpr(void* scratchpad, int argc, SValue* argv, SValue* out);
 void gteExpr(void* scratchpad, int argc, SValue* argv, SValue* out);
 
-}
 }
 }
 #endif

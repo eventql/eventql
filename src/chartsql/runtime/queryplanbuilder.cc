@@ -8,23 +8,22 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <stdlib.h>
-#include <fnordmetric/sql/parser/astnode.h>
-#include <fnordmetric/sql/parser/astutil.h>
-#include <fnordmetric/sql/runtime/queryplanbuilder.h>
-#include <fnordmetric/sql/runtime/queryplannode.h>
-#include <fnordmetric/sql/runtime/tablelessselect.h>
-#include <fnordmetric/sql/runtime/tablescan.h>
-#include <fnordmetric/sql/runtime/tablerepository.h>
-#include <fnordmetric/sql/runtime/limitclause.h>
-#include <fnordmetric/sql/runtime/orderby.h>
-#include <fnordmetric/sql/runtime/groupby.h>
-#include <fnordmetric/sql/runtime/groupovertimewindow.h>
-#include <fnordmetric/sql/runtime/runtime.h>
-#include <fnordmetric/sql/runtime/symboltable.h>
-#include <fnordmetric/sql/runtime/importstatement.h>
+#include <chartsql/parser/astnode.h>
+#include <chartsql/parser/astutil.h>
+#include <chartsql/runtime/queryplanbuilder.h>
+#include <chartsql/runtime/queryplannode.h>
+#include <chartsql/runtime/tablelessselect.h>
+#include <chartsql/runtime/tablescan.h>
+#include <chartsql/runtime/tablerepository.h>
+#include <chartsql/runtime/limitclause.h>
+#include <chartsql/runtime/orderby.h>
+#include <chartsql/runtime/groupby.h>
+#include <chartsql/runtime/groupovertimewindow.h>
+#include <chartsql/runtime/runtime.h>
+#include <chartsql/runtime/symboltable.h>
+#include <chartsql/runtime/importstatement.h>
 
-namespace fnordmetric {
-namespace query {
+namespace csql {
 
 QueryPlanBuilder::QueryPlanBuilder(
     Compiler* compiler,
@@ -37,7 +36,7 @@ void QueryPlanBuilder::buildQueryPlan(
 
   for (const auto& stmt : statements) {
     switch (stmt->getType()) {
-      case query::ASTNode::T_SELECT: {
+      case csql::ASTNode::T_SELECT: {
         auto query_plan_node = buildQueryPlan(
             stmt.get(),
             query_plan->tableRepository());
@@ -52,7 +51,7 @@ void QueryPlanBuilder::buildQueryPlan(
         break;
       }
 
-      case query::ASTNode::T_IMPORT:
+      case csql::ASTNode::T_IMPORT:
         query_plan->tableRepository()->import(
             ImportStatement(stmt.get(), compiler_),
             backends_);
@@ -472,7 +471,7 @@ QueryPlanNode* QueryPlanBuilder::buildGroupOverTimewindow(
   auto window_svalue = executeSimpleConstExpression(compiler_, window_expr_ast);
   auto window = window_svalue.getInteger();
 
-  fnordmetric::IntegerType step;
+  SValue::IntegerType step;
   if (step_expr_ast == nullptr) {
     step = window;
   } else {

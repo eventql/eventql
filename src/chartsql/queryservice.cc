@@ -8,18 +8,18 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <fnord-chart/svgtarget.h>
-#include <fnord-base/io/inputstream.h>
-#include <fnord-base/logging.h>
-#include <fnord-json/jsonoutputstream.h>
+#include <fnord/io/inputstream.h>
+#include <fnord/logging.h>
+}
+#include <fnord/json/jsonoutputstream.h>
 #include <fnordmetric/environment.h>
-#include <fnordmetric/chartsql/query.h>
-#include <fnordmetric/chartsql/queryservice.h>
-#include <fnordmetric/sql/runtime/queryplannode.h>
-#include <fnordmetric/sql/runtime/resultlist.h>
-#include <fnordmetric/sql/runtime/tablerepository.h>
+#include <chartsql/query.h>
+#include <chartsql/queryservice.h>
+#include <chartsql/runtime/queryplannode.h>
+#include <chartsql/runtime/resultlist.h>
+#include <chartsql/runtime/tablerepository.h>
 
-namespace fnordmetric {
-namespace query {
+namespace csql {
 
 QueryService::QueryService() {}
 

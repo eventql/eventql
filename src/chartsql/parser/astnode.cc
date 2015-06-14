@@ -11,10 +11,9 @@
 #include <assert.h>
 #include "astnode.h"
 #include "token.h"
-#include <fnord-base/inspect.h>
+#include <fnord/inspect.h>
 
-namespace fnordmetric {
-namespace query {
+namespace csql {
 
 ASTNode::ASTNode(kASTNodeType type) :
     type_(type),
@@ -244,22 +243,21 @@ void ASTNode::debugPrint(int indent /* = 0 */) const {
   }
 }
 
-} // namespace query
-} // namespace fnordmetric
+} // namespace csql
 
 namespace fnord {
 
 template <>
 std::string inspect<
-    fnordmetric::query::ASTNode::kASTNodeType>(
-    const fnordmetric::query::ASTNode::kASTNodeType& value) {
+    csql::ASTNode::kASTNodeType>(
+    const csql::ASTNode::kASTNodeType& value) {
   return "<ASTNode>";
 }
 
 template <>
 std::string inspect<
-    fnordmetric::query::ASTNode>(
-    const fnordmetric::query::ASTNode& value) {
+    csql::ASTNode>(
+    const csql::ASTNode& value) {
   return "<ASTNode>";
 }
 

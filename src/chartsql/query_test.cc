@@ -10,25 +10,25 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <fnordmetric/chartsql/query.h>
-#include <fnordmetric/chartsql/queryservice.h>
-#include <fnordmetric/sql/backends/csv/csvbackend.h>
-#include <fnordmetric/sql/backends/tableref.h>
-#include <fnordmetric/sql/parser/parser.h>
-#include <fnordmetric/sql/parser/token.h>
-#include <fnordmetric/sql/parser/tokenize.h>
-#include <fnordmetric/sql/runtime/defaultruntime.h>
-#include <fnordmetric/sql/runtime/queryplannode.h>
-#include <fnordmetric/sql/runtime/resultlist.h>
-#include <fnordmetric/sql/runtime/tablescan.h>
-#include <fnordmetric/sql/runtime/tablerepository.h>
+#include <chartsql/query.h>
+#include <chartsql/queryservice.h>
+#include <chartsql/backends/csv/csvbackend.h>
+#include <chartsql/backends/tableref.h>
+#include <chartsql/parser/parser.h>
+#include <chartsql/parser/token.h>
+#include <chartsql/parser/tokenize.h>
+#include <chartsql/runtime/defaultruntime.h>
+#include <chartsql/runtime/queryplannode.h>
+#include <chartsql/runtime/resultlist.h>
+#include <chartsql/runtime/tablescan.h>
+#include <chartsql/runtime/tablerepository.h>
 #include <ui/canvas.h>
 #include <ui/svgtarget.h>
 #include <util/inputstream.h>
 #include <util/outputstream.h>
 #include <util/unittest.h>
-#include <fnord-base/uri.h>
-#include <fnord-base/exception.h>
+#include <fnord/uri.h>
+#include <fnord/exception.h>
 
 using namespace fnordmetric::query;
 
@@ -264,8 +264,8 @@ TEST_CASE(QueryTest, TestQueryService, [] () {
 
   QueryService query_service;
   query_service.registerBackend(
-      std::unique_ptr<fnordmetric::query::Backend>(
-          new fnordmetric::query::csv_backend::CSVBackend));
+      std::unique_ptr<csql::Backend>(
+          new csql::csv_backend::CSVBackend));
 
   auto input = fnordmetric::util::StringInputStream::fromString(query);
   auto output = fnordmetric::util::FileOutputStream::openFile(

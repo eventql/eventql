@@ -7,12 +7,11 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <fnordmetric/chartsql/areachartbuilder.h>
-#include <fnordmetric/chartsql/drawstatement.h>
+#include <chartsql/areachartbuilder.h>
+#include <chartsql/drawstatement.h>
 #include <fnord-chart/areachart.h>
 
-namespace fnordmetric {
-namespace query {
+namespace csql {
 
 AreaChartBuilder::AreaChartBuilder(
     fnord::chart::Canvas* canvas,
@@ -23,36 +22,36 @@ fnord::chart::Drawable* AreaChartBuilder::getChart() const {
   preconditionCheck();
 
   if (auto c = tryType2D<fnord::chart::AreaChart2D<
-        fnordmetric::TimeType,
-        fnordmetric::FloatType>>())
+        SValue::TimeType,
+        SValue::FloatType>>())
     return c;
 
   if (auto c = tryType2D<fnord::chart::AreaChart2D<
-        fnordmetric::FloatType,
-        fnordmetric::FloatType>>())
+        SValue::FloatType,
+        SValue::FloatType>>())
     return c;
 
   if (auto c = tryType2D<fnord::chart::AreaChart2D<
-        fnordmetric::StringType,
-        fnordmetric::FloatType>>())
+        SValue::StringType,
+        SValue::FloatType>>())
     return c;
 
   if (auto c = tryType3D<fnord::chart::AreaChart3D<
-        fnordmetric::TimeType,
-        fnordmetric::FloatType,
-        fnordmetric::FloatType>>())
+        SValue::TimeType,
+        SValue::FloatType,
+        SValue::FloatType>>())
     return c;
 
   if (auto c = tryType3D<fnord::chart::AreaChart3D<
-        fnordmetric::FloatType,
-        fnordmetric::FloatType,
-        fnordmetric::FloatType>>())
+        SValue::FloatType,
+        SValue::FloatType,
+        SValue::FloatType>>())
     return c;
 
   if (auto c = tryType3D<fnord::chart::AreaChart3D<
-        fnordmetric::StringType,
-        fnordmetric::FloatType,
-        fnordmetric::FloatType>>())
+        SValue::StringType,
+        SValue::FloatType,
+        SValue::FloatType>>())
     return c;
 
   invalidType();
@@ -63,5 +62,4 @@ std::string AreaChartBuilder::chartName() const {
   return "AreaChart";
 }
 
-}
 }

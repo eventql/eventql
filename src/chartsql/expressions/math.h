@@ -9,10 +9,9 @@
  */
 #ifndef _FNORDMETRIC_SQL_EXPRESSIONS_MATH_H
 #define _FNORDMETRIC_SQL_EXPRESSIONS_MATH_H
-#include <fnordmetric/sql/svalue.h>
+#include <chartsql/svalue.h>
 
-namespace fnordmetric {
-namespace query {
+namespace csql {
 namespace expressions {
 
 void addExpr(void* scratchpad, int argc, SValue* argv, SValue* out);
@@ -22,7 +21,6 @@ void divExpr(void* scratchpad, int argc, SValue* argv, SValue* out);
 void modExpr(void* scratchpad, int argc, SValue* argv, SValue* out);
 void powExpr(void* scratchpad, int argc, SValue* argv, SValue* out);
 
-}
 }
 }
 #endif

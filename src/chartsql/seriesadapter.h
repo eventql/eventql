@@ -15,14 +15,13 @@
 #include <fnord-chart/canvas.h>
 #include <fnord-chart/barchart.h>
 #include <fnord-chart/series.h>
-#include <fnord-base/exception.h>
-#include <fnordmetric/sql/runtime/compile.h>
-#include <fnordmetric/sql/runtime/execute.h>
-#include <fnordmetric/sql/runtime/rowsink.h>
-#include <fnordmetric/sql/runtime/queryplannode.h>
+#include <fnord/exception.h>
+#include <chartsql/runtime/compile.h>
+#include <chartsql/runtime/execute.h>
+#include <chartsql/runtime/rowsink.h>
+#include <chartsql/runtime/queryplannode.h>
 
-namespace fnordmetric {
-namespace query {
+namespace csql {
 
 class AnySeriesAdapter : public RowSink {
 public:
@@ -154,6 +153,5 @@ public:
   std::vector<fnord::chart::Series3D<TX, TY, TZ>*> series_list_;
 };
 
-}
 }
 #endif

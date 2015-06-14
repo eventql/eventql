@@ -7,12 +7,11 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <fnordmetric/chartsql/barchartbuilder.h>
-#include <fnordmetric/chartsql/drawstatement.h>
+#include <chartsql/barchartbuilder.h>
+#include <chartsql/drawstatement.h>
 #include <fnord-chart/barchart.h>
 
-namespace fnordmetric {
-namespace query {
+namespace csql {
 
 BarChartBuilder::BarChartBuilder(
     fnord::chart::Canvas* canvas,
@@ -31,14 +30,14 @@ fnord::chart::Drawable* BarChartBuilder::findChartType() const {
   preconditionCheck();
 
   if (auto c = tryType2D<fnord::chart::BarChart2D<
-        fnordmetric::StringType,
-        fnordmetric::FloatType>>())
+        SValue::StringType,
+        SValue::FloatType>>())
     return c;
 
   if (auto c = tryType3D<fnord::chart::BarChart3D<
-        fnordmetric::StringType,
-        fnordmetric::FloatType,
-        fnordmetric::FloatType>>())
+        SValue::StringType,
+        SValue::FloatType,
+        SValue::FloatType>>())
     return c;
 
   invalidType();
@@ -80,5 +79,4 @@ void BarChartBuilder::setLabels(fnord::chart::BarChart* chart) const {
   chart->setLabels(prop != nullptr);
 }
 
-}
 }
