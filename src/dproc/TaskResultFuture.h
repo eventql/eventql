@@ -9,10 +9,11 @@
  */
 #ifndef _FNORD_DPROC_TASKRESULT_H
 #define _FNORD_DPROC_TASKRESULT_H
-#include <fnord-base/stdtypes.h>
-#include <fnord-dproc/Task.h>
+#include <fnord/stdtypes.h>
+#include <dproc/Task.h>
 
-namespace fnord {
+using namespace fnord;
+
 namespace dproc {
 
 struct TaskStatus {
@@ -45,6 +46,5 @@ protected:
 };
 
 } // namespace dproc
-} // namespace fnord
 
 #endif

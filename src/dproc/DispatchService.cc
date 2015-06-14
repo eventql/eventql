@@ -7,9 +7,10 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <fnord-dproc/DispatchService.h>
+#include <dproc/DispatchService.h>
 
-namespace fnord {
+using namespace fnord;
+
 namespace dproc {
 
 void DispatchService::registerApp(
@@ -34,5 +35,4 @@ RefPtr<TaskResultFuture> DispatchService::run(const TaskSpec& task) {
 }
 
 } // namespace dproc
-} // namespace fnord
 

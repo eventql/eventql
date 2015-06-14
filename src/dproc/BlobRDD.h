@@ -7,28 +7,28 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#ifndef _FNORD_SCHEDULER_H
-#define _FNORD_SCHEDULER_H
-#include "fnord-base/stdtypes.h"
-#include <fnord-dproc/Application.h>
-#include <fnord-dproc/TaskSpec.pb.h>
-#include <fnord-dproc/TaskResultFuture.h>
+#pragma once
+#include <fnord/stdtypes.h>
+#include <dproc/Task.h>
 
-namespace fnord {
+using namespace fnord;
+
 namespace dproc {
 
-class Scheduler : public RefCounted {
+class BlobRDD : public RDD {
 public:
 
-  virtual ~Scheduler() {}
+  BlobRDD();
 
-  virtual RefPtr<TaskResultFuture> run(
-      RefPtr<Application> app,
-      const TaskSpec& task) = 0;
+  virtual RefPtr<VFSFile> computeBlob(TaskContext* context) = 0;
 
+  void compute(TaskContext* context) override;
+  RefPtr<VFSFile> encode() const override;
+  void decode(RefPtr<VFSFile> data) override;
+
+protected:
+  RefPtr<VFSFile> blob_;
 };
 
 } // namespace dproc
-} // namespace fnord
 
-#endif

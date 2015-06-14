@@ -7,9 +7,10 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <fnord-dproc/TaskResultFuture.h>
+#include <dproc/TaskResultFuture.h>
 
-namespace fnord {
+using namespace fnord;
+
 namespace dproc {
 
 Future<RefPtr<Task>> TaskResultFuture::result() const {
@@ -63,4 +64,3 @@ double TaskStatus::progress() const {
 
 
 } // namespace dproc
-} // namespace fnord

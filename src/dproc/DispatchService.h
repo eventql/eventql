@@ -9,13 +9,14 @@
  */
 #ifndef _FNORD_DPROC_DISPATCHSERVICE_H
 #define _FNORD_DPROC_DISPATCHSERVICE_H
-#include <fnord-base/stdtypes.h>
-#include <fnord-dproc/Application.h>
-#include <fnord-dproc/Scheduler.h>
-#include <fnord-dproc/TaskSpec.pb.h>
-#include <fnord-dproc/TaskResultFuture.h>
+#include <fnord/stdtypes.h>
+#include <dproc/Application.h>
+#include <dproc/Scheduler.h>
+#include <dproc/TaskSpec.pb.h>
+#include <dproc/TaskResultFuture.h>
 
-namespace fnord {
+using namespace fnord;
+
 namespace dproc {
 
 class DispatchService {
@@ -38,6 +39,5 @@ protected:
 };
 
 } // namespace dproc
-} // namespace fnord
 
 #endif

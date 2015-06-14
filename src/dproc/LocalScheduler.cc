@@ -8,16 +8,17 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <unistd.h>
-#include <fnord-base/io/file.h>
-#include <fnord-base/io/fileutil.h>
-#include <fnord-base/io/mmappedfile.h>
-#include <fnord-base/logging.h>
-#include <fnord-base/io/fileutil.h>
-#include <fnord-base/util/binarymessagereader.h>
-#include <fnord-base/util/binarymessagewriter.h>
-#include <fnord-dproc/LocalScheduler.h>
+#include <fnord/io/file.h>
+#include <fnord/io/fileutil.h>
+#include <fnord/io/mmappedfile.h>
+#include <fnord/logging.h>
+#include <fnord/io/fileutil.h>
+#include <fnord/util/binarymessagereader.h>
+#include <fnord/util/binarymessagewriter.h>
+#include <dproc/LocalScheduler.h>
 
-namespace fnord {
+using namespace fnord;
+
 namespace dproc {
 
 LocalScheduler::LocalScheduler(
@@ -79,7 +80,7 @@ void LocalScheduler::runPipeline(
     LocalTaskPipeline* pipeline,
     RefPtr<TaskResultFuture> result) {
   fnord::logDebug(
-      "fnord.dproc",
+      "dproc",
       "Starting local pipeline id=$0 tasks=$1",
       (void*) pipeline,
       pipeline->tasks.size());
@@ -122,7 +123,7 @@ void LocalScheduler::runPipeline(
           if (!taskref->cache_filename.empty() &&
               FileUtil::exists(taskref->cache_filename)) {
             fnord::logDebug(
-                "fnord.dproc",
+                "dproc",
                 "Read RDD from cache: $0, key=$1",
                 taskref->debug_name,
                 cache_key.get());
@@ -178,7 +179,7 @@ void LocalScheduler::runPipeline(
         }
 
         fnord::logDebug(
-            "fnord.dproc",
+            "dproc",
             "Computing RDD: $0",
             taskref->debug_name);
 
@@ -195,7 +196,7 @@ void LocalScheduler::runPipeline(
     }
 
     fnord::logDebug(
-        "fnord.dproc",
+        "dproc",
         "Running local pipeline id=$0: $1",
         (void*) pipeline,
         result->status().toString());
@@ -210,7 +211,7 @@ void LocalScheduler::runPipeline(
   }
 
   fnord::logDebug(
-      "fnord.dproc",
+      "dproc",
       "Completed local pipeline id=$0",
       (void*) pipeline);
 }
@@ -226,7 +227,7 @@ void LocalScheduler::runTask(
       !task->cache_filename.empty() &&
       FileUtil::exists(task->cache_filename)) {
     fnord::logDebug(
-        "fnord.dproc",
+        "dproc",
         "Read RDD from cache: $0, key=$1",
         task->debug_name,
         rdd->cacheKeySHA1().get());
@@ -254,7 +255,7 @@ void LocalScheduler::runTask(
       }
     } catch (const std::exception& e) {
       task->failed = true;
-      fnord::logError("fnord.dproc", e, "error");
+      fnord::logError("dproc", e, "error");
     }
   }
 
@@ -306,4 +307,3 @@ size_t LocalScheduler::LocalTaskRef::numDependencies() const {
 }
 
 } // namespace dproc
-} // namespace fnord

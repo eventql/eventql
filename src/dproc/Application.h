@@ -9,13 +9,14 @@
  */
 #ifndef _FNORD_DPROC_APPLICATION_H
 #define _FNORD_DPROC_APPLICATION_H
-#include <fnord-base/stdtypes.h>
-#include <fnord-base/autoref.h>
-#include <fnord-dproc/Task.h>
-#include <fnord-dproc/TaskSpec.pb.h>
-#include <fnord-msg/msg.h>
+#include <fnord/stdtypes.h>
+#include <fnord/autoref.h>
+#include <dproc/Task.h>
+#include <dproc/TaskSpec.pb.h>
+#include <fnord/protobuf/msg.h>
 
-namespace fnord {
+using namespace fnord;
+
 namespace dproc {
 
 class Application : public RefCounted {
@@ -82,6 +83,5 @@ void DefaultApplication::registerProtoRDD(
 }
 
 } // namespace dproc
-} // namespace fnord
 
 #endif

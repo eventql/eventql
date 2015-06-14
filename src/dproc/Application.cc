@@ -7,9 +7,10 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <fnord-dproc/Application.h>
+#include <dproc/Application.h>
 
-namespace fnord {
+using namespace fnord;
+
 namespace dproc {
 
 RefPtr<Task> Application::getTaskInstance(
@@ -44,5 +45,4 @@ void DefaultApplication::registerTaskFactory(
 }
 
 } // namespace dproc
-} // namespace fnord
 

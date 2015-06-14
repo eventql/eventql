@@ -9,17 +9,18 @@
  */
 #ifndef _FNORD_DPROC_TASK_H
 #define _FNORD_DPROC_TASK_H
-#include <fnord-base/stdtypes.h>
-#include <fnord-base/autoref.h>
-#include <fnord-base/buffer.h>
-#include <fnord-base/option.h>
-#include <fnord-base/exception.h>
-#include <fnord-base/SHA1.h>
-#include <fnord-base/VFSFile.h>
-#include <fnord-base/thread/future.h>
-#include <fnord-msg/msg.h>
+#include <fnord/stdtypes.h>
+#include <fnord/autoref.h>
+#include <fnord/buffer.h>
+#include <fnord/option.h>
+#include <fnord/exception.h>
+#include <fnord/SHA1.h>
+#include <fnord/VFSFile.h>
+#include <fnord/thread/future.h>
+#include <fnord/protobuf/msg.h>
 
-namespace fnord {
+using namespace fnord;
+
 namespace dproc {
 
 class Task;
@@ -120,6 +121,5 @@ void ProtoRDD<ProtoType>::decode(RefPtr<VFSFile> data) {
 }
 
 } // namespace dproc
-} // namespace fnord
 
 #endif

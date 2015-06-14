@@ -9,15 +9,16 @@
  */
 #ifndef _FNORD_DPROC_LOCALSCHEDULER_H
 #define _FNORD_DPROC_LOCALSCHEDULER_H
-#include "fnord-base/stdtypes.h"
-#include "fnord-base/random.h"
-#include "fnord-base/thread/taskscheduler.h"
-#include "fnord-base/thread/FixedSizeThreadPool.h"
-#include <fnord-dproc/Application.h>
-#include <fnord-dproc/Scheduler.h>
-#include <fnord-dproc/TaskSpec.pb.h>
+#include "fnord/stdtypes.h"
+#include "fnord/random.h"
+#include "fnord/thread/taskscheduler.h"
+#include "fnord/thread/FixedSizeThreadPool.h"
+#include <dproc/Application.h>
+#include <dproc/Scheduler.h>
+#include <dproc/TaskSpec.pb.h>
 
-namespace fnord {
+using namespace fnord;
+
 namespace dproc {
 
 class LocalScheduler : public Scheduler {
@@ -84,6 +85,5 @@ protected:
 };
 
 } // namespace dproc
-} // namespace fnord
 
 #endif

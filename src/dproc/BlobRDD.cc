@@ -7,14 +7,25 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-package fnord.dproc;
+#include <dproc/BlobRDD.h>
 
-message TaskSpec {
+using namespace fnord;
 
-  optional string application = 3;
+namespace dproc {
 
-  required string task_name = 1;
+BlobRDD::BlobRDD() : blob_(nullptr) {}
 
-  optional string params = 2;
+void BlobRDD::compute(TaskContext* context) {
+  blob_ = computeBlob(context);
+}
 
-};
+RefPtr<VFSFile> BlobRDD::encode() const {
+  return blob_;
+}
+
+void BlobRDD::decode(RefPtr<VFSFile> data) {
+  blob_ = data;
+}
+
+} // namespace dproc
+
