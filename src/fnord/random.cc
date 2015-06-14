@@ -25,6 +25,11 @@ uint64_t Random::random64() {
   return rval;
 }
 
+SHA1Hash Random::sha1() {
+  auto rval = Random::random64();
+  return SHA1::compute(&rval, sizeof(rval));
+}
+
 std::string Random::hex64() {
   uint64_t val = random64();
   return StringUtil::hexPrint(&val, sizeof(val), false);
