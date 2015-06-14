@@ -14,8 +14,7 @@
 #include <string>
 #include <vector>
 
-namespace fnordmetric {
-namespace query {
+namespace csql {
 
 class Token {
 public:
@@ -130,6 +129,5 @@ protected:
   const kTokenType type_;
 };
 
-}
 }
 #endif

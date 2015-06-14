@@ -12,8 +12,7 @@
 #include <assert.h>
 #include "tokenize.h"
 
-namespace fnordmetric {
-namespace query {
+namespace csql {
 
 void tokenizeQuery(
     const char** cur,
@@ -576,5 +575,4 @@ void tokenizeQuery(
   tokenizeQuery(&str, str + query.size(), token_list);
 }
 
-}
 }

@@ -14,12 +14,11 @@
 #include <string>
 #include <vector>
 #include <assert.h>
-#include <fnordmetric/sql/parser/astnode.h>
-#include <fnordmetric/sql/parser/token.h>
-#include <fnordmetric/sql/runtime/queryplannode.h>
+#include <chartsql/parser/astnode.h>
+#include <chartsql/parser/token.h>
+#include <chartsql/runtime/queryplannode.h>
 
-namespace fnordmetric {
-namespace query {
+namespace csql {
 
 class LimitClause : public QueryPlanNode {
 public:
@@ -64,6 +63,5 @@ protected:
   size_t counter_;
 };
 
-}
 }
 #endif

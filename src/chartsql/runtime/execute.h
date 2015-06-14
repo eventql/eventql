@@ -12,8 +12,7 @@
 #include <stdlib.h>
 #include <vector>
 
-namespace fnordmetric {
-namespace query {
+namespace csql {
 class SValue;
 class Compiler;
 
@@ -27,6 +26,5 @@ bool executeExpression(
 
 SValue executeSimpleConstExpression(Compiler* compiler, ASTNode* expr);
 
-}
 }
 #endif

@@ -7,12 +7,11 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <fnordmetric/environment.h>
-#include <fnord-base/logging.h>
-#include <fnordmetric/sql/backends/mysql/mysqlconnection.h>
+//#include <fnordmetric/environment.h>
+#include <fnord/logging.h>
+#include <chartsql/backends/mysql/mysqlconnection.h>
 
-namespace fnordmetric {
-namespace query {
+namespace csql {
 namespace mysql_backend {
 
 std::unique_ptr<MySQLConnection> MySQLConnection::openConnection(
@@ -202,6 +201,5 @@ void MySQLConnection::executeQuery(
 #endif
 }
 
-}
 }
 }

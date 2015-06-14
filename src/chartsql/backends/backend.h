@@ -11,11 +11,10 @@
 #define _FNORDMETRIC_SQL_BACKEND_H
 #include <memory>
 #include <vector>
-#include <fnord-base/uri.h>
-#include <fnordmetric/sql/backends/tableref.h>
+#include <fnord/uri.h>
+#include <chartsql/backends/tableref.h>
 
-namespace fnordmetric {
-namespace query {
+namespace csql {
 
 class Backend {
 public:
@@ -28,6 +27,5 @@ public:
 
 };
 
-}
 }
 #endif

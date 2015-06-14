@@ -7,12 +7,11 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <fnordmetric/chartsql/domainconfig.h>
+#include <chartsql/domainconfig.h>
 #include <fnord-chart/continuousdomain.h>
 #include <fnord-chart/timedomain.h>
 
-namespace fnordmetric {
-namespace query {
+namespace csql {
 
 DomainConfig::DomainConfig(
     fnord::chart::Drawable* drawable,
@@ -22,23 +21,23 @@ DomainConfig::DomainConfig(
 
 void DomainConfig::setMin(const SValue& value) {
   auto int_domain = dynamic_cast<
-      fnord::chart::ContinuousDomain<fnordmetric::IntegerType>*>(domain_);
+      fnord::chart::ContinuousDomain<SValue::IntegerType>*>(domain_);
   if (int_domain != nullptr) {
-    int_domain->setMin(value.getValue<fnordmetric::IntegerType>());
+    int_domain->setMin(value.getValue<SValue::IntegerType>());
     return;
   }
 
   auto float_domain = dynamic_cast<
-      fnord::chart::ContinuousDomain<fnordmetric::FloatType>*>(domain_);
+      fnord::chart::ContinuousDomain<SValue::FloatType>*>(domain_);
   if (float_domain != nullptr) {
-    float_domain->setMin(value.getValue<fnordmetric::FloatType>());
+    float_domain->setMin(value.getValue<SValue::FloatType>());
     return;
   }
 
   auto time_domain =
       dynamic_cast<fnord::chart::TimeDomain*>(domain_);
   if (time_domain != nullptr) {
-    time_domain->setMin(value.getValue<fnordmetric::TimeType>());
+    time_domain->setMin(value.getValue<SValue::TimeType>());
     return;
   }
 
@@ -50,23 +49,23 @@ void DomainConfig::setMin(const SValue& value) {
 
 void DomainConfig::setMax(const SValue& value) {
   auto int_domain = dynamic_cast<
-      fnord::chart::ContinuousDomain<fnordmetric::IntegerType>*>(domain_);
+      fnord::chart::ContinuousDomain<SValue::IntegerType>*>(domain_);
   if (int_domain != nullptr) {
-    int_domain->setMax(value.getValue<fnordmetric::IntegerType>());
+    int_domain->setMax(value.getValue<SValue::IntegerType>());
     return;
   }
 
   auto float_domain = dynamic_cast<
-      fnord::chart::ContinuousDomain<fnordmetric::FloatType>*>(domain_);
+      fnord::chart::ContinuousDomain<SValue::FloatType>*>(domain_);
   if (float_domain != nullptr) {
-    float_domain->setMax(value.getValue<fnordmetric::FloatType>());
+    float_domain->setMax(value.getValue<SValue::FloatType>());
     return;
   }
 
   auto time_domain =
       dynamic_cast<fnord::chart::TimeDomain*>(domain_);
   if (time_domain != nullptr) {
-    time_domain->setMax(value.getValue<fnordmetric::TimeType>());
+    time_domain->setMax(value.getValue<SValue::TimeType>());
     return;
   }
 
@@ -101,5 +100,4 @@ void DomainConfig::setLogarithmic(bool logarithmic) {
   }
 }
 
-}
 }

@@ -7,15 +7,14 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <fnordmetric/sql/parser/token.h>
-#include <fnordmetric/sql/runtime/compile.h>
-#include <fnordmetric/sql/runtime/execute.h>
-#include <fnordmetric/sql/runtime/importstatement.h>
-#include <fnordmetric/sql/svalue.h>
-#include <fnord-base/exception.h>
+#include <chartsql/parser/token.h>
+#include <chartsql/runtime/compile.h>
+#include <chartsql/runtime/execute.h>
+#include <chartsql/runtime/importstatement.h>
+#include <chartsql/svalue.h>
+#include <fnord/exception.h>
 
-namespace fnordmetric {
-namespace query {
+namespace csql {
 
 ImportStatement::ImportStatement(ASTNode* ast, Compiler* compiler) {
   if (ast->getChildren().size() < 2) {

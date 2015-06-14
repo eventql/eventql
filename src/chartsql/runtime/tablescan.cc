@@ -1,4 +1,4 @@
-/**
+ /**
  * This file is part of the "FnordMetric" project
  *   Copyright (c) 2014 Paul Asmuth, Google Inc.
  *
@@ -7,11 +7,10 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <fnordmetric/sql/parser/astutil.h>
-#include <fnordmetric/sql/runtime/tablescan.h>
+#include <chartsql/parser/astutil.h>
+#include <chartsql/runtime/tablescan.h>
 
-namespace fnordmetric {
-namespace query {
+namespace csql {
 
 TableScan* TableScan::build(
     ASTNode* ast,
@@ -255,5 +254,4 @@ bool TableScan::resolveColumns(
   }
 }
 
-}
 }

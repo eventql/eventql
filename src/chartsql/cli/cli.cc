@@ -10,18 +10,18 @@
 #include <vector>
 #include <string>
 #include <memory>
-#include <fnord-base/exception.h>
-#include <fnord-base/exceptionhandler.h>
-#include <fnord-base/io/inputstream.h>
-#include <fnord-base/io/outputstream.h>
-#include <fnord-base/cli/flagparser.h>
+#include <fnord/exception.h>
+#include <fnord/exceptionhandler.h>
+#include <fnord/io/inputstream.h>
+#include <fnord/io/outputstream.h>
+#include <fnord/cli/flagparser.h>
 #include "environment.h"
 #include "cli/cli.h"
-#include <fnordmetric/sql/backends/csv/csvbackend.h>
-#include <fnordmetric/sql/backends/mysql/mysqlbackend.h>
-#include <fnordmetric/sql/backends/crate/cratebackend.h>
+#include <chartsql/backends/csv/csvbackend.h>
+#include <chartsql/backends/mysql/mysqlbackend.h>
+#include <chartsql/backends/crate/cratebackend.h>
 
-namespace fnordmetric {
+namespace csql {
 namespace cli {
 
 void CLI::parseArgs(Environment* env, const std::vector<std::string>& argv) {
@@ -159,19 +159,19 @@ void CLI::execute(Environment* env) {
   }
 
   /* execute query */
-  query::QueryService query_service;
+  csql::QueryService query_service;
 
   query_service.registerBackend(
-      std::unique_ptr<fnordmetric::query::Backend>(
-          new fnordmetric::query::mysql_backend::MySQLBackend));
+      std::unique_ptr<csql::Backend>(
+          new csql::mysql_backend::MySQLBackend));
 
   query_service.registerBackend(
-      std::unique_ptr<fnordmetric::query::Backend>(
-          new fnordmetric::query::csv_backend::CSVBackend));
+      std::unique_ptr<csql::Backend>(
+          new csql::csv_backend::CSVBackend));
 
   query_service.registerBackend(
-      std::unique_ptr<fnordmetric::query::Backend>(
-        new fnordmetric::query::crate_backend::CrateBackend));
+      std::unique_ptr<csql::Backend>(
+        new csql::crate_backend::CrateBackend));
 
   query_service.executeQuery(
       input,
@@ -179,29 +179,29 @@ void CLI::execute(Environment* env) {
       output);
 }
 
-const query::QueryService::kFormat CLI::getOutputFormat(Environment* env) {
+const csql::QueryService::kFormat CLI::getOutputFormat(Environment* env) {
   auto flags = env->flags();
 
   if (!flags->isSet("format")) {
-    return query::QueryService::FORMAT_TABLE;
+    return csql::QueryService::FORMAT_TABLE;
   }
 
   auto format_str = flags->getString("format");
 
   if (format_str == "csv") {
-    return query::QueryService::FORMAT_CSV;
+    return csql::QueryService::FORMAT_CSV;
   }
 
   if (format_str == "json") {
-    return query::QueryService::FORMAT_JSON;
+    return csql::QueryService::FORMAT_JSON;
   }
 
   if (format_str == "svg") {
-    return query::QueryService::FORMAT_SVG;
+    return csql::QueryService::FORMAT_SVG;
   }
 
   if (format_str == "table") {
-    return query::QueryService::FORMAT_TABLE;
+    return csql::QueryService::FORMAT_TABLE;
   }
 
   RAISE(

@@ -9,15 +9,10 @@
  */
 #ifndef _FNORDMETRIC_SQLEXTENSIONS_POINTCHARTBUILDER_H
 #define _FNORDMETRIC_SQLEXTENSIONS_POINTCHARTBUILDER_H
-#include <fnordmetric/chartsql/chartbuilder.h>
+#include <chartsql/chartbuilder.h>
 #include <fnord-chart/pointchart.h>
 
-namespace fnordmetric {
-namespace ui {
-class PointChart;
-}
-
-namespace query {
+namespace csql {
 class DrawStatement;
 
 class PointChartBuilder : public ChartBuilder {
@@ -33,6 +28,5 @@ protected:
   void setLabels(fnord::chart::PointChart* chart) const;
 };
 
-}
 }
 #endif

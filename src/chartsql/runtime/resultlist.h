@@ -13,11 +13,10 @@
 #include <string>
 #include <vector>
 #include <memory>
-#include <fnordmetric/sql/runtime/rowsink.h>
-#include <fnordmetric/sql/svalue.h>
+#include <chartsql/runtime/rowsink.h>
+#include <chartsql/svalue.h>
 
-namespace fnordmetric {
-namespace query {
+namespace csql {
 
 class ResultList : public RowSink {
 public:
@@ -71,7 +70,7 @@ public:
     rows_.back().push_back(value);
   }
 
-  bool nextRow(query::SValue* row, int row_len) override {
+  bool nextRow(csql::SValue* row, int row_len) override {
     addRow();
     for (int i = 0; i < row_len; ++i) {
       addColumn(row[i].toString());
@@ -123,6 +122,5 @@ protected:
   std::vector<std::vector<std::string>> rows_;
 };
 
-}
 }
 #endif

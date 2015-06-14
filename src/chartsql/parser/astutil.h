@@ -12,8 +12,7 @@
 #include <string>
 #include <vector>
 
-namespace fnordmetric {
-namespace query {
+namespace csql {
 class ASTNode;
 class TableRef;
 
@@ -26,6 +25,5 @@ public:
 
 };
 
-}
 }
 #endif

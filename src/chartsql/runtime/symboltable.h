@@ -14,8 +14,7 @@
 #include <vector>
 #include <unordered_map>
 
-namespace fnordmetric {
-namespace query {
+namespace csql {
 class SymbolTableEntry;
 class SValue;
 
@@ -63,6 +62,5 @@ protected:
   std::unordered_map<std::string, SymbolTableEntry> symbols_;
 };
 
-}
 }
 #endif

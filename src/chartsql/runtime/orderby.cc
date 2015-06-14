@@ -7,12 +7,11 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <fnordmetric/sql/runtime/orderby.h>
-#include <fnordmetric/sql/expressions/boolean.h>
+#include <chartsql/runtime/orderby.h>
+#include <chartsql/expressions/boolean.h>
 #include <algorithm>
 
-namespace fnordmetric {
-namespace query {
+namespace csql {
 
 OrderBy::OrderBy(
     size_t num_columns,
@@ -100,5 +99,4 @@ const std::vector<std::string>& OrderBy::getColumns() const {
   return columns_;
 }
 
-} // namespace query
-} // namespace fnordmetric
+} // namespace csql

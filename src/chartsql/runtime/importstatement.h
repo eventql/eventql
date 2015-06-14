@@ -11,11 +11,10 @@
 #define _FNORDMETRIC_QUERY_IMPORTSTATEMENT_H
 #include <stdlib.h>
 #include <vector>
-#include <fnordmetric/sql/parser/astnode.h>
-#include <fnordmetric/sql/runtime/compile.h>
+#include <chartsql/parser/astnode.h>
+#include <chartsql/runtime/compile.h>
 
-namespace fnordmetric {
-namespace query {
+namespace csql {
 
 class ImportStatement {
 public:
@@ -27,6 +26,5 @@ protected:
   std::vector<std::string> tables_;
 };
 
-}
 }
 #endif

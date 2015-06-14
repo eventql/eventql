@@ -12,8 +12,7 @@
 #include <string.h>
 #include "queryplannode.h"
 
-namespace fnordmetric {
-namespace query {
+namespace csql {
 
 QueryPlanNode::QueryPlanNode() : target_(nullptr) {}
 

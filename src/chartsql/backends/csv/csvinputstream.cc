@@ -11,11 +11,10 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include "csvinputstream.h"
-#include "fnord-base/exception.h"
-#include "fnord-base/io/inputstream.h"
+#include "fnord/exception.h"
+#include "fnord/io/inputstream.h"
 
-namespace fnordmetric {
-namespace query {
+namespace csql {
 namespace csv_backend {
 
 std::unique_ptr<CSVInputStream> CSVInputStream::openFile(
@@ -99,6 +98,6 @@ const fnord::RewindableInputStream& CSVInputStream::getInputStream()
   return *input_;
 }
 
-}
+
 }
 }

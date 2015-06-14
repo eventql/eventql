@@ -13,8 +13,7 @@
 #include <string>
 #include <memory>
 
-namespace fnordmetric {
-namespace query {
+namespace csql {
 class TableScan;
 
 class TableRef {
@@ -27,6 +26,5 @@ public:
 protected:
 };
 
-}
 }
 #endif

@@ -13,11 +13,10 @@
 #include <string>
 #include <vector>
 #include <memory>
-#include <fnordmetric/sql/runtime/queryplannode.h>
-#include <fnordmetric/sql/runtime/tablerepository.h>
+#include <chartsql/runtime/queryplannode.h>
+#include <chartsql/runtime/tablerepository.h>
 
-namespace fnordmetric {
-namespace query {
+namespace csql {
 
 class QueryPlan {
 public:
@@ -34,6 +33,5 @@ protected:
   std::vector<std::unique_ptr<QueryPlanNode>> queries_;
 };
 
-}
 }
 #endif

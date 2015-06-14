@@ -13,11 +13,10 @@
 #include <memory>
 #include <unordered_map>
 #include <string>
-#include <fnordmetric/sql/backends/csv/csvinputstream.h>
-#include <fnordmetric/sql/backends/tableref.h>
+#include <chartsql/backends/csv/csvinputstream.h>
+#include <chartsql/backends/tableref.h>
 
-namespace fnordmetric {
-namespace query {
+namespace csql {
 class SValue;
 namespace csv_backend {
 
@@ -49,7 +48,6 @@ protected:
   bool dirty_;
 };
 
-}
 }
 }
 #endif

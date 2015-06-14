@@ -9,10 +9,9 @@
  */
 #ifndef _FNORDMETRIC_SQLEXTENSIONS_AREACHARTBUILDER_H
 #define _FNORDMETRIC_SQLEXTENSIONS_AREACHARTBUILDER_H
-#include <fnordmetric/chartsql/chartbuilder.h>
+#include <chartsql/chartbuilder.h>
 
-namespace fnordmetric {
-namespace query {
+namespace csql {
 class DrawStatement;
 
 class AreaChartBuilder : public ChartBuilder {
@@ -24,6 +23,5 @@ public:
   std::string chartName() const override;
 };
 
-}
 }
 #endif

@@ -14,13 +14,12 @@
 #include <string>
 #include <vector>
 #include <memory>
-#include <fnordmetric/sql/runtime/runtime.h>
-#include <fnordmetric/sql/runtime/queryplannode.h>
-#include <fnordmetric/chartsql/drawstatement.h>
+#include <chartsql/runtime/runtime.h>
+#include <chartsql/runtime/queryplannode.h>
+#include <chartsql/drawstatement.h>
 #include <fnord-chart/canvas.h>
 
-namespace fnordmetric {
-namespace query {
+namespace csql {
 class TableRepository;
 class DrawStatement;
 class ASTNode;
@@ -94,6 +93,5 @@ protected:
   std::vector<std::unique_ptr<fnord::chart::Canvas>> charts_;
 };
 
-}
 }
 #endif

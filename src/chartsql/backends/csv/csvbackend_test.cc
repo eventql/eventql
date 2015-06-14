@@ -7,13 +7,13 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <fnord-base/exception.h>
+#include <fnord/exception.h>
 #include <util/unittest.h>
-#include <fnordmetric/sql/backends/csv/csvinputstream.h>
-#include <fnordmetric/sql/backends/csv/csvtableref.h>
-#include <fnordmetric/sql/svalue.h>
+#include <chartsql/backends/csv/csvinputstream.h>
+#include <chartsql/backends/csv/csvtableref.h>
+#include <chartsql/svalue.h>
 
-using namespace fnordmetric::query::csv_backend;
+using namespace csql::csv_backend;
 
 UNIT_TEST(CSVInputStreamTest);
 
@@ -104,7 +104,7 @@ TEST_CASE(CSVInputStreamTest, TestReadRowsWithHeaders, [] () {
   for (int n = 0; n < 2; n++) {
     int num_rows = 0;
     for (;; ++num_rows) {
-      std::vector<fnordmetric::query::SValue> target;
+      std::vector<csql::SValue> target;
       if (!table_ref.readNextRow(&target)) {
         break;
       }
@@ -137,7 +137,7 @@ TEST_CASE(CSVInputStreamTest, TestReadRowsWithoutHeaders, [] () {
 
   int num_rows = 0;
   for (;; ++num_rows) {
-    std::vector<fnordmetric::query::SValue> target;
+    std::vector<csql::SValue> target;
     if (!table_ref.readNextRow(&target)) {
       break;
     }
