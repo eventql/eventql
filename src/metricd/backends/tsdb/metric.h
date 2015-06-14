@@ -10,7 +10,7 @@
 #pragma once
 #include <atomic>
 #include <mutex>
-#include <fnord-metricdb/metric.h>
+#include <metricd/metric.h>
 #include <tsdb/TSDBClient.h>
 
 namespace fnord {

@@ -12,9 +12,9 @@
 #include <fnord/datetime.h>
 #include <fnord/stdtypes.h>
 #include <fnord/duration.h>
-#include <fnord-chart/series.h>
-#include <fnord-metricdb/sample.h>
-#include <fnord-metricdb/metricservice.h>
+#include <fnord/charts/series.h>
+#include <metricd/sample.h>
+#include <metricd/metricservice.h>
 
 namespace fnord {
 namespace metric_service {

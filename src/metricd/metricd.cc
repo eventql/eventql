@@ -24,9 +24,9 @@
 #include "fnord/protobuf/msg.h"
 #include <sensord/SensorSampleFeed.h>
 #include <sensord/SensorPushServlet.h>
-#include "fnord-metricdb/metricservice.h"
-#include "fnord-metricdb/httpapiservlet.h"
-#include "fnord-metricdb/backends/tsdb/metricrepository.h"
+#include "metricd/metricservice.h"
+#include "metricd/httpapiservlet.h"
+#include "metricd/backends/tsdb/metricrepository.h"
 #include "fnord/stats/statsd.h"
 
 using namespace fnord;
@@ -86,25 +86,25 @@ int main(int argc, const char** argv) {
   http_server.stats()->exportStats("/metricd/http");
 
   sensord::SensorSampleFeed sensor_feed;
-  sensor_feed.subscribe(&tp, [&tsdb] (const sensord::SampleEnvelope& smpl) {
-    if (smpl.sample_namespace().empty()) {
-      fnord::logWarning("metricd", "discarding sample without namespace");
-    }
+  //sensor_feed.subscribe(&tp, [&tsdb] (const sensord::SampleEnvelope& smpl) {
+  //  if (smpl.sample_namespace().empty()) {
+  //    fnord::logWarning("metricd", "discarding sample without namespace");
+  //  }
 
-    auto stream_key = StringUtil::format(
-        "metricd.sensors.$0.$1",
-        smpl.sample_namespace(),
-        smpl.sensor_key());
+  //  auto stream_key = StringUtil::format(
+  //      "metricd.sensors.$0.$1",
+  //      smpl.sample_namespace(),
+  //      smpl.sensor_key());
 
-    auto sample_data = smpl.data();
-    auto sample_time = WallClock::unixMicros();
+  //  auto sample_data = smpl.data();
+  //  auto sample_time = WallClock::unixMicros();
 
-    tsdb.insertRecord(
-        stream_key,
-        sample_time,
-        tsdb.mkMessageID(),
-        Buffer(sample_data.data(), sample_data.size()));
-  });
+  //  tsdb.insertRecord(
+  //      stream_key,
+  //      sample_time,
+  //      tsdb.mkMessageID(),
+  //      Buffer(sample_data.data(), sample_data.size()));
+  //});
 
   metricdb::SensorPushServlet sensor_servlet(&sensor_feed);
   http_router.addRouteByPrefixMatch("/sensors", &sensor_servlet);

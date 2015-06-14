@@ -8,8 +8,8 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <fnord/ieee754.h>
-#include <fnord-metricdb/backends/disk/tokenindex.h>
-#include <fnord-metricdb/backends/disk/samplereader.h>
+#include <metricd/backends/disk/tokenindex.h>
+#include <metricd/backends/disk/samplereader.h>
 
 namespace fnord {
 namespace metric_service {

@@ -9,7 +9,7 @@
  */
 #ifndef _FNORDMETRIC_METRICDB_TOKENINDEXREADER_H
 #define _FNORDMETRIC_METRICDB_TOKENINDEXREADER_H
-#include <fnord-metricdb/backends/disk/tokenindex.h>
+#include <metricd/backends/disk/tokenindex.h>
 #include <fnord/util/binarymessagereader.h>
 #include <stdlib.h>
 #include <stdint.h>
