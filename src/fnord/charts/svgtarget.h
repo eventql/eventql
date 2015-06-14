@@ -13,8 +13,8 @@
 #include <stdlib.h>
 #include <vector>
 #include <string>
-#include "fnord-chart/rendertarget.h"
-#include "fnord-chart/styles/style_default.h"
+#include "fnord/charts/rendertarget.h"
+#include "fnord/charts/styles/style_default.h"
 #include "fnord/io/outputstream.h"
 
 namespace fnord {

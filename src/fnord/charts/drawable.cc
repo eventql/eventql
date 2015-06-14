@@ -8,8 +8,8 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <string>
-#include "fnord-chart/canvas.h"
-#include "fnord-chart/drawable.h"
+#include "fnord/charts/canvas.h"
+#include "fnord/charts/drawable.h"
 
 namespace fnord {
 namespace chart {

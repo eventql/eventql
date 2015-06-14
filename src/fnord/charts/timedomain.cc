@@ -8,7 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include "fnord/datetime.h"
-#include "fnord-chart/timedomain.h"
+#include "fnord/charts/timedomain.h"
 
 namespace fnord {
 namespace chart {
