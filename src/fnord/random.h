@@ -13,6 +13,7 @@
 #include <stdint.h>
 #include <string>
 #include <random>
+#include "SHA1.h"
 
 namespace fnord {
 
@@ -53,8 +54,12 @@ public:
    */
   std::string alphanumericString(int nchars);
 
-protected:
+  /**
+   * Return a new random SHA1 sum
+   */
+  SHA1Hash sha1();
 
+protected:
   std::mt19937_64 prng_;
 };
 
