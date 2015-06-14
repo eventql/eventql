@@ -9,17 +9,16 @@
  */
 #ifndef _FNORDMETRIC_MYSQLBACKEND_H
 #define _FNORDMETRIC_MYSQLBACKEND_H
-#include <fnordmetric/sql/backends/backend.h>
-#include <fnordmetric/sql/backends/mysql/mysqlconnection.h>
+#include <chartsql/backends/backend.h>
+#include <chartsql/backends/mysql/mysqlconnection.h>
 #include <memory>
 #include <mutex>
 #include <vector>
 
-namespace fnordmetric {
-namespace query {
+namespace csql {
 namespace mysql_backend {
 
-class MySQLBackend : public fnordmetric::query::Backend {
+class MySQLBackend : public csql::Backend {
 public:
 
   static MySQLBackend* singleton();
@@ -36,7 +35,6 @@ protected:
   std::mutex connections_mutex_;
 };
 
-}
 }
 }
 #endif

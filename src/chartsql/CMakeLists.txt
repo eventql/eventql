@@ -8,4 +8,34 @@
 
 add_library(chartsql-lib OBJECT
     svalue.cc
-    format.cc)
+    format.cc
+    areachartbuilder.cc
+    barchartbuilder.cc
+    domainconfig.cc
+    drawstatement.cc
+    linechartbuilder.cc
+    pointchartbuilder.cc
+    #queryendpoint.cc
+    query.cc
+    #queryservice.cc
+    seriesadapter.cc
+    backends/csv/csvbackend.cc
+    backends/csv/csvinputstream.cc
+    backends/csv/csvtableref.cc
+    backends/mysql/mysqlbackend.cc
+    backends/mysql/mysqlconnection.cc
+    backends/mysql/mysqltableref.cc
+    backends/metricservice/metrictableref.cc
+    backends/metricservice/metrictablerepository.cc
+    expressions/aggregate.cc
+    expressions/boolean.cc
+    expressions/datetime.cc
+    expressions/math.cc
+    parser/astnode.cc
+    parser/astutil.cc
+    parser/parser.cc
+    parser/token.cc
+    parser/tokenize.cc
+    runtime/compile.cc
+    runtime/defaultruntime.cc
+    runtime/execute.cc)

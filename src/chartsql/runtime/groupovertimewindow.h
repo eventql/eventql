@@ -16,14 +16,13 @@
 #include <string.h>
 #include <vector>
 #include <assert.h>
-#include <fnordmetric/sql/parser/astnode.h>
-#include <fnordmetric/sql/parser/token.h>
-#include <fnordmetric/sql/runtime/queryplannode.h>
-#include <fnordmetric/sql/runtime/symboltable.h>
-#include <fnordmetric/sql/runtime/compile.h>
+#include <chartsql/parser/astnode.h>
+#include <chartsql/parser/token.h>
+#include <chartsql/runtime/queryplannode.h>
+#include <chartsql/runtime/symboltable.h>
+#include <chartsql/runtime/compile.h>
 
-namespace fnordmetric {
-namespace query {
+namespace csql {
 
 class GroupOverTimewindow : public QueryPlanNode {
 public:
@@ -31,8 +30,8 @@ public:
   GroupOverTimewindow(
       std::vector<std::string>&& columns,
       CompiledExpression* time_expr,
-      fnordmetric::IntegerType window,
-      fnordmetric::IntegerType step,
+      SValue::IntegerType window,
+      SValue::IntegerType step,
       size_t input_row_size,
       size_t input_row_time_index,
       CompiledExpression* select_expr,
@@ -65,8 +64,8 @@ protected:
 
   std::vector<std::string> columns_;
   CompiledExpression* time_expr_;
-  fnordmetric::IntegerType window_;
-  fnordmetric::IntegerType step_;
+  SValue::IntegerType window_;
+  SValue::IntegerType step_;
   size_t input_row_size_;
   size_t input_row_time_index_;
   CompiledExpression* select_expr_;
@@ -77,6 +76,5 @@ protected:
   std::unordered_map<std::string, Group> groups_;
 };
 
-}
 }
 #endif

@@ -8,11 +8,10 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <stdlib.h>
-#include <fnordmetric/sql/expressions/aggregate.h>
-#include <fnordmetric/sql/svalue.h>
+#include <chartsql/expressions/aggregate.h>
+#include <chartsql/svalue.h>
 
-namespace fnordmetric {
-namespace query {
+namespace csql {
 namespace expressions {
 
 void countExpr(void* scratchpad, int argc, SValue* argv, SValue* out) {
@@ -199,6 +198,5 @@ size_t minExprScratchpadSize() {
   return sizeof(union min_expr_scratchpad);
 }
 
-}
 }
 }

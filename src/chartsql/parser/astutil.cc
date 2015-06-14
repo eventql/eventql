@@ -7,14 +7,13 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <fnordmetric/sql/parser/astnode.h>
-#include <fnordmetric/sql/parser/astutil.h>
-#include <fnordmetric/sql/parser/token.h>
-#include <fnordmetric/sql/runtime/tablerepository.h>
-#include <fnord-base/exception.h>
+#include <chartsql/parser/astnode.h>
+#include <chartsql/parser/astutil.h>
+#include <chartsql/parser/token.h>
+#include <chartsql/runtime/tablerepository.h>
+#include <fnord/exception.h>
 
-namespace fnordmetric {
-namespace query {
+namespace csql {
 
 std::vector<std::string> ASTUtil::columnNamesFromSelectList(
     ASTNode* select_list,
@@ -62,5 +61,4 @@ std::vector<std::string> ASTUtil::columnNamesFromSelectList(
   return column_names;
 }
 
-}
 }

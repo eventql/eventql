@@ -13,8 +13,7 @@
 #include "parser.h"
 #include "tokenize.h"
 
-namespace fnordmetric {
-namespace query {
+namespace csql {
 
 Parser::Parser() : root_(ASTNode::T_ROOT) {}
 
@@ -1020,5 +1019,4 @@ void Parser::debugPrint() const {
 }
 
 
-}
 }

@@ -12,10 +12,9 @@
 #include <stdlib.h>
 #include <vector>
 #include <string>
-#include <fnordmetric/sql/runtime/symboltable.h>
+#include <chartsql/runtime/symboltable.h>
 
-namespace fnordmetric {
-namespace query {
+namespace csql {
 class ASTNode;
 class SValue;
 
@@ -64,6 +63,5 @@ protected:
   SymbolTable* symbol_table_;
 };
 
-}
 }
 #endif

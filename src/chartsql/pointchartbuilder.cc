@@ -7,11 +7,10 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <fnordmetric/chartsql/pointchartbuilder.h>
-#include <fnordmetric/chartsql/drawstatement.h>
+#include <chartsql/pointchartbuilder.h>
+#include <chartsql/drawstatement.h>
 
-namespace fnordmetric {
-namespace query {
+namespace csql {
 
 PointChartBuilder::PointChartBuilder(
     fnord::chart::Canvas* canvas,
@@ -28,102 +27,102 @@ fnord::chart::Drawable* PointChartBuilder::findChartType() const {
   preconditionCheck();
 
   if (auto c = tryType2D<fnord::chart::PointChart2D<
-        fnordmetric::TimeType,
-        fnordmetric::TimeType>>())
+        SValue::TimeType,
+        SValue::TimeType>>())
     return c;
 
   if (auto c = tryType2D<fnord::chart::PointChart2D<
-        fnordmetric::TimeType,
-        fnordmetric::FloatType>>())
+        SValue::TimeType,
+        SValue::FloatType>>())
     return c;
 
   if (auto c = tryType2D<fnord::chart::PointChart2D<
-        fnordmetric::TimeType,
-        fnordmetric::StringType>>())
+        SValue::TimeType,
+        SValue::StringType>>())
     return c;
 
   if (auto c = tryType2D<fnord::chart::PointChart2D<
-        fnordmetric::FloatType,
-        fnordmetric::TimeType>>())
+        SValue::FloatType,
+        SValue::TimeType>>())
     return c;
 
   if (auto c = tryType2D<fnord::chart::PointChart2D<
-        fnordmetric::FloatType,
-        fnordmetric::FloatType>>())
+        SValue::FloatType,
+        SValue::FloatType>>())
     return c;
 
   if (auto c = tryType2D<fnord::chart::PointChart2D<
-        fnordmetric::FloatType,
-        fnordmetric::StringType>>())
+        SValue::FloatType,
+        SValue::StringType>>())
     return c;
 
   if (auto c = tryType2D<fnord::chart::PointChart2D<
-        fnordmetric::StringType,
-        fnordmetric::TimeType>>())
+        SValue::StringType,
+        SValue::TimeType>>())
     return c;
 
   if (auto c = tryType2D<fnord::chart::PointChart2D<
-        fnordmetric::StringType,
-        fnordmetric::FloatType>>())
+        SValue::StringType,
+        SValue::FloatType>>())
     return c;
 
   if (auto c = tryType2D<fnord::chart::PointChart2D<
-        fnordmetric::StringType,
-        fnordmetric::StringType>>())
+        SValue::StringType,
+        SValue::StringType>>())
     return c;
 
   if (auto c = tryType3D<fnord::chart::PointChart3D<
-        fnordmetric::TimeType,
-        fnordmetric::TimeType,
-        fnordmetric::FloatType>>())
+        SValue::TimeType,
+        SValue::TimeType,
+        SValue::FloatType>>())
     return c;
 
   if (auto c = tryType3D<fnord::chart::PointChart3D<
-        fnordmetric::TimeType,
-        fnordmetric::FloatType,
-        fnordmetric::FloatType>>())
+        SValue::TimeType,
+        SValue::FloatType,
+        SValue::FloatType>>())
     return c;
 
   if (auto c = tryType3D<fnord::chart::PointChart3D<
-        fnordmetric::TimeType,
-        fnordmetric::StringType,
-        fnordmetric::FloatType>>())
+        SValue::TimeType,
+        SValue::StringType,
+        SValue::FloatType>>())
     return c;
 
   if (auto c = tryType3D<fnord::chart::PointChart3D<
-        fnordmetric::FloatType,
-        fnordmetric::TimeType,
-        fnordmetric::FloatType>>())
+        SValue::FloatType,
+        SValue::TimeType,
+        SValue::FloatType>>())
     return c;
 
   if (auto c = tryType3D<fnord::chart::PointChart3D<
-        fnordmetric::FloatType,
-        fnordmetric::FloatType,
-        fnordmetric::FloatType>>())
+        SValue::FloatType,
+        SValue::FloatType,
+        SValue::FloatType>>())
     return c;
 
   if (auto c = tryType3D<fnord::chart::PointChart3D<
-        fnordmetric::FloatType,
-        fnordmetric::StringType,
-        fnordmetric::FloatType>>())
+        SValue::FloatType,
+        SValue::StringType,
+        SValue::FloatType>>())
     return c;
 
   if (auto c = tryType3D<fnord::chart::PointChart3D<
-        fnordmetric::StringType,
-        fnordmetric::TimeType,
-        fnordmetric::FloatType>>())
+        SValue::StringType,
+        SValue::TimeType,
+        SValue::FloatType>>())
     return c;
 
   if (auto c = tryType3D<fnord::chart::PointChart3D<
-        fnordmetric::StringType,
-        fnordmetric::FloatType,
-        fnordmetric::FloatType>>())
+        SValue::StringType,
+        SValue::FloatType,
+        SValue::FloatType>>())
     return c;
 
   if (auto c = tryType3D<fnord::chart::PointChart3D<
-        fnordmetric::StringType,
-        fnordmetric::StringType,
-        fnordmetric::FloatType>>())
+        SValue::StringType,
+        SValue::StringType,
+        SValue::FloatType>>())
     return c;
 
   invalidType();
@@ -139,5 +138,4 @@ void PointChartBuilder::setLabels(fnord::chart::PointChart* chart) const {
   chart->setLabels(prop != nullptr);
 }
 
-}
 }

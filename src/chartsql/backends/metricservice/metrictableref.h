@@ -10,21 +10,20 @@
 #ifndef _FNORDMETRIC_METRICDB_METRICTABLEREF_H
 #define _FNORDMETRIC_METRICDB_METRICTABLEREF_H
 #include <fnord-metricdb/metric.h>
-#include <fnordmetric/sql/backends/tableref.h>
+#include <chartsql/backends/tableref.h>
 #include <stdlib.h>
 #include <string>
 #include <memory>
 
-namespace fnordmetric {
-namespace query {
+namespace csql {
 
-class MetricTableRef : public query::TableRef {
+class MetricTableRef : public csql::TableRef {
 public:
   MetricTableRef(fnord::metric_service::IMetric* metric);
 
   int getColumnIndex(const std::string& name) override;
   std::string getColumnName(int index) override;
-  void executeScan(query::TableScan* scan) override;
+  void executeScan(csql::TableScan* scan) override;
   std::vector<std::string> columns() override;
 
 protected:
@@ -32,6 +31,5 @@ protected:
   std::vector<std::string> fields_;
 };
 
-}
 }
 #endif

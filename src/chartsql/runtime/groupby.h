@@ -14,14 +14,13 @@
 #include <string.h>
 #include <vector>
 #include <assert.h>
-#include <fnordmetric/sql/parser/astnode.h>
-#include <fnordmetric/sql/parser/token.h>
-#include <fnordmetric/sql/runtime/queryplannode.h>
-#include <fnordmetric/sql/runtime/symboltable.h>
-#include <fnordmetric/sql/runtime/compile.h>
+#include <chartsql/parser/astnode.h>
+#include <chartsql/parser/token.h>
+#include <chartsql/runtime/queryplannode.h>
+#include <chartsql/runtime/symboltable.h>
+#include <chartsql/runtime/compile.h>
 
-namespace fnordmetric {
-namespace query {
+namespace csql {
 
 class GroupBy : public QueryPlanNode {
 public:
@@ -131,6 +130,5 @@ protected:
   std::unordered_map<std::string, Group> groups_;
 };
 
-}
 }
 #endif

@@ -7,13 +7,12 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <fnordmetric/sql/parser/token.h>
-#include <fnord-base/exception.h>
-#include <fnord-base/inspect.h>
+#include <chartsql/parser/token.h>
+#include <fnord/exception.h>
+#include <fnord/inspect.h>
 #include <string.h>
 
-namespace fnordmetric {
-namespace query {
+namespace csql {
 
 Token::Token(kTokenType token_type) :
     type_(token_type) {}
@@ -171,23 +170,22 @@ const std::string Token::getString() const {
   return str_;
 }
 
-} // namespace query
-} // namespace fnordmetric
+} // namespace csql
 
 namespace fnord {
 
 template <>
 std::string inspect<
-    fnordmetric::query::Token::kTokenType>(
-    const fnordmetric::query::Token::kTokenType& value) {
-  return fnordmetric::query::Token::getTypeName(value);
+    csql::Token::kTokenType>(
+    const csql::Token::kTokenType& value) {
+  return csql::Token::getTypeName(value);
 }
 
 template <>
 std::string inspect<
-    fnordmetric::query::Token>(
-    const fnordmetric::query::Token& value) {
-  return fnordmetric::query::Token::getTypeName(value.getType());
+    csql::Token>(
+    const csql::Token& value) {
+  return csql::Token::getTypeName(value.getType());
 }
 
 } // namespace fnord

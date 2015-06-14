@@ -10,11 +10,11 @@
 
 #ifndef _FNORDMETRIC_CLI_H
 #define _FNORDMETRIC_CLI_H
-#include <fnord-base/exception.h>
+#include <fnord/exception.h>
 #include <fnord/io/outputstream.h>
-#include <fnordmetric/chartsql/queryservice.h>
+#include <chartsql/queryservice.h>
 
-namespace fnordmetric {
+namespace csql {
 class Environment;
 namespace cli {
 class FlagParser;
@@ -41,10 +41,9 @@ protected:
 
   static void printUsage();
 
-  static const query::QueryService::kFormat getOutputFormat(Environment* env);
+  static const csql::QueryService::kFormat getOutputFormat(Environment* env);
 
 };
 
-}
 }
 #endif

@@ -10,14 +10,15 @@
 #ifndef _FNORDMETRIC_METRICDB_HTTPINTERFACE_H
 #define _FNORDMETRIC_METRICDB_HTTPINTERFACE_H
 #include <memory>
-#include <fnord-base/uri.h>
+#include <fnord/uri.h>
 #include <fnord-http/httpservice.h>
 #include <fnord-http/httprequest.h>
 #include <fnord-http/httpresponse.h>
-#include <fnord-json/jsonoutputstream.h>
+}
+#include <fnord/json/jsonoutputstream.h>
 
 using namespace fnord;
-namespace fnordmetric {
+namespace csql {
 class IMetric;
 class IMetricRepository;
 

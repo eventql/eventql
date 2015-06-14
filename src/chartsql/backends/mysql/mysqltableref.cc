@@ -7,11 +7,10 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <fnordmetric/sql/backends/mysql/mysqltableref.h>
-#include <fnordmetric/sql/runtime/tablescan.h>
+#include <chartsql/backends/mysql/mysqltableref.h>
+#include <chartsql/runtime/tablescan.h>
 
-namespace fnordmetric {
-namespace query {
+namespace csql {
 namespace mysql_backend {
 
 MySQLTableRef::MySQLTableRef(
@@ -85,6 +84,5 @@ void MySQLTableRef::executeScan(TableScan* scan) {
       });
 }
 
-}
 }
 }

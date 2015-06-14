@@ -13,8 +13,7 @@
 #include <vector>
 #include "token.h"
 
-namespace fnordmetric {
-namespace query {
+namespace csql {
 
 void tokenizeQuery(
     const char** cur,
@@ -25,6 +24,5 @@ void tokenizeQuery(
     const std::string& query,
     std::vector<Token>* token_list);
 
-}
 }
 #endif

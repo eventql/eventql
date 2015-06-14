@@ -11,16 +11,15 @@
 #ifndef _FNORDMETRIC_QUERY_DRAWSTATEMENT_H
 #define _FNORDMETRIC_QUERY_DRAWSTATEMENT_H
 #include <stdlib.h>
-#include <fnordmetric/sql/runtime/compile.h>
-#include <fnordmetric/sql/runtime/execute.h>
-#include <fnordmetric/sql/runtime/queryplannode.h>
-#include <fnordmetric/sql/runtime/resultlist.h>
-#include <fnord-base/exception.h>
+#include <chartsql/runtime/compile.h>
+#include <chartsql/runtime/execute.h>
+#include <chartsql/runtime/queryplannode.h>
+#include <chartsql/runtime/resultlist.h>
+#include <fnord/exception.h>
 #include <fnord-chart/canvas.h>
 #include <fnord-chart/drawable.h>
 
-namespace fnordmetric {
-namespace query {
+namespace csql {
 
 class DrawStatement {
 public:
@@ -62,6 +61,5 @@ protected:
   Compiler* compiler_;
 };
 
-}
 }
 #endif

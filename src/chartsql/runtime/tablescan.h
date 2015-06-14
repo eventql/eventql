@@ -13,16 +13,15 @@
 #include <string>
 #include <vector>
 #include <assert.h>
-#include <fnordmetric/sql/parser/token.h>
-#include <fnordmetric/sql/parser/astnode.h>
-#include <fnordmetric/sql/runtime/queryplannode.h>
-#include <fnordmetric/sql/runtime/tablerepository.h>
-#include <fnordmetric/sql/runtime/compile.h>
-#include <fnordmetric/sql/runtime/execute.h>
-#include <fnord-base/exception.h>
+#include <chartsql/parser/token.h>
+#include <chartsql/parser/astnode.h>
+#include <chartsql/runtime/queryplannode.h>
+#include <chartsql/runtime/tablerepository.h>
+#include <chartsql/runtime/compile.h>
+#include <chartsql/runtime/execute.h>
+#include <fnord/exception.h>
 
-namespace fnordmetric {
-namespace query {
+namespace csql {
 
 class TableScan : public QueryPlanNode {
 public:
@@ -53,6 +52,5 @@ protected:
   CompiledExpression* const where_expr_;
 };
 
-}
 }
 #endif

@@ -9,10 +9,9 @@
  */
 #ifndef _FNORDMETRIC_SQLEXTENSIONS_BARCHARTBUILDER_H
 #define _FNORDMETRIC_SQLEXTENSIONS_BARCHARTBUILDER_H
-#include <fnordmetric/chartsql/chartbuilder.h>
+#include <chartsql/chartbuilder.h>
 
-namespace fnordmetric {
-namespace query {
+namespace csql {
 class DrawStatement;
 
 class BarChartBuilder : public ChartBuilder {
@@ -27,6 +26,5 @@ protected:
   void setLabels(fnord::chart::BarChart* chart) const;
 };
 
-}
 }
 #endif

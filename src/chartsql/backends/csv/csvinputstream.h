@@ -13,10 +13,9 @@
 #include <string>
 #include <vector>
 #include <memory>
-#include "fnord-base/io/inputstream.h"
+#include "fnord/io/inputstream.h"
 
-namespace fnordmetric {
-namespace query {
+namespace csql {
 namespace csv_backend {
 
 class CSVInputStream {
@@ -78,7 +77,6 @@ protected:
   const char quote_char_;
 };
 
-}
 }
 }
 #endif

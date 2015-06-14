@@ -7,10 +7,9 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <fnordmetric/sql/runtime/queryplan.h>
+#include <chartsql/runtime/queryplan.h>
 
-namespace fnordmetric {
-namespace query {
+namespace csql {
 
 QueryPlan::QueryPlan(TableRepository* table_repo) : table_repo_(table_repo) {}
 
