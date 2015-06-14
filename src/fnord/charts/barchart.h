@@ -11,15 +11,15 @@
 #define _FNORDMETRIC_BARCHART_H
 #include <stdlib.h>
 #include <memory>
-#include "fnord-chart/axisdefinition.h"
-#include "fnord-chart/canvas.h"
-#include "fnord-chart/colorpalette.h"
-#include "fnord-chart/domain.h"
-#include "fnord-chart/continuousdomain.h"
-#include "fnord-chart/discretedomain.h"
-#include "fnord-chart/drawable.h"
-#include "fnord-chart/rendertarget.h"
-#include "fnord-chart/seriesjoin.h"
+#include "fnord/charts/axisdefinition.h"
+#include "fnord/charts/canvas.h"
+#include "fnord/charts/colorpalette.h"
+#include "fnord/charts/domain.h"
+#include "fnord/charts/continuousdomain.h"
+#include "fnord/charts/discretedomain.h"
+#include "fnord/charts/drawable.h"
+#include "fnord/charts/rendertarget.h"
+#include "fnord/charts/seriesjoin.h"
 #include <fnord/exception.h>
 
 namespace fnord {
