@@ -42,4 +42,3 @@ const std::vector<std::string>& ImportStatement::tables() const {
 }
 
 }
-}

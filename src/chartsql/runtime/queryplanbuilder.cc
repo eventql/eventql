@@ -677,4 +677,3 @@ void QueryPlanBuilder::extend(
 }
 
 }
-}

@@ -99,4 +99,3 @@ size_t SymbolTableEntry::getScratchpadSize() const {
 }
 
 }
-}
