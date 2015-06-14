@@ -16,8 +16,8 @@
 #include "fnord/stats/statsd.h"
 #include "fnord/json/jsonrpc.h"
 #include "fnord/json/jsonrpchttpadapter.h"
-#include "fnord-metricdb/metricservice.h"
-#include "fnord-metricdb/httpapiservlet.h"
+#include "metricd/metricservice.h"
+#include "metricd/httpapiservlet.h"
 #include "fnord/thread/threadpool.h"
 
 using fnord::http::HTTPServer;

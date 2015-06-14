@@ -10,8 +10,8 @@
 #include <fnord/exception.h>
 #include <fnord/wallclock.h>
 #include <fnord/protobuf/msg.h>
-#include <fnord-metricdb/backends/tsdb/metric.h>
-#include <fnord-metricdb/Sample.pb.h>
+#include <metricd/backends/tsdb/metric.h>
+#include <metricd/Sample.pb.h>
 
 namespace fnord {
 namespace metric_service {

@@ -9,8 +9,8 @@
  */
 #include <unistd.h>
 #include <fnord/wallclock.h>
-#include <fnord-metricdb/backends/disk/compactiontask.h>
-#include <fnord-metricdb/backends/disk/metricrepository.h>
+#include <metricd/backends/disk/compactiontask.h>
+#include <metricd/backends/disk/metricrepository.h>
 
 using fnord::WallClock;
 
