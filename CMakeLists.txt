@@ -56,6 +56,9 @@ include_directories(${INVENTORYD_INCLUDE})
 add_subdirectory(app/logjoind)
 include_directories(${LOGJOIND_INCLUDE})
 
+add_subdirectory(app/metricd)
+include_directories(${METRICD_INCLUDE})
+
 add_subdirectory(app/chartsql)
 include_directories(${CHARTSQL_INCLUDE})
 
