@@ -7,12 +7,11 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <fnordmetric/sql/runtime/runtime.h>
-#include <fnordmetric/sql/runtime/resultlist.h>
-#include <fnordmetric/sql/backends/csv/csvbackend.h>
+#include <chartsql/runtime/runtime.h>
+#include <chartsql/runtime/resultlist.h>
+#include <chartsql/backends/csv/csvbackend.h>
 
-namespace fnordmetric {
-namespace query {
+namespace csql {
 
 Runtime::Runtime() :
     compiler_(&symbol_table_),

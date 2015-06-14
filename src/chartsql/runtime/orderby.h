@@ -13,12 +13,11 @@
 #include <string>
 #include <string.h>
 #include <vector>
-#include <fnordmetric/sql/parser/astnode.h>
-#include <fnordmetric/sql/parser/token.h>
-#include <fnordmetric/sql/runtime/queryplannode.h>
+#include <chartsql/parser/astnode.h>
+#include <chartsql/parser/token.h>
+#include <chartsql/runtime/queryplannode.h>
 
-namespace fnordmetric {
-namespace query {
+namespace csql {
 
 class OrderBy : public QueryPlanNode {
 public:
@@ -45,6 +44,5 @@ protected:
   std::vector<std::vector<SValue>> rows_;
 };
 
-}
 }
 #endif

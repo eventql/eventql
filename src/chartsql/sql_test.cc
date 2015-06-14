@@ -10,24 +10,24 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <fnordmetric/sql/backends/csv/csvbackend.h>
-#include <fnordmetric/sql/backends/csv/csvtableref.h>
-#include <fnordmetric/sql/backends/tableref.h>
-#include <fnordmetric/sql/parser/parser.h>
-#include <fnordmetric/sql/parser/token.h>
-#include <fnordmetric/sql/parser/tokenize.h>
-#include <fnordmetric/sql/runtime/defaultruntime.h>
-#include <fnordmetric/sql/runtime/queryplannode.h>
-#include <fnordmetric/sql/runtime/resultlist.h>
-#include <fnordmetric/sql/runtime/tablescan.h>
-#include <fnordmetric/sql/runtime/tablerepository.h>
+#include <chartsql/backends/csv/csvbackend.h>
+#include <chartsql/backends/csv/csvtableref.h>
+#include <chartsql/backends/tableref.h>
+#include <chartsql/parser/parser.h>
+#include <chartsql/parser/token.h>
+#include <chartsql/parser/tokenize.h>
+#include <chartsql/runtime/defaultruntime.h>
+#include <chartsql/runtime/queryplannode.h>
+#include <chartsql/runtime/resultlist.h>
+#include <chartsql/runtime/tablescan.h>
+#include <chartsql/runtime/tablerepository.h>
 #include <ui/canvas.h>
 #include <ui/svgtarget.h>
 #include <util/datetime.h>
 #include <util/inputstream.h>
 #include <util/outputstream.h>
 #include <util/unittest.h>
-#include <fnord-base/exception.h>
+#include <fnord/exception.h>
 
 using namespace fnordmetric::query;
 
@@ -110,7 +110,7 @@ class TestTimeTableRef : public TableRef {
       }
 
       row.emplace_back(fnord::util::DateTime(start_time + 1000000 * i));
-      row.emplace_back(SValue((fnordmetric::IntegerType) i));
+      row.emplace_back(SValue((SValue::IntegerType) i));
       if (!scan->nextRow(row.data(), row.size())) {
         return;
       }
@@ -1272,7 +1272,7 @@ TEST_CASE(SQLTest, TestNumericConversion, [] () {
   {
     SValue val("42");
     EXPECT_EQ(val.getType(), SValue::T_STRING);
-    EXPECT(val.testType<fnordmetric::IntegerType>());
+    EXPECT(val.testType<SValue::IntegerType>());
     EXPECT(val.tryNumericConversion());
     EXPECT_EQ(val.getInteger(), 42);
   }
@@ -1280,7 +1280,7 @@ TEST_CASE(SQLTest, TestNumericConversion, [] () {
   {
     SValue val("1415912541648");
     EXPECT_EQ(val.getType(), SValue::T_STRING);
-    EXPECT(val.testType<fnordmetric::IntegerType>());
+    EXPECT(val.testType<SValue::IntegerType>());
     EXPECT(val.tryNumericConversion());
     EXPECT_EQ(val.getInteger(), 1415912541648lu);
   }

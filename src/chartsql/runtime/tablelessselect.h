@@ -12,15 +12,14 @@
 #include <stdlib.h>
 #include <string>
 #include <vector>
-#include <fnordmetric/sql/parser/astutil.h>
-#include <fnordmetric/sql/parser/astnode.h>
-#include <fnordmetric/sql/parser/token.h>
-#include <fnordmetric/sql/runtime/queryplannode.h>
-#include <fnordmetric/sql/runtime/compile.h>
-#include <fnordmetric/sql/runtime/execute.h>
+#include <chartsql/parser/astutil.h>
+#include <chartsql/parser/astnode.h>
+#include <chartsql/parser/token.h>
+#include <chartsql/runtime/queryplannode.h>
+#include <chartsql/runtime/compile.h>
+#include <chartsql/runtime/execute.h>
 
-namespace fnordmetric {
-namespace query {
+namespace csql {
 
 class TablelessSelect : public QueryPlanNode {
 public:
@@ -79,6 +78,5 @@ protected:
   CompiledExpression* expression_;
 };
 
-}
 }
 #endif

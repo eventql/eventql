@@ -10,24 +10,22 @@
 #ifndef _FNORDMETRIC_METRICDB_METRICTABLEREPOSITORY_H
 #define _FNORDMETRIC_METRICDB_METRICTABLEREPOSITORY_H
 #include <fnord-metricdb/metricrepository.h>
-#include <fnordmetric/sql/runtime/tablerepository.h>
+#include <chartsql/runtime/tablerepository.h>
 #include <memory>
 #include <mutex>
 #include <vector>
 
-namespace fnordmetric {
-namespace query {
+namespace csql {
 
 class MetricTableRepository : public TableRepository {
 public:
 
   MetricTableRepository(fnord::metric_service::IMetricRepository* metric_repo);
-  query::TableRef* getTableRef(const std::string& table_name) const override;
+  csql::TableRef* getTableRef(const std::string& table_name) const override;
 
 protected:
   fnord::metric_service::IMetricRepository* metric_repo_;
 };
 
-}
 }
 #endif

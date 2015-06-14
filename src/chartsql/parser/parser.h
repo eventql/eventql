@@ -13,12 +13,11 @@
 #include <string>
 #include <vector>
 #include <memory>
-#include <fnord-base/exception.h>
-#include <fnordmetric/sql/parser/token.h>
-#include <fnordmetric/sql/parser/astnode.h>
+#include <fnord/exception.h>
+#include <chartsql/parser/token.h>
+#include <chartsql/parser/astnode.h>
 
-namespace fnordmetric {
-namespace query {
+namespace csql {
 
 /**
  * todo: subqueries, limit/offset, join, union
@@ -191,6 +190,5 @@ protected:
   ASTNode root_;
 };
 
-}
 }
 #endif

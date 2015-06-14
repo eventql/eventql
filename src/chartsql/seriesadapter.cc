@@ -7,12 +7,11 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <fnordmetric/sql/runtime/resultlist.h>
-#include <fnordmetric/chartsql/seriesadapter.h>
-#include <fnord-base/exception.h>
+#include <chartsql/runtime/resultlist.h>
+#include <chartsql/seriesadapter.h>
+#include <fnord/exception.h>
 
-namespace fnordmetric {
-namespace query {
+namespace csql {
 
 AnySeriesAdapter::AnySeriesAdapter(
     int name_ind,
@@ -46,5 +45,4 @@ void AnySeriesAdapter::copyToResultList(SValue* row, int row_len) {
   }
 }
 
-}
 }

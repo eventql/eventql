@@ -14,11 +14,10 @@
 #include <unordered_map>
 #include <memory>
 #include <vector>
-#include <fnordmetric/sql/backends/backend.h>
-#include <fnordmetric/sql/backends/tableref.h>
+#include <chartsql/backends/backend.h>
+#include <chartsql/backends/tableref.h>
 
-namespace fnordmetric {
-namespace query {
+namespace csql {
 class ImportStatement;
 
 class TableRepository {
@@ -44,6 +43,5 @@ protected:
   std::unordered_map<std::string, std::unique_ptr<TableRef>> table_refs_;
 };
 
-}
 }
 #endif

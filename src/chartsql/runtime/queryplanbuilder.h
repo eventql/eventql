@@ -14,13 +14,12 @@
 #include <string>
 #include <vector>
 #include <assert.h>
-#include <fnordmetric/sql/parser/token.h>
-#include <fnordmetric/sql/parser/astnode.h>
-#include <fnordmetric/sql/runtime/queryplan.h>
-#include <fnordmetric/sql/runtime/compile.h>
+#include <chartsql/parser/token.h>
+#include <chartsql/parser/astnode.h>
+#include <chartsql/runtime/queryplan.h>
+#include <chartsql/runtime/compile.h>
 
-namespace fnordmetric {
-namespace query {
+namespace csql {
 class QueryPlanNode;
 class TableRepository;
 class Runtime;
@@ -142,6 +141,5 @@ protected:
   std::vector<std::unique_ptr<QueryPlanBuilderInterface>> extensions_;
 };
 
-}
 }
 #endif

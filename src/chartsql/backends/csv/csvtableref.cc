@@ -10,15 +10,14 @@
 
 #include <memory>
 #include <string.h>
-#include <fnordmetric/sql/parser/astnode.h>
-#include <fnordmetric/sql/backends/csv/csvtableref.h>
-#include <fnordmetric/sql/backends/csv/csvinputstream.h>
-#include <fnordmetric/sql/runtime/tablescan.h>
-#include <fnordmetric/sql/svalue.h>
-#include <fnord-base/exception.h>
+#include <chartsql/parser/astnode.h>
+#include <chartsql/backends/csv/csvtableref.h>
+#include <chartsql/backends/csv/csvinputstream.h>
+#include <chartsql/runtime/tablescan.h>
+#include <chartsql/svalue.h>
+#include <fnord/exception.h>
 
-namespace fnordmetric {
-namespace query {
+namespace csql {
 namespace csv_backend {
 
 CSVTableRef::CSVTableRef(
@@ -184,6 +183,5 @@ void CSVTableRef::rewind() {
   }
 }
 
-}
 }
 }

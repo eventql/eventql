@@ -10,13 +10,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include <vector>
-#include <fnordmetric/sql/parser/astnode.h>
-#include <fnordmetric/sql/runtime/compile.h>
-#include <fnordmetric/sql/svalue.h>
-#include <fnord-base/exception.h>
+#include <chartsql/parser/astnode.h>
+#include <chartsql/runtime/compile.h>
+#include <chartsql/svalue.h>
+#include <fnord/exception.h>
 
-namespace fnordmetric {
-namespace query {
+namespace csql {
 
 bool executeExpression(
     CompiledExpression* expr,
@@ -121,5 +120,4 @@ SValue executeSimpleConstExpression(Compiler* compiler, ASTNode* expr) {
   return eval_result;
 }
 
-}
 }

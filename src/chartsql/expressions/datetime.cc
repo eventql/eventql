@@ -11,11 +11,10 @@
 #include <assert.h>
 #include <math.h>
 #include <string.h>
-#include <fnordmetric/sql/expressions/datetime.h>
-#include <fnordmetric/sql/svalue.h>
+#include <chartsql/expressions/datetime.h>
+#include <chartsql/svalue.h>
 
-namespace fnordmetric {
-namespace query {
+namespace csql {
 namespace expressions {
 
 static void checkArgs(const char* symbol, int argc, int argc_expected) {
@@ -41,6 +40,5 @@ void fromTimestamp(
   *out = SValue(tmp.getTimestamp());
 }
 
-}
 }
 }

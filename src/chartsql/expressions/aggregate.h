@@ -9,10 +9,9 @@
  */
 #ifndef _FNORDMETRIC_SQL_EXPRESSIONS_AGGREGATE_H
 #define _FNORDMETRIC_SQL_EXPRESSIONS_AGGREGATE_H
-#include <fnordmetric/sql/svalue.h>
+#include <chartsql/svalue.h>
 
-namespace fnordmetric {
-namespace query {
+namespace csql {
 namespace expressions {
 
 void countExpr(void* scratchpad, int argc, SValue* argv, SValue* out);
@@ -35,7 +34,6 @@ void maxExpr(void* scratchpad, int argc, SValue* argv, SValue* out);
 void maxExprFree(void* scratchpad);
 size_t maxExprScratchpadSize();
 
-}
 }
 }
 #endif

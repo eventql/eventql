@@ -12,10 +12,9 @@
 #include <assert.h>
 #include <string>
 #include "symboltable.h"
-#include <fnord-base/exception.h>
+#include <fnord/exception.h>
 
-namespace fnordmetric {
-namespace query {
+namespace csql {
 
 void SymbolTable::registerSymbol(
     const std::string& symbol,

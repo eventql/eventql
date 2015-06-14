@@ -9,18 +9,17 @@
  */
 #include <stdlib.h>
 #include <string.h>
-#include <fnordmetric/chartsql/query.h>
-#include <fnordmetric/sql/parser/astnode.h>
-#include <fnordmetric/sql/parser/parser.h>
-#include <fnordmetric/sql/runtime/queryplanbuilder.h>
-#include <fnordmetric/sql/runtime/resultlist.h>
-#include <fnordmetric/sql/runtime/tablerepository.h>
-#include <fnordmetric/sql/runtime/importstatement.h>
-#include <fnordmetric/chartsql/drawstatement.h>
-#include <fnord-base/exception.h>
+#include <chartsql/query.h>
+#include <chartsql/parser/astnode.h>
+#include <chartsql/parser/parser.h>
+#include <chartsql/runtime/queryplanbuilder.h>
+#include <chartsql/runtime/resultlist.h>
+#include <chartsql/runtime/tablerepository.h>
+#include <chartsql/runtime/importstatement.h>
+#include <chartsql/drawstatement.h>
+#include <fnord/exception.h>
 
-namespace fnordmetric {
-namespace query {
+namespace csql {
 
 Query::Query(
     const char* query_string,
@@ -48,11 +47,11 @@ Query::Query(
 
   for (const auto& stmt : statements) {
     switch (stmt->getType()) {
-      case query::ASTNode::T_DRAW:
+      case csql::ASTNode::T_DRAW:
         draw_statements_.back().emplace_back(
             new DrawStatement(stmt.get(), runtime->compiler()));
         break;
-      case query::ASTNode::T_SELECT:
+      case csql::ASTNode::T_SELECT:
         statements_.emplace_back(
             std::unique_ptr<QueryPlanNode>(
                 runtime_->queryPlanBuilder()->buildQueryPlan(
@@ -60,7 +59,7 @@ Query::Query(
             draw_statements_.back().empty() ?
                 nullptr : draw_statements_.back().back().get());
         break;
-      case query::ASTNode::T_IMPORT:
+      case csql::ASTNode::T_IMPORT:
         table_repo_->import(
             ImportStatement(stmt.get(), runtime_->compiler()),
             runtime_->backends());
@@ -122,5 +121,4 @@ fnord::chart::Canvas* Query::getChart(size_t index) const {
   return charts_[index].get();
 }
 
-}
 }

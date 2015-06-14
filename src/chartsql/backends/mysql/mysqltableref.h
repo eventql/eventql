@@ -10,11 +10,10 @@
 #ifndef _FNORDMETRIC_MYSQLBACKEND_MYSQLTABLEREF_H
 #define _FNORDMETRIC_MYSQLBACKEND_MYSQLTABLEREF_H
 #include <memory>
-#include <fnordmetric/sql/backends/mysql/mysqlconnection.h>
-#include <fnordmetric/sql/backends/tableref.h>
+#include <chartsql/backends/mysql/mysqlconnection.h>
+#include <chartsql/backends/tableref.h>
 
-namespace fnordmetric {
-namespace query {
+namespace csql {
 namespace mysql_backend {
 
 class MySQLTableRef : public TableRef {
@@ -36,7 +35,6 @@ protected:
   std::vector<std::string*> columns_;
 };
 
-}
 }
 }
 #endif

@@ -7,7 +7,7 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <fnord-base/stringutil.h>
+#include <fnord/stringutil.h>
 #include <fnord-metricdb/metricrepository.h>
 #include "fnordmetric/environment.h"
 #include "fnordmetric/chartsql/queryendpoint.h"
@@ -15,9 +15,9 @@
 #include "fnordmetric/sql/backends/metricservice/metrictablerepository.h"
 #include "fnordmetric/sql/backends/csv/csvbackend.h"
 #include "fnordmetric/sql/backends/mysql/mysqlbackend.h"
-#include <fnordmetric/sql/backends/crate/cratebackend.h>
+#include <chartsql/backends/crate/cratebackend.h>
 
-namespace fnordmetric {
+namespace csql {
 
 static const char kMetricsUrl[] = "/metrics";
 static const char kMetricsUrlPrefix[] = "/metrics/";
@@ -50,39 +50,39 @@ void QueryEndpoint::handleHTTPRequest(
   std::shared_ptr<fnord::OutputStream> output_stream =
       response->getBodyOutputStream();
 
-  query::QueryService query_service;
-  std::unique_ptr<query::TableRepository> table_repo(
-      new query::MetricTableRepository(metric_repo_));
+  csql::QueryService query_service;
+  std::unique_ptr<csql::TableRepository> table_repo(
+      new csql::MetricTableRepository(metric_repo_));
 
   if (!env()->flags()->isSet("disable_external_sources")) {
     query_service.registerBackend(
-        std::unique_ptr<fnordmetric::query::Backend>(
-            new fnordmetric::query::mysql_backend::MySQLBackend));
+        std::unique_ptr<csql::Backend>(
+            new csql::mysql_backend::MySQLBackend));
 
     query_service.registerBackend(
-        std::unique_ptr<fnordmetric::query::Backend>(
-            new fnordmetric::query::csv_backend::CSVBackend));
+        std::unique_ptr<csql::Backend>(
+            new csql::csv_backend::CSVBackend));
 
     query_service.registerBackend(
-        std::unique_ptr<fnordmetric::query::Backend>(
-            new fnordmetric::query::crate_backend::CrateBackend));
+        std::unique_ptr<csql::Backend>(
+            new csql::crate_backend::CrateBackend));
   }
 
-  query::QueryService::kFormat resp_format = query::QueryService::FORMAT_JSON;
+  csql::QueryService::kFormat resp_format = csql::QueryService::FORMAT_JSON;
   std::string format_param;
   if (fnord::URI::getParam(params, "format", &format_param)) {
     if (format_param == "svg") {
-      resp_format = query::QueryService::FORMAT_SVG;
+      resp_format = csql::QueryService::FORMAT_SVG;
     }
   }
 
   response->setStatus(http::kStatusOK);
 
   switch (resp_format) {
-    case query::QueryService::FORMAT_JSON:
+    case csql::QueryService::FORMAT_JSON:
       response->addHeader("Content-Type", "application/json; charset=utf-8");
       break;
-    case query::QueryService::FORMAT_SVG:
+    case csql::QueryService::FORMAT_SVG:
       response->addHeader("Content-Type", "text/html; charset=utf-8");
       break;
     default:

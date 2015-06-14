@@ -13,14 +13,13 @@
 #include <string>
 #include <vector>
 #include <memory>
-#include <fnordmetric/sql/parser/astnode.h>
-#include <fnordmetric/sql/parser/parser.h>
-#include <fnordmetric/sql/runtime/compile.h>
-#include <fnordmetric/sql/runtime/queryplan.h>
-#include <fnordmetric/sql/runtime/queryplanbuilder.h>
+#include <chartsql/parser/astnode.h>
+#include <chartsql/parser/parser.h>
+#include <chartsql/runtime/compile.h>
+#include <chartsql/runtime/queryplan.h>
+#include <chartsql/runtime/queryplanbuilder.h>
 
-namespace fnordmetric {
-namespace query {
+namespace csql {
 class ResultList;
 
 /**
@@ -45,6 +44,5 @@ protected:
   QueryPlanBuilder query_plan_builder_;
 };
 
-}
 }
 #endif

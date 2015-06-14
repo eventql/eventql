@@ -12,19 +12,18 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <unordered_map>
-#include <fnord-base/exception.h>
+#include <fnord/exception.h>
 #include <fnord-chart/canvas.h>
 #include <fnord-chart/barchart.h>
 #include <fnord-chart/series.h>
-#include <fnordmetric/sql/runtime/compile.h>
-#include <fnordmetric/sql/runtime/execute.h>
-#include <fnordmetric/sql/runtime/rowsink.h>
-#include <fnordmetric/sql/runtime/resultlist.h>
-#include <fnordmetric/sql/runtime/queryplannode.h>
-#include <fnordmetric/chartsql/seriesadapter.h>
+#include <chartsql/runtime/compile.h>
+#include <chartsql/runtime/execute.h>
+#include <chartsql/runtime/rowsink.h>
+#include <chartsql/runtime/resultlist.h>
+#include <chartsql/runtime/queryplannode.h>
+#include <chartsql/seriesadapter.h>
 
-namespace fnordmetric {
-namespace query {
+namespace csql {
 class DrawStatement;
 
 class ChartBuilder : public RowSink {
@@ -129,9 +128,9 @@ protected:
 
   AnySeriesAdapter* mkSeriesAdapter(SValue* row) {
     AnySeriesAdapter* a = nullptr;
-    if (!a) a = mkSeriesAdapter1D<fnordmetric::TimeType>(row);
-    if (!a) a = mkSeriesAdapter1D<fnordmetric::FloatType>(row);
-    if (!a) a = mkSeriesAdapter1D<fnordmetric::StringType>(row);
+    if (!a) a = mkSeriesAdapter1D<SValue::TimeType>(row);
+    if (!a) a = mkSeriesAdapter1D<SValue::FloatType>(row);
+    if (!a) a = mkSeriesAdapter1D<SValue::StringType>(row);
 
     if (a == nullptr) {
       RAISE(kRuntimeError, "can't build seriesadapter");
@@ -151,9 +150,9 @@ protected:
     }
 
     AnySeriesAdapter* a = nullptr;
-    if (!a) a = mkSeriesAdapter2D<TX, fnordmetric::TimeType>(row);
-    if (!a) a = mkSeriesAdapter2D<TX, fnordmetric::FloatType>(row);
-    if (!a) a = mkSeriesAdapter2D<TX, fnordmetric::StringType>(row);
+    if (!a) a = mkSeriesAdapter2D<TX, SValue::TimeType>(row);
+    if (!a) a = mkSeriesAdapter2D<TX, SValue::FloatType>(row);
+    if (!a) a = mkSeriesAdapter2D<TX, SValue::StringType>(row);
     return a;
   }
 
@@ -172,9 +171,9 @@ protected:
     }
 
     AnySeriesAdapter* a = nullptr;
-    if (!a) a = mkSeriesAdapter3D<TX, TY, fnordmetric::TimeType>(row);
-    if (!a) a = mkSeriesAdapter3D<TX, TY, fnordmetric::FloatType>(row);
-    if (!a) a = mkSeriesAdapter3D<TX, TY, fnordmetric::StringType>(row);
+    if (!a) a = mkSeriesAdapter3D<TX, TY, SValue::TimeType>(row);
+    if (!a) a = mkSeriesAdapter3D<TX, TY, SValue::FloatType>(row);
+    if (!a) a = mkSeriesAdapter3D<TX, TY, SValue::StringType>(row);
     return a;
   }
 
@@ -253,6 +252,5 @@ protected:
 };
 
 
-}
 }
 #endif

@@ -14,8 +14,7 @@
 #include <string>
 #include <vector>
 
-namespace fnordmetric {
-namespace query {
+namespace csql {
 class Token;
 
 class ASTNode {
@@ -104,6 +103,5 @@ protected:
 };
 
 
-}
 }
 #endif

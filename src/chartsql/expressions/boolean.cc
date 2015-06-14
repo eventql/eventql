@@ -11,11 +11,10 @@
 #include <assert.h>
 #include <math.h>
 #include <string.h>
-#include <fnordmetric/sql/expressions/boolean.h>
-#include <fnord-base/exception.h>
+#include <chartsql/expressions/boolean.h>
+#include <fnord/exception.h>
 
-namespace fnordmetric {
-namespace query {
+namespace csql {
 namespace expressions {
 
 void eqExpr(void* scratchpad, int argc, SValue* argv, SValue* out) {
@@ -362,6 +361,5 @@ void gteExpr(void* scratchpad, int argc, SValue* argv, SValue* out) {
       rhs->getTypeName());
 }
 
-}
 }
 }

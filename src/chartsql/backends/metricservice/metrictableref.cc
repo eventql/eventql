@@ -7,12 +7,11 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <fnordmetric/sql/backends/metricservice/metrictableref.h>
-#include <fnordmetric/sql/runtime/tablescan.h>
-#include <fnordmetric/sql/svalue.h>
+#include <chartsql/backends/metricservice/metrictableref.h>
+#include <chartsql/runtime/tablescan.h>
+#include <chartsql/svalue.h>
 
-namespace fnordmetric {
-namespace query {
+namespace csql {
 
 MetricTableRef::MetricTableRef(
     fnord::metric_service::IMetric* metric) :
@@ -58,7 +57,7 @@ std::vector<std::string> MetricTableRef::columns() {
   return columns;
 }
 
-void MetricTableRef::executeScan(query::TableScan* scan) {
+void MetricTableRef::executeScan(csql::TableScan* scan) {
   auto begin = fnord::DateTime::epoch();
   auto limit = fnord::DateTime::now();
 
@@ -66,7 +65,7 @@ void MetricTableRef::executeScan(query::TableScan* scan) {
       begin,
       limit,
       [this, scan] (fnord::metric_service::Sample* sample) -> bool {
-        std::vector<query::SValue> row;
+        std::vector<csql::SValue> row;
         row.emplace_back(sample->time());
         row.emplace_back(sample->value());
 

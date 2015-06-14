@@ -8,14 +8,13 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <stdlib.h>
-#include <fnordmetric/sql/parser/astnode.h>
-#include <fnordmetric/sql/parser/token.h>
-#include <fnordmetric/sql/runtime/compile.h>
-#include <fnordmetric/sql/runtime/symboltable.h>
-#include <fnordmetric/sql/svalue.h>
+#include <chartsql/parser/astnode.h>
+#include <chartsql/parser/token.h>
+#include <chartsql/runtime/compile.h>
+#include <chartsql/runtime/symboltable.h>
+#include <chartsql/svalue.h>
 
-namespace fnordmetric {
-namespace query {
+namespace csql {
 
 Compiler::Compiler(SymbolTable* symbol_table) : symbol_table_(symbol_table) {}
 
@@ -226,5 +225,4 @@ CompiledExpression* Compiler::compileMethodCall(
   return op;
 }
 
-}
 }

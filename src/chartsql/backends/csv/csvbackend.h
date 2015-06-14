@@ -10,15 +10,14 @@
 #ifndef _FNORDMETRIC_CSVBACKEND_H
 #define _FNORDMETRIC_CSVBACKEND_H
 #include <memory>
-#include <fnordmetric/sql/backends/backend.h>
-#include <fnordmetric/sql/backends/csv/csvtableref.h>
+#include <chartsql/backends/backend.h>
+#include <chartsql/backends/csv/csvtableref.h>
 
-namespace fnordmetric {
-namespace query {
+namespace csql {
 class ASTNode;
 namespace csv_backend {
 
-class CSVBackend : public fnordmetric::query::Backend {
+class CSVBackend : public csql::Backend {
 public:
 
   static CSVBackend* singleton();
@@ -30,7 +29,6 @@ public:
 
 };
 
-}
 }
 }
 #endif
