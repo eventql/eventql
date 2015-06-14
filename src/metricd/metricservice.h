@@ -13,11 +13,11 @@
 #include <stdlib.h>
 #include <string>
 #include "fnord/datetime.h"
-#include "fnord-metricdb/metricrepository.h"
+#include "metricd/metricrepository.h"
 #include "fnord/stats/counter.h"
 #include "fnord/thread/taskscheduler.h"
 #include "tsdb/TSDBClient.h"
-#include "fnord-metricdb/Sample.pb.h"
+#include "metricd/Sample.pb.h"
 
 namespace fnord {
 namespace metric_service {
@@ -26,7 +26,7 @@ class MetricService {
 public:
 
   MetricService(
-      const String& tsdb_prefix,
+      const String& tsdb_namespace,
       tsdb::TSDBClient* tsdb);
 
   /**
@@ -55,7 +55,8 @@ public:
 
 protected:
 
-  String tsdb_prefix_;
+  Random rnd_;
+  String tsdb_namespace_;
   tsdb::TSDBClient* tsdb_;
 };
 

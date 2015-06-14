@@ -14,7 +14,7 @@
 #include <vector>
 #include <set>
 #include <fnord/datetime.h>
-#include <fnord-metricdb/sample.h>
+#include <metricd/sample.h>
 
 namespace fnord {
 namespace metric_service {

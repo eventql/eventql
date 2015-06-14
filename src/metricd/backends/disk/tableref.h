@@ -12,8 +12,8 @@
 #include <string>
 #include <sstable/sstablereader.h>
 #include <sstable/sstablewriter.h>
-#include <fnord-metricdb/backends/disk/samplewriter.h>
-#include <fnord-metricdb/sample.h>
+#include <metricd/backends/disk/samplewriter.h>
+#include <metricd/sample.h>
 
 using namespace fnord;
 namespace fnord {

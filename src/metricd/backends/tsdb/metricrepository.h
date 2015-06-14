@@ -8,8 +8,8 @@
  * <http://www.gnu.org/licenses/>.
  */
 #pragma once
-#include <fnord-metricdb/backends/tsdb/metric.h>
-#include <fnord-metricdb/metricrepository.h>
+#include <metricd/backends/tsdb/metric.h>
+#include <metricd/metricrepository.h>
 
 namespace fnord {
 namespace metric_service {

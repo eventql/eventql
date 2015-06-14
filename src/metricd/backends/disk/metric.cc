@@ -7,10 +7,10 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <fnord-metricdb/backends/disk/binaryformat.h>
-#include <fnord-metricdb/backends/disk/metric.h>
-#include <fnord-metricdb/backends/disk/tableref.h>
-#include <fnord-metricdb/backends/disk/samplewriter.h>
+#include <metricd/backends/disk/binaryformat.h>
+#include <metricd/backends/disk/metric.h>
+#include <metricd/backends/disk/tableref.h>
+#include <metricd/backends/disk/samplewriter.h>
 #include <fnord/exception.h>
 #include <fnord/freeondestroy.h>
 #include <fnord/wallclock.h>
