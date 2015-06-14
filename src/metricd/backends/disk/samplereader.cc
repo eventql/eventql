@@ -7,9 +7,9 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <fnord-base/ieee754.h>
-#include <fnord-metricdb/backends/disk/tokenindex.h>
-#include <fnord-metricdb/backends/disk/samplereader.h>
+#include <fnord/ieee754.h>
+#include <metricd/backends/disk/tokenindex.h>
+#include <metricd/backends/disk/samplereader.h>
 
 namespace fnord {
 namespace metric_service {

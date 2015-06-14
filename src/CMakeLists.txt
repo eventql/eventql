@@ -1,10 +1,3 @@
-# This file is part of the "FnordMetric" project
-#   Copyright (c) 2014 Paul Asmuth, Google Inc.
-#
-# FnordMetric is free software: you can redistribute it and/or modify it under
-# the terms of the GNU General Public License v3.0. You should have received a
-# copy of the GNU General Public License along with this program. If not, see
-# <http://www.gnu.org/licenses/>.
 file(GLOB PROTO_FILES *.proto)
 PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS ${PROTO_FILES})
 
@@ -29,6 +22,9 @@ add_library(fnord-metricdb OBJECT
     backends/inmemory/metricrepository.cc
     backends/tsdb/metric.cc
     backends/tsdb/metricrepository.cc
+    backends/crate/crateconnection.cc
+    backends/crate/metric.cc
+    backends/crate/metricrepository.cc
     httpapiservlet.cc
     metric.cc
     metricrepository.cc

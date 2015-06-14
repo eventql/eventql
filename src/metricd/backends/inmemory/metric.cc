@@ -7,9 +7,9 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <fnord-base/exception.h>
-#include <fnord-base/wallclock.h>
-#include <fnord-metricdb/backends/inmemory/metric.h>
+#include <fnord/exception.h>
+#include <fnord/wallclock.h>
+#include <metricd/backends/inmemory/metric.h>
 
 namespace fnord {
 namespace metric_service {

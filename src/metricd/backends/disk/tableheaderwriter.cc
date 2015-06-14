@@ -7,7 +7,7 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <fnord-metricdb/backends/disk/tableheaderwriter.h>
+#include <metricd/backends/disk/tableheaderwriter.h>
 
 namespace fnord {
 namespace metric_service {

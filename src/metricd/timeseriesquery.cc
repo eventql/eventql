@@ -8,9 +8,9 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <algorithm>
-#include <fnord-base/exception.h>
-#include <fnord-base/inspect.h>
-#include <fnord-metricdb/timeseriesquery.h>
+#include <fnord/exception.h>
+#include <fnord/inspect.h>
+#include <metricd/timeseriesquery.h>
 
 namespace fnord {
 namespace metric_service {

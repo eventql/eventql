@@ -7,17 +7,18 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include "fnord-metricdb/metricservice.h"
-#include "fnord-base/wallclock.h"
-#include "fnord-msg/msg.h"
+#include "metricd/metricservice.h"
+#include "tsdb/TimeWindowPartitioner.h"
+#include "fnord/wallclock.h"
+#include "fnord/protobuf/msg.h"
 
 namespace fnord {
 namespace metric_service {
 
 MetricService::MetricService(
-      const String& tsdb_prefix,
+      const String& tsdb_namespace,
       tsdb::TSDBClient* tsdb) :
-      tsdb_prefix_(tsdb_prefix),
+      tsdb_namespace_(tsdb_namespace),
       tsdb_(tsdb) {}
 
 std::vector<IMetric*> MetricService::listMetrics() const {
@@ -28,7 +29,6 @@ void MetricService::insertSample(
     const std::string& metric_key,
     double value,
     const std::vector<std::pair<std::string, std::string>>& labels) {
-  auto stream_key = tsdb_prefix_ + metric_key;
   auto sample_time = WallClock::unixMicros();
 
   metricd::MetricSample smpl;
@@ -41,10 +41,18 @@ void MetricService::insertSample(
     label->set_value(l.second);
   }
 
-  tsdb_->insertRecord(
-      stream_key,
+  auto partition_key = tsdb::TimeWindowPartitioner::partitionKeyFor(
+      metric_key,
       sample_time,
-      tsdb_->mkMessageID(),
+      600 * kMicrosPerSecond);
+
+  auto record_id = rnd_.sha1();
+
+  tsdb_->insertRecord(
+      tsdb_namespace_,
+      metric_key,
+      partition_key,
+      record_id,
       *msg::encode(smpl));
 }
 
@@ -53,13 +61,16 @@ void MetricService::scanSamples(
     const fnord::DateTime& time_begin,
     const fnord::DateTime& time_end,
     std::function<void (const metricd::MetricSample& sample)> callback) {
-  auto stream_key = tsdb_prefix_ + metric_key;
-
-  auto partitions = tsdb_->listPartitions(stream_key, time_begin, time_end);
+  auto partitions = tsdb::TimeWindowPartitioner::partitionKeysFor(
+      metric_key,
+      time_begin,
+      time_end,
+      600 * kMicrosPerSecond);
 
   for (const auto& partition_key : partitions) {
     tsdb_->fetchPartition(
-        stream_key,
+        tsdb_namespace_,
+        metric_key,
         partition_key,
         [callback] (const Buffer& buf) {
       callback(msg::decode<metricd::MetricSample>(buf));

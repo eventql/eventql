@@ -9,14 +9,14 @@
  */
 #ifndef _FNORD_METRIC_SERVICE_HTTPAPISERVLET_H
 #define _FNORD_METRIC_SERVICE_HTTPAPISERVLET_H
-#include "fnord-chart/areachart.h"
-#include "fnord-chart/canvas.h"
-#include "fnord-chart/linechart.h"
-#include "fnord-chart/svgtarget.h"
-#include "fnord-http/httpservice.h"
-#include "fnord-metricdb/metricservice.h"
-#include "fnord-metricdb/timeseriesquery.h"
-#include "fnord-json/json.h"
+#include "fnord/charts/areachart.h"
+#include "fnord/charts/canvas.h"
+#include "fnord/charts/linechart.h"
+#include "fnord/charts/svgtarget.h"
+#include "fnord/http/httpservice.h"
+#include "metricd/metricservice.h"
+#include "metricd/timeseriesquery.h"
+#include "fnord/json/json.h"
 
 namespace fnord {
 namespace metric_service {

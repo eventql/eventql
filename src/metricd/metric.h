@@ -13,8 +13,8 @@
 #include <string>
 #include <vector>
 #include <set>
-#include <fnord-base/datetime.h>
-#include <fnord-metricdb/sample.h>
+#include <fnord/datetime.h>
+#include <metricd/sample.h>
 
 namespace fnord {
 namespace metric_service {

@@ -9,12 +9,12 @@
  */
 #ifndef _FNORDMETRIC_METRICDB_TIMESERIESQUERY_H_
 #define _FNORDMETRIC_METRICDB_TIMESERIESQUERY_H_
-#include <fnord-base/datetime.h>
-#include <fnord-base/stdtypes.h>
-#include <fnord-base/duration.h>
-#include <fnord-chart/series.h>
-#include <fnord-metricdb/sample.h>
-#include <fnord-metricdb/metricservice.h>
+#include <fnord/datetime.h>
+#include <fnord/stdtypes.h>
+#include <fnord/duration.h>
+#include <fnord/charts/series.h>
+#include <metricd/sample.h>
+#include <metricd/metricservice.h>
 
 namespace fnord {
 namespace metric_service {
