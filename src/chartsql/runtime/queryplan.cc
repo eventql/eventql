@@ -26,5 +26,3 @@ TableRepository* QueryPlan::tableRepository() {
 }
 
 }
-}
-
