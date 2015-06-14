@@ -12,7 +12,7 @@ for i in $(seq 1 2); do
   #git subtree pull --prefix lib/libdproc git@github.com:fnordcorp/libdproc.git master
 done;
 
-git subtree push --prefix app/sensord git@github.com:fnordcorp/sensord.git master
+#git subtree push --prefix app/sensord git@github.com:fnordcorp/sensord.git master
 git subtree push --prefix app/metricd git@github.com:fnordcorp/metricd.git master
 git subtree push --prefix app/brokerd git@github.com:fnordcorp/brokerd.git master
 git subtree push --prefix app/tsdb git@github.com:fnordcorp/tsdb.git master
