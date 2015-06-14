@@ -10,10 +10,10 @@
 #ifndef _FNORDMETRIC_METRICDB_TABLEREF_H_
 #define _FNORDMETRIC_METRICDB_TABLEREF_H_
 #include <string>
-#include <fnord-sstable/sstablereader.h>
-#include <fnord-sstable/sstablewriter.h>
-#include <fnord-metricdb/backends/disk/samplewriter.h>
-#include <fnord-metricdb/sample.h>
+#include <sstable/sstablereader.h>
+#include <sstable/sstablewriter.h>
+#include <metricd/backends/disk/samplewriter.h>
+#include <metricd/sample.h>
 
 using namespace fnord;
 namespace fnord {

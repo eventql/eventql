@@ -7,9 +7,9 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <fnord-sstable/sstablerepair.h>
-#include <fnord-base/thread/task.h>
-#include <fnord-metricdb/backends/disk/metricrepository.h>
+#include <sstable/sstablerepair.h>
+#include <fnord/thread/task.h>
+#include <metricd/backends/disk/metricrepository.h>
 
 namespace fnord {
 namespace metric_service {

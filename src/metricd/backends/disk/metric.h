@@ -11,16 +11,16 @@
 #define _FNORDMETRIC_METRICDB_DISK_BACKEND_METRIC_H_
 #include <string>
 #include <vector>
-#include <fnord-base/datetime.h>
-#include <fnord-base/io/filerepository.h>
-#include <fnord-metricdb/backends/disk/compactionpolicy.h>
-#include <fnord-metricdb/backends/disk/labelindex.h>
-#include <fnord-metricdb/backends/disk/metriccursor.h>
-#include <fnord-metricdb/backends/disk/metricsnapshot.h>
-#include <fnord-metricdb/backends/disk/samplereader.h>
-#include <fnord-metricdb/backends/disk/tokenindex.h>
-#include <fnord-metricdb/metric.h>
-#include <fnord-metricdb/sample.h>
+#include <fnord/datetime.h>
+#include <fnord/io/filerepository.h>
+#include <metricd/backends/disk/compactionpolicy.h>
+#include <metricd/backends/disk/labelindex.h>
+#include <metricd/backends/disk/metriccursor.h>
+#include <metricd/backends/disk/metricsnapshot.h>
+#include <metricd/backends/disk/samplereader.h>
+#include <metricd/backends/disk/tokenindex.h>
+#include <metricd/metric.h>
+#include <metricd/sample.h>
 
 using namespace fnord;
 namespace fnord {
