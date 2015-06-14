@@ -25,7 +25,7 @@ message StreamConfig {
   /**
    * The maximum sstable size in bytes
    */
-  optional uint64 max_sstable_size = 4;
+  required uint64 sstable_size = 4;
 
   /**
    * The compaction interval in microseconds

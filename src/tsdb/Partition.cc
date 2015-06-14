@@ -78,7 +78,7 @@ Partition::Partition(
         node->db_path,
         key_.toString().substr(0, 12)  + "."),
     last_compaction_(0) {
-  records_.setMaxDatafileSize(config_->max_sstable_size());
+  records_.setMaxDatafileSize(config_->sstable_size());
 }
 
 Partition::Partition(
@@ -101,7 +101,7 @@ Partition::Partition(
   scheduleCompaction();
   node_->compactionq.insert(this, WallClock::unixMicros());
   node_->replicationq.insert(this, WallClock::unixMicros());
-  records_.setMaxDatafileSize(config_->max_sstable_size());
+  records_.setMaxDatafileSize(config_->sstable_size());
 }
 
 void Partition::insertRecord(
