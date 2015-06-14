@@ -397,5 +397,22 @@ void URI::parseQueryString(
   }
 }
 
+std::string URI::buildQueryString(const URI::ParamList& params) {
+  std::string out;
+
+  for (int i = 0; i < params.size(); ++i) {
+    if (i > 0) {
+      out += "&";
+    }
+
+    out += StringUtil::format(
+        "$0=$1",
+        URI::urlEncode(params[i].first),
+        URI::urlEncode(params[i].second));
+  }
+
+  return out;
+}
+
 } // namespace fnord
 
