@@ -16,6 +16,7 @@
 #include <fnord/inspect.h>
 #include <chartsql/svalue.h>
 #include <chartsql/format.h>
+#include <chartsql/parser/token.h>
 
 namespace csql {
 
@@ -445,6 +446,31 @@ bool SValue::tryTimeConversion() {
   // FIXPAUL take a smart guess if this is milli, micro, etc
   data_.u.t_timestamp = ts * 1000000llu;
   return true;
+}
+
+SValue* SValue::fromToken(const Token* token) {
+  switch (token->getType()) {
+
+    case Token::T_TRUE:
+      return new SValue(true);
+
+    case Token::T_FALSE:
+      return new SValue(false);
+
+    case Token::T_NUMERIC: {
+      auto sval = new SValue(token->getString());
+      sval->tryNumericConversion();
+      return sval;
+    }
+
+    case Token::T_STRING:
+      return new SValue(token->getString());
+
+    default:
+      RAISE(kRuntimeError, "can't cast Token to SValue");
+      return nullptr;
+
+  }
 }
 
 }
