@@ -8,7 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <fnord/stringutil.h>
-#include <fnord-metricdb/metricrepository.h>
+#include <metricd/metricrepository.h>
 #include "fnordmetric/environment.h"
 #include "fnordmetric/chartsql/queryendpoint.h"
 #include "fnordmetric/chartsql/queryservice.h"
