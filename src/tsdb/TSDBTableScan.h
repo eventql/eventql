@@ -46,6 +46,8 @@ public:
   RefPtr<VFSFile> encode() const override;
   void decode(RefPtr<VFSFile> data) override;
 
+  Option<String> cacheKey() const override;
+
   ResultType* result();
 
 protected:
