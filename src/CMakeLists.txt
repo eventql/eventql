@@ -384,7 +384,7 @@ target_link_libraries(tests/test-logjoin ${CMAKE_THREAD_LIBS_INIT} ${FNORD_LIBS}
 #     analytics/CTRCounterTableSink.cc
 #     analytics/CTRCounterMergeReducer.cc
 #     analytics/CTRBySearchTermCrossCategoryMapper.cc
-#     analytics/TopTermsByCategoryMapper.cc
+#     analytics/TopTermsByCategoryReport.cc
 #     cm-shopstatsbuild.cc
 #     ${PROTO_SRCS})
 # 
