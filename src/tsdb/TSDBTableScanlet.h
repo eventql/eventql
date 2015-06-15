@@ -31,6 +31,10 @@ public:
     return Set<String>{};
   }
 
+  virtual Option<String> cacheKey() const {
+    return None<String>();
+  }
+
   ResultType* result() {
     return &result_;
   }
