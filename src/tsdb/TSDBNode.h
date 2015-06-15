@@ -53,7 +53,7 @@ public:
   const String& dbPath() const;
 
   void start(
-      size_t num_comaction_threads = 4,
+      size_t num_comaction_threads = 8,
       size_t num_replication_threads = 4);
 
   void stop();

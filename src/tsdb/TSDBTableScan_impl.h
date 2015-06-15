@@ -99,6 +99,24 @@ void TSDBTableScan<ScanletType>::scanWithCSTableIndex(
 }
 
 template <typename ScanletType>
+Option<String> TSDBTableScan<ScanletType>::cacheKey() const {
+  auto ckey = scanlet_->cacheKey();
+
+  if (ckey.isEmpty()) {
+    return ckey;
+  } else {
+    return Some(
+        StringUtil::format(
+            "$0~$1~$2~$3~$4",
+            ckey.get(),
+            params_.tsdb_namespace(),
+            params_.stream_key(),
+            params_.partition_key(),
+            params_.version()));
+  }
+}
+
+template <typename ScanletType>
 void TSDBTableScan<ScanletType>::onRow(const Buffer& buffer) {
   typename ScanletType::RowType row;
   msg::decode(buffer, &row);
