@@ -81,6 +81,10 @@ uint64_t SSTableWriter::appendRow(
   }
   // FIXPAUL assert that key is monotonically increasing...
 
+  if (data_size == 0) {
+    RAISE(kIllegalArgumentError, "can't append empty row");
+  }
+
   size_t page_size = sizeof(BinaryFormat::RowHeader) + key_size + data_size;
   auto alloc = mmap_->allocPage(page_size);
   auto page = mmap_->getPage(alloc);
