@@ -70,6 +70,10 @@ bool HTTPResponseStream::isOutputStarted() const {
   return headers_written_;
 }
 
+bool HTTPResponseStream::isClosed() const {
+  return conn_->isClosed();
+}
+
 void HTTPResponseStream::onCallbackCompleted() {
   std::unique_lock<std::mutex> lk(mutex_);
   callback_running_ = false;

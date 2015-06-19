@@ -322,6 +322,11 @@ void HTTPServerConnection::close() {
   decRef();
 }
 
+bool HTTPServerConnection::isClosed() const {
+  std::unique_lock<std::mutex> lk(mutex_);
+  return closed_;
+}
+
 } // namespace http
 } // namespace fnord
 
