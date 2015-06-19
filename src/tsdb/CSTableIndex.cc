@@ -41,7 +41,11 @@ RefPtr<VFSFile> CSTableIndex::computeBlob(dproc::TaskContext* context) {
       params_.tsdb_namespace(),
       params_.stream_key(),
       SHA1Hash::fromHexString(params_.partition_key()),
-      [this, &cstable] (const Buffer& buf) {
+      [this, context, &cstable] (const Buffer& buf) {
+    if (context->isCancelled()) {
+      RAISE(kRuntimeError, "task cancelled");
+    }
+
     msg::MessageObject obj;
     msg::MessageDecoder::decode(buf, *schema_, &obj);
     cstable.addRecord(obj);
