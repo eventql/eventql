@@ -49,7 +49,26 @@ Future<T>& Future<T>::operator=(const Future<T>& other) {
 
 template <typename T>
 void Future<T>::wait() const {
-  state_->wakeup.waitForFirstWakeup();
+  std::unique_lock<std::mutex> lk(state_->mutex);
+
+  while (!state_->ready) {
+    state_->cv.wait(lk);
+  }
+}
+
+template <typename T>
+bool Future<T>::waitFor(const Duration& timeout) const {
+  std::unique_lock<std::mutex> lk(state_->mutex);
+
+  if (state_->ready) {
+    return true;
+  }
+
+  state_->cv.wait_for(
+      lk,
+      std::chrono::microseconds(timeout.microseconds()));
+
+  return state_->ready;
 }
 
 template <typename T>
@@ -86,8 +105,6 @@ void Future<T>::onReady(std::function<void ()> fn) {
   }
 }
 
-
-
 template <typename T>
 const T& Future<T>::get() const {
   std::unique_lock<std::mutex> lk(state_->mutex);
@@ -109,6 +126,12 @@ template <typename T>
 const T& Future<T>::waitAndGet() const {
   wait();
   return get();
+}
+
+template <typename T>
+bool Future<T>::isReady() const {
+  std::unique_lock<std::mutex> lk(state_->mutex);
+  return state_->ready;
 }
 
 template <typename T>
@@ -144,7 +167,7 @@ void Promise<T>::failure(const Status& status) {
   state_->ready = true;
   lk.unlock();
 
-  state_->wakeup.wakeup();
+  state_->cv.notify_all();
 
   if (state_->on_failure) {
     state_->on_failure(state_->status);
@@ -162,7 +185,7 @@ void Promise<T>::success(const T& value) {
   state_->ready = true;
   lk.unlock();
 
-  state_->wakeup.wakeup();
+  state_->cv.notify_all();
 
   if (state_->on_success) {
     state_->on_success(*(state_->value));
@@ -180,7 +203,7 @@ void Promise<T>::success(T&& value) {
   state_->ready = true;
   lk.unlock();
 
-  state_->wakeup.wakeup();
+  state_->cv.notify_all();
 
   if (state_->on_success) {
     state_->on_success(*(state_->value));
