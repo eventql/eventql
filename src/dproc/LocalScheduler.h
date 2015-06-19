@@ -47,16 +47,20 @@ protected:
 
     RefPtr<dproc::RDD> getDependency(size_t index) override;
     size_t numDependencies() const override;
+    bool isCancelled() const override;
 
     void readCache();
+    void cancel();
 
     RefPtr<Task> task;
     String cache_filename;
     String debug_name;
-    bool running;
-    bool finished;
-    bool failed;
-    bool expanded;
+    std::atomic<bool> running;
+    std::atomic<bool> finished;
+    std::atomic<bool> failed;
+    std::atomic<bool> expanded;
+    std::atomic<bool> cancelled;
+
     Vector<RefPtr<LocalTaskRef>> dependencies;
   };
 

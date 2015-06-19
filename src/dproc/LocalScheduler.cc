@@ -109,6 +109,10 @@ void LocalScheduler::runPipeline(
 
   while (pipeline->tasks.size() > 0) {
     if (result->isCancelled()) {
+      for (auto& taskref : pipeline->tasks) {
+        taskref->cancel();
+      }
+
       RAISE(kFutureError, "future cancelled");
     }
 
@@ -236,6 +240,10 @@ void LocalScheduler::runTask(
     LocalTaskPipeline* pipeline,
     RefPtr<LocalTaskRef> task,
     RefPtr<TaskResultFuture> result) {
+  if (task->isCancelled()) {
+    RAISE(kRuntimeError, "cancelled task");
+  }
+
   bool from_cache = false;
 
   auto rdd = dynamic_cast<dproc::RDD*>(task->task.get());
@@ -255,6 +263,10 @@ void LocalScheduler::runTask(
 
   if (!from_cache) {
     try {
+      if (task->isCancelled()) {
+        RAISE(kRuntimeError, "cancelled task");
+      }
+
       task->task->compute(task.get());
 
       if (rdd != nullptr && !task->cache_filename.empty()) {
@@ -294,7 +306,8 @@ LocalScheduler::LocalTaskRef::LocalTaskRef(
     running(false),
     expanded(false),
     finished(false),
-    failed(false) {}
+    failed(false),
+    cancelled(false) {}
 
 void LocalScheduler::LocalTaskRef::readCache() {
   auto rdd = dynamic_cast<dproc::RDD*>(task.get());
@@ -320,6 +333,14 @@ RefPtr<dproc::RDD> LocalScheduler::LocalTaskRef::getDependency(size_t index) {
 
 size_t LocalScheduler::LocalTaskRef::numDependencies() const {
   return dependencies.size();
+}
+
+void LocalScheduler::LocalTaskRef::cancel() {
+  cancelled = true;
+}
+
+bool LocalScheduler::LocalTaskRef::isCancelled() const {
+  return cancelled;
 }
 
 } // namespace dproc

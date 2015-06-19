@@ -89,6 +89,8 @@ public:
 
   virtual size_t numDependencies() const = 0;
 
+  virtual bool isCancelled() const = 0;
+
 };
 
 template <typename _ProtoType>
