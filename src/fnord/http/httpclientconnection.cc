@@ -126,6 +126,10 @@ void HTTPClientConnection::awaitWrite() {
 }
 
 void HTTPClientConnection::close() {
+  if (state_ == S_CONN_CLOSED) {
+    RAISE(kIllegalStateError, "connection already closed");
+  }
+
   state_ = S_CONN_CLOSED;
   scheduler_->cancelFD(conn_->fd());
   conn_->close();
