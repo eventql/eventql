@@ -35,6 +35,9 @@ public:
 
   ~HTTPClientConnection();
 
+  HTTPClientConnection(const HTTPClientConnection& other) = delete;
+  HTTPClientConnection& operator=(const HTTPClientConnection& other) = delete;
+
   void executeRequest(
       const HTTPRequest& request,
       HTTPResponseHandler* response_handler);

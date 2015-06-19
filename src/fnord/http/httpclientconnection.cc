@@ -127,6 +127,7 @@ void HTTPClientConnection::awaitWrite() {
 
 void HTTPClientConnection::close() {
   state_ = S_CONN_CLOSED;
+  scheduler_->cancelFD(conn_->fd());
   conn_->close();
 }
 
@@ -238,8 +239,8 @@ void HTTPClientConnection::error(const std::exception& e) {
     }
   }
 
-  cur_handler_->onError(e);
   on_ready_.wakeup();
+  cur_handler_->onError(e);
 }
 
 }
