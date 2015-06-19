@@ -29,6 +29,8 @@ struct TaskStatus {
 class TaskResultFuture : public RefCounted {
 public:
 
+  TaskResultFuture();
+
   Future<RefPtr<Task>> result() const;
 
   void returnResult(RefPtr<Task> result);
@@ -38,11 +40,19 @@ public:
   void onStatusChange(Function<void ()> fn);
   TaskStatus status() const;
 
+  /**
+   * Cancel the result future // abort the task
+   */
+  void cancel();
+
+  bool isCancelled() const;
+
 protected:
   TaskStatus status_;
   mutable std::mutex status_mutex_;
   Function<void ()> on_status_change_;
   Promise<RefPtr<Task>> promise_;
+  bool cancelled_;
 };
 
 } // namespace dproc

@@ -42,6 +42,13 @@ void LocalScheduler::stop() {
 RefPtr<TaskResultFuture> LocalScheduler::run(
     RefPtr<Application> app,
     const TaskSpec& task) {
+  auto task_id = rnd_.hex64();
+
+  fnord::logDebug(
+      "dproc",
+      "Starting job; id=$0",
+      task_id);
+
   RefPtr<TaskResultFuture> result(new TaskResultFuture());
 
   try {
@@ -51,24 +58,40 @@ RefPtr<TaskResultFuture> LocalScheduler::run(
             task.task_name(),
             Buffer(task.params().data(), task.params().size())));
 
-    req_tpool_.run([this, app, result, instance] () {
+    req_tpool_.run([this, app, result, instance, task_id] () {
       try {
         LocalTaskPipeline pipeline;
         pipeline.tasks.push_back(instance);
+
         runPipeline(app.get(), &pipeline, result);
 
         if (instance->failed) {
           RAISE(kRuntimeError, "task failed");
         }
 
+        fnord::logDebug(
+            "dproc",
+            "Job successfully completed; id=$0",
+            task_id);
+
         result->returnResult(instance->task);
       } catch (const StandardException& e) {
-        fnord::logError("dproc.scheduler", e, "task failed");
+        fnord::logError(
+            "dproc",
+            e,
+            "Job failed; id=$0",
+            task_id);
+
         result->returnError(e);
       }
     });
   } catch (const StandardException& e) {
-    fnord::logError("dproc.scheduler", e, "task failed");
+    fnord::logError(
+        "dproc",
+        e,
+        "Job failed; id=$0",
+        task_id);
+
     result->returnError(e);
   }
 
@@ -79,18 +102,16 @@ void LocalScheduler::runPipeline(
     Application* app,
     LocalTaskPipeline* pipeline,
     RefPtr<TaskResultFuture> result) {
-  fnord::logDebug(
-      "dproc",
-      "Starting local pipeline id=$0 tasks=$1",
-      (void*) pipeline,
-      pipeline->tasks.size());
-
   std::unique_lock<std::mutex> lk(pipeline->mutex);
   result->updateStatus([&pipeline] (TaskStatus* status) {
     status->num_subtasks_total = pipeline->tasks.size();
   });
 
   while (pipeline->tasks.size() > 0) {
+    if (result->isCancelled()) {
+      RAISE(kFutureError, "future cancelled");
+    }
+
     bool waiting = true;
     size_t num_waiting = 0;
     size_t num_running = 0;
@@ -209,11 +230,6 @@ void LocalScheduler::runPipeline(
       pipeline->tasks.pop_back();
     }
   }
-
-  fnord::logDebug(
-      "dproc",
-      "Completed local pipeline id=$0",
-      (void*) pipeline);
 }
 
 void LocalScheduler::runTask(

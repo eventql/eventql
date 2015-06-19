@@ -13,6 +13,8 @@ using namespace fnord;
 
 namespace dproc {
 
+TaskResultFuture::TaskResultFuture() : cancelled_(false) {}
+
 Future<RefPtr<Task>> TaskResultFuture::result() const {
   return promise_.future();
 }
@@ -62,5 +64,12 @@ double TaskStatus::progress() const {
   return num_subtasks_completed / (double) num_subtasks_total;
 }
 
+void TaskResultFuture::cancel() {
+  cancelled_ = true;
+}
+
+bool TaskResultFuture::isCancelled() const {
+  return cancelled_;
+}
 
 } // namespace dproc
