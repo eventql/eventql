@@ -60,6 +60,7 @@ HTTPResponse HTTPClient::executeRequest(
 
   Promise<HTTPResponse> promise;
   auto http_future = factory(promise);
+  bool failed = false;
 
   try {
     ScopedPtr<HTTPClientConnection> conn(
@@ -72,11 +73,15 @@ HTTPResponse HTTPClient::executeRequest(
     http_future->storeConnection(std::move(conn));
   } catch (const std::exception& e) {
     http_future->onError(e);
+    failed = true;
   }
 
   auto future = promise.future();
 
-  ev_.runOnce();
+  if (!failed) {
+    ev_.runOnce();
+  }
+
   return future.waitAndGet();
 }
 
