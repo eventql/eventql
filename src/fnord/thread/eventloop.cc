@@ -144,11 +144,14 @@ void EventLoop::cancelFD(int fd) {
     return;
   }
 
+  if (FD_ISSET(fd, &op_read_) || FD_ISSET(fd, &op_write_)) {
+    --num_fds_;
+  }
+
   FD_CLR(fd, &op_read_);
   FD_CLR(fd, &op_write_);
   FD_CLR(fd, &op_error_);
   callbacks_[fd] = nullptr;
-  --num_fds_;
 }
 
 void EventLoop::poll() {
@@ -236,11 +239,12 @@ void EventLoop::runOnce() {
   threadid_ = std::this_thread::get_id();
 
   while (running_.load()) {
-    std::unique_lock<std::mutex> lk(runq_mutex_);
-    if (runq_.empty() && num_fds_ == 0) {
-      return;
+    {
+      std::unique_lock<std::mutex> lk(runq_mutex_);
+      if (runq_.empty() && num_fds_ == 0) {
+        return;
+      }
     }
-    lk.unlock();
 
     poll();
   }
