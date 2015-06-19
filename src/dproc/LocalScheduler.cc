@@ -345,7 +345,6 @@ size_t LocalScheduler::LocalTaskRef::numDependencies() const {
 }
 
 void LocalScheduler::LocalTaskRef::cancel() {
-  fnord::iputs("got cancelled", 1);
   cancelled = true;
 }
 
