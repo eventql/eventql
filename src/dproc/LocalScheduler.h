@@ -64,7 +64,7 @@ protected:
     Vector<RefPtr<LocalTaskRef>> dependencies;
   };
 
-  struct LocalTaskPipeline {
+  struct LocalTaskPipeline : public RefCounted {
     Vector<RefPtr<LocalTaskRef>> tasks;
     std::mutex mutex;
     std::condition_variable wakeup;
@@ -72,11 +72,11 @@ protected:
 
   void runPipeline(
       Application* app,
-      LocalTaskPipeline* pipeline,
+      RefPtr<LocalTaskPipeline> pipeline,
       RefPtr<TaskResultFuture> result);
 
   void runTask(
-      LocalTaskPipeline* pipeline,
+      RefPtr<LocalTaskPipeline> pipeline,
       RefPtr<LocalTaskRef> task,
       RefPtr<TaskResultFuture> result);
 

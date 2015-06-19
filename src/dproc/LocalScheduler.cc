@@ -60,23 +60,22 @@ RefPtr<TaskResultFuture> LocalScheduler::run(
 
     req_tpool_.run([this, app, result, instance, task_id] () {
       try {
-        LocalTaskPipeline pipeline;
-        pipeline.tasks.push_back(instance);
+        auto pipeline = mkRef(new LocalTaskPipeline());
+        pipeline->tasks.push_back(instance);
 
-        result->onCancel([&pipeline] {
-          std::unique_lock<std::mutex> lk(pipeline.mutex);
+        result->onCancel([pipeline] {
+          std::unique_lock<std::mutex> lk(pipeline->mutex);
 
-          for (auto& taskref : pipeline.tasks) {
+          for (auto& taskref : pipeline->tasks) {
             taskref->cancel();
           }
         });
 
-        runPipeline(app.get(), &pipeline, result);
+        runPipeline(app.get(), pipeline, result);
 
         if (instance->failed) {
           RAISE(kRuntimeError, "task failed");
         }
-
 
         fnord::logDebug(
             "dproc",
@@ -109,10 +108,10 @@ RefPtr<TaskResultFuture> LocalScheduler::run(
 
 void LocalScheduler::runPipeline(
     Application* app,
-    LocalTaskPipeline* pipeline,
+    RefPtr<LocalTaskPipeline> pipeline,
     RefPtr<TaskResultFuture> result) {
   std::unique_lock<std::mutex> lk(pipeline->mutex);
-  result->updateStatus([&pipeline] (TaskStatus* status) {
+  result->updateStatus([pipeline] (TaskStatus* status) {
     status->num_subtasks_total = pipeline->tasks.size();
   });
 
@@ -164,7 +163,7 @@ void LocalScheduler::runPipeline(
 
             taskref->readCache();
 
-            result->updateStatus([&pipeline] (TaskStatus* status) {
+            result->updateStatus([] (TaskStatus* status) {
               ++status->num_subtasks_completed;
             });
 
@@ -231,8 +230,7 @@ void LocalScheduler::runPipeline(
 
     fnord::logDebug(
         "dproc",
-        "Running local pipeline id=$0: $1",
-        (void*) pipeline,
+        "Running local pipeline: $0",
         result->status().toString());
 
     if (waiting) {
@@ -246,57 +244,57 @@ void LocalScheduler::runPipeline(
 }
 
 void LocalScheduler::runTask(
-    LocalTaskPipeline* pipeline,
+    RefPtr<LocalTaskPipeline> pipeline,
     RefPtr<LocalTaskRef> task,
     RefPtr<TaskResultFuture> result) {
-  if (task->isCancelled()) {
-    RAISE(kRuntimeError, "cancelled task");
-  }
-
-  bool from_cache = false;
-
-  auto rdd = dynamic_cast<dproc::RDD*>(task->task.get());
-  if (rdd != nullptr &&
-      !task->cache_filename.empty() &&
-      FileUtil::exists(task->cache_filename)) {
-    fnord::logDebug(
-        "dproc",
-        "Read RDD from cache: $0, key=$1",
-        task->debug_name,
-        rdd->cacheKeySHA1().get());
-
-    task->readCache();
-
-    from_cache = true;
-  }
-
-  if (!from_cache) {
-    try {
-      if (task->isCancelled()) {
-        RAISE(kRuntimeError, "cancelled task");
-      }
-
-      task->task->compute(task.get());
-
-      if (rdd != nullptr && !task->cache_filename.empty()) {
-        auto cache_file = task->cache_filename;
-        auto cache = rdd->encode();
-
-        auto f = File::openFile(
-            cache_file + "~",
-            File::O_CREATEOROPEN | File::O_WRITE | File::O_TRUNCATE);
-
-        f.write(cache->data(), cache->size());
-
-        FileUtil::mv(cache_file + "~", cache_file);
-      }
-    } catch (const std::exception& e) {
-      task->failed = true;
-      fnord::logError("dproc", e, "error");
+  try {
+    if (task->isCancelled()) {
+      RAISE(kRuntimeError, "cancelled task");
     }
+
+    bool from_cache = false;
+
+    auto rdd = dynamic_cast<dproc::RDD*>(task->task.get());
+    if (rdd != nullptr &&
+        !task->cache_filename.empty() &&
+        FileUtil::exists(task->cache_filename)) {
+      fnord::logDebug(
+          "dproc",
+          "Read RDD from cache: $0, key=$1",
+          task->debug_name,
+          rdd->cacheKeySHA1().get());
+
+      task->readCache();
+
+      from_cache = true;
+    }
+
+    if (!from_cache) {
+        if (task->isCancelled()) {
+          RAISE(kRuntimeError, "cancelled task");
+        }
+
+        task->task->compute(task.get());
+
+        if (rdd != nullptr && !task->cache_filename.empty()) {
+          auto cache_file = task->cache_filename;
+          auto cache = rdd->encode();
+
+          auto f = File::openFile(
+              cache_file + "~",
+              File::O_CREATEOROPEN | File::O_WRITE | File::O_TRUNCATE);
+
+          f.write(cache->data(), cache->size());
+
+          FileUtil::mv(cache_file + "~", cache_file);
+        }
+    }
+  } catch (const std::exception& e) {
+    task->failed = true;
+    fnord::logError("dproc", e, "error");
   }
 
-  result->updateStatus([&pipeline] (TaskStatus* status) {
+  result->updateStatus([] (TaskStatus* status) {
     ++status->num_subtasks_completed;
   });
 
