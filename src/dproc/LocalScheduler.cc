@@ -63,11 +63,20 @@ RefPtr<TaskResultFuture> LocalScheduler::run(
         LocalTaskPipeline pipeline;
         pipeline.tasks.push_back(instance);
 
+        result->onCancel([&pipeline] {
+          std::unique_lock<std::mutex> lk(pipeline.mutex);
+
+          for (auto& taskref : pipeline.tasks) {
+            taskref->cancel();
+          }
+        });
+
         runPipeline(app.get(), &pipeline, result);
 
         if (instance->failed) {
           RAISE(kRuntimeError, "task failed");
         }
+
 
         fnord::logDebug(
             "dproc",
@@ -336,6 +345,7 @@ size_t LocalScheduler::LocalTaskRef::numDependencies() const {
 }
 
 void LocalScheduler::LocalTaskRef::cancel() {
+  fnord::iputs("got cancelled", 1);
   cancelled = true;
 }
 

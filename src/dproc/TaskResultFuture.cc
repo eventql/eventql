@@ -43,6 +43,11 @@ void TaskResultFuture::onStatusChange(Function<void ()> fn) {
   on_status_change_ = fn;
 }
 
+void TaskResultFuture::onCancel(Function<void ()> fn) {
+  std::unique_lock<std::mutex> lk(status_mutex_);
+  on_cancel_ = fn;
+}
+
 TaskStatus TaskResultFuture::status() const {
   std::unique_lock<std::mutex> lk(status_mutex_);
   return status_;
@@ -65,6 +70,12 @@ double TaskStatus::progress() const {
 }
 
 void TaskResultFuture::cancel() {
+  std::unique_lock<std::mutex> lk(status_mutex_);
+
+  if (on_cancel_) {
+    on_cancel_();
+  }
+
   cancelled_ = true;
 }
 

@@ -47,10 +47,13 @@ public:
 
   bool isCancelled() const;
 
+  void onCancel(Function<void ()> fn);
+
 protected:
   TaskStatus status_;
   mutable std::mutex status_mutex_;
   Function<void ()> on_status_change_;
+  Function<void ()> on_cancel_;
   Promise<RefPtr<Task>> promise_;
   bool cancelled_;
 };
