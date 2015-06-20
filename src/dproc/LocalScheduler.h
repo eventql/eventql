@@ -16,6 +16,7 @@
 #include <dproc/Application.h>
 #include <dproc/Scheduler.h>
 #include <dproc/TaskSpec.pb.h>
+#include <dproc/RDDRef.h>
 
 using namespace fnord;
 

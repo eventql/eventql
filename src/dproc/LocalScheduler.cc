@@ -270,24 +270,28 @@ void LocalScheduler::runTask(
     }
 
     if (!from_cache) {
-        if (task->isCancelled()) {
-          RAISE(kRuntimeError, "cancelled task");
-        }
+      if (task->isCancelled()) {
+        RAISE(kRuntimeError, "cancelled task");
+      }
 
-        task->task->compute(task.get());
+      task->task->compute(task.get());
 
-        if (rdd != nullptr && !task->cache_filename.empty()) {
-          auto cache_file = task->cache_filename;
-          auto cache = rdd->encode();
+      if (rdd != nullptr && !task->cache_filename.empty()) {
+        auto cache_file = task->cache_filename;
+        auto cache = rdd->encode();
 
-          auto f = File::openFile(
-              cache_file + "~",
-              File::O_CREATEOROPEN | File::O_WRITE | File::O_TRUNCATE);
+        auto f = File::openFile(
+            cache_file + "~",
+            File::O_CREATEOROPEN | File::O_WRITE | File::O_TRUNCATE);
 
-          f.write(cache->data(), cache->size());
+        f.write(cache->data(), cache->size());
 
-          FileUtil::mv(cache_file + "~", cache_file);
-        }
+        FileUtil::mv(cache_file + "~", cache_file);
+      }
+
+      if (task->task->storageLevel() != StorageLevel::MEMORY) {
+        task->task = RefPtr<dproc::Task>(nullptr);
+      }
     }
   } catch (const std::exception& e) {
     task->failed = true;
