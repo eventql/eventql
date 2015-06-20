@@ -16,6 +16,7 @@
 #include <fnord/util/binarymessagereader.h>
 #include <fnord/util/binarymessagewriter.h>
 #include <dproc/LocalScheduler.h>
+#include <dproc/TaskRef.h>
 
 using namespace fnord;
 
@@ -53,7 +54,7 @@ RefPtr<TaskResultFuture> LocalScheduler::run(
 
   try {
     auto instance = mkRef(
-        new LocalTaskRef(
+        new LocalTaskContext(
             app,
             task.task_name(),
             Buffer(task.params().data(), task.params().size())));
@@ -82,7 +83,7 @@ RefPtr<TaskResultFuture> LocalScheduler::run(
             "Job successfully completed; id=$0",
             task_id);
 
-        result->returnResult(instance->task);
+        result->returnResult(instance->task_ref);
       } catch (const StandardException& e) {
         fnord::logError(
             "dproc",
@@ -144,39 +145,37 @@ void LocalScheduler::runPipeline(
       if (!taskref->expanded) {
         taskref->expanded = true;
 
-        auto rdd = dynamic_cast<dproc::RDD*>(taskref->task.get());
-        if (rdd != nullptr) {
-          auto cache_key = rdd->cacheKeySHA1();
-          if (!cache_key.isEmpty()) {
-            taskref->cache_filename = FileUtil::joinPaths(
-                tempdir_,
-                StringUtil::format("$0.rdd", cache_key.get()));
-          }
+        auto task = taskref->task_ref->getInstance();
+        auto cache_key = task->cacheKeySHA1();
+        if (!cache_key.isEmpty()) {
+          taskref->cache_filename = FileUtil::joinPaths(
+              tempdir_,
+              StringUtil::format("$0.rdd", cache_key.get()));
+        }
 
-          if (!taskref->cache_filename.empty() &&
-              FileUtil::exists(taskref->cache_filename)) {
-            fnord::logDebug(
-                "dproc",
-                "Read RDD from cache: $0, key=$1",
-                taskref->debug_name,
-                cache_key.get());
+        if (!taskref->cache_filename.empty() &&
+            FileUtil::exists(taskref->cache_filename)) {
+          fnord::logDebug(
+              "dproc",
+              "Read RDD from cache: $0, key=$1",
+              taskref->debug_name,
+              cache_key.get());
 
-            taskref->readCache();
+          taskref->readCache();
 
-            result->updateStatus([] (TaskStatus* status) {
-              ++status->num_subtasks_completed;
-            });
+          result->updateStatus([] (TaskStatus* status) {
+            ++status->num_subtasks_completed;
+          });
 
-            taskref->finished = true;
-            waiting = false;
-            break;
-          }
+          taskref->finished = true;
+          waiting = false;
+          break;
         }
 
         auto parent_task = taskref;
         size_t numdeps = 0;
-        for (const auto& dep : taskref->task->dependencies()) {
-          RefPtr<LocalTaskRef> depref(new LocalTaskRef(app, dep.task_name, dep.params));
+        for (const auto& dep : task->dependencies()) {
+          RefPtr<LocalTaskContext> depref(new LocalTaskContext(app, dep.task_name, dep.params));
           parent_task->dependencies.emplace_back(depref);
           pipeline->tasks.emplace_back(depref);
           ++numdeps;
@@ -245,7 +244,7 @@ void LocalScheduler::runPipeline(
 
 void LocalScheduler::runTask(
     RefPtr<LocalTaskPipeline> pipeline,
-    RefPtr<LocalTaskRef> task,
+    RefPtr<LocalTaskContext> task,
     RefPtr<TaskResultFuture> result) {
   try {
     if (task->isCancelled()) {
@@ -254,9 +253,8 @@ void LocalScheduler::runTask(
 
     bool from_cache = false;
 
-    auto rdd = dynamic_cast<dproc::RDD*>(task->task.get());
-    if (rdd != nullptr &&
-        !task->cache_filename.empty() &&
+    auto rdd = task->task_ref->getInstance();
+    if (!task->cache_filename.empty() &&
         FileUtil::exists(task->cache_filename)) {
       fnord::logDebug(
           "dproc",
@@ -265,7 +263,6 @@ void LocalScheduler::runTask(
           rdd->cacheKeySHA1().get());
 
       task->readCache();
-
       from_cache = true;
     }
 
@@ -274,9 +271,9 @@ void LocalScheduler::runTask(
         RAISE(kRuntimeError, "cancelled task");
       }
 
-      task->task->compute(task.get());
+      rdd->compute(task.get());
 
-      if (rdd != nullptr && !task->cache_filename.empty()) {
+      if (!task->cache_filename.empty()) {
         auto cache_file = task->cache_filename;
         auto cache = rdd->encode();
 
@@ -289,8 +286,16 @@ void LocalScheduler::runTask(
         FileUtil::mv(cache_file + "~", cache_file);
       }
 
-      if (task->task->storageLevel() != StorageLevel::MEMORY) {
-        task->task = RefPtr<dproc::Task>(nullptr);
+      switch (rdd->storageLevel()) {
+
+        case StorageLevel::MEMORY:
+          break;
+
+        case StorageLevel::DISK:
+          task->task_ref = RefPtr<TaskRef>(
+              new DiskTaskRef(task->cache_filename, task->task_factory));
+          break;
+
       }
     }
   } catch (const std::exception& e) {
@@ -308,11 +313,14 @@ void LocalScheduler::runTask(
   pipeline->wakeup.notify_all();
 }
 
-LocalScheduler::LocalTaskRef::LocalTaskRef(
+LocalScheduler::LocalTaskContext::LocalTaskContext(
     RefPtr<Application> app,
     const String& task_name,
     const Buffer& params) :
-    task(app->getTaskInstance(task_name, params)),
+    task_factory([app, task_name, params] {
+      return app->getTaskInstance(task_name, params);
+    }),
+    task_ref(new LiveTaskRef(task_factory())),
     debug_name(StringUtil::format("$0#$1", app->name(), task_name)),
     running(false),
     expanded(false),
@@ -320,37 +328,28 @@ LocalScheduler::LocalTaskRef::LocalTaskRef(
     failed(false),
     cancelled(false) {}
 
-void LocalScheduler::LocalTaskRef::readCache() {
-  auto rdd = dynamic_cast<dproc::RDD*>(task.get());
-  if (rdd == nullptr) {
-    RAISE(kRuntimeError, "can't cache actions");
-  }
-
-  rdd->decode(
-      new io::MmappedFile(
-          File::openFile(
-              cache_filename,
-              File::O_READ)));
+void LocalScheduler::LocalTaskContext::readCache() {
+  task_ref = RefPtr<TaskRef>(new DiskTaskRef(cache_filename, task_factory));
 }
 
-RefPtr<dproc::RDD> LocalScheduler::LocalTaskRef::getDependency(size_t index) {
+RefPtr<dproc::RDD> LocalScheduler::LocalTaskContext::getDependency(size_t index) {
   if (index >= dependencies.size()) {
     RAISEF(kIndexError, "invalid dependecy index: $0", index);
   }
 
   const auto& dep = dependencies[index];
-  return dynamic_cast<dproc::RDD*>(dep->task.get());
+  //return dynamic_cast<dproc::RDD*>(dep->task.get());
 }
 
-size_t LocalScheduler::LocalTaskRef::numDependencies() const {
+size_t LocalScheduler::LocalTaskContext::numDependencies() const {
   return dependencies.size();
 }
 
-void LocalScheduler::LocalTaskRef::cancel() {
+void LocalScheduler::LocalTaskContext::cancel() {
   cancelled = true;
 }
 
-bool LocalScheduler::LocalTaskRef::isCancelled() const {
+bool LocalScheduler::LocalTaskContext::isCancelled() const {
   return cancelled;
 }
 

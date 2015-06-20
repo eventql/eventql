@@ -15,11 +15,11 @@ namespace dproc {
 
 TaskResultFuture::TaskResultFuture() : cancelled_(false) {}
 
-Future<RefPtr<Task>> TaskResultFuture::result() const {
+Future<RefPtr<TaskRef>> TaskResultFuture::result() const {
   return promise_.future();
 }
 
-void TaskResultFuture::returnResult(RefPtr<Task> result) {
+void TaskResultFuture::returnResult(RefPtr<TaskRef> result) {
   promise_.success(result);
 }
 

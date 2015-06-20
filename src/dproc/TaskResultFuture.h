@@ -11,6 +11,7 @@
 #define _FNORD_DPROC_TASKRESULT_H
 #include <fnord/stdtypes.h>
 #include <dproc/Task.h>
+#include <dproc/TaskRef.h>
 
 using namespace fnord;
 
@@ -31,9 +32,9 @@ public:
 
   TaskResultFuture();
 
-  Future<RefPtr<Task>> result() const;
+  Future<RefPtr<TaskRef>> result() const;
 
-  void returnResult(RefPtr<Task> result);
+  void returnResult(RefPtr<TaskRef> result);
   void returnError(const StandardException& e);
 
   void updateStatus(Function<void (TaskStatus* status)> fn);
@@ -44,9 +45,7 @@ public:
    * Cancel the result future // abort the task
    */
   void cancel();
-
   bool isCancelled() const;
-
   void onCancel(Function<void ()> fn);
 
 protected:
@@ -54,7 +53,7 @@ protected:
   mutable std::mutex status_mutex_;
   Function<void ()> on_status_change_;
   Function<void ()> on_cancel_;
-  Promise<RefPtr<Task>> promise_;
+  Promise<RefPtr<TaskRef>> promise_;
   bool cancelled_;
 };
 

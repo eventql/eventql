@@ -16,7 +16,7 @@ using namespace fnord;
 
 namespace dproc {
 
-class RDDRef : public RefCounted {
+class TaskRef : public RefCounted {
 public:
 
   virtual RefPtr<RDD> getInstance() const = 0;
@@ -28,11 +28,11 @@ public:
 
 };
 
-class DiskRDDRef : public RDDRef {
+class DiskTaskRef : public TaskRef {
 public:
   typedef Function<RefPtr<RDD> ()> InstanceFactoryFn;
 
-  DiskRDDRef(
+  DiskTaskRef(
       const String& filename,
       const InstanceFactoryFn factory);
 
@@ -44,10 +44,10 @@ protected:
   String filename_;
 };
 
-class LiveRDDRef : public RDDRef {
+class LiveTaskRef : public TaskRef {
 public:
 
-  LiveRDDRef(RefPtr<RDD> instance);
+  LiveTaskRef(RefPtr<RDD> instance);
 
   RefPtr<RDD> getInstance() const override;
 

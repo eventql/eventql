@@ -16,7 +16,7 @@
 #include <dproc/Application.h>
 #include <dproc/Scheduler.h>
 #include <dproc/TaskSpec.pb.h>
-#include <dproc/RDDRef.h>
+#include <dproc/TaskRef.h>
 
 using namespace fnord;
 
@@ -39,9 +39,9 @@ public:
 
 protected:
 
-  class LocalTaskRef : public TaskContext, public RefCounted {
+  class LocalTaskContext : public TaskContext, public RefCounted {
   public:
-    LocalTaskRef(
+    LocalTaskContext(
         RefPtr<Application> app,
         const String& task_name,
         const Buffer& params);
@@ -53,7 +53,8 @@ protected:
     void readCache();
     void cancel();
 
-    RefPtr<Task> task;
+    Function<RefPtr<Task> ()> task_factory;
+    RefPtr<TaskRef> task_ref;
     String cache_filename;
     String debug_name;
     std::atomic<bool> running;
@@ -62,11 +63,11 @@ protected:
     std::atomic<bool> expanded;
     std::atomic<bool> cancelled;
 
-    Vector<RefPtr<LocalTaskRef>> dependencies;
+    Vector<RefPtr<LocalTaskContext>> dependencies;
   };
 
   struct LocalTaskPipeline : public RefCounted {
-    Vector<RefPtr<LocalTaskRef>> tasks;
+    Vector<RefPtr<LocalTaskContext>> tasks;
     std::mutex mutex;
     std::condition_variable wakeup;
   };
@@ -78,7 +79,7 @@ protected:
 
   void runTask(
       RefPtr<LocalTaskPipeline> pipeline,
-      RefPtr<LocalTaskRef> task,
+      RefPtr<LocalTaskContext> task,
       RefPtr<TaskResultFuture> result);
 
   String tempdir_;
