@@ -36,6 +36,12 @@ struct TaskDependency {
   Buffer params;
 };
 
+enum class StorageLevel {
+  DISK = 0,
+  MEMORY = 1
+};
+
+
 class Task : public RefCounted {
 public:
 
@@ -54,6 +60,10 @@ public:
 
   virtual String contentType() const {
     return "application/octet-stream";
+  }
+
+  virtual StorageLevel storageLevel() const {
+    return StorageLevel::DISK;
   }
 
   virtual RefPtr<VFSFile> encode() const = 0;
