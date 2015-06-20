@@ -62,6 +62,8 @@ using RefPtr = AutoRef<T>;
 template <typename T>
 using RefPtrVector = Vector<AutoRef<T>>;
 
+using AnyRef = RefPtr<RefCounted>;
+
 template <typename T>
 AutoRef<T> mkRef(T* ptr);
 
