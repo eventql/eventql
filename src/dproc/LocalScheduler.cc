@@ -59,6 +59,7 @@ RefPtr<TaskResultFuture> LocalScheduler::run(
       try {
         auto pipeline = mkRef(new LocalTaskPipeline());
         pipeline->tasks.push_back(instance);
+        pipeline->max_tasks = 6;
 
         result->onCancel([pipeline] {
           std::unique_lock<std::mutex> lk(pipeline->mutex);
@@ -216,6 +217,12 @@ void LocalScheduler::runPipeline(
             taskref->debug_name);
 
         taskref->running = true;
+
+        while (pipeline->cur_tasks >= pipeline->max_tasks) {
+          pipeline->wakeup.wait(lk);
+        }
+
+        ++pipeline->cur_tasks;
         work_tpool_.run(std::bind(
             &LocalScheduler::runTask,
             this,
@@ -312,6 +319,7 @@ void LocalScheduler::runTask(
 
   std::unique_lock<std::mutex> lk(pipeline->mutex);
   task->finished = true;
+  --pipeline->cur_tasks;
   lk.unlock();
   pipeline->wakeup.notify_all();
 }

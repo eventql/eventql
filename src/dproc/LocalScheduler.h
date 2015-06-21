@@ -67,9 +67,12 @@ protected:
   };
 
   struct LocalTaskPipeline : public RefCounted {
+    LocalTaskPipeline() : cur_tasks(0), max_tasks(1) {}
     Vector<RefPtr<LocalTaskContext>> tasks;
     std::mutex mutex;
     std::condition_variable wakeup;
+    size_t cur_tasks;
+    size_t max_tasks;
   };
 
   void runPipeline(
