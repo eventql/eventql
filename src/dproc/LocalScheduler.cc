@@ -24,20 +24,16 @@ namespace dproc {
 
 LocalScheduler::LocalScheduler(
     const String& tempdir /* = "/tmp" */,
-    size_t max_threads /* = 8 */,
     size_t max_requests /* = 32 */) :
     tempdir_(tempdir),
-    tpool_(max_threads),
     req_tpool_(max_requests) {}
 
 void LocalScheduler::start() {
   req_tpool_.start();
-  tpool_.start();
 }
 
 void LocalScheduler::stop() {
   req_tpool_.stop();
-  tpool_.stop();
 }
 
 RefPtr<TaskResultFuture> LocalScheduler::run(
@@ -220,7 +216,7 @@ void LocalScheduler::runPipeline(
             taskref->debug_name);
 
         taskref->running = true;
-        tpool_.run(std::bind(
+        work_tpool_.run(std::bind(
             &LocalScheduler::runTask,
             this,
             pipeline,

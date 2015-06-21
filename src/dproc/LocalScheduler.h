@@ -12,6 +12,7 @@
 #include "fnord/stdtypes.h"
 #include "fnord/random.h"
 #include "fnord/thread/taskscheduler.h"
+#include "fnord/thread/ThreadPool.h"
 #include "fnord/thread/FixedSizeThreadPool.h"
 #include <dproc/Application.h>
 #include <dproc/Scheduler.h>
@@ -27,7 +28,6 @@ public:
 
   LocalScheduler(
       const String& tempdir = "/tmp",
-      size_t max_threads = 8,
       size_t max_requests = 32);
 
   RefPtr<TaskResultFuture> run(
@@ -86,7 +86,7 @@ protected:
   size_t max_threads_;
   size_t num_threads_;
   Random rnd_;
-  thread::FixedSizeThreadPool tpool_;
+  thread::CachedThreadPool work_tpool_;
   thread::FixedSizeThreadPool req_tpool_;
 };
 
