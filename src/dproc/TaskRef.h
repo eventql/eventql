@@ -66,5 +66,17 @@ protected:
   RefPtr<RDD> instance_;
 };
 
+template <typename TaskType>
+RefPtr<TaskType> TaskRef::getInstanceAs() const {
+  auto instance = getInstance();
+
+  auto cast = dynamic_cast<TaskType*>(instance.get());
+  if (cast == nullptr) {
+    RAISE(kTypeError, "can't make TaskRef into requested TaskType");
+  }
+
+  return mkRef(cast);
+}
+
 } // namespace dproc
 
