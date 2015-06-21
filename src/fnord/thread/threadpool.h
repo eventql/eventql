@@ -49,6 +49,8 @@ protected:
   std::atomic<int> free_threads_;
 };
 
+using CachedThreadPool = ThreadPool;
+
 }
 }
 #endif
