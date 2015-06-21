@@ -1,8 +1,6 @@
 cmake_minimum_required(VERSION 2.8.8)
 project(libfnord)
 
-option(ENABLE_TESTS "Build unit tests [default: ON]" ON)
-
 # INCLUDES
 set(MODULE_INCLUDE
     ${PROJECT_BINARY_DIR}
