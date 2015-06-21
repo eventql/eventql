@@ -10,17 +10,9 @@
 #ifndef _FNORD_CURRENCY_H
 #define _FNORD_CURRENCY_H
 #include "fnord/stdtypes.h"
+#include "fnord/Currency.pb.h"
 
 namespace fnord {
-
-enum class Currency : uint16_t {
-  UNKNOWN = 0,
-  EUR = 1,
-  PLN = 2,
-  USD = 3
-};
-
-const uint16_t kMaxCurrency = 3;
 
 Currency currencyFromString(const String& string);
 String currencyToString(Currency lang);

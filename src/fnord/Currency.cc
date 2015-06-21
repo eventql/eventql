@@ -49,19 +49,19 @@ Currency currencyFromString(const String& string) {
   String s(string);
   StringUtil::toLower(&s);
 
-  if (s == "eur") return Currency::EUR;
-  if (s == "pln") return Currency::PLN;
-  if (s == "usd") return Currency::USD;
+  if (s == "eur") return CURRENCY_EUR;
+  if (s == "pln") return CURRENCY_PLN;
+  if (s == "usd") return CURRENCY_USD;
 
-  return Currency::UNKNOWN;
+  return CURRENCY_UNKNOWN;
 }
 
 String currencyToString(Currency lang) {
   switch (lang) {
-    case Currency::UNKNOWN: return "unknown";
-    case Currency::EUR: return "EUR";
-    case Currency::PLN: return "PLN";
-    case Currency::USD: return "USD";
+    case CURRENCY_UNKNOWN: return "unknown";
+    case CURRENCY_EUR: return "EUR";
+    case CURRENCY_PLN: return "PLN";
+    case CURRENCY_USD: return "USD";
   }
 }
 
