@@ -80,8 +80,7 @@ void TSDBTableScan<ScanletType>::scanWithoutIndex(
 template <typename ScanletType>
 void TSDBTableScan<ScanletType>::scanWithCSTableIndex(
     dproc::TaskContext* context) {
-  // FIXPAUL use getDepedencyResult
-  auto dep = context->getDependency(0).asInstanceOf<CSTableIndex>();
+  auto dep = context->getDependency(0)->getInstanceAs<CSTableIndex>();
   auto data = dep->encode();
 
   cstable::CSTableReader reader(data);
