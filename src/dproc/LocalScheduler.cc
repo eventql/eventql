@@ -293,7 +293,10 @@ void LocalScheduler::runTask(
 
         case StorageLevel::DISK:
           task->task_ref = RefPtr<TaskRef>(
-              new DiskTaskRef(task->cache_filename, task->task_factory));
+              new DiskTaskRef(
+                  task->cache_filename,
+                  task->task_factory,
+                  rdd->contentType()));
           break;
 
       }
@@ -329,7 +332,11 @@ LocalScheduler::LocalTaskContext::LocalTaskContext(
     cancelled(false) {}
 
 void LocalScheduler::LocalTaskContext::readCache() {
-  task_ref = RefPtr<TaskRef>(new DiskTaskRef(cache_filename, task_factory));
+  task_ref = RefPtr<TaskRef>(
+      new DiskTaskRef(
+          cache_filename,
+          task_factory,
+          "application/octet-stream")); // FIXPAUL!
 }
 
 RefPtr<dproc::RDD> LocalScheduler::LocalTaskContext::getDependency(size_t index) {

@@ -26,6 +26,8 @@ public:
 
   virtual RefPtr<VFSFile> getData() const = 0;
 
+  virtual String contentType() const = 0;
+
 };
 
 class DiskTaskRef : public TaskRef {
@@ -34,14 +36,19 @@ public:
 
   DiskTaskRef(
       const String& filename,
-      const InstanceFactoryFn factory);
+      const InstanceFactoryFn factory,
+      const String& content_type);
 
   RefPtr<RDD> getInstance() const override;
 
   RefPtr<VFSFile> getData() const override;
 
+  virtual String contentType() const override;
+
 protected:
   String filename_;
+  InstanceFactoryFn factory_;
+  String content_type_;
 };
 
 class LiveTaskRef : public TaskRef {
@@ -52,6 +59,8 @@ public:
   RefPtr<RDD> getInstance() const override;
 
   RefPtr<VFSFile> getData() const override;
+
+  virtual String contentType() const override;
 
 protected:
   RefPtr<RDD> instance_;

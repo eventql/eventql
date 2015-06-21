@@ -18,6 +18,7 @@ add_library(dproc OBJECT
     Application.cc
     DispatchService.cc
     TaskSpec.pb.cc
+    TaskRef.cc
     LocalScheduler.cc
     TaskResultFuture.cc
     BlobRDD.cc
