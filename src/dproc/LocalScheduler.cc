@@ -147,7 +147,11 @@ void LocalScheduler::runPipeline(
 
         auto task = taskref->task_ref->getInstance();
         auto cache_key = task->cacheKeySHA1();
-        if (!cache_key.isEmpty()) {
+        if (cache_key.isEmpty()) {
+          taskref->cache_filename = FileUtil::joinPaths(
+              tempdir_,
+              StringUtil::format("$0.tmp", rnd_.sha1().toString()));
+        } else {
           taskref->cache_filename = FileUtil::joinPaths(
               tempdir_,
               StringUtil::format("$0.rdd", cache_key.get()));
