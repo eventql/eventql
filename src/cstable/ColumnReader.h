@@ -28,8 +28,8 @@ public:
       r_max_(r_max),
       d_max_(d_max),
       reader_(data, size),
-      vals_read_(0),
       vals_total_(*reader_.readUInt64()),
+      vals_read_(0),
       rlvl_size_(*reader_.readUInt64()),
       dlvl_size_(*reader_.readUInt64()),
       data_size_(*reader_.readUInt64()),
@@ -57,13 +57,13 @@ protected:
   uint64_t d_max_;
   util::BinaryMessageReader reader_;
   size_t vals_total_;
+  size_t vals_read_;
   uint64_t rlvl_size_;
   uint64_t dlvl_size_;
   uint64_t data_size_;
   util::BitPackDecoder rlvl_reader_;
   util::BitPackDecoder dlvl_reader_;
   void* data_;
-  size_t vals_read_;
 };
 
 } // namespace cstable
