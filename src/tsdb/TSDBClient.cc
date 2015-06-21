@@ -50,7 +50,29 @@ void TSDBClient::insertRecord(const RecordEnvelope& record) {
 }
 
 void TSDBClient::insertRecords(const RecordEnvelopeList& records) {
-  auto uri = URI(StringUtil::format("$0/insert", uri_));
+  HashMap<String, List<RecordEnvelopeList>> batches;
+
+  for (const auto& r : records.records()) {
+    auto& list = batches[uri_];
+
+    if (list.empty() || list.back().records().size() > kMaxInsertBachSize) {
+      list.emplace_back();
+    }
+
+    *list.back().add_records() = r;
+  }
+
+  for (const auto& per_host : batches) {
+    for (const auto& b : per_host.second) {
+      insertRecordsToHost(per_host.first, b);
+    }
+  }
+}
+
+void TSDBClient::insertRecordsToHost(
+    const String& host,
+    const RecordEnvelopeList& records) {
+  auto uri = URI(StringUtil::format("$0/insert", host));
 
   http::HTTPRequest req(http::HTTPMessage::M_POST, uri.pathAndQuery());
   req.addHeader("Host", uri.hostAndPort());

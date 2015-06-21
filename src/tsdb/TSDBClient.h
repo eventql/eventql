@@ -23,6 +23,7 @@ namespace tsdb {
 
 class TSDBClient {
 public:
+  size_t kMaxInsertBachSize = 1024;
 
   TSDBClient(
       const String& uri,
@@ -70,6 +71,11 @@ public:
   uint64_t mkMessageID();
 
 protected:
+
+  void insertRecordsToHost(
+      const String& host,
+      const RecordEnvelopeList& records);
+
   String uri_;
   http::HTTPConnectionPool* http_;
   Random rnd_;
