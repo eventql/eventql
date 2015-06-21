@@ -33,6 +33,11 @@ public:
       JSONObject::const_iterator end,
       const std::string& key);
 
+  static Option<bool> objectGetBool(
+      JSONObject::const_iterator begin,
+      JSONObject::const_iterator end,
+      const std::string& key);
+
   static size_t arrayLength(
       JSONObject::const_iterator begin,
       JSONObject::const_iterator end);

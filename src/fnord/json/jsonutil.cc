@@ -38,6 +38,34 @@ Option<uint64_t> JSONUtil::objectGetUInt64(
   }
 }
 
+Option<bool> JSONUtil::objectGetBool(
+    JSONObject::const_iterator begin,
+    JSONObject::const_iterator end,
+    const std::string& key) {
+  auto iter = objectLookup(begin, end, key);
+
+  if (iter != end) {
+    switch (iter->type) {
+
+      case JSON_TRUE:
+        return Some<bool>(true);
+
+      case JSON_FALSE:
+        return Some<bool>(false);
+
+      case JSON_STRING:
+        if (iter->data == "true" || iter->data == "TRUE")
+          return Some<bool>(true);
+        if (iter->data == "false" || iter->data == "FALSE")
+          return Some<bool>(false);
+
+        /* fallthrough */
+    }
+  }
+
+  return None<bool>();
+}
+
 JSONObject::const_iterator JSONUtil::objectLookup(
     JSONObject::const_iterator begin,
     JSONObject::const_iterator end,
