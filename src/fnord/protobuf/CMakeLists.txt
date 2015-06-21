@@ -25,6 +25,8 @@ add_library(fnord-protobuf OBJECT
     MessageObject.cc
     MessageSchema.cc)
 
+add_dependencies(fnord-protobuf fnord-base)
+
 set(FNORD_PROTOBUF_LIBS
     ${CMAKE_THREAD_LIBS_INIT}
     ${PROTOBUF_LIBRARIES}
