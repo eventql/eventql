@@ -22,7 +22,10 @@ typename ScanletType::ResultType TSDBTableScan<ScanletType>::mergeResults(
     dproc::TaskContext* context,
     RefPtr<ScanletType> scanlet) {
   for (int i = 0; i < context->numDependencies(); ++i) {
-    auto shard = context->getDependencyAs<TSDBTableScan<ScanletType>>(i);
+    auto shard = context
+        ->getDependency(i)
+        ->getInstanceAs<TSDBTableScan<ScanletType>>();
+
     scanlet->merge(*shard->result());
   }
 
