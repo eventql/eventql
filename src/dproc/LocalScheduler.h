@@ -12,7 +12,7 @@
 #include "fnord/stdtypes.h"
 #include "fnord/random.h"
 #include "fnord/thread/taskscheduler.h"
-#include "fnord/thread/ThreadPool.h"
+#include "fnord/thread/threadpool.h"
 #include "fnord/thread/FixedSizeThreadPool.h"
 #include <dproc/Application.h>
 #include <dproc/Scheduler.h>
