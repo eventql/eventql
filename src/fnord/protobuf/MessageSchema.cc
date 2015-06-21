@@ -11,8 +11,8 @@
 #include <fnord/exception.h>
 #include <fnord/inspect.h>
 #include <fnord/protobuf/MessageSchema.h>
-#include <fnord/protobuf/CodingOptions.pb.h>
 #include <fnord/protobuf/msg.h>
+#include <fnord/CodingOptions.pb.h>
 
 namespace fnord {
 namespace msg {
