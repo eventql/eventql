@@ -339,13 +339,13 @@ void LocalScheduler::LocalTaskContext::readCache() {
           "application/octet-stream")); // FIXPAUL!
 }
 
-RefPtr<dproc::RDD> LocalScheduler::LocalTaskContext::getDependency(size_t index) {
+RefPtr<TaskRef> LocalScheduler::LocalTaskContext::getDependency(size_t index) {
   if (index >= dependencies.size()) {
     RAISEF(kIndexError, "invalid dependecy index: $0", index);
   }
 
   const auto& dep = dependencies[index];
-  //return dynamic_cast<dproc::RDD*>(dep->task.get());
+  return dep->task_ref;
 }
 
 size_t LocalScheduler::LocalTaskContext::numDependencies() const {

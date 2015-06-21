@@ -46,7 +46,7 @@ protected:
         const String& task_name,
         const Buffer& params);
 
-    RefPtr<dproc::RDD> getDependency(size_t index) override;
+    RefPtr<dproc::TaskRef> getDependency(size_t index) override;
     size_t numDependencies() const override;
     bool isCancelled() const override;
 

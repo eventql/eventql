@@ -25,6 +25,7 @@ namespace dproc {
 
 class Task;
 class TaskContext;
+class TaskRef;
 
 typedef Function<RefPtr<Task> (const Buffer& params)> TaskFactory;
 
@@ -92,10 +93,7 @@ public:
 
   virtual ~TaskContext() {}
 
-  template <typename TaskType>
-  RefPtr<TaskType> getDependencyAs(size_t index);
-
-  virtual RefPtr<RDD> getDependency(size_t index) = 0;
+  virtual RefPtr<TaskRef> getDependency(size_t index) = 0;
 
   virtual size_t numDependencies() const = 0;
 
@@ -117,11 +115,6 @@ protected:
   ProtoType data_;
 };
 
-template <typename TaskType>
-RefPtr<TaskType> TaskContext::getDependencyAs(size_t index) {
-  return getDependency(index).asInstanceOf<TaskType>();
-}
-
 template <typename ProtoType>
 RefPtr<VFSFile> ProtoRDD<ProtoType>::encode() const {
   return msg::encode(data_).get();
@@ -134,4 +127,5 @@ void ProtoRDD<ProtoType>::decode(RefPtr<VFSFile> data) {
 
 } // namespace dproc
 
+#include <dproc/TaskRef.h>
 #endif
