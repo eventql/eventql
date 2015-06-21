@@ -11,6 +11,7 @@
 #include <stdarg.h>
 #include <string.h>
 #include <fnord/exception.h>
+#include <fnord/io/outputstream.h>
 
 namespace fnord {
 

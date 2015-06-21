@@ -7,8 +7,8 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#ifndef _FNORD_BASE_AUTOREF_IMPL_H
-#define _FNORD_BASE_AUTOREF_IMPL_H
+#pragma once
+#include <fnord/exception.h>
 
 namespace fnord {
 
@@ -76,7 +76,12 @@ T* AutoRef<T>::release() {
 template <typename T>
 template <typename T_>
 AutoRef<T_> AutoRef<T>::asInstanceOf() const {
-  return AutoRef<T_>(dynamic_cast<T_*>(ref_));
+  auto cast = dynamic_cast<T_*>(ref_);
+  if (cast == nullptr) {
+    RAISE(kTypeError, "can't make referenced pointer into requested type");
+  }
+
+  return AutoRef<T_>(cast);
 }
 
 template <typename T>
@@ -85,4 +90,3 @@ AutoRef<T> mkRef(T* ptr) {
 }
 
 } // namespace fnord
-#endif

@@ -14,7 +14,6 @@
 #include <string>
 #include "fnord/stringutil.h"
 #include "fnord/stdtypes.h"
-#include "fnord/io/outputstream.h"
 
 const char kBufferOverflowError[] = "BufferOverflowError";
 const char kEncodingError[] = "EncodingError";
@@ -70,6 +69,8 @@ const char kFutureError[] = "FutureError";
 #define __brk raise(SIGTRAP); while (0) {}
 
 namespace fnord {
+
+class OutputStream;
 
 using StandardException = std::exception;
 
