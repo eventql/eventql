@@ -30,10 +30,11 @@ CSTableIndex::CSTableIndex(
 RefPtr<VFSFile> CSTableIndex::computeBlob(dproc::TaskContext* context) {
   fnord::logDebug(
       "fnord.tsdb",
-      "Building cstable: stream=$0 partition=$1 schema=$2",
+      "Building cstable: stream=$0 partition=$1 schema=$2 version=$3",
       params_.stream_key(),
       params_.partition_key(),
-      params_.schema_name());
+      params_.schema_name(),
+      params_.version());
 
   cstable::CSTableBuilder cstable(schema_.get());
 
