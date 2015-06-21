@@ -36,7 +36,7 @@ CSTableReader::CSTableReader(const RefPtr<VFSFile> file) : file_(file) {
     RAISEF(kIllegalStateError, "unsupported sstable version: $0", version);
   }
 
-  //auto flags = *header.readUInt64();
+  auto flags = *header.readUInt64();
   num_records_ = *header.readUInt64();
   num_columns_ = *header.readUInt32();
 
