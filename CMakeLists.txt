@@ -7,14 +7,15 @@ project(cmapp)
 
 option(ENABLE_TESTS "Build unit tests [default: ON]" ON)
 
-set(CMAKE_CXX_FLAGS "-ftemplate-depth=500 ${CMAKE_CXX_FLAGS}")
-# set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fsanitize=address -g")
+set(CMAKE_CXX_FLAGS "-std=c++0x -ftemplate-depth=500 -mno-omit-leaf-frame-pointer -fno-omit-frame-pointer ${CMAKE_CXX_FLAGS}")
+# set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -pedantic -fsanitize=address -g")
+
+set(CMAKE_EXE_LINKER_FLAGS "-lprotobuf ${CMAKE_EXE_LINKER_FLAGS}")
 
 if(APPLE)
-  set(CMAKE_CXX_FLAGS "-std=c++0x ${CMAKE_CXX_FLAGS} -stdlib=libc++ ")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++ ")
 else()
-  set(CMAKE_CXX_FLAGS "-std=c++0x ${CMAKE_CXX_FLAGS}")
-  set(CMAKE_EXE_LINKER_FLAGS "-ldl -static-libstdc++ -static-libgcc")
+  set(CMAKE_EXE_LINKER_FLAGS "-ldl -static-libstdc++ -static-libgcc ${CMAKE_EXE_LINKER_FLAGS}")
   set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
   set(BUILD_SHARED_LIBRARIES OFF)
   set(CMAKE_EXE_LINK_DYNAMIC_C_FLAGS)       # remove -Wl,-Bdynamic
