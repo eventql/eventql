@@ -9,6 +9,7 @@
  */
 #include <dproc/TaskRef.h>
 #include <fnord/io/mmappedfile.h>
+#include <fnord/io/fileutil.h>
 
 using namespace fnord;
 
@@ -32,6 +33,10 @@ RefPtr<VFSFile> DiskTaskRef::getData() const {
   return new io::MmappedFile(File::openFile(filename_, File::O_READ));
 }
 
+void DiskTaskRef::saveToFile(const String& filename) const {
+  FileUtil::cp(filename_, filename);
+}
+
 String DiskTaskRef::contentType() const {
   return content_type_;
 }
@@ -48,6 +53,15 @@ RefPtr<VFSFile> LiveTaskRef::getData() const {
 
 String LiveTaskRef::contentType() const {
   return instance_->contentType();
+}
+
+void LiveTaskRef::saveToFile(const String& filename) const {
+  auto file = File::openFile(
+      filename,
+      File::O_WRITE | File::O_CREATEOROPEN | File::O_TRUNCATE);
+
+  auto data = getData();
+  file.write(data->data(), data->size());
 }
 
 } // namespace dproc

@@ -10,6 +10,7 @@
 #pragma once
 #include <fnord/stdtypes.h>
 #include <fnord/autoref.h>
+#include <fnord/io/file.h>
 #include <dproc/Task.h>
 
 using namespace fnord;
@@ -28,6 +29,8 @@ public:
 
   virtual String contentType() const = 0;
 
+  virtual void saveToFile(const String& filename) const = 0;
+
 };
 
 class DiskTaskRef : public TaskRef {
@@ -45,6 +48,8 @@ public:
 
   virtual String contentType() const override;
 
+  void saveToFile(const String& filename) const override;
+
 protected:
   String filename_;
   InstanceFactoryFn factory_;
@@ -61,6 +66,8 @@ public:
   RefPtr<VFSFile> getData() const override;
 
   virtual String contentType() const override;
+
+  void saveToFile(const String& filename) const override;
 
 protected:
   RefPtr<RDD> instance_;
