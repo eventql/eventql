@@ -280,25 +280,23 @@ void LocalScheduler::runTask(
 
       rdd->compute(task.get());
 
-      if (!task->cache_filename.empty()) {
-        auto cache_file = task->cache_filename;
-        auto cache = rdd->encode();
-
-        auto f = File::openFile(
-            cache_file + "~",
-            File::O_CREATEOROPEN | File::O_WRITE | File::O_TRUNCATE);
-
-        f.write(cache->data(), cache->size());
-
-        FileUtil::mv(cache_file + "~", cache_file);
-      }
-
       switch (rdd->storageLevel()) {
 
         case StorageLevel::MEMORY:
           break;
 
         case StorageLevel::DISK:
+          auto cache_file = task->cache_filename;
+          auto cache = rdd->encode();
+
+          auto f = File::openFile(
+              cache_file + "~",
+              File::O_CREATEOROPEN | File::O_WRITE | File::O_TRUNCATE);
+
+          f.write(cache->data(), cache->size());
+
+          FileUtil::mv(cache_file + "~", cache_file);
+
           task->task_ref = RefPtr<TaskRef>(
               new DiskTaskRef(
                   task->cache_filename,
