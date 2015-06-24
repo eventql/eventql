@@ -9,19 +9,16 @@
  */
 #pragma once
 #include <fnord/stdtypes.h>
-#include <chartsql/qtree/ScalarExpressionNode.h>
+#include <chartsql/svalue.h>
 
 using namespace fnord;
 
 namespace csql {
 
-class FieldReferenceNode : public ScalarExpressionNode {
+class Statement : public RefCounted {
 public:
-
-  FieldReferenceNode(const String& field_name);
-
-protected:
-  String field_name_;
+  virtual ~Statement() {}
+  virtual void execute(Function<bool (int argc, const SValue* argv)> fn) = 0;
 };
 
-} // namespace csql
+}

@@ -7,21 +7,18 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#pragma once
-#include <fnord/stdtypes.h>
-#include <chartsql/qtree/ScalarExpressionNode.h>
+#include <chartsql/qtree/BuiltinExpressionNode.h>
 
 using namespace fnord;
 
 namespace csql {
 
-class FieldReferenceNode : public ScalarExpressionNode {
-public:
+BuiltinExpressionNode::BuiltinExpressionNode(
+    const String& symbol,
+    Vector<RefPtr<ScalarExpressionNode>> arguments) :
+    symbol_(symbol),
+    arguments_(arguments) {}
 
-  FieldReferenceNode(const String& field_name);
-
-protected:
-  String field_name_;
-};
 
 } // namespace csql
+

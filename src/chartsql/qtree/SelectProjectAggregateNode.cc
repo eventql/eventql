@@ -7,21 +7,16 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#pragma once
-#include <fnord/stdtypes.h>
-#include <chartsql/qtree/ScalarExpressionNode.h>
+#include <chartsql/qtree/SelectProjectAggregateNode.h>
 
 using namespace fnord;
 
 namespace csql {
 
-class FieldReferenceNode : public ScalarExpressionNode {
-public:
-
-  FieldReferenceNode(const String& field_name);
-
-protected:
-  String field_name_;
-};
+SelectProjectAggregateNode::SelectProjectAggregateNode(
+    Vector<RefPtr<ScalarExpressionNode>> select_list,
+    RefPtr<ScalarExpressionNode> where_expr) :
+    select_list_(select_list),
+    where_expr_(where_expr) {}
 
 } // namespace csql
