@@ -7,6 +7,7 @@
 # <http://www.gnu.org/licenses/>.
 add_library(chartsql-lib OBJECT
     svalue.cc
+    Expression.cc
     format.cc
     areachartbuilder.cc
     barchartbuilder.cc
