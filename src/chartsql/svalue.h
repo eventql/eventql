@@ -89,3 +89,12 @@ protected:
 };
 
 }
+
+namespace std {
+
+template <>
+struct hash<csql::SValue> {
+  size_t operator()(const csql::SValue& sval) const;
+};
+
+}

@@ -484,3 +484,11 @@ std::string inspect<csql::SValue::kSValueType>(
 }
 
 }
+
+namespace std {
+
+size_t hash<csql::SValue>::operator()(const csql::SValue& sval) const {
+  return hash<std::string>()(sval.toString()); // FIXPAUL
+}
+
+}
