@@ -9,6 +9,7 @@
  */
 #pragma once
 #include <fnord/stdtypes.h>
+#include <fnord/autoref.h>
 #include <chartsql/svalue.h>
 
 using namespace fnord;
