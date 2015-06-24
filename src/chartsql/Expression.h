@@ -9,6 +9,10 @@
  */
 #pragma once
 #include <fnord/stdtypes.h>
+#include <fnord/ieee754.h>
+#include <fnord/util/binarymessagereader.h>
+#include <fnord/util/binarymessagewriter.h>
+#include <chartsql/svalue.h>
 
 using namespace fnord;
 
@@ -41,9 +45,17 @@ struct AggregateExpression {
  * computed commutatively
  */
 struct CommutativeExpression : public AggregateExpression {
+  virtual void dumpTo(util::BinaryMessageWriter* data) = 0;
+  virtual void mergeFrom(util::BinaryMessageReader* data) = 0;
+};
 
-  virtual void merge(const CommutativeExpression* other) = 0;
 
+struct SumExpression : public CommutativeExpression {
+  SumExpression();
+  void result(SValue* out) override;
+  void dumpTo(util::BinaryMessageWriter* data);
+  void mergeFrom(util::BinaryMessageReader* data);
+  double value;
 };
 
 }
