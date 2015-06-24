@@ -18,12 +18,6 @@ namespace csql {
 class ScalarExpressionNode : public QueryTreeNode {
 public:
 
-  ScalarExpressionNode(
-      const String& symbol,
-      Vector<RefPtr<ScalarExpressionNode>> arguments);
-
-protected:
-  Vector<RefPtr<ScalarExpressionNode>> arguments_;
 };
 
 } // namespace csql

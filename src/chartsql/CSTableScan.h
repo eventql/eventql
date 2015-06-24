@@ -9,19 +9,25 @@
  */
 #pragma once
 #include <fnord/stdtypes.h>
-#include <chartsql/qtree/ScalarExpressionNode.h>
+#include <chartsql/Statement.h>
+#include <chartsql/qtree/SelectProjectAggregateNode.h>
+#include <cstable/CSTableReader.h>
 
 using namespace fnord;
 
 namespace csql {
 
-class FieldReferenceNode : public ScalarExpressionNode {
+class CSTableScan : public Statement {
 public:
 
-  FieldReferenceNode(const String& field_name);
+  CSTableScan(
+      RefPtr<SelectProjectAggregateNode> stmt,
+      cstable::CSTableReader&& cstable);
+
+  void execute(Function<bool (int argc, const SValue* argv)> fn) override;
 
 protected:
-  String field_name_;
+  cstable::CSTableReader reader_;
 };
 
 } // namespace csql

@@ -15,13 +15,16 @@ using namespace fnord;
 
 namespace csql {
 
-class FieldReferenceNode : public ScalarExpressionNode {
+class BuiltinExpressionNode : public ScalarExpressionNode {
 public:
 
-  FieldReferenceNode(const String& field_name);
+  BuiltinExpressionNode(
+      const String& symbol,
+      Vector<RefPtr<ScalarExpressionNode>> arguments);
 
 protected:
-  String field_name_;
+  String symbol_;
+  Vector<RefPtr<ScalarExpressionNode>> arguments_;
 };
 
 } // namespace csql
