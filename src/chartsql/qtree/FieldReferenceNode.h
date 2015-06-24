@@ -20,6 +20,10 @@ public:
 
   FieldReferenceNode(const String& field_name);
 
+  const String& fieldName() const;
+
+  Vector<RefPtr<ScalarExpressionNode>> arguments() const override;
+
 protected:
   String field_name_;
 };

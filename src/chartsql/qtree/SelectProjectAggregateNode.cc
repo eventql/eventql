@@ -19,4 +19,9 @@ SelectProjectAggregateNode::SelectProjectAggregateNode(
     select_list_(select_list),
     where_expr_(where_expr) {}
 
+Vector<RefPtr<ScalarExpressionNode>> SelectProjectAggregateNode::selectList()
+    const {
+  return select_list_;
+}
+
 } // namespace csql

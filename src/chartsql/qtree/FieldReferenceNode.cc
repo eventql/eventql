@@ -17,4 +17,12 @@ FieldReferenceNode::FieldReferenceNode(
     const String& field_name) :
     field_name_(field_name) {}
 
+const String& FieldReferenceNode::fieldName() const {
+  return field_name_;
+}
+
+Vector<RefPtr<ScalarExpressionNode>> FieldReferenceNode::arguments() const {
+  return Vector<RefPtr<ScalarExpressionNode>>{};
+}
+
 } // namespace csql
