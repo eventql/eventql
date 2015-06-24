@@ -9,6 +9,7 @@
  */
 #pragma once
 #include <fnord/stdtypes.h>
+#include <fnord/protobuf/MessageSchema.h>
 #include <chartsql/Statement.h>
 #include <chartsql/qtree/SelectProjectAggregateNode.h>
 #include <cstable/CSTableReader.h>
@@ -27,7 +28,32 @@ public:
   void execute(Function<bool (int argc, const SValue* argv)> fn) override;
 
 protected:
-  cstable::CSTableReader reader_;
+
+  struct ColumnRef {
+    ColumnRef(const String& name);
+
+    const String column_name;
+    void* cur_data;
+    size_t cur_size;
+
+    uint32_t getUInt32() const;
+    bool getBool() const;
+    String getString() const;
+  };
+
+  struct ExpressionRef {
+    size_t rep_level;
+  };
+
+  void findColumns(
+      RefPtr<ScalarExpressionNode> expr,
+      Set<String>* column_names) const;
+
+  uint64_t findMaxRepetitionLevel(RefPtr<ScalarExpressionNode> expr) const;
+
+  cstable::CSTableReader cstable_;
+  HashMap<String, RefPtr<cstable::ColumnReader>> columns_;
+  Vector<ExpressionRef> select_list_;
 };
 
 } // namespace csql

@@ -19,6 +19,9 @@ BuiltinExpressionNode::BuiltinExpressionNode(
     symbol_(symbol),
     arguments_(arguments) {}
 
+Vector<RefPtr<ScalarExpressionNode>> BuiltinExpressionNode::arguments() const {
+  return arguments_;
+}
 
 } // namespace csql
 
