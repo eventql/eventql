@@ -23,6 +23,8 @@ public:
       Vector<RefPtr<ScalarExpressionNode>> select_list,
       RefPtr<ScalarExpressionNode> where_expr);
 
+  Vector<RefPtr<ScalarExpressionNode>> selectList() const;
+
 protected:
   Vector<RefPtr<ScalarExpressionNode>> select_list_;
   RefPtr<ScalarExpressionNode> where_expr_;
