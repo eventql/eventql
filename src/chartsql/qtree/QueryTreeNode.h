@@ -20,4 +20,9 @@ public:
   virtual ~QueryTreeNode() {}
 };
 
+class StatementNode : public QueryTreeNode {
+public:
+
+};
+
 } // namespace csql
