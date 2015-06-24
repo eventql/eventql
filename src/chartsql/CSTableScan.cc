@@ -18,7 +18,7 @@ namespace csql {
 CSTableScan::CSTableScan(
     RefPtr<SelectProjectAggregateNode> stmt,
     cstable::CSTableReader&& cstable) :
-    cstable_(std::move(cstable)){
+    cstable_(std::move(cstable)) {
 
   Set<String> column_names;
   for (const auto& expr : stmt->selectList()) {
@@ -26,7 +26,7 @@ CSTableScan::CSTableScan(
   }
 
   for (const auto& col : column_names) {
-    columns_.emplace(col, cstable_.getColumnReader(col));
+    columns_.emplace(col, ColumnRef(cstable_.getColumnReader(col)));
   }
 
   //fnord::iputs("all cols: $0", column_names);
@@ -39,7 +39,49 @@ CSTableScan::CSTableScan(
 }
 
 void CSTableScan::execute(Function<bool (int argc, const SValue* argv)> fn) {
-  RAISE(kNotYetImplementedError);
+  uint64_t select_level = 0;
+  uint64_t fetch_level = 0;
+
+  size_t n = 0; //debug
+
+  size_t num_records = 0;
+  size_t total_records = cstable_.numRecords();
+  while (num_records < total_records) {
+    uint64_t next_level = 0;
+
+    if (fetch_level == 0) {
+      ++num_records;
+    }
+
+    for (auto& col : columns_) {
+      if (col.second.reader->nextRepetitionLevel() >= fetch_level) {
+        uint64_t r;
+        uint64_t d;
+        col.second.reader->next(
+            &r,
+            &d,
+            &col.second.cur_data,
+            &col.second.cur_size);
+      }
+
+      next_level = std::max(next_level, col.second.reader->nextRepetitionLevel());
+    }
+
+    fetch_level = next_level;
+
+    if (true) { // where clause
+      for (auto& e : select_list_) {
+        if (e.rep_level >= select_level) {
+        }
+      }
+
+      //fnord::iputs("emit row... $0", ++n);
+
+      select_level = fetch_level;
+    } else {
+      select_level = std::min(select_level, fetch_level);
+    }
+  }
 }
 
 void CSTableScan::findColumns(
@@ -66,7 +108,7 @@ uint64_t CSTableScan::findMaxRepetitionLevel(
       RAISE(kIllegalStateError);
     }
 
-    auto col_level = col->second->maxRepetitionLevel();
+    auto col_level = col->second.reader->maxRepetitionLevel();
     if (col_level > max_level) {
       max_level = col_level;
     }
@@ -81,5 +123,11 @@ uint64_t CSTableScan::findMaxRepetitionLevel(
 
   return max_level;
 }
+
+CSTableScan::ColumnRef::ColumnRef(
+    RefPtr<cstable::ColumnReader> r) :
+    reader(r),
+    cur_data(nullptr),
+    cur_size(0) {}
 
 } // namespace csql

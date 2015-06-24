@@ -30,15 +30,11 @@ public:
 protected:
 
   struct ColumnRef {
-    ColumnRef(const String& name);
+    ColumnRef(RefPtr<cstable::ColumnReader> r);
 
-    const String column_name;
+    RefPtr<cstable::ColumnReader> reader;
     void* cur_data;
     size_t cur_size;
-
-    uint32_t getUInt32() const;
-    bool getBool() const;
-    String getString() const;
   };
 
   struct ExpressionRef {
@@ -51,8 +47,10 @@ protected:
 
   uint64_t findMaxRepetitionLevel(RefPtr<ScalarExpressionNode> expr) const;
 
+  void fetch();
+
   cstable::CSTableReader cstable_;
-  HashMap<String, RefPtr<cstable::ColumnReader>> columns_;
+  HashMap<String, ColumnRef> columns_;
   Vector<ExpressionRef> select_list_;
 };
 
