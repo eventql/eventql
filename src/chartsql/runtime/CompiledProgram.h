@@ -19,6 +19,8 @@ namespace csql {
 
 enum kCompiledExpressionType {
   X_CALL,
+  X_CALL_PURE,
+  X_CALL_AGGREGATE,
   X_LITERAL,
   X_INPUT,
   X_MULTI
@@ -60,6 +62,13 @@ public:
   void reset(Instance* instance) const;
 
 protected:
+
+  void evaluate(
+      Instance* instance,
+      CompiledExpression* expr,
+      int argc,
+      const SValue* argv,
+      SValue* out) const;
 
   void init(CompiledExpression* e, Instance* instance) const;
   void free(CompiledExpression* e, Instance* instance) const;
