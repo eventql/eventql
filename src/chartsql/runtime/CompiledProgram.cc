@@ -60,6 +60,9 @@ void CompiledProgram::free(CompiledExpression* e, Instance* instance) const {
     case X_CALL_AGGREGATE:
         fnord::iputs("free aggr: $0", (uint64_t) e);
 
+    case X_LITERAL:
+        fnord::iputs("free literal: $0", (uint64_t) e);
+
     default:
       break;
   }
@@ -72,7 +75,9 @@ void CompiledProgram::free(CompiledExpression* e, Instance* instance) const {
 void CompiledProgram::reset(CompiledExpression* e, Instance* instance) const {
   switch (e->type) {
     case X_CALL_AGGREGATE:
-        fnord::iputs("reset aggr: $0", (uint64_t) e);
+      e->vtable.t_aggregate.reset(
+          (char *) instance->scratch + (size_t) e->arg0);
+      break;
 
     default:
       break;
@@ -95,6 +100,7 @@ void CompiledProgram::accumulate(
     Instance* instance,
     int argc,
     const SValue* argv) const {
+  return accumulate(instance, expr_, argc, argv);
 }
 
 void CompiledProgram::evaluate(
@@ -135,7 +141,6 @@ void CompiledProgram::evaluate(
 
     case X_CALL_AGGREGATE: {
       auto scratch = (char *) instance->scratch + (size_t) expr->arg0;
-      fnord::iputs("call with scratch @ $0", (uint64_t) scratch);
       expr->vtable.t_aggregate.get(scratch, out);
       return;
     }
@@ -160,13 +165,52 @@ void CompiledProgram::evaluate(
 
 }
 
-//void accumulate(
-//    Instance* instance,
-//    int argc,
-//    const SValue* argv);
-//
 
-//
-//void reset(Instance* instance);
+void CompiledProgram::accumulate(
+    Instance* instance,
+    CompiledExpression* expr,
+    int argc,
+    const SValue* argv) const {
+
+  switch (expr->type) {
+
+    case X_CALL_AGGREGATE: {
+      SValue* stackv = nullptr;
+      auto stackn = expr->argn;
+      if (stackn > 0) {
+        stackv = reinterpret_cast<SValue*>(
+            alloca(sizeof(SValue) * expr->argn));
+
+        for (int i = 0; i < stackn; ++i) {
+          new (stackv + i) SValue();
+        }
+
+        auto stackp = stackv;
+        for (auto cur = expr->child; cur != nullptr; cur = cur->next) {
+          evaluate(
+              instance,
+              cur,
+              argc,
+              argv,
+              stackp++);
+        }
+      }
+
+      auto scratch = (char *) instance->scratch + (size_t) expr->arg0;
+      expr->vtable.t_aggregate.accumulate(scratch, stackn, stackv);
+      return;
+    }
+
+    default: {
+      for (auto cur = expr->child; cur != nullptr; cur = cur->next) {
+        accumulate(instance, cur, argc, argv);
+      }
+
+      return;
+    }
+
+  }
+
+}
 
 }
