@@ -35,25 +35,27 @@ struct CompiledExpression {
 class CompiledProgram {
 public:
 
+  struct Instance {
+    void* scratch;
+  };
+
   CompiledProgram(CompiledExpression* expr, size_t scratchpad_size);
 
-  void* alloc(ScratchMemory* scratch) const;
-
-  void init(void* scratchpad);
-  void free(void* scratchpad);
+  Instance allocInstance(ScratchMemory* scratch) const;
+  void freeInstance(Instance* instance);
 
   void accumulate(
-      void* scratchpad,
+      Instance* instance,
       int argc,
       const SValue* argv);
 
   void evaluate(
-      void* scratchpad,
+      Instance* instance,
       int argc,
       const SValue* argv,
       SValue* out);
 
-  void reset(void* scratchpad);
+  void reset(Instance* instance);
 
 protected:
   CompiledExpression* expr_;
