@@ -48,6 +48,10 @@ public:
   uint64_t maxRepetitionLevel() const { return r_max_; }
   uint64_t maxDefinitionLevel() const { return d_max_; }
 
+  uint64_t nextRepetitionLevel() {
+    return rlvl_reader_.peek();
+  }
+
   bool eofReached() const {
     return vals_read_ >= vals_total_;
   }
