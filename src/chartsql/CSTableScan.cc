@@ -22,7 +22,7 @@ CSTableScan::CSTableScan(
     cstable::CSTableReader&& cstable) :
     cstable_(std::move(cstable)),
     colindex_(0),
-    flat_(false) {
+    flat_(true) {
 
   Set<String> column_names;
   for (const auto& expr : stmt->selectList()) {
