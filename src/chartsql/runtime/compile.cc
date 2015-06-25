@@ -216,6 +216,7 @@ CompiledExpression* Compiler::compileColumnReference(
   ins->type = X_INPUT;
   ins->call = nullptr;
   ins->arg0 = (void *) node->columnIndex();
+  ins->argn = 0;
   ins->child = nullptr;
   ins->next  = nullptr;
   return ins;
@@ -262,23 +263,28 @@ CompiledExpression* Compiler::compileMethodCall(
 CompiledExpression* Compiler::compileMethodCall(
     RefPtr<BuiltinExpressionNode> node,
     size_t* scratchpad_size) {
-  auto symbol = symbol_table_->lookupSymbol(node->symbol());
-  if (symbol == nullptr) {
-    RAISEF(
-        kRuntimeError,
-        "error: cannot resolve symbol: $0",
-        node->symbol());
-  }
+  auto symbol = symbol_table_->lookup(node->symbol());
+  const auto& args = node->arguments();
 
   auto op = new CompiledExpression();
-  op->type = X_CALL;
-  op->call = symbol->getFnPtr();
-  op->arg0 = nullptr;
+  op->arg0  = nullptr;
+  op->argn  = args.size();
   op->child = nullptr;
   op->next  = nullptr;
 
+  switch (symbol.type) {
+    case EXP_PURE:
+      op->type = X_CALL_PURE;
+      op->vtable.t_pure = symbol.u.t_pure;
+      break;
+    case EXP_AGGREGATE:
+      op->type = X_CALL_AGGREGATE;
+      op->vtable.t_aggregate = symbol.u.t_aggregate;
+      break;
+  }
+
   auto cur = &op->child;
-  for (auto e : node->arguments()) {
+  for (auto e : args) {
     auto next = compileScalarExpression(e, scratchpad_size);
     *cur = next;
     cur = &next->next;

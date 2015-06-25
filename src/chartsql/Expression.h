@@ -47,7 +47,7 @@ struct ScalarExpression {
   union {
     PureExpression t_pure;
     AggregateExpression t_aggregate;
-  } expr;
+  } u;
 };
 
 

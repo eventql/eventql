@@ -73,6 +73,16 @@ SymbolTableEntry const* SymbolTable::lookupSymbol(const std::string& symbol)
   }
 }
 
+ScalarExpression SymbolTable::lookup(const String& symbol) const {
+  auto iter = syms_.find(symbol);
+
+  if (iter == syms_.end()) {
+    RAISEF(kRuntimeError, "symbol not found: $0", symbol);
+  }
+
+  return iter->second;
+}
+
 SymbolTableEntry::SymbolTableEntry(
     const std::string& symbol,
     void (*method)(void*, int, SValue*, SValue*),

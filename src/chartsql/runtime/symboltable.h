@@ -50,7 +50,7 @@ public:
 
   SymbolTableEntry const* lookupSymbol(const std::string& symbol) const;
 
-  const ScalarExpression* lookup(const String& symbol) const;
+  ScalarExpression lookup(const String& symbol) const;
 
   void registerSymbol(
       const std::string& symbol,
@@ -64,6 +64,7 @@ public:
 
 protected:
   std::unordered_map<std::string, SymbolTableEntry> symbols_;
+  HashMap<String, ScalarExpression> syms_;
 };
 
 }
