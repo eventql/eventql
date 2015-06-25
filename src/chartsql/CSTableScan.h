@@ -32,10 +32,7 @@ protected:
 
   struct ColumnRef {
     ColumnRef(RefPtr<cstable::ColumnReader> r, size_t i);
-
     RefPtr<cstable::ColumnReader> reader;
-    void* cur_data;
-    size_t cur_size;
     size_t index;
   };
 
@@ -46,12 +43,11 @@ protected:
         ScratchMemory* scratch);
 
     ExpressionRef(ExpressionRef&& other);
-
     ~ExpressionRef();
 
     size_t rep_level;
     ScopedPtr<CompiledProgram> compiled;
-    void* scratch;
+    CompiledProgram::Instance instance;
   };
 
   void findColumns(
