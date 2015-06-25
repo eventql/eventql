@@ -25,9 +25,22 @@ public:
 
   Vector<RefPtr<ScalarExpressionNode>> selectList() const;
 
+  /**
+   * If scanning a table that has nested records as columns/rows, this flag
+   * controls the behaviour:
+   *
+   *   - if true: return one row for each leaf record that was referenced
+   *   - if false: return one row for each source row (allowing WITHIN RECORD
+   *     aggregations)
+   */
+  bool expandNestedRecords() const;
+
+  void setExpandNestedRecords(bool expand);
+
 protected:
   Vector<RefPtr<ScalarExpressionNode>> select_list_;
   RefPtr<ScalarExpressionNode> where_expr_;
+  bool expand_nested_records_;
 };
 
 } // namespace csql
