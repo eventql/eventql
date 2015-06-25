@@ -25,6 +25,14 @@ BitPackDecoder::BitPackDecoder(
     outbuf_pos_(128) {}
 
 uint32_t BitPackDecoder::next() {
+  return fetch(true);
+}
+
+uint32_t BitPackDecoder::peek() {
+  return fetch(false);
+}
+
+uint32_t BitPackDecoder::fetch(bool advance) {
   if (maxbits_ == 0) {
     return 0;
   }
@@ -39,10 +47,14 @@ uint32_t BitPackDecoder::next() {
 
     simdunpack((__m128i*) (((char *) data_) + pos_), outbuf_, maxbits_);
     pos_ = new_pos;
-    outbuf_pos_ = 1;
+    outbuf_pos_ = advance ? 1 : 0;
     return outbuf_[0];
   } else {
-    return outbuf_[outbuf_pos_++];
+    if (advance) {
+      return outbuf_[outbuf_pos_++];
+    } else {
+      return outbuf_[outbuf_pos_];
+    }
   }
 }
 

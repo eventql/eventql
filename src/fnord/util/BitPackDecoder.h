@@ -23,8 +23,12 @@ public:
   BitPackDecoder(void* data, size_t size, uint32_t max_val);
 
   uint32_t next();
+  uint32_t peek();
 
 protected:
+
+  uint32_t fetch(bool advance);
+
   void* data_;
   size_t size_;
   size_t maxbits_;
