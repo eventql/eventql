@@ -41,6 +41,7 @@ add_library(chartsql-lib OBJECT
     qtree/FieldReferenceNode.cc
     qtree/SelectProjectAggregateNode.cc
     runtime/CompiledProgram.cc
+    runtime/ScratchMemory.cc
     runtime/runtime.cc
     runtime/symboltable.cc
     runtime/queryplannode.cc
