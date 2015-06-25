@@ -21,7 +21,8 @@ CSTableScan::CSTableScan(
     RefPtr<SelectProjectAggregateNode> stmt,
     cstable::CSTableReader&& cstable) :
     cstable_(std::move(cstable)),
-    colindex_(0) {
+    colindex_(0),
+    flat_(false) {
 
   Set<String> column_names;
   for (const auto& expr : stmt->selectList()) {
@@ -133,12 +134,14 @@ void CSTableScan::execute(Function<bool (int argc, const SValue* argv)> fn) {
         }
       }
 
-      for (int i = 0; i < select_list_.size(); ++i) {
-        select_list_[i].compiled->evaluate(
-            &select_list_[i].instance,
-            in_row.size(),
-            in_row.data(),
-            &out_row[i]);
+      if (!flat_ || next_level == 0) {
+        for (int i = 0; i < select_list_.size(); ++i) {
+          select_list_[i].compiled->evaluate(
+              &select_list_[i].instance,
+              in_row.size(),
+              in_row.data(),
+              &out_row[i]);
+        }
       }
 
       if (!fn(out_row.size(), out_row.data())) {
