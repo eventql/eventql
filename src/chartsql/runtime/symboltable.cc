@@ -22,7 +22,27 @@ void SymbolTable::registerFunction(
   ScalarExpression sym;
   sym.type = EXP_PURE;
   sym.u.t_pure.call = fn;
-  syms_.emplace(symbol, sym);
+  registerFunction(symbol, sym);
+}
+
+void SymbolTable::registerFunction(
+    const String& symbol,
+    AggregateExpression fn) {
+  ScalarExpression sym;
+  sym.type = EXP_AGGREGATE;
+  sym.u.t_aggregate.scratch_size = fn.scratch_size;
+  sym.u.t_aggregate.accumulate = fn.accumulate;
+  sym.u.t_aggregate.get = fn.get;
+  sym.u.t_aggregate.reset = fn.reset;
+  sym.u.t_aggregate.init = fn.init;
+  sym.u.t_aggregate.free = fn.free;
+  registerFunction(symbol, sym);
+}
+
+void SymbolTable::registerFunction(
+    const String& symbol,
+    ScalarExpression fn) {
+  syms_.emplace(symbol, fn);
 }
 
 void SymbolTable::registerSymbol(

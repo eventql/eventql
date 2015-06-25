@@ -76,6 +76,7 @@ protected:
 
   void init(CompiledExpression* e, Instance* instance) const;
   void free(CompiledExpression* e, Instance* instance) const;
+  void reset(CompiledExpression* e, Instance* instance) const;
 
   CompiledExpression* expr_;
   size_t scratchpad_size_;

@@ -35,11 +35,11 @@ struct PureExpression {
  */
 struct AggregateExpression {
   size_t scratch_size;
-  void (*init)(void* scratch);
   void (*accumulate)(void* scratch, int argc, SValue* in);
-  void (*get)(SValue* out);
+  void (*get)(void* scratch, SValue* out);
   void (*reset)(void* scratch);
-  void (*free)(void *scratch);
+  void (*init)(void* scratch);
+  void (*free)(void* scratch);
 };
 
 struct ScalarExpression {
