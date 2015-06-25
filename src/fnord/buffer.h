@@ -55,6 +55,7 @@ public:
    * value returned by size
    */
   size_t allocSize() const;
+  size_t capacity() const;
 
   /**
    * Reserve "size" new bytes of memory for future use. This method will not
