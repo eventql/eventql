@@ -12,6 +12,7 @@
 #include <fnord/protobuf/MessageSchema.h>
 #include <chartsql/Statement.h>
 #include <chartsql/qtree/SelectProjectAggregateNode.h>
+#include <chartsql/runtime/compile.h>
 #include <cstable/CSTableReader.h>
 
 using namespace fnord;
@@ -39,6 +40,7 @@ protected:
 
   struct ExpressionRef {
     size_t rep_level;
+    ScopedPtr<CompiledExpression> compiled;
   };
 
   void findColumns(

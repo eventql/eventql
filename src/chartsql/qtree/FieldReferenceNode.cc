@@ -25,4 +25,17 @@ Vector<RefPtr<ScalarExpressionNode>> FieldReferenceNode::arguments() const {
   return Vector<RefPtr<ScalarExpressionNode>>{};
 }
 
+size_t FieldReferenceNode::columnIndex() const {
+  if (column_index_.isEmpty()) {
+    RAISE(
+        kRuntimeError,
+        "internal error: columnIndex called on a unresolved ColumnReference. "
+        "did you try to execute an expression without resolving columns?");
+  }
+
+  return column_index_.get();
+}
+
+  void setColumnIndex(size_t index);
+
 } // namespace csql
