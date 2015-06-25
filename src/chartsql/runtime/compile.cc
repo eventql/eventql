@@ -18,7 +18,7 @@ namespace csql {
 
 Compiler::Compiler(SymbolTable* symbol_table) : symbol_table_(symbol_table) {}
 
-CompiledExpression* Compiler::compile(ASTNode* ast, size_t* scratchpad_len) {
+CompiledExpression* Compiler::compile(ASTNode* ast, size_t* scratchpad_size) {
   if (ast == nullptr) {
     RAISE(kNullPointerError, "can't compile nullptr");
   }
@@ -26,55 +26,55 @@ CompiledExpression* Compiler::compile(ASTNode* ast, size_t* scratchpad_len) {
   switch (ast->getType()) {
 
     case ASTNode::T_SELECT_LIST:
-      return compileSelectList(ast, scratchpad_len);
+      return compileSelectList(ast, scratchpad_size);
 
     case ASTNode::T_GROUP_BY:
-      return compileChildren(ast, scratchpad_len);
+      return compileChildren(ast, scratchpad_size);
 
     case ASTNode::T_EQ_EXPR:
-      return compileOperator("eq", ast, scratchpad_len);
+      return compileOperator("eq", ast, scratchpad_size);
 
     case ASTNode::T_NEQ_EXPR:
-      return compileOperator("neq", ast, scratchpad_len);
+      return compileOperator("neq", ast, scratchpad_size);
 
     case ASTNode::T_AND_EXPR:
-      return compileOperator("and", ast, scratchpad_len);
+      return compileOperator("and", ast, scratchpad_size);
 
     case ASTNode::T_OR_EXPR:
-      return compileOperator("or", ast, scratchpad_len);
+      return compileOperator("or", ast, scratchpad_size);
 
     case ASTNode::T_NEGATE_EXPR:
-      return compileOperator("neg", ast, scratchpad_len);
+      return compileOperator("neg", ast, scratchpad_size);
 
     case ASTNode::T_LT_EXPR:
-      return compileOperator("lt", ast, scratchpad_len);
+      return compileOperator("lt", ast, scratchpad_size);
 
     case ASTNode::T_LTE_EXPR:
-      return compileOperator("lte", ast, scratchpad_len);
+      return compileOperator("lte", ast, scratchpad_size);
 
     case ASTNode::T_GT_EXPR:
-      return compileOperator("gt", ast, scratchpad_len);
+      return compileOperator("gt", ast, scratchpad_size);
 
     case ASTNode::T_GTE_EXPR:
-      return compileOperator("gte", ast, scratchpad_len);
+      return compileOperator("gte", ast, scratchpad_size);
 
     case ASTNode::T_ADD_EXPR:
-      return compileOperator("add", ast, scratchpad_len);
+      return compileOperator("add", ast, scratchpad_size);
 
     case ASTNode::T_SUB_EXPR:
-      return compileOperator("sub", ast, scratchpad_len);
+      return compileOperator("sub", ast, scratchpad_size);
 
     case ASTNode::T_MUL_EXPR:
-      return compileOperator("mul", ast, scratchpad_len);
+      return compileOperator("mul", ast, scratchpad_size);
 
     case ASTNode::T_DIV_EXPR:
-      return compileOperator("div", ast, scratchpad_len);
+      return compileOperator("div", ast, scratchpad_size);
 
     case ASTNode::T_MOD_EXPR:
-      return compileOperator("mod", ast, scratchpad_len);
+      return compileOperator("mod", ast, scratchpad_size);
 
     case ASTNode::T_POW_EXPR:
-      return compileOperator("pow", ast, scratchpad_len);
+      return compileOperator("pow", ast, scratchpad_size);
 
     case ASTNode::T_LITERAL:
       return compileLiteral(ast);
@@ -83,7 +83,7 @@ CompiledExpression* Compiler::compile(ASTNode* ast, size_t* scratchpad_len) {
       return compileColumnReference(ast);
 
     case ASTNode::T_METHOD_CALL:
-      return compileMethodCall(ast, scratchpad_len);
+      return compileMethodCall(ast, scratchpad_size);
 
     default:
       ast->debugPrint();
@@ -91,11 +91,25 @@ CompiledExpression* Compiler::compile(ASTNode* ast, size_t* scratchpad_len) {
   }
 }
 
-ScopedPtr<CompiledExpression> Compiler::compileScalarExpression(
-   RefPtr<ScalarExpressionNode> node) {
+ScopedPtr<CompiledProgram> Compiler::compile(
+    RefPtr<ScalarExpressionNode> node) {
+  size_t scratchpad_size = 0;
+  auto expr = compileScalarExpression(node, &scratchpad_size);
+  return mkScoped(new CompiledProgram(expr, scratchpad_size));
+}
+
+CompiledExpression* Compiler::compileScalarExpression(
+   RefPtr<ScalarExpressionNode> node,
+   size_t* scratchpad_size) {
 
   if (dynamic_cast<FieldReferenceNode*>(node.get())) {
     return compileColumnReference(node.asInstanceOf<FieldReferenceNode>());
+  }
+
+  if (dynamic_cast<BuiltinExpressionNode*>(node.get())) {
+    return compileMethodCall(
+        node.asInstanceOf<BuiltinExpressionNode>(),
+        scratchpad_size);
   }
 
   RAISE(kRuntimeError, "internal error: can't compile expression");
@@ -103,7 +117,7 @@ ScopedPtr<CompiledExpression> Compiler::compileScalarExpression(
 
 CompiledExpression* Compiler::compileSelectList(
     ASTNode* select_list,
-    size_t* scratchpad_len) {
+    size_t* scratchpad_size) {
   auto root = new CompiledExpression();
   root->type = X_MULTI;
   root->call = nullptr;
@@ -117,7 +131,7 @@ CompiledExpression* Compiler::compileSelectList(
       RAISE(kRuntimeError, "internal error: corrupt ast");
     }
 
-    auto next = compile(col->getChildren()[0], scratchpad_len);
+    auto next = compile(col->getChildren()[0], scratchpad_size);
     *cur = next;
     cur = &next->next;
   }
@@ -127,7 +141,7 @@ CompiledExpression* Compiler::compileSelectList(
 
 CompiledExpression* Compiler::compileChildren(
     ASTNode* parent,
-    size_t* scratchpad_len) {
+    size_t* scratchpad_size) {
   auto root = new CompiledExpression();
   root->type = X_MULTI;
   root->call = nullptr;
@@ -136,7 +150,7 @@ CompiledExpression* Compiler::compileChildren(
 
   auto cur = &root->child;
   for (auto child : parent->getChildren()) {
-    auto next = compile(child, scratchpad_len);
+    auto next = compile(child, scratchpad_size);
     *cur = next;
     cur = &next->next;
   }
@@ -147,7 +161,7 @@ CompiledExpression* Compiler::compileChildren(
 CompiledExpression* Compiler::compileOperator(
     const std::string& name,
     ASTNode* ast,
-    size_t* scratchpad_len) {
+    size_t* scratchpad_size) {
   auto symbol = symbol_table_->lookupSymbol(name);
 
   if (symbol == nullptr) {
@@ -163,7 +177,7 @@ CompiledExpression* Compiler::compileOperator(
 
   auto cur = &op->child;
   for (auto e : ast->getChildren()) {
-    auto next = compile(e, scratchpad_len);
+    auto next = compile(e, scratchpad_size);
     *cur = next;
     cur = &next->next;
   }
@@ -196,9 +210,9 @@ CompiledExpression* Compiler::compileColumnReference(ASTNode* ast) {
   return ins;
 }
 
-ScopedPtr<CompiledExpression> Compiler::compileColumnReference(
+CompiledExpression* Compiler::compileColumnReference(
     RefPtr<FieldReferenceNode> node) {
-  auto ins = mkScoped(new CompiledExpression());
+  auto ins = new CompiledExpression();
   ins->type = X_INPUT;
   ins->call = nullptr;
   ins->arg0 = (void *) node->columnIndex();
@@ -209,7 +223,7 @@ ScopedPtr<CompiledExpression> Compiler::compileColumnReference(
 
 CompiledExpression* Compiler::compileMethodCall(
     ASTNode* ast,
-    size_t* scratchpad_len) {
+    size_t* scratchpad_size) {
   if (ast->getToken() == nullptr ||
       ast->getToken()->getType() != Token::T_IDENTIFIER) {
     RAISE(kRuntimeError, "corrupt AST");
@@ -231,18 +245,53 @@ CompiledExpression* Compiler::compileMethodCall(
   op->next  = nullptr;
 
   if (symbol->isAggregate()) {
-    op->arg0 = (void *) *scratchpad_len;
-    *scratchpad_len += symbol->getScratchpadSize();
+    op->arg0 = (void *) *scratchpad_size;
+    *scratchpad_size += symbol->getScratchpadSize();
   }
 
   auto cur = &op->child;
   for (auto e : ast->getChildren()) {
-    auto next = compile(e, scratchpad_len);
+    auto next = compile(e, scratchpad_size);
     *cur = next;
     cur = &next->next;
   }
 
   return op;
 }
+
+CompiledExpression* Compiler::compileMethodCall(
+    RefPtr<BuiltinExpressionNode> node,
+    size_t* scratchpad_size) {
+  auto symbol = symbol_table_->lookupSymbol(node->symbol());
+  if (symbol == nullptr) {
+    RAISEF(
+        kRuntimeError,
+        "error: cannot resolve symbol: $0",
+        node->symbol());
+  }
+
+  auto op = new CompiledExpression();
+  op->type = X_CALL;
+  op->call = symbol->getFnPtr();
+  op->arg0 = nullptr;
+  op->child = nullptr;
+  op->next  = nullptr;
+
+  auto cur = &op->child;
+  for (auto e : node->arguments()) {
+    auto next = compileScalarExpression(e, scratchpad_size);
+    *cur = next;
+    cur = &next->next;
+  }
+
+  return op;
+
+}
+
+CompiledProgram::CompiledProgram(
+    CompiledExpression* expr,
+    size_t scratchpad_size) :
+    expr_(expr),
+    scratchpad_size_(scratchpad_size) {}
 
 }
