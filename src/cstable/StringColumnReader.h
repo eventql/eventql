@@ -38,6 +38,10 @@ public:
       void** data,
       size_t* data_len) override;
 
+  msg::FieldType type() const override {
+    return msg::FieldType::STRING;
+  }
+
 protected:
   util::BinaryMessageReader data_reader_;
 };

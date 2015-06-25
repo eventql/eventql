@@ -11,6 +11,7 @@
 #define _FNORD_CSTABLE_COLUMNREADER_H
 #include <fnord/stdtypes.h>
 #include <fnord/autoref.h>
+#include <fnord/protobuf/MessageObject.h>
 #include <fnord/util/binarymessagereader.h>
 #include <fnord/util/BitPackDecoder.h>
 
@@ -44,6 +45,8 @@ public:
       uint64_t* def_level,
       void** data,
       size_t* data_len) = 0;
+
+  virtual msg::FieldType type() const = 0;
 
   uint64_t maxRepetitionLevel() const { return r_max_; }
   uint64_t maxDefinitionLevel() const { return d_max_; }

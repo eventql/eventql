@@ -34,6 +34,10 @@ public:
       void** data,
       size_t* data_len) override;
 
+  msg::FieldType type() const override {
+    return msg::FieldType::UINT32;
+  }
+
 protected:
   uint32_t max_value_;
   util::BitPackDecoder data_reader_;
