@@ -44,7 +44,11 @@ void CompiledProgram::reset(Instance* instance) const {
 void CompiledProgram::init(CompiledExpression* e, Instance* instance) const {
   switch (e->type) {
     case X_CALL_AGGREGATE:
-        fnord::iputs("init aggr: $0", (uint64_t) e);
+      if (e->vtable.t_aggregate.init) {
+        e->vtable.t_aggregate.init(
+            (char *) instance->scratch + (size_t) e->arg0);
+      }
+      break;
 
     default:
       break;
@@ -58,7 +62,11 @@ void CompiledProgram::init(CompiledExpression* e, Instance* instance) const {
 void CompiledProgram::free(CompiledExpression* e, Instance* instance) const {
   switch (e->type) {
     case X_CALL_AGGREGATE:
-        fnord::iputs("free aggr: $0", (uint64_t) e);
+      if (e->vtable.t_aggregate.free) {
+        e->vtable.t_aggregate.free(
+            (char *) instance->scratch + (size_t) e->arg0);
+      }
+      break;
 
     case X_LITERAL:
         fnord::iputs("free literal: $0", (uint64_t) e);

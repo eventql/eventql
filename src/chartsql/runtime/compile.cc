@@ -279,7 +279,9 @@ CompiledExpression* Compiler::compileMethodCall(
       break;
     case EXP_AGGREGATE:
       op->type = X_CALL_AGGREGATE;
+      op->arg0 = (void *) *scratchpad_size;
       op->vtable.t_aggregate = symbol.u.t_aggregate;
+      *scratchpad_size += symbol.u.t_aggregate.scratch_size;
       break;
   }
 

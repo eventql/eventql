@@ -22,7 +22,7 @@ CSTableScan::CSTableScan(
     cstable::CSTableReader&& cstable) :
     cstable_(std::move(cstable)),
     colindex_(0),
-    flat_(true) {
+    expand_(stmt->expandNestedRecords()) {
 
   Set<String> column_names;
   for (const auto& expr : stmt->selectList()) {
@@ -137,7 +137,7 @@ void CSTableScan::execute(Function<bool (int argc, const SValue* argv)> fn) {
         }
       }
 
-      if (!flat_ || next_level == 0) {
+      if (expand_ || next_level == 0) {
         for (int i = 0; i < select_list_.size(); ++i) {
           select_list_[i].compiled->evaluate(
               &select_list_[i].instance,
