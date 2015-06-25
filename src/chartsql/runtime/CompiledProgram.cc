@@ -79,31 +79,25 @@ void CompiledProgram::evaluate(
     const SValue* argv,
     SValue* out) const {
 
-  //int argc = 0;
-  //SValue argv[8];
+  SValue* stackv = nullptr;
+  auto stackn = expr->argn;
+  if (stackn > 0) {
+    stackv = reinterpret_cast<SValue*>(
+        alloca(sizeof(SValue) * expr->argn));
 
-  /* execute children */
-  for (auto cur = expr->child; cur != nullptr; cur = cur->next) {
-    //if (argc >= sizeof(argv) / sizeof(SValue)) {
-    //  RAISE(kRuntimeError, "too many arguments");
-    //}
+    for (int i = 0; i < stackn; ++i) {
+      new (stackv + i) SValue();
+    }
 
-    //int out_len = 0;
-    //if (!executeExpression(
-    //    cur,
-    //    scratchpad,
-    //    row_len,
-    //    row,
-    //    &out_len,
-    //    argv + argc)) {
-    //  return false;
-    //}
-
-    //if (out_len != 1) {
-    //  RAISE(kRuntimeError, "expression did not return");
-    //}
-
-    //argc++;
+    auto stackp = stackv;
+    for (auto cur = expr->child; cur != nullptr; cur = cur->next) {
+      evaluate(
+          instance,
+          cur,
+          argc,
+          argv,
+          stackp++);
+    }
   }
 
   /* execute expression */
@@ -118,6 +112,10 @@ void CompiledProgram::evaluate(
     //  *outc = 1;
     //  return true;
     //}
+
+    case X_CALL_PURE: {
+      expr->vtable.t_pure.call(stackn, stackv, out);
+    }
 
     case X_LITERAL: {
       *out = *static_cast<SValue*>(expr->arg0);

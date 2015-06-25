@@ -28,11 +28,15 @@ enum kCompiledExpressionType {
 
 struct CompiledExpression {
   kCompiledExpressionType type;
-  void (*call)(void*, int, SValue*, SValue*);
   void* arg0;
+  size_t argn;
   CompiledExpression* next;
   CompiledExpression* child;
-  ScalarExpression* expr;
+  union {
+    PureExpression t_pure;
+    AggregateExpression t_aggregate;
+  } vtable;
+  void (*call)(void*, int, SValue*, SValue*); // delete me
 };
 
 class CompiledProgram {
