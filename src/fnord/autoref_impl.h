@@ -89,4 +89,9 @@ AutoRef<T> mkRef(T* ptr) {
   return AutoRef<T>(ptr);
 }
 
+template <typename T>
+ScopedPtr<T> mkScoped(T* ptr) {
+  return ScopedPtr<T>(ptr);
+}
+
 } // namespace fnord
