@@ -179,10 +179,14 @@ CSTableScan::ExpressionRef::ExpressionRef(
     ExpressionRef&& other) :
     rep_level(other.rep_level),
     compiled(std::move(other.compiled)),
-    instance(other.instance) {}
+    instance(other.instance) {
+  other.instance.scratch = nullptr;
+}
 
 CSTableScan::ExpressionRef::~ExpressionRef() {
-  compiled->freeInstance(&instance);
+  if (instance.scratch) {
+    compiled->freeInstance(&instance);
+  }
 }
 
 } // namespace csql

@@ -46,7 +46,7 @@ void CompiledProgram::init(CompiledExpression* e, Instance* instance) const {
   }
 
   for (auto cur = e->child; cur != nullptr; cur = cur->next) {
-    init(e, instance);
+    init(cur, instance);
   }
 }
 
@@ -60,7 +60,7 @@ void CompiledProgram::free(CompiledExpression* e, Instance* instance) const {
   }
 
   for (auto cur = e->child; cur != nullptr; cur = cur->next) {
-    free(e, instance);
+    free(cur, instance);
   }
 }
 
