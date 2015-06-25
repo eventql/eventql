@@ -66,12 +66,59 @@ void CSTableScan::execute(Function<bool (int argc, const SValue* argv)> fn) {
 
     for (auto& col : columns_) {
       if (col.second.reader->nextRepetitionLevel() >= fetch_level) {
+        auto& reader = col.second.reader;
+
         uint64_t r;
         uint64_t d;
         void* data;
         size_t size;
-        col.second.reader->next(&r, &d, &data, &size);
-        in_row[col.second.index] = SValue("fnord");
+        reader->next(&r, &d, &data, &size);
+
+        switch (col.second.reader->type()) {
+
+          case msg::FieldType::STRING:
+            in_row[col.second.index] =
+                SValue(SValue::StringType((char*) data, size));
+            break;
+
+          case msg::FieldType::UINT32:
+          case msg::FieldType::UINT64:
+            switch (size) {
+              case sizeof(uint32_t):
+                in_row[col.second.index] =
+                    SValue(SValue::IntegerType(*((uint32_t*) data)));
+                break;
+              case sizeof(uint64_t):
+                in_row[col.second.index] =
+                    SValue(SValue::IntegerType(*((uint64_t*) data)));
+                break;
+              case 0:
+                in_row[col.second.index] = SValue(SValue::IntegerType(0));
+                break;
+            }
+            break;
+
+          case msg::FieldType::BOOLEAN:
+            switch (size) {
+              case sizeof(uint32_t):
+                in_row[col.second.index] =
+                    SValue(SValue::BoolType(*((uint32_t*) data) > 0));
+                break;
+              case sizeof(uint64_t):
+                in_row[col.second.index] =
+                    SValue(SValue::BoolType(*((uint64_t*) data) > 0));
+                break;
+              case 0:
+                in_row[col.second.index] = SValue(SValue::BoolType(false));
+                break;
+            }
+            break;
+
+          case msg::FieldType::OBJECT:
+            RAISE(kIllegalStateError);
+
+        }
+
       }
 
       next_level = std::max(next_level, col.second.reader->nextRepetitionLevel());
