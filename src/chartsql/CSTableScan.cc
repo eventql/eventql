@@ -20,7 +20,8 @@ namespace csql {
 CSTableScan::CSTableScan(
     RefPtr<SelectProjectAggregateNode> stmt,
     cstable::CSTableReader&& cstable) :
-    cstable_(std::move(cstable)) {
+    cstable_(std::move(cstable)),
+    colindex_(0) {
 
   Set<String> column_names;
   for (const auto& expr : stmt->selectList()) {
@@ -28,7 +29,11 @@ CSTableScan::CSTableScan(
   }
 
   for (const auto& col : column_names) {
-    columns_.emplace(col, ColumnRef(cstable_.getColumnReader(col)));
+    columns_.emplace(col, ColumnRef(cstable_.getColumnReader(col), colindex_++));
+  }
+
+  for (auto& expr : stmt->selectList()) {
+    resolveColumns(expr);
   }
 
   //fnord::iputs("all cols: $0", column_names);
@@ -102,6 +107,22 @@ void CSTableScan::findColumns(
   }
 }
 
+void CSTableScan::resolveColumns(RefPtr<ScalarExpressionNode> expr) const {
+  auto fieldref = dynamic_cast<FieldReferenceNode*>(expr.get());
+  if (fieldref != nullptr) {
+    auto col = columns_.find(fieldref->fieldName());
+    if (col == columns_.end()) {
+      RAISE(kIllegalStateError);
+    }
+
+    fieldref->setColumnIndex(col->second.index);
+  }
+
+  for (const auto& e : expr->arguments()) {
+    resolveColumns(e);
+  }
+}
+
 uint64_t CSTableScan::findMaxRepetitionLevel(
     RefPtr<ScalarExpressionNode> expr) const {
   uint64_t max_level = 0;
@@ -130,9 +151,11 @@ uint64_t CSTableScan::findMaxRepetitionLevel(
 }
 
 CSTableScan::ColumnRef::ColumnRef(
-    RefPtr<cstable::ColumnReader> r) :
+    RefPtr<cstable::ColumnReader> r,
+    size_t i) :
     reader(r),
     cur_data(nullptr),
-    cur_size(0) {}
+    cur_size(0),
+    index(i) {}
 
 } // namespace csql
