@@ -36,6 +36,8 @@ size_t FieldReferenceNode::columnIndex() const {
   return column_index_.get();
 }
 
-  void setColumnIndex(size_t index);
+void FieldReferenceNode::setColumnIndex(size_t index) {
+  column_index_ = index;
+}
 
 } // namespace csql
