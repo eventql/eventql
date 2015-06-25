@@ -37,7 +37,13 @@ void CompiledProgram::freeInstance(Instance* instance) const {
 }
 
 void CompiledProgram::init(CompiledExpression* e, Instance* instance) const {
-  fnord::iputs("init expr: $0", (uint64_t) e);
+  switch (e->type) {
+    case X_CALL_AGGREGATE:
+        fnord::iputs("init aggr: $0", (uint64_t) e);
+
+    default:
+      break;
+  }
 
   for (auto cur = e->child; cur != nullptr; cur = cur->next) {
     init(e, instance);
@@ -45,7 +51,13 @@ void CompiledProgram::init(CompiledExpression* e, Instance* instance) const {
 }
 
 void CompiledProgram::free(CompiledExpression* e, Instance* instance) const {
-  fnord::iputs("free expr: $0", (uint64_t) e);
+  switch (e->type) {
+    case X_CALL_AGGREGATE:
+        fnord::iputs("free aggr: $0", (uint64_t) e);
+
+    default:
+      break;
+  }
 
   for (auto cur = e->child; cur != nullptr; cur = cur->next) {
     free(e, instance);
@@ -57,7 +69,74 @@ void CompiledProgram::evaluate(
     int argc,
     const SValue* argv,
     SValue* out) const {
-  RAISE(kNotImplementedError);
+  return evaluate(instance, expr_, argc, argv, out);
+}
+
+void CompiledProgram::evaluate(
+    Instance* instance,
+    CompiledExpression* expr,
+    int argc,
+    const SValue* argv,
+    SValue* out) const {
+
+  //int argc = 0;
+  //SValue argv[8];
+
+  /* execute children */
+  for (auto cur = expr->child; cur != nullptr; cur = cur->next) {
+    //if (argc >= sizeof(argv) / sizeof(SValue)) {
+    //  RAISE(kRuntimeError, "too many arguments");
+    //}
+
+    //int out_len = 0;
+    //if (!executeExpression(
+    //    cur,
+    //    scratchpad,
+    //    row_len,
+    //    row,
+    //    &out_len,
+    //    argv + argc)) {
+    //  return false;
+    //}
+
+    //if (out_len != 1) {
+    //  RAISE(kRuntimeError, "expression did not return");
+    //}
+
+    //argc++;
+  }
+
+  /* execute expression */
+  switch (expr->type) {
+
+    //case X_CALL: {
+    //  void* this_scratchpad = nullptr;
+    //  if (scratchpad != nullptr) {
+    //    this_scratchpad = ((char *) scratchpad) + ((size_t) (expr->arg0));
+    //  }
+    //  expr->call(this_scratchpad, argc, argv, outv);
+    //  *outc = 1;
+    //  return true;
+    //}
+
+    case X_LITERAL: {
+      *out = *static_cast<SValue*>(expr->arg0);
+      return;
+    }
+
+    case X_INPUT: {
+      auto index = reinterpret_cast<uint64_t>(expr->arg0);
+
+      if (index >= argc) {
+        RAISE(kRuntimeError, "invalid row index %i", index);
+      }
+
+      *out = argv[index];
+      return;
+    }
+
+  }
+
 }
 
 //void accumulate(
