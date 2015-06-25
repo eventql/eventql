@@ -288,10 +288,4 @@ CompiledExpression* Compiler::compileMethodCall(
 
 }
 
-CompiledProgram::CompiledProgram(
-    CompiledExpression* expr,
-    size_t scratchpad_size) :
-    expr_(expr),
-    scratchpad_size_(scratchpad_size) {}
-
 }
