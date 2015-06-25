@@ -15,10 +15,7 @@
 namespace csql {
 namespace expressions {
 
-void countExpr(void* scratchpad, int argc, SValue* argv, SValue* out);
-void countExprFree(void* scratchpad);
-size_t countExprScratchpadSize();
-
+extern const AggregateExpression kCountExpr;
 extern const AggregateExpression kSumExpr;
 
 void meanExpr(void* scratchpad, int argc, SValue* argv, SValue* out);
