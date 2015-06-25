@@ -40,8 +40,18 @@ protected:
   };
 
   struct ExpressionRef {
+    ExpressionRef(
+        size_t _rep_level,
+        ScopedPtr<CompiledProgram> _compiled,
+        ScratchMemory* scratch);
+
+    ExpressionRef(ExpressionRef&& other);
+
+    ~ExpressionRef();
+
     size_t rep_level;
-    ScopedPtr<CompiledExpression> compiled;
+    ScopedPtr<CompiledProgram> compiled;
+    void* scratch;
   };
 
   void findColumns(
@@ -54,6 +64,7 @@ protected:
 
   void fetch();
 
+  ScratchMemory scratch_;
   cstable::CSTableReader cstable_;
   HashMap<String, ColumnRef> columns_;
   Vector<ExpressionRef> select_list_;

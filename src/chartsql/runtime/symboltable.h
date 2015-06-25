@@ -13,6 +13,7 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
+#include <chartsql/Expression.h>
 
 namespace csql {
 class SymbolTableEntry;
@@ -46,7 +47,10 @@ protected:
 
 class SymbolTable {
 public:
+
   SymbolTableEntry const* lookupSymbol(const std::string& symbol) const;
+
+  const ScalarExpression* lookup(const String& symbol) const;
 
   void registerSymbol(
       const std::string& symbol,
