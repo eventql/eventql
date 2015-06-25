@@ -8,6 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <chartsql/runtime/CompiledProgram.h>
+#include <fnord/inspect.h>
 
 using namespace fnord;
 
@@ -35,16 +36,36 @@ void CompiledProgram::freeInstance(Instance* instance) const {
   free(expr_, instance);
 }
 
+void CompiledProgram::init(CompiledExpression* e, Instance* instance) const {
+  fnord::iputs("init expr: $0", (uint64_t) e);
+
+  for (auto cur = e->child; cur != nullptr; cur = cur->next) {
+    init(e, instance);
+  }
+}
+
+void CompiledProgram::free(CompiledExpression* e, Instance* instance) const {
+  fnord::iputs("free expr: $0", (uint64_t) e);
+
+  for (auto cur = e->child; cur != nullptr; cur = cur->next) {
+    free(e, instance);
+  }
+}
+
+void CompiledProgram::evaluate(
+    Instance* instance,
+    int argc,
+    const SValue* argv,
+    SValue* out) const {
+  RAISE(kNotImplementedError);
+}
+
 //void accumulate(
 //    Instance* instance,
 //    int argc,
 //    const SValue* argv);
 //
-//void evaluate(
-//    Instance* instance,
-//    int argc,
-//    const SValue* argv,
-//    SValue* out);
+
 //
 //void reset(Instance* instance);
 

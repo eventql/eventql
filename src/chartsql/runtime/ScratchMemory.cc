@@ -7,22 +7,23 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#pragma once
-#include <fnord/stdtypes.h>
-#include <fnord/buffer.h>
+#include <chartsql/runtime/ScratchMemory.h>
 
 using namespace fnord;
 
 namespace csql {
 
-class ScratchMemory {
-public:
-  static const size_t kAllocSize;
+const size_t ScratchMemory::kAllocSize = 256;
 
-  void* alloc(size_t size);
+void* ScratchMemory::alloc(size_t size) {
+  auto offset = buf_.mark();
 
-protected:
-  Buffer buf_;
-};
+  if (offset + size > buf_.capacity()) {
+    buf_.reserve(std::max(size, kAllocSize));
+  }
+
+  buf_.setMark(offset + size);
+  return (char*) buf_.data() + offset;
+}
 
 }
