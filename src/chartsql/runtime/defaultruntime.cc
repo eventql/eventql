@@ -17,12 +17,7 @@ namespace csql {
 
 DefaultRuntime::DefaultRuntime() {
   /* expressions/aggregate.h */
-  symbol_table_.registerSymbol(
-      "count",
-      &expressions::countExpr,
-      expressions::countExprScratchpadSize(),
-      &expressions::countExprFree);
-
+  symbol_table_.registerFunction("count", expressions::kCountExpr);
   symbol_table_.registerFunction("sum", expressions::kSumExpr);
 
   symbol_table_.registerSymbol(
