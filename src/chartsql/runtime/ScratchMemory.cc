@@ -13,17 +13,34 @@ using namespace fnord;
 
 namespace csql {
 
-const size_t ScratchMemory::kAllocSize = 256;
+const size_t ScratchMemory::kBlockSize = 4096;
+
+ScratchMemory::ScratchMemory() : head_(nullptr) {}
+
+ScratchMemory::~ScratchMemory() {
+  for (auto cur = head_; cur != nullptr; ) {
+    auto next = cur->next;
+    free(cur);
+    cur = next;
+  }
+}
 
 void* ScratchMemory::alloc(size_t size) {
-  auto offset = buf_.mark();
-
-  if (offset + size > buf_.capacity()) {
-    buf_.reserve(std::max(size, kAllocSize));
+  if (!head_ || head_->used + size > head_->size) {
+    appendBlock(std::max(size, kBlockSize));
   }
 
-  buf_.setMark(offset + size);
-  return (char*) buf_.data() + offset;
+  auto off = head_->used;
+  head_->used += size;
+  return head_->data + off;
+}
+
+void ScratchMemory::appendBlock(size_t size) {
+  auto block = (ScratchMemoryBlock*) malloc(sizeof(ScratchMemoryBlock) + size);
+  block->size = size;
+  block->used = 0;
+  block->next = head_;
+  head_ = block;
 }
 
 }
