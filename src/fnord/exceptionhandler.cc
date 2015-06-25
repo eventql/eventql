@@ -51,7 +51,7 @@ void CatchAndAbortExceptionHandler::onException(
 
 static std::string globalEHandlerMessage;
 
-static void globalSEGVHandler(int sig) {
+static void globalSEGVHandler(int sig, siginfo_t* siginfo, void* ctx) {
   fprintf(stderr, "%s\n", globalEHandlerMessage.c_str());
   fprintf(stderr, "signal: %s\n", strsignal(sig));
 
@@ -85,12 +85,35 @@ void CatchAndAbortExceptionHandler::installGlobalHandlers() {
   globalEHandlerMessage = message_;
   std::set_terminate(&globalEHandler);
   std::set_unexpected(&globalEHandler);
-  signal(SIGILL, &globalSEGVHandler);
-  signal(SIGABRT, &globalSEGVHandler);
-  signal(SIGFPE, &globalSEGVHandler);
-  signal(SIGSEGV, &globalSEGVHandler);
-  signal(SIGBUS, &globalSEGVHandler);
-  signal(SIGSYS, &globalSEGVHandler);
+
+  struct sigaction sigact;
+  memset(&sigact, 0, sizeof(sigact));
+  sigact.sa_sigaction = &globalSEGVHandler;
+  sigact.sa_flags = SA_SIGINFO;
+
+  if (sigaction(SIGSEGV, &sigact, NULL) < 0) {
+    RAISE_ERRNO(kIOError, "sigaction() failed");
+  }
+
+  if (sigaction(SIGABRT, &sigact, NULL) < 0) {
+    RAISE_ERRNO(kIOError, "sigaction() failed");
+  }
+
+  if (sigaction(SIGBUS, &sigact, NULL) < 0) {
+    RAISE_ERRNO(kIOError, "sigaction() failed");
+  }
+
+  if (sigaction(SIGSYS, &sigact, NULL) < 0) {
+    RAISE_ERRNO(kIOError, "sigaction() failed");
+  }
+
+  if (sigaction(SIGILL, &sigact, NULL) < 0) {
+    RAISE_ERRNO(kIOError, "sigaction() failed");
+  }
+
+  if (sigaction(SIGFPE, &sigact, NULL) < 0) {
+    RAISE_ERRNO(kIOError, "sigaction() failed");
+  }
 }
 
 } // namespace fnord
