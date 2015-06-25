@@ -28,12 +28,17 @@ CompiledProgram::Instance CompiledProgram::allocInstance(
     ScratchMemory* scratch) const {
   Instance that;
   that.scratch = scratch->alloc(scratchpad_size_);
+  fnord::iputs("init scratch @ $0", (uint64_t) that.scratch);
   init(expr_, &that);
   return that;
 }
 
 void CompiledProgram::freeInstance(Instance* instance) const {
   free(expr_, instance);
+}
+
+void CompiledProgram::reset(Instance* instance) const {
+  reset(expr_, instance);
 }
 
 void CompiledProgram::init(CompiledExpression* e, Instance* instance) const {
@@ -64,12 +69,32 @@ void CompiledProgram::free(CompiledExpression* e, Instance* instance) const {
   }
 }
 
+void CompiledProgram::reset(CompiledExpression* e, Instance* instance) const {
+  switch (e->type) {
+    case X_CALL_AGGREGATE:
+        fnord::iputs("reset aggr: $0", (uint64_t) e);
+
+    default:
+      break;
+  }
+
+  for (auto cur = e->child; cur != nullptr; cur = cur->next) {
+    reset(cur, instance);
+  }
+}
+
 void CompiledProgram::evaluate(
     Instance* instance,
     int argc,
     const SValue* argv,
     SValue* out) const {
   return evaluate(instance, expr_, argc, argv, out);
+}
+
+void CompiledProgram::accumulate(
+    Instance* instance,
+    int argc,
+    const SValue* argv) const {
 }
 
 void CompiledProgram::evaluate(
@@ -79,42 +104,39 @@ void CompiledProgram::evaluate(
     const SValue* argv,
     SValue* out) const {
 
-  SValue* stackv = nullptr;
-  auto stackn = expr->argn;
-  if (stackn > 0) {
-    stackv = reinterpret_cast<SValue*>(
-        alloca(sizeof(SValue) * expr->argn));
-
-    for (int i = 0; i < stackn; ++i) {
-      new (stackv + i) SValue();
-    }
-
-    auto stackp = stackv;
-    for (auto cur = expr->child; cur != nullptr; cur = cur->next) {
-      evaluate(
-          instance,
-          cur,
-          argc,
-          argv,
-          stackp++);
-    }
-  }
-
   /* execute expression */
   switch (expr->type) {
 
-    //case X_CALL: {
-    //  void* this_scratchpad = nullptr;
-    //  if (scratchpad != nullptr) {
-    //    this_scratchpad = ((char *) scratchpad) + ((size_t) (expr->arg0));
-    //  }
-    //  expr->call(this_scratchpad, argc, argv, outv);
-    //  *outc = 1;
-    //  return true;
-    //}
-
     case X_CALL_PURE: {
+      SValue* stackv = nullptr;
+      auto stackn = expr->argn;
+      if (stackn > 0) {
+        stackv = reinterpret_cast<SValue*>(
+            alloca(sizeof(SValue) * expr->argn));
+
+        for (int i = 0; i < stackn; ++i) {
+          new (stackv + i) SValue();
+        }
+
+        auto stackp = stackv;
+        for (auto cur = expr->child; cur != nullptr; cur = cur->next) {
+          evaluate(
+              instance,
+              cur,
+              argc,
+              argv,
+              stackp++);
+        }
+      }
+
       expr->vtable.t_pure.call(stackn, stackv, out);
+      return;
+    }
+
+    case X_CALL_AGGREGATE: {
+      auto scratch = (char *) instance->scratch + (size_t) expr->arg0;
+      fnord::iputs("call with scratch @ $0", (uint64_t) scratch);
+      expr->vtable.t_aggregate.get(scratch, out);
       return;
     }
 

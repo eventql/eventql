@@ -17,12 +17,24 @@ namespace csql {
 
 class ScratchMemory {
 public:
-  static const size_t kAllocSize;
+  static const size_t kBlockSize;
+
+  ScratchMemory();
+  ~ScratchMemory();
 
   void* alloc(size_t size);
 
 protected:
-  Buffer buf_;
+  struct ScratchMemoryBlock {
+    size_t size;
+    size_t used;
+    ScratchMemoryBlock* next;
+    char data[];
+  };
+
+  void appendBlock(size_t size);
+
+  ScratchMemoryBlock* head_;
 };
 
 }

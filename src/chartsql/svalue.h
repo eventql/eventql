@@ -30,12 +30,12 @@ public:
   typedef fnord::DateTime TimeType;
 
   enum kSValueType {
-    T_STRING,
-    T_FLOAT,
-    T_INTEGER,
-    T_BOOL,
-    T_TIMESTAMP,
-    T_NULL
+    T_NULL = 0,
+    T_STRING = 1,
+    T_FLOAT = 2,
+    T_INTEGER = 3,
+    T_BOOL = 4,
+    T_TIMESTAMP = 5,
   };
 
   static const char* getTypeName(kSValueType type);
