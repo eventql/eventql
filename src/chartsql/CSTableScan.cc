@@ -9,6 +9,8 @@
  */
 #include <chartsql/CSTableScan.h>
 #include <chartsql/qtree/FieldReferenceNode.h>
+#include <chartsql/runtime/defaultruntime.h>
+#include <chartsql/runtime/compile.h>
 #include <fnord/inspect.h>
 
 using namespace fnord;
@@ -31,10 +33,13 @@ CSTableScan::CSTableScan(
 
   //fnord::iputs("all cols: $0", column_names);
 
+  DefaultRuntime runtime;
+
   for (const auto& expr : stmt->selectList()) {
     ExpressionRef expr_ref;
     expr_ref.rep_level = findMaxRepetitionLevel(expr);
-    select_list_.emplace_back(expr_ref);
+    select_list_.emplace_back(std::move(expr_ref));
+    expr_ref.compiled = runtime.compiler()->compileScalarExpression(expr);
   }
 }
 
