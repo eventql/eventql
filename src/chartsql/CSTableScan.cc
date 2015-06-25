@@ -88,7 +88,7 @@ void CSTableScan::execute(Function<bool (int argc, const SValue* argv)> fn) {
 
       for (int i = 0; i < select_list_.size(); ++i) {
         select_list_[i].compiled->evaluate(
-            select_list_[i].scratch,
+            &select_list_[i].instance,
             in_row.size(),
             in_row.data(),
             &out_row[i]);
@@ -165,8 +165,6 @@ CSTableScan::ColumnRef::ColumnRef(
     RefPtr<cstable::ColumnReader> r,
     size_t i) :
     reader(r),
-    cur_data(nullptr),
-    cur_size(0),
     index(i) {}
 
 CSTableScan::ExpressionRef::ExpressionRef(
@@ -175,20 +173,16 @@ CSTableScan::ExpressionRef::ExpressionRef(
     ScratchMemory* smem) :
     rep_level(_rep_level),
     compiled(std::move(_compiled)),
-    scratch(compiled->alloc(smem)) {
-  compiled->init(scratch);
-}
+    instance(compiled->allocInstance(smem)) {}
 
 CSTableScan::ExpressionRef::ExpressionRef(
     ExpressionRef&& other) :
     rep_level(other.rep_level),
     compiled(std::move(other.compiled)),
-    scratch(other.scratch) {
-  other.scratch = nullptr;
-}
+    instance(other.instance) {}
 
 CSTableScan::ExpressionRef::~ExpressionRef() {
-  compiled->free(scratch);
+  compiled->freeInstance(&instance);
 }
 
 } // namespace csql
