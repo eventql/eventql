@@ -23,11 +23,7 @@ DefaultRuntime::DefaultRuntime() {
       expressions::countExprScratchpadSize(),
       &expressions::countExprFree);
 
-  symbol_table_.registerSymbol(
-      "sum",
-      &expressions::sumExpr,
-      expressions::sumExprScratchpadSize(),
-      &expressions::sumExprFree);
+  symbol_table_.registerFunction("sum", expressions::kSumExpr);
 
   symbol_table_.registerSymbol(
       "mean",

@@ -66,6 +66,14 @@ public:
       const String& symbol,
       void (*fn)(int, SValue*, SValue*));
 
+  void registerFunction(
+      const String& symbol,
+      AggregateExpression fn);
+
+  void registerFunction(
+      const String& symbol,
+      ScalarExpression fn);
+
 protected:
   std::unordered_map<std::string, SymbolTableEntry> symbols_;
   HashMap<String, ScalarExpression> syms_;
