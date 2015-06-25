@@ -74,7 +74,9 @@ DefaultRuntime::DefaultRuntime() {
   symbol_table_.registerSymbol("FROM_TIMESTAMP", &expressions::fromTimestamp);
 
   /* expressions/math.h */
-  symbol_table_.registerSymbol("add", &expressions::addExpr);
+  //symbol_table_.registerSymbol("add", &expressions::addExpr);
+  symbol_table_.registerFunction("add", &expressions::addExpr);
+
   symbol_table_.registerSymbol("sub", &expressions::subExpr);
   symbol_table_.registerSymbol("mul", &expressions::mulExpr);
   symbol_table_.registerSymbol("div", &expressions::divExpr);

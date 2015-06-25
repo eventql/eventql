@@ -62,6 +62,10 @@ public:
       size_t scratchpad_size,
       void (*free_method)(void*));
 
+  void registerFunction(
+      const String& symbol,
+      void (*fn)(int, SValue*, SValue*));
+
 protected:
   std::unordered_map<std::string, SymbolTableEntry> symbols_;
   HashMap<String, ScalarExpression> syms_;
