@@ -74,6 +74,12 @@ protected:
       const SValue* argv,
       SValue* out) const;
 
+  void accumulate(
+      Instance* instance,
+      CompiledExpression* expr,
+      int argc,
+      const SValue* argv) const;
+
   void init(CompiledExpression* e, Instance* instance) const;
   void free(CompiledExpression* e, Instance* instance) const;
   void reset(CompiledExpression* e, Instance* instance) const;
