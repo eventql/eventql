@@ -13,20 +13,4 @@ using namespace fnord;
 
 namespace csql {
 
-SumExpression::SumExpression() : value(0) {}
-
-void SumExpression::result(SValue* out) {
-  *out = SValue(SValue::FloatType(value));
-}
-
-void SumExpression::dumpTo(util::BinaryMessageWriter* data) {
-  auto bytes = IEEE754::toBytes(value);
-  data->appendUInt64(bytes);
-}
-
-void SumExpression::mergeFrom(util::BinaryMessageReader* data) {
-  auto bytes = *data->readUInt64();
-  value += IEEE754::fromBytes(bytes);
-}
-
 }

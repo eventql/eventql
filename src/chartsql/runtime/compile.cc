@@ -91,6 +91,15 @@ CompiledExpression* Compiler::compile(ASTNode* ast, size_t* scratchpad_len) {
   }
 }
 
+ScopedPtr<CompiledExpression> Compiler::compileScalarExpression(
+   RefPtr<ScalarExpressionNode> node) {
+
+  if (dynamic_cast<FieldReferenceNode*>(node.get())) {
+    return compileColumnReference(node.asInstanceOf<FieldReferenceNode>());
+  }
+
+  RAISE(kRuntimeError, "internal error: can't compile expression");
+}
 
 CompiledExpression* Compiler::compileSelectList(
     ASTNode* select_list,
@@ -182,6 +191,17 @@ CompiledExpression* Compiler::compileColumnReference(ASTNode* ast) {
   ins->type = X_INPUT;
   ins->call = nullptr;
   ins->arg0 = (void *) ast->getID();
+  ins->child = nullptr;
+  ins->next  = nullptr;
+  return ins;
+}
+
+ScopedPtr<CompiledExpression> Compiler::compileColumnReference(
+    RefPtr<FieldReferenceNode> node) {
+  auto ins = mkScoped(new CompiledExpression());
+  ins->type = X_INPUT;
+  ins->call = nullptr;
+  ins->arg0 = (void *) node->columnIndex();
   ins->child = nullptr;
   ins->next  = nullptr;
   return ins;

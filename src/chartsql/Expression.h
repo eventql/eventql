@@ -22,40 +22,18 @@ namespace csql {
  * A pure/stateless expression that returns a single return value
  */
 struct PureExpression {
-  virtual ~PureExpression() {}
-
-  virtual void compute(int argc, const SValue* argv, SValue* out) = 0;
-
+  void (*call)(int argc, SValue* in, SValue* out);
 };
 
 /**
  * An aggregate expression that returns a single return value
  */
 struct AggregateExpression {
-  virtual ~AggregateExpression() {}
-
-  virtual void compute(int argc, const SValue* argv) = 0;
-
-  virtual void result(SValue* out) = 0;
-
-};
-
-/**
- * An aggregate expression that returns a single return value and can be
- * computed commutatively
- */
-struct CommutativeExpression : public AggregateExpression {
-  virtual void dumpTo(util::BinaryMessageWriter* data) = 0;
-  virtual void mergeFrom(util::BinaryMessageReader* data) = 0;
-};
-
-
-struct SumExpression : public CommutativeExpression {
-  SumExpression();
-  void result(SValue* out) override;
-  void dumpTo(util::BinaryMessageWriter* data);
-  void mergeFrom(util::BinaryMessageReader* data);
-  double value;
+  void* (*init)();
+  void  (*accumulate)(void* udata, int argc, SValue* in);
+  void  (*get)(SValue* out);
+  void  (*reset)(void* udata);
+  void  (*free)(void *udata);
 };
 
 }

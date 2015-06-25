@@ -13,6 +13,10 @@
 #include <vector>
 #include <string>
 #include <chartsql/runtime/symboltable.h>
+#include <chartsql/qtree/ScalarExpressionNode.h>
+#include <chartsql/qtree/FieldReferenceNode.h>
+
+using namespace fnord;
 
 namespace csql {
 class ASTNode;
@@ -39,12 +43,15 @@ public:
 
   CompiledExpression* compile(ASTNode* ast, size_t* scratchpad_len);
 
+  ScopedPtr<CompiledExpression> compileScalarExpression(
+     RefPtr<ScalarExpressionNode> node);
+
   SymbolTable* symbolTable() { return symbol_table_; }
 
 protected:
 
   CompiledExpression* compileSelectList(
-      ASTNode* select_list, 
+      ASTNode* select_list,
       size_t* scratchpad_len);
 
   CompiledExpression* compileOperator(
@@ -55,6 +62,9 @@ protected:
   CompiledExpression* compileLiteral(ASTNode* ast);
 
   CompiledExpression* compileColumnReference(ASTNode* ast);
+
+  ScopedPtr<CompiledExpression> compileColumnReference(
+      RefPtr<FieldReferenceNode> node);
 
   CompiledExpression* compileChildren(ASTNode* ast, size_t* scratchpad_len);
 
