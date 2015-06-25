@@ -130,7 +130,10 @@ void CSTableScan::execute(Function<bool (int argc, const SValue* argv)> fn) {
     if (true) { // where clause
       for (int i = 0; i < select_list_.size(); ++i) {
         if (select_list_[i].rep_level >= select_level) {
-          //select_level_[i].compiled.accumulate();
+          select_list_[i].compiled->accumulate(
+              &select_list_[i].instance,
+              in_row.size(),
+              in_row.data());
         }
       }
 
@@ -141,6 +144,8 @@ void CSTableScan::execute(Function<bool (int argc, const SValue* argv)> fn) {
               in_row.size(),
               in_row.data(),
               &out_row[i]);
+
+          select_list_[i].compiled->reset(&select_list_[i].instance);
         }
       }
 
