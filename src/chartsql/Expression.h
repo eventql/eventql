@@ -18,6 +18,11 @@ using namespace fnord;
 
 namespace csql {
 
+enum kScalarExpressionType {
+  EXP_PURE,
+  EXP_AGGREGATE
+};
+
 /**
  * A pure/stateless expression that returns a single return value
  */
@@ -29,11 +34,21 @@ struct PureExpression {
  * An aggregate expression that returns a single return value
  */
 struct AggregateExpression {
-  void* (*init)();
-  void  (*accumulate)(void* udata, int argc, SValue* in);
-  void  (*get)(SValue* out);
-  void  (*reset)(void* udata);
-  void  (*free)(void *udata);
+  size_t scratch_size;
+  void (*init)(void* scratch);
+  void (*accumulate)(void* scratch, int argc, SValue* in);
+  void (*get)(SValue* out);
+  void (*reset)(void* scratch);
+  void (*free)(void *scratch);
 };
+
+struct ScalarExpression {
+  kScalarExpressionType type;
+  union {
+    PureExpression t_pure;
+    AggregateExpression t_aggregate;
+  } expr;
+};
+
 
 }

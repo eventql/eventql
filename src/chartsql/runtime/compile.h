@@ -15,6 +15,7 @@
 #include <chartsql/runtime/symboltable.h>
 #include <chartsql/qtree/ScalarExpressionNode.h>
 #include <chartsql/qtree/FieldReferenceNode.h>
+#include <chartsql/qtree/BuiltinExpressionNode.h>
 
 using namespace fnord;
 
@@ -35,40 +36,85 @@ struct CompiledExpression {
   void* arg0;
   CompiledExpression* next;
   CompiledExpression* child;
+  ScalarExpression* expr;
+};
+
+class ScratchMemory {
+public:
+
+  void* alloc(size_t size);
+
+protected:
+  Buffer buf_;
+};
+
+class CompiledProgram {
+public:
+
+  CompiledProgram(CompiledExpression* expr, size_t scratchpad_size);
+
+  void* alloc(ScratchMemory* scratch) const;
+
+  void init(void* scratchpad);
+  void free(void* scratchpad);
+
+  void accumulate(
+      void* scratchpad,
+      int argc,
+      const SValue* argv);
+
+  void evaluate(
+      void* scratchpad,
+      int argc,
+      const SValue* argv,
+      SValue* out);
+
+  void reset(void* scratchpad);
+
+protected:
+  CompiledExpression* expr_;
+  size_t scratchpad_size_;
 };
 
 class Compiler {
 public:
   Compiler(SymbolTable* symbol_table);
 
-  CompiledExpression* compile(ASTNode* ast, size_t* scratchpad_len);
+  CompiledExpression* compile(ASTNode* ast, size_t* scratchpad_size);
 
-  ScopedPtr<CompiledExpression> compileScalarExpression(
-     RefPtr<ScalarExpressionNode> node);
+  ScopedPtr<CompiledProgram> compile(RefPtr<ScalarExpressionNode> node);
 
   SymbolTable* symbolTable() { return symbol_table_; }
 
 protected:
 
+  CompiledExpression* compileScalarExpression(
+     RefPtr<ScalarExpressionNode> node,
+     size_t* scratchpad_size);
+
   CompiledExpression* compileSelectList(
       ASTNode* select_list,
-      size_t* scratchpad_len);
+      size_t* scratchpad_size);
 
   CompiledExpression* compileOperator(
       const std::string& name,
       ASTNode* ast,
-      size_t* scratchpad_len);
+      size_t* scratchpad_size);
 
   CompiledExpression* compileLiteral(ASTNode* ast);
 
   CompiledExpression* compileColumnReference(ASTNode* ast);
 
-  ScopedPtr<CompiledExpression> compileColumnReference(
+  CompiledExpression* compileColumnReference(
       RefPtr<FieldReferenceNode> node);
 
-  CompiledExpression* compileChildren(ASTNode* ast, size_t* scratchpad_len);
+  CompiledExpression* compileChildren(ASTNode* ast, size_t* scratchpad_size);
 
-  CompiledExpression* compileMethodCall(ASTNode* ast, size_t* scratchpad_len);
+  CompiledExpression* compileMethodCall(ASTNode* ast, size_t* scratchpad_size);
+
+  CompiledExpression* compileMethodCall(
+      RefPtr<BuiltinExpressionNode> node,
+      size_t* scratchpad_size);
 
   SymbolTable* symbol_table_;
 };

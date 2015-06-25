@@ -41,10 +41,10 @@ CSTableScan::CSTableScan(
   DefaultRuntime runtime;
 
   for (const auto& expr : stmt->selectList()) {
-    ExpressionRef expr_ref;
-    expr_ref.rep_level = findMaxRepetitionLevel(expr);
-    select_list_.emplace_back(std::move(expr_ref));
-    expr_ref.compiled = runtime.compiler()->compileScalarExpression(expr);
+    select_list_.emplace_back(
+        findMaxRepetitionLevel(expr),
+        runtime.compiler()->compile(expr),
+        &scratch_);
   }
 }
 
@@ -52,7 +52,8 @@ void CSTableScan::execute(Function<bool (int argc, const SValue* argv)> fn) {
   uint64_t select_level = 0;
   uint64_t fetch_level = 0;
 
-  size_t n = 0; //debug
+  Vector<SValue> in_row(colindex_, SValue{});
+  Vector<SValue> out_row(select_list_.size(), SValue{});
 
   size_t num_records = 0;
   size_t total_records = cstable_.numRecords();
@@ -67,11 +68,10 @@ void CSTableScan::execute(Function<bool (int argc, const SValue* argv)> fn) {
       if (col.second.reader->nextRepetitionLevel() >= fetch_level) {
         uint64_t r;
         uint64_t d;
-        col.second.reader->next(
-            &r,
-            &d,
-            &col.second.cur_data,
-            &col.second.cur_size);
+        void* data;
+        size_t size;
+        col.second.reader->next(&r, &d, &data, &size);
+        in_row[col.second.index] = SValue("fnord");
       }
 
       next_level = std::max(next_level, col.second.reader->nextRepetitionLevel());
@@ -80,12 +80,23 @@ void CSTableScan::execute(Function<bool (int argc, const SValue* argv)> fn) {
     fetch_level = next_level;
 
     if (true) { // where clause
-      for (auto& e : select_list_) {
-        if (e.rep_level >= select_level) {
+      for (int i = 0; i < select_list_.size(); ++i) {
+        if (select_list_[i].rep_level >= select_level) {
+          //select_level_[i].compiled.accumulate();
         }
       }
 
-      //fnord::iputs("emit row... $0", ++n);
+      for (int i = 0; i < select_list_.size(); ++i) {
+        select_list_[i].compiled->evaluate(
+            select_list_[i].scratch,
+            in_row.size(),
+            in_row.data(),
+            &out_row[i]);
+      }
+
+      if (!fn(out_row.size(), out_row.data())) {
+        return;
+      }
 
       select_level = fetch_level;
     } else {
@@ -157,5 +168,27 @@ CSTableScan::ColumnRef::ColumnRef(
     cur_data(nullptr),
     cur_size(0),
     index(i) {}
+
+CSTableScan::ExpressionRef::ExpressionRef(
+    size_t _rep_level,
+    ScopedPtr<CompiledProgram> _compiled,
+    ScratchMemory* smem) :
+    rep_level(_rep_level),
+    compiled(std::move(_compiled)),
+    scratch(compiled->alloc(smem)) {
+  compiled->init(scratch);
+}
+
+CSTableScan::ExpressionRef::ExpressionRef(
+    ExpressionRef&& other) :
+    rep_level(other.rep_level),
+    compiled(std::move(other.compiled)),
+    scratch(other.scratch) {
+  other.scratch = nullptr;
+}
+
+CSTableScan::ExpressionRef::~ExpressionRef() {
+  compiled->free(scratch);
+}
 
 } // namespace csql

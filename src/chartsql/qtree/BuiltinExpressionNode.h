@@ -24,6 +24,8 @@ public:
 
   Vector<RefPtr<ScalarExpressionNode>> arguments() const override;
 
+  const String& symbol() const;
+
 protected:
   String symbol_;
   Vector<RefPtr<ScalarExpressionNode>> arguments_;
