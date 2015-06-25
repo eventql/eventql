@@ -14,18 +14,37 @@
 namespace csql {
 namespace expressions {
 
-void countExpr(void* scratchpad, int argc, SValue* argv, SValue* out) {
-  uint64_t* count = (uint64_t*) scratchpad;
-  *out = SValue((int64_t) ++(*count));
+/**
+ * COUNT() expression
+ */
+void countExprAcc(void* scratchpad, int argc, SValue* argv) {
+  switch(argv->getType()) {
+    case SValue::T_NULL:
+      return;
+
+    default:
+      ++(*(uint64_t*) scratchpad);
+      return;
+  }
 }
 
-void countExprFree(void* scratchpad) {
-  /* noop */
+void countExprGet(void* scratchpad, SValue* out) {
+  *out = SValue(SValue::IntegerType(*((uint64_t*) scratchpad)));
 }
 
-size_t countExprScratchpadSize() {
-  return sizeof(uint64_t);
+void countExprReset(void* scratchpad) {
+  memset(scratchpad, 0, sizeof(uint64_t));
 }
+
+const AggregateExpression kCountExpr {
+  .scratch_size = sizeof(uint64_t),
+  .accumulate = &countExprAcc,
+  .get = &countExprGet,
+  .reset = &countExprReset,
+  .init = &countExprReset,
+  .free = nullptr
+};
+
 
 /**
  * SUM() expression

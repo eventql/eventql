@@ -66,7 +66,9 @@ void CSTableScan::execute(Function<bool (int argc, const SValue* argv)> fn) {
     }
 
     for (auto& col : columns_) {
-      if (col.second.reader->nextRepetitionLevel() >= fetch_level) {
+      auto nextr = col.second.reader->nextRepetitionLevel();
+
+      if (nextr >= fetch_level) {
         auto& reader = col.second.reader;
 
         uint64_t r;
@@ -94,7 +96,7 @@ void CSTableScan::execute(Function<bool (int argc, const SValue* argv)> fn) {
                     SValue(SValue::IntegerType(*((uint64_t*) data)));
                 break;
               case 0:
-                in_row[col.second.index] = SValue(SValue::IntegerType(0));
+                in_row[col.second.index] = SValue();
                 break;
             }
             break;
@@ -119,7 +121,6 @@ void CSTableScan::execute(Function<bool (int argc, const SValue* argv)> fn) {
             RAISE(kIllegalStateError);
 
         }
-
       }
 
       next_level = std::max(next_level, col.second.reader->nextRepetitionLevel());
@@ -147,15 +148,22 @@ void CSTableScan::execute(Function<bool (int argc, const SValue* argv)> fn) {
 
           select_list_[i].compiled->reset(&select_list_[i].instance);
         }
+
+        if (!fn(out_row.size(), out_row.data())) {
+          return;
+        }
       }
 
-      if (!fn(out_row.size(), out_row.data())) {
-        return;
-      }
 
       select_level = fetch_level;
     } else {
       select_level = std::min(select_level, fetch_level);
+    }
+
+    for (const auto& col : columns_) {
+      if (col.second.reader->maxRepetitionLevel() >= select_level) {
+        in_row[col.second.index] = SValue();
+      }
     }
   }
 }
