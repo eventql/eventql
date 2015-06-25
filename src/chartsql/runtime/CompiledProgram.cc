@@ -115,6 +115,7 @@ void CompiledProgram::evaluate(
 
     case X_CALL_PURE: {
       expr->vtable.t_pure.call(stackn, stackv, out);
+      return;
     }
 
     case X_LITERAL: {
