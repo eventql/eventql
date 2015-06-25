@@ -16,6 +16,15 @@
 
 namespace csql {
 
+void SymbolTable::registerFunction(
+    const String& symbol,
+    void (*fn)(int, SValue*, SValue*)) {
+  ScalarExpression sym;
+  sym.type = EXP_PURE;
+  sym.u.t_pure.call = fn;
+  syms_.emplace(symbol, sym);
+}
+
 void SymbolTable::registerSymbol(
     const std::string& symbol,
     void (*method)(void*, int, SValue*, SValue*)) {

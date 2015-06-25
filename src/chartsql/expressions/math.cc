@@ -16,7 +16,7 @@
 namespace csql {
 namespace expressions {
 
-void addExpr(void* scratchpad, int argc, SValue* argv, SValue* out) {
+void addExpr(int argc, SValue* argv, SValue* out) {
   if (argc != 2) {
     RAISE(
         kRuntimeError,
