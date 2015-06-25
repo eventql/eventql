@@ -10,6 +10,7 @@
 #pragma once
 #include <fnord/stdtypes.h>
 #include <chartsql/svalue.h>
+#include <chartsql/Expression.h>
 #include <chartsql/runtime/ScratchMemory.h>
 
 using namespace fnord;
@@ -40,24 +41,29 @@ public:
   };
 
   CompiledProgram(CompiledExpression* expr, size_t scratchpad_size);
+  ~CompiledProgram();
 
   Instance allocInstance(ScratchMemory* scratch) const;
-  void freeInstance(Instance* instance);
+  void freeInstance(Instance* instance) const;
 
   void accumulate(
       Instance* instance,
       int argc,
-      const SValue* argv);
+      const SValue* argv) const;
 
   void evaluate(
       Instance* instance,
       int argc,
       const SValue* argv,
-      SValue* out);
+      SValue* out) const;
 
-  void reset(Instance* instance);
+  void reset(Instance* instance) const;
 
 protected:
+
+  void init(CompiledExpression* e, Instance* instance) const;
+  void free(CompiledExpression* e, Instance* instance) const;
+
   CompiledExpression* expr_;
   size_t scratchpad_size_;
 };
