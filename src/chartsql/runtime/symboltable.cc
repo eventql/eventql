@@ -27,7 +27,7 @@ void SymbolTable::registerFunction(
 
 void SymbolTable::registerFunction(
     const String& symbol,
-    AggregateExpression fn) {
+    AggregateFunction fn) {
   SFunction sym;
   sym.type = FN_AGGREGATE;
   sym.vtable.t_aggregate.scratch_size = fn.scratch_size;
