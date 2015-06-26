@@ -13,7 +13,7 @@
 #include <vector>
 #include <string>
 #include <chartsql/runtime/symboltable.h>
-#include <chartsql/runtime/CompiledProgram.h>
+#include <chartsql/runtime/ScalarExpression.h>
 #include <chartsql/qtree/ScalarExpressionNode.h>
 #include <chartsql/qtree/FieldReferenceNode.h>
 #include <chartsql/qtree/BuiltinExpressionNode.h>
@@ -30,7 +30,7 @@ public:
 
   Instruction* compile(ASTNode* ast, size_t* scratchpad_size);
 
-  ScopedPtr<CompiledProgram> compile(RefPtr<ScalarExpressionNode> node);
+  ScopedPtr<ScalarExpression> compile(RefPtr<ScalarExpressionNode> node);
 
   SymbolTable* symbolTable() { return symbol_table_; }
 
