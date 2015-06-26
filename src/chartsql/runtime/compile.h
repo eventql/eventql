@@ -28,7 +28,7 @@ class Compiler {
 public:
   Compiler(SymbolTable* symbol_table);
 
-  CompiledExpression* compile(ASTNode* ast, size_t* scratchpad_size);
+  Instruction* compile(ASTNode* ast, size_t* scratchpad_size);
 
   ScopedPtr<CompiledProgram> compile(RefPtr<ScalarExpressionNode> node);
 
@@ -36,31 +36,31 @@ public:
 
 protected:
 
-  CompiledExpression* compileScalarExpression(
+  Instruction* compileScalarExpression(
      RefPtr<ScalarExpressionNode> node,
      size_t* scratchpad_size);
 
-  CompiledExpression* compileSelectList(
+  Instruction* compileSelectList(
       ASTNode* select_list,
       size_t* scratchpad_size);
 
-  CompiledExpression* compileOperator(
+  Instruction* compileOperator(
       const std::string& name,
       ASTNode* ast,
       size_t* scratchpad_size);
 
-  CompiledExpression* compileLiteral(ASTNode* ast);
+  Instruction* compileLiteral(ASTNode* ast);
 
-  CompiledExpression* compileColumnReference(ASTNode* ast);
+  Instruction* compileColumnReference(ASTNode* ast);
 
-  CompiledExpression* compileColumnReference(
+  Instruction* compileColumnReference(
       RefPtr<FieldReferenceNode> node);
 
-  CompiledExpression* compileChildren(ASTNode* ast, size_t* scratchpad_size);
+  Instruction* compileChildren(ASTNode* ast, size_t* scratchpad_size);
 
-  CompiledExpression* compileMethodCall(ASTNode* ast, size_t* scratchpad_size);
+  Instruction* compileMethodCall(ASTNode* ast, size_t* scratchpad_size);
 
-  CompiledExpression* compileMethodCall(
+  Instruction* compileMethodCall(
       RefPtr<BuiltinExpressionNode> node,
       size_t* scratchpad_size);
 

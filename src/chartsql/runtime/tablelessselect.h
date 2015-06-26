@@ -48,7 +48,7 @@ public:
 
   TablelessSelect(
       std::vector<std::string>&& columns,
-      CompiledExpression* expression) :
+      Instruction* expression) :
       columns_(std::move(columns)),
       expression_(expression) {}
 
@@ -75,7 +75,7 @@ public:
 
 protected:
   const std::vector<std::string> columns_;
-  CompiledExpression* expression_;
+  Instruction* expression_;
 };
 
 }
