@@ -11,7 +11,7 @@
 #include <fnord/stdtypes.h>
 #include <chartsql/qtree/ScalarExpressionNode.h>
 #include <chartsql/qtree/FieldReferenceNode.h>
-#include <chartsql/qtree/BuiltinExpressionNode.h>
+#include <chartsql/qtree/CallExpressionNode.h>
 #include <chartsql/runtime/symboltable.h>
 #include <chartsql/runtime/ScalarExpression.h>
 #include <chartsql/svalue.h>
@@ -58,7 +58,7 @@ protected:
   Instruction* compileMethodCall(ASTNode* ast, size_t* scratchpad_size);
 
   Instruction* compileMethodCall(
-      RefPtr<BuiltinExpressionNode> node,
+      RefPtr<CallExpressionNode> node,
       size_t* scratchpad_size);
 
   SymbolTable* symbol_table_;

@@ -37,7 +37,7 @@ add_library(chartsql-lib OBJECT
     parser/parser.cc
     parser/token.cc
     parser/tokenize.cc
-    qtree/BuiltinExpressionNode.cc
+    qtree/CallExpressionNode.cc
     qtree/FieldReferenceNode.cc
     qtree/SelectProjectAggregateNode.cc
     qtree/LiteralExpressionNode.cc
