@@ -104,6 +104,13 @@ void ScalarExpression::evaluate(
   return evaluate(instance, expr_, argc, argv, out);
 }
 
+void ScalarExpression::evaluateStatic(
+    int argc,
+    const SValue* argv,
+    SValue* out) const {
+  return evaluate(nullptr, expr_, argc, argv, out);
+}
+
 void ScalarExpression::accumulate(
     Instance* instance,
     int argc,
@@ -148,6 +155,12 @@ void ScalarExpression::evaluate(
     }
 
     case X_CALL_AGGREGATE: {
+      if (!instance) {
+        RAISE(
+            kIllegalArgumentError,
+            "non-static expression called without instance pointer");
+      }
+
       auto scratch = (char *) instance->scratch + (size_t) expr->arg0;
       expr->vtable.t_aggregate.get(scratch, out);
       return;
