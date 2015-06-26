@@ -16,10 +16,10 @@ using namespace fnord;
 
 namespace csql {
 
-class FieldReferenceNode : public ScalarExpressionNode {
+class ColumnReferenceNode : public ScalarExpressionNode {
 public:
 
-  FieldReferenceNode(const String& field_name);
+  ColumnReferenceNode(const String& field_name);
 
   const String& fieldName() const;
 

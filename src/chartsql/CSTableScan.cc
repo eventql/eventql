@@ -8,7 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <chartsql/CSTableScan.h>
-#include <chartsql/qtree/FieldReferenceNode.h>
+#include <chartsql/qtree/ColumnReferenceNode.h>
 #include <chartsql/runtime/defaultruntime.h>
 #include <chartsql/runtime/compile.h>
 #include <fnord/inspect.h>
@@ -171,7 +171,7 @@ void CSTableScan::execute(Function<bool (int argc, const SValue* argv)> fn) {
 void CSTableScan::findColumns(
     RefPtr<ScalarExpressionNode> expr,
     Set<String>* column_names) const {
-  auto fieldref = dynamic_cast<FieldReferenceNode*>(expr.get());
+  auto fieldref = dynamic_cast<ColumnReferenceNode*>(expr.get());
   if (fieldref != nullptr) {
     column_names->emplace(fieldref->fieldName());
   }
@@ -182,7 +182,7 @@ void CSTableScan::findColumns(
 }
 
 void CSTableScan::resolveColumns(RefPtr<ScalarExpressionNode> expr) const {
-  auto fieldref = dynamic_cast<FieldReferenceNode*>(expr.get());
+  auto fieldref = dynamic_cast<ColumnReferenceNode*>(expr.get());
   if (fieldref != nullptr) {
     auto col = columns_.find(fieldref->fieldName());
     if (col == columns_.end()) {
@@ -201,7 +201,7 @@ uint64_t CSTableScan::findMaxRepetitionLevel(
     RefPtr<ScalarExpressionNode> expr) const {
   uint64_t max_level = 0;
 
-  auto fieldref = dynamic_cast<FieldReferenceNode*>(expr.get());
+  auto fieldref = dynamic_cast<ColumnReferenceNode*>(expr.get());
   if (fieldref != nullptr) {
     auto col = columns_.find(fieldref->fieldName());
     if (col == columns_.end()) {
