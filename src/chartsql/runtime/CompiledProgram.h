@@ -33,8 +33,8 @@ struct CompiledExpression {
   CompiledExpression* next;
   CompiledExpression* child;
   union {
-    PureExpression t_pure;
-    AggregateExpression t_aggregate;
+    PureFunction t_pure;
+    AggregateFunction t_aggregate;
   } vtable;
   void (*call)(void*, int, SValue*, SValue*); // delete me
 };
