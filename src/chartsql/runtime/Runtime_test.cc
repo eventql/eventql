@@ -13,7 +13,7 @@
 #include "chartsql/runtime/DefaultRuntime.h"
 #include "chartsql/qtree/SelectProjectAggregateNode.h"
 #include "chartsql/qtree/FieldReferenceNode.h"
-#include "chartsql/qtree/BuiltinExpressionNode.h"
+#include "chartsql/qtree/CallExpressionNode.h"
 #include "chartsql/qtree/LiteralExpressionNode.h"
 
 using namespace fnord;
@@ -25,7 +25,7 @@ TEST_CASE(RuntimeTest, TestStaticExpression, [] () {
   DefaultRuntime runtime;
 
   auto expr = mkRef(
-      new csql::BuiltinExpressionNode(
+      new csql::CallExpressionNode(
           "add",
           {
             new csql::LiteralExpressionNode(SValue(SValue::IntegerType(1))),

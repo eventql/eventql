@@ -106,9 +106,9 @@ Instruction* ScalarExpressionBuilder::compileScalarExpression(
     return compileColumnReference(node.asInstanceOf<FieldReferenceNode>());
   }
 
-  if (dynamic_cast<BuiltinExpressionNode*>(node.get())) {
+  if (dynamic_cast<CallExpressionNode*>(node.get())) {
     return compileMethodCall(
-        node.asInstanceOf<BuiltinExpressionNode>(),
+        node.asInstanceOf<CallExpressionNode>(),
         scratchpad_size);
   }
 
@@ -261,7 +261,7 @@ Instruction* ScalarExpressionBuilder::compileMethodCall(
 }
 
 Instruction* ScalarExpressionBuilder::compileMethodCall(
-    RefPtr<BuiltinExpressionNode> node,
+    RefPtr<CallExpressionNode> node,
     size_t* scratchpad_size) {
   auto symbol = symbol_table_->lookup(node->symbol());
   const auto& args = node->arguments();
