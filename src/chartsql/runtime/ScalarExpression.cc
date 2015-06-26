@@ -71,7 +71,8 @@ void ScalarExpression::free(Instruction* e, Instance* instance) const {
       break;
 
     case X_LITERAL:
-        fnord::iputs("free literal: $0", (uint64_t) e);
+      delete (SValue*) e->arg0;
+      break;
 
     default:
       break;
