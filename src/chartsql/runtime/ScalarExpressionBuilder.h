@@ -12,6 +12,7 @@
 #include <chartsql/qtree/ScalarExpressionNode.h>
 #include <chartsql/qtree/ColumnReferenceNode.h>
 #include <chartsql/qtree/CallExpressionNode.h>
+#include <chartsql/qtree/LiteralExpressionNode.h>
 #include <chartsql/runtime/symboltable.h>
 #include <chartsql/runtime/ScalarExpression.h>
 #include <chartsql/svalue.h>
@@ -35,33 +36,18 @@ protected:
 
   Instruction* compileScalarExpression(
      RefPtr<ScalarExpressionNode> node,
-     size_t* scratchpad_size,
-     Vector<SValue>* constants);
+     size_t* scratchpad_size);
 
-  Instruction* compileSelectList(
-      ASTNode* select_list,
+  Instruction* compileLiteral(
+      RefPtr<LiteralExpressionNode> node,
       size_t* scratchpad_size);
-
-  Instruction* compileOperator(
-      const std::string& name,
-      ASTNode* ast,
-      size_t* scratchpad_size);
-
-  Instruction* compileLiteral(ASTNode* ast);
-
-  Instruction* compileColumnReference(ASTNode* ast);
 
   Instruction* compileColumnReference(
       RefPtr<ColumnReferenceNode> node);
 
-  Instruction* compileChildren(ASTNode* ast, size_t* scratchpad_size);
-
-  Instruction* compileMethodCall(ASTNode* ast, size_t* scratchpad_size);
-
   Instruction* compileMethodCall(
       RefPtr<CallExpressionNode> node,
-      size_t* scratchpad_size,
-      Vector<SValue>* constants);
+      size_t* scratchpad_size);
 
   SymbolTable* symbol_table_;
 };
