@@ -24,7 +24,7 @@ namespace csql {
 class TablelessSelect : public QueryPlanNode {
 public:
 
-  static TablelessSelect* build(ASTNode* ast, Compiler* compiler) {
+  static TablelessSelect* build(ASTNode* ast, ScalarExpressionBuilder* compiler) {
     if (!(*ast == ASTNode::T_SELECT) || ast->getChildren().size() != 1) {
       return nullptr;
     }

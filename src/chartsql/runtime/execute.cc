@@ -91,7 +91,7 @@ bool executeExpression(
   }
 }
 
-SValue executeSimpleConstExpression(Compiler* compiler, ASTNode* expr) {
+SValue executeSimpleConstExpression(ScalarExpressionBuilder* compiler, ASTNode* expr) {
   size_t scratchpad_len = 0;
   auto compiled = compiler->compile(expr, &scratchpad_len);
 

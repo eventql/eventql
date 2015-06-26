@@ -26,7 +26,7 @@
 namespace csql {
 
 QueryPlanBuilder::QueryPlanBuilder(
-    Compiler* compiler,
+    ScalarExpressionBuilder* compiler,
     const std::vector<std::unique_ptr<Backend>>& backends) :
     QueryPlanBuilderInterface(compiler, backends) {}
 
