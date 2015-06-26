@@ -10,7 +10,7 @@
 #ifndef _FNORDMETRIC_SQL_EXPRESSIONS_AGGREGATE_H
 #define _FNORDMETRIC_SQL_EXPRESSIONS_AGGREGATE_H
 #include <chartsql/svalue.h>
-#include <chartsql/Expression.h>
+#include <chartsql/SFunction.h>
 
 namespace csql {
 namespace expressions {
