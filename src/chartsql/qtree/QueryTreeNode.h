@@ -20,7 +20,7 @@ public:
   virtual ~QueryTreeNode() {}
 };
 
-class StatementNode : public QueryTreeNode {
+class TableExpressionNode : public QueryTreeNode {
 public:
 
 };
