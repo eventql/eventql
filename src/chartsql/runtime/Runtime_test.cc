@@ -12,7 +12,7 @@
 #include <fnord/test/unittest.h>
 #include "chartsql/runtime/DefaultRuntime.h"
 #include "chartsql/qtree/SelectProjectAggregateNode.h"
-#include "chartsql/qtree/FieldReferenceNode.h"
+#include "chartsql/qtree/ColumnReferenceNode.h"
 #include "chartsql/qtree/CallExpressionNode.h"
 #include "chartsql/qtree/LiteralExpressionNode.h"
 
