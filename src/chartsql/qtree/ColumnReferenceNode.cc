@@ -7,25 +7,25 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <chartsql/qtree/FieldReferenceNode.h>
+#include <chartsql/qtree/ColumnReferenceNode.h>
 
 using namespace fnord;
 
 namespace csql {
 
-FieldReferenceNode::FieldReferenceNode(
+ColumnReferenceNode::ColumnReferenceNode(
     const String& field_name) :
     field_name_(field_name) {}
 
-const String& FieldReferenceNode::fieldName() const {
+const String& ColumnReferenceNode::fieldName() const {
   return field_name_;
 }
 
-Vector<RefPtr<ScalarExpressionNode>> FieldReferenceNode::arguments() const {
+Vector<RefPtr<ScalarExpressionNode>> ColumnReferenceNode::arguments() const {
   return Vector<RefPtr<ScalarExpressionNode>>{};
 }
 
-size_t FieldReferenceNode::columnIndex() const {
+size_t ColumnReferenceNode::columnIndex() const {
   if (column_index_.isEmpty()) {
     RAISE(
         kRuntimeError,
@@ -36,7 +36,7 @@ size_t FieldReferenceNode::columnIndex() const {
   return column_index_.get();
 }
 
-void FieldReferenceNode::setColumnIndex(size_t index) {
+void ColumnReferenceNode::setColumnIndex(size_t index) {
   column_index_ = index;
 }
 

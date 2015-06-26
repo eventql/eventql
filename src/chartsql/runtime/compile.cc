@@ -102,8 +102,8 @@ Instruction* ScalarExpressionBuilder::compileScalarExpression(
    RefPtr<ScalarExpressionNode> node,
    size_t* scratchpad_size) {
 
-  if (dynamic_cast<FieldReferenceNode*>(node.get())) {
-    return compileColumnReference(node.asInstanceOf<FieldReferenceNode>());
+  if (dynamic_cast<ColumnReferenceNode*>(node.get())) {
+    return compileColumnReference(node.asInstanceOf<ColumnReferenceNode>());
   }
 
   if (dynamic_cast<CallExpressionNode*>(node.get())) {
@@ -211,7 +211,7 @@ Instruction* ScalarExpressionBuilder::compileColumnReference(ASTNode* ast) {
 }
 
 Instruction* ScalarExpressionBuilder::compileColumnReference(
-    RefPtr<FieldReferenceNode> node) {
+    RefPtr<ColumnReferenceNode> node) {
   auto ins = new Instruction();
   ins->type = X_INPUT;
   ins->call = nullptr;
