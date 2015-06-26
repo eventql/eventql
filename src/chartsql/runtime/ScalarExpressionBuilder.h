@@ -10,7 +10,7 @@
 #pragma once
 #include <fnord/stdtypes.h>
 #include <chartsql/qtree/ScalarExpressionNode.h>
-#include <chartsql/qtree/FieldReferenceNode.h>
+#include <chartsql/qtree/ColumnReferenceNode.h>
 #include <chartsql/qtree/CallExpressionNode.h>
 #include <chartsql/runtime/symboltable.h>
 #include <chartsql/runtime/ScalarExpression.h>
@@ -51,7 +51,7 @@ protected:
   Instruction* compileColumnReference(ASTNode* ast);
 
   Instruction* compileColumnReference(
-      RefPtr<FieldReferenceNode> node);
+      RefPtr<ColumnReferenceNode> node);
 
   Instruction* compileChildren(ASTNode* ast, size_t* scratchpad_size);
 
