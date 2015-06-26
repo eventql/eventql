@@ -26,28 +26,33 @@ class ScalarExpressionBuilder {
 public:
   ScalarExpressionBuilder(SymbolTable* symbol_table);
 
-  Instruction* compile(ASTNode* ast, size_t* scratchpad_size);
+  Instruction* compile(ASTNode* ast, size_t* dynamic_storage_size);
 
-  ScopedPtr<ScalarExpression> compile(RefPtr<ScalarExpressionNode> node);
+  ScopedPtr<ScalarExpression> compile(
+      RefPtr<ScalarExpressionNode> node);
 
   SymbolTable* symbolTable() { return symbol_table_; }
 
 protected:
 
   Instruction* compileScalarExpression(
-     RefPtr<ScalarExpressionNode> node,
-     size_t* scratchpad_size);
+      RefPtr<ScalarExpressionNode> node,
+      size_t* dynamic_storage_size,
+      ScratchMemory* static_storage);
 
   Instruction* compileLiteral(
       RefPtr<LiteralExpressionNode> node,
-      size_t* scratchpad_size);
+      size_t* dynamic_storage_size,
+      ScratchMemory* static_storage);
 
   Instruction* compileColumnReference(
-      RefPtr<ColumnReferenceNode> node);
+      RefPtr<ColumnReferenceNode> node,
+      ScratchMemory* static_storage);
 
   Instruction* compileMethodCall(
       RefPtr<CallExpressionNode> node,
-      size_t* scratchpad_size);
+      size_t* dynamic_storage_size,
+      ScratchMemory* static_storage);
 
   SymbolTable* symbol_table_;
 };

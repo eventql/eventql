@@ -20,9 +20,15 @@ public:
   static const size_t kBlockSize;
 
   ScratchMemory();
+  ScratchMemory(ScratchMemory&& other);
+  ScratchMemory(const ScratchMemory& other) = delete;
+  ScratchMemory& operator=(const ScratchMemory& other) = delete;
   ~ScratchMemory();
 
   void* alloc(size_t size);
+
+  template <class ClassType, typename... ArgTypes>
+  ClassType* construct(ArgTypes... args);
 
 protected:
   struct ScratchMemoryBlock {
@@ -36,5 +42,11 @@ protected:
 
   ScratchMemoryBlock* head_;
 };
+
+template <class ClassType, typename... ArgTypes>
+ClassType* ScratchMemory::construct(ArgTypes... args) {
+  auto mem = alloc(sizeof(ClassType));
+  return new (mem) ClassType(args...);
+}
 
 }
