@@ -15,10 +15,12 @@ using namespace fnord;
 namespace csql {
 
 ScalarExpression::ScalarExpression(
-    Instruction* expr,
-    size_t scratchpad_size) :
-    expr_(expr),
-    scratchpad_size_(scratchpad_size) {}
+    Instruction* entry,
+    ScratchMemory&& static_storage,
+    size_t dynamic_storage_size) :
+    entry_(entry),
+    static_storage_(std::move(static_storage)),
+    dynamic_storage_size_(dynamic_storage_size) {}
 
 ScalarExpression::~ScalarExpression() {
   // FIXPAUL free instructions...
@@ -27,18 +29,18 @@ ScalarExpression::~ScalarExpression() {
 ScalarExpression::Instance ScalarExpression::allocInstance(
     ScratchMemory* scratch) const {
   Instance that;
-  that.scratch = scratch->alloc(scratchpad_size_);
+  that.scratch = scratch->alloc(dynamic_storage_size_);
   fnord::iputs("init scratch @ $0", (uint64_t) that.scratch);
-  init(expr_, &that);
+  init(entry_, &that);
   return that;
 }
 
 void ScalarExpression::freeInstance(Instance* instance) const {
-  free(expr_, instance);
+  free(entry_, instance);
 }
 
 void ScalarExpression::reset(Instance* instance) const {
-  reset(expr_, instance);
+  reset(entry_, instance);
 }
 
 void ScalarExpression::init(Instruction* e, Instance* instance) const {
@@ -101,21 +103,21 @@ void ScalarExpression::evaluate(
     int argc,
     const SValue* argv,
     SValue* out) const {
-  return evaluate(instance, expr_, argc, argv, out);
+  return evaluate(instance, entry_, argc, argv, out);
 }
 
 void ScalarExpression::evaluateStatic(
     int argc,
     const SValue* argv,
     SValue* out) const {
-  return evaluate(nullptr, expr_, argc, argv, out);
+  return evaluate(nullptr, entry_, argc, argv, out);
 }
 
 void ScalarExpression::accumulate(
     Instance* instance,
     int argc,
     const SValue* argv) const {
-  return accumulate(instance, expr_, argc, argv);
+  return accumulate(instance, entry_, argc, argv);
 }
 
 void ScalarExpression::evaluate(
