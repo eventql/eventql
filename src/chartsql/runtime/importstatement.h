@@ -18,7 +18,7 @@ namespace csql {
 
 class ImportStatement {
 public:
-  ImportStatement(ASTNode* ast, Compiler* compiler);
+  ImportStatement(ASTNode* ast, ScalarExpressionBuilder* compiler);
   const std::string& source_uri() const;
   const std::vector<std::string>& tables() const;
 protected:

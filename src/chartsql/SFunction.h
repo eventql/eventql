@@ -50,5 +50,4 @@ struct SFunction {
   } vtable;
 };
 
-
-}
+} // namespace csql

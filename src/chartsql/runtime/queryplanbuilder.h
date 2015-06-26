@@ -32,7 +32,7 @@ class Runtime;
 class QueryPlanBuilderInterface {
 public:
   QueryPlanBuilderInterface(
-      Compiler* compiler,
+      ScalarExpressionBuilder* compiler,
       const std::vector<std::unique_ptr<Backend>>& backends) :
       compiler_(compiler),
       backends_(backends) {}
@@ -44,14 +44,14 @@ public:
       TableRepository* repo) = 0;
 
 protected:
-  Compiler* compiler_;
+  ScalarExpressionBuilder* compiler_;
   const std::vector<std::unique_ptr<Backend>>& backends_;
 };
 
 class QueryPlanBuilder : public QueryPlanBuilderInterface {
 public:
   QueryPlanBuilder(
-      Compiler* compiler,
+      ScalarExpressionBuilder* compiler,
       const std::vector<std::unique_ptr<Backend>>& backends);
 
   void buildQueryPlan(
