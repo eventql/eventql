@@ -15,10 +15,10 @@ using namespace fnord;
 
 namespace csql {
 
-class BuiltinExpressionNode : public ScalarExpressionNode {
+class CallExpressionNode : public ScalarExpressionNode {
 public:
 
-  BuiltinExpressionNode(
+  CallExpressionNode(
       const String& symbol,
       Vector<RefPtr<ScalarExpressionNode>> arguments);
 

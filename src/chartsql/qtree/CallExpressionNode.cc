@@ -7,23 +7,23 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <chartsql/qtree/BuiltinExpressionNode.h>
+#include <chartsql/qtree/CallExpressionNode.h>
 
 using namespace fnord;
 
 namespace csql {
 
-BuiltinExpressionNode::BuiltinExpressionNode(
+CallExpressionNode::CallExpressionNode(
     const String& symbol,
     Vector<RefPtr<ScalarExpressionNode>> arguments) :
     symbol_(symbol),
     arguments_(arguments) {}
 
-Vector<RefPtr<ScalarExpressionNode>> BuiltinExpressionNode::arguments() const {
+Vector<RefPtr<ScalarExpressionNode>> CallExpressionNode::arguments() const {
   return arguments_;
 }
 
-const String& BuiltinExpressionNode::symbol() const {
+const String& CallExpressionNode::symbol() const {
   return symbol_;
 }
 
