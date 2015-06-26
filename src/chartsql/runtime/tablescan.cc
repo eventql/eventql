@@ -15,7 +15,7 @@ namespace csql {
 TableScan* TableScan::build(
     ASTNode* ast,
     TableRepository* repo,
-    Compiler* compiler) {
+    ScalarExpressionBuilder* compiler) {
   if (!(*ast == ASTNode::T_SELECT)) {
     return nullptr;
   }
