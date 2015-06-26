@@ -18,7 +18,7 @@
 namespace csql {
 
 bool executeExpression(
-    CompiledExpression* expr,
+    Instruction* expr,
     void* scratchpad,
     int row_len,
     const SValue* row,

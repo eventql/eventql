@@ -87,7 +87,7 @@ TableScan* TableScan::build(
   auto column_names = ASTUtil::columnNamesFromSelectList(select_list, tbl_ref);
 
   /* get where expression */
-  CompiledExpression* where_expr = nullptr;
+  Instruction* where_expr = nullptr;
   if (ast->getChildren().size() > 2) {
     ASTNode* where_clause = ast->getChildren()[2];
     if (!(where_clause)) {
@@ -131,8 +131,8 @@ TableScan* TableScan::build(
 TableScan::TableScan(
     TableRef* tbl_ref,
     std::vector<std::string>&& columns,
-    CompiledExpression* select_expr,
-    CompiledExpression* where_expr):
+    Instruction* select_expr,
+    Instruction* where_expr):
     tbl_ref_(tbl_ref),
     columns_(std::move(columns)),
     select_expr_(select_expr),

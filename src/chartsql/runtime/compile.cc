@@ -18,7 +18,7 @@ namespace csql {
 
 Compiler::Compiler(SymbolTable* symbol_table) : symbol_table_(symbol_table) {}
 
-CompiledExpression* Compiler::compile(ASTNode* ast, size_t* scratchpad_size) {
+Instruction* Compiler::compile(ASTNode* ast, size_t* scratchpad_size) {
   if (ast == nullptr) {
     RAISE(kNullPointerError, "can't compile nullptr");
   }
@@ -98,7 +98,7 @@ ScopedPtr<CompiledProgram> Compiler::compile(
   return mkScoped(new CompiledProgram(expr, scratchpad_size));
 }
 
-CompiledExpression* Compiler::compileScalarExpression(
+Instruction* Compiler::compileScalarExpression(
    RefPtr<ScalarExpressionNode> node,
    size_t* scratchpad_size) {
 
@@ -115,10 +115,10 @@ CompiledExpression* Compiler::compileScalarExpression(
   RAISE(kRuntimeError, "internal error: can't compile expression");
 }
 
-CompiledExpression* Compiler::compileSelectList(
+Instruction* Compiler::compileSelectList(
     ASTNode* select_list,
     size_t* scratchpad_size) {
-  auto root = new CompiledExpression();
+  auto root = new Instruction();
   root->type = X_MULTI;
   root->call = nullptr;
   root->arg0 = nullptr;
@@ -139,10 +139,10 @@ CompiledExpression* Compiler::compileSelectList(
   return root;
 }
 
-CompiledExpression* Compiler::compileChildren(
+Instruction* Compiler::compileChildren(
     ASTNode* parent,
     size_t* scratchpad_size) {
-  auto root = new CompiledExpression();
+  auto root = new Instruction();
   root->type = X_MULTI;
   root->call = nullptr;
   root->arg0 = nullptr;
@@ -158,7 +158,7 @@ CompiledExpression* Compiler::compileChildren(
   return root;
 }
 
-CompiledExpression* Compiler::compileOperator(
+Instruction* Compiler::compileOperator(
     const std::string& name,
     ASTNode* ast,
     size_t* scratchpad_size) {
@@ -168,7 +168,7 @@ CompiledExpression* Compiler::compileOperator(
     RAISE(kRuntimeError, "undefined symbol: '%s'\n", name.c_str());
   }
 
-  auto op = new CompiledExpression();
+  auto op = new Instruction();
   op->type = X_CALL;
   op->call = symbol->getFnPtr();
   op->arg0 = nullptr;
@@ -185,12 +185,12 @@ CompiledExpression* Compiler::compileOperator(
   return op;
 }
 
-CompiledExpression* Compiler::compileLiteral(ASTNode* ast) {
+Instruction* Compiler::compileLiteral(ASTNode* ast) {
   if (ast->getToken() == nullptr) {
     RAISE(kRuntimeError, "internal error: corrupt ast");
   }
 
-  auto ins = new CompiledExpression();
+  auto ins = new Instruction();
   ins->type = X_LITERAL;
   ins->call = nullptr;
   ins->arg0 = SValue::fromToken(ast->getToken());
@@ -200,8 +200,8 @@ CompiledExpression* Compiler::compileLiteral(ASTNode* ast) {
   return ins;
 }
 
-CompiledExpression* Compiler::compileColumnReference(ASTNode* ast) {
-  auto ins = new CompiledExpression();
+Instruction* Compiler::compileColumnReference(ASTNode* ast) {
+  auto ins = new Instruction();
   ins->type = X_INPUT;
   ins->call = nullptr;
   ins->arg0 = (void *) ast->getID();
@@ -210,9 +210,9 @@ CompiledExpression* Compiler::compileColumnReference(ASTNode* ast) {
   return ins;
 }
 
-CompiledExpression* Compiler::compileColumnReference(
+Instruction* Compiler::compileColumnReference(
     RefPtr<FieldReferenceNode> node) {
-  auto ins = new CompiledExpression();
+  auto ins = new Instruction();
   ins->type = X_INPUT;
   ins->call = nullptr;
   ins->arg0 = (void *) node->columnIndex();
@@ -222,7 +222,7 @@ CompiledExpression* Compiler::compileColumnReference(
   return ins;
 }
 
-CompiledExpression* Compiler::compileMethodCall(
+Instruction* Compiler::compileMethodCall(
     ASTNode* ast,
     size_t* scratchpad_size) {
   if (ast->getToken() == nullptr ||
@@ -238,7 +238,7 @@ CompiledExpression* Compiler::compileMethodCall(
         ast->getToken()->getString().c_str());
   }
 
-  auto op = new CompiledExpression();
+  auto op = new Instruction();
   op->type = X_CALL;
   op->call = symbol->getFnPtr();
   op->arg0 = nullptr;
@@ -260,13 +260,13 @@ CompiledExpression* Compiler::compileMethodCall(
   return op;
 }
 
-CompiledExpression* Compiler::compileMethodCall(
+Instruction* Compiler::compileMethodCall(
     RefPtr<BuiltinExpressionNode> node,
     size_t* scratchpad_size) {
   auto symbol = symbol_table_->lookup(node->symbol());
   const auto& args = node->arguments();
 
-  auto op = new CompiledExpression();
+  auto op = new Instruction();
   op->arg0  = nullptr;
   op->argn  = args.size();
   op->child = nullptr;
