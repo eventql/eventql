@@ -46,7 +46,11 @@ public:
     void* scratch;
   };
 
-  ScalarExpression(Instruction* expr, size_t scratchpad_size);
+  ScalarExpression(
+      Instruction* entry,
+      ScratchMemory&& static_storage,
+      size_t dynamic_storage_size);
+
   ~ScalarExpression();
 
   Instance allocInstance(ScratchMemory* scratch) const;
@@ -89,8 +93,9 @@ protected:
   void free(Instruction* e, Instance* instance) const;
   void reset(Instruction* e, Instance* instance) const;
 
-  Instruction* expr_;
-  size_t scratchpad_size_;
+  Instruction* entry_;
+  ScratchMemory static_storage_;
+  size_t dynamic_storage_size_;
 };
 
 }

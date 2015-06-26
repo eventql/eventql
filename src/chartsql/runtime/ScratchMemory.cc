@@ -17,6 +17,10 @@ const size_t ScratchMemory::kBlockSize = 4096;
 
 ScratchMemory::ScratchMemory() : head_(nullptr) {}
 
+ScratchMemory::ScratchMemory(ScratchMemory&& other) : head_(other.head_) {
+  other.head_ = nullptr;
+}
+
 ScratchMemory::~ScratchMemory() {
   for (auto cur = head_; cur != nullptr; ) {
     auto next = cur->next;
