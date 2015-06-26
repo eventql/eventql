@@ -65,6 +65,11 @@ public:
 
   void reset(Instance* instance) const;
 
+  void evaluateStatic(
+      int argc,
+      const SValue* argv,
+      SValue* out) const;
+
 protected:
 
   void evaluate(
