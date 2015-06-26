@@ -18,7 +18,7 @@ namespace csql {
 
 DrawStatement::DrawStatement(
     ASTNode* ast,
-    Compiler* compiler) :
+    ScalarExpressionBuilder* compiler) :
     ast_(ast->deepCopy()),
     compiler_(compiler) {}
 

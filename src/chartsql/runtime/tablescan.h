@@ -29,7 +29,7 @@ public:
   static TableScan* build(
       ASTNode* ast,
       TableRepository* repo,
-      Compiler* compiler);
+      ScalarExpressionBuilder* compiler);
 
   TableScan(
       TableRef* tbl_ref,

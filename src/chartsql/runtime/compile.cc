@@ -16,9 +16,9 @@
 
 namespace csql {
 
-Compiler::Compiler(SymbolTable* symbol_table) : symbol_table_(symbol_table) {}
+ScalarExpressionBuilder::ScalarExpressionBuilder(SymbolTable* symbol_table) : symbol_table_(symbol_table) {}
 
-Instruction* Compiler::compile(ASTNode* ast, size_t* scratchpad_size) {
+Instruction* ScalarExpressionBuilder::compile(ASTNode* ast, size_t* scratchpad_size) {
   if (ast == nullptr) {
     RAISE(kNullPointerError, "can't compile nullptr");
   }
@@ -91,14 +91,14 @@ Instruction* Compiler::compile(ASTNode* ast, size_t* scratchpad_size) {
   }
 }
 
-ScopedPtr<ScalarExpression> Compiler::compile(
+ScopedPtr<ScalarExpression> ScalarExpressionBuilder::compile(
     RefPtr<ScalarExpressionNode> node) {
   size_t scratchpad_size = 0;
   auto expr = compileScalarExpression(node, &scratchpad_size);
   return mkScoped(new ScalarExpression(expr, scratchpad_size));
 }
 
-Instruction* Compiler::compileScalarExpression(
+Instruction* ScalarExpressionBuilder::compileScalarExpression(
    RefPtr<ScalarExpressionNode> node,
    size_t* scratchpad_size) {
 
@@ -115,7 +115,7 @@ Instruction* Compiler::compileScalarExpression(
   RAISE(kRuntimeError, "internal error: can't compile expression");
 }
 
-Instruction* Compiler::compileSelectList(
+Instruction* ScalarExpressionBuilder::compileSelectList(
     ASTNode* select_list,
     size_t* scratchpad_size) {
   auto root = new Instruction();
@@ -139,7 +139,7 @@ Instruction* Compiler::compileSelectList(
   return root;
 }
 
-Instruction* Compiler::compileChildren(
+Instruction* ScalarExpressionBuilder::compileChildren(
     ASTNode* parent,
     size_t* scratchpad_size) {
   auto root = new Instruction();
@@ -158,7 +158,7 @@ Instruction* Compiler::compileChildren(
   return root;
 }
 
-Instruction* Compiler::compileOperator(
+Instruction* ScalarExpressionBuilder::compileOperator(
     const std::string& name,
     ASTNode* ast,
     size_t* scratchpad_size) {
@@ -185,7 +185,7 @@ Instruction* Compiler::compileOperator(
   return op;
 }
 
-Instruction* Compiler::compileLiteral(ASTNode* ast) {
+Instruction* ScalarExpressionBuilder::compileLiteral(ASTNode* ast) {
   if (ast->getToken() == nullptr) {
     RAISE(kRuntimeError, "internal error: corrupt ast");
   }
@@ -200,7 +200,7 @@ Instruction* Compiler::compileLiteral(ASTNode* ast) {
   return ins;
 }
 
-Instruction* Compiler::compileColumnReference(ASTNode* ast) {
+Instruction* ScalarExpressionBuilder::compileColumnReference(ASTNode* ast) {
   auto ins = new Instruction();
   ins->type = X_INPUT;
   ins->call = nullptr;
@@ -210,7 +210,7 @@ Instruction* Compiler::compileColumnReference(ASTNode* ast) {
   return ins;
 }
 
-Instruction* Compiler::compileColumnReference(
+Instruction* ScalarExpressionBuilder::compileColumnReference(
     RefPtr<FieldReferenceNode> node) {
   auto ins = new Instruction();
   ins->type = X_INPUT;
@@ -222,7 +222,7 @@ Instruction* Compiler::compileColumnReference(
   return ins;
 }
 
-Instruction* Compiler::compileMethodCall(
+Instruction* ScalarExpressionBuilder::compileMethodCall(
     ASTNode* ast,
     size_t* scratchpad_size) {
   if (ast->getToken() == nullptr ||
@@ -260,7 +260,7 @@ Instruction* Compiler::compileMethodCall(
   return op;
 }
 
-Instruction* Compiler::compileMethodCall(
+Instruction* ScalarExpressionBuilder::compileMethodCall(
     RefPtr<BuiltinExpressionNode> node,
     size_t* scratchpad_size) {
   auto symbol = symbol_table_->lookup(node->symbol());

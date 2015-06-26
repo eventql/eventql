@@ -29,7 +29,7 @@ const std::vector<std::unique_ptr<Backend>>& Runtime::backends() {
   return backends_;
 }
 
-Compiler* Runtime::compiler() {
+ScalarExpressionBuilder* Runtime::compiler() {
   return &compiler_;
 }
 

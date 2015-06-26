@@ -14,7 +14,7 @@
 
 namespace csql {
 class SValue;
-class Compiler;
+class ScalarExpressionBuilder;
 
 bool executeExpression(
     Instruction* expr,
@@ -24,7 +24,7 @@ bool executeExpression(
     int* outc,
     SValue* outv);
 
-SValue executeSimpleConstExpression(Compiler* compiler, ASTNode* expr);
+SValue executeSimpleConstExpression(ScalarExpressionBuilder* compiler, ASTNode* expr);
 
 }
 #endif
