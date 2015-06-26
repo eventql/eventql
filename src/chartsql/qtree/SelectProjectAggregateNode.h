@@ -16,7 +16,7 @@ using namespace fnord;
 
 namespace csql {
 
-class SelectProjectAggregateNode : public StatementNode {
+class SelectProjectAggregateNode : public TableExpressionNode {
 public:
 
   SelectProjectAggregateNode(
