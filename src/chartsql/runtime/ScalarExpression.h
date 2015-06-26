@@ -89,9 +89,10 @@ protected:
       int argc,
       const SValue* argv) const;
 
-  void init(Instruction* e, Instance* instance) const;
-  void free(Instruction* e, Instance* instance) const;
-  void reset(Instruction* e, Instance* instance) const;
+  void initInstance(Instruction* e, Instance* instance) const;
+  void freeInstance(Instruction* e, Instance* instance) const;
+  void resetInstance(Instruction* e, Instance* instance) const;
+  void freeProgram(Instruction* e) const;
 
   Instruction* entry_;
   ScratchMemory static_storage_;
