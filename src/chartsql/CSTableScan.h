@@ -10,16 +10,16 @@
 #pragma once
 #include <fnord/stdtypes.h>
 #include <fnord/protobuf/MessageSchema.h>
-#include <chartsql/Statement.h>
 #include <chartsql/qtree/SelectProjectAggregateNode.h>
 #include <chartsql/runtime/compile.h>
+#include <chartsql/runtime/TableExpression.h>
 #include <cstable/CSTableReader.h>
 
 using namespace fnord;
 
 namespace csql {
 
-class CSTableScan : public Statement {
+class CSTableScan : public TableExpression {
 public:
 
   CSTableScan(
