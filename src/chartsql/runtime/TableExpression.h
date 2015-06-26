@@ -16,10 +16,11 @@ using namespace fnord;
 
 namespace csql {
 
-class Statement : public RefCounted {
+class TableExpression : public RefCounted {
 public:
-  virtual ~Statement() {}
+
   virtual void execute(Function<bool (int argc, const SValue* argv)> fn) = 0;
+
 };
 
 }
