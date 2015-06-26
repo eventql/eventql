@@ -46,7 +46,7 @@ add_library(chartsql-lib OBJECT
     runtime/runtime.cc
     runtime/symboltable.cc
     runtime/queryplannode.cc
-    runtime/compile.cc
+    runtime/ScalarExpressionBuilder.cc
     runtime/defaultruntime.cc
     runtime/importstatement.cc
     runtime/tablerepository.cc

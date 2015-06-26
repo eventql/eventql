@@ -35,7 +35,8 @@ protected:
 
   Instruction* compileScalarExpression(
      RefPtr<ScalarExpressionNode> node,
-     size_t* scratchpad_size);
+     size_t* scratchpad_size,
+     Vector<SValue>* constants);
 
   Instruction* compileSelectList(
       ASTNode* select_list,
@@ -59,7 +60,8 @@ protected:
 
   Instruction* compileMethodCall(
       RefPtr<CallExpressionNode> node,
-      size_t* scratchpad_size);
+      size_t* scratchpad_size,
+      Vector<SValue>* constants);
 
   SymbolTable* symbol_table_;
 };
