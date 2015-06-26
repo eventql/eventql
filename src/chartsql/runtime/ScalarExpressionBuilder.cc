@@ -19,82 +19,16 @@ namespace csql {
 ScalarExpressionBuilder::ScalarExpressionBuilder(SymbolTable* symbol_table) : symbol_table_(symbol_table) {}
 
 Instruction* ScalarExpressionBuilder::compile(ASTNode* ast, size_t* scratchpad_size) {
-  if (ast == nullptr) {
-    RAISE(kNullPointerError, "can't compile nullptr");
-  }
-
-  switch (ast->getType()) {
-
-    case ASTNode::T_SELECT_LIST:
-      return compileSelectList(ast, scratchpad_size);
-
-    case ASTNode::T_GROUP_BY:
-      return compileChildren(ast, scratchpad_size);
-
-    case ASTNode::T_EQ_EXPR:
-      return compileOperator("eq", ast, scratchpad_size);
-
-    case ASTNode::T_NEQ_EXPR:
-      return compileOperator("neq", ast, scratchpad_size);
-
-    case ASTNode::T_AND_EXPR:
-      return compileOperator("and", ast, scratchpad_size);
-
-    case ASTNode::T_OR_EXPR:
-      return compileOperator("or", ast, scratchpad_size);
-
-    case ASTNode::T_NEGATE_EXPR:
-      return compileOperator("neg", ast, scratchpad_size);
-
-    case ASTNode::T_LT_EXPR:
-      return compileOperator("lt", ast, scratchpad_size);
-
-    case ASTNode::T_LTE_EXPR:
-      return compileOperator("lte", ast, scratchpad_size);
-
-    case ASTNode::T_GT_EXPR:
-      return compileOperator("gt", ast, scratchpad_size);
-
-    case ASTNode::T_GTE_EXPR:
-      return compileOperator("gte", ast, scratchpad_size);
-
-    case ASTNode::T_ADD_EXPR:
-      return compileOperator("add", ast, scratchpad_size);
-
-    case ASTNode::T_SUB_EXPR:
-      return compileOperator("sub", ast, scratchpad_size);
-
-    case ASTNode::T_MUL_EXPR:
-      return compileOperator("mul", ast, scratchpad_size);
-
-    case ASTNode::T_DIV_EXPR:
-      return compileOperator("div", ast, scratchpad_size);
-
-    case ASTNode::T_MOD_EXPR:
-      return compileOperator("mod", ast, scratchpad_size);
-
-    case ASTNode::T_POW_EXPR:
-      return compileOperator("pow", ast, scratchpad_size);
-
-    case ASTNode::T_LITERAL:
-      return compileLiteral(ast);
-
-    case ASTNode::T_RESOLVED_COLUMN:
-      return compileColumnReference(ast);
-
-    case ASTNode::T_METHOD_CALL:
-      return compileMethodCall(ast, scratchpad_size);
-
-    default:
-      ast->debugPrint();
-      RAISE(kRuntimeError, "internal error: can't compile expression");
-  }
+  RAISE(kNotImplementedError, "deprecated");
 }
 
 ScopedPtr<ScalarExpression> ScalarExpressionBuilder::compile(
     RefPtr<ScalarExpressionNode> node) {
   size_t scratchpad_size = 0;
-  auto expr = compileScalarExpression(node, &scratchpad_size);
+  auto expr = compileScalarExpression(
+      node,
+      &scratchpad_size);
+
   return mkScoped(new ScalarExpression(expr, scratchpad_size));
 }
 
@@ -106,6 +40,12 @@ Instruction* ScalarExpressionBuilder::compileScalarExpression(
     return compileColumnReference(node.asInstanceOf<ColumnReferenceNode>());
   }
 
+  if (dynamic_cast<LiteralExpressionNode*>(node.get())) {
+    return compileLiteral(
+        node.asInstanceOf<LiteralExpressionNode>(),
+        scratchpad_size);
+  }
+
   if (dynamic_cast<CallExpressionNode*>(node.get())) {
     return compileMethodCall(
         node.asInstanceOf<CallExpressionNode>(),
@@ -115,98 +55,16 @@ Instruction* ScalarExpressionBuilder::compileScalarExpression(
   RAISE(kRuntimeError, "internal error: can't compile expression");
 }
 
-Instruction* ScalarExpressionBuilder::compileSelectList(
-    ASTNode* select_list,
+Instruction* ScalarExpressionBuilder::compileLiteral(
+    RefPtr<LiteralExpressionNode> node,
     size_t* scratchpad_size) {
-  auto root = new Instruction();
-  root->type = X_MULTI;
-  root->call = nullptr;
-  root->arg0 = nullptr;
-  root->next  = nullptr;
-
-  auto cur = &root->child;
-  for (auto col : select_list->getChildren()) {
-    if (!(*col == ASTNode::T_DERIVED_COLUMN)
-        || col->getChildren().size() == 0) {
-      RAISE(kRuntimeError, "internal error: corrupt ast");
-    }
-
-    auto next = compile(col->getChildren()[0], scratchpad_size);
-    *cur = next;
-    cur = &next->next;
-  }
-
-  return root;
-}
-
-Instruction* ScalarExpressionBuilder::compileChildren(
-    ASTNode* parent,
-    size_t* scratchpad_size) {
-  auto root = new Instruction();
-  root->type = X_MULTI;
-  root->call = nullptr;
-  root->arg0 = nullptr;
-  root->next  = nullptr;
-
-  auto cur = &root->child;
-  for (auto child : parent->getChildren()) {
-    auto next = compile(child, scratchpad_size);
-    *cur = next;
-    cur = &next->next;
-  }
-
-  return root;
-}
-
-Instruction* ScalarExpressionBuilder::compileOperator(
-    const std::string& name,
-    ASTNode* ast,
-    size_t* scratchpad_size) {
-  auto symbol = symbol_table_->lookupSymbol(name);
-
-  if (symbol == nullptr) {
-    RAISE(kRuntimeError, "undefined symbol: '%s'\n", name.c_str());
-  }
-
-  auto op = new Instruction();
-  op->type = X_CALL;
-  op->call = symbol->getFnPtr();
-  op->arg0 = nullptr;
-  op->child = nullptr;
-  op->next  = nullptr;
-
-  auto cur = &op->child;
-  for (auto e : ast->getChildren()) {
-    auto next = compile(e, scratchpad_size);
-    *cur = next;
-    cur = &next->next;
-  }
-
-  return op;
-}
-
-Instruction* ScalarExpressionBuilder::compileLiteral(ASTNode* ast) {
-  if (ast->getToken() == nullptr) {
-    RAISE(kRuntimeError, "internal error: corrupt ast");
-  }
-
   auto ins = new Instruction();
   ins->type = X_LITERAL;
   ins->call = nullptr;
-  ins->arg0 = SValue::fromToken(ast->getToken());
+  ins->arg0 = new SValue(node->value());
   ins->child = nullptr;
   ins->next  = nullptr;
 
-  return ins;
-}
-
-Instruction* ScalarExpressionBuilder::compileColumnReference(ASTNode* ast) {
-  auto ins = new Instruction();
-  ins->type = X_INPUT;
-  ins->call = nullptr;
-  ins->arg0 = (void *) ast->getID();
-  ins->child = nullptr;
-  ins->next  = nullptr;
   return ins;
 }
 
@@ -220,44 +78,6 @@ Instruction* ScalarExpressionBuilder::compileColumnReference(
   ins->child = nullptr;
   ins->next  = nullptr;
   return ins;
-}
-
-Instruction* ScalarExpressionBuilder::compileMethodCall(
-    ASTNode* ast,
-    size_t* scratchpad_size) {
-  if (ast->getToken() == nullptr ||
-      ast->getToken()->getType() != Token::T_IDENTIFIER) {
-    RAISE(kRuntimeError, "corrupt AST");
-  }
-
-  auto symbol = symbol_table_->lookupSymbol(ast->getToken()->getString());
-  if (symbol == nullptr) {
-    RAISE(
-        kRuntimeError,
-        "error: cannot resolve symbol: %s\n",
-        ast->getToken()->getString().c_str());
-  }
-
-  auto op = new Instruction();
-  op->type = X_CALL;
-  op->call = symbol->getFnPtr();
-  op->arg0 = nullptr;
-  op->child = nullptr;
-  op->next  = nullptr;
-
-  if (symbol->isAggregate()) {
-    op->arg0 = (void *) *scratchpad_size;
-    *scratchpad_size += symbol->getScratchpadSize();
-  }
-
-  auto cur = &op->child;
-  for (auto e : ast->getChildren()) {
-    auto next = compile(e, scratchpad_size);
-    *cur = next;
-    cur = &next->next;
-  }
-
-  return op;
 }
 
 Instruction* ScalarExpressionBuilder::compileMethodCall(
