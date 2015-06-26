@@ -18,9 +18,9 @@ using namespace fnord;
 
 namespace csql {
 
-enum kScalarExpressionType {
-  EXP_PURE,
-  EXP_AGGREGATE
+enum kFunctionType {
+  FN_PURE,
+  FN_AGGREGATE
 };
 
 /**
@@ -42,12 +42,12 @@ struct AggregateExpression {
   void (*free)(void* scratch);
 };
 
-struct ScalarExpression {
-  kScalarExpressionType type;
+struct SFunction {
+  kFunctionType type;
   union {
     PureExpression t_pure;
     AggregateExpression t_aggregate;
-  } u;
+  } vtable;
 };
 
 
