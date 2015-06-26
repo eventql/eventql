@@ -26,14 +26,14 @@ enum kFunctionType {
 /**
  * A pure/stateless expression that returns a single return value
  */
-struct PureExpression {
+struct PureFunction {
   void (*call)(int argc, SValue* in, SValue* out);
 };
 
 /**
  * An aggregate expression that returns a single return value
  */
-struct AggregateExpression {
+struct AggregateFunction {
   size_t scratch_size;
   void (*accumulate)(void* scratch, int argc, SValue* in);
   void (*get)(void* scratch, SValue* out);
@@ -45,8 +45,8 @@ struct AggregateExpression {
 struct SFunction {
   kFunctionType type;
   union {
-    PureExpression t_pure;
-    AggregateExpression t_aggregate;
+    PureFunction t_pure;
+    AggregateFunction t_aggregate;
   } vtable;
 };
 

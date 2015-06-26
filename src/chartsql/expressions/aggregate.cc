@@ -36,7 +36,7 @@ void countExprReset(void* scratchpad) {
   memset(scratchpad, 0, sizeof(uint64_t));
 }
 
-const AggregateExpression kCountExpr {
+const AggregateFunction kCountExpr {
   .scratch_size = sizeof(uint64_t),
   .accumulate = &countExprAcc,
   .get = &countExprGet,
@@ -104,7 +104,7 @@ void sumExprReset(void* scratchpad) {
   memset(scratchpad, 0, sizeof(sum_expr_scratchpad));
 }
 
-const AggregateExpression kSumExpr {
+const AggregateFunction kSumExpr {
   .scratch_size = sizeof(sum_expr_scratchpad),
   .accumulate = &sumExprAcc,
   .get = &sumExprGet,

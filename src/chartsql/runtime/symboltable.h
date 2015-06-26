@@ -68,7 +68,7 @@ public:
 
   void registerFunction(
       const String& symbol,
-      AggregateExpression fn);
+      AggregateFunction fn);
 
   void registerFunction(
       const String& symbol,
