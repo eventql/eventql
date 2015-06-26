@@ -13,7 +13,7 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
-#include <chartsql/Expression.h>
+#include <chartsql/SFunction.h>
 
 namespace csql {
 class SymbolTableEntry;
@@ -50,7 +50,7 @@ public:
 
   SymbolTableEntry const* lookupSymbol(const std::string& symbol) const;
 
-  ScalarExpression lookup(const String& symbol) const;
+  SFunction lookup(const String& symbol) const;
 
   void registerSymbol(
       const std::string& symbol,
@@ -72,11 +72,11 @@ public:
 
   void registerFunction(
       const String& symbol,
-      ScalarExpression fn);
+      SFunction fn);
 
 protected:
   std::unordered_map<std::string, SymbolTableEntry> symbols_;
-  HashMap<String, ScalarExpression> syms_;
+  HashMap<String, SFunction> syms_;
 };
 
 }
