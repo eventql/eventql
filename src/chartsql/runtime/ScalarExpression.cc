@@ -23,7 +23,7 @@ ScalarExpression::ScalarExpression(
     dynamic_storage_size_(dynamic_storage_size) {}
 
 ScalarExpression::~ScalarExpression() {
-  // FIXPAUL free instructions...
+  freeProgram(entry_);
 }
 
 ScalarExpression::Instance ScalarExpression::allocInstance(
@@ -31,19 +31,19 @@ ScalarExpression::Instance ScalarExpression::allocInstance(
   Instance that;
   that.scratch = scratch->alloc(dynamic_storage_size_);
   fnord::iputs("init scratch @ $0", (uint64_t) that.scratch);
-  init(entry_, &that);
+  initInstance(entry_, &that);
   return that;
 }
 
 void ScalarExpression::freeInstance(Instance* instance) const {
-  free(entry_, instance);
+  freeInstance(entry_, instance);
 }
 
 void ScalarExpression::reset(Instance* instance) const {
-  reset(entry_, instance);
+  resetInstance(entry_, instance);
 }
 
-void ScalarExpression::init(Instruction* e, Instance* instance) const {
+void ScalarExpression::initInstance(Instruction* e, Instance* instance) const {
   switch (e->type) {
     case X_CALL_AGGREGATE:
       if (e->vtable.t_aggregate.init) {
@@ -57,11 +57,11 @@ void ScalarExpression::init(Instruction* e, Instance* instance) const {
   }
 
   for (auto cur = e->child; cur != nullptr; cur = cur->next) {
-    init(cur, instance);
+    initInstance(cur, instance);
   }
 }
 
-void ScalarExpression::free(Instruction* e, Instance* instance) const {
+void ScalarExpression::freeInstance(Instruction* e, Instance* instance) const {
   switch (e->type) {
     case X_CALL_AGGREGATE:
       if (e->vtable.t_aggregate.free) {
@@ -70,8 +70,19 @@ void ScalarExpression::free(Instruction* e, Instance* instance) const {
       }
       break;
 
+    default:
+      break;
+  }
+
+  for (auto cur = e->child; cur != nullptr; cur = cur->next) {
+    freeInstance(cur, instance);
+  }
+}
+
+void ScalarExpression::freeProgram(Instruction* e) const {
+  switch (e->type) {
     case X_LITERAL:
-      delete (SValue*) e->arg0;
+      ((SValue*) e->arg0)->~SValue();
       break;
 
     default:
@@ -79,11 +90,11 @@ void ScalarExpression::free(Instruction* e, Instance* instance) const {
   }
 
   for (auto cur = e->child; cur != nullptr; cur = cur->next) {
-    free(cur, instance);
+    freeProgram(cur);
   }
 }
 
-void ScalarExpression::reset(Instruction* e, Instance* instance) const {
+void ScalarExpression::resetInstance(Instruction* e, Instance* instance) const {
   switch (e->type) {
     case X_CALL_AGGREGATE:
       e->vtable.t_aggregate.reset(
@@ -95,7 +106,7 @@ void ScalarExpression::reset(Instruction* e, Instance* instance) const {
   }
 
   for (auto cur = e->child; cur != nullptr; cur = cur->next) {
-    reset(cur, instance);
+    resetInstance(cur, instance);
   }
 }
 
