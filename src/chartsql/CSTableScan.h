@@ -39,15 +39,15 @@ protected:
   struct ExpressionRef {
     ExpressionRef(
         size_t _rep_level,
-        ScopedPtr<CompiledProgram> _compiled,
+        ScopedPtr<ScalarExpression> _compiled,
         ScratchMemory* scratch);
 
     ExpressionRef(ExpressionRef&& other);
     ~ExpressionRef();
 
     size_t rep_level;
-    ScopedPtr<CompiledProgram> compiled;
-    CompiledProgram::Instance instance;
+    ScopedPtr<ScalarExpression> compiled;
+    ScalarExpression::Instance instance;
   };
 
   void findColumns(

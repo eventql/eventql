@@ -91,11 +91,11 @@ Instruction* Compiler::compile(ASTNode* ast, size_t* scratchpad_size) {
   }
 }
 
-ScopedPtr<CompiledProgram> Compiler::compile(
+ScopedPtr<ScalarExpression> Compiler::compile(
     RefPtr<ScalarExpressionNode> node) {
   size_t scratchpad_size = 0;
   auto expr = compileScalarExpression(node, &scratchpad_size);
-  return mkScoped(new CompiledProgram(expr, scratchpad_size));
+  return mkScoped(new ScalarExpression(expr, scratchpad_size));
 }
 
 Instruction* Compiler::compileScalarExpression(

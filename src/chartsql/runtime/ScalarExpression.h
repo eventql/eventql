@@ -39,15 +39,15 @@ struct Instruction {
   void (*call)(void*, int, SValue*, SValue*); // delete me
 };
 
-class CompiledProgram {
+class ScalarExpression {
 public:
 
   struct Instance {
     void* scratch;
   };
 
-  CompiledProgram(Instruction* expr, size_t scratchpad_size);
-  ~CompiledProgram();
+  ScalarExpression(Instruction* expr, size_t scratchpad_size);
+  ~ScalarExpression();
 
   Instance allocInstance(ScratchMemory* scratch) const;
   void freeInstance(Instance* instance) const;

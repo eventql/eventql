@@ -232,7 +232,7 @@ CSTableScan::ColumnRef::ColumnRef(
 
 CSTableScan::ExpressionRef::ExpressionRef(
     size_t _rep_level,
-    ScopedPtr<CompiledProgram> _compiled,
+    ScopedPtr<ScalarExpression> _compiled,
     ScratchMemory* smem) :
     rep_level(_rep_level),
     compiled(std::move(_compiled)),
