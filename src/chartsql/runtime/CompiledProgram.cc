@@ -15,7 +15,7 @@ using namespace fnord;
 namespace csql {
 
 CompiledProgram::CompiledProgram(
-    CompiledExpression* expr,
+    Instruction* expr,
     size_t scratchpad_size) :
     expr_(expr),
     scratchpad_size_(scratchpad_size) {}
@@ -41,7 +41,7 @@ void CompiledProgram::reset(Instance* instance) const {
   reset(expr_, instance);
 }
 
-void CompiledProgram::init(CompiledExpression* e, Instance* instance) const {
+void CompiledProgram::init(Instruction* e, Instance* instance) const {
   switch (e->type) {
     case X_CALL_AGGREGATE:
       if (e->vtable.t_aggregate.init) {
@@ -59,7 +59,7 @@ void CompiledProgram::init(CompiledExpression* e, Instance* instance) const {
   }
 }
 
-void CompiledProgram::free(CompiledExpression* e, Instance* instance) const {
+void CompiledProgram::free(Instruction* e, Instance* instance) const {
   switch (e->type) {
     case X_CALL_AGGREGATE:
       if (e->vtable.t_aggregate.free) {
@@ -80,7 +80,7 @@ void CompiledProgram::free(CompiledExpression* e, Instance* instance) const {
   }
 }
 
-void CompiledProgram::reset(CompiledExpression* e, Instance* instance) const {
+void CompiledProgram::reset(Instruction* e, Instance* instance) const {
   switch (e->type) {
     case X_CALL_AGGREGATE:
       e->vtable.t_aggregate.reset(
@@ -113,7 +113,7 @@ void CompiledProgram::accumulate(
 
 void CompiledProgram::evaluate(
     Instance* instance,
-    CompiledExpression* expr,
+    Instruction* expr,
     int argc,
     const SValue* argv,
     SValue* out) const {
@@ -176,7 +176,7 @@ void CompiledProgram::evaluate(
 
 void CompiledProgram::accumulate(
     Instance* instance,
-    CompiledExpression* expr,
+    Instruction* expr,
     int argc,
     const SValue* argv) const {
 

@@ -17,7 +17,7 @@ using namespace fnord;
 
 namespace csql {
 
-enum kCompiledExpressionType {
+enum kInstructionType {
   X_CALL,
   X_CALL_PURE,
   X_CALL_AGGREGATE,
@@ -26,12 +26,12 @@ enum kCompiledExpressionType {
   X_MULTI
 };
 
-struct CompiledExpression {
-  kCompiledExpressionType type;
+struct Instruction {
+  kInstructionType type;
   void* arg0;
   size_t argn;
-  CompiledExpression* next;
-  CompiledExpression* child;
+  Instruction* next;
+  Instruction* child;
   union {
     PureFunction t_pure;
     AggregateFunction t_aggregate;
@@ -46,7 +46,7 @@ public:
     void* scratch;
   };
 
-  CompiledProgram(CompiledExpression* expr, size_t scratchpad_size);
+  CompiledProgram(Instruction* expr, size_t scratchpad_size);
   ~CompiledProgram();
 
   Instance allocInstance(ScratchMemory* scratch) const;
@@ -69,22 +69,22 @@ protected:
 
   void evaluate(
       Instance* instance,
-      CompiledExpression* expr,
+      Instruction* expr,
       int argc,
       const SValue* argv,
       SValue* out) const;
 
   void accumulate(
       Instance* instance,
-      CompiledExpression* expr,
+      Instruction* expr,
       int argc,
       const SValue* argv) const;
 
-  void init(CompiledExpression* e, Instance* instance) const;
-  void free(CompiledExpression* e, Instance* instance) const;
-  void reset(CompiledExpression* e, Instance* instance) const;
+  void init(Instruction* e, Instance* instance) const;
+  void free(Instruction* e, Instance* instance) const;
+  void reset(Instruction* e, Instance* instance) const;
 
-  CompiledExpression* expr_;
+  Instruction* expr_;
   size_t scratchpad_size_;
 };
 

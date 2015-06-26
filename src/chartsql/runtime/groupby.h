@@ -27,8 +27,8 @@ public:
 
   GroupBy(
       std::vector<std::string>&& columns,
-      CompiledExpression* select_expr,
-      CompiledExpression* group_expr,
+      Instruction* select_expr,
+      Instruction* group_expr,
       size_t scratchpad_size,
       QueryPlanNode* child) :
       columns_(std::move(columns)),
@@ -123,8 +123,8 @@ protected:
   };
 
   std::vector<std::string> columns_;
-  CompiledExpression* select_expr_;
-  CompiledExpression* group_expr_;
+  Instruction* select_expr_;
+  Instruction* group_expr_;
   size_t scratchpad_size_;
   QueryPlanNode* child_;
   std::unordered_map<std::string, Group> groups_;
