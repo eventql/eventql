@@ -40,6 +40,7 @@ add_library(chartsql-lib OBJECT
     qtree/BuiltinExpressionNode.cc
     qtree/FieldReferenceNode.cc
     qtree/SelectProjectAggregateNode.cc
+    qtree/LiteralExpressionNode.cc
     runtime/ScalarExpression.cc
     runtime/ScratchMemory.cc
     runtime/runtime.cc
@@ -55,3 +56,20 @@ add_library(chartsql-lib OBJECT
     runtime/orderby.cc
     runtime/groupovertimewindow.cc
     runtime/execute.cc)
+
+add_executable(test-chartsql-runtime
+    $<TARGET_OBJECTS:fnord-base>
+    $<TARGET_OBJECTS:fnord-chart>
+    $<TARGET_OBJECTS:fnord-protobuf>
+    $<TARGET_OBJECTS:fnord-http>
+    $<TARGET_OBJECTS:fnord-json>
+    $<TARGET_OBJECTS:fnord-metricdb>
+    $<TARGET_OBJECTS:fnord-mdb>
+    $<TARGET_OBJECTS:sstable>
+    $<TARGET_OBJECTS:cstable>
+    $<TARGET_OBJECTS:dproc>
+    $<TARGET_OBJECTS:chartsql-lib>
+    $<TARGET_OBJECTS:tsdb>
+    runtime/Runtime_test.cc)
+
+target_link_libraries(test-chartsql-runtime ${CMAKE_THREAD_LIBS_INIT} ${FNORD_LIBS})
