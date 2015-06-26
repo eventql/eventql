@@ -7,24 +7,24 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <chartsql/runtime/CompiledProgram.h>
+#include <chartsql/runtime/ScalarExpression.h>
 #include <fnord/inspect.h>
 
 using namespace fnord;
 
 namespace csql {
 
-CompiledProgram::CompiledProgram(
+ScalarExpression::ScalarExpression(
     Instruction* expr,
     size_t scratchpad_size) :
     expr_(expr),
     scratchpad_size_(scratchpad_size) {}
 
-CompiledProgram::~CompiledProgram() {
+ScalarExpression::~ScalarExpression() {
   // FIXPAUL free instructions...
 }
 
-CompiledProgram::Instance CompiledProgram::allocInstance(
+ScalarExpression::Instance ScalarExpression::allocInstance(
     ScratchMemory* scratch) const {
   Instance that;
   that.scratch = scratch->alloc(scratchpad_size_);
@@ -33,15 +33,15 @@ CompiledProgram::Instance CompiledProgram::allocInstance(
   return that;
 }
 
-void CompiledProgram::freeInstance(Instance* instance) const {
+void ScalarExpression::freeInstance(Instance* instance) const {
   free(expr_, instance);
 }
 
-void CompiledProgram::reset(Instance* instance) const {
+void ScalarExpression::reset(Instance* instance) const {
   reset(expr_, instance);
 }
 
-void CompiledProgram::init(Instruction* e, Instance* instance) const {
+void ScalarExpression::init(Instruction* e, Instance* instance) const {
   switch (e->type) {
     case X_CALL_AGGREGATE:
       if (e->vtable.t_aggregate.init) {
@@ -59,7 +59,7 @@ void CompiledProgram::init(Instruction* e, Instance* instance) const {
   }
 }
 
-void CompiledProgram::free(Instruction* e, Instance* instance) const {
+void ScalarExpression::free(Instruction* e, Instance* instance) const {
   switch (e->type) {
     case X_CALL_AGGREGATE:
       if (e->vtable.t_aggregate.free) {
@@ -80,7 +80,7 @@ void CompiledProgram::free(Instruction* e, Instance* instance) const {
   }
 }
 
-void CompiledProgram::reset(Instruction* e, Instance* instance) const {
+void ScalarExpression::reset(Instruction* e, Instance* instance) const {
   switch (e->type) {
     case X_CALL_AGGREGATE:
       e->vtable.t_aggregate.reset(
@@ -96,7 +96,7 @@ void CompiledProgram::reset(Instruction* e, Instance* instance) const {
   }
 }
 
-void CompiledProgram::evaluate(
+void ScalarExpression::evaluate(
     Instance* instance,
     int argc,
     const SValue* argv,
@@ -104,14 +104,14 @@ void CompiledProgram::evaluate(
   return evaluate(instance, expr_, argc, argv, out);
 }
 
-void CompiledProgram::accumulate(
+void ScalarExpression::accumulate(
     Instance* instance,
     int argc,
     const SValue* argv) const {
   return accumulate(instance, expr_, argc, argv);
 }
 
-void CompiledProgram::evaluate(
+void ScalarExpression::evaluate(
     Instance* instance,
     Instruction* expr,
     int argc,
@@ -174,7 +174,7 @@ void CompiledProgram::evaluate(
 }
 
 
-void CompiledProgram::accumulate(
+void ScalarExpression::accumulate(
     Instance* instance,
     Instruction* expr,
     int argc,
