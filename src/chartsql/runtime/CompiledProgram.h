@@ -10,7 +10,7 @@
 #pragma once
 #include <fnord/stdtypes.h>
 #include <chartsql/svalue.h>
-#include <chartsql/Expression.h>
+#include <chartsql/SFunction.h>
 #include <chartsql/runtime/ScratchMemory.h>
 
 using namespace fnord;

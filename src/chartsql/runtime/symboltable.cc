@@ -19,29 +19,27 @@ namespace csql {
 void SymbolTable::registerFunction(
     const String& symbol,
     void (*fn)(int, SValue*, SValue*)) {
-  ScalarExpression sym;
-  sym.type = EXP_PURE;
-  sym.u.t_pure.call = fn;
+  SFunction sym;
+  sym.type = FN_PURE;
+  sym.vtable.t_pure.call = fn;
   registerFunction(symbol, sym);
 }
 
 void SymbolTable::registerFunction(
     const String& symbol,
     AggregateExpression fn) {
-  ScalarExpression sym;
-  sym.type = EXP_AGGREGATE;
-  sym.u.t_aggregate.scratch_size = fn.scratch_size;
-  sym.u.t_aggregate.accumulate = fn.accumulate;
-  sym.u.t_aggregate.get = fn.get;
-  sym.u.t_aggregate.reset = fn.reset;
-  sym.u.t_aggregate.init = fn.init;
-  sym.u.t_aggregate.free = fn.free;
+  SFunction sym;
+  sym.type = FN_AGGREGATE;
+  sym.vtable.t_aggregate.scratch_size = fn.scratch_size;
+  sym.vtable.t_aggregate.accumulate = fn.accumulate;
+  sym.vtable.t_aggregate.get = fn.get;
+  sym.vtable.t_aggregate.reset = fn.reset;
+  sym.vtable.t_aggregate.init = fn.init;
+  sym.vtable.t_aggregate.free = fn.free;
   registerFunction(symbol, sym);
 }
 
-void SymbolTable::registerFunction(
-    const String& symbol,
-    ScalarExpression fn) {
+void SymbolTable::registerFunction(const String& symbol, SFunction fn) {
   syms_.emplace(symbol, fn);
 }
 
@@ -102,7 +100,7 @@ SymbolTableEntry const* SymbolTable::lookupSymbol(const std::string& symbol)
   }
 }
 
-ScalarExpression SymbolTable::lookup(const String& symbol) const {
+SFunction SymbolTable::lookup(const String& symbol) const {
   auto iter = syms_.find(symbol);
 
   if (iter == syms_.end()) {

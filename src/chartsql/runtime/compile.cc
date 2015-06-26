@@ -273,15 +273,15 @@ CompiledExpression* Compiler::compileMethodCall(
   op->next  = nullptr;
 
   switch (symbol.type) {
-    case EXP_PURE:
+    case FN_PURE:
       op->type = X_CALL_PURE;
-      op->vtable.t_pure = symbol.u.t_pure;
+      op->vtable.t_pure = symbol.vtable.t_pure;
       break;
-    case EXP_AGGREGATE:
+    case FN_AGGREGATE:
       op->type = X_CALL_AGGREGATE;
       op->arg0 = (void *) *scratchpad_size;
-      op->vtable.t_aggregate = symbol.u.t_aggregate;
-      *scratchpad_size += symbol.u.t_aggregate.scratch_size;
+      op->vtable.t_aggregate = symbol.vtable.t_aggregate;
+      *scratchpad_size += symbol.vtable.t_aggregate.scratch_size;
       break;
   }
 
