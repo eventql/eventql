@@ -10,12 +10,25 @@
 #ifndef _FNORDMETRIC_SQL_DEFAULTRUNTIME_H
 #define _FNORDMETRIC_SQL_DEFAULTRUNTIME_H
 #include <chartsql/runtime/runtime.h>
+#include <chartsql/runtime/symboltable.h>
+#include <chartsql/runtime/ScalarExpressionBuilder.h>
+#include <chartsql/runtime/TableExpressionBuilder.h>
+#include <chartsql/runtime/DefaultQueryPlan.h>
 
 namespace csql {
 
-class DefaultRuntime : public Runtime {
+class DefaultRuntime {
 public:
+
   DefaultRuntime();
+
+  RefPtr<ExecutionPlan> buildQueryPlan(RefPtr<QueryTreeNode> qtree);
+
+protected:
+
+  SymbolTable symbol_table_;
+  ScalarExpressionBuilder scalar_exp_builder_;
+  TableExpressionBuilder table_exp_builder_;
 };
 
 }
