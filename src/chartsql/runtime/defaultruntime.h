@@ -24,6 +24,12 @@ public:
 
   RefPtr<ExecutionPlan> buildQueryPlan(RefPtr<QueryTreeNode> qtree);
 
+  ScopedPtr<ScalarExpression> buildScalarExpression(
+      RefPtr<ScalarExpressionNode> node);
+
+  ScopedPtr<TableExpression> buildTableExpression(
+      RefPtr<TableExpressionNode> node);
+
   void addBuildRule(RefPtr<TableExpressionBuilder::BuildRule> rule);
 
 protected:
