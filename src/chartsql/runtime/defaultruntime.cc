@@ -92,5 +92,9 @@ RefPtr<ExecutionPlan> DefaultRuntime::buildQueryPlan(
       "cannot figure out how to build a query plan for this QTree node");
 }
 
+void DefaultRuntime::addBuildRule(
+    RefPtr<TableExpressionBuilder::BuildRule> rule) {
+  table_exp_builder_.addBuildRule(rule);
+}
 
 }
