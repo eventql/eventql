@@ -8,6 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <chartsql/runtime/TableExpressionBuilder.h>
+#include <chartsql/runtime/groupby.h>
 
 using namespace fnord;
 
@@ -16,6 +17,11 @@ namespace csql {
 ScopedPtr<TableExpression> TableExpressionBuilder::build(
     RefPtr<TableExpressionNode> node,
     DefaultRuntime* runtime) {
+
+  if (dynamic_cast<GroupByNode*>(node.get())) {
+    return mkScoped(new GroupBy(node.asInstanceOf<GroupByNode>(), runtime));
+  }
+
   for (const auto& rule : rules_) {
     auto opt = rule->build(node, runtime);
     if (!opt.isEmpty()) {
