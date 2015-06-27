@@ -16,10 +16,14 @@ using namespace fnord;
 
 namespace csql {
 
+struct ExecutionContext {};
+
 class TableExpression : public RefCounted {
 public:
 
-  virtual void execute(Function<bool (int argc, const SValue* argv)> fn) = 0;
+  virtual void execute(
+      ExecutionContext* context,
+      Function<bool (int argc, const SValue* argv)> fn) = 0;
 
 };
 
