@@ -69,7 +69,7 @@ protected:
   HashMap<String, ColumnRef> columns_;
   Vector<ExpressionRef> select_list_;
   size_t colindex_;
-  bool expand_;
+  AggregationStrategy aggr_strategy_;
 };
 
 
