@@ -30,7 +30,6 @@ ScalarExpression::Instance ScalarExpression::allocInstance(
     ScratchMemory* scratch) const {
   Instance that;
   that.scratch = scratch->alloc(dynamic_storage_size_);
-  fnord::iputs("init scratch @ $0", (uint64_t) that.scratch);
   initInstance(entry_, &that);
   return that;
 }
