@@ -20,8 +20,11 @@ class SelectProjectAggregateNode : public TableExpressionNode {
 public:
 
   SelectProjectAggregateNode(
+      const String& table_name,
       Vector<RefPtr<ScalarExpressionNode>> select_list,
       RefPtr<ScalarExpressionNode> where_expr);
+
+  const String& tableName() const;
 
   Vector<RefPtr<ScalarExpressionNode>> selectList() const;
 
@@ -38,6 +41,7 @@ public:
   void setExpandNestedRecords(bool expand);
 
 protected:
+  String table_name_;
   Vector<RefPtr<ScalarExpressionNode>> select_list_;
   RefPtr<ScalarExpressionNode> where_expr_;
   bool expand_nested_records_;
