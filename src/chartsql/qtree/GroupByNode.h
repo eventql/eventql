@@ -9,30 +9,28 @@
  */
 #pragma once
 #include <fnord/stdtypes.h>
-#include <fnord/option.h>
+#include <chartsql/qtree/QueryTreeNode.h>
 #include <chartsql/qtree/ScalarExpressionNode.h>
+#include <chartsql/qtree/SelectListNode.h>
 
 using namespace fnord;
 
 namespace csql {
 
-class ColumnReferenceNode : public ScalarExpressionNode {
+class GroupByNode : public TableExpressionNode {
 public:
 
-  ColumnReferenceNode(const String& field_name);
-  ColumnReferenceNode(size_t column_index_);
+  GroupByNode(
+      Vector<RefPtr<SelectListNode>> select_list,
+      Vector<RefPtr<ScalarExpressionNode>> group_exprs,
+      RefPtr<TableExpressionNode> table);
 
-  const String& fieldName() const;
-
-  size_t columnIndex() const;
-
-  void setColumnIndex(size_t index);
-
-  Vector<RefPtr<ScalarExpressionNode>> arguments() const override;
+  Vector<RefPtr<SelectListNode>> selectList() const;
 
 protected:
-  String field_name_;
-  Option<size_t> column_index_;
+  Vector<RefPtr<SelectListNode>> select_list_;
+  Vector<RefPtr<ScalarExpressionNode>> group_exprs_;
+  RefPtr<TableExpressionNode> table_;
 };
 
 } // namespace csql
