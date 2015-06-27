@@ -20,7 +20,10 @@ ScalarExpression::ScalarExpression(
     size_t dynamic_storage_size) :
     entry_(entry),
     static_storage_(std::move(static_storage)),
-    dynamic_storage_size_(dynamic_storage_size) {}
+    dynamic_storage_size_(dynamic_storage_size),
+    has_aggregate_(false) {
+  initProgram(entry_);
+}
 
 ScalarExpression::~ScalarExpression() {
   freeProgram(entry_);
@@ -29,17 +32,59 @@ ScalarExpression::~ScalarExpression() {
 ScalarExpression::Instance ScalarExpression::allocInstance(
     ScratchMemory* scratch) const {
   Instance that;
-  that.scratch = scratch->alloc(dynamic_storage_size_);
-  initInstance(entry_, &that);
+
+  if (has_aggregate_) {
+    that.scratch = scratch->alloc(dynamic_storage_size_);
+    initInstance(entry_, &that);
+  } else {
+    that.scratch = scratch->construct<SValue>();
+  }
+
   return that;
 }
 
 void ScalarExpression::freeInstance(Instance* instance) const {
-  freeInstance(entry_, instance);
+  if (has_aggregate_) {
+    freeInstance(entry_, instance);
+  } else {
+    ((SValue*) instance->scratch)->~SValue();
+  }
 }
 
 void ScalarExpression::reset(Instance* instance) const {
-  resetInstance(entry_, instance);
+  if (has_aggregate_) {
+    resetInstance(entry_, instance);
+  } else {
+    *((SValue*) instance->scratch) = SValue();
+  }
+}
+
+void ScalarExpression::result(
+    Instance* instance,
+    SValue* out) const {
+  if (has_aggregate_) {
+    return evaluate(instance, entry_, 0, nullptr, out);
+  } else {
+    *out = *((SValue*) instance->scratch);
+  }
+}
+
+void ScalarExpression::accumulate(
+    Instance* instance,
+    int argc,
+    const SValue* argv) const {
+  if (has_aggregate_) {
+    return accumulate(instance, entry_, argc, argv);
+  } else {
+    return evaluate(nullptr, entry_, argc, argv, (SValue*) instance->scratch);
+  }
+}
+
+void ScalarExpression::evaluate(
+    int argc,
+    const SValue* argv,
+    SValue* out) const {
+  return evaluate(nullptr, entry_, argc, argv, out);
 }
 
 void ScalarExpression::initInstance(Instruction* e, Instance* instance) const {
@@ -78,21 +123,6 @@ void ScalarExpression::freeInstance(Instruction* e, Instance* instance) const {
   }
 }
 
-void ScalarExpression::freeProgram(Instruction* e) const {
-  switch (e->type) {
-    case X_LITERAL:
-      ((SValue*) e->arg0)->~SValue();
-      break;
-
-    default:
-      break;
-  }
-
-  for (auto cur = e->child; cur != nullptr; cur = cur->next) {
-    freeProgram(cur);
-  }
-}
-
 void ScalarExpression::resetInstance(Instruction* e, Instance* instance) const {
   switch (e->type) {
     case X_CALL_AGGREGATE:
@@ -109,26 +139,34 @@ void ScalarExpression::resetInstance(Instruction* e, Instance* instance) const {
   }
 }
 
-void ScalarExpression::evaluate(
-    Instance* instance,
-    int argc,
-    const SValue* argv,
-    SValue* out) const {
-  return evaluate(instance, entry_, argc, argv, out);
+void ScalarExpression::initProgram(Instruction* e) {
+  switch (e->type) {
+    case X_CALL_AGGREGATE:
+      has_aggregate_ = true;
+      break;
+
+    default:
+      break;
+  }
+
+  for (auto cur = e->child; cur != nullptr; cur = cur->next) {
+    initProgram(cur);
+  }
 }
 
-void ScalarExpression::evaluateStatic(
-    int argc,
-    const SValue* argv,
-    SValue* out) const {
-  return evaluate(nullptr, entry_, argc, argv, out);
-}
+void ScalarExpression::freeProgram(Instruction* e) const {
+  switch (e->type) {
+    case X_LITERAL:
+      ((SValue*) e->arg0)->~SValue();
+      break;
 
-void ScalarExpression::accumulate(
-    Instance* instance,
-    int argc,
-    const SValue* argv) const {
-  return accumulate(instance, entry_, argc, argv);
+    default:
+      break;
+  }
+
+  for (auto cur = e->child; cur != nullptr; cur = cur->next) {
+    freeProgram(cur);
+  }
 }
 
 void ScalarExpression::evaluate(
@@ -198,7 +236,6 @@ void ScalarExpression::evaluate(
   }
 
 }
-
 
 void ScalarExpression::accumulate(
     Instance* instance,
