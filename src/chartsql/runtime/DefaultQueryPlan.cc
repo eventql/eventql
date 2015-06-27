@@ -19,7 +19,7 @@ DefaultQueryPlan::DefaultQueryPlan(
 
 void DefaultQueryPlan::execute(
     Function<bool (int argc, const SValue* argv)> fn) {
-
+  entry_->execute(&context_, fn);
 }
 
 } // namespace csql
