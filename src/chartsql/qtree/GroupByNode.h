@@ -27,6 +27,10 @@ public:
 
   Vector<RefPtr<SelectListNode>> selectList() const;
 
+  Vector<RefPtr<ScalarExpressionNode>> groupExpressions() const;
+
+  RefPtr<TableExpressionNode> inputTable() const;
+
 protected:
   Vector<RefPtr<SelectListNode>> select_list_;
   Vector<RefPtr<ScalarExpressionNode>> group_exprs_;

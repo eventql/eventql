@@ -483,6 +483,12 @@ std::string inspect<csql::SValue::kSValueType>(
   return csql::SValue::getTypeName(type);
 }
 
+template <>
+std::string inspect<csql::SValue>(
+    const csql::SValue& sval) {
+  return sval.toString();
+}
+
 }
 
 namespace std {
