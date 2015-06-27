@@ -81,7 +81,8 @@ RefPtr<ExecutionPlan> DefaultRuntime::buildQueryPlan(
     RefPtr<QueryTreeNode> qtree) {
   if (dynamic_cast<TableExpressionNode*>(qtree.get())) {
     auto table_expr = table_exp_builder_.build(
-        qtree.asInstanceOf<TableExpressionNode>());
+        qtree.asInstanceOf<TableExpressionNode>(),
+        this);
 
     return new DefaultQueryPlan(std::move(table_expr));
   }
