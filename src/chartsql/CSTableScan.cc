@@ -39,14 +39,12 @@ CSTableScan::CSTableScan(
 
   //fnord::iputs("all cols: $0", column_names);
 
-  DefaultRuntime runtime;
-
-  for (const auto& expr : stmt->selectList()) {
-    select_list_.emplace_back(
-        findMaxRepetitionLevel(expr),
-        runtime.compiler()->compile(expr),
-        &scratch_);
-  }
+  //for (const auto& expr : stmt->selectList()) {
+  //  select_list_.emplace_back(
+  //      findMaxRepetitionLevel(expr),
+  //      runtime.compiler()->compile(expr),
+  //      &scratch_);
+  //}
 }
 
 void CSTableScan::execute(Function<bool (int argc, const SValue* argv)> fn) {
