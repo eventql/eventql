@@ -48,6 +48,7 @@ add_library(chartsql-lib OBJECT
     runtime/queryplannode.cc
     runtime/ScalarExpressionBuilder.cc
     runtime/defaultruntime.cc
+    runtime/DefaultQueryPlan.cc
     runtime/importstatement.cc
     runtime/tablerepository.cc
     runtime/queryplanbuilder.cc
