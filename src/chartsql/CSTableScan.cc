@@ -137,24 +137,35 @@ void CSTableScan::execute(
         }
       }
 
-      if (aggr_strategy_ == AggregationStrategy::NO_AGGREGATION ||
-          aggr_strategy_ == AggregationStrategy::AGGREGATE_WITHIN_RECORD
-              && next_level == 0) {
-        for (int i = 0; i < select_list_.size(); ++i) {
-          select_list_[i].compiled->evaluate(
-              &select_list_[i].instance,
-              in_row.size(),
-              in_row.data(),
-              &out_row[i]);
+      switch (aggr_strategy_) {
 
-          select_list_[i].compiled->reset(&select_list_[i].instance);
-        }
+        case AggregationStrategy::AGGREGATE_ALL:
+          break;
 
-        if (!fn(out_row.size(), out_row.data())) {
-          return;
-        }
+        case AggregationStrategy::AGGREGATE_WITHIN_RECORD:
+          if (next_level != 0) {
+            break;
+          }
+          /* fallthrough */
+
+        case AggregationStrategy::NO_AGGREGATION:
+          for (int i = 0; i < select_list_.size(); ++i) {
+            select_list_[i].compiled->evaluate(
+                &select_list_[i].instance,
+                in_row.size(),
+                in_row.data(),
+                &out_row[i]);
+
+            select_list_[i].compiled->reset(&select_list_[i].instance);
+          }
+
+          if (!fn(out_row.size(), out_row.data())) {
+            return;
+          }
+
+          break;
+
       }
-
 
       select_level = fetch_level;
     } else {
@@ -166,6 +177,26 @@ void CSTableScan::execute(
         in_row[col.second.index] = SValue();
       }
     }
+  }
+
+  switch (aggr_strategy_) {
+    case AggregationStrategy::AGGREGATE_ALL:
+      for (int i = 0; i < select_list_.size(); ++i) {
+        select_list_[i].compiled->evaluate(
+            &select_list_[i].instance,
+            in_row.size(),
+            in_row.data(),
+            &out_row[i]);
+
+        select_list_[i].compiled->reset(&select_list_[i].instance);
+      }
+
+      fn(out_row.size(), out_row.data());
+      break;
+
+    default:
+      break;
+
   }
 }
 
