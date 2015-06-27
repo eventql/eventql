@@ -48,10 +48,8 @@ void GroupBy::execute(
   for (auto& group : groups_) {
     //auto& row = pair.second.row;
     for (size_t i = 0; i < select_exprs_.size(); ++i) {
-      select_exprs_[i]->evaluate(
+      select_exprs_[i]->result(
           &group.second[i],
-          0,
-          nullptr,
           &out_row[i]);
     }
 
@@ -64,7 +62,7 @@ void GroupBy::execute(
 bool GroupBy::nextRow(int row_len, const SValue* row) {
   Vector<SValue> groups(group_exprs_.size(), SValue{});
   for (size_t i = 0; i < group_exprs_.size(); ++i) {
-    group_exprs_[i]->evaluateStatic(row_len, row, &groups[i]);
+    group_exprs_[i]->evaluate(row_len, row, &groups[i]);
   }
 
   auto group_key = SValue::makeUniqueKey(groups.data(), groups.size());
