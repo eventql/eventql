@@ -17,6 +17,11 @@ ColumnReferenceNode::ColumnReferenceNode(
     const String& field_name) :
     field_name_(field_name) {}
 
+ColumnReferenceNode::ColumnReferenceNode(
+    size_t column_index) :
+    field_name_(StringUtil::toString(column_index)),
+    column_index_(Some(column_index)) {}
+
 const String& ColumnReferenceNode::fieldName() const {
   return field_name_;
 }
