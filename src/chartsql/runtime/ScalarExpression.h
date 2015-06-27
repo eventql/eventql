@@ -53,6 +53,11 @@ public:
 
   ~ScalarExpression();
 
+  void evaluate(
+      int argc,
+      const SValue* argv,
+      SValue* out) const;
+
   Instance allocInstance(ScratchMemory* scratch) const;
   void freeInstance(Instance* instance) const;
 
@@ -66,11 +71,6 @@ public:
       SValue* out) const;
 
   void reset(Instance* instance) const;
-
-  void evaluate(
-      int argc,
-      const SValue* argv,
-      SValue* out) const;
 
 protected:
 
