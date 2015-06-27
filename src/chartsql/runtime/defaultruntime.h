@@ -24,8 +24,9 @@ public:
 
   RefPtr<ExecutionPlan> buildQueryPlan(RefPtr<QueryTreeNode> qtree);
 
-protected:
+  void addBuildRule(RefPtr<TableExpressionBuilder::BuildRule> rule);
 
+protected:
   SymbolTable symbol_table_;
   ScalarExpressionBuilder scalar_exp_builder_;
   TableExpressionBuilder table_exp_builder_;
