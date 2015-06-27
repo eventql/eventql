@@ -26,7 +26,9 @@ public:
       RefPtr<SelectProjectAggregateNode> stmt,
       cstable::CSTableReader&& cstable);
 
-  void execute(Function<bool (int argc, const SValue* argv)> fn) override;
+  void execute(
+      ExecutionContext* context,
+      Function<bool (int argc, const SValue* argv)> fn) override;
 
 protected:
 
