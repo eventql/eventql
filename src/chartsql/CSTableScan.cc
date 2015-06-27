@@ -19,7 +19,8 @@ namespace csql {
 
 CSTableScan::CSTableScan(
     RefPtr<SequentialScanNode> stmt,
-    cstable::CSTableReader&& cstable) :
+    cstable::CSTableReader&& cstable,
+    DefaultRuntime* runtime) :
     cstable_(std::move(cstable)),
     colindex_(0),
     expand_(stmt->expandNestedRecords()) {
@@ -37,14 +38,12 @@ CSTableScan::CSTableScan(
     resolveColumns(expr);
   }
 
-  //fnord::iputs("all cols: $0", column_names);
-
-  //for (const auto& expr : stmt->selectList()) {
-  //  select_list_.emplace_back(
-  //      findMaxRepetitionLevel(expr),
-  //      runtime.compiler()->compile(expr),
-  //      &scratch_);
-  //}
+  for (const auto& expr : stmt->selectList()) {
+    select_list_.emplace_back(
+        findMaxRepetitionLevel(expr),
+        runtime->buildScalarExpression(expr),
+        &scratch_);
+  }
 }
 
 void CSTableScan::execute(
