@@ -29,12 +29,10 @@ Option<ScopedPtr<TableExpression>> CSTableScanBuildRule::build(
     return None<ScopedPtr<TableExpression>>();
   }
 
-  return std::move(
-      Option<ScopedPtr<TableExpression>>(
-          mkScoped(
-              new CSTableScan(
-                  seqscan,
-                  cstable::CSTableReader(cstable_file_)))));
+  return Option<ScopedPtr<TableExpression>>(mkScoped(
+      new CSTableScan(
+          seqscan,
+          cstable::CSTableReader(cstable_file_))));
 }
 
 } // namespace csql
