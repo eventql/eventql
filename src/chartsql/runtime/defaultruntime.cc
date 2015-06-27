@@ -17,6 +17,7 @@ namespace csql {
 
 DefaultRuntime::DefaultRuntime() :
   scalar_exp_builder_(&symbol_table_) {
+
   /* expressions/aggregate.h */
   symbol_table_.registerFunction("count", expressions::kCountExpr);
   symbol_table_.registerFunction("sum", expressions::kSumExpr);
@@ -75,5 +76,20 @@ DefaultRuntime::DefaultRuntime() :
   symbol_table_.registerSymbol("mod", &expressions::modExpr);
   symbol_table_.registerSymbol("pow", &expressions::powExpr);
 }
+
+RefPtr<ExecutionPlan> DefaultRuntime::buildQueryPlan(
+    RefPtr<QueryTreeNode> qtree) {
+  if (dynamic_cast<TableExpressionNode*>(qtree.get())) {
+    auto table_expr = table_exp_builder_.build(
+        qtree.asInstanceOf<TableExpressionNode>());
+
+    return new DefaultQueryPlan(std::move(table_expr));
+  }
+
+  RAISE(
+      kRuntimeError,
+      "cannot figure out how to build a query plan for this QTree node");
+}
+
 
 }

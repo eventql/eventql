@@ -7,25 +7,19 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#pragma once
-#include <fnord/stdtypes.h>
-#include <chartsql/runtime/TableExpression.h>
-#include <chartsql/runtime/queryplan.h>
-#include <chartsql/svalue.h>
+#include <chartsql/runtime/DefaultQueryPlan.h>
 
 using namespace fnord;
 
 namespace csql {
 
-class DefaultQueryPlan : public ExecutionPlan {
-public:
+DefaultQueryPlan::DefaultQueryPlan(
+    ScopedPtr<TableExpression> entry) :
+    entry_(std::move(entry)) {}
 
-  DefaultQueryPlan(ScopedPtr<TableExpression> entry);
+void DefaultQueryPlan::execute(
+    Function<bool (int argc, const SValue* argv)> fn) {
 
-  void execute(Function<bool (int argc, const SValue* argv)> fn) override;
-
-protected:
-  ScopedPtr<TableExpression> entry_;
-};
+}
 
 } // namespace csql
