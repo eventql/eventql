@@ -61,15 +61,13 @@ public:
       int argc,
       const SValue* argv) const;
 
-  void evaluate(
+  void result(
       Instance* instance,
-      int argc,
-      const SValue* argv,
       SValue* out) const;
 
   void reset(Instance* instance) const;
 
-  void evaluateStatic(
+  void evaluate(
       int argc,
       const SValue* argv,
       SValue* out) const;
@@ -92,11 +90,13 @@ protected:
   void initInstance(Instruction* e, Instance* instance) const;
   void freeInstance(Instruction* e, Instance* instance) const;
   void resetInstance(Instruction* e, Instance* instance) const;
+  void initProgram(Instruction* e);
   void freeProgram(Instruction* e) const;
 
   Instruction* entry_;
   ScratchMemory static_storage_;
   size_t dynamic_storage_size_;
+  bool has_aggregate_;
 };
 
 }

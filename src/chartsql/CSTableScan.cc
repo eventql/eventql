@@ -150,10 +150,8 @@ void CSTableScan::execute(
 
         case AggregationStrategy::NO_AGGREGATION:
           for (int i = 0; i < select_list_.size(); ++i) {
-            select_list_[i].compiled->evaluate(
+            select_list_[i].compiled->result(
                 &select_list_[i].instance,
-                in_row.size(),
-                in_row.data(),
                 &out_row[i]);
 
             select_list_[i].compiled->reset(&select_list_[i].instance);
@@ -182,10 +180,8 @@ void CSTableScan::execute(
   switch (aggr_strategy_) {
     case AggregationStrategy::AGGREGATE_ALL:
       for (int i = 0; i < select_list_.size(); ++i) {
-        select_list_[i].compiled->evaluate(
+        select_list_[i].compiled->result(
             &select_list_[i].instance,
-            in_row.size(),
-            in_row.data(),
             &out_row[i]);
 
         select_list_[i].compiled->reset(&select_list_[i].instance);
