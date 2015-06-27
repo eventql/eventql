@@ -9,6 +9,7 @@
  */
 #include <fnord/stdtypes.h>
 #include <fnord/exception.h>
+#include <fnord/wallclock.h>
 #include <fnord/test/unittest.h>
 #include "chartsql/runtime/DefaultRuntime.h"
 #include "chartsql/qtree/SelectProjectAggregateNode.h"
@@ -32,13 +33,15 @@ TEST_CASE(RuntimeTest, TestStaticExpression, [] () {
             new csql::LiteralExpressionNode(SValue(SValue::IntegerType(2))),
           }));
 
-
   auto compiled = runtime.compiler()->compile(expr.get());
 
+  auto t0 = WallClock::unixMicros();
   SValue out;
-  compiled->evaluateStatic(0, nullptr, &out);
+  for (int i = 0; i < 1000000; ++i) {
+    compiled->evaluateStatic(0, nullptr, &out);
+  }
+  auto t1 = WallClock::unixMicros();
 
-  fnord::iputs("result: $0", out.toString());
   EXPECT_EQ(out.getInteger(), 3);
 });
 
