@@ -14,11 +14,17 @@ using namespace fnord;
 namespace csql {
 
 SelectProjectAggregateNode::SelectProjectAggregateNode(
+    const String& table_name,
     Vector<RefPtr<ScalarExpressionNode>> select_list,
     RefPtr<ScalarExpressionNode> where_expr) :
+    table_name_(table_name),
     select_list_(select_list),
     where_expr_(where_expr),
     expand_nested_records_(true) {}
+
+const String& SelectProjectAggregateNode::tableName() const {
+  return table_name_;
+}
 
 Vector<RefPtr<ScalarExpressionNode>> SelectProjectAggregateNode::selectList()
     const {
