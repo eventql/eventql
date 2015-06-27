@@ -10,7 +10,7 @@
 #pragma once
 #include <fnord/stdtypes.h>
 #include <fnord/protobuf/MessageSchema.h>
-#include <chartsql/qtree/SelectProjectAggregateNode.h>
+#include <chartsql/qtree/SequentialScanNode.h>
 #include <chartsql/runtime/compile.h>
 #include <chartsql/runtime/TableExpression.h>
 #include <cstable/CSTableReader.h>
@@ -23,7 +23,7 @@ class CSTableScan : public TableExpression {
 public:
 
   CSTableScan(
-      RefPtr<SelectProjectAggregateNode> stmt,
+      RefPtr<SequentialScanNode> stmt,
       cstable::CSTableReader&& cstable);
 
   void execute(
