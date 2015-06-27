@@ -365,12 +365,13 @@ QueryPlanNode* QueryPlanBuilder::buildGroupBy(
   /* resolve output column names */
   auto column_names = ASTUtil::columnNamesFromSelectList(select_list);
 
-  return new GroupBy(
-      std::move(column_names),
-      select_expr,
-      group_expr,
-      select_scratchpad_len,
-      buildQueryPlan(child_ast, repo));
+  RAISE(kNotImplementedError);
+  //return new GroupBy(
+  //    std::move(column_names),
+  //    select_expr,
+  //    group_expr,
+  //    select_scratchpad_len,
+  //    buildQueryPlan(child_ast, repo));
 }
 
 QueryPlanNode* QueryPlanBuilder::buildGroupOverTimewindow(
