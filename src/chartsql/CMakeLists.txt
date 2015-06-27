@@ -43,6 +43,7 @@ add_library(chartsql-lib OBJECT
     qtree/SequentialScanNode.cc
     qtree/LiteralExpressionNode.cc
     qtree/SelectListNode.cc
+    qtree/GroupByNode.cc
     runtime/ScalarExpression.cc
     runtime/ScratchMemory.cc
     runtime/runtime.cc
@@ -58,6 +59,7 @@ add_library(chartsql-lib OBJECT
     runtime/queryplan.cc
     runtime/tablescan.cc
     runtime/orderby.cc
+    runtime/groupby.cc
     runtime/groupovertimewindow.cc
     runtime/execute.cc)
 
