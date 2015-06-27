@@ -11,6 +11,7 @@
 #include <fnord/stdtypes.h>
 #include <chartsql/qtree/QueryTreeNode.h>
 #include <chartsql/qtree/ScalarExpressionNode.h>
+#include <chartsql/qtree/SelectListNode.h>
 
 using namespace fnord;
 
@@ -21,12 +22,12 @@ public:
 
   SequentialScanNode(
       const String& table_name,
-      Vector<RefPtr<ScalarExpressionNode>> select_list,
+      Vector<RefPtr<SelectListNode>> select_list,
       RefPtr<ScalarExpressionNode> where_expr);
 
   const String& tableName() const;
 
-  Vector<RefPtr<ScalarExpressionNode>> selectList() const;
+  Vector<RefPtr<SelectListNode>> selectList() const;
 
   /**
    * If scanning a table that has nested records as columns/rows, this flag
@@ -42,7 +43,7 @@ public:
 
 protected:
   String table_name_;
-  Vector<RefPtr<ScalarExpressionNode>> select_list_;
+  Vector<RefPtr<SelectListNode>> select_list_;
   RefPtr<ScalarExpressionNode> where_expr_;
   bool expand_nested_records_;
 };
