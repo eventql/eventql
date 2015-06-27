@@ -16,10 +16,10 @@ using namespace fnord;
 
 namespace csql {
 
-class SelectProjectAggregateNode : public TableExpressionNode {
+class SequentialScanNode : public TableExpressionNode {
 public:
 
-  SelectProjectAggregateNode(
+  SequentialScanNode(
       const String& table_name,
       Vector<RefPtr<ScalarExpressionNode>> select_list,
       RefPtr<ScalarExpressionNode> where_expr);

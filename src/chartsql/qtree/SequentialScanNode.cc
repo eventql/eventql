@@ -7,13 +7,13 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <chartsql/qtree/SelectProjectAggregateNode.h>
+#include <chartsql/qtree/SequentialScanNode.h>
 
 using namespace fnord;
 
 namespace csql {
 
-SelectProjectAggregateNode::SelectProjectAggregateNode(
+SequentialScanNode::SequentialScanNode(
     const String& table_name,
     Vector<RefPtr<ScalarExpressionNode>> select_list,
     RefPtr<ScalarExpressionNode> where_expr) :
@@ -22,20 +22,20 @@ SelectProjectAggregateNode::SelectProjectAggregateNode(
     where_expr_(where_expr),
     expand_nested_records_(true) {}
 
-const String& SelectProjectAggregateNode::tableName() const {
+const String& SequentialScanNode::tableName() const {
   return table_name_;
 }
 
-Vector<RefPtr<ScalarExpressionNode>> SelectProjectAggregateNode::selectList()
+Vector<RefPtr<ScalarExpressionNode>> SequentialScanNode::selectList()
     const {
   return select_list_;
 }
 
-bool SelectProjectAggregateNode::expandNestedRecords() const {
+bool SequentialScanNode::expandNestedRecords() const {
   return expand_nested_records_;
 }
 
-void SelectProjectAggregateNode::setExpandNestedRecords(bool expand) {
+void SequentialScanNode::setExpandNestedRecords(bool expand) {
   expand_nested_records_ = expand;
 }
 
