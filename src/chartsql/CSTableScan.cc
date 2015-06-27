@@ -23,7 +23,7 @@ CSTableScan::CSTableScan(
     DefaultRuntime* runtime) :
     cstable_(std::move(cstable)),
     colindex_(0),
-    expand_(stmt->expandNestedRecords()) {
+    aggr_strategy_(stmt->aggregationStrategy()) {
 
   Set<String> column_names;
   for (const auto& slnode : stmt->selectList()) {
@@ -137,7 +137,9 @@ void CSTableScan::execute(
         }
       }
 
-      if (expand_ || next_level == 0) {
+      if (aggr_strategy_ == AggregationStrategy::NO_AGGREGATION ||
+          aggr_strategy_ == AggregationStrategy::AGGREGATE_WITHIN_RECORD
+              && next_level == 0) {
         for (int i = 0; i < select_list_.size(); ++i) {
           select_list_[i].compiled->evaluate(
               &select_list_[i].instance,

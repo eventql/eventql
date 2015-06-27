@@ -20,7 +20,7 @@ SequentialScanNode::SequentialScanNode(
     table_name_(table_name),
     select_list_(select_list),
     where_expr_(where_expr),
-    expand_nested_records_(true) {}
+    aggr_strategy_(AggregationStrategy::NO_AGGREGATION) {}
 
 const String& SequentialScanNode::tableName() const {
   return table_name_;
@@ -31,12 +31,12 @@ Vector<RefPtr<SelectListNode>> SequentialScanNode::selectList()
   return select_list_;
 }
 
-bool SequentialScanNode::expandNestedRecords() const {
-  return expand_nested_records_;
+AggregationStrategy SequentialScanNode::aggregationStrategy() const {
+  return aggr_strategy_;
 }
 
-void SequentialScanNode::setExpandNestedRecords(bool expand) {
-  expand_nested_records_ = expand;
+void SequentialScanNode::setAggregationStrategy(AggregationStrategy strategy) {
+  aggr_strategy_ = strategy;
 }
 
 } // namespace csql
