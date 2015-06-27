@@ -15,7 +15,7 @@ namespace csql {
 
 SequentialScanNode::SequentialScanNode(
     const String& table_name,
-    Vector<RefPtr<ScalarExpressionNode>> select_list,
+    Vector<RefPtr<SelectListNode>> select_list,
     RefPtr<ScalarExpressionNode> where_expr) :
     table_name_(table_name),
     select_list_(select_list),
@@ -26,7 +26,7 @@ const String& SequentialScanNode::tableName() const {
   return table_name_;
 }
 
-Vector<RefPtr<ScalarExpressionNode>> SequentialScanNode::selectList()
+Vector<RefPtr<SelectListNode>> SequentialScanNode::selectList()
     const {
   return select_list_;
 }
