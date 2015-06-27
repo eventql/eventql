@@ -46,11 +46,8 @@ void GroupBy::execute(
 
   Vector<SValue> out_row(select_exprs_.size(), SValue{});
   for (auto& group : groups_) {
-    //auto& row = pair.second.row;
     for (size_t i = 0; i < select_exprs_.size(); ++i) {
-      select_exprs_[i]->result(
-          &group.second[i],
-          &out_row[i]);
+      select_exprs_[i]->result(&group.second[i], &out_row[i]);
     }
 
     if (!fn(out_row.size(), out_row.data())) {
@@ -73,29 +70,11 @@ bool GroupBy::nextRow(int row_len, const SValue* row) {
     }
   }
 
-  //fnord::iputs("got row: $0 -> $1 -> $2", row_len, groups, group_key);
-
   for (size_t i = 0; i < select_exprs_.size(); ++i) {
     select_exprs_[i]->accumulate(&group[i], row_len, row);
   }
 
-  //std::vector<SValue> row_vec;
-  //for (int i = 0; i < out_len; i++) {
-  //  row_vec.push_back(out[i]);
-  //}
-
-  ///* update group */
-  //group->row = row_vec;
-
   return true;
 }
-
-  //size_t getNumCols() const override {
-  //  return columns_.size();
-  //}
-
-  //const std::vector<std::string>& getColumns() const override {
-  //  return columns_;
-  //}
 
 }
