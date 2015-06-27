@@ -26,22 +26,22 @@ CSTableScan::CSTableScan(
     expand_(stmt->expandNestedRecords()) {
 
   Set<String> column_names;
-  for (const auto& expr : stmt->selectList()) {
-    findColumns(expr, &column_names);
+  for (const auto& slnode : stmt->selectList()) {
+    findColumns(slnode->expression(), &column_names);
   }
 
   for (const auto& col : column_names) {
     columns_.emplace(col, ColumnRef(cstable_.getColumnReader(col), colindex_++));
   }
 
-  for (auto& expr : stmt->selectList()) {
-    resolveColumns(expr);
+  for (auto& slnode : stmt->selectList()) {
+    resolveColumns(slnode->expression());
   }
 
-  for (const auto& expr : stmt->selectList()) {
+  for (const auto& slnode : stmt->selectList()) {
     select_list_.emplace_back(
-        findMaxRepetitionLevel(expr),
-        runtime->buildScalarExpression(expr),
+        findMaxRepetitionLevel(slnode->expression()),
+        runtime->buildScalarExpression(slnode->expression()),
         &scratch_);
   }
 }
