@@ -47,7 +47,9 @@ CSTableScan::CSTableScan(
   //}
 }
 
-void CSTableScan::execute(Function<bool (int argc, const SValue* argv)> fn) {
+void CSTableScan::execute(
+    ExecutionContext* context,
+    Function<bool (int argc, const SValue* argv)> fn) {
   uint64_t select_level = 0;
   uint64_t fetch_level = 0;
 
