@@ -92,6 +92,16 @@ RefPtr<ExecutionPlan> DefaultRuntime::buildQueryPlan(
       "cannot figure out how to build a query plan for this QTree node");
 }
 
+ScopedPtr<ScalarExpression> DefaultRuntime::buildScalarExpression(
+    RefPtr<ScalarExpressionNode> node) {
+  return scalar_exp_builder_.compile(node);
+}
+
+ScopedPtr<TableExpression> DefaultRuntime::buildTableExpression(
+    RefPtr<TableExpressionNode> node) {
+  return table_exp_builder_.build(node, this);
+}
+
 void DefaultRuntime::addBuildRule(
     RefPtr<TableExpressionBuilder::BuildRule> rule) {
   table_exp_builder_.addBuildRule(rule);

@@ -26,6 +26,7 @@ public:
 
 protected:
   ScopedPtr<TableExpression> entry_;
+  ExecutionContext context_;
 };
 
 } // namespace csql
