@@ -18,7 +18,7 @@ using namespace fnord;
 namespace csql {
 
 CSTableScan::CSTableScan(
-    RefPtr<SelectProjectAggregateNode> stmt,
+    RefPtr<SequentialScanNode> stmt,
     cstable::CSTableReader&& cstable) :
     cstable_(std::move(cstable)),
     colindex_(0),
