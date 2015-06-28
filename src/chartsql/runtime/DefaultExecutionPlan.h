@@ -17,10 +17,10 @@ using namespace fnord;
 
 namespace csql {
 
-class DefaultQueryPlan : public ExecutionPlan {
+class DefaultExecutionPlan : public ExecutionPlan {
 public:
 
-  DefaultQueryPlan(ScopedPtr<TableExpression> entry);
+  DefaultExecutionPlan(ScopedPtr<TableExpression> entry);
 
   void execute(Function<bool (int argc, const SValue* argv)> fn) override;
 

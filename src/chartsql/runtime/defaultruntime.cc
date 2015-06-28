@@ -86,7 +86,7 @@ RefPtr<ExecutionPlan> DefaultRuntime::buildExecutionPlan(
         this,
         tables);
 
-    return new DefaultQueryPlan(std::move(table_expr));
+    return new DefaultExecutionPlan(std::move(table_expr));
   }
 
   RAISE(

@@ -7,17 +7,17 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <chartsql/runtime/DefaultQueryPlan.h>
+#include <chartsql/runtime/DefaultExecutionPlan.h>
 
 using namespace fnord;
 
 namespace csql {
 
-DefaultQueryPlan::DefaultQueryPlan(
+DefaultExecutionPlan::DefaultExecutionPlan(
     ScopedPtr<TableExpression> entry) :
     entry_(std::move(entry)) {}
 
-void DefaultQueryPlan::execute(
+void DefaultExecutionPlan::execute(
     Function<bool (int argc, const SValue* argv)> fn) {
   entry_->execute(&context_, fn);
 }
