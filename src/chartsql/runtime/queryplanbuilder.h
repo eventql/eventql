@@ -126,15 +126,15 @@ protected:
   // */
   //QueryPlanNode* buildGroupOverTimewindow(ASTNode* ast, TableRepository* repo);
 
-  ///**
-  // * Recursively walk the provided ast and search for column references. For
-  // * each found column reference, add the column reference to the provided
-  // * select list and replace the original column reference with an index into
-  // * the new select list.
-  // *
-  // * This is used to create child select lists for nested query plan nodes.
-  // */
-  //bool buildInternalSelectList(ASTNode* ast, ASTNode* select_list);
+  /**
+   * Recursively walk the provided ast and search for column references. For
+   * each found column reference, add the column reference to the provided
+   * select list and replace the original column reference with an index into
+   * the new select list.
+   *
+   * This is used to create child select lists for nested query plan nodes.
+   */
+  bool buildInternalSelectList(ASTNode* ast, ASTNode* select_list);
 
   //QueryPlanNode* buildLimitClause(ASTNode* ast, TableRepository* repo);
   //QueryPlanNode* buildOrderByClause(ASTNode* ast, TableRepository* repo);
