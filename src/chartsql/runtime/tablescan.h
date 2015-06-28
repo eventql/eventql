@@ -26,11 +26,6 @@ namespace csql {
 class TableScan : public QueryPlanNode {
 public:
 
-  static TableScan* build(
-      ASTNode* ast,
-      TableRepository* repo,
-      ScalarExpressionBuilder* compiler);
-
   TableScan(
       TableRef* tbl_ref,
       std::vector<std::string>&& columns,

@@ -136,6 +136,8 @@ protected:
    */
   bool buildInternalSelectList(ASTNode* ast, ASTNode* select_list);
 
+  QueryTreeNode* buildSequentialScan(ASTNode* ast);
+
   ScalarExpressionNode* buildValueExpression(ASTNode* ast);
 
   SelectListNode* buildSelectList(ASTNode* select_list);
