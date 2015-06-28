@@ -12,6 +12,8 @@ import "StreamConfig.proto";
 
 message TSDBNodeConfig {
 
-  repeated StreamConfig stream_config = 1;
+  repeated StreamConfig event_stream = 1;
+
+  repeated string include_protobuf_schema = 2;
 
 };

@@ -19,6 +19,7 @@
 #include <tsdb/TSDBNodeRef.h>
 #include <tsdb/CompactionWorker.h>
 #include <tsdb/ReplicationWorker.h>
+#include <tsdb/TSDBNodeConfig.pb.h>
 
 using namespace fnord;
 
@@ -32,9 +33,7 @@ public:
       RefPtr<dproc::ReplicationScheme> replication_scheme,
       http::HTTPConnectionPool* http);
 
-  void configurePrefix(
-      const String& tsdb_namespace,
-      StreamConfig config);
+  void configure(const TSDBNodeConfig& config, const String& base_path);
 
   StreamConfig* configFor(
       const String& tsdb_namespace,

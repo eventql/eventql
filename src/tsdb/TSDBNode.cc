@@ -55,14 +55,18 @@ StreamConfig* TSDBNode::configFor(
   return config;
 }
 
-void TSDBNode::configurePrefix(
-    const String& stream_ns,
-    StreamConfig config) {
-  auto stream_ns_key = stream_ns + "~" + config.stream_key_prefix();
+void TSDBNode::configure(const TSDBNodeConfig& conf, const String& base_path) {
+  for (const auto& schema_file : conf.include_protobuf_schema()) {
+    schemas_.loadProtobufFile(base_path, schema_file);
+  }
 
-  configs_.emplace_back(
-      stream_ns_key,
-      ScopedPtr<StreamConfig>(new StreamConfig(config)));
+  for (const auto& sc : conf.event_stream()) {
+    auto stream_ns_key = sc.tsdb_namespace() + "~" + sc.stream_key_prefix();
+
+    configs_.emplace_back(
+        stream_ns_key,
+        ScopedPtr<StreamConfig>(new StreamConfig(sc)));
+  }
 }
 
 void TSDBNode::start(

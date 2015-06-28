@@ -120,9 +120,7 @@ int main(int argc, const char** argv) {
   }
 
   tsdb::TSDBNode tsdb_node(dir, repl_scheme.get(), &http);
-  for (const auto& sc : conf.stream_config()) {
-    tsdb_node.configurePrefix(sc.tsdb_namespace(), sc);
-  }
+  tsdb_node.configure(conf, FileUtil::basePath(flags.getString("conf")));
 
   tsdb::TSDBServlet tsdb_servlet(&tsdb_node);
   http_router.addRouteByPrefixMatch("/tsdb", &tsdb_servlet, &tpool);
