@@ -9,22 +9,22 @@
  */
 #pragma once
 #include <fnord/stdtypes.h>
-#include <chartsql/runtime/TableExpressionBuilder.h>
+#include <chartsql/runtime/tablerepository.h>
 #include <cstable/CSTableReader.h>
 
 using namespace fnord;
 
 namespace csql {
 
-struct CSTableScanBuildRule : public TableExpressionBuilder::BuildRule {
+struct CSTableScanProvider : public TableProvider {
 public:
 
-  CSTableScanBuildRule(
+  CSTableScanProvider(
       const String& table_name,
       const String& cstable_file);
 
-  Option<ScopedPtr<TableExpression>> build(
-        RefPtr<TableExpressionNode> node,
+  Option<ScopedPtr<TableExpression>> buildSequentialScan(
+        RefPtr<SequentialScanNode> node,
         DefaultRuntime* runtime) const override;
 
 protected:
