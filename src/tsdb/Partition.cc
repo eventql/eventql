@@ -13,7 +13,10 @@
 #include <fnord/util/binarymessagewriter.h>
 #include <fnord/wallclock.h>
 #include <fnord/protobuf/MessageEncoder.h>
+#include <fnord/protobuf/MessageDecoder.h>
 #include <fnord/protobuf/msg.h>
+#include <cstable/CSTableBuilder.h>
+#include <sstable/SSTableReader.h>
 
 using namespace fnord;
 
@@ -171,6 +174,7 @@ void Partition::compact() {
   auto version = records_.checksum();
   auto cstable_file = cstable_file_;
   auto cstable_version = cstable_version_;
+  auto sstable_files = records_.listDatafiles();
   lk.unlock();
 
   fnord::logDebug(
@@ -186,7 +190,7 @@ void Partition::compact() {
     deleted_files.emplace(cstable_file);
     cstable_file = SHA1::compute(
         key_.toString() + version.toString()).toString() + ".cst";
-    buildCSTable(cstable_file);
+    buildCSTable(sstable_files, cstable_file);
   }
 
   lk.lock();
@@ -346,6 +350,48 @@ void Partition::commitState() {
   auto txn = node_->db->startTransaction(false);
   txn->update(db_key_.data(), db_key_.size(), buf.data(), buf.size());
   txn->commit();
+}
+
+void Partition::buildCSTable(
+    const Vector<String>& input_files,
+    const String& output_file) {
+  fnord::logDebug(
+      "tsdb",
+      "Building cstable; stream='$0' partition='$1' output_file='$2'",
+      stream_key_,
+      key_.toString(),
+      output_file);
+
+  cstable::CSTableBuilder cstable(schema_.get());
+
+  for (const auto& f : input_files) {
+    auto fpath = FileUtil::joinPaths(node_->db_path, f);
+    sstable::SSTableReader reader(fpath);
+    auto cursor = reader.getCursor();
+
+    while (cursor->valid()) {
+      uint64_t* key;
+      size_t key_size;
+      cursor->getKey((void**) &key, &key_size);
+      if (key_size != SHA1Hash::kSize) {
+        RAISE(kRuntimeError, "invalid row");
+      }
+
+      void* data;
+      size_t data_size;
+      cursor->getData(&data, &data_size);
+
+      msg::MessageObject obj;
+      msg::MessageDecoder::decode(data, data_size, *schema_, &obj);
+      cstable.addRecord(obj);
+
+      if (!cursor->next()) {
+        break;
+      }
+    }
+  }
+
+  cstable.write(FileUtil::joinPaths(node_->db_path, output_file));
 }
 
 void PartitionState::encode(

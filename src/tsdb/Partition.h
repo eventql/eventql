@@ -87,14 +87,16 @@ protected:
   void commitState();
   uint64_t replicateTo(const String& addr, uint64_t offset);
 
-  void buildCSTable(const String& filename);
+  void buildCSTable(
+    const Vector<String>& input_files,
+    const String& output_file);
 
-  SHA1Hash key_;
-  String stream_key_;
-  String db_key_;
-  RefPtr<msg::MessageSchema> schema_;
+  const SHA1Hash key_;
+  const String stream_key_;
+  const String db_key_;
+  const RefPtr<msg::MessageSchema> schema_;
   RecordSet records_;
-  StreamConfig* config_;
+  const StreamConfig* config_;
   TSDBNodeRef* node_;
   std::mutex mutex_;
   std::mutex replication_mutex_;
