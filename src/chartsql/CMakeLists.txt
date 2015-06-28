@@ -44,6 +44,7 @@ add_library(chartsql-lib OBJECT
     qtree/LiteralExpressionNode.cc
     qtree/SelectListNode.cc
     qtree/GroupByNode.cc
+    qtree/UnionNode.cc
     runtime/ScalarExpression.cc
     runtime/ScratchMemory.cc
     runtime/runtime.cc
