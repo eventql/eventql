@@ -884,12 +884,22 @@ ScalarExpressionNode* QueryPlanBuilder::buildMethodCall(ASTNode* ast) {
 }
 
 ScalarExpressionNode* QueryPlanBuilder::buildColumnReference(ASTNode* ast) {
-  if (ast->getToken() == nullptr ||
-      ast->getToken()->getType() != Token::T_IDENTIFIER) {
-    RAISE(kRuntimeError, "corrupt AST");
+  String column_name;
+
+  for (
+      auto cur = ast;
+      cur->getToken() != nullptr &&
+      cur->getToken()->getType() == Token::T_IDENTIFIER; ) {
+    if (cur != ast) column_name += ".";
+    column_name += cur->getToken()->getString();
+
+    if (cur->getChildren().size() != 1) {
+      break;
+    } else {
+      cur = cur->getChildren()[0];
+    }
   }
 
-  auto column_name = ast->getToken()->getString();
   auto colref = new ColumnReferenceNode(column_name);
   colref->setColumnIndex(ast->getID());
   return colref;
