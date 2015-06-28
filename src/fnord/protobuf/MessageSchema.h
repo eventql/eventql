@@ -112,12 +112,17 @@ protected:
 class MessageSchemaRepository {
 public:
 
+  MessageSchemaRepository();
+
   RefPtr<MessageSchema> getSchema(const String& name) const;
 
   void registerSchema(RefPtr<MessageSchema> schema);
 
+  void loadProtobufFile(const String& base_path, const String& file_path);
+
 protected:
   HashMap<String, RefPtr<MessageSchema>> schemas_;
+  google::protobuf::DescriptorPool pool_;
 };
 
 } // namespace msg

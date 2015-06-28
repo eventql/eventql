@@ -10,9 +10,13 @@
 #include <fnord/stringutil.h>
 #include <fnord/exception.h>
 #include <fnord/inspect.h>
+#include <fnord/io/fileutil.h>
 #include <fnord/protobuf/MessageSchema.h>
 #include <fnord/protobuf/msg.h>
 #include <fnord/CodingOptions.pb.h>
+#include <google/protobuf/io/zero_copy_stream_impl_lite.h>
+#include <google/protobuf/io/tokenizer.h>
+#include <google/protobuf/compiler/parser.h>
 
 namespace fnord {
 namespace msg {
@@ -321,18 +325,43 @@ Set<String> MessageSchema::columns() const {
   return columns;
 }
 
+MessageSchemaRepository::MessageSchemaRepository() :
+    pool_(google::protobuf::DescriptorPool::generated_pool()) {}
+
 RefPtr<MessageSchema> MessageSchemaRepository::getSchema(
     const String& name) const {
   auto iter = schemas_.find(name);
-  if (iter == schemas_.end()) {
-    RAISEF(kRuntimeError, "schema not found: '$0'", name);
+  if (iter != schemas_.end()) {
+    return iter->second;
   }
 
-  return iter->second;
+  auto desc = pool_.FindMessageTypeByName(name);
+  if (desc != NULL) {
+    return MessageSchema::fromProtobuf(desc);
+  }
+
+  RAISEF(kRuntimeError, "schema not found: '$0'", name);
 }
 
 void MessageSchemaRepository::registerSchema(RefPtr<MessageSchema> schema) {
   schemas_.emplace(schema->name(), schema);
+}
+
+void MessageSchemaRepository::loadProtobufFile(
+    const String& base_path,
+    const String& file_path) {
+  auto data = FileUtil::read(FileUtil::joinPaths(base_path, file_path));
+  google::protobuf::io::ArrayInputStream is(data.data(), data.size());
+
+  google::protobuf::FileDescriptorProto fd_proto;
+  google::protobuf::io::Tokenizer tokenizer(&is, NULL);
+  google::protobuf::compiler::Parser parser;
+  if (!parser.Parse(&tokenizer, &fd_proto)) {
+    RAISEF(kParseError, "error while parsing .proto file '$0'", file_path);
+  }
+
+  fd_proto.set_name(file_path);
+  pool_.BuildFile(fd_proto);
 }
 
 } // namespace msg
