@@ -12,18 +12,12 @@
 namespace csql {
 
 GroupBy::GroupBy(
-    RefPtr<GroupByNode> node,
-    DefaultRuntime* runtime) :
-    source_(runtime->buildTableExpression(node->inputTable())) {
-  for (const auto& slnode : node->selectList()) {
-    select_exprs_.emplace_back(
-        runtime->buildScalarExpression(slnode->expression()));
-  }
-
-  for (const auto& e : node->groupExpressions()) {
-    group_exprs_.emplace_back(runtime->buildScalarExpression(e));
-  }
-}
+    ScopedPtr<TableExpression> source,
+    Vector<ScopedPtr<ScalarExpression>> select_expressions,
+    Vector<ScopedPtr<ScalarExpression>> group_expressions) :
+    source_(std::move(source)),
+    select_exprs_(std::move(select_expressions)),
+    group_exprs_(std::move(group_expressions)) {}
 
 GroupBy::~GroupBy() {
   for (auto& group : groups_) {

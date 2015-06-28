@@ -22,15 +22,16 @@ public:
 
   DefaultRuntime();
 
-  RefPtr<ExecutionPlan> buildQueryPlan(RefPtr<QueryTreeNode> qtree);
+  RefPtr<ExecutionPlan> buildExecutionPlan(
+      RefPtr<QueryTreeNode> qtree,
+      TableRepository* tables);
 
   ScopedPtr<ScalarExpression> buildScalarExpression(
-      RefPtr<ScalarExpressionNode> node);
+      RefPtr<ScalarExpressionNode> expression);
 
   ScopedPtr<TableExpression> buildTableExpression(
-      RefPtr<TableExpressionNode> node);
-
-  void addBuildRule(RefPtr<TableExpressionBuilder::BuildRule> rule);
+      RefPtr<TableExpressionNode> expression,
+      TableRepository* tables);
 
 protected:
   SymbolTable symbol_table_;

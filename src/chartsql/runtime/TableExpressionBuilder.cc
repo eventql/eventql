@@ -16,17 +16,11 @@ namespace csql {
 
 ScopedPtr<TableExpression> TableExpressionBuilder::build(
     RefPtr<TableExpressionNode> node,
-    DefaultRuntime* runtime) {
+    DefaultRuntime* runtime,
+    TableRepository* tables) {
 
   if (dynamic_cast<GroupByNode*>(node.get())) {
-    return mkScoped(new GroupBy(node.asInstanceOf<GroupByNode>(), runtime));
-  }
-
-  for (const auto& rule : rules_) {
-    auto opt = rule->build(node, runtime);
-    if (!opt.isEmpty()) {
-      return std::move(opt.get());
-    }
+    return buildGroupBy(node.asInstanceOf<GroupByNode>(), runtime, tables);
   }
 
   RAISE(
@@ -34,8 +28,30 @@ ScopedPtr<TableExpression> TableExpressionBuilder::build(
       "cannot figure out how to build a table expression for this QTree node");
 }
 
-void TableExpressionBuilder::addBuildRule(RefPtr<BuildRule> rule) {
-  rules_.emplace_back(rule);
+ScopedPtr<TableExpression> TableExpressionBuilder::buildGroupBy(
+    RefPtr<GroupByNode> node,
+    DefaultRuntime* runtime,
+    TableRepository* tables) {
+  Vector<ScopedPtr<ScalarExpression>> select_expressions;
+  Vector<ScopedPtr<ScalarExpression>> group_expressions;
+
+  for (const auto& slnode : node->selectList()) {
+    select_expressions.emplace_back(
+        runtime->buildScalarExpression(slnode->expression()));
+  }
+
+  for (const auto& e : node->groupExpressions()) {
+    group_expressions.emplace_back(runtime->buildScalarExpression(e));
+  }
+
+  auto next = build(node->inputTable(), runtime, tables);
+
+  return mkScoped(
+      new GroupBy(
+          std::move(next),
+          std::move(select_expressions),
+          std::move(group_expressions)));
 }
+
 
 } // namespace csql

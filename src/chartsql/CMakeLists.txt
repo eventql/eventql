@@ -20,7 +20,6 @@ add_library(chartsql-lib OBJECT
     #queryservice.cc
     seriesadapter.cc
     CSTableScan.cc
-    CSTableScanBuildRule.cc
     backends/csv/csvbackend.cc
     backends/csv/csvinputstream.cc
     backends/csv/csvtableref.cc
