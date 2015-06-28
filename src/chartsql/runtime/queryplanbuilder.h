@@ -7,13 +7,9 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#ifndef _FNORDMETRIC_SQL_QUERYPLANBUILDER_H
-#define _FNORDMETRIC_SQL_QUERYPLANBUILDER_H
-#include <memory>
-#include <stdlib.h>
-#include <string>
-#include <vector>
-#include <assert.h>
+#pragma once
+#include <fnord/stdtypes.h>
+#include <fnord/autoref.h>
 #include <chartsql/parser/token.h>
 #include <chartsql/parser/astnode.h>
 #include <chartsql/runtime/queryplan.h>
@@ -51,6 +47,10 @@ protected:
 class QueryPlanBuilder {
 public:
 
+  QueryPlanBuilder(SymbolTable* symbol_table);
+
+  RefPtr<QueryTreeNode> build(ASTNode* ast);
+
 //  QueryPlanBuilder(
 //      ScalarExpressionBuilder* compiler,
 //      const std::vector<std::unique_ptr<Backend>>& backends);
@@ -82,7 +82,7 @@ protected:
   // * Returns true if the ast is a SELECT statement that has a GROUP BY clause,
   // * otherwise false
   // */
-  //bool hasGroupByClause(ASTNode* ast) const;
+  bool hasGroupByClause(ASTNode* ast) const;
 
   ///**
   // * Returns true if the ast is a SELECT statement that has a GROUP OVER
@@ -100,13 +100,13 @@ protected:
   // * Returns true if the ast is a SELECT statement with a select list that
   // * contains at least one aggregation expression, otherwise false.
   // */
-  //bool hasAggregationInSelectList(ASTNode* ast) const;
+  bool hasAggregationInSelectList(ASTNode* ast) const;
 
-  ///**
-  // * Walks the ast recursively and returns true if at least one aggregation
-  // * expression was found, otherwise false.
-  // */
-  //bool hasAggregationExpression(ASTNode* ast) const;
+  /**
+   * Walks the ast recursively and returns true if at least one aggregation
+   * expression was found, otherwise false.
+   */
+  bool hasAggregationExpression(ASTNode* ast) const;
 
   ///**
   // * Build a group by query plan node for a SELECT statement that has a GROUP
@@ -118,7 +118,7 @@ protected:
   // * Build a group by query plan node for a SELECT statement that has a GROUP
   // * BY clause
   // */
-  //QueryPlanNode* buildGroupBy(ASTNode* ast, TableRepository* repo);
+  QueryTreeNode* buildGroupBy(ASTNode* ast);
 
   ///**
   // * Build a group over timewindow query plan node for a SELECT statement that
@@ -140,7 +140,9 @@ protected:
   //QueryPlanNode* buildOrderByClause(ASTNode* ast, TableRepository* repo);
 
   std::vector<std::unique_ptr<QueryPlanBuilderInterface>> extensions_;
+
+  SymbolTable* symbol_table_;
+
 };
 
 }
-#endif
