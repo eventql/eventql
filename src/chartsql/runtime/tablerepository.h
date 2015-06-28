@@ -16,6 +16,8 @@
 #include <vector>
 #include <chartsql/backends/backend.h>
 #include <chartsql/backends/tableref.h>
+#include <chartsql/runtime/TableExpression.h>
+#include <chartsql/qtree/SequentialScanNode.h>
 
 namespace csql {
 class ImportStatement;
@@ -38,6 +40,9 @@ public:
   void import(
       const ImportStatement& import_stmt,
       const std::vector<std::unique_ptr<Backend>>& backends);
+
+  ScopedPtr<TableExpression> scanTable(
+      RefPtr<SequentialScanNode> seqscan) const;
 
 protected:
   std::unordered_map<std::string, std::unique_ptr<TableRef>> table_refs_;

@@ -12,7 +12,9 @@
 #include <fnord/autoref.h>
 #include <fnord/option.h>
 #include <chartsql/qtree/QueryTreeNode.h>
+#include <chartsql/qtree/GroupByNode.h>
 #include <chartsql/runtime/TableExpression.h>
+#include <chartsql/runtime/TableRepository.h>
 #include <chartsql/svalue.h>
 
 using namespace fnord;
@@ -23,20 +25,18 @@ class DefaultRuntime;
 class TableExpressionBuilder {
 public:
 
-  struct BuildRule : public RefCounted {
-    virtual Option<ScopedPtr<TableExpression>> build(
-          RefPtr<TableExpressionNode> node,
-          DefaultRuntime* runtime) const = 0;
-  };
-
   ScopedPtr<TableExpression> build(
       RefPtr<TableExpressionNode> node,
-      DefaultRuntime* runtime);
-
-  void addBuildRule(RefPtr<BuildRule> rule);
+      DefaultRuntime* runtime,
+      TableRepository* tables);
 
 protected:
-  Vector<RefPtr<BuildRule>> rules_;
+
+  ScopedPtr<TableExpression> buildGroupBy(
+      RefPtr<GroupByNode> node,
+      DefaultRuntime* runtime,
+      TableRepository* tables);
+
 };
 
 } // namespace csql
