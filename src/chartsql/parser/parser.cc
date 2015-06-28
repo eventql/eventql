@@ -118,16 +118,20 @@ ASTNode* Parser::unaryExpr() {
 
       if (lookahead(1, Token::T_DOT)) {
         /* table_name.column_name */
-        auto table_name = new ASTNode(ASTNode::T_TABLE_NAME);
-        table_name->setToken(cur_token_);
+        auto col_name = new ASTNode(ASTNode::T_COLUMN_NAME);
+        auto cur = col_name;
+        cur->setToken(cur_token_);
         consumeToken();
-        consumeToken();
-        if (assertExpectation(Token::T_IDENTIFIER)) {
-          auto col_name = table_name->appendChild(ASTNode::T_COLUMN_NAME);
-          col_name->setToken(cur_token_);
+        do {
           consumeToken();
-        }
-        return table_name;
+          assertExpectation(Token::T_IDENTIFIER);
+          auto next = cur->appendChild(ASTNode::T_COLUMN_NAME);
+          next->setToken(cur_token_);
+          cur = next;
+          consumeToken();
+        } while (lookahead(0, Token::T_DOT));
+
+        return col_name;
       }
 
       if (lookahead(1, Token::T_LPAREN)) {
