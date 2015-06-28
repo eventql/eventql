@@ -14,29 +14,17 @@
 
 namespace csql {
 
-class GroupBy : public TableExpression {
+class Union : public TableExpression {
 public:
 
-  GroupBy(
-      ScopedPtr<TableExpression> source,
-      Vector<ScopedPtr<ScalarExpression>> select_expressions,
-      Vector<ScopedPtr<ScalarExpression>> group_expressions);
-
-  ~GroupBy();
+  Union(Vector<ScopedPtr<TableExpression>> sources);
 
   void execute(
       ExecutionContext* context,
       Function<bool (int argc, const SValue* argv)> fn) override;
 
 protected:
-
-  bool nextRow(int argc, const SValue* argv);
-
-  ScopedPtr<TableExpression> source_;
-  Vector<ScopedPtr<ScalarExpression>> select_exprs_;
-  Vector<ScopedPtr<ScalarExpression>> group_exprs_;
-  HashMap<String, Vector<ScalarExpression::Instance>> groups_;
-  ScratchMemory scratch_;
+  Vector<ScopedPtr<TableExpression>> sources_;
 };
 
 }
