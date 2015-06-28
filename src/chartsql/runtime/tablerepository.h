@@ -17,10 +17,8 @@
 namespace csql {
 class ImportStatement;
 
-class TableProvider {
+class TableProvider : public RefCounted {
 public:
-
-  virtual ~TableProvider() {}
 
   virtual Option<ScopedPtr<TableExpression>> buildSequentialScan(
       RefPtr<SequentialScanNode> seqscan) const = 0;
@@ -51,12 +49,12 @@ public:
   Option<ScopedPtr<TableExpression>> buildSequentialScan(
       RefPtr<SequentialScanNode> seqscan) const override;
 
-  void addTable(const String& table_name, TableFactoryFn factory);
+  void addProvider(RefPtr<TableProvider> provider);
 
 protected:
   std::unordered_map<std::string, std::unique_ptr<TableRef>> table_refs_;
 
-  HashMap<String, TableFactoryFn> factories_;
+  Vector<RefPtr<TableProvider>> providers_;
 };
 
 }

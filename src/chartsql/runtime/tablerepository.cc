@@ -67,4 +67,20 @@ void TableRepository::import(
   import(import_stmt.tables(), import_stmt.source_uri(), backends);
 }
 
+Option<ScopedPtr<TableExpression>> TableRepository::buildSequentialScan(
+    RefPtr<SequentialScanNode> seqscan) const {
+  for (const auto& p : providers_) {
+    auto tbl = p->buildSequentialScan(seqscan);
+    if (!tbl.isEmpty()) {
+      return std::move(tbl.get());
+    }
+  }
+
+  return None<ScopedPtr<TableExpression>>();
+}
+
+void TableRepository::addProvider(RefPtr<TableProvider> provider) {
+  providers_.emplace_back(provider);
+}
+
 }
