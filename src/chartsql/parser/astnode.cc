@@ -42,6 +42,10 @@ ASTNode* ASTNode::appendChild(ASTNode::kASTNodeType type) {
   return child;
 }
 
+void ASTNode::clearChildren() {
+  children_.clear();
+}
+
 void ASTNode::removeChildByIndex(size_t index) {
   children_.erase(children_.begin() + index);
 }
