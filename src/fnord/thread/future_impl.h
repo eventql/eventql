@@ -16,10 +16,10 @@ namespace fnord {
 template <typename T>
 PromiseState<T>::PromiseState() :
     status(eSuccess),
+    ready(false),
     value(nullptr),
     on_failure(nullptr),
-    on_success(nullptr),
-    ready(false) {}
+    on_success(nullptr) {}
 
 template <typename T>
 PromiseState<T>::~PromiseState() {

@@ -46,7 +46,7 @@ public:
   const std::string& uri() const;
   void setURI(const std::string& uri);
 
-  const bool keepalive() const;
+  bool keepalive() const;
   std::vector<std::pair<std::string, std::string>> cookies() const;
 
 protected:

@@ -107,7 +107,7 @@ void HTTPRequest::setURI(const std::string& uri) {
   url_ = uri;
 }
 
-const bool HTTPRequest::keepalive() const {
+bool HTTPRequest::keepalive() const {
   if (getHeader("Connection") == "keep-alive") {
     return true;
   }
