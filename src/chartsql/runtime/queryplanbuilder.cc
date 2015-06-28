@@ -11,19 +11,60 @@
 #include <chartsql/parser/astnode.h>
 #include <chartsql/parser/astutil.h>
 #include <chartsql/runtime/queryplanbuilder.h>
-#include <chartsql/runtime/queryplannode.h>
-#include <chartsql/runtime/tablelessselect.h>
-#include <chartsql/runtime/tablescan.h>
-#include <chartsql/runtime/tablerepository.h>
-#include <chartsql/runtime/limitclause.h>
-#include <chartsql/runtime/orderby.h>
-#include <chartsql/runtime/groupby.h>
-#include <chartsql/runtime/groupovertimewindow.h>
-#include <chartsql/runtime/runtime.h>
-#include <chartsql/runtime/symboltable.h>
-#include <chartsql/runtime/importstatement.h>
 
 namespace csql {
+
+QueryPlanBuilder::QueryPlanBuilder(
+    SymbolTable* symbol_table) :
+    symbol_table_(symbol_table) {}
+
+RefPtr<QueryTreeNode> QueryPlanBuilder::build(ASTNode* ast) {
+//  QueryTreeNode* node;
+
+//  /* exapand all column names + wildcard to tablename->columnanme */
+//  if (hasUnexpandedColumns(ast)) {
+//    expandColumns(ast, repo);
+//  }
+//
+//  for (const auto& extension : extensions_) {
+//    exec = extension->buildQueryPlan(ast, repo);
+//
+//    if (exec != nullptr) {
+//      return exec;
+//    }
+//  }
+//
+//  /* internal nodes: multi table query (joins), order, aggregation, limit */
+//  if ((exec = buildLimitClause(ast, repo)) != nullptr) {
+//    return exec;
+//  }
+//
+//  if (hasOrderByClause(ast)) {
+//    return buildOrderByClause(ast, repo);
+//  }
+//
+//  // FIXPAUL move to sql extensions
+//  if (hasGroupOverTimewindowClause(ast)) {
+//    return buildGroupOverTimewindow(ast, repo);
+//  }
+//
+  if (hasGroupByClause(ast) || hasAggregationInSelectList(ast)) {
+    return buildGroupBy(ast);
+  }
+//
+//  /* leaf nodes: table scan, tableless select */
+//  if ((exec = TableScan::build(ast, repo, compiler_)) != nullptr) {
+//    return exec;
+//  }
+//
+//  if ((exec = TablelessSelect::build(ast, compiler_)) != nullptr) {
+//    return exec;
+//  }
+//
+//
+
+  RAISE(kRuntimeError, "can't figure out a query plan for this, sorry :(");
+}
 
 //QueryPlanBuilder::QueryPlanBuilder(
 //    ScalarExpressionBuilder* compiler,
@@ -67,50 +108,7 @@ namespace csql {
 //    ASTNode* ast,
 //    TableRepository* repo) {
 //  QueryPlanNode* exec = nullptr;
-//
-//  /* exapand all column names + wildcard to tablename->columnanme */
-//  if (hasUnexpandedColumns(ast)) {
-//    expandColumns(ast, repo);
-//  }
-//
-//  for (const auto& extension : extensions_) {
-//    exec = extension->buildQueryPlan(ast, repo);
-//
-//    if (exec != nullptr) {
-//      return exec;
-//    }
-//  }
-//
-//  /* internal nodes: multi table query (joins), order, aggregation, limit */
-//  if ((exec = buildLimitClause(ast, repo)) != nullptr) {
-//    return exec;
-//  }
-//
-//  if (hasOrderByClause(ast)) {
-//    return buildOrderByClause(ast, repo);
-//  }
-//
-//  // FIXPAUL move to sql extensions
-//  if (hasGroupOverTimewindowClause(ast)) {
-//    return buildGroupOverTimewindow(ast, repo);
-//  }
-//
-//  if (hasGroupByClause(ast) || hasAggregationInSelectList(ast)) {
-//    return buildGroupBy(ast, repo);
-//  }
-//
-//  /* leaf nodes: table scan, tableless select */
-//  if ((exec = TableScan::build(ast, repo, compiler_)) != nullptr) {
-//    return exec;
-//  }
-//
-//  if ((exec = TablelessSelect::build(ast, compiler_)) != nullptr) {
-//    return exec;
-//  }
-//
-//  RAISE(kRuntimeError, "can't figure out a query plan for this, sorry :(");
-//
-//  // if verbose -> dump ast
+///  // if verbose -> dump ast
 //  return nullptr;
 //}
 //
@@ -142,19 +140,19 @@ namespace csql {
 //  return false;
 //}
 //
-//bool QueryPlanBuilder::hasGroupByClause(ASTNode* ast) const {
-//  if (!(*ast == ASTNode::T_SELECT) || ast->getChildren().size() < 2) {
-//    return false;
-//  }
-//
-//  for (const auto& child : ast->getChildren()) {
-//    if (child->getType() == ASTNode::T_GROUP_BY) {
-//      return true;
-//    }
-//  }
-//
-//  return false;
-//}
+bool QueryPlanBuilder::hasGroupByClause(ASTNode* ast) const {
+  if (!(*ast == ASTNode::T_SELECT) || ast->getChildren().size() < 2) {
+    return false;
+  }
+
+  for (const auto& child : ast->getChildren()) {
+    if (child->getType() == ASTNode::T_GROUP_BY) {
+      return true;
+    }
+  }
+
+  return false;
+}
 //
 //bool QueryPlanBuilder::hasGroupOverTimewindowClause(ASTNode* ast) const {
 //  if (!(*ast == ASTNode::T_SELECT) || ast->getChildren().size() < 2) {
@@ -211,45 +209,45 @@ namespace csql {
 //  return false;
 //}
 //
-//bool QueryPlanBuilder::hasAggregationInSelectList(ASTNode* ast) const {
-//  if (!(*ast == ASTNode::T_SELECT) || ast->getChildren().size() < 2) {
-//    return false;
-//  }
-//
-//  auto select_list = ast->getChildren()[0];
-//  if (!(select_list->getType() == ASTNode::T_SELECT_LIST)) {
-//    RAISE(kRuntimeError, "corrupt AST");
-//  }
-//
-//  return hasAggregationExpression(select_list);
-//}
-//
-//bool QueryPlanBuilder::hasAggregationExpression(ASTNode* ast) const {
-//  if (ast->getType() == ASTNode::T_METHOD_CALL) {
-//    if (!(ast->getToken() != nullptr)) {
-//      RAISE(kRuntimeError, "corrupt AST");
-//    }
-//
-//    auto symbol = compiler_->symbolTable()->lookupSymbol
-//        (ast->getToken()->getString());
-//
-//    if (symbol == nullptr) {
-//      RAISE(kRuntimeError, "symbol lookup failed");
-//    }
-//
-//    if (symbol->isAggregate()) {
-//      return true;
-//    }
-//  }
-//
-//  for (const auto& child : ast->getChildren()) {
-//    if (hasAggregationExpression(child)) {
-//      return true;
-//    }
-//  }
-//
-//  return false;
-//}
+bool QueryPlanBuilder::hasAggregationInSelectList(ASTNode* ast) const {
+  if (!(*ast == ASTNode::T_SELECT) || ast->getChildren().size() < 2) {
+    return false;
+  }
+
+  auto select_list = ast->getChildren()[0];
+  if (!(select_list->getType() == ASTNode::T_SELECT_LIST)) {
+    RAISE(kRuntimeError, "corrupt AST");
+  }
+
+  return hasAggregationExpression(select_list);
+}
+
+bool QueryPlanBuilder::hasAggregationExpression(ASTNode* ast) const {
+  if (ast->getType() == ASTNode::T_METHOD_CALL) {
+    if (!(ast->getToken() != nullptr)) {
+      RAISE(kRuntimeError, "corrupt AST");
+    }
+
+    auto symbol = symbol_table_->lookupSymbol
+        (ast->getToken()->getString());
+
+    if (symbol == nullptr) {
+      RAISE(kRuntimeError, "symbol lookup failed");
+    }
+
+    if (symbol->isAggregate()) {
+      return true;
+    }
+  }
+
+  for (const auto& child : ast->getChildren()) {
+    if (hasAggregationExpression(child)) {
+      return true;
+    }
+  }
+
+  return false;
+}
 //
 //void QueryPlanBuilder::expandColumns(ASTNode* ast, TableRepository* repo) {
 //  if (ast->getChildren().size() < 2) {
