@@ -7,13 +7,8 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#ifndef _FNORDMETRIC_QUERY_TABLEREPOSITORY_H
-#define _FNORDMETRIC_QUERY_TABLEREPOSITORY_H
-#include <stdlib.h>
-#include <string>
-#include <unordered_map>
-#include <memory>
-#include <vector>
+#pragma once
+#include <fnord/option.h>
 #include <chartsql/backends/backend.h>
 #include <chartsql/backends/tableref.h>
 #include <chartsql/runtime/TableExpression.h>
@@ -41,7 +36,7 @@ public:
       const ImportStatement& import_stmt,
       const std::vector<std::unique_ptr<Backend>>& backends);
 
-  ScopedPtr<TableExpression> scanTable(
+  Option<ScopedPtr<TableExpression>> buildSequentialScan(
       RefPtr<SequentialScanNode> seqscan) const;
 
 protected:
@@ -49,4 +44,3 @@ protected:
 };
 
 }
-#endif

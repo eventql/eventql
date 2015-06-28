@@ -23,6 +23,13 @@ ScopedPtr<TableExpression> TableExpressionBuilder::build(
     return buildGroupBy(node.asInstanceOf<GroupByNode>(), runtime, tables);
   }
 
+  if (dynamic_cast<SequentialScanNode*>(node.get())) {
+    return buildSequentialScan(
+        node.asInstanceOf<SequentialScanNode>(),
+        runtime,
+        tables);
+  }
+
   RAISE(
       kRuntimeError,
       "cannot figure out how to build a table expression for this QTree node");
@@ -53,5 +60,18 @@ ScopedPtr<TableExpression> TableExpressionBuilder::buildGroupBy(
           std::move(group_expressions)));
 }
 
+ScopedPtr<TableExpression> TableExpressionBuilder::buildSequentialScan(
+    RefPtr<SequentialScanNode> node,
+    DefaultRuntime* runtime,
+    TableRepository* tables) {
+  const auto& table_name = node->tableName();
+
+  auto seqscan = tables->buildSequentialScan(node);
+  if (seqscan.isEmpty()) {
+    RAISEF(kRuntimeError, "table not found: $0", table_name);
+  }
+
+  return std::move(seqscan.get());
+}
 
 } // namespace csql
