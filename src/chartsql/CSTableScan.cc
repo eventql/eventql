@@ -122,7 +122,9 @@ void CSTableScan::execute(
         }
       }
 
-      next_level = std::max(next_level, col.second.reader->nextRepetitionLevel());
+      next_level = std::max(
+          next_level,
+          col.second.reader->nextRepetitionLevel());
     }
 
     fetch_level = next_level;
@@ -150,11 +152,10 @@ void CSTableScan::execute(
 
         case AggregationStrategy::NO_AGGREGATION:
           for (int i = 0; i < select_list_.size(); ++i) {
-            select_list_[i].compiled->result(
-                &select_list_[i].instance,
+            select_list_[i].compiled->evaluate(
+                in_row.size(),
+                in_row.data(),
                 &out_row[i]);
-
-            select_list_[i].compiled->reset(&select_list_[i].instance);
           }
 
           if (!fn(out_row.size(), out_row.data())) {
@@ -168,12 +169,6 @@ void CSTableScan::execute(
       select_level = fetch_level;
     } else {
       select_level = std::min(select_level, fetch_level);
-    }
-
-    for (const auto& col : columns_) {
-      if (col.second.reader->maxRepetitionLevel() >= select_level) {
-        in_row[col.second.index] = SValue();
-      }
     }
   }
 
