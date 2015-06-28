@@ -25,7 +25,7 @@ RecordRef::RecordRef(
     record_id(_record_id),
     record(_record) {}
 
-RecordSet::RecordSet(  
+RecordSet::RecordSet(
     const String& datadir,
     const String& filename_prefix,
     RecordSetState state /* = RecordSetState{} */) :

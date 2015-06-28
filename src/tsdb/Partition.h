@@ -28,6 +28,8 @@ struct PartitionState {
   String stream_key;
   RecordSet::RecordSetState record_state;
   HashMap<uint64_t, uint64_t> repl_offsets;
+  String cstable_file;
+  SHA1Hash cstable_version;
   void encode(util::BinaryMessageWriter* writer) const;
   void decode(util::BinaryMessageReader* reader);
 };
@@ -91,6 +93,8 @@ protected:
   std::mutex replication_mutex_;
   DateTime last_compaction_;
   HashMap<uint64_t, uint64_t> repl_offsets_;
+  String cstable_file_;
+  SHA1Hash cstable_version_;
 };
 
 }

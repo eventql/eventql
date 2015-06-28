@@ -69,14 +69,14 @@ Partition::Partition(
     const String& db_key,
     StreamConfig* config,
     TSDBNodeRef* node) :
-    stream_key_(stream_key),
     key_(partition_key),
+    stream_key_(stream_key),
     db_key_(db_key),
-    config_(config),
-    node_(node),
     records_(
         node->db_path,
         key_.toString().substr(0, 12)  + "."),
+    config_(config),
+    node_(node),
     last_compaction_(0) {
   records_.setMaxDatafileSize(config_->sstable_size());
 }
@@ -87,17 +87,19 @@ Partition::Partition(
     const String& db_key,
     StreamConfig* config,
     TSDBNodeRef* node) :
-    stream_key_(state.stream_key),
     key_(partition_key),
+    stream_key_(state.stream_key),
     db_key_(db_key),
-    config_(config),
-    node_(node),
     records_(
         node->db_path,
         key_.toString().substr(0, 12) + ".",
         state.record_state),
+    config_(config),
+    node_(node),
+    last_compaction_(0),
     repl_offsets_(state.repl_offsets),
-    last_compaction_(0) {
+    cstable_file_(state.cstable_file),
+    cstable_version_(state.cstable_version) {
   scheduleCompaction();
   node_->compactionq.insert(this, WallClock::unixMicros());
   node_->replicationq.insert(this, WallClock::unixMicros());
@@ -315,6 +317,8 @@ void Partition::commitState() {
   state.record_state = records_.getState();
   state.stream_key = stream_key_;
   state.repl_offsets = repl_offsets_;
+  state.cstable_file = cstable_file_;
+  state.cstable_version = cstable_version_;
 
   util::BinaryMessageWriter buf;
   state.encode(&buf);
@@ -336,6 +340,8 @@ void PartitionState::encode(
   }
 
   writer->appendVarUInt(record_state.version);
+  writer->appendLenencString(cstable_file);
+  writer->append(cstable_version.data(), cstable_version.size());
 }
 
 void PartitionState::decode(util::BinaryMessageReader* reader) {
@@ -350,6 +356,10 @@ void PartitionState::decode(util::BinaryMessageReader* reader) {
   }
 
   record_state.version = reader->readVarUInt();
+  if (reader->remaining() > 0) {
+    cstable_file = reader->readLenencString();
+    cstable_version = SHA1Hash(reader->read(SHA1Hash::kSize), SHA1Hash::kSize);
+  }
 }
 
 }
