@@ -70,8 +70,6 @@ public:
   bool tryNumericConversion();
   bool tryTimeConversion();
 
-  static SValue* fromToken(const Token* token);
-
 protected:
   struct {
     kSValueType type;
