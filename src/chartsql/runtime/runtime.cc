@@ -14,11 +14,10 @@
 namespace csql {
 
 Runtime::Runtime() :
-    compiler_(&symbol_table_),
-    query_plan_builder_(&compiler_, backends_) {}
+    compiler_(&symbol_table_) {}
 
 QueryPlanBuilder* Runtime::queryPlanBuilder() {
-  return &query_plan_builder_;
+  RAISE(kNotImplementedError);
 }
 
 void Runtime::addBackend(std::unique_ptr<Backend> backend) {
