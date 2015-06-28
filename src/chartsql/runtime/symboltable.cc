@@ -110,6 +110,17 @@ SFunction SymbolTable::lookup(const String& symbol) const {
   return iter->second;
 }
 
+bool SymbolTable::isAggregateFunction(const String& symbol) const {
+  auto sf = lookup(symbol);
+
+  switch (sf.type) {
+    case FN_AGGREGATE:
+      return true;
+    case FN_PURE:
+      return false;
+  }
+}
+
 SymbolTableEntry::SymbolTableEntry(
     const std::string& symbol,
     void (*method)(void*, int, SValue*, SValue*),

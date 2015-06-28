@@ -52,6 +52,8 @@ public:
 
   SFunction lookup(const String& symbol) const;
 
+  bool isAggregateFunction(const String& symbol) const;
+
   void registerSymbol(
       const std::string& symbol,
       void (*method)(void*, int, SValue*, SValue*));
