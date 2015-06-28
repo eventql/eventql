@@ -170,6 +170,12 @@ void CSTableScan::execute(
     } else {
       select_level = std::min(select_level, fetch_level);
     }
+
+    for (const auto& col : columns_) {
+      if (col.second.reader->maxRepetitionLevel() >= select_level) {
+        in_row[col.second.index] = SValue();
+      }
+    }
   }
 
   switch (aggr_strategy_) {
