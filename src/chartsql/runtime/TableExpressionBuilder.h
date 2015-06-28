@@ -15,7 +15,7 @@
 #include <chartsql/qtree/GroupByNode.h>
 #include <chartsql/qtree/SequentialScanNode.h>
 #include <chartsql/runtime/TableExpression.h>
-#include <chartsql/runtime/TableRepository.h>
+#include <chartsql/runtime/tablerepository.h>
 #include <chartsql/svalue.h>
 
 using namespace fnord;
@@ -29,19 +29,19 @@ public:
   ScopedPtr<TableExpression> build(
       RefPtr<TableExpressionNode> node,
       DefaultRuntime* runtime,
-      TableRepository* tables);
+      TableProvider* tables);
 
 protected:
 
   ScopedPtr<TableExpression> buildGroupBy(
       RefPtr<GroupByNode> node,
       DefaultRuntime* runtime,
-      TableRepository* tables);
+      TableProvider* tables);
 
   ScopedPtr<TableExpression> buildSequentialScan(
       RefPtr<SequentialScanNode> node,
       DefaultRuntime* runtime,
-      TableRepository* tables);
+      TableProvider* tables);
 
 };
 
