@@ -66,7 +66,7 @@ ScopedPtr<TableExpression> TableExpressionBuilder::buildSequentialScan(
     TableProvider* tables) {
   const auto& table_name = node->tableName();
 
-  auto seqscan = tables->buildSequentialScan(node);
+  auto seqscan = tables->buildSequentialScan(node, runtime);
   if (seqscan.isEmpty()) {
     RAISEF(kRuntimeError, "table not found: $0", table_name);
   }

@@ -7,7 +7,7 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <chartsql/CSTableScanBuildRule.h>
+#include <chartsql/CSTableScanProvider.h>
 #include <chartsql/CSTableScan.h>
 #include <chartsql/qtree/SequentialScanNode.h>
 
@@ -15,24 +15,20 @@ using namespace fnord;
 
 namespace csql {
 
-CSTableScanBuildRule::CSTableScanBuildRule(
+CSTableScanProvider::CSTableScanProvider(
     const String& table_name,
     const String& cstable_file) :
     table_name_(table_name),
     cstable_file_(cstable_file) {}
 
-Option<ScopedPtr<TableExpression>> CSTableScanBuildRule::build(
-      RefPtr<TableExpressionNode> node,
-      DefaultRuntime* runtime) const {
-  auto seqscan = dynamic_cast<SequentialScanNode*>(node.get());
-  if (!seqscan || seqscan->tableName() != table_name_) {
-    return None<ScopedPtr<TableExpression>>();
-  }
-
+Option<ScopedPtr<TableExpression>>
+    CSTableScanProvider::buildSequentialScan(
+        RefPtr<SequentialScanNode> node,
+        DefaultRuntime* runtime) const {
   return Option<ScopedPtr<TableExpression>>(
       mkScoped(
           new CSTableScan(
-              seqscan,
+              node,
               cstable::CSTableReader(cstable_file_),
               runtime)));
 }
