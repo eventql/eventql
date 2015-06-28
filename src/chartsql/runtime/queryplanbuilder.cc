@@ -230,14 +230,7 @@ bool QueryPlanBuilder::hasAggregationExpression(ASTNode* ast) const {
       RAISE(kRuntimeError, "corrupt AST");
     }
 
-    auto symbol = symbol_table_->lookupSymbol
-        (ast->getToken()->getString());
-
-    if (symbol == nullptr) {
-      RAISE(kRuntimeError, "symbol lookup failed");
-    }
-
-    if (symbol->isAggregate()) {
+    if (symbol_table_->isAggregateFunction(ast->getToken()->getString())) {
       return true;
     }
   }
