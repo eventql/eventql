@@ -243,6 +243,20 @@ bool QueryPlanBuilder::hasAggregationExpression(ASTNode* ast) const {
 
   return false;
 }
+
+bool QueryPlanBuilder::hasAggregationWithinRecord(ASTNode* ast) const {
+  if (ast->getType() == ASTNode::T_METHOD_CALL_WITHIN_RECORD) {
+    return true;
+  }
+
+  for (const auto& child : ast->getChildren()) {
+    if (hasAggregationWithinRecord(child)) {
+      return true;
+    }
+  }
+
+  return false;
+}
 //
 //void QueryPlanBuilder::expandColumns(ASTNode* ast, TableRepository* repo) {
 //  if (ast->getChildren().size() < 2) {
@@ -690,6 +704,9 @@ bool QueryPlanBuilder::buildInternalSelectList(
 //}
 
 QueryTreeNode* QueryPlanBuilder::buildSequentialScan(ASTNode* ast) {
+  fnord::iputs("==== seqscan ====", 1);
+  ast->debugPrint();
+
   if (!(*ast == ASTNode::T_SELECT)) {
     return nullptr;
   }
@@ -768,16 +785,47 @@ QueryTreeNode* QueryPlanBuilder::buildSequentialScan(ASTNode* ast) {
     where_expr = Some(RefPtr<ScalarExpressionNode>(buildValueExpression(e)));
   }
 
+  bool has_aggregation = false;
+  bool has_aggregation_within_record = false;
+
   /* select list  */
   Vector<RefPtr<SelectListNode>> select_list_expressions;
   for (const auto& select_expr : select_list->getChildren()) {
+    if (hasAggregationExpression(select_expr)) {
+      has_aggregation = true;
+    }
+
+    if (hasAggregationWithinRecord(select_expr)) {
+      has_aggregation_within_record = true;
+    }
+
     select_list_expressions.emplace_back(buildSelectList(select_expr));
   }
 
-  return new SequentialScanNode(
+  if (has_aggregation && has_aggregation_within_record) {
+    RAISE(
+        kRuntimeError,
+        "invalid use of aggregation WITHIN RECORD functions");
+  }
+
+  /* aggregation type */
+  auto seqscan = new SequentialScanNode(
       table_name,
       select_list_expressions,
       where_expr);
+
+  if (has_aggregation) {
+    fnord::iputs("==== seqscan has aggr ====", 1);
+    seqscan->setAggregationStrategy(AggregationStrategy::AGGREGATE_ALL);
+  }
+
+  if (has_aggregation_within_record) {
+    fnord::iputs("==== seqscan has aggr within rec ====", 1);
+    seqscan->setAggregationStrategy(
+        AggregationStrategy::AGGREGATE_WITHIN_RECORD);
+  }
+
+  return seqscan;
 }
 
 ScalarExpressionNode* QueryPlanBuilder::buildValueExpression(ASTNode* ast) {
@@ -840,6 +888,7 @@ ScalarExpressionNode* QueryPlanBuilder::buildValueExpression(ASTNode* ast) {
       return buildColumnReference(ast);
 
     case ASTNode::T_METHOD_CALL:
+    case ASTNode::T_METHOD_CALL_WITHIN_RECORD:
       return buildMethodCall(ast);
 
     default:
