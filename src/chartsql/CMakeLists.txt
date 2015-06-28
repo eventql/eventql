@@ -61,6 +61,7 @@ add_library(chartsql-lib OBJECT
     runtime/tablescan.cc
     runtime/orderby.cc
     runtime/groupby.cc
+    runtime/Union.cc
     runtime/groupovertimewindow.cc
     runtime/execute.cc)
 
