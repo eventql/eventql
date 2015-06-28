@@ -13,7 +13,7 @@
 #include <chartsql/runtime/symboltable.h>
 #include <chartsql/runtime/ScalarExpressionBuilder.h>
 #include <chartsql/runtime/TableExpressionBuilder.h>
-#include <chartsql/runtime/DefaultQueryPlan.h>
+#include <chartsql/runtime/DefaultExecutionPlan.h>
 
 namespace csql {
 
