@@ -16,7 +16,7 @@ namespace csql {
 SequentialScanNode::SequentialScanNode(
     const String& table_name,
     Vector<RefPtr<SelectListNode>> select_list,
-    RefPtr<ScalarExpressionNode> where_expr) :
+    Option<RefPtr<ScalarExpressionNode>> where_expr) :
     table_name_(table_name),
     select_list_(select_list),
     where_expr_(where_expr),
