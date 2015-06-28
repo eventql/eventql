@@ -52,7 +52,7 @@ add_library(chartsql-lib OBJECT
     runtime/ScalarExpressionBuilder.cc
     runtime/TableExpressionBuilder.cc
     runtime/defaultruntime.cc
-    runtime/DefaultQueryPlan.cc
+    runtime/DefaultExecutionPlan.cc
     runtime/importstatement.cc
     runtime/tablerepository.cc
     runtime/queryplanbuilder.cc
