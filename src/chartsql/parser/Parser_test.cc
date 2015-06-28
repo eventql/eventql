@@ -512,7 +512,7 @@ TEST_CASE(ParserTest, TestTokenizerAsClause, [] () {
   EXPECT((*tl)[3] == "blah");
 });
 
-TEST_CASE(ParserTest, TestParseMultipleSeelcts, [] () {
+TEST_CASE(ParserTest, TestParseMultipleSelects, [] () {
   auto parser = parseTestQuery(
       "SELECT "
       "  'Berlin' AS series, "
