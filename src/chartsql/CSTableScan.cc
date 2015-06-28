@@ -148,7 +148,20 @@ void CSTableScan::execute(
           if (next_level != 0) {
             break;
           }
-          /* fallthrough */
+
+          for (int i = 0; i < select_list_.size(); ++i) {
+            select_list_[i].compiled->result(
+                &select_list_[i].instance,
+                &out_row[i]);
+
+            select_list_[i].compiled->reset(&select_list_[i].instance);
+          }
+
+          if (!fn(out_row.size(), out_row.data())) {
+            return;
+          }
+
+          break;
 
         case AggregationStrategy::NO_AGGREGATION:
           for (int i = 0; i < select_list_.size(); ++i) {
@@ -184,8 +197,6 @@ void CSTableScan::execute(
         select_list_[i].compiled->result(
             &select_list_[i].instance,
             &out_row[i]);
-
-        select_list_[i].compiled->reset(&select_list_[i].instance);
       }
 
       fn(out_row.size(), out_row.data());
