@@ -93,7 +93,7 @@ public:
 
   ASTNode* deepCopy() const;
 
-  void debugPrint(int indent = 0) const;
+  void debugPrint(int indent = 2) const;
 
 protected:
   kASTNodeType type_;

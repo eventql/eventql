@@ -63,7 +63,8 @@ add_library(chartsql-lib OBJECT
     runtime/GroupBy.cc
     runtime/Union.cc
     runtime/groupovertimewindow.cc
-    runtime/execute.cc)
+    runtime/execute.cc
+    defaults.cc)
 
 add_executable(test-chartsql-runtime
     $<TARGET_OBJECTS:fnord-base>

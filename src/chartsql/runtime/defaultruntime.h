@@ -20,7 +20,7 @@ namespace csql {
 class DefaultRuntime {
 public:
 
-  DefaultRuntime();
+  DefaultRuntime(SymbolTable* symbol_table);
 
   RefPtr<ExecutionPlan> buildExecutionPlan(
       RefPtr<QueryTreeNode> qtree,
@@ -34,7 +34,6 @@ public:
       TableRepository* tables);
 
 protected:
-  SymbolTable symbol_table_;
   ScalarExpressionBuilder scalar_exp_builder_;
   TableExpressionBuilder table_exp_builder_;
 };
