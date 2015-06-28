@@ -214,7 +214,10 @@ void ASTNode::debugPrint(int indent /* = 0 */) const {
       printf("- POW_EXPR");
       break;
     case T_METHOD_CALL:
-      printf("- <method_call>");
+      printf("- METHOD_CALL");
+      break;
+    case T_METHOD_CALL_WITHIN_RECORD:
+      printf("- METHOD_CALL_WITHIN_RECORD");
       break;
     default:
       printf("- <unknown ASTNode>");
