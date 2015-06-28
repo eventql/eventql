@@ -96,10 +96,10 @@ protected:
   // */
   //bool hasOrderByClause(ASTNode* ast) const;
 
-  ///**
-  // * Returns true if the ast is a SELECT statement with a select list that
-  // * contains at least one aggregation expression, otherwise false.
-  // */
+  /**
+   * Returns true if the ast is a SELECT statement with a select list that
+   * contains at least one aggregation expression, otherwise false.
+   */
   bool hasAggregationInSelectList(ASTNode* ast) const;
 
   /**
@@ -107,6 +107,12 @@ protected:
    * expression was found, otherwise false.
    */
   bool hasAggregationExpression(ASTNode* ast) const;
+
+  /**
+   * Walks the ast recursively and returns true if at least one aggregation
+   * WITHIN RECORD expression was found, otherwise false.
+   */
+  bool hasAggregationWithinRecord(ASTNode* ast) const;
 
   ///**
   // * Build a group by query plan node for a SELECT statement that has a GROUP
