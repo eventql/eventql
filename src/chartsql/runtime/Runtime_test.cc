@@ -11,7 +11,7 @@
 #include <fnord/exception.h>
 #include <fnord/wallclock.h>
 #include <fnord/test/unittest.h>
-#include "chartsql/runtime/DefaultRuntime.h"
+#include "chartsql/runtime/defaultruntime.h"
 #include "chartsql/qtree/SequentialScanNode.h"
 #include "chartsql/qtree/ColumnReferenceNode.h"
 #include "chartsql/qtree/CallExpressionNode.h"
