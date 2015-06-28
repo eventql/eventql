@@ -783,6 +783,15 @@ ScalarExpressionNode* QueryPlanBuilder::buildLiteral(ASTNode* ast) {
   return new LiteralExpressionNode(literal);
 }
 
+ScalarExpressionNode* QueryPlanBuilder::buildOperator(
+    const std::string& name,
+    ASTNode* ast) {
+  Vector<RefPtr<ScalarExpressionNode>> args;
+  for (auto e : ast->getChildren()) {
+    args.emplace_back(buildValueExpression(e));
+  }
 
+  return new CallExpressionNode(name, args);
+}
 
 }
