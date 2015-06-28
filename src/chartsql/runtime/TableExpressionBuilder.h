@@ -13,6 +13,7 @@
 #include <fnord/option.h>
 #include <chartsql/qtree/QueryTreeNode.h>
 #include <chartsql/qtree/GroupByNode.h>
+#include <chartsql/qtree/UnionNode.h>
 #include <chartsql/qtree/SequentialScanNode.h>
 #include <chartsql/runtime/TableExpression.h>
 #include <chartsql/runtime/tablerepository.h>
@@ -35,6 +36,11 @@ protected:
 
   ScopedPtr<TableExpression> buildGroupBy(
       RefPtr<GroupByNode> node,
+      DefaultRuntime* runtime,
+      TableProvider* tables);
+
+  ScopedPtr<TableExpression> buildUnion(
+      RefPtr<UnionNode> node,
       DefaultRuntime* runtime,
       TableProvider* tables);
 
