@@ -73,6 +73,9 @@ public:
     T_OFF,
     T_EOF,
 
+    T_WITHIN,
+    T_RECORD,
+
     T_DRAW,
     T_LINECHART,
     T_AREACHART,
@@ -125,8 +128,8 @@ public:
   void debugPrint() const;
 
 protected:
-  std::string str_;
   const kTokenType type_;
+  std::string str_;
 };
 
 }
