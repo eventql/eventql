@@ -16,7 +16,7 @@
 #include <fnord/protobuf/MessageDecoder.h>
 #include <fnord/protobuf/msg.h>
 #include <cstable/CSTableBuilder.h>
-#include <sstable/SSTableReader.h>
+#include <sstable/sstablereader.h>
 
 using namespace fnord;
 
