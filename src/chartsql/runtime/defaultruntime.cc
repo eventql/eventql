@@ -77,12 +77,14 @@ DefaultRuntime::DefaultRuntime() :
   symbol_table_.registerSymbol("pow", &expressions::powExpr);
 }
 
-RefPtr<ExecutionPlan> DefaultRuntime::buildQueryPlan(
-    RefPtr<QueryTreeNode> qtree) {
+RefPtr<ExecutionPlan> DefaultRuntime::buildExecutionPlan(
+    RefPtr<QueryTreeNode> qtree,
+    TableRepository* tables) {
   if (dynamic_cast<TableExpressionNode*>(qtree.get())) {
     auto table_expr = table_exp_builder_.build(
         qtree.asInstanceOf<TableExpressionNode>(),
-        this);
+        this,
+        tables);
 
     return new DefaultQueryPlan(std::move(table_expr));
   }
@@ -98,13 +100,9 @@ ScopedPtr<ScalarExpression> DefaultRuntime::buildScalarExpression(
 }
 
 ScopedPtr<TableExpression> DefaultRuntime::buildTableExpression(
-    RefPtr<TableExpressionNode> node) {
-  return table_exp_builder_.build(node, this);
-}
-
-void DefaultRuntime::addBuildRule(
-    RefPtr<TableExpressionBuilder::BuildRule> rule) {
-  table_exp_builder_.addBuildRule(rule);
+    RefPtr<TableExpressionNode> node,
+    TableRepository* tables) {
+  return table_exp_builder_.build(node, this, tables);
 }
 
 }

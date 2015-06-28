@@ -18,7 +18,11 @@ namespace csql {
 class GroupBy : public TableExpression {
 public:
 
-  GroupBy(RefPtr<GroupByNode> node, DefaultRuntime* runtime);
+  GroupBy(
+      ScopedPtr<TableExpression> source,
+      Vector<ScopedPtr<ScalarExpression>> select_expressions,
+      Vector<ScopedPtr<ScalarExpression>> group_expressions);
+
   ~GroupBy();
 
   void execute(
