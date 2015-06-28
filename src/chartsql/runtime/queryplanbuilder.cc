@@ -897,7 +897,9 @@ ScalarExpressionNode* QueryPlanBuilder::buildColumnReference(ASTNode* ast) {
   }
 
   auto column_name = ast->getToken()->getString();
-  return new ColumnReferenceNode(column_name);
+  auto colref = new ColumnReferenceNode(column_name);
+  colref->setColumnIndex(ast->getID());
+  return colref;
 }
 
 SelectListNode* QueryPlanBuilder::buildSelectList(ASTNode* ast) {
