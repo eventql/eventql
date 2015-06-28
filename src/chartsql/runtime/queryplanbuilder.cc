@@ -311,7 +311,7 @@ bool QueryPlanBuilder::hasAggregationExpression(ASTNode* ast) const {
 //
 
 QueryTreeNode* QueryPlanBuilder::buildGroupBy(ASTNode* ast) {
-  ASTNode group_exprs(ASTNode::T_GROUP_BY);
+  Vector<RefPtr<ScalarExpressionNode>> group_expressions;
 
   /* copy own select list */
   if (!(ast->getChildren()[0]->getType() == ASTNode::T_SELECT_LIST)) {
@@ -347,7 +347,7 @@ QueryTreeNode* QueryPlanBuilder::buildGroupBy(ASTNode* ast) {
         RAISE(kRuntimeError, "GROUP clause can only contain pure functions");
       }
 
-      group_exprs.appendChild(e);
+      group_expressions.emplace_back(buildValueExpression(e));
     }
 
     /* remove group by clause from child ast */
@@ -362,7 +362,8 @@ QueryTreeNode* QueryPlanBuilder::buildGroupBy(ASTNode* ast) {
   //auto group_expr = compiler_->compile(&group_exprs, &group_scratchpad_len);
 
   /* resolve output column names */
-  auto column_names = ASTUtil::columnNamesFromSelectList(select_list);
+  //auto column_names = ASTUtil::columnNamesFromSelectList(select_list);
+
   auto source_table = build(child_ast);
 
   RAISE(kNotImplementedError);
@@ -676,5 +677,112 @@ bool QueryPlanBuilder::buildInternalSelectList(
 //    std::unique_ptr<QueryPlanBuilderInterface> other) {
 //  extensions_.emplace_back(std::move(other));
 //}
+
+ScalarExpressionNode* QueryPlanBuilder::buildValueExpression(ASTNode* ast) {
+  if (ast == nullptr) {
+    RAISE(kNullPointerError, "can't build nullptr");
+  }
+
+  switch (ast->getType()) {
+
+    case ASTNode::T_GROUP_BY:
+      return buildChildren(ast);
+
+    case ASTNode::T_EQ_EXPR:
+      return buildOperator("eq", ast);
+
+    case ASTNode::T_NEQ_EXPR:
+      return buildOperator("neq", ast);
+
+    case ASTNode::T_AND_EXPR:
+      return buildOperator("and", ast);
+
+    case ASTNode::T_OR_EXPR:
+      return buildOperator("or", ast);
+
+    case ASTNode::T_NEGATE_EXPR:
+      return buildOperator("neg", ast);
+
+    case ASTNode::T_LT_EXPR:
+      return buildOperator("lt", ast);
+
+    case ASTNode::T_LTE_EXPR:
+      return buildOperator("lte", ast);
+
+    case ASTNode::T_GT_EXPR:
+      return buildOperator("gt", ast);
+
+    case ASTNode::T_GTE_EXPR:
+      return buildOperator("gte", ast);
+
+    case ASTNode::T_ADD_EXPR:
+      return buildOperator("add", ast);
+
+    case ASTNode::T_SUB_EXPR:
+      return buildOperator("sub", ast);
+
+    case ASTNode::T_MUL_EXPR:
+      return buildOperator("mul", ast);
+
+    case ASTNode::T_DIV_EXPR:
+      return buildOperator("div", ast);
+
+    case ASTNode::T_MOD_EXPR:
+      return buildOperator("mod", ast);
+
+    case ASTNode::T_POW_EXPR:
+      return buildOperator("pow", ast);
+
+    case ASTNode::T_LITERAL:
+      return buildLiteral(ast);
+
+    case ASTNode::T_RESOLVED_COLUMN:
+      return buildColumnReference(ast);
+
+    case ASTNode::T_METHOD_CALL:
+      return buildMethodCall(ast);
+
+    default:
+      ast->debugPrint();
+      RAISE(kRuntimeError, "internal error: can't build expression");
+  }
+}
+
+ScalarExpressionNode* QueryPlanBuilder::buildLiteral(ASTNode* ast) {
+  if (ast->getToken() == nullptr) {
+    RAISE(kRuntimeError, "internal error: corrupt ast");
+  }
+
+  SValue literal;
+  auto token = ast->getToken();
+
+  switch (token->getType()) {
+
+    case Token::T_TRUE:
+      literal = SValue(true);
+      break;
+
+    case Token::T_FALSE:
+      literal = SValue(false);
+      break;
+
+    case Token::T_NUMERIC:
+      literal = SValue(token->getString());
+      literal.tryNumericConversion();
+      break;
+
+    case Token::T_STRING:
+      literal = SValue(token->getString());
+      break;
+
+    default:
+      RAISE(kRuntimeError, "can't cast Token to SValue");
+
+  }
+
+  return new LiteralExpressionNode(literal);
+}
+
+
 
 }
