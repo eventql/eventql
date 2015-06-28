@@ -41,7 +41,6 @@ protected:
   SymbolTable symbol_table_;
   ScalarExpressionBuilder compiler_;
   std::vector<std::unique_ptr<Backend>> backends_;
-  QueryPlanBuilder query_plan_builder_;
 };
 
 }
