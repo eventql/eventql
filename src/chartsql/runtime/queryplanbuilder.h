@@ -146,8 +146,6 @@ protected:
 
   ScalarExpressionNode* buildColumnReference(ASTNode* ast);
 
-  ScalarExpressionNode* buildChildren(ASTNode* ast);
-
   ScalarExpressionNode* buildMethodCall(ASTNode* ast);
 
   //QueryPlanNode* buildLimitClause(ASTNode* ast, TableRepository* repo);
