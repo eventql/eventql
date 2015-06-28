@@ -369,6 +369,16 @@ next:
     goto next;
   }
 
+  if (token == "WITHIN") {
+    token_list->emplace_back(Token::T_WITHIN);
+    goto next;
+  }
+
+  if (token == "RECORD") {
+    token_list->emplace_back(Token::T_RECORD);
+    goto next;
+  }
+
   if (token == "MOD") {
     token_list->emplace_back(Token::T_MOD);
     goto next;
