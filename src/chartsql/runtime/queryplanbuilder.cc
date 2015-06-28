@@ -685,9 +685,6 @@ ScalarExpressionNode* QueryPlanBuilder::buildValueExpression(ASTNode* ast) {
 
   switch (ast->getType()) {
 
-    case ASTNode::T_GROUP_BY:
-      return buildChildren(ast);
-
     case ASTNode::T_EQ_EXPR:
       return buildOperator("eq", ast);
 
@@ -808,6 +805,16 @@ ScalarExpressionNode* QueryPlanBuilder::buildMethodCall(ASTNode* ast) {
   }
 
   return new CallExpressionNode(symbol, args);
+}
+
+ScalarExpressionNode* QueryPlanBuilder::buildColumnReference(ASTNode* ast) {
+  if (ast->getToken() == nullptr ||
+      ast->getToken()->getType() != Token::T_IDENTIFIER) {
+    RAISE(kRuntimeError, "corrupt AST");
+  }
+
+  auto column_name = ast->getToken()->getString();
+  return new ColumnReferenceNode(column_name);
 }
 
 }
