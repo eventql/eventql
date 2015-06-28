@@ -17,6 +17,11 @@ message StreamConfig {
   required string tsdb_namespace = 6;
 
   /**
+   * The full path/name of the schema
+   */
+  required string schema = 7;
+
+  /**
    * The stream key prefix for which this config should be applied/. (empty
    * matches all streams, longest prefix wins)
    */

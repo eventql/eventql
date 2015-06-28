@@ -41,6 +41,7 @@ public:
       const SHA1Hash& partition_key,
       const String& stream_key,
       const String& db_key,
+      RefPtr<msg::MessageSchema> schema,
       StreamConfig* config,
       TSDBNodeRef* node);
 
@@ -48,6 +49,7 @@ public:
       const SHA1Hash& partition_key,
       const PartitionState& state,
       const String& db_key,
+      RefPtr<msg::MessageSchema> schema,
       StreamConfig* config,
       TSDBNodeRef* node);
 
@@ -69,6 +71,7 @@ protected:
       const SHA1Hash& partition_key,
       const String& stream_key,
       const String& db_key,
+      RefPtr<msg::MessageSchema> schema,
       StreamConfig* config,
       TSDBNodeRef* node);
 
@@ -76,6 +79,7 @@ protected:
       const SHA1Hash& partition_key,
       const PartitionState& state,
       const String& db_key,
+      RefPtr<msg::MessageSchema> schema,
       StreamConfig* config,
       TSDBNodeRef* node);
 
@@ -88,6 +92,7 @@ protected:
   SHA1Hash key_;
   String stream_key_;
   String db_key_;
+  RefPtr<msg::MessageSchema> schema_;
   RecordSet records_;
   StreamConfig* config_;
   TSDBNodeRef* node_;

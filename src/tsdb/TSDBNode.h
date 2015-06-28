@@ -68,6 +68,7 @@ protected:
   HashMap<String, RefPtr<Partition>> partitions_;
   Vector<RefPtr<CompactionWorker>> compaction_workers_;
   Vector<RefPtr<ReplicationWorker>> replication_workers_;
+  msg::MessageSchemaRepository schemas_;
 };
 
 } // namespace tdsb

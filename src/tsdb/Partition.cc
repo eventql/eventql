@@ -23,6 +23,7 @@ RefPtr<Partition> Partition::create(
     const SHA1Hash& partition_key,
     const String& stream_key,
     const String& db_key,
+    RefPtr<msg::MessageSchema> schema,
     StreamConfig* config,
     TSDBNodeRef* node) {
 
@@ -37,6 +38,7 @@ RefPtr<Partition> Partition::create(
           partition_key,
           stream_key,
           db_key,
+          schema,
           config,
           node));
 }
@@ -45,6 +47,7 @@ RefPtr<Partition> Partition::reopen(
     const SHA1Hash& partition_key,
     const PartitionState& state,
     const String& db_key,
+    RefPtr<msg::MessageSchema> schema,
     StreamConfig* config,
     TSDBNodeRef* node) {
 
@@ -59,6 +62,7 @@ RefPtr<Partition> Partition::reopen(
           partition_key,
           state,
           db_key,
+          schema,
           config,
           node));
 }
@@ -67,11 +71,13 @@ Partition::Partition(
     const SHA1Hash& partition_key,
     const String& stream_key,
     const String& db_key,
+    RefPtr<msg::MessageSchema> schema,
     StreamConfig* config,
     TSDBNodeRef* node) :
     key_(partition_key),
     stream_key_(stream_key),
     db_key_(db_key),
+    schema_(schema),
     records_(
         node->db_path,
         key_.toString().substr(0, 12)  + "."),
@@ -85,11 +91,13 @@ Partition::Partition(
     const SHA1Hash& partition_key,
     const PartitionState& state,
     const String& db_key,
+    RefPtr<msg::MessageSchema> schema,
     StreamConfig* config,
     TSDBNodeRef* node) :
     key_(partition_key),
     stream_key_(state.stream_key),
     db_key_(db_key),
+    schema_(schema),
     records_(
         node->db_path,
         key_.toString().substr(0, 12) + ".",

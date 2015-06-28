@@ -131,11 +131,13 @@ void TSDBNode::reopenPartitions() {
     PartitionState state;
     state.decode(&reader);
 
+    auto config = configFor(tsdb_namespace, state.stream_key);
     auto partition = Partition::reopen(
         partition_key,
         state,
         db_key,
-        configFor(tsdb_namespace, state.stream_key),
+        schemas_.getSchema(config->schema()),
+        config,
         &noderef_);
 
     partitions_.emplace(db_key, partition);
@@ -158,11 +160,13 @@ RefPtr<Partition> TSDBNode::findOrCreatePartition(
     return iter->second;
   }
 
+  auto config = configFor(tsdb_namespace, stream_key);
   auto partition = Partition::create(
       partition_key,
       stream_key,
       db_key,
-      configFor(tsdb_namespace, stream_key),
+      schemas_.getSchema(config->schema()),
+      config,
       &noderef_);
 
   partitions_.emplace(db_key, partition);
