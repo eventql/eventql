@@ -310,11 +310,20 @@ QueryTreeNode* QueryPlanBuilder::buildGroupBy(ASTNode* ast) {
     RAISE(kRuntimeError, "corrupt AST");
   }
 
+  fnord::iputs("===== before ====", 1);
+  ast->debugPrint();
+
   auto select_list = ast->getChildren()[0]->deepCopy();
 
   /* generate select list for child */
   auto child_sl = new ASTNode(ASTNode::T_SELECT_LIST);
   buildInternalSelectList(select_list, child_sl);
+
+  fnord::iputs("===== after: groupby ====", 1);
+  select_list->debugPrint();
+
+  fnord::iputs("===== after: seqscan ====", 1);
+  child_sl->debugPrint();
 
   /* copy ast for child and swap out select lists*/
   auto child_ast = ast->deepCopy();
