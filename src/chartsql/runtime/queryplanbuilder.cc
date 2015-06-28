@@ -794,4 +794,20 @@ ScalarExpressionNode* QueryPlanBuilder::buildOperator(
   return new CallExpressionNode(name, args);
 }
 
+ScalarExpressionNode* QueryPlanBuilder::buildMethodCall(ASTNode* ast) {
+  if (ast->getToken() == nullptr ||
+      ast->getToken()->getType() != Token::T_IDENTIFIER) {
+    RAISE(kRuntimeError, "corrupt AST");
+  }
+
+  auto symbol = ast->getToken()->getString();
+
+  Vector<RefPtr<ScalarExpressionNode>> args;
+  for (auto e : ast->getChildren()) {
+    args.emplace_back(buildValueExpression(e));
+  }
+
+  return new CallExpressionNode(symbol, args);
+}
+
 }
