@@ -168,6 +168,14 @@ ASTNode* Parser::methodCall() {
   } while (*cur_token_ == Token::T_COMMA);
 
   expectAndConsume(Token::T_RPAREN);
+
+  if (lookahead(0, Token::T_WITHIN) &&
+      lookahead(1, Token::T_RECORD)) {
+    consumeToken();
+    consumeToken();
+    e->setType(ASTNode::T_METHOD_CALL_WITHIN_RECORD);
+  }
+
   return e;
 }
 
