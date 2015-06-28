@@ -83,6 +83,8 @@ protected:
   void commitState();
   uint64_t replicateTo(const String& addr, uint64_t offset);
 
+  void buildCSTable(const String& filename);
+
   SHA1Hash key_;
   String stream_key_;
   String db_key_;
