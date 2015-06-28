@@ -11,6 +11,7 @@
 #include <chartsql/parser/astnode.h>
 #include <chartsql/parser/astutil.h>
 #include <chartsql/runtime/queryplanbuilder.h>
+#include <chartsql/qtree/GroupByNode.h>
 
 namespace csql {
 
@@ -311,8 +312,6 @@ bool QueryPlanBuilder::hasAggregationExpression(ASTNode* ast) const {
 //
 
 QueryTreeNode* QueryPlanBuilder::buildGroupBy(ASTNode* ast) {
-  Vector<RefPtr<ScalarExpressionNode>> group_expressions;
-
   /* copy own select list */
   if (!(ast->getChildren()[0]->getType() == ASTNode::T_SELECT_LIST)) {
     RAISE(kRuntimeError, "corrupt AST");
@@ -330,6 +329,7 @@ QueryTreeNode* QueryPlanBuilder::buildGroupBy(ASTNode* ast) {
   child_ast->appendChild(child_sl, 0);
 
   /* search for a group by clause */
+  Vector<RefPtr<ScalarExpressionNode>> group_expressions;
   for (const auto& child : ast->getChildren()) {
     if (child->getType() != ASTNode::T_GROUP_BY) {
       continue;
@@ -354,27 +354,18 @@ QueryTreeNode* QueryPlanBuilder::buildGroupBy(ASTNode* ast) {
     child_ast->removeChildrenByType(ASTNode::T_GROUP_BY);
   }
 
-  /* compile select list and group expressions */
-  //size_t select_scratchpad_len = 0;
-  //auto select_expr = compiler_->compile(select_list, &select_scratchpad_len);
+  /* select list  */
+  Vector<RefPtr<SelectListNode>> select_list_expressions;
+  for (const auto& select_expr : select_list->getChildren()) {
+    select_list_expressions.emplace_back(buildSelectList(select_expr));
+  }
 
-  //size_t group_scratchpad_len = 0;
-  //auto group_expr = compiler_->compile(&group_exprs, &group_scratchpad_len);
-
-  /* resolve output column names */
-  //auto column_names = ASTUtil::columnNamesFromSelectList(select_list);
-
-  auto source_table = build(child_ast);
-
-  RAISE(kNotImplementedError);
-  //return new GroupBy(
-  //    std::move(column_names),
-  //    select_expr,
-  //    group_expr,
-  //    select_scratchpad_len,
-  //    );
+  return new GroupByNode(
+      select_list_expressions,
+      group_expressions,
+      build(child_ast).asInstanceOf<TableExpressionNode>());
 }
-//
+
 //QueryPlanNode* QueryPlanBuilder::buildGroupOverTimewindow(
 //    ASTNode* ast,
 //    TableRepository* repo) {
@@ -816,5 +807,15 @@ ScalarExpressionNode* QueryPlanBuilder::buildColumnReference(ASTNode* ast) {
   auto column_name = ast->getToken()->getString();
   return new ColumnReferenceNode(column_name);
 }
+
+SelectListNode* QueryPlanBuilder::buildSelectList(ASTNode* ast) {
+  if (!(*ast == ASTNode::T_DERIVED_COLUMN)
+      || ast->getChildren().size() == 0) {
+    RAISE(kRuntimeError, "internal error: corrupt ast");
+  }
+
+  return new SelectListNode(buildValueExpression(ast->getChildren()[0]));
+}
+
 
 }
