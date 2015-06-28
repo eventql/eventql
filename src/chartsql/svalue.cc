@@ -448,31 +448,6 @@ bool SValue::tryTimeConversion() {
   return true;
 }
 
-SValue* SValue::fromToken(const Token* token) {
-  switch (token->getType()) {
-
-    case Token::T_TRUE:
-      return new SValue(true);
-
-    case Token::T_FALSE:
-      return new SValue(false);
-
-    case Token::T_NUMERIC: {
-      auto sval = new SValue(token->getString());
-      sval->tryNumericConversion();
-      return sval;
-    }
-
-    case Token::T_STRING:
-      return new SValue(token->getString());
-
-    default:
-      RAISE(kRuntimeError, "can't cast Token to SValue");
-      return nullptr;
-
-  }
-}
-
 }
 
 namespace fnord {

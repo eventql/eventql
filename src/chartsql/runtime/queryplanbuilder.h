@@ -136,6 +136,20 @@ protected:
    */
   bool buildInternalSelectList(ASTNode* ast, ASTNode* select_list);
 
+  ScalarExpressionNode* buildValueExpression(ASTNode* ast);
+
+  SelectListNode* buildSelectList(ASTNode* select_list);
+
+  ScalarExpressionNode* buildOperator(const std::string& name, ASTNode* ast);
+
+  ScalarExpressionNode* buildLiteral(ASTNode* ast);
+
+  ScalarExpressionNode* buildColumnReference(ASTNode* ast);
+
+  ScalarExpressionNode* buildChildren(ASTNode* ast);
+
+  ScalarExpressionNode* buildMethodCall(ASTNode* ast);
+
   //QueryPlanNode* buildLimitClause(ASTNode* ast, TableRepository* repo);
   //QueryPlanNode* buildOrderByClause(ASTNode* ast, TableRepository* repo);
 
