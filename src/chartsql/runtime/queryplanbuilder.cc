@@ -493,45 +493,63 @@ QueryTreeNode* QueryPlanBuilder::buildGroupBy(ASTNode* ast) {
 bool QueryPlanBuilder::buildInternalSelectList(
     ASTNode* node,
     ASTNode* target_select_list) {
-  /* search for column references recursively */
-  if (node->getType() == ASTNode::T_COLUMN_NAME) {
-    auto col_index = -1;
+  /* search recursively */
+  switch (node->getType()) {
 
-    /* check if this column already exists in the select list */
-    const auto& candidates = target_select_list->getChildren();
-    for (int i = 0; i < candidates.size(); ++i) {
-      if (candidates[i]->getType() == ASTNode::T_DERIVED_COLUMN) {
-        if (candidates[i]->getChildren().size() == 1) {
-          auto colname = candidates[i]->getChildren()[0];
-          if (colname->getType() == ASTNode::T_COLUMN_NAME &&
-              node->getToken()->getString() ==
-                  colname->getToken()->getString()) {
-            col_index = i;
-            break;
+    /* push down WITHIN RECORD aggregations into child select list */
+    case ASTNode::T_METHOD_CALL_WITHIN_RECORD: {
+      fnord::iputs("split...", 1);
+      target_select_list->appendChild(node->deepCopy());
+      auto col_index = target_select_list->getChildren().size() - 1;
+      node->setType(ASTNode::T_RESOLVED_COLUMN);
+      node->setID(col_index);
+      node->clearChildren();
+      return true;
+    }
+
+    /* push down referenced columns into the child select list */
+    case ASTNode::T_COLUMN_NAME: {
+      auto col_index = -1;
+
+      /* check if this column already exists in the select list */
+      const auto& candidates = target_select_list->getChildren();
+      for (int i = 0; i < candidates.size(); ++i) {
+        if (candidates[i]->getType() == ASTNode::T_DERIVED_COLUMN) {
+          if (candidates[i]->getChildren().size() == 1) {
+            auto colname = candidates[i]->getChildren()[0];
+            if (colname->getType() == ASTNode::T_COLUMN_NAME &&
+                node->getToken()->getString() ==
+                    colname->getToken()->getString()) {
+              col_index = i;
+              break;
+            }
           }
         }
       }
-    }
 
-    /* otherwise add this column to the select list */
-    if (col_index < 0) {
-      auto derived = new ASTNode(ASTNode::T_DERIVED_COLUMN);
-      derived->appendChild(node->deepCopy());
-      target_select_list->appendChild(derived);
-      col_index = target_select_list->getChildren().size() - 1;
-    }
-
-    node->setType(ASTNode::T_RESOLVED_COLUMN);
-    node->setID(col_index);
-    return true;
-  } else {
-    for (const auto& child : node->getChildren()) {
-      if (!buildInternalSelectList(child, target_select_list)) {
-        return false;
+      /* otherwise add this column to the select list */
+      if (col_index < 0) {
+        auto derived = new ASTNode(ASTNode::T_DERIVED_COLUMN);
+        derived->appendChild(node->deepCopy());
+        target_select_list->appendChild(derived);
+        col_index = target_select_list->getChildren().size() - 1;
       }
+
+      node->setType(ASTNode::T_RESOLVED_COLUMN);
+      node->setID(col_index);
+      return true;
     }
 
-    return true;
+    default: {
+      for (const auto& child : node->getChildren()) {
+        if (!buildInternalSelectList(child, target_select_list)) {
+          return false;
+        }
+      }
+
+      return true;
+    }
+
   }
 }
 
@@ -915,8 +933,7 @@ ScalarExpressionNode* QueryPlanBuilder::buildColumnReference(ASTNode* ast) {
 }
 
 SelectListNode* QueryPlanBuilder::buildSelectList(ASTNode* ast) {
-  if (!(*ast == ASTNode::T_DERIVED_COLUMN)
-      || ast->getChildren().size() == 0) {
+  if (ast->getChildren().size() == 0) {
     RAISE(kRuntimeError, "internal error: corrupt ast");
   }
 

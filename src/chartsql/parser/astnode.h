@@ -84,6 +84,7 @@ public:
   void removeChildByIndex(size_t index);
   void removeChildrenByType(kASTNodeType type);
   void removeChild(ASTNode* node);
+  void clearChildren();
   const std::vector<ASTNode*>& getChildren() const;
   void setToken(const Token* token);
   const Token* getToken() const;
