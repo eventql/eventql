@@ -47,6 +47,7 @@ public:
     T_LIMIT,
     T_OFFSET,
 
+    T_IF_EXPR,
     T_EQ_EXPR,
     T_NEQ_EXPR,
     T_LT_EXPR,
