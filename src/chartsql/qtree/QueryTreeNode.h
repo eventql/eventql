@@ -17,9 +17,13 @@ namespace csql {
 
 class QueryTreeNode : public RefCounted {
 public:
+
   QueryTreeNode() {}
   QueryTreeNode(const QueryTreeNode& other) = delete;
   QueryTreeNode& operator=(const QueryTreeNode& other) = delete;
+
+  virtual RefPtr<QueryTreeNode> deepCopy() const = 0;
+
 };
 
 } // namespace csql

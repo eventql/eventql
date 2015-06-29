@@ -22,6 +22,8 @@ public:
 
   Vector<RefPtr<TableExpressionNode>> inputTables() const;
 
+  RefPtr<QueryTreeNode> deepCopy() const override;
+
 protected:
   Vector<RefPtr<TableExpressionNode>> tables_;
 };

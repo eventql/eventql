@@ -23,6 +23,8 @@ public:
 
   RefPtr<ValueExpressionNode> expression() const;
 
+  RefPtr<QueryTreeNode> deepCopy() const override;
+
 protected:
   RefPtr<ValueExpressionNode> expr_;
 };
