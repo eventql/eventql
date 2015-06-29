@@ -9,21 +9,26 @@
  */
 #pragma once
 #include <fnord/stdtypes.h>
-#include <chartsql/qtree/TableExpressionNode.h>
+#include <chartsql/qtree/QueryTreeNode.h>
 
 using namespace fnord;
 
 namespace csql {
 
-class UnionNode : public TableExpressionNode {
+class TableExpressionNode : public QueryTreeNode {
 public:
 
-  UnionNode(Vector<RefPtr<TableExpressionNode>> tables);
+  size_t numInputTables() const;
 
-  Vector<RefPtr<TableExpressionNode>> inputTables() const;
+  RefPtr<TableExpressionNode> inputTable(size_t index);
+
+  void replaceInputTable(size_t index, RefPtr<TableExpressionNode> new_table);
 
 protected:
-  Vector<RefPtr<TableExpressionNode>> tables_;
+
+  void addInputTable(RefPtr<TableExpressionNode>* table);
+
+  Vector<RefPtr<TableExpressionNode>*> input_tables_;
 };
 
 } // namespace csql
