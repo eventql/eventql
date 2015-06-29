@@ -12,6 +12,7 @@
 #include <chartsql/parser/astutil.h>
 #include <chartsql/runtime/queryplanbuilder.h>
 #include <chartsql/qtree/GroupByNode.h>
+#include <chartsql/qtree/IfExpressionNode.h>
 
 namespace csql {
 
@@ -957,7 +958,15 @@ ScalarExpressionNode* QueryPlanBuilder::buildMethodCall(ASTNode* ast) {
     args.emplace_back(buildValueExpression(e));
   }
 
-  return new CallExpressionNode(symbol, args);
+  if (symbol == "if") {
+    if (args.size() != 3) {
+      RAISE(kRuntimeError, "if statement must have exactly 3 arguments");
+    }
+
+    return new IfExpressionNode(args[0], args[1], args[2]);
+  } else {
+    return new CallExpressionNode(symbol, args);
+  }
 }
 
 ScalarExpressionNode* QueryPlanBuilder::buildColumnReference(ASTNode* ast) {
