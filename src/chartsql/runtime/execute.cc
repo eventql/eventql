@@ -24,100 +24,11 @@ bool executeExpression(
     const SValue* row,
     int* outc,
     SValue* outv) {
-  int argc = 0;
-  SValue argv[8];
-
-  /* execute children */
-  for (auto cur = expr->child; cur != nullptr; cur = cur->next) {
-    if (argc >= sizeof(argv) / sizeof(SValue)) {
-      RAISE(kRuntimeError, "too many arguments");
-    }
-
-    int out_len = 0;
-    if (!executeExpression(
-        cur,
-        scratchpad,
-        row_len,
-        row,
-        &out_len,
-        argv + argc)) {
-      return false;
-    }
-
-    if (out_len != 1) {
-      RAISE(kRuntimeError, "expression did not return");
-    }
-
-    argc++;
-  }
-
-  /* execute expression */
-  switch (expr->type) {
-
-    case X_CALL: {
-      void* this_scratchpad = nullptr;
-      if (scratchpad != nullptr) {
-        this_scratchpad = ((char *) scratchpad) + ((size_t) (expr->arg0));
-      }
-      expr->call(this_scratchpad, argc, argv, outv);
-      *outc = 1;
-      return true;
-    }
-
-    case X_LITERAL: {
-      *outv = *static_cast<SValue*>(expr->arg0);
-      *outc = 1;
-      return true;
-    }
-
-    case X_MULTI: {
-      *outc = argc;
-      memcpy(outv, argv, sizeof(SValue) * argc);
-      return true;
-    }
-
-    case X_INPUT: {
-      auto index = reinterpret_cast<uint64_t>(expr->arg0);
-
-      if (index >= row_len) {
-        RAISE(kRuntimeError, "invalid row index %i", index);
-      }
-
-      *outv = row[index];
-      *outc = 1;
-      return true;
-    }
-
-  }
+  RAISE(kNotImplementedError);
 }
 
 SValue executeSimpleConstExpression(ScalarExpressionBuilder* compiler, ASTNode* expr) {
-  size_t scratchpad_len = 0;
-  auto compiled = compiler->compile(expr, &scratchpad_len);
-
-  if (scratchpad_len > 0) {
-    RAISE(
-        kRuntimeError,
-        "invalid const expression: const expressions must be pure functions");
-  }
-
-  SValue eval_result;
-  int eval_result_len = 0;
-  auto eval_retcode = executeExpression(
-      compiled,
-      nullptr,
-      0,
-      nullptr,
-      &eval_result_len,
-      &eval_result);
-
-  if (!eval_retcode || eval_result_len != 1) {
-    RAISE(
-        kRuntimeError,
-        "invalid const expression: evaluation did not return a result");
-  }
-
-  return eval_result;
+  RAISE(kNotImplementedError);
 }
 
 }
