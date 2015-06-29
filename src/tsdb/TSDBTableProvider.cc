@@ -11,6 +11,7 @@
 #include <tsdb/TSDBTableProvider.h>
 #include <tsdb/TSDBNode.h>
 #include <chartsql/CSTableScan.h>
+#include <chartsql/runtime/EmptyTable.h>
 
 using namespace fnord;
 
@@ -52,12 +53,14 @@ Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildSequentialScan(
       partition_key);
 
   if (partition.isEmpty()) {
-    RAISEF(kNotFoundError, "partition not found: $0", table_name);
+    return Option<ScopedPtr<csql::TableExpression>>(
+        mkScoped(new csql::EmptyTable()));
   }
 
   auto cstable = partition.get()->cstable();
   if (cstable.isEmpty()) {
-    RAISEF(kRuntimeError, "partition not ready yet: $0", table_name);
+    return Option<ScopedPtr<csql::TableExpression>>(
+        mkScoped(new csql::EmptyTable()));
   }
 
   return Option<ScopedPtr<csql::TableExpression>>(
