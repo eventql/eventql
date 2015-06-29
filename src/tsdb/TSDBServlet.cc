@@ -257,6 +257,15 @@ void TSDBServlet::executeSQL(
     http::HTTPResponse* res,
     RefPtr<http::HTTPResponseStream> res_stream,
     URI* uri) {
+  if (!req->hasHeader("X-TSDB-Namespace")) {
+    http::HTTPResponse res;
+    res.populateFromRequest(*req);
+    res.setStatus(fnord::http::kStatusBadRequest);
+    res.addBody("missing X-TSDB-Namespace header");
+    res_stream->writeResponse(res);
+    return;
+  }
+
   auto tsdb_ns = req->getHeader("X-TSDB-Namespace");
 
   auto query = req->body().toString();
