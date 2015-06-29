@@ -64,6 +64,7 @@ add_library(chartsql-lib OBJECT
     runtime/orderby.cc
     runtime/GroupBy.cc
     runtime/Union.cc
+    runtime/SelectExpression.cc
     runtime/groupovertimewindow.cc
     runtime/execute.cc
     defaults.cc)
