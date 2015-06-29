@@ -17,27 +17,9 @@ namespace csql {
 
 class QueryTreeNode : public RefCounted {
 public:
-
   QueryTreeNode() {}
   QueryTreeNode(const QueryTreeNode& other) = delete;
   QueryTreeNode& operator=(const QueryTreeNode& other) = delete;
-
-};
-
-class TableExpressionNode : public QueryTreeNode {
-public:
-
-  size_t numInputTables() const;
-
-  RefPtr<TableExpressionNode> inputTable(size_t index);
-
-  void replaceInputTable(size_t index, RefPtr<TableExpressionNode> new_table);
-
-protected:
-
-  void addInputTable(RefPtr<TableExpressionNode>* table);
-
-  Vector<RefPtr<TableExpressionNode>*> input_tables_;
 };
 
 } // namespace csql

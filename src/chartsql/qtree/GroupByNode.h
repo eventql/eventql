@@ -9,7 +9,7 @@
  */
 #pragma once
 #include <fnord/stdtypes.h>
-#include <chartsql/qtree/QueryTreeNode.h>
+#include <chartsql/qtree/TableExpressionNode.h>
 #include <chartsql/qtree/ValueExpressionNode.h>
 #include <chartsql/qtree/SelectListNode.h>
 
