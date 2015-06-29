@@ -42,6 +42,7 @@ add_library(chartsql-lib OBJECT
     qtree/ColumnReferenceNode.cc
     qtree/SequentialScanNode.cc
     qtree/LiteralExpressionNode.cc
+    qtree/IfExpressionNode.cc
     qtree/SelectListNode.cc
     qtree/GroupByNode.cc
     qtree/UnionNode.cc
