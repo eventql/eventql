@@ -22,4 +22,13 @@ Vector<RefPtr<SelectListNode>> SelectExpressionNode::selectList()
   return select_list_;
 }
 
+RefPtr<QueryTreeNode> SelectExpressionNode::deepCopy() const {
+  Vector<RefPtr<SelectListNode>> args;
+  for (const auto& arg : select_list_) {
+    args.emplace_back(arg->deepCopyAs<SelectListNode>());
+  }
+
+  return new SelectExpressionNode(args);
+}
+
 } // namespace csql
