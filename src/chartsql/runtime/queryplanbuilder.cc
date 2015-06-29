@@ -885,6 +885,9 @@ ScalarExpressionNode* QueryPlanBuilder::buildValueExpression(ASTNode* ast) {
     case ASTNode::T_LITERAL:
       return buildLiteral(ast);
 
+    case ASTNode::T_IF_EXPR:
+      return buildIfStatement(ast);
+
     case ASTNode::T_RESOLVED_COLUMN:
     case ASTNode::T_COLUMN_NAME:
       return buildColumnReference(ast);
@@ -958,15 +961,20 @@ ScalarExpressionNode* QueryPlanBuilder::buildMethodCall(ASTNode* ast) {
     args.emplace_back(buildValueExpression(e));
   }
 
-  if (symbol == "if") {
-    if (args.size() != 3) {
-      RAISE(kRuntimeError, "if statement must have exactly 3 arguments");
-    }
+  return new CallExpressionNode(symbol, args);
+}
 
-    return new IfExpressionNode(args[0], args[1], args[2]);
-  } else {
-    return new CallExpressionNode(symbol, args);
+ScalarExpressionNode* QueryPlanBuilder::buildIfStatement(ASTNode* ast) {
+  Vector<RefPtr<ScalarExpressionNode>> args;
+  for (auto e : ast->getChildren()) {
+    args.emplace_back(buildValueExpression(e));
   }
+
+  if (args.size() != 3) {
+    RAISE(kRuntimeError, "if statement must have exactly 3 arguments");
+  }
+
+  return new IfExpressionNode(args[0], args[1], args[2]);
 }
 
 ScalarExpressionNode* QueryPlanBuilder::buildColumnReference(ASTNode* ast) {

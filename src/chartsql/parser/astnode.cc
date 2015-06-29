@@ -178,6 +178,9 @@ void ASTNode::debugPrint(int indent /* = 0 */) const {
     case T_LITERAL:
       printf("- LITERAL");
       break;
+    case T_IF_EXPR:
+      printf("- IF_EXPR");
+      break;
     case T_NEGATE_EXPR:
       printf("- NEGATE_EXPR");
       break;
