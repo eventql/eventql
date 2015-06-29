@@ -70,15 +70,29 @@ void SQLEngine::replaceSequentialScanWithUnion(
   auto seqscan = node->asInstanceOf<csql::SequentialScanNode>();
 
   auto stream_key = seqscan->tableName();
+  if (StringUtil::beginsWith(stream_key, "tsdb://")) {
+    return;
+  }
+
   auto partitions = TimeWindowPartitioner::partitionKeysFor(
       stream_key,
       WallClock::unixMicros() - 120 * kMicrosPerDay,
       WallClock::unixMicros(),
       4 * kMicrosPerHour);
 
-  fnord::iputs("stream: $0, partitions: $1", stream_key, partitions.size());
+  Vector<RefPtr<csql::TableExpressionNode>> union_tables;
+  for (const auto& partition : partitions) {
+    auto table_name = StringUtil::format(
+        "tsdb://$0/$1",
+        URI::urlEncode(stream_key),
+        partition.toString());
 
-  RAISE(kNotYetImplementedError);
+    auto copy = seqscan->deepCopyAs<csql::SequentialScanNode>();
+    copy->setTableName(table_name);
+    union_tables.emplace_back(copy.get());
+  }
+
+  *node = RefPtr<csql::TableExpressionNode>(new csql::UnionNode(union_tables));
 }
 
 }
