@@ -63,14 +63,12 @@ void installDefaultSymbols(SymbolTable* symbol_table) {
   symbol_table->registerSymbol("FROM_TIMESTAMP", &expressions::fromTimestamp);
 
   /* expressions/math.h */
-  //symbol_table->registerSymbol("add", &expressions::addExpr);
   symbol_table->registerFunction("add", &expressions::addExpr);
-
-  symbol_table->registerSymbol("sub", &expressions::subExpr);
-  symbol_table->registerSymbol("mul", &expressions::mulExpr);
-  symbol_table->registerSymbol("div", &expressions::divExpr);
-  symbol_table->registerSymbol("mod", &expressions::modExpr);
-  symbol_table->registerSymbol("pow", &expressions::powExpr);
+  symbol_table->registerFunction("sub", &expressions::subExpr);
+  symbol_table->registerFunction("mul", &expressions::mulExpr);
+  symbol_table->registerFunction("div", &expressions::divExpr);
+  symbol_table->registerFunction("mod", &expressions::modExpr);
+  symbol_table->registerFunction("pow", &expressions::powExpr);
 
 }
 

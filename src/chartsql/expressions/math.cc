@@ -58,7 +58,7 @@ void addExpr(int argc, SValue* argv, SValue* out) {
   *out = SValue(lhs->toString() + rhs->toString());
 }
 
-void subExpr(void* scratchpad, int argc, SValue* argv, SValue* out) {
+void subExpr(int argc, SValue* argv, SValue* out) {
   if (argc != 2) {
     RAISE(
         kRuntimeError,
@@ -102,7 +102,7 @@ void subExpr(void* scratchpad, int argc, SValue* argv, SValue* out) {
       rhs->getTypeName());
 }
 
-void mulExpr(void* scratchpad, int argc, SValue* argv, SValue* out) {
+void mulExpr(int argc, SValue* argv, SValue* out) {
   if (argc != 2) {
     RAISE(
         kRuntimeError,
@@ -146,7 +146,7 @@ void mulExpr(void* scratchpad, int argc, SValue* argv, SValue* out) {
       rhs->getTypeName());
 }
 
-void divExpr(void* scratchpad, int argc, SValue* argv, SValue* out) {
+void divExpr(int argc, SValue* argv, SValue* out) {
   if (argc != 2) {
     RAISE(
         kRuntimeError,
@@ -190,7 +190,7 @@ void divExpr(void* scratchpad, int argc, SValue* argv, SValue* out) {
       rhs->getTypeName());
 }
 
-void modExpr(void* scratchpad, int argc, SValue* argv, SValue* out) {
+void modExpr(int argc, SValue* argv, SValue* out) {
   if (argc != 2) {
     RAISE(
         kRuntimeError,
@@ -234,7 +234,7 @@ void modExpr(void* scratchpad, int argc, SValue* argv, SValue* out) {
       rhs->getTypeName());
 }
 
-void powExpr(void* scratchpad, int argc, SValue* argv, SValue* out) {
+void powExpr(int argc, SValue* argv, SValue* out) {
   if (argc != 2) {
     RAISE(
         kRuntimeError,
