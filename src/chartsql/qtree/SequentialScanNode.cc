@@ -40,6 +40,10 @@ const String& SequentialScanNode::tableName() const {
   return table_name_;
 }
 
+void SequentialScanNode::setTableName(const String& table_name) {
+  table_name_ = table_name;
+}
+
 Vector<RefPtr<SelectListNode>> SequentialScanNode::selectList()
     const {
   return select_list_;
