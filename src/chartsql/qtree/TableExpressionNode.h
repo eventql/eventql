@@ -22,7 +22,7 @@ public:
 
   RefPtr<TableExpressionNode> inputTable(size_t index);
 
-  void replaceInputTable(size_t index, RefPtr<TableExpressionNode> new_table);
+  RefPtr<TableExpressionNode>* mutableInputTable(size_t index);
 
 protected:
 
