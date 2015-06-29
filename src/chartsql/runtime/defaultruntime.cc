@@ -16,4 +16,13 @@ DefaultRuntime::DefaultRuntime() {
   installDefaultSymbols(&symbol_table_);
 }
 
+RefPtr<QueryTreeNode> DefaultRuntime::rewriteQuery(
+    RefPtr<QueryTreeNode> query) {
+  return query;
+}
+
+RefPtr<TableProvider> DefaultRuntime::defaultTableProvider() {
+  return new TableRepository();
+}
+
 }
