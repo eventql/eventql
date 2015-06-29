@@ -18,6 +18,7 @@ add_library(tsdb OBJECT
     Partition.cc
     CSTableIndex.cc
     TimeWindowPartitioner.cc
+    SQLEngine.cc
     ${PROTO_SRCS})
 
 add_executable(tests/test-recordset
@@ -30,6 +31,7 @@ add_executable(tests/test-recordset
     $<TARGET_OBJECTS:fnord-http>
     $<TARGET_OBJECTS:fnord-json>
     $<TARGET_OBJECTS:dproc>
+    $<TARGET_OBJECTS:chartsql-lib>
     RecordSet_test.cc)
 
 target_link_libraries(tests/test-recordset ${FNORD_LIBS})
@@ -44,6 +46,7 @@ add_executable(tests/test-tsdbnode
     $<TARGET_OBJECTS:fnord-http>
     $<TARGET_OBJECTS:fnord-json>
     $<TARGET_OBJECTS:dproc>
+    $<TARGET_OBJECTS:chartsql-lib>
     TSDBNode_test.cc)
 
 target_link_libraries(tests/test-tsdbnode ${CMAKE_THREAD_LIBS_INIT} ${FNORD_LIBS})
@@ -58,6 +61,7 @@ add_executable(tests/test-tsdb-timewindowpartitioner
     $<TARGET_OBJECTS:fnord-http>
     $<TARGET_OBJECTS:fnord-json>
     $<TARGET_OBJECTS:dproc>
+    $<TARGET_OBJECTS:chartsql-lib>
     TimeWindowPartitioner_test.cc)
 
 target_link_libraries(tests/test-tsdb-timewindowpartitioner ${CMAKE_THREAD_LIBS_INIT} ${FNORD_LIBS})
@@ -66,12 +70,14 @@ add_executable(tsdbd
     $<TARGET_OBJECTS:fnord-base>
     $<TARGET_OBJECTS:fnord-protobuf>
     $<TARGET_OBJECTS:fnord-mdb>
+    $<TARGET_OBJECTS:fnord-chart>
+    $<TARGET_OBJECTS:fnord-http>
+    $<TARGET_OBJECTS:fnord-json>
     $<TARGET_OBJECTS:tsdb>
     $<TARGET_OBJECTS:cstable>
     $<TARGET_OBJECTS:sstable>
-    $<TARGET_OBJECTS:fnord-http>
-    $<TARGET_OBJECTS:fnord-json>
     $<TARGET_OBJECTS:dproc>
+    $<TARGET_OBJECTS:chartsql-lib>
     tsdbd.cc)
 
 target_link_libraries(tsdbd ${FNORD_LIBS})

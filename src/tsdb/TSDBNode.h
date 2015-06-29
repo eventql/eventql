@@ -20,6 +20,7 @@
 #include <tsdb/CompactionWorker.h>
 #include <tsdb/ReplicationWorker.h>
 #include <tsdb/TSDBNodeConfig.pb.h>
+#include <tsdb/SQLEngine.h>
 
 using namespace fnord;
 
@@ -68,6 +69,8 @@ protected:
   Vector<RefPtr<CompactionWorker>> compaction_workers_;
   Vector<RefPtr<ReplicationWorker>> replication_workers_;
   msg::MessageSchemaRepository schemas_;
+
+  SQLEngine sql_engine_;
 };
 
 } // namespace tdsb
