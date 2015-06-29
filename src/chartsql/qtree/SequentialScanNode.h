@@ -60,6 +60,8 @@ public:
   AggregationStrategy aggregationStrategy() const;
   void setAggregationStrategy(AggregationStrategy strategy);
 
+  RefPtr<QueryTreeNode> deepCopy() const override;
+
 protected:
   String table_name_;
   Vector<RefPtr<SelectListNode>> select_list_;

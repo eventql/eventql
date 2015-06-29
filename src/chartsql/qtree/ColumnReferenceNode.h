@@ -30,6 +30,8 @@ public:
 
   Vector<RefPtr<ValueExpressionNode>> arguments() const override;
 
+  RefPtr<QueryTreeNode> deepCopy() const override;
+
 protected:
   String field_name_;
   Option<size_t> column_index_;

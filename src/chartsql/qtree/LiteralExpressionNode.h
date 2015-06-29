@@ -25,6 +25,8 @@ public:
 
   Vector<RefPtr<ValueExpressionNode>> arguments() const override;
 
+  RefPtr<QueryTreeNode> deepCopy() const override;
+
 protected:
   SValue value_;
 };

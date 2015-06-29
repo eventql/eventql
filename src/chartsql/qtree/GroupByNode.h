@@ -31,6 +31,8 @@ public:
 
   RefPtr<TableExpressionNode> inputTable() const;
 
+  RefPtr<QueryTreeNode> deepCopy() const override;
+
 protected:
   Vector<RefPtr<SelectListNode>> select_list_;
   Vector<RefPtr<ValueExpressionNode>> group_exprs_;

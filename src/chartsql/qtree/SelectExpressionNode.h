@@ -25,6 +25,8 @@ public:
 
   Vector<RefPtr<SelectListNode>> selectList() const;
 
+  RefPtr<QueryTreeNode> deepCopy() const override;
+
 protected:
   Vector<RefPtr<SelectListNode>> select_list_;
 };
