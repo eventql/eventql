@@ -13,6 +13,7 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
+#include <chartsql/SFunction.h>
 
 namespace csql {
 class SymbolTableEntry;
@@ -46,7 +47,12 @@ protected:
 
 class SymbolTable {
 public:
+
   SymbolTableEntry const* lookupSymbol(const std::string& symbol) const;
+
+  SFunction lookup(const String& symbol) const;
+
+  bool isAggregateFunction(const String& symbol) const;
 
   void registerSymbol(
       const std::string& symbol,
@@ -58,8 +64,21 @@ public:
       size_t scratchpad_size,
       void (*free_method)(void*));
 
+  void registerFunction(
+      const String& symbol,
+      void (*fn)(int, SValue*, SValue*));
+
+  void registerFunction(
+      const String& symbol,
+      AggregateFunction fn);
+
+  void registerFunction(
+      const String& symbol,
+      SFunction fn);
+
 protected:
   std::unordered_map<std::string, SymbolTableEntry> symbols_;
+  HashMap<String, SFunction> syms_;
 };
 
 }

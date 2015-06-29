@@ -8,78 +8,39 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <chartsql/runtime/defaultruntime.h>
-#include <chartsql/expressions/aggregate.h>
-#include <chartsql/expressions/boolean.h>
-#include <chartsql/expressions/datetime.h>
-#include <chartsql/expressions/math.h>
 
 namespace csql {
 
-DefaultRuntime::DefaultRuntime() {
-  /* expressions/aggregate.h */
-  symbol_table_.registerSymbol(
-      "count",
-      &expressions::countExpr,
-      expressions::countExprScratchpadSize(),
-      &expressions::countExprFree);
+DefaultRuntime::DefaultRuntime(
+    SymbolTable* symbol_table) :
+    scalar_exp_builder_(symbol_table) {}
 
-  symbol_table_.registerSymbol(
-      "sum",
-      &expressions::sumExpr,
-      expressions::sumExprScratchpadSize(),
-      &expressions::sumExprFree);
+RefPtr<ExecutionPlan> DefaultRuntime::buildExecutionPlan(
+    RefPtr<QueryTreeNode> qtree,
+    TableRepository* tables) {
+  if (dynamic_cast<TableExpressionNode*>(qtree.get())) {
+    auto table_expr = table_exp_builder_.build(
+        qtree.asInstanceOf<TableExpressionNode>(),
+        this,
+        tables);
 
-  symbol_table_.registerSymbol(
-      "mean",
-      &expressions::meanExpr,
-      expressions::meanExprScratchpadSize(),
-      &expressions::meanExprFree);
+    return new DefaultExecutionPlan(std::move(table_expr));
+  }
 
-  symbol_table_.registerSymbol(
-      "avg",
-      &expressions::meanExpr,
-      expressions::meanExprScratchpadSize(),
-      &expressions::meanExprFree);
+  RAISE(
+      kRuntimeError,
+      "cannot figure out how to build a query plan for this QTree node");
+}
 
-  symbol_table_.registerSymbol(
-      "average",
-      &expressions::meanExpr,
-      expressions::meanExprScratchpadSize(),
-      &expressions::meanExprFree);
+ScopedPtr<ValueExpression> DefaultRuntime::buildValueExpression(
+    RefPtr<ValueExpressionNode> node) {
+  return scalar_exp_builder_.compile(node);
+}
 
-  symbol_table_.registerSymbol(
-      "min",
-      &expressions::minExpr,
-      expressions::minExprScratchpadSize(),
-      &expressions::minExprFree);
-
-  symbol_table_.registerSymbol(
-      "max",
-      &expressions::maxExpr,
-      expressions::maxExprScratchpadSize(),
-      &expressions::maxExprFree);
-
-  /* expressions/boolean.h */
-  symbol_table_.registerSymbol("eq", &expressions::eqExpr);
-  symbol_table_.registerSymbol("neq", &expressions::neqExpr);
-  symbol_table_.registerSymbol("and", &expressions::andExpr);
-  symbol_table_.registerSymbol("or", &expressions::orExpr);
-  symbol_table_.registerSymbol("neg", &expressions::negExpr);
-  symbol_table_.registerSymbol("lt", &expressions::ltExpr);
-  symbol_table_.registerSymbol("lte", &expressions::lteExpr);
-  symbol_table_.registerSymbol("gt", &expressions::gtExpr);
-  symbol_table_.registerSymbol("gte", &expressions::gteExpr);
-
-  /* expressions/datetime.h */
-  symbol_table_.registerSymbol("FROM_TIMESTAMP", &expressions::fromTimestamp);
-
-  /* expressions/math.h */
-  symbol_table_.registerSymbol("add", &expressions::addExpr);
-  symbol_table_.registerSymbol("sub", &expressions::subExpr);
-  symbol_table_.registerSymbol("mul", &expressions::mulExpr);
-  symbol_table_.registerSymbol("div", &expressions::divExpr);
-  symbol_table_.registerSymbol("mod", &expressions::modExpr);
-  symbol_table_.registerSymbol("pow", &expressions::powExpr);
+ScopedPtr<TableExpression> DefaultRuntime::buildTableExpression(
+    RefPtr<TableExpressionNode> node,
+    TableRepository* tables) {
+  return table_exp_builder_.build(node, this, tables);
 }
 
 }

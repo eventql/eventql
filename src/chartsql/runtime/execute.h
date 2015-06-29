@@ -14,17 +14,17 @@
 
 namespace csql {
 class SValue;
-class Compiler;
+class ValueExpressionBuilder;
 
 bool executeExpression(
-    CompiledExpression* expr,
+    Instruction* expr,
     void* scratchpad,
     int argc,
     const SValue* argv,
     int* outc,
     SValue* outv);
 
-SValue executeSimpleConstExpression(Compiler* compiler, ASTNode* expr);
+SValue executeSimpleConstExpression(ValueExpressionBuilder* compiler, ASTNode* expr);
 
 }
 #endif

@@ -16,6 +16,33 @@
 
 namespace csql {
 
+void SymbolTable::registerFunction(
+    const String& symbol,
+    void (*fn)(int, SValue*, SValue*)) {
+  SFunction sym;
+  sym.type = FN_PURE;
+  sym.vtable.t_pure.call = fn;
+  registerFunction(symbol, sym);
+}
+
+void SymbolTable::registerFunction(
+    const String& symbol,
+    AggregateFunction fn) {
+  SFunction sym;
+  sym.type = FN_AGGREGATE;
+  sym.vtable.t_aggregate.scratch_size = fn.scratch_size;
+  sym.vtable.t_aggregate.accumulate = fn.accumulate;
+  sym.vtable.t_aggregate.get = fn.get;
+  sym.vtable.t_aggregate.reset = fn.reset;
+  sym.vtable.t_aggregate.init = fn.init;
+  sym.vtable.t_aggregate.free = fn.free;
+  registerFunction(symbol, sym);
+}
+
+void SymbolTable::registerFunction(const String& symbol, SFunction fn) {
+  syms_.emplace(symbol, fn);
+}
+
 void SymbolTable::registerSymbol(
     const std::string& symbol,
     void (*method)(void*, int, SValue*, SValue*)) {
@@ -70,6 +97,27 @@ SymbolTableEntry const* SymbolTable::lookupSymbol(const std::string& symbol)
     return nullptr;
   } else {
     return &iter->second;
+  }
+}
+
+SFunction SymbolTable::lookup(const String& symbol) const {
+  auto iter = syms_.find(symbol);
+
+  if (iter == syms_.end()) {
+    RAISEF(kRuntimeError, "symbol not found: $0", symbol);
+  }
+
+  return iter->second;
+}
+
+bool SymbolTable::isAggregateFunction(const String& symbol) const {
+  auto sf = lookup(symbol);
+
+  switch (sf.type) {
+    case FN_AGGREGATE:
+      return true;
+    case FN_PURE:
+      return false;
   }
 }
 

@@ -25,6 +25,7 @@ public:
 
     T_LITERAL,
     T_METHOD_CALL,
+    T_METHOD_CALL_WITHIN_RECORD,
     T_RESOLVED_CALL,
     T_COLUMN_NAME,
     T_COLUMN_ALIAS,
@@ -46,6 +47,7 @@ public:
     T_LIMIT,
     T_OFFSET,
 
+    T_IF_EXPR,
     T_EQ_EXPR,
     T_NEQ_EXPR,
     T_LT_EXPR,
@@ -83,6 +85,7 @@ public:
   void removeChildByIndex(size_t index);
   void removeChildrenByType(kASTNodeType type);
   void removeChild(ASTNode* node);
+  void clearChildren();
   const std::vector<ASTNode*>& getChildren() const;
   void setToken(const Token* token);
   const Token* getToken() const;
@@ -93,7 +96,7 @@ public:
 
   ASTNode* deepCopy() const;
 
-  void debugPrint(int indent = 0) const;
+  void debugPrint(int indent = 2) const;
 
 protected:
   kASTNodeType type_;

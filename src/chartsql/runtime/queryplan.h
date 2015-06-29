@@ -7,12 +7,9 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#ifndef _FNORDMETRIC_SQL_RUNTIME_QUERYPLAN_H
-#define _FNORDMETRIC_SQL_RUNTIME_QUERYPLAN_H
-#include <stdlib.h>
-#include <string>
-#include <vector>
-#include <memory>
+#pragma once
+#include <fnord/stdtypes.h>
+#include <fnord/autoref.h>
 #include <chartsql/runtime/queryplannode.h>
 #include <chartsql/runtime/tablerepository.h>
 
@@ -33,5 +30,12 @@ protected:
   std::vector<std::unique_ptr<QueryPlanNode>> queries_;
 };
 
+class ExecutionPlan : public RefCounted {
+public:
+
+  virtual ~ExecutionPlan() {}
+  virtual void execute(Function<bool (int argc, const SValue* argv)> fn) = 0;
+
+};
+
 }
-#endif
