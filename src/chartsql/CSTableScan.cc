@@ -76,49 +76,53 @@ void CSTableScan::execute(
         size_t size;
         reader->next(&r, &d, &data, &size);
 
-        switch (col.second.reader->type()) {
+        if (d < reader->maxDefinitionLevel()) {
+          in_row[col.second.index] = SValue();
+        } else {
+          switch (col.second.reader->type()) {
 
-          case msg::FieldType::STRING:
-            in_row[col.second.index] =
-                SValue(SValue::StringType((char*) data, size));
-            break;
+            case msg::FieldType::STRING:
+              in_row[col.second.index] =
+                  SValue(SValue::StringType((char*) data, size));
+              break;
 
-          case msg::FieldType::UINT32:
-          case msg::FieldType::UINT64:
-            switch (size) {
-              case sizeof(uint32_t):
-                in_row[col.second.index] =
-                    SValue(SValue::IntegerType(*((uint32_t*) data)));
-                break;
-              case sizeof(uint64_t):
-                in_row[col.second.index] =
-                    SValue(SValue::IntegerType(*((uint64_t*) data)));
-                break;
-              case 0:
-                in_row[col.second.index] = SValue();
-                break;
-            }
-            break;
+            case msg::FieldType::UINT32:
+            case msg::FieldType::UINT64:
+              switch (size) {
+                case sizeof(uint32_t):
+                  in_row[col.second.index] =
+                      SValue(SValue::IntegerType(*((uint32_t*) data)));
+                  break;
+                case sizeof(uint64_t):
+                  in_row[col.second.index] =
+                      SValue(SValue::IntegerType(*((uint64_t*) data)));
+                  break;
+                case 0:
+                  in_row[col.second.index] = SValue();
+                  break;
+              }
+              break;
 
-          case msg::FieldType::BOOLEAN:
-            switch (size) {
-              case sizeof(uint32_t):
-                in_row[col.second.index] =
-                    SValue(SValue::BoolType(*((uint32_t*) data) > 0));
-                break;
-              case sizeof(uint64_t):
-                in_row[col.second.index] =
-                    SValue(SValue::BoolType(*((uint64_t*) data) > 0));
-                break;
-              case 0:
-                in_row[col.second.index] = SValue(SValue::BoolType(false));
-                break;
-            }
-            break;
+            case msg::FieldType::BOOLEAN:
+              switch (size) {
+                case sizeof(uint32_t):
+                  in_row[col.second.index] =
+                      SValue(SValue::BoolType(*((uint32_t*) data) > 0));
+                  break;
+                case sizeof(uint64_t):
+                  in_row[col.second.index] =
+                      SValue(SValue::BoolType(*((uint64_t*) data) > 0));
+                  break;
+                case 0:
+                  in_row[col.second.index] = SValue(SValue::BoolType(false));
+                  break;
+              }
+              break;
 
-          case msg::FieldType::OBJECT:
-            RAISE(kIllegalStateError);
+            case msg::FieldType::OBJECT:
+              RAISE(kIllegalStateError);
 
+          }
         }
       }
 

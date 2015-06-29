@@ -512,8 +512,9 @@ bool QueryPlanBuilder::buildInternalSelectList(
 
     /* push down WITHIN RECORD aggregations into child select list */
     case ASTNode::T_METHOD_CALL_WITHIN_RECORD: {
-      fnord::iputs("split...", 1);
-      target_select_list->appendChild(node->deepCopy());
+      auto derived = new ASTNode(ASTNode::T_DERIVED_COLUMN);
+      derived->appendChild(node->deepCopy());
+      target_select_list->appendChild(derived);
       auto col_index = target_select_list->getChildren().size() - 1;
       node->setType(ASTNode::T_RESOLVED_COLUMN);
       node->setID(col_index);
