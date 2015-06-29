@@ -10,10 +10,10 @@
 #pragma once
 #include <fnord/stdtypes.h>
 #include <fnord/autoref.h>
-#include <chartsql/runtime/queryplannode.h>
 #include <chartsql/runtime/tablerepository.h>
 
 namespace csql {
+class Runtime;
 
 class QueryPlan : public RefCounted  {
 public:
@@ -21,7 +21,7 @@ public:
   QueryPlan(
       Vector<RefPtr<QueryTreeNode>> statements,
       RefPtr<TableProvider> tables,
-      DefaultRuntime* runtime);
+      Runtime* runtime);
 
   size_t numStatements() const;
 
@@ -32,7 +32,8 @@ public:
 protected:
   Vector<RefPtr<QueryTreeNode>> statements_;
   RefPtr<TableProvider> tables_;
-  DefaultRuntime* runtime_;
+  Runtime* runtime_;
+  ExecutionContext ctx_;
 };
 
 class ExecutionPlan : public RefCounted {

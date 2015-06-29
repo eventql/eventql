@@ -13,34 +13,36 @@
 #include <string>
 #include <vector>
 #include <memory>
-#include <chartsql/parser/astnode.h>
 #include <chartsql/parser/parser.h>
-#include <chartsql/runtime/compile.h>
 #include <chartsql/runtime/queryplan.h>
 #include <chartsql/runtime/queryplanbuilder.h>
+#include <chartsql/runtime/symboltable.h>
+#include <chartsql/runtime/ValueExpressionBuilder.h>
+#include <chartsql/runtime/TableExpressionBuilder.h>
 
 namespace csql {
-class ResultList;
 
-/**
- * A runtime can only be used within a a single thread!
- */
 class Runtime {
 public:
+
   Runtime();
 
-  void addBackend(std::unique_ptr<Backend> backend);
+  RefPtr<QueryPlan> parseAndBuildQueryPlan(
+      const String& query,
+      RefPtr<TableProvider> tables);
 
-  Parser* parser();
-  ValueExpressionBuilder* compiler();
-  const std::vector<std::unique_ptr<Backend>>& backends();
-  QueryPlanBuilder* queryPlanBuilder();
+  ScopedPtr<ValueExpression> buildValueExpression(
+      RefPtr<ValueExpressionNode> expression);
+
+  ScopedPtr<TableExpression> buildTableExpression(
+      RefPtr<TableExpressionNode> expression,
+      RefPtr<TableProvider> tables);
 
 protected:
-  Parser parser_;
   SymbolTable symbol_table_;
-  ValueExpressionBuilder compiler_;
-  std::vector<std::unique_ptr<Backend>> backends_;
+  QueryPlanBuilder query_plan_builder_;
+  ValueExpressionBuilder scalar_exp_builder_;
+  TableExpressionBuilder table_exp_builder_;
 };
 
 }

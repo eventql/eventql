@@ -16,14 +16,14 @@
 
 namespace csql {
 class ImportStatement;
-class DefaultRuntime;
+class Runtime;
 
 class TableProvider : public RefCounted {
 public:
 
   virtual Option<ScopedPtr<TableExpression>> buildSequentialScan(
       RefPtr<SequentialScanNode> seqscan,
-      DefaultRuntime* runtime) const = 0;
+      Runtime* runtime) const = 0;
 
 };
 
@@ -50,7 +50,7 @@ public:
 
   Option<ScopedPtr<TableExpression>> buildSequentialScan(
       RefPtr<SequentialScanNode> seqscan,
-      DefaultRuntime* runtime) const override;
+      Runtime* runtime) const override;
 
   void addProvider(RefPtr<TableProvider> provider);
 
