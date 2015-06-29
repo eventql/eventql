@@ -26,6 +26,9 @@ class Runtime {
 public:
 
   Runtime();
+  virtual ~Runtime() {}
+
+  RefPtr<QueryPlan> parseAndBuildQueryPlan(const String& query);
 
   RefPtr<QueryPlan> parseAndBuildQueryPlan(
       const String& query,
@@ -39,6 +42,11 @@ public:
       RefPtr<TableProvider> tables);
 
 protected:
+
+  virtual RefPtr<QueryTreeNode> rewriteQuery(RefPtr<QueryTreeNode> query) = 0;
+
+  virtual RefPtr<TableProvider> defaultTableProvider() = 0;
+
   SymbolTable symbol_table_;
   QueryPlanBuilder query_plan_builder_;
   ValueExpressionBuilder scalar_exp_builder_;

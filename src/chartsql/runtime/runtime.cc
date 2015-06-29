@@ -16,6 +16,11 @@ Runtime::Runtime() :
     scalar_exp_builder_(&symbol_table_) {}
 
 RefPtr<QueryPlan> Runtime::parseAndBuildQueryPlan(
+    const String& query) {
+  return parseAndBuildQueryPlan(query, defaultTableProvider());
+}
+
+RefPtr<QueryPlan> Runtime::parseAndBuildQueryPlan(
     const String& query,
     RefPtr<TableProvider> tables) {
   Vector<RefPtr<QueryTreeNode>> statements;

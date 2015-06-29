@@ -14,9 +14,10 @@ namespace csql {
 
 class DefaultRuntime : public Runtime {
 public:
-
   DefaultRuntime();
-
+protected:
+  RefPtr<QueryTreeNode> rewriteQuery(RefPtr<QueryTreeNode> query) override;
+  RefPtr<TableProvider> defaultTableProvider() override;
 };
 
 }
