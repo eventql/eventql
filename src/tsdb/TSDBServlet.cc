@@ -19,6 +19,7 @@
 #include <fnord/util/Base64.h>
 #include <fnord/fnv.h>
 #include <sstable/sstablereader.h>
+#include <chartsql/runtime/ASCIITableFormat.h>
 
 using namespace fnord;
 
@@ -52,6 +53,11 @@ void TSDBServlet::handleHTTPRequest(
     if (uri.path() == "/tsdb/partition_info") {
       fetchPartitionInfo(&req, &res, &uri);
       res_stream->writeResponse(res);
+      return;
+    }
+
+    if (uri.path() == "/tsdb/sql") {
+      executeSQL(&req, &res, res_stream, &uri);
       return;
     }
 
@@ -203,7 +209,6 @@ void TSDBServlet::streamPartition(
   res_stream->finishResponse();
 }
 
-
 void TSDBServlet::fetchPartitionInfo(
     const http::HTTPRequest* req,
     http::HTTPResponse* res,
@@ -245,6 +250,26 @@ void TSDBServlet::fetchPartitionInfo(
   res->setStatus(http::kStatusOK);
   res->addHeader("Content-Type", "application/x-protobuf");
   res->addBody(*msg::encode(pinfo));
+}
+
+void TSDBServlet::executeSQL(
+    const http::HTTPRequest* req,
+    http::HTTPResponse* res,
+    RefPtr<http::HTTPResponseStream> res_stream,
+    URI* uri) {
+  auto query = req->body().toString();
+  auto qplan = node_->sqlEngine()->parseAndBuildQueryPlan(query);
+
+  Buffer result;
+  csql::ASCIITableFormat format;
+  format.formatResults(qplan, BufferOutputStream::fromBuffer(&result));
+
+  res->setStatus(http::kStatusOK);
+  res->addHeader("Content-Type", "application/octet-stream");
+  res->addHeader("Connection", "close");
+  res_stream->startResponse(*res);
+  res_stream->writeBodyChunk(result);
+  res_stream->finishResponse();
 }
 
 }

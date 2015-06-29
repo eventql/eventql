@@ -197,6 +197,9 @@ const String& TSDBNode::dbPath() const {
   return noderef_.db_path;
 }
 
+SQLEngine* TSDBNode::sqlEngine() {
+  return &sql_engine_;
+}
 
 } // namespace tdsb
 

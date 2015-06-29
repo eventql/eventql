@@ -50,6 +50,8 @@ public:
       const String& stream_key,
       const SHA1Hash& partition_key);
 
+  SQLEngine* sqlEngine();
+
   const String& dbPath() const;
 
   void start(

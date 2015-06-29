@@ -44,6 +44,12 @@ protected:
       http::HTTPResponse* res,
       URI* uri);
 
+  void executeSQL(
+      const http::HTTPRequest* req,
+      http::HTTPResponse* res,
+      RefPtr<http::HTTPResponseStream> res_stream,
+      URI* uri);
+
   TSDBNode* node_;
   Random rnd_;
 };
