@@ -54,15 +54,15 @@ void OrderBy::execute() {
       args[0] = left[sort.column];
       args[1] = right[sort.column];
 
-      expressions::eqExpr(nullptr, 2, args, &res);
+      expressions::eqExpr(2, args, &res);
       if (res.getBool()) {
         continue;
       }
 
       if (sort.descending) {
-        expressions::gtExpr(nullptr, 2, args, &res);
+        expressions::gtExpr(2, args, &res);
       } else {
-        expressions::ltExpr(nullptr, 2, args, &res);
+        expressions::ltExpr(2, args, &res);
       }
 
       return res.getBool();
