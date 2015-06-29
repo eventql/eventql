@@ -32,14 +32,14 @@ public:
   void addBackend(std::unique_ptr<Backend> backend);
 
   Parser* parser();
-  ScalarExpressionBuilder* compiler();
+  ValueExpressionBuilder* compiler();
   const std::vector<std::unique_ptr<Backend>>& backends();
   QueryPlanBuilder* queryPlanBuilder();
 
 protected:
   Parser parser_;
   SymbolTable symbol_table_;
-  ScalarExpressionBuilder compiler_;
+  ValueExpressionBuilder compiler_;
   std::vector<std::unique_ptr<Backend>> backends_;
 };
 

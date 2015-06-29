@@ -16,33 +16,33 @@
 
 namespace csql {
 
-ScalarExpressionBuilder::ScalarExpressionBuilder(
+ValueExpressionBuilder::ValueExpressionBuilder(
     SymbolTable* symbol_table) :
     symbol_table_(symbol_table) {}
 
-Instruction* ScalarExpressionBuilder::compile(ASTNode* ast, size_t* dynamic_storage_size) {
+Instruction* ValueExpressionBuilder::compile(ASTNode* ast, size_t* dynamic_storage_size) {
   RAISE(kNotImplementedError, "deprecated");
 }
 
-ScopedPtr<ScalarExpression> ScalarExpressionBuilder::compile(
-    RefPtr<ScalarExpressionNode> node) {
+ScopedPtr<ValueExpression> ValueExpressionBuilder::compile(
+    RefPtr<ValueExpressionNode> node) {
   ScratchMemory static_storage;
   size_t dynamic_storage_size = 0;
 
-  auto expr = compileScalarExpression(
+  auto expr = compileValueExpression(
       node,
       &dynamic_storage_size,
       &static_storage);
 
   return mkScoped(
-      new ScalarExpression(
+      new ValueExpression(
           expr,
           std::move(static_storage),
           dynamic_storage_size));
 }
 
-Instruction* ScalarExpressionBuilder::compileScalarExpression(
-   RefPtr<ScalarExpressionNode> node,
+Instruction* ValueExpressionBuilder::compileValueExpression(
+   RefPtr<ValueExpressionNode> node,
    size_t* dynamic_storage_size,
    ScratchMemory* static_storage) {
   if (dynamic_cast<ColumnReferenceNode*>(node.get())) {
@@ -75,7 +75,7 @@ Instruction* ScalarExpressionBuilder::compileScalarExpression(
   RAISE(kRuntimeError, "internal error: can't compile expression");
 }
 
-Instruction* ScalarExpressionBuilder::compileLiteral(
+Instruction* ValueExpressionBuilder::compileLiteral(
     RefPtr<LiteralExpressionNode> node,
     size_t* dynamic_storage_size,
     ScratchMemory* static_storage) {
@@ -89,7 +89,7 @@ Instruction* ScalarExpressionBuilder::compileLiteral(
   return ins;
 }
 
-Instruction* ScalarExpressionBuilder::compileColumnReference(
+Instruction* ValueExpressionBuilder::compileColumnReference(
     RefPtr<ColumnReferenceNode> node,
     ScratchMemory* static_storage) {
   auto ins = static_storage->construct<Instruction>();
@@ -102,7 +102,7 @@ Instruction* ScalarExpressionBuilder::compileColumnReference(
   return ins;
 }
 
-Instruction* ScalarExpressionBuilder::compileMethodCall(
+Instruction* ValueExpressionBuilder::compileMethodCall(
     RefPtr<CallExpressionNode> node,
     size_t* dynamic_storage_size,
     ScratchMemory* static_storage) {
@@ -130,7 +130,7 @@ Instruction* ScalarExpressionBuilder::compileMethodCall(
 
   auto cur = &op->child;
   for (auto e : args) {
-    auto next = compileScalarExpression(
+    auto next = compileValueExpression(
         e,
         dynamic_storage_size,
         static_storage);
@@ -142,7 +142,7 @@ Instruction* ScalarExpressionBuilder::compileMethodCall(
   return op;
 }
 
-Instruction* ScalarExpressionBuilder::compileIfStatement(
+Instruction* ValueExpressionBuilder::compileIfStatement(
     RefPtr<IfExpressionNode> node,
     size_t* dynamic_storage_size,
     ScratchMemory* static_storage) {
@@ -157,7 +157,7 @@ Instruction* ScalarExpressionBuilder::compileIfStatement(
 
   auto cur = &op->child;
   for (auto e : args) {
-    auto next = compileScalarExpression(
+    auto next = compileValueExpression(
         e,
         dynamic_storage_size,
         static_storage);

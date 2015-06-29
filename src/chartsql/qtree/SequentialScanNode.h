@@ -11,7 +11,7 @@
 #include <fnord/stdtypes.h>
 #include <fnord/option.h>
 #include <chartsql/qtree/QueryTreeNode.h>
-#include <chartsql/qtree/ScalarExpressionNode.h>
+#include <chartsql/qtree/ValueExpressionNode.h>
 #include <chartsql/qtree/SelectListNode.h>
 
 using namespace fnord;
@@ -51,7 +51,7 @@ public:
   SequentialScanNode(
       const String& table_name,
       Vector<RefPtr<SelectListNode>> select_list,
-      Option<RefPtr<ScalarExpressionNode>> where_expr);
+      Option<RefPtr<ValueExpressionNode>> where_expr);
 
   const String& tableName() const;
 
@@ -63,7 +63,7 @@ public:
 protected:
   String table_name_;
   Vector<RefPtr<SelectListNode>> select_list_;
-  Option<RefPtr<ScalarExpressionNode>> where_expr_;
+  Option<RefPtr<ValueExpressionNode>> where_expr_;
   AggregationStrategy aggr_strategy_;
 };
 

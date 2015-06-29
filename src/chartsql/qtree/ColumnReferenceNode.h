@@ -10,13 +10,13 @@
 #pragma once
 #include <fnord/stdtypes.h>
 #include <fnord/option.h>
-#include <chartsql/qtree/ScalarExpressionNode.h>
+#include <chartsql/qtree/ValueExpressionNode.h>
 
 using namespace fnord;
 
 namespace csql {
 
-class ColumnReferenceNode : public ScalarExpressionNode {
+class ColumnReferenceNode : public ValueExpressionNode {
 public:
 
   ColumnReferenceNode(const String& field_name);
@@ -28,7 +28,7 @@ public:
 
   void setColumnIndex(size_t index);
 
-  Vector<RefPtr<ScalarExpressionNode>> arguments() const override;
+  Vector<RefPtr<ValueExpressionNode>> arguments() const override;
 
 protected:
   String field_name_;

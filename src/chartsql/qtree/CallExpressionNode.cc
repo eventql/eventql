@@ -15,11 +15,11 @@ namespace csql {
 
 CallExpressionNode::CallExpressionNode(
     const String& symbol,
-    Vector<RefPtr<ScalarExpressionNode>> arguments) :
+    Vector<RefPtr<ValueExpressionNode>> arguments) :
     symbol_(symbol),
     arguments_(arguments) {}
 
-Vector<RefPtr<ScalarExpressionNode>> CallExpressionNode::arguments() const {
+Vector<RefPtr<ValueExpressionNode>> CallExpressionNode::arguments() const {
   return arguments_;
 }
 

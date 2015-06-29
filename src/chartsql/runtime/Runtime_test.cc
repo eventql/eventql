@@ -33,7 +33,7 @@ TEST_CASE(RuntimeTest, TestStaticExpression, [] () {
             new csql::LiteralExpressionNode(SValue(SValue::IntegerType(2))),
           }));
 
-  auto compiled = runtime.buildScalarExpression(expr.get());
+  auto compiled = runtime.buildValueExpression(expr.get());
 
   auto t0 = WallClock::unixMicros();
   SValue out;

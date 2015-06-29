@@ -9,30 +9,30 @@
  */
 #pragma once
 #include <fnord/stdtypes.h>
-#include <chartsql/qtree/ScalarExpressionNode.h>
+#include <chartsql/qtree/ValueExpressionNode.h>
 
 using namespace fnord;
 
 namespace csql {
 
-class IfExpressionNode : public ScalarExpressionNode {
+class IfExpressionNode : public ValueExpressionNode {
 public:
 
   IfExpressionNode(
-      RefPtr<ScalarExpressionNode> conditional_expr,
-      RefPtr<ScalarExpressionNode> true_branch_expr,
-      RefPtr<ScalarExpressionNode> false_branch_expr);
+      RefPtr<ValueExpressionNode> conditional_expr,
+      RefPtr<ValueExpressionNode> true_branch_expr,
+      RefPtr<ValueExpressionNode> false_branch_expr);
 
-  Vector<RefPtr<ScalarExpressionNode>> arguments() const override;
+  Vector<RefPtr<ValueExpressionNode>> arguments() const override;
 
-  RefPtr<ScalarExpressionNode> conditional() const;
-  RefPtr<ScalarExpressionNode> trueBranch() const;
-  RefPtr<ScalarExpressionNode> falseBranch() const;
+  RefPtr<ValueExpressionNode> conditional() const;
+  RefPtr<ValueExpressionNode> trueBranch() const;
+  RefPtr<ValueExpressionNode> falseBranch() const;
 
 protected:
-  RefPtr<ScalarExpressionNode> conditional_expr_;
-  RefPtr<ScalarExpressionNode> true_branch_expr_;
-  RefPtr<ScalarExpressionNode> false_branch_expr_;
+  RefPtr<ValueExpressionNode> conditional_expr_;
+  RefPtr<ValueExpressionNode> true_branch_expr_;
+  RefPtr<ValueExpressionNode> false_branch_expr_;
 };
 
 } // namespace csql

@@ -28,7 +28,7 @@ class Runtime;
 class QueryPlanBuilderInterface {
 public:
   QueryPlanBuilderInterface(
-      ScalarExpressionBuilder* compiler,
+      ValueExpressionBuilder* compiler,
       const std::vector<std::unique_ptr<Backend>>& backends) :
       compiler_(compiler),
       backends_(backends) {}
@@ -40,7 +40,7 @@ public:
       TableRepository* repo) = 0;
 
 protected:
-  ScalarExpressionBuilder* compiler_;
+  ValueExpressionBuilder* compiler_;
   const std::vector<std::unique_ptr<Backend>>& backends_;
 };
 
@@ -52,7 +52,7 @@ public:
   RefPtr<QueryTreeNode> build(ASTNode* ast);
 
 //  QueryPlanBuilder(
-//      ScalarExpressionBuilder* compiler,
+//      ValueExpressionBuilder* compiler,
 //      const std::vector<std::unique_ptr<Backend>>& backends);
 //
 //  void buildQueryPlan(
@@ -144,19 +144,19 @@ protected:
 
   QueryTreeNode* buildSequentialScan(ASTNode* ast);
 
-  ScalarExpressionNode* buildValueExpression(ASTNode* ast);
+  ValueExpressionNode* buildValueExpression(ASTNode* ast);
 
   SelectListNode* buildSelectList(ASTNode* select_list);
 
-  ScalarExpressionNode* buildOperator(const std::string& name, ASTNode* ast);
+  ValueExpressionNode* buildOperator(const std::string& name, ASTNode* ast);
 
-  ScalarExpressionNode* buildLiteral(ASTNode* ast);
+  ValueExpressionNode* buildLiteral(ASTNode* ast);
 
-  ScalarExpressionNode* buildColumnReference(ASTNode* ast);
+  ValueExpressionNode* buildColumnReference(ASTNode* ast);
 
-  ScalarExpressionNode* buildIfStatement(ASTNode* ast);
+  ValueExpressionNode* buildIfStatement(ASTNode* ast);
 
-  ScalarExpressionNode* buildMethodCall(ASTNode* ast);
+  ValueExpressionNode* buildMethodCall(ASTNode* ast);
 
   //QueryPlanNode* buildLimitClause(ASTNode* ast, TableRepository* repo);
   //QueryPlanNode* buildOrderByClause(ASTNode* ast, TableRepository* repo);
