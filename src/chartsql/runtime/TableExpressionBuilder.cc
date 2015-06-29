@@ -10,6 +10,7 @@
 #include <chartsql/runtime/TableExpressionBuilder.h>
 #include <chartsql/runtime/groupby.h>
 #include <chartsql/runtime/Union.h>
+#include <chartsql/runtime/SelectExpression.h>
 
 using namespace fnord;
 
@@ -31,6 +32,13 @@ ScopedPtr<TableExpression> TableExpressionBuilder::build(
   if (dynamic_cast<SequentialScanNode*>(node.get())) {
     return buildSequentialScan(
         node.asInstanceOf<SequentialScanNode>(),
+        runtime,
+        tables);
+  }
+
+  if (dynamic_cast<SelectExpressionNode*>(node.get())) {
+    return buildSelectExpression(
+        node.asInstanceOf<SelectExpressionNode>(),
         runtime,
         tables);
   }
@@ -90,6 +98,20 @@ ScopedPtr<TableExpression> TableExpressionBuilder::buildUnion(
   }
 
   return mkScoped(new Union(std::move(union_tables)));
+}
+
+ScopedPtr<TableExpression> TableExpressionBuilder::buildSelectExpression(
+    RefPtr<SelectExpressionNode> node,
+    Runtime* runtime,
+    TableProvider* tables) {
+  Vector<ScopedPtr<ValueExpression>> select_expressions;
+
+  for (const auto& slnode : node->selectList()) {
+    select_expressions.emplace_back(
+        runtime->buildValueExpression(slnode->expression()));
+  }
+
+  return mkScoped(new SelectExpression(std::move(select_expressions)));
 }
 
 } // namespace csql
