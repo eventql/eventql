@@ -22,6 +22,20 @@ SequentialScanNode::SequentialScanNode(
     where_expr_(where_expr),
     aggr_strategy_(AggregationStrategy::NO_AGGREGATION) {}
 
+SequentialScanNode::SequentialScanNode(
+    const SequentialScanNode& other) :
+    table_name_(other.table_name_),
+    aggr_strategy_(other.aggr_strategy_) {
+  for (const auto& e : other.select_list_) {
+    select_list_.emplace_back(e->deepCopyAs<SelectListNode>());
+  }
+
+  if (!other.where_expr_.isEmpty()) {
+    where_expr_ = Some(
+        other.where_expr_.get()->deepCopyAs<ValueExpressionNode>());
+  }
+}
+
 const String& SequentialScanNode::tableName() const {
   return table_name_;
 }
@@ -37,6 +51,10 @@ AggregationStrategy SequentialScanNode::aggregationStrategy() const {
 
 void SequentialScanNode::setAggregationStrategy(AggregationStrategy strategy) {
   aggr_strategy_ = strategy;
+}
+
+RefPtr<QueryTreeNode> SequentialScanNode::deepCopy() const {
+  return new SequentialScanNode(*this);
 }
 
 } // namespace csql

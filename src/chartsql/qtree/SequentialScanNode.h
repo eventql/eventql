@@ -53,6 +53,8 @@ public:
       Vector<RefPtr<SelectListNode>> select_list,
       Option<RefPtr<ValueExpressionNode>> where_expr);
 
+  SequentialScanNode(const SequentialScanNode& other);
+
   const String& tableName() const;
 
   Vector<RefPtr<SelectListNode>> selectList() const;
