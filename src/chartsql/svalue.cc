@@ -211,6 +211,31 @@ SValue::BoolType SValue::getBool() const {
   return data_.u.t_bool;
 }
 
+SValue::BoolType SValue::getBoolWithConversion() const {
+  switch (data_.type) {
+
+    case T_INTEGER:
+      return getInteger() > 0;
+
+    case T_FLOAT:
+      return getFloat() > 0;
+
+    case T_BOOL:
+      return getBool();
+
+    case T_NULL:
+      return false;
+
+    default:
+      RAISEF(
+         kTypeError,
+          "can't convert $0 '$1' to Boolean",
+          SValue::getTypeName(data_.type),
+          toString());
+
+  }
+}
+
 SValue::TimeType SValue::getTimestamp() const {
   switch (getType()) {
 
@@ -223,8 +248,6 @@ SValue::TimeType SValue::getTimestamp() const {
           "can't convert %s '%s' to Timestamp",
           SValue::getTypeName(data_.type),
           toString().c_str());
-      time_t ts;
-      time(&ts);
 
   }
 }
