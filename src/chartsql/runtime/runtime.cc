@@ -42,5 +42,8 @@ ScopedPtr<TableExpression> Runtime::buildTableExpression(
   return table_exp_builder_.build(node, this, tables.get());
 }
 
-//void registerFunction(const String& symbol, SFunction fn);
+void Runtime::registerFunction(const String& name, SFunction fn) {
+  symbol_table_.registerFunction(name, fn);
+}
+
 }
