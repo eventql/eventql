@@ -41,6 +41,10 @@ uint32_t BitPackDecoder::fetch(bool advance) {
 #ifndef FNORD_NODEBUG
     auto new_pos = pos_ + 16 * maxbits_;
     if (new_pos > size_) {
+      if (!advance) {
+        return 0;
+      }
+
       RAISE(kBufferOverflowError, "read exceeds buffer boundary");
     }
 #endif
