@@ -47,6 +47,15 @@ Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildSequentialScan(
 
   fnord::iputs("lookup table: $0 / $1", stream_key, partition_key.toString());
 
+  auto partition = tsdb_node_->findPartition(
+      tsdb_namespace_,
+      stream_key,
+      partition_key);
+
+  if (partition.isEmpty()) {
+    RAISEF(kNotFoundError, "partition not found: $0", table_name);
+  }
+
   RAISE(kNotImplementedError);
 }
 
