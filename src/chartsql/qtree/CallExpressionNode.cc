@@ -27,5 +27,14 @@ const String& CallExpressionNode::symbol() const {
   return symbol_;
 }
 
+RefPtr<QueryTreeNode> CallExpressionNode::deepCopy() const {
+  Vector<RefPtr<ValueExpressionNode>> args;
+  for (const auto& arg : arguments_) {
+    args.emplace_back(arg->deepCopyAs<ValueExpressionNode>());
+  }
+
+  return new CallExpressionNode(symbol_, args);
+}
+
 } // namespace csql
 
