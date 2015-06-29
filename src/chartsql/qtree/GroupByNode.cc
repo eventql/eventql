@@ -35,4 +35,21 @@ RefPtr<TableExpressionNode> GroupByNode::inputTable() const {
   return table_;
 }
 
+RefPtr<QueryTreeNode> GroupByNode::deepCopy() const {
+  Vector<RefPtr<SelectListNode>> select_list;
+  for (const auto& e : select_list_) {
+    select_list.emplace_back(e->deepCopyAs<SelectListNode>());
+  }
+
+  Vector<RefPtr<ValueExpressionNode>> group_exprs;
+  for (const auto& e : group_exprs_) {
+    group_exprs.emplace_back(e->deepCopyAs<ValueExpressionNode>());
+  }
+
+  return new GroupByNode(
+      select_list,
+      group_exprs,
+      table_->deepCopyAs<TableExpressionNode>());
+}
+
 } // namespace csql
