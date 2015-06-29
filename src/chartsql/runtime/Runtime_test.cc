@@ -23,7 +23,7 @@ using namespace csql;
 UNIT_TEST(RuntimeTest);
 
 TEST_CASE(RuntimeTest, TestStaticExpression, [] () {
-  DefaultRuntime runtime;
+  Runtime runtime;
 
   auto expr = mkRef(
       new csql::CallExpressionNode(
