@@ -278,7 +278,8 @@ void TSDBServlet::executeSQL(
   format.formatResults(qplan, BufferOutputStream::fromBuffer(&result));
 
   res->setStatus(http::kStatusOK);
-  res->addHeader("Content-Type", "application/octet-stream");
+  res->addHeader("Access-Control-Allow-Origin", "*");
+  res->addHeader("Content-Type", "text/plain");
   res->addHeader("Connection", "close");
   res_stream->startResponse(*res);
   res_stream->writeBodyChunk(result);
