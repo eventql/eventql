@@ -16,20 +16,16 @@ Runtime::Runtime() :
     scalar_exp_builder_(&symbol_table_) {}
 
 RefPtr<QueryPlan> Runtime::parseAndBuildQueryPlan(
-    const String& query) {
-  return parseAndBuildQueryPlan(query, defaultTableProvider());
-}
-
-RefPtr<QueryPlan> Runtime::parseAndBuildQueryPlan(
     const String& query,
-    RefPtr<TableProvider> tables) {
+    RefPtr<TableProvider> tables,
+    QueryRewriteFn rewrite_fn) {
   Vector<RefPtr<QueryTreeNode>> statements;
 
   csql::Parser parser;
   parser.parse(query.data(), query.size());
 
   for (auto stmt : parser.getStatements()) {
-    statements.emplace_back(rewriteQuery(query_plan_builder_.build(stmt)));
+    statements.emplace_back(rewrite_fn(query_plan_builder_.build(stmt)));
   }
 
   return new QueryPlan(statements, tables, this);
@@ -46,4 +42,5 @@ ScopedPtr<TableExpression> Runtime::buildTableExpression(
   return table_exp_builder_.build(node, this, tables.get());
 }
 
+//void registerFunction(const String& symbol, SFunction fn);
 }

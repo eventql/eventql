@@ -81,7 +81,6 @@ Instruction* ValueExpressionBuilder::compileLiteral(
     ScratchMemory* static_storage) {
   auto ins = static_storage->construct<Instruction>();
   ins->type = X_LITERAL;
-  ins->call = nullptr;
   ins->arg0 = static_storage->construct<SValue>(node->value());
   ins->child = nullptr;
   ins->next  = nullptr;
@@ -94,7 +93,6 @@ Instruction* ValueExpressionBuilder::compileColumnReference(
     ScratchMemory* static_storage) {
   auto ins = static_storage->construct<Instruction>();
   ins->type = X_INPUT;
-  ins->call = nullptr;
   ins->arg0 = (void *) node->columnIndex();
   ins->argn = 0;
   ins->child = nullptr;
