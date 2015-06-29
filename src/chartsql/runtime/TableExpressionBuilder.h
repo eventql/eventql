@@ -15,6 +15,7 @@
 #include <chartsql/qtree/GroupByNode.h>
 #include <chartsql/qtree/UnionNode.h>
 #include <chartsql/qtree/SequentialScanNode.h>
+#include <chartsql/qtree/SelectExpressionNode.h>
 #include <chartsql/runtime/TableExpression.h>
 #include <chartsql/runtime/tablerepository.h>
 #include <chartsql/svalue.h>
@@ -46,6 +47,11 @@ protected:
 
   ScopedPtr<TableExpression> buildSequentialScan(
       RefPtr<SequentialScanNode> node,
+      Runtime* runtime,
+      TableProvider* tables);
+
+  ScopedPtr<TableExpression> buildSelectExpression(
+      RefPtr<SelectExpressionNode> node,
       Runtime* runtime,
       TableProvider* tables);
 
