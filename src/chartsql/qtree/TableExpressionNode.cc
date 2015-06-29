@@ -25,14 +25,13 @@ RefPtr<TableExpressionNode> TableExpressionNode::inputTable(size_t index) {
   return *input_tables_[index];
 }
 
-void TableExpressionNode::replaceInputTable(
-    size_t index,
-    RefPtr<TableExpressionNode> new_table) {
+RefPtr<TableExpressionNode>* TableExpressionNode::mutableInputTable(
+    size_t index) {
   if (index > input_tables_.size()) {
     RAISE(kIndexError, "invalid table index");
   }
 
-  *input_tables_[index] = new_table;
+  return input_tables_[index];
 }
 
 void TableExpressionNode::addInputTable(RefPtr<TableExpressionNode>* table) {

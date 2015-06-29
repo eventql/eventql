@@ -29,7 +29,7 @@ RefPtr<QueryPlan> Runtime::parseAndBuildQueryPlan(
   parser.parse(query.data(), query.size());
 
   for (auto stmt : parser.getStatements()) {
-    statements.emplace_back(query_plan_builder_.build(stmt));
+    statements.emplace_back(rewriteQuery(query_plan_builder_.build(stmt)));
   }
 
   return new QueryPlan(statements, tables, this);
