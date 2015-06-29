@@ -18,6 +18,7 @@ namespace csql {
 class UnionNode : public TableExpressionNode {
 public:
 
+  UnionNode(const UnionNode& other);
   UnionNode(Vector<RefPtr<TableExpressionNode>> tables);
 
   Vector<RefPtr<TableExpressionNode>> inputTables() const;

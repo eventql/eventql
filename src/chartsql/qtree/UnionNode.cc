@@ -13,6 +13,12 @@ using namespace fnord;
 
 namespace csql {
 
+UnionNode::UnionNode(const UnionNode& other) {
+  for (const auto& tbl : other.tables_) {
+    tables_.emplace_back(tbl->deepCopyAs<TableExpressionNode>());
+  }
+}
+
 UnionNode::UnionNode(
     Vector<RefPtr<TableExpressionNode>> tables) :
     tables_(tables) {
@@ -23,6 +29,10 @@ UnionNode::UnionNode(
 
 Vector<RefPtr<TableExpressionNode>> UnionNode::inputTables() const {
   return tables_;
+}
+
+RefPtr<QueryTreeNode> UnionNode::deepCopy() const {
+  return new UnionNode(*this);
 }
 
 } // namespace csql
