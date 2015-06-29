@@ -35,6 +35,9 @@ void addExpr(int argc, SValue* argv, SValue* out) {
         case SValue::T_FLOAT:
           *out = SValue((double) (lhs->getInteger() + rhs->getFloat()));
           return;
+        case SValue::T_NULL:
+          *out = SValue();
+          return;
         default:
           break;
       }
@@ -47,10 +50,16 @@ void addExpr(int argc, SValue* argv, SValue* out) {
         case SValue::T_FLOAT:
           *out = SValue((double) (lhs->getFloat() + rhs->getFloat()));
           return;
+        case SValue::T_NULL:
+          *out = SValue();
+          return;
         default:
           break;
       }
       break;
+    case SValue::T_NULL:
+      *out = SValue();
+      return;
     default:
       break;
   }
@@ -77,6 +86,9 @@ void subExpr(int argc, SValue* argv, SValue* out) {
         case SValue::T_FLOAT:
           *out = SValue((double) (lhs->getInteger() - rhs->getFloat()));
           return;
+        case SValue::T_NULL:
+          *out = SValue();
+          return;
         default:
           break;
       }
@@ -89,10 +101,16 @@ void subExpr(int argc, SValue* argv, SValue* out) {
         case SValue::T_FLOAT:
           *out = SValue((double) (lhs->getFloat() - rhs->getFloat()));
           return;
+        case SValue::T_NULL:
+          *out = SValue();
+          return;
         default:
           break;
       }
       break;
+    case SValue::T_NULL:
+      *out = SValue();
+      return;
     default:
       break;
   }
@@ -121,6 +139,9 @@ void mulExpr(int argc, SValue* argv, SValue* out) {
         case SValue::T_FLOAT:
           *out = SValue((double) (lhs->getInteger() * rhs->getFloat()));
           return;
+        case SValue::T_NULL:
+          *out = SValue();
+          return;
         default:
           break;
       }
@@ -133,10 +154,16 @@ void mulExpr(int argc, SValue* argv, SValue* out) {
         case SValue::T_FLOAT:
           *out = SValue((double) (lhs->getFloat() * rhs->getFloat()));
           return;
+        case SValue::T_NULL:
+          *out = SValue();
+          return;
         default:
           break;
       }
       break;
+    case SValue::T_NULL:
+      *out = SValue();
+      return;
     default:
       break;
   }
@@ -165,6 +192,9 @@ void divExpr(int argc, SValue* argv, SValue* out) {
         case SValue::T_FLOAT:
           *out = SValue((double) (lhs->getInteger() / rhs->getFloat()));
           return;
+        case SValue::T_NULL:
+          *out = SValue();
+          return;
         default:
           break;
       }
@@ -177,10 +207,16 @@ void divExpr(int argc, SValue* argv, SValue* out) {
         case SValue::T_FLOAT:
           *out = SValue((double) (lhs->getFloat() / rhs->getFloat()));
           return;
+        case SValue::T_NULL:
+          *out = SValue();
+          return;
         default:
           break;
       }
       break;
+    case SValue::T_NULL:
+      *out = SValue();
+      return;
     default:
       break;
   }
@@ -209,6 +245,9 @@ void modExpr(int argc, SValue* argv, SValue* out) {
         case SValue::T_FLOAT:
           *out = SValue(fmod(lhs->getInteger(), rhs->getFloat()));
           return;
+        case SValue::T_NULL:
+          *out = SValue();
+          return;
         default:
           break;
       }
@@ -221,10 +260,16 @@ void modExpr(int argc, SValue* argv, SValue* out) {
         case SValue::T_FLOAT:
           *out = SValue(fmod(lhs->getFloat(), rhs->getFloat()));
           return;
+        case SValue::T_NULL:
+          *out = SValue();
+          return;
         default:
           break;
       }
       break;
+    case SValue::T_NULL:
+      *out = SValue();
+      return;
     default:
       break;
   }
@@ -253,6 +298,9 @@ void powExpr(int argc, SValue* argv, SValue* out) {
         case SValue::T_FLOAT:
           *out = SValue((double) pow(lhs->getInteger(), rhs->getFloat()));
           return;
+        case SValue::T_NULL:
+          *out = SValue();
+          return;
         default:
           break;
       }
@@ -265,10 +313,16 @@ void powExpr(int argc, SValue* argv, SValue* out) {
         case SValue::T_FLOAT:
           *out = SValue((double) pow(lhs->getFloat(), rhs->getFloat()));
           return;
+        case SValue::T_NULL:
+          *out = SValue();
+          return;
         default:
           break;
       }
       break;
+    case SValue::T_NULL:
+      *out = SValue();
+      return;
     default:
       break;
   }
