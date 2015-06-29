@@ -19,7 +19,9 @@ GroupByNode::GroupByNode(
     RefPtr<TableExpressionNode> table) :
     select_list_(select_list),
     group_exprs_(group_exprs),
-    table_(table) {}
+    table_(table) {
+  addInputTable(&table_);
+}
 
 Vector<RefPtr<SelectListNode>> GroupByNode::selectList() const {
   return select_list_;
