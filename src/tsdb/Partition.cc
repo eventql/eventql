@@ -171,10 +171,6 @@ void Partition::scheduleCompaction() {
 void Partition::compact() {
   std::unique_lock<std::mutex> lk(mutex_);
   last_compaction_ = DateTime::now();
-  auto version = records_.checksum();
-  auto cstable_file = cstable_file_;
-  auto cstable_version = cstable_version_;
-  auto sstable_files = records_.listDatafiles();
   lk.unlock();
 
   fnord::logDebug(
@@ -186,11 +182,23 @@ void Partition::compact() {
   Set<String> deleted_files;
   records_.compact(&deleted_files);
 
+  lk.lock();
+  auto version = records_.checksum();
+  auto cstable_file = cstable_file_;
+  auto cstable_version = cstable_version_;
+  auto sstable_files = records_.listDatafiles();
+  lk.unlock();
+
   if (!(cstable_version == version)) {
-    deleted_files.emplace(cstable_file);
-    cstable_file = SHA1::compute(
+    auto new_cstable_file = SHA1::compute(
         key_.toString() + version.toString()).toString() + ".cst";
-    buildCSTable(sstable_files, cstable_file);
+    buildCSTable(sstable_files, new_cstable_file);
+
+    if (cstable_file != new_cstable_file) {
+      deleted_files.emplace(cstable_file);
+    }
+
+    cstable_file = new_cstable_file;
     cstable_version = version;
   }
 
