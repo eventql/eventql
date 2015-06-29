@@ -8,28 +8,29 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <chartsql/runtime/defaultruntime.h>
+#include "chartsql/defaults.h"
 
 namespace csql {
 
-DefaultRuntime::DefaultRuntime(
-    SymbolTable* symbol_table) :
-    scalar_exp_builder_(symbol_table) {}
+DefaultRuntime::DefaultRuntime() :
+    query_plan_builder_(&symbol_table_),
+    scalar_exp_builder_(&symbol_table_) {
+  installDefaultSymbols(&symbol_table_);
+}
 
-RefPtr<ExecutionPlan> DefaultRuntime::buildExecutionPlan(
-    RefPtr<QueryTreeNode> qtree,
-    TableRepository* tables) {
-  if (dynamic_cast<TableExpressionNode*>(qtree.get())) {
-    auto table_expr = table_exp_builder_.build(
-        qtree.asInstanceOf<TableExpressionNode>(),
-        this,
-        tables);
+RefPtr<QueryPlan> DefaultRuntime::parseAndBuildQueryPlan(
+    const String& query,
+    RefPtr<TableProvider> tables) {
+  Vector<RefPtr<QueryTreeNode>> statements;
 
-    return new DefaultExecutionPlan(std::move(table_expr));
+  csql::Parser parser;
+  parser.parse(query.data(), query.size());
+
+  for (auto stmt : parser.getStatements()) {
+    statements.emplace_back(query_plan_builder_.build(stmt));
   }
 
-  RAISE(
-      kRuntimeError,
-      "cannot figure out how to build a query plan for this QTree node");
+  return new QueryPlan(statements, tables, this);
 }
 
 ScopedPtr<ValueExpression> DefaultRuntime::buildValueExpression(
@@ -39,8 +40,8 @@ ScopedPtr<ValueExpression> DefaultRuntime::buildValueExpression(
 
 ScopedPtr<TableExpression> DefaultRuntime::buildTableExpression(
     RefPtr<TableExpressionNode> node,
-    TableRepository* tables) {
-  return table_exp_builder_.build(node, this, tables);
+    RefPtr<TableProvider> tables) {
+  return table_exp_builder_.build(node, this, tables.get());
 }
 
 }

@@ -16,7 +16,7 @@ add_library(chartsql-lib OBJECT
     linechartbuilder.cc
     pointchartbuilder.cc
     #queryendpoint.cc
-    query.cc
+    #query.cc
     #queryservice.cc
     seriesadapter.cc
     CSTableScan.cc
