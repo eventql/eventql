@@ -27,8 +27,8 @@ add_library(chartsql-lib OBJECT
     backends/mysql/mysqlbackend.cc
     backends/mysql/mysqlconnection.cc
     backends/mysql/mysqltableref.cc
-    backends/metricservice/metrictableref.cc
-    backends/metricservice/metrictablerepository.cc
+    #backends/metricservice/metrictableref.cc
+    #backends/metricservice/metrictablerepository.cc
     expressions/aggregate.cc
     expressions/boolean.cc
     expressions/datetime.cc
