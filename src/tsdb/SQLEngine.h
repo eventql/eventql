@@ -33,9 +33,11 @@ protected:
       RefPtr<csql::QueryTreeNode> query);
 
   void replaceAllSequentialScansWithUnions(
+      const String& tsdb_namespace,
       RefPtr<csql::TableExpressionNode>* node);
 
   void replaceSequentialScanWithUnion(
+      const String& tsdb_namespace,
       RefPtr<csql::TableExpressionNode>* node);
 
   TSDBNode* tsdb_node_;

@@ -9,6 +9,7 @@
  */
 #include <tsdb/SQLEngine.h>
 #include <tsdb/TSDBNode.h>
+#include <tsdb/TimeWindowPartitioner.h>
 #include <chartsql/defaults.h>
 
 namespace tsdb {
@@ -20,20 +21,22 @@ SQLEngine::SQLEngine(TSDBNode* tsdb_node) : tsdb_node_(tsdb_node) {
 RefPtr<csql::QueryPlan> SQLEngine::parseAndBuildQueryPlan(
     const String& tsdb_namespace,
     const String& query) {
-  return runtime_parseAndBuildQueryPlan(
+  return sql_runtime_.parseAndBuildQueryPlan(
       query,
       tableProviderForNamespace(tsdb_namespace),
       std::bind(
           &SQLEngine::rewriteQuery,
+          this,
           tsdb_namespace,
           std::placeholders::_1));
 }
 
 RefPtr<csql::QueryTreeNode> SQLEngine::rewriteQuery(
+    const String& tsdb_namespace,
     RefPtr<csql::QueryTreeNode> query) {
   if (dynamic_cast<csql::TableExpressionNode*>(query.get())) {
     auto tbl_expr = query.asInstanceOf<csql::TableExpressionNode>();
-    replaceAllSequentialScansWithUnions(&tbl_expr);
+    replaceAllSequentialScansWithUnions(tsdb_namespace, &tbl_expr);
     return tbl_expr.get();
   }
 
@@ -46,21 +49,34 @@ RefPtr<csql::TableProvider> SQLEngine::tableProviderForNamespace(
 }
 
 void SQLEngine::replaceAllSequentialScansWithUnions(
+    const String& tsdb_namespace,
     RefPtr<csql::TableExpressionNode>* node) {
   if (dynamic_cast<csql::SequentialScanNode*>(node->get())) {
-    replaceSequentialScanWithUnion(node);
+    replaceSequentialScanWithUnion(tsdb_namespace, node);
     return;
   }
 
   auto ntables = node->get()->numInputTables();
   for (int i = 0; i < ntables; ++i) {
-    replaceAllSequentialScansWithUnions(node->get()->mutableInputTable(i));
+    replaceAllSequentialScansWithUnions(
+        tsdb_namespace,
+        node->get()->mutableInputTable(i));
   }
 }
 
 void SQLEngine::replaceSequentialScanWithUnion(
+    const String& tsdb_namespace,
     RefPtr<csql::TableExpressionNode>* node) {
   auto seqscan = node->asInstanceOf<csql::SequentialScanNode>();
+
+  auto stream_key = seqscan->tableName();
+  auto partitions = TimeWindowPartitioner::partitionKeysFor(
+      stream_key,
+      WallClock::unixMicros() - 120 * kMicrosPerDay,
+      WallClock::unixMicros(),
+      4 * kMicrosPerHour);
+
+  fnord::iputs("stream: $0, partitions: $1", stream_key, partitions.size());
 
   RAISE(kNotYetImplementedError);
 }
