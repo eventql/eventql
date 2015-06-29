@@ -191,6 +191,7 @@ void Partition::compact() {
     cstable_file = SHA1::compute(
         key_.toString() + version.toString()).toString() + ".cst";
     buildCSTable(sstable_files, cstable_file);
+    cstable_version = version;
   }
 
   lk.lock();
