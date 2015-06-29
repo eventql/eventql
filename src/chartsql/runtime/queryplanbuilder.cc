@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <chartsql/parser/astnode.h>
 #include <chartsql/parser/astutil.h>
+#include <chartsql/parser/parser.h>
 #include <chartsql/runtime/queryplanbuilder.h>
 #include <chartsql/qtree/GroupByNode.h>
 #include <chartsql/qtree/IfExpressionNode.h>
@@ -19,6 +20,20 @@ namespace csql {
 QueryPlanBuilder::QueryPlanBuilder(
     SymbolTable* symbol_table) :
     symbol_table_(symbol_table) {}
+
+Vector<RefPtr<QueryTreeNode>> QueryPlanBuilder::parseAndBuild(
+    const String& query_string) {
+  Vector<RefPtr<QueryTreeNode>> statements;
+
+  csql::Parser parser;
+  parser.parse(query_string.data(), query_string.size());
+
+  for (auto stmt : parser.getStatements()) {
+    statements.emplace_back(build(stmt));
+  }
+
+  return statements;
+}
 
 RefPtr<QueryTreeNode> QueryPlanBuilder::build(ASTNode* ast) {
   QueryTreeNode* node = nullptr;
