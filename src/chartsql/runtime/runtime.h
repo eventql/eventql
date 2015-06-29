@@ -24,15 +24,16 @@ namespace csql {
 
 class Runtime {
 public:
+  typedef
+      Function<RefPtr<QueryTreeNode> (RefPtr<QueryTreeNode> query)>
+      QueryRewriteFn;
 
   Runtime();
-  virtual ~Runtime() {}
-
-  RefPtr<QueryPlan> parseAndBuildQueryPlan(const String& query);
 
   RefPtr<QueryPlan> parseAndBuildQueryPlan(
       const String& query,
-      RefPtr<TableProvider> tables);
+      RefPtr<TableProvider> tables,
+      QueryRewriteFn query_rewrite_fn);
 
   ScopedPtr<ValueExpression> buildValueExpression(
       RefPtr<ValueExpressionNode> expression);
@@ -41,12 +42,9 @@ public:
       RefPtr<TableExpressionNode> expression,
       RefPtr<TableProvider> tables);
 
+  void registerFunction(const String& symbol, SFunction fn);
+
 protected:
-
-  virtual RefPtr<QueryTreeNode> rewriteQuery(RefPtr<QueryTreeNode> query) = 0;
-
-  virtual RefPtr<TableProvider> defaultTableProvider() = 0;
-
   SymbolTable symbol_table_;
   QueryPlanBuilder query_plan_builder_;
   ValueExpressionBuilder scalar_exp_builder_;

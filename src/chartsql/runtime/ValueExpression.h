@@ -26,6 +26,7 @@ enum kInstructionType {
 };
 
 struct Instruction {
+  Instruction() : vtable{ .t_pure = nullptr } {}
   kInstructionType type;
   void* arg0;
   size_t argn;
@@ -35,7 +36,6 @@ struct Instruction {
     PureFunction t_pure;
     AggregateFunction t_aggregate;
   } vtable;
-  void (*call)(void*, int, SValue*, SValue*); // delete me
 };
 
 class ValueExpression {
