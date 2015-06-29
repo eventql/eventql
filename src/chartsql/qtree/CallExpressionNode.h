@@ -9,26 +9,26 @@
  */
 #pragma once
 #include <fnord/stdtypes.h>
-#include <chartsql/qtree/ScalarExpressionNode.h>
+#include <chartsql/qtree/ValueExpressionNode.h>
 
 using namespace fnord;
 
 namespace csql {
 
-class CallExpressionNode : public ScalarExpressionNode {
+class CallExpressionNode : public ValueExpressionNode {
 public:
 
   CallExpressionNode(
       const String& symbol,
-      Vector<RefPtr<ScalarExpressionNode>> arguments);
+      Vector<RefPtr<ValueExpressionNode>> arguments);
 
-  Vector<RefPtr<ScalarExpressionNode>> arguments() const override;
+  Vector<RefPtr<ValueExpressionNode>> arguments() const override;
 
   const String& symbol() const;
 
 protected:
   String symbol_;
-  Vector<RefPtr<ScalarExpressionNode>> arguments_;
+  Vector<RefPtr<ValueExpressionNode>> arguments_;
 };
 
 } // namespace csql

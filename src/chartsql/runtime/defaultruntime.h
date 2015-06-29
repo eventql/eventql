@@ -11,7 +11,7 @@
 #define _FNORDMETRIC_SQL_DEFAULTRUNTIME_H
 #include <chartsql/runtime/runtime.h>
 #include <chartsql/runtime/symboltable.h>
-#include <chartsql/runtime/ScalarExpressionBuilder.h>
+#include <chartsql/runtime/ValueExpressionBuilder.h>
 #include <chartsql/runtime/TableExpressionBuilder.h>
 #include <chartsql/runtime/DefaultExecutionPlan.h>
 
@@ -26,15 +26,15 @@ public:
       RefPtr<QueryTreeNode> qtree,
       TableRepository* tables);
 
-  ScopedPtr<ScalarExpression> buildScalarExpression(
-      RefPtr<ScalarExpressionNode> expression);
+  ScopedPtr<ValueExpression> buildValueExpression(
+      RefPtr<ValueExpressionNode> expression);
 
   ScopedPtr<TableExpression> buildTableExpression(
       RefPtr<TableExpressionNode> expression,
       TableRepository* tables);
 
 protected:
-  ScalarExpressionBuilder scalar_exp_builder_;
+  ValueExpressionBuilder scalar_exp_builder_;
   TableExpressionBuilder table_exp_builder_;
 };
 

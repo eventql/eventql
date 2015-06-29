@@ -7,14 +7,14 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <chartsql/runtime/ScalarExpression.h>
+#include <chartsql/runtime/ValueExpression.h>
 #include <fnord/inspect.h>
 
 using namespace fnord;
 
 namespace csql {
 
-ScalarExpression::ScalarExpression(
+ValueExpression::ValueExpression(
     Instruction* entry,
     ScratchMemory&& static_storage,
     size_t dynamic_storage_size) :
@@ -25,11 +25,11 @@ ScalarExpression::ScalarExpression(
   initProgram(entry_);
 }
 
-ScalarExpression::~ScalarExpression() {
+ValueExpression::~ValueExpression() {
   freeProgram(entry_);
 }
 
-ScalarExpression::Instance ScalarExpression::allocInstance(
+ValueExpression::Instance ValueExpression::allocInstance(
     ScratchMemory* scratch) const {
   Instance that;
 
@@ -43,7 +43,7 @@ ScalarExpression::Instance ScalarExpression::allocInstance(
   return that;
 }
 
-void ScalarExpression::freeInstance(Instance* instance) const {
+void ValueExpression::freeInstance(Instance* instance) const {
   if (has_aggregate_) {
     freeInstance(entry_, instance);
   } else {
@@ -51,7 +51,7 @@ void ScalarExpression::freeInstance(Instance* instance) const {
   }
 }
 
-void ScalarExpression::reset(Instance* instance) const {
+void ValueExpression::reset(Instance* instance) const {
   if (has_aggregate_) {
     resetInstance(entry_, instance);
   } else {
@@ -59,7 +59,7 @@ void ScalarExpression::reset(Instance* instance) const {
   }
 }
 
-void ScalarExpression::result(
+void ValueExpression::result(
     Instance* instance,
     SValue* out) const {
   if (has_aggregate_) {
@@ -69,7 +69,7 @@ void ScalarExpression::result(
   }
 }
 
-void ScalarExpression::accumulate(
+void ValueExpression::accumulate(
     Instance* instance,
     int argc,
     const SValue* argv) const {
@@ -80,14 +80,14 @@ void ScalarExpression::accumulate(
   }
 }
 
-void ScalarExpression::evaluate(
+void ValueExpression::evaluate(
     int argc,
     const SValue* argv,
     SValue* out) const {
   return evaluate(nullptr, entry_, argc, argv, out);
 }
 
-void ScalarExpression::initInstance(Instruction* e, Instance* instance) const {
+void ValueExpression::initInstance(Instruction* e, Instance* instance) const {
   switch (e->type) {
     case X_CALL_AGGREGATE:
       if (e->vtable.t_aggregate.init) {
@@ -105,7 +105,7 @@ void ScalarExpression::initInstance(Instruction* e, Instance* instance) const {
   }
 }
 
-void ScalarExpression::freeInstance(Instruction* e, Instance* instance) const {
+void ValueExpression::freeInstance(Instruction* e, Instance* instance) const {
   switch (e->type) {
     case X_CALL_AGGREGATE:
       if (e->vtable.t_aggregate.free) {
@@ -123,7 +123,7 @@ void ScalarExpression::freeInstance(Instruction* e, Instance* instance) const {
   }
 }
 
-void ScalarExpression::resetInstance(Instruction* e, Instance* instance) const {
+void ValueExpression::resetInstance(Instruction* e, Instance* instance) const {
   switch (e->type) {
     case X_CALL_AGGREGATE:
       e->vtable.t_aggregate.reset(
@@ -139,7 +139,7 @@ void ScalarExpression::resetInstance(Instruction* e, Instance* instance) const {
   }
 }
 
-void ScalarExpression::initProgram(Instruction* e) {
+void ValueExpression::initProgram(Instruction* e) {
   switch (e->type) {
     case X_CALL_AGGREGATE:
       has_aggregate_ = true;
@@ -154,7 +154,7 @@ void ScalarExpression::initProgram(Instruction* e) {
   }
 }
 
-void ScalarExpression::freeProgram(Instruction* e) const {
+void ValueExpression::freeProgram(Instruction* e) const {
   switch (e->type) {
     case X_LITERAL:
       ((SValue*) e->arg0)->~SValue();
@@ -169,7 +169,7 @@ void ScalarExpression::freeProgram(Instruction* e) const {
   }
 }
 
-void ScalarExpression::evaluate(
+void ValueExpression::evaluate(
     Instance* instance,
     Instruction* expr,
     int argc,
@@ -245,7 +245,7 @@ void ScalarExpression::evaluate(
 
 }
 
-void ScalarExpression::accumulate(
+void ValueExpression::accumulate(
     Instance* instance,
     Instruction* expr,
     int argc,

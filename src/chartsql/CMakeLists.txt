@@ -46,12 +46,12 @@ add_library(chartsql-lib OBJECT
     qtree/SelectListNode.cc
     qtree/GroupByNode.cc
     qtree/UnionNode.cc
-    runtime/ScalarExpression.cc
+    runtime/ValueExpression.cc
     runtime/ScratchMemory.cc
     runtime/runtime.cc
     runtime/symboltable.cc
     runtime/queryplannode.cc
-    runtime/ScalarExpressionBuilder.cc
+    runtime/ValueExpressionBuilder.cc
     runtime/TableExpressionBuilder.cc
     runtime/defaultruntime.cc
     runtime/DefaultExecutionPlan.cc

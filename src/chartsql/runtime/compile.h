@@ -11,6 +11,6 @@
 #include <stdlib.h>
 #include <vector>
 #include <string>
-#include <chartsql/runtime/ScalarExpressionBuilder.h>
+#include <chartsql/runtime/ValueExpressionBuilder.h>
 
 using namespace fnord;

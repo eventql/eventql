@@ -14,10 +14,10 @@ using namespace fnord;
 namespace csql {
 
 SelectListNode::SelectListNode(
-    RefPtr<ScalarExpressionNode> expr) :
+    RefPtr<ValueExpressionNode> expr) :
     expr_(expr) {}
 
-RefPtr<ScalarExpressionNode> SelectListNode::expression() const {
+RefPtr<ValueExpressionNode> SelectListNode::expression() const {
   return expr_;
 }
 
