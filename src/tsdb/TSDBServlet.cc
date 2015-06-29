@@ -37,6 +37,14 @@ void TSDBServlet::handleHTTPRequest(
   http::HTTPResponse res;
   res.populateFromRequest(req);
   res.addHeader("Access-Control-Allow-Origin", "*");
+  res.addHeader("Access-Control-Allow-Methods", "GET, POST");
+  res.addHeader("Access-Control-Allow-Headers", "X-TSDB-Namespace");
+
+  if (req.method() == http::HTTPMessage::M_OPTIONS) {
+    res.setStatus(http::kStatusOK);
+    res_stream->writeResponse(res);
+    return;
+  }
 
   try {
     if (uri.path() == "/tsdb/insert") {
@@ -260,7 +268,7 @@ void TSDBServlet::executeSQL(
   if (!req->hasHeader("X-TSDB-Namespace")) {
     res->setStatus(fnord::http::kStatusBadRequest);
     res->addBody("missing X-TSDB-Namespace header");
-    res_stream->writeResponse(res);
+    res_stream->writeResponse(*res);
     return;
   }
 
