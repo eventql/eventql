@@ -10,6 +10,7 @@
 #include <fnord/SHA1.h>
 #include <tsdb/TSDBTableProvider.h>
 #include <tsdb/TSDBNode.h>
+#include <chartsql/CSTableScan.h>
 
 using namespace fnord;
 
@@ -45,8 +46,6 @@ Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildSequentialScan(
   auto stream_key = URI::urlDecode(parts[0]);
   auto partition_key = SHA1Hash::fromHexString(URI::urlDecode(parts[1]));
 
-  fnord::iputs("lookup table: $0 / $1", stream_key, partition_key.toString());
-
   auto partition = tsdb_node_->findPartition(
       tsdb_namespace_,
       stream_key,
@@ -56,7 +55,17 @@ Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildSequentialScan(
     RAISEF(kNotFoundError, "partition not found: $0", table_name);
   }
 
-  RAISE(kNotImplementedError);
+  auto cstable = partition.get()->cstable();
+  if (cstable.isEmpty()) {
+    RAISEF(kRuntimeError, "partition not ready yet: $0", table_name);
+  }
+
+  return Option<ScopedPtr<csql::TableExpression>>(
+      mkScoped(
+          new csql::CSTableScan(
+              node,
+              std::move(cstable.get()),
+              runtime)));
 }
 
 } // namespace csql

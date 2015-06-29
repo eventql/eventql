@@ -19,6 +19,7 @@
 #include <tsdb/RecordSet.h>
 #include <tsdb/TSDBNodeRef.h>
 #include <tsdb/PartitionInfo.pb.h>
+#include <cstable/CSTableReader.h>
 
 using namespace fnord;
 
@@ -61,6 +62,8 @@ public:
 
   PartitionInfo partitionInfo() const;
   Vector<String> listFiles() const;
+
+  Option<cstable::CSTableReader> cstable() const;
 
   void compact();
   void replicate();
