@@ -17,7 +17,7 @@ namespace csql {
 
 ScopedPtr<TableExpression> TableExpressionBuilder::build(
     RefPtr<TableExpressionNode> node,
-    DefaultRuntime* runtime,
+    Runtime* runtime,
     TableProvider* tables) {
 
   if (dynamic_cast<GroupByNode*>(node.get())) {
@@ -42,7 +42,7 @@ ScopedPtr<TableExpression> TableExpressionBuilder::build(
 
 ScopedPtr<TableExpression> TableExpressionBuilder::buildGroupBy(
     RefPtr<GroupByNode> node,
-    DefaultRuntime* runtime,
+    Runtime* runtime,
     TableProvider* tables) {
   Vector<ScopedPtr<ValueExpression>> select_expressions;
   Vector<ScopedPtr<ValueExpression>> group_expressions;
@@ -67,7 +67,7 @@ ScopedPtr<TableExpression> TableExpressionBuilder::buildGroupBy(
 
 ScopedPtr<TableExpression> TableExpressionBuilder::buildSequentialScan(
     RefPtr<SequentialScanNode> node,
-    DefaultRuntime* runtime,
+    Runtime* runtime,
     TableProvider* tables) {
   const auto& table_name = node->tableName();
 
@@ -81,7 +81,7 @@ ScopedPtr<TableExpression> TableExpressionBuilder::buildSequentialScan(
 
 ScopedPtr<TableExpression> TableExpressionBuilder::buildUnion(
     RefPtr<UnionNode> node,
-    DefaultRuntime* runtime,
+    Runtime* runtime,
     TableProvider* tables) {
   Vector<ScopedPtr<TableExpression>> union_tables;
 

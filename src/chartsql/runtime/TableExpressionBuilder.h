@@ -22,31 +22,31 @@
 using namespace fnord;
 
 namespace csql {
-class DefaultRuntime;
+class Runtime;
 
 class TableExpressionBuilder {
 public:
 
   ScopedPtr<TableExpression> build(
       RefPtr<TableExpressionNode> node,
-      DefaultRuntime* runtime,
+      Runtime* runtime,
       TableProvider* tables);
 
 protected:
 
   ScopedPtr<TableExpression> buildGroupBy(
       RefPtr<GroupByNode> node,
-      DefaultRuntime* runtime,
+      Runtime* runtime,
       TableProvider* tables);
 
   ScopedPtr<TableExpression> buildUnion(
       RefPtr<UnionNode> node,
-      DefaultRuntime* runtime,
+      Runtime* runtime,
       TableProvider* tables);
 
   ScopedPtr<TableExpression> buildSequentialScan(
       RefPtr<SequentialScanNode> node,
-      DefaultRuntime* runtime,
+      Runtime* runtime,
       TableProvider* tables);
 
 };

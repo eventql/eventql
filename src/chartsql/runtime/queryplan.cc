@@ -8,13 +8,14 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <chartsql/runtime/queryplan.h>
+#include <chartsql/runtime/runtime.h>
 
 namespace csql {
 
 QueryPlan::QueryPlan(
     Vector<RefPtr<QueryTreeNode>> statements,
     RefPtr<TableProvider> tables,
-    DefaultRuntime* runtime) :
+    Runtime* runtime) :
     statements_(statements),
     tables_(tables),
     runtime_(runtime) {}
@@ -33,10 +34,10 @@ void QueryPlan::executeStatement(
   auto stmt = statements_[stmt_idx];
   if (dynamic_cast<TableExpressionNode*>(stmt.get())) {
     auto table_expr = runtime_->buildTableExpression(
-        qtree.asInstanceOf<TableExpressionNode>(),
-        tables.get());
+        stmt.asInstanceOf<TableExpressionNode>(),
+        tables_);
 
-    table_expr->execute(fn);
+    table_expr->execute(&ctx_, fn);
     return;
   }
 

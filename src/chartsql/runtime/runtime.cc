@@ -8,32 +8,37 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <chartsql/runtime/runtime.h>
-#include <chartsql/runtime/resultlist.h>
-#include <chartsql/backends/csv/csvbackend.h>
 
 namespace csql {
 
 Runtime::Runtime() :
-    compiler_(&symbol_table_) {}
+    query_plan_builder_(&symbol_table_),
+    scalar_exp_builder_(&symbol_table_) {}
 
-QueryPlanBuilder* Runtime::queryPlanBuilder() {
-  RAISE(kNotImplementedError);
+RefPtr<QueryPlan> Runtime::parseAndBuildQueryPlan(
+    const String& query,
+    RefPtr<TableProvider> tables) {
+  Vector<RefPtr<QueryTreeNode>> statements;
+
+  csql::Parser parser;
+  parser.parse(query.data(), query.size());
+
+  for (auto stmt : parser.getStatements()) {
+    statements.emplace_back(query_plan_builder_.build(stmt));
+  }
+
+  return new QueryPlan(statements, tables, this);
 }
 
-void Runtime::addBackend(std::unique_ptr<Backend> backend) {
-  backends_.emplace_back(std::move(backend));
+ScopedPtr<ValueExpression> Runtime::buildValueExpression(
+    RefPtr<ValueExpressionNode> node) {
+  return scalar_exp_builder_.compile(node);
 }
 
-const std::vector<std::unique_ptr<Backend>>& Runtime::backends() {
-  return backends_;
-}
-
-ValueExpressionBuilder* Runtime::compiler() {
-  return &compiler_;
-}
-
-Parser* Runtime::parser() {
-  return &parser_;
+ScopedPtr<TableExpression> Runtime::buildTableExpression(
+    RefPtr<TableExpressionNode> node,
+    RefPtr<TableProvider> tables) {
+  return table_exp_builder_.build(node, this, tables.get());
 }
 
 }

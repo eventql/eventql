@@ -26,7 +26,7 @@ public:
   CSTableScan(
       RefPtr<SequentialScanNode> stmt,
       cstable::CSTableReader&& cstable,
-      DefaultRuntime* runtime);
+      Runtime* runtime);
 
   void execute(
       ExecutionContext* context,
