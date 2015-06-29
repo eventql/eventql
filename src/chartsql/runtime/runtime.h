@@ -42,7 +42,7 @@ public:
       RefPtr<TableExpressionNode> expression,
       RefPtr<TableProvider> tables);
 
-  void registerFunction(const String& symbol, SFunction fn);
+  void registerFunction(const String& name, SFunction fn);
 
 protected:
   SymbolTable symbol_table_;
