@@ -14,6 +14,11 @@ using namespace fnord;
 namespace csql {
 
 ColumnReferenceNode::ColumnReferenceNode(
+    const ColumnReferenceNode& other) :
+    field_name_(other.field_name_),
+    column_index_(other.column_index_) {}
+
+ColumnReferenceNode::ColumnReferenceNode(
     const String& field_name) :
     field_name_(field_name) {}
 
@@ -44,5 +49,11 @@ size_t ColumnReferenceNode::columnIndex() const {
 void ColumnReferenceNode::setColumnIndex(size_t index) {
   column_index_ = index;
 }
+
+RefPtr<QueryTreeNode> ColumnReferenceNode::deepCopy() const {
+  return new ColumnReferenceNode(*this);
+}
+
+
 
 } // namespace csql
