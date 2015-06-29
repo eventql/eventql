@@ -76,7 +76,7 @@ void SQLEngine::replaceSequentialScanWithUnion(
 
   auto partitions = TimeWindowPartitioner::partitionKeysFor(
       stream_key,
-      WallClock::unixMicros() - 120 * kMicrosPerDay,
+      WallClock::unixMicros() - 30 * kMicrosPerDay,
       WallClock::unixMicros(),
       4 * kMicrosPerHour);
 
