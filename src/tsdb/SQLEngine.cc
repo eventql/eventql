@@ -14,15 +14,19 @@
 namespace tsdb {
 
 SQLEngine::SQLEngine(TSDBNode* tsdb_node) : tsdb_node_(tsdb_node) {
-  csql::installDefaultSymbols(&symbol_table_);
+  installDefaultSymbols(&sql_runtime_);
 }
 
 RefPtr<csql::QueryPlan> SQLEngine::parseAndBuildQueryPlan(
     const String& tsdb_namespace,
     const String& query) {
-  return Runtime::parseAndBuildQueryPlan(
+  return runtime_parseAndBuildQueryPlan(
       query,
-      tableProviderForNamespace(tsdb_namespace));
+      tableProviderForNamespace(tsdb_namespace),
+      std::bind(
+          &SQLEngine::rewriteQuery,
+          tsdb_namespace,
+          std::placeholders::_1));
 }
 
 RefPtr<csql::QueryTreeNode> SQLEngine::rewriteQuery(
@@ -39,10 +43,6 @@ RefPtr<csql::QueryTreeNode> SQLEngine::rewriteQuery(
 RefPtr<csql::TableProvider> SQLEngine::tableProviderForNamespace(
     const String& tsdb_namespace) {
   return new TSDBTableProvider(tsdb_namespace, tsdb_node_);
-}
-
-RefPtr<csql::TableProvider> SQLEngine::defaultTableProvider() {
-  RAISE(kRuntimeError, "must provide a namespace");
 }
 
 void SQLEngine::replaceAllSequentialScansWithUnions(

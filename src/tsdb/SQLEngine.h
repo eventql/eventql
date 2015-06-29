@@ -14,7 +14,7 @@
 namespace tsdb {
 class TSDBNode;
 
-class SQLEngine : public csql::Runtime {
+class SQLEngine {
 public:
 
   SQLEngine(TSDBNode* tsdb_node);
@@ -29,7 +29,8 @@ protected:
       const String& tsdb_namespace);
 
   RefPtr<csql::QueryTreeNode> rewriteQuery(
-      RefPtr<csql::QueryTreeNode> query) override;
+      const String& tsdb_namespace,
+      RefPtr<csql::QueryTreeNode> query);
 
   void replaceAllSequentialScansWithUnions(
       RefPtr<csql::TableExpressionNode>* node);
@@ -37,9 +38,8 @@ protected:
   void replaceSequentialScanWithUnion(
       RefPtr<csql::TableExpressionNode>* node);
 
-  RefPtr<csql::TableProvider> defaultTableProvider() override;
-
   TSDBNode* tsdb_node_;
+  csql::Runtime sql_runtime_;
 };
 
 }
