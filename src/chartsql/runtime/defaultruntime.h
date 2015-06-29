@@ -20,20 +20,22 @@ namespace csql {
 class DefaultRuntime {
 public:
 
-  DefaultRuntime(SymbolTable* symbol_table);
+  DefaultRuntime();
 
-  RefPtr<ExecutionPlan> buildExecutionPlan(
-      RefPtr<QueryTreeNode> qtree,
-      TableRepository* tables);
+  RefPtr<QueryPlan> parseAndBuildQueryPlan(
+      const String& query,
+      RefPtr<TableProvider> tables);
 
   ScopedPtr<ValueExpression> buildValueExpression(
       RefPtr<ValueExpressionNode> expression);
 
   ScopedPtr<TableExpression> buildTableExpression(
       RefPtr<TableExpressionNode> expression,
-      TableRepository* tables);
+      RefPtr<TableProvider> tables);
 
 protected:
+  SymbolTable symbol_table_;
+  QueryPlanBuilder query_plan_builder_;
   ValueExpressionBuilder scalar_exp_builder_;
   TableExpressionBuilder table_exp_builder_;
 };

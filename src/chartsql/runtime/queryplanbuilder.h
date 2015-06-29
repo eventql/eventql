@@ -50,11 +50,6 @@ public:
 
   QueryPlanBuilder(SymbolTable* symbol_table);
 
-  /**
-   * Parses the provided SQL query and returns a query tree per statement
-   */
-  Vector<RefPtr<QueryTreeNode>> parseAndBuild(const String& query_string);
-
   RefPtr<QueryTreeNode> build(ASTNode* ast);
 
 //  QueryPlanBuilder(

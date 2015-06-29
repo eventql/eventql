@@ -15,19 +15,24 @@
 
 namespace csql {
 
-class QueryPlan {
+class QueryPlan : public RefCounted  {
 public:
 
-  QueryPlan(TableRepository* table_repo);
+  QueryPlan(
+      Vector<RefPtr<QueryTreeNode>> statements,
+      RefPtr<TableProvider> tables,
+      DefaultRuntime* runtime);
 
-  void addQuery(std::unique_ptr<QueryPlanNode> query);
-  const std::vector<std::unique_ptr<QueryPlanNode>>& queries();
+  size_t numStatements() const;
 
-  TableRepository* tableRepository();
+  void executeStatement(
+      size_t stmt_idx,
+      Function<bool (int argc, const SValue* argv)> fn);
 
 protected:
-  TableRepository* table_repo_;
-  std::vector<std::unique_ptr<QueryPlanNode>> queries_;
+  Vector<RefPtr<QueryTreeNode>> statements_;
+  RefPtr<TableProvider> tables_;
+  DefaultRuntime* runtime_;
 };
 
 class ExecutionPlan : public RefCounted {
