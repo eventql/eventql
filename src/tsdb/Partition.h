@@ -101,7 +101,7 @@ protected:
   RecordSet records_;
   const StreamConfig* config_;
   TSDBNodeRef* node_;
-  std::mutex mutex_;
+  mutable std::mutex mutex_;
   std::mutex replication_mutex_;
   DateTime last_compaction_;
   HashMap<uint64_t, uint64_t> repl_offsets_;
