@@ -743,8 +743,14 @@ ASTNode* Parser::limitClause() {
 }
 
 ASTNode* Parser::tableName() {
-  if (!assertExpectation(Token::T_IDENTIFIER)) {
-    return nullptr;
+  switch (cur_token_->getType()) {
+    case Token::T_IDENTIFIER:
+    case Token::T_STRING:
+      break;
+
+    default:
+      assertExpectation(Token::T_IDENTIFIER);
+
   }
 
   auto name = new ASTNode(ASTNode::T_TABLE_NAME);
