@@ -14,15 +14,15 @@
 namespace csql {
 namespace expressions {
 
-void eqExpr(void* scratchpad, int argc, SValue* argv, SValue* out);
-void neqExpr(void* scratchpad, int argc, SValue* argv, SValue* out);
-void andExpr(void* scratchpad, int argc, SValue* argv, SValue* out);
-void orExpr(void* scratchpad, int argc, SValue* argv, SValue* out);
-void negExpr(void* scratchpad, int argc, SValue* argv, SValue* out);
-void ltExpr(void* scratchpad, int argc, SValue* argv, SValue* out);
-void lteExpr(void* scratchpad, int argc, SValue* argv, SValue* out);
-void gtExpr(void* scratchpad, int argc, SValue* argv, SValue* out);
-void gteExpr(void* scratchpad, int argc, SValue* argv, SValue* out);
+void eqExpr(int argc, SValue* argv, SValue* out);
+void neqExpr(int argc, SValue* argv, SValue* out);
+void andExpr(int argc, SValue* argv, SValue* out);
+void orExpr(int argc, SValue* argv, SValue* out);
+void negExpr(int argc, SValue* argv, SValue* out);
+void ltExpr(int argc, SValue* argv, SValue* out);
+void lteExpr(int argc, SValue* argv, SValue* out);
+void gtExpr(int argc, SValue* argv, SValue* out);
+void gteExpr(int argc, SValue* argv, SValue* out);
 
 }
 }
