@@ -18,12 +18,10 @@ using namespace fnord;
 namespace csql {
 
 enum kInstructionType {
-  X_CALL,
   X_CALL_PURE,
   X_CALL_AGGREGATE,
   X_LITERAL,
-  X_INPUT,
-  X_MULTI
+  X_INPUT
 };
 
 struct Instruction {
