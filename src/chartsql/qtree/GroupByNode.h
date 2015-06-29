@@ -10,7 +10,7 @@
 #pragma once
 #include <fnord/stdtypes.h>
 #include <chartsql/qtree/QueryTreeNode.h>
-#include <chartsql/qtree/ScalarExpressionNode.h>
+#include <chartsql/qtree/ValueExpressionNode.h>
 #include <chartsql/qtree/SelectListNode.h>
 
 using namespace fnord;
@@ -22,18 +22,18 @@ public:
 
   GroupByNode(
       Vector<RefPtr<SelectListNode>> select_list,
-      Vector<RefPtr<ScalarExpressionNode>> group_exprs,
+      Vector<RefPtr<ValueExpressionNode>> group_exprs,
       RefPtr<TableExpressionNode> table);
 
   Vector<RefPtr<SelectListNode>> selectList() const;
 
-  Vector<RefPtr<ScalarExpressionNode>> groupExpressions() const;
+  Vector<RefPtr<ValueExpressionNode>> groupExpressions() const;
 
   RefPtr<TableExpressionNode> inputTable() const;
 
 protected:
   Vector<RefPtr<SelectListNode>> select_list_;
-  Vector<RefPtr<ScalarExpressionNode>> group_exprs_;
+  Vector<RefPtr<ValueExpressionNode>> group_exprs_;
   RefPtr<TableExpressionNode> table_;
 };
 

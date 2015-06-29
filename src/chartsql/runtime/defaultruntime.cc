@@ -32,8 +32,8 @@ RefPtr<ExecutionPlan> DefaultRuntime::buildExecutionPlan(
       "cannot figure out how to build a query plan for this QTree node");
 }
 
-ScopedPtr<ScalarExpression> DefaultRuntime::buildScalarExpression(
-    RefPtr<ScalarExpressionNode> node) {
+ScopedPtr<ValueExpression> DefaultRuntime::buildValueExpression(
+    RefPtr<ValueExpressionNode> node) {
   return scalar_exp_builder_.compile(node);
 }
 

@@ -15,10 +15,10 @@ using namespace fnord;
 
 namespace csql {
 
-class ScalarExpressionNode : public QueryTreeNode {
+class ValueExpressionNode : public QueryTreeNode {
 public:
 
-  virtual Vector<RefPtr<ScalarExpressionNode>> arguments() const = 0;
+  virtual Vector<RefPtr<ValueExpressionNode>> arguments() const = 0;
 
 };
 

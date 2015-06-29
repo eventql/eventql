@@ -27,7 +27,7 @@ bool executeExpression(
   RAISE(kNotImplementedError);
 }
 
-SValue executeSimpleConstExpression(ScalarExpressionBuilder* compiler, ASTNode* expr) {
+SValue executeSimpleConstExpression(ValueExpressionBuilder* compiler, ASTNode* expr) {
   RAISE(kNotImplementedError);
 }
 

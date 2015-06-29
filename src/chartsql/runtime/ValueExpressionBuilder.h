@@ -9,13 +9,13 @@
  */
 #pragma once
 #include <fnord/stdtypes.h>
-#include <chartsql/qtree/ScalarExpressionNode.h>
+#include <chartsql/qtree/ValueExpressionNode.h>
 #include <chartsql/qtree/ColumnReferenceNode.h>
 #include <chartsql/qtree/CallExpressionNode.h>
 #include <chartsql/qtree/LiteralExpressionNode.h>
 #include <chartsql/qtree/IfExpressionNode.h>
 #include <chartsql/runtime/symboltable.h>
-#include <chartsql/runtime/ScalarExpression.h>
+#include <chartsql/runtime/ValueExpression.h>
 #include <chartsql/svalue.h>
 
 using namespace fnord;
@@ -23,13 +23,13 @@ using namespace fnord;
 namespace csql {
 class ASTNode;
 
-class ScalarExpressionBuilder {
+class ValueExpressionBuilder {
 public:
-  ScalarExpressionBuilder(SymbolTable* symbol_table);
+  ValueExpressionBuilder(SymbolTable* symbol_table);
 
   Instruction* compile(ASTNode* ast, size_t* dynamic_storage_size);
 
-  ScopedPtr<ScalarExpression> compile(RefPtr<ScalarExpressionNode> node);
+  ScopedPtr<ValueExpression> compile(RefPtr<ValueExpressionNode> node);
 
   SymbolTable* symbolTable() { return symbol_table_; }
 
@@ -40,8 +40,8 @@ protected:
       size_t* dynamic_storage_size,
       ScratchMemory* static_storage);
 
-  Instruction* compileScalarExpression(
-      RefPtr<ScalarExpressionNode> node,
+  Instruction* compileValueExpression(
+      RefPtr<ValueExpressionNode> node,
       size_t* dynamic_storage_size,
       ScratchMemory* static_storage);
 

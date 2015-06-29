@@ -19,8 +19,8 @@ const SValue& LiteralExpressionNode::value() const {
   return value_;
 }
 
-Vector<RefPtr<ScalarExpressionNode>> LiteralExpressionNode::arguments() const {
-  return Vector<RefPtr<ScalarExpressionNode>>{};
+Vector<RefPtr<ValueExpressionNode>> LiteralExpressionNode::arguments() const {
+  return Vector<RefPtr<ValueExpressionNode>>{};
 }
 
 } // namespace csql

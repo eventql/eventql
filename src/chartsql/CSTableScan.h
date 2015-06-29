@@ -43,24 +43,24 @@ protected:
   struct ExpressionRef {
     ExpressionRef(
         size_t _rep_level,
-        ScopedPtr<ScalarExpression> _compiled,
+        ScopedPtr<ValueExpression> _compiled,
         ScratchMemory* scratch);
 
     ExpressionRef(ExpressionRef&& other);
     ~ExpressionRef();
 
     size_t rep_level;
-    ScopedPtr<ScalarExpression> compiled;
-    ScalarExpression::Instance instance;
+    ScopedPtr<ValueExpression> compiled;
+    ValueExpression::Instance instance;
   };
 
   void findColumns(
-      RefPtr<ScalarExpressionNode> expr,
+      RefPtr<ValueExpressionNode> expr,
       Set<String>* column_names) const;
 
-  void resolveColumns(RefPtr<ScalarExpressionNode> expr) const;
+  void resolveColumns(RefPtr<ValueExpressionNode> expr) const;
 
-  uint64_t findMaxRepetitionLevel(RefPtr<ScalarExpressionNode> expr) const;
+  uint64_t findMaxRepetitionLevel(RefPtr<ValueExpressionNode> expr) const;
 
   void fetch();
 
