@@ -12,7 +12,7 @@
 
 namespace tsdb {
 
-SQLEngine::SQLEngine() {
+SQLEngine::SQLEngine() : tables_(new TSDBTableProvider()) {
   csql::installDefaultSymbols(&symbol_table_);
 }
 
@@ -22,7 +22,7 @@ RefPtr<csql::QueryTreeNode> SQLEngine::rewriteQuery(
 }
 
 RefPtr<csql::TableProvider> SQLEngine::defaultTableProvider() {
-  return new csql::TableRepository();
+  return tables_.get();
 }
 
 }

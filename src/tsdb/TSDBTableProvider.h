@@ -8,24 +8,23 @@
  * <http://www.gnu.org/licenses/>.
  */
 #pragma once
-#include <chartsql/runtime/runtime.h>
-#include <tsdb/TSDBTableProvider.h>
+#include <fnord/stdtypes.h>
+#include <chartsql/runtime/tablerepository.h>
+
+using namespace fnord;
 
 namespace tsdb {
 
-class SQLEngine : public csql::Runtime {
+struct TSDBTableProvider : public csql::TableProvider {
 public:
 
-  SQLEngine();
+  TSDBTableProvider();
 
-protected:
+  Option<ScopedPtr<csql::TableExpression>> buildSequentialScan(
+        RefPtr<csql::SequentialScanNode> node,
+        csql::Runtime* runtime) const override;
 
-  RefPtr<csql::QueryTreeNode> rewriteQuery(
-      RefPtr<csql::QueryTreeNode> query) override;
-
-  RefPtr<csql::TableProvider> defaultTableProvider() override;
-
-  RefPtr<TSDBTableProvider> tables_;
 };
 
-}
+
+} // namespace csql
