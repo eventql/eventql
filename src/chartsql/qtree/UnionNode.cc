@@ -15,7 +15,11 @@ namespace csql {
 
 UnionNode::UnionNode(
     Vector<RefPtr<TableExpressionNode>> tables) :
-    tables_(tables) {}
+    tables_(tables) {
+  for (auto& table : tables_) {
+    addInputTable(&table);
+  }
+}
 
 Vector<RefPtr<TableExpressionNode>> UnionNode::inputTables() const {
   return tables_;
