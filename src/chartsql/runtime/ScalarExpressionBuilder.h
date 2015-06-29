@@ -13,6 +13,7 @@
 #include <chartsql/qtree/ColumnReferenceNode.h>
 #include <chartsql/qtree/CallExpressionNode.h>
 #include <chartsql/qtree/LiteralExpressionNode.h>
+#include <chartsql/qtree/IfExpressionNode.h>
 #include <chartsql/runtime/symboltable.h>
 #include <chartsql/runtime/ScalarExpression.h>
 #include <chartsql/svalue.h>
@@ -28,12 +29,16 @@ public:
 
   Instruction* compile(ASTNode* ast, size_t* dynamic_storage_size);
 
-  ScopedPtr<ScalarExpression> compile(
-      RefPtr<ScalarExpressionNode> node);
+  ScopedPtr<ScalarExpression> compile(RefPtr<ScalarExpressionNode> node);
 
   SymbolTable* symbolTable() { return symbol_table_; }
 
 protected:
+
+  Instruction* compileIfStatement(
+      RefPtr<IfExpressionNode> node,
+      size_t* dynamic_storage_size,
+      ScratchMemory* static_storage);
 
   Instruction* compileScalarExpression(
       RefPtr<ScalarExpressionNode> node,

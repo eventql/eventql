@@ -45,7 +45,6 @@ Instruction* ScalarExpressionBuilder::compileScalarExpression(
    RefPtr<ScalarExpressionNode> node,
    size_t* dynamic_storage_size,
    ScratchMemory* static_storage) {
-
   if (dynamic_cast<ColumnReferenceNode*>(node.get())) {
     return compileColumnReference(
         node.asInstanceOf<ColumnReferenceNode>(),
@@ -55,6 +54,13 @@ Instruction* ScalarExpressionBuilder::compileScalarExpression(
   if (dynamic_cast<LiteralExpressionNode*>(node.get())) {
     return compileLiteral(
         node.asInstanceOf<LiteralExpressionNode>(),
+        dynamic_storage_size,
+        static_storage);
+  }
+
+  if (dynamic_cast<IfExpressionNode*>(node.get())) {
+    return compileIfStatement(
+        node.asInstanceOf<IfExpressionNode>(),
         dynamic_storage_size,
         static_storage);
   }
@@ -134,7 +140,33 @@ Instruction* ScalarExpressionBuilder::compileMethodCall(
   }
 
   return op;
+}
 
+Instruction* ScalarExpressionBuilder::compileIfStatement(
+    RefPtr<IfExpressionNode> node,
+    size_t* dynamic_storage_size,
+    ScratchMemory* static_storage) {
+  const auto& args = node->arguments();
+
+  auto op = static_storage->construct<Instruction>();
+  op->type = X_IF;
+  op->arg0  = nullptr;
+  op->argn  = args.size();
+  op->child = nullptr;
+  op->next  = nullptr;
+
+  auto cur = &op->child;
+  for (auto e : args) {
+    auto next = compileScalarExpression(
+        e,
+        dynamic_storage_size,
+        static_storage);
+
+    *cur = next;
+    cur = &next->next;
+  }
+
+  return op;
 }
 
 }
