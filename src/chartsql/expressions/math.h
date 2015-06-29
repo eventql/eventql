@@ -15,11 +15,11 @@ namespace csql {
 namespace expressions {
 
 void addExpr(int argc, SValue* argv, SValue* out);
-void subExpr(void* scratchpad, int argc, SValue* argv, SValue* out);
-void mulExpr(void* scratchpad, int argc, SValue* argv, SValue* out);
-void divExpr(void* scratchpad, int argc, SValue* argv, SValue* out);
-void modExpr(void* scratchpad, int argc, SValue* argv, SValue* out);
-void powExpr(void* scratchpad, int argc, SValue* argv, SValue* out);
+void subExpr(int argc, SValue* argv, SValue* out);
+void mulExpr(int argc, SValue* argv, SValue* out);
+void divExpr(int argc, SValue* argv, SValue* out);
+void modExpr(int argc, SValue* argv, SValue* out);
+void powExpr(int argc, SValue* argv, SValue* out);
 
 }
 }
