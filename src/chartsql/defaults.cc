@@ -49,15 +49,15 @@ void installDefaultSymbols(SymbolTable* symbol_table) {
       &expressions::maxExprFree);
 
   /* expressions/boolean.h */
-  symbol_table->registerSymbol("eq", &expressions::eqExpr);
-  symbol_table->registerSymbol("neq", &expressions::neqExpr);
-  symbol_table->registerSymbol("and", &expressions::andExpr);
-  symbol_table->registerSymbol("or", &expressions::orExpr);
-  symbol_table->registerSymbol("neg", &expressions::negExpr);
-  symbol_table->registerSymbol("lt", &expressions::ltExpr);
-  symbol_table->registerSymbol("lte", &expressions::lteExpr);
-  symbol_table->registerSymbol("gt", &expressions::gtExpr);
-  symbol_table->registerSymbol("gte", &expressions::gteExpr);
+  symbol_table->registerFunction("eq", &expressions::eqExpr);
+  symbol_table->registerFunction("neq", &expressions::neqExpr);
+  symbol_table->registerFunction("and", &expressions::andExpr);
+  symbol_table->registerFunction("or", &expressions::orExpr);
+  symbol_table->registerFunction("neg", &expressions::negExpr);
+  symbol_table->registerFunction("lt", &expressions::ltExpr);
+  symbol_table->registerFunction("lte", &expressions::lteExpr);
+  symbol_table->registerFunction("gt", &expressions::gtExpr);
+  symbol_table->registerFunction("gte", &expressions::gteExpr);
 
   /* expressions/datetime.h */
   symbol_table->registerSymbol("FROM_TIMESTAMP", &expressions::fromTimestamp);
