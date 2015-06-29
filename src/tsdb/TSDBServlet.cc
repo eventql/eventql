@@ -258,10 +258,8 @@ void TSDBServlet::executeSQL(
     RefPtr<http::HTTPResponseStream> res_stream,
     URI* uri) {
   if (!req->hasHeader("X-TSDB-Namespace")) {
-    http::HTTPResponse res;
-    res.populateFromRequest(*req);
-    res.setStatus(fnord::http::kStatusBadRequest);
-    res.addBody("missing X-TSDB-Namespace header");
+    res->setStatus(fnord::http::kStatusBadRequest);
+    res->addBody("missing X-TSDB-Namespace header");
     res_stream->writeResponse(res);
     return;
   }
@@ -278,7 +276,6 @@ void TSDBServlet::executeSQL(
   format.formatResults(qplan, BufferOutputStream::fromBuffer(&result));
 
   res->setStatus(http::kStatusOK);
-  res->addHeader("Access-Control-Allow-Origin", "*");
   res->addHeader("Content-Type", "text/plain");
   res->addHeader("Connection", "close");
   res_stream->startResponse(*res);
