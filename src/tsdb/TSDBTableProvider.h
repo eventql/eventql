@@ -18,12 +18,14 @@ namespace tsdb {
 struct TSDBTableProvider : public csql::TableProvider {
 public:
 
-  TSDBTableProvider();
+  TSDBTableProvider(const String& tsdb_namespace);
 
   Option<ScopedPtr<csql::TableExpression>> buildSequentialScan(
         RefPtr<csql::SequentialScanNode> node,
         csql::Runtime* runtime) const override;
 
+protected:
+  String tsdb_namespace_;
 };
 
 

@@ -12,7 +12,7 @@
 
 namespace tsdb {
 
-SQLEngine::SQLEngine() : tables_(new TSDBTableProvider()) {
+SQLEngine::SQLEngine() {
   csql::installDefaultSymbols(&symbol_table_);
 }
 
@@ -21,8 +21,13 @@ RefPtr<csql::QueryTreeNode> SQLEngine::rewriteQuery(
   return query;
 }
 
+RefPtr<csql::TableProvider> SQLEngine::tableProviderForNamespace(
+    const String& tsdb_namespace) {
+  return new TSDBTableProvider(tsdb_namespace);
+}
+
 RefPtr<csql::TableProvider> SQLEngine::defaultTableProvider() {
-  return tables_.get();
+  RAISE(kRuntimeError, "must provide a namespace");
 }
 
 }

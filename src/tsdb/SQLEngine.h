@@ -18,6 +18,9 @@ public:
 
   SQLEngine();
 
+  RefPtr<csql::TableProvider> tableProviderForNamespace(
+      const String& tsdb_namespace);
+
 protected:
 
   RefPtr<csql::QueryTreeNode> rewriteQuery(
@@ -25,7 +28,6 @@ protected:
 
   RefPtr<csql::TableProvider> defaultTableProvider() override;
 
-  RefPtr<TSDBTableProvider> tables_;
 };
 
 }

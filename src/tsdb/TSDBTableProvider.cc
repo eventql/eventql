@@ -14,7 +14,9 @@ using namespace fnord;
 
 namespace tsdb {
 
-TSDBTableProvider::TSDBTableProvider() {}
+TSDBTableProvider::TSDBTableProvider(
+    const String& tsdb_namespace) :
+    tsdb_namespace_(tsdb_namespace) {}
 
 Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildSequentialScan(
       RefPtr<csql::SequentialScanNode> node,
