@@ -28,9 +28,12 @@ protected:
   RefPtr<csql::TableProvider> tableProviderForNamespace(
       const String& tsdb_namespace);
 
-
   RefPtr<csql::QueryTreeNode> rewriteQuery(
       RefPtr<csql::QueryTreeNode> query) override;
+
+  void replaceAllSequentialScansWithUnions(RefPtr<csql::QueryTreeNode>* node);
+
+  void replaceSequentialScanWithUnion(RefPtr<csql::QueryTreeNode>* node);
 
   RefPtr<csql::TableProvider> defaultTableProvider() override;
 
