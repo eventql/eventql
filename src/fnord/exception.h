@@ -30,6 +30,7 @@ const char kKeyError[] = "KeyError";
 const char kMallocError[] = "MallocError";
 const char kNoSuchMethodError[] = "NoSuchMethodError";
 const char kNotImplementedError[] = "NotImplementedError";
+const char kNotFoundError[] = "NotFoundError";
 const char kNotYetImplementedError[] = "NotYetImplementedError";
 const char kNullPointerError[] = "NullPointerError";
 const char kParseError[] = "ParseError";
