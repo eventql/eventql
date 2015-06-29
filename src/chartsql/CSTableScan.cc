@@ -41,7 +41,7 @@ CSTableScan::CSTableScan(
   for (const auto& slnode : stmt->selectList()) {
     select_list_.emplace_back(
         findMaxRepetitionLevel(slnode->expression()),
-        runtime->buildScalarExpression(slnode->expression()),
+        runtime->buildValueExpression(slnode->expression()),
         &scratch_);
   }
 }
@@ -213,7 +213,7 @@ void CSTableScan::execute(
 }
 
 void CSTableScan::findColumns(
-    RefPtr<ScalarExpressionNode> expr,
+    RefPtr<ValueExpressionNode> expr,
     Set<String>* column_names) const {
   auto fieldref = dynamic_cast<ColumnReferenceNode*>(expr.get());
   if (fieldref != nullptr) {
@@ -225,7 +225,7 @@ void CSTableScan::findColumns(
   }
 }
 
-void CSTableScan::resolveColumns(RefPtr<ScalarExpressionNode> expr) const {
+void CSTableScan::resolveColumns(RefPtr<ValueExpressionNode> expr) const {
   auto fieldref = dynamic_cast<ColumnReferenceNode*>(expr.get());
   if (fieldref != nullptr) {
     auto col = columns_.find(fieldref->fieldName());
@@ -242,7 +242,7 @@ void CSTableScan::resolveColumns(RefPtr<ScalarExpressionNode> expr) const {
 }
 
 uint64_t CSTableScan::findMaxRepetitionLevel(
-    RefPtr<ScalarExpressionNode> expr) const {
+    RefPtr<ValueExpressionNode> expr) const {
   uint64_t max_level = 0;
 
   auto fieldref = dynamic_cast<ColumnReferenceNode*>(expr.get());
@@ -276,7 +276,7 @@ CSTableScan::ColumnRef::ColumnRef(
 
 CSTableScan::ExpressionRef::ExpressionRef(
     size_t _rep_level,
-    ScopedPtr<ScalarExpression> _compiled,
+    ScopedPtr<ValueExpression> _compiled,
     ScratchMemory* smem) :
     rep_level(_rep_level),
     compiled(std::move(_compiled)),

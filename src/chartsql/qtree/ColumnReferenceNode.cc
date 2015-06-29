@@ -26,8 +26,8 @@ const String& ColumnReferenceNode::fieldName() const {
   return field_name_;
 }
 
-Vector<RefPtr<ScalarExpressionNode>> ColumnReferenceNode::arguments() const {
-  return Vector<RefPtr<ScalarExpressionNode>>{};
+Vector<RefPtr<ValueExpressionNode>> ColumnReferenceNode::arguments() const {
+  return Vector<RefPtr<ValueExpressionNode>>{};
 }
 
 size_t ColumnReferenceNode::columnIndex() const {

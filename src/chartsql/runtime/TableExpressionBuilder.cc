@@ -44,16 +44,16 @@ ScopedPtr<TableExpression> TableExpressionBuilder::buildGroupBy(
     RefPtr<GroupByNode> node,
     DefaultRuntime* runtime,
     TableProvider* tables) {
-  Vector<ScopedPtr<ScalarExpression>> select_expressions;
-  Vector<ScopedPtr<ScalarExpression>> group_expressions;
+  Vector<ScopedPtr<ValueExpression>> select_expressions;
+  Vector<ScopedPtr<ValueExpression>> group_expressions;
 
   for (const auto& slnode : node->selectList()) {
     select_expressions.emplace_back(
-        runtime->buildScalarExpression(slnode->expression()));
+        runtime->buildValueExpression(slnode->expression()));
   }
 
   for (const auto& e : node->groupExpressions()) {
-    group_expressions.emplace_back(runtime->buildScalarExpression(e));
+    group_expressions.emplace_back(runtime->buildValueExpression(e));
   }
 
   auto next = build(node->inputTable(), runtime, tables);

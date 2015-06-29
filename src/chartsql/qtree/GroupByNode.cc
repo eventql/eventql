@@ -15,7 +15,7 @@ namespace csql {
 
 GroupByNode::GroupByNode(
     Vector<RefPtr<SelectListNode>> select_list,
-    Vector<RefPtr<ScalarExpressionNode>> group_exprs,
+    Vector<RefPtr<ValueExpressionNode>> group_exprs,
     RefPtr<TableExpressionNode> table) :
     select_list_(select_list),
     group_exprs_(group_exprs),
@@ -25,7 +25,7 @@ Vector<RefPtr<SelectListNode>> GroupByNode::selectList() const {
   return select_list_;
 }
 
-Vector<RefPtr<ScalarExpressionNode>> GroupByNode::groupExpressions() const {
+Vector<RefPtr<ValueExpressionNode>> GroupByNode::groupExpressions() const {
   return group_exprs_;
 }
 

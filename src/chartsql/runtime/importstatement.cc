@@ -16,7 +16,7 @@
 
 namespace csql {
 
-ImportStatement::ImportStatement(ASTNode* ast, ScalarExpressionBuilder* compiler) {
+ImportStatement::ImportStatement(ASTNode* ast, ValueExpressionBuilder* compiler) {
   if (ast->getChildren().size() < 2) {
     RAISE(kRuntimeError, "corrupt ast: ASTNode::Import\n");
   }

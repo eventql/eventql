@@ -70,7 +70,7 @@ RefPtr<QueryTreeNode> QueryPlanBuilder::build(ASTNode* ast) {
 }
 
 //QueryPlanBuilder::QueryPlanBuilder(
-//    ScalarExpressionBuilder* compiler,
+//    ValueExpressionBuilder* compiler,
 //    const std::vector<std::unique_ptr<Backend>>& backends) :
 //    QueryPlanBuilderInterface(compiler, backends) {}
 
@@ -346,7 +346,7 @@ QueryTreeNode* QueryPlanBuilder::buildGroupBy(ASTNode* ast) {
   child_ast->appendChild(child_sl, 0);
 
   /* search for a group by clause */
-  Vector<RefPtr<ScalarExpressionNode>> group_expressions;
+  Vector<RefPtr<ValueExpressionNode>> group_expressions;
   for (const auto& child : ast->getChildren()) {
     if (child->getType() != ASTNode::T_GROUP_BY) {
       continue;
@@ -757,7 +757,7 @@ QueryTreeNode* QueryPlanBuilder::buildSequentialScan(ASTNode* ast) {
   }
 
   /* get where expression */
-  Option<RefPtr<ScalarExpressionNode>> where_expr;
+  Option<RefPtr<ValueExpressionNode>> where_expr;
   if (ast->getChildren().size() > 2) {
     ASTNode* where_clause = ast->getChildren()[2];
     if (!(where_clause)) {
@@ -784,7 +784,7 @@ QueryTreeNode* QueryPlanBuilder::buildSequentialScan(ASTNode* ast) {
           "where expressions can only contain pure functions\n");
     }
 
-    where_expr = Some(RefPtr<ScalarExpressionNode>(buildValueExpression(e)));
+    where_expr = Some(RefPtr<ValueExpressionNode>(buildValueExpression(e)));
   }
 
   bool has_aggregation = false;
@@ -830,7 +830,7 @@ QueryTreeNode* QueryPlanBuilder::buildSequentialScan(ASTNode* ast) {
   return seqscan;
 }
 
-ScalarExpressionNode* QueryPlanBuilder::buildValueExpression(ASTNode* ast) {
+ValueExpressionNode* QueryPlanBuilder::buildValueExpression(ASTNode* ast) {
   if (ast == nullptr) {
     RAISE(kNullPointerError, "can't build nullptr");
   }
@@ -902,7 +902,7 @@ ScalarExpressionNode* QueryPlanBuilder::buildValueExpression(ASTNode* ast) {
   }
 }
 
-ScalarExpressionNode* QueryPlanBuilder::buildLiteral(ASTNode* ast) {
+ValueExpressionNode* QueryPlanBuilder::buildLiteral(ASTNode* ast) {
   if (ast->getToken() == nullptr) {
     RAISE(kRuntimeError, "internal error: corrupt ast");
   }
@@ -937,10 +937,10 @@ ScalarExpressionNode* QueryPlanBuilder::buildLiteral(ASTNode* ast) {
   return new LiteralExpressionNode(literal);
 }
 
-ScalarExpressionNode* QueryPlanBuilder::buildOperator(
+ValueExpressionNode* QueryPlanBuilder::buildOperator(
     const std::string& name,
     ASTNode* ast) {
-  Vector<RefPtr<ScalarExpressionNode>> args;
+  Vector<RefPtr<ValueExpressionNode>> args;
   for (auto e : ast->getChildren()) {
     args.emplace_back(buildValueExpression(e));
   }
@@ -948,7 +948,7 @@ ScalarExpressionNode* QueryPlanBuilder::buildOperator(
   return new CallExpressionNode(name, args);
 }
 
-ScalarExpressionNode* QueryPlanBuilder::buildMethodCall(ASTNode* ast) {
+ValueExpressionNode* QueryPlanBuilder::buildMethodCall(ASTNode* ast) {
   if (ast->getToken() == nullptr ||
       ast->getToken()->getType() != Token::T_IDENTIFIER) {
     RAISE(kRuntimeError, "corrupt AST");
@@ -956,7 +956,7 @@ ScalarExpressionNode* QueryPlanBuilder::buildMethodCall(ASTNode* ast) {
 
   auto symbol = ast->getToken()->getString();
 
-  Vector<RefPtr<ScalarExpressionNode>> args;
+  Vector<RefPtr<ValueExpressionNode>> args;
   for (auto e : ast->getChildren()) {
     args.emplace_back(buildValueExpression(e));
   }
@@ -964,8 +964,8 @@ ScalarExpressionNode* QueryPlanBuilder::buildMethodCall(ASTNode* ast) {
   return new CallExpressionNode(symbol, args);
 }
 
-ScalarExpressionNode* QueryPlanBuilder::buildIfStatement(ASTNode* ast) {
-  Vector<RefPtr<ScalarExpressionNode>> args;
+ValueExpressionNode* QueryPlanBuilder::buildIfStatement(ASTNode* ast) {
+  Vector<RefPtr<ValueExpressionNode>> args;
   for (auto e : ast->getChildren()) {
     args.emplace_back(buildValueExpression(e));
   }
@@ -977,7 +977,7 @@ ScalarExpressionNode* QueryPlanBuilder::buildIfStatement(ASTNode* ast) {
   return new IfExpressionNode(args[0], args[1], args[2]);
 }
 
-ScalarExpressionNode* QueryPlanBuilder::buildColumnReference(ASTNode* ast) {
+ValueExpressionNode* QueryPlanBuilder::buildColumnReference(ASTNode* ast) {
   String column_name;
 
   for (

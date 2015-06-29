@@ -14,30 +14,30 @@ using namespace fnord;
 namespace csql {
 
 IfExpressionNode::IfExpressionNode(
-    RefPtr<ScalarExpressionNode> conditional_expr,
-    RefPtr<ScalarExpressionNode> true_branch_expr,
-    RefPtr<ScalarExpressionNode> false_branch_expr) :
+    RefPtr<ValueExpressionNode> conditional_expr,
+    RefPtr<ValueExpressionNode> true_branch_expr,
+    RefPtr<ValueExpressionNode> false_branch_expr) :
     conditional_expr_(conditional_expr),
     true_branch_expr_(true_branch_expr),
     false_branch_expr_(false_branch_expr) {}
 
-Vector<RefPtr<ScalarExpressionNode>> IfExpressionNode::arguments() const {
-  Vector<RefPtr<ScalarExpressionNode>> args;
+Vector<RefPtr<ValueExpressionNode>> IfExpressionNode::arguments() const {
+  Vector<RefPtr<ValueExpressionNode>> args;
   args.emplace_back(conditional_expr_);
   args.emplace_back(true_branch_expr_);
   args.emplace_back(false_branch_expr_);
   return args;
 }
 
-RefPtr<ScalarExpressionNode> IfExpressionNode::conditional() const {
+RefPtr<ValueExpressionNode> IfExpressionNode::conditional() const {
   return conditional_expr_;
 }
 
-RefPtr<ScalarExpressionNode> IfExpressionNode::trueBranch() const {
+RefPtr<ValueExpressionNode> IfExpressionNode::trueBranch() const {
   return true_branch_expr_;
 }
 
-RefPtr<ScalarExpressionNode> IfExpressionNode::falseBranch() const {
+RefPtr<ValueExpressionNode> IfExpressionNode::falseBranch() const {
   return false_branch_expr_;
 }
 

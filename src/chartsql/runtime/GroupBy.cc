@@ -13,8 +13,8 @@ namespace csql {
 
 GroupBy::GroupBy(
     ScopedPtr<TableExpression> source,
-    Vector<ScopedPtr<ScalarExpression>> select_expressions,
-    Vector<ScopedPtr<ScalarExpression>> group_expressions) :
+    Vector<ScopedPtr<ValueExpression>> select_expressions,
+    Vector<ScopedPtr<ValueExpression>> group_expressions) :
     source_(std::move(source)),
     select_exprs_(std::move(select_expressions)),
     group_exprs_(std::move(group_expressions)) {}

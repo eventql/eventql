@@ -10,7 +10,7 @@
 #pragma once
 #include <fnord/stdtypes.h>
 #include <chartsql/qtree/QueryTreeNode.h>
-#include <chartsql/qtree/ScalarExpressionNode.h>
+#include <chartsql/qtree/ValueExpressionNode.h>
 
 using namespace fnord;
 
@@ -19,12 +19,12 @@ namespace csql {
 class SelectListNode : public QueryTreeNode {
 public:
 
-  SelectListNode(RefPtr<ScalarExpressionNode> expr);
+  SelectListNode(RefPtr<ValueExpressionNode> expr);
 
-  RefPtr<ScalarExpressionNode> expression() const;
+  RefPtr<ValueExpressionNode> expression() const;
 
 protected:
-  RefPtr<ScalarExpressionNode> expr_;
+  RefPtr<ValueExpressionNode> expr_;
 };
 
 } // namespace csql

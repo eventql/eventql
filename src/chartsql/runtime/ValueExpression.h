@@ -38,19 +38,19 @@ struct Instruction {
   void (*call)(void*, int, SValue*, SValue*); // delete me
 };
 
-class ScalarExpression {
+class ValueExpression {
 public:
 
   struct Instance {
     void* scratch;
   };
 
-  ScalarExpression(
+  ValueExpression(
       Instruction* entry,
       ScratchMemory&& static_storage,
       size_t dynamic_storage_size);
 
-  ~ScalarExpression();
+  ~ValueExpression();
 
   void evaluate(
       int argc,
