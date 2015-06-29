@@ -24,6 +24,14 @@ public:
 
   virtual RefPtr<QueryTreeNode> deepCopy() const = 0;
 
+  template <typename T>
+  RefPtr<T> deepCopyAs() const;
+
 };
+
+template <typename T>
+RefPtr<T> QueryTreeNode::deepCopyAs() const {
+  return deepCopy().asInstanceOf<T>();
+}
 
 } // namespace csql
