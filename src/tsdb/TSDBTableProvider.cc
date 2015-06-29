@@ -9,14 +9,17 @@
  */
 #include <fnord/SHA1.h>
 #include <tsdb/TSDBTableProvider.h>
+#include <tsdb/TSDBNode.h>
 
 using namespace fnord;
 
 namespace tsdb {
 
 TSDBTableProvider::TSDBTableProvider(
-    const String& tsdb_namespace) :
-    tsdb_namespace_(tsdb_namespace) {}
+    const String& tsdb_namespace,
+    TSDBNode* node) :
+    tsdb_namespace_(tsdb_namespace),
+    tsdb_node_(node) {}
 
 Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildSequentialScan(
       RefPtr<csql::SequentialScanNode> node,

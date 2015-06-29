@@ -14,11 +14,12 @@
 using namespace fnord;
 
 namespace tsdb {
+class TSDBNode;
 
 struct TSDBTableProvider : public csql::TableProvider {
 public:
 
-  TSDBTableProvider(const String& tsdb_namespace);
+  TSDBTableProvider(const String& tsdb_namespace, TSDBNode* node);
 
   Option<ScopedPtr<csql::TableExpression>> buildSequentialScan(
         RefPtr<csql::SequentialScanNode> node,
@@ -26,6 +27,7 @@ public:
 
 protected:
   String tsdb_namespace_;
+  TSDBNode* tsdb_node_;
 };
 
 

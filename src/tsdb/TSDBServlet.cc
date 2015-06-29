@@ -257,8 +257,12 @@ void TSDBServlet::executeSQL(
     http::HTTPResponse* res,
     RefPtr<http::HTTPResponseStream> res_stream,
     URI* uri) {
+  auto tsdb_ns = req->getHeader("X-TSDB-Namespace");
+
   auto query = req->body().toString();
-  auto qplan = node_->sqlEngine()->parseAndBuildQueryPlan(query);
+  auto qplan = node_->sqlEngine()->parseAndBuildQueryPlan(
+      tsdb_ns,
+      query);
 
   Buffer result;
   csql::ASCIITableFormat format;

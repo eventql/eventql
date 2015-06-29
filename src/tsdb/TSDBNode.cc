@@ -27,7 +27,8 @@ TSDBNode::TSDBNode(
             "index.db",
             "index.db.lck"),
         .replication_scheme = replication_scheme,
-        .http = http} {}
+        .http = http},
+    sql_engine_(this) {}
 
 // FIXPAUL proper longest prefix search ;)
 StreamConfig* TSDBNode::configFor(

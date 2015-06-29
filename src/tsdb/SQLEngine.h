@@ -12,22 +12,29 @@
 #include <tsdb/TSDBTableProvider.h>
 
 namespace tsdb {
+class TSDBNode;
 
 class SQLEngine : public csql::Runtime {
 public:
 
-  SQLEngine();
+  SQLEngine(TSDBNode* tsdb_node);
+
+  RefPtr<csql::QueryPlan> parseAndBuildQueryPlan(
+      const String& tsdb_namespace,
+      const String& query);
+
+protected:
 
   RefPtr<csql::TableProvider> tableProviderForNamespace(
       const String& tsdb_namespace);
 
-protected:
 
   RefPtr<csql::QueryTreeNode> rewriteQuery(
       RefPtr<csql::QueryTreeNode> query) override;
 
   RefPtr<csql::TableProvider> defaultTableProvider() override;
 
+  TSDBNode* tsdb_node_;
 };
 
 }
