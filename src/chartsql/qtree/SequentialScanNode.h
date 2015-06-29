@@ -56,6 +56,7 @@ public:
   SequentialScanNode(const SequentialScanNode& other);
 
   const String& tableName() const;
+  void setTableName(const String& table_name);
 
   Vector<RefPtr<SelectListNode>> selectList() const;
 
