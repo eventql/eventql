@@ -179,25 +179,33 @@ void ScalarExpression::evaluate(
   /* execute expression */
   switch (expr->type) {
 
+    case X_IF: {
+      SValue cond;
+      auto cond_expr = expr->child;
+      evaluate(instance, cond_expr, argc, argv, &cond);
+
+      auto branch = cond_expr->next;
+      if (!cond.getBoolWithConversion()) {
+        branch = branch->next;
+      }
+
+      evaluate(instance, branch, argc, argv, out);
+      return;
+    }
+
     case X_CALL_PURE: {
       SValue* stackv = nullptr;
       auto stackn = expr->argn;
       if (stackn > 0) {
-        stackv = reinterpret_cast<SValue*>(
-            alloca(sizeof(SValue) * expr->argn));
-
+        // FIXPAUL free...
+        stackv = reinterpret_cast<SValue*>(alloca(sizeof(SValue) * expr->argn));
         for (int i = 0; i < stackn; ++i) {
           new (stackv + i) SValue();
         }
 
         auto stackp = stackv;
         for (auto cur = expr->child; cur != nullptr; cur = cur->next) {
-          evaluate(
-              instance,
-              cur,
-              argc,
-              argv,
-              stackp++);
+          evaluate(instance, cur, argc, argv, stackp++);
         }
       }
 
