@@ -32,11 +32,10 @@ protected:
       RefPtr<csql::QueryTreeNode> query) override;
 
   void replaceAllSequentialScansWithUnions(
-      RefPtr<csql::TableExpressionNode> node);
+      RefPtr<csql::TableExpressionNode>* node);
 
   void replaceSequentialScanWithUnion(
-      RefPtr<csql::QueryTreeNode> parent,
-      size_t table_index);
+      RefPtr<csql::TableExpressionNode>* node);
 
   RefPtr<csql::TableProvider> defaultTableProvider() override;
 

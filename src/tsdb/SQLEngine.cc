@@ -27,6 +27,12 @@ RefPtr<csql::QueryPlan> SQLEngine::parseAndBuildQueryPlan(
 
 RefPtr<csql::QueryTreeNode> SQLEngine::rewriteQuery(
     RefPtr<csql::QueryTreeNode> query) {
+  if (dynamic_cast<csql::TableExpressionNode*>(query.get())) {
+    auto tbl_expr = query.asInstanceOf<csql::TableExpressionNode>();
+    replaceAllSequentialScansWithUnions(&tbl_expr);
+    return tbl_expr.get();
+  }
+
   return query;
 }
 
@@ -37,6 +43,26 @@ RefPtr<csql::TableProvider> SQLEngine::tableProviderForNamespace(
 
 RefPtr<csql::TableProvider> SQLEngine::defaultTableProvider() {
   RAISE(kRuntimeError, "must provide a namespace");
+}
+
+void SQLEngine::replaceAllSequentialScansWithUnions(
+    RefPtr<csql::TableExpressionNode>* node) {
+  if (dynamic_cast<csql::SequentialScanNode*>(node->get())) {
+    replaceSequentialScanWithUnion(node);
+    return;
+  }
+
+  auto ntables = node->get()->numInputTables();
+  for (int i = 0; i < ntables; ++i) {
+    replaceAllSequentialScansWithUnions(node->get()->mutableInputTable(i));
+  }
+}
+
+void SQLEngine::replaceSequentialScanWithUnion(
+    RefPtr<csql::TableExpressionNode>* node) {
+  auto seqscan = node->asInstanceOf<csql::SequentialScanNode>();
+
+  RAISE(kNotYetImplementedError);
 }
 
 }
