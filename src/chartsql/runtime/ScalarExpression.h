@@ -21,7 +21,8 @@ enum kInstructionType {
   X_CALL_PURE,
   X_CALL_AGGREGATE,
   X_LITERAL,
-  X_INPUT
+  X_INPUT,
+  X_IF
 };
 
 struct Instruction {
