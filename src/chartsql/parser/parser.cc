@@ -155,6 +155,10 @@ ASTNode* Parser::methodCall() {
   auto e = new ASTNode(ASTNode::T_METHOD_CALL);
   e->setToken(consumeToken());
 
+  if (e->getToken()->getString() == "if") {
+    e->setType(ASTNode::T_IF_EXPR);
+  }
+
   /* read arguments */
   do {
     consumeToken();
