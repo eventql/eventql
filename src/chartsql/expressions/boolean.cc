@@ -38,6 +38,9 @@ void eqExpr(int argc, SValue* argv, SValue* out) {
         case SValue::T_FLOAT:
           *out = SValue(lhs->getFloat() == rhs->getFloat());
           return;
+        case SValue::T_NULL:
+          *out = SValue(SValue::BoolType(false));
+          return;
         default:
           break;
       }
@@ -49,10 +52,16 @@ void eqExpr(int argc, SValue* argv, SValue* out) {
         case SValue::T_TIMESTAMP:
           *out = SValue(lhs->getFloat() == rhs->getFloat());
           return;
+        case SValue::T_NULL:
+          *out = SValue(SValue::BoolType(false));
+          return;
         default:
           break;
       }
       break;
+    case SValue::T_NULL:
+      *out = SValue(SValue::BoolType(false));
+      return;
     default:
       break;
   }
@@ -149,6 +158,9 @@ void negExpr(int argc, SValue* argv, SValue* out) {
     case SValue::T_BOOL:
       *out = SValue(!val->getBool());
       return;
+    case SValue::T_NULL:
+      *out = SValue();
+      return;
     default:
       break;
   }
@@ -178,6 +190,9 @@ void ltExpr(int argc, SValue* argv, SValue* out) {
         case SValue::T_FLOAT:
           *out = SValue(lhs->getFloat() < rhs->getFloat());
           return;
+        case SValue::T_NULL:
+          *out = SValue(SValue::BoolType(false));
+          return;
         default:
           break;
       }
@@ -189,10 +204,16 @@ void ltExpr(int argc, SValue* argv, SValue* out) {
         case SValue::T_TIMESTAMP:
           *out = SValue(lhs->getFloat() < rhs->getFloat());
           return;
+        case SValue::T_NULL:
+          *out = SValue(SValue::BoolType(false));
+          return;
         default:
           break;
       }
       break;
+    case SValue::T_NULL:
+      *out = SValue(SValue::BoolType(false));
+      return;
     default:
       break;
   }
@@ -229,6 +250,9 @@ void lteExpr(int argc, SValue* argv, SValue* out) {
         case SValue::T_FLOAT:
           *out = SValue(lhs->getFloat() <= rhs->getFloat());
           return;
+        case SValue::T_NULL:
+          *out = SValue(SValue::BoolType(false));
+          return;
         default:
           break;
       }
@@ -240,10 +264,16 @@ void lteExpr(int argc, SValue* argv, SValue* out) {
         case SValue::T_TIMESTAMP:
           *out = SValue(lhs->getFloat() <= rhs->getFloat());
           return;
+        case SValue::T_NULL:
+          *out = SValue(SValue::BoolType(false));
+          return;
         default:
           break;
       }
       break;
+    case SValue::T_NULL:
+      *out = SValue(SValue::BoolType(false));
+      return;
     default:
       break;
   }
@@ -280,6 +310,9 @@ void gtExpr(int argc, SValue* argv, SValue* out) {
         case SValue::T_FLOAT:
           *out = SValue(lhs->getFloat() > rhs->getFloat());
           return;
+        case SValue::T_NULL:
+          *out = SValue(SValue::BoolType(false));
+          return;
         default:
           break;
       }
@@ -291,10 +324,16 @@ void gtExpr(int argc, SValue* argv, SValue* out) {
         case SValue::T_TIMESTAMP:
           *out = SValue(lhs->getFloat() > rhs->getFloat());
           return;
+        case SValue::T_NULL:
+          *out = SValue(SValue::BoolType(false));
+          return;
         default:
           break;
       }
       break;
+    case SValue::T_NULL:
+      *out = SValue(SValue::BoolType(false));
+      return;
     default:
       break;
   }
@@ -331,6 +370,9 @@ void gteExpr(int argc, SValue* argv, SValue* out) {
         case SValue::T_FLOAT:
           *out = SValue(lhs->getFloat() >= rhs->getFloat());
           return;
+        case SValue::T_NULL:
+          *out = SValue(SValue::BoolType(false));
+          return;
         default:
           break;
       }
@@ -342,10 +384,16 @@ void gteExpr(int argc, SValue* argv, SValue* out) {
         case SValue::T_TIMESTAMP:
           *out = SValue(lhs->getFloat() >= rhs->getFloat());
           return;
+        case SValue::T_NULL:
+          *out = SValue(SValue::BoolType(false));
+          return;
         default:
           break;
       }
       break;
+    case SValue::T_NULL:
+      *out = SValue(SValue::BoolType(false));
+      return;
     default:
       break;
   }
