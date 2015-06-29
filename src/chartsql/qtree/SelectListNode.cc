@@ -21,4 +21,9 @@ RefPtr<ValueExpressionNode> SelectListNode::expression() const {
   return expr_;
 }
 
+RefPtr<QueryTreeNode> SelectListNode::deepCopy() const {
+  return new SelectListNode(expr_->deepCopyAs<ValueExpressionNode>());
+}
+
+
 } // namespace csql
