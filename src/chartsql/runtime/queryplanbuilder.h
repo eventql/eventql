@@ -7,13 +7,9 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#ifndef _FNORDMETRIC_SQL_QUERYPLANBUILDER_H
-#define _FNORDMETRIC_SQL_QUERYPLANBUILDER_H
-#include <memory>
-#include <stdlib.h>
-#include <string>
-#include <vector>
-#include <assert.h>
+#pragma once
+#include <fnord/stdtypes.h>
+#include <fnord/autoref.h>
 #include <chartsql/parser/token.h>
 #include <chartsql/parser/astnode.h>
 #include <chartsql/runtime/queryplan.h>
@@ -32,7 +28,7 @@ class Runtime;
 class QueryPlanBuilderInterface {
 public:
   QueryPlanBuilderInterface(
-      Compiler* compiler,
+      ValueExpressionBuilder* compiler,
       const std::vector<std::unique_ptr<Backend>>& backends) :
       compiler_(compiler),
       backends_(backends) {}
@@ -44,24 +40,29 @@ public:
       TableRepository* repo) = 0;
 
 protected:
-  Compiler* compiler_;
+  ValueExpressionBuilder* compiler_;
   const std::vector<std::unique_ptr<Backend>>& backends_;
 };
 
-class QueryPlanBuilder : public QueryPlanBuilderInterface {
+class QueryPlanBuilder {
 public:
-  QueryPlanBuilder(
-      Compiler* compiler,
-      const std::vector<std::unique_ptr<Backend>>& backends);
 
-  void buildQueryPlan(
-      const std::vector<std::unique_ptr<ASTNode>>& statements,
-      QueryPlan* query_plan);
+  QueryPlanBuilder(SymbolTable* symbol_table);
 
-  QueryPlanNode* buildQueryPlan(
-      ASTNode* statement,
-      TableRepository* repo) override;
+  RefPtr<QueryTreeNode> build(ASTNode* ast);
 
+//  QueryPlanBuilder(
+//      ValueExpressionBuilder* compiler,
+//      const std::vector<std::unique_ptr<Backend>>& backends);
+//
+//  void buildQueryPlan(
+//      const std::vector<std::unique_ptr<ASTNode>>& statements,
+//      QueryPlan* query_plan);
+//
+//  QueryPlanNode* buildQueryPlan(
+//      ASTNode* statement,
+//      TableRepository* repo) override;
+//
   void extend(std::unique_ptr<QueryPlanBuilderInterface> other);
 
 protected:
@@ -70,30 +71,30 @@ protected:
    * Returns true if the ast is a SELECT statement that has columns in its
    * select list that are not of the form T_TABLE_NAME -> T_COLUMN_NAME
    */
-  bool hasUnexpandedColumns(ASTNode* ast) const;
+  //bool hasUnexpandedColumns(ASTNode* ast) const;
 
-  /**
-   * Returns true if the ast is a SELECT statement that has a join
-   */
-  bool hasJoin(ASTNode* ast) const;
+  ///**
+  // * Returns true if the ast is a SELECT statement that has a join
+  // */
+  //bool hasJoin(ASTNode* ast) const;
 
-  /**
-   * Returns true if the ast is a SELECT statement that has a GROUP BY clause,
-   * otherwise false
-   */
+  ///**
+  // * Returns true if the ast is a SELECT statement that has a GROUP BY clause,
+  // * otherwise false
+  // */
   bool hasGroupByClause(ASTNode* ast) const;
 
-  /**
-   * Returns true if the ast is a SELECT statement that has a GROUP OVER
-   * TIMEWINDOW clause, otherwise false
-   */
-  bool hasGroupOverTimewindowClause(ASTNode* ast) const;
+  ///**
+  // * Returns true if the ast is a SELECT statement that has a GROUP OVER
+  // * TIMEWINDOW clause, otherwise false
+  // */
+  //bool hasGroupOverTimewindowClause(ASTNode* ast) const;
 
-  /**
-   * Returns true if the ast is a SELECT statement that has a ORDER BY clause,
-   * otherwise false
-   */
-  bool hasOrderByClause(ASTNode* ast) const;
+  ///**
+  // * Returns true if the ast is a SELECT statement that has a ORDER BY clause,
+  // * otherwise false
+  // */
+  //bool hasOrderByClause(ASTNode* ast) const;
 
   /**
    * Returns true if the ast is a SELECT statement with a select list that
@@ -108,22 +109,28 @@ protected:
   bool hasAggregationExpression(ASTNode* ast) const;
 
   /**
-   * Build a group by query plan node for a SELECT statement that has a GROUP
-   * BY clause
+   * Walks the ast recursively and returns true if at least one aggregation
+   * WITHIN RECORD expression was found, otherwise false.
    */
-  void expandColumns(ASTNode* ast, TableRepository* repo);
+  bool hasAggregationWithinRecord(ASTNode* ast) const;
 
-  /**
-   * Build a group by query plan node for a SELECT statement that has a GROUP
-   * BY clause
-   */
-  QueryPlanNode* buildGroupBy(ASTNode* ast, TableRepository* repo);
+  ///**
+  // * Build a group by query plan node for a SELECT statement that has a GROUP
+  // * BY clause
+  // */
+  //void expandColumns(ASTNode* ast, TableRepository* repo);
 
-  /**
-   * Build a group over timewindow query plan node for a SELECT statement that
-   * has a GROUP OVer TIMEWINDOW clause
-   */
-  QueryPlanNode* buildGroupOverTimewindow(ASTNode* ast, TableRepository* repo);
+  ///**
+  // * Build a group by query plan node for a SELECT statement that has a GROUP
+  // * BY clause
+  // */
+  QueryTreeNode* buildGroupBy(ASTNode* ast);
+
+  ///**
+  // * Build a group over timewindow query plan node for a SELECT statement that
+  // * has a GROUP OVer TIMEWINDOW clause
+  // */
+  //QueryPlanNode* buildGroupOverTimewindow(ASTNode* ast, TableRepository* repo);
 
   /**
    * Recursively walk the provided ast and search for column references. For
@@ -135,11 +142,29 @@ protected:
    */
   bool buildInternalSelectList(ASTNode* ast, ASTNode* select_list);
 
-  QueryPlanNode* buildLimitClause(ASTNode* ast, TableRepository* repo);
-  QueryPlanNode* buildOrderByClause(ASTNode* ast, TableRepository* repo);
+  QueryTreeNode* buildSequentialScan(ASTNode* ast);
+
+  ValueExpressionNode* buildValueExpression(ASTNode* ast);
+
+  SelectListNode* buildSelectList(ASTNode* select_list);
+
+  ValueExpressionNode* buildOperator(const std::string& name, ASTNode* ast);
+
+  ValueExpressionNode* buildLiteral(ASTNode* ast);
+
+  ValueExpressionNode* buildColumnReference(ASTNode* ast);
+
+  ValueExpressionNode* buildIfStatement(ASTNode* ast);
+
+  ValueExpressionNode* buildMethodCall(ASTNode* ast);
+
+  //QueryPlanNode* buildLimitClause(ASTNode* ast, TableRepository* repo);
+  //QueryPlanNode* buildOrderByClause(ASTNode* ast, TableRepository* repo);
 
   std::vector<std::unique_ptr<QueryPlanBuilderInterface>> extensions_;
+
+  SymbolTable* symbol_table_;
+
 };
 
 }
-#endif

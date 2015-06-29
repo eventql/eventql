@@ -93,6 +93,8 @@ const char* Token::getTypeName(kTokenType type) {
     case T_GT: return "T_GT";
     case T_GTE: return "T_GTE";
     case T_BEGIN: return "T_BEGIN";
+    case T_WITHIN: return "T_WITHIN";
+    case T_RECORD: return "T_RECORD";
     case T_CREATE: return "T_CREATE";
     case T_WITH: return "T_WITH";
     case T_IMPORT: return "T_IMPORT";

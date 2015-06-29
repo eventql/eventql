@@ -26,16 +26,11 @@ namespace csql {
 class TableScan : public QueryPlanNode {
 public:
 
-  static TableScan* build(
-      ASTNode* ast,
-      TableRepository* repo,
-      Compiler* compiler);
-
   TableScan(
       TableRef* tbl_ref,
       std::vector<std::string>&& columns,
-      CompiledExpression* select_expr,
-      CompiledExpression* where_expr);
+      Instruction* select_expr,
+      Instruction* where_expr);
 
   void execute() override;
   bool nextRow(SValue* row, int row_len) override;
@@ -48,8 +43,8 @@ protected:
 
   TableRef* const tbl_ref_;
   const std::vector<std::string> columns_;
-  CompiledExpression* const select_expr_;
-  CompiledExpression* const where_expr_;
+  Instruction* const select_expr_;
+  Instruction* const where_expr_;
 };
 
 }

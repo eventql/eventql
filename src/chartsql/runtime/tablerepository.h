@@ -7,22 +7,31 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#ifndef _FNORDMETRIC_QUERY_TABLEREPOSITORY_H
-#define _FNORDMETRIC_QUERY_TABLEREPOSITORY_H
-#include <stdlib.h>
-#include <string>
-#include <unordered_map>
-#include <memory>
-#include <vector>
+#pragma once
+#include <fnord/option.h>
 #include <chartsql/backends/backend.h>
 #include <chartsql/backends/tableref.h>
+#include <chartsql/runtime/TableExpression.h>
+#include <chartsql/qtree/SequentialScanNode.h>
 
 namespace csql {
 class ImportStatement;
+class DefaultRuntime;
 
-class TableRepository {
+class TableProvider : public RefCounted {
 public:
-  virtual ~TableRepository() {}
+
+  virtual Option<ScopedPtr<TableExpression>> buildSequentialScan(
+      RefPtr<SequentialScanNode> seqscan,
+      DefaultRuntime* runtime) const = 0;
+
+};
+
+class TableRepository : public TableProvider {
+public:
+  typedef
+      Function<RefPtr<ScopedPtr<TableExpression>> (RefPtr<SequentialScanNode>)>
+      TableFactoryFn;
 
   virtual TableRef* getTableRef(const std::string& table_name) const;
 
@@ -39,9 +48,16 @@ public:
       const ImportStatement& import_stmt,
       const std::vector<std::unique_ptr<Backend>>& backends);
 
+  Option<ScopedPtr<TableExpression>> buildSequentialScan(
+      RefPtr<SequentialScanNode> seqscan,
+      DefaultRuntime* runtime) const override;
+
+  void addProvider(RefPtr<TableProvider> provider);
+
 protected:
   std::unordered_map<std::string, std::unique_ptr<TableRef>> table_refs_;
+
+  Vector<RefPtr<TableProvider>> providers_;
 };
 
 }
-#endif

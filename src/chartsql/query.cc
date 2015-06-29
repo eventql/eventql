@@ -45,29 +45,29 @@ Query::Query(
   auto statements = runtime->parser()->parseQuery(query_string);
   draw_statements_.emplace_back();
 
-  for (const auto& stmt : statements) {
-    switch (stmt->getType()) {
-      case csql::ASTNode::T_DRAW:
-        draw_statements_.back().emplace_back(
-            new DrawStatement(stmt.get(), runtime->compiler()));
-        break;
-      case csql::ASTNode::T_SELECT:
-        statements_.emplace_back(
-            std::unique_ptr<QueryPlanNode>(
-                runtime_->queryPlanBuilder()->buildQueryPlan(
-                    stmt.get(), table_repo_.get())),
-            draw_statements_.back().empty() ?
-                nullptr : draw_statements_.back().back().get());
-        break;
-      case csql::ASTNode::T_IMPORT:
-        table_repo_->import(
-            ImportStatement(stmt.get(), runtime_->compiler()),
-            runtime_->backends());
-        break;
-      default:
-        RAISE(kRuntimeError, "invalid statement");
-    }
-  }
+  //for (const auto& stmt : statements) {
+  //  switch (stmt->getType()) {
+  //    case csql::ASTNode::T_DRAW:
+  //      draw_statements_.back().emplace_back(
+  //          new DrawStatement(stmt.get(), runtime->compiler()));
+  //      break;
+  //    case csql::ASTNode::T_SELECT:
+  //      statements_.emplace_back(
+  //          std::unique_ptr<QueryPlanNode>(
+  //              runtime_->queryPlanBuilder()->buildQueryPlan(
+  //                  stmt.get(), table_repo_.get())),
+  //          draw_statements_.back().empty() ?
+  //              nullptr : draw_statements_.back().back().get());
+  //      break;
+  //    case csql::ASTNode::T_IMPORT:
+  //      table_repo_->import(
+  //          ImportStatement(stmt.get(), runtime_->compiler()),
+  //          runtime_->backends());
+  //      break;
+  //    default:
+  //      RAISE(kRuntimeError, "invalid statement");
+  //  }
+  //}
 }
 
 void Query::execute() {

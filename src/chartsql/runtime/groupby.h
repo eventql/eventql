@@ -7,128 +7,36 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#ifndef _FNORDMETRIC_SQL_GROUPBY_H
-#define _FNORDMETRIC_SQL_GROUPBY_H
-#include <stdlib.h>
-#include <string>
-#include <string.h>
-#include <vector>
-#include <assert.h>
-#include <chartsql/parser/astnode.h>
-#include <chartsql/parser/token.h>
-#include <chartsql/runtime/queryplannode.h>
-#include <chartsql/runtime/symboltable.h>
-#include <chartsql/runtime/compile.h>
+#pragma once
+#include <fnord/stdtypes.h>
+#include <chartsql/runtime/TableExpression.h>
+#include <chartsql/runtime/defaultruntime.h>
 
 namespace csql {
 
-class GroupBy : public QueryPlanNode {
+class GroupBy : public TableExpression {
 public:
 
   GroupBy(
-      std::vector<std::string>&& columns,
-      CompiledExpression* select_expr,
-      CompiledExpression* group_expr,
-      size_t scratchpad_size,
-      QueryPlanNode* child) :
-      columns_(std::move(columns)),
-      select_expr_(select_expr),
-      group_expr_(group_expr),
-      scratchpad_size_(scratchpad_size),
-      child_(child) {
-    child->setTarget(this);
-  }
+      ScopedPtr<TableExpression> source,
+      Vector<ScopedPtr<ValueExpression>> select_expressions,
+      Vector<ScopedPtr<ValueExpression>> group_expressions);
 
-  ~GroupBy() {
-    for (auto& pair : groups_) {
-      auto scratchpad = pair.second.scratchpad;
+  ~GroupBy();
 
-      if (scratchpad != nullptr) {
-        free(scratchpad);
-      }
-    }
-  }
-
-  void execute() override {
-    child_->execute();
-
-    for (auto& pair : groups_) {
-      auto& row = pair.second.row;
-      emitRow(row.data(), row.size());
-    }
-  }
-
-  bool nextRow(SValue* row, int row_len) override {
-    SValue out[128]; // FIXPAUL
-    int out_len;
-
-    /* execute group expression */
-    if (group_expr_ != nullptr) {
-      executeExpression(group_expr_, nullptr, row_len, row, &out_len, out);
-    }
-
-    /* stringify expression results into group key */
-    auto key_str = SValue::makeUniqueKey(out, out_len);
-
-    /* get group */
-    Group* group = nullptr;
-
-    auto group_iter = groups_.find(key_str);
-    if (group_iter == groups_.end()) {
-      group = &groups_[key_str];
-      group->scratchpad = malloc(scratchpad_size_);
-
-      if (group->scratchpad == nullptr) {
-        RAISE(kMallocError, "malloc() failed");
-      }
-
-      memset(group->scratchpad, 0, scratchpad_size_);
-    } else {
-      group = &group_iter->second;
-    }
-
-    /* execute select expresion and save results */
-    executeExpression(
-        select_expr_,
-        group->scratchpad,
-        row_len,
-        row,
-        &out_len,
-        out);
-
-    std::vector<SValue> row_vec;
-    for (int i = 0; i < out_len; i++) {
-      row_vec.push_back(out[i]);
-    }
-
-    /* update group */
-    group->row = row_vec;
-
-    return true;
-  }
-
-  size_t getNumCols() const override {
-    return columns_.size();
-  }
-
-  const std::vector<std::string>& getColumns() const override {
-    return columns_;
-  }
+  void execute(
+      ExecutionContext* context,
+      Function<bool (int argc, const SValue* argv)> fn) override;
 
 protected:
 
-  struct Group {
-    std::vector<SValue> row;
-    void* scratchpad;
-  };
+  bool nextRow(int argc, const SValue* argv);
 
-  std::vector<std::string> columns_;
-  CompiledExpression* select_expr_;
-  CompiledExpression* group_expr_;
-  size_t scratchpad_size_;
-  QueryPlanNode* child_;
-  std::unordered_map<std::string, Group> groups_;
+  ScopedPtr<TableExpression> source_;
+  Vector<ScopedPtr<ValueExpression>> select_exprs_;
+  Vector<ScopedPtr<ValueExpression>> group_exprs_;
+  HashMap<String, Vector<ValueExpression::Instance>> groups_;
+  ScratchMemory scratch_;
 };
 
 }
-#endif

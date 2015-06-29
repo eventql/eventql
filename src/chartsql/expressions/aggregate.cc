@@ -14,30 +14,49 @@
 namespace csql {
 namespace expressions {
 
-void countExpr(void* scratchpad, int argc, SValue* argv, SValue* out) {
-  uint64_t* count = (uint64_t*) scratchpad;
-  *out = SValue((int64_t) ++(*count));
+/**
+ * COUNT() expression
+ */
+void countExprAcc(void* scratchpad, int argc, SValue* argv) {
+  switch(argv->getType()) {
+    case SValue::T_NULL:
+      return;
+
+    default:
+      ++(*(uint64_t*) scratchpad);
+      return;
+  }
 }
 
-void countExprFree(void* scratchpad) {
-  /* noop */
+void countExprGet(void* scratchpad, SValue* out) {
+  *out = SValue(SValue::IntegerType(*((uint64_t*) scratchpad)));
 }
 
-size_t countExprScratchpadSize() {
-  return sizeof(uint64_t);
+void countExprReset(void* scratchpad) {
+  memset(scratchpad, 0, sizeof(uint64_t));
 }
+
+const AggregateFunction kCountExpr {
+  .scratch_size = sizeof(uint64_t),
+  .accumulate = &countExprAcc,
+  .get = &countExprGet,
+  .reset = &countExprReset,
+  .init = &countExprReset,
+  .free = nullptr
+};
+
 
 /**
  * SUM() expression
  */
-union sum_expr_scratchpad {
-  uint64_t t_integer;
-  double t_float;
+struct sum_expr_scratchpad {
+  SValue::kSValueType type;
+  double val;
 };
 
-void sumExpr(void* scratchpad, int argc, SValue* argv, SValue* out) {
+void sumExprAcc(void* scratchpad, int argc, SValue* argv) {
   SValue* val = argv;
-  union sum_expr_scratchpad* data = (union sum_expr_scratchpad*) scratchpad;
+  auto data = (sum_expr_scratchpad*) scratchpad;
 
   if (argc != 1) {
     RAISE(
@@ -51,25 +70,48 @@ void sumExpr(void* scratchpad, int argc, SValue* argv, SValue* out) {
       return;
 
     case SValue::T_INTEGER:
-      data->t_integer += val->getInteger();
-      *out = SValue((int64_t) data->t_integer);
+      data->type = SValue::T_INTEGER;
+      data->val += val->getInteger();
       return;
 
     case SValue::T_FLOAT:
     default:
-      data->t_float += val->getFloat();
-      *out = SValue(data->t_float);
+      data->type = SValue::T_FLOAT;
+      data->val += val->getFloat();
       return;
   }
 }
 
-void sumExprFree(void* scratchpad) {
-  /* noop */
+void sumExprGet(void* scratchpad, SValue* out) {
+  auto data = (sum_expr_scratchpad*) scratchpad;
+
+  switch(data->type) {
+    case SValue::T_INTEGER:
+      *out = SValue(SValue::IntegerType(data->val));
+      return;
+
+    case SValue::T_FLOAT:
+      *out = SValue(SValue::FloatType(data->val));
+      return;
+
+    default:
+      *out = SValue();
+      return;
+  }
 }
 
-size_t sumExprScratchpadSize() {
-  return sizeof(union sum_expr_scratchpad);
+void sumExprReset(void* scratchpad) {
+  memset(scratchpad, 0, sizeof(sum_expr_scratchpad));
 }
+
+const AggregateFunction kSumExpr {
+  .scratch_size = sizeof(sum_expr_scratchpad),
+  .accumulate = &sumExprAcc,
+  .get = &sumExprGet,
+  .reset = &sumExprReset,
+  .init = &sumExprReset,
+  .free = nullptr,
+};
 
 /**
  * MEAN() expression

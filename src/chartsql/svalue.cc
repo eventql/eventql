@@ -211,6 +211,31 @@ SValue::BoolType SValue::getBool() const {
   return data_.u.t_bool;
 }
 
+SValue::BoolType SValue::getBoolWithConversion() const {
+  switch (data_.type) {
+
+    case T_INTEGER:
+      return getInteger() > 0;
+
+    case T_FLOAT:
+      return getFloat() > 0;
+
+    case T_BOOL:
+      return getBool();
+
+    case T_NULL:
+      return false;
+
+    default:
+      RAISEF(
+         kTypeError,
+          "can't convert $0 '$1' to Boolean",
+          SValue::getTypeName(data_.type),
+          toString());
+
+  }
+}
+
 SValue::TimeType SValue::getTimestamp() const {
   switch (getType()) {
 
@@ -223,8 +248,6 @@ SValue::TimeType SValue::getTimestamp() const {
           "can't convert %s '%s' to Timestamp",
           SValue::getTypeName(data_.type),
           toString().c_str());
-      time_t ts;
-      time(&ts);
 
   }
 }
@@ -448,31 +471,6 @@ bool SValue::tryTimeConversion() {
   return true;
 }
 
-SValue* SValue::fromToken(const Token* token) {
-  switch (token->getType()) {
-
-    case Token::T_TRUE:
-      return new SValue(true);
-
-    case Token::T_FALSE:
-      return new SValue(false);
-
-    case Token::T_NUMERIC: {
-      auto sval = new SValue(token->getString());
-      sval->tryNumericConversion();
-      return sval;
-    }
-
-    case Token::T_STRING:
-      return new SValue(token->getString());
-
-    default:
-      RAISE(kRuntimeError, "can't cast Token to SValue");
-      return nullptr;
-
-  }
-}
-
 }
 
 namespace fnord {
@@ -481,6 +479,20 @@ template <>
 std::string inspect<csql::SValue::kSValueType>(
     const csql::SValue::kSValueType& type) {
   return csql::SValue::getTypeName(type);
+}
+
+template <>
+std::string inspect<csql::SValue>(
+    const csql::SValue& sval) {
+  return sval.toString();
+}
+
+}
+
+namespace std {
+
+size_t hash<csql::SValue>::operator()(const csql::SValue& sval) const {
+  return hash<std::string>()(sval.toString()); // FIXPAUL
 }
 
 }

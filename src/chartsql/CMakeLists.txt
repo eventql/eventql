@@ -7,6 +7,7 @@
 # <http://www.gnu.org/licenses/>.
 add_library(chartsql-lib OBJECT
     svalue.cc
+    SFunction.cc
     format.cc
     areachartbuilder.cc
     barchartbuilder.cc
@@ -18,6 +19,8 @@ add_library(chartsql-lib OBJECT
     query.cc
     #queryservice.cc
     seriesadapter.cc
+    CSTableScan.cc
+    CSTableScanProvider.cc
     backends/csv/csvbackend.cc
     backends/csv/csvinputstream.cc
     backends/csv/csvtableref.cc
@@ -35,16 +38,65 @@ add_library(chartsql-lib OBJECT
     parser/parser.cc
     parser/token.cc
     parser/tokenize.cc
+    qtree/CallExpressionNode.cc
+    qtree/ColumnReferenceNode.cc
+    qtree/SequentialScanNode.cc
+    qtree/LiteralExpressionNode.cc
+    qtree/IfExpressionNode.cc
+    qtree/SelectListNode.cc
+    qtree/GroupByNode.cc
+    qtree/UnionNode.cc
+    runtime/ValueExpression.cc
+    runtime/ScratchMemory.cc
     runtime/runtime.cc
     runtime/symboltable.cc
     runtime/queryplannode.cc
-    runtime/compile.cc
+    runtime/ValueExpressionBuilder.cc
+    runtime/TableExpressionBuilder.cc
     runtime/defaultruntime.cc
+    runtime/DefaultExecutionPlan.cc
     runtime/importstatement.cc
     runtime/tablerepository.cc
     runtime/queryplanbuilder.cc
     runtime/queryplan.cc
     runtime/tablescan.cc
     runtime/orderby.cc
+    runtime/GroupBy.cc
+    runtime/Union.cc
     runtime/groupovertimewindow.cc
-    runtime/execute.cc)
+    runtime/execute.cc
+    defaults.cc)
+
+add_executable(test-chartsql-runtime
+    $<TARGET_OBJECTS:fnord-base>
+    $<TARGET_OBJECTS:fnord-chart>
+    $<TARGET_OBJECTS:fnord-protobuf>
+    $<TARGET_OBJECTS:fnord-http>
+    $<TARGET_OBJECTS:fnord-json>
+    $<TARGET_OBJECTS:fnord-metricdb>
+    $<TARGET_OBJECTS:fnord-mdb>
+    $<TARGET_OBJECTS:sstable>
+    $<TARGET_OBJECTS:cstable>
+    $<TARGET_OBJECTS:dproc>
+    $<TARGET_OBJECTS:chartsql-lib>
+    $<TARGET_OBJECTS:tsdb>
+    runtime/Runtime_test.cc)
+
+target_link_libraries(test-chartsql-runtime ${CMAKE_THREAD_LIBS_INIT} ${FNORD_LIBS})
+
+add_executable(test-chartsql-parser
+    $<TARGET_OBJECTS:fnord-base>
+    $<TARGET_OBJECTS:fnord-chart>
+    $<TARGET_OBJECTS:fnord-protobuf>
+    $<TARGET_OBJECTS:fnord-http>
+    $<TARGET_OBJECTS:fnord-json>
+    $<TARGET_OBJECTS:fnord-metricdb>
+    $<TARGET_OBJECTS:fnord-mdb>
+    $<TARGET_OBJECTS:sstable>
+    $<TARGET_OBJECTS:cstable>
+    $<TARGET_OBJECTS:dproc>
+    $<TARGET_OBJECTS:chartsql-lib>
+    $<TARGET_OBJECTS:tsdb>
+    parser/Parser_test.cc)
+
+target_link_libraries(test-chartsql-parser ${CMAKE_THREAD_LIBS_INIT} ${FNORD_LIBS})

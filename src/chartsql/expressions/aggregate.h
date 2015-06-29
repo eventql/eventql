@@ -10,17 +10,13 @@
 #ifndef _FNORDMETRIC_SQL_EXPRESSIONS_AGGREGATE_H
 #define _FNORDMETRIC_SQL_EXPRESSIONS_AGGREGATE_H
 #include <chartsql/svalue.h>
+#include <chartsql/SFunction.h>
 
 namespace csql {
 namespace expressions {
 
-void countExpr(void* scratchpad, int argc, SValue* argv, SValue* out);
-void countExprFree(void* scratchpad);
-size_t countExprScratchpadSize();
-
-void sumExpr(void* scratchpad, int argc, SValue* argv, SValue* out);
-void sumExprFree(void* scratchpad);
-size_t sumExprScratchpadSize();
+extern const AggregateFunction kCountExpr;
+extern const AggregateFunction kSumExpr;
 
 void meanExpr(void* scratchpad, int argc, SValue* argv, SValue* out);
 void meanExprFree(void* scratchpad);

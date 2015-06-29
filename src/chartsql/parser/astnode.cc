@@ -42,6 +42,10 @@ ASTNode* ASTNode::appendChild(ASTNode::kASTNodeType type) {
   return child;
 }
 
+void ASTNode::clearChildren() {
+  children_.clear();
+}
+
 void ASTNode::removeChildByIndex(size_t index) {
   children_.erase(children_.begin() + index);
 }
@@ -174,6 +178,9 @@ void ASTNode::debugPrint(int indent /* = 0 */) const {
     case T_LITERAL:
       printf("- LITERAL");
       break;
+    case T_IF_EXPR:
+      printf("- IF_EXPR");
+      break;
     case T_NEGATE_EXPR:
       printf("- NEGATE_EXPR");
       break;
@@ -214,7 +221,10 @@ void ASTNode::debugPrint(int indent /* = 0 */) const {
       printf("- POW_EXPR");
       break;
     case T_METHOD_CALL:
-      printf("- <method_call>");
+      printf("- METHOD_CALL");
+      break;
+    case T_METHOD_CALL_WITHIN_RECORD:
+      printf("- METHOD_CALL_WITHIN_RECORD");
       break;
     default:
       printf("- <unknown ASTNode>");

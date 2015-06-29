@@ -17,7 +17,7 @@
 namespace csql {
 namespace expressions {
 
-void eqExpr(void* scratchpad, int argc, SValue* argv, SValue* out) {
+void eqExpr(int argc, SValue* argv, SValue* out) {
   if (argc != 2) {
     RAISE(
         kRuntimeError,
@@ -38,6 +38,9 @@ void eqExpr(void* scratchpad, int argc, SValue* argv, SValue* out) {
         case SValue::T_FLOAT:
           *out = SValue(lhs->getFloat() == rhs->getFloat());
           return;
+        case SValue::T_NULL:
+          *out = SValue(SValue::BoolType(false));
+          return;
         default:
           break;
       }
@@ -49,10 +52,16 @@ void eqExpr(void* scratchpad, int argc, SValue* argv, SValue* out) {
         case SValue::T_TIMESTAMP:
           *out = SValue(lhs->getFloat() == rhs->getFloat());
           return;
+        case SValue::T_NULL:
+          *out = SValue(SValue::BoolType(false));
+          return;
         default:
           break;
       }
       break;
+    case SValue::T_NULL:
+      *out = SValue(SValue::BoolType(false));
+      return;
     default:
       break;
   }
@@ -68,13 +77,13 @@ void eqExpr(void* scratchpad, int argc, SValue* argv, SValue* out) {
       rhs->getTypeName());
 }
 
-void neqExpr(void* scratchpad, int argc, SValue* argv, SValue* out) {
+void neqExpr(int argc, SValue* argv, SValue* out) {
   SValue ret;
-  eqExpr(scratchpad, argc, argv, &ret);
+  eqExpr(argc, argv, &ret);
   *out = SValue(!ret.getValue<bool>());
 }
 
-void andExpr(void* scratchpad, int argc, SValue* argv, SValue* out) {
+void andExpr(int argc, SValue* argv, SValue* out) {
   if (argc != 2) {
     RAISE(
         kRuntimeError,
@@ -102,7 +111,7 @@ void andExpr(void* scratchpad, int argc, SValue* argv, SValue* out) {
       rhs->getTypeName());
 }
 
-void orExpr(void* scratchpad, int argc, SValue* argv, SValue* out) {
+void orExpr(int argc, SValue* argv, SValue* out) {
   if (argc != 2) {
     RAISE(
         kRuntimeError,
@@ -130,7 +139,7 @@ void orExpr(void* scratchpad, int argc, SValue* argv, SValue* out) {
       rhs->getTypeName());
 }
 
-void negExpr(void* scratchpad, int argc, SValue* argv, SValue* out) {
+void negExpr(int argc, SValue* argv, SValue* out) {
   if (argc != 1) {
     RAISE(
         kRuntimeError,
@@ -149,6 +158,9 @@ void negExpr(void* scratchpad, int argc, SValue* argv, SValue* out) {
     case SValue::T_BOOL:
       *out = SValue(!val->getBool());
       return;
+    case SValue::T_NULL:
+      *out = SValue();
+      return;
     default:
       break;
   }
@@ -157,7 +169,7 @@ void negExpr(void* scratchpad, int argc, SValue* argv, SValue* out) {
       val->getTypeName());
 }
 
-void ltExpr(void* scratchpad, int argc, SValue* argv, SValue* out) {
+void ltExpr(int argc, SValue* argv, SValue* out) {
   if (argc != 2) {
     RAISE(
         kRuntimeError,
@@ -178,6 +190,9 @@ void ltExpr(void* scratchpad, int argc, SValue* argv, SValue* out) {
         case SValue::T_FLOAT:
           *out = SValue(lhs->getFloat() < rhs->getFloat());
           return;
+        case SValue::T_NULL:
+          *out = SValue(SValue::BoolType(false));
+          return;
         default:
           break;
       }
@@ -189,10 +204,16 @@ void ltExpr(void* scratchpad, int argc, SValue* argv, SValue* out) {
         case SValue::T_TIMESTAMP:
           *out = SValue(lhs->getFloat() < rhs->getFloat());
           return;
+        case SValue::T_NULL:
+          *out = SValue(SValue::BoolType(false));
+          return;
         default:
           break;
       }
       break;
+    case SValue::T_NULL:
+      *out = SValue(SValue::BoolType(false));
+      return;
     default:
       break;
   }
@@ -208,7 +229,7 @@ void ltExpr(void* scratchpad, int argc, SValue* argv, SValue* out) {
       rhs->getTypeName());
 }
 
-void lteExpr(void* scratchpad, int argc, SValue* argv, SValue* out) {
+void lteExpr(int argc, SValue* argv, SValue* out) {
   if (argc != 2) {
     RAISE(
         kRuntimeError,
@@ -229,6 +250,9 @@ void lteExpr(void* scratchpad, int argc, SValue* argv, SValue* out) {
         case SValue::T_FLOAT:
           *out = SValue(lhs->getFloat() <= rhs->getFloat());
           return;
+        case SValue::T_NULL:
+          *out = SValue(SValue::BoolType(false));
+          return;
         default:
           break;
       }
@@ -240,10 +264,16 @@ void lteExpr(void* scratchpad, int argc, SValue* argv, SValue* out) {
         case SValue::T_TIMESTAMP:
           *out = SValue(lhs->getFloat() <= rhs->getFloat());
           return;
+        case SValue::T_NULL:
+          *out = SValue(SValue::BoolType(false));
+          return;
         default:
           break;
       }
       break;
+    case SValue::T_NULL:
+      *out = SValue(SValue::BoolType(false));
+      return;
     default:
       break;
   }
@@ -259,7 +289,7 @@ void lteExpr(void* scratchpad, int argc, SValue* argv, SValue* out) {
       rhs->getTypeName());
 }
 
-void gtExpr(void* scratchpad, int argc, SValue* argv, SValue* out) {
+void gtExpr(int argc, SValue* argv, SValue* out) {
   if (argc != 2) {
     RAISE(
         kRuntimeError,
@@ -280,6 +310,9 @@ void gtExpr(void* scratchpad, int argc, SValue* argv, SValue* out) {
         case SValue::T_FLOAT:
           *out = SValue(lhs->getFloat() > rhs->getFloat());
           return;
+        case SValue::T_NULL:
+          *out = SValue(SValue::BoolType(false));
+          return;
         default:
           break;
       }
@@ -291,10 +324,16 @@ void gtExpr(void* scratchpad, int argc, SValue* argv, SValue* out) {
         case SValue::T_TIMESTAMP:
           *out = SValue(lhs->getFloat() > rhs->getFloat());
           return;
+        case SValue::T_NULL:
+          *out = SValue(SValue::BoolType(false));
+          return;
         default:
           break;
       }
       break;
+    case SValue::T_NULL:
+      *out = SValue(SValue::BoolType(false));
+      return;
     default:
       break;
   }
@@ -310,7 +349,7 @@ void gtExpr(void* scratchpad, int argc, SValue* argv, SValue* out) {
       rhs->getTypeName());
 }
 
-void gteExpr(void* scratchpad, int argc, SValue* argv, SValue* out) {
+void gteExpr(int argc, SValue* argv, SValue* out) {
   if (argc != 2) {
     RAISE(
         kRuntimeError,
@@ -331,6 +370,9 @@ void gteExpr(void* scratchpad, int argc, SValue* argv, SValue* out) {
         case SValue::T_FLOAT:
           *out = SValue(lhs->getFloat() >= rhs->getFloat());
           return;
+        case SValue::T_NULL:
+          *out = SValue(SValue::BoolType(false));
+          return;
         default:
           break;
       }
@@ -342,10 +384,16 @@ void gteExpr(void* scratchpad, int argc, SValue* argv, SValue* out) {
         case SValue::T_TIMESTAMP:
           *out = SValue(lhs->getFloat() >= rhs->getFloat());
           return;
+        case SValue::T_NULL:
+          *out = SValue(SValue::BoolType(false));
+          return;
         default:
           break;
       }
       break;
+    case SValue::T_NULL:
+      *out = SValue(SValue::BoolType(false));
+      return;
     default:
       break;
   }
