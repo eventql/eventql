@@ -64,6 +64,7 @@ public:
   IntegerType getInteger() const;
   FloatType getFloat() const;
   BoolType getBool() const;
+  BoolType getBoolWithConversion() const;
   TimeType getTimestamp() const;
   StringType getString() const;
   std::string toString() const;
