@@ -145,6 +145,11 @@ protected:
 
   QueryTreeNode* buildSequentialScan(ASTNode* ast);
 
+  /**
+   * Builds a standalone SELECT expression (A SELECT without any tables)
+   */
+  QueryTreeNode* buildSelectExpression(ASTNode* ast);
+
   ValueExpressionNode* buildValueExpression(ASTNode* ast);
 
   SelectListNode* buildSelectList(ASTNode* select_list);

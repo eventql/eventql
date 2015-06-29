@@ -14,6 +14,7 @@
 #include <chartsql/runtime/queryplanbuilder.h>
 #include <chartsql/qtree/GroupByNode.h>
 #include <chartsql/qtree/IfExpressionNode.h>
+#include <chartsql/qtree/SelectExpressionNode.h>
 
 namespace csql {
 
@@ -60,11 +61,9 @@ RefPtr<QueryTreeNode> QueryPlanBuilder::build(ASTNode* ast) {
     return node;
   }
 
-//  if ((exec = TablelessSelect::build(ast, compiler_)) != nullptr) {
-//    return exec;
-//  }
-//
-//
+  if ((node = buildSelectExpression(ast)) != nullptr) {
+    return node;
+  }
 
   ast->debugPrint(2);
   RAISE(kRuntimeError, "can't figure out a query plan for this, sorry :(");
@@ -815,6 +814,29 @@ QueryTreeNode* QueryPlanBuilder::buildSequentialScan(ASTNode* ast) {
   }
 
   return seqscan;
+}
+
+QueryTreeNode* QueryPlanBuilder::buildSelectExpression(ASTNode* ast) {
+  if (!(*ast == ASTNode::T_SELECT) || ast->getChildren().size() != 1) {
+    return nullptr;
+  }
+
+  auto select_list = ast->getChildren()[0];
+
+  /* select list  */
+  Vector<RefPtr<SelectListNode>> select_list_expressions;
+  for (const auto& select_expr : select_list->getChildren()) {
+    if (hasAggregationExpression(select_expr) ||
+        hasAggregationWithinRecord(select_expr)) {
+      RAISE(
+          kRuntimeError,
+          "a SELECT without any tables can only contain pure functions");
+    }
+
+    select_list_expressions.emplace_back(buildSelectList(select_expr));
+  }
+
+  return new SelectExpressionNode(select_list_expressions);
 }
 
 ValueExpressionNode* QueryPlanBuilder::buildValueExpression(ASTNode* ast) {
