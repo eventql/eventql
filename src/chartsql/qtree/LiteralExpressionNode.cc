@@ -23,4 +23,8 @@ Vector<RefPtr<ValueExpressionNode>> LiteralExpressionNode::arguments() const {
   return Vector<RefPtr<ValueExpressionNode>>{};
 }
 
+RefPtr<QueryTreeNode> LiteralExpressionNode::deepCopy() const {
+  return new LiteralExpressionNode(value_);
+}
+
 } // namespace csql

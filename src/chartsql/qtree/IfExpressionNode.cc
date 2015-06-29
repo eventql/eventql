@@ -41,5 +41,12 @@ RefPtr<ValueExpressionNode> IfExpressionNode::falseBranch() const {
   return false_branch_expr_;
 }
 
+RefPtr<QueryTreeNode> IfExpressionNode::deepCopy() const {
+  return new IfExpressionNode(
+      conditional_expr_->deepCopyAs<ValueExpressionNode>(),
+      true_branch_expr_->deepCopyAs<ValueExpressionNode>(),
+      false_branch_expr_->deepCopyAs<ValueExpressionNode>());
+}
+
 } // namespace csql
 
