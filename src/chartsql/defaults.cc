@@ -60,7 +60,7 @@ void installDefaultSymbols(SymbolTable* symbol_table) {
   symbol_table->registerFunction("gte", &expressions::gteExpr);
 
   /* expressions/datetime.h */
-  symbol_table->registerSymbol("FROM_TIMESTAMP", &expressions::fromTimestamp);
+  symbol_table->registerFunction("FROM_TIMESTAMP", &expressions::fromTimestamp);
 
   /* expressions/math.h */
   symbol_table->registerFunction("add", &expressions::addExpr);
