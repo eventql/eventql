@@ -9,29 +9,24 @@ file(GLOB PROTO_FILES *.proto)
 PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS ${PROTO_FILES})
 
 add_library(tsdb OBJECT
-    CompactionWorker.cc
-    ReplicationWorker.cc
     TSDBClient.cc
-    TSDBNode.cc
-    TSDBServlet.cc
-    RecordSet.cc
-    Partition.cc
-    CSTableIndex.cc
     TimeWindowPartitioner.cc
-    SQLEngine.cc
+    CSTableIndex.cc
     ${PROTO_SRCS})
 
 add_executable(tests/test-recordset
     $<TARGET_OBJECTS:fnord-base>
     $<TARGET_OBJECTS:fnord-protobuf>
     $<TARGET_OBJECTS:fnord-mdb>
+    $<TARGET_OBJECTS:fnord-chart>
+    $<TARGET_OBJECTS:fnord-http>
+    $<TARGET_OBJECTS:fnord-json>
     $<TARGET_OBJECTS:tsdb>
     $<TARGET_OBJECTS:cstable>
     $<TARGET_OBJECTS:sstable>
-    $<TARGET_OBJECTS:fnord-http>
-    $<TARGET_OBJECTS:fnord-json>
     $<TARGET_OBJECTS:dproc>
     $<TARGET_OBJECTS:chartsql-lib>
+    RecordSet.cc
     RecordSet_test.cc)
 
 target_link_libraries(tests/test-recordset ${FNORD_LIBS})
@@ -40,11 +35,12 @@ add_executable(tests/test-tsdbnode
     $<TARGET_OBJECTS:fnord-base>
     $<TARGET_OBJECTS:fnord-protobuf>
     $<TARGET_OBJECTS:fnord-mdb>
+    $<TARGET_OBJECTS:fnord-chart>
+    $<TARGET_OBJECTS:fnord-http>
+    $<TARGET_OBJECTS:fnord-json>
     $<TARGET_OBJECTS:tsdb>
     $<TARGET_OBJECTS:cstable>
     $<TARGET_OBJECTS:sstable>
-    $<TARGET_OBJECTS:fnord-http>
-    $<TARGET_OBJECTS:fnord-json>
     $<TARGET_OBJECTS:dproc>
     $<TARGET_OBJECTS:chartsql-lib>
     TSDBNode_test.cc)
@@ -55,11 +51,12 @@ add_executable(tests/test-tsdb-timewindowpartitioner
     $<TARGET_OBJECTS:fnord-base>
     $<TARGET_OBJECTS:fnord-protobuf>
     $<TARGET_OBJECTS:fnord-mdb>
+    $<TARGET_OBJECTS:fnord-chart>
+    $<TARGET_OBJECTS:fnord-http>
+    $<TARGET_OBJECTS:fnord-json>
     $<TARGET_OBJECTS:tsdb>
     $<TARGET_OBJECTS:cstable>
     $<TARGET_OBJECTS:sstable>
-    $<TARGET_OBJECTS:fnord-http>
-    $<TARGET_OBJECTS:fnord-json>
     $<TARGET_OBJECTS:dproc>
     $<TARGET_OBJECTS:chartsql-lib>
     TimeWindowPartitioner_test.cc)
@@ -78,6 +75,13 @@ add_executable(tsdbd
     $<TARGET_OBJECTS:sstable>
     $<TARGET_OBJECTS:dproc>
     $<TARGET_OBJECTS:chartsql-lib>
+    SQLEngine.cc
+    TSDBNode.cc
+    TSDBServlet.cc
+    RecordSet.cc
+    Partition.cc
+    CompactionWorker.cc
+    ReplicationWorker.cc
     tsdbd.cc)
 
 target_link_libraries(tsdbd ${FNORD_LIBS})
