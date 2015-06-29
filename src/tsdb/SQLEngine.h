@@ -31,9 +31,12 @@ protected:
   RefPtr<csql::QueryTreeNode> rewriteQuery(
       RefPtr<csql::QueryTreeNode> query) override;
 
-  void replaceAllSequentialScansWithUnions(RefPtr<csql::QueryTreeNode>* node);
+  void replaceAllSequentialScansWithUnions(
+      RefPtr<csql::TableExpressionNode> node);
 
-  void replaceSequentialScanWithUnion(RefPtr<csql::QueryTreeNode>* node);
+  void replaceSequentialScanWithUnion(
+      RefPtr<csql::QueryTreeNode> parent,
+      size_t table_index);
 
   RefPtr<csql::TableProvider> defaultTableProvider() override;
 
