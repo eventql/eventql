@@ -38,7 +38,7 @@ void TSDBServlet::handleHTTPRequest(
   res.populateFromRequest(req);
   res.addHeader("Access-Control-Allow-Origin", "*");
   res.addHeader("Access-Control-Allow-Methods", "GET, POST");
-  res.addHeader("Access-Control-Allow-Headers", "X-TSDB-Namespace, X-TSDB-With-Status");
+  res.addHeader("Access-Control-Allow-Headers", "X-TSDB-Namespace");
 
   if (req.method() == http::HTTPMessage::M_OPTIONS) {
     res.setStatus(http::kStatusOK);
@@ -65,7 +65,13 @@ void TSDBServlet::handleHTTPRequest(
     }
 
     if (uri.path() == "/tsdb/sql") {
-      executeSQL(&req, &res, res_stream, &uri);
+      executeSQL(&req, &res, &uri);
+      res_stream->writeResponse(res);
+      return;
+    }
+
+    if (uri.path() == "/tsdb/sql_stream") {
+      executeSQLStream(&req, &res, res_stream, &uri);
       return;
     }
 
@@ -263,17 +269,14 @@ void TSDBServlet::fetchPartitionInfo(
 void TSDBServlet::executeSQL(
     const http::HTTPRequest* req,
     http::HTTPResponse* res,
-    RefPtr<http::HTTPResponseStream> res_stream,
     URI* uri) {
   if (!req->hasHeader("X-TSDB-Namespace")) {
     res->setStatus(fnord::http::kStatusBadRequest);
     res->addBody("missing X-TSDB-Namespace header");
-    res_stream->writeResponse(*res);
     return;
   }
 
   auto tsdb_ns = req->getHeader("X-TSDB-Namespace");
-  bool with_status = req->hasHeader("X-TSDB-With-Status");
 
   auto query = req->body().toString();
   auto qplan = node_->sqlEngine()->parseAndBuildQueryPlan(
@@ -282,35 +285,59 @@ void TSDBServlet::executeSQL(
 
   csql::ExecutionContext context;
 
+  Buffer result;
+  csql::ASCIITableFormat format;
+  format.formatResults(
+      qplan,
+      &context,
+      BufferOutputStream::fromBuffer(&result));
+
+  res->setStatus(http::kStatusOK);
+  res->addHeader("Content-Type", "text/plain");
+  res->addHeader("Connection", "close");
+  res->addBody(result);
+}
+
+void TSDBServlet::executeSQLStream(
+    const http::HTTPRequest* req,
+    http::HTTPResponse* res,
+    RefPtr<http::HTTPResponseStream> res_stream,
+    URI* uri) {
+  auto tsdb_ns = req->getHeader("X-TSDB-Namespace");
+
+  auto query = req->body().toString();
+  auto qplan = node_->sqlEngine()->parseAndBuildQueryPlan(
+      tsdb_ns,
+      query);
+
   http::HTTPSSEStream sse_stream(res, res_stream);
-  if (with_status) {
-    sse_stream.start();
+  sse_stream.start();
 
-    context.onStatusChange([&sse_stream] (const csql::ExecutionStatus& status) {
-      auto progress = status.progress();
+  csql::ExecutionContext context;
+  context.onStatusChange([&sse_stream] (const csql::ExecutionStatus& status) {
+    auto progress = status.progress();
 
-      Buffer buf;
-      json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
-      json.beginObject();
-      json.addObjectEntry("status");
-      json.addString("running");
-      json.addComma();
-      json.addObjectEntry("progress");
-      json.addFloat(progress);
-      json.addComma();
-      json.addObjectEntry("message");
-      if (progress == 0.0f) {
-        json.addString("Waiting...");
-      } else if (progress == 1.0f) {
-        json.addString("Downloading...");
-      } else {
-        json.addString("Running...");
-      }
-      json.endObject();
+    Buffer buf;
+    json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
+    json.beginObject();
+    json.addObjectEntry("status");
+    json.addString("running");
+    json.addComma();
+    json.addObjectEntry("progress");
+    json.addFloat(progress);
+    json.addComma();
+    json.addObjectEntry("message");
+    if (progress == 0.0f) {
+      json.addString("Waiting...");
+    } else if (progress == 1.0f) {
+      json.addString("Downloading...");
+    } else {
+      json.addString("Running...");
+    }
+    json.endObject();
 
-      sse_stream.sendEvent(buf, Some(String("status")));
-    });
-  }
+    sse_stream.sendEvent(buf, Some(String("status")));
+  });
 
   Buffer result;
   csql::ASCIITableFormat format;
@@ -319,18 +346,10 @@ void TSDBServlet::executeSQL(
       &context,
       BufferOutputStream::fromBuffer(&result));
 
-  if (with_status) {
-    sse_stream.sendEvent(result, Some(String("result")));
-    sse_stream.finish();
-  } else {
-    res->setStatus(http::kStatusOK);
-    res->addHeader("Content-Type", "text/plain");
-    res->addHeader("Connection", "close");
-    res_stream->startResponse(*res);
-    res_stream->writeBodyChunk(result);
-    res_stream->finishResponse();
-  }
+  sse_stream.sendEvent(result, Some(String("result")));
+  sse_stream.finish();
 }
+
 
 }
 
