@@ -22,7 +22,7 @@ add_library(fnord-base OBJECT
     cli/flagparser.cc
     cli/CLI.cc
     cli/CLICommand.cc
-    datetime.cc
+    UnixTime.cc
     duration.cc
     exception.cc
     exceptionhandler.cc

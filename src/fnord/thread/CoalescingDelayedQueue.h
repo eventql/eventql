@@ -28,7 +28,7 @@ public:
 
   CoalescingDelayedQueue(size_t max_size = -1);
 
-  void insert(RefPtr<T> job, DateTime when, bool block = false);
+  void insert(RefPtr<T> job, UnixTime when, bool block = false);
   Option<RefPtr<T>> interruptiblePop();
 
   size_t length() const;

@@ -51,7 +51,7 @@ Cookies::CookieList Cookies::parseCookieHeader(const std::string& header_str) {
 std::string Cookies::mkCookie(
     const std::string& key,
     const std::string& value,
-    const DateTime& expire /* = DateTime::epoch() */,
+    const UnixTime& expire /* = UnixTime::epoch() */,
     const std::string& path /* = "" */,
     const std::string& domain /* = "" */,
     bool secure /* = false */,

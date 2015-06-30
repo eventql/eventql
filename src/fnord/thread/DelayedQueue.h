@@ -27,7 +27,7 @@ public:
 
   DelayedQueue(size_t max_size = -1);
 
-  void insert(const T& job, DateTime when, bool block = false);
+  void insert(const T& job, UnixTime when, bool block = false);
   Option<T> interruptiblePop();
 
   size_t length() const;

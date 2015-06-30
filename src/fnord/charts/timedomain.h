@@ -9,24 +9,24 @@
  */
 #ifndef _FNORDMETRIC_TIMEDOMAIN_H
 #define _FNORDMETRIC_TIMEDOMAIN_H
-#include "fnord/datetime.h"
+#include "fnord/UnixTime.h"
 #include "fnord/charts/continuousdomain.h"
 
 namespace fnord {
 namespace chart {
 
-class TimeDomain : public ContinuousDomain<fnord::DateTime> {
+class TimeDomain : public ContinuousDomain<fnord::UnixTime> {
 public:
 
   TimeDomain(
-    fnord::DateTime min_value =
-        std::numeric_limits<fnord::DateTime>::max(),
-    fnord::DateTime max_value =
-        std::numeric_limits<fnord::DateTime>::min(),
+    fnord::UnixTime min_value =
+        std::numeric_limits<fnord::UnixTime>::max(),
+    fnord::UnixTime max_value =
+        std::numeric_limits<fnord::UnixTime>::min(),
     bool is_logarithmic = false,
     bool is_inverted = false);
 
-  std::string label(fnord::DateTime value) const;
+  std::string label(fnord::UnixTime value) const;
 
 };
 
