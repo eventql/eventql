@@ -29,11 +29,15 @@ public:
       size_t stmt_idx,
       Function<bool (int argc, const SValue* argv)> fn);
 
+  void executeStatement(
+      ExecutionContext* context,
+      size_t stmt_idx,
+      Function<bool (int argc, const SValue* argv)> fn);
+
 protected:
   Vector<RefPtr<QueryTreeNode>> statements_;
   RefPtr<TableProvider> tables_;
   Runtime* runtime_;
-  ExecutionContext ctx_;
 };
 
 class ExecutionPlan : public RefCounted {
