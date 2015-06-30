@@ -297,32 +297,36 @@ void TSDBServlet::executeSQLStream(
   http::HTTPSSEStream sse_stream(res, res_stream);
   sse_stream.start();
 
-  const auto& params = uri->queryParams();
+  try {
+    const auto& params = uri->queryParams();
 
-  String tsdb_namespace;
-  if (!URI::getParam(params, "namespace", &tsdb_namespace)) {
-    sse_stream.sendEvent(
-        "missing ?namespace=... parameter",
-        Some(String("error")));
+    String tsdb_namespace;
+    if (!URI::getParam(params, "namespace", &tsdb_namespace)) {
+      RAISE(kRuntimeError, "missing ?namespace=... parameter");
+    }
 
-    sse_stream.finish();
-    return;
+    String query;
+    if (!URI::getParam(params, "query", &query)) {
+      RAISE(kRuntimeError, "missing ?query=... parameter");
+    }
+
+    node_->sqlEngine()->executeQuery(
+        tsdb_namespace,
+        query,
+        new csql::JSONSSEStreamFormat(&sse_stream));
+
+  } catch (const StandardException& e) {
+    fnord::logError("sql", e, "SQL execution failed");
+
+    Buffer buf;
+    json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
+    json.beginObject();
+    json.addObjectEntry("error");
+    json.addString(e.what());
+    json.endObject();
+
+    sse_stream.sendEvent(buf, Some(String("error")));
   }
-
-  String query;
-  if (!URI::getParam(params, "query", &query)) {
-    sse_stream.sendEvent(
-        "missing ?query=... parameter",
-        Some(String("error")));
-
-    sse_stream.finish();
-    return;
-  }
-
-  node_->sqlEngine()->executeQuery(
-      tsdb_namespace,
-      query,
-      new csql::JSONSSEStreamFormat(&sse_stream));
 
   sse_stream.finish();
 }
