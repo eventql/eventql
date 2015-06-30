@@ -15,6 +15,13 @@ Runtime::Runtime() :
     query_plan_builder_(&symbol_table_),
     scalar_exp_builder_(&symbol_table_) {}
 
+void Runtime::executeQuery(
+    RefPtr<QueryPlan> query_plan,
+    RefPtr<ResultFormat> result_format) {
+  csql::ExecutionContext context;
+  result_format->formatResults(query_plan, &context);
+}
+
 RefPtr<QueryPlan> Runtime::parseAndBuildQueryPlan(
     const String& query,
     RefPtr<TableProvider> tables,
