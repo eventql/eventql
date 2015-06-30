@@ -9,21 +9,18 @@
  */
 #pragma once
 #include <fnord/stdtypes.h>
-#include <chartsql/runtime/ResultFormat.h>
+#include <chartsql/runtime/queryplan.h>
 
 namespace csql {
 
-class ASCIITableFormat : public ResultFormat {
+class JSONResultFormat {
 public:
-
-  ASCIITableFormat(ScopedPtr<OutputStream> output);
 
   void formatResults(
       RefPtr<QueryPlan> query,
-      ExecutionContext* context);
+      ExecutionContext* context,
+      ScopedPtr<OutputStream> output);
 
-protected:
-  ScopedPtr<OutputStream> output_;
 };
 
 }

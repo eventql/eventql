@@ -11,25 +11,28 @@
 
 namespace csql {
 
+ASCIITableFormat::ASCIITableFormat(
+    ScopedPtr<OutputStream> output) :
+    output_(std::move(output)) {}
+
 void ASCIITableFormat::formatResults(
     RefPtr<QueryPlan> query,
-    ExecutionContext* context,
-    ScopedPtr<OutputStream> output) {
+    ExecutionContext* context) {
 
   for (int i = 0; i < query->numStatements(); ++i) {
-    output->write("==== query ====\n");
+    output_->write("==== query ====\n");
 
     query->executeStatement(
         context,
         i,
-        [&output] (int argc, const csql::SValue* argv) -> bool {
+        [this] (int argc, const csql::SValue* argv) -> bool {
       Vector<String> row;
       for (int n = 0; n < argc; ++n) {
         row.emplace_back(argv[n].toString());
       }
 
-      output->write(fnord::inspect(row));
-      output->write("\n");
+      output_->write(fnord::inspect(row));
+      output_->write("\n");
       return true;
     });
   }

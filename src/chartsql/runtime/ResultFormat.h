@@ -9,21 +9,17 @@
  */
 #pragma once
 #include <fnord/stdtypes.h>
-#include <chartsql/runtime/ResultFormat.h>
+#include <chartsql/runtime/queryplan.h>
 
 namespace csql {
 
-class ASCIITableFormat : public ResultFormat {
+class ResultFormat : public RefCounted {
 public:
 
-  ASCIITableFormat(ScopedPtr<OutputStream> output);
-
-  void formatResults(
+  virtual void formatResults(
       RefPtr<QueryPlan> query,
-      ExecutionContext* context);
+      ExecutionContext* context) = 0;
 
-protected:
-  ScopedPtr<OutputStream> output_;
 };
 
 }
