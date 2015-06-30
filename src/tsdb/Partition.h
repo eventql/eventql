@@ -11,7 +11,7 @@
 #define _FNORD_TSDB_STREAMCHUNK_H
 #include <fnord/stdtypes.h>
 #include <fnord/option.h>
-#include <fnord/datetime.h>
+#include <fnord/UnixTime.h>
 #include <fnord/util/binarymessagereader.h>
 #include <fnord/util/binarymessagewriter.h>
 #include <fnord/protobuf/MessageSchema.h>
@@ -103,7 +103,7 @@ protected:
   TSDBNodeRef* node_;
   mutable std::mutex mutex_;
   std::mutex replication_mutex_;
-  DateTime last_compaction_;
+  UnixTime last_compaction_;
   HashMap<uint64_t, uint64_t> repl_offsets_;
   String cstable_file_;
   SHA1Hash cstable_version_;

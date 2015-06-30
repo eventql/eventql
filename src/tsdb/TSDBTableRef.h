@@ -9,7 +9,7 @@
  */
 #pragma once
 #include <fnord/stdtypes.h>
-#include <fnord/datetime.h>
+#include <fnord/UnixTime.h>
 #include <fnord/option.h>
 #include <fnord/SHA1.h>
 
@@ -23,8 +23,8 @@ struct TSDBTableRef {
   String table_key;
   Option<String> host;
   Option<SHA1Hash> partition_key;
-  Option<DateTime> timerange_begin;
-  Option<DateTime> timerange_limit;
+  Option<UnixTime> timerange_begin;
+  Option<UnixTime> timerange_limit;
 };
 
 } // namespace csql

@@ -170,7 +170,7 @@ void Partition::scheduleCompaction() {
 
 void Partition::compact() {
   std::unique_lock<std::mutex> lk(mutex_);
-  last_compaction_ = DateTime::now();
+  last_compaction_ = UnixTime::now();
   lk.unlock();
 
   fnord::logDebug(

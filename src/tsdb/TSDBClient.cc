@@ -89,8 +89,8 @@ void TSDBClient::insertRecordsToHost(
 
 Vector<String> TSDBClient::listPartitions(
     const String& stream_key,
-    const DateTime& from,
-    const DateTime& until) {
+    const UnixTime& from,
+    const UnixTime& until) {
   auto uri = StringUtil::format(
       "$0/list_chunks?stream=$1&from=$2&until=$3",
       uri_,

@@ -10,7 +10,7 @@
 #pragma once
 #include <fnord/stdtypes.h>
 #include <fnord/option.h>
-#include <fnord/datetime.h>
+#include <fnord/UnixTime.h>
 #include <fnord/duration.h>
 #include <fnord/SHA1.h>
 
@@ -23,13 +23,13 @@ public:
 
   static SHA1Hash partitionKeyFor(
       const String& stream_key,
-      DateTime time,
+      UnixTime time,
       Duration window_size);
 
   static Vector<SHA1Hash> partitionKeysFor(
       const String& stream_key,
-      DateTime from,
-      DateTime until,
+      UnixTime from,
+      UnixTime until,
       Duration window_size);
 
 };

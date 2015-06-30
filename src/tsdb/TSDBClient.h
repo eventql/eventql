@@ -41,8 +41,8 @@ public:
 
   Vector<String> listPartitions(
       const String& stream_key,
-      const DateTime& from,
-      const DateTime& until);
+      const UnixTime& from,
+      const UnixTime& until);
 
   void fetchPartition(
       const String& tsdb_namespace,
