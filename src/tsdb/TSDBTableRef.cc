@@ -9,6 +9,8 @@
  */
 #include <tsdb/TSDBTableRef.h>
 #include <fnord/uri.h>
+#include <fnord/wallclock.h>
+#include <fnord/human.h>
 
 using namespace fnord;
 
@@ -24,7 +26,7 @@ TSDBTableRef TSDBTableRef::parse(const String& table_ref) {
     URI uri(table_ref);
     ref.host = Some(uri.hostAndPort());
 
-    auto parts = StringUtil::split(uri.path(), "/");
+    auto parts = StringUtil::split(uri.path().substr(1), "/");
 
     switch (parts.size()) {
 
@@ -52,8 +54,16 @@ TSDBTableRef TSDBTableRef::parse(const String& table_ref) {
 
     static const String last_prefix = "last";
     if (StringUtil::beginsWith(suffix, last_prefix)) {
+      auto now = WallClock::unixMicros();
       auto timespec = suffix.substr(last_prefix.size());
-      fnord::iputs("ts: $0", timespec);
+      auto offset = Human::parseDuration(timespec);
+      if (!offset.isEmpty()) {
+        ref.timerange_begin = Some(DateTime(now - offset.get().microseconds()));
+        ref.timerange_limit = Some(DateTime(now));
+        ref.table_key = ref.table_key.substr(
+            0,
+            ref.table_key.size() - suffix.size() - 1);
+      }
     }
   }
 
