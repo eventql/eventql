@@ -38,7 +38,7 @@ void TSDBServlet::handleHTTPRequest(
   res.populateFromRequest(req);
   res.addHeader("Access-Control-Allow-Origin", "*");
   res.addHeader("Access-Control-Allow-Methods", "GET, POST");
-  res.addHeader("Access-Control-Allow-Headers", "X-TSDB-Namespace");
+  res.addHeader("Access-Control-Allow-Headers", "X-TSDB-Namespace, X-TSDB-With-Status");
 
   if (req.method() == http::HTTPMessage::M_OPTIONS) {
     res.setStatus(http::kStatusOK);
