@@ -15,14 +15,27 @@ namespace fnord {
 namespace http {
 
 HTTPSSEStream::HTTPSSEStream(
-  RefPtr<http::HTTPRequestStream> req_stream,
-  RefPtr<http::HTTPResponseStream> res_stream) :
-  req_stream_(req_stream),
-  res_stream_(res_stream) {}
+    RefPtr<http::HTTPRequestStream> req_stream,
+    RefPtr<http::HTTPResponseStream> res_stream) :
+    res_stream_(res_stream) {
+  req_stream->readBody();
+  res_.populateFromRequest(req_stream->request());
+}
+
+HTTPSSEStream::HTTPSSEStream(
+    const http::HTTPRequest* req,
+    RefPtr<http::HTTPResponseStream> res_stream) :
+    res_stream_(res_stream) {
+  res_.populateFromRequest(*req);
+}
+
+HTTPSSEStream::HTTPSSEStream(
+    const http::HTTPResponse* res,
+    RefPtr<http::HTTPResponseStream> res_stream) : 
+    res_stream_(res_stream),
+    res_(*res) {}
 
 void HTTPSSEStream::start() {
-  req_stream_->readBody();
-  res_.populateFromRequest(req_stream_->request());
   res_.setStatus(kStatusOK);
   res_.addHeader("Content-Type", "text/event-stream");
   res_.addHeader("Cache-Control", "no-cache");
