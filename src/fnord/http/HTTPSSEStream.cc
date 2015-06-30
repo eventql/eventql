@@ -83,6 +83,9 @@ const HTTPResponse HTTPSSEStream::response() const {
   return res_;
 }
 
+bool HTTPSSEStream::isClosed() const {
+  return res_stream_->isClosed();
+}
 
 }
 }

@@ -63,6 +63,11 @@ public:
   const HTTPResponse response() const;
   void finish();
 
+  /**
+   * Returns true if the HTTP connection was closed
+   */
+  bool isClosed() const;
+
 private:
 
   RefPtr<http::HTTPResponseStream> res_stream_;
