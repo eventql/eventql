@@ -21,8 +21,14 @@ void JSONSSEStreamFormat::formatResults(
     RefPtr<QueryPlan> query,
     ExecutionContext* context) {
   try {
-    context->onStatusChange([this] (const csql::ExecutionStatus& status) {
+    context->onStatusChange([this, context] (const csql::ExecutionStatus& status) {
       auto progress = status.progress();
+
+      if (output_->isClosed()) {
+        fnord::logDebug("sql", "Aborting Query...");
+        context->cancel();
+        return;
+      }
 
       Buffer buf;
       json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
