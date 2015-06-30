@@ -25,9 +25,9 @@ public:
       ExecutionContext* context,
       Function<bool (int argc, const SValue* argv)> fn) override;
 
-  virtual Vector<String> columnNames() const override;
+  Vector<String> columnNames() const override;
 
-  virtual size_t numColunns() const override;
+  size_t numColunns() const override;
 
 protected:
   Vector<String> column_names_;

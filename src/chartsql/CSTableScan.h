@@ -71,6 +71,7 @@ protected:
 
   void fetch();
 
+  Vector<String> column_names_;
   ScratchMemory scratch_;
   cstable::CSTableReader cstable_;
   HashMap<String, ColumnRef> columns_;
