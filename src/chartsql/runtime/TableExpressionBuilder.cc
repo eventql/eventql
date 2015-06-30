@@ -52,10 +52,13 @@ ScopedPtr<TableExpression> TableExpressionBuilder::buildGroupBy(
     RefPtr<GroupByNode> node,
     Runtime* runtime,
     TableProvider* tables) {
+  Vector<String> column_names;
   Vector<ScopedPtr<ValueExpression>> select_expressions;
   Vector<ScopedPtr<ValueExpression>> group_expressions;
 
   for (const auto& slnode : node->selectList()) {
+    column_names.emplace_back(slnode->columnName());
+
     select_expressions.emplace_back(
         runtime->buildValueExpression(slnode->expression()));
   }
@@ -69,6 +72,7 @@ ScopedPtr<TableExpression> TableExpressionBuilder::buildGroupBy(
   return mkScoped(
       new GroupBy(
           std::move(next),
+          column_names,
           std::move(select_expressions),
           std::move(group_expressions)));
 }

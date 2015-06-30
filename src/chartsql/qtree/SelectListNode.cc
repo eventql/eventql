@@ -25,5 +25,8 @@ RefPtr<QueryTreeNode> SelectListNode::deepCopy() const {
   return new SelectListNode(expr_->deepCopyAs<ValueExpressionNode>());
 }
 
+String SelectListNode::columnName() const {
+  return "FIXME";
+}
 
 } // namespace csql
