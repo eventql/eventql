@@ -273,22 +273,61 @@ void TSDBServlet::executeSQL(
   }
 
   auto tsdb_ns = req->getHeader("X-TSDB-Namespace");
+  bool with_status = req->hasHeader("X-TSDB-With-Status");
 
   auto query = req->body().toString();
   auto qplan = node_->sqlEngine()->parseAndBuildQueryPlan(
       tsdb_ns,
       query);
 
+  csql::ExecutionContext context;
+
+  http::HTTPSSEStream sse_stream(res, res_stream);
+  if (with_status) {
+    sse_stream.start();
+
+  //auto send_status_update = [&sse_stream, &task_future] {
+  //  auto status = task_future->status();
+  //  auto progress = status.progress();
+
+  //  Buffer buf;
+  //  json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
+  //  json.beginObject();
+  //  json.addObjectEntry("status");
+  //  json.addString("running");
+  //  json.addComma();
+  //  json.addObjectEntry("progress");
+  //  json.addFloat(progress);
+  //  json.addComma();
+  //  json.addObjectEntry("message");
+  //  if (progress == 0.0f) {
+  //    json.addString("Waiting...");
+  //  } else if (progress == 1.0f) {
+  //    json.addString("Downloading...");
+  //  } else {
+  //    json.addString("Running...");
+  //  }
+  //  json.endObject();
+
+  //  sse_stream.sendEvent(buf, Some(String("status")));
+  //};
+  }
+
   Buffer result;
   csql::ASCIITableFormat format;
   format.formatResults(qplan, BufferOutputStream::fromBuffer(&result));
 
-  res->setStatus(http::kStatusOK);
-  res->addHeader("Content-Type", "text/plain");
-  res->addHeader("Connection", "close");
-  res_stream->startResponse(*res);
-  res_stream->writeBodyChunk(result);
-  res_stream->finishResponse();
+  if (with_status) {
+    sse_stream.sendEvent(result, Some(String("result")));
+    sse_stream.finish();
+  } else {
+    res->setStatus(http::kStatusOK);
+    res->addHeader("Content-Type", "text/plain");
+    res->addHeader("Connection", "close");
+    res_stream->startResponse(*res);
+    res_stream->writeBodyChunk(result);
+    res_stream->finishResponse();
+  }
 }
 
 }

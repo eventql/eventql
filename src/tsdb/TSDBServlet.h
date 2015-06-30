@@ -12,6 +12,7 @@
 #include "fnord/http/httpservice.h"
 #include <fnord/random.h>
 #include <tsdb/TSDBNode.h>
+#include <fnord/http/HTTPSSEStream.h>
 
 using namespace fnord;
 
