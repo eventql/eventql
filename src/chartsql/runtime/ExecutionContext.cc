@@ -15,18 +15,8 @@ namespace csql {
 
 ExecutionContext::ExecutionContext() : cancelled_(false) {}
 
-void ExecutionContext::updateStatus(Function<void (ExecutionStatus* status)> fn) {
-  std::unique_lock<std::mutex> lk(mutex_);
-  fn(&status_);
-
-  if (on_status_change_) {
-    auto cb = on_status_change_;
-    lk.unlock();
-    cb();
-  }
-}
-
-void ExecutionContext::onStatusChange(Function<void ()> fn) {
+void ExecutionContext::onStatusChange(
+    Function<void (const ExecutionStatus& status)> fn) {
   std::unique_lock<std::mutex> lk(mutex_);
   on_status_change_ = fn;
 }
@@ -34,11 +24,6 @@ void ExecutionContext::onStatusChange(Function<void ()> fn) {
 void ExecutionContext::onCancel(Function<void ()> fn) {
   std::unique_lock<std::mutex> lk(mutex_);
   on_cancel_ = fn;
-}
-
-ExecutionStatus ExecutionContext::status() const {
-  std::unique_lock<std::mutex> lk(mutex_);
-  return status_;
 }
 
 void ExecutionContext::cancel() {
@@ -55,6 +40,30 @@ bool ExecutionContext::isCancelled() const {
   return cancelled_;
 }
 
+void ExecutionContext::incrNumSubtasksTotal(size_t n) {
+  status_.num_subtasks_total += n;
+  statusChanged();
+}
+
+void ExecutionContext::incrNumSubtasksCompleted(size_t n) {
+  status_.num_subtasks_completed += n;
+  statusChanged();
+}
+
+void ExecutionContext::incrNumRowsScanned(size_t n) {
+  status_.num_rows_scanned += n;
+  statusChanged();
+}
+
+void ExecutionContext::statusChanged() {
+  // FIXPAUL rate limit...
+
+  std::unique_lock<std::mutex> lk(mutex_);
+  if (on_status_change_) {
+    on_status_change_(status_);
+  }
+}
+
 ExecutionStatus::ExecutionStatus() :
     num_subtasks_total(1),
     num_subtasks_completed(0) {}
@@ -62,8 +71,8 @@ ExecutionStatus::ExecutionStatus() :
 String ExecutionStatus::toString() const {
   return StringUtil::format(
       "$0/$1 ($2%)",
-      num_subtasks_completed,
-      num_subtasks_total,
+      num_subtasks_completed.load(),
+      num_subtasks_total.load(),
       progress() * 100);
 }
 
