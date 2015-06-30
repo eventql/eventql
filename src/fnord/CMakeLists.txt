@@ -27,6 +27,7 @@ add_library(fnord-base OBJECT
     exception.cc
     exceptionhandler.cc
     fnv.cc
+    human.cc
     ieee754.cc
     inspect.cc
     InternMap.cc

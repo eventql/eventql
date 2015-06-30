@@ -192,6 +192,20 @@ bool StringUtil::isAlphanumeric(char chr) {
   return is_alphanum;
 }
 
+bool StringUtil::isNumber(const std::string& str) {
+  return isNumber(str.data(), str.data() + str.size());
+}
+
+bool StringUtil::isNumber(const char* begin, const char* end) {
+  for (auto cur = begin; cur < end; ++cur) {
+    if (!isdigit(*cur)) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
 void StringUtil::toLower(std::string* str) {
   auto& str_ref = *str;
 
