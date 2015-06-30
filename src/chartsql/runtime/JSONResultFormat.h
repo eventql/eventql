@@ -9,6 +9,7 @@
  */
 #pragma once
 #include <fnord/stdtypes.h>
+#include <fnord/json/json.h>
 #include <chartsql/runtime/queryplan.h>
 
 namespace csql {
@@ -16,11 +17,14 @@ namespace csql {
 class JSONResultFormat {
 public:
 
+  JSONResultFormat(json::JSONOutputStream* json);
+
   void formatResults(
       RefPtr<QueryPlan> query,
-      ExecutionContext* context,
-      ScopedPtr<OutputStream> output);
+      ExecutionContext* context);
 
+protected:
+  json::JSONOutputStream* json_;
 };
 
 }
