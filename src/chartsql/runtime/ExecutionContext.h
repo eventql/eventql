@@ -16,10 +16,36 @@ using namespace fnord;
 
 namespace csql {
 
+struct ExecutionStatus {
+  ExecutionStatus();
+
+  size_t num_subtasks_total;
+  size_t num_subtasks_completed;
+
+  String toString() const;
+  double progress() const;
+};
+
+
 class ExecutionContext : public RefCounted {
 public:
 
+  ExecutionContext();
 
+  void updateStatus(Function<void (ExecutionStatus* status)> fn);
+  void onStatusChange(Function<void ()> fn);
+  ExecutionStatus status() const;
+
+  void cancel();
+  bool isCancelled() const;
+  void onCancel(Function<void ()> fn);
+
+protected:
+  ExecutionStatus status_;
+  mutable std::mutex mutex_;
+  Function<void ()> on_status_change_;
+  Function<void ()> on_cancel_;
+  bool cancelled_;
 };
 
 }

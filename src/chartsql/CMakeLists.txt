@@ -70,6 +70,7 @@ add_library(chartsql-lib OBJECT
     runtime/EmptyTable.cc
     runtime/groupovertimewindow.cc
     runtime/execute.cc
+    runtime/ExecutionContext.cc
     defaults.cc)
 
 add_executable(test-chartsql-runtime
