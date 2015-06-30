@@ -12,7 +12,9 @@
 namespace csql {
 
 SelectExpression::SelectExpression(
+    const Vector<String>& column_names,
     Vector<ScopedPtr<ValueExpression>> select_expressions) :
+    column_names_(column_names),
     select_exprs_(std::move(select_expressions)) {}
 
 void SelectExpression::execute(
@@ -25,6 +27,14 @@ void SelectExpression::execute(
   }
 
   fn(out_row.size(), out_row.data());
+}
+
+Vector<String> SelectExpression::columnNames() const {
+  return column_names_;
+}
+
+size_t SelectExpression::numColunns() const {
+  return column_names_.size();
 }
 
 }
