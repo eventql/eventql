@@ -23,8 +23,7 @@ void SQLEngine::executeQuery(
     const String& query,
     RefPtr<csql::ResultFormat> result_format) {
   auto qplan = parseAndBuildQueryPlan(tsdb_namespace, query);
-  csql::ExecutionContext context;
-  result_format->formatResults(qplan, &context);
+  sql_runtime_.executeQuery(qplan, result_format);
 }
 
 RefPtr<csql::QueryPlan> SQLEngine::parseAndBuildQueryPlan(
