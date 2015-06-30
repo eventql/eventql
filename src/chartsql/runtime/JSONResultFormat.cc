@@ -24,28 +24,29 @@ void JSONResultFormat::formatResults(
   json_->beginArray();
 
   for (int i = 0; i < query->numStatements(); ++i) {
+    auto stmt = query->getStatement(i);
+
     json_->beginObject();
 
-    //json_->addObjectEntry("columns");
-    //json_->beginArray();
+    json_->addObjectEntry("columns");
+    json_->beginArray();
 
-    //auto columns = query->getResultColumns(i);
-    //for (int i = 0; i < columns.size(); ++i) {
-    //  if (i > 0) {
-    //    json_->addComma();
-    //  }
-    //  json_->addString(columns[i]);
-    //}
-    //json_->endArray();
-    //json_->addComma();
+    auto columns = stmt->columnNames();
+    for (int n = 0; n < columns.size(); ++n) {
+      if (n > 0) {
+        json_->addComma();
+      }
+      json_->addString(columns[n]);
+    }
+    json_->endArray();
+    json_->addComma();
 
     json_->addObjectEntry("rows");
     json_->beginArray();
 
     size_t j = 0;
-    query->executeStatement(
+    stmt->execute(
         context,
-        i,
         [this, &j] (int argc, const csql::SValue* argv) -> bool {
       if (++j > 1) {
         json_->addComma();

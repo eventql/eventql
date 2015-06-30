@@ -22,9 +22,10 @@ void ASCIITableFormat::formatResults(
   for (int i = 0; i < query->numStatements(); ++i) {
     output_->write("==== query ====\n");
 
-    query->executeStatement(
+    auto stmt = query->getStatement(i);
+
+    stmt->execute(
         context,
-        i,
         [this] (int argc, const csql::SValue* argv) -> bool {
       Vector<String> row;
       for (int n = 0; n < argc; ++n) {
