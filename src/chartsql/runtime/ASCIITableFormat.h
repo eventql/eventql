@@ -18,6 +18,7 @@ public:
 
   void formatResults(
       RefPtr<QueryPlan> query,
+      ExecutionContext* context,
       ScopedPtr<OutputStream> output);
 
 };

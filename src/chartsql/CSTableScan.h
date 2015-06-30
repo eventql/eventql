@@ -54,6 +54,9 @@ protected:
     ValueExpression::Instance instance;
   };
 
+  void scan(
+      Function<bool (int argc, const SValue* argv)> fn);
+
   void findColumns(
       RefPtr<ValueExpressionNode> expr,
       Set<String>* column_names) const;
