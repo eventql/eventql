@@ -19,6 +19,7 @@
 #include <chartsql/runtime/symboltable.h>
 #include <chartsql/runtime/ValueExpressionBuilder.h>
 #include <chartsql/runtime/TableExpressionBuilder.h>
+#include <chartsql/runtime/ResultFormat.h>
 
 namespace csql {
 
@@ -29,6 +30,10 @@ public:
       QueryRewriteFn;
 
   Runtime();
+
+  void executeQuery(
+      RefPtr<QueryPlan> query_plan,
+      RefPtr<ResultFormat> result_format);
 
   RefPtr<QueryPlan> parseAndBuildQueryPlan(
       const String& query,
