@@ -23,7 +23,7 @@
 #include <chartsql/runtime/tablerepository.h>
 #include <ui/canvas.h>
 #include <ui/svgtarget.h>
-#include <util/datetime.h>
+#include <util/UnixTime.h>
 #include <util/inputstream.h>
 #include <util/outputstream.h>
 #include <util/unittest.h>
@@ -108,7 +108,7 @@ class TestTimeTableRef : public TableRef {
         start_time += 120000000;
       }
 
-      row.emplace_back(fnord::util::DateTime(start_time + 1000000 * i));
+      row.emplace_back(fnord::util::UnixTime(start_time + 1000000 * i));
       row.emplace_back(SValue((SValue::IntegerType) i));
       if (!scan->nextRow(row.data(), row.size())) {
         return;

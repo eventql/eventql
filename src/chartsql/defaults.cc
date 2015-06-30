@@ -59,7 +59,7 @@ void installDefaultSymbols(Runtime* rt) {
   rt->registerFunction("gt",  PureFunction(&expressions::gtExpr));
   rt->registerFunction("gte", PureFunction(&expressions::gteExpr));
 
-  /* expressions/datetime.h */
+  /* expressions/UnixTime.h */
   rt->registerFunction(
       "FROM_TIMESTAMP",
       PureFunction(&expressions::fromTimestamp));
