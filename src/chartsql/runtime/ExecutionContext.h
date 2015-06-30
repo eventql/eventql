@@ -11,18 +11,14 @@
 #include <fnord/stdtypes.h>
 #include <fnord/autoref.h>
 #include <chartsql/svalue.h>
-#include <chartsql/runtime/ExecutionContext.h>
 
 using namespace fnord;
 
 namespace csql {
 
-class TableExpression : public RefCounted {
+class ExecutionContext : public RefCounted {
 public:
 
-  virtual void execute(
-      ExecutionContext* context,
-      Function<bool (int argc, const SValue* argv)> fn) = 0;
 
 };
 

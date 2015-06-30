@@ -27,6 +27,14 @@ size_t QueryPlan::numStatements() const {
 void QueryPlan::executeStatement(
     size_t stmt_idx,
     Function<bool (int argc, const SValue* argv)> fn) {
+  ExecutionContext context;
+  executeStatement(&context, stmt_idx, fn);
+}
+
+void QueryPlan::executeStatement(
+    ExecutionContext* context,
+    size_t stmt_idx,
+    Function<bool (int argc, const SValue* argv)> fn) {
   if (stmt_idx >= statements_.size()) {
     RAISE(kIndexError, "invalid statement index");
   }
@@ -37,7 +45,7 @@ void QueryPlan::executeStatement(
         stmt.asInstanceOf<TableExpressionNode>(),
         tables_);
 
-    table_expr->execute(&ctx_, fn);
+    table_expr->execute(context, fn);
     return;
   }
 
