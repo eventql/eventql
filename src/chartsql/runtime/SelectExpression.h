@@ -17,7 +17,9 @@ namespace csql {
 class SelectExpression : public TableExpression {
 public:
 
-  SelectExpression(Vector<ScopedPtr<ValueExpression>> select_expressions);
+  SelectExpression(
+      const Vector<String>& column_names,
+      Vector<ScopedPtr<ValueExpression>> select_expressions);
 
   void execute(
       ExecutionContext* context,
@@ -28,6 +30,7 @@ public:
   virtual size_t numColunns() const override;
 
 protected:
+  Vector<String> column_names_;
   Vector<ScopedPtr<ValueExpression>> select_exprs_;
 };
 

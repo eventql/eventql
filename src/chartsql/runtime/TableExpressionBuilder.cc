@@ -108,14 +108,19 @@ ScopedPtr<TableExpression> TableExpressionBuilder::buildSelectExpression(
     RefPtr<SelectExpressionNode> node,
     Runtime* runtime,
     TableProvider* tables) {
+  Vector<String> column_names;
   Vector<ScopedPtr<ValueExpression>> select_expressions;
 
   for (const auto& slnode : node->selectList()) {
+    column_names.emplace_back(slnode->columnName());
+
     select_expressions.emplace_back(
         runtime->buildValueExpression(slnode->expression()));
   }
 
-  return mkScoped(new SelectExpression(std::move(select_expressions)));
+  return mkScoped(new SelectExpression(
+      column_names,
+      std::move(select_expressions)));
 }
 
 } // namespace csql
