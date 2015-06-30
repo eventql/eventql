@@ -84,10 +84,11 @@ void SQLEngine::replaceSequentialScanWithUnion(
 
   if (table_ref.timerange_begin.isEmpty() ||
       table_ref.timerange_limit.isEmpty()) {
-    RAISE(
+    RAISEF(
         kRuntimeError,
-        "invalid reference to timeseries table without timerange. " \
-        "try appending .last30days to the table name");
+        "invalid reference to timeseries table '$0' without timerange. " \
+        "try appending .last30days to the table name",
+        table_ref.table_key);
   }
 
   auto partitions = TimeWindowPartitioner::partitionKeysFor(
