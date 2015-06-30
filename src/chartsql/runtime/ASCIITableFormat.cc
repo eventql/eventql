@@ -13,12 +13,14 @@ namespace csql {
 
 void ASCIITableFormat::formatResults(
     RefPtr<QueryPlan> query,
+    ExecutionContext* context,
     ScopedPtr<OutputStream> output) {
 
   for (int i = 0; i < query->numStatements(); ++i) {
     output->write("==== query ====\n");
 
     query->executeStatement(
+        context,
         i,
         [&output] (int argc, const csql::SValue* argv) -> bool {
       Vector<String> row;

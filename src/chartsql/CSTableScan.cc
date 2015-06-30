@@ -49,6 +49,13 @@ CSTableScan::CSTableScan(
 void CSTableScan::execute(
     ExecutionContext* context,
     Function<bool (int argc, const SValue* argv)> fn) {
+  context->incrNumSubtasksTotal(1);
+  scan(fn);
+  context->incrNumSubtasksCompleted(1);
+}
+
+void CSTableScan::scan(
+    Function<bool (int argc, const SValue* argv)> fn) {
   uint64_t select_level = 0;
   uint64_t fetch_level = 0;
 
