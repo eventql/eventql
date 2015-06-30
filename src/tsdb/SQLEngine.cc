@@ -77,22 +77,30 @@ void SQLEngine::replaceSequentialScanWithUnion(
     RefPtr<csql::TableExpressionNode>* node) {
   auto seqscan = node->asInstanceOf<csql::SequentialScanNode>();
 
-  auto stream_key = seqscan->tableName();
-  if (StringUtil::beginsWith(stream_key, "tsdb://")) {
+  auto table_ref = TSDBTableRef::parse(seqscan->tableName());
+  if (!table_ref.partition_key.isEmpty()) {
     return;
   }
 
+  if (table_ref.timerange_begin.isEmpty() ||
+      table_ref.timerange_limit.isEmpty()) {
+    RAISE(
+        kRuntimeError,
+        "invalid reference to timeseries table without timerange. " \
+        "try appending .last30days to the table name");
+  }
+
   auto partitions = TimeWindowPartitioner::partitionKeysFor(
-      stream_key,
-      WallClock::unixMicros() - 30 * kMicrosPerDay,
-      WallClock::unixMicros(),
+      table_ref.table_key,
+      table_ref.timerange_begin.get(),
+      table_ref.timerange_limit.get(),
       4 * kMicrosPerHour);
 
   Vector<RefPtr<csql::TableExpressionNode>> union_tables;
   for (const auto& partition : partitions) {
     auto table_name = StringUtil::format(
-        "tsdb://$0/$1",
-        URI::urlEncode(stream_key),
+        "tsdb://localhost/$0/$1",
+        URI::urlEncode(table_ref.table_key),
         partition.toString());
 
     auto copy = seqscan->deepCopyAs<csql::SequentialScanNode>();

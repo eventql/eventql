@@ -9,27 +9,22 @@
  */
 #pragma once
 #include <fnord/stdtypes.h>
-#include <chartsql/runtime/tablerepository.h>
-#include <tsdb/TSDBTableRef.h>
+#include <fnord/datetime.h>
+#include <fnord/option.h>
+#include <fnord/SHA1.h>
 
 using namespace fnord;
 
 namespace tsdb {
-class TSDBNode;
 
-struct TSDBTableProvider : public csql::TableProvider {
-public:
+struct TSDBTableRef {
+  static TSDBTableRef parse(const String& table_ref);
 
-  TSDBTableProvider(const String& tsdb_namespace, TSDBNode* node);
-
-  Option<ScopedPtr<csql::TableExpression>> buildSequentialScan(
-        RefPtr<csql::SequentialScanNode> node,
-        csql::Runtime* runtime) const override;
-
-protected:
-  String tsdb_namespace_;
-  TSDBNode* tsdb_node_;
+  String table_key;
+  Option<String> host;
+  Option<SHA1Hash> partition_key;
+  Option<DateTime> timerange_begin;
+  Option<DateTime> timerange_limit;
 };
-
 
 } // namespace csql

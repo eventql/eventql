@@ -26,31 +26,20 @@ TSDBTableProvider::TSDBTableProvider(
 Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildSequentialScan(
       RefPtr<csql::SequentialScanNode> node,
       csql::Runtime* runtime) const {
-  auto table_name = node->tableName();
-  static const String prefix = "tsdb://";
+  auto table_ref = TSDBTableRef::parse(node->tableName());
 
-  if (!StringUtil::beginsWith(table_name, prefix)) {
-    return None<ScopedPtr<csql::TableExpression>>();
+  if (table_ref.host.isEmpty() || table_ref.host.get() != "localhost") {
+    RAISE(kRuntimeError, "host must be == localhost");
   }
 
-  auto path = table_name.substr(prefix.size());
-  auto parts = StringUtil::split(path, "/");
-
-  if (parts.size() != 2) {
-    RAISEF(
-        kIllegalArgumentError,
-        "invalid tsdb table reference '$0', format is: "
-        "tsdb://<stream>/<partition>",
-        table_name);
+  if (table_ref.partition_key.isEmpty()) {
+    RAISE(kRuntimeError, "missing partition key");
   }
-
-  auto stream_key = URI::urlDecode(parts[0]);
-  auto partition_key = SHA1Hash::fromHexString(URI::urlDecode(parts[1]));
 
   auto partition = tsdb_node_->findPartition(
       tsdb_namespace_,
-      stream_key,
-      partition_key);
+      table_ref.table_key,
+      table_ref.partition_key.get());
 
   if (partition.isEmpty()) {
     return Option<ScopedPtr<csql::TableExpression>>(
@@ -70,5 +59,7 @@ Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildSequentialScan(
               std::move(cstable.get()),
               runtime)));
 }
+
+
 
 } // namespace csql

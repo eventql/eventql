@@ -79,6 +79,7 @@ add_executable(tsdbd
     TSDBNode.cc
     TSDBServlet.cc
     TSDBTableProvider.cc
+    TSDBTableRef.cc
     RecordSet.cc
     Partition.cc
     CompactionWorker.cc
