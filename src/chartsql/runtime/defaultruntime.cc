@@ -12,8 +12,23 @@
 
 namespace csql {
 
-DefaultRuntime::DefaultRuntime() {
+DefaultRuntime::DefaultRuntime() : tables_(new TableRepository()) {
   installDefaultSymbols(&runtime_);
+}
+
+void DefaultRuntime::executeQuery(
+    const String& query,
+    RefPtr<csql::ResultFormat> result_format) {
+  auto qplan = runtime_.parseAndBuildQueryPlan(
+      query,
+      tables_.get(),
+      [] (RefPtr<QueryTreeNode> query) { return query; });
+
+  runtime_.executeQuery(qplan, result_format);
+}
+
+void DefaultRuntime::addTableProvider(RefPtr<TableProvider> table) {
+  tables_->addProvider(table);
 }
 
 }
