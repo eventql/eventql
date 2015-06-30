@@ -28,6 +28,9 @@ include_directories(${SENSORD_INCLUDE})
 add_subdirectory(app/brokerd)
 include_directories(${BROKERD_INCLUDE})
 
+add_subdirectory(app/chartsql)
+include_directories(${CHARTSQL_INCLUDE})
+
 add_subdirectory(app/tsdb)
 include_directories(${TSDB_INCLUDE})
 
@@ -39,9 +42,6 @@ include_directories(${LOGJOIND_INCLUDE})
 
 add_subdirectory(app/metricd)
 include_directories(${METRICD_INCLUDE})
-
-add_subdirectory(app/chartsql)
-include_directories(${CHARTSQL_INCLUDE})
 
 add_subdirectory(app/analyticsd)
 include_directories(${ANALYTICSD_INCLUDE})
