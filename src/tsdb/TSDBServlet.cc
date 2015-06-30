@@ -325,50 +325,6 @@ void TSDBServlet::executeSQLStream(
       new csql::JSONSSEStreamFormat(&sse_stream));
 
   sse_stream.finish();
-//  Buffer result;
-//  try {
-//    auto qplan = node_->sqlEngine()->parseAndBuildQueryPlan(
-//        tsdb_namespace,
-//        query);
-//
-//    csql::ExecutionContext context;
-//
-//    context.onStatusChange([&sse_stream] (const csql::ExecutionStatus& status) {
-//      auto progress = status.progress();
-//
-//      Buffer buf;
-//      json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
-//      json.beginObject();
-//      json.addObjectEntry("status");
-//      json.addString("running");
-//      json.addComma();
-//      json.addObjectEntry("progress");
-//      json.addFloat(progress);
-//      json.addComma();
-//      json.addObjectEntry("message");
-//      if (progress == 0.0f) {
-//        json.addString("Waiting...");
-//      } else if (progress == 1.0f) {
-//        json.addString("Downloading...");
-//      } else {
-//        json.addString("Running...");
-//      }
-//      json.endObject();
-//
-//      sse_stream.sendEvent(buf, Some(String("status")));
-//    });
-//
-//    csql::ASCIITableFormat format(BufferOutputStream::fromBuffer(&result));
-//    format.formatResults(qplan, &context);
-//
-//  } catch (const StandardException& e) {
-//    fnord::logError("tsdb.sql", e, "SQL execution failed");
-//    sse_stream.sendEvent(e.what(), Some(String("error")));
-//    sse_stream.finish();
-//  }
-//
-//  sse_stream.sendEvent(result, Some(String("result")));
-//  sse_stream.finish();
 }
 
 
