@@ -11,7 +11,7 @@
 #include <stack>
 #include <string>
 #include "fnord/inspect.h"
-#include "fnord/datetime.h"
+#include "fnord/UnixTime.h"
 #include "fnord/json/json.h"
 #include "fnord/json/jsoninputstream.h"
 
@@ -253,10 +253,10 @@ bool fromJSONImpl(
 }
 
 template <>
-DateTime fromJSONImpl(
+UnixTime fromJSONImpl(
     std::vector<JSONToken>::const_iterator begin,
     std::vector<JSONToken>::const_iterator end) {
-  return DateTime(fromJSONImpl<uint64_t>(begin, end));
+  return UnixTime(fromJSONImpl<uint64_t>(begin, end));
 }
 
 template <>

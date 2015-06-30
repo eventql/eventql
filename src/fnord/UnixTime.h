@@ -17,20 +17,20 @@
 
 namespace fnord {
 
-class DateTime {
+class UnixTime {
 public:
 
   /**
-   * Create a new UTC DateTime instance with time = now
+   * Create a new UTC UnixTime instance with time = now
    */
-  DateTime();
+  UnixTime();
 
   /**
-   * Create a new UTC DateTime instance
+   * Create a new UTC UnixTime instance
    *
    * @param timestamp the UTC microsecond timestamp
    */
-  DateTime(uint64_t utc_time);
+  UnixTime(uint64_t utc_time);
 
   /**
    * Return a representation of the date as a string (strftime)
@@ -39,22 +39,22 @@ public:
    */
   std::string toString(const char* fmt = "%Y-%m-%d %H:%M:%S") const;
 
-  DateTime& operator=(const DateTime& other);
+  UnixTime& operator=(const UnixTime& other);
 
-  bool operator==(const DateTime& other) const;
-  bool operator<(const DateTime& other) const;
-  bool operator>(const DateTime& other) const;
-  bool operator<=(const DateTime& other) const;
-  bool operator>=(const DateTime& other) const;
+  bool operator==(const UnixTime& other) const;
+  bool operator<(const UnixTime& other) const;
+  bool operator>(const UnixTime& other) const;
+  bool operator<=(const UnixTime& other) const;
+  bool operator>=(const UnixTime& other) const;
 
   /**
-   * Cast the DateTime object to a UTC unix microsecond timestamp represented as
+   * Cast the UnixTime object to a UTC unix microsecond timestamp represented as
    * an uint64_t
    */
   explicit operator uint64_t() const;
 
   /**
-   * Cast the DateTime object to a UTC unix microsecond timestamp represented as
+   * Cast the UnixTime object to a UTC unix microsecond timestamp represented as
    * a double
    */
   explicit operator double() const;
@@ -65,19 +65,19 @@ public:
   uint64_t unixMicros() const;
 
   /**
-   * Return a new DateTime instance with time 00:00:00 UTC, 1 Jan. 1970
+   * Return a new UnixTime instance with time 00:00:00 UTC, 1 Jan. 1970
    */
-  static DateTime epoch();
+  static UnixTime epoch();
 
   /**
-   * Return a new DateTime instance with time = now
+   * Return a new UnixTime instance with time = now
    */
-  static DateTime now();
+  static UnixTime now();
 
   /**
-   * Return a new DateTime instance with time = now + days
+   * Return a new UnixTime instance with time = now + days
    */
-  static DateTime daysFromNow(double days);
+  static UnixTime daysFromNow(double days);
 
 protected:
 
@@ -96,10 +96,10 @@ protected:
 }
 
 namespace std {
-template <> class numeric_limits<fnord::DateTime> {
+template <> class numeric_limits<fnord::UnixTime> {
 public:
-  static fnord::DateTime max();
-  static fnord::DateTime min();
+  static fnord::UnixTime max();
+  static fnord::UnixTime min();
 };
 }
 

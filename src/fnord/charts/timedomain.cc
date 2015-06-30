@@ -7,25 +7,25 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include "fnord/datetime.h"
+#include "fnord/UnixTime.h"
 #include "fnord/charts/timedomain.h"
 
 namespace fnord {
 namespace chart {
 
 TimeDomain::TimeDomain(
-    fnord::DateTime min_value,
-    fnord::DateTime max_value,
+    fnord::UnixTime min_value,
+    fnord::UnixTime max_value,
     bool is_logarithmic,
     bool is_inverted) :
-    ContinuousDomain<fnord::DateTime>(
+    ContinuousDomain<fnord::UnixTime>(
         min_value,
         max_value,
         is_logarithmic,
         is_inverted) {}
 
-std::string TimeDomain::label(fnord::DateTime value) const {
-  auto range = ContinuousDomain<fnord::DateTime>::getRange();
+std::string TimeDomain::label(fnord::UnixTime value) const {
+  auto range = ContinuousDomain<fnord::UnixTime>::getRange();
 
   if (range < 60 * 60) {
     return value.toString("%H:%M:%S");

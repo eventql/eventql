@@ -14,10 +14,10 @@
 
 namespace fnord {
 
-Option<DateTime> Human::parseTime(const String& str) {
+Option<UnixTime> Human::parseTime(const String& str) {
   /* now */
   if (str == "now") {
-    return Some(DateTime(WallClock::unixMicros()));
+    return Some(UnixTime(WallClock::unixMicros()));
   }
 
   /* -<duration> */
@@ -25,7 +25,7 @@ Option<DateTime> Human::parseTime(const String& str) {
     auto offset = parseDuration(str.substr(1));
     if (!offset.isEmpty()) {
       return Some(
-          DateTime(
+          UnixTime(
               WallClock::unixMicros() - offset.get().microseconds()));
     }
   }
@@ -38,27 +38,27 @@ Option<DateTime> Human::parseTime(const String& str) {
       uint64_t ts = std::stoull(str);
 
       if (ts < bound_milli) {
-        return Some(DateTime(ts * kMicrosPerSecond));
+        return Some(UnixTime(ts * kMicrosPerSecond));
       }
 
       if (ts > bound_milli && ts < bound_micro) {
-        return Some(DateTime(ts * kMillisPerSecond));
+        return Some(UnixTime(ts * kMillisPerSecond));
       }
 
       if (ts > bound_micro) {
-        return Some(DateTime(ts));
+        return Some(UnixTime(ts));
       }
     } catch (...) {
       /* fallthrough */
     }
   }
 
-  //auto isodate = IsoDate::toDateTime(str);
+  //auto isodate = IsoDate::toUnixTime(str);
   //if (!isodate.isEmpty()) {
   //  return isodate.get();
   //}
 
-  return None<DateTime> ();
+  return None<UnixTime> ();
 }
 
 Option<Duration> Human::parseDuration(const String& str) {

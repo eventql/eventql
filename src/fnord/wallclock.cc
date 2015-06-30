@@ -12,8 +12,8 @@
 
 namespace fnord {
 
-DateTime WallClock::now() {
-  return DateTime(WallClock::getUnixMicros());
+UnixTime WallClock::now() {
+  return UnixTime(WallClock::getUnixMicros());
 }
 
 uint64_t WallClock::unixSeconds() {

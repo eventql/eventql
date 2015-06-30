@@ -9,7 +9,7 @@
  */
 #pragma once
 #include "fnord/stdtypes.h"
-#include "fnord/datetime.h"
+#include "fnord/UnixTime.h"
 #include "fnord/duration.h"
 #include "fnord/option.h"
 
@@ -20,7 +20,7 @@ public:
 
   static Option<Duration> parseDuration(const String& str);
 
-  static Option<DateTime> parseTime(const String& str);
+  static Option<UnixTime> parseTime(const String& str);
 
 };
 

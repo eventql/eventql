@@ -88,7 +88,7 @@ const std::string& HTTPResponse::statusName() const {
 void HTTPResponse::addCookie(
     const std::string& key,
     const std::string& value,
-    const DateTime& expire /* = DateTime::epoch() */,
+    const UnixTime& expire /* = UnixTime::epoch() */,
     const std::string& path /* = "" */,
     const std::string& domain /* = "" */,
     bool secure /* = false */,
