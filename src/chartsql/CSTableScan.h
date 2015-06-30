@@ -28,6 +28,10 @@ public:
       cstable::CSTableReader&& cstable,
       Runtime* runtime);
 
+  virtual Vector<String> columnNames() const override;
+
+  virtual size_t numColunns() const override;
+
   void execute(
       ExecutionContext* context,
       Function<bool (int argc, const SValue* argv)> fn) override;
