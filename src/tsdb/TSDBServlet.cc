@@ -20,6 +20,7 @@
 #include <fnord/fnv.h>
 #include <sstable/sstablereader.h>
 #include <chartsql/runtime/ASCIITableFormat.h>
+#include <chartsql/runtime/JSONSSEStreamFormat.h>
 
 using namespace fnord;
 
@@ -71,7 +72,6 @@ void TSDBServlet::handleHTTPRequest(
     }
 
     if (uri.path() == "/tsdb/sql_stream") {
-      fnord::iputs("match", 1);
       executeSQLStream(&req, &res, res_stream, &uri);
       return;
     }
@@ -274,21 +274,14 @@ void TSDBServlet::executeSQL(
     const http::HTTPRequest* req,
     http::HTTPResponse* res,
     URI* uri) {
-  auto tsdb_ns = req->getHeader("X-TSDB-Namespace");
-
+  auto tsdb_namespace = req->getHeader("X-TSDB-Namespace");
   auto query = req->body().toString();
-  auto qplan = node_->sqlEngine()->parseAndBuildQueryPlan(
-      tsdb_ns,
-      query);
-
-  csql::ExecutionContext context;
 
   Buffer result;
-  csql::ASCIITableFormat format;
-  format.formatResults(
-      qplan,
-      &context,
-      BufferOutputStream::fromBuffer(&result));
+  node_->sqlEngine()->executeQuery(
+      tsdb_namespace,
+      query,
+      new csql::ASCIITableFormat(BufferOutputStream::fromBuffer(&result)));
 
   res->setStatus(http::kStatusOK);
   res->addHeader("Content-Type", "text/plain");
@@ -326,52 +319,56 @@ void TSDBServlet::executeSQLStream(
     return;
   }
 
-  Buffer result;
-  try {
-    auto qplan = node_->sqlEngine()->parseAndBuildQueryPlan(
-        tsdb_namespace,
-        query);
+  node_->sqlEngine()->executeQuery(
+      tsdb_namespace,
+      query,
+      new csql::JSONSSEStreamFormat(&sse_stream));
 
-    csql::ExecutionContext context;
-
-    context.onStatusChange([&sse_stream] (const csql::ExecutionStatus& status) {
-      auto progress = status.progress();
-
-      Buffer buf;
-      json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
-      json.beginObject();
-      json.addObjectEntry("status");
-      json.addString("running");
-      json.addComma();
-      json.addObjectEntry("progress");
-      json.addFloat(progress);
-      json.addComma();
-      json.addObjectEntry("message");
-      if (progress == 0.0f) {
-        json.addString("Waiting...");
-      } else if (progress == 1.0f) {
-        json.addString("Downloading...");
-      } else {
-        json.addString("Running...");
-      }
-      json.endObject();
-
-      sse_stream.sendEvent(buf, Some(String("status")));
-    });
-
-    csql::ASCIITableFormat format;
-    format.formatResults(
-        qplan,
-        &context,
-        BufferOutputStream::fromBuffer(&result));
-  } catch (const StandardException& e) {
-    fnord::logError("tsdb.sql", e, "SQL execution failed");
-    sse_stream.sendEvent(e.what(), Some(String("error")));
-    sse_stream.finish();
-  }
-
-  sse_stream.sendEvent(result, Some(String("result")));
   sse_stream.finish();
+//  Buffer result;
+//  try {
+//    auto qplan = node_->sqlEngine()->parseAndBuildQueryPlan(
+//        tsdb_namespace,
+//        query);
+//
+//    csql::ExecutionContext context;
+//
+//    context.onStatusChange([&sse_stream] (const csql::ExecutionStatus& status) {
+//      auto progress = status.progress();
+//
+//      Buffer buf;
+//      json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
+//      json.beginObject();
+//      json.addObjectEntry("status");
+//      json.addString("running");
+//      json.addComma();
+//      json.addObjectEntry("progress");
+//      json.addFloat(progress);
+//      json.addComma();
+//      json.addObjectEntry("message");
+//      if (progress == 0.0f) {
+//        json.addString("Waiting...");
+//      } else if (progress == 1.0f) {
+//        json.addString("Downloading...");
+//      } else {
+//        json.addString("Running...");
+//      }
+//      json.endObject();
+//
+//      sse_stream.sendEvent(buf, Some(String("status")));
+//    });
+//
+//    csql::ASCIITableFormat format(BufferOutputStream::fromBuffer(&result));
+//    format.formatResults(qplan, &context);
+//
+//  } catch (const StandardException& e) {
+//    fnord::logError("tsdb.sql", e, "SQL execution failed");
+//    sse_stream.sendEvent(e.what(), Some(String("error")));
+//    sse_stream.finish();
+//  }
+//
+//  sse_stream.sendEvent(result, Some(String("result")));
+//  sse_stream.finish();
 }
 
 

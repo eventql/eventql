@@ -18,6 +18,15 @@ SQLEngine::SQLEngine(TSDBNode* tsdb_node) : tsdb_node_(tsdb_node) {
   installDefaultSymbols(&sql_runtime_);
 }
 
+void SQLEngine::executeQuery(
+    const String& tsdb_namespace,
+    const String& query,
+    RefPtr<csql::ResultFormat> result_format) {
+  auto qplan = parseAndBuildQueryPlan(tsdb_namespace, query);
+  csql::ExecutionContext context;
+  result_format->formatResults(qplan, &context);
+}
+
 RefPtr<csql::QueryPlan> SQLEngine::parseAndBuildQueryPlan(
     const String& tsdb_namespace,
     const String& query) {

@@ -9,6 +9,7 @@
  */
 #pragma once
 #include <chartsql/runtime/runtime.h>
+#include <chartsql/runtime/ResultFormat.h>
 #include <tsdb/TSDBTableProvider.h>
 
 namespace tsdb {
@@ -19,11 +20,16 @@ public:
 
   SQLEngine(TSDBNode* tsdb_node);
 
+  void executeQuery(
+      const String& tsdb_namespace,
+      const String& query,
+      RefPtr<csql::ResultFormat> result_format);
+
+protected:
+
   RefPtr<csql::QueryPlan> parseAndBuildQueryPlan(
       const String& tsdb_namespace,
       const String& query);
-
-protected:
 
   RefPtr<csql::TableProvider> tableProviderForNamespace(
       const String& tsdb_namespace);
