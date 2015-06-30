@@ -23,6 +23,10 @@ public:
       ExecutionContext* context,
       Function<bool (int argc, const SValue* argv)> fn) override;
 
+  virtual Vector<String> columnNames() const override;
+
+  virtual size_t numColunns() const override;
+
 protected:
   Vector<ScopedPtr<TableExpression>> sources_;
 };

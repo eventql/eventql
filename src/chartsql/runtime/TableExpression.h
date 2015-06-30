@@ -20,6 +20,10 @@ namespace csql {
 class TableExpression : public RefCounted {
 public:
 
+  virtual Vector<String> columnNames() const = 0;
+
+  virtual size_t numColunns() const = 0;
+
   virtual void execute(
       ExecutionContext* context,
       Function<bool (int argc, const SValue* argv)> fn) = 0;
