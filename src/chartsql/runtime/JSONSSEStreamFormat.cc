@@ -7,9 +7,9 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <fnord/logging.h>
-#include <chartsql/runtime/ASCIITableFormat.h>
 #include <chartsql/runtime/JSONSSEStreamFormat.h>
+#include <chartsql/runtime/JSONResultFormat.h>
+#include <fnord/logging.h>
 
 namespace csql {
 
@@ -47,7 +47,8 @@ void JSONSSEStreamFormat::formatResults(
     });
 
     Buffer result;
-    ASCIITableFormat format(BufferOutputStream::fromBuffer(&result));
+    json::JSONOutputStream json(BufferOutputStream::fromBuffer(&result));
+    JSONResultFormat format(&json);
     format.formatResults(query, context);
     output_->sendEvent(result, Some(String("result")));
   } catch (const StandardException& e) {
