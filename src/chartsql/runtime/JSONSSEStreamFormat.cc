@@ -52,7 +52,15 @@ void JSONSSEStreamFormat::formatResults(
     output_->sendEvent(result, Some(String("result")));
   } catch (const StandardException& e) {
     fnord::logError("sql", e, "SQL execution failed");
-    output_->sendEvent(e.what(), Some(String("error")));
+
+    Buffer buf;
+    json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
+    json.beginObject();
+    json.addObjectEntry("error");
+    json.addString(e.what());
+    json.endObject();
+
+    output_->sendEvent(buf, Some(String("error")));
   }
 }
 
