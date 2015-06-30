@@ -24,29 +24,16 @@ size_t QueryPlan::numStatements() const {
   return statements_.size();
 }
 
-void QueryPlan::executeStatement(
-    size_t stmt_idx,
-    Function<bool (int argc, const SValue* argv)> fn) {
-  ExecutionContext context;
-  executeStatement(&context, stmt_idx, fn);
-}
-
-void QueryPlan::executeStatement(
-    ExecutionContext* context,
-    size_t stmt_idx,
-    Function<bool (int argc, const SValue* argv)> fn) {
+ScopedPtr<TableExpression> QueryPlan::getStatement(size_t stmt_idx) const {
   if (stmt_idx >= statements_.size()) {
     RAISE(kIndexError, "invalid statement index");
   }
 
   auto stmt = statements_[stmt_idx];
   if (dynamic_cast<TableExpressionNode*>(stmt.get())) {
-    auto table_expr = runtime_->buildTableExpression(
+    return runtime_->buildTableExpression(
         stmt.asInstanceOf<TableExpressionNode>(),
         tables_);
-
-    table_expr->execute(context, fn);
-    return;
   }
 
   RAISE(

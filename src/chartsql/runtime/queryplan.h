@@ -25,14 +25,7 @@ public:
 
   size_t numStatements() const;
 
-  void executeStatement(
-      size_t stmt_idx,
-      Function<bool (int argc, const SValue* argv)> fn);
-
-  void executeStatement(
-      ExecutionContext* context,
-      size_t stmt_idx,
-      Function<bool (int argc, const SValue* argv)> fn);
+  ScopedPtr<TableExpression> getStatement(size_t stmt_idx) const;
 
 protected:
   Vector<RefPtr<QueryTreeNode>> statements_;
