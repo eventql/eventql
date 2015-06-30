@@ -25,6 +25,8 @@ public:
 
   RefPtr<QueryTreeNode> deepCopy() const override;
 
+  String columnName() const;
+
 protected:
   RefPtr<ValueExpressionNode> expr_;
 };

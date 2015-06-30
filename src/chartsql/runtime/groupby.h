@@ -19,6 +19,7 @@ public:
 
   GroupBy(
       ScopedPtr<TableExpression> source,
+      const Vector<String>& column_names,
       Vector<ScopedPtr<ValueExpression>> select_expressions,
       Vector<ScopedPtr<ValueExpression>> group_expressions);
 
@@ -37,6 +38,7 @@ protected:
   bool nextRow(int argc, const SValue* argv);
 
   ScopedPtr<TableExpression> source_;
+  Vector<String> column_names_;
   Vector<ScopedPtr<ValueExpression>> select_exprs_;
   Vector<ScopedPtr<ValueExpression>> group_exprs_;
   HashMap<String, Vector<ValueExpression::Instance>> groups_;
