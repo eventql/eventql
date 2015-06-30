@@ -60,7 +60,9 @@ void ExecutionContext::statusChanged() {
 
   std::unique_lock<std::mutex> lk(mutex_);
   if (on_status_change_) {
-    on_status_change_(status_);
+    auto cb = on_status_change_;
+    lk.unlock();
+    cb(status_);
   }
 }
 
