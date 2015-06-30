@@ -20,31 +20,41 @@ TSDBTableRef TSDBTableRef::parse(const String& table_ref) {
   static const String prefix = "tsdb://";
   if (!StringUtil::beginsWith(table_ref, prefix)) {
     ref.table_key = table_ref;
-    return ref;
+  } else {
+    URI uri(table_ref);
+    ref.host = Some(uri.hostAndPort());
+
+    auto parts = StringUtil::split(uri.path(), "/");
+
+    switch (parts.size()) {
+
+      case 2:
+        ref.partition_key = SHA1Hash::fromHexString(parts[1]);
+        /* fallthrough */
+
+      case 1:
+        ref.table_key = parts[0];
+        break;
+
+      default:
+        RAISEF(
+            kIllegalArgumentError,
+            "invalid tsdb table reference '$0', format is: "
+            "tsdb://<host>/<table>[/<partition>]",
+            table_ref);
+
+    }
   }
 
-  URI uri(table_ref);
-  ref.host = Some(uri.hostAndPort());
+  auto spos = StringUtil::findLast(ref.table_key, '.');
+  if (spos != String::npos) {
+    auto suffix = ref.table_key.substr(spos + 1);
 
-  auto parts = StringUtil::split(uri.path(), "/");
-
-  switch (parts.size()) {
-
-    case 2:
-      ref.partition_key = SHA1Hash::fromHexString(parts[1]);
-      /* fallthrough */
-
-    case 1:
-      ref.table_key = parts[0];
-      break;
-
-    default:
-      RAISEF(
-          kIllegalArgumentError,
-          "invalid tsdb table reference '$0', format is: "
-          "tsdb://<host>/<table>[/<partition>]",
-          table_ref);
-
+    static const String last_prefix = "last";
+    if (StringUtil::beginsWith(suffix, last_prefix)) {
+      auto timespec = suffix.substr(last_prefix.size());
+      fnord::iputs("ts: $0", timespec);
+    }
   }
 
   return ref;
