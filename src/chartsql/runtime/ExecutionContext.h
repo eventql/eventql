@@ -19,8 +19,9 @@ namespace csql {
 struct ExecutionStatus {
   ExecutionStatus();
 
-  size_t num_subtasks_total;
-  size_t num_subtasks_completed;
+  std::atomic<size_t> num_subtasks_total;
+  std::atomic<size_t> num_subtasks_completed;
+  std::atomic<size_t> num_rows_scanned;
 
   String toString() const;
   double progress() const;
@@ -32,18 +33,23 @@ public:
 
   ExecutionContext();
 
-  void updateStatus(Function<void (ExecutionStatus* status)> fn);
-  void onStatusChange(Function<void ()> fn);
-  ExecutionStatus status() const;
+  void onStatusChange(Function<void (const ExecutionStatus& status)> fn);
 
   void cancel();
   bool isCancelled() const;
   void onCancel(Function<void ()> fn);
 
+  void incrNumSubtasksTotal(size_t n);
+  void incrNumSubtasksCompleted(size_t n);
+  void incrNumRowsScanned(size_t n);
+
 protected:
+
+  void statusChanged();
+
   ExecutionStatus status_;
   mutable std::mutex mutex_;
-  Function<void ()> on_status_change_;
+  Function<void (const ExecutionStatus& status)> on_status_change_;
   Function<void ()> on_cancel_;
   bool cancelled_;
 };
