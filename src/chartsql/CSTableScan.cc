@@ -28,6 +28,7 @@ CSTableScan::CSTableScan(
   Set<String> column_names;
   for (const auto& slnode : stmt->selectList()) {
     findColumns(slnode->expression(), &column_names);
+    column_names_.emplace_back(slnode->columnName());
   }
 
   for (const auto& col : column_names) {
@@ -277,6 +278,14 @@ uint64_t CSTableScan::findMaxRepetitionLevel(
   }
 
   return max_level;
+}
+
+Vector<String> CSTableScan::columnNames() const {
+  return column_names_;
+}
+
+size_t CSTableScan::numColunns() const {
+  return column_names_.size();
 }
 
 CSTableScan::ColumnRef::ColumnRef(

@@ -15,4 +15,12 @@ void EmptyTable::execute(
     ExecutionContext* context,
     Function<bool (int argc, const SValue* argv)> fn) {}
 
+Vector<String> EmptyTable::columnNames() const {
+  return Vector<String>();
+}
+
+size_t EmptyTable::numColunns() const {
+  return 0;
+}
+
 }
