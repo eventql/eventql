@@ -112,6 +112,10 @@ void CSTableScan::scan(
 
             case msg::FieldType::BOOLEAN:
               switch (size) {
+                case sizeof(uint8_t):
+                  in_row[col.second.index] =
+                      SValue(SValue::BoolType(*((uint8_t*) data) > 0));
+                  break;
                 case sizeof(uint32_t):
                   in_row[col.second.index] =
                       SValue(SValue::BoolType(*((uint32_t*) data) > 0));
