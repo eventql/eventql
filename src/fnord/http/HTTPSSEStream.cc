@@ -37,9 +37,9 @@ HTTPSSEStream::HTTPSSEStream(
 
 void HTTPSSEStream::start() {
   res_.setStatus(kStatusOK);
-  res_.addHeader("Content-Type", "text/event-stream");
-  res_.addHeader("Cache-Control", "no-cache");
-  res_.addHeader("Access-Control-Allow-Origin", "*");
+  res_.setHeader("Content-Type", "text/event-stream");
+  res_.setHeader("Cache-Control", "no-cache");
+  res_.setHeader("Access-Control-Allow-Origin", "*");
   res_stream_->startResponse(res_);
 }
 
