@@ -286,36 +286,38 @@ void TSDBServlet::executeSQL(
   if (with_status) {
     sse_stream.start();
 
-  //auto send_status_update = [&sse_stream, &task_future] {
-  //  auto status = task_future->status();
-  //  auto progress = status.progress();
+    context.onStatusChange([&sse_stream] (const csql::ExecutionStatus& status) {
+      auto progress = status.progress();
 
-  //  Buffer buf;
-  //  json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
-  //  json.beginObject();
-  //  json.addObjectEntry("status");
-  //  json.addString("running");
-  //  json.addComma();
-  //  json.addObjectEntry("progress");
-  //  json.addFloat(progress);
-  //  json.addComma();
-  //  json.addObjectEntry("message");
-  //  if (progress == 0.0f) {
-  //    json.addString("Waiting...");
-  //  } else if (progress == 1.0f) {
-  //    json.addString("Downloading...");
-  //  } else {
-  //    json.addString("Running...");
-  //  }
-  //  json.endObject();
+      Buffer buf;
+      json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
+      json.beginObject();
+      json.addObjectEntry("status");
+      json.addString("running");
+      json.addComma();
+      json.addObjectEntry("progress");
+      json.addFloat(progress);
+      json.addComma();
+      json.addObjectEntry("message");
+      if (progress == 0.0f) {
+        json.addString("Waiting...");
+      } else if (progress == 1.0f) {
+        json.addString("Downloading...");
+      } else {
+        json.addString("Running...");
+      }
+      json.endObject();
 
-  //  sse_stream.sendEvent(buf, Some(String("status")));
-  //};
+      sse_stream.sendEvent(buf, Some(String("status")));
+    });
   }
 
   Buffer result;
   csql::ASCIITableFormat format;
-  format.formatResults(qplan, BufferOutputStream::fromBuffer(&result));
+  format.formatResults(
+      qplan,
+      &context,
+      BufferOutputStream::fromBuffer(&result));
 
   if (with_status) {
     sse_stream.sendEvent(result, Some(String("result")));
