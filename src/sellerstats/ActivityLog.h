@@ -25,25 +25,25 @@ using namespace fnord;
 namespace cm {
 class CustomerNamespace;
 
-typedef Pair<DateTime, json::JSONObject> ActivityLogEntry;
+typedef Pair<UnixTime, json::JSONObject> ActivityLogEntry;
 
 class ActivityLog {
 public:
 
-  Option<DateTime> fetchHead(
+  Option<UnixTime> fetchHead(
       const String& shopid,
       mdb::MDBTransaction* sellerstatsdb_txn);
 
   size_t fetch(
       const String& shopid,
-      const DateTime& time,
+      const UnixTime& time,
       size_t limit,
       mdb::MDBTransaction* sellerstatsdb_txn,
       Vector<ActivityLogEntry>* entries);
 
   void append(
       const String& shopid,
-      const DateTime& time,
+      const UnixTime& time,
       const json::JSONObject& entry,
       mdb::MDBTransaction* sellerstatsdb_txn);
 

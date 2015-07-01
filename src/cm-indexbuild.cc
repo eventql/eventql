@@ -211,7 +211,7 @@ int main(int argc, const char** argv) {
   };
 
   /* fetch from logtable in batches */
-  DateTime last_run;
+  UnixTime last_run;
   for (;;) {
     auto t0 = WallClock::unixMicros();
     auto eof_reached = !tail->fetchNext(on_record, batch_size);
