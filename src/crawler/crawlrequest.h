@@ -10,7 +10,7 @@
 #define _CM_CRAWLREQUEST_H
 #include <stdlib.h>
 #include <string>
-#include <fnord/datetime.h>
+#include <fnord/UnixTime.h>
 #include <fnord/reflect/reflect.h>
 
 namespace cm {

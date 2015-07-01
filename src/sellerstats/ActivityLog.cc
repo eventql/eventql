@@ -14,7 +14,7 @@ namespace cm {
 
 void ActivityLog::append(
     const String& shopid,
-    const DateTime& time,
+    const UnixTime& time,
     const json::JSONObject& entry,
     mdb::MDBTransaction* sellerstatsdb_txn) {
   auto json_str = json::toJSONString(entry);
@@ -40,22 +40,22 @@ void ActivityLog::append(
   }
 }
 
-Option<DateTime> ActivityLog::fetchHead(
+Option<UnixTime> ActivityLog::fetchHead(
     const String& shopid,
     mdb::MDBTransaction* sellerstatsdb_txn) {
   auto head_dbkey = StringUtil::format("activitylog~$0~HEAD", shopid);
 
   auto buf = sellerstatsdb_txn->get(head_dbkey);
   if (buf.isEmpty()) {
-    return None<DateTime>();
+    return None<UnixTime>();
   } else {
-    return Some(DateTime(std::stoul(buf.get().toString()) * kMicrosPerSecond));
+    return Some(UnixTime(std::stoul(buf.get().toString()) * kMicrosPerSecond));
   }
 }
 
 size_t ActivityLog::fetch(
     const String& shopid,
-    const DateTime& time,
+    const UnixTime& time,
     size_t limit,
     mdb::MDBTransaction* sellerstatsdb_txn,
     Vector<ActivityLogEntry>* entries) {
@@ -87,7 +87,7 @@ size_t ActivityLog::fetch(
       RAISEF(kRuntimeError, "entry has no _t field: $0", entry.toString());
     }
 
-    auto entry_time = DateTime(
+    auto entry_time = UnixTime(
         std::stoul(dbkey.substr(dbkey_prefix.length())) * kMicrosPerSecond);
 
     entries->emplace_back(entry_time, json);
