@@ -145,6 +145,8 @@ protected:
 
   QueryTreeNode* buildSequentialScan(ASTNode* ast);
 
+  QueryTreeNode* buildLimitClause(ASTNode* ast);
+
   /**
    * Builds a standalone SELECT expression (A SELECT without any tables)
    */
@@ -163,8 +165,6 @@ protected:
   ValueExpressionNode* buildIfStatement(ASTNode* ast);
 
   ValueExpressionNode* buildMethodCall(ASTNode* ast);
-
-  //QueryPlanNode* buildLimitClause(ASTNode* ast, TableRepository* repo);
   //QueryPlanNode* buildOrderByClause(ASTNode* ast, TableRepository* repo);
 
   std::vector<std::unique_ptr<QueryPlanBuilderInterface>> extensions_;

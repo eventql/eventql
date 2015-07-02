@@ -15,6 +15,7 @@
 #include <chartsql/qtree/GroupByNode.h>
 #include <chartsql/qtree/IfExpressionNode.h>
 #include <chartsql/qtree/SelectExpressionNode.h>
+#include <chartsql/qtree/LimitNode.h>
 
 namespace csql {
 
@@ -39,9 +40,9 @@ RefPtr<QueryTreeNode> QueryPlanBuilder::build(ASTNode* ast) {
 //  }
 //
 //  /* internal nodes: multi table query (joins), order, aggregation, limit */
-//  if ((exec = buildLimitClause(ast, repo)) != nullptr) {
-//    return exec;
-//  }
+  if ((node = buildLimitClause(ast)) != nullptr) {
+    return node;
+  }
 //
 //  if (hasOrderByClause(ast)) {
 //    return buildOrderByClause(ast, repo);
@@ -560,57 +561,58 @@ bool QueryPlanBuilder::buildInternalSelectList(
   }
 }
 
-//QueryPlanNode* QueryPlanBuilder::buildLimitClause(
-//    ASTNode* ast,
-//    TableRepository* repo) {
-//  if (!(*ast == ASTNode::T_SELECT) || ast->getChildren().size() < 3) {
-//    return nullptr;
-//  }
-//
-//  for (const auto& child : ast->getChildren()) {
-//    int limit = 0;
-//    int offset = 0;
-//
-//    if (child->getType() != ASTNode::T_LIMIT) {
-//      continue;
-//    }
-//
-//    auto limit_token = child->getToken();
-//    if (!(limit_token)) {
-//      RAISE(kRuntimeError, "corrupt AST");
-//    }
-//
-//    if (!(*limit_token == Token::T_NUMERIC)) {
-//      RAISE(kRuntimeError, "corrupt AST");
-//    }
-//
-//    limit = limit_token->getInteger();
-//
-//    if (child->getChildren().size() == 1) {
-//      if (!(child->getChildren()[0]->getType() == ASTNode::T_OFFSET)) {
-//        RAISE(kRuntimeError, "corrupt AST");
-//      }
-//
-//      auto offset_token = child->getChildren()[0]->getToken();
-//      if (!(offset_token)) {
-//        RAISE(kRuntimeError, "corrupt AST");
-//      }
-//
-//      if (!(*offset_token == Token::T_NUMERIC)) {
-//        RAISE(kRuntimeError, "corrupt AST");
-//      }
-//      offset = offset_token->getInteger();
-//    }
-//
-//    // clone ast + remove limit clause
-//    auto new_ast = ast->deepCopy();
-//    new_ast->removeChildrenByType(ASTNode::T_LIMIT);
-//
-//    return new LimitClause(limit, offset, buildQueryPlan(new_ast, repo));
-//  }
-//
-//  return nullptr;
-//}
+QueryTreeNode* QueryPlanBuilder::buildLimitClause(ASTNode* ast) {
+  if (!(*ast == ASTNode::T_SELECT) || ast->getChildren().size() < 3) {
+    return nullptr;
+  }
+
+  for (const auto& child : ast->getChildren()) {
+    int limit = 0;
+    int offset = 0;
+
+    if (child->getType() != ASTNode::T_LIMIT) {
+      continue;
+    }
+
+    auto limit_token = child->getToken();
+    if (!(limit_token)) {
+      RAISE(kRuntimeError, "corrupt AST");
+    }
+
+    if (!(*limit_token == Token::T_NUMERIC)) {
+      RAISE(kRuntimeError, "corrupt AST");
+    }
+
+    limit = limit_token->getInteger();
+
+    if (child->getChildren().size() == 1) {
+      if (!(child->getChildren()[0]->getType() == ASTNode::T_OFFSET)) {
+        RAISE(kRuntimeError, "corrupt AST");
+      }
+
+      auto offset_token = child->getChildren()[0]->getToken();
+      if (!(offset_token)) {
+        RAISE(kRuntimeError, "corrupt AST");
+      }
+
+      if (!(*offset_token == Token::T_NUMERIC)) {
+        RAISE(kRuntimeError, "corrupt AST");
+      }
+      offset = offset_token->getInteger();
+    }
+
+    // clone ast + remove limit clause
+    auto new_ast = ast->deepCopy();
+    new_ast->removeChildrenByType(ASTNode::T_LIMIT);
+
+    return new LimitNode(
+        limit,
+        offset,
+        build(new_ast).asInstanceOf<TableExpressionNode>());
+  }
+
+  return nullptr;
+}
 //
 //QueryPlanNode* QueryPlanBuilder::buildOrderByClause(
 //    ASTNode* ast,
