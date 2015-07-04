@@ -7,19 +7,13 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#ifndef _FNORDMETRIC_SQL_ORDERBY_H
-#define _FNORDMETRIC_SQL_ORDERBY_H
-#include <stdlib.h>
-#include <string>
-#include <string.h>
-#include <vector>
-#include <chartsql/parser/astnode.h>
-#include <chartsql/parser/token.h>
-#include <chartsql/runtime/queryplannode.h>
+#pragma once
+#include <fnord/stdtypes.h>
+#include <chartsql/runtime/TableExpression.h>
 
 namespace csql {
 
-class OrderBy : public QueryPlanNode {
+class OrderBy : public TableExpression {
 public:
 
   struct SortSpec {
@@ -28,21 +22,17 @@ public:
   };
 
   OrderBy(
-      size_t num_columns,
-      std::vector<SortSpec> sort_specs,
-      QueryPlanNode* child);
+      Vector<SortSpec> sort_specs,
+      ScopedPtr<TableExpression> child);
 
-  void execute() override;
-  bool nextRow(SValue* row, int row_len) override;
-  size_t getNumCols() const override;
-  const std::vector<std::string>& getColumns() const override;
+  //void execute() override;
+  //bool nextRow(SValue* row, int row_len) override;
+  //size_t getNumCols() const override;
 
 protected:
-  std::vector<std::string> columns_;
-  std::vector<SortSpec> sort_specs_;
-  QueryPlanNode* child_;
-  std::vector<std::vector<SValue>> rows_;
+  Vector<SortSpec> sort_specs_;
+  ScopedPtr<TableExpression> child_;
+  Vector<Vector<SValue>> rows_;
 };
 
 }
-#endif
