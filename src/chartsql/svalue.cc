@@ -223,6 +223,9 @@ SValue::BoolType SValue::getBoolWithConversion() const {
     case T_BOOL:
       return getBool();
 
+    case T_STRING:
+      return true;
+
     case T_NULL:
       return false;
 
