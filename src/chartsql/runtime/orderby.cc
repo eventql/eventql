@@ -16,8 +16,10 @@ namespace csql {
 
 OrderBy::OrderBy(
     Vector<OrderByNode::SortSpec> sort_specs,
+    size_t max_output_column_index,
     ScopedPtr<TableExpression> child) :
     sort_specs_(sort_specs),
+    max_output_column_index_(max_output_column_index),
     child_(std::move(child)) {
   if (sort_specs_.size() == 0) {
     RAISE(kIllegalArgumentError, "can't execute ORDER BY: no sort specs");

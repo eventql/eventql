@@ -15,8 +15,10 @@ namespace csql {
 
 OrderByNode::OrderByNode(
     Vector<SortSpec> sort_specs,
+    size_t max_output_column_index,
     RefPtr<TableExpressionNode> table) :
     sort_specs_(sort_specs),
+    max_output_column_index_(max_output_column_index),
     table_(table) {
   addInputTable(&table_);
 }
@@ -29,9 +31,14 @@ const Vector<OrderByNode::SortSpec>& OrderByNode::sortSpecs() const {
   return sort_specs_;
 }
 
+size_t OrderByNode::maxOutputColumnIndex() const {
+  return max_output_column_index_;
+}
+
 RefPtr<QueryTreeNode> OrderByNode::deepCopy() const {
   return new OrderByNode(
       sort_specs_,
+      max_output_column_index_,
       table_->deepCopy().asInstanceOf<TableExpressionNode>());
 }
 

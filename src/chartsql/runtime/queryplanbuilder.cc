@@ -685,6 +685,7 @@ QueryTreeNode* QueryPlanBuilder::buildOrderByClause(ASTNode* ast) {
 
   return new OrderByNode(
       sort_specs,
+      ast->getChildren()[0]->getChildren().size(),
       build(child_ast).asInstanceOf<TableExpressionNode>());
 }
 
