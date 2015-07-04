@@ -132,6 +132,7 @@ ScopedPtr<TableExpression> TableExpressionBuilder::buildOrderBy(
   return mkScoped(
       new OrderBy(
           node->sortSpecs(),
+          node->maxOutputColumnIndex(),
           build(node->inputTable(), runtime, tables)));
 }
 

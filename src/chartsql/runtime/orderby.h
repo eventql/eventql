@@ -19,6 +19,7 @@ public:
 
   OrderBy(
       Vector<OrderByNode::SortSpec> sort_specs,
+      size_t max_output_column_index,
       ScopedPtr<TableExpression> child);
 
   void execute(
@@ -31,6 +32,7 @@ public:
 
 protected:
   Vector<OrderByNode::SortSpec> sort_specs_;
+  size_t max_output_column_index_;
   ScopedPtr<TableExpression> child_;
 };
 

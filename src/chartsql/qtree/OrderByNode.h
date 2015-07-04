@@ -25,16 +25,20 @@ public:
 
   OrderByNode(
       Vector<SortSpec> sort_specs,
+      size_t max_output_column_index,
       RefPtr<TableExpressionNode> table);
 
   RefPtr<TableExpressionNode> inputTable() const;
 
   const Vector<SortSpec>& sortSpecs() const;
 
+  size_t maxOutputColumnIndex() const;
+
   RefPtr<QueryTreeNode> deepCopy() const override;
 
 protected:
   Vector<SortSpec> sort_specs_;
+  size_t max_output_column_index_;
   RefPtr<TableExpressionNode> table_;
 };
 
