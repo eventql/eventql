@@ -24,11 +24,15 @@ CSTableScan::CSTableScan(
     cstable_(std::move(cstable)),
     colindex_(0),
     aggr_strategy_(stmt->aggregationStrategy()) {
-
   Set<String> column_names;
   for (const auto& slnode : stmt->selectList()) {
     findColumns(slnode->expression(), &column_names);
     column_names_.emplace_back(slnode->columnName());
+  }
+
+  auto where_expr = stmt->whereExpression();
+  if (!where_expr.isEmpty()) {
+    findColumns(where_expr.get(), &column_names);
   }
 
   for (const auto& col : column_names) {
@@ -46,8 +50,8 @@ CSTableScan::CSTableScan(
         &scratch_);
   }
 
-  auto where_expr = stmt->whereExpression();
   if (!where_expr.isEmpty()) {
+    resolveColumns(where_expr.get());
     where_expr_ = runtime->buildValueExpression(where_expr.get());
   }
 }
