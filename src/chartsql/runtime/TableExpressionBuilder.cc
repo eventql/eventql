@@ -11,6 +11,7 @@
 #include <chartsql/runtime/groupby.h>
 #include <chartsql/runtime/Union.h>
 #include <chartsql/runtime/SelectExpression.h>
+#include <chartsql/runtime/limitclause.h>
 
 using namespace fnord;
 
@@ -23,6 +24,10 @@ ScopedPtr<TableExpression> TableExpressionBuilder::build(
 
   if (dynamic_cast<GroupByNode*>(node.get())) {
     return buildGroupBy(node.asInstanceOf<GroupByNode>(), runtime, tables);
+  }
+
+  if (dynamic_cast<LimitNode*>(node.get())) {
+    return buildLimit(node.asInstanceOf<LimitNode>(), runtime, tables);
   }
 
   if (dynamic_cast<UnionNode*>(node.get())) {
@@ -97,11 +102,21 @@ ScopedPtr<TableExpression> TableExpressionBuilder::buildUnion(
     TableProvider* tables) {
   Vector<ScopedPtr<TableExpression>> union_tables;
 
-  for (const auto& table_name : node->inputTables()) {
-    union_tables.emplace_back(build(table_name, runtime, tables));
+  for (const auto& table : node->inputTables()) {
+    union_tables.emplace_back(build(table, runtime, tables));
   }
 
   return mkScoped(new Union(std::move(union_tables)));
+}
+
+ScopedPtr<TableExpression> TableExpressionBuilder::buildLimit(
+    RefPtr<LimitNode> node,
+    Runtime* runtime,
+    TableProvider* tables) {
+  return mkScoped(new LimitClause(
+      node->limit(),
+      node->offset(),
+      build(node->inputTable(), runtime, tables)));
 }
 
 ScopedPtr<TableExpression> TableExpressionBuilder::buildSelectExpression(

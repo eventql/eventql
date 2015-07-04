@@ -7,30 +7,25 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-
-#ifndef _FNORDMETRIC_QUERY_LIMITCLAUSE_H
-#define _FNORDMETRIC_QUERY_LIMITCLAUSE_H
-#include <stdlib.h>
-#include <string>
-#include <vector>
-#include <assert.h>
-#include <chartsql/parser/astnode.h>
-#include <chartsql/parser/token.h>
-#include <chartsql/runtime/queryplannode.h>
+#pragma once
+#include <fnord/stdtypes.h>
+#include <chartsql/runtime/TableExpression.h>
 
 namespace csql {
 
-class LimitClause : public QueryPlanNode {
+class LimitClause : public TableExpression {
 public:
 
-  LimitClause(int limit, int offset, QueryPlanNode* child) :
-      limit_(limit),
-      offset_(offset),
-      child_(child),
-      counter_(0) {
-    child->setTarget(this);
-  }
+  LimitClause(int limit, int offset, ScopedPtr<TableExpression> child);
 
+  void execute(
+      ExecutionContext* context,
+      Function<bool (int argc, const SValue* argv)> fn) override;
+
+  Vector<String> columnNames() const override;
+
+  size_t numColunns() const override;
+/*
   void execute() override {
     child_->execute();
   }
@@ -55,13 +50,12 @@ public:
   const std::vector<std::string>& getColumns() const override {
     return child_->getColumns();
   }
+*/
 
 protected:
   size_t limit_;
   size_t offset_;
-  QueryPlanNode* child_;
-  size_t counter_;
+  ScopedPtr<TableExpression> child_;
 };
 
 }
-#endif

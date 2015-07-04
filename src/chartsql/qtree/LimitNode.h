@@ -25,6 +25,10 @@ public:
 
   RefPtr<TableExpressionNode> inputTable() const;
 
+  size_t limit() const;
+
+  size_t offset() const;
+
   RefPtr<QueryTreeNode> deepCopy() const override;
 
 protected:
