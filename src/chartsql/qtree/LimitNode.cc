@@ -32,4 +32,13 @@ RefPtr<QueryTreeNode> LimitNode::deepCopy() const {
       table_->deepCopy().asInstanceOf<TableExpressionNode>());
 }
 
+size_t LimitNode::limit() const {
+  return limit_;
+}
+
+size_t LimitNode::offset() const {
+  return offset_;
+}
+
+
 } // namespace csql
