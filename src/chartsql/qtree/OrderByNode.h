@@ -29,7 +29,7 @@ public:
 
   RefPtr<TableExpressionNode> inputTable() const;
 
-  const Vector<SortSpec> sortSpecs() const;
+  const Vector<SortSpec>& sortSpecs() const;
 
   RefPtr<QueryTreeNode> deepCopy() const override;
 
