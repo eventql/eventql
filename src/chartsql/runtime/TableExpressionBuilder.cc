@@ -12,6 +12,7 @@
 #include <chartsql/runtime/Union.h>
 #include <chartsql/runtime/SelectExpression.h>
 #include <chartsql/runtime/limitclause.h>
+#include <chartsql/runtime/orderby.h>
 
 using namespace fnord;
 
@@ -113,10 +114,21 @@ ScopedPtr<TableExpression> TableExpressionBuilder::buildLimit(
     RefPtr<LimitNode> node,
     Runtime* runtime,
     TableProvider* tables) {
-  return mkScoped(new LimitClause(
-      node->limit(),
-      node->offset(),
-      build(node->inputTable(), runtime, tables)));
+  return mkScoped(
+      new LimitClause(
+          node->limit(),
+          node->offset(),
+          build(node->inputTable(), runtime, tables)));
+}
+
+ScopedPtr<TableExpression> TableExpressionBuilder::buildOrderBy(
+    RefPtr<OrderByNode> node,
+    Runtime* runtime,
+    TableProvider* tables) {
+  return mkScoped(
+      new OrderBy(
+          node->sortSpecs(),
+          build(node->inputTable(), runtime, tables));
 }
 
 ScopedPtr<TableExpression> TableExpressionBuilder::buildSelectExpression(
