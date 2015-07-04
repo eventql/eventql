@@ -10,11 +10,12 @@
 #include <chartsql/runtime/orderby.h>
 #include <chartsql/expressions/boolean.h>
 #include <algorithm>
+#include <fnord/inspect.h>
 
 namespace csql {
 
 OrderBy::OrderBy(
-    std::vector<SortSpec> sort_specs,
+    Vector<OrderByNode::SortSpec> sort_specs,
     ScopedPtr<TableExpression> child) :
     sort_specs_(sort_specs),
     child_(std::move(child)) {
@@ -38,67 +39,62 @@ OrderBy::OrderBy(
 }
 
 // FIXPAUL this should mergesort while inserting...
-// void OrderBy::execute() {
-//   child_->execute();
-// 
-//   std::sort(rows_.begin(), rows_.end(), [this] (
-//       const std::vector<SValue>& left,
-//       const std::vector<SValue>& right) -> bool {
-// 
-//     for (const auto& sort : sort_specs_) {
-//       if (sort.column >= left.size() || sort.column >= right.size()) {
-// 
-//         RAISE(kIndexError, "column index out of bounds");
-//       }
-// 
-//       SValue args[2];
-//       SValue res(false);
-//       args[0] = left[sort.column];
-//       args[1] = right[sort.column];
-// 
-//       expressions::eqExpr(2, args, &res);
-//       if (res.getBool()) {
-//         continue;
-//       }
-// 
-//       if (sort.descending) {
-//         expressions::gtExpr(2, args, &res);
-//       } else {
-//         expressions::ltExpr(2, args, &res);
-//       }
-// 
-//       return res.getBool();
-//     }
-// 
-//     /* all dimensions equal */
-//     return false;
-//   });
-// 
-//   for (auto& row : rows_) {
-//     if (row.size() < columns_.size()) {
-//       RAISE(kRuntimeError, "row too small");
-//     }
-// 
-//     emitRow(row.data(), columns_.size());
-//   }
-// }
-// 
-// bool OrderBy::nextRow(SValue* row, int row_len) {
-//   std::vector<SValue> row_vec;
-//   for (int i = 0; i < row_len; i++) {
-//     row_vec.emplace_back(row[i]);
-//   }
-// 
-//   rows_.emplace_back(row_vec);
-//   return true;
-// }
-// 
-// size_t OrderBy::getNumCols() const {
-//   return columns_.size();
-// }
-// 
-// const std::vector<std::string>& OrderBy::getColumns() const {
-//   return columns_;
-// }
+void OrderBy::execute(
+    ExecutionContext* context,
+    Function<bool (int argc, const SValue* argv)> fn) {
+  Vector<Vector<SValue>> rows;
+
+  child_->execute(context, [&rows] (int argc, const SValue* argv) -> bool {
+    Vector<SValue> row;
+    for (int i = 0; i < argc; i++) {
+      row.emplace_back(argv[i]);
+    }
+
+    rows.emplace_back(row);
+    return true;
+  });
+
+  std::sort(
+      rows.begin(),
+      rows.end(),
+      [this] (const Vector<SValue>& left, const Vector<SValue>& right) -> bool {
+    for (const auto& sort : sort_specs_) {
+      SValue args[2];
+      SValue res(false);
+      args[0] = left[sort.column];
+      args[1] = right[sort.column];
+
+      expressions::eqExpr(2, args, &res);
+      if (res.getBool()) {
+        continue;
+      }
+
+      if (sort.descending) {
+        expressions::gtExpr(2, args, &res);
+      } else {
+        expressions::ltExpr(2, args, &res);
+      }
+
+      return res.getBool();
+    }
+
+    /* all dimensions equal */
+    return false;
+  });
+
+  for (auto& row : rows) {
+    if (!fn(row.size(), row.data())) {
+      return;
+    }
+  }
+}
+
+Vector<String> OrderBy::columnNames() const {
+  return child_->columnNames();
+}
+
+size_t OrderBy::numColumns() const {
+  return child_->numColumns();
+}
 
 } // namespace csql
