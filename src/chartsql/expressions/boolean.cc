@@ -60,7 +60,14 @@ void eqExpr(int argc, SValue* argv, SValue* out) {
       }
       break;
     case SValue::T_NULL:
-      *out = SValue(SValue::BoolType(false));
+      switch(rhs->getType()) {
+        case SValue::T_NULL:
+          *out = SValue(SValue::BoolType(true));
+          break;
+        default:
+          *out = SValue(SValue::BoolType(false));
+          break;
+      }
       return;
     default:
       break;
@@ -191,7 +198,7 @@ void ltExpr(int argc, SValue* argv, SValue* out) {
           *out = SValue(lhs->getFloat() < rhs->getFloat());
           return;
         case SValue::T_NULL:
-          *out = SValue(SValue::BoolType(false));
+          *out = SValue(lhs->getFloat() < 0.0f);
           return;
         default:
           break;
@@ -205,15 +212,25 @@ void ltExpr(int argc, SValue* argv, SValue* out) {
           *out = SValue(lhs->getFloat() < rhs->getFloat());
           return;
         case SValue::T_NULL:
-          *out = SValue(SValue::BoolType(false));
+          *out = SValue(lhs->getFloat() < 0.0f);
           return;
         default:
           break;
       }
       break;
     case SValue::T_NULL:
-      *out = SValue(SValue::BoolType(false));
-      return;
+      switch(rhs->testTypeWithNumericConversion()) {
+        case SValue::T_INTEGER:
+        case SValue::T_FLOAT:
+        case SValue::T_TIMESTAMP:
+          *out = SValue(0.0f < rhs->getFloat());
+          return;
+        case SValue::T_NULL:
+          *out = SValue(SValue::BoolType(false));
+          return;
+        default:
+          break;
+      }
     default:
       break;
   }
@@ -251,7 +268,7 @@ void lteExpr(int argc, SValue* argv, SValue* out) {
           *out = SValue(lhs->getFloat() <= rhs->getFloat());
           return;
         case SValue::T_NULL:
-          *out = SValue(SValue::BoolType(false));
+          *out = SValue(lhs->getFloat() <= 0.0f);
           return;
         default:
           break;
@@ -265,15 +282,25 @@ void lteExpr(int argc, SValue* argv, SValue* out) {
           *out = SValue(lhs->getFloat() <= rhs->getFloat());
           return;
         case SValue::T_NULL:
-          *out = SValue(SValue::BoolType(false));
+          *out = SValue(lhs->getFloat() <= 0.0f);
           return;
         default:
           break;
       }
       break;
     case SValue::T_NULL:
-      *out = SValue(SValue::BoolType(false));
-      return;
+      switch(rhs->testTypeWithNumericConversion()) {
+        case SValue::T_INTEGER:
+        case SValue::T_FLOAT:
+        case SValue::T_TIMESTAMP:
+          *out = SValue(0.0f <= rhs->getFloat());
+          return;
+        case SValue::T_NULL:
+          *out = SValue(SValue::BoolType(true));
+          return;
+        default:
+          break;
+      }
     default:
       break;
   }
@@ -311,7 +338,7 @@ void gtExpr(int argc, SValue* argv, SValue* out) {
           *out = SValue(lhs->getFloat() > rhs->getFloat());
           return;
         case SValue::T_NULL:
-          *out = SValue(SValue::BoolType(false));
+          *out = SValue(lhs->getFloat() > 0.0f);
           return;
         default:
           break;
@@ -325,15 +352,25 @@ void gtExpr(int argc, SValue* argv, SValue* out) {
           *out = SValue(lhs->getFloat() > rhs->getFloat());
           return;
         case SValue::T_NULL:
-          *out = SValue(SValue::BoolType(false));
+          *out = SValue(lhs->getFloat() > 0.0f);
           return;
         default:
           break;
       }
       break;
     case SValue::T_NULL:
-      *out = SValue(SValue::BoolType(false));
-      return;
+      switch(rhs->testTypeWithNumericConversion()) {
+        case SValue::T_INTEGER:
+        case SValue::T_FLOAT:
+        case SValue::T_TIMESTAMP:
+          *out = SValue(0.0f > rhs->getFloat());
+          return;
+        case SValue::T_NULL:
+          *out = SValue(SValue::BoolType(false));
+          return;
+        default:
+          break;
+      }
     default:
       break;
   }
@@ -371,7 +408,7 @@ void gteExpr(int argc, SValue* argv, SValue* out) {
           *out = SValue(lhs->getFloat() >= rhs->getFloat());
           return;
         case SValue::T_NULL:
-          *out = SValue(SValue::BoolType(false));
+          *out = SValue(lhs->getFloat() >= 0.0f);
           return;
         default:
           break;
@@ -385,15 +422,25 @@ void gteExpr(int argc, SValue* argv, SValue* out) {
           *out = SValue(lhs->getFloat() >= rhs->getFloat());
           return;
         case SValue::T_NULL:
-          *out = SValue(SValue::BoolType(false));
+          *out = SValue(lhs->getFloat() >= 0.0f);
           return;
         default:
           break;
       }
       break;
     case SValue::T_NULL:
-      *out = SValue(SValue::BoolType(false));
-      return;
+      switch(rhs->testTypeWithNumericConversion()) {
+        case SValue::T_INTEGER:
+        case SValue::T_FLOAT:
+        case SValue::T_TIMESTAMP:
+          *out = SValue(0.0f >= rhs->getFloat());
+          return;
+        case SValue::T_NULL:
+          *out = SValue(SValue::BoolType(true));
+          return;
+        default:
+          break;
+      }
     default:
       break;
   }
