@@ -632,30 +632,26 @@ QueryTreeNode* QueryPlanBuilder::buildOrderByClause(ASTNode* ast) {
     auto sort_specs_asts = child->getChildren();
     for (int i = 0; i < sort_specs_asts.size(); ++i) {
       auto sort = sort_specs_asts[i];
-      //if (sort->getChildren().size() != 1 ||
-      //    sort->getChildren()[0]->getType() != ASTNode::T_COLUMN_NAME) {
-      //  RAISE(kRuntimeError, "corrupt AST");
-      //}
-
       auto col = sort->getChildren()[0];
       size_t col_index;
       bool col_found = false;
 
-      /* check if column is already included in the child select list */
-      for (const auto& derived : child_sl->getChildren()) {
-        /*
-        if (derived->getChildren().size != 1 ||
-            derived->getChildren()[0]->getType() != ASTNode::T_DERVIED_COLUMN) {
-          RAISE(kRuntimeError, "corrupt AST");
-        }
+      /* check if sort spec is referencing a column alias from the select list */
+      auto child_sllist = child_sl->getChildren();
+      for (int n = 0; n < child_sllist.size(); ++n) {
+        const auto& derived = child_sllist[n];
 
-        auto sel_col = derived.getChildren()[0];
-        if (col->getToken()->toString() == sel_col->getToken()->toString()) {
-          col_index = i;
-          col_found = true;
-          break;
+        if (derived->getType() == ASTNode::T_DERIVED_COLUMN &&
+            derived->getChildren().size() > 1 &&
+            sort->getChildren()[0]->getType() != ASTNode::T_COLUMN_ALIAS) {
+
+          auto this_alias = derived->getChildren()[1]->getToken()->getString();
+          if (this_alias == col->getToken()->getString()) { // FIXPAUL case insensitive match
+            col_index = n;
+            col_found = true;
+            break;
+          }
         }
-        */
       }
 
       /* otherwise add the column to the child select list */
