@@ -15,6 +15,7 @@
 #include <chartsql/qtree/GroupByNode.h>
 #include <chartsql/qtree/UnionNode.h>
 #include <chartsql/qtree/LimitNode.h>
+#include <chartsql/qtree/OrderByNode.h>
 #include <chartsql/qtree/SequentialScanNode.h>
 #include <chartsql/qtree/SelectExpressionNode.h>
 #include <chartsql/runtime/TableExpression.h>
@@ -48,6 +49,11 @@ protected:
 
   ScopedPtr<TableExpression> buildLimit(
       RefPtr<LimitNode> node,
+      Runtime* runtime,
+      TableProvider* tables);
+
+  ScopedPtr<TableExpression> buildOrderBy(
+      RefPtr<OrderByNode> node,
       Runtime* runtime,
       TableProvider* tables);
 
