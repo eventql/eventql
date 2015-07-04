@@ -92,11 +92,19 @@ void OrderBy::execute(
 }
 
 Vector<String> OrderBy::columnNames() const {
-  return child_->columnNames();
+  auto col_names = child_->columnNames();
+
+  if (col_names.size() > max_output_column_index_) {
+    col_names.erase(
+        col_names.begin() + max_output_column_index_,
+        col_names.end());
+  }
+
+  return col_names;
 }
 
 size_t OrderBy::numColumns() const {
-  return child_->numColumns();
+  return std::min(child_->numColumns(), max_output_column_index_);
 }
 
 } // namespace csql
