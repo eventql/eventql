@@ -22,7 +22,7 @@ public:
 
   virtual Vector<String> columnNames() const = 0;
 
-  virtual size_t numColunns() const = 0;
+  virtual size_t numColumns() const = 0;
 
   virtual void execute(
       ExecutionContext* context,

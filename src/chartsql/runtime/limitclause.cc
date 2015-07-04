@@ -44,8 +44,8 @@ Vector<String> LimitClause::columnNames() const {
   return child_->columnNames();
 }
 
-size_t LimitClause::numColunns() const {
-  return child_->numColunns();
+size_t LimitClause::numColumns() const {
+  return child_->numColumns();
 }
 
 }

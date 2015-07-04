@@ -27,7 +27,7 @@ public:
 
   Vector<String> columnNames() const override;
 
-  size_t numColunns() const override;
+  size_t numColumns() const override;
 
 protected:
   Vector<String> column_names_;

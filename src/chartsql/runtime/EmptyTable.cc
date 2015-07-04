@@ -19,7 +19,7 @@ Vector<String> EmptyTable::columnNames() const {
   return Vector<String>();
 }
 
-size_t EmptyTable::numColunns() const {
+size_t EmptyTable::numColumns() const {
   return 0;
 }
 

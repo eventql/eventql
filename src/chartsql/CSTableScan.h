@@ -30,7 +30,7 @@ public:
 
   virtual Vector<String> columnNames() const override;
 
-  virtual size_t numColunns() const override;
+  virtual size_t numColumns() const override;
 
   void execute(
       ExecutionContext* context,
