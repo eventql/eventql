@@ -19,10 +19,19 @@ Union::Union(
     RAISE(kRuntimeError, "UNION must have at least one source table");
   }
 
-  for (const auto& s : sources_) {
-    if (s->numColunns() != sources_[0]->numColunns()) {
+  for (auto cur = sources_.begin(); cur != sources_.end(); ) {
+    auto ncols = cur->get()->numColunns();
+
+    if (ncols == 0) {
+      cur = sources_.erase(cur);
+      continue;
+    }
+
+    if (ncols != sources_[0]->numColunns()) {
       RAISE(kRuntimeError, "UNION tables return different number of columns");
     }
+
+    ++cur;
   }
 }
 
@@ -40,11 +49,11 @@ void Union::execute(
 }
 
 Vector<String> Union::columnNames() const {
-  sources_[0]->columnNames();
+  return sources_[0]->columnNames();
 }
 
 size_t Union::numColunns() const {
-  sources_[0]->numColunns();
+  return sources_[0]->numColunns();
 }
 
 }
