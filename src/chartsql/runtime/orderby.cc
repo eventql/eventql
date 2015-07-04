@@ -85,7 +85,7 @@ void OrderBy::execute(
   });
 
   for (auto& row : rows) {
-    if (!fn(row.size(), row.data())) {
+    if (!fn(std::min(row.size(), max_output_column_index_), row.data())) {
       return;
     }
   }
