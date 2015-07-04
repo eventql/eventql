@@ -19,7 +19,9 @@ LimitNode::LimitNode(
     RefPtr<TableExpressionNode> table) :
     limit_(limit),
     offset_(offset),
-    table_(table) {}
+    table_(table) {
+  addInputTable(&table_);
+}
 
 RefPtr<TableExpressionNode> LimitNode::inputTable() const {
   return table_;
