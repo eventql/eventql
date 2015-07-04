@@ -76,6 +76,7 @@ protected:
   cstable::CSTableReader cstable_;
   HashMap<String, ColumnRef> columns_;
   Vector<ExpressionRef> select_list_;
+  ScopedPtr<ValueExpression> where_expr_;
   size_t colindex_;
   AggregationStrategy aggr_strategy_;
 };
