@@ -145,7 +145,14 @@ void CSTableScan::scan(
 
     fetch_level = next_level;
 
-    if (true) { // where clause
+    bool where_pred = true;
+    if (where_expr_.get() != nullptr) {
+      SValue where_tmp;
+      where_expr_->evaluate(in_row.size(), in_row.data(), &where_tmp);
+      where_pred = where_tmp.getBoolWithConversion();
+    }
+
+    if (where_pred) { // where clause
       for (int i = 0; i < select_list_.size(); ++i) {
         if (select_list_[i].rep_level >= select_level) {
           select_list_[i].compiled->accumulate(
