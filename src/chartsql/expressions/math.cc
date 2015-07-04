@@ -187,7 +187,10 @@ void divExpr(int argc, SValue* argv, SValue* out) {
     case SValue::T_INTEGER:
       switch(rhs->testTypeWithNumericConversion()) {
         case SValue::T_INTEGER:
-          *out = SValue((int64_t) (lhs->getInteger() / rhs->getInteger()));
+          *out = SValue(int64_t(
+               rhs->getInteger() == 0
+                    ? 0
+                    : lhs->getInteger() / rhs->getInteger()));
           return;
         case SValue::T_FLOAT:
           *out = SValue((double) (lhs->getInteger() / rhs->getFloat()));
@@ -202,7 +205,10 @@ void divExpr(int argc, SValue* argv, SValue* out) {
     case SValue::T_FLOAT:
       switch(rhs->testTypeWithNumericConversion()) {
         case SValue::T_INTEGER:
-          *out = SValue((double) (lhs->getFloat() / rhs->getInteger()));
+          *out = SValue(int64_t(
+               rhs->getInteger() == 0
+                    ? 0
+                    : lhs->getFloat() / rhs->getInteger()));
           return;
         case SValue::T_FLOAT:
           *out = SValue((double) (lhs->getFloat() / rhs->getFloat()));
