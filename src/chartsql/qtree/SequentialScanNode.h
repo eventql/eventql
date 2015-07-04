@@ -60,6 +60,8 @@ public:
 
   Vector<RefPtr<SelectListNode>> selectList() const;
 
+  Option<RefPtr<ValueExpressionNode>> whereExpression() const;
+
   AggregationStrategy aggregationStrategy() const;
   void setAggregationStrategy(AggregationStrategy strategy);
 

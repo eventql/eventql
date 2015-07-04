@@ -45,6 +45,11 @@ CSTableScan::CSTableScan(
         runtime->buildValueExpression(slnode->expression()),
         &scratch_);
   }
+
+  auto where_expr = stmt->whereExpression();
+  if (!where_expr.isEmpty()) {
+    where_expr_ = runtime->buildValueExpression(where_expr.get());
+  }
 }
 
 void CSTableScan::execute(

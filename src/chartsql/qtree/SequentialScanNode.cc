@@ -36,6 +36,10 @@ SequentialScanNode::SequentialScanNode(
   }
 }
 
+Option<RefPtr<ValueExpressionNode>> SequentialScanNode::whereExpression() const {
+  return where_expr_;
+}
+
 const String& SequentialScanNode::tableName() const {
   return table_name_;
 }
