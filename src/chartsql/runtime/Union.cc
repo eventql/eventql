@@ -20,14 +20,14 @@ Union::Union(
   }
 
   for (auto cur = sources_.begin(); cur != sources_.end(); ) {
-    auto ncols = cur->get()->numColunns();
+    auto ncols = cur->get()->numColumns();
 
     if (ncols == 0) {
       cur = sources_.erase(cur);
       continue;
     }
 
-    if (ncols != sources_[0]->numColunns()) {
+    if (ncols != sources_[0]->numColumns()) {
       RAISE(kRuntimeError, "UNION tables return different number of columns");
     }
 
@@ -52,8 +52,8 @@ Vector<String> Union::columnNames() const {
   return sources_[0]->columnNames();
 }
 
-size_t Union::numColunns() const {
-  return sources_[0]->numColunns();
+size_t Union::numColumns() const {
+  return sources_[0]->numColumns();
 }
 
 }

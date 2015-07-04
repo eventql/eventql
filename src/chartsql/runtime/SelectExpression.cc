@@ -33,7 +33,7 @@ Vector<String> SelectExpression::columnNames() const {
   return column_names_;
 }
 
-size_t SelectExpression::numColunns() const {
+size_t SelectExpression::numColumns() const {
   return column_names_.size();
 }
 

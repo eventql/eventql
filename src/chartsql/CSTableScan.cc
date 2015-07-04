@@ -284,7 +284,7 @@ Vector<String> CSTableScan::columnNames() const {
   return column_names_;
 }
 
-size_t CSTableScan::numColunns() const {
+size_t CSTableScan::numColumns() const {
   return column_names_.size();
 }
 

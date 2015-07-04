@@ -77,7 +77,7 @@ Vector<String> GroupBy::columnNames() const {
   return column_names_;
 }
 
-size_t GroupBy::numColunns() const {
+size_t GroupBy::numColumns() const {
   return column_names_.size();
 }
 

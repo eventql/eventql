@@ -29,7 +29,7 @@ OrderBy::OrderBy(
     }
   }
 
-  const auto& child_columns = child_->numColunns();
+  const auto& child_columns = child_->numColumns();
   if (child_columns <= max_sort_idx) {
     RAISE(
         kRuntimeError,
