@@ -29,11 +29,17 @@ Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildSequentialScan(
   auto table_ref = TSDBTableRef::parse(node->tableName());
 
   if (table_ref.host.isEmpty() || table_ref.host.get() != "localhost") {
-    RAISE(kRuntimeError, "host must be == localhost");
+    RAISEF(
+        kRuntimeError,
+        "error while opening table '$0': host must be == localhost",
+        node->tableName());
   }
 
   if (table_ref.partition_key.isEmpty()) {
-    RAISE(kRuntimeError, "missing partition key");
+    RAISEF(
+        kRuntimeError,
+        "error while opening table '$0': missing partition key",
+        node->tableName());
   }
 
   auto partition = tsdb_node_->findPartition(
