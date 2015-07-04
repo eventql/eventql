@@ -95,7 +95,7 @@ protected:
   // * Returns true if the ast is a SELECT statement that has a ORDER BY clause,
   // * otherwise false
   // */
-  //bool hasOrderByClause(ASTNode* ast) const;
+  bool hasOrderByClause(ASTNode* ast) const;
 
   /**
    * Returns true if the ast is a SELECT statement with a select list that
@@ -147,6 +147,8 @@ protected:
 
   QueryTreeNode* buildLimitClause(ASTNode* ast);
 
+  QueryTreeNode* buildOrderByClause(ASTNode* ast);
+
   /**
    * Builds a standalone SELECT expression (A SELECT without any tables)
    */
@@ -165,7 +167,6 @@ protected:
   ValueExpressionNode* buildIfStatement(ASTNode* ast);
 
   ValueExpressionNode* buildMethodCall(ASTNode* ast);
-  //QueryPlanNode* buildOrderByClause(ASTNode* ast, TableRepository* repo);
 
   std::vector<std::unique_ptr<QueryPlanBuilderInterface>> extensions_;
 
