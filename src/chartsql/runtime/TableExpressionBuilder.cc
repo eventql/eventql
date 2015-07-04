@@ -23,12 +23,16 @@ ScopedPtr<TableExpression> TableExpressionBuilder::build(
     Runtime* runtime,
     TableProvider* tables) {
 
-  if (dynamic_cast<GroupByNode*>(node.get())) {
-    return buildGroupBy(node.asInstanceOf<GroupByNode>(), runtime, tables);
-  }
-
   if (dynamic_cast<LimitNode*>(node.get())) {
     return buildLimit(node.asInstanceOf<LimitNode>(), runtime, tables);
+  }
+
+  if (dynamic_cast<OrderByNode*>(node.get())) {
+    return buildOrderBy(node.asInstanceOf<OrderByNode>(), runtime, tables);
+  }
+
+  if (dynamic_cast<GroupByNode*>(node.get())) {
+    return buildGroupBy(node.asInstanceOf<GroupByNode>(), runtime, tables);
   }
 
   if (dynamic_cast<UnionNode*>(node.get())) {
@@ -128,7 +132,7 @@ ScopedPtr<TableExpression> TableExpressionBuilder::buildOrderBy(
   return mkScoped(
       new OrderBy(
           node->sortSpecs(),
-          build(node->inputTable(), runtime, tables));
+          build(node->inputTable(), runtime, tables)));
 }
 
 ScopedPtr<TableExpression> TableExpressionBuilder::buildSelectExpression(

@@ -25,32 +25,6 @@ public:
   Vector<String> columnNames() const override;
 
   size_t numColumns() const override;
-/*
-  void execute() override {
-    child_->execute();
-  }
-
-  size_t getNumCols() const override {
-    return child_->getNumCols();
-  }
-
-  bool nextRow(SValue* row, int row_len) override {
-    if (counter_++ < offset_) {
-      return true;
-    }
-
-    if (counter_ > (offset_ + limit_)) {
-      return false;
-    }
-
-    emitRow(row, row_len);
-    return true;
-  }
-
-  const std::vector<std::string>& getColumns() const override {
-    return child_->getColumns();
-  }
-*/
 
 protected:
   size_t limit_;

@@ -10,29 +10,28 @@
 #pragma once
 #include <fnord/stdtypes.h>
 #include <chartsql/runtime/TableExpression.h>
+#include <chartsql/qtree/OrderByNode.h>
 
 namespace csql {
 
 class OrderBy : public TableExpression {
 public:
 
-  struct SortSpec {
-    size_t column;
-    bool descending; // false == ASCENDING, true == DESCENDING
-  };
-
   OrderBy(
-      Vector<SortSpec> sort_specs,
+      Vector<OrderByNode::SortSpec> sort_specs,
       ScopedPtr<TableExpression> child);
 
-  //void execute() override;
-  //bool nextRow(SValue* row, int row_len) override;
-  //size_t getNumCols() const override;
+  void execute(
+      ExecutionContext* context,
+      Function<bool (int argc, const SValue* argv)> fn) override;
+
+  Vector<String> columnNames() const override;
+
+  size_t numColumns() const override;
 
 protected:
-  Vector<SortSpec> sort_specs_;
+  Vector<OrderByNode::SortSpec> sort_specs_;
   ScopedPtr<TableExpression> child_;
-  Vector<Vector<SValue>> rows_;
 };
 
 }
