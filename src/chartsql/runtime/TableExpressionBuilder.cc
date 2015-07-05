@@ -23,6 +23,10 @@ ScopedPtr<TableExpression> TableExpressionBuilder::build(
     Runtime* runtime,
     TableProvider* tables) {
 
+  if (dynamic_cast<DrawNode*>(node.get())) {
+    return buildDrawStatement(node.asInstanceOf<DrawNode>(), runtime, tables);
+  }
+
   if (dynamic_cast<LimitNode*>(node.get())) {
     return buildLimit(node.asInstanceOf<LimitNode>(), runtime, tables);
   }
@@ -153,6 +157,13 @@ ScopedPtr<TableExpression> TableExpressionBuilder::buildSelectExpression(
   return mkScoped(new SelectExpression(
       column_names,
       std::move(select_expressions)));
+}
+
+ScopedPtr<TableExpression> TableExpressionBuilder::buildDrawStatement(
+    RefPtr<DrawNode> node,
+    Runtime* runtime,
+    TableProvider* tables) {
+  RAISE(kRuntimeError);
 }
 
 } // namespace csql

@@ -11,7 +11,7 @@
 #include <fnord/stdtypes.h>
 #include <fnord/autoref.h>
 #include <chartsql/runtime/tablerepository.h>
-#include <chartsql/charts/drawstatement.h>
+#include <chartsql/runtime/charts/drawstatement.h>
 
 namespace csql {
 class Runtime;

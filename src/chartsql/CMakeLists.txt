@@ -9,13 +9,6 @@ add_library(chartsql-lib OBJECT
     svalue.cc
     SFunction.cc
     format.cc
-    #areachartbuilder.cc
-    #barchartbuilder.cc
-    #domainconfig.cc
-    charts/drawstatement.cc
-    #linechartbuilder.cc
-    #pointchartbuilder.cc
-    #seriesadapter.cc
     #queryendpoint.cc
     #query.cc
     #queryservice.cc
@@ -77,6 +70,13 @@ add_library(chartsql-lib OBJECT
     runtime/groupovertimewindow.cc
     runtime/execute.cc
     runtime/ExecutionContext.cc
+    #runtime/charts/areachartbuilder.cc
+    #runtime/charts/barchartbuilder.cc
+    #runtime/charts/domainconfig.cc
+    runtime/charts/drawstatement.cc
+    #runtime/charts/linechartbuilder.cc
+    #runtime/charts/pointchartbuilder.cc
+    #runtime/charts/seriesadapter.cc
     defaults.cc)
 
 add_executable(test-chartsql-runtime
