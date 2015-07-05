@@ -36,5 +36,17 @@ RefPtr<QueryTreeNode> CallExpressionNode::deepCopy() const {
   return new CallExpressionNode(symbol_, args);
 }
 
+String CallExpressionNode::toSQL() const {
+  Vector<String> args_sql;
+  for (const auto& a : arguments_) {
+    args_sql.emplace_back(a->toSQL());
+  }
+
+  return StringUtil::format(
+      "$0($1)",
+      symbol_,
+      StringUtil::join(args_sql, ","));
+}
+
 } // namespace csql
 
