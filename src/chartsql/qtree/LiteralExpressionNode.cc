@@ -27,4 +27,8 @@ RefPtr<QueryTreeNode> LiteralExpressionNode::deepCopy() const {
   return new LiteralExpressionNode(value_);
 }
 
+String LiteralExpressionNode::toSQL() const {
+  return value_.toSQL();
+}
+
 } // namespace csql
