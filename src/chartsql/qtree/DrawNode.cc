@@ -8,6 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <chartsql/qtree/DrawNode.h>
+#include <chartsql/parser/Token.h>
 
 using namespace fnord;
 
@@ -33,6 +34,24 @@ DrawNode::DrawNode(
 
 Vector<RefPtr<TableExpressionNode>> DrawNode::inputTables() const {
   return tables_;
+}
+
+DrawNode::ChartType DrawNode::chartType() const {
+  switch (ast_->getToken()->getType()) {
+    case Token::T_AREACHART:
+      return ChartType::AREACHART;
+    case Token::T_BARCHART:
+      return ChartType::BARCHART;
+    case Token::T_LINECHART:
+      return ChartType::LINECHART;
+    case Token::T_POINTCHART:
+      return ChartType::POINTCHART;
+    default:
+      RAISEF(
+          kRuntimeError,
+          "invalid chart type: $0",
+          Token::getTypeName(ast_->getToken()->getType()));
+  }
 }
 
 RefPtr<QueryTreeNode> DrawNode::deepCopy() const {

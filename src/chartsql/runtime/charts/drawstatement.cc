@@ -27,34 +27,29 @@ DrawStatement::DrawStatement(
 void DrawStatement::execute(
     ExecutionContext* context,
     Function<bool (int argc, const SValue* argv)> fn) {
-//  fnord::chart::Drawable* chart = nullptr;
-//
-//  switch (ast_->getToken()->getType()) {
-//    case Token::T_AREACHART:
-//      chart = mkChart<AreaChartBuilder>(canvas);
-//      break;
-//    case Token::T_BARCHART:
-//      chart = mkChart<BarChartBuilder>(canvas);
-//      break;
-//    case Token::T_LINECHART:
-//      chart = mkChart<LineChartBuilder>(canvas);
-//      break;
-//    case Token::T_POINTCHART:
-//      chart = mkChart<PointChartBuilder>(canvas);
-//      break;
-//    default:
-//      RAISE(
-//          kRuntimeError,
-//          "invalid chart type: %s",
-//          Token::getTypeName(ast_->getToken()->getType()));
-//  }
-//
+  fnord::chart::Drawable* chart = nullptr;
+
+  switch (node_->chartType()) {
+    case DrawNode::ChartType::AREACHART:
+      chart = executeWithChart<AreaChartBuilder>(context, fn);
+      break;
+  //  case DrawNode::ChartType::BARCHART:
+  //    chart = mkChart<BarChartBuilder>(canvas);
+  //    break;
+  //  case DrawNode::ChartType::LINECHART:
+  //    chart = mkChart<LineChartBuilder>(canvas);
+  //    break;
+  //  case DrawNode::ChartType::T_POINTCHART:
+  //    chart = mkChart<PointChartBuilder>(canvas);
+  //    break;
+  }
+
 //  applyDomainDefinitions(chart);
 //  applyTitle(chart);
 //  applyAxisDefinitions(chart);
 //  applyGrid(chart);
 //  applyLegend(chart);
-//}
+}
 
 //ASTNode const* DrawStatement::getProperty(Token::kTokenType key) const {
 //  for (const auto& child : ast_->getChildren()) {
