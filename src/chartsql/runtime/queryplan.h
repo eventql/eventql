@@ -11,6 +11,7 @@
 #include <fnord/stdtypes.h>
 #include <fnord/autoref.h>
 #include <chartsql/runtime/tablerepository.h>
+#include <chartsql/charts/drawstatement.h>
 
 namespace csql {
 class Runtime;
@@ -20,6 +21,7 @@ public:
 
   QueryPlan(
       Vector<RefPtr<QueryTreeNode>> statements,
+      Vector<ChartStatement> charts,
       RefPtr<TableProvider> tables,
       Runtime* runtime);
 
@@ -27,8 +29,11 @@ public:
 
   ScopedPtr<TableExpression> getStatement(size_t stmt_idx) const;
 
+  const Vector<ChartStatement>& charts();
+
 protected:
   Vector<RefPtr<QueryTreeNode>> statements_;
+  Vector<ChartStatement> charts_;
   RefPtr<TableProvider> tables_;
   Runtime* runtime_;
 };

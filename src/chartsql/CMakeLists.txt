@@ -12,7 +12,7 @@ add_library(chartsql-lib OBJECT
     #areachartbuilder.cc
     #barchartbuilder.cc
     #domainconfig.cc
-    drawstatement.cc
+    charts/drawstatement.cc
     #linechartbuilder.cc
     #pointchartbuilder.cc
     #seriesadapter.cc

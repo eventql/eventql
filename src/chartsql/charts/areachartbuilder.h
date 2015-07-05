@@ -9,7 +9,7 @@
  */
 #ifndef _FNORDMETRIC_SQLEXTENSIONS_AREACHARTBUILDER_H
 #define _FNORDMETRIC_SQLEXTENSIONS_AREACHARTBUILDER_H
-#include <chartsql/chartbuilder.h>
+#include <chartsql/charts/chartbuilder.h>
 
 namespace csql {
 class DrawStatement;
