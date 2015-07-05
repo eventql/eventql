@@ -31,6 +31,8 @@ public:
 
   RefPtr<QueryTreeNode> deepCopy() const override;
 
+  String toSQL() const override;
+
 protected:
   RefPtr<ValueExpressionNode> conditional_expr_;
   RefPtr<ValueExpressionNode> true_branch_expr_;
