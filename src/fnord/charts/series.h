@@ -105,11 +105,11 @@ public:
     return getProperty(prop);
   }
 
-  const bool hasProperty(kProperty prop) const {
+  bool hasProperty(kProperty prop) const {
     return properties_.find(prop) != properties_.end();
   }
 
-  const void setProperty(
+  void setProperty(
       kProperty prop,
       AnyPoint* point,
       const std::string& val) {
@@ -126,7 +126,7 @@ public:
     point->setPropertyOverride(prop, p->second.size() - 1);
   }
 
-  const void setDefaultProperty(kProperty prop, const std::string& val) {
+  void setDefaultProperty(kProperty prop, const std::string& val) {
     const auto p = properties_.find(prop);
 
     if (p == properties_.end()) {
