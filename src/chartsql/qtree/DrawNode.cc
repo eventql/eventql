@@ -75,6 +75,10 @@ ASTNode const* DrawNode::getProperty(Token::kTokenType key) const {
   return nullptr;
 }
 
+const ASTNode* DrawNode::ast() const {
+  return ast_.get();
+}
+
 RefPtr<QueryTreeNode> DrawNode::deepCopy() const {
   return new DrawNode(*this);
 }
