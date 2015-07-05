@@ -175,8 +175,7 @@ protected:
       return new SeriesAdapter2D<TX, TY>(
           name_ind_,
           x_ind_,
-          y_ind_,
-          result_list_);
+          y_ind_);
     }
 
     AnySeriesAdapter* a = nullptr;
@@ -196,8 +195,7 @@ protected:
         name_ind_,
         x_ind_,
         y_ind_,
-        z_ind_,
-        result_list_);
+        z_ind_);
   }
 
   template <typename T>
@@ -255,7 +253,6 @@ protected:
   int z_ind_;
   std::vector<std::pair<fnord::chart::Series::kProperty, int>> prop_indexes_;
   QueryPlanNode* stmt_;
-  ResultList* result_list_;
   fnord::chart::Canvas* canvas_;
   RefPtr<DrawNode> draw_stmt_;
 };
