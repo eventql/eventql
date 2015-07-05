@@ -15,7 +15,7 @@ namespace csql {
 
 BarChartBuilder::BarChartBuilder(
     fnord::chart::Canvas* canvas,
-    DrawStatement const* draw_stmt) :
+    RefPtr<DrawNode> draw_stmt) :
     ChartBuilder(canvas, draw_stmt) {}
 
 fnord::chart::Drawable* BarChartBuilder::getChart() const {

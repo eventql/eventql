@@ -16,7 +16,7 @@ class DrawStatement;
 
 class BarChartBuilder : public ChartBuilder {
 public:
-  BarChartBuilder(fnord::chart::Canvas* canvas, DrawStatement const* draw_stmt);
+  BarChartBuilder(fnord::chart::Canvas* canvas, RefPtr<DrawNode> draw_stmt);
   fnord::chart::Drawable* getChart() const override;
   std::string chartName() const override;
 protected:

@@ -15,7 +15,7 @@ namespace csql {
 
 AreaChartBuilder::AreaChartBuilder(
     fnord::chart::Canvas* canvas,
-    DrawStatement const* draw_stmt) :
+    RefPtr<DrawNode> draw_stmt) :
     ChartBuilder(canvas, draw_stmt) {}
 
 fnord::chart::Drawable* AreaChartBuilder::getChart() const {
