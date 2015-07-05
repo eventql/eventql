@@ -24,6 +24,8 @@ public:
 
   virtual size_t numColumns() const = 0;
 
+  virtual size_t getColumnIndex(const String& column_name) const;
+
   virtual void execute(
       ExecutionContext* context,
       Function<bool (int argc, const SValue* argv)> fn) = 0;
