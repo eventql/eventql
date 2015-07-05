@@ -20,7 +20,7 @@ class ColumnReferenceNode : public ValueExpressionNode {
 public:
 
   ColumnReferenceNode(const ColumnReferenceNode& other);
-  ColumnReferenceNode(const String& field_name);
+  ColumnReferenceNode(const String& column_name);
   ColumnReferenceNode(size_t column_index_);
 
   const String& fieldName() const;
@@ -36,7 +36,7 @@ public:
   String toSQL() const override;
 
 protected:
-  String field_name_;
+  String column_name_;
   Option<size_t> column_index_;
 };
 
