@@ -643,7 +643,7 @@ QueryTreeNode* QueryPlanBuilder::buildOrderByClause(ASTNode* ast) {
 
         if (derived->getType() == ASTNode::T_DERIVED_COLUMN &&
             derived->getChildren().size() > 1 &&
-            sort->getChildren()[0]->getType() != ASTNode::T_COLUMN_ALIAS) {
+            derived->getChildren()[1]->getType() == ASTNode::T_COLUMN_ALIAS) {
 
           auto this_alias = derived->getChildren()[1]->getToken()->getString();
           if (this_alias == col->getToken()->getString()) { // FIXPAUL case insensitive match
@@ -1002,7 +1002,16 @@ SelectListNode* QueryPlanBuilder::buildSelectList(ASTNode* ast) {
     RAISE(kRuntimeError, "internal error: corrupt ast");
   }
 
-  return new SelectListNode(buildValueExpression(ast->getChildren()[0]));
+  auto slnode = new SelectListNode(buildValueExpression(ast->getChildren()[0]));
+
+  /* .. AS alias */
+  if (ast->getType() == ASTNode::T_DERIVED_COLUMN &&
+      ast->getChildren().size() > 1 &&
+      ast->getChildren()[1]->getType() == ASTNode::T_COLUMN_ALIAS) {
+    slnode->setAlias(ast->getChildren()[1]->getToken()->getString());
+  };
+
+  return slnode;
 }
 
 //void QueryPlanBuilder::extend(
