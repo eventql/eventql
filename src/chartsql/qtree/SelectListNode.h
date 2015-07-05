@@ -9,6 +9,7 @@
  */
 #pragma once
 #include <fnord/stdtypes.h>
+#include <fnord/option.h>
 #include <chartsql/qtree/QueryTreeNode.h>
 #include <chartsql/qtree/ValueExpressionNode.h>
 
@@ -27,7 +28,10 @@ public:
 
   String columnName() const;
 
+  void setAlias(const String& alias);
+
 protected:
+  Option<String> alias_;
   RefPtr<ValueExpressionNode> expr_;
 };
 
