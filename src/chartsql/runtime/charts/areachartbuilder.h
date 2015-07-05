@@ -18,7 +18,7 @@ class AreaChartBuilder : public ChartBuilder {
 public:
   AreaChartBuilder(
       fnord::chart::Canvas* canvas,
-      RefPtr<DrawNode> draw_stmt);
+      RefPtr<DrawStatementNode> draw_stmt);
   fnord::chart::Drawable* getChart() const override;
   std::string chartName() const override;
 };

@@ -17,7 +17,7 @@
 #include <chartsql/qtree/LimitNode.h>
 #include <chartsql/qtree/OrderByNode.h>
 #include <chartsql/qtree/SequentialScanNode.h>
-#include <chartsql/qtree/DrawNode.h>
+#include <chartsql/qtree/DrawStatementNode.h>
 #include <chartsql/qtree/SelectExpressionNode.h>
 #include <chartsql/runtime/TableExpression.h>
 #include <chartsql/runtime/tablerepository.h>
@@ -69,7 +69,7 @@ protected:
       TableProvider* tables);
 
   ScopedPtr<TableExpression> buildDrawStatement(
-      RefPtr<DrawNode> node,
+      RefPtr<DrawStatementNode> node,
       Runtime* runtime,
       TableProvider* tables);
 

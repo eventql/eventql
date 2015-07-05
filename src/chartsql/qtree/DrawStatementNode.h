@@ -17,7 +17,7 @@ using namespace fnord;
 
 namespace csql {
 
-class DrawNode : public TableExpressionNode {
+class DrawStatementNode : public TableExpressionNode {
 public:
 
   enum class ChartType {
@@ -27,8 +27,8 @@ public:
     POINTCHART
   };
 
-  DrawNode(const DrawNode& other);
-  DrawNode(
+  DrawStatementNode(const DrawStatementNode& other);
+  DrawStatementNode(
       ScopedPtr<ASTNode> ast,
       Vector<RefPtr<TableExpressionNode>> tables);
 

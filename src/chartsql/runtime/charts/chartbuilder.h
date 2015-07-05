@@ -16,7 +16,7 @@
 #include <fnord/charts/canvas.h>
 #include <fnord/charts/barchart.h>
 #include <fnord/charts/series.h>
-#include <chartsql/qtree/DrawNode.h>
+#include <chartsql/qtree/DrawStatementNode.h>
 #include <chartsql/runtime/compile.h>
 #include <chartsql/runtime/execute.h>
 #include <chartsql/runtime/rowsink.h>
@@ -33,7 +33,7 @@ public:
 
   ChartBuilder(
       fnord::chart::Canvas* canvas,
-      RefPtr<DrawNode> draw_stmt) :
+      RefPtr<DrawStatementNode> draw_stmt) :
       canvas_(canvas),
       draw_stmt_(draw_stmt) {}
 
@@ -262,7 +262,7 @@ protected:
   std::vector<std::pair<fnord::chart::Series::kProperty, int>> prop_indexes_;
   QueryPlanNode* stmt_;
   fnord::chart::Canvas* canvas_;
-  RefPtr<DrawNode> draw_stmt_;
+  RefPtr<DrawStatementNode> draw_stmt_;
 };
 
 
