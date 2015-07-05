@@ -98,7 +98,7 @@ public:
           point_size_ind);
     }
 
-    bool first = false;
+    bool first = true;
     stmt->execute(
         context,
         [this, &first] (int row_len, const SValue* row_const) -> bool {
