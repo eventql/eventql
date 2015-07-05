@@ -24,8 +24,9 @@ void JSONResultFormat::formatResults(
   json_->addObjectEntry("result_tables");
   json_->beginArray();
 
+  Vector<ScopedPtr<TableExpression>> statements;
   for (int i = 0; i < query->numStatements(); ++i) {
-    auto stmt = query->getStatement(i);
+    auto stmt = query->buildStatement(i);
 
     json_->beginObject();
 
@@ -69,6 +70,8 @@ void JSONResultFormat::formatResults(
 
     json_->endArray();
     json_->endObject();
+
+    statements.emplace_back(std::move(stmt));
   }
   json_->endArray();
 
@@ -76,8 +79,7 @@ void JSONResultFormat::formatResults(
   json_->beginArray();
 
   size_t nchart = 0;
-  for (int i = 0; i < query->numStatements(); ++i) {
-    auto stmt = query->getStatement(i);
+  for (auto& stmt : statements) {
     auto draw_stmt = dynamic_cast<DrawStatement*>(stmt.get());
     if (!draw_stmt) {
       continue;

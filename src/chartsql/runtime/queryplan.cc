@@ -24,7 +24,7 @@ size_t QueryPlan::numStatements() const {
   return statements_.size();
 }
 
-ScopedPtr<TableExpression> QueryPlan::getStatement(size_t stmt_idx) const {
+ScopedPtr<TableExpression> QueryPlan::buildStatement(size_t stmt_idx) const {
   if (stmt_idx >= statements_.size()) {
     RAISE(kIndexError, "invalid statement index");
   }

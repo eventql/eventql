@@ -22,7 +22,7 @@ void ASCIITableFormat::formatResults(
   for (int i = 0; i < query->numStatements(); ++i) {
     output_->write("==== query ====\n");
 
-    auto stmt = query->getStatement(i);
+    auto stmt = query->buildStatement(i);
 
     stmt->execute(
         context,
