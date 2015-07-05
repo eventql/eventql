@@ -8,7 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <chartsql/runtime/runtime.h>
-#include <chartsql/charts/drawstatement.h>
+#include <chartsql/runtime/charts/drawstatement.h>
 
 namespace csql {
 

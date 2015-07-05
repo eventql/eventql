@@ -7,12 +7,12 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <chartsql/charts/domainconfig.h>
-#include <chartsql/charts/drawstatement.h>
-#include <chartsql/charts/areachartbuilder.h>
-#include <chartsql/charts/barchartbuilder.h>
-#include <chartsql/charts/linechartbuilder.h>
-#include <chartsql/charts/pointchartbuilder.h>
+#include <chartsql/runtime/charts/domainconfig.h>
+#include <chartsql/runtime/charts/drawstatement.h>
+#include <chartsql/runtime/charts/areachartbuilder.h>
+#include <chartsql/runtime/charts/barchartbuilder.h>
+#include <chartsql/runtime/charts/linechartbuilder.h>
+#include <chartsql/runtime/charts/pointchartbuilder.h>
 
 namespace csql {
 

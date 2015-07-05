@@ -21,7 +21,7 @@
 #include <chartsql/runtime/rowsink.h>
 #include <chartsql/runtime/resultlist.h>
 #include <chartsql/runtime/queryplannode.h>
-#include <chartsql/charts/seriesadapter.h>
+#include <chartsql/runtime/charts/seriesadapter.h>
 
 namespace csql {
 class DrawStatement;
