@@ -10,6 +10,7 @@
 #pragma once
 #include <fnord/stdtypes.h>
 #include <chartsql/parser/ASTNode.h>
+#include <chartsql/parser/Token.h>
 #include <chartsql/qtree/TableExpressionNode.h>
 
 using namespace fnord;
@@ -34,6 +35,8 @@ public:
   Vector<RefPtr<TableExpressionNode>> inputTables() const;
 
   ChartType chartType() const;
+
+  ASTNode const* getProperty(Token::kTokenType key) const;
 
   RefPtr<QueryTreeNode> deepCopy() const override;
 
