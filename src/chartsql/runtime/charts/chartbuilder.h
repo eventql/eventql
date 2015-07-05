@@ -99,9 +99,12 @@ public:
     }
 
     bool first = true;
+    bool upstream_done = false;
     stmt->execute(
         context,
-        [this, &first] (int row_len, const SValue* row_const) -> bool {
+        [this, &first, &upstream_done, &fn] (
+            int row_len,
+            const SValue* row_const) -> bool {
       auto row = const_cast<SValue*>(row_const);
 
       if (first) {
@@ -126,6 +129,11 @@ public:
       }
 
       adapter_->nextRow(row, row_len);
+
+      if (!upstream_done) {
+        upstream_done = !fn(row_len, row);
+      }
+
       return true;
     });
   }
