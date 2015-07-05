@@ -14,11 +14,9 @@ namespace csql {
 
 QueryPlan::QueryPlan(
     Vector<RefPtr<QueryTreeNode>> statements,
-    Vector<ChartStatement> charts,
     RefPtr<TableProvider> tables,
     Runtime* runtime) :
     statements_(statements),
-    charts_(std::move(charts)),
     tables_(tables),
     runtime_(runtime) {}
 
@@ -41,10 +39,6 @@ ScopedPtr<TableExpression> QueryPlan::getStatement(size_t stmt_idx) const {
   RAISE(
       kRuntimeError,
       "cannot figure out how to execute this query plan");
-}
-
-const Vector<ChartStatement>& QueryPlan::charts() {
-  return charts_;
 }
 
 }

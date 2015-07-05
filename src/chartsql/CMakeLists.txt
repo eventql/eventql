@@ -50,6 +50,7 @@ add_library(chartsql-lib OBJECT
     qtree/UnionNode.cc
     qtree/LimitNode.cc
     qtree/OrderByNode.cc
+    qtree/DrawNode.cc
     runtime/ASCIITableFormat.cc
     runtime/JSONSSEStreamFormat.cc
     runtime/JSONResultFormat.cc
