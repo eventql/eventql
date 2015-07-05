@@ -33,32 +33,11 @@ RefPtr<QueryPlan> Runtime::parseAndBuildQueryPlan(
   csql::Parser parser;
   parser.parse(query.data(), query.size());
 
-  for (auto stmt : parser.getStatements()) {
-    switch (stmt->getType()) {
-
-      case ASTNode::T_SELECT:
-        statements.emplace_back(rewrite_fn(query_plan_builder_.build(stmt)));
-        break;
-
-      case ASTNode::T_DRAW:
-        if (charts.size() == 0) {
-          charts.emplace_back();
-        }
-
-        charts.back().draw_statements.emplace_back(
-            new DrawStatement(stmt, this));
-        break;
-
-      default:
-        RAISE(kRuntimeError, "invalid statement");
-    }
+  for (auto stmt : query_plan_builder_.build(parser.getStatements())) {
+    statements.emplace_back(rewrite_fn(stmt));
   }
 
-  return new QueryPlan(
-      statements,
-      charts,
-      tables,
-      this);
+  return new QueryPlan(statements, tables, this);
 }
 
 ScopedPtr<ValueExpression> Runtime::buildValueExpression(

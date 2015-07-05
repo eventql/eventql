@@ -52,6 +52,9 @@ public:
 
   RefPtr<QueryTreeNode> build(ASTNode* ast);
 
+  Vector<RefPtr<QueryTreeNode>> build(const Vector<ASTNode*>& ast);
+
+
 //  QueryPlanBuilder(
 //      ValueExpressionBuilder* compiler,
 //      const std::vector<std::unique_ptr<Backend>>& backends);

@@ -17,6 +17,7 @@
 #include <chartsql/qtree/SelectExpressionNode.h>
 #include <chartsql/qtree/LimitNode.h>
 #include <chartsql/qtree/OrderByNode.h>
+#include <chartsql/qtree/DrawNode.h>
 
 namespace csql {
 
@@ -69,6 +70,49 @@ RefPtr<QueryTreeNode> QueryPlanBuilder::build(ASTNode* ast) {
 
   ast->debugPrint(2);
   RAISE(kRuntimeError, "can't figure out a query plan for this, sorry :(");
+}
+
+Vector<RefPtr<QueryTreeNode>> QueryPlanBuilder::build(
+    const Vector<ASTNode*>& statements) {
+  Vector<RefPtr<QueryTreeNode>> nodes;
+
+  for (int i = 0; i < statements.size(); ++i) {
+    switch (statements[i]->getType()) {
+
+      case ASTNode::T_SELECT:
+        nodes.emplace_back(build(statements[i]));
+        break;
+
+      case ASTNode::T_DRAW: {
+        ScopedPtr<ASTNode> draw_ast(statements[i]->deepCopy());
+        Vector<RefPtr<TableExpressionNode>> subselects;
+
+        for (++i; i < statements.size(); ) {
+          switch (statements[i]->getType()) {
+            case ASTNode::T_SELECT:
+              subselects.emplace_back(
+                  build(statements[i++]).asInstanceOf<TableExpressionNode>());
+              break;
+            case ASTNode::T_DRAW:
+              break;
+            default:
+              RAISE(
+                  kRuntimeError,
+                  "DRAW statments may only be followed by SELECT or END DRAW " \
+                  "statements");
+          }
+        }
+
+        nodes.emplace_back(new DrawNode(std::move(draw_ast), subselects));
+        break;
+      }
+
+      default:
+        RAISE(kRuntimeError, "invalid statement");
+    }
+  }
+
+  return nodes;
 }
 
 //QueryPlanBuilder::QueryPlanBuilder(

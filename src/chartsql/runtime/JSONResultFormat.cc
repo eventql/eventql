@@ -75,16 +75,16 @@ void JSONResultFormat::formatResults(
   json_->addObjectEntry("result_charts");
   json_->beginArray();
 
-  size_t nchart = 0;
-  for (const auto& chart : query->charts()) {
-    String svg_str;
-    auto svg_stream = StringOutputStream::fromString(&svg_str);
-    fnord::chart::SVGTarget svg(svg_stream.get());
-    chart.render(&svg);
+  //size_t nchart = 0;
+  //for (const auto& chart : query->charts()) {
+  //  String svg_str;
+  //  auto svg_stream = StringOutputStream::fromString(&svg_str);
+  //  fnord::chart::SVGTarget svg(svg_stream.get());
+  //  chart.render(&svg);
 
-    if (++nchart > 1) json_->addComma();
-    json_->addString(svg_str);
-  }
+  //  if (++nchart > 1) json_->addComma();
+  //  json_->addString(svg_str);
+  //}
 
   json_->endArray();
   json_->endObject();
