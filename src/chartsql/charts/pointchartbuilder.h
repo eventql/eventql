@@ -7,23 +7,25 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#ifndef _FNORDMETRIC_SQLEXTENSIONS_BARCHARTBUILDER_H
-#define _FNORDMETRIC_SQLEXTENSIONS_BARCHARTBUILDER_H
-#include <chartsql/chartbuilder.h>
+#ifndef _FNORDMETRIC_SQLEXTENSIONS_POINTCHARTBUILDER_H
+#define _FNORDMETRIC_SQLEXTENSIONS_POINTCHARTBUILDER_H
+#include <chartsql/charts/chartbuilder.h>
+#include <fnord/charts/pointchart.h>
 
 namespace csql {
 class DrawStatement;
 
-class BarChartBuilder : public ChartBuilder {
+class PointChartBuilder : public ChartBuilder {
 public:
-  BarChartBuilder(fnord::chart::Canvas* canvas, DrawStatement const* draw_stmt);
+  PointChartBuilder(
+      fnord::chart::Canvas* canvas,
+      DrawStatement const* draw_stmt);
+
   fnord::chart::Drawable* getChart() const override;
   std::string chartName() const override;
 protected:
   fnord::chart::Drawable* findChartType() const;
-  void setOrientation(fnord::chart::BarChart* chart) const;
-  void setStacked(fnord::chart::BarChart* chart) const;
-  void setLabels(fnord::chart::BarChart* chart) const;
+  void setLabels(fnord::chart::PointChart* chart) const;
 };
 
 }

@@ -9,7 +9,7 @@
  */
 #ifndef _FNORDMETRIC_SQLEXTENSIONS_LINECHARTBUILDER_H
 #define _FNORDMETRIC_SQLEXTENSIONS_LINECHARTBUILDER_H
-#include <chartsql/chartbuilder.h>
+#include <chartsql/charts/chartbuilder.h>
 #include <fnord/charts/linechart.h>
 
 namespace csql {

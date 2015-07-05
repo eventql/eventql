@@ -16,13 +16,14 @@
 #include <chartsql/runtime/queryplannode.h>
 #include <chartsql/runtime/resultlist.h>
 #include <fnord/exception.h>
+#include <fnord/autoref.h>
 #include <fnord/charts/canvas.h>
 #include <fnord/charts/drawable.h>
 
 namespace csql {
 class Runtime;
 
-class DrawStatement {
+class DrawStatement : public RefCounted {
 public:
 
   DrawStatement(ASTNode* ast, Runtime* runtime);
@@ -60,6 +61,10 @@ protected:
   //std::vector<QueryPlanNode*> select_stmts_;
   //std::vector<ResultList*> result_lists_;
   ScopedPtr<ASTNode> ast_;
+};
+
+struct ChartStatement {
+  Vector<RefPtr<DrawStatement>> draw_statements;
 };
 
 }
