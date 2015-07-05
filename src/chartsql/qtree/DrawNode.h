@@ -36,7 +36,9 @@ public:
 
   ChartType chartType() const;
 
-  ASTNode const* getProperty(Token::kTokenType key) const;
+  const ASTNode* getProperty(Token::kTokenType key) const;
+
+  const ASTNode* ast() const;
 
   RefPtr<QueryTreeNode> deepCopy() const override;
 

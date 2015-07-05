@@ -35,6 +35,9 @@ public:
       RefPtr<QueryPlan> query_plan,
       RefPtr<ResultFormat> result_format);
 
+  SValue evaluateStaticExpression(const String& expr);
+  SValue evaluateStaticExpression(ASTNode* expr);
+
   RefPtr<QueryPlan> parseAndBuildQueryPlan(
       const String& query,
       RefPtr<TableProvider> tables,
