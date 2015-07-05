@@ -40,11 +40,11 @@ protected:
 
   void replaceAllSequentialScansWithUnions(
       const String& tsdb_namespace,
-      RefPtr<csql::TableExpressionNode>* node);
+      RefPtr<csql::QueryTreeNode>* node);
 
   void replaceSequentialScanWithUnion(
       const String& tsdb_namespace,
-      RefPtr<csql::TableExpressionNode>* node);
+      RefPtr<csql::QueryTreeNode>* node);
 
   TSDBNode* tsdb_node_;
   csql::Runtime sql_runtime_;

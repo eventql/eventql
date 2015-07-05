@@ -43,9 +43,7 @@ RefPtr<csql::QueryTreeNode> SQLEngine::rewriteQuery(
     const String& tsdb_namespace,
     RefPtr<csql::QueryTreeNode> query) {
   if (dynamic_cast<csql::TableExpressionNode*>(query.get())) {
-    auto tbl_expr = query.asInstanceOf<csql::TableExpressionNode>();
-    replaceAllSequentialScansWithUnions(tsdb_namespace, &tbl_expr);
-    return tbl_expr.get();
+    replaceAllSequentialScansWithUnions(tsdb_namespace, &query);
   }
 
   return query;
@@ -58,23 +56,23 @@ RefPtr<csql::TableProvider> SQLEngine::tableProviderForNamespace(
 
 void SQLEngine::replaceAllSequentialScansWithUnions(
     const String& tsdb_namespace,
-    RefPtr<csql::TableExpressionNode>* node) {
+    RefPtr<csql::QueryTreeNode>* node) {
   if (dynamic_cast<csql::SequentialScanNode*>(node->get())) {
     replaceSequentialScanWithUnion(tsdb_namespace, node);
     return;
   }
 
-  auto ntables = node->get()->numInputTables();
+  auto ntables = node->get()->numChildren();
   for (int i = 0; i < ntables; ++i) {
     replaceAllSequentialScansWithUnions(
         tsdb_namespace,
-        node->get()->mutableInputTable(i));
+        node->get()->mutableChild(i));
   }
 }
 
 void SQLEngine::replaceSequentialScanWithUnion(
     const String& tsdb_namespace,
-    RefPtr<csql::TableExpressionNode>* node) {
+    RefPtr<csql::QueryTreeNode>* node) {
   auto seqscan = node->asInstanceOf<csql::SequentialScanNode>();
 
   auto table_ref = TSDBTableRef::parse(seqscan->tableName());
@@ -97,7 +95,7 @@ void SQLEngine::replaceSequentialScanWithUnion(
       table_ref.timerange_limit.get(),
       4 * kMicrosPerHour);
 
-  Vector<RefPtr<csql::TableExpressionNode>> union_tables;
+  Vector<RefPtr<csql::QueryTreeNode>> union_tables;
   for (const auto& partition : partitions) {
     auto table_name = StringUtil::format(
         "tsdb://localhost/$0/$1",
@@ -109,7 +107,7 @@ void SQLEngine::replaceSequentialScanWithUnion(
     union_tables.emplace_back(copy.get());
   }
 
-  *node = RefPtr<csql::TableExpressionNode>(new csql::UnionNode(union_tables));
+  *node = RefPtr<csql::QueryTreeNode>(new csql::UnionNode(union_tables));
 }
 
 }
