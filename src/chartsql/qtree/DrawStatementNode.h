@@ -30,9 +30,9 @@ public:
   DrawStatementNode(const DrawStatementNode& other);
   DrawStatementNode(
       ScopedPtr<ASTNode> ast,
-      Vector<RefPtr<TableExpressionNode>> tables);
+      Vector<RefPtr<QueryTreeNode>> tables);
 
-  Vector<RefPtr<TableExpressionNode>> inputTables() const;
+  Vector<RefPtr<QueryTreeNode>> inputTables() const;
 
   ChartType chartType() const;
 
@@ -44,7 +44,7 @@ public:
 
 protected:
   ScopedPtr<ASTNode> ast_;
-  Vector<RefPtr<TableExpressionNode>> tables_;
+  Vector<RefPtr<QueryTreeNode>> tables_;
 };
 
 } // namespace csql

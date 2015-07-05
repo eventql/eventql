@@ -16,11 +16,11 @@ namespace csql {
 GroupByNode::GroupByNode(
     Vector<RefPtr<SelectListNode>> select_list,
     Vector<RefPtr<ValueExpressionNode>> group_exprs,
-    RefPtr<TableExpressionNode> table) :
+    RefPtr<QueryTreeNode> table) :
     select_list_(select_list),
     group_exprs_(group_exprs),
     table_(table) {
-  addInputTable(&table_);
+  addChild(&table_);
 }
 
 Vector<RefPtr<SelectListNode>> GroupByNode::selectList() const {
@@ -31,7 +31,7 @@ Vector<RefPtr<ValueExpressionNode>> GroupByNode::groupExpressions() const {
   return group_exprs_;
 }
 
-RefPtr<TableExpressionNode> GroupByNode::inputTable() const {
+RefPtr<QueryTreeNode> GroupByNode::inputTable() const {
   return table_;
 }
 
@@ -49,7 +49,7 @@ RefPtr<QueryTreeNode> GroupByNode::deepCopy() const {
   return new GroupByNode(
       select_list,
       group_exprs,
-      table_->deepCopyAs<TableExpressionNode>());
+      table_->deepCopyAs<QueryTreeNode>());
 }
 
 } // namespace csql

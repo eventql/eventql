@@ -16,14 +16,14 @@ namespace csql {
 LimitNode::LimitNode(
     size_t limit,
     size_t offset,
-    RefPtr<TableExpressionNode> table) :
+    RefPtr<QueryTreeNode> table) :
     limit_(limit),
     offset_(offset),
     table_(table) {
-  addInputTable(&table_);
+  addChild(&table_);
 }
 
-RefPtr<TableExpressionNode> LimitNode::inputTable() const {
+RefPtr<QueryTreeNode> LimitNode::inputTable() const {
   return table_;
 }
 
@@ -31,7 +31,7 @@ RefPtr<QueryTreeNode> LimitNode::deepCopy() const {
   return new LimitNode(
       limit_,
       offset_,
-      table_->deepCopy().asInstanceOf<TableExpressionNode>());
+      table_->deepCopy().asInstanceOf<QueryTreeNode>());
 }
 
 size_t LimitNode::limit() const {

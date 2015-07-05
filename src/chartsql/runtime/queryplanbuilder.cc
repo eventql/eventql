@@ -18,6 +18,7 @@
 #include <chartsql/qtree/LimitNode.h>
 #include <chartsql/qtree/OrderByNode.h>
 #include <chartsql/qtree/DrawStatementNode.h>
+#include <chartsql/qtree/ChartStatementNode.h>
 
 namespace csql {
 
@@ -84,28 +85,33 @@ Vector<RefPtr<QueryTreeNode>> QueryPlanBuilder::build(
         break;
 
       case ASTNode::T_DRAW: {
-        ScopedPtr<ASTNode> draw_ast(statements[i]->deepCopy());
-        Vector<RefPtr<TableExpressionNode>> subselects;
+        Vector<RefPtr<DrawStatementNode>> draw_nodes;
 
-        for (++i; i < statements.size(); ) {
-          switch (statements[i]->getType()) {
-            case ASTNode::T_SELECT:
-              subselects.emplace_back(
-                  build(statements[i++]).asInstanceOf<TableExpressionNode>());
-              continue;
-            case ASTNode::T_DRAW:
-              break;
-            default:
-              RAISE(
-                  kRuntimeError,
-                  "DRAW statments may only be followed by SELECT or END DRAW " \
-                  "statements");
+        while (i < statements.size() &&
+            statements[i]->getType() == ASTNode::T_DRAW) {
+          ScopedPtr<ASTNode> draw_ast(statements[i]->deepCopy());
+          Vector<RefPtr<QueryTreeNode>> subselects;
+
+          for (++i; i < statements.size(); ) {
+            switch (statements[i]->getType()) {
+              case ASTNode::T_SELECT:
+                subselects.emplace_back(build(statements[i++]));
+                continue;
+              case ASTNode::T_DRAW:
+                break;
+              default:
+                RAISE(
+                    kRuntimeError,
+                    "DRAW statments may only be followed by SELECT or END DRAW " \
+                    "statements");
+            }
+
+            draw_nodes.emplace_back(
+                new DrawStatementNode(std::move(draw_ast), subselects));
           }
-
-          break;
         }
 
-        nodes.emplace_back(new DrawStatementNode(std::move(draw_ast), subselects));
+        nodes.emplace_back(new ChartStatementNode(draw_nodes));
         break;
       }
 
@@ -417,7 +423,7 @@ QueryTreeNode* QueryPlanBuilder::buildGroupBy(ASTNode* ast) {
   return new GroupByNode(
       select_list_expressions,
       group_expressions,
-      build(child_ast).asInstanceOf<TableExpressionNode>());
+      build(child_ast));
 }
 
 //QueryPlanNode* QueryPlanBuilder::buildGroupOverTimewindow(
@@ -653,7 +659,7 @@ QueryTreeNode* QueryPlanBuilder::buildLimitClause(ASTNode* ast) {
     return new LimitNode(
         limit,
         offset,
-        build(new_ast).asInstanceOf<TableExpressionNode>());
+        build(new_ast));
   }
 
   return nullptr;
@@ -728,7 +734,7 @@ QueryTreeNode* QueryPlanBuilder::buildOrderByClause(ASTNode* ast) {
   return new OrderByNode(
       sort_specs,
       ast->getChildren()[0]->getChildren().size(),
-      build(child_ast).asInstanceOf<TableExpressionNode>());
+      build(child_ast));
 }
 
 QueryTreeNode* QueryPlanBuilder::buildSequentialScan(ASTNode* ast) {

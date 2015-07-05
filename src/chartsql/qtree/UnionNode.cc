@@ -15,19 +15,19 @@ namespace csql {
 
 UnionNode::UnionNode(const UnionNode& other) {
   for (const auto& tbl : other.tables_) {
-    tables_.emplace_back(tbl->deepCopyAs<TableExpressionNode>());
+    tables_.emplace_back(tbl->deepCopy());
   }
 }
 
 UnionNode::UnionNode(
-    Vector<RefPtr<TableExpressionNode>> tables) :
+    Vector<RefPtr<QueryTreeNode>> tables) :
     tables_(tables) {
   for (auto& table : tables_) {
-    addInputTable(&table);
+    addChild(&table);
   }
 }
 
-Vector<RefPtr<TableExpressionNode>> UnionNode::inputTables() const {
+Vector<RefPtr<QueryTreeNode>> UnionNode::inputTables() const {
   return tables_;
 }
 

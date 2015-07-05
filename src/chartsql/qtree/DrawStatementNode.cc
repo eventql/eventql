@@ -17,21 +17,21 @@ DrawStatementNode::DrawStatementNode(
     const DrawStatementNode& other) :
     ast_(other.ast_->deepCopy()) {
   for (const auto& tbl : other.tables_) {
-    tables_.emplace_back(tbl->deepCopyAs<TableExpressionNode>());
+    tables_.emplace_back(tbl->deepCopyAs<QueryTreeNode>());
   }
 }
 
 DrawStatementNode::DrawStatementNode(
     ScopedPtr<ASTNode> ast,
-    Vector<RefPtr<TableExpressionNode>> tables) :
+    Vector<RefPtr<QueryTreeNode>> tables) :
     ast_(std::move(ast)),
     tables_(tables) {
   for (auto& table : tables_) {
-    addInputTable(&table);
+    addChild(&table);
   }
 }
 
-Vector<RefPtr<TableExpressionNode>> DrawStatementNode::inputTables() const {
+Vector<RefPtr<QueryTreeNode>> DrawStatementNode::inputTables() const {
   return tables_;
 }
 

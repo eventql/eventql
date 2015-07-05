@@ -19,7 +19,7 @@ using namespace fnord;
 namespace csql {
 
 ScopedPtr<TableExpression> TableExpressionBuilder::build(
-    RefPtr<TableExpressionNode> node,
+    RefPtr<QueryTreeNode> node,
     Runtime* runtime,
     TableProvider* tables) {
 

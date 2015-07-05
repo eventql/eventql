@@ -26,9 +26,9 @@ public:
   OrderByNode(
       Vector<SortSpec> sort_specs,
       size_t max_output_column_index,
-      RefPtr<TableExpressionNode> table);
+      RefPtr<QueryTreeNode> table);
 
-  RefPtr<TableExpressionNode> inputTable() const;
+  RefPtr<QueryTreeNode> inputTable() const;
 
   const Vector<SortSpec>& sortSpecs() const;
 
@@ -39,7 +39,7 @@ public:
 protected:
   Vector<SortSpec> sort_specs_;
   size_t max_output_column_index_;
-  RefPtr<TableExpressionNode> table_;
+  RefPtr<QueryTreeNode> table_;
 };
 
 } // namespace csql

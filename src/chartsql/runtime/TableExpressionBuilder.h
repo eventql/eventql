@@ -32,7 +32,7 @@ class TableExpressionBuilder {
 public:
 
   ScopedPtr<TableExpression> build(
-      RefPtr<TableExpressionNode> node,
+      RefPtr<QueryTreeNode> node,
       Runtime* runtime,
       TableProvider* tables);
 

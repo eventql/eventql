@@ -18,17 +18,6 @@ namespace csql {
 class TableExpressionNode : public QueryTreeNode {
 public:
 
-  size_t numInputTables() const;
-
-  RefPtr<TableExpressionNode> inputTable(size_t index);
-
-  RefPtr<TableExpressionNode>* mutableInputTable(size_t index);
-
-protected:
-
-  void addInputTable(RefPtr<TableExpressionNode>* table);
-
-  Vector<RefPtr<TableExpressionNode>*> input_tables_;
 };
 
 } // namespace csql
