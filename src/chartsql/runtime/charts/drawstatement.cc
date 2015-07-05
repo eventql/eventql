@@ -35,6 +35,10 @@ DrawStatement::DrawStatement(
   }
 }
 
+void DrawStatement::render(fnord::chart::RenderTarget* target) const {
+  canvas_.render(target);
+}
+
 void DrawStatement::execute(
     ExecutionContext* context,
     Function<bool (int argc, const SValue* argv)> fn) {
