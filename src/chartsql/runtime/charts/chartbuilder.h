@@ -16,6 +16,7 @@
 #include <fnord/charts/canvas.h>
 #include <fnord/charts/barchart.h>
 #include <fnord/charts/series.h>
+#include <chartsql/qtree/DrawNode.h>
 #include <chartsql/runtime/compile.h>
 #include <chartsql/runtime/execute.h>
 #include <chartsql/runtime/rowsink.h>
@@ -32,7 +33,7 @@ public:
 
   ChartBuilder(
       fnord::chart::Canvas* canvas,
-      DrawStatement const* draw_stmt) :
+      RefPtr<DrawNode> draw_stmt) :
       canvas_(canvas),
       draw_stmt_(draw_stmt) {}
 
@@ -256,7 +257,7 @@ protected:
   QueryPlanNode* stmt_;
   ResultList* result_list_;
   fnord::chart::Canvas* canvas_;
-  DrawStatement const* draw_stmt_;
+  RefPtr<DrawNode> draw_stmt_;
 };
 
 

@@ -42,7 +42,7 @@ protected:
   fnord::chart::Drawable* executeWithChart(
       ExecutionContext* context,
       Function<bool (int argc, const SValue* argv)> fn) {
-    ChartBuilderType chart_builder(&canvas_, this);
+    ChartBuilderType chart_builder(&canvas_, node_);
 
     for (auto& source : sources_) {
       chart_builder.executeStatement(source.get(), context, fn);
@@ -59,8 +59,6 @@ protected:
   //void applyLegend(fnord::chart::Drawable* chart) const;
   //void applyTitle(fnord::chart::Drawable* chart) const;
 
-  //std::vector<QueryPlanNode*> select_stmts_;
-  //std::vector<ResultList*> result_lists_;
   RefPtr<DrawNode> node_;
   Vector<ScopedPtr<TableExpression>> sources_;
   Runtime* runtime_;

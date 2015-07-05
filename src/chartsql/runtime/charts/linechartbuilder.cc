@@ -14,7 +14,7 @@ namespace csql {
 
 LineChartBuilder::LineChartBuilder(
     fnord::chart::Canvas* canvas,
-    DrawStatement const* draw_stmt) :
+    RefPtr<DrawNode> draw_stmt) :
     ChartBuilder(canvas, draw_stmt) {}
 
 fnord::chart::Drawable* LineChartBuilder::getChart() const {

@@ -19,7 +19,7 @@ class PointChartBuilder : public ChartBuilder {
 public:
   PointChartBuilder(
       fnord::chart::Canvas* canvas,
-      DrawStatement const* draw_stmt);
+      RefPtr<DrawNode> draw_stmt);
 
   fnord::chart::Drawable* getChart() const override;
   std::string chartName() const override;
