@@ -28,6 +28,10 @@ void JSONResultFormat::formatResults(
   for (int i = 0; i < query->numStatements(); ++i) {
     auto stmt = query->buildStatement(i);
 
+    if (++i > 1) {
+      json_->addComma();
+    }
+
     json_->beginObject();
 
     json_->addObjectEntry("columns");
