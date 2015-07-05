@@ -36,6 +36,8 @@ public:
 
   size_t numColumns() const override;
 
+  void render(fnord::chart::RenderTarget* target) const;
+
 protected:
 
   template <typename ChartBuilderType>
