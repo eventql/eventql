@@ -18,7 +18,7 @@
 namespace csql {
 
 DrawStatement::DrawStatement(
-    RefPtr<DrawNode> node,
+    RefPtr<DrawStatementNode> node,
     Vector<ScopedPtr<TableExpression>> sources,
     Runtime* runtime) :
     node_(node),
@@ -45,16 +45,16 @@ void DrawStatement::execute(
   fnord::chart::Drawable* chart = nullptr;
 
   switch (node_->chartType()) {
-    case DrawNode::ChartType::AREACHART:
+    case DrawStatementNode::ChartType::AREACHART:
       chart = executeWithChart<AreaChartBuilder>(context, fn);
       break;
-    case DrawNode::ChartType::BARCHART:
+    case DrawStatementNode::ChartType::BARCHART:
       chart = executeWithChart<BarChartBuilder>(context, fn);
       break;
-    case DrawNode::ChartType::LINECHART:
+    case DrawStatementNode::ChartType::LINECHART:
       chart = executeWithChart<LineChartBuilder>(context, fn);
       break;
-    case DrawNode::ChartType::POINTCHART:
+    case DrawStatementNode::ChartType::POINTCHART:
       chart = executeWithChart<PointChartBuilder>(context, fn);
       break;
   }

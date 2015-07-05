@@ -23,8 +23,8 @@ ScopedPtr<TableExpression> TableExpressionBuilder::build(
     Runtime* runtime,
     TableProvider* tables) {
 
-  if (dynamic_cast<DrawNode*>(node.get())) {
-    return buildDrawStatement(node.asInstanceOf<DrawNode>(), runtime, tables);
+  if (dynamic_cast<DrawStatementNode*>(node.get())) {
+    return buildDrawStatement(node.asInstanceOf<DrawStatementNode>(), runtime, tables);
   }
 
   if (dynamic_cast<LimitNode*>(node.get())) {
@@ -160,7 +160,7 @@ ScopedPtr<TableExpression> TableExpressionBuilder::buildSelectExpression(
 }
 
 ScopedPtr<TableExpression> TableExpressionBuilder::buildDrawStatement(
-    RefPtr<DrawNode> node,
+    RefPtr<DrawStatementNode> node,
     Runtime* runtime,
     TableProvider* tables) {
   Vector<ScopedPtr<TableExpression>> union_tables;

@@ -10,7 +10,7 @@
 #pragma once
 #include <fnord/stdtypes.h>
 #include <chartsql/runtime/TableExpression.h>
-#include <chartsql/qtree/DrawNode.h>
+#include <chartsql/qtree/DrawStatementNode.h>
 #include <chartsql/parser/token.h>
 #include <fnord/exception.h>
 #include <fnord/autoref.h>
@@ -24,7 +24,7 @@ class DrawStatement : public TableExpression {
 public:
 
   DrawStatement(
-      RefPtr<DrawNode> node,
+      RefPtr<DrawStatementNode> node,
       Vector<ScopedPtr<TableExpression>> sources,
       Runtime* runtime);
 
@@ -60,7 +60,7 @@ protected:
   void applyLegend(fnord::chart::Drawable* chart) const;
   void applyTitle(fnord::chart::Drawable* chart) const;
 
-  RefPtr<DrawNode> node_;
+  RefPtr<DrawStatementNode> node_;
   Vector<ScopedPtr<TableExpression>> sources_;
   Runtime* runtime_;
   fnord::chart::Canvas canvas_;

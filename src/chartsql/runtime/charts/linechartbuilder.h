@@ -17,7 +17,7 @@ class DrawStatement;
 
 class LineChartBuilder : public ChartBuilder {
 public:
-  LineChartBuilder(fnord::chart::Canvas* canvas, RefPtr<DrawNode> draw_stmt);
+  LineChartBuilder(fnord::chart::Canvas* canvas, RefPtr<DrawStatementNode> draw_stmt);
   fnord::chart::Drawable* getChart() const override;
   std::string chartName() const override;
 protected:

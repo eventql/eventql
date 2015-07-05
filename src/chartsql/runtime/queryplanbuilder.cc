@@ -17,7 +17,7 @@
 #include <chartsql/qtree/SelectExpressionNode.h>
 #include <chartsql/qtree/LimitNode.h>
 #include <chartsql/qtree/OrderByNode.h>
-#include <chartsql/qtree/DrawNode.h>
+#include <chartsql/qtree/DrawStatementNode.h>
 
 namespace csql {
 
@@ -105,7 +105,7 @@ Vector<RefPtr<QueryTreeNode>> QueryPlanBuilder::build(
           break;
         }
 
-        nodes.emplace_back(new DrawNode(std::move(draw_ast), subselects));
+        nodes.emplace_back(new DrawStatementNode(std::move(draw_ast), subselects));
         break;
       }
 
