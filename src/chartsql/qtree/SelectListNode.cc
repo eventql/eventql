@@ -30,7 +30,7 @@ String SelectListNode::columnName() const {
     return alias_.get();
   }
 
-  return "FIXME";
+  return expr_->toSQL();
 }
 
 void SelectListNode::setAlias(const String& alias) {
