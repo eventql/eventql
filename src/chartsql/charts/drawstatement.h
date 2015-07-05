@@ -65,6 +65,7 @@ protected:
 
 struct ChartStatement {
   Vector<RefPtr<DrawStatement>> draw_statements;
+  void render(fnord::chart::RenderTarget* target) const;
 };
 
 }
