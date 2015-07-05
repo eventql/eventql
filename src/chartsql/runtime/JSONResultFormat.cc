@@ -74,6 +74,7 @@ void JSONResultFormat::formatResults(
     statements.emplace_back(std::move(stmt));
   }
   json_->endArray();
+  json_->addComma();
 
   json_->addObjectEntry("result_charts");
   json_->beginArray();
