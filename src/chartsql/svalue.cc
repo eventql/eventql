@@ -325,6 +325,38 @@ std::string SValue::toString() const {
   return std::string(str, len);
 }
 
+String SValue::toSQL() const {
+  switch (data_.type) {
+
+    case T_INTEGER: {
+      return toString();
+    }
+
+    case T_TIMESTAMP: {
+      return StringUtil::format("\"$0\"", toString());
+    }
+
+    case T_FLOAT: {
+      return toString();
+    }
+
+    case T_BOOL: {
+      return toString();
+    }
+
+    case T_STRING: {
+      auto str = getString();
+      StringUtil::replaceAll(&str, "\"", "\\\"");
+      return StringUtil::format("\"$0\"", str);
+    }
+
+    case T_NULL: {
+      return "NULL";
+    }
+
+  }
+}
+
 const char* SValue::getTypeName(kSValueType type) {
   switch (type) {
     case T_STRING:
