@@ -51,27 +51,6 @@ void DrawStatement::execute(
 //  applyLegend(chart);
 }
 
-//ASTNode const* DrawStatement::getProperty(Token::kTokenType key) const {
-//  for (const auto& child : ast_->getChildren()) {
-//    if (child->getType() != ASTNode::T_PROPERTY) {
-//      continue;
-//    }
-//
-//    if (child->getToken()->getType() != key) {
-//      continue;
-//    }
-//
-//    const auto& values = child->getChildren();
-//    if (values.size() != 1) {
-//      RAISE(kRuntimeError, "corrupt AST: T_PROPERTY has != 1 child");
-//    }
-//
-//    return values[0];
-//  }
-//
-//  return nullptr;
-//}
-//
 //void DrawStatement::applyAxisDefinitions(fnord::chart::Drawable* chart) const {
 //  for (const auto& child : ast_->getChildren()) {
 //    if (child->getType() != ASTNode::T_AXIS ||
