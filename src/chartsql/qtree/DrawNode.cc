@@ -8,7 +8,6 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <chartsql/qtree/DrawNode.h>
-#include <chartsql/parser/Token.h>
 
 using namespace fnord;
 

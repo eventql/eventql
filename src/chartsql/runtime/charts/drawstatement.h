@@ -10,8 +10,8 @@
 #pragma once
 #include <fnord/stdtypes.h>
 #include <chartsql/runtime/TableExpression.h>
-#include <chartsql/qtree/drawnode.h>
-#include <chartsql/parser/Token.h>
+#include <chartsql/qtree/DrawNode.h>
+#include <chartsql/parser/token.h>
 #include <fnord/exception.h>
 #include <fnord/autoref.h>
 #include <fnord/charts/canvas.h>
