@@ -44,6 +44,7 @@ add_library(chartsql-lib OBJECT
     qtree/LimitNode.cc
     qtree/OrderByNode.cc
     qtree/DrawStatementNode.cc
+    qtree/QueryTreeNode.cc
     runtime/ASCIITableFormat.cc
     runtime/JSONSSEStreamFormat.cc
     runtime/JSONResultFormat.cc
