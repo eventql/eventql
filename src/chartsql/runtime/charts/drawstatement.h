@@ -44,10 +44,10 @@ protected:
       Function<bool (int argc, const SValue* argv)> fn) {
     ChartBuilderType chart_builder(&canvas_, this);
 
-    //for (size_t i = 0; i < sources_.size(); ++i) {
-    //  const auto& stmt = select_stmts_[i];
-    //  chart_builder.executeStatement(stmt, result_lists_[i]);
-    //}
+    for (auto& source : sources_) {
+      chart_builder.executeStatement(source.get(), context, fn);
+
+    }
 
     return chart_builder.getChart();
   }

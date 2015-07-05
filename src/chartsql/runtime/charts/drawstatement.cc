@@ -33,15 +33,15 @@ void DrawStatement::execute(
     case DrawNode::ChartType::AREACHART:
       chart = executeWithChart<AreaChartBuilder>(context, fn);
       break;
-  //  case DrawNode::ChartType::BARCHART:
-  //    chart = mkChart<BarChartBuilder>(canvas);
-  //    break;
-  //  case DrawNode::ChartType::LINECHART:
-  //    chart = mkChart<LineChartBuilder>(canvas);
-  //    break;
-  //  case DrawNode::ChartType::T_POINTCHART:
-  //    chart = mkChart<PointChartBuilder>(canvas);
-  //    break;
+    case DrawNode::ChartType::BARCHART:
+      chart = executeWithChart<BarChartBuilder>(context, fn);
+      break;
+    case DrawNode::ChartType::LINECHART:
+      chart = executeWithChart<LineChartBuilder>(context, fn);
+      break;
+    case DrawNode::ChartType::POINTCHART:
+      chart = executeWithChart<PointChartBuilder>(context, fn);
+      break;
   }
 
 //  applyDomainDefinitions(chart);
