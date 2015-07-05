@@ -19,12 +19,21 @@ namespace csql {
 class DrawNode : public TableExpressionNode {
 public:
 
+  enum class ChartType {
+    AREACHART,
+    BARCHART,
+    LINECHART,
+    POINTCHART
+  };
+
   DrawNode(const DrawNode& other);
   DrawNode(
       ScopedPtr<ASTNode> ast,
       Vector<RefPtr<TableExpressionNode>> tables);
 
   Vector<RefPtr<TableExpressionNode>> inputTables() const;
+
+  ChartType chartType() const;
 
   RefPtr<QueryTreeNode> deepCopy() const override;
 

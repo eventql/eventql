@@ -39,10 +39,12 @@ public:
 protected:
 
   template <typename ChartBuilderType>
-  fnord::chart::Drawable* mkChart(fnord::chart::Canvas* canvas) const {
+  fnord::chart::Drawable* executeWithChart(
+      ExecutionContext* context,
+      Function<bool (int argc, const SValue* argv)> fn) {
     ChartBuilderType chart_builder(&canvas_, this);
 
-    //for (int i = 0; i < select_stmts_.size(); ++i) {
+    //for (size_t i = 0; i < sources_.size(); ++i) {
     //  const auto& stmt = select_stmts_[i];
     //  chart_builder.executeStatement(stmt, result_lists_[i]);
     //}
