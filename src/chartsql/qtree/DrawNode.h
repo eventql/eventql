@@ -9,8 +9,8 @@
  */
 #pragma once
 #include <fnord/stdtypes.h>
-#include <chartsql/parser/ASTNode.h>
-#include <chartsql/parser/Token.h>
+#include <chartsql/parser/astnode.h>
+#include <chartsql/parser/token.h>
 #include <chartsql/qtree/TableExpressionNode.h>
 
 using namespace fnord;
