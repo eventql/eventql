@@ -163,7 +163,13 @@ ScopedPtr<TableExpression> TableExpressionBuilder::buildDrawStatement(
     RefPtr<DrawNode> node,
     Runtime* runtime,
     TableProvider* tables) {
-  RAISE(kRuntimeError);
+  Vector<ScopedPtr<TableExpression>> union_tables;
+
+  for (const auto& table : node->inputTables()) {
+    union_tables.emplace_back(build(table, runtime, tables));
+  }
+
+  return mkScoped(new DrawStatement(node, std::move(union_tables), runtime));
 }
 
 } // namespace csql

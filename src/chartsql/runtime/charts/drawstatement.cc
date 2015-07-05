@@ -17,11 +17,16 @@
 namespace csql {
 
 DrawStatement::DrawStatement(
-    ASTNode* ast,
+    RefPtr<DrawNode> node,
+    Vector<ScopedPtr<TableExpression>> sources,
     Runtime* runtime) :
-    ast_(ast->deepCopy()) {}
+    node_(node),
+    sources_(std::move(sources)),
+    runtime_(runtime) {}
 
-//void DrawStatement::execute(fnord::chart::Canvas* canvas) const {
+void DrawStatement::execute(
+    ExecutionContext* context,
+    Function<bool (int argc, const SValue* argv)> fn) {
 //  fnord::chart::Drawable* chart = nullptr;
 //
 //  switch (ast_->getToken()->getType()) {
