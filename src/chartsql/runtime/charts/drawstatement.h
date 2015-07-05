@@ -46,18 +46,17 @@ protected:
 
     for (auto& source : sources_) {
       chart_builder.executeStatement(source.get(), context, fn);
-
     }
 
     return chart_builder.getChart();
   }
 
-  //void applyAxisDefinitions(fnord::chart::Drawable* chart) const;
-  //void applyAxisLabels(ASTNode* ast, fnord::chart::AxisDefinition* axis) const;
-  //void applyDomainDefinitions(fnord::chart::Drawable* chart) const;
-  //void applyGrid(fnord::chart::Drawable* chart) const;
-  //void applyLegend(fnord::chart::Drawable* chart) const;
-  //void applyTitle(fnord::chart::Drawable* chart) const;
+  void applyAxisDefinitions(fnord::chart::Drawable* chart) const;
+  void applyAxisLabels(ASTNode* ast, fnord::chart::AxisDefinition* axis) const;
+  void applyDomainDefinitions(fnord::chart::Drawable* chart) const;
+  void applyGrid(fnord::chart::Drawable* chart) const;
+  void applyLegend(fnord::chart::Drawable* chart) const;
+  void applyTitle(fnord::chart::Drawable* chart) const;
 
   RefPtr<DrawNode> node_;
   Vector<ScopedPtr<TableExpression>> sources_;

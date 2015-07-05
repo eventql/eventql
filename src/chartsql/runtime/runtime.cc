@@ -23,6 +23,15 @@ void Runtime::executeQuery(
   result_format->formatResults(query_plan, &context);
 }
 
+SValue Runtime::evaluateStaticExpression(ASTNode* expr) {
+  auto compiled = scalar_exp_builder_.compile(
+      query_plan_builder_.build(expr).asInstanceOf<ValueExpressionNode>());
+
+  SValue out;
+  compiled->evaluate(0, nullptr, &out);
+  return out;
+}
+
 RefPtr<QueryPlan> Runtime::parseAndBuildQueryPlan(
     const String& query,
     RefPtr<TableProvider> tables,
