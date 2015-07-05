@@ -9,16 +9,16 @@ add_library(chartsql-lib OBJECT
     svalue.cc
     SFunction.cc
     format.cc
-    areachartbuilder.cc
-    barchartbuilder.cc
-    domainconfig.cc
+    #areachartbuilder.cc
+    #barchartbuilder.cc
+    #domainconfig.cc
     drawstatement.cc
-    linechartbuilder.cc
-    pointchartbuilder.cc
+    #linechartbuilder.cc
+    #pointchartbuilder.cc
+    #seriesadapter.cc
     #queryendpoint.cc
     #query.cc
     #queryservice.cc
-    seriesadapter.cc
     CSTableScan.cc
     CSTableScanProvider.cc
     backends/csv/csvbackend.cc
