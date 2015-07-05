@@ -7,14 +7,11 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-
-#ifndef _FNORDMETRIC_QUERY_DRAWSTATEMENT_H
-#define _FNORDMETRIC_QUERY_DRAWSTATEMENT_H
-#include <stdlib.h>
-#include <chartsql/runtime/compile.h>
-#include <chartsql/runtime/execute.h>
-#include <chartsql/runtime/queryplannode.h>
-#include <chartsql/runtime/resultlist.h>
+#pragma once
+#include <fnord/stdtypes.h>
+#include <chartsql/runtime/TableExpression.h>
+#include <chartsql/qtree/drawnode.h>
+#include <chartsql/parser/Token.h>
 #include <fnord/exception.h>
 #include <fnord/autoref.h>
 #include <fnord/charts/canvas.h>
@@ -23,33 +20,35 @@
 namespace csql {
 class Runtime;
 
-class DrawStatement : public RefCounted {
+class DrawStatement : public TableExpression {
 public:
 
-  DrawStatement(ASTNode* ast, Runtime* runtime);
+  DrawStatement(
+      RefPtr<DrawNode> node,
+      Vector<ScopedPtr<TableExpression>> sources,
+      Runtime* runtime);
 
-  //void addSelectStatement(QueryPlanNode* select_stmt, ResultList* target) {
-  //  select_stmts_.emplace_back(select_stmt);
-  //  result_lists_.emplace_back(target);
-  //}
+  void execute(
+      ExecutionContext* context,
+      Function<bool (int argc, const SValue* argv)> fn) override;
 
-  //void execute(fnord::chart::Canvas* canvas) const;
+  Vector<String> columnNames() const override;
 
-  ASTNode const* getProperty(Token::kTokenType key) const;
+  size_t numColumns() const override;
 
 protected:
 
-  //template <typename ChartBuilderType>
-  //fnord::chart::Drawable* mkChart(fnord::chart::Canvas* canvas) const {
-  //  ChartBuilderType chart_builder(canvas, this);
+  template <typename ChartBuilderType>
+  fnord::chart::Drawable* mkChart(fnord::chart::Canvas* canvas) const {
+    ChartBuilderType chart_builder(&canvas_, this);
 
-  //  for (int i = 0; i < select_stmts_.size(); ++i) {
-  //    const auto& stmt = select_stmts_[i];
-  //    chart_builder.executeStatement(stmt, result_lists_[i]);
-  //  }
+    //for (int i = 0; i < select_stmts_.size(); ++i) {
+    //  const auto& stmt = select_stmts_[i];
+    //  chart_builder.executeStatement(stmt, result_lists_[i]);
+    //}
 
-  //  return chart_builder.getChart();
-  //}
+    return chart_builder.getChart();
+  }
 
   //void applyAxisDefinitions(fnord::chart::Drawable* chart) const;
   //void applyAxisLabels(ASTNode* ast, fnord::chart::AxisDefinition* axis) const;
@@ -60,7 +59,10 @@ protected:
 
   //std::vector<QueryPlanNode*> select_stmts_;
   //std::vector<ResultList*> result_lists_;
-  ScopedPtr<ASTNode> ast_;
+  RefPtr<DrawNode> node_;
+  Vector<ScopedPtr<TableExpression>> sources_;
+  Runtime* runtime_;
+  fnord::chart::Canvas canvas_;
 };
 
 struct ChartStatement {
@@ -69,4 +71,3 @@ struct ChartStatement {
 };
 
 }
-#endif
