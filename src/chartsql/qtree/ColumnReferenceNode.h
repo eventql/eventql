@@ -33,6 +33,8 @@ public:
 
   RefPtr<QueryTreeNode> deepCopy() const override;
 
+  String toSQL() const override;
+
 protected:
   String field_name_;
   Option<size_t> column_index_;

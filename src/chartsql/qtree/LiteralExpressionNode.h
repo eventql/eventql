@@ -27,6 +27,8 @@ public:
 
   RefPtr<QueryTreeNode> deepCopy() const override;
 
+  String toSQL() const override;
+
 protected:
   SValue value_;
 };

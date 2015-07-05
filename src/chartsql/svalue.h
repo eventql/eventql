@@ -71,6 +71,8 @@ public:
   bool tryNumericConversion();
   bool tryTimeConversion();
 
+  String toSQL() const;
+
 protected:
   struct {
     kSValueType type;
