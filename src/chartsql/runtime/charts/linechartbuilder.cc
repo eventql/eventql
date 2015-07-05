@@ -7,8 +7,8 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <chartsql/linechartbuilder.h>
-#include <chartsql/drawstatement.h>
+#include <chartsql/runtime/charts/linechartbuilder.h>
+#include <chartsql/runtime/charts/drawstatement.h>
 
 namespace csql {
 
