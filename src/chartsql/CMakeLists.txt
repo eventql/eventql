@@ -70,6 +70,7 @@ add_library(chartsql-lib OBJECT
     runtime/groupovertimewindow.cc
     runtime/execute.cc
     runtime/ExecutionContext.cc
+    runtime/TableExpression.cc
     #runtime/charts/areachartbuilder.cc
     #runtime/charts/barchartbuilder.cc
     #runtime/charts/domainconfig.cc

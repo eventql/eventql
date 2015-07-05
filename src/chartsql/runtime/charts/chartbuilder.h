@@ -57,7 +57,10 @@ public:
     return true;
   }
 
-  void executeStatement(QueryPlanNode* stmt, ResultList* result_list) {
+  void executeStatement(
+      TableExpression* stmt,
+      ExecutionContext* context,
+      Function<bool (int argc, const SValue* argv)> fn) {
     name_ind_ = stmt->getColumnIndex("series");
 
     x_ind_ = stmt->getColumnIndex("x");
@@ -115,10 +118,10 @@ public:
           point_size_ind);
     }
 
-    stmt_ = stmt;
-    result_list_ = result_list;
-    stmt->setTarget(this);
-    stmt->execute();
+    //stmt_ = stmt;
+    //result_list_ = result_list;
+    //stmt->setTarget(this);
+    //stmt->execute();
   }
 
   virtual fnord::chart::Drawable* getChart() const = 0;
