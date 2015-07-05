@@ -57,7 +57,7 @@ ScopedPtr<ValueExpression> Runtime::buildValueExpression(
 ScopedPtr<TableExpression> Runtime::buildTableExpression(
     RefPtr<TableExpressionNode> node,
     RefPtr<TableProvider> tables) {
-  return table_exp_builder_.build(node, this, tables.get());
+  return table_exp_builder_.build(node.get(), this, tables.get());
 }
 
 void Runtime::registerFunction(const String& name, SFunction fn) {

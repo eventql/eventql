@@ -27,6 +27,17 @@ public:
   template <typename T>
   RefPtr<T> deepCopyAs() const;
 
+  size_t numChildren() const;
+
+  RefPtr<QueryTreeNode> child(size_t index);
+
+  RefPtr<QueryTreeNode>* mutableChild(size_t index);
+
+protected:
+
+  void addChild(RefPtr<QueryTreeNode>* table);
+
+  Vector<RefPtr<QueryTreeNode>*> children_;
 };
 
 template <typename T>

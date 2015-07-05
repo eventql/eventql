@@ -15,26 +15,16 @@ using namespace fnord;
 
 namespace csql {
 
-class LimitNode : public TableExpressionNode {
+class ChartStatementNode : public TableExpressionNode {
 public:
 
-  LimitNode(
-      size_t limit,
-      size_t offset,
-      RefPtr<QueryTreeNode> table);
+  ChartStatementNode(const ChartStatementNode& other);
+  ChartStatementNode(Vector<RefPtr<DrawStatementNode>> draw_statements);
 
-  RefPtr<QueryTreeNode> inputTable() const;
-
-  size_t limit() const;
-
-  size_t offset() const;
+  Vector<RefPtr<TableExpressionNode>> inputTables() const;
 
   RefPtr<QueryTreeNode> deepCopy() const override;
 
-protected:
-  size_t limit_;
-  size_t offset_;
-  RefPtr<QueryTreeNode> table_;
 };
 
 } // namespace csql

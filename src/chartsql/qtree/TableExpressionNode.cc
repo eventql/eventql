@@ -13,29 +13,4 @@ using namespace fnord;
 
 namespace csql {
 
-size_t TableExpressionNode::numInputTables() const {
-  return input_tables_.size();
-}
-
-RefPtr<TableExpressionNode> TableExpressionNode::inputTable(size_t index) {
-  if (index > input_tables_.size()) {
-    RAISE(kIndexError, "invalid table index");
-  }
-
-  return *input_tables_[index];
-}
-
-RefPtr<TableExpressionNode>* TableExpressionNode::mutableInputTable(
-    size_t index) {
-  if (index > input_tables_.size()) {
-    RAISE(kIndexError, "invalid table index");
-  }
-
-  return input_tables_[index];
-}
-
-void TableExpressionNode::addInputTable(RefPtr<TableExpressionNode>* table) {
-  input_tables_.emplace_back(table);
-}
-
 } // namespace csql
