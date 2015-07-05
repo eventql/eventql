@@ -23,7 +23,17 @@ DrawStatement::DrawStatement(
     Runtime* runtime) :
     node_(node),
     sources_(std::move(sources)),
-    runtime_(runtime) {}
+    runtime_(runtime) {
+  if (sources_.empty()) {
+    RAISE(kRuntimeError, "DRAW statement without any tables");
+  }
+
+  for (auto& table : sources_) {
+    if (table->numColumns() != sources_[0]->numColumns()) {
+      RAISE(kRuntimeError, "DRAW tables return different number of columns");
+    }
+  }
+}
 
 void DrawStatement::execute(
     ExecutionContext* context,
@@ -354,6 +364,14 @@ void DrawStatement::applyLegend(fnord::chart::Drawable* chart) const {
   }
 
   chart->addLegend(vert_pos, horiz_pos, placement, title);
+}
+
+Vector<String> DrawStatement::columnNames() const {
+  return sources_[0]->columnNames();
+}
+
+size_t DrawStatement::numColumns() const {
+  return sources_[0]->numColumns();
 }
 
 }
