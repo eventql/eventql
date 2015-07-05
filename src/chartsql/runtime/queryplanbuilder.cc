@@ -92,7 +92,7 @@ Vector<RefPtr<QueryTreeNode>> QueryPlanBuilder::build(
             case ASTNode::T_SELECT:
               subselects.emplace_back(
                   build(statements[i++]).asInstanceOf<TableExpressionNode>());
-              break;
+              continue;
             case ASTNode::T_DRAW:
               break;
             default:
@@ -101,6 +101,8 @@ Vector<RefPtr<QueryTreeNode>> QueryPlanBuilder::build(
                   "DRAW statments may only be followed by SELECT or END DRAW " \
                   "statements");
           }
+
+          break;
         }
 
         nodes.emplace_back(new DrawNode(std::move(draw_ast), subselects));
