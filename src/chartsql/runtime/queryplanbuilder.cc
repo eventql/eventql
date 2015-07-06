@@ -105,10 +105,10 @@ Vector<RefPtr<QueryTreeNode>> QueryPlanBuilder::build(
                     "DRAW statments may only be followed by SELECT or END DRAW " \
                     "statements");
             }
-
-            draw_nodes.emplace_back(
-                new DrawStatementNode(std::move(draw_ast), subselects));
           }
+
+          draw_nodes.emplace_back(
+              new DrawStatementNode(std::move(draw_ast), subselects));
         }
 
         nodes.emplace_back(new ChartStatementNode(draw_nodes));
