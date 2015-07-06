@@ -19,6 +19,10 @@ DrawStatementNode::DrawStatementNode(
   for (const auto& tbl : other.tables_) {
     tables_.emplace_back(tbl->deepCopyAs<QueryTreeNode>());
   }
+
+  for (auto& table : tables_) {
+    addChild(&table);
+  }
 }
 
 DrawStatementNode::DrawStatementNode(

@@ -17,6 +17,10 @@ UnionNode::UnionNode(const UnionNode& other) {
   for (const auto& tbl : other.tables_) {
     tables_.emplace_back(tbl->deepCopy());
   }
+
+  for (auto& table : tables_) {
+    addChild(&table);
+  }
 }
 
 UnionNode::UnionNode(
