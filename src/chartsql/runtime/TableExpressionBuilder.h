@@ -68,11 +68,6 @@ protected:
       Runtime* runtime,
       TableProvider* tables);
 
-  ScopedPtr<TableExpression> buildDrawStatement(
-      RefPtr<DrawStatementNode> node,
-      Runtime* runtime,
-      TableProvider* tables);
-
 };
 
 } // namespace csql

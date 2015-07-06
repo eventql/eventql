@@ -30,9 +30,16 @@ ScopedPtr<Statement> QueryPlan::buildStatement(size_t stmt_idx) const {
   }
 
   auto stmt = statements_[stmt_idx];
+
   if (dynamic_cast<TableExpressionNode*>(stmt.get())) {
     return runtime_->buildTableExpression(
         stmt.asInstanceOf<TableExpressionNode>(),
+        tables_);
+  }
+
+  if (dynamic_cast<ChartStatementNode*>(stmt.get())) {
+    return runtime_->buildChartStatement(
+        stmt.asInstanceOf<ChartStatementNode>(),
         tables_);
   }
 

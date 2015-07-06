@@ -77,6 +77,7 @@ add_library(chartsql-lib OBJECT
     runtime/charts/barchartbuilder.cc
     runtime/charts/domainconfig.cc
     runtime/charts/drawstatement.cc
+    runtime/charts/ChartStatement.cc
     runtime/charts/linechartbuilder.cc
     runtime/charts/pointchartbuilder.cc
     runtime/charts/seriesadapter.cc

@@ -20,7 +20,7 @@
 namespace csql {
 class Runtime;
 
-class DrawStatement : public TableExpression {
+class DrawStatement : public Statement {
 public:
 
   DrawStatement(
@@ -30,24 +30,18 @@ public:
 
   void execute(
       ExecutionContext* context,
-      Function<bool (int argc, const SValue* argv)> fn) override;
-
-  Vector<String> columnNames() const override;
-
-  size_t numColumns() const override;
-
-  void render(fnord::chart::RenderTarget* target) const;
+      fnord::chart::Canvas* canvas);
 
 protected:
 
   template <typename ChartBuilderType>
   fnord::chart::Drawable* executeWithChart(
       ExecutionContext* context,
-      Function<bool (int argc, const SValue* argv)> fn) {
-    ChartBuilderType chart_builder(&canvas_, node_);
+      fnord::chart::Canvas* canvas) {
+    ChartBuilderType chart_builder(canvas, node_);
 
     for (auto& source : sources_) {
-      chart_builder.executeStatement(source.get(), context, fn);
+      chart_builder.executeStatement(source.get(), context);
     }
 
     return chart_builder.getChart();
@@ -63,12 +57,6 @@ protected:
   RefPtr<DrawStatementNode> node_;
   Vector<ScopedPtr<TableExpression>> sources_;
   Runtime* runtime_;
-  fnord::chart::Canvas canvas_;
-};
-
-struct ChartStatement {
-  Vector<RefPtr<DrawStatement>> draw_statements;
-  void render(fnord::chart::RenderTarget* target) const;
 };
 
 }
