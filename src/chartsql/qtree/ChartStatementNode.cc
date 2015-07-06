@@ -17,6 +17,10 @@ ChartStatementNode::ChartStatementNode(const ChartStatementNode& other) {
   for (const auto& draw_stmt : other.draw_stmts_) {
     draw_stmts_.emplace_back(draw_stmt->deepCopy());
   }
+
+  for (auto& stmt : draw_stmts_) {
+    addChild(&stmt);
+  }
 }
 
 ChartStatementNode::ChartStatementNode(
