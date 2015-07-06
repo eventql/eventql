@@ -85,7 +85,7 @@ Vector<RefPtr<QueryTreeNode>> QueryPlanBuilder::build(
         break;
 
       case ASTNode::T_DRAW: {
-        Vector<RefPtr<DrawStatementNode>> draw_nodes;
+        Vector<RefPtr<QueryTreeNode>> draw_nodes;
 
         while (i < statements.size() &&
             statements[i]->getType() == ASTNode::T_DRAW) {

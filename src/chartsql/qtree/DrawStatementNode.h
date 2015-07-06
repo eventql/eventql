@@ -17,7 +17,7 @@ using namespace fnord;
 
 namespace csql {
 
-class DrawStatementNode : public TableExpressionNode {
+class DrawStatementNode : public QueryTreeNode {
 public:
 
   enum class ChartType {
