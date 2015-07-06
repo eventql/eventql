@@ -35,27 +35,23 @@ DrawStatement::DrawStatement(
   }
 }
 
-void DrawStatement::render(fnord::chart::RenderTarget* target) const {
-  canvas_.render(target);
-}
-
 void DrawStatement::execute(
     ExecutionContext* context,
-    Function<bool (int argc, const SValue* argv)> fn) {
+    fnord::chart::Canvas* canvas) {
   fnord::chart::Drawable* chart = nullptr;
 
   switch (node_->chartType()) {
     case DrawStatementNode::ChartType::AREACHART:
-      chart = executeWithChart<AreaChartBuilder>(context, fn);
+      chart = executeWithChart<AreaChartBuilder>(context, canvas);
       break;
     case DrawStatementNode::ChartType::BARCHART:
-      chart = executeWithChart<BarChartBuilder>(context, fn);
+      chart = executeWithChart<BarChartBuilder>(context, canvas);
       break;
     case DrawStatementNode::ChartType::LINECHART:
-      chart = executeWithChart<LineChartBuilder>(context, fn);
+      chart = executeWithChart<LineChartBuilder>(context, canvas);
       break;
     case DrawStatementNode::ChartType::POINTCHART:
-      chart = executeWithChart<PointChartBuilder>(context, fn);
+      chart = executeWithChart<PointChartBuilder>(context, canvas);
       break;
   }
 
@@ -368,14 +364,6 @@ void DrawStatement::applyLegend(fnord::chart::Drawable* chart) const {
   }
 
   chart->addLegend(vert_pos, horiz_pos, placement, title);
-}
-
-Vector<String> DrawStatement::columnNames() const {
-  return sources_[0]->columnNames();
-}
-
-size_t DrawStatement::numColumns() const {
-  return sources_[0]->numColumns();
 }
 
 }
