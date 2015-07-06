@@ -105,6 +105,8 @@ Vector<RefPtr<QueryTreeNode>> QueryPlanBuilder::build(
                     "DRAW statments may only be followed by SELECT or END DRAW " \
                     "statements");
             }
+
+            break;
           }
 
           draw_nodes.emplace_back(
