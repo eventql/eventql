@@ -21,10 +21,9 @@ void JSONResultFormat::formatResults(
     ExecutionContext* context) {
   json_->beginObject();
 
-  json_->addObjectEntry("result_tables");
+  json_->addObjectEntry("results");
   json_->beginArray();
 
-  Vector<ScopedPtr<TableExpression>> statements;
   for (int i = 0; i < query->numStatements(); ++i) {
     auto stmt = query->buildStatement(i);
 
@@ -32,72 +31,67 @@ void JSONResultFormat::formatResults(
       json_->addComma();
     }
 
-    json_->beginObject();
+    renderStatement(stmt.get(), context);
+  }
 
-    json_->addObjectEntry("columns");
-    json_->beginArray();
+  json_->endArray();
+  json_->endObject();
+}
 
-    auto columns = stmt->columnNames();
-    for (int n = 0; n < columns.size(); ++n) {
-      if (n > 0) {
-        json_->addComma();
-      }
-      json_->addString(columns[n]);
+void JSONResultFormat::renderStatement(
+    Statement* stmt,
+    ExecutionContext* context) {
+  auto table_expr = dynamic_cast<TableExpression*>(stmt);
+  if (table_expr) {
+    renderTable(table_expr, context);
+    return;
+  }
+
+  RAISE(kRuntimeError, "can't render statement in JSONResultFormat");
+}
+
+void JSONResultFormat::renderTable(
+    TableExpression* stmt,
+    ExecutionContext* context) {
+  json_->beginObject();
+
+  json_->addObjectEntry("columns");
+  json_->beginArray();
+
+  auto columns = stmt->columnNames();
+  for (int n = 0; n < columns.size(); ++n) {
+    if (n > 0) {
+      json_->addComma();
     }
-    json_->endArray();
-    json_->addComma();
-
-    json_->addObjectEntry("rows");
-    json_->beginArray();
-
-    size_t j = 0;
-    stmt->execute(
-        context,
-        [this, &j] (int argc, const csql::SValue* argv) -> bool {
-      if (++j > 1) {
-        json_->addComma();
-      }
-
-      json_->beginArray();
-
-      for (int n = 0; n < argc; ++n) {
-        if (n > 0) {
-          json_->addComma();
-        }
-
-        json_->addString(argv[n].toString());
-      }
-
-      json_->endArray();
-      return true;
-    });
-
-    json_->endArray();
-    json_->endObject();
-
-    statements.emplace_back(std::move(stmt));
+    json_->addString(columns[n]);
   }
   json_->endArray();
   json_->addComma();
 
-  json_->addObjectEntry("result_charts");
+  json_->addObjectEntry("rows");
   json_->beginArray();
 
-  size_t nchart = 0;
-  for (auto& stmt : statements) {
-    auto draw_stmt = dynamic_cast<DrawStatement*>(stmt.get());
-    if (!draw_stmt) {
-      continue;
+  size_t j = 0;
+  stmt->execute(
+      context,
+      [this, &j] (int argc, const csql::SValue* argv) -> bool {
+    if (++j > 1) {
+      json_->addComma();
     }
 
-    String svg_str;
-    auto svg_stream = StringOutputStream::fromString(&svg_str);
-    fnord::chart::SVGTarget svg(svg_stream.get());
-    draw_stmt->render(&svg);
+    json_->beginArray();
 
-    if (++nchart > 1) json_->addComma();
-    json_->addString(svg_str);
-  }
+    for (int n = 0; n < argc; ++n) {
+      if (n > 0) {
+        json_->addComma();
+      }
+
+      json_->addString(argv[n].toString());
+    }
+
+    json_->endArray();
+    return true;
+  });
 
   json_->endArray();
   json_->endObject();

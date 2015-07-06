@@ -23,8 +23,14 @@ void ASCIITableFormat::formatResults(
     output_->write("==== query ====\n");
 
     auto stmt = query->buildStatement(i);
+    auto select = dynamic_cast<TableExpression*>(stmt.get());
+    if (!select) {
+      RAISE(
+          kRuntimeError,
+          "can't execute non select statement in ASCIITableFormat");
+    }
 
-    stmt->execute(
+    select->execute(
         context,
         [this] (int argc, const csql::SValue* argv) -> bool {
       Vector<String> row;
