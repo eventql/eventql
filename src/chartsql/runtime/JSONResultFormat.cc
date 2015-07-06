@@ -47,6 +47,12 @@ void JSONResultFormat::renderStatement(
     return;
   }
 
+  auto chart_expr = dynamic_cast<ChartStatement*>(stmt);
+  if (chart_expr) {
+    renderChart(chart_expr, context);
+    return;
+  }
+
   RAISE(kRuntimeError, "can't render statement in JSONResultFormat");
 }
 
@@ -54,6 +60,9 @@ void JSONResultFormat::renderTable(
     TableExpression* stmt,
     ExecutionContext* context) {
   json_->beginObject();
+  json_->addObjectEntry("type");
+  json_->addString("table");
+  json_->addComma();
 
   json_->addObjectEntry("columns");
   json_->beginArray();
@@ -97,4 +106,20 @@ void JSONResultFormat::renderTable(
   json_->endObject();
 }
 
+void JSONResultFormat::renderChart(
+    ChartStatement* stmt,
+    ExecutionContext* context) {
+  String svg_str;
+  auto svg_stream = StringOutputStream::fromString(&svg_str);
+  fnord::chart::SVGTarget svg(svg_stream.get());
+  stmt->execute(context, &svg);
+
+  json_->beginObject();
+  json_->addObjectEntry("type");
+  json_->addString("chart");
+  json_->addComma();
+  json_->addObjectEntry("svg");
+  json_->addString(svg_str);
+  json_->endObject();
+}
 }

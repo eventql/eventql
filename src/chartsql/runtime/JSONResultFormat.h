@@ -11,6 +11,7 @@
 #include <fnord/stdtypes.h>
 #include <fnord/json/json.h>
 #include <chartsql/runtime/queryplan.h>
+#include <chartsql/runtime/charts/ChartStatement.h>
 
 namespace csql {
 
@@ -31,6 +32,10 @@ protected:
 
   void renderTable(
       TableExpression* stmt,
+      ExecutionContext* context);
+
+  void renderChart(
+      ChartStatement* stmt,
       ExecutionContext* context);
 
   json::JSONOutputStream* json_;
