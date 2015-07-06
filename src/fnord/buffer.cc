@@ -40,6 +40,8 @@ Buffer::Buffer(
   }
 }
 
+Buffer::Buffer(const String& string) : Buffer(string.data(), string.size()) {}
+
 Buffer::Buffer(const Buffer& copy) : size_(copy.size_), alloc_(copy.size_) {
   data_ = malloc(size_);
 

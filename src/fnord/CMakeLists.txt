@@ -93,6 +93,10 @@ add_executable(tests/test-internmap
     $<TARGET_OBJECTS:fnord-base>
     InternMap_test.cc)
 
+add_executable(tests/test-hmac
+    $<TARGET_OBJECTS:fnord-base>
+    HMAC_test.cc)
+
 ## redis
 #add_library(fnord-redis OBJECT
 #    ../3rdparty/hiredis/async.c
