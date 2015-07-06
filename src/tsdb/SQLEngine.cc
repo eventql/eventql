@@ -42,10 +42,7 @@ RefPtr<csql::QueryPlan> SQLEngine::parseAndBuildQueryPlan(
 RefPtr<csql::QueryTreeNode> SQLEngine::rewriteQuery(
     const String& tsdb_namespace,
     RefPtr<csql::QueryTreeNode> query) {
-  if (dynamic_cast<csql::TableExpressionNode*>(query.get())) {
-    replaceAllSequentialScansWithUnions(tsdb_namespace, &query);
-  }
-
+  replaceAllSequentialScansWithUnions(tsdb_namespace, &query);
   return query;
 }
 
