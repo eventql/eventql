@@ -24,6 +24,15 @@ public:
       ExecutionContext* context);
 
 protected:
+
+  void renderStatement(
+      Statement* stmt,
+      ExecutionContext* context);
+
+  void renderTable(
+      TableExpression* stmt,
+      ExecutionContext* context);
+
   json::JSONOutputStream* json_;
 };
 

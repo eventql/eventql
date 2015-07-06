@@ -26,7 +26,7 @@ public:
 
   size_t numStatements() const;
 
-  ScopedPtr<TableExpression> buildStatement(size_t stmt_idx) const;
+  ScopedPtr<Statement> buildStatement(size_t stmt_idx) const;
 
 protected:
   Vector<RefPtr<QueryTreeNode>> statements_;
