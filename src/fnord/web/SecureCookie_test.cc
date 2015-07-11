@@ -23,5 +23,5 @@ TEST_CASE(SecureCookieTest, TestEncodeDecodeWithoutDecryption, [] () {
   auto decoded = coder.decodeAndVerify(encoded);
 
   EXPECT_FALSE(decoded.isEmpty());
-  EXPECT_EQ(decoded.get().data(), msg);
+  EXPECT_EQ(decoded.get().data().toString(), msg);
 });

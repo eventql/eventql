@@ -93,6 +93,7 @@ public:
 
 protected:
   String secret_key_;
+  Buffer secret_key_buf_;
   Duration expire_after_;
 };
 

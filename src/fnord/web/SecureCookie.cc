@@ -7,6 +7,7 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
+#include <fnord/util/Base64.h>
 #include <fnord/web/SecureCookie.h>
 
 namespace fnord {
@@ -43,6 +44,7 @@ SecureCookieCoder::SecureCookieCoder(
     String secret_key,
     const Duration& expire_after) :
     secret_key_(secret_key),
+    secret_key_buf_(secret_key.data(), secret_key.size()),
     expire_after_(expire_after) {}
 
 Option<SecureCookie> SecureCookieCoder::decodeAndVerify(const String& data) {
@@ -61,14 +63,49 @@ Option<SecureCookie> SecureCookieCoder::decodeAndVerify(const String& data) {
   }
 }
 
-//Option<SecureCookie> SecureCookieCoder::decodeAndVerifyWithoutExpiration(
-//    const String& data) {
-//
-//}
-//
-//String SecureCookieCoder::encodeWithoutEncryption(const SecureCookie& cookie) {
-//
-//}
+Option<SecureCookie> SecureCookieCoder::decodeAndVerifyWithoutExpiration(
+    const String& data) {
+  auto parts = StringUtil::split(data, "|");
+  if (parts.size() != 5) {
+    return None<SecureCookie>();
+  }
+
+  auto pad_end = StringUtil::findLast(data, '|');
+  auto pad_hmac = HMAC::hmac_sha1(
+      secret_key_buf_,
+      Buffer(data.data(), pad_end + 1));
+
+  const auto& ciphertext = parts[0];
+  UnixTime created_at = std::stoull(parts[1]);
+  const auto& algo = parts[2];
+  const auto& iv = parts[3];
+  const auto& hmac = SHA1Hash::fromHexString(parts[4]);
+
+  if (!(pad_hmac == hmac)) {
+    return None<SecureCookie>();
+  }
+
+  if (algo == "PLAIN") {
+    String plaintext;
+    util::Base64::decode(ciphertext, &plaintext);
+    return Some(SecureCookie(plaintext, created_at));
+  }
+
+  return None<SecureCookie>();
+}
+
+String SecureCookieCoder::encodeWithoutEncryption(const SecureCookie& cookie) {
+  Buffer out;
+  out.append(util::Base64::encode(cookie.data().data(), cookie.data().size()));
+  out.append('|');
+  out.append(StringUtil::toString(cookie.createdAt().unixMicros()));
+  out.append("|PLAIN||");
+
+  auto hmac = HMAC::hmac_sha1(secret_key_buf_, out);
+  out.append(hmac.toString());
+
+  return out.toString();
+}
 
 }
 }
