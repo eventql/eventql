@@ -19,7 +19,7 @@ namespace fnord {
 class HMAC {
 public:
 
-  const static size_t kBlocKSize;
+  const static size_t kBlockSize;
   const static char kOPad;
   const static char kIPad;
   //$blockSize=64,$opad=0x5c,$ipad=0x36

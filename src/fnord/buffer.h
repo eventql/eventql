@@ -39,6 +39,7 @@ public:
   void append(const void* data, size_t size);
   void append(const String& string);
   void append(const Buffer& buffer);
+  void append(char chr);
   void clear();
   void truncate(size_t size);
 

@@ -127,6 +127,10 @@ void Buffer::append(const Buffer& buf) {
   append(buf.data(), buf.size());
 }
 
+void Buffer::append(char chr) {
+  append(&chr, sizeof(chr));
+}
+
 void Buffer::truncate(size_t size) {
   if (size > size_) {
     RAISE(kIndexError, "requested size is out of bounds");
