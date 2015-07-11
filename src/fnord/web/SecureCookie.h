@@ -10,9 +10,12 @@
 #ifndef _FNORD_WEB_SECURECOOKIE_H
 #define _FNORD_WEB_SECURECOOKIE_H
 #include <fnord/stdtypes.h>
-#include <fnord/exception.h>
 #include <fnord/buffer.h>
+#include <fnord/duration.h>
+#include <fnord/exception.h>
 #include <fnord/HMAC.h>
+#include <fnord/option.h>
+#include <fnord/wallclock.h>
 
 namespace fnord {
 namespace web {
@@ -38,7 +41,24 @@ public:
    */
   SecureCookie(
       Buffer data,
-      DateTime created_at = WallClock::now());
+      UnixTime created_at = WallClock::now());
+
+  /**
+   * Create a new secure cookie from some plaintext data and additionally
+   * an explicit created_at time
+   */
+  SecureCookie(
+      String data,
+      UnixTime created_at = WallClock::now());
+
+  /**
+   * Create a new secure cookie from some plaintext data and additionally
+   * an explicit created_at time
+   */
+  SecureCookie(
+      const void* data,
+      size_t size,
+      UnixTime created_at = WallClock::now());
 
   /**
    * Returns the plaintext data stored in this Secure Cookie
@@ -48,11 +68,11 @@ public:
   /**
    * Returns the time at which this secure cookie was created
    */
-  const DateTime& created_at() const;
+  const UnixTime& created_at() const;
 
 protected:
   Buffer data_;
-  DateTime created_at_;
+  UnixTime created_at_;
 };
 
 class SecureCookieCoder {
@@ -68,9 +88,9 @@ public:
 
   Option<SecureCookie> decodeAndVerifyWithoutExpiration(const String& data);
 
-  String encodeWithoutEncryption(const String& SecureCookie);
+  String encodeWithoutEncryption(const SecureCookie& cookie);
 
-  String encodeWithAES128(const String& SecureCookie);
+  String encodeWithAES128(const SecureCookie& cookie);
 
 protected:
   String secret_key_;
