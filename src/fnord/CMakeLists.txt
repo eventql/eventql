@@ -76,6 +76,7 @@ add_library(fnord-base OBJECT
     util/SimpleRateLimit.cc
     VFS.cc
     wallclock.cc
+    web/SecureCookie.cc
     ${PROTO_SRCS})
 
 add_executable(tests/test-inputstream

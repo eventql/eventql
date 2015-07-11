@@ -7,8 +7,7 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#ifndef _FNORD_WEB_SECURECOOKIE_H
-#define _FNORD_WEB_SECURECOOKIE_H
+#pragma once
 #include <fnord/stdtypes.h>
 #include <fnord/buffer.h>
 #include <fnord/duration.h>
@@ -68,7 +67,7 @@ public:
   /**
    * Returns the time at which this secure cookie was created
    */
-  const UnixTime& created_at() const;
+  const UnixTime& createdAt() const;
 
 protected:
   Buffer data_;
@@ -100,4 +99,3 @@ protected:
 }
 }
 
-#endif
