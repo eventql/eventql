@@ -21,7 +21,9 @@ struct HTTPStatus {
 
 const HTTPStatus kStatusOK(200, "OK");
 const HTTPStatus kStatusCreated(201, "Created");
-const HTTPStatus kStatusBadRequest(404, "Bad request");
+const HTTPStatus kStatusBadRequest(400, "Bad request");
+const HTTPStatus kStatusUnauthorized(401, "Unauthorized");
+const HTTPStatus kStatusForbidden(403, "Forbidden");
 const HTTPStatus kStatusNotFound(404, "Not found");
 const HTTPStatus kStatusMovedPermanently(301, "Moved permanently");
 const HTTPStatus kStatusFound(302, "Found");
