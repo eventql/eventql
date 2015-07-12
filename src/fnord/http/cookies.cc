@@ -41,7 +41,7 @@ Cookies::CookieList Cookies::parseCookieHeader(const std::string& header_str) {
     cookies.emplace_back(
         std::make_pair(
             URI::urlDecode(std::string(begin, split - 1)),
-            URI::urlEncode(std::string(split, cur))));
+            URI::urlDecode(std::string(split, cur))));
     begin = ++cur;
   }
 
