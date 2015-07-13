@@ -15,6 +15,7 @@
 #include "fnord/stringutil.h"
 #include "fnord/stdtypes.h"
 
+const char kAccessDeniedError[] = "AccessDeniedError";
 const char kBufferOverflowError[] = "BufferOverflowError";
 const char kEncodingError[] = "EncodingError";
 const char kConcurrentModificationError[] = "ConcurrentModificationError";
@@ -34,6 +35,7 @@ const char kNotFoundError[] = "NotFoundError";
 const char kNotYetImplementedError[] = "NotYetImplementedError";
 const char kNullPointerError[] = "NullPointerError";
 const char kParseError[] = "ParseError";
+const char kPermissionDenied[] = "PermissionDeniedError";
 const char kRangeError[] = "RangeError";
 const char kReflectionError[] = "kReflectionError";
 const char kResolveError[] = "kResolveError";
