@@ -23,10 +23,16 @@
 
 namespace csql {
 
-class Runtime {
+class Runtime : public RefCounted {
 public:
 
-  Runtime();
+  static RefPtr<Runtime> getDefaultRuntime();
+
+  // FIXPAUL: make parser configurable via parserfactory
+  Runtime(
+      RefPtr<SymbolTable> symbol_table,
+      RefPtr<QueryBuilder> query_builder,
+      RefPtr<QueryPlanBuilder> query_plan_builder);
 
   void executeQuery(
       const String& query,
@@ -40,7 +46,7 @@ public:
   void registerFunction(const String& name, SFunction fn);
 
 protected:
-  SymbolTable symbol_table_;
+  RefPtr<SymbolTable> symbol_table_;
   RefPtr<QueryBuilder> query_builder_;
   RefPtr<QueryPlanBuilder> query_plan_builder_;
 };

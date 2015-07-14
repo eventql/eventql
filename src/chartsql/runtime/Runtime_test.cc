@@ -23,7 +23,7 @@ using namespace csql;
 UNIT_TEST(RuntimeTest);
 
 TEST_CASE(RuntimeTest, TestStaticExpression, [] () {
-  Runtime runtime;
+  auto runtime = Runtime::getDefaultRuntime();
 
   auto expr = mkRef(
       new csql::CallExpressionNode(
@@ -36,7 +36,7 @@ TEST_CASE(RuntimeTest, TestStaticExpression, [] () {
   auto t0 = WallClock::unixMicros();
   SValue out;
   for (int i = 0; i < 1000000; ++i) {
-    out = runtime.evaluateStaticExpression(expr.get());
+    out = runtime->evaluateStaticExpression(expr.get());
   }
   auto t1 = WallClock::unixMicros();
 

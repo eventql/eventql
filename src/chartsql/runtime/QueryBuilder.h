@@ -22,8 +22,8 @@ class QueryBuilder : public RefCounted {
 public:
 
   QueryBuilder(
-      ValueExpressionBuilder scalar_exp_builder,
-      TableExpressionBuilder table_exp_builder);
+      RefPtr<ValueExpressionBuilder> scalar_exp_builder,
+      RefPtr<TableExpressionBuilder> table_exp_builder);
 
   ScopedPtr<ValueExpression> buildValueExpression(
       RefPtr<ValueExpressionNode> expression);
@@ -39,8 +39,8 @@ public:
       Runtime* runtime);
 
 protected:
-  ValueExpressionBuilder scalar_exp_builder_;
-  TableExpressionBuilder table_exp_builder_;
+  RefPtr<ValueExpressionBuilder> scalar_exp_builder_;
+  RefPtr<TableExpressionBuilder> table_exp_builder_;
 };
 
 } // namespace csql

@@ -12,8 +12,5 @@
 
 namespace csql {
 
-DefaultRuntime::DefaultRuntime(){
-  installDefaultSymbols(this);
-}
 
 }

@@ -12,9 +12,9 @@
 
 namespace csql {
 
-class DefaultRuntime : public Runtime {
-public:
-  DefaultRuntime();
+class DefaultRuntime {
+
+
 };
 
 }
