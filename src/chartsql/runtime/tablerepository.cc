@@ -91,4 +91,15 @@ void TableRepository::listTables(
   }
 }
 
+Option<TableInfo> TableRepository::describe(const String& table_name) const {
+  for (const auto& p : providers_) {
+    auto tbl = p->describe(table_name);
+    if (!tbl.isEmpty()) {
+      return tbl;
+    }
+  }
+
+  return None<TableInfo>();
+}
+
 }
