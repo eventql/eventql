@@ -69,10 +69,8 @@ Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildSequentialScan(
 
 void TSDBTableProvider::listTables(
     Function<void (const csql::TableInfo& table)> fn) const {
-  tsdb_node_->listTables([fn] (const TableConfig& table) {
-    csql::TableInfo ti;
-    ti.table_name = table.table_name();
-    fn(ti);
+  tsdb_node_->listTables([this, fn] (const TableConfig& table) {
+    fn(tableInfoForTable(table));
   });
 }
 
@@ -82,10 +80,15 @@ Option<csql::TableInfo> TSDBTableProvider::describe(
   if (table == nullptr) {
     return None<csql::TableInfo>();
   } else {
-    csql::TableInfo ti;
-    ti.table_name = table->table_name();
-    return Some(ti);
+    return Some(tableInfoForTable(*table));
   }
+}
+
+csql::TableInfo TSDBTableProvider::tableInfoForTable(
+    const TableConfig& table) const {
+  csql::TableInfo ti;
+  ti.table_name = table.table_name();
+  return ti;
 }
 
 } // namespace csql
