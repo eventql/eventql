@@ -25,9 +25,13 @@ public:
 
   QueryPlanBuilder(SymbolTable* symbol_table);
 
-  RefPtr<QueryTreeNode> build(ASTNode* ast);
+  RefPtr<QueryTreeNode> build(ASTNode* ast, RefPtr<TableProvider> tables);
 
-  Vector<RefPtr<QueryTreeNode>> build(const Vector<ASTNode*>& ast);
+  Vector<RefPtr<QueryTreeNode>> build(
+      const Vector<ASTNode*>& ast,
+      RefPtr<TableProvider> tables);
+
+  ValueExpressionNode* buildValueExpression(ASTNode* ast);
 
 protected:
 
@@ -79,15 +83,10 @@ protected:
   bool hasAggregationWithinRecord(ASTNode* ast) const;
 
   /**
-   * expand all column names + wildcard to tablename->columnanme
-   */
-  void expandColumns(ASTNode* ast);
-
-  /**
    * Build a group by query plan node for a SELECT statement that has a GROUP
    * BY clause
    */
-  QueryTreeNode* buildGroupBy(ASTNode* ast);
+  QueryTreeNode* buildGroupBy(ASTNode* ast, RefPtr<TableProvider> tables);
 
   ///**
   // * Build a group over timewindow query plan node for a SELECT statement that
@@ -95,30 +94,21 @@ protected:
   // */
   //QueryPlanNode* buildGroupOverTimewindow(ASTNode* ast, TableRepository* repo);
 
-  /**
-   * Recursively walk the provided ast and search for column references. For
-   * each found column reference, add the column reference to the provided
-   * select list and replace the original column reference with an index into
-   * the new select list.
-   *
-   * This is used to create child select lists for nested query plan nodes.
-   */
-  bool buildInternalSelectList(ASTNode* ast, ASTNode* select_list);
 
   QueryTreeNode* buildSequentialScan(ASTNode* ast);
 
-  QueryTreeNode* buildLimitClause(ASTNode* ast);
+  QueryTreeNode* buildLimitClause(ASTNode* ast, RefPtr<TableProvider> tables);
 
-  QueryTreeNode* buildOrderByClause(ASTNode* ast);
+  QueryTreeNode* buildOrderByClause(ASTNode* ast, RefPtr<TableProvider> tables);
 
   /**
    * Builds a standalone SELECT expression (A SELECT without any tables)
    */
   QueryTreeNode* buildSelectExpression(ASTNode* ast);
 
-  ValueExpressionNode* buildValueExpression(ASTNode* ast);
+  QueryTreeNode* buildShowTables(ASTNode* ast);
 
-  SelectListNode* buildSelectList(ASTNode* select_list);
+  QueryTreeNode* buildDescribeTable(ASTNode* ast);
 
   ValueExpressionNode* buildOperator(const std::string& name, ASTNode* ast);
 
@@ -130,9 +120,22 @@ protected:
 
   ValueExpressionNode* buildMethodCall(ASTNode* ast);
 
-  QueryTreeNode* buildShowTables(ASTNode* ast);
+  /**
+   * expand all column names + wildcard to tablename->columnanme
+   */
+  void expandColumns(ASTNode* ast, RefPtr<TableProvider> tables);
 
-  QueryTreeNode* buildDescribeTable(ASTNode* ast);
+  /**
+   * Recursively walk the provided ast and search for column references. For
+   * each found column reference, add the column reference to the provided
+   * select list and replace the original column reference with an index into
+   * the new select list.
+   *
+   * This is used to create child select lists for nested query plan nodes.
+   */
+  bool buildInternalSelectList(ASTNode* ast, ASTNode* select_list);
+
+  SelectListNode* buildSelectList(ASTNode* select_list);
 
 
   SymbolTable* symbol_table_;
