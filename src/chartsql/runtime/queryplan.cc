@@ -9,7 +9,6 @@
  */
 #include <chartsql/runtime/queryplan.h>
 #include <chartsql/runtime/runtime.h>
-#include <chartsql/runtime/ShowTablesStatement.h>
 
 namespace csql {
 
@@ -36,10 +35,6 @@ ScopedPtr<Statement> QueryPlan::buildStatement(size_t stmt_idx) const {
     return runtime_->buildTableExpression(
         stmt.asInstanceOf<TableExpressionNode>(),
         tables_);
-  }
-
-  if (dynamic_cast<ShowTablesNode*>(stmt.get())) {
-    return mkScoped<Statement>(new ShowTablesStatement(tables_));
   }
 
   if (dynamic_cast<ChartStatementNode*>(stmt.get())) {
