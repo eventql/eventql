@@ -165,6 +165,7 @@ ASTNode* Parser::methodCall() {
 
     /* ignore T_ALL in SELECT count(*) FROM ... */
     if (*cur_token_ == Token::T_ASTERISK) {
+      e->appendChild(ASTNode::T_VOID);
       consumeToken();
     } else {
       e->appendChild(expr());
