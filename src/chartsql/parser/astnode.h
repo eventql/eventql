@@ -65,6 +65,8 @@ public:
     T_POW_EXPR,
 
     T_SHOW_TABLES,
+    T_DESCRIBE_TABLE,
+    T_EXPLAIN_QUERY,
 
     T_DRAW,
     T_IMPORT,
