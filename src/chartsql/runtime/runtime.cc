@@ -18,10 +18,29 @@ Runtime::Runtime() :
 
 void Runtime::executeQuery(
     const String& query,
-    RefPtr<TableProvider> table_provider,
+    RefPtr<ExecutionStrategy> execution_strategy,
     RefPtr<ResultFormat> result_format) {
 
-  auto query_plan = parseAndBuildQueryPlan(query, table_provider);
+  /* parse query */
+  csql::Parser parser;
+  parser.parse(query.data(), query.size());
+
+  /* build query plan */
+  auto statements = query_plan_builder_.build(
+      parser.getStatements(),
+      execution_strategy->tableProvider());
+
+  for (auto& stmt : statements) {
+    stmt = execution_strategy->rewriteQueryTree(stmt);
+  }
+
+  auto query_plan = mkRef(
+      new QueryPlan(
+          statements,
+          execution_strategy->tableProvider(),
+          this));
+
+  /* execute query and format results */
   csql::ExecutionContext context;
   result_format->formatResults(query_plan, &context);
 }
@@ -33,26 +52,6 @@ SValue Runtime::evaluateStaticExpression(ASTNode* expr) {
   SValue out;
   compiled->evaluate(0, nullptr, &out);
   return out;
-}
-
-RefPtr<QueryPlan> Runtime::parseAndBuildQueryPlan(
-    const String& query,
-    RefPtr<TableProvider> tables) {
-  Vector<RefPtr<QueryTreeNode>> statements;
-  Vector<ChartStatement> charts;
-
-  csql::Parser parser;
-  parser.parse(query.data(), query.size());
-
-  for (auto stmt : query_plan_builder_.build(parser.getStatements(), tables)) {
-    for (const auto& fn : qtree_rewrite_fns_) {
-      stmt = fn(stmt);
-    }
-
-    statements.emplace_back(stmt);
-  }
-
-  return new QueryPlan(statements, tables, this);
 }
 
 ScopedPtr<ValueExpression> Runtime::buildValueExpression(
