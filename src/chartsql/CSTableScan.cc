@@ -60,7 +60,12 @@ void CSTableScan::execute(
     ExecutionContext* context,
     Function<bool (int argc, const SValue* argv)> fn) {
   context->incrNumSubtasksTotal(1);
-  scan(fn);
+
+  if (columns_.empty()) {
+    scanWithoutColumns(fn);
+  } else {
+    scan(fn);
+  }
   context->incrNumSubtasksCompleted(1);
 }
 
@@ -161,7 +166,7 @@ void CSTableScan::scan(
       where_pred = where_tmp.getBoolWithConversion();
     }
 
-    if (where_pred) { // where clause
+    if (where_pred) {
       for (int i = 0; i < select_list_.size(); ++i) {
         if (select_list_[i].rep_level >= select_level) {
           select_list_[i].compiled->accumulate(
@@ -219,6 +224,65 @@ void CSTableScan::scan(
     for (const auto& col : columns_) {
       if (col.second.reader->maxRepetitionLevel() >= select_level) {
         in_row[col.second.index] = SValue();
+      }
+    }
+  }
+
+  switch (aggr_strategy_) {
+    case AggregationStrategy::AGGREGATE_ALL:
+      for (int i = 0; i < select_list_.size(); ++i) {
+        select_list_[i].compiled->result(
+            &select_list_[i].instance,
+            &out_row[i]);
+      }
+
+      fn(out_row.size(), out_row.data());
+      break;
+
+    default:
+      break;
+
+  }
+}
+
+void CSTableScan::scanWithoutColumns(
+    Function<bool (int argc, const SValue* argv)> fn) {
+  Vector<SValue> out_row(select_list_.size(), SValue{});
+
+  size_t total_records = cstable_.numRecords();
+  for (size_t i = 0; i < total_records; ++i) {
+    bool where_pred = true;
+    if (where_expr_.get() != nullptr) {
+      SValue where_tmp;
+      where_expr_->evaluate(0, nullptr, &where_tmp);
+      where_pred = where_tmp.getBoolWithConversion();
+    }
+
+    if (where_pred) {
+      switch (aggr_strategy_) {
+
+        case AggregationStrategy::AGGREGATE_ALL:
+          for (int i = 0; i < select_list_.size(); ++i) {
+            select_list_[i].compiled->accumulate(
+                &select_list_[i].instance,
+                0,
+                nullptr);
+          }
+          break;
+
+        case AggregationStrategy::AGGREGATE_WITHIN_RECORD:
+        case AggregationStrategy::NO_AGGREGATION:
+          for (int i = 0; i < select_list_.size(); ++i) {
+            select_list_[i].compiled->evaluate(
+                0,
+                nullptr,
+                &out_row[i]);
+          }
+
+          if (!fn(out_row.size(), out_row.data())) {
+            return;
+          }
+          break;
       }
     }
   }
