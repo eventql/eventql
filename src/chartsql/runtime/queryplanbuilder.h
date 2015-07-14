@@ -75,17 +75,17 @@ protected:
    * Returns true if the ast is a SELECT statement that has columns in its
    * select list that are not of the form T_TABLE_NAME -> T_COLUMN_NAME
    */
-  //bool hasUnexpandedColumns(ASTNode* ast) const;
+  bool hasUnexpandedColumns(ASTNode* ast) const;
 
-  ///**
-  // * Returns true if the ast is a SELECT statement that has a join
-  // */
-  //bool hasJoin(ASTNode* ast) const;
+  /**
+   * Returns true if the ast is a SELECT statement that has a join
+   */
+  bool hasJoin(ASTNode* ast) const;
 
-  ///**
-  // * Returns true if the ast is a SELECT statement that has a GROUP BY clause,
-  // * otherwise false
-  // */
+  /**
+   * Returns true if the ast is a SELECT statement that has a GROUP BY clause,
+   * otherwise false
+   */
   bool hasGroupByClause(ASTNode* ast) const;
 
   ///**
@@ -94,10 +94,10 @@ protected:
   // */
   //bool hasGroupOverTimewindowClause(ASTNode* ast) const;
 
-  ///**
-  // * Returns true if the ast is a SELECT statement that has a ORDER BY clause,
-  // * otherwise false
-  // */
+  /**
+   * Returns true if the ast is a SELECT statement that has a ORDER BY clause,
+   * otherwise false
+   */
   bool hasOrderByClause(ASTNode* ast) const;
 
   /**
@@ -118,16 +118,15 @@ protected:
    */
   bool hasAggregationWithinRecord(ASTNode* ast) const;
 
-  ///**
-  // * Build a group by query plan node for a SELECT statement that has a GROUP
-  // * BY clause
-  // */
-  //void expandColumns(ASTNode* ast, TableRepository* repo);
+  /**
+   * expand all column names + wildcard to tablename->columnanme
+   */
+  void expandColumns(ASTNode* ast);
 
-  ///**
-  // * Build a group by query plan node for a SELECT statement that has a GROUP
-  // * BY clause
-  // */
+  /**
+   * Build a group by query plan node for a SELECT statement that has a GROUP
+   * BY clause
+   */
   QueryTreeNode* buildGroupBy(ASTNode* ast);
 
   ///**
