@@ -29,6 +29,8 @@ public:
   void listTables(
       Function<void (const csql::TableInfo& table)> fn) const override;
 
+  Option<csql::TableInfo> describe(const String& table_name) const override;
+
 protected:
   String tsdb_namespace_;
   TSDBNode* tsdb_node_;
