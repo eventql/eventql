@@ -961,6 +961,9 @@ ValueExpressionNode* QueryPlanBuilder::buildValueExpression(ASTNode* ast) {
     case ASTNode::T_COLUMN_NAME:
       return buildColumnReference(ast);
 
+    case ASTNode::T_TABLE_NAME:
+      return buildColumnReference(ast->getChildren()[0]);
+
     case ASTNode::T_METHOD_CALL:
     case ASTNode::T_METHOD_CALL_WITHIN_RECORD:
       return buildMethodCall(ast);
