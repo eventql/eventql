@@ -45,6 +45,7 @@ add_library(chartsql-lib OBJECT
     qtree/OrderByNode.cc
     qtree/QueryTreeNode.cc
     qtree/ShowTablesNode.cc
+    qtree/DescribeTableNode.cc
     qtree/DrawStatementNode.cc
     qtree/ChartStatementNode.cc
     runtime/ASCIITableFormat.cc
@@ -72,6 +73,7 @@ add_library(chartsql-lib OBJECT
     runtime/EmptyTable.cc
     runtime/groupovertimewindow.cc
     runtime/ShowTablesStatement.cc
+    runtime/DescribeTableStatement.cc
     runtime/execute.cc
     runtime/ExecutionContext.cc
     runtime/TableExpression.cc

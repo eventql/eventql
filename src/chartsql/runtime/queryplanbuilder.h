@@ -20,31 +20,6 @@ class QueryPlanNode;
 class TableRepository;
 class Runtime;
 
-/**
- * All QueryPlanBuilder imeplementations must be thread safe. Specifically they
- * must support calling the buildQueryPlan method concurrenctly from many
- * threads
- */
-class QueryPlanBuilderInterface {
-public:
-
-  QueryPlanBuilderInterface(
-      ValueExpressionBuilder* compiler,
-      const std::vector<std::unique_ptr<Backend>>& backends) :
-      compiler_(compiler),
-      backends_(backends) {}
-
-  virtual ~QueryPlanBuilderInterface() {}
-
-  virtual QueryPlanNode* buildQueryPlan(
-      ASTNode* statement,
-      TableRepository* repo) = 0;
-
-protected:
-  ValueExpressionBuilder* compiler_;
-  const std::vector<std::unique_ptr<Backend>>& backends_;
-};
-
 class QueryPlanBuilder {
 public:
 
@@ -53,21 +28,6 @@ public:
   RefPtr<QueryTreeNode> build(ASTNode* ast);
 
   Vector<RefPtr<QueryTreeNode>> build(const Vector<ASTNode*>& ast);
-
-
-//  QueryPlanBuilder(
-//      ValueExpressionBuilder* compiler,
-//      const std::vector<std::unique_ptr<Backend>>& backends);
-//
-//  void buildQueryPlan(
-//      const std::vector<std::unique_ptr<ASTNode>>& statements,
-//      QueryPlan* query_plan);
-//
-//  QueryPlanNode* buildQueryPlan(
-//      ASTNode* statement,
-//      TableRepository* repo) override;
-//
-  void extend(std::unique_ptr<QueryPlanBuilderInterface> other);
 
 protected:
 
@@ -172,11 +132,10 @@ protected:
 
   QueryTreeNode* buildShowTables(ASTNode* ast);
 
+  QueryTreeNode* buildDescribeTable(ASTNode* ast);
 
-  std::vector<std::unique_ptr<QueryPlanBuilderInterface>> extensions_;
 
   SymbolTable* symbol_table_;
-
 };
 
 }
