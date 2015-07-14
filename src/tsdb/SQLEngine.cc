@@ -7,6 +7,7 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
+#ifdef XXXX
 #include <tsdb/SQLEngine.h>
 #include <tsdb/TSDBNode.h>
 #include <tsdb/TimeWindowPartitioner.h>
@@ -108,3 +109,4 @@ void SQLEngine::replaceSequentialScanWithUnion(
 }
 
 }
+#endif

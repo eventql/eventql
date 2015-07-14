@@ -278,10 +278,10 @@ void TSDBServlet::executeSQL(
   auto query = req->body().toString();
 
   Buffer result;
-  node_->sqlEngine()->executeQuery(
-      tsdb_namespace,
-      query,
-      new csql::ASCIITableFormat(BufferOutputStream::fromBuffer(&result)));
+  //node_->sqlEngine()->executeQuery(
+  //    tsdb_namespace,
+  //    query,
+  //    new csql::ASCIITableFormat(BufferOutputStream::fromBuffer(&result)));
 
   res->setStatus(http::kStatusOK);
   res->addHeader("Content-Type", "text/plain");
@@ -310,10 +310,10 @@ void TSDBServlet::executeSQLStream(
       RAISE(kRuntimeError, "missing ?query=... parameter");
     }
 
-    node_->sqlEngine()->executeQuery(
-        tsdb_namespace,
-        query,
-        new csql::JSONSSEStreamFormat(&sse_stream));
+    //node_->sqlEngine()->executeQuery(
+    //    tsdb_namespace,
+    //    query,
+    //    new csql::JSONSSEStreamFormat(&sse_stream));
 
   } catch (const StandardException& e) {
     fnord::logError("sql", e, "SQL execution failed");

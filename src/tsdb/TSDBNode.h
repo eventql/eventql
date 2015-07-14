@@ -58,8 +58,6 @@ public:
       const String& tsdb_namespace,
       const String& table_key) const;
 
-  SQLEngine* sqlEngine();
-
   const String& dbPath() const;
 
   void start(
@@ -79,8 +77,6 @@ protected:
   Vector<RefPtr<CompactionWorker>> compaction_workers_;
   Vector<RefPtr<ReplicationWorker>> replication_workers_;
   msg::MessageSchemaRepository schemas_;
-
-  SQLEngine sql_engine_;
 };
 
 } // namespace tdsb

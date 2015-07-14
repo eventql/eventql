@@ -27,8 +27,7 @@ TSDBNode::TSDBNode(
             "index.db",
             "index.db.lck"),
         .replication_scheme = replication_scheme,
-        .http = http},
-    sql_engine_(this) {}
+        .http = http} {}
 
 // FIXPAUL proper longest prefix search ;)
 TableConfig* TSDBNode::configFor(
@@ -223,10 +222,6 @@ Option<TSDBTableInfo> TSDBNode::tableInfo(
 
 const String& TSDBNode::dbPath() const {
   return noderef_.db_path;
-}
-
-SQLEngine* TSDBNode::sqlEngine() {
-  return &sql_engine_;
 }
 
 } // namespace tdsb

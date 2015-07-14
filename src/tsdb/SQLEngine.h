@@ -7,6 +7,7 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
+#ifdef XXXX
 #pragma once
 #include <chartsql/runtime/runtime.h>
 #include <chartsql/runtime/ResultFormat.h>
@@ -51,3 +52,4 @@ protected:
 };
 
 }
+#endif
