@@ -81,6 +81,7 @@ Vector<RefPtr<QueryTreeNode>> QueryPlanBuilder::build(
     switch (statements[i]->getType()) {
 
       case ASTNode::T_SELECT:
+      case ASTNode::T_SHOW_TABLES:
         nodes.emplace_back(build(statements[i]));
         break;
 

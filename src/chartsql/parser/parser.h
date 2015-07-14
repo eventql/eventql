@@ -86,6 +86,7 @@ protected:
   ASTNode* legendClause();
 
   ASTNode* importStatement();
+  ASTNode* showStatement();
 
   ASTNode* fromClause();
   ASTNode* whereClause();
