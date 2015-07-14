@@ -262,6 +262,9 @@ ASTNode* Parser::statement() {
       return importStatement();
     case Token::T_SHOW:
       return showStatement();
+    case Token::T_DESCRIBE:
+    case Token::T_EXPLAIN:
+      return explainStatement();
     default:
       break;
   }
@@ -368,6 +371,30 @@ ASTNode* Parser::showStatement() {
 
   auto stmt = new ASTNode(ASTNode::T_SHOW_TABLES);
 
+  consumeIf(Token::T_SEMICOLON);
+  return stmt;
+}
+
+ASTNode* Parser::explainStatement() {
+  consumeToken();
+
+  if (cur_token_->getType()) {
+    return explainQueryStatement();
+  } else {
+    return describeTableStatement();
+  }
+}
+
+ASTNode* Parser::explainQueryStatement() {
+  auto stmt = new ASTNode(ASTNode::T_EXPLAIN_QUERY);
+  stmt->appendChild(tableName());
+  consumeIf(Token::T_SEMICOLON);
+  return stmt;
+}
+
+ASTNode* Parser::describeTableStatement() {
+  auto stmt = new ASTNode(ASTNode::T_DESCRIBE_TABLE);
+  stmt->appendChild(selectStatement());
   consumeIf(Token::T_SEMICOLON);
   return stmt;
 }
