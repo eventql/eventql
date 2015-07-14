@@ -30,11 +30,13 @@ public:
 
   ScopedPtr<TableExpression> buildTableExpression(
       RefPtr<TableExpressionNode> expression,
-      RefPtr<TableProvider> tables);
+      RefPtr<TableProvider> tables,
+      Runtime* runtime);
 
   ScopedPtr<ChartStatement> buildChartStatement(
       RefPtr<ChartStatementNode> node,
-      RefPtr<TableProvider> tables);
+      RefPtr<TableProvider> tables,
+      Runtime* runtime);
 
 protected:
   ValueExpressionBuilder scalar_exp_builder_;

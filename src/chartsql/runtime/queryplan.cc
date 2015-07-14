@@ -15,10 +15,12 @@ namespace csql {
 QueryPlan::QueryPlan(
     Vector<RefPtr<QueryTreeNode>> statements,
     RefPtr<TableProvider> tables,
-    QueryBuilder* runtime) :
+    QueryBuilder* qbuilder,
+    Runtime* runtime) :
     statements_(statements),
     tables_(tables),
-    runtime_(runtime) {}
+    runtime_(runtime),
+    qbuilder_(qbuilder) {}
 
 size_t QueryPlan::numStatements() const {
   return statements_.size();
@@ -32,15 +34,17 @@ ScopedPtr<Statement> QueryPlan::buildStatement(size_t stmt_idx) const {
   auto stmt = statements_[stmt_idx];
 
   if (dynamic_cast<TableExpressionNode*>(stmt.get())) {
-    return runtime_->buildTableExpression(
+    return qbuilder_->buildTableExpression(
         stmt.asInstanceOf<TableExpressionNode>(),
-        tables_);
+        tables_,
+        runtime_);
   }
 
   if (dynamic_cast<ChartStatementNode*>(stmt.get())) {
-    return runtime_->buildChartStatement(
+    return qbuilder_->buildChartStatement(
         stmt.asInstanceOf<ChartStatementNode>(),
-        tables_);
+        tables_,
+        runtime_);
   }
 
   RAISE(
