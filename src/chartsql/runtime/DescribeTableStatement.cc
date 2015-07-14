@@ -22,6 +22,11 @@ void DescribeTableStatement::execute(
     Vector<SValue> row;
     row.emplace_back(col.column_name);
     row.emplace_back(col.type);
+    //if (col.type_size == 0) {
+    //  row.emplace_back();
+    //} else {
+    //  row.emplace_back(SValue::IntegerType(col.type_size));
+    //}
     row.emplace_back(col.is_nullable ? "YES" : "NO");
     row.emplace_back();
     fn(row.size(), row.data());
@@ -32,6 +37,7 @@ Vector<String> DescribeTableStatement::columnNames() const {
   return Vector<String> {
     "Field",
     "Type",
+    //"Type Size",
     "Null",
     "Description"
   };

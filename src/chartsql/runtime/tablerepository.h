@@ -22,6 +22,7 @@ struct ColumnInfo {
   String column_name;
   String type;
   bool is_nullable;
+  size_t type_size;
 };
 
 struct TableInfo {
