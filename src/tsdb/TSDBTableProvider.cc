@@ -92,6 +92,9 @@ csql::TableInfo TSDBTableProvider::tableInfoForTable(
   for (const auto& col : table.schema->columns()) {
     csql::ColumnInfo ci;
     ci.column_name = col.first;
+    ci.type = col.second.typeName();
+    ci.is_nullable = col.second.optional;
+
     ti.columns.emplace_back(ci);
   }
 
