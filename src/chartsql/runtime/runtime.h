@@ -34,6 +34,11 @@ public:
   Runtime();
 
   void executeQuery(
+      const String& query,
+      RefPtr<TableProvider> table_provider,
+      RefPtr<ResultFormat> result_format);
+
+  void executeQuery(
       RefPtr<QueryPlan> query_plan,
       RefPtr<ResultFormat> result_format);
 
