@@ -21,21 +21,19 @@
 #include <chartsql/runtime/ValueExpressionBuilder.h>
 #include <chartsql/runtime/TableExpressionBuilder.h>
 #include <chartsql/runtime/ResultFormat.h>
+#include <chartsql/runtime/ExecutionStrategy.h>
 #include <chartsql/runtime/charts/ChartStatement.h>
 
 namespace csql {
 
 class Runtime {
 public:
-  typedef
-      Function<RefPtr<QueryTreeNode> (RefPtr<QueryTreeNode> query)>
-      QueryRewriteFn;
 
   Runtime();
 
   void executeQuery(
       const String& query,
-      RefPtr<TableProvider> table_provider,
+      RefPtr<ExecutionStrategy> execution_strategy,
       RefPtr<ResultFormat> result_format);
 
   SValue evaluateStaticExpression(const String& expr);
@@ -54,15 +52,7 @@ public:
 
   void registerFunction(const String& name, SFunction fn);
 
-  void addQTreeRewriteRule(QueryRewriteFn fn);
-
 protected:
-
-  RefPtr<QueryPlan> parseAndBuildQueryPlan(
-      const String& query,
-      RefPtr<TableProvider> tables);
-
-  Vector<QueryRewriteFn> qtree_rewrite_fns_;
   SymbolTable symbol_table_;
   QueryPlanBuilder query_plan_builder_;
   ValueExpressionBuilder scalar_exp_builder_;
