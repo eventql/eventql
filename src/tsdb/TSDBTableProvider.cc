@@ -76,4 +76,16 @@ void TSDBTableProvider::listTables(
   });
 }
 
+Option<csql::TableInfo> TSDBTableProvider::describe(
+    const String& table_name) const {
+  auto table = tsdb_node_->configFor(tsdb_namespace_, table_name);
+  if (table == nullptr) {
+    return None<csql::TableInfo>();
+  } else {
+    csql::TableInfo ti;
+    ti.table_name = table->table_name();
+    return Some(ti);
+  }
+}
+
 } // namespace csql
