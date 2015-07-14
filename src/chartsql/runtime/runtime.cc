@@ -11,9 +11,9 @@
 
 namespace csql {
 
-Runtime::Runtime() :
-    query_plan_builder_(&symbol_table_),
-    scalar_exp_builder_(&symbol_table_) {}
+//Runtime::Runtime() :
+//    query_plan_builder_(&symbol_table_),
+//    scalar_exp_builder_(&symbol_table_) {}
 
 void Runtime::executeQuery(
     const String& query,
@@ -37,7 +37,7 @@ void Runtime::executeQuery(
       new QueryPlan(
           statements,
           execution_strategy->tableProvider(),
-          this));
+          &query_builder_));
 
   /* execute query and format results */
   csql::ExecutionContext context;
@@ -46,7 +46,15 @@ void Runtime::executeQuery(
 
 SValue Runtime::evaluateStaticExpression(ASTNode* expr) {
   auto val_expr = mkRef(query_plan_builder_.buildValueExpression(expr));
-  auto compiled = scalar_exp_builder_.compile(val_expr);
+  auto compiled = query_builder_.buildValueExpression(val_expr);
+
+  SValue out;
+  compiled->evaluate(0, nullptr, &out);
+  return out;
+}
+
+SValue Runtime::evaluateStaticExpression(RefPtr<ValueExpressionNode> expr) {
+  auto compiled = query_builder_.buildValueExpression(expr);
 
   SValue out;
   compiled->evaluate(0, nullptr, &out);

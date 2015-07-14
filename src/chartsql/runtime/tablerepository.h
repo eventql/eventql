@@ -16,7 +16,7 @@
 
 namespace csql {
 class ImportStatement;
-class Runtime;
+class QueryBuilder;
 
 struct ColumnInfo {
   String column_name;
@@ -36,7 +36,7 @@ public:
 
   virtual Option<ScopedPtr<TableExpression>> buildSequentialScan(
       RefPtr<SequentialScanNode> seqscan,
-      Runtime* runtime) const = 0;
+      QueryBuilder* runtime) const = 0;
 
   virtual void listTables(Function<void (const TableInfo& table)> fn) const = 0;
 
@@ -67,7 +67,7 @@ public:
 
   Option<ScopedPtr<TableExpression>> buildSequentialScan(
       RefPtr<SequentialScanNode> seqscan,
-      Runtime* runtime) const override;
+      QueryBuilder* runtime) const override;
 
   void addProvider(RefPtr<TableProvider> provider);
 

@@ -35,6 +35,7 @@ public:
 
   SValue evaluateStaticExpression(const String& expr);
   SValue evaluateStaticExpression(ASTNode* expr);
+  SValue evaluateStaticExpression(RefPtr<ValueExpressionNode> expr);
 
   void registerFunction(const String& name, SFunction fn);
 

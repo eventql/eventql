@@ -27,51 +27,51 @@
 using namespace fnord;
 
 namespace csql {
-class Runtime;
+class QueryBuilder;
 
 class TableExpressionBuilder {
 public:
 
   ScopedPtr<TableExpression> build(
       RefPtr<QueryTreeNode> node,
-      Runtime* runtime,
+      QueryBuilder* runtime,
       TableProvider* tables);
 
 protected:
 
   ScopedPtr<TableExpression> buildGroupBy(
       RefPtr<GroupByNode> node,
-      Runtime* runtime,
+      QueryBuilder* runtime,
       TableProvider* tables);
 
   ScopedPtr<TableExpression> buildUnion(
       RefPtr<UnionNode> node,
-      Runtime* runtime,
+      QueryBuilder* runtime,
       TableProvider* tables);
 
   ScopedPtr<TableExpression> buildLimit(
       RefPtr<LimitNode> node,
-      Runtime* runtime,
+      QueryBuilder* runtime,
       TableProvider* tables);
 
   ScopedPtr<TableExpression> buildOrderBy(
       RefPtr<OrderByNode> node,
-      Runtime* runtime,
+      QueryBuilder* runtime,
       TableProvider* tables);
 
   ScopedPtr<TableExpression> buildSequentialScan(
       RefPtr<SequentialScanNode> node,
-      Runtime* runtime,
+      QueryBuilder* runtime,
       TableProvider* tables);
 
   ScopedPtr<TableExpression> buildSelectExpression(
       RefPtr<SelectExpressionNode> node,
-      Runtime* runtime,
+      QueryBuilder* runtime,
       TableProvider* tables);
 
   ScopedPtr<TableExpression> buildDescribeTableStatment(
       RefPtr<DescribeTableNode> node,
-      Runtime* runtime,
+      QueryBuilder* runtime,
       TableProvider* tables);
 
 };

@@ -22,7 +22,7 @@ namespace csql {
 
 ScopedPtr<TableExpression> TableExpressionBuilder::build(
     RefPtr<QueryTreeNode> node,
-    Runtime* runtime,
+    QueryBuilder* runtime,
     TableProvider* tables) {
 
   if (dynamic_cast<LimitNode*>(node.get())) {
@@ -73,7 +73,7 @@ ScopedPtr<TableExpression> TableExpressionBuilder::build(
 
 ScopedPtr<TableExpression> TableExpressionBuilder::buildGroupBy(
     RefPtr<GroupByNode> node,
-    Runtime* runtime,
+    QueryBuilder* runtime,
     TableProvider* tables) {
   Vector<String> column_names;
   Vector<ScopedPtr<ValueExpression>> select_expressions;
@@ -102,7 +102,7 @@ ScopedPtr<TableExpression> TableExpressionBuilder::buildGroupBy(
 
 ScopedPtr<TableExpression> TableExpressionBuilder::buildSequentialScan(
     RefPtr<SequentialScanNode> node,
-    Runtime* runtime,
+    QueryBuilder* runtime,
     TableProvider* tables) {
   const auto& table_name = node->tableName();
 
@@ -116,7 +116,7 @@ ScopedPtr<TableExpression> TableExpressionBuilder::buildSequentialScan(
 
 ScopedPtr<TableExpression> TableExpressionBuilder::buildUnion(
     RefPtr<UnionNode> node,
-    Runtime* runtime,
+    QueryBuilder* runtime,
     TableProvider* tables) {
   Vector<ScopedPtr<TableExpression>> union_tables;
 
@@ -129,7 +129,7 @@ ScopedPtr<TableExpression> TableExpressionBuilder::buildUnion(
 
 ScopedPtr<TableExpression> TableExpressionBuilder::buildLimit(
     RefPtr<LimitNode> node,
-    Runtime* runtime,
+    QueryBuilder* runtime,
     TableProvider* tables) {
   return mkScoped(
       new LimitClause(
@@ -140,7 +140,7 @@ ScopedPtr<TableExpression> TableExpressionBuilder::buildLimit(
 
 ScopedPtr<TableExpression> TableExpressionBuilder::buildOrderBy(
     RefPtr<OrderByNode> node,
-    Runtime* runtime,
+    QueryBuilder* runtime,
     TableProvider* tables) {
   return mkScoped(
       new OrderBy(
@@ -151,7 +151,7 @@ ScopedPtr<TableExpression> TableExpressionBuilder::buildOrderBy(
 
 ScopedPtr<TableExpression> TableExpressionBuilder::buildSelectExpression(
     RefPtr<SelectExpressionNode> node,
-    Runtime* runtime,
+    QueryBuilder* runtime,
     TableProvider* tables) {
   Vector<String> column_names;
   Vector<ScopedPtr<ValueExpression>> select_expressions;
@@ -170,7 +170,7 @@ ScopedPtr<TableExpression> TableExpressionBuilder::buildSelectExpression(
 
 ScopedPtr<TableExpression> TableExpressionBuilder::buildDescribeTableStatment(
     RefPtr<DescribeTableNode> node,
-    Runtime* runtime,
+    QueryBuilder* runtime,
     TableProvider* tables) {
   auto table_info = tables->describe(node->tableName());
   if (table_info.isEmpty()) {
