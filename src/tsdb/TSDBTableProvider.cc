@@ -25,7 +25,7 @@ TSDBTableProvider::TSDBTableProvider(
 
 Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildSequentialScan(
       RefPtr<csql::SequentialScanNode> node,
-      csql::Runtime* runtime) const {
+      csql::QueryBuilder* runtime) const {
   auto table_ref = TSDBTableRef::parse(node->tableName());
 
   if (table_ref.host.isEmpty() || table_ref.host.get() != "localhost") {

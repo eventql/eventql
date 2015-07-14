@@ -26,7 +26,7 @@ public:
 
   Option<ScopedPtr<csql::TableExpression>> buildSequentialScan(
         RefPtr<csql::SequentialScanNode> node,
-        csql::Runtime* runtime) const override;
+        csql::QueryBuilder* runtime) const override;
 
   void listTables(
       Function<void (const csql::TableInfo& table)> fn) const override;
