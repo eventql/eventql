@@ -26,6 +26,9 @@ public:
         RefPtr<csql::SequentialScanNode> node,
         csql::Runtime* runtime) const override;
 
+  void listTables(
+      Function<void (const csql::TableInfo& table)> fn) const override;
+
 protected:
   String tsdb_namespace_;
   TSDBNode* tsdb_node_;
