@@ -260,6 +260,8 @@ ASTNode* Parser::statement() {
       return drawStatement();
     case Token::T_IMPORT:
       return importStatement();
+    case Token::T_SHOW:
+      return showStatement();
     default:
       break;
   }
@@ -358,6 +360,16 @@ ASTNode* Parser::importStatement() {
 
   consumeIf(Token::T_SEMICOLON);
   return import;
+}
+
+ASTNode* Parser::showStatement() {
+  consumeToken();
+  expectAndConsume(Token::T_TABLES);
+
+  auto stmt = new ASTNode(ASTNode::T_SHOW_TABLES);
+
+  consumeIf(Token::T_SEMICOLON);
+  return stmt;
 }
 
 // FIXPAUL move this into sql extensions

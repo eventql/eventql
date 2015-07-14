@@ -69,6 +69,7 @@ public:
     T_WITH,
     T_IMPORT,
     T_TABLE,
+    T_TABLES,
     T_ON,
     T_OFF,
     T_EOF,

@@ -419,6 +419,11 @@ next:
     goto next;
   }
 
+  if (token == "TABLES") {
+    token_list->emplace_back(Token::T_TABLES);
+    goto next;
+  }
+
   if (token == "AXIS") {
     token_list->emplace_back(Token::T_AXIS);
     goto next;
