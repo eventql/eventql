@@ -8,6 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <chartsql/runtime/Union.h>
+#include <chartsql/runtime/EmptyTable.h>
 
 namespace csql {
 
@@ -20,13 +21,12 @@ Union::Union(
   }
 
   for (auto cur = sources_.begin(); cur != sources_.end(); ) {
-    auto ncols = cur->get()->numColumns();
-
-    if (ncols == 0) {
+    if (dynamic_cast<EmptyTable*>(cur->get())) {
       cur = sources_.erase(cur);
       continue;
     }
 
+    auto ncols = cur->get()->numColumns();
     if (ncols != sources_[0]->numColumns()) {
       RAISE(kRuntimeError, "UNION tables return different number of columns");
     }
