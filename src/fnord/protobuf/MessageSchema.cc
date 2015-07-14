@@ -21,6 +21,26 @@
 namespace fnord {
 namespace msg {
 
+String MessageSchemaField::typeName() const {
+  switch (type) {
+    case FieldType::OBJECT:
+      return "object";
+
+    case FieldType::BOOLEAN:
+      return "bool";
+
+    case FieldType::UINT32:
+      return "uint32";
+
+    case FieldType::UINT64:
+      return "uint64";
+
+    case FieldType::STRING:
+      return StringUtil::format("varchar($0)", type_size);
+
+  }
+}
+
 RefPtr<MessageSchema> MessageSchema::fromProtobuf(
     const google::protobuf::Descriptor* dsc) {
   Vector<msg::MessageSchemaField> fields;
