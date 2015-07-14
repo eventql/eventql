@@ -31,10 +31,10 @@ TSDBNode::TSDBNode(
     sql_engine_(this) {}
 
 // FIXPAUL proper longest prefix search ;)
-StreamConfig* TSDBNode::configFor(
+TableConfig* TSDBNode::configFor(
     const String& stream_ns,
     const String& stream_key) const {
-  StreamConfig* config = nullptr;
+  TableConfig* config = nullptr;
   size_t match_len = 0;
 
   auto stream_ns_key = stream_ns + "~" + stream_key;
@@ -66,7 +66,7 @@ void TSDBNode::configure(const TSDBNodeConfig& conf, const String& base_path) {
 
     configs_.emplace_back(
         stream_ns_key,
-        ScopedPtr<StreamConfig>(new StreamConfig(sc)));
+        ScopedPtr<TableConfig>(new TableConfig(sc)));
   }
 }
 
@@ -195,7 +195,7 @@ Option<RefPtr<Partition>> TSDBNode::findPartition(
 }
 
 void TSDBNode::listTables(
-    Function<void (const StreamConfig& table)> fn) const {
+    Function<void (const TableConfig& table)> fn) const {
   for (const auto& tbl : configs_) {
     fn(*tbl.second);
   }

@@ -15,7 +15,7 @@
 #include <fnord/util/binarymessagereader.h>
 #include <fnord/util/binarymessagewriter.h>
 #include <fnord/protobuf/MessageSchema.h>
-#include <tsdb/StreamConfig.pb.h>
+#include <tsdb/TableConfig.pb.h>
 #include <tsdb/RecordSet.h>
 #include <tsdb/TSDBNodeRef.h>
 #include <tsdb/PartitionInfo.pb.h>
@@ -43,7 +43,7 @@ public:
       const String& stream_key,
       const String& db_key,
       RefPtr<msg::MessageSchema> schema,
-      StreamConfig* config,
+      TableConfig* config,
       TSDBNodeRef* node);
 
   static RefPtr<Partition> reopen(
@@ -51,7 +51,7 @@ public:
       const PartitionState& state,
       const String& db_key,
       RefPtr<msg::MessageSchema> schema,
-      StreamConfig* config,
+      TableConfig* config,
       TSDBNodeRef* node);
 
   void insertRecord(
@@ -75,7 +75,7 @@ protected:
       const String& stream_key,
       const String& db_key,
       RefPtr<msg::MessageSchema> schema,
-      StreamConfig* config,
+      TableConfig* config,
       TSDBNodeRef* node);
 
   Partition(
@@ -83,7 +83,7 @@ protected:
       const PartitionState& state,
       const String& db_key,
       RefPtr<msg::MessageSchema> schema,
-      StreamConfig* config,
+      TableConfig* config,
       TSDBNodeRef* node);
 
   void scheduleCompaction();
@@ -99,7 +99,7 @@ protected:
   const String db_key_;
   const RefPtr<msg::MessageSchema> schema_;
   RecordSet records_;
-  const StreamConfig* config_;
+  const TableConfig* config_;
   TSDBNodeRef* node_;
   mutable std::mutex mutex_;
   std::mutex replication_mutex_;

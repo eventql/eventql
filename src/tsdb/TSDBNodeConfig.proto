@@ -8,11 +8,11 @@
  * <http://www.gnu.org/licenses/>.
  */
 package tsdb;
-import "StreamConfig.proto";
+import "TableConfig.proto";
 
 message TSDBNodeConfig {
 
-  repeated StreamConfig event_stream = 1;
+  repeated TableConfig event_stream = 1;
 
   repeated string include_protobuf_schema = 2;
 

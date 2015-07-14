@@ -14,7 +14,7 @@
 #include <fnord/option.h>
 #include <fnord/thread/queue.h>
 #include <fnord/mdb/MDB.h>
-#include <tsdb/StreamConfig.pb.h>
+#include <tsdb/TableConfig.pb.h>
 #include <tsdb/Partition.h>
 #include <tsdb/TSDBNodeRef.h>
 #include <tsdb/CompactionWorker.h>
@@ -36,7 +36,7 @@ public:
 
   void configure(const TSDBNodeConfig& config, const String& base_path);
 
-  StreamConfig* configFor(
+  TableConfig* configFor(
       const String& tsdb_namespace,
       const String& stream_key) const;
 
@@ -51,7 +51,7 @@ public:
       const SHA1Hash& partition_key);
 
   void listTables(
-      Function<void (const StreamConfig& table)> fn) const;
+      Function<void (const TableConfig& table)> fn) const;
 
   SQLEngine* sqlEngine();
 
@@ -68,7 +68,7 @@ protected:
   void reopenPartitions();
 
   TSDBNodeRef noderef_;
-  Vector<Pair<String, ScopedPtr<StreamConfig>>> configs_;
+  Vector<Pair<String, ScopedPtr<TableConfig>>> configs_;
   std::mutex mutex_;
   HashMap<String, RefPtr<Partition>> partitions_;
   Vector<RefPtr<CompactionWorker>> compaction_workers_;

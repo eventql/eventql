@@ -27,7 +27,7 @@ RefPtr<Partition> Partition::create(
     const String& stream_key,
     const String& db_key,
     RefPtr<msg::MessageSchema> schema,
-    StreamConfig* config,
+    TableConfig* config,
     TSDBNodeRef* node) {
 
   fnord::logDebug(
@@ -51,7 +51,7 @@ RefPtr<Partition> Partition::reopen(
     const PartitionState& state,
     const String& db_key,
     RefPtr<msg::MessageSchema> schema,
-    StreamConfig* config,
+    TableConfig* config,
     TSDBNodeRef* node) {
 
   fnord::logDebug(
@@ -75,7 +75,7 @@ Partition::Partition(
     const String& stream_key,
     const String& db_key,
     RefPtr<msg::MessageSchema> schema,
-    StreamConfig* config,
+    TableConfig* config,
     TSDBNodeRef* node) :
     key_(partition_key),
     stream_key_(stream_key),
@@ -95,7 +95,7 @@ Partition::Partition(
     const PartitionState& state,
     const String& db_key,
     RefPtr<msg::MessageSchema> schema,
-    StreamConfig* config,
+    TableConfig* config,
     TSDBNodeRef* node) :
     key_(partition_key),
     stream_key_(state.stream_key),

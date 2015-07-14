@@ -9,7 +9,7 @@
  */
 package tsdb;
 
-message StreamConfig {
+message TableConfig {
 
   /**
    * The tsdb namespace to be configured
