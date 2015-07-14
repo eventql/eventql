@@ -84,4 +84,11 @@ void TableRepository::addProvider(RefPtr<TableProvider> provider) {
   providers_.emplace_back(provider);
 }
 
+void TableRepository::listTables(
+    Function<void (const TableInfo& table)> fn) const {
+  for (const auto& p : providers_) {
+    p->listTables(fn);
+  }
+}
+
 }

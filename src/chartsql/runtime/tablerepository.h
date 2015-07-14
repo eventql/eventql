@@ -18,12 +18,19 @@ namespace csql {
 class ImportStatement;
 class Runtime;
 
+struct TableInfo {
+  String table_name;
+  Option<String> table_description;
+};
+
 class TableProvider : public RefCounted {
 public:
 
   virtual Option<ScopedPtr<TableExpression>> buildSequentialScan(
       RefPtr<SequentialScanNode> seqscan,
       Runtime* runtime) const = 0;
+
+  virtual void listTables(Function<void (const TableInfo& table)> fn) const = 0;
 
 };
 
@@ -53,6 +60,8 @@ public:
       Runtime* runtime) const override;
 
   void addProvider(RefPtr<TableProvider> provider);
+
+  void listTables(Function<void (const TableInfo& table)> fn) const override;
 
 protected:
   std::unordered_map<std::string, std::unique_ptr<TableRef>> table_refs_;
