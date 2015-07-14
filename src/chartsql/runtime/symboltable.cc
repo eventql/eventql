@@ -34,7 +34,7 @@ void SymbolTable::registerFunction(
   sym.reset = fn.reset;
   sym.init = fn.init;
   sym.free = fn.free;
-  registerFunction(symbol, sym);
+  registerFunction(symbol, SFunction(sym));
 }
 
 void SymbolTable::registerFunction(const String& symbol, SFunction fn) {
