@@ -71,6 +71,7 @@ add_library(chartsql-lib OBJECT
     runtime/SelectExpression.cc
     runtime/EmptyTable.cc
     runtime/groupovertimewindow.cc
+    runtime/ShowTablesStatement.cc
     runtime/execute.cc
     runtime/ExecutionContext.cc
     runtime/TableExpression.cc

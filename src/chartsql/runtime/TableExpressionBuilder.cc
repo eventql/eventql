@@ -13,6 +13,7 @@
 #include <chartsql/runtime/SelectExpression.h>
 #include <chartsql/runtime/limitclause.h>
 #include <chartsql/runtime/orderby.h>
+#include <chartsql/runtime/ShowTablesStatement.h>
 
 using namespace fnord;
 
@@ -51,6 +52,10 @@ ScopedPtr<TableExpression> TableExpressionBuilder::build(
         node.asInstanceOf<SelectExpressionNode>(),
         runtime,
         tables);
+  }
+
+  if (dynamic_cast<ShowTablesNode*>(node.get())) {
+    return mkScoped<csql::TableExpression>(new ShowTablesStatement(tables));
   }
 
   RAISE(
