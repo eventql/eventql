@@ -29,7 +29,7 @@ using namespace fnord;
 namespace csql {
 class QueryBuilder;
 
-class TableExpressionBuilder {
+class TableExpressionBuilder : public RefCounted {
 public:
 
   ScopedPtr<TableExpression> build(

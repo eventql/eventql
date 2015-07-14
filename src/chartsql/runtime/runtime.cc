@@ -11,6 +11,18 @@
 
 namespace csql {
 
+RefPtr<Runtime> Runtime::getDefaultRuntime() {
+  auto symbols = mkRef(new SymbolTable());
+  //installDefaultSymbols(symbols.get());
+
+  return new Runtime(
+      symbols,
+      new QueryBuilder(
+          new ValueExpressionBuilder(symbols.get()),
+          new TableExpressionBuilder()),
+      new QueryPlanBuilder(symbols.get()));
+}
+
 //Runtime::Runtime() :
 //    query_plan_builder_(&symbol_table_),
 //    scalar_exp_builder_(&symbol_table_) {}
@@ -60,10 +72,6 @@ SValue Runtime::evaluateStaticExpression(RefPtr<ValueExpressionNode> expr) {
   SValue out;
   compiled->evaluate(0, nullptr, &out);
   return out;
-}
-
-void Runtime::registerFunction(const String& name, SFunction fn) {
-  symbol_table_.registerFunction(name, fn);
 }
 
 }
