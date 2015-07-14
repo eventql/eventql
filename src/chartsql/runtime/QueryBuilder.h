@@ -18,7 +18,7 @@ using namespace fnord;
 
 namespace csql {
 
-class QueryBuilder {
+class QueryBuilder : public RefCounted {
 public:
 
   QueryBuilder(

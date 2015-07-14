@@ -41,8 +41,8 @@ public:
 
 protected:
   SymbolTable symbol_table_;
-  QueryBuilder query_builder_;
-  QueryPlanBuilder query_plan_builder_;
+  RefPtr<QueryBuilder> query_builder_;
+  RefPtr<QueryPlanBuilder> query_plan_builder_;
 };
 
 }

@@ -25,7 +25,7 @@ void Runtime::executeQuery(
   parser.parse(query.data(), query.size());
 
   /* build query plan */
-  auto statements = query_plan_builder_.build(
+  auto statements = query_plan_builder_->build(
       parser.getStatements(),
       execution_strategy->tableProvider());
 
@@ -37,7 +37,7 @@ void Runtime::executeQuery(
       new QueryPlan(
           statements,
           execution_strategy->tableProvider(),
-          &query_builder_,
+          query_builder_.get(),
           this));
 
   /* execute query and format results */
@@ -46,8 +46,8 @@ void Runtime::executeQuery(
 }
 
 SValue Runtime::evaluateStaticExpression(ASTNode* expr) {
-  auto val_expr = mkRef(query_plan_builder_.buildValueExpression(expr));
-  auto compiled = query_builder_.buildValueExpression(val_expr);
+  auto val_expr = mkRef(query_plan_builder_->buildValueExpression(expr));
+  auto compiled = query_builder_->buildValueExpression(val_expr);
 
   SValue out;
   compiled->evaluate(0, nullptr, &out);
@@ -55,7 +55,7 @@ SValue Runtime::evaluateStaticExpression(ASTNode* expr) {
 }
 
 SValue Runtime::evaluateStaticExpression(RefPtr<ValueExpressionNode> expr) {
-  auto compiled = query_builder_.buildValueExpression(expr);
+  auto compiled = query_builder_->buildValueExpression(expr);
 
   SValue out;
   compiled->evaluate(0, nullptr, &out);

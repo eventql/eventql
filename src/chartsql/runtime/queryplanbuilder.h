@@ -20,7 +20,7 @@ class QueryPlanNode;
 class TableRepository;
 class Runtime;
 
-class QueryPlanBuilder {
+class QueryPlanBuilder : public RefCounted {
 public:
 
   QueryPlanBuilder(SymbolTable* symbol_table);
