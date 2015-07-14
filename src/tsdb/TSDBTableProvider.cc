@@ -93,6 +93,7 @@ csql::TableInfo TSDBTableProvider::tableInfoForTable(
     csql::ColumnInfo ci;
     ci.column_name = col.first;
     ci.type = col.second.typeName();
+    ci.type_size = col.second.typeSize();
     ci.is_nullable = col.second.optional;
 
     ti.columns.emplace_back(ci);
