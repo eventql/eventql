@@ -18,9 +18,14 @@ namespace csql {
 class ImportStatement;
 class Runtime;
 
+struct ColumnInfo {
+  String column_name;
+};
+
 struct TableInfo {
   String table_name;
   Option<String> description;
+  Vector<ColumnInfo> columns;
 };
 
 class TableProvider : public RefCounted {
