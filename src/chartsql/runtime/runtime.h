@@ -38,17 +38,8 @@ public:
       RefPtr<TableProvider> table_provider,
       RefPtr<ResultFormat> result_format);
 
-  void executeQuery(
-      RefPtr<QueryPlan> query_plan,
-      RefPtr<ResultFormat> result_format);
-
   SValue evaluateStaticExpression(const String& expr);
   SValue evaluateStaticExpression(ASTNode* expr);
-
-  RefPtr<QueryPlan> parseAndBuildQueryPlan(
-      const String& query,
-      RefPtr<TableProvider> tables,
-      QueryRewriteFn query_rewrite_fn);
 
   ScopedPtr<ValueExpression> buildValueExpression(
       RefPtr<ValueExpressionNode> expression);
@@ -63,7 +54,15 @@ public:
 
   void registerFunction(const String& name, SFunction fn);
 
+  void addQTreeRewriteRule(QueryRewriteFn fn);
+
 protected:
+
+  RefPtr<QueryPlan> parseAndBuildQueryPlan(
+      const String& query,
+      RefPtr<TableProvider> tables);
+
+  Vector<QueryRewriteFn> qtree_rewrite_fns_;
   SymbolTable symbol_table_;
   QueryPlanBuilder query_plan_builder_;
   ValueExpressionBuilder scalar_exp_builder_;
