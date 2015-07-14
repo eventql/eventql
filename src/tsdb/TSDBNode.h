@@ -50,6 +50,9 @@ public:
       const String& stream_key,
       const SHA1Hash& partition_key);
 
+  void listTables(
+      Function<void (const StreamConfig& table)> fn) const;
+
   SQLEngine* sqlEngine();
 
   const String& dbPath() const;

@@ -67,5 +67,13 @@ Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildSequentialScan(
 }
 
 
+void TSDBTableProvider::listTables(
+    Function<void (const csql::TableInfo& table)> fn) const {
+  tsdb_node_->listTables([fn] (const StreamConfig& table) {
+    csql::TableInfo ti;
+    ti.table_name = table.stream_key_prefix();
+    fn(ti);
+  });
+}
 
 } // namespace csql
