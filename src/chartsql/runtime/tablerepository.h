@@ -20,7 +20,7 @@ class Runtime;
 
 struct TableInfo {
   String table_name;
-  Option<String> table_description;
+  Option<String> description;
 };
 
 class TableProvider : public RefCounted {
