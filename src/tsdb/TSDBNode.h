@@ -20,6 +20,7 @@
 #include <tsdb/CompactionWorker.h>
 #include <tsdb/ReplicationWorker.h>
 #include <tsdb/TSDBNodeConfig.pb.h>
+#include <tsdb/TSDBTableInfo.h>
 #include <tsdb/SQLEngine.h>
 
 using namespace fnord;
@@ -51,7 +52,11 @@ public:
       const SHA1Hash& partition_key);
 
   void listTables(
-      Function<void (const TableConfig& table)> fn) const;
+      Function<void (const TSDBTableInfo& table)> fn) const;
+
+  Option<TSDBTableInfo> tableInfo(
+      const String& tsdb_namespace,
+      const String& table_key) const;
 
   SQLEngine* sqlEngine();
 

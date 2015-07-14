@@ -69,25 +69,32 @@ Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildSequentialScan(
 
 void TSDBTableProvider::listTables(
     Function<void (const csql::TableInfo& table)> fn) const {
-  tsdb_node_->listTables([this, fn] (const TableConfig& table) {
+  tsdb_node_->listTables([this, fn] (const TSDBTableInfo& table) {
     fn(tableInfoForTable(table));
   });
 }
 
 Option<csql::TableInfo> TSDBTableProvider::describe(
     const String& table_name) const {
-  auto table = tsdb_node_->configFor(tsdb_namespace_, table_name);
-  if (table == nullptr) {
+  auto table = tsdb_node_->tableInfo(tsdb_namespace_, table_name);
+  if (table.isEmpty()) {
     return None<csql::TableInfo>();
   } else {
-    return Some(tableInfoForTable(*table));
+    return Some(tableInfoForTable(table.get()));
   }
 }
 
 csql::TableInfo TSDBTableProvider::tableInfoForTable(
-    const TableConfig& table) const {
+    const TSDBTableInfo& table) const {
   csql::TableInfo ti;
-  ti.table_name = table.table_name();
+  ti.table_name = table.table_name;
+
+  for (const auto& col : table.schema->columns()) {
+    csql::ColumnInfo ci;
+    ci.column_name = col;
+    ti.columns.emplace_back(ci);
+  }
+
   return ti;
 }
 

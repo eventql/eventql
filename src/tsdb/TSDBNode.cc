@@ -195,10 +195,30 @@ Option<RefPtr<Partition>> TSDBNode::findPartition(
 }
 
 void TSDBNode::listTables(
-    Function<void (const TableConfig& table)> fn) const {
+    Function<void (const TSDBTableInfo& table)> fn) const {
   for (const auto& tbl : configs_) {
-    fn(*tbl.second);
+    TSDBTableInfo ti;
+    ti.table_name = tbl.first;
+    ti.config = *tbl.second;
+    ti.schema = schemas_.getSchema(ti.config.schema());
+    fn(ti);
   }
+}
+
+Option<TSDBTableInfo> TSDBNode::tableInfo(
+      const String& tsdb_namespace,
+      const String& table_key) const {
+
+  auto config = configFor(tsdb_namespace, table_key);
+  if (config == nullptr) {
+    return None<TSDBTableInfo>();
+  }
+
+  TSDBTableInfo ti;
+  ti.table_name = table_key;
+  ti.config = *config;
+  ti.schema = schemas_.getSchema(config->schema());
+  return Some(ti);
 }
 
 const String& TSDBNode::dbPath() const {

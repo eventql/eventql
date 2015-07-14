@@ -12,6 +12,7 @@
 #include <chartsql/runtime/tablerepository.h>
 #include <tsdb/TSDBTableRef.h>
 #include <tsdb/TableConfig.pb.h>
+#include <tsdb/TSDBTableInfo.h>
 
 using namespace fnord;
 
@@ -34,7 +35,7 @@ public:
 
 protected:
 
-  csql::TableInfo tableInfoForTable(const TableConfig& table) const;
+  csql::TableInfo tableInfoForTable(const TSDBTableInfo& table) const;
 
   String tsdb_namespace_;
   TSDBNode* tsdb_node_;
