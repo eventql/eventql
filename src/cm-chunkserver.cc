@@ -148,7 +148,7 @@ int main(int argc, const char** argv) {
 
   {
     tsdb::TableConfig config;
-    config.set_stream_key_prefix("joined_sessions.");
+    config.set_table_name("joined_sessions.");
     config.set_max_sstable_size(1024 * 1024 * 512);
     config.set_compaction_interval(1800 * kMicrosPerSecond);
     config.set_partitioner(tsdb::TIME_WINDOW);
@@ -158,7 +158,7 @@ int main(int argc, const char** argv) {
 
   {
     tsdb::TableConfig config;
-    config.set_stream_key_prefix("metricd.sensors.");
+    config.set_table_name("metricd.sensors.");
     config.set_max_sstable_size(1024 * 1024 * 512);
     config.set_compaction_interval(10 * kMicrosPerSecond);
     config.set_partitioner(tsdb::TIME_WINDOW);
@@ -168,7 +168,7 @@ int main(int argc, const char** argv) {
 
   {
     tsdb::TableConfig config;
-    config.set_stream_key_prefix("metricd.metrics.");
+    config.set_table_name("metricd.metrics.");
     config.set_max_sstable_size(1024 * 1024 * 512);
     config.set_compaction_interval(10 * kMicrosPerSecond);
     config.set_partitioner(tsdb::TIME_WINDOW);
