@@ -30,6 +30,8 @@ public:
       Function<RefPtr<QueryTreeNode> (RefPtr<QueryTreeNode> query)>
       QueryTreeRewriteRule;
 
+  DefaultExecutionStrategy();
+
   RefPtr<TableProvider> tableProvider() const override;
 
   void addTableProvider(RefPtr<TableProvider> provider);
