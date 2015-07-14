@@ -13,6 +13,9 @@
 namespace fnord {
 
 template <typename T>
+AutoRef<T>::AutoRef() : ref_(nullptr) {}
+
+template <typename T>
 AutoRef<T>::AutoRef(std::nullptr_t) : ref_(nullptr) {}
 
 template <typename T>

@@ -23,6 +23,7 @@ class AutoRef {
 public:
   using ValueType = T;
 
+  AutoRef();
   AutoRef(std::nullptr_t);
   AutoRef(T* ref);
 
