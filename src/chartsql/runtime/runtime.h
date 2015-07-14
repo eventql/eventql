@@ -43,8 +43,6 @@ public:
   SValue evaluateStaticExpression(ASTNode* expr);
   SValue evaluateStaticExpression(RefPtr<ValueExpressionNode> expr);
 
-  void registerFunction(const String& name, SFunction fn);
-
 protected:
   RefPtr<SymbolTable> symbol_table_;
   RefPtr<QueryBuilder> query_builder_;

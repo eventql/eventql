@@ -19,6 +19,6 @@ using namespace fnord;
 
 namespace csql {
 
-void installDefaultSymbols(Runtime* rt);
+void installDefaultSymbols(SymbolTable* rt);
 
 } // namespace csql
