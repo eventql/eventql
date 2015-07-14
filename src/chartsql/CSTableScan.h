@@ -58,8 +58,8 @@ protected:
     ValueExpression::Instance instance;
   };
 
-  void scan(
-      Function<bool (int argc, const SValue* argv)> fn);
+  void scan(Function<bool (int argc, const SValue* argv)> fn);
+  void scanWithoutColumns(Function<bool (int argc, const SValue* argv)> fn);
 
   void findColumns(
       RefPtr<ValueExpressionNode> expr,

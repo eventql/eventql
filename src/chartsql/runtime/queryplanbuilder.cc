@@ -30,20 +30,12 @@ QueryPlanBuilder::QueryPlanBuilder(
 RefPtr<QueryTreeNode> QueryPlanBuilder::build(ASTNode* ast) {
   QueryTreeNode* node = nullptr;
 
-//  /* exapand all column names + wildcard to tablename->columnanme */
-//  if (hasUnexpandedColumns(ast)) {
-//    expandColumns(ast, repo);
-//  }
-//
-//  for (const auto& extension : extensions_) {
-//    exec = extension->buildQueryPlan(ast, repo);
-//
-//    if (exec != nullptr) {
-//      return exec;
-//    }
-//  }
-//
-//  /* internal nodes: multi table query (joins), order, aggregation, limit */
+  /* exapand all column names + wildcard to tablename->columnanme */
+  //if (hasUnexpandedColumns(ast)) {
+  //  expandColumns(ast, repo);
+  //}
+
+  /* internal nodes: multi table query (joins), order, aggregation, limit */
   if ((node = buildLimitClause(ast)) != nullptr) {
     return node;
   }
@@ -51,12 +43,11 @@ RefPtr<QueryTreeNode> QueryPlanBuilder::build(ASTNode* ast) {
   if (hasOrderByClause(ast)) {
     return buildOrderByClause(ast);
   }
-//
-//  // FIXPAUL move to sql extensions
+
 //  if (hasGroupOverTimewindowClause(ast)) {
 //    return buildGroupOverTimewindow(ast, repo);
 //  }
-//
+
   if (hasGroupByClause(ast) || hasAggregationInSelectList(ast)) {
     return buildGroupBy(ast);
   }
