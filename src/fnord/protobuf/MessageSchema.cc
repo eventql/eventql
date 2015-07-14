@@ -17,6 +17,7 @@
 #include <google/protobuf/io/zero_copy_stream_impl_lite.h>
 #include <google/protobuf/io/tokenizer.h>
 #include <google/protobuf/compiler/parser.h>
+#include <3rdparty/simdcomp/simdcomp.h>
 
 namespace fnord {
 namespace msg {
@@ -36,7 +37,25 @@ String MessageSchemaField::typeName() const {
       return "uint64";
 
     case FieldType::STRING:
-      return StringUtil::format("varchar($0)", type_size);
+      return "string";
+
+  }
+}
+
+size_t MessageSchemaField::typeSize() const {
+  switch (type) {
+    case FieldType::OBJECT:
+      return 0;
+
+    case FieldType::BOOLEAN:
+      return 0;
+
+    case FieldType::UINT32:
+    case FieldType::UINT64:
+      return bits(type_size);
+
+    case FieldType::STRING:
+      return type_size;
 
   }
 }

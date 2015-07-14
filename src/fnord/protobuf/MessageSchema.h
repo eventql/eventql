@@ -69,6 +69,7 @@ struct MessageSchemaField {
     schema(nullptr) {}
 
   String typeName() const;
+  size_t typeSize() const;
 
   uint32_t id;
   String name;
