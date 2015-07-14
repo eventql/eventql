@@ -13,7 +13,7 @@ using namespace fnord;
 
 namespace csql {
 
-void installDefaultSymbols(Runtime* rt) {
+void installDefaultSymbols(SymbolTable* rt) {
   /* expressions/aggregate.h */
   rt->registerFunction("count", expressions::kCountExpr);
   rt->registerFunction("sum", expressions::kSumExpr);

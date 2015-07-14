@@ -8,12 +8,13 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <chartsql/runtime/runtime.h>
+#include <chartsql/defaults.h>
 
 namespace csql {
 
 RefPtr<Runtime> Runtime::getDefaultRuntime() {
   auto symbols = mkRef(new SymbolTable());
-  //installDefaultSymbols(symbols.get());
+  installDefaultSymbols(symbols.get());
 
   return new Runtime(
       symbols,
@@ -23,9 +24,13 @@ RefPtr<Runtime> Runtime::getDefaultRuntime() {
       new QueryPlanBuilder(symbols.get()));
 }
 
-//Runtime::Runtime() :
-//    query_plan_builder_(&symbol_table_),
-//    scalar_exp_builder_(&symbol_table_) {}
+Runtime::Runtime(
+    RefPtr<SymbolTable> symbol_table,
+    RefPtr<QueryBuilder> query_builder,
+    RefPtr<QueryPlanBuilder> query_plan_builder) :
+    symbol_table_(symbol_table),
+    query_builder_(query_builder),
+    query_plan_builder_(query_plan_builder) {}
 
 void Runtime::executeQuery(
     const String& query,
