@@ -32,6 +32,8 @@ public:
 
   virtual void listTables(Function<void (const TableInfo& table)> fn) const = 0;
 
+  virtual Option<TableInfo> describe(const String& table_name) const = 0;
+
 };
 
 class TableRepository : public TableProvider {
@@ -62,6 +64,8 @@ public:
   void addProvider(RefPtr<TableProvider> provider);
 
   void listTables(Function<void (const TableInfo& table)> fn) const override;
+
+  Option<TableInfo> describe(const String& table_name) const override;
 
 protected:
   std::unordered_map<std::string, std::unique_ptr<TableRef>> table_refs_;
