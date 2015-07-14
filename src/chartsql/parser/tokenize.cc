@@ -494,6 +494,16 @@ next:
     goto next;
   }
 
+  if (token == "DESCRIBE") {
+    token_list->emplace_back(Token::T_DESCRIBE);
+    goto next;
+  }
+
+  if (token == "EXPLAIN") {
+    token_list->emplace_back(Token::T_EXPLAIN);
+    goto next;
+  }
+
   if (token == "XDOMAIN") {
     token_list->emplace_back(Token::T_XDOMAIN);
     goto next;
