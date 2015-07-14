@@ -28,21 +28,23 @@ QueryPlanBuilder::QueryPlanBuilder(
     SymbolTable* symbol_table) :
     symbol_table_(symbol_table) {}
 
-RefPtr<QueryTreeNode> QueryPlanBuilder::build(ASTNode* ast) {
+RefPtr<QueryTreeNode> QueryPlanBuilder::build(
+    ASTNode* ast,
+    RefPtr<TableProvider> tables) {
   QueryTreeNode* node = nullptr;
 
   /* expand all column names + wildcard to tablename->columnanme */
   if (hasUnexpandedColumns(ast)) {
-    expandColumns(ast);
+    expandColumns(ast, tables);
   }
 
   /* internal nodes: multi table query (joins), order, aggregation, limit */
-  if ((node = buildLimitClause(ast)) != nullptr) {
+  if ((node = buildLimitClause(ast, tables)) != nullptr) {
     return node;
   }
 
   if (hasOrderByClause(ast)) {
-    return buildOrderByClause(ast);
+    return buildOrderByClause(ast, tables);
   }
 
 //  if (hasGroupOverTimewindowClause(ast)) {
@@ -50,7 +52,7 @@ RefPtr<QueryTreeNode> QueryPlanBuilder::build(ASTNode* ast) {
 //  }
 
   if (hasGroupByClause(ast) || hasAggregationInSelectList(ast)) {
-    return buildGroupBy(ast);
+    return buildGroupBy(ast, tables);
   }
 
   /* leaf nodes: table scan, tableless select */
@@ -76,7 +78,8 @@ RefPtr<QueryTreeNode> QueryPlanBuilder::build(ASTNode* ast) {
 }
 
 Vector<RefPtr<QueryTreeNode>> QueryPlanBuilder::build(
-    const Vector<ASTNode*>& statements) {
+    const Vector<ASTNode*>& statements,
+    RefPtr<TableProvider> tables) {
   Vector<RefPtr<QueryTreeNode>> nodes;
 
   for (int i = 0; i < statements.size(); ++i) {
@@ -85,7 +88,7 @@ Vector<RefPtr<QueryTreeNode>> QueryPlanBuilder::build(
       case ASTNode::T_SELECT:
       case ASTNode::T_SHOW_TABLES:
       case ASTNode::T_DESCRIBE_TABLE:
-        nodes.emplace_back(build(statements[i]));
+        nodes.emplace_back(build(statements[i], tables));
         break;
 
       case ASTNode::T_DRAW: {
@@ -99,7 +102,7 @@ Vector<RefPtr<QueryTreeNode>> QueryPlanBuilder::build(
           for (++i; i < statements.size(); ) {
             switch (statements[i]->getType()) {
               case ASTNode::T_SELECT:
-                subselects.emplace_back(build(statements[i++]));
+                subselects.emplace_back(build(statements[i++], tables));
                 continue;
               case ASTNode::T_DRAW:
                 break;
@@ -319,7 +322,9 @@ bool QueryPlanBuilder::hasAggregationWithinRecord(ASTNode* ast) const {
   return false;
 }
 
-void QueryPlanBuilder::expandColumns(ASTNode* ast) {
+void QueryPlanBuilder::expandColumns(
+    ASTNode* ast,
+    RefPtr<TableProvider> tables) {
   if (ast->getChildren().size() < 2) {
     RAISE(kRuntimeError, "corrupt AST");
   }
@@ -380,7 +385,9 @@ void QueryPlanBuilder::expandColumns(ASTNode* ast) {
 }
 
 
-QueryTreeNode* QueryPlanBuilder::buildGroupBy(ASTNode* ast) {
+QueryTreeNode* QueryPlanBuilder::buildGroupBy(
+    ASTNode* ast,
+    RefPtr<TableProvider> tables) {
   /* copy own select list */
   if (!(ast->getChildren()[0]->getType() == ASTNode::T_SELECT_LIST)) {
     RAISE(kRuntimeError, "corrupt AST");
@@ -432,7 +439,7 @@ QueryTreeNode* QueryPlanBuilder::buildGroupBy(ASTNode* ast) {
   return new GroupByNode(
       select_list_expressions,
       group_expressions,
-      build(child_ast));
+      build(child_ast, tables));
 }
 
 //QueryPlanNode* QueryPlanBuilder::buildGroupOverTimewindow(
@@ -621,7 +628,9 @@ bool QueryPlanBuilder::buildInternalSelectList(
   }
 }
 
-QueryTreeNode* QueryPlanBuilder::buildLimitClause(ASTNode* ast) {
+QueryTreeNode* QueryPlanBuilder::buildLimitClause(
+    ASTNode* ast,
+    RefPtr<TableProvider> tables) {
   if (!(*ast == ASTNode::T_SELECT) || ast->getChildren().size() < 3) {
     return nullptr;
   }
@@ -668,13 +677,15 @@ QueryTreeNode* QueryPlanBuilder::buildLimitClause(ASTNode* ast) {
     return new LimitNode(
         limit,
         offset,
-        build(new_ast));
+        build(new_ast, tables));
   }
 
   return nullptr;
 }
 
-QueryTreeNode* QueryPlanBuilder::buildOrderByClause(ASTNode* ast) {
+QueryTreeNode* QueryPlanBuilder::buildOrderByClause(
+    ASTNode* ast,
+    RefPtr<TableProvider> tables) {
   Vector<OrderByNode::SortSpec> sort_specs;
 
   /* copy select list for child */
@@ -743,7 +754,7 @@ QueryTreeNode* QueryPlanBuilder::buildOrderByClause(ASTNode* ast) {
   return new OrderByNode(
       sort_specs,
       ast->getChildren()[0]->getChildren().size(),
-      build(child_ast));
+      build(child_ast, tables));
 }
 
 QueryTreeNode* QueryPlanBuilder::buildSequentialScan(ASTNode* ast) {

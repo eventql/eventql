@@ -24,8 +24,8 @@ void Runtime::executeQuery(
 }
 
 SValue Runtime::evaluateStaticExpression(ASTNode* expr) {
-  auto compiled = scalar_exp_builder_.compile(
-      query_plan_builder_.build(expr).asInstanceOf<ValueExpressionNode>());
+  auto val_expr = mkRef(query_plan_builder_.buildValueExpression(expr));
+  auto compiled = scalar_exp_builder_.compile(val_expr);
 
   SValue out;
   compiled->evaluate(0, nullptr, &out);
@@ -42,7 +42,7 @@ RefPtr<QueryPlan> Runtime::parseAndBuildQueryPlan(
   csql::Parser parser;
   parser.parse(query.data(), query.size());
 
-  for (auto stmt : query_plan_builder_.build(parser.getStatements())) {
+  for (auto stmt : query_plan_builder_.build(parser.getStatements(), tables)) {
     statements.emplace_back(rewrite_fn(stmt));
   }
 
