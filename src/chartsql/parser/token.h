@@ -72,6 +72,7 @@ public:
     T_ON,
     T_OFF,
     T_EOF,
+    T_SHOW,
 
     T_WITHIN,
     T_RECORD,
