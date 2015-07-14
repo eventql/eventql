@@ -7,7 +7,6 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#ifdef XXXX
 #include <tsdb/SQLEngine.h>
 #include <tsdb/TSDBNode.h>
 #include <tsdb/TimeWindowPartitioner.h>
@@ -15,60 +14,65 @@
 
 namespace tsdb {
 
-SQLEngine::SQLEngine(TSDBNode* tsdb_node) : tsdb_node_(tsdb_node) {
-  installDefaultSymbols(&sql_runtime_);
-}
-
-void SQLEngine::executeQuery(
-    const String& tsdb_namespace,
-    const String& query,
-    RefPtr<csql::ResultFormat> result_format) {
-  auto qplan = parseAndBuildQueryPlan(tsdb_namespace, query);
-  sql_runtime_.executeQuery(qplan, result_format);
-}
-
-RefPtr<csql::QueryPlan> SQLEngine::parseAndBuildQueryPlan(
-    const String& tsdb_namespace,
-    const String& query) {
-  return sql_runtime_.parseAndBuildQueryPlan(
-      query,
-      tableProviderForNamespace(tsdb_namespace),
-      std::bind(
-          &SQLEngine::rewriteQuery,
-          this,
-          tsdb_namespace,
-          std::placeholders::_1));
-}
+//SQLEngine::SQLEngine(TSDBNode* tsdb_node) : tsdb_node_(tsdb_node) {
+//  installDefaultSymbols(&sql_runtime_);
+//}
+//
+//void SQLEngine::executeQuery(
+//    const String& tsdb_namespace,
+//    const String& query,
+//    RefPtr<csql::ResultFormat> result_format) {
+//  auto qplan = parseAndBuildQueryPlan(tsdb_namespace, query);
+//  sql_runtime_.executeQuery(qplan, result_format);
+//}
+//
+//RefPtr<csql::QueryPlan> SQLEngine::parseAndBuildQueryPlan(
+//    const String& tsdb_namespace,
+//    const String& query) {
+//  return sql_runtime_.parseAndBuildQueryPlan(
+//      query,
+//      tableProviderForNamespace(tsdb_namespace),
+//      std::bind(
+//          &SQLEngine::rewriteQuery,
+//          this,
+//          tsdb_namespace,
+//          std::placeholders::_1));
+//}
 
 RefPtr<csql::QueryTreeNode> SQLEngine::rewriteQuery(
+    TSDBNode* tsdb_node,
     const String& tsdb_namespace,
     RefPtr<csql::QueryTreeNode> query) {
-  replaceAllSequentialScansWithUnions(tsdb_namespace, &query);
+  replaceAllSequentialScansWithUnions(tsdb_node, tsdb_namespace, &query);
   return query;
 }
 
 RefPtr<csql::TableProvider> SQLEngine::tableProviderForNamespace(
+    TSDBNode* tsdb_node,
     const String& tsdb_namespace) {
-  return new TSDBTableProvider(tsdb_namespace, tsdb_node_);
+  return new TSDBTableProvider(tsdb_namespace, tsdb_node);
 }
 
 void SQLEngine::replaceAllSequentialScansWithUnions(
+    TSDBNode* tsdb_node,
     const String& tsdb_namespace,
     RefPtr<csql::QueryTreeNode>* node) {
   if (dynamic_cast<csql::SequentialScanNode*>(node->get())) {
-    replaceSequentialScanWithUnion(tsdb_namespace, node);
+    replaceSequentialScanWithUnion(tsdb_node, tsdb_namespace, node);
     return;
   }
 
   auto ntables = node->get()->numChildren();
   for (int i = 0; i < ntables; ++i) {
     replaceAllSequentialScansWithUnions(
+        tsdb_node,
         tsdb_namespace,
         node->get()->mutableChild(i));
   }
 }
 
 void SQLEngine::replaceSequentialScanWithUnion(
+    TSDBNode* tsdb_node,
     const String& tsdb_namespace,
     RefPtr<csql::QueryTreeNode>* node) {
   auto seqscan = node->asInstanceOf<csql::SequentialScanNode>();
@@ -109,4 +113,3 @@ void SQLEngine::replaceSequentialScanWithUnion(
 }
 
 }
-#endif

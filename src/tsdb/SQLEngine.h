@@ -7,7 +7,6 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#ifdef XXXX
 #pragma once
 #include <chartsql/runtime/runtime.h>
 #include <chartsql/runtime/ResultFormat.h>
@@ -19,37 +18,27 @@ class TSDBNode;
 class SQLEngine {
 public:
 
-  SQLEngine(TSDBNode* tsdb_node);
-
-  void executeQuery(
-      const String& tsdb_namespace,
-      const String& query,
-      RefPtr<csql::ResultFormat> result_format);
-
-protected:
-
-  RefPtr<csql::QueryPlan> parseAndBuildQueryPlan(
-      const String& tsdb_namespace,
-      const String& query);
-
-  RefPtr<csql::TableProvider> tableProviderForNamespace(
+  static RefPtr<csql::TableProvider> tableProviderForNamespace(
+      TSDBNode* tsdb_node,
       const String& tsdb_namespace);
 
-  RefPtr<csql::QueryTreeNode> rewriteQuery(
+  static RefPtr<csql::QueryTreeNode> rewriteQuery(
+      TSDBNode* tsdb_node,
       const String& tsdb_namespace,
       RefPtr<csql::QueryTreeNode> query);
 
-  void replaceAllSequentialScansWithUnions(
+protected:
+
+  static void replaceAllSequentialScansWithUnions(
+      TSDBNode* tsdb_node,
       const String& tsdb_namespace,
       RefPtr<csql::QueryTreeNode>* node);
 
-  void replaceSequentialScanWithUnion(
+  static void replaceSequentialScanWithUnion(
+      TSDBNode* tsdb_node,
       const String& tsdb_namespace,
       RefPtr<csql::QueryTreeNode>* node);
 
-  TSDBNode* tsdb_node_;
-  csql::Runtime sql_runtime_;
 };
 
 }
-#endif
