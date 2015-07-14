@@ -315,11 +315,24 @@ RefPtr<MessageSchema> MessageSchema::fieldSchema(uint32_t id) const {
   RAISEF(kIndexError, "field not found: $0", id);
 }
 
-Set<String> MessageSchema::columns() const {
-  Set<String> columns;
+Vector<Pair<String, MessageSchemaField>> MessageSchema::columns() const {
+  Vector<Pair<String, MessageSchemaField>> columns;
 
-  for (const auto& c : field_names_) {
-    columns.emplace(c.second);
+  for (const auto& field : fields_) {
+    switch (field.type) {
+
+      case FieldType::OBJECT: {
+        auto cld_cols = field.schema->columns();
+        for (const auto& c : cld_cols) {
+          columns.emplace_back(field.name + "." + c.first, c.second);
+        }
+        break;
+      }
+
+      default:
+        columns.emplace_back(field.name, field);
+        break;
+    }
   }
 
   return columns;

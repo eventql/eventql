@@ -98,10 +98,16 @@ public:
   const String& fieldName(uint32_t id) const;
   RefPtr<MessageSchema> fieldSchema(uint32_t id) const;
 
-  Set<String> columns() const;
+  Vector<Pair<String, MessageSchemaField>> columns() const;
   String toString() const;
 
 protected:
+
+  void findColumns(
+      const MessageSchemaField& field,
+      const String& prefix,
+      Set<String>* columns);
+
   String name_;
   Vector<MessageSchemaField> fields_;
   HashMap<String, uint32_t> field_ids_;
