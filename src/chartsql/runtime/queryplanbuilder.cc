@@ -358,25 +358,24 @@ void QueryPlanBuilder::expandColumns(
 
       select_list->removeChild(node);
 
-      RAISE(kNotYetImplementedError);
-      //auto tbl_ref = repo->getTableRef(table_name->getToken()->getString());
-      //if (tbl_ref == nullptr) {
-      //  RAISE(
-      //      kRuntimeError,
-      //      "unknown table: %s",
-      //      table_name->getToken()->getString().c_str());
-      //}
+      auto tbl_info = tables->describe(table_name->getToken()->getString());
+      if (tbl_info.isEmpty()) {
+        RAISEF(
+            kNotFoundError,
+            "table not found: $)",
+            table_name->getToken()->getString());
+      }
 
-      //for (const auto& column : tbl_ref->columns()) {
-      //  auto derived_col = new ASTNode(ASTNode::T_DERIVED_COLUMN);
-      //  auto derived_table_name = new ASTNode(ASTNode::T_TABLE_NAME);
-      //  derived_table_name->setToken(table_name->getToken());
-      //  auto column_name = new ASTNode(ASTNode::T_COLUMN_NAME);
-      //  column_name->setToken(new Token(Token::T_IDENTIFIER, column));
-      //  derived_col->appendChild(derived_table_name);
-      //  derived_table_name->appendChild(column_name);
-      //  select_list->appendChild(derived_col);
-      //}
+      for (const auto& column : tbl_info.get().columns) {
+        auto derived_col = new ASTNode(ASTNode::T_DERIVED_COLUMN);
+        auto derived_table_name = new ASTNode(ASTNode::T_TABLE_NAME);
+        derived_table_name->setToken(table_name->getToken());
+        auto column_name = new ASTNode(ASTNode::T_COLUMN_NAME);
+        column_name->setToken(new Token(Token::T_IDENTIFIER, column.column_name));
+        derived_col->appendChild(derived_table_name);
+        derived_table_name->appendChild(column_name);
+        select_list->appendChild(derived_col);
+      }
 
       continue;
     }
