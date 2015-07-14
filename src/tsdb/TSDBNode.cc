@@ -194,6 +194,13 @@ Option<RefPtr<Partition>> TSDBNode::findPartition(
   }
 }
 
+void TSDBNode::listTables(
+    Function<void (const StreamConfig& table)> fn) const {
+  for (const auto& tbl : configs_) {
+    fn(*tbl.second);
+  }
+}
+
 const String& TSDBNode::dbPath() const {
   return noderef_.db_path;
 }
