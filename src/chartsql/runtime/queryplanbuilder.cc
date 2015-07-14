@@ -19,6 +19,7 @@
 #include <chartsql/qtree/OrderByNode.h>
 #include <chartsql/qtree/DrawStatementNode.h>
 #include <chartsql/qtree/ChartStatementNode.h>
+#include <chartsql/qtree/ShowTablesNode.h>
 
 namespace csql {
 
@@ -66,6 +67,11 @@ RefPtr<QueryTreeNode> QueryPlanBuilder::build(ASTNode* ast) {
   }
 
   if ((node = buildSelectExpression(ast)) != nullptr) {
+    return node;
+  }
+
+  /* other statments */
+  if ((node = buildShowTables(ast)) != nullptr) {
     return node;
   }
 
@@ -1067,6 +1073,14 @@ SelectListNode* QueryPlanBuilder::buildSelectList(ASTNode* ast) {
   };
 
   return slnode;
+}
+
+QueryTreeNode* QueryPlanBuilder::buildShowTables(ASTNode* ast) {
+  if (!(*ast == ASTNode::T_SHOW_TABLES)) {
+    return nullptr;
+  }
+
+  return new ShowTablesNode();
 }
 
 //void QueryPlanBuilder::extend(

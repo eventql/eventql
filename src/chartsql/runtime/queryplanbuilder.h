@@ -171,6 +171,9 @@ protected:
 
   ValueExpressionNode* buildMethodCall(ASTNode* ast);
 
+  QueryTreeNode* buildShowTables(ASTNode* ast);
+
+
   std::vector<std::unique_ptr<QueryPlanBuilderInterface>> extensions_;
 
   SymbolTable* symbol_table_;
