@@ -954,6 +954,9 @@ ValueExpressionNode* QueryPlanBuilder::buildValueExpression(ASTNode* ast) {
     case ASTNode::T_LITERAL:
       return buildLiteral(ast);
 
+    case ASTNode::T_VOID:
+      return new LiteralExpressionNode(SValue("void"));
+
     case ASTNode::T_IF_EXPR:
       return buildIfStatement(ast);
 
