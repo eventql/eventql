@@ -15,7 +15,7 @@ namespace csql {
 QueryPlan::QueryPlan(
     Vector<RefPtr<QueryTreeNode>> statements,
     RefPtr<TableProvider> tables,
-    Runtime* runtime) :
+    QueryBuilder* runtime) :
     statements_(statements),
     tables_(tables),
     runtime_(runtime) {}

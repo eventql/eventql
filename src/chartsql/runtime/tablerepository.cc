@@ -69,7 +69,7 @@ void TableRepository::import(
 
 Option<ScopedPtr<TableExpression>> TableRepository::buildSequentialScan(
     RefPtr<SequentialScanNode> seqscan,
-    Runtime* runtime) const {
+    QueryBuilder* runtime) const {
   for (const auto& p : providers_) {
     auto tbl = p->buildSequentialScan(seqscan, runtime);
     if (!tbl.isEmpty()) {

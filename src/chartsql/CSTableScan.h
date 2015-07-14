@@ -26,7 +26,7 @@ public:
   CSTableScan(
       RefPtr<SequentialScanNode> stmt,
       cstable::CSTableReader&& cstable,
-      Runtime* runtime);
+      QueryBuilder* runtime);
 
   virtual Vector<String> columnNames() const override;
 

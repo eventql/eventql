@@ -20,7 +20,7 @@ namespace csql {
 CSTableScan::CSTableScan(
     RefPtr<SequentialScanNode> stmt,
     cstable::CSTableReader&& cstable,
-    Runtime* runtime) :
+    QueryBuilder* runtime) :
     cstable_(std::move(cstable)),
     colindex_(0),
     aggr_strategy_(stmt->aggregationStrategy()) {

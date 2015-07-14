@@ -25,7 +25,7 @@ public:
 
   Option<ScopedPtr<TableExpression>> buildSequentialScan(
         RefPtr<SequentialScanNode> node,
-        Runtime* runtime) const override;
+        QueryBuilder* runtime) const override;
 
 protected:
   const String table_name_;
