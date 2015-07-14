@@ -74,6 +74,8 @@ public:
     T_OFF,
     T_EOF,
     T_SHOW,
+    T_DESCRIBE,
+    T_EXPLAIN,
 
     T_WITHIN,
     T_RECORD,
