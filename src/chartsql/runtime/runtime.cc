@@ -17,8 +17,11 @@ Runtime::Runtime() :
     scalar_exp_builder_(&symbol_table_) {}
 
 void Runtime::executeQuery(
-    RefPtr<QueryPlan> query_plan,
+    const String& query,
+    RefPtr<TableProvider> table_provider,
     RefPtr<ResultFormat> result_format) {
+
+  auto query_plan = parseAndBuildQueryPlan(query, table_provider);
   csql::ExecutionContext context;
   result_format->formatResults(query_plan, &context);
 }
@@ -34,8 +37,7 @@ SValue Runtime::evaluateStaticExpression(ASTNode* expr) {
 
 RefPtr<QueryPlan> Runtime::parseAndBuildQueryPlan(
     const String& query,
-    RefPtr<TableProvider> tables,
-    QueryRewriteFn rewrite_fn) {
+    RefPtr<TableProvider> tables) {
   Vector<RefPtr<QueryTreeNode>> statements;
   Vector<ChartStatement> charts;
 
@@ -43,7 +45,11 @@ RefPtr<QueryPlan> Runtime::parseAndBuildQueryPlan(
   parser.parse(query.data(), query.size());
 
   for (auto stmt : query_plan_builder_.build(parser.getStatements(), tables)) {
-    statements.emplace_back(rewrite_fn(stmt));
+    for (const auto& fn : qtree_rewrite_fns_) {
+      stmt = fn(stmt);
+    }
+
+    statements.emplace_back(stmt);
   }
 
   return new QueryPlan(statements, tables, this);

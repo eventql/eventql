@@ -12,20 +12,9 @@
 
 namespace csql {
 
-class DefaultRuntime {
+class DefaultRuntime : public Runtime {
 public:
-
   DefaultRuntime();
-
-  void executeQuery(
-      const String& query,
-      RefPtr<csql::ResultFormat> result_format);
-
-  void addTableProvider(RefPtr<TableProvider> table);
-
-protected:
-  RefPtr<TableRepository> tables_;
-  Runtime runtime_;
 };
 
 }
