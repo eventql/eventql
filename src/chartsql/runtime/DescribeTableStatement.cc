@@ -21,13 +21,19 @@ void DescribeTableStatement::execute(
   for (const auto& col : table_info_.columns) {
     Vector<SValue> row;
     row.emplace_back(col.column_name);
+    row.emplace_back(col.type);
+    row.emplace_back(col.is_nullable ? "YES" : "NO");
+    row.emplace_back();
     fn(row.size(), row.data());
   }
 }
 
 Vector<String> DescribeTableStatement::columnNames() const {
   return Vector<String> {
-    "column_name"
+    "Field",
+    "Type",
+    "Null",
+    "Description"
   };
 }
 

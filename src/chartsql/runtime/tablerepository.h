@@ -20,6 +20,8 @@ class Runtime;
 
 struct ColumnInfo {
   String column_name;
+  String type;
+  bool is_nullable;
 };
 
 struct TableInfo {
