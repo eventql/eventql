@@ -68,6 +68,8 @@ struct MessageSchemaField {
     encoding(_encoding),
     schema(nullptr) {}
 
+  String typeName() const;
+
   uint32_t id;
   String name;
   FieldType type;
