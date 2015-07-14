@@ -14,6 +14,7 @@
 #include <chartsql/runtime/limitclause.h>
 #include <chartsql/runtime/orderby.h>
 #include <chartsql/runtime/ShowTablesStatement.h>
+#include <chartsql/runtime/DescribeTableStatement.h>
 
 using namespace fnord;
 
@@ -56,6 +57,13 @@ ScopedPtr<TableExpression> TableExpressionBuilder::build(
 
   if (dynamic_cast<ShowTablesNode*>(node.get())) {
     return mkScoped<csql::TableExpression>(new ShowTablesStatement(tables));
+  }
+
+  if (dynamic_cast<DescribeTableNode*>(node.get())) {
+    return buildDescribeTableStatment(
+        node.asInstanceOf<DescribeTableNode>(),
+        runtime,
+        tables);
   }
 
   RAISE(
@@ -158,6 +166,18 @@ ScopedPtr<TableExpression> TableExpressionBuilder::buildSelectExpression(
   return mkScoped(new SelectExpression(
       column_names,
       std::move(select_expressions)));
+}
+
+ScopedPtr<TableExpression> TableExpressionBuilder::buildDescribeTableStatment(
+    RefPtr<DescribeTableNode> node,
+    Runtime* runtime,
+    TableProvider* tables) {
+  auto table_info = tables->describe(node->tableName());
+  if (table_info.isEmpty()) {
+    RAISEF(kNotFoundError, "table not found: $0", node->tableName());
+  }
+
+  return mkScoped(new DescribeTableStatement(table_info.get()));
 }
 
 } // namespace csql
