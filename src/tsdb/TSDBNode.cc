@@ -198,9 +198,9 @@ void TSDBNode::listTables(
     Function<void (const TSDBTableInfo& table)> fn) const {
   for (const auto& tbl : configs_) {
     TSDBTableInfo ti;
-    ti.table_name = tbl.first;
+    ti.table_name = tbl.second->table_name();
     ti.config = *tbl.second;
-    ti.schema = schemas_.getSchema(ti.config.schema());
+    ti.schema = schemas_.getSchema(tbl.second->schema());
     fn(ti);
   }
 }
