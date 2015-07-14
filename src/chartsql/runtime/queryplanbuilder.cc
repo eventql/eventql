@@ -20,6 +20,7 @@
 #include <chartsql/qtree/DrawStatementNode.h>
 #include <chartsql/qtree/ChartStatementNode.h>
 #include <chartsql/qtree/ShowTablesNode.h>
+#include <chartsql/qtree/DescribeTableNode.h>
 
 namespace csql {
 
@@ -66,6 +67,10 @@ RefPtr<QueryTreeNode> QueryPlanBuilder::build(ASTNode* ast) {
     return node;
   }
 
+  if ((node = buildDescribeTable(ast)) != nullptr) {
+    return node;
+  }
+
   ast->debugPrint(2);
   RAISE(kRuntimeError, "can't figure out a query plan for this, sorry :(");
 }
@@ -79,6 +84,7 @@ Vector<RefPtr<QueryTreeNode>> QueryPlanBuilder::build(
 
       case ASTNode::T_SELECT:
       case ASTNode::T_SHOW_TABLES:
+      case ASTNode::T_DESCRIBE_TABLE:
         nodes.emplace_back(build(statements[i]));
         break;
 
@@ -116,6 +122,7 @@ Vector<RefPtr<QueryTreeNode>> QueryPlanBuilder::build(
       }
 
       default:
+        statements[i]->debugPrint();
         RAISE(kRuntimeError, "invalid statement");
     }
   }
@@ -242,11 +249,11 @@ bool QueryPlanBuilder::hasJoin(ASTNode* ast) const {
     return true;
   }
 
-  for (const auto& child : ast->getChildren()) {
+  //for (const auto& child : ast->getChildren()) {
     //if (child->getType() == ASTNode::T_JOIN) {
     //  return true;
     //}
-  }
+  //}
 
   return false;
 }
@@ -1076,9 +1083,18 @@ QueryTreeNode* QueryPlanBuilder::buildShowTables(ASTNode* ast) {
   return new ShowTablesNode();
 }
 
-//void QueryPlanBuilder::extend(
-//    std::unique_ptr<QueryPlanBuilderInterface> other) {
-//  extensions_.emplace_back(std::move(other));
-//}
+QueryTreeNode* QueryPlanBuilder::buildDescribeTable(ASTNode* ast) {
+  if (!(*ast == ASTNode::T_DESCRIBE_TABLE) || ast->getChildren().size() != 1) {
+    return nullptr;
+  }
+
+  auto table_name = ast->getChildren()[0];
+  if (table_name->getType() != ASTNode::T_TABLE_NAME ||
+      table_name->getToken() == nullptr) {
+    RAISE(kRuntimeError, "corrupt AST");
+  }
+
+  return new DescribeTableNode(table_name->getToken()->getString());
+}
 
 }
