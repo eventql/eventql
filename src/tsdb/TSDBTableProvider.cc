@@ -71,7 +71,7 @@ void TSDBTableProvider::listTables(
     Function<void (const csql::TableInfo& table)> fn) const {
   tsdb_node_->listTables([fn] (const TableConfig& table) {
     csql::TableInfo ti;
-    ti.table_name = table.stream_key_prefix();
+    ti.table_name = table.table_name();
     fn(ti);
   });
 }

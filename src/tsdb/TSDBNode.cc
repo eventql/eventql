@@ -62,7 +62,7 @@ void TSDBNode::configure(const TSDBNodeConfig& conf, const String& base_path) {
   }
 
   for (const auto& sc : conf.event_stream()) {
-    auto stream_ns_key = sc.tsdb_namespace() + "~" + sc.stream_key_prefix();
+    auto stream_ns_key = sc.tsdb_namespace() + "~" + sc.table_name();
 
     configs_.emplace_back(
         stream_ns_key,
