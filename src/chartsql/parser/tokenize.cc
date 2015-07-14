@@ -484,6 +484,11 @@ next:
     goto next;
   }
 
+  if (token == "SHOW") {
+    token_list->emplace_back(Token::T_SHOW);
+    goto next;
+  }
+
   if (token == "XDOMAIN") {
     token_list->emplace_back(Token::T_XDOMAIN);
     goto next;
