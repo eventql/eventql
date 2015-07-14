@@ -14,15 +14,12 @@
 #include <vector>
 #include <memory>
 #include <chartsql/parser/parser.h>
-#include <chartsql/qtree/ChartStatementNode.h>
 #include <chartsql/runtime/queryplan.h>
 #include <chartsql/runtime/queryplanbuilder.h>
+#include <chartsql/runtime/QueryBuilder.h>
 #include <chartsql/runtime/symboltable.h>
-#include <chartsql/runtime/ValueExpressionBuilder.h>
-#include <chartsql/runtime/TableExpressionBuilder.h>
 #include <chartsql/runtime/ResultFormat.h>
 #include <chartsql/runtime/ExecutionStrategy.h>
-#include <chartsql/runtime/charts/ChartStatement.h>
 
 namespace csql {
 
@@ -39,24 +36,12 @@ public:
   SValue evaluateStaticExpression(const String& expr);
   SValue evaluateStaticExpression(ASTNode* expr);
 
-  ScopedPtr<ValueExpression> buildValueExpression(
-      RefPtr<ValueExpressionNode> expression);
-
-  ScopedPtr<TableExpression> buildTableExpression(
-      RefPtr<TableExpressionNode> expression,
-      RefPtr<TableProvider> tables);
-
-  ScopedPtr<ChartStatement> buildChartStatement(
-      RefPtr<ChartStatementNode> node,
-      RefPtr<TableProvider> tables);
-
   void registerFunction(const String& name, SFunction fn);
 
 protected:
   SymbolTable symbol_table_;
+  QueryBuilder query_builder_;
   QueryPlanBuilder query_plan_builder_;
-  ValueExpressionBuilder scalar_exp_builder_;
-  TableExpressionBuilder table_exp_builder_;
 };
 
 }

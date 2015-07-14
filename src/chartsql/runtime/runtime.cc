@@ -8,7 +8,6 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <chartsql/runtime/runtime.h>
-#include <chartsql/runtime/charts/drawstatement.h>
 
 namespace csql {
 
@@ -52,38 +51,6 @@ SValue Runtime::evaluateStaticExpression(ASTNode* expr) {
   SValue out;
   compiled->evaluate(0, nullptr, &out);
   return out;
-}
-
-ScopedPtr<ValueExpression> Runtime::buildValueExpression(
-    RefPtr<ValueExpressionNode> node) {
-  return scalar_exp_builder_.compile(node);
-}
-
-ScopedPtr<TableExpression> Runtime::buildTableExpression(
-    RefPtr<TableExpressionNode> node,
-    RefPtr<TableProvider> tables) {
-  return table_exp_builder_.build(node.get(), this, tables.get());
-}
-
-ScopedPtr<ChartStatement> Runtime::buildChartStatement(
-    RefPtr<ChartStatementNode> node,
-    RefPtr<TableProvider> tables) {
-  Vector<ScopedPtr<DrawStatement>> draw_statements;
-
-  for (size_t i = 0; i < node->numChildren(); ++i) {
-    Vector<ScopedPtr<TableExpression>> union_tables;
-
-    auto draw_stmt_node = node->child(i).asInstanceOf<DrawStatementNode>();
-    for (const auto& table : draw_stmt_node->inputTables()) {
-      union_tables.emplace_back(
-          table_exp_builder_.build(table, this, tables.get()));
-    }
-
-    draw_statements.emplace_back(
-        new DrawStatement(draw_stmt_node, std::move(union_tables), this));
-  }
-
-  return mkScoped(new ChartStatement(std::move(draw_statements)));
 }
 
 void Runtime::registerFunction(const String& name, SFunction fn) {
