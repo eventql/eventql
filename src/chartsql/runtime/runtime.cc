@@ -37,7 +37,8 @@ void Runtime::executeQuery(
       new QueryPlan(
           statements,
           execution_strategy->tableProvider(),
-          &query_builder_));
+          &query_builder_,
+          this));
 
   /* execute query and format results */
   csql::ExecutionContext context;

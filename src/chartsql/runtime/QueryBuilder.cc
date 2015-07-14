@@ -21,13 +21,15 @@ ScopedPtr<ValueExpression> QueryBuilder::buildValueExpression(
 
 ScopedPtr<TableExpression> QueryBuilder::buildTableExpression(
     RefPtr<TableExpressionNode> node,
-    RefPtr<TableProvider> tables) {
+    RefPtr<TableProvider> tables,
+    Runtime* runtime) {
   return table_exp_builder_.build(node.get(), this, tables.get());
 }
 
 ScopedPtr<ChartStatement> QueryBuilder::buildChartStatement(
     RefPtr<ChartStatementNode> node,
-    RefPtr<TableProvider> tables) {
+    RefPtr<TableProvider> tables,
+    Runtime* runtime) {
   Vector<ScopedPtr<DrawStatement>> draw_statements;
 
   for (size_t i = 0; i < node->numChildren(); ++i) {
@@ -40,7 +42,7 @@ ScopedPtr<ChartStatement> QueryBuilder::buildChartStatement(
     }
 
     draw_statements.emplace_back(
-        new DrawStatement(draw_stmt_node, std::move(union_tables), this));
+        new DrawStatement(draw_stmt_node, std::move(union_tables), runtime));
   }
 
   return mkScoped(new ChartStatement(std::move(draw_statements)));

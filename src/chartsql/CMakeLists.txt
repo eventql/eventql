@@ -77,6 +77,7 @@ add_library(chartsql-lib OBJECT
     runtime/execute.cc
     runtime/ExecutionContext.cc
     runtime/TableExpression.cc
+    runtime/QueryBuilder.cc
     runtime/charts/areachartbuilder.cc
     runtime/charts/barchartbuilder.cc
     runtime/charts/domainconfig.cc

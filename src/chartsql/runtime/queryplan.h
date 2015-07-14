@@ -22,7 +22,8 @@ public:
   QueryPlan(
       Vector<RefPtr<QueryTreeNode>> statements,
       RefPtr<TableProvider> tables,
-      QueryBuilder* runtime);
+      QueryBuilder* qbuilder,
+      Runtime* runtime);
 
   size_t numStatements() const;
 
@@ -31,7 +32,8 @@ public:
 protected:
   Vector<RefPtr<QueryTreeNode>> statements_;
   RefPtr<TableProvider> tables_;
-  QueryBuilder* runtime_;
+  Runtime* runtime_;
+  QueryBuilder* qbuilder_;
 };
 
 class ExecutionPlan : public RefCounted {
