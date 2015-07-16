@@ -36,6 +36,7 @@ public:
       http::HTTPConnectionPool* http);
 
   void configure(const TSDBNodeConfig& config, const String& base_path);
+  void configure(const TableConfig& config);
 
   TableConfig* configFor(
       const String& tsdb_namespace,
