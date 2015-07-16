@@ -24,6 +24,7 @@
 using namespace fnord;
 
 namespace tsdb {
+class Table;
 
 struct PartitionState {
   String stream_key;

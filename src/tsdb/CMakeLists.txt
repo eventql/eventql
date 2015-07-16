@@ -25,6 +25,7 @@ add_library(tsdb-server OBJECT
     TSDBTableRef.cc
     RecordSet.cc
     Partition.cc
+    Table.cc
     CompactionWorker.cc
     ReplicationWorker.cc
     ${PROTO_SRCS})

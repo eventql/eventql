@@ -33,16 +33,17 @@ TSDBNode::TSDBNode(
         .replication_scheme = replication_scheme,
         .http = http} {}
 
-Option<TableConfig> TSDBNode::configFor(
+Option<RefPtr<Table>> TSDBNode::findTable(
     const String& stream_ns,
     const String& stream_key) const {
+  std::unique_lock<std::mutex> lk(mutex_);
   auto stream_ns_key = stream_ns + "~" + stream_key;
 
   const auto& iter = tables_.find(stream_ns_key);
   if (iter == tables_.end()) {
-    return None<TableConfig>();
+    return None<RefPtr<Table>>();
   } else {
-    return Some(iter->second->config());
+    return Some(iter->second);
   }
 }
 
@@ -52,11 +53,12 @@ void TSDBNode::configure(const TSDBNodeConfig& conf, const String& base_path) {
   }
 
   for (const auto& sc : conf.event_stream()) {
-    configure(sc);
+    createTable(sc);
   }
 }
 
-void TSDBNode::configure(const TableConfig& table) {
+void TSDBNode::createTable(const TableConfig& table) {
+  std::unique_lock<std::mutex> lk(mutex_);
   auto stream_ns_key = table.tsdb_namespace() + "~" + table.table_name();
 
   tables_.emplace(

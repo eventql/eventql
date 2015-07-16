@@ -38,11 +38,8 @@ public:
       http::HTTPConnectionPool* http);
 
   void configure(const TSDBNodeConfig& config, const String& base_path);
-  void configure(const TableConfig& config);
 
-  Option<TableConfig> configFor(
-      const String& tsdb_namespace,
-      const String& stream_key) const;
+  void createTable(const TableConfig& config);
 
   Option<RefPtr<Table>> findTable(
       const String& tsdb_namespace,
@@ -79,7 +76,7 @@ protected:
   void reopenPartitions();
 
   TSDBNodeRef noderef_;
-  std::mutex mutex_;
+  mutable std::mutex mutex_;
   HashMap<String, RefPtr<Table>> tables_;
   HashMap<String, RefPtr<Partition>> partitions_;
   Vector<RefPtr<CompactionWorker>> compaction_workers_;
