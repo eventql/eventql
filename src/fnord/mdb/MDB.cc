@@ -37,17 +37,19 @@ RefPtr<MDB> MDB::open(
   }
 
   RefPtr<MDB> mdb(
-      new MDB(mdb_env, path, opts.data_filename, opts.lock_filename));
+      new MDB(opts, mdb_env, path, opts.data_filename, opts.lock_filename));
 
   mdb->openDBHandle(flags, opts.duplicate_keys);
   return mdb;
 }
 
 MDB::MDB(
+    const MDBOptions& opts,
     MDB_env* mdb_env,
     const String& path,
     const String& data_filename,
     const String& lock_filename) :
+    opts_(opts),
     mdb_env_(mdb_env),
     path_(path),
     data_filename_("/" + data_filename),
@@ -75,7 +77,7 @@ RefPtr<MDBTransaction> MDB::startTransaction(bool readonly /* = false */) {
     RAISEF(kRuntimeError, "mdb_txn_begin() failed: $0", err);
   }
 
-  return RefPtr<MDBTransaction>(new MDBTransaction(txn, mdb_handle_));
+  return RefPtr<MDBTransaction>(new MDBTransaction(txn, mdb_handle_, &opts_));
 }
 
 void MDB::openDBHandle(int flags, bool dupsort) {
