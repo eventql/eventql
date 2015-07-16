@@ -29,6 +29,11 @@ String Table::tsdbNamespace() const {
   return config_.tsdb_namespace();
 }
 
+Duration Table::partitionSize() const {
+  std::unique_lock<std::mutex> lk(mutex_);
+  return config_.partition_size();
+}
+
 Duration Table::compactionInterval() const {
   std::unique_lock<std::mutex> lk(mutex_);
   return config_.compaction_interval();

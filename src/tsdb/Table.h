@@ -27,6 +27,8 @@ public:
 
   String tsdbNamespace() const;
 
+  Duration partitionSize() const;
+
   Duration compactionInterval() const;
 
   size_t sstableSize() const;
