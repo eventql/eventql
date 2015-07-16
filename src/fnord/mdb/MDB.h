@@ -60,7 +60,9 @@ public:
   void removeStaleReaders();
 
 protected:
+
   MDB(
+      const MDBOptions& opts,
       MDB_env* mdb_env,
       const String& path,
       const String& data_filename,
@@ -68,6 +70,7 @@ protected:
 
   void openDBHandle(int flags, bool dupsort);
 
+  MDBOptions opts_;
   MDB_env* mdb_env_;
   MDB_dbi mdb_handle_;
 
