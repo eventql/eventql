@@ -39,7 +39,7 @@ RefPtr<MDB> MDB::open(
   RefPtr<MDB> mdb(
       new MDB(mdb_env, path, opts.data_filename, opts.lock_filename));
 
-  mdb->openDBHandle(flags);
+  mdb->openDBHandle(flags, opts.duplicate_keys);
   return mdb;
 }
 
@@ -78,7 +78,7 @@ RefPtr<MDBTransaction> MDB::startTransaction(bool readonly /* = false */) {
   return RefPtr<MDBTransaction>(new MDBTransaction(txn, mdb_handle_));
 }
 
-void MDB::openDBHandle(int flags) {
+void MDB::openDBHandle(int flags, bool dupsort) {
   int rc = mdb_env_open(
       mdb_env_,
       path_.c_str(),
@@ -99,7 +99,12 @@ void MDB::openDBHandle(int flags) {
     RAISEF(kRuntimeError, "mdb_txn_begin() failed: $0", err);
   }
 
-  if (mdb_dbi_open(txn, NULL, MDB_DUPSORT, &mdb_handle_) != 0) {
+  auto oflags = 0;
+  if (dupsort) {
+    oflags |= MDB_DUPSORT;
+  }
+
+  if (mdb_dbi_open(txn, NULL, oflags, &mdb_handle_) != 0) {
     RAISE(kRuntimeError, "mdb_dbi_open() failed");
   }
 

@@ -25,13 +25,15 @@ struct MDBOptions {
       maxsize(1024 * 1024 * 1024),
       data_filename("data.mdb"),
       lock_filename("lock.mdb"),
-      sync(true) {}
+      sync(true),
+      duplicate_keys(true) {}
 
   bool readonly;
   size_t maxsize;
   String data_filename;
   String lock_filename;
   bool sync;
+  bool duplicate_keys;
 };
 
 class MDB : public RefCounted {
@@ -64,7 +66,7 @@ protected:
       const String& data_filename,
       const String& lock_filename);
 
-  void openDBHandle(int flags);
+  void openDBHandle(int flags, bool dupsort);
 
   MDB_env* mdb_env_;
   MDB_dbi mdb_handle_;
