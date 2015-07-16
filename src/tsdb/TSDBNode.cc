@@ -202,8 +202,13 @@ Option<RefPtr<Partition>> TSDBNode::findPartition(
 }
 
 void TSDBNode::listTables(
+    const String& tsdb_namespace,
     Function<void (const TSDBTableInfo& table)> fn) const {
   for (const auto& tbl : configs_) {
+    if (tbl.second->tsdb_namespace() != tsdb_namespace) {
+      continue;
+    }
+
     TSDBTableInfo ti;
     ti.table_name = tbl.second->table_name();
     ti.config = *tbl.second;

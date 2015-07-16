@@ -53,6 +53,7 @@ public:
       const SHA1Hash& partition_key);
 
   void listTables(
+      const String& tsdb_namespace,
       Function<void (const TSDBTableInfo& table)> fn) const;
 
   Option<TSDBTableInfo> tableInfo(

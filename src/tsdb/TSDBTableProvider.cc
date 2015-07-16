@@ -69,7 +69,9 @@ Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildSequentialScan(
 
 void TSDBTableProvider::listTables(
     Function<void (const csql::TableInfo& table)> fn) const {
-  tsdb_node_->listTables([this, fn] (const TSDBTableInfo& table) {
+  tsdb_node_->listTables(
+      tsdb_namespace_,
+      [this, fn] (const TSDBTableInfo& table) {
     fn(tableInfoForTable(table));
   });
 }
