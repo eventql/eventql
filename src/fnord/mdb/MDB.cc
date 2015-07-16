@@ -14,33 +14,31 @@ namespace mdb {
 
 RefPtr<MDB> MDB::open(
     const String& path,
-    bool readonly /* = false */,
-    size_t maxsize /* = ... */,
-    const String& data_filename /* = "data.mdb" */,
-    const String& lock_filename /* = "lock.mdb" */,
-    bool sync /* = true */) {
+    const MDBOptions& opts) {
   MDB_env* mdb_env;
 
   if (mdb_env_create(&mdb_env) != 0) {
     RAISE(kRuntimeError, "mdb_env_create() failed");
   }
 
-  auto rc = mdb_env_set_mapsize(mdb_env, maxsize);
+  auto rc = mdb_env_set_mapsize(mdb_env, opts.maxsize);
   if (rc != 0) {
     auto err = String(mdb_strerror(rc));
     RAISEF(kRuntimeError, "mdb_set_mapsize() failed: $0", err);
   }
 
   int flags = 0;
-  if (readonly) {
+  if (opts.readonly) {
     flags |= MDB_RDONLY;
   }
 
-  if (!sync) {
+  if (!opts.sync) {
     flags |= MDB_NOSYNC;
   }
 
-  RefPtr<MDB> mdb(new MDB(mdb_env, path, data_filename, lock_filename));
+  RefPtr<MDB> mdb(
+      new MDB(mdb_env, path, opts.data_filename, opts.lock_filename));
+
   mdb->openDBHandle(flags);
   return mdb;
 }
