@@ -50,6 +50,12 @@ void MessageDecoder::decode(
         break;
       }
 
+      case FieldType::UINT64: {
+        auto val = reader.readVarUInt();
+        msg->addChild(fid, (uint64_t) val);
+        break;
+      }
+
       case FieldType::BOOLEAN: {
         auto val = reader.readVarUInt();
         msg->addChild(fid, val == 1);
