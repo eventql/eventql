@@ -33,30 +33,17 @@ TSDBNode::TSDBNode(
         .replication_scheme = replication_scheme,
         .http = http} {}
 
-// FIXPAUL proper longest prefix search ;)
 TableConfig* TSDBNode::configFor(
     const String& stream_ns,
     const String& stream_key) const {
-  TableConfig* config = nullptr;
-  size_t match_len = 0;
-
   auto stream_ns_key = stream_ns + "~" + stream_key;
-  for (const auto& cfg : configs_) {
-    if (!StringUtil::beginsWith(stream_ns_key, cfg.first)) {
-      continue;
-    }
 
-    if (cfg.first.length() > match_len) {
-      config = cfg.second.get();
-      match_len = cfg.first.length();
-    }
+  const auto& iter = configs_.find(stream_ns_key);
+  if (iter == configs_.end()) {
+    return nullptr;
+  } else {
+    return iter->second.get();
   }
-
-  if (config == nullptr) {
-    RAISEF(kIndexError, "no config found for stream key: '$0'", stream_key);
-  }
-
-  return config;
 }
 
 void TSDBNode::configure(const TSDBNodeConfig& conf, const String& base_path) {
@@ -72,7 +59,7 @@ void TSDBNode::configure(const TSDBNodeConfig& conf, const String& base_path) {
 void TSDBNode::configure(const TableConfig& table) {
   auto stream_ns_key = table.tsdb_namespace() + "~" + table.table_name();
 
-  configs_.emplace_back(
+  configs_.emplace(
       stream_ns_key,
       ScopedPtr<TableConfig>(new TableConfig(table)));
 }
