@@ -28,6 +28,11 @@ message TableConfig {
   optional string table_name = 1;
 
   /**
+   * The partition size in microseconds
+   */
+  optional uint64 partition_size = 8;
+
+  /**
    * The maximum sstable size in bytes
    */
   required uint64 sstable_size = 4;
