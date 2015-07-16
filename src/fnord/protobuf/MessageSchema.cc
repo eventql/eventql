@@ -271,15 +271,14 @@ MessageSchemaField MessageSchemaField::mkObjectField(
   return field;
 }
 
+MessageSchema::MessageSchema(std::nullptr_t) {}
+
 MessageSchema::MessageSchema(
     const String& name,
     Vector<MessageSchemaField> fields) :
-    name_(name),
-    fields_(fields) {
-  for (const auto& field : fields_) {
-    field_ids_.emplace(field.name, field.id);
-    field_types_.emplace(field.id, field.type);
-    field_names_.emplace(field.id, field.name);
+    name_(name) {
+  for (const auto& field : fields) {
+    addField(field);
   }
 }
 
@@ -352,6 +351,67 @@ RefPtr<MessageSchema> MessageSchema::fieldSchema(uint32_t id) const {
   }
 
   RAISEF(kIndexError, "field not found: $0", id);
+}
+
+void MessageSchema::addField(const MessageSchemaField& field) {
+  field_ids_.emplace(field.name, field.id);
+  field_types_.emplace(field.id, field.type);
+  field_names_.emplace(field.id, field.name);
+  fields_.emplace_back(field);
+}
+
+void MessageSchema::encode(util::BinaryMessageWriter* buf) const {
+  buf->appendUInt8(0x1);
+  buf->appendLenencString(name_);
+  buf->appendVarUInt(fields_.size());
+
+  for (const auto& field : fields_) {
+    buf->appendVarUInt(field.id);
+    buf->appendLenencString(field.name);
+    buf->appendUInt8((uint8_t) field.type);
+    buf->appendVarUInt(field.type_size);
+    buf->appendUInt8(field.repeated);
+    buf->appendUInt8(field.optional);
+    buf->appendUInt8((uint8_t) field.encoding);
+
+    if (field.type == FieldType::OBJECT) {
+      field.schema->encode(buf);
+    }
+  }
+}
+
+void MessageSchema::decode(util::BinaryMessageReader* buf) {
+  auto version = *buf->readUInt8();
+  (void) version; // unused
+
+  name_ = buf->readLenencString();
+
+  auto nfields = buf->readVarUInt();
+  for (int i = 0; i < nfields; ++i) {
+    auto id = buf->readVarUInt();
+    auto name = buf->readLenencString();
+    auto type = (FieldType) *buf->readUInt8();
+    auto type_size = buf->readVarUInt();
+    auto repeated = *buf->readUInt8() > 0;
+    auto optional = *buf->readUInt8() > 0;
+    auto encoding = (EncodingHint) *buf->readUInt8();
+
+    msg::MessageSchemaField field(
+        id,
+        name,
+        type,
+        type_size,
+        repeated,
+        optional,
+        encoding);
+
+    if (field.type == FieldType::OBJECT) {
+      field.schema = mkRef(new MessageSchema(nullptr));
+      field.schema->decode(buf);
+    }
+
+    addField(field);
+  }
 }
 
 Vector<Pair<String, MessageSchemaField>> MessageSchema::columns() const {
