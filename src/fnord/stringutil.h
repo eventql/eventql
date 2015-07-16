@@ -87,11 +87,32 @@ public:
   static bool isHexString(const std::string& str);
 
   /**
+   * Check if the provided string consists only of 0-9a-zA-Z
+   *
+   * @param chr the char to check
+   */
+  static bool isAlphanumeric(const String& string);
+
+  /**
    * Check if the provided char is one of 0-9a-zA-Z
    *
    * @param chr the char to check
    */
   static bool isAlphanumeric(char chr);
+
+  /**
+   * Check if the provided string consists only of 0-9a-zA-Z-_.
+   *
+   * @param chr the char to check
+   */
+  static bool isShellSafe(const String& string);
+
+  /**
+   * Check if the provided char is one of 0-9a-zA-Z-_.
+   *
+   * @param chr the char to check
+   */
+  static bool isShellSafe(char chr);
 
   /**
    * Check if the provided string consists only of digits
