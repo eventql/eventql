@@ -362,7 +362,7 @@ void QueryPlanBuilder::expandColumns(
       if (tbl_info.isEmpty()) {
         RAISEF(
             kNotFoundError,
-            "table not found: $)",
+            "table not found: $0",
             table_name->getToken()->getString());
       }
 
