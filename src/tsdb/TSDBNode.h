@@ -22,6 +22,8 @@
 #include <tsdb/TSDBNodeConfig.pb.h>
 #include <tsdb/TSDBTableInfo.h>
 #include <tsdb/SQLEngine.h>
+#include <tsdb/PartitionInfo.pb.h>
+#include <tsdb/RecordEnvelope.pb.h>
 
 using namespace fnord;
 
@@ -59,6 +61,52 @@ public:
   Option<TSDBTableInfo> tableInfo(
       const String& tsdb_namespace,
       const String& table_key) const;
+
+  void insertRecord(const RecordEnvelope& record);
+  void insertRecords(const RecordEnvelopeList& records);
+
+  void insertRecord(
+      const String& tsdb_namespace,
+      const String& stream_key,
+      const SHA1Hash& partition_key,
+      const SHA1Hash& record_id,
+      const Buffer& record_data);
+
+  void insertRecord(
+      const String& tsdb_namespace,
+      const String& stream_key,
+      const UnixTime& time,
+      const SHA1Hash& record_id,
+      const Buffer& record_data);
+
+  Vector<String> listPartitions(
+      const String& stream_key,
+      const UnixTime& from,
+      const UnixTime& until);
+
+  void fetchPartition(
+      const String& tsdb_namespace,
+      const String& stream_key,
+      const SHA1Hash& partition_key,
+      Function<void (const Buffer& record)> fn);
+
+  void fetchPartitionWithSampling(
+      const String& tsdb_namespace,
+      const String& stream_key,
+      const SHA1Hash& partition_key,
+      size_t sample_modulo,
+      size_t sample_index,
+      Function<void (const Buffer& record)> fn);
+
+  PartitionInfo fetchPartitionInfo(
+      const String& tsdb_namespace,
+      const String& stream_key,
+      const SHA1Hash& partition_key);
+
+  Buffer fetchDerivedDataset(
+      const String& stream_key,
+      const String& partition,
+      const String& derived_dataset_name);
 
   const String& dbPath() const;
 
