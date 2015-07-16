@@ -19,16 +19,27 @@
 namespace fnord {
 namespace mdb {
 
+struct MDBOptions {
+  MDBOptions() :
+      readonly(false), // 1 GiB
+      maxsize(1024 * 1024 * 1024),
+      data_filename("data.mdb"),
+      lock_filename("lock.mdb"),
+      sync(true) {}
+
+  bool readonly;
+  size_t maxsize;
+  String data_filename;
+  String lock_filename;
+  bool sync;
+};
+
 class MDB : public RefCounted {
 public:
 
   static RefPtr<MDB> open(
       const String& path,
-      bool readonly = false,
-      size_t maxsize = 1024 * 1024 * 1024, // 1 GiB
-      const String& data_filename = "data.mdb",
-      const String& lock_filename = "lock.mdb",
-      bool sync = true);
+      const MDBOptions& opts = MDBOptions());
 
   MDB(const MDB& other) = delete;
   MDB& operator=(const MDB& other) = delete;
