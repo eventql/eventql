@@ -14,6 +14,13 @@ using namespace fnord;
 
 namespace tsdb {
 
+static mdb::MDBOptions tsdb_mdb_opts() {
+  mdb::MDBOptions opts;
+  opts.data_filename = "index.db";
+  opts.lock_filename = "index.db.lck";
+  return opts;
+};
+
 TSDBNode::TSDBNode(
     const String& db_path,
     RefPtr<dproc::ReplicationScheme> replication_scheme,
@@ -22,10 +29,7 @@ TSDBNode::TSDBNode(
         .db_path = db_path,
         .db = mdb::MDB::open(
             db_path,
-            false,
-            1024 * 1024 * 1024, // 1 GiB
-            "index.db",
-            "index.db.lck"),
+            tsdb_mdb_opts()),
         .replication_scheme = replication_scheme,
         .http = http} {}
 
