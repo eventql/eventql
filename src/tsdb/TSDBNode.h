@@ -40,9 +40,13 @@ public:
   void configure(const TSDBNodeConfig& config, const String& base_path);
   void configure(const TableConfig& config);
 
-  TableConfig* configFor(
+  Option<TableConfig> configFor(
       const String& tsdb_namespace,
       const String& stream_key) const;
+
+  Option<RefPtr<Table>> findTable(
+      const String& tsdb_namespace,
+      const String& table_name) const;
 
   Option<RefPtr<Partition>> findPartition(
       const String& tsdb_namespace,
@@ -75,8 +79,8 @@ protected:
   void reopenPartitions();
 
   TSDBNodeRef noderef_;
-  HashMap<String, ScopedPtr<TableConfig>> configs_;
   std::mutex mutex_;
+  HashMap<String, RefPtr<Table>> tables_;
   HashMap<String, RefPtr<Partition>> partitions_;
   Vector<RefPtr<CompactionWorker>> compaction_workers_;
   Vector<RefPtr<ReplicationWorker>> replication_workers_;

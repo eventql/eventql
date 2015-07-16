@@ -33,16 +33,16 @@ TSDBNode::TSDBNode(
         .replication_scheme = replication_scheme,
         .http = http} {}
 
-TableConfig* TSDBNode::configFor(
+Option<TableConfig> TSDBNode::configFor(
     const String& stream_ns,
     const String& stream_key) const {
   auto stream_ns_key = stream_ns + "~" + stream_key;
 
-  const auto& iter = configs_.find(stream_ns_key);
-  if (iter == configs_.end()) {
-    return nullptr;
+  const auto& iter = tables_.find(stream_ns_key);
+  if (iter == tables_.end()) {
+    return None<TableConfig>();
   } else {
-    return iter->second.get();
+    return Some(iter->second->config());
   }
 }
 
@@ -59,9 +59,11 @@ void TSDBNode::configure(const TSDBNodeConfig& conf, const String& base_path) {
 void TSDBNode::configure(const TableConfig& table) {
   auto stream_ns_key = table.tsdb_namespace() + "~" + table.table_name();
 
-  configs_.emplace(
+  tables_.emplace(
       stream_ns_key,
-      ScopedPtr<TableConfig>(new TableConfig(table)));
+      new Table(
+          table,
+          schemas_.getSchema(table.schema())));
 }
 
 void TSDBNode::start(
@@ -130,13 +132,11 @@ void TSDBNode::reopenPartitions() {
     PartitionState state;
     state.decode(&reader);
 
-    auto config = configFor(tsdb_namespace, state.stream_key);
     auto partition = Partition::reopen(
         partition_key,
         state,
         db_key,
-        schemas_.getSchema(config->schema()),
-        config,
+        findTable(tsdb_namespace, state.stream_key).get(),
         &noderef_);
 
     partitions_.emplace(db_key, partition);
@@ -159,13 +159,11 @@ RefPtr<Partition> TSDBNode::findOrCreatePartition(
     return iter->second;
   }
 
-  auto config = configFor(tsdb_namespace, stream_key);
   auto partition = Partition::create(
       partition_key,
       stream_key,
       db_key,
-      schemas_.getSchema(config->schema()),
-      config,
+      findTable(tsdb_namespace, stream_key).get(),
       &noderef_);
 
   partitions_.emplace(db_key, partition);
@@ -191,15 +189,15 @@ Option<RefPtr<Partition>> TSDBNode::findPartition(
 void TSDBNode::listTables(
     const String& tsdb_namespace,
     Function<void (const TSDBTableInfo& table)> fn) const {
-  for (const auto& tbl : configs_) {
-    if (tbl.second->tsdb_namespace() != tsdb_namespace) {
+  for (const auto& tbl : tables_) {
+    if (tbl.second->tsdbNamespace() != tsdb_namespace) {
       continue;
     }
 
     TSDBTableInfo ti;
-    ti.table_name = tbl.second->table_name();
-    ti.config = *tbl.second;
-    ti.schema = schemas_.getSchema(tbl.second->schema());
+    ti.table_name = tbl.second->name();
+    ti.config = tbl.second->config();
+    ti.schema = tbl.second->schema();
     fn(ti);
   }
 }
@@ -207,16 +205,15 @@ void TSDBNode::listTables(
 Option<TSDBTableInfo> TSDBNode::tableInfo(
       const String& tsdb_namespace,
       const String& table_key) const {
-
-  auto config = configFor(tsdb_namespace, table_key);
-  if (config == nullptr) {
+  auto table = findTable(tsdb_namespace, table_key);
+  if (table.isEmpty()) {
     return None<TSDBTableInfo>();
   }
 
   TSDBTableInfo ti;
-  ti.table_name = table_key;
-  ti.config = *config;
-  ti.schema = schemas_.getSchema(config->schema());
+  ti.table_name = table.get()->name();
+  ti.config = table.get()->config();
+  ti.schema = table.get()->schema();
   return Some(ti);
 }
 

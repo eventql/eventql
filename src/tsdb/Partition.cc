@@ -26,8 +26,7 @@ RefPtr<Partition> Partition::create(
     const SHA1Hash& partition_key,
     const String& stream_key,
     const String& db_key,
-    RefPtr<msg::MessageSchema> schema,
-    TableConfig* config,
+    RefPtr<Table> table,
     TSDBNodeRef* node) {
 
   fnord::logDebug(
@@ -41,8 +40,7 @@ RefPtr<Partition> Partition::create(
           partition_key,
           stream_key,
           db_key,
-          schema,
-          config,
+          table,
           node));
 }
 
@@ -50,8 +48,7 @@ RefPtr<Partition> Partition::reopen(
     const SHA1Hash& partition_key,
     const PartitionState& state,
     const String& db_key,
-    RefPtr<msg::MessageSchema> schema,
-    TableConfig* config,
+    RefPtr<Table> table,
     TSDBNodeRef* node) {
 
   fnord::logDebug(
@@ -65,8 +62,7 @@ RefPtr<Partition> Partition::reopen(
           partition_key,
           state,
           db_key,
-          schema,
-          config,
+          table,
           node));
 }
 
@@ -74,39 +70,34 @@ Partition::Partition(
     const SHA1Hash& partition_key,
     const String& stream_key,
     const String& db_key,
-    RefPtr<msg::MessageSchema> schema,
-    TableConfig* config,
+    RefPtr<Table> table,
     TSDBNodeRef* node) :
     key_(partition_key),
     stream_key_(stream_key),
     db_key_(db_key),
-    schema_(schema),
+    table_(table),
     records_(
         node->db_path,
         key_.toString().substr(0, 12)  + "."),
-    config_(config),
     node_(node),
     last_compaction_(0) {
-  records_.setMaxDatafileSize(config_->sstable_size());
+  records_.setMaxDatafileSize(table_->sstableSize());
 }
 
 Partition::Partition(
     const SHA1Hash& partition_key,
     const PartitionState& state,
     const String& db_key,
-    RefPtr<msg::MessageSchema> schema,
-    TableConfig* config,
+    RefPtr<Table> table,
     TSDBNodeRef* node) :
     key_(partition_key),
     stream_key_(state.stream_key),
     db_key_(db_key),
-    schema_(schema),
+    table_(table),
     records_(
         node->db_path,
         key_.toString().substr(0, 12) + ".",
         state.record_state),
-    config_(config),
-    node_(node),
     last_compaction_(0),
     repl_offsets_(state.repl_offsets),
     cstable_file_(state.cstable_file),
@@ -114,7 +105,7 @@ Partition::Partition(
   scheduleCompaction();
   node_->compactionq.insert(this, WallClock::unixMicros());
   node_->replicationq.insert(this, WallClock::unixMicros());
-  records_.setMaxDatafileSize(config_->sstable_size());
+  records_.setMaxDatafileSize(table_->sstableSize());
 }
 
 void Partition::insertRecord(
@@ -157,7 +148,7 @@ void Partition::insertRecords(const Vector<RecordRef>& records) {
 
 void Partition::scheduleCompaction() {
   auto now = WallClock::unixMicros();
-  auto interval = config_->compaction_interval();
+  auto interval = table_->compactionInterval().microseconds();
   auto last = last_compaction_.unixMicros();
   uint64_t compaction_delay = 0;
 
@@ -371,7 +362,8 @@ void Partition::buildCSTable(
       key_.toString(),
       output_file);
 
-  cstable::CSTableBuilder cstable(schema_.get());
+  auto schema = table_->schema();
+  cstable::CSTableBuilder cstable(schema.get());
 
   for (const auto& f : input_files) {
     auto fpath = FileUtil::joinPaths(node_->db_path, f);
@@ -391,7 +383,7 @@ void Partition::buildCSTable(
       cursor->getData(&data, &data_size);
 
       msg::MessageObject obj;
-      msg::MessageDecoder::decode(data, data_size, *schema_, &obj);
+      msg::MessageDecoder::decode(data, data_size, *schema, &obj);
       cstable.addRecord(obj);
 
       if (!cursor->next()) {
