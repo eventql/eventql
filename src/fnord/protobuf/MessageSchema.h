@@ -12,6 +12,8 @@
 #include <fnord/stdtypes.h>
 #include <fnord/exception.h>
 #include <fnord/autoref.h>
+#include <fnord/util/binarymessagereader.h>
+#include <fnord/util/binarymessagewriter.h>
 #include <fnord/protobuf/MessageObject.h>
 #include <google/protobuf/descriptor.h>
 #include <google/protobuf/descriptor.pb.h>
@@ -91,6 +93,8 @@ public:
       const String& name,
       Vector<MessageSchemaField> fields);
 
+  MessageSchema(std::nullptr_t);
+
   MessageSchema(const MessageSchema& other);
 
   const String& name() const;
@@ -104,7 +108,12 @@ public:
   Vector<Pair<String, MessageSchemaField>> columns() const;
   String toString() const;
 
+  void encode(util::BinaryMessageWriter* buf) const;
+  void decode(util::BinaryMessageReader* buf);
+
 protected:
+
+  void addField(const MessageSchemaField& field);
 
   void findColumns(
       const MessageSchemaField& field,
