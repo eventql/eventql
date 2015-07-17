@@ -30,6 +30,22 @@ MessageObject::MessageObject(
 
 MessageObject::MessageObject(
     uint32_t _id,
+    uint64_t value) :
+    id(_id),
+    type(FieldType::UINT64) {
+  new (&data_) uint64_t(value);
+}
+
+MessageObject::MessageObject(
+    uint32_t _id,
+    double value) :
+    id(_id),
+    type(FieldType::DOUBLE) {
+  new (&data_) double(value);
+}
+
+MessageObject::MessageObject(
+    uint32_t _id,
     const String& value) : id(_id),
     type(FieldType::STRING) {
   new (&data_) String(value);
@@ -73,6 +89,10 @@ MessageObject::MessageObject(
       new (&data_) uint64_t(other.asUInt64());
       break;
 
+    case FieldType::DOUBLE:
+      new (&data_) double(other.asDouble());
+      break;
+
     case FieldType::BOOLEAN:
       new (&data_) uint8_t(other.asBool() ? 1 : 0);
       break;
@@ -93,6 +113,7 @@ MessageObject& MessageObject::operator=(const MessageObject& other) {
 
     case FieldType::UINT32:
     case FieldType::UINT64:
+    case FieldType::DOUBLE:
     case FieldType::BOOLEAN:
       break;
 
@@ -119,6 +140,10 @@ MessageObject& MessageObject::operator=(const MessageObject& other) {
       new (&data_) uint64_t(other.asUInt64());
       break;
 
+    case FieldType::DOUBLE:
+      new (&data_) double(other.asDouble());
+      break;
+
     case FieldType::BOOLEAN:
       new (&data_) uint8_t(other.asBool() ? 1 : 0);
       break;
@@ -141,6 +166,7 @@ MessageObject::~MessageObject() {
 
     case FieldType::UINT32:
     case FieldType::UINT64:
+    case FieldType::DOUBLE:
     case FieldType::BOOLEAN:
       break;
 
@@ -189,6 +215,16 @@ uint64_t MessageObject::asUInt64() const {
 #endif
 
   return *((uint64_t*) &data_);
+}
+
+double MessageObject::asDouble() const {
+#ifndef FNORD_NODEBUG
+  if (type != FieldType::DOUBLE) {
+    RAISE(kTypeError);
+  }
+#endif
+
+  return *((double*) &data_);
 }
 
 bool MessageObject::asBool() const {

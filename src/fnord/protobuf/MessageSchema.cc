@@ -232,6 +232,10 @@ static void schemaNodeToString(
       attrs += StringUtil::format(" @maxval=$0", field.type_size);
       break;
 
+    case FieldType::DOUBLE:
+      type_name = "double";
+      break;
+
     case FieldType::STRING:
       type_name = "string";
       attrs += StringUtil::format(" @maxlen=$0", field.type_size);
