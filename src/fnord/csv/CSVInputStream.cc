@@ -92,8 +92,7 @@ void CSVInputStream::rewind() {
   input_->rewind();
 }
 
-const RewindableInputStream& CSVInputStream::getInputStream()
-    const {
+const RewindableInputStream& CSVInputStream::getInputStream() const {
   return *input_;
 }
 
