@@ -16,6 +16,7 @@
 namespace fnord {
 
 enum class HumanDataType {
+  UNKNOWN,
   DATETIME,
   DATETIME_NULLABLE,
   URL,
@@ -30,8 +31,9 @@ enum class HumanDataType {
   FLOAT_NULLABLE,
   BOOLEAN,
   BOOLEAN_NULLABLE,
+  NULL_OR_EMPTY,
   TEXT,
-  UNKNOWN
+  BINARY
 };
 
 class Human {
@@ -41,7 +43,9 @@ public:
 
   static Option<UnixTime> parseTime(const String& str);
 
-  static HumanDataType detectDataType(
+  static HumanDataType detectDataType(const String& value);
+
+  static HumanDataType detectDataTypeSeries(
       const String& value,
       HumanDataType prev = HumanDataType::UNKNOWN);
 
