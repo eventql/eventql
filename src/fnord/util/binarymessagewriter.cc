@@ -69,8 +69,19 @@ void BinaryMessageWriter::updateUInt64(size_t offset, uint64_t value) {
   update(offset, &value, sizeof(value));
 }
 
+void BinaryMessageWriter::appendDouble(double value) {
+  auto bytes = IEEE754::toBytes(value);
+  append(&bytes, sizeof(bytes));
+}
+
 void BinaryMessageWriter::appendString(const std::string& string) {
   append(string.data(), string.size());
+}
+
+void BinaryMessageWriter::updateString(
+    size_t offset,
+    const std::string& string) {
+  update(offset, string.data(), string.size());
 }
 
 void BinaryMessageWriter::appendLenencString(const std::string& string) {
@@ -90,16 +101,6 @@ void BinaryMessageWriter::appendVarUInt(uint64_t value) {
   append(buf, bytes);
 }
 
-void BinaryMessageWriter::updateString(
-    size_t offset,
-    const std::string& string) {
-  update(offset, string.data(), string.size());
-}
-
-void BinaryMessageWriter::appendDouble(double value) {
-  auto bytes = IEEE754::toBytes(value);
-  append(&bytes, sizeof(bytes));
-}
 
 void* BinaryMessageWriter::data() const {
   return ptr_;
