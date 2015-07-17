@@ -124,6 +124,15 @@ public:
   static bool isDigitString(const char* begin, const char* end);
 
   /**
+   * Check if the provided string matches the pattern ^-?[0-9]+([,\.][0-9])$
+   *
+   * @param str the string to check
+   * @return true if the string consists only of digits, false otherwise
+   */
+  static bool isNumber(const std::string& str);
+  static bool isNumber(const char* begin, const char* end);
+
+  /**
    * Replace all occurences of pattern with replacement in str
    *
    * @param str the str that should be modified

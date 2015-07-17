@@ -238,6 +238,36 @@ bool StringUtil::isDigitString(const char* begin, const char* end) {
   return true;
 }
 
+bool StringUtil::isNumber(const std::string& str) {
+  return isNumber(str.data(), str.data() + str.size());
+}
+
+bool StringUtil::isNumber(const char* begin, const char* end) {
+  auto cur = begin;
+
+  if (cur < end && *cur == '-') {
+    ++cur;
+  }
+
+  for (; cur < end; ++cur) {
+    if (!isdigit(*cur)) {
+      return false;
+    }
+  }
+
+  if (cur < end && (*cur == '.' || *cur == ',')) {
+    ++cur;
+  }
+
+  for (; cur < end; ++cur) {
+    if (!isdigit(*cur)) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
 void StringUtil::toLower(std::string* str) {
   auto& str_ref = *str;
 
