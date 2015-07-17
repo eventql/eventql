@@ -118,7 +118,7 @@ target_link_libraries(tests/test-logjoin ${CMAKE_THREAD_LIBS_INIT} ${FNORD_LIBS}
 #    $<TARGET_OBJECTS:fnord-http>
 #    $<TARGET_OBJECTS:fnord-json>
 #    $<TARGET_OBJECTS:fnord-rpc>
-#    $<TARGET_OBJECTS:cstable>
+#    $<TARGET_OBJECTS:libcstable>
 #    $<TARGET_OBJECTS:sstable>
 #    $<TARGET_OBJECTS:fnord-fts>
 #    $<TARGET_OBJECTS:fnord-protobuf>
@@ -150,7 +150,7 @@ target_link_libraries(tests/test-logjoin ${CMAKE_THREAD_LIBS_INIT} ${FNORD_LIBS}
 #    $<TARGET_OBJECTS:fnord-rpc>
 #    $<TARGET_OBJECTS:fnord-mdb>
 #    $<TARGET_OBJECTS:fnord-protobuf>
-#    $<TARGET_OBJECTS:cstable>
+#    $<TARGET_OBJECTS:libcstable>
 #    $<TARGET_OBJECTS:fnord-afx>
 #    cm-indexbuild.cc
 #    ../3rdparty/libfnord/fnord-logtable/RemoteTableReader.cc
@@ -307,7 +307,7 @@ target_link_libraries(tests/test-logjoin ${CMAKE_THREAD_LIBS_INIT} ${FNORD_LIBS}
 #    $<TARGET_OBJECTS:fnord-http>
 #    $<TARGET_OBJECTS:fnord-json>
 #    $<TARGET_OBJECTS:fnord-rpc>
-#    $<TARGET_OBJECTS:cstable>
+#    $<TARGET_OBJECTS:libcstable>
 #    $<TARGET_OBJECTS:sstable>
 #    $<TARGET_OBJECTS:fnord-fts>
 #    $<TARGET_OBJECTS:fnord-protobuf>
@@ -352,7 +352,7 @@ target_link_libraries(tests/test-logjoin ${CMAKE_THREAD_LIBS_INIT} ${FNORD_LIBS}
 #     $<TARGET_OBJECTS:fnord-http>
 #     $<TARGET_OBJECTS:fnord-json>
 #     $<TARGET_OBJECTS:fnord-rpc>
-#     $<TARGET_OBJECTS:cstable>
+#     $<TARGET_OBJECTS:libcstable>
 #     $<TARGET_OBJECTS:sstable>
 #     $<TARGET_OBJECTS:fnord-fts>
 #     $<TARGET_OBJECTS:fnord-protobuf>
@@ -399,7 +399,7 @@ target_link_libraries(tests/test-logjoin ${CMAKE_THREAD_LIBS_INIT} ${FNORD_LIBS}
 #     $<TARGET_OBJECTS:fnord-http>
 #     $<TARGET_OBJECTS:fnord-json>
 #     $<TARGET_OBJECTS:fnord-rpc>
-#     $<TARGET_OBJECTS:cstable>
+#     $<TARGET_OBJECTS:libcstable>
 #     $<TARGET_OBJECTS:sstable>
 #     $<TARGET_OBJECTS:fnord-fts>
 #     $<TARGET_OBJECTS:fnord-protobuf>
@@ -433,7 +433,7 @@ add_executable(cm-chunkserver
     $<TARGET_OBJECTS:fnord-json>
     $<TARGET_OBJECTS:fnord-rpc>
     $<TARGET_OBJECTS:sstable>
-    $<TARGET_OBJECTS:cstable>
+    $<TARGET_OBJECTS:libcstable>
     $<TARGET_OBJECTS:fnord-protobuf>
     $<TARGET_OBJECTS:tsdb-client>
     $<TARGET_OBJECTS:dproc>
@@ -467,7 +467,7 @@ add_executable(analyticsd
     $<TARGET_OBJECTS:fnord-json>
     $<TARGET_OBJECTS:fnord-rpc>
     $<TARGET_OBJECTS:sstable>
-    $<TARGET_OBJECTS:cstable>
+    $<TARGET_OBJECTS:libcstable>
     $<TARGET_OBJECTS:fnord-protobuf>
     $<TARGET_OBJECTS:tsdb-client>
     $<TARGET_OBJECTS:fnord-afx>
@@ -578,7 +578,7 @@ target_link_libraries(analyticsd
 #    $<TARGET_OBJECTS:fnord-http>
 #    $<TARGET_OBJECTS:fnord-json>
 #    $<TARGET_OBJECTS:fnord-rpc>
-#    $<TARGET_OBJECTS:cstable>
+#    $<TARGET_OBJECTS:libcstable>
 #    $<TARGET_OBJECTS:sstable>
 #    $<TARGET_OBJECTS:fnord-protobuf>
 #    $<TARGET_OBJECTS:fnord-fts>
