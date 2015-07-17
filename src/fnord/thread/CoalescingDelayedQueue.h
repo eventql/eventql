@@ -35,6 +35,9 @@ public:
   void wakeup();
 
 protected:
+  size_t max_size_;
+  size_t length_;
+
   std::multiset<
       Pair<uint64_t, RefPtr<T>>,
       Function<bool (
@@ -45,8 +48,6 @@ protected:
 
   mutable std::mutex mutex_;
   std::condition_variable wakeup_;
-  size_t max_size_;
-  size_t length_;
 };
 
 }
