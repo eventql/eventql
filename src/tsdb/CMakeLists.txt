@@ -38,7 +38,7 @@ add_executable(tests/test-recordset
     $<TARGET_OBJECTS:fnord-http>
     $<TARGET_OBJECTS:fnord-json>
     $<TARGET_OBJECTS:tsdb-server>
-    $<TARGET_OBJECTS:cstable>
+    $<TARGET_OBJECTS:libcstable>
     $<TARGET_OBJECTS:sstable>
     $<TARGET_OBJECTS:dproc>
     $<TARGET_OBJECTS:chartsql-lib>
@@ -54,7 +54,7 @@ add_executable(tests/test-tsdbnode
     $<TARGET_OBJECTS:fnord-http>
     $<TARGET_OBJECTS:fnord-json>
     $<TARGET_OBJECTS:tsdb-server>
-    $<TARGET_OBJECTS:cstable>
+    $<TARGET_OBJECTS:libcstable>
     $<TARGET_OBJECTS:sstable>
     $<TARGET_OBJECTS:dproc>
     $<TARGET_OBJECTS:chartsql-lib>
@@ -70,7 +70,7 @@ add_executable(tests/test-tsdb-timewindowpartitioner
     $<TARGET_OBJECTS:fnord-http>
     $<TARGET_OBJECTS:fnord-json>
     $<TARGET_OBJECTS:tsdb-server>
-    $<TARGET_OBJECTS:cstable>
+    $<TARGET_OBJECTS:libcstable>
     $<TARGET_OBJECTS:sstable>
     $<TARGET_OBJECTS:dproc>
     $<TARGET_OBJECTS:chartsql-lib>
@@ -86,7 +86,7 @@ add_executable(tsdbd
     $<TARGET_OBJECTS:fnord-http>
     $<TARGET_OBJECTS:fnord-json>
     $<TARGET_OBJECTS:tsdb-server>
-    $<TARGET_OBJECTS:cstable>
+    $<TARGET_OBJECTS:libcstable>
     $<TARGET_OBJECTS:sstable>
     $<TARGET_OBJECTS:dproc>
     $<TARGET_OBJECTS:chartsql-lib>
