@@ -8,6 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include "fnord/io/fileutil.h"
+#include "fnord/ieee754.h"
 #include <cstable/CSTableBuilder.h>
 #include <cstable/CSTableWriter.h>
 #include "cstable/BitPackedIntColumnWriter.h"
@@ -84,7 +85,11 @@ void CSTableBuilder::createColumns(
       }
       break;
 
-
+    case msg::FieldType::DOUBLE:
+      columns_.emplace(
+          colname,
+          new cstable::UInt64ColumnWriter(r_max, d_max));
+      break;
 
     case msg::FieldType::STRING:
       columns_.emplace(
@@ -213,6 +218,12 @@ void CSTableBuilder::writeField(
 
     case msg::FieldType::UINT64: {
       uint64_t val = msg.asUInt64();
+      col->second->addDatum(r, d, &val, sizeof(val));
+      break;
+    }
+
+    case msg::FieldType::DOUBLE: {
+      uint64_t val = IEEE754::toBytes(msg.asDouble());
       col->second->addDatum(r, d, &val, sizeof(val));
       break;
     }
