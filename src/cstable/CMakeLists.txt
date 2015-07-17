@@ -8,23 +8,25 @@
 
 # cstable
 add_library(cstable OBJECT
+    BitPackedIntColumnReader.cc
+    BitPackedIntColumnWriter.cc
+    BooleanColumnReader.cc
+    BooleanColumnWriter.cc
     CSTableBuilder.cc
     CSTableReader.cc
     CSTableWriter.cc
     ColumnWriter.cc
-    BooleanColumnReader.cc
-    BooleanColumnWriter.cc
+    DoubleColumnReader.cc
+    DoubleColumnWriter.cc
+    LEB128ColumnReader.cc
+    LEB128ColumnWriter.cc
+    RecordMaterializer.cc
+    StringColumnReader.cc
+    StringColumnWriter.cc
     UInt32ColumnReader.cc
     UInt32ColumnWriter.cc
     UInt64ColumnReader.cc
-    UInt64ColumnWriter.cc
-    LEB128ColumnReader.cc
-    LEB128ColumnWriter.cc
-    BitPackedIntColumnReader.cc
-    BitPackedIntColumnWriter.cc
-    RecordMaterializer.cc
-    StringColumnReader.cc
-    StringColumnWriter.cc)
+    UInt64ColumnWriter.cc)
 
 add_executable(tests/test-recordmaterializer
     $<TARGET_OBJECTS:fnord-base>

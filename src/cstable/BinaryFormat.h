@@ -58,6 +58,7 @@ enum class ColumnType : uint8_t {
   UINT32_PLAIN = 11,
   UINT64_PLAIN = 12,
   UINT64_LEB128 = 13,
+  DOUBLE = 14,
   STRING_PLAIN = 100,
 };
 

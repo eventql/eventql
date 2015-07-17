@@ -16,6 +16,7 @@
 #include "cstable/UInt64ColumnWriter.h"
 #include "cstable/LEB128ColumnWriter.h"
 #include "cstable/StringColumnWriter.h"
+#include "cstable/DoubleColumnWriter.h"
 #include "cstable/BooleanColumnWriter.h"
 
 namespace fnord {
@@ -88,7 +89,7 @@ void CSTableBuilder::createColumns(
     case msg::FieldType::DOUBLE:
       columns_.emplace(
           colname,
-          new cstable::UInt64ColumnWriter(r_max, d_max));
+          new cstable::DoubleColumnWriter(r_max, d_max));
       break;
 
     case msg::FieldType::STRING:
