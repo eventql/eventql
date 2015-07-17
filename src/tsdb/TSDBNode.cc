@@ -25,13 +25,13 @@ TSDBNode::TSDBNode(
     const String& db_path,
     RefPtr<dproc::ReplicationScheme> replication_scheme,
     http::HTTPConnectionPool* http) :
-    noderef_{
-        .db_path = db_path,
-        .db = mdb::MDB::open(
+    noderef_(
+        db_path,
+        mdb::MDB::open(
             db_path,
             tsdb_mdb_opts()),
-        .replication_scheme = replication_scheme,
-        .http = http} {}
+        replication_scheme,
+        http) {}
 
 Option<RefPtr<Table>> TSDBNode::findTable(
     const String& stream_ns,

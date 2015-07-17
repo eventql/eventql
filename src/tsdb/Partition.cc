@@ -98,6 +98,7 @@ Partition::Partition(
         node->db_path,
         key_.toString().substr(0, 12) + ".",
         state.record_state),
+    node_(node),
     last_compaction_(0),
     repl_offsets_(state.repl_offsets),
     cstable_file_(state.cstable_file),
