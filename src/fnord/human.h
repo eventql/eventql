@@ -15,12 +15,35 @@
 
 namespace fnord {
 
+enum class HumanDataType {
+  DATETIME,
+  DATETIME_NULLABLE,
+  URL,
+  URL_NULLABLE,
+  CURRENCY,
+  CURRENCY_NULLABLE,
+  UNSIGNED_INTEGER,
+  UNSIGNED_INTEGER_NULLABLE,
+  SIGNED_INTEGER,
+  SIGNED_INTEGER_NULLABLE,
+  FLOAT,
+  FLOAT_NULLABLE,
+  BOOLEAN,
+  BOOLEAN_NULLABLE,
+  TEXT,
+  UNKNOWN
+};
+
 class Human {
 public:
 
   static Option<Duration> parseDuration(const String& str);
 
   static Option<UnixTime> parseTime(const String& str);
+
+  static HumanDataType detectDataType(
+      const String& value,
+      HumanDataType prev = HumanDataType::UNKNOWN);
 
 };
 
