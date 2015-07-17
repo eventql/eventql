@@ -147,10 +147,9 @@ void CSTableScan::scan(
 
             case msg::FieldType::DOUBLE:
               switch (size) {
-                case sizeof(uint64_t):
+                case sizeof(double):
                   in_row[col.second.index] =
-                      SValue(SValue::FloatType(
-                          IEEE754::fromBytes(*((uint64_t*) data))));
+                      SValue(SValue::FloatType(*((double*) data)));
                   break;
                 case 0:
                   in_row[col.second.index] = SValue();
