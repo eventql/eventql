@@ -15,6 +15,10 @@
 #include "fnord/io/file.h"
 #include "fnord/inspect.h"
 #include "fnord/human.h"
+#include "cstable/LEB128ColumnWriter.h"
+#include "cstable/StringColumnWriter.h"
+#include "cstable/DoubleColumnWriter.h"
+#include "cstable/BooleanColumnWriter.h"
 
 using namespace fnord;
 
@@ -37,6 +41,81 @@ void cmd_from_csv(const cli::FlagParser& flags) {
     for (size_t i = 0; i < row.size() && i < columns.size(); ++i) {
       auto& ctype = column_types[columns[i]];
       ctype = Human::detectDataTypeSeries(row[i], ctype);
+    }
+  }
+
+  HashMap<String, RefPtr<cstable::ColumnWriter>> column_writers;
+  for (const auto& col : column_types) {
+    switch (col.second) {
+
+        case HumanDataType::UNSIGNED_INTEGER:
+          column_writers.emplace(
+              col.first,
+              new cstable::LEB128ColumnWriter(0, 0));
+          break;
+
+        case HumanDataType::UNSIGNED_INTEGER_NULLABLE:
+          column_writers.emplace(
+              col.first,
+              new cstable::LEB128ColumnWriter(0, 1));
+          break;
+
+        case HumanDataType::SIGNED_INTEGER:
+          column_writers.emplace(
+              col.first,
+              new cstable::DoubleColumnWriter(0, 0)); // FIXME
+          break;
+
+        case HumanDataType::SIGNED_INTEGER_NULLABLE:
+          column_writers.emplace(
+              col.first,
+              new cstable::DoubleColumnWriter(0, 1)); // FIXME
+          break;
+
+        case HumanDataType::FLOAT:
+          column_writers.emplace(
+              col.first,
+              new cstable::DoubleColumnWriter(0, 0));
+          break;
+
+        case HumanDataType::FLOAT_NULLABLE:
+          column_writers.emplace(
+              col.first,
+              new cstable::DoubleColumnWriter(0, 1));
+          break;
+
+        case HumanDataType::BOOLEAN:
+          column_writers.emplace(
+              col.first,
+              new cstable::BooleanColumnWriter(0, 0));
+          break;
+
+        case HumanDataType::BOOLEAN_NULLABLE:
+          column_writers.emplace(
+              col.first,
+              new cstable::BooleanColumnWriter(0, 1));
+          break;
+
+        case HumanDataType::DATETIME:
+        case HumanDataType::DATETIME_NULLABLE:
+        case HumanDataType::URL:
+        case HumanDataType::URL_NULLABLE:
+        case HumanDataType::CURRENCY:
+        case HumanDataType::CURRENCY_NULLABLE:
+        case HumanDataType::TEXT:
+          column_writers.emplace(
+              col.first,
+              new cstable::StringColumnWriter(0, 1));
+          break;
+
+        case HumanDataType::NULL_OR_EMPTY:
+          column_writers.emplace(col.first, nullptr);
+          break;
+
+        case HumanDataType::UNKNOWN:
+        case HumanDataType::BINARY:
+          RAISEF(kTypeError, "invalid column type for column '$0'", col.first);
+
     }
   }
 

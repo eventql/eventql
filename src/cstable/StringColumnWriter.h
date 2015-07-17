@@ -24,7 +24,7 @@ public:
   StringColumnWriter(
       uint64_t r_max,
       uint64_t d_max,
-      size_t max_strlen);
+      size_t max_strlen = -1);
 
   void addDatum(
       uint64_t rep_level,
@@ -43,7 +43,6 @@ protected:
   void write(util::BinaryMessageWriter* writer) override;
 
   util::BinaryMessageWriter data_writer_;
-  size_t max_strlen_;
 };
 
 } // namespace cstable

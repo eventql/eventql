@@ -16,8 +16,7 @@ StringColumnWriter::StringColumnWriter(
     uint64_t r_max,
     uint64_t d_max,
     size_t max_strlen) :
-    ColumnWriter(r_max, d_max),
-    max_strlen_(max_strlen) {}
+    ColumnWriter(r_max, d_max) {}
 
 void StringColumnWriter::addDatum(
     uint64_t rep_level,
@@ -33,7 +32,7 @@ void StringColumnWriter::addDatum(
     const String& value) {
   rlvl_writer_.encode(rep_level);
   dlvl_writer_.encode(def_level);
-  data_writer_.appendUInt32(value.size());
+  data_writer_.appendUInt32(value.size()); // FIXPAUL use varuint...
   data_writer_.append(value.data(), value.size());
   ++num_vals_;
 }
