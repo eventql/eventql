@@ -11,7 +11,7 @@
 #include <chartsql/qtree/ColumnReferenceNode.h>
 #include <chartsql/runtime/defaultruntime.h>
 #include <chartsql/runtime/compile.h>
-#include <fnord/inspect.h>
+#include <fnord/ieee754.h>
 
 using namespace fnord;
 
@@ -145,7 +145,20 @@ void CSTableScan::scan(
               }
               break;
 
-            case msg::FieldType::OBJECT:
+            case msg::FieldType::DOUBLE:
+              switch (size) {
+                case sizeof(uint64_t):
+                  in_row[col.second.index] =
+                      SValue(SValue::FloatType(
+                          IEEE754::fromBytes(*((uint64_t*) data))));
+                  break;
+                case 0:
+                  in_row[col.second.index] = SValue();
+                  break;
+              }
+              break;
+
+            default:
               RAISE(kIllegalStateError);
 
           }
