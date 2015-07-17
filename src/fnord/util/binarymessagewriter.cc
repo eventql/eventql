@@ -9,7 +9,7 @@
  */
 #include <fnord/util/binarymessagewriter.h>
 #include <fnord/exception.h>
-#include <fnord/inspect.h>
+#include <fnord/IEEE754.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -94,6 +94,11 @@ void BinaryMessageWriter::updateString(
     size_t offset,
     const std::string& string) {
   update(offset, string.data(), string.size());
+}
+
+void BinaryMessageWriter::appendDouble(double value) {
+  auto bytes = IEEE754::toBytes(value);
+  append(&bytes, sizeof(bytes));
 }
 
 void* BinaryMessageWriter::data() const {
