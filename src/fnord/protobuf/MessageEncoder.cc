@@ -57,6 +57,16 @@ void MessageEncoder::encodeObject(
         data->appendVarUInt(msg.asUInt32());
         break;
 
+      case FieldType::UINT64:
+        data->appendVarUInt((msg.id << 3) | 0x0);
+        data->appendVarUInt(msg.asUInt64());
+        break;
+
+      case FieldType::DOUBLE:
+        data->appendVarUInt((msg.id << 3) | 0x1);
+        data->appendDouble(msg.asDouble());
+        break;
+
       case FieldType::BOOLEAN:
         data->appendVarUInt((msg.id << 3) | 0x0);
         data->appendVarUInt(msg.asBool() ? 1 : 0);

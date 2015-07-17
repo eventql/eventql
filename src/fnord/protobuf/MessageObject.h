@@ -21,13 +21,15 @@ enum class FieldType : uint8_t {
   BOOLEAN = 1,
   UINT32 = 2,
   STRING = 3,
-  UINT64 = 4
+  UINT64 = 4,
+  DOUBLE = 5
 };
 
 union MessageObjectValues {
   Vector<MessageObject> t_obj;
   String t_str;
   uint64_t t_uint;
+  double t_dbl;
 };
 
 struct TrueType {};
@@ -53,6 +55,7 @@ struct MessageObject {
   uint32_t asUInt32() const;
   uint64_t asUInt64() const;
   bool asBool() const;
+  double asDouble() const;
 
   MessageObject& getObject(uint32_t id) const;
   Vector<MessageObject*> getObjects(uint32_t id) const;
@@ -60,6 +63,7 @@ struct MessageObject {
   uint32_t getUInt32(uint32_t id) const;
   uint64_t getUInt64(uint32_t id) const;
   bool getBool(uint32_t id) const;
+  bool getDouble(uint32_t id) const;
 
   template <typename... ArgTypes>
   MessageObject& addChild(ArgTypes... args) {

@@ -56,6 +56,12 @@ void MessageDecoder::decode(
         break;
       }
 
+      case FieldType::DOUBLE: {
+        auto val = reader.readDouble();
+        msg->addChild(fid, val);
+        break;
+      }
+
       case FieldType::BOOLEAN: {
         auto val = reader.readVarUInt();
         msg->addChild(fid, val == 1);

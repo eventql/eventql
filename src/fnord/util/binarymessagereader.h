@@ -29,6 +29,7 @@ public:
   char const* readString(size_t size);
   void const* read(size_t size);
   std::string readLenencString();
+  double readDouble();
 
   template <typename T>
   T const* readValue();
