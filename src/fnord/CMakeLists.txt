@@ -22,6 +22,7 @@ add_library(fnord-base OBJECT
     cli/flagparser.cc
     cli/CLI.cc
     cli/CLICommand.cc
+    csv/CSVOutputStream.cc
     UnixTime.cc
     duration.cc
     exception.cc
@@ -69,7 +70,6 @@ add_library(fnord-base OBJECT
     util/Base64.cc
     util/binarymessagereader.cc
     util/binarymessagewriter.cc
-    util/CSVOutputStream.cc
     util/CumulativeHistogram.cc
     util/BitPackDecoder.cc
     util/BitPackEncoder.cc
