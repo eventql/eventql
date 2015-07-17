@@ -23,6 +23,7 @@ add_library(fnord-base OBJECT
     cli/CLI.cc
     cli/CLICommand.cc
     csv/CSVOutputStream.cc
+    csv/CSVInputStream.cc
     UnixTime.cc
     duration.cc
     exception.cc
