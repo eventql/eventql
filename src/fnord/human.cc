@@ -10,6 +10,7 @@
 #include <fnord/stdtypes.h>
 #include "fnord/exception.h"
 #include "fnord/wallclock.h"
+#include "fnord/UTF8.h"
 #include <fnord/human.h>
 
 namespace fnord {
@@ -109,6 +110,235 @@ Option<Duration> Human::parseDuration(const String& str) {
   return None<Duration>();
 }
 
+HumanDataType Human::detectDataType(const String& value) {
+  /* number like types */
+  if (StringUtil::isNumber(value)) {
+    if (StringUtil::includes(value, ".") || StringUtil::includes(value, ",")) {
+      return HumanDataType::FLOAT;
+    }
+
+    if (StringUtil::beginsWith(value, "-")) {
+      return HumanDataType::SIGNED_INTEGER;
+    } else {
+      return HumanDataType::UNSIGNED_INTEGER;
+    }
+  }
+
+  /* null */
+  if (value.empty() ||
+      value == "null" ||
+      value == "NULL") {
+    return HumanDataType::NULL_OR_EMPTY;
+  }
+
+  /* boolean */
+  if (value == "true" ||
+      value == "TRUE" ||
+      value == "false" ||
+      value == "FALSE" ||
+      value == "yes" ||
+      value == "YES" ||
+      value == "no" ||
+      value == "NO") {
+    return HumanDataType::BOOLEAN;
+  }
+
+  if (UTF8::isValidUTF8(value)) {
+    return HumanDataType::TEXT;
+  }
+
+  return HumanDataType::BINARY;
+}
+
+HumanDataType Human::detectDataTypeSeries(
+    const String& value,
+    HumanDataType prev /* = HumanDataType::UNKNOWN */) {
+  if (prev == HumanDataType::BINARY) {
+    return prev;
+  }
+
+  auto type = detectDataType(value);
+
+  if (type == prev || prev == HumanDataType::UNKNOWN) {
+    return type; // fastpath
+  }
+
+  switch (type) {
+
+    case HumanDataType::TEXT:
+      return HumanDataType::TEXT;
+
+    case HumanDataType::BINARY:
+      return HumanDataType::BINARY;
+
+    case HumanDataType::NULL_OR_EMPTY:
+      switch (prev) {
+        case HumanDataType::DATETIME:
+        case HumanDataType::DATETIME_NULLABLE:
+          return HumanDataType::DATETIME_NULLABLE;
+
+        case HumanDataType::URL:
+        case HumanDataType::URL_NULLABLE:
+          return HumanDataType::URL_NULLABLE;
+
+        case HumanDataType::CURRENCY:
+        case HumanDataType::CURRENCY_NULLABLE:
+          return HumanDataType::CURRENCY_NULLABLE;
+
+        case HumanDataType::UNSIGNED_INTEGER:
+        case HumanDataType::UNSIGNED_INTEGER_NULLABLE:
+          return HumanDataType::UNSIGNED_INTEGER_NULLABLE;
+
+        case HumanDataType::SIGNED_INTEGER:
+        case HumanDataType::SIGNED_INTEGER_NULLABLE:
+          return HumanDataType::SIGNED_INTEGER_NULLABLE;
+
+        case HumanDataType::FLOAT:
+        case HumanDataType::FLOAT_NULLABLE:
+          return HumanDataType::FLOAT_NULLABLE;
+
+        case HumanDataType::BOOLEAN:
+        case HumanDataType::BOOLEAN_NULLABLE:
+          return HumanDataType::BOOLEAN_NULLABLE;
+
+        case HumanDataType::TEXT:
+          return HumanDataType::TEXT;
+
+        case HumanDataType::BINARY:
+          return HumanDataType::BINARY;
+
+        case HumanDataType::UNKNOWN:
+        case HumanDataType::NULL_OR_EMPTY:
+          return HumanDataType::NULL_OR_EMPTY;
+
+      }
+      break;
+
+    case HumanDataType::DATETIME:
+    case HumanDataType::DATETIME_NULLABLE:
+      switch (prev) {
+        case HumanDataType::NULL_OR_EMPTY:
+        case HumanDataType::DATETIME_NULLABLE:
+           return HumanDataType::DATETIME_NULLABLE;
+        default:
+          break;
+      }
+      break;
+
+    case HumanDataType::URL:
+    case HumanDataType::URL_NULLABLE:
+      switch (prev) {
+        case HumanDataType::NULL_OR_EMPTY:
+        case HumanDataType::URL_NULLABLE:
+           return HumanDataType::URL_NULLABLE;
+        default:
+          break;
+      }
+      break;
+
+    case HumanDataType::CURRENCY:
+    case HumanDataType::CURRENCY_NULLABLE:
+      switch (prev) {
+        case HumanDataType::NULL_OR_EMPTY:
+        case HumanDataType::CURRENCY_NULLABLE:
+           return HumanDataType::CURRENCY_NULLABLE;
+        default:
+          break;
+      }
+      break;
+
+    case HumanDataType::UNSIGNED_INTEGER:
+      switch (prev) {
+        case HumanDataType::FLOAT:
+           return HumanDataType::FLOAT;
+        case HumanDataType::SIGNED_INTEGER:
+           return HumanDataType::SIGNED_INTEGER;
+      }
+      /* fallthrough */
+
+    case HumanDataType::UNSIGNED_INTEGER_NULLABLE:
+      switch (prev) {
+        case HumanDataType::FLOAT:
+        case HumanDataType::FLOAT_NULLABLE:
+           return HumanDataType::FLOAT_NULLABLE;
+
+        case HumanDataType::SIGNED_INTEGER:
+        case HumanDataType::SIGNED_INTEGER_NULLABLE:
+           return HumanDataType::SIGNED_INTEGER_NULLABLE;
+
+        case HumanDataType::NULL_OR_EMPTY:
+        case HumanDataType::UNSIGNED_INTEGER:
+        case HumanDataType::UNSIGNED_INTEGER_NULLABLE:
+           return HumanDataType::UNSIGNED_INTEGER_NULLABLE;
+
+        default:
+          break;
+      }
+      break;
+
+    case HumanDataType::SIGNED_INTEGER:
+      switch (prev) {
+        case HumanDataType::FLOAT:
+           return HumanDataType::FLOAT;
+        case HumanDataType::UNSIGNED_INTEGER:
+           return HumanDataType::SIGNED_INTEGER;
+      }
+      /* fallthrough */
+
+    case HumanDataType::SIGNED_INTEGER_NULLABLE:
+      switch (prev) {
+        case HumanDataType::FLOAT:
+        case HumanDataType::FLOAT_NULLABLE:
+           return HumanDataType::FLOAT_NULLABLE;
+
+        case HumanDataType::NULL_OR_EMPTY:
+        case HumanDataType::UNSIGNED_INTEGER:
+        case HumanDataType::UNSIGNED_INTEGER_NULLABLE:
+        case HumanDataType::SIGNED_INTEGER:
+        case HumanDataType::SIGNED_INTEGER_NULLABLE:
+           return HumanDataType::SIGNED_INTEGER_NULLABLE;
+        default:
+          break;
+      }
+      break;
+
+    case HumanDataType::FLOAT:
+      switch (prev) {
+        case HumanDataType::UNSIGNED_INTEGER:
+        case HumanDataType::SIGNED_INTEGER:
+           return HumanDataType::FLOAT;
+      }
+      /* fallthrough */
+
+    case HumanDataType::FLOAT_NULLABLE:
+      switch (prev) {
+        case HumanDataType::NULL_OR_EMPTY:
+        case HumanDataType::FLOAT_NULLABLE:
+        case HumanDataType::UNSIGNED_INTEGER:
+        case HumanDataType::UNSIGNED_INTEGER_NULLABLE:
+        case HumanDataType::SIGNED_INTEGER:
+        case HumanDataType::SIGNED_INTEGER_NULLABLE:
+           return HumanDataType::FLOAT_NULLABLE;
+        default:
+          break;
+      }
+      break;
+
+    case HumanDataType::BOOLEAN:
+    case HumanDataType::BOOLEAN_NULLABLE:
+      switch (prev) {
+        case HumanDataType::NULL_OR_EMPTY:
+        case HumanDataType::BOOLEAN_NULLABLE:
+           return HumanDataType::BOOLEAN_NULLABLE;
+        default:
+          break;
+      }
+      break;
+
+  }
+
+  return HumanDataType::TEXT;
+}
 
 } // namespace fnord
 
