@@ -7,7 +7,7 @@
 # <http://www.gnu.org/licenses/>.
 
 # cstable
-add_library(cstable OBJECT
+add_library(libcstable OBJECT
     BitPackedIntColumnReader.cc
     BitPackedIntColumnWriter.cc
     BooleanColumnReader.cc
@@ -31,10 +31,18 @@ add_library(cstable OBJECT
 add_executable(tests/test-recordmaterializer
     $<TARGET_OBJECTS:fnord-base>
     $<TARGET_OBJECTS:fnord-protobuf>
-    $<TARGET_OBJECTS:cstable>
+    $<TARGET_OBJECTS:libcstable>
     RecordMaterializer_test.cc)
 
 target_link_libraries(
     tests/test-recordmaterializer
     ${CMAKE_THREAD_LIBS_INIT}
     ${FNORD_LIBS})
+
+add_executable(cstable
+    $<TARGET_OBJECTS:fnord-base>
+    $<TARGET_OBJECTS:fnord-protobuf>
+    $<TARGET_OBJECTS:libcstable>
+    cstable.cc)
+
+target_link_libraries(cstable ${CMAKE_THREAD_LIBS_INIT} ${FNORD_LIBS})
