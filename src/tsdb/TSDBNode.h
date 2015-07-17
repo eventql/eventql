@@ -75,6 +75,10 @@ protected:
 
   void reopenPartitions();
 
+  Option<RefPtr<Table>> findTableWithLock(
+      const String& tsdb_namespace,
+      const String& table_name) const;
+
   TSDBNodeRef noderef_;
   mutable std::mutex mutex_;
   HashMap<String, RefPtr<Table>> tables_;

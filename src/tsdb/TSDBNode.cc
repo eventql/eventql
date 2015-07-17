@@ -37,6 +37,12 @@ Option<RefPtr<Table>> TSDBNode::findTable(
     const String& stream_ns,
     const String& stream_key) const {
   std::unique_lock<std::mutex> lk(mutex_);
+  return findTableWithLock(stream_ns, stream_key);
+}
+
+Option<RefPtr<Table>> TSDBNode::findTableWithLock(
+    const String& stream_ns,
+    const String& stream_key) const {
   auto stream_ns_key = stream_ns + "~" + stream_key;
 
   const auto& iter = tables_.find(stream_ns_key);
@@ -138,7 +144,7 @@ void TSDBNode::reopenPartitions() {
         partition_key,
         state,
         db_key,
-        findTable(tsdb_namespace, state.stream_key).get(),
+        findTableWithLock(tsdb_namespace, state.stream_key).get(),
         &noderef_);
 
     partitions_.emplace(db_key, partition);
@@ -165,7 +171,7 @@ RefPtr<Partition> TSDBNode::findOrCreatePartition(
       partition_key,
       stream_key,
       db_key,
-      findTable(tsdb_namespace, stream_key).get(),
+      findTableWithLock(tsdb_namespace, stream_key).get(),
       &noderef_);
 
   partitions_.emplace(db_key, partition);
