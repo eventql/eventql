@@ -42,6 +42,8 @@ struct MessageObject {
   explicit MessageObject(uint32_t id = 0);
   explicit MessageObject(uint32_t id, const String& value);
   explicit MessageObject(uint32_t id, uint32_t value);
+  explicit MessageObject(uint32_t id, uint64_t value);
+  explicit MessageObject(uint32_t id, double value);
   explicit MessageObject(uint32_t id, TrueType t);
   explicit MessageObject(uint32_t id, FalseType f);
 
