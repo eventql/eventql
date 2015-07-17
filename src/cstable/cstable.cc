@@ -11,13 +11,36 @@
 #include "fnord/application.h"
 #include "fnord/cli/flagparser.h"
 #include "fnord/cli/CLI.h"
+#include "fnord/csv/CSVInputStream.h"
 #include "fnord/io/file.h"
 #include "fnord/inspect.h"
+#include "fnord/human.h"
 
 using namespace fnord;
 
 void cmd_from_csv(const cli::FlagParser& flags) {
-  fnord::iputs("fro csv...", 1);
+  auto csv = CSVInputStream::openFile(
+      flags.getString("input_file"),
+      '\t',
+      '\n');
+
+  Vector<String> columns;
+  csv->readNextRow(&columns);
+
+  HashMap<String, HumanDataType> column_types;
+  for (const auto& hdr : columns) {
+    column_types[hdr] = HumanDataType::UNKNOWN;
+  }
+
+  Vector<String> row;
+  while (csv->readNextRow(&row)) {
+    for (size_t i = 0; i < row.size() && i < columns.size(); ++i) {
+      auto& ctype = column_types[columns[i]];
+      ctype = Human::detectDataType(row[i], ctype);
+    }
+  }
+
+  //fnord::iputs("row... $0", row.size());
 }
 
 int main(int argc, const char** argv) {
