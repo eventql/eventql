@@ -8,7 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <fnord/stringutil.h>
-#include <fnord/util/CSVOutputStream.h>
+#include <fnord/csv/CSVOutputStream.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdio.h>
