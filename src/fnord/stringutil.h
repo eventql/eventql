@@ -120,8 +120,8 @@ public:
    * @param str the string to check
    * @return true if the string consists only of digits, false otherwise
    */
-  static bool isNumber(const std::string& str);
-  static bool isNumber(const char* begin, const char* end);
+  static bool isDigitString(const std::string& str);
+  static bool isDigitString(const char* begin, const char* end);
 
   /**
    * Replace all occurences of pattern with replacement in str

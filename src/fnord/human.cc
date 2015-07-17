@@ -31,7 +31,7 @@ Option<UnixTime> Human::parseTime(const String& str) {
   }
 
   /* raw timestamps */
-  if (StringUtil::isNumber(str)) {
+  if (StringUtil::isDigitString(str)) {
     static const uint64_t bound_milli = 30000000000;
     static const uint64_t bound_micro = 30000000000000;
     try {
