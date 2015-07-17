@@ -165,6 +165,9 @@ HumanDataType Human::detectDataTypeSeries(
 
   switch (type) {
 
+    case HumanDataType::UNKNOWN:
+      return HumanDataType::UNKNOWN;
+
     case HumanDataType::TEXT:
       return HumanDataType::TEXT;
 
@@ -253,6 +256,8 @@ HumanDataType Human::detectDataTypeSeries(
            return HumanDataType::FLOAT;
         case HumanDataType::SIGNED_INTEGER:
            return HumanDataType::SIGNED_INTEGER;
+        default:
+          { /* fallthrough */ }
       }
       /* fallthrough */
 
@@ -282,6 +287,8 @@ HumanDataType Human::detectDataTypeSeries(
            return HumanDataType::FLOAT;
         case HumanDataType::UNSIGNED_INTEGER:
            return HumanDataType::SIGNED_INTEGER;
+        default:
+          { /* fallthrough */ }
       }
       /* fallthrough */
 
@@ -307,6 +314,8 @@ HumanDataType Human::detectDataTypeSeries(
         case HumanDataType::UNSIGNED_INTEGER:
         case HumanDataType::SIGNED_INTEGER:
            return HumanDataType::FLOAT;
+        default:
+          { /* fallthrough */ }
       }
       /* fallthrough */
 
