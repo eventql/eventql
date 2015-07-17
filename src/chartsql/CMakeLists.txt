@@ -15,7 +15,6 @@ add_library(chartsql-lib OBJECT
     CSTableScan.cc
     CSTableScanProvider.cc
     backends/csv/csvbackend.cc
-    backends/csv/csvinputstream.cc
     backends/csv/csvtableref.cc
     backends/mysql/mysqlbackend.cc
     backends/mysql/mysqlconnection.cc

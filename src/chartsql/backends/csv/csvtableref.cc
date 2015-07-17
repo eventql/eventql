@@ -7,15 +7,13 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-
-#include <memory>
-#include <string.h>
+#include <fnord/stdtypes.h>
+#include <fnord/csv/csvinputstream.h>
+#include <fnord/exception.h>
 #include <chartsql/parser/astnode.h>
 #include <chartsql/backends/csv/csvtableref.h>
-#include <chartsql/backends/csv/csvinputstream.h>
 #include <chartsql/runtime/tablescan.h>
 #include <chartsql/svalue.h>
-#include <fnord/exception.h>
 
 namespace csql {
 namespace csv_backend {
