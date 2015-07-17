@@ -26,6 +26,9 @@ public:
 
   static void encodeCodepoint(char32_t codepoint, String* target);
 
+  static bool isValidUTF8(const String& str);
+  static bool isValidUTF8(const char* str, size_t size);
+
 };
 
 }
