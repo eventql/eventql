@@ -36,7 +36,7 @@ void cmd_from_csv(const cli::FlagParser& flags) {
   while (csv->readNextRow(&row)) {
     for (size_t i = 0; i < row.size() && i < columns.size(); ++i) {
       auto& ctype = column_types[columns[i]];
-      ctype = Human::detectDataType(row[i], ctype);
+      ctype = Human::detectDataTypeSeries(row[i], ctype);
     }
   }
 
