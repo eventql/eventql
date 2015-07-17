@@ -98,7 +98,7 @@ add_executable(test-chartsql-runtime
     $<TARGET_OBJECTS:fnord-metricdb>
     $<TARGET_OBJECTS:fnord-mdb>
     $<TARGET_OBJECTS:sstable>
-    $<TARGET_OBJECTS:cstable>
+    $<TARGET_OBJECTS:libcstable>
     $<TARGET_OBJECTS:dproc>
     $<TARGET_OBJECTS:chartsql-lib>
     $<TARGET_OBJECTS:tsdb-client>
@@ -115,7 +115,7 @@ add_executable(test-chartsql-parser
     $<TARGET_OBJECTS:fnord-metricdb>
     $<TARGET_OBJECTS:fnord-mdb>
     $<TARGET_OBJECTS:sstable>
-    $<TARGET_OBJECTS:cstable>
+    $<TARGET_OBJECTS:libcstable>
     $<TARGET_OBJECTS:dproc>
     $<TARGET_OBJECTS:chartsql-lib>
     $<TARGET_OBJECTS:tsdb-client>
