@@ -39,15 +39,17 @@ String MessageSchemaField::typeName() const {
     case FieldType::STRING:
       return "string";
 
+    case FieldType::DOUBLE:
+      return "double";
+
   }
 }
 
 size_t MessageSchemaField::typeSize() const {
   switch (type) {
     case FieldType::OBJECT:
-      return 0;
-
     case FieldType::BOOLEAN:
+    case FieldType::DOUBLE:
       return 0;
 
     case FieldType::UINT32:
@@ -117,6 +119,17 @@ RefPtr<MessageSchema> MessageSchema::fromProtobuf(
             msg::FieldType::UINT32,
             copts.has_maxval() ?
                 copts.maxval() : std::numeric_limits<uint32_t>::max(),
+            field->is_repeated(),
+            field->is_optional(),
+            enc_hint);
+        break;
+
+      case google::protobuf::FieldDescriptor::TYPE_DOUBLE:
+        fields.emplace_back(
+            field->number(),
+            field->name(),
+            msg::FieldType::DOUBLE,
+            0,
             field->is_repeated(),
             field->is_optional(),
             enc_hint);
