@@ -431,6 +431,65 @@ void MessageSchema::decode(util::BinaryMessageReader* buf) {
   }
 }
 
+void MessageSchema::toJSON(json::JSONOutputStream* json) const {
+  json->beginObject();
+
+  json->addObjectEntry("name");
+  json->addString(name_);
+  json->addComma();
+
+  json->addObjectEntry("columns");
+  json->beginArray();
+
+  for (int i = 0; i < fields_.size(); ++i) {
+    const auto& field = fields_[i];
+
+    if (i > 0) {
+      json->addComma();
+    }
+
+    json->beginObject();
+
+    json->addObjectEntry("id");
+    json->addInteger(field.id);
+    json->addComma();
+
+    json->addObjectEntry("name");
+    json->addString(field.name);
+    json->addComma();
+
+    json->addObjectEntry("type");
+    json->addString(fieldTypeToString(field.type));
+    json->addComma();
+
+    json->addObjectEntry("type_size");
+    json->addInteger(field.type_size);
+    json->addComma();
+
+    json->addObjectEntry("optional");
+    field.optional ? json->addTrue() : json->addFalse();
+    json->addComma();
+
+    json->addObjectEntry("repeated");
+    field.repeated ? json->addTrue() : json->addFalse();
+    json->addComma();
+
+    json->addObjectEntry("encoding_hint");
+    json->addString("NONE");
+
+    if (field.type == FieldType::OBJECT) {
+      json->addComma();
+      json->addObjectEntry("schema");
+      field.schema->toJSON(json);
+    }
+
+    json->endObject();
+  }
+
+  json->endArray();
+  json->endObject();
+}
+
 Vector<Pair<String, MessageSchemaField>> MessageSchema::columns() const {
   Vector<Pair<String, MessageSchemaField>> columns;
 
