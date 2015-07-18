@@ -38,6 +38,10 @@ public:
     return ColumnType::STRING_PLAIN;
   }
 
+  msg::FieldType fieldType() const override {
+    return msg::FieldType::STRING;
+  }
+
 protected:
   size_t size() const override;
   void write(util::BinaryMessageWriter* writer) override;

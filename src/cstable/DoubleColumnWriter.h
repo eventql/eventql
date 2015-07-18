@@ -36,6 +36,10 @@ public:
     return ColumnType::DOUBLE;
   }
 
+  msg::FieldType fieldType() const override {
+    return msg::FieldType::DOUBLE;
+  }
+
 protected:
   size_t size() const override;
   void write(util::BinaryMessageWriter* writer) override;

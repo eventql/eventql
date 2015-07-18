@@ -37,6 +37,10 @@ public:
     return ColumnType::UINT32_PLAIN;
   }
 
+  msg::FieldType fieldType() const override {
+    return msg::FieldType::UINT32;
+  }
+
 protected:
   size_t size() const override;
   void write(util::BinaryMessageWriter* writer) override;
