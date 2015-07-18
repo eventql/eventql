@@ -31,6 +31,8 @@ add_library(libcstable OBJECT
 add_executable(tests/test-recordmaterializer
     $<TARGET_OBJECTS:fnord-base>
     $<TARGET_OBJECTS:fnord-protobuf>
+    $<TARGET_OBJECTS:fnord-http>
+    $<TARGET_OBJECTS:fnord-json>
     $<TARGET_OBJECTS:libcstable>
     RecordMaterializer_test.cc)
 
@@ -42,6 +44,8 @@ target_link_libraries(
 add_executable(cstable
     $<TARGET_OBJECTS:fnord-base>
     $<TARGET_OBJECTS:fnord-protobuf>
+    $<TARGET_OBJECTS:fnord-http>
+    $<TARGET_OBJECTS:fnord-json>
     $<TARGET_OBJECTS:libcstable>
     cstable.cc)
 
