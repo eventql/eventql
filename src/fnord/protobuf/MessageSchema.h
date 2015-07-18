@@ -15,6 +15,7 @@
 #include <fnord/util/binarymessagereader.h>
 #include <fnord/util/binarymessagewriter.h>
 #include <fnord/protobuf/MessageObject.h>
+#include <fnord/json/json.h>
 #include <google/protobuf/descriptor.h>
 #include <google/protobuf/descriptor.pb.h>
 
@@ -110,6 +111,8 @@ public:
 
   void encode(util::BinaryMessageWriter* buf) const;
   void decode(util::BinaryMessageReader* buf);
+
+  void toJSON(json::JSONOutputStream* json) const;
 
 protected:
 
