@@ -22,8 +22,8 @@ include_directories(${SSTABLE_INCLUDE})
 add_subdirectory(lib/libdproc)
 include_directories(${DPROC_INCLUDE})
 
-add_subdirectory(app/sensord)
-include_directories(${SENSORD_INCLUDE})
+#add_subdirectory(app/sensord)
+#include_directories(${SENSORD_INCLUDE})
 
 add_subdirectory(app/brokerd)
 include_directories(${BROKERD_INCLUDE})
