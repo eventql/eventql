@@ -13,6 +13,30 @@
 namespace fnord {
 namespace msg {
 
+String fieldTypeToString(FieldType type) {
+  switch (type) {
+    case FieldType::OBJECT: return "OBJECT";
+    case FieldType::STRING: return "STRING";
+    case FieldType::BOOLEAN: return "BOOLEAN";
+    case FieldType::UINT32: return "UINT32";
+    case FieldType::UINT64: return "UINT64";
+    case FieldType::DOUBLE: return "DOUBLE";
+  }
+}
+
+FieldType fieldTypeFromString(String str) {
+  StringUtil::toUpper(&str);
+
+  if (str == "OBJECT") return FieldType::OBJECT;
+  if (str == "STRING") return FieldType::STRING;
+  if (str == "BOOLEAN") return FieldType::BOOLEAN;
+  if (str == "UINT32") return FieldType::UINT32;
+  if (str == "UINT64") return FieldType::UINT64;
+  if (str == "DOUBLE") return FieldType::DOUBLE;
+
+  RAISEF(kTypeError, "can't convert '$0' to FieldType", str);
+}
+
 MessageObject::MessageObject(
     uint32_t _id /* = 0 */) :
     id(_id),

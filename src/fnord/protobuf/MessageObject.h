@@ -25,6 +25,9 @@ enum class FieldType : uint8_t {
   DOUBLE = 5
 };
 
+String fieldTypeToString(FieldType type);
+FieldType fieldTypeFromString(String str);
+
 union MessageObjectValues {
   Vector<MessageObject> t_obj;
   String t_str;
