@@ -109,6 +109,7 @@ public:
   Vector<Pair<String, MessageSchemaField>> columns() const;
   String toString() const;
 
+  Buffer encode() const;
   void encode(util::BinaryMessageWriter* buf) const;
   void decode(util::BinaryMessageReader* buf);
 
