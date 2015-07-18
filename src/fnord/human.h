@@ -43,6 +43,8 @@ public:
 
   static Option<UnixTime> parseTime(const String& str);
 
+  static Option<bool> parseBoolean(const String& value);
+
   static HumanDataType detectDataType(const String& value);
 
   static HumanDataType detectDataTypeSeries(

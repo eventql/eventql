@@ -110,6 +110,24 @@ Option<Duration> Human::parseDuration(const String& str) {
   return None<Duration>();
 }
 
+Option<bool> Human::parseBoolean(const String& value) {
+  if (value == "true" ||
+      value == "TRUE" ||
+      value == "yes" ||
+      value == "YES") {
+    return Some(true);
+  }
+
+  if (value == "false" ||
+      value == "FALSE" ||
+      value == "no" ||
+      value == "NO") {
+    return Some(false);
+  }
+
+  return None<bool>();
+}
+
 HumanDataType Human::detectDataType(const String& value) {
   /* number like types */
   if (StringUtil::isNumber(value)) {
