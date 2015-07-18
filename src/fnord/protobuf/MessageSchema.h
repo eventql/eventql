@@ -113,6 +113,9 @@ public:
   void decode(util::BinaryMessageReader* buf);
 
   void toJSON(json::JSONOutputStream* json) const;
+  void fromJSON(
+      json::JSONObject::const_iterator begin,
+      json::JSONObject::const_iterator end);
 
 protected:
 

@@ -490,6 +490,64 @@ void MessageSchema::toJSON(json::JSONOutputStream* json) const {
   json->endObject();
 }
 
+void MessageSchema::fromJSON(
+    json::JSONObject::const_iterator begin,
+    json::JSONObject::const_iterator end) {
+  auto tname = json::objectGetString(begin, end, "name");
+  if (!tname.isEmpty()) {
+    name_ = tname.get();
+  }
+
+  auto cols = json::objectLookup(begin, end, "columns");
+  if (cols == end) {
+    RAISE(kRuntimeError, "missing field: columns");
+  }
+
+  auto ncols = json::arrayLength(cols, end);
+  for (size_t i = 0; i < ncols; ++i) {
+    auto col = json::arrayLookup(cols, end, i);
+
+    auto id = json::objectGetUInt64(col, end, "id");
+    if (id.isEmpty()) {
+      RAISE(kRuntimeError, "missing field: id");
+    }
+
+    auto name = json::objectGetString(col, end, "name");
+    if (name.isEmpty()) {
+      RAISE(kRuntimeError, "missing field: name");
+    }
+
+    auto type = json::objectGetString(col, end, "type");
+    if (type.isEmpty()) {
+      RAISE(kRuntimeError, "missing field: type");
+    }
+
+    auto type_size = json::objectGetUInt64(col, end, "type_size");
+    if (type_size.isEmpty()) {
+      RAISE(kRuntimeError, "missing field: type_size");
+    }
+
+    auto optional = json::objectGetBool(col, end, "optional");
+    if (optional.isEmpty()) {
+      RAISE(kRuntimeError, "missing field: optional");
+    }
+
+    auto repeated = json::objectGetBool(col, end, "repeated");
+    if (repeated.isEmpty()) {
+      RAISE(kRuntimeError, "missing field: repeated");
+    }
+
+    addField(
+        MessageSchemaField(
+            id.get(),
+            name.get(),
+            fieldTypeFromString(type.get()),
+            type_size.get(),
+            repeated.get(),
+            optional.get()));
+  }
+}
+
 Vector<Pair<String, MessageSchemaField>> MessageSchema::columns() const {
   Vector<Pair<String, MessageSchemaField>> columns;
 
