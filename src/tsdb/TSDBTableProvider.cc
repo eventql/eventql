@@ -27,6 +27,9 @@ Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildSequentialScan(
       RefPtr<csql::SequentialScanNode> node,
       csql::QueryBuilder* runtime) const {
   auto table_ref = TSDBTableRef::parse(node->tableName());
+  if (tsdb_node_->findTable(tsdb_namespace_, table_ref.table_key).isEmpty()) {
+    return None<ScopedPtr<csql::TableExpression>>();
+  }
 
   if (table_ref.host.isEmpty() || table_ref.host.get() != "localhost") {
     RAISEF(

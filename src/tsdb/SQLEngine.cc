@@ -82,6 +82,10 @@ void SQLEngine::replaceSequentialScanWithUnion(
     return;
   }
 
+  if (tsdb_node->findTable(tsdb_namespace, table_ref.table_key).isEmpty()) {
+    return;
+  }
+
   if (table_ref.timerange_begin.isEmpty() ||
       table_ref.timerange_limit.isEmpty()) {
     RAISEF(
