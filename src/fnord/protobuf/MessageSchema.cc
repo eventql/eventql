@@ -377,6 +377,12 @@ void MessageSchema::addField(const MessageSchemaField& field) {
   fields_.emplace_back(field);
 }
 
+Buffer MessageSchema::encode() const {
+  util::BinaryMessageWriter writer;
+  encode(&writer);
+  return Buffer(writer.data(), writer.size());
+}
+
 void MessageSchema::encode(util::BinaryMessageWriter* buf) const {
   buf->appendUInt8(0x1);
   buf->appendLenencString(name_);
