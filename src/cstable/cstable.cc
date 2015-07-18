@@ -121,6 +121,7 @@ void cmd_from_csv(const cli::FlagParser& flags) {
   }
 
   csv->rewind();
+  csv->skipNextRow();
 
   size_t num_records = 0;
   while (csv->readNextRow(&row)) {
