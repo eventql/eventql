@@ -19,6 +19,7 @@
 #include "cstable/StringColumnWriter.h"
 #include "cstable/DoubleColumnWriter.h"
 #include "cstable/BooleanColumnWriter.h"
+#include "cstable/CSTableWriter.h"
 
 using namespace fnord;
 
@@ -119,7 +120,74 @@ void cmd_from_csv(const cli::FlagParser& flags) {
     }
   }
 
-  //fnord::iputs("row... $0", row.size());
+  csv->rewind();
+
+  size_t num_records = 0;
+  while (csv->readNextRow(&row)) {
+    ++num_records;
+
+    for (size_t i = 0; i < row.size() && i < columns.size(); ++i) {
+      auto& col = column_writers[columns[i]];
+      const auto& val = row[i];
+
+      if (col.get() == nullptr) {
+        continue;
+      }
+
+      if (Human::isNullOrEmpty(val)) {
+        col->addNull(0, 0);
+        continue;
+      }
+
+      switch (col->fieldType()) {
+
+        case msg::FieldType::STRING: {
+          col->addDatum(0, col->maxDefinitionLevel(), val.data(), val.size());
+          break;
+        }
+
+        case msg::FieldType::UINT32: {
+          uint32_t v = std::stoull(val);
+          col->addDatum(0, col->maxDefinitionLevel(), &v, sizeof(v));
+          break;
+        }
+
+        case msg::FieldType::UINT64: {
+          uint64_t v = std::stoull(val);
+          col->addDatum(0, col->maxDefinitionLevel(), &v, sizeof(v));
+          break;
+        }
+
+        case msg::FieldType::DOUBLE: {
+          double v = std::stod(val);
+          col->addDatum(0, col->maxDefinitionLevel(), &v, sizeof(v));
+          break;
+        }
+
+        case msg::FieldType::BOOLEAN: {
+          auto b = Human::parseBoolean(val);
+          uint8_t v = !b.isEmpty() && b.get() ? 1 : 0;
+          col->addDatum(0, col->maxDefinitionLevel(), &v, sizeof(v));
+          break;
+        }
+
+        case msg::FieldType::OBJECT:
+          RAISE(kIllegalStateError);
+
+      }
+    }
+  }
+
+  {
+    cstable::CSTableWriter writer(flags.getString("output_file"), num_records);
+    for (const auto& col : column_writers) {
+      if (col.second.get()) {
+        writer.addColumn(col.first, col.second.get());
+      }
+    }
+
+    writer.commit();
+  }
 }
 
 int main(int argc, const char** argv) {
