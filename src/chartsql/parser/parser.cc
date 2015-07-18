@@ -380,7 +380,7 @@ ASTNode* Parser::explainStatement() {
   consumeToken();
 
   switch (cur_token_->getType()) {
-    case ASTNode::T_SELECT:
+    case Token::T_SELECT:
       return explainQueryStatement();
     default:
       return describeTableStatement();
