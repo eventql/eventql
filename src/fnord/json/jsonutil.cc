@@ -16,6 +16,19 @@ Option<String> JSONUtil::objectGetString(
     JSONObject::const_iterator begin,
     JSONObject::const_iterator end,
     const std::string& key) {
+  return json::objectGetString(begin, end, key);
+}
+
+Option<String> objectGetString(
+    const JSONObject& obj,
+    const std::string& key) {
+  return objectGetString(obj.begin(), obj.end(), key);
+}
+
+Option<String> objectGetString(
+    JSONObject::const_iterator begin,
+    JSONObject::const_iterator end,
+    const std::string& key) {
   auto iter = objectLookup(begin, end, key);
 
   if (iter != end && iter->type == JSON_STRING) {
@@ -29,6 +42,19 @@ Option<uint64_t> JSONUtil::objectGetUInt64(
     JSONObject::const_iterator begin,
     JSONObject::const_iterator end,
     const std::string& key) {
+  return json::objectGetUInt64(begin, end, key);
+}
+
+Option<uint64_t> objectGetUInt64(
+    const JSONObject& obj,
+    const std::string& key) {
+  return json::objectGetUInt64(obj.begin(), obj.end(), key);
+}
+
+Option<uint64_t> objectGetUInt64(
+    JSONObject::const_iterator begin,
+    JSONObject::const_iterator end,
+    const std::string& key) {
   auto iter = objectLookup(begin, end, key);
 
   if (iter != end && (iter->type == JSON_STRING || iter->type == JSON_NUMBER)) {
@@ -39,6 +65,19 @@ Option<uint64_t> JSONUtil::objectGetUInt64(
 }
 
 Option<bool> JSONUtil::objectGetBool(
+    JSONObject::const_iterator begin,
+    JSONObject::const_iterator end,
+    const std::string& key) {
+  return json::objectGetBool(begin, end, key);
+}
+
+Option<bool> objectGetBool(
+    const JSONObject& obj,
+    const std::string& key) {
+  return json::objectGetBool(obj.begin(), obj.end(), key);
+}
+
+Option<bool> objectGetBool(
     JSONObject::const_iterator begin,
     JSONObject::const_iterator end,
     const std::string& key) {
@@ -67,6 +106,19 @@ Option<bool> JSONUtil::objectGetBool(
 }
 
 JSONObject::const_iterator JSONUtil::objectLookup(
+    JSONObject::const_iterator begin,
+    JSONObject::const_iterator end,
+    const std::string& key) {
+  return json::objectLookup(begin, end, key);
+}
+
+JSONObject::const_iterator objectLookup(
+    const JSONObject& obj,
+    const std::string& key) {
+  return objectLookup(obj.begin(), obj.end(), key);
+}
+
+JSONObject::const_iterator objectLookup(
     JSONObject::const_iterator begin,
     JSONObject::const_iterator end,
     const std::string& key) {
@@ -107,6 +159,16 @@ JSONObject::const_iterator JSONUtil::objectLookup(
 size_t JSONUtil::arrayLength(
     JSONObject::const_iterator begin,
     JSONObject::const_iterator end) {
+  return json::arrayLength(begin, end);
+}
+
+size_t arrayLength(const JSONObject& obj) {
+  return arrayLength(obj.begin(), obj.end());
+}
+
+size_t arrayLength(
+    JSONObject::const_iterator begin,
+    JSONObject::const_iterator end) {
   if (begin == end) {
     return 0;
   }
@@ -129,6 +191,19 @@ size_t JSONUtil::arrayLength(
 }
 
 JSONObject::const_iterator JSONUtil::arrayLookup(
+    JSONObject::const_iterator begin,
+    JSONObject::const_iterator end,
+    size_t index) {
+  return json::arrayLookup(begin, end, index);
+}
+
+JSONObject::const_iterator arrayLookup(
+    const JSONObject& obj,
+    size_t index) {
+  return arrayLookup(obj.begin(), obj.end(), index);
+}
+
+JSONObject::const_iterator arrayLookup(
     JSONObject::const_iterator begin,
     JSONObject::const_iterator end,
     size_t index) {
@@ -157,6 +232,19 @@ JSONObject::const_iterator JSONUtil::arrayLookup(
 }
 
 Option<String> JSONUtil::arrayGetString(
+    JSONObject::const_iterator begin,
+    JSONObject::const_iterator end,
+    size_t index) {
+  return json::arrayGetString(begin, end, index);
+}
+
+Option<String> arrayGetString(
+    const JSONObject& obj,
+    size_t index) {
+  return arrayGetString(obj.begin(), obj.end(), index);
+}
+
+Option<String> arrayGetString(
     JSONObject::const_iterator begin,
     JSONObject::const_iterator end,
     size_t index) {

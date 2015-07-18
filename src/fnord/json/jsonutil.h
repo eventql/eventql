@@ -15,6 +15,66 @@
 namespace fnord {
 namespace json {
 
+JSONObject::const_iterator objectLookup(
+    const JSONObject& obj,
+    const std::string& key);
+
+JSONObject::const_iterator objectLookup(
+    JSONObject::const_iterator begin,
+    JSONObject::const_iterator end,
+    const std::string& key);
+
+Option<String> objectGetString(
+    const JSONObject& obj,
+    const std::string& key);
+
+Option<String> objectGetString(
+    JSONObject::const_iterator begin,
+    JSONObject::const_iterator end,
+    const std::string& key);
+
+Option<uint64_t> objectGetUInt64(
+    const JSONObject& obj,
+    const std::string& key);
+
+Option<uint64_t> objectGetUInt64(
+    JSONObject::const_iterator begin,
+    JSONObject::const_iterator end,
+    const std::string& key);
+
+Option<bool> objectGetBool(
+    const JSONObject& obj,
+    const std::string& key);
+
+Option<bool> objectGetBool(
+    JSONObject::const_iterator begin,
+    JSONObject::const_iterator end,
+    const std::string& key);
+
+size_t arrayLength(const JSONObject& obj);
+
+size_t arrayLength(
+    JSONObject::const_iterator begin,
+    JSONObject::const_iterator end);
+
+JSONObject::const_iterator arrayLookup(
+    const JSONObject& obj,
+    size_t index);
+
+JSONObject::const_iterator arrayLookup(
+    JSONObject::const_iterator begin,
+    JSONObject::const_iterator end,
+    size_t index);
+
+Option<String> arrayGetString(
+    const JSONObject& obj,
+    size_t index);
+
+Option<String> arrayGetString(
+    JSONObject::const_iterator begin,
+    JSONObject::const_iterator end,
+    size_t index);
+
 class JSONUtil {
 public:
 
