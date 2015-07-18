@@ -49,6 +49,8 @@ public:
       const String& value,
       HumanDataType prev = HumanDataType::UNKNOWN);
 
+  static bool isNullOrEmpty(const String& value);
+
 };
 
 }

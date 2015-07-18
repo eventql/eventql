@@ -125,9 +125,7 @@ HumanDataType Human::detectDataType(const String& value) {
   }
 
   /* null */
-  if (value.empty() ||
-      value == "null" ||
-      value == "NULL") {
+  if (isNullOrEmpty(value)) {
     return HumanDataType::NULL_OR_EMPTY;
   }
 
@@ -347,6 +345,13 @@ HumanDataType Human::detectDataTypeSeries(
   }
 
   return HumanDataType::TEXT;
+}
+
+bool Human::isNullOrEmpty(const String& value) {
+  return
+      value.empty() ||
+      value == "null" ||
+      value == "NULL";
 }
 
 } // namespace fnord
