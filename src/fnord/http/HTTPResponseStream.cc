@@ -19,8 +19,8 @@ HTTPResponseStream::HTTPResponseStream(
     HTTPServerConnection* conn) :
     conn_(conn),
     callback_running_(false),
-    response_finished_(false),
-    headers_written_(false) {}
+    headers_written_(false),
+    response_finished_(false) {}
 
 void HTTPResponseStream::writeResponse(HTTPResponse res) {
   auto body_size = res.body().size();

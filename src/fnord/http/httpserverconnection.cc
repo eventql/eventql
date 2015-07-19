@@ -47,10 +47,10 @@ HTTPServerConnection::HTTPServerConnection(
     handler_factory_(handler_factory),
     conn_(std::move(conn)),
     scheduler_(scheduler),
-    on_write_completed_cb_(nullptr),
-    stats_(stats),
     parser_(HTTPParser::PARSE_HTTP_REQUEST),
-    closed_(false) {
+    on_write_completed_cb_(nullptr),
+    closed_(false),
+    stats_(stats) {
   logTrace("http.server", "New HTTP connection: $0", inspect(*this));
   stats_->total_connections.incr(1);
   stats_->current_connections.incr(1);

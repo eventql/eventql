@@ -22,10 +22,10 @@ HTTPClientConnection::HTTPClientConnection(
     HTTPClientStats* stats) :
     conn_(std::move(conn)),
     scheduler_(scheduler),
-    stats_(stats),
     state_(S_CONN_IDLE),
     parser_(HTTPParser::PARSE_HTTP_RESPONSE),
-    keepalive_(false) {
+    keepalive_(false),
+    stats_(stats) {
   buf_.reserve(kMinBufferSize);
   conn_->checkErrors();
 
