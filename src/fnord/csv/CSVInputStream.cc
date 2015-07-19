@@ -45,6 +45,8 @@ CSVInputStream::CSVInputStream(
 
 // FIXPAUL quotechar escaping...
 bool CSVInputStream::readNextRow(std::vector<std::string>* target) {
+  target->clear();
+
   bool eof = false;
 
   for (;;) {
