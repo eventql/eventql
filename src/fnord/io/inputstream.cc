@@ -81,22 +81,28 @@ std::unique_ptr<FileInputStream> FileInputStream::openFile(
     RAISE_ERRNO(kIOError, "error opening file '%s'", fp);
   }
 
-  auto file = std::unique_ptr<FileInputStream>(new FileInputStream(fd, true));
-  file->readNextChunk();
-  file->setFileName(file_path);
-  return file;
+  std::unique_ptr<FileInputStream> stream(new FileInputStream(fd, true));
+  stream->readNextChunk();
+  stream->setFileName(file_path);
+  return stream;
 }
 
 std::unique_ptr<FileInputStream> FileInputStream::fromFileDescriptor(
     int fd,
     bool close_on_destroy /* = false */) {
-  return std::unique_ptr<FileInputStream>(
+  std::unique_ptr<FileInputStream> stream(
       new FileInputStream(fd, close_on_destroy));
+
+  stream->setFileName(StringUtil::format("<fd:$0>", fd));
+  return stream;
 }
 
 std::unique_ptr<FileInputStream> FileInputStream::fromFile(File&& file) {
-  return std::unique_ptr<FileInputStream>(
-      new FileInputStream(std::move(file)));
+  auto fd = file.fd();
+
+  std::unique_ptr<FileInputStream> stream(new FileInputStream(std::move(file)));
+  stream->setFileName(StringUtil::format("<fd:$0>", fd));
+  return stream;
 }
 
 FileInputStream::FileInputStream(
