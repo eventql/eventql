@@ -22,9 +22,7 @@ MDBTransaction::MDBTransaction(
     mdb_handle_(mdb_handle),
     opts_(opts),
     is_commited_(false),
-    abort_on_free_(false) {
-  incRef();
-}
+    abort_on_free_(false) {}
 
 MDBTransaction::~MDBTransaction() {
   if (!is_commited_ && abort_on_free_) {
@@ -56,8 +54,6 @@ void MDBTransaction::commit() {
     auto err = String(mdb_strerror(rc));
     RAISEF(kRuntimeError, "mdb_txn_commit() failed: $0", err);
   }
-
-  decRef();
 }
 
 void MDBTransaction::abort() {
@@ -67,13 +63,10 @@ void MDBTransaction::abort() {
 
   is_commited_ = true;
   mdb_txn_abort(mdb_txn_);
-
-  decRef();
 }
 
 void MDBTransaction::autoAbort() {
   abort_on_free_ = true;
-  decRef();
 }
 
 Option<Buffer> MDBTransaction::get(const Buffer& key) {
