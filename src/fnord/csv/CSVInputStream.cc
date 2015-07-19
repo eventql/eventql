@@ -18,16 +18,16 @@ namespace fnord {
 
 std::unique_ptr<CSVInputStream> CSVInputStream::openFile(
     const std::string& file_path,
-    char column_seperator /* = ';' */,
-    char row_seperator /* = '\n' */,
+    char column_separator /* = ';' */,
+    char row_separator /* = '\n' */,
     char quote_char /* = '"' */) {
   auto file = FileInputStream::openFile(file_path);
   file->readByteOrderMark();
 
   auto csv_file = new CSVInputStream(
       std::move(file),
-      column_seperator,
-      row_seperator,
+      column_separator,
+      row_separator,
       quote_char);
 
   return std::unique_ptr<CSVInputStream>(csv_file);
@@ -35,12 +35,12 @@ std::unique_ptr<CSVInputStream> CSVInputStream::openFile(
 
 CSVInputStream::CSVInputStream(
     std::unique_ptr<RewindableInputStream>&& input_stream,
-    char column_seperator /* = ';' */,
-    char row_seperator /* = '\n' */,
+    char column_separator /* = ';' */,
+    char row_separator /* = '\n' */,
     char quote_char /* = '"' */) :
     input_(std::move(input_stream)),
-    column_seperator_(column_seperator),
-    row_seperator_(row_seperator),
+    column_separator_(column_separator),
+    row_separator_(row_separator),
     quote_char_(quote_char) {}
 
 // FIXPAUL quotechar unescaping...
@@ -60,11 +60,11 @@ bool CSVInputStream::readNextRow(std::vector<std::string>* target) {
         break;
       }
 
-      if (!quoted && byte == column_seperator_) {
+      if (!quoted && byte == column_separator_) {
         break;
       }
 
-      if (!quoted && byte == row_seperator_) {
+      if (!quoted && byte == row_separator_) {
         break;
       }
 
@@ -77,7 +77,7 @@ bool CSVInputStream::readNextRow(std::vector<std::string>* target) {
 
     target->emplace_back(column);
 
-    if (eof || byte == row_seperator_) {
+    if (eof || byte == row_separator_) {
       break;
     }
   }
