@@ -12,6 +12,7 @@
 #include <memory>
 #include <string>
 #include "fnord/buffer.h"
+#include "fnord/io/file.h"
 
 namespace fnord {
 
@@ -112,7 +113,33 @@ public:
    * @param fd a valid fd
    * @param close_on_destroy close the fd on destroy?
    */
+  static std::unique_ptr<FileInputStream> fromFileDescriptor(
+      int fd,
+      bool close_on_destroy = false);
+
+  /**
+   * Create a new FileInputStream instance from the provided File. 
+   *
+   * @param file the opened file
+   */
+  static std::unique_ptr<FileInputStream> fromFile(File&& file);
+
+  /**
+   * Create a new FileInputStream instance from the provided filedescriptor. If
+   * close on_destroy is true, the fd will be close()ed when the input stream
+   * is destroyed.
+   *
+   * @param fd a valid fd
+   * @param close_on_destroy close the fd on destroy?
+   */
   explicit FileInputStream(int fd, bool close_on_destroy = false);
+
+  /**
+   * Create a new FileInputStream instance from the provided File. 
+   *
+   * @param file the opened file
+   */
+  explicit FileInputStream(File&& file);
 
   /**
    * Close the fd if close_on_destroy is true
