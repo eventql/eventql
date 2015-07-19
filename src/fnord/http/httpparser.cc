@@ -22,7 +22,6 @@ const char HTTPParser::kConnectionHeader[] = "Connection";
 HTTPParser::HTTPParser(
     kParserMode mode,
     size_t buffer_size /* = kDefaultBufferSize */) :
-    mode_(mode),
     on_method_cb_(nullptr),
     on_uri_cb_(nullptr),
     on_version_cb_(nullptr),
@@ -31,9 +30,10 @@ HTTPParser::HTTPParser(
     on_header_cb_(nullptr),
     on_headers_complete_cb_(nullptr),
     on_body_chunk_cb_(nullptr),
-    expect_body_(true),
+    mode_(mode),
     body_bytes_read_(0),
-    body_bytes_expected_(0) {
+    body_bytes_expected_(0),
+    expect_body_(true) {
   switch (mode) {
     case PARSE_HTTP_REQUEST:
       state_ = S_REQ_METHOD;

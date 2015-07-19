@@ -124,9 +124,8 @@ protected:
   ScopedPtr<HTTPRequest> cur_request_;
   ScopedPtr<HTTPHandler> cur_handler_;
   mutable std::mutex mutex_;
-  HTTPServerStats* stats_;
   bool closed_;
-  bool output_closed_;
+  HTTPServerStats* stats_;
 };
 
 }
