@@ -24,8 +24,8 @@ public:
    */
   static std::unique_ptr<CSVInputStream> openFile(
       const std::string& file_path,
-      char column_seperator = ';',
-      char row_seperator = '\n',
+      char column_separator = ';',
+      char row_separator = '\n',
       char quote_char = '"');
 
   /**
@@ -33,8 +33,8 @@ public:
    */
   explicit CSVInputStream(
       std::unique_ptr<RewindableInputStream>&& input_stream,
-      char column_seperator = ';',
-      char row_seperator = '\n',
+      char column_separator = ';',
+      char row_separator = '\n',
       char quote_char = '"');
 
   /**
@@ -67,8 +67,8 @@ protected:
   std::string readNextColumn();
 
   std::unique_ptr<RewindableInputStream> input_;
-  const char column_seperator_;
-  const char row_seperator_;
+  const char column_separator_;
+  const char row_separator_;
   const char quote_char_;
 };
 
