@@ -9,6 +9,7 @@
  */
 #include "fnord/io/fileutil.h"
 #include "fnord/ieee754.h"
+#include "fnord/human.h"
 #include <cstable/CSTableBuilder.h>
 #include <cstable/CSTableWriter.h>
 #include "cstable/BitPackedIntColumnWriter.h"
@@ -238,6 +239,87 @@ void CSTableBuilder::writeField(
     case msg::FieldType::OBJECT:
       RAISE(kIllegalStateError);
 
+  }
+}
+
+void CSTableBuilder::addRecordsFromCSV(CSVInputStream* csv) {
+  Vector<String> columns;
+  csv->readNextRow(&columns);
+
+  Set<String> missing_columns;
+  for (const auto& col : columns_) {
+    missing_columns.emplace(col.first);
+  }
+
+  Vector<RefPtr<ColumnWriter>> column_writers;
+  for (const auto& col : columns) {
+    if (columns_.count(col) == 0) {
+      RAISEF(kRuntimeError, "column '$0' not found in schema", col);
+    }
+
+    missing_columns.erase(col);
+    column_writers.emplace_back(columns_[col]);
+  }
+
+  Vector<RefPtr<ColumnWriter>> missing_column_writers;
+  for (const auto& col : missing_columns) {
+    missing_column_writers.emplace_back(columns_[col]);
+  }
+
+  Vector<String> row;
+  while (csv->readNextRow(&row)) {
+    for (size_t i = 0; i < row.size() && i < columns.size(); ++i) {
+      const auto& col = column_writers[i];
+      const auto& val = row[i];
+
+      if (Human::isNullOrEmpty(val)) {
+        col->addNull(0, 0);
+        continue;
+      }
+
+      switch (col->fieldType()) {
+
+        case msg::FieldType::STRING: {
+          col->addDatum(0, col->maxDefinitionLevel(), val.data(), val.size());
+          break;
+        }
+
+        case msg::FieldType::UINT32: {
+          uint32_t v = std::stoull(val);
+          col->addDatum(0, col->maxDefinitionLevel(), &v, sizeof(v));
+          break;
+        }
+
+        case msg::FieldType::UINT64: {
+          uint64_t v = std::stoull(val);
+          col->addDatum(0, col->maxDefinitionLevel(), &v, sizeof(v));
+          break;
+        }
+
+        case msg::FieldType::DOUBLE: {
+          double v = std::stod(val);
+          col->addDatum(0, col->maxDefinitionLevel(), &v, sizeof(v));
+          break;
+        }
+
+        case msg::FieldType::BOOLEAN: {
+          auto b = Human::parseBoolean(val);
+          uint8_t v = !b.isEmpty() && b.get() ? 1 : 0;
+          col->addDatum(0, col->maxDefinitionLevel(), &v, sizeof(v));
+          break;
+        }
+
+        case msg::FieldType::OBJECT:
+          RAISE(kIllegalStateError, "can't read OBJECTs from CSV");
+
+      }
+    }
+
+    for (auto& col : missing_column_writers) {
+      col->addNull(0, 0);
+    }
+
+    ++num_records_;
   }
 }
 
