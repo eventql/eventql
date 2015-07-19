@@ -18,7 +18,7 @@ namespace fnord {
 
 std::unique_ptr<CSVInputStream> CSVInputStream::openFile(
     const std::string& file_path,
-    char column_seperator /* = ',' */,
+    char column_seperator /* = ';' */,
     char row_seperator /* = '\n' */,
     char quote_char /* = '"' */) {
   auto file = FileInputStream::openFile(file_path);
@@ -35,7 +35,7 @@ std::unique_ptr<CSVInputStream> CSVInputStream::openFile(
 
 CSVInputStream::CSVInputStream(
     std::unique_ptr<RewindableInputStream>&& input_stream,
-    char column_seperator /* = ',' */,
+    char column_seperator /* = ';' */,
     char row_seperator /* = '\n' */,
     char quote_char /* = '"' */) :
     input_(std::move(input_stream)),
@@ -43,7 +43,7 @@ CSVInputStream::CSVInputStream(
     row_seperator_(row_seperator),
     quote_char_(quote_char) {}
 
-// FIXPAUL quotechar escaping...
+// FIXPAUL quotechar unescaping...
 bool CSVInputStream::readNextRow(std::vector<std::string>* target) {
   target->clear();
 
