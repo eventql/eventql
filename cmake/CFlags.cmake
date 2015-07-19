@@ -4,8 +4,9 @@ set(CMAKE_C_FLAGS "-std=c11 -mno-omit-leaf-frame-pointer -fno-omit-frame-pointer
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lprotobuf -lz -lpthread")
 
 set(CMAKE_C_FLAGS_DEBUG "-g ${CMAKE_CXX_FLAGS_DEBUG}")
-set(CMAKE_CXX_FLAGS_DEBUG "-g -fsanitize=address ${CMAKE_CXX_FLAGS_DEBUG}")
-set(CMAKE_EXE_LINKER_FLAGS_DEBUG "-fsanitize=address ${CMAKE_EXE_LINKER_FLAGS_DEBUG}")
+set(CMAKE_CXX_FLAGS_DEBUG "-g ${CMAKE_CXX_FLAGS_DEBUG}")
+#set(CMAKE_CXX_FLAGS_DEBUG "-fsanitize=address ${CMAKE_CXX_FLAGS_DEBUG}")
+#set(CMAKE_EXE_LINKER_FLAGS_DEBUG "-fsanitize=address ${CMAKE_EXE_LINKER_FLAGS_DEBUG}")
 
 # OSX FLAGS
 if(APPLE)
