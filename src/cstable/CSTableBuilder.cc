@@ -263,7 +263,12 @@ void CSTableBuilder::addRecordsFromCSV(CSVInputStream* csv) {
 
   Vector<RefPtr<ColumnWriter>> missing_column_writers;
   for (const auto& col : missing_columns) {
-    missing_column_writers.emplace_back(columns_[col]);
+    auto writer = columns_[col];
+    if (writer->maxDefinitionLevel() == 0) {
+      RAISEF(kRuntimeError, "missing required column: $0", col);
+    }
+
+    missing_column_writers.emplace_back(writer);
   }
 
   Vector<String> row;
@@ -273,6 +278,13 @@ void CSTableBuilder::addRecordsFromCSV(CSVInputStream* csv) {
       const auto& val = row[i];
 
       if (Human::isNullOrEmpty(val)) {
+        if (col->maxDefinitionLevel() == 0) {
+          RAISEF(
+              kRuntimeError,
+              "missing value for required column: $0",
+              columns[i]);
+        }
+
         col->addNull(0, 0);
         continue;
       }
