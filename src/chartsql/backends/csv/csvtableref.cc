@@ -8,7 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <fnord/stdtypes.h>
-#include <fnord/csv/csvinputstream.h>
+#include <fnord/csv/CSVInputStream.h>
 #include <fnord/exception.h>
 #include <chartsql/parser/astnode.h>
 #include <chartsql/backends/csv/csvtableref.h>

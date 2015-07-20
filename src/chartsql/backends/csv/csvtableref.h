@@ -13,7 +13,7 @@
 #include <memory>
 #include <unordered_map>
 #include <string>
-#include <fnord/csv/csvinputstream.h>
+#include <fnord/csv/CSVInputStream.h>
 #include <chartsql/backends/tableref.h>
 
 using namespace fnord;
