@@ -18,7 +18,7 @@
 #endif
 
 namespace fnord {
-namespace sql {
+namespace mysql {
 
 class MySQLConnection {
 public:

@@ -8,10 +8,10 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <fnord/logging.h>
-#include <fnord-sql/MySQLConnection.h>
+#include <fnord/net/mysql/MySQLConnection.h>
 
 namespace fnord {
-namespace sql {
+namespace mysql {
 
 std::unique_ptr<MySQLConnection> MySQLConnection::openConnection(
     const fnord::URI& uri) {
