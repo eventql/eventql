@@ -12,6 +12,7 @@
 #include <memory>
 #include <fnord/uri.h>
 #include <fnord/exception.h>
+#include <fnord/protobuf/MessageSchema.h>
 #include <functional>
 #ifdef FNORD_ENABLE_MYSQL
 #include <mysql.h>
@@ -89,13 +90,22 @@ public:
       const std::string& password);
 
   /**
-   * Returns a list of all column names for the provided table name. May 
-   * throw an exception (This does the equivalent to a DESCRIBEL TABLE)
+   * Returns a list of all column names for the provided table name. May
+   * throw an exception (This does the equivalent to a DESCRIBE TABLE)
    *
    * @param table_name the name of the table do describe
    * @returns a list of all columns names of the table
    */
   std::vector<std::string> describeTable(const std::string& table_name);
+
+  /**
+   * Returns a MessageSchema for the provided table name. May throw an
+   * exception (This does the equivalent to a DESCRIBE TABLE)
+   *
+   * @param table_name the name of the table do describe
+   * @returns a list of all columns names of the table
+   */
+  RefPtr<msg::MessageSchema> getTableSchema(const std::string& table_name);
 
   /**
    * Execute a mysql query. The mysql query string must not include a terminal
