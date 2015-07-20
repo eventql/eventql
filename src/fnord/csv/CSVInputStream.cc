@@ -10,7 +10,7 @@
 #include <assert.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include "csvinputstream.h"
+#include "fnord/csv/CSVInputStream.h"
 #include "fnord/exception.h"
 #include "fnord/io/inputstream.h"
 
