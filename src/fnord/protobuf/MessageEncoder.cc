@@ -58,6 +58,7 @@ void MessageEncoder::encodeObject(
         break;
 
       case FieldType::UINT64:
+      case FieldType::DATETIME:
         data->appendVarUInt((msg.id << 3) | 0x0);
         data->appendVarUInt(msg.asUInt64());
         break;

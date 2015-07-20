@@ -14,6 +14,7 @@
 #include <limits>
 #include <string>
 #include "fnord/time_constants.h"
+#include "fnord/CivilTime.h"
 
 namespace fnord {
 
@@ -31,6 +32,13 @@ public:
    * @param timestamp the UTC microsecond timestamp
    */
   UnixTime(uint64_t utc_time);
+
+  /**
+   * Create a new UTC UnixTime instance from a civil time reference
+   *
+   * @param civil the civil time
+   */
+  UnixTime(const CivilTime& civil);
 
   /**
    * Return a representation of the date as a string (strftime)

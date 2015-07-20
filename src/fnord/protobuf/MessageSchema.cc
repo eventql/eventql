@@ -42,6 +42,9 @@ String MessageSchemaField::typeName() const {
     case FieldType::DOUBLE:
       return "double";
 
+    case FieldType::DATETIME:
+      return "datetime";
+
   }
 }
 
@@ -50,6 +53,7 @@ size_t MessageSchemaField::typeSize() const {
     case FieldType::OBJECT:
     case FieldType::BOOLEAN:
     case FieldType::DOUBLE:
+    case FieldType::DATETIME:
       return 0;
 
     case FieldType::UINT32:
@@ -184,7 +188,6 @@ static void schemaNodeToString(
     const MessageSchemaField& field,
     String* str) {
   String ws(level * 2, ' ');
-  String type_name;
   String attrs;
 
   String type_prefix = "";
@@ -200,47 +203,21 @@ static void schemaNodeToString(
     type_suffix += "]";
   }
 
-  switch (field.type) {
+  if (field.type == FieldType::OBJECT) {
+    str->append(StringUtil::format(
+        "$0$1object$2 $3 = $4 {\n",
+        ws,
+        type_prefix,
+        type_suffix,
+        field.name,
+        field.id));
 
-    case FieldType::OBJECT:
-      str->append(StringUtil::format(
-          "$0$1object$2 $3 = $4 {\n",
-          ws,
-          type_prefix,
-          type_suffix,
-          field.name,
-          field.id));
+    for (const auto& f : field.schema->fields()) {
+      schemaNodeToString(level + 1, f, str);
+    }
 
-      for (const auto& f : field.schema->fields()) {
-        schemaNodeToString(level + 1, f, str);
-      }
-
-      str->append(ws + "}\n");
-      return;
-
-    case FieldType::BOOLEAN:
-      type_name = "bool";
-      break;
-
-    case FieldType::UINT32:
-      type_name = "uint32";
-      attrs += StringUtil::format(" @maxval=$0", field.type_size);
-      break;
-
-    case FieldType::UINT64:
-      type_name = "uint64";
-      attrs += StringUtil::format(" @maxval=$0", field.type_size);
-      break;
-
-    case FieldType::DOUBLE:
-      type_name = "double";
-      break;
-
-    case FieldType::STRING:
-      type_name = "string";
-      attrs += StringUtil::format(" @maxlen=$0", field.type_size);
-      break;
-
+    str->append(ws + "}\n");
+    return;
   }
 
   switch (field.encoding) {
@@ -263,7 +240,7 @@ static void schemaNodeToString(
       "$0$1$2$3 $4 = $5$6;\n",
       ws,
       type_prefix,
-      type_name,
+      field.typeName(),
       type_suffix,
       field.name,
       field.id,

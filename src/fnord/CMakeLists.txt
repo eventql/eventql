@@ -42,7 +42,9 @@ add_library(fnord-base OBJECT
     io/outputstream.cc
     io/mmappedfile.cc
     io/pagemanager.cc
+    ISO8601.cc
     Currency.cc
+    CivilTime.cc
     Language.cc
     logging.cc
     logging/logoutputstream.cc
@@ -99,6 +101,10 @@ add_executable(tests/test-internmap
 add_executable(tests/test-hmac
     $<TARGET_OBJECTS:fnord-base>
     HMAC_test.cc)
+
+add_executable(tests/test-human
+    $<TARGET_OBJECTS:fnord-base>
+    human_test.cc)
 
 add_executable(tests/test-secure-cookie
     $<TARGET_OBJECTS:fnord-base>
