@@ -9,7 +9,7 @@
  */
 #include <fnord/util/binarymessagewriter.h>
 #include <fnord/exception.h>
-#include <fnord/IEEE754.h>
+#include <fnord/ieee754.h>
 #include <stdlib.h>
 #include <string.h>
 

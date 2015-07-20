@@ -9,7 +9,7 @@
  */
 #include <fnord/util/binarymessagereader.h>
 #include <fnord/exception.h>
-#include <fnord/IEEE754.h>
+#include <fnord/ieee754.h>
 
 namespace fnord {
 namespace util {
