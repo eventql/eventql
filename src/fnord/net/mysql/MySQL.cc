@@ -11,7 +11,7 @@
 #include <mutex>
 
 namespace fnord {
-namespace sql {
+namespace mysql {
 
 void mysqlInit() {
 #ifdef FNORD_ENABLE_MYSQL
