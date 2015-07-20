@@ -8,6 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include "fnord/ISO8601.h"
+#include "fnord/time_constants.h"
 
 using namespace fnord;
 
@@ -283,7 +284,7 @@ bool ISO8601::isLeapYear(uint16_t year) {
 
 uint8_t ISO8601::daysInMonth(uint16_t year, uint8_t month) {
   if (month == 2) {
-    return (28 + isLeapYear(year) ? 1 : 0);
+    return (28 + (isLeapYear(year) ? 1 : 0));
   }
 
   return (31 - (month - 1) % 7 % 2);

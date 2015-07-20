@@ -44,6 +44,7 @@ add_library(fnord-base OBJECT
     io/pagemanager.cc
     ISO8601.cc
     Currency.cc
+    CivilTime.cc
     Language.cc
     logging.cc
     logging/logoutputstream.cc
