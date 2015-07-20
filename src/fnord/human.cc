@@ -9,25 +9,25 @@
  */
 #include <fnord/stdtypes.h>
 #include "fnord/exception.h"
-#include "fnord/wallclock.h"
 #include "fnord/UTF8.h"
 #include <fnord/human.h>
+#include <fnord/ISO8601.h>
 
 namespace fnord {
 
-Option<UnixTime> Human::parseTime(const String& str) {
+Option<UnixTime> Human::parseTime(
+    const String& str,
+    UnixTime now /* = WallClock::now() */) {
   /* now */
   if (str == "now") {
-    return Some(UnixTime(WallClock::unixMicros()));
+    return Some(now);
   }
 
   /* -<duration> */
   if (StringUtil::beginsWith(str, "-") && str.size() > 1 && isdigit(str[1])) {
     auto offset = parseDuration(str.substr(1));
     if (!offset.isEmpty()) {
-      return Some(
-          UnixTime(
-              WallClock::unixMicros() - offset.get().microseconds()));
+      return Some(UnixTime(now.unixMicros() - offset.get().microseconds()));
     }
   }
 
@@ -54,10 +54,10 @@ Option<UnixTime> Human::parseTime(const String& str) {
     }
   }
 
-  //auto isodate = IsoDate::toUnixTime(str);
-  //if (!isodate.isEmpty()) {
-  //  return isodate.get();
-  //}
+  auto civil = ISO8601::parse(str);
+  if (!civil.isEmpty()) {
+    return Some(UnixTime(civil.get()));
+  }
 
   return None<UnixTime> ();
 }

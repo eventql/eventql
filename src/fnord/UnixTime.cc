@@ -13,12 +13,33 @@
 #include "fnord/inspect.h"
 #include "fnord/wallclock.h"
 #include "fnord/stringutil.h"
+#include "fnord/ISO8601.h"
 
 namespace fnord {
 
 UnixTime::UnixTime() : utc_micros_(WallClock::unixMicros()) {}
 
 UnixTime::UnixTime(uint64_t utc_time) : utc_micros_(utc_time) {}
+
+UnixTime::UnixTime(const CivilTime& civil) {
+  uint64_t days = civil.day() - 1;
+
+  for (auto i = 1970; i < civil.year(); ++i) {
+    days += 365 + ISO8601::isLeapYear(i);
+  }
+
+  for (auto i = 1; i < civil.month(); ++i) {
+    days += ISO8601::daysInMonth(civil.year(), i);
+  }
+
+  utc_micros_ =
+      days * kMicrosPerDay +
+      civil.hour() * kMicrosPerHour +
+      civil.minute() * kMicrosPerMinute +
+      civil.second() * kMicrosPerSecond +
+      civil.millisecond() * 1000 +
+      civil.offset() * kMicrosPerSecond * -1;
+}
 
 UnixTime& UnixTime::operator=(const UnixTime& other) {
   utc_micros_ = other.utc_micros_;

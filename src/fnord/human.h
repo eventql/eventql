@@ -11,6 +11,7 @@
 #include "fnord/stdtypes.h"
 #include "fnord/UnixTime.h"
 #include "fnord/duration.h"
+#include "fnord/wallclock.h"
 #include "fnord/option.h"
 
 namespace fnord {
@@ -41,7 +42,9 @@ public:
 
   static Option<Duration> parseDuration(const String& str);
 
-  static Option<UnixTime> parseTime(const String& str);
+  static Option<UnixTime> parseTime(
+      const String& str,
+      UnixTime now = WallClock::now());
 
   static Option<bool> parseBoolean(const String& value);
 

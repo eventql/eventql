@@ -10,6 +10,7 @@
 #ifndef _FNORD_MSG_MESSAGEBOJECT_H
 #define _FNORD_MSG_MESSAGEBOJECT_H
 #include <fnord/stdtypes.h>
+#include <fnord/UnixTime.h>
 
 namespace fnord {
 namespace msg {
@@ -22,7 +23,8 @@ enum class FieldType : uint8_t {
   UINT32 = 2,
   STRING = 3,
   UINT64 = 4,
-  DOUBLE = 5
+  DOUBLE = 5,
+  DATETIME = 6,
 };
 
 String fieldTypeToString(FieldType type);
@@ -40,7 +42,6 @@ struct FalseType {};
 static const TrueType TRUE {};
 static const FalseType FALSE {};
 
-
 struct MessageObject {
   explicit MessageObject(uint32_t id = 0);
   explicit MessageObject(uint32_t id, const String& value);
@@ -49,6 +50,7 @@ struct MessageObject {
   explicit MessageObject(uint32_t id, double value);
   explicit MessageObject(uint32_t id, TrueType t);
   explicit MessageObject(uint32_t id, FalseType f);
+  explicit MessageObject(uint32_t id, UnixTime time);
 
   MessageObject(const MessageObject& other);
   MessageObject(MessageObject&& other) = delete;
@@ -61,6 +63,7 @@ struct MessageObject {
   uint64_t asUInt64() const;
   bool asBool() const;
   double asDouble() const;
+  UnixTime asUnixTime() const;
 
   MessageObject& getObject(uint32_t id) const;
   Vector<MessageObject*> getObjects(uint32_t id) const;
@@ -68,7 +71,8 @@ struct MessageObject {
   uint32_t getUInt32(uint32_t id) const;
   uint64_t getUInt64(uint32_t id) const;
   bool getBool(uint32_t id) const;
-  bool getDouble(uint32_t id) const;
+  double getDouble(uint32_t id) const;
+  UnixTime getUnixTime(uint32_t id) const;
 
   template <typename... ArgTypes>
   MessageObject& addChild(ArgTypes... args) {
