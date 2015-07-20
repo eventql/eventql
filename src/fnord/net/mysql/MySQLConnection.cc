@@ -198,7 +198,8 @@ RefPtr<msg::MessageSchema> MySQLConnection::getTableSchema(
       case MYSQL_TYPE_DATE:
       case MYSQL_TYPE_TIME:
       case MYSQL_TYPE_DATETIME:
-        type = msg::FieldType::STRING;
+      case MYSQL_TYPE_NEWDATE:
+        type = msg::FieldType::DATETIME;
         break;
 
       case MYSQL_TYPE_NULL:
@@ -208,6 +209,10 @@ RefPtr<msg::MessageSchema> MySQLConnection::getTableSchema(
       case MYSQL_TYPE_STRING:
       case MYSQL_TYPE_VAR_STRING:
       case MYSQL_TYPE_BLOB:
+      case MYSQL_TYPE_VARCHAR:
+      case MYSQL_TYPE_TINY_BLOB:
+      case MYSQL_TYPE_MEDIUM_BLOB:
+      case MYSQL_TYPE_LONG_BLOB:
         type = msg::FieldType::STRING;
         break;
 
@@ -215,6 +220,7 @@ RefPtr<msg::MessageSchema> MySQLConnection::getTableSchema(
       case MYSQL_TYPE_ENUM:
       case MYSQL_TYPE_GEOMETRY:
       case MYSQL_TYPE_YEAR:
+      case MAX_NO_FIELD_TYPES:
         RAISE(kRuntimeError, "unsupported MySQL type");
 
     }
