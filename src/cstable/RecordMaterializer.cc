@@ -7,7 +7,7 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <fnord/IEEE754.h>
+#include <fnord/ieee754.h>
 #include <cstable/RecordMaterializer.h>
 
 namespace fnord {
