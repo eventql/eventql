@@ -37,7 +37,8 @@ UnixTime::UnixTime(const CivilTime& civil) {
       civil.hour() * kMicrosPerHour +
       civil.minute() * kMicrosPerMinute +
       civil.second() * kMicrosPerSecond +
-      civil.millisecond() * 1000;
+      civil.millisecond() * 1000 +
+      civil.offset() * kMicrosPerSecond * -1;
 }
 
 UnixTime& UnixTime::operator=(const UnixTime& other) {
