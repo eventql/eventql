@@ -9,17 +9,11 @@
  */
 #pragma once
 #include "fnord/stdtypes.h"
-#include "fnord/UnixTime.h"
 
 namespace fnord {
 
 class CivilTime {
 public:
-
-  /**
-   * Create a new CivilTime instance from the provided ISO8601 string
-   */
-  static CivilTime parseISO861(const String& str);
 
   /**
    * Create a new CivilTime instance with time = now
@@ -38,7 +32,7 @@ public:
   uint8_t minute() const;
   uint8_t second() const;
   uint16_t millisecond() const;
-  uint32_t offset() const;
+  int32_t offset() const;
 
   void setYear(uint16_t value);
   void setMonth(uint8_t value);
@@ -47,9 +41,7 @@ public:
   void setMinute(uint8_t value);
   void setSecond(uint8_t value);
   void setMillisecond(uint16_t value);
-  void setOffset(uint32_t value);
-
-  UnixTime toUnixTime();
+  void setOffset(int32_t value);
 
 protected:
   uint16_t year_;
@@ -59,7 +51,7 @@ protected:
   uint8_t minute_;
   uint8_t second_;
   uint16_t millisecond_;
-  uint32_t offset_;
+  int32_t offset_;
 };
 
 }

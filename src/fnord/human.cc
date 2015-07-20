@@ -12,6 +12,7 @@
 #include "fnord/wallclock.h"
 #include "fnord/UTF8.h"
 #include <fnord/human.h>
+#include <fnord/ISO8601.h>
 
 namespace fnord {
 
@@ -54,10 +55,10 @@ Option<UnixTime> Human::parseTime(const String& str) {
     }
   }
 
-  //auto ISO8601 = ISO8601::toUnixTime(str);
-  //if (!ISO8601.isEmpty()) {
-  //  return ISO8601.get();
-  //}
+  auto civil = ISO8601::parse(str);
+  if (!civil.isEmpty()) {
+    return Some(UnixTime(civil.get()));
+  }
 
   return None<UnixTime> ();
 }
