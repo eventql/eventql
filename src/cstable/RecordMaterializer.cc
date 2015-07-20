@@ -189,6 +189,12 @@ void RecordMaterializer::insertValue(
           *((uint64_t*) column->data));
       break;
 
+    case msg::FieldType::DATETIME:
+      record->addChild(
+          column->field_id,
+          UnixTime(*((uint64_t*) column->data)));
+      break;
+
     case msg::FieldType::STRING:
       record->addChild(
           column->field_id,
