@@ -54,9 +54,9 @@ Option<UnixTime> Human::parseTime(const String& str) {
     }
   }
 
-  //auto isodate = IsoDate::toUnixTime(str);
-  //if (!isodate.isEmpty()) {
-  //  return isodate.get();
+  //auto ISO8601 = ISO8601::toUnixTime(str);
+  //if (!ISO8601.isEmpty()) {
+  //  return ISO8601.get();
   //}
 
   return None<UnixTime> ();
