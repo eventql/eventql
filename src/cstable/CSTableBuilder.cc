@@ -87,6 +87,12 @@ void CSTableBuilder::createColumns(
       }
       break;
 
+    case msg::FieldType::DATETIME:
+      columns_.emplace(
+          colname,
+          new cstable::LEB128ColumnWriter(r_max, d_max));
+      break;
+
     case msg::FieldType::DOUBLE:
       columns_.emplace(
           colname,
@@ -218,6 +224,7 @@ void CSTableBuilder::writeField(
       break;
     }
 
+    case msg::FieldType::DATETIME:
     case msg::FieldType::UINT64: {
       uint64_t val = msg.asUInt64();
       col->second->addDatum(r, d, &val, sizeof(val));
@@ -302,6 +309,7 @@ void CSTableBuilder::addRecordsFromCSV(CSVInputStream* csv) {
           break;
         }
 
+        case msg::FieldType::DATETIME:
         case msg::FieldType::UINT64: {
           uint64_t v = std::stoull(val);
           col->addDatum(0, col->maxDefinitionLevel(), &v, sizeof(v));
