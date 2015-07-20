@@ -56,7 +56,7 @@ bool parseTimeOffset(
   auto minute_end = minute_begin + 2;
 
   if (minute_end > end ||
-      *begin != ':' ||
+      *hour_end != ':' ||
       !StringUtil::isDigitString(minute_begin, minute_end)) {
         return false;
   }

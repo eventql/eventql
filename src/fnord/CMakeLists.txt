@@ -102,6 +102,10 @@ add_executable(tests/test-hmac
     $<TARGET_OBJECTS:fnord-base>
     HMAC_test.cc)
 
+add_executable(tests/test-human
+    $<TARGET_OBJECTS:fnord-base>
+    human_test.cc)
+
 add_executable(tests/test-secure-cookie
     $<TARGET_OBJECTS:fnord-base>
     web/SecureCookie_test.cc)
