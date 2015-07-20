@@ -129,7 +129,6 @@ void CSTableBuilder::addRecordField(
     const msg::MessageObject& msg,
     const String& column,
     const msg::MessageSchemaField& field) {
-  auto this_r = r;
   auto next_r = r;
   auto next_d = d;
 
@@ -224,7 +223,12 @@ void CSTableBuilder::writeField(
       break;
     }
 
-    case msg::FieldType::DATETIME:
+    case msg::FieldType::DATETIME: {
+      uint64_t val = msg.asUInt64();
+      col->second->addDatum(r, d, &val, sizeof(val));
+      break;
+    }
+
     case msg::FieldType::UINT64: {
       uint64_t val = msg.asUInt64();
       col->second->addDatum(r, d, &val, sizeof(val));
@@ -259,6 +263,7 @@ void CSTableBuilder::addRecordsFromCSV(CSVInputStream* csv) {
   }
 
   Vector<RefPtr<ColumnWriter>> column_writers;
+  Vector<msg::FieldType> field_types;
   for (const auto& col : columns) {
     if (columns_.count(col) == 0) {
       RAISEF(kRuntimeError, "column '$0' not found in schema", col);
@@ -266,6 +271,7 @@ void CSTableBuilder::addRecordsFromCSV(CSVInputStream* csv) {
 
     missing_columns.erase(col);
     column_writers.emplace_back(columns_[col]);
+    field_types.emplace_back(schema_->fieldType(schema_->fieldId(col)));
   }
 
   Vector<RefPtr<ColumnWriter>> missing_column_writers;
@@ -296,7 +302,7 @@ void CSTableBuilder::addRecordsFromCSV(CSVInputStream* csv) {
         continue;
       }
 
-      switch (col->fieldType()) {
+      switch (field_types[i]) {
 
         case msg::FieldType::STRING: {
           col->addDatum(0, col->maxDefinitionLevel(), val.data(), val.size());
@@ -309,7 +315,17 @@ void CSTableBuilder::addRecordsFromCSV(CSVInputStream* csv) {
           break;
         }
 
-        case msg::FieldType::DATETIME:
+        case msg::FieldType::DATETIME: {
+          auto t = Human::parseTime(val);
+          if (t.isEmpty()) {
+            RAISEF(kTypeError, "can't convert '$0' to DATETIME", val);
+          }
+
+          uint64_t v = t.get().unixMicros();
+          col->addDatum(0, col->maxDefinitionLevel(), &v, sizeof(v));
+          break;
+        }
+
         case msg::FieldType::UINT64: {
           uint64_t v = std::stoull(val);
           col->addDatum(0, col->maxDefinitionLevel(), &v, sizeof(v));
