@@ -156,6 +156,85 @@ std::vector<std::string> MySQLConnection::describeTable(
   return columns;
 }
 
+RefPtr<msg::MessageSchema> MySQLConnection::getTableSchema(
+    const std::string& table_name) {
+  std::vector<std::string> columns;
+#ifdef FNORD_ENABLE_MYSQL
+  MYSQL_RES* res = mysql_list_fields(mysql_, table_name.c_str(), NULL);
+  if (res == nullptr) {
+    RAISE(
+      kRuntimeError,
+      "mysql_list_fields() failed: %s\n",
+      mysql_error(mysql_));
+  }
+
+  Vector<msg::MessageSchemaField> schema_fields;
+  auto num_cols = mysql_num_fields(res);
+  for (int i = 0; i < num_cols; ++i) {
+    MYSQL_FIELD* col = mysql_fetch_field_direct(res, i);
+
+    bool optional = (col->flags & NOT_NULL_FLAG) > 0;
+    bool is_unsigned = (col->flags & UNSIGNED_FLAG) > 0;
+    msg::FieldType type;
+
+    switch (col->type) {
+      case MYSQL_TYPE_TINY:
+      case MYSQL_TYPE_SHORT:
+      case MYSQL_TYPE_LONG:
+      case MYSQL_TYPE_INT24:
+      case MYSQL_TYPE_LONGLONG:
+      case MYSQL_TYPE_BIT:
+        type = is_unsigned ? msg::FieldType::UINT64 : msg::FieldType::DOUBLE;
+        break;
+
+      case MYSQL_TYPE_DECIMAL:
+      case MYSQL_TYPE_NEWDECIMAL:
+      case MYSQL_TYPE_FLOAT:
+      case MYSQL_TYPE_DOUBLE:
+        type = msg::FieldType::DOUBLE;
+        break;
+
+      case MYSQL_TYPE_TIMESTAMP:
+      case MYSQL_TYPE_DATE:
+      case MYSQL_TYPE_TIME:
+      case MYSQL_TYPE_DATETIME:
+        type = msg::FieldType::STRING;
+        break;
+
+      case MYSQL_TYPE_NULL:
+        optional = true;
+        /* fallthrough */
+
+      case MYSQL_TYPE_STRING:
+      case MYSQL_TYPE_VAR_STRING:
+      case MYSQL_TYPE_BLOB:
+        type = msg::FieldType::STRING;
+        break;
+
+      case MYSQL_TYPE_SET:
+      case MYSQL_TYPE_ENUM:
+      case MYSQL_TYPE_GEOMETRY:
+      case MYSQL_TYPE_YEAR:
+        RAISE(kRuntimeError, "unsupported MySQL type");
+
+    }
+
+    schema_fields.emplace_back(
+        i + 1,
+        col->name,
+        type,
+        0,
+        false,
+        optional);
+  }
+
+  mysql_free_result(res);
+  return new msg::MessageSchema(table_name, schema_fields);
+#else
+  RAISE(kRuntimeError, "libfnord was compiled without libmysqlclient");
+#endif
+}
+
 void MySQLConnection::executeQuery(
     const std::string& query,
     std::function<bool (const std::vector<std::string>&)> row_callback) {
