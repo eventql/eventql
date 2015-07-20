@@ -56,6 +56,12 @@ void MessageDecoder::decode(
         break;
       }
 
+      case FieldType::DATETIME: {
+        auto val = reader.readVarUInt();
+        msg->addChild(fid, UnixTime(val));
+        break;
+      }
+
       case FieldType::DOUBLE: {
         auto val = reader.readDouble();
         msg->addChild(fid, val);

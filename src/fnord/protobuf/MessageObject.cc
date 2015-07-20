@@ -21,6 +21,7 @@ String fieldTypeToString(FieldType type) {
     case FieldType::UINT32: return "UINT32";
     case FieldType::UINT64: return "UINT64";
     case FieldType::DOUBLE: return "DOUBLE";
+    case FieldType::DATETIME: return "DATETIME";
   }
 }
 
@@ -33,6 +34,7 @@ FieldType fieldTypeFromString(String str) {
   if (str == "UINT32") return FieldType::UINT32;
   if (str == "UINT64") return FieldType::UINT64;
   if (str == "DOUBLE") return FieldType::DOUBLE;
+  if (str == "DATETIME") return FieldType::DATETIME;
 
   RAISEF(kTypeError, "can't convert '$0' to FieldType", str);
 }
@@ -92,6 +94,15 @@ MessageObject::MessageObject(
 }
 
 MessageObject::MessageObject(
+    uint32_t _id,
+    UnixTime time) :
+    id(_id),
+    type(FieldType::BOOLEAN) {
+  new (&data_) uint64_t(time.unixMicros());
+}
+
+
+MessageObject::MessageObject(
     const MessageObject& other) :
     id(other.id),
     type(other.type) {
@@ -110,6 +121,7 @@ MessageObject::MessageObject(
       break;
 
     case FieldType::UINT64:
+    case FieldType::DATETIME:
       new (&data_) uint64_t(other.asUInt64());
       break;
 
@@ -139,6 +151,7 @@ MessageObject& MessageObject::operator=(const MessageObject& other) {
     case FieldType::UINT64:
     case FieldType::DOUBLE:
     case FieldType::BOOLEAN:
+    case FieldType::DATETIME:
       break;
 
   }
@@ -161,6 +174,7 @@ MessageObject& MessageObject::operator=(const MessageObject& other) {
       break;
 
     case FieldType::UINT64:
+    case FieldType::DATETIME:
       new (&data_) uint64_t(other.asUInt64());
       break;
 
@@ -192,6 +206,7 @@ MessageObject::~MessageObject() {
     case FieldType::UINT64:
     case FieldType::DOUBLE:
     case FieldType::BOOLEAN:
+    case FieldType::DATETIME:
       break;
 
   }
@@ -265,6 +280,17 @@ bool MessageObject::asBool() const {
 
   uint8_t val = *((uint8_t*) &data_);
   return val > 0;
+}
+
+UnixTime MessageObject::asUnixTime() const {
+#ifndef FNORD_NODEBUG
+  if (type != FieldType::DATETIME) {
+    RAISE(kTypeError);
+  }
+#endif
+
+  auto val = *((uint64_t*) &data_);
+  return UnixTime(val);
 }
 
 MessageObject& MessageObject::getObject(uint32_t id) const {
