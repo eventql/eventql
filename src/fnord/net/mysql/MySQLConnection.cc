@@ -220,7 +220,9 @@ RefPtr<msg::MessageSchema> MySQLConnection::getTableSchema(
       case MYSQL_TYPE_ENUM:
       case MYSQL_TYPE_GEOMETRY:
       case MYSQL_TYPE_YEAR:
+#ifdef MAX_NO_FIELD_TYPES
       case MAX_NO_FIELD_TYPES:
+#endif
         RAISE(kRuntimeError, "unsupported MySQL type");
 
     }
