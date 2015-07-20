@@ -14,7 +14,7 @@
 #endif
 
 namespace fnord {
-namespace sql {
+namespace mysql {
 
 void mysqlInit();
 
