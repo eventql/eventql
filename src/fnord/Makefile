@@ -9,7 +9,7 @@ CXXFLAGS += -stdlib=libc++
 endif
 
 FNORD_BASE_TARGET  = libfnord-base.a
-FNORD_BASE_SOURCES = assets.cc buffer.cc bufferutil.cc datetime.cc exception.cc exceptionhandler.cc inspect.cc ieee754.cc random.cc stringutil.cc uri.cc wallclock.cc fnv.cc isodate.cc
+FNORD_BASE_SOURCES = assets.cc buffer.cc bufferutil.cc datetime.cc exception.cc exceptionhandler.cc inspect.cc ieee754.cc random.cc stringutil.cc uri.cc wallclock.cc fnv.cc ISO8601.cc
 FNORD_BASE_OBJECTS = $(subst .cc,.o,$(FNORD_BASE_SOURCES))
 
 %.o : %.cc
