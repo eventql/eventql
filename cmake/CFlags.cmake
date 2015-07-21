@@ -24,6 +24,3 @@ else()
   set(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS)    # remove -rdynamic
   set(CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS)
 endif()
-
-# strip binaries
-#  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -s")
