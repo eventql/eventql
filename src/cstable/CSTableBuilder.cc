@@ -310,7 +310,13 @@ void CSTableBuilder::addRecordsFromCSV(CSVInputStream* csv) {
         }
 
         case msg::FieldType::UINT32: {
-          uint32_t v = std::stoull(val);
+          uint32_t v;
+          try {
+            v = std::stoull(val);
+          } catch (const StandardException& e) {
+            RAISEF(kTypeError, "can't convert '$0' to UINT32", val);
+          }
+
           col->addDatum(0, col->maxDefinitionLevel(), &v, sizeof(v));
           break;
         }
@@ -327,13 +333,25 @@ void CSTableBuilder::addRecordsFromCSV(CSVInputStream* csv) {
         }
 
         case msg::FieldType::UINT64: {
-          uint64_t v = std::stoull(val);
+          uint64_t v;
+          try {
+            v = std::stoull(val);
+          } catch (const StandardException& e) {
+            RAISEF(kTypeError, "can't convert '$0' to UINT64", val);
+          }
+
           col->addDatum(0, col->maxDefinitionLevel(), &v, sizeof(v));
           break;
         }
 
         case msg::FieldType::DOUBLE: {
-          double v = std::stod(val);
+          double v;
+          try {
+            v = std::stod(val);
+          } catch (const StandardException& e) {
+            RAISEF(kTypeError, "can't convert '$0' to DOUBLE", val);
+          }
+
           col->addDatum(0, col->maxDefinitionLevel(), &v, sizeof(v));
           break;
         }
