@@ -20,10 +20,7 @@ add_library(fnord-protobuf OBJECT
 
 add_dependencies(fnord-protobuf fnord-base)
 
-set(FNORD_PROTOBUF_LIBS
-    ${PROTOBUF_LIBRARIES}
-    ${CMAKE_THREAD_LIBS_INIT}
-    PARENT_SCOPE)
+set(FNORD_PROTOBUF_LIBS ${PROTOBUF_LIBRARIES} PARENT_SCOPE)
 
 include_directories(${PROTOBUF_INCLUDE_DIRS})
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
