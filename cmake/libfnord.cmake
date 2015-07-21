@@ -1,4 +1,6 @@
-include(lib/libfnord/cmake/CFlags.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/CFlags.cmake)
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/..)
 include_directories(${FNORD_INCLUDE})
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${FNORD_LDFLAGS}")
+set(CMAKE_CXX_LINK_EXECUTABLE "${CMAKE_CXX_LINK_EXECUTABLE} ${FNORD_LDFLAGS}")
+message(STATUS "LDFLAGS ${FNORD_LDFLAGS}")
