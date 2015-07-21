@@ -173,7 +173,7 @@ RefPtr<msg::MessageSchema> MySQLConnection::getTableSchema(
   for (int i = 0; i < num_cols; ++i) {
     MYSQL_FIELD* col = mysql_fetch_field_direct(res, i);
 
-    bool optional = (col->flags & NOT_NULL_FLAG) > 0;
+    bool optional = true; // (col->flags & NOT_NULL_FLAG) > 0;
     bool is_unsigned = (col->flags & UNSIGNED_FLAG) > 0;
     msg::FieldType type;
 
