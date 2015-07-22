@@ -24,7 +24,7 @@ std::unique_ptr<CSVInputStream> CSVInputStream::openFile(
   auto file = FileInputStream::openFile(file_path);
   file->readByteOrderMark();
 
-  auto csv_file = new CSVInputStream(
+  auto csv_file = new DefaultCSVInputStream(
       std::move(file),
       column_separator,
       row_separator,
@@ -33,7 +33,7 @@ std::unique_ptr<CSVInputStream> CSVInputStream::openFile(
   return std::unique_ptr<CSVInputStream>(csv_file);
 }
 
-CSVInputStream::CSVInputStream(
+DefaultCSVInputStream::DefaultCSVInputStream(
     std::unique_ptr<RewindableInputStream>&& input_stream,
     char column_separator /* = ';' */,
     char row_separator /* = '\n' */,
@@ -44,7 +44,7 @@ CSVInputStream::CSVInputStream(
     quote_char_(quote_char) {}
 
 // FIXPAUL quotechar unescaping...
-bool CSVInputStream::readNextRow(std::vector<std::string>* target) {
+bool DefaultCSVInputStream::readNextRow(std::vector<std::string>* target) {
   target->clear();
 
   bool eof = false;
@@ -85,16 +85,16 @@ bool CSVInputStream::readNextRow(std::vector<std::string>* target) {
   return !eof;
 }
 
-bool CSVInputStream::skipNextRow() {
+bool DefaultCSVInputStream::skipNextRow() {
   std::vector<std::string> devnull;
   return readNextRow(&devnull);
 }
 
-void CSVInputStream::rewind() {
+void DefaultCSVInputStream::rewind() {
   input_->rewind();
 }
 
-const RewindableInputStream& CSVInputStream::getInputStream() const {
+const RewindableInputStream& DefaultCSVInputStream::getInputStream() const {
   return *input_;
 }
 

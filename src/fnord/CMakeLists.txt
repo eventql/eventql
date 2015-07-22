@@ -25,6 +25,7 @@ add_library(fnord-base OBJECT
     csv/CSVOutputStream.cc
     csv/BinaryCSVOutputStream.cc
     csv/CSVInputStream.cc
+    csv/BinaryCSVInputStream.cc
     UnixTime.cc
     duration.cc
     exception.cc

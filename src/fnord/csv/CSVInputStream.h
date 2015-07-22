@@ -16,6 +16,7 @@ namespace fnord {
 class CSVInputStream {
 public:
 
+
   /**
    * Open a new csv file input stream from the provided file path. Throws an
    * exception if the file cannot be opened.
@@ -29,9 +30,36 @@ public:
       char quote_char = '"');
 
   /**
+   * Read the next row from the csv file. Returns true if a row was read and
+   * false on EOF. May raise an exception.
+   */
+  virtual bool readNextRow(std::vector<std::string>* target) = 0;
+
+  /**
+   * Skip the next row from the csv file. Returns true if a row was skipped and
+   * false on EOF. May raise an exception.
+   */
+  virtual bool skipNextRow() = 0;
+
+  /**
+   * Rewind the input stream
+   */
+  virtual void rewind() = 0;
+
+  /**
+   * Return the input stream
+   */
+  virtual const RewindableInputStream& getInputStream() const = 0;
+
+};
+
+class DefaultCSVInputStream : public CSVInputStream {
+public:
+
+  /**
    * Create a new CSVInputStream from the provided InputStream.
    */
-  explicit CSVInputStream(
+  explicit DefaultCSVInputStream(
       std::unique_ptr<RewindableInputStream>&& input_stream,
       char column_separator = ';',
       char row_separator = '\n',
@@ -41,23 +69,23 @@ public:
    * Read the next row from the csv file. Returns true if a row was read and
    * false on EOF. May raise an exception.
    */
-  bool readNextRow(std::vector<std::string>* target);
+  bool readNextRow(std::vector<std::string>* target) override;
 
   /**
    * Skip the next row from the csv file. Returns true if a row was skipped and
    * false on EOF. May raise an exception.
    */
-  bool skipNextRow();
+  bool skipNextRow() override;
 
   /**
    * Rewind the input stream
    */
-  void rewind();
+  void rewind() override;
 
   /**
    * Return the input stream
    */
-  const RewindableInputStream& getInputStream() const;
+  const RewindableInputStream& getInputStream() const override;
 
 protected:
 
