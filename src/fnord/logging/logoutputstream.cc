@@ -34,7 +34,7 @@ void LogOutputStream::log(
   StringUtil::replaceAll(&lines, "\n", "\n" + prefix);
   lines.append("\n");
 
-  ScopedLock<std::mutex> lk(target_->mutex_);
+  ScopedLock<std::mutex> lk(target_->mutex);
   target_->write(lines);
 }
 
