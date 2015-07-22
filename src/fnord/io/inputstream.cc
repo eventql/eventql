@@ -86,7 +86,7 @@ size_t InputStream::readUntilEOF(std::string* target) {
 uint8_t InputStream::readUInt8() {
   uint8_t val;
   if (readNextBytes(&val, sizeof(uint8_t)) != sizeof(uint8_t)) {
-    RAISE(kRuntimeError, "unexpected end of stream");
+    RAISE(kEOFError, "unexpected end of stream");
   }
 
   return val;
@@ -95,7 +95,7 @@ uint8_t InputStream::readUInt8() {
 uint16_t InputStream::readUInt16() {
   uint16_t val;
   if (readNextBytes(&val, sizeof(uint16_t)) != sizeof(uint16_t)) {
-    RAISE(kRuntimeError, "unexpected end of stream");
+    RAISE(kEOFError, "unexpected end of stream");
   }
 
   return val;
@@ -104,7 +104,7 @@ uint16_t InputStream::readUInt16() {
 uint32_t InputStream::readUInt32() {
   uint32_t val;
   if (readNextBytes(&val, sizeof(uint32_t)) != sizeof(uint32_t)) {
-    RAISE(kRuntimeError, "unexpected end of stream");
+    RAISE(kEOFError, "unexpected end of stream");
   }
 
   return val;
@@ -113,7 +113,7 @@ uint32_t InputStream::readUInt32() {
 uint64_t InputStream::readUInt64() {
   uint64_t val;
   if (readNextBytes(&val, sizeof(uint64_t)) != sizeof(uint64_t)) {
-    RAISE(kRuntimeError, "unexpected end of stream");
+    RAISE(kEOFError, "unexpected end of stream");
   }
 
   return val;
@@ -139,7 +139,7 @@ uint64_t InputStream::readVarUInt() {
 String InputStream::readString(size_t size) {
   String val;
   if (readNextBytes(&val, size) != size) {
-    RAISE(kRuntimeError, "unexpected end of stream");
+    RAISE(kEOFError, "unexpected end of stream");
   }
 
   return val;
@@ -150,7 +150,7 @@ String InputStream::readLenencString() {
 
   String val;
   if (readNextBytes(&val, size) != size) {
-    RAISE(kRuntimeError, "unexpected end of stream");
+    RAISE(kEOFError, "unexpected end of stream");
   }
 
   return val;
@@ -159,7 +159,7 @@ String InputStream::readLenencString() {
 double InputStream::readDouble() {
   uint64_t val;
   if (readNextBytes(&val, sizeof(uint64_t)) != sizeof(uint64_t)) {
-    RAISE(kRuntimeError, "unexpected end of stream");
+    RAISE(kEOFError, "unexpected end of stream");
   }
 
   return IEEE754::fromBytes(val);
@@ -230,6 +230,15 @@ bool FileInputStream::readNextByte(char* target) {
   }
 }
 
+bool FileInputStream::eof() {
+  if (buf_pos_ >= buf_len_) {
+    readNextChunk();
+  }
+
+  return buf_pos_ < buf_len_;
+}
+
+// FIXPAUL move somwhere else...
 FileInputStream::kByteOrderMark FileInputStream::readByteOrderMark() {
   static char kByteOrderMarkUTF8[] = "\xEF\xBB\xBF";
   if (buf_pos_ + 2 < buf_len_ &&
@@ -281,7 +290,7 @@ bool StringInputStream::readNextByte(char* target) {
   }
 }
 
-bool StringInputStream::eof() const {
+bool StringInputStream::eof() {
   return cur_ >= str_.size();
 }
 
@@ -309,7 +318,7 @@ bool BufferInputStream::readNextByte(char* target) {
   }
 }
 
-bool BufferInputStream::eof() const {
+bool BufferInputStream::eof() {
   return cur_ >= buf_->size();
 }
 
