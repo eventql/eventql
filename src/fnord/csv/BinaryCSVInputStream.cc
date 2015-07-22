@@ -16,6 +16,8 @@ BinaryCSVInputStream::BinaryCSVInputStream(
     input_(std::move(input_stream)) {}
 
 bool BinaryCSVInputStream::readNextRow(std::vector<std::string>* target) {
+  target->clear();
+
   if (input_->eof()) {
     return false;
   }
