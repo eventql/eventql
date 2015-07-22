@@ -18,7 +18,8 @@ namespace fnord {
 namespace thread {
 
 FixedSizeThreadPool::FixedSizeThreadPool(
-    size_t nthreads) :
+    size_t nthreads,
+    size_t maxqueuelen /* = -1 */) :
     FixedSizeThreadPool(
         nthreads,
         std::unique_ptr<fnord::ExceptionHandler>(
@@ -26,9 +27,11 @@ FixedSizeThreadPool::FixedSizeThreadPool(
 
 FixedSizeThreadPool::FixedSizeThreadPool(
     size_t nthreads,
-    std::unique_ptr<ExceptionHandler> error_handler) :
+    std::unique_ptr<ExceptionHandler> error_handler,
+    size_t maxqueuelen /* = -1 */) :
     nthreads_(nthreads),
-    error_handler_(std::move(error_handler)) {}
+    error_handler_(std::move(error_handler)),
+    queue_(maxqueuelen) {}
 
 void FixedSizeThreadPool::start() {
   for (int i = 0; i < nthreads_; ++i) {
@@ -51,7 +54,7 @@ void FixedSizeThreadPool::stop() {
 }
 
 void FixedSizeThreadPool::run(std::function<void()> task) {
-  queue_.insert(task);
+  queue_.insert(task, true);
 }
 
 void FixedSizeThreadPool::runOnReadable(std::function<void()> task, int fd) {
