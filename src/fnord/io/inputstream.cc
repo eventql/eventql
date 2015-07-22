@@ -118,6 +118,15 @@ uint64_t InputStream::readUInt64() {
   return val;
 }
 
+String InputStream::readString(size_t size) {
+  String val;
+  if (readNextBytes(&val, size) != size) {
+    RAISE(kRuntimeError, "unexpected end of stream");
+  }
+
+  return val;
+}
+
 std::unique_ptr<FileInputStream> FileInputStream::openFile(
     const std::string& file_path) {
   auto fp = file_path.c_str();
