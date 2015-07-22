@@ -20,6 +20,7 @@ const char kBufferOverflowError[] = "BufferOverflowError";
 const char kEncodingError[] = "EncodingError";
 const char kConcurrentModificationError[] = "ConcurrentModificationError";
 const char kDivideByZeroError[] = "DivideByZeroError";
+const char kEOFError[] = "EOFError";
 const char kFlagError[] = "FlagError";
 const char kIOError[] = "IOError";
 const char kIllegalArgumentError[] = "IllegalArgument";

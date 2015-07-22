@@ -41,7 +41,7 @@ public:
    * Check if the end of this input stream was reached. Returns true if the
    * end was reached, false otherwise
    */
-  virtual bool eof() const = 0;
+  virtual bool eof() = 0;
 
   /**
    * Read N bytes from the stream and copy the data into the provided string.
@@ -214,7 +214,7 @@ public:
    * Check if the end of this input stream was reached. Returns true if the
    * end was reached, false otherwise
    */
-  bool eof() const override;
+  bool eof() override;
 
   /**
    * Rewind the input stream
@@ -265,7 +265,7 @@ public:
    * Check if the end of this input stream was reached. Returns true if the
    * end was reached, false otherwise
    */
-  bool eof() const override;
+  bool eof() override;
 
   /**
    * Rewind the input stream
@@ -306,7 +306,7 @@ public:
    * Check if the end of this input stream was reached. Returns true if the
    * end was reached, false otherwise
    */
-  bool eof() const override;
+  bool eof() override;
 
   /**
    * Rewind the input stream
