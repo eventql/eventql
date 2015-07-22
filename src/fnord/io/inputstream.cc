@@ -235,7 +235,7 @@ bool FileInputStream::eof() {
     readNextChunk();
   }
 
-  return buf_pos_ < buf_len_;
+  return buf_pos_ >= buf_len_;
 }
 
 // FIXPAUL move somwhere else...
