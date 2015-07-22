@@ -60,6 +60,16 @@ size_t InputStream::readNextBytes(Buffer* target, size_t n_bytes) {
   return length;
 }
 
+size_t InputStream::readNextBytes(void* target, size_t n_bytes) {
+  size_t length = 0;
+
+  while (length < n_bytes && readNextByte(((char*) target) + length)) {
+    ++length;
+  }
+
+  return length;
+}
+
 // FIXPAUL: optimize?
 size_t InputStream::readUntilEOF(std::string* target) {
   char byte;
@@ -70,6 +80,42 @@ size_t InputStream::readUntilEOF(std::string* target) {
   }
 
   return length;
+}
+
+uint8_t InputStream::readUInt8() {
+  uint8_t val;
+  if (readNextBytes(&val, sizeof(uint8_t)) != sizeof(uint8_t)) {
+    RAISE(kRuntimeError, "unexpected end of stream");
+  }
+
+  return val;
+}
+
+uint16_t InputStream::readUInt16() {
+  uint16_t val;
+  if (readNextBytes(&val, sizeof(uint16_t)) != sizeof(uint16_t)) {
+    RAISE(kRuntimeError, "unexpected end of stream");
+  }
+
+  return val;
+}
+
+uint32_t InputStream::readUInt32() {
+  uint32_t val;
+  if (readNextBytes(&val, sizeof(uint32_t)) != sizeof(uint32_t)) {
+    RAISE(kRuntimeError, "unexpected end of stream");
+  }
+
+  return val;
+}
+
+uint64_t InputStream::readUInt64() {
+  uint64_t val;
+  if (readNextBytes(&val, sizeof(uint64_t)) != sizeof(uint64_t)) {
+    RAISE(kRuntimeError, "unexpected end of stream");
+  }
+
+  return val;
 }
 
 std::unique_ptr<FileInputStream> FileInputStream::openFile(
