@@ -145,6 +145,17 @@ String InputStream::readString(size_t size) {
   return val;
 }
 
+String InputStream::readLenencString() {
+  auto size = readVarUInt();
+
+  String val;
+  if (readNextBytes(&val, size) != size) {
+    RAISE(kRuntimeError, "unexpected end of stream");
+  }
+
+  return val;
+}
+
 double InputStream::readDouble() {
   uint64_t val;
   if (readNextBytes(&val, sizeof(uint64_t)) != sizeof(uint64_t)) {
@@ -270,6 +281,10 @@ bool StringInputStream::readNextByte(char* target) {
   }
 }
 
+bool StringInputStream::eof() const {
+  return cur_ >= str_.size();
+}
+
 void StringInputStream::rewind() {
   cur_ = 0;
 }
@@ -292,6 +307,10 @@ bool BufferInputStream::readNextByte(char* target) {
   } else {
     return false;
   }
+}
+
+bool BufferInputStream::eof() const {
+  return cur_ >= buf_->size();
 }
 
 void BufferInputStream::rewind() {
