@@ -16,6 +16,7 @@
 #include "fnord/buffer.h"
 #include "fnord/exception.h"
 #include "fnord/io/outputstream.h"
+#include "fnord/IEEE754.h"
 
 namespace fnord {
 
@@ -57,6 +58,48 @@ size_t OutputStream::printf(const char* format, ...) {
   }
 
   return pos;
+}
+
+void OutputStream::appendUInt8(uint8_t value) {
+  write((char*) &value, sizeof(value));
+}
+
+void OutputStream::appendUInt16(uint16_t value) {
+  write((char*) &value, sizeof(value));
+}
+
+void OutputStream::appendUInt32(uint32_t value) {
+  write((char*) &value, sizeof(value));
+}
+
+void OutputStream::appendUInt64(uint64_t value) {
+  write((char*) &value, sizeof(value));
+}
+
+void OutputStream::appendDouble(double value) {
+  auto bytes = IEEE754::toBytes(value);
+  write((char*) &bytes, sizeof(bytes));
+}
+
+void OutputStream::appendString(const std::string& string) {
+  write(string.data(), string.size());
+}
+
+void OutputStream::appendLenencString(const std::string& string) {
+  appendVarUInt(string.size());
+  write(string.data(), string.size());
+}
+
+void OutputStream::appendVarUInt(uint64_t value) {
+  unsigned char buf[10];
+  size_t bytes = 0;
+  do {
+    buf[bytes] = value & 0x7fU;
+    if (value >>= 7) buf[bytes] |= 0x80U;
+    ++bytes;
+  } while (value);
+
+  write((char*) buf, bytes);
 }
 
 std::unique_ptr<FileOutputStream> FileOutputStream::openFile(

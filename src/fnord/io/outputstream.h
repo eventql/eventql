@@ -45,6 +45,15 @@ public:
   virtual size_t write(const Buffer& buf);
   virtual size_t printf(const char* format, ...);
 
+  void appendUInt8(uint8_t value);
+  void appendUInt16(uint16_t value);
+  void appendUInt32(uint32_t value);
+  void appendUInt64(uint64_t value);
+  void appendVarUInt(uint64_t value);
+  void appendDouble(double value);
+  void appendString(const std::string& string);
+  void appendLenencString(const std::string& string);
+
   mutable std::mutex mutex_;
 };
 
