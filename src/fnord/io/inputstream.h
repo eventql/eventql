@@ -64,6 +64,15 @@ public:
    */
   virtual size_t readUntilEOF(std::string* target);
 
+  uint8_t readUInt8();
+  uint16_t readUInt16();
+  uint32_t readUInt32();
+  uint64_t readUInt64();
+  uint64_t readVarUInt();
+  String readString(size_t size);
+  String readLenencString();
+  double readDouble();
+
   /**
    * Return the input stream filename
    */
