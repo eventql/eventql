@@ -119,6 +119,23 @@ uint64_t InputStream::readUInt64() {
   return val;
 }
 
+uint64_t InputStream::readVarUInt() {
+  uint64_t val = 0;
+
+  for (int i = 0; ; ++i) {
+    unsigned char b;
+    readNextByte((char*) &b);
+
+    val |= (b & 0x7fULL) << (7 * i);
+
+    if (!(b & 0x80U)) {
+      break;
+    }
+  }
+
+  return val;
+}
+
 String InputStream::readString(size_t size) {
   String val;
   if (readNextBytes(&val, size) != size) {
