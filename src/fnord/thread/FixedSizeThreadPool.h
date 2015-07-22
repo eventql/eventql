@@ -29,11 +29,29 @@ namespace thread {
 class FixedSizeThreadPool : public TaskScheduler {
 public:
 
-  FixedSizeThreadPool(size_t nthreads);
-
+  /**
+   * Construct a new fixed size thread pool. If maxqueuelen is set, the run()
+   * operation will block if the queue is full. Default is an unbounded queue
+   *
+   * @param nthreads number of threads to run
+   * @param maxqueuelen max queue len. default is -1 == unbounded
+   */
   FixedSizeThreadPool(
       size_t nthreads,
-      std::unique_ptr<fnord::ExceptionHandler> error_handler);
+      size_t maxqueuelen = -1);
+
+  /**
+   * Construct a new fixed size thread pool. If maxqueuelen is set, the run()
+   * operation will block if the queue is full. Default is an unbounded queue
+   *
+   * @param nthreads number of threads to run
+   * @param error_handler the exception handler to call for unhandled errors
+   * @param maxqueuelen max queue len. default is -1 == unbounded
+   */
+  FixedSizeThreadPool(
+      size_t nthreads,
+      std::unique_ptr<fnord::ExceptionHandler> error_handler,
+      size_t maxqueuelen = -1);
 
   void start();
   void stop();
