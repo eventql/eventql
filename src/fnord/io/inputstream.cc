@@ -14,6 +14,7 @@
 #include <fnord/buffer.h>
 #include <fnord/exception.h>
 #include <fnord/io/inputstream.h>
+#include <fnord/IEEE754.h>
 
 namespace fnord {
 
@@ -126,6 +127,16 @@ String InputStream::readString(size_t size) {
 
   return val;
 }
+
+double InputStream::readDouble() {
+  uint64_t val;
+  if (readNextBytes(&val, sizeof(uint64_t)) != sizeof(uint64_t)) {
+    RAISE(kRuntimeError, "unexpected end of stream");
+  }
+
+  return IEEE754::fromBytes(val);
+}
+
 
 std::unique_ptr<FileInputStream> FileInputStream::openFile(
     const std::string& file_path) {
