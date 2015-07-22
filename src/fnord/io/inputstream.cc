@@ -14,7 +14,7 @@
 #include <fnord/buffer.h>
 #include <fnord/exception.h>
 #include <fnord/io/inputstream.h>
-#include <fnord/IEEE754.h>
+#include <fnord/ieee754.h>
 
 namespace fnord {
 
