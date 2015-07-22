@@ -38,6 +38,12 @@ public:
   virtual bool readNextByte(char* target) = 0;
 
   /**
+   * Check if the end of this input stream was reached. Returns true if the
+   * end was reached, false otherwise
+   */
+  virtual bool eof() const = 0;
+
+  /**
    * Read N bytes from the stream and copy the data into the provided string.
    * Returns the number of bytes read.
    *
@@ -64,14 +70,47 @@ public:
    */
   virtual size_t readUntilEOF(std::string* target);
 
-  uint8_t readUInt8();
-  uint16_t readUInt16();
-  uint32_t readUInt32();
-  uint64_t readUInt64();
-  uint64_t readVarUInt();
-  String readString(size_t size);
-  String readLenencString();
-  double readDouble();
+  /**
+   * Reads a uint8 from the stream. Throws an exception on error
+   */
+  virtual uint8_t readUInt8();
+
+  /**
+   * Reads a uint16 from the stream. Throws an exception on error
+   */
+  virtual uint16_t readUInt16();
+
+  /**
+   * Reads a uint32 from the stream. Throws an exception on error
+   */
+  virtual uint32_t readUInt32();
+
+  /**
+   * Reads a uint64 from the stream. Throws an exception on error
+   */
+  virtual uint64_t readUInt64();
+
+  /**
+   * Reads a LEB128 encoded uint64 from the stream. Throws an exception on error
+   */
+  virtual uint64_t readVarUInt();
+
+  /**
+   * Reads a string from the stream. Throws an exception on error
+   */
+  virtual String readString(size_t size);
+
+  /**
+   * Reads a LEB128 prefix-length-encoded string from the stream. Throws an
+   * exception on error
+   */
+  virtual String readLenencString();
+
+  /**
+   * Reads a IEEE754 encoded double from the stream. Throws an exception on
+   * error
+   */
+  virtual double readDouble();
 
   /**
    * Return the input stream filename
@@ -164,6 +203,12 @@ public:
   bool readNextByte(char* target) override;
 
   /**
+   * Check if the end of this input stream was reached. Returns true if the
+   * end was reached, false otherwise
+   */
+  bool eof() const override;
+
+  /**
    * Rewind the input stream
    */
   void rewind() override;
@@ -209,6 +254,12 @@ public:
   bool readNextByte(char* target) override;
 
   /**
+   * Check if the end of this input stream was reached. Returns true if the
+   * end was reached, false otherwise
+   */
+  bool eof() const override;
+
+  /**
    * Rewind the input stream
    */
   void rewind() override;
@@ -242,6 +293,12 @@ public:
    * @param target the target char pointer
    */
   bool readNextByte(char* target) override;
+
+  /**
+   * Check if the end of this input stream was reached. Returns true if the
+   * end was reached, false otherwise
+   */
+  bool eof() const override;
 
   /**
    * Rewind the input stream
