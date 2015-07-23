@@ -39,12 +39,12 @@ RefPtr<VFSFile> CSTableIndex::computeBlob(dproc::TaskContext* context) {
       SHA1Hash::fromHexString(params_.partition_key()));
 
   if (partition.isEmpty()) {
-    RAISE(kNotFoundError, "partition not found");
+    return new Buffer();
   }
 
   auto cstable = partition.get()->cstableFile();
   if (cstable.isEmpty()) {
-    RAISE(kNotFoundError, "partition not built yet");
+    return new Buffer();
   }
 
   return cstable.get();
