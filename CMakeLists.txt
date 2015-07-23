@@ -28,11 +28,9 @@ add_subdirectory(src/fnord/rpc)
 add_subdirectory(src/fnord/charts)
 
 add_subdirectory(src/fnord/net/mysql)
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -l${FNORD_MYSQL_LIBS}")
+set(FNORD_MYSQL_LIBS ${FNORD_MYSQL_LIBS} PARENT_SCOPE)
 
 add_subdirectory(src/fnord)
-
-set(FNORD_MYSQL_LIBS ${FNORD_MYSQL_LIBS} PARENT_SCOPE)
 
 set(FNORD_INCLUDE ${MODULE_INCLUDE} PARENT_SCOPE)
 set(FNORD_LDFLAGS ${MODULE_LDFLAGS} PARENT_SCOPE)
