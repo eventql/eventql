@@ -28,6 +28,10 @@ public:
 
   RefPtr<VFSFile> computeBlob(dproc::TaskContext* context) override;
 
+  dproc::StorageLevel storageLevel() const override {
+    return dproc::StorageLevel::MEMORY;
+  }
+
 protected:
   TSDBTableScanSpec params_;
   tsdb::TSDBNode* tsdb_;
