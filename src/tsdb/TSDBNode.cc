@@ -225,6 +225,22 @@ Option<TSDBTableInfo> TSDBNode::tableInfo(
   return Some(ti);
 }
 
+Option<PartitionInfo> TSDBNode::partitionInfo(
+    const String& tsdb_namespace,
+    const String& table_key,
+    const SHA1Hash& partition_key) {
+  auto partition = findPartition(
+      tsdb_namespace,
+      table_key,
+      partition_key);
+
+  if (partition.isEmpty()) {
+    return None<PartitionInfo>();
+  } else {
+    return Some(partition.get()->partitionInfo());
+  }
+}
+
 const String& TSDBNode::dbPath() const {
   return noderef_.db_path;
 }
