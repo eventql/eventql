@@ -10,7 +10,6 @@ PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS ${PROTO_FILES})
 
 # base
 add_library(fnord-base OBJECT
-    ../../3rdparty/libart/art.c
     ../../3rdparty/simdcomp/simdbitpacking.c
     ../../3rdparty/simdcomp/simdintegratedbitpacking.c
     ../../3rdparty/simdcomp/simdcomputil.c
