@@ -410,6 +410,21 @@ Option<cstable::CSTableReader> Partition::cstable() const {
   }
 }
 
+Option<RefPtr<VFSFile>> Partition::cstableFile() const {
+  std::unique_lock<std::mutex> lk(mutex_);
+
+  if (cstable_file_.empty()) {
+    return None<RefPtr<VFSFile>>();
+  } else {
+    auto cstable_file_path = FileUtil::joinPaths(
+        node_->db_path,
+        cstable_file_);
+
+    return Some<RefPtr<VFSFile>>(
+        new io::MmappedFile(File::openFile(cstable_file_path, File::O_READ)));
+  }
+}
+
 void PartitionState::encode(
     util::BinaryMessageWriter* writer) const {
   writer->appendLenencString(stream_key);

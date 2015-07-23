@@ -21,52 +21,33 @@ namespace tsdb {
 
 CSTableIndex::CSTableIndex(
     const TSDBTableScanSpec params,
-    msg::MessageSchemaRepository* repo,
-    tsdb::TSDBClient* tsdb) :
+    tsdb::TSDBNode* tsdb) :
     params_(params),
-    schema_(repo->getSchema(params.schema_name())),
     tsdb_(tsdb) {}
 
 RefPtr<VFSFile> CSTableIndex::computeBlob(dproc::TaskContext* context) {
   fnord::logDebug(
       "fnord.tsdb",
-      "Building cstable: stream=$0 partition=$1 schema=$2 version=$3 cachekey=$4",
-      params_.stream_key(),
-      params_.partition_key(),
-      params_.schema_name(),
-      params_.version(),
-      cacheKeySHA1().get());
-
-  cstable::CSTableBuilder cstable(schema_.get());
-
-  tsdb_->fetchPartition(
+      "Fetching cstable: namespace=$0 table=$1 partition=$2 schema=$2",
       params_.tsdb_namespace(),
       params_.stream_key(),
-      SHA1Hash::fromHexString(params_.partition_key()),
-      [this, context, &cstable] (const Buffer& buf) {
-    if (context->isCancelled()) {
-      RAISE(kRuntimeError, "task cancelled");
-    }
+      params_.partition_key());
 
-    msg::MessageObject obj;
-    msg::MessageDecoder::decode(buf, *schema_, &obj);
-    cstable.addRecord(obj);
-  });
+  auto partition = tsdb_->findPartition(
+      params_.tsdb_namespace(),
+      params_.stream_key(),
+      SHA1Hash::fromHexString(params_.partition_key()));
 
-  auto tmpfile = "/tmp/__cstableindex_ "+ rnd_.hex64() + ".cst"; // FIXPAUL!
-  cstable.write(tmpfile);
+  if (partition.isEmpty()) {
+    RAISE(kNotFoundError, "partition not found");
+  }
 
-  return new io::MmappedFile(
-      File::openFile(tmpfile, File::O_READ | File::O_AUTODELETE));
-}
+  auto cstable = partition.get()->cstableFile();
+  if (cstable.isEmpty()) {
+    RAISE(kNotFoundError, "partition not built yet");
+  }
 
-Option<String> CSTableIndex::cacheKey() const {
-  return Some(
-      StringUtil::format(
-          "tsdb.cstableindex~$0~$1~$2",
-          params_.stream_key(),
-          params_.partition_key(),
-          params_.version()));
+  return cstable.get();
 }
 
 }
