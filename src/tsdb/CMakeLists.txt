@@ -30,7 +30,7 @@ add_library(tsdb-server OBJECT
     ReplicationWorker.cc
     ${PROTO_SRCS})
 
-add_executable(tests/test-recordset
+add_executable(test-recordset
     $<TARGET_OBJECTS:fnord-base>
     $<TARGET_OBJECTS:fnord-protobuf>
     $<TARGET_OBJECTS:fnord-mdb>
@@ -44,9 +44,9 @@ add_executable(tests/test-recordset
     $<TARGET_OBJECTS:chartsql-lib>
     RecordSet_test.cc)
 
-target_link_libraries(tests/test-recordset ${FNORD_LIBS})
+target_link_libraries(test-recordset ${FNORD_LIBS})
 
-add_executable(tests/test-tsdbnode
+add_executable(test-tsdbnode
     $<TARGET_OBJECTS:fnord-base>
     $<TARGET_OBJECTS:fnord-protobuf>
     $<TARGET_OBJECTS:fnord-mdb>
@@ -60,9 +60,9 @@ add_executable(tests/test-tsdbnode
     $<TARGET_OBJECTS:chartsql-lib>
     TSDBNode_test.cc)
 
-target_link_libraries(tests/test-tsdbnode ${CMAKE_THREAD_LIBS_INIT} ${FNORD_LIBS})
+target_link_libraries(test-tsdbnode ${CMAKE_THREAD_LIBS_INIT} ${FNORD_LIBS})
 
-add_executable(tests/test-tsdb-timewindowpartitioner
+add_executable(test-tsdb-timewindowpartitioner
     $<TARGET_OBJECTS:fnord-base>
     $<TARGET_OBJECTS:fnord-protobuf>
     $<TARGET_OBJECTS:fnord-mdb>
@@ -76,7 +76,7 @@ add_executable(tests/test-tsdb-timewindowpartitioner
     $<TARGET_OBJECTS:chartsql-lib>
     TimeWindowPartitioner_test.cc)
 
-target_link_libraries(tests/test-tsdb-timewindowpartitioner ${CMAKE_THREAD_LIBS_INIT} ${FNORD_LIBS})
+target_link_libraries(test-tsdb-timewindowpartitioner ${CMAKE_THREAD_LIBS_INIT} ${FNORD_LIBS})
 
 add_executable(tsdbd
     $<TARGET_OBJECTS:fnord-base>
