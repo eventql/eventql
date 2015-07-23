@@ -22,9 +22,9 @@ add_library(fnord-chart OBJECT
     series.cc
     timedomain.cc)
 
-add_executable(tests/test-chart
+add_executable(test-chart
     $<TARGET_OBJECTS:fnord-base>
     $<TARGET_OBJECTS:fnord-chart>
     chart_test.cc)
 
-target_link_libraries(tests/test-chart ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(test-chart ${CMAKE_THREAD_LIBS_INIT})
