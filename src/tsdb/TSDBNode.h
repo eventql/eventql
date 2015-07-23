@@ -45,6 +45,10 @@ public:
       const String& tsdb_namespace,
       const String& table_name) const;
 
+  void listTables(
+      const String& tsdb_namespace,
+      Function<void (const TSDBTableInfo& table)> fn) const;
+
   Option<RefPtr<Partition>> findPartition(
       const String& tsdb_namespace,
       const String& stream_key,
@@ -55,13 +59,34 @@ public:
       const String& stream_key,
       const SHA1Hash& partition_key);
 
-  void listTables(
+  void fetchPartition(
       const String& tsdb_namespace,
-      Function<void (const TSDBTableInfo& table)> fn) const;
+      const String& stream_key,
+      const SHA1Hash& partition_key,
+      Function<void (const Buffer& record)> fn);
+
+  void fetchPartitionWithSampling(
+      const String& tsdb_namespace,
+      const String& stream_key,
+      const SHA1Hash& partition_key,
+      size_t sample_modulo,
+      size_t sample_index,
+      Function<void (const Buffer& record)> fn);
+
+  Vector<String> listPartitions(
+      const String& tsdb_namespace,
+      const String& table_key,
+      const UnixTime& from,
+      const UnixTime& until);
 
   Option<TSDBTableInfo> tableInfo(
       const String& tsdb_namespace,
       const String& table_key) const;
+
+  Option<PartitionInfo> partitionInfo(
+      const String& tsdb_namespace,
+      const String& table_key,
+      const SHA1Hash& partition_key);
 
   const String& dbPath() const;
 
