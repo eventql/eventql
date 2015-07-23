@@ -8,7 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <fnord/util/Base64.h>
-#include <fnord/FNV.h>
+#include <fnord/fnv.h>
 #include <tsdb/TSDBNode.h>
 #include <sstable/sstablereader.h>
 
