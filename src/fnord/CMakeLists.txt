@@ -84,31 +84,31 @@ add_library(fnord-base OBJECT
     web/SecureCookie.cc
     ${PROTO_SRCS})
 
-add_executable(tests/test-inputstream
+add_executable(test-inputstream
     $<TARGET_OBJECTS:fnord-base>
     io/inputstream_test.cc)
 
-add_executable(tests/test-uri
+add_executable(test-uri
     $<TARGET_OBJECTS:fnord-base>
     uri_test.cc)
 
-add_executable(tests/test-stringutil
+add_executable(test-stringutil
     $<TARGET_OBJECTS:fnord-base>
     stringutil_test.cc)
 
-add_executable(tests/test-internmap
+add_executable(test-internmap
     $<TARGET_OBJECTS:fnord-base>
     InternMap_test.cc)
 
-add_executable(tests/test-hmac
+add_executable(test-hmac
     $<TARGET_OBJECTS:fnord-base>
     HMAC_test.cc)
 
-add_executable(tests/test-human
+add_executable(test-human
     $<TARGET_OBJECTS:fnord-base>
     human_test.cc)
 
-add_executable(tests/test-secure-cookie
+add_executable(test-secure-cookie
     $<TARGET_OBJECTS:fnord-base>
     web/SecureCookie_test.cc)
 
