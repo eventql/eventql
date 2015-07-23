@@ -28,7 +28,7 @@ add_library(libcstable OBJECT
     UInt64ColumnReader.cc
     UInt64ColumnWriter.cc)
 
-add_executable(tests/test-recordmaterializer
+add_executable(test-recordmaterializer
     $<TARGET_OBJECTS:fnord-base>
     $<TARGET_OBJECTS:fnord-protobuf>
     $<TARGET_OBJECTS:fnord-http>
@@ -37,7 +37,7 @@ add_executable(tests/test-recordmaterializer
     RecordMaterializer_test.cc)
 
 target_link_libraries(
-    tests/test-recordmaterializer
+    test-recordmaterializer
     ${CMAKE_THREAD_LIBS_INIT}
     ${FNORD_LIBS})
 
