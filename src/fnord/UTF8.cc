@@ -97,6 +97,68 @@ char32_t UTF8::nextCodepoint(const char** cur, const char* end_) {
   RAISE(kEncodingError, "invalid UTF8 encoding");
 }
 
+bool UTF8::isValidUTF8(const String& str) {
+  return UTF8::isValidUTF8(str.data(), str.size());
+}
+
+bool UTF8::isValidUTF8(const char* str, size_t size) {
+  auto end = str + size;
+
+  for (auto cur = str; cur < end; ) {
+    if (*reinterpret_cast<const uint8_t*>(cur) < 0b10000000) {
+      cur = cur + 1;
+      return true;
+    }
+
+    if ((*reinterpret_cast<const uint8_t*>(cur) & 0b11100000) == 0b11000000) {
+      if (cur + 1 >= end) {
+        return false;
+      } else {
+        cur = cur + 2;
+        continue;
+      }
+    }
+
+    if ((*reinterpret_cast<const uint8_t*>(cur) & 0b11110000) == 0b11100000) {
+      if (cur + 2 >= end) {
+        return false;
+      } else {
+        cur = cur + 3;
+        continue;
+      }
+    }
+
+    if ((*reinterpret_cast<const uint8_t*>(cur) & 0b11111000) == 0b11110000) {
+      if (cur + 3 >= end) {
+        return false;
+      } else {
+        cur = cur + 4;
+        continue;
+      }
+    }
+
+    if ((*reinterpret_cast<const uint8_t*>(cur) & 0b11111100) == 0b11111000) {
+      if (cur + 4 >= end) {
+        return false;
+      } else {
+        cur = cur + 5;
+        continue;
+      }
+    }
+
+    if ((*reinterpret_cast<const uint8_t*>(cur) & 0b11111110) == 0b11111100) {
+      if (cur + 5 >= end) {
+        return false;
+      } else {
+        cur = cur + 6;
+        continue;
+      }
+    }
+  }
+
+  return true;
+}
+
 void UTF8::encodeCodepoint(char32_t codepoint, String* target) {
   if (codepoint < 0b10000000) {
     *target += (char) codepoint;

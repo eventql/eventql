@@ -151,7 +151,7 @@ TEST_CASE(HTTPTest, TestAddCookie, [] () {
 
   {
     HTTPResponse response;
-    response.addCookie("fnord", "bar", fnord::DateTime(1418571527495314));
+    response.addCookie("fnord", "bar", fnord::UnixTime(1418571527495314));
     EXPECT_EQ(
         response.getHeader("Set-Cookie"),
         "fnord=bar; Expires=Sun, 14-Dec-2014 15:38:47 UTC");
@@ -162,7 +162,7 @@ TEST_CASE(HTTPTest, TestAddCookie, [] () {
     response.addCookie(
         "fnord",
         "bar",
-        fnord::DateTime::epoch(),
+        fnord::UnixTime::epoch(),
         "/blah");
     EXPECT_EQ(
         response.getHeader("Set-Cookie"), "fnord=bar; Path=/blah");
@@ -173,7 +173,7 @@ TEST_CASE(HTTPTest, TestAddCookie, [] () {
     response.addCookie(
         "fnord",
         "bar",
-        fnord::DateTime::epoch(),
+        fnord::UnixTime::epoch(),
         "",
         ".fnrd.net");
     EXPECT_EQ(
@@ -185,7 +185,7 @@ TEST_CASE(HTTPTest, TestAddCookie, [] () {
     response.addCookie(
         "fnord",
         "bar",
-        fnord::DateTime::epoch(),
+        fnord::UnixTime::epoch(),
         "",
         "",
         false,
@@ -199,7 +199,7 @@ TEST_CASE(HTTPTest, TestAddCookie, [] () {
     response.addCookie(
         "fnord",
         "bar",
-        fnord::DateTime::epoch(),
+        fnord::UnixTime::epoch(),
         "",
         "",
         true,

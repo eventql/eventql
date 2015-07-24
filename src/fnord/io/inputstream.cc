@@ -14,6 +14,7 @@
 #include <fnord/buffer.h>
 #include <fnord/exception.h>
 #include <fnord/io/inputstream.h>
+#include <fnord/ieee754.h>
 
 namespace fnord {
 
@@ -60,6 +61,16 @@ size_t InputStream::readNextBytes(Buffer* target, size_t n_bytes) {
   return length;
 }
 
+size_t InputStream::readNextBytes(void* target, size_t n_bytes) {
+  size_t length = 0;
+
+  while (length < n_bytes && readNextByte(((char*) target) + length)) {
+    ++length;
+  }
+
+  return length;
+}
+
 // FIXPAUL: optimize?
 size_t InputStream::readUntilEOF(std::string* target) {
   char byte;
@@ -72,6 +83,89 @@ size_t InputStream::readUntilEOF(std::string* target) {
   return length;
 }
 
+uint8_t InputStream::readUInt8() {
+  uint8_t val;
+  if (readNextBytes(&val, sizeof(uint8_t)) != sizeof(uint8_t)) {
+    RAISE(kEOFError, "unexpected end of stream");
+  }
+
+  return val;
+}
+
+uint16_t InputStream::readUInt16() {
+  uint16_t val;
+  if (readNextBytes(&val, sizeof(uint16_t)) != sizeof(uint16_t)) {
+    RAISE(kEOFError, "unexpected end of stream");
+  }
+
+  return val;
+}
+
+uint32_t InputStream::readUInt32() {
+  uint32_t val;
+  if (readNextBytes(&val, sizeof(uint32_t)) != sizeof(uint32_t)) {
+    RAISE(kEOFError, "unexpected end of stream");
+  }
+
+  return val;
+}
+
+uint64_t InputStream::readUInt64() {
+  uint64_t val;
+  if (readNextBytes(&val, sizeof(uint64_t)) != sizeof(uint64_t)) {
+    RAISE(kEOFError, "unexpected end of stream");
+  }
+
+  return val;
+}
+
+uint64_t InputStream::readVarUInt() {
+  uint64_t val = 0;
+
+  for (int i = 0; ; ++i) {
+    unsigned char b;
+    readNextByte((char*) &b);
+
+    val |= (b & 0x7fULL) << (7 * i);
+
+    if (!(b & 0x80U)) {
+      break;
+    }
+  }
+
+  return val;
+}
+
+String InputStream::readString(size_t size) {
+  String val;
+  if (readNextBytes(&val, size) != size) {
+    RAISE(kEOFError, "unexpected end of stream");
+  }
+
+  return val;
+}
+
+String InputStream::readLenencString() {
+  auto size = readVarUInt();
+
+  String val;
+  if (readNextBytes(&val, size) != size) {
+    RAISE(kEOFError, "unexpected end of stream");
+  }
+
+  return val;
+}
+
+double InputStream::readDouble() {
+  uint64_t val;
+  if (readNextBytes(&val, sizeof(uint64_t)) != sizeof(uint64_t)) {
+    RAISE(kEOFError, "unexpected end of stream");
+  }
+
+  return IEEE754::fromBytes(val);
+}
+
+
 std::unique_ptr<FileInputStream> FileInputStream::openFile(
     const std::string& file_path) {
   auto fp = file_path.c_str();
@@ -81,10 +175,28 @@ std::unique_ptr<FileInputStream> FileInputStream::openFile(
     RAISE_ERRNO(kIOError, "error opening file '%s'", fp);
   }
 
-  auto file = new FileInputStream(fd, true);
-  file->readNextChunk();
-  file->setFileName(file_path);
-  return std::unique_ptr<FileInputStream>(file);
+  std::unique_ptr<FileInputStream> stream(new FileInputStream(fd, true));
+  stream->readNextChunk();
+  stream->setFileName(file_path);
+  return stream;
+}
+
+std::unique_ptr<FileInputStream> FileInputStream::fromFileDescriptor(
+    int fd,
+    bool close_on_destroy /* = false */) {
+  std::unique_ptr<FileInputStream> stream(
+      new FileInputStream(fd, close_on_destroy));
+
+  stream->setFileName(StringUtil::format("<fd:$0>", fd));
+  return stream;
+}
+
+std::unique_ptr<FileInputStream> FileInputStream::fromFile(File&& file) {
+  auto fd = file.fd();
+
+  std::unique_ptr<FileInputStream> stream(new FileInputStream(std::move(file)));
+  stream->setFileName(StringUtil::format("<fd:$0>", fd));
+  return stream;
 }
 
 FileInputStream::FileInputStream(
@@ -94,6 +206,10 @@ FileInputStream::FileInputStream(
     close_on_destroy_(close_on_destroy),
     buf_len_(0),
     buf_pos_(0) {}
+
+FileInputStream::FileInputStream(
+    File&& file) :
+    FileInputStream(file.releaseFD(), true) {}
 
 FileInputStream::~FileInputStream() {
   if (fd_ >= 0 && close_on_destroy_) {
@@ -114,6 +230,15 @@ bool FileInputStream::readNextByte(char* target) {
   }
 }
 
+bool FileInputStream::eof() {
+  if (buf_pos_ >= buf_len_) {
+    readNextChunk();
+  }
+
+  return buf_pos_ >= buf_len_;
+}
+
+// FIXPAUL move somwhere else...
 FileInputStream::kByteOrderMark FileInputStream::readByteOrderMark() {
   static char kByteOrderMarkUTF8[] = "\xEF\xBB\xBF";
   if (buf_pos_ + 2 < buf_len_ &&
@@ -165,6 +290,10 @@ bool StringInputStream::readNextByte(char* target) {
   }
 }
 
+bool StringInputStream::eof() {
+  return cur_ >= str_.size();
+}
+
 void StringInputStream::rewind() {
   cur_ = 0;
 }
@@ -187,6 +316,10 @@ bool BufferInputStream::readNextByte(char* target) {
   } else {
     return false;
   }
+}
+
+bool BufferInputStream::eof() {
+  return cur_ >= buf_->size();
 }
 
 void BufferInputStream::rewind() {

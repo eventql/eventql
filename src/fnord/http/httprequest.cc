@@ -42,6 +42,26 @@ HTTPRequest HTTPRequest::mkGet(
   return req;
 }
 
+HTTPRequest HTTPRequest::mkPost(
+    const URI& uri,
+    const Buffer& data) {
+  return mkPost(uri, data, HTTPMessage::HeaderList{});
+}
+
+HTTPRequest HTTPRequest::mkPost(
+    const URI& uri,
+    const Buffer& data,
+    const HTTPMessage::HeaderList& headers) {
+  HTTPRequest req(HTTPMessage::M_POST, uri.pathAndQuery());
+  req.addHeader("Host", uri.hostAndPort());
+
+  for (const auto& hdr : headers) {
+    req.setHeader(hdr.first, hdr.second);
+  }
+
+  req.addBody(data);
+  return req;
+}
 
 HTTPRequest HTTPRequest::parse(const std::string& str) {
   HTTPParser parser(HTTPParser::PARSE_HTTP_REQUEST);
@@ -107,7 +127,7 @@ void HTTPRequest::setURI(const std::string& uri) {
   url_ = uri;
 }
 
-const bool HTTPRequest::keepalive() const {
+bool HTTPRequest::keepalive() const {
   if (getHeader("Connection") == "keep-alive") {
     return true;
   }

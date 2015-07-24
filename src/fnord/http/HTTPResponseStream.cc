@@ -19,8 +19,8 @@ HTTPResponseStream::HTTPResponseStream(
     HTTPServerConnection* conn) :
     conn_(conn),
     callback_running_(false),
-    response_finished_(false),
-    headers_written_(false) {}
+    headers_written_(false),
+    response_finished_(false) {}
 
 void HTTPResponseStream::writeResponse(HTTPResponse res) {
   auto body_size = res.body().size();
@@ -68,6 +68,10 @@ void HTTPResponseStream::finishResponse() {
 bool HTTPResponseStream::isOutputStarted() const {
   std::unique_lock<std::mutex> lk(mutex_);
   return headers_written_;
+}
+
+bool HTTPResponseStream::isClosed() const {
+  return conn_->isClosed();
 }
 
 void HTTPResponseStream::onCallbackCompleted() {

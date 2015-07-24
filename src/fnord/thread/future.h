@@ -29,12 +29,13 @@ public:
   PromiseState();
   ~PromiseState();
 
-  Wakeup wakeup;
   Status status;
-  std::mutex mutex; // FIXPAUL use spinlock
+  std::mutex mutex;
+  std::condition_variable cv;
+  bool ready;
+
   char value_data[sizeof(T)];
   T* value;
-  bool ready;
 
   std::function<void (const Status& status)> on_failure;
   std::function<void (const T& value)> on_success;
@@ -50,15 +51,14 @@ public:
 
   Future& operator=(const Future<T>& other);
 
-  bool isFailure() const;
-  bool isSuccess() const;
+  bool isReady() const;
 
   void onFailure(std::function<void (const Status& status)> fn);
   void onSuccess(std::function<void (const T& value)> fn);
   void onReady(std::function<void ()> fn);
 
   void wait() const;
-  void wait(const Duration& timeout) const;
+  bool waitFor(const Duration& timeout) const;
 
   void onReady(TaskScheduler* scheduler, std::function<void()> fn);
 

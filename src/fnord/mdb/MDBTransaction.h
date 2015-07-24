@@ -19,11 +19,16 @@
 
 namespace fnord {
 namespace mdb {
+struct MDBOptions;
 
 class MDBTransaction : public RefCounted {
 public:
 
-  MDBTransaction(MDB_txn* mdb_txn, MDB_dbi mdb_handle);
+  MDBTransaction(
+      MDB_txn* mdb_txn,
+      MDB_dbi mdb_handle,
+      MDBOptions* opts);
+
   ~MDBTransaction();
   MDBTransaction(const MDBTransaction& other) = delete;
   MDBTransaction& operator=(const MDBTransaction& other) = delete;
@@ -71,6 +76,7 @@ public:
 protected:
   MDB_txn* mdb_txn_;
   MDB_dbi mdb_handle_;
+  MDBOptions* opts_;
   bool is_commited_;
   bool abort_on_free_;
 };

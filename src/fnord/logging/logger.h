@@ -10,7 +10,7 @@
 #ifndef _FNORDMETRIC_UTIL_LOGGER_H
 #define _FNORDMETRIC_UTIL_LOGGER_H
 #include <atomic>
-#include "fnord/datetime.h"
+#include "fnord/UnixTime.h"
 #include "fnord/stdtypes.h"
 #include "fnord/logging/loglevel.h"
 #include "fnord/logging/logtarget.h"

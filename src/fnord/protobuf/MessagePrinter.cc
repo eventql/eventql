@@ -60,6 +60,27 @@ String MessagePrinter::printObject(
           schema.fieldName(msg.id),
           msg.asUInt32());
 
+    case FieldType::UINT64:
+      return StringUtil::format(
+          "$0$1 = $2\n",
+          ws,
+          schema.fieldName(msg.id),
+          msg.asUInt64());
+
+    case FieldType::DATETIME:
+      return StringUtil::format(
+          "$0$1 = $2\n",
+          ws,
+          schema.fieldName(msg.id),
+          msg.asUnixTime());
+
+    case FieldType::DOUBLE:
+      return StringUtil::format(
+          "$0$1 = $2\n",
+          ws,
+          schema.fieldName(msg.id),
+          msg.asDouble());
+
   }
 }
 

@@ -11,7 +11,7 @@
 #define _FNORD_JSON_IMPL_H
 #include "fnord/exception.h"
 #include "fnord/inspect.h"
-#include "fnord/datetime.h"
+#include "fnord/UnixTime.h"
 #include "fnord/traits.h"
 #include "fnord/json/jsonutil.h"
 #include "fnord/json/jsonoutputstream.h"
@@ -270,7 +270,7 @@ void toJSONImpl(double const& val, O* target) {
 }
 
 template <typename O>
-void toJSONImpl(const fnord::DateTime& val, O* target) {
+void toJSONImpl(const fnord::UnixTime& val, O* target) {
   toJSONImpl(static_cast<uint64_t>(val), target);
 }
 

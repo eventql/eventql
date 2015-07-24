@@ -29,7 +29,7 @@ public:
   const std::string& scheme() const;
   const std::string& userinfo() const;
   const std::string& host() const;
-  const unsigned port() const;
+  unsigned port() const;
   std::string hostAndPort() const;
   const std::string& path() const;
   const std::string& query() const;

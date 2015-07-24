@@ -25,6 +25,7 @@ public:
   Buffer();
   Buffer(const void* initial_data, size_t initial_size);
   Buffer(size_t initial_size);
+  Buffer(const String& string);
   Buffer(const Buffer& copy);
   Buffer(Buffer&& move);
   Buffer& operator=(const Buffer& copy);
@@ -38,6 +39,7 @@ public:
   void append(const void* data, size_t size);
   void append(const String& string);
   void append(const Buffer& buffer);
+  void append(char chr);
   void clear();
   void truncate(size_t size);
 
@@ -55,6 +57,7 @@ public:
    * value returned by size
    */
   size_t allocSize() const;
+  size_t capacity() const;
 
   /**
    * Reserve "size" new bytes of memory for future use. This method will not

@@ -12,7 +12,10 @@
 #include <fnord/stdtypes.h>
 #include <fnord/exception.h>
 #include <fnord/autoref.h>
+#include <fnord/util/binarymessagereader.h>
+#include <fnord/util/binarymessagewriter.h>
 #include <fnord/protobuf/MessageObject.h>
+#include <fnord/json/json.h>
 #include <google/protobuf/descriptor.h>
 #include <google/protobuf/descriptor.pb.h>
 
@@ -68,6 +71,9 @@ struct MessageSchemaField {
     encoding(_encoding),
     schema(nullptr) {}
 
+  String typeName() const;
+  size_t typeSize() const;
+
   uint32_t id;
   String name;
   FieldType type;
@@ -88,6 +94,8 @@ public:
       const String& name,
       Vector<MessageSchemaField> fields);
 
+  MessageSchema(std::nullptr_t);
+
   MessageSchema(const MessageSchema& other);
 
   const String& name() const;
@@ -98,10 +106,27 @@ public:
   const String& fieldName(uint32_t id) const;
   RefPtr<MessageSchema> fieldSchema(uint32_t id) const;
 
-  Set<String> columns() const;
+  Vector<Pair<String, MessageSchemaField>> columns() const;
   String toString() const;
 
+  Buffer encode() const;
+  void encode(util::BinaryMessageWriter* buf) const;
+  void decode(util::BinaryMessageReader* buf);
+
+  void toJSON(json::JSONOutputStream* json) const;
+  void fromJSON(
+      json::JSONObject::const_iterator begin,
+      json::JSONObject::const_iterator end);
+
 protected:
+
+  void addField(const MessageSchemaField& field);
+
+  void findColumns(
+      const MessageSchemaField& field,
+      const String& prefix,
+      Set<String>* columns);
+
   String name_;
   Vector<MessageSchemaField> fields_;
   HashMap<String, uint32_t> field_ids_;
@@ -112,12 +137,17 @@ protected:
 class MessageSchemaRepository {
 public:
 
+  MessageSchemaRepository();
+
   RefPtr<MessageSchema> getSchema(const String& name) const;
 
   void registerSchema(RefPtr<MessageSchema> schema);
 
+  void loadProtobufFile(const String& base_path, const String& file_path);
+
 protected:
   HashMap<String, RefPtr<MessageSchema>> schemas_;
+  google::protobuf::DescriptorPool pool_;
 };
 
 } // namespace msg

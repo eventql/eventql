@@ -95,6 +95,8 @@ public:
 
   void finishResponse();
 
+  bool isClosed() const;
+
 protected:
   HTTPServerConnection(
       HTTPHandlerFactory* handler_factory,
@@ -121,9 +123,9 @@ protected:
   Buffer body_buf_;
   ScopedPtr<HTTPRequest> cur_request_;
   ScopedPtr<HTTPHandler> cur_handler_;
-  std::mutex mutex_;
-  HTTPServerStats* stats_;
+  mutable std::recursive_mutex mutex_;
   bool closed_;
+  HTTPServerStats* stats_;
 };
 
 }

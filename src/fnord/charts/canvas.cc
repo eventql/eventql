@@ -11,7 +11,6 @@
 #include "fnord/charts/canvas.h"
 #include "fnord/charts/rendertarget.h"
 #include "fnord/charts/domain.h"
-#include "fnord/charts/rendertarget.h"
 #include "fnord/charts/svgtarget.h"
 
 namespace fnord {

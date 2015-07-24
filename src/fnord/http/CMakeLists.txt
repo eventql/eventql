@@ -32,10 +32,10 @@ add_library(fnord-http OBJECT
     #streaminghttpservice_example/SSEStreamServlet.cc
     #streaminghttpservice_example/WriteStreamServlet.cc)
 
-add_executable(tests/test-http
+add_executable(test-http
     $<TARGET_OBJECTS:fnord-base>
     $<TARGET_OBJECTS:fnord-http>
     http_test.cc)
 
-target_link_libraries(tests/test-http ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(test-http ${CMAKE_THREAD_LIBS_INIT})
 

@@ -94,6 +94,8 @@ public:
 
   bool isWritable() const;
 
+  int releaseFD();
+
 protected:
 
   File(int fd, int flags);

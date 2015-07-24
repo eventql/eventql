@@ -28,13 +28,16 @@ public:
 
   CoalescingDelayedQueue(size_t max_size = -1);
 
-  void insert(RefPtr<T> job, DateTime when, bool block = false);
+  void insert(RefPtr<T> job, UnixTime when, bool block = false);
   Option<RefPtr<T>> interruptiblePop();
 
   size_t length() const;
   void wakeup();
 
 protected:
+  size_t max_size_;
+  size_t length_;
+
   std::multiset<
       Pair<uint64_t, RefPtr<T>>,
       Function<bool (
@@ -45,8 +48,6 @@ protected:
 
   mutable std::mutex mutex_;
   std::condition_variable wakeup_;
-  size_t max_size_;
-  size_t length_;
 };
 
 }

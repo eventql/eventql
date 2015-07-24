@@ -26,7 +26,7 @@ class HTTPResponseHandler;
 
 class HTTPClientConnection {
 public:
-  static const size_t kMinBufferSize = 8192;
+  static const size_t kMinBufferSize = 1024 * 1024 * 8;
 
   HTTPClientConnection(
       std::unique_ptr<net::TCPConnection> conn,
@@ -34,6 +34,9 @@ public:
       HTTPClientStats* stats);
 
   ~HTTPClientConnection();
+
+  HTTPClientConnection(const HTTPClientConnection& other) = delete;
+  HTTPClientConnection& operator=(const HTTPClientConnection& other) = delete;
 
   void executeRequest(
       const HTTPRequest& request,

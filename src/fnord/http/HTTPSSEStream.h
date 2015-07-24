@@ -21,9 +21,29 @@ namespace http {
 class HTTPSSEStream {
 public:
 
+  /**
+   * Initialize the response from the provided request stream, write to the
+   * provided response stream
+   */
   HTTPSSEStream(
-    RefPtr<http::HTTPRequestStream> req_stream,
-    RefPtr<http::HTTPResponseStream> res_stream);
+      RefPtr<http::HTTPRequestStream> req_stream,
+      RefPtr<http::HTTPResponseStream> res_stream);
+
+  /**
+   * Initialize the response from the provided request, write to the provided
+   * response stream
+   */
+  HTTPSSEStream(
+      const http::HTTPRequest* req,
+      RefPtr<http::HTTPResponseStream> res_stream);
+
+  /**
+   * Initialize the response from the provided response, write to the provided
+   * response stream
+   */
+  HTTPSSEStream(
+      const http::HTTPResponse* res,
+      RefPtr<http::HTTPResponseStream> res_stream);
 
   void start();
 
@@ -43,10 +63,14 @@ public:
   const HTTPResponse response() const;
   void finish();
 
+  /**
+   * Returns true if the HTTP connection was closed
+   */
+  bool isClosed() const;
+
 private:
 
   RefPtr<http::HTTPResponseStream> res_stream_;
-  RefPtr<http::HTTPRequestStream> req_stream_;
   HTTPResponse res_;
 };
 

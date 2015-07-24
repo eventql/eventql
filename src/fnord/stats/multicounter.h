@@ -11,7 +11,7 @@
 #define _FNORD_STATS_MULTICOUNTER_H
 #include <stdlib.h>
 #include <stdint.h>
-#include "fnord/datetime.h"
+#include "fnord/UnixTime.h"
 #include "fnord/hash.h"
 #include "fnord/stats/stat.h"
 

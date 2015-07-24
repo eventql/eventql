@@ -87,6 +87,12 @@ int File::fd() const {
   return fd_;
 }
 
+int File::releaseFD() {
+  auto fd = fd_;
+  fd_ = -1;
+  return fd;
+}
+
 bool File::isWritable() const {
   return (flags_ & O_WRITE) == O_WRITE;
 }

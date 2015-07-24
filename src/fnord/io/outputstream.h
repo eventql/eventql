@@ -45,7 +45,52 @@ public:
   virtual size_t write(const Buffer& buf);
   virtual size_t printf(const char* format, ...);
 
-  mutable std::mutex mutex_;
+  /**
+   * Writes a plain uint8 to the stream.
+   */
+  void appendUInt8(uint8_t value);
+
+  /**
+   * Writes a plain uint16 to the stream.
+   */
+  void appendUInt16(uint16_t value);
+
+  /**
+   * Writes a plain uint32 to the stream.
+   */
+  void appendUInt32(uint32_t value);
+
+  /**
+   * Writes a plain uint64 to the stream.
+   */
+  void appendUInt64(uint64_t value);
+
+  /**
+   * Writes a LEB128 encoded uint64 to the stream.
+   */
+  void appendVarUInt(uint64_t value);
+
+  /**
+   * Writes a IEEE754 encoded double to the stream.
+   */
+  void appendDouble(double value);
+
+  /**
+   * Writes a string to the stream.
+   */
+  void appendString(const std::string& string);
+
+  /**
+   * Writes a LEB128 prefix-length-encoded string to the stream.
+   */
+  void appendLenencString(const std::string& string);
+
+  /**
+   * Publicly accessible mutex that may be used to synchronize writes to this
+   * output stream
+   */
+  mutable std::mutex mutex;
+
 };
 
 class FileOutputStream : public OutputStream {

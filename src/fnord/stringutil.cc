@@ -183,6 +183,16 @@ bool StringUtil::isHexString(const std::string& str) {
   return true;
 }
 
+bool StringUtil::isAlphanumeric(const std::string& str) {
+  for (const auto& c : str) {
+    if (!isAlphanumeric(c)) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
 bool StringUtil::isAlphanumeric(char chr) {
   bool is_alphanum =
       (chr >= '0' && chr <= '9') ||
@@ -190,6 +200,72 @@ bool StringUtil::isAlphanumeric(char chr) {
       (chr >= 'A' && chr <= 'Z');
 
   return is_alphanum;
+}
+
+bool StringUtil::isShellSafe(const std::string& str) {
+  for (const auto& c : str) {
+    if (!isShellSafe(c)) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+bool StringUtil::isShellSafe(char chr) {
+  bool is_safe =
+      (chr >= '0' && chr <= '9') ||
+      (chr >= 'a' && chr <= 'z') ||
+      (chr >= 'A' && chr <= 'Z') ||
+      (chr == '_') ||
+      (chr == '-') ||
+      (chr == '.');
+
+  return is_safe;
+}
+
+bool StringUtil::isDigitString(const std::string& str) {
+  return isDigitString(str.data(), str.data() + str.size());
+}
+
+bool StringUtil::isDigitString(const char* begin, const char* end) {
+  for (auto cur = begin; cur < end; ++cur) {
+    if (!isdigit(*cur)) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+bool StringUtil::isNumber(const std::string& str) {
+  return isNumber(str.data(), str.data() + str.size());
+}
+
+bool StringUtil::isNumber(const char* begin, const char* end) {
+  auto cur = begin;
+
+  if (cur < end && *cur == '-') {
+    ++cur;
+  }
+
+  for (; cur < end; ++cur) {
+    if (!isdigit(*cur)) {
+      return false;
+    }
+  }
+
+  if (cur < end && (*cur == '.' || *cur == ',')) {
+    ++cur;
+  }
+
+  for (; cur < end; ++cur) {
+    if (!isdigit(*cur)) {
+      return false;
+    }
+  }
+
+  return true;
 }
 
 void StringUtil::toLower(std::string* str) {

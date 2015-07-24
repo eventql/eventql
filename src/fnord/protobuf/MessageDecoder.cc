@@ -50,9 +50,31 @@ void MessageDecoder::decode(
         break;
       }
 
+      case FieldType::UINT64: {
+        auto val = reader.readVarUInt();
+        msg->addChild(fid, (uint64_t) val);
+        break;
+      }
+
+      case FieldType::DATETIME: {
+        auto val = reader.readVarUInt();
+        msg->addChild(fid, UnixTime(val));
+        break;
+      }
+
+      case FieldType::DOUBLE: {
+        auto val = reader.readDouble();
+        msg->addChild(fid, val);
+        break;
+      }
+
       case FieldType::BOOLEAN: {
         auto val = reader.readVarUInt();
-        msg->addChild(fid, val == 1);
+        if (val == 1) {
+          msg->addChild(fid, msg::TRUE);
+        } else {
+          msg->addChild(fid, msg::FALSE);
+        }
         break;
       }
 

@@ -129,6 +129,7 @@ std::string StringUtil::toString(http::HTTPMessage::kHTTPMethod method) {
     case http::HTTPMessage::M_POST: return "POST";
     case http::HTTPMessage::M_PUT: return "PUT";
     case http::HTTPMessage::M_TRACE: return "TRACE";
+    default: RAISE(kTypeError, "invalid HTTP method");
   }
 }
 

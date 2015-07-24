@@ -8,6 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <assert.h>
+#include "fnord/mdb/MDB.h"
 #include "fnord/mdb/MDBTransaction.h"
 
 namespace fnord {
@@ -15,13 +16,13 @@ namespace mdb {
 
 MDBTransaction::MDBTransaction(
     MDB_txn* mdb_txn,
-    MDB_dbi mdb_handle) :
+    MDB_dbi mdb_handle,
+    MDBOptions* opts) :
     mdb_txn_(mdb_txn),
     mdb_handle_(mdb_handle),
+    opts_(opts),
     is_commited_(false),
-    abort_on_free_(false) {
-  incRef();
-}
+    abort_on_free_(false) {}
 
 MDBTransaction::~MDBTransaction() {
   if (!is_commited_ && abort_on_free_) {
@@ -53,8 +54,6 @@ void MDBTransaction::commit() {
     auto err = String(mdb_strerror(rc));
     RAISEF(kRuntimeError, "mdb_txn_commit() failed: $0", err);
   }
-
-  decRef();
 }
 
 void MDBTransaction::abort() {
@@ -64,13 +63,10 @@ void MDBTransaction::abort() {
 
   is_commited_ = true;
   mdb_txn_abort(mdb_txn_);
-
-  decRef();
 }
 
 void MDBTransaction::autoAbort() {
   abort_on_free_ = true;
-  decRef();
 }
 
 Option<Buffer> MDBTransaction::get(const Buffer& key) {
@@ -157,7 +153,12 @@ void MDBTransaction::insert(
   mval.mv_data = const_cast<void*>(value);
   mval.mv_size = value_size;
 
-  auto rc = mdb_put(mdb_txn_, mdb_handle_, &mkey, &mval, 0);
+  auto flags = 0;
+  if (!opts_->duplicate_keys) {
+    flags |= MDB_NOOVERWRITE;
+  }
+
+  auto rc = mdb_put(mdb_txn_, mdb_handle_, &mkey, &mval, flags);
   if (rc != 0) {
     auto err = String(mdb_strerror(rc));
     RAISEF(kRuntimeError, "mdb_put() failed: $0", err);
@@ -195,12 +196,26 @@ void MDBTransaction::update(
     size_t key_size,
     const void* value,
     size_t value_size) {
-  auto cur = getCursor();
+  if (opts_->duplicate_keys) {
+    auto cur = getCursor();
 
-  if (cur->set(key, key_size)) {
-    cur->put(key, key_size, value, value_size);
+    if (cur->set(key, key_size)) {
+      cur->put(key, key_size, value, value_size);
+    } else {
+      insert(key, key_size, value, value_size);
+    }
   } else {
-    insert(key, key_size, value, value_size);
+    MDB_val mkey, mval;
+    mkey.mv_data = const_cast<void*>(key);
+    mkey.mv_size = key_size;
+    mval.mv_data = const_cast<void*>(value);
+    mval.mv_size = value_size;
+
+    auto rc = mdb_put(mdb_txn_, mdb_handle_, &mkey, &mval, 0);
+    if (rc != 0) {
+      auto err = String(mdb_strerror(rc));
+      RAISEF(kRuntimeError, "mdb_put() failed: $0", err);
+    }
   }
 }
 

@@ -23,6 +23,7 @@ class AutoRef {
 public:
   using ValueType = T;
 
+  AutoRef();
   AutoRef(std::nullptr_t);
   AutoRef(T* ref);
 
@@ -62,8 +63,13 @@ using RefPtr = AutoRef<T>;
 template <typename T>
 using RefPtrVector = Vector<AutoRef<T>>;
 
+using AnyRef = RefPtr<RefCounted>;
+
 template <typename T>
 AutoRef<T> mkRef(T* ptr);
+
+template <typename T>
+ScopedPtr<T> mkScoped(T* ptr);
 
 } // namespace fnord
 
