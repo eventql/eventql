@@ -8,8 +8,8 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <assert.h>
-#include "fnord/exception.h"
-#include "fnord/http/httpresponsefuture.h"
+#include "stx/exception.h"
+#include "stx/http/httpresponsefuture.h"
 
 namespace fnord {
 namespace http {

@@ -10,11 +10,11 @@
 #ifndef _FNORDMETRIC_HTTPSTATS_H
 #define _FNORDMETRIC_HTTPSTATS_H
 
-#include "fnord/io/fileutil.h"
-#include "fnord/stdtypes.h"
-#include "fnord/stats/counter.h"
-#include "fnord/stats/multicounter.h"
-#include "fnord/stats/statsrepository.h"
+#include "stx/io/fileutil.h"
+#include "stx/stdtypes.h"
+#include "stx/stats/counter.h"
+#include "stx/stats/multicounter.h"
+#include "stx/stats/statsrepository.h"
 
 namespace fnord {
 namespace http {

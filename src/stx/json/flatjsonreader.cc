@@ -9,9 +9,9 @@
  */
 #include <stdlib.h>
 #include <string>
-#include "fnord/exception.h"
-#include "fnord/inspect.h"
-#include "fnord/json/flatjsonreader.h"
+#include "stx/exception.h"
+#include "stx/inspect.h"
+#include "stx/json/flatjsonreader.h"
 
 namespace fnord {
 namespace json {

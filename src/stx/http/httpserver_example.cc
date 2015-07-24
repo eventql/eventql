@@ -9,16 +9,16 @@
  */
 #include <stdlib.h>
 #include <unistd.h>
-#include "fnord/exception.h"
-#include "fnord/exceptionhandler.h"
-#include "fnord/http/httpserver.h"
-#include "fnord/http/httphandler.h"
-#include "fnord/http/httprouter.h"
-#include "fnord/http/httpservice.h"
-#include "fnord/logging/logger.h"
-#include "fnord/logging/logoutputstream.h"
-#include "fnord/thread/threadpool.h"
-#include "fnord/system/signalhandler.h"
+#include "stx/exception.h"
+#include "stx/exceptionhandler.h"
+#include "stx/http/httpserver.h"
+#include "stx/http/httphandler.h"
+#include "stx/http/httprouter.h"
+#include "stx/http/httpservice.h"
+#include "stx/logging/logger.h"
+#include "stx/logging/logoutputstream.h"
+#include "stx/thread/threadpool.h"
+#include "stx/system/signalhandler.h"
 
 /**
  * Example 1: A simple HTTP Service

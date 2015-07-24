@@ -7,9 +7,9 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include "fnord/exception.h"
-#include "fnord/json/jsonrpcrequest.h"
-#include "fnord/json/jsonutil.h"
+#include "stx/exception.h"
+#include "stx/json/jsonrpcrequest.h"
+#include "stx/json/jsonutil.h"
 
 namespace fnord {
 namespace json {

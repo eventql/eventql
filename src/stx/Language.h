@@ -9,7 +9,7 @@
  */
 #ifndef _FNORD_LANGUAGE_H
 #define _FNORD_LANGUAGE_H
-#include "fnord/stdtypes.h"
+#include "stx/stdtypes.h"
 
 namespace fnord {
 

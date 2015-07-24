@@ -14,8 +14,8 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
-#include "fnord/json/jsonrpchttpadapter.h"
-#include "fnord/reflect/reflect.h"
+#include "stx/json/jsonrpchttpadapter.h"
+#include "stx/reflect/reflect.h"
 
 namespace fnord {
 namespace json {

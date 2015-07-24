@@ -8,13 +8,13 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <set>
-#include "fnord/UnixTime.h"
-#include "fnord/exception.h"
-#include "fnord/stringutil.h"
-#include "fnord/inspect.h"
-#include "fnord/json/flatjsonreader.h"
-#include "fnord/json/jsondocument.h"
-#include "fnord/json/jsonpointer.h"
+#include "stx/UnixTime.h"
+#include "stx/exception.h"
+#include "stx/stringutil.h"
+#include "stx/inspect.h"
+#include "stx/json/flatjsonreader.h"
+#include "stx/json/jsondocument.h"
+#include "stx/json/jsonpointer.h"
 
 namespace fnord {
 namespace json {

@@ -7,14 +7,14 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include "fnord/inspect.h"
-#include "fnord/stringutil.h"
-#include "fnord/json/json.h"
-#include "fnord/json/jsonoutputstream.h"
-#include "fnord/json/jsonrpc.h"
-#include "fnord/json/jsonrpchttpadapter.h"
-#include "fnord/json/jsonrpcresponse.h"
-#include "fnord/json/jsonrpcrequest.h"
+#include "stx/inspect.h"
+#include "stx/stringutil.h"
+#include "stx/json/json.h"
+#include "stx/json/jsonoutputstream.h"
+#include "stx/json/jsonrpc.h"
+#include "stx/json/jsonrpchttpadapter.h"
+#include "stx/json/jsonrpcresponse.h"
+#include "stx/json/jsonrpcrequest.h"
 
 namespace fnord {
 namespace json {

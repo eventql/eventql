@@ -11,8 +11,8 @@
 #define _FNORD_HTTP_COOKIES_H
 #include <vector>
 #include <string>
-#include "fnord/UnixTime.h"
-#include <fnord/uri.h>
+#include "stx/UnixTime.h"
+#include <stx/uri.h>
 
 namespace fnord {
 namespace http {

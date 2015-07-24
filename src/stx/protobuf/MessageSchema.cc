@@ -7,13 +7,13 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <fnord/stringutil.h>
-#include <fnord/exception.h>
-#include <fnord/inspect.h>
-#include <fnord/io/fileutil.h>
-#include <fnord/protobuf/MessageSchema.h>
-#include <fnord/protobuf/msg.h>
-#include <fnord/CodingOptions.pb.h>
+#include <stx/stringutil.h>
+#include <stx/exception.h>
+#include <stx/inspect.h>
+#include <stx/io/fileutil.h>
+#include <stx/protobuf/MessageSchema.h>
+#include <stx/protobuf/msg.h>
+#include <stx/CodingOptions.pb.h>
 #include <google/protobuf/io/zero_copy_stream_impl_lite.h>
 #include <google/protobuf/io/tokenizer.h>
 #include <google/protobuf/compiler/parser.h>

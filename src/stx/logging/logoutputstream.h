@@ -10,10 +10,10 @@
 #ifndef _FNORDMETRIC_UTIL_LOGOUTPUTSTREAM_H
 #define _FNORDMETRIC_UTIL_LOGOUTPUTSTREAM_H
 
-#include "fnord/io/outputstream.h"
-#include "fnord/logging/loglevel.h"
-#include "fnord/logging/logtarget.h"
-#include "fnord/stdtypes.h"
+#include "stx/io/outputstream.h"
+#include "stx/logging/loglevel.h"
+#include "stx/logging/logtarget.h"
+#include "stx/stdtypes.h"
 
 namespace fnord {
 

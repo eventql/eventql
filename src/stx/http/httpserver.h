@@ -11,12 +11,12 @@
 #define _FNORDMETRIC_WEB_HTTPSERVER_H
 #include <memory>
 #include <vector>
-#include <fnord/http/httprequest.h>
-#include <fnord/http/httphandler.h>
-#include "fnord/http/httpserverconnection.h"
-#include <fnord/http/httpstats.h>
-#include <fnord/net/tcpserver.h>
-#include <fnord/thread/taskscheduler.h>
+#include <stx/http/httprequest.h>
+#include <stx/http/httphandler.h>
+#include "stx/http/httpserverconnection.h"
+#include <stx/http/httpstats.h>
+#include <stx/net/tcpserver.h>
+#include <stx/thread/taskscheduler.h>
 
 namespace fnord {
 namespace http {

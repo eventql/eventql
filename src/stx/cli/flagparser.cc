@@ -1,8 +1,8 @@
 #include <string>
 #include <vector>
-#include <fnord/exception.h>
-#include <fnord/cli/flagparser.h>
-#include <fnord/io/outputstream.h>
+#include <stx/exception.h>
+#include <stx/cli/flagparser.h>
+#include <stx/io/outputstream.h>
 
 namespace fnord {
 namespace cli {

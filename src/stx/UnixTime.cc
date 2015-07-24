@@ -9,11 +9,11 @@
  */
 #include <string>
 #include <ctime>
-#include "fnord/UnixTime.h"
-#include "fnord/inspect.h"
-#include "fnord/wallclock.h"
-#include "fnord/stringutil.h"
-#include "fnord/ISO8601.h"
+#include "stx/UnixTime.h"
+#include "stx/inspect.h"
+#include "stx/wallclock.h"
+#include "stx/stringutil.h"
+#include "stx/ISO8601.h"
 
 namespace fnord {
 

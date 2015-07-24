@@ -7,8 +7,8 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include "fnord/http/VFSFileServlet.h"
-#include "fnord/io/fileutil.h"
+#include "stx/http/VFSFileServlet.h"
+#include "stx/io/fileutil.h"
 
 namespace fnord {
 namespace http {

@@ -7,8 +7,8 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include "fnord/UnixTime.h"
-#include "fnord/charts/timedomain.h"
+#include "stx/UnixTime.h"
+#include "stx/charts/timedomain.h"
 
 namespace fnord {
 namespace chart {

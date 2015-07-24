@@ -12,9 +12,9 @@
 #include <memory>
 #include <vector>
 #include <liblmdb/lmdb.h>
-#include "fnord/logging.h"
-#include "fnord/autoref.h"
-#include "fnord/mdb/MDBTransaction.h"
+#include "stx/logging.h"
+#include "stx/autoref.h"
+#include "stx/mdb/MDBTransaction.h"
 
 namespace fnord {
 namespace mdb {

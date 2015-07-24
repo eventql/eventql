@@ -13,9 +13,9 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "fnord/exception.h"
-#include "fnord/inspect.h"
-#include "fnord/net/tcpserver.h"
+#include "stx/exception.h"
+#include "stx/inspect.h"
+#include "stx/net/tcpserver.h"
 
 namespace fnord {
 namespace net {

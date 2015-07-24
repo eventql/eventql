@@ -9,12 +9,12 @@
  */
 #ifndef _FNORDMETRIC_HTTPRESPONSEFUTURE_H
 #define _FNORDMETRIC_HTTPRESPONSEFUTURE_H
-#include "fnord/status.h"
-#include "fnord/http/httpresponse.h"
-#include "fnord/http/httpresponsehandler.h"
-#include "fnord/http/httpclientconnection.h"
-#include "fnord/thread/future.h"
-#include "fnord/thread/wakeup.h"
+#include "stx/status.h"
+#include "stx/http/httpresponse.h"
+#include "stx/http/httpresponsehandler.h"
+#include "stx/http/httpclientconnection.h"
+#include "stx/thread/future.h"
+#include "stx/thread/wakeup.h"
 #include <memory>
 
 namespace fnord {

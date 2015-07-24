@@ -12,8 +12,8 @@
 #include <stdlib.h>
 #include <functional>
 #include <string>
-#include "fnord/io/outputstream.h"
-#include "fnord/json/jsonoutputstream.h"
+#include "stx/io/outputstream.h"
+#include "stx/json/jsonoutputstream.h"
 
 namespace fnord {
 namespace json {

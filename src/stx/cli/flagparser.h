@@ -11,8 +11,8 @@
 #define _FNORD_CLI_FLAGPARSER_H
 #include <string>
 #include <vector>
-#include <fnord/exception.h>
-#include <fnord/io/outputstream.h>
+#include <stx/exception.h>
+#include <stx/io/outputstream.h>
 
 namespace fnord {
 namespace cli {

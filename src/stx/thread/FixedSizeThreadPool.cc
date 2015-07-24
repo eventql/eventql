@@ -12,7 +12,7 @@
 #include <sys/select.h>
 #include <thread>
 #include <unistd.h>
-#include "fnord/thread/FixedSizeThreadPool.h"
+#include "stx/thread/FixedSizeThreadPool.h"
 
 namespace fnord {
 namespace thread {

@@ -7,9 +7,9 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <fnord/buffer.h>
-#include <fnord/exception.h>
-#include <fnord/io/file.h>
+#include <stx/buffer.h>
+#include <stx/exception.h>
+#include <stx/io/file.h>
 #include <sys/fcntl.h>
 #include <sys/stat.h>
 #include <sys/types.h>

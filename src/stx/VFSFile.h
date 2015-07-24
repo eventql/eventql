@@ -9,8 +9,8 @@
  */
 #ifndef _FNORD_VFSFILE_H_
 #define _FNORD_VFSFILE_H_
-#include <fnord/stdtypes.h>
-#include <fnord/autoref.h>
+#include <stx/stdtypes.h>
+#include <stx/autoref.h>
 
 namespace fnord {
 

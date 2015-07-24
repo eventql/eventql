@@ -8,10 +8,10 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <stdlib.h>
-#include "fnord/charts/canvas.h"
-#include "fnord/charts/rendertarget.h"
-#include "fnord/charts/domain.h"
-#include "fnord/charts/svgtarget.h"
+#include "stx/charts/canvas.h"
+#include "stx/charts/rendertarget.h"
+#include "stx/charts/domain.h"
+#include "stx/charts/svgtarget.h"
 
 namespace fnord {
 namespace chart {

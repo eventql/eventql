@@ -9,9 +9,9 @@
  */
 #ifndef _FNORD_MSG_MSG_H
 #define _FNORD_MSG_MSG_H
-#include <fnord/stdtypes.h>
-#include <fnord/buffer.h>
-#include "fnord/exception.h"
+#include <stx/stdtypes.h>
+#include <stx/buffer.h>
+#include "stx/exception.h"
 #include <google/protobuf/io/zero_copy_stream_impl_lite.h>
 #include <google/protobuf/text_format.h>
 

@@ -7,7 +7,7 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <fnord/util/Base64.h>
+#include <stx/util/Base64.h>
 
 namespace fnord {
 namespace util {

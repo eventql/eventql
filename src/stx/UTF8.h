@@ -15,7 +15,7 @@
 #include <string>
 #include <vector>
 #include <locale>
-#include "fnord/stdtypes.h"
+#include "stx/stdtypes.h"
 
 namespace fnord {
 
