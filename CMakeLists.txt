@@ -29,6 +29,7 @@ include_directories(${TSDB_INCLUDE})
 
 add_subdirectory(3rdparty/fnord-fts)
 include_directories(3rdparty/fnord-fts)
+include_directories(3rdparty/)
 
 include_directories(src/)
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/src)
