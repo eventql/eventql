@@ -9,19 +9,19 @@
  */
 #include <stdlib.h>
 #include <unistd.h>
-#include "fnord/stdtypes.h"
-#include "fnord/inspect.h"
-#include "fnord/application.h"
-#include "fnord/cli/flagparser.h"
-#include "fnord/cli/CLI.h"
-#include "fnord/thread/eventloop.h"
-#include "fnord/io/file.h"
-#include "fnord/random.h"
-#include "fnord/option.h"
-#include "fnord/http/httpconnectionpool.h"
+#include "stx/stdtypes.h"
+#include "stx/inspect.h"
+#include "stx/application.h"
+#include "stx/cli/flagparser.h"
+#include "stx/cli/CLI.h"
+#include "stx/thread/eventloop.h"
+#include "stx/io/file.h"
+#include "stx/random.h"
+#include "stx/option.h"
+#include "stx/http/httpconnectionpool.h"
 #include "brokerd/BrokerClient.h"
 #include "brokerd/ExportCursor.pb.h"
-#include "fnord/protobuf/msg.h"
+#include "stx/protobuf/msg.h"
 
 using namespace fnord;
 using namespace fnord::feeds;

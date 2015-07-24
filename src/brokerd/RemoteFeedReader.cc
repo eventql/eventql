@@ -8,8 +8,8 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include "brokerd/RemoteFeedReader.h"
-#include "fnord/logging.h"
-#include "fnord/json/JSONRPCCodec.h"
+#include "stx/logging.h"
+#include "stx/json/JSONRPCCodec.h"
 #include "brokerd/FeedService.h"
 
 namespace fnord {

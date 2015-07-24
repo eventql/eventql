@@ -8,14 +8,14 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <algorithm>
-#include "fnord/inspect.h"
-#include "fnord/logging.h"
-#include "fnord/json/json.h"
+#include "stx/inspect.h"
+#include "stx/logging.h"
+#include "stx/json/json.h"
 #include "sstable/sstablereader.h"
 #include "brokerd/LocalFeed.h"
 #include "brokerd/FeedService.h"
-#include "fnord/stats/stats.h"
-#include "fnord/wallclock.h"
+#include "stx/stats/stats.h"
+#include "stx/wallclock.h"
 
 namespace fnord {
 namespace feeds {

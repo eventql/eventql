@@ -11,7 +11,7 @@
 #define _FNORD_FEEDS_LOGSTREAMENTRY_H
 #include <stdlib.h>
 #include <string>
-#include "fnord/UnixTime.h"
+#include "stx/UnixTime.h"
 
 namespace fnord {
 namespace feeds {

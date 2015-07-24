@@ -9,10 +9,10 @@
  */
 #ifndef _FNORD_FEEDS_REMOTEFEEDWRITER_H
 #define _FNORD_FEEDS_REMOTEFEEDWRITER_H
-#include "fnord/stdtypes.h"
-#include "fnord/option.h"
-#include "fnord/rpc/RPC.h"
-#include "fnord/rpc/RPCClient.h"
+#include "stx/stdtypes.h"
+#include "stx/option.h"
+#include "stx/rpc/RPC.h"
+#include "stx/rpc/RPCClient.h"
 #include "brokerd/FeedEntry.h"
 
 namespace fnord {

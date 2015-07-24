@@ -9,7 +9,7 @@
  */
 #include "brokerd/FeedService.h"
 #include "brokerd/RemoteFeed.h"
-#include "fnord/rpc/RPC.h"
+#include "stx/rpc/RPC.h"
 
 namespace fnord {
 namespace feeds {
