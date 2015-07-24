@@ -7,7 +7,7 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <fnord/protobuf/JSONEncoder.h>
+#include <stx/protobuf/JSONEncoder.h>
 
 namespace fnord {
 namespace msg {

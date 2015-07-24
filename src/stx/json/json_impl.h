@@ -9,14 +9,14 @@
  */
 #ifndef _FNORD_JSON_IMPL_H
 #define _FNORD_JSON_IMPL_H
-#include "fnord/exception.h"
-#include "fnord/inspect.h"
-#include "fnord/UnixTime.h"
-#include "fnord/traits.h"
-#include "fnord/json/jsonutil.h"
-#include "fnord/json/jsonoutputstream.h"
-#include "fnord/reflect/indexsequence.h"
-#include "fnord/reflect/reflect.h"
+#include "stx/exception.h"
+#include "stx/inspect.h"
+#include "stx/UnixTime.h"
+#include "stx/traits.h"
+#include "stx/json/jsonutil.h"
+#include "stx/json/jsonoutputstream.h"
+#include "stx/reflect/indexsequence.h"
+#include "stx/reflect/reflect.h"
 
 namespace fnord {
 namespace json {

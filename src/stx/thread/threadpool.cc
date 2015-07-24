@@ -13,10 +13,10 @@
 #include <thread>
 #include <unistd.h>
 
-#include "fnord/exception.h"
-#include "fnord/exceptionhandler.h"
-#include "fnord/logging.h"
-#include "fnord/thread/threadpool.h"
+#include "stx/exception.h"
+#include "stx/exceptionhandler.h"
+#include "stx/logging.h"
+#include "stx/thread/threadpool.h"
 
 using fnord::ExceptionHandler;
 

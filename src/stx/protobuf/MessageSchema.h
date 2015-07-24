@@ -9,13 +9,13 @@
  */
 #ifndef _FNORD_MSG_MESSAGESCHEMA_H
 #define _FNORD_MSG_MESSAGESCHEMA_H
-#include <fnord/stdtypes.h>
-#include <fnord/exception.h>
-#include <fnord/autoref.h>
-#include <fnord/util/binarymessagereader.h>
-#include <fnord/util/binarymessagewriter.h>
-#include <fnord/protobuf/MessageObject.h>
-#include <fnord/json/json.h>
+#include <stx/stdtypes.h>
+#include <stx/exception.h>
+#include <stx/autoref.h>
+#include <stx/util/binarymessagereader.h>
+#include <stx/util/binarymessagewriter.h>
+#include <stx/protobuf/MessageObject.h>
+#include <stx/json/json.h>
 #include <google/protobuf/descriptor.h>
 #include <google/protobuf/descriptor.pb.h>
 

@@ -9,10 +9,10 @@
  */
 #ifndef _FNORDMETRIC_HTTPCLIENT_H
 #define _FNORDMETRIC_HTTPCLIENT_H
-#include "fnord/uri.h"
-#include "fnord/http/httpresponsefuture.h"
-#include "fnord/http/httpconnectionpool.h"
-#include "fnord/thread/eventloop.h"
+#include "stx/uri.h"
+#include "stx/http/httpresponsefuture.h"
+#include "stx/http/httpconnectionpool.h"
+#include "stx/thread/eventloop.h"
 
 namespace fnord {
 namespace http {

@@ -13,7 +13,7 @@
 #include <memory>
 #include <string>
 #include <vector>
-#include "fnord/reflect/indexsequence.h"
+#include "stx/reflect/indexsequence.h"
 
 namespace fnord {
 namespace reflect {

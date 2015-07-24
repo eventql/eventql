@@ -14,8 +14,8 @@
 #include <sys/uio.h>
 #include <sys/socket.h>
 #include <unistd.h>
-#include "fnord/exception.h"
-#include "fnord/net/udpsocket.h"
+#include "stx/exception.h"
+#include "stx/net/udpsocket.h"
 
 namespace fnord {
 namespace net {

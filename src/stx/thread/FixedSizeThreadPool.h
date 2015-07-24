@@ -14,11 +14,11 @@
 #include <functional>
 #include <list>
 #include <thread>
-#include "fnord/thread/task.h"
-#include "fnord/thread/queue.h"
-#include "fnord/thread/taskscheduler.h"
-#include "fnord/thread/wakeup.h"
-#include "fnord/exceptionhandler.h"
+#include "stx/thread/task.h"
+#include "stx/thread/queue.h"
+#include "stx/thread/taskscheduler.h"
+#include "stx/thread/wakeup.h"
+#include "stx/exceptionhandler.h"
 
 namespace fnord {
 namespace thread {

@@ -9,8 +9,8 @@
  */
 #ifndef _FNORD_MSG_MESSAGEBOJECT_H
 #define _FNORD_MSG_MESSAGEBOJECT_H
-#include <fnord/stdtypes.h>
-#include <fnord/UnixTime.h>
+#include <stx/stdtypes.h>
+#include <stx/UnixTime.h>
 
 namespace fnord {
 namespace msg {

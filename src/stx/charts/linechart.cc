@@ -10,7 +10,7 @@
 #include <stdlib.h>
 #include "canvas.h"
 #include "linechart.h"
-#include <fnord/exception.h>
+#include <stx/exception.h>
 
 namespace fnord {
 namespace chart {

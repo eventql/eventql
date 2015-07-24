@@ -14,11 +14,11 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
-#include "fnord/autoref.h"
-#include "fnord/thread/taskscheduler.h"
-#include "fnord/uri.h"
-#include "fnord/rpc/RPC.h"
-#include "fnord/http/httpconnectionpool.h"
+#include "stx/autoref.h"
+#include "stx/thread/taskscheduler.h"
+#include "stx/uri.h"
+#include "stx/rpc/RPC.h"
+#include "stx/http/httpconnectionpool.h"
 
 namespace fnord {
 

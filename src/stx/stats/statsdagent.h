@@ -10,13 +10,13 @@
 #ifndef _FNORD_STATS_STATSDAGENT_H_
 #define _FNORD_STATS_STATSDAGENT_H_
 #include <thread>
-#include "fnord/stdtypes.h"
-#include "fnord/duration.h"
-#include "fnord/exception.h"
-#include "fnord/net/inetaddr.h"
-#include "fnord/net/udpsocket.h"
-#include "fnord/stats/stat.h"
-#include "fnord/stats/statsrepository.h"
+#include "stx/stdtypes.h"
+#include "stx/duration.h"
+#include "stx/exception.h"
+#include "stx/net/inetaddr.h"
+#include "stx/net/udpsocket.h"
+#include "stx/stats/stat.h"
+#include "stx/stats/statsrepository.h"
 
 namespace fnord {
 namespace stats {

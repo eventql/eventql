@@ -7,11 +7,11 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include "fnord/application.h"
-#include "fnord/logging.h"
-#include "fnord/logging/logoutputstream.h"
-#include "fnord/exceptionhandler.h"
-#include "fnord/thread/signalhandler.h"
+#include "stx/application.h"
+#include "stx/logging.h"
+#include "stx/logging/logoutputstream.h"
+#include "stx/exceptionhandler.h"
+#include "stx/thread/signalhandler.h"
 
 namespace fnord {
 

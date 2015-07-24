@@ -14,7 +14,7 @@
 #include <stdint.h>
 #include <string>
 #include <time.h>
-#include "fnord/json/json.h"
+#include "stx/json/json.h"
 
 namespace fnord {
 namespace json {

@@ -13,8 +13,8 @@
 #include <sys/socket.h>
 #include <string.h>
 #include <unistd.h>
-#include <fnord/exception.h>
-#include <fnord/net/udpserver.h>
+#include <stx/exception.h>
+#include <stx/net/udpserver.h>
 
 namespace fnord {
 namespace net {

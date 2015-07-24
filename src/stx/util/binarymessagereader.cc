@@ -7,9 +7,9 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <fnord/util/binarymessagereader.h>
-#include <fnord/exception.h>
-#include <fnord/ieee754.h>
+#include <stx/util/binarymessagereader.h>
+#include <stx/exception.h>
+#include <stx/ieee754.h>
 
 namespace fnord {
 namespace util {

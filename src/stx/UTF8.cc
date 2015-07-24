@@ -7,8 +7,8 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include "fnord/UTF8.h"
-#include "fnord/exception.h"
+#include "stx/UTF8.h"
+#include "stx/exception.h"
 
 namespace fnord {
 

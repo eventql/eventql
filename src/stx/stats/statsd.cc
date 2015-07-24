@@ -7,10 +7,10 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <fnord/exception.h>
-#include <fnord/inspect.h>
-#include <fnord/logging.h>
-#include <fnord/stats/statsd.h>
+#include <stx/exception.h>
+#include <stx/inspect.h>
+#include <stx/logging.h>
+#include <stx/stats/statsd.h>
 
 namespace fnord {
 namespace statsd {

@@ -9,8 +9,8 @@
  */
 #ifndef _FNORD_STATS_STATSREPOSITORY_H
 #define _FNORD_STATS_STATSREPOSITORY_H
-#include "fnord/stdtypes.h"
-#include "fnord/stats/stat.h"
+#include "stx/stdtypes.h"
+#include "stx/stats/stat.h"
 
 namespace fnord {
 namespace stats {

@@ -16,12 +16,12 @@
 #include <string>
 #include <string.h>
 
-#include "fnord/exception.h"
-#include "fnord/inspect.h"
-#include "fnord/random.h"
-#include "fnord/io/fileutil.h"
-#include "fnord/io/inputstream.h"
-#include "fnord/io/outputstream.h"
+#include "stx/exception.h"
+#include "stx/inspect.h"
+#include "stx/random.h"
+#include "stx/io/fileutil.h"
+#include "stx/io/inputstream.h"
+#include "stx/io/outputstream.h"
 
 const char kExpectationFailed[] = "ExpectationFailed";
 

@@ -9,8 +9,8 @@
  */
 #ifndef _FNORD_STATS_STAT_H
 #define _FNORD_STATS_STAT_H
-#include "fnord/autoref.h"
-#include "fnord/stats/statssink.h"
+#include "stx/autoref.h"
+#include "stx/stats/statssink.h"
 
 namespace fnord {
 namespace stats {

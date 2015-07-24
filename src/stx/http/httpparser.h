@@ -12,8 +12,8 @@
 #include <memory>
 #include <vector>
 
-#include "fnord/buffer.h"
-#include "fnord/http/httpmessage.h"
+#include "stx/buffer.h"
+#include "stx/http/httpmessage.h"
 
 namespace fnord {
 namespace http {

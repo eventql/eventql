@@ -9,7 +9,7 @@
  */
 #ifndef _FNORDMETRIC_UTIL_LOGTARGET_H
 #define _FNORDMETRIC_UTIL_LOGTARGET_H
-#include "fnord/logging/loglevel.h"
+#include "stx/logging/loglevel.h"
 
 namespace fnord {
 

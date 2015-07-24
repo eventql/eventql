@@ -9,10 +9,10 @@
  */
 #ifndef _FNORD_VFS_H_
 #define _FNORD_VFS_H_
-#include <fnord/VFSFile.h>
-#include <fnord/stdtypes.h>
-#include <fnord/exception.h>
-#include <fnord/autoref.h>
+#include <stx/VFSFile.h>
+#include <stx/stdtypes.h>
+#include <stx/exception.h>
+#include <stx/autoref.h>
 
 namespace fnord {
 

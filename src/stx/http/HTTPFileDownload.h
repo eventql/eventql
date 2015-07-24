@@ -9,13 +9,13 @@
  */
 #ifndef _FNORD_HTTP_FILEDOWNLOAD_H
 #define _FNORD_HTTP_FILEDOWNLOAD_H
-#include <fnord/uri.h>
-#include <fnord/io/file.h>
-#include <fnord/http/httpmessage.h>
-#include "fnord/http/httprequest.h"
-#include "fnord/http/httpresponse.h"
-#include "fnord/http/httpstats.h"
-#include "fnord/http/httpconnectionpool.h"
+#include <stx/uri.h>
+#include <stx/io/file.h>
+#include <stx/http/httpmessage.h>
+#include "stx/http/httprequest.h"
+#include "stx/http/httpresponse.h"
+#include "stx/http/httpstats.h"
+#include "stx/http/httpconnectionpool.h"
 #include <string>
 
 namespace fnord {

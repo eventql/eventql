@@ -7,8 +7,8 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include "fnord/ISO8601.h"
-#include "fnord/time_constants.h"
+#include "stx/ISO8601.h"
+#include "stx/time_constants.h"
 
 using namespace fnord;
 

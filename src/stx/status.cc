@@ -7,9 +7,9 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include "fnord/inspect.h"
-#include "fnord/exception.h"
-#include "fnord/status.h"
+#include "stx/inspect.h"
+#include "stx/exception.h"
+#include "stx/status.h"
 
 namespace fnord {
 

@@ -8,11 +8,11 @@
  * <http://www.gnu.org/licenses/>.
  */
 #pragma once
-#include "fnord/stdtypes.h"
-#include "fnord/UnixTime.h"
-#include "fnord/duration.h"
-#include "fnord/wallclock.h"
-#include "fnord/option.h"
+#include "stx/stdtypes.h"
+#include "stx/UnixTime.h"
+#include "stx/duration.h"
+#include "stx/wallclock.h"
+#include "stx/option.h"
 
 namespace fnord {
 

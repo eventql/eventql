@@ -10,9 +10,9 @@
 #ifndef _FNORD_NET_UDPSOCKET_H
 #define _FNORD_NET_UDPSOCKET_H
 #include <stdlib.h>
-#include "fnord/buffer.h"
-#include "fnord/net/inetaddr.h"
-#include "fnord/thread/taskscheduler.h"
+#include "stx/buffer.h"
+#include "stx/net/inetaddr.h"
+#include "stx/thread/taskscheduler.h"
 
 namespace fnord {
 namespace net {

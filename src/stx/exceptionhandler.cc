@@ -11,11 +11,11 @@
 #include <assert.h>
 #include <signal.h>
 #include <string.h>
-#include <fnord/exception.h>
-#include <fnord/exceptionhandler.h>
-#include <fnord/inspect.h>
-#include <fnord/logging.h>
-#include <fnord/StackTrace.h>
+#include <stx/exception.h>
+#include <stx/exceptionhandler.h>
+#include <stx/inspect.h>
+#include <stx/logging.h>
+#include <stx/StackTrace.h>
 
 namespace fnord {
 

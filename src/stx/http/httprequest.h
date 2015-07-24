@@ -9,8 +9,8 @@
  */
 #ifndef _FNORDMETRIC_WEB_HTTPREQUEST_H
 #define _FNORDMETRIC_WEB_HTTPREQUEST_H
-#include <fnord/uri.h>
-#include <fnord/http/httpmessage.h>
+#include <stx/uri.h>
+#include <stx/http/httpmessage.h>
 #include <string>
 
 namespace fnord {

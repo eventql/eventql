@@ -13,7 +13,7 @@
 #include <inttypes.h>
 #include <limits>
 #include <string>
-#include "fnord/time_constants.h"
+#include "stx/time_constants.h"
 
 namespace fnord {
 

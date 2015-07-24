@@ -10,7 +10,7 @@
  */
 #ifndef _CM_HTTPSERVLET_H
 #define _CM_HTTPSERVLET_H
-#include "fnord/http/httpservice.h"
+#include "stx/http/httpservice.h"
 
 namespace fnord {
 namespace http {

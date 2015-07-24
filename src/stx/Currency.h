@@ -9,8 +9,8 @@
  */
 #ifndef _FNORD_CURRENCY_H
 #define _FNORD_CURRENCY_H
-#include "fnord/stdtypes.h"
-#include "fnord/Currency.pb.h"
+#include "stx/stdtypes.h"
+#include "stx/Currency.pb.h"
 
 namespace fnord {
 
