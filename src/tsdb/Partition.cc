@@ -8,13 +8,13 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <tsdb/Partition.h>
-#include <fnord/io/fileutil.h>
-#include <fnord/uri.h>
-#include <fnord/util/binarymessagewriter.h>
-#include <fnord/wallclock.h>
-#include <fnord/protobuf/MessageEncoder.h>
-#include <fnord/protobuf/MessageDecoder.h>
-#include <fnord/protobuf/msg.h>
+#include <stx/io/fileutil.h>
+#include <stx/uri.h>
+#include <stx/util/binarymessagewriter.h>
+#include <stx/wallclock.h>
+#include <stx/protobuf/MessageEncoder.h>
+#include <stx/protobuf/MessageDecoder.h>
+#include <stx/protobuf/msg.h>
 #include <cstable/CSTableBuilder.h>
 #include <sstable/sstablereader.h>
 

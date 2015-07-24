@@ -7,7 +7,7 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <fnord/logging.h>
+#include <stx/logging.h>
 #include <fnord-logtable/LogTableTail.h>
 
 namespace fnord {

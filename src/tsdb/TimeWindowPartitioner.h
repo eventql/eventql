@@ -8,11 +8,11 @@
  * <http://www.gnu.org/licenses/>.
  */
 #pragma once
-#include <fnord/stdtypes.h>
-#include <fnord/option.h>
-#include <fnord/UnixTime.h>
-#include <fnord/duration.h>
-#include <fnord/SHA1.h>
+#include <stx/stdtypes.h>
+#include <stx/option.h>
+#include <stx/UnixTime.h>
+#include <stx/duration.h>
+#include <stx/SHA1.h>
 
 using namespace fnord;
 

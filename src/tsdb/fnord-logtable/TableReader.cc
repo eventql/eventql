@@ -10,10 +10,10 @@
 #include <algorithm>
 #include <thread>
 #include <fnord-logtable/TableReader.h>
-#include <fnord/logging.h>
-#include <fnord/io/fileutil.h>
-#include <fnord/protobuf/MessageDecoder.h>
-#include <fnord/protobuf/MessageEncoder.h>
+#include <stx/logging.h>
+#include <stx/io/fileutil.h>
+#include <stx/protobuf/MessageDecoder.h>
+#include <stx/protobuf/MessageEncoder.h>
 
 namespace fnord {
 namespace logtable {

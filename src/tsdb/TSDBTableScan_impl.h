@@ -11,7 +11,7 @@
 #include <tsdb/CSTableIndex.h>
 #include <cstable/CSTableReader.h>
 #include <cstable/RecordMaterializer.h>
-#include <fnord/protobuf/MessageEncoder.h>
+#include <stx/protobuf/MessageEncoder.h>
 
 using namespace fnord;
 

@@ -8,8 +8,8 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include "unistd.h"
-#include <fnord/logging.h>
-#include <fnord/wallclock.h>
+#include <stx/logging.h>
+#include <stx/wallclock.h>
 #include <tsdb/CompactionWorker.h>
 #include <tsdb/Partition.h>
 

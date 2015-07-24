@@ -8,7 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <fnord-logtable/RemoteTableReader.h>
-#include <fnord/protobuf/MessageDecoder.h>
+#include <stx/protobuf/MessageDecoder.h>
 
 namespace fnord {
 namespace logtable {

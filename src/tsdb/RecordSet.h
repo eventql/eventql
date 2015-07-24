@@ -9,13 +9,13 @@
  */
 #ifndef _FNORD_TSDB_MESSAGESET_H
 #define _FNORD_TSDB_MESSAGESET_H
-#include <fnord/stdtypes.h>
-#include <fnord/io/file.h>
-#include <fnord/option.h>
-#include <fnord/SHA1.h>
-#include <fnord/util/binarymessagereader.h>
-#include <fnord/util/binarymessagewriter.h>
-#include <fnord/random.h>
+#include <stx/stdtypes.h>
+#include <stx/io/file.h>
+#include <stx/option.h>
+#include <stx/SHA1.h>
+#include <stx/util/binarymessagereader.h>
+#include <stx/util/binarymessagewriter.h>
+#include <stx/random.h>
 
 using namespace fnord;
 

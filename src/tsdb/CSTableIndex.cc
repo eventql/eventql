@@ -7,12 +7,12 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <fnord/stdtypes.h>
-#include <fnord/logging.h>
-#include <fnord/io/mmappedfile.h>
+#include <stx/stdtypes.h>
+#include <stx/logging.h>
+#include <stx/io/mmappedfile.h>
 #include <tsdb/CSTableIndex.h>
 #include <tsdb/RecordSet.h>
-#include <fnord/protobuf/MessageDecoder.h>
+#include <stx/protobuf/MessageDecoder.h>
 #include <cstable/CSTableBuilder.h>
 
 using namespace fnord;

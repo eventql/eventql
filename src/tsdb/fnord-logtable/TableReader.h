@@ -9,8 +9,8 @@
  */
 #ifndef _FNORD_LOGTABLE_TABLEREADER_H
 #define _FNORD_LOGTABLE_TABLEREADER_H
-#include <fnord/stdtypes.h>
-#include <fnord/autoref.h>
+#include <stx/stdtypes.h>
+#include <stx/autoref.h>
 #include <fnord-logtable/AbstractTableReader.h>
 #include "sstable/sstablereader.h"
 #include "cstable/CSTableReader.h"
