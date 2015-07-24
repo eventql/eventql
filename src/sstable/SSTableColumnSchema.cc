@@ -10,8 +10,8 @@
 #include <sstable/SSTableColumnSchema.h>
 #include <sstable/sstablereader.h>
 #include <sstable/sstablewriter.h>
-#include <fnord/util/binarymessagereader.h>
-#include <fnord/util/binarymessagewriter.h>
+#include <stx/util/binarymessagereader.h>
+#include <stx/util/binarymessagewriter.h>
 
 namespace fnord {
 namespace sstable {

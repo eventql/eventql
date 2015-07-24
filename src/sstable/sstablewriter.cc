@@ -8,8 +8,8 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <string.h>
-#include <fnord/exception.h>
-#include <fnord/fnv.h>
+#include <stx/exception.h>
+#include <stx/fnv.h>
 #include <sstable/binaryformat.h>
 #include <sstable/fileheaderwriter.h>
 #include <sstable/fileheaderreader.h>

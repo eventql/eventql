@@ -7,9 +7,9 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <fnord/fnv.h>
-#include <fnord/exception.h>
-#include <fnord/inspect.h>
+#include <stx/fnv.h>
+#include <stx/exception.h>
+#include <stx/inspect.h>
 #include <sstable/binaryformat.h>
 #include <sstable/sstablereader.h>
 
