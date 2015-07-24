@@ -123,7 +123,7 @@ protected:
   Buffer body_buf_;
   ScopedPtr<HTTPRequest> cur_request_;
   ScopedPtr<HTTPHandler> cur_handler_;
-  mutable std::mutex mutex_;
+  mutable std::recursive_mutex mutex_;
   bool closed_;
   HTTPServerStats* stats_;
 };

@@ -89,7 +89,7 @@ HTTPServerConnection::~HTTPServerConnection() {
 }
 
 void HTTPServerConnection::read() {
-  std::unique_lock<std::mutex> lk(mutex_);
+  std::unique_lock<std::recursive_mutex> lk(mutex_);
 
   size_t len;
   try {
@@ -107,11 +107,10 @@ void HTTPServerConnection::read() {
     return;
   }
 
-  lk.unlock();
-
   try {
     if (len == 0) {
       parser_.eof();
+      lk.unlock();
       close();
       return;
     } else {
@@ -119,19 +118,18 @@ void HTTPServerConnection::read() {
     }
   } catch (Exception& e) {
     logDebug("http.server", e, "HTTP parse error, closing...");
+    lk.unlock();
     close();
     return;
   }
 
   if (parser_.state() != HTTPParser::S_DONE) {
-    lk.lock();
     awaitRead();
-    lk.unlock();
   }
 }
 
 void HTTPServerConnection::write() {
-  std::unique_lock<std::mutex> lk(mutex_);
+  std::unique_lock<std::recursive_mutex> lk(mutex_);
 
   auto data = ((char *) write_buf_.data()) + write_buf_.mark();
   auto size = write_buf_.size() - write_buf_.mark();
@@ -193,7 +191,7 @@ void HTTPServerConnection::nextRequest() {
   body_buf_.clear();
 
   parser_.onBodyChunk([this] (const char* data, size_t size) {
-    std::unique_lock<std::mutex> lk(mutex_);
+    std::unique_lock<std::recursive_mutex> lk(mutex_);
     body_buf_.append(data, size);
   });
 
@@ -211,7 +209,7 @@ void HTTPServerConnection::dispatchRequest() {
 
 void HTTPServerConnection::readRequestBody(
     Function<void (const void*, size_t, bool)> callback) {
-  std::unique_lock<std::mutex> lk(mutex_);
+  std::unique_lock<std::recursive_mutex> lk(mutex_);
 
   switch (parser_.state()) {
     case HTTPParser::S_REQ_METHOD:
@@ -228,7 +226,7 @@ void HTTPServerConnection::readRequestBody(
   }
 
   auto read_body_chunk_fn = [this, callback] (const char* data, size_t size) {
-    std::unique_lock<std::mutex> lk(mutex_);
+    std::unique_lock<std::recursive_mutex> lk(mutex_);
     body_buf_.append(data, size);
     auto last_chunk = parser_.state() == HTTPParser::S_DONE;
 
@@ -262,7 +260,7 @@ void HTTPServerConnection::discardRequestBody(Function<void ()> callback) {
 void HTTPServerConnection::writeResponse(
     const HTTPResponse& resp,
     Function<void()> ready_callback) {
-  std::lock_guard<std::mutex> lk(mutex_);
+  std::lock_guard<std::recursive_mutex> lk(mutex_);
 
   if (parser_.state() != HTTPParser::S_DONE) {
     RAISE(kIllegalStateError, "can't write response before request is read");
@@ -278,7 +276,7 @@ void HTTPServerConnection::writeResponseBody(
     const void* data,
     size_t size,
     Function<void()> ready_callback) {
-  std::lock_guard<std::mutex> lk(mutex_);
+  std::lock_guard<std::recursive_mutex> lk(mutex_);
 
   if (parser_.state() != HTTPParser::S_DONE) {
     RAISE(kIllegalStateError, "can't write response before request is read");
@@ -297,7 +295,7 @@ void HTTPServerConnection::finishResponse() {
   }
 
   if (false && cur_request_->keepalive()) {
-    std::lock_guard<std::mutex> lk(mutex_);
+    std::lock_guard<std::recursive_mutex> lk(mutex_);
     nextRequest();
   } else {
     close();
@@ -306,7 +304,7 @@ void HTTPServerConnection::finishResponse() {
 
 // precondition: must not hold mutex
 void HTTPServerConnection::close() {
-  std::unique_lock<std::mutex> lk(mutex_);
+  std::unique_lock<std::recursive_mutex> lk(mutex_);
 
   logTrace("http.server", "HTTP connection close: $0", inspect(*this));
 
@@ -323,7 +321,7 @@ void HTTPServerConnection::close() {
 }
 
 bool HTTPServerConnection::isClosed() const {
-  std::unique_lock<std::mutex> lk(mutex_);
+  std::unique_lock<std::recursive_mutex> lk(mutex_);
   return closed_;
 }
 
