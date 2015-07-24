@@ -8,7 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <chartsql/runtime/ValueExpression.h>
-#include <fnord/inspect.h>
+#include <stx/inspect.h>
 
 using namespace fnord;
 

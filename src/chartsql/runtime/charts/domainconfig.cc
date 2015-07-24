@@ -8,8 +8,8 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <chartsql/runtime/charts/domainconfig.h>
-#include <fnord/charts/continuousdomain.h>
-#include <fnord/charts/timedomain.h>
+#include <stx/charts/continuousdomain.h>
+#include <stx/charts/timedomain.h>
 
 namespace csql {
 

@@ -10,7 +10,7 @@
 #ifndef _FNORDMETRIC_SQLEXTENSIONS_POINTCHARTBUILDER_H
 #define _FNORDMETRIC_SQLEXTENSIONS_POINTCHARTBUILDER_H
 #include <chartsql/runtime/charts/chartbuilder.h>
-#include <fnord/charts/pointchart.h>
+#include <stx/charts/pointchart.h>
 
 namespace csql {
 class DrawStatement;

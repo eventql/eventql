@@ -13,7 +13,7 @@
 #include <string>
 #include <vector>
 #include <memory>
-#include <fnord/exception.h>
+#include <stx/exception.h>
 #include <chartsql/parser/token.h>
 #include <chartsql/parser/astnode.h>
 

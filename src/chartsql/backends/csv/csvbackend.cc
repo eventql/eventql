@@ -8,8 +8,8 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <memory>
-#include <fnord/exception.h>
-#include <fnord/io/inputstream.h>
+#include <stx/exception.h>
+#include <stx/io/inputstream.h>
 #include <chartsql/backends/csv/csvbackend.h>
 #include <chartsql/backends/csv/csvtableref.h>
 #include <chartsql/parser/astnode.h>

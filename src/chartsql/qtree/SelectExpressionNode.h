@@ -8,8 +8,8 @@
  * <http://www.gnu.org/licenses/>.
  */
 #pragma once
-#include <fnord/stdtypes.h>
-#include <fnord/option.h>
+#include <stx/stdtypes.h>
+#include <stx/option.h>
 #include <chartsql/qtree/TableExpressionNode.h>
 #include <chartsql/qtree/ValueExpressionNode.h>
 #include <chartsql/qtree/SelectListNode.h>

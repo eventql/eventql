@@ -8,14 +8,14 @@
  * <http://www.gnu.org/licenses/>.
  */
 #pragma once
-#include <fnord/stdtypes.h>
+#include <stx/stdtypes.h>
 #include <chartsql/runtime/TableExpression.h>
 #include <chartsql/qtree/DrawStatementNode.h>
 #include <chartsql/parser/token.h>
-#include <fnord/exception.h>
-#include <fnord/autoref.h>
-#include <fnord/charts/canvas.h>
-#include <fnord/charts/drawable.h>
+#include <stx/exception.h>
+#include <stx/autoref.h>
+#include <stx/charts/canvas.h>
+#include <stx/charts/drawable.h>
 
 namespace csql {
 class Runtime;

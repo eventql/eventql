@@ -8,9 +8,9 @@
  * <http://www.gnu.org/licenses/>.
  */
 #pragma once
-#include "fnord/http/httpservice.h"
-#include <fnord/random.h>
-#include <fnord/http/HTTPSSEStream.h>
+#include "stx/http/httpservice.h"
+#include <stx/random.h>
+#include <stx/http/HTTPSSEStream.h>
 
 using namespace fnord;
 

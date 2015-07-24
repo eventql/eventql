@@ -9,8 +9,8 @@
  */
 #include <chartsql/runtime/tablerepository.h>
 #include <chartsql/runtime/importstatement.h>
-#include <fnord/exception.h>
-#include <fnord/uri.h>
+#include <stx/exception.h>
+#include <stx/uri.h>
 
 namespace csql {
 

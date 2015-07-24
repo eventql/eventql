@@ -11,7 +11,7 @@
 #define _FNORDMETRIC_SQL_BACKEND_H
 #include <memory>
 #include <vector>
-#include <fnord/uri.h>
+#include <stx/uri.h>
 #include <chartsql/backends/tableref.h>
 
 namespace csql {

@@ -10,11 +10,11 @@
 #include <vector>
 #include <string>
 #include <memory>
-#include <fnord/exception.h>
-#include <fnord/exceptionhandler.h>
-#include <fnord/io/inputstream.h>
-#include <fnord/io/outputstream.h>
-#include <fnord/cli/flagparser.h>
+#include <stx/exception.h>
+#include <stx/exceptionhandler.h>
+#include <stx/io/inputstream.h>
+#include <stx/io/outputstream.h>
+#include <stx/cli/flagparser.h>
 #include "environment.h"
 #include "cli/cli.h"
 #include <chartsql/backends/csv/csvbackend.h>

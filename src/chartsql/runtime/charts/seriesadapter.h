@@ -12,10 +12,10 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <unordered_map>
-#include <fnord/charts/canvas.h>
-#include <fnord/charts/barchart.h>
-#include <fnord/charts/series.h>
-#include <fnord/exception.h>
+#include <stx/charts/canvas.h>
+#include <stx/charts/barchart.h>
+#include <stx/charts/series.h>
+#include <stx/exception.h>
 #include <chartsql/runtime/compile.h>
 #include <chartsql/runtime/execute.h>
 #include <chartsql/runtime/rowsink.h>
