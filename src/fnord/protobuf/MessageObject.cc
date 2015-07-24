@@ -233,6 +233,10 @@ const String& MessageObject::asString() const {
 }
 
 uint32_t MessageObject::asUInt32() const {
+  if (type == FieldType::UINT64) {
+    return *((uint64_t*) &data_); // silent truncation :(
+  }
+
 #ifndef FNORD_NODEBUG
   if (type != FieldType::UINT32) {
     RAISE(kTypeError);
