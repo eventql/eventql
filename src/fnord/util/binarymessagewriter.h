@@ -29,6 +29,7 @@ public:
   void appendUInt32(uint32_t value);
   void appendUInt64(uint64_t value);
   void appendVarUInt(uint64_t value);
+  void appendDouble(double value);
   void appendString(const std::string& string);
   void appendLenencString(const std::string& string);
   void append(void const* data, size_t size);
@@ -39,6 +40,7 @@ public:
   void updateUInt16(size_t offset, uint16_t value);
   void updateUInt32(size_t offset, uint32_t value);
   void updateUInt64(size_t offset, uint64_t value);
+  void updateDouble(size_t offset, double value);
   void updateString(size_t offset, const std::string& string);
   void update(size_t offset, void const* data, size_t size);
 

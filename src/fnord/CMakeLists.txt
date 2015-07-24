@@ -5,30 +5,11 @@
 # the terms of the GNU General Public License v3.0. You should have received a
 # copy of the GNU General Public License along with this program. If not, see
 # <http://www.gnu.org/licenses/>.
-cmake_minimum_required(VERSION 2.8.8)
-project(libfnord-base)
-include(FindPkgConfig)
-
-option(ENABLE_TESTS "Build unit tests [default: ON]" ON)
-
-include_directories(${PROJECT_BINARY_DIR})
-file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/tests)
-include_directories(../)
-include_directories(../3rdparty/)
-
-find_package(Threads)
-
-if(APPLE)
-  set(CMAKE_CXX_FLAGS "-std=c++0x -stdlib=libc++ ${CMAKE_CXX_FLAGS}")
-else()
-  set(CMAKE_CXX_FLAGS "-std=c++0x -pthread ${CMAKE_CXX_FLAGS}")
-endif()
-
-set(CMAKE_C_FLAGS "-std=c11 ${CMAKE_C_FLAGS}")
+file(GLOB PROTO_FILES *.proto)
+PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS ${PROTO_FILES})
 
 # base
 add_library(fnord-base OBJECT
-    ../../3rdparty/libart/art.c
     ../../3rdparty/simdcomp/simdbitpacking.c
     ../../3rdparty/simdcomp/simdintegratedbitpacking.c
     ../../3rdparty/simdcomp/simdcomputil.c
@@ -40,11 +21,17 @@ add_library(fnord-base OBJECT
     cli/flagparser.cc
     cli/CLI.cc
     cli/CLICommand.cc
-    datetime.cc
+    csv/CSVOutputStream.cc
+    csv/BinaryCSVOutputStream.cc
+    csv/CSVInputStream.cc
+    csv/BinaryCSVInputStream.cc
+    UnixTime.cc
     duration.cc
     exception.cc
     exceptionhandler.cc
     fnv.cc
+    HMAC.cc
+    human.cc
     ieee754.cc
     inspect.cc
     InternMap.cc
@@ -56,7 +43,9 @@ add_library(fnord-base OBJECT
     io/outputstream.cc
     io/mmappedfile.cc
     io/pagemanager.cc
+    ISO8601.cc
     Currency.cc
+    CivilTime.cc
     Language.cc
     logging.cc
     logging/logoutputstream.cc
@@ -85,29 +74,49 @@ add_library(fnord-base OBJECT
     util/Base64.cc
     util/binarymessagereader.cc
     util/binarymessagewriter.cc
-    util/CSVOutputStream.cc
     util/CumulativeHistogram.cc
     util/BitPackDecoder.cc
     util/BitPackEncoder.cc
     util/SimpleRateLimit.cc
     VFS.cc
-    wallclock.cc)
+    wallclock.cc
+    web/SecureCookie.cc
+    ${PROTO_SRCS})
 
-add_executable(tests/test-inputstream
+add_executable(test-inputstream
     $<TARGET_OBJECTS:fnord-base>
     io/inputstream_test.cc)
 
-add_executable(tests/test-uri
+add_executable(test-uri
     $<TARGET_OBJECTS:fnord-base>
     uri_test.cc)
 
-add_executable(tests/test-stringutil
+add_executable(test-stringutil
     $<TARGET_OBJECTS:fnord-base>
     stringutil_test.cc)
 
-add_executable(tests/test-internmap
+add_executable(test-internmap
     $<TARGET_OBJECTS:fnord-base>
     InternMap_test.cc)
+
+add_executable(test-hmac
+    $<TARGET_OBJECTS:fnord-base>
+    HMAC_test.cc)
+
+add_executable(test-human
+    $<TARGET_OBJECTS:fnord-base>
+    human_test.cc)
+
+add_executable(test-secure-cookie
+    $<TARGET_OBJECTS:fnord-base>
+    web/SecureCookie_test.cc)
+
+add_executable(test-protobuf
+    $<TARGET_OBJECTS:fnord-base>
+    $<TARGET_OBJECTS:fnord-protobuf>
+    $<TARGET_OBJECTS:fnord-json>
+    $<TARGET_OBJECTS:fnord-http>
+    protobuf/protobuf_test.cc)
 
 ## redis
 #add_library(fnord-redis OBJECT

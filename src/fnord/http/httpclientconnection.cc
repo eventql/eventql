@@ -22,10 +22,10 @@ HTTPClientConnection::HTTPClientConnection(
     HTTPClientStats* stats) :
     conn_(std::move(conn)),
     scheduler_(scheduler),
-    stats_(stats),
     state_(S_CONN_IDLE),
     parser_(HTTPParser::PARSE_HTTP_RESPONSE),
-    keepalive_(false) {
+    keepalive_(false),
+    stats_(stats) {
   buf_.reserve(kMinBufferSize);
   conn_->checkErrors();
 
@@ -126,7 +126,12 @@ void HTTPClientConnection::awaitWrite() {
 }
 
 void HTTPClientConnection::close() {
+  if (state_ == S_CONN_CLOSED) {
+    RAISE(kIllegalStateError, "connection already closed");
+  }
+
   state_ = S_CONN_CLOSED;
+  scheduler_->cancelFD(conn_->fd());
   conn_->close();
 }
 
@@ -238,8 +243,8 @@ void HTTPClientConnection::error(const std::exception& e) {
     }
   }
 
-  cur_handler_->onError(e);
   on_ready_.wakeup();
+  cur_handler_->onError(e);
 }
 
 }

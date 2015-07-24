@@ -8,7 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <set>
-#include "fnord/datetime.h"
+#include "fnord/UnixTime.h"
 #include "fnord/exception.h"
 #include "fnord/stringutil.h"
 #include "fnord/inspect.h"
@@ -113,14 +113,14 @@ bool JSONDocument::getMaybeAs(
 }
 
 template <>
-bool JSONDocument::getMaybeAs(const JSONPointer& path, DateTime* dst) const {
+bool JSONDocument::getMaybeAs(const JSONPointer& path, UnixTime* dst) const {
   uint64_t val;
 
   if (!getMaybeAs<uint64_t>(path, &val)) {
     return false;
   }
 
-  *dst = DateTime(val);
+  *dst = UnixTime(val);
   return true;
 }
 

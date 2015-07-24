@@ -11,28 +11,17 @@ find_package(Protobuf)
 set(PROTOC_ARGS --proto_path ${CMAKE_CURRENT_SOURCE_DIR}/ PARENT_SCOPE)
 option(ENABLE_TESTS "Build unit tests [default: ON]" ON)
 
-#include_directories(${PROJECT_BINARY_DIR})
-#file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/tests)
-#include_directories(../)
-#include_directories(../3rdparty/)
-#include_directories(${CMAKE_CURRENT_BINARY_DIR}/../)
-#include_directories(${CMAKE_CURRENT_BINARY_DIR})
-
-file(GLOB META_PROTO_FILES *.proto)
-PROTOBUF_GENERATE_CPP(META_PROTO_SRCS META_PROTO_HDRS ${META_PROTO_FILES})
-
 add_library(fnord-protobuf OBJECT
     MessageDecoder.cc
     MessageEncoder.cc
     MessagePrinter.cc
     MessageObject.cc
     MessageSchema.cc
-    ${META_PROTO_SRCS})
+    JSONEncoder.cc)
 
-set(FNORD_PROTOBUF_LIBS
-    ${CMAKE_THREAD_LIBS_INIT}
-    ${PROTOBUF_LIBRARIES}
-    PARENT_SCOPE)
+add_dependencies(fnord-protobuf fnord-base)
+
+set(FNORD_PROTOBUF_LIBS ${PROTOBUF_LIBRARIES} PARENT_SCOPE)
 
 include_directories(${PROTOBUF_INCLUDE_DIRS})
 include_directories(${CMAKE_CURRENT_BINARY_DIR})

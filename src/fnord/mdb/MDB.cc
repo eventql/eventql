@@ -14,42 +14,42 @@ namespace mdb {
 
 RefPtr<MDB> MDB::open(
     const String& path,
-    bool readonly /* = false */,
-    size_t maxsize /* = ... */,
-    const String& data_filename /* = "data.mdb" */,
-    const String& lock_filename /* = "lock.mdb" */,
-    bool sync /* = true */) {
+    const MDBOptions& opts) {
   MDB_env* mdb_env;
 
   if (mdb_env_create(&mdb_env) != 0) {
     RAISE(kRuntimeError, "mdb_env_create() failed");
   }
 
-  auto rc = mdb_env_set_mapsize(mdb_env, maxsize);
+  auto rc = mdb_env_set_mapsize(mdb_env, opts.maxsize);
   if (rc != 0) {
     auto err = String(mdb_strerror(rc));
     RAISEF(kRuntimeError, "mdb_set_mapsize() failed: $0", err);
   }
 
   int flags = 0;
-  if (readonly) {
+  if (opts.readonly) {
     flags |= MDB_RDONLY;
   }
 
-  if (!sync) {
+  if (!opts.sync) {
     flags |= MDB_NOSYNC;
   }
 
-  RefPtr<MDB> mdb(new MDB(mdb_env, path, data_filename, lock_filename));
-  mdb->openDBHandle(flags);
+  RefPtr<MDB> mdb(
+      new MDB(opts, mdb_env, path, opts.data_filename, opts.lock_filename));
+
+  mdb->openDBHandle(flags, opts.duplicate_keys);
   return mdb;
 }
 
 MDB::MDB(
+    const MDBOptions& opts,
     MDB_env* mdb_env,
     const String& path,
     const String& data_filename,
     const String& lock_filename) :
+    opts_(opts),
     mdb_env_(mdb_env),
     path_(path),
     data_filename_("/" + data_filename),
@@ -77,10 +77,10 @@ RefPtr<MDBTransaction> MDB::startTransaction(bool readonly /* = false */) {
     RAISEF(kRuntimeError, "mdb_txn_begin() failed: $0", err);
   }
 
-  return RefPtr<MDBTransaction>(new MDBTransaction(txn, mdb_handle_));
+  return RefPtr<MDBTransaction>(new MDBTransaction(txn, mdb_handle_, &opts_));
 }
 
-void MDB::openDBHandle(int flags) {
+void MDB::openDBHandle(int flags, bool dupsort) {
   int rc = mdb_env_open(
       mdb_env_,
       path_.c_str(),
@@ -101,7 +101,12 @@ void MDB::openDBHandle(int flags) {
     RAISEF(kRuntimeError, "mdb_txn_begin() failed: $0", err);
   }
 
-  if (mdb_dbi_open(txn, NULL, MDB_DUPSORT, &mdb_handle_) != 0) {
+  auto oflags = 0;
+  if (dupsort) {
+    oflags |= MDB_DUPSORT;
+  }
+
+  if (mdb_dbi_open(txn, NULL, oflags, &mdb_handle_) != 0) {
     RAISE(kRuntimeError, "mdb_dbi_open() failed");
   }
 

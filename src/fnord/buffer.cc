@@ -40,6 +40,8 @@ Buffer::Buffer(
   }
 }
 
+Buffer::Buffer(const String& string) : Buffer(string.data(), string.size()) {}
+
 Buffer::Buffer(const Buffer& copy) : size_(copy.size_), alloc_(copy.size_) {
   data_ = malloc(size_);
 
@@ -125,6 +127,10 @@ void Buffer::append(const Buffer& buf) {
   append(buf.data(), buf.size());
 }
 
+void Buffer::append(char chr) {
+  append(&chr, sizeof(chr));
+}
+
 void Buffer::truncate(size_t size) {
   if (size > size_) {
     RAISE(kIndexError, "requested size is out of bounds");
@@ -179,6 +185,10 @@ size_t Buffer::size() const {
 }
 
 size_t Buffer::allocSize() const {
+  return alloc_;
+}
+
+size_t Buffer::capacity() const {
   return alloc_;
 }
 

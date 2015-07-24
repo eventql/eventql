@@ -12,6 +12,7 @@
 #include <memory>
 #include <string>
 #include "fnord/buffer.h"
+#include "fnord/io/file.h"
 
 namespace fnord {
 
@@ -37,6 +38,12 @@ public:
   virtual bool readNextByte(char* target) = 0;
 
   /**
+   * Check if the end of this input stream was reached. Returns true if the
+   * end was reached, false otherwise
+   */
+  virtual bool eof() = 0;
+
+  /**
    * Read N bytes from the stream and copy the data into the provided string.
    * Returns the number of bytes read.
    *
@@ -53,6 +60,14 @@ public:
   virtual size_t readNextBytes(Buffer* target, size_t n_bytes);
 
   /**
+   * Read N bytes from the stream and copy the data into the provided buffer
+   * Returns the number of bytes read.
+   *
+   * @param target the string to copy the data into
+   */
+  virtual size_t readNextBytes(void* target, size_t n_bytes);
+
+  /**
    * Read from the stream until EOF and copy the data into the provided string.
    * Returns the number of bytes read.
    *
@@ -62,6 +77,48 @@ public:
    * @param target the string to copy the data into
    */
   virtual size_t readUntilEOF(std::string* target);
+
+  /**
+   * Reads a uint8 from the stream. Throws an exception on error
+   */
+  virtual uint8_t readUInt8();
+
+  /**
+   * Reads a uint16 from the stream. Throws an exception on error
+   */
+  virtual uint16_t readUInt16();
+
+  /**
+   * Reads a uint32 from the stream. Throws an exception on error
+   */
+  virtual uint32_t readUInt32();
+
+  /**
+   * Reads a uint64 from the stream. Throws an exception on error
+   */
+  virtual uint64_t readUInt64();
+
+  /**
+   * Reads a LEB128 encoded uint64 from the stream. Throws an exception on error
+   */
+  virtual uint64_t readVarUInt();
+
+  /**
+   * Reads a string from the stream. Throws an exception on error
+   */
+  virtual String readString(size_t size);
+
+  /**
+   * Reads a LEB128 prefix-length-encoded string from the stream. Throws an
+   * exception on error
+   */
+  virtual String readLenencString();
+
+  /**
+   * Reads a IEEE754 encoded double from the stream. Throws an exception on
+   * error
+   */
+  virtual double readDouble();
 
   /**
    * Return the input stream filename
@@ -112,7 +169,33 @@ public:
    * @param fd a valid fd
    * @param close_on_destroy close the fd on destroy?
    */
+  static std::unique_ptr<FileInputStream> fromFileDescriptor(
+      int fd,
+      bool close_on_destroy = false);
+
+  /**
+   * Create a new FileInputStream instance from the provided File. 
+   *
+   * @param file the opened file
+   */
+  static std::unique_ptr<FileInputStream> fromFile(File&& file);
+
+  /**
+   * Create a new FileInputStream instance from the provided filedescriptor. If
+   * close on_destroy is true, the fd will be close()ed when the input stream
+   * is destroyed.
+   *
+   * @param fd a valid fd
+   * @param close_on_destroy close the fd on destroy?
+   */
   explicit FileInputStream(int fd, bool close_on_destroy = false);
+
+  /**
+   * Create a new FileInputStream instance from the provided File. 
+   *
+   * @param file the opened file
+   */
+  explicit FileInputStream(File&& file);
 
   /**
    * Close the fd if close_on_destroy is true
@@ -126,6 +209,12 @@ public:
    * @param target the target char pointer
    */
   bool readNextByte(char* target) override;
+
+  /**
+   * Check if the end of this input stream was reached. Returns true if the
+   * end was reached, false otherwise
+   */
+  bool eof() override;
 
   /**
    * Rewind the input stream
@@ -173,6 +262,12 @@ public:
   bool readNextByte(char* target) override;
 
   /**
+   * Check if the end of this input stream was reached. Returns true if the
+   * end was reached, false otherwise
+   */
+  bool eof() override;
+
+  /**
    * Rewind the input stream
    */
   void rewind() override;
@@ -206,6 +301,12 @@ public:
    * @param target the target char pointer
    */
   bool readNextByte(char* target) override;
+
+  /**
+   * Check if the end of this input stream was reached. Returns true if the
+   * end was reached, false otherwise
+   */
+  bool eof() override;
 
   /**
    * Rewind the input stream

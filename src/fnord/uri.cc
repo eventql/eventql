@@ -169,7 +169,7 @@ const std::string& URI::host() const {
   return host_;
 }
 
-const unsigned URI::port() const {
+unsigned URI::port() const {
   return port_;
 }
 

@@ -9,7 +9,7 @@
  */
 #include <fnord/util/binarymessagereader.h>
 #include <fnord/exception.h>
-#include <fnord/inspect.h>
+#include <fnord/ieee754.h>
 
 namespace fnord {
 namespace util {
@@ -84,6 +84,11 @@ char const* BinaryMessageReader::readString(size_t size) {
   auto ptr = static_cast<char const*>(ptr_) + pos_;
   pos_ += size;
   return ptr;
+}
+
+double BinaryMessageReader::readDouble() {
+  return IEEE754::fromBytes(
+      *static_cast<uint64_t const*>(read(sizeof(uint64_t))));
 }
 
 std::string BinaryMessageReader::readLenencString() {

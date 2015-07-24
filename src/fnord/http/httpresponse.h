@@ -9,7 +9,7 @@
  */
 #ifndef _FNORDMETRIC_WEB_HTTPRESPONSE_H
 #define _FNORDMETRIC_WEB_HTTPRESPONSE_H
-#include <fnord/datetime.h>
+#include <fnord/UnixTime.h>
 #include <fnord/http/httpmessage.h>
 #include <fnord/http/httprequest.h>
 #include <fnord/http/status.h>
@@ -35,7 +35,7 @@ public:
   void addCookie(
       const std::string& key,
       const std::string& value,
-      const DateTime& expire = DateTime::epoch(),
+      const UnixTime& expire = UnixTime::epoch(),
       const std::string& path = "",
       const std::string& domain = "",
       bool secure = false,

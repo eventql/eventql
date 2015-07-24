@@ -13,6 +13,32 @@
 namespace fnord {
 namespace msg {
 
+String fieldTypeToString(FieldType type) {
+  switch (type) {
+    case FieldType::OBJECT: return "OBJECT";
+    case FieldType::STRING: return "STRING";
+    case FieldType::BOOLEAN: return "BOOLEAN";
+    case FieldType::UINT32: return "UINT32";
+    case FieldType::UINT64: return "UINT64";
+    case FieldType::DOUBLE: return "DOUBLE";
+    case FieldType::DATETIME: return "DATETIME";
+  }
+}
+
+FieldType fieldTypeFromString(String str) {
+  StringUtil::toUpper(&str);
+
+  if (str == "OBJECT") return FieldType::OBJECT;
+  if (str == "STRING") return FieldType::STRING;
+  if (str == "BOOLEAN") return FieldType::BOOLEAN;
+  if (str == "UINT32") return FieldType::UINT32;
+  if (str == "UINT64") return FieldType::UINT64;
+  if (str == "DOUBLE") return FieldType::DOUBLE;
+  if (str == "DATETIME") return FieldType::DATETIME;
+
+  RAISEF(kTypeError, "can't convert '$0' to FieldType", str);
+}
+
 MessageObject::MessageObject(
     uint32_t _id /* = 0 */) :
     id(_id),
@@ -26,6 +52,22 @@ MessageObject::MessageObject(
     id(_id),
     type(FieldType::UINT32) {
   new (&data_) uint32_t(value);
+}
+
+MessageObject::MessageObject(
+    uint32_t _id,
+    uint64_t value) :
+    id(_id),
+    type(FieldType::UINT64) {
+  new (&data_) uint64_t(value);
+}
+
+MessageObject::MessageObject(
+    uint32_t _id,
+    double value) :
+    id(_id),
+    type(FieldType::DOUBLE) {
+  new (&data_) double(value);
 }
 
 MessageObject::MessageObject(
@@ -52,6 +94,15 @@ MessageObject::MessageObject(
 }
 
 MessageObject::MessageObject(
+    uint32_t _id,
+    UnixTime time) :
+    id(_id),
+    type(FieldType::BOOLEAN) {
+  new (&data_) uint64_t(time.unixMicros());
+}
+
+
+MessageObject::MessageObject(
     const MessageObject& other) :
     id(other.id),
     type(other.type) {
@@ -70,7 +121,12 @@ MessageObject::MessageObject(
       break;
 
     case FieldType::UINT64:
+    case FieldType::DATETIME:
       new (&data_) uint64_t(other.asUInt64());
+      break;
+
+    case FieldType::DOUBLE:
+      new (&data_) double(other.asDouble());
       break;
 
     case FieldType::BOOLEAN:
@@ -93,7 +149,9 @@ MessageObject& MessageObject::operator=(const MessageObject& other) {
 
     case FieldType::UINT32:
     case FieldType::UINT64:
+    case FieldType::DOUBLE:
     case FieldType::BOOLEAN:
+    case FieldType::DATETIME:
       break;
 
   }
@@ -116,7 +174,12 @@ MessageObject& MessageObject::operator=(const MessageObject& other) {
       break;
 
     case FieldType::UINT64:
+    case FieldType::DATETIME:
       new (&data_) uint64_t(other.asUInt64());
+      break;
+
+    case FieldType::DOUBLE:
+      new (&data_) double(other.asDouble());
       break;
 
     case FieldType::BOOLEAN:
@@ -141,7 +204,9 @@ MessageObject::~MessageObject() {
 
     case FieldType::UINT32:
     case FieldType::UINT64:
+    case FieldType::DOUBLE:
     case FieldType::BOOLEAN:
+    case FieldType::DATETIME:
       break;
 
   }
@@ -168,6 +233,10 @@ const String& MessageObject::asString() const {
 }
 
 uint32_t MessageObject::asUInt32() const {
+  if (type == FieldType::UINT64) {
+    return *((uint64_t*) &data_); // silent truncation :(
+  }
+
 #ifndef FNORD_NODEBUG
   if (type != FieldType::UINT32) {
     RAISE(kTypeError);
@@ -191,6 +260,16 @@ uint64_t MessageObject::asUInt64() const {
   return *((uint64_t*) &data_);
 }
 
+double MessageObject::asDouble() const {
+#ifndef FNORD_NODEBUG
+  if (type != FieldType::DOUBLE) {
+    RAISE(kTypeError);
+  }
+#endif
+
+  return *((double*) &data_);
+}
+
 bool MessageObject::asBool() const {
   if (type == FieldType::UINT32) {
     uint32_t val = *((uint32_t*) &data_);
@@ -205,6 +284,17 @@ bool MessageObject::asBool() const {
 
   uint8_t val = *((uint8_t*) &data_);
   return val > 0;
+}
+
+UnixTime MessageObject::asUnixTime() const {
+#ifndef FNORD_NODEBUG
+  if (type != FieldType::DATETIME) {
+    RAISE(kTypeError);
+  }
+#endif
+
+  auto val = *((uint64_t*) &data_);
+  return UnixTime(val);
 }
 
 MessageObject& MessageObject::getObject(uint32_t id) const {

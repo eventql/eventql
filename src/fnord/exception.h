@@ -14,15 +14,16 @@
 #include <string>
 #include "fnord/stringutil.h"
 #include "fnord/stdtypes.h"
-#include "fnord/io/outputstream.h"
 
+const char kAccessDeniedError[] = "AccessDeniedError";
 const char kBufferOverflowError[] = "BufferOverflowError";
 const char kEncodingError[] = "EncodingError";
 const char kConcurrentModificationError[] = "ConcurrentModificationError";
 const char kDivideByZeroError[] = "DivideByZeroError";
+const char kEOFError[] = "EOFError";
 const char kFlagError[] = "FlagError";
 const char kIOError[] = "IOError";
-const char kIllegalArgumentError[] = "IOIllegalArgument";
+const char kIllegalArgumentError[] = "IllegalArgument";
 const char kIllegalFormatError[] = "IllegalFormat";
 const char kIllegalStateError[] = "IllegalState";
 const char kIndexError[] = "IndexError";
@@ -31,9 +32,11 @@ const char kKeyError[] = "KeyError";
 const char kMallocError[] = "MallocError";
 const char kNoSuchMethodError[] = "NoSuchMethodError";
 const char kNotImplementedError[] = "NotImplementedError";
+const char kNotFoundError[] = "NotFoundError";
 const char kNotYetImplementedError[] = "NotYetImplementedError";
 const char kNullPointerError[] = "NullPointerError";
 const char kParseError[] = "ParseError";
+const char kPermissionDenied[] = "PermissionDeniedError";
 const char kRangeError[] = "RangeError";
 const char kReflectionError[] = "kReflectionError";
 const char kResolveError[] = "kResolveError";
@@ -70,6 +73,8 @@ const char kFutureError[] = "FutureError";
 #define __brk raise(SIGTRAP); while (0) {}
 
 namespace fnord {
+
+class OutputStream;
 
 using StandardException = std::exception;
 

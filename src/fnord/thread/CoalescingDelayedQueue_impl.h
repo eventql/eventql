@@ -24,7 +24,7 @@ CoalescingDelayedQueue<T>::CoalescingDelayedQueue(
 template <typename T>
 void CoalescingDelayedQueue<T>::insert(
     RefPtr<T> job,
-    DateTime when,
+    UnixTime when,
     bool block /* = false */) {
   std::unique_lock<std::mutex> lk(mutex_);
 

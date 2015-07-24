@@ -30,8 +30,8 @@ template <> Domain<double>*
   return new ContinuousDomain<double>();
 }
 
-template <> Domain<fnord::DateTime>*
-    Domain<fnord::DateTime>::mkDomain() {
+template <> Domain<fnord::UnixTime>*
+    Domain<fnord::UnixTime>::mkDomain() {
   return new TimeDomain();
 }
 

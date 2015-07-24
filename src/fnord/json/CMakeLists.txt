@@ -19,10 +19,10 @@ add_library(fnord-json OBJECT
     jsonrpcresponse.cc
     jsonutil.cc)
 
-add_executable(tests/test-json
+add_executable(test-json
     $<TARGET_OBJECTS:fnord-base>
     $<TARGET_OBJECTS:fnord-http>
     $<TARGET_OBJECTS:fnord-json>
     json_test.cc)
 
-target_link_libraries(tests/test-json ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(test-json ${CMAKE_THREAD_LIBS_INIT})

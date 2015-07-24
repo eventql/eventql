@@ -77,6 +77,11 @@ public:
    */
   bool isOutputStarted() const;
 
+  /**
+   * Returns true if the HTTP connection was closed
+   */
+  bool isClosed() const;
+
 protected:
 
   void onCallbackCompleted();
@@ -84,7 +89,7 @@ protected:
 
   mutable std::mutex mutex_;
   mutable std::condition_variable cv_;
-  HTTPServerConnection* conn_;
+  RefPtr<HTTPServerConnection> conn_;
   bool callback_running_;
   bool headers_written_;
   bool response_finished_;

@@ -24,7 +24,7 @@ DelayedQueue<T>::DelayedQueue(
 template <typename T>
 void DelayedQueue<T>::insert(
     const T& job,
-    DateTime when,
+    UnixTime when,
     bool block /* = false */) {
   std::unique_lock<std::mutex> lk(mutex_);
 

@@ -10,12 +10,61 @@
 #include <fnord/stringutil.h>
 #include <fnord/exception.h>
 #include <fnord/inspect.h>
+#include <fnord/io/fileutil.h>
 #include <fnord/protobuf/MessageSchema.h>
-#include <fnord/protobuf/CodingOptions.pb.h>
 #include <fnord/protobuf/msg.h>
+#include <fnord/CodingOptions.pb.h>
+#include <google/protobuf/io/zero_copy_stream_impl_lite.h>
+#include <google/protobuf/io/tokenizer.h>
+#include <google/protobuf/compiler/parser.h>
+#include <3rdparty/simdcomp/simdcomp.h>
 
 namespace fnord {
 namespace msg {
+
+String MessageSchemaField::typeName() const {
+  switch (type) {
+    case FieldType::OBJECT:
+      return "object";
+
+    case FieldType::BOOLEAN:
+      return "bool";
+
+    case FieldType::UINT32:
+      return "uint32";
+
+    case FieldType::UINT64:
+      return "uint64";
+
+    case FieldType::STRING:
+      return "string";
+
+    case FieldType::DOUBLE:
+      return "double";
+
+    case FieldType::DATETIME:
+      return "datetime";
+
+  }
+}
+
+size_t MessageSchemaField::typeSize() const {
+  switch (type) {
+    case FieldType::OBJECT:
+    case FieldType::BOOLEAN:
+    case FieldType::DOUBLE:
+    case FieldType::DATETIME:
+      return 0;
+
+    case FieldType::UINT32:
+    case FieldType::UINT64:
+      return bits(type_size);
+
+    case FieldType::STRING:
+      return type_size;
+
+  }
+}
 
 RefPtr<MessageSchema> MessageSchema::fromProtobuf(
     const google::protobuf::Descriptor* dsc) {
@@ -79,6 +128,17 @@ RefPtr<MessageSchema> MessageSchema::fromProtobuf(
             enc_hint);
         break;
 
+      case google::protobuf::FieldDescriptor::TYPE_DOUBLE:
+        fields.emplace_back(
+            field->number(),
+            field->name(),
+            msg::FieldType::DOUBLE,
+            0,
+            field->is_repeated(),
+            field->is_optional(),
+            enc_hint);
+        break;
+
       case google::protobuf::FieldDescriptor::TYPE_ENUM: {
         size_t maxval = 0;
         auto enum_dsc = field->enum_type();
@@ -128,7 +188,6 @@ static void schemaNodeToString(
     const MessageSchemaField& field,
     String* str) {
   String ws(level * 2, ' ');
-  String type_name;
   String attrs;
 
   String type_prefix = "";
@@ -144,43 +203,21 @@ static void schemaNodeToString(
     type_suffix += "]";
   }
 
-  switch (field.type) {
+  if (field.type == FieldType::OBJECT) {
+    str->append(StringUtil::format(
+        "$0$1object$2 $3 = $4 {\n",
+        ws,
+        type_prefix,
+        type_suffix,
+        field.name,
+        field.id));
 
-    case FieldType::OBJECT:
-      str->append(StringUtil::format(
-          "$0$1object$2 $3 = $4 {\n",
-          ws,
-          type_prefix,
-          type_suffix,
-          field.name,
-          field.id));
+    for (const auto& f : field.schema->fields()) {
+      schemaNodeToString(level + 1, f, str);
+    }
 
-      for (const auto& f : field.schema->fields()) {
-        schemaNodeToString(level + 1, f, str);
-      }
-
-      str->append(ws + "}\n");
-      return;
-
-    case FieldType::BOOLEAN:
-      type_name = "bool";
-      break;
-
-    case FieldType::UINT32:
-      type_name = "uint32";
-      attrs += StringUtil::format(" @maxval=$0", field.type_size);
-      break;
-
-    case FieldType::UINT64:
-      type_name = "uint64";
-      attrs += StringUtil::format(" @maxval=$0", field.type_size);
-      break;
-
-    case FieldType::STRING:
-      type_name = "string";
-      attrs += StringUtil::format(" @maxlen=$0", field.type_size);
-      break;
-
+    str->append(ws + "}\n");
+    return;
   }
 
   switch (field.encoding) {
@@ -203,7 +240,7 @@ static void schemaNodeToString(
       "$0$1$2$3 $4 = $5$6;\n",
       ws,
       type_prefix,
-      type_name,
+      field.typeName(),
       type_suffix,
       field.name,
       field.id,
@@ -228,15 +265,14 @@ MessageSchemaField MessageSchemaField::mkObjectField(
   return field;
 }
 
+MessageSchema::MessageSchema(std::nullptr_t) {}
+
 MessageSchema::MessageSchema(
     const String& name,
     Vector<MessageSchemaField> fields) :
-    name_(name),
-    fields_(fields) {
-  for (const auto& field : fields_) {
-    field_ids_.emplace(field.name, field.id);
-    field_types_.emplace(field.id, field.type);
-    field_names_.emplace(field.id, field.name);
+    name_(name) {
+  for (const auto& field : fields) {
+    addField(field);
   }
 }
 
@@ -311,28 +347,250 @@ RefPtr<MessageSchema> MessageSchema::fieldSchema(uint32_t id) const {
   RAISEF(kIndexError, "field not found: $0", id);
 }
 
-Set<String> MessageSchema::columns() const {
-  Set<String> columns;
+void MessageSchema::addField(const MessageSchemaField& field) {
+  field_ids_.emplace(field.name, field.id);
+  field_types_.emplace(field.id, field.type);
+  field_names_.emplace(field.id, field.name);
+  fields_.emplace_back(field);
+}
 
-  for (const auto& c : field_names_) {
-    columns.emplace(c.second);
+Buffer MessageSchema::encode() const {
+  util::BinaryMessageWriter writer;
+  encode(&writer);
+  return Buffer(writer.data(), writer.size());
+}
+
+void MessageSchema::encode(util::BinaryMessageWriter* buf) const {
+  buf->appendUInt8(0x1);
+  buf->appendLenencString(name_);
+  buf->appendVarUInt(fields_.size());
+
+  for (const auto& field : fields_) {
+    buf->appendVarUInt(field.id);
+    buf->appendLenencString(field.name);
+    buf->appendUInt8((uint8_t) field.type);
+    buf->appendVarUInt(field.type_size);
+    buf->appendUInt8(field.repeated);
+    buf->appendUInt8(field.optional);
+    buf->appendUInt8((uint8_t) field.encoding);
+
+    if (field.type == FieldType::OBJECT) {
+      field.schema->encode(buf);
+    }
+  }
+}
+
+void MessageSchema::decode(util::BinaryMessageReader* buf) {
+  auto version = *buf->readUInt8();
+  (void) version; // unused
+
+  name_ = buf->readLenencString();
+
+  auto nfields = buf->readVarUInt();
+  for (int i = 0; i < nfields; ++i) {
+    auto id = buf->readVarUInt();
+    auto name = buf->readLenencString();
+    auto type = (FieldType) *buf->readUInt8();
+    auto type_size = buf->readVarUInt();
+    auto repeated = *buf->readUInt8() > 0;
+    auto optional = *buf->readUInt8() > 0;
+    auto encoding = (EncodingHint) *buf->readUInt8();
+
+    msg::MessageSchemaField field(
+        id,
+        name,
+        type,
+        type_size,
+        repeated,
+        optional,
+        encoding);
+
+    if (field.type == FieldType::OBJECT) {
+      field.schema = mkRef(new MessageSchema(nullptr));
+      field.schema->decode(buf);
+    }
+
+    addField(field);
+  }
+}
+
+void MessageSchema::toJSON(json::JSONOutputStream* json) const {
+  json->beginObject();
+
+  json->addObjectEntry("name");
+  json->addString(name_);
+  json->addComma();
+
+  json->addObjectEntry("columns");
+  json->beginArray();
+
+  for (int i = 0; i < fields_.size(); ++i) {
+    const auto& field = fields_[i];
+
+    if (i > 0) {
+      json->addComma();
+    }
+
+    json->beginObject();
+
+    json->addObjectEntry("id");
+    json->addInteger(field.id);
+    json->addComma();
+
+    json->addObjectEntry("name");
+    json->addString(field.name);
+    json->addComma();
+
+    json->addObjectEntry("type");
+    json->addString(fieldTypeToString(field.type));
+    json->addComma();
+
+    json->addObjectEntry("type_size");
+    json->addInteger(field.type_size);
+    json->addComma();
+
+    json->addObjectEntry("optional");
+    field.optional ? json->addTrue() : json->addFalse();
+    json->addComma();
+
+    json->addObjectEntry("repeated");
+    field.repeated ? json->addTrue() : json->addFalse();
+    json->addComma();
+
+    json->addObjectEntry("encoding_hint");
+    json->addString("NONE");
+
+    if (field.type == FieldType::OBJECT) {
+      json->addComma();
+      json->addObjectEntry("schema");
+      field.schema->toJSON(json);
+    }
+
+    json->endObject();
+  }
+
+  json->endArray();
+  json->endObject();
+}
+
+void MessageSchema::fromJSON(
+    json::JSONObject::const_iterator begin,
+    json::JSONObject::const_iterator end) {
+  auto tname = json::objectGetString(begin, end, "name");
+  if (!tname.isEmpty()) {
+    name_ = tname.get();
+  }
+
+  auto cols = json::objectLookup(begin, end, "columns");
+  if (cols == end) {
+    RAISE(kRuntimeError, "missing field: columns");
+  }
+
+  auto ncols = json::arrayLength(cols, end);
+  for (size_t i = 0; i < ncols; ++i) {
+    auto col = json::arrayLookup(cols, end, i);
+
+    auto id = json::objectGetUInt64(col, end, "id");
+    if (id.isEmpty()) {
+      RAISE(kRuntimeError, "missing field: id");
+    }
+
+    auto name = json::objectGetString(col, end, "name");
+    if (name.isEmpty()) {
+      RAISE(kRuntimeError, "missing field: name");
+    }
+
+    auto type = json::objectGetString(col, end, "type");
+    if (type.isEmpty()) {
+      RAISE(kRuntimeError, "missing field: type");
+    }
+
+    auto type_size = json::objectGetUInt64(col, end, "type_size");
+    if (type_size.isEmpty()) {
+      RAISE(kRuntimeError, "missing field: type_size");
+    }
+
+    auto optional = json::objectGetBool(col, end, "optional");
+    if (optional.isEmpty()) {
+      RAISE(kRuntimeError, "missing field: optional");
+    }
+
+    auto repeated = json::objectGetBool(col, end, "repeated");
+    if (repeated.isEmpty()) {
+      RAISE(kRuntimeError, "missing field: repeated");
+    }
+
+    addField(
+        MessageSchemaField(
+            id.get(),
+            name.get(),
+            fieldTypeFromString(type.get()),
+            type_size.get(),
+            repeated.get(),
+            optional.get()));
+  }
+}
+
+Vector<Pair<String, MessageSchemaField>> MessageSchema::columns() const {
+  Vector<Pair<String, MessageSchemaField>> columns;
+
+  for (const auto& field : fields_) {
+    switch (field.type) {
+
+      case FieldType::OBJECT: {
+        auto cld_cols = field.schema->columns();
+        for (const auto& c : cld_cols) {
+          columns.emplace_back(field.name + "." + c.first, c.second);
+        }
+        break;
+      }
+
+      default:
+        columns.emplace_back(field.name, field);
+        break;
+    }
   }
 
   return columns;
 }
 
+MessageSchemaRepository::MessageSchemaRepository() :
+    pool_(google::protobuf::DescriptorPool::generated_pool()) {}
+
 RefPtr<MessageSchema> MessageSchemaRepository::getSchema(
     const String& name) const {
   auto iter = schemas_.find(name);
-  if (iter == schemas_.end()) {
-    RAISEF(kRuntimeError, "schema not found: '$0'", name);
+  if (iter != schemas_.end()) {
+    return iter->second;
   }
 
-  return iter->second;
+  auto desc = pool_.FindMessageTypeByName(name);
+  if (desc != NULL) {
+    return MessageSchema::fromProtobuf(desc);
+  }
+
+  RAISEF(kRuntimeError, "schema not found: '$0'", name);
 }
 
 void MessageSchemaRepository::registerSchema(RefPtr<MessageSchema> schema) {
   schemas_.emplace(schema->name(), schema);
+}
+
+void MessageSchemaRepository::loadProtobufFile(
+    const String& base_path,
+    const String& file_path) {
+  auto data = FileUtil::read(FileUtil::joinPaths(base_path, file_path));
+  google::protobuf::io::ArrayInputStream is(data.data(), data.size());
+
+  google::protobuf::FileDescriptorProto fd_proto;
+  google::protobuf::io::Tokenizer tokenizer(&is, NULL);
+  google::protobuf::compiler::Parser parser;
+  if (!parser.Parse(&tokenizer, &fd_proto)) {
+    RAISEF(kParseError, "error while parsing .proto file '$0'", file_path);
+  }
+
+  fd_proto.set_name(file_path);
+  pool_.BuildFile(fd_proto);
 }
 
 } // namespace msg

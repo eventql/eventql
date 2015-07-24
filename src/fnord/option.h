@@ -43,9 +43,6 @@ protected:
 template <typename T>
 Option<T> Some(const T& value);
 
-//template <typename T>
-//Option<T> Some(T&& value);
-
 template <typename T>
 Option<T> None();
 

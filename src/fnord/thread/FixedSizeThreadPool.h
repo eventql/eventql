@@ -29,11 +29,37 @@ namespace thread {
 class FixedSizeThreadPool : public TaskScheduler {
 public:
 
-  FixedSizeThreadPool(size_t nthreads);
-
+  /**
+   * Construct a new fixed size thread pool. If maxqueuelen is set and the
+   * queue is full, the the run() operation will block if the block param was
+   * set to true and throw an exception otherwise. Default queue size is
+   * unbounded
+   *
+   * @param nthreads number of threads to run
+   * @param maxqueuelen max queue len. default is -1 == unbounded
+   * @param true=block if the queue is full, false=throw an exception
+   */
   FixedSizeThreadPool(
       size_t nthreads,
-      std::unique_ptr<fnord::ExceptionHandler> error_handler);
+      size_t maxqueuelen = -1,
+      bool block = true);
+
+  /**
+   * Construct a new fixed size thread pool. If maxqueuelen is set and the
+   * queue is full, the the run() operation will block if the block param was
+   * set to true and throw an exception otherwise. Default queue size is
+   * unbounded
+   *
+   * @param nthreads number of threads to run
+   * @param error_handler the exception handler to call for unhandled errors
+   * @param maxqueuelen max queue len. default is -1 == unbounded
+   * @param true=block if the queue is full, false=throw an exception
+   */
+  FixedSizeThreadPool(
+      size_t nthreads,
+      std::unique_ptr<fnord::ExceptionHandler> error_handler,
+      size_t maxqueuelen = -1,
+      bool block = true);
 
   void start();
   void stop();
@@ -51,6 +77,7 @@ protected:
   size_t nthreads_;
   std::unique_ptr<fnord::ExceptionHandler> error_handler_;
   Queue<std::function<void()>> queue_;
+  bool block_;
   Vector<std::thread> threads_;
 };
 

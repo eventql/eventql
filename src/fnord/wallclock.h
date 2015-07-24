@@ -11,13 +11,13 @@
 #define _FNORDMETRIC_UTIL_WALLCLOCK_H
 #include <stdlib.h>
 #include <stdint.h>
-#include "fnord/datetime.h"
+#include "fnord/UnixTime.h"
 
 namespace fnord {
 
 class WallClock {
 public:
-  static DateTime now();
+  static UnixTime now();
   static uint64_t unixSeconds();
   static uint64_t getUnixMillis();
   static uint64_t unixMillis();

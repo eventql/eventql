@@ -32,6 +32,15 @@ public:
       const URI& uri,
       const HTTPMessage::HeaderList& headers);
 
+  static HTTPRequest mkPost(
+      const URI& uri,
+      const Buffer& data);
+
+  static HTTPRequest mkPost(
+      const URI& uri,
+      const Buffer& data,
+      const HTTPMessage::HeaderList& headers);
+
   /**
    * Parse the provided http request string and return the parsed http request
    */
@@ -46,7 +55,7 @@ public:
   const std::string& uri() const;
   void setURI(const std::string& uri);
 
-  const bool keepalive() const;
+  bool keepalive() const;
   std::vector<std::pair<std::string, std::string>> cookies() const;
 
 protected:
