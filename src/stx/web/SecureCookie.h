@@ -8,13 +8,13 @@
  * <http://www.gnu.org/licenses/>.
  */
 #pragma once
-#include <fnord/stdtypes.h>
-#include <fnord/buffer.h>
-#include <fnord/duration.h>
-#include <fnord/exception.h>
-#include <fnord/HMAC.h>
-#include <fnord/option.h>
-#include <fnord/wallclock.h>
+#include <stx/stdtypes.h>
+#include <stx/buffer.h>
+#include <stx/duration.h>
+#include <stx/exception.h>
+#include <stx/HMAC.h>
+#include <stx/option.h>
+#include <stx/wallclock.h>
 
 namespace fnord {
 namespace web {

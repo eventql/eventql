@@ -7,10 +7,10 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include "fnord/exception.h"
-#include "fnord/http/httpclient.h"
-#include "fnord/http/httpclientconnection.h"
-#include "fnord/net/tcpconnection.h"
+#include "stx/exception.h"
+#include "stx/http/httpclient.h"
+#include "stx/http/httpclientconnection.h"
+#include "stx/net/tcpconnection.h"
 
 namespace fnord {
 namespace http {

@@ -8,10 +8,10 @@
  * <http://www.gnu.org/licenses/>.
  */
 #pragma once
-#include <fnord/stdtypes.h>
-#include <fnord/protobuf/MessageSchema.h>
-#include <fnord/protobuf/MessageObject.h>
-#include <fnord/json/json.h>
+#include <stx/stdtypes.h>
+#include <stx/protobuf/MessageSchema.h>
+#include <stx/protobuf/MessageObject.h>
+#include <stx/json/json.h>
 
 namespace fnord {
 namespace msg {

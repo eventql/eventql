@@ -8,10 +8,10 @@
  * <http://www.gnu.org/licenses/>.
  */
 #ifdef TRASH
-#include <fnord/protobuf/MessageSchema.h>
-#include <fnord/stdtypes.h>
-#include <fnord/buffer.h>
-#include <fnord/util/binarymessagewriter.h>
+#include <stx/protobuf/MessageSchema.h>
+#include <stx/stdtypes.h>
+#include <stx/buffer.h>
+#include <stx/util/binarymessagewriter.h>
 
 namespace fnord {
 namespace msg {

@@ -16,7 +16,7 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
-#include "fnord/logging.h"
+#include "stx/logging.h"
 
 namespace fnord {
 

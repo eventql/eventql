@@ -9,9 +9,9 @@
  */
 #include <stdlib.h>
 #include <string>
-#include "fnord/inspect.h"
-#include "fnord/stringutil.h"
-#include "fnord/json/jsonpointer.h"
+#include "stx/inspect.h"
+#include "stx/stringutil.h"
+#include "stx/json/jsonpointer.h"
 
 namespace fnord {
 namespace json {

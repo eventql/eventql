@@ -9,8 +9,8 @@
  */
 #ifndef _FNORD_HTTP_VFSFILESERVLET_H
 #define _FNORD_HTTP_VFSFILESERVLET_H
-#include "fnord/VFS.h"
-#include "fnord/http/httpservice.h"
+#include "stx/VFS.h"
+#include "stx/http/httpservice.h"
 
 namespace fnord {
 namespace http {

@@ -9,8 +9,8 @@
  */
 #ifndef _FNORDMETRIC_HTTPCONNECTIONHANDLER_H
 #define _FNORDMETRIC_HTTPCONNECTIONHANDLER_H
-#include <fnord/http/httprequest.h>
-#include <fnord/http/httpresponse.h>
+#include <stx/http/httprequest.h>
+#include <stx/http/httpresponse.h>
 
 namespace fnord {
 namespace http {

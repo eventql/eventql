@@ -12,8 +12,8 @@
 #include <sys/mman.h>
 #include <unistd.h>
 #include "pagemanager.h"
-#include <fnord/io/file.h>
-#include <fnord/io/fileutil.h>
+#include <stx/io/file.h>
+#include <stx/io/fileutil.h>
 
 namespace fnord {
 namespace io {

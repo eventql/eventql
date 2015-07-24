@@ -7,9 +7,9 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <fnord/protobuf/MessageBuilder.h>
-#include <fnord/inspect.h>
-#include <fnord/exception.h>
+#include <stx/protobuf/MessageBuilder.h>
+#include <stx/inspect.h>
+#include <stx/exception.h>
 
 namespace fnord {
 namespace msg {

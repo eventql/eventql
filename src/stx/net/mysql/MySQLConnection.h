@@ -10,9 +10,9 @@
 #ifndef _FNORD_SQL_MYSQLCONNECTION_H
 #define _FNORD_SQL_MYSQLCONNECTION_H
 #include <memory>
-#include <fnord/uri.h>
-#include <fnord/exception.h>
-#include <fnord/protobuf/MessageSchema.h>
+#include <stx/uri.h>
+#include <stx/exception.h>
+#include <stx/protobuf/MessageSchema.h>
 #include <functional>
 #ifdef FNORD_ENABLE_MYSQL
 #include <mysql.h>

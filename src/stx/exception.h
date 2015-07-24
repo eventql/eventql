@@ -12,8 +12,8 @@
 #include <errno.h>
 #include <exception>
 #include <string>
-#include "fnord/stringutil.h"
-#include "fnord/stdtypes.h"
+#include "stx/stringutil.h"
+#include "stx/stdtypes.h"
 
 const char kAccessDeniedError[] = "AccessDeniedError";
 const char kBufferOverflowError[] = "BufferOverflowError";

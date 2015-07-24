@@ -8,10 +8,10 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <string.h>
-#include "fnord/bufferutil.h"
-#include "fnord/exception.h"
-#include "fnord/inspect.h"
-#include "fnord/http/httpparser.h"
+#include "stx/bufferutil.h"
+#include "stx/exception.h"
+#include "stx/inspect.h"
+#include "stx/http/httpparser.h"
 
 namespace fnord {
 namespace http {

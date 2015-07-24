@@ -8,9 +8,9 @@
  * <http://www.gnu.org/licenses/>.
  */
 #pragma once
-#include <fnord/stdtypes.h>
-#include <fnord/exception.h>
-#include <fnord/io/outputstream.h>
+#include <stx/stdtypes.h>
+#include <stx/exception.h>
+#include <stx/io/outputstream.h>
 
 namespace fnord {
 

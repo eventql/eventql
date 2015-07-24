@@ -7,11 +7,11 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <fnord/inspect.h>
-#include <fnord/logging.h>
-#include "fnord/http/httpserverconnection.h"
-#include <fnord/http/httpservice.h>
-#include <fnord/http/HTTPResponseStream.h>
+#include <stx/inspect.h>
+#include <stx/logging.h>
+#include "stx/http/httpserverconnection.h"
+#include <stx/http/httpservice.h>
+#include <stx/http/HTTPResponseStream.h>
 
 namespace fnord {
 namespace http {

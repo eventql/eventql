@@ -11,10 +11,10 @@
 #include <string.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include <fnord/buffer.h>
-#include <fnord/exception.h>
-#include <fnord/io/inputstream.h>
-#include <fnord/ieee754.h>
+#include <stx/buffer.h>
+#include <stx/exception.h>
+#include <stx/io/inputstream.h>
+#include <stx/ieee754.h>
 
 namespace fnord {
 

@@ -14,9 +14,9 @@
 #include <string.h>
 #include <thread>
 #include <unistd.h>
-#include "fnord/exception.h"
-#include "fnord/inspect.h"
-#include "fnord/thread/eventloop.h"
+#include "stx/exception.h"
+#include "stx/inspect.h"
+#include "stx/thread/eventloop.h"
 
 namespace fnord {
 namespace thread {

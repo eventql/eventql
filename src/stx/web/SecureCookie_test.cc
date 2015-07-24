@@ -7,8 +7,8 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include "fnord/web/SecureCookie.h"
-#include "fnord/test/unittest.h"
+#include "stx/web/SecureCookie.h"
+#include "stx/test/unittest.h"
 
 using namespace fnord;
 

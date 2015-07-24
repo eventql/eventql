@@ -10,9 +10,9 @@
 #include <assert.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include "fnord/csv/CSVInputStream.h"
-#include "fnord/exception.h"
-#include "fnord/io/inputstream.h"
+#include "stx/csv/CSVInputStream.h"
+#include "stx/exception.h"
+#include "stx/io/inputstream.h"
 
 namespace fnord {
 

@@ -10,7 +10,7 @@ if test -z $ASSETS_FILE; then
   exit 1
 fi;
 
-echo "#include <fnord/assets.h>" > $ASSETS_FILE
+echo "#include <stx/assets.h>" > $ASSETS_FILE
 
 while read line; do
   logical_path=$(echo $line | sed -e 's/:.*//')

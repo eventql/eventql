@@ -7,8 +7,8 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <fnord/VFS.h>
-#include <fnord/io/mmappedfile.h>
+#include <stx/VFS.h>
+#include <stx/io/mmappedfile.h>
 
 namespace fnord {
 

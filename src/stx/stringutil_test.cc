@@ -6,8 +6,8 @@
  */
 #include <stdlib.h>
 #include <stdio.h>
-#include "fnord/stringutil.h"
-#include "fnord/test/unittest.h"
+#include "stx/stringutil.h"
+#include "stx/test/unittest.h"
 
 using namespace fnord;
 

@@ -9,12 +9,12 @@
  */
 #ifndef _FNORDMETRIC_HTTPSERVICE_H
 #define _FNORDMETRIC_HTTPSERVICE_H
-#include <fnord/http/httphandler.h>
-#include <fnord/http/httprequest.h>
-#include <fnord/http/httpresponse.h>
-#include <fnord/http/HTTPRequestStream.h>
-#include <fnord/http/HTTPResponseStream.h>
-#include "fnord/thread/taskscheduler.h"
+#include <stx/http/httphandler.h>
+#include <stx/http/httprequest.h>
+#include <stx/http/httpresponse.h>
+#include <stx/http/HTTPRequestStream.h>
+#include <stx/http/HTTPResponseStream.h>
+#include "stx/thread/taskscheduler.h"
 
 namespace fnord {
 namespace http {

@@ -7,11 +7,11 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <fnord/exception.h>
-#include <fnord/inspect.h>
-#include <fnord/http/httpgenerator.h>
-#include <fnord/http/httpclientconnection.h>
-#include <fnord/http/httpresponsehandler.h>
+#include <stx/exception.h>
+#include <stx/inspect.h>
+#include <stx/http/httpgenerator.h>
+#include <stx/http/httpclientconnection.h>
+#include <stx/http/httpresponsehandler.h>
 
 namespace fnord {
 namespace http {

@@ -7,8 +7,8 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include "fnord/util/CumulativeHistogram.h"
-#include "fnord/stringutil.h"
+#include "stx/util/CumulativeHistogram.h"
+#include "stx/stringutil.h"
 
 namespace fnord {
 namespace util {

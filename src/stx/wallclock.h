@@ -11,7 +11,7 @@
 #define _FNORDMETRIC_UTIL_WALLCLOCK_H
 #include <stdlib.h>
 #include <stdint.h>
-#include "fnord/UnixTime.h"
+#include "stx/UnixTime.h"
 
 namespace fnord {
 

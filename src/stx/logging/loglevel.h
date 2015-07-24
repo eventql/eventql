@@ -9,8 +9,8 @@
  */
 #ifndef _FNORDMETRIC_UTIL_LOGLEVEL_H
 #define _FNORDMETRIC_UTIL_LOGLEVEL_H
-#include "fnord/UnixTime.h"
-#include "fnord/stdtypes.h"
+#include "stx/UnixTime.h"
+#include "stx/stdtypes.h"
 
 namespace fnord {
 

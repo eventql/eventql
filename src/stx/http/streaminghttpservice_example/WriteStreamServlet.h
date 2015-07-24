@@ -11,7 +11,7 @@
 #ifndef _CM_WRITESTREAMSERVLET_H
 #define _CM_WRITESTREAMSERVLET_H
 #include <unistd.h>
-#include "fnord/http/httpservice.h"
+#include "stx/http/httpservice.h"
 
 namespace fnord {
 namespace http {

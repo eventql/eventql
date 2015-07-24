@@ -14,8 +14,8 @@
 #include <vector>
 #include <unordered_map>
 #include <tuple>
-#include <fnord/exception.h>
-#include <fnord/stringutil.h>
+#include <stx/exception.h>
+#include <stx/stringutil.h>
 
 namespace fnord {
 namespace chart {

@@ -13,7 +13,7 @@
 #include <sys/select.h>
 #include <thread>
 #include <vector>
-#include "fnord/thread/taskscheduler.h"
+#include "stx/thread/taskscheduler.h"
 
 namespace fnord {
 namespace thread {

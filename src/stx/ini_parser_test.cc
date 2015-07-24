@@ -8,8 +8,8 @@
  * <http://www.gnu.org/licenses/>.
  */
 
-#include "fnord/ini_parser.h"
-#include "fnord/test/unittest.h"
+#include "stx/ini_parser.h"
+#include "stx/test/unittest.h"
 
 using namespace fnord;
 

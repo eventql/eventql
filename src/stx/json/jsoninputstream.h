@@ -13,9 +13,9 @@
 #include <string>
 #include <vector>
 #include <functional>
-#include "fnord/io/inputstream.h"
-#include "fnord/json/json.h"
-#include "fnord/json/jsonpointer.h"
+#include "stx/io/inputstream.h"
+#include "stx/json/json.h"
+#include "stx/json/jsonpointer.h"
 
 namespace fnord {
 namespace json {

@@ -12,7 +12,7 @@
 
 #include <stdlib.h>
 #include <stdint.h>
-#include "fnord/buffer.h"
+#include "stx/buffer.h"
 
 namespace fnord {
 

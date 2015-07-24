@@ -8,9 +8,9 @@
  * <http://www.gnu.org/licenses/>.
  */
 #pragma once
-#include "fnord/stdtypes.h"
-#include "fnord/io/inputstream.h"
-#include "fnord/csv/CSVInputStream.h"
+#include "stx/stdtypes.h"
+#include "stx/io/inputstream.h"
+#include "stx/csv/CSVInputStream.h"
 
 namespace fnord {
 
