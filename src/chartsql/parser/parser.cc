@@ -165,6 +165,7 @@ ASTNode* Parser::methodCall() {
 
     /* ignore T_ALL in SELECT count(*) FROM ... */
     if (*cur_token_ == Token::T_ASTERISK) {
+      e->appendChild(ASTNode::T_VOID);
       consumeToken();
     } else {
       e->appendChild(expr());
@@ -260,6 +261,11 @@ ASTNode* Parser::statement() {
       return drawStatement();
     case Token::T_IMPORT:
       return importStatement();
+    case Token::T_SHOW:
+      return showStatement();
+    case Token::T_DESCRIBE:
+    case Token::T_EXPLAIN:
+      return explainStatement();
     default:
       break;
   }
@@ -358,6 +364,41 @@ ASTNode* Parser::importStatement() {
 
   consumeIf(Token::T_SEMICOLON);
   return import;
+}
+
+ASTNode* Parser::showStatement() {
+  consumeToken();
+  expectAndConsume(Token::T_TABLES);
+
+  auto stmt = new ASTNode(ASTNode::T_SHOW_TABLES);
+
+  consumeIf(Token::T_SEMICOLON);
+  return stmt;
+}
+
+ASTNode* Parser::explainStatement() {
+  consumeToken();
+
+  switch (cur_token_->getType()) {
+    case Token::T_SELECT:
+      return explainQueryStatement();
+    default:
+      return describeTableStatement();
+  }
+}
+
+ASTNode* Parser::explainQueryStatement() {
+  auto stmt = new ASTNode(ASTNode::T_EXPLAIN_QUERY);
+  stmt->appendChild(selectStatement());
+  consumeIf(Token::T_SEMICOLON);
+  return stmt;
+}
+
+ASTNode* Parser::describeTableStatement() {
+  auto stmt = new ASTNode(ASTNode::T_DESCRIBE_TABLE);
+  stmt->appendChild(tableName());
+  consumeIf(Token::T_SEMICOLON);
+  return stmt;
 }
 
 // FIXPAUL move this into sql extensions
@@ -743,8 +784,14 @@ ASTNode* Parser::limitClause() {
 }
 
 ASTNode* Parser::tableName() {
-  if (!assertExpectation(Token::T_IDENTIFIER)) {
-    return nullptr;
+  switch (cur_token_->getType()) {
+    case Token::T_IDENTIFIER:
+    case Token::T_STRING:
+      break;
+
+    default:
+      assertExpectation(Token::T_IDENTIFIER);
+
   }
 
   auto name = new ASTNode(ASTNode::T_TABLE_NAME);

@@ -419,6 +419,11 @@ next:
     goto next;
   }
 
+  if (token == "TABLES") {
+    token_list->emplace_back(Token::T_TABLES);
+    goto next;
+  }
+
   if (token == "AXIS") {
     token_list->emplace_back(Token::T_AXIS);
     goto next;
@@ -481,6 +486,21 @@ next:
 
   if (token == "OFF") {
     token_list->emplace_back(Token::T_OFF);
+    goto next;
+  }
+
+  if (token == "SHOW") {
+    token_list->emplace_back(Token::T_SHOW);
+    goto next;
+  }
+
+  if (token == "DESCRIBE") {
+    token_list->emplace_back(Token::T_DESCRIBE);
+    goto next;
+  }
+
+  if (token == "EXPLAIN") {
+    token_list->emplace_back(Token::T_EXPLAIN);
     goto next;
   }
 

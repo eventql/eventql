@@ -34,6 +34,7 @@ public:
     T_DERIVED_COLUMN,
     T_PROPERTY,
     T_PROPERTY_VALUE,
+    T_VOID,
 
     T_SELECT,
     T_SELECT_LIST,
@@ -63,6 +64,10 @@ public:
     T_DIV_EXPR,
     T_MOD_EXPR,
     T_POW_EXPR,
+
+    T_SHOW_TABLES,
+    T_DESCRIBE_TABLE,
+    T_EXPLAIN_QUERY,
 
     T_DRAW,
     T_IMPORT,

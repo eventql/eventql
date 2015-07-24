@@ -16,48 +16,30 @@
 #include <fnord/charts/canvas.h>
 #include <fnord/charts/barchart.h>
 #include <fnord/charts/series.h>
+#include <chartsql/qtree/DrawStatementNode.h>
 #include <chartsql/runtime/compile.h>
 #include <chartsql/runtime/execute.h>
 #include <chartsql/runtime/rowsink.h>
 #include <chartsql/runtime/resultlist.h>
 #include <chartsql/runtime/queryplannode.h>
-#include <chartsql/seriesadapter.h>
+#include <chartsql/runtime/TableExpression.h>
+#include <chartsql/runtime/charts/seriesadapter.h>
 
 namespace csql {
 class DrawStatement;
 
-class ChartBuilder : public RowSink {
+class ChartBuilder {
 public:
 
   ChartBuilder(
       fnord::chart::Canvas* canvas,
-      DrawStatement const* draw_stmt) :
+      RefPtr<DrawStatementNode> draw_stmt) :
       canvas_(canvas),
       draw_stmt_(draw_stmt) {}
 
-  bool nextRow(SValue* row, int row_len) {
-    if (x_ind_ < 0) {
-      RAISE(
-          kRuntimeError,
-          "can't draw SELECT because it has no 'x' column");
-    }
-
-    if (adapter_.get() == nullptr) {
-      adapter_.reset(mkSeriesAdapter(row));
-    } else {
-      adapter_->name_ind_ = name_ind_;
-      adapter_->x_ind_ = x_ind_;
-      adapter_->y_ind_ = y_ind_;
-      adapter_->z_ind_ = z_ind_;
-    }
-
-    adapter_->prop_indexes_ = prop_indexes_;
-    adapter_->nextRow(row, row_len);
-    stmt_->setTarget(adapter_.get());
-    return true;
-  }
-
-  void executeStatement(QueryPlanNode* stmt, ResultList* result_list) {
+  void executeStatement(
+      TableExpression* stmt,
+      ExecutionContext* context) {
     name_ind_ = stmt->getColumnIndex("series");
 
     x_ind_ = stmt->getColumnIndex("x");
@@ -115,10 +97,36 @@ public:
           point_size_ind);
     }
 
-    stmt_ = stmt;
-    result_list_ = result_list;
-    stmt->setTarget(this);
-    stmt->execute();
+    bool first = true;
+    stmt->execute(
+        context,
+        [this, &first] (int row_len, const SValue* row_const) -> bool {
+      auto row = const_cast<SValue*>(row_const);
+
+      if (first) {
+        first = false;
+
+        if (x_ind_ < 0) {
+          RAISE(
+              kRuntimeError,
+              "can't draw SELECT because it has no 'x' column");
+        }
+
+        if (adapter_.get() == nullptr) {
+          adapter_.reset(mkSeriesAdapter(row));
+        } else {
+          adapter_->name_ind_ = name_ind_;
+          adapter_->x_ind_ = x_ind_;
+          adapter_->y_ind_ = y_ind_;
+          adapter_->z_ind_ = z_ind_;
+        }
+
+        adapter_->prop_indexes_ = prop_indexes_;
+      }
+
+      adapter_->nextRow(row, row_len);
+      return true;
+    });
   }
 
   virtual fnord::chart::Drawable* getChart() const = 0;
@@ -166,8 +174,7 @@ protected:
       return new SeriesAdapter2D<TX, TY>(
           name_ind_,
           x_ind_,
-          y_ind_,
-          result_list_);
+          y_ind_);
     }
 
     AnySeriesAdapter* a = nullptr;
@@ -187,8 +194,7 @@ protected:
         name_ind_,
         x_ind_,
         y_ind_,
-        z_ind_,
-        result_list_);
+        z_ind_);
   }
 
   template <typename T>
@@ -246,9 +252,8 @@ protected:
   int z_ind_;
   std::vector<std::pair<fnord::chart::Series::kProperty, int>> prop_indexes_;
   QueryPlanNode* stmt_;
-  ResultList* result_list_;
   fnord::chart::Canvas* canvas_;
-  DrawStatement const* draw_stmt_;
+  RefPtr<DrawStatementNode> draw_stmt_;
 };
 
 

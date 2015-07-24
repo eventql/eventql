@@ -7,7 +7,7 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <chartsql/domainconfig.h>
+#include <chartsql/runtime/charts/domainconfig.h>
 #include <fnord/charts/continuousdomain.h>
 #include <fnord/charts/timedomain.h>
 

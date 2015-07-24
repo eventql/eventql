@@ -9,7 +9,7 @@
  */
 #pragma once
 #include <fnord/stdtypes.h>
-#include <chartsql/qtree/QueryTreeNode.h>
+#include <chartsql/qtree/TableExpressionNode.h>
 
 using namespace fnord;
 
@@ -18,12 +18,15 @@ namespace csql {
 class UnionNode : public TableExpressionNode {
 public:
 
-  UnionNode(Vector<RefPtr<TableExpressionNode>> tables);
+  UnionNode(const UnionNode& other);
+  UnionNode(Vector<RefPtr<QueryTreeNode>> tables);
 
-  Vector<RefPtr<TableExpressionNode>> inputTables() const;
+  Vector<RefPtr<QueryTreeNode>> inputTables() const;
+
+  RefPtr<QueryTreeNode> deepCopy() const override;
 
 protected:
-  Vector<RefPtr<TableExpressionNode>> tables_;
+  Vector<RefPtr<QueryTreeNode>> tables_;
 };
 
 } // namespace csql

@@ -30,8 +30,7 @@ public:
       int name_ind,
       int x_ind,
       int y_ind,
-      int z_ind,
-      ResultList* result_list);
+      int z_ind);
 
   int name_ind_;
   int x_ind_;
@@ -47,9 +46,6 @@ protected:
       fnord::chart::Series* series,
       fnord::chart::Series::AnyPoint* point);
 
-  void copyToResultList(SValue* row, int row_len);
-
-  ResultList* result_list_;
 };
 
 template <typename TX, typename TY>
@@ -59,12 +55,10 @@ public:
   SeriesAdapter2D(
       int name_ind,
       int x_ind,
-      int y_ind,
-      ResultList* result_list) :
-      AnySeriesAdapter(name_ind, x_ind, y_ind, -1, result_list) {}
+      int y_ind) :
+      AnySeriesAdapter(name_ind, x_ind, y_ind, -1) {}
 
   bool nextRow(SValue* row, int row_len) override {
-    copyToResultList(row, row_len);
     std::string name = "unnamed";
 
     if (name_ind_ >= 0) {
@@ -110,12 +104,10 @@ public:
       int name_ind,
       int x_ind,
       int y_ind,
-      int z_ind,
-      ResultList* result_list) :
-      AnySeriesAdapter(name_ind, x_ind, y_ind, z_ind, result_list) {}
+      int z_ind) :
+      AnySeriesAdapter(name_ind, x_ind, y_ind, z_ind) {}
 
   bool nextRow(SValue* row, int row_len) override {
-    copyToResultList(row, row_len);
     std::string name = "unnamed";
 
     if (name_ind_ >= 0) {

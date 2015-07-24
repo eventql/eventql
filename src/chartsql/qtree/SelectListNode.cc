@@ -21,4 +21,20 @@ RefPtr<ValueExpressionNode> SelectListNode::expression() const {
   return expr_;
 }
 
+RefPtr<QueryTreeNode> SelectListNode::deepCopy() const {
+  return new SelectListNode(expr_->deepCopyAs<ValueExpressionNode>());
+}
+
+String SelectListNode::columnName() const {
+  if (!alias_.isEmpty()) {
+    return alias_.get();
+  }
+
+  return expr_->toSQL();
+}
+
+void SelectListNode::setAlias(const String& alias) {
+  alias_ = Some(alias);
+}
+
 } // namespace csql

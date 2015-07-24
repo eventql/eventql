@@ -20,6 +20,8 @@ public:
 
   virtual Vector<RefPtr<ValueExpressionNode>> arguments() const = 0;
 
+  virtual String toSQL() const = 0;
+
 };
 
 } // namespace csql

@@ -86,6 +86,10 @@ protected:
   ASTNode* legendClause();
 
   ASTNode* importStatement();
+  ASTNode* showStatement();
+  ASTNode* explainStatement();
+  ASTNode* explainQueryStatement();
+  ASTNode* describeTableStatement();
 
   ASTNode* fromClause();
   ASTNode* whereClause();

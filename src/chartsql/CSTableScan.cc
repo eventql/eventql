@@ -11,7 +11,7 @@
 #include <chartsql/qtree/ColumnReferenceNode.h>
 #include <chartsql/runtime/defaultruntime.h>
 #include <chartsql/runtime/compile.h>
-#include <fnord/inspect.h>
+#include <fnord/ieee754.h>
 
 using namespace fnord;
 
@@ -20,14 +20,19 @@ namespace csql {
 CSTableScan::CSTableScan(
     RefPtr<SequentialScanNode> stmt,
     cstable::CSTableReader&& cstable,
-    DefaultRuntime* runtime) :
+    QueryBuilder* runtime) :
     cstable_(std::move(cstable)),
     colindex_(0),
     aggr_strategy_(stmt->aggregationStrategy()) {
-
   Set<String> column_names;
   for (const auto& slnode : stmt->selectList()) {
     findColumns(slnode->expression(), &column_names);
+    column_names_.emplace_back(slnode->columnName());
+  }
+
+  auto where_expr = stmt->whereExpression();
+  if (!where_expr.isEmpty()) {
+    findColumns(where_expr.get(), &column_names);
   }
 
   for (const auto& col : column_names) {
@@ -44,10 +49,27 @@ CSTableScan::CSTableScan(
         runtime->buildValueExpression(slnode->expression()),
         &scratch_);
   }
+
+  if (!where_expr.isEmpty()) {
+    resolveColumns(where_expr.get());
+    where_expr_ = runtime->buildValueExpression(where_expr.get());
+  }
 }
 
 void CSTableScan::execute(
     ExecutionContext* context,
+    Function<bool (int argc, const SValue* argv)> fn) {
+  context->incrNumSubtasksTotal(1);
+
+  if (columns_.empty()) {
+    scanWithoutColumns(fn);
+  } else {
+    scan(fn);
+  }
+  context->incrNumSubtasksCompleted(1);
+}
+
+void CSTableScan::scan(
     Function<bool (int argc, const SValue* argv)> fn) {
   uint64_t select_level = 0;
   uint64_t fetch_level = 0;
@@ -105,6 +127,10 @@ void CSTableScan::execute(
 
             case msg::FieldType::BOOLEAN:
               switch (size) {
+                case sizeof(uint8_t):
+                  in_row[col.second.index] =
+                      SValue(SValue::BoolType(*((uint8_t*) data) > 0));
+                  break;
                 case sizeof(uint32_t):
                   in_row[col.second.index] =
                       SValue(SValue::BoolType(*((uint32_t*) data) > 0));
@@ -119,7 +145,19 @@ void CSTableScan::execute(
               }
               break;
 
-            case msg::FieldType::OBJECT:
+            case msg::FieldType::DOUBLE:
+              switch (size) {
+                case sizeof(double):
+                  in_row[col.second.index] =
+                      SValue(SValue::FloatType(*((double*) data)));
+                  break;
+                case 0:
+                  in_row[col.second.index] = SValue();
+                  break;
+              }
+              break;
+
+            default:
               RAISE(kIllegalStateError);
 
           }
@@ -133,7 +171,14 @@ void CSTableScan::execute(
 
     fetch_level = next_level;
 
-    if (true) { // where clause
+    bool where_pred = true;
+    if (where_expr_.get() != nullptr) {
+      SValue where_tmp;
+      where_expr_->evaluate(in_row.size(), in_row.data(), &where_tmp);
+      where_pred = where_tmp.getBoolWithConversion();
+    }
+
+    if (where_pred) {
       for (int i = 0; i < select_list_.size(); ++i) {
         if (select_list_[i].rep_level >= select_level) {
           select_list_[i].compiled->accumulate(
@@ -212,6 +257,65 @@ void CSTableScan::execute(
   }
 }
 
+void CSTableScan::scanWithoutColumns(
+    Function<bool (int argc, const SValue* argv)> fn) {
+  Vector<SValue> out_row(select_list_.size(), SValue{});
+
+  size_t total_records = cstable_.numRecords();
+  for (size_t i = 0; i < total_records; ++i) {
+    bool where_pred = true;
+    if (where_expr_.get() != nullptr) {
+      SValue where_tmp;
+      where_expr_->evaluate(0, nullptr, &where_tmp);
+      where_pred = where_tmp.getBoolWithConversion();
+    }
+
+    if (where_pred) {
+      switch (aggr_strategy_) {
+
+        case AggregationStrategy::AGGREGATE_ALL:
+          for (int i = 0; i < select_list_.size(); ++i) {
+            select_list_[i].compiled->accumulate(
+                &select_list_[i].instance,
+                0,
+                nullptr);
+          }
+          break;
+
+        case AggregationStrategy::AGGREGATE_WITHIN_RECORD:
+        case AggregationStrategy::NO_AGGREGATION:
+          for (int i = 0; i < select_list_.size(); ++i) {
+            select_list_[i].compiled->evaluate(
+                0,
+                nullptr,
+                &out_row[i]);
+          }
+
+          if (!fn(out_row.size(), out_row.data())) {
+            return;
+          }
+          break;
+      }
+    }
+  }
+
+  switch (aggr_strategy_) {
+    case AggregationStrategy::AGGREGATE_ALL:
+      for (int i = 0; i < select_list_.size(); ++i) {
+        select_list_[i].compiled->result(
+            &select_list_[i].instance,
+            &out_row[i]);
+      }
+
+      fn(out_row.size(), out_row.data());
+      break;
+
+    default:
+      break;
+
+  }
+}
+
 void CSTableScan::findColumns(
     RefPtr<ValueExpressionNode> expr,
     Set<String>* column_names) const {
@@ -266,6 +370,14 @@ uint64_t CSTableScan::findMaxRepetitionLevel(
   }
 
   return max_level;
+}
+
+Vector<String> CSTableScan::columnNames() const {
+  return column_names_;
+}
+
+size_t CSTableScan::numColumns() const {
+  return column_names_.size();
 }
 
 CSTableScan::ColumnRef::ColumnRef(

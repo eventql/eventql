@@ -8,32 +8,75 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <chartsql/runtime/runtime.h>
-#include <chartsql/runtime/resultlist.h>
-#include <chartsql/backends/csv/csvbackend.h>
+#include <chartsql/defaults.h>
 
 namespace csql {
 
-Runtime::Runtime() :
-    compiler_(&symbol_table_) {}
+RefPtr<Runtime> Runtime::getDefaultRuntime() {
+  auto symbols = mkRef(new SymbolTable());
+  installDefaultSymbols(symbols.get());
 
-QueryPlanBuilder* Runtime::queryPlanBuilder() {
-  RAISE(kNotImplementedError);
+  return new Runtime(
+      symbols,
+      new QueryBuilder(
+          new ValueExpressionBuilder(symbols.get()),
+          new TableExpressionBuilder()),
+      new QueryPlanBuilder(symbols.get()));
 }
 
-void Runtime::addBackend(std::unique_ptr<Backend> backend) {
-  backends_.emplace_back(std::move(backend));
+Runtime::Runtime(
+    RefPtr<SymbolTable> symbol_table,
+    RefPtr<QueryBuilder> query_builder,
+    RefPtr<QueryPlanBuilder> query_plan_builder) :
+    symbol_table_(symbol_table),
+    query_builder_(query_builder),
+    query_plan_builder_(query_plan_builder) {}
+
+void Runtime::executeQuery(
+    const String& query,
+    RefPtr<ExecutionStrategy> execution_strategy,
+    RefPtr<ResultFormat> result_format) {
+
+  /* parse query */
+  csql::Parser parser;
+  parser.parse(query.data(), query.size());
+
+  /* build query plan */
+  auto statements = query_plan_builder_->build(
+      parser.getStatements(),
+      execution_strategy->tableProvider());
+
+  for (auto& stmt : statements) {
+    stmt = execution_strategy->rewriteQueryTree(stmt);
+  }
+
+  auto query_plan = mkRef(
+      new QueryPlan(
+          statements,
+          execution_strategy->tableProvider(),
+          query_builder_.get(),
+          this));
+
+  /* execute query and format results */
+  csql::ExecutionContext context;
+  result_format->formatResults(query_plan, &context);
 }
 
-const std::vector<std::unique_ptr<Backend>>& Runtime::backends() {
-  return backends_;
+SValue Runtime::evaluateStaticExpression(ASTNode* expr) {
+  auto val_expr = mkRef(query_plan_builder_->buildValueExpression(expr));
+  auto compiled = query_builder_->buildValueExpression(val_expr);
+
+  SValue out;
+  compiled->evaluate(0, nullptr, &out);
+  return out;
 }
 
-ValueExpressionBuilder* Runtime::compiler() {
-  return &compiler_;
-}
+SValue Runtime::evaluateStaticExpression(RefPtr<ValueExpressionNode> expr) {
+  auto compiled = query_builder_->buildValueExpression(expr);
 
-Parser* Runtime::parser() {
-  return &parser_;
+  SValue out;
+  compiled->evaluate(0, nullptr, &out);
+  return out;
 }
 
 }

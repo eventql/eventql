@@ -8,21 +8,48 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <chartsql/runtime/queryplan.h>
+#include <chartsql/runtime/runtime.h>
 
 namespace csql {
 
-QueryPlan::QueryPlan(TableRepository* table_repo) : table_repo_(table_repo) {}
+QueryPlan::QueryPlan(
+    Vector<RefPtr<QueryTreeNode>> statements,
+    RefPtr<TableProvider> tables,
+    QueryBuilder* qbuilder,
+    Runtime* runtime) :
+    statements_(statements),
+    tables_(tables),
+    runtime_(runtime),
+    qbuilder_(qbuilder) {}
 
-void QueryPlan::addQuery(std::unique_ptr<QueryPlanNode> query) {
-  queries_.emplace_back(std::move(query));
+size_t QueryPlan::numStatements() const {
+  return statements_.size();
 }
 
-const std::vector<std::unique_ptr<QueryPlanNode>>& QueryPlan::queries() {
-  return queries_;
-}
+ScopedPtr<Statement> QueryPlan::buildStatement(size_t stmt_idx) const {
+  if (stmt_idx >= statements_.size()) {
+    RAISE(kIndexError, "invalid statement index");
+  }
 
-TableRepository* QueryPlan::tableRepository() {
-  return table_repo_;
+  auto stmt = statements_[stmt_idx];
+
+  if (dynamic_cast<TableExpressionNode*>(stmt.get())) {
+    return qbuilder_->buildTableExpression(
+        stmt.asInstanceOf<TableExpressionNode>(),
+        tables_,
+        runtime_);
+  }
+
+  if (dynamic_cast<ChartStatementNode*>(stmt.get())) {
+    return qbuilder_->buildChartStatement(
+        stmt.asInstanceOf<ChartStatementNode>(),
+        tables_,
+        runtime_);
+  }
+
+  RAISE(
+      kRuntimeError,
+      "cannot figure out how to execute this query plan");
 }
 
 }

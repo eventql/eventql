@@ -13,8 +13,10 @@
 #include <memory>
 #include <unordered_map>
 #include <string>
-#include <chartsql/backends/csv/csvinputstream.h>
+#include <fnord/csv/CSVInputStream.h>
 #include <chartsql/backends/tableref.h>
+
+using namespace fnord;
 
 namespace csql {
 class SValue;

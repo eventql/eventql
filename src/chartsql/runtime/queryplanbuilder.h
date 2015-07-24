@@ -20,50 +20,18 @@ class QueryPlanNode;
 class TableRepository;
 class Runtime;
 
-/**
- * All QueryPlanBuilder imeplementations must be thread safe. Specifically they
- * must support calling the buildQueryPlan method concurrenctly from many
- * threads
- */
-class QueryPlanBuilderInterface {
-public:
-  QueryPlanBuilderInterface(
-      ValueExpressionBuilder* compiler,
-      const std::vector<std::unique_ptr<Backend>>& backends) :
-      compiler_(compiler),
-      backends_(backends) {}
-
-  virtual ~QueryPlanBuilderInterface() {}
-
-  virtual QueryPlanNode* buildQueryPlan(
-      ASTNode* statement,
-      TableRepository* repo) = 0;
-
-protected:
-  ValueExpressionBuilder* compiler_;
-  const std::vector<std::unique_ptr<Backend>>& backends_;
-};
-
-class QueryPlanBuilder {
+class QueryPlanBuilder : public RefCounted {
 public:
 
   QueryPlanBuilder(SymbolTable* symbol_table);
 
-  RefPtr<QueryTreeNode> build(ASTNode* ast);
+  RefPtr<QueryTreeNode> build(ASTNode* ast, RefPtr<TableProvider> tables);
 
-//  QueryPlanBuilder(
-//      ValueExpressionBuilder* compiler,
-//      const std::vector<std::unique_ptr<Backend>>& backends);
-//
-//  void buildQueryPlan(
-//      const std::vector<std::unique_ptr<ASTNode>>& statements,
-//      QueryPlan* query_plan);
-//
-//  QueryPlanNode* buildQueryPlan(
-//      ASTNode* statement,
-//      TableRepository* repo) override;
-//
-  void extend(std::unique_ptr<QueryPlanBuilderInterface> other);
+  Vector<RefPtr<QueryTreeNode>> build(
+      const Vector<ASTNode*>& ast,
+      RefPtr<TableProvider> tables);
+
+  ValueExpressionNode* buildValueExpression(ASTNode* ast);
 
 protected:
 
@@ -71,17 +39,17 @@ protected:
    * Returns true if the ast is a SELECT statement that has columns in its
    * select list that are not of the form T_TABLE_NAME -> T_COLUMN_NAME
    */
-  //bool hasUnexpandedColumns(ASTNode* ast) const;
+  bool hasUnexpandedColumns(ASTNode* ast) const;
 
-  ///**
-  // * Returns true if the ast is a SELECT statement that has a join
-  // */
-  //bool hasJoin(ASTNode* ast) const;
+  /**
+   * Returns true if the ast is a SELECT statement that has a join
+   */
+  bool hasJoin(ASTNode* ast) const;
 
-  ///**
-  // * Returns true if the ast is a SELECT statement that has a GROUP BY clause,
-  // * otherwise false
-  // */
+  /**
+   * Returns true if the ast is a SELECT statement that has a GROUP BY clause,
+   * otherwise false
+   */
   bool hasGroupByClause(ASTNode* ast) const;
 
   ///**
@@ -90,11 +58,11 @@ protected:
   // */
   //bool hasGroupOverTimewindowClause(ASTNode* ast) const;
 
-  ///**
-  // * Returns true if the ast is a SELECT statement that has a ORDER BY clause,
-  // * otherwise false
-  // */
-  //bool hasOrderByClause(ASTNode* ast) const;
+  /**
+   * Returns true if the ast is a SELECT statement that has a ORDER BY clause,
+   * otherwise false
+   */
+  bool hasOrderByClause(ASTNode* ast) const;
 
   /**
    * Returns true if the ast is a SELECT statement with a select list that
@@ -114,17 +82,11 @@ protected:
    */
   bool hasAggregationWithinRecord(ASTNode* ast) const;
 
-  ///**
-  // * Build a group by query plan node for a SELECT statement that has a GROUP
-  // * BY clause
-  // */
-  //void expandColumns(ASTNode* ast, TableRepository* repo);
-
-  ///**
-  // * Build a group by query plan node for a SELECT statement that has a GROUP
-  // * BY clause
-  // */
-  QueryTreeNode* buildGroupBy(ASTNode* ast);
+  /**
+   * Build a group by query plan node for a SELECT statement that has a GROUP
+   * BY clause
+   */
+  QueryTreeNode* buildGroupBy(ASTNode* ast, RefPtr<TableProvider> tables);
 
   ///**
   // * Build a group over timewindow query plan node for a SELECT statement that
@@ -132,21 +94,21 @@ protected:
   // */
   //QueryPlanNode* buildGroupOverTimewindow(ASTNode* ast, TableRepository* repo);
 
-  /**
-   * Recursively walk the provided ast and search for column references. For
-   * each found column reference, add the column reference to the provided
-   * select list and replace the original column reference with an index into
-   * the new select list.
-   *
-   * This is used to create child select lists for nested query plan nodes.
-   */
-  bool buildInternalSelectList(ASTNode* ast, ASTNode* select_list);
 
   QueryTreeNode* buildSequentialScan(ASTNode* ast);
 
-  ValueExpressionNode* buildValueExpression(ASTNode* ast);
+  QueryTreeNode* buildLimitClause(ASTNode* ast, RefPtr<TableProvider> tables);
 
-  SelectListNode* buildSelectList(ASTNode* select_list);
+  QueryTreeNode* buildOrderByClause(ASTNode* ast, RefPtr<TableProvider> tables);
+
+  /**
+   * Builds a standalone SELECT expression (A SELECT without any tables)
+   */
+  QueryTreeNode* buildSelectExpression(ASTNode* ast);
+
+  QueryTreeNode* buildShowTables(ASTNode* ast);
+
+  QueryTreeNode* buildDescribeTable(ASTNode* ast);
 
   ValueExpressionNode* buildOperator(const std::string& name, ASTNode* ast);
 
@@ -158,13 +120,25 @@ protected:
 
   ValueExpressionNode* buildMethodCall(ASTNode* ast);
 
-  //QueryPlanNode* buildLimitClause(ASTNode* ast, TableRepository* repo);
-  //QueryPlanNode* buildOrderByClause(ASTNode* ast, TableRepository* repo);
+  /**
+   * expand all column names + wildcard to tablename->columnanme
+   */
+  void expandColumns(ASTNode* ast, RefPtr<TableProvider> tables);
 
-  std::vector<std::unique_ptr<QueryPlanBuilderInterface>> extensions_;
+  /**
+   * Recursively walk the provided ast and search for column references. For
+   * each found column reference, add the column reference to the provided
+   * select list and replace the original column reference with an index into
+   * the new select list.
+   *
+   * This is used to create child select lists for nested query plan nodes.
+   */
+  bool buildInternalSelectList(ASTNode* ast, ASTNode* select_list);
+
+  SelectListNode* buildSelectList(ASTNode* select_list);
+
 
   SymbolTable* symbol_table_;
-
 };
 
 }

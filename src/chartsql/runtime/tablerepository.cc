@@ -69,7 +69,7 @@ void TableRepository::import(
 
 Option<ScopedPtr<TableExpression>> TableRepository::buildSequentialScan(
     RefPtr<SequentialScanNode> seqscan,
-    DefaultRuntime* runtime) const {
+    QueryBuilder* runtime) const {
   for (const auto& p : providers_) {
     auto tbl = p->buildSequentialScan(seqscan, runtime);
     if (!tbl.isEmpty()) {
@@ -82,6 +82,24 @@ Option<ScopedPtr<TableExpression>> TableRepository::buildSequentialScan(
 
 void TableRepository::addProvider(RefPtr<TableProvider> provider) {
   providers_.emplace_back(provider);
+}
+
+void TableRepository::listTables(
+    Function<void (const TableInfo& table)> fn) const {
+  for (const auto& p : providers_) {
+    p->listTables(fn);
+  }
+}
+
+Option<TableInfo> TableRepository::describe(const String& table_name) const {
+  for (const auto& p : providers_) {
+    auto tbl = p->describe(table_name);
+    if (!tbl.isEmpty()) {
+      return tbl;
+    }
+  }
+
+  return None<TableInfo>();
 }
 
 }

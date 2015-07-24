@@ -14,7 +14,7 @@
 namespace csql {
 namespace expressions {
 
-void fromTimestamp(void* scratchpad, int argc, SValue* argv, SValue* out);
+void fromTimestamp(int argc, SValue* argv, SValue* out);
 
 }
 }

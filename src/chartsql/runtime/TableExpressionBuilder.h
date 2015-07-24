@@ -14,7 +14,12 @@
 #include <chartsql/qtree/QueryTreeNode.h>
 #include <chartsql/qtree/GroupByNode.h>
 #include <chartsql/qtree/UnionNode.h>
+#include <chartsql/qtree/LimitNode.h>
+#include <chartsql/qtree/OrderByNode.h>
 #include <chartsql/qtree/SequentialScanNode.h>
+#include <chartsql/qtree/DrawStatementNode.h>
+#include <chartsql/qtree/SelectExpressionNode.h>
+#include <chartsql/qtree/DescribeTableNode.h>
 #include <chartsql/runtime/TableExpression.h>
 #include <chartsql/runtime/tablerepository.h>
 #include <chartsql/svalue.h>
@@ -22,31 +27,51 @@
 using namespace fnord;
 
 namespace csql {
-class DefaultRuntime;
+class QueryBuilder;
 
-class TableExpressionBuilder {
+class TableExpressionBuilder : public RefCounted {
 public:
 
   ScopedPtr<TableExpression> build(
-      RefPtr<TableExpressionNode> node,
-      DefaultRuntime* runtime,
+      RefPtr<QueryTreeNode> node,
+      QueryBuilder* runtime,
       TableProvider* tables);
 
 protected:
 
   ScopedPtr<TableExpression> buildGroupBy(
       RefPtr<GroupByNode> node,
-      DefaultRuntime* runtime,
+      QueryBuilder* runtime,
       TableProvider* tables);
 
   ScopedPtr<TableExpression> buildUnion(
       RefPtr<UnionNode> node,
-      DefaultRuntime* runtime,
+      QueryBuilder* runtime,
+      TableProvider* tables);
+
+  ScopedPtr<TableExpression> buildLimit(
+      RefPtr<LimitNode> node,
+      QueryBuilder* runtime,
+      TableProvider* tables);
+
+  ScopedPtr<TableExpression> buildOrderBy(
+      RefPtr<OrderByNode> node,
+      QueryBuilder* runtime,
       TableProvider* tables);
 
   ScopedPtr<TableExpression> buildSequentialScan(
       RefPtr<SequentialScanNode> node,
-      DefaultRuntime* runtime,
+      QueryBuilder* runtime,
+      TableProvider* tables);
+
+  ScopedPtr<TableExpression> buildSelectExpression(
+      RefPtr<SelectExpressionNode> node,
+      QueryBuilder* runtime,
+      TableProvider* tables);
+
+  ScopedPtr<TableExpression> buildDescribeTableStatment(
+      RefPtr<DescribeTableNode> node,
+      QueryBuilder* runtime,
       TableProvider* tables);
 
 };

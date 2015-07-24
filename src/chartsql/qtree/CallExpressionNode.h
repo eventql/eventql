@@ -26,6 +26,10 @@ public:
 
   const String& symbol() const;
 
+  RefPtr<QueryTreeNode> deepCopy() const override;
+
+  String toSQL() const override;
+
 protected:
   String symbol_;
   Vector<RefPtr<ValueExpressionNode>> arguments_;
