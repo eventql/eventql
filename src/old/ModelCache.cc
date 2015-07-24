@@ -6,9 +6,9 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-#include "fnord/logging.h"
-#include "fnord/exception.h"
-#include "fnord/io/fileutil.h"
+#include "stx/logging.h"
+#include "stx/exception.h"
+#include "stx/io/fileutil.h"
 #include "ModelCache.h"
 
 using namespace fnord;

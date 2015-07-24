@@ -8,7 +8,7 @@
  */
 #ifndef _CM_LOGJOINSHARD_H
 #define _CM_LOGJOINSHARD_H
-#include <fnord/stdtypes.h>
+#include <stx/stdtypes.h>
 
 using namespace fnord;
 

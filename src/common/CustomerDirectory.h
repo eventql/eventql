@@ -7,7 +7,7 @@
  * permission is obtained.
  */
 #pragma once
-#include <fnord/stdtypes.h>
+#include <stx/stdtypes.h>
 #include <common/CustomerConfig.pb.h>
 
 using namespace fnord;

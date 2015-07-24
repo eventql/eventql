@@ -7,15 +7,15 @@
  * permission is obtained.
  */
 #include <assert.h>
-#include <fnord/exception.h>
-#include <fnord/inspect.h>
-#include <fnord/logging.h>
-#include <fnord/stringutil.h>
-#include <fnord/uri.h>
-#include <fnord/wallclock.h>
-#include <fnord/rpc/RPC.h>
-#include <fnord/json/json.h>
-#include <fnord/protobuf/msg.h>
+#include <stx/exception.h>
+#include <stx/inspect.h>
+#include <stx/logging.h>
+#include <stx/stringutil.h>
+#include <stx/uri.h>
+#include <stx/wallclock.h>
+#include <stx/rpc/RPC.h>
+#include <stx/json/json.h>
+#include <stx/protobuf/msg.h>
 #include <brokerd/RemoteFeedFactory.h>
 #include <brokerd/RemoteFeedWriter.h>
 #include <inventory/ItemRef.h>

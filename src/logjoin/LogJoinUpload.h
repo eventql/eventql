@@ -8,13 +8,13 @@
  */
 #ifndef _CM_LOGJOINUPLOAD_H
 #define _CM_LOGJOINUPLOAD_H
-#include "fnord/stdtypes.h"
-#include "fnord/mdb/MDB.h"
-#include "fnord/thread/FixedSizeThreadPool.h"
-#include "fnord/protobuf/MessageSchema.h"
-#include "fnord/protobuf/msg.h"
-#include "fnord/protobuf/JSONEncoder.h"
-#include "fnord/http/httpconnectionpool.h"
+#include "stx/stdtypes.h"
+#include "stx/mdb/MDB.h"
+#include "stx/thread/FixedSizeThreadPool.h"
+#include "stx/protobuf/MessageSchema.h"
+#include "stx/protobuf/msg.h"
+#include "stx/protobuf/JSONEncoder.h"
+#include "stx/http/httpconnectionpool.h"
 #include "brokerd/BrokerClient.h"
 #include "logjoin/JoinedSession.pb.h"
 #include "common/CustomerDirectory.h"

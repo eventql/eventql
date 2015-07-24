@@ -9,7 +9,7 @@
 #ifndef _CM_SCHEMAS_H
 #define _CM_SCHEMAS_H
 #include "common.h"
-#include "fnord/protobuf/MessageSchema.h"
+#include "stx/protobuf/MessageSchema.h"
 
 using namespace cm;
 using namespace fnord;

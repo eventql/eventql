@@ -9,12 +9,12 @@
 #ifndef _CM_COMMON_H
 #define _CM_COMMON_H
 #include <string>
-#include <fnord/option.h>
-#include <fnord/stdtypes.h>
-#include <fnord/Language.h>
-#include <fnord/Currency.h>
-#include <fnord/util/CumulativeHistogram.h>
-#include <fnord/json/json.h>
+#include <stx/option.h>
+#include <stx/stdtypes.h>
+#include <stx/Language.h>
+#include <stx/Currency.h>
+#include <stx/util/CumulativeHistogram.h>
+#include <stx/json/json.h>
 
 using namespace fnord;
 

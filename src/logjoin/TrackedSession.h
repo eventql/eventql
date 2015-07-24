@@ -14,9 +14,9 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
-#include <fnord/UnixTime.h>
-#include <fnord/option.h>
-#include <fnord/Currency.h>
+#include <stx/UnixTime.h>
+#include <stx/option.h>
+#include <stx/Currency.h>
 
 #include <inventory/ItemRef.h>
 #include "logjoin/TrackedQuery.h"

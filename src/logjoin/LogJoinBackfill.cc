@@ -8,7 +8,7 @@
  */
 #include "unistd.h"
 #include "logjoin/LogJoinBackfill.h"
-#include "fnord/protobuf/MessagePrinter.h"
+#include "stx/protobuf/MessagePrinter.h"
 
 using namespace fnord;
 

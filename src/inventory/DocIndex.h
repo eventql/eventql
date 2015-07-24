@@ -15,11 +15,11 @@
 #include <unordered_map>
 #include <vector>
 #include <queue>
-#include "fnord/stdtypes.h"
-#include "fnord/mdb/MDB.h"
-#include "fnord/stats/stats.h"
-#include "fnord/util/binarymessagereader.h"
-#include "fnord/util/binarymessagewriter.h"
+#include "stx/stdtypes.h"
+#include "stx/mdb/MDB.h"
+#include "stx/stats/stats.h"
+#include "stx/util/binarymessagereader.h"
+#include "stx/util/binarymessagewriter.h"
 #include "IndexChangeRequest.h"
 #include <inventory/ItemRef.h>
 #include "Document.h"

@@ -8,10 +8,10 @@
  */
 #include <stdlib.h>
 #include <stdio.h>
-#include "fnord/stdtypes.h"
-#include "fnord/exception.h"
-#include "fnord/test/unittest.h"
-#include "fnord/protobuf/msg.h"
+#include "stx/stdtypes.h"
+#include "stx/exception.h"
+#include "stx/test/unittest.h"
+#include "stx/protobuf/msg.h"
 #include "logjoin/LogJoinTarget.cc"
 #include "logjoin/JoinedSession.pb.h"
 

@@ -7,12 +7,12 @@
  * permission is obtained.
  */
 #include "logjoin/LogJoinUpload.h"
-#include "fnord/uri.h"
-#include "fnord/util/binarymessagereader.h"
-#include "fnord/util/binarymessagewriter.h"
-#include "fnord/wallclock.h"
-#include "fnord/http/httprequest.h"
-#include "fnord/json/json.h"
+#include "stx/uri.h"
+#include "stx/util/binarymessagereader.h"
+#include "stx/util/binarymessagewriter.h"
+#include "stx/wallclock.h"
+#include "stx/http/httprequest.h"
+#include "stx/json/json.h"
 #include "tsdb/RecordEnvelope.pb.h"
 #include "tsdb/TimeWindowPartitioner.h"
 

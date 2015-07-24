@@ -6,7 +6,7 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-#include <fnord/inspect.h>
+#include <stx/inspect.h>
 #include "logjoin/TrackedSession.h"
 #include "common.h"
 

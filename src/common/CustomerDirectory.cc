@@ -6,7 +6,7 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-#include <fnord/exception.h>
+#include <stx/exception.h>
 #include <common/CustomerDirectory.h>
 
 using namespace fnord;

@@ -8,8 +8,8 @@
  */
 #ifndef _CM_AUTOCOMPLETESERVLET_H
 #define _CM_AUTOCOMPLETESERVLET_H
-#include "fnord/http/httpservice.h"
-#include "fnord/json/json.h"
+#include "stx/http/httpservice.h"
+#include "stx/json/json.h"
 #include "ModelCache.h"
 #include "AutoCompleteModel.h"
 

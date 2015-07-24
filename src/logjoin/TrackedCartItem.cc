@@ -7,10 +7,10 @@
  * permission is obtained.
  */
 #include <algorithm>
-#include <fnord/exception.h>
-#include <fnord/inspect.h>
-#include <fnord/stringutil.h>
-#include <fnord/uri.h>
+#include <stx/exception.h>
+#include <stx/inspect.h>
+#include <stx/stringutil.h>
+#include <stx/uri.h>
 #include "common.h"
 #include "logjoin/TrackedCartItem.h"
 

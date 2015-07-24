@@ -8,7 +8,7 @@
  */
 #ifndef _CM_LOGJOINSPLICE_H
 #define _CM_LOGJOINSPLICE_H
-#include "fnord/stdtypes.h"
+#include "stx/stdtypes.h"
 #include "src/JoinedSession.pb.h"
 
 using namespace fnord;

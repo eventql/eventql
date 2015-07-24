@@ -7,9 +7,9 @@
  * permission is obtained.
  */
 #include <algorithm>
-#include <fnord/exception.h>
-#include <fnord/inspect.h>
-#include <fnord/stringutil.h>
+#include <stx/exception.h>
+#include <stx/inspect.h>
+#include <stx/stringutil.h>
 #include "common.h"
 #include "logjoin/TrackedItemVisit.h"
 

@@ -8,8 +8,8 @@
  */
 #ifndef _CM_LOGJOINEXPORT_H
 #define _CM_LOGJOINEXPORT_H
-#include "fnord/stdtypes.h"
-#include "fnord/http/httpconnectionpool.h"
+#include "stx/stdtypes.h"
+#include "stx/http/httpconnectionpool.h"
 #include "brokerd/BrokerClient.h"
 #include "logjoin/JoinedSession.pb.h"
 
