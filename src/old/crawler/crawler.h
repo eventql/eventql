@@ -13,11 +13,11 @@
 #include <set>
 #include <string>
 #include <unordered_map>
-#include <fnord/random.h>
-#include <fnord/uri.h>
-#include <fnord/thread/taskscheduler.h>
+#include <stx/random.h>
+#include <stx/uri.h>
+#include <stx/thread/taskscheduler.h>
 #include <brokerd/RemoteFeed.h>
-#include <fnord/http/httpconnectionpool.h>
+#include <stx/http/httpconnectionpool.h>
 #include "crawler/crawlrequest.h"
 
 namespace cm {

@@ -14,9 +14,9 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
-#include <fnord/stdtypes.h>
-#include <fnord/UnixTime.h>
-#include <fnord/uri.h>
+#include <stx/stdtypes.h>
+#include <stx/UnixTime.h>
+#include <stx/uri.h>
 
 #include <inventory/ItemRef.h>
 

@@ -6,12 +6,12 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-#include "fnord/protobuf/MessageBuilder.h"
-#include "fnord/protobuf/MessageObject.h"
-#include "fnord/protobuf/MessageEncoder.h"
-#include "fnord/protobuf/MessageDecoder.h"
-#include "fnord/protobuf/MessagePrinter.h"
-#include "fnord/protobuf/msg.h"
+#include "stx/protobuf/MessageBuilder.h"
+#include "stx/protobuf/MessageObject.h"
+#include "stx/protobuf/MessageEncoder.h"
+#include "stx/protobuf/MessageDecoder.h"
+#include "stx/protobuf/MessagePrinter.h"
+#include "stx/protobuf/msg.h"
 #include "logjoin/LogJoinTarget.h"
 #include "common.h"
 

@@ -8,12 +8,12 @@
  */
 #ifndef _CM_LOGJOINTARGET_H
 #define _CM_LOGJOINTARGET_H
-#include "fnord/stdtypes.h"
-#include "fnord/Currency.h"
-#include "fnord/Language.h"
-#include "fnord/random.h"
-#include "fnord/mdb/MDB.h"
-#include "fnord/protobuf/MessageSchema.h"
+#include "stx/stdtypes.h"
+#include "stx/Currency.h"
+#include "stx/Language.h"
+#include "stx/random.h"
+#include "stx/mdb/MDB.h"
+#include "stx/protobuf/MessageSchema.h"
 #include <inventory/ItemRef.h>
 #include "logjoin/TrackedSession.h"
 #include "logjoin/TrackedQuery.h"

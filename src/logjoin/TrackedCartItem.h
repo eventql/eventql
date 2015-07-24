@@ -14,9 +14,9 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
-#include <fnord/UnixTime.h>
-#include <fnord/uri.h>
-#include <fnord/reflect/reflect.h>
+#include <stx/UnixTime.h>
+#include <stx/uri.h>
+#include <stx/reflect/reflect.h>
 #include <inventory/ItemRef.h>
 
 namespace cm {

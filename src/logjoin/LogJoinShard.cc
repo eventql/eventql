@@ -6,8 +6,8 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-#include <fnord/fnv.h>
-#include <fnord/exception.h>
+#include <stx/fnv.h>
+#include <stx/exception.h>
 #include "logjoin/LogJoinShard.h"
 
 namespace cm {

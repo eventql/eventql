@@ -8,7 +8,7 @@
  */
 #ifndef _CM_AUTOCOMPLETEMODEL_H
 #define _CM_AUTOCOMPLETEMODEL_H
-#include "fnord/json/json.h"
+#include "stx/json/json.h"
 #include "ModelCache.h"
 #include "analytics/TermInfo.h"
 #include <fnord-fts/fts.h>

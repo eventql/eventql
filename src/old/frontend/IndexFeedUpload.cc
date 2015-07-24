@@ -7,14 +7,14 @@
  * permission is obtained.
  */
 #include "frontend/IndexFeedUpload.h"
-#include "fnord/uri.h"
-#include "fnord/logging.h"
-#include "fnord/util/binarymessagewriter.h"
-#include "fnord/http/httprequest.h"
-#include "fnord/protobuf/MessageSchema.h"
-#include "fnord/protobuf/MessagePrinter.h"
-#include "fnord/protobuf/MessageEncoder.h"
-#include "fnord/protobuf/msg.h"
+#include "stx/uri.h"
+#include "stx/logging.h"
+#include "stx/util/binarymessagewriter.h"
+#include "stx/http/httprequest.h"
+#include "stx/protobuf/MessageSchema.h"
+#include "stx/protobuf/MessagePrinter.h"
+#include "stx/protobuf/MessageEncoder.h"
+#include "stx/protobuf/msg.h"
 #include "schemas.h"
 #include "unistd.h"
 

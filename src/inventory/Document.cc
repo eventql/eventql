@@ -7,7 +7,7 @@
  * permission is obtained.
  */
 #include "Document.h"
-#include <fnord/inspect.h>
+#include <stx/inspect.h>
 
 using namespace fnord;
 

@@ -8,13 +8,13 @@
  */
 #ifndef _CM_SELLERSTATSLOOKUP_H
 #define _CM_SELLERSTATSLOOKUP_H
-#include "fnord/stdtypes.h"
-#include "fnord/rpc/RPC.h"
-#include "fnord/rpc/RPCClient.h"
-#include "fnord/thread/taskscheduler.h"
-#include "fnord/mdb/MDB.h"
-#include "fnord/stats/stats.h"
-#include "fnord/json/json.h"
+#include "stx/stdtypes.h"
+#include "stx/rpc/RPC.h"
+#include "stx/rpc/RPCClient.h"
+#include "stx/thread/taskscheduler.h"
+#include "stx/mdb/MDB.h"
+#include "stx/stats/stats.h"
+#include "stx/json/json.h"
 #include <inventory/ItemRef.h>
 #include "JoinedItemVisit.h"
 #include "FeatureIndex.h"

@@ -6,7 +6,7 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-#include "fnord/json/json.h"
+#include "stx/json/json.h"
 #include "logjoin/LogJoinExport.h"
 
 using namespace fnord;

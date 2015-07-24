@@ -8,7 +8,7 @@
  */
 #include "DocIndex.h"
 #include "IndexChangeRequest.h"
-#include <fnord/inspect.h>
+#include <stx/inspect.h>
 
 using namespace fnord;
 

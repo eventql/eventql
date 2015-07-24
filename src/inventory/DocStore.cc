@@ -6,9 +6,9 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-#include <fnord/fnv.h>
-#include <fnord/io/file.h>
-#include <fnord/json/json.h>
+#include <stx/fnv.h>
+#include <stx/io/file.h>
+#include <stx/json/json.h>
 #include "DocStore.h"
 
 using namespace fnord;

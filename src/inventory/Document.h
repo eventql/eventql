@@ -13,7 +13,7 @@
 #include <set>
 #include <string>
 #include <unordered_map>
-#include <fnord/autoref.h>
+#include <stx/autoref.h>
 #include "DocID.h"
 #include "IndexChangeRequest.h"
 

@@ -8,8 +8,8 @@
  */
 #ifndef _CM_INDEXSERVLET_H
 #define _CM_INDEXSERVLET_H
-#include "fnord/autoref.h"
-#include "fnord/http/httpservice.h"
+#include "stx/autoref.h"
+#include "stx/http/httpservice.h"
 #include "fnord-fts/Analyzer.h"
 #include "IndexReader.h"
 

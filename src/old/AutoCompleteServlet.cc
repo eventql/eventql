@@ -8,10 +8,10 @@
  */
 #include "AutoCompleteServlet.h"
 #include "analytics/CTRCounter.h"
-#include "fnord/Language.h"
-#include "fnord/logging.h"
-#include "fnord/wallclock.h"
-#include "fnord/io/fileutil.h"
+#include "stx/Language.h"
+#include "stx/logging.h"
+#include "stx/wallclock.h"
+#include "stx/io/fileutil.h"
 
 using namespace fnord;
 

@@ -8,7 +8,7 @@
  */
 #include "IndexServlet.h"
 #include "SearchQuery.h"
-#include "fnord/json/json.h"
+#include "stx/json/json.h"
 
 using namespace fnord;
 
