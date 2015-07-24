@@ -16,6 +16,7 @@ add_executable(logjoind
     $<TARGET_OBJECTS:fnord-rpc>
     $<TARGET_OBJECTS:fnord-protobuf>
     $<TARGET_OBJECTS:fnord-fts>
+    $<TARGET_OBJECTS:hunspell>
     $<TARGET_OBJECTS:logjoind-client>
     $<TARGET_OBJECTS:tsdb-client>
     $<TARGET_OBJECTS:dproc>
@@ -44,6 +45,7 @@ add_executable(test-logjoin
     $<TARGET_OBJECTS:fnord-rpc>
     $<TARGET_OBJECTS:fnord-protobuf>
     $<TARGET_OBJECTS:fnord-fts>
+    $<TARGET_OBJECTS:hunspell>
     $<TARGET_OBJECTS:inventoryd-client>
     $<TARGET_OBJECTS:brokerd-client>
     $<TARGET_OBJECTS:logjoind-client>

@@ -31,6 +31,23 @@ add_subdirectory(3rdparty/fnord-fts)
 include_directories(3rdparty/fnord-fts)
 include_directories(3rdparty/)
 
+add_library(hunspell OBJECT
+    3rdparty/hunspell/affentry.cxx
+    3rdparty/hunspell/affixmgr.cxx
+    3rdparty/hunspell/csutil.cxx
+    3rdparty/hunspell/dictmgr.cxx
+    3rdparty/hunspell/filemgr.cxx
+    3rdparty/hunspell/hashmgr.cxx
+    3rdparty/hunspell/hunspell.cxx
+    3rdparty/hunspell/hunzip.cxx
+    3rdparty/hunspell/phonet.cxx
+    3rdparty/hunspell/replist.cxx
+    3rdparty/hunspell/suggestmgr.cxx
+    3rdparty/hunspell/utf_info.cxx
+    3rdparty/hunspell/hnjalloc.c
+    3rdparty/hunspell/hnjalloc.c
+    3rdparty/hunspell/hyphen.c)
+
 include_directories(src/)
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/src)
 add_subdirectory(src/customerdb)
