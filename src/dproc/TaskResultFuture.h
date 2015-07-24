@@ -11,6 +11,7 @@
 #define _FNORD_DPROC_TASKRESULT_H
 #include <fnord/stdtypes.h>
 #include <dproc/Task.h>
+#include <dproc/TaskRef.h>
 
 using namespace fnord;
 
@@ -29,20 +30,31 @@ struct TaskStatus {
 class TaskResultFuture : public RefCounted {
 public:
 
-  Future<RefPtr<Task>> result() const;
+  TaskResultFuture();
 
-  void returnResult(RefPtr<Task> result);
+  Future<RefPtr<TaskRef>> result() const;
+
+  void returnResult(RefPtr<TaskRef> result);
   void returnError(const StandardException& e);
 
   void updateStatus(Function<void (TaskStatus* status)> fn);
   void onStatusChange(Function<void ()> fn);
   TaskStatus status() const;
 
+  /**
+   * Cancel the result future // abort the task
+   */
+  void cancel();
+  bool isCancelled() const;
+  void onCancel(Function<void ()> fn);
+
 protected:
   TaskStatus status_;
   mutable std::mutex status_mutex_;
   Function<void ()> on_status_change_;
-  Promise<RefPtr<Task>> promise_;
+  Function<void ()> on_cancel_;
+  Promise<RefPtr<TaskRef>> promise_;
+  bool cancelled_;
 };
 
 } // namespace dproc

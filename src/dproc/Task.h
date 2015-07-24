@@ -25,6 +25,7 @@ namespace dproc {
 
 class Task;
 class TaskContext;
+class TaskRef;
 
 typedef Function<RefPtr<Task> (const Buffer& params)> TaskFactory;
 
@@ -35,6 +36,12 @@ struct TaskDependency {
   String task_name;
   Buffer params;
 };
+
+enum class StorageLevel {
+  DISK = 0,
+  MEMORY = 1
+};
+
 
 class Task : public RefCounted {
 public:
@@ -54,6 +61,10 @@ public:
 
   virtual String contentType() const {
     return "application/octet-stream";
+  }
+
+  virtual StorageLevel storageLevel() const {
+    return StorageLevel::DISK;
   }
 
   virtual RefPtr<VFSFile> encode() const = 0;
@@ -82,12 +93,11 @@ public:
 
   virtual ~TaskContext() {}
 
-  template <typename TaskType>
-  RefPtr<TaskType> getDependencyAs(size_t index);
-
-  virtual RefPtr<RDD> getDependency(size_t index) = 0;
+  virtual RefPtr<TaskRef> getDependency(size_t index) = 0;
 
   virtual size_t numDependencies() const = 0;
+
+  virtual bool isCancelled() const = 0;
 
 };
 
@@ -105,11 +115,6 @@ protected:
   ProtoType data_;
 };
 
-template <typename TaskType>
-RefPtr<TaskType> TaskContext::getDependencyAs(size_t index) {
-  return getDependency(index).asInstanceOf<TaskType>();
-}
-
 template <typename ProtoType>
 RefPtr<VFSFile> ProtoRDD<ProtoType>::encode() const {
   return msg::encode(data_).get();
@@ -122,4 +127,5 @@ void ProtoRDD<ProtoType>::decode(RefPtr<VFSFile> data) {
 
 } // namespace dproc
 
+#include <dproc/TaskRef.h>
 #endif
