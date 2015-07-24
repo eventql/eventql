@@ -8,8 +8,8 @@
  * <http://www.gnu.org/licenses/>.
  */
 #pragma once
-#include <fnord/stdtypes.h>
-#include <fnord/json/json.h>
+#include <stx/stdtypes.h>
+#include <stx/json/json.h>
 #include <chartsql/runtime/queryplan.h>
 #include <chartsql/runtime/charts/ChartStatement.h>
 

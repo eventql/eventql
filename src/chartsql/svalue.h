@@ -12,9 +12,9 @@
 #include <string>
 #include <string.h>
 #include <vector>
-#include <fnord/stdtypes.h>
-#include <fnord/UnixTime.h>
-#include <fnord/exception.h>
+#include <stx/stdtypes.h>
+#include <stx/UnixTime.h>
+#include <stx/exception.h>
 
 using namespace fnord;
 

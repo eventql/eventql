@@ -8,7 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 //#include <fnordmetric/environment.h>
-#include <fnord/logging.h>
+#include <stx/logging.h>
 #include <chartsql/backends/mysql/mysqlconnection.h>
 
 namespace csql {

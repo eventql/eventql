@@ -19,7 +19,7 @@
 #include <chartsql/runtime/tablerepository.h>
 #include <chartsql/runtime/compile.h>
 #include <chartsql/runtime/execute.h>
-#include <fnord/exception.h>
+#include <stx/exception.h>
 
 namespace csql {
 

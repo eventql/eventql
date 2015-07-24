@@ -7,9 +7,9 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <fnord/stdtypes.h>
-#include <fnord/csv/CSVInputStream.h>
-#include <fnord/exception.h>
+#include <stx/stdtypes.h>
+#include <stx/csv/CSVInputStream.h>
+#include <stx/exception.h>
 #include <chartsql/parser/astnode.h>
 #include <chartsql/backends/csv/csvtableref.h>
 #include <chartsql/runtime/tablescan.h>

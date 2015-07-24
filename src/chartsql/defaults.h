@@ -8,7 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #pragma once
-#include <fnord/stdtypes.h>
+#include <stx/stdtypes.h>
 #include <chartsql/runtime/runtime.h>
 #include <chartsql/expressions/aggregate.h>
 #include <chartsql/expressions/boolean.h>

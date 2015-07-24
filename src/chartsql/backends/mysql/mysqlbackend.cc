@@ -11,7 +11,7 @@
 #include <chartsql/backends/mysql/mysqlbackend.h>
 #include <chartsql/backends/mysql/mysqlconnection.h>
 #include <chartsql/backends/mysql/mysqltableref.h>
-#include <fnord/exception.h>
+#include <stx/exception.h>
 #include <memory>
 #include <mutex>
 

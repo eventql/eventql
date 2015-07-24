@@ -7,10 +7,10 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <fnord/stdtypes.h>
-#include <fnord/exception.h>
-#include <fnord/wallclock.h>
-#include <fnord/test/unittest.h>
+#include <stx/stdtypes.h>
+#include <stx/exception.h>
+#include <stx/wallclock.h>
+#include <stx/test/unittest.h>
 #include "chartsql/runtime/defaultruntime.h"
 #include "chartsql/qtree/SequentialScanNode.h"
 #include "chartsql/qtree/ColumnReferenceNode.h"

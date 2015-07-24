@@ -12,8 +12,8 @@
 #include <algorithm>
 #include <stdlib.h>
 #include <assert.h>
-#include <fnord/charts/domain.h>
-#include <fnord/charts/drawable.h>
+#include <stx/charts/domain.h>
+#include <stx/charts/drawable.h>
 #include <chartsql/svalue.h>
 
 namespace csql {
