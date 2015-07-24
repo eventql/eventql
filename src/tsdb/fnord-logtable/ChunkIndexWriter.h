@@ -7,13 +7,21 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-package tsdb;
-import "TableConfig.proto";
+#ifndef _FNORD_LOGTABLE_CHUNKINDEXWRITER_H
+#define _FNORD_LOGTABLE_CHUNKINDEXWRITER_H
+#include <fnord/stdtypes.h>
 
-message TSDBNodeConfig {
+namespace fnord {
+namespace cstable {
 
-  repeated TableConfig event_stream = 1;
+class ChunkIndexWriter {
+public:
 
-  repeated string include_protobuf_schema = 2;
+  ChunkIndexWriter(const String& directory, bool create);
 
 };
+
+} // namespace logtable
+} // namespace fnord
+
+#endif

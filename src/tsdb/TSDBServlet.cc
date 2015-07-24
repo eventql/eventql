@@ -19,6 +19,8 @@
 #include <fnord/util/Base64.h>
 #include <fnord/fnv.h>
 #include <sstable/sstablereader.h>
+#include <chartsql/runtime/ASCIITableFormat.h>
+#include <chartsql/runtime/JSONSSEStreamFormat.h>
 
 using namespace fnord;
 
@@ -36,6 +38,14 @@ void TSDBServlet::handleHTTPRequest(
   http::HTTPResponse res;
   res.populateFromRequest(req);
   res.addHeader("Access-Control-Allow-Origin", "*");
+  res.addHeader("Access-Control-Allow-Methods", "GET, POST");
+  res.addHeader("Access-Control-Allow-Headers", "X-TSDB-Namespace");
+
+  if (req.method() == http::HTTPMessage::M_OPTIONS) {
+    res.setStatus(http::kStatusOK);
+    res_stream->writeResponse(res);
+    return;
+  }
 
   try {
     if (uri.path() == "/tsdb/insert") {
@@ -52,6 +62,17 @@ void TSDBServlet::handleHTTPRequest(
     if (uri.path() == "/tsdb/partition_info") {
       fetchPartitionInfo(&req, &res, &uri);
       res_stream->writeResponse(res);
+      return;
+    }
+
+    if (uri.path() == "/tsdb/sql") {
+      executeSQL(&req, &res, &uri);
+      res_stream->writeResponse(res);
+      return;
+    }
+
+    if (uri.path() == "/tsdb/sql_stream") {
+      executeSQLStream(&req, &res, res_stream, &uri);
       return;
     }
 
@@ -113,6 +134,7 @@ void TSDBServlet::streamPartition(
   if (!URI::getParam(params, "namespace", &tsdb_namespace)) {
     res->setStatus(fnord::http::kStatusBadRequest);
     res->addBody("missing ?namespace=... parameter");
+    res_stream->writeResponse(*res);
     return;
   }
 
@@ -120,6 +142,7 @@ void TSDBServlet::streamPartition(
   if (!URI::getParam(params, "stream", &stream_key)) {
     res->setStatus(fnord::http::kStatusBadRequest);
     res->addBody("missing ?stream=... parameter");
+    res_stream->writeResponse(*res);
     return;
   }
 
@@ -127,6 +150,7 @@ void TSDBServlet::streamPartition(
   if (!URI::getParam(params, "partition", &partition_key)) {
     res->setStatus(fnord::http::kStatusBadRequest);
     res->addBody("missing ?partition=... parameter");
+    res_stream->writeResponse(*res);
     return;
   }
 
@@ -203,7 +227,6 @@ void TSDBServlet::streamPartition(
   res_stream->finishResponse();
 }
 
-
 void TSDBServlet::fetchPartitionInfo(
     const http::HTTPRequest* req,
     http::HTTPResponse* res,
@@ -246,6 +269,68 @@ void TSDBServlet::fetchPartitionInfo(
   res->addHeader("Content-Type", "application/x-protobuf");
   res->addBody(*msg::encode(pinfo));
 }
+
+void TSDBServlet::executeSQL(
+    const http::HTTPRequest* req,
+    http::HTTPResponse* res,
+    URI* uri) {
+  auto tsdb_namespace = req->getHeader("X-TSDB-Namespace");
+  auto query = req->body().toString();
+
+  Buffer result;
+  //node_->sqlEngine()->executeQuery(
+  //    tsdb_namespace,
+  //    query,
+  //    new csql::ASCIITableFormat(BufferOutputStream::fromBuffer(&result)));
+
+  res->setStatus(http::kStatusOK);
+  res->addHeader("Content-Type", "text/plain");
+  res->addHeader("Connection", "close");
+  res->addBody(result);
+}
+
+void TSDBServlet::executeSQLStream(
+    const http::HTTPRequest* req,
+    http::HTTPResponse* res,
+    RefPtr<http::HTTPResponseStream> res_stream,
+    URI* uri) {
+  http::HTTPSSEStream sse_stream(res, res_stream);
+  sse_stream.start();
+
+  try {
+    const auto& params = uri->queryParams();
+
+    String tsdb_namespace;
+    if (!URI::getParam(params, "namespace", &tsdb_namespace)) {
+      RAISE(kRuntimeError, "missing ?namespace=... parameter");
+    }
+
+    String query;
+    if (!URI::getParam(params, "query", &query)) {
+      RAISE(kRuntimeError, "missing ?query=... parameter");
+    }
+
+    //node_->sqlEngine()->executeQuery(
+    //    tsdb_namespace,
+    //    query,
+    //    new csql::JSONSSEStreamFormat(&sse_stream));
+
+  } catch (const StandardException& e) {
+    fnord::logError("sql", e, "SQL execution failed");
+
+    Buffer buf;
+    json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
+    json.beginObject();
+    json.addObjectEntry("error");
+    json.addString(e.what());
+    json.endObject();
+
+    sse_stream.sendEvent(buf, Some(String("error")));
+  }
+
+  sse_stream.finish();
+}
+
 
 }
 

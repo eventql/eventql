@@ -13,7 +13,10 @@
 #include <fnord/util/binarymessagewriter.h>
 #include <fnord/wallclock.h>
 #include <fnord/protobuf/MessageEncoder.h>
+#include <fnord/protobuf/MessageDecoder.h>
 #include <fnord/protobuf/msg.h>
+#include <cstable/CSTableBuilder.h>
+#include <sstable/sstablereader.h>
 
 using namespace fnord;
 
@@ -23,7 +26,7 @@ RefPtr<Partition> Partition::create(
     const SHA1Hash& partition_key,
     const String& stream_key,
     const String& db_key,
-    StreamConfig* config,
+    RefPtr<Table> table,
     TSDBNodeRef* node) {
 
   fnord::logDebug(
@@ -37,7 +40,7 @@ RefPtr<Partition> Partition::create(
           partition_key,
           stream_key,
           db_key,
-          config,
+          table,
           node));
 }
 
@@ -45,7 +48,7 @@ RefPtr<Partition> Partition::reopen(
     const SHA1Hash& partition_key,
     const PartitionState& state,
     const String& db_key,
-    StreamConfig* config,
+    RefPtr<Table> table,
     TSDBNodeRef* node) {
 
   fnord::logDebug(
@@ -59,7 +62,7 @@ RefPtr<Partition> Partition::reopen(
           partition_key,
           state,
           db_key,
-          config,
+          table,
           node));
 }
 
@@ -67,41 +70,43 @@ Partition::Partition(
     const SHA1Hash& partition_key,
     const String& stream_key,
     const String& db_key,
-    StreamConfig* config,
+    RefPtr<Table> table,
     TSDBNodeRef* node) :
-    stream_key_(stream_key),
     key_(partition_key),
+    stream_key_(stream_key),
     db_key_(db_key),
-    config_(config),
-    node_(node),
+    table_(table),
     records_(
         node->db_path,
         key_.toString().substr(0, 12)  + "."),
+    node_(node),
     last_compaction_(0) {
-  records_.setMaxDatafileSize(config_->sstable_size());
+  records_.setMaxDatafileSize(table_->sstableSize());
 }
 
 Partition::Partition(
     const SHA1Hash& partition_key,
     const PartitionState& state,
     const String& db_key,
-    StreamConfig* config,
+    RefPtr<Table> table,
     TSDBNodeRef* node) :
-    stream_key_(state.stream_key),
     key_(partition_key),
+    stream_key_(state.stream_key),
     db_key_(db_key),
-    config_(config),
-    node_(node),
+    table_(table),
     records_(
         node->db_path,
         key_.toString().substr(0, 12) + ".",
         state.record_state),
+    node_(node),
+    last_compaction_(0),
     repl_offsets_(state.repl_offsets),
-    last_compaction_(0) {
+    cstable_file_(state.cstable_file),
+    cstable_version_(state.cstable_version) {
   scheduleCompaction();
   node_->compactionq.insert(this, WallClock::unixMicros());
   node_->replicationq.insert(this, WallClock::unixMicros());
-  records_.setMaxDatafileSize(config_->sstable_size());
+  records_.setMaxDatafileSize(table_->sstableSize());
 }
 
 void Partition::insertRecord(
@@ -144,7 +149,7 @@ void Partition::insertRecords(const Vector<RecordRef>& records) {
 
 void Partition::scheduleCompaction() {
   auto now = WallClock::unixMicros();
-  auto interval = config_->compaction_interval();
+  auto interval = table_->compactionInterval().microseconds();
   auto last = last_compaction_.unixMicros();
   uint64_t compaction_delay = 0;
 
@@ -157,7 +162,7 @@ void Partition::scheduleCompaction() {
 
 void Partition::compact() {
   std::unique_lock<std::mutex> lk(mutex_);
-  last_compaction_ = DateTime::now();
+  last_compaction_ = UnixTime::now();
   lk.unlock();
 
   fnord::logDebug(
@@ -170,6 +175,28 @@ void Partition::compact() {
   records_.compact(&deleted_files);
 
   lk.lock();
+  auto version = records_.checksum();
+  auto cstable_file = cstable_file_;
+  auto cstable_version = cstable_version_;
+  auto sstable_files = records_.listDatafiles();
+  lk.unlock();
+
+  if (!(cstable_version == version)) {
+    auto new_cstable_file = SHA1::compute(
+        key_.toString() + version.toString()).toString() + ".cst";
+    buildCSTable(sstable_files, new_cstable_file);
+
+    if (cstable_file != new_cstable_file) {
+      deleted_files.emplace(cstable_file);
+    }
+
+    cstable_file = new_cstable_file;
+    cstable_version = version;
+  }
+
+  lk.lock();
+  cstable_file_ = cstable_file;
+  cstable_version_ = cstable_version;
   commitState();
   lk.unlock();
 
@@ -315,6 +342,8 @@ void Partition::commitState() {
   state.record_state = records_.getState();
   state.stream_key = stream_key_;
   state.repl_offsets = repl_offsets_;
+  state.cstable_file = cstable_file_;
+  state.cstable_version = cstable_version_;
 
   util::BinaryMessageWriter buf;
   state.encode(&buf);
@@ -322,6 +351,78 @@ void Partition::commitState() {
   auto txn = node_->db->startTransaction(false);
   txn->update(db_key_.data(), db_key_.size(), buf.data(), buf.size());
   txn->commit();
+}
+
+void Partition::buildCSTable(
+    const Vector<String>& input_files,
+    const String& output_file) {
+  fnord::logDebug(
+      "tsdb",
+      "Building cstable; stream='$0' partition='$1' output_file='$2'",
+      stream_key_,
+      key_.toString(),
+      output_file);
+
+  auto schema = table_->schema();
+  cstable::CSTableBuilder cstable(schema.get());
+
+  for (const auto& f : input_files) {
+    auto fpath = FileUtil::joinPaths(node_->db_path, f);
+    sstable::SSTableReader reader(fpath);
+    auto cursor = reader.getCursor();
+
+    while (cursor->valid()) {
+      uint64_t* key;
+      size_t key_size;
+      cursor->getKey((void**) &key, &key_size);
+      if (key_size != SHA1Hash::kSize) {
+        RAISE(kRuntimeError, "invalid row");
+      }
+
+      void* data;
+      size_t data_size;
+      cursor->getData(&data, &data_size);
+
+      msg::MessageObject obj;
+      msg::MessageDecoder::decode(data, data_size, *schema, &obj);
+      cstable.addRecord(obj);
+
+      if (!cursor->next()) {
+        break;
+      }
+    }
+  }
+
+  cstable.write(FileUtil::joinPaths(node_->db_path, output_file));
+}
+
+Option<cstable::CSTableReader> Partition::cstable() const {
+  std::unique_lock<std::mutex> lk(mutex_);
+
+  if (cstable_file_.empty()) {
+    return None<cstable::CSTableReader>();
+  } else {
+    auto cstable_file_path = FileUtil::joinPaths(
+        node_->db_path,
+        cstable_file_);
+
+    return Some(cstable::CSTableReader(cstable_file_path));
+  }
+}
+
+Option<RefPtr<VFSFile>> Partition::cstableFile() const {
+  std::unique_lock<std::mutex> lk(mutex_);
+
+  if (cstable_file_.empty()) {
+    return None<RefPtr<VFSFile>>();
+  } else {
+    auto cstable_file_path = FileUtil::joinPaths(
+        node_->db_path,
+        cstable_file_);
+
+    return Some<RefPtr<VFSFile>>(
+        new io::MmappedFile(File::openFile(cstable_file_path, File::O_READ)));
+  }
 }
 
 void PartitionState::encode(
@@ -336,6 +437,8 @@ void PartitionState::encode(
   }
 
   writer->appendVarUInt(record_state.version);
+  writer->appendLenencString(cstable_file);
+  writer->append(cstable_version.data(), cstable_version.size());
 }
 
 void PartitionState::decode(util::BinaryMessageReader* reader) {
@@ -350,6 +453,10 @@ void PartitionState::decode(util::BinaryMessageReader* reader) {
   }
 
   record_state.version = reader->readVarUInt();
+  if (reader->remaining() > 0) {
+    cstable_file = reader->readLenencString();
+    cstable_version = SHA1Hash(reader->read(SHA1Hash::kSize), SHA1Hash::kSize);
+  }
 }
 
 }

@@ -14,11 +14,16 @@
 #include <fnord/option.h>
 #include <fnord/thread/queue.h>
 #include <fnord/mdb/MDB.h>
-#include <tsdb/StreamConfig.pb.h>
+#include <tsdb/TableConfig.pb.h>
 #include <tsdb/Partition.h>
 #include <tsdb/TSDBNodeRef.h>
 #include <tsdb/CompactionWorker.h>
 #include <tsdb/ReplicationWorker.h>
+#include <tsdb/TSDBNodeConfig.pb.h>
+#include <tsdb/TSDBTableInfo.h>
+#include <tsdb/SQLEngine.h>
+#include <tsdb/PartitionInfo.pb.h>
+#include <tsdb/RecordEnvelope.pb.h>
 
 using namespace fnord;
 
@@ -32,13 +37,17 @@ public:
       RefPtr<dproc::ReplicationScheme> replication_scheme,
       http::HTTPConnectionPool* http);
 
-  void configurePrefix(
-      const String& tsdb_namespace,
-      StreamConfig config);
+  void configure(const TSDBNodeConfig& config, const String& base_path);
 
-  StreamConfig* configFor(
+  void createTable(const TableConfig& config);
+
+  Option<RefPtr<Table>> findTable(
       const String& tsdb_namespace,
-      const String& stream_key) const;
+      const String& table_name) const;
+
+  void listTables(
+      const String& tsdb_namespace,
+      Function<void (const TSDBTableInfo& table)> fn) const;
 
   Option<RefPtr<Partition>> findPartition(
       const String& tsdb_namespace,
@@ -48,6 +57,35 @@ public:
   RefPtr<Partition> findOrCreatePartition(
       const String& tsdb_namespace,
       const String& stream_key,
+      const SHA1Hash& partition_key);
+
+  void fetchPartition(
+      const String& tsdb_namespace,
+      const String& stream_key,
+      const SHA1Hash& partition_key,
+      Function<void (const Buffer& record)> fn);
+
+  void fetchPartitionWithSampling(
+      const String& tsdb_namespace,
+      const String& stream_key,
+      const SHA1Hash& partition_key,
+      size_t sample_modulo,
+      size_t sample_index,
+      Function<void (const Buffer& record)> fn);
+
+  Vector<String> listPartitions(
+      const String& tsdb_namespace,
+      const String& table_key,
+      const UnixTime& from,
+      const UnixTime& until);
+
+  Option<TSDBTableInfo> tableInfo(
+      const String& tsdb_namespace,
+      const String& table_key) const;
+
+  Option<PartitionInfo> partitionInfo(
+      const String& tsdb_namespace,
+      const String& table_key,
       const SHA1Hash& partition_key);
 
   const String& dbPath() const;
@@ -62,12 +100,17 @@ protected:
 
   void reopenPartitions();
 
+  Option<RefPtr<Table>> findTableWithLock(
+      const String& tsdb_namespace,
+      const String& table_name) const;
+
   TSDBNodeRef noderef_;
-  Vector<Pair<String, ScopedPtr<StreamConfig>>> configs_;
-  std::mutex mutex_;
+  mutable std::mutex mutex_;
+  HashMap<String, RefPtr<Table>> tables_;
   HashMap<String, RefPtr<Partition>> partitions_;
   Vector<RefPtr<CompactionWorker>> compaction_workers_;
   Vector<RefPtr<ReplicationWorker>> replication_workers_;
+  msg::MessageSchemaRepository schemas_;
 };
 
 } // namespace tdsb

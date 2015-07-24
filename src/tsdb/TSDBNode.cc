@@ -8,61 +8,72 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <fnord/util/Base64.h>
+#include <fnord/fnv.h>
 #include <tsdb/TSDBNode.h>
+#include <sstable/sstablereader.h>
 
 using namespace fnord;
 
 namespace tsdb {
 
+static mdb::MDBOptions tsdb_mdb_opts() {
+  mdb::MDBOptions opts;
+  opts.data_filename = "index.db";
+  opts.lock_filename = "index.db.lck";
+  return opts;
+};
+
 TSDBNode::TSDBNode(
     const String& db_path,
     RefPtr<dproc::ReplicationScheme> replication_scheme,
     http::HTTPConnectionPool* http) :
-    noderef_{
-        .db_path = db_path,
-        .db = mdb::MDB::open(
+    noderef_(
+        db_path,
+        mdb::MDB::open(
             db_path,
-            false,
-            1024 * 1024 * 1024, // 1 GiB
-            "index.db",
-            "index.db.lck"),
-        .replication_scheme = replication_scheme,
-        .http = http} {}
+            tsdb_mdb_opts()),
+        replication_scheme,
+        http) {}
 
-// FIXPAUL proper longest prefix search ;)
-StreamConfig* TSDBNode::configFor(
+Option<RefPtr<Table>> TSDBNode::findTable(
     const String& stream_ns,
     const String& stream_key) const {
-  StreamConfig* config = nullptr;
-  size_t match_len = 0;
-
-  auto stream_ns_key = stream_ns + "~" + stream_key;
-  for (const auto& cfg : configs_) {
-    if (!StringUtil::beginsWith(stream_ns_key, cfg.first)) {
-      continue;
-    }
-
-    if (cfg.first.length() > match_len) {
-      config = cfg.second.get();
-      match_len = cfg.first.length();
-    }
-  }
-
-  if (config == nullptr) {
-    RAISEF(kIndexError, "no config found for stream key: '$0'", stream_key);
-  }
-
-  return config;
+  std::unique_lock<std::mutex> lk(mutex_);
+  return findTableWithLock(stream_ns, stream_key);
 }
 
-void TSDBNode::configurePrefix(
+Option<RefPtr<Table>> TSDBNode::findTableWithLock(
     const String& stream_ns,
-    StreamConfig config) {
-  auto stream_ns_key = stream_ns + "~" + config.stream_key_prefix();
+    const String& stream_key) const {
+  auto stream_ns_key = stream_ns + "~" + stream_key;
 
-  configs_.emplace_back(
+  const auto& iter = tables_.find(stream_ns_key);
+  if (iter == tables_.end()) {
+    return None<RefPtr<Table>>();
+  } else {
+    return Some(iter->second);
+  }
+}
+
+void TSDBNode::configure(const TSDBNodeConfig& conf, const String& base_path) {
+  for (const auto& schema_file : conf.include_protobuf_schema()) {
+    schemas_.loadProtobufFile(base_path, schema_file);
+  }
+
+  for (const auto& sc : conf.event_stream()) {
+    createTable(sc);
+  }
+}
+
+void TSDBNode::createTable(const TableConfig& table) {
+  std::unique_lock<std::mutex> lk(mutex_);
+  auto stream_ns_key = table.tsdb_namespace() + "~" + table.table_name();
+
+  tables_.emplace(
       stream_ns_key,
-      ScopedPtr<StreamConfig>(new StreamConfig(config)));
+      new Table(
+          table,
+          schemas_.getSchema(table.schema())));
 }
 
 void TSDBNode::start(
@@ -135,7 +146,7 @@ void TSDBNode::reopenPartitions() {
         partition_key,
         state,
         db_key,
-        configFor(tsdb_namespace, state.stream_key),
+        findTableWithLock(tsdb_namespace, state.stream_key).get(),
         &noderef_);
 
     partitions_.emplace(db_key, partition);
@@ -162,7 +173,7 @@ RefPtr<Partition> TSDBNode::findOrCreatePartition(
       partition_key,
       stream_key,
       db_key,
-      configFor(tsdb_namespace, stream_key),
+      findTableWithLock(tsdb_namespace, stream_key).get(),
       &noderef_);
 
   partitions_.emplace(db_key, partition);
@@ -185,10 +196,114 @@ Option<RefPtr<Partition>> TSDBNode::findPartition(
   }
 }
 
+void TSDBNode::fetchPartition(
+    const String& tsdb_namespace,
+    const String& stream_key,
+    const SHA1Hash& partition_key,
+    Function<void (const Buffer& record)> fn) {
+  fetchPartitionWithSampling(
+      tsdb_namespace,
+      stream_key,
+      partition_key,
+      0,
+      0,
+      fn);
+}
+
+void TSDBNode::fetchPartitionWithSampling(
+    const String& tsdb_namespace,
+    const String& stream_key,
+    const SHA1Hash& partition_key,
+    size_t sample_modulo,
+    size_t sample_index,
+    Function<void (const Buffer& record)> fn) {
+  auto partition = findPartition(tsdb_namespace, stream_key, partition_key);
+  if (partition.isEmpty()) {
+    return;
+  }
+
+  FNV<uint64_t> fnv;
+  auto files = partition.get()->listFiles();
+
+  for (const auto& f : files) {
+    auto fpath = FileUtil::joinPaths(dbPath(), f);
+    sstable::SSTableReader reader(fpath);
+    auto cursor = reader.getCursor();
+
+    while (cursor->valid()) {
+      uint64_t* key;
+      size_t key_size;
+      cursor->getKey((void**) &key, &key_size);
+      if (key_size != SHA1Hash::kSize) {
+        RAISE(kRuntimeError, "invalid row");
+      }
+
+      if (sample_modulo == 0 ||
+          (fnv.hash(key, key_size) % sample_modulo == sample_index)) {
+        void* data;
+        size_t data_size;
+        cursor->getData(&data, &data_size);
+
+        fn(Buffer(data, data_size));
+      }
+
+      if (!cursor->next()) {
+        break;
+      }
+    }
+  }
+}
+
+void TSDBNode::listTables(
+    const String& tsdb_namespace,
+    Function<void (const TSDBTableInfo& table)> fn) const {
+  for (const auto& tbl : tables_) {
+    if (tbl.second->tsdbNamespace() != tsdb_namespace) {
+      continue;
+    }
+
+    TSDBTableInfo ti;
+    ti.table_name = tbl.second->name();
+    ti.config = tbl.second->config();
+    ti.schema = tbl.second->schema();
+    fn(ti);
+  }
+}
+
+Option<TSDBTableInfo> TSDBNode::tableInfo(
+      const String& tsdb_namespace,
+      const String& table_key) const {
+  auto table = findTable(tsdb_namespace, table_key);
+  if (table.isEmpty()) {
+    return None<TSDBTableInfo>();
+  }
+
+  TSDBTableInfo ti;
+  ti.table_name = table.get()->name();
+  ti.config = table.get()->config();
+  ti.schema = table.get()->schema();
+  return Some(ti);
+}
+
+Option<PartitionInfo> TSDBNode::partitionInfo(
+    const String& tsdb_namespace,
+    const String& table_key,
+    const SHA1Hash& partition_key) {
+  auto partition = findPartition(
+      tsdb_namespace,
+      table_key,
+      partition_key);
+
+  if (partition.isEmpty()) {
+    return None<PartitionInfo>();
+  } else {
+    return Some(partition.get()->partitionInfo());
+  }
+}
+
 const String& TSDBNode::dbPath() const {
   return noderef_.db_path;
 }
-
 
 } // namespace tdsb
 

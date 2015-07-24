@@ -27,6 +27,16 @@ namespace tsdb {
 class Partition;
 
 struct TSDBNodeRef {
+  TSDBNodeRef(
+      const String& _db_path,
+      RefPtr<mdb::MDB> _db,
+      RefPtr<dproc::ReplicationScheme> _replication_scheme,
+      http::HTTPConnectionPool* _http) :
+      db_path(_db_path),
+      db(_db),
+      replication_scheme(_replication_scheme),
+      http(_http) {}
+
   const String db_path;
   thread::CoalescingDelayedQueue<Partition> compactionq;
   thread::CoalescingDelayedQueue<Partition> replicationq;

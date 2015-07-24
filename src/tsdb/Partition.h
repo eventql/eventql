@@ -11,23 +11,27 @@
 #define _FNORD_TSDB_STREAMCHUNK_H
 #include <fnord/stdtypes.h>
 #include <fnord/option.h>
-#include <fnord/datetime.h>
+#include <fnord/UnixTime.h>
 #include <fnord/util/binarymessagereader.h>
 #include <fnord/util/binarymessagewriter.h>
 #include <fnord/protobuf/MessageSchema.h>
-#include <tsdb/StreamConfig.pb.h>
+#include <tsdb/Table.h>
 #include <tsdb/RecordSet.h>
 #include <tsdb/TSDBNodeRef.h>
 #include <tsdb/PartitionInfo.pb.h>
+#include <cstable/CSTableReader.h>
 
 using namespace fnord;
 
 namespace tsdb {
+class Table;
 
 struct PartitionState {
   String stream_key;
   RecordSet::RecordSetState record_state;
   HashMap<uint64_t, uint64_t> repl_offsets;
+  String cstable_file;
+  SHA1Hash cstable_version;
   void encode(util::BinaryMessageWriter* writer) const;
   void decode(util::BinaryMessageReader* reader);
 };
@@ -39,14 +43,14 @@ public:
       const SHA1Hash& partition_key,
       const String& stream_key,
       const String& db_key,
-      StreamConfig* config,
+      RefPtr<Table> table,
       TSDBNodeRef* node);
 
   static RefPtr<Partition> reopen(
       const SHA1Hash& partition_key,
       const PartitionState& state,
       const String& db_key,
-      StreamConfig* config,
+      RefPtr<Table> table,
       TSDBNodeRef* node);
 
   void insertRecord(
@@ -58,6 +62,9 @@ public:
   PartitionInfo partitionInfo() const;
   Vector<String> listFiles() const;
 
+  Option<cstable::CSTableReader> cstable() const;
+  Option<RefPtr<VFSFile>> cstableFile() const;
+
   void compact();
   void replicate();
 
@@ -67,30 +74,36 @@ protected:
       const SHA1Hash& partition_key,
       const String& stream_key,
       const String& db_key,
-      StreamConfig* config,
+      RefPtr<Table> table,
       TSDBNodeRef* node);
 
   Partition(
       const SHA1Hash& partition_key,
       const PartitionState& state,
       const String& db_key,
-      StreamConfig* config,
+      RefPtr<Table> table,
       TSDBNodeRef* node);
 
   void scheduleCompaction();
   void commitState();
   uint64_t replicateTo(const String& addr, uint64_t offset);
 
-  SHA1Hash key_;
-  String stream_key_;
-  String db_key_;
+  void buildCSTable(
+    const Vector<String>& input_files,
+    const String& output_file);
+
+  const SHA1Hash key_;
+  const String stream_key_;
+  const String db_key_;
+  const RefPtr<Table> table_;
   RecordSet records_;
-  StreamConfig* config_;
   TSDBNodeRef* node_;
-  std::mutex mutex_;
+  mutable std::mutex mutex_;
   std::mutex replication_mutex_;
-  DateTime last_compaction_;
+  UnixTime last_compaction_;
   HashMap<uint64_t, uint64_t> repl_offsets_;
+  String cstable_file_;
+  SHA1Hash cstable_version_;
 };
 
 }

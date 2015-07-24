@@ -17,7 +17,7 @@ namespace tsdb {
 
 SHA1Hash TimeWindowPartitioner::partitionKeyFor(
     const String& stream_key,
-    DateTime time,
+    UnixTime time,
     Duration window_size) {
   util::BinaryMessageWriter buf(stream_key.size() + 32);
 
@@ -33,8 +33,8 @@ SHA1Hash TimeWindowPartitioner::partitionKeyFor(
 
 Vector<SHA1Hash> TimeWindowPartitioner::partitionKeysFor(
     const String& stream_key,
-    DateTime from,
-    DateTime until,
+    UnixTime from,
+    UnixTime until,
     Duration window_size) {
   auto cs = window_size.microseconds();
   auto first_chunk = (from.unixMicros() / cs) * cs;

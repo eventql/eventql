@@ -9,7 +9,7 @@
  */
 package tsdb;
 
-message StreamConfig {
+message TableConfig {
 
   /**
    * The tsdb namespace to be configured
@@ -17,10 +17,20 @@ message StreamConfig {
   required string tsdb_namespace = 6;
 
   /**
+   * The full path/name of the schema
+   */
+  required string schema = 7;
+
+  /**
    * The stream key prefix for which this config should be applied/. (empty
    * matches all streams, longest prefix wins)
    */
-  optional string stream_key_prefix = 1;
+  optional string table_name = 1;
+
+  /**
+   * The partition size in microseconds
+   */
+  optional uint64 partition_size = 8;
 
   /**
    * The maximum sstable size in bytes

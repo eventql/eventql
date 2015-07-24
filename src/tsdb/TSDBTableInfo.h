@@ -9,29 +9,17 @@
  */
 #pragma once
 #include <fnord/stdtypes.h>
-#include <fnord/option.h>
-#include <fnord/UnixTime.h>
-#include <fnord/duration.h>
-#include <fnord/SHA1.h>
+#include <fnord/protobuf/MessageSchema.h>
+#include <tsdb/TableConfig.pb.h>
 
 using namespace fnord;
 
 namespace tsdb {
 
-class TimeWindowPartitioner : public RefCounted {
-public:
-
-  static SHA1Hash partitionKeyFor(
-      const String& stream_key,
-      UnixTime time,
-      Duration window_size);
-
-  static Vector<SHA1Hash> partitionKeysFor(
-      const String& stream_key,
-      UnixTime from,
-      UnixTime until,
-      Duration window_size);
-
+struct TSDBTableInfo {
+  String table_name;
+  RefPtr<msg::MessageSchema> schema;
+  TableConfig config;
 };
 
 }

@@ -23,6 +23,7 @@ namespace tsdb {
 
 class TSDBClient {
 public:
+  size_t kMaxInsertBachSize = 1024;
 
   TSDBClient(
       const String& uri,
@@ -38,10 +39,10 @@ public:
       const SHA1Hash& record_id,
       const Buffer& record_data);
 
-  Vector<String> listPartitions(
-      const String& stream_key,
-      const DateTime& from,
-      const DateTime& until);
+  //Vector<String> listPartitions(
+  //    const String& stream_key,
+  //    const UnixTime& from,
+  //    const UnixTime& until);
 
   void fetchPartition(
       const String& tsdb_namespace,
@@ -57,19 +58,24 @@ public:
       size_t sample_index,
       Function<void (const Buffer& record)> fn);
 
-  PartitionInfo fetchPartitionInfo(
-      const String& tsdb_namespace,
-      const String& stream_key,
-      const SHA1Hash& partition_key);
+  //PartitionInfo fetchPartitionInfo(
+  //    const String& tsdb_namespace,
+  //    const String& stream_key,
+  //    const SHA1Hash& partition_key);
 
-  Buffer fetchDerivedDataset(
-      const String& stream_key,
-      const String& partition,
-      const String& derived_dataset_name);
+  //Buffer fetchDerivedDataset(
+  //    const String& stream_key,
+  //    const String& partition,
+  //    const String& derived_dataset_name);
 
   uint64_t mkMessageID();
 
 protected:
+
+  void insertRecordsToHost(
+      const String& host,
+      const RecordEnvelopeList& records);
+
   String uri_;
   http::HTTPConnectionPool* http_;
   Random rnd_;

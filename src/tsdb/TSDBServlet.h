@@ -12,6 +12,7 @@
 #include "fnord/http/httpservice.h"
 #include <fnord/random.h>
 #include <tsdb/TSDBNode.h>
+#include <fnord/http/HTTPSSEStream.h>
 
 using namespace fnord;
 
@@ -42,6 +43,17 @@ protected:
   void fetchPartitionInfo(
       const http::HTTPRequest* req,
       http::HTTPResponse* res,
+      URI* uri);
+
+  void executeSQL(
+      const http::HTTPRequest* req,
+      http::HTTPResponse* res,
+      URI* uri);
+
+  void executeSQLStream(
+      const http::HTTPRequest* req,
+      http::HTTPResponse* res,
+      RefPtr<http::HTTPResponseStream> res_stream,
       URI* uri);
 
   TSDBNode* node_;

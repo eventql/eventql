@@ -9,29 +9,22 @@
  */
 #pragma once
 #include <fnord/stdtypes.h>
-#include <fnord/option.h>
 #include <fnord/UnixTime.h>
-#include <fnord/duration.h>
+#include <fnord/option.h>
 #include <fnord/SHA1.h>
 
 using namespace fnord;
 
 namespace tsdb {
 
-class TimeWindowPartitioner : public RefCounted {
-public:
+struct TSDBTableRef {
+  static TSDBTableRef parse(const String& table_ref);
 
-  static SHA1Hash partitionKeyFor(
-      const String& stream_key,
-      UnixTime time,
-      Duration window_size);
-
-  static Vector<SHA1Hash> partitionKeysFor(
-      const String& stream_key,
-      UnixTime from,
-      UnixTime until,
-      Duration window_size);
-
+  String table_key;
+  Option<String> host;
+  Option<SHA1Hash> partition_key;
+  Option<UnixTime> timerange_begin;
+  Option<UnixTime> timerange_limit;
 };
 
-}
+} // namespace csql

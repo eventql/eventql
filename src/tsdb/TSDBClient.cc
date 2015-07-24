@@ -50,7 +50,29 @@ void TSDBClient::insertRecord(const RecordEnvelope& record) {
 }
 
 void TSDBClient::insertRecords(const RecordEnvelopeList& records) {
-  auto uri = URI(StringUtil::format("$0/insert", uri_));
+  HashMap<String, List<RecordEnvelopeList>> batches;
+
+  for (const auto& r : records.records()) {
+    auto& list = batches[uri_];
+
+    if (list.empty() || list.back().records().size() > kMaxInsertBachSize) {
+      list.emplace_back();
+    }
+
+    *list.back().add_records() = r;
+  }
+
+  for (const auto& per_host : batches) {
+    for (const auto& b : per_host.second) {
+      insertRecordsToHost(per_host.first, b);
+    }
+  }
+}
+
+void TSDBClient::insertRecordsToHost(
+    const String& host,
+    const RecordEnvelopeList& records) {
+  auto uri = URI(StringUtil::format("$0/insert", host));
 
   http::HTTPRequest req(http::HTTPMessage::M_POST, uri.pathAndQuery());
   req.addHeader("Host", uri.hostAndPort());
@@ -65,35 +87,35 @@ void TSDBClient::insertRecords(const RecordEnvelopeList& records) {
   }
 }
 
-Vector<String> TSDBClient::listPartitions(
-    const String& stream_key,
-    const DateTime& from,
-    const DateTime& until) {
-  auto uri = StringUtil::format(
-      "$0/list_chunks?stream=$1&from=$2&until=$3",
-      uri_,
-      URI::urlEncode(stream_key),
-      from.unixMicros(),
-      until.unixMicros());
-
-  auto req = http::HTTPRequest::mkGet(uri);
-  auto res = http_->executeRequest(req);
-  res.wait();
-
-  const auto& r = res.get();
-  if (r.statusCode() != 200) {
-    RAISEF(kRuntimeError, "received non-200 response: $0", r.body().toString());
-  }
-
-  Vector<String> partitions;
-  const auto& body = r.body();
-  util::BinaryMessageReader reader(body.data(), body.size());
-  while (reader.remaining() > 0) {
-    partitions.emplace_back(reader.readLenencString());
-  }
-
-  return partitions;
-}
+//Vector<String> TSDBClient::listPartitions(
+//    const String& stream_key,
+//    const UnixTime& from,
+//    const UnixTime& until) {
+//  auto uri = StringUtil::format(
+//      "$0/list_chunks?stream=$1&from=$2&until=$3",
+//      uri_,
+//      URI::urlEncode(stream_key),
+//      from.unixMicros(),
+//      until.unixMicros());
+//
+//  auto req = http::HTTPRequest::mkGet(uri);
+//  auto res = http_->executeRequest(req);
+//  res.wait();
+//
+//  const auto& r = res.get();
+//  if (r.statusCode() != 200) {
+//    RAISEF(kRuntimeError, "received non-200 response: $0", r.body().toString());
+//  }
+//
+//  Vector<String> partitions;
+//  const auto& body = r.body();
+//  util::BinaryMessageReader reader(body.data(), body.size());
+//  while (reader.remaining() > 0) {
+//    partitions.emplace_back(reader.readLenencString());
+//  }
+//
+//  return partitions;
+//}
 
 void TSDBClient::fetchPartition(
     const String& tsdb_namespace,
@@ -181,51 +203,51 @@ void TSDBClient::fetchPartitionWithSampling(
   }
 }
 
-PartitionInfo TSDBClient::fetchPartitionInfo(
-    const String& tsdb_namespace,
-    const String& stream_key,
-    const SHA1Hash& partition_key) {
-  auto uri = StringUtil::format(
-      "$0/partition_info?namespace=$1&stream=$2&partition=$3",
-      uri_,
-      URI::urlEncode(tsdb_namespace),
-      URI::urlEncode(stream_key),
-      partition_key.toString());
-
-  auto req = http::HTTPRequest::mkGet(uri);
-  auto res = http_->executeRequest(req);
-  res.wait();
-
-  const auto& r = res.get();
-  if (r.statusCode() != 200) {
-    RAISEF(kRuntimeError, "received non-200 response: $0", r.body().toString());
-  }
-
-  return msg::decode<PartitionInfo>(r.body());
-}
-
-Buffer TSDBClient::fetchDerivedDataset(
-    const String& stream_key,
-    const String& partition,
-    const String& derived_dataset_name) {
-  auto uri = StringUtil::format(
-      "$0/fetch_derived_dataset?chunk=$1&derived_dataset=$2",
-      uri_,
-      URI::urlEncode(partition),
-      URI::urlEncode(derived_dataset_name));
-
-  auto req = http::HTTPRequest::mkGet(uri);
-  auto res = http_->executeRequest(req);
-  res.wait();
-
-  const auto& r = res.get();
-  if (r.statusCode() != 200) {
-    RAISEF(kRuntimeError, "received non-200 response: $0", r.body().toString());
-  }
-
-  return r.body();
-}
-
+//PartitionInfo TSDBClient::fetchPartitionInfo(
+//    const String& tsdb_namespace,
+//    const String& stream_key,
+//    const SHA1Hash& partition_key) {
+//  auto uri = StringUtil::format(
+//      "$0/partition_info?namespace=$1&stream=$2&partition=$3",
+//      uri_,
+//      URI::urlEncode(tsdb_namespace),
+//      URI::urlEncode(stream_key),
+//      partition_key.toString());
+//
+//  auto req = http::HTTPRequest::mkGet(uri);
+//  auto res = http_->executeRequest(req);
+//  res.wait();
+//
+//  const auto& r = res.get();
+//  if (r.statusCode() != 200) {
+//    RAISEF(kRuntimeError, "received non-200 response: $0", r.body().toString());
+//  }
+//
+//  return msg::decode<PartitionInfo>(r.body());
+//}
+//
+//Buffer TSDBClient::fetchDerivedDataset(
+//    const String& stream_key,
+//    const String& partition,
+//    const String& derived_dataset_name) {
+//  auto uri = StringUtil::format(
+//      "$0/fetch_derived_dataset?chunk=$1&derived_dataset=$2",
+//      uri_,
+//      URI::urlEncode(partition),
+//      URI::urlEncode(derived_dataset_name));
+//
+//  auto req = http::HTTPRequest::mkGet(uri);
+//  auto res = http_->executeRequest(req);
+//  res.wait();
+//
+//  const auto& r = res.get();
+//  if (r.statusCode() != 200) {
+//    RAISEF(kRuntimeError, "received non-200 response: $0", r.body().toString());
+//  }
+//
+//  return r.body();
+//}
+//
 uint64_t TSDBClient::mkMessageID() {
   return rnd_.random64();
 }
