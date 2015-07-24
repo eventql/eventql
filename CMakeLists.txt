@@ -35,9 +35,6 @@ include_directories(${TSDB_INCLUDE})
 add_subdirectory(app/inventoryd)
 include_directories(${INVENTORYD_INCLUDE})
 
-add_subdirectory(app/logjoind)
-include_directories(${LOGJOIND_INCLUDE})
-
 add_subdirectory(app/metricd)
 include_directories(${METRICD_INCLUDE})
 
