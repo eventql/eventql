@@ -13,7 +13,7 @@
 
 #include <tuple>
 #include <string>
-#include "fnord/inspect.h"
+#include "stx/inspect.h"
 
 namespace fnord {
 

@@ -7,11 +7,11 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <fnord/stdtypes.h>
-#include "fnord/exception.h"
-#include "fnord/UTF8.h"
-#include <fnord/human.h>
-#include <fnord/ISO8601.h>
+#include <stx/stdtypes.h>
+#include "stx/exception.h"
+#include "stx/UTF8.h"
+#include <stx/human.h>
+#include <stx/ISO8601.h>
 
 namespace fnord {
 

@@ -11,9 +11,9 @@
 #define _FNORD_STATS_COUNTER_H
 #include <stdlib.h>
 #include <stdint.h>
-#include "fnord/UnixTime.h"
-#include "fnord/hash.h"
-#include "fnord/stats/stat.h"
+#include "stx/UnixTime.h"
+#include "stx/hash.h"
+#include "stx/stats/stat.h"
 
 namespace fnord {
 namespace stats {

@@ -13,8 +13,8 @@
 #include <inttypes.h>
 #include <limits>
 #include <string>
-#include "fnord/time_constants.h"
-#include "fnord/CivilTime.h"
+#include "stx/time_constants.h"
+#include "stx/CivilTime.h"
 
 namespace fnord {
 

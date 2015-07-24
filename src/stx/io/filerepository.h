@@ -12,7 +12,7 @@
 #include <functional>
 #include <string>
 #include <vector>
-#include "fnord/random.h"
+#include "stx/random.h"
 
 namespace fnord {
 

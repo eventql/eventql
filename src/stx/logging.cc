@@ -9,10 +9,10 @@
  */
 #include <sstream>
 #include <stdarg.h>
-#include <fnord/exception.h>
-#include <fnord/inspect.h>
-#include <fnord/wallclock.h>
-#include <fnord/logging.h>
+#include <stx/exception.h>
+#include <stx/inspect.h>
+#include <stx/wallclock.h>
+#include <stx/logging.h>
 
 using fnord::Exception;
 

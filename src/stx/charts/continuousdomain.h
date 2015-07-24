@@ -9,9 +9,9 @@
  */
 #ifndef _FNORDMETRIC_CONTINUOUSDOMAIN_H
 #define _FNORDMETRIC_CONTINUOUSDOMAIN_H
-#include "fnord/exception.h"
-#include "fnord/stringutil.h"
-#include "fnord/charts/domain.h"
+#include "stx/exception.h"
+#include "stx/stringutil.h"
+#include "stx/charts/domain.h"
 
 namespace fnord {
 namespace chart {

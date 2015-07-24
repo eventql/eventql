@@ -8,9 +8,9 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <string>
-#include <fnord/bufferutil.h>
-#include <fnord/stringutil.h>
-#include <fnord/UTF8.h>
+#include <stx/bufferutil.h>
+#include <stx/stringutil.h>
+#include <stx/UTF8.h>
 
 namespace fnord {
 

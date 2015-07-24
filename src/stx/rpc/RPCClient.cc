@@ -7,8 +7,8 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include "fnord/logging.h"
-#include "fnord/rpc/RPCClient.h"
+#include "stx/logging.h"
+#include "stx/rpc/RPCClient.h"
 
 namespace fnord {
 

@@ -9,10 +9,10 @@
  */
 #ifndef _FNORD_UTIL_HMAC_H
 #define _FNORD_UTIL_HMAC_H
-#include <fnord/stdtypes.h>
-#include <fnord/exception.h>
-#include <fnord/buffer.h>
-#include <fnord/SHA1.h>
+#include <stx/stdtypes.h>
+#include <stx/exception.h>
+#include <stx/buffer.h>
+#include <stx/SHA1.h>
 
 namespace fnord {
 

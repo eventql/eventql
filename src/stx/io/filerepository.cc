@@ -7,9 +7,9 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <fnord/random.h>
-#include <fnord/io/filerepository.h>
-#include <fnord/io/fileutil.h>
+#include <stx/random.h>
+#include <stx/io/filerepository.h>
+#include <stx/io/fileutil.h>
 
 namespace fnord {
 

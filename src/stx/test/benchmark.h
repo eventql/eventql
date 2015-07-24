@@ -11,7 +11,7 @@
 #define _FNORD_TEST_BENCHMARK_H
 #include <stdlib.h>
 #include <stdint.h>
-#include "fnord/UnixTime.h"
+#include "stx/UnixTime.h"
 
 namespace fnord {
 

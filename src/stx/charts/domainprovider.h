@@ -12,8 +12,8 @@
 #include <algorithm>
 #include <stdlib.h>
 #include <math.h>
-#include "fnord/charts/domain.h"
-#include "fnord/exception.h"
+#include "stx/charts/domain.h"
+#include "stx/exception.h"
 
 namespace fnord {
 namespace chart {

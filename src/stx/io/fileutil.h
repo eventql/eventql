@@ -9,8 +9,8 @@
  */
 #ifndef _FNORDMETRIC_UTIL_FILEUTIL_H_
 #define _FNORDMETRIC_UTIL_FILEUTIL_H_
-#include "fnord/buffer.h"
-#include "fnord/stdtypes.h"
+#include "stx/buffer.h"
+#include "stx/stdtypes.h"
 
 namespace fnord {
 

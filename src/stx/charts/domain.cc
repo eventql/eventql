@@ -7,10 +7,10 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include "fnord/charts/domain.h"
-#include "fnord/charts/continuousdomain.h"
-#include "fnord/charts/discretedomain.h"
-#include "fnord/charts/timedomain.h"
+#include "stx/charts/domain.h"
+#include "stx/charts/continuousdomain.h"
+#include "stx/charts/discretedomain.h"
+#include "stx/charts/timedomain.h"
 
 using namespace fnord;
 namespace fnord {

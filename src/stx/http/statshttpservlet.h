@@ -9,9 +9,9 @@
  */
 #ifndef _FNORD_STATS_STATSHTTPSERVLET_H
 #define _FNORD_STATS_STATSHTTPSERVLET_H
-#include "fnord/autoref.h"
-#include "fnord/http/httpservice.h"
-#include "fnord/stats/statsrepository.h"
+#include "stx/autoref.h"
+#include "stx/http/httpservice.h"
+#include "stx/stats/statsrepository.h"
 
 namespace fnord {
 namespace stats {

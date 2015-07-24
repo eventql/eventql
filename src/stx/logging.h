@@ -10,8 +10,8 @@
 #ifndef _FNORDMETRIC_UTIL_LOGGING_H
 #define _FNORDMETRIC_UTIL_LOGGING_H
 
-#include "fnord/logging/loglevel.h"
-#include "fnord/logging/logger.h"
+#include "stx/logging/loglevel.h"
+#include "stx/logging/logger.h"
 
 namespace fnord {
 

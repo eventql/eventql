@@ -10,17 +10,17 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include "fnord/charts/axisdefinition.h"
-#include "fnord/charts/areachart.h"
-#include "fnord/charts/barchart.h"
-#include "fnord/charts/canvas.h"
-#include "fnord/charts/domain.h"
-#include "fnord/charts/linechart.h"
-#include "fnord/charts/pointchart.h"
-#include "fnord/charts/series.h"
-#include "fnord/charts/svgtarget.h"
-#include "fnord/io/fileutil.h"
-#include "fnord/test/unittest.h"
+#include "stx/charts/axisdefinition.h"
+#include "stx/charts/areachart.h"
+#include "stx/charts/barchart.h"
+#include "stx/charts/canvas.h"
+#include "stx/charts/domain.h"
+#include "stx/charts/linechart.h"
+#include "stx/charts/pointchart.h"
+#include "stx/charts/series.h"
+#include "stx/charts/svgtarget.h"
+#include "stx/io/fileutil.h"
+#include "stx/test/unittest.h"
 
 UNIT_TEST(ChartTest);
 

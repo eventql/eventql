@@ -13,7 +13,7 @@
 #include <condition_variable>
 #include <mutex>
 #include <list>
-#include <fnord/autoref.h>
+#include <stx/autoref.h>
 
 namespace fnord {
 

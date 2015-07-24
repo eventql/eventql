@@ -10,10 +10,10 @@
 #include <stdlib.h>
 #include <stack>
 #include <string>
-#include "fnord/inspect.h"
-#include "fnord/UnixTime.h"
-#include "fnord/json/json.h"
-#include "fnord/json/jsoninputstream.h"
+#include "stx/inspect.h"
+#include "stx/UnixTime.h"
+#include "stx/json/json.h"
+#include "stx/json/jsoninputstream.h"
 
 namespace fnord {
 namespace json {

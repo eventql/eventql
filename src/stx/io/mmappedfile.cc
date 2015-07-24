@@ -9,7 +9,7 @@
  */
 #include <sys/mman.h>
 #include <unistd.h>
-#include <fnord/io/mmappedfile.h>
+#include <stx/io/mmappedfile.h>
 
 namespace fnord {
 namespace io {

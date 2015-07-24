@@ -9,8 +9,8 @@
  */
 #ifndef _FNORDMETRIC_TIMEDOMAIN_H
 #define _FNORDMETRIC_TIMEDOMAIN_H
-#include "fnord/UnixTime.h"
-#include "fnord/charts/continuousdomain.h"
+#include "stx/UnixTime.h"
+#include "stx/charts/continuousdomain.h"
 
 namespace fnord {
 namespace chart {

@@ -10,13 +10,13 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include "fnord/io/inputstream.h"
-#include "fnord/json/flatjsonreader.h"
-#include "fnord/json/jsondocument.h"
-#include "fnord/json/jsonutil.h"
-#include "fnord/json/jsoninputstream.h"
-#include "fnord/json/jsonpointer.h"
-#include "fnord/test/unittest.h"
+#include "stx/io/inputstream.h"
+#include "stx/json/flatjsonreader.h"
+#include "stx/json/jsondocument.h"
+#include "stx/json/jsonutil.h"
+#include "stx/json/jsoninputstream.h"
+#include "stx/json/jsonpointer.h"
+#include "stx/test/unittest.h"
 
 UNIT_TEST(JSONTest);
 

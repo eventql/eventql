@@ -18,8 +18,8 @@
 #include <mutex>
 #include <vector>
 #include <atomic>
-#include <fnord/exception.h>
-#include <fnord/autoref.h>
+#include <stx/exception.h>
+#include <stx/autoref.h>
 
 namespace fnord {
 namespace io {

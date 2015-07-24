@@ -7,8 +7,8 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include "fnord/exception.h"
-#include "fnord/http/httpconnectionpool.h"
+#include "stx/exception.h"
+#include "stx/http/httpconnectionpool.h"
 
 namespace fnord {
 namespace http {

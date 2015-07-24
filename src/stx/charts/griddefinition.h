@@ -9,8 +9,8 @@
  */
 #ifndef _FNORDMETRIC_UI_GRIDDEFINITION_H
 #define _FNORDMETRIC_UI_GRIDDEFINITION_H
-#include "fnord/charts/domain.h"
-#include "fnord/charts/domainprovider.h"
+#include "stx/charts/domain.h"
+#include "stx/charts/domainprovider.h"
 
 namespace fnord {
 namespace chart {

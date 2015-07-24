@@ -10,8 +10,8 @@
 #ifndef _FNORDMETRIC_NET_UDPSERVER_H
 #define _FNORDMETRIC_NET_UDPSERVER_H
 #include <functional>
-#include <fnord/buffer.h>
-#include <fnord/thread/taskscheduler.h>
+#include <stx/buffer.h>
+#include <stx/thread/taskscheduler.h>
 
 namespace fnord {
 namespace net {

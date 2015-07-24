@@ -11,9 +11,9 @@
 #define _FNORD_CLI_CLI_H
 #include <string>
 #include <vector>
-#include <fnord/exception.h>
-#include <fnord/stdtypes.h>
-#include <fnord/cli/CLICommand.h>
+#include <stx/exception.h>
+#include <stx/stdtypes.h>
+#include <stx/cli/CLICommand.h>
 
 namespace fnord {
 namespace cli {

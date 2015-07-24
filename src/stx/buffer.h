@@ -12,9 +12,9 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <string>
-#include "fnord/stdtypes.h"
-#include "fnord/autoref.h"
-#include "fnord/VFSFile.h"
+#include "stx/stdtypes.h"
+#include "stx/autoref.h"
+#include "stx/VFSFile.h"
 
 namespace fnord {
 

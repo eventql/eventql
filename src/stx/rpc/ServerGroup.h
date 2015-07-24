@@ -16,7 +16,7 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
-#include "fnord/net/inetaddr.h"
+#include "stx/net/inetaddr.h"
 
 namespace fnord {
 

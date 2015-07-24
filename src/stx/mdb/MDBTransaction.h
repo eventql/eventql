@@ -12,10 +12,10 @@
 #include <memory>
 #include <vector>
 #include <liblmdb/lmdb.h>
-#include "fnord/autoref.h"
-#include "fnord/logging.h"
-#include "fnord/option.h"
-#include "fnord/mdb/MDBCursor.h"
+#include "stx/autoref.h"
+#include "stx/logging.h"
+#include "stx/option.h"
+#include "stx/mdb/MDBCursor.h"
 
 namespace fnord {
 namespace mdb {

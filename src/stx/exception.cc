@@ -10,8 +10,8 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
-#include <fnord/exception.h>
-#include <fnord/io/outputstream.h>
+#include <stx/exception.h>
+#include <stx/io/outputstream.h>
 
 namespace fnord {
 

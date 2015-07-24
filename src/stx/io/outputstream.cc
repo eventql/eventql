@@ -13,10 +13,10 @@
 #include <stdarg.h>
 #include <string>
 #include <unistd.h>
-#include "fnord/buffer.h"
-#include "fnord/exception.h"
-#include "fnord/io/outputstream.h"
-#include "fnord/ieee754.h"
+#include "stx/buffer.h"
+#include "stx/exception.h"
+#include "stx/io/outputstream.h"
+#include "stx/ieee754.h"
 
 namespace fnord {
 

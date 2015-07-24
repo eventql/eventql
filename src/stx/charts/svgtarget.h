@@ -13,9 +13,9 @@
 #include <stdlib.h>
 #include <vector>
 #include <string>
-#include "fnord/charts/rendertarget.h"
-#include "fnord/charts/styles/style_default.h"
-#include "fnord/io/outputstream.h"
+#include "stx/charts/rendertarget.h"
+#include "stx/charts/styles/style_default.h"
+#include "stx/io/outputstream.h"
 
 namespace fnord {
 namespace chart {

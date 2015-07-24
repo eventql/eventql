@@ -13,12 +13,12 @@
 #include <memory>
 #include <mutex>
 #include <stdlib.h>
-#include "fnord/autoref.h"
-#include "fnord/duration.h"
-#include "fnord/exception.h"
-#include "fnord/inspect.h"
-#include "fnord/status.h"
-#include "fnord/thread/wakeup.h"
+#include "stx/autoref.h"
+#include "stx/duration.h"
+#include "stx/exception.h"
+#include "stx/inspect.h"
+#include "stx/status.h"
+#include "stx/thread/wakeup.h"
 
 namespace fnord {
 class TaskScheduler;

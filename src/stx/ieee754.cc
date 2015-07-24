@@ -10,8 +10,8 @@
 #include <limits>
 #include <string.h>
 #include <stdio.h>
-#include <fnord/exception.h>
-#include <fnord/ieee754.h>
+#include <stx/exception.h>
+#include <stx/ieee754.h>
 
 namespace fnord {
 
