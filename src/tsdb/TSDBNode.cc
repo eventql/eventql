@@ -7,8 +7,8 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <fnord/util/Base64.h>
-#include <fnord/fnv.h>
+#include <stx/util/Base64.h>
+#include <stx/fnv.h>
 #include <tsdb/TSDBNode.h>
 #include <sstable/sstablereader.h>
 

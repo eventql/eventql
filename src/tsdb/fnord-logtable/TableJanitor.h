@@ -10,7 +10,7 @@
 #ifndef _FNORD_LOGTABLE_TABLEREJANITOR_H
 #define _FNORD_LOGTABLE_TABLEREJANITOR_H
 #include <thread>
-#include <fnord/stdtypes.h>
+#include <stx/stdtypes.h>
 #include <fnord-logtable/TableRepository.h>
 
 namespace fnord {

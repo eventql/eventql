@@ -8,8 +8,8 @@
  * <http://www.gnu.org/licenses/>.
  */
 #pragma once
-#include <fnord/stdtypes.h>
-#include <fnord/protobuf/MessageSchema.h>
+#include <stx/stdtypes.h>
+#include <stx/protobuf/MessageSchema.h>
 #include <tsdb/TableConfig.pb.h>
 
 using namespace fnord;

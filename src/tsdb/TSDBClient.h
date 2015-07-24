@@ -9,11 +9,11 @@
  */
 #ifndef _FNORD_TSDB_TSDBCLIENT_H
 #define _FNORD_TSDB_TSDBCLIENT_H
-#include <fnord/stdtypes.h>
-#include <fnord/random.h>
-#include <fnord/option.h>
-#include <fnord/SHA1.h>
-#include <fnord/http/httpconnectionpool.h>
+#include <stx/stdtypes.h>
+#include <stx/random.h>
+#include <stx/option.h>
+#include <stx/SHA1.h>
+#include <stx/http/httpconnectionpool.h>
 #include <tsdb/PartitionInfo.pb.h>
 #include <tsdb/RecordEnvelope.pb.h>
 

@@ -9,11 +9,11 @@
  */
 #ifndef _FNORD_TSDB_TSDBNODE_H
 #define _FNORD_TSDB_TSDBNODE_H
-#include <fnord/stdtypes.h>
-#include <fnord/random.h>
-#include <fnord/option.h>
-#include <fnord/thread/queue.h>
-#include <fnord/mdb/MDB.h>
+#include <stx/stdtypes.h>
+#include <stx/random.h>
+#include <stx/option.h>
+#include <stx/thread/queue.h>
+#include <stx/mdb/MDB.h>
 #include <tsdb/TableConfig.pb.h>
 #include <tsdb/Partition.h>
 #include <tsdb/TSDBNodeRef.h>

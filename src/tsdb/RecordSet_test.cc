@@ -10,9 +10,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include "fnord/test/unittest.h"
-#include "fnord/protobuf/MessageDecoder.h"
-#include "fnord/protobuf/MessageEncoder.h"
+#include "stx/test/unittest.h"
+#include "stx/protobuf/MessageDecoder.h"
+#include "stx/protobuf/MessageEncoder.h"
 #include "tsdb/RecordSet.h"
 
 using namespace fnord;

@@ -8,9 +8,9 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <tsdb/TSDBTableRef.h>
-#include <fnord/uri.h>
-#include <fnord/wallclock.h>
-#include <fnord/human.h>
+#include <stx/uri.h>
+#include <stx/wallclock.h>
+#include <stx/human.h>
 
 using namespace fnord;
 

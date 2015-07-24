@@ -10,7 +10,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include "fnord/test/unittest.h"
+#include "stx/test/unittest.h"
 #include "tsdb/TSDBNode.h"
 
 using namespace fnord;

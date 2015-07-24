@@ -9,10 +9,10 @@
  */
 #ifndef _FNORD_LOGTABLE_TABLEARENA_H
 #define _FNORD_LOGTABLE_TABLEARENA_H
-#include <fnord/stdtypes.h>
-#include <fnord/autoref.h>
-#include <fnord/protobuf/MessageSchema.h>
-#include <fnord/protobuf/MessageObject.h>
+#include <stx/stdtypes.h>
+#include <stx/autoref.h>
+#include <stx/protobuf/MessageSchema.h>
+#include <stx/protobuf/MessageObject.h>
 
 namespace fnord {
 namespace logtable {

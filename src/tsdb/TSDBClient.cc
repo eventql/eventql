@@ -9,11 +9,11 @@
  */
 #include <tsdb/TSDBClient.h>
 #include <tsdb/RecordEnvelope.pb.h>
-#include <fnord/util/binarymessagereader.h>
-#include <fnord/util/binarymessagewriter.h>
-#include <fnord/protobuf/msg.h>
-#include <fnord/http/httpclient.h>
-#include <fnord/logging.h>
+#include <stx/util/binarymessagereader.h>
+#include <stx/util/binarymessagewriter.h>
+#include <stx/protobuf/msg.h>
+#include <stx/http/httpclient.h>
+#include <stx/logging.h>
 
 using namespace fnord;
 

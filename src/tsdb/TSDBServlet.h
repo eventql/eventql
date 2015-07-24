@@ -9,10 +9,10 @@
  */
 #ifndef _FNORD_TSDB_TSDBSERVLET_H
 #define _FNORD_TSDB_TSDBSERVLET_H
-#include "fnord/http/httpservice.h"
-#include <fnord/random.h>
+#include "stx/http/httpservice.h"
+#include <stx/random.h>
 #include <tsdb/TSDBNode.h>
-#include <fnord/http/HTTPSSEStream.h>
+#include <stx/http/HTTPSSEStream.h>
 
 using namespace fnord;
 
