@@ -7,11 +7,11 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <fnord/charts/svgtarget.h>
-#include <fnord/io/inputstream.h>
-#include <fnord/logging.h>
+#include <stx/charts/svgtarget.h>
+#include <stx/io/inputstream.h>
+#include <stx/logging.h>
 }
-#include <fnord/json/jsonoutputstream.h>
+#include <stx/json/jsonoutputstream.h>
 #include <fnordmetric/environment.h>
 #include <chartsql/query.h>
 #include <chartsql/queryservice.h>

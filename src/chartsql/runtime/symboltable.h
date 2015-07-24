@@ -8,8 +8,8 @@
  * <http://www.gnu.org/licenses/>.
  */
 #pragma once
-#include <fnord/stdtypes.h>
-#include <fnord/autoref.h>
+#include <stx/stdtypes.h>
+#include <stx/autoref.h>
 #include <chartsql/SFunction.h>
 
 namespace csql {

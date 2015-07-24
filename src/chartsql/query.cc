@@ -17,7 +17,7 @@
 #include <chartsql/runtime/tablerepository.h>
 #include <chartsql/runtime/importstatement.h>
 #include <chartsql/drawstatement.h>
-#include <fnord/exception.h>
+#include <stx/exception.h>
 
 namespace csql {
 

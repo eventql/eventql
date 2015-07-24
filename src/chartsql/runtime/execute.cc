@@ -13,7 +13,7 @@
 #include <chartsql/parser/astnode.h>
 #include <chartsql/runtime/compile.h>
 #include <chartsql/svalue.h>
-#include <fnord/exception.h>
+#include <stx/exception.h>
 
 namespace csql {
 

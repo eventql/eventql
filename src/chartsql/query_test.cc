@@ -27,8 +27,8 @@
 #include <util/inputstream.h>
 #include <util/outputstream.h>
 #include <util/unittest.h>
-#include <fnord/uri.h>
-#include <fnord/exception.h>
+#include <stx/uri.h>
+#include <stx/exception.h>
 
 using namespace fnordmetric::query;
 

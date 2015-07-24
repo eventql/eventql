@@ -7,10 +7,10 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <fnord/stdtypes.h>
-#include <fnord/exception.h>
-#include <fnord/wallclock.h>
-#include <fnord/test/unittest.h>
+#include <stx/stdtypes.h>
+#include <stx/exception.h>
+#include <stx/wallclock.h>
+#include <stx/test/unittest.h>
 #include <chartsql/parser/parser.h>
 #include <chartsql/parser/token.h>
 #include <chartsql/parser/tokenize.h>

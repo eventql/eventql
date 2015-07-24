@@ -10,8 +10,8 @@
 
 #ifndef _FNORDMETRIC_CLI_H
 #define _FNORDMETRIC_CLI_H
-#include <fnord/exception.h>
-#include <fnord/io/outputstream.h>
+#include <stx/exception.h>
+#include <stx/io/outputstream.h>
 #include <chartsql/queryservice.h>
 
 namespace csql {

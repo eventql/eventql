@@ -9,7 +9,7 @@
  */
 #include <chartsql/runtime/JSONSSEStreamFormat.h>
 #include <chartsql/runtime/JSONResultFormat.h>
-#include <fnord/logging.h>
+#include <stx/logging.h>
 
 namespace csql {
 

@@ -8,7 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <chartsql/runtime/charts/seriesadapter.h>
-#include <fnord/exception.h>
+#include <stx/exception.h>
 
 namespace csql {
 

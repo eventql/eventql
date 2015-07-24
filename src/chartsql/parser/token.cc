@@ -8,8 +8,8 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <chartsql/parser/token.h>
-#include <fnord/exception.h>
-#include <fnord/inspect.h>
+#include <stx/exception.h>
+#include <stx/inspect.h>
 #include <string.h>
 
 namespace csql {

@@ -11,7 +11,7 @@
 #include <chartsql/qtree/ColumnReferenceNode.h>
 #include <chartsql/runtime/defaultruntime.h>
 #include <chartsql/runtime/compile.h>
-#include <fnord/ieee754.h>
+#include <stx/ieee754.h>
 
 using namespace fnord;
 

@@ -12,7 +12,7 @@
 #include <chartsql/runtime/execute.h>
 #include <chartsql/runtime/importstatement.h>
 #include <chartsql/svalue.h>
-#include <fnord/exception.h>
+#include <stx/exception.h>
 
 namespace csql {
 

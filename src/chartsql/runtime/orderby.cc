@@ -10,7 +10,7 @@
 #include <chartsql/runtime/orderby.h>
 #include <chartsql/expressions/boolean.h>
 #include <algorithm>
-#include <fnord/inspect.h>
+#include <stx/inspect.h>
 
 namespace csql {
 

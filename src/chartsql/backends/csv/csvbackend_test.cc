@@ -7,7 +7,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <fnord/exception.h>
+#include <stx/exception.h>
 #include <util/unittest.h>
 #include <chartsql/backends/csv/csvinputstream.h>
 #include <chartsql/backends/csv/csvtableref.h>
