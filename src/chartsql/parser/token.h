@@ -80,9 +80,6 @@ public:
     T_WITHIN,
     T_RECORD,
 
-    T_WITHIN,
-    T_RECORD,
-
     T_DRAW,
     T_LINECHART,
     T_AREACHART,
