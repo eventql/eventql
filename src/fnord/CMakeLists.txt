@@ -111,6 +111,13 @@ add_executable(test-secure-cookie
     $<TARGET_OBJECTS:fnord-base>
     web/SecureCookie_test.cc)
 
+add_executable(test-protobuf
+    $<TARGET_OBJECTS:fnord-base>
+    $<TARGET_OBJECTS:fnord-protobuf>
+    $<TARGET_OBJECTS:fnord-json>
+    $<TARGET_OBJECTS:fnord-http>
+    protobuf/protobuf_test.cc)
+
 ## redis
 #add_library(fnord-redis OBJECT
 #    ../3rdparty/hiredis/async.c

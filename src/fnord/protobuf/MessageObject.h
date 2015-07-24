@@ -67,6 +67,7 @@ struct MessageObject {
 
   MessageObject& getObject(uint32_t id) const;
   Vector<MessageObject*> getObjects(uint32_t id) const;
+  size_t fieldCount(uint32_t id);
   const String& getString(uint32_t id) const;
   uint32_t getUInt32(uint32_t id) const;
   uint64_t getUInt64(uint32_t id) const;

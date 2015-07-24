@@ -16,7 +16,8 @@ add_library(fnord-protobuf OBJECT
     MessageEncoder.cc
     MessagePrinter.cc
     MessageObject.cc
-    MessageSchema.cc)
+    MessageSchema.cc
+    JSONEncoder.cc)
 
 add_dependencies(fnord-protobuf fnord-base)
 
