@@ -13,12 +13,12 @@
 #include <string>
 #include <vector>
 #include <memory>
-#include <fnord/io/file.h>
-#include <fnord/io/pagemanager.h>
+#include <stx/io/file.h>
+#include <stx/io/pagemanager.h>
 #include <sstable/cursor.h>
 #include <sstable/index.h>
 #include <sstable/indexprovider.h>
-#include <fnord/exception.h>
+#include <stx/exception.h>
 
 namespace fnord {
 namespace sstable {

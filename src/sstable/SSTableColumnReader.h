@@ -13,11 +13,11 @@
 #include <string>
 #include <vector>
 #include <memory>
-#include <fnord/buffer.h>
-#include <fnord/exception.h>
-#include <fnord/io/file.h>
-#include <fnord/io/mmappedfile.h>
-#include <fnord/util/binarymessagewriter.h>
+#include <stx/buffer.h>
+#include <stx/exception.h>
+#include <stx/io/file.h>
+#include <stx/io/mmappedfile.h>
+#include <stx/util/binarymessagewriter.h>
 #include <sstable/binaryformat.h>
 #include <sstable/fileheaderreader.h>
 #include <sstable/cursor.h>
