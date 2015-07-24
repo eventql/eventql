@@ -27,9 +27,7 @@ include_directories(${CHARTSQL_INCLUDE})
 add_subdirectory(3rdparty/tsdb)
 include_directories(${TSDB_INCLUDE})
 
-add_subdirectory(src/inventoryd)
-include_directories(${INVENTORYD_INCLUDE})
-
 add_subdirectory(src/customerdb)
 add_subdirectory(src/analytics)
 add_subdirectory(src/logjoin)
+add_subdirectory(src/inventory)
