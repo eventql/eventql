@@ -50,7 +50,7 @@ add_library(hunspell OBJECT
 
 include_directories(src/)
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/src)
-add_subdirectory(src/customerdb)
+add_subdirectory(src/common)
 add_subdirectory(src/analytics)
 add_subdirectory(src/logjoin)
 add_subdirectory(src/inventory)

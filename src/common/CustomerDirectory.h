@@ -8,7 +8,7 @@
  */
 #pragma once
 #include <fnord/stdtypes.h>
-#include <customerdb/CustomerConfig.pb.h>
+#include <common/CustomerConfig.pb.h>
 
 using namespace fnord;
 

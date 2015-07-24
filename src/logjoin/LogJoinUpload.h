@@ -17,7 +17,7 @@
 #include "fnord/http/httpconnectionpool.h"
 #include "brokerd/BrokerClient.h"
 #include "logjoin/JoinedSession.pb.h"
-#include "customerdb/CustomerDirectory.h"
+#include "common/CustomerDirectory.h"
 
 using namespace fnord;
 
