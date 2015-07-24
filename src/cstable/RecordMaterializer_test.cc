@@ -10,9 +10,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include "fnord/test/unittest.h"
-#include "fnord/protobuf/MessageEncoder.h"
-#include "fnord/protobuf/MessagePrinter.h"
+#include "stx/test/unittest.h"
+#include "stx/protobuf/MessageEncoder.h"
+#include "stx/protobuf/MessagePrinter.h"
 #include "cstable/CSTableReader.h"
 #include "cstable/CSTableBuilder.h"
 #include "cstable/RecordMaterializer.h"

@@ -9,15 +9,15 @@
  */
 #ifndef _FNORD_CSTABLE_CSTABLEBUILDER_H
 #define _FNORD_CSTABLE_CSTABLEBUILDER_H
-#include <fnord/stdtypes.h>
-#include <fnord/io/file.h>
-#include <fnord/util/binarymessagewriter.h>
-#include <fnord/autoref.h>
-#include <fnord/csv/CSVInputStream.h>
+#include <stx/stdtypes.h>
+#include <stx/io/file.h>
+#include <stx/util/binarymessagewriter.h>
+#include <stx/autoref.h>
+#include <stx/csv/CSVInputStream.h>
 #include <cstable/ColumnWriter.h>
 #include <cstable/CSTableWriter.h>
-#include <fnord/protobuf/MessageSchema.h>
-#include <fnord/protobuf/MessageObject.h>
+#include <stx/protobuf/MessageSchema.h>
+#include <stx/protobuf/MessageObject.h>
 
 namespace fnord {
 namespace cstable {

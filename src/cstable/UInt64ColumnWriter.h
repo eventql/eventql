@@ -9,9 +9,9 @@
  */
 #ifndef _FNORD_CSTABLE_INT64COLUMNWRITER_H
 #define _FNORD_CSTABLE_INT64COLUMNWRITER_H
-#include <fnord/stdtypes.h>
-#include <fnord/util/binarymessagewriter.h>
-#include <fnord/util/BitPackEncoder.h>
+#include <stx/stdtypes.h>
+#include <stx/util/binarymessagewriter.h>
+#include <stx/util/BitPackEncoder.h>
 #include <cstable/BinaryFormat.h>
 #include <cstable/ColumnWriter.h>
 

@@ -7,9 +7,9 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include "fnord/io/fileutil.h"
-#include "fnord/ieee754.h"
-#include "fnord/human.h"
+#include "stx/io/fileutil.h"
+#include "stx/ieee754.h"
+#include "stx/human.h"
 #include <cstable/CSTableBuilder.h>
 #include <cstable/CSTableWriter.h>
 #include "cstable/BitPackedIntColumnWriter.h"

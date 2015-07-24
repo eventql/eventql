@@ -7,14 +7,14 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include "fnord/stdtypes.h"
-#include "fnord/application.h"
-#include "fnord/cli/flagparser.h"
-#include "fnord/cli/CLI.h"
-#include "fnord/csv/CSVInputStream.h"
-#include "fnord/io/file.h"
-#include "fnord/inspect.h"
-#include "fnord/human.h"
+#include "stx/stdtypes.h"
+#include "stx/application.h"
+#include "stx/cli/flagparser.h"
+#include "stx/cli/CLI.h"
+#include "stx/csv/CSVInputStream.h"
+#include "stx/io/file.h"
+#include "stx/inspect.h"
+#include "stx/human.h"
 #include "cstable/LEB128ColumnWriter.h"
 #include "cstable/StringColumnWriter.h"
 #include "cstable/DoubleColumnWriter.h"

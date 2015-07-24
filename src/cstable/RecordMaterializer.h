@@ -9,13 +9,13 @@
  */
 #ifndef _FNORD_CSTABLE_RECORDMATERIALIZER_H
 #define _FNORD_CSTABLE_RECORDMATERIALIZER_H
-#include <fnord/stdtypes.h>
-#include <fnord/io/file.h>
-#include <fnord/io/mmappedfile.h>
+#include <stx/stdtypes.h>
+#include <stx/io/file.h>
+#include <stx/io/mmappedfile.h>
 #include <cstable/BinaryFormat.h>
 #include <cstable/CSTableReader.h>
 #include <cstable/ColumnReader.h>
-#include <fnord/protobuf/MessageSchema.h>
+#include <stx/protobuf/MessageSchema.h>
 
 namespace fnord {
 namespace cstable {
