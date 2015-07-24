@@ -94,7 +94,6 @@ add_executable(test-chartsql-runtime
     $<TARGET_OBJECTS:fnord-protobuf>
     $<TARGET_OBJECTS:fnord-http>
     $<TARGET_OBJECTS:fnord-json>
-    $<TARGET_OBJECTS:fnord-metricdb>
     $<TARGET_OBJECTS:fnord-mdb>
     $<TARGET_OBJECTS:sstable>
     $<TARGET_OBJECTS:libcstable>
@@ -111,7 +110,6 @@ add_executable(test-chartsql-parser
     $<TARGET_OBJECTS:fnord-protobuf>
     $<TARGET_OBJECTS:fnord-http>
     $<TARGET_OBJECTS:fnord-json>
-    $<TARGET_OBJECTS:fnord-metricdb>
     $<TARGET_OBJECTS:fnord-mdb>
     $<TARGET_OBJECTS:sstable>
     $<TARGET_OBJECTS:libcstable>
