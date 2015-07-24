@@ -9,8 +9,8 @@
  */
 #ifndef _FNORD_BROKER_BROKERCLIENT_H
 #define _FNORD_BROKER_BROKERCLIENT_H
-#include <fnord/stdtypes.h>
-#include <fnord/http/httpconnectionpool.h>
+#include <stx/stdtypes.h>
+#include <stx/http/httpconnectionpool.h>
 #include <brokerd/Message.pb.h>
 #include <brokerd/TopicCursor.pb.h>
 

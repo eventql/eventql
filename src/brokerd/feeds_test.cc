@@ -8,15 +8,15 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <stdlib.h>
-#include "fnord/stringutil.h"
-#include "fnord/http/httprouter.h"
-#include "fnord/http/httpserver.h"
-#include "fnord/io/filerepository.h"
-#include "fnord/io/fileutil.h"
-#include "fnord/json/jsonrpc.h"
-#include "fnord/json/jsonrpchttpadapter.h"
+#include "stx/stringutil.h"
+#include "stx/http/httprouter.h"
+#include "stx/http/httpserver.h"
+#include "stx/io/filerepository.h"
+#include "stx/io/fileutil.h"
+#include "stx/json/jsonrpc.h"
+#include "stx/json/jsonrpchttpadapter.h"
 #include "brokerd/FeedService.h"
-#include "fnord/test/unittest.h"
+#include "stx/test/unittest.h"
 
 UNIT_TEST(FeedServiceTest);
 

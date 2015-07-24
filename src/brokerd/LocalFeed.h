@@ -14,12 +14,12 @@
 #include <set>
 #include <string>
 #include <unordered_map>
-#include "fnord/io/filerepository.h"
-#include "fnord/reflect/reflect.h"
+#include "stx/io/filerepository.h"
+#include "stx/reflect/reflect.h"
 #include "brokerd/FeedEntry.h"
 #include "brokerd/Message.pb.h"
 #include "sstable/sstablewriter.h"
-#include "fnord/stats/counter.h"
+#include "stx/stats/counter.h"
 
 namespace fnord {
 namespace feeds {

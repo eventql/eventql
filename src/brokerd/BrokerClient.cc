@@ -8,7 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <brokerd/BrokerClient.h>
-#include <fnord/protobuf/msg.h>
+#include <stx/protobuf/msg.h>
 
 namespace fnord {
 namespace feeds {

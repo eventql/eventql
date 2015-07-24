@@ -8,16 +8,16 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <stdlib.h>
-#include "fnord/application.h"
-#include "fnord/http/httprouter.h"
-#include "fnord/http/httpserver.h"
-#include "fnord/io/filerepository.h"
-#include "fnord/io/fileutil.h"
-#include "fnord/json/jsonrpc.h"
-#include "fnord/json/jsonrpchttpadapter.h"
+#include "stx/application.h"
+#include "stx/http/httprouter.h"
+#include "stx/http/httpserver.h"
+#include "stx/io/filerepository.h"
+#include "stx/io/fileutil.h"
+#include "stx/json/jsonrpc.h"
+#include "stx/json/jsonrpchttpadapter.h"
 #include "brokerd/FeedService.h"
-#include "fnord/thread/eventloop.h"
-#include "fnord/thread/threadpool.h"
+#include "stx/thread/eventloop.h"
+#include "stx/thread/threadpool.h"
 
 using fnord::json::JSONRPC;
 using fnord::json::JSONRPCHTTPAdapter;

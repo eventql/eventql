@@ -9,9 +9,9 @@
  */
 #ifndef _FNORD_FEEDS_FEED_H
 #define _FNORD_FEEDS_FEED_H
-#include "fnord/stdtypes.h"
-#include "fnord/option.h"
-#include "fnord/rpc/RPC.h"
+#include "stx/stdtypes.h"
+#include "stx/option.h"
+#include "stx/rpc/RPC.h"
 #include "brokerd/FeedEntry.h"
 
 namespace fnord {
