@@ -29,6 +29,10 @@ public:
   RefPtr<ValueExpressionNode> trueBranch() const;
   RefPtr<ValueExpressionNode> falseBranch() const;
 
+  RefPtr<QueryTreeNode> deepCopy() const override;
+
+  String toSQL() const override;
+
 protected:
   RefPtr<ValueExpressionNode> conditional_expr_;
   RefPtr<ValueExpressionNode> true_branch_expr_;

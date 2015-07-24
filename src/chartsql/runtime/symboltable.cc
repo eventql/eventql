@@ -19,24 +19,22 @@ namespace csql {
 void SymbolTable::registerFunction(
     const String& symbol,
     void (*fn)(int, SValue*, SValue*)) {
-  SFunction sym;
-  sym.type = FN_PURE;
-  sym.vtable.t_pure.call = fn;
+  PureFunction sym;
+  sym.call = fn;
   registerFunction(symbol, sym);
 }
 
 void SymbolTable::registerFunction(
     const String& symbol,
     AggregateFunction fn) {
-  SFunction sym;
-  sym.type = FN_AGGREGATE;
-  sym.vtable.t_aggregate.scratch_size = fn.scratch_size;
-  sym.vtable.t_aggregate.accumulate = fn.accumulate;
-  sym.vtable.t_aggregate.get = fn.get;
-  sym.vtable.t_aggregate.reset = fn.reset;
-  sym.vtable.t_aggregate.init = fn.init;
-  sym.vtable.t_aggregate.free = fn.free;
-  registerFunction(symbol, sym);
+  AggregateFunction sym;
+  sym.scratch_size = fn.scratch_size;
+  sym.accumulate = fn.accumulate;
+  sym.get = fn.get;
+  sym.reset = fn.reset;
+  sym.init = fn.init;
+  sym.free = fn.free;
+  registerFunction(symbol, SFunction(sym));
 }
 
 void SymbolTable::registerFunction(const String& symbol, SFunction fn) {

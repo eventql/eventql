@@ -7,15 +7,15 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <chartsql/areachartbuilder.h>
-#include <chartsql/drawstatement.h>
+#include <chartsql/runtime/charts/areachartbuilder.h>
+#include <chartsql/runtime/charts/drawstatement.h>
 #include <fnord/charts/areachart.h>
 
 namespace csql {
 
 AreaChartBuilder::AreaChartBuilder(
     fnord::chart::Canvas* canvas,
-    DrawStatement const* draw_stmt) :
+    RefPtr<DrawStatementNode> draw_stmt) :
     ChartBuilder(canvas, draw_stmt) {}
 
 fnord::chart::Drawable* AreaChartBuilder::getChart() const {

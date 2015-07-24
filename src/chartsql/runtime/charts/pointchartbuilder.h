@@ -9,7 +9,7 @@
  */
 #ifndef _FNORDMETRIC_SQLEXTENSIONS_POINTCHARTBUILDER_H
 #define _FNORDMETRIC_SQLEXTENSIONS_POINTCHARTBUILDER_H
-#include <chartsql/chartbuilder.h>
+#include <chartsql/runtime/charts/chartbuilder.h>
 #include <fnord/charts/pointchart.h>
 
 namespace csql {
@@ -19,7 +19,7 @@ class PointChartBuilder : public ChartBuilder {
 public:
   PointChartBuilder(
       fnord::chart::Canvas* canvas,
-      DrawStatement const* draw_stmt);
+      RefPtr<DrawStatementNode> draw_stmt);
 
   fnord::chart::Drawable* getChart() const override;
   std::string chartName() const override;

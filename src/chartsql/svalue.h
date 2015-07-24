@@ -13,7 +13,7 @@
 #include <string.h>
 #include <vector>
 #include <fnord/stdtypes.h>
-#include <fnord/datetime.h>
+#include <fnord/UnixTime.h>
 #include <fnord/exception.h>
 
 using namespace fnord;
@@ -27,7 +27,7 @@ public:
   typedef double FloatType;
   typedef int64_t IntegerType;
   typedef bool BoolType;
-  typedef fnord::DateTime TimeType;
+  typedef fnord::UnixTime TimeType;
 
   enum kSValueType {
     T_NULL = 0,
@@ -70,6 +70,8 @@ public:
   std::string toString() const;
   bool tryNumericConversion();
   bool tryTimeConversion();
+
+  String toSQL() const;
 
 protected:
   struct {

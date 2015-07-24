@@ -17,12 +17,32 @@ namespace csql {
 
 class QueryTreeNode : public RefCounted {
 public:
-  virtual ~QueryTreeNode() {}
+
+  QueryTreeNode() {}
+  QueryTreeNode(const QueryTreeNode& other) = delete;
+  QueryTreeNode& operator=(const QueryTreeNode& other) = delete;
+
+  virtual RefPtr<QueryTreeNode> deepCopy() const = 0;
+
+  template <typename T>
+  RefPtr<T> deepCopyAs() const;
+
+  size_t numChildren() const;
+
+  RefPtr<QueryTreeNode> child(size_t index);
+
+  RefPtr<QueryTreeNode>* mutableChild(size_t index);
+
+protected:
+
+  void addChild(RefPtr<QueryTreeNode>* table);
+
+  Vector<RefPtr<QueryTreeNode>*> children_;
 };
 
-class TableExpressionNode : public QueryTreeNode {
-public:
-
-};
+template <typename T>
+RefPtr<T> QueryTreeNode::deepCopyAs() const {
+  return deepCopy().asInstanceOf<T>();
+}
 
 } // namespace csql

@@ -23,8 +23,9 @@ using namespace fnord;
 namespace csql {
 class ASTNode;
 
-class ValueExpressionBuilder {
+class ValueExpressionBuilder : public RefCounted{
 public:
+
   ValueExpressionBuilder(SymbolTable* symbol_table);
 
   Instruction* compile(ASTNode* ast, size_t* dynamic_storage_size);

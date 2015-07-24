@@ -13,34 +13,40 @@
 #include <string>
 #include <vector>
 #include <memory>
-#include <chartsql/parser/astnode.h>
 #include <chartsql/parser/parser.h>
-#include <chartsql/runtime/compile.h>
 #include <chartsql/runtime/queryplan.h>
 #include <chartsql/runtime/queryplanbuilder.h>
+#include <chartsql/runtime/QueryBuilder.h>
+#include <chartsql/runtime/symboltable.h>
+#include <chartsql/runtime/ResultFormat.h>
+#include <chartsql/runtime/ExecutionStrategy.h>
 
 namespace csql {
-class ResultList;
 
-/**
- * A runtime can only be used within a a single thread!
- */
-class Runtime {
+class Runtime : public RefCounted {
 public:
-  Runtime();
 
-  void addBackend(std::unique_ptr<Backend> backend);
+  static RefPtr<Runtime> getDefaultRuntime();
 
-  Parser* parser();
-  ValueExpressionBuilder* compiler();
-  const std::vector<std::unique_ptr<Backend>>& backends();
-  QueryPlanBuilder* queryPlanBuilder();
+  // FIXPAUL: make parser configurable via parserfactory
+  Runtime(
+      RefPtr<SymbolTable> symbol_table,
+      RefPtr<QueryBuilder> query_builder,
+      RefPtr<QueryPlanBuilder> query_plan_builder);
+
+  void executeQuery(
+      const String& query,
+      RefPtr<ExecutionStrategy> execution_strategy,
+      RefPtr<ResultFormat> result_format);
+
+  SValue evaluateStaticExpression(const String& expr);
+  SValue evaluateStaticExpression(ASTNode* expr);
+  SValue evaluateStaticExpression(RefPtr<ValueExpressionNode> expr);
 
 protected:
-  Parser parser_;
-  SymbolTable symbol_table_;
-  ValueExpressionBuilder compiler_;
-  std::vector<std::unique_ptr<Backend>> backends_;
+  RefPtr<SymbolTable> symbol_table_;
+  RefPtr<QueryBuilder> query_builder_;
+  RefPtr<QueryPlanBuilder> query_plan_builder_;
 };
 
 }

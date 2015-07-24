@@ -7,12 +7,9 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#ifndef _FNORDMETRIC_QUERY_SYMBOLTABLE_H
-#define _FNORDMETRIC_QUERY_SYMBOLTABLE_H
-#include <stdlib.h>
-#include <string>
-#include <vector>
-#include <unordered_map>
+#pragma once
+#include <fnord/stdtypes.h>
+#include <fnord/autoref.h>
 #include <chartsql/SFunction.h>
 
 namespace csql {
@@ -45,7 +42,7 @@ protected:
   const size_t scratchpad_size_;
 };
 
-class SymbolTable {
+class SymbolTable : public RefCounted {
 public:
 
   SymbolTableEntry const* lookupSymbol(const std::string& symbol) const;
@@ -82,4 +79,3 @@ protected:
 };
 
 }
-#endif

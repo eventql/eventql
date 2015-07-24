@@ -10,24 +10,30 @@
 #pragma once
 #include <fnord/stdtypes.h>
 #include <fnord/autoref.h>
-#include <chartsql/runtime/queryplannode.h>
 #include <chartsql/runtime/tablerepository.h>
+#include <chartsql/runtime/charts/drawstatement.h>
 
 namespace csql {
+class Runtime;
 
-class QueryPlan {
+class QueryPlan : public RefCounted  {
 public:
 
-  QueryPlan(TableRepository* table_repo);
+  QueryPlan(
+      Vector<RefPtr<QueryTreeNode>> statements,
+      RefPtr<TableProvider> tables,
+      QueryBuilder* qbuilder,
+      Runtime* runtime);
 
-  void addQuery(std::unique_ptr<QueryPlanNode> query);
-  const std::vector<std::unique_ptr<QueryPlanNode>>& queries();
+  size_t numStatements() const;
 
-  TableRepository* tableRepository();
+  ScopedPtr<Statement> buildStatement(size_t stmt_idx) const;
 
 protected:
-  TableRepository* table_repo_;
-  std::vector<std::unique_ptr<QueryPlanNode>> queries_;
+  Vector<RefPtr<QueryTreeNode>> statements_;
+  RefPtr<TableProvider> tables_;
+  Runtime* runtime_;
+  QueryBuilder* qbuilder_;
 };
 
 class ExecutionPlan : public RefCounted {

@@ -26,7 +26,11 @@ public:
   CSTableScan(
       RefPtr<SequentialScanNode> stmt,
       cstable::CSTableReader&& cstable,
-      DefaultRuntime* runtime);
+      QueryBuilder* runtime);
+
+  virtual Vector<String> columnNames() const override;
+
+  virtual size_t numColumns() const override;
 
   void execute(
       ExecutionContext* context,
@@ -54,6 +58,9 @@ protected:
     ValueExpression::Instance instance;
   };
 
+  void scan(Function<bool (int argc, const SValue* argv)> fn);
+  void scanWithoutColumns(Function<bool (int argc, const SValue* argv)> fn);
+
   void findColumns(
       RefPtr<ValueExpressionNode> expr,
       Set<String>* column_names) const;
@@ -64,10 +71,12 @@ protected:
 
   void fetch();
 
+  Vector<String> column_names_;
   ScratchMemory scratch_;
   cstable::CSTableReader cstable_;
   HashMap<String, ColumnRef> columns_;
   Vector<ExpressionRef> select_list_;
+  ScopedPtr<ValueExpression> where_expr_;
   size_t colindex_;
   AggregationStrategy aggr_strategy_;
 };

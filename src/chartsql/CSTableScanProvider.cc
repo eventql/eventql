@@ -24,7 +24,7 @@ CSTableScanProvider::CSTableScanProvider(
 Option<ScopedPtr<TableExpression>>
     CSTableScanProvider::buildSequentialScan(
         RefPtr<SequentialScanNode> node,
-        DefaultRuntime* runtime) const {
+        QueryBuilder* runtime) const {
   return Option<ScopedPtr<TableExpression>>(
       mkScoped(
           new CSTableScan(

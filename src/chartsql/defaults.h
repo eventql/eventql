@@ -9,7 +9,7 @@
  */
 #pragma once
 #include <fnord/stdtypes.h>
-#include <chartsql/runtime/symboltable.h>
+#include <chartsql/runtime/runtime.h>
 #include <chartsql/expressions/aggregate.h>
 #include <chartsql/expressions/boolean.h>
 #include <chartsql/expressions/datetime.h>
@@ -19,6 +19,6 @@ using namespace fnord;
 
 namespace csql {
 
-void installDefaultSymbols(SymbolTable* symbol_table);
+void installDefaultSymbols(SymbolTable* rt);
 
 } // namespace csql

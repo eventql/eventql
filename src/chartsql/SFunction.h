@@ -27,6 +27,8 @@ enum kFunctionType {
  * A pure/stateless expression that returns a single return value
  */
 struct PureFunction {
+  PureFunction();
+  PureFunction(void (*_call)(int argc, SValue* in, SValue* out));
   void (*call)(int argc, SValue* in, SValue* out);
 };
 
@@ -43,6 +45,10 @@ struct AggregateFunction {
 };
 
 struct SFunction {
+  SFunction();
+  SFunction(PureFunction fn);
+  SFunction(AggregateFunction fn);
+
   kFunctionType type;
   union {
     PureFunction t_pure;

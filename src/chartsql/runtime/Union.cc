@@ -8,13 +8,29 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <chartsql/runtime/Union.h>
+#include <chartsql/runtime/EmptyTable.h>
 
 namespace csql {
 
 
 Union::Union(
     Vector<ScopedPtr<TableExpression>> sources) :
-    sources_(std::move(sources)) {}
+    sources_(std::move(sources)) {
+  if (sources_.size() == 0) {
+    RAISE(kRuntimeError, "UNION must have at least one source table");
+  }
+
+  for (const auto& cur : sources_) {
+    if (dynamic_cast<EmptyTable*>(cur.get())) {
+      continue;
+    }
+
+    auto ncols = cur->numColumns();
+    if (ncols != sources_[0]->numColumns()) {
+      RAISE(kRuntimeError, "UNION tables return different number of columns");
+    }
+  }
+}
 
 void Union::execute(
     ExecutionContext* context,
@@ -27,6 +43,14 @@ void Union::execute(
       return fn(sargc, sargv);
     });
   }
+}
+
+Vector<String> Union::columnNames() const {
+  return sources_[0]->columnNames();
+}
+
+size_t Union::numColumns() const {
+  return sources_[0]->numColumns();
 }
 
 }

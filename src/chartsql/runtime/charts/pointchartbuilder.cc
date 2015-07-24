@@ -7,14 +7,14 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <chartsql/pointchartbuilder.h>
-#include <chartsql/drawstatement.h>
+#include <chartsql/runtime/charts/pointchartbuilder.h>
+#include <chartsql/runtime/charts/drawstatement.h>
 
 namespace csql {
 
 PointChartBuilder::PointChartBuilder(
     fnord::chart::Canvas* canvas,
-    DrawStatement const* draw_stmt) :
+    RefPtr<DrawStatementNode> draw_stmt) :
     ChartBuilder(canvas, draw_stmt) {}
 
 fnord::chart::Drawable* PointChartBuilder::getChart() const {

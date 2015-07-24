@@ -23,7 +23,7 @@ using namespace csql;
 UNIT_TEST(RuntimeTest);
 
 TEST_CASE(RuntimeTest, TestStaticExpression, [] () {
-  DefaultRuntime runtime;
+  auto runtime = Runtime::getDefaultRuntime();
 
   auto expr = mkRef(
       new csql::CallExpressionNode(
@@ -33,12 +33,10 @@ TEST_CASE(RuntimeTest, TestStaticExpression, [] () {
             new csql::LiteralExpressionNode(SValue(SValue::IntegerType(2))),
           }));
 
-  auto compiled = runtime.buildValueExpression(expr.get());
-
   auto t0 = WallClock::unixMicros();
   SValue out;
   for (int i = 0; i < 1000000; ++i) {
-    compiled->evaluate(0, nullptr, &out);
+    out = runtime->evaluateStaticExpression(expr.get());
   }
   auto t1 = WallClock::unixMicros();
 

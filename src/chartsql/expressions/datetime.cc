@@ -28,11 +28,7 @@ static void checkArgs(const char* symbol, int argc, int argc_expected) {
   }
 }
 
-void fromTimestamp(
-    void* scratchpad,
-    int argc,
-    SValue* argv,
-    SValue* out) {
+void fromTimestamp(int argc, SValue* argv, SValue* out) {
   checkArgs("FROM_TIMESTAMP", argc, 1);
 
   SValue tmp = *argv;

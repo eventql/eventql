@@ -19,7 +19,8 @@ namespace csql {
 class ColumnReferenceNode : public ValueExpressionNode {
 public:
 
-  ColumnReferenceNode(const String& field_name);
+  ColumnReferenceNode(const ColumnReferenceNode& other);
+  ColumnReferenceNode(const String& column_name);
   ColumnReferenceNode(size_t column_index_);
 
   const String& fieldName() const;
@@ -30,8 +31,12 @@ public:
 
   Vector<RefPtr<ValueExpressionNode>> arguments() const override;
 
+  RefPtr<QueryTreeNode> deepCopy() const override;
+
+  String toSQL() const override;
+
 protected:
-  String field_name_;
+  String column_name_;
   Option<size_t> column_index_;
 };
 

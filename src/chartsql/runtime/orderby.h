@@ -7,42 +7,33 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#ifndef _FNORDMETRIC_SQL_ORDERBY_H
-#define _FNORDMETRIC_SQL_ORDERBY_H
-#include <stdlib.h>
-#include <string>
-#include <string.h>
-#include <vector>
-#include <chartsql/parser/astnode.h>
-#include <chartsql/parser/token.h>
-#include <chartsql/runtime/queryplannode.h>
+#pragma once
+#include <fnord/stdtypes.h>
+#include <chartsql/runtime/TableExpression.h>
+#include <chartsql/qtree/OrderByNode.h>
 
 namespace csql {
 
-class OrderBy : public QueryPlanNode {
+class OrderBy : public TableExpression {
 public:
 
-  struct SortSpec {
-    size_t column;
-    bool descending; // false == ASCENDING, true == DESCENDING
-  };
-
   OrderBy(
-      size_t num_columns,
-      std::vector<SortSpec> sort_specs,
-      QueryPlanNode* child);
+      Vector<OrderByNode::SortSpec> sort_specs,
+      size_t max_output_column_index,
+      ScopedPtr<TableExpression> child);
 
-  void execute() override;
-  bool nextRow(SValue* row, int row_len) override;
-  size_t getNumCols() const override;
-  const std::vector<std::string>& getColumns() const override;
+  void execute(
+      ExecutionContext* context,
+      Function<bool (int argc, const SValue* argv)> fn) override;
+
+  Vector<String> columnNames() const override;
+
+  size_t numColumns() const override;
 
 protected:
-  std::vector<std::string> columns_;
-  std::vector<SortSpec> sort_specs_;
-  QueryPlanNode* child_;
-  std::vector<std::vector<SValue>> rows_;
+  Vector<OrderByNode::SortSpec> sort_specs_;
+  size_t max_output_column_index_;
+  ScopedPtr<TableExpression> child_;
 };
 
 }
-#endif

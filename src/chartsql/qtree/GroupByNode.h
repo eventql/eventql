@@ -9,7 +9,7 @@
  */
 #pragma once
 #include <fnord/stdtypes.h>
-#include <chartsql/qtree/QueryTreeNode.h>
+#include <chartsql/qtree/TableExpressionNode.h>
 #include <chartsql/qtree/ValueExpressionNode.h>
 #include <chartsql/qtree/SelectListNode.h>
 
@@ -23,18 +23,20 @@ public:
   GroupByNode(
       Vector<RefPtr<SelectListNode>> select_list,
       Vector<RefPtr<ValueExpressionNode>> group_exprs,
-      RefPtr<TableExpressionNode> table);
+      RefPtr<QueryTreeNode> table);
 
   Vector<RefPtr<SelectListNode>> selectList() const;
 
   Vector<RefPtr<ValueExpressionNode>> groupExpressions() const;
 
-  RefPtr<TableExpressionNode> inputTable() const;
+  RefPtr<QueryTreeNode> inputTable() const;
+
+  RefPtr<QueryTreeNode> deepCopy() const override;
 
 protected:
   Vector<RefPtr<SelectListNode>> select_list_;
   Vector<RefPtr<ValueExpressionNode>> group_exprs_;
-  RefPtr<TableExpressionNode> table_;
+  RefPtr<QueryTreeNode> table_;
 };
 
 } // namespace csql

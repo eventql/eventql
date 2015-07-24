@@ -14,16 +14,21 @@ using namespace fnord;
 namespace csql {
 
 ColumnReferenceNode::ColumnReferenceNode(
-    const String& field_name) :
-    field_name_(field_name) {}
+    const ColumnReferenceNode& other) :
+    column_name_(other.column_name_),
+    column_index_(other.column_index_) {}
+
+ColumnReferenceNode::ColumnReferenceNode(
+    const String& column_name) :
+    column_name_(column_name) {}
 
 ColumnReferenceNode::ColumnReferenceNode(
     size_t column_index) :
-    field_name_(StringUtil::toString(column_index)),
+    column_name_(StringUtil::toString(column_index)),
     column_index_(Some(column_index)) {}
 
 const String& ColumnReferenceNode::fieldName() const {
-  return field_name_;
+  return column_name_;
 }
 
 Vector<RefPtr<ValueExpressionNode>> ColumnReferenceNode::arguments() const {
@@ -43,6 +48,14 @@ size_t ColumnReferenceNode::columnIndex() const {
 
 void ColumnReferenceNode::setColumnIndex(size_t index) {
   column_index_ = index;
+}
+
+RefPtr<QueryTreeNode> ColumnReferenceNode::deepCopy() const {
+  return new ColumnReferenceNode(*this);
+}
+
+String ColumnReferenceNode::toSQL() const {
+  return column_name_;
 }
 
 } // namespace csql

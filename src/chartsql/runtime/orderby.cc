@@ -10,45 +10,57 @@
 #include <chartsql/runtime/orderby.h>
 #include <chartsql/expressions/boolean.h>
 #include <algorithm>
+#include <fnord/inspect.h>
 
 namespace csql {
 
 OrderBy::OrderBy(
-    size_t num_columns,
-    std::vector<SortSpec> sort_specs,
-    QueryPlanNode* child) :
+    Vector<OrderByNode::SortSpec> sort_specs,
+    size_t max_output_column_index,
+    ScopedPtr<TableExpression> child) :
     sort_specs_(sort_specs),
-    child_(child) {
+    max_output_column_index_(max_output_column_index),
+    child_(std::move(child)) {
   if (sort_specs_.size() == 0) {
-    RAISE(kIllegalArgumentError, "empty sort spec");
+    RAISE(kIllegalArgumentError, "can't execute ORDER BY: no sort specs");
   }
 
-  const auto& child_columns = child_->getColumns();
-  if (child_columns.size() < num_columns) {
-    RAISE(kRuntimeError, "not enough columns in virtual table");
+  size_t max_sort_idx = 0;
+  for (const auto& sspec : sort_specs_) {
+    if (sspec.column > max_sort_idx) {
+      max_sort_idx = sspec.column;
+    }
   }
 
-  for (int i = 0; i < num_columns; ++i) {
-    columns_.emplace_back(child_columns[i]);
+  const auto& child_columns = child_->numColumns();
+  if (child_columns <= max_sort_idx) {
+    RAISE(
+        kRuntimeError,
+        "can't execute ORDER BY: not enough columns in virtual table");
   }
-
-  child->setTarget(this);
 }
 
 // FIXPAUL this should mergesort while inserting...
-void OrderBy::execute() {
-  child_->execute();
+void OrderBy::execute(
+    ExecutionContext* context,
+    Function<bool (int argc, const SValue* argv)> fn) {
+  Vector<Vector<SValue>> rows;
 
-  std::sort(rows_.begin(), rows_.end(), [this] (
-      const std::vector<SValue>& left,
-      const std::vector<SValue>& right) -> bool {
+  child_->execute(context, [&rows] (int argc, const SValue* argv) -> bool {
+    Vector<SValue> row;
+    for (int i = 0; i < argc; i++) {
+      row.emplace_back(argv[i]);
+    }
 
+    rows.emplace_back(row);
+    return true;
+  });
+
+  std::sort(
+      rows.begin(),
+      rows.end(),
+      [this] (const Vector<SValue>& left, const Vector<SValue>& right) -> bool {
     for (const auto& sort : sort_specs_) {
-      if (sort.column >= left.size() || sort.column >= right.size()) {
-
-        RAISE(kIndexError, "column index out of bounds");
-      }
-
       SValue args[2];
       SValue res(false);
       args[0] = left[sort.column];
@@ -72,31 +84,27 @@ void OrderBy::execute() {
     return false;
   });
 
-  for (auto& row : rows_) {
-    if (row.size() < columns_.size()) {
-      RAISE(kRuntimeError, "row too small");
+  for (auto& row : rows) {
+    if (!fn(std::min(row.size(), max_output_column_index_), row.data())) {
+      return;
     }
-
-    emitRow(row.data(), columns_.size());
   }
 }
 
-bool OrderBy::nextRow(SValue* row, int row_len) {
-  std::vector<SValue> row_vec;
-  for (int i = 0; i < row_len; i++) {
-    row_vec.emplace_back(row[i]);
+Vector<String> OrderBy::columnNames() const {
+  auto col_names = child_->columnNames();
+
+  if (col_names.size() > max_output_column_index_) {
+    col_names.erase(
+        col_names.begin() + max_output_column_index_,
+        col_names.end());
   }
 
-  rows_.emplace_back(row_vec);
-  return true;
+  return col_names;
 }
 
-size_t OrderBy::getNumCols() const {
-  return columns_.size();
-}
-
-const std::vector<std::string>& OrderBy::getColumns() const {
-  return columns_;
+size_t OrderBy::numColumns() const {
+  return std::min(child_->numColumns(), max_output_column_index_);
 }
 
 } // namespace csql

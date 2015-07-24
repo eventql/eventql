@@ -10,7 +10,7 @@
 #pragma once
 #include <fnord/stdtypes.h>
 #include <fnord/option.h>
-#include <chartsql/qtree/QueryTreeNode.h>
+#include <chartsql/qtree/TableExpressionNode.h>
 #include <chartsql/qtree/ValueExpressionNode.h>
 #include <chartsql/qtree/SelectListNode.h>
 
@@ -53,12 +53,19 @@ public:
       Vector<RefPtr<SelectListNode>> select_list,
       Option<RefPtr<ValueExpressionNode>> where_expr);
 
+  SequentialScanNode(const SequentialScanNode& other);
+
   const String& tableName() const;
+  void setTableName(const String& table_name);
 
   Vector<RefPtr<SelectListNode>> selectList() const;
 
+  Option<RefPtr<ValueExpressionNode>> whereExpression() const;
+
   AggregationStrategy aggregationStrategy() const;
   void setAggregationStrategy(AggregationStrategy strategy);
+
+  RefPtr<QueryTreeNode> deepCopy() const override;
 
 protected:
   String table_name_;

@@ -10,15 +10,28 @@
 #include <chartsql/runtime/TableExpressionBuilder.h>
 #include <chartsql/runtime/groupby.h>
 #include <chartsql/runtime/Union.h>
+#include <chartsql/runtime/SelectExpression.h>
+#include <chartsql/runtime/limitclause.h>
+#include <chartsql/runtime/orderby.h>
+#include <chartsql/runtime/ShowTablesStatement.h>
+#include <chartsql/runtime/DescribeTableStatement.h>
 
 using namespace fnord;
 
 namespace csql {
 
 ScopedPtr<TableExpression> TableExpressionBuilder::build(
-    RefPtr<TableExpressionNode> node,
-    DefaultRuntime* runtime,
+    RefPtr<QueryTreeNode> node,
+    QueryBuilder* runtime,
     TableProvider* tables) {
+
+  if (dynamic_cast<LimitNode*>(node.get())) {
+    return buildLimit(node.asInstanceOf<LimitNode>(), runtime, tables);
+  }
+
+  if (dynamic_cast<OrderByNode*>(node.get())) {
+    return buildOrderBy(node.asInstanceOf<OrderByNode>(), runtime, tables);
+  }
 
   if (dynamic_cast<GroupByNode*>(node.get())) {
     return buildGroupBy(node.asInstanceOf<GroupByNode>(), runtime, tables);
@@ -35,6 +48,24 @@ ScopedPtr<TableExpression> TableExpressionBuilder::build(
         tables);
   }
 
+  if (dynamic_cast<SelectExpressionNode*>(node.get())) {
+    return buildSelectExpression(
+        node.asInstanceOf<SelectExpressionNode>(),
+        runtime,
+        tables);
+  }
+
+  if (dynamic_cast<ShowTablesNode*>(node.get())) {
+    return mkScoped<csql::TableExpression>(new ShowTablesStatement(tables));
+  }
+
+  if (dynamic_cast<DescribeTableNode*>(node.get())) {
+    return buildDescribeTableStatment(
+        node.asInstanceOf<DescribeTableNode>(),
+        runtime,
+        tables);
+  }
+
   RAISE(
       kRuntimeError,
       "cannot figure out how to build a table expression for this QTree node");
@@ -42,12 +73,15 @@ ScopedPtr<TableExpression> TableExpressionBuilder::build(
 
 ScopedPtr<TableExpression> TableExpressionBuilder::buildGroupBy(
     RefPtr<GroupByNode> node,
-    DefaultRuntime* runtime,
+    QueryBuilder* runtime,
     TableProvider* tables) {
+  Vector<String> column_names;
   Vector<ScopedPtr<ValueExpression>> select_expressions;
   Vector<ScopedPtr<ValueExpression>> group_expressions;
 
   for (const auto& slnode : node->selectList()) {
+    column_names.emplace_back(slnode->columnName());
+
     select_expressions.emplace_back(
         runtime->buildValueExpression(slnode->expression()));
   }
@@ -61,13 +95,14 @@ ScopedPtr<TableExpression> TableExpressionBuilder::buildGroupBy(
   return mkScoped(
       new GroupBy(
           std::move(next),
+          column_names,
           std::move(select_expressions),
           std::move(group_expressions)));
 }
 
 ScopedPtr<TableExpression> TableExpressionBuilder::buildSequentialScan(
     RefPtr<SequentialScanNode> node,
-    DefaultRuntime* runtime,
+    QueryBuilder* runtime,
     TableProvider* tables) {
   const auto& table_name = node->tableName();
 
@@ -81,15 +116,68 @@ ScopedPtr<TableExpression> TableExpressionBuilder::buildSequentialScan(
 
 ScopedPtr<TableExpression> TableExpressionBuilder::buildUnion(
     RefPtr<UnionNode> node,
-    DefaultRuntime* runtime,
+    QueryBuilder* runtime,
     TableProvider* tables) {
   Vector<ScopedPtr<TableExpression>> union_tables;
 
-  for (const auto& table_name : node->inputTables()) {
-    union_tables.emplace_back(build(table_name, runtime, tables));
+  for (const auto& table : node->inputTables()) {
+    union_tables.emplace_back(build(table, runtime, tables));
   }
 
   return mkScoped(new Union(std::move(union_tables)));
+}
+
+ScopedPtr<TableExpression> TableExpressionBuilder::buildLimit(
+    RefPtr<LimitNode> node,
+    QueryBuilder* runtime,
+    TableProvider* tables) {
+  return mkScoped(
+      new LimitClause(
+          node->limit(),
+          node->offset(),
+          build(node->inputTable(), runtime, tables)));
+}
+
+ScopedPtr<TableExpression> TableExpressionBuilder::buildOrderBy(
+    RefPtr<OrderByNode> node,
+    QueryBuilder* runtime,
+    TableProvider* tables) {
+  return mkScoped(
+      new OrderBy(
+          node->sortSpecs(),
+          node->maxOutputColumnIndex(),
+          build(node->inputTable(), runtime, tables)));
+}
+
+ScopedPtr<TableExpression> TableExpressionBuilder::buildSelectExpression(
+    RefPtr<SelectExpressionNode> node,
+    QueryBuilder* runtime,
+    TableProvider* tables) {
+  Vector<String> column_names;
+  Vector<ScopedPtr<ValueExpression>> select_expressions;
+
+  for (const auto& slnode : node->selectList()) {
+    column_names.emplace_back(slnode->columnName());
+
+    select_expressions.emplace_back(
+        runtime->buildValueExpression(slnode->expression()));
+  }
+
+  return mkScoped(new SelectExpression(
+      column_names,
+      std::move(select_expressions)));
+}
+
+ScopedPtr<TableExpression> TableExpressionBuilder::buildDescribeTableStatment(
+    RefPtr<DescribeTableNode> node,
+    QueryBuilder* runtime,
+    TableProvider* tables) {
+  auto table_info = tables->describe(node->tableName());
+  if (table_info.isEmpty()) {
+    RAISEF(kNotFoundError, "table not found: $0", node->tableName());
+  }
+
+  return mkScoped(new DescribeTableStatement(table_info.get()));
 }
 
 } // namespace csql

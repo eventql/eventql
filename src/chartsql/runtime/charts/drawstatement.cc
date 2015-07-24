@@ -7,42 +7,52 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <chartsql/domainconfig.h>
-#include <chartsql/drawstatement.h>
-#include <chartsql/areachartbuilder.h>
-#include <chartsql/barchartbuilder.h>
-#include <chartsql/linechartbuilder.h>
-#include <chartsql/pointchartbuilder.h>
+#include <chartsql/runtime/runtime.h>
+#include <chartsql/runtime/charts/domainconfig.h>
+#include <chartsql/runtime/charts/drawstatement.h>
+#include <chartsql/runtime/charts/areachartbuilder.h>
+#include <chartsql/runtime/charts/barchartbuilder.h>
+#include <chartsql/runtime/charts/linechartbuilder.h>
+#include <chartsql/runtime/charts/pointchartbuilder.h>
 
 namespace csql {
 
 DrawStatement::DrawStatement(
-    ASTNode* ast,
-    ValueExpressionBuilder* compiler) :
-    ast_(ast->deepCopy()),
-    compiler_(compiler) {}
+    RefPtr<DrawStatementNode> node,
+    Vector<ScopedPtr<TableExpression>> sources,
+    Runtime* runtime) :
+    node_(node),
+    sources_(std::move(sources)),
+    runtime_(runtime) {
+  if (sources_.empty()) {
+    RAISE(kRuntimeError, "DRAW statement without any tables");
+  }
 
-void DrawStatement::execute(fnord::chart::Canvas* canvas) const {
+  for (auto& table : sources_) {
+    if (table->numColumns() != sources_[0]->numColumns()) {
+      RAISE(kRuntimeError, "DRAW tables return different number of columns");
+    }
+  }
+}
+
+void DrawStatement::execute(
+    ExecutionContext* context,
+    fnord::chart::Canvas* canvas) {
   fnord::chart::Drawable* chart = nullptr;
 
-  switch (ast_->getToken()->getType()) {
-    case Token::T_AREACHART:
-      chart = mkChart<AreaChartBuilder>(canvas);
+  switch (node_->chartType()) {
+    case DrawStatementNode::ChartType::AREACHART:
+      chart = executeWithChart<AreaChartBuilder>(context, canvas);
       break;
-    case Token::T_BARCHART:
-      chart = mkChart<BarChartBuilder>(canvas);
+    case DrawStatementNode::ChartType::BARCHART:
+      chart = executeWithChart<BarChartBuilder>(context, canvas);
       break;
-    case Token::T_LINECHART:
-      chart = mkChart<LineChartBuilder>(canvas);
+    case DrawStatementNode::ChartType::LINECHART:
+      chart = executeWithChart<LineChartBuilder>(context, canvas);
       break;
-    case Token::T_POINTCHART:
-      chart = mkChart<PointChartBuilder>(canvas);
+    case DrawStatementNode::ChartType::POINTCHART:
+      chart = executeWithChart<PointChartBuilder>(context, canvas);
       break;
-    default:
-      RAISE(
-          kRuntimeError,
-          "invalid chart type: %s",
-          Token::getTypeName(ast_->getToken()->getType()));
   }
 
   applyDomainDefinitions(chart);
@@ -52,29 +62,8 @@ void DrawStatement::execute(fnord::chart::Canvas* canvas) const {
   applyLegend(chart);
 }
 
-ASTNode const* DrawStatement::getProperty(Token::kTokenType key) const {
-  for (const auto& child : ast_->getChildren()) {
-    if (child->getType() != ASTNode::T_PROPERTY) {
-      continue;
-    }
-
-    if (child->getToken()->getType() != key) {
-      continue;
-    }
-
-    const auto& values = child->getChildren();
-    if (values.size() != 1) {
-      RAISE(kRuntimeError, "corrupt AST: T_PROPERTY has != 1 child");
-    }
-
-    return values[0];
-  }
-
-  return nullptr;
-}
-
 void DrawStatement::applyAxisDefinitions(fnord::chart::Drawable* chart) const {
-  for (const auto& child : ast_->getChildren()) {
+  for (const auto& child : node_->ast()->getChildren()) {
     if (child->getType() != ASTNode::T_AXIS ||
         child->getChildren().size() < 1 ||
         child->getChildren()[0]->getType() != ASTNode::T_AXIS_POSITION) {
@@ -115,8 +104,7 @@ void DrawStatement::applyAxisDefinitions(fnord::chart::Drawable* chart) const {
           prop->getToken() != nullptr &&
           *prop->getToken() == Token::T_TITLE &&
           prop->getChildren().size() == 1) {
-        auto axis_title = executeSimpleConstExpression(
-            compiler_,
+        auto axis_title = runtime_->evaluateStaticExpression(
             prop->getChildren()[0]);
         axis->setTitle(axis_title.toString());
         continue;
@@ -153,8 +141,7 @@ void DrawStatement::applyAxisLabels(
           RAISE(kRuntimeError, "corrupt AST: ROTATE has no children");
         }
 
-        auto rot = executeSimpleConstExpression(
-            compiler_,
+        auto rot = runtime_->evaluateStaticExpression(
             prop->getChildren()[0]);
         axis->setLabelRotation(rot.getValue<double>());
         break;
@@ -167,7 +154,7 @@ void DrawStatement::applyAxisLabels(
 
 void DrawStatement::applyDomainDefinitions(
     fnord::chart::Drawable* chart) const {
-  for (const auto& child : ast_->getChildren()) {
+  for (const auto& child : node_->ast()->getChildren()) {
     bool invert = false;
     bool logarithmic = false;
     ASTNode* min_expr = nullptr;
@@ -236,14 +223,14 @@ void DrawStatement::applyDomainDefinitions(
     domain_config.setInvert(invert);
     domain_config.setLogarithmic(logarithmic);
     if (min_expr != nullptr && max_expr != nullptr) {
-      domain_config.setMin(executeSimpleConstExpression(compiler_, min_expr));
-      domain_config.setMax(executeSimpleConstExpression(compiler_, max_expr));
+      domain_config.setMin(runtime_->evaluateStaticExpression(min_expr));
+      domain_config.setMax(runtime_->evaluateStaticExpression(max_expr));
     }
   }
 }
 
 void DrawStatement::applyTitle(fnord::chart::Drawable* chart) const {
-  for (const auto& child : ast_->getChildren()) {
+  for (const auto& child : node_->ast()->getChildren()) {
     if (child->getType() != ASTNode::T_PROPERTY ||
         child->getToken() == nullptr || !(
         child->getToken()->getType() == Token::T_TITLE ||
@@ -255,8 +242,7 @@ void DrawStatement::applyTitle(fnord::chart::Drawable* chart) const {
       RAISE(kRuntimeError, "corrupt AST: [SUB]TITLE has != 1 child");
     }
 
-    auto title_eval = executeSimpleConstExpression(
-        compiler_,
+    auto title_eval = runtime_->evaluateStaticExpression(
         child->getChildren()[0]);
     auto title_str = title_eval.toString();
 
@@ -276,7 +262,7 @@ void DrawStatement::applyTitle(fnord::chart::Drawable* chart) const {
 void DrawStatement::applyGrid(fnord::chart::Drawable* chart) const {
   ASTNode* grid = nullptr;
 
-  for (const auto& child : ast_->getChildren()) {
+  for (const auto& child : node_->ast()->getChildren()) {
     if (child->getType() == ASTNode::T_GRID) {
       grid = child;
       break;
@@ -317,7 +303,7 @@ void DrawStatement::applyGrid(fnord::chart::Drawable* chart) const {
 void DrawStatement::applyLegend(fnord::chart::Drawable* chart) const {
   ASTNode* legend = nullptr;
 
-  for (const auto& child : ast_->getChildren()) {
+  for (const auto& child : node_->ast()->getChildren()) {
     if (child->getType() == ASTNode::T_LEGEND) {
       legend = child;
       break;
@@ -363,8 +349,7 @@ void DrawStatement::applyLegend(fnord::chart::Drawable* chart) const {
             RAISE(kRuntimeError, "corrupt AST: TITLE has no children");
           }
 
-          auto sval = executeSimpleConstExpression(
-              compiler_,
+          auto sval = runtime_->evaluateStaticExpression(
               prop->getChildren()[0]);
 
           title = sval.toString();
