@@ -7,9 +7,7 @@ project(cmapp)
 
 option(ENABLE_TESTS "Build unit tests [default: ON]" ON)
 
-include(lib/libfnord/cmake/libfnord.cmake)
-
-#add_subdirectory(lib/libfnord/fnord-fts)
+include(3rdparty/libstx/cmake/libfnord.cmake)
 
 add_subdirectory(3rdparty/libcstable)
 include_directories(${CSTABLE_INCLUDE})
