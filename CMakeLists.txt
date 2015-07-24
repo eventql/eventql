@@ -9,34 +9,29 @@ option(ENABLE_TESTS "Build unit tests [default: ON]" ON)
 
 include(lib/libfnord/cmake/libfnord.cmake)
 
-add_subdirectory(lib/libfnord/fnord-fts)
+#add_subdirectory(lib/libfnord/fnord-fts)
 
-add_subdirectory(lib/libcstable)
+add_subdirectory(3rdparty/libcstable)
 include_directories(${CSTABLE_INCLUDE})
 
-add_subdirectory(lib/libsstable)
+add_subdirectory(3rdparty/libsstable)
 include_directories(${SSTABLE_INCLUDE})
 
-add_subdirectory(lib/libdproc)
+add_subdirectory(3rdparty/libdproc)
 include_directories(${DPROC_INCLUDE})
 
-#add_subdirectory(app/sensord)
-#include_directories(${SENSORD_INCLUDE})
-
-add_subdirectory(app/brokerd)
+add_subdirectory(3rdparty/brokerd)
 include_directories(${BROKERD_INCLUDE})
 
-add_subdirectory(app/chartsql)
+add_subdirectory(3rdparty/chartsql)
 include_directories(${CHARTSQL_INCLUDE})
 
-add_subdirectory(app/tsdb)
+add_subdirectory(3rdparty/tsdb)
 include_directories(${TSDB_INCLUDE})
 
-add_subdirectory(app/inventoryd)
+add_subdirectory(src/inventoryd)
 include_directories(${INVENTORYD_INCLUDE})
 
-add_subdirectory(app/metricd)
-include_directories(${METRICD_INCLUDE})
-
-add_subdirectory(app/analyticsd)
-include_directories(${ANALYTICSD_INCLUDE})
+add_subdirectory(src/customerdb)
+add_subdirectory(src/analytics)
+add_subdirectory(src/logjoin)
