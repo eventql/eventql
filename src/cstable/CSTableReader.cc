@@ -14,6 +14,7 @@
 #include <cstable/UInt32ColumnReader.h>
 #include <cstable/UInt64ColumnReader.h>
 #include <cstable/LEB128ColumnReader.h>
+#include <cstable/DoubleColumnReader.h>
 #include <cstable/StringColumnReader.h>
 
 namespace fnord {
@@ -81,6 +82,8 @@ RefPtr<ColumnReader> CSTableReader::getColumnReader(const String& column_name) {
       return new UInt64ColumnReader(c.r_max, c.d_max, cdata, c.size);
     case ColumnType::UINT64_LEB128:
       return new LEB128ColumnReader(c.r_max, c.d_max, cdata, c.size);
+    case ColumnType::DOUBLE:
+      return new DoubleColumnReader(c.r_max, c.d_max, cdata, c.size);
     case ColumnType::STRING_PLAIN:
       return new StringColumnReader(c.r_max, c.d_max, cdata, c.size);
   }

@@ -34,6 +34,10 @@ public:
       void** data,
       size_t* data_len) override;
 
+  msg::FieldType type() const override {
+    return msg::FieldType::BOOLEAN;
+  }
+
 protected:
   util::BitPackDecoder data_reader_;
   uint8_t cur_val_;

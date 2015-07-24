@@ -7,6 +7,7 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
+#include <fnord/ieee754.h>
 #include <cstable/RecordMaterializer.h>
 
 namespace fnord {
@@ -188,6 +189,12 @@ void RecordMaterializer::insertValue(
           *((uint64_t*) column->data));
       break;
 
+    case msg::FieldType::DATETIME:
+      record->addChild(
+          column->field_id,
+          UnixTime(*((uint64_t*) column->data)));
+      break;
+
     case msg::FieldType::STRING:
       record->addChild(
           column->field_id,
@@ -201,6 +208,13 @@ void RecordMaterializer::insertValue(
         record->addChild(column->field_id, msg::FALSE);
       }
       break;
+
+    case msg::FieldType::DOUBLE:
+      record->addChild(
+          column->field_id,
+          IEEE754::fromBytes(*((uint64_t*) column->data)));
+      break;
+
   }
 }
 

@@ -11,6 +11,7 @@
 #define _FNORD_CSTABLE_COLUMNREADER_H
 #include <fnord/stdtypes.h>
 #include <fnord/autoref.h>
+#include <fnord/protobuf/MessageObject.h>
 #include <fnord/util/binarymessagereader.h>
 #include <fnord/util/BitPackDecoder.h>
 
@@ -28,8 +29,8 @@ public:
       r_max_(r_max),
       d_max_(d_max),
       reader_(data, size),
-      vals_read_(0),
       vals_total_(*reader_.readUInt64()),
+      vals_read_(0),
       rlvl_size_(*reader_.readUInt64()),
       dlvl_size_(*reader_.readUInt64()),
       data_size_(*reader_.readUInt64()),
@@ -45,8 +46,14 @@ public:
       void** data,
       size_t* data_len) = 0;
 
+  virtual msg::FieldType type() const = 0;
+
   uint64_t maxRepetitionLevel() const { return r_max_; }
   uint64_t maxDefinitionLevel() const { return d_max_; }
+
+  uint64_t nextRepetitionLevel() {
+    return rlvl_reader_.peek();
+  }
 
   bool eofReached() const {
     return vals_read_ >= vals_total_;
@@ -57,13 +64,13 @@ protected:
   uint64_t d_max_;
   util::BinaryMessageReader reader_;
   size_t vals_total_;
+  size_t vals_read_;
   uint64_t rlvl_size_;
   uint64_t dlvl_size_;
   uint64_t data_size_;
   util::BitPackDecoder rlvl_reader_;
   util::BitPackDecoder dlvl_reader_;
   void* data_;
-  size_t vals_read_;
 };
 
 } // namespace cstable

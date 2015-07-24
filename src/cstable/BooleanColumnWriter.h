@@ -36,6 +36,10 @@ public:
     return ColumnType::BOOLEAN;
   }
 
+  msg::FieldType fieldType() const override {
+    return msg::FieldType::BOOLEAN;
+  }
+
 protected:
   size_t size() const override;
   void write(util::BinaryMessageWriter* writer) override;

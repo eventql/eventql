@@ -7,8 +7,7 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#ifndef _FNORD_CSTABLE_INT64COLUMNWRITER_H
-#define _FNORD_CSTABLE_INT64COLUMNWRITER_H
+#pragma once
 #include <fnord/stdtypes.h>
 #include <fnord/util/binarymessagewriter.h>
 #include <fnord/util/BitPackEncoder.h>
@@ -18,10 +17,10 @@
 namespace fnord {
 namespace cstable {
 
-class UInt64ColumnWriter : public ColumnWriter {
+class DoubleColumnWriter : public ColumnWriter {
 public:
 
-  UInt64ColumnWriter(
+  DoubleColumnWriter(
       uint64_t r_max,
       uint64_t d_max);
 
@@ -31,25 +30,23 @@ public:
       const void* data,
       size_t size) override;
 
-  void addDatum(uint64_t rep_level, uint64_t def_level, uint64_t value);
+  void addDatum(uint64_t rep_level, uint64_t def_level, double value);
 
   ColumnType type() const override {
-    return ColumnType::UINT64_PLAIN;
+    return ColumnType::DOUBLE;
   }
 
   msg::FieldType fieldType() const override {
-    return msg::FieldType::UINT64;
+    return msg::FieldType::DOUBLE;
   }
 
 protected:
   size_t size() const override;
   void write(util::BinaryMessageWriter* writer) override;
 
-  uint64_t max_value_;
   util::BinaryMessageWriter data_writer_;
 };
 
 } // namespace cstable
 } // namespace fnord
 
-#endif

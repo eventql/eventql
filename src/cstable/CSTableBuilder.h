@@ -13,6 +13,7 @@
 #include <fnord/io/file.h>
 #include <fnord/util/binarymessagewriter.h>
 #include <fnord/autoref.h>
+#include <fnord/csv/CSVInputStream.h>
 #include <cstable/ColumnWriter.h>
 #include <cstable/CSTableWriter.h>
 #include <fnord/protobuf/MessageSchema.h>
@@ -26,6 +27,7 @@ public:
   CSTableBuilder(const msg::MessageSchema* schema);
 
   void addRecord(const msg::MessageObject& msg);
+  void addRecordsFromCSV(CSVInputStream* csv);
 
   void write(const String& filename);
   void write(CSTableWriter* writer);

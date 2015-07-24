@@ -14,6 +14,7 @@
 #include <fnord/autoref.h>
 #include <fnord/util/binarymessagewriter.h>
 #include <fnord/util/BitPackEncoder.h>
+#include <fnord/protobuf/MessageObject.h>
 #include <cstable/BinaryFormat.h>
 
 namespace fnord {
@@ -33,7 +34,9 @@ public:
 
   void write(void* buf, size_t buf_len);
   virtual void commit();
+
   virtual ColumnType type() const = 0;
+  virtual msg::FieldType fieldType() const = 0;
 
   size_t maxRepetitionLevel() const;
   size_t maxDefinitionLevel() const;
