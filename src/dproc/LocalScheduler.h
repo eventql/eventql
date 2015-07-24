@@ -12,12 +12,10 @@
 #include "fnord/stdtypes.h"
 #include "fnord/random.h"
 #include "fnord/thread/taskscheduler.h"
-#include "fnord/thread/threadpool.h"
 #include "fnord/thread/FixedSizeThreadPool.h"
 #include <dproc/Application.h>
 #include <dproc/Scheduler.h>
 #include <dproc/TaskSpec.pb.h>
-#include <dproc/TaskRef.h>
 
 using namespace fnord;
 
@@ -28,6 +26,7 @@ public:
 
   LocalScheduler(
       const String& tempdir = "/tmp",
+      size_t max_threads = 8,
       size_t max_requests = 32);
 
   RefPtr<TaskResultFuture> run(
@@ -39,57 +38,49 @@ public:
 
 protected:
 
-  class LocalTaskContext : public TaskContext, public RefCounted {
+  class LocalTaskRef : public TaskContext, public RefCounted {
   public:
-    LocalTaskContext(
+    LocalTaskRef(
         RefPtr<Application> app,
         const String& task_name,
         const Buffer& params);
 
-    RefPtr<dproc::TaskRef> getDependency(size_t index) override;
+    RefPtr<dproc::RDD> getDependency(size_t index) override;
     size_t numDependencies() const override;
-    bool isCancelled() const override;
 
     void readCache();
-    void cancel();
 
-    Function<RefPtr<Task> ()> task_factory;
-    RefPtr<TaskRef> task_ref;
+    RefPtr<Task> task;
     String cache_filename;
     String debug_name;
-    std::atomic<bool> running;
-    std::atomic<bool> finished;
-    std::atomic<bool> failed;
-    std::atomic<bool> expanded;
-    std::atomic<bool> cancelled;
-
-    Vector<RefPtr<LocalTaskContext>> dependencies;
+    bool running;
+    bool finished;
+    bool failed;
+    bool expanded;
+    Vector<RefPtr<LocalTaskRef>> dependencies;
   };
 
-  struct LocalTaskPipeline : public RefCounted {
-    LocalTaskPipeline() : cur_tasks(0), max_tasks(1) {}
-    Vector<RefPtr<LocalTaskContext>> tasks;
+  struct LocalTaskPipeline {
+    Vector<RefPtr<LocalTaskRef>> tasks;
     std::mutex mutex;
     std::condition_variable wakeup;
-    size_t cur_tasks;
-    size_t max_tasks;
   };
 
   void runPipeline(
       Application* app,
-      RefPtr<LocalTaskPipeline> pipeline,
+      LocalTaskPipeline* pipeline,
       RefPtr<TaskResultFuture> result);
 
   void runTask(
-      RefPtr<LocalTaskPipeline> pipeline,
-      RefPtr<LocalTaskContext> task,
+      LocalTaskPipeline* pipeline,
+      RefPtr<LocalTaskRef> task,
       RefPtr<TaskResultFuture> result);
 
   String tempdir_;
   size_t max_threads_;
   size_t num_threads_;
   Random rnd_;
-  thread::CachedThreadPool work_tpool_;
+  thread::FixedSizeThreadPool tpool_;
   thread::FixedSizeThreadPool req_tpool_;
 };
 

@@ -13,13 +13,11 @@ using namespace fnord;
 
 namespace dproc {
 
-TaskResultFuture::TaskResultFuture() : cancelled_(false) {}
-
-Future<RefPtr<TaskRef>> TaskResultFuture::result() const {
+Future<RefPtr<Task>> TaskResultFuture::result() const {
   return promise_.future();
 }
 
-void TaskResultFuture::returnResult(RefPtr<TaskRef> result) {
+void TaskResultFuture::returnResult(RefPtr<Task> result) {
   promise_.success(result);
 }
 
@@ -43,11 +41,6 @@ void TaskResultFuture::onStatusChange(Function<void ()> fn) {
   on_status_change_ = fn;
 }
 
-void TaskResultFuture::onCancel(Function<void ()> fn) {
-  std::unique_lock<std::mutex> lk(status_mutex_);
-  on_cancel_ = fn;
-}
-
 TaskStatus TaskResultFuture::status() const {
   std::unique_lock<std::mutex> lk(status_mutex_);
   return status_;
@@ -69,18 +62,5 @@ double TaskStatus::progress() const {
   return num_subtasks_completed / (double) num_subtasks_total;
 }
 
-void TaskResultFuture::cancel() {
-  std::unique_lock<std::mutex> lk(status_mutex_);
-
-  if (on_cancel_) {
-    on_cancel_();
-  }
-
-  cancelled_ = true;
-}
-
-bool TaskResultFuture::isCancelled() const {
-  return cancelled_;
-}
 
 } // namespace dproc
