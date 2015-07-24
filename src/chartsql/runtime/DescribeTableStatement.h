@@ -8,7 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #pragma once
-#include <fnord/stdtypes.h>
+#include <stx/stdtypes.h>
 #include <chartsql/qtree/ShowTablesNode.h>
 #include <chartsql/runtime/TableExpression.h>
 #include <chartsql/runtime/tablerepository.h>

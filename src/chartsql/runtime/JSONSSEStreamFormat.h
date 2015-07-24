@@ -8,9 +8,9 @@
  * <http://www.gnu.org/licenses/>.
  */
 #pragma once
-#include <fnord/stdtypes.h>
+#include <stx/stdtypes.h>
 #include <chartsql/runtime/ResultFormat.h>
-#include <fnord/http/HTTPSSEStream.h>
+#include <stx/http/HTTPSSEStream.h>
 
 namespace csql {
 

@@ -16,7 +16,7 @@
 #include <chartsql/runtime/runtime.h>
 #include <chartsql/svalue.h>
 #include <util/unittest.h>
-#include <fnord/exception.h>
+#include <stx/exception.h>
 
 using namespace fnordmetric::query;
 

@@ -8,7 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #pragma once
-#include <fnord/stdtypes.h>
+#include <stx/stdtypes.h>
 #include <chartsql/runtime/tablerepository.h>
 #include <cstable/CSTableReader.h>
 

@@ -11,7 +11,7 @@
 #include <chartsql/parser/astutil.h>
 #include <chartsql/parser/token.h>
 #include <chartsql/runtime/tablerepository.h>
-#include <fnord/exception.h>
+#include <stx/exception.h>
 
 namespace csql {
 

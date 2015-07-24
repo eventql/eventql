@@ -12,7 +12,7 @@
 #include <math.h>
 #include <string.h>
 #include <chartsql/expressions/boolean.h>
-#include <fnord/exception.h>
+#include <stx/exception.h>
 
 namespace csql {
 namespace expressions {

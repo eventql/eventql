@@ -13,7 +13,7 @@
 #include <string>
 #include <ctime>
 #include <stdint.h>
-#include <fnord/inspect.h>
+#include <stx/inspect.h>
 #include <chartsql/svalue.h>
 #include <chartsql/format.h>
 #include <chartsql/parser/token.h>

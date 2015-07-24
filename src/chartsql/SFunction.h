@@ -8,10 +8,10 @@
  * <http://www.gnu.org/licenses/>.
  */
 #pragma once
-#include <fnord/stdtypes.h>
-#include <fnord/ieee754.h>
-#include <fnord/util/binarymessagereader.h>
-#include <fnord/util/binarymessagewriter.h>
+#include <stx/stdtypes.h>
+#include <stx/ieee754.h>
+#include <stx/util/binarymessagereader.h>
+#include <stx/util/binarymessagewriter.h>
 #include <chartsql/svalue.h>
 
 using namespace fnord;

@@ -10,12 +10,12 @@
 #ifndef _FNORDMETRIC_METRICDB_HTTPINTERFACE_H
 #define _FNORDMETRIC_METRICDB_HTTPINTERFACE_H
 #include <memory>
-#include <fnord/uri.h>
+#include <stx/uri.h>
 #include <fnord-http/httpservice.h>
 #include <fnord-http/httprequest.h>
 #include <fnord-http/httpresponse.h>
 }
-#include <fnord/json/jsonoutputstream.h>
+#include <stx/json/jsonoutputstream.h>
 
 using namespace fnord;
 namespace csql {

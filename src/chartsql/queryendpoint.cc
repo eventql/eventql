@@ -7,7 +7,7 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <fnord/stringutil.h>
+#include <stx/stringutil.h>
 #include <metricd/metricrepository.h>
 #include "fnordmetric/environment.h"
 #include "fnordmetric/chartsql/queryendpoint.h"

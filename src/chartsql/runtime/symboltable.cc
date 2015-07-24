@@ -12,7 +12,7 @@
 #include <assert.h>
 #include <string>
 #include "symboltable.h"
-#include <fnord/exception.h>
+#include <stx/exception.h>
 
 namespace csql {
 
