@@ -7,7 +7,7 @@
  * permission is obtained.
  */
 #include <fnord/exception.h>
-#include <customerdb/CustomerDirectory.h>
+#include <common/CustomerDirectory.h>
 
 using namespace fnord;
 

@@ -39,7 +39,7 @@
 #include "inventory/DocIndex.h"
 #include <inventory/ItemRef.h>
 #include <fnord-fts/Analyzer.h>
-#include "customerdb/CustomerDirectory.h"
+#include "common/CustomerDirectory.h"
 #include "common.h"
 
 using namespace cm;
