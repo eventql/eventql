@@ -43,17 +43,17 @@ public:
   /**
    * Return the <low, high> time watermarks
    */
-  Pair<DateTime, DateTime> watermarks() const;
+  Pair<UnixTime, UnixTime> watermarks() const;
 
   /**
    * Return the current <feed_name, offset> stream offsets
    */
   Vector<Pair<String, uint64_t>> streamOffsets() const;
 
-  DateTime lowWatermark() const;
-  DateTime highWatermark() const;
+  UnixTime lowWatermark() const;
+  UnixTime highWatermark() const;
 
-  void setTimeBackfill(Function<DateTime (const FeedEntry& entry)> fn);
+  void setTimeBackfill(Function<UnixTime (const FeedEntry& entry)> fn);
 
   void setMaxSpread(Duration duration);
 
@@ -69,7 +69,7 @@ protected:
     bool is_fetching;
     uint64_t next_offset;
     uint64_t consumed_offset;
-    DateTime stream_time;
+    UnixTime stream_time;
   };
 
   RPCClient* rpc_client_;
@@ -78,7 +78,7 @@ protected:
   Wakeup data_available_wakeup_;
   mutable std::mutex mutex_;
 
-  Function<DateTime (const FeedEntry& entry)> time_backfill_fn_;
+  Function<UnixTime (const FeedEntry& entry)> time_backfill_fn_;
   Duration max_spread_;
 
   //fnord::stats::Counter<uint64_t> stat_entries_written_total_;

@@ -237,11 +237,11 @@ Vector<Pair<String, uint64_t>> RemoteFeedReader::streamOffsets() const {
   return offsets;
 }
 
-Pair<DateTime, DateTime> RemoteFeedReader::watermarks() const {
+Pair<UnixTime, UnixTime> RemoteFeedReader::watermarks() const {
   ScopedLock<std::mutex> lk(mutex_);
 
   if (sources_.size() == 0) {
-    return std::make_pair(DateTime(0), DateTime(0));
+    return std::make_pair(UnixTime(0), UnixTime(0));
   }
 
   uint64_t low = std::numeric_limits<uint64_t>::max();
@@ -257,19 +257,19 @@ Pair<DateTime, DateTime> RemoteFeedReader::watermarks() const {
     }
   }
 
-  return std::make_pair(DateTime(low), DateTime(high));
+  return std::make_pair(UnixTime(low), UnixTime(high));
 }
 
-DateTime RemoteFeedReader::lowWatermark() const {
+UnixTime RemoteFeedReader::lowWatermark() const {
   return watermarks().first;
 }
 
-DateTime RemoteFeedReader::highWatermark() const {
+UnixTime RemoteFeedReader::highWatermark() const {
   return watermarks().second;
 }
 
 void RemoteFeedReader::setTimeBackfill(
-    Function<DateTime (const FeedEntry& entry)> fn) {
+    Function<UnixTime (const FeedEntry& entry)> fn) {
   time_backfill_fn_ = fn;
 }
 

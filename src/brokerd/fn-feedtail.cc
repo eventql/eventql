@@ -171,7 +171,7 @@ int main(int argc, const char** argv) {
         buffer_size);
   }
 
-  DateTime last_iter;
+  UnixTime last_iter;
   uint64_t rate_limit_micros = 1 * kMicrosPerSecond;
 
   for (;;) {

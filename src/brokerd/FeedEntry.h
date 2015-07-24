@@ -11,7 +11,7 @@
 #define _FNORD_FEEDS_LOGSTREAMENTRY_H
 #include <stdlib.h>
 #include <string>
-#include "fnord/datetime.h"
+#include "fnord/UnixTime.h"
 
 namespace fnord {
 namespace feeds {
@@ -21,7 +21,7 @@ typedef uint64_t FeedOffset;
 struct FeedEntry {
   uint64_t offset;
   uint64_t next_offset;
-  DateTime time;
+  UnixTime time;
   std::string data;
 
   template <typename T>

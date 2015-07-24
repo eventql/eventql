@@ -242,7 +242,7 @@ int main(int argc, const char** argv) {
   auto start_time = WallClock::now().unixMicros();
   auto last_status_line = start_time;
 
-  DateTime last_iter;
+  UnixTime last_iter;
   uint64_t rate_limit_micros = 0.1 * kMicrosPerSecond;
 
   for (;;) {
