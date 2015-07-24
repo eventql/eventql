@@ -9,9 +9,9 @@
  */
 #ifndef _FNORD_CSTABLE_STRINGCOLUMNREADER_H
 #define _FNORD_CSTABLE_STRINGCOLUMNREADER_H
-#include <fnord/stdtypes.h>
-#include <fnord/util/binarymessagereader.h>
-#include <fnord/util/BitPackDecoder.h>
+#include <stx/stdtypes.h>
+#include <stx/util/binarymessagereader.h>
+#include <stx/util/BitPackDecoder.h>
 #include <cstable/ColumnReader.h>
 
 namespace fnord {

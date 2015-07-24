@@ -9,12 +9,12 @@
  */
 #ifndef _FNORD_CSTABLE_COLUMNWRITER_H
 #define _FNORD_CSTABLE_COLUMNWRITER_H
-#include <fnord/stdtypes.h>
-#include <fnord/exception.h>
-#include <fnord/autoref.h>
-#include <fnord/util/binarymessagewriter.h>
-#include <fnord/util/BitPackEncoder.h>
-#include <fnord/protobuf/MessageObject.h>
+#include <stx/stdtypes.h>
+#include <stx/exception.h>
+#include <stx/autoref.h>
+#include <stx/util/binarymessagewriter.h>
+#include <stx/util/BitPackEncoder.h>
+#include <stx/protobuf/MessageObject.h>
 #include <cstable/BinaryFormat.h>
 
 namespace fnord {

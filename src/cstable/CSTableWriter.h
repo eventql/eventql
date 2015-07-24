@@ -9,11 +9,11 @@
  */
 #ifndef _FNORD_CSTABLE_CSTABLEWRITER_H
 #define _FNORD_CSTABLE_CSTABLEWRITER_H
-#include <fnord/stdtypes.h>
-#include <fnord/exception.h>
-#include <fnord/duration.h>
-#include <fnord/io/file.h>
-#include <fnord/util/binarymessagewriter.h>
+#include <stx/stdtypes.h>
+#include <stx/exception.h>
+#include <stx/duration.h>
+#include <stx/io/file.h>
+#include <stx/util/binarymessagewriter.h>
 #include <cstable/ColumnWriter.h>
 
 namespace fnord {
