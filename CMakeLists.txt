@@ -27,6 +27,8 @@ include_directories(${CHARTSQL_INCLUDE})
 add_subdirectory(3rdparty/tsdb)
 include_directories(${TSDB_INCLUDE})
 
+add_subdirectory(3rdparty/fnord-fts)
+
 add_subdirectory(src/customerdb)
 add_subdirectory(src/analytics)
 add_subdirectory(src/logjoin)
