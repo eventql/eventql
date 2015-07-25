@@ -121,61 +121,6 @@ void TrackedSession::debugPrint() const {
   }
 }
 
-Option<UnixTime> TrackedSession::firstSeenTime() const {
-  uint64_t t = std::numeric_limits<uint64_t>::max();
-
-  for (const auto& e : queries) {
-    if (e.time.unixMicros() < t) {
-      t = e.time.unixMicros();
-    }
-  }
-
-  for (const auto& e : item_visits) {
-    if (e.time.unixMicros() < t) {
-      t = e.time.unixMicros();
-    }
-  }
-
-  for (const auto& e : cart_items) {
-    if (e.time.unixMicros() < t) {
-      t = e.time.unixMicros();
-    }
-  }
-
-  if (t == std::numeric_limits<uint64_t>::max()) {
-    return None<UnixTime>();
-  } else {
-    return Some(UnixTime(t));
-  }
-}
-
-Option<UnixTime> TrackedSession::lastSeenTime() const {
-  uint64_t t = std::numeric_limits<uint64_t>::min();
-
-  for (const auto& e : queries) {
-    if (e.time.unixMicros() > t) {
-      t = e.time.unixMicros();
-    }
-  }
-
-  for (const auto& e : item_visits) {
-    if (e.time.unixMicros() > t) {
-      t = e.time.unixMicros();
-    }
-  }
-
-  for (const auto& e : cart_items) {
-    if (e.time.unixMicros() > t) {
-      t = e.time.unixMicros();
-    }
-  }
-
-  if (t == std::numeric_limits<uint64_t>::min()) {
-    return None<UnixTime>();
-  } else {
-    return Some(UnixTime(t));
-  }
-}
 
 String TrackedSession::joinedExperiments() const {
   String joined;

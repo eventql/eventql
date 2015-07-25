@@ -61,9 +61,6 @@ struct TrackedSession {
 
   Vector<TrackedEvent> events;
 
-  std::vector<TrackedQuery> queries;
-  std::vector<TrackedItemVisit> item_visits;
-  std::vector<TrackedCartItem> cart_items;
   std::vector<std::string> attrs;
 
   uint32_t num_cart_items;
