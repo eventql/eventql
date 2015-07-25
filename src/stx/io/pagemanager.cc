@@ -24,10 +24,6 @@ PageManager::PageManager(
   end_pos_(end_pos),
   block_size_(block_size) {}
 
-//PageManager::PageManager(size_t block_size, const LogSnapshot& log_snapshot) :
-//  block_size_(block_size),
-//  end_pos_(log_snapshot.last_used_byte) {}
-
 PageManager::PageManager(const PageManager&& move) :
   end_pos_(move.end_pos_),
   block_size_(move.block_size_),
@@ -151,16 +147,6 @@ std::unique_ptr<PageManager::PageRef> MmapPageManager::getPageImpl(
     } else {
       new_size = last_byte;
     }
-
-/*
-    if (fnordmetric::env()->verbose()) {
-      fnordmetric::env()->logger()->printf(
-          "DEBUG",
-          "Truncating file %s to %lu bytes",
-          filename_.c_str(),
-          (long unsigned) new_size);
-    }
-*/
 
     FileUtil::truncate(filename_, new_size);
     file_size_ = new_size;
