@@ -7,6 +7,9 @@
  * permission is obtained.
  */
 #include <assert.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <signal.h>
 #include <stx/exception.h>
 #include <stx/inspect.h>
 #include <stx/logging.h>
@@ -29,10 +32,16 @@ namespace cm {
 LogJoin::LogJoin(
     LogJoinShard shard,
     bool dry_run,
-    SessionProcessor* target) :
-    dry_run_(dry_run),
+    RefPtr<mdb::MDB> sessdb,
+    SessionProcessor* target,
+    thread::EventLoop* evloop) :
     shard_(shard),
-    target_(target) {
+    dry_run_(dry_run),
+    sessdb_(sessdb),
+    target_(target),
+    shutdown_(false),
+    rpc_client_(evloop),
+    feed_reader_(&rpc_client_) {
   addPixelParamID("dw_ab", 1);
   addPixelParamID("l", 2);
   addPixelParamID("u_x", 3);
@@ -66,6 +75,19 @@ LogJoin::LogJoin(
   addPixelParamID("qstr~it", 104);
   addPixelParamID("qstr~nl", 105);
   addPixelParamID("qstr~es", 106);
+
+  feed_reader_.setMaxSpread(10 * kMicrosPerSecond);
+  feed_reader_.setTimeBackfill([] (const feeds::FeedEntry& entry) -> UnixTime {
+    const auto& log_line = entry.data;
+
+    auto c_end = log_line.find("|");
+    if (c_end == std::string::npos) return 0;
+    auto t_end = log_line.find("|", c_end + 1);
+    if (t_end == std::string::npos) return 0;
+
+    auto timestr = log_line.substr(c_end + 1, t_end - c_end - 1);
+    return std::stoul(timestr) * stx::kMicrosPerSecond;
+  });
 }
 
 size_t LogJoin::numSessions() const {
@@ -416,6 +438,153 @@ void LogJoin::exportStats(const std::string& prefix) {
       StringUtil::format("$0/$1", prefix, "joined_item_visits"),
       &stat_joined_item_visits_,
       stx::stats::ExportMode::EXPORT_DELTA);
+
+  exportStat(
+      StringUtil::format("/cm-logjoin/$0/stream_time_low", shard_.shard_name),
+      &stat_stream_time_low,
+      stx::stats::ExportMode::EXPORT_VALUE);
+
+  exportStat(
+      StringUtil::format("/cm-logjoin/$0/stream_time_high", shard_.shard_name),
+      &stat_stream_time_high,
+      stx::stats::ExportMode::EXPORT_VALUE);
+
+  exportStat(
+      StringUtil::format("/cm-logjoin/$0/active_sessions", shard_.shard_name),
+      &stat_active_sessions,
+      stx::stats::ExportMode::EXPORT_VALUE);
+
+  exportStat(
+      StringUtil::format("/cm-logjoin/$0/dbsize", shard_.shard_name),
+      &stat_dbsize,
+      stx::stats::ExportMode::EXPORT_VALUE);
+
+}
+
+void LogJoin::processClickstream(
+      const HashMap<String, URI>& input_feeds,
+      size_t batch_size,
+      size_t buffer_size,
+      Duration flush_interval) {
+  /* resume from last offset */
+  auto txn = sessdb_->startTransaction(true);
+  try {
+    importTimeoutList(txn.get());
+
+    for (const auto& input_feed : input_feeds) {
+      uint64_t offset = 0;
+
+      auto last_offset = txn->get(
+          StringUtil::format("__logjoin_offset~$0", input_feed.first));
+
+      if (!last_offset.isEmpty()) {
+        offset = std::stoul(last_offset.get().toString());
+      }
+
+      stx::logInfo(
+          "cm.logjoin",
+          "Adding source feed:\n    feed=$0\n    url=$1\n    offset: $2",
+          input_feed.first,
+          input_feed.second.toString(),
+          offset);
+
+      feed_reader_.addSourceFeed(
+          input_feed.second,
+          input_feed.first,
+          offset,
+          batch_size,
+          buffer_size);
+    }
+
+    txn->abort();
+  } catch (...) {
+    txn->abort();
+    throw;
+  }
+
+  stx::logInfo("cm.logjoin", "Resuming logjoin...");
+
+  UnixTime last_flush;
+  uint64_t rate_limit_micros = flush_interval.microseconds();
+
+  for (;;) {
+    auto begin = WallClock::unixMicros();
+
+    feed_reader_.fillBuffers();
+    auto txn = sessdb_->startTransaction();
+
+    int i = 0;
+    for (; i < batch_size; ++i) {
+      auto entry = feed_reader_.fetchNextEntry();
+
+      if (entry.isEmpty()) {
+        break;
+      }
+
+      try {
+        insertLogline(entry.get().data, txn.get());
+      } catch (const std::exception& e) {
+        stx::logError("cm.logjoin", e, "invalid log line");
+      }
+    }
+
+    auto watermarks = feed_reader_.watermarks();
+
+    auto etime = WallClock::now().unixMicros() - last_flush.unixMicros();
+    if (etime > rate_limit_micros) {
+      last_flush = WallClock::now();
+      flush(txn.get(), watermarks.first);
+    }
+
+    auto stream_offsets = feed_reader_.streamOffsets();
+    String stream_offsets_str;
+
+    for (const auto& soff : stream_offsets) {
+      txn->update(
+          StringUtil::format("__logjoin_offset~$0", soff.first),
+          StringUtil::toString(soff.second));
+
+      stream_offsets_str +=
+          StringUtil::format("\n    offset[$0]=$1", soff.first, soff.second);
+    }
+
+    stx::logInfo(
+        "cm.logjoin",
+        "LogJoin comitting...\n    stream_time=<$0 ... $1>\n" \
+        "    active_sessions=$2\n    flushed_sessions=$3$4",
+        watermarks.first,
+        watermarks.second,
+        numSessions(),
+        0, //session_proc.num_sessions,
+        stream_offsets_str);
+
+    if (dry_run_) {
+      txn->abort();
+    } else {
+      txn->commit();
+    }
+
+    sessdb_->removeStaleReaders();
+
+    if (shutdown_.load()) {
+      break;
+    }
+
+    stat_stream_time_low.set(watermarks.first.unixMicros());
+    stat_stream_time_high.set(watermarks.second.unixMicros());
+    stat_active_sessions.set(numSessions());
+    //stat_dbsize.set(FileUtil::du_c(flags.getString("datadir"));
+
+    auto rtime = WallClock::unixMicros() - begin;
+    auto rlimit = kMicrosPerSecond;
+    if (i < 2 && rtime < rlimit) {
+      usleep(rlimit - rtime);
+    }
+  }
+}
+
+void LogJoin::shutdown() {
+  shutdown_ = true;
 }
 
 } // namespace cm
