@@ -36,6 +36,7 @@
 #include "logjoin/stages/NormalizeQueryStrings.h"
 #include "logjoin/stages/DebugPrintStage.h"
 #include "logjoin/stages/DeliverWebhookStage.h"
+#include "logjoin/stages/TSDBUploadStage.h"
 #include "inventory/DocStore.h"
 #include "inventory/IndexChangeRequest.h"
 #include "inventory/DocIndex.h"
@@ -204,6 +205,8 @@ int main(int argc, const char** argv) {
     ev.run();
   });
 
+  http::HTTPConnectionPool http(&ev);
+
   /* start stats reporting */
   stx::stats::StatsdAgent statsd_agent(
       stx::InetAddr::resolve(flags.getString("statsd_addr")),
@@ -293,6 +296,14 @@ int main(int argc, const char** argv) {
                   std::placeholders::_1,
                   std::placeholders::_2)),
           std::placeholders::_1));
+
+  /* pipeline stage: TSDBUpload */
+  pipeline->addStage(
+      std::bind(
+          &TSDBUploadStage::process,
+          std::placeholders::_1,
+          flags.getString("tsdb_addr"),
+          &http));
 
   /* pipeline stage: DeliverWebHook */
   pipeline->addStage(
