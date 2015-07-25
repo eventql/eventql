@@ -61,10 +61,10 @@ void SessionJoin::process(RefPtr<TrackedSessionContext> ctx) {
   }
 
   /* calculate global gmv */
-  uint32_t num_cart_items;
-  uint32_t num_order_items;
-  uint32_t gmv_eurcents;
-  uint32_t cart_value_eurcents;
+  uint32_t num_cart_items = 0;
+  uint32_t num_order_items = 0;
+  uint32_t gmv_eurcents = 0;
+  uint32_t cart_value_eurcents = 0;
   HashMap<String, uint64_t> cart_eurcents_per_item;
   HashMap<String, uint64_t> gmv_eurcents_per_item;
   for (const auto& ci : cart_items) {
@@ -119,6 +119,91 @@ void SessionJoin::process(RefPtr<TrackedSessionContext> ctx) {
     }
   }
 
+  for (const auto& q : queries) {
+    auto qobj = ctx->joined_session.add_search_queries();
+
+    qobj->set_time(q.time.unixMicros() / kMicrosPerSecond);
+    qobj->set_language((ProtoLanguage) cm::extractLanguage(q.attrs));
+
+    auto qstr = cm::extractQueryString(q.attrs);
+    if (!qstr.isEmpty()) {
+      qobj->set_query_string(qstr.get());
+    }
+
+    auto slrid = cm::extractAttr(q.attrs, "slrid");
+    if (!slrid.isEmpty()) {
+      try {
+        uint32_t sid = std::stoul(slrid.get());
+        qobj->set_shop_id(sid);
+      } catch (...) {}
+    }
+
+    qobj->set_num_result_items(q.nitems);
+    qobj->set_num_result_items_clicked(q.nclicks);
+    qobj->set_num_ad_impressions(q.nads);
+    qobj->set_num_ad_clicks(q.nadclicks);
+    qobj->set_num_cart_items(q.num_cart_items);
+    qobj->set_cart_value_eurcents(q.cart_value_eurcents);
+    qobj->set_num_order_items(q.num_order_items);
+    qobj->set_gmv_eurcents(q.gmv_eurcents);
+
+    auto pg_str = cm::extractAttr(q.attrs, "pg");
+    if (!pg_str.isEmpty()) {
+      try {
+        auto val = std::stoull(pg_str.get());
+        qobj->set_page(val);
+      } catch (...) {}
+    }
+
+    auto abgrp = cm::extractABTestGroup(q.attrs);
+    if (!abgrp.isEmpty()) {
+      qobj->set_ab_test_group(abgrp.get());
+    }
+
+    auto qcat1 = cm::extractAttr(q.attrs, "q_cat1");
+    if (!qcat1.isEmpty()) {
+      try {
+        auto val = std::stoull(qcat1.get());
+        qobj->set_category1(val);
+      } catch (...) {}
+    }
+
+    auto qcat2 = cm::extractAttr(q.attrs, "q_cat2");
+    if (!qcat2.isEmpty()) {
+      try {
+        auto val = std::stoull(qcat2.get());
+        qobj->set_category2(val);
+      } catch (...) {}
+    }
+
+    auto qcat3 = cm::extractAttr(q.attrs, "q_cat3");
+    if (!qcat3.isEmpty()) {
+      try {
+        auto val = std::stoull(qcat3.get());
+        qobj->set_category3(val);
+      } catch (...) {}
+    }
+
+    qobj->set_device_type((ProtoDeviceType) extractDeviceType(q.attrs));
+    qobj->set_page_type((ProtoPageType) extractPageType(q.attrs));
+
+    String query_type = pageTypeToString((PageType) qobj->page_type());
+    auto qtype_attr = cm::extractAttr(q.attrs, "qt");
+    if (!qtype_attr.isEmpty()) {
+      query_type = qtype_attr.get();
+    }
+
+    qobj->set_query_type(query_type);
+
+    for (const auto& item : q.items) {
+      auto item_obj = qobj->add_result_items();
+
+      item_obj->set_position(item.position);
+      item_obj->set_item_id(item.item.docID().docid);
+      item_obj->set_clicked(item.clicked);
+      item_obj->set_seen(item.seen);
+    }
+  }
 }
 
 void SessionJoin::processSearchQueryEvent(
