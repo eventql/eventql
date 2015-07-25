@@ -20,6 +20,7 @@ add_library(logjoin-base OBJECT
     stages/SessionJoin.cc
     stages/BuildSessionAttributes.cc
     stages/NormalizeQueryStrings.cc
+    stages/DebugPrintStage.cc
     LogJoinShard.cc)
 
 add_executable(logjoind

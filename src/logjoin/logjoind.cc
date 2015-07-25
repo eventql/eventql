@@ -37,6 +37,7 @@
 #include "logjoin/stages/SessionJoin.h"
 #include "logjoin/stages/BuildSessionAttributes.h"
 #include "logjoin/stages/NormalizeQueryStrings.h"
+#include "logjoin/stages/DebugPrintStage.h"
 #include "inventory/DocStore.h"
 #include "inventory/IndexChangeRequest.h"
 #include "inventory/DocIndex.h"
@@ -339,6 +340,9 @@ int main(int argc, const char** argv) {
                   std::placeholders::_2)),
           std::placeholders::_1));
 
+  /* pipeline stage: DebugPrint */
+  pipeline->addStage(
+      std::bind(&DebugPrintStage::process, std::placeholders::_1));
 
   /* set up session processor */
   cm::SessionProcessor session_proc(pipeline, &schemas, dry_run);
