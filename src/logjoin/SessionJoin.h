@@ -34,6 +34,8 @@ protected:
       const TrackedEvent& event,
       Vector<TrackedCartItem>* cart_items);
 
+  static Option<UnixTime> firstSeenTime(const JoinedSession& session);
+  static Option<UnixTime> lastSeenTime(const JoinedSession& session);
 
 };
 

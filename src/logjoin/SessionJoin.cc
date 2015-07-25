@@ -227,6 +227,17 @@ void SessionJoin::process(RefPtr<TrackedSessionContext> ctx) {
   //obj.addChild(session_schema->fieldId("gmv_eurcents"), session.gmv_eurcents);
   //obj.addChild(session_schema->fieldId("customer"), session.customer_key);
 
+  auto first_seen = firstSeenTime(ctx->joined_session);
+  auto last_seen = lastSeenTime(ctx->joined_session);
+  if (first_seen.isEmpty() || last_seen.isEmpty()) {
+    RAISE(kRuntimeError, "session: time isn't set");
+  }
+
+  ctx->joined_session.set_first_seen_time(
+      first_seen.get().unixMicros() / kMicrosPerSecond);
+
+  ctx->joined_session.set_last_seen_time(
+      last_seen.get().unixMicros() / kMicrosPerSecond);
 }
 
 void SessionJoin::processSearchQueryEvent(
@@ -296,6 +307,62 @@ void SessionJoin::processCartItemsEvent(
     if (!merged) {
       cart_items->emplace_back(cart_item);
     }
+  }
+}
+
+Option<UnixTime> SessionJoin::firstSeenTime(const JoinedSession& sess) {
+  uint64_t t = std::numeric_limits<uint64_t>::max();
+
+  for (const auto& e : sess.search_queries()) {
+    if (e.time() * kMicrosPerSecond < t) {
+      t = e.time() * kMicrosPerSecond;
+    }
+  }
+
+  for (const auto& e : sess.item_visits()) {
+    if (e.time() * kMicrosPerSecond < t) {
+      t = e.time() * kMicrosPerSecond;
+    }
+  }
+
+  for (const auto& e : sess.cart_items()) {
+    if (e.time() * kMicrosPerSecond < t) {
+      t = e.time() * kMicrosPerSecond;
+    }
+  }
+
+  if (t == std::numeric_limits<uint64_t>::max()) {
+    return None<UnixTime>();
+  } else {
+    return Some(UnixTime(t));
+  }
+}
+
+Option<UnixTime> SessionJoin::lastSeenTime(const JoinedSession& sess) {
+  uint64_t t = std::numeric_limits<uint64_t>::min();
+
+  for (const auto& e : sess.search_queries()) {
+    if (e.time() * kMicrosPerSecond > t) {
+      t = e.time() * kMicrosPerSecond;
+    }
+  }
+
+  for (const auto& e : sess.item_visits()) {
+    if (e.time() * kMicrosPerSecond > t) {
+      t = e.time() * kMicrosPerSecond;
+    }
+  }
+
+  for (const auto& e : sess.cart_items()) {
+    if (e.time() * kMicrosPerSecond > t) {
+      t = e.time() * kMicrosPerSecond;
+    }
+  }
+
+  if (t == std::numeric_limits<uint64_t>::min()) {
+    return None<UnixTime>();
+  } else {
+    return Some(UnixTime(t));
   }
 }
 
