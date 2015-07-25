@@ -204,10 +204,6 @@ int main(int argc, const char** argv) {
     ev.run();
   });
 
-  /* set up rpc client */
-  HTTPRPCClient rpc_client(&ev);
-  http::HTTPConnectionPool http(&ev);
-
   /* start stats reporting */
   stx::stats::StatsdAgent statsd_agent(
       stx::InetAddr::resolve(flags.getString("statsd_addr")),
