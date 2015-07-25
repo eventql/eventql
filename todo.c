@@ -1,8 +1,3 @@
-//    if (!qstr.isEmpty()) {
-//      auto qstr_norm = normalize_(lang, qstr.get());
-//      qry_obj.addChild(searchq_schema->fieldId("query_string"), qstr.get());
-//      qry_obj.addChild(searchq_schema->fieldId("query_string_normalized"), qstr_norm);
-//    }
 
 //      auto docid = item.item.docID();
 //

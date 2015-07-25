@@ -36,6 +36,7 @@
 #include "logjoin/LogJoinUpload.h"
 #include "logjoin/stages/SessionJoin.h"
 #include "logjoin/stages/BuildSessionAttributes.h"
+#include "logjoin/stages/NormalizeQueryStrings.h"
 #include "inventory/DocStore.h"
 #include "inventory/IndexChangeRequest.h"
 #include "inventory/DocIndex.h"
@@ -313,7 +314,6 @@ int main(int argc, const char** argv) {
           "documents-dawanda",
           true));
 
-  stx::fts::Analyzer analyzer(flags.getString("conf"));
 
   /* set up session processing pipeline */
   auto pipeline = mkRef(new cm::SessionPipeline());
@@ -322,6 +322,22 @@ int main(int argc, const char** argv) {
   pipeline->addStage(
       std::bind(&SessionJoin::process, std::placeholders::_1));
 
+  /* pipeline stage: BuildSessionAttributes */
+  pipeline->addStage(
+      std::bind(&BuildSessionAttributes::process, std::placeholders::_1));
+
+  /* pipeline stage: NormalizeQueryStrings */
+  stx::fts::Analyzer analyzer(flags.getString("conf"));
+  pipeline->addStage(
+      std::bind(
+          &NormalizeQueryStrings::process,
+          NormalizeQueryStrings::NormalizeFn(
+              std::bind(
+                  &stx::fts::Analyzer::normalize,
+                  &analyzer,
+                  std::placeholders::_1,
+                  std::placeholders::_2)),
+          std::placeholders::_1));
 
 
   /* set up session processor */
