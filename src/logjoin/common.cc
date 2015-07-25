@@ -231,6 +231,12 @@ CurrencyConverter::ConversionTable currencyConversionTable() {
   return tbl;
 }
 
+CurrencyConverter* cconv() {
+  static CurrencyConverter cc(currencyConversionTable());
+  return &cc;
+}
+
+
 bool isIndexAttributeWhitelisted(const String& attr) {
   if (attr == "category1") return true;
   if (attr == "category2") return true;

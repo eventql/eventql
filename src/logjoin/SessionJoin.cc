@@ -7,6 +7,7 @@
  * permission is obtained.
  */
 #include "logjoin/SessionJoin.h"
+#include "logjoin/common.h"
 
 using namespace stx;
 
@@ -33,6 +34,88 @@ void SessionJoin::process(RefPtr<TrackedSessionContext> ctx) {
     if (ev.evtype == "_cart_items") {
       processCartItemsEvent(ev, &cart_items);
       continue;
+    }
+  }
+
+  /* update queries (mark items as clicked) */
+  for (auto& cur_query : queries) {
+
+    /* search for matching item visits */
+    for (auto& cur_visit : page_views) {
+      auto cutoff = cur_query.time.unixMicros() +
+          kMaxQueryClickDelaySeconds * kMicrosPerSecond;
+
+      if (cur_visit.time < cur_query.time ||
+          cur_visit.time.unixMicros() > cutoff) {
+        continue;
+      }
+
+      for (auto& qitem : cur_query.items) {
+        if (cur_visit.item == qitem.item) {
+          qitem.clicked = true;
+          qitem.seen = true;
+          break;
+        }
+      }
+    }
+  }
+
+  /* calculate global gmv */
+  uint32_t num_cart_items;
+  uint32_t num_order_items;
+  uint32_t gmv_eurcents;
+  uint32_t cart_value_eurcents;
+  HashMap<String, uint64_t> cart_eurcents_per_item;
+  HashMap<String, uint64_t> gmv_eurcents_per_item;
+  for (const auto& ci : cart_items) {
+    auto currency = currencyFromString(ci.currency);
+    auto eur = cconv()->convert(Money(ci.price_cents, currency), CURRENCY_EUR);
+    auto eurcents = eur.cents;
+    eurcents *= ci.quantity;
+    cart_eurcents_per_item.emplace(ci.item.docID().docid, eurcents);
+
+    ++num_cart_items;
+    cart_value_eurcents += eurcents;
+    if (ci.checkout_step == 1) {
+      gmv_eurcents_per_item.emplace(ci.item.docID().docid, eurcents);
+      ++num_order_items;
+      gmv_eurcents += eurcents;
+    }
+  }
+
+  /* calculate gmv and ctrs per query */
+  for (auto& q : queries) {
+    auto slrid = extractAttr(q.attrs, "slrid");
+
+    for (auto& i : q.items) {
+      // DAWANDA HACK
+      if (i.position >= 1 && i.position <= 4 && slrid.isEmpty()) {
+        ++q.nads;
+        q.nadclicks += i.clicked;
+      }
+      // EOF DAWANDA HACK
+
+      ++q.nitems;
+
+      if (i.clicked) {
+        ++q.nclicks;
+
+        {
+          auto ci = cart_eurcents_per_item.find(i.item.docID().docid);
+          if (ci != cart_eurcents_per_item.end()) {
+            ++q.num_cart_items;
+            q.cart_value_eurcents += ci->second;
+          }
+        }
+
+        {
+          auto ci = gmv_eurcents_per_item.find(i.item.docID().docid);
+          if (ci != gmv_eurcents_per_item.end()) {
+            ++q.num_order_items;
+            q.gmv_eurcents += ci->second;
+          }
+        }
+      }
     }
   }
 
