@@ -89,12 +89,12 @@ add_library(chartsql-lib OBJECT
     defaults.cc)
 
 add_executable(test-chartsql-runtime
-    $<TARGET_OBJECTS:fnord-base>
+    $<TARGET_OBJECTS:stx-base>
     $<TARGET_OBJECTS:fnord-chart>
-    $<TARGET_OBJECTS:fnord-protobuf>
-    $<TARGET_OBJECTS:fnord-http>
-    $<TARGET_OBJECTS:fnord-json>
-    $<TARGET_OBJECTS:fnord-mdb>
+    $<TARGET_OBJECTS:stx-protobuf>
+    $<TARGET_OBJECTS:stx-http>
+    $<TARGET_OBJECTS:stx-json>
+    $<TARGET_OBJECTS:stx-mdb>
     $<TARGET_OBJECTS:sstable>
     $<TARGET_OBJECTS:libcstable>
     $<TARGET_OBJECTS:dproc>
@@ -105,12 +105,12 @@ add_executable(test-chartsql-runtime
 target_link_libraries(test-chartsql-runtime ${CMAKE_THREAD_LIBS_INIT} ${FNORD_LIBS})
 
 add_executable(test-chartsql-parser
-    $<TARGET_OBJECTS:fnord-base>
+    $<TARGET_OBJECTS:stx-base>
     $<TARGET_OBJECTS:fnord-chart>
-    $<TARGET_OBJECTS:fnord-protobuf>
-    $<TARGET_OBJECTS:fnord-http>
-    $<TARGET_OBJECTS:fnord-json>
-    $<TARGET_OBJECTS:fnord-mdb>
+    $<TARGET_OBJECTS:stx-protobuf>
+    $<TARGET_OBJECTS:stx-http>
+    $<TARGET_OBJECTS:stx-json>
+    $<TARGET_OBJECTS:stx-mdb>
     $<TARGET_OBJECTS:sstable>
     $<TARGET_OBJECTS:libcstable>
     $<TARGET_OBJECTS:dproc>
