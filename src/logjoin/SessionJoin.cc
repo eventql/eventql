@@ -204,6 +204,29 @@ void SessionJoin::process(RefPtr<TrackedSessionContext> ctx) {
       item_obj->set_seen(item.seen);
     }
   }
+
+  //if (!session.referrer_url.isEmpty()) {
+  //  //obj.addChild(session_schema->fieldId("referrer_url"), session.referrer_url.get());
+  //}
+
+  //if (!session.referrer_campaign.isEmpty()) {
+  //  obj.addChild(session_schema->fieldId("referrer_campaign"), session.referrer_campaign.get());
+  //}
+
+  //if (!session.referrer_name.isEmpty()) {
+  //  obj.addChild(session_schema->fieldId("referrer_name"), session.referrer_name.get());
+  //}
+
+  //if (!session.customer_session_id.isEmpty()) {
+  //  obj.addChild(session_schema->fieldId("customer_session_id"), session.customer_session_id.get());
+  //}
+
+  //obj.addChild(session_schema->fieldId("num_cart_items"), session.num_cart_items);
+  //obj.addChild(session_schema->fieldId("cart_value_eurcents"), session.cart_value_eurcents);
+  //obj.addChild(session_schema->fieldId("num_order_items"), session.num_order_items);
+  //obj.addChild(session_schema->fieldId("gmv_eurcents"), session.gmv_eurcents);
+  //obj.addChild(session_schema->fieldId("customer"), session.customer_key);
+
 }
 
 void SessionJoin::processSearchQueryEvent(
