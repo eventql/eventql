@@ -16,7 +16,7 @@ void SessionJoin::process(RefPtr<TrackedSessionContext> ctx) {
 
   /* process builtin events */
   std::vector<TrackedQuery> queries;
-  std::vector<TrackedItemVisit> item_visits;
+  std::vector<TrackedItemVisit> page_views;
   std::vector<TrackedCartItem> cart_items;
 
   for (const auto& ev : ctx->tracked_session.events) {
@@ -26,12 +26,12 @@ void SessionJoin::process(RefPtr<TrackedSessionContext> ctx) {
       continue;
     }
 
+    if (ev.evtype == "_pageview") {
+      processPageViewEvent(ev, &page_views);
+      continue;
+    }
+
     ///* item visit event */
-    //  TrackedItemVisit visit;
-    //  visit.time = time;
-    //  visit.eid = evid;
-    //  visit.fromParams(logline);
-    //  insertItemVisit(visit);
     //  break;
     //}
 
@@ -66,6 +66,27 @@ void SessionJoin::processSearchQueryEvent(
   }
 
   queries->emplace_back(query);
+}
+
+void SessionJoin::processPageViewEvent(
+    const TrackedEvent& event,
+    Vector<TrackedItemVisit>* page_views) {
+  TrackedItemVisit visit;
+  visit.time = event.time;
+  visit.eid = event.evid;
+
+  URI::ParamList logline;
+  URI::parseQueryString(event.data, &logline);
+  visit.fromParams(logline);
+
+  for (auto& v : *page_views) {
+    if (v.eid == visit.eid) {
+      v.merge(visit);
+      return;
+    }
+  }
+
+  page_views->emplace_back(visit);
 }
 
 } // namespace cm
