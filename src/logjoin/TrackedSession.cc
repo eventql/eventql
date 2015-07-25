@@ -18,11 +18,11 @@ TrackedEvent::TrackedEvent(
     UnixTime _time,
     String _evid,
     String _evtype,
-    String _value) :
+    String _data) :
     time(_time),
     evid(_evid),
     evtype(_evtype),
-    value(_value) {}
+    data(_data) {}
 
 TrackedSession::TrackedSession() :
   num_cart_items(0),
@@ -109,37 +109,15 @@ void TrackedSession::updateSessionAttributes(
 }
 
 void TrackedSession::debugPrint() const {
-  stx::iputs("=== session $0/$1 ===", customer_key, uid);
-
-  stx::iputs(" > queries: ", 1);
-  for (const auto& query : queries) {
+  stx::iputs("* session $0/$1", customer_key, uid);
+  for (const auto& ev : events) {
     stx::iputs(
-        "    > query time=$0 eid=$2\n        > attrs: $1",
-        query.time,
-        query.attrs,
-        query.eid);
-
-    for (const auto& item : query.items) {
-      stx::iputs(
-          "        > qitem: id=$0 clicked=$1 position=$2 variant=$3",
-          item.item,
-          item.clicked,
-          item.position,
-          item.variant);
-    }
+        "    > event time=$0 evtype=$1 eid=$2 data=$3",
+        ev.time,
+        ev.evtype,
+        ev.evid,
+        ev.data);
   }
-
-  stx::iputs(" > item visits: ", 1);
-  for (const auto& view : item_visits) {
-    stx::iputs(
-        "    > visit: item=$0 time=$1 eid=$3 attrs=$2",
-        view.item,
-        view.time,
-        view.attrs,
-        view.eid);
-  }
-
-  stx::iputs("", 1);
 }
 
 Option<UnixTime> TrackedSession::firstSeenTime() const {

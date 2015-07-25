@@ -42,12 +42,12 @@ struct TrackedEvent {
       UnixTime _time,
       String _evid,
       String _evtype,
-      String _value);
+      String _data);
 
   const UnixTime time;
   const String evid;
   const String evtype;
-  const String value;
+  const String data;
 };
 
 /**
