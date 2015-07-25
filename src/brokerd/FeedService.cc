@@ -149,4 +149,4 @@ String FeedService::hostID() {
 }
 
 } // namespace logstream_service
-} // namespace fnord
+} // namespace stx
