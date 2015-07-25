@@ -12,7 +12,7 @@
 #include "stx/exception.h"
 #include "stx/test/unittest.h"
 #include "stx/protobuf/msg.h"
-#include "logjoin/LogJoinTarget.cc"
+#include "logjoin/SessionProcessor.cc"
 #include "logjoin/JoinedSession.pb.h"
 
 using namespace stx;
@@ -42,10 +42,10 @@ void loadDefaultSchemas(msg::MessageSchemaRepository* repo) {
       msg::MessageSchema::fromProtobuf(IndexChangeRequest::descriptor()));
 }
 
-LogJoinTarget mkTestTarget() {
+SessionProcessor mkTestTarget() {
   auto schemas = new msg::MessageSchemaRepository(); // FIXPAUL leak
   loadDefaultSchemas(schemas);
-  LogJoinTarget trgt(schemas, false);
+  SessionProcessor trgt(schemas, false);
 
   trgt.setNormalize([] (Language l, const String& q) { return q; });
 
@@ -56,10 +56,10 @@ LogJoinTarget mkTestTarget() {
   return trgt;
 }
 
-LogJoinTarget mkTestTargetWithFieldExpansion() {
+SessionProcessor mkTestTargetWithFieldExpansion() {
   auto schemas = new msg::MessageSchemaRepository(); // FIXPAUL leak
   loadDefaultSchemas(schemas);
-  LogJoinTarget trgt(schemas, false);
+  SessionProcessor trgt(schemas, false);
 
   trgt.setNormalize([] (Language l, const String& q) { return q; });
 
@@ -483,7 +483,7 @@ TEST_CASE(LogJoinTest, Test1, [] () {
   }
 
   auto joined_sessions_schema = joinedSessionsSchema();
-  LogJoinTarget logjoin_target(joined_sessions_schema, false);
+  SessionProcessor logjoin_target(joined_sessions_schema, false);
 
   StringMap fields;
   fields["p~62797695"]["category1"] = "4";

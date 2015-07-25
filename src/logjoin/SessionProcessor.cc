@@ -12,14 +12,14 @@
 #include "stx/protobuf/MessageDecoder.h"
 #include "stx/protobuf/MessagePrinter.h"
 #include "stx/protobuf/msg.h"
-#include "logjoin/LogJoinTarget.h"
+#include "logjoin/SessionProcessor.h"
 #include "common.h"
 
 using namespace stx;
 
 namespace cm {
 
-LogJoinTarget::LogJoinTarget(
+SessionProcessor::SessionProcessor(
     msg::MessageSchemaRepository* schemas,
     bool dry_run) :
     num_sessions(0),
@@ -32,39 +32,39 @@ LogJoinTarget::LogJoinTarget(
         100,
         true) {}
 
-void LogJoinTarget::start() {
+void SessionProcessor::start() {
   tpool_.start();
 }
 
-void LogJoinTarget::stop() {
+void SessionProcessor::stop() {
   tpool_.stop();
 }
 
-void LogJoinTarget::enqueueSession(const TrackedSession& session) {
+void SessionProcessor::enqueueSession(const TrackedSession& session) {
   // FIXPAUL: write to some form of persisten queue
   tpool_.run(
       std::bind(
-          &LogJoinTarget::processSession,
+          &SessionProcessor::processSession,
           this,
           session));
 }
 
-void LogJoinTarget::processSession(TrackedSession session) {
+void SessionProcessor::processSession(TrackedSession session) {
   stx::iputs("process session...", 1);
   session.debugPrint();
 }
 
-void LogJoinTarget::setNormalize(
+void SessionProcessor::setNormalize(
     Function<stx::String (Language lang, const stx::String& query)> normalizeCb) {
   normalize_ = normalizeCb;
 }
 
-void LogJoinTarget::setGetField(
+void SessionProcessor::setGetField(
     Function<Option<String> (const DocID& docid, const String& feature)> getFieldCb) {
   get_field_ = getFieldCb;
 }
 
-Buffer LogJoinTarget::joinSession(TrackedSession& session) {
+Buffer SessionProcessor::joinSession(TrackedSession& session) {
   if (!get_field_) {
     RAISE(kRuntimeError, "getField has not been initialized");
   }

@@ -6,8 +6,8 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-#ifndef _CM_LOGJOINTARGET_H
-#define _CM_LOGJOINTARGET_H
+#ifndef _CM_SessionProcessor_H
+#define _CM_SessionProcessor_H
 #include "stx/stdtypes.h"
 #include "stx/Currency.h"
 #include "stx/Language.h"
@@ -33,10 +33,10 @@ class Analyzer;
 
 namespace cm {
 
-class LogJoinTarget {
+class SessionProcessor {
 public:
 
-  LogJoinTarget(
+  SessionProcessor(
       msg::MessageSchemaRepository* schemas,
       bool dry_run);
 

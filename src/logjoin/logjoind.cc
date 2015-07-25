@@ -32,7 +32,7 @@
 #include "stx/http/httpconnectionpool.h"
 #include "stx/mdb/MDB.h"
 #include "logjoin/LogJoin.h"
-#include "logjoin/LogJoinTarget.h"
+#include "logjoin/SessionProcessor.h"
 #include "logjoin/LogJoinUpload.h"
 #include "inventory/DocStore.h"
 #include "inventory/IndexChangeRequest.h"
@@ -313,7 +313,7 @@ int main(int argc, const char** argv) {
 
   /* set up logjoin target */
   stx::fts::Analyzer analyzer(flags.getString("conf"));
-  cm::LogJoinTarget logjoin_target(&schemas, dry_run);
+  cm::SessionProcessor logjoin_target(&schemas, dry_run);
 
   auto normalize = [&analyzer] (Language lang, const String& query) -> String {
     return analyzer.normalize(lang, query);
