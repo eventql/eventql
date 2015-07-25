@@ -7,7 +7,7 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <stx/charts/svgtarget.h>
+#include <cplot/svgtarget.h>
 #include <stx/io/inputstream.h>
 #include <stx/logging.h>
 }
