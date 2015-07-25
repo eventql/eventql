@@ -15,7 +15,7 @@ namespace csql {
 namespace mysql_backend {
 
 std::unique_ptr<MySQLConnection> MySQLConnection::openConnection(
-    const fnord::URI& uri) {
+    const stx::URI& uri) {
   std::unique_ptr<MySQLConnection> conn(new MySQLConnection());
   conn->connect(uri);
   return conn;
@@ -41,7 +41,7 @@ MySQLConnection::~MySQLConnection() {
 #endif
 }
 
-void MySQLConnection::connect(const fnord::URI& uri) {
+void MySQLConnection::connect(const stx::URI& uri) {
   unsigned int port = 3306;
   std::string host = uri.host();
   std::string username;
@@ -150,7 +150,7 @@ void MySQLConnection::executeQuery(
     std::function<bool (const std::vector<std::string>&)> row_callback) {
 #ifdef FNORD_ENABLE_MYSQL
   if (env()->verbose()) {
-    fnord::logDebug("fnordmetric", "Executing MySQL query: $0", query);
+    stx::logDebug("fnordmetric", "Executing MySQL query: $0", query);
   }
 
   MYSQL_RES* result = nullptr;
@@ -187,7 +187,7 @@ void MySQLConnection::executeQuery(
     } catch (const std::exception& e) {
       mysql_free_result(result);
       try {
-        auto rte = dynamic_cast<const fnord::Exception&>(e);
+        auto rte = dynamic_cast<const stx::Exception&>(e);
         throw rte;
       } catch (std::bad_cast bce) {
         throw e;

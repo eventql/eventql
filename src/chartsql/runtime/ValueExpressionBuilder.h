@@ -18,7 +18,7 @@
 #include <chartsql/runtime/ValueExpression.h>
 #include <chartsql/svalue.h>
 
-using namespace fnord;
+using namespace stx;
 
 namespace csql {
 class ASTNode;

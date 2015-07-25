@@ -13,4 +13,4 @@
 #include <string>
 #include <chartsql/runtime/ValueExpressionBuilder.h>
 
-using namespace fnord;
+using namespace stx;

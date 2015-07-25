@@ -25,7 +25,7 @@ void JSONSSEStreamFormat::formatResults(
       auto progress = status.progress();
 
       if (output_->isClosed()) {
-        fnord::logDebug("sql", "Aborting Query...");
+        stx::logDebug("sql", "Aborting Query...");
         context->cancel();
         return;
       }
@@ -58,7 +58,7 @@ void JSONSSEStreamFormat::formatResults(
     format.formatResults(query, context);
     output_->sendEvent(result, Some(String("result")));
   } catch (const StandardException& e) {
-    fnord::logError("sql", e, "SQL execution failed");
+    stx::logError("sql", e, "SQL execution failed");
 
     Buffer buf;
     json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));

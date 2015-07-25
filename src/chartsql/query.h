@@ -79,7 +79,7 @@ public:
    *
    * @param index the requested chart index
    */
-  fnord::chart::Canvas* getChart(size_t index) const;
+  stx::chart::Canvas* getChart(size_t index) const;
 
 protected:
   Runtime* runtime_;
@@ -90,7 +90,7 @@ protected:
       statements_;
   std::vector<std::vector<std::unique_ptr<DrawStatement>>> draw_statements_;
   std::vector<std::unique_ptr<ResultList>> results_;
-  std::vector<std::unique_ptr<fnord::chart::Canvas>> charts_;
+  std::vector<std::unique_ptr<stx::chart::Canvas>> charts_;
 };
 
 }

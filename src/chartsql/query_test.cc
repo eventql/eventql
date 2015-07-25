@@ -30,7 +30,7 @@
 #include <stx/uri.h>
 #include <stx/exception.h>
 
-using namespace fnordmetric::query;
+using namespace stxmetric::query;
 
 UNIT_TEST(QueryTest);
 
@@ -71,7 +71,7 @@ public:
 
   bool openTables(
     const std::vector<std::string>& table_names,
-    const fnord::URI& source_uri,
+    const stx::URI& source_uri,
     std::vector<std::unique_ptr<TableRef>>* target) {
     EXPECT_EQ(source_uri.scheme(), "testtable");
     target->emplace_back(new TestTableRef());

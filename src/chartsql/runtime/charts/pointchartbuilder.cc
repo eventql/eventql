@@ -13,113 +13,113 @@
 namespace csql {
 
 PointChartBuilder::PointChartBuilder(
-    fnord::chart::Canvas* canvas,
+    stx::chart::Canvas* canvas,
     RefPtr<DrawStatementNode> draw_stmt) :
     ChartBuilder(canvas, draw_stmt) {}
 
-fnord::chart::Drawable* PointChartBuilder::getChart() const {
-  auto chart = dynamic_cast<fnord::chart::PointChart*>(findChartType());
+stx::chart::Drawable* PointChartBuilder::getChart() const {
+  auto chart = dynamic_cast<stx::chart::PointChart*>(findChartType());
   setLabels(chart);
   return chart;
 }
 
-fnord::chart::Drawable* PointChartBuilder::findChartType() const {
+stx::chart::Drawable* PointChartBuilder::findChartType() const {
   preconditionCheck();
 
-  if (auto c = tryType2D<fnord::chart::PointChart2D<
+  if (auto c = tryType2D<stx::chart::PointChart2D<
         SValue::TimeType,
         SValue::TimeType>>())
     return c;
 
-  if (auto c = tryType2D<fnord::chart::PointChart2D<
+  if (auto c = tryType2D<stx::chart::PointChart2D<
         SValue::TimeType,
         SValue::FloatType>>())
     return c;
 
-  if (auto c = tryType2D<fnord::chart::PointChart2D<
+  if (auto c = tryType2D<stx::chart::PointChart2D<
         SValue::TimeType,
         SValue::StringType>>())
     return c;
 
-  if (auto c = tryType2D<fnord::chart::PointChart2D<
+  if (auto c = tryType2D<stx::chart::PointChart2D<
         SValue::FloatType,
         SValue::TimeType>>())
     return c;
 
-  if (auto c = tryType2D<fnord::chart::PointChart2D<
+  if (auto c = tryType2D<stx::chart::PointChart2D<
         SValue::FloatType,
         SValue::FloatType>>())
     return c;
 
-  if (auto c = tryType2D<fnord::chart::PointChart2D<
+  if (auto c = tryType2D<stx::chart::PointChart2D<
         SValue::FloatType,
         SValue::StringType>>())
     return c;
 
-  if (auto c = tryType2D<fnord::chart::PointChart2D<
+  if (auto c = tryType2D<stx::chart::PointChart2D<
         SValue::StringType,
         SValue::TimeType>>())
     return c;
 
-  if (auto c = tryType2D<fnord::chart::PointChart2D<
+  if (auto c = tryType2D<stx::chart::PointChart2D<
         SValue::StringType,
         SValue::FloatType>>())
     return c;
 
-  if (auto c = tryType2D<fnord::chart::PointChart2D<
+  if (auto c = tryType2D<stx::chart::PointChart2D<
         SValue::StringType,
         SValue::StringType>>())
     return c;
 
-  if (auto c = tryType3D<fnord::chart::PointChart3D<
+  if (auto c = tryType3D<stx::chart::PointChart3D<
         SValue::TimeType,
         SValue::TimeType,
         SValue::FloatType>>())
     return c;
 
-  if (auto c = tryType3D<fnord::chart::PointChart3D<
+  if (auto c = tryType3D<stx::chart::PointChart3D<
         SValue::TimeType,
         SValue::FloatType,
         SValue::FloatType>>())
     return c;
 
-  if (auto c = tryType3D<fnord::chart::PointChart3D<
+  if (auto c = tryType3D<stx::chart::PointChart3D<
         SValue::TimeType,
         SValue::StringType,
         SValue::FloatType>>())
     return c;
 
-  if (auto c = tryType3D<fnord::chart::PointChart3D<
+  if (auto c = tryType3D<stx::chart::PointChart3D<
         SValue::FloatType,
         SValue::TimeType,
         SValue::FloatType>>())
     return c;
 
-  if (auto c = tryType3D<fnord::chart::PointChart3D<
+  if (auto c = tryType3D<stx::chart::PointChart3D<
         SValue::FloatType,
         SValue::FloatType,
         SValue::FloatType>>())
     return c;
 
-  if (auto c = tryType3D<fnord::chart::PointChart3D<
+  if (auto c = tryType3D<stx::chart::PointChart3D<
         SValue::FloatType,
         SValue::StringType,
         SValue::FloatType>>())
     return c;
 
-  if (auto c = tryType3D<fnord::chart::PointChart3D<
+  if (auto c = tryType3D<stx::chart::PointChart3D<
         SValue::StringType,
         SValue::TimeType,
         SValue::FloatType>>())
     return c;
 
-  if (auto c = tryType3D<fnord::chart::PointChart3D<
+  if (auto c = tryType3D<stx::chart::PointChart3D<
         SValue::StringType,
         SValue::FloatType,
         SValue::FloatType>>())
     return c;
 
-  if (auto c = tryType3D<fnord::chart::PointChart3D<
+  if (auto c = tryType3D<stx::chart::PointChart3D<
         SValue::StringType,
         SValue::StringType,
         SValue::FloatType>>())
@@ -133,7 +133,7 @@ std::string PointChartBuilder::chartName() const {
   return "PointChart";
 }
 
-void PointChartBuilder::setLabels(fnord::chart::PointChart* chart) const {
+void PointChartBuilder::setLabels(stx::chart::PointChart* chart) const {
   auto prop = draw_stmt_->getProperty(Token::T_LABELS);
   chart->setLabels(prop != nullptr);
 }

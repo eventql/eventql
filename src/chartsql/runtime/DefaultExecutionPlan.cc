@@ -9,7 +9,7 @@
  */
 #include <chartsql/runtime/DefaultExecutionPlan.h>
 
-using namespace fnord;
+using namespace stx;
 
 namespace csql {
 

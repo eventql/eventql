@@ -9,7 +9,7 @@
  */
 #include <chartsql/qtree/ShowTablesNode.h>
 
-using namespace fnord;
+using namespace stx;
 
 namespace csql {
 

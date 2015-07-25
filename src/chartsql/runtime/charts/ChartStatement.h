@@ -22,7 +22,7 @@ public:
 
   void execute(
       ExecutionContext* context,
-      fnord::chart::RenderTarget* target);
+      stx::chart::RenderTarget* target);
 
 protected:
   Vector<ScopedPtr<DrawStatement>> draw_statements_;

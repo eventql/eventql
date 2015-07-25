@@ -75,7 +75,7 @@ void CLI::parseArgs(Environment* env, int argc, const char** argv) {
 }
 
 void CLI::printUsage() {
-  auto err_stream = fnord::io::OutputStream::getStderr();
+  auto err_stream = stx::io::OutputStream::getStderr();
   err_stream->printf("usage: fnordmetric-cli [options] [file.sql]\n");
   err_stream->printf("\noptions:\n");
   env()->flags()->printUsage(err_stream.get());
@@ -85,7 +85,7 @@ void CLI::printUsage() {
 }
 
 int CLI::executeSafely(Environment* env) {
-  auto err_stream = fnord::io::OutputStream::getStderr();
+  auto err_stream = stx::io::OutputStream::getStderr();
 
   try {
     if (env->flags()->isSet("help")) {
@@ -94,7 +94,7 @@ int CLI::executeSafely(Environment* env) {
     }
 
     execute(env);
-  } catch (const fnord::Exception& e) {
+  } catch (const stx::Exception& e) {
     if (e.getTypeName() == "UsageError") {
       err_stream->printf("\n");
       printUsage();
@@ -122,27 +122,27 @@ void CLI::execute(Environment* env) {
   const auto& args = flags->getArgv();
 
   /* open input stream */
-  std::shared_ptr<fnord::io::InputStream> input;
+  std::shared_ptr<stx::io::InputStream> input;
   if (args.size() == 1) {
     if (args[0] == "-") {
       if (env->verbose()) {
         env->logger()->log("DEBUG", "Input from stdin");
       }
 
-      input = std::move(fnord::io::InputStream::getStdin());
+      input = std::move(stx::io::InputStream::getStdin());
     } else {
       if (env->verbose()) {
         env->logger()->log("DEBUG", "Input file: " + args[0]);
       }
 
-      input = std::move(fnord::io::FileInputStream::openFile(args[0]));
+      input = std::move(stx::io::FileInputStream::openFile(args[0]));
     }
   } else {
     RAISE("UsageError", "usage error");
   }
 
   /* open output stream */
-  std::shared_ptr<fnord::io::OutputStream> output;
+  std::shared_ptr<stx::io::OutputStream> output;
   if (flags->isSet("output")) {
     auto output_file = flags->getString("output");
 
@@ -150,12 +150,12 @@ void CLI::execute(Environment* env) {
       env->logger()->log("DEBUG", "Output file: " + output_file);
     }
 
-    output = std::move(fnord::io::FileOutputStream::openFile(output_file));
+    output = std::move(stx::io::FileOutputStream::openFile(output_file));
   } else {
     if (env->verbose()) {
       env->logger()->log("DEBUG", "Output to stdout");
     }
-    output = std::move(fnord::io::OutputStream::getStdout());
+    output = std::move(stx::io::OutputStream::getStdout());
   }
 
   /* execute query */

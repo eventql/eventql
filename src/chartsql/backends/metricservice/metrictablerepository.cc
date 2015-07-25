@@ -14,7 +14,7 @@
 namespace csql {
 
 MetricTableRepository::MetricTableRepository(
-    fnord::metric_service::IMetricRepository* metric_repo) :
+    stx::metric_service::IMetricRepository* metric_repo) :
     metric_repo_(metric_repo) {}
 
 csql::TableRef* MetricTableRepository::getTableRef(

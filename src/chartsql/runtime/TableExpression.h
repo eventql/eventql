@@ -14,7 +14,7 @@
 #include <chartsql/runtime/ExecutionContext.h>
 #include <chartsql/runtime/Statement.h>
 
-using namespace fnord;
+using namespace stx;
 
 namespace csql {
 

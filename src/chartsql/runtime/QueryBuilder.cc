@@ -10,7 +10,7 @@
 #include <chartsql/runtime/QueryBuilder.h>
 #include <chartsql/runtime/charts/drawstatement.h>
 
-using namespace fnord;
+using namespace stx;
 
 namespace csql {
 
