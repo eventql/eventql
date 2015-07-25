@@ -26,6 +26,10 @@ protected:
       const TrackedEvent& event,
       Vector<TrackedQuery>* queries);
 
+  static void processPageViewEvent(
+      const TrackedEvent& event,
+      Vector<TrackedItemVisit>* page_views);
+
   //void insertLogline(
   //    const UnixTime& time,
   //    const String& evtype,
