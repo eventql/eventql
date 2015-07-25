@@ -21,6 +21,7 @@ add_library(logjoin-base OBJECT
     stages/BuildSessionAttributes.cc
     stages/NormalizeQueryStrings.cc
     stages/DebugPrintStage.cc
+    stages/DeliverWebhookStage.cc
     LogJoinShard.cc)
 
 add_executable(logjoind
