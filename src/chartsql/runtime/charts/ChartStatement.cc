@@ -17,9 +17,9 @@ ChartStatement::ChartStatement(
 
 void ChartStatement::execute(
     ExecutionContext* context,
-    fnord::chart::RenderTarget* target) {
+    stx::chart::RenderTarget* target) {
 
-  fnord::chart::Canvas canvas;
+  stx::chart::Canvas canvas;
   for (auto& draw_stmt : draw_statements_) {
     draw_stmt->execute(context, &canvas);
   }

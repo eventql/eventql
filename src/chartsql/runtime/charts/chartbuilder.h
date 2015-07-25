@@ -32,7 +32,7 @@ class ChartBuilder {
 public:
 
   ChartBuilder(
-      fnord::chart::Canvas* canvas,
+      stx::chart::Canvas* canvas,
       RefPtr<DrawStatementNode> draw_stmt) :
       canvas_(canvas),
       draw_stmt_(draw_stmt) {}
@@ -61,39 +61,39 @@ public:
 
     int color_ind = stmt->getColumnIndex("color");
     if (color_ind >= 0) {
-      prop_indexes_.emplace_back(fnord::chart::Series::P_COLOR, color_ind);
+      prop_indexes_.emplace_back(stx::chart::Series::P_COLOR, color_ind);
     }
 
     int label_ind = stmt->getColumnIndex("label");
     if (label_ind >= 0) {
-      prop_indexes_.emplace_back(fnord::chart::Series::P_LABEL, label_ind);
+      prop_indexes_.emplace_back(stx::chart::Series::P_LABEL, label_ind);
     }
 
     int line_style_ind = stmt->getColumnIndex("linestyle");
     if (line_style_ind >= 0) {
       prop_indexes_.emplace_back(
-          fnord::chart::Series::P_LINE_STYLE,
+          stx::chart::Series::P_LINE_STYLE,
           line_style_ind);
     }
 
     int line_width_ind = stmt->getColumnIndex("linewidth");
     if (line_width_ind >= 0) {
       prop_indexes_.emplace_back(
-          fnord::chart::Series::P_LINE_WIDTH,
+          stx::chart::Series::P_LINE_WIDTH,
           line_width_ind);
     }
 
     int point_style_ind = stmt->getColumnIndex("pointstyle");
     if (point_style_ind >= 0) {
       prop_indexes_.emplace_back(
-          fnord::chart::Series::P_POINT_STYLE,
+          stx::chart::Series::P_POINT_STYLE,
           point_style_ind);
     }
 
     int point_size_ind = stmt->getColumnIndex("pointsize");
     if (point_size_ind >= 0) {
       prop_indexes_.emplace_back(
-          fnord::chart::Series::P_POINT_SIZE,
+          stx::chart::Series::P_POINT_SIZE,
           point_size_ind);
     }
 
@@ -129,7 +129,7 @@ public:
     });
   }
 
-  virtual fnord::chart::Drawable* getChart() const = 0;
+  virtual stx::chart::Drawable* getChart() const = 0;
   virtual std::string chartName() const = 0;
 
 protected:
@@ -250,9 +250,9 @@ protected:
   int x_ind_;
   int y_ind_;
   int z_ind_;
-  std::vector<std::pair<fnord::chart::Series::kProperty, int>> prop_indexes_;
+  std::vector<std::pair<stx::chart::Series::kProperty, int>> prop_indexes_;
   QueryPlanNode* stmt_;
-  fnord::chart::Canvas* canvas_;
+  stx::chart::Canvas* canvas_;
   RefPtr<DrawStatementNode> draw_stmt_;
 };
 

@@ -13,7 +13,7 @@
 #include <chartsql/runtime/compile.h>
 #include <stx/ieee754.h>
 
-using namespace fnord;
+using namespace stx;
 
 namespace csql {
 

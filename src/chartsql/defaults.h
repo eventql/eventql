@@ -15,7 +15,7 @@
 #include <chartsql/expressions/datetime.h>
 #include <chartsql/expressions/math.h>
 
-using namespace fnord;
+using namespace stx;
 
 namespace csql {
 

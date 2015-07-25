@@ -15,7 +15,7 @@
 #include <chartsql/parser/token.h>
 #include <chartsql/parser/tokenize.h>
 
-using namespace fnord;
+using namespace stx;
 using namespace csql;
 
 UNIT_TEST(ParserTest);
@@ -564,7 +564,7 @@ TEST_INITIALIZER(ParserTest, InitializeComplexQueries, [] () {
         "    o_orderdate;");
 
   for (auto query : queries) {
-    new fnord::test::UnitTest::TestCase(
+    new stx::test::UnitTest::TestCase(
         &ParserTest,
         "TestComplexQueries",
         [query] () {

@@ -17,12 +17,12 @@ class DrawStatement;
 
 class LineChartBuilder : public ChartBuilder {
 public:
-  LineChartBuilder(fnord::chart::Canvas* canvas, RefPtr<DrawStatementNode> draw_stmt);
-  fnord::chart::Drawable* getChart() const override;
+  LineChartBuilder(stx::chart::Canvas* canvas, RefPtr<DrawStatementNode> draw_stmt);
+  stx::chart::Drawable* getChart() const override;
   std::string chartName() const override;
 protected:
-  fnord::chart::Drawable* findChartType() const;
-  void setLabels(fnord::chart::LineChart* chart) const;
+  stx::chart::Drawable* findChartType() const;
+  void setLabels(stx::chart::LineChart* chart) const;
 };
 
 }

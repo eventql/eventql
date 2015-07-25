@@ -16,7 +16,7 @@
 #include <chartsql/runtime/ShowTablesStatement.h>
 #include <chartsql/runtime/DescribeTableStatement.h>
 
-using namespace fnord;
+using namespace stx;
 
 namespace csql {
 

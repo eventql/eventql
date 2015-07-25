@@ -17,13 +17,13 @@
 #include <cli/flagparser.h>
 #include <util/outputstream.h>
 
-using namespace fnordmetric::cli;
+using namespace stxmetric::cli;
 
 UNIT_TEST(CLITest);
 
 static fnordmetric::util::UnitTest::TestCase __test_simple_sql_to_svg_(
     &CLITest, "TestSimpleSQLToSVG", [] () {
-  fnord::io::FileUtil::mkdir_p("build/tests/tmp");
+  stx::io::FileUtil::mkdir_p("build/tests/tmp");
 
   std::vector<std::string> args = {
     "test/fixtures/gdp_bar_chart.sql",

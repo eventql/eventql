@@ -9,7 +9,7 @@
  */
 #include <chartsql/qtree/GroupByNode.h>
 
-using namespace fnord;
+using namespace stx;
 
 namespace csql {
 

@@ -11,13 +11,13 @@
 #define _FNORDMETRIC_METRICDB_HTTPINTERFACE_H
 #include <memory>
 #include <stx/uri.h>
-#include <fnord-http/httpservice.h>
-#include <fnord-http/httprequest.h>
-#include <fnord-http/httpresponse.h>
+#include <stx-http/httpservice.h>
+#include <stx-http/httprequest.h>
+#include <stx-http/httpresponse.h>
 }
 #include <stx/json/jsonoutputstream.h>
 
-using namespace fnord;
+using namespace stx;
 namespace csql {
 class IMetric;
 class IMetricRepository;
@@ -25,7 +25,7 @@ class IMetricRepository;
 class QueryEndpoint : public http::HTTPService {
 public:
 
-  QueryEndpoint(fnord::metric_service::IMetricRepository* metric_repo);
+  QueryEndpoint(stx::metric_service::IMetricRepository* metric_repo);
 
   void handleHTTPRequest(
       http::HTTPRequest* request,
@@ -33,7 +33,7 @@ public:
 
 protected:
 
-  fnord::metric_service::IMetricRepository* metric_repo_;
+  stx::metric_service::IMetricRepository* metric_repo_;
 };
 
 }

@@ -12,11 +12,11 @@
 #include <stx/random.h>
 #include <stx/http/HTTPSSEStream.h>
 
-using namespace fnord;
+using namespace stx;
 
 namespace tsdb {
 
-class SQLServlet : public fnord::http::StreamingHTTPService {
+class SQLServlet : public stx::http::StreamingHTTPService {
 public:
 
   SQLServlet(TSDBNode* node);

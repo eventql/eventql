@@ -12,7 +12,7 @@
 #include <stx/option.h>
 #include <chartsql/qtree/ValueExpressionNode.h>
 
-using namespace fnord;
+using namespace stx;
 
 namespace csql {
 

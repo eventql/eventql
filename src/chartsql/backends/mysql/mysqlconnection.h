@@ -34,7 +34,7 @@ public:
    * @param URI the mysql:// URI
    * @returns a new MySQLConnection
    */
-  static std::unique_ptr<MySQLConnection> openConnection(const fnord::URI& uri);
+  static std::unique_ptr<MySQLConnection> openConnection(const stx::URI& uri);
 
   /**
    * Create a new mysql connection
@@ -56,7 +56,7 @@ public:
    * @param URI the mysql:// URI
    * @returns a new MySQLConnection
    */
-  void connect(const fnord::URI& uri);
+  void connect(const stx::URI& uri);
 
   /**
    * Connect to a mysql server. May throw an exception

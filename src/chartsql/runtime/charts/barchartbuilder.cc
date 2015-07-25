@@ -14,27 +14,27 @@
 namespace csql {
 
 BarChartBuilder::BarChartBuilder(
-    fnord::chart::Canvas* canvas,
+    stx::chart::Canvas* canvas,
     RefPtr<DrawStatementNode> draw_stmt) :
     ChartBuilder(canvas, draw_stmt) {}
 
-fnord::chart::Drawable* BarChartBuilder::getChart() const {
-  auto chart = dynamic_cast<fnord::chart::BarChart*>(findChartType());
+stx::chart::Drawable* BarChartBuilder::getChart() const {
+  auto chart = dynamic_cast<stx::chart::BarChart*>(findChartType());
   setOrientation(chart);
   setStacked(chart);
   setLabels(chart);
   return chart;
 }
 
-fnord::chart::Drawable* BarChartBuilder::findChartType() const {
+stx::chart::Drawable* BarChartBuilder::findChartType() const {
   preconditionCheck();
 
-  if (auto c = tryType2D<fnord::chart::BarChart2D<
+  if (auto c = tryType2D<stx::chart::BarChart2D<
         SValue::StringType,
         SValue::FloatType>>())
     return c;
 
-  if (auto c = tryType3D<fnord::chart::BarChart3D<
+  if (auto c = tryType3D<stx::chart::BarChart3D<
         SValue::StringType,
         SValue::FloatType,
         SValue::FloatType>>())
@@ -44,7 +44,7 @@ fnord::chart::Drawable* BarChartBuilder::findChartType() const {
   return nullptr;
 }
 
-void BarChartBuilder::setOrientation(fnord::chart::BarChart* chart) const {
+void BarChartBuilder::setOrientation(stx::chart::BarChart* chart) const {
   auto prop = draw_stmt_->getProperty(Token::T_ORIENTATION);
 
   if (prop == nullptr) {
@@ -53,11 +53,11 @@ void BarChartBuilder::setOrientation(fnord::chart::BarChart* chart) const {
 
   switch (prop->getToken()->getType()) {
     case Token::T_VERTICAL:
-      chart->setOrientation(fnord::chart::BarChart::O_VERTICAL);
+      chart->setOrientation(stx::chart::BarChart::O_VERTICAL);
       break;
 
     case Token::T_HORIZONTAL:
-      chart->setOrientation(fnord::chart::BarChart::O_HORIZONTAL);
+      chart->setOrientation(stx::chart::BarChart::O_HORIZONTAL);
       break;
 
     default:
@@ -65,7 +65,7 @@ void BarChartBuilder::setOrientation(fnord::chart::BarChart* chart) const {
   }
 }
 
-void BarChartBuilder::setStacked(fnord::chart::BarChart* chart) const {
+void BarChartBuilder::setStacked(stx::chart::BarChart* chart) const {
   auto prop = draw_stmt_->getProperty(Token::T_STACKED);
   chart->setStacked(prop != nullptr);
 }
@@ -74,7 +74,7 @@ std::string BarChartBuilder::chartName() const {
   return "BarChart";
 }
 
-void BarChartBuilder::setLabels(fnord::chart::BarChart* chart) const {
+void BarChartBuilder::setLabels(stx::chart::BarChart* chart) const {
   auto prop = draw_stmt_->getProperty(Token::T_LABELS);
   chart->setLabels(prop != nullptr);
 }

@@ -18,7 +18,7 @@
 #include <util/unittest.h>
 #include <stx/exception.h>
 
-using namespace fnordmetric::query;
+using namespace stxmetric::query;
 
 UNIT_TEST(SQLExtensionsTest);
 
