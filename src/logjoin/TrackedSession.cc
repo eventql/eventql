@@ -14,91 +14,21 @@ using namespace stx;
 
 namespace cm {
 
+TrackedEvent::TrackedEvent(
+    UnixTime _time,
+    String _evid,
+    String _evtype,
+    String _value) :
+    time(_time),
+    evid(_evid),
+    evtype(_evtype),
+    value(_value) {}
+
 TrackedSession::TrackedSession() :
   num_cart_items(0),
   num_order_items(0),
   gmv_eurcents(0),
   cart_value_eurcents(0) {}
-
-void TrackedSession::joinEvents(const CurrencyConverter& cconv) {
-  /* update queries (mark items as clicked) */
-  for (auto& cur_query : queries) {
-
-    /* search for matching item visits */
-    for (auto& cur_visit : item_visits) {
-      auto cutoff = cur_query.time.unixMicros() +
-          kMaxQueryClickDelaySeconds * kMicrosPerSecond;
-
-      if (cur_visit.time < cur_query.time ||
-          cur_visit.time.unixMicros() > cutoff) {
-        continue;
-      }
-
-      for (auto& qitem : cur_query.items) {
-        if (cur_visit.item == qitem.item) {
-          qitem.clicked = true;
-          qitem.seen = true;
-          break;
-        }
-      }
-    }
-  }
-
-  /* calculate global gmv */
-  HashMap<String, uint64_t> cart_eurcents_per_item;
-  HashMap<String, uint64_t> gmv_eurcents_per_item;
-  for (const auto& ci : cart_items) {
-    auto currency = currencyFromString(ci.currency);
-    auto eur = cconv.convert(Money(ci.price_cents, currency), CURRENCY_EUR);
-    auto eurcents = eur.cents;
-    eurcents *= ci.quantity;
-    cart_eurcents_per_item.emplace(ci.item.docID().docid, eurcents);
-
-    ++num_cart_items;
-    cart_value_eurcents += eurcents;
-    if (ci.checkout_step == 1) {
-      gmv_eurcents_per_item.emplace(ci.item.docID().docid, eurcents);
-      ++num_order_items;
-      gmv_eurcents += eurcents;
-    }
-  }
-
-  /* calculate gmv and ctrs per query */
-  for (auto& q : queries) {
-    auto slrid = extractAttr(q.attrs, "slrid");
-
-    for (auto& i : q.items) {
-      // DAWANDA HACK
-      if (i.position >= 1 && i.position <= 4 && slrid.isEmpty()) {
-        ++q.nads;
-        q.nadclicks += i.clicked;
-      }
-      // EOF DAWANDA HACK
-
-      ++q.nitems;
-
-      if (i.clicked) {
-        ++q.nclicks;
-
-        {
-          auto ci = cart_eurcents_per_item.find(i.item.docID().docid);
-          if (ci != cart_eurcents_per_item.end()) {
-            ++q.num_cart_items;
-            q.cart_value_eurcents += ci->second;
-          }
-        }
-
-        {
-          auto ci = gmv_eurcents_per_item.find(i.item.docID().docid);
-          if (ci != gmv_eurcents_per_item.end()) {
-            ++q.num_order_items;
-            q.gmv_eurcents += ci->second;
-          }
-        }
-      }
-    }
-  }
-}
 
 void TrackedSession::insertLogline(
     const UnixTime& time,
@@ -112,35 +42,29 @@ void TrackedSession::insertLogline(
   switch (evtype[0]) {
 
     /* query event */
-    case 'q': {
-      TrackedQuery query;
-      query.time = time;
-      query.eid = evid;
-      query.fromParams(logline);
-      insertQuery(query);
-      break;
-    }
+    case 'q':
+      events.emplace_back(
+          time,
+          evid,
+          "_search_query",
+          URI::buildQueryString(logline));
+      return;
 
-    /* item visit event */
-    case 'v': {
-      TrackedItemVisit visit;
-      visit.time = time;
-      visit.eid = evid;
-      visit.fromParams(logline);
-      insertItemVisit(visit);
-      break;
-    }
+    case 'v':
+      events.emplace_back(
+          time,
+          evid,
+          "_pageview",
+          URI::buildQueryString(logline));
+      return;
 
-    /* cart event */
-    case 'c': {
-      auto cart_items = TrackedCartItem::fromParams(logline);
-      for (auto& ci : cart_items) {
-        ci.time = time;
-      }
-
-      insertCartVisit(cart_items);
-      break;
-    }
+    case 'c':
+      events.emplace_back(
+          time,
+          evid,
+          "_cart_items",
+          URI::buildQueryString(logline));
+      return;
 
     case 'u':
       updateSessionAttributes(time, evid, logline);
@@ -149,47 +73,6 @@ void TrackedSession::insertLogline(
     default:
       RAISE(kParseError, "invalid e param");
 
-  }
-}
-
-void TrackedSession::insertQuery(const TrackedQuery& query) {
-  for (auto& q : queries) {
-    if (q.eid == query.eid) {
-      q.merge(query);
-      return;
-    }
-  }
-
-  queries.emplace_back(query);
-}
-
-void TrackedSession::insertItemVisit(const TrackedItemVisit& visit) {
-  for (auto& v : item_visits) {
-    if (v.eid == visit.eid) {
-      v.merge(visit);
-      return;
-    }
-  }
-
-  item_visits.emplace_back(visit);
-}
-
-void TrackedSession::insertCartVisit(
-    const Vector<TrackedCartItem>& new_cart_items) {
-  for (const auto& cart_item : new_cart_items) {
-    bool merged = false;
-
-    for (auto& c : cart_items) {
-      if (c.item == cart_item.item) {
-        c.merge(cart_item);
-        merged = true;
-        break;
-      }
-    }
-
-    if (!merged) {
-      cart_items.emplace_back(cart_item);
-    }
   }
 }
 

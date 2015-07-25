@@ -37,6 +37,19 @@ static const uint64_t kMaxQueryClickDelaySeconds = 180;
  */
 static const uint64_t kSessionIdleTimeoutSeconds = 60 * 90;
 
+struct TrackedEvent {
+  TrackedEvent(
+      UnixTime _time,
+      String _evid,
+      String _evtype,
+      String _value);
+
+  const UnixTime time;
+  const String evid;
+  const String evtype;
+  const String value;
+};
+
 /**
  * A tracked session. Make sure to hold the mutex when updating or accessing
  * any of the fields.
@@ -44,6 +57,9 @@ static const uint64_t kSessionIdleTimeoutSeconds = 60 * 90;
 struct TrackedSession {
   std::string customer_key;
   std::string uid;
+
+  Vector<TrackedEvent> events;
+
   std::vector<TrackedQuery> queries;
   std::vector<TrackedItemVisit> item_visits;
   std::vector<TrackedCartItem> cart_items;
@@ -69,9 +85,9 @@ struct TrackedSession {
       const String& evid,
       const URI::ParamList& logline);
 
-  void insertQuery(const TrackedQuery& query);
-  void insertItemVisit(const TrackedItemVisit& visit);
-  void insertCartVisit(const Vector<TrackedCartItem>& new_cart_items);
+  //void insertQuery(const TrackedQuery& query);
+  //void insertItemVisit(const TrackedItemVisit& visit);
+  //void insertCartVisit(const Vector<TrackedCartItem>& new_cart_items);
 
   void updateSessionAttributes(
       const UnixTime& time,
