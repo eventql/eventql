@@ -1,0 +1,32 @@
+/**
+ * Copyright (c) 2015 - The CM Authors <legal@clickmatcher.com>
+ *   All Rights Reserved.
+ *
+ * This file is CONFIDENTIAL -- Distribution or duplication of this material or
+ * the information contained herein is strictly forbidden unless prior written
+ * permission is obtained.
+ */
+#include "logjoin/stages/NormalizeQueryStrings.h"
+#include "logjoin/common.h"
+
+using namespace stx;
+
+namespace cm {
+
+void NormalizeQueryStrings::process(
+      NormalizeFn normalize_fn,
+      RefPtr<TrackedSessionContext> ctx) {
+  for (auto& q : *ctx->joined_session.mutable_search_queries()) {
+    if (!q.has_query_string()) {
+      continue;
+    }
+
+    q.set_query_string_normalized(
+        normalize_fn(
+            (stx::Language) q.language(),
+            q.query_string()));
+  }
+}
+
+} // namespace cm
+
