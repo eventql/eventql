@@ -7,7 +7,7 @@ project(cmapp)
 
 option(ENABLE_TESTS "Build unit tests [default: ON]" ON)
 
-include(3rdparty/libstx/cmake/libfnord.cmake)
+include(3rdparty/libstx/cmake/libstdx.cmake)
 
 add_subdirectory(3rdparty/libcstable)
 include_directories(${CSTABLE_INCLUDE})
