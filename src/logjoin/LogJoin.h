@@ -101,9 +101,9 @@ protected:
       UnixTime stream_time,
       mdb::MDBTransaction* txn);
 
-  void onSession(
-      mdb::MDBTransaction* txn,
-      TrackedSession& session);
+  //void onSession(
+  //    mdb::MDBTransaction* txn,
+  //    TrackedSession& session);
 
   bool dry_run_;
   LogJoinShard shard_;

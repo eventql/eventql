@@ -32,20 +32,8 @@ LogJoinUpload::LogJoinUpload(
     broker_addr_(InetAddr::resolve(broker_addr)),
     http_(http),
     broker_client_(http),
-    batch_size_(kDefaultBatchSize),
-    webhook_delivery_tpool_(
-        4,
-        mkScoped(new CatchAndLogExceptionHandler("logjoind")),
-        10000,
-        false) {}
+    batch_size_(kDefaultBatchSize) {}
 
-void LogJoinUpload::start() {
-  webhook_delivery_tpool_.start();
-}
-
-void LogJoinUpload::stop() {
-  webhook_delivery_tpool_.stop();
-}
 
 void LogJoinUpload::upload() {
   while (scanQueue("__uploadq-sessions") > 0);
@@ -55,16 +43,10 @@ void LogJoinUpload::onSession(
     const JoinedSession& session) {
   auto conf = customer_dir_->logjoinConfigFor(session.customer());
 
-  try {
-    webhook_delivery_tpool_.run(
-        std::bind(
-            &LogJoinUpload::deliverWebhooks,
-            this,
-            conf,
-            session));
-  } catch (const Exception& e) {
-    stx::logError("logjoind", e, "error while delivering webhooks");
-  }
+  //try {
+  //} catch (const Exception& e) {
+  //  stx::logError("logjoind", e, "error while delivering webhooks");
+  //}
 }
 
 void LogJoinUpload::deliverWebhooks(

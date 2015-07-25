@@ -10,7 +10,6 @@
 #define _CM_LOGJOINUPLOAD_H
 #include "stx/stdtypes.h"
 #include "stx/mdb/MDB.h"
-#include "stx/thread/FixedSizeThreadPool.h"
 #include "stx/protobuf/MessageSchema.h"
 #include "stx/protobuf/msg.h"
 #include "stx/protobuf/JSONEncoder.h"
@@ -36,9 +35,6 @@ public:
 
   void upload();
 
-  void start();
-  void stop();
-
 protected:
 
   void onSession(const JoinedSession& session);
@@ -57,7 +53,6 @@ protected:
   http::HTTPConnectionPool* http_;
   feeds::BrokerClient broker_client_;
   size_t batch_size_;
-  thread::FixedSizeThreadPool webhook_delivery_tpool_;
 };
 
 } // namespace cm

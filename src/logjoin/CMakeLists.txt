@@ -36,27 +36,27 @@ add_executable(logjoind
 
 target_link_libraries(logjoind ${CMAKE_THREAD_LIBS_INIT} ${FNORD_LIBS} ${FNORD_FTS_LIBS})
 
-add_executable(test-logjoin
-    $<TARGET_OBJECTS:stx-base>
-    $<TARGET_OBJECTS:stx-json>
-    $<TARGET_OBJECTS:sstable>
-    $<TARGET_OBJECTS:stx-http>
-    $<TARGET_OBJECTS:stx-mdb>
-    $<TARGET_OBJECTS:stx-rpc>
-    $<TARGET_OBJECTS:stx-protobuf>
-    $<TARGET_OBJECTS:fnord-fts>
-    $<TARGET_OBJECTS:hunspell>
-    $<TARGET_OBJECTS:inventoryd-client>
-    $<TARGET_OBJECTS:brokerd-client>
-    $<TARGET_OBJECTS:logjoind-client>
-    $<TARGET_OBJECTS:customerdirectory>
-    TrackedCartItem.cc
-    TrackedItemVisit.cc
-    TrackedQuery.cc
-    TrackedSession.cc
-    LogJoin_test.cc)
-
-target_link_libraries(test-logjoin ${CMAKE_THREAD_LIBS_INIT} ${FNORD_LIBS} ${FNORD_FTS_LIBS})
+#add_executable(test-logjoin
+#    $<TARGET_OBJECTS:stx-base>
+#    $<TARGET_OBJECTS:stx-json>
+#    $<TARGET_OBJECTS:sstable>
+#    $<TARGET_OBJECTS:stx-http>
+#    $<TARGET_OBJECTS:stx-mdb>
+#    $<TARGET_OBJECTS:stx-rpc>
+#    $<TARGET_OBJECTS:stx-protobuf>
+#    $<TARGET_OBJECTS:fnord-fts>
+#    $<TARGET_OBJECTS:hunspell>
+#    $<TARGET_OBJECTS:inventoryd-client>
+#    $<TARGET_OBJECTS:brokerd-client>
+#    $<TARGET_OBJECTS:logjoind-client>
+#    $<TARGET_OBJECTS:customerdirectory>
+#    TrackedCartItem.cc
+#    TrackedItemVisit.cc
+#    TrackedQuery.cc
+#    TrackedSession.cc
+#    LogJoin_test.cc)
+#
+#target_link_libraries(test-logjoin ${CMAKE_THREAD_LIBS_INIT} ${FNORD_LIBS} ${FNORD_FTS_LIBS})
 
 #add_executable(cm-logjoin-backfill
 #    $<TARGET_OBJECTS:cm-common>

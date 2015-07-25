@@ -21,6 +21,7 @@
 #include "inventory/IndexChangeRequest.h"
 #include "inventory/DocIndex.h"
 #include <inventory/ItemRef.h>
+#include "stx/thread/FixedSizeThreadPool.h"
 
 using namespace stx;
 
@@ -39,6 +40,12 @@ public:
       msg::MessageSchemaRepository* schemas,
       bool dry_run);
 
+  void enqueueSession(const TrackedSession& session);
+
+  void start();
+  void stop();
+
+
   void setNormalize(
     Function<stx::String (Language lang, const stx::String& query)> normalizeCb);
 
@@ -50,12 +57,15 @@ public:
   size_t num_sessions;
 
 protected:
+  void processSession(TrackedSession session);
+
   msg::MessageSchemaRepository* schemas_;
   Function<stx::String (Language lang, const stx::String& query)> normalize_;
   Function<Option<String> (const DocID& docid, const String& feature)> get_field_;
   bool dry_run_;
   Random rnd_;
   CurrencyConverter cconv_;
+  thread::FixedSizeThreadPool tpool_;
 };
 } // namespace cm
 

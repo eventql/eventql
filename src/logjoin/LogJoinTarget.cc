@@ -25,7 +25,34 @@ LogJoinTarget::LogJoinTarget(
     num_sessions(0),
     schemas_(schemas),
     dry_run_(dry_run),
-    cconv_(currencyConversionTable()) {}
+    cconv_(currencyConversionTable()),
+    tpool_(
+        4,
+        mkScoped(new CatchAndLogExceptionHandler("logjoind")),
+        100,
+        true) {}
+
+void LogJoinTarget::start() {
+  tpool_.start();
+}
+
+void LogJoinTarget::stop() {
+  tpool_.stop();
+}
+
+void LogJoinTarget::enqueueSession(const TrackedSession& session) {
+  // FIXPAUL: write to some form of persisten queue
+  tpool_.run(
+      std::bind(
+          &LogJoinTarget::processSession,
+          this,
+          session));
+}
+
+void LogJoinTarget::processSession(TrackedSession session) {
+  stx::iputs("process session...", 1);
+  session.debugPrint();
+}
 
 void LogJoinTarget::setNormalize(
     Function<stx::String (Language lang, const stx::String& query)> normalizeCb) {
