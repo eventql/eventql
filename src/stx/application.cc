@@ -8,6 +8,7 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
+#include <string.h>
 #include <pwd.h>
 #include <grp.h>
 #include <unistd.h>
