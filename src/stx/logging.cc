@@ -54,7 +54,7 @@ Logger* Logger::get() {
 Logger::Logger() :
     min_level_(LogLevel::kNotice),
     max_listener_index_(0) {
-  for (int i = 0; i < FNORD_LOGGER_MAX_LISTENERS; ++i) {
+  for (int i = 0; i < STX_LOGGER_MAX_LISTENERS; ++i) {
     listeners_[i] = nullptr;
   }
 }

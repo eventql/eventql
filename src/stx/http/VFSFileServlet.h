@@ -7,8 +7,8 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#ifndef _FNORD_HTTP_VFSFILESERVLET_H
-#define _FNORD_HTTP_VFSFILESERVLET_H
+#ifndef _STX_HTTP_VFSFILESERVLET_H
+#define _STX_HTTP_VFSFILESERVLET_H
 #include "stx/VFS.h"
 #include "stx/http/httpservice.h"
 

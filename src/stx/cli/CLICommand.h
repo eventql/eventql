@@ -7,8 +7,8 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#ifndef _FNORD_CLI_CLICOMMAND_H
-#define _FNORD_CLI_CLICOMMAND_H
+#ifndef _STX_CLI_CLICOMMAND_H
+#define _STX_CLI_CLICOMMAND_H
 #include <string>
 #include <vector>
 #include <stx/exception.h>

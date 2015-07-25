@@ -7,8 +7,8 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#ifndef _FNORD_MSG_MESSAGEENCODER_H
-#define _FNORD_MSG_MESSAGEENCODER_H
+#ifndef _STX_MSG_MESSAGEENCODER_H
+#define _STX_MSG_MESSAGEENCODER_H
 #include <stx/stdtypes.h>
 #include <stx/buffer.h>
 #include <stx/util/binarymessagewriter.h>

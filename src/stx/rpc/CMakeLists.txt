@@ -1,4 +1,4 @@
-project(FNORD_RPC)
+project(STX_RPC)
 
 include_directories(../)
 

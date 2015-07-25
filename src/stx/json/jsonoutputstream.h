@@ -7,8 +7,8 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#ifndef _FNORD_JSON_JSONOUTPUTSTREAM_H
-#define _FNORD_JSON_JSONOUTPUTSTREAM_H
+#ifndef _STX_JSON_JSONOUTPUTSTREAM_H
+#define _STX_JSON_JSONOUTPUTSTREAM_H
 #include <set>
 #include <stack>
 #include <vector>

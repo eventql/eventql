@@ -8,8 +8,8 @@
  * <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _FNORD_BASE_INIPARSER_H_
-#define _FNORD_BASE_INIPARSER_H_
+#ifndef _STX_BASE_INIPARSER_H_
+#define _STX_BASE_INIPARSER_H_
 
 #include <tuple>
 #include <string>

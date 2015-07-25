@@ -15,8 +15,8 @@
 #include "stx/logging/loglevel.h"
 #include "stx/logging/logtarget.h"
 
-#ifndef FNORD_LOGGER_MAX_LISTENERS
-#define FNORD_LOGGER_MAX_LISTENERS 64
+#ifndef STX_LOGGER_MAX_LISTENERS
+#define STX_LOGGER_MAX_LISTENERS 64
 #endif
 
 namespace stx {
@@ -58,7 +58,7 @@ public:
 protected:
   std::atomic<LogLevel> min_level_;
   std::atomic<size_t> max_listener_index_;
-  std::atomic<LogTarget*> listeners_[FNORD_LOGGER_MAX_LISTENERS];
+  std::atomic<LogTarget*> listeners_[STX_LOGGER_MAX_LISTENERS];
 };
 
 } // namespace stx

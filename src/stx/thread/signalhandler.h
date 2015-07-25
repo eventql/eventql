@@ -7,8 +7,8 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#ifndef _FNORD_SYSTEM_SIGNALHANDLER_H
-#define _FNORD_SYSTEM_SIGNALHANDLER_H
+#ifndef _STX_SYSTEM_SIGNALHANDLER_H
+#define _STX_SYSTEM_SIGNALHANDLER_H
 
 namespace stx {
 namespace thread {

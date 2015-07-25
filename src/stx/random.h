@@ -7,8 +7,8 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#ifndef _FNORD_RANDOM_H_
-#define _FNORD_RANDOM_H_
+#ifndef _STX_RANDOM_H_
+#define _STX_RANDOM_H_
 #include <stdlib.h>
 #include <stdint.h>
 #include <string>

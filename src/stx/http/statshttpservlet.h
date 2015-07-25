@@ -7,8 +7,8 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#ifndef _FNORD_STATS_STATSHTTPSERVLET_H
-#define _FNORD_STATS_STATSHTTPSERVLET_H
+#ifndef _STX_STATS_STATSHTTPSERVLET_H
+#define _STX_STATS_STATSHTTPSERVLET_H
 #include "stx/autoref.h"
 #include "stx/http/httpservice.h"
 #include "stx/stats/statsrepository.h"

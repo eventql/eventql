@@ -7,8 +7,8 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#ifndef _FNORD_IO_FILELOCK_H_
-#define _FNORD_IO_FILELOCK_H_
+#ifndef _STX_IO_FILELOCK_H_
+#define _STX_IO_FILELOCK_H_
 
 #include <stx/stdtypes.h>
 #include <stx/io/file.h>

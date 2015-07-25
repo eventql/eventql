@@ -7,8 +7,8 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#ifndef _FNORD_HTTP_FILEDOWNLOAD_H
-#define _FNORD_HTTP_FILEDOWNLOAD_H
+#ifndef _STX_HTTP_FILEDOWNLOAD_H
+#define _STX_HTTP_FILEDOWNLOAD_H
 #include <stx/uri.h>
 #include <stx/io/file.h>
 #include <stx/http/httpmessage.h>

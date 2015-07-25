@@ -7,8 +7,8 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#ifndef _FNORD_JSONUTIL_H
-#define _FNORD_JSONUTIL_H
+#ifndef _STX_JSONUTIL_H
+#define _STX_JSONUTIL_H
 #include "stx/option.h"
 #include "stx/json/jsontypes.h"
 

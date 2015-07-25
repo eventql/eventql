@@ -7,8 +7,8 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#ifndef _FNORD_STDTYPES_H
-#define _FNORD_STDTYPES_H
+#ifndef _STX_STDTYPES_H
+#define _STX_STDTYPES_H
 #include <ctime>
 #include <deque>
 #include <inttypes.h>

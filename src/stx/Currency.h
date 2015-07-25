@@ -7,8 +7,8 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#ifndef _FNORD_CURRENCY_H
-#define _FNORD_CURRENCY_H
+#ifndef _STX_CURRENCY_H
+#define _STX_CURRENCY_H
 #include "stx/stdtypes.h"
 #include "stx/Currency.pb.h"
 

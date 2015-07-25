@@ -7,8 +7,8 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#ifndef _FNORD_BASE_INTERNAMP_H
-#define _FNORD_BASE_INTERNAMP_H
+#ifndef _STX_BASE_INTERNAMP_H
+#define _STX_BASE_INTERNAMP_H
 #include <mutex>
 #include "stx/stdtypes.h"
 

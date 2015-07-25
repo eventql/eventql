@@ -7,8 +7,8 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#ifndef _FNORD_IO_MMAPPED_FILE_H_
-#define _FNORD_IO_MMAPPED_FILE_H_
+#ifndef _STX_IO_MMAPPED_FILE_H_
+#define _STX_IO_MMAPPED_FILE_H_
 #include <stx/exception.h>
 #include <stx/io/file.h>
 #include <stx/VFS.h>

@@ -7,8 +7,8 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#ifndef _FNORD_MDBTRANSACTION_H
-#define _FNORD_MDBTRANSACTION_H
+#ifndef _STX_MDBTRANSACTION_H
+#define _STX_MDBTRANSACTION_H
 #include <memory>
 #include <vector>
 #include <liblmdb/lmdb.h>

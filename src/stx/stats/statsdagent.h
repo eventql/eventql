@@ -7,8 +7,8 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#ifndef _FNORD_STATS_STATSDAGENT_H_
-#define _FNORD_STATS_STATSDAGENT_H_
+#ifndef _STX_STATS_STATSDAGENT_H_
+#define _STX_STATS_STATSDAGENT_H_
 #include <thread>
 #include "stx/stdtypes.h"
 #include "stx/duration.h"

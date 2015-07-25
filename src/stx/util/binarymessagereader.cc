@@ -75,7 +75,7 @@ String const* BinaryMessageReader::readValue<String>() {
 }
 
 char const* BinaryMessageReader::readString(size_t size) {
-#ifndef FNORD_NODBEUG
+#ifndef STX_NODBEUG
   if ((pos_ + size) > size_) {
     RAISE(kBufferOverflowError, "requested read exceeds message bounds");
   }
@@ -101,7 +101,7 @@ void BinaryMessageReader::rewind() {
 }
 
 void BinaryMessageReader::seekTo(size_t pos) {
-#ifndef FNORD_NODBEUG
+#ifndef STX_NODBEUG
   if (pos > size_) {
     RAISE(kBufferOverflowError, "requested position exceeds message bounds");
   }

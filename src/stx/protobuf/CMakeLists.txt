@@ -21,7 +21,7 @@ add_library(stx-protobuf OBJECT
 
 add_dependencies(stx-protobuf stx-base)
 
-set(FNORD_PROTOBUF_LIBS ${PROTOBUF_LIBRARIES} PARENT_SCOPE)
+set(STX_PROTOBUF_LIBS ${PROTOBUF_LIBRARIES} PARENT_SCOPE)
 
 include_directories(${PROTOBUF_INCLUDE_DIRS})
 include_directories(${CMAKE_CURRENT_BINARY_DIR})

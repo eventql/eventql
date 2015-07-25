@@ -7,8 +7,8 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#ifndef _FNORD_APPLICATION_H
-#define _FNORD_APPLICATION_H
+#ifndef _STX_APPLICATION_H
+#define _STX_APPLICATION_H
 #include <functional>
 #include <memory>
 #include <mutex>

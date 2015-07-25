@@ -7,8 +7,8 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#ifndef _FNORD_NET_UDPSOCKET_H
-#define _FNORD_NET_UDPSOCKET_H
+#ifndef _STX_NET_UDPSOCKET_H
+#define _STX_NET_UDPSOCKET_H
 #include <stdlib.h>
 #include "stx/buffer.h"
 #include "stx/net/inetaddr.h"
