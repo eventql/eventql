@@ -38,5 +38,5 @@ protected:
 };
 
 } // namespace json
-} // namsepace fnord
+} // namespace fnord
 #endif

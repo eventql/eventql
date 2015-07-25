@@ -34,5 +34,5 @@ void JSONRPC::registerMethod(
 }
 
 } // namespace json
-} // namsepace fnord
+} // namespace fnord
 

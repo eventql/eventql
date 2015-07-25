@@ -66,7 +66,7 @@ protected:
 };
 
 } // namespace json
-} // namsepace fnord
+} // namespace fnord
 
 #include "jsonrpc_impl.h"
 #endif

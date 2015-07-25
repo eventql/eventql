@@ -43,7 +43,7 @@ protected:
 };
 
 } // namespace json
-} // namsepace fnord
+} // namespace fnord
 
 #include "jsonrpcresponse_impl.h"
 #endif
