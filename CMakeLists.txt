@@ -25,7 +25,6 @@ add_subdirectory(src/stx/mdb)
 add_subdirectory(src/stx/http)
 add_subdirectory(src/stx/json)
 add_subdirectory(src/stx/rpc)
-add_subdirectory(src/stx/charts)
 
 add_subdirectory(src/stx/net/mysql)
 set(STX_MYSQL_LIBS ${STX_MYSQL_LIBS} PARENT_SCOPE)
