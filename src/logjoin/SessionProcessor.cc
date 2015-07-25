@@ -6,14 +6,7 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-#include "stx/protobuf/MessageBuilder.h"
-#include "stx/protobuf/MessageObject.h"
-#include "stx/protobuf/MessageEncoder.h"
-#include "stx/protobuf/MessageDecoder.h"
-#include "stx/protobuf/MessagePrinter.h"
-#include "stx/protobuf/msg.h"
 #include "logjoin/SessionProcessor.h"
-#include "common.h"
 
 using namespace stx;
 
@@ -45,6 +38,7 @@ void SessionProcessor::enqueueSession(const TrackedSession& session) {
 
 void SessionProcessor::processSession(const TrackedSession& session) {
   auto ctx = mkRef(new TrackedSessionContext(session));
+  ctx->customer_config = customer_dir_->configFor(session.customer_key);
   pipeline_->run(ctx);
 }
 

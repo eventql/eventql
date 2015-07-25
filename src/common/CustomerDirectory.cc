@@ -13,9 +13,8 @@ using namespace stx;
 
 namespace cm {
 
-//CustomerConfig customerConfigFor(const String& customer_key);
-
-LogJoinConfig CustomerDirectory::logjoinConfigFor(const String& customer_key) {
+RefPtr<CustomerConfigRef> CustomerDirectory::configFor(
+    const String& customer_key) {
   std::unique_lock<std::mutex> lk(mutex_);
 
   auto iter = customers_.find(customer_key);
@@ -23,12 +22,12 @@ LogJoinConfig CustomerDirectory::logjoinConfigFor(const String& customer_key) {
     RAISEF(kNotFoundError, "customer not found: $0", customer_key);
   }
 
-  return iter->second.logjoin_config();
+  return iter->second;
 }
 
 void CustomerDirectory::updateCustomerConfig(CustomerConfig config) {
   std::unique_lock<std::mutex> lk(mutex_);
-  customers_.emplace(config.customer(), config);
+  customers_.emplace(config.customer(), new CustomerConfigRef(config));
 }
 
 } // namespace cm
