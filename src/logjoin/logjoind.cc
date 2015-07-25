@@ -118,7 +118,7 @@ int main(int argc, const char** argv) {
       stx::cli::FlagParser::T_INTEGER,
       false,
       NULL,
-      "2048",
+      "8192",
       "batch_size",
       "<num>");
 
@@ -127,7 +127,7 @@ int main(int argc, const char** argv) {
       stx::cli::FlagParser::T_INTEGER,
       false,
       NULL,
-      "8192",
+      "32000",
       "buffer_size",
       "<num>");
 
@@ -136,7 +136,7 @@ int main(int argc, const char** argv) {
       stx::cli::FlagParser::T_INTEGER,
       false,
       NULL,
-      "5",
+      "30",
       "flush_interval",
       "<num>");
 
@@ -181,6 +181,8 @@ int main(int argc, const char** argv) {
   Logger::get()->setMinimumLogLevel(
       strToLogLevel(flags.getString("loglevel")));
 
+  auto dry_run = !flags.isSet("no_dryrun");
+
   /* start event loop */
   auto evloop_thread = std::thread([] {
     ev.run();
@@ -198,12 +200,6 @@ int main(int argc, const char** argv) {
   /* get logjoin shard */
   cm::LogJoinShardMap shard_map;
   auto shard = shard_map.getShard(flags.getString("shard"));
-
-  /* args */
-  auto dry_run = !flags.isSet("no_dryrun");
-  size_t batch_size = flags.getInt("batch_size");
-  size_t buffer_size = flags.getInt("buffer_size");
-  size_t flush_interval = flags.getInt("flush_interval");
 
   /* open customer directory */
   CustomerDirectory customer_dir;
@@ -286,27 +282,19 @@ int main(int argc, const char** argv) {
   /* run logjoin */
   stx::logInfo(
       "cm.logjoin",
-      "Starting cm-logjoin with:\n    dry_run=$0\n    batch_size=$1\n" \
-      "    buffer_size=$2\n    flush_interval=$9\n"
-      "    max_dbsize=$4MB\n" \
-      "    shard=$5\n    shard_range=[$6, $7)\n    shard_modulo=$8",
+      "Starting logjoind; dry_run=$0 shard=$1: [$2, $3) of [0, $4]",
       dry_run,
-      batch_size,
-      buffer_size,
-      0,
-      flags.getInt("db_size"),
       shard.shard_name,
       shard.begin,
       shard.end,
-      cm::LogJoinShard::modulo,
-      flush_interval);
+      cm::LogJoinShard::modulo);
 
   session_proc.start();
   logjoin.processClickstream(
       input_feeds,
-      batch_size,
-      buffer_size,
-      flush_interval * kMicrosPerSecond);
+      flags.getInt("batch_size"),
+      flags.getInt("buffer_size"),
+      flags.getInt("flush_interval") * kMicrosPerSecond);
 
   /* shutdown */
   stx::logInfo("cm.logjoin", "LogJoin exiting...");
