@@ -73,6 +73,8 @@ struct TrackedSession {
 
 struct TrackedSessionContext : public RefCounted {
 
+  TrackedSessionContext(TrackedSession session);
+
   TrackedSession tracked_session;
 
   JoinedSession joined_session;

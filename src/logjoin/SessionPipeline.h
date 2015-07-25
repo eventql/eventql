@@ -18,7 +18,7 @@ class SessionPipeline : public RefCounted {
 public:
   typedef Function<void (RefPtr<TrackedSessionContext> ctx)> PipelineStageFn;
 
-  RefPtr<TrackedSessionContext> processSession(TrackedSession session);
+  void run(RefPtr<TrackedSessionContext> ctx);
 
   void addStage(PipelineStageFn fn);
 

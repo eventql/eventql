@@ -38,6 +38,9 @@ public:
   void stop();
 
 protected:
+
+  void processSession(const TrackedSession& session);
+
   RefPtr<SessionPipeline> pipeline_;
   thread::FixedSizeThreadPool tpool_;
 };
