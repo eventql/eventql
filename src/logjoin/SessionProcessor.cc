@@ -20,8 +20,10 @@ using namespace stx;
 namespace cm {
 
 SessionProcessor::SessionProcessor(
+    RefPtr<SessionPipeline> pipeline,
     msg::MessageSchemaRepository* schemas,
     bool dry_run) :
+    pipeline_(pipeline),
     num_sessions(0),
     schemas_(schemas),
     dry_run_(dry_run),
@@ -40,27 +42,11 @@ void SessionProcessor::stop() {
   tpool_.stop();
 }
 
-void SessionProcessor::addPipelineStage(PipelineStageFn fn) {
-  stages_.emplace_back(fn);
-}
-
 void SessionProcessor::enqueueSession(const TrackedSession& session) {
   // FIXPAUL: write to some form of persisten queue
   tpool_.run([this, session] {
-    processSession(session);
+    pipeline_->processSession(session);
   });
-}
-
-RefPtr<TrackedSessionContext> SessionProcessor::processSession(
-    TrackedSession session) {
-  auto ctx = mkRef(new TrackedSessionContext);
-  ctx->tracked_session = session;
-
-  for (const auto& stage : stages_) {
-    stage(ctx);
-  }
-
-  return ctx;
 }
 
 void SessionProcessor::setNormalize(
