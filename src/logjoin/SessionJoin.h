@@ -18,7 +18,7 @@ namespace cm {
 class SessionJoin {
 public:
 
-  static void process(TrackedSession* session);
+  static void process(RefPtr<TrackedSessionContext> session);
 
 protected:
 
