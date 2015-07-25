@@ -52,7 +52,7 @@ protected:
 };
 
 } // namespace json
-} // namespace fnord
+} // namespace stx
 
 #include "jsondocument_impl.h"
 #endif

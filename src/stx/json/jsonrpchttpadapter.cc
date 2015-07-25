@@ -63,5 +63,5 @@ void JSONRPCHTTPAdapter::handleHTTPRequest(
 
 
 } // namespace json
-} // namespace fnord
+} // namespace stx
 

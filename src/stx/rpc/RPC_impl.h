@@ -104,5 +104,5 @@ AutoRef<RPC<ReturnType, std::tuple<ArgTypes...>>> mkRPC(
       std::tuple<typename std::decay<ArgTypes>::type...>(args...));
 }
 
-} // namespace fnord
+} // namespace stx
 

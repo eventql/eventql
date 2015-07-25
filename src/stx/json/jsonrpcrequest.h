@@ -39,7 +39,7 @@ protected:
 };
 
 } // namespace json
-} // namespace fnord
+} // namespace stx
 
 #include "jsonrpcrequest_impl.h"
 #endif

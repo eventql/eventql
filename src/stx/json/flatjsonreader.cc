@@ -171,5 +171,5 @@ void FlatJSONReader::readArray(
 }
 
 } // namespace json
-} // namespace fnord
+} // namespace stx
 

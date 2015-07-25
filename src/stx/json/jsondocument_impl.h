@@ -36,4 +36,4 @@ T JSONDocument::getAs(const JSONPointer& path, const T& fallback) const {
 }
 
 } // namespace json
-} // namespace fnord
+} // namespace stx

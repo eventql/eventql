@@ -70,5 +70,5 @@ void JSONRPCResponse::setID(const std::string& id) {
 }
 
 } // namespace json
-} // namespace fnord
+} // namespace stx
 
