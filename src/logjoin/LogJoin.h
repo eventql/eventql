@@ -37,6 +37,11 @@ using namespace stx;
 namespace cm {
 class CustomerNamespace;
 
+/**
+ * Flush/expire a session after N seconds of inactivity
+ */
+static const uint64_t kSessionIdleTimeoutSeconds = 60 * 90;
+
 class LogJoin {
 public:
   static const size_t kFlushIntervalMicros = 500 * stx::kMicrosPerSecond;
