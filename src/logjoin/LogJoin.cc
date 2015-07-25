@@ -19,6 +19,8 @@
 #include <stx/rpc/RPC.h>
 #include <stx/json/json.h>
 #include <stx/protobuf/msg.h>
+#include "stx/util/binarymessagereader.h"
+#include "stx/util/binarymessagewriter.h"
 #include <brokerd/RemoteFeedFactory.h>
 #include <brokerd/RemoteFeedWriter.h>
 #include <inventory/ItemRef.h>
