@@ -15,6 +15,11 @@ using namespace stx;
 
 namespace cm {
 
+/**
+ * The max time after which a click on a query result is considered a click
+ */
+static const uint64_t kMaxQueryClickDelaySeconds = 180;
+
 class SessionJoin {
 public:
 
