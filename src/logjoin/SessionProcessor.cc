@@ -13,15 +13,17 @@ using namespace stx;
 namespace cm {
 
 SessionProcessor::SessionProcessor(
-    RefPtr<SessionPipeline> pipeline,
     CustomerDirectory* customer_dir) :
-    pipeline_(pipeline),
     customer_dir_(customer_dir),
     tpool_(
         4,
         mkScoped(new CatchAndLogExceptionHandler("logjoind")),
         100,
         true) {}
+
+void SessionProcessor::addPipelineStage(PipelineStageFn fn) {
+  stages_.emplace_back(fn);
+}
 
 void SessionProcessor::start() {
   tpool_.start();
@@ -39,7 +41,10 @@ void SessionProcessor::enqueueSession(const TrackedSession& session) {
 void SessionProcessor::processSession(const TrackedSession& session) {
   auto ctx = mkRef(new SessionContext(session));
   ctx->customer_config = customer_dir_->configFor(session.customer_key);
-  pipeline_->run(ctx);
+
+  for (const auto& stage : stages_) {
+    stage(ctx);
+  }
 }
 
 } // namespace cm

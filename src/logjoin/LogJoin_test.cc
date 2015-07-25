@@ -12,7 +12,6 @@
 #include "stx/exception.h"
 #include "stx/test/unittest.h"
 #include "stx/protobuf/msg.h"
-#include "logjoin/SessionPipeline.h"
 #include "logjoin/JoinedSession.pb.h"
 #include "logjoin/stages/SessionJoin.h"
 #include "logjoin/stages/BuildSessionAttributes.h"
@@ -27,14 +26,6 @@ UNIT_TEST(LogJoinTest);
  * Simple Search
  */
 TEST_CASE(LogJoinTest, SimpleQuery, [] () {
-  auto pipeline = mkRef(new SessionPipeline());
-  pipeline->addStage(std::bind(&SessionJoin::process, std::placeholders::_1));
-  pipeline->addStage(std::bind(&BuildSessionAttributes::process, std::placeholders::_1));
-  pipeline->addStage(std::bind(
-      &NormalizeQueryStrings::process,
-      [] (Language l, const String& q) { return q + "...norm"; },
-      std::placeholders::_1));
-
   auto t = 1432311555 * kMicrosPerSecond;
   TrackedSession sess;
   sess.insertLogline(t + 0, "q", "E1", URI::ParamList {
@@ -43,7 +34,12 @@ TEST_CASE(LogJoinTest, SimpleQuery, [] () {
   });
 
   auto ctx = mkRef(new SessionContext(sess));
-  pipeline->run(ctx);
+  SessionJoin::process(ctx);
+  BuildSessionAttributes::process(ctx);
+  NormalizeQueryStrings::process(
+      [] (Language l, const String& q) { return q + "...norm"; },
+      ctx);
+
   const auto& joined = ctx->session;
 
   EXPECT_EQ(joined.num_cart_items(), 0);
@@ -87,10 +83,6 @@ TEST_CASE(LogJoinTest, SimpleQuery, [] () {
  * Cart Item (checkout_step 1) and GMV
  */
 TEST_CASE(LogJoinTest, ItemOrder, [] () {
-  auto pipeline = mkRef(new SessionPipeline());
-  pipeline->addStage(std::bind(&SessionJoin::process, std::placeholders::_1));
-  pipeline->addStage(std::bind(&BuildSessionAttributes::process, std::placeholders::_1));
-
   auto t = 1432311555 * kMicrosPerSecond;
   TrackedSession sess;
   sess.insertLogline(t + 0, "q", "E1", URI::ParamList {
@@ -109,7 +101,9 @@ TEST_CASE(LogJoinTest, ItemOrder, [] () {
   });
 
   auto ctx = mkRef(new SessionContext(sess));
-  pipeline->run(ctx);
+  SessionJoin::process(ctx);
+  BuildSessionAttributes::process(ctx);
+
   const auto& joined = ctx->session;
 
   EXPECT_EQ(joined.num_cart_items(), 1);
@@ -165,10 +159,6 @@ TEST_CASE(LogJoinTest, ItemOrder, [] () {
 // * Multiple Query Batches and Ad click
 // */
 TEST_CASE(LogJoinTest, MultipleQueryBatches, [] () {
-  auto pipeline = mkRef(new SessionPipeline());
-  pipeline->addStage(std::bind(&SessionJoin::process, std::placeholders::_1));
-  pipeline->addStage(std::bind(&BuildSessionAttributes::process, std::placeholders::_1));
-
   auto t = 1432311555 * kMicrosPerSecond;
   TrackedSession sess;
   sess.insertLogline(t + 0, "q", "E1", URI::ParamList {
@@ -188,7 +178,9 @@ TEST_CASE(LogJoinTest, MultipleQueryBatches, [] () {
   });
 
   auto ctx = mkRef(new SessionContext(sess));
-  pipeline->run(ctx);
+  SessionJoin::process(ctx);
+  BuildSessionAttributes::process(ctx);
+
   const auto& joined = ctx->session;
 
   EXPECT_EQ(joined.num_cart_items(), 0);
@@ -221,10 +213,6 @@ TEST_CASE(LogJoinTest, MultipleQueryBatches, [] () {
  * Multiple Queries (search, catalog, shop)
  */
 TEST_CASE(LogJoinTest, MultipleQueries, [] () {
-  auto pipeline = mkRef(new SessionPipeline());
-  pipeline->addStage(std::bind(&SessionJoin::process, std::placeholders::_1));
-  pipeline->addStage(std::bind(&BuildSessionAttributes::process, std::placeholders::_1));
-
   auto t = 1432311555 * kMicrosPerSecond;
   TrackedSession sess;
   sess.insertLogline(t + 0, "q", "E1", URI::ParamList {
@@ -243,7 +231,9 @@ TEST_CASE(LogJoinTest, MultipleQueries, [] () {
   });
 
   auto ctx = mkRef(new SessionContext(sess));
-  pipeline->run(ctx);
+  SessionJoin::process(ctx);
+  BuildSessionAttributes::process(ctx);
+
   const auto& joined = ctx->session;
 
   EXPECT_EQ(joined.search_queries().size(), 3);
@@ -343,10 +333,6 @@ TEST_CASE(LogJoinTest, MultipleQueries, [] () {
 //});
 
 TEST_CASE(LogJoinTest, SeenResultItems, [] () {
-  auto pipeline = mkRef(new SessionPipeline());
-  pipeline->addStage(std::bind(&SessionJoin::process, std::placeholders::_1));
-  pipeline->addStage(std::bind(&BuildSessionAttributes::process, std::placeholders::_1));
-
   auto t = 1432311555 * kMicrosPerSecond;
   TrackedSession sess;
   sess.insertLogline(t + 0, "q", "E1", URI::ParamList {
@@ -359,7 +345,9 @@ TEST_CASE(LogJoinTest, SeenResultItems, [] () {
   });
 
   auto ctx = mkRef(new SessionContext(sess));
-  pipeline->run(ctx);
+  SessionJoin::process(ctx);
+  BuildSessionAttributes::process(ctx);
+
   const auto& joined = ctx->session;
 
   EXPECT_EQ(joined.search_queries().size(), 1);
