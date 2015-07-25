@@ -1,8 +1,8 @@
 /**
- * This file is part of the "FnordMetric" project
+ * This file is part of the "libstx" project
  *   Copyright (c) 2014 Paul Asmuth, Google Inc.
  *
- * FnordMetric is free software: you can redistribute it and/or modify it under
+ * libstx is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License v3.0. You should have received a
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
@@ -101,11 +101,11 @@ TEST_CASE(PageManagerTest, TestAbstractPageManagerAllocFree, [] () {
 });
 
 TEST_CASE(PageManagerTest, TestMmapPageManager, [] () {
-  int fd = open("build/tests/tmp/__fnordmetric_testMmapPageManager",
+  int fd = open("build/tests/tmp/__libstx_testMmapPageManager",
       O_CREAT | O_TRUNC | O_RDWR, S_IRUSR | S_IWUSR);
   EXPECT(fd > 0);
   auto page_manager = new TestMmapPageManager(
-      "build/tests/tmp/__fnordmetric_testMmapPageManager", 0);
+      "build/tests/tmp/__libstx_testMmapPageManager", 0);
 
   auto mfile1 = page_manager->getMmappedFileTest(3000);
   auto mfile2 = page_manager->getMmappedFileTest(304200);
@@ -121,7 +121,7 @@ TEST_CASE(PageManagerTest, TestMmapPageManager, [] () {
   mfile2->decrRefs();
 
   delete page_manager;
-  unlink("build/tests/tmp/__fnordmetric_testMmapPageManager");
+  unlink("build/tests/tmp/__libstx_testMmapPageManager");
   close(fd);
 });
 

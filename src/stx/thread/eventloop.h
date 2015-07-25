@@ -1,14 +1,14 @@
 /**
- * This file is part of the "FnordMetric" project
+ * This file is part of the "libstx" project
  *   Copyright (c) 2014 Paul Asmuth, Google Inc.
  *
- * FnordMetric is free software: you can redistribute it and/or modify it under
+ * libstx is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License v3.0. You should have received a
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#ifndef FNORDMETRIC_EV_EVENTLOOP_H
-#define FNORDMETRIC_EV_EVENTLOOP_H
+#ifndef libstx_EV_EVENTLOOP_H
+#define libstx_EV_EVENTLOOP_H
 #include <list>
 #include <sys/select.h>
 #include <thread>
