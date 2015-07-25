@@ -20,8 +20,10 @@ using namespace stx;
 namespace cm {
 
 SessionProcessor::SessionProcessor(
-    RefPtr<SessionPipeline> pipeline) :
+    RefPtr<SessionPipeline> pipeline,
+    CustomerDirectory* customer_dir) :
     pipeline_(pipeline),
+    customer_dir_(customer_dir),
     tpool_(
         4,
         mkScoped(new CatchAndLogExceptionHandler("logjoind")),

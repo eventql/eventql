@@ -307,7 +307,7 @@ int main(int argc, const char** argv) {
   auto sessdb = mdb::MDB::open(flags.getString("datadir"), mdb_opts);
 
   /* set up session processor */
-  cm::SessionProcessor session_proc(pipeline);
+  cm::SessionProcessor session_proc(pipeline, &customer_dir);
   session_proc.start();
 
   /* setup logjoin */

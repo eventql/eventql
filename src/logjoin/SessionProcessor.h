@@ -8,20 +8,12 @@
  */
 #pragma once
 #include "stx/stdtypes.h"
-#include "stx/Currency.h"
-#include "stx/Language.h"
 #include "stx/random.h"
-#include "stx/mdb/MDB.h"
-#include "stx/protobuf/MessageSchema.h"
-#include <inventory/ItemRef.h>
+#include "stx/thread/FixedSizeThreadPool.h"
 #include "logjoin/TrackedSession.h"
 #include "logjoin/TrackedQuery.h"
 #include "logjoin/SessionPipeline.h"
-#include "inventory/DocStore.h"
-#include "inventory/IndexChangeRequest.h"
-#include "inventory/DocIndex.h"
-#include <inventory/ItemRef.h>
-#include "stx/thread/FixedSizeThreadPool.h"
+#include "common/CustomerDirectory.h"
 
 using namespace stx;
 
@@ -31,7 +23,9 @@ class SessionProcessor {
 public:
   typedef Function<void (RefPtr<TrackedSessionContext> ctx)> PipelineStageFn;
 
-  SessionProcessor(RefPtr<SessionPipeline> pipeline);
+  SessionProcessor(
+      RefPtr<SessionPipeline> pipeline,
+      CustomerDirectory* customer_dir);
 
   void enqueueSession(const TrackedSession& session);
   void start();
@@ -42,7 +36,9 @@ protected:
   void processSession(const TrackedSession& session);
 
   RefPtr<SessionPipeline> pipeline_;
+  CustomerDirectory* customer_dir_;
   thread::FixedSizeThreadPool tpool_;
 };
+
 } // namespace cm
 
