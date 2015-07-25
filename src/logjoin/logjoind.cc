@@ -334,7 +334,7 @@ int main(int argc, const char** argv) {
       flags.getString("broker_addr"),
       &http);
 
-  logjoin_upload.start();
+  logjoin_target.start();
 
   /* setup logjoin */
   cm::LogJoin logjoin(shard, dry_run, &logjoin_target);
@@ -501,7 +501,7 @@ int main(int argc, const char** argv) {
   sessdb->sync();
   stx::logInfo("cm.logjoin", "LogJoin exiting...");
 
-  logjoin_upload.stop();
+  logjoin_target.stop();
   return 0;
 }
 

@@ -285,42 +285,42 @@ void LogJoin::flushSession(
   }
 
   try {
-    onSession(txn, session);
+    target_->enqueueSession(session);
   } catch (const std::exception& e) {
-    stx::logError("cm.logjoin", e, "LogJoint::onSession crashed");
+    stx::logError("cm.logjoin", e, "SessionProcessor::enqueueSession crashed");
     session.debugPrint();
   }
 
   stat_joined_sessions_.incr(1);
 }
 
-void LogJoin::onSession(
-    mdb::MDBTransaction* txn,
-    TrackedSession& session) {
-  auto session_data = target_->joinSession(session);
-
-  if (dry_run_) {
-    stx::logInfo(
-        "cm.logjoin",
-        "[DRYRUN] not uploading session: ", 1);
-        //msg::MessagePrinter::print(obj, joined_session_schema_));
-    return;
-  }
-
-  SessionEnvelope envelope;
-  envelope.set_customer(session.customer_key);
-  envelope.set_session_id(session.uid);
-  envelope.set_time(session.firstSeenTime().get().unixMicros());
-  envelope.set_session_data(session_data.toString());
-
-  auto envelope_buf = msg::encode(envelope);
-  auto key = StringUtil::format("__sessionq-$0",  rnd_.hex128());
-  txn->update(
-      key.data(),
-      key.size(),
-      envelope_buf->data(),
-      envelope_buf->size());
-}
+//void LogJoin::onSession(
+//    mdb::MDBTransaction* txn,
+//    TrackedSession& session) {
+//  auto session_data = target_->joinSession(session);
+//
+//  if (dry_run_) {
+//    stx::logInfo(
+//        "cm.logjoin",
+//        "[DRYRUN] not uploading session: ", 1);
+//        //msg::MessagePrinter::print(obj, joined_session_schema_));
+//    return;
+//  }
+//
+//  SessionEnvelope envelope;
+//  envelope.set_customer(session.customer_key);
+//  envelope.set_session_id(session.uid);
+//  envelope.set_time(session.firstSeenTime().get().unixMicros());
+//  envelope.set_session_data(session_data.toString());
+//
+//  auto envelope_buf = msg::encode(envelope);
+//  auto key = StringUtil::format("__sessionq-$0",  rnd_.hex128());
+//  txn->update(
+//      key.data(),
+//      key.size(),
+//      envelope_buf->data(),
+//      envelope_buf->size());
+//}
 
 void LogJoin::importTimeoutList(mdb::MDBTransaction* txn) {
   Buffer key;
