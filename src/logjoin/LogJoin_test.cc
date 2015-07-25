@@ -16,6 +16,7 @@
 #include "logjoin/JoinedSession.pb.h"
 #include "logjoin/stages/SessionJoin.h"
 #include "logjoin/stages/BuildSessionAttributes.h"
+#include "logjoin/stages/NormalizeQueryStrings.h"
 
 using namespace stx;
 using namespace cm;
@@ -29,6 +30,10 @@ TEST_CASE(LogJoinTest, SimpleQuery, [] () {
   auto pipeline = mkRef(new SessionPipeline());
   pipeline->addStage(std::bind(&SessionJoin::process, std::placeholders::_1));
   pipeline->addStage(std::bind(&BuildSessionAttributes::process, std::placeholders::_1));
+  pipeline->addStage(std::bind(
+      &NormalizeQueryStrings::process,
+      [] (Language l, const String& q) { return q + "...norm"; },
+      std::placeholders::_1));
 
   auto t = 1432311555 * kMicrosPerSecond;
   TrackedSession sess;
@@ -55,7 +60,9 @@ TEST_CASE(LogJoinTest, SimpleQuery, [] () {
   EXPECT_EQ(joined.search_queries().Get(0).num_order_items(), 0);
   EXPECT_EQ(joined.search_queries().Get(0).gmv_eurcents(), 0);
   EXPECT_EQ(joined.search_queries().Get(0).query_string(), "blah");
-  EXPECT_EQ(joined.search_queries().Get(0).query_string_normalized(), "blah");
+  EXPECT_EQ(
+      joined.search_queries().Get(0).query_string_normalized(),
+      "blah...norm");
   EXPECT_EQ(
     ProtoLanguage_Name(joined.search_queries().Get(0).language()),
     "LANGUAGE_DE");
@@ -291,45 +298,45 @@ TEST_CASE(LogJoinTest, MultipleQueries, [] () {
 /*
  * Field Expansion
  */
-TEST_CASE(LogJoinTest, FieldExpansion, [] () {
-  auto pipeline = mkRef(new SessionPipeline());
-  pipeline->addStage(std::bind(&SessionJoin::process, std::placeholders::_1));
-  pipeline->addStage(std::bind(&BuildSessionAttributes::process, std::placeholders::_1));
-
-  auto t = 1432311555 * kMicrosPerSecond;
-  TrackedSession sess;
-  sess.insertLogline(t + 0, "q", "E1", URI::ParamList {
-    { "is", "p~101~p1,p~102~p2" },
-    { "qstr~de", "blah" }
-  });
-
-  auto ctx = pipeline->processSession(sess);
-  const auto& joined = ctx->joined_session;
-
-  EXPECT_EQ(joined.search_queries().Get(0).result_items().size(), 2);
-  EXPECT_EQ(
-    joined.search_queries().Get(0).result_items().Get(0).item_id(),
-    "p~101");
-  EXPECT_EQ(
-    joined.search_queries().Get(0).result_items().Get(0).category1(),
-    1);
-  EXPECT_EQ(
-    joined.search_queries().Get(0).result_items().Get(0).category2(),
-    21);
-  EXPECT_EQ(
-    joined.search_queries().Get(0).result_items().Get(0).category3(),
-    31);
-
-  EXPECT_EQ(
-    joined.search_queries().Get(0).result_items().Get(1).category1(),
-    1);
-  EXPECT_EQ(
-    joined.search_queries().Get(0).result_items().Get(1).category2(),
-    22);
-  EXPECT_EQ(
-    joined.search_queries().Get(0).result_items().Get(1).category3(),
-    32);
-});
+//TEST_CASE(LogJoinTest, FieldExpansion, [] () {
+//  auto pipeline = mkRef(new SessionPipeline());
+//  pipeline->addStage(std::bind(&SessionJoin::process, std::placeholders::_1));
+//  pipeline->addStage(std::bind(&BuildSessionAttributes::process, std::placeholders::_1));
+//
+//  auto t = 1432311555 * kMicrosPerSecond;
+//  TrackedSession sess;
+//  sess.insertLogline(t + 0, "q", "E1", URI::ParamList {
+//    { "is", "p~101~p1,p~102~p2" },
+//    { "qstr~de", "blah" }
+//  });
+//
+//  auto ctx = pipeline->processSession(sess);
+//  const auto& joined = ctx->joined_session;
+//
+//  EXPECT_EQ(joined.search_queries().Get(0).result_items().size(), 2);
+//  EXPECT_EQ(
+//    joined.search_queries().Get(0).result_items().Get(0).item_id(),
+//    "p~101");
+//  EXPECT_EQ(
+//    joined.search_queries().Get(0).result_items().Get(0).category1(),
+//    1);
+//  EXPECT_EQ(
+//    joined.search_queries().Get(0).result_items().Get(0).category2(),
+//    21);
+//  EXPECT_EQ(
+//    joined.search_queries().Get(0).result_items().Get(0).category3(),
+//    31);
+//
+//  EXPECT_EQ(
+//    joined.search_queries().Get(0).result_items().Get(1).category1(),
+//    1);
+//  EXPECT_EQ(
+//    joined.search_queries().Get(0).result_items().Get(1).category2(),
+//    22);
+//  EXPECT_EQ(
+//    joined.search_queries().Get(0).result_items().Get(1).category3(),
+//    32);
+//});
 
 TEST_CASE(LogJoinTest, SeenResultItems, [] () {
   auto pipeline = mkRef(new SessionPipeline());
@@ -472,7 +479,6 @@ TEST_CASE(LogJoinTest, Test1, [] () {
 //  loadDefaultSchemas(schemas);
 //  SessionProcessor trgt(schemas, false);
 //
-//  trgt.setNormalize([] (Language l, const String& q) { return q; });
 //
 //  trgt.setGetField([] (
 //      const DocID& doc,
