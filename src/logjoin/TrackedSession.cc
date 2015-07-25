@@ -74,21 +74,4 @@ void TrackedSession::insertLogline(
   }
 }
 
-void TrackedSession::debugPrint() const {
-  stx::iputs("* session $0/$1", customer_key, uuid);
-  for (const auto& ev : events) {
-    stx::iputs(
-        "    > event time=$0 evtype=$1 eid=$2 data=$3$4",
-        ev.time,
-        ev.evtype,
-        ev.evid,
-        ev.data.substr(0, 40),
-        String(ev.data.size() > 40 ? "[...]" : ""));
-  }
-}
-
-TrackedSessionContext::TrackedSessionContext(
-    TrackedSession session) :
-    tracked_session(session) {}
-
 } // namespace cm

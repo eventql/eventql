@@ -6,24 +6,11 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-#ifndef _CM_TRACKEDSESSION_H
-#define _CM_TRACKEDSESSION_H
-#include <mutex>
-#include <stdlib.h>
-#include <set>
-#include <string>
-#include <unordered_map>
-#include <vector>
-#include <stx/UnixTime.h>
+#pragma once
+#include <stx/stdtypes.h>
 #include <stx/option.h>
-#include <stx/Currency.h>
-
-#include <inventory/ItemRef.h>
-#include "logjoin/TrackedQuery.h"
-#include "logjoin/TrackedItemVisit.h"
-#include "logjoin/TrackedCartItem.h"
-#include "logjoin/JoinedSession.pb.h"
-#include "common/CustomerConfig.h"
+#include <stx/UnixTime.h>
+#include <stx/uri.h>
 
 using namespace stx;
 
@@ -42,10 +29,6 @@ struct TrackedEvent {
   String data;
 };
 
-/**
- * A tracked session. Make sure to hold the mutex when updating or accessing
- * any of the fields.
- */
 struct TrackedSession {
   std::string customer_key;
   std::string uuid;
@@ -58,21 +41,6 @@ struct TrackedSession {
       const String& evid,
       const URI::ParamList& logline);
 
-  void debugPrint() const;
-
-};
-
-struct TrackedSessionContext : public RefCounted {
-
-  TrackedSessionContext(TrackedSession session);
-
-  TrackedSession tracked_session;
-
-  JoinedSession joined_session;
-
-  RefPtr<CustomerConfigRef> customer_config;
-
 };
 
 } // namespace cm
-#endif

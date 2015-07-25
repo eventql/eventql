@@ -9,8 +9,7 @@
 #pragma once
 #include "stx/stdtypes.h"
 #include "stx/Language.h"
-#include "logjoin/TrackedSession.h"
-#include "logjoin/TrackedQuery.h"
+#include "logjoin/TrackedSessionContext.h"
 
 using namespace stx;
 
