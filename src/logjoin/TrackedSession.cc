@@ -75,7 +75,7 @@ void TrackedSession::insertLogline(
 }
 
 void TrackedSession::debugPrint() const {
-  stx::iputs("* session $0/$1", customer_key, uid);
+  stx::iputs("* session $0/$1", customer_key, uuid);
   for (const auto& ev : events) {
     stx::iputs(
         "    > event time=$0 evtype=$1 eid=$2 data=$3$4",

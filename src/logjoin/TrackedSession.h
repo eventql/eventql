@@ -58,7 +58,7 @@ struct TrackedEvent {
  */
 struct TrackedSession {
   std::string customer_key;
-  std::string uid;
+  std::string uuid;
   Vector<TrackedEvent> events;
   std::vector<std::string> attrs;
 

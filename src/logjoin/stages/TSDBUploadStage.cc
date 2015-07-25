@@ -24,7 +24,7 @@ void TSDBUploadStage::process(
   tsdb::RecordEnvelopeList records;
 
   auto time = ctx->joined_session.last_seen_time() * kMicrosPerSecond;
-  auto record_id = SHA1::compute(ctx->tracked_session.uid);
+  auto record_id = SHA1::compute(ctx->tracked_session.uuid);
   auto stream_key = "web.sessions";
   auto partition_key = tsdb::TimeWindowPartitioner::partitionKeyFor(
       stream_key,
