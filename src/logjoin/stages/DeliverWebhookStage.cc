@@ -8,6 +8,9 @@
  */
 #include "stx/logging.h"
 #include "stx/http/httprequest.h"
+#include "stx/protobuf/msg.h"
+#include "stx/protobuf/JSONEncoder.h"
+#include "stx/protobuf/MessageDecoder.h"
 #include "logjoin/stages/DeliverWebhookStage.h"
 #include "logjoin/common.h"
 
@@ -16,6 +19,9 @@ using namespace stx;
 namespace cm {
 
 void DeliverWebhookStage::process(RefPtr<SessionContext> ctx) {
+  static auto schema = msg::MessageSchema::fromProtobuf(
+      cm::JoinedSession::descriptor());
+
   const auto& logjoin_config = ctx->customer_config->config.logjoin_config();
 
   for (const auto hook : logjoin_config.webhooks()) {
@@ -26,7 +32,11 @@ void DeliverWebhookStage::process(RefPtr<SessionContext> ctx) {
 
     json.beginObject();
     json.addObjectEntry("session");
-    //msg::JSONEncoder::encode(session, &json);
+
+    msg::MessageObject obj;
+    msg::MessageDecoder::decode(*msg::encode(ctx->session), *schema, &obj); // FIXPAUL slooow
+    msg::JSONEncoder::encode(obj, *schema, &json);
+
     json.endObject();
 
     stx::iputs("session json: $0", json_buf.toString());
