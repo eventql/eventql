@@ -23,7 +23,7 @@ void LogJoinExport::exportSession(const JoinedSession& session) {
 
 void LogJoinExport::exportPreferenceSetFeed(const JoinedSession& session) {
   Set<String> visited_products;
-  for (const auto& item_visit : session.item_visits()) {
+  for (const auto& item_visit : session.page_views()) {
     visited_products.emplace(item_visit.item_id());
   }
 

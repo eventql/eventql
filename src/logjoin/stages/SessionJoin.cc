@@ -217,7 +217,7 @@ void SessionJoin::process(RefPtr<SessionContext> ctx) {
   }
 
   for (const auto& iv : page_views) {
-    auto ivobj = ctx->session.add_item_visits();
+    auto ivobj = ctx->session.add_page_views();
 
     ivobj->set_time(iv.time.unixMicros() / kMicrosPerSecond);
     ivobj->set_item_id(iv.item.docID().docid);
