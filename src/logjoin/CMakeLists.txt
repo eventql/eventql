@@ -14,7 +14,6 @@ add_library(logjoin-base OBJECT
     TrackedSession.cc
     SessionContext.cc
     LogJoin.cc
-    LogJoinUpload.cc
     LogJoinExport.cc
     SessionProcessor.cc
     SessionPipeline.cc

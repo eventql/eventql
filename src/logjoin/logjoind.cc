@@ -30,7 +30,6 @@
 #include "stx/mdb/MDB.h"
 #include "logjoin/LogJoin.h"
 #include "logjoin/SessionProcessor.h"
-#include "logjoin/LogJoinUpload.h"
 #include "logjoin/stages/SessionJoin.h"
 #include "logjoin/stages/BuildSessionAttributes.h"
 #include "logjoin/stages/NormalizeQueryStrings.h"
@@ -182,24 +181,6 @@ int main(int argc, const char** argv) {
   Logger::get()->setMinimumLogLevel(
       strToLogLevel(flags.getString("loglevel")));
 
-  /* load schemas */
-  msg::MessageSchemaRepository schemas;
-
-  schemas.registerSchema(
-      msg::MessageSchema::fromProtobuf(JoinedSession::descriptor()));
-
-  schemas.registerSchema(
-      msg::MessageSchema::fromProtobuf(JoinedSearchQuery::descriptor()));
-
-  schemas.registerSchema(
-      msg::MessageSchema::fromProtobuf(JoinedSearchQueryResultItem::descriptor()));
-
-  schemas.registerSchema(
-      msg::MessageSchema::fromProtobuf(JoinedCartItem::descriptor()));
-
-  schemas.registerSchema(
-      msg::MessageSchema::fromProtobuf(JoinedItemVisit::descriptor()));
-
   /* start event loop */
   auto evloop_thread = std::thread([] {
     ev.run();
@@ -240,11 +221,6 @@ int main(int argc, const char** argv) {
       shard.end,
       cm::LogJoinShard::modulo,
       flush_interval);
-
-  stx::logInfo(
-      "cm.logjoin",
-      "Using session schema:\n$0",
-      schemas.getSchema("cm.JoinedSession")->toString());
 
   /* open customer directory */
   CustomerDirectory customer_dir;
