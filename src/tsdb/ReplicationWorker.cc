@@ -13,7 +13,7 @@
 #include <tsdb/ReplicationWorker.h>
 #include <tsdb/Partition.h>
 
-using namespace fnord;
+using namespace stx;
 
 namespace tsdb {
 
@@ -47,7 +47,7 @@ void ReplicationWorker::run() {
     try {
       job.get()->replicate();
     } catch (const std::exception& e) {
-      fnord::logError("fnord.evdb", e, "ReplicationWorker error");
+      stx::logError("fnord.evdb", e, "ReplicationWorker error");
     }
   }
 }

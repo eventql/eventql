@@ -22,7 +22,7 @@
 #include <chartsql/runtime/ASCIITableFormat.h>
 #include <chartsql/runtime/JSONSSEStreamFormat.h>
 
-using namespace fnord;
+using namespace stx;
 
 namespace tsdb {
 
@@ -76,11 +76,11 @@ void TSDBServlet::handleHTTPRequest(
       return;
     }
 
-    res.setStatus(fnord::http::kStatusNotFound);
+    res.setStatus(stx::http::kStatusNotFound);
     res.addBody("not found");
     res_stream->writeResponse(res);
   } catch (const Exception& e) {
-    fnord::logError("tsdb", e, "error while processing HTTP request");
+    stx::logError("tsdb", e, "error while processing HTTP request");
 
     res.setStatus(http::kStatusInternalServerError);
     res.addBody(StringUtil::format("error: $0: $1", e.getTypeName(), e.getMessage()));
@@ -132,7 +132,7 @@ void TSDBServlet::streamPartition(
 
   String tsdb_namespace;
   if (!URI::getParam(params, "namespace", &tsdb_namespace)) {
-    res->setStatus(fnord::http::kStatusBadRequest);
+    res->setStatus(stx::http::kStatusBadRequest);
     res->addBody("missing ?namespace=... parameter");
     res_stream->writeResponse(*res);
     return;
@@ -140,7 +140,7 @@ void TSDBServlet::streamPartition(
 
   String stream_key;
   if (!URI::getParam(params, "stream", &stream_key)) {
-    res->setStatus(fnord::http::kStatusBadRequest);
+    res->setStatus(stx::http::kStatusBadRequest);
     res->addBody("missing ?stream=... parameter");
     res_stream->writeResponse(*res);
     return;
@@ -148,7 +148,7 @@ void TSDBServlet::streamPartition(
 
   String partition_key;
   if (!URI::getParam(params, "partition", &partition_key)) {
-    res->setStatus(fnord::http::kStatusBadRequest);
+    res->setStatus(stx::http::kStatusBadRequest);
     res->addBody("missing ?partition=... parameter");
     res_stream->writeResponse(*res);
     return;
@@ -161,7 +161,7 @@ void TSDBServlet::streamPartition(
     auto parts = StringUtil::split(sample_str, ":");
 
     if (parts.size() != 2) {
-      res->setStatus(fnord::http::kStatusBadRequest);
+      res->setStatus(stx::http::kStatusBadRequest);
       res->addBody("invalid ?sample=... parameter, format is <mod>:<idx>");
       res_stream->writeResponse(*res);
     }
@@ -235,21 +235,21 @@ void TSDBServlet::fetchPartitionInfo(
 
   String tsdb_namespace;
   if (!URI::getParam(params, "namespace", &tsdb_namespace)) {
-    res->setStatus(fnord::http::kStatusBadRequest);
+    res->setStatus(stx::http::kStatusBadRequest);
     res->addBody("missing ?namespace=... parameter");
     return;
   }
 
   String stream_key;
   if (!URI::getParam(params, "stream", &stream_key)) {
-    res->setStatus(fnord::http::kStatusBadRequest);
+    res->setStatus(stx::http::kStatusBadRequest);
     res->addBody("missing ?stream=... parameter");
     return;
   }
 
   String partition_key;
   if (!URI::getParam(params, "partition", &partition_key)) {
-    res->setStatus(fnord::http::kStatusBadRequest);
+    res->setStatus(stx::http::kStatusBadRequest);
     res->addBody("missing ?partition=... parameter");
     return;
   }
@@ -316,7 +316,7 @@ void TSDBServlet::executeSQLStream(
     //    new csql::JSONSSEStreamFormat(&sse_stream));
 
   } catch (const StandardException& e) {
-    fnord::logError("sql", e, "SQL execution failed");
+    stx::logError("sql", e, "SQL execution failed");
 
     Buffer buf;
     json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));

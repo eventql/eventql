@@ -14,7 +14,7 @@
 #include "tsdb/Partition.h"
 #include "tsdb/TimeWindowPartitioner.h"
 
-using namespace fnord;
+using namespace stx;
 using namespace tsdb;
 
 // FIXPAUL rename to TimeWindowPartitionerTest

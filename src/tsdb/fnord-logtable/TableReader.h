@@ -15,7 +15,7 @@
 #include "sstable/sstablereader.h"
 #include "cstable/CSTableReader.h"
 
-namespace fnord {
+namespace stx {
 namespace logtable {
 
 class TableReader : public AbstractTableReader {
@@ -63,6 +63,6 @@ protected:
 };
 
 } // namespace logtable
-} // namespace fnord
+} // namespace stx
 
 #endif

@@ -10,7 +10,7 @@
 #include <fnord-logtable/RemoteTableReader.h>
 #include <stx/protobuf/MessageDecoder.h>
 
-namespace fnord {
+namespace stx {
 namespace logtable {
 
 RemoteTableReader::RemoteTableReader(
@@ -96,6 +96,6 @@ size_t RemoteTableReader::fetchRecords(
 }
 
 } // namespace logtable
-} // namespace fnord
+} // namespace stx
 
 

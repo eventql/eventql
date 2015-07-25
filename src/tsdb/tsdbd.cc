@@ -38,20 +38,20 @@
 #include "tsdb/TSDBServlet.h"
 #include "tsdb/TSDBNodeConfig.pb.h"
 
-using namespace fnord;
+using namespace stx;
 
 std::atomic<bool> shutdown_sig;
-fnord::thread::EventLoop ev;
+stx::thread::EventLoop ev;
 
 int main(int argc, const char** argv) {
-  fnord::Application::init();
-  fnord::Application::logToStderr();
+  stx::Application::init();
+  stx::Application::logToStderr();
 
-  fnord::cli::FlagParser flags;
+  stx::cli::FlagParser flags;
 
   flags.defineFlag(
       "http_port",
-      fnord::cli::FlagParser::T_INTEGER,
+      stx::cli::FlagParser::T_INTEGER,
       false,
       NULL,
       "8000",
@@ -87,7 +87,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "loglevel",
-      fnord::cli::FlagParser::T_STRING,
+      stx::cli::FlagParser::T_STRING,
       false,
       NULL,
       "INFO",
@@ -108,10 +108,10 @@ int main(int argc, const char** argv) {
   auto conf = msg::parseText<tsdb::TSDBNodeConfig>(conf_data);
 
   /* start http server and worker pools */
-  fnord::thread::ThreadPool tpool;
+  stx::thread::ThreadPool tpool;
   http::HTTPConnectionPool http(&ev);
-  fnord::http::HTTPRouter http_router;
-  fnord::http::HTTPServer http_server(&http_router, &ev);
+  stx::http::HTTPRouter http_router;
+  stx::http::HTTPServer http_server(&http_router, &ev);
   http_server.listen(flags.getInt("http_port"));
 
   auto repl_scheme = mkRef(new dproc::FixedReplicationScheme());
@@ -129,7 +129,7 @@ int main(int argc, const char** argv) {
   ev.run();
 
   tsdb_node.stop();
-  fnord::logInfo("tsdb", "Exiting...");
+  stx::logInfo("tsdb", "Exiting...");
 
   exit(0);
 }

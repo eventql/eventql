@@ -15,7 +15,7 @@
 #include "stx/protobuf/MessageEncoder.h"
 #include "tsdb/RecordSet.h"
 
-using namespace fnord;
+using namespace stx;
 using namespace tsdb;
 
 UNIT_TEST(RecordSetTest);

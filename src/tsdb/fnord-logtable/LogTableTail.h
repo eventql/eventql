@@ -17,7 +17,7 @@
 #include <stx/protobuf/MessageObject.h>
 #include <fnord-logtable/TableReader.h>
 
-namespace fnord {
+namespace stx {
 namespace logtable {
 
 struct LogTableTailOffset {
@@ -54,6 +54,6 @@ protected:
 };
 
 } // namespace logtable
-} // namespace fnord
+} // namespace stx
 
 #endif

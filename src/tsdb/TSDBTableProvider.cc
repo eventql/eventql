@@ -13,7 +13,7 @@
 #include <chartsql/CSTableScan.h>
 #include <chartsql/runtime/EmptyTable.h>
 
-using namespace fnord;
+using namespace stx;
 
 namespace tsdb {
 

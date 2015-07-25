@@ -15,7 +15,7 @@
 #include <fnord-afx/ArtifactIndex.h>
 #include <stx/protobuf/MessageSchema.h>
 
-namespace fnord {
+namespace stx {
 namespace logtable {
 
 class TableRepository {
@@ -48,6 +48,6 @@ protected:
 };
 
 } // namespace logtable
-} // namespace fnord
+} // namespace stx
 
 #endif

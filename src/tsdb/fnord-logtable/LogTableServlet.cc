@@ -13,14 +13,14 @@
 #include "stx/protobuf/MessageEncoder.h"
 #include "stx/protobuf/MessagePrinter.h"
 
-namespace fnord {
+namespace stx {
 namespace logtable {
 
 LogTableServlet::LogTableServlet(TableRepository* tables) : tables_(tables) {}
 
 void LogTableServlet::handleHTTPRequest(
-    fnord::http::HTTPRequest* req,
-    fnord::http::HTTPResponse* res) {
+    stx::http::HTTPRequest* req,
+    stx::http::HTTPResponse* res) {
   URI uri(req->uri());
 
   res->addHeader("Access-Control-Allow-Origin", "*");
@@ -62,7 +62,7 @@ void LogTableServlet::handleHTTPRequest(
       return tableSnapshot(req, res, &uri);
     }
 
-    res->setStatus(fnord::http::kStatusNotFound);
+    res->setStatus(stx::http::kStatusNotFound);
     res->addBody("not found");
   } catch (const Exception& e) {
     res->setStatus(http::kStatusInternalServerError);
@@ -78,7 +78,7 @@ void LogTableServlet::insertRecord(
 
   String table;
   if (!URI::getParam(params, "table", &table)) {
-    res->setStatus(fnord::http::kStatusBadRequest);
+    res->setStatus(stx::http::kStatusBadRequest);
     res->addBody("missing ?table=... parameter");
     return;
   }
@@ -103,7 +103,7 @@ void LogTableServlet::insertRecordsBatch(
 
   String table;
   if (!URI::getParam(params, "table", &table)) {
-    res->setStatus(fnord::http::kStatusBadRequest);
+    res->setStatus(stx::http::kStatusBadRequest);
     res->addBody("missing ?table=... parameter");
     return;
   }
@@ -135,7 +135,7 @@ void LogTableServlet::commitTable(
 
   String table;
   if (!URI::getParam(params, "table", &table)) {
-    res->setStatus(fnord::http::kStatusBadRequest);
+    res->setStatus(stx::http::kStatusBadRequest);
     res->addBody("missing ?table=... parameter");
     return;
   }
@@ -155,7 +155,7 @@ void LogTableServlet::mergeTable(
 
   String table;
   if (!URI::getParam(params, "table", &table)) {
-    res->setStatus(fnord::http::kStatusBadRequest);
+    res->setStatus(stx::http::kStatusBadRequest);
     res->addBody("missing ?table=... parameter");
     return;
   }
@@ -174,7 +174,7 @@ void LogTableServlet::gcTable(
 
   String table;
   if (!URI::getParam(params, "table", &table)) {
-    res->setStatus(fnord::http::kStatusBadRequest);
+    res->setStatus(stx::http::kStatusBadRequest);
     res->addBody("missing ?table=... parameter");
     return;
   }
@@ -193,7 +193,7 @@ void LogTableServlet::tableInfo(
 
   String table;
   if (!URI::getParam(params, "table", &table)) {
-    res->setStatus(fnord::http::kStatusBadRequest);
+    res->setStatus(stx::http::kStatusBadRequest);
     res->addBody("missing ?table=... parameter");
     return;
   }
@@ -337,7 +337,7 @@ void LogTableServlet::tableSnapshot(
 
   String table;
   if (!URI::getParam(params, "table", &table)) {
-    res->setStatus(fnord::http::kStatusBadRequest);
+    res->setStatus(stx::http::kStatusBadRequest);
     res->addBody("missing ?table=... parameter");
     return;
   }
@@ -360,14 +360,14 @@ void LogTableServlet::fetchRecord(
 
   String table;
   if (!URI::getParam(params, "table", &table)) {
-    res->setStatus(fnord::http::kStatusBadRequest);
+    res->setStatus(stx::http::kStatusBadRequest);
     res->addBody("missing ?table=... parameter");
     return;
   }
 
   String replica;
   if (!URI::getParam(params, "replica", &replica)) {
-    res->setStatus(fnord::http::kStatusBadRequest);
+    res->setStatus(stx::http::kStatusBadRequest);
     res->addBody("missing ?replica=... parameter");
     return;
   }
@@ -377,7 +377,7 @@ void LogTableServlet::fetchRecord(
   if (URI::getParam(params, "seq", &seq_str)) {
     seq = std::stoull(seq_str);
   } else {
-    res->setStatus(fnord::http::kStatusBadRequest);
+    res->setStatus(stx::http::kStatusBadRequest);
     res->addBody("missing ?seq=... parameter");
     return;
   }
@@ -426,14 +426,14 @@ void LogTableServlet::fetchRecordsBatch(
 
   String table;
   if (!URI::getParam(params, "table", &table)) {
-    res->setStatus(fnord::http::kStatusBadRequest);
+    res->setStatus(stx::http::kStatusBadRequest);
     res->addBody("missing ?table=... parameter");
     return;
   }
 
   String replica;
   if (!URI::getParam(params, "replica", &replica)) {
-    res->setStatus(fnord::http::kStatusBadRequest);
+    res->setStatus(stx::http::kStatusBadRequest);
     res->addBody("missing ?replica=... parameter");
     return;
   }
@@ -443,7 +443,7 @@ void LogTableServlet::fetchRecordsBatch(
   if (URI::getParam(params, "seq", &seq_str)) {
     seq = std::stoull(seq_str);
   } else {
-    res->setStatus(fnord::http::kStatusBadRequest);
+    res->setStatus(stx::http::kStatusBadRequest);
     res->addBody("missing ?seq=... parameter");
     return;
   }
@@ -453,7 +453,7 @@ void LogTableServlet::fetchRecordsBatch(
   if (URI::getParam(params, "limit", &limit_str)) {
     limit = std::stoull(limit_str);
   } else {
-    res->setStatus(fnord::http::kStatusBadRequest);
+    res->setStatus(stx::http::kStatusBadRequest);
     res->addBody("missing ?limit=... parameter");
     return;
   }

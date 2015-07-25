@@ -9,7 +9,7 @@
  */
 #include <tsdb/Table.h>
 
-using namespace fnord;
+using namespace stx;
 
 namespace tsdb {
 

@@ -15,7 +15,7 @@
 #include <tsdb/TSDBTableScanlet.h>
 #include <tsdb/TSDBClient.h>
 
-using namespace fnord;
+using namespace stx;
 
 namespace tsdb {
 

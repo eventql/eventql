@@ -14,11 +14,11 @@
 #include <tsdb/TSDBNode.h>
 #include <stx/http/HTTPSSEStream.h>
 
-using namespace fnord;
+using namespace stx;
 
 namespace tsdb {
 
-class TSDBServlet : public fnord::http::StreamingHTTPService {
+class TSDBServlet : public stx::http::StreamingHTTPService {
 public:
 
   TSDBServlet(TSDBNode* node);

@@ -16,7 +16,7 @@
 #include "stx/http/httprequest.h"
 #include "stx/http/httpconnectionpool.h"
 
-namespace fnord {
+namespace stx {
 namespace logtable {
 
 class TableReplication {
@@ -48,6 +48,6 @@ protected:
 };
 
 } // namespace logtable
-} // namespace fnord
+} // namespace stx
 
 #endif

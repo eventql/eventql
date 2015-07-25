@@ -18,7 +18,7 @@
 #include <cstable/CSTableBuilder.h>
 #include <sstable/sstablereader.h>
 
-using namespace fnord;
+using namespace stx;
 
 namespace tsdb {
 
@@ -29,7 +29,7 @@ RefPtr<Partition> Partition::create(
     RefPtr<Table> table,
     TSDBNodeRef* node) {
 
-  fnord::logDebug(
+  stx::logDebug(
       "tsdb",
       "Creating new partition; stream='$0' partition='$1'",
       stream_key,
@@ -51,7 +51,7 @@ RefPtr<Partition> Partition::reopen(
     RefPtr<Table> table,
     TSDBNodeRef* node) {
 
-  fnord::logDebug(
+  stx::logDebug(
       "tsdb",
       "Loading partition; stream='$0' partition='$1'",
       state.stream_key,
@@ -114,7 +114,7 @@ void Partition::insertRecord(
     const Buffer& record) {
   std::unique_lock<std::mutex> lk(mutex_);
 
-  fnord::logTrace(
+  stx::logTrace(
       "tsdb",
       "Insert 1 record into stream='$0' partition='$1'",
       stream_key_,
@@ -132,7 +132,7 @@ void Partition::insertRecord(
 void Partition::insertRecords(const Vector<RecordRef>& records) {
   std::unique_lock<std::mutex> lk(mutex_);
 
-  fnord::logTrace(
+  stx::logTrace(
       "tsdb",
       "Insert $0 records into stream='$1'",
       records.size(),
@@ -165,7 +165,7 @@ void Partition::compact() {
   last_compaction_ = UnixTime::now();
   lk.unlock();
 
-  fnord::logDebug(
+  stx::logDebug(
       "tsdb",
       "Compacting partition; stream='$0' partition='$1'",
       stream_key_,
@@ -232,7 +232,7 @@ void Partition::replicate() {
       } catch (const std::exception& e) {
         has_error = true;
 
-        fnord::logError(
+        stx::logError(
           "tsdb.replication",
           e,
           "Error while replicating stream '$0' to '$1'",
@@ -294,7 +294,7 @@ uint64_t Partition::replicateTo(const String& addr, uint64_t offset) {
     batch.append(record_data, record_size);
   });
 
-  fnord::logDebug(
+  stx::logDebug(
       "tsdb.replication",
       "Replicating to $0; stream='$1' partition='$2' offset=$3",
       addr,
@@ -356,7 +356,7 @@ void Partition::commitState() {
 void Partition::buildCSTable(
     const Vector<String>& input_files,
     const String& output_file) {
-  fnord::logDebug(
+  stx::logDebug(
       "tsdb",
       "Building cstable; stream='$0' partition='$1' output_file='$2'",
       stream_key_,

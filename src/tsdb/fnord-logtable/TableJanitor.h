@@ -13,7 +13,7 @@
 #include <stx/stdtypes.h>
 #include <fnord-logtable/TableRepository.h>
 
-namespace fnord {
+namespace stx {
 namespace logtable {
 
 class TableJanitor {
@@ -34,6 +34,6 @@ protected:
 };
 
 } // namespace logtable
-} // namespace fnord
+} // namespace stx
 
 #endif

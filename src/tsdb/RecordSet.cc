@@ -15,7 +15,7 @@
 #include <sstable/sstablereader.h>
 #include <tsdb/RecordSet.h>
 
-using namespace fnord;
+using namespace stx;
 
 namespace tsdb {
 

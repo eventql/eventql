@@ -12,7 +12,7 @@
 #include <tsdb/TSDBNode.h>
 #include <sstable/sstablereader.h>
 
-using namespace fnord;
+using namespace stx;
 
 namespace tsdb {
 

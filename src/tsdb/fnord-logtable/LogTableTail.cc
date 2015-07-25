@@ -10,7 +10,7 @@
 #include <stx/logging.h>
 #include <fnord-logtable/LogTableTail.h>
 
-namespace fnord {
+namespace stx {
 namespace logtable {
 
 void LogTableTailCursor::encode(util::BinaryMessageWriter* writer) const {
@@ -123,5 +123,5 @@ String LogTableTailCursor::debugPrint() const {
 }
 
 } // namespace logtable
-} // namespace fnord
+} // namespace stx
 

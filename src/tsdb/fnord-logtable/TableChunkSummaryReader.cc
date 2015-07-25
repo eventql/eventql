@@ -10,7 +10,7 @@
 #include <fnord-logtable/TableChunkSummaryReader.h>
 #include <stx/util/binarymessagereader.h>
 
-namespace fnord {
+namespace stx {
 namespace logtable {
 
 TableChunkSummaryReader::TableChunkSummaryReader(

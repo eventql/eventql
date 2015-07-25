@@ -14,7 +14,7 @@
 #include <stx/duration.h>
 #include <stx/SHA1.h>
 
-using namespace fnord;
+using namespace stx;
 
 namespace tsdb {
 

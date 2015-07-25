@@ -15,7 +15,7 @@
 #include <stx/util/binarymessagereader.h>
 #include <stx/util/binarymessagewriter.h>
 
-using namespace fnord;
+using namespace stx;
 
 namespace tsdb {
 class RecordSet;

@@ -16,7 +16,7 @@
 #include <stx/protobuf/MessageObject.h>
 #include <fnord-logtable/TableArena.h>
 
-namespace fnord {
+namespace stx {
 namespace logtable {
 
 struct TableChunkRef {
@@ -53,6 +53,6 @@ struct TableSnapshot : public RefCounted {
 };
 
 } // namespace logtable
-} // namespace fnord
+} // namespace stx
 
 #endif

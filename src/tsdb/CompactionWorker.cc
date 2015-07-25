@@ -13,7 +13,7 @@
 #include <tsdb/CompactionWorker.h>
 #include <tsdb/Partition.h>
 
-using namespace fnord;
+using namespace stx;
 
 namespace tsdb {
 
@@ -47,7 +47,7 @@ void CompactionWorker::run() {
     try {
       job.get()->compact();
     } catch (const std::exception& e) {
-      fnord::logError("fnord.evdb", e, "CompactionWorker error");
+      stx::logError("fnord.evdb", e, "CompactionWorker error");
     }
   }
 }

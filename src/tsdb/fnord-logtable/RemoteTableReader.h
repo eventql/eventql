@@ -14,7 +14,7 @@
 #include <stx/http/httpconnectionpool.h>
 #include <fnord-logtable/AbstractTableReader.h>
 
-namespace fnord {
+namespace stx {
 namespace logtable {
 
 class RemoteTableReader : public AbstractTableReader{
@@ -45,7 +45,7 @@ protected:
 };
 
 } // namespace logtable
-} // namespace fnord
+} // namespace stx
 
 #endif
 
