@@ -18,11 +18,14 @@
 #include "stx/stdtypes.h"
 #include "brokerd/RemoteFeed.h"
 #include "brokerd/RemoteFeedWriter.h"
+#include "brokerd/RemoteFeedFactory.h"
+#include "brokerd/RemoteFeedReader.h"
 #include "stx/rpc/RPC.h"
 #include "stx/rpc/RPCClient.h"
 #include "stx/thread/taskscheduler.h"
 #include "stx/mdb/MDB.h"
 #include "stx/stats/stats.h"
+#include "stx/thread/eventloop.h"
 #include <inventory/ItemRef.h>
 #include "logjoin/TrackedSession.h"
 #include "logjoin/TrackedQuery.h"
@@ -41,7 +44,28 @@ public:
   LogJoin(
       LogJoinShard shard,
       bool dry_run,
-      SessionProcessor* target);
+      RefPtr<mdb::MDB> sessdb,
+      SessionProcessor* target,
+      thread::EventLoop* evloop);
+
+  void processClickstream(
+      const HashMap<String, URI>& input_feeds,
+      size_t batch_size,
+      size_t buffer_size,
+      Duration flush_interval);
+
+  void shutdown();
+
+  size_t numSessions() const;
+  size_t cacheSize() const;
+
+  void exportStats(const std::string& path_prefix);
+
+protected:
+
+  void addPixelParamID(const String& param, uint32_t id);
+  uint32_t getPixelParamID(const String& param) const;
+  const String& getPixelParamName(uint32_t id) const;
 
   void insertLogline(
       const std::string& log_line,
@@ -52,40 +76,6 @@ public:
       const stx::UnixTime& time,
       const std::string& log_line,
       mdb::MDBTransaction* txn);
-
-  size_t numSessions() const;
-  size_t cacheSize() const;
-
-  void flush(mdb::MDBTransaction* txn, UnixTime stream_time);
-
-  void importTimeoutList(mdb::MDBTransaction* txn);
-
-  void exportStats(const std::string& path_prefix);
-
-protected:
-
-  void addPixelParamID(const String& param, uint32_t id);
-  uint32_t getPixelParamID(const String& param) const;
-  const String& getPixelParamName(uint32_t id) const;
-
-  //void insertQuery(
-  //    const std::string& customer_key,
-  //    const std::string& uid,
-  //    const TrackedQuery& query,
-  //    mdb::MDBTransaction* txn);
-
-  //void insertItemVisit(
-  //    const std::string& customer_key,
-  //    const std::string& uid,
-  //    const TrackedItemVisit& visit,
-  //    mdb::MDBTransaction* txn);
-
-  //void insertCartVisit(
-  //    const std::string& customer_key,
-  //    const std::string& uid,
-  //    const Vector<TrackedCartItem>& cart_items,
-  //    const UnixTime& time,
-  //    mdb::MDBTransaction* txn);
 
   void appendToSession(
       const std::string& customer_key,
@@ -96,18 +86,25 @@ protected:
       const Vector<Pair<String, String>>& logline,
       mdb::MDBTransaction* txn);
 
+  void flush(mdb::MDBTransaction* txn, UnixTime stream_time);
+
   void flushSession(
       const std::string uid,
       UnixTime stream_time,
       mdb::MDBTransaction* txn);
 
-  //void onSession(
-  //    mdb::MDBTransaction* txn,
-  //    TrackedSession& session);
+  void importTimeoutList(mdb::MDBTransaction* txn);
 
-  bool dry_run_;
   LogJoinShard shard_;
+  bool dry_run_;
+  RefPtr<mdb::MDB> sessdb_;
   SessionProcessor* target_;
+
+  std::atomic<bool> shutdown_;
+
+  HTTPRPCClient rpc_client_;
+  feeds::RemoteFeedReader feed_reader_;
+
   HashMap<String, UnixTime> sessions_flush_times_;
   HashMap<String, TrackedSession> session_cache_;
 
@@ -119,6 +116,10 @@ protected:
   stx::stats::Counter<uint64_t> stat_joined_sessions_;
   stx::stats::Counter<uint64_t> stat_joined_queries_;
   stx::stats::Counter<uint64_t> stat_joined_item_visits_;
+  stx::stats::Counter<uint64_t> stat_stream_time_low;
+  stx::stats::Counter<uint64_t> stat_stream_time_high;
+  stx::stats::Counter<uint64_t> stat_active_sessions;
+  stx::stats::Counter<uint64_t> stat_dbsize;
 
   Random rnd_;
 };
