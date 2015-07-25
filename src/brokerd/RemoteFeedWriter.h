@@ -15,7 +15,7 @@
 #include "stx/rpc/RPCClient.h"
 #include "brokerd/FeedEntry.h"
 
-namespace fnord {
+namespace stx {
 namespace feeds {
 
 class RemoteFeedWriter : public RefCounted {
@@ -53,7 +53,7 @@ protected:
   void flushBuffer();
   void flushBuffer(RefPtr<TargetFeed> feed);
 
-  fnord::RPCClient* rpc_client_;
+  stx::RPCClient* rpc_client_;
   size_t max_buffer_size_;
 
   std::mutex write_queue_mutex_;
@@ -63,10 +63,10 @@ protected:
   Vector<RefPtr<TargetFeed>> target_feeds_;
   size_t sequence_;
 
-  fnord::stats::Counter<uint64_t> stat_entries_written_total_;
-  fnord::stats::Counter<uint64_t> stat_entries_written_success_;
-  fnord::stats::Counter<uint64_t> stat_entries_written_error_;
-  fnord::stats::Counter<uint64_t> stat_entries_written_retry_;
+  stx::stats::Counter<uint64_t> stat_entries_written_total_;
+  stx::stats::Counter<uint64_t> stat_entries_written_success_;
+  stx::stats::Counter<uint64_t> stat_entries_written_error_;
+  stx::stats::Counter<uint64_t> stat_entries_written_retry_;
 
   std::atomic<size_t> queue_length_;
 };

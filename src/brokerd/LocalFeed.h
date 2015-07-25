@@ -21,7 +21,7 @@
 #include "sstable/sstablewriter.h"
 #include "stx/stats/counter.h"
 
-namespace fnord {
+namespace stx {
 namespace feeds {
 class FeedService;
 
@@ -81,5 +81,5 @@ protected:
 
 
 } // namespace logstream_service
-} // namespace fnord
+} // namespace stx
 #endif

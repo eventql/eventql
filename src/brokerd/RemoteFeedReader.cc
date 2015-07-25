@@ -12,7 +12,7 @@
 #include "stx/json/JSONRPCCodec.h"
 #include "brokerd/FeedService.h"
 
-namespace fnord {
+namespace stx {
 namespace feeds {
 
 // TODO: retry timeout after error?
@@ -143,7 +143,7 @@ void RemoteFeedReader::fillBuffers() {
     source->is_fetching = true;
 
 #ifndef FNORD_NOTRACE
-    fnord::logTrace(
+    stx::logTrace(
         "fnord.feeds.remotefeedreader",
         "Fetching from feed @$3\n    name=$0\n    url=$1\n    offset=$2",
         source->feed_name,
@@ -152,7 +152,7 @@ void RemoteFeedReader::fillBuffers() {
         (void*) source.get());
 #endif
 
-    auto rpc = fnord::mkRPC<json::JSONRPCCodec>(
+    auto rpc = stx::mkRPC<json::JSONRPCCodec>(
         &FeedService::fetch,
         source->feed_name,
         source->next_offset,
@@ -168,7 +168,7 @@ void RemoteFeedReader::fillBuffers() {
           try {
             entry.time = time_backfill_fn_(entry);
           } catch (const Exception& e) {
-            fnord::logError(
+            stx::logError(
                 "fnord.feeds.remotefeedreader",
                 e,
                 "time backfill function crashed");
@@ -185,7 +185,7 @@ void RemoteFeedReader::fillBuffers() {
       }
 
 #ifndef FNORD_NOTRACE
-    fnord::logTrace(
+    stx::logTrace(
         "fnord.feeds.remotefeedreader",
         "Fetch from feed $0 returned $1 entries, new offset: $2",
         (void*) source.get(),

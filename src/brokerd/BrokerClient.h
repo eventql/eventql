@@ -14,7 +14,7 @@
 #include <brokerd/Message.pb.h>
 #include <brokerd/TopicCursor.pb.h>
 
-namespace fnord {
+namespace stx {
 namespace feeds {
 
 class BrokerClient {

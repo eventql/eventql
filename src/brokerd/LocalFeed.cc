@@ -17,7 +17,7 @@
 #include "stx/stats/stats.h"
 #include "stx/wallclock.h"
 
-namespace fnord {
+namespace stx {
 namespace feeds {
 
 LogStream::LogStream(
@@ -74,7 +74,7 @@ void LogStream::fetch(
 #endif
 
 #ifndef FNORD_NOTRACE
-  fnord::logTrace(
+  stx::logTrace(
       "fnord.feeds.localfeed",
       "request id=$0 feed=$1 offset=$2 batch_size=$3",
       request_id,
@@ -89,7 +89,7 @@ void LogStream::fetch(
 
 #ifndef FNORD_NOTRACE
     if (tables_.empty()) {
-      fnord::logTrace(
+      stx::logTrace(
           "fnord.feeds.localfeed",
           "request id=$0: feed has no tables",
           request_id);
@@ -115,7 +115,7 @@ void LogStream::fetch(
   }
 
 #ifndef FNORD_NOTRACE
-  fnord::logTrace(
+  stx::logTrace(
       "fnord.feeds.localfeed",
       "request id=$0: choosing table: $1",
       request_id,
@@ -140,7 +140,7 @@ void LogStream::fetch(
 
   if (offset > 0) {
 #ifndef FNORD_NOTRACE
-    fnord::logTrace(
+    stx::logTrace(
         "fnord.feeds.localfeed",
         "request id=$0: seeking to table_offset=$1 logical_offset=$2",
         request_id,
@@ -155,7 +155,7 @@ void LogStream::fetch(
 
   for (int i = 0; i < batch_size; i++) {
 #ifndef FNORD_NOTRACE
-    fnord::logTrace(
+    stx::logTrace(
         "fnord.feeds.localfeed",
         "request id=$0: reading entry at table_offset=$1 "
             "logical_offset=$2",
@@ -208,7 +208,7 @@ std::shared_ptr<LogStream::TableRef> LogStream::createTable() {
   TableHeader tbl_header;
   tbl_header.offset = table->offset;
   tbl_header.stream_name = name_;
-  auto tbl_header_json = fnord::json::toJSONString(tbl_header);
+  auto tbl_header_json = stx::json::toJSONString(tbl_header);
 
   table->writer = sstable::SSTableWriter::create(
       table->file_path,
@@ -223,7 +223,7 @@ void LogStream::reopenTable(const std::string& file_path) {
   auto file = File::openFile(file_path, File::O_READ);
   sstable::SSTableReader reader(std::move(file));
 
-  auto table_header = fnord::json::fromJSON<LogStream::TableHeader>(
+  auto table_header = stx::json::fromJSON<LogStream::TableHeader>(
       reader.readHeader());
 
   auto tbl = new TableRef();
@@ -254,5 +254,5 @@ size_t LogStream::getTableBodySize(const std::string& file_path) {
 }
 
 } // namespace logstream_service
-} // namespace fnord
+} // namespace stx
 

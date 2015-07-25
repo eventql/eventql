@@ -12,7 +12,7 @@
 #include "brokerd/FeedService.h"
 #include "brokerd/RemoteFeedWriter.h"
 
-namespace fnord {
+namespace stx {
 namespace feeds {
 
 RemoteFeedWriter::RemoteFeedWriter(
@@ -76,7 +76,7 @@ void RemoteFeedWriter::flushBuffer() {
 
 void RemoteFeedWriter::flushBuffer(RefPtr<TargetFeed> target) {
 #ifndef FNORD_NOTRACE
-    fnord::logTrace(
+    stx::logTrace(
         "fnord.feeds.remotefeedwriter",
         "Trying to write to feed name=$0 url=$1",
         target->feed_name,
@@ -92,7 +92,7 @@ void RemoteFeedWriter::flushBuffer(RefPtr<TargetFeed> target) {
   write_queue_.pop_back();
   lk.unlock();
 
-  auto rpc = fnord::mkRPC<json::JSONRPCCodec>(
+  auto rpc = stx::mkRPC<json::JSONRPCCodec>(
       &FeedService::append,
       target->feed_name,
       entry);
@@ -111,7 +111,7 @@ void RemoteFeedWriter::flushBuffer(RefPtr<TargetFeed> target) {
     target->cur_requests--;
     stat_entries_written_error_.incr(1);
 
-    fnord::logError(
+    stx::logError(
         "fnord.feeds.remotefeedwriter",
         "Writing to feed feed name=$0 url=$1 failed: $2",
         target->feed_name,

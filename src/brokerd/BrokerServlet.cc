@@ -16,14 +16,14 @@
 #include <stx/util/Base64.h>
 #include "brokerd/BrokerServlet.h"
 
-namespace fnord {
+namespace stx {
 namespace feeds {
 
 BrokerServlet::BrokerServlet(FeedService* service) : service_(service) {}
 
 void BrokerServlet::handleHTTPRequest(
-    fnord::http::HTTPRequest* req,
-    fnord::http::HTTPResponse* res) {
+    stx::http::HTTPRequest* req,
+    stx::http::HTTPResponse* res) {
   URI uri(req->uri());
 
   res->addHeader("Access-Control-Allow-Origin", "*");
@@ -41,7 +41,7 @@ void BrokerServlet::handleHTTPRequest(
       return getHostID(req, res, &uri);
     }
 
-    res->setStatus(fnord::http::kStatusNotFound);
+    res->setStatus(stx::http::kStatusNotFound);
     res->addBody("not found");
   } catch (const Exception& e) {
     res->setStatus(http::kStatusInternalServerError);
@@ -57,13 +57,13 @@ void BrokerServlet::insertRecord(
 
   String topic;
   if (!URI::getParam(params, "topic", &topic)) {
-    res->setStatus(fnord::http::kStatusBadRequest);
+    res->setStatus(stx::http::kStatusBadRequest);
     res->addBody("error: missing ?topic=... parameter");
     return;
   }
 
   if (req->body().size() == 0) {
-    res->setStatus(fnord::http::kStatusBadRequest);
+    res->setStatus(stx::http::kStatusBadRequest);
     res->addBody("error: empty record (body_size == 0)");
   }
 
@@ -81,21 +81,21 @@ void BrokerServlet::fetchRecords(
 
   String topic;
   if (!URI::getParam(params, "topic", &topic)) {
-    res->setStatus(fnord::http::kStatusBadRequest);
+    res->setStatus(stx::http::kStatusBadRequest);
     res->addBody("error: missing ?topic=... parameter");
     return;
   }
 
   String offset;
   if (!URI::getParam(params, "offset", &offset)) {
-    res->setStatus(fnord::http::kStatusBadRequest);
+    res->setStatus(stx::http::kStatusBadRequest);
     res->addBody("error: missing ?offset=... parameter");
     return;
   }
 
   String limit;
   if (!URI::getParam(params, "limit", &limit)) {
-    res->setStatus(fnord::http::kStatusBadRequest);
+    res->setStatus(stx::http::kStatusBadRequest);
     res->addBody("error: missing ?limit=... parameter");
     return;
   }

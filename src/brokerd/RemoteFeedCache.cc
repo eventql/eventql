@@ -9,7 +9,7 @@
  */
 #include "brokerd/RemoteFeed.h"
 
-namespace fnord {
+namespace stx {
 namespace comm {
 
 Feed::Feed(const std::string& name) : name_(name) {}

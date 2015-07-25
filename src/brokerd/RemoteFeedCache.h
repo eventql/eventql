@@ -20,7 +20,7 @@
 #include "stx/stdtypes.h"
 #include "stx/thread/future.h"
 
-namespace fnord {
+namespace stx {
 namespace comm {
 
 class Feed {

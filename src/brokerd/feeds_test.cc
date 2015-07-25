@@ -22,17 +22,17 @@ UNIT_TEST(FeedServiceTest);
 
 TEST_CASE(FeedServiceTest, IntegrationTest, [] () {
   auto log_path = "/tmp/__fnord_logstream_service_test";
-  fnord::FileUtil::mkdir_p(log_path);
-  fnord::FileRepository repo(log_path);
+  stx::FileUtil::mkdir_p(log_path);
+  stx::FileRepository repo(log_path);
   repo.deleteAllFiles();
 
-  auto msggen = [] (int i) { return fnord::StringUtil::format("msg$0", i); };
+  auto msggen = [] (int i) { return stx::StringUtil::format("msg$0", i); };
 
   const int kPerRun = 1000;
   const int kNumRuns = 10;
   const int kBatchSize = 23;
 
-  auto checkall = [&] (fnord::feeds::FeedService* ls, int i) {
+  auto checkall = [&] (stx::feeds::FeedService* ls, int i) {
     int n = 0;
     for (size_t offset = 0; ;) {
       auto entries = ls->fetch("teststream", offset, kBatchSize);
@@ -53,8 +53,8 @@ TEST_CASE(FeedServiceTest, IntegrationTest, [] () {
 
   int i = 0;
   for (int r = 0; r < kNumRuns; ++r) {
-    fnord::feeds::FeedService ls_service{
-        fnord::FileRepository(log_path)};
+    stx::feeds::FeedService ls_service{
+        stx::FileRepository(log_path)};
 
     if (r > 0) {
       checkall(&ls_service, i);

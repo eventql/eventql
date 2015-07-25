@@ -18,7 +18,7 @@
 #include "stx/rpc/RPC.h"
 #include "brokerd/RemoteFeed.h"
 
-namespace fnord {
+namespace stx {
 namespace feeds {
 
 class RemoteFeedFactory {

@@ -34,17 +34,17 @@
 #include "CustomerNamespace.h"
 #include "logjoin/LogJoin.h"
 
-using namespace fnord;
+using namespace stx;
 
 int main(int argc, const char** argv) {
-  fnord::Application::init();
-  fnord::Application::logToStderr();
+  stx::Application::init();
+  stx::Application::logToStderr();
 
-  fnord::cli::FlagParser flags;
+  stx::cli::FlagParser flags;
 
   flags.defineFlag(
       "input",
-      fnord::cli::FlagParser::T_STRING,
+      stx::cli::FlagParser::T_STRING,
       true,
       "i",
       NULL,
@@ -53,7 +53,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "separator",
-      fnord::cli::FlagParser::T_STRING,
+      stx::cli::FlagParser::T_STRING,
       false,
       "s",
       "\n",
@@ -62,7 +62,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "concurrency",
-      fnord::cli::FlagParser::T_INTEGER,
+      stx::cli::FlagParser::T_INTEGER,
       false,
       "c",
       "10",
@@ -71,7 +71,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "loglevel",
-      fnord::cli::FlagParser::T_STRING,
+      stx::cli::FlagParser::T_STRING,
       false,
       NULL,
       "CRITICAL",
@@ -101,7 +101,7 @@ int main(int argc, const char** argv) {
   }
 
   /* start event loop */
-  fnord::thread::EventLoop ev;
+  stx::thread::EventLoop ev;
 
   auto evloop_thread = std::thread([&ev] {
     ev.run();

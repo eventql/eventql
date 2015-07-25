@@ -34,7 +34,7 @@
 #include "CustomerNamespace.h"
 #include "logjoin/LogJoin.h"
 
-using namespace fnord;
+using namespace stx;
 
 struct FeedChunkInfo {
   uint64_t generation;
@@ -54,14 +54,14 @@ struct FeedChunkInfo {
 };
 
 int main(int argc, const char** argv) {
-  fnord::Application::init();
-  fnord::Application::logToStderr();
+  stx::Application::init();
+  stx::Application::logToStderr();
 
-  fnord::cli::FlagParser flags;
+  stx::cli::FlagParser flags;
 
   flags.defineFlag(
       "output_path",
-      fnord::cli::FlagParser::T_STRING,
+      stx::cli::FlagParser::T_STRING,
       false,
       NULL,
       NULL,
@@ -70,7 +70,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "output_prefix",
-      fnord::cli::FlagParser::T_STRING,
+      stx::cli::FlagParser::T_STRING,
       false,
       NULL,
       NULL,
@@ -79,7 +79,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "batch_size",
-      fnord::cli::FlagParser::T_INTEGER,
+      stx::cli::FlagParser::T_INTEGER,
       false,
       NULL,
       "2048",
@@ -88,7 +88,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "buffer_size",
-      fnord::cli::FlagParser::T_INTEGER,
+      stx::cli::FlagParser::T_INTEGER,
       false,
       NULL,
       "8192",
@@ -97,7 +97,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "generation_window_secs",
-      fnord::cli::FlagParser::T_INTEGER,
+      stx::cli::FlagParser::T_INTEGER,
       false,
       NULL,
       "14400",
@@ -106,7 +106,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "generation_delay_secs",
-      fnord::cli::FlagParser::T_INTEGER,
+      stx::cli::FlagParser::T_INTEGER,
       false,
       NULL,
       "3600",
@@ -115,7 +115,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "loglevel",
-      fnord::cli::FlagParser::T_STRING,
+      stx::cli::FlagParser::T_STRING,
       false,
       NULL,
       "INFO",
@@ -128,7 +128,7 @@ int main(int argc, const char** argv) {
       strToLogLevel(flags.getString("loglevel")));
 
   /* start event loop */
-  fnord::thread::EventLoop ev;
+  stx::thread::EventLoop ev;
 
   auto evloop_thread = std::thread([&ev] {
     ev.run();
@@ -170,7 +170,7 @@ int main(int argc, const char** argv) {
         File::openFile(filepath, File::O_READ));
 
     if (reader.bodySize() == 0) {
-        fnord::logWarning(
+        stx::logWarning(
             "fnord.feedexport",
             "Deleting unfinished sstable $0",
             filepath);
@@ -296,7 +296,7 @@ int main(int argc, const char** argv) {
       if (iter == generations.end()) {
         if (max_gen >= entry_gen) {
           if (finished_generations.count(entry_gen) == 0) {
-            fnord::logWarning(
+            stx::logWarning(
                 "fnord.feedexport",
                 "Dropping late data for  generation #$0",
                 entry_gen);
@@ -305,7 +305,7 @@ int main(int argc, const char** argv) {
           continue;
         }
 
-        fnord::logDebug(
+        stx::logDebug(
             "fnord.feedexport",
             "Creating new generation #$0",
             entry_gen);
@@ -368,7 +368,7 @@ int main(int argc, const char** argv) {
         continue;
       }
 
-      fnord::logDebug(
+      stx::logDebug(
           "cm.ctrstatsbuild",
           "Flushing report generation #$0",
           iter->first);

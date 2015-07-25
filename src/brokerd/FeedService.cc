@@ -15,7 +15,7 @@
 #include "sstable/sstablerepair.h"
 #include "brokerd/FeedService.h"
 
-namespace fnord {
+namespace stx {
 namespace feeds {
 
 FeedService::FeedService(
@@ -110,7 +110,7 @@ LogStream* FeedService::openStream(const std::string& name, bool create) {
 }
 
 void FeedService::reopenTable(const std::string& file_path) {
-  fnord::sstable::SSTableRepair repair(file_path);
+  stx::sstable::SSTableRepair repair(file_path);
   if (!repair.checkAndRepair(true)) {
     RAISEF(kRuntimeError, "corrupt sstable: $0", file_path);
   }
@@ -121,10 +121,10 @@ void FeedService::reopenTable(const std::string& file_path) {
   LogStream::TableHeader table_header;
 
   try {
-    table_header = fnord::json::fromJSON<LogStream::TableHeader>(
+    table_header = stx::json::fromJSON<LogStream::TableHeader>(
         reader.readHeader());
   } catch (const Exception& e) {
-    fnord::logError(
+    stx::logError(
         "fnord.feed",
         e,
         "error while reading table header of file: $0",
@@ -149,4 +149,4 @@ String FeedService::hostID() {
 }
 
 } // namespace logstream_service
-} // namsepace fnord
+} // namespace stx
