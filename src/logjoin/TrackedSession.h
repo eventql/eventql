@@ -22,6 +22,7 @@
 #include "logjoin/TrackedQuery.h"
 #include "logjoin/TrackedItemVisit.h"
 #include "logjoin/TrackedCartItem.h"
+#include "logjoin/JoinedSession.pb.h"
 
 using namespace stx;
 
@@ -112,6 +113,8 @@ struct TrackedSession {
 struct TrackedSessionContext : public RefCounted {
 
   TrackedSession tracked_session;
+
+  JoinedSession joined_session;
 
 };
 

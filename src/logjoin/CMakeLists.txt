@@ -57,6 +57,7 @@ add_executable(test-logjoin
     TrackedQuery.cc
     TrackedSession.cc
     SessionPipeline.cc
+    SessionJoin.cc
     LogJoin_test.cc)
 
 target_link_libraries(test-logjoin ${CMAKE_THREAD_LIBS_INIT} ${FNORD_LIBS} ${FNORD_FTS_LIBS})

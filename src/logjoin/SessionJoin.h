@@ -22,6 +22,10 @@ public:
 
 protected:
 
+  static void processSearchQueryEvent(
+      const TrackedEvent& event,
+      Vector<TrackedQuery>* queries);
+
   //void insertLogline(
   //    const UnixTime& time,
   //    const String& evtype,
