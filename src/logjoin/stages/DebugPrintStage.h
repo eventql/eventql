@@ -16,13 +16,10 @@ using namespace stx;
 
 namespace cm {
 
-class NormalizeQueryStrings {
+class DebugPrintStage {
 public:
-  typedef Function<String (Language l, const String& s)> NormalizeFn;
 
-  static void process(
-      NormalizeFn normalize_fn,
-      RefPtr<TrackedSessionContext> session);
+  static void process(RefPtr<TrackedSessionContext> session);
 
 };
 
