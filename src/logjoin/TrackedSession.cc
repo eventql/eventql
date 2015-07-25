@@ -112,11 +112,12 @@ void TrackedSession::debugPrint() const {
   stx::iputs("* session $0/$1", customer_key, uid);
   for (const auto& ev : events) {
     stx::iputs(
-        "    > event time=$0 evtype=$1 eid=$2 data=$3",
+        "    > event time=$0 evtype=$1 eid=$2 data=$3$4",
         ev.time,
         ev.evtype,
         ev.evid,
-        ev.data);
+        ev.data.substr(0, 20),
+        ev.data.size() > 20 ? "[...]" : "");
   }
 }
 
