@@ -1,14 +1,14 @@
 /**
- * This file is part of the "FnordMetric" project
+ * This file is part of the "libstx" project
  *   Copyright (c) 2014 Paul Asmuth, Google Inc.
  *
- * FnordMetric is free software: you can redistribute it and/or modify it under
+ * libstx is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License v3.0. You should have received a
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#ifndef _FNORDMETRIC_UTIL_FILEUTIL_H_
-#define _FNORDMETRIC_UTIL_FILEUTIL_H_
+#ifndef _libstx_UTIL_FILEUTIL_H_
+#define _libstx_UTIL_FILEUTIL_H_
 #include "stx/buffer.h"
 #include "stx/stdtypes.h"
 
