@@ -12,7 +12,60 @@ using namespace stx;
 
 namespace cm {
 
-void SessionJoin::process(RefPtr<TrackedSessionContext> session) {
+void SessionJoin::process(RefPtr<TrackedSessionContext> ctx) {
+
+  /* process builtin events */
+  std::vector<TrackedQuery> queries;
+  std::vector<TrackedItemVisit> item_visits;
+  std::vector<TrackedCartItem> cart_items;
+
+  for (const auto& ev : ctx->tracked_session.events) {
+
+    if (ev.evtype == "_search_query") {
+      processSearchQueryEvent(ev, &queries);
+      continue;
+    }
+
+    ///* item visit event */
+    //  TrackedItemVisit visit;
+    //  visit.time = time;
+    //  visit.eid = evid;
+    //  visit.fromParams(logline);
+    //  insertItemVisit(visit);
+    //  break;
+    //}
+
+    ///* cart event */
+    //  auto cart_items = TrackedCartItem::fromParams(logline);
+    //  for (auto& ci : cart_items) {
+    //    ci.time = time;
+    //  }
+
+    //  insertCartVisit(cart_items);
+    //  break;
+  }
+
+}
+
+void SessionJoin::processSearchQueryEvent(
+    const TrackedEvent& event,
+    Vector<TrackedQuery>* queries) {
+  TrackedQuery query;
+  query.time = event.time;
+  query.eid = event.evid;
+
+  URI::ParamList logline;
+  URI::parseQueryString(event.data, &logline);
+  query.fromParams(logline);
+
+  for (auto& q : *queries) {
+    if (q.eid == query.eid) {
+      q.merge(query);
+      return;
+    }
+  }
+
+  queries->emplace_back(query);
 }
 
 } // namespace cm

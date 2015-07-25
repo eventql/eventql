@@ -14,6 +14,7 @@
 #include "stx/protobuf/msg.h"
 #include "logjoin/SessionProcessor.cc"
 #include "logjoin/JoinedSession.pb.h"
+#include "logjoin/SessionJoin.h"
 
 using namespace stx;
 using namespace cm;
@@ -98,6 +99,9 @@ typedef HashMap<String, HashMap<String, String>> StringMap;
  * Simple Search
  */
 TEST_CASE(LogJoinTest, SimpleQuery, [] () {
+  auto pipeline = mkRef(new SessionPipeline());
+  pipeline->addStage(std::bind(&SessionJoin::process, std::placeholders::_1));
+
   auto t = 1432311555 * kMicrosPerSecond;
   TrackedSession sess;
   sess.insertLogline(t + 0, "q", "E1", URI::ParamList {
@@ -106,11 +110,9 @@ TEST_CASE(LogJoinTest, SimpleQuery, [] () {
   });
 
 
-  stx::iputs("", 1);
-  sess.debugPrint();
-  //auto buf = trgt.joinSession(sess);
-  //auto joined = msg::decode<JoinedSession>(buf);
-  JoinedSession joined;
+  auto ctx = pipeline->processSession(sess);
+  const auto& joined = ctx->joined_session;
+
   EXPECT_EQ(joined.num_cart_items(), 0);
   EXPECT_EQ(joined.cart_value_eurcents(), 0);
   EXPECT_EQ(joined.num_order_items(), 0);
