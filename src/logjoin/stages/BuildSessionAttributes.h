@@ -15,24 +15,12 @@ using namespace stx;
 
 namespace cm {
 
-class SessionJoin {
+class BuildSessionAttributes {
 public:
 
   static void process(RefPtr<TrackedSessionContext> session);
 
 protected:
-
-  static void processSearchQueryEvent(
-      const TrackedEvent& event,
-      Vector<TrackedQuery>* queries);
-
-  static void processPageViewEvent(
-      const TrackedEvent& event,
-      Vector<TrackedItemVisit>* page_views);
-
-  static void processCartItemsEvent(
-      const TrackedEvent& event,
-      Vector<TrackedCartItem>* cart_items);
 
   static Option<UnixTime> firstSeenTime(const JoinedSession& session);
   static Option<UnixTime> lastSeenTime(const JoinedSession& session);

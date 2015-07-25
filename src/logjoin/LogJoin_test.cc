@@ -12,9 +12,10 @@
 #include "stx/exception.h"
 #include "stx/test/unittest.h"
 #include "stx/protobuf/msg.h"
-#include "logjoin/SessionProcessor.cc"
+#include "logjoin/SessionPipeline.h"
 #include "logjoin/JoinedSession.pb.h"
-#include "logjoin/SessionJoin.h"
+#include "logjoin/stages/SessionJoin.h"
+#include "logjoin/stages/BuildSessionAttributes.h"
 
 using namespace stx;
 using namespace cm;
@@ -27,6 +28,7 @@ UNIT_TEST(LogJoinTest);
 TEST_CASE(LogJoinTest, SimpleQuery, [] () {
   auto pipeline = mkRef(new SessionPipeline());
   pipeline->addStage(std::bind(&SessionJoin::process, std::placeholders::_1));
+  pipeline->addStage(std::bind(&BuildSessionAttributes::process, std::placeholders::_1));
 
   auto t = 1432311555 * kMicrosPerSecond;
   TrackedSession sess;
@@ -79,6 +81,7 @@ TEST_CASE(LogJoinTest, SimpleQuery, [] () {
 TEST_CASE(LogJoinTest, ItemOrder, [] () {
   auto pipeline = mkRef(new SessionPipeline());
   pipeline->addStage(std::bind(&SessionJoin::process, std::placeholders::_1));
+  pipeline->addStage(std::bind(&BuildSessionAttributes::process, std::placeholders::_1));
 
   auto t = 1432311555 * kMicrosPerSecond;
   TrackedSession sess;
@@ -155,6 +158,7 @@ TEST_CASE(LogJoinTest, ItemOrder, [] () {
 TEST_CASE(LogJoinTest, MultipleQueryBatches, [] () {
   auto pipeline = mkRef(new SessionPipeline());
   pipeline->addStage(std::bind(&SessionJoin::process, std::placeholders::_1));
+  pipeline->addStage(std::bind(&BuildSessionAttributes::process, std::placeholders::_1));
 
   auto t = 1432311555 * kMicrosPerSecond;
   TrackedSession sess;
@@ -209,6 +213,7 @@ TEST_CASE(LogJoinTest, MultipleQueryBatches, [] () {
 TEST_CASE(LogJoinTest, MultipleQueries, [] () {
   auto pipeline = mkRef(new SessionPipeline());
   pipeline->addStage(std::bind(&SessionJoin::process, std::placeholders::_1));
+  pipeline->addStage(std::bind(&BuildSessionAttributes::process, std::placeholders::_1));
 
   auto t = 1432311555 * kMicrosPerSecond;
   TrackedSession sess;
@@ -289,6 +294,7 @@ TEST_CASE(LogJoinTest, MultipleQueries, [] () {
 TEST_CASE(LogJoinTest, FieldExpansion, [] () {
   auto pipeline = mkRef(new SessionPipeline());
   pipeline->addStage(std::bind(&SessionJoin::process, std::placeholders::_1));
+  pipeline->addStage(std::bind(&BuildSessionAttributes::process, std::placeholders::_1));
 
   auto t = 1432311555 * kMicrosPerSecond;
   TrackedSession sess;
@@ -328,6 +334,7 @@ TEST_CASE(LogJoinTest, FieldExpansion, [] () {
 TEST_CASE(LogJoinTest, SeenResultItems, [] () {
   auto pipeline = mkRef(new SessionPipeline());
   pipeline->addStage(std::bind(&SessionJoin::process, std::placeholders::_1));
+  pipeline->addStage(std::bind(&BuildSessionAttributes::process, std::placeholders::_1));
 
   auto t = 1432311555 * kMicrosPerSecond;
   TrackedSession sess;
