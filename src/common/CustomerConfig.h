@@ -7,23 +7,18 @@
  * permission is obtained.
  */
 #pragma once
-#include <stx/stdtypes.h>
-#include <common/CustomerConfig.h>
+#include "stx/stdtypes.h"
+#include "stx/autoref.h"
+#include "common/CustomerConfig.pb.h"
 
 using namespace stx;
 
 namespace cm {
 
-class CustomerDirectory {
-public:
-
-  RefPtr<CustomerConfigRef> configFor(const String& customer_key);
-
-  void updateCustomerConfig(CustomerConfig config);
-
-protected:
-  std::mutex mutex_;
-  HashMap<String, RefPtr<CustomerConfigRef>> customers_;
+struct CustomerConfigRef : public RefCounted {
+  CustomerConfigRef(CustomerConfig _config) : config(_config) {}
+  CustomerConfig config;
 };
 
 } // namespace cm
+

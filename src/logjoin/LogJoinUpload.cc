@@ -41,7 +41,6 @@ void LogJoinUpload::upload() {
 
 void LogJoinUpload::onSession(
     const JoinedSession& session) {
-  auto conf = customer_dir_->logjoinConfigFor(session.customer());
 
   //try {
   //} catch (const Exception& e) {
