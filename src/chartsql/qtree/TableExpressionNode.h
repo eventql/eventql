@@ -11,7 +11,7 @@
 #include <stx/stdtypes.h>
 #include <chartsql/qtree/QueryTreeNode.h>
 
-using namespace fnord;
+using namespace stx;
 
 namespace csql {
 

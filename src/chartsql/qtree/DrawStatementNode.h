@@ -13,7 +13,7 @@
 #include <chartsql/parser/token.h>
 #include <chartsql/qtree/TableExpressionNode.h>
 
-using namespace fnord;
+using namespace stx;
 
 namespace csql {
 

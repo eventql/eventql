@@ -12,7 +12,7 @@
 #include <chartsql/runtime/tablerepository.h>
 #include <cstable/CSTableReader.h>
 
-using namespace fnord;
+using namespace stx;
 
 namespace csql {
 

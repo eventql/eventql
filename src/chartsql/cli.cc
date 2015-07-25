@@ -17,15 +17,15 @@
 #include <fnordmetric/environment.h>
 #include <cli/cli.h>
 
-using namespace fnordmetric;
+using namespace stxmetric;
 
 static const char kCrashErrorMsg[] =
     "FnordMetric crashed :( -- Please report a bug at "
     "github.com/paulasmuth/fnordmetric";
 
 int main(int argc, const char** argv) {
-  fnord::Application::init();
-  fnord::Application::logToStderr();
+  stx::Application::init();
+  stx::Application::logToStderr();
 
   cli::CLI::parseArgs(env(), argc, argv);
   cli::CLI::executeSafely(env());

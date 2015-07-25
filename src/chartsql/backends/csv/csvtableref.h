@@ -16,7 +16,7 @@
 #include <stx/csv/CSVInputStream.h>
 #include <chartsql/backends/tableref.h>
 
-using namespace fnord;
+using namespace stx;
 
 namespace csql {
 class SValue;

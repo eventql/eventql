@@ -11,7 +11,7 @@
 #include <chartsql/CSTableScan.h>
 #include <chartsql/qtree/SequentialScanNode.h>
 
-using namespace fnord;
+using namespace stx;
 
 namespace csql {
 

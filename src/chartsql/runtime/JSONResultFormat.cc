@@ -111,7 +111,7 @@ void JSONResultFormat::renderChart(
     ExecutionContext* context) {
   String svg_str;
   auto svg_stream = StringOutputStream::fromString(&svg_str);
-  fnord::chart::SVGTarget svg(svg_stream.get());
+  stx::chart::SVGTarget svg(svg_stream.get());
   stmt->execute(context, &svg);
 
   json_->beginObject();

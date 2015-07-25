@@ -20,11 +20,11 @@ namespace csql {
 class MetricTableRepository : public TableRepository {
 public:
 
-  MetricTableRepository(fnord::metric_service::IMetricRepository* metric_repo);
+  MetricTableRepository(stx::metric_service::IMetricRepository* metric_repo);
   csql::TableRef* getTableRef(const std::string& table_name) const override;
 
 protected:
-  fnord::metric_service::IMetricRepository* metric_repo_;
+  stx::metric_service::IMetricRepository* metric_repo_;
 };
 
 }

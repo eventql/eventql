@@ -13,7 +13,7 @@
 #include <chartsql/qtree/ValueExpressionNode.h>
 #include <chartsql/qtree/SelectListNode.h>
 
-using namespace fnord;
+using namespace stx;
 
 namespace csql {
 

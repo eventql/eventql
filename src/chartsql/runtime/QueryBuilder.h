@@ -14,7 +14,7 @@
 #include <chartsql/runtime/TableExpressionBuilder.h>
 #include <chartsql/runtime/charts/ChartStatement.h>
 
-using namespace fnord;
+using namespace stx;
 
 namespace csql {
 

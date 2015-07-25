@@ -17,7 +17,7 @@
 #include "chartsql/qtree/CallExpressionNode.h"
 #include "chartsql/qtree/LiteralExpressionNode.h"
 
-using namespace fnord;
+using namespace stx;
 using namespace csql;
 
 UNIT_TEST(RuntimeTest);

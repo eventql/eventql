@@ -25,29 +25,29 @@ static const char kQueryUrl[] = "/query";
 static const char kLabelParamPrefix[] = "label[";
 
 QueryEndpoint::QueryEndpoint(
-    fnord::metric_service::IMetricRepository* metric_repo) :
+    stx::metric_service::IMetricRepository* metric_repo) :
     metric_repo_(metric_repo) {}
 
 void QueryEndpoint::handleHTTPRequest(
     http::HTTPRequest* request,
     http::HTTPResponse* response) {
-  fnord::URI uri(request->uri());
+  stx::URI uri(request->uri());
   auto path = uri.path();
-  fnord::StringUtil::stripTrailingSlashes(&path);
+  stx::StringUtil::stripTrailingSlashes(&path);
 
   response->addHeader("Access-Control-Allow-Origin", "*");
 
   auto params = uri.queryParams();
 
-  std::shared_ptr<fnord::InputStream> input_stream;
+  std::shared_ptr<stx::InputStream> input_stream;
   std::string get_query;
-  if (fnord::URI::getParam(params, "q", &get_query)) {
-    input_stream.reset(new fnord::StringInputStream(get_query));
+  if (stx::URI::getParam(params, "q", &get_query)) {
+    input_stream.reset(new stx::StringInputStream(get_query));
   } else {
     input_stream = request->getBodyInputStream();
   }
 
-  std::shared_ptr<fnord::OutputStream> output_stream =
+  std::shared_ptr<stx::OutputStream> output_stream =
       response->getBodyOutputStream();
 
   csql::QueryService query_service;
@@ -70,7 +70,7 @@ void QueryEndpoint::handleHTTPRequest(
 
   csql::QueryService::kFormat resp_format = csql::QueryService::FORMAT_JSON;
   std::string format_param;
-  if (fnord::URI::getParam(params, "format", &format_param)) {
+  if (stx::URI::getParam(params, "format", &format_param)) {
     if (format_param == "svg") {
       resp_format = csql::QueryService::FORMAT_SVG;
     }
@@ -91,13 +91,13 @@ void QueryEndpoint::handleHTTPRequest(
 
   int width = -1;
   std::string width_param;
-  if (fnord::URI::getParam(params, "width", &width_param)) {
+  if (stx::URI::getParam(params, "width", &width_param)) {
     width = std::stoi(width_param);
   }
 
   int height = -1;
   std::string height_param;
-  if (fnord::URI::getParam(params, "height", &height_param)) {
+  if (stx::URI::getParam(params, "height", &height_param)) {
     height = std::stoi(height_param);
   }
 
@@ -110,10 +110,10 @@ void QueryEndpoint::handleHTTPRequest(
         width,
         height);
 
-  } catch (fnord::Exception e) {
+  } catch (stx::Exception e) {
     response->clearBody();
 
-    fnord::json::JSONOutputStream json(std::move(output_stream));
+    stx::json::JSONOutputStream json(std::move(output_stream));
     json.beginObject();
     json.addObjectEntry("status");
     json.addString("error");

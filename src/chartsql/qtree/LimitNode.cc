@@ -9,7 +9,7 @@
  */
 #include <chartsql/qtree/LimitNode.h>
 
-using namespace fnord;
+using namespace stx;
 
 namespace csql {
 

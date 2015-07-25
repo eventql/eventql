@@ -9,7 +9,7 @@
  */
 #include <chartsql/runtime/ScratchMemory.h>
 
-using namespace fnord;
+using namespace stx;
 
 namespace csql {
 

@@ -38,7 +38,7 @@ void ASCIITableFormat::formatResults(
         row.emplace_back(argv[n].toString());
       }
 
-      output_->write(fnord::inspect(row));
+      output_->write(stx::inspect(row));
       output_->write("\n");
       return true;
     });

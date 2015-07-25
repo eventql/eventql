@@ -255,7 +255,7 @@ void ASTNode::debugPrint(int indent /* = 0 */) const {
 
 } // namespace csql
 
-namespace fnord {
+namespace stx {
 
 template <>
 std::string inspect<
@@ -271,4 +271,4 @@ std::string inspect<
   return "<ASTNode>";
 }
 
-} // namespace fnord
+} // namespace stx

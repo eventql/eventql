@@ -13,7 +13,7 @@
 #include <chartsql/svalue.h>
 #include <chartsql/runtime/ExecutionContext.h>
 
-using namespace fnord;
+using namespace stx;
 
 namespace csql {
 

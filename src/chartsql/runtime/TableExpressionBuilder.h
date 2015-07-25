@@ -24,7 +24,7 @@
 #include <chartsql/runtime/tablerepository.h>
 #include <chartsql/svalue.h>
 
-using namespace fnord;
+using namespace stx;
 
 namespace csql {
 class QueryBuilder;

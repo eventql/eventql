@@ -36,15 +36,15 @@ public:
   int x_ind_;
   int y_ind_;
   int z_ind_;
-  std::vector<std::pair<fnord::chart::Series::kProperty, int>> prop_indexes_;
+  std::vector<std::pair<stx::chart::Series::kProperty, int>> prop_indexes_;
 
 protected:
 
   void applyProperties(
       SValue* row,
       int row_len,
-      fnord::chart::Series* series,
-      fnord::chart::Series::AnyPoint* point);
+      stx::chart::Series* series,
+      stx::chart::Series::AnyPoint* point);
 
 };
 
@@ -65,10 +65,10 @@ public:
       name = row[name_ind_].template getValue<std::string>();
     }
 
-    fnord::chart::Series2D<TX, TY>* series = nullptr;
+    stx::chart::Series2D<TX, TY>* series = nullptr;
     const auto& series_iter = series_map_.find(name);
     if (series_iter == series_map_.end()) {
-      series = new fnord::chart::Series2D<TX, TY>(name);
+      series = new stx::chart::Series2D<TX, TY>(name);
       series_map_.emplace(name, series);
       series_list_.emplace_back(series);
     } else {
@@ -92,8 +92,8 @@ public:
     return true;
   }
 
-  std::unordered_map<std::string, fnord::chart::Series2D<TX, TY>*> series_map_;
-  std::vector<fnord::chart::Series2D<TX, TY>*> series_list_;
+  std::unordered_map<std::string, stx::chart::Series2D<TX, TY>*> series_map_;
+  std::vector<stx::chart::Series2D<TX, TY>*> series_list_;
 };
 
 template <typename TX, typename TY, typename TZ>
@@ -114,10 +114,10 @@ public:
       name = row[name_ind_].template getValue<std::string>();
     }
 
-    fnord::chart::Series3D<TX, TY, TZ>* series = nullptr;
+    stx::chart::Series3D<TX, TY, TZ>* series = nullptr;
     const auto& series_iter = series_map_.find(name);
     if (series_iter == series_map_.end()) {
-      series = new fnord::chart::Series3D<TX, TY, TZ>(name);
+      series = new stx::chart::Series3D<TX, TY, TZ>(name);
       series_map_.emplace(name, series);
       series_list_.emplace_back(series);
     } else {
@@ -140,9 +140,9 @@ public:
 
   std::unordered_map<
       std::string,
-      fnord::chart::Series3D<TX, TY, TZ>*> series_map_;
+      stx::chart::Series3D<TX, TY, TZ>*> series_map_;
 
-  std::vector<fnord::chart::Series3D<TX, TY, TZ>*> series_list_;
+  std::vector<stx::chart::Series3D<TX, TY, TZ>*> series_list_;
 };
 
 }

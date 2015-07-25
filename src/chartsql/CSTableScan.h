@@ -16,7 +16,7 @@
 #include <chartsql/runtime/TableExpression.h>
 #include <cstable/CSTableReader.h>
 
-using namespace fnord;
+using namespace stx;
 
 namespace csql {
 
