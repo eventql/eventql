@@ -53,4 +53,4 @@ void JSONRPCCodec::decodeRPCResponse(RPCType* rpc, const Buffer& buffer) {
 
 
 } // namespace json
-} // namespace fnord
+} // namespace stx

@@ -32,7 +32,7 @@ public:
 };
 
 } // namespace json
-} // namespace fnord
+} // namespace stx
 
 #include "JSONRPCCodec_impl.h"
 #endif

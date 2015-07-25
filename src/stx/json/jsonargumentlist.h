@@ -29,5 +29,5 @@ protected:
 };
 
 } // namespace json
-} // namespace fnord
+} // namespace stx
 #endif

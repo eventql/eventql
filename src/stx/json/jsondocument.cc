@@ -180,5 +180,5 @@ void JSONDocument::forEach(
 }
 
 } // namespace json
-} // namespace fnord
+} // namespace stx
 
