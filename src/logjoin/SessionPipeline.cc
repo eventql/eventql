@@ -16,16 +16,10 @@ void SessionPipeline::addStage(PipelineStageFn fn) {
   stages_.emplace_back(fn);
 }
 
-RefPtr<TrackedSessionContext> SessionPipeline::processSession(
-    TrackedSession session) {
-  auto ctx = mkRef(new TrackedSessionContext);
-  ctx->tracked_session = session;
-
+void SessionPipeline::run(RefPtr<TrackedSessionContext> ctx) {
   for (const auto& stage : stages_) {
     stage(ctx);
   }
-
-  return ctx;
 }
 
 } // namespace cm

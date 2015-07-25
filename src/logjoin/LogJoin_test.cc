@@ -42,7 +42,8 @@ TEST_CASE(LogJoinTest, SimpleQuery, [] () {
     { "qstr~de", "blah" }
   });
 
-  auto ctx = pipeline->processSession(sess);
+  auto ctx = mkRef(new TrackedSessionContext(sess));
+  pipeline->run(ctx);
   const auto& joined = ctx->joined_session;
 
   EXPECT_EQ(joined.num_cart_items(), 0);
@@ -107,7 +108,8 @@ TEST_CASE(LogJoinTest, ItemOrder, [] () {
     { "is", "p~105~2~550~eur" },
   });
 
-  auto ctx = pipeline->processSession(sess);
+  auto ctx = mkRef(new TrackedSessionContext(sess));
+  pipeline->run(ctx);
   const auto& joined = ctx->joined_session;
 
   EXPECT_EQ(joined.num_cart_items(), 1);
@@ -185,7 +187,8 @@ TEST_CASE(LogJoinTest, MultipleQueryBatches, [] () {
     { "i", "p~101"}
   });
 
-  auto ctx = pipeline->processSession(sess);
+  auto ctx = mkRef(new TrackedSessionContext(sess));
+  pipeline->run(ctx);
   const auto& joined = ctx->joined_session;
 
   EXPECT_EQ(joined.num_cart_items(), 0);
@@ -239,7 +242,8 @@ TEST_CASE(LogJoinTest, MultipleQueries, [] () {
     { "is", "p~11~p1,p~12~p2,p~13~p3,p~14~p4" }
   });
 
-  auto ctx = pipeline->processSession(sess);
+  auto ctx = mkRef(new TrackedSessionContext(sess));
+  pipeline->run(ctx);
   const auto& joined = ctx->joined_session;
 
   EXPECT_EQ(joined.search_queries().size(), 3);
@@ -354,7 +358,8 @@ TEST_CASE(LogJoinTest, SeenResultItems, [] () {
     { "is", "p~102~p2~s,p~103~s" }
   });
 
-  auto ctx = pipeline->processSession(sess);
+  auto ctx = mkRef(new TrackedSessionContext(sess));
+  pipeline->run(ctx);
   const auto& joined = ctx->joined_session;
 
   EXPECT_EQ(joined.search_queries().size(), 1);

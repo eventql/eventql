@@ -87,4 +87,8 @@ void TrackedSession::debugPrint() const {
   }
 }
 
+TrackedSessionContext::TrackedSessionContext(
+    TrackedSession session) :
+    tracked_session(session) {}
+
 } // namespace cm

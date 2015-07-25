@@ -38,9 +38,12 @@ void SessionProcessor::stop() {
 
 void SessionProcessor::enqueueSession(const TrackedSession& session) {
   // FIXPAUL: write to some form of persistent queue
-  tpool_.run([this, session] {
-    pipeline_->processSession(session);
-  });
+  tpool_.run(std::bind(&SessionProcessor::processSession, this, session));
+}
+
+void SessionProcessor::processSession(const TrackedSession& session) {
+  auto ctx = mkRef(new TrackedSessionContext(session));
+  pipeline_->run(ctx);
 }
 
 } // namespace cm
