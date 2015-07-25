@@ -149,9 +149,9 @@ TEST_CASE(LogJoinTest, ItemOrder, [] () {
   EXPECT_EQ(joined.search_queries().Get(0).result_items().Get(1).item_id(), "p~106");
   EXPECT_FALSE(joined.search_queries().Get(0).result_items().Get(1).clicked());
 
-  EXPECT_EQ(joined.item_visits().size(), 1);
-  EXPECT_EQ(joined.item_visits().Get(0).time(), 1432311565);
-  EXPECT_EQ(joined.item_visits().Get(0).item_id(), "p~105");
+  EXPECT_EQ(joined.page_views().size(), 1);
+  EXPECT_EQ(joined.page_views().Get(0).time(), 1432311565);
+  EXPECT_EQ(joined.page_views().Get(0).item_id(), "p~105");
 });
 //
 //

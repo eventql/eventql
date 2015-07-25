@@ -73,7 +73,7 @@ Option<UnixTime> BuildSessionAttributes::firstSeenTime(const JoinedSession& sess
     }
   }
 
-  for (const auto& e : sess.item_visits()) {
+  for (const auto& e : sess.page_views()) {
     if (e.time() * kMicrosPerSecond < t) {
       t = e.time() * kMicrosPerSecond;
     }
@@ -101,7 +101,7 @@ Option<UnixTime> BuildSessionAttributes::lastSeenTime(const JoinedSession& sess)
     }
   }
 
-  for (const auto& e : sess.item_visits()) {
+  for (const auto& e : sess.page_views()) {
     if (e.time() * kMicrosPerSecond > t) {
       t = e.time() * kMicrosPerSecond;
     }

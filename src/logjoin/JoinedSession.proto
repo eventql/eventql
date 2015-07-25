@@ -250,10 +250,10 @@ message JoinedSearchQuery {
 
 
 /**
- * A JoinedItemVisit is added to the session for each single visit/click on
+ * A JoinedPageView is added to the session for each single visit/click on
  * an item page (via search or otherwise)
  */
-message JoinedItemVisit {
+message JoinedPageView {
   /**
    * The time at which the item was visited
    */
@@ -439,7 +439,7 @@ message JoinedSession {
   /**
    * A list of all item visits associated with this session
    */
-  repeated JoinedItemVisit item_visits = 25;
+  repeated JoinedPageView page_views = 25;
 
   /**
    * A list of all cart items associated with this session
