@@ -35,6 +35,7 @@ namespace cm {
 
 class SessionProcessor {
 public:
+  typedef Function<void (TrackedSession* session)> PipelineStageFn;
 
   SessionProcessor(
       msg::MessageSchemaRepository* schemas,
@@ -42,9 +43,9 @@ public:
 
   void enqueueSession(const TrackedSession& session);
 
+  void addPipelineStage(PipelineStageFn fn);
   void start();
   void stop();
-
 
   void setNormalize(
     Function<stx::String (Language lang, const stx::String& query)> normalizeCb);
@@ -59,6 +60,7 @@ public:
 protected:
   void processSession(TrackedSession session);
 
+
   msg::MessageSchemaRepository* schemas_;
   Function<stx::String (Language lang, const stx::String& query)> normalize_;
   Function<Option<String> (const DocID& docid, const String& feature)> get_field_;
@@ -66,6 +68,7 @@ protected:
   Random rnd_;
   CurrencyConverter cconv_;
   thread::FixedSizeThreadPool tpool_;
+  Vector<PipelineStageFn> stages_;
 };
 } // namespace cm
 
