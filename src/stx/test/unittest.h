@@ -121,7 +121,7 @@ class UnitTest {
 public:
 
   static std::string tempFilePath() {
-    return "/tmp/_libfnord_test_tmp/";
+    return "/tmp/_libstx_test_tmp/";
   }
 
   static std::string testDataPath() {

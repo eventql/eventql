@@ -8,7 +8,7 @@ ifeq ($(UNAME), Darwin)
 CXXFLAGS += -stdlib=libc++
 endif
 
-FNORD_HTTP_TARGET  = libfnord-http.a
+FNORD_HTTP_TARGET  = libstx-http.a
 FNORD_HTTP_SOURCES = cookies.cc httpconnection.cc httpmessage.cc httpparser.cc httpgenerator.cc httpservice.cc httprequest.cc httpresponse.cc httpserver.cc httprouter.cc
 FNORD_HTTP_OBJECTS = $(subst .cc,.o,$(FNORD_HTTP_SOURCES))
 
@@ -18,7 +18,7 @@ FNORD_HTTP_OBJECTS = $(subst .cc,.o,$(FNORD_HTTP_SOURCES))
 $(FNORD_HTTP_TARGET): $(FNORD_HTTP_OBJECTS)
 	ar rcs $(FNORD_HTTP_TARGET) $(FNORD_HTTP_OBJECTS)
 
-http_test: libfnord-http.a http_test.cc
+http_test: libstx-http.a http_test.cc
 	(cd ../../base && make)
 	(cd ../../io && make)
 	(cd ../../logging && make)
@@ -29,7 +29,7 @@ http_test: libfnord-http.a http_test.cc
 http_test\:run: http_test
 	./http_test
 
-httpserver_example: libfnord-http.a httpserver_example.cc
+httpserver_example: libstx-http.a httpserver_example.cc
 	(cd ../../base && make)
 	(cd ../../io && make)
 	(cd ../../logging && make)
