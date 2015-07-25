@@ -34,6 +34,7 @@
 #include "logjoin/LogJoin.h"
 #include "logjoin/SessionProcessor.h"
 #include "logjoin/LogJoinUpload.h"
+#include "logjoin/SessionJoin.h"
 #include "inventory/DocStore.h"
 #include "inventory/IndexChangeRequest.h"
 #include "inventory/DocIndex.h"
@@ -311,16 +312,23 @@ int main(int argc, const char** argv) {
           "documents-dawanda",
           true));
 
-  /* set up logjoin target */
   stx::fts::Analyzer analyzer(flags.getString("conf"));
-  cm::SessionProcessor logjoin_target(&schemas, dry_run);
+
+  /* set up session processor */
+  cm::SessionProcessor session_proc(&schemas, dry_run);
+
+  /* pipeline stage: session join */
+  session_proc.addPipelineStage(
+      std::bind(&SessionJoin::process, std::placeholders::_1));
+
+
 
   auto normalize = [&analyzer] (Language lang, const String& query) -> String {
     return analyzer.normalize(lang, query);
   };
 
-  logjoin_target.setNormalize(normalize);
-  logjoin_target.setGetField(std::bind(
+  session_proc.setNormalize(normalize);
+  session_proc.setGetField(std::bind(
       &DocIndex::getField,
       index.get(),
       std::placeholders::_1,
@@ -334,10 +342,10 @@ int main(int argc, const char** argv) {
       flags.getString("broker_addr"),
       &http);
 
-  logjoin_target.start();
+  session_proc.start();
 
   /* setup logjoin */
-  cm::LogJoin logjoin(shard, dry_run, &logjoin_target);
+  cm::LogJoin logjoin(shard, dry_run, &session_proc);
   logjoin.exportStats("/cm-logjoin/global");
   logjoin.exportStats(StringUtil::format("/cm-logjoin/$0", shard.shard_name));
 
@@ -461,7 +469,7 @@ int main(int argc, const char** argv) {
         watermarks.first,
         watermarks.second,
         logjoin.numSessions(),
-        logjoin_target.num_sessions,
+        session_proc.num_sessions,
         stream_offsets_str);
 
     if (dry_run) {
@@ -501,7 +509,7 @@ int main(int argc, const char** argv) {
   sessdb->sync();
   stx::logInfo("cm.logjoin", "LogJoin exiting...");
 
-  logjoin_target.stop();
+  session_proc.stop();
   return 0;
 }
 
