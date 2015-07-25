@@ -20,7 +20,7 @@ $(FNORD_BASE_TARGET): $(FNORD_BASE_OBJECTS)
 
 stringutil_test: $(FNORD_BASE_TARGET) stringutil_test.cc
 	(cd ../io && make libstx-io.a)
-	$(CXX) $(CFLAGS) $(CXXFLAGS) -o stringutil_test stringutil_test.cc -L. -L../io -lfnord-base -lfnord-io -lpthread
+	$(CXX) $(CFLAGS) $(CXXFLAGS) -o stringutil_test stringutil_test.cc -L. -L../io -lstx-base -lfnord-io -lpthread
 
 stringutil_test\:run: stringutil_test
 	./stringutil_test

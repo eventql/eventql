@@ -16,6 +16,6 @@ else()
   message("WARNING: libmysqlclient not found, libstx will be compiled without MySQL support")
 endif()
 
-add_library(fnord-mysql OBJECT
+add_library(stx-mysql OBJECT
     MySQLConnection.cc
     MySQL.cc)

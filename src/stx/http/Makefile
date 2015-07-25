@@ -24,7 +24,7 @@ http_test: libstx-http.a http_test.cc
 	(cd ../../logging && make)
 	(cd ../../system && make)
 	(cd ../../thread && make)
-	$(CXX) $(CFLAGS) $(CXXFLAGS) -o http_test http_test.cc -L. -L../../base -L../../io -lfnord-http -lfnord-io -lfnord-base -lpthread
+	$(CXX) $(CFLAGS) $(CXXFLAGS) -o http_test http_test.cc -L. -L../../base -L../../io -lstx-http -lfnord-io -lstx-base -lpthread
 
 http_test\:run: http_test
 	./http_test
@@ -35,7 +35,7 @@ httpserver_example: libstx-http.a httpserver_example.cc
 	(cd ../../logging && make)
 	(cd ../../system && make)
 	(cd ../../thread && make)
-	$(CXX) $(CFLAGS) $(CXXFLAGS) -o httpserver_example httpserver_example.cc -L. -L../../base -L../../io -L../../logging -L../../net -L../../system -L../../thread -lfnord-http -lfnord-io -lfnord-base -lfnord-system -lfnord-thread -lfnord-logging -lfnord-net -lpthread
+	$(CXX) $(CFLAGS) $(CXXFLAGS) -o httpserver_example httpserver_example.cc -L. -L../../base -L../../io -L../../logging -L../../net -L../../system -L../../thread -lstx-http -lfnord-io -lstx-base -lfnord-system -lfnord-thread -lfnord-logging -lfnord-net -lpthread
 
 httpserver_example\:run: httpserver_example
 	./httpserver_example
