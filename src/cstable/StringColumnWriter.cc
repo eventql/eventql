@@ -9,7 +9,7 @@
  */
 #include <cstable/StringColumnWriter.h>
 
-namespace fnord {
+namespace stx {
 namespace cstable {
 
 StringColumnWriter::StringColumnWriter(
@@ -47,4 +47,4 @@ size_t StringColumnWriter::size() const {
 
 
 } // namespace cstable
-} // namespace fnord
+} // namespace stx

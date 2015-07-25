@@ -9,7 +9,7 @@
  */
 #include <cstable/ColumnWriter.h>
 
-namespace fnord {
+namespace stx {
 namespace cstable {
 
 ColumnWriter::ColumnWriter(
@@ -58,5 +58,5 @@ void ColumnWriter::addNull(
 }
 
 } // namespace cstable
-} // namespace fnord
+} // namespace stx
 

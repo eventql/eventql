@@ -9,7 +9,7 @@
  */
 #include <cstable/BooleanColumnWriter.h>
 
-namespace fnord {
+namespace stx {
 namespace cstable {
 
 BooleanColumnWriter::BooleanColumnWriter(
@@ -55,4 +55,4 @@ size_t BooleanColumnWriter::size() const {
 
 
 } // namespace cstable
-} // namespace fnord
+} // namespace stx

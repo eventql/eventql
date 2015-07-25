@@ -29,10 +29,10 @@ add_library(libcstable OBJECT
     UInt64ColumnWriter.cc)
 
 add_executable(test-recordmaterializer
-    $<TARGET_OBJECTS:fnord-base>
-    $<TARGET_OBJECTS:fnord-protobuf>
-    $<TARGET_OBJECTS:fnord-http>
-    $<TARGET_OBJECTS:fnord-json>
+    $<TARGET_OBJECTS:stx-base>
+    $<TARGET_OBJECTS:stx-protobuf>
+    $<TARGET_OBJECTS:stx-http>
+    $<TARGET_OBJECTS:stx-json>
     $<TARGET_OBJECTS:libcstable>
     RecordMaterializer_test.cc)
 
@@ -42,10 +42,10 @@ target_link_libraries(
     ${FNORD_LIBS})
 
 add_executable(cstable
-    $<TARGET_OBJECTS:fnord-base>
-    $<TARGET_OBJECTS:fnord-protobuf>
-    $<TARGET_OBJECTS:fnord-http>
-    $<TARGET_OBJECTS:fnord-json>
+    $<TARGET_OBJECTS:stx-base>
+    $<TARGET_OBJECTS:stx-protobuf>
+    $<TARGET_OBJECTS:stx-http>
+    $<TARGET_OBJECTS:stx-json>
     $<TARGET_OBJECTS:libcstable>
     cstable.cc)
 

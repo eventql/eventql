@@ -17,7 +17,7 @@
 #include <stx/protobuf/MessageObject.h>
 #include <cstable/BinaryFormat.h>
 
-namespace fnord {
+namespace stx {
 namespace cstable {
 
 class ColumnWriter : public RefCounted {
@@ -55,6 +55,6 @@ protected:
 };
 
 } // namespace cstable
-} // namespace fnord
+} // namespace stx
 
 #endif

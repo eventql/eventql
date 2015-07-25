@@ -16,7 +16,7 @@
 #include <stx/util/binarymessagewriter.h>
 #include <cstable/ColumnWriter.h>
 
-namespace fnord {
+namespace stx {
 namespace cstable {
 
 class CSTableWriter {
@@ -51,6 +51,6 @@ protected:
 };
 
 } // namespace cstable
-} // namespace fnord
+} // namespace stx
 
 #endif

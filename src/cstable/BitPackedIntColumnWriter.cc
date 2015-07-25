@@ -9,7 +9,7 @@
  */
 #include <cstable/BitPackedIntColumnWriter.h>
 
-namespace fnord {
+namespace stx {
 namespace cstable {
 
 BitPackedIntColumnWriter::BitPackedIntColumnWriter(
@@ -58,4 +58,4 @@ size_t BitPackedIntColumnWriter::size() const {
 
 
 } // namespace cstable
-} // namespace fnord
+} // namespace stx

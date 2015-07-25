@@ -15,7 +15,7 @@
 #include <cstable/BinaryFormat.h>
 #include <cstable/ColumnWriter.h>
 
-namespace fnord {
+namespace stx {
 namespace cstable {
 
 class StringColumnWriter : public ColumnWriter {
@@ -50,6 +50,6 @@ protected:
 };
 
 } // namespace cstable
-} // namespace fnord
+} // namespace stx
 
 #endif

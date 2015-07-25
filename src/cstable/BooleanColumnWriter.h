@@ -14,7 +14,7 @@
 #include <stx/util/BitPackEncoder.h>
 #include <cstable/ColumnWriter.h>
 
-namespace fnord {
+namespace stx {
 namespace cstable {
 
 class BooleanColumnWriter : public ColumnWriter {
@@ -48,6 +48,6 @@ protected:
 };
 
 } // namespace cstable
-} // namespace fnord
+} // namespace stx
 
 #endif

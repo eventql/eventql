@@ -9,7 +9,7 @@
  */
 #include <cstable/DoubleColumnReader.h>
 
-namespace fnord {
+namespace stx {
 namespace cstable {
 
 DoubleColumnReader::DoubleColumnReader(
@@ -57,4 +57,4 @@ bool DoubleColumnReader::next(
 }
 
 } // namespace cstable
-} // namespace fnord
+} // namespace stx

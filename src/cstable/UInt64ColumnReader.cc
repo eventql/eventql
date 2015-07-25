@@ -9,7 +9,7 @@
  */
 #include <cstable/UInt64ColumnReader.h>
 
-namespace fnord {
+namespace stx {
 namespace cstable {
 
 UInt64ColumnReader::UInt64ColumnReader(
@@ -57,4 +57,4 @@ bool UInt64ColumnReader::next(
 }
 
 } // namespace cstable
-} // namespace fnord
+} // namespace stx

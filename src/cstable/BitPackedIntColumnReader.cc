@@ -9,7 +9,7 @@
  */
 #include <cstable/BitPackedIntColumnReader.h>
 
-namespace fnord {
+namespace stx {
 namespace cstable {
 
 BitPackedIntColumnReader::BitPackedIntColumnReader(
@@ -61,4 +61,4 @@ bool BitPackedIntColumnReader::next(
 }
 
 } // namespace cstable
-} // namespace fnord
+} // namespace stx

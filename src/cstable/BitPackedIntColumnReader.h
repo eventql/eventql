@@ -14,7 +14,7 @@
 #include <stx/util/BitPackDecoder.h>
 #include <cstable/ColumnReader.h>
 
-namespace fnord {
+namespace stx {
 namespace cstable {
 
 class BitPackedIntColumnReader : public ColumnReader {
@@ -45,6 +45,6 @@ protected:
 };
 
 } // namespace cstable
-} // namespace fnord
+} // namespace stx
 
 #endif

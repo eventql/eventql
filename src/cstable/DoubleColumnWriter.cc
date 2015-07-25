@@ -9,7 +9,7 @@
  */
 #include <cstable/DoubleColumnWriter.h>
 
-namespace fnord {
+namespace stx {
 namespace cstable {
 
 DoubleColumnWriter::DoubleColumnWriter(
@@ -49,4 +49,4 @@ size_t DoubleColumnWriter::size() const {
 
 
 } // namespace cstable
-} // namespace fnord
+} // namespace stx

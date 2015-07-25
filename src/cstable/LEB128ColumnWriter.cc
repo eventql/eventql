@@ -9,7 +9,7 @@
  */
 #include <cstable/LEB128ColumnWriter.h>
 
-namespace fnord {
+namespace stx {
 namespace cstable {
 
 LEB128ColumnWriter::LEB128ColumnWriter(
@@ -54,4 +54,4 @@ size_t LEB128ColumnWriter::size() const {
 
 
 } // namespace cstable
-} // namespace fnord
+} // namespace stx

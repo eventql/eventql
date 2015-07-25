@@ -12,7 +12,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 
-namespace fnord {
+namespace stx {
 namespace cstable {
 
 /**
