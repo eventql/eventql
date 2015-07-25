@@ -100,8 +100,6 @@ struct TrackedSession {
    */
   void joinEvents(const CurrencyConverter& cconv);
 
-  Option<UnixTime> firstSeenTime() const;
-  Option<UnixTime> lastSeenTime() const;
 
   void debugPrint() const;
 
