@@ -21,6 +21,9 @@ include_directories(${DPROC_INCLUDE})
 add_subdirectory(3rdparty/brokerd)
 include_directories(${BROKERD_INCLUDE})
 
+add_subdirectory(3rdparty/libcplot)
+include_directories(${CPLOT_INCLUDE})
+
 add_subdirectory(3rdparty/chartsql)
 include_directories(${CHARTSQL_INCLUDE})
 
