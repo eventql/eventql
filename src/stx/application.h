@@ -1,5 +1,6 @@
 /**
  * This file is part of the "libstx" project
+ *   Copyright (c) 2015 Christian Parpart
  *   Copyright (c) 2014 Paul Asmuth, Google Inc.
  *
  * libstx is free software: you can redistribute it and/or modify it under
@@ -26,6 +27,28 @@ public:
   static void init();
 
   static void logToStderr(LogLevel min_log_level = LogLevel::kInfo);
+  /**
+   * Retrieves the user-name this application is running under.
+   */
+  static std::string userName();
+
+  /**
+   * Retrieves the group-name this application is running under.
+   */
+  static std::string groupName();
+
+  /**
+   * Drops privileges to given @p user and @p group.
+   *
+   * Will only actually perform the drop if currently running as root
+   * and the respective values are non-empty.
+   */
+  static void dropPrivileges(const std::string& user, const std::string& group);
+
+  /**
+   * Forks the application into background and become a daemon.
+   */
+  static void daemonize();
 
 };
 
