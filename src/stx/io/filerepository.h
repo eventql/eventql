@@ -7,8 +7,8 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#ifndef _FNORD_IO_FILEREPOSITORY_H_
-#define _FNORD_IO_FILEREPOSITORY_H_
+#ifndef _STX_IO_FILEREPOSITORY_H_
+#define _STX_IO_FILEREPOSITORY_H_
 #include <functional>
 #include <string>
 #include <vector>

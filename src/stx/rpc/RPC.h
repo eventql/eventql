@@ -7,8 +7,8 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#ifndef _FNORD_COMM_RPC_H
-#define _FNORD_COMM_RPC_H
+#ifndef _STX_COMM_RPC_H
+#define _STX_COMM_RPC_H
 #include <functional>
 #include <memory>
 #include <mutex>

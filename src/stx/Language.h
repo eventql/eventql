@@ -7,8 +7,8 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#ifndef _FNORD_LANGUAGE_H
-#define _FNORD_LANGUAGE_H
+#ifndef _STX_LANGUAGE_H
+#define _STX_LANGUAGE_H
 #include "stx/stdtypes.h"
 
 namespace stx {

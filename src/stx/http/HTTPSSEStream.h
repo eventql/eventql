@@ -9,8 +9,8 @@
  * <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _FNORD_HTTP_HTTPSSESTREAM_H
-#define _FNORD_HTTP_HTTPSSESTREAM_H
+#ifndef _STX_HTTP_HTTPSSESTREAM_H
+#define _STX_HTTP_HTTPSSESTREAM_H
 #include "stx/http/httpservice.h"
 #include "stx/json/json.h"
 #include <stx/inspect.h>

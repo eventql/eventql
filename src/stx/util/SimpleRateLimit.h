@@ -7,8 +7,8 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#ifndef _FNORD_UTIL_SIMPLERATELIMIT_H
-#define _FNORD_UTIL_SIMPLERATELIMIT_H
+#ifndef _STX_UTIL_SIMPLERATELIMIT_H
+#define _STX_UTIL_SIMPLERATELIMIT_H
 #include <stdlib.h>
 #include <stdint.h>
 #include <string>

@@ -32,7 +32,7 @@ std::unique_ptr<MySQLConnection> MySQLConnection::openConnection(
 }
 
 MySQLConnection::MySQLConnection() : mysql_(nullptr) {
-#ifdef FNORD_ENABLE_MYSQL
+#ifdef STX_ENABLE_MYSQL
   mysql_ = mysql_init(NULL);
 
   if (mysql_ == nullptr) {
@@ -46,7 +46,7 @@ MySQLConnection::MySQLConnection() : mysql_(nullptr) {
 }
 
 MySQLConnection::~MySQLConnection() {
-#ifdef FNORD_ENABLE_MYSQL
+#ifdef STX_ENABLE_MYSQL
   mysql_close(mysql_);
 #else
   RAISE(kRuntimeError, "libstx was compiled without libmysqlclient");
@@ -108,7 +108,7 @@ void MySQLConnection::connect(
     const std::string& database,
     const std::string& username,
     const std::string& password) {
-#ifdef FNORD_ENABLE_MYSQL
+#ifdef STX_ENABLE_MYSQL
   auto ret = mysql_real_connect(
       mysql_,
       host.c_str(),
@@ -134,7 +134,7 @@ std::vector<std::string> MySQLConnection::describeTable(
     const std::string& table_name) {
   std::vector<std::string> columns;
 
-#ifdef FNORD_ENABLE_MYSQL
+#ifdef STX_ENABLE_MYSQL
   MYSQL_RES* res = mysql_list_fields(mysql_, table_name.c_str(), NULL);
   if (res == nullptr) {
     RAISE(
@@ -159,7 +159,7 @@ std::vector<std::string> MySQLConnection::describeTable(
 RefPtr<msg::MessageSchema> MySQLConnection::getTableSchema(
     const std::string& table_name) {
   std::vector<std::string> columns;
-#ifdef FNORD_ENABLE_MYSQL
+#ifdef STX_ENABLE_MYSQL
   MYSQL_RES* res = mysql_list_fields(mysql_, table_name.c_str(), NULL);
   if (res == nullptr) {
     RAISE(
@@ -246,9 +246,9 @@ RefPtr<msg::MessageSchema> MySQLConnection::getTableSchema(
 void MySQLConnection::executeQuery(
     const std::string& query,
     std::function<bool (const std::vector<std::string>&)> row_callback) {
-#ifdef FNORD_ENABLE_MYSQL
+#ifdef STX_ENABLE_MYSQL
 
-#ifndef FNORD_NOTRACE
+#ifndef STX_NOTRACE
     stx::logTrace("fnord.mysql", "Executing MySQL query: $0", query);
 #endif
 
@@ -303,9 +303,9 @@ void MySQLConnection::executeQuery(
 std::list<std::vector<std::string>> MySQLConnection::executeQuery(
     const std::string& query) {
   std::list<std::vector<std::string>> result_rows;
-#ifdef FNORD_ENABLE_MYSQL
+#ifdef STX_ENABLE_MYSQL
 
-#ifndef FNORD_NOTRACE
+#ifndef STX_NOTRACE
     stx::logTrace("fnord.mysql", "Executing MySQL query: $0", query);
 #endif
 

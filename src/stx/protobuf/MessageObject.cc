@@ -213,7 +213,7 @@ MessageObject::~MessageObject() {
 }
 
 Vector<MessageObject>& MessageObject::asObject() const {
-#ifndef FNORD_NODEBUG
+#ifndef STX_NODEBUG
   if (type != FieldType::OBJECT) {
     RAISE(kTypeError);
   }
@@ -223,7 +223,7 @@ Vector<MessageObject>& MessageObject::asObject() const {
 }
 
 const String& MessageObject::asString() const {
-#ifndef FNORD_NODEBUG
+#ifndef STX_NODEBUG
   if (type != FieldType::STRING) {
     RAISE(kTypeError);
   }
@@ -237,7 +237,7 @@ uint32_t MessageObject::asUInt32() const {
     return *((uint64_t*) &data_); // silent truncation :(
   }
 
-#ifndef FNORD_NODEBUG
+#ifndef STX_NODEBUG
   if (type != FieldType::UINT32) {
     RAISE(kTypeError);
   }
@@ -251,7 +251,7 @@ uint64_t MessageObject::asUInt64() const {
     return *((uint32_t*) &data_);
   }
 
-#ifndef FNORD_NODEBUG
+#ifndef STX_NODEBUG
   if (type != FieldType::UINT64) {
     RAISE(kTypeError);
   }
@@ -261,7 +261,7 @@ uint64_t MessageObject::asUInt64() const {
 }
 
 double MessageObject::asDouble() const {
-#ifndef FNORD_NODEBUG
+#ifndef STX_NODEBUG
   if (type != FieldType::DOUBLE) {
     RAISE(kTypeError);
   }
@@ -276,7 +276,7 @@ bool MessageObject::asBool() const {
     return val > 0;
   }
 
-#ifndef FNORD_NODEBUG
+#ifndef STX_NODEBUG
   if (type != FieldType::BOOLEAN) {
     RAISE(kTypeError);
   }
@@ -287,7 +287,7 @@ bool MessageObject::asBool() const {
 }
 
 UnixTime MessageObject::asUnixTime() const {
-#ifndef FNORD_NODEBUG
+#ifndef STX_NODEBUG
   if (type != FieldType::DATETIME) {
     RAISE(kTypeError);
   }

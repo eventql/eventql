@@ -14,7 +14,7 @@ namespace stx {
 namespace mysql {
 
 void mysqlInit() {
-#ifdef FNORD_ENABLE_MYSQL
+#ifdef STX_ENABLE_MYSQL
   static std::mutex global_mysql_init_lock;
   static bool global_mysql_initialized = false;
 

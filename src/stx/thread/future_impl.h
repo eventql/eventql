@@ -7,8 +7,8 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#ifndef _FNORD_THREAD_FUTURE_IMPL_H
-#define _FNORD_THREAD_FUTURE_IMPL_H
+#ifndef _STX_THREAD_FUTURE_IMPL_H
+#define _STX_THREAD_FUTURE_IMPL_H
 #include <assert.h>
 
 namespace stx {

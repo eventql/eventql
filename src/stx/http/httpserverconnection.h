@@ -7,8 +7,8 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#ifndef _FNORD_HTTP_SERVERCONNECTION_H
-#define _FNORD_HTTP_SERVERCONNECTION_H
+#ifndef _STX_HTTP_SERVERCONNECTION_H
+#define _STX_HTTP_SERVERCONNECTION_H
 #include <memory>
 #include <vector>
 #include <stx/autoref.h>

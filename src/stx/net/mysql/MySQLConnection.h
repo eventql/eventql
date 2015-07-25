@@ -7,14 +7,14 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#ifndef _FNORD_SQL_MYSQLCONNECTION_H
-#define _FNORD_SQL_MYSQLCONNECTION_H
+#ifndef _STX_SQL_MYSQLCONNECTION_H
+#define _STX_SQL_MYSQLCONNECTION_H
 #include <memory>
 #include <stx/uri.h>
 #include <stx/exception.h>
 #include <stx/protobuf/MessageSchema.h>
 #include <functional>
-#ifdef FNORD_ENABLE_MYSQL
+#ifdef STX_ENABLE_MYSQL
 #include <mysql.h>
 #endif
 
@@ -144,7 +144,7 @@ public:
   std::list<std::vector<std::string>> executeQuery(const std::string& query);
 
 protected:
-#ifdef FNORD_ENABLE_MYSQL
+#ifdef STX_ENABLE_MYSQL
    MYSQL* mysql_;
 #else
    void* mysql_;

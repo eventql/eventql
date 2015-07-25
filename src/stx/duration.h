@@ -7,8 +7,8 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#ifndef _FNORD_DURATION_H
-#define _FNORD_DURATION_H
+#ifndef _STX_DURATION_H
+#define _STX_DURATION_H
 #include <ctime>
 #include <inttypes.h>
 #include <limits>

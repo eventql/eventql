@@ -38,7 +38,7 @@ uint32_t BitPackDecoder::fetch(bool advance) {
   }
 
   if (outbuf_pos_ == 128) {
-#ifndef FNORD_NODEBUG
+#ifndef STX_NODEBUG
     auto new_pos = pos_ + 16 * maxbits_;
     if (new_pos > size_) {
       if (!advance) {

@@ -7,8 +7,8 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#ifndef _FNORD_JSON_JSONRPCRESPONSE_H
-#define _FNORD_JSON_JSONRPCRESPONSE_H
+#ifndef _STX_JSON_JSONRPCRESPONSE_H
+#define _STX_JSON_JSONRPCRESPONSE_H
 #include <stdlib.h>
 #include <functional>
 #include <string>

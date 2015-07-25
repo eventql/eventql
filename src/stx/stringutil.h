@@ -7,8 +7,8 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#ifndef _FNORD_BASE_STRINGUTIL_H_
-#define _FNORD_BASE_STRINGUTIL_H_
+#ifndef _STX_BASE_STRINGUTIL_H_
+#define _STX_BASE_STRINGUTIL_H_
 
 #include <stdlib.h>
 #include <stdint.h>

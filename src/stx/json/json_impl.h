@@ -7,8 +7,8 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#ifndef _FNORD_JSON_IMPL_H
-#define _FNORD_JSON_IMPL_H
+#ifndef _STX_JSON_IMPL_H
+#define _STX_JSON_IMPL_H
 #include "stx/exception.h"
 #include "stx/inspect.h"
 #include "stx/UnixTime.h"

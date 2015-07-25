@@ -7,9 +7,9 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#ifndef _FNORD_SQL_MYSQL_H
-#define _FNORD_SQL_MYSQL_H
-#ifdef FNORD_ENABLE_MYSQL
+#ifndef _STX_SQL_MYSQL_H
+#define _STX_SQL_MYSQL_H
+#ifdef STX_ENABLE_MYSQL
 #include <mysql.h>
 #endif
 

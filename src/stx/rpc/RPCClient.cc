@@ -24,7 +24,7 @@ void HTTPRPCClient::call(const URI& uri, RefPtr<AnyRPC> rpc) {
 
   auto http_future = http_pool_.executeRequest(http_req);
 
-#ifndef FNORD_NOTRACE
+#ifndef STX_NOTRACE
   stx::logTrace(
       "http.rpcclient",
       "executing RPC via HTTP request\n    id=$2\n    method=$1\n    uri=$0",
@@ -39,7 +39,7 @@ void HTTPRPCClient::call(const URI& uri, RefPtr<AnyRPC> rpc) {
           "got non-200 HTTP response code: $0",
           resp.body().toString());
 
-#ifndef FNORD_NOTRACE
+#ifndef STX_NOTRACE
     stx::logTrace(
         "http.rpcclient",
         "RPC via HTTP request id=$0: Failed: $1",
@@ -51,7 +51,7 @@ void HTTPRPCClient::call(const URI& uri, RefPtr<AnyRPC> rpc) {
       return;
     }
 
-#ifndef FNORD_NOTRACE
+#ifndef STX_NOTRACE
     stx::logTrace(
         "http.rpcclient",
         "RPC via HTTP request id=$0: Success, got $1 bytes response",
@@ -62,7 +62,7 @@ void HTTPRPCClient::call(const URI& uri, RefPtr<AnyRPC> rpc) {
   });
 
   http_future.onFailure([uri, rpc] (const Status& status) mutable{
-#ifndef FNORD_NOTRACE
+#ifndef STX_NOTRACE
     stx::logTrace(
         "http.rpcclient",
         "RPC via HTTP request id=$0: Failed: $1",

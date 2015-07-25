@@ -7,8 +7,8 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#ifndef _FNORD_VFS_H_
-#define _FNORD_VFS_H_
+#ifndef _STX_VFS_H_
+#define _STX_VFS_H_
 #include <stx/VFSFile.h>
 #include <stx/stdtypes.h>
 #include <stx/exception.h>

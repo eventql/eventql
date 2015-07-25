@@ -7,8 +7,8 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#ifndef _FNORD_STATS_H
-#define _FNORD_STATS_H
+#ifndef _STX_STATS_H
+#define _STX_STATS_H
 #include "stx/stats/counter.h"
 #include "stx/stats/statsrepository.h"
 #endif
