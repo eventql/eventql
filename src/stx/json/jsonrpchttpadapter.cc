@@ -63,5 +63,5 @@ void JSONRPCHTTPAdapter::handleHTTPRequest(
 
 
 } // namespace json
-} // namsepace fnord
+} // namespace fnord
 

@@ -39,7 +39,7 @@ protected:
 };
 
 } // namespace json
-} // namsepace fnord
+} // namespace fnord
 
 #include "jsonrpcrequest_impl.h"
 #endif

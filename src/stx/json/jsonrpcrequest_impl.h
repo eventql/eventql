@@ -45,4 +45,4 @@ T JSONRPCRequest::getArg(size_t index, const std::string& name) const {
 }
 
 } // namespace json
-} // namsepace fnord
+} // namespace fnord

@@ -53,5 +53,5 @@ std::string inspect(const json::JSONPointer& ptr) {
   return ptr.toString();
 }
 
-} // namsepace fnord
+} // namespace fnord
 

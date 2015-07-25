@@ -107,7 +107,7 @@ AutoRef<RPC<ReturnType, std::tuple<ArgTypes...>>> mkRPC(
   ReturnType (ClassType::* method)(ArgTypes...),
   ArgTypes... args);
 
-} // namsepace fnord
+} // namespace fnord
 
 #include "RPC_impl.h"
 #endif

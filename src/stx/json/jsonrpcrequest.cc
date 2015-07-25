@@ -62,5 +62,5 @@ const std::string& JSONRPCRequest::method() const {
 }
 
 } // namespace json
-} // namsepace fnord
+} // namespace fnord
 

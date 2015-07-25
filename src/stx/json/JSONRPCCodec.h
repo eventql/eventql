@@ -32,7 +32,7 @@ public:
 };
 
 } // namespace json
-} // namsepace fnord
+} // namespace fnord
 
 #include "JSONRPCCodec_impl.h"
 #endif
