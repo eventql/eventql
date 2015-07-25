@@ -30,15 +30,11 @@ protected:
       const TrackedEvent& event,
       Vector<TrackedItemVisit>* page_views);
 
-  //void insertLogline(
-  //    const UnixTime& time,
-  //    const String& evtype,
-  //    const String& evid,
-  //    const URI::ParamList& logline);
+  static void processCartItemsEvent(
+      const TrackedEvent& event,
+      Vector<TrackedCartItem>* cart_items);
 
-  //void insertQuery(const TrackedQuery& query);
-  //void insertItemVisit(const TrackedItemVisit& visit);
-  //void insertCartVisit(const Vector<TrackedCartItem>& new_cart_items);
+
 };
 
 } // namespace cm

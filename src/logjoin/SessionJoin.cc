@@ -14,13 +14,12 @@ namespace cm {
 
 void SessionJoin::process(RefPtr<TrackedSessionContext> ctx) {
 
-  /* process builtin events */
+  /* load builtin events into structured format */
   std::vector<TrackedQuery> queries;
   std::vector<TrackedItemVisit> page_views;
   std::vector<TrackedCartItem> cart_items;
 
   for (const auto& ev : ctx->tracked_session.events) {
-
     if (ev.evtype == "_search_query") {
       processSearchQueryEvent(ev, &queries);
       continue;
@@ -31,18 +30,10 @@ void SessionJoin::process(RefPtr<TrackedSessionContext> ctx) {
       continue;
     }
 
-    ///* item visit event */
-    //  break;
-    //}
-
-    ///* cart event */
-    //  auto cart_items = TrackedCartItem::fromParams(logline);
-    //  for (auto& ci : cart_items) {
-    //    ci.time = time;
-    //  }
-
-    //  insertCartVisit(cart_items);
-    //  break;
+    if (ev.evtype == "_cart_items") {
+      processCartItemsEvent(ev, &cart_items);
+      continue;
+    }
   }
 
 }
@@ -87,6 +78,34 @@ void SessionJoin::processPageViewEvent(
   }
 
   page_views->emplace_back(visit);
+}
+
+void SessionJoin::processCartItemsEvent(
+    const TrackedEvent& event,
+    Vector<TrackedCartItem>* cart_items) {
+  URI::ParamList logline;
+  URI::parseQueryString(event.data, &logline);
+
+  auto new_cart_items = TrackedCartItem::fromParams(logline);
+  for (auto& ci : new_cart_items) {
+    ci.time = event.time;
+  }
+
+  for (const auto& cart_item : new_cart_items) {
+    bool merged = false;
+
+    for (auto& c : *cart_items) {
+      if (c.item == cart_item.item) {
+        c.merge(cart_item);
+        merged = true;
+        break;
+      }
+    }
+
+    if (!merged) {
+      cart_items->emplace_back(cart_item);
+    }
+  }
 }
 
 } // namespace cm
