@@ -9,7 +9,7 @@
  */
 #include <sstable/cursor.h>
 
-namespace fnord {
+namespace stx {
 namespace sstable {
 
 Cursor::Cursor() {}

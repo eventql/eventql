@@ -11,7 +11,7 @@
 #include <sstable/SSTableScan.h>
 #include <sstable/SSTableColumnReader.h>
 
-namespace fnord {
+namespace stx {
 namespace sstable {
 
 SSTableScan::SSTableScan(
@@ -211,4 +211,4 @@ void SSTableScan::execute(
 }
 
 } // namespace sstable
-} // namespace fnord
+} // namespace stx

@@ -23,7 +23,7 @@ add_library(sstable OBJECT
     SSTableColumnWriter.cc)
 
 add_executable(fn-sstablescan
-    $<TARGET_OBJECTS:fnord-base>
+    $<TARGET_OBJECTS:stx-base>
     $<TARGET_OBJECTS:sstable>
     fn-sstablescan.cc)
 

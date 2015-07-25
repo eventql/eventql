@@ -10,7 +10,7 @@
 #include <stx/ieee754.h>
 #include <sstable/SSTableColumnWriter.h>
 
-namespace fnord {
+namespace stx {
 namespace sstable {
 
 SSTableColumnWriter::SSTableColumnWriter(
@@ -74,4 +74,4 @@ size_t SSTableColumnWriter::size() const {
 }
 
 } // namespace sstable
-} // namespace fnord
+} // namespace stx

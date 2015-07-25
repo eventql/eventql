@@ -27,7 +27,7 @@
 #include <sstable/indexprovider.h>
 #include <sstable/SSTableColumnSchema.h>
 
-namespace fnord {
+namespace stx {
 namespace sstable {
 
 class SSTableScan {
@@ -62,6 +62,6 @@ protected:
 };
 
 } // namespace sstable
-} // namespace fnord
+} // namespace stx
 
 #endif

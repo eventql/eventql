@@ -12,13 +12,13 @@
 #include <stx/exception.h>
 #include <stx/fnv.h>
 
-namespace fnord {
+namespace stx {
 namespace sstable {
 
 FileHeaderReader::FileHeaderReader(
     void* buf,
     size_t buf_size) :
-    fnord::util::BinaryMessageReader(buf, buf_size) {
+    stx::util::BinaryMessageReader(buf, buf_size) {
   auto magic_bytes = *readUInt32();
   if (magic_bytes != BinaryFormat::kMagicBytes) {
     RAISE(kIllegalStateError, "not a valid sstable");

@@ -9,7 +9,7 @@
  */
 #include <sstable/indexprovider.h>
 
-namespace fnord {
+namespace stx {
 namespace sstable {
 
 IndexProvider::IndexProvider() {}

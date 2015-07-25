@@ -15,8 +15,8 @@
 #include <sstable/sstablewriter.h>
 #include <sstable/rowoffsetindex.h>
 
-using namespace fnord::sstable;
-using namespace fnord;
+using namespace stx::sstable;
+using namespace stx;
 UNIT_TEST(SSTableTest);
 
 TEST_CASE(SSTableTest, TestSSTableWriter, [] () {

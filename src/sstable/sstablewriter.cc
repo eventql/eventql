@@ -16,7 +16,7 @@
 #include <sstable/sstablewriter.h>
 #include <sstable/SSTableColumnWriter.h>
 
-namespace fnord {
+namespace stx {
 namespace sstable {
 
 std::unique_ptr<SSTableWriter> SSTableWriter::create(

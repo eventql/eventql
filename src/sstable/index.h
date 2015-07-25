@@ -14,7 +14,7 @@
 #include <vector>
 #include <memory>
 
-namespace fnord {
+namespace stx {
 namespace sstable {
 
 class Index {
