@@ -113,6 +113,8 @@ TEST_CASE(LogJoinTest, SimpleQuery, [] () {
   auto ctx = pipeline->processSession(sess);
   const auto& joined = ctx->joined_session;
 
+  stx::iputs("output:\n $0", joined.DebugString());
+
   EXPECT_EQ(joined.num_cart_items(), 0);
   EXPECT_EQ(joined.cart_value_eurcents(), 0);
   EXPECT_EQ(joined.num_order_items(), 0);
