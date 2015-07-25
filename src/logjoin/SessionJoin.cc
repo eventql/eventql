@@ -221,11 +221,10 @@ void SessionJoin::process(RefPtr<TrackedSessionContext> ctx) {
   //  obj.addChild(session_schema->fieldId("customer_session_id"), session.customer_session_id.get());
   //}
 
-  //obj.addChild(session_schema->fieldId("num_cart_items"), session.num_cart_items);
-  //obj.addChild(session_schema->fieldId("cart_value_eurcents"), session.cart_value_eurcents);
-  //obj.addChild(session_schema->fieldId("num_order_items"), session.num_order_items);
-  //obj.addChild(session_schema->fieldId("gmv_eurcents"), session.gmv_eurcents);
-  //obj.addChild(session_schema->fieldId("customer"), session.customer_key);
+  ctx->joined_session.set_num_cart_items(num_cart_items);
+  ctx->joined_session.set_cart_value_eurcents(cart_value_eurcents);
+  ctx->joined_session.set_num_order_items(num_order_items);
+  ctx->joined_session.set_gmv_eurcents(gmv_eurcents);
 
   auto first_seen = firstSeenTime(ctx->joined_session);
   auto last_seen = lastSeenTime(ctx->joined_session);
@@ -238,6 +237,8 @@ void SessionJoin::process(RefPtr<TrackedSessionContext> ctx) {
 
   ctx->joined_session.set_last_seen_time(
       last_seen.get().unixMicros() / kMicrosPerSecond);
+
+  ctx->joined_session.set_customer(ctx->tracked_session.customer_key);
 }
 
 void SessionJoin::processSearchQueryEvent(
