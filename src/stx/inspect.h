@@ -14,7 +14,7 @@
 #include <vector>
 #include "stx/io/outputstream.h"
 
-namespace fnord {
+namespace stx {
 
 template <typename T>
 std::string inspect(const T& value);

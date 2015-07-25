@@ -23,7 +23,7 @@ add_library(fnord-chart OBJECT
     timedomain.cc)
 
 add_executable(test-chart
-    $<TARGET_OBJECTS:fnord-base>
+    $<TARGET_OBJECTS:stx-base>
     $<TARGET_OBJECTS:fnord-chart>
     chart_test.cc)
 

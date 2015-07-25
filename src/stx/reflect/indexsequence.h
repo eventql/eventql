@@ -10,7 +10,7 @@
 #ifndef _FNORD_REFLECT_INDEXSEQUENCE_H
 #define _FNORD_REFLECT_INDEXSEQUENCE_H
 
-namespace fnord {
+namespace stx {
 namespace reflect {
 
 template <int...>

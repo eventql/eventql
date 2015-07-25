@@ -9,7 +9,7 @@
  */
 #include "stx/util/SimpleRateLimit.h"
 
-namespace fnord {
+namespace stx {
 namespace util {
 
 SimpleRateLimit::SimpleRateLimit(

@@ -10,7 +10,7 @@
 #pragma once
 #include <stx/exception.h>
 
-namespace fnord {
+namespace stx {
 
 template <typename T>
 AutoRef<T>::AutoRef() : ref_(nullptr) {}
@@ -97,4 +97,4 @@ ScopedPtr<T> mkScoped(T* ptr) {
   return ScopedPtr<T>(ptr);
 }
 
-} // namespace fnord
+} // namespace stx

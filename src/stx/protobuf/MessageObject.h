@@ -1,5 +1,5 @@
 /**
- * This file is part of the "libfnord" project
+ * This file is part of the "libstx" project
  *   Copyright (c) 2015 Paul Asmuth
  *
  * FnordMetric is free software: you can redistribute it and/or modify it under
@@ -12,7 +12,7 @@
 #include <stx/stdtypes.h>
 #include <stx/UnixTime.h>
 
-namespace fnord {
+namespace stx {
 namespace msg {
 
 struct MessageObject;
@@ -89,6 +89,6 @@ struct MessageObject {
 
 
 } // namespace msg
-} // namespace fnord
+} // namespace stx
 
 #endif

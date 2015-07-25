@@ -13,7 +13,7 @@
 #include <vector>
 #include <string>
 
-namespace fnord {
+namespace stx {
 namespace chart {
 
 class RenderTarget {

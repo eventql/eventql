@@ -11,7 +11,7 @@
 #include "stx/json/jsonrpcrequest.h"
 #include "stx/json/jsonrpcresponse.h"
 
-namespace fnord {
+namespace stx {
 namespace json {
 
 template <class ServiceType>

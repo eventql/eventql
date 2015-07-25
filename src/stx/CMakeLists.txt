@@ -9,7 +9,7 @@ file(GLOB PROTO_FILES *.proto)
 PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS ${PROTO_FILES})
 
 # base
-add_library(fnord-base OBJECT
+add_library(stx-base OBJECT
     ../../3rdparty/simdcomp/simdbitpacking.c
     ../../3rdparty/simdcomp/simdintegratedbitpacking.c
     ../../3rdparty/simdcomp/simdcomputil.c
@@ -84,38 +84,38 @@ add_library(fnord-base OBJECT
     ${PROTO_SRCS})
 
 add_executable(test-inputstream
-    $<TARGET_OBJECTS:fnord-base>
+    $<TARGET_OBJECTS:stx-base>
     io/inputstream_test.cc)
 
 add_executable(test-uri
-    $<TARGET_OBJECTS:fnord-base>
+    $<TARGET_OBJECTS:stx-base>
     uri_test.cc)
 
 add_executable(test-stringutil
-    $<TARGET_OBJECTS:fnord-base>
+    $<TARGET_OBJECTS:stx-base>
     stringutil_test.cc)
 
 add_executable(test-internmap
-    $<TARGET_OBJECTS:fnord-base>
+    $<TARGET_OBJECTS:stx-base>
     InternMap_test.cc)
 
 add_executable(test-hmac
-    $<TARGET_OBJECTS:fnord-base>
+    $<TARGET_OBJECTS:stx-base>
     HMAC_test.cc)
 
 add_executable(test-human
-    $<TARGET_OBJECTS:fnord-base>
+    $<TARGET_OBJECTS:stx-base>
     human_test.cc)
 
 add_executable(test-secure-cookie
-    $<TARGET_OBJECTS:fnord-base>
+    $<TARGET_OBJECTS:stx-base>
     web/SecureCookie_test.cc)
 
 add_executable(test-protobuf
-    $<TARGET_OBJECTS:fnord-base>
-    $<TARGET_OBJECTS:fnord-protobuf>
-    $<TARGET_OBJECTS:fnord-json>
-    $<TARGET_OBJECTS:fnord-http>
+    $<TARGET_OBJECTS:stx-base>
+    $<TARGET_OBJECTS:stx-protobuf>
+    $<TARGET_OBJECTS:stx-json>
+    $<TARGET_OBJECTS:stx-http>
     protobuf/protobuf_test.cc)
 
 ## redis
@@ -129,7 +129,7 @@ add_executable(test-protobuf
 #    net/redis/redisqueue.cc)
 
 #add_executable(tests/test-redis
-#    $<TARGET_OBJECTS:fnord-base>
+#    $<TARGET_OBJECTS:stx-base>
 #    $<TARGET_OBJECTS:fnord-comm>
 #    $<TARGET_OBJECTS:fnord-net>
 #    $<TARGET_OBJECTS:fnord-redis>

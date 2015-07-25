@@ -12,17 +12,17 @@
 #include "stx/VFS.h"
 #include "stx/http/httpservice.h"
 
-namespace fnord {
+namespace stx {
 namespace http {
 
-class VFSFileServlet : public fnord::http::HTTPService {
+class VFSFileServlet : public stx::http::HTTPService {
 public:
 
   VFSFileServlet(const String& base_path, VFS* vfs);
 
   void handleHTTPRequest(
-      fnord::http::HTTPRequest* req,
-      fnord::http::HTTPResponse* res);
+      stx::http::HTTPRequest* req,
+      stx::http::HTTPResponse* res);
 
 protected:
   String contentTypeFromFilename(const String& filename) const;

@@ -11,7 +11,7 @@
 #define _FNORDMETRIC_UTIL_LOGTARGET_H
 #include "stx/logging/loglevel.h"
 
-namespace fnord {
+namespace stx {
 
 class LogTarget {
 public:

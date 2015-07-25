@@ -21,7 +21,7 @@
 #include <stx/net/tcpconnection.h>
 #include <stx/thread/taskscheduler.h>
 
-namespace fnord {
+namespace stx {
 namespace http {
 
 class HTTPServerConnection : public RefCounted {

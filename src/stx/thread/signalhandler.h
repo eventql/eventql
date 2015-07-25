@@ -10,7 +10,7 @@
 #ifndef _FNORD_SYSTEM_SIGNALHANDLER_H
 #define _FNORD_SYSTEM_SIGNALHANDLER_H
 
-namespace fnord {
+namespace stx {
 namespace thread {
 
 class SignalHandler {

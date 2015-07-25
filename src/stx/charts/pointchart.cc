@@ -11,7 +11,7 @@
 #include "pointchart.h"
 #include <stx/exception.h>
 
-namespace fnord {
+namespace stx {
 namespace chart {
 
 char PointChart::kDefaultPointStyle[] = "circle";

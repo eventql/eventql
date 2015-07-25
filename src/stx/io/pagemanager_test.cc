@@ -16,7 +16,7 @@
 #include <sys/fcntl.h>
 #include <unistd.h>
 
-using namespace fnord;
+using namespace stx;
 
 UNIT_TEST(PageManagerTest);
 

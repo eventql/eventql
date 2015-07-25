@@ -17,11 +17,11 @@
 #include "stx/http/httpresponse.h"
 #include "stx/http/httpservice.h"
 
-namespace fnord {
+namespace stx {
 namespace json {
 class JSONRPC;
 
-class JSONRPCHTTPAdapter : public fnord::http::HTTPService {
+class JSONRPCHTTPAdapter : public stx::http::HTTPService {
 public:
 
   static std::unique_ptr<http::HTTPService> make(JSONRPC* rpc);
@@ -40,5 +40,5 @@ protected:
 };
 
 } // namespace json
-} // namsepace fnord
+} // namespace stx
 #endif

@@ -12,7 +12,7 @@
 #include "stx/http/httpclientconnection.h"
 #include "stx/net/tcpconnection.h"
 
-namespace fnord {
+namespace stx {
 namespace http {
 
 HTTPClient::HTTPClient() {}
@@ -28,7 +28,7 @@ HTTPResponse HTTPClient::executeRequest(
 
 HTTPResponse HTTPClient::executeRequest(
     const HTTPRequest& req,
-    const fnord::InetAddr& addr) {
+    const stx::InetAddr& addr) {
   return executeRequest(
       req,
       addr,
@@ -54,7 +54,7 @@ HTTPResponse HTTPClient::executeRequest(
 
 HTTPResponse HTTPClient::executeRequest(
     const HTTPRequest& req,
-    const fnord::InetAddr& addr,
+    const stx::InetAddr& addr,
     Function<HTTPResponseFuture* (Promise<HTTPResponse> promise)> factory) {
   std::unique_lock<std::mutex> lk(mutex_);
 

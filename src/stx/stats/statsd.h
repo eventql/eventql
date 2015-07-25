@@ -11,15 +11,15 @@
 #include <stx/net/udpserver.h>
 #include <stx/thread/taskscheduler.h>
 
-namespace fnord {
+namespace stx {
 namespace statsd {
 
 class StatsdServer {
 public:
 
   StatsdServer(
-      fnord::TaskScheduler* server_scheduler,
-      fnord::TaskScheduler* work_scheduler);
+      stx::TaskScheduler* server_scheduler,
+      stx::TaskScheduler* work_scheduler);
 
   void listen(int port);
 
@@ -37,9 +37,9 @@ public:
 
 protected:
 
-  void messageReceived(const fnord::Buffer& msg);
+  void messageReceived(const stx::Buffer& msg);
 
-  fnord::net::UDPServer udp_server_;
+  stx::net::UDPServer udp_server_;
 
   std::function<void (
       const std::string&,

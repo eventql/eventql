@@ -18,7 +18,7 @@
 #include <vector>
 #include "stx/logging.h"
 
-namespace fnord {
+namespace stx {
 
 class Application {
 public:

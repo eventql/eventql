@@ -9,7 +9,7 @@
  */
 #include "stx/json/jsonutil.h"
 
-namespace fnord {
+namespace stx {
 namespace json {
 
 template <typename T>
@@ -45,4 +45,4 @@ T JSONRPCRequest::getArg(size_t index, const std::string& name) const {
 }
 
 } // namespace json
-} // namsepace fnord
+} // namespace stx

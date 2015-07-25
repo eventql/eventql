@@ -1,5 +1,5 @@
 /**
- * This file is part of the "libfnord" project
+ * This file is part of the "libstx" project
  *   Copyright (c) 2015 Paul Asmuth
  *
  * FnordMetric is free software: you can redistribute it and/or modify it under
@@ -12,7 +12,7 @@
 #include <stx/inspect.h>
 #include <stx/stringutil.h>
 
-namespace fnord {
+namespace stx {
 
 SHA1Hash SHA1Hash::fromHexString(const String& str) {
   SHA1Hash hash(DeferInitialization{});

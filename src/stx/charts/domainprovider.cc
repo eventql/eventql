@@ -9,7 +9,7 @@
  */
 #include "stx/charts/domainprovider.h"
 
-namespace fnord {
+namespace stx {
 namespace chart {
 
 DomainProvider::DomainProvider(

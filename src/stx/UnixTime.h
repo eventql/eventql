@@ -16,7 +16,7 @@
 #include "stx/time_constants.h"
 #include "stx/CivilTime.h"
 
-namespace fnord {
+namespace stx {
 
 class UnixTime {
 public:
@@ -104,10 +104,10 @@ protected:
 }
 
 namespace std {
-template <> class numeric_limits<fnord::UnixTime> {
+template <> class numeric_limits<stx::UnixTime> {
 public:
-  static fnord::UnixTime max();
-  static fnord::UnixTime min();
+  static stx::UnixTime max();
+  static stx::UnixTime min();
 };
 }
 

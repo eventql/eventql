@@ -1,9 +1,9 @@
 /**
- *  This file is part of the "libfnord" project
+ *  This file is part of the "libstx" project
  *    (c) 2009-2015 Christian Parpart <https://github.com/christianparpart>
  *    (c) 2014-2015 Paul Asmuth <https://github.com/paulasmuth>
  *
- *  libfnord is free software: you can redistribute it and/or modify it under
+ *  libstx is free software: you can redistribute it and/or modify it under
  *  the terms of the GNU Affero General Public License v3.0.
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
@@ -12,7 +12,7 @@
 #include <vector>
 #include <string>
 
-namespace fnord {
+namespace stx {
 
 class StackTrace {
  public:
@@ -33,4 +33,4 @@ class StackTrace {
   int frameCount_;
 };
 
-} // namespace fnord
+} // namespace stx

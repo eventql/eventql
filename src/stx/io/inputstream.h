@@ -14,7 +14,7 @@
 #include "stx/buffer.h"
 #include "stx/io/file.h"
 
-namespace fnord {
+namespace stx {
 
 class InputStream {
 public:

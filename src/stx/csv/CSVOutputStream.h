@@ -1,5 +1,5 @@
 /**
- * This file is part of the "libfnord" project
+ * This file is part of the "libstx" project
  *   Copyright (c) 2015 Paul Asmuth
  *
  * FnordMetric is free software: you can redistribute it and/or modify it under
@@ -12,7 +12,7 @@
 #include <stx/exception.h>
 #include <stx/io/outputstream.h>
 
-namespace fnord {
+namespace stx {
 
 class CSVOutputStream {
 public:
@@ -30,5 +30,5 @@ protected:
   String row_sep_;
 };
 
-} // namespace fnord
+} // namespace stx
 

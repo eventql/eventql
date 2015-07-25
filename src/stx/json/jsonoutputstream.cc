@@ -15,7 +15,7 @@
 #include <stdio.h>
 #include <cmath>
 
-namespace fnord {
+namespace stx {
 namespace json {
 
 JSONOutputStream::JSONOutputStream(
@@ -265,5 +265,5 @@ std::string JSONOutputStream::escapeString(const std::string& string) const {
 
 
 } // namespace json
-} // namespace fnord
+} // namespace stx
 

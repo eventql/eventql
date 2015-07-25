@@ -12,7 +12,7 @@
 #include <stx/http/httprequest.h>
 #include <stx/http/httpresponse.h>
 
-namespace fnord {
+namespace stx {
 namespace http {
 
 class HTTPServerConnectionHandler {

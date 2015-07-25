@@ -12,7 +12,7 @@
 #include <functional>
 #include <memory>
 
-namespace fnord {
+namespace stx {
 namespace thread {
 
 class Task {

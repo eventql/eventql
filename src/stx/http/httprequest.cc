@@ -12,7 +12,7 @@
 #include <stx/http/httpparser.h>
 #include <stx/http/httprequest.h>
 
-namespace fnord {
+namespace stx {
 namespace http {
 
 HTTPRequest HTTPRequest::mkGet(const std::string& uri) {

@@ -10,7 +10,7 @@
 #include "stx/logging.h"
 #include "stx/rpc/RPCClient.h"
 
-namespace fnord {
+namespace stx {
 
 HTTPRPCClient::HTTPRPCClient(
     TaskScheduler* sched) :
@@ -25,7 +25,7 @@ void HTTPRPCClient::call(const URI& uri, RefPtr<AnyRPC> rpc) {
   auto http_future = http_pool_.executeRequest(http_req);
 
 #ifndef FNORD_NOTRACE
-  fnord::logTrace(
+  stx::logTrace(
       "http.rpcclient",
       "executing RPC via HTTP request\n    id=$2\n    method=$1\n    uri=$0",
       uri.toString(),
@@ -40,7 +40,7 @@ void HTTPRPCClient::call(const URI& uri, RefPtr<AnyRPC> rpc) {
           resp.body().toString());
 
 #ifndef FNORD_NOTRACE
-    fnord::logTrace(
+    stx::logTrace(
         "http.rpcclient",
         "RPC via HTTP request id=$0: Failed: $1",
         (void*) rpc.get(),
@@ -52,7 +52,7 @@ void HTTPRPCClient::call(const URI& uri, RefPtr<AnyRPC> rpc) {
     }
 
 #ifndef FNORD_NOTRACE
-    fnord::logTrace(
+    stx::logTrace(
         "http.rpcclient",
         "RPC via HTTP request id=$0: Success, got $1 bytes response",
         (void*) rpc.get(),
@@ -63,7 +63,7 @@ void HTTPRPCClient::call(const URI& uri, RefPtr<AnyRPC> rpc) {
 
   http_future.onFailure([uri, rpc] (const Status& status) mutable{
 #ifndef FNORD_NOTRACE
-    fnord::logTrace(
+    stx::logTrace(
         "http.rpcclient",
         "RPC via HTTP request id=$0: Failed: $1",
         (void*) rpc.get(),
@@ -74,5 +74,5 @@ void HTTPRPCClient::call(const URI& uri, RefPtr<AnyRPC> rpc) {
   });
 }
 
-} // namespace fnord
+} // namespace stx
 

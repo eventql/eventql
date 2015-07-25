@@ -12,7 +12,7 @@
 #include <stx/random.h>
 #include <stx/stringutil.h>
 
-namespace fnord {
+namespace stx {
 
 Random::Random() {
   std::random_device r;

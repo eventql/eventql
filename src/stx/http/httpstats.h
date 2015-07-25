@@ -16,7 +16,7 @@
 #include "stx/stats/multicounter.h"
 #include "stx/stats/statsrepository.h"
 
-namespace fnord {
+namespace stx {
 namespace http {
 
 struct HTTPClientStats {

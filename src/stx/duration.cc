@@ -9,7 +9,7 @@
  */
 #include "stx/duration.h"
 
-namespace fnord {
+namespace stx {
 
 Duration::Duration(uint64_t microseconds) : micros_(microseconds) {}
 

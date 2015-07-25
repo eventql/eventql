@@ -12,7 +12,7 @@
 #include "stx/stats/statsdagent.h"
 #include "stx/wallclock.h"
 
-namespace fnord {
+namespace stx {
 namespace stats {
 
 StatsdAgent::StatsdAgent(
@@ -52,7 +52,7 @@ void StatsdAgent::start() {
       try {
         report();
       } catch (const StandardException& e) {
-        fnord::logError("fnord.statsd_agent", e, "StatsD push failed");
+        stx::logError("fnord.statsd_agent", e, "StatsD push failed");
       }
     }
   });

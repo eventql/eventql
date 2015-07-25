@@ -10,7 +10,7 @@
 #include "stx/human.h"
 #include "stx/test/unittest.h"
 
-using namespace fnord;
+using namespace stx;
 
 UNIT_TEST(HumanTest);
 

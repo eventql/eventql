@@ -9,7 +9,7 @@
  */
 #include "stx/rpc/RPC.h"
 
-namespace fnord {
+namespace stx {
 
 AnyRPC::AnyRPC(
     const std::string& method) :

@@ -16,7 +16,7 @@
 #include "stx/autoref.h"
 #include "stx/VFSFile.h"
 
-namespace fnord {
+namespace stx {
 
 class Buffer : public VFSFile {
 public:

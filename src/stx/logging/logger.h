@@ -19,7 +19,7 @@
 #define FNORD_LOGGER_MAX_LISTENERS 64
 #endif
 
-namespace fnord {
+namespace stx {
 
 class Logger {
 public:
@@ -61,7 +61,7 @@ protected:
   std::atomic<LogTarget*> listeners_[FNORD_LOGGER_MAX_LISTENERS];
 };
 
-} // namespace fnord
+} // namespace stx
 
 #include "stx/logging/logger_impl.h"
 #endif

@@ -15,7 +15,7 @@
 #include <string>
 #include "stx/time_constants.h"
 
-namespace fnord {
+namespace stx {
 
 class Duration {
 public:

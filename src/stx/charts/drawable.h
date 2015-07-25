@@ -17,7 +17,7 @@
 #include "stx/charts/series.h"
 #include "stx/charts/viewport.h"
 
-namespace fnord {
+namespace stx {
 namespace chart {
 class RenderTarget;
 class Canvas;

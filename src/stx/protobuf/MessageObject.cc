@@ -1,5 +1,5 @@
 /**
- * This file is part of the "libfnord" project
+ * This file is part of the "libstx" project
  *   Copyright (c) 2015 Paul Asmuth
  *
  * FnordMetric is free software: you can redistribute it and/or modify it under
@@ -10,7 +10,7 @@
 #include <stx/protobuf/MessageObject.h>
 #include <stx/exception.h>
 
-namespace fnord {
+namespace stx {
 namespace msg {
 
 String fieldTypeToString(FieldType type) {
@@ -352,4 +352,4 @@ const String& MessageObject::getString(uint32_t id) const {
 }
 
 } // namespace msg
-} // namespace fnord
+} // namespace stx

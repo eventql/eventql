@@ -10,7 +10,7 @@
 #ifndef _FNORD_STATS_COUNTERSTAT_H
 #define _FNORD_STATS_COUNTERSTAT_H
 
-namespace fnord {
+namespace stx {
 namespace stats {
 
 /**

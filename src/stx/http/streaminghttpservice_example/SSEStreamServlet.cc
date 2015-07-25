@@ -1,5 +1,5 @@
 /**
- * This file is part of the "libfnord" project
+ * This file is part of the "libstx" project
  *   Copyright (c) 2015 Paul Asmuth
  *   Copyright (c) 2015 Laura Schlimmer
  *
@@ -10,7 +10,7 @@
  */
 #include "SSEStreamServlet.h"
 
-namespace fnord {
+namespace stx {
 namespace http {
 
 void SSEStreamServlet::handleHTTPRequest(

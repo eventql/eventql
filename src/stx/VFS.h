@@ -14,7 +14,7 @@
 #include <stx/exception.h>
 #include <stx/autoref.h>
 
-namespace fnord {
+namespace stx {
 
 class VFS {
 public:

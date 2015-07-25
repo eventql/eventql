@@ -10,22 +10,22 @@
 #include "stx/UnixTime.h"
 #include "stx/charts/timedomain.h"
 
-namespace fnord {
+namespace stx {
 namespace chart {
 
 TimeDomain::TimeDomain(
-    fnord::UnixTime min_value,
-    fnord::UnixTime max_value,
+    stx::UnixTime min_value,
+    stx::UnixTime max_value,
     bool is_logarithmic,
     bool is_inverted) :
-    ContinuousDomain<fnord::UnixTime>(
+    ContinuousDomain<stx::UnixTime>(
         min_value,
         max_value,
         is_logarithmic,
         is_inverted) {}
 
-std::string TimeDomain::label(fnord::UnixTime value) const {
-  auto range = ContinuousDomain<fnord::UnixTime>::getRange();
+std::string TimeDomain::label(stx::UnixTime value) const {
+  auto range = ContinuousDomain<stx::UnixTime>::getRange();
 
   if (range < 60 * 60) {
     return value.toString("%H:%M:%S");

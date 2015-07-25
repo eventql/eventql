@@ -18,7 +18,7 @@
 #include <vector>
 #include "stx/net/inetaddr.h"
 
-namespace fnord {
+namespace stx {
 
 class ServerGroup {
 public:

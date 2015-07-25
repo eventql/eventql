@@ -15,7 +15,7 @@
 #include <string>
 #include <stx/stdtypes.h>
 
-namespace fnord {
+namespace stx {
 class Buffer;
 
 #undef O_APPEND

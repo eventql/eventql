@@ -11,7 +11,7 @@
 #include "stx/mdb/MDB.h"
 #include "stx/mdb/MDBTransaction.h"
 
-namespace fnord {
+namespace stx {
 namespace mdb {
 
 MDBTransaction::MDBTransaction(

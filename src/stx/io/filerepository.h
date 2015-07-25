@@ -14,7 +14,7 @@
 #include <vector>
 #include "stx/random.h"
 
-namespace fnord {
+namespace stx {
 
 class FileRepository {
 public:

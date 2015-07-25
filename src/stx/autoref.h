@@ -16,7 +16,7 @@
 #include <atomic>
 #include <stx/stdtypes.h>
 
-namespace fnord {
+namespace stx {
 
 template <typename T>
 class AutoRef {
@@ -71,7 +71,7 @@ AutoRef<T> mkRef(T* ptr);
 template <typename T>
 ScopedPtr<T> mkScoped(T* ptr);
 
-} // namespace fnord
+} // namespace stx
 
 #include "autoref_impl.h"
 #endif

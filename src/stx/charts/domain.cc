@@ -12,8 +12,8 @@
 #include "stx/charts/discretedomain.h"
 #include "stx/charts/timedomain.h"
 
-using namespace fnord;
-namespace fnord {
+using namespace stx;
+namespace stx {
 namespace chart {
 
 const char AnyDomain::kDimensionLetters[] = "xyz";
@@ -30,8 +30,8 @@ template <> Domain<double>*
   return new ContinuousDomain<double>();
 }
 
-template <> Domain<fnord::UnixTime>*
-    Domain<fnord::UnixTime>::mkDomain() {
+template <> Domain<stx::UnixTime>*
+    Domain<stx::UnixTime>::mkDomain() {
   return new TimeDomain();
 }
 

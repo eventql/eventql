@@ -13,7 +13,7 @@
 #include <stx/exception.h>
 #include <stx/io/outputstream.h>
 
-namespace fnord {
+namespace stx {
 
 Exception::Exception() :
     type_name_(nullptr),
@@ -145,5 +145,5 @@ int Exception::line() const {
   return line_;
 }
 
-} // namespace fnord
+} // namespace stx
 

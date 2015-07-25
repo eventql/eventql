@@ -12,7 +12,7 @@
 #include "stx/autoref.h"
 #include "stx/stats/statssink.h"
 
-namespace fnord {
+namespace stx {
 namespace stats {
 
 class Stat : public RefCounted {

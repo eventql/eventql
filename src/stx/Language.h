@@ -1,5 +1,5 @@
 /**
- * This file is part of the "libfnord" project
+ * This file is part of the "libstx" project
  *   Copyright (c) 2015 Paul Asmuth
  *
  * FnordMetric is free software: you can redistribute it and/or modify it under
@@ -11,7 +11,7 @@
 #define _FNORD_LANGUAGE_H
 #include "stx/stdtypes.h"
 
-namespace fnord {
+namespace stx {
 
 /* ISO 639-1 */
 enum class Language : uint16_t {
@@ -30,6 +30,6 @@ const uint16_t kMaxLanguage = 7;
 Language languageFromString(const String& string);
 String languageToString(Language lang);
 
-} // namespace fnord
+} // namespace stx
 
 #endif

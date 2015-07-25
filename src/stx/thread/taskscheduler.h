@@ -12,7 +12,7 @@
 #include "stx/thread/task.h"
 #include "stx/thread/wakeup.h"
 
-namespace fnord {
+namespace stx {
 
 class TaskScheduler {
 public:

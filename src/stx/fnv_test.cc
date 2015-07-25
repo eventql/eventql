@@ -16,11 +16,11 @@
 UNIT_TEST(FNVTest);
 
 TEST_CASE(FNVTest, TestFNV64, [] () {
-  fnord::util::FNV<uint64_t> fnv64;
+  stx::util::FNV<uint64_t> fnv64;
   EXPECT_EQ(fnv64.hash("fnord"), 0xE4D8CB6A3646310);
 });
 
 TEST_CASE(FNVTest, TestFNV32, [] () {
-  fnord::util::FNV<uint32_t> fnv32;
+  stx::util::FNV<uint32_t> fnv32;
   EXPECT_EQ(fnv32.hash("fnord"), 0x6D964EB0);
 });

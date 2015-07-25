@@ -11,7 +11,7 @@
 #define _FNORD_REFLECT_METACLASS_H
 #include <unordered_map>
 
-namespace fnord {
+namespace stx {
 namespace reflect {
 
 template <class ClassType>
@@ -43,7 +43,7 @@ struct is_reflected : std::false_type {};
 template<typename T>
 struct is_reflected<
     T,
-    decltype(T::reflect((fnord::reflect::DummyTarget<T>*) nullptr))> :
+    decltype(T::reflect((stx::reflect::DummyTarget<T>*) nullptr))> :
         std::true_type {};
 
 template <class ClassType>

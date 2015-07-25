@@ -20,7 +20,7 @@
 #include "stx/status.h"
 #include "stx/thread/wakeup.h"
 
-namespace fnord {
+namespace stx {
 class TaskScheduler;
 
 template <typename T>
@@ -91,7 +91,7 @@ protected:
   AutoRef<PromiseState<T>> state_;
 };
 
-} // namespace fnord
+} // namespace stx
 
 #include "future_impl.h"
 #endif

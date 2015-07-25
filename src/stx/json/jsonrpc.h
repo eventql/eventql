@@ -17,7 +17,7 @@
 #include "stx/json/jsonrpchttpadapter.h"
 #include "stx/reflect/reflect.h"
 
-namespace fnord {
+namespace stx {
 namespace json {
 class JSONRPCRequest;
 class JSONRPCResponse;
@@ -66,7 +66,7 @@ protected:
 };
 
 } // namespace json
-} // namsepace fnord
+} // namespace stx
 
 #include "jsonrpc_impl.h"
 #endif

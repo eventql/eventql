@@ -14,7 +14,7 @@
 #include "stx/http/httpconnectionpool.h"
 #include "stx/thread/eventloop.h"
 
-namespace fnord {
+namespace stx {
 namespace http {
 
 class HTTPClient {
@@ -26,7 +26,7 @@ public:
 
   HTTPResponse executeRequest(
       const HTTPRequest& req,
-      const fnord::InetAddr& addr);
+      const stx::InetAddr& addr);
 
   HTTPResponse executeRequest(
       const HTTPRequest& req,
@@ -34,13 +34,13 @@ public:
 
   HTTPResponse executeRequest(
       const HTTPRequest& req,
-      const fnord::InetAddr& addr,
+      const stx::InetAddr& addr,
       Function<HTTPResponseFuture* (Promise<HTTPResponse> promise)> factory);
 
 protected:
   thread::EventLoop ev_;
   std::mutex mutex_;
-  fnord::net::DNSCache dns_cache_;
+  stx::net::DNSCache dns_cache_;
 };
 
 }

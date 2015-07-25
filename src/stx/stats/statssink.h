@@ -12,7 +12,7 @@
 #include <stdlib.h>
 #include "stx/stdtypes.h"
 
-namespace fnord {
+namespace stx {
 namespace stats {
 
 class StatsSink {

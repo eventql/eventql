@@ -11,7 +11,7 @@
 #define _FNORD_UTIL_FREEONDESTROY_H
 #include <stdlib.h>
 
-namespace fnord {
+namespace stx {
 namespace util {
 
 class FreeOnDestroy {

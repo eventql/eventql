@@ -13,7 +13,7 @@
 #include <stdint.h>
 #include "stx/UnixTime.h"
 
-namespace fnord {
+namespace stx {
 namespace stats {
 
 template <typename T>

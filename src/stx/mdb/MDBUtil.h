@@ -11,7 +11,7 @@
 #define _FNORD_MDBUTIL_H
 #include "stx/mdb/MDBTransaction.h"
 
-namespace fnord {
+namespace stx {
 namespace mdb {
 
 class MDBUtil {

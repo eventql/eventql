@@ -11,7 +11,7 @@
 #include "stx/json/jsonrpcrequest.h"
 #include "stx/json/jsonrpcresponse.h"
 
-namespace fnord {
+namespace stx {
 namespace json {
 
 JSONRPC::JSONRPC() {}
@@ -34,5 +34,5 @@ void JSONRPC::registerMethod(
 }
 
 } // namespace json
-} // namsepace fnord
+} // namespace stx
 

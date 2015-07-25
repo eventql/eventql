@@ -9,7 +9,7 @@
  */
 #include "stx/charts/legenddefinition.h"
 
-namespace fnord {
+namespace stx {
 namespace chart {
 
 LegendDefinition::LegendDefinition(

@@ -14,7 +14,7 @@
 #include "stx/json/json.h"
 #include "stx/json/jsoninputstream.h"
 
-namespace fnord {
+namespace stx {
 namespace json {
 
 class FlatJSONReader {
@@ -38,5 +38,5 @@ protected:
 };
 
 } // namespace json
-} // namsepace fnord
+} // namespace stx
 #endif

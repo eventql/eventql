@@ -1,5 +1,5 @@
 /**
- * This file is part of the "libfnord" project
+ * This file is part of the "libstx" project
  *   Copyright (c) 2015 Paul Asmuth
  *
  * FnordMetric is free software: you can redistribute it and/or modify it under
@@ -13,7 +13,7 @@
 #include <stx/buffer.h>
 #include <stx/util/binarymessagewriter.h>
 
-namespace fnord {
+namespace stx {
 namespace msg {
 
 class MessageBuilder {
@@ -50,6 +50,6 @@ protected:
 };
 
 } // namespace msg
-} // namespace fnord
+} // namespace stx
 
 #endif

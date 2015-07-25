@@ -12,21 +12,21 @@
 #include "stx/UnixTime.h"
 #include "stx/charts/continuousdomain.h"
 
-namespace fnord {
+namespace stx {
 namespace chart {
 
-class TimeDomain : public ContinuousDomain<fnord::UnixTime> {
+class TimeDomain : public ContinuousDomain<stx::UnixTime> {
 public:
 
   TimeDomain(
-    fnord::UnixTime min_value =
-        std::numeric_limits<fnord::UnixTime>::max(),
-    fnord::UnixTime max_value =
-        std::numeric_limits<fnord::UnixTime>::min(),
+    stx::UnixTime min_value =
+        std::numeric_limits<stx::UnixTime>::max(),
+    stx::UnixTime max_value =
+        std::numeric_limits<stx::UnixTime>::min(),
     bool is_logarithmic = false,
     bool is_inverted = false);
 
-  std::string label(fnord::UnixTime value) const;
+  std::string label(stx::UnixTime value) const;
 
 };
 

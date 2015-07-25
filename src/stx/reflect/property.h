@@ -14,7 +14,7 @@
 #include <functional>
 #include "stx/reflect/indexsequence.h"
 
-namespace fnord {
+namespace stx {
 namespace reflect {
 
 template <typename ClassType, typename TargetType>

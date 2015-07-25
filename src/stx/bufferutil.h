@@ -14,7 +14,7 @@
 #include <stdint.h>
 #include "stx/buffer.h"
 
-namespace fnord {
+namespace stx {
 
 class BufferUtil {
 public:
@@ -54,6 +54,6 @@ public:
 
 };
 
-} // namespace fnord
+} // namespace stx
 
 #endif

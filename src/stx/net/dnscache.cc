@@ -9,7 +9,7 @@
  */
 #include "stx/net/dnscache.h"
 
-namespace fnord {
+namespace stx {
 namespace net {
 
 InetAddr DNSCache::resolve(const std::string& addr_str) {

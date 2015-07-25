@@ -23,16 +23,16 @@
 /**
  * Example 1: A simple HTTP Service
  */
-class TestService : public fnord::http::HTTPService {
+class TestService : public stx::http::HTTPService {
 
   void handleHTTPRequest(
-      fnord::http::HTTPRequest* req,
-      fnord::http::HTTPResponse* res) {
-    auto res_body = fnord::StringUtil::format(
+      stx::http::HTTPRequest* req,
+      stx::http::HTTPResponse* res) {
+    auto res_body = stx::StringUtil::format(
         "pong: $0",
         req->body().toString());
 
-    res->setStatus(fnord::http::kStatusOK);
+    res->setStatus(stx::http::kStatusOK);
     res->addBody(res_body);
   }
 
@@ -41,11 +41,11 @@ class TestService : public fnord::http::HTTPService {
 /**
  * Example 2: A streaming HTTP Handler
  */
-class StreamingTestHandler : public fnord::http::HTTPHandler {
+class StreamingTestHandler : public stx::http::HTTPHandler {
 public:
   StreamingTestHandler(
-      fnord::http::HTTPServerConnection* conn,
-      fnord::http::HTTPRequest* req) :
+      stx::http::HTTPServerConnection* conn,
+      stx::http::HTTPRequest* req) :
       conn_(conn),
       req_(req),
       body_len_(0),
@@ -67,9 +67,9 @@ public:
   }
 
   void writeResponseHeaders() {
-    res_.setStatus(fnord::http::kStatusOK);
-    res_.addHeader("Content-Length", fnord::StringUtil::toString(5 * 10));
-    res_.addHeader("X-Orig-Bodylen", fnord::StringUtil::toString(body_len_));
+    res_.setStatus(stx::http::kStatusOK);
+    res_.addHeader("Content-Length", stx::StringUtil::toString(5 * 10));
+    res_.addHeader("X-Orig-Bodylen", stx::StringUtil::toString(body_len_));
 
     conn_->writeResponse(
         res_,
@@ -84,7 +84,7 @@ public:
       conn_->writeResponseBody(
           buf.c_str(),
           buf.length(),
-          std::bind(&fnord::http::HTTPServerConnection::finishResponse, conn_));
+          std::bind(&stx::http::HTTPServerConnection::finishResponse, conn_));
     } else {
       conn_->writeResponseBody(
           buf.c_str(),
@@ -96,35 +96,35 @@ public:
 protected:
   size_t body_len_;
   int chunks_written_;
-  fnord::http::HTTPServerConnection* conn_;
-  fnord::http::HTTPRequest* req_;
-  fnord::http::HTTPResponse res_;
+  stx::http::HTTPServerConnection* conn_;
+  stx::http::HTTPRequest* req_;
+  stx::http::HTTPResponse res_;
 };
 
-class StreamingTestHandlerFactory : public fnord::http::HTTPHandlerFactory {
+class StreamingTestHandlerFactory : public stx::http::HTTPHandlerFactory {
 public:
-  std::unique_ptr<fnord::http::HTTPHandler> getHandler(
-      fnord::http::HTTPServerConnection* conn,
-      fnord::http::HTTPRequest* req) override {
-    return std::unique_ptr<fnord::http::HTTPHandler>(
+  std::unique_ptr<stx::http::HTTPHandler> getHandler(
+      stx::http::HTTPServerConnection* conn,
+      stx::http::HTTPRequest* req) override {
+    return std::unique_ptr<stx::http::HTTPHandler>(
         new StreamingTestHandler(conn, req));
   }
 };
 
 int main() {
-  fnord::system::SignalHandler::ignoreSIGHUP();
-  fnord::system::SignalHandler::ignoreSIGPIPE();
+  stx::system::SignalHandler::ignoreSIGHUP();
+  stx::system::SignalHandler::ignoreSIGPIPE();
 
-  fnord::CatchAndAbortExceptionHandler ehandler;
+  stx::CatchAndAbortExceptionHandler ehandler;
   ehandler.installGlobalHandlers();
 
-  fnord::log::LogOutputStream logger(fnord::OutputStream::getStderr());
-  fnord::log::Logger::get()->setMinimumLogLevel(fnord::log::kTrace);
-  fnord::log::Logger::get()->listen(&logger);
+  stx::log::LogOutputStream logger(stx::OutputStream::getStderr());
+  stx::log::Logger::get()->setMinimumLogLevel(stx::log::kTrace);
+  stx::log::Logger::get()->listen(&logger);
 
-  fnord::thread::ThreadPool thread_pool;
-  fnord::http::HTTPRouter router;
-  fnord::http::HTTPServer http_server(&router, &thread_pool);
+  stx::thread::ThreadPool thread_pool;
+  stx::http::HTTPRouter router;
+  stx::http::HTTPServer http_server(&router, &thread_pool);
 
   TestService ping_example;
   router.addRouteByPrefixMatch("/ping", &ping_example, &thread_pool);

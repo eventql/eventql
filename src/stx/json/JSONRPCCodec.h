@@ -17,7 +17,7 @@
 #include "stx/buffer.h"
 #include "stx/json/json.h"
 
-namespace fnord {
+namespace stx {
 namespace json {
 
 class JSONRPCCodec {
@@ -32,7 +32,7 @@ public:
 };
 
 } // namespace json
-} // namsepace fnord
+} // namespace stx
 
 #include "JSONRPCCodec_impl.h"
 #endif

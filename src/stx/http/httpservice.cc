@@ -13,7 +13,7 @@
 #include <stx/http/httpservice.h>
 #include <stx/http/HTTPResponseStream.h>
 
-namespace fnord {
+namespace stx {
 namespace http {
 
 void HTTPService::handleHTTPRequest(

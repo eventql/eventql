@@ -12,7 +12,7 @@
 #include <stx/stdtypes.h>
 #include <stx/autoref.h>
 
-namespace fnord {
+namespace stx {
 
 class VFSFile : public RefCounted {
 public:

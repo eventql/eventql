@@ -16,7 +16,7 @@
 #include <stx/exception.h>
 #include <stx/io/outputstream.h>
 
-namespace fnord {
+namespace stx {
 namespace json {
 
 class JSONOutputStream {
@@ -51,7 +51,7 @@ protected:
 };
 
 } // namespace json
-} // namespace fnord
+} // namespace stx
 
 //#include "jsonoutputstream_impl.h"
 #endif

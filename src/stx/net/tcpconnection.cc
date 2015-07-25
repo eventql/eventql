@@ -18,7 +18,7 @@
 #include "stx/inspect.h"
 #include "stx/net/tcpconnection.h"
 
-namespace fnord {
+namespace stx {
 namespace net {
 
 TCPConnection::TCPConnection(int fd) : fd_(fd), closed_(false) {}

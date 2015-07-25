@@ -15,7 +15,7 @@
 #include <stdlib.h>
 #include <string>
 
-namespace fnord {
+namespace stx {
 
 enum kStatusType {
   eSuccess,
