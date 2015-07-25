@@ -8,7 +8,7 @@
  */
 #pragma once
 #include "stx/stdtypes.h"
-#include "logjoin/TrackedSessionContext.h"
+#include "logjoin/SessionContext.h"
 
 using namespace stx;
 
@@ -17,7 +17,7 @@ namespace cm {
 class DeliverWebhookStage {
 public:
 
-  static void process(RefPtr<TrackedSessionContext> session);
+  static void process(RefPtr<SessionContext> session);
 
 };
 

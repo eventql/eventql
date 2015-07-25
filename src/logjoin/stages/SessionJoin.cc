@@ -13,7 +13,7 @@ using namespace stx;
 
 namespace cm {
 
-void SessionJoin::process(RefPtr<TrackedSessionContext> ctx) {
+void SessionJoin::process(RefPtr<SessionContext> ctx) {
 
   /* load builtin events into structured format */
   std::vector<TrackedQuery> queries;

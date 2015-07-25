@@ -8,7 +8,7 @@
  */
 #pragma once
 #include "stx/stdtypes.h"
-#include "logjoin/TrackedSessionContext.h"
+#include "logjoin/SessionContext.h"
 
 using namespace stx;
 
@@ -16,9 +16,9 @@ namespace cm {
 
 class SessionPipeline : public RefCounted {
 public:
-  typedef Function<void (RefPtr<TrackedSessionContext> ctx)> PipelineStageFn;
+  typedef Function<void (RefPtr<SessionContext> ctx)> PipelineStageFn;
 
-  void run(RefPtr<TrackedSessionContext> ctx);
+  void run(RefPtr<SessionContext> ctx);
 
   void addStage(PipelineStageFn fn);
 

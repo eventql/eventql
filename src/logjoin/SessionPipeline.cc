@@ -16,7 +16,7 @@ void SessionPipeline::addStage(PipelineStageFn fn) {
   stages_.emplace_back(fn);
 }
 
-void SessionPipeline::run(RefPtr<TrackedSessionContext> ctx) {
+void SessionPipeline::run(RefPtr<SessionContext> ctx) {
   for (const auto& stage : stages_) {
     stage(ctx);
   }

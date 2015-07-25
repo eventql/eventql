@@ -8,7 +8,7 @@
  */
 #pragma once
 #include "stx/stdtypes.h"
-#include "logjoin/TrackedSessionContext.h"
+#include "logjoin/SessionContext.h"
 #include "logjoin/TrackedItemVisit.h"
 #include "logjoin/TrackedCartItem.h"
 #include "logjoin/TrackedQuery.h"
@@ -25,7 +25,7 @@ static const uint64_t kMaxQueryClickDelaySeconds = 180;
 class SessionJoin {
 public:
 
-  static void process(RefPtr<TrackedSessionContext> session);
+  static void process(RefPtr<SessionContext> session);
 
 protected:
 

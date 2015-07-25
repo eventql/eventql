@@ -12,7 +12,7 @@ add_library(logjoin-base OBJECT
     TrackedItemVisit.cc
     TrackedQuery.cc
     TrackedSession.cc
-    TrackedSessionContext.cc
+    SessionContext.cc
     LogJoin.cc
     LogJoinUpload.cc
     LogJoinExport.cc

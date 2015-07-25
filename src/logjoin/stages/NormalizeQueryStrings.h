@@ -9,7 +9,7 @@
 #pragma once
 #include "stx/stdtypes.h"
 #include "stx/Language.h"
-#include "logjoin/TrackedSessionContext.h"
+#include "logjoin/SessionContext.h"
 
 using namespace stx;
 
@@ -21,7 +21,7 @@ public:
 
   static void process(
       NormalizeFn normalize_fn,
-      RefPtr<TrackedSessionContext> session);
+      RefPtr<SessionContext> session);
 
 };
 

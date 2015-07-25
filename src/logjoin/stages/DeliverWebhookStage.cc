@@ -15,7 +15,7 @@ using namespace stx;
 
 namespace cm {
 
-void DeliverWebhookStage::process(RefPtr<TrackedSessionContext> ctx) {
+void DeliverWebhookStage::process(RefPtr<SessionContext> ctx) {
   const auto& logjoin_config = ctx->customer_config->config.logjoin_config();
 
   for (const auto hook : logjoin_config.webhooks()) {

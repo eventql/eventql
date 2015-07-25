@@ -6,13 +6,13 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-#include "logjoin/TrackedSessionContext.h"
+#include "logjoin/SessionContext.h"
 
 using namespace stx;
 
 namespace cm {
 
-TrackedSessionContext::TrackedSessionContext(
+SessionContext::SessionContext(
     TrackedSession session) :
     uuid(session.uuid),
     customer_key(session.customer_key),

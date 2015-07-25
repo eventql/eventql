@@ -37,7 +37,7 @@ void SessionProcessor::enqueueSession(const TrackedSession& session) {
 }
 
 void SessionProcessor::processSession(const TrackedSession& session) {
-  auto ctx = mkRef(new TrackedSessionContext(session));
+  auto ctx = mkRef(new SessionContext(session));
   ctx->customer_config = customer_dir_->configFor(session.customer_key);
   pipeline_->run(ctx);
 }
