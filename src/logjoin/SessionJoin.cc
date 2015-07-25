@@ -119,6 +119,17 @@ void SessionJoin::process(RefPtr<TrackedSessionContext> ctx) {
     }
   }
 
+  for (const auto& ci : cart_items) {
+    auto ciobj = ctx->joined_session.add_cart_items();
+
+    ciobj->set_time(ci.time.unixMicros() / kMicrosPerSecond);
+    ciobj->set_item_id(ci.item.docID().docid);
+    ciobj->set_quantity(ci.quantity);
+    ciobj->set_price_cents(ci.price_cents);
+    ciobj->set_currency((Currency) currencyFromString(ci.currency));
+    ciobj->set_checkout_step(ci.checkout_step);
+  }
+
   for (const auto& q : queries) {
     auto qobj = ctx->joined_session.add_search_queries();
 
