@@ -38,6 +38,7 @@
 #include "logjoin/stages/BuildSessionAttributes.h"
 #include "logjoin/stages/NormalizeQueryStrings.h"
 #include "logjoin/stages/DebugPrintStage.h"
+#include "logjoin/stages/DeliverWebhookStage.h"
 #include "inventory/DocStore.h"
 #include "inventory/IndexChangeRequest.h"
 #include "inventory/DocIndex.h"
@@ -315,7 +316,6 @@ int main(int argc, const char** argv) {
           "documents-dawanda",
           true));
 
-
   /* set up session processing pipeline */
   auto pipeline = mkRef(new cm::SessionPipeline());
 
@@ -340,9 +340,9 @@ int main(int argc, const char** argv) {
                   std::placeholders::_2)),
           std::placeholders::_1));
 
-  /* pipeline stage: DebugPrint */
+  /* pipeline stage: DeliverWebHook */
   pipeline->addStage(
-      std::bind(&DebugPrintStage::process, std::placeholders::_1));
+      std::bind(&DeliverWebhookStage::process, std::placeholders::_1));
 
   /* set up session processor */
   cm::SessionProcessor session_proc(pipeline, &schemas, dry_run);
@@ -534,6 +534,6 @@ int main(int argc, const char** argv) {
   stx::logInfo("cm.logjoin", "LogJoin exiting...");
 
   session_proc.stop();
-  return 0;
+  exit(0);
 }
 
