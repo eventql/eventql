@@ -13,7 +13,7 @@
 #include <stx/util/binarymessagereader.h>
 #include <stx/util/binarymessagewriter.h>
 
-namespace fnord {
+namespace stx {
 namespace sstable {
 
 SSTableColumnSchema::SSTableColumnSchema() {}
@@ -95,7 +95,7 @@ void SSTableColumnSchema::loadIndex(const Buffer& buf) {
     uint32_t col_name_len = *reader.readUInt32();
     String col_name((char*) reader.read(col_name_len), col_name_len);
 
-    addColumn(col_name, col_id, (fnord::sstable::SSTableColumnType) col_type);
+    addColumn(col_name, col_id, (stx::sstable::SSTableColumnType) col_type);
   }
 }
 
@@ -106,4 +106,4 @@ void SSTableColumnSchema::loadIndex(
 }
 
 } // namespace sstable
-} // namespace fnord
+} // namespace stx

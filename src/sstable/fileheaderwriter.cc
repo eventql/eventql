@@ -11,7 +11,7 @@
 #include <sstable/binaryformat.h>
 #include <sstable/fileheaderwriter.h>
 
-namespace fnord {
+namespace stx {
 namespace sstable {
 
 size_t FileHeaderWriter::calculateSize(size_t userdata_size) {
@@ -24,7 +24,7 @@ FileHeaderWriter::FileHeaderWriter(
     size_t body_size,
     const void* userdata,
     size_t userdata_size) :
-    fnord::util::BinaryMessageWriter(buf, buf_size) {
+    stx::util::BinaryMessageWriter(buf, buf_size) {
   uint64_t flags = 0;
 
   appendUInt32(BinaryFormat::kMagicBytes);
@@ -47,7 +47,7 @@ FileHeaderWriter::FileHeaderWriter(
 FileHeaderWriter::FileHeaderWriter(
     void* buf,
     size_t buf_size) :
-    fnord::util::BinaryMessageWriter(buf, buf_size) {}
+    stx::util::BinaryMessageWriter(buf, buf_size) {}
 
 void FileHeaderWriter::updateBodySize(size_t body_size) {
   updateUInt64(14, body_size); // FIXPAUL

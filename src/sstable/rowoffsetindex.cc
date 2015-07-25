@@ -9,7 +9,7 @@
  */
 #include <sstable/rowoffsetindex.h>
 
-namespace fnord {
+namespace stx {
 namespace sstable {
 
 RowOffsetIndex* RowOffsetIndex::makeIndex() {

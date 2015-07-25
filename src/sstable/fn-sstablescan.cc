@@ -16,17 +16,17 @@
 #include "sstable/sstablereader.h"
 #include "sstable/SSTableScan.h"
 
-using namespace fnord;
+using namespace stx;
 
 int main(int argc, const char** argv) {
-  fnord::Application::init();
-  fnord::Application::logToStderr();
+  stx::Application::init();
+  stx::Application::logToStderr();
 
-  fnord::cli::FlagParser flags;
+  stx::cli::FlagParser flags;
 
   flags.defineFlag(
       "file",
-      fnord::cli::FlagParser::T_STRING,
+      stx::cli::FlagParser::T_STRING,
       true,
       "f",
       NULL,
@@ -35,7 +35,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "limit",
-      fnord::cli::FlagParser::T_INTEGER,
+      stx::cli::FlagParser::T_INTEGER,
       false,
       NULL,
       NULL,
@@ -44,7 +44,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "offset",
-      fnord::cli::FlagParser::T_INTEGER,
+      stx::cli::FlagParser::T_INTEGER,
       false,
       NULL,
       NULL,
@@ -53,7 +53,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "order_by",
-      fnord::cli::FlagParser::T_STRING,
+      stx::cli::FlagParser::T_STRING,
       false,
       NULL,
       NULL,
@@ -62,7 +62,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "order_fn",
-      fnord::cli::FlagParser::T_STRING,
+      stx::cli::FlagParser::T_STRING,
       false,
       NULL,
       "STRASC",
@@ -71,7 +71,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "loglevel",
-      fnord::cli::FlagParser::T_STRING,
+      stx::cli::FlagParser::T_STRING,
       false,
       NULL,
       "INFO",
@@ -87,7 +87,7 @@ int main(int argc, const char** argv) {
   auto input_file = flags.getString("file");
   sstable::SSTableReader reader(File::openFile(input_file, File::O_READ));
   if (reader.bodySize() == 0) {
-    fnord::logWarning("fnord.sstablescan", "sstable is unfinished");
+    stx::logWarning("fnord.sstablescan", "sstable is unfinished");
   }
 
   sstable::SSTableColumnSchema schema;
@@ -109,11 +109,11 @@ int main(int argc, const char** argv) {
 
   /* execute scan */
   auto headers = scan.columnNames();
-  fnord::iputs("$0", StringUtil::join(headers, ";"));
+  stx::iputs("$0", StringUtil::join(headers, ";"));
 
   auto cursor = reader.getCursor();
   scan.execute(cursor.get(), [] (const Vector<String> row) {
-    fnord::iputs("$0", StringUtil::join(row, ";"));
+    stx::iputs("$0", StringUtil::join(row, ";"));
   });
 
   return 0;

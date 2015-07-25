@@ -10,7 +10,7 @@
 #include <stx/ieee754.h>
 #include <sstable/SSTableColumnReader.h>
 
-namespace fnord {
+namespace stx {
 namespace sstable {
 
 SSTableColumnReader::SSTableColumnReader(
@@ -132,5 +132,5 @@ Vector<String> SSTableColumnReader::getStringColumns(SSTableColumnID id) {
 }
 
 } // namespace sstable
-} // namespace fnord
+} // namespace stx
 

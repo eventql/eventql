@@ -20,7 +20,7 @@
 #include <sstable/indexprovider.h>
 #include <stx/exception.h>
 
-namespace fnord {
+namespace stx {
 namespace sstable {
 
 class SSTableColumnWriter;

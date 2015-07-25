@@ -23,7 +23,7 @@
 #include <sstable/index.h>
 #include <sstable/indexprovider.h>
 
-namespace fnord {
+namespace stx {
 namespace sstable {
 class SSTableWriter;
 class SSTableReader;
@@ -70,6 +70,6 @@ protected:
 };
 
 } // namespace sstable
-} // namespace fnord
+} // namespace stx
 
 #endif

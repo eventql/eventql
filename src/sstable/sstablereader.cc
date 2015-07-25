@@ -13,7 +13,7 @@
 #include <sstable/binaryformat.h>
 #include <sstable/sstablereader.h>
 
-namespace fnord {
+namespace stx {
 namespace sstable {
 
 

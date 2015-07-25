@@ -12,7 +12,7 @@
 #include "sstable/SSTableScan.h"
 #include "stx/io/fileutil.h"
 
-namespace fnord {
+namespace stx {
 namespace sstable {
 
 SSTableServlet::SSTableServlet(
@@ -22,8 +22,8 @@ SSTableServlet::SSTableServlet(
     vfs_(vfs) {}
 
 void SSTableServlet::handleHTTPRequest(
-    fnord::http::HTTPRequest* req,
-    fnord::http::HTTPResponse* res) {
+    stx::http::HTTPRequest* req,
+    stx::http::HTTPResponse* res) {
   URI uri(req->uri());
 
   res->addHeader("Access-Control-Allow-Origin", "*");
@@ -38,24 +38,24 @@ void SSTableServlet::handleHTTPRequest(
     return;
   }
 
-  res->setStatus(fnord::http::kStatusNotFound);
+  res->setStatus(stx::http::kStatusNotFound);
   res->addBody("not found");
 }
 
 void SSTableServlet::scan(
-    fnord::http::HTTPRequest* req,
-    fnord::http::HTTPResponse* res,
+    stx::http::HTTPRequest* req,
+    stx::http::HTTPResponse* res,
     const URI& uri) {
-  fnord::URI::ParamList params = uri.queryParams();
+  stx::URI::ParamList params = uri.queryParams();
 
   auto format = ResponseFormat::CSV;
   std::string format_param;
-  if (fnord::URI::getParam(params, "format", &format_param)) {
+  if (stx::URI::getParam(params, "format", &format_param)) {
     format = formatFromString(format_param);
   }
 
   std::string file_path;
-  if (!fnord::URI::getParam(params, "file", &file_path)) {
+  if (!stx::URI::getParam(params, "file", &file_path)) {
     res->addBody("error: missing ?file=... parameter");
     res->setStatus(http::kStatusBadRequest);
     return;
@@ -74,17 +74,17 @@ void SSTableServlet::scan(
   sstable::SSTableScan sstable_scan(&schema);
 
   String limit_str;
-  if (fnord::URI::getParam(params, "limit", &limit_str)) {
+  if (stx::URI::getParam(params, "limit", &limit_str)) {
     sstable_scan.setLimit(std::stoul(limit_str));
   }
 
   String key_prefix_str;
-  if (fnord::URI::getParam(params, "key_prefix", &key_prefix_str)) {
+  if (stx::URI::getParam(params, "key_prefix", &key_prefix_str)) {
     sstable_scan.setKeyPrefix(key_prefix_str);
   }
 
   String key_regex_str;
-  if (fnord::URI::getParam(params, "key_regex", &key_regex_str)) {
+  if (stx::URI::getParam(params, "key_regex", &key_regex_str)) {
     sstable_scan.setKeyFilterRegex(key_regex_str);
   }
 
@@ -99,14 +99,14 @@ void SSTableServlet::scan(
   }
 
   String offset_str;
-  if (fnord::URI::getParam(params, "offset", &offset_str)) {
+  if (stx::URI::getParam(params, "offset", &offset_str)) {
     sstable_scan.setOffset(std::stoul(offset_str));
   }
 
   String order_by;
   String order_fn = "STRASC";
-  if (fnord::URI::getParam(params, "order_by", &order_by)) {
-    fnord::URI::getParam(params, "order_fn", &order_fn);
+  if (stx::URI::getParam(params, "order_by", &order_by)) {
+    stx::URI::getParam(params, "order_fn", &order_fn);
     sstable_scan.setOrderBy(order_by, order_fn);
   }
 
@@ -159,7 +159,7 @@ void SSTableServlet::scan(
       break;
   }
 
-  res->setStatus(fnord::http::kStatusOK);
+  res->setStatus(stx::http::kStatusOK);
   res->addBody(buf);
 }
 

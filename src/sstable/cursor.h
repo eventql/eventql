@@ -15,7 +15,7 @@
 #include <memory>
 #include "stx/buffer.h"
 
-namespace fnord {
+namespace stx {
 namespace sstable {
 
 class Cursor {

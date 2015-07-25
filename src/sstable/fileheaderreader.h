@@ -14,10 +14,10 @@
 #include <stdint.h>
 #include <string>
 
-namespace fnord {
+namespace stx {
 namespace sstable {
 
-class FileHeaderReader : public fnord::util::BinaryMessageReader {
+class FileHeaderReader : public stx::util::BinaryMessageReader {
 public:
 
   FileHeaderReader(

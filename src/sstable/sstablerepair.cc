@@ -12,9 +12,9 @@
 #include <sstable/sstablereader.h>
 #include <sstable/sstablerepair.h>
 
-using fnord::Exception;
+using stx::Exception;
 
-namespace fnord {
+namespace stx {
 namespace sstable {
 
 SSTableRepair::SSTableRepair(
@@ -23,11 +23,11 @@ SSTableRepair::SSTableRepair(
 
 bool SSTableRepair::checkAndRepair(bool repair /* = false */) {
   auto file = File::openFile(filename_, File::O_READ);
-  std::unique_ptr<fnord::sstable::SSTableReader> reader_;
+  std::unique_ptr<stx::sstable::SSTableReader> reader_;
 
   try {
     reader_.reset(new sstable::SSTableReader(std::move(file)));
-  } catch (fnord::Exception& rte) {
+  } catch (stx::Exception& rte) {
     /*
     fnordmetric::env()->logger()->printf(
         "INFO",
@@ -49,7 +49,7 @@ bool SSTableRepair::checkAndRepair(bool repair /* = false */) {
       void* dummy_data;
       size_t dummy_size;
       reader_->readFooter(0, &dummy_data, &dummy_size);
-    } catch (fnord::Exception& rte) {
+    } catch (stx::Exception& rte) {
       /*
       fnordmetric::env()->logger()->printf(
           "INFO",

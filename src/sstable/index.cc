@@ -9,7 +9,7 @@
  */
 #include <sstable/index.h>
 
-namespace fnord {
+namespace stx {
 namespace sstable {
 
 Index::Index(uint32_t type) : type_(type) {}

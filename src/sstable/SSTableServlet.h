@@ -13,10 +13,10 @@
 #include "stx/http/httpservice.h"
 #include "stx/json/json.h"
 
-namespace fnord {
+namespace stx {
 namespace sstable {
 
-class SSTableServlet : public fnord::http::HTTPService {
+class SSTableServlet : public stx::http::HTTPService {
 public:
   enum class ResponseFormat {
     JSON,
@@ -26,14 +26,14 @@ public:
   SSTableServlet(const String& base_path, VFS* vfs);
 
   void handleHTTPRequest(
-      fnord::http::HTTPRequest* req,
-      fnord::http::HTTPResponse* res);
+      stx::http::HTTPRequest* req,
+      stx::http::HTTPResponse* res);
 
 protected:
 
   void scan(
-      fnord::http::HTTPRequest* req,
-      fnord::http::HTTPResponse* res,
+      stx::http::HTTPRequest* req,
+      stx::http::HTTPResponse* res,
       const URI& uri);
 
   ResponseFormat formatFromString(const String& format);

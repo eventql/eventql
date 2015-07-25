@@ -14,10 +14,10 @@
 #include <stdint.h>
 #include <string>
 
-namespace fnord {
+namespace stx {
 namespace sstable {
 
-class FileHeaderWriter : public fnord::util::BinaryMessageWriter {
+class FileHeaderWriter : public stx::util::BinaryMessageWriter {
 public:
   static size_t calculateSize(size_t userdata_size);
 
