@@ -47,14 +47,14 @@ message JoinedSearchQueryResultItem {
    * The item id of the result item/product
    */
   required string item_id = 20
-      [(fnord.coding) = { maxval: 1024 }];
+      [(stx.coding) = { maxval: 1024 }];
 
   /**
    * The position at which this item was shown. Start from 1 and 1 is the first
    * result item (i.e. the topmost lefmost one)
    */
   required uint32 position = 19
-      [(fnord.coding) = { maxval: 64 encoding: "BITPACK" }];
+      [(stx.coding) = { maxval: 64 encoding: "BITPACK" }];
 
   /**
    * True if the result item was subsequently clicked
@@ -71,19 +71,19 @@ message JoinedSearchQueryResultItem {
    * If applicable, the result item's shop id (DaWanda user id)
    */
   optional uint32 shop_id = 21
-      [(fnord.coding) = { maxval: 4294967295 encoding: "LEB128" }];
+      [(stx.coding) = { maxval: 4294967295 encoding: "LEB128" }];
 
   /**
    * If applicable, the item's category1/2/3 id (DaWanda e1/2/3)
    */
   optional uint32 category1 = 22
-      [(fnord.coding) = { maxval: 65535 encoding: "LEB128" }];
+      [(stx.coding) = { maxval: 65535 encoding: "LEB128" }];
 
   optional uint32 category2 = 23
-      [(fnord.coding) = { maxval: 65535 encoding: "LEB128" }];
+      [(stx.coding) = { maxval: 65535 encoding: "LEB128" }];
 
   optional uint32 category3 = 24
-      [(fnord.coding) = { maxval: 65535 encoding: "LEB128" }];
+      [(stx.coding) = { maxval: 65535 encoding: "LEB128" }];
 
   /**
    * True if this result item is a a paid result item (advertisment)
@@ -132,25 +132,25 @@ message JoinedSearchQuery {
    * The "querty type" (catalog/search/shop/recommendation/etc) as a string
    */
   optional string query_type = 64
-      [(fnord.coding) = { maxval: 1024 }];
+      [(stx.coding) = { maxval: 1024 }];
 
   /**
    * The page number of the query was paginated. Starts from 1 == first page
    */
   optional uint32 page = 1
-      [(fnord.coding) = { maxval: 100 encoding: "BITPACK" }];
+      [(stx.coding) = { maxval: 100 encoding: "BITPACK" }];
 
   /**
    * The raw search query string (as it was submitted by the user)
    */
   optional string query_string = 3
-      [(fnord.coding) = { maxval: 8192 }];
+      [(stx.coding) = { maxval: 8192 }];
 
   /**
    * The normalized search query string (tokenized, gargabe removed, lowercase)
    */
   optional string query_string_normalized = 4
-      [(fnord.coding) = { maxval: 8192 }];
+      [(stx.coding) = { maxval: 8192 }];
 
   /**
    * The category1/2/3 filter if this was a fulltext search query with category
@@ -159,20 +159,20 @@ message JoinedSearchQuery {
    * time (e.g. for a DaWanda e2 view we will set category1 and category2)
    */
   optional uint32 category1 = 12
-      [(fnord.coding) = { maxval: 65535 encoding: "LEB128" }];
+      [(stx.coding) = { maxval: 65535 encoding: "LEB128" }];
 
   optional uint32 category2 = 13
-      [(fnord.coding) = { maxval: 65535 encoding: "LEB128" }];
+      [(stx.coding) = { maxval: 65535 encoding: "LEB128" }];
 
   optional uint32 category3 = 14
-      [(fnord.coding) = { maxval: 65535 encoding: "LEB128" }];
+      [(stx.coding) = { maxval: 65535 encoding: "LEB128" }];
 
   /**
    * If this was a shop page view / search within a shop the shop id of the
    * shop
    */
   optional uint32 shop_id = 32
-      [(fnord.coding) = { maxval: 4294967295 encoding: "LEB128" }];
+      [(stx.coding) = { maxval: 4294967295 encoding: "LEB128" }];
 
   /**
    * The full result list for this query
@@ -183,45 +183,45 @@ message JoinedSearchQuery {
    * How many result items were returned for this query
    */
   optional uint32 num_result_items = 5
-      [(fnord.coding) = { maxval: 250 encoding: "BITPACK" }];
+      [(stx.coding) = { maxval: 250 encoding: "BITPACK" }];
 
   /**
    * How many of the query result items were subsequently clicked
    */
   optional uint32 num_result_items_clicked = 6
-      [(fnord.coding) = { maxval: 250 encoding: "BITPACK" }];
+      [(stx.coding) = { maxval: 250 encoding: "BITPACK" }];
 
   /**
    * How many of the shown result items were ads
    */
   optional uint32 num_ad_impressions = 7
-      [(fnord.coding) = { maxval: 250 encoding: "BITPACK" }];
+      [(stx.coding) = { maxval: 250 encoding: "BITPACK" }];
 
   /**
    * How many of the shown ads were clicked
    */
   optional uint32 num_ad_clicks = 8
-      [(fnord.coding) = { maxval: 250 encoding: "BITPACK" }];
+      [(stx.coding) = { maxval: 250 encoding: "BITPACK" }];
 
   /**
    * How many cart items resulted from this query (i.e. result items that have
    * been subsequently clicked and added to the cart)
    */
   optional uint32 num_cart_items = 43
-      [(fnord.coding) = { maxval: 250 encoding: "BITPACK" }];
+      [(stx.coding) = { maxval: 250 encoding: "BITPACK" }];
 
   /**
    * How many order items resulted from this query (i.e. result items that have
    * been subsequently clicked and bought)
    */
   optional uint32 num_order_items = 44
-      [(fnord.coding) = { maxval: 250 encoding: "BITPACK" }];
+      [(stx.coding) = { maxval: 250 encoding: "BITPACK" }];
 
   /**
    * The gross value of all cart items that resultes from this query
    */
   optional uint32 cart_value_eurcents = 45
-      [(fnord.coding) = { maxval: 16777215 encoding: "LEB128" }];
+      [(stx.coding) = { maxval: 16777215 encoding: "LEB128" }];
 
   /**
    * The gross merchandise value / gross revenue that resulted from this query.
@@ -231,20 +231,20 @@ message JoinedSearchQuery {
    * revenue when summed up
    */
   optional uint32 gmv_eurcents = 46
-      [(fnord.coding) = { maxval: 16777215 encoding: "LEB128" }];
+      [(stx.coding) = { maxval: 16777215 encoding: "LEB128" }];
 
   /**
    * A number indicating in which test group the user that submitted this query
    * was. DaWanda sets this to (1..100]
    */
   optional uint32 ab_test_group = 9
-      [(fnord.coding) = { maxval: 100 encoding: "BITPACK" }];
+      [(stx.coding) = { maxval: 100 encoding: "BITPACK" }];
 
   /**
    * A semicolon-separated string of all experiment tags for this query
    */
   optional string experiments = 55
-      [(fnord.coding) = { maxval: 8192 }];
+      [(stx.coding) = { maxval: 8192 }];
 
 }
 
@@ -263,25 +263,25 @@ message JoinedItemVisit {
    * The item id of the item that was visited
    */
   required string item_id = 27
-      [(fnord.coding) = { maxval: 1024 }];
+      [(stx.coding) = { maxval: 1024 }];
 
   /**
    * If applicable, the item's shop id (DaWanda user id)
    */
   optional uint32 shop_id = 28
-      [(fnord.coding) = { maxval: 4294967295 encoding: "LEB128" }];
+      [(stx.coding) = { maxval: 4294967295 encoding: "LEB128" }];
 
   /**
    * If applicable, the item's category1/2/3 id (DaWanda e1/2/3)
    */
   optional uint32 category1 = 29
-      [(fnord.coding) = { maxval: 65535 encoding: "LEB128" }];
+      [(stx.coding) = { maxval: 65535 encoding: "LEB128" }];
 
   optional uint32 category2 = 30
-      [(fnord.coding) = { maxval: 65535 encoding: "LEB128" }];
+      [(stx.coding) = { maxval: 65535 encoding: "LEB128" }];
 
   optional uint32 category3 = 31
-      [(fnord.coding) = { maxval: 65535 encoding: "LEB128" }];
+      [(stx.coding) = { maxval: 65535 encoding: "LEB128" }];
 
 
 }
@@ -302,22 +302,22 @@ message JoinedCartItem {
    * The item id of the item (=product) that was added to the cart
    */
   required string item_id = 34
-      [(fnord.coding) = { maxval: 1024 }];
+      [(stx.coding) = { maxval: 1024 }];
 
   /**
    * The quantity of this cart item. N.B. that we always store the largest
    * quantity obeerved
    */
   required uint32 quantity = 39
-      [(fnord.coding) = { maxval: 65535 encoding: "LEB128" }];
+      [(stx.coding) = { maxval: 65535 encoding: "LEB128" }];
 
   /**
    * The price in cents and currency for a single instance of the item
    */
   required uint32 price_cents = 40
-      [(fnord.coding) = { maxval: 4294967295 encoding: "LEB128" }];
+      [(stx.coding) = { maxval: 4294967295 encoding: "LEB128" }];
 
-  required fnord.Currency currency = 41;
+  required stx.Currency currency = 41;
 
   /**
    * The most advanced cart step we have seen this item in. Note that smaller
@@ -325,25 +325,25 @@ message JoinedCartItem {
    * implied the item was bought
    */
   required uint32 checkout_step = 42
-      [(fnord.coding) = { maxval: 32 encoding: "BITPACK" }];
+      [(stx.coding) = { maxval: 32 encoding: "BITPACK" }];
 
   /**
    * If applicable, the product's/item's shop id (DaWanda user id)
    */
   optional uint32 shop_id = 35
-      [(fnord.coding) = { maxval: 4294967295 encoding: "LEB128" }];
+      [(stx.coding) = { maxval: 4294967295 encoding: "LEB128" }];
 
   /**
    * If applicable, the product's/item's category1/2/3 id (DaWanda e1/2/3)
    */
   optional uint32 category1 = 36
-      [(fnord.coding) = { maxval: 65535 encoding: "LEB128" }];
+      [(stx.coding) = { maxval: 65535 encoding: "LEB128" }];
 
   optional uint32 category2 = 37
-      [(fnord.coding) = { maxval: 65535 encoding: "LEB128" }];
+      [(stx.coding) = { maxval: 65535 encoding: "LEB128" }];
 
   optional uint32 category3 = 38
-      [(fnord.coding) = { maxval: 65535 encoding: "LEB128" }];
+      [(stx.coding) = { maxval: 65535 encoding: "LEB128" }];
 
 }
 
@@ -369,13 +369,13 @@ message JoinedSession {
    * For which customer did we record this session?
    */
   optional string customer = 60
-      [(fnord.coding) = { maxval: 250 }];
+      [(stx.coding) = { maxval: 250 }];
 
   /**
    * The customer's session id
    */
   optional string customer_session_id = 61
-      [(fnord.coding) = { maxval: 4096 }];
+      [(stx.coding) = { maxval: 4096 }];
 
   /**
    * The time at which this search query was first/last seen
@@ -384,52 +384,52 @@ message JoinedSession {
   optional uint32 last_seen_time = 54;
 
   optional string referrer_url = 57
-      [(fnord.coding) = { maxval: 1024 }];
+      [(stx.coding) = { maxval: 1024 }];
 
   optional string referrer_campaign = 58
-      [(fnord.coding) = { maxval: 4096 }];
+      [(stx.coding) = { maxval: 4096 }];
 
   optional string referrer_name = 59
-      [(fnord.coding) = { maxval: 255 }];
+      [(stx.coding) = { maxval: 255 }];
 
   /**
    * How many unique cart items have we seen in this session
    */
   optional uint32 num_cart_items = 47
-      [(fnord.coding) = { maxval: 250 encoding: "BITPACK" }];
+      [(stx.coding) = { maxval: 250 encoding: "BITPACK" }];
 
   /**
    * How many unique items have been bought in this session. value >1 implies
    * that there was a transaction in this session
    */
   optional uint32 num_order_items = 48
-      [(fnord.coding) = { maxval: 250 encoding: "BITPACK" }];
+      [(stx.coding) = { maxval: 250 encoding: "BITPACK" }];
 
   /**
    * The gross value of all cart items in this session in euro cents
    */
   optional uint32 cart_value_eurcents = 49
-      [(fnord.coding) = { maxval: 16777215 encoding: "LEB128" }];
+      [(stx.coding) = { maxval: 16777215 encoding: "LEB128" }];
 
   /**
    * The gross merchandise value of all transactions/sales in this session in
    * euro cents
    */
   optional uint32 gmv_eurcents = 50
-      [(fnord.coding) = { maxval: 16777215 encoding: "LEB128" }];
+      [(stx.coding) = { maxval: 16777215 encoding: "LEB128" }];
 
   /**
    * A number indicating in which test group this session was. DaWanda sets this
    * to (1..100]
    */
   optional uint32 ab_test_group = 51
-      [(fnord.coding) = { maxval: 100 encoding: "BITPACK" }];
+      [(stx.coding) = { maxval: 100 encoding: "BITPACK" }];
 
   /**
    * A semicolon-separated string of all experiment tags for this session
    */
   optional string experiments = 56
-      [(fnord.coding) = { maxval: 8192 }];
+      [(stx.coding) = { maxval: 8192 }];
 
   /**
    * A list of all search queries associated with this session
