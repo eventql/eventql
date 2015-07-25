@@ -7,7 +7,7 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-package fnord.feeds;
+package stx.feeds;
 
 message TopicCursorOffset {
   required uint64 next_offset = 5;
