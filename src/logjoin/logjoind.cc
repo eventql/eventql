@@ -267,8 +267,8 @@ int main(int argc, const char** argv) {
 
   /* setup logjoin */
   cm::LogJoin logjoin(shard, dry_run, sessdb, &session_proc, &ev);
-  logjoin.exportStats("/cm-logjoin/global");
-  logjoin.exportStats(StringUtil::format("/cm-logjoin/$0", shard.shard_name));
+  logjoin.exportStats("/logjoind/global");
+  logjoin.exportStats(StringUtil::format("/logjoind/$0", shard.shard_name));
 
   /* shutdown hook */
   logjoin_instance = &logjoin;
@@ -281,7 +281,7 @@ int main(int argc, const char** argv) {
 
   /* run logjoin */
   stx::logInfo(
-      "cm.logjoin",
+      "logjoind",
       "Starting logjoind\n    dry_run=$0\n    shard=$1, [$2, $3) of [0, $4]",
       dry_run,
       shard.shard_name,
@@ -297,7 +297,7 @@ int main(int argc, const char** argv) {
       flags.getInt("flush_interval") * kMicrosPerSecond);
 
   /* shutdown */
-  stx::logInfo("cm.logjoin", "LogJoin exiting...");
+  stx::logInfo("logjoind", "LogJoin exiting...");
   ev.shutdown();
   evloop_thread.join();
   sessdb->sync();

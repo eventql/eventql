@@ -152,7 +152,7 @@ void LogJoin::insertLogline(
     if (!shard_.testUID(uid)) {
 #ifndef NDEBUG
       stx::logTrace(
-          "cm.logjoin",
+          "logjoind",
           "dropping logline with uid=$0 because it does not match my shard",
           uid);
 #endif
@@ -293,7 +293,7 @@ void LogJoin::flushSession(
 
         session.insertLogline(time, evtype, evid, logline);
       } catch (const std::exception& e) {
-        stx::logError("cm.logjoin", e, "invalid logline");
+        stx::logError("logjoind", e, "invalid logline");
         stat_loglines_invalid_.incr(1);
       }
     }
@@ -304,14 +304,14 @@ void LogJoin::flushSession(
   cursor->close();
 
   if (session.customer_key.length() == 0) {
-    stx::logError("cm.logjoin", "missing customer key for: $0", uid);
+    stx::logError("logjoind", "missing customer key for: $0", uid);
     return;
   }
 
   try {
     target_->enqueueSession(session);
   } catch (const std::exception& e) {
-    stx::logError("cm.logjoin", e, "SessionProcessor::enqueueSession crashed");
+    stx::logError("logjoind", e, "SessionProcessor::enqueueSession crashed");
   }
 
   stat_joined_sessions_.incr(1);
@@ -324,7 +324,7 @@ void LogJoin::flushSession(
 //
 //  if (dry_run_) {
 //    stx::logInfo(
-//        "cm.logjoin",
+//        "logjoind",
 //        "[DRYRUN] not uploading session: ", 1);
 //        //msg::MessagePrinter::print(obj, joined_session_schema_));
 //    return;
@@ -441,22 +441,22 @@ void LogJoin::exportStats(const std::string& prefix) {
       stx::stats::ExportMode::EXPORT_DELTA);
 
   exportStat(
-      StringUtil::format("/cm-logjoin/$0/stream_time_low", shard_.shard_name),
+      StringUtil::format("/logjoind/$0/stream_time_low", shard_.shard_name),
       &stat_stream_time_low,
       stx::stats::ExportMode::EXPORT_VALUE);
 
   exportStat(
-      StringUtil::format("/cm-logjoin/$0/stream_time_high", shard_.shard_name),
+      StringUtil::format("/logjoind/$0/stream_time_high", shard_.shard_name),
       &stat_stream_time_high,
       stx::stats::ExportMode::EXPORT_VALUE);
 
   exportStat(
-      StringUtil::format("/cm-logjoin/$0/active_sessions", shard_.shard_name),
+      StringUtil::format("/logjoind/$0/active_sessions", shard_.shard_name),
       &stat_active_sessions,
       stx::stats::ExportMode::EXPORT_VALUE);
 
   exportStat(
-      StringUtil::format("/cm-logjoin/$0/dbsize", shard_.shard_name),
+      StringUtil::format("/logjoind/$0/dbsize", shard_.shard_name),
       &stat_dbsize,
       stx::stats::ExportMode::EXPORT_VALUE);
 
@@ -483,7 +483,7 @@ void LogJoin::processClickstream(
       }
 
       stx::logInfo(
-          "cm.logjoin",
+          "logjoind",
           "Adding source feed:\n    feed=$0\n    url=$1\n    offset: $2",
           input_feed.first,
           input_feed.second.toString(),
@@ -503,7 +503,7 @@ void LogJoin::processClickstream(
     throw;
   }
 
-  stx::logInfo("cm.logjoin", "Resuming logjoin...");
+  stx::logInfo("logjoind", "Resuming logjoin...");
 
   UnixTime last_flush;
   uint64_t rate_limit_micros = flush_interval.microseconds();
@@ -525,7 +525,7 @@ void LogJoin::processClickstream(
       try {
         insertLogline(entry.get().data, txn.get());
       } catch (const std::exception& e) {
-        stx::logError("cm.logjoin", e, "invalid log line");
+        stx::logError("logjoind", e, "invalid log line");
       }
     }
 
@@ -550,7 +550,7 @@ void LogJoin::processClickstream(
     }
 
     stx::logInfo(
-        "cm.logjoin",
+        "logjoind",
         "LogJoin comitting...\n    stream_time=<$0 ... $1>\n" \
         "    active_sessions=$2\n    flushed_sessions=$3$4",
         watermarks.first,
