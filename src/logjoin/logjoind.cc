@@ -282,7 +282,7 @@ int main(int argc, const char** argv) {
   /* run logjoin */
   stx::logInfo(
       "cm.logjoin",
-      "Starting logjoind; dry_run=$0 shard=$1: [$2, $3) of [0, $4]",
+      "Starting logjoind\n    dry_run=$0\n    shard=$1, [$2, $3) of [0, $4]",
       dry_run,
       shard.shard_name,
       shard.begin,
