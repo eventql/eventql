@@ -23,18 +23,18 @@ void TSDBUploadStage::process(
     http::HTTPConnectionPool* http) {
   tsdb::RecordEnvelopeList records;
 
-  auto time = ctx->joined_session.last_seen_time() * kMicrosPerSecond;
-  auto record_id = SHA1::compute(ctx->tracked_session.uuid);
+  auto time = ctx->session.last_seen_time() * kMicrosPerSecond;
+  auto record_id = SHA1::compute(ctx->uuid);
   auto stream_key = "web.sessions";
   auto partition_key = tsdb::TimeWindowPartitioner::partitionKeyFor(
       stream_key,
       time,
       4 * kMicrosPerHour);
 
-  auto record_data = msg::encode(ctx->joined_session);
+  auto record_data = msg::encode(ctx->session);
 
   auto r = records.add_records();
-  r->set_tsdb_namespace(ctx->tracked_session.customer_key);
+  r->set_tsdb_namespace(ctx->customer_key);
   r->set_stream_key(stream_key);
   r->set_partition_key(partition_key.toString());
   r->set_record_id(record_id.toString());

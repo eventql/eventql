@@ -14,9 +14,19 @@ using namespace stx;
 namespace cm {
 
 void DebugPrintStage::process(RefPtr<TrackedSessionContext> ctx) {
-  stx::iputs("\n\n==== SESSION ====", 1);
-  ctx->tracked_session.debugPrint();
-  stx::iputs("$0", ctx->joined_session.DebugString());
+  stx::iputs("\n\n==== SESSION  $0/$1 ====", ctx->customer_key, ctx->uuid);
+
+  for (const auto& ev : ctx->events) {
+    stx::iputs(
+        "    > event time=$0 evtype=$1 eid=$2 data=$3$4",
+        ev.time,
+        ev.evtype,
+        ev.evid,
+        ev.data.substr(0, 40),
+        String(ev.data.size() > 40 ? "[...]" : ""));
+  }
+
+  stx::iputs("$0", ctx->session.DebugString());
 }
 
 } // namespace cm

@@ -20,7 +20,7 @@ void SessionJoin::process(RefPtr<TrackedSessionContext> ctx) {
   std::vector<TrackedItemVisit> page_views;
   std::vector<TrackedCartItem> cart_items;
 
-  for (const auto& ev : ctx->tracked_session.events) {
+  for (const auto& ev : ctx->events) {
     if (ev.evtype == "_search_query") {
       processSearchQueryEvent(ev, &queries);
       continue;
@@ -120,7 +120,7 @@ void SessionJoin::process(RefPtr<TrackedSessionContext> ctx) {
   }
 
   for (const auto& ci : cart_items) {
-    auto ciobj = ctx->joined_session.add_cart_items();
+    auto ciobj = ctx->session.add_cart_items();
 
     ciobj->set_time(ci.time.unixMicros() / kMicrosPerSecond);
     ciobj->set_item_id(ci.item.docID().docid);
@@ -131,7 +131,7 @@ void SessionJoin::process(RefPtr<TrackedSessionContext> ctx) {
   }
 
   for (const auto& q : queries) {
-    auto qobj = ctx->joined_session.add_search_queries();
+    auto qobj = ctx->session.add_search_queries();
 
     qobj->set_time(q.time.unixMicros() / kMicrosPerSecond);
     qobj->set_language((ProtoLanguage) cm::extractLanguage(q.attrs));
@@ -217,16 +217,16 @@ void SessionJoin::process(RefPtr<TrackedSessionContext> ctx) {
   }
 
   for (const auto& iv : page_views) {
-    auto ivobj = ctx->joined_session.add_item_visits();
+    auto ivobj = ctx->session.add_item_visits();
 
     ivobj->set_time(iv.time.unixMicros() / kMicrosPerSecond);
     ivobj->set_item_id(iv.item.docID().docid);
   }
 
-  ctx->joined_session.set_num_cart_items(num_cart_items);
-  ctx->joined_session.set_cart_value_eurcents(cart_value_eurcents);
-  ctx->joined_session.set_num_order_items(num_order_items);
-  ctx->joined_session.set_gmv_eurcents(gmv_eurcents);
+  ctx->session.set_num_cart_items(num_cart_items);
+  ctx->session.set_cart_value_eurcents(cart_value_eurcents);
+  ctx->session.set_num_order_items(num_order_items);
+  ctx->session.set_gmv_eurcents(gmv_eurcents);
 }
 
 void SessionJoin::processSearchQueryEvent(

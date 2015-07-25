@@ -7,24 +7,26 @@
  * permission is obtained.
  */
 #pragma once
-#include "stx/stdtypes.h"
-#include "logjoin/TrackedSessionContext.h"
+#include "logjoin/TrackedSession.h"
+#include "logjoin/JoinedSession.pb.h"
+#include "common/CustomerConfig.h"
 
 using namespace stx;
 
 namespace cm {
 
-class BuildSessionAttributes {
-public:
+struct TrackedSessionContext : public RefCounted {
+  TrackedSessionContext(TrackedSession session);
 
-  static void process(RefPtr<TrackedSessionContext> session);
+  std::string uuid;
 
-protected:
+  std::string customer_key;
+  RefPtr<CustomerConfigRef> customer_config;
 
-  static Option<UnixTime> firstSeenTime(const JoinedSession& session);
-  static Option<UnixTime> lastSeenTime(const JoinedSession& session);
+  Vector<TrackedEvent> events;
+
+  JoinedSession session;
 
 };
 
 } // namespace cm
-

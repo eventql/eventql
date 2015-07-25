@@ -44,7 +44,7 @@ TEST_CASE(LogJoinTest, SimpleQuery, [] () {
 
   auto ctx = mkRef(new TrackedSessionContext(sess));
   pipeline->run(ctx);
-  const auto& joined = ctx->joined_session;
+  const auto& joined = ctx->session;
 
   EXPECT_EQ(joined.num_cart_items(), 0);
   EXPECT_EQ(joined.cart_value_eurcents(), 0);
@@ -110,7 +110,7 @@ TEST_CASE(LogJoinTest, ItemOrder, [] () {
 
   auto ctx = mkRef(new TrackedSessionContext(sess));
   pipeline->run(ctx);
-  const auto& joined = ctx->joined_session;
+  const auto& joined = ctx->session;
 
   EXPECT_EQ(joined.num_cart_items(), 1);
   EXPECT_EQ(joined.cart_value_eurcents(), 1100);
@@ -189,7 +189,7 @@ TEST_CASE(LogJoinTest, MultipleQueryBatches, [] () {
 
   auto ctx = mkRef(new TrackedSessionContext(sess));
   pipeline->run(ctx);
-  const auto& joined = ctx->joined_session;
+  const auto& joined = ctx->session;
 
   EXPECT_EQ(joined.num_cart_items(), 0);
   EXPECT_EQ(joined.cart_value_eurcents(), 0);
@@ -244,7 +244,7 @@ TEST_CASE(LogJoinTest, MultipleQueries, [] () {
 
   auto ctx = mkRef(new TrackedSessionContext(sess));
   pipeline->run(ctx);
-  const auto& joined = ctx->joined_session;
+  const auto& joined = ctx->session;
 
   EXPECT_EQ(joined.search_queries().size(), 3);
   EXPECT_EQ(joined.search_queries().Get(0).time(), 1432311555);
@@ -315,7 +315,7 @@ TEST_CASE(LogJoinTest, MultipleQueries, [] () {
 //  });
 //
 //  auto ctx = pipeline->processSession(sess);
-//  const auto& joined = ctx->joined_session;
+//  const auto& joined = ctx->session;
 //
 //  EXPECT_EQ(joined.search_queries().Get(0).result_items().size(), 2);
 //  EXPECT_EQ(
@@ -360,7 +360,7 @@ TEST_CASE(LogJoinTest, SeenResultItems, [] () {
 
   auto ctx = mkRef(new TrackedSessionContext(sess));
   pipeline->run(ctx);
-  const auto& joined = ctx->joined_session;
+  const auto& joined = ctx->session;
 
   EXPECT_EQ(joined.search_queries().size(), 1);
   EXPECT_EQ(joined.search_queries().Get(0).result_items().size(), 3);

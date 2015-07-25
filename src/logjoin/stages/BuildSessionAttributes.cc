@@ -14,20 +14,20 @@ using namespace stx;
 namespace cm {
 
 void BuildSessionAttributes::process(RefPtr<TrackedSessionContext> ctx) {
-  auto first_seen = firstSeenTime(ctx->joined_session);
-  auto last_seen = lastSeenTime(ctx->joined_session);
+  auto first_seen = firstSeenTime(ctx->session);
+  auto last_seen = lastSeenTime(ctx->session);
   if (first_seen.isEmpty() || last_seen.isEmpty()) {
     RAISE(kRuntimeError, "session: time isn't set");
   }
 
-  ctx->joined_session.set_first_seen_time(
+  ctx->session.set_first_seen_time(
       first_seen.get().unixMicros() / kMicrosPerSecond);
 
-  ctx->joined_session.set_last_seen_time(
+  ctx->session.set_last_seen_time(
       last_seen.get().unixMicros() / kMicrosPerSecond);
 
-  ctx->joined_session.set_customer(ctx->tracked_session.customer_key);
-  for (const auto& ev : ctx->tracked_session.events) {
+  ctx->session.set_customer(ctx->customer_key);
+  for (const auto& ev : ctx->events) {
     if (ev.evtype != "__sattr") {
       continue;
     }
@@ -44,22 +44,22 @@ void BuildSessionAttributes::process(RefPtr<TrackedSessionContext> ctx) {
 
     std::string r_url;
     if (stx::URI::getParam(logline, "r_url", &r_url)) {
-      ctx->joined_session.set_referrer_url(r_url);
+      ctx->session.set_referrer_url(r_url);
     }
 
     std::string r_cpn;
     if (stx::URI::getParam(logline, "r_cpn", &r_cpn)) {
-      ctx->joined_session.set_referrer_campaign(r_cpn);
+      ctx->session.set_referrer_campaign(r_cpn);
     }
 
     std::string r_nm;
     if (stx::URI::getParam(logline, "r_nm", &r_nm)) {
-      ctx->joined_session.set_referrer_name(r_nm);
+      ctx->session.set_referrer_name(r_nm);
     }
 
     std::string cs;
     if (stx::URI::getParam(logline, "cs", &cs)) {
-      ctx->joined_session.set_customer_session_id(cs);
+      ctx->session.set_customer_session_id(cs);
     }
   }
 }

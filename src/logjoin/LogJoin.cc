@@ -312,7 +312,6 @@ void LogJoin::flushSession(
     target_->enqueueSession(session);
   } catch (const std::exception& e) {
     stx::logError("cm.logjoin", e, "SessionProcessor::enqueueSession crashed");
-    session.debugPrint();
   }
 
   stat_joined_sessions_.incr(1);

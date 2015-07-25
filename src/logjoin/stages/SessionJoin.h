@@ -8,7 +8,9 @@
  */
 #pragma once
 #include "stx/stdtypes.h"
-#include "logjoin/TrackedSession.h"
+#include "logjoin/TrackedSessionContext.h"
+#include "logjoin/TrackedItemVisit.h"
+#include "logjoin/TrackedCartItem.h"
 #include "logjoin/TrackedQuery.h"
 
 using namespace stx;

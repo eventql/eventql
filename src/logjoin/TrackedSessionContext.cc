@@ -6,25 +6,16 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-#pragma once
-#include "stx/stdtypes.h"
 #include "logjoin/TrackedSessionContext.h"
 
 using namespace stx;
 
 namespace cm {
 
-class BuildSessionAttributes {
-public:
-
-  static void process(RefPtr<TrackedSessionContext> session);
-
-protected:
-
-  static Option<UnixTime> firstSeenTime(const JoinedSession& session);
-  static Option<UnixTime> lastSeenTime(const JoinedSession& session);
-
-};
+TrackedSessionContext::TrackedSessionContext(
+    TrackedSession session) :
+    uuid(session.uuid),
+    customer_key(session.customer_key),
+    events(session.events) {}
 
 } // namespace cm
-

@@ -35,7 +35,7 @@ void DeliverWebhookStage::process(RefPtr<TrackedSessionContext> ctx) {
     http::HTTPMessage::HeaderList headers;
     headers.emplace_back(
         "X-DeepAnalytics-SessionID",
-        ctx->joined_session.session_id());
+        ctx->session.session_id());
 
     auto request = http::HTTPRequest::mkPost(
         hook.target_url(),
