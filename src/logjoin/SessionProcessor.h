@@ -35,13 +35,14 @@ namespace cm {
 
 class SessionProcessor {
 public:
-  typedef Function<void (TrackedSession* session)> PipelineStageFn;
+  typedef Function<void (RefPtr<TrackedSessionContext> ctx)> PipelineStageFn;
 
   SessionProcessor(
       msg::MessageSchemaRepository* schemas,
       bool dry_run);
 
   void enqueueSession(const TrackedSession& session);
+  RefPtr<TrackedSessionContext> processSession(TrackedSession session);
 
   void addPipelineStage(PipelineStageFn fn);
   void start();
@@ -58,7 +59,6 @@ public:
   size_t num_sessions;
 
 protected:
-  void processSession(TrackedSession session);
 
 
   msg::MessageSchemaRepository* schemas_;

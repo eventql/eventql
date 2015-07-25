@@ -44,10 +44,10 @@ struct TrackedEvent {
       String _evtype,
       String _data);
 
-  const UnixTime time;
-  const String evid;
-  const String evtype;
-  const String data;
+  UnixTime time;
+  String evid;
+  String evtype;
+  String data;
 };
 
 /**
@@ -109,6 +109,11 @@ struct TrackedSession {
 
 };
 
+struct TrackedSessionContext : public RefCounted {
+
+  TrackedSession tracked_session;
+
+};
 
 } // namespace cm
 #endif

@@ -40,18 +40,27 @@ void SessionProcessor::stop() {
   tpool_.stop();
 }
 
-void SessionProcessor::enqueueSession(const TrackedSession& session) {
-  // FIXPAUL: write to some form of persisten queue
-  tpool_.run(
-      std::bind(
-          &SessionProcessor::processSession,
-          this,
-          session));
+void SessionProcessor::addPipelineStage(PipelineStageFn fn) {
+  stages_.emplace_back(fn);
 }
 
-void SessionProcessor::processSession(TrackedSession session) {
-  stx::iputs("process session...", 1);
-  session.debugPrint();
+void SessionProcessor::enqueueSession(const TrackedSession& session) {
+  // FIXPAUL: write to some form of persisten queue
+  tpool_.run([this, session] {
+    processSession(session);
+  });
+}
+
+RefPtr<TrackedSessionContext> SessionProcessor::processSession(
+    TrackedSession session) {
+  auto ctx = mkRef(new TrackedSessionContext);
+  ctx->tracked_session = session;
+
+  for (const auto& stage : stages_) {
+    stage(ctx);
+  }
+
+  return ctx;
 }
 
 void SessionProcessor::setNormalize(
