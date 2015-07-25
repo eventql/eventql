@@ -20,7 +20,7 @@
 #include "cstable/DoubleColumnWriter.h"
 #include "cstable/BooleanColumnWriter.h"
 
-namespace fnord {
+namespace stx {
 namespace cstable {
 
 CSTableBuilder::CSTableBuilder(
@@ -397,5 +397,5 @@ size_t CSTableBuilder::numRecords() const {
 }
 
 } // namespace cstable
-} // namespace fnord
+} // namespace stx
 

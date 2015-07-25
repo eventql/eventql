@@ -10,7 +10,7 @@
 #include <stx/buffer.h>
 #include <cstable/CSTableWriter.h>
 
-namespace fnord {
+namespace stx {
 namespace cstable {
 
 CSTableWriter::CSTableWriter(
@@ -88,5 +88,5 @@ void CSTableWriter::commit() {
 }
 
 } // namespace cstable
-} // namespace fnord
+} // namespace stx
 

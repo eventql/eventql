@@ -19,7 +19,7 @@
 #include <stx/protobuf/MessageSchema.h>
 #include <stx/protobuf/MessageObject.h>
 
-namespace fnord {
+namespace stx {
 namespace cstable {
 
 class CSTableBuilder {
@@ -69,6 +69,6 @@ protected:
 };
 
 } // namespace cstable
-} // namespace fnord
+} // namespace stx
 
 #endif

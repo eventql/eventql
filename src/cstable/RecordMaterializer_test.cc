@@ -18,9 +18,9 @@
 #include "cstable/RecordMaterializer.h"
 #include "cstable/StringColumnReader.h"
 
-using namespace fnord;
-using namespace fnord::cstable;
-using namespace fnord::msg;
+using namespace stx;
+using namespace stx::cstable;
+using namespace stx::msg;
 
 UNIT_TEST(RecordMaterializerTest);
 

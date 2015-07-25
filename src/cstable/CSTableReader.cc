@@ -17,7 +17,7 @@
 #include <cstable/DoubleColumnReader.h>
 #include <cstable/StringColumnReader.h>
 
-namespace fnord {
+namespace stx {
 namespace cstable {
 
 CSTableReader::CSTableReader(
@@ -114,5 +114,5 @@ size_t CSTableReader::numRecords() const {
 }
 
 } // namespace cstable
-} // namespace fnord
+} // namespace stx
 

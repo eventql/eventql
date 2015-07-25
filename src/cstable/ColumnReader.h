@@ -15,7 +15,7 @@
 #include <stx/util/binarymessagereader.h>
 #include <stx/util/BitPackDecoder.h>
 
-namespace fnord {
+namespace stx {
 namespace cstable {
 
 class ColumnReader : public RefCounted {
@@ -74,6 +74,6 @@ protected:
 };
 
 } // namespace cstable
-} // namespace fnord
+} // namespace stx
 
 #endif

@@ -15,7 +15,7 @@
 #include <cstable/BinaryFormat.h>
 #include <cstable/ColumnReader.h>
 
-namespace fnord {
+namespace stx {
 namespace cstable {
 
 class CSTableReader {
@@ -52,6 +52,6 @@ protected:
 };
 
 } // namespace cstable
-} // namespace fnord
+} // namespace stx
 
 #endif

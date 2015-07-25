@@ -10,7 +10,7 @@
 #include <stx/ieee754.h>
 #include <cstable/RecordMaterializer.h>
 
-namespace fnord {
+namespace stx {
 namespace cstable {
 
 RecordMaterializer::RecordMaterializer(
@@ -284,5 +284,5 @@ void RecordMaterializer::ColumnState::consume() {
 
 
 } // namespace cstable
-} // namespace fnord
+} // namespace stx
 

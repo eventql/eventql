@@ -9,7 +9,7 @@
  */
 #include <cstable/LEB128ColumnReader.h>
 
-namespace fnord {
+namespace stx {
 namespace cstable {
 
 LEB128ColumnReader::LEB128ColumnReader(
@@ -57,5 +57,5 @@ bool LEB128ColumnReader::next(
 }
 
 } // namespace cstable
-} // namespace fnord
+} // namespace stx
 

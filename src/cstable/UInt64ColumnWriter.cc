@@ -9,7 +9,7 @@
  */
 #include <cstable/UInt64ColumnWriter.h>
 
-namespace fnord {
+namespace stx {
 namespace cstable {
 
 UInt64ColumnWriter::UInt64ColumnWriter(
@@ -49,4 +49,4 @@ size_t UInt64ColumnWriter::size() const {
 
 
 } // namespace cstable
-} // namespace fnord
+} // namespace stx

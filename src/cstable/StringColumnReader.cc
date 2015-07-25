@@ -9,7 +9,7 @@
  */
 #include <cstable/StringColumnReader.h>
 
-namespace fnord {
+namespace stx {
 namespace cstable {
 
 StringColumnReader::StringColumnReader(
@@ -55,4 +55,4 @@ bool StringColumnReader::next(
 }
 
 } // namespace cstable
-} // namespace fnord
+} // namespace stx

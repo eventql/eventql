@@ -9,7 +9,7 @@
  */
 #include <cstable/BooleanColumnReader.h>
 
-namespace fnord {
+namespace stx {
 namespace cstable {
 
 BooleanColumnReader::BooleanColumnReader(
@@ -60,4 +60,4 @@ bool BooleanColumnReader::next(
 }
 
 } // namespace cstable
-} // namespace fnord
+} // namespace stx

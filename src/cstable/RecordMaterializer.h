@@ -17,7 +17,7 @@
 #include <cstable/ColumnReader.h>
 #include <stx/protobuf/MessageSchema.h>
 
-namespace fnord {
+namespace stx {
 namespace cstable {
 
 class RecordMaterializer {
@@ -87,6 +87,6 @@ protected:
 };
 
 } // namespace cstable
-} // namespace fnord
+} // namespace stx
 
 #endif
