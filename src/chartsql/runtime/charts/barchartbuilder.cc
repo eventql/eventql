@@ -9,7 +9,7 @@
  */
 #include <chartsql/runtime/charts/barchartbuilder.h>
 #include <chartsql/runtime/charts/drawstatement.h>
-#include <stx/charts/barchart.h>
+#include <cplot/barchart.h>
 
 namespace csql {
 
