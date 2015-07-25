@@ -11,7 +11,7 @@
 #include "stx/io/fileutil.h"
 #include "ModelCache.h"
 
-using namespace fnord;
+using namespace stx;
 
 namespace cm {
 
@@ -49,7 +49,7 @@ RefCounted* ModelCache::loadModel(
 
   auto filename = getLatestModelFilename(index_name, prefix);
 
-  fnord::logInfo(
+  stx::logInfo(
       "cm.modelcache",
       "Loading new model $0/$1 from $2",
       index_name,

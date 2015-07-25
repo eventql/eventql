@@ -19,7 +19,7 @@
 #include <stx/reflect/reflect.h>
 #include <inventory/ItemRef.h>
 
-using namespace fnord;
+using namespace stx;
 
 namespace cm {
 

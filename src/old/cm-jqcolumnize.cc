@@ -55,19 +55,19 @@
 #include "analytics/CTRByPositionQuery.h"
 
 using namespace cm;
-using namespace fnord;
+using namespace stx;
 
-fnord::thread::EventLoop ev;
+stx::thread::EventLoop ev;
 
 int main(int argc, const char** argv) {
-  fnord::Application::init();
-  fnord::Application::logToStderr();
+  stx::Application::init();
+  stx::Application::logToStderr();
 
-  fnord::cli::FlagParser flags;
+  stx::cli::FlagParser flags;
 
   flags.defineFlag(
       "file",
-      fnord::cli::FlagParser::T_STRING,
+      stx::cli::FlagParser::T_STRING,
       true,
       "f",
       NULL,
@@ -76,7 +76,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "upload_to",
-      fnord::cli::FlagParser::T_STRING,
+      stx::cli::FlagParser::T_STRING,
       true,
       NULL,
       NULL,
@@ -86,7 +86,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "loglevel",
-      fnord::cli::FlagParser::T_STRING,
+      stx::cli::FlagParser::T_STRING,
       false,
       NULL,
       "INFO",
@@ -131,7 +131,7 @@ int main(int argc, const char** argv) {
       try {
         time = obj.getUInt64(schema.id("first_seen_time")) * kMicrosPerSecond;
       } catch (...) {
-        fnord::iputs("skipping row b/c it has no first_seen_time: $0", msgid);
+        stx::iputs("skipping row b/c it has no first_seen_time: $0", msgid);
         continue;
       }
 
@@ -145,7 +145,7 @@ int main(int argc, const char** argv) {
       }
     }
 
-    fnord::iputs("upload batch: $0 -- $1/$2", batch.size(), i, n);
+    stx::iputs("upload batch: $0 -- $1/$2", batch.size(), i, n);
     URI uri(upload_to + "/tsdb/insert_batch?stream=joined_sessions.dawanda");
 
     http::HTTPRequest req(http::HTTPMessage::M_POST, uri.pathAndQuery());

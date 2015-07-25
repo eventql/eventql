@@ -49,17 +49,17 @@
 #include "FeatureSelector.h"
 #
 
-using namespace fnord;
+using namespace stx;
 
 int main(int argc, const char** argv) {
-  fnord::Application::init();
-  fnord::Application::logToStderr();
+  stx::Application::init();
+  stx::Application::logToStderr();
 
-  fnord::cli::FlagParser flags;
+  stx::cli::FlagParser flags;
 
   flags.defineFlag(
       "file",
-      fnord::cli::FlagParser::T_STRING,
+      stx::cli::FlagParser::T_STRING,
       true,
       "i",
       NULL,
@@ -86,7 +86,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "loglevel",
-      fnord::cli::FlagParser::T_STRING,
+      stx::cli::FlagParser::T_STRING,
       false,
       NULL,
       "INFO",
@@ -128,25 +128,25 @@ int main(int argc, const char** argv) {
   cm::FeatureIndex feature_index(featuredb, &feature_schema);
 
   /* set up analyzer */
-  fnord::fts::Analyzer analyzer(flags.getString("conf"));
+  stx::fts::Analyzer analyzer(flags.getString("conf"));
 
   /* feature selector */
   cm::FeatureSelector feature_select(&feature_index, &analyzer);
   HashMap<String, Pair<uint32_t, uint32_t>> feature_counts;
 
   /* open output sstable */
-  fnord::logInfo(
+  stx::logInfo(
       "cm.featureprep",
       "Writing features to: $0",
       output_data_file);
 
-  fnord::logInfo(
+  stx::logInfo(
       "cm.featureprep",
       "Writing feature metadata to: $0",
       output_meta_file);
 
   if (FileUtil::exists(output_data_file + "~")) {
-    fnord::logInfo(
+    stx::logInfo(
         "cm.featureprep",
         "Deleting orphaned tmp file: $0",
         output_data_file + "~");
@@ -155,7 +155,7 @@ int main(int argc, const char** argv) {
   }
 
   if (FileUtil::exists(output_meta_file + "~")) {
-    fnord::logInfo(
+    stx::logInfo(
         "cm.featureprep",
         "Deleting orphaned tmp file: $0",
         output_meta_file + "~");
@@ -170,11 +170,11 @@ int main(int argc, const char** argv) {
       0);
 
   /* read input table */
-  fnord::logInfo("cm.featureprep", "Importing sstable: $0", file);
+  stx::logInfo("cm.featureprep", "Importing sstable: $0", file);
   sstable::SSTableReader reader(File::openFile(file, File::O_READ));
 
   if (reader.bodySize() == 0) {
-    fnord::logCritical("cm.featureprep", "unfinished table: $0", file);
+    stx::logCritical("cm.featureprep", "unfinished table: $0", file);
     return 1;
   }
 
@@ -185,7 +185,7 @@ int main(int argc, const char** argv) {
 
   /* status line */
   util::SimpleRateLimitedFn status_line(kMicrosPerSecond, [&] () {
-    fnord::logInfo(
+    stx::logInfo(
         "cm.featureprep",
         "[$0%] Reading sstable... rows=$1",
         (size_t) ((cursor->position() / (double) body_size) * 100),
@@ -227,7 +227,7 @@ int main(int argc, const char** argv) {
         }
       }
     } catch (const Exception& e) {
-      fnord::logWarning(
+      stx::logWarning(
           "cm.featureprep",
           e,
           "error while indexing query: $0",

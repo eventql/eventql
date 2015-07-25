@@ -9,7 +9,7 @@
 #include "stx/json/json.h"
 #include "logjoin/LogJoinExport.h"
 
-using namespace fnord;
+using namespace stx;
 
 namespace cm {
 
@@ -50,7 +50,7 @@ void LogJoinExport::exportPreferenceSetFeed(const JoinedSession& session) {
       "logjoin.ecommerce_preference_sets.$0",
       session.customer());
 
-  fnord::iputs("export: $0 -> $1", topic, buf.toString());
+  stx::iputs("export: $0 -> $1", topic, buf.toString());
 }
 
 void LogJoinExport::exportQueryFeed(const JoinedSession& session) {

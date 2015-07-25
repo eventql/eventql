@@ -27,17 +27,17 @@
 #include "common.h"
 #include "PackedExample.h"
 
-using namespace fnord;
+using namespace stx;
 
 int main(int argc, const char** argv) {
-  fnord::Application::init();
-  fnord::Application::logToStderr();
+  stx::Application::init();
+  stx::Application::logToStderr();
 
-  fnord::cli::FlagParser flags;
+  stx::cli::FlagParser flags;
 
   flags.defineFlag(
       "input_meta",
-      fnord::cli::FlagParser::T_STRING,
+      stx::cli::FlagParser::T_STRING,
       false,
       NULL,
       NULL,
@@ -46,7 +46,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "output_lightsvm",
-      fnord::cli::FlagParser::T_STRING,
+      stx::cli::FlagParser::T_STRING,
       false,
       NULL,
       NULL,
@@ -55,7 +55,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "output_mm_labels",
-      fnord::cli::FlagParser::T_STRING,
+      stx::cli::FlagParser::T_STRING,
       false,
       NULL,
       NULL,
@@ -64,7 +64,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "output_mm_features",
-      fnord::cli::FlagParser::T_STRING,
+      stx::cli::FlagParser::T_STRING,
       false,
       NULL,
       NULL,
@@ -73,7 +73,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "output_meta",
-      fnord::cli::FlagParser::T_STRING,
+      stx::cli::FlagParser::T_STRING,
       false,
       NULL,
       NULL,
@@ -82,7 +82,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "min_observations",
-      fnord::cli::FlagParser::T_INTEGER,
+      stx::cli::FlagParser::T_INTEGER,
       false,
       NULL,
       "100",
@@ -91,7 +91,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "loglevel",
-      fnord::cli::FlagParser::T_STRING,
+      stx::cli::FlagParser::T_STRING,
       false,
       NULL,
       "INFO",
@@ -106,7 +106,7 @@ int main(int argc, const char** argv) {
   auto sstables = flags.getArgv();
   auto tbl_cnt = sstables.size();
   if (tbl_cnt == 0) {
-    fnord::logCritical("cm.featuredump", "No input tables, exiting");
+    stx::logCritical("cm.featuredump", "No input tables, exiting");
     return 1;
   }
 
@@ -117,7 +117,7 @@ int main(int argc, const char** argv) {
   if (flags.isSet("output_meta")) {
     output_meta_file_path = flags.getString("output_meta");
 
-    fnord::logInfo(
+    stx::logInfo(
         "cm.featureprep",
         "Writing feature metadata to: $0",
         output_meta_file_path);
@@ -135,7 +135,7 @@ int main(int argc, const char** argv) {
   if (flags.isSet("output_lightsvm")) {
     output_lightsvm_file_path = flags.getString("output_lightsvm");
 
-    fnord::logInfo(
+    stx::logInfo(
         "cm.featureprep",
         "Writing lightSVM features to: $0",
         output_lightsvm_file_path);
@@ -153,7 +153,7 @@ int main(int argc, const char** argv) {
   if (flags.isSet("output_mm_labels")) {
     output_mm_labels_file_path = flags.getString("output_mm_labels");
 
-    fnord::logInfo(
+    stx::logInfo(
         "cm.featureprep",
         "Writing matrix market labels to $0",
         output_mm_labels_file_path);
@@ -171,7 +171,7 @@ int main(int argc, const char** argv) {
   if (flags.isSet("output_mm_features")) {
     output_mm_features_file_path = flags.getString("output_mm_features");
 
-    fnord::logInfo(
+    stx::logInfo(
         "cm.featureprep",
         "Writing matrix market features to $0",
         output_mm_features_file_path);
@@ -213,7 +213,7 @@ int main(int argc, const char** argv) {
     for (int tbl_idx = 0; tbl_idx < sstables.size(); ++tbl_idx) {
       String sstable = sstables[tbl_idx];
       StringUtil::replaceAll(&sstable, ".sstable", "_meta.sstable");
-      fnord::logInfo("cm.featuredump", "Importing meta sstable: $0", sstable);
+      stx::logInfo("cm.featuredump", "Importing meta sstable: $0", sstable);
 
       /* read sstable heade r*/
       sstable::SSTableReader reader(File::openFile(sstable, File::O_READ));
@@ -221,7 +221,7 @@ int main(int argc, const char** argv) {
       schema.loadIndex(&reader);
 
       if (reader.bodySize() == 0) {
-        fnord::logCritical("cm.featuredump", "unfinished sstable: $0", sstable);
+        stx::logCritical("cm.featuredump", "unfinished sstable: $0", sstable);
         exit(1);
       }
 
@@ -234,7 +234,7 @@ int main(int argc, const char** argv) {
         auto p = (tbl_idx / (double) tbl_cnt) +
             ((cursor->position() / (double) body_size)) / (double) tbl_cnt;
 
-        fnord::logInfo(
+        stx::logInfo(
             "cm.featuredump",
             "[$0%] Reading meta sstables... rows=$1 features=$2",
             (size_t) (p * 100),
@@ -275,7 +275,7 @@ int main(int argc, const char** argv) {
     }
   }
 
-  fnord::logInfo(
+  stx::logInfo(
       "cm.featuredump",
       "Exporting $1/$0 features",
       orig_count,
@@ -295,7 +295,7 @@ int main(int argc, const char** argv) {
   int features_written = 0;
   for (int tbl_idx = 0; tbl_idx < sstables.size(); ++tbl_idx) {
     const auto& sstable = sstables[tbl_idx];
-    fnord::logInfo("cm.featuredump", "Importing data sstable: $0", sstable);
+    stx::logInfo("cm.featuredump", "Importing data sstable: $0", sstable);
 
     /* read sstable heade r*/
     sstable::SSTableReader reader(File::openFile(sstable, File::O_READ));
@@ -303,7 +303,7 @@ int main(int argc, const char** argv) {
     schema.loadIndex(&reader);
 
     if (reader.bodySize() == 0) {
-      fnord::logCritical("cm.featuredump", "unfinished sstable: $0", sstable);
+      stx::logCritical("cm.featuredump", "unfinished sstable: $0", sstable);
       exit(1);
     }
 
@@ -316,7 +316,7 @@ int main(int argc, const char** argv) {
       auto p = (tbl_idx / (double) tbl_cnt) +
           ((cursor->position() / (double) body_size)) / (double) tbl_cnt;
 
-      fnord::logInfo(
+      stx::logInfo(
           "cm.featuredump",
           "[$0%] Dumping features... rows_read=$1 rows_written=$2",
           (size_t) (p * 100),
@@ -355,7 +355,7 @@ int main(int argc, const char** argv) {
         features_written += ex.features.size();
 
 #ifndef FNORD_NOTRACE
-        fnord::logTrace(
+        stx::logTrace(
             "cm.featuredump",
             "Dumping example: label=$0 features=$1",
             ex.label,

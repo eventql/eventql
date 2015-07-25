@@ -17,9 +17,9 @@ namespace cm {
 const char Crawler::kUserAgent[] = "cm-crawler (http://fnrd.net/)";
 
 Crawler::Crawler(
-    fnord::feeds::RemoteFeedFactory feed_factory,
+    stx::feeds::RemoteFeedFactory feed_factory,
     size_t max_concurrency,
-    fnord::TaskScheduler* scheduler) :
+    stx::TaskScheduler* scheduler) :
     feed_cache_(feed_factory),
     max_concurrency_(max_concurrency),
     scheduler_(scheduler),
@@ -37,7 +37,7 @@ void Crawler::enqueue(const CrawlRequest& req) {
   lk.unlock();
 
   scheduler_->run([req, this] {
-    auto http_req = fnord::http::HTTPRequest::mkGet(req.url);
+    auto http_req = stx::http::HTTPRequest::mkGet(req.url);
     http_req.setHeader("User-Agent", kUserAgent);
 
     enqueue(req, http_req);
@@ -46,21 +46,21 @@ void Crawler::enqueue(const CrawlRequest& req) {
 
 void Crawler::enqueue(
     const CrawlRequest& req,
-    const fnord::http::HTTPRequest http_req) {
+    const stx::http::HTTPRequest http_req) {
   try {
     auto future = http_.executeRequest(http_req);
     scheduler_->runOnFirstWakeup(
         std::bind(&Crawler::requestReady, this, req, future),
         future.wakeup());
   } catch (const std::exception& e) {
-    fnord::logError("cm.crawler", e, "error while executing request");
+    stx::logError("cm.crawler", e, "error while executing request");
     return;
   }
 }
 
 void Crawler::requestReady(
     CrawlRequest req,
-    fnord::Future<fnord::http::HTTPResponse> res_future) {
+    stx::Future<stx::http::HTTPResponse> res_future) {
   in_flight_--;
   wakeup_.wakeup();
 
@@ -71,14 +71,14 @@ void Crawler::requestReady(
   if ((status == 301 || status == 302) && req.follow_redirects) {
     auto new_url = res.getHeader("Location");
 
-    fnord::logDebug(
+    stx::logDebug(
         "cm.crawler",
         "following $1 redirect for: $0 => $2",
         req.url,
         res.statusCode(),
         new_url);
 
-    auto http_req = fnord::http::HTTPRequest::mkGet(new_url);
+    auto http_req = stx::http::HTTPRequest::mkGet(new_url);
     http_req.setHeader("User-Agent", kUserAgent);
 
     in_flight_++;
@@ -89,7 +89,7 @@ void Crawler::requestReady(
 
   /* bail on error */
   if (status != 200) {
-    fnord::logError(
+    stx::logError(
         "cm.crawler",
         "received non-200 status code for: $0 => $1, $2",
         req.url,
@@ -103,16 +103,16 @@ void Crawler::requestReady(
 
   auto feed = feed_cache_.getFeed(req.target_feed);
   auto future = feed->appendEntry(
-      fnord::StringUtil::format(
+      stx::StringUtil::format(
           "$0\n$1",
-          fnord::json::toJSONString(result),
+          stx::json::toJSONString(result),
           res.body().toString()));
 
-  future.onFailure([] (const fnord::Status& status) {
-    fnord::logError("cm.crawler", "error writing to feed: $0", status);
+  future.onFailure([] (const stx::Status& status) {
+    stx::logError("cm.crawler", "error writing to feed: $0", status);
   });
 
-  fnord::logDebug("cm.crawler", "successfully crawled $0", req.url);
+  stx::logDebug("cm.crawler", "successfully crawled $0", req.url);
 }
 
 } // namespace cm

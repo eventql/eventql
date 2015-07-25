@@ -15,7 +15,7 @@
 #include "logjoin/LogJoinTarget.h"
 #include "common.h"
 
-using namespace fnord;
+using namespace stx;
 
 namespace cm {
 
@@ -28,7 +28,7 @@ LogJoinTarget::LogJoinTarget(
     cconv_(currencyConversionTable()) {}
 
 void LogJoinTarget::setNormalize(
-    Function<fnord::String (Language lang, const fnord::String& query)> normalizeCb) {
+    Function<stx::String (Language lang, const stx::String& query)> normalizeCb) {
   normalize_ = normalizeCb;
 }
 
@@ -85,7 +85,7 @@ Buffer LogJoinTarget::joinSession(TrackedSession& session) {
     auto docid = ci.item.docID();
     auto shopid = get_field_(docid, "shop_id");
     if (shopid.isEmpty()) {
-      //fnord::logWarning(
+      //stx::logWarning(
       //    "cm.logjoin",
       //    "item not found in featureindex: $0",
       //    docid.docid);
@@ -252,7 +252,7 @@ Buffer LogJoinTarget::joinSession(TrackedSession& session) {
 
       auto shopid = get_field_(docid, "shop_id");
       if (shopid.isEmpty()) {
-        //fnord::logWarning(
+        //stx::logWarning(
         //    "cm.logjoin",
         //    "item not found in featureindex: $0",
         //    docid.docid);
@@ -314,7 +314,7 @@ Buffer LogJoinTarget::joinSession(TrackedSession& session) {
     auto docid = iv.item.docID();
     auto shopid = get_field_(docid, "shop_id");
     if (shopid.isEmpty()) {
-      //fnord::logWarning(
+      //stx::logWarning(
       //    "cm.logjoin",
       //    "item not found in featureindex: $0",
       //    docid.docid);

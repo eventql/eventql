@@ -16,7 +16,7 @@
 namespace cm {
 
 struct CrawlResult {
-  fnord::UnixTime time;
+  stx::UnixTime time;
   std::string url;
   std::string userdata;
 

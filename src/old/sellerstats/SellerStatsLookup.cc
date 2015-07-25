@@ -9,7 +9,7 @@
 #include "sellerstats/ActivityLog.h"
 #include "sellerstats/SellerStatsLookup.h"
 
-using namespace fnord;
+using namespace stx;
 
 namespace cm {
 

@@ -11,7 +11,7 @@
 #include "analytics/TermInfoTableSource.h"
 #include "AutoCompleteModel.h"
 
-using namespace fnord;
+using namespace stx;
 
 namespace cm {
 
@@ -131,11 +131,11 @@ AutoCompleteModel::AutoCompleteModel(
 }
 
 AutoCompleteModel::~AutoCompleteModel() {
-  fnord::logDebug("cm.autocompletemodel", "Free'ing model <$0>");
+  stx::logDebug("cm.autocompletemodel", "Free'ing model <$0>");
 }
 
 void AutoCompleteModel::loadModelFile(const String& filename) {
-  fnord::logDebug(
+  stx::logDebug(
       "cm.autocompletemodel",
       "Loading model <$0> from: $1",
       filename);
@@ -180,7 +180,7 @@ void AutoCompleteModel::suggest(
   }
 
 #ifndef FNORD_NODEBUG
-  fnord::logDebug(
+  stx::logDebug(
       "cm.autocompletemodel",
       "suggest lang=$0 qstr=$1 terms=$2 valid_terms=$3 results=$4",
       lang_str,
@@ -195,7 +195,7 @@ void AutoCompleteModel::suggestSingleTerm(
     Language lang,
     Vector<String> terms,
     ResultListType* results) {
-  auto lang_str = fnord::languageToString(lang);
+  auto lang_str = stx::languageToString(lang);
   auto prefix = lang_str + "~" + terms.back();
   terms.pop_back();
   String qstr_prefix;
@@ -283,7 +283,7 @@ void AutoCompleteModel::suggestMultiTerm(
     const Vector<String>& valid_terms,
     ResultListType* results) {
   Set<String> search_terms;
-  auto lang_str = fnord::languageToString(lang);
+  auto lang_str = stx::languageToString(lang);
   auto last_term = terms.back();
   terms.pop_back();
   String qstr_prefix;

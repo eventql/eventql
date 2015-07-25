@@ -34,7 +34,7 @@ const std::string& CustomerNamespace::trackingJS() {
 }
 
 void CustomerNamespace::loadTrackingJS(const std::string& filename) {
-  tracking_js_ = fnord::Assets::getAsset(filename);
+  tracking_js_ = stx::Assets::getAsset(filename);
 }
 
 } // namespace cm

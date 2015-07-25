@@ -10,7 +10,7 @@
 #include <stx/stdtypes.h>
 #include <common/CustomerConfig.pb.h>
 
-using namespace fnord;
+using namespace stx;
 
 namespace cm {
 

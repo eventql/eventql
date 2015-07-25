@@ -39,13 +39,13 @@
 
 #include "IndexServlet.h"
 
-using namespace fnord;
+using namespace stx;
 
 int main(int argc, const char** argv) {
-  fnord::Application::init();
-  fnord::Application::logToStderr();
+  stx::Application::init();
+  stx::Application::logToStderr();
 
-  fnord::cli::FlagParser flags;
+  stx::cli::FlagParser flags;
 
   flags.defineFlag(
       "index",
@@ -67,7 +67,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "http_port",
-      fnord::cli::FlagParser::T_INTEGER,
+      stx::cli::FlagParser::T_INTEGER,
       false,
       NULL,
       "8000",
@@ -76,7 +76,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "loglevel",
-      fnord::cli::FlagParser::T_STRING,
+      stx::cli::FlagParser::T_STRING,
       false,
       NULL,
       "INFO",
@@ -96,9 +96,9 @@ int main(int argc, const char** argv) {
   auto analyzer = RefPtr<fts::Analyzer>(new fts::Analyzer(conf_path));
 
   /* start http server */
-  fnord::thread::EventLoop ev;
-  fnord::http::HTTPRouter http_router;
-  fnord::http::HTTPServer http_server(&http_router, &ev);
+  stx::thread::EventLoop ev;
+  stx::http::HTTPRouter http_router;
+  stx::http::HTTPServer http_server(&http_router, &ev);
   http_server.listen(flags.getInt("http_port"));
 
   /* index servlet */

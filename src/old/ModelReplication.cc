@@ -11,7 +11,7 @@
 #include <stx/logging.h>
 #include "ModelReplication.h"
 
-using namespace fnord;
+using namespace stx;
 
 namespace cm {
 
@@ -73,7 +73,7 @@ void ModelReplication::run() {
       try {
         job.second();
       } catch (const Exception& e) {
-        fnord::logError(
+        stx::logError(
             "cm.chunkserver",
             e,
             "ModelReplication error for model '$0'",

@@ -6,15 +6,15 @@
 #include "common.h"
 
 
-using namespace fnord;
+using namespace stx;
 namespace cm {
 
-class JoinedSessionViewer : public fnord::http::HTTPService {
+class JoinedSessionViewer : public stx::http::HTTPService {
 public:
 
   void handleHTTPRequest(
-      fnord::http::HTTPRequest* req,
-      fnord::http::HTTPResponse* res);
+      stx::http::HTTPRequest* req,
+      stx::http::HTTPResponse* res);
 
 };
 

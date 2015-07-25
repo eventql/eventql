@@ -13,7 +13,7 @@
 #include "ModelCache.h"
 #include "AutoCompleteModel.h"
 
-using namespace fnord;
+using namespace stx;
 
 namespace cm {
 
@@ -21,14 +21,14 @@ namespace cm {
  *  GET /autocomplete
  *
  */
-class AutoCompleteServlet : public fnord::http::HTTPService {
+class AutoCompleteServlet : public stx::http::HTTPService {
 public:
 
   AutoCompleteServlet(ModelCache* models);
 
   void handleHTTPRequest(
-      fnord::http::HTTPRequest* req,
-      fnord::http::HTTPResponse* res);
+      stx::http::HTTPRequest* req,
+      stx::http::HTTPResponse* res);
 
 protected:
 

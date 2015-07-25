@@ -13,7 +13,7 @@
 namespace cm {
 
 bool LogJoinShard::testUID(const String& uid) {
-  fnord::FNV<uint64_t> fnv;
+  stx::FNV<uint64_t> fnv;
   auto h = fnv.hash(uid.c_str(), uid.length());
   auto m = h % LogJoinShard::modulo;
   return m >= begin && m < end;

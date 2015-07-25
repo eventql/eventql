@@ -10,7 +10,7 @@
 #define _CM_LOGJOINSHARD_H
 #include <stx/stdtypes.h>
 
-using namespace fnord;
+using namespace stx;
 
 namespace cm {
 

@@ -26,16 +26,16 @@ TrackedQuery::TrackedQuery() :
     gmv_eurcents(0),
     cart_value_eurcents(0) {}
 
-void TrackedQuery::fromParams(const fnord::URI::ParamList& params) {
+void TrackedQuery::fromParams(const stx::URI::ParamList& params) {
 
   std::string items_str;
-  if (fnord::URI::getParam(params, "is", &items_str)) {
-    for (const auto& item_str : fnord::StringUtil::split(items_str, ",")) {
+  if (stx::URI::getParam(params, "is", &items_str)) {
+    for (const auto& item_str : stx::StringUtil::split(items_str, ",")) {
       if (item_str.length() == 0) {
         continue;
       }
 
-      auto item_str_parts = fnord::StringUtil::split(item_str, "~");
+      auto item_str_parts = stx::StringUtil::split(item_str, "~");
       if (item_str_parts.size() < 2) {
         RAISE(kParseError, "invalid is param");
       }
@@ -79,7 +79,7 @@ void TrackedQuery::fromParams(const fnord::URI::ParamList& params) {
     }
 
     if (!isReservedPixelParam(p.first)) {
-      attrs.emplace_back(fnord::StringUtil::format("$0:$1", p.first, p.second));
+      attrs.emplace_back(stx::StringUtil::format("$0:$1", p.first, p.second));
     }
   }
 }

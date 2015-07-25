@@ -27,7 +27,7 @@ struct TrackedCartItem {
       price_cents(0),
       checkout_step(0) {}
 
-  fnord::UnixTime time;
+  stx::UnixTime time;
   ItemRef item;
   uint32_t quantity;
   uint32_t price_cents;

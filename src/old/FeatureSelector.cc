@@ -9,13 +9,13 @@
 #include "common.h"
 #include "FeatureSelector.h"
 
-using namespace fnord;
+using namespace stx;
 
 namespace cm {
 
 FeatureSelector::FeatureSelector(
       FeatureIndex* feature_index,
-      fnord::fts::Analyzer* analyzer) :
+      stx::fts::Analyzer* analyzer) :
       feature_index_(feature_index),
       analyzer_(analyzer) {}
 

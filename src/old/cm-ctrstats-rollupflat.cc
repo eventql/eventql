@@ -28,7 +28,7 @@
 #
 #include "analytics/CTRCounter.h"
 
-using namespace fnord;
+using namespace stx;
 
 typedef Tuple<
     String,
@@ -47,7 +47,7 @@ typedef HashMap<String, cm::CTRCounterData> CounterMap;
 void importInputTables(const Vector<String> sstables, CounterMap* counters) {
   for (int tbl_idx = 0; tbl_idx < sstables.size(); ++tbl_idx) {
     const auto& sstable = sstables[tbl_idx];
-    fnord::logInfo("cm.ctrstats", "Importing sstable: $0", sstable);
+    stx::logInfo("cm.ctrstats", "Importing sstable: $0", sstable);
 
     /* read sstable heade r*/
     sstable::SSTableReader reader(File::openFile(sstable, File::O_READ));
@@ -55,7 +55,7 @@ void importInputTables(const Vector<String> sstables, CounterMap* counters) {
     schema.loadIndex(&reader);
 
     if (reader.bodySize() == 0) {
-      fnord::logCritical("cm.ctrstats", "unfinished sstable: $0", sstable);
+      stx::logCritical("cm.ctrstats", "unfinished sstable: $0", sstable);
       exit(1);
     }
 
@@ -66,7 +66,7 @@ void importInputTables(const Vector<String> sstables, CounterMap* counters) {
 
     /* status line */
     util::SimpleRateLimitedFn status_line(kMicrosPerSecond, [&] () {
-      fnord::logInfo(
+      stx::logInfo(
           "cm.ctrstats",
           "[$1/$2] [$0%] Reading sstable... rows=$3",
           (size_t) ((cursor->position() / (double) body_size) * 100),
@@ -113,7 +113,7 @@ void writeOutputTable(const String& filename, const Vector<OutputRow>& rows) {
   schema.addColumn("perf_base", 9, sstable::SSTableColumnType::FLOAT);
 
   /* open output sstable */
-  fnord::logInfo("cm.ctrstats", "Writing results to: $0", filename);
+  stx::logInfo("cm.ctrstats", "Writing results to: $0", filename);
   auto sstable_writer = sstable::SSTableWriter::create(
       filename,
       sstable::IndexProvider{},
@@ -145,7 +145,7 @@ void writeOutputTable(const String& filename, const Vector<OutputRow>& rows) {
 void aggregateCounters(CounterMap* counters, Vector<OutputRow>* rows) {
   const auto& global_counter_iter = counters->find("__GLOBAL");
   if (global_counter_iter == counters->end()) {
-    fnord::logCritical("cm.ctrstats", "missing global counter");
+    stx::logCritical("cm.ctrstats", "missing global counter");
     exit(1);
   }
   const auto& global_counter = global_counter_iter->second;
@@ -178,10 +178,10 @@ void aggregateCounters(CounterMap* counters, Vector<OutputRow>* rows) {
 }
 
 int main(int argc, const char** argv) {
-  fnord::Application::init();
-  fnord::Application::logToStderr();
+  stx::Application::init();
+  stx::Application::logToStderr();
 
-  fnord::cli::FlagParser flags;
+  stx::cli::FlagParser flags;
 
   flags.defineFlag(
       "output_file",
@@ -194,7 +194,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "loglevel",
-      fnord::cli::FlagParser::T_STRING,
+      stx::cli::FlagParser::T_STRING,
       false,
       NULL,
       "INFO",

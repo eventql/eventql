@@ -11,7 +11,7 @@
 #include <stx/json/json.h>
 #include "DocStore.h"
 
-using namespace fnord;
+using namespace stx;
 
 namespace cm {
 
@@ -42,7 +42,7 @@ void DocStore::loadDocument(RefPtr<Document> doc) {
     return;
   }
 
-  auto doc_json = fnord::json::parseJSON(FileUtil::read(docpath));
+  auto doc_json = stx::json::parseJSON(FileUtil::read(docpath));
   for (int i = 1; i < doc_json.size() - 1; i += 2) {
     doc->setField(doc_json[i].data, doc_json[i + 1].data);
   }
@@ -68,7 +68,7 @@ void DocStore::commitDocument(RefPtr<Document> doc) {
 }
 
 String DocStore::docPath(DocID docid) const {
-  fnord::FNV<uint64_t> fnv;
+  stx::FNV<uint64_t> fnv;
 
   auto docid_str = docid.docid;
   auto h = fnv.hash(docid_str.c_str(), docid_str.length()) % 8192;

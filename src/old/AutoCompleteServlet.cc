@@ -13,7 +13,7 @@
 #include "stx/wallclock.h"
 #include "stx/io/fileutil.h"
 
-using namespace fnord;
+using namespace stx;
 
 namespace cm {
 
@@ -23,7 +23,7 @@ AutoCompleteServlet::AutoCompleteServlet(
   exportStat(
       "/cm-autocompleteserver/global/requests_total",
       &stat_requests_total_,
-      fnord::stats::ExportMode::EXPORT_DELTA);
+      stx::stats::ExportMode::EXPORT_DELTA);
 }
 
 void AutoCompleteServlet::handleHTTPRequest(

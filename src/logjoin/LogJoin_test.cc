@@ -15,7 +15,7 @@
 #include "logjoin/LogJoinTarget.cc"
 #include "logjoin/JoinedSession.pb.h"
 
-using namespace fnord;
+using namespace stx;
 using namespace cm;
 
 UNIT_TEST(LogJoinTest);

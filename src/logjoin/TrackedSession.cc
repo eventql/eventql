@@ -10,7 +10,7 @@
 #include "logjoin/TrackedSession.h"
 #include "common.h"
 
-using namespace fnord;
+using namespace stx;
 
 namespace cm {
 
@@ -205,39 +205,39 @@ void TrackedSession::updateSessionAttributes(
   }
 
   std::string r_url;
-  if (fnord::URI::getParam(logline, "r_url", &r_url)) {
+  if (stx::URI::getParam(logline, "r_url", &r_url)) {
     referrer_url = Some(r_url);
   }
 
   std::string r_cpn;
-  if (fnord::URI::getParam(logline, "r_cpn", &r_cpn)) {
+  if (stx::URI::getParam(logline, "r_cpn", &r_cpn)) {
     referrer_campaign = Some(r_cpn);
   }
 
   std::string r_nm;
-  if (fnord::URI::getParam(logline, "r_nm", &r_nm)) {
+  if (stx::URI::getParam(logline, "r_nm", &r_nm)) {
     referrer_name = Some(r_nm);
   }
 
   std::string cs;
-  if (fnord::URI::getParam(logline, "cs", &cs)) {
+  if (stx::URI::getParam(logline, "cs", &cs)) {
     customer_session_id = Some(cs);
   }
 }
 
 void TrackedSession::debugPrint() const {
-  fnord::iputs("=== session $0/$1 ===", customer_key, uid);
+  stx::iputs("=== session $0/$1 ===", customer_key, uid);
 
-  fnord::iputs(" > queries: ", 1);
+  stx::iputs(" > queries: ", 1);
   for (const auto& query : queries) {
-    fnord::iputs(
+    stx::iputs(
         "    > query time=$0 eid=$2\n        > attrs: $1",
         query.time,
         query.attrs,
         query.eid);
 
     for (const auto& item : query.items) {
-      fnord::iputs(
+      stx::iputs(
           "        > qitem: id=$0 clicked=$1 position=$2 variant=$3",
           item.item,
           item.clicked,
@@ -246,9 +246,9 @@ void TrackedSession::debugPrint() const {
     }
   }
 
-  fnord::iputs(" > item visits: ", 1);
+  stx::iputs(" > item visits: ", 1);
   for (const auto& view : item_visits) {
-    fnord::iputs(
+    stx::iputs(
         "    > visit: item=$0 time=$1 eid=$3 attrs=$2",
         view.item,
         view.time,
@@ -256,7 +256,7 @@ void TrackedSession::debugPrint() const {
         view.eid);
   }
 
-  fnord::iputs("", 1);
+  stx::iputs("", 1);
 }
 
 Option<UnixTime> TrackedSession::firstSeenTime() const {

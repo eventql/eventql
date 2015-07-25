@@ -23,7 +23,7 @@
 #include "logjoin/TrackedItemVisit.h"
 #include "logjoin/TrackedCartItem.h"
 
-using namespace fnord;
+using namespace stx;
 
 namespace cm {
 

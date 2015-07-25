@@ -18,7 +18,7 @@
 #include <stx/uri.h>
 #include <fnord-afx/ArtifactIndex.h>
 
-using namespace fnord;
+using namespace stx;
 
 namespace cm {
 

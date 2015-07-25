@@ -29,14 +29,14 @@
 #include "logjoin/LogJoinShard.h"
 #include "logjoin/LogJoinTarget.h"
 
-using namespace fnord;
+using namespace stx;
 
 namespace cm {
 class CustomerNamespace;
 
 class LogJoin {
 public:
-  static const size_t kFlushIntervalMicros = 500 * fnord::kMicrosPerSecond;
+  static const size_t kFlushIntervalMicros = 500 * stx::kMicrosPerSecond;
 
   LogJoin(
       LogJoinShard shard,
@@ -49,7 +49,7 @@ public:
 
   void insertLogline(
       const std::string& customer_key,
-      const fnord::UnixTime& time,
+      const stx::UnixTime& time,
       const std::string& log_line,
       mdb::MDBTransaction* txn);
 
@@ -89,7 +89,7 @@ protected:
 
   void appendToSession(
       const std::string& customer_key,
-      const fnord::UnixTime& time,
+      const stx::UnixTime& time,
       const std::string& uid,
       const std::string& evid,
       const std::string& evtype,
@@ -114,11 +114,11 @@ protected:
   HashMap<String, uint32_t> pixel_param_ids_;
   HashMap<uint32_t, String> pixel_param_names_;
 
-  fnord::stats::Counter<uint64_t> stat_loglines_total_;
-  fnord::stats::Counter<uint64_t> stat_loglines_invalid_;
-  fnord::stats::Counter<uint64_t> stat_joined_sessions_;
-  fnord::stats::Counter<uint64_t> stat_joined_queries_;
-  fnord::stats::Counter<uint64_t> stat_joined_item_visits_;
+  stx::stats::Counter<uint64_t> stat_loglines_total_;
+  stx::stats::Counter<uint64_t> stat_loglines_invalid_;
+  stx::stats::Counter<uint64_t> stat_joined_sessions_;
+  stx::stats::Counter<uint64_t> stat_joined_queries_;
+  stx::stats::Counter<uint64_t> stat_joined_item_visits_;
 
   Random rnd_;
 };

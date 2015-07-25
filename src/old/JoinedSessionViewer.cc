@@ -1,24 +1,24 @@
 #include "JoinedSessionViewer.h"
 
-using namespace fnord;
+using namespace stx;
 namespace cm {
 
 void JoinedSessionViewer::handleHTTPRequest(
-  fnord::http::HTTPRequest* req,
-  fnord::http::HTTPResponse* res) {
+  stx::http::HTTPRequest* req,
+  stx::http::HTTPResponse* res) {
 
   if (req->method() == http::HTTPMessage::M_GET) {
     URI uri(req->uri());
-    fnord::URI::ParamList params = uri.queryParams();
+    stx::URI::ParamList params = uri.queryParams();
 
     std::string session;
-    if (!fnord::URI::getParam(params, "session", &session)) {
+    if (!stx::URI::getParam(params, "session", &session)) {
       res->addBody("error: missing session parameter");
-      res->setStatus(fnord::http::kStatusBadRequest);
+      res->setStatus(stx::http::kStatusBadRequest);
       return;
     }
 
-    fnord::iputs("session parameter: $0", session);
+    stx::iputs("session parameter: $0", session);
   }
 
   if (req->method() == http::HTTPMessage::M_POST) {
@@ -27,7 +27,7 @@ void JoinedSessionViewer::handleHTTPRequest(
     util::Base64::encode(body.toString(), &session_param);
 
     //redirect
-    res->setStatus(fnord::http::kStatusFound);
+    res->setStatus(stx::http::kStatusFound);
     res->addHeader("Location", "/view_session" + session_param);
   }
 }

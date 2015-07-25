@@ -13,7 +13,7 @@
 #include "brokerd/BrokerClient.h"
 #include "logjoin/JoinedSession.pb.h"
 
-using namespace fnord;
+using namespace stx;
 
 namespace cm {
 

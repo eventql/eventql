@@ -16,7 +16,7 @@
 #include "stx/reflect/reflect.h"
 #include "DocID.h"
 
-using namespace fnord;
+using namespace stx;
 
 namespace cm {
 

@@ -22,7 +22,7 @@
 #include "logjoin/SessionEnvelope.pb.h"
 #include "logjoin/LogJoin.h"
 
-using namespace fnord;
+using namespace stx;
 
 namespace cm {
 
@@ -92,25 +92,25 @@ void LogJoin::insertLogline(
   auto customer_key = log_line.substr(0, c_end);
   auto body = log_line.substr(t_end + 1);
   auto timestr = log_line.substr(c_end + 1, t_end - c_end - 1);
-  fnord::UnixTime time(std::stoul(timestr) * fnord::kMicrosPerSecond);
+  stx::UnixTime time(std::stoul(timestr) * stx::kMicrosPerSecond);
 
   insertLogline(customer_key, time, body, txn);
 }
 
 void LogJoin::insertLogline(
     const std::string& customer_key,
-    const fnord::UnixTime& time,
+    const stx::UnixTime& time,
     const std::string& log_line,
     mdb::MDBTransaction* txn) {
-  fnord::URI::ParamList params;
-  fnord::URI::parseQueryString(log_line, &params);
+  stx::URI::ParamList params;
+  stx::URI::parseQueryString(log_line, &params);
 
   stat_loglines_total_.incr(1);
 
   try {
     /* extract uid (userid) and eid (eventid) */
     std::string c;
-    if (!fnord::URI::getParam(params, "c", &c)) {
+    if (!stx::URI::getParam(params, "c", &c)) {
       RAISE(kParseError, "c param is missing");
     }
 
@@ -127,7 +127,7 @@ void LogJoin::insertLogline(
 
     if (!shard_.testUID(uid)) {
 #ifndef NDEBUG
-      fnord::logTrace(
+      stx::logTrace(
           "cm.logjoin",
           "dropping logline with uid=$0 because it does not match my shard",
           uid);
@@ -136,7 +136,7 @@ void LogJoin::insertLogline(
     }
 
     std::string evtype;
-    if (!fnord::URI::getParam(params, "e", &evtype) || evtype.length() != 1) {
+    if (!stx::URI::getParam(params, "e", &evtype) || evtype.length() != 1) {
       RAISE(kParseError, "e param is missing");
     }
 
@@ -176,7 +176,7 @@ void LogJoin::insertLogline(
 
 void LogJoin::appendToSession(
     const std::string& customer_key,
-    const fnord::UnixTime& time,
+    const stx::UnixTime& time,
     const std::string& uid,
     const std::string& evid,
     const std::string& evtype,
@@ -184,7 +184,7 @@ void LogJoin::appendToSession(
     mdb::MDBTransaction* txn) {
 
   auto flush_at = time.unixMicros() +
-      kSessionIdleTimeoutSeconds * fnord::kMicrosPerSecond;
+      kSessionIdleTimeoutSeconds * stx::kMicrosPerSecond;
 
   auto old_ftime = sessions_flush_times_.find(uid);
   if (old_ftime == sessions_flush_times_.end() ||
@@ -269,7 +269,7 @@ void LogJoin::flushSession(
 
         session.insertLogline(time, evtype, evid, logline);
       } catch (const std::exception& e) {
-        fnord::logError("cm.logjoin", e, "invalid logline");
+        stx::logError("cm.logjoin", e, "invalid logline");
         stat_loglines_invalid_.incr(1);
       }
     }
@@ -280,14 +280,14 @@ void LogJoin::flushSession(
   cursor->close();
 
   if (session.customer_key.length() == 0) {
-    fnord::logError("cm.logjoin", "missing customer key for: $0", uid);
+    stx::logError("cm.logjoin", "missing customer key for: $0", uid);
     return;
   }
 
   try {
     onSession(txn, session);
   } catch (const std::exception& e) {
-    fnord::logError("cm.logjoin", e, "LogJoint::onSession crashed");
+    stx::logError("cm.logjoin", e, "LogJoint::onSession crashed");
     session.debugPrint();
   }
 
@@ -300,7 +300,7 @@ void LogJoin::onSession(
   auto session_data = target_->joinSession(session);
 
   if (dry_run_) {
-    fnord::logInfo(
+    stx::logInfo(
         "cm.logjoin",
         "[DRYRUN] not uploading session: ", 1);
         //msg::MessagePrinter::print(obj, joined_session_schema_));
@@ -354,7 +354,7 @@ void LogJoin::importTimeoutList(mdb::MDBTransaction* txn) {
 
     util::BinaryMessageReader reader(value.data(), value.size());
     auto time = reader.readVarUInt();
-    auto ftime = (time + kSessionIdleTimeoutSeconds) * fnord::kMicrosPerSecond;
+    auto ftime = (time + kSessionIdleTimeoutSeconds) * stx::kMicrosPerSecond;
 
     auto old_ftime = sessions_flush_times_.find(sid);
     if (old_ftime == sessions_flush_times_.end() ||
@@ -395,27 +395,27 @@ void LogJoin::exportStats(const std::string& prefix) {
   exportStat(
       StringUtil::format("$0/$1", prefix, "loglines_total"),
       &stat_loglines_total_,
-      fnord::stats::ExportMode::EXPORT_DELTA);
+      stx::stats::ExportMode::EXPORT_DELTA);
 
   exportStat(
       StringUtil::format("$0/$1", prefix, "loglines_invalid"),
       &stat_loglines_invalid_,
-      fnord::stats::ExportMode::EXPORT_DELTA);
+      stx::stats::ExportMode::EXPORT_DELTA);
 
   exportStat(
       StringUtil::format("$0/$1", prefix, "joined_sessions"),
       &stat_joined_sessions_,
-      fnord::stats::ExportMode::EXPORT_DELTA);
+      stx::stats::ExportMode::EXPORT_DELTA);
 
   exportStat(
       StringUtil::format("$0/$1", prefix, "joined_queries"),
       &stat_joined_queries_,
-      fnord::stats::ExportMode::EXPORT_DELTA);
+      stx::stats::ExportMode::EXPORT_DELTA);
 
   exportStat(
       StringUtil::format("$0/$1", prefix, "joined_item_visits"),
       &stat_joined_item_visits_,
-      fnord::stats::ExportMode::EXPORT_DELTA);
+      stx::stats::ExportMode::EXPORT_DELTA);
 }
 
 } // namespace cm

@@ -9,7 +9,7 @@
 #include "Document.h"
 #include <stx/inspect.h>
 
-using namespace fnord;
+using namespace stx;
 
 namespace cm {
 
@@ -28,13 +28,13 @@ void Document::setField(const String& field, const String& value) {
 }
 
 void Document::debugPrint() const {
-  fnord::iputs("------ BEGIN DOC -------\n    id=$0", id_.docid);
+  stx::iputs("------ BEGIN DOC -------\n    id=$0", id_.docid);
   for (const auto& f : fields_) {
     String abbr = f.second.substr(0, 80);
     StringUtil::replaceAll(&abbr, "\n", " ");
-    fnord::iputs("    $0=$1", f.first, abbr);
+    stx::iputs("    $0=$1", f.first, abbr);
   }
-  fnord::iputs("------- END DOC --------", 0);
+  stx::iputs("------- END DOC --------", 0);
 }
 
 } // namespace cm

@@ -50,21 +50,21 @@
 #include "ModelReplication.h"
 #include "JoinedSessionViewer.h"
 
-using namespace fnord;
+using namespace stx;
 
 std::atomic<bool> shutdown_sig;
-fnord::thread::EventLoop ev;
+stx::thread::EventLoop ev;
 
 void quit(int n) {
   shutdown_sig = true;
-  fnord::logInfo("cm.chunkserver", "Shutting down...");
+  stx::logInfo("cm.chunkserver", "Shutting down...");
   // FIXPAUL: wait for http server stop...
   ev.shutdown();
 }
 
 int main(int argc, const char** argv) {
-  fnord::Application::init();
-  fnord::Application::logToStderr();
+  stx::Application::init();
+  stx::Application::logToStderr();
 
   /* shutdown hook */
   shutdown_sig = false;
@@ -75,11 +75,11 @@ int main(int argc, const char** argv) {
   sigaction(SIGQUIT, &sa, NULL);
   sigaction(SIGINT, &sa, NULL);
 
-  fnord::cli::FlagParser flags;
+  stx::cli::FlagParser flags;
 
   flags.defineFlag(
       "http_port",
-      fnord::cli::FlagParser::T_INTEGER,
+      stx::cli::FlagParser::T_INTEGER,
       false,
       NULL,
       "8000",
@@ -106,7 +106,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "loglevel",
-      fnord::cli::FlagParser::T_STRING,
+      stx::cli::FlagParser::T_STRING,
       false,
       NULL,
       "INFO",
@@ -127,10 +127,10 @@ int main(int argc, const char** argv) {
   loadDefaultSchemas(&schemas);
 
   /* start http server and worker pools */
-  fnord::thread::ThreadPool tpool;
+  stx::thread::ThreadPool tpool;
   http::HTTPConnectionPool http(&ev);
-  fnord::http::HTTPRouter http_router;
-  fnord::http::HTTPServer http_server(&http_router, &ev);
+  stx::http::HTTPRouter http_router;
+  stx::http::HTTPServer http_server(&http_router, &ev);
   http_server.listen(flags.getInt("http_port"));
 
 
@@ -183,7 +183,7 @@ int main(int argc, const char** argv) {
   ev.run();
 
   tsdb_node.stop();
-  fnord::logInfo("cm.chunkserver", "Exiting...");
+  stx::logInfo("cm.chunkserver", "Exiting...");
 
   exit(0);
 }
