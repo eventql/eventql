@@ -116,8 +116,8 @@ void TrackedSession::debugPrint() const {
         ev.time,
         ev.evtype,
         ev.evid,
-        ev.data.substr(0, 20),
-        ev.data.size() > 20 ? "[...]" : "");
+        ev.data.substr(0, 40),
+        String(ev.data.size() > 40 ? "[...]" : ""));
   }
 }
 
