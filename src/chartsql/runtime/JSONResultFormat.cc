@@ -8,7 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <chartsql/runtime/JSONResultFormat.h>
-#include <stx/charts/svgtarget.h>
+#include <cplot/svgtarget.h>
 
 namespace csql {
 
