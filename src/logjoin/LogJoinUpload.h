@@ -19,7 +19,7 @@
 #include "logjoin/JoinedSession.pb.h"
 #include "common/CustomerDirectory.h"
 
-using namespace fnord;
+using namespace stx;
 
 namespace cm {
 

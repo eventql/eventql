@@ -22,13 +22,13 @@
 namespace cm {
 
 struct TrackedItemVisit {
-  fnord::UnixTime time;
-  fnord::String eid;
+  stx::UnixTime time;
+  stx::String eid;
   ItemRef item;
   std::vector<std::string> attrs;
 
   void merge(const TrackedItemVisit& other);
-  void fromParams(const fnord::URI::ParamList& params);
+  void fromParams(const stx::URI::ParamList& params);
 
   template <typename T>
   static void reflect(T* meta) {

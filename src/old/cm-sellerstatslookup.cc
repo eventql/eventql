@@ -42,7 +42,7 @@
 #include "sellerstats/SellerStatsLookup.h"
 
 using namespace cm;
-using namespace fnord;
+using namespace stx;
 
 int main(int argc, const char** argv) {
   Application::init();
@@ -79,7 +79,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "loglevel",
-      fnord::cli::FlagParser::T_STRING,
+      stx::cli::FlagParser::T_STRING,
       false,
       NULL,
       "INFO",

@@ -30,7 +30,7 @@
 #
 #include "analytics/CTRCounter.h"
 
-using namespace fnord;
+using namespace stx;
 
 struct PageInfo {
   PageInfo() : views(0), clicks(0) {}
@@ -64,14 +64,14 @@ void indexJoinedQuery(
 }
 
 int main(int argc, const char** argv) {
-  fnord::Application::init();
-  fnord::Application::logToStderr();
+  stx::Application::init();
+  stx::Application::logToStderr();
 
-  fnord::cli::FlagParser flags;
+  stx::cli::FlagParser flags;
 
   flags.defineFlag(
       "loglevel",
-      fnord::cli::FlagParser::T_STRING,
+      stx::cli::FlagParser::T_STRING,
       false,
       NULL,
       "INFO",
@@ -107,13 +107,13 @@ int main(int argc, const char** argv) {
       return a.first < b.first;
     });
 
-    fnord::iputs("page;views;clicks;ctr;viewshare;clickshare", 1);
+    stx::iputs("page;views;clicks;ctr;viewshare;clickshare", 1);
     for (const auto& p : pages) {
       if (p.first > 100) {
         continue;
       }
 
-      fnord::iputs(
+      stx::iputs(
           "$0,$1,$2,$3,$4,$5",
           p.first,
           p.second.views,
@@ -129,13 +129,13 @@ int main(int argc, const char** argv) {
   int row_idx = 0;
   for (int tbl_idx = 0; tbl_idx < sstables.size(); ++tbl_idx) {
     const auto& sstable = sstables[tbl_idx];
-    fnord::logInfo("cm.ctrstats", "Importing sstable: $0", sstable);
+    stx::logInfo("cm.ctrstats", "Importing sstable: $0", sstable);
 
     /* read sstable header */
     sstable::SSTableReader reader(File::openFile(sstable, File::O_READ));
 
     if (reader.bodySize() == 0) {
-      fnord::logCritical("cm.ctrstats", "unfinished sstable: $0", sstable);
+      stx::logCritical("cm.ctrstats", "unfinished sstable: $0", sstable);
       exit(1);
     }
 
@@ -166,7 +166,7 @@ int main(int argc, const char** argv) {
 
     /* status line */
     util::SimpleRateLimitedFn status_line(kMicrosPerSecond, [&] () {
-      fnord::logInfo(
+      stx::logInfo(
           "cm.ctrstats",
           "[$1/$2] [$0%] Reading sstable... rows=$3",
           (size_t) ((cursor->position() / (double) body_size) * 100),
@@ -184,7 +184,7 @@ int main(int argc, const char** argv) {
       try {
         q = Some(json::fromJSON<cm::JoinedQuery>(val));
       } catch (const Exception& e) {
-        fnord::logWarning("cm.ctrstats", e, "invalid json: $0", val.toString());
+        stx::logWarning("cm.ctrstats", e, "invalid json: $0", val.toString());
       }
 
       if (!q.isEmpty()) {

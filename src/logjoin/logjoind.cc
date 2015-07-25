@@ -43,18 +43,18 @@
 #include "common.h"
 
 using namespace cm;
-using namespace fnord;
+using namespace stx;
 
 std::atomic<bool> cm_logjoin_shutdown;
-fnord::thread::EventLoop ev;
+stx::thread::EventLoop ev;
 
 void quit(int n) {
   cm_logjoin_shutdown = true;
 }
 
 int main(int argc, const char** argv) {
-  fnord::Application::init();
-  fnord::Application::logToStderr();
+  stx::Application::init();
+  stx::Application::logToStderr();
 
   /* shutdown hook */
   cm_logjoin_shutdown = false;
@@ -65,7 +65,7 @@ int main(int argc, const char** argv) {
   sigaction(SIGQUIT, &sa, NULL);
   sigaction(SIGINT, &sa, NULL);
 
-  fnord::cli::FlagParser flags;
+  stx::cli::FlagParser flags;
 
   flags.defineFlag(
       "conf",
@@ -96,7 +96,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "tsdb_addr",
-      fnord::cli::FlagParser::T_STRING,
+      stx::cli::FlagParser::T_STRING,
       true,
       NULL,
       NULL,
@@ -105,7 +105,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "broker_addr",
-      fnord::cli::FlagParser::T_STRING,
+      stx::cli::FlagParser::T_STRING,
       true,
       NULL,
       NULL,
@@ -114,7 +114,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "statsd_addr",
-      fnord::cli::FlagParser::T_STRING,
+      stx::cli::FlagParser::T_STRING,
       false,
       NULL,
       "127.0.0.1:8192",
@@ -123,7 +123,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "batch_size",
-      fnord::cli::FlagParser::T_INTEGER,
+      stx::cli::FlagParser::T_INTEGER,
       false,
       NULL,
       "2048",
@@ -132,7 +132,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "buffer_size",
-      fnord::cli::FlagParser::T_INTEGER,
+      stx::cli::FlagParser::T_INTEGER,
       false,
       NULL,
       "8192",
@@ -141,7 +141,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "flush_interval",
-      fnord::cli::FlagParser::T_INTEGER,
+      stx::cli::FlagParser::T_INTEGER,
       false,
       NULL,
       "5",
@@ -150,7 +150,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "db_size",
-      fnord::cli::FlagParser::T_INTEGER,
+      stx::cli::FlagParser::T_INTEGER,
       false,
       NULL,
       "128",
@@ -159,7 +159,7 @@ int main(int argc, const char** argv) {
 
    flags.defineFlag(
       "no_dryrun",
-      fnord::cli::FlagParser::T_SWITCH,
+      stx::cli::FlagParser::T_SWITCH,
       false,
       NULL,
       NULL,
@@ -168,7 +168,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "shard",
-      fnord::cli::FlagParser::T_STRING,
+      stx::cli::FlagParser::T_STRING,
       false,
       NULL,
       NULL,
@@ -177,7 +177,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "loglevel",
-      fnord::cli::FlagParser::T_STRING,
+      stx::cli::FlagParser::T_STRING,
       false,
       NULL,
       "INFO",
@@ -217,9 +217,9 @@ int main(int argc, const char** argv) {
   http::HTTPConnectionPool http(&ev);
 
   /* start stats reporting */
-  fnord::stats::StatsdAgent statsd_agent(
-      fnord::InetAddr::resolve(flags.getString("statsd_addr")),
-      10 * fnord::kMicrosPerSecond);
+  stx::stats::StatsdAgent statsd_agent(
+      stx::InetAddr::resolve(flags.getString("statsd_addr")),
+      10 * stx::kMicrosPerSecond);
 
   statsd_agent.start();
 
@@ -233,7 +233,7 @@ int main(int argc, const char** argv) {
   size_t buffer_size = flags.getInt("buffer_size");
   size_t flush_interval = flags.getInt("flush_interval");
 
-  fnord::logInfo(
+  stx::logInfo(
       "cm.logjoin",
       "Starting cm-logjoin with:\n    dry_run=$0\n    batch_size=$1\n" \
       "    buffer_size=$2\n    flush_interval=$9\n"
@@ -250,7 +250,7 @@ int main(int argc, const char** argv) {
       cm::LogJoinShard::modulo,
       flush_interval);
 
-  fnord::logInfo(
+  stx::logInfo(
       "cm.logjoin",
       "Using session schema:\n$0",
       schemas.getSchema("cm.JoinedSession")->toString());
@@ -301,7 +301,7 @@ int main(int argc, const char** argv) {
     if (t_end == std::string::npos) return 0;
 
     auto timestr = log_line.substr(c_end + 1, t_end - c_end - 1);
-    return std::stoul(timestr) * fnord::kMicrosPerSecond;
+    return std::stoul(timestr) * stx::kMicrosPerSecond;
   });
 
   /* open index */
@@ -312,7 +312,7 @@ int main(int argc, const char** argv) {
           true));
 
   /* set up logjoin target */
-  fnord::fts::Analyzer analyzer(flags.getString("conf"));
+  stx::fts::Analyzer analyzer(flags.getString("conf"));
   cm::LogJoinTarget logjoin_target(&schemas, dry_run);
 
   auto normalize = [&analyzer] (Language lang, const String& query) -> String {
@@ -341,30 +341,30 @@ int main(int argc, const char** argv) {
   logjoin.exportStats("/cm-logjoin/global");
   logjoin.exportStats(StringUtil::format("/cm-logjoin/$0", shard.shard_name));
 
-  fnord::stats::Counter<uint64_t> stat_stream_time_low;
-  fnord::stats::Counter<uint64_t> stat_stream_time_high;
-  fnord::stats::Counter<uint64_t> stat_active_sessions;
-  fnord::stats::Counter<uint64_t> stat_dbsize;
+  stx::stats::Counter<uint64_t> stat_stream_time_low;
+  stx::stats::Counter<uint64_t> stat_stream_time_high;
+  stx::stats::Counter<uint64_t> stat_active_sessions;
+  stx::stats::Counter<uint64_t> stat_dbsize;
 
   exportStat(
       StringUtil::format("/cm-logjoin/$0/stream_time_low", shard.shard_name),
       &stat_stream_time_low,
-      fnord::stats::ExportMode::EXPORT_VALUE);
+      stx::stats::ExportMode::EXPORT_VALUE);
 
   exportStat(
       StringUtil::format("/cm-logjoin/$0/stream_time_high", shard.shard_name),
       &stat_stream_time_high,
-      fnord::stats::ExportMode::EXPORT_VALUE);
+      stx::stats::ExportMode::EXPORT_VALUE);
 
   exportStat(
       StringUtil::format("/cm-logjoin/$0/active_sessions", shard.shard_name),
       &stat_active_sessions,
-      fnord::stats::ExportMode::EXPORT_VALUE);
+      stx::stats::ExportMode::EXPORT_VALUE);
 
   exportStat(
       StringUtil::format("/cm-logjoin/$0/dbsize", shard.shard_name),
       &stat_dbsize,
-      fnord::stats::ExportMode::EXPORT_VALUE);
+      stx::stats::ExportMode::EXPORT_VALUE);
 
 
   /* upload pending q */
@@ -387,7 +387,7 @@ int main(int argc, const char** argv) {
         offset = std::stoul(last_offset.get().toString());
       }
 
-      fnord::logInfo(
+      stx::logInfo(
           "cm.logjoin",
           "Adding source feed:\n    feed=$0\n    url=$1\n    offset: $2",
           input_feed.first,
@@ -408,7 +408,7 @@ int main(int argc, const char** argv) {
     throw;
   }
 
-  fnord::logInfo("cm.logjoin", "Resuming logjoin...");
+  stx::logInfo("cm.logjoin", "Resuming logjoin...");
 
   UnixTime last_flush;
   uint64_t rate_limit_micros = flush_interval * kMicrosPerSecond;
@@ -430,7 +430,7 @@ int main(int argc, const char** argv) {
       try {
         logjoin.insertLogline(entry.get().data, txn.get());
       } catch (const std::exception& e) {
-        fnord::logError("cm.logjoin", e, "invalid log line");
+        stx::logError("cm.logjoin", e, "invalid log line");
       }
     }
 
@@ -454,7 +454,7 @@ int main(int argc, const char** argv) {
           StringUtil::format("\n    offset[$0]=$1", soff.first, soff.second);
     }
 
-    fnord::logInfo(
+    stx::logInfo(
         "cm.logjoin",
         "LogJoin comitting...\n    stream_time=<$0 ... $1>\n" \
         "    active_sessions=$2\n    flushed_sessions=$3$4",
@@ -472,7 +472,7 @@ int main(int argc, const char** argv) {
       try {
         logjoin_upload.upload();
       } catch (const std::exception& e) {
-        fnord::logError("cm.logjoin", e, "upload failed");
+        stx::logError("cm.logjoin", e, "upload failed");
       }
     }
 
@@ -499,7 +499,7 @@ int main(int argc, const char** argv) {
   evloop_thread.join();
 
   sessdb->sync();
-  fnord::logInfo("cm.logjoin", "LogJoin exiting...");
+  stx::logInfo("cm.logjoin", "LogJoin exiting...");
 
   logjoin_upload.stop();
   return 0;

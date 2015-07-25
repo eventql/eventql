@@ -24,7 +24,7 @@
 #include "stx/protobuf/MessageEncoder.h"
 #include "stx/http/httpconnectionpool.h"
 
-using namespace fnord;
+using namespace stx;
 
 namespace cm {
 

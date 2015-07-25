@@ -34,7 +34,7 @@
 #include "schemas.h"
 
 using namespace cm;
-using namespace fnord;
+using namespace stx;
 
 int main(int argc, const char** argv) {
   Application::init();
@@ -53,7 +53,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "publish_to",
-      fnord::cli::FlagParser::T_STRING,
+      stx::cli::FlagParser::T_STRING,
       true,
       NULL,
       NULL,

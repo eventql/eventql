@@ -20,7 +20,7 @@
 #include <inventory/ItemRef.h>
 #include <inventory/IndexChangeRequest.pb.h>
 
-using namespace fnord;
+using namespace stx;
 
 namespace cm {
 

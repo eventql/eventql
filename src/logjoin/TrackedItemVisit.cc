@@ -15,13 +15,13 @@
 
 namespace cm {
 
-void TrackedItemVisit::fromParams(const fnord::URI::ParamList& params) {
+void TrackedItemVisit::fromParams(const stx::URI::ParamList& params) {
   std::string item_id_str;
-  if (!fnord::URI::getParam(params, "i", &item_id_str)) {
+  if (!stx::URI::getParam(params, "i", &item_id_str)) {
     RAISE(kParseError, "invalid i param");
   }
 
-  auto item_id_parts = fnord::StringUtil::split(item_id_str, "~");
+  auto item_id_parts = stx::StringUtil::split(item_id_str, "~");
   if (item_id_parts.size() < 2) {
     RAISE(kParseError, "invalid i param");
   }
@@ -32,7 +32,7 @@ void TrackedItemVisit::fromParams(const fnord::URI::ParamList& params) {
   /* extract all non-reserved params as event attributes */
   for (const auto& p : params) {
     if (!isReservedPixelParam(p.first)) {
-      attrs.emplace_back(fnord::StringUtil::format("$0:$1", p.first, p.second));
+      attrs.emplace_back(stx::StringUtil::format("$0:$1", p.first, p.second));
     }
   }
 }

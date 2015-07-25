@@ -24,12 +24,12 @@
 #include "common.h"
 #include "IndexChangeRequest.h"
 
-using namespace fnord;
+using namespace stx;
 
 namespace cm {
 class CustomerNamespace;
 
-class CMFrontend : public fnord::http::HTTPService {
+class CMFrontend : public stx::http::HTTPService {
 public:
   static const int kMinPixelVersion = 5;
 
@@ -38,8 +38,8 @@ public:
       thread::Queue<IndexChangeRequest>* indexfeed);
 
   void handleHTTPRequest(
-      fnord::http::HTTPRequest* request,
-      fnord::http::HTTPResponse* response) override;
+      stx::http::HTTPRequest* request,
+      stx::http::HTTPResponse* response) override;
 
   void addCustomer(
       CustomerNamespace* customer,
@@ -51,7 +51,7 @@ protected:
 
   void dispatchRPC(json::JSONRPCRequest* req, json::JSONRPCResponse* res);
 
-  void track(CustomerNamespace* customer, const fnord::URI& uri);
+  void track(CustomerNamespace* customer, const stx::URI& uri);
   void recordLogLine(CustomerNamespace* customer, const std::string& logline);
 
   feeds::RemoteFeedWriter* tracker_log_feed_;

@@ -15,7 +15,7 @@
 #include <fnord-fts/fts_common.h>
 #include <fnord-fts/Analyzer.h>
 
-using namespace fnord;
+using namespace stx;
 
 namespace cm {
 

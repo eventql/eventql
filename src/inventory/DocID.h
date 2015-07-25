@@ -12,7 +12,7 @@
 #include <string>
 #include <stx/stdtypes.h>
 
-using namespace fnord;
+using namespace stx;
 
 namespace cm {
 

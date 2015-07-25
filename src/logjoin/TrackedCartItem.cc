@@ -17,24 +17,24 @@
 namespace cm {
 
 Vector<TrackedCartItem> TrackedCartItem::fromParams(
-  const fnord::URI::ParamList& params) {
+  const stx::URI::ParamList& params) {
   Vector<TrackedCartItem> items;
 
   std::string step_str;
-  if (!fnord::URI::getParam(params, "s", &step_str)) {
+  if (!stx::URI::getParam(params, "s", &step_str)) {
     RAISE(kParseError, "missing s param");
   }
 
   auto checkout_step = std::stoul(step_str);
 
   std::string items_str;
-  if (fnord::URI::getParam(params, "is", &items_str)) {
-    for (const auto& item_str : fnord::StringUtil::split(items_str, ",")) {
+  if (stx::URI::getParam(params, "is", &items_str)) {
+    for (const auto& item_str : stx::StringUtil::split(items_str, ",")) {
       if (item_str.length() == 0) {
         continue;
       }
 
-      auto item_str_parts = fnord::StringUtil::split(item_str, "~");
+      auto item_str_parts = stx::StringUtil::split(item_str, "~");
       if (item_str_parts.size() != 5) {
         RAISE(kParseError, "invalid is param");
       }

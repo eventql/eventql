@@ -9,7 +9,7 @@
 #include <stx/exception.h>
 #include <common/CustomerDirectory.h>
 
-using namespace fnord;
+using namespace stx;
 
 namespace cm {
 

@@ -19,7 +19,7 @@
 #include "fnord-afx/ArtifactReplication.h"
 #include "fnord-afx/ArtifactIndexReplication.h"
 
-using namespace fnord;
+using namespace stx;
 
 namespace cm {
 

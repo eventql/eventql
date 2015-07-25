@@ -32,8 +32,8 @@ struct TrackedQueryItem {
 };
 
 struct TrackedQuery {
-  fnord::UnixTime time;
-  fnord::String eid;
+  stx::UnixTime time;
+  stx::String eid;
   std::vector<TrackedQueryItem> items;
   std::vector<std::string> attrs;
   Set<String> experiments;
@@ -50,7 +50,7 @@ struct TrackedQuery {
   TrackedQuery();
 
   void merge(const TrackedQuery& other);
-  void fromParams(const fnord::URI::ParamList& params);
+  void fromParams(const stx::URI::ParamList& params);
   String joinedExperiments() const;
 };
 

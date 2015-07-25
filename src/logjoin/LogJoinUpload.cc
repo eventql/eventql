@@ -16,7 +16,7 @@
 #include "tsdb/RecordEnvelope.pb.h"
 #include "tsdb/TimeWindowPartitioner.h"
 
-using namespace fnord;
+using namespace stx;
 
 namespace cm {
 
@@ -63,7 +63,7 @@ void LogJoinUpload::onSession(
             conf,
             session));
   } catch (const Exception& e) {
-    fnord::logError("logjoind", e, "error while delivering webhooks");
+    stx::logError("logjoind", e, "error while delivering webhooks");
   }
 }
 
@@ -71,7 +71,7 @@ void LogJoinUpload::deliverWebhooks(
     const LogJoinConfig& conf,
     const JoinedSession& session) {
   for (const auto hook : conf.webhooks()) {
-    fnord::logDebug("logjoind", "Delivering webhook: $0", hook.target_url());
+    stx::logDebug("logjoind", "Delivering webhook: $0", hook.target_url());
 
     Buffer json_buf;
     json::JSONOutputStream json(BufferOutputStream::fromBuffer(&json_buf));
@@ -81,7 +81,7 @@ void LogJoinUpload::deliverWebhooks(
     //msg::JSONEncoder::encode(session, &json);
     json.endObject();
 
-    fnord::iputs("session json: $0", json_buf.toString());
+    stx::iputs("session json: $0", json_buf.toString());
 
     // FIXPAUL: security risk ahead, make sure url is actually external
     http::HTTPMessage::HeaderList headers;

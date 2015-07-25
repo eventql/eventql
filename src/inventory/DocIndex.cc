@@ -10,7 +10,7 @@
 #include "IndexChangeRequest.h"
 #include <stx/inspect.h>
 
-using namespace fnord;
+using namespace stx;
 
 namespace cm {
 
@@ -218,7 +218,7 @@ RefPtr<mdb::MDB> DocIndex::getDBHanndle() const {
 //    auto buf = txn_->get(db_key);
 //
 //#ifndef FNORD_NOTRACE
-//  fnord::logTrace(
+//  stx::logTrace(
 //      "cm.featureindex",
 //      "Read from featuredb with key=$0 returned $1 bytes",
 //      db_key,
@@ -357,7 +357,7 @@ RefPtr<mdb::MDB> DocIndex::getDBHanndle() const {
 //    auto buf = txn_->get(db_key);
 //
 //#ifndef FNORD_NOTRACE
-//  fnord::logTrace(
+//  stx::logTrace(
 //      "cm.featureindex",
 //      "Read from featuredb with key=$0 returned $1 bytes",
 //      db_key,
@@ -388,7 +388,7 @@ RefPtr<mdb::MDB> DocIndex::getDBHanndle() const {
 //  auto buf = txn_->get(db_key);
 //
 //#ifndef FNORD_NOTRACE
-//fnord::logTrace(
+//stx::logTrace(
 //    "cm.featureindex",
 //    "Read from featuredb with key=$0 returned $1 bytes",
 //    db_key,

@@ -24,7 +24,7 @@
 #include <inventory/ItemRef.h>
 #include "Document.h"
 
-using namespace fnord;
+using namespace stx;
 
 namespace cm {
 class CustomerNamespace;

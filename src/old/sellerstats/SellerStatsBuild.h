@@ -21,7 +21,7 @@
 
 #include "sellerstats/ActivityLog.h"
 
-using namespace fnord;
+using namespace stx;
 
 namespace cm {
 class CustomerNamespace;
@@ -49,7 +49,7 @@ protected:
   FeatureIndex feature_index_;
   FeatureID shop_id_feature_;
 
-  fnord::stats::Counter<uint64_t> stat_processed_item_visits_;
+  stx::stats::Counter<uint64_t> stat_processed_item_visits_;
 };
 } // namespace cm
 

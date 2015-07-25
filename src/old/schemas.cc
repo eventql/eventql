@@ -11,7 +11,7 @@
 #include "IndexChangeRequest.pb.h"
 
 using namespace cm;
-using namespace fnord;
+using namespace stx;
 
 namespace cm {
 

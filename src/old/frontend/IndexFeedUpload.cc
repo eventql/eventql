@@ -18,7 +18,7 @@
 #include "schemas.h"
 #include "unistd.h"
 
-using namespace fnord;
+using namespace stx;
 
 namespace cm {
 
@@ -118,7 +118,7 @@ void IndexFeedUpload::uploadWithRetries(const http::HTTPRequest& req) {
 
       return;
     } catch (const Exception& e) {
-      fnord::logError("cm.frontend", e, "error in IndexFeedUploader");
+      stx::logError("cm.frontend", e, "error in IndexFeedUploader");
     }
 
     usleep(sleeptime);
@@ -133,7 +133,7 @@ void IndexFeedUpload::run() {
     try {
       uploadNext();
     } catch (const std::exception& e) {
-      fnord::logError("cm.frontend", e, "error in IndexFeedUploader");
+      stx::logError("cm.frontend", e, "error in IndexFeedUploader");
     }
   }
 }

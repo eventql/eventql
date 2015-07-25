@@ -10,7 +10,7 @@
 #include "logjoin/LogJoinBackfill.h"
 #include "stx/protobuf/MessagePrinter.h"
 
-using namespace fnord;
+using namespace stx;
 
 namespace cm {
 
@@ -47,7 +47,7 @@ LogJoinBackfill::LogJoinBackfill(
 }
 
 void LogJoinBackfill::start() {
-  fnord::logInfo("cm.logjoin", "Starting LogJoin backfill");
+  stx::logInfo("cm.logjoin", "Starting LogJoin backfill");
 
   for (int i = 8; i > 0; --i) {
     threads_.emplace_back([this] {
@@ -72,7 +72,7 @@ void LogJoinBackfill::start() {
 
 void LogJoinBackfill::shutdown() {
   while (inputq_.length() > 0 || uploadq_.length() > 0) {
-    fnord::logInfo(
+    stx::logInfo(
         "cm.logjoin",
         "Waiting for $0 jobs to finish...",
         inputq_.length() + uploadq_.length());
@@ -82,16 +82,16 @@ void LogJoinBackfill::shutdown() {
 
   shutdown_ = true;
 
-  fnord::logInfo("cm.logjoin", "Waiting for jobs to finish...");
+  stx::logInfo("cm.logjoin", "Waiting for jobs to finish...");
   for (auto& t : threads_) {
     t.join();
   }
 
-  fnord::logInfo("cm.logjoin", "LogJoin backfill finished succesfully :)");
+  stx::logInfo("cm.logjoin", "LogJoin backfill finished succesfully :)");
 }
 
 bool LogJoinBackfill::process(size_t batch_size) {
-  fnord::logInfo(
+  stx::logInfo(
       "cm.logjoin",
       "LogJoin backfill comitting; num_records=$0 inputq=$1 uploadq=$2",
       num_records_,
@@ -134,11 +134,11 @@ size_t LogJoinBackfill::runWorker() {
     try {
       backfill_fn_(rec.get().get());
     } catch (const Exception& e) {
-      fnord::logError("cm.logjoin", e, "backfill error");
+      stx::logError("cm.logjoin", e, "backfill error");
     }
 
     if (dry_run_) {
-      fnord::logInfo(
+      stx::logInfo(
           "cm.logjoin",
           "[DRYRUN] not uploading record: $0",
           msg::MessagePrinter::print(*rec.get(), table_->schema()));
@@ -192,7 +192,7 @@ size_t LogJoinBackfill::runUpload() {
 
       break;
     } catch (const Exception& e) {
-      fnord::logError("cm.logjoin", e, "upload error");
+      stx::logError("cm.logjoin", e, "upload error");
     }
   }
 

@@ -8,7 +8,7 @@
  */
 #include "sellerstats/ActivityLog.h"
 
-using namespace fnord;
+using namespace stx;
 
 namespace cm {
 
@@ -23,7 +23,7 @@ void ActivityLog::append(
   auto head_dbkey = StringUtil::format("activitylog~$0~HEAD", shopid);
 
 #ifndef FNORD_NOTRACE
-  fnord::logTrace(
+  stx::logTrace(
       "cm.sellerstats",
       "Write to activity log: shopid=$0 time=$1 dbkey=$2 => $3",
       shopid,

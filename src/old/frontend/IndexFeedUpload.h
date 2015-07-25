@@ -15,7 +15,7 @@
 #include "IndexChangeRequest.h"
 #include <thread>
 
-using namespace fnord;
+using namespace stx;
 
 namespace cm {
 

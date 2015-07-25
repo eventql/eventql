@@ -14,7 +14,7 @@
 #include "fnord-fts/Analyzer.h"
 #include "IndexReader.h"
 
-using namespace fnord;
+using namespace stx;
 
 namespace cm {
 
@@ -29,8 +29,8 @@ public:
 
   void addQuery(
       const String& query,
-      fnord::Language lang,
-      fnord::fts::Analyzer* analyzer);
+      stx::Language lang,
+      stx::fts::Analyzer* analyzer);
 
   void execute(IndexReader* index);
 
@@ -38,14 +38,14 @@ public:
 
 protected:
   struct FieldInfo {
-    fnord::WString field_name;
+    stx::WString field_name;
     double boost;
   };
 
   Vector<FieldInfo> fields_;
-  fnord::Set<String> terms_;
-  fnord::fts::TopScoreDocCollectorPtr results_;
-  fnord::Vector<String> res_docids_;
+  stx::Set<String> terms_;
+  stx::fts::TopScoreDocCollectorPtr results_;
+  stx::Vector<String> res_docids_;
   size_t total_hits_;
 };
 

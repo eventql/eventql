@@ -16,7 +16,7 @@
 #include <stx/util/CumulativeHistogram.h>
 #include <stx/json/json.h>
 
-using namespace fnord;
+using namespace stx;
 
 /**
  * mandatory global params:

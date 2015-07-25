@@ -27,26 +27,26 @@ public:
   static const char kUserAgent[];
 
   explicit Crawler(
-      fnord::feeds::RemoteFeedFactory feed_factory,
+      stx::feeds::RemoteFeedFactory feed_factory,
       size_t max_concurrency,
-      fnord::TaskScheduler* scheduler);
+      stx::TaskScheduler* scheduler);
 
   void enqueue(const CrawlRequest& req);
 
 protected:
   void enqueue(
       const CrawlRequest& req,
-      const fnord::http::HTTPRequest http_req);
+      const stx::http::HTTPRequest http_req);
 
   void requestReady(
       CrawlRequest req,
-      fnord::Future<fnord::http::HTTPResponse> res);
+      stx::Future<stx::http::HTTPResponse> res);
 
-  fnord::feeds::RemoteFeedCache feed_cache_;
+  stx::feeds::RemoteFeedCache feed_cache_;
   size_t max_concurrency_;
-  fnord::TaskScheduler* scheduler_;
-  fnord::Wakeup wakeup_;
-  fnord::http::HTTPConnectionPool http_;
+  stx::TaskScheduler* scheduler_;
+  stx::Wakeup wakeup_;
+  stx::http::HTTPConnectionPool http_;
   std::atomic<size_t> in_flight_;
   std::mutex enqueue_lock_;
 };

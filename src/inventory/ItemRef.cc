@@ -21,7 +21,7 @@ DocID ItemRef::docID() const {
 
 }
 
-namespace fnord {
+namespace stx {
 
 template <>
 std::string inspect(const cm::ItemRef& itemref) {

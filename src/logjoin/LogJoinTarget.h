@@ -22,9 +22,9 @@
 #include "inventory/DocIndex.h"
 #include <inventory/ItemRef.h>
 
-using namespace fnord;
+using namespace stx;
 
-namespace fnord {
+namespace stx {
 namespace fts {
 class Analyzer;
 }
@@ -40,7 +40,7 @@ public:
       bool dry_run);
 
   void setNormalize(
-    Function<fnord::String (Language lang, const fnord::String& query)> normalizeCb);
+    Function<stx::String (Language lang, const stx::String& query)> normalizeCb);
 
   void setGetField(
     Function<Option<String> (const DocID& docid, const String& feature)> getFieldCb);
@@ -51,7 +51,7 @@ public:
 
 protected:
   msg::MessageSchemaRepository* schemas_;
-  Function<fnord::String (Language lang, const fnord::String& query)> normalize_;
+  Function<stx::String (Language lang, const stx::String& query)> normalize_;
   Function<Option<String> (const DocID& docid, const String& feature)> get_field_;
   bool dry_run_;
   Random rnd_;

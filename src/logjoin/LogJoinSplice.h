@@ -11,7 +11,7 @@
 #include "stx/stdtypes.h"
 #include "src/JoinedSession.pb.h"
 
-using namespace fnord;
+using namespace stx;
 
 namespace cm {
 

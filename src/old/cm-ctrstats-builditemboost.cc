@@ -34,7 +34,7 @@
 #
 #include "analytics/CTRCounter.h"
 
-using namespace fnord;
+using namespace stx;
 using namespace cm;
 
 struct ItemStats {
@@ -61,7 +61,7 @@ void indexJoinedQuery(
     const cm::JoinedQuery& query,
     ItemEligibility eligibility,
     //FeatureIndex* feature_index,
-    fnord::fts::Analyzer* analyzer,
+    stx::fts::Analyzer* analyzer,
     Language lang,
     CounterMap* counters,
     GlobalCounter* global_counter) {
@@ -231,10 +231,10 @@ void writeOutputTable(
 }
 
 int main(int argc, const char** argv) {
-  fnord::Application::init();
-  fnord::Application::logToStderr();
+  stx::Application::init();
+  stx::Application::logToStderr();
 
-  fnord::cli::FlagParser flags;
+  stx::cli::FlagParser flags;
 
   flags.defineFlag(
       "lang",
@@ -274,7 +274,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "merge",
-      fnord::cli::FlagParser::T_SWITCH,
+      stx::cli::FlagParser::T_SWITCH,
       false,
       NULL,
       NULL,
@@ -283,7 +283,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "rollup",
-      fnord::cli::FlagParser::T_SWITCH,
+      stx::cli::FlagParser::T_SWITCH,
       false,
       NULL,
       NULL,
@@ -292,7 +292,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "write_index_requests",
-      fnord::cli::FlagParser::T_SWITCH,
+      stx::cli::FlagParser::T_SWITCH,
       false,
       NULL,
       NULL,
@@ -301,7 +301,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "min_views",
-      fnord::cli::FlagParser::T_INTEGER,
+      stx::cli::FlagParser::T_INTEGER,
       false,
       NULL,
       "100",
@@ -310,7 +310,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "min_clicks",
-      fnord::cli::FlagParser::T_INTEGER,
+      stx::cli::FlagParser::T_INTEGER,
       false,
       NULL,
       "10",
@@ -319,7 +319,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "loglevel",
-      fnord::cli::FlagParser::T_STRING,
+      stx::cli::FlagParser::T_STRING,
       false,
       NULL,
       "INFO",
@@ -337,7 +337,7 @@ int main(int argc, const char** argv) {
   auto end_time = std::numeric_limits<uint64_t>::min();
 
   auto lang = languageFromString(flags.getString("lang"));
-  fnord::fts::Analyzer analyzer(flags.getString("conf"));
+  stx::fts::Analyzer analyzer(flags.getString("conf"));
 
   /* set up posi norm */
   posi_norm.emplace(1 , 1.0 / 0.006592);
@@ -404,13 +404,13 @@ int main(int argc, const char** argv) {
   auto merge = flags.isSet("merge");
   for (int tbl_idx = 0; tbl_idx < sstables.size(); ++tbl_idx) {
     const auto& sstable = sstables[tbl_idx];
-    fnord::logInfo("cm.ctrstats", "Importing sstable: $0", sstable);
+    stx::logInfo("cm.ctrstats", "Importing sstable: $0", sstable);
 
     /* read sstable header */
     sstable::SSTableReader reader(File::openFile(sstable, File::O_READ));
 
     if (reader.bodySize() == 0) {
-      fnord::logCritical("cm.ctrstats", "unfinished sstable: $0", sstable);
+      stx::logCritical("cm.ctrstats", "unfinished sstable: $0", sstable);
       exit(1);
     }
 
@@ -450,7 +450,7 @@ int main(int argc, const char** argv) {
       auto p = (tbl_idx / (double) tbl_cnt) +
           ((cursor->position() / (double) body_size)) / (double) tbl_cnt;
 
-      fnord::logInfo(
+      stx::logInfo(
           "cm.ctrstats",
           "[$0%] Reading sstables... rows=$1",
           (size_t) (p * 100),
@@ -489,7 +489,7 @@ int main(int argc, const char** argv) {
         try {
           q = Some(json::fromJSON<cm::JoinedQuery>(val));
         } catch (const Exception& e) {
-          fnord::logWarning(
+          stx::logWarning(
               "cm.ctrstats",
               e,
               "invalid json: $0",
@@ -508,7 +508,7 @@ int main(int argc, const char** argv) {
                 &global_counter);
           }
         } catch (const Exception& e) {
-          fnord::logError("cm.ctrstats", e, "error while indexing query");
+          stx::logError("cm.ctrstats", e, "error while indexing query");
         }
       }
 
@@ -524,10 +524,10 @@ int main(int argc, const char** argv) {
   auto min_views = flags.getInt("min_views");
   auto min_clicks = flags.getInt("min_clicks");
   auto outfile = flags.getString("output_file");
-  fnord::logInfo("cm.ctrstats", "Writing results to: $0", outfile);
+  stx::logInfo("cm.ctrstats", "Writing results to: $0", outfile);
 
   if (FileUtil::exists(outfile + "~")) {
-    fnord::logInfo(
+    stx::logInfo(
         "cm.ctrstats",
         "Deleting orphaned temp file: $0",
         outfile + "~");

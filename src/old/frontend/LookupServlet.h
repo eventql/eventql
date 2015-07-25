@@ -12,7 +12,7 @@
 #include "stx/json/json.h"
 #include "stx/mdb/MDB.h"
 
-using namespace fnord;
+using namespace stx;
 
 namespace cm {
 

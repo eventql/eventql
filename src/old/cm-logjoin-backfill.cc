@@ -30,9 +30,9 @@
 #include "schemas.h"
 
 using namespace cm;
-using namespace fnord;
+using namespace stx;
 
-fnord::thread::EventLoop ev;
+stx::thread::EventLoop ev;
 std::atomic<bool> cm_logjoin_shutdown;
 
 void quit(int n) {
@@ -47,8 +47,8 @@ struct BackfillData {
 };
 
 int main(int argc, const char** argv) {
-  fnord::Application::init();
-  fnord::Application::logToStderr();
+  stx::Application::init();
+  stx::Application::logToStderr();
 
   cm_logjoin_shutdown = false;
   struct sigaction sa;
@@ -58,7 +58,7 @@ int main(int argc, const char** argv) {
   sigaction(SIGQUIT, &sa, NULL);
   sigaction(SIGINT, &sa, NULL);
 
-  fnord::cli::FlagParser flags;
+  stx::cli::FlagParser flags;
 
   flags.defineFlag(
       "datadir",
@@ -71,7 +71,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "feedserver_addr",
-      fnord::cli::FlagParser::T_STRING,
+      stx::cli::FlagParser::T_STRING,
       false,
       NULL,
       "http://localhost:8000",
@@ -80,7 +80,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "batch_size",
-      fnord::cli::FlagParser::T_INTEGER,
+      stx::cli::FlagParser::T_INTEGER,
       false,
       NULL,
       "2048",
@@ -89,7 +89,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "worker_threads",
-      fnord::cli::FlagParser::T_INTEGER,
+      stx::cli::FlagParser::T_INTEGER,
       false,
       NULL,
       "4",
@@ -98,7 +98,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "upload_threads",
-      fnord::cli::FlagParser::T_INTEGER,
+      stx::cli::FlagParser::T_INTEGER,
       false,
       NULL,
       "1",
@@ -107,7 +107,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "no_dryrun",
-      fnord::cli::FlagParser::T_SWITCH,
+      stx::cli::FlagParser::T_SWITCH,
       false,
       NULL,
       NULL,
@@ -143,7 +143,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "no_dryrun",
-      fnord::cli::FlagParser::T_SWITCH,
+      stx::cli::FlagParser::T_SWITCH,
       false,
       NULL,
       NULL,
@@ -152,7 +152,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "loglevel",
-      fnord::cli::FlagParser::T_STRING,
+      stx::cli::FlagParser::T_STRING,
       false,
       NULL,
       "INFO",

@@ -13,11 +13,11 @@
 #include "fnord-fts/Analyzer.h"
 #include "IndexReader.h"
 
-using namespace fnord;
+using namespace stx;
 
 namespace cm {
 
-class IndexServlet : public fnord::http::HTTPService {
+class IndexServlet : public stx::http::HTTPService {
 public:
 
   IndexServlet(
@@ -25,8 +25,8 @@ public:
       RefPtr<fts::Analyzer> r);
 
   void handleHTTPRequest(
-      fnord::http::HTTPRequest* req,
-      fnord::http::HTTPResponse* res) override;
+      stx::http::HTTPRequest* req,
+      stx::http::HTTPResponse* res) override;
 
 protected:
 
