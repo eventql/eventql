@@ -20,7 +20,7 @@
 #include <dproc/ReplicationScheme.h>
 #include <stx/http/httpconnectionpool.h>
 
-using namespace fnord;
+using namespace stx;
 
 namespace tsdb {
 

@@ -14,7 +14,7 @@
 #include <tsdb/TableConfig.pb.h>
 #include <tsdb/TSDBTableInfo.h>
 
-using namespace fnord;
+using namespace stx;
 
 namespace tsdb {
 class TSDBNode;

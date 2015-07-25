@@ -12,7 +12,7 @@
 #include <stx/wallclock.h>
 #include <fnord-logtable/TableReplication.h>
 
-namespace fnord {
+namespace stx {
 namespace logtable {
 
 TableReplication::TableReplication(
@@ -44,7 +44,7 @@ void TableReplication::stop() {
 void TableReplication::pull(
       RefPtr<TableWriter> table,
       const URI& uri) {
-  fnord::logDebug(
+  stx::logDebug(
       "fn.evdb",
       "Replicating table '$0' from '$1'...",
       table->name(),
@@ -85,7 +85,7 @@ void TableReplication::run() {
       try {
         pull(t.first, t.second);
       } catch (const Exception& e) {
-        fnord::logError("fnord.evdb", e, "TableReplication error");
+        stx::logError("fnord.evdb", e, "TableReplication error");
       }
     }
 
@@ -97,5 +97,5 @@ void TableReplication::run() {
 }
 
 } // namespace logtable
-} // namespace fnord
+} // namespace stx
 

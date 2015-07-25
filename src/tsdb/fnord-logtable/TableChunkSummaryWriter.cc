@@ -9,7 +9,7 @@
  */
 #include <fnord-logtable/TableChunkSummaryWriter.h>
 
-namespace fnord {
+namespace stx {
 namespace logtable {
 
 TableChunkSummaryWriter::TableChunkSummaryWriter(

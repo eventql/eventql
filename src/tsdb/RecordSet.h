@@ -17,7 +17,7 @@
 #include <stx/util/binarymessagewriter.h>
 #include <stx/random.h>
 
-using namespace fnord;
+using namespace stx;
 
 namespace tsdb {
 

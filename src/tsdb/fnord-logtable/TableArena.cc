@@ -9,7 +9,7 @@
  */
 #include <fnord-logtable/TableArena.h>
 
-namespace fnord {
+namespace stx {
 namespace logtable {
 
 TableArena::TableArena(
@@ -50,5 +50,5 @@ void TableArena::commit() {
 }
 
 } // namespace logtable
-} // namespace fnord
+} // namespace stx
 

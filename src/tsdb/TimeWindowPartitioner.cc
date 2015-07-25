@@ -11,7 +11,7 @@
 #include <stx/util/binarymessagewriter.h>
 #include <tsdb/TimeWindowPartitioner.h>
 
-using namespace fnord;
+using namespace stx;
 
 namespace tsdb {
 

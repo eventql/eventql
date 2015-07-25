@@ -14,7 +14,7 @@
 #include <stx/util/binarymessagereader.h>
 #include <fnord-logtable/TableChunkSummaryBuilder.h>
 
-namespace fnord {
+namespace stx {
 namespace logtable {
 class TableChunkSummaryWriter;
 

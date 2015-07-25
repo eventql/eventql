@@ -12,7 +12,7 @@
 #include <stx/protobuf/MessageSchema.h>
 #include <tsdb/TableConfig.pb.h>
 
-using namespace fnord;
+using namespace stx;
 
 namespace tsdb {
 

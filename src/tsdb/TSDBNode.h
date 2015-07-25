@@ -25,7 +25,7 @@
 #include <tsdb/PartitionInfo.pb.h>
 #include <tsdb/RecordEnvelope.pb.h>
 
-using namespace fnord;
+using namespace stx;
 
 namespace tsdb {
 

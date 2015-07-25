@@ -13,7 +13,7 @@
 #include <cstable/RecordMaterializer.h>
 #include <stx/protobuf/MessageEncoder.h>
 
-using namespace fnord;
+using namespace stx;
 
 namespace tsdb {
 

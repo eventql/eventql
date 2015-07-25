@@ -12,7 +12,7 @@
 #include <stx/wallclock.h>
 #include <fnord-logtable/TableJanitor.h>
 
-namespace fnord {
+namespace stx {
 namespace logtable {
 
 TableJanitor::TableJanitor(
@@ -36,7 +36,7 @@ void TableJanitor::stop() {
 }
 
 void TableJanitor::check() {
-  fnord::logDebug("fnord.evdb", "Running TableJanitor...");
+  stx::logDebug("fnord.evdb", "Running TableJanitor...");
 
   auto tables = repo_->tables();
 
@@ -56,7 +56,7 @@ void TableJanitor::run() {
     try {
       check();
     } catch (const Exception& e) {
-      fnord::logError("fnord.evdb", e, "TableJanitor error");
+      stx::logError("fnord.evdb", e, "TableJanitor error");
     }
 
     auto elapsed = WallClock::unixMicros() - begin;
@@ -67,5 +67,5 @@ void TableJanitor::run() {
 }
 
 } // namespace logtable
-} // namespace fnord
+} // namespace stx
 

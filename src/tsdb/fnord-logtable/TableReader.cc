@@ -15,7 +15,7 @@
 #include <stx/protobuf/MessageDecoder.h>
 #include <stx/protobuf/MessageEncoder.h>
 
-namespace fnord {
+namespace stx {
 namespace logtable {
 
 static uint64_t findHeadGen(
@@ -134,7 +134,7 @@ RefPtr<TableSnapshot> TableReader::getSnapshot() {
 
   return new TableSnapshot(
       head,
-      List<RefPtr<fnord::logtable::TableArena>>{});
+      List<RefPtr<stx::logtable::TableArena>>{});
 }
 
 size_t TableReader::fetchRecords(
@@ -180,7 +180,7 @@ size_t TableReader::fetchRecords(
       chunk.chunk_id);
 
 #ifndef FNORD_NOTRACE
-  fnord::logTrace(
+  stx::logTrace(
       "fnord.evdb",
       "Reading rows local=$0..$1 global=$2..$3 from table=$4 chunk=$5",
       offset,
@@ -199,7 +199,7 @@ size_t TableReader::fetchRecords(
 
   auto body_size = reader.bodySize();
   if (body_size == 0) {
-    fnord::logWarning("fnord.evdb", "empty table chunk: $0", filename);
+    stx::logWarning("fnord.evdb", "empty table chunk: $0", filename);
     return 0;
   }
 
@@ -228,5 +228,5 @@ size_t TableReader::fetchRecords(
 }
 
 } // namespace logtable
-} // namespace fnord
+} // namespace stx
 

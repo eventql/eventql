@@ -21,7 +21,7 @@
 #include <tsdb/PartitionInfo.pb.h>
 #include <cstable/CSTableReader.h>
 
-using namespace fnord;
+using namespace stx;
 
 namespace tsdb {
 class Table;

@@ -20,7 +20,7 @@
 #include <stx/protobuf/MessageSchema.h>
 #include <stx/protobuf/MessageObject.h>
 
-namespace fnord {
+namespace stx {
 namespace logtable {
 
 class TableChunkSummaryReader {

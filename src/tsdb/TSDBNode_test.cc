@@ -13,7 +13,7 @@
 #include "stx/test/unittest.h"
 #include "tsdb/TSDBNode.h"
 
-using namespace fnord;
+using namespace stx;
 using namespace tsdb;
 
 UNIT_TEST(TSDBNodeTest);

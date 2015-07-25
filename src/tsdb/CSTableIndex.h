@@ -15,7 +15,7 @@
 #include <stx/random.h>
 #include <dproc/BlobRDD.h>
 
-using namespace fnord;
+using namespace stx;
 
 namespace tsdb {
 

@@ -11,7 +11,7 @@
 #define _FNORD_LOGTABLE_CHUNKINDEXWRITER_H
 #include <stx/stdtypes.h>
 
-namespace fnord {
+namespace stx {
 namespace cstable {
 
 class ChunkIndexWriter {
@@ -22,6 +22,6 @@ public:
 };
 
 } // namespace logtable
-} // namespace fnord
+} // namespace stx
 
 #endif

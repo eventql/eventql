@@ -30,7 +30,7 @@
 #include "cstable/CSTableReader.h"
 #include "cstable/CSTableBuilder.h"
 
-namespace fnord {
+namespace stx {
 namespace logtable {
 
 class TableChunkWriter : public RefCounted {
@@ -177,6 +177,6 @@ protected:
 };
 
 } // namespace logtable
-} // namespace fnord
+} // namespace stx
 
 #endif

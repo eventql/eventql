@@ -13,7 +13,7 @@
 #include <stx/stdtypes.h>
 #include <tsdb/TSDBNodeRef.h>
 
-using namespace fnord;
+using namespace stx;
 
 namespace tsdb {
 

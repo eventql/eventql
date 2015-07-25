@@ -12,7 +12,7 @@
 #include <stx/wallclock.h>
 #include <stx/human.h>
 
-using namespace fnord;
+using namespace stx;
 
 namespace tsdb {
 

@@ -9,7 +9,7 @@
  */
 #include <tsdb/DerivedDataset.h>
 
-using namespace fnord;
+using namespace stx;
 
 namespace tsdb {
 

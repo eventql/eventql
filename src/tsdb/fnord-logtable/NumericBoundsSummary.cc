@@ -10,7 +10,7 @@
 #include <fnord-logtable/NumericBoundsSummary.h>
 #include <fnord-logtable/TableChunkSummaryWriter.h>
 
-namespace fnord {
+namespace stx {
 namespace logtable {
 
 void NumericBoundsSummary::encode(util::BinaryMessageWriter* writer) const {

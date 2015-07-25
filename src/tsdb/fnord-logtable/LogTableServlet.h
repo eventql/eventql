@@ -13,10 +13,10 @@
 #include "stx/json/json.h"
 #include <fnord-logtable/TableRepository.h>
 
-namespace fnord {
+namespace stx {
 namespace logtable {
 
-class LogTableServlet : public fnord::http::HTTPService {
+class LogTableServlet : public stx::http::HTTPService {
 public:
   enum class ResponseFormat {
     JSON,

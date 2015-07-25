@@ -15,7 +15,7 @@
 #include <stx/http/httpclient.h>
 #include <stx/logging.h>
 
-using namespace fnord;
+using namespace stx;
 
 namespace tsdb {
 
@@ -184,7 +184,7 @@ void TSDBClient::fetchPartitionWithSampling(
     return new http::StreamingResponseFuture(promise, handler);
   };
 
-  fnord::logTrace("tsdb.client", "Executing request: $0", uri);
+  stx::logTrace("tsdb.client", "Executing request: $0", uri);
 
   auto req = http::HTTPRequest::mkGet(uri);
   auto res = http.executeRequest(req, handler_factory);

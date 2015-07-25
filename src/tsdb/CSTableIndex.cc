@@ -15,7 +15,7 @@
 #include <stx/protobuf/MessageDecoder.h>
 #include <cstable/CSTableBuilder.h>
 
-using namespace fnord;
+using namespace stx;
 
 namespace tsdb {
 
@@ -26,7 +26,7 @@ CSTableIndex::CSTableIndex(
     tsdb_(tsdb) {}
 
 RefPtr<VFSFile> CSTableIndex::computeBlob(dproc::TaskContext* context) {
-  fnord::logDebug(
+  stx::logDebug(
       "fnord.tsdb",
       "Fetching cstable: namespace=$0 table=$1 partition=$2 schema=$2",
       params_.tsdb_namespace(),
