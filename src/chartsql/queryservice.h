@@ -9,7 +9,7 @@
  */
 #ifndef _FNORDMETRIC_QUERYSERVICE_H
 #define _FNORDMETRIC_QUERYSERVICE_H
-#include <stx/charts/rendertarget.h>
+#include <cplot/rendertarget.h>
 #include <stx/io/inputstream.h>
 }
 #include <stx/json/jsonoutputstream.h>

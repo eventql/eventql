@@ -14,8 +14,8 @@
 #include <chartsql/parser/token.h>
 #include <stx/exception.h>
 #include <stx/autoref.h>
-#include <stx/charts/canvas.h>
-#include <stx/charts/drawable.h>
+#include <cplot/canvas.h>
+#include <cplot/drawable.h>
 
 namespace csql {
 class Runtime;

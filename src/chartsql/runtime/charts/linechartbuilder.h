@@ -10,7 +10,7 @@
 #ifndef _FNORDMETRIC_SQLEXTENSIONS_LINECHARTBUILDER_H
 #define _FNORDMETRIC_SQLEXTENSIONS_LINECHARTBUILDER_H
 #include <chartsql/runtime/charts/chartbuilder.h>
-#include <stx/charts/linechart.h>
+#include <cplot/linechart.h>
 
 namespace csql {
 class DrawStatement;

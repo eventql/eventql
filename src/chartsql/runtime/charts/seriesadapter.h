@@ -12,9 +12,9 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <unordered_map>
-#include <stx/charts/canvas.h>
-#include <stx/charts/barchart.h>
-#include <stx/charts/series.h>
+#include <cplot/canvas.h>
+#include <cplot/barchart.h>
+#include <cplot/series.h>
 #include <stx/exception.h>
 #include <chartsql/runtime/compile.h>
 #include <chartsql/runtime/execute.h>
