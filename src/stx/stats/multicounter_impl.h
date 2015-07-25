@@ -10,7 +10,7 @@
 #ifndef _FNORD_STATS_MULTICOUNTER_IMPL_H
 #define _FNORD_STATS_MULTICOUNTER_IMPL_H
 
-namespace fnord {
+namespace stx {
 namespace stats {
 
 template <typename ValueType, typename... LabelTypes>

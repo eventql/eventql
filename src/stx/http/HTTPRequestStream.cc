@@ -10,7 +10,7 @@
  */
 #include <stx/http/HTTPRequestStream.h>
 
-namespace fnord {
+namespace stx {
 namespace http {
 
 HTTPRequestStream::HTTPRequestStream(

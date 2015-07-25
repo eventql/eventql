@@ -10,7 +10,7 @@
 #include "stx/exception.h"
 #include "stx/stringutil.h"
 
-namespace fnord {
+namespace stx {
 namespace json {
 
 template <typename T>

@@ -9,7 +9,7 @@
  */
 #include <stx/cli/CLICommand.h>
 
-namespace fnord {
+namespace stx {
 namespace cli {
 
 CLICommand::CLICommand(const String& command) {}

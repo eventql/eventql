@@ -17,7 +17,7 @@
 #include "stx/charts/styles/style_default.h"
 #include "stx/io/outputstream.h"
 
-namespace fnord {
+namespace stx {
 namespace chart {
 
 class SVGTarget : public RenderTarget {

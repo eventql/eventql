@@ -11,7 +11,7 @@
 #include "stx/Language.h"
 #include "stx/stringutil.h"
 
-namespace fnord {
+namespace stx {
 
 Language languageFromString(const String& string) {
   String s(string);
@@ -41,4 +41,4 @@ String languageToString(Language lang) {
   }
 }
 
-} // namespace fnord
+} // namespace stx

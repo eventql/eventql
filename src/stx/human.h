@@ -14,7 +14,7 @@
 #include "stx/wallclock.h"
 #include "stx/option.h"
 
-namespace fnord {
+namespace stx {
 
 enum class HumanDataType {
   UNKNOWN,

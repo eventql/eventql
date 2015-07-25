@@ -12,15 +12,15 @@
 #include <stx/logging.h>
 #include <stx/stats/statsd.h>
 
-namespace fnord {
+namespace stx {
 namespace statsd {
 
 StatsdServer::StatsdServer(
-    fnord::TaskScheduler* server_scheduler,
-    fnord::TaskScheduler* work_scheduler) :
+    stx::TaskScheduler* server_scheduler,
+    stx::TaskScheduler* work_scheduler) :
     udp_server_(server_scheduler, work_scheduler) {
 
-  udp_server_.onMessage([this] (const fnord::Buffer& msg) {
+  udp_server_.onMessage([this] (const stx::Buffer& msg) {
     this->messageReceived(msg);
   });
 }
@@ -44,7 +44,7 @@ enum StatsdParseState {
   S_VALUE
 };
 
-void StatsdServer::messageReceived(const fnord::Buffer& msg) {
+void StatsdServer::messageReceived(const stx::Buffer& msg) {
   std::string key;
   std::string value;
   std::vector<std::pair<std::string, std::string>> labels;

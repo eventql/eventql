@@ -17,9 +17,9 @@
 #include <stx/logging.h>
 #include <stx/StackTrace.h>
 
-namespace fnord {
+namespace stx {
 
-using fnord::Exception;
+using stx::Exception;
 
 CatchAndLogExceptionHandler::CatchAndLogExceptionHandler(
     const String& component) :
@@ -39,7 +39,7 @@ void CatchAndAbortExceptionHandler::onException(
   fprintf(stderr, "%s\n\n", message_.c_str()); // FIXPAUL
 
   try {
-    auto rte = dynamic_cast<const fnord::Exception&>(error);
+    auto rte = dynamic_cast<const stx::Exception&>(error);
     rte.debugPrint();
   } catch (const std::exception& cast_error) {
     fprintf(stderr, "foreign exception: %s\n", error.what());
@@ -72,7 +72,7 @@ static void globalEHandler() {
 
   try {
     std::rethrow_exception(ex);
-  } catch (const fnord::Exception& e) {
+  } catch (const stx::Exception& e) {
     e.debugPrint();
   } catch (const std::exception& e) {
     fprintf(stderr, "foreign exception: %s\n", e.what());
@@ -116,5 +116,5 @@ void CatchAndAbortExceptionHandler::installGlobalHandlers() {
   }
 }
 
-} // namespace fnord
+} // namespace stx
 

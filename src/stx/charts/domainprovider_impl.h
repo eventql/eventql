@@ -10,7 +10,7 @@
 #ifndef _FNORDMETRIC_DOMAINPROVIDER_IMPL_H
 #define _FNORDMETRIC_DOMAINPROVIDER_IMPL_H
 
-namespace fnord {
+namespace stx {
 namespace chart {
 
 template <typename T>

@@ -15,7 +15,7 @@
 #include <list>
 #include <stx/autoref.h>
 
-namespace fnord {
+namespace stx {
 
 class Wakeup : public RefCounted {
 public:

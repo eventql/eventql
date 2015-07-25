@@ -15,7 +15,7 @@
 #include <stx/stdtypes.h>
 #include <stx/cli/CLICommand.h>
 
-namespace fnord {
+namespace stx {
 namespace cli {
 
 class CLI {

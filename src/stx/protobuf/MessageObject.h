@@ -12,7 +12,7 @@
 #include <stx/stdtypes.h>
 #include <stx/UnixTime.h>
 
-namespace fnord {
+namespace stx {
 namespace msg {
 
 struct MessageObject;
@@ -89,6 +89,6 @@ struct MessageObject {
 
 
 } // namespace msg
-} // namespace fnord
+} // namespace stx
 
 #endif

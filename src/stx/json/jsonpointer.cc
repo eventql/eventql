@@ -13,7 +13,7 @@
 #include "stx/stringutil.h"
 #include "stx/json/jsonpointer.h"
 
-namespace fnord {
+namespace stx {
 namespace json {
 
 JSONPointer::JSONPointer() : path_("") {}

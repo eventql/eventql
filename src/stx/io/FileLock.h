@@ -13,7 +13,7 @@
 #include <stx/stdtypes.h>
 #include <stx/io/file.h>
 
-namespace fnord {
+namespace stx {
 
 /**
  * A RAII File Lock class. Destructor automatically yields the lock if is was

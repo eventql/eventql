@@ -13,7 +13,7 @@
 #include <string>
 #include <vector>
 
-namespace fnord {
+namespace stx {
 namespace chart {
 
 class LegendDefinition {

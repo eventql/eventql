@@ -13,7 +13,7 @@
 #include "stx/inspect.h"
 #include "stx/json/flatjsonreader.h"
 
-namespace fnord {
+namespace stx {
 namespace json {
 
 FlatJSONReader::FlatJSONReader(

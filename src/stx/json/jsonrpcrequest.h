@@ -15,7 +15,7 @@
 #include "stx/inspect.h"
 #include "stx/json/json.h"
 
-namespace fnord {
+namespace stx {
 namespace json {
 
 class JSONRPCRequest {

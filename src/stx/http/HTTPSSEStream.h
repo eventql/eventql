@@ -15,7 +15,7 @@
 #include "stx/json/json.h"
 #include <stx/inspect.h>
 
-namespace fnord {
+namespace stx {
 namespace http {
 
 class HTTPSSEStream {

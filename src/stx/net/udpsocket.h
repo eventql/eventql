@@ -14,7 +14,7 @@
 #include "stx/net/inetaddr.h"
 #include "stx/thread/taskscheduler.h"
 
-namespace fnord {
+namespace stx {
 namespace net {
 
 class UDPSocket {

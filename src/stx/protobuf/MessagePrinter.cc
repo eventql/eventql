@@ -10,7 +10,7 @@
 #include <stx/protobuf/MessagePrinter.h>
 #include <stx/stringutil.h>
 
-namespace fnord {
+namespace stx {
 namespace msg {
 
 String MessagePrinter::print(
@@ -85,5 +85,5 @@ String MessagePrinter::printObject(
 }
 
 } // namespace msg
-} // namespace fnord
+} // namespace stx
 

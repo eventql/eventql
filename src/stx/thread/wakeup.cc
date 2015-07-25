@@ -10,7 +10,7 @@
 #include "stx/inspect.h"
 #include "stx/thread/wakeup.h"
 
-namespace fnord {
+namespace stx {
 
 Wakeup::Wakeup() : gen_(0) {
 }

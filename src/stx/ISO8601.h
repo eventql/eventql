@@ -12,7 +12,7 @@
 #include "stx/option.h"
 #include "stx/CivilTime.h"
 
-namespace fnord {
+namespace stx {
 
 class ISO8601 {
 public:

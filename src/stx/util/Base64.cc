@@ -9,7 +9,7 @@
  */
 #include <stx/util/Base64.h>
 
-namespace fnord {
+namespace stx {
 namespace util {
 
 /**

@@ -10,7 +10,7 @@
  */
 #include "SSEStreamServlet.h"
 
-namespace fnord {
+namespace stx {
 namespace http {
 
 void SSEStreamServlet::handleHTTPRequest(

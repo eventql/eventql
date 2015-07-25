@@ -9,7 +9,7 @@
  */
 #include "stx/charts/barchart.h"
 
-namespace fnord {
+namespace stx {
 namespace chart {
 
 BarChart::BarChart(

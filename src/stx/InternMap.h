@@ -12,7 +12,7 @@
 #include <mutex>
 #include "stx/stdtypes.h"
 
-namespace fnord {
+namespace stx {
 
 class InternMap {
 public:
@@ -31,5 +31,5 @@ protected:
   HashMap<String, void*> intern_map_;
 };
 
-} // namespace fnord
+} // namespace stx
 #endif

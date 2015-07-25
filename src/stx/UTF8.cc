@@ -10,7 +10,7 @@
 #include "stx/UTF8.h"
 #include "stx/exception.h"
 
-namespace fnord {
+namespace stx {
 
 char32_t UTF8::nextCodepoint(const char** cur, const char* end_) {
   auto begin = reinterpret_cast<const uint8_t*>(*cur);

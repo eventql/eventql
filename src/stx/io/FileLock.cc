@@ -11,7 +11,7 @@
 #include <stx/exception.h>
 #include <stx/io/FileLock.h>
 
-namespace fnord {
+namespace stx {
 
 FileLock::FileLock(
     const String& filename) :

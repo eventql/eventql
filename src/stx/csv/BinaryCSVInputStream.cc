@@ -9,7 +9,7 @@
  */
 #include "stx/csv/BinaryCSVInputStream.h"
 
-namespace fnord {
+namespace stx {
 
 BinaryCSVInputStream::BinaryCSVInputStream(
     std::unique_ptr<RewindableInputStream>&& input_stream) :

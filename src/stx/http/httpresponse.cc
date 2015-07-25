@@ -15,7 +15,7 @@
 #include <stx/http/httpresponse.h>
 #include <stx/http/httpparser.h>
 
-namespace fnord {
+namespace stx {
 namespace http {
 
 HTTPResponse HTTPResponse::parse(const std::string& str) {

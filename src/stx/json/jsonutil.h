@@ -12,7 +12,7 @@
 #include "stx/option.h"
 #include "stx/json/jsontypes.h"
 
-namespace fnord {
+namespace stx {
 namespace json {
 
 JSONObject::const_iterator objectLookup(

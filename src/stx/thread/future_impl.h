@@ -11,7 +11,7 @@
 #define _FNORD_THREAD_FUTURE_IMPL_H
 #include <assert.h>
 
-namespace fnord {
+namespace stx {
 
 template <typename T>
 PromiseState<T>::PromiseState() :
@@ -216,6 +216,6 @@ bool Promise<T>::isFulfilled() const {
   return state_->ready;
 }
 
-} // namespace fnord
+} // namespace stx
 
 #endif

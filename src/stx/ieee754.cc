@@ -13,7 +13,7 @@
 #include <stx/exception.h>
 #include <stx/ieee754.h>
 
-namespace fnord {
+namespace stx {
 
 uint64_t IEEE754::toBytes(double value) {
   uint64_t bytes;

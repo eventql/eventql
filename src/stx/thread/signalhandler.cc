@@ -10,7 +10,7 @@
 #include <signal.h>
 #include "stx/thread/signalhandler.h"
 
-namespace fnord {
+namespace stx {
 namespace thread {
 
 void SignalHandler::ignoreSIGHUP() {

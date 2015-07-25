@@ -11,7 +11,7 @@
 #include <stx/inspect.h>
 #include <stx/util/BitPackEncoder.h>
 
-namespace fnord {
+namespace stx {
 namespace util {
 
 

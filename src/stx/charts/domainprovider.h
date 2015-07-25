@@ -15,7 +15,7 @@
 #include "stx/charts/domain.h"
 #include "stx/exception.h"
 
-namespace fnord {
+namespace stx {
 namespace chart {
 
 class DomainProvider {

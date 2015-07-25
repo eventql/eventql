@@ -21,7 +21,7 @@
 #include "stx/thread/future.h"
 #include "stx/thread/wakeup.h"
 
-namespace fnord {
+namespace stx {
 class RPCChannel;
 
 class AnyRPC : public RefCounted {

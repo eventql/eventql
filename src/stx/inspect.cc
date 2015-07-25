@@ -9,7 +9,7 @@
  */
 #include <stx/inspect.h>
 
-namespace fnord {
+namespace stx {
 
 template <>
 std::string inspect<bool>(const bool& value) {
@@ -101,5 +101,5 @@ std::string inspect<std::exception>(const std::exception& e) {
   return e.what();
 }
 
-} // namespace fnord
+} // namespace stx
 

@@ -18,7 +18,7 @@
 #include "stx/inspect.h"
 #include "stx/thread/eventloop.h"
 
-namespace fnord {
+namespace stx {
 namespace thread {
 
 EventLoop::EventLoop() :

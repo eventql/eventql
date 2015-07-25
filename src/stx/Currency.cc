@@ -11,7 +11,7 @@
 #include "stx/Currency.h"
 #include "stx/stringutil.h"
 
-namespace fnord {
+namespace stx {
 
 Money::Money(
     uint64_t _cents,
@@ -65,4 +65,4 @@ String currencyToString(Currency lang) {
   }
 }
 
-} // namespace fnord
+} // namespace stx

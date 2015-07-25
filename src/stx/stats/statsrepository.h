@@ -12,7 +12,7 @@
 #include "stx/stdtypes.h"
 #include "stx/stats/stat.h"
 
-namespace fnord {
+namespace stx {
 namespace stats {
 
 enum class ExportMode {

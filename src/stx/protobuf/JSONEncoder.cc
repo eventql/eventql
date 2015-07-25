@@ -9,7 +9,7 @@
  */
 #include <stx/protobuf/JSONEncoder.h>
 
-namespace fnord {
+namespace stx {
 namespace msg {
 
 void JSONEncoder::encode(
@@ -106,5 +106,5 @@ void JSONEncoder::encodeField(
 }
 
 } // namespace msg
-} // namespace fnord
+} // namespace stx
 

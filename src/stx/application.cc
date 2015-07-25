@@ -13,13 +13,13 @@
 #include "stx/exceptionhandler.h"
 #include "stx/thread/signalhandler.h"
 
-namespace fnord {
+namespace stx {
 
 void Application::init() {
-  fnord::thread::SignalHandler::ignoreSIGHUP();
-  fnord::thread::SignalHandler::ignoreSIGPIPE();
+  stx::thread::SignalHandler::ignoreSIGHUP();
+  stx::thread::SignalHandler::ignoreSIGPIPE();
 
-  auto ehandler = new fnord::CatchAndAbortExceptionHandler();
+  auto ehandler = new stx::CatchAndAbortExceptionHandler();
   ehandler->installGlobalHandlers();
 }
 

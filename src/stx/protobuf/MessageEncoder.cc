@@ -9,7 +9,7 @@
  */
 #include <stx/protobuf/MessageEncoder.h>
 
-namespace fnord {
+namespace stx {
 namespace msg {
 
 void MessageEncoder::encode(
@@ -86,5 +86,5 @@ void MessageEncoder::encodeObject(
 
 
 } // namespace msg
-} // namespace fnord
+} // namespace stx
 

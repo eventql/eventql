@@ -10,11 +10,11 @@
 #include <stx/logging.h>
 #include <stx/net/mysql/MySQLConnection.h>
 
-namespace fnord {
+namespace stx {
 namespace mysql {
 
 std::unique_ptr<MySQLConnection> MySQLConnection::openConnection(
-    const fnord::URI& uri) {
+    const stx::URI& uri) {
   std::unique_ptr<MySQLConnection> conn(new MySQLConnection());
   conn->connect(uri);
   return conn;
@@ -53,7 +53,7 @@ MySQLConnection::~MySQLConnection() {
 #endif
 }
 
-void MySQLConnection::connect(const fnord::URI& uri) {
+void MySQLConnection::connect(const stx::URI& uri) {
   unsigned int port = 3306;
   std::string host = uri.host();
   std::string username;
@@ -249,7 +249,7 @@ void MySQLConnection::executeQuery(
 #ifdef FNORD_ENABLE_MYSQL
 
 #ifndef FNORD_NOTRACE
-    fnord::logTrace("fnord.mysql", "Executing MySQL query: $0", query);
+    stx::logTrace("fnord.mysql", "Executing MySQL query: $0", query);
 #endif
 
   MYSQL_RES* result = nullptr;
@@ -286,7 +286,7 @@ void MySQLConnection::executeQuery(
     } catch (const std::exception& e) {
       mysql_free_result(result);
       try {
-        auto rte = dynamic_cast<const fnord::Exception&>(e);
+        auto rte = dynamic_cast<const stx::Exception&>(e);
         throw rte;
       } catch (std::bad_cast bce) {
         throw e;
@@ -306,7 +306,7 @@ std::list<std::vector<std::string>> MySQLConnection::executeQuery(
 #ifdef FNORD_ENABLE_MYSQL
 
 #ifndef FNORD_NOTRACE
-    fnord::logTrace("fnord.mysql", "Executing MySQL query: $0", query);
+    stx::logTrace("fnord.mysql", "Executing MySQL query: $0", query);
 #endif
 
   MYSQL_RES* result = nullptr;

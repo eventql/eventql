@@ -16,7 +16,7 @@
 #include <stx/exception.h>
 #include <stx/buffer.h>
 
-namespace fnord {
+namespace stx {
 
 class SHA1Hash {
   friend class SHA1;

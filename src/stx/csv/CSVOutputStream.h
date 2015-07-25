@@ -12,7 +12,7 @@
 #include <stx/exception.h>
 #include <stx/io/outputstream.h>
 
-namespace fnord {
+namespace stx {
 
 class CSVOutputStream {
 public:
@@ -30,5 +30,5 @@ protected:
   String row_sep_;
 };
 
-} // namespace fnord
+} // namespace stx
 

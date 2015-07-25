@@ -12,7 +12,7 @@
 #include <stx/exception.h>
 #include <stx/io/outputstream.h>
 
-namespace fnord {
+namespace stx {
 
 class BinaryCSVOutputStream {
 public:
@@ -25,5 +25,5 @@ protected:
   std::shared_ptr<OutputStream> output_;
 };
 
-} // namespace fnord
+} // namespace stx
 

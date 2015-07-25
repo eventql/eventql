@@ -11,7 +11,7 @@
 #include "stx/charts/canvas.h"
 #include "stx/charts/drawable.h"
 
-namespace fnord {
+namespace stx {
 namespace chart {
 
 Drawable::Drawable(Canvas* canvas) : canvas_(canvas) {}

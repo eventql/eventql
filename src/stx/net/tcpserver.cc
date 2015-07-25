@@ -17,7 +17,7 @@
 #include "stx/inspect.h"
 #include "stx/net/tcpserver.h"
 
-namespace fnord {
+namespace stx {
 namespace net {
 
 TCPServer::TCPServer(

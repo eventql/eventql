@@ -53,26 +53,26 @@ const char kFutureError[] = "FutureError";
 
 #define RAISE(E, ...) \
     RAISE_EXCEPTION( \
-        fnord::Exception( __VA_ARGS__).setTypeName(E)); \
+        stx::Exception( __VA_ARGS__).setTypeName(E)); \
         while(0) {}
 
 #define RAISEF(E, ...) \
     RAISE_EXCEPTION( \
-        fnord::Exception( \
-            fnord::StringUtil::format(__VA_ARGS__)).setTypeName(E)); \
+        stx::Exception( \
+            stx::StringUtil::format(__VA_ARGS__)).setTypeName(E)); \
         while(0) {}
 
 #define RAISE_ERRNO(E, ...) \
     { \
       int e = errno; \
       RAISE_EXCEPTION( \
-          fnord::Exception( \
+          stx::Exception( \
               __VA_ARGS__).setTypeName(E).setErrno(e)); \
     }
 
 #define __brk raise(SIGTRAP); while (0) {}
 
-namespace fnord {
+namespace stx {
 
 class OutputStream;
 
@@ -110,6 +110,6 @@ private:
   char message_[1024];
 };
 
-} // namespace fnord
+} // namespace stx
 
 #endif

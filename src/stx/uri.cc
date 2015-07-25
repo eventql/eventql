@@ -10,7 +10,7 @@
 #include <stx/exception.h>
 #include <stx/uri.h>
 
-namespace fnord {
+namespace stx {
 
 
 std::string URI::urlEncode(const std::string& str) {
@@ -414,5 +414,5 @@ std::string URI::buildQueryString(const URI::ParamList& params) {
   return out;
 }
 
-} // namespace fnord
+} // namespace stx
 

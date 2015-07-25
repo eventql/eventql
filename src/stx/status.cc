@@ -11,7 +11,7 @@
 #include "stx/exception.h"
 #include "stx/status.h"
 
-namespace fnord {
+namespace stx {
 
 Status Status::success() {
   return Status(eSuccess);
@@ -21,7 +21,7 @@ Status::Status(kStatusType type) : type_(type) {}
 
 Status::Status(const std::exception& e) {
   try {
-    auto rte = dynamic_cast<const fnord::Exception&>(e);
+    auto rte = dynamic_cast<const stx::Exception&>(e);
     type_ = eRuntimeError; // FIXPAUL
     message_ = StringUtil::format(
         "$0: $1",

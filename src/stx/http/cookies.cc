@@ -10,7 +10,7 @@
 #include "stx/http/cookies.h"
 #include "stx/inspect.h"
 
-namespace fnord {
+namespace stx {
 namespace http {
 
 bool Cookies::getCookie(
@@ -86,4 +86,4 @@ std::string Cookies::mkCookie(
 }
 
 } // namespace http
-} // namespace fnord
+} // namespace stx

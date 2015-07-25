@@ -12,7 +12,7 @@
 #include "stx/buffer.h"
 #include "stx/stdtypes.h"
 
-namespace fnord {
+namespace stx {
 
 class FileUtil {
 public:

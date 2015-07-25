@@ -12,7 +12,7 @@
 #include "stx/charts/domain.h"
 #include "stx/charts/domainprovider.h"
 
-namespace fnord {
+namespace stx {
 namespace chart {
 
 class GridDefinition {

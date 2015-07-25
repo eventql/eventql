@@ -12,7 +12,7 @@
 #include <mutex>
 #include "stx/stdtypes.h"
 
-namespace fnord {
+namespace stx {
 
 class ExceptionHandler {
 public:

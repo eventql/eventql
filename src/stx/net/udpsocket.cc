@@ -17,7 +17,7 @@
 #include "stx/exception.h"
 #include "stx/net/udpsocket.h"
 
-namespace fnord {
+namespace stx {
 namespace net {
 
 UDPSocket::UDPSocket() {

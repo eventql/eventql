@@ -15,7 +15,7 @@
 #include "stx/http/httpservice.h"
 
 
-namespace fnord {
+namespace stx {
 namespace http {
 
 class ReadStreamServlet : public http::StreamingHTTPService {

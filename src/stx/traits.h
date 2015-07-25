@@ -10,11 +10,11 @@
 #ifndef _FNORD_TRAITS_H
 #define _FNORD_TRAITS_H
 
-namespace fnord {
+namespace stx {
 
 /* TypeIsReflected<T> */
 template <typename T>
-using TypeIsReflected = fnord::reflect::is_reflected<T>;
+using TypeIsReflected = stx::reflect::is_reflected<T>;
 
 /* TypeIsVector<T> */
 template <typename T, typename = void>
@@ -34,5 +34,5 @@ struct TypeIsVector<
   static const bool value = true;
 };
 
-} // namespace fnord
+} // namespace stx
 #endif

@@ -15,7 +15,7 @@
 #include <stx/http/httpresponse.h>
 #include <stx/http/httpserverconnection.h>
 
-namespace fnord {
+namespace stx {
 namespace http {
 
 class HTTPRequestStream : public RefCounted {

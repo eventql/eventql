@@ -14,9 +14,9 @@
 #include <stx/wallclock.h>
 #include <stx/logging.h>
 
-using fnord::Exception;
+using stx::Exception;
 
-namespace fnord {
+namespace stx {
 
 const char* logLevelToStr(LogLevel log_level) {
   switch (log_level) {
@@ -69,7 +69,7 @@ void Logger::logException(
   }
 
   try {
-    auto rte = dynamic_cast<const fnord::Exception&>(exception);
+    auto rte = dynamic_cast<const stx::Exception&>(exception);
     log(
         log_level,
         component,

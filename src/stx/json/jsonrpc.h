@@ -17,7 +17,7 @@
 #include "stx/json/jsonrpchttpadapter.h"
 #include "stx/reflect/reflect.h"
 
-namespace fnord {
+namespace stx {
 namespace json {
 class JSONRPCRequest;
 class JSONRPCResponse;

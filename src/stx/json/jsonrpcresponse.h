@@ -15,7 +15,7 @@
 #include "stx/io/outputstream.h"
 #include "stx/json/jsonoutputstream.h"
 
-namespace fnord {
+namespace stx {
 namespace json {
 
 class JSONRPCResponse {

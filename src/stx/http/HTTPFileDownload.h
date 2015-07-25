@@ -18,7 +18,7 @@
 #include "stx/http/httpconnectionpool.h"
 #include <string>
 
-namespace fnord {
+namespace stx {
 namespace http {
 
 class HTTPFileDownload {

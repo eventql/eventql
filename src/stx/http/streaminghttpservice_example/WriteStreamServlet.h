@@ -13,7 +13,7 @@
 #include <unistd.h>
 #include "stx/http/httpservice.h"
 
-namespace fnord {
+namespace stx {
 namespace http {
 
 class WriteStreamServlet : public http::StreamingHTTPService {

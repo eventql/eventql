@@ -24,10 +24,10 @@
 #include <stx/thread/eventloop.h>
 #include <stx/thread/threadpool.h>
 
-using namespace fnord;
-using namespace fnord::http;
-using fnord::StringInputStream;
-using fnord::StringOutputStream;
+using namespace stx;
+using namespace stx::http;
+using stx::StringInputStream;
+using stx::StringOutputStream;
 
 UNIT_TEST(HTTPTest);
 
@@ -151,7 +151,7 @@ TEST_CASE(HTTPTest, TestAddCookie, [] () {
 
   {
     HTTPResponse response;
-    response.addCookie("fnord", "bar", fnord::UnixTime(1418571527495314));
+    response.addCookie("fnord", "bar", stx::UnixTime(1418571527495314));
     EXPECT_EQ(
         response.getHeader("Set-Cookie"),
         "fnord=bar; Expires=Sun, 14-Dec-2014 15:38:47 UTC");
@@ -162,7 +162,7 @@ TEST_CASE(HTTPTest, TestAddCookie, [] () {
     response.addCookie(
         "fnord",
         "bar",
-        fnord::UnixTime::epoch(),
+        stx::UnixTime::epoch(),
         "/blah");
     EXPECT_EQ(
         response.getHeader("Set-Cookie"), "fnord=bar; Path=/blah");
@@ -173,7 +173,7 @@ TEST_CASE(HTTPTest, TestAddCookie, [] () {
     response.addCookie(
         "fnord",
         "bar",
-        fnord::UnixTime::epoch(),
+        stx::UnixTime::epoch(),
         "",
         ".fnrd.net");
     EXPECT_EQ(
@@ -185,7 +185,7 @@ TEST_CASE(HTTPTest, TestAddCookie, [] () {
     response.addCookie(
         "fnord",
         "bar",
-        fnord::UnixTime::epoch(),
+        stx::UnixTime::epoch(),
         "",
         "",
         false,
@@ -199,7 +199,7 @@ TEST_CASE(HTTPTest, TestAddCookie, [] () {
     response.addCookie(
         "fnord",
         "bar",
-        fnord::UnixTime::epoch(),
+        stx::UnixTime::epoch(),
         "",
         "",
         true,
@@ -244,11 +244,11 @@ TEST_CASE(HTTPTest, TestInvalidCookies, [] () {
 });
 
 //TEST_CASE(HTTPTest, TestHTTPConnectionPoolEnd2End, [] () {
-//  fnord::thread::ThreadPool tp;
+//  stx::thread::ThreadPool tp;
 //  HTTPConnectionPool http_pool(&tp);
 //
 //  auto res = http_pool.executeRequest(
-//      fnord::http::HTTPRequest::mkGet("http://www.google.com/"));
+//      stx::http::HTTPRequest::mkGet("http://www.google.com/"));
 //  res.wait();
 //
 //  const auto& r = res.get();

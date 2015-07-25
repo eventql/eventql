@@ -13,7 +13,7 @@
 #include <stx/buffer.h>
 #include <stx/thread/taskscheduler.h>
 
-namespace fnord {
+namespace stx {
 namespace net {
 
 class UDPServer {
@@ -33,7 +33,7 @@ protected:
   TaskScheduler* server_scheduler_;
   TaskScheduler* callback_scheduler_;
   int ssock_;
-  std::function<void (const fnord::Buffer&)> callback_;
+  std::function<void (const stx::Buffer&)> callback_;
 };
 
 

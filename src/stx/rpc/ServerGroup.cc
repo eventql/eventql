@@ -10,7 +10,7 @@
 #include "stx/exception.h"
 #include "stx/rpc/ServerGroup.h"
 
-namespace fnord {
+namespace stx {
 
 ServerGroup::ServerGroup() {}
 

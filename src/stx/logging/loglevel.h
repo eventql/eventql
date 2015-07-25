@@ -12,7 +12,7 @@
 #include "stx/UnixTime.h"
 #include "stx/stdtypes.h"
 
-namespace fnord {
+namespace stx {
 
 enum class LogLevel {
   kEmergency = 9000,
