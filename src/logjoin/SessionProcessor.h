@@ -11,8 +11,7 @@
 #include "stx/random.h"
 #include "stx/thread/FixedSizeThreadPool.h"
 #include "logjoin/TrackedSession.h"
-#include "logjoin/TrackedQuery.h"
-#include "logjoin/SessionPipeline.h"
+#include "logjoin/SessionContext.h"
 #include "common/CustomerDirectory.h"
 
 using namespace stx;
@@ -24,8 +23,9 @@ public:
   typedef Function<void (RefPtr<SessionContext> ctx)> PipelineStageFn;
 
   SessionProcessor(
-      RefPtr<SessionPipeline> pipeline,
       CustomerDirectory* customer_dir);
+
+  void addPipelineStage(PipelineStageFn fn);
 
   void enqueueSession(const TrackedSession& session);
   void start();
@@ -35,7 +35,7 @@ protected:
 
   void processSession(const TrackedSession& session);
 
-  RefPtr<SessionPipeline> pipeline_;
+  Vector<PipelineStageFn> stages_;
   CustomerDirectory* customer_dir_;
   thread::FixedSizeThreadPool tpool_;
 };

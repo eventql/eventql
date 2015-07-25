@@ -16,7 +16,6 @@ add_library(logjoin-base OBJECT
     LogJoin.cc
     LogJoinExport.cc
     SessionProcessor.cc
-    SessionPipeline.cc
     stages/SessionJoin.cc
     stages/BuildSessionAttributes.cc
     stages/NormalizeQueryStrings.cc

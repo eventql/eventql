@@ -199,28 +199,11 @@ int main(int argc, const char** argv) {
   cm::LogJoinShardMap shard_map;
   auto shard = shard_map.getShard(flags.getString("shard"));
 
-  /* set up logjoin */
+  /* args */
   auto dry_run = !flags.isSet("no_dryrun");
   size_t batch_size = flags.getInt("batch_size");
   size_t buffer_size = flags.getInt("buffer_size");
   size_t flush_interval = flags.getInt("flush_interval");
-
-  stx::logInfo(
-      "cm.logjoin",
-      "Starting cm-logjoin with:\n    dry_run=$0\n    batch_size=$1\n" \
-      "    buffer_size=$2\n    flush_interval=$9\n"
-      "    max_dbsize=$4MB\n" \
-      "    shard=$5\n    shard_range=[$6, $7)\n    shard_modulo=$8",
-      dry_run,
-      batch_size,
-      buffer_size,
-      0,
-      flags.getInt("db_size"),
-      shard.shard_name,
-      shard.begin,
-      shard.end,
-      cm::LogJoinShard::modulo,
-      flush_interval);
 
   /* open customer directory */
   CustomerDirectory customer_dir;
@@ -242,27 +225,20 @@ int main(int argc, const char** argv) {
       "tracker_log.feedserver03.production.fnrd.net",
       URI("http://nue03.prod.fnrd.net:7001/rpc"));
 
-  /* open index */
-  //RefPtr<DocIndex> index(
-  //    new DocIndex(
-  //        flags.getString("index"),
-  //        "documents-dawanda",
-  //        true));
-
   /* set up session processing pipeline */
-  auto pipeline = mkRef(new cm::SessionPipeline());
+  cm::SessionProcessor session_proc(&customer_dir);
 
   /* pipeline stage: session join */
-  pipeline->addStage(
+  session_proc.addPipelineStage(
       std::bind(&SessionJoin::process, std::placeholders::_1));
 
   /* pipeline stage: BuildSessionAttributes */
-  pipeline->addStage(
+  session_proc.addPipelineStage(
       std::bind(&BuildSessionAttributes::process, std::placeholders::_1));
 
   /* pipeline stage: NormalizeQueryStrings */
   stx::fts::Analyzer analyzer(flags.getString("conf"));
-  pipeline->addStage(
+  session_proc.addPipelineStage(
       std::bind(
           &NormalizeQueryStrings::process,
           NormalizeQueryStrings::NormalizeFn(
@@ -274,7 +250,7 @@ int main(int argc, const char** argv) {
           std::placeholders::_1));
 
   /* pipeline stage: TSDBUpload */
-  pipeline->addStage(
+  session_proc.addPipelineStage(
       std::bind(
           &TSDBUploadStage::process,
           std::placeholders::_1,
@@ -282,7 +258,7 @@ int main(int argc, const char** argv) {
           &http));
 
   /* pipeline stage: DeliverWebHook */
-  pipeline->addStage(
+  session_proc.addPipelineStage(
       std::bind(&DeliverWebhookStage::process, std::placeholders::_1));
 
   /* open session db */
@@ -292,10 +268,6 @@ int main(int argc, const char** argv) {
   mdb_opts.lock_filename = shard.shard_name + ".db.lck",
   mdb_opts.sync = false;
   auto sessdb = mdb::MDB::open(flags.getString("datadir"), mdb_opts);
-
-  /* set up session processor */
-  cm::SessionProcessor session_proc(pipeline, &customer_dir);
-  session_proc.start();
 
   /* setup logjoin */
   cm::LogJoin logjoin(shard, dry_run, sessdb, &session_proc, &ev);
@@ -312,6 +284,24 @@ int main(int argc, const char** argv) {
   sigaction(SIGINT, &sa, NULL);
 
   /* run logjoin */
+  stx::logInfo(
+      "cm.logjoin",
+      "Starting cm-logjoin with:\n    dry_run=$0\n    batch_size=$1\n" \
+      "    buffer_size=$2\n    flush_interval=$9\n"
+      "    max_dbsize=$4MB\n" \
+      "    shard=$5\n    shard_range=[$6, $7)\n    shard_modulo=$8",
+      dry_run,
+      batch_size,
+      buffer_size,
+      0,
+      flags.getInt("db_size"),
+      shard.shard_name,
+      shard.begin,
+      shard.end,
+      cm::LogJoinShard::modulo,
+      flush_interval);
+
+  session_proc.start();
   logjoin.processClickstream(
       input_feeds,
       batch_size,
