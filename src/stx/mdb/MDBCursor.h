@@ -16,7 +16,7 @@
 #include "stx/logging.h"
 #include "stx/option.h"
 
-namespace fnord {
+namespace stx {
 namespace mdb {
 
 class MDBCursor : public RefCounted {

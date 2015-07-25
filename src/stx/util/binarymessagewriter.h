@@ -13,7 +13,7 @@
 #include <stdint.h>
 #include <string>
 
-namespace fnord {
+namespace stx {
 namespace util {
 
 class BinaryMessageWriter {

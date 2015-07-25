@@ -10,7 +10,7 @@
 #ifndef _FNORD_BASE_OPTION_IMPL_H
 #define _FNORD_BASE_OPTION_IMPL_H
 
-namespace fnord {
+namespace stx {
 
 template <typename T>
 Option<T>::Option() : value_(nullptr) {}

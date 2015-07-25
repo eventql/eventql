@@ -9,7 +9,7 @@
  */
 #include "stx/stringutil.h"
 
-namespace fnord {
+namespace stx {
 namespace http {
 
 template <typename... HandlerArgs>

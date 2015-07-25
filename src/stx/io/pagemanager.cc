@@ -15,7 +15,7 @@
 #include <stx/io/file.h>
 #include <stx/io/fileutil.h>
 
-namespace fnord {
+namespace stx {
 namespace io {
 
 PageManager::PageManager(
@@ -181,7 +181,7 @@ RefPtr<MmapPageManager::MmappedFile> MmapPageManager::getMmappedFile(
   if (current_mapping_.get() == nullptr ||
       last_byte > current_mapping_->size) {
     /* align mmap size to the next larger block boundary */
-    auto file = fnord::File::openFile(
+    auto file = stx::File::openFile(
         filename_,
         File::O_READ | File::O_WRITE);
 

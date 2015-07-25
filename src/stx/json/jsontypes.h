@@ -16,7 +16,7 @@
 #include "stx/reflect/reflect.h"
 #include "stx/traits.h"
 
-namespace fnord {
+namespace stx {
 namespace json {
 
 enum kTokenType {
@@ -48,6 +48,6 @@ struct TypeIsVector<json::JSONObject> {
   static const bool value = false;
 };
 
-} // namespace fnord
+} // namespace stx
 
 #endif

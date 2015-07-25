@@ -11,12 +11,12 @@
 #include <stx/inspect.h>
 #include <stx/http/httprequest.h>
 
-using fnord::InputStream;
-using fnord::OutputStream;
-using fnord::StringInputStream;
-using fnord::StringOutputStream;
+using stx::InputStream;
+using stx::OutputStream;
+using stx::StringInputStream;
+using stx::StringOutputStream;
 
-namespace fnord {
+namespace stx {
 namespace http {
 
 std::string HTTPMessage::kEmptyHeader = "";

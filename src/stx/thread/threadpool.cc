@@ -18,14 +18,14 @@
 #include "stx/logging.h"
 #include "stx/thread/threadpool.h"
 
-using fnord::ExceptionHandler;
+using stx::ExceptionHandler;
 
-namespace fnord {
+namespace stx {
 namespace thread {
 
 ThreadPool::ThreadPool() :
-    ThreadPool(std::unique_ptr<fnord::ExceptionHandler>(
-        new fnord::CatchAndAbortExceptionHandler())) {}
+    ThreadPool(std::unique_ptr<stx::ExceptionHandler>(
+        new stx::CatchAndAbortExceptionHandler())) {}
 
 ThreadPool::ThreadPool(
     std::unique_ptr<ExceptionHandler> error_handler) :

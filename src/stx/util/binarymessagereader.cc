@@ -11,7 +11,7 @@
 #include <stx/exception.h>
 #include <stx/ieee754.h>
 
-namespace fnord {
+namespace stx {
 namespace util {
 
 BinaryMessageReader::BinaryMessageReader(

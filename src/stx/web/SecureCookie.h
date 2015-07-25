@@ -16,7 +16,7 @@
 #include <stx/option.h>
 #include <stx/wallclock.h>
 
-namespace fnord {
+namespace stx {
 namespace web {
 
 /**

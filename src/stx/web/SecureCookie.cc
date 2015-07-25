@@ -10,7 +10,7 @@
 #include <stx/util/Base64.h>
 #include <stx/web/SecureCookie.h>
 
-namespace fnord {
+namespace stx {
 namespace web {
 
 SecureCookie::SecureCookie(

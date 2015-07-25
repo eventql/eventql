@@ -14,7 +14,7 @@
 #include <mutex>
 #include "stx/buffer.h"
 
-namespace fnord {
+namespace stx {
 
 class OutputStream {
 public:

@@ -10,7 +10,7 @@
 #include <stx/VFS.h>
 #include <stx/io/mmappedfile.h>
 
-namespace fnord {
+namespace stx {
 
 RefPtr<VFSFile> WhitelistVFS::openFile(const String& filename) {
   auto iter = whitelist_.find(filename);

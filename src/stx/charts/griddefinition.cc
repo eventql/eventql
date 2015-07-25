@@ -9,7 +9,7 @@
  */
 #include "stx/charts/griddefinition.h"
 
-namespace fnord {
+namespace stx {
 namespace chart {
 
 GridDefinition::GridDefinition(

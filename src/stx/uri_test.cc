@@ -10,7 +10,7 @@
 #include "stx/uri.h"
 #include "stx/test/unittest.h"
 
-using namespace fnord;
+using namespace stx;
 
 UNIT_TEST(URITest);
 

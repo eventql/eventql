@@ -20,7 +20,7 @@
 #include "stx/rpc/RPC.h"
 #include "stx/http/httpconnectionpool.h"
 
-namespace fnord {
+namespace stx {
 
 class RPCClient {
 public:
@@ -35,8 +35,8 @@ public:
   HTTPRPCClient(TaskScheduler* sched);
   void call(const URI& uri, RefPtr<AnyRPC> rpc) override;
 protected:
-  fnord::http::HTTPConnectionPool http_pool_;
+  stx::http::HTTPConnectionPool http_pool_;
 };
 
-} // namespace fnord
+} // namespace stx
 #endif

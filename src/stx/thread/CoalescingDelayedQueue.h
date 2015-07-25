@@ -16,7 +16,7 @@
 #include <list>
 #include "stx/option.h"
 
-namespace fnord {
+namespace stx {
 namespace thread {
 
 /**

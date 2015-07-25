@@ -18,7 +18,7 @@
 #include <mysql.h>
 #endif
 
-namespace fnord {
+namespace stx {
 namespace mysql {
 
 class MySQLConnection {
@@ -35,7 +35,7 @@ public:
    * @param URI the mysql:// URI
    * @returns a new MySQLConnection
    */
-  static std::unique_ptr<MySQLConnection> openConnection(const fnord::URI& uri);
+  static std::unique_ptr<MySQLConnection> openConnection(const stx::URI& uri);
 
   /**
    * Creates a new mysql connection and tries to connect
@@ -70,7 +70,7 @@ public:
    * @param URI the mysql:// URI
    * @returns a new MySQLConnection
    */
-  void connect(const fnord::URI& uri);
+  void connect(const stx::URI& uri);
 
   /**
    * Connect to a mysql server. May throw an exception

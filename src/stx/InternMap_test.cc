@@ -16,7 +16,7 @@
 UNIT_TEST(InternMapTest);
 
 TEST_CASE(InternMapTest, TestInternMap, [] () {
-  fnord::InternMap im;
+  stx::InternMap im;
 
   auto a = im.internString("fnord");
   auto b = im.internString("bar");

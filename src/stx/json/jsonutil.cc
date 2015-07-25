@@ -9,7 +9,7 @@
  */
 #include "stx/json/jsonutil.h"
 
-namespace fnord {
+namespace stx {
 namespace json {
 
 Option<String> JSONUtil::objectGetString(

@@ -14,7 +14,7 @@
 #include "stx/http/httpservice.h"
 #include "stx/http/HTTPSSEStream.h"
 
-namespace fnord {
+namespace stx {
 namespace http {
 
 class SSEStreamServlet : public http::StreamingHTTPService {

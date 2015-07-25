@@ -9,7 +9,7 @@
  */
 #include "series.h"
 
-namespace fnord {
+namespace stx {
 namespace chart {
 
 template <>

@@ -11,7 +11,7 @@
 #include "stx/exception.h"
 #include "stx/http/httpresponsefuture.h"
 
-namespace fnord {
+namespace stx {
 namespace http {
 
 HTTPResponseFuture::HTTPResponseFuture(

@@ -12,7 +12,7 @@
 #include <stx/exception.h>
 #include <stx/http/HTTPResponseStream.h>
 
-namespace fnord {
+namespace stx {
 namespace http {
 
 HTTPResponseStream::HTTPResponseStream(

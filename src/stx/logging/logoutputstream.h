@@ -15,7 +15,7 @@
 #include "stx/logging/logtarget.h"
 #include "stx/stdtypes.h"
 
-namespace fnord {
+namespace stx {
 
 class LogOutputStream : public LogTarget {
 public:

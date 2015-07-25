@@ -15,7 +15,7 @@
 #include <stx/stdtypes.h>
 #include <stx/cli/flagparser.h>
 
-namespace fnord {
+namespace stx {
 namespace cli {
 
 class CLICommand : public RefCounted {

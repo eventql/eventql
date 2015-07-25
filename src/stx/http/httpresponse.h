@@ -15,7 +15,7 @@
 #include <stx/http/status.h>
 #include <string>
 
-namespace fnord {
+namespace stx {
 namespace http {
 
 class HTTPResponse : public HTTPMessage {

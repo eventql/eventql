@@ -14,7 +14,7 @@
 #include <stx/buffer.h>
 #include <stx/SHA1.h>
 
-namespace fnord {
+namespace stx {
 
 class HMAC {
 public:

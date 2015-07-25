@@ -11,7 +11,7 @@
 #include "stx/json/jsonrpcrequest.h"
 #include "stx/json/jsonutil.h"
 
-namespace fnord {
+namespace stx {
 namespace json {
 
 JSONRPCRequest::JSONRPCRequest(

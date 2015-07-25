@@ -10,7 +10,7 @@
  */
 #include "WriteStreamServlet.h"
 
-namespace fnord {
+namespace stx {
 namespace http {
 
 void WriteStreamServlet::handleHTTPRequest(

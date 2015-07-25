@@ -14,7 +14,7 @@
 #include <vector>
 #include "eventloop.h"
 
-namespace fnordmetric {
+namespace stxmetric {
 namespace ev {
 
 class Acceptor {

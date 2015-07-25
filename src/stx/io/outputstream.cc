@@ -18,7 +18,7 @@
 #include "stx/io/outputstream.h"
 #include "stx/ieee754.h"
 
-namespace fnord {
+namespace stx {
 
 std::unique_ptr<OutputStream> OutputStream::getStdout() {
   auto stdout_stream = new FileOutputStream(1, false);

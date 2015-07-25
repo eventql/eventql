@@ -13,7 +13,7 @@
 #include "stx/inspect.h"
 #include "stx/http/httpparser.h"
 
-namespace fnord {
+namespace stx {
 namespace http {
 
 const char HTTPParser::kContentLengthHeader[] = "Content-Length";

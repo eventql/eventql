@@ -9,7 +9,7 @@
  */
 #include "stx/CivilTime.h"
 
-namespace fnord {
+namespace stx {
 
 CivilTime::CivilTime(
     std::nullptr_t) :

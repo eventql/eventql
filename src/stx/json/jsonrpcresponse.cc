@@ -9,7 +9,7 @@
  */
 #include "stx/json/jsonrpcresponse.h"
 
-namespace fnord {
+namespace stx {
 namespace json {
 
 JSONRPCResponse::JSONRPCResponse(

@@ -11,7 +11,7 @@
 #define _FNORDMETRIC_HASH_H
 #include <tuple>
 
-namespace fnord {
+namespace stx {
 
 template <typename T>
 struct hash {

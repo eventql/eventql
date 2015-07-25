@@ -13,7 +13,7 @@
 #include "stx/charts/domain.h"
 #include "stx/charts/svgtarget.h"
 
-namespace fnord {
+namespace stx {
 namespace chart {
 
 Canvas::Canvas() :

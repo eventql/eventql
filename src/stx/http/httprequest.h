@@ -13,7 +13,7 @@
 #include <stx/http/httpmessage.h>
 #include <string>
 
-namespace fnord {
+namespace stx {
 namespace http {
 class HTTPInputStream;
 

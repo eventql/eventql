@@ -16,7 +16,7 @@
 #include "stx/wallclock.h"
 #include "stx/duration.h"
 
-namespace fnord {
+namespace stx {
 namespace util {
 
 class SimpleRateLimit {

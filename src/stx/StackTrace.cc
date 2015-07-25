@@ -32,7 +32,7 @@
 #include <dlfcn.h>
 #endif
 
-namespace fnord {
+namespace stx {
 
 #define MAX_FRAMES 64
 #define SKIP_FRAMES 2
@@ -176,4 +176,4 @@ void StackTrace::debugPrint(int fd) {
   }
 }
 
-}  // namespace fnord
+}  // namespace stx

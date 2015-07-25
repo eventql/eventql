@@ -13,7 +13,7 @@
 #include <stx/buffer.h>
 #include <stx/util/binarymessagewriter.h>
 
-namespace fnord {
+namespace stx {
 namespace msg {
 
 class MessageBuilder {
@@ -50,6 +50,6 @@ protected:
 };
 
 } // namespace msg
-} // namespace fnord
+} // namespace stx
 
 #endif

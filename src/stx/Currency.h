@@ -12,7 +12,7 @@
 #include "stx/stdtypes.h"
 #include "stx/Currency.pb.h"
 
-namespace fnord {
+namespace stx {
 
 Currency currencyFromString(const String& string);
 String currencyToString(Currency lang);
@@ -38,6 +38,6 @@ protected:
 };
 
 
-} // namespace fnord
+} // namespace stx
 
 #endif

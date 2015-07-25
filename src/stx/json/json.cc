@@ -15,7 +15,7 @@
 #include "stx/json/json.h"
 #include "stx/json/jsoninputstream.h"
 
-namespace fnord {
+namespace stx {
 namespace json {
 
 JSONToken::JSONToken(
@@ -35,7 +35,7 @@ JSONObject parseJSON(const std::string& json_str) {
   return parseJSON(&json);
 }
 
-JSONObject parseJSON(const fnord::Buffer& json_buf) {
+JSONObject parseJSON(const stx::Buffer& json_buf) {
   JSONInputStream json(BufferInputStream::fromBuffer(&json_buf));
   return parseJSON(&json);
 }
@@ -341,8 +341,8 @@ template <>
 std::string inspect(const json::JSONToken& token) {
   return StringUtil::format(
       "$0:$1",
-      fnord::StringUtil::toString(token.type),
+      stx::StringUtil::toString(token.type),
       token.data);
 }
 
-} // namespace fnord
+} // namespace stx

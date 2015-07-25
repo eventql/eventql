@@ -19,7 +19,7 @@
 #include <google/protobuf/compiler/parser.h>
 #include <3rdparty/simdcomp/simdcomp.h>
 
-namespace fnord {
+namespace stx {
 namespace msg {
 
 String MessageSchemaField::typeName() const {
@@ -594,4 +594,4 @@ void MessageSchemaRepository::loadProtobufFile(
 }
 
 } // namespace msg
-} // namespace fnord
+} // namespace stx

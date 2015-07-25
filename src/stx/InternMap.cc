@@ -11,7 +11,7 @@
 #include "stx/exception.h"
 #include "stx/InternMap.h"
 
-namespace fnord {
+namespace stx {
 
 void* InternMap::internString(const String& str) {
   std::unique_lock<std::mutex> lk(intern_map_mutex_);
@@ -45,4 +45,4 @@ String InternMap::getString(const void* interned) {
   return std::string(data, size);
 }
 
-} // namespace fnord
+} // namespace stx

@@ -12,7 +12,7 @@
 #include "stx/exception.h"
 #include "stx/io/inputstream.h"
 
-namespace fnord {
+namespace stx {
 
 Assets::AssetMap* Assets::globalMap() {
   static AssetMap map;
@@ -62,5 +62,5 @@ std::string Assets::getAsset(const std::string& filename) {
   RAISE(kRuntimeError, "asset not found: %s", filename.c_str());
 }
 
-} // namespace fnord
+} // namespace stx
 

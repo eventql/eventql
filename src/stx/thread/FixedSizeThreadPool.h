@@ -20,7 +20,7 @@
 #include "stx/thread/wakeup.h"
 #include "stx/exceptionhandler.h"
 
-namespace fnord {
+namespace stx {
 namespace thread {
 
 /**
@@ -57,7 +57,7 @@ public:
    */
   FixedSizeThreadPool(
       size_t nthreads,
-      std::unique_ptr<fnord::ExceptionHandler> error_handler,
+      std::unique_ptr<stx::ExceptionHandler> error_handler,
       size_t maxqueuelen = -1,
       bool block = true);
 
@@ -75,7 +75,7 @@ public:
 protected:
 
   size_t nthreads_;
-  std::unique_ptr<fnord::ExceptionHandler> error_handler_;
+  std::unique_ptr<stx::ExceptionHandler> error_handler_;
   Queue<std::function<void()>> queue_;
   bool block_;
   Vector<std::thread> threads_;

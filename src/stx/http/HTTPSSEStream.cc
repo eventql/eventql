@@ -11,7 +11,7 @@
 
 #include "HTTPSSEStream.h"
 
-namespace fnord {
+namespace stx {
 namespace http {
 
 HTTPSSEStream::HTTPSSEStream(

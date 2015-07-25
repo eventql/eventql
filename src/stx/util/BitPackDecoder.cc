@@ -11,7 +11,7 @@
 #include <stx/exception.h>
 #include <3rdparty/simdcomp/simdcomp.h>
 
-namespace fnord {
+namespace stx {
 namespace util {
 
 BitPackDecoder::BitPackDecoder(

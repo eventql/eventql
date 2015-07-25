@@ -10,7 +10,7 @@
 #include "stx/stringutil.h"
 #include "stx/io/outputstream.h"
 
-namespace fnord {
+namespace stx {
 
 template <typename T1, typename T2>
 std::string inspect(const std::pair<T1, T2>& value) {

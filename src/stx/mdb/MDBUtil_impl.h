@@ -10,7 +10,7 @@
 #ifndef _FNORD_MDBUTIL_IMPL_H
 #define _FNORD_MDBUTIL_IMPL_H
 
-namespace fnord {
+namespace stx {
 namespace mdb {
 
 template <typename T>

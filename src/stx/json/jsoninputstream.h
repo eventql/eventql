@@ -17,7 +17,7 @@
 #include "stx/json/json.h"
 #include "stx/json/jsonpointer.h"
 
-namespace fnord {
+namespace stx {
 namespace json {
 
 class JSONInputStream {

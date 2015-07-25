@@ -11,7 +11,7 @@
 #include <stx/io/filerepository.h>
 #include <stx/io/fileutil.h>
 
-namespace fnord {
+namespace stx {
 
 FileRepository::FileRepository(
     const std::string& basedir) :

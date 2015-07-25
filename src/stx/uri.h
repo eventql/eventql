@@ -13,7 +13,7 @@
 #include <vector>
 #include <utility>
 
-namespace fnord {
+namespace stx {
 
 class URI {
 public:
@@ -68,6 +68,6 @@ protected:
   std::string fragment_;
 };
 
-} // namespace fnord
+} // namespace stx
 
 #endif

@@ -10,7 +10,7 @@
 #include <metricdb/statsd.h>
 #include <util/unittest.h>
 
-using namespace fnordmetric::metricdb;
+using namespace stxmetric::metricdb;
 
 UNIT_TEST(StatsdTest);
 

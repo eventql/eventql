@@ -11,9 +11,9 @@
 #include <stx/stringutil.h>
 #include <stx/http/httpgenerator.h>
 
-using fnord::OutputStream;
+using stx::OutputStream;
 
-namespace fnord {
+namespace stx {
 namespace http {
 
 void HTTPGenerator::generate(const HTTPRequest& req, OutputStream* os) {

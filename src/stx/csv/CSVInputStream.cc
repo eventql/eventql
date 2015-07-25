@@ -14,7 +14,7 @@
 #include "stx/exception.h"
 #include "stx/io/inputstream.h"
 
-namespace fnord {
+namespace stx {
 
 std::unique_ptr<CSVInputStream> CSVInputStream::openFile(
     const std::string& file_path,

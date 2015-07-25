@@ -13,18 +13,18 @@
 #include "stx/http/httpservice.h"
 #include "stx/stats/statsrepository.h"
 
-namespace fnord {
+namespace stx {
 namespace stats {
 
-class StatsHTTPServlet : public fnord::http::HTTPService {
+class StatsHTTPServlet : public stx::http::HTTPService {
 public:
 
   StatsHTTPServlet();
   StatsHTTPServlet(StatsRepository* stats_repo);
 
   void handleHTTPRequest(
-      fnord::http::HTTPRequest* req,
-      fnord::http::HTTPResponse* res);
+      stx::http::HTTPRequest* req,
+      stx::http::HTTPResponse* res);
 
 protected:
   StatsRepository* stats_repo_;

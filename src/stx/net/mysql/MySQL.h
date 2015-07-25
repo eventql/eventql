@@ -13,7 +13,7 @@
 #include <mysql.h>
 #endif
 
-namespace fnord {
+namespace stx {
 namespace mysql {
 
 void mysqlInit();

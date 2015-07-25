@@ -13,7 +13,7 @@
 #include "stx/http/httprouter.h"
 #include "stx/http/httpservice.h"
 
-namespace fnord {
+namespace stx {
 namespace http {
 
 void HTTPRouter::addRoute(

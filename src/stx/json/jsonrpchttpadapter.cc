@@ -16,7 +16,7 @@
 #include "stx/json/jsonrpcresponse.h"
 #include "stx/json/jsonrpcrequest.h"
 
-namespace fnord {
+namespace stx {
 namespace json {
 
 std::unique_ptr<http::HTTPService> JSONRPCHTTPAdapter::make(JSONRPC* rpc) {
@@ -54,7 +54,7 @@ void JSONRPCHTTPAdapter::handleHTTPRequest(
     JSONRPCRequest req(parseJSON(request->body()));
     res.setID(req.id());
     json_rpc_->dispatch(&req, &res);
-  } catch (const fnord::Exception& e) {
+  } catch (const stx::Exception& e) {
     res.error(
         JSONRPCResponse::kJSONRPCPInternalError,
         e.getMessage());

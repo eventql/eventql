@@ -9,7 +9,7 @@
  */
 #include <stx/cli/CLI.h>
 
-namespace fnord {
+namespace stx {
 namespace cli {
 
 RefPtr<CLICommand> CLI::defineCommand(const String& command) {

@@ -10,7 +10,7 @@
  */
 #include "HttpServlet.h"
 
-namespace fnord {
+namespace stx {
 namespace http {
 
 void HTTPServlet::handleHTTPRequest(

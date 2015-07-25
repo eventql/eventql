@@ -16,7 +16,7 @@
 #include <stx/http/HTTPResponseStream.h>
 #include "stx/thread/taskscheduler.h"
 
-namespace fnord {
+namespace stx {
 namespace http {
 
 class StreamingHTTPService {

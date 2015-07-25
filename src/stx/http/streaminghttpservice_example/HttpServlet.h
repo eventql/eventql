@@ -12,7 +12,7 @@
 #define _CM_HTTPSERVLET_H
 #include "stx/http/httpservice.h"
 
-namespace fnord {
+namespace stx {
 namespace http {
 
 class HTTPServlet : public http::StreamingHTTPService {

@@ -11,7 +11,7 @@
 #include <stx/inspect.h>
 #include <stx/exception.h>
 
-namespace fnord {
+namespace stx {
 namespace msg {
 
 void MessageBuilder::setUInt32(const String path, uint32_t value) {
@@ -142,5 +142,5 @@ bool MessageBuilder::isSet(const String& path) const {
 }
 
 } // namespace msg
-} // namespace fnord
+} // namespace stx
 

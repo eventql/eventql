@@ -15,7 +15,7 @@
 #include <stdint.h>
 #include <string>
 
-namespace fnord {
+namespace stx {
 
 /**
  * This implements the FNV1a (Fowler–Noll–Vo) hash function

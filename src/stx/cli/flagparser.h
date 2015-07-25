@@ -14,7 +14,7 @@
 #include <stx/exception.h>
 #include <stx/io/outputstream.h>
 
-namespace fnord {
+namespace stx {
 namespace cli {
 
 class FlagParser {
@@ -86,7 +86,7 @@ public:
    */
   const std::vector<std::string>& getArgv() const;
 
-  void printUsage(fnord::OutputStream* target) const;
+  void printUsage(stx::OutputStream* target) const;
 
   void ignoreUnknownFlags();
 

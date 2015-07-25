@@ -12,7 +12,7 @@
 #include "stx/stringutil.h"
 #include "stx/json/jsoninputstream.h"
 
-namespace fnord {
+namespace stx {
 namespace json {
 
 JSONInputStream::JSONInputStream(
@@ -214,5 +214,5 @@ std::string inspect(const json::kTokenType& token) {
   }
 }
 
-} // namespace fnord
+} // namespace stx
 

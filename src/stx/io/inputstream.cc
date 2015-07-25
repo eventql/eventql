@@ -16,7 +16,7 @@
 #include <stx/io/inputstream.h>
 #include <stx/ieee754.h>
 
-namespace fnord {
+namespace stx {
 
 std::unique_ptr<InputStream> InputStream::getStdin() {
   auto stdin_stream = new FileInputStream(0, false);

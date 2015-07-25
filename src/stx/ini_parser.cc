@@ -10,10 +10,10 @@
 
 #include "ini_parser.h"
 
-namespace fnord {
+namespace stx {
 
 void IniParser::start(const String& str) {
-  fnord::iputs("start parsing $0", str);
+  stx::iputs("start parsing $0", str);
 
 }
 

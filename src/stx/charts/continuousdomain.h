@@ -13,7 +13,7 @@
 #include "stx/stringutil.h"
 #include "stx/charts/domain.h"
 
-namespace fnord {
+namespace stx {
 namespace chart {
 
 class AnyContinuousDomain {

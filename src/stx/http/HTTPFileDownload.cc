@@ -9,7 +9,7 @@
  */
 #include "stx/http/HTTPFileDownload.h"
 
-namespace fnord {
+namespace stx {
 namespace http {
 
 HTTPFileDownload::HTTPFileDownload(

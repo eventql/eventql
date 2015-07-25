@@ -10,11 +10,11 @@
 #include "stx/exception.h"
 #include "stx/http/httpconnectionpool.h"
 
-namespace fnord {
+namespace stx {
 namespace http {
 
 HTTPConnectionPool::HTTPConnectionPool(
-    fnord::TaskScheduler* scheduler) :
+    stx::TaskScheduler* scheduler) :
     scheduler_(scheduler) {}
 
 Future<HTTPResponse> HTTPConnectionPool::executeRequest(
@@ -28,7 +28,7 @@ Future<HTTPResponse> HTTPConnectionPool::executeRequest(
 
 Future<HTTPResponse> HTTPConnectionPool::executeRequest(
     const HTTPRequest& req,
-    const fnord::InetAddr& addr) {
+    const stx::InetAddr& addr) {
   return executeRequest(
       req,
       addr,
@@ -54,7 +54,7 @@ Future<HTTPResponse> HTTPConnectionPool::executeRequest(
 
 Future<HTTPResponse> HTTPConnectionPool::executeRequest(
     const HTTPRequest& req,
-    const fnord::InetAddr& addr,
+    const stx::InetAddr& addr,
     Function<HTTPResponseFuture* (Promise<HTTPResponse> promise)> factory) {
   Promise<HTTPResponse> promise;
 
@@ -86,7 +86,7 @@ void HTTPConnectionPool::parkConnection(
 }
 
 void HTTPConnectionPool::leaseConnection(
-    const fnord::InetAddr& addr,
+    const stx::InetAddr& addr,
     Promise<HTTPResponse> promise,
     Function<void (HTTPClientConnection* conn)> callback) {
   std::unique_lock<std::mutex> lk(connection_cache_mutex_);

@@ -12,7 +12,7 @@
 #include <stx/inspect.h>
 #include <stx/stringutil.h>
 
-namespace fnord {
+namespace stx {
 
 SHA1Hash SHA1Hash::fromHexString(const String& str) {
   SHA1Hash hash(DeferInitialization{});

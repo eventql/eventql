@@ -10,7 +10,7 @@
 #include <stx/protobuf/MessageObject.h>
 #include <stx/exception.h>
 
-namespace fnord {
+namespace stx {
 namespace msg {
 
 String fieldTypeToString(FieldType type) {
@@ -352,4 +352,4 @@ const String& MessageObject::getString(uint32_t id) const {
 }
 
 } // namespace msg
-} // namespace fnord
+} // namespace stx

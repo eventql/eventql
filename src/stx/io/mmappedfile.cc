@@ -11,7 +11,7 @@
 #include <unistd.h>
 #include <stx/io/mmappedfile.h>
 
-namespace fnord {
+namespace stx {
 namespace io {
 
 MmappedFile::MmappedFile(File&& file) : MmappedFile(std::move(file), 0, -1) {}

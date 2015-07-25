@@ -15,7 +15,7 @@
 #include <vector>
 #include "stx/thread/taskscheduler.h"
 
-namespace fnord {
+namespace stx {
 namespace thread {
 
 class EventLoop : public TaskScheduler {

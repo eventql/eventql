@@ -17,7 +17,7 @@
 #include <locale>
 #include "stx/stdtypes.h"
 
-namespace fnord {
+namespace stx {
 
 class StringUtil {
 public:
@@ -339,7 +339,7 @@ protected:
 
 };
 
-} // namespace fnord
+} // namespace stx
 
 #include "stringutil_impl.h"
 #endif

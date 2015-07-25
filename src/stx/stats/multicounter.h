@@ -15,7 +15,7 @@
 #include "stx/hash.h"
 #include "stx/stats/stat.h"
 
-namespace fnord {
+namespace stx {
 namespace stats {
 
 template <typename ValueType, typename... LabelTypes>

@@ -15,7 +15,7 @@
 #include <string>
 #include "stx/inspect.h"
 
-namespace fnord {
+namespace stx {
 
 class IniParser {
 public:

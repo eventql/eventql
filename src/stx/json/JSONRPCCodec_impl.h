@@ -7,7 +7,7 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-namespace fnord {
+namespace stx {
 namespace json {
 
 template <typename RPCType>
@@ -23,7 +23,7 @@ void JSONRPCCodec::encodeRPCRequest(RPCType* rpc, Buffer* buffer) {
   json.emplace_back(JSON_STRING, "id");
   json.emplace_back(JSON_STRING, "0"); // FIXPAUL
   json.emplace_back(JSON_STRING, "params");
-  fnord::json::toJSON(rpc->args(), &json);
+  stx::json::toJSON(rpc->args(), &json);
   json.emplace_back(JSON_OBJECT_END);
 
 }

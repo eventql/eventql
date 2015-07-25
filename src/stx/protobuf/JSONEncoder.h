@@ -13,7 +13,7 @@
 #include <stx/protobuf/MessageObject.h>
 #include <stx/json/json.h>
 
-namespace fnord {
+namespace stx {
 namespace msg {
 
 class JSONEncoder {
@@ -34,5 +34,5 @@ protected:
 };
 
 } // namespace msg
-} // namespace fnord
+} // namespace stx
 

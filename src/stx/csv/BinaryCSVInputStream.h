@@ -12,7 +12,7 @@
 #include "stx/io/inputstream.h"
 #include "stx/csv/CSVInputStream.h"
 
-namespace fnord {
+namespace stx {
 
 class BinaryCSVInputStream : public CSVInputStream {
 public:

@@ -12,7 +12,7 @@
 #include <vector>
 #include <string>
 
-namespace fnord {
+namespace stx {
 
 class StackTrace {
  public:
@@ -33,4 +33,4 @@ class StackTrace {
   int frameCount_;
 };
 
-} // namespace fnord
+} // namespace stx

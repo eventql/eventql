@@ -10,7 +10,7 @@
 #pragma once
 #include "stx/stdtypes.h"
 
-namespace fnord {
+namespace stx {
 
 class CivilTime {
 public:

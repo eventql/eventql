@@ -9,7 +9,7 @@
  */
 #include <stx/HMAC.h>
 
-namespace fnord {
+namespace stx {
 
 const size_t HMAC::kBlockSize = 64;
 const char HMAC::kOPad = 0x5c;

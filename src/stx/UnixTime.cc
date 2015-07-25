@@ -15,7 +15,7 @@
 #include "stx/stringutil.h"
 #include "stx/ISO8601.h"
 
-namespace fnord {
+namespace stx {
 
 UnixTime::UnixTime() : utc_micros_(WallClock::unixMicros()) {}
 
@@ -115,12 +115,12 @@ std::string inspect(const UnixTime& value) {
 
 }
 
-fnord::UnixTime
-    std::numeric_limits<fnord::UnixTime>::min() {
-  return fnord::UnixTime::epoch();
+stx::UnixTime
+    std::numeric_limits<stx::UnixTime>::min() {
+  return stx::UnixTime::epoch();
 }
 
-fnord::UnixTime
-    std::numeric_limits<fnord::UnixTime>::max() {
-  return fnord::UnixTime(std::numeric_limits<uint64_t>::max());
+stx::UnixTime
+    std::numeric_limits<stx::UnixTime>::max() {
+  return stx::UnixTime(std::numeric_limits<uint64_t>::max());
 }

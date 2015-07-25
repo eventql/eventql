@@ -14,7 +14,7 @@
 #include <string>
 #include <stx/buffer.h>
 
-namespace fnord {
+namespace stx {
 namespace util {
 
 class Base64 {

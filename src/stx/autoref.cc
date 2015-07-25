@@ -9,7 +9,7 @@
  */
 #include "stx/autoref.h"
 
-namespace fnord {
+namespace stx {
 
 RefCounted::RefCounted() : refcount_(0) {}
 
@@ -30,4 +30,4 @@ bool RefCounted::decRef() {
   return false;
 }
 
-} // namespace fnord
+} // namespace stx

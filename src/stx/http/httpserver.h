@@ -18,10 +18,10 @@
 #include <stx/net/tcpserver.h>
 #include <stx/thread/taskscheduler.h>
 
-namespace fnord {
+namespace stx {
 namespace http {
 
-using fnord::TaskScheduler;
+using stx::TaskScheduler;
 
 class HTTPServer {
 public:

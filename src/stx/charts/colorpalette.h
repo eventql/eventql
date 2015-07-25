@@ -11,7 +11,7 @@
 #define _FNORDMETRIC_UI_COLORPALETTE_H
 #include <stdlib.h>
 
-namespace fnord {
+namespace stx {
 namespace chart {
 
 class ColorPalette {

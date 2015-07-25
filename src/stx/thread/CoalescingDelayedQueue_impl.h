@@ -9,7 +9,7 @@
  */
 #include <stx/wallclock.h>
 
-namespace fnord {
+namespace stx {
 namespace thread {
 
 template <typename T>

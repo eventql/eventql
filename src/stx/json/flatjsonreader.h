@@ -14,7 +14,7 @@
 #include "stx/json/json.h"
 #include "stx/json/jsoninputstream.h"
 
-namespace fnord {
+namespace stx {
 namespace json {
 
 class FlatJSONReader {

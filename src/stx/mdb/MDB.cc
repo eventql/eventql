@@ -9,7 +9,7 @@
  */
 #include "stx/mdb/MDB.h"
 
-namespace fnord {
+namespace stx {
 namespace mdb {
 
 RefPtr<MDB> MDB::open(

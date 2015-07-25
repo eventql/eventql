@@ -13,7 +13,7 @@
 #include <stx/protobuf/MessageSchema.h>
 #include <stx/protobuf/MessageObject.h>
 
-namespace fnord {
+namespace stx {
 namespace msg {
 
 class MessagePrinter {
@@ -33,6 +33,6 @@ protected:
 };
 
 } // namespace msg
-} // namespace fnord
+} // namespace stx
 
 #endif

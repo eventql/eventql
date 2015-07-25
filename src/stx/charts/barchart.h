@@ -22,7 +22,7 @@
 #include "stx/charts/seriesjoin.h"
 #include <stx/exception.h>
 
-namespace fnord {
+namespace stx {
 namespace chart {
 
 /**
