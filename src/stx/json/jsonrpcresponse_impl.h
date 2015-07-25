@@ -9,7 +9,7 @@
  */
 #include "stx/json/json.h"
 
-namespace fnord {
+namespace stx {
 namespace json {
 
 template <typename T>

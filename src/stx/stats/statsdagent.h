@@ -18,7 +18,7 @@
 #include "stx/stats/stat.h"
 #include "stx/stats/statsrepository.h"
 
-namespace fnord {
+namespace stx {
 namespace stats {
 
 class StatsdAgent {

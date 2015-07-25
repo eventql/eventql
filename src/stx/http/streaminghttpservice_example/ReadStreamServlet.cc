@@ -1,5 +1,5 @@
 /**
- * This file is part of the "libfnord" project
+ * This file is part of the "libstx" project
  *   Copyright (c) 2015 Paul Asmuth
  *   Copyright (c) 2015 Laura Schlimmer
  *
@@ -11,7 +11,7 @@
 #include "ReadStreamServlet.h"
 
 
-namespace fnord {
+namespace stx {
 namespace http {
 
 void ReadStreamServlet::handleHTTPRequest(
@@ -24,11 +24,11 @@ void ReadStreamServlet::handleHTTPRequest(
     Buffer chunk;
     chunk.append(data, size);
     body.append(data, size);
-    fnord::iputs("Request Body Chunk read: $0", chunk.toString());
+    stx::iputs("Request Body Chunk read: $0", chunk.toString());
   };
 
   req_stream->readBody(bodyChunkRead);
-  fnord::iputs("Request Body: $0", body.toString());
+  stx::iputs("Request Body: $0", body.toString());
 
 }
 

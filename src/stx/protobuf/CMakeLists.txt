@@ -11,7 +11,7 @@ find_package(Protobuf)
 set(PROTOC_ARGS --proto_path ${CMAKE_CURRENT_SOURCE_DIR}/ PARENT_SCOPE)
 option(ENABLE_TESTS "Build unit tests [default: ON]" ON)
 
-add_library(fnord-protobuf OBJECT
+add_library(stx-protobuf OBJECT
     MessageDecoder.cc
     MessageEncoder.cc
     MessagePrinter.cc
@@ -19,7 +19,7 @@ add_library(fnord-protobuf OBJECT
     MessageSchema.cc
     JSONEncoder.cc)
 
-add_dependencies(fnord-protobuf fnord-base)
+add_dependencies(stx-protobuf stx-base)
 
 set(FNORD_PROTOBUF_LIBS ${PROTOBUF_LIBRARIES} PARENT_SCOPE)
 

@@ -1,5 +1,5 @@
 /**
- * This file is part of the "libfnord" project
+ * This file is part of the "libstx" project
  *   Copyright (c) 2015 Paul Asmuth
  *
  * FnordMetric is free software: you can redistribute it and/or modify it under
@@ -19,7 +19,7 @@
 #include <google/protobuf/compiler/parser.h>
 #include <3rdparty/simdcomp/simdcomp.h>
 
-namespace fnord {
+namespace stx {
 namespace msg {
 
 String MessageSchemaField::typeName() const {
@@ -594,4 +594,4 @@ void MessageSchemaRepository::loadProtobufFile(
 }
 
 } // namespace msg
-} // namespace fnord
+} // namespace stx

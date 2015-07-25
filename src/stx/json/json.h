@@ -18,7 +18,7 @@
 #include "stx/json/jsontypes.h"
 #include "stx/reflect/reflect.h"
 
-namespace fnord {
+namespace stx {
 namespace json {
 class JSONOutputStream;
 class JSONInputStream;
@@ -75,13 +75,13 @@ template <typename T>
 T fromJSON(const std::string& json_str);
 
 template <typename T>
-T fromJSON(const fnord::Buffer& json_buf);
+T fromJSON(const stx::Buffer& json_buf);
 
 template <typename T>
 T fromJSON(const JSONObject& jsonobj);
 
 JSONObject parseJSON(const std::string& json_str);
-JSONObject parseJSON(const fnord::Buffer& json_buf);
+JSONObject parseJSON(const stx::Buffer& json_buf);
 JSONObject parseJSON(JSONInputStream* json);
 
 }

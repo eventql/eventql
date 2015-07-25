@@ -10,7 +10,7 @@
 #include "stx/http/statshttpservlet.h"
 #include "stx/stats/statssink.h"
 
-namespace fnord {
+namespace stx {
 namespace stats {
 
 StatsHTTPServlet::StatsHTTPServlet() : stats_repo_(StatsRepository::get()) {}
@@ -19,8 +19,8 @@ StatsHTTPServlet::StatsHTTPServlet(StatsRepository* stats_repo) :
     stats_repo_(stats_repo) {}
 
 void StatsHTTPServlet::handleHTTPRequest(
-    fnord::http::HTTPRequest* req,
-    fnord::http::HTTPResponse* res) {
+    stx::http::HTTPRequest* req,
+    stx::http::HTTPResponse* res) {
   Buffer buf;
 
   TextStatsSink sink([&buf] (const String& line) {
@@ -32,7 +32,7 @@ void StatsHTTPServlet::handleHTTPRequest(
     exp.stat->exportAll(exp.path, &sink);
   });
 
-  res->setStatus(fnord::http::kStatusOK);
+  res->setStatus(stx::http::kStatusOK);
   res->addBody(buf);
 }
 

@@ -11,7 +11,7 @@
 #define _FNORDMETRIC_UTIL_LOGGER_IMPL_H
 #include "stx/stringutil.h"
 
-namespace fnord {
+namespace stx {
 
 template <typename... T>
 void Logger::log(
@@ -40,6 +40,6 @@ void Logger::logException(
   }
 }
 
-} // namespace fnord
+} // namespace stx
 
 #endif

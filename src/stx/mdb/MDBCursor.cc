@@ -10,7 +10,7 @@
 #include <assert.h>
 #include "stx/mdb/MDBCursor.h"
 
-namespace fnord {
+namespace stx {
 namespace mdb {
 
 MDBCursor::MDBCursor(

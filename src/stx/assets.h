@@ -14,7 +14,7 @@
 #include <vector>
 #include <mutex>
 
-namespace fnord {
+namespace stx {
 
 class Assets {
 public:
@@ -46,6 +46,6 @@ protected:
 
 };
 
-} // namespace fnord
+} // namespace stx
 
 #endif

@@ -17,7 +17,7 @@
 #include "stx/option.h"
 #include "stx/mdb/MDBCursor.h"
 
-namespace fnord {
+namespace stx {
 namespace mdb {
 struct MDBOptions;
 

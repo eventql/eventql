@@ -11,7 +11,7 @@
 #define _FNORD_INETADDR_H
 #include <string>
 
-namespace fnord {
+namespace stx {
 
 class InetAddr {
 public:

@@ -12,7 +12,7 @@
 #include <stdlib.h>
 #include <string>
 
-namespace fnord {
+namespace stx {
 namespace json {
 
 class JSONPointer {
@@ -41,5 +41,5 @@ protected:
 };
 
 } // namespace json
-} // namsepace fnord
+} // namespace stx
 #endif

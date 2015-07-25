@@ -16,7 +16,7 @@
 #include "stx/inspect.h"
 #include "stx/exception.h"
 
-namespace fnord {
+namespace stx {
 
 template <typename T>
 class Option {
@@ -46,7 +46,7 @@ Option<T> Some(const T& value);
 template <typename T>
 Option<T> None();
 
-} // namespace fnord
+} // namespace stx
 
 #include "option_impl.h"
 #endif

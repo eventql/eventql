@@ -13,7 +13,7 @@
 #include <stx/human.h>
 #include <stx/ISO8601.h>
 
-namespace fnord {
+namespace stx {
 
 Option<UnixTime> Human::parseTime(
     const String& str,
@@ -372,5 +372,5 @@ bool Human::isNullOrEmpty(const String& value) {
       value == "NULL";
 }
 
-} // namespace fnord
+} // namespace stx
 

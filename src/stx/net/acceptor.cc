@@ -21,7 +21,7 @@
 #include "eventloop.h"
 #include <stx/exception.h>
 
-namespace fnordmetric {
+namespace stxmetric {
 namespace ev {
 
 Acceptor::Acceptor(EventLoop* ev_loop) : ev_loop_(ev_loop) {}

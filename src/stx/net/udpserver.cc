@@ -16,7 +16,7 @@
 #include <stx/exception.h>
 #include <stx/net/udpserver.h>
 
-namespace fnord {
+namespace stx {
 namespace net {
 
 UDPServer::UDPServer(

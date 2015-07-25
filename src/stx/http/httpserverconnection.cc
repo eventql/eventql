@@ -13,7 +13,7 @@
 #include "stx/http/httpserverconnection.h"
 #include "stx/http/httpgenerator.h"
 
-namespace fnord {
+namespace stx {
 
 template <>
 std::string inspect(const http::HTTPServerConnection& conn) {
@@ -326,5 +326,5 @@ bool HTTPServerConnection::isClosed() const {
 }
 
 } // namespace http
-} // namespace fnord
+} // namespace stx
 

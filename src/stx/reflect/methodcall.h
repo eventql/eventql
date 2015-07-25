@@ -15,7 +15,7 @@
 #include <vector>
 #include "stx/reflect/indexsequence.h"
 
-namespace fnord {
+namespace stx {
 namespace reflect {
 
 template <typename _ClassType, typename _ReturnType, typename... ArgTypes>

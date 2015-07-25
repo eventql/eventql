@@ -9,7 +9,7 @@
  */
 #include "stx/json/jsonrpcresponse.h"
 
-namespace fnord {
+namespace stx {
 namespace json {
 
 JSONRPCResponse::JSONRPCResponse(
@@ -70,5 +70,5 @@ void JSONRPCResponse::setID(const std::string& id) {
 }
 
 } // namespace json
-} // namsepace fnord
+} // namespace stx
 

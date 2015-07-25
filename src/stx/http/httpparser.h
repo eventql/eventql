@@ -15,7 +15,7 @@
 #include "stx/buffer.h"
 #include "stx/http/httpmessage.h"
 
-namespace fnord {
+namespace stx {
 namespace http {
 
 class HTTPParser {

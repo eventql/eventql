@@ -12,7 +12,7 @@
 #include "linechart.h"
 #include <stx/exception.h>
 
-namespace fnord {
+namespace stx {
 namespace chart {
 
 char LineChart::kDefaultLineStyle[] = "solid";

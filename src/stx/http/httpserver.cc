@@ -24,7 +24,7 @@ TODO:
   - https
 */
 
-namespace fnord {
+namespace stx {
 namespace http {
 
 HTTPServer::HTTPServer(

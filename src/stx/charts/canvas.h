@@ -17,7 +17,7 @@
 #include "stx/charts/drawable.h"
 #include "stx/charts/legenddefinition.h"
 
-namespace fnord {
+namespace stx {
 namespace chart {
 class RenderTarget;
 

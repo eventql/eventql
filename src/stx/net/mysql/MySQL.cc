@@ -10,7 +10,7 @@
 #include <stx/net/mysql/MySQL.h>
 #include <mutex>
 
-namespace fnord {
+namespace stx {
 namespace mysql {
 
 void mysqlInit() {

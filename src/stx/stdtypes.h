@@ -23,7 +23,7 @@
 #include <map>
 #include <vector>
 
-namespace fnord {
+namespace stx {
 
 using String = std::string;
 using WString = std::wstring;
@@ -67,5 +67,5 @@ using Stack = std::stack<T>;
 
 using StandardException = std::exception;
 
-} // namespace fnord
+} // namespace stx
 #endif

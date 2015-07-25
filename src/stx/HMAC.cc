@@ -1,5 +1,5 @@
 /**
- * This file is part of the "libfnord" project
+ * This file is part of the "libstx" project
  *   Copyright (c) 2015 Paul Asmuth
  *
  * FnordMetric is free software: you can redistribute it and/or modify it under
@@ -9,7 +9,7 @@
  */
 #include <stx/HMAC.h>
 
-namespace fnord {
+namespace stx {
 
 const size_t HMAC::kBlockSize = 64;
 const char HMAC::kOPad = 0x5c;

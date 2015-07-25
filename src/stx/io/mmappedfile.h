@@ -17,7 +17,7 @@
 #include <stdint.h>
 #include <string>
 
-namespace fnord {
+namespace stx {
 namespace io {
 
 class MmappedFile : public VFSFile {

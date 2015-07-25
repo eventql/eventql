@@ -9,7 +9,7 @@
  */
 #include "stx/stats/statsrepository.h"
 
-namespace fnord {
+namespace stx {
 namespace stats {
 
 StatsRepository* StatsRepository::get() {

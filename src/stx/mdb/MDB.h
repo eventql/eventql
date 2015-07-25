@@ -16,7 +16,7 @@
 #include "stx/autoref.h"
 #include "stx/mdb/MDBTransaction.h"
 
-namespace fnord {
+namespace stx {
 namespace mdb {
 
 struct MDBOptions {

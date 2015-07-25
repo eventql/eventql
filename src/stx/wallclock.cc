@@ -10,7 +10,7 @@
 #include <sys/time.h>
 #include "stx/wallclock.h"
 
-namespace fnord {
+namespace stx {
 
 UnixTime WallClock::now() {
   return UnixTime(WallClock::getUnixMicros());

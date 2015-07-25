@@ -6,7 +6,7 @@
 # copy of the GNU General Public License along with this program. If not, see
 # <http://www.gnu.org/licenses/>.
 
-add_library(fnord-json OBJECT
+add_library(stx-json OBJECT
     flatjsonreader.cc
     json.cc
     jsondocument.cc
@@ -20,9 +20,9 @@ add_library(fnord-json OBJECT
     jsonutil.cc)
 
 add_executable(test-json
-    $<TARGET_OBJECTS:fnord-base>
-    $<TARGET_OBJECTS:fnord-http>
-    $<TARGET_OBJECTS:fnord-json>
+    $<TARGET_OBJECTS:stx-base>
+    $<TARGET_OBJECTS:stx-http>
+    $<TARGET_OBJECTS:stx-json>
     json_test.cc)
 
 target_link_libraries(test-json ${CMAKE_THREAD_LIBS_INIT})

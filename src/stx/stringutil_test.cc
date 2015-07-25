@@ -9,7 +9,7 @@
 #include "stx/stringutil.h"
 #include "stx/test/unittest.h"
 
-using namespace fnord;
+using namespace stx;
 
 UNIT_TEST(StringUtilTest);
 

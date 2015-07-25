@@ -15,7 +15,7 @@
 #include "stx/inspect.h"
 #include "stx/json/json.h"
 
-namespace fnord {
+namespace stx {
 namespace json {
 
 class JSONRPCRequest {
@@ -39,7 +39,7 @@ protected:
 };
 
 } // namespace json
-} // namsepace fnord
+} // namespace stx
 
 #include "jsonrpcrequest_impl.h"
 #endif

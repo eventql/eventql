@@ -14,7 +14,7 @@
 #include <stdint.h>
 #include <string>
 
-namespace fnord {
+namespace stx {
 
 class IEEE754 {
 public:

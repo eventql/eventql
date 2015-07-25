@@ -14,7 +14,7 @@
 #include <unistd.h>
 #include "stx/thread/FixedSizeThreadPool.h"
 
-namespace fnord {
+namespace stx {
 namespace thread {
 
 FixedSizeThreadPool::FixedSizeThreadPool(
@@ -23,8 +23,8 @@ FixedSizeThreadPool::FixedSizeThreadPool(
     bool block /* = true */) :
     FixedSizeThreadPool(
         nthreads,
-        std::unique_ptr<fnord::ExceptionHandler>(
-            new fnord::CatchAndAbortExceptionHandler())) {}
+        std::unique_ptr<stx::ExceptionHandler>(
+            new stx::CatchAndAbortExceptionHandler())) {}
 
 FixedSizeThreadPool::FixedSizeThreadPool(
     size_t nthreads,

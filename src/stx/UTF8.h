@@ -17,7 +17,7 @@
 #include <locale>
 #include "stx/stdtypes.h"
 
-namespace fnord {
+namespace stx {
 
 class UTF8 {
 public:

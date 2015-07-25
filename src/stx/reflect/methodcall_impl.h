@@ -14,7 +14,7 @@
 #include "stx/stringutil.h"
 #include "stx/reflect/metaclass.h"
 
-namespace fnord {
+namespace stx {
 namespace reflect {
 
 template <typename ClassType, typename ReturnType, typename... ArgTypes>
@@ -88,7 +88,7 @@ template <typename ClassType, typename ReturnType, typename... ArgTypes>
 MethodCall<ClassType, ReturnType, ArgTypes...> reflectMethodImpl(
     ReturnType (ClassType::* method)(ArgTypes...)) {
   MethodCallLookup<ClassType, ReturnType, ArgTypes...> lookup(method);
-  fnord::reflect::MetaClass<ClassType>::reflect(&lookup);
+  stx::reflect::MetaClass<ClassType>::reflect(&lookup);
   return lookup.get();
 }
 

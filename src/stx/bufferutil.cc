@@ -10,7 +10,7 @@
 #include "stx/bufferutil.h"
 #include "stx/inspect.h"
 
-namespace fnord {
+namespace stx {
 
 void BufferUtil::stripTrailingBytes(Buffer* buf, unsigned char byte) {
   auto begin = (const unsigned char*) buf->data();
@@ -54,5 +54,5 @@ std::string BufferUtil::hexPrint(
 
   return str;
 }
-} // namespace fnord
+} // namespace stx
 

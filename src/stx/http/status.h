@@ -10,7 +10,7 @@
 #ifndef _FNORDMETRIC_HTTP_STATUSES_H
 #define _FNORDMETRIC_HTTP_STATUSES_H
 
-namespace fnord {
+namespace stx {
 namespace http {
 
 struct HTTPStatus {

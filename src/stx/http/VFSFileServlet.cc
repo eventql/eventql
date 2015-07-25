@@ -10,7 +10,7 @@
 #include "stx/http/VFSFileServlet.h"
 #include "stx/io/fileutil.h"
 
-namespace fnord {
+namespace stx {
 namespace http {
 
 VFSFileServlet::VFSFileServlet(
@@ -20,15 +20,15 @@ VFSFileServlet::VFSFileServlet(
     vfs_(vfs) {}
 
 void VFSFileServlet::handleHTTPRequest(
-    fnord::http::HTTPRequest* req,
-    fnord::http::HTTPResponse* res) {
+    stx::http::HTTPRequest* req,
+    stx::http::HTTPResponse* res) {
   URI uri(req->uri());
-  fnord::URI::ParamList params = uri.queryParams();
+  stx::URI::ParamList params = uri.queryParams();
 
   res->addHeader("Access-Control-Allow-Origin", "*");
 
   std::string file_path;
-  if (!fnord::URI::getParam(params, "file", &file_path)) {
+  if (!stx::URI::getParam(params, "file", &file_path)) {
     res->addBody("error: missing ?file=... parameter");
     res->setStatus(http::kStatusBadRequest);
     return;
@@ -36,7 +36,7 @@ void VFSFileServlet::handleHTTPRequest(
 
   if (uri.path() == base_path_ + "/get") {
     auto file = vfs_->openFile(file_path);
-    res->setStatus(fnord::http::kStatusOK);
+    res->setStatus(stx::http::kStatusOK);
     res->addHeader("Content-Type", contentTypeFromFilename(file_path));
     res->addBody(file->data(), file->size());
     return;
@@ -44,12 +44,12 @@ void VFSFileServlet::handleHTTPRequest(
 
   if (uri.path() == base_path_ + "/size") {
     auto file = vfs_->openFile(file_path);
-    res->setStatus(fnord::http::kStatusOK);
+    res->setStatus(stx::http::kStatusOK);
     res->addBody(StringUtil::toString(file->size()));
     return;
   }
 
-  res->setStatus(fnord::http::kStatusNotFound);
+  res->setStatus(stx::http::kStatusNotFound);
   res->addBody("not found");
 }
 

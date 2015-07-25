@@ -18,7 +18,7 @@
 #include "stx/charts/colorpalette.h"
 #include "stx/charts/rendertarget.h"
 
-namespace fnord {
+namespace stx {
 namespace chart {
 
 class AreaChart : public Drawable {

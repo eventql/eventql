@@ -13,7 +13,7 @@
 #include "stx/thread/taskscheduler.h"
 #include "stx/net/tcpconnection.h"
 
-namespace fnord {
+namespace stx {
 namespace net {
 
 class TCPServer {

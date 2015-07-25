@@ -14,7 +14,7 @@
 #include "stx/UnixTime.h"
 #include <stx/uri.h>
 
-namespace fnord {
+namespace stx {
 namespace http {
 
 class Cookies {

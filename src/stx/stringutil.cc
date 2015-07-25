@@ -12,7 +12,7 @@
 #include <stx/stringutil.h>
 #include <stx/UTF8.h>
 
-namespace fnord {
+namespace stx {
 
 void StringUtil::toStringVImpl(std::vector<std::string>* target) {}
 
@@ -367,4 +367,4 @@ String StringUtil::stripShell(const std::string& str) {
   return out;
 }
 
-} // namespace fnord
+} // namespace stx

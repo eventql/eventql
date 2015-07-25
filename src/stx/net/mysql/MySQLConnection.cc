@@ -10,11 +10,11 @@
 #include <stx/logging.h>
 #include <stx/net/mysql/MySQLConnection.h>
 
-namespace fnord {
+namespace stx {
 namespace mysql {
 
 std::unique_ptr<MySQLConnection> MySQLConnection::openConnection(
-    const fnord::URI& uri) {
+    const stx::URI& uri) {
   std::unique_ptr<MySQLConnection> conn(new MySQLConnection());
   conn->connect(uri);
   return conn;
@@ -41,7 +41,7 @@ MySQLConnection::MySQLConnection() : mysql_(nullptr) {
 
   mysql_options(mysql_, MYSQL_SET_CHARSET_NAME, "utf8");
 #else
-  RAISE(kRuntimeError, "libfnord was compiled without libmysqlclient");
+  RAISE(kRuntimeError, "libstx was compiled without libmysqlclient");
 #endif
 }
 
@@ -49,11 +49,11 @@ MySQLConnection::~MySQLConnection() {
 #ifdef FNORD_ENABLE_MYSQL
   mysql_close(mysql_);
 #else
-  RAISE(kRuntimeError, "libfnord was compiled without libmysqlclient");
+  RAISE(kRuntimeError, "libstx was compiled without libmysqlclient");
 #endif
 }
 
-void MySQLConnection::connect(const fnord::URI& uri) {
+void MySQLConnection::connect(const stx::URI& uri) {
   unsigned int port = 3306;
   std::string host = uri.host();
   std::string username;
@@ -126,7 +126,7 @@ void MySQLConnection::connect(
       mysql_error(mysql_));
   }
 #else
-  RAISE(kRuntimeError, "libfnord was compiled without libmysqlclient");
+  RAISE(kRuntimeError, "libstx was compiled without libmysqlclient");
 #endif
 }
 
@@ -151,7 +151,7 @@ std::vector<std::string> MySQLConnection::describeTable(
 
   mysql_free_result(res);
 #else
-  RAISE(kRuntimeError, "libfnord was compiled without libmysqlclient");
+  RAISE(kRuntimeError, "libstx was compiled without libmysqlclient");
 #endif
   return columns;
 }
@@ -239,7 +239,7 @@ RefPtr<msg::MessageSchema> MySQLConnection::getTableSchema(
   mysql_free_result(res);
   return new msg::MessageSchema(table_name, schema_fields);
 #else
-  RAISE(kRuntimeError, "libfnord was compiled without libmysqlclient");
+  RAISE(kRuntimeError, "libstx was compiled without libmysqlclient");
 #endif
 }
 
@@ -249,7 +249,7 @@ void MySQLConnection::executeQuery(
 #ifdef FNORD_ENABLE_MYSQL
 
 #ifndef FNORD_NOTRACE
-    fnord::logTrace("fnord.mysql", "Executing MySQL query: $0", query);
+    stx::logTrace("fnord.mysql", "Executing MySQL query: $0", query);
 #endif
 
   MYSQL_RES* result = nullptr;
@@ -286,7 +286,7 @@ void MySQLConnection::executeQuery(
     } catch (const std::exception& e) {
       mysql_free_result(result);
       try {
-        auto rte = dynamic_cast<const fnord::Exception&>(e);
+        auto rte = dynamic_cast<const stx::Exception&>(e);
         throw rte;
       } catch (std::bad_cast bce) {
         throw e;
@@ -296,7 +296,7 @@ void MySQLConnection::executeQuery(
 
   mysql_free_result(result);
 #else
-  RAISE(kRuntimeError, "libfnord was compiled without libmysqlclient");
+  RAISE(kRuntimeError, "libstx was compiled without libmysqlclient");
 #endif
 }
 
@@ -306,7 +306,7 @@ std::list<std::vector<std::string>> MySQLConnection::executeQuery(
 #ifdef FNORD_ENABLE_MYSQL
 
 #ifndef FNORD_NOTRACE
-    fnord::logTrace("fnord.mysql", "Executing MySQL query: $0", query);
+    stx::logTrace("fnord.mysql", "Executing MySQL query: $0", query);
 #endif
 
   MYSQL_RES* result = nullptr;
@@ -341,7 +341,7 @@ std::list<std::vector<std::string>> MySQLConnection::executeQuery(
 
   mysql_free_result(result);
 #else
-  RAISE(kRuntimeError, "libfnord was compiled without libmysqlclient");
+  RAISE(kRuntimeError, "libstx was compiled without libmysqlclient");
 #endif
 
   return result_rows;

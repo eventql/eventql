@@ -18,7 +18,7 @@
 #include "stx/thread/wakeup.h"
 #include "stx/exceptionhandler.h"
 
-namespace fnord {
+namespace stx {
 namespace thread {
 
 /**
@@ -29,7 +29,7 @@ public:
   ThreadPool();
 
   ThreadPool(
-      std::unique_ptr<fnord::ExceptionHandler> error_handler);
+      std::unique_ptr<stx::ExceptionHandler> error_handler);
 
   void run(std::function<void()> task) override;
   void runOnReadable(std::function<void()> task, int fd) override;
@@ -42,7 +42,7 @@ public:
 protected:
   void startThread();
 
-  std::unique_ptr<fnord::ExceptionHandler> error_handler_;
+  std::unique_ptr<stx::ExceptionHandler> error_handler_;
   std::mutex runq_mutex_;
   std::list<std::function<void()>> runq_;
   std::condition_variable wakeup_;

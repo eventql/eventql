@@ -20,18 +20,18 @@
 #include "stx/http/httpstats.h"
 #include "stx/stats/statsrepository.h"
 
-namespace fnord {
+namespace stx {
 namespace http {
 
 class HTTPConnectionPool {
 public:
-  HTTPConnectionPool(fnord::TaskScheduler* scheduler);
+  HTTPConnectionPool(stx::TaskScheduler* scheduler);
 
   Future<HTTPResponse> executeRequest(const HTTPRequest& req);
 
   Future<HTTPResponse> executeRequest(
       const HTTPRequest& req,
-      const fnord::InetAddr& addr);
+      const stx::InetAddr& addr);
 
   Future<HTTPResponse> executeRequest(
       const HTTPRequest& req,
@@ -39,7 +39,7 @@ public:
 
   Future<HTTPResponse> executeRequest(
       const HTTPRequest& req,
-      const fnord::InetAddr& addr,
+      const stx::InetAddr& addr,
       Function<HTTPResponseFuture* (Promise<HTTPResponse> promise)> factory);
 
   HTTPClientStats* stats();
@@ -49,18 +49,18 @@ protected:
   void parkConnection(HTTPClientConnection* conn, InetAddr addr);
 
   void leaseConnection(
-      const fnord::InetAddr& addr,
+      const stx::InetAddr& addr,
       Promise<HTTPResponse> promise,
       Function<void (HTTPClientConnection* conn)> callback);
 
-  fnord::TaskScheduler* scheduler_;
+  stx::TaskScheduler* scheduler_;
 
   std::multimap<
       std::string,
       HTTPClientConnection*> connection_cache_;
   std::mutex connection_cache_mutex_;
 
-  fnord::net::DNSCache dns_cache_;
+  stx::net::DNSCache dns_cache_;
   HTTPClientStats stats_;
 };
 

@@ -13,7 +13,7 @@
 #include "stx/stringutil.h"
 #include "stx/json/jsonpointer.h"
 
-namespace fnord {
+namespace stx {
 namespace json {
 
 JSONPointer::JSONPointer() : path_("") {}
@@ -53,5 +53,5 @@ std::string inspect(const json::JSONPointer& ptr) {
   return ptr.toString();
 }
 
-} // namsepace fnord
+} // namespace stx
 

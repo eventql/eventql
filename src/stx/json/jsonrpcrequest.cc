@@ -11,7 +11,7 @@
 #include "stx/json/jsonrpcrequest.h"
 #include "stx/json/jsonutil.h"
 
-namespace fnord {
+namespace stx {
 namespace json {
 
 JSONRPCRequest::JSONRPCRequest(
@@ -62,5 +62,5 @@ const std::string& JSONRPCRequest::method() const {
 }
 
 } // namespace json
-} // namsepace fnord
+} // namespace stx
 

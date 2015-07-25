@@ -13,7 +13,7 @@
 #include "stx/logging/loglevel.h"
 #include "stx/logging/logger.h"
 
-namespace fnord {
+namespace stx {
 
 /**
  * EMERGENCY: Something very bad happened

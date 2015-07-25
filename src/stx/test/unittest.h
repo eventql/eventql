@@ -26,17 +26,17 @@
 const char kExpectationFailed[] = "ExpectationFailed";
 
 #define UNIT_TEST(T) \
-    static fnord::test::UnitTest T(#T); \
+    static stx::test::UnitTest T(#T); \
     int main() { \
       auto& t = T; \
       return t.run(); \
     }
 
 #define TEST_CASE(T, N, L) \
-    static fnord::test::UnitTest::TestCase __##T##__case__##N(&T, #N, (L));
+    static stx::test::UnitTest::TestCase __##T##__case__##N(&T, #N, (L));
 
 #define TEST_INITIALIZER(T, N, L) \
-    static fnord::test::UnitTest::TestInitializer __##T##__case__##N( \
+    static stx::test::UnitTest::TestInitializer __##T##__case__##N( \
         &T, (L));
 
 #define EXPECT(X) \
@@ -69,8 +69,8 @@ void EXPECT_EQ(T1 left, T2 right) {
     RAISE(
         kExpectationFailed,
         "expectation failed: %s == %s",
-        fnord::inspect<T1>(left).c_str(),
-        fnord::inspect<T2>(right).c_str());
+        stx::inspect<T1>(left).c_str(),
+        stx::inspect<T2>(right).c_str());
   }
 }
 
@@ -79,7 +79,7 @@ void EXPECT_EQ(T1 left, T2 right) {
       bool raised = false; \
       try { \
         L(); \
-      } catch (fnord::Exception e) { \
+      } catch (stx::Exception e) { \
         raised = true; \
         auto msg = e.getMessage().c_str(); \
         if (strcmp(msg, E) != 0) { \
@@ -97,8 +97,8 @@ void EXPECT_EQ(T1 left, T2 right) {
 
 #define EXPECT_FILES_EQ(F1, F2) \
   { \
-    auto one = fnord::FileInputStream::openFile(F1); \
-    auto two = fnord::FileInputStream::openFile(F2); \
+    auto one = stx::FileInputStream::openFile(F1); \
+    auto two = stx::FileInputStream::openFile(F2); \
     std::string one_str; \
     std::string two_str; \
     one->readUntilEOF(&one_str); \
@@ -114,14 +114,14 @@ void EXPECT_EQ(T1 left, T2 right) {
   }
 
 
-namespace fnord {
+namespace stx {
 namespace test {
 
 class UnitTest {
 public:
 
   static std::string tempFilePath() {
-    return "/tmp/_libfnord_test_tmp/";
+    return "/tmp/_libstx_test_tmp/";
   }
 
   static std::string testDataPath() {
@@ -166,7 +166,7 @@ public:
   }
 
   int run() {
-    fnord::FileUtil::mkdir_p(UnitTest::tempFilePath());
+    stx::FileUtil::mkdir_p(UnitTest::tempFilePath());
 
     for (auto initializer : initializers_) {
       initializer->lambda_();
@@ -176,7 +176,7 @@ public:
 
     const TestCase* current_test_case = nullptr;
     int num_tests_passed = 0;
-    std::unordered_map<const TestCase*, fnord::Exception> errors;
+    std::unordered_map<const TestCase*, stx::Exception> errors;
 
     for (auto test_case : cases_) {
       fprintf(stderr, "    %s::%s", name_, test_case->name_);
@@ -185,7 +185,7 @@ public:
 
       try {
         test_case->lambda_();
-      } catch (fnord::Exception e) {
+      } catch (stx::Exception e) {
         fprintf(stderr, " \033[1;31m[FAIL]\e[0m\n");
         errors.emplace(test_case, e);
         continue;

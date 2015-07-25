@@ -13,7 +13,7 @@
 #include <stx/http/httpclientconnection.h>
 #include <stx/http/httpresponsehandler.h>
 
-namespace fnord {
+namespace stx {
 namespace http {
 
 HTTPClientConnection::HTTPClientConnection(

@@ -12,7 +12,7 @@
 #include "stx/thread/wakeup.h"
 #include <memory>
 
-namespace fnord {
+namespace stx {
 namespace http {
 
 class HTTPResponseHandler {

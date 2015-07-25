@@ -11,7 +11,7 @@
 #define _FNORDMETRIC_HTTPHANDLER_H
 #include <memory>
 
-namespace fnord {
+namespace stx {
 namespace http {
 class HTTPServerConnection;
 class HTTPRequest;

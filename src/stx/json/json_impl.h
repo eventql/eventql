@@ -18,7 +18,7 @@
 #include "stx/reflect/indexsequence.h"
 #include "stx/reflect/reflect.h"
 
-namespace fnord {
+namespace stx {
 namespace json {
 
 template <typename T>
@@ -80,7 +80,7 @@ T fromJSON(const std::string& json_str) {
 }
 
 template <typename T>
-T fromJSON(const fnord::Buffer& json_buf) {
+T fromJSON(const stx::Buffer& json_buf) {
   return fromJSON<T>(parseJSON(json_buf));
 }
 
@@ -93,7 +93,7 @@ template <
     typename T,
     typename O,
     typename = typename std::enable_if<
-        fnord::reflect::is_reflected<T>::value>::type>
+        stx::reflect::is_reflected<T>::value>::type>
 void toJSON(const T& value, O* target) {
   JSONOutputProxy<O> proxy(value, target);
 }
@@ -102,7 +102,7 @@ template <
     typename T,
     typename O,
     typename = typename std::enable_if<
-        !fnord::reflect::is_reflected<T>::value>::type,
+        !stx::reflect::is_reflected<T>::value>::type,
     typename = void>
 void toJSON(const T& value, O* target) {
   toJSONImpl(value, target);
@@ -132,7 +132,7 @@ JSONInputProxy<T>::JSONInputProxy(
     JSONObject::const_iterator end) :
     obj_begin(begin),
     obj_end(end),
-    value(fnord::reflect::MetaClass<T>::unserialize(this)) {}
+    value(stx::reflect::MetaClass<T>::unserialize(this)) {}
 
 template <typename T>
 template <typename PropertyType>
@@ -169,7 +169,7 @@ JSONOutputProxy<OutputType>::JSONOutputProxy(
     OutputType* target) :
     target_(target) {
   target_->emplace_back(json::JSON_OBJECT_BEGIN);
-  fnord::reflect::MetaClass<T>::serialize(instance, this);
+  stx::reflect::MetaClass<T>::serialize(instance, this);
   target_->emplace_back(json::JSON_OBJECT_END);
 }
 
@@ -220,7 +220,7 @@ template <typename... T, int... I, typename O>
 void toJSONTupleImpl(
     const std::tuple<T...>& value,
     O* target,
-    fnord::reflect::IndexSequence<I...>) {
+    stx::reflect::IndexSequence<I...>) {
   toJSONVariadicImpl(target, std::get<I>(value)...);
 }
 
@@ -230,7 +230,7 @@ void toJSONImpl(const std::tuple<T...>& value, O* target) {
   toJSONTupleImpl(
       value,
       target,
-      typename fnord::reflect::MkIndexSequenceFor<T...>::type());
+      typename stx::reflect::MkIndexSequenceFor<T...>::type());
   target->emplace_back(json::JSON_ARRAY_END);
 }
 
@@ -270,7 +270,7 @@ void toJSONImpl(double const& val, O* target) {
 }
 
 template <typename O>
-void toJSONImpl(const fnord::UnixTime& val, O* target) {
+void toJSONImpl(const stx::UnixTime& val, O* target) {
   toJSONImpl(static_cast<uint64_t>(val), target);
 }
 

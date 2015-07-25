@@ -15,7 +15,7 @@
 #include "stx/io/outputstream.h"
 #include "stx/json/jsonoutputstream.h"
 
-namespace fnord {
+namespace stx {
 namespace json {
 
 class JSONRPCResponse {
@@ -43,7 +43,7 @@ protected:
 };
 
 } // namespace json
-} // namsepace fnord
+} // namespace stx
 
 #include "jsonrpcresponse_impl.h"
 #endif

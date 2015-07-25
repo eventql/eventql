@@ -1,5 +1,5 @@
 /**
- * This file is part of the "libfnord" project
+ * This file is part of the "libstx" project
  *   Copyright (c) 2015 Paul Asmuth
  *
  * FnordMetric is free software: you can redistribute it and/or modify it under
@@ -9,7 +9,7 @@
  */
 #include <stx/protobuf/MessageEncoder.h>
 
-namespace fnord {
+namespace stx {
 namespace msg {
 
 void MessageEncoder::encode(
@@ -86,5 +86,5 @@ void MessageEncoder::encodeObject(
 
 
 } // namespace msg
-} // namespace fnord
+} // namespace stx
 

@@ -11,7 +11,7 @@
 #include "stx/stdtypes.h"
 #include "stx/io/inputstream.h"
 
-namespace fnord {
+namespace stx {
 
 class CSVInputStream {
 public:

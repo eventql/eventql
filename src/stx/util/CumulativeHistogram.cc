@@ -10,7 +10,7 @@
 #include "stx/util/CumulativeHistogram.h"
 #include "stx/stringutil.h"
 
-namespace fnord {
+namespace stx {
 namespace util {
 
 CumulativeHistogram CumulativeHistogram::withLinearBins(double bin_size) {

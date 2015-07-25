@@ -15,7 +15,7 @@
 #include "stx/stringutil.h"
 #include "stx/net/inetaddr.h"
 
-namespace fnord {
+namespace stx {
 
 InetAddr InetAddr::resolve(const std::string& addr_str) {
   auto parts = StringUtil::split(addr_str, ":");

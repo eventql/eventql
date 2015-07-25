@@ -21,7 +21,7 @@
 #include "stx/thread/future.h"
 #include "stx/thread/wakeup.h"
 
-namespace fnord {
+namespace stx {
 class RPCChannel;
 
 class AnyRPC : public RefCounted {
@@ -107,7 +107,7 @@ AutoRef<RPC<ReturnType, std::tuple<ArgTypes...>>> mkRPC(
   ReturnType (ClassType::* method)(ArgTypes...),
   ArgTypes... args);
 
-} // namsepace fnord
+} // namespace stx
 
 #include "RPC_impl.h"
 #endif

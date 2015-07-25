@@ -10,7 +10,7 @@
 #include "stx/ISO8601.h"
 #include "stx/time_constants.h"
 
-using namespace fnord;
+using namespace stx;
 
 namespace {
 
@@ -262,7 +262,7 @@ static bool parseYear(const char* begin, const char* end, CivilTime* date) {
 
 }
 
-namespace fnord {
+namespace stx {
 
 Option<CivilTime> ISO8601::parse(const String& str) {
   CivilTime date(nullptr);

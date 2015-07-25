@@ -9,7 +9,7 @@
  */
 #include "stx/reflect/reflect.h"
 
-namespace fnord {
+namespace stx {
 
 template <typename ResultType, typename ArgPackType>
 RPC<ResultType, ArgPackType>::RPC(
@@ -100,9 +100,9 @@ AutoRef<RPC<ReturnType, std::tuple<ArgTypes...>>> mkRPC(
   ReturnType (ClassType::* method)(ArgTypes...),
   ArgTypes... args) {
   return mkRPC<Codec>(
-      fnord::reflect::reflectMethod(method),
+      stx::reflect::reflectMethod(method),
       std::tuple<typename std::decay<ArgTypes>::type...>(args...));
 }
 
-} // namsepace fnord
+} // namespace stx
 

@@ -15,7 +15,7 @@
 #include <random>
 #include "SHA1.h"
 
-namespace fnord {
+namespace stx {
 
 class Random {
 public:

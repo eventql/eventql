@@ -10,7 +10,7 @@
 #ifndef _FNORDMETRIC_UI_VIEWPORT_H
 #define _FNORDMETRIC_UI_VIEWPORT_H
 
-namespace fnord {
+namespace stx {
 namespace chart {
 
 class Viewport {

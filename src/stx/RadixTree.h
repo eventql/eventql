@@ -11,7 +11,7 @@
 #define _FNORD_RADIXTREE_H
 #include "3rdparty/libart/art.h"
 
-namespace fnord {
+namespace stx {
 
 template <typename T>
 class RadixTree {

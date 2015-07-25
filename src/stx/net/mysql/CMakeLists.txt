@@ -13,9 +13,9 @@ if(MYSQL_FOUND)
   add_definitions(-DFNORD_ENABLE_MYSQL)
   set(FNORD_MYSQL_LIBS ${MYSQL_CLIENT_LIBS} PARENT_SCOPE)
 else()
-  message("WARNING: libmysqlclient not found, libfnord will be compiled without MySQL support")
+  message("WARNING: libmysqlclient not found, libstx will be compiled without MySQL support")
 endif()
 
-add_library(fnord-mysql OBJECT
+add_library(stx-mysql OBJECT
     MySQLConnection.cc
     MySQL.cc)

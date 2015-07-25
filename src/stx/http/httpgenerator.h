@@ -16,9 +16,9 @@
 #include <stx/http/httpresponse.h>
 #include <stx/http/httprequest.h>
 
-using fnord::OutputStream;
+using stx::OutputStream;
 
-namespace fnord {
+namespace stx {
 namespace http {
 
 class HTTPGenerator {

@@ -12,9 +12,9 @@
 #include "stx/stringutil.h"
 #include "stx/wallclock.h"
 
-using fnord::OutputStream;
+using stx::OutputStream;
 
-namespace fnord {
+namespace stx {
 
 LogOutputStream::LogOutputStream(
     std::unique_ptr<OutputStream> target) :

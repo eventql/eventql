@@ -14,7 +14,7 @@
 #include <unordered_map>
 #include "stx/net/inetaddr.h"
 
-namespace fnord {
+namespace stx {
 namespace net {
 
 class DNSCache {

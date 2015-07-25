@@ -1,5 +1,5 @@
 /**
- * This file is part of the "libfnord" project
+ * This file is part of the "libstx" project
  *   Copyright (c) 2015 Paul Asmuth
  *
  * FnordMetric is free software: you can redistribute it and/or modify it under
@@ -10,7 +10,7 @@
 #include <stx/protobuf/MessagePrinter.h>
 #include <stx/stringutil.h>
 
-namespace fnord {
+namespace stx {
 namespace msg {
 
 String MessagePrinter::print(
@@ -85,5 +85,5 @@ String MessagePrinter::printObject(
 }
 
 } // namespace msg
-} // namespace fnord
+} // namespace stx
 

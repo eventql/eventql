@@ -11,7 +11,7 @@
 #define _FNORD_UTIL_CUMULATIVEHISTOGRAM_H
 #include "stx/stdtypes.h"
 
-namespace fnord {
+namespace stx {
 namespace util {
 
 class CumulativeHistogram {

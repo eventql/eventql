@@ -15,7 +15,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-namespace fnord {
+namespace stx {
 
 File File::openFile(
     const std::string& filename,

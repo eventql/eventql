@@ -1,5 +1,5 @@
 /**
- * This file is part of the "libfnord" project
+ * This file is part of the "libstx" project
  *   Copyright (c) 2015 Paul Asmuth
  *   Copyright (c) 2015 Laura Schlimmer
  *
@@ -13,7 +13,7 @@
 #include <unistd.h>
 #include "stx/http/httpservice.h"
 
-namespace fnord {
+namespace stx {
 namespace http {
 
 class WriteStreamServlet : public http::StreamingHTTPService {

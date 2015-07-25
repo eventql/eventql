@@ -16,7 +16,7 @@
 #include <stx/io/inputstream.h>
 #include <stx/io/outputstream.h>
 
-namespace fnord {
+namespace stx {
 namespace http {
 
 class HTTPMessage {
