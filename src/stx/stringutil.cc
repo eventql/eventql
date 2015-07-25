@@ -27,6 +27,11 @@ std::string StringUtil::toString(const char* value) {
 }
 
 template <>
+std::string StringUtil::toString(char* value) {
+  return value;
+}
+
+template <>
 std::string StringUtil::toString(int value) {
   return std::to_string(value);
 }
