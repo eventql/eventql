@@ -107,6 +107,7 @@ PageType pageTypeFromString(const String& page_type);
 String pageTypeToString(PageType device_type);
 
 CurrencyConverter::ConversionTable currencyConversionTable();
+CurrencyConverter* cconv();
 
 bool isIndexAttributeWhitelisted(const String& attr);
 
