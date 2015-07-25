@@ -15,7 +15,7 @@ namespace cm {
 
 void NormalizeQueryStrings::process(
       NormalizeFn normalize_fn,
-      RefPtr<TrackedSessionContext> ctx) {
+      RefPtr<SessionContext> ctx) {
   for (auto& q : *ctx->session.mutable_search_queries()) {
     if (!q.has_query_string()) {
       continue;

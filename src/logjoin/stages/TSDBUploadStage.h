@@ -9,7 +9,7 @@
 #pragma once
 #include "stx/stdtypes.h"
 #include "stx/http/httpconnectionpool.h"
-#include "logjoin/TrackedSessionContext.h"
+#include "logjoin/SessionContext.h"
 
 using namespace stx;
 
@@ -19,7 +19,7 @@ class TSDBUploadStage {
 public:
 
   static void process(
-      RefPtr<TrackedSessionContext> session,
+      RefPtr<SessionContext> session,
       const String& tsdb_addr,
       http::HTTPConnectionPool* http);
 

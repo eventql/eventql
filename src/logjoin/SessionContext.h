@@ -15,8 +15,8 @@ using namespace stx;
 
 namespace cm {
 
-struct TrackedSessionContext : public RefCounted {
-  TrackedSessionContext(TrackedSession session);
+struct SessionContext : public RefCounted {
+  SessionContext(TrackedSession session);
 
   std::string uuid;
 

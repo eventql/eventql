@@ -13,7 +13,7 @@ using namespace stx;
 
 namespace cm {
 
-void BuildSessionAttributes::process(RefPtr<TrackedSessionContext> ctx) {
+void BuildSessionAttributes::process(RefPtr<SessionContext> ctx) {
   auto first_seen = firstSeenTime(ctx->session);
   auto last_seen = lastSeenTime(ctx->session);
   if (first_seen.isEmpty() || last_seen.isEmpty()) {

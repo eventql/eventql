@@ -13,7 +13,7 @@ using namespace stx;
 
 namespace cm {
 
-void DebugPrintStage::process(RefPtr<TrackedSessionContext> ctx) {
+void DebugPrintStage::process(RefPtr<SessionContext> ctx) {
   stx::iputs("\n\n==== SESSION  $0/$1 ====", ctx->customer_key, ctx->uuid);
 
   for (const auto& ev : ctx->events) {

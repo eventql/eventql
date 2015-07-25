@@ -18,7 +18,7 @@ using namespace stx;
 namespace cm {
 
 void TSDBUploadStage::process(
-    RefPtr<TrackedSessionContext> ctx,
+    RefPtr<SessionContext> ctx,
     const String& tsdb_addr,
     http::HTTPConnectionPool* http) {
   tsdb::RecordEnvelopeList records;

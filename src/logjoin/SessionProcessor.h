@@ -21,7 +21,7 @@ namespace cm {
 
 class SessionProcessor {
 public:
-  typedef Function<void (RefPtr<TrackedSessionContext> ctx)> PipelineStageFn;
+  typedef Function<void (RefPtr<SessionContext> ctx)> PipelineStageFn;
 
   SessionProcessor(
       RefPtr<SessionPipeline> pipeline,
