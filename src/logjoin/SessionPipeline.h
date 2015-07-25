@@ -6,6 +6,7 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
+#pragma once
 #include "stx/stdtypes.h"
 #include "logjoin/TrackedSession.h"
 
