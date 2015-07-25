@@ -58,48 +58,14 @@ struct TrackedEvent {
 struct TrackedSession {
   std::string customer_key;
   std::string uid;
-
   Vector<TrackedEvent> events;
-
   std::vector<std::string> attrs;
-
-  uint32_t num_cart_items;
-  uint32_t num_order_items;
-  uint32_t gmv_eurcents;
-  uint32_t cart_value_eurcents;
-
-  Set<String> experiments;
-  Option<String> referrer_url;
-  Option<String> referrer_campaign;
-  Option<String> referrer_name;
-  Option<String> customer_session_id;
-
-
-  TrackedSession();
 
   void insertLogline(
       const UnixTime& time,
       const String& evtype,
       const String& evid,
       const URI::ParamList& logline);
-
-  //void insertQuery(const TrackedQuery& query);
-  //void insertItemVisit(const TrackedItemVisit& visit);
-  //void insertCartVisit(const Vector<TrackedCartItem>& new_cart_items);
-
-  void updateSessionAttributes(
-      const UnixTime& time,
-      const String& evid,
-      const URI::ParamList& logline);
-
-  String joinedExperiments() const;
-
-  /**
-   * Trigger an update to incorporate new information. This will e.g. mark
-   * query items as clicked if a corresponding click was observed.
-   */
-  void joinEvents(const CurrencyConverter& cconv);
-
 
   void debugPrint() const;
 
