@@ -205,21 +205,41 @@ void SessionJoin::process(RefPtr<TrackedSessionContext> ctx) {
     }
   }
 
-  //if (!session.referrer_url.isEmpty()) {
-  //  //obj.addChild(session_schema->fieldId("referrer_url"), session.referrer_url.get());
-  //}
+  for (const auto& ev : ctx->tracked_session.events) {
+    if (ev.evtype != "__sattr") {
+      continue;
+    }
 
-  //if (!session.referrer_campaign.isEmpty()) {
-  //  obj.addChild(session_schema->fieldId("referrer_campaign"), session.referrer_campaign.get());
-  //}
+    URI::ParamList logline;
+    URI::parseQueryString(ev.data, &logline);
 
-  //if (!session.referrer_name.isEmpty()) {
-  //  obj.addChild(session_schema->fieldId("referrer_name"), session.referrer_name.get());
-  //}
+    //for (const auto& p : logline) {
+    //  if (p.first == "x") {
+    //    experiments.emplace(p.second);
+    //    continue;
+    //  }
+    //}
 
-  //if (!session.customer_session_id.isEmpty()) {
-  //  obj.addChild(session_schema->fieldId("customer_session_id"), session.customer_session_id.get());
-  //}
+    std::string r_url;
+    if (stx::URI::getParam(logline, "r_url", &r_url)) {
+      ctx->joined_session.set_referrer_url(r_url);
+    }
+
+    std::string r_cpn;
+    if (stx::URI::getParam(logline, "r_cpn", &r_cpn)) {
+      ctx->joined_session.set_referrer_campaign(r_cpn);
+    }
+
+    std::string r_nm;
+    if (stx::URI::getParam(logline, "r_nm", &r_nm)) {
+      ctx->joined_session.set_referrer_name(r_nm);
+    }
+
+    std::string cs;
+    if (stx::URI::getParam(logline, "cs", &cs)) {
+      ctx->joined_session.set_customer_session_id(cs);
+    }
+  }
 
   ctx->joined_session.set_num_cart_items(num_cart_items);
   ctx->joined_session.set_cart_value_eurcents(cart_value_eurcents);

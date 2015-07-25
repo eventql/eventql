@@ -67,7 +67,11 @@ void TrackedSession::insertLogline(
       return;
 
     case 'u':
-      updateSessionAttributes(time, evid, logline);
+      events.emplace_back(
+          time,
+          evid,
+          "__sattr",
+          URI::buildQueryString(logline));
       return;
 
     default:
