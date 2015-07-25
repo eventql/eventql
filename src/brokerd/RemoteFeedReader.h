@@ -15,7 +15,7 @@
 #include "stx/rpc/RPCClient.h"
 #include "brokerd/FeedEntry.h"
 
-namespace fnord {
+namespace stx {
 namespace feeds {
 
 class RemoteFeedReader {
@@ -81,10 +81,10 @@ protected:
   Function<UnixTime (const FeedEntry& entry)> time_backfill_fn_;
   Duration max_spread_;
 
-  //fnord::stats::Counter<uint64_t> stat_entries_written_total_;
-  //fnord::stats::Counter<uint64_t> stat_entries_written_success_;
-  //fnord::stats::Counter<uint64_t> stat_entries_written_error_;
-  //fnord::stats::Counter<uint64_t> stat_entries_written_retry_;
+  //stx::stats::Counter<uint64_t> stat_entries_written_total_;
+  //stx::stats::Counter<uint64_t> stat_entries_written_success_;
+  //stx::stats::Counter<uint64_t> stat_entries_written_error_;
+  //stx::stats::Counter<uint64_t> stat_entries_written_retry_;
 };
 
 }

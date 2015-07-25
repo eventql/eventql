@@ -10,7 +10,7 @@
 #include <brokerd/BrokerClient.h>
 #include <stx/protobuf/msg.h>
 
-namespace fnord {
+namespace stx {
 namespace feeds {
 
 BrokerClient::BrokerClient(http::HTTPConnectionPool* http) : http_(http) {}

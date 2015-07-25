@@ -13,10 +13,10 @@
 #include <stx/random.h>
 #include <brokerd/FeedService.h>
 
-namespace fnord {
+namespace stx {
 namespace feeds {
 
-class BrokerServlet : public fnord::http::HTTPService {
+class BrokerServlet : public stx::http::HTTPService {
 public:
 
   BrokerServlet(FeedService* service);

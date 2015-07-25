@@ -23,17 +23,17 @@
 #include "brokerd/ExportCursor.pb.h"
 #include "stx/protobuf/msg.h"
 
-using namespace fnord;
-using namespace fnord::feeds;
+using namespace stx;
+using namespace stx::feeds;
 
 void cmd_monitor(const cli::FlagParser& flags) {
-  fnord::iputs("monitor", 1);
+  stx::iputs("monitor", 1);
 
 }
 
 void cmd_export(const cli::FlagParser& flags) {
   Random rnd;
-  fnord::thread::EventLoop ev;
+  stx::thread::EventLoop ev;
 
   auto evloop_thread = std::thread([&ev] {
     ev.run();
@@ -59,7 +59,7 @@ void cmd_export(const cli::FlagParser& flags) {
     RAISE(kUsageError, "no servers specified");
   }
 
-  fnord::logInfo("brokerctl", "Exporting topic '$0'", topic);
+  stx::logInfo("brokerctl", "Exporting topic '$0'", topic);
 
   ExportCursor cursor;
   if (FileUtil::exists(cursorfile_path)) {
@@ -71,13 +71,13 @@ void cmd_export(const cli::FlagParser& flags) {
       RAISEF(kRuntimeError, "topic mismatch: '$0' vs '$1;", cur_topic, topic);
     }
 
-    fnord::logInfo(
+    stx::logInfo(
         "brokerctl",
         "Resuming export from sequence $0",
         cursor.head_sequence());
   } else {
     cursor.mutable_topic_cursor()->set_topic(topic);
-    fnord::logInfo("brokerctl", "Starting new export from epoch...");
+    stx::logInfo("brokerctl", "Starting new export from epoch...");
   }
 
   Vector<String> rows;
@@ -100,7 +100,7 @@ void cmd_export(const cli::FlagParser& flags) {
 
     if (rows_size >= maxsize) {
       auto next_seq = cursor.head_sequence() + 1;
-      fnord::logInfo("brokerctl", "Writing sequence $0", next_seq);
+      stx::logInfo("brokerctl", "Writing sequence $0", next_seq);
 
       auto dstpath = FileUtil::joinPaths(
           path,
@@ -144,14 +144,14 @@ void cmd_export(const cli::FlagParser& flags) {
 }
 
 int main(int argc, const char** argv) {
-  fnord::Application::init();
-  fnord::Application::logToStderr();
+  stx::Application::init();
+  stx::Application::logToStderr();
 
-  fnord::cli::FlagParser flags;
+  stx::cli::FlagParser flags;
 
   flags.defineFlag(
       "loglevel",
-      fnord::cli::FlagParser::T_STRING,
+      stx::cli::FlagParser::T_STRING,
       false,
       NULL,
       "INFO",
@@ -175,7 +175,7 @@ int main(int argc, const char** argv) {
 
   export_cmd->flags().defineFlag(
       "topic",
-      fnord::cli::FlagParser::T_STRING,
+      stx::cli::FlagParser::T_STRING,
       true,
       NULL,
       NULL,
@@ -184,7 +184,7 @@ int main(int argc, const char** argv) {
 
   export_cmd->flags().defineFlag(
       "datadir",
-      fnord::cli::FlagParser::T_STRING,
+      stx::cli::FlagParser::T_STRING,
       true,
       NULL,
       NULL,
@@ -193,7 +193,7 @@ int main(int argc, const char** argv) {
 
   export_cmd->flags().defineFlag(
       "server",
-      fnord::cli::FlagParser::T_STRING,
+      stx::cli::FlagParser::T_STRING,
       false,
       NULL,
       NULL,

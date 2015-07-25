@@ -23,7 +23,7 @@
 #include "brokerd/Message.pb.h"
 #include "stx/reflect/reflect.h"
 
-namespace fnord {
+namespace stx {
 namespace feeds {
 
 class FeedService {
@@ -95,7 +95,7 @@ protected:
   LogStream* openStream(const std::string& name, bool create);
   void reopenTable(const std::string& file_path);
 
-  fnord::FileRepository file_repo_;
+  stx::FileRepository file_repo_;
   std::unordered_map<std::string, std::unique_ptr<LogStream>> streams_;
   std::mutex streams_mutex_;
   FileLock lock_;
@@ -104,20 +104,20 @@ protected:
 };
 
 } // namespace logstream_service
-} // namespace fnord
+} // namespace stx
 
 template <> template <class T>
-void fnord::reflect::MetaClass<
-    fnord::feeds::FeedService>::reflect(T* t) {
+void stx::reflect::MetaClass<
+    stx::feeds::FeedService>::reflect(T* t) {
   t->method(
       "FeedService.append",
-      &fnord::feeds::FeedService::append,
+      &stx::feeds::FeedService::append,
       "stream",
       "entry");
 
   t->method(
       "FeedService.fetch",
-      &fnord::feeds::FeedService::fetch,
+      &stx::feeds::FeedService::fetch,
       "stream",
       "offset",
       "batch_size");

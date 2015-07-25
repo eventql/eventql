@@ -10,7 +10,7 @@
 #include "brokerd/RemoteFeed.h"
 #include "brokerd/RemoteFeedFactory.h"
 
-namespace fnord {
+namespace stx {
 namespace feeds {
 
 RemoteFeedFactory::RemoteFeedFactory(
@@ -20,7 +20,7 @@ RemoteFeedFactory::RemoteFeedFactory(
 std::unique_ptr<RemoteFeed> RemoteFeedFactory::getFeed(
     const std::string& name) {
   return std::unique_ptr<RemoteFeed>(
-      new fnord::feeds::RemoteFeed(name, rpc_channel_));
+      new stx::feeds::RemoteFeed(name, rpc_channel_));
 }
 
 }

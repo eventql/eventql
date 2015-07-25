@@ -31,17 +31,17 @@
 #include "stx/stats/statsdagent.h"
 #include "stx/mdb/MDB.h"
 
-using namespace fnord;
+using namespace stx;
 
 int main(int argc, const char** argv) {
-  fnord::Application::init();
-  fnord::Application::logToStderr();
+  stx::Application::init();
+  stx::Application::logToStderr();
 
-  fnord::cli::FlagParser flags;
+  stx::cli::FlagParser flags;
 
   flags.defineFlag(
       "statefile",
-      fnord::cli::FlagParser::T_STRING,
+      stx::cli::FlagParser::T_STRING,
       false,
       "s",
       NULL,
@@ -50,7 +50,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "time",
-      fnord::cli::FlagParser::T_SWITCH,
+      stx::cli::FlagParser::T_SWITCH,
       false,
       "t",
       NULL,
@@ -59,7 +59,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "batch_size",
-      fnord::cli::FlagParser::T_INTEGER,
+      stx::cli::FlagParser::T_INTEGER,
       false,
       NULL,
       "2048",
@@ -68,7 +68,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "buffer_size",
-      fnord::cli::FlagParser::T_INTEGER,
+      stx::cli::FlagParser::T_INTEGER,
       false,
       NULL,
       "8192",
@@ -77,7 +77,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "commit_size",
-      fnord::cli::FlagParser::T_INTEGER,
+      stx::cli::FlagParser::T_INTEGER,
       false,
       NULL,
       "1024",
@@ -86,7 +86,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "max_spread_secs",
-      fnord::cli::FlagParser::T_INTEGER,
+      stx::cli::FlagParser::T_INTEGER,
       false,
       NULL,
       "10",
@@ -95,7 +95,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "loglevel",
-      fnord::cli::FlagParser::T_STRING,
+      stx::cli::FlagParser::T_STRING,
       false,
       NULL,
       "INFO",
@@ -108,7 +108,7 @@ int main(int argc, const char** argv) {
       strToLogLevel(flags.getString("loglevel")));
 
   /* start event loop */
-  fnord::thread::EventLoop ev;
+  stx::thread::EventLoop ev;
 
   auto evloop_thread = std::thread([&ev] {
     ev.run();
@@ -187,9 +187,9 @@ int main(int argc, const char** argv) {
       }
 
       if (print_time) {
-        fnord::iputs("[$0] $1", entry.get().time, entry.get().data);
+        stx::iputs("[$0] $1", entry.get().time, entry.get().data);
       } else {
-        fnord::iputs("$0", entry.get().data);
+        stx::iputs("$0", entry.get().data);
       }
     }
 

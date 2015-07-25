@@ -10,7 +10,7 @@
 #ifndef _FNORD_BROKER_BROKERCURSOR_H
 #define _FNORD_BROKER_BROKERCURSOR_H
 
-namespace fnord {
+namespace stx {
 namespace feeds {
 
 class BrokerCursor {

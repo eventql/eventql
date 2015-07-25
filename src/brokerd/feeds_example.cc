@@ -19,28 +19,28 @@
 #include "stx/thread/eventloop.h"
 #include "stx/thread/threadpool.h"
 
-using fnord::json::JSONRPC;
-using fnord::json::JSONRPCHTTPAdapter;
-using fnord::feeds::FeedService;
+using stx::json::JSONRPC;
+using stx::json::JSONRPCHTTPAdapter;
+using stx::feeds::FeedService;
 
 int main() {
-  fnord::Application::init();
-  fnord::Application::logToStderr();
+  stx::Application::init();
+  stx::Application::logToStderr();
 
   JSONRPC rpc;
   JSONRPCHTTPAdapter rpc_http(&rpc);
 
   auto log_path = "/tmp/cm-logs";
-  fnord::FileUtil::mkdir_p(log_path);
+  stx::FileUtil::mkdir_p(log_path);
 
-  FeedService ls_service{fnord::FileRepository(log_path)};
+  FeedService ls_service{stx::FileRepository(log_path)};
   rpc.registerService(&ls_service);
 
-  fnord::thread::EventLoop event_loop;
-  fnord::thread::ThreadPool thread_pool;
-  fnord::http::HTTPRouter http_router;
+  stx::thread::EventLoop event_loop;
+  stx::thread::ThreadPool thread_pool;
+  stx::http::HTTPRouter http_router;
   http_router.addRouteByPrefixMatch("/rpc", &rpc_http);
-  fnord::http::HTTPServer http_server(&http_router, &event_loop);
+  stx::http::HTTPServer http_server(&http_router, &event_loop);
   http_server.listen(8080);
   event_loop.run();
 

@@ -13,7 +13,7 @@
 #include <string>
 #include "stx/UnixTime.h"
 
-namespace fnord {
+namespace stx {
 namespace feeds {
 
 typedef uint64_t FeedOffset;
@@ -34,5 +34,5 @@ struct FeedEntry {
 };
 
 } // namespace logstream_service
-} // namespace fnord
+} // namespace stx
 #endif

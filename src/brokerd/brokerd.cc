@@ -27,7 +27,7 @@
 #include "stx/http/statshttpservlet.h"
 #include "stx/stats/statsdagent.h"
 
-using namespace fnord;
+using namespace stx;
 
 int main(int argc, const char** argv) {
   Application::init();

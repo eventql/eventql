@@ -11,12 +11,12 @@
 #include "brokerd/RemoteFeed.h"
 #include "stx/rpc/RPC.h"
 
-namespace fnord {
+namespace stx {
 namespace feeds {
 
 RemoteFeed::RemoteFeed(
     const String& name,
-    fnord::RPCChannel* rpc_channel,
+    stx::RPCChannel* rpc_channel,
     int batch_size /* = kDefaultBatchSize */,
     int buffer_size /* = kDefaultBufferSize */) :
     name_(name),
@@ -29,7 +29,7 @@ Future<bool> RemoteFeed::appendEntry(const String& entry) {
   Promise<bool> promise;
 
 /*
-  auto rpc = fnord::mkRPC(
+  auto rpc = stx::mkRPC(
       &FeedService::append,
       name_,
       entry);
@@ -51,7 +51,7 @@ Future<Option<FeedEntry>>
     RemoteFeed::fetchEntry(const FeedOffset& offset) {
   Promise<Option<FeedEntry>> promise;
 /*
-  auto rpc = fnord::mkRPC(
+  auto rpc = stx::mkRPC(
       &FeedService::fetch,
       name_,
       offset,
@@ -81,7 +81,7 @@ Future<Vector<FeedEntry>>
   Promise<Vector<FeedEntry>> promise;
 
 /*
-  auto rpc = fnord::mkRPC(
+  auto rpc = stx::mkRPC(
       &FeedService::fetch,
       name_,
       offset,
@@ -123,7 +123,7 @@ void RemoteFeed::insertDone() {
 
   if (insert_buf_.size() > 0) {
     // FIXPAUL: batch insert
-    cur_insert_rpc_ = fnord::mkRPC(
+    cur_insert_rpc_ = stx::mkRPC(
         &FeedService::append,
         name(),
         insert_buf_.back());
@@ -140,7 +140,7 @@ void RemoteFeed::maybeFillBuffer() {
     return;
   }
 
-  cur_fetch_rpc_ = fnord::mkRPC(
+  cur_fetch_rpc_ = stx::mkRPC(
       &FeedService::fetch,
       name(),
       offset_,

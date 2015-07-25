@@ -14,7 +14,7 @@
 #include "stx/rpc/RPC.h"
 #include "brokerd/FeedEntry.h"
 
-namespace fnord {
+namespace stx {
 namespace feeds {
 
 class RemoteFeed {
@@ -24,7 +24,7 @@ public:
 
   RemoteFeed(
       const String& name,
-      fnord::RPCChannel* rpc_channel,
+      stx::RPCChannel* rpc_channel,
       int batch_size = kDefaultBatchSize,
       int buffer_size = kDefaultBufferSize);
 
@@ -43,7 +43,7 @@ protected:
   void fillBuffer();
 
   std::string name_;
-  fnord::RPCChannel* rpc_channel_;
+  stx::RPCChannel* rpc_channel_;
   int batch_size_;
   int buffer_size_;
   uint64_t offset_;
