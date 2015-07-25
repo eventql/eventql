@@ -178,7 +178,7 @@ const std::string Token::getString() const {
 
 } // namespace csql
 
-namespace fnord {
+namespace stx {
 
 template <>
 std::string inspect<
@@ -194,4 +194,4 @@ std::string inspect<
   return csql::Token::getTypeName(value.getType());
 }
 
-} // namespace fnord
+} // namespace stx

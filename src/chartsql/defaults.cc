@@ -9,7 +9,7 @@
  */
 #include <chartsql/defaults.h>
 
-using namespace fnord;
+using namespace stx;
 
 namespace csql {
 

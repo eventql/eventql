@@ -508,7 +508,7 @@ bool SValue::tryTimeConversion() {
 
 }
 
-namespace fnord {
+namespace stx {
 
 template <>
 std::string inspect<csql::SValue::kSValueType>(

@@ -16,7 +16,7 @@
 #include <stx/UnixTime.h>
 #include <stx/exception.h>
 
-using namespace fnord;
+using namespace stx;
 
 namespace csql {
 class Token;
@@ -27,7 +27,7 @@ public:
   typedef double FloatType;
   typedef int64_t IntegerType;
   typedef bool BoolType;
-  typedef fnord::UnixTime TimeType;
+  typedef stx::UnixTime TimeType;
 
   enum kSValueType {
     T_NULL = 0,

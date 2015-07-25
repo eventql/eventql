@@ -14,7 +14,7 @@
 #include <stx/util/binarymessagewriter.h>
 #include <chartsql/svalue.h>
 
-using namespace fnord;
+using namespace stx;
 
 namespace csql {
 

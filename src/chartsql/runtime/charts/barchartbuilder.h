@@ -16,14 +16,14 @@ class DrawStatement;
 
 class BarChartBuilder : public ChartBuilder {
 public:
-  BarChartBuilder(fnord::chart::Canvas* canvas, RefPtr<DrawStatementNode> draw_stmt);
-  fnord::chart::Drawable* getChart() const override;
+  BarChartBuilder(stx::chart::Canvas* canvas, RefPtr<DrawStatementNode> draw_stmt);
+  stx::chart::Drawable* getChart() const override;
   std::string chartName() const override;
 protected:
-  fnord::chart::Drawable* findChartType() const;
-  void setOrientation(fnord::chart::BarChart* chart) const;
-  void setStacked(fnord::chart::BarChart* chart) const;
-  void setLabels(fnord::chart::BarChart* chart) const;
+  stx::chart::Drawable* findChartType() const;
+  void setOrientation(stx::chart::BarChart* chart) const;
+  void setStacked(stx::chart::BarChart* chart) const;
+  void setLabels(stx::chart::BarChart* chart) const;
 };
 
 }

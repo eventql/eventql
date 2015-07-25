@@ -18,14 +18,14 @@ class DrawStatement;
 class PointChartBuilder : public ChartBuilder {
 public:
   PointChartBuilder(
-      fnord::chart::Canvas* canvas,
+      stx::chart::Canvas* canvas,
       RefPtr<DrawStatementNode> draw_stmt);
 
-  fnord::chart::Drawable* getChart() const override;
+  stx::chart::Drawable* getChart() const override;
   std::string chartName() const override;
 protected:
-  fnord::chart::Drawable* findChartType() const;
-  void setLabels(fnord::chart::PointChart* chart) const;
+  stx::chart::Drawable* findChartType() const;
+  void setLabels(stx::chart::PointChart* chart) const;
 };
 
 }

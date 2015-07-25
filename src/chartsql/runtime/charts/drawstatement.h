@@ -30,14 +30,14 @@ public:
 
   void execute(
       ExecutionContext* context,
-      fnord::chart::Canvas* canvas);
+      stx::chart::Canvas* canvas);
 
 protected:
 
   template <typename ChartBuilderType>
-  fnord::chart::Drawable* executeWithChart(
+  stx::chart::Drawable* executeWithChart(
       ExecutionContext* context,
-      fnord::chart::Canvas* canvas) {
+      stx::chart::Canvas* canvas) {
     ChartBuilderType chart_builder(canvas, node_);
 
     for (auto& source : sources_) {
@@ -47,12 +47,12 @@ protected:
     return chart_builder.getChart();
   }
 
-  void applyAxisDefinitions(fnord::chart::Drawable* chart) const;
-  void applyAxisLabels(ASTNode* ast, fnord::chart::AxisDefinition* axis) const;
-  void applyDomainDefinitions(fnord::chart::Drawable* chart) const;
-  void applyGrid(fnord::chart::Drawable* chart) const;
-  void applyLegend(fnord::chart::Drawable* chart) const;
-  void applyTitle(fnord::chart::Drawable* chart) const;
+  void applyAxisDefinitions(stx::chart::Drawable* chart) const;
+  void applyAxisLabels(ASTNode* ast, stx::chart::AxisDefinition* axis) const;
+  void applyDomainDefinitions(stx::chart::Drawable* chart) const;
+  void applyGrid(stx::chart::Drawable* chart) const;
+  void applyLegend(stx::chart::Drawable* chart) const;
+  void applyTitle(stx::chart::Drawable* chart) const;
 
   RefPtr<DrawStatementNode> node_;
   Vector<ScopedPtr<TableExpression>> sources_;

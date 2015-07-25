@@ -19,7 +19,7 @@ namespace csql {
 
 class MetricTableRef : public csql::TableRef {
 public:
-  MetricTableRef(fnord::metric_service::IMetric* metric);
+  MetricTableRef(stx::metric_service::IMetric* metric);
 
   int getColumnIndex(const std::string& name) override;
   std::string getColumnName(int index) override;
@@ -27,7 +27,7 @@ public:
   std::vector<std::string> columns() override;
 
 protected:
-  fnord::metric_service::IMetric* metric_;
+  stx::metric_service::IMetric* metric_;
   std::vector<std::string> fields_;
 };
 

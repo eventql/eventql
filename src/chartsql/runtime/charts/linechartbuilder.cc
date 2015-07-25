@@ -13,65 +13,65 @@
 namespace csql {
 
 LineChartBuilder::LineChartBuilder(
-    fnord::chart::Canvas* canvas,
+    stx::chart::Canvas* canvas,
     RefPtr<DrawStatementNode> draw_stmt) :
     ChartBuilder(canvas, draw_stmt) {}
 
-fnord::chart::Drawable* LineChartBuilder::getChart() const {
-  auto chart = dynamic_cast<fnord::chart::LineChart*>(findChartType());
+stx::chart::Drawable* LineChartBuilder::getChart() const {
+  auto chart = dynamic_cast<stx::chart::LineChart*>(findChartType());
   setLabels(chart);
   return chart;
 }
 
-fnord::chart::Drawable* LineChartBuilder::findChartType() const {
+stx::chart::Drawable* LineChartBuilder::findChartType() const {
   preconditionCheck();
 
-  if (auto c = tryType2D<fnord::chart::LineChart2D<
+  if (auto c = tryType2D<stx::chart::LineChart2D<
         SValue::TimeType,
         SValue::TimeType>>())
     return c;
 
-  if (auto c = tryType2D<fnord::chart::LineChart2D<
+  if (auto c = tryType2D<stx::chart::LineChart2D<
         SValue::TimeType,
         SValue::FloatType>>())
     return c;
 
-  if (auto c = tryType2D<fnord::chart::LineChart2D<
+  if (auto c = tryType2D<stx::chart::LineChart2D<
         SValue::TimeType,
         SValue::StringType>>())
     return c;
 
-  if (auto c = tryType2D<fnord::chart::LineChart2D<
+  if (auto c = tryType2D<stx::chart::LineChart2D<
         SValue::FloatType,
         SValue::StringType>>())
     return c;
 
-  if (auto c = tryType2D<fnord::chart::LineChart2D<
+  if (auto c = tryType2D<stx::chart::LineChart2D<
         SValue::FloatType,
         SValue::FloatType>>())
     return c;
 
-  if (auto c = tryType2D<fnord::chart::LineChart2D<
+  if (auto c = tryType2D<stx::chart::LineChart2D<
         SValue::FloatType,
         SValue::TimeType>>())
     return c;
 
-  if (auto c = tryType2D<fnord::chart::LineChart2D<
+  if (auto c = tryType2D<stx::chart::LineChart2D<
         SValue::FloatType,
         SValue::StringType>>())
     return c;
 
-  if (auto c = tryType2D<fnord::chart::LineChart2D<
+  if (auto c = tryType2D<stx::chart::LineChart2D<
         SValue::StringType,
         SValue::TimeType>>())
     return c;
 
-  if (auto c = tryType2D<fnord::chart::LineChart2D<
+  if (auto c = tryType2D<stx::chart::LineChart2D<
         SValue::StringType,
         SValue::FloatType>>())
     return c;
 
-  if (auto c = tryType2D<fnord::chart::LineChart2D<
+  if (auto c = tryType2D<stx::chart::LineChart2D<
         SValue::StringType,
         SValue::StringType>>())
     return c;
@@ -84,7 +84,7 @@ std::string LineChartBuilder::chartName() const {
   return "LineChart";
 }
 
-void LineChartBuilder::setLabels(fnord::chart::LineChart* chart) const {
+void LineChartBuilder::setLabels(stx::chart::LineChart* chart) const {
   auto prop = draw_stmt_->getProperty(Token::T_LABELS);
   chart->setLabels(prop != nullptr);
 }

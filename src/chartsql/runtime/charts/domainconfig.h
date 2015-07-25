@@ -25,8 +25,8 @@ public:
    * @param dimension 0 for x, 1 for y, etc
    */
   DomainConfig(
-      fnord::chart::Drawable* drawable,
-      fnord::chart::AnyDomain::kDimension dimension);
+      stx::chart::Drawable* drawable,
+      stx::chart::AnyDomain::kDimension dimension);
 
   void setMin(const SValue& value);
   void setMax(const SValue& value);
@@ -34,7 +34,7 @@ public:
   void setLogarithmic(bool logarithmic);
 
 protected:
-  fnord::chart::AnyDomain* domain_;
+  stx::chart::AnyDomain* domain_;
   char dimension_letter_;
 };
 

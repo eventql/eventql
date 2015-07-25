@@ -11,7 +11,7 @@
 #include <stx/stdtypes.h>
 #include <stx/buffer.h>
 
-using namespace fnord;
+using namespace stx;
 
 namespace csql {
 

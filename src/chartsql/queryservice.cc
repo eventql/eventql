@@ -24,9 +24,9 @@ namespace csql {
 QueryService::QueryService() {}
 
 void QueryService::executeQuery(
-    std::shared_ptr<fnord::InputStream> input_stream,
+    std::shared_ptr<stx::InputStream> input_stream,
     kFormat output_format,
-    std::shared_ptr<fnord::OutputStream> output_stream) {
+    std::shared_ptr<stx::OutputStream> output_stream) {
   std::unique_ptr<TableRepository> table_repo(new TableRepository());
   executeQuery(
       input_stream,
@@ -36,9 +36,9 @@ void QueryService::executeQuery(
 }
 
 void QueryService::executeQuery(
-    std::shared_ptr<fnord::InputStream> input_stream,
+    std::shared_ptr<stx::InputStream> input_stream,
     kFormat output_format,
-    std::shared_ptr<fnord::OutputStream> output_stream,
+    std::shared_ptr<stx::OutputStream> output_stream,
     std::unique_ptr<TableRepository> table_repo,
     int width /* = -1 */,
     int height /* = -1 */) {
@@ -46,7 +46,7 @@ void QueryService::executeQuery(
   input_stream->readUntilEOF(&query_string);
 
   if (fnordmetric::env()->verbose()) {
-    fnord::logDebug(
+    stx::logDebug(
         "fnordmetric",
         "Executing ChartSQL query: $0",
         query_string);
@@ -58,13 +58,13 @@ void QueryService::executeQuery(
 
     switch (output_format) {
       case FORMAT_SVG: {
-        fnord::chart::SVGTarget target(output_stream.get());
+        stx::chart::SVGTarget target(output_stream.get());
         renderCharts(&query, &target, width, height);
         break;
       }
 
       case FORMAT_JSON: {
-        fnord::json::JSONOutputStream target(output_stream);
+        stx::json::JSONOutputStream target(output_stream);
         renderJSON(&query, &target, width, height);
         break;
       }
@@ -78,7 +78,7 @@ void QueryService::executeQuery(
         RAISE(kRuntimeError, "can't handle this output format");
 
     }
-  } catch (fnord::Exception e) {
+  } catch (stx::Exception e) {
     e.appendMessage(" while executing query: %s", query_string.c_str());
     throw e;
   }
@@ -90,7 +90,7 @@ void QueryService::registerBackend(std::unique_ptr<Backend>&& backend) {
 
 void QueryService::renderCharts(
     Query* query,
-    fnord::chart::RenderTarget* target,
+    stx::chart::RenderTarget* target,
     int width,
     int height) const {
   for (int i = 0; i < query->getNumCharts(); ++i) {
@@ -102,7 +102,7 @@ void QueryService::renderCharts(
 
 void QueryService::renderJSON(
     Query* query,
-    fnord::json::JSONOutputStream* target,
+    stx::json::JSONOutputStream* target,
     int width,
     int height) const {
   target->beginObject();
@@ -165,8 +165,8 @@ void QueryService::renderJSON(
 
     for (int i = 0; i < query->getNumCharts(); ++i) {
       std::string svg_data;
-      auto string_stream = fnord::StringOutputStream::fromString(&svg_data);
-      fnord::chart::SVGTarget svg_target(string_stream.get());
+      auto string_stream = stx::StringOutputStream::fromString(&svg_data);
+      stx::chart::SVGTarget svg_target(string_stream.get());
       auto chart = query->getChart(i);
       chart->setDimensions(width, height);
       chart->render(&svg_target);
@@ -202,7 +202,7 @@ void QueryService::renderJSON(
 
 void QueryService::renderTables(
     Query* query,
-    fnord::OutputStream* out) const {
+    stx::OutputStream* out) const {
   for (int i = 0; i < query->getNumResultLists(); ++i) {
     const auto result_list = query->getResultList(i);
     result_list->debugPrint();

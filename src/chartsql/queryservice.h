@@ -44,9 +44,9 @@ public:
    * @param output_stream The output stream to write the results
    */
   void executeQuery(
-      std::shared_ptr<fnord::InputStream> input_stream,
+      std::shared_ptr<stx::InputStream> input_stream,
       kFormat output_format,
-      std::shared_ptr<fnord::OutputStream> output_stream);
+      std::shared_ptr<stx::OutputStream> output_stream);
 
   /**
    * Execute a query. This may raise an exception.
@@ -56,9 +56,9 @@ public:
    * @param output_stream The output stream to write the results
    */
   void executeQuery(
-      std::shared_ptr<fnord::InputStream> input_stream,
+      std::shared_ptr<stx::InputStream> input_stream,
       kFormat output_format,
-      std::shared_ptr<fnord::OutputStream> output_stream,
+      std::shared_ptr<stx::OutputStream> output_stream,
       std::unique_ptr<TableRepository> table_repo,
       int width = -1,
       int height = -1);
@@ -72,17 +72,17 @@ protected:
 
   void renderCharts(
       Query* query,
-      fnord::chart::RenderTarget* target,
+      stx::chart::RenderTarget* target,
       int width,
       int height) const;
 
   void renderJSON(
       Query* query,
-      fnord::json::JSONOutputStream* target,
+      stx::json::JSONOutputStream* target,
       int width,
       int height) const;
 
-  void renderTables(Query* query, fnord::OutputStream* out) const;
+  void renderTables(Query* query, stx::OutputStream* out) const;
 
   DefaultRuntime runtime_;
 };

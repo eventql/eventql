@@ -14,7 +14,7 @@
 namespace csql {
 
 MetricTableRef::MetricTableRef(
-    fnord::metric_service::IMetric* metric) :
+    stx::metric_service::IMetric* metric) :
     metric_(metric) {}
 
 int MetricTableRef::getColumnIndex(const std::string& name) {
@@ -58,13 +58,13 @@ std::vector<std::string> MetricTableRef::columns() {
 }
 
 void MetricTableRef::executeScan(csql::TableScan* scan) {
-  auto begin = fnord::UnixTime::epoch();
-  auto limit = fnord::UnixTime::now();
+  auto begin = stx::UnixTime::epoch();
+  auto limit = stx::UnixTime::now();
 
   metric_->scanSamples(
       begin,
       limit,
-      [this, scan] (fnord::metric_service::Sample* sample) -> bool {
+      [this, scan] (stx::metric_service::Sample* sample) -> bool {
         std::vector<csql::SValue> row;
         row.emplace_back(sample->time());
         row.emplace_back(sample->value());

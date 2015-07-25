@@ -10,7 +10,7 @@
 #include <chartsql/runtime/ValueExpression.h>
 #include <stx/inspect.h>
 
-using namespace fnord;
+using namespace stx;
 
 namespace csql {
 
