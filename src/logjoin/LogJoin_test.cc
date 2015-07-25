@@ -105,6 +105,9 @@ TEST_CASE(LogJoinTest, SimpleQuery, [] () {
     { "qstr~de", "blah" }
   });
 
+
+  stx::iputs("", 1);
+  sess.debugPrint();
   //auto buf = trgt.joinSession(sess);
   //auto joined = msg::decode<JoinedSession>(buf);
   JoinedSession joined;
