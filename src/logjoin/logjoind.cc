@@ -314,14 +314,17 @@ int main(int argc, const char** argv) {
 
   stx::fts::Analyzer analyzer(flags.getString("conf"));
 
-  /* set up session processor */
-  cm::SessionProcessor session_proc(&schemas, dry_run);
+  /* set up session processing pipeline */
+  auto pipeline = mkRef(new cm::SessionPipeline());
 
   /* pipeline stage: session join */
-  session_proc.addPipelineStage(
+  pipeline->addStage(
       std::bind(&SessionJoin::process, std::placeholders::_1));
 
 
+
+  /* set up session processor */
+  cm::SessionProcessor session_proc(pipeline, &schemas, dry_run);
 
   auto normalize = [&analyzer] (Language lang, const String& query) -> String {
     return analyzer.normalize(lang, query);
@@ -469,7 +472,7 @@ int main(int argc, const char** argv) {
         watermarks.first,
         watermarks.second,
         logjoin.numSessions(),
-        session_proc.num_sessions,
+        0, //session_proc.num_sessions,
         stream_offsets_str);
 
     if (dry_run) {

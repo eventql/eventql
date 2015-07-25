@@ -6,8 +6,7 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-#ifndef _CM_SessionProcessor_H
-#define _CM_SessionProcessor_H
+#pragma once
 #include "stx/stdtypes.h"
 #include "stx/Currency.h"
 #include "stx/Language.h"
@@ -17,6 +16,7 @@
 #include <inventory/ItemRef.h>
 #include "logjoin/TrackedSession.h"
 #include "logjoin/TrackedQuery.h"
+#include "logjoin/SessionPipeline.h"
 #include "inventory/DocStore.h"
 #include "inventory/IndexChangeRequest.h"
 #include "inventory/DocIndex.h"
@@ -38,13 +38,11 @@ public:
   typedef Function<void (RefPtr<TrackedSessionContext> ctx)> PipelineStageFn;
 
   SessionProcessor(
+      RefPtr<SessionPipeline> pipeline,
       msg::MessageSchemaRepository* schemas,
       bool dry_run);
 
   void enqueueSession(const TrackedSession& session);
-  RefPtr<TrackedSessionContext> processSession(TrackedSession session);
-
-  void addPipelineStage(PipelineStageFn fn);
   void start();
   void stop();
 
@@ -56,11 +54,10 @@ public:
 
   Buffer joinSession(TrackedSession& session);
 
-  size_t num_sessions;
 
 protected:
-
-
+  RefPtr<SessionPipeline> pipeline_;
+  size_t num_sessions;
   msg::MessageSchemaRepository* schemas_;
   Function<stx::String (Language lang, const stx::String& query)> normalize_;
   Function<Option<String> (const DocID& docid, const String& feature)> get_field_;
@@ -68,8 +65,6 @@ protected:
   Random rnd_;
   CurrencyConverter cconv_;
   thread::FixedSizeThreadPool tpool_;
-  Vector<PipelineStageFn> stages_;
 };
 } // namespace cm
 
-#endif
