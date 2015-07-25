@@ -86,7 +86,7 @@ add_executable(cm-logjoin
     logjoin/LogJoin.cc
     logjoin/LogJoinUpload.cc
     logjoin/LogJoinExport.cc
-    logjoin/LogJoinTarget.cc
+    logjoin/SessionProcessor.cc
     logjoin/LogJoinShard.cc)
 
 target_link_libraries(cm-logjoin ${CMAKE_THREAD_LIBS_INIT} ${FNORD_LIBS} ${FNORD_FTS_LIBS})

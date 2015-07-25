@@ -27,7 +27,7 @@
 #include "logjoin/TrackedSession.h"
 #include "logjoin/TrackedQuery.h"
 #include "logjoin/LogJoinShard.h"
-#include "logjoin/LogJoinTarget.h"
+#include "logjoin/SessionProcessor.h"
 
 using namespace stx;
 
@@ -41,7 +41,7 @@ public:
   LogJoin(
       LogJoinShard shard,
       bool dry_run,
-      LogJoinTarget* target);
+      SessionProcessor* target);
 
   void insertLogline(
       const std::string& log_line,
@@ -107,7 +107,7 @@ protected:
 
   bool dry_run_;
   LogJoinShard shard_;
-  LogJoinTarget* target_;
+  SessionProcessor* target_;
   HashMap<String, UnixTime> sessions_flush_times_;
   HashMap<String, TrackedSession> session_cache_;
 

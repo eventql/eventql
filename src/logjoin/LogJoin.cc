@@ -29,7 +29,7 @@ namespace cm {
 LogJoin::LogJoin(
     LogJoinShard shard,
     bool dry_run,
-    LogJoinTarget* target) :
+    SessionProcessor* target) :
     dry_run_(dry_run),
     shard_(shard),
     target_(target) {

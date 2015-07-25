@@ -31,7 +31,7 @@ add_executable(logjoind
     LogJoin.cc
     LogJoinUpload.cc
     LogJoinExport.cc
-    LogJoinTarget.cc
+    SessionProcessor.cc
     LogJoinShard.cc)
 
 target_link_libraries(logjoind ${CMAKE_THREAD_LIBS_INIT} ${FNORD_LIBS} ${FNORD_FTS_LIBS})
