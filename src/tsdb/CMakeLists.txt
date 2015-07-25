@@ -30,12 +30,12 @@ add_library(tsdb-server OBJECT
     ${PROTO_SRCS})
 
 add_executable(test-recordset
-    $<TARGET_OBJECTS:fnord-base>
-    $<TARGET_OBJECTS:fnord-protobuf>
-    $<TARGET_OBJECTS:fnord-mdb>
+    $<TARGET_OBJECTS:stx-base>
+    $<TARGET_OBJECTS:stx-protobuf>
+    $<TARGET_OBJECTS:stx-mdb>
     $<TARGET_OBJECTS:fnord-chart>
-    $<TARGET_OBJECTS:fnord-http>
-    $<TARGET_OBJECTS:fnord-json>
+    $<TARGET_OBJECTS:stx-http>
+    $<TARGET_OBJECTS:stx-json>
     $<TARGET_OBJECTS:tsdb-server>
     $<TARGET_OBJECTS:libcstable>
     $<TARGET_OBJECTS:sstable>
@@ -46,12 +46,12 @@ add_executable(test-recordset
 target_link_libraries(test-recordset ${FNORD_LIBS})
 
 add_executable(test-tsdbnode
-    $<TARGET_OBJECTS:fnord-base>
-    $<TARGET_OBJECTS:fnord-protobuf>
-    $<TARGET_OBJECTS:fnord-mdb>
+    $<TARGET_OBJECTS:stx-base>
+    $<TARGET_OBJECTS:stx-protobuf>
+    $<TARGET_OBJECTS:stx-mdb>
     $<TARGET_OBJECTS:fnord-chart>
-    $<TARGET_OBJECTS:fnord-http>
-    $<TARGET_OBJECTS:fnord-json>
+    $<TARGET_OBJECTS:stx-http>
+    $<TARGET_OBJECTS:stx-json>
     $<TARGET_OBJECTS:tsdb-server>
     $<TARGET_OBJECTS:libcstable>
     $<TARGET_OBJECTS:sstable>
@@ -62,12 +62,12 @@ add_executable(test-tsdbnode
 target_link_libraries(test-tsdbnode ${CMAKE_THREAD_LIBS_INIT} ${FNORD_LIBS})
 
 add_executable(test-tsdb-timewindowpartitioner
-    $<TARGET_OBJECTS:fnord-base>
-    $<TARGET_OBJECTS:fnord-protobuf>
-    $<TARGET_OBJECTS:fnord-mdb>
+    $<TARGET_OBJECTS:stx-base>
+    $<TARGET_OBJECTS:stx-protobuf>
+    $<TARGET_OBJECTS:stx-mdb>
     $<TARGET_OBJECTS:fnord-chart>
-    $<TARGET_OBJECTS:fnord-http>
-    $<TARGET_OBJECTS:fnord-json>
+    $<TARGET_OBJECTS:stx-http>
+    $<TARGET_OBJECTS:stx-json>
     $<TARGET_OBJECTS:tsdb-server>
     $<TARGET_OBJECTS:libcstable>
     $<TARGET_OBJECTS:sstable>
@@ -78,12 +78,12 @@ add_executable(test-tsdb-timewindowpartitioner
 target_link_libraries(test-tsdb-timewindowpartitioner ${CMAKE_THREAD_LIBS_INIT} ${FNORD_LIBS})
 
 add_executable(tsdbd
-    $<TARGET_OBJECTS:fnord-base>
-    $<TARGET_OBJECTS:fnord-protobuf>
-    $<TARGET_OBJECTS:fnord-mdb>
+    $<TARGET_OBJECTS:stx-base>
+    $<TARGET_OBJECTS:stx-protobuf>
+    $<TARGET_OBJECTS:stx-mdb>
     $<TARGET_OBJECTS:fnord-chart>
-    $<TARGET_OBJECTS:fnord-http>
-    $<TARGET_OBJECTS:fnord-json>
+    $<TARGET_OBJECTS:stx-http>
+    $<TARGET_OBJECTS:stx-json>
     $<TARGET_OBJECTS:tsdb-server>
     $<TARGET_OBJECTS:libcstable>
     $<TARGET_OBJECTS:sstable>
