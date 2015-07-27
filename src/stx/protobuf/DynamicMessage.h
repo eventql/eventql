@@ -20,6 +20,7 @@ public:
 
   DynamicMessage(RefPtr<msg::MessageSchema> schema);
 
+  bool addField(const String& name, const String& val);
   bool addUInt32Field(const String& name, uint32_t val);
   bool addStringField(const String& name, const String& val);
   bool addBoolField(const String& name, bool val);
