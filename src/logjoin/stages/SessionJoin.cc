@@ -143,10 +143,7 @@ void SessionJoin::process(RefPtr<SessionContext> ctx) {
 
     auto slrid = cm::extractAttr(q.attrs, "slrid");
     if (!slrid.isEmpty()) {
-      try {
-        uint32_t sid = std::stoul(slrid.get());
-        qobj->addUInt32Field("shop_id", sid);
-      } catch (...) {}
+      qobj->addField("shop_id", slrid.get());
     }
 
     qobj->addUInt32Field("num_result_items", q.nitems);
@@ -160,39 +157,27 @@ void SessionJoin::process(RefPtr<SessionContext> ctx) {
 
     auto pg_str = cm::extractAttr(q.attrs, "pg");
     if (!pg_str.isEmpty()) {
-      try {
-        auto val = std::stoull(pg_str.get());
-        qobj->addUInt32Field("ab_page", val);
-      } catch (...) {}
+      qobj->addField("ab_page", pg_str.get());
     }
 
     auto abgrp = cm::extractABTestGroup(q.attrs);
     if (!abgrp.isEmpty()) {
-      qobj->addUInt32Field("ab_test_group", abgrp.get());
+      qobj->addField("ab_test_group", StringUtil::toString(abgrp.get()));
     }
 
     auto qcat1 = cm::extractAttr(q.attrs, "q_cat1");
     if (!qcat1.isEmpty()) {
-      try {
-        auto val = std::stoull(qcat1.get());
-        qobj->addUInt32Field("category1", val);
-      } catch (...) {}
+      qobj->addField("category1", qcat1.get());
     }
 
     auto qcat2 = cm::extractAttr(q.attrs, "q_cat2");
     if (!qcat2.isEmpty()) {
-      try {
-        auto val = std::stoull(qcat2.get());
-        qobj->addUInt32Field("category2", val);
-      } catch (...) {}
+      qobj->addField("category2", qcat2.get());
     }
 
     auto qcat3 = cm::extractAttr(q.attrs, "q_cat3");
     if (!qcat3.isEmpty()) {
-      try {
-        auto val = std::stoull(qcat3.get());
-        qobj->addUInt32Field("category3", val);
-      } catch (...) {}
+      qobj->addField("category3", qcat3.get());
     }
 
     auto page_type = extractPageType(q.attrs);
