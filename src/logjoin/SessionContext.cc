@@ -111,7 +111,7 @@ JoinedEvent* SessionContext::addOutputEvent(const String& evtype) {
     }
   }
 
-  RAISEF(kNotFoundError, "event schema not found: $0", evtype);
+  RAISEF(kNotFoundError, "event schema not found: $0 -- $1", evtype, logjoin_cfg.DebugString());
   return nullptr;
 }
 
