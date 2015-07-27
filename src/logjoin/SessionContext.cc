@@ -38,6 +38,14 @@ msg::DynamicMessage* SessionContext::addOutputEvent(const String& evtype) {
   return nullptr;
 }
 
+void SessionContext::setAttribute(const String& key, const String& value) {
+  attributes_[key] = value;
+}
+
+const HashMap<String, String>& SessionContext::attributes() const {
+  return attributes_;
+}
+
 const Vector<ScopedPtr<msg::DynamicMessage>>& SessionContext::outputEvents() const {
   return output_events_;
 }

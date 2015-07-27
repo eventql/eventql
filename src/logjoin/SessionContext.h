@@ -27,17 +27,18 @@ struct SessionContext : public RefCounted {
   RefPtr<CustomerConfigRef> customer_config;
 
   Vector<TrackedEvent> events;
-
-  HashMap<String, String> output_attrs;
-
+  
   JoinedSession session;
 
+  const Vector<ScopedPtr<msg::DynamicMessage>>& outputEvents() const;
   msg::DynamicMessage* addOutputEvent(const String& evtype);
 
-  const Vector<ScopedPtr<msg::DynamicMessage>>& outputEvents() const;
+  const HashMap<String, String>& attributes() const;
+  void setAttribute(const String& key, const String& value);
 
 protected:
   Vector<ScopedPtr<msg::DynamicMessage>> output_events_;
+  HashMap<String, String> attributes_;
 };
 
 } // namespace cm
