@@ -27,8 +27,6 @@ struct SessionContext : public RefCounted {
   RefPtr<CustomerConfigRef> customer_config;
 
   Vector<TrackedEvent> events;
-  
-  JoinedSession session;
 
   const Vector<ScopedPtr<msg::DynamicMessage>>& outputEvents() const;
   msg::DynamicMessage* addOutputEvent(const String& evtype);
