@@ -8,8 +8,10 @@
  */
 #include "stx/SHA1.h"
 #include "stx/protobuf/msg.h"
+#include "stx/protobuf/MessagePrinter.h"
 #include "logjoin/stages/TSDBUploadStage.h"
 #include "logjoin/common.h"
+#include "common/SessionSchema.h"
 #include "tsdb/RecordEnvelope.pb.h"
 #include "tsdb/TimeWindowPartitioner.h"
 
@@ -21,6 +23,28 @@ void TSDBUploadStage::process(
     RefPtr<SessionContext> ctx,
     const String& tsdb_addr,
     http::HTTPConnectionPool* http) {
+  const auto& logjoin_cfg = ctx->customer_config->config.logjoin_config();
+
+  auto attrs_schema = msg::MessageSchema::decode(
+      logjoin_cfg.session_attributes_schema());
+
+  msg::DynamicMessage attrs(attrs_schema);
+  for (const auto& attr : ctx->attributes()) {
+    attrs.addField(attr.first, attr.second);
+  }
+
+  auto attrs_obj = attrs.data();
+  attrs_obj.id = 1;
+
+  msg::MessageObject session;
+  session.addChild(attrs_obj);
+
+  iputs(
+      "session: $0",
+      msg::MessagePrinter::print(
+          session,
+          *SessionSchema::forCustomer(ctx->customer_config->config)));
+
   //tsdb::RecordEnvelopeList records;
 
   //auto time = ctx->session.last_seen_time() * kMicrosPerSecond;
