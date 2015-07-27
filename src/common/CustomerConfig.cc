@@ -26,21 +26,27 @@ CustomerConfig createCustomerConfig(const String& customer) {
     auto ev = conf.mutable_logjoin_config()->add_session_event_schemas();
     ev->set_evtype("search_query");
     ev->set_evid(16);
-    ev->set_schema(msg::MessageSchema::fromProtobuf(cm::JoinedSearchQuery::descriptor())->encode().toString());
+    auto schema = msg::MessageSchema::fromProtobuf(cm::JoinedSearchQuery::descriptor());
+    schema->setName(ev->evtype());
+    ev->set_schema(schema->encode().toString());
   }
 
   {
     auto ev = conf.mutable_logjoin_config()->add_session_event_schemas();
     ev->set_evtype("page_view");
     ev->set_evid(25);
-    ev->set_schema(msg::MessageSchema::fromProtobuf(cm::JoinedPageView::descriptor())->encode().toString());
+    auto schema = msg::MessageSchema::fromProtobuf(cm::JoinedPageView::descriptor());
+    schema->setName(ev->evtype());
+    ev->set_schema(schema->encode().toString());
   }
 
   {
     auto ev = conf.mutable_logjoin_config()->add_session_event_schemas();
     ev->set_evtype("cart_items");
     ev->set_evid(52);
-    ev->set_schema(msg::MessageSchema::fromProtobuf(cm::JoinedCartItem::descriptor())->encode().toString());
+    auto schema = msg::MessageSchema::fromProtobuf(cm::JoinedCartItem::descriptor());
+    schema->setName(ev->evtype());
+    ev->set_schema(schema->encode().toString());
   }
 
   conf.mutable_logjoin_config()->set_session_attributes_schema(
