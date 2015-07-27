@@ -99,6 +99,7 @@ public:
   MessageSchema(const MessageSchema& other);
 
   const String& name() const;
+  void setName(const String& name);
 
   const Vector<MessageSchemaField>& fields() const;
   bool hasField(const String& name) const;

@@ -287,6 +287,10 @@ const String& MessageSchema::name() const {
   return name_;
 }
 
+void MessageSchema::setName(const String& name) {
+  name_ = name;
+}
+
 const Vector<MessageSchemaField>& MessageSchema::fields() const {
   return fields_;
 }
