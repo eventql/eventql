@@ -17,9 +17,9 @@ message TableConfig {
   required string tsdb_namespace = 6;
 
   /**
-   * The full path/name of the schema
+   * The schema for this table
    */
-  required string schema = 7;
+  required bytes schema = 7;
 
   /**
    * The stream key prefix for which this config should be applied/. (empty

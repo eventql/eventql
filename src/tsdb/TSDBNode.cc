@@ -55,16 +55,6 @@ Option<RefPtr<Table>> TSDBNode::findTableWithLock(
   }
 }
 
-void TSDBNode::configure(const TSDBNodeConfig& conf, const String& base_path) {
-  for (const auto& schema_file : conf.include_protobuf_schema()) {
-    schemas_.loadProtobufFile(base_path, schema_file);
-  }
-
-  for (const auto& sc : conf.event_stream()) {
-    createTable(sc);
-  }
-}
-
 void TSDBNode::createTable(const TableConfig& table) {
   std::unique_lock<std::mutex> lk(mutex_);
   auto stream_ns_key = table.tsdb_namespace() + "~" + table.table_name();
@@ -73,7 +63,7 @@ void TSDBNode::createTable(const TableConfig& table) {
       stream_ns_key,
       new Table(
           table,
-          schemas_.getSchema(table.schema())));
+          msg::MessageSchema::decode(table.schema())));
 }
 
 void TSDBNode::start(
@@ -142,11 +132,21 @@ void TSDBNode::reopenPartitions() {
     PartitionState state;
     state.decode(&reader);
 
+    auto table = findTableWithLock(tsdb_namespace, state.stream_key);
+    if (table.isEmpty()) {
+      logWarning(
+          "tsdb",
+          "Orphaned partition: $0/$1",
+          state.stream_key,
+          partition_key.toString());
+      continue;
+    }
+
     auto partition = Partition::reopen(
         partition_key,
         state,
         db_key,
-        findTableWithLock(tsdb_namespace, state.stream_key).get(),
+        table.get(),
         &noderef_);
 
     partitions_.emplace(db_key, partition);

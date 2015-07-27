@@ -37,8 +37,6 @@ public:
       RefPtr<dproc::ReplicationScheme> replication_scheme,
       http::HTTPConnectionPool* http);
 
-  void configure(const TSDBNodeConfig& config, const String& base_path);
-
   void createTable(const TableConfig& config);
 
   Option<RefPtr<Table>> findTable(
@@ -110,7 +108,6 @@ protected:
   HashMap<String, RefPtr<Partition>> partitions_;
   Vector<RefPtr<CompactionWorker>> compaction_workers_;
   Vector<RefPtr<ReplicationWorker>> replication_workers_;
-  msg::MessageSchemaRepository schemas_;
 };
 
 } // namespace tdsb
