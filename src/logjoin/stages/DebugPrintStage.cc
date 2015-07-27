@@ -30,8 +30,8 @@ void DebugPrintStage::process(RefPtr<SessionContext> ctx) {
   for (const auto& ev : ctx->outputEvents()) {
     stx::iputs(
         "    > output_event evtype=$0\n$1",
-        ev->schema->name(),
-        msg::MessagePrinter::print(ev->data, *ev->schema));
+        ev->schema()->name(),
+        msg::MessagePrinter::print(ev->data(), *ev->schema()));
   }
 }
 

@@ -207,7 +207,7 @@ void SessionJoin::process(RefPtr<SessionContext> ctx) {
     qobj->addStringField("query_type", query_type);
 
     for (const auto& item : q.items) {
-      qobj->addObject("result_items", [&item] (JoinedEvent* ev) {
+      qobj->addObject("result_items", [&item] (msg::DynamicMessage* ev) {
         ev->addUInt32Field("position", item.position);
         ev->addStringField("item_id", item.item.docID().docid);
         ev->addBoolField("clicked", item.clicked);
