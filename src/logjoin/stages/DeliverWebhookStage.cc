@@ -31,6 +31,20 @@ void DeliverWebhookStage::process(RefPtr<SessionContext> ctx) {
     json::JSONOutputStream json(BufferOutputStream::fromBuffer(&json_buf));
 
     json.beginObject();
+    json.addObjectEntry("attributes");
+    json.beginObject();
+    size_t nattr = 0;
+    for (const auto& attr : ctx->attributes()) {
+      if (++nattr > 1) {
+        json.addComma();
+      }
+
+      json.addObjectEntry(attr.first);
+      json.addString(attr.second);
+    }
+    json.endObject();
+    json.addComma();
+
     json.addObjectEntry("events");
     json.beginArray();
 
