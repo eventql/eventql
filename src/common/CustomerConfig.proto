@@ -11,6 +11,7 @@ package cm;
 message EventDefinition {
   required string evtype = 1;
   required bytes schema = 2;
+  required uint32 evid = 3;
 };
 
 message LogJoinWebhook {
@@ -21,6 +22,7 @@ message LogJoinConfig {
   repeated LogJoinWebhook webhooks = 1;
   repeated EventDefinition session_event_schemas = 2;
   required bytes session_attributes_schema = 3;
+  required uint32 session_schema_next_field_id = 4;
 };
 
 message CustomerConfig {

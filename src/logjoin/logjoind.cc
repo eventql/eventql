@@ -42,6 +42,7 @@
 #include <inventory/ItemRef.h>
 #include <fnord-fts/Analyzer.h>
 #include "common/CustomerDirectory.h"
+#include "common/SessionSchema.h"
 #include "common.h"
 
 using namespace cm;
@@ -203,36 +204,7 @@ int main(int argc, const char** argv) {
 
   /* open customer directory */
   CustomerDirectory customer_dir;
-
-  {
-    CustomerConfig dwn;
-    dwn.set_customer("dawanda");
-    auto hook = dwn.mutable_logjoin_config()->add_webhooks();
-    hook->set_target_url("http://localhost:8080/mywebhook");
-
-    {
-      auto ev = dwn.mutable_logjoin_config()->add_session_event_schemas();
-      ev->set_evtype("search_query");
-      ev->set_schema(msg::MessageSchema::fromProtobuf(cm::JoinedSearchQuery::descriptor())->encode().toString());
-    }
-
-    {
-      auto ev = dwn.mutable_logjoin_config()->add_session_event_schemas();
-      ev->set_evtype("page_view");
-      ev->set_schema(msg::MessageSchema::fromProtobuf(cm::JoinedPageView::descriptor())->encode().toString());
-    }
-
-    {
-      auto ev = dwn.mutable_logjoin_config()->add_session_event_schemas();
-      ev->set_evtype("cart_items");
-      ev->set_schema(msg::MessageSchema::fromProtobuf(cm::JoinedCartItem::descriptor())->encode().toString());
-    }
-
-    dwn.mutable_logjoin_config()->set_session_attributes_schema(
-        msg::MessageSchema::fromProtobuf(cm::DefaultSessionAttributes::descriptor())->encode().toString());
-
-    customer_dir.updateCustomerConfig(dwn);
-  }
+  customer_dir.updateCustomerConfig(createCustomerConfig("dawanda"));
 
   HashMap<String, URI> input_feeds;
   input_feeds.emplace(

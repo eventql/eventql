@@ -114,7 +114,7 @@ message JoinedSearchQuery {
    * The language of the search query (i.e. on which language page/subdomain
    * was the query executed)
    */
-  optional ProtoLanguage language = 2;
+  optional ProtoLanguage language = 69;
 
   /**
    * The "device type" (mobile/table/desktop) for this query. N.B. that the
@@ -137,7 +137,7 @@ message JoinedSearchQuery {
   /**
    * The page number of the query was paginated. Starts from 1 == first page
    */
-  optional uint32 page = 1
+  optional uint32 page = 68
       [(stx.coding) = { maxval: 100 encoding: "BITPACK" }];
 
   /**

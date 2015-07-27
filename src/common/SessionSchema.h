@@ -7,20 +7,17 @@
  * permission is obtained.
  */
 #pragma once
-#include "stx/stdtypes.h"
-#include "stx/autoref.h"
-#include "common/CustomerConfig.pb.h"
+#include "stx/protobuf/MessageSchema.h"
+#include "common/CustomerConfig.h"
 
 using namespace stx;
 
 namespace cm {
 
-struct CustomerConfigRef : public RefCounted {
-  CustomerConfigRef(CustomerConfig _config) : config(_config) {}
-  CustomerConfig config;
+struct SessionSchema {
+
+  static RefPtr<msg::MessageSchema> forCustomer(CustomerConfig& cfg);
+
 };
 
-CustomerConfig createCustomerConfig(const String& customer);
-
 } // namespace cm
-
