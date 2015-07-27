@@ -15,39 +15,41 @@ using namespace stx;
 namespace cm {
 
 CustomerConfig createCustomerConfig(const String& customer) {
-  CustomerConfig dwn;
+  CustomerConfig conf;
 
-  dwn.set_customer(customer);
+  conf.set_customer(customer);
 
-  auto hook = dwn.mutable_logjoin_config()->add_webhooks();
+  auto hook = conf.mutable_logjoin_config()->add_webhooks();
   hook->set_target_url("http://localhost:8080/mywebhook");
 
   {
-    auto ev = dwn.mutable_logjoin_config()->add_session_event_schemas();
+    auto ev = conf.mutable_logjoin_config()->add_session_event_schemas();
     ev->set_evtype("search_query");
     ev->set_evid(16);
     ev->set_schema(msg::MessageSchema::fromProtobuf(cm::JoinedSearchQuery::descriptor())->encode().toString());
   }
 
   {
-    auto ev = dwn.mutable_logjoin_config()->add_session_event_schemas();
+    auto ev = conf.mutable_logjoin_config()->add_session_event_schemas();
     ev->set_evtype("page_view");
     ev->set_evid(25);
     ev->set_schema(msg::MessageSchema::fromProtobuf(cm::JoinedPageView::descriptor())->encode().toString());
   }
 
   {
-    auto ev = dwn.mutable_logjoin_config()->add_session_event_schemas();
+    auto ev = conf.mutable_logjoin_config()->add_session_event_schemas();
     ev->set_evtype("cart_items");
     ev->set_evid(52);
     ev->set_schema(msg::MessageSchema::fromProtobuf(cm::JoinedCartItem::descriptor())->encode().toString());
   }
 
-  dwn.mutable_logjoin_config()->set_session_attributes_schema(
+  conf.mutable_logjoin_config()->set_session_attributes_schema(
       msg::MessageSchema::fromProtobuf(
           cm::DefaultSessionAttributes::descriptor())->encode().toString());
 
-  dwn.mutable_logjoin_config()->set_session_schema_next_field_id(70);
+  conf.mutable_logjoin_config()->set_session_schema_next_field_id(70);
+
+  return conf;
 }
 
 } // namespace cm
