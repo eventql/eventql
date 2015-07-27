@@ -27,6 +27,13 @@ void DebugPrintStage::process(RefPtr<SessionContext> ctx) {
         String(ev.data.size() > 40 ? "[...]" : ""));
   }
 
+  for (const auto& attr : ctx->attributes()) {
+    stx::iputs(
+        "    > output_attr key=$0 value=$1",
+        attr.first,
+        attr.second);
+  }
+
   for (const auto& ev : ctx->outputEvents()) {
     stx::iputs(
         "    > output_event evtype=$0\n$1",

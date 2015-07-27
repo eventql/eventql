@@ -208,10 +208,10 @@ void SessionJoin::process(RefPtr<SessionContext> ctx) {
     ivobj->set_item_id(iv.item.docID().docid);
   }
 
-  ctx->session.set_num_cart_items(num_cart_items);
-  ctx->session.set_cart_value_eurcents(cart_value_eurcents);
-  ctx->session.set_num_order_items(num_order_items);
-  ctx->session.set_gmv_eurcents(gmv_eurcents);
+  ctx->setAttribute("num_cart_items", StringUtil::toString(num_cart_items));
+  ctx->setAttribute("cart_value_eurcents", StringUtil::toString(cart_value_eurcents));
+  ctx->setAttribute("num_order_items", StringUtil::toString(num_order_items));
+  ctx->setAttribute("gmv_eurcents", StringUtil::toString(gmv_eurcents));
 }
 
 void SessionJoin::processSearchQueryEvent(
