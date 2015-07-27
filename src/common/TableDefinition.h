@@ -7,21 +7,12 @@
  * permission is obtained.
  */
 #pragma once
-#include "stx/protobuf/MessageSchema.h"
-#include "common/CustomerConfig.h"
-#include "common/TableDefinition.h"
+#include <stx/stdtypes.h>
+#include <analytics/TableDefinition.pb.h>
+#include <tsdb/TableConfig.pb.h>
 
 using namespace stx;
 
 namespace cm {
 
-struct SessionSchema {
-
-  static RefPtr<msg::MessageSchema> forCustomer(const CustomerConfig& cfg);
-
-  static Vector<TableDefinition> tableDefinitionsForCustomer(
-      const CustomerConfig& cfg);
-
-};
-
-} // namespace cm
+}

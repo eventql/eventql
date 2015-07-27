@@ -5,5 +5,6 @@ add_library(customerdirectory OBJECT
     CustomerConfig.cc
     CustomerDirectory.cc
     SessionSchema.cc
+    TableDefinition.cc
     ${PROTO_SRCS})
 
