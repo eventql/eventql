@@ -17,6 +17,7 @@ add_library(stx-protobuf OBJECT
     MessagePrinter.cc
     MessageObject.cc
     MessageSchema.cc
+    DynamicMessage.cc
     JSONEncoder.cc)
 
 add_dependencies(stx-protobuf stx-base)
