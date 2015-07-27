@@ -120,14 +120,13 @@ void SessionJoin::process(RefPtr<SessionContext> ctx) {
   }
 
   for (const auto& ci : cart_items) {
-    auto ciobj = ctx->session.add_cart_items();
-
-    ciobj->set_time(ci.time.unixMicros() / kMicrosPerSecond);
-    ciobj->set_item_id(ci.item.docID().docid);
-    ciobj->set_quantity(ci.quantity);
-    ciobj->set_price_cents(ci.price_cents);
-    ciobj->set_currency((Currency) currencyFromString(ci.currency));
-    ciobj->set_checkout_step(ci.checkout_step);
+    auto ciobj = ctx->addOutputEvent("cart_items");
+    ciobj->addUInt32Field("time", ci.time.unixMicros() / kMicrosPerSecond);
+    ciobj->addField("item_id", ci.item.docID().docid);
+    ciobj->addUInt32Field("quantity", ci.quantity);
+    ciobj->addUInt32Field("price_cents", ci.price_cents);
+    ciobj->addUInt32Field("currency", (uint32_t) currencyFromString(ci.currency));
+    ciobj->addUInt32Field("checkout_step", ci.checkout_step);
   }
 
   for (const auto& q : queries) {
@@ -202,10 +201,9 @@ void SessionJoin::process(RefPtr<SessionContext> ctx) {
   }
 
   for (const auto& iv : page_views) {
-    auto ivobj = ctx->session.add_page_views();
-
-    ivobj->set_time(iv.time.unixMicros() / kMicrosPerSecond);
-    ivobj->set_item_id(iv.item.docID().docid);
+    auto ivobj = ctx->addOutputEvent("page_view");
+    ivobj->addUInt32Field("time", iv.time.unixMicros() / kMicrosPerSecond);
+    ivobj->addField("item_id", iv.item.docID().docid);
   }
 
   ctx->setAttribute("num_cart_items", StringUtil::toString(num_cart_items));
