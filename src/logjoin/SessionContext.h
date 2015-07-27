@@ -21,6 +21,9 @@ struct JoinedEvent {
   JoinedEvent(RefPtr<msg::MessageSchema> _schema);
 
   void addUInt32Field(const String& name, uint32_t val);
+  void addStringField(const String& name, const String& val);
+  void addBoolField(const String& name, bool val);
+  void addObject(const String& name, Function<void (JoinedEvent* ev)> fn);
 
   void toJSON(json::JSONOutputStream* json) const;
 

@@ -30,6 +30,56 @@ void JoinedEvent::addUInt32Field(const String& name, uint32_t val) {
   data.addChild(field_id, uint32_t(val));
 }
 
+void JoinedEvent::addBoolField(const String& name, bool val) {
+  if (!schema->hasField(name)) {
+    return;
+  }
+
+  auto field_id = schema->fieldId(name);
+  if (schema->fieldType(field_id) != msg::FieldType::BOOLEAN) {
+    return;
+  }
+
+  if (val) {
+    data.addChild(field_id, msg::TRUE);
+  } else {
+    data.addChild(field_id, msg::FALSE);
+  }
+}
+
+void JoinedEvent::addStringField(const String& name, const String& value) {
+  if (!schema->hasField(name)) {
+    return;
+  }
+
+  auto field_id = schema->fieldId(name);
+  if (schema->fieldType(field_id) != msg::FieldType::STRING) {
+    return;
+  }
+
+  data.addChild(field_id, value);
+}
+
+void JoinedEvent::addObject(
+    const String& name,
+    Function<void (JoinedEvent* ev)> fn) {
+  if (!schema->hasField(name)) {
+    return;
+  }
+
+  auto field_id = schema->fieldId(name);
+  if (schema->fieldType(field_id) != msg::FieldType::OBJECT) {
+    return;
+  }
+
+  auto subschema = schema->fieldSchema(field_id);
+
+  JoinedEvent subev(subschema);
+  fn(&subev);
+  subev.data.id = field_id;
+  data.addChild(subev.data);
+}
+
 void JoinedEvent::toJSON(json::JSONOutputStream* json) const {
   json->beginObject();
   json->addObjectEntry("type");
