@@ -8,6 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <stx/stdtypes.h>
+#include <stx/Human.h>
 #include <stx/protobuf/DynamicMessage.h>
 #include <stx/protobuf/JSONEncoder.h>
 
@@ -17,6 +18,75 @@ namespace msg {
 DynamicMessage::DynamicMessage(
     RefPtr<msg::MessageSchema> schema) :
     schema_(schema) {}
+
+bool DynamicMessage::addField(const String& name, const String& value) {
+  if (!schema_->hasField(name)) {
+    return false;
+  }
+
+  auto field_id = schema_->fieldId(name);
+  switch (schema_->fieldType(field_id)) {
+
+    case msg::FieldType::BOOLEAN: {
+      auto v = Human::parseBoolean(value);
+      if (v.isEmpty()) {
+        return false;
+      } else {
+        if (v.get()) {
+          data_.addChild(field_id, msg::TRUE);
+        } else {
+          data_.addChild(field_id, msg::FALSE);
+        }
+        return true;
+      }
+    }
+
+    case msg::FieldType::UINT32:
+      try {
+        auto v = std::stoull(value);
+        data_.addChild(field_id, uint32_t(v));
+        return true;
+      } catch (...) {
+        return false;
+      }
+
+    case msg::FieldType::UINT64:
+      try {
+        auto v = std::stoull(value);
+        data_.addChild(field_id, uint64_t(v));
+        return true;
+      } catch (...) {
+        return false;
+      }
+
+    case msg::FieldType::DOUBLE:
+      try {
+        auto v = std::stod(value);
+        data_.addChild(field_id, double(v));
+        return true;
+      } catch (...) {
+        return false;
+      }
+
+    case msg::FieldType::DATETIME: {
+      auto v = Human::parseTime(value);
+      if (v.isEmpty()) {
+        return false;
+      } else {
+        data_.addChild(field_id, v.get());
+        return true;
+      }
+    }
+
+    case msg::FieldType::STRING:
+      data_.addChild(field_id, value);
+      return true;
+
+    case msg::FieldType::OBJECT:
+      return false;
+
+  }
+}
 
 bool DynamicMessage::addUInt32Field(const String& name, uint32_t val) {
   if (!schema_->hasField(name)) {
