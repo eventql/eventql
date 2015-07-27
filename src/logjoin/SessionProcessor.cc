@@ -39,8 +39,10 @@ void SessionProcessor::enqueueSession(const TrackedSession& session) {
 }
 
 void SessionProcessor::processSession(const TrackedSession& session) {
-  auto ctx = mkRef(new SessionContext(session));
-  ctx->customer_config = customer_dir_->configFor(session.customer_key);
+  auto ctx = mkRef(
+      new SessionContext(
+          session,
+          customer_dir_->configFor(session.customer_key)));
 
   for (const auto& stage : stages_) {
     stage(ctx);
