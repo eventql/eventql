@@ -448,3 +448,61 @@ message JoinedSession {
 
 }
 
+
+message DefaultSessionAttributes {
+
+  /**
+   * The customer's session id
+   */
+  optional string customer_session_id = 61
+      [(stx.coding) = { maxval: 4096 }];
+
+  /**
+   * The time at which this search query was first/last seen
+   */
+  optional uint32 first_seen_time = 53;
+  optional uint32 last_seen_time = 54;
+
+  optional string referrer_url = 57
+      [(stx.coding) = { maxval: 1024 }];
+
+  optional string referrer_campaign = 58
+      [(stx.coding) = { maxval: 4096 }];
+
+  optional string referrer_name = 59
+      [(stx.coding) = { maxval: 255 }];
+
+  /**
+   * How many unique cart items have we seen in this session
+   */
+  optional uint32 num_cart_items = 47
+      [(stx.coding) = { maxval: 250 encoding: "BITPACK" }];
+
+  /**
+   * How many unique items have been bought in this session. value >1 implies
+   * that there was a transaction in this session
+   */
+  optional uint32 num_order_items = 48
+      [(stx.coding) = { maxval: 250 encoding: "BITPACK" }];
+
+  /**
+   * The gross value of all cart items in this session in euro cents
+   */
+  optional uint32 cart_value_eurcents = 49
+      [(stx.coding) = { maxval: 16777215 encoding: "LEB128" }];
+
+  /**
+   * The gross merchandise value of all transactions/sales in this session in
+   * euro cents
+   */
+  optional uint32 gmv_eurcents = 50
+      [(stx.coding) = { maxval: 16777215 encoding: "LEB128" }];
+
+  /**
+   * A number indicating in which test group this session was. DaWanda sets this
+   * to (1..100]
+   */
+  optional uint32 ab_test_group = 51
+      [(stx.coding) = { maxval: 100 encoding: "BITPACK" }];
+
+};

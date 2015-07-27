@@ -19,7 +19,8 @@ message LogJoinWebhook {
 
 message LogJoinConfig {
   repeated LogJoinWebhook webhooks = 1;
-  repeated EventDefinition session_events = 2;
+  repeated EventDefinition session_event_schemas = 2;
+  required bytes session_attributes_schema = 3;
 };
 
 message CustomerConfig {
