@@ -29,6 +29,8 @@ void BuildSessionAttributes::process(RefPtr<SessionContext> ctx) {
       StringUtil::toString(last_seen.get().unixMicros() / kMicrosPerSecond));
 
 
+  ctx->time = last_seen.get();
+
   for (const auto& ev : ctx->events) {
     if (ev.evtype != "__sattr") {
       continue;
