@@ -209,6 +209,11 @@ int main(int argc, const char** argv) {
     dwn.set_customer("dawanda");
     auto hook = dwn.mutable_logjoin_config()->add_webhooks();
     hook->set_target_url("http://localhost:8080/mywebhook");
+
+    auto qev = dwn.mutable_logjoin_config()->add_session_events();
+    qev->set_evtype("search_query");
+    qev->set_schema(msg::MessageSchema::fromProtobuf(cm::JoinedSearchQuery::descriptor())->encode().toString());
+
     customer_dir.updateCustomerConfig(dwn);
   }
 
