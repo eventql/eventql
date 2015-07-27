@@ -49,6 +49,15 @@ Vector<TableDefinition> SessionSchema::tableDefinitionsForCustomer(
     const CustomerConfig& cfg) {
   Vector<TableDefinition> tbls;
 
+  for (const auto& evschema : cfg.logjoin_config().session_event_schemas()) {
+    TableDefinition td;
+    td.set_customer(cfg.customer());
+    td.set_table_name("sessions." + evschema.evtype());
+    td.set_type(TBL_LOGTABLE);
+    td.set_schema_inline(evschema.schema());
+    tbls.emplace_back(td);
+  }
+
   {
     TableDefinition td;
     td.set_customer(cfg.customer());
