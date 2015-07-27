@@ -22,6 +22,8 @@ struct JoinedEvent {
 
   void addUInt32Field(const String& name, uint32_t val);
 
+  void toJSON(json::JSONOutputStream* json) const;
+
   RefPtr<msg::MessageSchema> schema;
   msg::MessageObject data;
 };
@@ -41,6 +43,8 @@ struct SessionContext : public RefCounted {
   JoinedSession session;
 
   JoinedEvent* addOutputEvent(const String& evtype);
+
+  const Vector<ScopedPtr<JoinedEvent>>& outputEvents() const;
 
 protected:
 

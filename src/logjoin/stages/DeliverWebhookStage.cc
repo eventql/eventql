@@ -31,12 +31,19 @@ void DeliverWebhookStage::process(RefPtr<SessionContext> ctx) {
     json::JSONOutputStream json(BufferOutputStream::fromBuffer(&json_buf));
 
     json.beginObject();
-    json.addObjectEntry("session");
+    json.addObjectEntry("events");
+    json.beginArray();
 
-    msg::MessageObject obj;
-    msg::MessageDecoder::decode(*msg::encode(ctx->session), *schema, &obj); // FIXPAUL slooow
-    msg::JSONEncoder::encode(obj, *schema, &json);
+    size_t nevent = 0;
+    for (const auto& ev : ctx->outputEvents()) {
+      if (++nevent > 1) {
+        json.addComma();
+      }
 
+      ev->toJSON(&json);
+    }
+
+    json.endArray();
     json.endObject();
 
     stx::iputs("session json: $0", json_buf.toString());

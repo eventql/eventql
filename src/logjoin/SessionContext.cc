@@ -6,6 +6,7 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
+#include "stx/protobuf/JSONEncoder.h"
 #include "logjoin/SessionContext.h"
 
 using namespace stx;
@@ -29,6 +30,16 @@ void JoinedEvent::addUInt32Field(const String& name, uint32_t val) {
   data.addChild(field_id, uint32_t(val));
 }
 
+void JoinedEvent::toJSON(json::JSONOutputStream* json) const {
+  json->beginObject();
+  json->addObjectEntry("type");
+  json->addString(schema->name());
+  json->addComma();
+  json->addObjectEntry("data");
+  msg::JSONEncoder::encode(data, *schema, json);
+  json->endObject();
+}
+
 SessionContext::SessionContext(
     TrackedSession session) :
     uuid(session.uuid),
@@ -50,6 +61,10 @@ JoinedEvent* SessionContext::addOutputEvent(const String& evtype) {
 
   RAISEF(kNotFoundError, "event schema not found: $0", evtype);
   return nullptr;
+}
+
+const Vector<ScopedPtr<JoinedEvent>>& SessionContext::outputEvents() const {
+  return output_events_;
 }
 
 } // namespace cm
