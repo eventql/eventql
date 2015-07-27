@@ -8,18 +8,21 @@
  */
 package cm;
 
+message EventDefinition {
+  required string evtype = 1;
+  required bytes schema = 2;
+};
+
 message LogJoinWebhook {
   required string target_url = 1;
 };
 
 message LogJoinConfig {
   repeated LogJoinWebhook webhooks = 1;
+  repeated EventDefinition session_events = 2;
 };
 
 message CustomerConfig {
-
   required string customer = 1;
-
   required LogJoinConfig logjoin_config = 2;
-
 };

@@ -227,6 +227,185 @@ void SessionJoin::process(RefPtr<SessionContext> ctx) {
   ctx->session.set_cart_value_eurcents(cart_value_eurcents);
   ctx->session.set_num_order_items(num_order_items);
   ctx->session.set_gmv_eurcents(gmv_eurcents);
+
+
+  for (const auto& q : queries) {
+    auto ev = ctx->addOutputEvent("search_query");
+    ev->addUInt32Field("time", q.time.unixMicros() / kMicrosPerSecond);
+    ev->addUInt32Field("language", (uint32_t) cm::extractLanguage(q.attrs));
+
+//
+//    /* queries.query_string */
+//    auto qstr = cm::extractQueryString(q.attrs);
+//    if (!qstr.isEmpty()) {
+//      auto qstr_norm = normalize_(lang, qstr.get());
+//      qry_obj.addChild(searchq_schema->fieldId("query_string"), qstr.get());
+//      qry_obj.addChild(searchq_schema->fieldId("query_string_normalized"), qstr_norm);
+//    }
+//
+//    /* queries.shopid */
+//    auto slrid = cm::extractAttr(q.attrs, "slrid");
+//    if (!slrid.isEmpty()) {
+//      uint32_t sid = std::stoul(slrid.get());
+//      qry_obj.addChild(searchq_schema->fieldId("shop_id"), sid);
+//    }
+//
+//    qry_obj.addChild(searchq_schema->fieldId("num_result_items"), q.nitems);
+//    qry_obj.addChild(searchq_schema->fieldId("num_result_items_clicked"), q.nclicks);
+//    qry_obj.addChild(searchq_schema->fieldId("num_ad_impressions"), q.nads);
+//    qry_obj.addChild(searchq_schema->fieldId("num_ad_clicks"), q.nadclicks);
+//    qry_obj.addChild(searchq_schema->fieldId("num_cart_items"), q.num_cart_items);
+//    qry_obj.addChild(searchq_schema->fieldId("cart_value_eurcents"), q.cart_value_eurcents);
+//    qry_obj.addChild(searchq_schema->fieldId("num_order_items"), q.num_order_items);
+//    qry_obj.addChild(searchq_schema->fieldId("gmv_eurcents"), q.gmv_eurcents);
+//
+//    /* queries.page */
+//    auto pg_str = cm::extractAttr(q.attrs, "pg");
+//    if (!pg_str.isEmpty()) {
+//      uint32_t pg = std::stoul(pg_str.get());
+//      qry_obj.addChild(searchq_schema->fieldId("page"), pg);
+//    }
+//
+//    /* queries.ab_test_group */
+//    auto abgrp = cm::extractABTestGroup(q.attrs);
+//    if (!abgrp.isEmpty()) {
+//      sess_abgrp = abgrp.get();
+//      qry_obj.addChild(searchq_schema->fieldId("ab_test_group"), abgrp.get());
+//    }
+//
+//    /* queries.experiments */
+//    auto qexps = q.joinedExperiments();
+//    if (qexps.size() > 0) {
+//      qry_obj.addChild(searchq_schema->fieldId("experiments"), qexps);
+//    }
+//
+//    /* queries.category1 */
+//    auto qcat1 = cm::extractAttr(q.attrs, "q_cat1");
+//    if (!qcat1.isEmpty()) {
+//      uint32_t c = std::stoul(qcat1.get());
+//      qry_obj.addChild(searchq_schema->fieldId("category1"), c);
+//    }
+//
+//    /* queries.category1 */
+//    auto qcat2 = cm::extractAttr(q.attrs, "q_cat2");
+//    if (!qcat2.isEmpty()) {
+//      uint32_t c = std::stoul(qcat2.get());
+//      qry_obj.addChild(searchq_schema->fieldId("category2"), c);
+//    }
+//
+//    /* queries.category1 */
+//    auto qcat3 = cm::extractAttr(q.attrs, "q_cat3");
+//    if (!qcat3.isEmpty()) {
+//      uint32_t c = std::stoul(qcat3.get());
+//      qry_obj.addChild(searchq_schema->fieldId("category3"), c);
+//    }
+//
+//    /* queries.device_type */
+//    qry_obj.addChild(
+//        searchq_schema->fieldId("device_type"),
+//        (uint32_t) extractDeviceType(q.attrs));
+//
+//    /* queries.page_type */
+//    auto page_type = extractPageType(q.attrs);
+//    qry_obj.addChild(
+//        searchq_schema->fieldId("page_type"),
+//        (uint32_t) page_type);
+//
+//    /* queries.query_type */
+//    String query_type = pageTypeToString(page_type);
+//    auto qtype_attr = cm::extractAttr(q.attrs, "qt");
+//    if (!qtype_attr.isEmpty()) {
+//      query_type = qtype_attr.get();
+//    }
+//    qry_obj.addChild(
+//        searchq_schema->fieldId("query_type"),
+//        query_type);
+//
+//    for (const auto& item : q.items) {
+//      auto& item_obj = qry_obj.addChild(
+//          searchq_schema->fieldId("result_items"));
+//
+//      item_obj.addChild(
+//          searchq_item_schema->fieldId("position"),
+//          (uint32_t) item.position);
+//
+//      item_obj.addChild(
+//          searchq_item_schema->fieldId("item_id"),
+//          item.item.docID().docid);
+//
+//      if (item.clicked) {
+//        item_obj.addChild(
+//            searchq_item_schema->fieldId("clicked"),
+//            msg::TRUE);
+//      } else {
+//        item_obj.addChild(
+//            searchq_item_schema->fieldId("clicked"),
+//            msg::FALSE);
+//      }
+//
+//      if (item.seen) {
+//        item_obj.addChild(
+//            searchq_item_schema->fieldId("seen"),
+//            msg::TRUE);
+//      } else {
+//        item_obj.addChild(
+//            searchq_item_schema->fieldId("seen"),
+//            msg::FALSE);
+//      }
+//
+//      auto docid = item.item.docID();
+//
+//      auto shopid = get_field_(docid, "shop_id");
+//      if (shopid.isEmpty()) {
+//        //stx::logWarning(
+//        //    "cm.logjoin",
+//        //    "item not found in featureindex: $0",
+//        //    docid.docid);
+//      } else {
+//        item_obj.addChild(
+//            searchq_item_schema->fieldId("shop_id"),
+//            (uint32_t) std::stoull(shopid.get()));
+//      }
+//
+//      auto category1 = get_field_(docid, "category1");
+//      if (!category1.isEmpty()) {
+//        item_obj.addChild(
+//            searchq_item_schema->fieldId("category1"),
+//            (uint32_t) std::stoull(category1.get()));
+//      }
+//
+//      auto category2 = get_field_(docid, "category2");
+//      if (!category2.isEmpty()) {
+//        item_obj.addChild(
+//            searchq_item_schema->fieldId("category2"),
+//            (uint32_t) std::stoull(category2.get()));
+//      }
+//
+//      auto category3 = get_field_(docid, "category3");
+//      if (!category3.isEmpty()) {
+//        item_obj.addChild(
+//            searchq_item_schema->fieldId("category3"),
+//            (uint32_t) std::stoull(category3.get()));
+//      }
+//
+//      /* DAWANDA HACK */
+//      if (item.position <= 4 && slrid.isEmpty()) {
+//        item_obj.addChild(
+//            searchq_item_schema->fieldId("is_paid_result"),
+//            msg::TRUE);
+//      }
+//
+//      if ((item.position > 40 && slrid.isEmpty()) ||
+//          StringUtil::beginsWith(query_type, "recos_")) {
+//        item_obj.addChild(
+//            searchq_item_schema->fieldId("is_recommendation"),
+//            msg::TRUE);
+//      }
+//      /* EOF DAWANDA HACK */
+//    }
+  }
+
+
 }
 
 void SessionJoin::processSearchQueryEvent(
