@@ -9,6 +9,7 @@
 #pragma once
 #include "stx/protobuf/MessageSchema.h"
 #include "common/CustomerConfig.h"
+#include "analytics/TableDefinition.h"
 
 using namespace stx;
 
@@ -16,7 +17,10 @@ namespace cm {
 
 struct SessionSchema {
 
-  static RefPtr<msg::MessageSchema> forCustomer(CustomerConfig& cfg);
+  static RefPtr<msg::MessageSchema> forCustomer(const CustomerConfig& cfg);
+
+  static Vector<TableDefinition> tableDefinitionsForCustomer(
+      const CustomerConfig& cfg);
 
 };
 

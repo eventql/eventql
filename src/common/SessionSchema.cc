@@ -12,7 +12,8 @@ using namespace stx;
 
 namespace cm {
 
-RefPtr<msg::MessageSchema> SessionSchema::forCustomer(CustomerConfig& cfg) {
+RefPtr<msg::MessageSchema> SessionSchema::forCustomer(
+    const CustomerConfig& cfg) {
   Vector<msg::MessageSchemaField> events;
 
   for (const auto& evschema : cfg.logjoin_config().session_event_schemas()) {
@@ -42,6 +43,22 @@ RefPtr<msg::MessageSchema> SessionSchema::forCustomer(CustomerConfig& cfg) {
                 true,
                 new msg::MessageSchema("event", events)),
       });
+}
+
+Vector<TableDefinition> SessionSchema::tableDefinitionsForCustomer(
+    const CustomerConfig& cfg) {
+  Vector<TableDefinition> tbls;
+
+  {
+    TableDefinition td;
+    td.set_customer(cfg.customer());
+    td.set_table_name("sessions");
+    td.set_type(TBL_LOGTABLE);
+    td.set_schema_inline(SessionSchema::forCustomer(cfg)->encode().toString());
+    tbls.emplace_back(td);
+  }
+
+  return tbls;
 }
 
 } // namespace cm
