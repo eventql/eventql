@@ -238,17 +238,17 @@ int main(int argc, const char** argv) {
       std::bind(&BuildSessionAttributes::process, std::placeholders::_1));
 
   /* pipeline stage: NormalizeQueryStrings */
-  stx::fts::Analyzer analyzer(flags.getString("conf"));
-  session_proc.addPipelineStage(
-      std::bind(
-          &NormalizeQueryStrings::process,
-          NormalizeQueryStrings::NormalizeFn(
-              std::bind(
-                  &stx::fts::Analyzer::normalize,
-                  &analyzer,
-                  std::placeholders::_1,
-                  std::placeholders::_2)),
-          std::placeholders::_1));
+  //stx::fts::Analyzer analyzer(flags.getString("conf"));
+  //session_proc.addPipelineStage(
+  //    std::bind(
+  //        &NormalizeQueryStrings::process,
+  //        NormalizeQueryStrings::NormalizeFn(
+  //            std::bind(
+  //                &stx::fts::Analyzer::normalize,
+  //                &analyzer,
+  //                std::placeholders::_1,
+  //                std::placeholders::_2)),
+  //        std::placeholders::_1));
 
   session_proc.addPipelineStage(
       std::bind(&DebugPrintStage::process, std::placeholders::_1));
