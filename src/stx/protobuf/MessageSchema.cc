@@ -302,6 +302,11 @@ String MessageSchema::toString() const {
   return str;
 }
 
+bool MessageSchema::hasField(const String& path) const {
+  auto id = field_ids_.find(path);
+  return id != field_ids_.end();
+}
+
 uint32_t MessageSchema::fieldId(const String& path) const {
   auto id = field_ids_.find(path);
   if (id == field_ids_.end()) {
@@ -412,6 +417,13 @@ void MessageSchema::decode(util::BinaryMessageReader* buf) {
 
     addField(field);
   }
+}
+
+RefPtr<MessageSchema> MessageSchema::decode(const String& data) {
+  util::BinaryMessageReader reader(data.data(), data.size());
+  auto schema = mkRef(new MessageSchema(nullptr));
+  schema->decode(&reader);
+  return schema;
 }
 
 void MessageSchema::toJSON(json::JSONOutputStream* json) const {

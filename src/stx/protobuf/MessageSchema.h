@@ -101,6 +101,7 @@ public:
   const String& name() const;
 
   const Vector<MessageSchemaField>& fields() const;
+  bool hasField(const String& name) const;
   uint32_t fieldId(const String& name) const;
   FieldType fieldType(uint32_t id) const;
   const String& fieldName(uint32_t id) const;
@@ -112,6 +113,7 @@ public:
   Buffer encode() const;
   void encode(util::BinaryMessageWriter* buf) const;
   void decode(util::BinaryMessageReader* buf);
+  static RefPtr<msg::MessageSchema> decode(const String& buf);
 
   void toJSON(json::JSONOutputStream* json) const;
   void fromJSON(
