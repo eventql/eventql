@@ -21,8 +21,8 @@ public:
 
 protected:
 
-  static Option<UnixTime> firstSeenTime(const JoinedSession& session);
-  static Option<UnixTime> lastSeenTime(const JoinedSession& session);
+  static Option<UnixTime> firstSeenTime(SessionContext* session);
+  static Option<UnixTime> lastSeenTime(SessionContext* session);
 
 };
 
