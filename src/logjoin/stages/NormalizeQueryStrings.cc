@@ -16,16 +16,16 @@ namespace cm {
 void NormalizeQueryStrings::process(
       NormalizeFn normalize_fn,
       RefPtr<SessionContext> ctx) {
-  for (auto& q : *ctx->session.mutable_search_queries()) {
-    if (!q.has_query_string()) {
-      continue;
-    }
+  //for (auto& q : *ctx->session.mutable_search_queries()) {
+  //  if (!q.has_query_string()) {
+  //    continue;
+  //  }
 
-    q.set_query_string_normalized(
-        normalize_fn(
-            (stx::Language) q.language(),
-            q.query_string()));
-  }
+  //  q.set_query_string_normalized(
+  //      normalize_fn(
+  //          (stx::Language) q.language(),
+  //          q.query_string()));
+  //}
 }
 
 } // namespace cm

@@ -21,40 +21,40 @@ void TSDBUploadStage::process(
     RefPtr<SessionContext> ctx,
     const String& tsdb_addr,
     http::HTTPConnectionPool* http) {
-  tsdb::RecordEnvelopeList records;
+  //tsdb::RecordEnvelopeList records;
 
-  auto time = ctx->session.last_seen_time() * kMicrosPerSecond;
-  auto record_id = SHA1::compute(ctx->uuid);
-  auto stream_key = "web.sessions";
-  auto partition_key = tsdb::TimeWindowPartitioner::partitionKeyFor(
-      stream_key,
-      time,
-      4 * kMicrosPerHour);
+  //auto time = ctx->session.last_seen_time() * kMicrosPerSecond;
+  //auto record_id = SHA1::compute(ctx->uuid);
+  //auto stream_key = "web.sessions";
+  //auto partition_key = tsdb::TimeWindowPartitioner::partitionKeyFor(
+  //    stream_key,
+  //    time,
+  //    4 * kMicrosPerHour);
 
-  auto record_data = msg::encode(ctx->session);
+  //auto record_data = msg::encode(ctx->session);
 
-  auto r = records.add_records();
-  r->set_tsdb_namespace(ctx->customer_key);
-  r->set_stream_key(stream_key);
-  r->set_partition_key(partition_key.toString());
-  r->set_record_id(record_id.toString());
-  r->set_record_data(record_data->data(), record_data->size());
+  //auto r = records.add_records();
+  //r->set_tsdb_namespace(ctx->customer_key);
+  //r->set_stream_key(stream_key);
+  //r->set_partition_key(partition_key.toString());
+  //r->set_record_id(record_id.toString());
+  //r->set_record_data(record_data->data(), record_data->size());
 
-  URI uri(StringUtil::format("http://$0/tsdb/insert", tsdb_addr));
-  http::HTTPRequest req(http::HTTPMessage::M_POST, uri.pathAndQuery());
-  req.addHeader("Host", uri.hostAndPort());
-  req.addHeader("Content-Type", "application/fnord-msg");
-  req.addBody(*msg::encode(records));
+  //URI uri(StringUtil::format("http://$0/tsdb/insert", tsdb_addr));
+  //http::HTTPRequest req(http::HTTPMessage::M_POST, uri.pathAndQuery());
+  //req.addHeader("Host", uri.hostAndPort());
+  //req.addHeader("Content-Type", "application/fnord-msg");
+  //req.addBody(*msg::encode(records));
 
-  auto res = http->executeRequest(req);
-  res.wait();
+  //auto res = http->executeRequest(req);
+  //res.wait();
 
-  if (res.get().statusCode() != 201) {
-    RAISEF(
-        kRuntimeError,
-        "received non-201 response: $0",
-        res.get().body().toString());
-  }
+  //if (res.get().statusCode() != 201) {
+  //  RAISEF(
+  //      kRuntimeError,
+  //      "received non-201 response: $0",
+  //      res.get().body().toString());
+  //}
 }
 
 } // namespace cm
