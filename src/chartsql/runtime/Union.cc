@@ -20,15 +20,19 @@ Union::Union(
     RAISE(kRuntimeError, "UNION must have at least one source table");
   }
 
+  size_t ncols = size_t(-1);
+
   for (const auto& cur : sources_) {
     if (dynamic_cast<EmptyTable*>(cur.get())) {
       continue;
     }
 
-    auto ncols = cur->numColumns();
-    if (ncols != sources_[0]->numColumns()) {
+    auto tcols = cur->numColumns();
+    if (ncols != size_t(-1) && ncols != tcols) {
       RAISE(kRuntimeError, "UNION tables return different number of columns");
     }
+
+    ncols = tcols;
   }
 }
 
