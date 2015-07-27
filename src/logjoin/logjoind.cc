@@ -234,8 +234,8 @@ int main(int argc, const char** argv) {
       std::bind(&SessionJoin::process, std::placeholders::_1));
 
   /* pipeline stage: BuildSessionAttributes */
-  //session_proc.addPipelineStage(
-  //    std::bind(&BuildSessionAttributes::process, std::placeholders::_1));
+  session_proc.addPipelineStage(
+      std::bind(&BuildSessionAttributes::process, std::placeholders::_1));
 
   /* pipeline stage: NormalizeQueryStrings */
   stx::fts::Analyzer analyzer(flags.getString("conf"));
