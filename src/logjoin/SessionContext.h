@@ -26,6 +26,8 @@ struct SessionContext : public RefCounted {
   std::string customer_key;
   RefPtr<CustomerConfigRef> customer_config;
 
+  UnixTime time;
+
   Vector<TrackedEvent> events;
 
   const Vector<ScopedPtr<msg::DynamicMessage>>& outputEvents() const;
