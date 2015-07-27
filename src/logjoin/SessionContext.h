@@ -29,7 +29,9 @@ struct JoinedEvent {
 };
 
 struct SessionContext : public RefCounted {
-  SessionContext(TrackedSession session);
+  SessionContext(
+      TrackedSession session,
+      RefPtr<CustomerConfigRef> cconf);
 
   std::string uuid;
 

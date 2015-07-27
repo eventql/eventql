@@ -15,7 +15,7 @@ namespace cm {
 
 JoinedEvent::JoinedEvent(
     RefPtr<msg::MessageSchema> _schema) :
-    schema(schema) {}
+    schema(_schema) {}
 
 void JoinedEvent::addUInt32Field(const String& name, uint32_t val) {
   if (!schema->hasField(name)) {
@@ -41,10 +41,12 @@ void JoinedEvent::toJSON(json::JSONOutputStream* json) const {
 }
 
 SessionContext::SessionContext(
-    TrackedSession session) :
+    TrackedSession session,
+    RefPtr<CustomerConfigRef> cconf) :
     uuid(session.uuid),
     customer_key(session.customer_key),
-    events(session.events) {}
+    events(session.events),
+    customer_config(cconf) {}
 
 JoinedEvent* SessionContext::addOutputEvent(const String& evtype) {
   const auto& logjoin_cfg = customer_config->config.logjoin_config();
