@@ -25,6 +25,9 @@ void TSDBUploadStage::process(
     http::HTTPConnectionPool* http) {
   const auto& logjoin_cfg = ctx->customer_config->config.logjoin_config();
 
+  msg::MessageObject session;
+
+  /* add attributes */
   auto attrs_schema = msg::MessageSchema::decode(
       logjoin_cfg.session_attributes_schema());
 
@@ -35,9 +38,28 @@ void TSDBUploadStage::process(
 
   auto attrs_obj = attrs.data();
   attrs_obj.id = 1;
-
-  msg::MessageObject session;
   session.addChild(attrs_obj);
+
+  /* add events */
+  msg::MessageObject events_obj(2);
+
+  HashMap<String, uint32_t> event_ids;
+  for (const auto& evschema : logjoin_cfg.session_event_schemas()) {
+    event_ids.emplace(evschema.evtype(), evschema.evid());
+  }
+
+  for (const auto& ev : ctx->outputEvents()) {
+    auto evid = event_ids[ev->schema()->name()];
+    if (evid == 0) {
+      continue;
+    }
+
+    auto ev_obj = ev->data();
+    ev_obj.id = evid;
+    events_obj.addChild(ev_obj);
+  }
+
+  session.addChild(events_obj);
 
   iputs(
       "session: $0",
