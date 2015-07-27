@@ -8,7 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <stx/stdtypes.h>
-#include <stx/Human.h>
+#include <stx/human.h>
 #include <stx/protobuf/DynamicMessage.h>
 #include <stx/protobuf/JSONEncoder.h>
 
