@@ -250,8 +250,8 @@ int main(int argc, const char** argv) {
   //                std::placeholders::_2)),
   //        std::placeholders::_1));
 
-  session_proc.addPipelineStage(
-      std::bind(&DebugPrintStage::process, std::placeholders::_1));
+  //session_proc.addPipelineStage(
+  //    std::bind(&DebugPrintStage::process, std::placeholders::_1));
   /* pipeline stage: TSDBUpload */
   //session_proc.addPipelineStage(
   //    std::bind(
