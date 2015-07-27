@@ -6,6 +6,7 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
+#include "stx/protobuf/MessagePrinter.h"
 #include "logjoin/stages/DebugPrintStage.h"
 #include "logjoin/common.h"
 
@@ -18,7 +19,7 @@ void DebugPrintStage::process(RefPtr<SessionContext> ctx) {
 
   for (const auto& ev : ctx->events) {
     stx::iputs(
-        "    > event time=$0 evtype=$1 eid=$2 data=$3$4",
+        "    > input_event evtype=$1 time=$0 eid=$2 data=$3$4",
         ev.time,
         ev.evtype,
         ev.evid,
@@ -26,7 +27,12 @@ void DebugPrintStage::process(RefPtr<SessionContext> ctx) {
         String(ev.data.size() > 40 ? "[...]" : ""));
   }
 
-  stx::iputs("$0", ctx->session.DebugString());
+  for (const auto& ev : ctx->outputEvents()) {
+    stx::iputs(
+        "    > output_event evtype=$0\n$1",
+        ev->schema->name(),
+        msg::MessagePrinter::print(ev->data, *ev->schema));
+  }
 }
 
 } // namespace cm
