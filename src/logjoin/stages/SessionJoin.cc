@@ -131,88 +131,88 @@ void SessionJoin::process(RefPtr<SessionContext> ctx) {
   }
 
   for (const auto& q : queries) {
-    auto qobj = ctx->session.add_search_queries();
+    auto qobj = ctx->addOutputEvent("search_query");
 
-    qobj->set_time(q.time.unixMicros() / kMicrosPerSecond);
-    qobj->set_language((ProtoLanguage) cm::extractLanguage(q.attrs));
+    qobj->addUInt32Field("time", q.time.unixMicros() / kMicrosPerSecond);
+    qobj->addUInt32Field("language", (uint32_t) cm::extractLanguage(q.attrs));
 
     auto qstr = cm::extractQueryString(q.attrs);
     if (!qstr.isEmpty()) {
-      qobj->set_query_string(qstr.get());
+      qobj->addStringField("query_string", qstr.get());
     }
 
     auto slrid = cm::extractAttr(q.attrs, "slrid");
     if (!slrid.isEmpty()) {
       try {
         uint32_t sid = std::stoul(slrid.get());
-        qobj->set_shop_id(sid);
+        qobj->addUInt32Field("shop_id", sid);
       } catch (...) {}
     }
 
-    qobj->set_num_result_items(q.nitems);
-    qobj->set_num_result_items_clicked(q.nclicks);
-    qobj->set_num_ad_impressions(q.nads);
-    qobj->set_num_ad_clicks(q.nadclicks);
-    qobj->set_num_cart_items(q.num_cart_items);
-    qobj->set_cart_value_eurcents(q.cart_value_eurcents);
-    qobj->set_num_order_items(q.num_order_items);
-    qobj->set_gmv_eurcents(q.gmv_eurcents);
+    qobj->addUInt32Field("num_result_items", q.nitems);
+    qobj->addUInt32Field("num_result_items_clicked", q.nclicks);
+    qobj->addUInt32Field("num_ad_impressions", q.nads);
+    qobj->addUInt32Field("num_ad_clicks", q.nadclicks);
+    qobj->addUInt32Field("num_cart_items", q.num_cart_items);
+    qobj->addUInt32Field("cart_value_eurcents", q.cart_value_eurcents);
+    qobj->addUInt32Field("num_order_items", q.num_order_items);
+    qobj->addUInt32Field("gmv_eurcents", q.gmv_eurcents);
 
-    auto pg_str = cm::extractAttr(q.attrs, "pg");
-    if (!pg_str.isEmpty()) {
-      try {
-        auto val = std::stoull(pg_str.get());
-        qobj->set_page(val);
-      } catch (...) {}
-    }
+    //auto pg_str = cm::extractAttr(q.attrs, "pg");
+    //if (!pg_str.isEmpty()) {
+    //  try {
+    //    auto val = std::stoull(pg_str.get());
+    //    qobj->set_page(val);
+    //  } catch (...) {}
+    //}
 
-    auto abgrp = cm::extractABTestGroup(q.attrs);
-    if (!abgrp.isEmpty()) {
-      qobj->set_ab_test_group(abgrp.get());
-    }
+    //auto abgrp = cm::extractABTestGroup(q.attrs);
+    //if (!abgrp.isEmpty()) {
+    //  qobj->set_ab_test_group(abgrp.get());
+    //}
 
-    auto qcat1 = cm::extractAttr(q.attrs, "q_cat1");
-    if (!qcat1.isEmpty()) {
-      try {
-        auto val = std::stoull(qcat1.get());
-        qobj->set_category1(val);
-      } catch (...) {}
-    }
+    //auto qcat1 = cm::extractAttr(q.attrs, "q_cat1");
+    //if (!qcat1.isEmpty()) {
+    //  try {
+    //    auto val = std::stoull(qcat1.get());
+    //    qobj->set_category1(val);
+    //  } catch (...) {}
+    //}
 
-    auto qcat2 = cm::extractAttr(q.attrs, "q_cat2");
-    if (!qcat2.isEmpty()) {
-      try {
-        auto val = std::stoull(qcat2.get());
-        qobj->set_category2(val);
-      } catch (...) {}
-    }
+    //auto qcat2 = cm::extractAttr(q.attrs, "q_cat2");
+    //if (!qcat2.isEmpty()) {
+    //  try {
+    //    auto val = std::stoull(qcat2.get());
+    //    qobj->set_category2(val);
+    //  } catch (...) {}
+    //}
 
-    auto qcat3 = cm::extractAttr(q.attrs, "q_cat3");
-    if (!qcat3.isEmpty()) {
-      try {
-        auto val = std::stoull(qcat3.get());
-        qobj->set_category3(val);
-      } catch (...) {}
-    }
+    //auto qcat3 = cm::extractAttr(q.attrs, "q_cat3");
+    //if (!qcat3.isEmpty()) {
+    //  try {
+    //    auto val = std::stoull(qcat3.get());
+    //    qobj->set_category3(val);
+    //  } catch (...) {}
+    //}
 
-    qobj->set_device_type((ProtoDeviceType) extractDeviceType(q.attrs));
-    qobj->set_page_type((ProtoPageType) extractPageType(q.attrs));
+    //qobj->set_device_type((ProtoDeviceType) extractDeviceType(q.attrs));
+    //qobj->set_page_type((ProtoPageType) extractPageType(q.attrs));
 
-    String query_type = pageTypeToString((PageType) qobj->page_type());
-    auto qtype_attr = cm::extractAttr(q.attrs, "qt");
-    if (!qtype_attr.isEmpty()) {
-      query_type = qtype_attr.get();
-    }
+    //String query_type = pageTypeToString((PageType) qobj->page_type());
+    //auto qtype_attr = cm::extractAttr(q.attrs, "qt");
+    //if (!qtype_attr.isEmpty()) {
+    //  query_type = qtype_attr.get();
+    //}
 
-    qobj->set_query_type(query_type);
+    //qobj->set_query_type(query_type);
 
     for (const auto& item : q.items) {
-      auto item_obj = qobj->add_result_items();
-
-      item_obj->set_position(item.position);
-      item_obj->set_item_id(item.item.docID().docid);
-      item_obj->set_clicked(item.clicked);
-      item_obj->set_seen(item.seen);
+      qobj->addObject("result_items", [&item] (JoinedEvent* ev) {
+        ev->addUInt32Field("position", item.position);
+        ev->addStringField("item_id", item.item.docID().docid);
+        ev->addBoolField("clicked", item.clicked);
+        ev->addBoolField("seen", item.seen);
+      });
     }
   }
 
@@ -227,184 +227,6 @@ void SessionJoin::process(RefPtr<SessionContext> ctx) {
   ctx->session.set_cart_value_eurcents(cart_value_eurcents);
   ctx->session.set_num_order_items(num_order_items);
   ctx->session.set_gmv_eurcents(gmv_eurcents);
-
-
-  for (const auto& q : queries) {
-    auto ev = ctx->addOutputEvent("search_query");
-    ev->addUInt32Field("time", q.time.unixMicros() / kMicrosPerSecond);
-    ev->addUInt32Field("language", (uint32_t) cm::extractLanguage(q.attrs));
-
-//
-//    /* queries.query_string */
-//    auto qstr = cm::extractQueryString(q.attrs);
-//    if (!qstr.isEmpty()) {
-//      auto qstr_norm = normalize_(lang, qstr.get());
-//      qry_obj.addChild(searchq_schema->fieldId("query_string"), qstr.get());
-//      qry_obj.addChild(searchq_schema->fieldId("query_string_normalized"), qstr_norm);
-//    }
-//
-//    /* queries.shopid */
-//    auto slrid = cm::extractAttr(q.attrs, "slrid");
-//    if (!slrid.isEmpty()) {
-//      uint32_t sid = std::stoul(slrid.get());
-//      qry_obj.addChild(searchq_schema->fieldId("shop_id"), sid);
-//    }
-//
-//    qry_obj.addChild(searchq_schema->fieldId("num_result_items"), q.nitems);
-//    qry_obj.addChild(searchq_schema->fieldId("num_result_items_clicked"), q.nclicks);
-//    qry_obj.addChild(searchq_schema->fieldId("num_ad_impressions"), q.nads);
-//    qry_obj.addChild(searchq_schema->fieldId("num_ad_clicks"), q.nadclicks);
-//    qry_obj.addChild(searchq_schema->fieldId("num_cart_items"), q.num_cart_items);
-//    qry_obj.addChild(searchq_schema->fieldId("cart_value_eurcents"), q.cart_value_eurcents);
-//    qry_obj.addChild(searchq_schema->fieldId("num_order_items"), q.num_order_items);
-//    qry_obj.addChild(searchq_schema->fieldId("gmv_eurcents"), q.gmv_eurcents);
-//
-//    /* queries.page */
-//    auto pg_str = cm::extractAttr(q.attrs, "pg");
-//    if (!pg_str.isEmpty()) {
-//      uint32_t pg = std::stoul(pg_str.get());
-//      qry_obj.addChild(searchq_schema->fieldId("page"), pg);
-//    }
-//
-//    /* queries.ab_test_group */
-//    auto abgrp = cm::extractABTestGroup(q.attrs);
-//    if (!abgrp.isEmpty()) {
-//      sess_abgrp = abgrp.get();
-//      qry_obj.addChild(searchq_schema->fieldId("ab_test_group"), abgrp.get());
-//    }
-//
-//    /* queries.experiments */
-//    auto qexps = q.joinedExperiments();
-//    if (qexps.size() > 0) {
-//      qry_obj.addChild(searchq_schema->fieldId("experiments"), qexps);
-//    }
-//
-//    /* queries.category1 */
-//    auto qcat1 = cm::extractAttr(q.attrs, "q_cat1");
-//    if (!qcat1.isEmpty()) {
-//      uint32_t c = std::stoul(qcat1.get());
-//      qry_obj.addChild(searchq_schema->fieldId("category1"), c);
-//    }
-//
-//    /* queries.category1 */
-//    auto qcat2 = cm::extractAttr(q.attrs, "q_cat2");
-//    if (!qcat2.isEmpty()) {
-//      uint32_t c = std::stoul(qcat2.get());
-//      qry_obj.addChild(searchq_schema->fieldId("category2"), c);
-//    }
-//
-//    /* queries.category1 */
-//    auto qcat3 = cm::extractAttr(q.attrs, "q_cat3");
-//    if (!qcat3.isEmpty()) {
-//      uint32_t c = std::stoul(qcat3.get());
-//      qry_obj.addChild(searchq_schema->fieldId("category3"), c);
-//    }
-//
-//    /* queries.device_type */
-//    qry_obj.addChild(
-//        searchq_schema->fieldId("device_type"),
-//        (uint32_t) extractDeviceType(q.attrs));
-//
-//    /* queries.page_type */
-//    auto page_type = extractPageType(q.attrs);
-//    qry_obj.addChild(
-//        searchq_schema->fieldId("page_type"),
-//        (uint32_t) page_type);
-//
-//    /* queries.query_type */
-//    String query_type = pageTypeToString(page_type);
-//    auto qtype_attr = cm::extractAttr(q.attrs, "qt");
-//    if (!qtype_attr.isEmpty()) {
-//      query_type = qtype_attr.get();
-//    }
-//    qry_obj.addChild(
-//        searchq_schema->fieldId("query_type"),
-//        query_type);
-//
-//    for (const auto& item : q.items) {
-//      auto& item_obj = qry_obj.addChild(
-//          searchq_schema->fieldId("result_items"));
-//
-//      item_obj.addChild(
-//          searchq_item_schema->fieldId("position"),
-//          (uint32_t) item.position);
-//
-//      item_obj.addChild(
-//          searchq_item_schema->fieldId("item_id"),
-//          item.item.docID().docid);
-//
-//      if (item.clicked) {
-//        item_obj.addChild(
-//            searchq_item_schema->fieldId("clicked"),
-//            msg::TRUE);
-//      } else {
-//        item_obj.addChild(
-//            searchq_item_schema->fieldId("clicked"),
-//            msg::FALSE);
-//      }
-//
-//      if (item.seen) {
-//        item_obj.addChild(
-//            searchq_item_schema->fieldId("seen"),
-//            msg::TRUE);
-//      } else {
-//        item_obj.addChild(
-//            searchq_item_schema->fieldId("seen"),
-//            msg::FALSE);
-//      }
-//
-//      auto docid = item.item.docID();
-//
-//      auto shopid = get_field_(docid, "shop_id");
-//      if (shopid.isEmpty()) {
-//        //stx::logWarning(
-//        //    "cm.logjoin",
-//        //    "item not found in featureindex: $0",
-//        //    docid.docid);
-//      } else {
-//        item_obj.addChild(
-//            searchq_item_schema->fieldId("shop_id"),
-//            (uint32_t) std::stoull(shopid.get()));
-//      }
-//
-//      auto category1 = get_field_(docid, "category1");
-//      if (!category1.isEmpty()) {
-//        item_obj.addChild(
-//            searchq_item_schema->fieldId("category1"),
-//            (uint32_t) std::stoull(category1.get()));
-//      }
-//
-//      auto category2 = get_field_(docid, "category2");
-//      if (!category2.isEmpty()) {
-//        item_obj.addChild(
-//            searchq_item_schema->fieldId("category2"),
-//            (uint32_t) std::stoull(category2.get()));
-//      }
-//
-//      auto category3 = get_field_(docid, "category3");
-//      if (!category3.isEmpty()) {
-//        item_obj.addChild(
-//            searchq_item_schema->fieldId("category3"),
-//            (uint32_t) std::stoull(category3.get()));
-//      }
-//
-//      /* DAWANDA HACK */
-//      if (item.position <= 4 && slrid.isEmpty()) {
-//        item_obj.addChild(
-//            searchq_item_schema->fieldId("is_paid_result"),
-//            msg::TRUE);
-//      }
-//
-//      if ((item.position > 40 && slrid.isEmpty()) ||
-//          StringUtil::beginsWith(query_type, "recos_")) {
-//        item_obj.addChild(
-//            searchq_item_schema->fieldId("is_recommendation"),
-//            msg::TRUE);
-//      }
-//      /* EOF DAWANDA HACK */
-//    }
-  }
-
 
 }
 
