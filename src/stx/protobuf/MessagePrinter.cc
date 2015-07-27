@@ -25,19 +25,27 @@ String MessagePrinter::printObject(
     const MessageSchema& schema) {
   String ws(level * 2, ' ');
 
+  String str;
+  str.append(StringUtil::format("$0$1 {\n", ws, schema.name()));
+
+  for (const auto& o : msg.asObject()) {
+    str.append(printField(level + 1, o, schema));
+  }
+
+  str.append(ws + "}\n");
+  return str;
+}
+
+String MessagePrinter::printField(
+    size_t level,
+    const MessageObject& msg,
+    const MessageSchema& schema) {
+  String ws(level * 2, ' ');
+
   switch (schema.fieldType(msg.id)) {
 
-    case FieldType::OBJECT: {
-      String str;
-      str.append(StringUtil::format("$0$1 {\n", ws, schema.fieldName(msg.id)));
-
-      for (const auto& o : msg.asObject()) {
-        str.append(printObject(level + 1, o, *schema.fieldSchema(msg.id)));
-      }
-
-      str.append(ws + "}\n");
-      return str;
-    }
+    case FieldType::OBJECT:
+      return printObject(level, msg, *schema.fieldSchema(msg.id));
 
     case FieldType::BOOLEAN:
       return StringUtil::format(

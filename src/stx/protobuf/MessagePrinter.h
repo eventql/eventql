@@ -30,6 +30,11 @@ protected:
       const MessageObject& msg,
       const MessageSchema& schema);
 
+  static String printField(
+      size_t level,
+      const MessageObject& msg,
+      const MessageSchema& schema);
+
 };
 
 } // namespace msg
