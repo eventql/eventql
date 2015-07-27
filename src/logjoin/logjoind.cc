@@ -211,22 +211,25 @@ int main(int argc, const char** argv) {
     hook->set_target_url("http://localhost:8080/mywebhook");
 
     {
-      auto ev = dwn.mutable_logjoin_config()->add_session_events();
+      auto ev = dwn.mutable_logjoin_config()->add_session_event_schemas();
       ev->set_evtype("search_query");
       ev->set_schema(msg::MessageSchema::fromProtobuf(cm::JoinedSearchQuery::descriptor())->encode().toString());
     }
 
     {
-      auto ev = dwn.mutable_logjoin_config()->add_session_events();
+      auto ev = dwn.mutable_logjoin_config()->add_session_event_schemas();
       ev->set_evtype("page_view");
       ev->set_schema(msg::MessageSchema::fromProtobuf(cm::JoinedPageView::descriptor())->encode().toString());
     }
 
     {
-      auto ev = dwn.mutable_logjoin_config()->add_session_events();
+      auto ev = dwn.mutable_logjoin_config()->add_session_event_schemas();
       ev->set_evtype("cart_items");
       ev->set_schema(msg::MessageSchema::fromProtobuf(cm::JoinedCartItem::descriptor())->encode().toString());
     }
+
+    dwn.mutable_logjoin_config()->set_session_attributes_schema(
+        msg::MessageSchema::fromProtobuf(cm::DefaultSessionAttributes::descriptor())->encode().toString());
 
     customer_dir.updateCustomerConfig(dwn);
   }

@@ -24,7 +24,7 @@ SessionContext::SessionContext(
 msg::DynamicMessage* SessionContext::addOutputEvent(const String& evtype) {
   const auto& logjoin_cfg = customer_config->config.logjoin_config();
 
-  for (const auto& evschema : logjoin_cfg.session_events()) {
+  for (const auto& evschema : logjoin_cfg.session_event_schemas()) {
     if (evschema.evtype() == evtype) {
       auto schema = msg::MessageSchema::decode(evschema.schema());
 
