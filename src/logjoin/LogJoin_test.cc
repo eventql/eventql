@@ -16,6 +16,7 @@
 #include "logjoin/stages/SessionJoin.h"
 #include "logjoin/stages/BuildSessionAttributes.h"
 #include "logjoin/stages/NormalizeQueryStrings.h"
+#include "logjoin/stages/DebugPrintStage.h"
 
 using namespace stx;
 using namespace cm;
@@ -45,10 +46,11 @@ TEST_CASE(LogJoinTest, SimpleQuery, [] () {
 
   auto ctx = mkRef(new SessionContext(sess, mkRef(new CustomerConfigRef(dwn))));
   SessionJoin::process(ctx);
-  BuildSessionAttributes::process(ctx);
-  NormalizeQueryStrings::process(
-      [] (Language l, const String& q) { return q + "...norm"; },
-      ctx);
+  DebugPrintStage::process(ctx);
+  //BuildSessionAttributes::process(ctx);
+  //NormalizeQueryStrings::process(
+  //    [] (Language l, const String& q) { return q + "...norm"; },
+  //    ctx);
 
   const auto& joined = ctx->session;
 
