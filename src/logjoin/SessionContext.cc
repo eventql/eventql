@@ -95,8 +95,8 @@ SessionContext::SessionContext(
     RefPtr<CustomerConfigRef> cconf) :
     uuid(session.uuid),
     customer_key(session.customer_key),
-    events(session.events),
-    customer_config(cconf) {}
+    customer_config(cconf),
+    events(session.events) {}
 
 JoinedEvent* SessionContext::addOutputEvent(const String& evtype) {
   const auto& logjoin_cfg = customer_config->config.logjoin_config();

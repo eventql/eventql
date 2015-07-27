@@ -250,13 +250,15 @@ int main(int argc, const char** argv) {
                   std::placeholders::_2)),
           std::placeholders::_1));
 
-  /* pipeline stage: TSDBUpload */
   session_proc.addPipelineStage(
-      std::bind(
-          &TSDBUploadStage::process,
-          std::placeholders::_1,
-          flags.getString("tsdb_addr"),
-          &http));
+      std::bind(&DebugPrintStage::process, std::placeholders::_1));
+  /* pipeline stage: TSDBUpload */
+  //session_proc.addPipelineStage(
+  //    std::bind(
+  //        &TSDBUploadStage::process,
+  //        std::placeholders::_1,
+  //        flags.getString("tsdb_addr"),
+  //        &http));
 
   /* pipeline stage: DeliverWebHook */
   session_proc.addPipelineStage(
