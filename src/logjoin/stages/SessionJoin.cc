@@ -158,53 +158,53 @@ void SessionJoin::process(RefPtr<SessionContext> ctx) {
     qobj->addUInt32Field("num_order_items", q.num_order_items);
     qobj->addUInt32Field("gmv_eurcents", q.gmv_eurcents);
 
-    //auto pg_str = cm::extractAttr(q.attrs, "pg");
-    //if (!pg_str.isEmpty()) {
-    //  try {
-    //    auto val = std::stoull(pg_str.get());
-    //    qobj->set_page(val);
-    //  } catch (...) {}
-    //}
+    auto pg_str = cm::extractAttr(q.attrs, "pg");
+    if (!pg_str.isEmpty()) {
+      try {
+        auto val = std::stoull(pg_str.get());
+        qobj->addUInt32Field("ab_page", val);
+      } catch (...) {}
+    }
 
-    //auto abgrp = cm::extractABTestGroup(q.attrs);
-    //if (!abgrp.isEmpty()) {
-    //  qobj->set_ab_test_group(abgrp.get());
-    //}
+    auto abgrp = cm::extractABTestGroup(q.attrs);
+    if (!abgrp.isEmpty()) {
+      qobj->addUInt32Field("ab_test_group", abgrp.get());
+    }
 
-    //auto qcat1 = cm::extractAttr(q.attrs, "q_cat1");
-    //if (!qcat1.isEmpty()) {
-    //  try {
-    //    auto val = std::stoull(qcat1.get());
-    //    qobj->set_category1(val);
-    //  } catch (...) {}
-    //}
+    auto qcat1 = cm::extractAttr(q.attrs, "q_cat1");
+    if (!qcat1.isEmpty()) {
+      try {
+        auto val = std::stoull(qcat1.get());
+        qobj->addUInt32Field("category1", val);
+      } catch (...) {}
+    }
 
-    //auto qcat2 = cm::extractAttr(q.attrs, "q_cat2");
-    //if (!qcat2.isEmpty()) {
-    //  try {
-    //    auto val = std::stoull(qcat2.get());
-    //    qobj->set_category2(val);
-    //  } catch (...) {}
-    //}
+    auto qcat2 = cm::extractAttr(q.attrs, "q_cat2");
+    if (!qcat2.isEmpty()) {
+      try {
+        auto val = std::stoull(qcat2.get());
+        qobj->addUInt32Field("category2", val);
+      } catch (...) {}
+    }
 
-    //auto qcat3 = cm::extractAttr(q.attrs, "q_cat3");
-    //if (!qcat3.isEmpty()) {
-    //  try {
-    //    auto val = std::stoull(qcat3.get());
-    //    qobj->set_category3(val);
-    //  } catch (...) {}
-    //}
+    auto qcat3 = cm::extractAttr(q.attrs, "q_cat3");
+    if (!qcat3.isEmpty()) {
+      try {
+        auto val = std::stoull(qcat3.get());
+        qobj->addUInt32Field("category3", val);
+      } catch (...) {}
+    }
 
-    //qobj->set_device_type((ProtoDeviceType) extractDeviceType(q.attrs));
-    //qobj->set_page_type((ProtoPageType) extractPageType(q.attrs));
+    auto page_type = extractPageType(q.attrs);
+    String query_type = pageTypeToString((PageType) page_type);
+    auto qtype_attr = cm::extractAttr(q.attrs, "qt");
+    if (!qtype_attr.isEmpty()) {
+      query_type = qtype_attr.get();
+    }
 
-    //String query_type = pageTypeToString((PageType) qobj->page_type());
-    //auto qtype_attr = cm::extractAttr(q.attrs, "qt");
-    //if (!qtype_attr.isEmpty()) {
-    //  query_type = qtype_attr.get();
-    //}
-
-    //qobj->set_query_type(query_type);
+    qobj->addUInt32Field("device_type", (uint32_t) extractDeviceType(q.attrs));
+    qobj->addUInt32Field("page_type", (uint32_t) page_type);
+    qobj->addStringField("query_type", query_type);
 
     for (const auto& item : q.items) {
       qobj->addObject("result_items", [&item] (JoinedEvent* ev) {
@@ -227,7 +227,6 @@ void SessionJoin::process(RefPtr<SessionContext> ctx) {
   ctx->session.set_cart_value_eurcents(cart_value_eurcents);
   ctx->session.set_num_order_items(num_order_items);
   ctx->session.set_gmv_eurcents(gmv_eurcents);
-
 }
 
 void SessionJoin::processSearchQueryEvent(
