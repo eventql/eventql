@@ -41,6 +41,9 @@ protected:
   RefPtr<mdb::MDB> db_;
   mutable std::mutex mutex_;
   HashMap<String, RefPtr<CustomerConfigRef>> customers_;
+
+  Vector<Function<void (const CustomerConfig& cfg)>> on_customer_change_;
+  Vector<Function<void (const TableDefinition& cfg)>> on_table_change_;
 };
 
 } // namespace cm
