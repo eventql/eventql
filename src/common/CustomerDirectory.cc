@@ -26,7 +26,7 @@ CustomerDirectory::CustomerDirectory(const String& path) {
 }
 
 RefPtr<CustomerConfigRef> CustomerDirectory::configFor(
-    const String& customer_key) {
+    const String& customer_key) const {
   std::unique_lock<std::mutex> lk(mutex_);
 
   auto iter = customers_.find(customer_key);
@@ -52,7 +52,7 @@ void CustomerDirectory::updateCustomerConfig(CustomerConfig config) {
   customers_.emplace(config.customer(), new CustomerConfigRef(config));
 }
 
-void CustomerDirectory::addTableDefinition(const TableDefinition& table) const {
+void CustomerDirectory::addTableDefinition(const TableDefinition& table) {
   if (!StringUtil::isShellSafe(table.table_name())) {
     RAISEF(
         kIllegalArgumentError,
@@ -81,7 +81,7 @@ void CustomerDirectory::addTableDefinition(const TableDefinition& table) const {
   txn->commit();
 }
 
-void CustomerDirectory::updateTableDefinition(const TableDefinition& table) const {
+void CustomerDirectory::updateTableDefinition(const TableDefinition& table) {
   if (!StringUtil::isShellSafe(table.table_name())) {
     RAISEF(
         kIllegalArgumentError,
