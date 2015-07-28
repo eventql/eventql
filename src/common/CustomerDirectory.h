@@ -31,6 +31,9 @@ public:
       Function<void (const TableDefinition& table)> fn) const;
 
 protected:
+
+  void loadCustomerConfigs();
+
   RefPtr<mdb::MDB> db_;
   std::mutex mutex_;
   HashMap<String, RefPtr<CustomerConfigRef>> customers_;

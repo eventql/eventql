@@ -14,7 +14,6 @@ using namespace stx;
 
 namespace cm {
 
-
 CustomerDirectory::CustomerDirectory(const String& path) {
   mdb::MDBOptions mdb_opts;
   mdb_opts.data_filename = "cdb.db",
@@ -22,6 +21,8 @@ CustomerDirectory::CustomerDirectory(const String& path) {
   mdb_opts.duplicate_keys = false;
 
   db_ = mdb::MDB::open(path, mdb_opts);
+
+  loadCustomerConfigs();
 }
 
 RefPtr<CustomerConfigRef> CustomerDirectory::configFor(
@@ -38,6 +39,16 @@ RefPtr<CustomerConfigRef> CustomerDirectory::configFor(
 
 void CustomerDirectory::updateCustomerConfig(CustomerConfig config) {
   std::unique_lock<std::mutex> lk(mutex_);
+
+  auto db_key = StringUtil::format("cfg~$0", config.customer());
+  auto buf = msg::encode(config);
+
+  auto txn = db_->startTransaction(false);
+  txn->autoAbort();
+
+  txn->update(db_key.data(), db_key.size(), buf->data(), buf->size());
+  txn->commit();
+
   customers_.emplace(config.customer(), new CustomerConfigRef(config));
 }
 
@@ -122,6 +133,34 @@ void CustomerDirectory::listTableDefinitions(
     }
 
     fn(msg::decode<TableDefinition>(value));
+  } while (cursor->getNext(&key, &value));
+
+  cursor->close();
+}
+
+void CustomerDirectory::loadCustomerConfigs() {
+  auto prefix = "cfg~";
+
+  Buffer key;
+  Buffer value;
+
+  auto txn = db_->startTransaction(true);
+  txn->autoAbort();
+
+  auto cursor = txn->getCursor();
+  key.append(prefix);
+
+  if (!cursor->getFirstOrGreater(&key, &value)) {
+    return;
+  }
+
+  do {
+    if (!StringUtil::beginsWith(key.toString(), prefix)) {
+      break;
+    }
+
+    auto cfg = msg::decode<CustomerConfig>(value);
+    customers_.emplace(cfg.customer(), new CustomerConfigRef(cfg));
   } while (cursor->getNext(&key, &value));
 
   cursor->close();
