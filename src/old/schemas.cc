@@ -7,7 +7,7 @@
  * permission is obtained.
  */
 #include "schemas.h"
-#include "logjoin/JoinedSession.pb.h"
+#include "common/JoinedSession.pb.h"
 #include "IndexChangeRequest.pb.h"
 
 using namespace cm;

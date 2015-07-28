@@ -24,7 +24,6 @@
 #include <brokerd/RemoteFeedFactory.h>
 #include <brokerd/RemoteFeedWriter.h>
 #include <inventory/ItemRef.h>
-#include "logjoin/SessionEnvelope.pb.h"
 #include "logjoin/LogJoin.h"
 
 using namespace stx;
