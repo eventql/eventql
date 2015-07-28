@@ -8,7 +8,10 @@
  */
 #pragma once
 #include <stx/stdtypes.h>
+#include <stx/SHA1.h>
+#include <stx/mdb/MDB.h>
 #include <common/CustomerConfig.h>
+#include <common/TableDefinition.h>
 
 using namespace stx;
 
@@ -17,11 +20,18 @@ namespace cm {
 class CustomerDirectory {
 public:
 
-  RefPtr<CustomerConfigRef> configFor(const String& customer_key);
+  CustomerDirectory(const String& path);
 
+  RefPtr<CustomerConfigRef> configFor(const String& customer_key);
   void updateCustomerConfig(CustomerConfig config);
 
+  void addTableDefinition(const TableDefinition& table) const;
+  void updateTableDefinition(const TableDefinition& table) const;
+  void listTableDefinitions(
+      Function<void (const TableDefinition& table)> fn) const;
+
 protected:
+  RefPtr<mdb::MDB> db_;
   std::mutex mutex_;
   HashMap<String, RefPtr<CustomerConfigRef>> customers_;
 };

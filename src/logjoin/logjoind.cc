@@ -70,6 +70,15 @@ int main(int argc, const char** argv) {
       "<path>");
 
   flags.defineFlag(
+      "cdb",
+      cli::FlagParser::T_STRING,
+      true,
+      NULL,
+      NULL,
+      "data dir",
+      "<path>");
+
+  flags.defineFlag(
       "datadir",
       cli::FlagParser::T_STRING,
       true,
@@ -203,7 +212,7 @@ int main(int argc, const char** argv) {
   auto shard = shard_map.getShard(flags.getString("shard"));
 
   /* open customer directory */
-  CustomerDirectory customer_dir;
+  CustomerDirectory customer_dir(flags.getString("cdb"));
   customer_dir.updateCustomerConfig(createCustomerConfig("dawanda"));
 
   HashMap<String, URI> input_feeds;
