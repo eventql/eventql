@@ -15,7 +15,8 @@ message EventDefinition {
 };
 
 message LogJoinWebhook {
-  required string target_url = 1;
+  required string id = 1;
+  required string target_url = 2;
 };
 
 message LogJoinConfig {

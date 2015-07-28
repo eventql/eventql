@@ -9,7 +9,7 @@
 #include "stx/exception.h"
 #include "stx/test/unittest.h"
 #include "JoinedSessionViewer.h"
-#include "logjoin/JoinedSession.pb.h"
+#include "common/JoinedSession.pb.h"
 
 using namespace stx;
 using namespace cm;
