@@ -22,7 +22,9 @@ CustomerDirectory::CustomerDirectory(const String& path) {
 
   db_ = mdb::MDB::open(path, mdb_opts);
 
-  loadCustomerConfigs();
+  listCustomers([this] (const CustomerConfig& cfg) {
+    customers_.emplace(cfg.customer(), new CustomerConfigRef(cfg));
+  });
 }
 
 RefPtr<CustomerConfigRef> CustomerDirectory::configFor(
@@ -50,9 +52,49 @@ void CustomerDirectory::updateCustomerConfig(CustomerConfig config) {
   txn->commit();
 
   customers_.emplace(config.customer(), new CustomerConfigRef(config));
+
+  for (const auto& cb : on_customer_change_) {
+    cb(config);
+  }
+}
+
+void CustomerDirectory::listCustomers(
+    Function<void (const CustomerConfig& cfg)> fn) const {
+  auto prefix = "cfg~";
+
+  Buffer key;
+  Buffer value;
+
+  auto txn = db_->startTransaction(true);
+  txn->autoAbort();
+
+  auto cursor = txn->getCursor();
+  key.append(prefix);
+
+  if (!cursor->getFirstOrGreater(&key, &value)) {
+    return;
+  }
+
+  do {
+    if (!StringUtil::beginsWith(key.toString(), prefix)) {
+      break;
+    }
+
+    fn(msg::decode<CustomerConfig>(value));
+  } while (cursor->getNext(&key, &value));
+
+  cursor->close();
+}
+
+void CustomerDirectory::onCustomerConfigChange(
+    Function<void (const CustomerConfig& cfg)> fn) {
+  std::unique_lock<std::mutex> lk(mutex_);
+  on_customer_change_.emplace_back(fn);
 }
 
 void CustomerDirectory::addTableDefinition(const TableDefinition& table) {
+  std::unique_lock<std::mutex> lk(mutex_);
+
   if (!StringUtil::isShellSafe(table.table_name())) {
     RAISEF(
         kIllegalArgumentError,
@@ -79,9 +121,15 @@ void CustomerDirectory::addTableDefinition(const TableDefinition& table) {
 
   txn->insert(db_key.data(), db_key.size(), buf->data(), buf->size());
   txn->commit();
+
+  for (const auto& cb : on_table_change_) {
+    cb(table);
+  }
 }
 
 void CustomerDirectory::updateTableDefinition(const TableDefinition& table) {
+  std::unique_lock<std::mutex> lk(mutex_);
+
   if (!StringUtil::isShellSafe(table.table_name())) {
     RAISEF(
         kIllegalArgumentError,
@@ -108,6 +156,10 @@ void CustomerDirectory::updateTableDefinition(const TableDefinition& table) {
 
   txn->update(db_key.data(), db_key.size(), buf->data(), buf->size());
   txn->commit();
+
+  for (const auto& cb : on_table_change_) {
+    cb(table);
+  }
 }
 
 void CustomerDirectory::listTableDefinitions(
@@ -138,32 +190,10 @@ void CustomerDirectory::listTableDefinitions(
   cursor->close();
 }
 
-void CustomerDirectory::loadCustomerConfigs() {
-  auto prefix = "cfg~";
-
-  Buffer key;
-  Buffer value;
-
-  auto txn = db_->startTransaction(true);
-  txn->autoAbort();
-
-  auto cursor = txn->getCursor();
-  key.append(prefix);
-
-  if (!cursor->getFirstOrGreater(&key, &value)) {
-    return;
-  }
-
-  do {
-    if (!StringUtil::beginsWith(key.toString(), prefix)) {
-      break;
-    }
-
-    auto cfg = msg::decode<CustomerConfig>(value);
-    customers_.emplace(cfg.customer(), new CustomerConfigRef(cfg));
-  } while (cursor->getNext(&key, &value));
-
-  cursor->close();
+void CustomerDirectory::onTableDefinitionChange(
+    Function<void (const TableDefinition& tbl)> fn) {
+  std::unique_lock<std::mutex> lk(mutex_);
+  on_table_change_.emplace_back(fn);
 }
 
 } // namespace cm
