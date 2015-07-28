@@ -26,7 +26,14 @@ message LogJoinConfig {
   required uint32 session_schema_next_field_id = 4;
 };
 
+message LogfileDefinition {
+  
+};
+
 message CustomerConfig {
   required string customer = 1;
   required LogJoinConfig logjoin_config = 2;
+
+  repeated LogfileDefinition logfile_definitions = 3;
+
 };
