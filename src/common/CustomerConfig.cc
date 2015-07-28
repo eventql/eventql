@@ -20,6 +20,7 @@ CustomerConfig createCustomerConfig(const String& customer) {
   conf.set_customer(customer);
 
   auto hook = conf.mutable_logjoin_config()->add_webhooks();
+  hook->set_id("23");
   hook->set_target_url("http://localhost:8080/mywebhook");
 
   {
