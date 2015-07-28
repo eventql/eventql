@@ -8,7 +8,7 @@
  */
 #pragma once
 #include <stx/stdtypes.h>
-#include <analytics/TableDefinition.pb.h>
+#include <common/TableDefinition.pb.h>
 #include <tsdb/TableConfig.pb.h>
 
 using namespace stx;

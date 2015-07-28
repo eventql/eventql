@@ -9,7 +9,6 @@
 #pragma once
 #include "stx/protobuf/DynamicMessage.h"
 #include "logjoin/TrackedSession.h"
-#include "logjoin/JoinedSession.pb.h"
 #include "common/CustomerConfig.h"
 
 using namespace stx;

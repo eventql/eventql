@@ -19,9 +19,6 @@ using namespace stx;
 namespace cm {
 
 void DeliverWebhookStage::process(RefPtr<SessionContext> ctx) {
-  static auto schema = msg::MessageSchema::fromProtobuf(
-      cm::JoinedSession::descriptor());
-
   const auto& logjoin_config = ctx->customer_config->config.logjoin_config();
 
   for (const auto hook : logjoin_config.webhooks()) {

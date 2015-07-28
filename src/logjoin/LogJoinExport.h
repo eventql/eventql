@@ -11,7 +11,7 @@
 #include "stx/stdtypes.h"
 #include "stx/http/httpconnectionpool.h"
 #include "brokerd/BrokerClient.h"
-#include "logjoin/JoinedSession.pb.h"
+#include "common/JoinedSession.pb.h"
 
 using namespace stx;
 
