@@ -33,7 +33,6 @@ RefPtr<OutputEvent> SessionContext::addOutputEvent(
     UnixTime time,
     SHA1Hash evid,
     const String& evtype) {
-  stx::iputs("add event: $0", evtype);
   const auto& logjoin_cfg = customer_config->config.logjoin_config();
 
   for (const auto& evschema : logjoin_cfg.session_event_schemas()) {
