@@ -23,7 +23,7 @@ namespace cm {
 
 struct TrackedItemVisit {
   stx::UnixTime time;
-  stx::String eid;
+  stx::String clickid;
   ItemRef item;
   std::vector<std::string> attrs;
 
@@ -33,7 +33,7 @@ struct TrackedItemVisit {
   template <typename T>
   static void reflect(T* meta) {
     meta->prop(&cm::TrackedItemVisit::time, 1, "t", false);
-    meta->prop(&cm::TrackedItemVisit::eid, 2, "e", false);
+    meta->prop(&cm::TrackedItemVisit::clickid, 2, "e", false);
     meta->prop(&cm::TrackedItemVisit::item, 3, "i", false);
     meta->prop(&cm::TrackedItemVisit::attrs, 4, "a", false);
   };

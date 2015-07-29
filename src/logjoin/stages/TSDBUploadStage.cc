@@ -121,7 +121,7 @@ void TSDBUploadStage::serializeEvent(
       &record_data);
 
   /* add to record list */
-  auto record_id = SHA1::compute(ctx->uuid);
+  auto record_id = ev->evid;
   auto stream_key = "sessions." + ev->obj.schema()->name();
   auto partition_key = tsdb::TimeWindowPartitioner::partitionKeyFor(
       stream_key,

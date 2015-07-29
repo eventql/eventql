@@ -28,6 +28,7 @@ struct TrackedCartItem {
       checkout_step(0) {}
 
   stx::UnixTime time;
+  String clickid;
   ItemRef item;
   uint32_t quantity;
   uint32_t price_cents;
