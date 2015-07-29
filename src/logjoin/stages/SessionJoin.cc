@@ -120,7 +120,7 @@ void SessionJoin::process(RefPtr<SessionContext> ctx) {
   }
 
   for (const auto& ci : cart_items) {
-    auto& ciobj = ctx->addOutputEvent("cart_items")->obj;
+    auto& ciobj = ctx->addOutputEvent(ci.time, "cart_items")->obj;
     ciobj.addUInt32Field("time", ci.time.unixMicros() / kMicrosPerSecond);
     ciobj.addField("item_id", ci.item.docID().docid);
     ciobj.addUInt32Field("quantity", ci.quantity);
@@ -130,7 +130,7 @@ void SessionJoin::process(RefPtr<SessionContext> ctx) {
   }
 
   for (const auto& q : queries) {
-    auto& qobj = ctx->addOutputEvent("search_query")->obj;
+    auto& qobj = ctx->addOutputEvent(q.time, "search_query")->obj;
 
     qobj.addUInt32Field("time", q.time.unixMicros() / kMicrosPerSecond);
     qobj.addUInt32Field("language", (uint32_t) cm::extractLanguage(q.attrs));
@@ -201,7 +201,7 @@ void SessionJoin::process(RefPtr<SessionContext> ctx) {
   }
 
   for (const auto& iv : page_views) {
-    auto& ivobj = ctx->addOutputEvent("page_view")->obj;
+    auto& ivobj = ctx->addOutputEvent(iv.time, "page_view")->obj;
     ivobj.addUInt32Field("time", iv.time.unixMicros() / kMicrosPerSecond);
     ivobj.addField("item_id", iv.item.docID().docid);
   }
