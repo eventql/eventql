@@ -62,13 +62,9 @@ void TSDBUploadStage::serializeSession(
 
   msg::DynamicMessage session(session_schema);
   session.addField("session_id", ctx->uuid);
-  session.addDateTimeField("time", ctx->time.unixMicros() / kMicrosPerSecond);
-  session.addDateTimeField(
-      "last_seen_time",
-      ctx->last_seen_time.unixMicros() / kMicrosPerSecond);
-  session.addDateTimeField(
-      "first_seen_time",
-      ctx->first_seen_time.unixMicros() / kMicrosPerSecond);
+  session.addDateTimeField("time", ctx->time);
+  session.addDateTimeField("last_seen_time", ctx->last_seen_time);
+  session.addDateTimeField("first_seen_time", ctx->first_seen_time);
 
   /* add attributes */
   session.addObject("attr", [ctx] (msg::DynamicMessage* obj) {
