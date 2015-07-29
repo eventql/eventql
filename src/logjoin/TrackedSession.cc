@@ -89,4 +89,25 @@ void TrackedSession::encode(OutputStream* os) const {
   }
 }
 
+void TrackedSession::decode(InputStream* is) {
+  is->readUInt8();
+
+  customer_key = is->readLenencString();
+  uuid = is->readLenencString();
+
+  auto nevents = is->readVarUInt();
+  for (size_t i = 0; i < nevents; ++i) {
+    auto time = is->readUInt64();
+    auto evid = is->readLenencString();
+    auto evtype = is->readLenencString();
+    auto evdata = is->readLenencString();
+
+    events.emplace_back(
+        time,
+        evid,
+        evtype,
+        evdata);
+  }
+}
+
 } // namespace cm
