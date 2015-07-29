@@ -97,7 +97,7 @@ MessageObject::MessageObject(
     uint32_t _id,
     UnixTime time) :
     id(_id),
-    type(FieldType::BOOLEAN) {
+    type(FieldType::DATETIME) {
   new (&data_) uint64_t(time.unixMicros());
 }
 
@@ -252,8 +252,9 @@ uint64_t MessageObject::asUInt64() const {
   }
 
 #ifndef STX_NODEBUG
-  if (type != FieldType::UINT64) {
-    RAISE(kTypeError);
+  if (type != FieldType::UINT64 &&
+      type != FieldType::DATETIME) {
+    RAISE(kTypeError, "can't convert MessageObject to UINT64");
   }
 #endif
 

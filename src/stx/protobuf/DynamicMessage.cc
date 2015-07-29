@@ -102,6 +102,34 @@ bool DynamicMessage::addUInt32Field(const String& name, uint32_t val) {
   return true;
 }
 
+bool DynamicMessage::addUInt64Field(const String& name, uint64_t val) {
+  if (!schema_->hasField(name)) {
+    return false;
+  }
+
+  auto field_id = schema_->fieldId(name);
+  if (schema_->fieldType(field_id) != msg::FieldType::UINT64) {
+    return false;
+  }
+
+  data_.addChild(field_id, uint64_t(val));
+  return true;
+}
+
+bool DynamicMessage::addDateTimeField(const String& name, const UnixTime& val) {
+  if (!schema_->hasField(name)) {
+    return false;
+  }
+
+  auto field_id = schema_->fieldId(name);
+  if (schema_->fieldType(field_id) != msg::FieldType::DATETIME) {
+    return false;
+  }
+
+  data_.addChild(field_id, val);
+  return true;
+}
+
 bool DynamicMessage::addBoolField(const String& name, bool val) {
   if (!schema_->hasField(name)) {
     return false;
