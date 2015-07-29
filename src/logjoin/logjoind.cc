@@ -225,7 +225,12 @@ int main(int argc, const char** argv) {
       URI("http://nue03.prod.fnrd.net:7001/rpc"));
 
   /* set up session processing pipeline */
-  cm::SessionProcessor session_proc(&customer_dir);
+  auto spool_path = FileUtil::joinPaths(
+      flags.getString("datadir"),
+      shard.shard_name + "/spool");
+
+  FileUtil::mkdir_p(spool_path);
+  cm::SessionProcessor session_proc(&customer_dir, spool_path);
 
   /* pipeline stage: session join */
   session_proc.addPipelineStage(

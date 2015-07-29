@@ -15,8 +15,10 @@ using namespace stx;
 namespace cm {
 
 SessionProcessor::SessionProcessor(
-    CustomerDirectory* customer_dir) :
+    CustomerDirectory* customer_dir,
+    const String& spool_path) :
     customer_dir_(customer_dir),
+    spool_path_(spool_path),
     queue_(100),
     running_(false) {}
     //tpool_(
