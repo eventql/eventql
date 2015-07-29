@@ -272,6 +272,7 @@ void SessionJoin::processCartItemsEvent(
   URI::ParamList logline;
   URI::parseQueryString(event.data, &logline);
 
+  stx::iputs("cart items event 3", 1);
   auto new_cart_items = TrackedCartItem::fromParams(logline);
   for (auto& ci : new_cart_items) {
     ci.time = event.time;
@@ -289,6 +290,7 @@ void SessionJoin::processCartItemsEvent(
     }
 
     if (!merged) {
+      stx::iputs("cart items event 4", 1);
       cart_items->emplace_back(cart_item);
     }
   }

@@ -114,6 +114,10 @@ void TSDBUploadStage::serializeEvent(
     RefPtr<SessionContext> ctx,
     RefPtr<OutputEvent> ev,
     tsdb::RecordEnvelopeList* records) {
+  if (ev->obj.schema()->name() == "cart_items") {
+    stx::iputs("cart items event 5", 1);
+  }
+
   Buffer record_data;
   msg::MessageEncoder::encode(
       ev->obj.data(),
