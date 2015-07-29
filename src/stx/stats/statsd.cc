@@ -26,7 +26,6 @@ StatsdServer::StatsdServer(
 }
 
 void StatsdServer::listen(int port) {
-  logNotice("fnord.statsd.server", "Starting StatsD server on port $0", port);
   udp_server_.listen(port);
 }
 
