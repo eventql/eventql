@@ -6,6 +6,7 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
+#include <unistd.h>
 #include "stx/wallclock.h"
 #include "stx/io/fileutil.h"
 #include "logjoin/SessionProcessor.h"
@@ -19,12 +20,12 @@ SessionProcessor::SessionProcessor(
     const String& spool_path) :
     customer_dir_(customer_dir),
     spool_path_(spool_path),
-    queue_(100),
+    queue_(-1),
     running_(false) {
   FileUtil::ls(spool_path_, [this] (const String& filename) -> bool {
     if (!StringUtil::endsWith(filename, "~")) {
       auto skey = SHA1Hash::fromHexString(filename);
-      queue_.insert(skey, WallClock::now(), true);
+      queue_.insert(skey, WallClock::now(), false);
     }
     return true;
   });
@@ -80,7 +81,12 @@ void SessionProcessor::enqueueSession(const TrackedSession& session) {
   }
 
   FileUtil::mv(fpath + "~", fpath);
-  queue_.insert(skey, WallClock::now(), true);
+
+  while (queue_.length() > 1000) {
+    usleep(1000);
+  }
+
+  queue_.insert(skey, WallClock::now(), false);
 }
 
 void SessionProcessor::processSession(const SHA1Hash& skey) {
