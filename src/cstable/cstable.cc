@@ -165,6 +165,13 @@ void cmd_from_csv(const cli::FlagParser& flags) {
           break;
         }
 
+        case msg::FieldType::DATETIME: {
+          auto t = Human::parseTime(val);
+          auto v = !t.isEmpty() ? UnixTime(0) : t.get();
+          col->addDatum(0, col->maxDefinitionLevel(), &v, sizeof(v));
+          break;
+        }
+
         case msg::FieldType::BOOLEAN: {
           auto b = Human::parseBoolean(val);
           uint8_t v = !b.isEmpty() && b.get() ? 1 : 0;
