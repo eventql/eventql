@@ -251,7 +251,7 @@ void LogJoin::flushSession(
   auto cursor = txn->getCursor();
 
   TrackedSession session;
-  session.uuid = uid;
+  session.uuid = SHA1::compute(uid).toString();
 
   Buffer key;
   Buffer value;
