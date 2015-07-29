@@ -53,7 +53,7 @@ void SessionProcessor::stop() {
 }
 
 void SessionProcessor::work() {
-  while (running_) {
+  while (running_.load()) {
     auto skey = queue_.interruptiblePop();
     if (skey.isEmpty()) {
       continue;
