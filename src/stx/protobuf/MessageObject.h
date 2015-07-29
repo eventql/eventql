@@ -27,6 +27,13 @@ enum class FieldType : uint8_t {
   DATETIME = 6,
 };
 
+enum class WireType : uint8_t {
+  VARINT = 0,
+  FIXED64 = 1,
+  LENENC = 2,
+  FIXED32 = 5,
+};
+
 String fieldTypeToString(FieldType type);
 FieldType fieldTypeFromString(String str);
 
