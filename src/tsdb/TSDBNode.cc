@@ -169,11 +169,16 @@ RefPtr<Partition> TSDBNode::findOrCreatePartition(
     return iter->second;
   }
 
+  auto table = findTableWithLock(tsdb_namespace, stream_key);
+  if (table.isEmpty()) {
+    RAISEF(kNotFoundError, "table not found: $0", stream_key);
+  }
+
   auto partition = Partition::create(
       partition_key,
       stream_key,
       db_key,
-      findTableWithLock(tsdb_namespace, stream_key).get(),
+      table.get(),
       &noderef_);
 
   partitions_.emplace(db_key, partition);
