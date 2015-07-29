@@ -8,7 +8,7 @@
  */
 #include <algorithm>
 #include <stx/exception.h>
-#include <stx/inspect.h>
+#include <stx/logging.h>
 #include <stx/stringutil.h>
 #include <stx/uri.h>
 #include "common.h"
@@ -31,43 +31,47 @@ void TrackedQuery::fromParams(const stx::URI::ParamList& params) {
   std::string items_str;
   if (stx::URI::getParam(params, "is", &items_str)) {
     for (const auto& item_str : stx::StringUtil::split(items_str, ",")) {
-      if (item_str.length() == 0) {
-        continue;
-      }
-
-      auto item_str_parts = stx::StringUtil::split(item_str, "~");
-      if (item_str_parts.size() < 2) {
-        RAISE(kParseError, "invalid is param");
-      }
-
-      TrackedQueryItem qitem;
-      qitem.item.set_id = item_str_parts[0];
-      qitem.item.item_id = item_str_parts[1];
-      qitem.clicked = false;
-      qitem.seen = false;
-      qitem.position = -1;
-      qitem.variant = -1;
-
-      for (int i = 2; i < item_str_parts.size(); ++i) {
-        const auto& iattr = item_str_parts[i];
-        if (iattr.length() < 1) {
+      try {
+        if (item_str.length() == 0) {
           continue;
         }
 
-        switch (iattr[0]) {
-          case 'p':
-            qitem.position = std::stoi(iattr.substr(1, iattr.length() - 1));
-            break;
-          case 'v':
-            qitem.variant = std::stoi(iattr.substr(1, iattr.length() - 1));
-            break;
-          case 's':
-            qitem.seen = true;
-            break;
+        auto item_str_parts = stx::StringUtil::split(item_str, "~");
+        if (item_str_parts.size() < 2) {
+          RAISE(kParseError, "invalid is param");
         }
-      }
 
-      items.emplace_back(qitem);
+        TrackedQueryItem qitem;
+        qitem.item.set_id = item_str_parts[0];
+        qitem.item.item_id = item_str_parts[1];
+        qitem.clicked = false;
+        qitem.seen = false;
+        qitem.position = -1;
+        qitem.variant = -1;
+
+        for (int i = 2; i < item_str_parts.size(); ++i) {
+          const auto& iattr = item_str_parts[i];
+          if (iattr.length() < 1) {
+            continue;
+          }
+
+          switch (iattr[0]) {
+            case 'p':
+              qitem.position = std::stoi(iattr.substr(1, iattr.length() - 1));
+              break;
+            case 'v':
+              qitem.variant = std::stoi(iattr.substr(1, iattr.length() - 1));
+              break;
+            case 's':
+              qitem.seen = true;
+              break;
+          }
+        }
+
+        items.emplace_back(qitem);
+      } catch (const StandardException& e) {
+        logError("logjoin", e, "error while parsing TrackedQuery::ResultItem");
+      }
     }
   }
 
