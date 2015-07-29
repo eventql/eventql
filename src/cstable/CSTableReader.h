@@ -23,6 +23,8 @@ public:
 
   CSTableReader(const String& filename);
   CSTableReader(const RefPtr<VFSFile> file);
+  CSTableReader(const CSTableReader& other) = delete;
+  CSTableReader& operator=(const CSTableReader other) = delete;
 
   void getColumn(
       const String& column_name,
