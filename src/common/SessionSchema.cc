@@ -29,6 +29,34 @@ RefPtr<msg::MessageSchema> SessionSchema::forCustomer(
   return new msg::MessageSchema(
       "session",
       Vector<msg::MessageSchemaField> {
+            msg::MessageSchemaField(
+                70,
+                "session_id",
+                msg::FieldType::STRING,
+                0,
+                false,
+                true),
+            msg::MessageSchemaField(
+                71,
+                "time",
+                msg::FieldType::DATETIME,
+                0,
+                false,
+                true),
+            msg::MessageSchemaField(
+                53,
+                "first_seen_time",
+                msg::FieldType::DATETIME,
+                0,
+                false,
+                true),
+            msg::MessageSchemaField(
+                54,
+                "last_seen_time",
+                msg::FieldType::DATETIME,
+                0,
+                false,
+                true),
             msg::MessageSchemaField::mkObjectField(
                 1,
                 "attr",
