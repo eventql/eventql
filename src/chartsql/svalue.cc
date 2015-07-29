@@ -65,7 +65,7 @@ SValue::SValue(SValue::BoolType bool_value) {
 
 SValue::SValue(SValue::TimeType time_value) {
   data_.type = T_TIMESTAMP;
-  data_.u.t_timestamp = static_cast<uint64_t>(time_value);
+  data_.u.t_timestamp = static_cast<uint64_t>(time_value) / kMicrosPerSecond;
 }
 
 SValue::SValue(const SValue& copy) {
@@ -243,7 +243,7 @@ SValue::TimeType SValue::getTimestamp() const {
   switch (getType()) {
 
     case T_TIMESTAMP:
-      return data_.u.t_timestamp;
+      return data_.u.t_timestamp * kMicrosPerSecond;
 
     default:
       RAISE(
@@ -502,7 +502,7 @@ bool SValue::tryTimeConversion() {
   time_t ts = getInteger();
   data_.type = T_TIMESTAMP;
   // FIXPAUL take a smart guess if this is milli, micro, etc
-  data_.u.t_timestamp = ts * 1000000llu;
+  data_.u.t_timestamp = ts;
   return true;
 }
 
