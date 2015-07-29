@@ -32,10 +32,13 @@ void SessionJoin::process(RefPtr<SessionContext> ctx) {
     }
 
     if (ev.evtype == "_cart_items") {
+      stx::iputs("cart items event", 1);
       processCartItemsEvent(ev, &cart_items);
       continue;
     }
   }
+
+  stx::iputs("ncartitems: $0", cart_items.size());
 
   /* update queries (mark items as clicked) */
   for (auto& cur_query : queries) {
