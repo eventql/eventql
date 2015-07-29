@@ -62,7 +62,6 @@ public:
   PartitionInfo partitionInfo() const;
   Vector<String> listFiles() const;
 
-  Option<cstable::CSTableReader> cstable() const;
   Option<RefPtr<VFSFile>> cstableFile() const;
 
   void compact();

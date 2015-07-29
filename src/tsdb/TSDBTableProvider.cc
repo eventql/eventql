@@ -55,7 +55,7 @@ Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildSequentialScan(
         mkScoped(new csql::EmptyTable()));
   }
 
-  auto cstable = partition.get()->cstable();
+  auto cstable = partition.get()->cstableFile();
   if (cstable.isEmpty()) {
     return Option<ScopedPtr<csql::TableExpression>>(
         mkScoped(new csql::EmptyTable()));
@@ -65,7 +65,7 @@ Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildSequentialScan(
       mkScoped(
           new csql::CSTableScan(
               node,
-              std::move(cstable.get()),
+              mkScoped(new cstable::CSTableReader(cstable.get())),
               runtime)));
 }
 

@@ -396,20 +396,6 @@ void Partition::buildCSTable(
   cstable.write(FileUtil::joinPaths(node_->db_path, output_file));
 }
 
-Option<cstable::CSTableReader> Partition::cstable() const {
-  std::unique_lock<std::mutex> lk(mutex_);
-
-  if (cstable_file_.empty()) {
-    return None<cstable::CSTableReader>();
-  } else {
-    auto cstable_file_path = FileUtil::joinPaths(
-        node_->db_path,
-        cstable_file_);
-
-    return Some(cstable::CSTableReader(cstable_file_path));
-  }
-}
-
 Option<RefPtr<VFSFile>> Partition::cstableFile() const {
   std::unique_lock<std::mutex> lk(mutex_);
 
