@@ -9,6 +9,7 @@
 #include "stx/SHA1.h"
 #include "stx/protobuf/msg.h"
 #include "stx/protobuf/MessageEncoder.h"
+#include "stx/protobuf/MessagePrinter.h"
 #include "logjoin/stages/TSDBUploadStage.h"
 #include "logjoin/common.h"
 #include "common/SessionSchema.h"
@@ -96,6 +97,8 @@ void TSDBUploadStage::serializeSession(
   /* encode session */
   Buffer record_data;
   msg::MessageEncoder::encode(session_data, *session_schema, &record_data);
+
+  iputs("upload: $0", msg::MessagePrinter::print(session_data, *session_schema));
 
   /* add to record list */
   auto record_id = SHA1::compute(ctx->uuid);
