@@ -29,7 +29,7 @@ Option<ScopedPtr<TableExpression>>
       mkScoped(
           new CSTableScan(
               node,
-              cstable::CSTableReader(cstable_file_),
+              mkScoped(new cstable::CSTableReader(cstable_file_)),
               runtime)));
 }
 
