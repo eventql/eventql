@@ -45,7 +45,7 @@ protected:
   Vector<PipelineStageFn> stages_;
   thread::DelayedQueue<SHA1Hash> queue_;
   Vector<std::thread> threads_;
-  bool running_;
+  std::atomic<bool> running_;
 };
 
 } // namespace cm

@@ -308,10 +308,10 @@ int main(int argc, const char** argv) {
 
   /* shutdown */
   stx::logInfo("logjoind", "LogJoin exiting...");
+  session_proc.stop();
   ev.shutdown();
   evloop_thread.join();
   sessdb->sync();
-  session_proc.stop();
   exit(0);
 }
 

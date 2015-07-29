@@ -94,8 +94,6 @@ void TSDBUploadStage::serializeSession(
   Buffer record_data;
   msg::MessageEncoder::encode(session_data, *session_schema, &record_data);
 
-  iputs("upload: $0", msg::MessagePrinter::print(session_data, *session_schema));
-
   /* add to record list */
   auto record_id = SHA1::compute(ctx->uuid);
   auto stream_key = "sessions";
