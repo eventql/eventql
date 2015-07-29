@@ -356,13 +356,11 @@ uint64_t CSTableScan::findMaxRepetitionLevel(
   auto fieldref = dynamic_cast<ColumnReferenceNode*>(expr.get());
   if (fieldref != nullptr) {
     auto col = columns_.find(fieldref->fieldName());
-    if (col == columns_.end()) {
-      RAISE(kIllegalStateError);
-    }
-
-    auto col_level = col->second.reader->maxRepetitionLevel();
-    if (col_level > max_level) {
-      max_level = col_level;
+      if (col != columns_.end()) {
+      auto col_level = col->second.reader->maxRepetitionLevel();
+      if (col_level > max_level) {
+        max_level = col_level;
+      }
     }
   }
 
