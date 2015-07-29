@@ -26,7 +26,7 @@ void TSDBUploadStage::process(
   serializeSession(ctx, &records);
 
   for (const auto& ev : ctx->outputEvents()) {
-    serializeEvent(ev->obj, &records);
+    serializeEvent(ctx, ev, &records);
   }
 
   URI uri(StringUtil::format("http://$0/tsdb/insert", tsdb_addr));
@@ -111,8 +111,29 @@ void TSDBUploadStage::serializeSession(
 }
 
 void TSDBUploadStage::serializeEvent(
-    const msg::DynamicMessage& event,
+    RefPtr<SessionContext> ctx,
+    RefPtr<OutputEvent> ev,
     tsdb::RecordEnvelopeList* records) {
+  Buffer record_data;
+  msg::MessageEncoder::encode(
+      ev->obj.data(),
+      *ev->obj.schema(),
+      &record_data);
+
+  /* add to record list */
+  auto record_id = SHA1::compute(ctx->uuid);
+  auto stream_key = "sessions." + ev->obj.schema()->name();
+  auto partition_key = tsdb::TimeWindowPartitioner::partitionKeyFor(
+      stream_key,
+      ev->time,
+      4 * kMicrosPerHour);
+
+  auto r = records->add_records();
+  r->set_tsdb_namespace(ctx->customer_key);
+  r->set_stream_key(stream_key);
+  r->set_partition_key(partition_key.toString());
+  r->set_record_id(record_id.toString());
+  r->set_record_data(record_data.data(), record_data.size());
 }
 
 } // namespace cm
