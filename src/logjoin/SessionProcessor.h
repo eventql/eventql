@@ -24,7 +24,8 @@ public:
   typedef Function<void (RefPtr<SessionContext> ctx)> PipelineStageFn;
 
   SessionProcessor(
-      CustomerDirectory* customer_dir);
+      CustomerDirectory* customer_dir,
+      const String& spool_path);
 
   void addPipelineStage(PipelineStageFn fn);
 
