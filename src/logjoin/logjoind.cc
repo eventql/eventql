@@ -257,16 +257,16 @@ int main(int argc, const char** argv) {
   //    std::bind(&DebugPrintStage::process, std::placeholders::_1));
 
   /* pipeline stage: TSDBUpload */
-  //session_proc.addPipelineStage(
-  //    std::bind(
-  //        &TSDBUploadStage::process,
-  //        std::placeholders::_1,
-  //        flags.getString("tsdb_addr"),
-  //        &http));
+  session_proc.addPipelineStage(
+      std::bind(
+          &TSDBUploadStage::process,
+          std::placeholders::_1,
+          flags.getString("tsdb_addr"),
+          &http));
 
   ///* pipeline stage: DeliverWebHook */
-  //session_proc.addPipelineStage(
-  //    std::bind(&DeliverWebhookStage::process, std::placeholders::_1));
+  session_proc.addPipelineStage(
+      std::bind(&DeliverWebhookStage::process, std::placeholders::_1));
 
   /* open session db */
   mdb::MDBOptions mdb_opts;

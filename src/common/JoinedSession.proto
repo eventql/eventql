@@ -535,8 +535,8 @@ message NewJoinedSession {
   /**
    * The time at which this search query was first/last seen
    */
-  optional uint32 first_seen_time = 53;
-  optional uint32 last_seen_time = 54;
+  optional uint64 first_seen_time = 53;
+  optional uint64 last_seen_time = 54;
 
   optional DefaultSessionAttributes attr = 1;
   optional NewSessionEvents event = 2;
