@@ -7,6 +7,7 @@
  * permission is obtained.
  */
 #include "stx/wallclock.h"
+#include "stx/io/fileutil.h"
 #include "logjoin/SessionProcessor.h"
 
 using namespace stx;
@@ -73,6 +74,13 @@ void SessionProcessor::enqueueSession(const TrackedSession& session) {
       session.customer_key,
       session.uuid);
 
+  auto fpath = FileUtil::joinPaths(spool_path_, skey.toString());
+  {
+    auto os = FileOutputStream::openFile(fpath + "~");
+    session.encode(os.get());
+  }
+
+  FileUtil::mv(fpath + "~", fpath);
   queue_.insert(skey, WallClock::now(), true);
 }
 

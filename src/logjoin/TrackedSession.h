@@ -10,6 +10,8 @@
 #include <stx/stdtypes.h>
 #include <stx/option.h>
 #include <stx/UnixTime.h>
+#include <stx/io/inputstream.h>
+#include <stx/io/outputstream.h>
 #include <stx/uri.h>
 
 using namespace stx;
@@ -39,6 +41,9 @@ struct TrackedSession {
       const String& evtype,
       const String& evid,
       const URI::ParamList& logline);
+
+  void encode(OutputStream* os) const;
+  void decode(InputStream* os);
 
 };
 

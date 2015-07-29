@@ -39,8 +39,9 @@ protected:
   void processSession(const SHA1Hash& skey);
   void processSession(const TrackedSession& session);
 
-  Vector<PipelineStageFn> stages_;
   CustomerDirectory* customer_dir_;
+  String spool_path_;
+  Vector<PipelineStageFn> stages_;
   thread::DelayedQueue<SHA1Hash> queue_;
   Vector<std::thread> threads_;
   bool running_;
