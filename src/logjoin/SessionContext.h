@@ -38,6 +38,8 @@ struct SessionContext : public RefCounted {
   RefPtr<CustomerConfigRef> customer_config;
 
   UnixTime time;
+  UnixTime first_seen_time;
+  UnixTime last_seen_time;
 
   Vector<TrackedEvent> events;
 

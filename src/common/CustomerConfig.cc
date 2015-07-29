@@ -54,7 +54,7 @@ CustomerConfig createCustomerConfig(const String& customer) {
       msg::MessageSchema::fromProtobuf(
           cm::DefaultSessionAttributes::descriptor())->encode().toString());
 
-  conf.mutable_logjoin_config()->set_session_schema_next_field_id(70);
+  conf.mutable_logjoin_config()->set_session_schema_next_field_id(72);
 
   return conf;
 }

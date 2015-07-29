@@ -9,6 +9,7 @@
 #include "stx/SHA1.h"
 #include "stx/protobuf/msg.h"
 #include "stx/protobuf/MessageEncoder.h"
+#include "stx/protobuf/MessagePrinter.h"
 #include "logjoin/stages/TSDBUploadStage.h"
 #include "logjoin/common.h"
 #include "common/SessionSchema.h"
@@ -56,20 +57,21 @@ void TSDBUploadStage::serializeSession(
     event_ids.emplace(evschema.evtype(), evschema.evid());
   }
 
-  msg::MessageObject session;
+  auto session_schema = SessionSchema::forCustomer(
+      ctx->customer_config->config);
+
+  msg::DynamicMessage session(session_schema);
+  session.addField("session_id", ctx->uuid);
+  session.addDateTimeField("time", ctx->time);
+  session.addDateTimeField("last_seen_time", ctx->last_seen_time);
+  session.addDateTimeField("first_seen_time", ctx->first_seen_time);
 
   /* add attributes */
-  auto attrs_schema = msg::MessageSchema::decode(
-      logjoin_cfg.session_attributes_schema());
-
-  msg::DynamicMessage attrs(attrs_schema);
-  for (const auto& attr : ctx->attributes()) {
-    attrs.addField(attr.first, attr.second);
-  }
-
-  auto attrs_obj = attrs.data();
-  attrs_obj.id = 1;
-  session.addChild(attrs_obj);
+  session.addObject("attr", [ctx] (msg::DynamicMessage* obj) {
+    for (const auto& attr : ctx->attributes()) {
+      obj->addField(attr.first, attr.second);
+    }
+  });
 
   /* add events */
   msg::MessageObject events_obj(2);
@@ -85,14 +87,14 @@ void TSDBUploadStage::serializeSession(
     events_obj.addChild(ev_obj);
   }
 
-  session.addChild(events_obj);
+  auto session_data = session.data();
+  session_data.addChild(events_obj);
 
   /* encode session */
-  auto session_schema = SessionSchema::forCustomer(
-      ctx->customer_config->config);
-
   Buffer record_data;
-  msg::MessageEncoder::encode(session, *session_schema, &record_data);
+  msg::MessageEncoder::encode(session_data, *session_schema, &record_data);
+
+  iputs("upload: $0", msg::MessagePrinter::print(session_data, *session_schema));
 
   /* add to record list */
   auto record_id = SHA1::compute(ctx->uuid);

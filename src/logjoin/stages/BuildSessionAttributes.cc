@@ -20,15 +20,8 @@ void BuildSessionAttributes::process(RefPtr<SessionContext> ctx) {
     RAISE(kRuntimeError, "session: time isn't set");
   }
 
-  ctx->setAttribute(
-      "first_seen_time",
-      StringUtil::toString(first_seen.get().unixMicros() / kMicrosPerSecond));
-
-  ctx->setAttribute(
-      "last_seen_time",
-      StringUtil::toString(last_seen.get().unixMicros() / kMicrosPerSecond));
-
-
+  ctx->first_seen_time = first_seen.get();
+  ctx->last_seen_time = last_seen.get();
   ctx->time = last_seen.get();
 
   for (const auto& ev : ctx->events) {

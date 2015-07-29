@@ -457,12 +457,6 @@ message DefaultSessionAttributes {
   optional string customer_session_id = 61
       [(stx.coding) = { maxval: 4096 }];
 
-  /**
-   * The time at which this search query was first/last seen
-   */
-  optional uint32 first_seen_time = 53;
-  optional uint32 last_seen_time = 54;
-
   optional string referrer_url = 57
       [(stx.coding) = { maxval: 1024 }];
 
@@ -504,5 +498,47 @@ message DefaultSessionAttributes {
    */
   optional uint32 ab_test_group = 51
       [(stx.coding) = { maxval: 100 encoding: "BITPACK" }];
+
+};
+
+message NewSessionEvents {
+  
+  /**
+   * A list of all search queries associated with this session
+   */
+  repeated JoinedSearchQuery search_query = 16;
+
+  /**
+   * A list of all item visits associated with this session
+   */
+  repeated JoinedPageView page_view = 25;
+
+  /**
+   * A list of all cart items associated with this session
+   */
+  repeated JoinedCartItem cart_items = 52;
+
+};
+
+message NewJoinedSession {
+
+  /**
+   * Deep Analytics session id
+   */
+  optional string session_id = 70;
+
+  /**
+   * Nominal session time (emit time)
+   */
+  optional uint64 time = 71;
+
+  /**
+   * The time at which this search query was first/last seen
+   */
+  optional uint64 first_seen_time = 53;
+  optional uint64 last_seen_time = 54;
+
+  optional DefaultSessionAttributes attr = 1;
+  optional NewSessionEvents event = 2;
 
 };

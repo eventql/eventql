@@ -57,7 +57,7 @@ void DeliverWebhookStage::process(RefPtr<SessionContext> ctx) {
     json.endArray();
     json.endObject();
 
-    stx::iputs("session json: $0", json_buf.toString());
+    //stx::iputs("session json: $0", json_buf.toString());
 
     // FIXPAUL: security risk ahead, make sure url is actually external
     http::HTTPMessage::HeaderList headers;
