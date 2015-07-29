@@ -14,6 +14,7 @@
 #include <functional>
 #include <list>
 #include "stx/option.h"
+#include "stx/UnixTime.h"
 
 namespace stx {
 namespace thread {
@@ -34,6 +35,9 @@ public:
   void wakeup();
 
 protected:
+  size_t max_size_;
+  size_t length_;
+
   std::multiset<
       Pair<uint64_t, T>,
       Function<bool (
@@ -42,8 +46,6 @@ protected:
 
   mutable std::mutex mutex_;
   std::condition_variable wakeup_;
-  size_t max_size_;
-  size_t length_;
 };
 
 }
