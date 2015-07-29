@@ -93,7 +93,7 @@ Instruction* ValueExpressionBuilder::compileColumnReference(
     ScratchMemory* static_storage) {
   auto col_idx = node->columnIndex();
 
-  if (col_idx == -1) {
+  if (col_idx == size_t(-1)) {
     auto ins = static_storage->construct<Instruction>();
     ins->type = X_LITERAL;
     ins->arg0 = static_storage->construct<SValue>();

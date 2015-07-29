@@ -25,7 +25,7 @@ public:
 
   CSTableScan(
       RefPtr<SequentialScanNode> stmt,
-      cstable::CSTableReader&& cstable,
+      ScopedPtr<cstable::CSTableReader> cstable,
       QueryBuilder* runtime);
 
   virtual Vector<String> columnNames() const override;
@@ -73,7 +73,7 @@ protected:
 
   Vector<String> column_names_;
   ScratchMemory scratch_;
-  cstable::CSTableReader cstable_;
+  ScopedPtr<cstable::CSTableReader> cstable_;
   HashMap<String, ColumnRef> columns_;
   Vector<ExpressionRef> select_list_;
   ScopedPtr<ValueExpression> where_expr_;

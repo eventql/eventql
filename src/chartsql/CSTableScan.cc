@@ -19,7 +19,7 @@ namespace csql {
 
 CSTableScan::CSTableScan(
     RefPtr<SequentialScanNode> stmt,
-    cstable::CSTableReader&& cstable,
+    ScopedPtr<cstable::CSTableReader> cstable,
     QueryBuilder* runtime) :
     cstable_(std::move(cstable)),
     colindex_(0),
@@ -36,10 +36,10 @@ CSTableScan::CSTableScan(
   }
 
   for (const auto& col : column_names) {
-    if (cstable.hasColumn(col)) {
+    if (cstable_->hasColumn(col)) {
       columns_.emplace(
           col,
-          ColumnRef(cstable_.getColumnReader(col), colindex_++));
+          ColumnRef(cstable_->getColumnReader(col), colindex_++));
     }
   }
 
@@ -82,7 +82,7 @@ void CSTableScan::scan(
   Vector<SValue> out_row(select_list_.size(), SValue{});
 
   size_t num_records = 0;
-  size_t total_records = cstable_.numRecords();
+  size_t total_records = cstable_->numRecords();
   while (num_records < total_records) {
     uint64_t next_level = 0;
 
@@ -265,7 +265,7 @@ void CSTableScan::scanWithoutColumns(
     Function<bool (int argc, const SValue* argv)> fn) {
   Vector<SValue> out_row(select_list_.size(), SValue{});
 
-  size_t total_records = cstable_.numRecords();
+  size_t total_records = cstable_->numRecords();
   for (size_t i = 0; i < total_records; ++i) {
     bool where_pred = true;
     if (where_expr_.get() != nullptr) {
@@ -338,7 +338,7 @@ void CSTableScan::resolveColumns(RefPtr<ValueExpressionNode> expr) const {
   if (fieldref != nullptr) {
     auto col = columns_.find(fieldref->fieldName());
     if (col == columns_.end()) {
-      fieldref->setColumnIndex(-1);
+      fieldref->setColumnIndex(size_t(-1));
     } else {
       fieldref->setColumnIndex(col->second.index);
     }
