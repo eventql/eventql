@@ -26,7 +26,6 @@ void TSDBUploadStage::process(
   serializeSession(ctx, &records);
 
   for (const auto& ev : ctx->outputEvents()) {
-    stx::iputs("push event: $0", ev->obj.schema()->name());
     serializeEvent(ctx, ev, &records);
   }
 
