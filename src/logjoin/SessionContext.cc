@@ -13,6 +13,14 @@ using namespace stx;
 
 namespace cm {
 
+OutputEvent::OutputEvent(
+    UnixTime _time,
+    SHA1Hash _evid,
+    RefPtr<msg::MessageSchema> schema) :
+    time(_time),
+    evid(_evid),
+    obj(schema) {}
+
 SessionContext::SessionContext(
     TrackedSession session,
     RefPtr<CustomerConfigRef> cconf) :
@@ -21,14 +29,17 @@ SessionContext::SessionContext(
     customer_config(cconf),
     events(session.events) {}
 
-msg::DynamicMessage* SessionContext::addOutputEvent(const String& evtype) {
+RefPtr<OutputEvent> SessionContext::addOutputEvent(
+    UnixTime time,
+    SHA1Hash evid,
+    const String& evtype) {
   const auto& logjoin_cfg = customer_config->config.logjoin_config();
 
   for (const auto& evschema : logjoin_cfg.session_event_schemas()) {
     if (evschema.evtype() == evtype) {
       auto schema = msg::MessageSchema::decode(evschema.schema());
 
-      auto event = new msg::DynamicMessage(schema);
+      auto event = mkRef(new OutputEvent(time, evid, schema));
       output_events_.emplace_back(event);
       return event;
     }
@@ -46,7 +57,7 @@ const HashMap<String, String>& SessionContext::attributes() const {
   return attributes_;
 }
 
-const Vector<ScopedPtr<msg::DynamicMessage>>& SessionContext::outputEvents() const {
+const Vector<RefPtr<OutputEvent>>& SessionContext::outputEvents() const {
   return output_events_;
 }
 

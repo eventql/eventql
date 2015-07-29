@@ -8,12 +8,24 @@
  */
 #pragma once
 #include "stx/protobuf/DynamicMessage.h"
+#include "stx/SHA1.h"
 #include "logjoin/TrackedSession.h"
 #include "common/CustomerConfig.h"
 
 using namespace stx;
 
 namespace cm {
+
+struct OutputEvent : public RefCounted {
+  OutputEvent(
+      UnixTime _time,
+      SHA1Hash _evid,
+      RefPtr<msg::MessageSchema> schema);
+
+  UnixTime time;
+  SHA1Hash evid;
+  msg::DynamicMessage obj;
+};
 
 struct SessionContext : public RefCounted {
   SessionContext(
@@ -29,14 +41,17 @@ struct SessionContext : public RefCounted {
 
   Vector<TrackedEvent> events;
 
-  const Vector<ScopedPtr<msg::DynamicMessage>>& outputEvents() const;
-  msg::DynamicMessage* addOutputEvent(const String& evtype);
+  const Vector<RefPtr<OutputEvent>>& outputEvents() const;
+  RefPtr<OutputEvent> addOutputEvent(
+      UnixTime time,
+      SHA1Hash evid,
+      const String& evtype);
 
   const HashMap<String, String>& attributes() const;
   void setAttribute(const String& key, const String& value);
 
 protected:
-  Vector<ScopedPtr<msg::DynamicMessage>> output_events_;
+  Vector<RefPtr<OutputEvent>> output_events_;
   HashMap<String, String> attributes_;
 };
 

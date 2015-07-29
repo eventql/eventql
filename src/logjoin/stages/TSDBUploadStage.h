@@ -31,7 +31,8 @@ private:
       tsdb::RecordEnvelopeList* records);
 
   static void serializeEvent(
-      const msg::DynamicMessage& event,
+      RefPtr<SessionContext> ctx,
+      RefPtr<OutputEvent> ev,
       tsdb::RecordEnvelopeList* records);
 
 };
