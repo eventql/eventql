@@ -14,7 +14,9 @@ using namespace stx;
 namespace cm {
 
 OutputEvent::OutputEvent(
+    UnixTime _time,
     RefPtr<msg::MessageSchema> schema) :
+    time(_time),
     obj(schema) {}
 
 SessionContext::SessionContext(
@@ -25,14 +27,16 @@ SessionContext::SessionContext(
     customer_config(cconf),
     events(session.events) {}
 
-RefPtr<OutputEvent> SessionContext::addOutputEvent(const String& evtype) {
+RefPtr<OutputEvent> SessionContext::addOutputEvent(
+    UnixTime time,
+    const String& evtype) {
   const auto& logjoin_cfg = customer_config->config.logjoin_config();
 
   for (const auto& evschema : logjoin_cfg.session_event_schemas()) {
     if (evschema.evtype() == evtype) {
       auto schema = msg::MessageSchema::decode(evschema.schema());
 
-      auto event = mkRef(new OutputEvent(schema));
+      auto event = mkRef(new OutputEvent(time, schema));
       output_events_.emplace_back(event);
       return event;
     }
