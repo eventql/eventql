@@ -120,63 +120,70 @@ void SessionJoin::process(RefPtr<SessionContext> ctx) {
   }
 
   for (const auto& ci : cart_items) {
-    auto ciobj = ctx->addOutputEvent("cart_items");
-    ciobj->addUInt32Field("time", ci.time.unixMicros() / kMicrosPerSecond);
-    ciobj->addField("item_id", ci.item.docID().docid);
-    ciobj->addUInt32Field("quantity", ci.quantity);
-    ciobj->addUInt32Field("price_cents", ci.price_cents);
-    ciobj->addUInt32Field("currency", (uint32_t) currencyFromString(ci.currency));
-    ciobj->addUInt32Field("checkout_step", ci.checkout_step);
+    auto& ciobj = ctx->addOutputEvent(
+        ci.time,
+        SHA1::compute(ctx->uuid + "~" + ci.item.docID().docid),
+        "cart_items")->obj;
+
+    ciobj.addUInt32Field("time", ci.time.unixMicros() / kMicrosPerSecond);
+    ciobj.addField("item_id", ci.item.docID().docid);
+    ciobj.addUInt32Field("quantity", ci.quantity);
+    ciobj.addUInt32Field("price_cents", ci.price_cents);
+    ciobj.addUInt32Field("currency", (uint32_t) currencyFromString(ci.currency));
+    ciobj.addUInt32Field("checkout_step", ci.checkout_step);
   }
 
   for (const auto& q : queries) {
-    auto qobj = ctx->addOutputEvent("search_query");
+    auto& qobj = ctx->addOutputEvent(
+        q.time,
+        SHA1::compute(ctx->uuid + "~" + q.clickid),
+        "search_query")->obj;
 
-    qobj->addUInt32Field("time", q.time.unixMicros() / kMicrosPerSecond);
-    qobj->addUInt32Field("language", (uint32_t) cm::extractLanguage(q.attrs));
+    qobj.addUInt32Field("time", q.time.unixMicros() / kMicrosPerSecond);
+    qobj.addUInt32Field("language", (uint32_t) cm::extractLanguage(q.attrs));
 
     auto qstr = cm::extractQueryString(q.attrs);
     if (!qstr.isEmpty()) {
-      qobj->addStringField("query_string", qstr.get());
+      qobj.addStringField("query_string", qstr.get());
     }
 
     auto slrid = cm::extractAttr(q.attrs, "slrid");
     if (!slrid.isEmpty()) {
-      qobj->addField("shop_id", slrid.get());
+      qobj.addField("shop_id", slrid.get());
     }
 
-    qobj->addUInt32Field("num_result_items", q.nitems);
-    qobj->addUInt32Field("num_result_items_clicked", q.nclicks);
-    qobj->addUInt32Field("num_ad_impressions", q.nads);
-    qobj->addUInt32Field("num_ad_clicks", q.nadclicks);
-    qobj->addUInt32Field("num_cart_items", q.num_cart_items);
-    qobj->addUInt32Field("cart_value_eurcents", q.cart_value_eurcents);
-    qobj->addUInt32Field("num_order_items", q.num_order_items);
-    qobj->addUInt32Field("gmv_eurcents", q.gmv_eurcents);
+    qobj.addUInt32Field("num_result_items", q.nitems);
+    qobj.addUInt32Field("num_result_items_clicked", q.nclicks);
+    qobj.addUInt32Field("num_ad_impressions", q.nads);
+    qobj.addUInt32Field("num_ad_clicks", q.nadclicks);
+    qobj.addUInt32Field("num_cart_items", q.num_cart_items);
+    qobj.addUInt32Field("cart_value_eurcents", q.cart_value_eurcents);
+    qobj.addUInt32Field("num_order_items", q.num_order_items);
+    qobj.addUInt32Field("gmv_eurcents", q.gmv_eurcents);
 
     auto pg_str = cm::extractAttr(q.attrs, "pg");
     if (!pg_str.isEmpty()) {
-      qobj->addField("ab_page", pg_str.get());
+      qobj.addField("ab_page", pg_str.get());
     }
 
     auto abgrp = cm::extractABTestGroup(q.attrs);
     if (!abgrp.isEmpty()) {
-      qobj->addField("ab_test_group", StringUtil::toString(abgrp.get()));
+      qobj.addField("ab_test_group", StringUtil::toString(abgrp.get()));
     }
 
     auto qcat1 = cm::extractAttr(q.attrs, "q_cat1");
     if (!qcat1.isEmpty()) {
-      qobj->addField("category1", qcat1.get());
+      qobj.addField("category1", qcat1.get());
     }
 
     auto qcat2 = cm::extractAttr(q.attrs, "q_cat2");
     if (!qcat2.isEmpty()) {
-      qobj->addField("category2", qcat2.get());
+      qobj.addField("category2", qcat2.get());
     }
 
     auto qcat3 = cm::extractAttr(q.attrs, "q_cat3");
     if (!qcat3.isEmpty()) {
-      qobj->addField("category3", qcat3.get());
+      qobj.addField("category3", qcat3.get());
     }
 
     auto page_type = extractPageType(q.attrs);
@@ -186,12 +193,12 @@ void SessionJoin::process(RefPtr<SessionContext> ctx) {
       query_type = qtype_attr.get();
     }
 
-    qobj->addUInt32Field("device_type", (uint32_t) extractDeviceType(q.attrs));
-    qobj->addUInt32Field("page_type", (uint32_t) page_type);
-    qobj->addStringField("query_type", query_type);
+    qobj.addUInt32Field("device_type", (uint32_t) extractDeviceType(q.attrs));
+    qobj.addUInt32Field("page_type", (uint32_t) page_type);
+    qobj.addStringField("query_type", query_type);
 
     for (const auto& item : q.items) {
-      qobj->addObject("result_items", [&item] (msg::DynamicMessage* ev) {
+      qobj.addObject("result_items", [&item] (msg::DynamicMessage* ev) {
         ev->addUInt32Field("position", item.position);
         ev->addStringField("item_id", item.item.docID().docid);
         ev->addBoolField("clicked", item.clicked);
@@ -201,9 +208,13 @@ void SessionJoin::process(RefPtr<SessionContext> ctx) {
   }
 
   for (const auto& iv : page_views) {
-    auto ivobj = ctx->addOutputEvent("page_view");
-    ivobj->addUInt32Field("time", iv.time.unixMicros() / kMicrosPerSecond);
-    ivobj->addField("item_id", iv.item.docID().docid);
+    auto& ivobj = ctx->addOutputEvent(
+        iv.time,
+        SHA1::compute(ctx->uuid + "~" + iv.clickid),
+        "page_view")->obj;
+
+    ivobj.addUInt32Field("time", iv.time.unixMicros() / kMicrosPerSecond);
+    ivobj.addField("item_id", iv.item.docID().docid);
   }
 
   ctx->setAttribute("num_cart_items", StringUtil::toString(num_cart_items));
@@ -217,14 +228,14 @@ void SessionJoin::processSearchQueryEvent(
     Vector<TrackedQuery>* queries) {
   TrackedQuery query;
   query.time = event.time;
-  query.eid = event.evid;
+  query.clickid = event.evid;
 
   URI::ParamList logline;
   URI::parseQueryString(event.data, &logline);
   query.fromParams(logline);
 
   for (auto& q : *queries) {
-    if (q.eid == query.eid) {
+    if (q.clickid == query.clickid) {
       q.merge(query);
       return;
     }
@@ -238,14 +249,14 @@ void SessionJoin::processPageViewEvent(
     Vector<TrackedItemVisit>* page_views) {
   TrackedItemVisit visit;
   visit.time = event.time;
-  visit.eid = event.evid;
+  visit.clickid = event.evid;
 
   URI::ParamList logline;
   URI::parseQueryString(event.data, &logline);
   visit.fromParams(logline);
 
   for (auto& v : *page_views) {
-    if (v.eid == visit.eid) {
+    if (v.clickid == visit.clickid) {
       v.merge(visit);
       return;
     }
