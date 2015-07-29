@@ -53,7 +53,6 @@ void TrackedSession::insertLogline(
       return;
 
     case 'c':
-      stx::iputs("cart items event 1", 1);
       events.emplace_back(
           time,
           evid,
