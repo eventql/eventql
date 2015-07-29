@@ -171,39 +171,48 @@ void Partition::compact() {
       stream_key_,
       key_.toString());
 
-  Set<String> deleted_files;
-  records_.compact(&deleted_files);
+  try {
+    Set<String> deleted_files;
+    records_.compact(&deleted_files);
 
-  lk.lock();
-  auto version = records_.checksum();
-  auto cstable_file = cstable_file_;
-  auto cstable_version = cstable_version_;
-  auto sstable_files = records_.listDatafiles();
-  lk.unlock();
+    lk.lock();
+    auto version = records_.checksum();
+    auto cstable_file = cstable_file_;
+    auto cstable_version = cstable_version_;
+    auto sstable_files = records_.listDatafiles();
+    lk.unlock();
 
-  if (!(cstable_version == version)) {
-    auto new_cstable_file = SHA1::compute(
-        key_.toString() + version.toString()).toString() + ".cst";
-    buildCSTable(sstable_files, new_cstable_file);
+    if (!(cstable_version == version)) {
+      auto new_cstable_file = SHA1::compute(
+          key_.toString() + version.toString()).toString() + ".cst";
+      buildCSTable(sstable_files, new_cstable_file);
 
-    if (cstable_file != new_cstable_file) {
-      deleted_files.emplace(cstable_file);
+      if (cstable_file != new_cstable_file) {
+        deleted_files.emplace(cstable_file);
+      }
+
+      cstable_file = new_cstable_file;
+      cstable_version = version;
     }
 
-    cstable_file = new_cstable_file;
-    cstable_version = version;
-  }
+    lk.lock();
+    cstable_file_ = cstable_file;
+    cstable_version_ = cstable_version;
+    commitState();
+    lk.unlock();
 
-  lk.lock();
-  cstable_file_ = cstable_file;
-  cstable_version_ = cstable_version;
-  commitState();
-  lk.unlock();
+    node_->replicationq.insert(this, WallClock::unixMicros());
 
-  node_->replicationq.insert(this, WallClock::unixMicros());
-
-  for (const auto& f : deleted_files) {
-    FileUtil::rm(FileUtil::joinPaths(node_->db_path, f));
+    for (const auto& f : deleted_files) {
+      FileUtil::rm(FileUtil::joinPaths(node_->db_path, f));
+    }
+  } catch (const std::exception& e) {
+    stx::logError(
+        "tsdb",
+        e,
+        "error while compacting partition $0/$1",
+        stream_key_,
+        key_.toString());
   }
 }
 
