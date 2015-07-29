@@ -36,7 +36,11 @@ CSTableScan::CSTableScan(
   }
 
   for (const auto& col : column_names) {
-    columns_.emplace(col, ColumnRef(cstable_.getColumnReader(col), colindex_++));
+    if (cstable.hasColumn(col)) {
+      columns_.emplace(
+          col,
+          ColumnRef(cstable_.getColumnReader(col), colindex_++));
+    }
   }
 
   for (auto& slnode : stmt->selectList()) {
@@ -334,10 +338,10 @@ void CSTableScan::resolveColumns(RefPtr<ValueExpressionNode> expr) const {
   if (fieldref != nullptr) {
     auto col = columns_.find(fieldref->fieldName());
     if (col == columns_.end()) {
-      RAISE(kIllegalStateError);
+      fieldref->setColumnIndex(-1);
+    } else {
+      fieldref->setColumnIndex(col->second.index);
     }
-
-    fieldref->setColumnIndex(col->second.index);
   }
 
   for (const auto& e : expr->arguments()) {

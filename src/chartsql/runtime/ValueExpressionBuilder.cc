@@ -91,13 +91,24 @@ Instruction* ValueExpressionBuilder::compileLiteral(
 Instruction* ValueExpressionBuilder::compileColumnReference(
     RefPtr<ColumnReferenceNode> node,
     ScratchMemory* static_storage) {
-  auto ins = static_storage->construct<Instruction>();
-  ins->type = X_INPUT;
-  ins->arg0 = (void *) node->columnIndex();
-  ins->argn = 0;
-  ins->child = nullptr;
-  ins->next  = nullptr;
-  return ins;
+  auto col_idx = node->columnIndex();
+
+  if (col_idx == -1) {
+    auto ins = static_storage->construct<Instruction>();
+    ins->type = X_LITERAL;
+    ins->arg0 = static_storage->construct<SValue>();
+    ins->child = nullptr;
+    ins->next  = nullptr;
+    return ins;
+  } else {
+    auto ins = static_storage->construct<Instruction>();
+    ins->type = X_INPUT;
+    ins->arg0 = (void *) col_idx;
+    ins->argn = 0;
+    ins->child = nullptr;
+    ins->next  = nullptr;
+    return ins;
+  }
 }
 
 Instruction* ValueExpressionBuilder::compileMethodCall(
