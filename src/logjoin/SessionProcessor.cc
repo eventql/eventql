@@ -20,12 +20,15 @@ SessionProcessor::SessionProcessor(
     customer_dir_(customer_dir),
     spool_path_(spool_path),
     queue_(100),
-    running_(false) {}
-    //tpool_(
-    //    4,
-    //    mkScoped(new CatchAndLogExceptionHandler("logjoind")),
-    //    100,
-    //    true) {}
+    running_(false) {
+  FileUtil::ls(spool_path_, [this] (const String& filename) -> bool {
+    if (!StringUtil::endsWith(filename, "~")) {
+      auto skey = SHA1Hash::fromHexString(filename);
+      queue_.insert(skey, WallClock::now(), true);
+    }
+    return true;
+  });
+}
 
 void SessionProcessor::addPipelineStage(PipelineStageFn fn) {
   stages_.emplace_back(fn);
@@ -70,12 +73,6 @@ void SessionProcessor::work() {
 void SessionProcessor::enqueueSession(const TrackedSession& session) {
   auto skey = SHA1::compute(session.customer_key + "~" + session.uuid);
 
-  logDebug(
-      "logjoin",
-      "Enqueueing session for processing: $0/$1",
-      session.customer_key,
-      session.uuid);
-
   auto fpath = FileUtil::joinPaths(spool_path_, skey.toString());
   {
     auto os = FileOutputStream::openFile(fpath + "~");
@@ -87,13 +84,23 @@ void SessionProcessor::enqueueSession(const TrackedSession& session) {
 }
 
 void SessionProcessor::processSession(const SHA1Hash& skey) {
-  logDebug(
-      "logjoin",
-      "Processing session: $1/$2 ($0)",
-      skey.toString());
+  TrackedSession sess;
+
+  auto fpath = FileUtil::joinPaths(spool_path_, skey.toString());
+  auto is = FileInputStream::openFile(fpath);
+  sess.decode(is.get());
+
+  processSession(sess);
+  FileUtil::rm(fpath);
 }
 
 void SessionProcessor::processSession(const TrackedSession& session) {
+  logDebug(
+      "logjoin",
+      "Processing session: $0/$1",
+      session.customer_key,
+      session.uuid);
+
   auto ctx = mkRef(
       new SessionContext(
           session,
