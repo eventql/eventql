@@ -60,14 +60,14 @@ int main(int argc, const char** argv) {
   stx::Application::logToStderr();
   stx::cli::FlagParser flags;
 
-  flags.defineFlag(
-      "conf",
-      cli::FlagParser::T_STRING,
-      false,
-      NULL,
-      "./conf",
-      "conf directory",
-      "<path>");
+  //flags.defineFlag(
+  //    "conf",
+  //    cli::FlagParser::T_STRING,
+  //    false,
+  //    NULL,
+  //    "./conf",
+  //    "conf directory",
+  //    "<path>");
 
   flags.defineFlag(
       "cdb",
@@ -105,14 +105,14 @@ int main(int argc, const char** argv) {
       "upload target url",
       "<addr>");
 
-  flags.defineFlag(
-      "broker_addr",
-      stx::cli::FlagParser::T_STRING,
-      true,
-      NULL,
-      NULL,
-      "upload target url",
-      "<addr>");
+  //flags.defineFlag(
+  //    "broker_addr",
+  //    stx::cli::FlagParser::T_STRING,
+  //    true,
+  //    NULL,
+  //    NULL,
+  //    "upload target url",
+  //    "<addr>");
 
   flags.defineFlag(
       "statsd_addr",
