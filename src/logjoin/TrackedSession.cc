@@ -74,4 +74,40 @@ void TrackedSession::insertLogline(
   }
 }
 
+void TrackedSession::encode(OutputStream* os) const {
+  os->appendUInt8(0x1);
+
+  os->appendLenencString(customer_key);
+  os->appendLenencString(uuid);
+
+  os->appendVarUInt(events.size());
+  for (const auto& ev : events) {
+    os->appendUInt64(ev.time.unixMicros());
+    os->appendLenencString(ev.evid);
+    os->appendLenencString(ev.evtype);
+    os->appendLenencString(ev.data);
+  }
+}
+
+void TrackedSession::decode(InputStream* is) {
+  is->readUInt8();
+
+  customer_key = is->readLenencString();
+  uuid = is->readLenencString();
+
+  auto nevents = is->readVarUInt();
+  for (size_t i = 0; i < nevents; ++i) {
+    auto time = is->readUInt64();
+    auto evid = is->readLenencString();
+    auto evtype = is->readLenencString();
+    auto evdata = is->readLenencString();
+
+    events.emplace_back(
+        time,
+        evid,
+        evtype,
+        evdata);
+  }
+}
+
 } // namespace cm

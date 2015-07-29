@@ -225,7 +225,12 @@ int main(int argc, const char** argv) {
       URI("http://nue03.prod.fnrd.net:7001/rpc"));
 
   /* set up session processing pipeline */
-  cm::SessionProcessor session_proc(&customer_dir);
+  auto spool_path = FileUtil::joinPaths(
+      flags.getString("datadir"),
+      shard.shard_name + "/spool");
+
+  FileUtil::mkdir_p(spool_path);
+  cm::SessionProcessor session_proc(&customer_dir, spool_path);
 
   /* pipeline stage: session join */
   session_proc.addPipelineStage(
@@ -259,16 +264,15 @@ int main(int argc, const char** argv) {
           flags.getString("tsdb_addr"),
           &http));
 
-  /* pipeline stage: DeliverWebHook */
+  ///* pipeline stage: DeliverWebHook */
   session_proc.addPipelineStage(
       std::bind(&DeliverWebhookStage::process, std::placeholders::_1));
 
   /* open session db */
   mdb::MDBOptions mdb_opts;
-  mdb_opts.maxsize = 1000000 * flags.getInt("db_size"),
-  mdb_opts.data_filename = shard.shard_name + ".db",
-  mdb_opts.lock_filename = shard.shard_name + ".db.lck",
-  mdb_opts.sync = false;
+  mdb_opts.maxsize = 1000000 * flags.getInt("db_size");
+  mdb_opts.data_filename = shard.shard_name + ".db";
+  mdb_opts.lock_filename = shard.shard_name + ".db.lck";
   auto sessdb = mdb::MDB::open(flags.getString("datadir"), mdb_opts);
 
   /* setup logjoin */
