@@ -506,3 +506,29 @@ message DefaultSessionAttributes {
       [(stx.coding) = { maxval: 100 encoding: "BITPACK" }];
 
 };
+
+message NewSessionEvents {
+  
+  /**
+   * A list of all search queries associated with this session
+   */
+  repeated JoinedSearchQuery search_query = 16;
+
+  /**
+   * A list of all item visits associated with this session
+   */
+  repeated JoinedPageView page_view = 25;
+
+  /**
+   * A list of all cart items associated with this session
+   */
+  repeated JoinedCartItem cart_items = 52;
+
+};
+
+message NewJoinedSession {
+
+  optional DefaultSessionAttributes attr = 1;
+  optional NewSessionEvents event = 2;
+
+};
