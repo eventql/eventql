@@ -51,7 +51,7 @@ void DeliverWebhookStage::process(RefPtr<SessionContext> ctx) {
         json.addComma();
       }
 
-      ev->toJSON(&json);
+      ev->obj.toJSON(&json);
     }
 
     json.endArray();

@@ -26,7 +26,7 @@ void TSDBUploadStage::process(
   serializeSession(ctx, &records);
 
   for (const auto& ev : ctx->outputEvents()) {
-    serializeEvent(*ev, &records);
+    serializeEvent(ev->obj, &records);
   }
 
   URI uri(StringUtil::format("http://$0/tsdb/insert", tsdb_addr));
@@ -75,12 +75,12 @@ void TSDBUploadStage::serializeSession(
   msg::MessageObject events_obj(2);
 
   for (const auto& ev : ctx->outputEvents()) {
-    auto evid = event_ids.find(ev->schema()->name());
+    auto evid = event_ids.find(ev->obj.schema()->name());
     if (evid == event_ids.end()) {
       continue;
     }
 
-    auto ev_obj = ev->data();
+    auto ev_obj = ev->obj.data();
     ev_obj.id = evid->second;
     events_obj.addChild(ev_obj);
   }

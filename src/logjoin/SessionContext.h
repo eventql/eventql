@@ -15,6 +15,13 @@ using namespace stx;
 
 namespace cm {
 
+struct OutputEvent : public RefCounted {
+  OutputEvent(RefPtr<msg::MessageSchema> schema);
+
+  UnixTime time;
+  msg::DynamicMessage obj;
+};
+
 struct SessionContext : public RefCounted {
   SessionContext(
       TrackedSession session,
@@ -29,14 +36,14 @@ struct SessionContext : public RefCounted {
 
   Vector<TrackedEvent> events;
 
-  const Vector<ScopedPtr<msg::DynamicMessage>>& outputEvents() const;
-  msg::DynamicMessage* addOutputEvent(const String& evtype);
+  const Vector<RefPtr<OutputEvent>>& outputEvents() const;
+  RefPtr<OutputEvent> addOutputEvent(const String& evtype);
 
   const HashMap<String, String>& attributes() const;
   void setAttribute(const String& key, const String& value);
 
 protected:
-  Vector<ScopedPtr<msg::DynamicMessage>> output_events_;
+  Vector<RefPtr<OutputEvent>> output_events_;
   HashMap<String, String> attributes_;
 };
 
