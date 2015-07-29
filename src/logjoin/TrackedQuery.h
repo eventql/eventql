@@ -33,7 +33,7 @@ struct TrackedQueryItem {
 
 struct TrackedQuery {
   stx::UnixTime time;
-  stx::String eid;
+  stx::String clickid;
   std::vector<TrackedQueryItem> items;
   std::vector<std::string> attrs;
   Set<String> experiments;

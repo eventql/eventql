@@ -25,6 +25,11 @@ Vector<TrackedCartItem> TrackedCartItem::fromParams(
     RAISE(kParseError, "missing s param");
   }
 
+  std::string clickid;
+  if (!stx::URI::getParam(params, "c", &clickid)) {
+    RAISE(kParseError, "c");
+  }
+
   auto checkout_step = std::stoul(step_str);
 
   std::string items_str;
@@ -40,6 +45,7 @@ Vector<TrackedCartItem> TrackedCartItem::fromParams(
       }
 
       TrackedCartItem citem;
+      citem.clickid = clickid;
       citem.item.set_id = item_str_parts[0];
       citem.item.item_id = item_str_parts[1];
       citem.quantity = std::stoul(item_str_parts[2]);

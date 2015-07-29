@@ -15,8 +15,10 @@ namespace cm {
 
 OutputEvent::OutputEvent(
     UnixTime _time,
+    SHA1Hash _evid,
     RefPtr<msg::MessageSchema> schema) :
     time(_time),
+    evid(_evid),
     obj(schema) {}
 
 SessionContext::SessionContext(
@@ -29,6 +31,7 @@ SessionContext::SessionContext(
 
 RefPtr<OutputEvent> SessionContext::addOutputEvent(
     UnixTime time,
+    SHA1Hash evid,
     const String& evtype) {
   const auto& logjoin_cfg = customer_config->config.logjoin_config();
 
@@ -36,7 +39,7 @@ RefPtr<OutputEvent> SessionContext::addOutputEvent(
     if (evschema.evtype() == evtype) {
       auto schema = msg::MessageSchema::decode(evschema.schema());
 
-      auto event = mkRef(new OutputEvent(time, schema));
+      auto event = mkRef(new OutputEvent(time, evid, schema));
       output_events_.emplace_back(event);
       return event;
     }
