@@ -311,6 +311,11 @@ bool MessageSchema::hasField(const String& path) const {
   return id != field_ids_.end();
 }
 
+bool MessageSchema::hasField(uint32_t id) const {
+  auto iter = field_types_.find(id);
+  return iter != field_types_.end();
+}
+
 uint32_t MessageSchema::fieldId(const String& path) const {
   auto id = field_ids_.find(path);
   if (id == field_ids_.end()) {

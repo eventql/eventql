@@ -103,6 +103,7 @@ public:
 
   const Vector<MessageSchemaField>& fields() const;
   bool hasField(const String& name) const;
+  bool hasField(uint32_t id) const;
   uint32_t fieldId(const String& name) const;
   FieldType fieldType(uint32_t id) const;
   const String& fieldName(uint32_t id) const;

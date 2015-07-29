@@ -31,6 +31,36 @@ void MessageDecoder::decode(
     auto fkey = reader.readVarUInt();
     auto fid = fkey >> 3;
 
+    /* skip unknown fields */
+    if (!schema.hasField(fid)) {
+      auto wire_type = (WireType) uint8_t(fkey & 0x7);
+      switch (wire_type) {
+
+        case WireType::VARINT:
+          reader.readVarUInt();
+          break;
+
+        case WireType::LENENC:
+          reader.read(reader.readVarUInt());
+          break;
+
+        case WireType::FIXED32:
+          reader.readUInt32();
+          break;
+
+        case WireType::FIXED64:
+          reader.readUInt64();
+          break;
+
+        default:
+          RAISE(kRuntimeError, "invalid wire type");
+
+      }
+
+      continue;
+    }
+
+    /* parse known fields */
     switch (schema.fieldType(fid)) {
       case FieldType::OBJECT: {
         auto len = reader.readVarUInt();
