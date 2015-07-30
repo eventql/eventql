@@ -10,15 +10,15 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <signal.h>
-#include "fnord/io/fileutil.h"
-#include "fnord/application.h"
-#include "fnord/logging.h"
-#include "fnord/cli/flagparser.h"
-#include "fnord/util/SimpleRateLimit.h"
-#include "fnord/InternMap.h"
-#include "fnord/json/json.h"
-#include "fnord/mdb/MDB.h"
-#include "fnord/mdb/MDBUtil.h"
+#include "stx/io/fileutil.h"
+#include "stx/application.h"
+#include "stx/logging.h"
+#include "stx/cli/flagparser.h"
+#include "stx/util/SimpleRateLimit.h"
+#include "stx/InternMap.h"
+#include "stx/json/json.h"
+#include "stx/mdb/MDB.h"
+#include "stx/mdb/MDBUtil.h"
 #include "sstable/sstablereader.h"
 #include "sstable/sstablewriter.h"
 #include "sstable/SSTableColumnSchema.h"
@@ -30,7 +30,7 @@
 #
 #include "analytics/CTRCounter.h"
 
-using namespace fnord;
+using namespace stx;
 
 struct PosiInfo {
   PosiInfo() : views(0), clicks(0) {}
@@ -39,14 +39,14 @@ struct PosiInfo {
 };
 
 int main(int argc, const char** argv) {
-  fnord::Application::init();
-  fnord::Application::logToStderr();
+  stx::Application::init();
+  stx::Application::logToStderr();
 
-  fnord::cli::FlagParser flags;
+  stx::cli::FlagParser flags;
 
   flags.defineFlag(
       "loglevel",
-      fnord::cli::FlagParser::T_STRING,
+      stx::cli::FlagParser::T_STRING,
       false,
       NULL,
       "INFO",
@@ -84,7 +84,7 @@ int main(int argc, const char** argv) {
       auto share = (p.second.clicks / (double) total_clicks) * 100;
       auto ctr = p.second.clicks / (double) p.second.views;
 
-      fnord::iputs("  position $0 => views=$1 clicks=$2 share=$3 ctr=$4",
+      stx::iputs("  position $0 => views=$1 clicks=$2 share=$3 ctr=$4",
           p.first,
           p.second.views,
           p.second.clicks,
@@ -98,13 +98,13 @@ int main(int argc, const char** argv) {
   int row_idx = 0;
   for (int tbl_idx = 0; tbl_idx < sstables.size(); ++tbl_idx) {
     const auto& sstable = sstables[tbl_idx];
-    fnord::logInfo("cm.ctrstats", "Importing sstable: $0", sstable);
+    stx::logInfo("cm.ctrstats", "Importing sstable: $0", sstable);
 
     /* read sstable header */
     sstable::SSTableReader reader(File::openFile(sstable, File::O_READ));
 
     if (reader.bodySize() == 0) {
-      fnord::logCritical("cm.ctrstats", "unfinished sstable: $0", sstable);
+      stx::logCritical("cm.ctrstats", "unfinished sstable: $0", sstable);
       exit(1);
     }
 
@@ -135,7 +135,7 @@ int main(int argc, const char** argv) {
 
     /* status line */
     util::SimpleRateLimitedFn status_line(kMicrosPerSecond, [&] () {
-      fnord::logInfo(
+      stx::logInfo(
           "cm.ctrstats",
           "[$1/$2] [$0%] Reading sstable... rows=$3",
           (size_t) ((cursor->position() / (double) body_size) * 100),
@@ -153,7 +153,7 @@ int main(int argc, const char** argv) {
       try {
         q = Some(json::fromJSON<cm::JoinedQuery>(val));
       } catch (const Exception& e) {
-        //fnord::logWarning("cm.ctrstats", e, "invalid json: $0", val.toString());
+        //stx::logWarning("cm.ctrstats", e, "invalid json: $0", val.toString());
       }
 
       if (!q.isEmpty() && isQueryEligible(eligibility, q.get())) {

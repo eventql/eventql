@@ -1,0 +1,39 @@
+/**
+ * Copyright (c) 2015 - The CM Authors <legal@clickmatcher.com>
+ *   All Rights Reserved.
+ *
+ * This file is CONFIDENTIAL -- Distribution or duplication of this material or
+ * the information contained herein is strictly forbidden unless prior written
+ * permission is obtained.
+ */
+package cm;
+
+message EventDefinition {
+  required string evtype = 1;
+  required bytes schema = 2;
+  required uint32 evid = 3;
+};
+
+message LogJoinWebhook {
+  required string id = 1;
+  required string target_url = 2;
+};
+
+message LogJoinConfig {
+  repeated LogJoinWebhook webhooks = 1;
+  repeated EventDefinition session_event_schemas = 2;
+  required bytes session_attributes_schema = 3;
+  required uint32 session_schema_next_field_id = 4;
+};
+
+message LogfileDefinition {
+  
+};
+
+message CustomerConfig {
+  required string customer = 1;
+  required LogJoinConfig logjoin_config = 2;
+
+  repeated LogfileDefinition logfile_definitions = 3;
+
+};

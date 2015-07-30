@@ -6,12 +6,12 @@
  */
 #include <stdlib.h>
 #include <stdio.h>
-#include "fnord/exception.h"
-#include "fnord/test/unittest.h"
+#include "stx/exception.h"
+#include "stx/test/unittest.h"
 #include "JoinedSessionViewer.h"
-#include "logjoin/JoinedSession.pb.h"
+#include "common/JoinedSession.pb.h"
 
-using namespace fnord;
+using namespace stx;
 using namespace cm;
 
 unsigned char test_session_bin[1759] = {
@@ -172,7 +172,7 @@ TEST_CASE(JoinedSessionViewerTest, POST, [] () {
   /*JoinedSession js;
   js.ParseFromArray(test_session.data(), test_session.size());
 
-  fnord::iputs("has num cart items: $0", js.referrer_name());*/
+  stx::iputs("has num cart items: $0", js.referrer_name());*/
 
   http::HTTPRequest request(http::HTTPMessage::M_POST, "/blah");
   request.addBody(test_session);

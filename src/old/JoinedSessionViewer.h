@@ -1,20 +1,20 @@
 #ifndef _CM_JOINEDSESSIONVIEWER_H
 #define _CM_JOINEDSESSIONVIEWER_H
-#include <fnord/stdtypes.h>
-#include <fnord/util/Base64.h>
-#include "fnord/http/httpservice.h"
+#include <stx/stdtypes.h>
+#include <stx/util/Base64.h>
+#include "stx/http/httpservice.h"
 #include "common.h"
 
 
-using namespace fnord;
+using namespace stx;
 namespace cm {
 
-class JoinedSessionViewer : public fnord::http::HTTPService {
+class JoinedSessionViewer : public stx::http::HTTPService {
 public:
 
   void handleHTTPRequest(
-      fnord::http::HTTPRequest* req,
-      fnord::http::HTTPResponse* res);
+      stx::http::HTTPRequest* req,
+      stx::http::HTTPResponse* res);
 
 };
 

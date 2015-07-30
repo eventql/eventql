@@ -10,7 +10,7 @@
 #include "sellerstats/SellerStatsItemVisit.h"
 #include "CTRStatsKey.h"
 
-using namespace fnord;
+using namespace stx;
 
 namespace cm {
 
@@ -34,7 +34,7 @@ void SellerStatsBuild::insertJoinedItemVisit(
       featuredb_txn);
 
   if (shopid.isEmpty()) {
-    fnord::logWarning(
+    stx::logWarning(
         "cm.sellerstats",
         "Item $0 not found in featuredb",
         docid.docid);
@@ -43,7 +43,7 @@ void SellerStatsBuild::insertJoinedItemVisit(
   }
 
 #ifndef FNORD_NODEBUG
-  fnord::logDebug(
+  stx::logDebug(
       "cm.sellerstats",
       "Indexing JoinedItemVisit\n    itemid=$0\n    shopid=$1\n    attrs=$2",
       inspect(item_visit.item),

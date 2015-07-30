@@ -11,21 +11,21 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <signal.h>
-#include "fnord/io/fileutil.h"
-#include "fnord/application.h"
-#include "fnord/logging.h"
-#include "fnord/cli/flagparser.h"
+#include "stx/io/fileutil.h"
+#include "stx/application.h"
+#include "stx/logging.h"
+#include "stx/cli/flagparser.h"
 #include "common.h"
 #include <fnord-fts/fts.h>
 #include <fnord-fts/fts_common.h>
 
-using namespace fnord;
+using namespace stx;
 
 int main(int argc, const char** argv) {
-  fnord::Application::init();
-  fnord::Application::logToStderr();
+  stx::Application::init();
+  stx::Application::logToStderr();
 
-  fnord::cli::FlagParser flags;
+  stx::cli::FlagParser flags;
 
   flags.defineFlag(
       "lang",
@@ -47,7 +47,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "loglevel",
-      fnord::cli::FlagParser::T_STRING,
+      stx::cli::FlagParser::T_STRING,
       false,
       NULL,
       "INFO",
@@ -60,12 +60,12 @@ int main(int argc, const char** argv) {
       strToLogLevel(flags.getString("loglevel")));
 
   auto lang = languageFromString(flags.getString("lang"));
-  fnord::fts::Analyzer analyzer(flags.getString("conf"));
+  stx::fts::Analyzer analyzer(flags.getString("conf"));
 
   for (String line; std::getline(std::cin, line); ) {
     Set<String> tokens;
     analyzer.extractTerms(lang, line, &tokens);
-    fnord::iputs("\ninput: $0\noutput: $1", line, tokens);
+    stx::iputs("\ninput: $0\noutput: $1", line, tokens);
   }
 
   return 0;

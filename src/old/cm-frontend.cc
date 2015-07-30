@@ -8,33 +8,33 @@
  */
 #include <stdlib.h>
 #include <unistd.h>
-#include "fnord/io/filerepository.h"
-#include "fnord/io/fileutil.h"
-#include "fnord/application.h"
-#include "fnord/random.h"
-#include "fnord/thread/eventloop.h"
-#include "fnord/thread/threadpool.h"
-#include "fnord/thread/queue.h"
-#include "fnord/rpc/ServerGroup.h"
-#include "fnord/rpc/RPC.h"
-#include "fnord/cli/flagparser.h"
-#include "fnord/json/json.h"
-#include "fnord/json/jsonrpc.h"
-#include "fnord/json/JSONRPCCodec.h"
-#include "fnord/http/httprouter.h"
-#include "fnord/http/httpserver.h"
+#include "stx/io/filerepository.h"
+#include "stx/io/fileutil.h"
+#include "stx/application.h"
+#include "stx/random.h"
+#include "stx/thread/eventloop.h"
+#include "stx/thread/threadpool.h"
+#include "stx/thread/queue.h"
+#include "stx/rpc/ServerGroup.h"
+#include "stx/rpc/RPC.h"
+#include "stx/cli/flagparser.h"
+#include "stx/json/json.h"
+#include "stx/json/jsonrpc.h"
+#include "stx/json/JSONRPCCodec.h"
+#include "stx/http/httprouter.h"
+#include "stx/http/httpserver.h"
 #include "brokerd/FeedService.h"
 #include "brokerd/RemoteFeedWriter.h"
-#include "fnord/http/statshttpservlet.h"
-#include "fnord/stats/statsdagent.h"
-#include "fnord/rpc/RPCClient.h"
+#include "stx/http/statshttpservlet.h"
+#include "stx/stats/statsdagent.h"
+#include "stx/rpc/RPCClient.h"
 #include "CustomerNamespace.h"
 #include "frontend/CMFrontend.h"
 #include "frontend/IndexFeedUpload.h"
 #include "schemas.h"
 
 using namespace cm;
-using namespace fnord;
+using namespace stx;
 
 int main(int argc, const char** argv) {
   Application::init();
@@ -53,7 +53,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "publish_to",
-      fnord::cli::FlagParser::T_STRING,
+      stx::cli::FlagParser::T_STRING,
       true,
       NULL,
       NULL,

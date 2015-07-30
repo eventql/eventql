@@ -8,7 +8,7 @@
  */
 #include "ItemBoostScanlet.h"
 
-using namespace fnord;
+using namespace stx;
 
 namespace cm {
 

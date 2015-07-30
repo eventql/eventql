@@ -10,18 +10,18 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <signal.h>
-#include "fnord/io/fileutil.h"
-#include "fnord/application.h"
-#include "fnord/logging.h"
-#include "fnord/Language.h"
-#include "fnord/random.h"
-#include "fnord/cli/flagparser.h"
-#include "fnord/util/SimpleRateLimit.h"
-#include "fnord/InternMap.h"
-#include "fnord/thread/threadpool.h"
-#include "fnord/json/json.h"
-#include "fnord/mdb/MDB.h"
-#include "fnord/mdb/MDBUtil.h"
+#include "stx/io/fileutil.h"
+#include "stx/application.h"
+#include "stx/logging.h"
+#include "stx/Language.h"
+#include "stx/random.h"
+#include "stx/cli/flagparser.h"
+#include "stx/util/SimpleRateLimit.h"
+#include "stx/InternMap.h"
+#include "stx/thread/threadpool.h"
+#include "stx/json/json.h"
+#include "stx/mdb/MDB.h"
+#include "stx/mdb/MDBUtil.h"
 #include "sstable/sstablereader.h"
 #include "sstable/sstablewriter.h"
 #include "sstable/SSTableColumnSchema.h"
@@ -45,14 +45,14 @@
 #include "analytics/TopCategoriesByTermMapper.h"
 #include "analytics/TermInfoMergeReducer.h"
 
-using namespace fnord;
+using namespace stx;
 using namespace cm;
 
 int main(int argc, const char** argv) {
-  fnord::Application::init();
-  fnord::Application::logToStderr();
+  stx::Application::init();
+  stx::Application::logToStderr();
 
-  fnord::cli::FlagParser flags;
+  stx::cli::FlagParser flags;
 
   //flags.defineFlag(
   //    "conf",
@@ -110,7 +110,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "loglevel",
-      fnord::cli::FlagParser::T_STRING,
+      stx::cli::FlagParser::T_STRING,
       false,
       NULL,
       "INFO",
@@ -220,12 +220,12 @@ int main(int argc, const char** argv) {
   auto outfile = StringUtil::format("termstats-dawanda.$0.sst", buildid);
   auto tempfile_path = FileUtil::joinPaths(tempdir, outfile);
   auto outfile_path = FileUtil::joinPaths(datadir, outfile);
-  fnord::logInfo("cm.reportbuild", "Build completed: $0", outfile);
+  stx::logInfo("cm.reportbuild", "Build completed: $0", outfile);
 
   if (flags.isSet("publish")) {
-    fnord::logInfo("cm.reportbuild", "Publishing artifact: $0", outfile);
+    stx::logInfo("cm.reportbuild", "Publishing artifact: $0", outfile);
   } else {
-    fnord::logInfo(
+    stx::logInfo(
         "cm.reportbuild",
         "Not publishing anything since you didn't pass the --publish flag");
 

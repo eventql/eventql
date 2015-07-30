@@ -7,36 +7,53 @@ project(cmapp)
 
 option(ENABLE_TESTS "Build unit tests [default: ON]" ON)
 
-include(lib/libfnord/cmake/libfnord.cmake)
+include(3rdparty/libstx/cmake/libstx.cmake)
 
-add_subdirectory(lib/libfnord/fnord-fts)
-
-add_subdirectory(lib/libcstable)
+add_subdirectory(3rdparty/libcstable)
 include_directories(${CSTABLE_INCLUDE})
 
-add_subdirectory(lib/libsstable)
+add_subdirectory(3rdparty/libsstable)
 include_directories(${SSTABLE_INCLUDE})
 
-add_subdirectory(lib/libdproc)
+add_subdirectory(3rdparty/libdproc)
 include_directories(${DPROC_INCLUDE})
 
-#add_subdirectory(app/sensord)
-#include_directories(${SENSORD_INCLUDE})
-
-add_subdirectory(app/brokerd)
+add_subdirectory(3rdparty/brokerd)
 include_directories(${BROKERD_INCLUDE})
 
-add_subdirectory(app/chartsql)
+add_subdirectory(3rdparty/libcplot)
+include_directories(${CPLOT_INCLUDE})
+
+add_subdirectory(3rdparty/chartsql)
 include_directories(${CHARTSQL_INCLUDE})
 
-add_subdirectory(app/tsdb)
+add_subdirectory(3rdparty/tsdb)
 include_directories(${TSDB_INCLUDE})
 
-add_subdirectory(app/inventoryd)
-include_directories(${INVENTORYD_INCLUDE})
+add_subdirectory(3rdparty/fnord-fts)
+include_directories(3rdparty/fnord-fts)
+include_directories(3rdparty/)
 
-add_subdirectory(app/metricd)
-include_directories(${METRICD_INCLUDE})
+add_library(hunspell OBJECT
+    3rdparty/hunspell/affentry.cxx
+    3rdparty/hunspell/affixmgr.cxx
+    3rdparty/hunspell/csutil.cxx
+    3rdparty/hunspell/dictmgr.cxx
+    3rdparty/hunspell/filemgr.cxx
+    3rdparty/hunspell/hashmgr.cxx
+    3rdparty/hunspell/hunspell.cxx
+    3rdparty/hunspell/hunzip.cxx
+    3rdparty/hunspell/phonet.cxx
+    3rdparty/hunspell/replist.cxx
+    3rdparty/hunspell/suggestmgr.cxx
+    3rdparty/hunspell/utf_info.cxx
+    3rdparty/hunspell/hnjalloc.c
+    3rdparty/hunspell/hnjalloc.c
+    3rdparty/hunspell/hyphen.c)
 
-add_subdirectory(app/analyticsd)
-include_directories(${ANALYTICSD_INCLUDE})
+include_directories(src/)
+include_directories(${CMAKE_CURRENT_BINARY_DIR}/src)
+add_subdirectory(src/common)
+add_subdirectory(src/analytics)
+add_subdirectory(src/logjoin)
+add_subdirectory(src/inventory)

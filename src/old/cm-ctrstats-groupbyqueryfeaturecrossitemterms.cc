@@ -10,16 +10,16 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <signal.h>
-#include "fnord/io/fileutil.h"
-#include "fnord/application.h"
-#include "fnord/logging.h"
-#include "fnord/Language.h"
-#include "fnord/cli/flagparser.h"
-#include "fnord/util/SimpleRateLimit.h"
-#include "fnord/InternMap.h"
-#include "fnord/json/json.h"
-#include "fnord/mdb/MDB.h"
-#include "fnord/mdb/MDBUtil.h"
+#include "stx/io/fileutil.h"
+#include "stx/application.h"
+#include "stx/logging.h"
+#include "stx/Language.h"
+#include "stx/cli/flagparser.h"
+#include "stx/util/SimpleRateLimit.h"
+#include "stx/InternMap.h"
+#include "stx/json/json.h"
+#include "stx/mdb/MDB.h"
+#include "stx/mdb/MDBUtil.h"
 #include "sstable/sstablereader.h"
 #include "sstable/sstablewriter.h"
 #include "sstable/SSTableColumnSchema.h"
@@ -33,7 +33,7 @@
 #include <fnord-fts/fts.h>
 #include <fnord-fts/fts_common.h>
 
-using namespace fnord;
+using namespace stx;
 using namespace cm;
 
 typedef Tuple<String, uint64_t, uint64_t> OutputRow;
@@ -48,7 +48,7 @@ void indexJoinedQuery(
     FeatureIndex* feature_index,
     FeatureID item_feature_id,
     ItemEligibility eligibility,
-    fnord::fts::Analyzer* analyzer,
+    stx::fts::Analyzer* analyzer,
     Language lang,
     CounterMap* counters) {
   if (!isQueryEligible(eligibility, query)) {
@@ -75,7 +75,7 @@ void indexJoinedQuery(
           item.item.docID(),
           item_feature_id);
     } catch (const Exception& e) {
-      fnord::logError("cm.ctrstatsbuild", e, "error");
+      stx::logError("cm.ctrstatsbuild", e, "error");
     }
 
    if (ifstr_opt.isEmpty()) {
@@ -128,7 +128,7 @@ void writeOutputTable(
   auto outhdr_json = json::toJSONString(out_hdr);
 
   /* open output sstable */
-  fnord::logInfo("cm.ctrstats", "Writing results to: $0", filename);
+  stx::logInfo("cm.ctrstats", "Writing results to: $0", filename);
   auto sstable_writer = sstable::SSTableWriter::create(
       filename,
       sstable::IndexProvider{},
@@ -175,10 +175,10 @@ void writeOutputTable(
 }
 
 int main(int argc, const char** argv) {
-  fnord::Application::init();
-  fnord::Application::logToStderr();
+  stx::Application::init();
+  stx::Application::logToStderr();
 
-  fnord::cli::FlagParser flags;
+  stx::cli::FlagParser flags;
 
   flags.defineFlag(
       "lang",
@@ -236,7 +236,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "loglevel",
-      fnord::cli::FlagParser::T_STRING,
+      stx::cli::FlagParser::T_STRING,
       false,
       NULL,
       "INFO",
@@ -254,7 +254,7 @@ int main(int argc, const char** argv) {
   auto end_time = std::numeric_limits<uint64_t>::min();
 
   auto lang = languageFromString(flags.getString("lang"));
-  fnord::fts::Analyzer analyzer(flags.getString("conf"));
+  stx::fts::Analyzer analyzer(flags.getString("conf"));
 
   /* set up feature schema */
   cm::FeatureSchema feature_schema;
@@ -273,13 +273,13 @@ int main(int argc, const char** argv) {
   auto sstables = flags.getArgv();
   for (int tbl_idx = 0; tbl_idx < sstables.size(); ++tbl_idx) {
     const auto& sstable = sstables[tbl_idx];
-    fnord::logInfo("cm.ctrstats", "Importing sstable: $0", sstable);
+    stx::logInfo("cm.ctrstats", "Importing sstable: $0", sstable);
 
     /* read sstable header */
     sstable::SSTableReader reader(File::openFile(sstable, File::O_READ));
 
     if (reader.bodySize() == 0) {
-      fnord::logCritical("cm.ctrstats", "unfinished sstable: $0", sstable);
+      stx::logCritical("cm.ctrstats", "unfinished sstable: $0", sstable);
       exit(1);
     }
 
@@ -311,7 +311,7 @@ int main(int argc, const char** argv) {
 
     /* status line */
     util::SimpleRateLimitedFn status_line(kMicrosPerSecond, [&] () {
-      fnord::logInfo(
+      stx::logInfo(
           "cm.ctrstats",
           "[$1/$2] [$0%] Reading sstable... rows=$3",
           (size_t) ((cursor->position() / (double) body_size) * 100),
@@ -328,7 +328,7 @@ int main(int argc, const char** argv) {
       try {
         q = Some(json::fromJSON<cm::JoinedQuery>(val));
       } catch (const Exception& e) {
-        //fnord::logWarning("cm.ctrstats", e, "invalid json: $0", val.toString());
+        //stx::logWarning("cm.ctrstats", e, "invalid json: $0", val.toString());
       }
 
       if (!q.isEmpty()) {

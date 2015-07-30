@@ -14,12 +14,12 @@
 #include <string>
 #include <thread>
 #include <unordered_map>
-#include <fnord/autoref.h>
-#include <fnord/uri.h>
+#include <stx/autoref.h>
+#include <stx/uri.h>
 #include "fnord-afx/ArtifactReplication.h"
 #include "fnord-afx/ArtifactIndexReplication.h"
 
-using namespace fnord;
+using namespace stx;
 
 namespace cm {
 

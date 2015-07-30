@@ -11,7 +11,7 @@
 #include "fnord-fts/search/DisjunctionMaxQuery.h"
 #include "SearchQuery.h"
 
-using namespace fnord;
+using namespace stx;
 
 namespace cm {
 
@@ -32,8 +32,8 @@ void SearchQuery::addTerm(const String& term) {
 
 void SearchQuery::addQuery(
     const String& query,
-    fnord::Language lang,
-    fnord::fts::Analyzer* analyzer) {
+    stx::Language lang,
+    stx::fts::Analyzer* analyzer) {
   analyzer->extractTerms(lang, query, [this] (const String& t) {
     addTerm(t);
   });

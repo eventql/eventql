@@ -28,20 +28,20 @@ endforeach()
 
 add_custom_command(
     OUTPUT ${CMAKE_BINARY_DIR}/cm-frontend-assets.cc
-    COMMAND ./3rdparty/libfnord/fnord-base/assets.sh ${CMAKE_BINARY_DIR}/cm-frontend-assets.cc < ./src/cm-frontend.assets
+    COMMAND ./3rdparty/libfnord/stx-base/assets.sh ${CMAKE_BINARY_DIR}/cm-frontend-assets.cc < ./src/cm-frontend.assets
     DEPENDS ${FRONTEND_ASSETS_DEPS_FULL}
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 
 add_executable(cm-frontend
     $<TARGET_OBJECTS:cm-common>
-    $<TARGET_OBJECTS:fnord-base>
-    $<TARGET_OBJECTS:fnord-http>
-    $<TARGET_OBJECTS:fnord-json>
-    $<TARGET_OBJECTS:fnord-mdb>
+    $<TARGET_OBJECTS:stx-base>
+    $<TARGET_OBJECTS:stx-http>
+    $<TARGET_OBJECTS:stx-json>
+    $<TARGET_OBJECTS:stx-mdb>
     $<TARGET_OBJECTS:sstable>
     $<TARGET_OBJECTS:fnord-feeds>
-    $<TARGET_OBJECTS:fnord-rpc>
-    $<TARGET_OBJECTS:fnord-protobuf>
+    $<TARGET_OBJECTS:stx-rpc>
+    $<TARGET_OBJECTS:stx-protobuf>
     frontend/CMFrontend.cc
     frontend/IndexFeedUpload.cc
     cm-frontend.cc
@@ -54,27 +54,27 @@ add_dependencies(cm-frontend cm-frontend-assets)
 
 #add_executable(cm-feedserver
 #    $<TARGET_OBJECTS:cm-common>
-#    $<TARGET_OBJECTS:fnord-base>
-#    $<TARGET_OBJECTS:fnord-http>
-#    $<TARGET_OBJECTS:fnord-mdb>
-#    $<TARGET_OBJECTS:fnord-json>
+#    $<TARGET_OBJECTS:stx-base>
+#    $<TARGET_OBJECTS:stx-http>
+#    $<TARGET_OBJECTS:stx-mdb>
+#    $<TARGET_OBJECTS:stx-json>
 #    $<TARGET_OBJECTS:sstable>
 #    $<TARGET_OBJECTS:fnord-feeds>
-#    $<TARGET_OBJECTS:fnord-rpc>
+#    $<TARGET_OBJECTS:stx-rpc>
 #    cm-feedserver.cc)
 #
 #target_link_libraries(cm-feedserver ${CMAKE_THREAD_LIBS_INIT} ${FNORD_LIBS})
 
 add_executable(cm-logjoin
     $<TARGET_OBJECTS:cm-common>
-    $<TARGET_OBJECTS:fnord-base>
-    $<TARGET_OBJECTS:fnord-http>
-    $<TARGET_OBJECTS:fnord-json>
+    $<TARGET_OBJECTS:stx-base>
+    $<TARGET_OBJECTS:stx-http>
+    $<TARGET_OBJECTS:stx-json>
     $<TARGET_OBJECTS:sstable>
     $<TARGET_OBJECTS:fnord-feeds>
-    $<TARGET_OBJECTS:fnord-mdb>
-    $<TARGET_OBJECTS:fnord-rpc>
-    $<TARGET_OBJECTS:fnord-protobuf>
+    $<TARGET_OBJECTS:stx-mdb>
+    $<TARGET_OBJECTS:stx-rpc>
+    $<TARGET_OBJECTS:stx-protobuf>
     $<TARGET_OBJECTS:fnord-fts>
     logjoin/TrackedCartItem.cc
     logjoin/TrackedItemVisit.cc
@@ -86,21 +86,21 @@ add_executable(cm-logjoin
     logjoin/LogJoin.cc
     logjoin/LogJoinUpload.cc
     logjoin/LogJoinExport.cc
-    logjoin/LogJoinTarget.cc
+    logjoin/SessionProcessor.cc
     logjoin/LogJoinShard.cc)
 
 target_link_libraries(cm-logjoin ${CMAKE_THREAD_LIBS_INIT} ${FNORD_LIBS} ${FNORD_FTS_LIBS})
 
 add_executable(tests/test-logjoin
     $<TARGET_OBJECTS:cm-common>
-    $<TARGET_OBJECTS:fnord-base>
-    $<TARGET_OBJECTS:fnord-json>
+    $<TARGET_OBJECTS:stx-base>
+    $<TARGET_OBJECTS:stx-json>
     $<TARGET_OBJECTS:sstable>
-    $<TARGET_OBJECTS:fnord-http>
+    $<TARGET_OBJECTS:stx-http>
     $<TARGET_OBJECTS:fnord-feeds>
-    $<TARGET_OBJECTS:fnord-mdb>
-    $<TARGET_OBJECTS:fnord-rpc>
-    $<TARGET_OBJECTS:fnord-protobuf>
+    $<TARGET_OBJECTS:stx-mdb>
+    $<TARGET_OBJECTS:stx-rpc>
+    $<TARGET_OBJECTS:stx-protobuf>
     $<TARGET_OBJECTS:fnord-fts>
     logjoin/TrackedCartItem.cc
     logjoin/TrackedItemVisit.cc
@@ -112,16 +112,16 @@ target_link_libraries(tests/test-logjoin ${CMAKE_THREAD_LIBS_INIT} ${FNORD_LIBS}
 
 #add_executable(cm-logjoin-backfill
 #    $<TARGET_OBJECTS:cm-common>
-#    $<TARGET_OBJECTS:fnord-base>
+#    $<TARGET_OBJECTS:stx-base>
 #    $<TARGET_OBJECTS:fnord-feeds>
-#    $<TARGET_OBJECTS:fnord-mdb>
-#    $<TARGET_OBJECTS:fnord-http>
-#    $<TARGET_OBJECTS:fnord-json>
-#    $<TARGET_OBJECTS:fnord-rpc>
+#    $<TARGET_OBJECTS:stx-mdb>
+#    $<TARGET_OBJECTS:stx-http>
+#    $<TARGET_OBJECTS:stx-json>
+#    $<TARGET_OBJECTS:stx-rpc>
 #    $<TARGET_OBJECTS:libcstable>
 #    $<TARGET_OBJECTS:sstable>
 #    $<TARGET_OBJECTS:fnord-fts>
-#    $<TARGET_OBJECTS:fnord-protobuf>
+#    $<TARGET_OBJECTS:stx-protobuf>
 #    3rdparty/libfnord/fnord-logtable/TableReader.cc
 #    3rdparty/libfnord/fnord-logtable/TableArena.cc
 #    3rdparty/libfnord/fnord-logtable/TableWriter.cc
@@ -141,15 +141,15 @@ target_link_libraries(tests/test-logjoin ${CMAKE_THREAD_LIBS_INIT} ${FNORD_LIBS}
 #
 #add_executable(cm-indexbuild
 #    $<TARGET_OBJECTS:cm-common>
-#    $<TARGET_OBJECTS:fnord-base>
-#    $<TARGET_OBJECTS:fnord-http>
-#    $<TARGET_OBJECTS:fnord-json>
+#    $<TARGET_OBJECTS:stx-base>
+#    $<TARGET_OBJECTS:stx-http>
+#    $<TARGET_OBJECTS:stx-json>
 #    $<TARGET_OBJECTS:sstable>
 #    $<TARGET_OBJECTS:fnord-fts>
 #    $<TARGET_OBJECTS:fnord-feeds>
-#    $<TARGET_OBJECTS:fnord-rpc>
-#    $<TARGET_OBJECTS:fnord-mdb>
-#    $<TARGET_OBJECTS:fnord-protobuf>
+#    $<TARGET_OBJECTS:stx-rpc>
+#    $<TARGET_OBJECTS:stx-mdb>
+#    $<TARGET_OBJECTS:stx-protobuf>
 #    $<TARGET_OBJECTS:libcstable>
 #    $<TARGET_OBJECTS:fnord-afx>
 #    cm-indexbuild.cc
@@ -171,14 +171,14 @@ target_link_libraries(tests/test-logjoin ${CMAKE_THREAD_LIBS_INIT} ${FNORD_LIBS}
 
 #add_executable(cm-indexlookup
 #    $<TARGET_OBJECTS:cm-common>
-#    $<TARGET_OBJECTS:fnord-base>
-#    $<TARGET_OBJECTS:fnord-http>
-#    $<TARGET_OBJECTS:fnord-json>
+#    $<TARGET_OBJECTS:stx-base>
+#    $<TARGET_OBJECTS:stx-http>
+#    $<TARGET_OBJECTS:stx-json>
 #    $<TARGET_OBJECTS:sstable>
 #    $<TARGET_OBJECTS:fnord-fts>
 #    $<TARGET_OBJECTS:fnord-feeds>
-#    $<TARGET_OBJECTS:fnord-rpc>
-#    $<TARGET_OBJECTS:fnord-mdb>
+#    $<TARGET_OBJECTS:stx-rpc>
+#    $<TARGET_OBJECTS:stx-mdb>
 #    DocStore.cc
 #    DocIndex.cc
 #    cm-indexlookup.cc)
@@ -189,14 +189,14 @@ target_link_libraries(tests/test-logjoin ${CMAKE_THREAD_LIBS_INIT} ${FNORD_LIBS}
 #
 #add_executable(cm-indexserver
 #    $<TARGET_OBJECTS:cm-common>
-#    $<TARGET_OBJECTS:fnord-base>
-#    $<TARGET_OBJECTS:fnord-http>
-#    $<TARGET_OBJECTS:fnord-json>
+#    $<TARGET_OBJECTS:stx-base>
+#    $<TARGET_OBJECTS:stx-http>
+#    $<TARGET_OBJECTS:stx-json>
 #    $<TARGET_OBJECTS:sstable>
 #    $<TARGET_OBJECTS:fnord-fts>
 #    $<TARGET_OBJECTS:fnord-feeds>
-#    $<TARGET_OBJECTS:fnord-rpc>
-#    $<TARGET_OBJECTS:fnord-mdb>
+#    $<TARGET_OBJECTS:stx-rpc>
+#    $<TARGET_OBJECTS:stx-mdb>
 #    DocStore.cc
 #    IndexServlet.cc
 #    SearchQuery.cc
@@ -209,11 +209,11 @@ target_link_libraries(tests/test-logjoin ${CMAKE_THREAD_LIBS_INIT} ${FNORD_LIBS}
 
 #add_executable(cm-dawandaindexpush
 #    $<TARGET_OBJECTS:cm-common>
-#    $<TARGET_OBJECTS:fnord-base>
-#    $<TARGET_OBJECTS:fnord-http>
-#    $<TARGET_OBJECTS:fnord-json>
-#    $<TARGET_OBJECTS:fnord-rpc>
-#    $<TARGET_OBJECTS:fnord-mdb>
+#    $<TARGET_OBJECTS:stx-base>
+#    $<TARGET_OBJECTS:stx-http>
+#    $<TARGET_OBJECTS:stx-json>
+#    $<TARGET_OBJECTS:stx-rpc>
+#    $<TARGET_OBJECTS:stx-mdb>
 #    $<TARGET_OBJECTS:fnord-sql>
 #    $<TARGET_OBJECTS:sstable>
 #    customers/dawanda/cm-dawandaindexpush.cc)
@@ -223,12 +223,12 @@ target_link_libraries(tests/test-logjoin ${CMAKE_THREAD_LIBS_INIT} ${FNORD_LIBS}
 
 #add_executable(cm-featuredump
 #    $<TARGET_OBJECTS:cm-common>
-#    $<TARGET_OBJECTS:fnord-base>
+#    $<TARGET_OBJECTS:stx-base>
 #    $<TARGET_OBJECTS:fnord-feeds>
-#    $<TARGET_OBJECTS:fnord-http>
-#    $<TARGET_OBJECTS:fnord-mdb>
-#    $<TARGET_OBJECTS:fnord-json>
-#    $<TARGET_OBJECTS:fnord-rpc>
+#    $<TARGET_OBJECTS:stx-http>
+#    $<TARGET_OBJECTS:stx-mdb>
+#    $<TARGET_OBJECTS:stx-json>
+#    $<TARGET_OBJECTS:stx-rpc>
 #    $<TARGET_OBJECTS:sstable>
 #    cm-featuredump.cc)
 #
@@ -237,12 +237,12 @@ target_link_libraries(tests/test-logjoin ${CMAKE_THREAD_LIBS_INIT} ${FNORD_LIBS}
 #
 #add_executable(cm-featureprep
 #    $<TARGET_OBJECTS:cm-common>
-#    $<TARGET_OBJECTS:fnord-base>
+#    $<TARGET_OBJECTS:stx-base>
 #    $<TARGET_OBJECTS:fnord-feeds>
-#    $<TARGET_OBJECTS:fnord-mdb>
-#    $<TARGET_OBJECTS:fnord-http>
-#    $<TARGET_OBJECTS:fnord-json>
-#    $<TARGET_OBJECTS:fnord-rpc>
+#    $<TARGET_OBJECTS:stx-mdb>
+#    $<TARGET_OBJECTS:stx-http>
+#    $<TARGET_OBJECTS:stx-json>
+#    $<TARGET_OBJECTS:stx-rpc>
 #    $<TARGET_OBJECTS:sstable>
 #    $<TARGET_OBJECTS:fnord-fts>
 #    FeatureSelector.cc
@@ -253,12 +253,12 @@ target_link_libraries(tests/test-logjoin ${CMAKE_THREAD_LIBS_INIT} ${FNORD_LIBS}
 
 #add_executable(cm-ctrstats-builditemboost
 #    $<TARGET_OBJECTS:cm-common>
-#    $<TARGET_OBJECTS:fnord-base>
+#    $<TARGET_OBJECTS:stx-base>
 #    $<TARGET_OBJECTS:fnord-feeds>
-#    $<TARGET_OBJECTS:fnord-mdb>
-#    $<TARGET_OBJECTS:fnord-http>
-#    $<TARGET_OBJECTS:fnord-json>
-#    $<TARGET_OBJECTS:fnord-rpc>
+#    $<TARGET_OBJECTS:stx-mdb>
+#    $<TARGET_OBJECTS:stx-http>
+#    $<TARGET_OBJECTS:stx-json>
+#    $<TARGET_OBJECTS:stx-rpc>
 #    $<TARGET_OBJECTS:sstable>
 #    $<TARGET_OBJECTS:fnord-fts>
 #    cm-ctrstats-builditemboost.cc)
@@ -268,12 +268,12 @@ target_link_libraries(tests/test-logjoin ${CMAKE_THREAD_LIBS_INIT} ${FNORD_LIBS}
 
 #add_executable(cm-reportbuild
 #    $<TARGET_OBJECTS:cm-common>
-#    $<TARGET_OBJECTS:fnord-base>
+#    $<TARGET_OBJECTS:stx-base>
 #    $<TARGET_OBJECTS:fnord-feeds>
-#    $<TARGET_OBJECTS:fnord-mdb>
-#    $<TARGET_OBJECTS:fnord-http>
-#    $<TARGET_OBJECTS:fnord-json>
-#    $<TARGET_OBJECTS:fnord-rpc>
+#    $<TARGET_OBJECTS:stx-mdb>
+#    $<TARGET_OBJECTS:stx-http>
+#    $<TARGET_OBJECTS:stx-json>
+#    $<TARGET_OBJECTS:stx-rpc>
 #    $<TARGET_OBJECTS:sstable>
 #    $<TARGET_OBJECTS:fnord-fts>
 #    IndexReader.cc
@@ -301,16 +301,16 @@ target_link_libraries(tests/test-logjoin ${CMAKE_THREAD_LIBS_INIT} ${FNORD_LIBS}
 
 #add_executable(cm-autocompletebuild
 #    $<TARGET_OBJECTS:cm-common>
-#    $<TARGET_OBJECTS:fnord-base>
+#    $<TARGET_OBJECTS:stx-base>
 #    $<TARGET_OBJECTS:fnord-feeds>
-#    $<TARGET_OBJECTS:fnord-mdb>
-#    $<TARGET_OBJECTS:fnord-http>
-#    $<TARGET_OBJECTS:fnord-json>
-#    $<TARGET_OBJECTS:fnord-rpc>
+#    $<TARGET_OBJECTS:stx-mdb>
+#    $<TARGET_OBJECTS:stx-http>
+#    $<TARGET_OBJECTS:stx-json>
+#    $<TARGET_OBJECTS:stx-rpc>
 #    $<TARGET_OBJECTS:libcstable>
 #    $<TARGET_OBJECTS:sstable>
 #    $<TARGET_OBJECTS:fnord-fts>
-#    $<TARGET_OBJECTS:fnord-protobuf>
+#    $<TARGET_OBJECTS:stx-protobuf>
 #    3rdparty/libfnord/fnord-logtable/TableReader.cc
 #    3rdparty/libfnord/fnord-logtable/TableArena.cc
 #    3rdparty/libfnord/fnord-logtable/TableWriter.cc
@@ -346,16 +346,16 @@ target_link_libraries(tests/test-logjoin ${CMAKE_THREAD_LIBS_INIT} ${FNORD_LIBS}
 
 # add_executable(cm-shopstatsbuild
 #     $<TARGET_OBJECTS:cm-common>
-#     $<TARGET_OBJECTS:fnord-base>
+#     $<TARGET_OBJECTS:stx-base>
 #     $<TARGET_OBJECTS:fnord-feeds>
-#     $<TARGET_OBJECTS:fnord-mdb>
-#     $<TARGET_OBJECTS:fnord-http>
-#     $<TARGET_OBJECTS:fnord-json>
-#     $<TARGET_OBJECTS:fnord-rpc>
+#     $<TARGET_OBJECTS:stx-mdb>
+#     $<TARGET_OBJECTS:stx-http>
+#     $<TARGET_OBJECTS:stx-json>
+#     $<TARGET_OBJECTS:stx-rpc>
 #     $<TARGET_OBJECTS:libcstable>
 #     $<TARGET_OBJECTS:sstable>
 #     $<TARGET_OBJECTS:fnord-fts>
-#     $<TARGET_OBJECTS:fnord-protobuf>
+#     $<TARGET_OBJECTS:stx-protobuf>
 #     $<TARGET_OBJECTS:tsdb-client>
 #     $<TARGET_OBJECTS:dproc>
 #     $<TARGET_OBJECTS:fnord-afx>
@@ -393,16 +393,16 @@ target_link_libraries(tests/test-logjoin ${CMAKE_THREAD_LIBS_INIT} ${FNORD_LIBS}
 
 # add_executable(cm-itemboostbuild
 #     $<TARGET_OBJECTS:cm-common>
-#     $<TARGET_OBJECTS:fnord-base>
+#     $<TARGET_OBJECTS:stx-base>
 #     $<TARGET_OBJECTS:fnord-feeds>
-#     $<TARGET_OBJECTS:fnord-mdb>
-#     $<TARGET_OBJECTS:fnord-http>
-#     $<TARGET_OBJECTS:fnord-json>
-#     $<TARGET_OBJECTS:fnord-rpc>
+#     $<TARGET_OBJECTS:stx-mdb>
+#     $<TARGET_OBJECTS:stx-http>
+#     $<TARGET_OBJECTS:stx-json>
+#     $<TARGET_OBJECTS:stx-rpc>
 #     $<TARGET_OBJECTS:libcstable>
 #     $<TARGET_OBJECTS:sstable>
 #     $<TARGET_OBJECTS:fnord-fts>
-#     $<TARGET_OBJECTS:fnord-protobuf>
+#     $<TARGET_OBJECTS:stx-protobuf>
 #     $<TARGET_OBJECTS:tsdb-client>
 #     $<TARGET_OBJECTS:dproc>
 #     schemas.cc
@@ -426,15 +426,15 @@ target_link_libraries(tests/test-logjoin ${CMAKE_THREAD_LIBS_INIT} ${FNORD_LIBS}
 
 add_executable(cm-chunkserver
     $<TARGET_OBJECTS:cm-common>
-    $<TARGET_OBJECTS:fnord-base>
+    $<TARGET_OBJECTS:stx-base>
     $<TARGET_OBJECTS:fnord-feeds>
-    $<TARGET_OBJECTS:fnord-mdb>
-    $<TARGET_OBJECTS:fnord-http>
-    $<TARGET_OBJECTS:fnord-json>
-    $<TARGET_OBJECTS:fnord-rpc>
+    $<TARGET_OBJECTS:stx-mdb>
+    $<TARGET_OBJECTS:stx-http>
+    $<TARGET_OBJECTS:stx-json>
+    $<TARGET_OBJECTS:stx-rpc>
     $<TARGET_OBJECTS:sstable>
     $<TARGET_OBJECTS:libcstable>
-    $<TARGET_OBJECTS:fnord-protobuf>
+    $<TARGET_OBJECTS:stx-protobuf>
     $<TARGET_OBJECTS:tsdb-client>
     $<TARGET_OBJECTS:dproc>
     $<TARGET_OBJECTS:dproc>
@@ -460,15 +460,15 @@ target_link_libraries(cm-chunkserver
 
 add_executable(analyticsd
     $<TARGET_OBJECTS:cm-common>
-    $<TARGET_OBJECTS:fnord-base>
+    $<TARGET_OBJECTS:stx-base>
     $<TARGET_OBJECTS:fnord-feeds>
-    $<TARGET_OBJECTS:fnord-mdb>
-    $<TARGET_OBJECTS:fnord-http>
-    $<TARGET_OBJECTS:fnord-json>
-    $<TARGET_OBJECTS:fnord-rpc>
+    $<TARGET_OBJECTS:stx-mdb>
+    $<TARGET_OBJECTS:stx-http>
+    $<TARGET_OBJECTS:stx-json>
+    $<TARGET_OBJECTS:stx-rpc>
     $<TARGET_OBJECTS:sstable>
     $<TARGET_OBJECTS:libcstable>
-    $<TARGET_OBJECTS:fnord-protobuf>
+    $<TARGET_OBJECTS:stx-protobuf>
     $<TARGET_OBJECTS:tsdb-client>
     $<TARGET_OBJECTS:fnord-afx>
     $<TARGET_OBJECTS:dproc>
@@ -537,12 +537,12 @@ target_link_libraries(analyticsd
 
 # add_executable(cm-autocompleteserver
 #     $<TARGET_OBJECTS:cm-common>
-#     $<TARGET_OBJECTS:fnord-base>
+#     $<TARGET_OBJECTS:stx-base>
 #     $<TARGET_OBJECTS:fnord-feeds>
-#     $<TARGET_OBJECTS:fnord-mdb>
-#     $<TARGET_OBJECTS:fnord-http>
-#     $<TARGET_OBJECTS:fnord-json>
-#     $<TARGET_OBJECTS:fnord-rpc>
+#     $<TARGET_OBJECTS:stx-mdb>
+#     $<TARGET_OBJECTS:stx-http>
+#     $<TARGET_OBJECTS:stx-json>
+#     $<TARGET_OBJECTS:stx-rpc>
 #     $<TARGET_OBJECTS:sstable>
 #     $<TARGET_OBJECTS:fnord-fts>
 #     3rdparty/libfnord/fnord-logtable/ArtifactIndex.cc
@@ -559,11 +559,11 @@ target_link_libraries(analyticsd
 
 #add_executable(cm-tokenize
 #    $<TARGET_OBJECTS:cm-common>
-#    $<TARGET_OBJECTS:fnord-base>
-#    $<TARGET_OBJECTS:fnord-mdb>
+#    $<TARGET_OBJECTS:stx-base>
+#    $<TARGET_OBJECTS:stx-mdb>
 #    $<TARGET_OBJECTS:fnord-fts>
-#    $<TARGET_OBJECTS:fnord-json>
-#    $<TARGET_OBJECTS:fnord-http>
+#    $<TARGET_OBJECTS:stx-json>
+#    $<TARGET_OBJECTS:stx-http>
 #    $<TARGET_OBJECTS:sstable>
 #    cm-tokenize.cc)
 #
@@ -572,15 +572,15 @@ target_link_libraries(analyticsd
 #
 #add_executable(cm-jqcolumnize
 #    $<TARGET_OBJECTS:cm-common>
-#    $<TARGET_OBJECTS:fnord-base>
+#    $<TARGET_OBJECTS:stx-base>
 #    $<TARGET_OBJECTS:fnord-feeds>
-#    $<TARGET_OBJECTS:fnord-mdb>
-#    $<TARGET_OBJECTS:fnord-http>
-#    $<TARGET_OBJECTS:fnord-json>
-#    $<TARGET_OBJECTS:fnord-rpc>
+#    $<TARGET_OBJECTS:stx-mdb>
+#    $<TARGET_OBJECTS:stx-http>
+#    $<TARGET_OBJECTS:stx-json>
+#    $<TARGET_OBJECTS:stx-rpc>
 #    $<TARGET_OBJECTS:libcstable>
 #    $<TARGET_OBJECTS:sstable>
-#    $<TARGET_OBJECTS:fnord-protobuf>
+#    $<TARGET_OBJECTS:stx-protobuf>
 #    $<TARGET_OBJECTS:fnord-fts>
 #    schemas.cc
 #    analytics/AnalyticsTableScan.cc
@@ -594,10 +594,10 @@ target_link_libraries(analyticsd
 
 #add_executable(tests/test-joinedsessionviewer
 #    $<TARGET_OBJECTS:cm-common>
-#    $<TARGET_OBJECTS:fnord-base>
-#    $<TARGET_OBJECTS:fnord-json>
+#    $<TARGET_OBJECTS:stx-base>
+#    $<TARGET_OBJECTS:stx-json>
 #    $<TARGET_OBJECTS:sstable>
-#    $<TARGET_OBJECTS:fnord-http>
+#    $<TARGET_OBJECTS:stx-http>
 #    JoinedSessionViewer.cc
 #    JoinedSession.pb.cc
 #    JoinedSessionViewer_test.cc)

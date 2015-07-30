@@ -10,13 +10,13 @@
 #define _CM_CRAWLRESEULT_H
 #include <stdlib.h>
 #include <string>
-#include <fnord/UnixTime.h>
-#include <fnord/reflect/reflect.h>
+#include <stx/UnixTime.h>
+#include <stx/reflect/reflect.h>
 
 namespace cm {
 
 struct CrawlResult {
-  fnord::UnixTime time;
+  stx::UnixTime time;
   std::string url;
   std::string userdata;
 

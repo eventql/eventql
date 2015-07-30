@@ -13,23 +13,23 @@
 #include <set>
 #include <string>
 #include <unordered_map>
-#include <fnord/random.h>
-#include <fnord/uri.h>
-#include <fnord/thread/queue.h>
+#include <stx/random.h>
+#include <stx/uri.h>
+#include <stx/thread/queue.h>
 #include <brokerd/RemoteFeed.h>
 #include <brokerd/RemoteFeedFactory.h>
 #include "brokerd/RemoteFeedWriter.h"
-#include <fnord/http/httpservice.h>
-#include "fnord/stats/stats.h"
+#include <stx/http/httpservice.h>
+#include "stx/stats/stats.h"
 #include "common.h"
 #include "IndexChangeRequest.h"
 
-using namespace fnord;
+using namespace stx;
 
 namespace cm {
 class CustomerNamespace;
 
-class CMFrontend : public fnord::http::HTTPService {
+class CMFrontend : public stx::http::HTTPService {
 public:
   static const int kMinPixelVersion = 5;
 
@@ -38,8 +38,8 @@ public:
       thread::Queue<IndexChangeRequest>* indexfeed);
 
   void handleHTTPRequest(
-      fnord::http::HTTPRequest* request,
-      fnord::http::HTTPResponse* response) override;
+      stx::http::HTTPRequest* request,
+      stx::http::HTTPResponse* response) override;
 
   void addCustomer(
       CustomerNamespace* customer,
@@ -51,7 +51,7 @@ protected:
 
   void dispatchRPC(json::JSONRPCRequest* req, json::JSONRPCResponse* res);
 
-  void track(CustomerNamespace* customer, const fnord::URI& uri);
+  void track(CustomerNamespace* customer, const stx::URI& uri);
   void recordLogLine(CustomerNamespace* customer, const std::string& logline);
 
   feeds::RemoteFeedWriter* tracker_log_feed_;

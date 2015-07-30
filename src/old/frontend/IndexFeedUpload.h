@@ -8,14 +8,14 @@
  */
 #ifndef _CM_INDEXFEEDUPLOAD_H
 #define _CM_INDEXFEEDUPLOAD_H
-#include "fnord/stdtypes.h"
-#include "fnord/thread/queue.h"
-#include "fnord/http/httpconnectionpool.h"
-#include "fnord/protobuf/MessageSchema.h"
+#include "stx/stdtypes.h"
+#include "stx/thread/queue.h"
+#include "stx/http/httpconnectionpool.h"
+#include "stx/protobuf/MessageSchema.h"
 #include "IndexChangeRequest.h"
 #include <thread>
 
-using namespace fnord;
+using namespace stx;
 
 namespace cm {
 

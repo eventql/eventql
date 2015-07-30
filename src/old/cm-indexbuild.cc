@@ -9,32 +9,32 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <signal.h>
-#include "fnord/io/filerepository.h"
-#include "fnord/io/fileutil.h"
-#include "fnord/application.h"
-#include "fnord/logging.h"
-#include "fnord/random.h"
-#include "fnord/thread/eventloop.h"
-#include "fnord/thread/threadpool.h"
-#include "fnord/wallclock.h"
-#include "fnord/util/SimpleRateLimit.h"
-#include "fnord/rpc/ServerGroup.h"
-#include "fnord/rpc/RPC.h"
-#include "fnord/rpc/RPCClient.h"
-#include "fnord/cli/flagparser.h"
-#include "fnord/json/json.h"
-#include "fnord/json/jsonrpc.h"
-#include "fnord/http/httprouter.h"
-#include "fnord/http/httpserver.h"
+#include "stx/io/filerepository.h"
+#include "stx/io/fileutil.h"
+#include "stx/application.h"
+#include "stx/logging.h"
+#include "stx/random.h"
+#include "stx/thread/eventloop.h"
+#include "stx/thread/threadpool.h"
+#include "stx/wallclock.h"
+#include "stx/util/SimpleRateLimit.h"
+#include "stx/rpc/ServerGroup.h"
+#include "stx/rpc/RPC.h"
+#include "stx/rpc/RPCClient.h"
+#include "stx/cli/flagparser.h"
+#include "stx/json/json.h"
+#include "stx/json/jsonrpc.h"
+#include "stx/http/httprouter.h"
+#include "stx/http/httpserver.h"
 #include "brokerd/FeedService.h"
 #include "brokerd/RemoteFeedFactory.h"
 #include "brokerd/RemoteFeedReader.h"
-#include "fnord/stats/statsdagent.h"
+#include "stx/stats/statsdagent.h"
 #include "sstable/sstablereader.h"
 #include "fnord-logtable/RemoteTableReader.h"
 #include "fnord-logtable/LogTableTail.h"
-#include "fnord/mdb/MDB.h"
-#include "fnord/protobuf/MessagePrinter.h"
+#include "stx/mdb/MDB.h"
+#include "stx/protobuf/MessagePrinter.h"
 #include "CustomerNamespace.h"
 
 #include "DocIndex.h"
@@ -42,9 +42,9 @@
 #include "schemas.h"
 
 using namespace cm;
-using namespace fnord;
+using namespace stx;
 
-fnord::thread::EventLoop ev;
+stx::thread::EventLoop ev;
 
 int main(int argc, const char** argv) {
   Application::init();
@@ -63,7 +63,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "fetch_from",
-      fnord::cli::FlagParser::T_STRING,
+      stx::cli::FlagParser::T_STRING,
       true,
       NULL,
       NULL,
@@ -72,7 +72,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "statsd_addr",
-      fnord::cli::FlagParser::T_STRING,
+      stx::cli::FlagParser::T_STRING,
       false,
       NULL,
       "127.0.0.1:8192",
@@ -81,7 +81,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "batch_size",
-      fnord::cli::FlagParser::T_INTEGER,
+      stx::cli::FlagParser::T_INTEGER,
       false,
       NULL,
       "2048",
@@ -90,7 +90,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "commit_interval",
-      fnord::cli::FlagParser::T_INTEGER,
+      stx::cli::FlagParser::T_INTEGER,
       false,
       NULL,
       "5",
@@ -99,7 +99,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "db_size",
-      fnord::cli::FlagParser::T_INTEGER,
+      stx::cli::FlagParser::T_INTEGER,
       false,
       NULL,
       "128",
@@ -108,7 +108,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "reset_cursor",
-      fnord::cli::FlagParser::T_SWITCH,
+      stx::cli::FlagParser::T_SWITCH,
       false,
       NULL,
       NULL,
@@ -117,7 +117,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "loglevel",
-      fnord::cli::FlagParser::T_STRING,
+      stx::cli::FlagParser::T_STRING,
       false,
       NULL,
       "INFO",
@@ -140,7 +140,7 @@ int main(int argc, const char** argv) {
   uint64_t rate_limit_micros = flags.getInt("commit_interval") * kMicrosPerSecond;
 
   /* open index */
-  fnord::logInfo(
+  stx::logInfo(
       "cm.indexbuild",
       "Opening index at $0",
       flags.getString("index"));
@@ -175,7 +175,7 @@ int main(int argc, const char** argv) {
     logtable::LogTableTailCursor cursor;
     cursor.decode(&reader);
 
-    fnord::logInfo(
+    stx::logInfo(
         "cm.indexbuild",
         "Resuming from cursor: $0",
         cursor.debugPrint());
@@ -185,9 +185,9 @@ int main(int argc, const char** argv) {
   }
 
   /* start stats reporting */
-  fnord::stats::StatsdAgent statsd_agent(
-      fnord::InetAddr::resolve(flags.getString("statsd_addr")),
-      10 * fnord::kMicrosPerSecond);
+  stx::stats::StatsdAgent statsd_agent(
+      stx::InetAddr::resolve(flags.getString("statsd_addr")),
+      10 * stx::kMicrosPerSecond);
 
   statsd_agent.start();
 
@@ -220,7 +220,7 @@ int main(int argc, const char** argv) {
     util::BinaryMessageWriter cursor_buf;
     cursor.encode(&cursor_buf);
 
-    fnord::logInfo(
+    stx::logInfo(
         "cm.indexbuild",
         "Comitting with cursor: $0",
         cursor.debugPrint());
@@ -238,7 +238,7 @@ int main(int argc, const char** argv) {
   ev.shutdown();
   evloop_thread.join();
 
-  fnord::logInfo("cm.indexbuild", "Exiting...");
+  stx::logInfo("cm.indexbuild", "Exiting...");
   return 0;
 }
 

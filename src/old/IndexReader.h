@@ -15,19 +15,19 @@
 #include <unordered_map>
 #include <vector>
 #include <queue>
-#include "fnord/stdtypes.h"
-#include "fnord/thread/taskscheduler.h"
+#include "stx/stdtypes.h"
+#include "stx/thread/taskscheduler.h"
 #include <fnord-fts/fts.h>
 #include <fnord-fts/fts_common.h>
-#include "fnord/mdb/MDB.h"
-#include "fnord/stats/stats.h"
+#include "stx/mdb/MDB.h"
+#include "stx/stats/stats.h"
 #include "FeatureIndex.h"
 #include "DocStore.h"
 #include "IndexChangeRequest.h"
 #include "DocIndex.h"
 #include <inventory/ItemRef.h>
 
-using namespace fnord;
+using namespace stx;
 
 namespace cm {
 
