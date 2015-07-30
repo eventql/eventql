@@ -19,7 +19,7 @@
 namespace stx {
 namespace sstable {
 
-class FileHeaderReader {
+class FileHeaderReader : public stx::util::BinaryMessageReader {
 public:
 
   /**

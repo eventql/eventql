@@ -55,12 +55,17 @@ MetaPage FileHeaderReader::readMetaPage(InputStream* is) {
 FileHeaderReader::FileHeaderReader(
     void* buf,
     size_t buf_size) :
+    util::BinaryMessageReader(buf, buf_size),
     file_size_(buf_size) {
   MemoryInputStream is(buf, buf_size);
   hdr_ = FileHeaderReader::readMetaPage(&is);
 }
 
 bool FileHeaderReader::verify() {
+  if (hdr_.headerSize() > file_size_) {
+    return false;
+  }
+
   if (hdr_.userdataOffset() + hdr_.userdataSize() > file_size_) {
     return false;
   }
@@ -99,9 +104,8 @@ void FileHeaderReader::readUserdata(
     const void** userdata,
     size_t* userdata_size) {
   *userdata_size = hdr_.userdataSize();
-  //seekTo(hdr.userdataOffset());
-  //*userdata = read(*userdata_size);
-  // : public stx::util::BinaryMessageReader 
+  seekTo(hdr_.userdataOffset());
+  *userdata = read(*userdata_size);
 }
 
 }
