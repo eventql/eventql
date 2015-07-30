@@ -7,7 +7,7 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <stx/FNV.h>
+#include <stx/fnv.h>
 #include <sstable/RowWriter.h>
 
 namespace stx {
