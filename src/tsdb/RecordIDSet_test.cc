@@ -25,7 +25,7 @@ TEST_CASE(RecordIDSetTest, TestAddRowToEmptySet, [] () {
   EXPECT_FALSE(recset.hasRecordID(SHA1::compute("0x42424242")));
   EXPECT_FALSE(recset.hasRecordID(SHA1::compute("0x23232323")));
 
-  EXPECT_EQ(recset.fetchRecordIDs().size(), 2);
+  EXPECT_EQ(recset.fetchRecordIDs().size(), 0);
 
   recset.addRecordID(SHA1::compute("0x42424242"));
   recset.addRecordID(SHA1::compute("0x23232323"));

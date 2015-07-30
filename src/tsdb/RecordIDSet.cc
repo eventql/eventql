@@ -7,8 +7,12 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
+#include <sys/mman.h>
+#include <unistd.h>
 #include <tsdb/RecordIDSet.h>
 #include <stx/io/fileutil.h>
+#include <stx/io/mmappedfile.h>
+#include <stx/fnv.h>
 
 using namespace stx;
 
@@ -36,6 +40,40 @@ void RecordIDSet::addRecordID(const SHA1Hash& record_id) {
   if (nslots_used_ + 1 > nslots_ * kMaxFillFactor) {
     grow();
   }
+
+  FNV<uint64_t> fnv;
+  auto h = fnv.hash(record_id.data(), record_id.size());
+
+  auto file = File::openFile(fpath_, File::O_READ | File::O_WRITE);
+  auto file_size = sizeof(FileHeader) + nslots_ * SHA1Hash::kSize;
+  auto file_mmap = mmap(
+      nullptr,
+      file_size,
+      PROT_WRITE | PROT_READ,
+      MAP_SHARED,
+      file.fd(),  0);
+
+  if (file_mmap == MAP_FAILED) {
+    RAISE_ERRNO(kIOError, "mmap() failed");
+  }
+
+  for (size_t i = 0; i < nslots_; ++i) {
+    auto pos = (h + i) % nslots_;
+    auto ptr = (char *) file_mmap + sizeof(FileHeader) + pos * SHA1Hash::kSize;
+
+    if (*((uint64_t*) ptr) == 0 &&
+        memcmp(
+            ptr,
+            ptr + sizeof(uint64_t),
+            SHA1Hash::kSize - sizeof(uint64_t))) {
+
+      memcpy(ptr, record_id.data(), SHA1Hash::kSize);
+      ++nslots_used_;
+      break;
+    }
+  }
+
+  munmap(file_mmap, file_size);
 }
 
 bool RecordIDSet::hasRecordID(const SHA1Hash& record_id) {
