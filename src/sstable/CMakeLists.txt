@@ -9,6 +9,7 @@
 # sstable
 add_library(sstable OBJECT
     cursor.cc
+    FileHeader.cc
     fileheaderreader.cc
     fileheaderwriter.cc
     index.cc
