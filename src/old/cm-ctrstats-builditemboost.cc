@@ -23,7 +23,7 @@
 #include <fnord-fts/fts.h>
 #include <fnord-fts/fts_common.h>
 #include "sstable/sstablereader.h"
-#include "sstable/sstablewriter.h"
+#include "sstable/SSTableEditor.h"
 #include "sstable/SSTableColumnSchema.h"
 #include "sstable/SSTableColumnReader.h"
 #include "sstable/SSTableColumnWriter.h"
@@ -174,7 +174,7 @@ void writeOutputTable(
   }
 
   ///* open output sstable */
-  auto sstable_writer = sstable::SSTableWriter::create(
+  auto sstable_writer = sstable::SSTableEditor::create(
       filename,
       sstable::IndexProvider{},
       outhdr_json.data(),
