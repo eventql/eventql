@@ -31,10 +31,11 @@ public:
   Set<SHA1Hash> fetchRecordIDs();
 
 protected:
-
+  static const size_t kVersion;
   static const double kMaxFillFactor;
   static const double kGrowthFactor;
   static const size_t kInitialSlots;
+  static const size_t kIOBatchSize;
 
   struct  __attribute__((packed)) FileHeader {
     uint8_t version;
@@ -54,8 +55,6 @@ protected:
       size_t* insert_idx = nullptr);
 
   void grow(File* file);
-
-  void reopenFile();
 
   String fpath_;
   size_t nslots_;

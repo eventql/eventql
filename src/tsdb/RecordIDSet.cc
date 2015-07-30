@@ -18,9 +18,11 @@ using namespace stx;
 
 namespace tsdb {
 
+const size_t RecordIDSet::kVersion = 1;
 const double RecordIDSet::kMaxFillFactor = 0.5f;
 const double RecordIDSet::kGrowthFactor = 2.0f;
 const size_t RecordIDSet::kInitialSlots = 512;
+const size_t RecordIDSet::kIOBatchSize = 256;
 
 #define IS_SLOT_EMPTY(slot) (\
     *((uint64_t*) (slot)) == 0 && \
@@ -35,7 +37,23 @@ RecordIDSet::RecordIDSet(
     nslots_(0),
     nslots_used_(-1) {
   if (FileUtil::exists(filepath)) {
-    reopenFile();
+    auto file = File::openFile(fpath_, File::O_READ);
+
+    FileHeader hdr;
+    if (file.read(&hdr, sizeof(hdr)) != sizeof(hdr)) {
+      RAISE(kRuntimeError, "error while reading file header");
+    }
+
+    if (hdr.version != kVersion) {
+      RAISEF(kRuntimeError, "invalid version $0", hdr.version);
+    }
+
+    auto file_size = file.size();
+    if (file_size != sizeof(FileHeader) + SHA1Hash::kSize * hdr.nslots) {
+      RAISE(kRuntimeError, "invalid file size");
+    }
+
+    nslots_ = hdr.nslots;
   }
 }
 
@@ -105,8 +123,7 @@ bool RecordIDSet::lookup(
   FNV<uint64_t> fnv;
   auto h = fnv.hash(record_id.data(), record_id.size());
 
-  static const size_t kBatchSize = 2;
-  Buffer buf(kBatchSize * SHA1Hash::kSize);
+  Buffer buf(kIOBatchSize * SHA1Hash::kSize);
   size_t buf_offset = -1;
   size_t buf_size = 0;
 
@@ -149,16 +166,15 @@ void RecordIDSet::scan(
     Function<void (void* slot)> fn) {
   file->seekTo(sizeof(FileHeader));
 
-  static const size_t kBatchSize = 256;
-  Buffer buf(kBatchSize * SHA1Hash::kSize);
-  auto nbatches = (nslots + kBatchSize - 1) / kBatchSize;
+  Buffer buf(kIOBatchSize * SHA1Hash::kSize);
+  auto nbatches = (nslots + kIOBatchSize - 1) / kIOBatchSize;
   for (size_t b = 0; b < nbatches; ++b) {
     auto nread = file->read(buf.data(), buf.size());
     if (nread == -1) {
       break;
     }
 
-    for (size_t pos = 0; pos < SHA1Hash::kSize * kBatchSize;
+    for (size_t pos = 0; pos < SHA1Hash::kSize * kIOBatchSize;
         pos += SHA1Hash::kSize) {
       auto slot = static_cast<char*>(buf.data()) + pos;
       if (IS_SLOT_EMPTY(slot)) {
@@ -202,7 +218,7 @@ void RecordIDSet::grow(File* file) {
     FileHeader hdr;
     memset(&hdr, 0, sizeof(hdr));
 
-    hdr.version = 0x1;
+    hdr.version = kVersion;
     hdr.nslots = new_nslots;
 
     new_file.write(&hdr, sizeof(hdr));
@@ -213,26 +229,6 @@ void RecordIDSet::grow(File* file) {
   std::unique_lock<std::mutex> lk(read_mutex_);
   FileUtil::mv(fpath_ + "~", fpath_);
   nslots_ = new_nslots;
-}
-
-void RecordIDSet::reopenFile() {
-  auto file = File::openFile(fpath_, File::O_READ);
-
-  FileHeader hdr;
-  if (file.read(&hdr, sizeof(hdr)) != sizeof(hdr)) {
-    RAISE(kRuntimeError, "error while reading file header");
-  }
-
-  if (hdr.version != 0x1) {
-    RAISEF(kRuntimeError, "invalid version $0", hdr.version);
-  }
-
-  auto file_size = file.size();
-  if (file_size != sizeof(FileHeader) + SHA1Hash::kSize * hdr.nslots) {
-    RAISE(kRuntimeError, "invalid file size");
-  }
-
-  nslots_ = hdr.nslots;
 }
 
 } // namespace tdsb
