@@ -20,6 +20,7 @@
 #include <tsdb/RecordRef.h>
 #include <tsdb/TSDBNodeRef.h>
 #include <tsdb/PartitionInfo.pb.h>
+#include <tsdb/PartitionState.pb.h>
 #include <cstable/CSTableReader.h>
 
 using namespace stx;
@@ -27,32 +28,28 @@ using namespace stx;
 namespace tsdb {
 class Table;
 
-struct PartitionState {
-  String stream_key;
-  HashMap<uint64_t, uint64_t> repl_offsets;
-  String cstable_file;
-  SHA1Hash cstable_version;
-  void encode(util::BinaryMessageWriter* writer) const;
-  void decode(util::BinaryMessageReader* reader);
-};
+//struct PartitionState {
+//  String stream_key;
+//  HashMap<uint64_t, uint64_t> repl_offsets;
+//  String cstable_file;
+//  SHA1Hash cstable_version;
+//  void encode(util::BinaryMessageWriter* writer) const;
+//  void decode(util::BinaryMessageReader* reader);
+//};
 
 class Partition : public RefCounted {
 public:
 
   static RefPtr<Partition> create(
       const String& tsdb_namespace,
-      const SHA1Hash& partition_key,
-      const String& stream_key,
-      const String& db_key,
       RefPtr<Table> table,
+      const SHA1Hash& partition_key,
       TSDBNodeRef* node);
 
   static RefPtr<Partition> reopen(
       const String& tsdb_namespace,
-      const SHA1Hash& partition_key,
-      const PartitionState& state,
-      const String& db_key,
       RefPtr<Table> table,
+      const SHA1Hash& partition_key,
       TSDBNodeRef* node);
 
   void insertRecord(
@@ -72,10 +69,7 @@ public:
 protected:
 
   Partition(
-      const String& tsdb_namespace,
-      const SHA1Hash& partition_key,
-      const String& stream_key,
-      const String& db_key,
+      const PartitionState& state,
       RefPtr<Table> table,
       TSDBNodeRef* node);
 
@@ -87,18 +81,17 @@ protected:
     const Vector<String>& input_files,
     const String& output_file);
 
-  const SHA1Hash key_;
-  const String stream_key_;
-  const String db_key_;
+  const PartitionState& state_;
+  SHA1Hash key_;
   const RefPtr<Table> table_;
   TSDBNodeRef* node_;
   RecordIDSet recids_;
   mutable std::mutex mutex_;
   std::mutex replication_mutex_;
-  UnixTime last_compaction_;
-  HashMap<uint64_t, uint64_t> repl_offsets_;
-  String cstable_file_;
-  SHA1Hash cstable_version_;
+  //UnixTime last_compaction_;
+  //HashMap<uint64_t, uint64_t> repl_offsets_;
+  //String cstable_file_;
+  //SHA1Hash cstable_version_;
 };
 
 }

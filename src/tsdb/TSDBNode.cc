@@ -9,8 +9,11 @@
  */
 #include <stx/util/Base64.h>
 #include <stx/fnv.h>
-#include <tsdb/TSDBNode.h>
+#include <stx/protobuf/msg.h>
+#include <stx/io/fileutil.h>
 #include <sstable/sstablereader.h>
+#include <tsdb/TSDBNode.h>
+#include <tsdb/PartitionState.pb.h>
 
 using namespace stx;
 
@@ -128,26 +131,22 @@ void TSDBNode::reopenPartitions() {
         db_key.data() + tsdb_namespace_off + 1,
         db_key.size() - tsdb_namespace_off - 1);
 
-    util::BinaryMessageReader reader(value.data(), value.size());
-    PartitionState state;
-    state.decode(&reader);
+    auto table_key = value.toString();
+    auto table = findTableWithLock(tsdb_namespace, table_key);
 
-    auto table = findTableWithLock(tsdb_namespace, state.stream_key);
     if (table.isEmpty()) {
       logWarning(
           "tsdb",
           "Orphaned partition: $0/$1",
-          state.stream_key,
+          table_key,
           partition_key.toString());
       continue;
     }
 
     auto partition = Partition::reopen(
         tsdb_namespace,
-        partition_key,
-        state,
-        db_key,
         table.get(),
+        partition_key,
         &noderef_);
 
     partitions_.emplace(db_key, partition);
@@ -177,10 +176,8 @@ RefPtr<Partition> TSDBNode::findOrCreatePartition(
 
   auto partition = Partition::create(
       tsdb_namespace,
-      partition_key,
-      stream_key,
-      db_key,
       table.get(),
+      partition_key,
       &noderef_);
 
   partitions_.emplace(db_key, partition);

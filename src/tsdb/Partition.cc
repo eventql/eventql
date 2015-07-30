@@ -24,68 +24,64 @@ namespace tsdb {
 
 RefPtr<Partition> Partition::create(
     const String& tsdb_namespace,
-    const SHA1Hash& partition_key,
-    const String& stream_key,
-    const String& db_key,
     RefPtr<Table> table,
+    const SHA1Hash& partition_key,
     TSDBNodeRef* node) {
-
   stx::logDebug(
       "tsdb",
       "Creating new partition; stream='$0' partition='$1'",
-      stream_key,
+      table->name(),
       partition_key.toString());
 
   auto pdir = FileUtil::joinPaths(
       node->db_path,
-      StringUtil::format("$0/$1", tsdb_namespace, stream_key));
+      StringUtil::format("$0/$1", tsdb_namespace, table->name()));
 
   FileUtil::mkdir_p(pdir);
 
-  return RefPtr<Partition>(
-      new Partition(
-          tsdb_namespace,
-          partition_key,
-          stream_key,
-          db_key,
-          table,
-          node));
+  PartitionState state;
+  state.set_tsdb_namespace(tsdb_namespace);
+  state.set_partition_key(partition_key.data(), partition_key.size());
+  state.set_table_key(table->name());
+
+  return RefPtr<Partition>(new Partition(state, table, node));
 }
 
 RefPtr<Partition> Partition::reopen(
     const String& tsdb_namespace,
-    const SHA1Hash& partition_key,
-    const PartitionState& state,
-    const String& db_key,
     RefPtr<Table> table,
+    const SHA1Hash& partition_key,
     TSDBNodeRef* node) {
-
   stx::logDebug(
       "tsdb",
-      "Loading partition; stream='$0' partition='$1'",
-      state.stream_key,
+      "Loading partition  $0/$1/$2",
+      tsdb_namespace,
+      table->name(),
       partition_key.toString());
+
+  auto state = msg::decode<PartitionState>(
+      FileUtil::read(
+          FileUtil::joinPaths(
+              node->db_path,
+              StringUtil::format(
+                  "$0/$1/$2.ptt",
+                  tsdb_namespace,
+                  table->name(),
+                  partition_key.toString()))));
 
   return RefPtr<Partition>(
       new Partition(
-          tsdb_namespace,
-          partition_key,
-          state.stream_key,
-          db_key,
+          state,
           table,
           node));
 }
 
 Partition::Partition(
-    const String& tsdb_namespace,
-    const SHA1Hash& partition_key,
-    const String& stream_key,
-    const String& db_key,
+    const PartitionState& state,
     RefPtr<Table> table,
     TSDBNodeRef* node) :
-    key_(partition_key),
-    stream_key_(stream_key),
-    db_key_(db_key),
+    state_(state),
+    key_(state.partition_key().data(), state.partition_key().size()),
     table_(table),
     node_(node),
     recids_(
@@ -93,11 +89,10 @@ Partition::Partition(
             node->db_path,
             StringUtil::format(
                 "$0/$1/$2.idx",
-                tsdb_namespace,
-                stream_key,
-                partition_key.toString()))),
-    last_compaction_(0) {
-  scheduleCompaction();
+                state_.tsdb_namespace(),
+                state_.table_key(),
+                key_.toString()))) {
+  //scheduleCompaction();
   //node_->compactionq.insert(this, WallClock::unixMicros());
   //node_->replicationq.insert(this, WallClock::unixMicros());
 }
@@ -107,14 +102,14 @@ void Partition::insertRecord(
     const Buffer& record) {
   stx::logTrace(
       "tsdb",
-      "Insert 1 record into stream='$0' partition='$1'",
-      stream_key_,
+      "Insert 1 record into partition $0/$1/$2",
+      state_.tsdb_namespace(),
+      table_->name(),
       key_.toString());
 
   std::unique_lock<std::mutex> lk(mutex_);
 
-
-  scheduleCompaction();
+  //scheduleCompaction();
 }
 
 //void Partition::insertRecords(const Vector<RecordRef>& records) {
@@ -135,18 +130,18 @@ void Partition::insertRecord(
 //  scheduleCompaction();
 //}
 
-void Partition::scheduleCompaction() {
-  auto now = WallClock::unixMicros();
-  auto interval = table_->compactionInterval().microseconds();
-  auto last = last_compaction_.unixMicros();
-  uint64_t compaction_delay = 0;
-
-  if (last + interval > now) {
-    compaction_delay = (last + interval) - now;
-  }
-
-  node_->compactionq.insert(this, now + compaction_delay);
-}
+//void Partition::scheduleCompaction() {
+//  auto now = WallClock::unixMicros();
+//  auto interval = table_->compactionInterval().microseconds();
+//  auto last = last_compaction_.unixMicros();
+//  uint64_t compaction_delay = 0;
+//
+//  if (last + interval > now) {
+//    compaction_delay = (last + interval) - now;
+//  }
+//
+//  node_->compactionq.insert(this, now + compaction_delay);
+//}
 
 /*
 void Partition::compact() {
@@ -353,63 +348,63 @@ uint64_t Partition::replicateTo(const String& addr, uint64_t offset) {
 //  txn->commit();
 //}
 
-void Partition::buildCSTable(
-    const Vector<String>& input_files,
-    const String& output_file) {
-  stx::logDebug(
-      "tsdb",
-      "Building cstable; stream='$0' partition='$1' output_file='$2'",
-      stream_key_,
-      key_.toString(),
-      output_file);
+//void Partition::buildCSTable(
+//    const Vector<String>& input_files,
+//    const String& output_file) {
+//  stx::logDebug(
+//      "tsdb",
+//      "Building cstable; stream='$0' partition='$1' output_file='$2'",
+//      stream_key_,
+//      key_.toString(),
+//      output_file);
+//
+//  auto schema = table_->schema();
+//  cstable::CSTableBuilder cstable(schema.get());
+//
+//  for (const auto& f : input_files) {
+//    auto fpath = FileUtil::joinPaths(node_->db_path, f);
+//    sstable::SSTableReader reader(fpath);
+//    auto cursor = reader.getCursor();
+//
+//    while (cursor->valid()) {
+//      uint64_t* key;
+//      size_t key_size;
+//      cursor->getKey((void**) &key, &key_size);
+//      if (key_size != SHA1Hash::kSize) {
+//        RAISE(kRuntimeError, "invalid row");
+//      }
+//
+//      void* data;
+//      size_t data_size;
+//      cursor->getData(&data, &data_size);
+//
+//      msg::MessageObject obj;
+//      msg::MessageDecoder::decode(data, data_size, *schema, &obj);
+//      cstable.addRecord(obj);
+//
+//      if (!cursor->next()) {
+//        break;
+//      }
+//    }
+//  }
+//
+//  cstable.write(FileUtil::joinPaths(node_->db_path, output_file));
+//}
 
-  auto schema = table_->schema();
-  cstable::CSTableBuilder cstable(schema.get());
-
-  for (const auto& f : input_files) {
-    auto fpath = FileUtil::joinPaths(node_->db_path, f);
-    sstable::SSTableReader reader(fpath);
-    auto cursor = reader.getCursor();
-
-    while (cursor->valid()) {
-      uint64_t* key;
-      size_t key_size;
-      cursor->getKey((void**) &key, &key_size);
-      if (key_size != SHA1Hash::kSize) {
-        RAISE(kRuntimeError, "invalid row");
-      }
-
-      void* data;
-      size_t data_size;
-      cursor->getData(&data, &data_size);
-
-      msg::MessageObject obj;
-      msg::MessageDecoder::decode(data, data_size, *schema, &obj);
-      cstable.addRecord(obj);
-
-      if (!cursor->next()) {
-        break;
-      }
-    }
-  }
-
-  cstable.write(FileUtil::joinPaths(node_->db_path, output_file));
-}
-
-Option<RefPtr<VFSFile>> Partition::cstableFile() const {
-  std::unique_lock<std::mutex> lk(mutex_);
-
-  if (cstable_file_.empty()) {
-    return None<RefPtr<VFSFile>>();
-  } else {
-    auto cstable_file_path = FileUtil::joinPaths(
-        node_->db_path,
-        cstable_file_);
-
-    return Some<RefPtr<VFSFile>>(
-        new io::MmappedFile(File::openFile(cstable_file_path, File::O_READ)));
-  }
-}
+//Option<RefPtr<VFSFile>> Partition::cstableFile() const {
+//  std::unique_lock<std::mutex> lk(mutex_);
+//
+//  if (cstable_file_.empty()) {
+//    return None<RefPtr<VFSFile>>();
+//  } else {
+//    auto cstable_file_path = FileUtil::joinPaths(
+//        node_->db_path,
+//        cstable_file_);
+//
+//    return Some<RefPtr<VFSFile>>(
+//        new io::MmappedFile(File::openFile(cstable_file_path, File::O_READ)));
+//  }
+//}
 
 //void PartitionState::encode(
 //    util::BinaryMessageWriter* writer) const {
