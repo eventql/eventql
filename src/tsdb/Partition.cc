@@ -116,38 +116,27 @@ Partition::Partition(
 void Partition::insertRecord(
     const SHA1Hash& record_id,
     const Buffer& record) {
+  Vector<RecordRef> recs;
+  recs.emplace_back(record_id, record);
+  insertRecords(recs);
+}
+
+void Partition::insertRecords(const Vector<RecordRef>& records) {
   std::unique_lock<std::mutex> lk(write_mutex_);
 
   auto snap = getSnapshot(false);
 
   stx::logTrace(
       "tsdb",
-      "Insert 1 record into partition $0/$1/$2",
+      "Insert $0 record into partition $1/$2/$3",
+      records.size(),
       snap->state.tsdb_namespace(),
       table_->name(),
       key_.toString());
 
 
-  //scheduleCompaction();
+  commitSnapshot(snap);
 }
-
-//void Partition::insertRecords(const Vector<RecordRef>& records) {
-//  std::unique_lock<std::mutex> lk(mutex_);
-//
-//  stx::logTrace(
-//      "tsdb",
-//      "Insert $0 records into stream='$1'",
-//      records.size(),
-//      stream_key_);
-//
-//  auto old_ver = records_.version();
-//  records_.addRecords(records);
-//  if (records_.version() != old_ver) {
-//    commitState();
-//  }
-//
-//  scheduleCompaction();
-//}
 
 //void Partition::scheduleCompaction() {
 //  auto now = WallClock::unixMicros();

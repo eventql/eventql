@@ -45,7 +45,7 @@ void ReplicationWorker::run() {
     }
 
     try {
-      job.get()->replicate();
+      //job.get()->replicate();
     } catch (const std::exception& e) {
       stx::logError("fnord.evdb", e, "ReplicationWorker error");
     }

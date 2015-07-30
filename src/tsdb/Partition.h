@@ -63,8 +63,8 @@ public:
 
   Option<RefPtr<VFSFile>> cstableFile() const;
 
-  void compact();
-  void replicate();
+  //void compact();
+  //void replicate();
 
 protected:
 
@@ -99,10 +99,6 @@ protected:
   std::mutex write_mutex_;
 
   std::mutex replication_mutex_;
-  //UnixTime last_compaction_;
-  //HashMap<uint64_t, uint64_t> repl_offsets_;
-  //String cstable_file_;
-  //SHA1Hash cstable_version_;
 };
 
 }

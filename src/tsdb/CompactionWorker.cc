@@ -45,7 +45,7 @@ void CompactionWorker::run() {
     }
 
     try {
-      job.get()->compact();
+      //job.get()->compact();
     } catch (const std::exception& e) {
       stx::logError("fnord.evdb", e, "CompactionWorker error");
     }
