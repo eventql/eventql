@@ -101,27 +101,26 @@ TEST_CASE(RecordIDSetTest, TestDuplicateRecordIDs, [] () {
   EXPECT_EQ(res.count(SHA1::compute("0x32323232")), 1);
 });
 
-/*
-TEST_CASE(RecordSetTest, TestInsert10kRows, [] () {
+TEST_CASE(RecordIDSetTest, TestInsert10kRows, [] () {
+  FileUtil::rm("/tmp/_fnord_testrecidset.idx");
   Random rnd;
-  auto schema = testSchema();
-  RecordSet recset("/tmp", "_fnord_testrecset");
 
-  for (int i = 0; i < 10; ++i) {
-    for (int i = 0; i < 1000; ++i) {
-      recset.addRecord(
-          SHA1::compute(rnd.hex64()),
-          testObject(schema, "1a", "1b"));
+  {
+    RecordIDSet recset("/tmp/_fnord_testrecidset.idx");
+    for (int i = 0; i < 10000; ++i) {
+      recset.addRecordID(SHA1::compute(StringUtil::toString(i)));
     }
-
-    recset.rollCommitlog();
   }
 
-  EXPECT_EQ(recset.getState().old_commitlogs.size(), 10);
-  recset.compact();
-  EXPECT_EQ(recset.commitlogSize(), 0);
-  EXPECT_EQ(recset.getState().datafiles.size(), 1);
-  EXPECT_EQ(recset.listRecords().size(), 10000);
+  {
+    Random rnd;
+    RecordIDSet recset("/tmp/_fnord_testrecidset.idx");
+
+    auto ids = recset.fetchRecordIDs();
+    EXPECT_EQ(ids.size(), 10000);
+    for (int i = 0; i < 10000; ++i) {
+      EXPECT_EQ(ids.count(SHA1::compute(StringUtil::toString(i))), 1);
+    }
+  }
 });
-*/
 

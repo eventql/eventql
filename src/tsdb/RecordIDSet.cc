@@ -136,8 +136,27 @@ void RecordIDSet::scan(Function<void (void* slot)> fn) {
 }
 
 void RecordIDSet::grow() {
-  auto new_nslots = nslots_ == 0 ? kInitialSlots : nslots_ * kGrowthFactor;
-  auto new_size = sizeof(FileHeader) + SHA1Hash::kSize * new_nslots;
+  size_t new_nslots = nslots_ == 0 ? kInitialSlots : nslots_ * kGrowthFactor;
+
+  Buffer new_data(new_nslots * SHA1Hash::kSize);
+  memset(new_data.data(), 0, new_data.size());
+
+  if (nslots_ > 0) {
+    scan([this, &new_nslots, &new_data] (void* old_slot) {
+      FNV<uint64_t> fnv;
+      auto h = fnv.hash(old_slot, SHA1Hash::kSize);
+
+      for (size_t i = 0; i < new_nslots; ++i) {
+        size_t idx = (h + i) % new_nslots;
+        auto slot = (char *) new_data.data() + idx * SHA1Hash::kSize;
+
+        if (IS_SLOT_EMPTY(slot)) {
+          memcpy(slot, old_slot, SHA1Hash::kSize);
+          break;
+        }
+      }
+    });
+  }
 
   {
     auto file = File::openFile(
@@ -151,7 +170,7 @@ void RecordIDSet::grow() {
     hdr.nslots = new_nslots;
 
     file.write(&hdr, sizeof(hdr));
-    file.truncate(new_size);
+    file.write(new_data.data(), new_data.size());
   }
 
   FileUtil::mv(fpath_ + "~", fpath_);
