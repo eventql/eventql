@@ -66,6 +66,8 @@ public:
   void compact();
   void replicate();
 
+  void commit();
+
 protected:
 
   Partition(
@@ -74,7 +76,7 @@ protected:
       TSDBNodeRef* node);
 
   void scheduleCompaction();
-  //void commitState();
+  
   uint64_t replicateTo(const String& addr, uint64_t offset);
 
   void buildCSTable(

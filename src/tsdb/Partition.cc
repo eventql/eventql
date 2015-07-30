@@ -35,7 +35,10 @@ RefPtr<Partition> Partition::create(
 
   auto pdir = FileUtil::joinPaths(
       node->db_path,
-      StringUtil::format("$0/$1", tsdb_namespace, table->name()));
+      StringUtil::format(
+          "$0/$1",
+          tsdb_namespace,
+          SHA1::compute(table->name()).toString()));
 
   FileUtil::mkdir_p(pdir);
 
@@ -44,7 +47,9 @@ RefPtr<Partition> Partition::create(
   state.set_partition_key(partition_key.data(), partition_key.size());
   state.set_table_key(table->name());
 
-  return RefPtr<Partition>(new Partition(state, table, node));
+  auto partition = mkRef(new Partition(state, table, node));
+  partition->commit();
+  return partition;
 }
 
 RefPtr<Partition> Partition::reopen(
@@ -66,7 +71,7 @@ RefPtr<Partition> Partition::reopen(
               StringUtil::format(
                   "$0/$1/$2.ptt",
                   tsdb_namespace,
-                  table->name(),
+                  SHA1::compute(table->name()).toString(),
                   partition_key.toString()))));
 
   return RefPtr<Partition>(
@@ -333,20 +338,24 @@ uint64_t Partition::replicateTo(const String& addr, uint64_t offset) {
 //  return pi;
 //}
 
-//void Partition::commitState() {
-//  PartitionState state;
-//  state.stream_key = stream_key_;
-//  state.repl_offsets = repl_offsets_;
-//  state.cstable_file = cstable_file_;
-//  state.cstable_version = cstable_version_;
-//
-//  util::BinaryMessageWriter buf;
-//  state.encode(&buf);
-//
-//  auto txn = node_->db->startTransaction(false);
-//  txn->update(db_key_.data(), db_key_.size(), buf.data(), buf.size());
-//  txn->commit();
-//}
+void Partition::commit() {
+  auto fpath = StringUtil::format(
+      "$0/$1/$2.ptt",
+      state_.tsdb_namespace(),
+      SHA1::compute(table_->name()).toString(),
+      key_.toString());
+
+  {
+    auto f = File::openFile(
+        fpath + "~",
+        File::O_WRITE | File::O_CREATEOROPEN | File::O_TRUNCATE);
+
+    auto buf = msg::encode(state_);
+    f.write(buf->data(), buf->size());
+  }
+
+  FileUtil::mv(fpath + "~", fpath);
+}
 
 //void Partition::buildCSTable(
 //    const Vector<String>& input_files,
