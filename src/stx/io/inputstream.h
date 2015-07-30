@@ -174,7 +174,7 @@ public:
       bool close_on_destroy = false);
 
   /**
-   * Create a new FileInputStream instance from the provided File. 
+   * Create a new FileInputStream instance from the provided File.
    *
    * @param file the opened file
    */
@@ -191,7 +191,7 @@ public:
   explicit FileInputStream(int fd, bool close_on_destroy = false);
 
   /**
-   * Create a new FileInputStream instance from the provided File. 
+   * Create a new FileInputStream instance from the provided File.
    *
    * @param file the opened file
    */
