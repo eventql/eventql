@@ -22,8 +22,6 @@ namespace sstable {
 class FileHeaderReader {
 public:
 
-  static FileHeader readMetaPage(InputStream* is);
-
   FileHeaderReader(
       void* buf,
       size_t buf_size);

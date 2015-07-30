@@ -9,6 +9,9 @@
  */
 #pragma once
 #include <stx/stdtypes.h>
+#include <stx/buffer.h>
+#include <stx/io/inputstream.h>
+#include <stx/io/outputstream.h>
 
 namespace stx {
 namespace sstable {
@@ -17,9 +20,11 @@ class FileHeader {
   friend class FileHeaderReader;
 public:
 
-  static FileHeader createHeader(
+  static FileHeader createMetaPage(
       const void* userdata,
       size_t userdata_size);
+
+  static FileHeader readMetaPage(InputStream* is);
 
   /**
    * Returns the size of the header, including userdata in bytes

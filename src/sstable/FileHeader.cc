@@ -14,16 +14,56 @@
 namespace stx {
 namespace sstable {
 
-FileHeader FileHeader::createHeader(
+FileHeader FileHeader::createMetaPage(
     const void* userdata,
     size_t userdata_size) {
 
   FNV<uint32_t> fnv;
   FileHeader hdr;
 
-  hdr.version_ = 2;
+  hdr.version_ = BinaryFormat::kVersion;
   hdr.userdata_size_ = userdata_size;
   hdr.userdata_checksum_ = fnv.hash(userdata, userdata_size);
+  return hdr;
+}
+
+FileHeader FileHeader::readMetaPage(InputStream* is) {
+  FileHeader hdr;
+
+  auto magic_bytes = is->readUInt32();
+  if (magic_bytes != BinaryFormat::kMagicBytes) {
+    RAISE(kIllegalStateError, "not a valid sstable");
+  }
+
+  hdr.version_ = is->readUInt16();
+  hdr.userdata_offset_ = 6;
+
+  switch (hdr.version_) {
+
+    case 0x1:
+      hdr.flags_ = 0;
+      break;
+
+    case 0x2:
+      hdr.flags_ = is->readUInt64();
+      hdr.userdata_offset_ += 8;
+      break;
+
+    default:
+      RAISE(kIllegalStateError, "unsupported sstable version");
+
+  }
+
+  hdr.body_size_ = is->readUInt64();
+  hdr.userdata_checksum_ = is->readUInt32();
+  hdr.userdata_size_ = is->readUInt32();
+  hdr.userdata_offset_ += 16;
+
+  /* pre version 0x02 body_size > 0 implied that the table is finalized */
+  if (hdr.version_ == 0x01 && hdr.body_size_ > 0) {
+    hdr.flags_ |= (uint64_t) FileHeaderFlags::FINALIZED;
+  }
+
   return hdr;
 }
 
