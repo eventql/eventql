@@ -38,9 +38,7 @@ protected:
 
   struct  __attribute__((packed)) FileHeader {
     uint8_t version;
-    uint8_t unused1;
-    uint8_t unused2;
-    uint8_t unused3;
+    uint8_t unused[3];
     uint64_t nslots;
   };
 

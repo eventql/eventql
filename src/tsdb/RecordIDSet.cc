@@ -74,25 +74,42 @@ bool RecordIDSet::hasRecordID(const SHA1Hash& record_id) {
     return false;
   }
 
+  auto file = File::openFile(fpath_, File::O_READ);
+
+  FNV<uint64_t> fnv;
+  auto h = fnv.hash(record_id.data(), record_id.size());
   bool found = false;
-  withMmap(true, [this, &found, &record_id] (void* mmap) {
-    FNV<uint64_t> fnv;
-    auto h = fnv.hash(record_id.data(), record_id.size());
 
-    for (size_t i = 0; i < nslots_; ++i) {
-      auto idx = (h + i) % nslots_;
-      auto slot = (char *) mmap + sizeof(FileHeader) + idx * SHA1Hash::kSize;
+  static const size_t kBatchSize = 2;
+  Buffer buf(kBatchSize * SHA1Hash::kSize);
+  size_t buf_offset = -1;
+  size_t buf_size = 0;
 
-      if (memcmp(slot, record_id.data(), SHA1Hash::kSize) == 0) {
-        found = true;
-        break;
+  for (size_t i = 0; i < nslots_; ++i) {
+    auto idx = (h + i) % nslots_;
+
+    if (!buf_size || idx >= buf_offset + buf_size || idx < buf_offset) {
+      file.seekTo(sizeof(FileHeader) + idx * SHA1Hash::kSize);
+      auto nread = file.read(buf.data(), buf.size());
+      if (nread < SHA1Hash::kSize) {
+        RAISE(kRuntimeError, "error while reading from file");;
       }
 
-      if (IS_SLOT_EMPTY(slot)) {
-        break;
-      }
+      buf_offset = idx;
+      buf_size = nread / SHA1Hash::kSize;
     }
-  });
+
+    auto slot = (char *) buf.data() + (idx - buf_offset) * SHA1Hash::kSize;
+
+    if (memcmp(slot, record_id.data(), SHA1Hash::kSize) == 0) {
+      found = true;
+      break;
+    }
+
+    if (IS_SLOT_EMPTY(slot)) {
+      break;
+    }
+  }
 
   return found;
 }
