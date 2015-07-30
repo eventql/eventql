@@ -57,7 +57,7 @@ RecordIDSet::RecordIDSet(
   }
 }
 
-void RecordIDSet::addRecordID(const SHA1Hash& record_id) {
+bool RecordIDSet::addRecordID(const SHA1Hash& record_id) {
   std::unique_lock<std::mutex> lk(write_mutex_);
   auto file = File::openFile(
       fpath_,
@@ -75,10 +75,24 @@ void RecordIDSet::addRecordID(const SHA1Hash& record_id) {
   }
 
   size_t insert_idx = 0;
-  if (!lookup(&file, nslots_, record_id, &insert_idx)) {
+  if (lookup(&file, nslots_, record_id, &insert_idx)) {
+    return false;
+  } else {
     file.seekTo(sizeof(FileHeader) + insert_idx * SHA1Hash::kSize);
     file.write(record_id.data(), SHA1Hash::kSize);
     ++nslots_used_;
+    return true;
+  }
+}
+
+// FIXPAUL keep file open for all writes...
+void RecordIDSet::addRecordIDs(Set<SHA1Hash>* record_ids) {
+  for (auto cur = record_ids->begin(); cur != record_ids->end(); ) {
+    if (addRecordID(*cur)) {
+      ++cur;
+    } else {
+      cur = record_ids->erase(cur);
+    }
   }
 }
 

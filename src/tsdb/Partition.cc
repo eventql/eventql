@@ -47,9 +47,8 @@ RefPtr<Partition> Partition::create(
   state.set_partition_key(partition_key.data(), partition_key.size());
   state.set_table_key(table->name());
 
-  //partition->commit();
-  //return partition;
   auto snap = mkRef(new PartitionSnapshot(state, pdir, table, 0));
+  snap->writeToDisk();
   return new Partition(snap);
 }
 
