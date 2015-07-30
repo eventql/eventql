@@ -20,14 +20,10 @@ using namespace stx;
 UNIT_TEST(SSTableTest);
 
 TEST_CASE(SSTableTest, TestSSTableEditor, [] () {
-  auto file = File::openFile(
-      "/tmp/__fnord__sstabletest1.sstable",
-      File::O_READ | File::O_WRITE | File::O_CREATEOROPEN | File::O_TRUNCATE);
-
   std::string header = "myfnordyheader!";
-
   IndexProvider indexes;
 
+  FileUtil::rm("/tmp/__fnord__sstabletest1.sstable");
   auto tbl = SSTableEditor::create(
       "/tmp/__fnord__sstabletest1.sstable",
       std::move(indexes),
@@ -62,15 +58,12 @@ TEST_CASE(SSTableTest, TestSSTableEditor, [] () {
 });
 
 TEST_CASE(SSTableTest, TestSSTableEditorWithIndexes, [] () {
-  auto file = File::openFile(
-      "/tmp/__fnord__sstabletest2.sstable",
-      File::O_READ | File::O_WRITE | File::O_CREATEOROPEN | File::O_TRUNCATE);
-
   std::string header = "myfnordyheader!";
 
   IndexProvider indexes;
   indexes.addIndex<RowOffsetIndex>();
 
+  FileUtil::rm("/tmp/__fnord__sstabletest2.sstable");
   auto tbl = SSTableEditor::create(
       "/tmp/__fnord__sstabletest2.sstable",
       std::move(indexes),
