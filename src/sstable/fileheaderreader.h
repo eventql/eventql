@@ -19,10 +19,10 @@
 namespace stx {
 namespace sstable {
 
-class FileHeaderReader : public stx::util::BinaryMessageReader {
+class FileHeaderReader {
 public:
 
-  static FileHeader readHeader(InputStream* is);
+  static FileHeader readMetaPage(InputStream* is);
 
   FileHeaderReader(
       void* buf,
@@ -59,11 +59,8 @@ public:
   void readUserdata(const void** userdata, size_t* userdata_size);
 
 protected:
-  uint64_t flags_;
-  uint64_t body_size_;
-  uint32_t userdata_checksum_;
-  uint32_t userdata_size_;
-  size_t userdata_offset_;
+  FileHeader hdr_;
+  size_t file_size_;
 };
 
 }

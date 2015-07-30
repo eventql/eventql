@@ -14,7 +14,7 @@ namespace stx {
 namespace sstable {
 
 class FileHeader {
-  friend class FieleHeaderReader;
+  friend class FileHeaderReader;
 public:
 
   /**
@@ -33,6 +33,11 @@ public:
   size_t bodySize() const;
 
   /**
+   * Returns the body offset in bytes
+   */
+  size_t bodyOffset() const;
+
+  /**
    * Returns the header userdata size in bytes
    */
   size_t userdataSize() const;
@@ -42,11 +47,20 @@ public:
    */
   size_t userdataOffset() const;
 
+  /**
+   * Returns the userdata checksum
+   */
+  uint32_t userdataChecksum() const;
+
 protected:
+  FileHeader();
+
+  uint16_t version_;
   uint64_t flags_;
   uint64_t body_size_;
   uint32_t userdata_checksum_;
   uint32_t userdata_size_;
+  uint32_t userdata_offset_;
 };
 
 }

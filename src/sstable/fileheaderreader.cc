@@ -15,25 +15,26 @@
 namespace stx {
 namespace sstable {
 
+FileHeader FileHeaderReader::readMetaPage(InputStream* is) {
+  FileHeader hdr;
 
-FileHeaderReader::FileHeaderReader(
-    void* buf,
-    size_t buf_size) :
-    stx::util::BinaryMessageReader(buf, buf_size) {
-  auto magic_bytes = *readUInt32();
+  auto magic_bytes = is->readUInt32();
   if (magic_bytes != BinaryFormat::kMagicBytes) {
     RAISE(kIllegalStateError, "not a valid sstable");
   }
 
-  auto version = *readUInt16();
-  switch (version) {
+  hdr.version_ = is->readUInt16();
+  hdr.userdata_offset_ = 6;
+
+  switch (hdr.version_) {
 
     case 0x1:
-      flags_ = 0;
+      hdr.flags_ = 0;
       break;
 
     case 0x2:
-      flags_ = *readUInt64();
+      hdr.flags_ = is->readUInt64();
+      hdr.userdata_offset_ += 8;
       break;
 
     default:
@@ -41,23 +42,33 @@ FileHeaderReader::FileHeaderReader(
 
   }
 
-  body_size_ = *readUInt64();
-  userdata_checksum_ = *readUInt32();
-  userdata_size_ = *readUInt32();
-  userdata_offset_ = pos_;
+  hdr.body_size_ = is->readUInt64();
+  hdr.userdata_checksum_ = is->readUInt32();
+  hdr.userdata_size_ = is->readUInt32();
+  hdr.userdata_offset_ += 16;
 
   /* pre version 0x02 body_size > 0 implied that the table is finalized */
-  if (version == 0x01 && body_size_ > 0) {
-    flags_ |= (uint64_t) FileHeaderFlags::FINALIZED;
+  if (hdr.version_ == 0x01 && hdr.body_size_ > 0) {
+    hdr.flags_ |= (uint64_t) FileHeaderFlags::FINALIZED;
   }
+
+  return hdr;
+}
+
+FileHeaderReader::FileHeaderReader(
+    void* buf,
+    size_t buf_size) :
+    file_size_(buf_size) {
+  MemoryInputStream is(buf, buf_size);
+  hdr_ = FileHeaderReader::readMetaPage(&is);
 }
 
 bool FileHeaderReader::verify() {
-  if (userdata_offset_ + userdata_size_ > size_) {
+  if (hdr_.userdataOffset() + hdr_.userdataSize() > file_size_) {
     return false;
   }
 
-  if (userdata_size_ == 0) {
+  if (hdr_.userdataSize() == 0) {
     return true;
   }
 
@@ -68,31 +79,32 @@ bool FileHeaderReader::verify() {
   FNV<uint32_t> fnv;
   uint32_t userdata_checksum = fnv.hash(userdata, userdata_size);
 
-  return userdata_checksum == userdata_checksum_;
+  return userdata_checksum == hdr_.userdataChecksum();
 }
 
 size_t FileHeaderReader::headerSize() const {
-  return userdata_offset_ + userdata_size_;
+  return hdr_.headerSize();
 }
 
 size_t FileHeaderReader::bodySize() const {
-  return body_size_;
+  return hdr_.bodySize();
 }
 
 bool FileHeaderReader::isFinalized() const {
-  return (flags_ & (uint64_t) FileHeaderFlags::FINALIZED) > 0;
+  return hdr_.isFinalized();
 }
 
 size_t FileHeaderReader::userdataSize() const {
-  return userdata_size_;
+  return hdr_.userdataSize();
 }
 
 void FileHeaderReader::readUserdata(
     const void** userdata,
     size_t* userdata_size) {
-  seekTo(userdata_offset_);
-  *userdata = read(userdata_size_);
-  *userdata_size = userdata_size_;
+  *userdata_size = hdr_.userdataSize();
+  //seekTo(hdr.userdataOffset());
+  //*userdata = read(*userdata_size);
+  // : public stx::util::BinaryMessageReader 
 }
 
 }
