@@ -74,11 +74,29 @@ bool RecordIDSet::hasRecordID(const SHA1Hash& record_id) {
     return false;
   }
 
+  return lookup(record_id);
+}
+
+Set<SHA1Hash> RecordIDSet::fetchRecordIDs() {
+  Set<SHA1Hash> ids;
+  if (nslots_ == 0) {
+    return ids;
+  }
+
+  scan([&ids] (void* slot) {
+    ids.emplace(SHA1Hash(slot, SHA1Hash::kSize));
+  });
+
+  return ids;
+}
+
+bool RecordIDSet::lookup(
+    const SHA1Hash& record_id,
+    size_t* insert_idx /* = nullptr */) {
   auto file = File::openFile(fpath_, File::O_READ);
 
   FNV<uint64_t> fnv;
   auto h = fnv.hash(record_id.data(), record_id.size());
-  bool found = false;
 
   static const size_t kBatchSize = 2;
   Buffer buf(kBatchSize * SHA1Hash::kSize);
@@ -102,30 +120,20 @@ bool RecordIDSet::hasRecordID(const SHA1Hash& record_id) {
     auto slot = (char *) buf.data() + (idx - buf_offset) * SHA1Hash::kSize;
 
     if (memcmp(slot, record_id.data(), SHA1Hash::kSize) == 0) {
-      found = true;
-      break;
+      return true;
     }
 
     if (IS_SLOT_EMPTY(slot)) {
-      break;
+      if (insert_idx) {
+        *insert_idx = idx;
+      }
+      return false;
     }
   }
 
-  return found;
+  RAISE(kIllegalStateError, "set is full");
 }
 
-Set<SHA1Hash> RecordIDSet::fetchRecordIDs() {
-  Set<SHA1Hash> ids;
-  if (nslots_ == 0) {
-    return ids;
-  }
-
-  scan([&ids] (void* slot) {
-    ids.emplace(SHA1Hash(slot, SHA1Hash::kSize));
-  });
-
-  return ids;
-}
 
 void RecordIDSet::scan(Function<void (void* slot)> fn) {
   auto file = File::openFile(fpath_, File::O_READ);
