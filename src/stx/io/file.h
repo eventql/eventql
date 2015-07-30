@@ -72,11 +72,12 @@ public:
       int permissions = 0666);
 
 
-  File(File&& move);
-  File(const File& copy) = delete;
+  File(File&& other);
+  File(const File& other) = delete;
   ~File();
 
-  File& operator=(const File& copy) = delete;
+  File& operator=(const File& other) = delete;
+  File& operator=(File&& other);
 
   void seekTo(size_t pos);
   size_t read(void* buf, size_t buf_len);

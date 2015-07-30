@@ -81,6 +81,19 @@ File::~File() {
 
 File::File(File&& other) : fd_(other.fd_), flags_(other.flags_) {
   other.fd_ = -1;
+  other.flags_ = 0;
+}
+
+File& File::operator=(File&& other) {
+  if (fd_ >= 0) {
+    close(fd_);
+  }
+
+  fd_ = other.fd_;
+  flags_ = other.flags_;
+  other.fd_ = -1;
+  other.flags_ = 0;
+  return *this;
 }
 
 int File::fd() const {
