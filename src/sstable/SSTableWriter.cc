@@ -41,12 +41,8 @@ std::unique_ptr<SSTableWriter> SSTableWriter::reopen(
     const std::string& filename) {
   auto file = File::openFile(filename, File::O_READ);
 
-  FileInputStream is(file.clone());
+  FileInputStream is(file.clone()); // FIXPAUL
   auto header = FileHeaderReader::readHeader(&is);
-
-  if (header.headerSize() + header.bodySize() > file.size()) {
-    RAISE(kIllegalStateError, "file metadata offsets exceed file bounds");
-  }
 
   return mkScoped(new SSTableWriter(std::move(file), header));
 }

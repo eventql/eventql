@@ -11,8 +11,7 @@
 #include <stx/stdtypes.h>
 #include <stx/io/file.h>
 #include <stx/io/pagemanager.h>
-#include <sstable/index.h>
-#include <sstable/indexprovider.h>
+#include <sstable/FileHeader.h>
 #include <stx/exception.h>
 
 namespace stx {
@@ -70,8 +69,8 @@ public:
    */
   void commit();
 
-  void writeFooter(uint32_t index_type, void* data, size_t size);
-  void writeFooter(uint32_t index_type, const Buffer& buf);
+  void writeFooter(uint32_t footer_type, void* data, size_t size);
+  void writeFooter(uint32_t footer_type, const Buffer& buf);
 
 protected:
 
