@@ -52,7 +52,7 @@ RefPtr<Partition> Partition::create(
   snap->nrecs = 0;
 
   auto partition = mkRef(new Partition(snap, table, node));
-  partition->commitSnapshot(snap);
+  partition->commitSnapshot([] (PartitionSnapshot* snap) {});
   return partition;
 }
 
@@ -113,30 +113,30 @@ Partition::Partition(
   //node_->replicationq.insert(this, WallClock::unixMicros());
 }
 
-void Partition::insertRecord(
-    const SHA1Hash& record_id,
-    const Buffer& record) {
-  Vector<RecordRef> recs;
-  recs.emplace_back(record_id, record);
-  insertRecords(recs);
-}
-
-void Partition::insertRecords(const Vector<RecordRef>& records) {
-  std::unique_lock<std::mutex> lk(write_mutex_);
-
-  auto snap = getSnapshot(false);
-
-  stx::logTrace(
-      "tsdb",
-      "Insert $0 record into partition $1/$2/$3",
-      records.size(),
-      snap->state.tsdb_namespace(),
-      table_->name(),
-      key_.toString());
-
-
-  commitSnapshot(snap);
-}
+//void Partition::insertRecord(
+//    const SHA1Hash& record_id,
+//    const Buffer& record) {
+//  Vector<RecordRef> recs;
+//  recs.emplace_back(record_id, record);
+//  insertRecords(recs);
+//}
+//
+//void Partition::insertRecords(const Vector<RecordRef>& records) {
+//  std::unique_lock<std::mutex> lk(write_mutex_);
+//
+//  auto snap = getSnapshot();
+//
+//  stx::logTrace(
+//      "tsdb",
+//      "Insert $0 record into partition $1/$2/$3",
+//      records.size(),
+//      snap->state.tsdb_namespace(),
+//      table_->name(),
+//      key_.toString());
+//
+//
+//  //commitSnapshot(snap);
+//}
 
 //void Partition::scheduleCompaction() {
 //  auto now = WallClock::unixMicros();
@@ -341,24 +341,20 @@ uint64_t Partition::replicateTo(const String& addr, uint64_t offset) {
 //  return pi;
 //}
 
-RefPtr<Partition::PartitionSnapshot> Partition::getSnapshot(
-    bool readonly) const {
+RefPtr<PartitionSnapshot> Partition::getSnapshot() const {
   std::unique_lock<std::mutex> lk(head_mutex_);
-  auto head = head_;
-  lk.unlock();
-
-  if (readonly) {
-    return head;
-  } else {
-    auto copy = mkRef(new PartitionSnapshot());
-    copy->state = head->state;
-    copy->nrecs = head->nrecs;
-    return copy;
-  }
+  return head_;
 }
 
-// precondition: must hold write mutex
-void Partition::commitSnapshot(RefPtr<PartitionSnapshot> snap) {
+void Partition::commitSnapshot(Function<void (PartitionSnapshot* snap)> fn) {
+  std::unique_lock<std::mutex> lk(head_mutex_);
+  auto snap = mkRef(new PartitionSnapshot());
+  snap->state = head_->state;
+  snap->nrecs = head_->nrecs;
+  fn(snap.get());
+  head_ = snap;
+  lk.unlock();
+
   auto fpath = StringUtil::format(
       "$0/$1/$2.ptt",
       snap->state.tsdb_namespace(),
@@ -375,9 +371,6 @@ void Partition::commitSnapshot(RefPtr<PartitionSnapshot> snap) {
   }
 
   FileUtil::mv(fpath + "~", fpath);
-
-  std::unique_lock<std::mutex> lk(head_mutex_);
-  head_ = snap;
 }
 
 //void Partition::buildCSTable(

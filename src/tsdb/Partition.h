@@ -37,6 +37,11 @@ class Table;
 //  void decode(util::BinaryMessageReader* reader);
 //};
 
+struct PartitionSnapshot : public RefCounted {
+  PartitionState state;
+  uint64_t nrecs;
+};
+
 class Partition : public RefCounted {
 public:
 
@@ -52,34 +57,27 @@ public:
       const SHA1Hash& partition_key,
       TSDBNodeRef* node);
 
-  void insertRecord(
-      const SHA1Hash& record_id,
-      const Buffer& record);
+  //void insertRecord(
+  //    const SHA1Hash& record_id,
+  //    const Buffer& record);
 
-  void insertRecords(const Vector<RecordRef>& records);
+  //void insertRecords(const Vector<RecordRef>& records);
 
   PartitionInfo partitionInfo() const;
   Vector<String> listFiles() const;
 
   Option<RefPtr<VFSFile>> cstableFile() const;
 
-  //void compact();
-  //void replicate();
+  RefPtr<PartitionSnapshot> getSnapshot() const;
+  void commitSnapshot(Function<void (PartitionSnapshot* snap)> fn);
 
 protected:
-
-  struct PartitionSnapshot : public RefCounted {
-    PartitionState state;
-    uint64_t nrecs;
-  };
 
   Partition(
       RefPtr<PartitionSnapshot> snap,
       RefPtr<Table> table,
       TSDBNodeRef* node);
 
-  RefPtr<PartitionSnapshot> getSnapshot(bool readonly) const;
-  void commitSnapshot(RefPtr<PartitionSnapshot> snap);
 
   void scheduleCompaction();
   uint64_t replicateTo(const String& addr, uint64_t offset);

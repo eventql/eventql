@@ -117,7 +117,7 @@ void TSDBServlet::insertRecords(
   }
 
   for (const auto& group : grouped) {
-    group.first->insertRecords(group.second);
+    //group.first->insertRecords(group.second);
   }
 
   res->setStatus(http::kStatusCreated);
