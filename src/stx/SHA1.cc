@@ -45,15 +45,23 @@ SHA1Hash::SHA1Hash(DeferInitialization) {
 }
 
 bool SHA1Hash::operator==(const SHA1Hash& other) const {
-  return strncmp((char*) hash, (char*) other.hash, sizeof(hash)) == 0;
+  return memcmp((char*) hash, (char*) other.hash, kSize) == 0;
 }
 
 bool SHA1Hash::operator<(const SHA1Hash& other) const {
-  return strncmp((char*) hash, (char*) other.hash, sizeof(hash)) < 0;
+  return StringUtil::compare(
+      (char*) hash,
+      kSize,
+      (char*) other.hash,
+      kSize) < 0;
 }
 
 bool SHA1Hash::operator>(const SHA1Hash& other) const {
-  return strncmp((char*) hash, (char*) other.hash, sizeof(hash)) > 0;
+  return StringUtil::compare(
+      (char*) hash,
+      kSize,
+      (char*) other.hash,
+      kSize) > 0;
 }
 
 SHA1Hash::SHA1Hash(const void* data, size_t size) {
@@ -128,7 +136,7 @@ String inspect<SHA1Hash>(const SHA1Hash& hash) {
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-static inline const unsigned int rol(
+static inline unsigned int rol(
     const unsigned int value,
     const unsigned int steps) {
   return ((value << steps) | (value >> (32 - steps)));
