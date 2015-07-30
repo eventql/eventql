@@ -24,6 +24,7 @@ TEST_CASE(RecordIDSetTest, TestAddRowToEmptySet, [] () {
 
   EXPECT_FALSE(recset.hasRecordID(SHA1::compute("0x42424242")));
   EXPECT_FALSE(recset.hasRecordID(SHA1::compute("0x23232323")));
+  EXPECT_FALSE(recset.hasRecordID(SHA1::compute("0x52525252")));
 
   EXPECT_EQ(recset.fetchRecordIDs().size(), 0);
 
@@ -32,8 +33,12 @@ TEST_CASE(RecordIDSetTest, TestAddRowToEmptySet, [] () {
 
   EXPECT_TRUE(recset.hasRecordID(SHA1::compute("0x42424242")));
   EXPECT_TRUE(recset.hasRecordID(SHA1::compute("0x23232323")));
+  EXPECT_FALSE(recset.hasRecordID(SHA1::compute("0x52525252")));
 
-  EXPECT_EQ(recset.fetchRecordIDs().size(), 2);
+  auto ids = recset.fetchRecordIDs();
+  EXPECT_EQ(ids.size(), 2);
+  EXPECT_EQ(ids.count(SHA1::compute("0x42424242")), 1);
+  EXPECT_EQ(ids.count(SHA1::compute("0x23232323")), 1);
 });
 
 /*

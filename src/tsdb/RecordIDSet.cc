@@ -74,11 +74,58 @@ bool RecordIDSet::hasRecordID(const SHA1Hash& record_id) {
     return false;
   }
 
-  return false;
+  bool found = false;
+  withMmap(true, [this, &found, &record_id] (void* mmap) {
+    FNV<uint64_t> fnv;
+    auto h = fnv.hash(record_id.data(), record_id.size());
+
+    for (size_t i = 0; i < nslots_; ++i) {
+      auto idx = (h + i) % nslots_;
+      auto slot = (char *) mmap + sizeof(FileHeader) + idx * SHA1Hash::kSize;
+
+      if (memcmp(slot, record_id.data(), SHA1Hash::kSize) == 0) {
+        found = true;
+        break;
+      }
+
+      if (IS_SLOT_EMPTY(slot)) {
+        break;
+      }
+    }
+  });
+
+  return found;
 }
 
 Set<SHA1Hash> RecordIDSet::fetchRecordIDs() {
   Set<SHA1Hash> ids;
+  if (nslots_ == 0) {
+    return ids;
+  }
+
+  auto file = File::openFile(fpath_, File::O_READ);
+  file.seekTo(sizeof(FileHeader));
+
+  static const size_t kBatchSize = 256;
+  Buffer buf(kBatchSize * SHA1Hash::kSize);
+  auto nbatches = (nslots_ + kBatchSize - 1) / kBatchSize;
+  for (size_t b = 0; b < nbatches; ++b) {
+    auto nread = file.read(buf.data(), buf.size());
+    if (nread == -1) {
+      break;
+    }
+
+    for (size_t pos = 0; pos < SHA1Hash::kSize * kBatchSize;
+        pos += SHA1Hash::kSize) {
+      auto slot = static_cast<char*>(buf.data()) + pos;
+      if (IS_SLOT_EMPTY(slot)) {
+        continue;
+      }
+
+      ids.emplace(SHA1Hash(slot, SHA1Hash::kSize));
+    }
+  }
+
   return ids;
 }
 
