@@ -25,48 +25,37 @@ std::unique_ptr<SSTableWriter> SSTableWriter::create(
     size_t header_size) {
   auto file = File::openFile(
       filename,
-      File::O_READ | File::O_WRITE | File::O_CREATE));
+      File::O_READ | File::O_WRITE | File::O_CREATE);
 
-  auto header_page_size = FileHeaderWriter::calculateSize(header_udata_size);
-  Buffer header_page(header_page_size);
-
-  FileHeaderWriter header(
-      header_page.data(),
-      header_page.size(),
-      0,
-      userdata,
-      userdata_size);
-
+  auto header_page = FileHeaderWriter::buildHeader(header, header_size);
   file.write(header_page.data(), header_page.size());
 
-  return new SSTableWriter(
-      std::move(file),
-      header_page_size,
-      false);
+  // FIXPAUL!
+  MemoryInputStream is(header_page.data(), header_page.size());
+  auto hdr = FileHeaderReader::readHeader(&is);
+
+  return mkScoped(new SSTableWriter(std::move(file), hdr));
 }
 
 std::unique_ptr<SSTableWriter> SSTableWriter::reopen(
     const std::string& filename) {
-  auto is = io::FileInputStream::openFile(filename);
-  auto header = FileHeaderReader::readHeader(is);
+  auto file = File::openFile(filename, File::O_READ);
 
-  if (header.headerSize() + header.bodySize() > file_size) {
+  FileInputStream is(file.clone());
+  auto header = FileHeaderReader::readHeader(&is);
+
+  if (header.headerSize() + header.bodySize() > file.size()) {
     RAISE(kIllegalStateError, "file metadata offsets exceed file bounds");
   }
 
-  return new SSTableWriter(
-      std::move(file),
-      header.headerSize() + header.bodySize(),
-      header.finalized());
+  return mkScoped(new SSTableWriter(std::move(file), header));
 }
 
 SSTableWriter::SSTableWriter(
     File&& file,
-    size_t pos,
-    bool finalized_) :
+    FileHeader hdr) :
     file_(std::move(file)),
-    pos_(0),
-    finalized_(finalized),
+    hdr_(hdr),
     meta_dirty_(false) {}
 
 SSTableWriter::~SSTableWriter() {
@@ -78,13 +67,8 @@ uint64_t SSTableWriter::appendRow(
     size_t key_size,
     void const* data,
     size_t data_size) {
-  switch (state_) {
-    case SSTableWriterState::HEADER:
-      RAISE(kIllegalStateError, "can't append row before header is written");
-    case SSTableWriterState::FOOTER:
-      RAISE(kIllegalStateError, "can't append row after footer was written");
-    case SSTableWriterState::BODY:
-      break;
+  if (hdr_.isFinalized()) {
+    RAISE(kIllegalStateError, "can't append row to finalized sstable");
   }
 
   if (data_size == 0) {
@@ -134,6 +118,12 @@ uint64_t SSTableWriter::appendRow(
     const std::string& key,
     const SSTableColumnWriter& value) {
   return appendRow(key.data(), key.size(), value.data(), value.size());
+}
+
+void SSTableWriter::commit() {
+  if (!meta_dirty_) {
+    return;
+  }
 }
 
 //void SSTableWriter::writeIndex(uint32_t index_type, const Buffer& buf) {

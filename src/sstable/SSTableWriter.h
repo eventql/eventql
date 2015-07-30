@@ -77,12 +77,11 @@ protected:
 
   SSTableWriter(
       File&& file,
-      size_t pos,
-      bool finalized);
+      FileHeader hdr);
 
 private:
   File file_;
-  size_t pos_;
+  FileHeader hdr_;
   bool meta_dirty_;
 };
 

@@ -10,6 +10,7 @@
 #ifndef _FNORDMETRIC_METRICDB_FILEHEADERWRITER_H
 #define _FNORDMETRIC_METRICDB_FILEHEADERWRITER_H
 #include <stx/util/binarymessagewriter.h>
+#include <stx/buffer.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <string>
@@ -20,6 +21,10 @@ namespace sstable {
 class FileHeaderWriter : public stx::util::BinaryMessageWriter {
 public:
   static size_t calculateSize(size_t userdata_size);
+
+  static Buffer buildHeader(
+      const void* userdate,
+      size_t userdata_size);
 
   /**
    * Write a new file header
