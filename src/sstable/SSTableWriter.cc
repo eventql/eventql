@@ -30,7 +30,7 @@ std::unique_ptr<SSTableWriter> SSTableWriter::create(
   FileHeader hdr(header, header_size);
 
   FileOutputStream os(file.fd());
-  FileHeader::writeHeader(
+  FileHeaderWriter::writeHeader(
       hdr,
       header,
       header_size,
@@ -44,7 +44,7 @@ std::unique_ptr<SSTableWriter> SSTableWriter::reopen(
   auto file = File::openFile(filename, File::O_READ);
 
   FileInputStream is(file.fd());
-  auto header = FileHeader::readMetaPage(&is);
+  auto header = FileHeaderReader::readMetaPage(&is);
 
   return mkScoped(new SSTableWriter(std::move(file), header));
 }

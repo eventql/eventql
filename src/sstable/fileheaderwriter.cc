@@ -18,6 +18,34 @@ size_t FileHeaderWriter::calculateSize(size_t userdata_size) {
   return 30 + userdata_size; // FIXPAUL
 }
 
+void FileHeaderWriter::writeMetaPage(
+    const FileHeader& header,
+    OutputStream* os) {
+  if (header.version() != 0x02) {
+    RAISE(kIllegalStateError, "unsupported sstable version");
+  }
+
+  os->appendUInt32(BinaryFormat::kMagicBytes);
+  os->appendUInt16(header.version());
+  os->appendUInt64(header.flags());
+  os->appendUInt64(header.bodySize());
+  os->appendUInt32(header.userdataChecksum());
+  os->appendUInt32(header.userdataSize());
+}
+
+void FileHeaderWriter::writeHeader(
+    const FileHeader& header,
+    const void* userdata,
+    size_t userdata_size,
+    OutputStream* os) {
+  if (userdata_size != header.userdataSize()) {
+    RAISE(kIllegalStateError, "userdata size does not match meta page");
+  }
+
+  writeMetaPage(header, os);
+  os->write((char*) userdata, userdata_size);
+}
+
 FileHeaderWriter::FileHeaderWriter(
     void* buf,
     size_t buf_size,

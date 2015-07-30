@@ -22,37 +22,59 @@ namespace sstable {
 class FileHeaderReader {
 public:
 
+  /**
+   * Read and verify the header from the provided input stream
+   */
+  static bool verifyHeader(InputStream* is);
+
+  /**
+   * Read the header meta page, but not the userdata from the provided input
+   * stream
+   */
+  static FileHeader readMetaPage(InputStream* is);
+
+  /**
+   * Read the full header (meta page + userdata) from the provided input stream
+   */
+  static FileHeader readHeader(
+      Buffer* userdata,
+      InputStream* is);
+
+
+  /**
+   * DEPRECATED
+   */
   FileHeaderReader(
       void* buf,
       size_t buf_size);
 
   /**
-   * Verify the checksums and boundaries. Returns true if valid, false otherwise
+   * DEPRECATED Verify the checksums and boundaries. Returns true if valid, false otherwise
    */
   bool verify();
 
   /**
-   * Returns the size of the header, including userdata in bytes
+   * DEPRECATED Returns the size of the header, including userdata in bytes
    */
   size_t headerSize() const;
 
   /**
-   * Returns true iff the table is finalized (immutable)
+   * DEPRECATED Returns true iff the table is finalized (immutable)
    */
   bool isFinalized() const;
 
   /**
-   * Returns the body size in bytes
+   * DEPRECATED Returns the body size in bytes
    */
   size_t bodySize() const;
 
   /**
-   * Returns the header userdata size in bytes
+   * DEPRECATED Returns the header userdata size in bytes
    */
   size_t userdataSize() const;
 
   /**
-   * Return the userdata
+   * DEPRECATED Return the userdata
    */
   void readUserdata(const void** userdata, size_t* userdata_size);
 

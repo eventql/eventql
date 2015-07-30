@@ -23,7 +23,27 @@ namespace sstable {
 class FileHeaderWriter : public stx::util::BinaryMessageWriter {
 public:
 
+  /**
+   * DEPRECATED
+   */
   static size_t calculateSize(size_t userdata_size);
+
+  /**
+   * Write the header meta page, but not the userdata to the provided output
+   * stream
+   */
+  static void writeMetaPage(
+      const FileHeader& header,
+      OutputStream* os);
+
+  /**
+   * Write the full header (meta page + userdata) to the provided output stream
+   */
+  static void writeHeader(
+      const FileHeader& header,
+      const void* userdata,
+      size_t userdata_size,
+      OutputStream* os);
 
   /**
    * Write a new file header
@@ -36,19 +56,19 @@ public:
       size_t userdata_size);
 
   /**
-   * Open an existing file header for update
+   * DEPRECATED
    */
   FileHeaderWriter(
       void* buf,
       size_t buf_size);
 
   /**
-   * Update/rewrite the body size field
+   * DEPRECATED
    */
   void updateBodySize(size_t body_size);
 
   /**
-   * Update/set a flag
+   * DEPRECATED
    */
   void setFlag(FileHeaderFlags flag);
 

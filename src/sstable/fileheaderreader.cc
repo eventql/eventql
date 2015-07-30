@@ -15,12 +15,49 @@
 namespace stx {
 namespace sstable {
 
+FileHeader FileHeaderReader::readMetaPage(InputStream* is) {
+  FileHeader hdr;
+
+  auto magic_bytes = is->readUInt32();
+  if (magic_bytes != BinaryFormat::kMagicBytes) {
+    RAISE(kIllegalStateError, "not a valid sstable");
+  }
+
+  hdr.version_ = is->readUInt16();
+
+  switch (hdr.version_) {
+
+    case 0x1:
+      hdr.flags_ = 0;
+      break;
+
+    case 0x2:
+      hdr.flags_ = is->readUInt64();
+      break;
+
+    default:
+      RAISE(kIllegalStateError, "unsupported sstable version");
+
+  }
+
+  hdr.body_size_ = is->readUInt64();
+  hdr.userdata_checksum_ = is->readUInt32();
+  hdr.userdata_size_ = is->readUInt32();
+
+  /* pre version 0x02 body_size > 0 implied that the table is finalized */
+  if (hdr.version_ == 0x01 && hdr.body_size_ > 0) {
+    hdr.flags_ |= (uint64_t) FileHeaderFlags::FINALIZED;
+  }
+
+  return hdr;
+}
+
 FileHeaderReader::FileHeaderReader(
     void* buf,
     size_t buf_size) :
     file_size_(buf_size) {
   MemoryInputStream is(buf, buf_size);
-  hdr_ = FileHeader::readMetaPage(&is);
+  hdr_ = FileHeaderReader::readMetaPage(&is);
 }
 
 bool FileHeaderReader::verify() {
