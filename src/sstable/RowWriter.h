@@ -12,6 +12,7 @@
 #include <stx/buffer.h>
 #include <stx/io/inputstream.h>
 #include <stx/io/outputstream.h>
+#include <sstable/FileHeader.h>
 
 namespace stx {
 namespace sstable {
