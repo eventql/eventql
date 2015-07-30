@@ -8,11 +8,11 @@
  */
 #ifndef _CM_LOOKUPSERVLET_H
 #define _CM_LOOKUPSERVLET_H
-#include "fnord/http/httpservice.h"
-#include "fnord/json/json.h"
-#include "fnord/mdb/MDB.h"
+#include "stx/http/httpservice.h"
+#include "stx/json/json.h"
+#include "stx/mdb/MDB.h"
 
-using namespace fnord;
+using namespace stx;
 
 namespace cm {
 

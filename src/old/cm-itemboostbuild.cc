@@ -6,15 +6,15 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-#include <fnord/stdtypes.h>
-#include <fnord/cli/flagparser.h>
-#include <fnord/application.h>
-#include <fnord/logging.h>
-#include <fnord/random.h>
-#include <fnord/wallclock.h>
-#include <fnord/thread/eventloop.h>
-#include <fnord/thread/threadpool.h>
-#include <fnord/http/httpconnectionpool.h>
+#include <stx/stdtypes.h>
+#include <stx/cli/flagparser.h>
+#include <stx/application.h>
+#include <stx/logging.h>
+#include <stx/random.h>
+#include <stx/wallclock.h>
+#include <stx/thread/eventloop.h>
+#include <stx/thread/threadpool.h>
+#include <stx/http/httpconnectionpool.h>
 #include <dproc/Application.h>
 #include <dproc/LocalScheduler.h>
 #include <tsdb/TSDBClient.h>
@@ -23,16 +23,16 @@
 #include "analytics/ItemBoostExport.h"
 #include "analytics/ProtoSSTableMergeReducer.h"
 
-using namespace fnord;
+using namespace stx;
 using namespace cm;
 
-fnord::thread::EventLoop ev;
+stx::thread::EventLoop ev;
 
 int main(int argc, const char** argv) {
-  fnord::Application::init();
-  fnord::Application::logToStderr();
+  stx::Application::init();
+  stx::Application::logToStderr();
 
-  fnord::cli::FlagParser flags;
+  stx::cli::FlagParser flags;
 
   flags.defineFlag(
       "output",
@@ -63,7 +63,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "loglevel",
-      fnord::cli::FlagParser::T_STRING,
+      stx::cli::FlagParser::T_STRING,
       false,
       NULL,
       "INFO",

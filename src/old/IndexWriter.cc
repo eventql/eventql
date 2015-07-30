@@ -9,7 +9,7 @@
 #include "IndexWriter.h"
 #include <fnord-fts/AnalyzerAdapter.h>
 
-using namespace fnord;
+using namespace stx;
 
 namespace cm {
 
@@ -27,8 +27,8 @@ RefPtr<IndexWriter> IndexWriter::openIndex(
       new DocIndex(index_path, "documents-dawanda", false));
 
   /* open lucene */
-  RefPtr<fnord::fts::Analyzer> analyzer(new fnord::fts::Analyzer(conf_path));
-  auto adapter = std::make_shared<fnord::fts::AnalyzerAdapter>(analyzer);
+  RefPtr<stx::fts::Analyzer> analyzer(new stx::fts::Analyzer(conf_path));
+  auto adapter = std::make_shared<stx::fts::AnalyzerAdapter>(analyzer);
 
   auto fts_path = FileUtil::joinPaths(index_path, "fts");
   bool create = false;
@@ -181,7 +181,7 @@ void IndexWriter::rebuildFTS(RefPtr<Document> doc) {
 
   fts_doc->setBoost(boost);
 
-  fnord::logDebug(
+  stx::logDebug(
       "cm.indexwriter",
       "Rebuilding FTS Index for docid=$0 boost=$1 active=$2",
       doc->docID().docid,
@@ -226,22 +226,22 @@ void IndexWriter::exportStats(const String& prefix) {
   exportStat(
       StringUtil::format("$0/documents_indexed_total", prefix),
       &stat_documents_indexed_total_,
-      fnord::stats::ExportMode::EXPORT_DELTA);
+      stx::stats::ExportMode::EXPORT_DELTA);
 
   exportStat(
       StringUtil::format("$0/documents_indexed_success", prefix),
       &stat_documents_indexed_success_,
-      fnord::stats::ExportMode::EXPORT_DELTA);
+      stx::stats::ExportMode::EXPORT_DELTA);
 
   exportStat(
       StringUtil::format("$0/documents_indexed_error", prefix),
       &stat_documents_indexed_error_,
-      fnord::stats::ExportMode::EXPORT_DELTA);
+      stx::stats::ExportMode::EXPORT_DELTA);
 
   exportStat(
       StringUtil::format("$0/documents_indexed_fts", prefix),
       &stat_documents_indexed_fts_,
-      fnord::stats::ExportMode::EXPORT_DELTA);
+      stx::stats::ExportMode::EXPORT_DELTA);
 }
 
 

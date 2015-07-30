@@ -9,7 +9,7 @@
 #include "IndexReader.h"
 #include <fnord-fts/AnalyzerAdapter.h>
 
-using namespace fnord;
+using namespace stx;
 
 namespace cm {
 
@@ -37,7 +37,7 @@ IndexReader::IndexReader(
     std::shared_ptr<fts::IndexReader> fts) :
     doc_idx_(doc_idx),
     fts_(fts),
-    fts_searcher_(new fnord::fts::IndexSearcher(fts_)) {}
+    fts_searcher_(new stx::fts::IndexSearcher(fts_)) {}
 
 IndexReader::~IndexReader() {
   fts_->close();

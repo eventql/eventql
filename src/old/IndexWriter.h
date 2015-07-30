@@ -15,20 +15,20 @@
 #include <unordered_map>
 #include <vector>
 #include <queue>
-#include "fnord/stdtypes.h"
+#include "stx/stdtypes.h"
 #include "brokerd/RemoteFeed.h"
 #include "brokerd/RemoteFeedWriter.h"
-#include "fnord/thread/taskscheduler.h"
+#include "stx/thread/taskscheduler.h"
 #include <fnord-fts/fts.h>
 #include <fnord-fts/fts_common.h>
-#include "fnord/mdb/MDB.h"
-#include "fnord/stats/stats.h"
+#include "stx/mdb/MDB.h"
+#include "stx/stats/stats.h"
 #include "DocStore.h"
 #include "IndexChangeRequest.h"
 #include "DocIndex.h"
 #include <inventory/ItemRef.h>
 
-using namespace fnord;
+using namespace stx;
 
 namespace cm {
 
@@ -62,10 +62,10 @@ protected:
   RefPtr<DocIndex> doc_idx_;
   std::shared_ptr<fts::IndexWriter> fts_idx_;
 
-  fnord::stats::Counter<uint64_t> stat_documents_indexed_total_;
-  fnord::stats::Counter<uint64_t> stat_documents_indexed_success_;
-  fnord::stats::Counter<uint64_t> stat_documents_indexed_error_;
-  fnord::stats::Counter<uint64_t> stat_documents_indexed_fts_;
+  stx::stats::Counter<uint64_t> stat_documents_indexed_total_;
+  stx::stats::Counter<uint64_t> stat_documents_indexed_success_;
+  stx::stats::Counter<uint64_t> stat_documents_indexed_error_;
+  stx::stats::Counter<uint64_t> stat_documents_indexed_fts_;
 };
 
 } // namespace cm

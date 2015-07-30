@@ -8,36 +8,36 @@
  */
 #include <stdlib.h>
 #include <unistd.h>
-#include "fnord/application.h"
-#include "fnord/io/filerepository.h"
-#include "fnord/io/fileutil.h"
-#include "fnord/thread/eventloop.h"
-#include "fnord/thread/threadpool.h"
-#include "fnord/random.h"
-#include "fnord/rpc/RPC.h"
-#include "fnord/cli/flagparser.h"
-#include "fnord/json/json.h"
-#include "fnord/json/jsonrpc.h"
-#include "fnord/http/httprouter.h"
-#include "fnord/http/httpserver.h"
+#include "stx/application.h"
+#include "stx/io/filerepository.h"
+#include "stx/io/fileutil.h"
+#include "stx/thread/eventloop.h"
+#include "stx/thread/threadpool.h"
+#include "stx/random.h"
+#include "stx/rpc/RPC.h"
+#include "stx/cli/flagparser.h"
+#include "stx/json/json.h"
+#include "stx/json/jsonrpc.h"
+#include "stx/http/httprouter.h"
+#include "stx/http/httpserver.h"
 #include "brokerd/FeedService.h"
 #include "brokerd/RemoteFeedFactory.h"
-#include "fnord/http/statshttpservlet.h"
-#include "fnord/stats/statsdagent.h"
+#include "stx/http/statshttpservlet.h"
+#include "stx/stats/statsdagent.h"
 #include "common.h"
 #include "CustomerNamespace.h"
 
-using namespace fnord;
+using namespace stx;
 
 int main(int argc, const char** argv) {
-  fnord::Application::init();
-  fnord::Application::logToStderr();
+  stx::Application::init();
+  stx::Application::logToStderr();
 
-  fnord::cli::FlagParser flags;
+  stx::cli::FlagParser flags;
 
   flags.defineFlag(
       "http_port",
-      fnord::cli::FlagParser::T_INTEGER,
+      stx::cli::FlagParser::T_INTEGER,
       false,
       NULL,
       "8000",
@@ -46,7 +46,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "loglevel",
-      fnord::cli::FlagParser::T_STRING,
+      stx::cli::FlagParser::T_STRING,
       false,
       NULL,
       "INFO",
@@ -55,7 +55,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "datadir",
-      fnord::cli::FlagParser::T_STRING,
+      stx::cli::FlagParser::T_STRING,
       true,
       NULL,
       NULL,
@@ -64,7 +64,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "statsd_addr",
-      fnord::cli::FlagParser::T_STRING,
+      stx::cli::FlagParser::T_STRING,
       false,
       NULL,
       "127.0.0.1:8192",
@@ -76,28 +76,28 @@ int main(int argc, const char** argv) {
   Logger::get()->setMinimumLogLevel(
       strToLogLevel(flags.getString("loglevel")));
 
-  fnord::thread::EventLoop event_loop;
-  fnord::thread::ThreadPool tp(
+  stx::thread::EventLoop event_loop;
+  stx::thread::ThreadPool tp(
       std::unique_ptr<ExceptionHandler>(
           new CatchAndLogExceptionHandler("cm.feedserver")));
 
-  fnord::json::JSONRPC rpc;
-  fnord::json::JSONRPCHTTPAdapter http(&rpc);
+  stx::json::JSONRPC rpc;
+  stx::json::JSONRPCHTTPAdapter http(&rpc);
 
   /* set up logstream service */
   auto feeds_dir_path = flags.getString("datadir");
-  fnord::FileUtil::mkdir_p(feeds_dir_path);
+  stx::FileUtil::mkdir_p(feeds_dir_path);
 
-  fnord::feeds::FeedService logstream_service{
-      fnord::FileRepository(feeds_dir_path),
+  stx::feeds::FeedService logstream_service{
+      stx::FileRepository(feeds_dir_path),
       "/cm-feedserver/global/feeds"};
 
   rpc.registerService(&logstream_service);
 
   /* set up rpc http server */
-  fnord::http::HTTPRouter http_router;
+  stx::http::HTTPRouter http_router;
   http_router.addRouteByPrefixMatch("/rpc", &http, &tp);
-  fnord::http::HTTPServer http_server(&http_router, &event_loop);
+  stx::http::HTTPServer http_server(&http_router, &event_loop);
   http_server.listen(flags.getInt("http_port"));
 
   http_server.stats()->exportStats(
@@ -105,12 +105,12 @@ int main(int argc, const char** argv) {
   http_server.stats()->exportStats(
       StringUtil::format("/cm-feedserver/$0/http/inbound", cm::cmHostname()));
 
-  fnord::stats::StatsHTTPServlet stats_servlet;
+  stx::stats::StatsHTTPServlet stats_servlet;
   http_router.addRouteByPrefixMatch("/stats", &stats_servlet);
 
-  fnord::stats::StatsdAgent statsd_agent(
-      fnord::InetAddr::resolve(flags.getString("statsd_addr")),
-      10 * fnord::kMicrosPerSecond);
+  stx::stats::StatsdAgent statsd_agent(
+      stx::InetAddr::resolve(flags.getString("statsd_addr")),
+      10 * stx::kMicrosPerSecond);
 
   statsd_agent.start();
 

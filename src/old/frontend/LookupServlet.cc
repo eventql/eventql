@@ -9,22 +9,22 @@
 #include "frontend/LookupServlet.h"
 #include "sellerstats/SellerStatsLookup.h"
 
-using namespace fnord;
+using namespace stx;
 
 namespace cm {
 
 LookupServlet::LookupServlet(const String& cmdata) : cmdata_(cmdata) {}
 
 void LookupServlet::handleHTTPRequest(
-    fnord::http::HTTPRequest* req,
-    fnord::http::HTTPResponse* res) {
+    stx::http::HTTPRequest* req,
+    stx::http::HTTPResponse* res) {
   URI uri(req->uri());
   URI::ParamList params = uri.queryParams();
 
   res->addHeader("Access-Control-Allow-Origin", "*");
 
   std::string lookup_type;
-  if (!fnord::URI::getParam(params, "lookup", &lookup_type)) {
+  if (!stx::URI::getParam(params, "lookup", &lookup_type)) {
     res->setStatus(http::kStatusBadRequest);
     res->addBody("missing parameter ?lookup=...");
     return;
@@ -47,14 +47,14 @@ void LookupServlet::lookupSellerStats(
   URI::ParamList params = uri.queryParams();
 
   std::string shopid;
-  if (!fnord::URI::getParam(params, "shopid", &shopid)) {
+  if (!stx::URI::getParam(params, "shopid", &shopid)) {
     res->setStatus(http::kStatusBadRequest);
     res->addBody("missing parameter ?shopid=...");
     return;
   }
 
   std::string customer;
-  if (!fnord::URI::getParam(params, "customer", &customer)) {
+  if (!stx::URI::getParam(params, "customer", &customer)) {
     res->setStatus(http::kStatusBadRequest);
     res->addBody("missing parameter ?customer=...");
     return;

@@ -11,17 +11,17 @@
 #include <unistd.h>
 #include <signal.h>
 #include <thread>
-#include "fnord/io/fileutil.h"
-#include "fnord/application.h"
-#include "fnord/logging.h"
-#include "fnord/cli/flagparser.h"
-#include "fnord/util/SimpleRateLimit.h"
-#include "fnord/InternMap.h"
-#include "fnord/thread/eventloop.h"
-#include "fnord/http/httpconnectionpool.h"
-#include "fnord/json/json.h"
-#include "fnord/mdb/MDB.h"
-#include "fnord/mdb/MDBUtil.h"
+#include "stx/io/fileutil.h"
+#include "stx/application.h"
+#include "stx/logging.h"
+#include "stx/cli/flagparser.h"
+#include "stx/util/SimpleRateLimit.h"
+#include "stx/InternMap.h"
+#include "stx/thread/eventloop.h"
+#include "stx/http/httpconnectionpool.h"
+#include "stx/json/json.h"
+#include "stx/mdb/MDB.h"
+#include "stx/mdb/MDBUtil.h"
 #include "sstable/sstablereader.h"
 #include "sstable/sstablewriter.h"
 #include "sstable/SSTableColumnSchema.h"
@@ -39,12 +39,12 @@
 #include "cstable/CSTableReader.h"
 #include "cstable/CSTableBuilder.h"
 #include "cstable/RecordMaterializer.h"
-#include "fnord/protobuf/MessageSchema.h"
-#include "fnord/protobuf/MessageBuilder.h"
-#include "fnord/protobuf/MessageObject.h"
-#include "fnord/protobuf/MessageEncoder.h"
-#include "fnord/protobuf/MessageDecoder.h"
-#include "fnord/protobuf/MessagePrinter.h"
+#include "stx/protobuf/MessageSchema.h"
+#include "stx/protobuf/MessageBuilder.h"
+#include "stx/protobuf/MessageObject.h"
+#include "stx/protobuf/MessageEncoder.h"
+#include "stx/protobuf/MessageDecoder.h"
+#include "stx/protobuf/MessagePrinter.h"
 #include <fnord-fts/fts.h>
 #include <fnord-fts/fts_common.h>
 #include "common.h"
@@ -55,19 +55,19 @@
 #include "analytics/CTRByPositionQuery.h"
 
 using namespace cm;
-using namespace fnord;
+using namespace stx;
 
-fnord::thread::EventLoop ev;
+stx::thread::EventLoop ev;
 
 int main(int argc, const char** argv) {
-  fnord::Application::init();
-  fnord::Application::logToStderr();
+  stx::Application::init();
+  stx::Application::logToStderr();
 
-  fnord::cli::FlagParser flags;
+  stx::cli::FlagParser flags;
 
   flags.defineFlag(
       "file",
-      fnord::cli::FlagParser::T_STRING,
+      stx::cli::FlagParser::T_STRING,
       true,
       "f",
       NULL,
@@ -76,7 +76,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "upload_to",
-      fnord::cli::FlagParser::T_STRING,
+      stx::cli::FlagParser::T_STRING,
       true,
       NULL,
       NULL,
@@ -86,7 +86,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "loglevel",
-      fnord::cli::FlagParser::T_STRING,
+      stx::cli::FlagParser::T_STRING,
       false,
       NULL,
       "INFO",
@@ -131,7 +131,7 @@ int main(int argc, const char** argv) {
       try {
         time = obj.getUInt64(schema.id("first_seen_time")) * kMicrosPerSecond;
       } catch (...) {
-        fnord::iputs("skipping row b/c it has no first_seen_time: $0", msgid);
+        stx::iputs("skipping row b/c it has no first_seen_time: $0", msgid);
         continue;
       }
 
@@ -145,7 +145,7 @@ int main(int argc, const char** argv) {
       }
     }
 
-    fnord::iputs("upload batch: $0 -- $1/$2", batch.size(), i, n);
+    stx::iputs("upload batch: $0 -- $1/$2", batch.size(), i, n);
     URI uri(upload_to + "/tsdb/insert_batch?stream=joined_sessions.dawanda");
 
     http::HTTPRequest req(http::HTTPMessage::M_POST, uri.pathAndQuery());

@@ -6,9 +6,9 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-#include <fnord/assets.h>
-#include <fnord/stringutil.h>
-#include <fnord/io/fileutil.h>
+#include <stx/assets.h>
+#include <stx/stringutil.h>
+#include <stx/io/fileutil.h>
 #include "CustomerNamespace.h"
 
 namespace cm {
@@ -34,7 +34,7 @@ const std::string& CustomerNamespace::trackingJS() {
 }
 
 void CustomerNamespace::loadTrackingJS(const std::string& filename) {
-  tracking_js_ = fnord::Assets::getAsset(filename);
+  tracking_js_ = stx::Assets::getAsset(filename);
 }
 
 } // namespace cm

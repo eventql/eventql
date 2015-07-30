@@ -6,23 +6,23 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-#include <fnord/exception.h>
-#include <fnord/inspect.h>
-#include "fnord/logging.h"
-#include <fnord/wallclock.h>
-#include <fnord/http/cookies.h>
-#include "fnord/http/httprequest.h"
-#include "fnord/http/httpresponse.h"
-#include "fnord/http/status.h"
-#include "fnord/random.h"
-#include "fnord/json/json.h"
-#include "fnord/json/jsonrpcrequest.h"
-#include "fnord/json/jsonrpcresponse.h"
+#include <stx/exception.h>
+#include <stx/inspect.h>
+#include "stx/logging.h"
+#include <stx/wallclock.h>
+#include <stx/http/cookies.h>
+#include "stx/http/httprequest.h"
+#include "stx/http/httpresponse.h"
+#include "stx/http/status.h"
+#include "stx/random.h"
+#include "stx/json/json.h"
+#include "stx/json/jsonrpcrequest.h"
+#include "stx/json/jsonrpcresponse.h"
 #include "CustomerNamespace.h"
 #include "IndexChangeRequest.h"
 #include "frontend/CMFrontend.h"
 
-using namespace fnord;
+using namespace stx;
 
 namespace cm {
 
@@ -47,58 +47,58 @@ void CMFrontend::exportStats(const std::string& prefix) {
   exportStat(
       StringUtil::format("$0/$1", prefix, "rpc_requests_total"),
       &stat_rpc_requests_total_,
-      fnord::stats::ExportMode::EXPORT_DELTA);
+      stx::stats::ExportMode::EXPORT_DELTA);
 
   exportStat(
       StringUtil::format("$0/$1", prefix, "rpc_errors_total"),
       &stat_rpc_errors_total_,
-      fnord::stats::ExportMode::EXPORT_DELTA);
+      stx::stats::ExportMode::EXPORT_DELTA);
 
   exportStat(
       StringUtil::format("$0/$1", prefix, "loglines_total"),
       &stat_loglines_total_,
-      fnord::stats::ExportMode::EXPORT_DELTA);
+      stx::stats::ExportMode::EXPORT_DELTA);
 
   exportStat(
       StringUtil::format("$0/$1", prefix, "loglines_versiontooold"),
       &stat_loglines_versiontooold_,
-      fnord::stats::ExportMode::EXPORT_DELTA);
+      stx::stats::ExportMode::EXPORT_DELTA);
 
   exportStat(
       StringUtil::format("$0/$1", prefix, "loglines_invalid"),
       &stat_loglines_invalid_,
-      fnord::stats::ExportMode::EXPORT_DELTA);
+      stx::stats::ExportMode::EXPORT_DELTA);
 
   exportStat(
       StringUtil::format("$0/$1", prefix, "loglines_written_success"),
       &stat_loglines_written_success_,
-      fnord::stats::ExportMode::EXPORT_DELTA);
+      stx::stats::ExportMode::EXPORT_DELTA);
 
   exportStat(
       StringUtil::format("$0/$1", prefix, "loglines_written_failure"),
       &stat_loglines_written_failure_,
-      fnord::stats::ExportMode::EXPORT_DELTA);
+      stx::stats::ExportMode::EXPORT_DELTA);
 
   exportStat(
       StringUtil::format("$0/$1", prefix, "index_requests_total"),
       &stat_index_requests_total_,
-      fnord::stats::ExportMode::EXPORT_DELTA);
+      stx::stats::ExportMode::EXPORT_DELTA);
 
   exportStat(
       StringUtil::format("$0/$1", prefix, "index_requests_written_success"),
       &stat_index_requests_written_success_,
-      fnord::stats::ExportMode::EXPORT_DELTA);
+      stx::stats::ExportMode::EXPORT_DELTA);
 
   exportStat(
       StringUtil::format("$0/$1", prefix, "index_requests_written_failure"),
       &stat_index_requests_written_failure_,
-      fnord::stats::ExportMode::EXPORT_DELTA);
+      stx::stats::ExportMode::EXPORT_DELTA);
 }
 
 void CMFrontend::handleHTTPRequest(
-    fnord::http::HTTPRequest* request,
-    fnord::http::HTTPResponse* response) {
-  fnord::URI uri(request->uri());
+    stx::http::HTTPRequest* request,
+    stx::http::HTTPResponse* response) {
+  stx::URI uri(request->uri());
 
   /* find namespace */
   CustomerNamespace* ns = nullptr;
@@ -106,7 +106,7 @@ void CMFrontend::handleHTTPRequest(
 
   auto ns_iter = vhosts_.find(hostname);
   if (ns_iter == vhosts_.end()) {
-    response->setStatus(fnord::http::kStatusNotFound);
+    response->setStatus(stx::http::kStatusNotFound);
     response->addBody("not found");
     return;
   } else {
@@ -114,7 +114,7 @@ void CMFrontend::handleHTTPRequest(
   }
 
   if (uri.path() == "/t.js") {
-    response->setStatus(fnord::http::kStatusOK);
+    response->setStatus(stx::http::kStatusOK);
     response->addHeader("Content-Type", "application/javascript");
     response->addHeader("Cache-Control", "no-cache, no-store, must-revalidate");
     response->addHeader("Pragma", "no-cache");
@@ -127,14 +127,14 @@ void CMFrontend::handleHTTPRequest(
     try {
       recordLogLine(ns, uri.query());
     } catch (const std::exception& e) {
-      auto msg = fnord::StringUtil::format(
+      auto msg = stx::StringUtil::format(
           "invalid tracking pixel url: $0",
           uri.query());
 
-      fnord::logDebug("cm.frontend", e, msg);
+      stx::logDebug("cm.frontend", e, msg);
     }
 
-    response->setStatus(fnord::http::kStatusOK);
+    response->setStatus(stx::http::kStatusOK);
     response->addHeader("Content-Type", "image/gif");
     response->addHeader("Cache-Control", "no-cache, no-store, must-revalidate");
     response->addHeader("Pragma", "no-cache");
@@ -159,7 +159,7 @@ void CMFrontend::handleHTTPRequest(
       json::JSONRPCRequest req(json::parseJSON(request->body()));
       res.setID(req.id());
       dispatchRPC(&req, &res);
-    } catch (const fnord::Exception& e) {
+    } catch (const stx::Exception& e) {
       stat_rpc_errors_total_.incr(1);
       res.error(
           json::JSONRPCResponse::kJSONRPCPInternalError,
@@ -169,7 +169,7 @@ void CMFrontend::handleHTTPRequest(
     return;
   }
 
-  response->setStatus(fnord::http::kStatusNotFound);
+  response->setStatus(stx::http::kStatusNotFound);
   response->addBody("not found");
 }
 
@@ -212,13 +212,13 @@ void CMFrontend::addCustomer(
 void CMFrontend::recordLogLine(
     CustomerNamespace* customer,
     const std::string& logline) {
-  fnord::URI::ParamList params;
-  fnord::URI::parseQueryString(logline, &params);
+  stx::URI::ParamList params;
+  stx::URI::parseQueryString(logline, &params);
 
   stat_loglines_total_.incr(1);
 
   std::string pixel_ver;
-  if (!fnord::URI::getParam(params, "v", &pixel_ver)) {
+  if (!stx::URI::getParam(params, "v", &pixel_ver)) {
     stat_loglines_invalid_.incr(1);
     RAISE(kRuntimeError, "missing v parameter");
   }
@@ -234,10 +234,10 @@ void CMFrontend::recordLogLine(
     RAISEF(kRuntimeError, "invalid pixel version: $0", pixel_ver);
   }
 
-  auto feedline = fnord::StringUtil::format(
+  auto feedline = stx::StringUtil::format(
       "$0|$1|$2",
       customer->key(),
-      fnord::WallClock::unixSeconds(),
+      stx::WallClock::unixSeconds(),
       logline);
 
   tracker_log_feed_->appendEntry(feedline);

@@ -9,20 +9,20 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <signal.h>
-#include "fnord/io/filerepository.h"
-#include "fnord/io/fileutil.h"
-#include "fnord/application.h"
-#include "fnord/logging.h"
-#include "fnord/random.h"
-#include "fnord/thread/eventloop.h"
-#include "fnord/thread/threadpool.h"
-#include "fnord/thread/queue.h"
-#include "fnord/wallclock.h"
-#include "fnord/cli/flagparser.h"
+#include "stx/io/filerepository.h"
+#include "stx/io/fileutil.h"
+#include "stx/application.h"
+#include "stx/logging.h"
+#include "stx/random.h"
+#include "stx/thread/eventloop.h"
+#include "stx/thread/threadpool.h"
+#include "stx/thread/queue.h"
+#include "stx/wallclock.h"
+#include "stx/cli/flagparser.h"
 #include "fnord-logtable/TableRepository.h"
 #include "fnord-logtable/LogTableTail.h"
-#include "fnord/protobuf/MessageEncoder.h"
-#include "fnord/protobuf/MessagePrinter.h"
+#include "stx/protobuf/MessageEncoder.h"
+#include "stx/protobuf/MessagePrinter.h"
 #include "logjoin/LogJoinBackfill.h"
 #include "IndexReader.h"
 
@@ -30,9 +30,9 @@
 #include "schemas.h"
 
 using namespace cm;
-using namespace fnord;
+using namespace stx;
 
-fnord::thread::EventLoop ev;
+stx::thread::EventLoop ev;
 std::atomic<bool> cm_logjoin_shutdown;
 
 void quit(int n) {
@@ -47,8 +47,8 @@ struct BackfillData {
 };
 
 int main(int argc, const char** argv) {
-  fnord::Application::init();
-  fnord::Application::logToStderr();
+  stx::Application::init();
+  stx::Application::logToStderr();
 
   cm_logjoin_shutdown = false;
   struct sigaction sa;
@@ -58,7 +58,7 @@ int main(int argc, const char** argv) {
   sigaction(SIGQUIT, &sa, NULL);
   sigaction(SIGINT, &sa, NULL);
 
-  fnord::cli::FlagParser flags;
+  stx::cli::FlagParser flags;
 
   flags.defineFlag(
       "datadir",
@@ -71,7 +71,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "feedserver_addr",
-      fnord::cli::FlagParser::T_STRING,
+      stx::cli::FlagParser::T_STRING,
       false,
       NULL,
       "http://localhost:8000",
@@ -80,7 +80,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "batch_size",
-      fnord::cli::FlagParser::T_INTEGER,
+      stx::cli::FlagParser::T_INTEGER,
       false,
       NULL,
       "2048",
@@ -89,7 +89,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "worker_threads",
-      fnord::cli::FlagParser::T_INTEGER,
+      stx::cli::FlagParser::T_INTEGER,
       false,
       NULL,
       "4",
@@ -98,7 +98,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "upload_threads",
-      fnord::cli::FlagParser::T_INTEGER,
+      stx::cli::FlagParser::T_INTEGER,
       false,
       NULL,
       "1",
@@ -107,7 +107,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "no_dryrun",
-      fnord::cli::FlagParser::T_SWITCH,
+      stx::cli::FlagParser::T_SWITCH,
       false,
       NULL,
       NULL,
@@ -143,7 +143,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "no_dryrun",
-      fnord::cli::FlagParser::T_SWITCH,
+      stx::cli::FlagParser::T_SWITCH,
       false,
       NULL,
       NULL,
@@ -152,7 +152,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "loglevel",
-      fnord::cli::FlagParser::T_STRING,
+      stx::cli::FlagParser::T_STRING,
       false,
       NULL,
       "INFO",

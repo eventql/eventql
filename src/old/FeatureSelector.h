@@ -8,21 +8,21 @@
  */
 #ifndef _CM_FEATURESELECTOR_H
 #define _CM_FEATURESELECTOR_H
-#include "fnord/stdtypes.h"
-#include "fnord/option.h"
+#include "stx/stdtypes.h"
+#include "stx/option.h"
 #include "FeatureID.h"
 #
 #include <fnord-fts/fts.h>
 #include <fnord-fts/fts_common.h>
 
-using namespace fnord;
+using namespace stx;
 
 namespace cm {
 
 class FeatureSelector {
 public:
 
-  FeatureSelector(FeatureIndex* feature_index, fnord::fts::Analyzer* analyzer);
+  FeatureSelector(FeatureIndex* feature_index, stx::fts::Analyzer* analyzer);
 
   void featuresFor(
       const JoinedQuery& query,
@@ -31,7 +31,7 @@ public:
 
 protected:
   FeatureIndex* feature_index_;
-  fnord::fts::Analyzer* analyzer_;
+  stx::fts::Analyzer* analyzer_;
 };
 
 } // namespace cm

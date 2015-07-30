@@ -8,16 +8,16 @@
  */
 #ifndef _CM_INDEXSERVLET_H
 #define _CM_INDEXSERVLET_H
-#include "fnord/autoref.h"
-#include "fnord/http/httpservice.h"
+#include "stx/autoref.h"
+#include "stx/http/httpservice.h"
 #include "fnord-fts/Analyzer.h"
 #include "IndexReader.h"
 
-using namespace fnord;
+using namespace stx;
 
 namespace cm {
 
-class IndexServlet : public fnord::http::HTTPService {
+class IndexServlet : public stx::http::HTTPService {
 public:
 
   IndexServlet(
@@ -25,8 +25,8 @@ public:
       RefPtr<fts::Analyzer> r);
 
   void handleHTTPRequest(
-      fnord::http::HTTPRequest* req,
-      fnord::http::HTTPResponse* res) override;
+      stx::http::HTTPRequest* req,
+      stx::http::HTTPResponse* res) override;
 
 protected:
 

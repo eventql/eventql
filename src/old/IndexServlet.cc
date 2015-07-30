@@ -8,9 +8,9 @@
  */
 #include "IndexServlet.h"
 #include "SearchQuery.h"
-#include "fnord/json/json.h"
+#include "stx/json/json.h"
 
-using namespace fnord;
+using namespace stx;
 
 namespace cm {
 
@@ -21,8 +21,8 @@ IndexServlet::IndexServlet(
     analyzer_(analyzer) {}
 
 void IndexServlet::handleHTTPRequest(
-    fnord::http::HTTPRequest* req,
-    fnord::http::HTTPResponse* res) {
+    stx::http::HTTPRequest* req,
+    stx::http::HTTPResponse* res) {
   URI uri(req->uri());
 
   res->addHeader("Access-Control-Allow-Origin", "*");
@@ -40,7 +40,7 @@ void IndexServlet::handleHTTPRequest(
       return fetchDocs(req, res, &uri);
     }
 
-    res->setStatus(fnord::http::kStatusNotFound);
+    res->setStatus(stx::http::kStatusNotFound);
     res->addBody("not found");
   } catch (const Exception& e) {
     res->setStatus(http::kStatusInternalServerError);
@@ -55,7 +55,7 @@ void IndexServlet::searchQuery(
   const auto& params = uri->queryParams();
 
   String query_str;
-  if (!fnord::URI::getParam(params, "q", &query_str)) {
+  if (!stx::URI::getParam(params, "q", &query_str)) {
     res->addBody("error: missing ?q=... parameter");
     res->setStatus(http::kStatusBadRequest);
     return;
@@ -82,7 +82,7 @@ void IndexServlet::fetchDoc(
   const auto& params = uri->queryParams();
 
   String docid_str;
-  if (!fnord::URI::getParam(params, "id", &docid_str)) {
+  if (!stx::URI::getParam(params, "id", &docid_str)) {
     res->addBody("error: missing ?id=... parameter");
     res->setStatus(http::kStatusBadRequest);
     return;
@@ -107,7 +107,7 @@ void IndexServlet::fetchDocs(
   const auto& params = uri->queryParams();
 
   String docids_str;
-  if (!fnord::URI::getParam(params, "ids", &docids_str)) {
+  if (!stx::URI::getParam(params, "ids", &docids_str)) {
     res->addBody("error: missing ?ids=... parameter");
     res->setStatus(http::kStatusBadRequest);
     return;
@@ -117,7 +117,7 @@ void IndexServlet::fetchDocs(
 
   Set<String> field_list;
   String fieldlist_str;
-  if (fnord::URI::getParam(params, "fields", &fieldlist_str)) {
+  if (stx::URI::getParam(params, "fields", &fieldlist_str)) {
     for (const auto& f : StringUtil::split(fieldlist_str, ",")) {
       field_list.emplace(f);
     }

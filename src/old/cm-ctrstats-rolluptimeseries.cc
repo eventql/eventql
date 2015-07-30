@@ -10,14 +10,14 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <signal.h>
-#include "fnord/io/fileutil.h"
-#include "fnord/application.h"
-#include "fnord/logging.h"
-#include "fnord/cli/flagparser.h"
-#include "fnord/util/SimpleRateLimit.h"
-#include "fnord/mdb/MDB.h"
-#include "fnord/mdb/MDBUtil.h"
-#include "fnord/json/json.h"
+#include "stx/io/fileutil.h"
+#include "stx/application.h"
+#include "stx/logging.h"
+#include "stx/cli/flagparser.h"
+#include "stx/util/SimpleRateLimit.h"
+#include "stx/mdb/MDB.h"
+#include "stx/mdb/MDBUtil.h"
+#include "stx/json/json.h"
 #include "sstable/sstablereader.h"
 #include "sstable/sstablewriter.h"
 #include "sstable/SSTableColumnSchema.h"
@@ -29,7 +29,7 @@
 #
 #include "analytics/CTRCounter.h"
 
-using namespace fnord;
+using namespace stx;
 
 typedef Tuple<String, uint64_t, double> OutputRow;
 typedef HashMap<String, HashMap<uint64_t, cm::CTRCounterData>> CounterMap;
@@ -41,7 +41,7 @@ void importInputTables(
     CounterMap* counters) {
   for (int tbl_idx = 0; tbl_idx < sstables.size(); ++tbl_idx) {
     const auto& sstable = sstables[tbl_idx];
-    fnord::logInfo("cm.ctrstats", "Importing sstable: $0", sstable);
+    stx::logInfo("cm.ctrstats", "Importing sstable: $0", sstable);
 
     /* read sstable heade r*/
     sstable::SSTableReader reader(File::openFile(sstable, File::O_READ));
@@ -49,7 +49,7 @@ void importInputTables(
     schema.loadIndex(&reader);
 
     if (reader.bodySize() == 0) {
-      fnord::logCritical("cm.ctrstats", "unfinished sstable: $0", sstable);
+      stx::logCritical("cm.ctrstats", "unfinished sstable: $0", sstable);
       exit(1);
     }
 
@@ -76,7 +76,7 @@ void importInputTables(
 
     /* status line */
     util::SimpleRateLimitedFn status_line(kMicrosPerSecond, [&] () {
-      fnord::logInfo(
+      stx::logInfo(
           "cm.ctrstats",
           "[$1/$2] [$0%] Reading sstable... rows=$3",
           (size_t) ((cursor->position() / (double) body_size) * 100),
@@ -117,7 +117,7 @@ void writeOutputTable(const String& filename, const Vector<OutputRow>& rows) {
   sstable_schema.addColumn("value", 2, sstable::SSTableColumnType::FLOAT);
 
   /* open output sstable */
-  fnord::logInfo("cm.ctrstats", "Writing results to: $0", filename);
+  stx::logInfo("cm.ctrstats", "Writing results to: $0", filename);
   auto sstable_writer = sstable::SSTableWriter::create(
       filename,
       sstable::IndexProvider{},
@@ -248,10 +248,10 @@ void aggregateCounters(
 }
 
 int main(int argc, const char** argv) {
-  fnord::Application::init();
-  fnord::Application::logToStderr();
+  stx::Application::init();
+  stx::Application::logToStderr();
 
-  fnord::cli::FlagParser flags;
+  stx::cli::FlagParser flags;
 
   flags.defineFlag(
       "output_file",
@@ -264,7 +264,7 @@ int main(int argc, const char** argv) {
 
   flags.defineFlag(
       "loglevel",
-      fnord::cli::FlagParser::T_STRING,
+      stx::cli::FlagParser::T_STRING,
       false,
       NULL,
       "INFO",
