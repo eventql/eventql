@@ -45,6 +45,22 @@ add_executable(test-recordset
 
 target_link_libraries(test-recordset ${FNORD_LIBS})
 
+add_executable(test-recordidset
+    $<TARGET_OBJECTS:stx-base>
+    $<TARGET_OBJECTS:stx-protobuf>
+    $<TARGET_OBJECTS:stx-mdb>
+    $<TARGET_OBJECTS:fnord-chart>
+    $<TARGET_OBJECTS:stx-http>
+    $<TARGET_OBJECTS:stx-json>
+    $<TARGET_OBJECTS:tsdb-server>
+    $<TARGET_OBJECTS:libcstable>
+    $<TARGET_OBJECTS:sstable>
+    $<TARGET_OBJECTS:dproc>
+    $<TARGET_OBJECTS:chartsql-lib>
+    RecordIDSet_test.cc)
+
+target_link_libraries(test-recordset ${FNORD_LIBS})
+
 add_executable(test-tsdbnode
     $<TARGET_OBJECTS:stx-base>
     $<TARGET_OBJECTS:stx-protobuf>
