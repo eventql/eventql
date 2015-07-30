@@ -101,6 +101,11 @@ void SSTableWriter::commit() {
   if (!meta_dirty_) {
     return;
   }
+
+  file_.seekTo(0);
+  FileOutputStream os(file_.fd());
+  FileHeaderWriter::writeMetaPage(hdr_, &os);
+  meta_dirty_ = false;
 }
 
 }
