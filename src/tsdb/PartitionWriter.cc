@@ -16,14 +16,12 @@ using namespace stx;
 namespace tsdb {
 
 PartitionWriter::PartitionWriter(
-    Partition* partition,
     RefPtr<PartitionSnapshot>* head) :
-    partition_(partition),
     head_(head),
     idset_(
         FileUtil::joinPaths(
-            partition_->basePath(),
-            partition_->key().toString() + ".idx")) {}
+            head_->get()->base_path,
+            head_->get()->key.toString() + ".idx")) {}
 
 bool PartitionWriter::insertRecord(
     const SHA1Hash& record_id,
@@ -58,7 +56,7 @@ Set<SHA1Hash> PartitionWriter::insertRecords(const Vector<RecordRef>& records) {
   if (old_files.size() == 0) {
     filename = StringUtil::format(
         "$0.$1.sst",
-        partition_->key().toString(),
+        snap->key.toString(),
         Random::singleton()->hex64());
 
     snap->state.add_sstable_files(filename);
@@ -66,7 +64,7 @@ Set<SHA1Hash> PartitionWriter::insertRecords(const Vector<RecordRef>& records) {
     RAISE(kIllegalStateError);
   }
 
-  auto filepath = FileUtil::joinPaths(partition_->basePath(), filename);
+  auto filepath = FileUtil::joinPaths(snap->base_path, filename);
 
   for (const auto& r : records) {
     if (record_ids.count(r.record_id) == 0) {

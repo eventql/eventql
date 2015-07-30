@@ -45,9 +45,6 @@ public:
 
   Partition(RefPtr<PartitionSnapshot> snap);
 
-  const SHA1Hash& key() const;
-  String basePath() const;
-
   RefPtr<PartitionWriter> getWriter();
   RefPtr<PartitionSnapshot> getSnapshot() const;
 

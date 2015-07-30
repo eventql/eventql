@@ -86,15 +86,7 @@ RefPtr<Partition> Partition::reopen(
 Partition::Partition(
     RefPtr<PartitionSnapshot> head) :
     head_(head),
-    writer_(new PartitionWriter(this, &head_)) {}
-
-const SHA1Hash& Partition::key() const {
-  return head_->key;
-}
-
-String Partition::basePath() const {
-  return head_->base_path;
-}
+    writer_(new PartitionWriter(&head_)) {}
 
 //void Partition::scheduleCompaction() {
 //  auto now = WallClock::unixMicros();

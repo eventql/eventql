@@ -21,9 +21,7 @@ class Partition;
 
 struct PartitionWriter : public RefCounted {
 
-  PartitionWriter(
-      Partition* partition,
-      RefPtr<PartitionSnapshot>* head);
+  PartitionWriter(RefPtr<PartitionSnapshot>* head);
 
   bool insertRecord(
       const SHA1Hash& record_id,
@@ -33,7 +31,6 @@ struct PartitionWriter : public RefCounted {
       const Vector<RecordRef>& records);
 
 protected:
-  Partition* partition_;
   RefPtr<PartitionSnapshot>* head_;
   RecordIDSet idset_;
   std::mutex mutex_;
