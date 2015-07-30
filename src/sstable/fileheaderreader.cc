@@ -15,6 +15,7 @@
 namespace stx {
 namespace sstable {
 
+
 FileHeaderReader::FileHeaderReader(
     void* buf,
     size_t buf_size) :

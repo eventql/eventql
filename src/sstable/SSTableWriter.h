@@ -70,19 +70,20 @@ public:
    */
   void commit();
 
-  void writeIndex(uint32_t index_type, void* data, size_t size);
-  void writeIndex(uint32_t index_type, const Buffer& buf);
+  void writeFooter(uint32_t index_type, void* data, size_t size);
+  void writeFooter(uint32_t index_type, const Buffer& buf);
 
 protected:
 
-  SSTableWriter(File&& file);
-
-  void writeHeader(void const* data, size_t size);
+  SSTableWriter(
+      File&& file,
+      size_t pos,
+      bool finalized);
 
 private:
   File file_;
-  size_t file_size_;
-  bool body_finished_;
+  size_t pos_;
+  bool meta_dirty_;
 };
 
 

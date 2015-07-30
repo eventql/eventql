@@ -10,6 +10,7 @@
 #ifndef _FNORDMETRIC_METRICDB_FILEHEADERREADER_H
 #define _FNORDMETRIC_METRICDB_FILEHEADERREADER_H
 #include <stx/util/binarymessagereader.h>
+#include <stx/io/inputstream.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <string>
@@ -17,8 +18,42 @@
 namespace stx {
 namespace sstable {
 
+class FileHeader {
+  friend class FieleHeaderReader;
+public:
+
+  /**
+   * Returns the size of the header, including userdata in bytes
+   */
+  size_t headerSize() const;
+
+  /**
+   * Returns true iff the table is finalized (immutable)
+   */
+  bool isFinalized() const;
+
+  /**
+   * Returns the body size in bytes
+   */
+  size_t bodySize() const;
+
+  /**
+   * Returns the header userdata size in bytes
+   */
+  size_t userdataSize() const;
+
+protected:
+  uint64_t flags_;
+  uint64_t body_size_;
+  uint32_t userdata_checksum_;
+  uint32_t userdata_size_;
+  size_t userdata_offset_;
+};
+
 class FileHeaderReader : public stx::util::BinaryMessageReader {
 public:
+
+  static FileHeader readHeader(InputStream* is);
 
   FileHeaderReader(
       void* buf,
