@@ -23,9 +23,7 @@ namespace tsdb {
 class RecordIDSet {
 public:
 
-  RecordIDSet(
-      const String& datadir,
-      const String& filename);
+  RecordIDSet(const String& fpath);
 
   void addRecordID(const SHA1Hash& record_id);
   bool hasRecordID(const SHA1Hash& record_id);
@@ -33,8 +31,11 @@ public:
   Set<SHA1Hash> fetchRecordIDs();
 
 protected:
-  String datadir_;
-  String filename_prefix_;
+
+  void reopenFile();
+
+  String fpath_;
+  size_t nslots_;
   mutable std::mutex mutex_;
 };
 

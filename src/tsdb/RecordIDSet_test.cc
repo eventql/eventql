@@ -19,7 +19,8 @@ using namespace tsdb;
 UNIT_TEST(RecordIDSetTest);
 
 TEST_CASE(RecordIDSetTest, TestAddRowToEmptySet, [] () {
-  RecordIDSet recset("/tmp", "_fnord_testrecset");
+  FileUtil::rm("/tmp/_fnord_testrecidset.idx");
+  RecordIDSet recset("/tmp/_fnord_testrecidset.idx");
 
   EXPECT_FALSE(recset.hasRecordID(SHA1::compute("0x42424242")));
   EXPECT_FALSE(recset.hasRecordID(SHA1::compute("0x23232323")));

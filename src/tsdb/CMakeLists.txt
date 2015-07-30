@@ -23,6 +23,7 @@ add_library(tsdb-server OBJECT
     TSDBTableProvider.cc
     TSDBTableRef.cc
     RecordSet.cc
+    RecordIDSet.cc
     Partition.cc
     Table.cc
     CompactionWorker.cc
