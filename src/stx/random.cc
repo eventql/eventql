@@ -26,8 +26,8 @@ uint64_t Random::random64() {
 }
 
 SHA1Hash Random::sha1() {
-  auto rval = Random::random64();
-  return SHA1::compute(&rval, sizeof(rval));
+  auto rval = Random::hex256();
+  return SHA1::compute(rval.data(), rval.size());
 }
 
 std::string Random::hex64() {
