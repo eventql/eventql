@@ -111,6 +111,10 @@ add_executable(test-secure-cookie
     $<TARGET_OBJECTS:stx-base>
     web/SecureCookie_test.cc)
 
+add_executable(test-sha1
+    $<TARGET_OBJECTS:stx-base>
+    SHA1_test.cc)
+
 add_executable(test-protobuf
     $<TARGET_OBJECTS:stx-base>
     $<TARGET_OBJECTS:stx-protobuf>
