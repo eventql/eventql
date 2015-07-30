@@ -124,11 +124,29 @@ std::unique_ptr<FileOutputStream> FileOutputStream::openFile(
   return std::unique_ptr<FileOutputStream>(new FileOutputStream(fd, true));
 }
 
+std::unique_ptr<FileOutputStream> FileOutputStream::fromFileDescriptor(
+    int fd,
+    bool close_on_destroy /* = false */) {
+  std::unique_ptr<FileOutputStream> stream(
+      new FileOutputStream(fd, close_on_destroy));
+
+  return stream;
+}
+
+std::unique_ptr<FileOutputStream> FileOutputStream::fromFile(File&& file) {
+  std::unique_ptr<FileOutputStream> stream(new FileOutputStream(std::move(file)));
+  return stream;
+}
+
 FileOutputStream::FileOutputStream(
     int fd,
     bool close_on_destroy /* = false */) :
     fd_(fd),
     close_on_destroy_(close_on_destroy) {}
+
+FileOutputStream::FileOutputStream(
+    File&& file) :
+    FileOutputStream(file.releaseFD(), true) {}
 
 FileOutputStream::~FileOutputStream() {
   if (fd_ >= 0 && close_on_destroy_) {

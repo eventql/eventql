@@ -13,6 +13,7 @@
 #include <memory>
 #include <mutex>
 #include "stx/buffer.h"
+#include "stx/io/file.h"
 
 namespace stx {
 
@@ -110,6 +111,25 @@ public:
       int permissions = 0666);
 
   /**
+   * Create a new FileOutputStream instance from the provided filedescriptor. If
+   * close on_destroy is true, the fd will be close()ed when the input stream
+   * is destroyed.
+   *
+   * @param fd a valid fd
+   * @param close_on_destroy close the fd on destroy?
+   */
+  static std::unique_ptr<FileOutputStream> fromFileDescriptor(
+      int fd,
+      bool close_on_destroy = false);
+
+  /**
+   * Create a new FileOutputStream instance from the provided File.
+   *
+   * @param file the opened file
+   */
+  static std::unique_ptr<FileOutputStream> fromFile(File&& file);
+
+  /**
    * Create a new FileOuputStream instance from the provided filedescriptor. If 
    * close on_destroy is true, the fd will be close()ed when the output stream
    * is destroyed.
@@ -118,6 +138,13 @@ public:
    * @param close_on_destroy close the fd on destroy?
    */
   explicit FileOutputStream(int fd, bool close_on_destroy = false);
+
+  /**
+   * Create a new FileOutputStream instance from the provided File.
+   *
+   * @param file the opened file
+   */
+  explicit FileOutputStream(File&& file);
 
   /**
    * Close the fd if close_on_destroy is true
