@@ -14,19 +14,6 @@
 namespace stx {
 namespace sstable {
 
-FileHeader FileHeader::createMetaPage(
-    const void* userdata,
-    size_t userdata_size) {
-
-  FNV<uint32_t> fnv;
-  FileHeader hdr;
-
-  hdr.version_ = BinaryFormat::kVersion;
-  hdr.userdata_size_ = userdata_size;
-  hdr.userdata_checksum_ = fnv.hash(userdata, userdata_size);
-  return hdr;
-}
-
 FileHeader FileHeader::readMetaPage(InputStream* is) {
   FileHeader hdr;
 
@@ -65,6 +52,18 @@ FileHeader FileHeader::readMetaPage(InputStream* is) {
   }
 
   return hdr;
+}
+
+FileHeader::FileHeader(
+    const void* userdata,
+    size_t userdata_size) :
+    FileHeader() {
+  FNV<uint32_t> fnv;
+  FileHeader hdr;
+
+  version_ = BinaryFormat::kVersion;
+  userdata_size_ = userdata_size;
+  userdata_checksum_ = fnv.hash(userdata, userdata_size);
 }
 
 FileHeader::FileHeader() :

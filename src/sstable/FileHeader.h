@@ -26,6 +26,18 @@ public:
 
   static FileHeader readMetaPage(InputStream* is);
 
+  static void writeMetaPage(
+      const FileHeader& header,
+      OutputStream* os);
+
+  static void writeHeader(
+      const FileHeader& header,
+      const void* userdata,
+      size_t userdata_size,
+      OutputStream* os);
+
+  FileHeader(const void* userdata, size_t userdata_size);
+
   /**
    * Returns the size of the header, including userdata in bytes
    */

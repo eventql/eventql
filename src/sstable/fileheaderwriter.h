@@ -24,23 +24,6 @@ class FileHeaderWriter : public stx::util::BinaryMessageWriter {
 public:
   static size_t calculateSize(size_t userdata_size);
 
-  static Buffer buildMetaPage(
-      const FileHeader& header);
-
-  static void writeMetaPage(
-      const FileHeader& header,
-      OutputStream* os);
-
-  static void writeHeader(
-      const void* userdata,
-      size_t userdata_size,
-      OutputStream* os);
-
-  static void writeHeader(
-      const FileHeader& header,
-      const void* userdata,
-      size_t userdata_size,
-      OutputStream* os);
 
   /**
    * Write a new file header
