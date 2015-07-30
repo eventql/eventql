@@ -63,6 +63,11 @@ public:
       size_t userdata_size);
 
   /**
+   * Returns the file version
+   */
+  uint16_t version() const;
+
+  /**
    * Returns the size of the header, including userdata in bytes
    */
   size_t headerSize() const;
@@ -97,7 +102,10 @@ public:
    */
   uint32_t userdataChecksum() const;
 
-  uint16_t version() const;
+  /**
+   * Returns the raw flags
+   */
+  uint64_t flags() const;
 
 protected:
   FileHeader();
@@ -107,7 +115,6 @@ protected:
   uint64_t body_size_;
   uint32_t userdata_checksum_;
   uint32_t userdata_size_;
-  uint32_t userdata_offset_;
 };
 
 }
