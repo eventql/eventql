@@ -80,6 +80,20 @@ public:
       const std::string& suffix);
 
   /**
+   * Lexicographically compare the strings s1 and s2. Return an integer greater
+   * than, equal to, or less than 0, according as the string s1 is greater than,
+   * equal to, or less than the string s2.
+   *
+   * The comparison is done using unsigned characters, so that `\200' is greater
+   * than `\0'.
+   */
+  static int compare(
+      const char* s1,
+      size_t s1_len,
+      const char* s2,
+      size_t s2_len);
+
+  /**
    * Check if the provided string contains only 0-9a-fA-f
    *
    * @param str the string to check
