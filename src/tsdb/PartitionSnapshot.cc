@@ -7,24 +7,26 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#pragma once
-#include <stx/stdtypes.h>
-#include <tsdb/PartitionSnapshot>
+#include <stx/io/file.h>
+#include <stx/io/fileutil.h>
+#include <stx/protobuf/msg.h>
+#include <tsdb/PartitionSnapshot.h>
+#include <tsdb/Table.h>
 
 using namespace stx;
 
 namespace tsdb {
 
 PartitionSnapshot::PartitionSnapshot(
-    const PartitionState& state,
+    const PartitionState& _state,
     const String& _base_path,
     RefPtr<Table> _table,
     size_t _nrecs) :
-    key_(
+    key(
         state.partition_key().data(),
         state.partition_key().size()),
     state(_state),
-    base_path(_base_path)
+    base_path(_base_path),
     table(_table),
     nrecs(_nrecs) {}
 
@@ -46,9 +48,11 @@ void PartitionSnapshot::writeToDisk() {
         fpath + "~",
         File::O_WRITE | File::O_CREATEOROPEN | File::O_TRUNCATE);
 
-    auto buf = msg::encode(snap->state);
+    auto buf = msg::encode(state);
     f.write(buf->data(), buf->size());
   }
 
   FileUtil::mv(fpath + "~", fpath);
+}
+
 }
