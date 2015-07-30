@@ -7,12 +7,12 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
+#include <stx/stdtypes.h>
 #include <stx/io/file.h>
-#include <util/unittest.h>
+#include <stx/test/unittest.h>
 #include <sstable/SSTableEditor.h>
+#include <sstable/SSTableWriter.h>
+#include <sstable/sstablereader.h>
 #include <sstable/rowoffsetindex.h>
 
 using namespace stx::sstable;
@@ -102,6 +102,41 @@ TEST_CASE(SSTableTest, TestSSTableEditorWithIndexes, [] () {
   EXPECT_EQ(cursor->next(), false);
 
   tbl->finalize();
+});
+
+
+TEST_CASE(SSTableTest, TestSSTableWriteThenRead, [] () {
+  FileUtil::rm("/tmp/__fnord__sstabletest1.sstable");
+
+  {
+    std::string header = "myfnordyheader!";
+    auto tbl = SSTableWriter::create(
+        "/tmp/__fnord__sstabletest1.sstable",
+        header.data(),
+        header.size());
+
+    tbl->appendRow("key1", "value1");
+    tbl->appendRow("key2", "value2");
+    tbl->appendRow("key3", "value3");
+    tbl->commit();
+  }
+
+  {
+    SSTableReader tbl("/tmp/__fnord__sstabletest1.sstable");
+
+    auto cursor = tbl.getCursor();
+    EXPECT_EQ(cursor->getKeyString(), "key1");
+    EXPECT_EQ(cursor->getDataString(), "value1");
+    EXPECT_EQ(cursor->next(), true);
+
+    EXPECT_EQ(cursor->getKeyString(), "key2");
+    EXPECT_EQ(cursor->getDataString(), "value2");
+    EXPECT_EQ(cursor->next(), true);
+
+    EXPECT_EQ(cursor->getKeyString(), "key3");
+    EXPECT_EQ(cursor->getDataString(), "value3");
+    EXPECT_EQ(cursor->next(), false);
+  }
 });
 
 

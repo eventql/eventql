@@ -28,3 +28,10 @@ add_executable(fn-sstablescan
     fn-sstablescan.cc)
 
 target_link_libraries(fn-sstablescan ${CMAKE_THREAD_LIBS_INIT})
+
+add_executable(test-sstable
+    $<TARGET_OBJECTS:stx-base>
+    $<TARGET_OBJECTS:sstable>
+    sstable_test.cc)
+
+target_link_libraries(test-sstable ${CMAKE_THREAD_LIBS_INIT})
