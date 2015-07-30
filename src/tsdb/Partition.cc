@@ -47,9 +47,9 @@ RefPtr<Partition> Partition::create(
   state.set_partition_key(partition_key.data(), partition_key.size());
   state.set_table_key(table->name());
 
-  auto snap = mkRef(new PartitionSnapshot(state, pdir, table, 0));
+  auto snap = mkRef(new PartitionSnapshot(state, pdir, 0));
   snap->writeToDisk();
-  return new Partition(snap);
+  return new Partition(snap, table);
 }
 
 RefPtr<Partition> Partition::reopen(
@@ -80,12 +80,15 @@ RefPtr<Partition> Partition::reopen(
   auto nrecs = 0; // FIXPAUL
 
   return new Partition(
-      new PartitionSnapshot(state, pdir, table, nrecs));
+      new PartitionSnapshot(state, pdir, nrecs),
+      table);
 }
 
 Partition::Partition(
-    RefPtr<PartitionSnapshot> head) :
+    RefPtr<PartitionSnapshot> head,
+    RefPtr<Table> table) :
     head_(head),
+    table_(table),
     writer_(new PartitionWriter(&head_)) {}
 
 //void Partition::scheduleCompaction() {

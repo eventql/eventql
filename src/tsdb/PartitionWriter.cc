@@ -41,7 +41,7 @@ Set<SHA1Hash> PartitionWriter::insertRecords(const Vector<RecordRef>& records) {
       "Insert $0 record into partition $1/$2/$3",
       records.size(),
       snap->state.tsdb_namespace(),
-      snap->table->name(),
+      snap->state.table_key(),
       snap->key.toString());
 
   Set<SHA1Hash> record_ids;

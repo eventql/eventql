@@ -23,16 +23,14 @@ struct PartitionSnapshot : public RefCounted {
   PartitionSnapshot(
       const PartitionState& state,
       const String& _base_path,
-      RefPtr<Table> _table,
       size_t _nrecs);
 
   RefPtr<PartitionSnapshot> clone() const;
   void writeToDisk();
 
-  SHA1Hash key;
+  const SHA1Hash key;
   PartitionState state;
-  String base_path;
-  RefPtr<Table> table;
+  const String base_path;
   uint64_t nrecs;
 };
 

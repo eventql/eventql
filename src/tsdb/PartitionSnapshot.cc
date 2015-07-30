@@ -20,21 +20,18 @@ namespace tsdb {
 PartitionSnapshot::PartitionSnapshot(
     const PartitionState& _state,
     const String& _base_path,
-    RefPtr<Table> _table,
     size_t _nrecs) :
     key(
         state.partition_key().data(),
         state.partition_key().size()),
     state(_state),
     base_path(_base_path),
-    table(_table),
     nrecs(_nrecs) {}
 
 RefPtr<PartitionSnapshot> PartitionSnapshot::clone() const {
   return new PartitionSnapshot(
       state,
       base_path,
-      table,
       nrecs);
 }
 

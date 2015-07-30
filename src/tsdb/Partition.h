@@ -43,7 +43,9 @@ public:
       const SHA1Hash& partition_key,
       TSDBNodeRef* node);
 
-  Partition(RefPtr<PartitionSnapshot> snap);
+  Partition(
+      RefPtr<PartitionSnapshot> snap,
+      RefPtr<Table> table);
 
   RefPtr<PartitionWriter> getWriter();
   RefPtr<PartitionSnapshot> getSnapshot() const;
@@ -63,6 +65,7 @@ protected:
     const String& output_file);
 
   RefPtr<PartitionSnapshot> head_;
+  RefPtr<Table> table_;
   RefPtr<PartitionWriter> writer_;
 };
 
