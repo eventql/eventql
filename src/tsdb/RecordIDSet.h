@@ -42,16 +42,17 @@ protected:
     uint64_t nslots;
   };
 
-  void countUsedSlots();
-  void withMmap(bool readonly, Function<void (void* ptr)> fn);
-
-  void scan(Function<void (void* slot)> fn);
+  void scan(
+      File* file,
+      Function<void (void* slot)> fn);
 
   bool lookup(
+      File* file,
       const SHA1Hash& record_id,
       size_t* insert_idx = nullptr);
 
-  void grow();
+  void grow(File* file);
+
   void reopenFile();
 
   String fpath_;

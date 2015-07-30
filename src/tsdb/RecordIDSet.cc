@@ -40,17 +40,23 @@ RecordIDSet::RecordIDSet(
 }
 
 void RecordIDSet::addRecordID(const SHA1Hash& record_id) {
+  auto file = File::openFile(
+      fpath_,
+      File::O_WRITE | File::O_READ | File::O_CREATEOROPEN);
+
   if (nslots_used_ == size_t(-1)) {
-    countUsedSlots();
+    nslots_used_ = 0;
+    if (nslots_ > 0) {
+      scan(&file, [this] (void* slot) {++nslots_used_; });
+    }
   }
 
   if (nslots_used_ + 1 > nslots_ * kMaxFillFactor) {
-    grow();
+    grow(&file);
   }
 
   size_t insert_idx = 0;
-  if (!lookup(record_id, &insert_idx)) {
-    auto file = File::openFile(fpath_, File::O_WRITE);
+  if (!lookup(&file, record_id, &insert_idx)) {
     file.seekTo(sizeof(FileHeader) + insert_idx * SHA1Hash::kSize);
     file.write(record_id.data(), SHA1Hash::kSize);
     ++nslots_used_;
@@ -62,7 +68,8 @@ bool RecordIDSet::hasRecordID(const SHA1Hash& record_id) {
     return false;
   }
 
-  return lookup(record_id);
+  auto file = File::openFile(fpath_, File::O_READ);
+  return lookup(&file, record_id);
 }
 
 Set<SHA1Hash> RecordIDSet::fetchRecordIDs() {
@@ -71,7 +78,8 @@ Set<SHA1Hash> RecordIDSet::fetchRecordIDs() {
     return ids;
   }
 
-  scan([&ids] (void* slot) {
+  auto file = File::openFile(fpath_, File::O_READ);
+  scan(&file, [&ids] (void* slot) {
     ids.emplace(SHA1Hash(slot, SHA1Hash::kSize));
   });
 
@@ -79,10 +87,9 @@ Set<SHA1Hash> RecordIDSet::fetchRecordIDs() {
 }
 
 bool RecordIDSet::lookup(
+    File* file,
     const SHA1Hash& record_id,
     size_t* insert_idx /* = nullptr */) {
-  auto file = File::openFile(fpath_, File::O_READ);
-
   FNV<uint64_t> fnv;
   auto h = fnv.hash(record_id.data(), record_id.size());
 
@@ -95,8 +102,8 @@ bool RecordIDSet::lookup(
     auto idx = (h + i) % nslots_;
 
     if (!buf_size || idx >= buf_offset + buf_size || idx < buf_offset) {
-      file.seekTo(sizeof(FileHeader) + idx * SHA1Hash::kSize);
-      auto nread = file.read(buf.data(), buf.size());
+      file->seekTo(sizeof(FileHeader) + idx * SHA1Hash::kSize);
+      auto nread = file->read(buf.data(), buf.size());
       if (nread < SHA1Hash::kSize) {
         RAISE(kRuntimeError, "error while reading from file");;
       }
@@ -115,6 +122,7 @@ bool RecordIDSet::lookup(
       if (insert_idx) {
         *insert_idx = idx;
       }
+
       return false;
     }
   }
@@ -123,15 +131,14 @@ bool RecordIDSet::lookup(
 }
 
 
-void RecordIDSet::scan(Function<void (void* slot)> fn) {
-  auto file = File::openFile(fpath_, File::O_READ);
-  file.seekTo(sizeof(FileHeader));
+void RecordIDSet::scan(File* file, Function<void (void* slot)> fn) {
+  file->seekTo(sizeof(FileHeader));
 
   static const size_t kBatchSize = 256;
   Buffer buf(kBatchSize * SHA1Hash::kSize);
   auto nbatches = (nslots_ + kBatchSize - 1) / kBatchSize;
   for (size_t b = 0; b < nbatches; ++b) {
-    auto nread = file.read(buf.data(), buf.size());
+    auto nread = file->read(buf.data(), buf.size());
     if (nread == -1) {
       break;
     }
@@ -148,14 +155,14 @@ void RecordIDSet::scan(Function<void (void* slot)> fn) {
   }
 }
 
-void RecordIDSet::grow() {
+void RecordIDSet::grow(File* file) {
   size_t new_nslots = nslots_ == 0 ? kInitialSlots : nslots_ * kGrowthFactor;
 
   Buffer new_data(new_nslots * SHA1Hash::kSize);
   memset(new_data.data(), 0, new_data.size());
 
   if (nslots_ > 0) {
-    scan([this, &new_nslots, &new_data] (void* old_slot) {
+    scan(file, [this, &new_nslots, &new_data] (void* old_slot) {
       FNV<uint64_t> fnv;
       auto h = fnv.hash(old_slot, SHA1Hash::kSize);
 
@@ -172,9 +179,9 @@ void RecordIDSet::grow() {
   }
 
   {
-    auto file = File::openFile(
+    auto new_file = File::openFile(
         fpath_ + "~",
-        File::O_CREATEOROPEN | File::O_WRITE | File::O_TRUNCATE);
+        File::O_CREATEOROPEN | File::O_WRITE | File::O_READ | File::O_TRUNCATE);
 
     FileHeader hdr;
     memset(&hdr, 0, sizeof(hdr));
@@ -182,8 +189,9 @@ void RecordIDSet::grow() {
     hdr.version = 0x1;
     hdr.nslots = new_nslots;
 
-    file.write(&hdr, sizeof(hdr));
-    file.write(new_data.data(), new_data.size());
+    new_file.write(&hdr, sizeof(hdr));
+    new_file.write(new_data.data(), new_data.size());
+    *file = std::move(new_file);
   }
 
   FileUtil::mv(fpath_ + "~", fpath_);
@@ -208,43 +216,6 @@ void RecordIDSet::reopenFile() {
   }
 
   nslots_ = hdr.nslots;
-}
-
-void RecordIDSet::countUsedSlots() {
-  nslots_used_ = 0;
-
-  if (nslots_ > 0) {
-    scan([this] (void* slot) {++nslots_used_; });
-  }
-}
-
-void RecordIDSet::withMmap(
-    bool readonly,
-    Function<void (void* ptr)> fn) {
-  auto file = File::openFile(
-      fpath_,
-      readonly ? File::O_READ : File::O_READ | File::O_WRITE);
-
-  auto file_size = sizeof(FileHeader) + nslots_ * SHA1Hash::kSize;
-  auto file_mmap = mmap(
-      nullptr,
-      file_size,
-      readonly ? PROT_READ : PROT_WRITE | PROT_READ,
-      MAP_SHARED,
-      file.fd(),  0);
-
-  if (file_mmap == MAP_FAILED) {
-    RAISE_ERRNO(kIOError, "mmap() failed");
-  }
-
-  try {
-    fn(file_mmap);
-  } catch (...) {
-    munmap(file_mmap, file_size);
-    throw;
-  }
-
-  munmap(file_mmap, file_size); // FIXPAUL RAII...
 }
 
 } // namespace tdsb
