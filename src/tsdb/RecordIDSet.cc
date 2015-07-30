@@ -48,25 +48,13 @@ void RecordIDSet::addRecordID(const SHA1Hash& record_id) {
     grow();
   }
 
-  withMmap(false, [this, &record_id] (void* mmap) {
-    FNV<uint64_t> fnv;
-    auto h = fnv.hash(record_id.data(), record_id.size());
-
-    for (size_t i = 0; i < nslots_; ++i) {
-      auto idx = (h + i) % nslots_;
-      auto slot = (char *) mmap + sizeof(FileHeader) + idx * SHA1Hash::kSize;
-
-      if (memcmp(slot, record_id.data(), SHA1Hash::kSize) == 0) {
-        break;
-      }
-
-      if (IS_SLOT_EMPTY(slot)) {
-        memcpy(slot, record_id.data(), SHA1Hash::kSize);
-        ++nslots_used_;
-        break;
-      }
-    }
-  });
+  size_t insert_idx = 0;
+  if (!lookup(record_id, &insert_idx)) {
+    auto file = File::openFile(fpath_, File::O_WRITE);
+    file.seekTo(sizeof(FileHeader) + insert_idx * SHA1Hash::kSize);
+    file.write(record_id.data(), SHA1Hash::kSize);
+    ++nslots_used_;
+  }
 }
 
 bool RecordIDSet::hasRecordID(const SHA1Hash& record_id) {
