@@ -174,6 +174,29 @@ bool StringUtil::endsWith(const std::string& str, const std::string& suffix) {
       suffix) == 0;
 }
 
+int StringUtil::compare(
+    const char* s1,
+    size_t s1_len,
+    const char* s2,
+    size_t s2_len) {
+  for (; s1_len > 0 && s2_len > 0; s1++, s2++, --s1_len, --s2_len) {
+    if (*s1 != *s2) {
+      return (*(uint8_t *) s1 < *(uint8_t *) s2) ? -1 : 1;
+    }
+  }
+
+  if (s1_len > 0) {
+    return 1;
+  }
+
+  if (s2_len > 0) {
+    return -1;
+  }
+
+  return 0;
+}
+
+
 bool StringUtil::isHexString(const std::string& str) {
   for (const auto& c : str) {
     if ((c >= '0' && c <= '9') ||
