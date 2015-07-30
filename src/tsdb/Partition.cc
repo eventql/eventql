@@ -304,27 +304,6 @@ RefPtr<PartitionSnapshot> Partition::getSnapshot() const {
   return head_;
 }
 
-void Partition::commit() {
-  auto snap = getSnapshot();
-
-  auto fpath = StringUtil::format(
-      "$0/$1/$2.snx",
-      snap->state.tsdb_namespace(),
-      SHA1::compute(snap->table->name()).toString(),
-      snap->key.toString());
-
-  {
-    auto f = File::openFile(
-        fpath + "~",
-        File::O_WRITE | File::O_CREATEOROPEN | File::O_TRUNCATE);
-
-    auto buf = msg::encode(snap->state);
-    f.write(buf->data(), buf->size());
-  }
-
-  FileUtil::mv(fpath + "~", fpath);
-}
-
 //void Partition::buildCSTable(
 //    const Vector<String>& input_files,
 //    const String& output_file) {

@@ -36,21 +36,15 @@ bool PartitionWriter::insertRecord(
 
 Set<SHA1Hash> PartitionWriter::insertRecords(const Vector<RecordRef>& records) {
   std::unique_lock<std::mutex> lk(mutex_);
-
   auto snap = head_->get()->clone();
 
-  //mkRef(new PartitionSnapshot());
-  //snap->state = head_->state;
-  //snap->nrecs = head_->nrecs;
-  //fn(snap.get());
-
-  //stx::logTrace(
-  //    "tsdb",
-  //    "Insert $0 record into partition $1/$2/$3",
-  //    records.size(),
-  //    snap->state.tsdb_namespace(),
-  //    table_->name(),
-  //    key_.toString());
+  stx::logTrace(
+      "tsdb",
+      "Insert $0 record into partition $1/$2/$3",
+      records.size(),
+      snap->state.tsdb_namespace(),
+      snap->table->name(),
+      snap->key.toString());
 
   Set<SHA1Hash> record_ids;
   idset_.addRecordIDs(&record_ids);
@@ -64,7 +58,7 @@ Set<SHA1Hash> PartitionWriter::insertRecords(const Vector<RecordRef>& records) {
   if (old_files.size() == 0) {
     filename = StringUtil::format(
         "$0.$1.sst",
-        partition_->key(),
+        partition_->key().toString(),
         Random::singleton()->hex64());
 
     snap->state.add_sstable_files(filename);
@@ -81,9 +75,8 @@ Set<SHA1Hash> PartitionWriter::insertRecords(const Vector<RecordRef>& records) {
   }
 
   snap->nrecs += record_ids.size();
+  snap->writeToDisk();
   *head_ = snap;
-
-  partition_->commit();
 
   return record_ids;
 }

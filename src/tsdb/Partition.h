@@ -51,8 +51,6 @@ public:
   RefPtr<PartitionWriter> getWriter();
   RefPtr<PartitionSnapshot> getSnapshot() const;
 
-  void commit();
-
   PartitionInfo partitionInfo() const;
   Vector<String> listFiles() const;
 

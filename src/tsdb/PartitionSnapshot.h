@@ -25,6 +25,7 @@ struct PartitionSnapshot : public RefCounted {
       size_t _nrecs);
 
   RefPtr<PartitionSnapshot> clone() const;
+  void writeToDisk();
 
   SHA1Hash key;
   PartitionState state;

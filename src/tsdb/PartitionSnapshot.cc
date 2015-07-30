@@ -36,4 +36,19 @@ RefPtr<PartitionSnapshot> PartitionSnapshot::clone() const {
       nrecs);
 }
 
+void PartitionSnapshot::writeToDisk() {
+  auto fpath = StringUtil::format(
+      "$0/$1.snx",
+      base_path,
+      key.toString());
+  {
+    auto f = File::openFile(
+        fpath + "~",
+        File::O_WRITE | File::O_CREATEOROPEN | File::O_TRUNCATE);
+
+    auto buf = msg::encode(snap->state);
+    f.write(buf->data(), buf->size());
+  }
+
+  FileUtil::mv(fpath + "~", fpath);
 }
