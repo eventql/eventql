@@ -40,6 +40,7 @@ RecordIDSet::RecordIDSet(
 }
 
 void RecordIDSet::addRecordID(const SHA1Hash& record_id) {
+  std::unique_lock<std::mutex> lk(write_mutex_);
   auto file = File::openFile(
       fpath_,
       File::O_WRITE | File::O_READ | File::O_CREATEOROPEN);
@@ -47,7 +48,7 @@ void RecordIDSet::addRecordID(const SHA1Hash& record_id) {
   if (nslots_used_ == size_t(-1)) {
     nslots_used_ = 0;
     if (nslots_ > 0) {
-      scan(&file, [this] (void* slot) {++nslots_used_; });
+      scan(&file, nslots_, [this] (void* slot) {++nslots_used_; });
     }
   }
 
@@ -56,7 +57,7 @@ void RecordIDSet::addRecordID(const SHA1Hash& record_id) {
   }
 
   size_t insert_idx = 0;
-  if (!lookup(&file, record_id, &insert_idx)) {
+  if (!lookup(&file, nslots_, record_id, &insert_idx)) {
     file.seekTo(sizeof(FileHeader) + insert_idx * SHA1Hash::kSize);
     file.write(record_id.data(), SHA1Hash::kSize);
     ++nslots_used_;
@@ -64,30 +65,41 @@ void RecordIDSet::addRecordID(const SHA1Hash& record_id) {
 }
 
 bool RecordIDSet::hasRecordID(const SHA1Hash& record_id) {
-  if (nslots_ == 0) {
+  std::unique_lock<std::mutex> lk(read_mutex_);
+  auto nslots = nslots_;
+  if (nslots == 0) {
     return false;
   }
 
   auto file = File::openFile(fpath_, File::O_READ);
-  return lookup(&file, record_id);
+  lk.unlock();
+
+  return lookup(&file, nslots, record_id);
 }
 
 Set<SHA1Hash> RecordIDSet::fetchRecordIDs() {
   Set<SHA1Hash> ids;
+
+  std::unique_lock<std::mutex> lk(read_mutex_);
+  auto nslots = nslots_;
   if (nslots_ == 0) {
     return ids;
   }
 
   auto file = File::openFile(fpath_, File::O_READ);
-  scan(&file, [&ids] (void* slot) {
+  lk.unlock();
+
+  scan(&file, nslots, [&ids] (void* slot) {
     ids.emplace(SHA1Hash(slot, SHA1Hash::kSize));
   });
 
   return ids;
 }
 
+// preconditions: no locks required
 bool RecordIDSet::lookup(
     File* file,
+    size_t nslots,
     const SHA1Hash& record_id,
     size_t* insert_idx /* = nullptr */) {
   FNV<uint64_t> fnv;
@@ -98,8 +110,8 @@ bool RecordIDSet::lookup(
   size_t buf_offset = -1;
   size_t buf_size = 0;
 
-  for (size_t i = 0; i < nslots_; ++i) {
-    auto idx = (h + i) % nslots_;
+  for (size_t i = 0; i < nslots; ++i) {
+    auto idx = (h + i) % nslots;
 
     if (!buf_size || idx >= buf_offset + buf_size || idx < buf_offset) {
       file->seekTo(sizeof(FileHeader) + idx * SHA1Hash::kSize);
@@ -130,13 +142,16 @@ bool RecordIDSet::lookup(
   RAISE(kIllegalStateError, "set is full");
 }
 
-
-void RecordIDSet::scan(File* file, Function<void (void* slot)> fn) {
+// preconditions: no locks required
+void RecordIDSet::scan(
+    File* file,
+    size_t nslots,
+    Function<void (void* slot)> fn) {
   file->seekTo(sizeof(FileHeader));
 
   static const size_t kBatchSize = 256;
   Buffer buf(kBatchSize * SHA1Hash::kSize);
-  auto nbatches = (nslots_ + kBatchSize - 1) / kBatchSize;
+  auto nbatches = (nslots + kBatchSize - 1) / kBatchSize;
   for (size_t b = 0; b < nbatches; ++b) {
     auto nread = file->read(buf.data(), buf.size());
     if (nread == -1) {
@@ -155,6 +170,7 @@ void RecordIDSet::scan(File* file, Function<void (void* slot)> fn) {
   }
 }
 
+// preconditions: must hold write lock
 void RecordIDSet::grow(File* file) {
   size_t new_nslots = nslots_ == 0 ? kInitialSlots : nslots_ * kGrowthFactor;
 
@@ -162,7 +178,7 @@ void RecordIDSet::grow(File* file) {
   memset(new_data.data(), 0, new_data.size());
 
   if (nslots_ > 0) {
-    scan(file, [this, &new_nslots, &new_data] (void* old_slot) {
+    scan(file, nslots_, [this, &new_nslots, &new_data] (void* old_slot) {
       FNV<uint64_t> fnv;
       auto h = fnv.hash(old_slot, SHA1Hash::kSize);
 
@@ -194,6 +210,7 @@ void RecordIDSet::grow(File* file) {
     *file = std::move(new_file);
   }
 
+  std::unique_lock<std::mutex> lk(read_mutex_);
   FileUtil::mv(fpath_ + "~", fpath_);
   nslots_ = new_nslots;
 }

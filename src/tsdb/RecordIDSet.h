@@ -44,10 +44,12 @@ protected:
 
   void scan(
       File* file,
+      size_t nslots,
       Function<void (void* slot)> fn);
 
   bool lookup(
       File* file,
+      size_t nslots,
       const SHA1Hash& record_id,
       size_t* insert_idx = nullptr);
 
@@ -58,7 +60,8 @@ protected:
   String fpath_;
   size_t nslots_;
   size_t nslots_used_;
-  mutable std::mutex mutex_;
+  mutable std::mutex write_mutex_;
+  mutable std::mutex read_mutex_;
 };
 
 } // namespace tdsb
