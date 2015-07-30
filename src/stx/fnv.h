@@ -26,30 +26,33 @@ class FNV {
 public:
 
   FNV();
-  FNV(T basis, T prime) : basis_(basis), prime_(prime) {}
+  FNV(T basis, T prime) : basis_(basis), prime_(prime), memory_(basis) {}
 
-  T hash(const uint8_t* data, size_t len) const {
-    T memory = basis_;
-
+  T hash(const uint8_t* data, size_t len) {
     for (size_t i = 0; i < len; ++i) {
-      memory ^= data[i];
-      memory *= prime_;
+      memory_ ^= data[i];
+      memory_ *= prime_;
     }
 
-    return memory;
+    return memory_;
   }
 
-  inline T hash(const void* data, size_t len) const {
+  inline T hash(const void* data, size_t len) {
     return hash(static_cast<const uint8_t*>(data), len);
   }
 
-  inline T hash(const std::string& data) const {
+  inline T hash(const std::string& data) {
     return hash(reinterpret_cast<const uint8_t*>(data.c_str()), data.length());
+  }
+
+  inline T get() const {
+    return memory_;
   }
 
 protected:
   T basis_;
   T prime_;
+  T memory_;
 };
 
 }

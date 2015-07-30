@@ -22,8 +22,7 @@ namespace stx {
  *
  */
 template<> FNV<uint32_t>::FNV() :
-    basis_(2166136261llu),
-    prime_(16777619llu) {}
+    FNV(2166136261llu, 16777619llu) {}
 
 
 /**
@@ -34,7 +33,6 @@ template<> FNV<uint32_t>::FNV() :
  *
  */
 template<> FNV<uint64_t>::FNV() :
-    basis_(14695981039346656037llu),
-    prime_(1099511628211llu) {}
+    FNV(14695981039346656037llu, 1099511628211llu) {}
 
 }
