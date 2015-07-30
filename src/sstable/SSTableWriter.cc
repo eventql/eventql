@@ -15,6 +15,7 @@
 #include <sstable/fileheaderreader.h>
 #include <sstable/SSTableWriter.h>
 #include <sstable/SSTableColumnWriter.h>
+#include <sstable/RowWriter.h>
 
 namespace stx {
 namespace sstable {
@@ -73,37 +74,15 @@ uint64_t SSTableWriter::appendRow(
     RAISE(kIllegalArgumentError, "can't append empty row");
   }
 
-  RAISE(kNotYetImplementedError);
-  //size_t page_size = sizeof(BinaryFormat::RowHeader) + key_size + data_size;
-  //auto alloc = mmap_->allocPage(page_size);
-  //auto page = mmap_->getPage(alloc);
+  file_.seekTo(hdr_.bodyOffset() + hdr_.bodySize());
+  FileOutputStream os(file_.fd());
+  auto rsize = RowWriter::appendRow(hdr_, key, key_size, data, data_size, &os);
 
-  //auto header = page->structAt<BinaryFormat::RowHeader>(0);
-  //header->key_size = key_size;
-  //header->data_size = data_size;
+  auto roff = hdr_.bodySize();
+  hdr_.setBodySize(roff + rsize);
+  meta_dirty_ = true;
 
-  //auto key_dst = page->structAt<void>(sizeof(BinaryFormat::RowHeader));
-  //memcpy(key_dst, key, key_size);
-
-  //auto data_dst = page->structAt<void>(
-  //    sizeof(BinaryFormat::RowHeader) + key_size);
-  //memcpy(data_dst, data, data_size);
-
-  //FNV<uint32_t> fnv;
-  //header->checksum = fnv.hash(
-  //    page->structAt<void>(sizeof(uint32_t)),
-  //    page_size - sizeof(uint32_t));
-
-  //page->sync();
-
-  //auto row_body_offset = body_size_;
-  //body_size_ += page_size;
-
-  //for (const auto& idx : indexes_) {
-  //  idx->addRow(row_body_offset, key, key_size, data, data_size);
-  //}
-
-  //return row_body_offset;
+  return roff;
 }
 
 uint64_t SSTableWriter::appendRow(

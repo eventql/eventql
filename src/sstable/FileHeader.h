@@ -48,6 +48,11 @@ public:
   size_t bodySize() const;
 
   /**
+   * Set the body size
+   */
+  void setBodySize(size_t new_body_size);
+
+  /**
    * Returns the body offset in bytes
    */
   size_t bodyOffset() const;

@@ -62,6 +62,10 @@ size_t FileHeader::bodySize() const {
   return body_size_;
 }
 
+void FileHeader::setBodySize(size_t new_body_size) {
+  body_size_ = new_body_size;
+}
+
 size_t FileHeader::bodyOffset() const {
   return userdataOffset() + userdata_size_;
 }
