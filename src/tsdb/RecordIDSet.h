@@ -32,10 +32,25 @@ public:
 
 protected:
 
+  static const double kMaxFillFactor;
+  static const double kGrowthFactor;
+  static const size_t kInitialSlots;
+
+  struct  __attribute__((packed)) FileHeader {
+    uint8_t version;
+    uint8_t unused1;
+    uint8_t unused2;
+    uint8_t unused3;
+    uint64_t nslots;
+  };
+
+  void grow();
+  void countUsedSlots();
   void reopenFile();
 
   String fpath_;
   size_t nslots_;
+  size_t nslots_used_;
   mutable std::mutex mutex_;
 };
 
