@@ -326,5 +326,29 @@ void BufferInputStream::rewind() {
   cur_ = 0;
 }
 
-} // fnord
+MemoryInputStream::MemoryInputStream(
+    const void* data,
+    size_t size) :
+    data_(data),
+    size_(size),
+    cur_(0) {}
+
+bool MemoryInputStream::readNextByte(char* target) {
+  if (cur_ < size_) {
+    *target = *(((char*) data_) + cur_++);
+    return true;
+  } else {
+    return false;
+  }
+}
+
+bool MemoryInputStream::eof() {
+  return cur_ >= size_;
+}
+
+void MemoryInputStream::rewind() {
+  cur_ = 0;
+}
+
+} // namespace stx
 

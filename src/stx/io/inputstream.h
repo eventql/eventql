@@ -318,5 +318,40 @@ protected:
   size_t cur_;
 };
 
+class MemoryInputStream : public RewindableInputStream {
+public:
+
+  /**
+   * Create a new InputStream from the provided string
+   *
+   * @param string the input string
+   */
+  MemoryInputStream(const void* data, size_t size);
+
+  /**
+   * Read the next byte from the file. Returns true if the next byte was read
+   * and false if the end of the stream was reached.
+   *
+   * @param target the target char pointer
+   */
+  bool readNextByte(char* target) override;
+
+  /**
+   * Check if the end of this input stream was reached. Returns true if the
+   * end was reached, false otherwise
+   */
+  bool eof() override;
+
+  /**
+   * Rewind the input stream
+   */
+  void rewind() override;
+
+protected:
+  const void* data_;
+  size_t size_;
+  size_t cur_;
+};
+
 }
 #endif
