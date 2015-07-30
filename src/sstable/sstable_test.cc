@@ -133,4 +133,55 @@ TEST_CASE(SSTableTest, TestSSTableWriteThenRead, [] () {
 });
 
 
+TEST_CASE(SSTableTest, TestSSTableWriteReopenThenRead, [] () {
+  FileUtil::rm("/tmp/__fnord__sstabletest1.sstable");
+
+  {
+    std::string header = "myfnordyheader!";
+    auto tbl = SSTableWriter::create(
+        "/tmp/__fnord__sstabletest1.sstable",
+        header.data(),
+        header.size());
+
+    tbl->appendRow("key1", "value1");
+    tbl->appendRow("key2", "value2");
+    tbl->appendRow("key3", "value3");
+    tbl->commit();
+  }
+
+  {
+    auto tbl = SSTableWriter::reopen(
+        "/tmp/__fnord__sstabletest1.sstable");
+
+    tbl->appendRow("key5", "value5");
+    tbl->appendRow("key6", "value6");
+    tbl->commit();
+  }
+
+  {
+    SSTableReader tbl("/tmp/__fnord__sstabletest1.sstable");
+
+    auto cursor = tbl.getCursor();
+    EXPECT_EQ(cursor->getKeyString(), "key1");
+    EXPECT_EQ(cursor->getDataString(), "value1");
+    EXPECT_EQ(cursor->next(), true);
+
+    EXPECT_EQ(cursor->getKeyString(), "key2");
+    EXPECT_EQ(cursor->getDataString(), "value2");
+    EXPECT_EQ(cursor->next(), true);
+
+    EXPECT_EQ(cursor->getKeyString(), "key3");
+    EXPECT_EQ(cursor->getDataString(), "value3");
+    EXPECT_EQ(cursor->next(), true);
+
+    EXPECT_EQ(cursor->getKeyString(), "key5");
+    EXPECT_EQ(cursor->getDataString(), "value5");
+    EXPECT_EQ(cursor->next(), true);
+
+    EXPECT_EQ(cursor->getKeyString(), "key6");
+    EXPECT_EQ(cursor->getDataString(), "value6");
+    EXPECT_EQ(cursor->next(), false);
+  }
+});
+
 

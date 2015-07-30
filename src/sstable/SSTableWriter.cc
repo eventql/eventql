@@ -42,7 +42,7 @@ std::unique_ptr<SSTableWriter> SSTableWriter::create(
 
 std::unique_ptr<SSTableWriter> SSTableWriter::reopen(
     const std::string& filename) {
-  auto file = File::openFile(filename, File::O_READ);
+  auto file = File::openFile(filename, File::O_READ | File::O_WRITE);
 
   FileInputStream is(file.fd());
   auto header = FileHeaderReader::readMetaPage(&is);
