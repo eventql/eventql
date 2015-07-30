@@ -47,8 +47,12 @@ RefPtr<Partition> Partition::create(
   state.set_partition_key(partition_key.data(), partition_key.size());
   state.set_table_key(table->name());
 
-  auto partition = mkRef(new Partition(state, table, node));
-  partition->commit();
+  auto snap = mkRef(new PartitionSnapshot());
+  snap->state = state;
+  snap->nrecs = 0;
+
+  auto partition = mkRef(new Partition(snap, table, node));
+  partition->commitSnapshot(snap);
   return partition;
 }
 
@@ -64,7 +68,9 @@ RefPtr<Partition> Partition::reopen(
       table->name(),
       partition_key.toString());
 
-  auto state = msg::decode<PartitionState>(
+  auto snap = mkRef(new PartitionSnapshot());
+
+  msg::decode<PartitionState>(
       FileUtil::read(
           FileUtil::joinPaths(
               node->db_path,
@@ -72,21 +78,26 @@ RefPtr<Partition> Partition::reopen(
                   "$0/$1/$2.ptt",
                   tsdb_namespace,
                   SHA1::compute(table->name()).toString(),
-                  partition_key.toString()))));
+                  partition_key.toString()))),
+      &snap->state);
+
+  snap->nrecs = 0; // FIXPAUL
 
   return RefPtr<Partition>(
       new Partition(
-          state,
+          snap,
           table,
           node));
 }
 
 Partition::Partition(
-    const PartitionState& state,
+    RefPtr<PartitionSnapshot> head,
     RefPtr<Table> table,
     TSDBNodeRef* node) :
-    state_(state),
-    key_(state.partition_key().data(), state.partition_key().size()),
+    head_(head),
+    key_(
+        head_->state.partition_key().data(),
+        head->state.partition_key().size()),
     table_(table),
     node_(node),
     recids_(
@@ -94,8 +105,8 @@ Partition::Partition(
             node->db_path,
             StringUtil::format(
                 "$0/$1/$2.idx",
-                state_.tsdb_namespace(),
-                state_.table_key(),
+                head_->state.tsdb_namespace(),
+                head_->state.table_key(),
                 key_.toString()))) {
   //scheduleCompaction();
   //node_->compactionq.insert(this, WallClock::unixMicros());
@@ -105,14 +116,17 @@ Partition::Partition(
 void Partition::insertRecord(
     const SHA1Hash& record_id,
     const Buffer& record) {
+  std::unique_lock<std::mutex> lk(write_mutex_);
+
+  auto snap = getSnapshot(false);
+
   stx::logTrace(
       "tsdb",
       "Insert 1 record into partition $0/$1/$2",
-      state_.tsdb_namespace(),
+      snap->state.tsdb_namespace(),
       table_->name(),
       key_.toString());
 
-  std::unique_lock<std::mutex> lk(mutex_);
 
   //scheduleCompaction();
 }
@@ -338,10 +352,27 @@ uint64_t Partition::replicateTo(const String& addr, uint64_t offset) {
 //  return pi;
 //}
 
-void Partition::commit() {
+RefPtr<Partition::PartitionSnapshot> Partition::getSnapshot(
+    bool readonly) const {
+  std::unique_lock<std::mutex> lk(head_mutex_);
+  auto head = head_;
+  lk.unlock();
+
+  if (readonly) {
+    return head;
+  } else {
+    auto copy = mkRef(new PartitionSnapshot());
+    copy->state = head->state;
+    copy->nrecs = head->nrecs;
+    return copy;
+  }
+}
+
+// precondition: must hold write mutex
+void Partition::commitSnapshot(RefPtr<PartitionSnapshot> snap) {
   auto fpath = StringUtil::format(
       "$0/$1/$2.ptt",
-      state_.tsdb_namespace(),
+      snap->state.tsdb_namespace(),
       SHA1::compute(table_->name()).toString(),
       key_.toString());
 
@@ -350,11 +381,14 @@ void Partition::commit() {
         fpath + "~",
         File::O_WRITE | File::O_CREATEOROPEN | File::O_TRUNCATE);
 
-    auto buf = msg::encode(state_);
+    auto buf = msg::encode(snap->state);
     f.write(buf->data(), buf->size());
   }
 
   FileUtil::mv(fpath + "~", fpath);
+
+  std::unique_lock<std::mutex> lk(head_mutex_);
+  head_ = snap;
 }
 
 //void Partition::buildCSTable(

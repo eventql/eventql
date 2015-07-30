@@ -66,29 +66,38 @@ public:
   void compact();
   void replicate();
 
-  void commit();
-
 protected:
 
+  struct PartitionSnapshot : public RefCounted {
+    PartitionState state;
+    uint64_t nrecs;
+  };
+
   Partition(
-      const PartitionState& state,
+      RefPtr<PartitionSnapshot> snap,
       RefPtr<Table> table,
       TSDBNodeRef* node);
 
+  RefPtr<PartitionSnapshot> getSnapshot(bool readonly) const;
+  void commitSnapshot(RefPtr<PartitionSnapshot> snap);
+
   void scheduleCompaction();
-  
   uint64_t replicateTo(const String& addr, uint64_t offset);
 
   void buildCSTable(
     const Vector<String>& input_files,
     const String& output_file);
 
-  const PartitionState& state_;
+  RefPtr<PartitionSnapshot> head_;
+  mutable std::mutex head_mutex_;
+
   SHA1Hash key_;
   const RefPtr<Table> table_;
   TSDBNodeRef* node_;
   RecordIDSet recids_;
-  mutable std::mutex mutex_;
+
+  std::mutex write_mutex_;
+
   std::mutex replication_mutex_;
   //UnixTime last_compaction_;
   //HashMap<uint64_t, uint64_t> repl_offsets_;
