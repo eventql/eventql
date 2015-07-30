@@ -11,7 +11,7 @@
 #include <stx/io/mmappedfile.h>
 #include <stx/util/binarymessagereader.h>
 #include <stx/util/binarymessagewriter.h>
-#include <sstable/sstablewriter.h>
+#include <sstable/SSTableEditor.h>
 #include <sstable/sstablereader.h>
 #include <tsdb/RecordSet.h>
 
@@ -184,7 +184,7 @@ void RecordSet::compact(Set<String>* deleted_files) {
 
   auto outfile_name = filename_prefix_ + rnd_.hex64() + ".sst";
   auto outfile_path = FileUtil::joinPaths(datadir_, outfile_name);
-  auto outfile = sstable::SSTableWriter::create(
+  auto outfile = sstable::SSTableEditor::create(
       outfile_path + "~",
       sstable::IndexProvider{},
       nullptr,

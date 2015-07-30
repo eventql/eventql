@@ -542,7 +542,7 @@ TableChunkWriter::TableChunkWriter(
         chunk->replica_id,
         chunk->chunk_id)),
     chunk_filename_(FileUtil::joinPaths(db_path, chunk_name_)),
-    sstable_(sstable::SSTableWriter::create(
+    sstable_(sstable::SSTableEditor::create(
         chunk_filename_ + ".sst~",
         sstable::IndexProvider{},
         nullptr,

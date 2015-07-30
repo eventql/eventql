@@ -22,7 +22,7 @@
 #include <fnord-logtable/TableSnapshot.h>
 #include <fnord-logtable/TableChunkSummaryBuilder.h>
 #include "sstable/sstablereader.h"
-#include "sstable/sstablewriter.h"
+#include "sstable/SSTableEditor.h"
 #include "sstable/SSTableColumnSchema.h"
 #include "sstable/SSTableColumnReader.h"
 #include "sstable/SSTableColumnWriter.h"
@@ -52,7 +52,7 @@ protected:
   size_t seq_;
   String chunk_name_;
   String chunk_filename_;
-  std::unique_ptr<sstable::SSTableWriter> sstable_;
+  std::unique_ptr<sstable::SSTableEditor> sstable_;
   std::unique_ptr<cstable::CSTableBuilder> cstable_;
   List<RefPtr<TableChunkSummaryBuilder>> summaries_;
 };
