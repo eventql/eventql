@@ -13,6 +13,14 @@ using namespace stx;
 
 namespace tsdb {
 
+PartitionWriter::PartitionWriter(
+    Partition* partition) :
+    partition_(partition)
+    recids_(
+        FileUtil::joinPaths(
+            partition->baseDir(),
+            partition->key()->toString() + ".idx")) {}
+
 void PartitionWriter::insertRecord(
     RefPtr<Partition> partition,
     const SHA1Hash& record_id,

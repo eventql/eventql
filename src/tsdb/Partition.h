@@ -66,6 +66,9 @@ public:
 
   RefPtr<PartitionWriter> getWriter();
 
+  const SHA1Hash& key() const;
+  String basePath() const;
+
   PartitionInfo partitionInfo() const;
   Vector<String> listFiles() const;
 
@@ -94,6 +97,7 @@ protected:
   mutable std::mutex head_mutex_;
 
   SHA1Hash key_;
+  String base_path_;
   const RefPtr<Table> table_;
   TSDBNodeRef* node_;
   RefPtr<PartitionWriter> writer_;

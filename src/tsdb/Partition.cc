@@ -98,12 +98,23 @@ Partition::Partition(
     key_(
         head_->state.partition_key().data(),
         head->state.partition_key().size()),
+    base_path_(
+        FileUtil::joinPaths(
+            node_->db_path,
+            StringUtil::format(
+                "$0/$1",
+                head_->state.tsdb_namespace(),
+                head_->state.table_key()))),
     table_(table),
     node_(node),
-    writer_(new PartitionWriter(this)) {
-  //scheduleCompaction();
-  //node_->compactionq.insert(this, WallClock::unixMicros());
-  //node_->replicationq.insert(this, WallClock::unixMicros());
+    writer_(new PartitionWriter(this)) {}
+
+const SHA1Hash& Partition::key() const {
+  return key_;
+}
+
+String Partition::basePath() const {
+  return base_path_;
 }
 
 //void Partition::scheduleCompaction() {
