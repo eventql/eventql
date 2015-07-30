@@ -20,23 +20,47 @@ class FileHeader {
   friend class FileHeaderReader;
 public:
 
-  static FileHeader createMetaPage(
-      const void* userdata,
-      size_t userdata_size);
+  /**
+   * Read and verify the header from the provided input stream
+   */
+  static bool verifyHeader(InputStream* is);
 
+  /**
+   * Read the header meta page, but not the userdata from the provided input
+   * stream
+   */
   static FileHeader readMetaPage(InputStream* is);
 
+  /**
+   * Read the full header (meta page + userdata) from the provided input stream
+   */
+  static FileHeader readHeader(
+      Buffer* userdata,
+      InputStream* is);
+
+  /**
+   * Write the header meta page, but not the userdata to the provided output
+   * stream
+   */
   static void writeMetaPage(
       const FileHeader& header,
       OutputStream* os);
 
+  /**
+   * Write the full header (meta page + userdata) to the provided output stream
+   */
   static void writeHeader(
       const FileHeader& header,
       const void* userdata,
       size_t userdata_size,
       OutputStream* os);
 
-  FileHeader(const void* userdata, size_t userdata_size);
+  /**
+   * Create a new file header from the provided arguments
+   */
+  FileHeader(
+      const void* userdata,
+      size_t userdata_size);
 
   /**
    * Returns the size of the header, including userdata in bytes
