@@ -19,7 +19,7 @@ size_t FileHeaderWriter::calculateSize(size_t userdata_size) {
 }
 
 void FileHeaderWriter::writeMetaPage(
-    const FileHeader& header,
+    const MetaPage& header,
     OutputStream* os) {
   if (header.version() != 0x02) {
     RAISE(kIllegalStateError, "unsupported sstable version");
@@ -34,7 +34,7 @@ void FileHeaderWriter::writeMetaPage(
 }
 
 void FileHeaderWriter::writeHeader(
-    const FileHeader& header,
+    const MetaPage& header,
     const void* userdata,
     size_t userdata_size,
     OutputStream* os) {

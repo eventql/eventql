@@ -28,7 +28,7 @@ std::unique_ptr<SSTableWriter> SSTableWriter::create(
       filename,
       File::O_READ | File::O_WRITE | File::O_CREATE);
 
-  FileHeader hdr(header, header_size);
+  MetaPage hdr(header, header_size);
 
   FileOutputStream os(file.fd());
   FileHeaderWriter::writeHeader(
@@ -52,7 +52,7 @@ std::unique_ptr<SSTableWriter> SSTableWriter::reopen(
 
 SSTableWriter::SSTableWriter(
     File&& file,
-    FileHeader hdr) :
+    MetaPage hdr) :
     file_(std::move(file)),
     hdr_(hdr),
     meta_dirty_(false) {}

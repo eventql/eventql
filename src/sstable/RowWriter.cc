@@ -13,7 +13,7 @@ namespace stx {
 namespace sstable {
 
 size_t RowWriter::appendRow(
-    const FileHeader& hdr,
+    const MetaPage& hdr,
     void const* key,
     size_t key_size,
     void const* data,

@@ -15,7 +15,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <string>
-#include <sstable/FileHeader.h>
+#include <sstable/MetaPage.h>
 
 namespace stx {
 namespace sstable {
@@ -33,14 +33,14 @@ public:
    * stream
    */
   static void writeMetaPage(
-      const FileHeader& header,
+      const MetaPage& header,
       OutputStream* os);
 
   /**
    * Write the full header (meta page + userdata) to the provided output stream
    */
   static void writeHeader(
-      const FileHeader& header,
+      const MetaPage& header,
       const void* userdata,
       size_t userdata_size,
       OutputStream* os);

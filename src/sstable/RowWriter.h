@@ -12,7 +12,7 @@
 #include <stx/buffer.h>
 #include <stx/io/inputstream.h>
 #include <stx/io/outputstream.h>
-#include <sstable/FileHeader.h>
+#include <sstable/MetaPage.h>
 
 namespace stx {
 namespace sstable {
@@ -24,7 +24,7 @@ struct RowWriter {
    * bytes written
    */
   static size_t appendRow(
-      const FileHeader& hdr,
+      const MetaPage& hdr,
       void const* key,
       size_t key_size,
       void const* data,

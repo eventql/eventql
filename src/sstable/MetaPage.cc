@@ -8,32 +8,32 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <stx/fnv.h>
-#include <sstable/FileHeader.h>
+#include <sstable/MetaPage.h>
 #include <sstable/binaryformat.h>
 
 namespace stx {
 namespace sstable {
 
-FileHeader::FileHeader(
+MetaPage::MetaPage(
     const void* userdata,
     size_t userdata_size) :
-    FileHeader() {
+    MetaPage() {
   FNV<uint32_t> fnv;
-  FileHeader hdr;
+  MetaPage hdr;
 
   version_ = BinaryFormat::kVersion;
   userdata_size_ = userdata_size;
   userdata_checksum_ = fnv.hash(userdata, userdata_size);
 }
 
-FileHeader::FileHeader() :
+MetaPage::MetaPage() :
   version_(0),
   flags_(0),
   body_size_(0),
   userdata_checksum_(0),
   userdata_size_(0) {}
 
-size_t FileHeader::userdataOffset() const {
+size_t MetaPage::userdataOffset() const {
   switch (version_) {
 
     case 0x1:
@@ -50,39 +50,39 @@ size_t FileHeader::userdataOffset() const {
   }
 }
 
-uint16_t FileHeader::version() const {
+uint16_t MetaPage::version() const {
   return version_;
 }
 
-size_t FileHeader::headerSize() const {
+size_t MetaPage::headerSize() const {
   return bodyOffset();
 }
 
-size_t FileHeader::bodySize() const {
+size_t MetaPage::bodySize() const {
   return body_size_;
 }
 
-void FileHeader::setBodySize(size_t new_body_size) {
+void MetaPage::setBodySize(size_t new_body_size) {
   body_size_ = new_body_size;
 }
 
-size_t FileHeader::bodyOffset() const {
+size_t MetaPage::bodyOffset() const {
   return userdataOffset() + userdata_size_;
 }
 
-bool FileHeader::isFinalized() const {
+bool MetaPage::isFinalized() const {
   return (flags_ & (uint64_t) FileHeaderFlags::FINALIZED) > 0;
 }
 
-size_t FileHeader::userdataSize() const {
+size_t MetaPage::userdataSize() const {
   return userdata_size_;
 }
 
-uint32_t FileHeader::userdataChecksum() const {
+uint32_t MetaPage::userdataChecksum() const {
   return userdata_checksum_;
 }
 
-uint64_t FileHeader::flags() const {
+uint64_t MetaPage::flags() const {
   return flags_;
 }
 

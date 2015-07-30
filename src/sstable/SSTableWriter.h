@@ -11,7 +11,7 @@
 #include <stx/stdtypes.h>
 #include <stx/io/file.h>
 #include <stx/io/pagemanager.h>
-#include <sstable/FileHeader.h>
+#include <sstable/MetaPage.h>
 #include <stx/exception.h>
 
 namespace stx {
@@ -76,11 +76,11 @@ protected:
 
   SSTableWriter(
       File&& file,
-      FileHeader hdr);
+      MetaPage hdr);
 
 private:
   File file_;
-  FileHeader hdr_;
+  MetaPage hdr_;
   bool meta_dirty_;
 };
 

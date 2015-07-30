@@ -15,8 +15,8 @@
 namespace stx {
 namespace sstable {
 
-FileHeader FileHeaderReader::readMetaPage(InputStream* is) {
-  FileHeader hdr;
+MetaPage FileHeaderReader::readMetaPage(InputStream* is) {
+  MetaPage hdr;
 
   auto magic_bytes = is->readUInt32();
   if (magic_bytes != BinaryFormat::kMagicBytes) {

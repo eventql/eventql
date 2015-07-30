@@ -16,14 +16,14 @@
 namespace stx {
 namespace sstable {
 
-class FileHeader {
+class MetaPage {
   friend class FileHeaderReader;
 public:
 
   /**
    * Create a new file header from the provided arguments
    */
-  FileHeader(
+  MetaPage(
       const void* userdata,
       size_t userdata_size);
 
@@ -78,7 +78,7 @@ public:
   uint64_t flags() const;
 
 protected:
-  FileHeader();
+  MetaPage();
 
   uint16_t version_;
   uint64_t flags_;

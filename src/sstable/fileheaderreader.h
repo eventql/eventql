@@ -14,7 +14,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <string>
-#include <sstable/FileHeader.h>
+#include <sstable/MetaPage.h>
 
 namespace stx {
 namespace sstable {
@@ -31,12 +31,12 @@ public:
    * Read the header meta page, but not the userdata from the provided input
    * stream
    */
-  static FileHeader readMetaPage(InputStream* is);
+  static MetaPage readMetaPage(InputStream* is);
 
   /**
    * Read the full header (meta page + userdata) from the provided input stream
    */
-  static FileHeader readHeader(
+  static MetaPage readHeader(
       Buffer* userdata,
       InputStream* is);
 
@@ -79,7 +79,7 @@ public:
   void readUserdata(const void** userdata, size_t* userdata_size);
 
 protected:
-  FileHeader hdr_;
+  MetaPage hdr_;
   size_t file_size_;
 };
 
