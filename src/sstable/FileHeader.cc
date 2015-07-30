@@ -7,13 +7,33 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
+#include <stx/fnv.h>
 #include <sstable/FileHeader.h>
 #include <sstable/binaryformat.h>
 
 namespace stx {
 namespace sstable {
 
-FileHeader::FileHeader() {}
+FileHeader FileHeader::createHeader(
+    const void* userdata,
+    size_t userdata_size) {
+
+  FNV<uint32_t> fnv;
+  FileHeader hdr;
+
+  hdr.version_ = 2;
+  hdr.userdata_size_ = userdata_size;
+  hdr.userdata_checksum_ = fnv.hash(userdata, userdata_size);
+  return hdr;
+}
+
+FileHeader::FileHeader() :
+  version_(0),
+  flags_(0),
+  body_size_(0),
+  userdata_checksum_(0),
+  userdata_size_(0),
+  userdata_offset_(0) {}
 
 size_t FileHeader::headerSize() const {
   return bodyOffset();

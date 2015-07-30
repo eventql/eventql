@@ -17,6 +17,10 @@ class FileHeader {
   friend class FileHeaderReader;
 public:
 
+  static FileHeader createHeader(
+      const void* userdata,
+      size_t userdata_size);
+
   /**
    * Returns the size of the header, including userdata in bytes
    */
@@ -51,6 +55,8 @@ public:
    * Returns the userdata checksum
    */
   uint32_t userdataChecksum() const;
+
+  uint16_t version() const;
 
 protected:
   FileHeader();

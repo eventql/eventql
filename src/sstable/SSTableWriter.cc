@@ -27,12 +27,14 @@ std::unique_ptr<SSTableWriter> SSTableWriter::create(
       filename,
       File::O_READ | File::O_WRITE | File::O_CREATE);
 
-  auto header_page = FileHeaderWriter::buildHeader(header, header_size);
-  file.write(header_page.data(), header_page.size());
+  auto hdr = FileHeader::createHeader(header, header_size);
 
-  // FIXPAUL!
-  MemoryInputStream is(header_page.data(), header_page.size());
-  auto hdr = FileHeaderReader::readMetaPage(&is);
+  FileOutputStream os(file.fd());
+  FileHeaderWriter::writeHeader(
+      hdr,
+      header,
+      header_size,
+      &os);
 
   return mkScoped(new SSTableWriter(std::move(file), hdr));
 }
@@ -41,7 +43,7 @@ std::unique_ptr<SSTableWriter> SSTableWriter::reopen(
     const std::string& filename) {
   auto file = File::openFile(filename, File::O_READ);
 
-  FileInputStream is(file.clone()); // FIXPAUL
+  FileInputStream is(file.fd());
   auto header = FileHeaderReader::readMetaPage(&is);
 
   return mkScoped(new SSTableWriter(std::move(file), header));
