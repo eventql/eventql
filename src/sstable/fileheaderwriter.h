@@ -24,7 +24,6 @@ class FileHeaderWriter : public stx::util::BinaryMessageWriter {
 public:
   static size_t calculateSize(size_t userdata_size);
 
-
   /**
    * Write a new file header
    */

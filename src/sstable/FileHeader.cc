@@ -23,7 +23,6 @@ FileHeader FileHeader::readMetaPage(InputStream* is) {
   }
 
   hdr.version_ = is->readUInt16();
-  hdr.userdata_offset_ = 6;
 
   switch (hdr.version_) {
 
@@ -33,7 +32,6 @@ FileHeader FileHeader::readMetaPage(InputStream* is) {
 
     case 0x2:
       hdr.flags_ = is->readUInt64();
-      hdr.userdata_offset_ += 8;
       break;
 
     default:
@@ -44,7 +42,6 @@ FileHeader FileHeader::readMetaPage(InputStream* is) {
   hdr.body_size_ = is->readUInt64();
   hdr.userdata_checksum_ = is->readUInt32();
   hdr.userdata_size_ = is->readUInt32();
-  hdr.userdata_offset_ += 16;
 
   /* pre version 0x02 body_size > 0 implied that the table is finalized */
   if (hdr.version_ == 0x01 && hdr.body_size_ > 0) {
@@ -71,8 +68,24 @@ FileHeader::FileHeader() :
   flags_(0),
   body_size_(0),
   userdata_checksum_(0),
-  userdata_size_(0),
-  userdata_offset_(0) {}
+  userdata_size_(0) {}
+
+size_t FileHeader::userdataOffset() const {
+  switch (version_) {
+
+    case 0x1:
+      return 22;
+      break;
+
+    case 0x2:
+      return 30;
+      break;
+
+    default:
+      RAISE(kIllegalStateError, "unsupported sstable version");
+
+  }
+}
 
 size_t FileHeader::headerSize() const {
   return bodyOffset();
@@ -83,7 +96,7 @@ size_t FileHeader::bodySize() const {
 }
 
 size_t FileHeader::bodyOffset() const {
-  return userdata_offset_ + userdata_size_;
+  return userdataOffset() + userdata_size_;
 }
 
 bool FileHeader::isFinalized() const {
@@ -92,10 +105,6 @@ bool FileHeader::isFinalized() const {
 
 size_t FileHeader::userdataSize() const {
   return userdata_size_;
-}
-
-size_t FileHeader::userdataOffset() const {
-  return userdata_offset_;
 }
 
 uint32_t FileHeader::userdataChecksum() const {
