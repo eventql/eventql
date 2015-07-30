@@ -210,7 +210,7 @@ std::shared_ptr<LogStream::TableRef> LogStream::createTable() {
   tbl_header.stream_name = name_;
   auto tbl_header_json = stx::json::toJSONString(tbl_header);
 
-  table->writer = sstable::SSTableWriter::create(
+  table->writer = sstable::SSTableEditor::create(
       table->file_path,
       sstable::IndexProvider{},
       tbl_header_json.c_str(),

@@ -18,7 +18,7 @@
 #include "stx/reflect/reflect.h"
 #include "brokerd/FeedEntry.h"
 #include "brokerd/Message.pb.h"
-#include "sstable/sstablewriter.h"
+#include "sstable/SSTableEditor.h"
 #include "stx/stats/counter.h"
 
 namespace stx {
@@ -60,7 +60,7 @@ protected:
   struct TableRef {
     uint64_t offset;
     std::string file_path;
-    std::unique_ptr<sstable::SSTableWriter> writer;
+    std::unique_ptr<sstable::SSTableEditor> writer;
   };
 
   std::shared_ptr<TableRef> createTable();

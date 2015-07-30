@@ -134,7 +134,7 @@ void FeedService::reopenTable(const std::string& file_path) {
   }
 
   if (reader.bodySize() == 0) {
-    auto writer = sstable::SSTableWriter::reopen(
+    auto writer = sstable::SSTableEditor::reopen(
         file_path,
         sstable::IndexProvider{});
     writer->finalize();

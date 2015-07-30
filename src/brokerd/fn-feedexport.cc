@@ -149,7 +149,7 @@ int main(int argc, const char** argv) {
   FileUtil::mkdir_p(output_path);
 
   HashMap<String, uint64_t> feed_offsets;
-  HashMap<uint64_t, std::unique_ptr<sstable::SSTableWriter>> generations;
+  HashMap<uint64_t, std::unique_ptr<sstable::SSTableEditor>> generations;
   Set<uint64_t> finished_generations;
   uint64_t max_gen = 0;
 
@@ -329,7 +329,7 @@ int main(int argc, const char** argv) {
             output_path,
             StringUtil::format("$0.$1.sstable", output_prefix, entry_gen));
 
-        auto sstable_writer = sstable::SSTableWriter::create(
+        auto sstable_writer = sstable::SSTableEditor::create(
             sstable_file_path,
             sstable::IndexProvider{},
             fci_json.c_str(),
