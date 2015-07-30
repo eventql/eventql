@@ -143,6 +143,7 @@ void TSDBNode::reopenPartitions() {
     }
 
     auto partition = Partition::reopen(
+        tsdb_namespace,
         partition_key,
         state,
         db_key,
@@ -175,6 +176,7 @@ RefPtr<Partition> TSDBNode::findOrCreatePartition(
   }
 
   auto partition = Partition::create(
+      tsdb_namespace,
       partition_key,
       stream_key,
       db_key,

@@ -16,17 +16,11 @@
 #include <stx/util/binarymessagereader.h>
 #include <stx/util/binarymessagewriter.h>
 #include <stx/random.h>
+#include <tsdb/RecordRef.h>
 
 using namespace stx;
 
 namespace tsdb {
-
-struct RecordRef {
-  RecordRef(const SHA1Hash& _record_id, const Buffer& _record);
-
-  SHA1Hash record_id;
-  Buffer record;
-};
 
 class RecordSet {
 public:

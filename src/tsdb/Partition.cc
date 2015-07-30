@@ -23,6 +23,7 @@ using namespace stx;
 namespace tsdb {
 
 RefPtr<Partition> Partition::create(
+    const String& tsdb_namespace,
     const SHA1Hash& partition_key,
     const String& stream_key,
     const String& db_key,
@@ -35,8 +36,15 @@ RefPtr<Partition> Partition::create(
       stream_key,
       partition_key.toString());
 
+  auto pdir = FileUtil::joinPaths(
+      node->db_path,
+      StringUtil::format("$0/$1", tsdb_namespace, stream_key));
+
+  FileUtil::mkdir_p(pdir);
+
   return RefPtr<Partition>(
       new Partition(
+          tsdb_namespace,
           partition_key,
           stream_key,
           db_key,
@@ -45,6 +53,7 @@ RefPtr<Partition> Partition::create(
 }
 
 RefPtr<Partition> Partition::reopen(
+    const String& tsdb_namespace,
     const SHA1Hash& partition_key,
     const PartitionState& state,
     const String& db_key,
@@ -59,14 +68,16 @@ RefPtr<Partition> Partition::reopen(
 
   return RefPtr<Partition>(
       new Partition(
+          tsdb_namespace,
           partition_key,
-          state,
+          state.stream_key,
           db_key,
           table,
           node));
 }
 
 Partition::Partition(
+    const String& tsdb_namespace,
     const SHA1Hash& partition_key,
     const String& stream_key,
     const String& db_key,
@@ -76,76 +87,53 @@ Partition::Partition(
     stream_key_(stream_key),
     db_key_(db_key),
     table_(table),
-    records_(
-        node->db_path,
-        key_.toString().substr(0, 12)  + "."),
     node_(node),
+    recids_(
+        FileUtil::joinPaths(
+            node->db_path,
+            StringUtil::format(
+                "$0/$1/$2.idx",
+                tsdb_namespace,
+                stream_key,
+                partition_key.toString()))),
     last_compaction_(0) {
-  records_.setMaxDatafileSize(table_->sstableSize());
-}
-
-Partition::Partition(
-    const SHA1Hash& partition_key,
-    const PartitionState& state,
-    const String& db_key,
-    RefPtr<Table> table,
-    TSDBNodeRef* node) :
-    key_(partition_key),
-    stream_key_(state.stream_key),
-    db_key_(db_key),
-    table_(table),
-    records_(
-        node->db_path,
-        key_.toString().substr(0, 12) + ".",
-        state.record_state),
-    node_(node),
-    last_compaction_(0),
-    repl_offsets_(state.repl_offsets),
-    cstable_file_(state.cstable_file),
-    cstable_version_(state.cstable_version) {
   scheduleCompaction();
-  node_->compactionq.insert(this, WallClock::unixMicros());
-  node_->replicationq.insert(this, WallClock::unixMicros());
-  records_.setMaxDatafileSize(table_->sstableSize());
+  //node_->compactionq.insert(this, WallClock::unixMicros());
+  //node_->replicationq.insert(this, WallClock::unixMicros());
 }
 
 void Partition::insertRecord(
     const SHA1Hash& record_id,
     const Buffer& record) {
-  std::unique_lock<std::mutex> lk(mutex_);
-
   stx::logTrace(
       "tsdb",
       "Insert 1 record into stream='$0' partition='$1'",
       stream_key_,
       key_.toString());
 
-  auto old_ver = records_.version();
-  records_.addRecord(record_id, record);
-  if (records_.version() != old_ver) {
-    commitState();
-  }
-
-  scheduleCompaction();
-}
-
-void Partition::insertRecords(const Vector<RecordRef>& records) {
   std::unique_lock<std::mutex> lk(mutex_);
 
-  stx::logTrace(
-      "tsdb",
-      "Insert $0 records into stream='$1'",
-      records.size(),
-      stream_key_);
-
-  auto old_ver = records_.version();
-  records_.addRecords(records);
-  if (records_.version() != old_ver) {
-    commitState();
-  }
 
   scheduleCompaction();
 }
+
+//void Partition::insertRecords(const Vector<RecordRef>& records) {
+//  std::unique_lock<std::mutex> lk(mutex_);
+//
+//  stx::logTrace(
+//      "tsdb",
+//      "Insert $0 records into stream='$1'",
+//      records.size(),
+//      stream_key_);
+//
+//  auto old_ver = records_.version();
+//  records_.addRecords(records);
+//  if (records_.version() != old_ver) {
+//    commitState();
+//  }
+//
+//  scheduleCompaction();
+//}
 
 void Partition::scheduleCompaction() {
   auto now = WallClock::unixMicros();
@@ -160,6 +148,7 @@ void Partition::scheduleCompaction() {
   node_->compactionq.insert(this, now + compaction_delay);
 }
 
+/*
 void Partition::compact() {
   std::unique_lock<std::mutex> lk(mutex_);
   last_compaction_ = UnixTime::now();
@@ -215,7 +204,9 @@ void Partition::compact() {
         key_.toString());
   }
 }
+*/
 
+/*
 void Partition::replicate() {
   std::unique_lock<std::mutex> lk(replication_mutex_);
 
@@ -332,35 +323,35 @@ uint64_t Partition::replicateTo(const String& addr, uint64_t offset) {
 
   return offset + n;
 }
+*/
 
-Vector<String> Partition::listFiles() const {
-  return records_.listDatafiles();
-}
+//Vector<String> Partition::listFiles() const {
+//  return records_.listDatafiles();
+//}
 
-PartitionInfo Partition::partitionInfo() const {
-  PartitionInfo pi;
-  pi.set_partition_key(key_.toString());
-  pi.set_stream_key(stream_key_);
-  pi.set_checksum(records_.checksum().toString());
-  pi.set_exists(true);
-  return pi;
-}
+//PartitionInfo Partition::partitionInfo() const {
+//  PartitionInfo pi;
+//  pi.set_partition_key(key_.toString());
+//  pi.set_stream_key(stream_key_);
+//  pi.set_checksum(records_.checksum().toString());
+//  pi.set_exists(true);
+//  return pi;
+//}
 
-void Partition::commitState() {
-  PartitionState state;
-  state.record_state = records_.getState();
-  state.stream_key = stream_key_;
-  state.repl_offsets = repl_offsets_;
-  state.cstable_file = cstable_file_;
-  state.cstable_version = cstable_version_;
-
-  util::BinaryMessageWriter buf;
-  state.encode(&buf);
-
-  auto txn = node_->db->startTransaction(false);
-  txn->update(db_key_.data(), db_key_.size(), buf.data(), buf.size());
-  txn->commit();
-}
+//void Partition::commitState() {
+//  PartitionState state;
+//  state.stream_key = stream_key_;
+//  state.repl_offsets = repl_offsets_;
+//  state.cstable_file = cstable_file_;
+//  state.cstable_version = cstable_version_;
+//
+//  util::BinaryMessageWriter buf;
+//  state.encode(&buf);
+//
+//  auto txn = node_->db->startTransaction(false);
+//  txn->update(db_key_.data(), db_key_.size(), buf.data(), buf.size());
+//  txn->commit();
+//}
 
 void Partition::buildCSTable(
     const Vector<String>& input_files,
@@ -420,38 +411,38 @@ Option<RefPtr<VFSFile>> Partition::cstableFile() const {
   }
 }
 
-void PartitionState::encode(
-    util::BinaryMessageWriter* writer) const {
-  writer->appendLenencString(stream_key);
-  record_state.encode(writer);
-
-  writer->appendVarUInt(repl_offsets.size());
-  for (const auto& ro : repl_offsets) {
-    writer->appendVarUInt(ro.first);
-    writer->appendVarUInt(ro.second);
-  }
-
-  writer->appendVarUInt(record_state.version);
-  writer->appendLenencString(cstable_file);
-  writer->append(cstable_version.data(), cstable_version.size());
-}
-
-void PartitionState::decode(util::BinaryMessageReader* reader) {
-  stream_key = reader->readLenencString();
-  record_state.decode(reader);
-
-  auto nrepl_offsets = reader->readVarUInt();
-  for (int i = 0; i < nrepl_offsets; ++i) {
-    auto id = reader->readVarUInt();
-    auto off = reader->readVarUInt();
-    repl_offsets.emplace(id, off);
-  }
-
-  record_state.version = reader->readVarUInt();
-  if (reader->remaining() > 0) {
-    cstable_file = reader->readLenencString();
-    cstable_version = SHA1Hash(reader->read(SHA1Hash::kSize), SHA1Hash::kSize);
-  }
-}
+//void PartitionState::encode(
+//    util::BinaryMessageWriter* writer) const {
+//  writer->appendLenencString(stream_key);
+//  //record_state.encode(writer);
+//
+//  writer->appendVarUInt(repl_offsets.size());
+//  for (const auto& ro : repl_offsets) {
+//    writer->appendVarUInt(ro.first);
+//    writer->appendVarUInt(ro.second);
+//  }
+//
+//  //writer->appendVarUInt(record_state.version);
+//  writer->appendLenencString(cstable_file);
+//  writer->append(cstable_version.data(), cstable_version.size());
+//}
+//
+//void PartitionState::decode(util::BinaryMessageReader* reader) {
+//  stream_key = reader->readLenencString();
+//  //record_state.decode(reader);
+//
+//  auto nrepl_offsets = reader->readVarUInt();
+//  for (int i = 0; i < nrepl_offsets; ++i) {
+//    auto id = reader->readVarUInt();
+//    auto off = reader->readVarUInt();
+//    repl_offsets.emplace(id, off);
+//  }
+//
+//  record_state.version = reader->readVarUInt();
+//  if (reader->remaining() > 0) {
+//    cstable_file = reader->readLenencString();
+//    cstable_version = SHA1Hash(reader->read(SHA1Hash::kSize), SHA1Hash::kSize);
+//  }
+//}
 
 }

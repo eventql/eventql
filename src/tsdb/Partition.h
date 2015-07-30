@@ -16,7 +16,8 @@
 #include <stx/util/binarymessagewriter.h>
 #include <stx/protobuf/MessageSchema.h>
 #include <tsdb/Table.h>
-#include <tsdb/RecordSet.h>
+#include <tsdb/RecordIDSet.h>
+#include <tsdb/RecordRef.h>
 #include <tsdb/TSDBNodeRef.h>
 #include <tsdb/PartitionInfo.pb.h>
 #include <cstable/CSTableReader.h>
@@ -28,7 +29,6 @@ class Table;
 
 struct PartitionState {
   String stream_key;
-  RecordSet::RecordSetState record_state;
   HashMap<uint64_t, uint64_t> repl_offsets;
   String cstable_file;
   SHA1Hash cstable_version;
@@ -40,6 +40,7 @@ class Partition : public RefCounted {
 public:
 
   static RefPtr<Partition> create(
+      const String& tsdb_namespace,
       const SHA1Hash& partition_key,
       const String& stream_key,
       const String& db_key,
@@ -47,6 +48,7 @@ public:
       TSDBNodeRef* node);
 
   static RefPtr<Partition> reopen(
+      const String& tsdb_namespace,
       const SHA1Hash& partition_key,
       const PartitionState& state,
       const String& db_key,
@@ -70,21 +72,15 @@ public:
 protected:
 
   Partition(
+      const String& tsdb_namespace,
       const SHA1Hash& partition_key,
       const String& stream_key,
       const String& db_key,
       RefPtr<Table> table,
       TSDBNodeRef* node);
 
-  Partition(
-      const SHA1Hash& partition_key,
-      const PartitionState& state,
-      const String& db_key,
-      RefPtr<Table> table,
-      TSDBNodeRef* node);
-
   void scheduleCompaction();
-  void commitState();
+  //void commitState();
   uint64_t replicateTo(const String& addr, uint64_t offset);
 
   void buildCSTable(
@@ -95,8 +91,8 @@ protected:
   const String stream_key_;
   const String db_key_;
   const RefPtr<Table> table_;
-  RecordSet records_;
   TSDBNodeRef* node_;
+  RecordIDSet recids_;
   mutable std::mutex mutex_;
   std::mutex replication_mutex_;
   UnixTime last_compaction_;
