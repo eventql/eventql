@@ -47,6 +47,7 @@ protected:
   void grow();
   void countUsedSlots();
   void reopenFile();
+  void withMmap(bool readonly, Function<void (void* ptr)> fn);
 
   String fpath_;
   size_t nslots_;

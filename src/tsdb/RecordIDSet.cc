@@ -22,6 +22,13 @@ const double RecordIDSet::kMaxFillFactor = 0.5f;
 const double RecordIDSet::kGrowthFactor = 2.0f;
 const size_t RecordIDSet::kInitialSlots = 512;
 
+#define IS_SLOT_EMPTY(slot) (\
+    *((uint64_t*) (slot)) == 0 && \
+    memcmp( \
+        (slot), \
+        (slot) + sizeof(uint64_t), \
+        SHA1Hash::kSize - sizeof(uint64_t)) == 0)
+
 RecordIDSet::RecordIDSet(
     const String& filepath) :
     fpath_(filepath),
@@ -41,39 +48,25 @@ void RecordIDSet::addRecordID(const SHA1Hash& record_id) {
     grow();
   }
 
-  FNV<uint64_t> fnv;
-  auto h = fnv.hash(record_id.data(), record_id.size());
+  withMmap(false, [this, &record_id] (void* mmap) {
+    FNV<uint64_t> fnv;
+    auto h = fnv.hash(record_id.data(), record_id.size());
 
-  auto file = File::openFile(fpath_, File::O_READ | File::O_WRITE);
-  auto file_size = sizeof(FileHeader) + nslots_ * SHA1Hash::kSize;
-  auto file_mmap = mmap(
-      nullptr,
-      file_size,
-      PROT_WRITE | PROT_READ,
-      MAP_SHARED,
-      file.fd(),  0);
+    for (size_t i = 0; i < nslots_; ++i) {
+      auto idx = (h + i) % nslots_;
+      auto slot = (char *) mmap + sizeof(FileHeader) + idx * SHA1Hash::kSize;
 
-  if (file_mmap == MAP_FAILED) {
-    RAISE_ERRNO(kIOError, "mmap() failed");
-  }
+      if (memcmp(slot, record_id.data(), SHA1Hash::kSize) == 0) {
+        break;
+      }
 
-  for (size_t i = 0; i < nslots_; ++i) {
-    auto pos = (h + i) % nslots_;
-    auto ptr = (char *) file_mmap + sizeof(FileHeader) + pos * SHA1Hash::kSize;
-
-    if (*((uint64_t*) ptr) == 0 &&
-        memcmp(
-            ptr,
-            ptr + sizeof(uint64_t),
-            SHA1Hash::kSize - sizeof(uint64_t))) {
-
-      memcpy(ptr, record_id.data(), SHA1Hash::kSize);
-      ++nslots_used_;
-      break;
+      if (IS_SLOT_EMPTY(slot)) {
+        memcpy(slot, record_id.data(), SHA1Hash::kSize);
+        ++nslots_used_;
+        break;
+      }
     }
-  }
-
-  munmap(file_mmap, file_size);
+  });
 }
 
 bool RecordIDSet::hasRecordID(const SHA1Hash& record_id) {
@@ -123,6 +116,35 @@ void RecordIDSet::countUsedSlots() {
   }
 
   RAISE(kNotYetImplementedError);
+}
+
+void RecordIDSet::withMmap(
+    bool readonly,
+    Function<void (void* ptr)> fn) {
+  auto file = File::openFile(
+      fpath_,
+      readonly ? File::O_READ : File::O_READ | File::O_WRITE);
+
+  auto file_size = sizeof(FileHeader) + nslots_ * SHA1Hash::kSize;
+  auto file_mmap = mmap(
+      nullptr,
+      file_size,
+      readonly ? PROT_READ : PROT_WRITE | PROT_READ,
+      MAP_SHARED,
+      file.fd(),  0);
+
+  if (file_mmap == MAP_FAILED) {
+    RAISE_ERRNO(kIOError, "mmap() failed");
+  }
+
+  try {
+    fn(file_mmap);
+  } catch (...) {
+    munmap(file_mmap, file_size);
+    throw;
+  }
+
+  munmap(file_mmap, file_size); // FIXPAUL RAII...
 }
 
 } // namespace tdsb
