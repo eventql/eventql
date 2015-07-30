@@ -18,7 +18,7 @@ using namespace tsdb;
 
 UNIT_TEST(RecordIDSetTest);
 
-TEST_CASE(RecordIDSetTest, TestAddRowToEmptySet, [] () {
+TEST_CASE(RecordIDSetTest, TestInsertIntoEmptySet, [] () {
   FileUtil::rm("/tmp/_fnord_testrecidset.idx");
   RecordIDSet recset("/tmp/_fnord_testrecidset.idx");
 
@@ -41,25 +41,49 @@ TEST_CASE(RecordIDSetTest, TestAddRowToEmptySet, [] () {
   EXPECT_EQ(ids.count(SHA1::compute("0x23232323")), 1);
 });
 
-/*
-TEST_CASE(RecordSetTest, TestCommitlogReopen, [] () {
-  auto schema = testSchema();
-  RecordSet::RecordSetState state;
+TEST_CASE(RecordIDSetTest, TestReopen, [] () {
+  FileUtil::rm("/tmp/_fnord_testrecidset.idx");
 
   {
-    RecordSet recset("/tmp", "_fnord_testrecset");
-    recset.addRecord(SHA1::compute("0x42424242"), testObject(schema, "1a", "1b"));
-    recset.addRecord(SHA1::compute("0x23232323"), testObject(schema, "2a", "2b"));
-    state = recset.getState();
+    RecordIDSet recset("/tmp/_fnord_testrecidset.idx");
+    EXPECT_FALSE(recset.hasRecordID(SHA1::compute("0x42424242")));
+    EXPECT_FALSE(recset.hasRecordID(SHA1::compute("0x23232323")));
+    EXPECT_FALSE(recset.hasRecordID(SHA1::compute("0x52525252")));
+
+    EXPECT_EQ(recset.fetchRecordIDs().size(), 0);
+    recset.addRecordID(SHA1::compute("0x42424242"));
+    recset.addRecordID(SHA1::compute("0x23232323"));
   }
 
   {
-    RecordSet recset("/tmp", "_fnord_testrecset", state);
-    EXPECT_EQ(recset.getState().commitlog_size, state.commitlog_size);
-    EXPECT_EQ(recset.getState().old_commitlogs.size(), 0);
-    EXPECT_EQ(recset.commitlogSize(), 2);
+    RecordIDSet recset("/tmp/_fnord_testrecidset.idx");
+    EXPECT_TRUE(recset.hasRecordID(SHA1::compute("0x42424242")));
+    EXPECT_TRUE(recset.hasRecordID(SHA1::compute("0x23232323")));
+    EXPECT_FALSE(recset.hasRecordID(SHA1::compute("0x52525252")));
+
+    auto ids = recset.fetchRecordIDs();
+    EXPECT_EQ(ids.size(), 2);
+    EXPECT_EQ(ids.count(SHA1::compute("0x42424242")), 1);
+    EXPECT_EQ(ids.count(SHA1::compute("0x23232323")), 1);
+
+    recset.addRecordID(SHA1::compute("0x52525252"));
+  }
+
+  {
+    RecordIDSet recset("/tmp/_fnord_testrecidset.idx");
+    EXPECT_TRUE(recset.hasRecordID(SHA1::compute("0x42424242")));
+    EXPECT_TRUE(recset.hasRecordID(SHA1::compute("0x23232323")));
+    EXPECT_TRUE(recset.hasRecordID(SHA1::compute("0x52525252")));
+
+    auto ids = recset.fetchRecordIDs();
+    EXPECT_EQ(ids.size(), 3);
+    EXPECT_EQ(ids.count(SHA1::compute("0x42424242")), 1);
+    EXPECT_EQ(ids.count(SHA1::compute("0x23232323")), 1);
+    EXPECT_EQ(ids.count(SHA1::compute("0x52525252")), 1);
   }
 });
+
+/*
 
 TEST_CASE(RecordSetTest, TestDuplicateRowsInCommitlog, [] () {
   auto schema = testSchema();

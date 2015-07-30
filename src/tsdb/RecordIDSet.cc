@@ -103,6 +103,14 @@ Set<SHA1Hash> RecordIDSet::fetchRecordIDs() {
     return ids;
   }
 
+  scan([&ids] (void* slot) {
+    ids.emplace(SHA1Hash(slot, SHA1Hash::kSize));
+  });
+
+  return ids;
+}
+
+void RecordIDSet::scan(Function<void (void* slot)> fn) {
   auto file = File::openFile(fpath_, File::O_READ);
   file.seekTo(sizeof(FileHeader));
 
@@ -122,16 +130,14 @@ Set<SHA1Hash> RecordIDSet::fetchRecordIDs() {
         continue;
       }
 
-      ids.emplace(SHA1Hash(slot, SHA1Hash::kSize));
+      fn(slot);
     }
   }
-
-  return ids;
 }
 
 void RecordIDSet::grow() {
-    auto new_nslots = nslots_ == 0 ? kInitialSlots : nslots_ * kGrowthFactor;
-    auto new_size = sizeof(FileHeader) + SHA1Hash::kSize * new_nslots;
+  auto new_nslots = nslots_ == 0 ? kInitialSlots : nslots_ * kGrowthFactor;
+  auto new_size = sizeof(FileHeader) + SHA1Hash::kSize * new_nslots;
 
   {
     auto file = File::openFile(
@@ -153,7 +159,23 @@ void RecordIDSet::grow() {
 }
 
 void RecordIDSet::reopenFile() {
+  auto file = File::openFile(fpath_, File::O_READ);
 
+  FileHeader hdr;
+  if (file.read(&hdr, sizeof(hdr)) != sizeof(hdr)) {
+    RAISE(kRuntimeError, "error while reading file header");
+  }
+
+  if (hdr.version != 0x1) {
+    RAISEF(kRuntimeError, "invalid version $0", hdr.version);
+  }
+
+  auto file_size = file.size();
+  if (file_size != sizeof(FileHeader) + SHA1Hash::kSize * hdr.nslots) {
+    RAISE(kRuntimeError, "invalid file size");
+  }
+
+  nslots_ = hdr.nslots;
 }
 
 void RecordIDSet::countUsedSlots() {

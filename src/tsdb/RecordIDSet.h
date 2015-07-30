@@ -49,6 +49,8 @@ protected:
   void reopenFile();
   void withMmap(bool readonly, Function<void (void* ptr)> fn);
 
+  void scan(Function<void (void* slot)> fn);
+
   String fpath_;
   size_t nslots_;
   size_t nslots_used_;
