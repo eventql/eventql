@@ -16,7 +16,7 @@ add_library(sstable OBJECT
     rowoffsetindex.cc
     sstablereader.cc
     sstablerepair.cc
-    sstablewriter.cc
+    SSTableEditor.cc
     SSTableScan.cc
     SSTableColumnSchema.cc
     SSTableColumnReader.cc

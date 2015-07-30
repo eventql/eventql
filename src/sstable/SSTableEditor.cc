@@ -13,13 +13,13 @@
 #include <sstable/binaryformat.h>
 #include <sstable/fileheaderwriter.h>
 #include <sstable/fileheaderreader.h>
-#include <sstable/sstablewriter.h>
+#include <sstable/SSTableEditor.h>
 #include <sstable/SSTableColumnWriter.h>
 
 namespace stx {
 namespace sstable {
 
-std::unique_ptr<SSTableWriter> SSTableWriter::create(
+std::unique_ptr<SSTableEditor> SSTableEditor::create(
     const std::string& filename,
     IndexProvider index_provider,
     void const* header,
@@ -33,31 +33,31 @@ std::unique_ptr<SSTableWriter> SSTableWriter::create(
     RAISE(kIllegalStateError, "file size must be 0");
   }
 
-  auto sstable = new SSTableWriter(
+  auto sstable = new SSTableEditor(
       filename,
       file_size,
       index_provider.popIndexes());
 
   sstable->writeHeader(header, header_size);
-  return std::unique_ptr<SSTableWriter>(sstable);
+  return std::unique_ptr<SSTableEditor>(sstable);
 }
 
-std::unique_ptr<SSTableWriter> SSTableWriter::reopen(
+std::unique_ptr<SSTableEditor> SSTableEditor::reopen(
     const std::string& filename,
     IndexProvider index_provider) {
   auto file = File::openFile(filename, File::O_READ);
   auto file_size = file.size();
 
-  auto sstable = new SSTableWriter(
+  auto sstable = new SSTableEditor(
       filename,
       file_size,
       index_provider.popIndexes());
 
   sstable->reopen(file_size);
-  return std::unique_ptr<SSTableWriter>(sstable);
+  return std::unique_ptr<SSTableEditor>(sstable);
 }
 
-SSTableWriter::SSTableWriter(
+SSTableEditor::SSTableEditor(
     const std::string& filename,
     size_t file_size,
     std::vector<Index::IndexRef>&& indexes) :
@@ -67,11 +67,11 @@ SSTableWriter::SSTableWriter(
     body_size_(0),
     finalized_(false) {}
 
-SSTableWriter::~SSTableWriter() {
+SSTableEditor::~SSTableEditor() {
 }
 
 // FIXPAUL lock
-uint64_t SSTableWriter::appendRow(
+uint64_t SSTableEditor::appendRow(
     void const* key,
     size_t key_size,
     void const* data,
@@ -117,20 +117,20 @@ uint64_t SSTableWriter::appendRow(
   return row_body_offset;
 }
 
-uint64_t SSTableWriter::appendRow(
+uint64_t SSTableEditor::appendRow(
     const std::string& key,
     const std::string& value) {
   return appendRow(key.data(), key.size(), value.data(), value.size());
 }
 
-uint64_t SSTableWriter::appendRow(
+uint64_t SSTableEditor::appendRow(
     const std::string& key,
     const SSTableColumnWriter& value) {
   return appendRow(key.data(), key.size(), value.data(), value.size());
 }
 
 // FIXPAUL lock
-void SSTableWriter::writeHeader(void const* userdata, size_t userdata_size) {
+void SSTableEditor::writeHeader(void const* userdata, size_t userdata_size) {
   if (header_size_ > 0) {
     RAISE(kIllegalStateError, "header already written");
   }
@@ -153,11 +153,11 @@ void SSTableWriter::writeHeader(void const* userdata, size_t userdata_size) {
   page->sync();
 }
 
-void SSTableWriter::writeIndex(uint32_t index_type, const Buffer& buf) {
+void SSTableEditor::writeIndex(uint32_t index_type, const Buffer& buf) {
   writeIndex(index_type, buf.data(), buf.size());
 }
 
-void SSTableWriter::writeIndex(uint32_t index_type, void* data, size_t size) {
+void SSTableEditor::writeIndex(uint32_t index_type, void* data, size_t size) {
   if (finalized_) {
     RAISE(kIllegalStateError, "table is immutable (alread finalized)");
   }
@@ -186,7 +186,7 @@ void SSTableWriter::writeIndex(uint32_t index_type, void* data, size_t size) {
   mmap_->shrinkFile();
 }
 
-void SSTableWriter::reopen(size_t file_size) {
+void SSTableEditor::reopen(size_t file_size) {
   auto page = mmap_->getPage(io::PageManager::Page(0, file_size));
 
   FileHeaderReader header(page->ptr(), page->size());
@@ -208,7 +208,7 @@ void SSTableWriter::reopen(size_t file_size) {
 }
 
 // FIXPAUL lock
-void SSTableWriter::finalize() {
+void SSTableEditor::finalize() {
   finalized_ = true;
 
   auto page = mmap_->getPage(
@@ -223,28 +223,28 @@ void SSTableWriter::finalize() {
 }
 
 // FIXPAUL lock
-std::unique_ptr<SSTableWriter::SSTableWriterCursor> SSTableWriter::getCursor() {
-  return std::unique_ptr<SSTableWriterCursor>(
-      new SSTableWriter::SSTableWriterCursor(this, mmap_.get()));
+std::unique_ptr<SSTableEditor::SSTableEditorCursor> SSTableEditor::getCursor() {
+  return std::unique_ptr<SSTableEditorCursor>(
+      new SSTableEditor::SSTableEditorCursor(this, mmap_.get()));
 }
 
 // FIXPAUL lock
-size_t SSTableWriter::bodySize() const {
+size_t SSTableEditor::bodySize() const {
   return body_size_;
 }
 
-size_t SSTableWriter::headerSize() const {
+size_t SSTableEditor::headerSize() const {
   return header_size_;
 }
 
-SSTableWriter::SSTableWriterCursor::SSTableWriterCursor(
-    SSTableWriter* table,
+SSTableEditor::SSTableEditorCursor::SSTableEditorCursor(
+    SSTableEditor* table,
     io::MmapPageManager* mmap) :
     table_(table),
     mmap_(mmap),
     pos_(0) {}
 
-bool SSTableWriter::SSTableWriterCursor::trySeekTo(size_t body_offset) {
+bool SSTableEditor::SSTableEditorCursor::trySeekTo(size_t body_offset) {
   if (body_offset >= table_->bodySize()) {
     return false;
   } else {
@@ -253,7 +253,7 @@ bool SSTableWriter::SSTableWriterCursor::trySeekTo(size_t body_offset) {
   }
 }
 
-void SSTableWriter::SSTableWriterCursor::seekTo(size_t body_offset) {
+void SSTableEditor::SSTableEditorCursor::seekTo(size_t body_offset) {
   if (body_offset >= table_->bodySize()) {
     RAISE(kIndexError, "seekTo() out of bounds position");
   }
@@ -261,7 +261,7 @@ void SSTableWriter::SSTableWriterCursor::seekTo(size_t body_offset) {
   pos_ = body_offset;
 }
 
-bool SSTableWriter::SSTableWriterCursor::next() {
+bool SSTableEditor::SSTableEditorCursor::next() {
   auto page = getPage();
   auto header = page->structAt<BinaryFormat::RowHeader>(0);
 
@@ -277,11 +277,11 @@ bool SSTableWriter::SSTableWriterCursor::next() {
   }
 }
 
-bool SSTableWriter::SSTableWriterCursor::valid() {
+bool SSTableEditor::SSTableEditorCursor::valid() {
   return pos_ < table_->bodySize();
 }
 
-void SSTableWriter::SSTableWriterCursor::getKey(void** data, size_t* size) {
+void SSTableEditor::SSTableEditorCursor::getKey(void** data, size_t* size) {
   auto page = getPage();
   size_t page_size = page->page_.size;
 
@@ -298,11 +298,11 @@ void SSTableWriter::SSTableWriterCursor::getKey(void** data, size_t* size) {
   *size = header->key_size;
 }
 
-size_t SSTableWriter::SSTableWriterCursor::position() const {
+size_t SSTableEditor::SSTableEditorCursor::position() const {
   return pos_;
 }
 
-size_t SSTableWriter::SSTableWriterCursor::nextPosition() {
+size_t SSTableEditor::SSTableEditorCursor::nextPosition() {
   auto page = getPage();
   auto header = page->structAt<BinaryFormat::RowHeader>(0);
   size_t row_size = sizeof(BinaryFormat::RowHeader) + header->key_size +
@@ -311,7 +311,7 @@ size_t SSTableWriter::SSTableWriterCursor::nextPosition() {
   return pos_ + row_size;
 }
 
-void SSTableWriter::SSTableWriterCursor::getData(void** data, size_t* size) {
+void SSTableEditor::SSTableEditorCursor::getData(void** data, size_t* size) {
   auto page = getPage();
   auto header = page->structAt<BinaryFormat::RowHeader>(0);
 
@@ -328,7 +328,7 @@ void SSTableWriter::SSTableWriterCursor::getData(void** data, size_t* size) {
 }
 
 std::unique_ptr<io::PageManager::PageRef>
-SSTableWriter::SSTableWriterCursor::getPage() {
+SSTableEditor::SSTableEditorCursor::getPage() {
   return mmap_->getPage(io::PageManager::Page(
       table_->headerSize() + pos_,
       table_->bodySize() - pos_));

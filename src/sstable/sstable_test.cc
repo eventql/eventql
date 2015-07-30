@@ -12,14 +12,14 @@
 #include <string.h>
 #include <stx/io/file.h>
 #include <util/unittest.h>
-#include <sstable/sstablewriter.h>
+#include <sstable/SSTableEditor.h>
 #include <sstable/rowoffsetindex.h>
 
 using namespace stx::sstable;
 using namespace stx;
 UNIT_TEST(SSTableTest);
 
-TEST_CASE(SSTableTest, TestSSTableWriter, [] () {
+TEST_CASE(SSTableTest, TestSSTableEditor, [] () {
   auto file = File::openFile(
       "/tmp/__fnord__sstabletest1.sstable",
       File::O_READ | File::O_WRITE | File::O_CREATEOROPEN | File::O_TRUNCATE);
@@ -28,7 +28,7 @@ TEST_CASE(SSTableTest, TestSSTableWriter, [] () {
 
   IndexProvider indexes;
 
-  auto tbl = SSTableWriter::create(
+  auto tbl = SSTableEditor::create(
       "/tmp/__fnord__sstabletest1.sstable",
       std::move(indexes),
       header.data(),
@@ -61,7 +61,7 @@ TEST_CASE(SSTableTest, TestSSTableWriter, [] () {
   tbl->finalize();
 });
 
-TEST_CASE(SSTableTest, TestSSTableWriterWithIndexes, [] () {
+TEST_CASE(SSTableTest, TestSSTableEditorWithIndexes, [] () {
   auto file = File::openFile(
       "/tmp/__fnord__sstabletest2.sstable",
       File::O_READ | File::O_WRITE | File::O_CREATEOROPEN | File::O_TRUNCATE);
@@ -71,7 +71,7 @@ TEST_CASE(SSTableTest, TestSSTableWriterWithIndexes, [] () {
   IndexProvider indexes;
   indexes.addIndex<RowOffsetIndex>();
 
-  auto tbl = SSTableWriter::create(
+  auto tbl = SSTableEditor::create(
       "/tmp/__fnord__sstabletest2.sstable",
       std::move(indexes),
       header.data(),

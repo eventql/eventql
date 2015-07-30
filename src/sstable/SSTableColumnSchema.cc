@@ -9,7 +9,7 @@
  */
 #include <sstable/SSTableColumnSchema.h>
 #include <sstable/sstablereader.h>
-#include <sstable/sstablewriter.h>
+#include <sstable/SSTableEditor.h>
 #include <stx/util/binarymessagereader.h>
 #include <stx/util/binarymessagewriter.h>
 
@@ -79,7 +79,7 @@ void SSTableColumnSchema::writeIndex(Buffer* buf) {
   buf->append(writer.data(), writer.size());
 }
 
-void SSTableColumnSchema::writeIndex(SSTableWriter* sstable_writer) {
+void SSTableColumnSchema::writeIndex(SSTableEditor* sstable_writer) {
   Buffer buf;
   writeIndex(&buf);
 

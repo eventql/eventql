@@ -25,7 +25,7 @@
 
 namespace stx {
 namespace sstable {
-class SSTableWriter;
+class SSTableEditor;
 class SSTableReader;
 
 enum class SSTableColumnType : uint8_t {
@@ -54,7 +54,7 @@ public:
   Set<SSTableColumnID> columnIDs() const;
 
   void writeIndex(Buffer* buf);
-  void writeIndex(SSTableWriter* sstable_writer);
+  void writeIndex(SSTableEditor* sstable_writer);
 
   void loadIndex(const Buffer& buf);
   void loadIndex(SSTableReader* sstable_reader);

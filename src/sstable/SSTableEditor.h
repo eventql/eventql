@@ -7,8 +7,8 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#ifndef _FNORD_SSTABLE_SSTABLEWRITER_H
-#define _FNORD_SSTABLE_SSTABLEWRITER_H
+#ifndef _FNORD_SSTABLE_SSTableEditor_H
+#define _FNORD_SSTABLE_SSTableEditor_H
 #include <stdlib.h>
 #include <string>
 #include <vector>
@@ -27,20 +27,15 @@ class SSTableColumnWriter;
 class SSTableColumnSchema;
 
 /**
- * A sstable that can written (appended) to and read from at the same time.
- *
- *
- *
- *
- * 
- *
+ * A SSTableEditor allows writing to and reading from an sstable file at the
+ * same time.
  */
-class SSTableWriter {
+class SSTableEditor {
 public:
-  class SSTableWriterCursor : public sstable::Cursor {
+  class SSTableEditorCursor : public sstable::Cursor {
   public:
-    SSTableWriterCursor(
-        SSTableWriter* table,
+    SSTableEditorCursor(
+        SSTableEditor* table,
         io::MmapPageManager* mmap);
 
     void seekTo(size_t body_offset) override;
@@ -53,7 +48,7 @@ public:
     size_t nextPosition() override;
   protected:
     std::unique_ptr<io::PageManager::PageRef> getPage();
-    SSTableWriter* table_;
+    SSTableEditor* table_;
     io::MmapPageManager* mmap_;
     size_t pos_;
   };
@@ -61,7 +56,7 @@ public:
   /**
    * Create and open a new sstable for writing
    */
-  static std::unique_ptr<SSTableWriter> create(
+  static std::unique_ptr<SSTableEditor> create(
       const std::string& filename,
       IndexProvider index_provider,
       void const* header,
@@ -70,14 +65,14 @@ public:
   /**
    * Re-open a partially written sstable for writing
    */
-  static std::unique_ptr<SSTableWriter> reopen(
+  static std::unique_ptr<SSTableEditor> reopen(
       const std::string& filename,
       IndexProvider index_provider);
 
 
-  SSTableWriter(const SSTableWriter& other) = delete;
-  SSTableWriter& operator=(const SSTableWriter& other) = delete;
-  ~SSTableWriter();
+  SSTableEditor(const SSTableEditor& other) = delete;
+  SSTableEditor& operator=(const SSTableEditor& other) = delete;
+  ~SSTableEditor();
 
   /**
    * Append a row to the sstable
@@ -110,7 +105,7 @@ public:
   /**
    * Get an sstable cursor for the sstable currently being written
    */
-  std::unique_ptr<SSTableWriterCursor> getCursor();
+  std::unique_ptr<SSTableEditorCursor> getCursor();
 
   template <typename IndexType>
   IndexType* getIndex() const;
@@ -123,7 +118,7 @@ public:
 
 protected:
 
-  SSTableWriter(
+  SSTableEditor(
       const std::string& filename,
       size_t file_size,
       std::vector<Index::IndexRef>&& indexes);
@@ -144,5 +139,5 @@ private:
 }
 }
 
-#include "sstablewriter_impl.h"
+#include "SSTableEditor_impl.h"
 #endif

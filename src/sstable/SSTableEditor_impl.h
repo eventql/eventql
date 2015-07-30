@@ -11,7 +11,7 @@ namespace stx {
 namespace sstable {
 
 template <typename IndexType>
-IndexType* SSTableWriter::getIndex() const {
+IndexType* SSTableEditor::getIndex() const {
   for (const auto& idx : indexes_) {
     if (idx->type() == IndexType::kIndexType) {
       auto idx_cast = dynamic_cast<IndexType*>(idx.get());
