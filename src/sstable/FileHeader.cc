@@ -115,6 +115,10 @@ size_t FileHeader::userdataOffset() const {
   }
 }
 
+uint16_t FileHeader::version() const {
+  return version_;
+}
+
 size_t FileHeader::headerSize() const {
   return bodyOffset();
 }
@@ -137,6 +141,10 @@ size_t FileHeader::userdataSize() const {
 
 uint32_t FileHeader::userdataChecksum() const {
   return userdata_checksum_;
+}
+
+uint64_t FileHeader::flags() const {
+  return flags_;
 }
 
 }

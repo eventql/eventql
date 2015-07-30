@@ -22,6 +22,7 @@ namespace sstable {
 
 class FileHeaderWriter : public stx::util::BinaryMessageWriter {
 public:
+
   static size_t calculateSize(size_t userdata_size);
 
   /**
