@@ -179,12 +179,11 @@ void RecordIDSet::reopenFile() {
 }
 
 void RecordIDSet::countUsedSlots() {
-  if (nslots_ == 0) {
-    nslots_used_ = 0;
-    return;
-  }
+  nslots_used_ = 0;
 
-  RAISE(kNotYetImplementedError);
+  if (nslots_ > 0) {
+    scan([this] (void* slot) {++nslots_used_; });
+  }
 }
 
 void RecordIDSet::withMmap(
