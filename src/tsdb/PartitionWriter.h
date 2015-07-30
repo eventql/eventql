@@ -9,23 +9,28 @@
  */
 #pragma once
 #include <stx/stdtypes.h>
-#include <tsdb/Partition.h>
+#include <tsdb/RecordRef.h>
 
 using namespace stx;
 
 namespace tsdb {
+class Partition;
 
-struct PartitionWriter {
+struct PartitionWriter : public RefCounted {
 
-  static void insertRecord(
-      RefPtr<Partition> partition,
+  PartitionWriter(Partition* partition);
+
+  void insertRecord(
       const SHA1Hash& record_id,
       const Buffer& record);
 
-  static void insertRecords(
-      RefPtr<Partition> partition,
+  void insertRecords(
       const Vector<RecordRef>& records);
 
+protected:
+  Partition* partition_;
+  RecordIDSet recids_;
+  std::mutex mutex_;
 };
 
 } // namespace tdsb

@@ -9,7 +9,6 @@
  */
 #include "stx/util/binarymessagewriter.h"
 #include "tsdb/TSDBServlet.h"
-#include "tsdb/PartitionWriter.h"
 #include "tsdb/RecordEnvelope.pb.h"
 #include "stx/json/json.h"
 #include <stx/wallclock.h>
@@ -118,7 +117,7 @@ void TSDBServlet::insertRecords(
   }
 
   for (const auto& group : grouped) {
-    tsdb::PartitionWriter::insertRecords(group.first, group.second);
+    group.first->getWriter()->insertRecords(group.second);
   }
 
   res->setStatus(http::kStatusCreated);

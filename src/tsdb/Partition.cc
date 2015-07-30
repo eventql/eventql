@@ -100,43 +100,11 @@ Partition::Partition(
         head->state.partition_key().size()),
     table_(table),
     node_(node),
-    recids_(
-        FileUtil::joinPaths(
-            node->db_path,
-            StringUtil::format(
-                "$0/$1/$2.idx",
-                head_->state.tsdb_namespace(),
-                head_->state.table_key(),
-                key_.toString()))) {
+    writer_(new PartitionWriter(this)) {
   //scheduleCompaction();
   //node_->compactionq.insert(this, WallClock::unixMicros());
   //node_->replicationq.insert(this, WallClock::unixMicros());
 }
-
-//void Partition::insertRecord(
-//    const SHA1Hash& record_id,
-//    const Buffer& record) {
-//  Vector<RecordRef> recs;
-//  recs.emplace_back(record_id, record);
-//  insertRecords(recs);
-//}
-//
-//void Partition::insertRecords(const Vector<RecordRef>& records) {
-//  std::unique_lock<std::mutex> lk(write_mutex_);
-//
-//  auto snap = getSnapshot();
-//
-//  stx::logTrace(
-//      "tsdb",
-//      "Insert $0 record into partition $1/$2/$3",
-//      records.size(),
-//      snap->state.tsdb_namespace(),
-//      table_->name(),
-//      key_.toString());
-//
-//
-//  //commitSnapshot(snap);
-//}
 
 //void Partition::scheduleCompaction() {
 //  auto now = WallClock::unixMicros();

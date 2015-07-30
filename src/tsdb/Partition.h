@@ -21,6 +21,7 @@
 #include <tsdb/TSDBNodeRef.h>
 #include <tsdb/PartitionInfo.pb.h>
 #include <tsdb/PartitionState.pb.h>
+#include <tsdb/PartitionWriter.h>
 #include <cstable/CSTableReader.h>
 
 using namespace stx;
@@ -63,10 +64,13 @@ public:
 
   //void insertRecords(const Vector<RecordRef>& records);
 
+  RefPtr<PartitionWriter> getWriter();
+
   PartitionInfo partitionInfo() const;
   Vector<String> listFiles() const;
 
   Option<RefPtr<VFSFile>> cstableFile() const;
+
 
   RefPtr<PartitionSnapshot> getSnapshot() const;
   void commitSnapshot(Function<void (PartitionSnapshot* snap)> fn);
@@ -92,11 +96,7 @@ protected:
   SHA1Hash key_;
   const RefPtr<Table> table_;
   TSDBNodeRef* node_;
-  RecordIDSet recids_;
-
-  std::mutex write_mutex_;
-
-  std::mutex replication_mutex_;
+  RefPtr<PartitionWriter> writer_;
 };
 
 }

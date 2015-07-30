@@ -26,6 +26,8 @@ public:
   RecordIDSet(const String& fpath);
 
   void addRecordID(const SHA1Hash& record_id);
+  void addRecordIDs(Set<SHA1Hash>* record_ids);
+
   bool hasRecordID(const SHA1Hash& record_id);
 
   Set<SHA1Hash> fetchRecordIDs();
