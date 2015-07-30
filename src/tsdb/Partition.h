@@ -43,6 +43,8 @@ public:
       const SHA1Hash& partition_key,
       TSDBNodeRef* node);
 
+  Partition(RefPtr<PartitionSnapshot> snap);
+
   const SHA1Hash& key() const;
   String basePath() const;
 
@@ -58,11 +60,6 @@ public:
 
 protected:
 
-  Partition(
-      RefPtr<PartitionSnapshot> snap,
-      RefPtr<Table> table,
-      TSDBNodeRef* node);
-
   void scheduleCompaction();
   uint64_t replicateTo(const String& addr, uint64_t offset);
 
@@ -71,12 +68,6 @@ protected:
     const String& output_file);
 
   RefPtr<PartitionSnapshot> head_;
-  mutable std::mutex head_mutex_;
-
-  SHA1Hash key_;
-  String base_path_;
-  const RefPtr<Table> table_;
-  TSDBNodeRef* node_;
   RefPtr<PartitionWriter> writer_;
 };
 

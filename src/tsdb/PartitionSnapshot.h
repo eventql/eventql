@@ -14,13 +14,23 @@
 using namespace stx;
 
 namespace tsdb {
+class Table;
 
 struct PartitionSnapshot : public RefCounted {
-  PartitionState state;
-  uint64_t nrecs;
+
+  PartitionSnapshot(
+      const PartitionState& state,
+      const String& _base_path,
+      RefPtr<Table> _table,
+      size_t _nrecs);
 
   RefPtr<PartitionSnapshot> clone() const;
 
+  SHA1Hash key;
+  PartitionState state;
+  String base_path;
+  RefPtr<Table> table;
+  uint64_t nrecs;
 };
 
 }

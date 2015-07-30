@@ -47,13 +47,10 @@ RefPtr<Partition> Partition::create(
   state.set_partition_key(partition_key.data(), partition_key.size());
   state.set_table_key(table->name());
 
-  auto snap = mkRef(new PartitionSnapshot());
-  snap->state = state;
-  snap->nrecs = 0;
-
-  auto partition = mkRef(new Partition(snap, table, node));
-  partition->commit();
-  return partition;
+  //partition->commit();
+  //return partition;
+  auto snap = mkRef(new PartitionSnapshot(state, pdir, table, 0));
+  return new Partition(snap);
 }
 
 RefPtr<Partition> Partition::reopen(
@@ -68,53 +65,36 @@ RefPtr<Partition> Partition::reopen(
       table->name(),
       partition_key.toString());
 
-  auto snap = mkRef(new PartitionSnapshot());
+  auto pdir = FileUtil::joinPaths(
+      node->db_path,
+      StringUtil::format(
+          "$0/$1",
+          tsdb_namespace,
+          SHA1::compute(table->name()).toString()));
 
-  msg::decode<PartitionState>(
+  auto state = msg::decode<PartitionState>(
       FileUtil::read(
           FileUtil::joinPaths(
-              node->db_path,
-              StringUtil::format(
-                  "$0/$1/$2.snx",
-                  tsdb_namespace,
-                  SHA1::compute(table->name()).toString(),
-                  partition_key.toString()))),
-      &snap->state);
+              pdir,
+              StringUtil::format("$0.snx", partition_key.toString()))));
 
-  snap->nrecs = 0; // FIXPAUL
+  auto nrecs = 0; // FIXPAUL
 
-  return RefPtr<Partition>(
-      new Partition(
-          snap,
-          table,
-          node));
+  return new Partition(
+      new PartitionSnapshot(state, pdir, table, nrecs));
 }
 
 Partition::Partition(
-    RefPtr<PartitionSnapshot> head,
-    RefPtr<Table> table,
-    TSDBNodeRef* node) :
+    RefPtr<PartitionSnapshot> head) :
     head_(head),
-    key_(
-        head_->state.partition_key().data(),
-        head->state.partition_key().size()),
-    base_path_(
-        FileUtil::joinPaths(
-            node_->db_path,
-            StringUtil::format(
-                "$0/$1",
-                head_->state.tsdb_namespace(),
-                head_->state.table_key()))),
-    table_(table),
-    node_(node),
     writer_(new PartitionWriter(this, &head_)) {}
 
 const SHA1Hash& Partition::key() const {
-  return key_;
+  return head_->key;
 }
 
 String Partition::basePath() const {
-  return base_path_;
+  return head_->base_path;
 }
 
 //void Partition::scheduleCompaction() {
@@ -325,12 +305,13 @@ RefPtr<PartitionSnapshot> Partition::getSnapshot() const {
 }
 
 void Partition::commit() {
-  auto snap = head_;
+  auto snap = getSnapshot();
+
   auto fpath = StringUtil::format(
       "$0/$1/$2.snx",
       snap->state.tsdb_namespace(),
-      SHA1::compute(table_->name()).toString(),
-      key_.toString());
+      SHA1::compute(snap->table->name()).toString(),
+      snap->key.toString());
 
   {
     auto f = File::openFile(
