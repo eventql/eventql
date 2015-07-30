@@ -26,9 +26,9 @@ struct RowWriter {
   static size_t appendRow(
       const MetaPage& hdr,
       void const* key,
-      size_t key_size,
+      uint32_t key_size,
       void const* data,
-      size_t data_size,
+      uint32_t data_size,
       OutputStream* os);
 
 };
