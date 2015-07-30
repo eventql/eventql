@@ -16,11 +16,10 @@
 #include <stx/util/binarymessagewriter.h>
 #include <stx/protobuf/MessageSchema.h>
 #include <tsdb/Table.h>
-#include <tsdb/RecordIDSet.h>
 #include <tsdb/RecordRef.h>
 #include <tsdb/TSDBNodeRef.h>
 #include <tsdb/PartitionInfo.pb.h>
-#include <tsdb/PartitionState.pb.h>
+#include <tsdb/PartitionSnapshot.h>
 #include <tsdb/PartitionWriter.h>
 #include <cstable/CSTableReader.h>
 
@@ -28,20 +27,6 @@ using namespace stx;
 
 namespace tsdb {
 class Table;
-
-//struct PartitionState {
-//  String stream_key;
-//  HashMap<uint64_t, uint64_t> repl_offsets;
-//  String cstable_file;
-//  SHA1Hash cstable_version;
-//  void encode(util::BinaryMessageWriter* writer) const;
-//  void decode(util::BinaryMessageReader* reader);
-//};
-
-struct PartitionSnapshot : public RefCounted {
-  PartitionState state;
-  uint64_t nrecs;
-};
 
 class Partition : public RefCounted {
 public:
@@ -58,25 +43,18 @@ public:
       const SHA1Hash& partition_key,
       TSDBNodeRef* node);
 
-  //void insertRecord(
-  //    const SHA1Hash& record_id,
-  //    const Buffer& record);
-
-  //void insertRecords(const Vector<RecordRef>& records);
-
-  RefPtr<PartitionWriter> getWriter();
-
   const SHA1Hash& key() const;
   String basePath() const;
+
+  RefPtr<PartitionWriter> getWriter();
+  RefPtr<PartitionSnapshot> getSnapshot() const;
+
+  void commit();
 
   PartitionInfo partitionInfo() const;
   Vector<String> listFiles() const;
 
   Option<RefPtr<VFSFile>> cstableFile() const;
-
-
-  RefPtr<PartitionSnapshot> getSnapshot() const;
-  void commitSnapshot(Function<void (PartitionSnapshot* snap)> fn);
 
 protected:
 
@@ -84,7 +62,6 @@ protected:
       RefPtr<PartitionSnapshot> snap,
       RefPtr<Table> table,
       TSDBNodeRef* node);
-
 
   void scheduleCompaction();
   uint64_t replicateTo(const String& addr, uint64_t offset);

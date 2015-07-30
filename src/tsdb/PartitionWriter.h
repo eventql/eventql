@@ -9,7 +9,10 @@
  */
 #pragma once
 #include <stx/stdtypes.h>
+#include <stx/autoref.h>
+#include <tsdb/PartitionSnapshot.h>
 #include <tsdb/RecordRef.h>
+#include <tsdb/RecordIDSet.h>
 
 using namespace stx;
 
@@ -18,18 +21,21 @@ class Partition;
 
 struct PartitionWriter : public RefCounted {
 
-  PartitionWriter(Partition* partition);
+  PartitionWriter(
+      Partition* partition,
+      RefPtr<PartitionSnapshot>* head);
 
-  void insertRecord(
+  bool insertRecord(
       const SHA1Hash& record_id,
       const Buffer& record);
 
-  void insertRecords(
+  Set<SHA1Hash> insertRecords(
       const Vector<RecordRef>& records);
 
 protected:
   Partition* partition_;
-  RecordIDSet recids_;
+  RefPtr<PartitionSnapshot>* head_;
+  RecordIDSet idset_;
   std::mutex mutex_;
 };
 

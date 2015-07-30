@@ -25,6 +25,7 @@ add_library(tsdb-server OBJECT
     RecordSet.cc
     RecordIDSet.cc
     Partition.cc
+    PartitionWriter.cc
     Table.cc
     CompactionWorker.cc
     ReplicationWorker.cc

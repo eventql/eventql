@@ -7,6 +7,8 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
+#include <stx/io/fileutil.h>
+#include <tsdb/Partition.h>
 #include <tsdb/PartitionWriter.h>
 
 using namespace stx;
@@ -14,48 +16,76 @@ using namespace stx;
 namespace tsdb {
 
 PartitionWriter::PartitionWriter(
-    Partition* partition) :
-    partition_(partition)
-    recids_(
+    Partition* partition,
+    RefPtr<PartitionSnapshot>* head) :
+    partition_(partition),
+    head_(head),
+    idset_(
         FileUtil::joinPaths(
-            partition->baseDir(),
-            partition->key()->toString() + ".idx")) {}
+            partition_->basePath(),
+            partition_->key().toString() + ".idx")) {}
 
-void PartitionWriter::insertRecord(
-    RefPtr<Partition> partition,
+bool PartitionWriter::insertRecord(
     const SHA1Hash& record_id,
     const Buffer& record) {
   Vector<RecordRef> recs;
   recs.emplace_back(record_id, record);
-  insertRecords(recs);
+  auto ids = insertRecords(recs);
+  return !ids.empty();
 }
 
-size_t Partition::insertRecords(
-    RefPtr<Partition> partition,
-    const Vector<RecordRef>& records) {
-  auto snap = partition->getSnapshot();
-  auto idset = partition->idSet();
+Set<SHA1Hash> PartitionWriter::insertRecords(const Vector<RecordRef>& records) {
+  std::unique_lock<std::mutex> lk(mutex_);
 
-  stx::logTrace(
-      "tsdb",
-      "Insert $0 record into partition $1/$2/$3",
-      records.size(),
-      snap->state.tsdb_namespace(),
-      table_->name(),
-      key_.toString());
+  auto snap = head_->get()->clone();
+
+  //mkRef(new PartitionSnapshot());
+  //snap->state = head_->state;
+  //snap->nrecs = head_->nrecs;
+  //fn(snap.get());
+
+  //stx::logTrace(
+  //    "tsdb",
+  //    "Insert $0 record into partition $1/$2/$3",
+  //    records.size(),
+  //    snap->state.tsdb_namespace(),
+  //    table_->name(),
+  //    key_.toString());
 
   Set<SHA1Hash> record_ids;
-  idset->addRecordIDs(&record_ids);
+  idset_.addRecordIDs(&record_ids);
 
-  if (record_ids.empty() {
-    return 0;
+  if (record_ids.empty()) {
+    return record_ids;
   }
 
-  auto num_new_recs = record_ids.size();
+  String filename;
+  const auto& old_files = snap->state.sstable_files();
+  if (old_files.size() == 0) {
+    filename = StringUtil::format(
+        "$0.$1.sst",
+        partition_->key(),
+        Random::singleton()->hex64());
 
-  commitSnapshot([num_new_recs] (PartitionSnapshot* snap) {
-    snap->nrecs += new_num_recs;
-  });
+    snap->state.add_sstable_files(filename);
+  } else {
+    RAISE(kIllegalStateError);
+  }
+
+  auto filepath = FileUtil::joinPaths(partition_->basePath(), filename);
+
+  for (const auto& r : records) {
+    if (record_ids.count(r.record_id) == 0) {
+      continue;
+    }
+  }
+
+  snap->nrecs += record_ids.size();
+  *head_ = snap;
+
+  partition_->commit();
+
+  return record_ids;
 }
 
 } // namespace tdsb

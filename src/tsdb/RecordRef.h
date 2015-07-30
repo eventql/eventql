@@ -9,8 +9,8 @@
  */
 #pragma once
 #include <stx/stdtypes.h>
-#include <stx/option.h>
 #include <stx/buffer.h>
+#include <stx/SHA1.h>
 
 using namespace stx;
 

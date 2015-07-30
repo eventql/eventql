@@ -52,7 +52,7 @@ RefPtr<Partition> Partition::create(
   snap->nrecs = 0;
 
   auto partition = mkRef(new Partition(snap, table, node));
-  partition->commitSnapshot([] (PartitionSnapshot* snap) {});
+  partition->commit();
   return partition;
 }
 
@@ -75,7 +75,7 @@ RefPtr<Partition> Partition::reopen(
           FileUtil::joinPaths(
               node->db_path,
               StringUtil::format(
-                  "$0/$1/$2.ptt",
+                  "$0/$1/$2.snx",
                   tsdb_namespace,
                   SHA1::compute(table->name()).toString(),
                   partition_key.toString()))),
@@ -107,7 +107,7 @@ Partition::Partition(
                 head_->state.table_key()))),
     table_(table),
     node_(node),
-    writer_(new PartitionWriter(this)) {}
+    writer_(new PartitionWriter(this, &head_)) {}
 
 const SHA1Hash& Partition::key() const {
   return key_;
@@ -321,21 +321,13 @@ uint64_t Partition::replicateTo(const String& addr, uint64_t offset) {
 //}
 
 RefPtr<PartitionSnapshot> Partition::getSnapshot() const {
-  std::unique_lock<std::mutex> lk(head_mutex_);
   return head_;
 }
 
-void Partition::commitSnapshot(Function<void (PartitionSnapshot* snap)> fn) {
-  std::unique_lock<std::mutex> lk(head_mutex_);
-  auto snap = mkRef(new PartitionSnapshot());
-  snap->state = head_->state;
-  snap->nrecs = head_->nrecs;
-  fn(snap.get());
-  head_ = snap;
-  lk.unlock();
-
+void Partition::commit() {
+  auto snap = head_;
   auto fpath = StringUtil::format(
-      "$0/$1/$2.ptt",
+      "$0/$1/$2.snx",
       snap->state.tsdb_namespace(),
       SHA1::compute(table_->name()).toString(),
       key_.toString());

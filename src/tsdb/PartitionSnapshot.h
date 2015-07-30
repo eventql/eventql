@@ -7,16 +7,20 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-package tsdb;
+#pragma once
+#include <stx/stdtypes.h>
+#include <tsdb/PartitionState.pb.h>
 
-message PartitionState {
+using namespace stx;
 
-  required string tsdb_namespace = 1;
+namespace tsdb {
 
-  required bytes partition_key = 2;
+struct PartitionSnapshot : public RefCounted {
+  PartitionState state;
+  uint64_t nrecs;
 
-  required string table_key = 3;
-
-  repeated string sstable_files = 4;
+  RefPtr<PartitionSnapshot> clone() const;
 
 };
+
+}
