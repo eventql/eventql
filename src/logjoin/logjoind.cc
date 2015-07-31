@@ -273,6 +273,7 @@ int main(int argc, const char** argv) {
   mdb_opts.maxsize = 1000000 * flags.getInt("db_size");
   mdb_opts.data_filename = shard.shard_name + ".db";
   mdb_opts.lock_filename = shard.shard_name + ".db.lck";
+  mdb_opts.duplicate_keys = false;
   auto sessdb = mdb::MDB::open(flags.getString("datadir"), mdb_opts);
 
   /* setup logjoin */
