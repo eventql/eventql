@@ -48,6 +48,17 @@ void CSTableIndex::buildCSTable(RefPtr<Partition> partition) {
   auto table = partition->getTable();
   auto schema = table->schema();
 
+  auto metapath = FileUtil::joinPaths(snap->base_path, "_cstable_meta");
+  auto metapath_tmp = metapath + "." + Random::singleton()->hex128();
+  if (FileUtil::exists(metapath)) {
+    auto metadata = FileUtil::read(metapath);
+    auto last_offset = std::stoull(metadata.toString());
+
+    if (last_offset >= snap->nrecs) {
+      return; // cstable is up to date...
+    }
+  }
+
   logDebug(
       "tsdb",
       "Building CSTable index for partition $0/$1/$2",
@@ -56,19 +67,31 @@ void CSTableIndex::buildCSTable(RefPtr<Partition> partition) {
       snap->key.toString());
 
   auto filepath = FileUtil::joinPaths(snap->base_path, "_cstable");
-  auto tmppath = filepath + "." + Random::singleton()->hex128();
+  auto filepath_tmp = filepath + "." + Random::singleton()->hex128();
 
-  cstable::CSTableBuilder cstable(schema.get());
+  {
+    cstable::CSTableBuilder cstable(schema.get());
 
-  auto reader = partition->getReader();
-  reader->fetchRecords([&schema, &cstable] (const Buffer& record) {
-      msg::MessageObject obj;
-      msg::MessageDecoder::decode(record.data(), record.size(), *schema, &obj);
-      cstable.addRecord(obj);
-  });
+    auto reader = partition->getReader();
+    reader->fetchRecords([&schema, &cstable] (const Buffer& record) {
+        msg::MessageObject obj;
+        msg::MessageDecoder::decode(record.data(), record.size(), *schema, &obj);
+        cstable.addRecord(obj);
+    });
 
-  cstable.write(tmppath);
-  FileUtil::mv(tmppath, filepath);
+    cstable.write(filepath_tmp);
+  }
+
+  {
+    auto metafile = File::openFile(
+        metapath_tmp,
+        File::O_CREATE | File::O_WRITE);
+
+    metafile.write(StringUtil::toString(snap->nrecs));
+  }
+
+  FileUtil::mv(filepath_tmp, filepath);
+  FileUtil::mv(metapath_tmp, metapath);
 }
 
 } // namespace tsdb
