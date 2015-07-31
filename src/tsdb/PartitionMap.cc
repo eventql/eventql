@@ -116,6 +116,10 @@ void PartitionMap::open() {
         db_path_);
 
     partitions_.emplace(db_key, partition);
+
+    auto change = mkRef(new PartitionChangeNotification());
+    change->partition = partition;
+    publishPartitionChange(change);
   }
 
   cursor->close();
