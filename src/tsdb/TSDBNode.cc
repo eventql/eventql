@@ -19,57 +19,30 @@ using namespace stx;
 
 namespace tsdb {
 
-TSDBNode::TSDBNode(const String& db_path) :
-    pmap_(db_path) {}
+TSDBNode::TSDBNode(PartitionMap* pmap) : pmap_(pmap) {}
 
 Option<RefPtr<Table>> TSDBNode::findTable(
     const String& stream_ns,
     const String& stream_key) const {
-  return pmap_.findTable(stream_ns, stream_key);
+  return pmap_->findTable(stream_ns, stream_key);
 }
 
 void TSDBNode::createTable(const TableConfig& table) {
-  pmap_.configureTable(table);
-}
-
-void TSDBNode::start(
-    size_t num_compaction_threads,
-    size_t num_replication_threads) {
-  pmap_.open();
-
-  //for (int i = 0; i < num_compaction_threads; ++i) {
-  //  compaction_workers_.emplace_back(new CompactionWorker(&noderef_));
-  //  compaction_workers_.back()->start();
-  //}
-
-  //for (int i = 0; i < num_replication_threads; ++i) {
-  //  replication_workers_.emplace_back(new ReplicationWorker(&noderef_));
-  //  replication_workers_.back()->start();
-  //}
-}
-
-void TSDBNode::stop() {
-  //for (auto& w : compaction_workers_) {
-  //  w->stop();
-  //}
-
-  //for (auto& w : replication_workers_) {
-  //  w->stop();
-  //}
+  pmap_->configureTable(table);
 }
 
 RefPtr<Partition> TSDBNode::findOrCreatePartition(
     const String& tsdb_namespace,
     const String& stream_key,
     const SHA1Hash& partition_key) {
-  return pmap_.findOrCreatePartition(tsdb_namespace, stream_key, partition_key);
+  return pmap_->findOrCreatePartition(tsdb_namespace, stream_key, partition_key);
 }
 
 Option<RefPtr<Partition>> TSDBNode::findPartition(
     const String& tsdb_namespace,
     const String& stream_key,
     const SHA1Hash& partition_key) {
-  return pmap_.findPartition(tsdb_namespace, stream_key, partition_key);
+  return pmap_->findPartition(tsdb_namespace, stream_key, partition_key);
 }
 
 void TSDBNode::fetchPartition(
@@ -93,7 +66,7 @@ void TSDBNode::fetchPartitionWithSampling(
     size_t sample_modulo,
     size_t sample_index,
     Function<void (const Buffer& record)> fn) {
-  auto partition = pmap_.findPartition(
+  auto partition = pmap_->findPartition(
       tsdb_namespace,
       stream_key,
       partition_key);
@@ -109,13 +82,13 @@ void TSDBNode::fetchPartitionWithSampling(
 void TSDBNode::listTables(
     const String& tsdb_namespace,
     Function<void (const TSDBTableInfo& table)> fn) const {
-  pmap_.listTables(tsdb_namespace, fn);
+  pmap_->listTables(tsdb_namespace, fn);
 }
 
 Option<TSDBTableInfo> TSDBNode::tableInfo(
       const String& tsdb_namespace,
       const String& table_key) const {
-  auto table = pmap_.findTable(tsdb_namespace, table_key);
+  auto table = pmap_->findTable(tsdb_namespace, table_key);
   if (table.isEmpty()) {
     return None<TSDBTableInfo>();
   }
@@ -131,7 +104,7 @@ Option<PartitionInfo> TSDBNode::partitionInfo(
     const String& tsdb_namespace,
     const String& table_key,
     const SHA1Hash& partition_key) {
-  auto partition = pmap_.findPartition(
+  auto partition = pmap_->findPartition(
       tsdb_namespace,
       table_key,
       partition_key);

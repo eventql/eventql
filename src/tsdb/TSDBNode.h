@@ -32,7 +32,7 @@ namespace tsdb {
 class TSDBNode {
 public:
 
-  TSDBNode(const String& db_path);
+  TSDBNode(PartitionMap* pmap);
 
   void createTable(const TableConfig& config);
 
@@ -83,14 +83,8 @@ public:
       const String& table_key,
       const SHA1Hash& partition_key);
 
-  void start(
-      size_t num_comaction_threads = 8,
-      size_t num_replication_threads = 4);
-
-  void stop();
-
 protected:
-  PartitionMap pmap_;
+  PartitionMap* pmap_;
 };
 
 } // namespace tdsb

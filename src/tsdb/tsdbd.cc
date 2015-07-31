@@ -119,15 +119,15 @@ int main(int argc, const char** argv) {
     repl_scheme->addHost(r);
   }
 
-  tsdb::TSDBNode tsdb_node(dir);
+  tsdb::PartitionMap pmap(dir);
+  pmap.open();
+
+  tsdb::TSDBNode tsdb_node(&pmap);
 
   tsdb::TSDBServlet tsdb_servlet(&tsdb_node);
   http_router.addRouteByPrefixMatch("/tsdb", &tsdb_servlet, &tpool);
 
-  tsdb_node.start();
   ev.run();
-
-  tsdb_node.stop();
   stx::logInfo("tsdb", "Exiting...");
 
   exit(0);
