@@ -210,6 +210,36 @@ Option<RefPtr<Partition>> TSDBNode::findPartition(
   }
 }
 
+void TSDBNode::fetchPartition(
+    const String& tsdb_namespace,
+    const String& stream_key,
+    const SHA1Hash& partition_key,
+    Function<void (const Buffer& record)> fn) {
+  fetchPartitionWithSampling(
+      tsdb_namespace,
+      stream_key,
+      partition_key,
+      0,
+      0,
+      fn);
+}
+
+void TSDBNode::fetchPartitionWithSampling(
+    const String& tsdb_namespace,
+    const String& stream_key,
+    const SHA1Hash& partition_key,
+    size_t sample_modulo,
+    size_t sample_index,
+    Function<void (const Buffer& record)> fn) {
+  auto partition = findPartition(tsdb_namespace, stream_key, partition_key);
+  if (partition.isEmpty()) {
+    return;
+  }
+
+  auto reader = partition.get()->getReader();
+  reader->fetchRecordsWithSampling(sample_modulo, sample_index, fn);
+}
+
 void TSDBNode::listTables(
     const String& tsdb_namespace,
     Function<void (const TSDBTableInfo& table)> fn) const {

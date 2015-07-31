@@ -29,7 +29,7 @@ struct PartitionReader : public RefCounted {
       Function<void (const Buffer& record)> fn);
 
 protected:
-  RefPtr<PartitionSnapshot> snap;
+  RefPtr<PartitionSnapshot> snap_;
 };
 
 } // namespace tdsb
