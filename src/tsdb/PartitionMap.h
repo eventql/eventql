@@ -22,6 +22,7 @@
 #include <tsdb/TSDBTableInfo.h>
 #include <tsdb/SQLEngine.h>
 #include <tsdb/PartitionInfo.pb.h>
+#include <tsdb/PartitionChangeNotification.h>
 #include <tsdb/RecordEnvelope.pb.h>
 
 using namespace stx;
@@ -30,7 +31,6 @@ namespace tsdb {
 
 class PartitionMap {
 public:
-
   PartitionMap(const String& db_path);
 
   void configureTable(const TableConfig& config);
@@ -54,6 +54,10 @@ public:
       const String& stream_key,
       const SHA1Hash& partition_key);
 
+  void subscribeToPartitionChanges(PartitionChangeCallbackFn fn);
+
+  void publishPartitionChange(RefPtr<PartitionChangeNotification> change);
+
 protected:
 
   Option<RefPtr<Table>> findTableWithLock(
@@ -66,6 +70,7 @@ protected:
   mutable std::mutex mutex_;
   HashMap<String, RefPtr<Table>> tables_;
   HashMap<String, RefPtr<Partition>> partitions_;
+  Vector<PartitionChangeCallbackFn> callbacks_;
 };
 
 } // namespace tdsb
