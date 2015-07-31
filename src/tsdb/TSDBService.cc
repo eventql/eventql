@@ -21,12 +21,6 @@ namespace tsdb {
 
 TSDBService::TSDBService(PartitionMap* pmap) : pmap_(pmap) {}
 
-Option<RefPtr<Table>> TSDBService::findTable(
-    const String& stream_ns,
-    const String& stream_key) const {
-  return pmap_->findTable(stream_ns, stream_key);
-}
-
 void TSDBService::createTable(const TableConfig& table) {
   pmap_->configureTable(table);
 }
@@ -105,12 +99,6 @@ void TSDBService::fetchPartitionWithSampling(
 
   auto reader = partition.get()->getReader();
   reader->fetchRecordsWithSampling(sample_modulo, sample_index, fn);
-}
-
-void TSDBService::listTables(
-    const String& tsdb_namespace,
-    Function<void (const TSDBTableInfo& table)> fn) const {
-  pmap_->listTables(tsdb_namespace, fn);
 }
 
 Option<PartitionInfo> TSDBService::partitionInfo(

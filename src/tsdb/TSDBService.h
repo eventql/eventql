@@ -35,14 +35,6 @@ public:
 
   void createTable(const TableConfig& config);
 
-  Option<RefPtr<Table>> findTable(
-      const String& tsdb_namespace,
-      const String& table_name) const;
-
-  void listTables(
-      const String& tsdb_namespace,
-      Function<void (const TSDBTableInfo& table)> fn) const;
-
   void insertRecords(const RecordEnvelopeList& records);
 
   void insertRecord(
