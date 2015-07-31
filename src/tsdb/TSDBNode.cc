@@ -26,15 +26,8 @@ static mdb::MDBOptions tsdb_mdb_opts() {
   return opts;
 };
 
-TSDBNode::TSDBNode(
-    const String& db_path,
-    RefPtr<dproc::ReplicationScheme> replication_scheme,
-    http::HTTPConnectionPool* http) :
-    pmap_(db_path),
-    noderef_(
-        db_path,
-        replication_scheme,
-        http) {}
+TSDBNode::TSDBNode(const String& db_path) :
+    pmap_(db_path) {}
 
 Option<RefPtr<Table>> TSDBNode::findTable(
     const String& stream_ns,
@@ -51,25 +44,25 @@ void TSDBNode::start(
     size_t num_replication_threads) {
   pmap_.open();
 
-  for (int i = 0; i < num_compaction_threads; ++i) {
-    compaction_workers_.emplace_back(new CompactionWorker(&noderef_));
-    compaction_workers_.back()->start();
-  }
+  //for (int i = 0; i < num_compaction_threads; ++i) {
+  //  compaction_workers_.emplace_back(new CompactionWorker(&noderef_));
+  //  compaction_workers_.back()->start();
+  //}
 
-  for (int i = 0; i < num_replication_threads; ++i) {
-    replication_workers_.emplace_back(new ReplicationWorker(&noderef_));
-    replication_workers_.back()->start();
-  }
+  //for (int i = 0; i < num_replication_threads; ++i) {
+  //  replication_workers_.emplace_back(new ReplicationWorker(&noderef_));
+  //  replication_workers_.back()->start();
+  //}
 }
 
 void TSDBNode::stop() {
-  for (auto& w : compaction_workers_) {
-    w->stop();
-  }
+  //for (auto& w : compaction_workers_) {
+  //  w->stop();
+  //}
 
-  for (auto& w : replication_workers_) {
-    w->stop();
-  }
+  //for (auto& w : replication_workers_) {
+  //  w->stop();
+  //}
 }
 
 RefPtr<Partition> TSDBNode::findOrCreatePartition(
@@ -158,7 +151,7 @@ Option<PartitionInfo> TSDBNode::partitionInfo(
 }
 
 const String& TSDBNode::dbPath() const {
-  return noderef_.db_path;
+  return db_path_;
 }
 
 } // namespace tdsb

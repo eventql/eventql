@@ -119,7 +119,7 @@ int main(int argc, const char** argv) {
     repl_scheme->addHost(r);
   }
 
-  tsdb::TSDBNode tsdb_node(dir, repl_scheme.get(), &http);
+  tsdb::TSDBNode tsdb_node(dir);
 
   tsdb::TSDBServlet tsdb_servlet(&tsdb_node);
   http_router.addRouteByPrefixMatch("/tsdb", &tsdb_servlet, &tpool);

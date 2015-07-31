@@ -16,7 +16,6 @@
 #include <stx/mdb/MDB.h>
 #include <tsdb/TableConfig.pb.h>
 #include <tsdb/Partition.h>
-#include <tsdb/TSDBNodeRef.h>
 #include <tsdb/CompactionWorker.h>
 #include <tsdb/ReplicationWorker.h>
 #include <tsdb/TSDBNodeConfig.pb.h>
@@ -33,10 +32,7 @@ namespace tsdb {
 class TSDBNode {
 public:
 
-  TSDBNode(
-      const String& db_path,
-      RefPtr<dproc::ReplicationScheme> replication_scheme,
-      http::HTTPConnectionPool* http);
+  TSDBNode(const String& db_path);
 
   void createTable(const TableConfig& config);
 
@@ -97,12 +93,7 @@ public:
 
 protected:
   PartitionMap pmap_;
-  TSDBNodeRef noderef_;
-  mutable std::mutex mutex_;
-  HashMap<String, RefPtr<Table>> tables_;
-  HashMap<String, RefPtr<Partition>> partitions_;
-  Vector<RefPtr<CompactionWorker>> compaction_workers_;
-  Vector<RefPtr<ReplicationWorker>> replication_workers_;
+  String db_path_;
 };
 
 } // namespace tdsb
