@@ -219,6 +219,21 @@ void SSTableReader::SSTableReaderCursor::getData(void** data, size_t* size) {
   *size = header->data_size;
 }
 
+size_t SSTableReader::countRows() {
+  size_t n = 0;
+
+  auto cursor = getCursor();
+  while (cursor->valid()) {
+    ++n;
+
+    if (!cursor->next()) {
+      break;
+    }
+  }
+
+  return n;
+}
+
 }
 }
 

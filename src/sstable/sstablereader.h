@@ -87,6 +87,11 @@ public:
    **/
   size_t headerSize() const;
 
+  /**
+   * Returns the number of rows in thos table
+   */
+  size_t countRows();
+
 private:
   RefPtr<VFSFile> mmap_;
   uint64_t file_size_;
