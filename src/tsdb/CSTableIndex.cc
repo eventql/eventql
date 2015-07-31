@@ -19,6 +19,13 @@ using namespace stx;
 
 namespace tsdb {
 
+Option<RefPtr<VFSFile>> CSTableIndex::fetchCSTable(
+    const String& tsdb_namespace,
+    const String& table,
+    const SHA1Hash& partition) const {
+  return None<RefPtr<VFSFile>>();
+}
+
 /*
 CSTableIndex::CSTableIndex(
     const TSDBTableScanSpec params,
