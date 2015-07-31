@@ -7,9 +7,14 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
+#include <stx/fnv.h>
+#include <stx/io/fileutil.h>
+#include <sstable/sstablereader.h>
 #include <tsdb/PartitionReader.h>
 
 using namespace stx;
+
+namespace tsdb {
 
 PartitionReader::PartitionReader(
     RefPtr<PartitionSnapshot> head) :
@@ -25,7 +30,38 @@ void PartitionReader::fetchRecords(Function<void (const Buffer& record)> fn) {
 void PartitionReader::fetchRecordsWithSampling(
     size_t sample_modulo,
     size_t sample_index,
-    Function<void (const Buffer& record)> fn);
+    Function<void (const Buffer& record)> fn) {
+  FNV<uint64_t> fnv;
+
+  const auto& files = snap_->state.sstable_files();
+  for (const auto& f : files) {
+    auto fpath = FileUtil::joinPaths(snap_->base_path, f);
+    sstable::SSTableReader reader(fpath);
+    auto cursor = reader.getCursor();
+
+    while (cursor->valid()) {
+      uint64_t* key;
+      size_t key_size;
+      cursor->getKey((void**) &key, &key_size);
+      if (key_size != SHA1Hash::kSize) {
+        RAISE(kRuntimeError, "invalid row");
+      }
+
+      if (sample_modulo == 0 ||
+          (fnv.hash(key, key_size) % sample_modulo == sample_index)) {
+        void* data;
+        size_t data_size;
+        cursor->getData(&data, &data_size);
+
+        fn(Buffer(data, data_size));
+      }
+
+      if (!cursor->next()) {
+        break;
+      }
+    }
+  }
+}
 
 } // namespace tdsb
 
