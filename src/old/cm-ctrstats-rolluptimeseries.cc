@@ -19,7 +19,7 @@
 #include "stx/mdb/MDBUtil.h"
 #include "stx/json/json.h"
 #include "sstable/sstablereader.h"
-#include "sstable/sstablewriter.h"
+#include "sstable/SSTableEditor.h"
 #include "sstable/SSTableColumnSchema.h"
 #include "sstable/SSTableColumnReader.h"
 #include "sstable/SSTableColumnWriter.h"
@@ -118,7 +118,7 @@ void writeOutputTable(const String& filename, const Vector<OutputRow>& rows) {
 
   /* open output sstable */
   stx::logInfo("cm.ctrstats", "Writing results to: $0", filename);
-  auto sstable_writer = sstable::SSTableWriter::create(
+  auto sstable_writer = sstable::SSTableEditor::create(
       filename,
       sstable::IndexProvider{},
       nullptr,
