@@ -33,6 +33,7 @@ void PartitionReader::fetchRecordsWithSampling(
     Function<void (const Buffer& record)> fn) {
   FNV<uint64_t> fnv;
 
+  auto nrows = snap_->nrecs;
   const auto& files = snap_->state.sstable_files();
   for (const auto& f : files) {
     auto fpath = FileUtil::joinPaths(snap_->base_path, f);
@@ -54,6 +55,10 @@ void PartitionReader::fetchRecordsWithSampling(
         cursor->getData(&data, &data_size);
 
         fn(Buffer(data, data_size));
+      }
+
+      if (--nrows == 0) {
+        return;
       }
 
       if (!cursor->next()) {
