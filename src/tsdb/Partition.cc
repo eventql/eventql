@@ -57,13 +57,6 @@ RefPtr<Partition> Partition::reopen(
     RefPtr<Table> table,
     const SHA1Hash& partition_key,
     TSDBNodeRef* node) {
-  stx::logDebug(
-      "tsdb",
-      "Loading partition  $0/$1/$2",
-      tsdb_namespace,
-      table->name(),
-      partition_key.toString());
-
   auto pdir = FileUtil::joinPaths(
       node->db_path,
       StringUtil::format(
@@ -77,7 +70,20 @@ RefPtr<Partition> Partition::reopen(
               pdir,
               StringUtil::format("$0.snx", partition_key.toString()))));
 
-  auto nrecs = 0; // FIXPAUL
+  auto nrecs = 0;
+  const auto& files = state.sstable_files();
+  for (const auto& f : files) {
+    sstable::SSTableReader reader(FileUtil::joinPaths(pdir, f));
+    nrecs += reader.countRows();
+  }
+
+  stx::logDebug(
+      "tsdb",
+      "Loading partition $0/$1/$2 ($3 records)",
+      tsdb_namespace,
+      table->name(),
+      partition_key.toString(),
+      nrecs);
 
   return new Partition(
       new PartitionSnapshot(state, pdir, nrecs),
