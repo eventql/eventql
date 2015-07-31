@@ -57,6 +57,22 @@ void TSDBService::insertRecords(const RecordEnvelopeList& record_list) {
   }
 }
 
+void TSDBService::insertRecord(
+    const String& tsdb_namespace,
+    const String& stream_key,
+    const SHA1Hash& partition_key,
+    const SHA1Hash& record_id,
+    const Buffer& record) {
+
+  auto partition = pmap_->findOrCreatePartition(
+      tsdb_namespace,
+      stream_key,
+      partition_key);
+
+  auto writer = partition->getWriter();
+  writer->insertRecord(record_id, record);
+}
+
 void TSDBService::fetchPartition(
     const String& tsdb_namespace,
     const String& stream_key,
