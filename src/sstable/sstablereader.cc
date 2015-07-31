@@ -219,14 +219,14 @@ void SSTableReader::SSTableReaderCursor::getData(void** data, size_t* size) {
 }
 
 size_t SSTableReader::countRows() {
-  size_t n = 0;
+  size_t n = header_.rowCount();
 
-  auto cursor = getCursor();
-  while (cursor->valid()) {
-    ++n;
-
-    if (!cursor->next()) {
-      break;
+  if (n == uint64_t(-1)) {
+    auto cursor = getCursor();
+    for (n = 0; cursor->valid(); ++n) {
+      if (!cursor->next()) {
+        break;
+      }
     }
   }
 
