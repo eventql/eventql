@@ -44,15 +44,7 @@ public:
       const String& tsdb_namespace,
       Function<void (const TSDBTableInfo& table)> fn) const;
 
-  Option<RefPtr<Partition>> findPartition(
-      const String& tsdb_namespace,
-      const String& stream_key,
-      const SHA1Hash& partition_key);
-
-  RefPtr<Partition> findOrCreatePartition(
-      const String& tsdb_namespace,
-      const String& stream_key,
-      const SHA1Hash& partition_key);
+  void insertRecords(const RecordEnvelopeList& records);
 
   void fetchPartition(
       const String& tsdb_namespace,

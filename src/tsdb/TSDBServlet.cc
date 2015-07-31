@@ -95,31 +95,7 @@ void TSDBServlet::insertRecords(
     http::HTTPResponse* res,
     URI* uri) {
   auto record_list = msg::decode<RecordEnvelopeList>(req->body());
-
-  Vector<RefPtr<Partition>> partition_refs;
-  HashMap<Partition*, Vector<RecordRef>> grouped;
-  for (const auto& record : record_list.records()) {
-    auto partition = node_->findOrCreatePartition(
-        record.tsdb_namespace(),
-        record.stream_key(),
-        SHA1Hash::fromHexString(record.partition_key()));
-
-    auto record_data = record.record_data().data();
-    auto record_size = record.record_data().size();
-
-    if (grouped.count(partition.get()) == 0) {
-      partition_refs.emplace_back(partition);
-    }
-
-    grouped[partition.get()].emplace_back(
-        SHA1Hash::fromHexString(record.record_id()),
-        Buffer(record_data, record_size));
-  }
-
-  for (const auto& group : grouped) {
-    group.first->getWriter()->insertRecords(group.second);
-  }
-
+  node_->insertRecords(record_list);
   res->setStatus(http::kStatusCreated);
 }
 
@@ -175,29 +151,23 @@ void TSDBServlet::streamPartition(
   res->addHeader("Connection", "close");
   res_stream->startResponse(*res);
 
-  auto partition = node_->findPartition(
+  node_->fetchPartitionWithSampling(
       tsdb_namespace,
       stream_key,
-      SHA1Hash::fromHexString(partition_key));
+      SHA1Hash::fromHexString(partition_key),
+      sample_mod,
+      sample_idx,
+      [&res_stream] (const Buffer& record) {
+    util::BinaryMessageWriter buf;
 
-  if (!partition.isEmpty()) {
-    auto reader = partition.get()->getReader();
+    if (record.size() > 0) {
+      buf.appendUInt64(record.size());
+      buf.append(record.data(), record.size());
+      res_stream->writeBodyChunk(Buffer(buf.data(), buf.size()));
+    }
 
-    reader->fetchRecordsWithSampling(
-        sample_mod,
-        sample_idx,
-        [&res_stream] (const Buffer& record) {
-      util::BinaryMessageWriter buf;
-
-      if (record.size() > 0) {
-        buf.appendUInt64(record.size());
-        buf.append(record.data(), record.size());
-        res_stream->writeBodyChunk(Buffer(buf.data(), buf.size()));
-      }
-
-      res_stream->waitForReader();
-    });
-  }
+    res_stream->waitForReader();
+  });
 
   util::BinaryMessageWriter buf;
   buf.appendUInt64(0);
@@ -233,20 +203,18 @@ void TSDBServlet::fetchPartitionInfo(
     return;
   }
 
-  auto partition = node_->findPartition(
+  auto pinfo = node_->partitionInfo(
       tsdb_namespace,
       stream_key,
       SHA1Hash::fromHexString(partition_key));
 
-  PartitionInfo pinfo;
-  pinfo.set_partition_key(partition_key);
-  if (!partition.isEmpty()) {
-    pinfo = partition.get()->getInfo();
+  if (pinfo.isEmpty()) {
+    res->setStatus(http::kStatusNotFound);
+  } else {
+    res->setStatus(http::kStatusOK);
+    res->addHeader("Content-Type", "application/x-protobuf");
+    res->addBody(*msg::encode(pinfo.get()));
   }
-
-  res->setStatus(http::kStatusOK);
-  res->addHeader("Content-Type", "application/x-protobuf");
-  res->addBody(*msg::encode(pinfo));
 }
 
 void TSDBServlet::executeSQL(

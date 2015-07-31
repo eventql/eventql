@@ -31,20 +31,6 @@ void TSDBService::createTable(const TableConfig& table) {
   pmap_->configureTable(table);
 }
 
-RefPtr<Partition> TSDBService::findOrCreatePartition(
-    const String& tsdb_namespace,
-    const String& stream_key,
-    const SHA1Hash& partition_key) {
-  return pmap_->findOrCreatePartition(tsdb_namespace, stream_key, partition_key);
-}
-
-Option<RefPtr<Partition>> TSDBService::findPartition(
-    const String& tsdb_namespace,
-    const String& stream_key,
-    const SHA1Hash& partition_key) {
-  return pmap_->findPartition(tsdb_namespace, stream_key, partition_key);
-}
-
 void TSDBService::fetchPartition(
     const String& tsdb_namespace,
     const String& stream_key,
