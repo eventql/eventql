@@ -115,10 +115,13 @@ RefPtr<Table> Partition::getTable() {
 PartitionInfo Partition::getInfo() const {
   auto snap = head_;
 
+  auto checksum = SHA1::compute(
+      StringUtil::format("$0~$1", snap->key.toString(), snap->nrecs));
+
   PartitionInfo pi;
   pi.set_partition_key(snap->key.toString());
   pi.set_stream_key(table_->name());
-  //pi.set_checksum(records_.checksum().toString());
+  pi.set_checksum(checksum.toString());
   pi.set_exists(true);
   return pi;
 }
