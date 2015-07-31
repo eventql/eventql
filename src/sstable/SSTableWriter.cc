@@ -80,6 +80,7 @@ uint64_t SSTableWriter::appendRow(
 
   auto roff = hdr_.bodySize();
   hdr_.setBodySize(roff + rsize);
+  hdr_.setRowCount(hdr_.rowCount() + 1);
   meta_dirty_ = true;
 
   return roff;

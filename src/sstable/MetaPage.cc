@@ -30,9 +30,11 @@ MetaPage::MetaPage() :
   version_(0),
   flags_(0),
   body_size_(0),
+  num_rows_(0),
   userdata_checksum_(0),
   userdata_size_(0) {}
 
+// FIXPAUL move logic into fileheaderreader
 size_t MetaPage::userdataOffset() const {
   switch (version_) {
 
@@ -42,6 +44,10 @@ size_t MetaPage::userdataOffset() const {
 
     case 0x2:
       return 30;
+      break;
+
+    case 0x3:
+      return 38;
       break;
 
     default:
@@ -56,6 +62,14 @@ uint16_t MetaPage::version() const {
 
 size_t MetaPage::headerSize() const {
   return bodyOffset();
+}
+
+size_t MetaPage::rowCount() const {
+  return num_rows_;
+}
+
+void MetaPage::setRowCount(size_t new_row_count) {
+  num_rows_ = new_row_count;
 }
 
 size_t MetaPage::bodySize() const {

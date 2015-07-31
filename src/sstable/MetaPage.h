@@ -48,6 +48,11 @@ public:
   size_t rowCount() const;
 
   /**
+   * Set the number of rows in this table
+   */
+  void setRowCount(size_t new_row_count);
+
+  /**
    * Returns the body size in bytes
    */
   size_t bodySize() const;

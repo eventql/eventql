@@ -21,13 +21,14 @@ size_t FileHeaderWriter::calculateSize(size_t userdata_size) {
 void FileHeaderWriter::writeMetaPage(
     const MetaPage& header,
     OutputStream* os) {
-  if (header.version() != 0x02) {
+  if (header.version() != BinaryFormat::kVersion) {
     RAISE(kIllegalStateError, "unsupported sstable version");
   }
 
   os->appendUInt32(BinaryFormat::kMagicBytes);
   os->appendUInt16(header.version());
   os->appendUInt64(header.flags());
+  os->appendUInt64(header.rowCount());
   os->appendUInt64(header.bodySize());
   os->appendUInt32(header.userdataChecksum());
   os->appendUInt32(header.userdataSize());
@@ -46,6 +47,7 @@ void FileHeaderWriter::writeHeader(
   os->write((char*) userdata, userdata_size);
 }
 
+// DEPRECATED
 FileHeaderWriter::FileHeaderWriter(
     void* buf,
     size_t buf_size,
@@ -56,7 +58,7 @@ FileHeaderWriter::FileHeaderWriter(
   uint64_t flags = 0;
 
   appendUInt32(BinaryFormat::kMagicBytes);
-  appendUInt16(BinaryFormat::kVersion);
+  appendUInt16(0x2);
   appendUInt64(flags);
   appendUInt64(body_size);
 
@@ -72,15 +74,18 @@ FileHeaderWriter::FileHeaderWriter(
   }
 }
 
+// DEPRECATED
 FileHeaderWriter::FileHeaderWriter(
     void* buf,
     size_t buf_size) :
     stx::util::BinaryMessageWriter(buf, buf_size) {}
 
+// DEPRECATED
 void FileHeaderWriter::updateBodySize(size_t body_size) {
   updateUInt64(14, body_size); // FIXPAUL
 }
 
+// DEPRECATED
 void FileHeaderWriter::setFlag(FileHeaderFlags flag) {
   auto flags = *((uint64_t*) (((char*) ptr_) + 6));
   flags |= (uint64_t) flag;

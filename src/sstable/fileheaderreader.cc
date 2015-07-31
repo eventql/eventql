@@ -37,6 +37,11 @@ MetaPage FileHeaderReader::readMetaPage(InputStream* is) {
       hdr.num_rows_ = uint64_t(-1);
       break;
 
+    case 0x3:
+      hdr.flags_ = is->readUInt64();
+      hdr.num_rows_ = is->readUInt64();
+      break;
+
     default:
       RAISE(kIllegalStateError, "unsupported sstable version");
 

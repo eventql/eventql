@@ -73,7 +73,7 @@ enum class FileHeaderFlags : uint64_t {
 
 class BinaryFormat {
 public:
-  static const uint16_t kVersion = 2;
+  static const uint16_t kVersion = 3;
   static const uint64_t kMagicBytes = 0x17171717;
 
   struct __attribute__((packed)) RowHeader {

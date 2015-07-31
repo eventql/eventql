@@ -24,11 +24,6 @@ class FileHeaderWriter : public stx::util::BinaryMessageWriter {
 public:
 
   /**
-   * DEPRECATED
-   */
-  static size_t calculateSize(size_t userdata_size);
-
-  /**
    * Write the header meta page, but not the userdata to the provided output
    * stream
    */
@@ -46,6 +41,12 @@ public:
       OutputStream* os);
 
   /**
+   * DEPRECATED
+   */
+  static size_t calculateSize(size_t userdata_size);
+
+  /**
+   * DEPRECATED
    * Write a new file header
    */
   FileHeaderWriter(
