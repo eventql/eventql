@@ -20,7 +20,7 @@
 #include "stx/mdb/MDB.h"
 #include "stx/mdb/MDBUtil.h"
 #include "sstable/sstablereader.h"
-#include "sstable/sstablewriter.h"
+#include "sstable/SSTableEditor.h"
 #include "sstable/SSTableColumnSchema.h"
 #include "sstable/SSTableColumnReader.h"
 #include "sstable/SSTableColumnWriter.h"

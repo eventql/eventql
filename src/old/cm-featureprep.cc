@@ -29,7 +29,7 @@
 #include "stx/http/httprouter.h"
 #include "stx/http/httpserver.h"
 #include "sstable/sstablereader.h"
-#include "sstable/sstablewriter.h"
+#include "sstable/SSTableEditor.h"
 #include "sstable/SSTableColumnSchema.h"
 #include "sstable/SSTableColumnReader.h"
 #include "sstable/SSTableColumnWriter.h"
@@ -163,7 +163,7 @@ int main(int argc, const char** argv) {
     FileUtil::rm(output_meta_file + "~");
   }
 
-  auto sstable_writer = sstable::SSTableWriter::create(
+  auto sstable_writer = sstable::SSTableEditor::create(
       output_data_file + "~",
       sstable::IndexProvider{},
       NULL,
@@ -245,7 +245,7 @@ int main(int argc, const char** argv) {
   sstable_writer->finalize();
 
   /* write meta sstable */
-  auto meta_sstable_writer = sstable::SSTableWriter::create(
+  auto meta_sstable_writer = sstable::SSTableEditor::create(
       output_meta_file + "~",
       sstable::IndexProvider{},
       NULL,
