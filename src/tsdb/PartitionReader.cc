@@ -63,5 +63,10 @@ void PartitionReader::fetchRecordsWithSampling(
   }
 }
 
+Option<RefPtr<VFSFile>> PartitionReader::fetchSecondaryIndex(
+    const String& index) const {
+  return None<RefPtr<VFSFile>>();
+}
+
 } // namespace tdsb
 
