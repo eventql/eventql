@@ -31,6 +31,32 @@ void TSDBService::createTable(const TableConfig& table) {
   pmap_->configureTable(table);
 }
 
+void TSDBService::insertRecords(const RecordEnvelopeList& record_list) {
+  Vector<RefPtr<Partition>> partition_refs;
+  HashMap<Partition*, Vector<RecordRef>> grouped;
+  for (const auto& record : record_list.records()) {
+    auto partition = pmap_->findOrCreatePartition(
+        record.tsdb_namespace(),
+        record.stream_key(),
+        SHA1Hash::fromHexString(record.partition_key()));
+
+    auto record_data = record.record_data().data();
+    auto record_size = record.record_data().size();
+
+    if (grouped.count(partition.get()) == 0) {
+      partition_refs.emplace_back(partition);
+    }
+
+    grouped[partition.get()].emplace_back(
+        SHA1Hash::fromHexString(record.record_id()),
+        Buffer(record_data, record_size));
+  }
+
+  for (const auto& group : grouped) {
+    group.first->getWriter()->insertRecords(group.second);
+  }
+}
+
 void TSDBService::fetchPartition(
     const String& tsdb_namespace,
     const String& stream_key,
