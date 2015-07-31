@@ -55,7 +55,6 @@ public:
   SSTableReader(RefPtr<VFSFile> vfs_file);
   SSTableReader(const SSTableReader& other) = delete;
   SSTableReader& operator=(const SSTableReader& other) = delete;
-  ~SSTableReader();
 
   /**
    * Get an sstable cursor for the body of this sstable
@@ -94,8 +93,9 @@ public:
 
 private:
   RefPtr<VFSFile> mmap_;
+  MemoryInputStream is_;
   uint64_t file_size_;
-  FileHeaderReader header_;
+  MetaPage header_;
 };
 
 

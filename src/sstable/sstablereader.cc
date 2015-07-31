@@ -28,22 +28,21 @@ SSTableReader::SSTableReader(
 SSTableReader::SSTableReader(
     RefPtr<VFSFile> vfs_file) :
     mmap_(vfs_file),
+    is_(mmap_->data(), mmap_->size()),
     file_size_(mmap_->size()),
-    header_(mmap_->data(), file_size_) {
-  if (!header_.verify()) {
-    RAISE(kIllegalStateError, "corrupt sstable header");
-  }
+    header_(FileHeaderReader::readMetaPage(&is_)) {
+  //if (!header_.verify()) {
+  //  RAISE(kIllegalStateError, "corrupt sstable header");
+  //}
 
   if (header_.headerSize() + header_.bodySize() > file_size_) {
     RAISE(kIllegalStateError, "file metadata offsets exceed file bounds");
   }
 }
 
-SSTableReader::~SSTableReader() {
-}
-
 void SSTableReader::readHeader(const void** userdata, size_t* userdata_size) {
-  header_.readUserdata(userdata, userdata_size);
+  *userdata_size = header_.userdataSize();
+  *userdata = mmap_->structAt<void>(header_.userdataOffset());
 }
 
 Buffer SSTableReader::readHeader() {
