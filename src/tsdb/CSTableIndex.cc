@@ -21,7 +21,7 @@ namespace tsdb {
 
 CSTableIndex::CSTableIndex(
     const TSDBTableScanSpec params,
-    tsdb::TSDBNode* tsdb) :
+    tsdb::TSDBService* tsdb) :
     params_(params),
     tsdb_(tsdb) {}
 

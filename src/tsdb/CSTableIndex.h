@@ -10,7 +10,7 @@
 #pragma once
 #include <stx/stdtypes.h>
 #include <tsdb/TSDBTableScanSpec.pb.h>
-#include <tsdb/TSDBNode.h>
+#include <tsdb/TSDBService.h>
 #include <stx/protobuf/MessageSchema.h>
 #include <stx/random.h>
 #include <dproc/BlobRDD.h>
@@ -24,7 +24,7 @@ public:
 
   CSTableIndex(
       const TSDBTableScanSpec params,
-      tsdb::TSDBNode* tsdb);
+      tsdb::TSDBService* tsdb);
 
   RefPtr<VFSFile> computeBlob(dproc::TaskContext* context) override;
 
@@ -34,7 +34,7 @@ public:
 
 protected:
   TSDBTableScanSpec params_;
-  tsdb::TSDBNode* tsdb_;
+  tsdb::TSDBService* tsdb_;
 };
 
 }

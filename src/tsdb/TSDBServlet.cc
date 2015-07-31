@@ -26,7 +26,7 @@ using namespace stx;
 
 namespace tsdb {
 
-TSDBServlet::TSDBServlet(TSDBNode* node) : node_(node) {}
+TSDBServlet::TSDBServlet(TSDBService* node) : node_(node) {}
 
 void TSDBServlet::handleHTTPRequest(
     RefPtr<http::HTTPRequestStream> req_stream,

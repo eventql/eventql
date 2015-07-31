@@ -12,40 +12,40 @@
 #include <stx/protobuf/msg.h>
 #include <stx/io/fileutil.h>
 #include <sstable/sstablereader.h>
-#include <tsdb/TSDBNode.h>
+#include <tsdb/TSDBService.h>
 #include <tsdb/PartitionState.pb.h>
 
 using namespace stx;
 
 namespace tsdb {
 
-TSDBNode::TSDBNode(PartitionMap* pmap) : pmap_(pmap) {}
+TSDBService::TSDBService(PartitionMap* pmap) : pmap_(pmap) {}
 
-Option<RefPtr<Table>> TSDBNode::findTable(
+Option<RefPtr<Table>> TSDBService::findTable(
     const String& stream_ns,
     const String& stream_key) const {
   return pmap_->findTable(stream_ns, stream_key);
 }
 
-void TSDBNode::createTable(const TableConfig& table) {
+void TSDBService::createTable(const TableConfig& table) {
   pmap_->configureTable(table);
 }
 
-RefPtr<Partition> TSDBNode::findOrCreatePartition(
+RefPtr<Partition> TSDBService::findOrCreatePartition(
     const String& tsdb_namespace,
     const String& stream_key,
     const SHA1Hash& partition_key) {
   return pmap_->findOrCreatePartition(tsdb_namespace, stream_key, partition_key);
 }
 
-Option<RefPtr<Partition>> TSDBNode::findPartition(
+Option<RefPtr<Partition>> TSDBService::findPartition(
     const String& tsdb_namespace,
     const String& stream_key,
     const SHA1Hash& partition_key) {
   return pmap_->findPartition(tsdb_namespace, stream_key, partition_key);
 }
 
-void TSDBNode::fetchPartition(
+void TSDBService::fetchPartition(
     const String& tsdb_namespace,
     const String& stream_key,
     const SHA1Hash& partition_key,
@@ -59,7 +59,7 @@ void TSDBNode::fetchPartition(
       fn);
 }
 
-void TSDBNode::fetchPartitionWithSampling(
+void TSDBService::fetchPartitionWithSampling(
     const String& tsdb_namespace,
     const String& stream_key,
     const SHA1Hash& partition_key,
@@ -79,13 +79,13 @@ void TSDBNode::fetchPartitionWithSampling(
   reader->fetchRecordsWithSampling(sample_modulo, sample_index, fn);
 }
 
-void TSDBNode::listTables(
+void TSDBService::listTables(
     const String& tsdb_namespace,
     Function<void (const TSDBTableInfo& table)> fn) const {
   pmap_->listTables(tsdb_namespace, fn);
 }
 
-Option<TSDBTableInfo> TSDBNode::tableInfo(
+Option<TSDBTableInfo> TSDBService::tableInfo(
       const String& tsdb_namespace,
       const String& table_key) const {
   auto table = pmap_->findTable(tsdb_namespace, table_key);
@@ -100,7 +100,7 @@ Option<TSDBTableInfo> TSDBNode::tableInfo(
   return Some(ti);
 }
 
-Option<PartitionInfo> TSDBNode::partitionInfo(
+Option<PartitionInfo> TSDBService::partitionInfo(
     const String& tsdb_namespace,
     const String& table_key,
     const SHA1Hash& partition_key) {
@@ -116,7 +116,7 @@ Option<PartitionInfo> TSDBNode::partitionInfo(
   }
 }
 
-//const String& TSDBNode::dbPath() const {
+//const String& TSDBService::dbPath() const {
 //  return db_path_;
 //}
 

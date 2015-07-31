@@ -29,10 +29,10 @@ using namespace stx;
 
 namespace tsdb {
 
-class TSDBNode {
+class TSDBService {
 public:
 
-  TSDBNode(PartitionMap* pmap);
+  TSDBService(PartitionMap* pmap);
 
   void createTable(const TableConfig& config);
 

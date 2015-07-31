@@ -9,7 +9,7 @@
  */
 #include <stx/SHA1.h>
 #include <tsdb/TSDBTableProvider.h>
-#include <tsdb/TSDBNode.h>
+#include <tsdb/TSDBService.h>
 #include <chartsql/CSTableScan.h>
 #include <chartsql/runtime/EmptyTable.h>
 
@@ -19,7 +19,7 @@ namespace tsdb {
 
 TSDBTableProvider::TSDBTableProvider(
     const String& tsdb_namespace,
-    TSDBNode* node) :
+    TSDBService* node) :
     tsdb_namespace_(tsdb_namespace),
     tsdb_node_(node) {}
 

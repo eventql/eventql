@@ -34,7 +34,7 @@
 #include "stx/mdb/MDBUtil.h"
 #include "stx/protobuf/msg.h"
 #include "stx/protobuf/MessageSchema.h"
-#include "tsdb/TSDBNode.h"
+#include "tsdb/TSDBService.h"
 #include "tsdb/TSDBServlet.h"
 #include "tsdb/TSDBNodeConfig.pb.h"
 
@@ -122,7 +122,7 @@ int main(int argc, const char** argv) {
   tsdb::PartitionMap pmap(dir);
   pmap.open();
 
-  tsdb::TSDBNode tsdb_node(&pmap);
+  tsdb::TSDBService tsdb_node(&pmap);
 
   tsdb::TSDBServlet tsdb_servlet(&tsdb_node);
   http_router.addRouteByPrefixMatch("/tsdb", &tsdb_servlet, &tpool);

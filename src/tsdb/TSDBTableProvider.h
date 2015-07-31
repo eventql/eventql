@@ -17,12 +17,12 @@
 using namespace stx;
 
 namespace tsdb {
-class TSDBNode;
+class TSDBService;
 
 struct TSDBTableProvider : public csql::TableProvider {
 public:
 
-  TSDBTableProvider(const String& tsdb_namespace, TSDBNode* node);
+  TSDBTableProvider(const String& tsdb_namespace, TSDBService* node);
 
   Option<ScopedPtr<csql::TableExpression>> buildSequentialScan(
         RefPtr<csql::SequentialScanNode> node,
@@ -38,7 +38,7 @@ protected:
   csql::TableInfo tableInfoForTable(const TSDBTableInfo& table) const;
 
   String tsdb_namespace_;
-  TSDBNode* tsdb_node_;
+  TSDBService* tsdb_node_;
 };
 
 

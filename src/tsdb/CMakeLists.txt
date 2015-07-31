@@ -18,7 +18,7 @@ add_library(tsdb-server OBJECT
     TimeWindowPartitioner.cc
     CSTableIndex.cc
     SQLEngine.cc
-    TSDBNode.cc
+    TSDBService.cc
     TSDBServlet.cc
     TSDBTableProvider.cc
     TSDBTableRef.cc

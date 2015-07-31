@@ -11,7 +11,7 @@
 #define _FNORD_TSDB_TSDBSERVLET_H
 #include "stx/http/httpservice.h"
 #include <stx/random.h>
-#include <tsdb/TSDBNode.h>
+#include <tsdb/TSDBService.h>
 #include <stx/http/HTTPSSEStream.h>
 
 using namespace stx;
@@ -21,7 +21,7 @@ namespace tsdb {
 class TSDBServlet : public stx::http::StreamingHTTPService {
 public:
 
-  TSDBServlet(TSDBNode* node);
+  TSDBServlet(TSDBService* node);
 
   void handleHTTPRequest(
       RefPtr<http::HTTPRequestStream> req_stream,
@@ -56,7 +56,7 @@ protected:
       RefPtr<http::HTTPResponseStream> res_stream,
       URI* uri);
 
-  TSDBNode* node_;
+  TSDBService* node_;
   Random rnd_;
 };
 

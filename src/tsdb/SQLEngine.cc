@@ -8,13 +8,13 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <tsdb/SQLEngine.h>
-#include <tsdb/TSDBNode.h>
+#include <tsdb/TSDBService.h>
 #include <tsdb/TimeWindowPartitioner.h>
 #include <chartsql/defaults.h>
 
 namespace tsdb {
 
-//SQLEngine::SQLEngine(TSDBNode* tsdb_node) : tsdb_node_(tsdb_node) {
+//SQLEngine::SQLEngine(TSDBService* tsdb_node) : tsdb_node_(tsdb_node) {
 //  installDefaultSymbols(&sql_runtime_);
 //}
 //
@@ -40,7 +40,7 @@ namespace tsdb {
 //}
 
 RefPtr<csql::QueryTreeNode> SQLEngine::rewriteQuery(
-    TSDBNode* tsdb_node,
+    TSDBService* tsdb_node,
     const String& tsdb_namespace,
     RefPtr<csql::QueryTreeNode> query) {
   replaceAllSequentialScansWithUnions(tsdb_node, tsdb_namespace, &query);
@@ -48,13 +48,13 @@ RefPtr<csql::QueryTreeNode> SQLEngine::rewriteQuery(
 }
 
 RefPtr<csql::TableProvider> SQLEngine::tableProviderForNamespace(
-    TSDBNode* tsdb_node,
+    TSDBService* tsdb_node,
     const String& tsdb_namespace) {
   return new TSDBTableProvider(tsdb_namespace, tsdb_node);
 }
 
 void SQLEngine::replaceAllSequentialScansWithUnions(
-    TSDBNode* tsdb_node,
+    TSDBService* tsdb_node,
     const String& tsdb_namespace,
     RefPtr<csql::QueryTreeNode>* node) {
   if (dynamic_cast<csql::SequentialScanNode*>(node->get())) {
@@ -72,7 +72,7 @@ void SQLEngine::replaceAllSequentialScansWithUnions(
 }
 
 void SQLEngine::replaceSequentialScanWithUnion(
-    TSDBNode* tsdb_node,
+    TSDBService* tsdb_node,
     const String& tsdb_namespace,
     RefPtr<csql::QueryTreeNode>* node) {
   auto seqscan = node->asInstanceOf<csql::SequentialScanNode>();

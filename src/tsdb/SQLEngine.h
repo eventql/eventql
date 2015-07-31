@@ -13,29 +13,29 @@
 #include <tsdb/TSDBTableProvider.h>
 
 namespace tsdb {
-class TSDBNode;
+class TSDBService;
 
 class SQLEngine {
 public:
 
   static RefPtr<csql::TableProvider> tableProviderForNamespace(
-      TSDBNode* tsdb_node,
+      TSDBService* tsdb_node,
       const String& tsdb_namespace);
 
   static RefPtr<csql::QueryTreeNode> rewriteQuery(
-      TSDBNode* tsdb_node,
+      TSDBService* tsdb_node,
       const String& tsdb_namespace,
       RefPtr<csql::QueryTreeNode> query);
 
 protected:
 
   static void replaceAllSequentialScansWithUnions(
-      TSDBNode* tsdb_node,
+      TSDBService* tsdb_node,
       const String& tsdb_namespace,
       RefPtr<csql::QueryTreeNode>* node);
 
   static void replaceSequentialScanWithUnion(
-      TSDBNode* tsdb_node,
+      TSDBService* tsdb_node,
       const String& tsdb_namespace,
       RefPtr<csql::QueryTreeNode>* node);
 
