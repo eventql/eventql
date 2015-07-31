@@ -564,7 +564,7 @@ void LogJoin::processClickstream(
       txn->commit();
     }
 
-    sessdb_->removeStaleReaders();
+    //sessdb_->removeStaleReaders();
 
     if (shutdown_.load()) {
       break;
