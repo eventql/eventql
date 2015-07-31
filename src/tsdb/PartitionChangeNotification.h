@@ -18,8 +18,7 @@ using namespace stx;
 namespace tsdb {
 
 struct PartitionChangeNotification : public RefCounted {
-  RefPtr<PartitionSnapshot> partition;
-  RefPtr<Table> table;
+  RefPtr<Partition> partition;
 };
 
 typedef

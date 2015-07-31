@@ -51,8 +51,7 @@ void TSDBService::insertRecords(const RecordEnvelopeList& record_list) {
     partition->getWriter()->insertRecords(group.second);
 
     auto change = mkRef(new PartitionChangeNotification());
-    change->partition = partition->getSnapshot();
-    change->table = partition->getTable();
+    change->partition = partition;
     pmap_->publishPartitionChange(change);
   }
 }
@@ -73,8 +72,7 @@ void TSDBService::insertRecord(
   writer->insertRecord(record_id, record);
 
   auto change = mkRef(new PartitionChangeNotification());
-  change->partition = partition->getSnapshot();
-  change->table = partition->getTable();
+  change->partition = partition;
   pmap_->publishPartitionChange(change);
 }
 

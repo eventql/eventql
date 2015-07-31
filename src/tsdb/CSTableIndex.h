@@ -19,15 +19,17 @@ namespace tsdb {
 class CSTableIndex {
 public:
 
+  CSTableIndex(const String& db_path);
+
   Option<RefPtr<VFSFile>> fetchCSTable(
       const String& tsdb_namespace,
       const String& table,
       const SHA1Hash& partition) const;
 
-  void buildCSTable(
-      RefPtr<Table> table,
-      RefPtr<PartitionSnapshot> partition);
+  void buildCSTable(RefPtr<Partition> partition);
 
+protected:
+  const String db_path_;
 };
 
 }

@@ -112,6 +112,17 @@ RefPtr<Table> Partition::getTable() {
   return table_;
 }
 
+PartitionInfo Partition::getInfo() const {
+  auto snap = head_;
+
+  PartitionInfo pi;
+  pi.set_partition_key(snap->key.toString());
+  pi.set_stream_key(table_->name());
+  //pi.set_checksum(records_.checksum().toString());
+  pi.set_exists(true);
+  return pi;
+}
+
 //void Partition::scheduleCompaction() {
 //  auto now = WallClock::unixMicros();
 //  auto interval = table_->compactionInterval().microseconds();
@@ -301,112 +312,5 @@ uint64_t Partition::replicateTo(const String& addr, uint64_t offset) {
   return offset + n;
 }
 */
-
-//Vector<String> Partition::listFiles() const {
-//  return records_.listDatafiles();
-//}
-
-PartitionInfo Partition::getInfo() const {
-  auto snap = head_;
-
-  PartitionInfo pi;
-  pi.set_partition_key(snap->key.toString());
-  pi.set_stream_key(table_->name());
-  //pi.set_checksum(records_.checksum().toString());
-  pi.set_exists(true);
-  return pi;
-}
-
-//void Partition::buildCSTable(
-//    const Vector<String>& input_files,
-//    const String& output_file) {
-//  stx::logDebug(
-//      "tsdb",
-//      "Building cstable; stream='$0' partition='$1' output_file='$2'",
-//      stream_key_,
-//      key_.toString(),
-//      output_file);
-//
-//  auto schema = table_->schema();
-//  cstable::CSTableBuilder cstable(schema.get());
-//
-//  for (const auto& f : input_files) {
-//    auto fpath = FileUtil::joinPaths(node_->db_path, f);
-//    sstable::SSTableReader reader(fpath);
-//    auto cursor = reader.getCursor();
-//
-//    while (cursor->valid()) {
-//      uint64_t* key;
-//      size_t key_size;
-//      cursor->getKey((void**) &key, &key_size);
-//      if (key_size != SHA1Hash::kSize) {
-//        RAISE(kRuntimeError, "invalid row");
-//      }
-//
-//      void* data;
-//      size_t data_size;
-//      cursor->getData(&data, &data_size);
-//
-//      msg::MessageObject obj;
-//      msg::MessageDecoder::decode(data, data_size, *schema, &obj);
-//      cstable.addRecord(obj);
-//
-//      if (!cursor->next()) {
-//        break;
-//      }
-//    }
-//  }
-//
-//  cstable.write(FileUtil::joinPaths(node_->db_path, output_file));
-//}
-
-//Option<RefPtr<VFSFile>> Partition::cstableFile() const {
-//  std::unique_lock<std::mutex> lk(mutex_);
-//
-//  if (cstable_file_.empty()) {
-//    return None<RefPtr<VFSFile>>();
-//  } else {
-//    auto cstable_file_path = FileUtil::joinPaths(
-//        node_->db_path,
-//        cstable_file_);
-//
-//    return Some<RefPtr<VFSFile>>(
-//        new io::MmappedFile(File::openFile(cstable_file_path, File::O_READ)));
-//  }
-//}
-
-//void PartitionState::encode(
-//    util::BinaryMessageWriter* writer) const {
-//  writer->appendLenencString(stream_key);
-//  //record_state.encode(writer);
-//
-//  writer->appendVarUInt(repl_offsets.size());
-//  for (const auto& ro : repl_offsets) {
-//    writer->appendVarUInt(ro.first);
-//    writer->appendVarUInt(ro.second);
-//  }
-//
-//  //writer->appendVarUInt(record_state.version);
-//  writer->appendLenencString(cstable_file);
-//  writer->append(cstable_version.data(), cstable_version.size());
-//}
-//
-//void PartitionState::decode(util::BinaryMessageReader* reader) {
-//  stream_key = reader->readLenencString();
-//  //record_state.decode(reader);
-//
-//  auto nrepl_offsets = reader->readVarUInt();
-//  for (int i = 0; i < nrepl_offsets; ++i) {
-//    auto id = reader->readVarUInt();
-//    auto off = reader->readVarUInt();
-//    repl_offsets.emplace(id, off);
-//  }
-//
-//  record_state.version = reader->readVarUInt();
-//  if (reader->remaining() > 0) {
-//    cstable_file = reader->readLenencString();
-//    cstable_version = SHA1Hash(reader->read(SHA1Hash::kSize), SHA1Hash::kSize);
-//  }
-//}
 
 }
