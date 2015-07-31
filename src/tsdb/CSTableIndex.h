@@ -24,6 +24,10 @@ public:
       const String& table,
       const SHA1Hash& partition) const;
 
+  void buildCSTable(
+      RefPtr<Table> table,
+      RefPtr<PartitionSnapshot> partition);
+
 };
 
 }

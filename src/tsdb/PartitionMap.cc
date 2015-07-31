@@ -207,6 +207,17 @@ Option<TSDBTableInfo> PartitionMap::tableInfo(
   return Some(ti);
 }
 
+void PartitionMap::subscribeToPartitionChanges(PartitionChangeCallbackFn fn) {
+  callbacks_.emplace_back(fn);
+}
+
+void PartitionMap::publishPartitionChange(
+    RefPtr<PartitionChangeNotification> change) {
+  for (const auto& cb : callbacks_) {
+    cb(change);
+  }
+}
+
 
 } // namespace tdsb
 
