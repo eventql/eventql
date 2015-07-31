@@ -19,6 +19,7 @@ using namespace stx;
 namespace tsdb {
 
 struct PartitionWriter : public RefCounted {
+  static const size_t kDefaultMaxDatafileSize = 1024 * 1024 * 128;
 
   PartitionWriter(RefPtr<PartitionSnapshot>* head);
 
@@ -32,6 +33,7 @@ struct PartitionWriter : public RefCounted {
 protected:
   RefPtr<PartitionSnapshot>* head_;
   RecordIDSet idset_;
+  size_t max_datafile_size_;
   std::mutex mutex_;
 };
 

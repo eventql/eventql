@@ -10,6 +10,7 @@
 #include <stx/io/fileutil.h>
 #include <tsdb/Partition.h>
 #include <tsdb/PartitionWriter.h>
+#include <sstable/SSTableWriter.h>
 
 using namespace stx;
 
@@ -21,7 +22,8 @@ PartitionWriter::PartitionWriter(
     idset_(
         FileUtil::joinPaths(
             head_->get()->base_path,
-            head_->get()->key.toString() + ".idx")) {}
+            head_->get()->key.toString() + ".idx")),
+    max_datafile_size_(kDefaultMaxDatafileSize) {}
 
 bool PartitionWriter::insertRecord(
     const SHA1Hash& record_id,
@@ -45,6 +47,10 @@ Set<SHA1Hash> PartitionWriter::insertRecords(const Vector<RecordRef>& records) {
       snap->key.toString());
 
   Set<SHA1Hash> record_ids;
+  for (const auto& r : records) {
+    record_ids.emplace(r.record_id);
+  }
+
   idset_.addRecordIDs(&record_ids);
 
   if (record_ids.empty()) {
@@ -53,24 +59,45 @@ Set<SHA1Hash> PartitionWriter::insertRecords(const Vector<RecordRef>& records) {
 
   String filename;
   const auto& old_files = snap->state.sstable_files();
-  if (old_files.size() == 0) {
+  if (old_files.size() > 0) {
+    auto last_file = *(old_files.end() + - 1);
+    auto last_file_size = FileUtil::size(
+        FileUtil::joinPaths(snap->base_path, last_file));
+
+    if (last_file_size < max_datafile_size_) {
+      filename = last_file;
+    }
+  }
+
+
+  ScopedPtr<sstable::SSTableWriter> writer;
+  if (filename.empty()) {
     filename = StringUtil::format(
         "$0.$1.sst",
         snap->key.toString(),
         Random::singleton()->hex64());
 
     snap->state.add_sstable_files(filename);
+    writer = sstable::SSTableWriter::create(
+        FileUtil::joinPaths(snap->base_path, filename), nullptr, 0);
   } else {
-    RAISE(kIllegalStateError);
+    writer = sstable::SSTableWriter::reopen(
+        FileUtil::joinPaths(snap->base_path, filename));
   }
-
-  auto filepath = FileUtil::joinPaths(snap->base_path, filename);
 
   for (const auto& r : records) {
     if (record_ids.count(r.record_id) == 0) {
       continue;
     }
+
+    writer->appendRow(
+        r.record_id.data(),
+        r.record_id.size(),
+        r.record.data(),
+        r.record.size());
   }
+
+  writer->commit();
 
   snap->nrecs += record_ids.size();
   snap->writeToDisk();

@@ -22,8 +22,8 @@ PartitionSnapshot::PartitionSnapshot(
     const String& _base_path,
     size_t _nrecs) :
     key(
-        state.partition_key().data(),
-        state.partition_key().size()),
+        _state.partition_key().data(),
+        _state.partition_key().size()),
     state(_state),
     base_path(_base_path),
     nrecs(_nrecs) {}
