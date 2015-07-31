@@ -26,39 +26,16 @@ Option<RefPtr<VFSFile>> CSTableIndex::fetchCSTable(
   return None<RefPtr<VFSFile>>();
 }
 
-/*
-CSTableIndex::CSTableIndex(
-    const TSDBTableScanSpec params,
-    tsdb::TSDBService* tsdb) :
-    params_(params),
-    tsdb_(tsdb) {}
-
-RefPtr<VFSFile> CSTableIndex::computeBlob(dproc::TaskContext* context) {
-  stx::logDebug(
-      "fnord.tsdb",
-      "Fetching cstable: namespace=$0 table=$1 partition=$2 schema=$2",
-      params_.tsdb_namespace(),
-      params_.stream_key(),
-      params_.partition_key());
-
-  auto partition = tsdb_->findPartition(
-      params_.tsdb_namespace(),
-      params_.stream_key(),
-      SHA1Hash::fromHexString(params_.partition_key()));
-
-  if (partition.isEmpty()) {
-    return new Buffer();
-  }
-
-  auto partition_reader = partition.get()->getReader();
-
-  auto cstable = partition_reader->fetchSecondaryIndex("cstable");
-  if (cstable.isEmpty()) {
-    return new Buffer();
-  }
-
-  return cstable.get();
+void CSTableIndex::buildCSTable(
+    RefPtr<Table> table,
+    RefPtr<PartitionSnapshot> partition) {
+  logDebug(
+      "tsdb",
+      "Building CSTable index for partition $0/$1/$2",
+      partition->state.tsdb_namespace(),
+      table->name(),
+      partition->key.toString());
 }
-*/
 
-}
+
+} // namespace tsdb
