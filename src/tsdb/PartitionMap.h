@@ -1,14 +1,13 @@
 /**
- * This file is part of the "libfnord" project
- *   Copyright (c) 2015 Paul Asmuth
+ * This file is part of the "tsdb" project
+ *   Copyright (c) 2015 Paul Asmuth, FnordCorp B.V.
  *
  * FnordMetric is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License v3.0. You should have received a
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#ifndef _FNORD_TSDB_TSDBNODE_H
-#define _FNORD_TSDB_TSDBNODE_H
+#pragma once
 #include <stx/stdtypes.h>
 #include <stx/random.h>
 #include <stx/option.h>
@@ -24,21 +23,18 @@
 #include <tsdb/SQLEngine.h>
 #include <tsdb/PartitionInfo.pb.h>
 #include <tsdb/RecordEnvelope.pb.h>
-#include <tsdb/PartitionMap.h>
 
 using namespace stx;
 
 namespace tsdb {
 
-class TSDBNode {
+class PartitionMap {
 public:
 
-  TSDBNode(
-      const String& db_path,
-      RefPtr<dproc::ReplicationScheme> replication_scheme,
-      http::HTTPConnectionPool* http);
+  PartitionMap(const String& db_path);
 
-  void createTable(const TableConfig& config);
+  void configureTable(const TableConfig& config);
+  void open();
 
   Option<RefPtr<Table>> findTable(
       const String& tsdb_namespace,
@@ -58,53 +54,19 @@ public:
       const String& stream_key,
       const SHA1Hash& partition_key);
 
-  void fetchPartition(
-      const String& tsdb_namespace,
-      const String& stream_key,
-      const SHA1Hash& partition_key,
-      Function<void (const Buffer& record)> fn);
-
-  void fetchPartitionWithSampling(
-      const String& tsdb_namespace,
-      const String& stream_key,
-      const SHA1Hash& partition_key,
-      size_t sample_modulo,
-      size_t sample_index,
-      Function<void (const Buffer& record)> fn);
-
-  Vector<String> listPartitions(
-      const String& tsdb_namespace,
-      const String& table_key,
-      const UnixTime& from,
-      const UnixTime& until);
-
-  Option<TSDBTableInfo> tableInfo(
-      const String& tsdb_namespace,
-      const String& table_key) const;
-
-  Option<PartitionInfo> partitionInfo(
-      const String& tsdb_namespace,
-      const String& table_key,
-      const SHA1Hash& partition_key);
-
-  const String& dbPath() const;
-
-  void start(
-      size_t num_comaction_threads = 8,
-      size_t num_replication_threads = 4);
-
-  void stop();
-
 protected:
-  PartitionMap pmap_;
-  TSDBNodeRef noderef_;
+
+  Option<RefPtr<Table>> findTableWithLock(
+      const String& tsdb_namespace,
+      const String& table_name) const;
+
+  String db_path_;
+  RefPtr<mdb::MDB> db_;
+
   mutable std::mutex mutex_;
   HashMap<String, RefPtr<Table>> tables_;
   HashMap<String, RefPtr<Partition>> partitions_;
-  Vector<RefPtr<CompactionWorker>> compaction_workers_;
-  Vector<RefPtr<ReplicationWorker>> replication_workers_;
 };
 
 } // namespace tdsb
 
-#endif

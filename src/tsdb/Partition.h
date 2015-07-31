@@ -36,13 +36,13 @@ public:
       const String& tsdb_namespace,
       RefPtr<Table> table,
       const SHA1Hash& partition_key,
-      TSDBNodeRef* node);
+      const String& db_path);
 
   static RefPtr<Partition> reopen(
       const String& tsdb_namespace,
       RefPtr<Table> table,
       const SHA1Hash& partition_key,
-      TSDBNodeRef* node);
+      const String& db_path);
 
   Partition(
       RefPtr<PartitionSnapshot> snap,
