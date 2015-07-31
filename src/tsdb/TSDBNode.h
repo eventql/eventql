@@ -57,20 +57,6 @@ public:
       const String& stream_key,
       const SHA1Hash& partition_key);
 
-  void fetchPartition(
-      const String& tsdb_namespace,
-      const String& stream_key,
-      const SHA1Hash& partition_key,
-      Function<void (const Buffer& record)> fn);
-
-  void fetchPartitionWithSampling(
-      const String& tsdb_namespace,
-      const String& stream_key,
-      const SHA1Hash& partition_key,
-      size_t sample_modulo,
-      size_t sample_index,
-      Function<void (const Buffer& record)> fn);
-
   Vector<String> listPartitions(
       const String& tsdb_namespace,
       const String& table_key,

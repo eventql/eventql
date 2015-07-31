@@ -294,10 +294,6 @@ uint64_t Partition::replicateTo(const String& addr, uint64_t offset) {
 //  return pi;
 //}
 
-RefPtr<PartitionSnapshot> Partition::getSnapshot() const {
-  return head_;
-}
-
 //void Partition::buildCSTable(
 //    const Vector<String>& input_files,
 //    const String& output_file) {

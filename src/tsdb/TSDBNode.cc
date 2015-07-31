@@ -210,64 +210,6 @@ Option<RefPtr<Partition>> TSDBNode::findPartition(
   }
 }
 
-void TSDBNode::fetchPartition(
-    const String& tsdb_namespace,
-    const String& stream_key,
-    const SHA1Hash& partition_key,
-    Function<void (const Buffer& record)> fn) {
-  fetchPartitionWithSampling(
-      tsdb_namespace,
-      stream_key,
-      partition_key,
-      0,
-      0,
-      fn);
-}
-
-//void TSDBNode::fetchPartitionWithSampling(
-//    const String& tsdb_namespace,
-//    const String& stream_key,
-//    const SHA1Hash& partition_key,
-//    size_t sample_modulo,
-//    size_t sample_index,
-//    Function<void (const Buffer& record)> fn) {
-//  auto partition = findPartition(tsdb_namespace, stream_key, partition_key);
-//  if (partition.isEmpty()) {
-//    return;
-//  }
-//
-//  FNV<uint64_t> fnv;
-//  auto files = partition.get()->listFiles();
-//
-//  for (const auto& f : files) {
-//    auto fpath = FileUtil::joinPaths(dbPath(), f);
-//    sstable::SSTableReader reader(fpath);
-//    auto cursor = reader.getCursor();
-//
-//    while (cursor->valid()) {
-//      uint64_t* key;
-//      size_t key_size;
-//      cursor->getKey((void**) &key, &key_size);
-//      if (key_size != SHA1Hash::kSize) {
-//        RAISE(kRuntimeError, "invalid row");
-//      }
-//
-//      if (sample_modulo == 0 ||
-//          (fnv.hash(key, key_size) % sample_modulo == sample_index)) {
-//        void* data;
-//        size_t data_size;
-//        cursor->getData(&data, &data_size);
-//
-//        fn(Buffer(data, data_size));
-//      }
-//
-//      if (!cursor->next()) {
-//        break;
-//      }
-//    }
-//  }
-//}
-
 void TSDBNode::listTables(
     const String& tsdb_namespace,
     Function<void (const TSDBTableInfo& table)> fn) const {

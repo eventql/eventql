@@ -21,6 +21,7 @@
 #include <tsdb/PartitionInfo.pb.h>
 #include <tsdb/PartitionSnapshot.h>
 #include <tsdb/PartitionWriter.h>
+#include <tsdb/PartitionReader.h>
 #include <cstable/CSTableReader.h>
 
 using namespace stx;
@@ -48,21 +49,19 @@ public:
       RefPtr<Table> table);
 
   RefPtr<PartitionWriter> getWriter();
-  RefPtr<PartitionSnapshot> getSnapshot() const;
+  RefPtr<PartitionReader> getReader();
 
   PartitionInfo partitionInfo() const;
   Vector<String> listFiles() const;
-
   Option<RefPtr<VFSFile>> cstableFile() const;
 
 protected:
+  //void scheduleCompaction();
+  //uint64_t replicateTo(const String& addr, uint64_t offset);
 
-  void scheduleCompaction();
-  uint64_t replicateTo(const String& addr, uint64_t offset);
-
-  void buildCSTable(
-    const Vector<String>& input_files,
-    const String& output_file);
+  //void buildCSTable(
+  //  const Vector<String>& input_files,
+  //  const String& output_file);
 
   RefPtr<PartitionSnapshot> head_;
   RefPtr<Table> table_;

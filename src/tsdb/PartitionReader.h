@@ -11,28 +11,25 @@
 #include <stx/stdtypes.h>
 #include <stx/autoref.h>
 #include <tsdb/PartitionSnapshot.h>
-#include <tsdb/RecordRef.h>
-#include <tsdb/RecordIDSet.h>
 
 using namespace stx;
 
 namespace tsdb {
+class Partition;
 
-struct PartitionWriter : public RefCounted {
+struct PartitionReader : public RefCounted {
 
-  PartitionWriter(RefPtr<PartitionSnapshot>* head);
+  PartitionReader(RefPtr<PartitionSnapshot> head);
 
-  bool insertRecord(
-      const SHA1Hash& record_id,
-      const Buffer& record);
+  void fetchRecords(Function<void (const Buffer& record)> fn);
 
-  Set<SHA1Hash> insertRecords(
-      const Vector<RecordRef>& records);
+  void fetchRecordsWithSampling(
+      size_t sample_modulo,
+      size_t sample_index,
+      Function<void (const Buffer& record)> fn);
 
 protected:
-  RefPtr<PartitionSnapshot>* head_;
-  RecordIDSet idset_;
-  std::mutex mutex_;
+  RefPtr<PartitionSnapshot> snap;
 };
 
 } // namespace tdsb
