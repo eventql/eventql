@@ -9,32 +9,21 @@
  */
 #pragma once
 #include <stx/stdtypes.h>
-#include <tsdb/TSDBTableScanSpec.pb.h>
 #include <tsdb/TSDBService.h>
-#include <stx/protobuf/MessageSchema.h>
 #include <stx/random.h>
-#include <dproc/BlobRDD.h>
 
 using namespace stx;
 
 namespace tsdb {
 
-class CSTableIndex : public dproc::BlobRDD {
+class CSTableIndex {
 public:
 
-  CSTableIndex(
-      const TSDBTableScanSpec params,
-      tsdb::TSDBService* tsdb);
+  Option<RefPtr<VFSFile>> fetchCSTable(
+      const String& tsdb_namespace,
+      const String& table,
+      const SHA1Hash& partition) const;
 
-  RefPtr<VFSFile> computeBlob(dproc::TaskContext* context) override;
-
-  dproc::StorageLevel storageLevel() const override {
-    return dproc::StorageLevel::MEMORY;
-  }
-
-protected:
-  TSDBTableScanSpec params_;
-  tsdb::TSDBService* tsdb_;
 };
 
 }

@@ -20,7 +20,6 @@
 #include <tsdb/ReplicationWorker.h>
 #include <tsdb/TSDBNodeConfig.pb.h>
 #include <tsdb/TSDBTableInfo.h>
-#include <tsdb/SQLEngine.h>
 #include <tsdb/PartitionInfo.pb.h>
 #include <tsdb/RecordEnvelope.pb.h>
 #include <tsdb/PartitionMap.h>
@@ -65,10 +64,6 @@ public:
       const String& table_key,
       const UnixTime& from,
       const UnixTime& until);
-
-  Option<TSDBTableInfo> tableInfo(
-      const String& tsdb_namespace,
-      const String& table_key) const;
 
   Option<PartitionInfo> partitionInfo(
       const String& tsdb_namespace,

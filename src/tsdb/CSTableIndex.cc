@@ -19,6 +19,7 @@ using namespace stx;
 
 namespace tsdb {
 
+/*
 CSTableIndex::CSTableIndex(
     const TSDBTableScanSpec params,
     tsdb::TSDBService* tsdb) :
@@ -51,5 +52,6 @@ RefPtr<VFSFile> CSTableIndex::computeBlob(dproc::TaskContext* context) {
 
   return cstable.get();
 }
+*/
 
 }

@@ -11,6 +11,8 @@
 #include <stx/stdtypes.h>
 #include <chartsql/runtime/tablerepository.h>
 #include <tsdb/TSDBTableRef.h>
+#include <tsdb/PartitionMap.h>
+#include <tsdb/CSTableIndex.h>
 #include <tsdb/TableConfig.pb.h>
 #include <tsdb/TSDBTableInfo.h>
 
@@ -22,7 +24,10 @@ class TSDBService;
 struct TSDBTableProvider : public csql::TableProvider {
 public:
 
-  TSDBTableProvider(const String& tsdb_namespace, TSDBService* node);
+  TSDBTableProvider(
+      const String& tsdb_namespace,
+      PartitionMap* partition_map,
+      CSTableIndex* cstable_index);
 
   Option<ScopedPtr<csql::TableExpression>> buildSequentialScan(
         RefPtr<csql::SequentialScanNode> node,
@@ -38,7 +43,8 @@ protected:
   csql::TableInfo tableInfoForTable(const TSDBTableInfo& table) const;
 
   String tsdb_namespace_;
-  TSDBService* tsdb_node_;
+  PartitionMap* partition_map_;
+  CSTableIndex* cstable_index_;
 };
 
 

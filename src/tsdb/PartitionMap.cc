@@ -192,5 +192,21 @@ void PartitionMap::listTables(
   }
 }
 
+Option<TSDBTableInfo> PartitionMap::tableInfo(
+      const String& tsdb_namespace,
+      const String& table_key) const {
+  auto table = findTable(tsdb_namespace, table_key);
+  if (table.isEmpty()) {
+    return None<TSDBTableInfo>();
+  }
+
+  TSDBTableInfo ti;
+  ti.table_name = table.get()->name();
+  ti.config = table.get()->config();
+  ti.schema = table.get()->schema();
+  return Some(ti);
+}
+
+
 } // namespace tdsb
 

@@ -19,15 +19,17 @@ namespace tsdb {
 
 TSDBTableProvider::TSDBTableProvider(
     const String& tsdb_namespace,
-    TSDBService* node) :
+    PartitionMap* partition_map,
+    CSTableIndex* cstable_index) :
     tsdb_namespace_(tsdb_namespace),
-    tsdb_node_(node) {}
+    partition_map_(partition_map),
+    cstable_index_(cstable_index) {}
 
 Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildSequentialScan(
       RefPtr<csql::SequentialScanNode> node,
       csql::QueryBuilder* runtime) const {
   auto table_ref = TSDBTableRef::parse(node->tableName());
-  if (tsdb_node_->findTable(tsdb_namespace_, table_ref.table_key).isEmpty()) {
+  if (partition_map_->findTable(tsdb_namespace_, table_ref.table_key).isEmpty()) {
     return None<ScopedPtr<csql::TableExpression>>();
   }
 
@@ -45,19 +47,11 @@ Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildSequentialScan(
         node->tableName());
   }
 
-  auto partition = tsdb_node_->findPartition(
+  auto cstable = cstable_index_->fetchCSTable(
       tsdb_namespace_,
       table_ref.table_key,
       table_ref.partition_key.get());
 
-  if (partition.isEmpty()) {
-    return Option<ScopedPtr<csql::TableExpression>>(
-        mkScoped(new csql::EmptyTable()));
-  }
-
-  auto partition_reader = partition.get()->getReader();
-
-  auto cstable = partition_reader->fetchSecondaryIndex("cstable");
   if (cstable.isEmpty()) {
     return Option<ScopedPtr<csql::TableExpression>>(
         mkScoped(new csql::EmptyTable()));
@@ -74,7 +68,7 @@ Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildSequentialScan(
 
 void TSDBTableProvider::listTables(
     Function<void (const csql::TableInfo& table)> fn) const {
-  tsdb_node_->listTables(
+  partition_map_->listTables(
       tsdb_namespace_,
       [this, fn] (const TSDBTableInfo& table) {
     fn(tableInfoForTable(table));
@@ -84,7 +78,7 @@ void TSDBTableProvider::listTables(
 Option<csql::TableInfo> TSDBTableProvider::describe(
     const String& table_name) const {
   auto table_ref = TSDBTableRef::parse(table_name);
-  auto table = tsdb_node_->tableInfo(tsdb_namespace_, table_ref.table_key);
+  auto table = partition_map_->tableInfo(tsdb_namespace_, table_ref.table_key);
   if (table.isEmpty()) {
     return None<csql::TableInfo>();
   } else {

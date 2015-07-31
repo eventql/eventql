@@ -11,16 +11,11 @@
 #include <stx/stdtypes.h>
 #include <stx/random.h>
 #include <stx/option.h>
-#include <stx/thread/queue.h>
 #include <stx/mdb/MDB.h>
 #include <tsdb/TableConfig.pb.h>
 #include <tsdb/Partition.h>
-#include <tsdb/TSDBNodeRef.h>
-#include <tsdb/CompactionWorker.h>
-#include <tsdb/ReplicationWorker.h>
 #include <tsdb/TSDBNodeConfig.pb.h>
 #include <tsdb/TSDBTableInfo.h>
-#include <tsdb/SQLEngine.h>
 #include <tsdb/PartitionInfo.pb.h>
 #include <tsdb/PartitionChangeNotification.h>
 #include <tsdb/RecordEnvelope.pb.h>
@@ -43,6 +38,10 @@ public:
   void listTables(
       const String& tsdb_namespace,
       Function<void (const TSDBTableInfo& table)> fn) const;
+
+  Option<TSDBTableInfo> tableInfo(
+      const String& tsdb_namespace,
+      const String& table_key) const;
 
   Option<RefPtr<Partition>> findPartition(
       const String& tsdb_namespace,

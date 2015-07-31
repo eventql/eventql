@@ -71,21 +71,6 @@ void TSDBService::listTables(
   pmap_->listTables(tsdb_namespace, fn);
 }
 
-Option<TSDBTableInfo> TSDBService::tableInfo(
-      const String& tsdb_namespace,
-      const String& table_key) const {
-  auto table = pmap_->findTable(tsdb_namespace, table_key);
-  if (table.isEmpty()) {
-    return None<TSDBTableInfo>();
-  }
-
-  TSDBTableInfo ti;
-  ti.table_name = table.get()->name();
-  ti.config = table.get()->config();
-  ti.schema = table.get()->schema();
-  return Some(ti);
-}
-
 Option<PartitionInfo> TSDBService::partitionInfo(
     const String& tsdb_namespace,
     const String& table_key,
