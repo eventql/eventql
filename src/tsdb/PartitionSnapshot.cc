@@ -36,10 +36,8 @@ RefPtr<PartitionSnapshot> PartitionSnapshot::clone() const {
 }
 
 void PartitionSnapshot::writeToDisk() {
-  auto fpath = StringUtil::format(
-      "$0/$1.snx",
-      base_path,
-      key.toString());
+  auto fpath = FileUtil::joinPaths(base_path, "_snapshot");
+
   {
     auto f = File::openFile(
         fpath + "~",

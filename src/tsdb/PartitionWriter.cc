@@ -19,10 +19,7 @@ namespace tsdb {
 PartitionWriter::PartitionWriter(
     RefPtr<PartitionSnapshot>* head) :
     head_(head),
-    idset_(
-        FileUtil::joinPaths(
-            head_->get()->base_path,
-            head_->get()->key.toString() + ".idx")),
+    idset_(FileUtil::joinPaths(head_->get()->base_path, "_idset")),
     max_datafile_size_(kDefaultMaxDatafileSize) {}
 
 bool PartitionWriter::insertRecord(
@@ -72,11 +69,7 @@ Set<SHA1Hash> PartitionWriter::insertRecords(const Vector<RecordRef>& records) {
 
   ScopedPtr<sstable::SSTableWriter> writer;
   if (filename.empty()) {
-    filename = StringUtil::format(
-        "$0.$1.sst",
-        snap->key.toString(),
-        Random::singleton()->hex64());
-
+    filename = StringUtil::format("$0.sst", Random::singleton()->hex64());
     snap->state.add_sstable_files(filename);
     writer = sstable::SSTableWriter::create(
         FileUtil::joinPaths(snap->base_path, filename), nullptr, 0);

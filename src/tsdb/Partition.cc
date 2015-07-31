@@ -36,9 +36,10 @@ RefPtr<Partition> Partition::create(
   auto pdir = FileUtil::joinPaths(
       node->db_path,
       StringUtil::format(
-          "$0/$1",
+          "$0/$1/$2",
           tsdb_namespace,
-          SHA1::compute(table->name()).toString()));
+          SHA1::compute(table->name()).toString(),
+          partition_key.toString()));
 
   FileUtil::mkdir_p(pdir);
 
@@ -60,15 +61,13 @@ RefPtr<Partition> Partition::reopen(
   auto pdir = FileUtil::joinPaths(
       node->db_path,
       StringUtil::format(
-          "$0/$1",
+          "$0/$1/$2",
           tsdb_namespace,
-          SHA1::compute(table->name()).toString()));
+          SHA1::compute(table->name()).toString(),
+          partition_key.toString()));
 
   auto state = msg::decode<PartitionState>(
-      FileUtil::read(
-          FileUtil::joinPaths(
-              pdir,
-              StringUtil::format("$0.snx", partition_key.toString()))));
+      FileUtil::read(FileUtil::joinPaths(pdir, "_snapshot")));
 
   auto nrecs = 0;
   const auto& files = state.sstable_files();
