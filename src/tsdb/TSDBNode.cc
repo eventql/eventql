@@ -283,7 +283,7 @@ Option<PartitionInfo> TSDBNode::partitionInfo(
   if (partition.isEmpty()) {
     return None<PartitionInfo>();
   } else {
-    return Some(partition.get()->partitionInfo());
+    return Some(partition.get()->getInfo());
   }
 }
 

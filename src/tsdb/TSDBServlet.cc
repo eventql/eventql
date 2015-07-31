@@ -262,7 +262,7 @@ void TSDBServlet::fetchPartitionInfo(
   PartitionInfo pinfo;
   pinfo.set_partition_key(partition_key);
   if (!partition.isEmpty()) {
-    pinfo = partition.get()->partitionInfo();
+    pinfo = partition.get()->getInfo();
   }
 
   res->setStatus(http::kStatusOK);

@@ -91,6 +91,14 @@ Partition::Partition(
     table_(table),
     writer_(new PartitionWriter(&head_)) {}
 
+RefPtr<PartitionWriter> Partition::getWriter() {
+  return writer_;
+}
+
+RefPtr<PartitionReader> Partition::getReader() {
+  return new PartitionReader(head_);
+}
+
 //void Partition::scheduleCompaction() {
 //  auto now = WallClock::unixMicros();
 //  auto interval = table_->compactionInterval().microseconds();
@@ -285,14 +293,16 @@ uint64_t Partition::replicateTo(const String& addr, uint64_t offset) {
 //  return records_.listDatafiles();
 //}
 
-//PartitionInfo Partition::partitionInfo() const {
-//  PartitionInfo pi;
-//  pi.set_partition_key(key_.toString());
-//  pi.set_stream_key(stream_key_);
-//  pi.set_checksum(records_.checksum().toString());
-//  pi.set_exists(true);
-//  return pi;
-//}
+PartitionInfo Partition::getInfo() const {
+  auto snap = head_;
+
+  PartitionInfo pi;
+  pi.set_partition_key(snap->key.toString());
+  pi.set_stream_key(table_->name());
+  //pi.set_checksum(records_.checksum().toString());
+  pi.set_exists(true);
+  return pi;
+}
 
 //void Partition::buildCSTable(
 //    const Vector<String>& input_files,

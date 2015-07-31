@@ -51,7 +51,7 @@ public:
   RefPtr<PartitionWriter> getWriter();
   RefPtr<PartitionReader> getReader();
 
-  PartitionInfo partitionInfo() const;
+  PartitionInfo getInfo() const;
   Vector<String> listFiles() const;
   Option<RefPtr<VFSFile>> cstableFile() const;
 
