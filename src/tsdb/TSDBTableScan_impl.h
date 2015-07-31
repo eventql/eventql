@@ -57,11 +57,11 @@ TSDBTableScan<ScanletType>::TSDBTableScan(
 
 template <typename ScanletType>
 void TSDBTableScan<ScanletType>::compute(dproc::TaskContext* context) {
-  if (params_.use_cstable_index()) {
-    scanWithCSTableIndex(context);
-  } else {
+  //if (params_.use_cstable_index()) {
+  //  scanWithCSTableIndex(context);
+  //} else {
     scanWithoutIndex(context);
-  }
+  //}
 }
 
 template <typename ScanletType>
@@ -80,24 +80,24 @@ void TSDBTableScan<ScanletType>::scanWithoutIndex(
 template <typename ScanletType>
 void TSDBTableScan<ScanletType>::scanWithCSTableIndex(
     dproc::TaskContext* context) {
-  auto dep = context->getDependency(0)->getInstanceAs<CSTableIndex>();
-  auto data = dep->encode();
+  //auto dep = context->getDependency(0)->getInstanceAs<CSTableIndex>();
+  //auto data = dep->encode();
 
-  cstable::CSTableReader reader(data);
-  cstable::RecordMaterializer materializer(
-      schema_.get(),
-      &reader,
-      scanlet_->requiredFields());
+  //cstable::CSTableReader reader(data);
+  //cstable::RecordMaterializer materializer(
+  //    schema_.get(),
+  //    &reader,
+  //    scanlet_->requiredFields());
 
-  auto rec_count = reader.numRecords();
-  // FIXPAUL soooo sloooooowww
-  for (size_t i = 0; i < rec_count; ++i) {
-    msg::MessageObject robj;
-    materializer.nextRecord(&robj);
-    Buffer buf;
-    msg::MessageEncoder::encode(robj, *schema_, &buf);
-    onRow(buf);
-  }
+  //auto rec_count = reader.numRecords();
+  //// FIXPAUL soooo sloooooowww
+  //for (size_t i = 0; i < rec_count; ++i) {
+  //  msg::MessageObject robj;
+  //  materializer.nextRecord(&robj);
+  //  Buffer buf;
+  //  msg::MessageEncoder::encode(robj, *schema_, &buf);
+  //  onRow(buf);
+  //}
 }
 
 template <typename ScanletType>
