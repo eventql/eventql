@@ -22,7 +22,7 @@ const size_t RecordIDSet::kVersion = 1;
 const double RecordIDSet::kMaxFillFactor = 0.5f;
 const double RecordIDSet::kGrowthFactor = 2.0f;
 const size_t RecordIDSet::kInitialSlots = 512;
-const size_t RecordIDSet::kIOBatchSize = 256;
+const size_t RecordIDSet::kIOBatchSize = 200;
 
 #define IS_SLOT_EMPTY(slot) (\
     *((uint64_t*) (slot)) == 0 && \
