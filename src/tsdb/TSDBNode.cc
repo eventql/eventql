@@ -19,13 +19,6 @@ using namespace stx;
 
 namespace tsdb {
 
-static mdb::MDBOptions tsdb_mdb_opts() {
-  mdb::MDBOptions opts;
-  opts.data_filename = "index.db";
-  opts.lock_filename = "index.db.lck";
-  return opts;
-};
-
 TSDBNode::TSDBNode(const String& db_path) :
     pmap_(db_path) {}
 
@@ -150,9 +143,9 @@ Option<PartitionInfo> TSDBNode::partitionInfo(
   }
 }
 
-const String& TSDBNode::dbPath() const {
-  return db_path_;
-}
+//const String& TSDBNode::dbPath() const {
+//  return db_path_;
+//}
 
 } // namespace tdsb
 

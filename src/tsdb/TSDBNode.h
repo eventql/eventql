@@ -83,8 +83,6 @@ public:
       const String& table_key,
       const SHA1Hash& partition_key);
 
-  const String& dbPath() const;
-
   void start(
       size_t num_comaction_threads = 8,
       size_t num_replication_threads = 4);
@@ -93,7 +91,6 @@ public:
 
 protected:
   PartitionMap pmap_;
-  String db_path_;
 };
 
 } // namespace tdsb
