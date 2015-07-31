@@ -170,7 +170,6 @@ void TSDBServlet::streamPartition(
     sample_idx = std::stoull(parts[1]);
   }
 
-
   res->setStatus(http::kStatusOK);
   res->addHeader("Content-Type", "application/octet-stream");
   res->addHeader("Connection", "close");
@@ -182,42 +181,22 @@ void TSDBServlet::streamPartition(
       SHA1Hash::fromHexString(partition_key));
 
   if (!partition.isEmpty()) {
-    FNV<uint64_t> fnv;
-    auto files = partition.get()->listFiles();
+    auto reader = partition.get()->getReader();
 
-    for (const auto& f : files) {
-      auto fpath = FileUtil::joinPaths(node_->dbPath(), f);
-      sstable::SSTableReader reader(fpath);
-      auto cursor = reader.getCursor();
+    reader->fetchRecordsWithSampling(
+        sample_mod,
+        sample_idx,
+        [&res_stream] (const Buffer& record) {
+      util::BinaryMessageWriter buf;
 
-      while (cursor->valid()) {
-        uint64_t* key;
-        size_t key_size;
-        cursor->getKey((void**) &key, &key_size);
-        if (key_size != SHA1Hash::kSize) {
-          RAISE(kRuntimeError, "invalid row");
-        }
-
-        if (sample_mod == 0 ||
-            (fnv.hash(key, key_size) % sample_mod == sample_idx)) {
-          void* data;
-          size_t data_size;
-          cursor->getData(&data, &data_size);
-
-          util::BinaryMessageWriter buf;
-          if (data_size > 0) {
-            buf.appendUInt64(data_size);
-            buf.append(data, data_size);
-            res_stream->writeBodyChunk(Buffer(buf.data(), buf.size()));
-          }
-          res_stream->waitForReader();
-        }
-
-        if (!cursor->next()) {
-          break;
-        }
+      if (record.size() > 0) {
+        buf.appendUInt64(record.size());
+        buf.append(record.data(), record.size());
+        res_stream->writeBodyChunk(Buffer(buf.data(), buf.size()));
       }
-    }
+
+      res_stream->waitForReader();
+    });
   }
 
   util::BinaryMessageWriter buf;

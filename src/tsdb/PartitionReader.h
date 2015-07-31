@@ -10,6 +10,7 @@
 #pragma once
 #include <stx/stdtypes.h>
 #include <stx/autoref.h>
+#include <stx/option.h>
 #include <tsdb/PartitionSnapshot.h>
 
 using namespace stx;
@@ -27,6 +28,8 @@ struct PartitionReader : public RefCounted {
       size_t sample_modulo,
       size_t sample_index,
       Function<void (const Buffer& record)> fn);
+
+  Option<RefPtr<VFSFile>> fetchSecondaryIndex(const String& index) const;
 
 protected:
   RefPtr<PartitionSnapshot> snap_;

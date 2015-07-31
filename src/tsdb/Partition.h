@@ -50,19 +50,9 @@ public:
 
   RefPtr<PartitionWriter> getWriter();
   RefPtr<PartitionReader> getReader();
-
   PartitionInfo getInfo() const;
-  Vector<String> listFiles() const;
-  Option<RefPtr<VFSFile>> cstableFile() const;
 
 protected:
-  //void scheduleCompaction();
-  //uint64_t replicateTo(const String& addr, uint64_t offset);
-
-  //void buildCSTable(
-  //  const Vector<String>& input_files,
-  //  const String& output_file);
-
   RefPtr<PartitionSnapshot> head_;
   RefPtr<Table> table_;
   RefPtr<PartitionWriter> writer_;

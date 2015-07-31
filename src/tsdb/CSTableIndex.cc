@@ -42,7 +42,9 @@ RefPtr<VFSFile> CSTableIndex::computeBlob(dproc::TaskContext* context) {
     return new Buffer();
   }
 
-  auto cstable = partition.get()->cstableFile();
+  auto partition_reader = partition.get()->getReader();
+
+  auto cstable = partition_reader->fetchSecondaryIndex("cstable");
   if (cstable.isEmpty()) {
     return new Buffer();
   }

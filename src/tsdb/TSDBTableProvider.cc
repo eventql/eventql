@@ -55,7 +55,9 @@ Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildSequentialScan(
         mkScoped(new csql::EmptyTable()));
   }
 
-  auto cstable = partition.get()->cstableFile();
+  auto partition_reader = partition.get()->getReader();
+
+  auto cstable = partition_reader->fetchSecondaryIndex("cstable");
   if (cstable.isEmpty()) {
     return Option<ScopedPtr<csql::TableExpression>>(
         mkScoped(new csql::EmptyTable()));
