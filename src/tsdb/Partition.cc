@@ -104,6 +104,14 @@ RefPtr<PartitionReader> Partition::getReader() {
   return new PartitionReader(head_);
 }
 
+RefPtr<PartitionSnapshot> Partition::getSnapshot() {
+  return head_;
+}
+
+RefPtr<Table> Partition::getTable() {
+  return table_;
+}
+
 //void Partition::scheduleCompaction() {
 //  auto now = WallClock::unixMicros();
 //  auto interval = table_->compactionInterval().microseconds();

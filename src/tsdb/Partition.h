@@ -50,6 +50,8 @@ public:
 
   RefPtr<PartitionWriter> getWriter();
   RefPtr<PartitionReader> getReader();
+  RefPtr<PartitionSnapshot> getSnapshot();
+  RefPtr<Table> getTable();
   PartitionInfo getInfo() const;
 
 protected:
