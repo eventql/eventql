@@ -14,65 +14,53 @@
 
 namespace tsdb {
 
-//SQLEngine::SQLEngine(TSDBService* tsdb_node) : tsdb_node_(tsdb_node) {
-//  installDefaultSymbols(&sql_runtime_);
-//}
-//
-//void SQLEngine::executeQuery(
-//    const String& tsdb_namespace,
-//    const String& query,
-//    RefPtr<csql::ResultFormat> result_format) {
-//  auto qplan = parseAndBuildQueryPlan(tsdb_namespace, query);
-//  sql_runtime_.executeQuery(qplan, result_format);
-//}
-//
-//RefPtr<csql::QueryPlan> SQLEngine::parseAndBuildQueryPlan(
-//    const String& tsdb_namespace,
-//    const String& query) {
-//  return sql_runtime_.parseAndBuildQueryPlan(
-//      query,
-//      tableProviderForNamespace(tsdb_namespace),
-//      std::bind(
-//          &SQLEngine::rewriteQuery,
-//          this,
-//          tsdb_namespace,
-//          std::placeholders::_1));
-//}
-
 RefPtr<csql::QueryTreeNode> SQLEngine::rewriteQuery(
-    TSDBService* tsdb_node,
+    PartitionMap* partition_map,
+    CSTableIndex* cstable_index,
     const String& tsdb_namespace,
     RefPtr<csql::QueryTreeNode> query) {
-  replaceAllSequentialScansWithUnions(tsdb_node, tsdb_namespace, &query);
+  replaceAllSequentialScansWithUnions(
+      partition_map,
+      cstable_index,
+      tsdb_namespace,
+      &query);
   return query;
 }
 
 RefPtr<csql::TableProvider> SQLEngine::tableProviderForNamespace(
-    TSDBService* tsdb_node,
+    PartitionMap* partition_map,
+    CSTableIndex* cstable_index,
     const String& tsdb_namespace) {
-  return new TSDBTableProvider(tsdb_namespace, tsdb_node);
+  return new TSDBTableProvider(tsdb_namespace, partition_map, cstable_index);
 }
 
 void SQLEngine::replaceAllSequentialScansWithUnions(
-    TSDBService* tsdb_node,
+    PartitionMap* partition_map,
+    CSTableIndex* cstable_index,
     const String& tsdb_namespace,
     RefPtr<csql::QueryTreeNode>* node) {
   if (dynamic_cast<csql::SequentialScanNode*>(node->get())) {
-    replaceSequentialScanWithUnion(tsdb_node, tsdb_namespace, node);
+    replaceSequentialScanWithUnion(
+        partition_map,
+        cstable_index,
+        tsdb_namespace,
+        node);
     return;
   }
 
   auto ntables = node->get()->numChildren();
   for (int i = 0; i < ntables; ++i) {
     replaceAllSequentialScansWithUnions(
-        tsdb_node,
+        partition_map,
+        cstable_index,
         tsdb_namespace,
         node->get()->mutableChild(i));
   }
 }
 
 void SQLEngine::replaceSequentialScanWithUnion(
-    TSDBService* tsdb_node,
+    PartitionMap* partition_map,
+    CSTableIndex* cstable_index,
     const String& tsdb_namespace,
     RefPtr<csql::QueryTreeNode>* node) {
   auto seqscan = node->asInstanceOf<csql::SequentialScanNode>();
@@ -82,7 +70,7 @@ void SQLEngine::replaceSequentialScanWithUnion(
     return;
   }
 
-  if (tsdb_node->findTable(tsdb_namespace, table_ref.table_key).isEmpty()) {
+  if (partition_map->findTable(tsdb_namespace, table_ref.table_key).isEmpty()) {
     return;
   }
 

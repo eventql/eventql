@@ -19,23 +19,27 @@ class SQLEngine {
 public:
 
   static RefPtr<csql::TableProvider> tableProviderForNamespace(
-      TSDBService* tsdb_node,
+      PartitionMap* partition_map,
+      CSTableIndex* cstable_index,
       const String& tsdb_namespace);
 
   static RefPtr<csql::QueryTreeNode> rewriteQuery(
-      TSDBService* tsdb_node,
+      PartitionMap* partition_map,
+      CSTableIndex* cstable_index,
       const String& tsdb_namespace,
       RefPtr<csql::QueryTreeNode> query);
 
 protected:
 
   static void replaceAllSequentialScansWithUnions(
-      TSDBService* tsdb_node,
+      PartitionMap* partition_map,
+      CSTableIndex* cstable_index,
       const String& tsdb_namespace,
       RefPtr<csql::QueryTreeNode>* node);
 
   static void replaceSequentialScanWithUnion(
-      TSDBService* tsdb_node,
+      PartitionMap* partition_map,
+      CSTableIndex* cstable_index,
       const String& tsdb_namespace,
       RefPtr<csql::QueryTreeNode>* node);
 
