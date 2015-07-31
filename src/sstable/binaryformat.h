@@ -40,6 +40,16 @@ namespace sstable {
  *       <uint32_t>              // userdata size in bytes
  *       <bytes>                 // userdata
  *
+ *   <header v3> :=
+ *       %x17 %x17 %x17 %x17"    // magic bytes
+ *       %x00 %x03               // sstable file format version
+ *       <uint64_t>              // flags (1=finalized)
+ *       <uint64_t>              // number of rows in the table
+ *       <uint64_t>              // total body size in bytes
+ *       <uint32_t>              // userdata checksum
+ *       <uint32_t>              // userdata size in bytes
+ *       <bytes>                 // userdata
+ *
  *   <body> :=
  *       *<row>
  *

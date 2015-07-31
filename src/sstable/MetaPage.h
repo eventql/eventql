@@ -43,6 +43,11 @@ public:
   bool isFinalized() const;
 
   /**
+   * Returns the number of rows in this table
+   */
+  size_t rowCount() const;
+
+  /**
    * Returns the body size in bytes
    */
   size_t bodySize() const;
@@ -83,6 +88,7 @@ protected:
   uint16_t version_;
   uint64_t flags_;
   uint64_t body_size_;
+  uint64_t num_rows_;
   uint32_t userdata_checksum_;
   uint32_t userdata_size_;
 };

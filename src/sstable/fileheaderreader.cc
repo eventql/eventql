@@ -29,10 +29,12 @@ MetaPage FileHeaderReader::readMetaPage(InputStream* is) {
 
     case 0x1:
       hdr.flags_ = 0;
+      hdr.num_rows_ = uint64_t(-1);
       break;
 
     case 0x2:
       hdr.flags_ = is->readUInt64();
+      hdr.num_rows_ = uint64_t(-1);
       break;
 
     default:
