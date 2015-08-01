@@ -123,6 +123,12 @@ add_executable(test-protobuf
     $<TARGET_OBJECTS:stx-http>
     protobuf/protobuf_test.cc)
 
+add_executable(test-persistenthashset
+    $<TARGET_OBJECTS:stx-base>
+    util/PersistentHashSet_test.cc)
+
+target_link_libraries(test-persistenthashset ${FNORD_LIBS})
+
 ## redis
 #add_library(fnord-redis OBJECT
 #    ../3rdparty/hiredis/async.c
