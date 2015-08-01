@@ -9,20 +9,19 @@
  */
 #include <string.h>
 #include <unistd.h>
-#include <stx/util/RecordIDSet.h>
+#include <stx/RecordIDSet.h>
 #include <stx/io/fileutil.h>
 #include <stx/io/mmappedfile.h>
 #include <stx/fnv.h>
 
-using namespace stx;
-
-namespace tsdb {
+namespace stx {
 
 const size_t RecordIDSet::kVersion = 1;
 const double RecordIDSet::kMaxFillFactor = 0.5f;
 const double RecordIDSet::kGrowthFactor = 2.0f;
 const size_t RecordIDSet::kInitialSlots = 512;
-const size_t RecordIDSet::kIOBatchSize = 200;
+const size_t RecordIDSet::kFetchIOBatchSize = 200;
+const size_t RecordIDSet::kProbeIOBatchSize = 25;
 
 #define IS_SLOT_EMPTY(slot) (\
     *((uint64_t*) (slot)) == 0 && \
@@ -63,36 +62,44 @@ bool RecordIDSet::addRecordID(const SHA1Hash& record_id) {
       fpath_,
       File::O_WRITE | File::O_READ | File::O_CREATEOROPEN);
 
-  if (nslots_used_ == size_t(-1)) {
-    nslots_used_ = 0;
-    if (nslots_ > 0) {
-      scan(&file, nslots_, [this] (void* slot) {++nslots_used_; });
-    }
-  }
-
-  if (nslots_used_ + 1 > nslots_ * kMaxFillFactor) {
-    grow(&file);
-  }
-
-  size_t insert_idx = 0;
-  if (lookup(&file, nslots_, record_id, &insert_idx)) {
-    return false;
-  } else {
-    file.seekTo(sizeof(FileHeader) + insert_idx * SHA1Hash::kSize);
-    file.write(record_id.data(), SHA1Hash::kSize);
-    ++nslots_used_;
-    return true;
-  }
+  return insert(&file, record_id);
 }
 
-// FIXPAUL keep file open for all writes...
 void RecordIDSet::addRecordIDs(Set<SHA1Hash>* record_ids) {
+  std::unique_lock<std::mutex> lk(write_mutex_);
+  auto file = File::openFile(
+      fpath_,
+      File::O_WRITE | File::O_READ | File::O_CREATEOROPEN);
+
   for (auto cur = record_ids->begin(); cur != record_ids->end(); ) {
-    if (addRecordID(*cur)) {
+    if (insert(&file, *cur)) {
       ++cur;
     } else {
       cur = record_ids->erase(cur);
     }
+  }
+}
+
+bool RecordIDSet::insert(File* file, const SHA1Hash& record_id) {
+  if (nslots_used_ == size_t(-1)) {
+    nslots_used_ = 0;
+    if (nslots_ > 0) {
+      scan(file, nslots_, [this] (void* slot) {++nslots_used_; });
+    }
+  }
+
+  if (nslots_used_ + 1 > nslots_ * kMaxFillFactor) {
+    grow(file);
+  }
+
+  size_t insert_idx = 0;
+  if (lookup(file, nslots_, record_id, &insert_idx)) {
+    return false;
+  } else {
+    file->seekTo(sizeof(FileHeader) + insert_idx * SHA1Hash::kSize);
+    file->write(record_id.data(), SHA1Hash::kSize);
+    ++nslots_used_;
+    return true;
   }
 }
 
@@ -137,7 +144,7 @@ bool RecordIDSet::lookup(
   FNV<uint64_t> fnv;
   auto h = fnv.hash(record_id.data(), record_id.size());
 
-  Buffer buf(kIOBatchSize * SHA1Hash::kSize);
+  Buffer buf(kProbeIOBatchSize * SHA1Hash::kSize);
   size_t buf_offset = -1;
   size_t buf_size = 0;
 
@@ -180,15 +187,15 @@ void RecordIDSet::scan(
     Function<void (void* slot)> fn) {
   file->seekTo(sizeof(FileHeader));
 
-  Buffer buf(kIOBatchSize * SHA1Hash::kSize);
-  auto nbatches = (nslots + kIOBatchSize - 1) / kIOBatchSize;
+  Buffer buf(kFetchIOBatchSize * SHA1Hash::kSize);
+  auto nbatches = (nslots + kFetchIOBatchSize - 1) / kFetchIOBatchSize;
   for (size_t b = 0; b < nbatches; ++b) {
     auto nread = file->read(buf.data(), buf.size());
     if (nread == -1) {
       break;
     }
 
-    for (size_t pos = 0; pos < SHA1Hash::kSize * kIOBatchSize;
+    for (size_t pos = 0; pos < SHA1Hash::kSize * kFetchIOBatchSize;
         pos += SHA1Hash::kSize) {
       auto slot = static_cast<char*>(buf.data()) + pos;
       if (IS_SLOT_EMPTY(slot)) {
@@ -245,5 +252,5 @@ void RecordIDSet::grow(File* file) {
   nslots_ = new_nslots;
 }
 
-} // namespace tdsb
+} // namespace stx
 
