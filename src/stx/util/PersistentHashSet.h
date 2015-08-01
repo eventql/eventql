@@ -16,8 +16,6 @@
 #include <stx/util/binarymessagewriter.h>
 #include <stx/random.h>
 
-using namespace stx;
-
 namespace stx {
 
 class RecordIDSet {
@@ -37,7 +35,8 @@ protected:
   static const double kMaxFillFactor;
   static const double kGrowthFactor;
   static const size_t kInitialSlots;
-  static const size_t kIOBatchSize;
+  static const size_t kFetchIOBatchSize;
+  static const size_t kProbeIOBatchSize;
 
   struct  __attribute__((packed)) FileHeader {
     uint8_t version;
@@ -57,6 +56,10 @@ protected:
       size_t* insert_idx = nullptr);
 
   void grow(File* file);
+
+  bool insert(
+      File* file,
+      const SHA1Hash& record_id);
 
   String fpath_;
   size_t nslots_;
