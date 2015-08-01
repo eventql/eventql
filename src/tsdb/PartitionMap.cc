@@ -114,7 +114,7 @@ void PartitionMap::open() {
     partitions.emplace_back(
         std::make_tuple(tsdb_namespace, table_key, partition_key));
 
-    partitions_.emplace(db_key, new LazyPartition());
+    partitions_.emplace(db_key, mkScoped(new LazyPartition()));
   }
 
   cursor->close();
