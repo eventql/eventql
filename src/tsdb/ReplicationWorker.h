@@ -7,20 +7,19 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#ifndef _FNORD_TSDB_REPLICATIONWORKER_H
-#define _FNORD_TSDB_REPLICATIONWORKER_H
+#pragma once
 #include <thread>
 #include <stx/stdtypes.h>
-#include <tsdb/TSDBNodeRef.h>
+#include <tsdb/PartitionMap.h>
 
 using namespace stx;
 
 namespace tsdb {
 
-class ReplicationWorker : public RefCounted {
+class ReplicationWorker {
 public:
 
-  ReplicationWorker();
+  ReplicationWorker(PartitionMap* pmap);
   ~ReplicationWorker();
 
   void enqueuePartition(RefPtr<Partition> partition);
@@ -51,4 +50,3 @@ protected:
 
 } // namespace tsdb
 
-#endif

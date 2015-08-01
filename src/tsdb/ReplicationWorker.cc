@@ -17,13 +17,19 @@ using namespace stx;
 
 namespace tsdb {
 
-ReplicationWorker::ReplicationWorker() :
+ReplicationWorker::ReplicationWorker(
+    PartitionMap* pmap) :
     queue_([] (
         const Pair<uint64_t, RefPtr<Partition>>& a,
         const Pair<uint64_t, RefPtr<Partition>>& b) {
       return a.first < b.first;
     }),
     running_(false) {
+  pmap->subscribeToPartitionChanges([this] (
+      RefPtr<tsdb::PartitionChangeNotification> change) {
+    enqueuePartition(change->partition);
+  });
+
   start();
 }
 
