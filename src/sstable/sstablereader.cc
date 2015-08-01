@@ -35,9 +35,9 @@ SSTableReader::SSTableReader(
   //  RAISE(kIllegalStateError, "corrupt sstable header");
   //}
 
-  if (header_.headerSize() + header_.bodySize() > file_size_) {
-    RAISE(kIllegalStateError, "file metadata offsets exceed file bounds");
-  }
+  //if (header_.headerSize() + header_.bodySize() > file_size_) {
+  //  RAISE(kIllegalStateError, "file metadata offsets exceed file bounds");
+  //}
 }
 
 void SSTableReader::readHeader(const void** userdata, size_t* userdata_size) {
