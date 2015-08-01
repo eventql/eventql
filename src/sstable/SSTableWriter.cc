@@ -10,6 +10,7 @@
 #include <string.h>
 #include <stx/exception.h>
 #include <stx/fnv.h>
+#include <stx/io/BufferedOutputStream.h>
 #include <sstable/binaryformat.h>
 #include <sstable/fileheaderwriter.h>
 #include <sstable/fileheaderreader.h>
@@ -75,7 +76,7 @@ uint64_t SSTableWriter::appendRow(
   }
 
   file_.seekTo(hdr_.bodyOffset() + hdr_.bodySize());
-  FileOutputStream os(file_.fd());
+  BufferedOutputStream os(FileOutputStream::fromFileDescriptor(file_.fd()));
   auto rsize = RowWriter::appendRow(hdr_, key, key_size, data, data_size, &os);
 
   auto roff = hdr_.bodySize();
