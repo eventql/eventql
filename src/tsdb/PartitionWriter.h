@@ -12,7 +12,7 @@
 #include <stx/autoref.h>
 #include <tsdb/PartitionSnapshot.h>
 #include <tsdb/RecordRef.h>
-#include <tsdb/RecordIDSet.h>
+#include <stx/util/PersistentHashSet.h>
 
 using namespace stx;
 
@@ -32,7 +32,7 @@ struct PartitionWriter : public RefCounted {
 
 protected:
   RefPtr<PartitionSnapshot>* head_;
-  RecordIDSet idset_;
+  PersistentHashSet idset_;
   size_t max_datafile_size_;
   std::mutex mutex_;
 };
