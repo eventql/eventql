@@ -11,16 +11,15 @@
 #include <stdio.h>
 #include <string.h>
 #include "stx/test/unittest.h"
-#include "tsdb/RecordIDSet.h"
+#include "stx/util/PersistentHashSet.h"
 
 using namespace stx;
-using namespace tsdb;
 
 UNIT_TEST(RecordIDSetTest);
 
 TEST_CASE(RecordIDSetTest, TestInsertIntoEmptySet, [] () {
   FileUtil::rm("/tmp/_fnord_testrecidset.idx");
-  RecordIDSet recset("/tmp/_fnord_testrecidset.idx");
+  PersistentHashSet recset("/tmp/_fnord_testrecidset.idx");
 
   EXPECT_FALSE(recset.hasRecordID(SHA1::compute("0x42424242")));
   EXPECT_FALSE(recset.hasRecordID(SHA1::compute("0x23232323")));
@@ -45,7 +44,7 @@ TEST_CASE(RecordIDSetTest, TestReopen, [] () {
   FileUtil::rm("/tmp/_fnord_testrecidset.idx");
 
   {
-    RecordIDSet recset("/tmp/_fnord_testrecidset.idx");
+    PersistentHashSet recset("/tmp/_fnord_testrecidset.idx");
     EXPECT_FALSE(recset.hasRecordID(SHA1::compute("0x42424242")));
     EXPECT_FALSE(recset.hasRecordID(SHA1::compute("0x23232323")));
     EXPECT_FALSE(recset.hasRecordID(SHA1::compute("0x52525252")));
@@ -56,7 +55,7 @@ TEST_CASE(RecordIDSetTest, TestReopen, [] () {
   }
 
   {
-    RecordIDSet recset("/tmp/_fnord_testrecidset.idx");
+    PersistentHashSet recset("/tmp/_fnord_testrecidset.idx");
     EXPECT_TRUE(recset.hasRecordID(SHA1::compute("0x42424242")));
     EXPECT_TRUE(recset.hasRecordID(SHA1::compute("0x23232323")));
     EXPECT_FALSE(recset.hasRecordID(SHA1::compute("0x52525252")));
@@ -70,7 +69,7 @@ TEST_CASE(RecordIDSetTest, TestReopen, [] () {
   }
 
   {
-    RecordIDSet recset("/tmp/_fnord_testrecidset.idx");
+    PersistentHashSet recset("/tmp/_fnord_testrecidset.idx");
     EXPECT_TRUE(recset.hasRecordID(SHA1::compute("0x42424242")));
     EXPECT_TRUE(recset.hasRecordID(SHA1::compute("0x23232323")));
     EXPECT_TRUE(recset.hasRecordID(SHA1::compute("0x52525252")));
@@ -85,7 +84,7 @@ TEST_CASE(RecordIDSetTest, TestReopen, [] () {
 
 TEST_CASE(RecordIDSetTest, TestDuplicateRecordIDs, [] () {
   FileUtil::rm("/tmp/_fnord_testrecidset.idx");
-  RecordIDSet recset("/tmp/_fnord_testrecidset.idx");
+  PersistentHashSet recset("/tmp/_fnord_testrecidset.idx");
 
   recset.addRecordID(SHA1::compute("0x42424242"));
   recset.addRecordID(SHA1::compute("0x42424242"));
@@ -106,7 +105,7 @@ TEST_CASE(RecordIDSetTest, TestInsert10kRows, [] () {
   Random rnd;
 
   {
-    RecordIDSet recset("/tmp/_fnord_testrecidset.idx");
+    PersistentHashSet recset("/tmp/_fnord_testrecidset.idx");
     for (int i = 0; i < 10000; ++i) {
       recset.addRecordID(SHA1::compute(StringUtil::toString(i)));
     }
@@ -114,7 +113,7 @@ TEST_CASE(RecordIDSetTest, TestInsert10kRows, [] () {
 
   {
     Random rnd;
-    RecordIDSet recset("/tmp/_fnord_testrecidset.idx");
+    PersistentHashSet recset("/tmp/_fnord_testrecidset.idx");
 
     auto ids = recset.fetchRecordIDs();
     EXPECT_EQ(ids.size(), 10000);
