@@ -102,6 +102,8 @@ void PartitionMap::open() {
     auto table_key = value.toString();
     auto table = findTableWithLock(tsdb_namespace, table_key);
 
+    partitions_.emplace(db_key, mkScoped(new LazyPartition()));
+
     if (table.isEmpty()) {
       logWarning(
           "tsdb",
@@ -113,8 +115,6 @@ void PartitionMap::open() {
 
     partitions.emplace_back(
         std::make_tuple(tsdb_namespace, table_key, partition_key));
-
-    partitions_.emplace(db_key, mkScoped(new LazyPartition()));
   }
 
   cursor->close();
