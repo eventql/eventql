@@ -115,8 +115,12 @@ public:
   void append(const Buffer& buffer);
   void append(char chr);
 
-
+  /**
+   * Clear this buffer by setting the logical size to zero. Does _not_ free any
+   * memory, zero out the backing storage or change the capacity of the buffer
+   */
   void clear();
+
   void truncate(size_t size);
 
   /**

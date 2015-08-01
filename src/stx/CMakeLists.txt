@@ -41,6 +41,7 @@ add_library(stx-base OBJECT
     io/filerepository.cc
     io/inputstream.cc
     io/outputstream.cc
+    io/BufferedOutputStream.cc
     io/mmappedfile.cc
     io/pagemanager.cc
     ISO8601.cc
