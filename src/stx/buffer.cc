@@ -192,6 +192,10 @@ size_t Buffer::capacity() const {
   return alloc_;
 }
 
+size_t Buffer::remaining() const {
+  return alloc_ - size_;
+}
+
 std::string Buffer::toString() const {
   return std::string(static_cast<char *>(data_), size_);
 }
