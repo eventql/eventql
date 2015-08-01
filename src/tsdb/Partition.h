@@ -54,6 +54,8 @@ public:
       RefPtr<PartitionSnapshot> snap,
       RefPtr<Table> table);
 
+  SHA1Hash uuid() const;
+
   RefPtr<PartitionWriter> getWriter();
   RefPtr<PartitionReader> getReader();
   RefPtr<PartitionSnapshot> getSnapshot();

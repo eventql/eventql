@@ -17,14 +17,26 @@ using namespace stx;
 
 namespace tsdb {
 
-ReplicationWorker::ReplicationWorker(
-    TSDBNodeRef* node) :
-    queue_(&node->replicationq),
-    running_(true) {}
+ReplicationWorker::ReplicationWorker() :
+    queue_([] (
+        const Pair<uint64_t, RefPtr<Partition>>& a,
+        const Pair<uint64_t, RefPtr<Partition>>& b) {
+      return a.first < b.first;
+    }),
+    running_(false) {
+  start();
+}
+
+ReplicationWorker::~ReplicationWorker() {
+  stop();
+}
 
 void ReplicationWorker::start() {
   running_ = true;
-  thread_ = std::thread(std::bind(&ReplicationWorker::run, this));
+
+  for (int i = 0; i < 4; ++i) {
+    threads_.emplace_back(std::bind(&ReplicationWorker::work, this));
+  }
 }
 
 void ReplicationWorker::stop() {
@@ -33,22 +45,52 @@ void ReplicationWorker::stop() {
   }
 
   running_ = false;
-  queue_->wakeup();
-  thread_.join();
+  cv_.notify_all();
+
+  for (auto& t : threads_) {
+    t.join();
+  }
 }
 
-void ReplicationWorker::run() {
-  while (running_.load()) {
-    auto job = queue_->interruptiblePop();
-    if (job.isEmpty()) {
+void ReplicationWorker::work() {
+  std::unique_lock<std::mutex> lk(mutex_);
+
+  while (running_) {
+    if (queue_.size() == 0) {
+      cv_.wait(lk);
+    }
+
+    if (queue_.size() == 0) {
       continue;
     }
 
-    try {
-      //job.get()->replicate();
-    } catch (const std::exception& e) {
-      stx::logError("fnord.evdb", e, "ReplicationWorker error");
+    auto now = WallClock::unixMicros();
+    if (now < queue_.begin()->first) {
+      cv_.wait_for(
+          lk,
+          std::chrono::microseconds(queue_.begin()->first - now));
+
+      continue;
     }
+
+    auto partition = queue_.begin()->second;
+    queue_.erase(queue_.begin());
+    lk.unlock();
+
+    try {
+      replicate(partition);
+    } catch (const StandardException& e) {
+      logError("tsdb", e, "ReplicationWorker error");
+
+      lk.lock();
+      auto delay = 30 * kMicrosPerSecond; // FIXPAUL increasing delay..
+      queue_.emplace(now + delay, partition);
+      continue;
+    }
+
+    lk.lock();
+    waitset_.erase(partition->uuid());
+    maybeEnqueuePartition(partition);
   }
 }
 

@@ -20,16 +20,33 @@ namespace tsdb {
 class ReplicationWorker : public RefCounted {
 public:
 
-  ReplicationWorker(TSDBNodeRef* node);
-  void start();
-  void stop();
+  ReplicationWorker();
+  ~ReplicationWorker();
+
+  void enqueuePartition(RefPtr<Partition> partition);
+  void maybeEnqueuePartition(RefPtr<Partition> partition);
 
 protected:
-  void run();
 
-  thread::CoalescingDelayedQueue<Partition>* queue_;
+  void replicate(RefPtr<Partition> partition);
+
+  void start();
+  void stop();
+  void work();
+
+  mutable std::mutex mutex_;
+  std::condition_variable cv_;
+
+  std::multiset<
+      Pair<uint64_t, RefPtr<Partition>>,
+      Function<bool (
+          const Pair<uint64_t, RefPtr<Partition>>&,
+          const Pair<uint64_t, RefPtr<Partition>>&)>> queue_;
+
+  Set<SHA1Hash> waitset_;
+
   std::atomic<bool> running_;
-  std::thread thread_;
+  Vector<std::thread> threads_;
 };
 
 } // namespace tsdb
