@@ -15,6 +15,7 @@ using namespace stx;
 
 namespace tsdb {
 class Table;
+class PartitionMap;
 
 class LazyPartition {
 public:
@@ -26,7 +27,8 @@ public:
       const String& tsdb_namespace,
       RefPtr<Table> table,
       const SHA1Hash& partition_key,
-      const String& db_path);
+      const String& db_path,
+      PartitionMap* pmap);
 
   RefPtr<Partition> getPartition();
 

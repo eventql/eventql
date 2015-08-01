@@ -89,7 +89,6 @@ void PartitionMap::open() {
 
     partitions_.emplace(db_key, mkScoped(new LazyPartition()));
 
-/*
     auto tsdb_namespace_off = StringUtil::find(db_key, '~');
     if (tsdb_namespace_off == String::npos) {
       RAISEF(kRuntimeError, "invalid partition key: $0", db_key);
@@ -111,17 +110,6 @@ void PartitionMap::open() {
           partition_key.toString());
       continue;
     }
-
-    auto partition = Partition::reopen(
-        tsdb_namespace,
-        table.get(),
-        partition_key,
-        db_path_);
-
-    auto change = mkRef(new PartitionChangeNotification());
-    change->partition = partition;
-    publishPartitionChange(change);
-*/
   }
 
   cursor->close();
@@ -153,7 +141,8 @@ RefPtr<Partition> PartitionMap::findOrCreatePartition(
         tsdb_namespace,
         table.get(),
         partition_key,
-        db_path_);
+        db_path_,
+        this);
   }
 
   auto partition = Partition::create(
@@ -172,6 +161,10 @@ RefPtr<Partition> PartitionMap::findOrCreatePartition(
       stream_key.size());
 
   txn->commit();
+
+  auto change = mkRef(new PartitionChangeNotification());
+  change->partition = partition;
+  publishPartitionChange(change);
 
   return partition;
 }
@@ -202,7 +195,8 @@ Option<RefPtr<Partition>> PartitionMap::findPartition(
             tsdb_namespace,
             table.get(),
             partition_key,
-            db_path_));
+            db_path_,
+            this));
   }
 }
 

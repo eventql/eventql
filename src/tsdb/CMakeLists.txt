@@ -28,6 +28,7 @@ add_library(tsdb-server OBJECT
     PartitionReader.cc
     PartitionWriter.cc
     PartitionSnapshot.cc
+    LazyPartition.cc
     Table.cc
     CompactionWorker.cc
     ReplicationWorker.cc
