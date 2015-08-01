@@ -31,6 +31,29 @@ ReplicationWorker::~ReplicationWorker() {
   stop();
 }
 
+void ReplicationWorker::enqueuePartition(RefPtr<Partition> partition) {
+  std::unique_lock<std::mutex> lk(mutex_);
+
+  auto uuid = partition->uuid();
+  if (waitset_.count(uuid) > 0) {
+    return;
+  }
+
+  queue_.emplace(WallClock::unixMicros(), partition);
+  waitset_.emplace(uuid);
+}
+
+void ReplicationWorker::maybeEnqueuePartition(RefPtr<Partition> partition) {
+  // FIXME check if partition needs replication, then enqueue
+}
+
+void ReplicationWorker::replicate(RefPtr<Partition> partition) {
+  logDebug(
+      "tsdb",
+      "Replicating partition $0",
+      partition->uuid().toString());
+}
+
 void ReplicationWorker::start() {
   running_ = true;
 
