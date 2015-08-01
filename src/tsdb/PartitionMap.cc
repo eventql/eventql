@@ -180,7 +180,7 @@ RefPtr<Partition> PartitionMap::findOrCreatePartition(
       partition_key,
       db_path_);
 
-  partitions_.emplace(db_key, new LazyPartition(partition));
+  partitions_.emplace(db_key, mkScoped(new LazyPartition(partition)));
 
   auto txn = db_->startTransaction(false);
   txn->update(
