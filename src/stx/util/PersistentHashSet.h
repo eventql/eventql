@@ -18,10 +18,10 @@
 
 namespace stx {
 
-class RecordIDSet {
+class PersistentHashSet {
 public:
 
-  RecordIDSet(const String& fpath);
+  PersistentHashSet(const String& fpath);
 
   bool addRecordID(const SHA1Hash& record_id);
   void addRecordIDs(Set<SHA1Hash>* record_ids);

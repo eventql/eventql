@@ -9,19 +9,19 @@
  */
 #include <string.h>
 #include <unistd.h>
-#include <stx/RecordIDSet.h>
+#include <stx/PersistentHashSet.h>
 #include <stx/io/fileutil.h>
 #include <stx/io/mmappedfile.h>
 #include <stx/fnv.h>
 
 namespace stx {
 
-const size_t RecordIDSet::kVersion = 1;
-const double RecordIDSet::kMaxFillFactor = 0.5f;
-const double RecordIDSet::kGrowthFactor = 2.0f;
-const size_t RecordIDSet::kInitialSlots = 512;
-const size_t RecordIDSet::kFetchIOBatchSize = 200;
-const size_t RecordIDSet::kProbeIOBatchSize = 25;
+const size_t PersistentHashSet::kVersion = 1;
+const double PersistentHashSet::kMaxFillFactor = 0.5f;
+const double PersistentHashSet::kGrowthFactor = 2.0f;
+const size_t PersistentHashSet::kInitialSlots = 512;
+const size_t PersistentHashSet::kFetchIOBatchSize = 200;
+const size_t PersistentHashSet::kProbeIOBatchSize = 25;
 
 #define IS_SLOT_EMPTY(slot) (\
     *((uint64_t*) (slot)) == 0 && \
@@ -30,7 +30,7 @@ const size_t RecordIDSet::kProbeIOBatchSize = 25;
         (slot) + sizeof(uint64_t), \
         SHA1Hash::kSize - sizeof(uint64_t)) == 0)
 
-RecordIDSet::RecordIDSet(
+PersistentHashSet::PersistentHashSet(
     const String& filepath) :
     fpath_(filepath),
     nslots_(0),
@@ -56,7 +56,7 @@ RecordIDSet::RecordIDSet(
   }
 }
 
-bool RecordIDSet::addRecordID(const SHA1Hash& record_id) {
+bool PersistentHashSet::addRecordID(const SHA1Hash& record_id) {
   std::unique_lock<std::mutex> lk(write_mutex_);
   auto file = File::openFile(
       fpath_,
@@ -65,7 +65,7 @@ bool RecordIDSet::addRecordID(const SHA1Hash& record_id) {
   return insert(&file, record_id);
 }
 
-void RecordIDSet::addRecordIDs(Set<SHA1Hash>* record_ids) {
+void PersistentHashSet::addRecordIDs(Set<SHA1Hash>* record_ids) {
   std::unique_lock<std::mutex> lk(write_mutex_);
   auto file = File::openFile(
       fpath_,
@@ -80,7 +80,7 @@ void RecordIDSet::addRecordIDs(Set<SHA1Hash>* record_ids) {
   }
 }
 
-bool RecordIDSet::insert(File* file, const SHA1Hash& record_id) {
+bool PersistentHashSet::insert(File* file, const SHA1Hash& record_id) {
   if (nslots_used_ == size_t(-1)) {
     nslots_used_ = 0;
     if (nslots_ > 0) {
@@ -103,7 +103,7 @@ bool RecordIDSet::insert(File* file, const SHA1Hash& record_id) {
   }
 }
 
-bool RecordIDSet::hasRecordID(const SHA1Hash& record_id) {
+bool PersistentHashSet::hasRecordID(const SHA1Hash& record_id) {
   std::unique_lock<std::mutex> lk(read_mutex_);
   auto nslots = nslots_;
   if (nslots == 0) {
@@ -116,7 +116,7 @@ bool RecordIDSet::hasRecordID(const SHA1Hash& record_id) {
   return lookup(&file, nslots, record_id);
 }
 
-Set<SHA1Hash> RecordIDSet::fetchRecordIDs() {
+Set<SHA1Hash> PersistentHashSet::fetchRecordIDs() {
   Set<SHA1Hash> ids;
 
   std::unique_lock<std::mutex> lk(read_mutex_);
@@ -136,7 +136,7 @@ Set<SHA1Hash> RecordIDSet::fetchRecordIDs() {
 }
 
 // preconditions: no locks required
-bool RecordIDSet::lookup(
+bool PersistentHashSet::lookup(
     File* file,
     size_t nslots,
     const SHA1Hash& record_id,
@@ -181,7 +181,7 @@ bool RecordIDSet::lookup(
 }
 
 // preconditions: no locks required
-void RecordIDSet::scan(
+void PersistentHashSet::scan(
     File* file,
     size_t nslots,
     Function<void (void* slot)> fn) {
@@ -208,7 +208,7 @@ void RecordIDSet::scan(
 }
 
 // preconditions: must hold write lock
-void RecordIDSet::grow(File* file) {
+void PersistentHashSet::grow(File* file) {
   size_t new_nslots = nslots_ == 0 ? kInitialSlots : nslots_ * kGrowthFactor;
 
   Buffer new_data(new_nslots * SHA1Hash::kSize);
