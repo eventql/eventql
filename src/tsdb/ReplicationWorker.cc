@@ -47,6 +47,7 @@ void ReplicationWorker::enqueuePartition(RefPtr<Partition> partition) {
 
   queue_.emplace(WallClock::unixMicros(), partition);
   waitset_.emplace(uuid);
+  cv_.notify_all();
 }
 
 void ReplicationWorker::maybeEnqueuePartition(RefPtr<Partition> partition) {
