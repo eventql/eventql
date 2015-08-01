@@ -9,7 +9,7 @@
  */
 #include <string.h>
 #include <unistd.h>
-#include <stx/PersistentHashSet.h>
+#include <stx/util/PersistentHashSet.h>
 #include <stx/io/fileutil.h>
 #include <stx/io/mmappedfile.h>
 #include <stx/fnv.h>

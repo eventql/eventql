@@ -79,6 +79,7 @@ add_library(stx-base OBJECT
     util/BitPackDecoder.cc
     util/BitPackEncoder.cc
     util/SimpleRateLimit.cc
+    util/PersistentHashSet.cc
     VFS.cc
     wallclock.cc
     web/SecureCookie.cc
