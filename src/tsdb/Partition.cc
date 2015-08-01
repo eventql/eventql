@@ -96,6 +96,17 @@ Partition::Partition(
     table_(table),
     writer_(new PartitionWriter(&head_)) {}
 
+SHA1Hash Partition::uuid() const {
+  auto snap = head_;
+
+  return SHA1::compute(
+      StringUtil::format(
+          "$0/$1/$2",
+          snap->state.tsdb_namespace(),
+          table_->name(),
+          snap->key.toString()));
+}
+
 RefPtr<PartitionWriter> Partition::getWriter() {
   return writer_;
 }
