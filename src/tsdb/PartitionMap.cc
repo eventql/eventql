@@ -87,6 +87,9 @@ void PartitionMap::open() {
       continue;
     }
 
+    partitions_.emplace(db_key, mkScoped(new LazyPartition()));
+
+/*
     auto tsdb_namespace_off = StringUtil::find(db_key, '~');
     if (tsdb_namespace_off == String::npos) {
       RAISEF(kRuntimeError, "invalid partition key: $0", db_key);
@@ -115,11 +118,10 @@ void PartitionMap::open() {
         partition_key,
         db_path_);
 
-    partitions_.emplace(db_key, partition);
-
     auto change = mkRef(new PartitionChangeNotification());
     change->partition = partition;
     publishPartitionChange(change);
+*/
   }
 
   cursor->close();
@@ -136,12 +138,22 @@ RefPtr<Partition> PartitionMap::findOrCreatePartition(
   std::unique_lock<std::mutex> lk(mutex_);
   auto iter = partitions_.find(db_key);
   if (iter != partitions_.end()) {
-    return iter->second;
+    if (iter->second->isLoaded()) {
+      return iter->second->getPartition();
+    }
   }
 
   auto table = findTableWithLock(tsdb_namespace, stream_key);
   if (table.isEmpty()) {
     RAISEF(kNotFoundError, "table not found: $0", stream_key);
+  }
+
+  if (iter != partitions_.end()) {
+    return iter->second->getPartition(
+        tsdb_namespace,
+        table.get(),
+        partition_key,
+        db_path_);
   }
 
   auto partition = Partition::create(
@@ -150,7 +162,7 @@ RefPtr<Partition> PartitionMap::findOrCreatePartition(
       partition_key,
       db_path_);
 
-  partitions_.emplace(db_key, partition);
+  partitions_.emplace(db_key, mkScoped(new LazyPartition(partition)));
 
   auto txn = db_->startTransaction(false);
   txn->update(
@@ -176,7 +188,21 @@ Option<RefPtr<Partition>> PartitionMap::findPartition(
   if (iter == partitions_.end()) {
     return None<RefPtr<Partition>>();
   } else {
-    return Some(iter->second);
+    if (iter->second->isLoaded()) {
+      return Some(iter->second->getPartition());
+    }
+
+    auto table = findTableWithLock(tsdb_namespace, stream_key);
+    if (table.isEmpty()) {
+      RAISEF(kNotFoundError, "table not found: $0", stream_key);
+    }
+
+    return Some(
+        iter->second->getPartition(
+            tsdb_namespace,
+            table.get(),
+            partition_key,
+            db_path_));
   }
 }
 

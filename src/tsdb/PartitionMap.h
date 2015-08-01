@@ -14,6 +14,7 @@
 #include <stx/mdb/MDB.h>
 #include <tsdb/TableConfig.pb.h>
 #include <tsdb/Partition.h>
+#include <tsdb/LazyPartition.h>
 #include <tsdb/TSDBNodeConfig.pb.h>
 #include <tsdb/TSDBTableInfo.h>
 #include <tsdb/PartitionInfo.pb.h>
@@ -68,7 +69,7 @@ protected:
 
   mutable std::mutex mutex_;
   HashMap<String, RefPtr<Table>> tables_;
-  HashMap<String, RefPtr<Partition>> partitions_;
+  HashMap<String, ScopedPtr<LazyPartition>> partitions_;
   Vector<PartitionChangeCallbackFn> callbacks_;
 };
 
