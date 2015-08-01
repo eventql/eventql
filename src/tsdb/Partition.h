@@ -29,6 +29,12 @@ using namespace stx;
 namespace tsdb {
 class Table;
 
+using PartitionKey =
+    std::tuple<
+        String,     // namespace
+        String,     // table
+        SHA1Hash>;  // partition
+
 class Partition : public RefCounted {
 public:
 

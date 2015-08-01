@@ -7,6 +7,7 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
+#include <thread>
 #include <stx/util/Base64.h>
 #include <stx/fnv.h>
 #include <stx/protobuf/msg.h>
@@ -65,6 +66,7 @@ void PartitionMap::open() {
   auto txn = db_->startTransaction(false);
   auto cursor = txn->getCursor();
 
+  Vector<PartitionKey> partitions;
   for (int i = 0; ; ++i) {
     Buffer key;
     Buffer value;
@@ -87,8 +89,6 @@ void PartitionMap::open() {
       continue;
     }
 
-    partitions_.emplace(db_key, mkScoped(new LazyPartition()));
-
     auto tsdb_namespace_off = StringUtil::find(db_key, '~');
     if (tsdb_namespace_off == String::npos) {
       RAISEF(kRuntimeError, "invalid partition key: $0", db_key);
@@ -110,10 +110,34 @@ void PartitionMap::open() {
           partition_key.toString());
       continue;
     }
+
+    partitions.emplace_back(tsdb_namespace, table_key, partition_key);
+    partitions_.emplace(db_key, new LazyPartition());
   }
 
   cursor->close();
   txn->abort();
+
+  auto background_load_thread = std::thread(
+      std::bind(&PartitionMap::loadPartitions, this, partitions));
+
+  background_load_thread.detach();
+}
+
+void PartitionMap::loadPartitions(const Vector<PartitionKey>& partitions) {
+  for (const auto& p : partitions) {
+    try {
+      findPartition(std::get<0>(p), std::get<1>(p), std::get<2>(p));
+    } catch (const StandardException& e) {
+      logError(
+          "tsdb",
+          e,
+          "error while loading partition $0/$1/$2",
+          std::get<0>(p),
+          std::get<1>(p),
+          std::get<2>(p).toString());
+    }
+  }
 }
 
 RefPtr<Partition> PartitionMap::findOrCreatePartition(
@@ -137,7 +161,10 @@ RefPtr<Partition> PartitionMap::findOrCreatePartition(
   }
 
   if (iter != partitions_.end()) {
-    return iter->second->getPartition(
+    auto partition = iter->second.get();
+    lk.unlock();
+
+    return partition->getPartition(
         tsdb_namespace,
         table.get(),
         partition_key,
@@ -151,7 +178,7 @@ RefPtr<Partition> PartitionMap::findOrCreatePartition(
       partition_key,
       db_path_);
 
-  partitions_.emplace(db_key, mkScoped(new LazyPartition(partition)));
+  partitions_.emplace(db_key, new LazyPartition(partition));
 
   auto txn = db_->startTransaction(false);
   txn->update(
@@ -190,8 +217,11 @@ Option<RefPtr<Partition>> PartitionMap::findPartition(
       RAISEF(kNotFoundError, "table not found: $0", stream_key);
     }
 
+    auto partition = iter->second.get();
+    lk.unlock();
+
     return Some(
-        iter->second->getPartition(
+        partition->getPartition(
             tsdb_namespace,
             table.get(),
             partition_key,

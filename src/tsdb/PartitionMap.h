@@ -64,6 +64,8 @@ protected:
       const String& tsdb_namespace,
       const String& table_name) const;
 
+  void loadPartitions(const Vector<PartitionKey>& partitions);
+
   String db_path_;
   RefPtr<mdb::MDB> db_;
 
