@@ -10,6 +10,7 @@
 #include <stx/io/fileutil.h>
 #include <tsdb/Partition.h>
 #include <tsdb/PartitionWriter.h>
+#include <stx/logging.h>
 #include <sstable/SSTableWriter.h>
 
 using namespace stx;

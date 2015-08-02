@@ -12,12 +12,9 @@
 #include <stx/stdtypes.h>
 #include <stx/option.h>
 #include <stx/UnixTime.h>
-#include <stx/util/binarymessagereader.h>
-#include <stx/util/binarymessagewriter.h>
 #include <stx/protobuf/MessageSchema.h>
 #include <tsdb/Table.h>
 #include <tsdb/RecordRef.h>
-#include <tsdb/TSDBNodeRef.h>
 #include <tsdb/PartitionInfo.pb.h>
 #include <tsdb/PartitionSnapshot.h>
 #include <tsdb/PartitionWriter.h>

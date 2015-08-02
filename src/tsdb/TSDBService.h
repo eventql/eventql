@@ -16,8 +16,6 @@
 #include <stx/mdb/MDB.h>
 #include <tsdb/TableConfig.pb.h>
 #include <tsdb/Partition.h>
-#include <tsdb/CompactionWorker.h>
-#include <tsdb/ReplicationWorker.h>
 #include <tsdb/TSDBNodeConfig.pb.h>
 #include <tsdb/TSDBTableInfo.h>
 #include <tsdb/PartitionInfo.pb.h>

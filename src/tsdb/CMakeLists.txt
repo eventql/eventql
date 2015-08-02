@@ -31,7 +31,6 @@ add_library(tsdb-server OBJECT
     PartitionReplication.cc
     LazyPartition.cc
     Table.cc
-    CompactionWorker.cc
     ReplicationWorker.cc
     ${PROTO_SRCS})
 

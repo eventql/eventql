@@ -9,6 +9,7 @@
  */
 #include <stx/stdtypes.h>
 #include <stx/logging.h>
+#include <stx/io/fileutil.h>
 #include <stx/io/mmappedfile.h>
 #include <tsdb/CSTableIndex.h>
 #include <tsdb/RecordSet.h>
