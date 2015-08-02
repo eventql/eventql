@@ -11,6 +11,7 @@
 #include <stx/stdtypes.h>
 #include <tsdb/Partition.h>
 #include <tsdb/ReplicationScheme.h>
+#include <tsdb/ReplicationState.pb.h>
 
 using namespace stx;
 
@@ -27,7 +28,11 @@ public:
   void replicate();
 
 protected:
+
+  ReplicationState fetchReplicationState() const;
+
   RefPtr<Partition> partition_;
+  RefPtr<PartitionSnapshot> snap_;
   RefPtr<ReplicationScheme> repl_scheme_;
 };
 
