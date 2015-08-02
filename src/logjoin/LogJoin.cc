@@ -248,11 +248,11 @@ void LogJoin::flushSession(
     const std::string uid,
     UnixTime stream_time,
     mdb::MDBTransaction* txn) {
-  auto cursor = txn->getCursor();
+  TrackedSession session;
+  session.uuid = SHA1::compute(uid).toString();
 
+  auto cursor = txn->getCursor();
   try {
-    TrackedSession session;
-    session.uuid = SHA1::compute(uid).toString();
 
     Buffer key;
     Buffer value;
