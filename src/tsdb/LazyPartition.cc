@@ -38,11 +38,13 @@ RefPtr<Partition> LazyPartition::getPartition(
       partition_key,
       db_path);
 
+  auto partition = partition_;
+  lk.unlock();
+
   auto change = mkRef(new PartitionChangeNotification());
-  change->partition = partition_;
+  change->partition = partition;
   pmap->publishPartitionChange(change);
 
-  auto partition = partition_;
   return partition;
 }
 
@@ -52,7 +54,7 @@ RefPtr<Partition> LazyPartition::getPartition() {
     RAISE(kRuntimeError, "partition not loaded");
   }
 
-  auto partition = partition_
+  auto partition = partition_;
   return partition;
 }
 

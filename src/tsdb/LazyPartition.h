@@ -36,7 +36,7 @@ public:
 
 protected:
   RefPtr<Partition> partition_;
-  std::mutex mutex_;
+  mutable std::mutex mutex_;
 };
 
 }
