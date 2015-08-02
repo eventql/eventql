@@ -35,7 +35,7 @@ void PartitionReader::fetchRecords(
 
     auto nrows = reader.countRows();
     if (offset > nrows) {
-      offset += nrows;
+      offset -= nrows;
       continue;
     }
 
