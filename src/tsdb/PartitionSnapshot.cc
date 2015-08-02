@@ -50,4 +50,19 @@ void PartitionSnapshot::writeToDisk() {
   FileUtil::mv(fpath + "~", fpath);
 }
 
+PartitionSnapshotRef::PartitionSnapshotRef(
+    RefPtr<PartitionSnapshot> snap) :
+    snap_(snap) {}
+
+RefPtr<PartitionSnapshot> PartitionSnapshotRef::getSnapshot() const {
+  std::unique_lock<std::mutex> lk(mutex_);
+  auto snap = snap_;
+  return snap;
+}
+
+void PartitionSnapshotRef::setSnapshot(RefPtr<PartitionSnapshot> snap) {
+  std::unique_lock<std::mutex> lk(mutex_);
+  snap_ = snap;
+}
+
 }

@@ -17,9 +17,9 @@ using namespace stx;
 namespace tsdb {
 
 PartitionWriter::PartitionWriter(
-    RefPtr<PartitionSnapshot>* head) :
+    PartitionSnapshotRef* head) :
     head_(head),
-    idset_(FileUtil::joinPaths(head_->get()->base_path, "_idset")),
+    idset_(FileUtil::joinPaths(head_->getSnapshot()->base_path, "_idset")),
     max_datafile_size_(kDefaultMaxDatafileSize) {}
 
 bool PartitionWriter::insertRecord(
@@ -33,7 +33,7 @@ bool PartitionWriter::insertRecord(
 
 Set<SHA1Hash> PartitionWriter::insertRecords(const Vector<RecordRef>& records) {
   std::unique_lock<std::mutex> lk(mutex_);
-  auto snap = head_->get()->clone();
+  auto snap = head_->getSnapshot()->clone();
 
   stx::logTrace(
       "tsdb",
@@ -94,7 +94,7 @@ Set<SHA1Hash> PartitionWriter::insertRecords(const Vector<RecordRef>& records) {
 
   snap->nrecs += record_ids.size();
   snap->writeToDisk();
-  *head_ = snap;
+  head_->setSnapshot(snap);
 
   return record_ids;
 }

@@ -22,7 +22,7 @@ class PartitionWriter : public RefCounted {
 public:
   static const size_t kDefaultMaxDatafileSize = 1024 * 1024 * 128;
 
-  PartitionWriter(RefPtr<PartitionSnapshot>* head);
+  PartitionWriter(PartitionSnapshotRef* head);
 
   bool insertRecord(
       const SHA1Hash& record_id,
@@ -32,7 +32,7 @@ public:
       const Vector<RecordRef>& records);
 
 protected:
-  RefPtr<PartitionSnapshot>* head_;
+  PartitionSnapshotRef* head_;
   PersistentHashSet idset_;
   size_t max_datafile_size_;
   std::mutex mutex_;

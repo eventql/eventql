@@ -34,4 +34,17 @@ struct PartitionSnapshot : public RefCounted {
   uint64_t nrecs;
 };
 
+class PartitionSnapshotRef {
+public:
+
+  PartitionSnapshotRef(RefPtr<PartitionSnapshot> snap);
+
+  RefPtr<PartitionSnapshot> getSnapshot() const;
+  void setSnapshot(RefPtr<PartitionSnapshot> snap);
+
+protected:
+  RefPtr<PartitionSnapshot> snap_;
+  mutable std::mutex mutex_;
+};
+
 }

@@ -63,7 +63,7 @@ public:
   PartitionInfo getInfo() const;
 
 protected:
-  RefPtr<PartitionSnapshot> head_;
+  PartitionSnapshotRef head_;
   RefPtr<Table> table_;
   RefPtr<PartitionWriter> writer_;
 };

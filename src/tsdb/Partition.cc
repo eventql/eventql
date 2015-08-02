@@ -97,7 +97,7 @@ Partition::Partition(
     writer_(new PartitionWriter(&head_)) {}
 
 SHA1Hash Partition::uuid() const {
-  auto snap = head_;
+  auto snap = head_.getSnapshot();
 
   return SHA1::compute(
       StringUtil::format(
@@ -112,11 +112,11 @@ RefPtr<PartitionWriter> Partition::getWriter() {
 }
 
 RefPtr<PartitionReader> Partition::getReader() {
-  return new PartitionReader(head_);
+  return new PartitionReader(head_.getSnapshot());
 }
 
 RefPtr<PartitionSnapshot> Partition::getSnapshot() {
-  return head_;
+  return head_.getSnapshot();
 }
 
 RefPtr<Table> Partition::getTable() {
@@ -124,7 +124,7 @@ RefPtr<Table> Partition::getTable() {
 }
 
 PartitionInfo Partition::getInfo() const {
-  auto snap = head_;
+  auto snap = head_.getSnapshot();
 
   auto checksum = SHA1::compute(
       StringUtil::format("$0~$1", snap->key.toString(), snap->nrecs));
