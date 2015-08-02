@@ -114,7 +114,6 @@ void ReplicationWorker::work() {
       lk.lock();
     }
 
-
     if (success) {
       waitset_.erase(partition->uuid());
 

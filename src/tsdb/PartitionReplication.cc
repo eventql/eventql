@@ -25,21 +25,30 @@ PartitionReplication::PartitionReplication(
     repl_scheme_(repl_scheme) {}
 
 bool PartitionReplication::needsReplication() const {
+  auto replicas = repl_scheme_->replicasFor(snap_->key);
+  if (replicas.size() == 0) {
+    return false;
+  }
+
+  auto repl_state = fetchReplicationState();
+  auto head_offset = snap_->nrecs;
+  for (const auto& r : replicas) {
+    const auto& replica_offset = replicatedOffsetFor(repl_state, r.unique_id);
+    if (replica_offset < head_offset) {
+      return true;
+    }
+  }
+
   return false;
 }
 
 bool PartitionReplication::replicate() {
-  auto table = partition_->getTable();
-
-  logDebug(
-      "tsdb",
-      "Replicating partition $0/$1/$2",
-      snap_->state.tsdb_namespace(),
-      table->name(),
-      snap_->key.toString());
+  auto replicas = repl_scheme_->replicasFor(snap_->key);
+  if (replicas.size() == 0) {
+    return true;
+  }
 
   auto repl_state = fetchReplicationState();
-  auto replicas = repl_scheme_->replicasFor(snap_->key);
   auto head_offset = snap_->nrecs;
   bool dirty = false;
   bool success = true;
@@ -48,6 +57,14 @@ bool PartitionReplication::replicate() {
     const auto& replica_offset = replicatedOffsetFor(repl_state, r.unique_id);
 
     if (replica_offset < head_offset) {
+      logDebug(
+          "tsdb",
+          "Replicating partition $0/$1/$2 to $3",
+          snap_->state.tsdb_namespace(),
+          snap_->state.table_key(),
+          snap_->key.toString(),
+          r.addr);
+
       try {
         replicateTo(r);
         setReplicatedOffsetFor(&repl_state, r.unique_id, head_offset);
@@ -60,7 +77,7 @@ bool PartitionReplication::replicate() {
           e,
           "Error while replicating partition $0/$1/$2 to $3",
           snap_->state.tsdb_namespace(),
-          table->name(),
+          snap_->state.table_key(),
           snap_->key.toString(),
           r.addr);
       }
