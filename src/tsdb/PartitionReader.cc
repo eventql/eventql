@@ -27,7 +27,7 @@ void PartitionReader::fetchRecords(
         const SHA1Hash& record_id,
         const void* record_data,
         size_t record_size)> fn) {
-  auto nrows = snap_->nrecs;
+  int64_t remaining = snap_->nrecs;
   const auto& files = snap_->state.sstable_files();
   for (const auto& f : files) {
     auto fpath = FileUtil::joinPaths(snap_->base_path, f);
@@ -36,7 +36,12 @@ void PartitionReader::fetchRecords(
     auto nrows = reader.countRows();
     if (offset > nrows) {
       offset -= nrows;
+      remaining -= nrows;
       continue;
+    }
+
+    if (remaining <= 0) {
+      return;
     }
 
     auto cursor = reader.getCursor();
@@ -60,6 +65,10 @@ void PartitionReader::fetchRecords(
         if (limit != size_t(-1) && --limit == 0) {
           return;
         }
+      }
+
+      if (--remaining <= 0) {
+        return;
       }
 
       if (!cursor->next()) {
