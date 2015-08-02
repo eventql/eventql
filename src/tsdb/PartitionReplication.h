@@ -25,11 +25,18 @@ public:
       RefPtr<ReplicationScheme> repl_scheme);
 
   bool needsReplication() const;
-  void replicate();
+
+  /**
+   * Returns true on success, false on error
+   */
+  bool replicate();
 
 protected:
 
+  void replicateTo(const ReplicaRef& replica);
+
   ReplicationState fetchReplicationState() const;
+  void commitReplicationState(ReplicationState& state);
 
   RefPtr<Partition> partition_;
   RefPtr<PartitionSnapshot> snap_;

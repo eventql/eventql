@@ -20,5 +20,10 @@ uint64_t replicatedOffsetFor(
     const ReplicationState& repl_state,
     const SHA1Hash& replica_id);
 
+void setReplicatedOffsetFor(
+    ReplicationState* repl_state,
+    const SHA1Hash& replica_id,
+    uint64_t replicated_offset);
+
 } // namespace tdsb
 

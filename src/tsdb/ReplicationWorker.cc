@@ -97,26 +97,33 @@ void ReplicationWorker::work() {
     auto partition = queue_.begin()->second;
     queue_.erase(queue_.begin());
     auto repl_scheme = repl_scheme_;
-    lk.unlock();
 
     ScopedPtr<PartitionReplication> repl;
-    try {
-      repl = mkScoped(new PartitionReplication(partition, repl_scheme));
-      repl->replicate();
-    } catch (const StandardException& e) {
-      logError("tsdb", e, "ReplicationWorker error");
+    bool success = true;
+    {
+      lk.unlock();
+
+      try {
+        repl = mkScoped(new PartitionReplication(partition, repl_scheme));
+        success = repl->replicate();
+      } catch (const StandardException& e) {
+        logError("tsdb", e, "ReplicationWorker error");
+        success = false;
+      }
 
       lk.lock();
-      auto delay = 30 * kMicrosPerSecond; // FIXPAUL increasing delay..
-      queue_.emplace(now + delay, partition);
-      continue;
     }
 
-    lk.lock();
-    waitset_.erase(partition->uuid());
 
-    if (repl->needsReplication()) {
-      enqueuePartition(partition);
+    if (success) {
+      waitset_.erase(partition->uuid());
+
+      if (repl->needsReplication()) {
+        enqueuePartition(partition);
+      }
+    } else {
+      auto delay = 30 * kMicrosPerSecond; // FIXPAUL increasing delay..
+      queue_.emplace(now + delay, partition);
     }
   }
 }

@@ -28,7 +28,7 @@ bool PartitionReplication::needsReplication() const {
   return false;
 }
 
-void PartitionReplication::replicate() {
+bool PartitionReplication::replicate() {
   auto table = partition_->getTable();
 
   logDebug(
@@ -40,48 +40,38 @@ void PartitionReplication::replicate() {
 
   auto repl_state = fetchReplicationState();
   auto replicas = repl_scheme_->replicasFor(snap_->key);
-  auto cur_offset = snap_->nrecs;
+  auto head_offset = snap_->nrecs;
+  bool dirty = false;
+  bool success = true;
 
   for (const auto& r : replicas) {
-    const auto& off = replicatedOffsetFor(repl_state, r.unique_id);
+    const auto& replica_offset = replicatedOffsetFor(repl_state, r.unique_id);
 
-  //  if (off < cur_offset) {
-  //    try {
-  //      auto rep_offset = replicateTo(r.addr, off);
-  //      dirty = true;
-  //      off = rep_offset;
-  //      if (off < cur_offset) {
-  //        needs_replication = true;
-  //      }
-  //    } catch (const std::exception& e) {
-  //      has_error = true;
+    if (replica_offset < head_offset) {
+      try {
+        replicateTo(r);
+        setReplicatedOffsetFor(&repl_state, r.unique_id, head_offset);
+        dirty = true;
+      } catch (const std::exception& e) {
+        success = false;
 
-  //      stx::logError(
-  //        "tsdb.replication",
-  //        e,
-  //        "Error while replicating stream '$0' to '$1'",
-  //        stream_key_,
-  //        r.addr);
-  //    }
-  //  }
+        stx::logError(
+          "tsdb",
+          e,
+          "Error while replicating partition $0/$1/$2 to $3",
+          snap_->state.tsdb_namespace(),
+          table->name(),
+          snap_->key.toString(),
+          r.addr);
+      }
+    }
   }
 
-  //for (auto cur = repl_offsets_.begin(); cur != repl_offsets_.end(); ) {
-  //  bool found;
-  //  for (const auto& r : replicas) {
-  //    if (r.unique_id == cur->first) {
-  //      found = true;
-  //      break;
-  //    }
-  //  }
+  if (dirty) {
+    commitReplicationState(repl_state);
+  }
 
-  //  if (found) {
-  //    ++cur;
-  //  } else {
-  //    cur = repl_offsets_.erase(cur);
-  //    dirty = true;
-  //  }
-  //}
+  return success;
 }
 
 //uint64_t Partition::replicateTo(const String& addr, uint64_t offset) {
