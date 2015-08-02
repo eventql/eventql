@@ -48,11 +48,13 @@ void TSDBService::insertRecords(const RecordEnvelopeList& record_list) {
 
   for (const auto& group : grouped) {
     auto partition = group.first;
-    partition->getWriter()->insertRecords(group.second);
+    auto inserted = partition->getWriter()->insertRecords(group.second);
 
-    auto change = mkRef(new PartitionChangeNotification());
-    change->partition = partition;
-    pmap_->publishPartitionChange(change);
+    if (inserted.size() > 0) {
+      auto change = mkRef(new PartitionChangeNotification());
+      change->partition = partition;
+      pmap_->publishPartitionChange(change);
+    }
   }
 }
 
@@ -69,11 +71,13 @@ void TSDBService::insertRecord(
       partition_key);
 
   auto writer = partition->getWriter();
-  writer->insertRecord(record_id, record);
+  auto inserted = writer->insertRecord(record_id, record);
 
-  auto change = mkRef(new PartitionChangeNotification());
-  change->partition = partition;
-  pmap_->publishPartitionChange(change);
+  if (inserted) {
+    auto change = mkRef(new PartitionChangeNotification());
+    change->partition = partition;
+    pmap_->publishPartitionChange(change);
+  }
 }
 
 void TSDBService::fetchPartition(
