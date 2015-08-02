@@ -15,13 +15,19 @@ using namespace stx;
 
 namespace tsdb {
 
-bool PartitionReplication::needsReplication(RefPtr<Partition> partition) {
+PartitionReplication::PartitionReplication(
+    RefPtr<Partition> partition,
+    RefPtr<ReplicationScheme> repl_scheme) :
+    partition_(partition),
+    repl_scheme_(repl_scheme) {}
+
+bool PartitionReplication::needsReplication() const {
   return false;
 }
 
-void PartitionReplication::replicate(RefPtr<Partition> partition) {
-  auto snap = partition->getSnapshot();
-  auto table = partition->getTable();
+void PartitionReplication::replicate() {
+  auto snap = partition_->getSnapshot();
+  auto table = partition_->getTable();
 
   logDebug(
       "tsdb",

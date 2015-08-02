@@ -22,10 +22,15 @@ namespace tsdb {
 class ReplicationWorker {
 public:
 
-  ReplicationWorker(PartitionMap* pmap);
+  ReplicationWorker(
+      RefPtr<ReplicationScheme> repl_scheme,
+      PartitionMap* pmap);
+
   ~ReplicationWorker();
 
   void enqueuePartition(RefPtr<Partition> partition);
+
+  void updateReplicationScheme(RefPtr<ReplicationScheme> new_repl_scheme);
 
 protected:
 
@@ -33,19 +38,19 @@ protected:
   void stop();
   void work();
 
-  mutable std::mutex mutex_;
-  std::condition_variable cv_;
+  RefPtr<ReplicationScheme> repl_scheme_;
 
+  Set<SHA1Hash> waitset_;
   std::multiset<
       Pair<uint64_t, RefPtr<Partition>>,
       Function<bool (
           const Pair<uint64_t, RefPtr<Partition>>&,
           const Pair<uint64_t, RefPtr<Partition>>&)>> queue_;
 
-  Set<SHA1Hash> waitset_;
-
   std::atomic<bool> running_;
   Vector<std::thread> threads_;
+  mutable std::mutex mutex_;
+  std::condition_variable cv_;
 };
 
 } // namespace tsdb

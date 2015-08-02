@@ -18,7 +18,9 @@ using namespace stx;
 namespace tsdb {
 
 ReplicationWorker::ReplicationWorker(
+    RefPtr<ReplicationScheme> repl_scheme,
     PartitionMap* pmap) :
+    repl_scheme_(repl_scheme),
     queue_([] (
         const Pair<uint64_t, RefPtr<Partition>>& a,
         const Pair<uint64_t, RefPtr<Partition>>& b) {
@@ -94,10 +96,13 @@ void ReplicationWorker::work() {
 
     auto partition = queue_.begin()->second;
     queue_.erase(queue_.begin());
+    auto repl_scheme = repl_scheme_;
     lk.unlock();
 
+    ScopedPtr<PartitionReplication> repl;
     try {
-      PartitionReplication::replicate(partition);
+      repl = mkScoped(new PartitionReplication(partition, repl_scheme));
+      repl->replicate();
     } catch (const StandardException& e) {
       logError("tsdb", e, "ReplicationWorker error");
 
@@ -110,7 +115,7 @@ void ReplicationWorker::work() {
     lk.lock();
     waitset_.erase(partition->uuid());
 
-    if (PartitionReplication::needsReplication(partition)) {
+    if (repl->needsReplication()) {
       enqueuePartition(partition);
     }
   }

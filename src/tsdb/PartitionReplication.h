@@ -10,17 +10,25 @@
 #pragma once
 #include <stx/stdtypes.h>
 #include <tsdb/Partition.h>
+#include <tsdb/ReplicationScheme.h>
 
 using namespace stx;
 
 namespace tsdb {
 
-struct PartitionReplication {
+class PartitionReplication {
+public:
 
-  static bool needsReplication(RefPtr<Partition> partition);
+  PartitionReplication(
+      RefPtr<Partition> partition,
+      RefPtr<ReplicationScheme> repl_scheme);
 
-  static void replicate(RefPtr<Partition> partition);
+  bool needsReplication() const;
+  void replicate();
 
+protected:
+  RefPtr<Partition> partition_;
+  RefPtr<ReplicationScheme> repl_scheme_;
 };
 
 } // namespace tdsb
