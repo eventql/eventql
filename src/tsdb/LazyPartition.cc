@@ -26,13 +26,10 @@ RefPtr<Partition> LazyPartition::getPartition(
     const SHA1Hash& partition_key,
     const String& db_path,
     PartitionMap* pmap) {
-  if (partition_.get() != nullptr) {
-    return partition_;
-  }
-
   std::unique_lock<std::mutex> lk(mutex_);
   if (partition_.get() != nullptr) {
-    return partition_;
+    auto partition = partition_;
+    return partition;
   }
 
   partition_ = Partition::reopen(
@@ -45,19 +42,23 @@ RefPtr<Partition> LazyPartition::getPartition(
   change->partition = partition_;
   pmap->publishPartitionChange(change);
 
-  return partition_;
+  auto partition = partition_;
+  return partition;
 }
 
 RefPtr<Partition> LazyPartition::getPartition() {
+  std::unique_lock<std::mutex> lk(mutex_);
   if (partition_.get() == nullptr) {
     RAISE(kRuntimeError, "partition not loaded");
   }
 
-  return partition_;
+  auto partition = partition_
+  return partition;
 }
 
 
 bool LazyPartition::isLoaded() const {
+  std::unique_lock<std::mutex> lk(mutex_);
   return partition_.get() != nullptr;
 }
 

@@ -190,6 +190,7 @@ RefPtr<Partition> PartitionMap::findOrCreatePartition(
       stream_key.size());
 
   txn->commit();
+  lk.unlock();
 
   auto change = mkRef(new PartitionChangeNotification());
   change->partition = partition;
