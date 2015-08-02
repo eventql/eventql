@@ -48,6 +48,16 @@ void ReplicationWorker::enqueuePartition(RefPtr<Partition> partition) {
   queue_.emplace(WallClock::unixMicros(), partition);
   waitset_.emplace(uuid);
   cv_.notify_all();
+
+  auto snap = partition->getSnapshot();
+  auto table = partition->getTable();
+
+  logDebug(
+      "tsdb",
+      "Enqueue partition $0/$1/$2 for replication",
+      snap->state.tsdb_namespace(),
+      table->name(),
+      snap->key.toString());
 }
 
 void ReplicationWorker::maybeEnqueuePartition(RefPtr<Partition> partition) {
@@ -55,10 +65,15 @@ void ReplicationWorker::maybeEnqueuePartition(RefPtr<Partition> partition) {
 }
 
 void ReplicationWorker::replicate(RefPtr<Partition> partition) {
+  auto snap = partition->getSnapshot();
+  auto table = partition->getTable();
+
   logDebug(
       "tsdb",
-      "Replicating partition $0",
-      partition->uuid().toString());
+      "Replicating partition $0/$1/$2",
+      snap->state.tsdb_namespace(),
+      table->name(),
+      snap->key.toString());
 }
 
 void ReplicationWorker::start() {
