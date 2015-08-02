@@ -28,6 +28,10 @@ PartitionSnapshot::PartitionSnapshot(
     base_path(_base_path),
     nrecs(_nrecs) {}
 
+SHA1Hash PartitionSnapshot::uuid() const {
+  return SHA1Hash(state.uuid().data(), state.uuid().size());
+}
+
 RefPtr<PartitionSnapshot> PartitionSnapshot::clone() const {
   return new PartitionSnapshot(
       state,

@@ -43,10 +43,13 @@ RefPtr<Partition> Partition::create(
 
   FileUtil::mkdir_p(pdir);
 
+  auto uuid = Random::singleton()->sha1();
+
   PartitionState state;
   state.set_tsdb_namespace(tsdb_namespace);
   state.set_partition_key(partition_key.data(), partition_key.size());
   state.set_table_key(table->name());
+  state.set_uuid(uuid.data(), uuid.size());
 
   auto snap = mkRef(new PartitionSnapshot(state, pdir, 0));
   snap->writeToDisk();
@@ -84,9 +87,21 @@ RefPtr<Partition> Partition::reopen(
       partition_key.toString(),
       nrecs);
 
-  return new Partition(
-      new PartitionSnapshot(state, pdir, nrecs),
-      table);
+  auto snap = mkRef(new PartitionSnapshot(state, pdir, nrecs));
+
+  // backfill uuid
+  if (!snap->state.has_uuid()) {
+    logInfo("tsdb", "backfilling partition uuid for: $0/$1/$2",
+          tsdb_namespace,
+          SHA1::compute(table->name()).toString(),
+          partition_key.toString());
+
+    auto uuid = Random::singleton()->sha1();
+    snap->state.set_uuid(uuid.data(), uuid.size());
+    snap->writeToDisk();
+  }
+
+  return new Partition(snap, table);
 }
 
 Partition::Partition(
@@ -98,13 +113,7 @@ Partition::Partition(
 
 SHA1Hash Partition::uuid() const {
   auto snap = head_.getSnapshot();
-
-  return SHA1::compute(
-      StringUtil::format(
-          "$0/$1/$2",
-          snap->state.tsdb_namespace(),
-          table_->name(),
-          snap->key.toString()));
+  return snap->uuid();
 }
 
 RefPtr<PartitionWriter> Partition::getWriter() {

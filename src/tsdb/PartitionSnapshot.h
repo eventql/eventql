@@ -28,6 +28,8 @@ struct PartitionSnapshot : public RefCounted {
   RefPtr<PartitionSnapshot> clone() const;
   void writeToDisk();
 
+  SHA1Hash uuid() const;
+
   SHA1Hash key;
   PartitionState state;
   const String base_path;
