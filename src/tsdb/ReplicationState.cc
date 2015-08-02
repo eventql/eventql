@@ -39,6 +39,7 @@ void setReplicatedOffsetFor(
   }
 
   auto replica = repl_state->add_replicas();
+  replica->set_replica_id(replica_id.data(), replica_id.size());
   replica->set_replicated_offset(replicated_offset);
 }
 
