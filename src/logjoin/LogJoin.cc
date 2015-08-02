@@ -250,57 +250,62 @@ void LogJoin::flushSession(
     mdb::MDBTransaction* txn) {
   auto cursor = txn->getCursor();
 
-  TrackedSession session;
-  session.uuid = SHA1::compute(uid).toString();
+  try {
+    TrackedSession session;
+    session.uuid = SHA1::compute(uid).toString();
 
-  Buffer key;
-  Buffer value;
-  for (int i = 0; ; ++i) {
-    if (i == 0) {
-      key.append(uid);
-      if (!cursor->getFirstOrGreater(&key, &value)) {
-        break;
-      }
-    } else {
-      if (!cursor->getNext(&key, &value)) {
-        break;
-      }
-    }
-
-    auto key_str = key.toString();
-    if (!StringUtil::beginsWith(key_str, uid)) {
-      break;
-    }
-
-    if (StringUtil::endsWith(key_str, "~cust")) {
-      session.customer_key = value.toString();
-    } else {
-      auto evtype = key_str.substr(uid.length() + 1).substr(0, 1);
-
-      util::BinaryMessageReader reader(value.data(), value.size());
-      auto time = reader.readVarUInt() * kMicrosPerSecond;
-      auto evid_len = reader.readVarUInt();
-      auto evid = String((char*) reader.read(evid_len), evid_len);
-
-      try {
-        URI::ParamList logline;
-        while (reader.remaining() > 0) {
-          auto key = getPixelParamName(reader.readVarUInt());
-          auto len = reader.readVarUInt();
-          logline.emplace_back(key, String((char*) reader.read(len), len));
+    Buffer key;
+    Buffer value;
+    for (int i = 0; ; ++i) {
+      if (i == 0) {
+        key.append(uid);
+        if (!cursor->getFirstOrGreater(&key, &value)) {
+          break;
         }
-
-        session.insertLogline(time, evtype, evid, logline);
-      } catch (const std::exception& e) {
-        stx::logError("logjoind", e, "invalid logline");
-        stat_loglines_invalid_.incr(1);
+      } else {
+        if (!cursor->getNext(&key, &value)) {
+          break;
+        }
       }
+
+      auto key_str = key.toString();
+      if (!StringUtil::beginsWith(key_str, uid)) {
+        break;
+      }
+
+      if (StringUtil::endsWith(key_str, "~cust")) {
+        session.customer_key = value.toString();
+      } else {
+        auto evtype = key_str.substr(uid.length() + 1).substr(0, 1);
+
+        util::BinaryMessageReader reader(value.data(), value.size());
+        auto time = reader.readVarUInt() * kMicrosPerSecond;
+        auto evid_len = reader.readVarUInt();
+        auto evid = String((char*) reader.read(evid_len), evid_len);
+
+        try {
+          URI::ParamList logline;
+          while (reader.remaining() > 0) {
+            auto key = getPixelParamName(reader.readVarUInt());
+            auto len = reader.readVarUInt();
+            logline.emplace_back(key, String((char*) reader.read(len), len));
+          }
+
+          session.insertLogline(time, evtype, evid, logline);
+        } catch (const std::exception& e) {
+          stx::logError("logjoind", e, "invalid logline");
+          stat_loglines_invalid_.incr(1);
+        }
+      }
+
+      cursor->del();
     }
 
-    cursor->del();
+    cursor->close();
+  } catch (StandardException& e) {
+    cursor->close();
+    logError("logjond", e, "error while processing session");
   }
-
-  cursor->close();
 
   if (session.customer_key.length() == 0) {
     stx::logError("logjoind", "missing customer key for: $0", uid);
@@ -467,39 +472,41 @@ void LogJoin::processClickstream(
       size_t buffer_size,
       Duration flush_interval) {
   /* resume from last offset */
-  auto txn = sessdb_->startTransaction(true);
-  try {
-    importTimeoutList(txn.get());
+  {
+    auto txn = sessdb_->startTransaction(true);
+    try {
+      importTimeoutList(txn.get());
 
-    for (const auto& input_feed : input_feeds) {
-      uint64_t offset = 0;
+      for (const auto& input_feed : input_feeds) {
+        uint64_t offset = 0;
 
-      auto last_offset = txn->get(
-          StringUtil::format("__logjoin_offset~$0", input_feed.first));
+        auto last_offset = txn->get(
+            StringUtil::format("__logjoin_offset~$0", input_feed.first));
 
-      if (!last_offset.isEmpty()) {
-        offset = std::stoul(last_offset.get().toString());
+        if (!last_offset.isEmpty()) {
+          offset = std::stoul(last_offset.get().toString());
+        }
+
+        stx::logInfo(
+            "logjoind",
+            "Adding source feed:\n    feed=$0\n    url=$1\n    offset: $2",
+            input_feed.first,
+            input_feed.second.toString(),
+            offset);
+
+        feed_reader_.addSourceFeed(
+            input_feed.second,
+            input_feed.first,
+            offset,
+            batch_size,
+            buffer_size);
       }
 
-      stx::logInfo(
-          "logjoind",
-          "Adding source feed:\n    feed=$0\n    url=$1\n    offset: $2",
-          input_feed.first,
-          input_feed.second.toString(),
-          offset);
-
-      feed_reader_.addSourceFeed(
-          input_feed.second,
-          input_feed.first,
-          offset,
-          batch_size,
-          buffer_size);
+      txn->abort();
+    } catch (...) {
+      txn->abort();
+      throw;
     }
-
-    txn->abort();
-  } catch (...) {
-    txn->abort();
-    throw;
   }
 
   stx::logInfo("logjoind", "Resuming logjoin...");
