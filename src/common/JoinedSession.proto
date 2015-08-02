@@ -46,20 +46,20 @@ message JoinedSearchQueryResultItem {
   /**
    * The item id of the result item/product
    */
-  required string item_id = 20
+  optional string item_id = 20
       [(stx.coding) = { maxval: 1024 }];
 
   /**
    * The position at which this item was shown. Start from 1 and 1 is the first
    * result item (i.e. the topmost lefmost one)
    */
-  required uint32 position = 19
+  optional uint32 position = 19
       [(stx.coding) = { maxval: 64 encoding: "BITPACK" }];
 
   /**
    * True if the result item was subsequently clicked
    */
-  required bool clicked = 15;
+  optional bool clicked = 15;
 
   /**
    * True if the result item was "seen" by the user (i.e. it was in the
@@ -108,7 +108,7 @@ message JoinedSearchQuery {
   /**
    * The time at which this search query was observer
    */
-  required uint64 time = 18;
+  optional uint64 time = 18;
 
   /**
    * The language of the search query (i.e. on which language page/subdomain
@@ -257,12 +257,12 @@ message JoinedPageView {
   /**
    * The time at which the item was visited
    */
-  required uint64 time = 26;
+  optional uint64 time = 26;
 
   /**
    * The item id of the item that was visited
    */
-  required string item_id = 27
+  optional string item_id = 27
       [(stx.coding) = { maxval: 1024 }];
 
   /**
@@ -296,35 +296,35 @@ message JoinedCartItem {
   /**
    * The time at which this item was last seen in the users cart
    */
-  required uint64 time = 33;
+  optional uint64 time = 33;
 
   /**
    * The item id of the item (=product) that was added to the cart
    */
-  required string item_id = 34
+  optional string item_id = 34
       [(stx.coding) = { maxval: 1024 }];
 
   /**
    * The quantity of this cart item. N.B. that we always store the largest
    * quantity obeerved
    */
-  required uint32 quantity = 39
+  optional uint32 quantity = 39
       [(stx.coding) = { maxval: 65535 encoding: "LEB128" }];
 
   /**
    * The price in cents and currency for a single instance of the item
    */
-  required uint32 price_cents = 40
+  optional uint32 price_cents = 40
       [(stx.coding) = { maxval: 4294967295 encoding: "LEB128" }];
 
-  required stx.Currency currency = 41;
+  optional stx.Currency currency = 41;
 
   /**
    * The most advanced cart step we have seen this item in. Note that smaller
    * value means more advanced -- step 1 means "transaction confirmed" and
    * implied the item was bought
    */
-  required uint32 checkout_step = 42
+  optional uint32 checkout_step = 42
       [(stx.coding) = { maxval: 32 encoding: "BITPACK" }];
 
   /**
