@@ -22,10 +22,12 @@ const char PartitionReplication::kStateFileName[] = "_repl";
 
 PartitionReplication::PartitionReplication(
     RefPtr<Partition> partition,
-    RefPtr<ReplicationScheme> repl_scheme) :
+    RefPtr<ReplicationScheme> repl_scheme,
+    http::HTTPConnectionPool* http) :
     partition_(partition),
     snap_(partition_->getSnapshot()),
-    repl_scheme_(repl_scheme) {}
+    repl_scheme_(repl_scheme),
+    http_(http) {}
 
 bool PartitionReplication::needsReplication() const {
   auto replicas = repl_scheme_->replicasFor(snap_->key);

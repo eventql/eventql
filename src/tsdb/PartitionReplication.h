@@ -24,7 +24,8 @@ public:
 
   PartitionReplication(
       RefPtr<Partition> partition,
-      RefPtr<ReplicationScheme> repl_scheme);
+      RefPtr<ReplicationScheme> repl_scheme,
+      http::HTTPConnectionPool* http);
 
   bool needsReplication() const;
 

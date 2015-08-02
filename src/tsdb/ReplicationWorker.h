@@ -24,7 +24,8 @@ public:
 
   ReplicationWorker(
       RefPtr<ReplicationScheme> repl_scheme,
-      PartitionMap* pmap);
+      PartitionMap* pmap,
+      http::HTTPConnectionPool* http);
 
   ~ReplicationWorker();
 
@@ -39,6 +40,7 @@ protected:
   void work();
 
   RefPtr<ReplicationScheme> repl_scheme_;
+  http::HTTPConnectionPool* http_;
 
   Set<SHA1Hash> waitset_;
   std::multiset<

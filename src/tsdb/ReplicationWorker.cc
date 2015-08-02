@@ -19,8 +19,10 @@ namespace tsdb {
 
 ReplicationWorker::ReplicationWorker(
     RefPtr<ReplicationScheme> repl_scheme,
-    PartitionMap* pmap) :
+    PartitionMap* pmap,
+    http::HTTPConnectionPool* http) :
     repl_scheme_(repl_scheme),
+    http_(http),
     queue_([] (
         const Pair<uint64_t, RefPtr<Partition>>& a,
         const Pair<uint64_t, RefPtr<Partition>>& b) {
@@ -104,7 +106,9 @@ void ReplicationWorker::work() {
       lk.unlock();
 
       try {
-        repl = mkScoped(new PartitionReplication(partition, repl_scheme));
+        repl = mkScoped(
+            new PartitionReplication(partition, repl_scheme, http_));
+
         success = repl->replicate();
       } catch (const StandardException& e) {
         logError("tsdb", e, "ReplicationWorker error");
