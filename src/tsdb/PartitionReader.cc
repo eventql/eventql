@@ -20,6 +20,55 @@ PartitionReader::PartitionReader(
     RefPtr<PartitionSnapshot> head) :
     snap_(head) {}
 
+void PartitionReader::fetchRecords(
+    size_t offset,
+    size_t limit,
+    Function<void (
+        const SHA1Hash& record_id,
+        const void* record_data,
+        size_t record_size)> fn) {
+  auto nrows = snap_->nrecs;
+  const auto& files = snap_->state.sstable_files();
+  for (const auto& f : files) {
+    auto fpath = FileUtil::joinPaths(snap_->base_path, f);
+    sstable::SSTableReader reader(fpath);
+
+    auto nrows = reader.countRows();
+    if (offset > nrows) {
+      offset += nrows;
+      continue;
+    }
+
+    auto cursor = reader.getCursor();
+    while (cursor->valid()) {
+      void* key;
+      size_t key_size;
+      cursor->getKey(&key, &key_size);
+      if (key_size != SHA1Hash::kSize) {
+        RAISE(kRuntimeError, "invalid row");
+      }
+
+      void* data;
+      size_t data_size;
+      cursor->getData(&data, &data_size);
+
+      if (offset > 0) {
+        --offset;
+      } else {
+        fn(SHA1Hash(key, key_size), data, data_size);
+
+        if (limit != size_t(-1) && --limit == 0) {
+          return;
+        }
+      }
+
+      if (!cursor->next()) {
+        break;
+      }
+    }
+  }
+}
+
 void PartitionReader::fetchRecords(Function<void (const Buffer& record)> fn) {
   fetchRecordsWithSampling(
       0,
@@ -41,7 +90,7 @@ void PartitionReader::fetchRecordsWithSampling(
     auto cursor = reader.getCursor();
 
     while (cursor->valid()) {
-      uint64_t* key;
+      void* key;
       size_t key_size;
       cursor->getKey((void**) &key, &key_size);
       if (key_size != SHA1Hash::kSize) {
