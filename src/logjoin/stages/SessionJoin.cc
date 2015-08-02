@@ -128,7 +128,7 @@ void SessionJoin::process(RefPtr<SessionContext> ctx) {
     ciobj.addField("time", StringUtil::toString(ci.time.unixMicros()));
     ciobj.addField("item_id", ci.item.docID().docid);
     ciobj.addField("quantity", StringUtil::toString(ci.quantity));
-    ciobj.addField("price_cents", StringUtil::toString(ci.price_cents);
+    ciobj.addField("price_cents", StringUtil::toString(ci.price_cents));
     ciobj.addUInt32Field("currency", (uint32_t) currencyFromString(ci.currency));
     ciobj.addField("checkout_step", StringUtil::toString(ci.checkout_step));
   }
