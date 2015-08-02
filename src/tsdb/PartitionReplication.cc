@@ -43,7 +43,7 @@ void PartitionReplication::replicate() {
   auto cur_offset = snap_->nrecs;
 
   for (const auto& r : replicas) {
-    //const auto& off = replicatedOffsetFor(repl_state, r.unique_id);
+    const auto& off = replicatedOffsetFor(repl_state, r.unique_id);
 
   //  if (off < cur_offset) {
   //    try {

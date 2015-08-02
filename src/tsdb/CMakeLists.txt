@@ -33,6 +33,7 @@ add_library(tsdb-server OBJECT
     Table.cc
     ReplicationWorker.cc
     ReplicationScheme.cc
+    ReplicationState.cc
     ${PROTO_SRCS})
 
 add_executable(test-recordset

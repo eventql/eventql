@@ -7,34 +7,24 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#pragma once
-#include <stx/stdtypes.h>
-#include <tsdb/Partition.h>
-#include <tsdb/ReplicationScheme.h>
 #include <tsdb/ReplicationState.h>
 
 using namespace stx;
 
 namespace tsdb {
 
-class PartitionReplication {
-public:
+uint64_t replicatedOffsetFor(
+    const ReplicationState& repl_state,
+    const SHA1Hash& replica_id) {
+  for (const auto& replica : repl_state.replicas()) {
+    SHA1Hash rid(replica.replica_id().data(), replica.replica_id().size());
+    if (rid == replica_id) {
+      return replica.replicated_offset();
+    }
+  }
 
-  PartitionReplication(
-      RefPtr<Partition> partition,
-      RefPtr<ReplicationScheme> repl_scheme);
-
-  bool needsReplication() const;
-  void replicate();
-
-protected:
-
-  ReplicationState fetchReplicationState() const;
-
-  RefPtr<Partition> partition_;
-  RefPtr<PartitionSnapshot> snap_;
-  RefPtr<ReplicationScheme> repl_scheme_;
-};
+  return 0;
+}
 
 } // namespace tdsb
 
