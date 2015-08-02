@@ -38,6 +38,6 @@ message PartitionState {
    * time the same partition is created it will have a different uuid (and
    * the same partition will have different uuids on each host).
    */
-  optional bytes uuid = 5;
+  required bytes uuid = 5;
 
 };

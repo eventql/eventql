@@ -88,19 +88,6 @@ RefPtr<Partition> Partition::reopen(
       nrecs);
 
   auto snap = mkRef(new PartitionSnapshot(state, pdir, nrecs));
-
-  // backfill uuid
-  if (!snap->state.has_uuid()) {
-    logInfo("tsdb", "backfilling partition uuid for: $0/$1/$2",
-          tsdb_namespace,
-          SHA1::compute(table->name()).toString(),
-          partition_key.toString());
-
-    auto uuid = Random::singleton()->sha1();
-    snap->state.set_uuid(uuid.data(), uuid.size());
-    snap->writeToDisk();
-  }
-
   return new Partition(snap, table);
 }
 
