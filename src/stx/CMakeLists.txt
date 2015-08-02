@@ -66,7 +66,7 @@ if(HAVE_BZLIB_H)
 endif(HAVE_BZLIB_H)
 
 # PCRE
-option(ENABLE_PCRE "With PCRE support [default: on]" OFF)
+option(ENABLE_PCRE "With PCRE support [default: on]" ON)
 if(ENABLE_PCRE)
   pkg_check_modules(PCRE REQUIRED libpcre>=7.0)
 else()
