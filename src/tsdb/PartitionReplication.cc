@@ -9,7 +9,6 @@
  */
 #include <tsdb/PartitionReplication.h>
 #include <tsdb/ReplicationScheme.h>
-#include <tsdb/RecordEnvelope.pb.h>
 #include <stx/logging.h>
 #include <stx/io/fileutil.h>
 #include <stx/protobuf/msg.h>
@@ -19,6 +18,7 @@ using namespace stx;
 namespace tsdb {
 
 const char PartitionReplication::kStateFileName[] = "_repl";
+const size_t PartitionReplication::kBatchSize = 512;
 
 PartitionReplication::PartitionReplication(
     RefPtr<Partition> partition,
@@ -50,40 +50,50 @@ bool PartitionReplication::needsReplication() const {
 void PartitionReplication::replicateTo(
     const ReplicaRef& replica,
     uint64_t replicated_offset) {
-  auto head_offset = snap_->nrecs;
   PartitionReader reader(snap_);
 
-  while (replicated_offset < head_offset) {
-    RecordEnvelopeList batch;
+  RecordEnvelopeList batch;
+  reader.fetchRecords(
+      replicated_offset,
+      size_t(-1),
+      [this, &batch, &replica, &replicated_offset] (
+          const SHA1Hash& record_id,
+          const void* record_data,
+          size_t record_size) {
+    auto rec = batch.add_records();
+    rec->set_tsdb_namespace(snap_->state.tsdb_namespace());
+    rec->set_stream_key(snap_->state.table_key());
+    rec->set_partition_key(snap_->key.toString());
+    rec->set_record_id(record_id.toString());
+    rec->set_record_data(record_data, record_size);
 
-    reader.fetchRecords(replicated_offset, 1024, [this, &batch] (
-        const SHA1Hash& record_id,
-        const void* record_data,
-        size_t record_size) {
-      auto rec = batch.add_records();
-      rec->set_tsdb_namespace(snap_->state.tsdb_namespace());
-      rec->set_stream_key(snap_->state.table_key());
-      rec->set_partition_key(snap_->key.toString());
-      rec->set_record_id(record_id.toString());
-      rec->set_record_data(record_data, record_size);
-    });
-
-    auto body = msg::encode(batch);
-    URI uri(StringUtil::format("http://$0/tsdb/insert", replica.addr));
-    http::HTTPRequest req(http::HTTPMessage::M_POST, uri.pathAndQuery());
-    req.addHeader("Host", uri.hostAndPort());
-    req.addHeader("Content-Type", "application/fnord-msg");
-    req.addBody(body->data(), body->size());
-
-    auto res = http_->executeRequest(req);
-    res.wait();
-
-    const auto& r = res.get();
-    if (r.statusCode() != 201) {
-      RAISEF(kRuntimeError, "received non-201 response: $0", r.body().toString());
+    if (batch.records().size() > kBatchSize) {
+      uploadBatchTo(replica, batch);
+      batch.mutable_records()->Clear();
     }
+  });
 
-    replicated_offset += batch.records().size();
+  if (batch.records().size() > 0) {
+    uploadBatchTo(replica, batch);
+  }
+}
+
+void PartitionReplication::uploadBatchTo(
+    const ReplicaRef& replica,
+    const RecordEnvelopeList& batch) {
+  auto body = msg::encode(batch);
+  URI uri(StringUtil::format("http://$0/tsdb/insert", replica.addr));
+  http::HTTPRequest req(http::HTTPMessage::M_POST, uri.pathAndQuery());
+  req.addHeader("Host", uri.hostAndPort());
+  req.addHeader("Content-Type", "application/fnord-msg");
+  req.addBody(body->data(), body->size());
+
+  auto res = http_->executeRequest(req);
+  res.wait();
+
+  const auto& r = res.get();
+  if (r.statusCode() != 201) {
+    RAISEF(kRuntimeError, "received non-201 response: $0", r.body().toString());
   }
 }
 

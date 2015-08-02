@@ -13,6 +13,7 @@
 #include <tsdb/Partition.h>
 #include <tsdb/ReplicationScheme.h>
 #include <tsdb/ReplicationState.h>
+#include <tsdb/RecordEnvelope.pb.h>
 
 using namespace stx;
 
@@ -21,6 +22,7 @@ namespace tsdb {
 class PartitionReplication {
 public:
   static const char kStateFileName[];
+  static const size_t kBatchSize;
 
   PartitionReplication(
       RefPtr<Partition> partition,
@@ -37,6 +39,10 @@ public:
 protected:
 
   void replicateTo(const ReplicaRef& replica, uint64_t replicated_offset);
+
+  void uploadBatchTo(
+      const ReplicaRef& replica,
+      const RecordEnvelopeList& batch);
 
   ReplicationState fetchReplicationState() const;
   void commitReplicationState(const ReplicationState& state);
