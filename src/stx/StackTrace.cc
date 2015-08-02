@@ -19,10 +19,7 @@
 #include <sys/types.h>
 #include <cxxabi.h>
 #include "StackTrace.h"
-
-#define HAVE_BACKTRACE 1
-#define HAVE_EXECINFO_H 1
-#define HAVE_DLFCN_H 1
+#include <stx/sysconfig.h>
 
 #if defined(HAVE_EXECINFO_H)
 #include <execinfo.h>
