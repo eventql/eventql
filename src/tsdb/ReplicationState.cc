@@ -26,5 +26,21 @@ uint64_t replicatedOffsetFor(
   return 0;
 }
 
+void setReplicatedOffsetFor(
+    ReplicationState* repl_state,
+    const SHA1Hash& replica_id,
+    uint64_t replicated_offset) {
+  for (auto& replica : *repl_state->mutable_replicas()) {
+    SHA1Hash rid(replica.replica_id().data(), replica.replica_id().size());
+    if (rid == replica_id) {
+      replica.set_replicated_offset(replicated_offset);
+      return;
+    }
+  }
+
+  auto replica = repl_state->add_replicas();
+  replica->set_replicated_offset(replicated_offset);
+}
+
 } // namespace tdsb
 
