@@ -9,6 +9,7 @@
  */
 #pragma once
 #include <stx/stdtypes.h>
+#include <stx/http/httpconnectionpool.h>
 #include <tsdb/Partition.h>
 #include <tsdb/ReplicationScheme.h>
 #include <tsdb/ReplicationState.h>
@@ -34,7 +35,7 @@ public:
 
 protected:
 
-  void replicateTo(const ReplicaRef& replica);
+  void replicateTo(const ReplicaRef& replica, uint64_t replicated_offset);
 
   ReplicationState fetchReplicationState() const;
   void commitReplicationState(const ReplicationState& state);
@@ -42,6 +43,7 @@ protected:
   RefPtr<Partition> partition_;
   RefPtr<PartitionSnapshot> snap_;
   RefPtr<ReplicationScheme> repl_scheme_;
+  http::HTTPConnectionPool* http_;
 };
 
 } // namespace tdsb

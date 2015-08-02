@@ -9,6 +9,7 @@
  */
 #include <tsdb/PartitionReplication.h>
 #include <tsdb/ReplicationScheme.h>
+#include <tsdb/RecordEnvelope.pb.h>
 #include <stx/logging.h>
 #include <stx/io/fileutil.h>
 #include <stx/protobuf/msg.h>
@@ -44,6 +45,46 @@ bool PartitionReplication::needsReplication() const {
   return false;
 }
 
+void PartitionReplication::replicateTo(
+    const ReplicaRef& replica,
+    uint64_t replicated_offset) {
+  auto head_offset = snap_->nrecs;
+  PartitionReader reader(snap_);
+
+  while (replicated_offset < head_offset) {
+    RecordEnvelopeList batch;
+
+    reader.fetchRecords(replicated_offset, 1024, [this, &batch] (
+        const SHA1Hash& record_id,
+        const void* record_data,
+        size_t record_size) {
+      auto rec = batch.add_records();
+      rec->set_tsdb_namespace(snap_->state.tsdb_namespace());
+      rec->set_stream_key(snap_->state.table_key());
+      rec->set_partition_key(snap_->key.toString());
+      rec->set_record_id(record_id.toString());
+      rec->set_record_data(record_data, record_size);
+    });
+
+    auto body = msg::encode(batch);
+    URI uri(StringUtil::format("http://$0/tsdb/insert", replica.addr));
+    http::HTTPRequest req(http::HTTPMessage::M_POST, uri.pathAndQuery());
+    req.addHeader("Host", uri.hostAndPort());
+    req.addHeader("Content-Type", "application/fnord-msg");
+    req.addBody(body->data(), body->size());
+
+    auto res = http_->executeRequest(req);
+    res.wait();
+
+    const auto& r = res.get();
+    if (r.statusCode() != 201) {
+      RAISEF(kRuntimeError, "received non-201 response: $0", r.body().toString());
+    }
+
+    replicated_offset += batch.records().size();
+  }
+}
+
 bool PartitionReplication::replicate() {
   auto replicas = repl_scheme_->replicasFor(snap_->key);
   if (replicas.size() == 0) {
@@ -68,7 +109,7 @@ bool PartitionReplication::replicate() {
           r.addr);
 
       try {
-        replicateTo(r);
+        replicateTo(r, replica_offset);
         setReplicatedOffsetFor(&repl_state, r.unique_id, head_offset);
         dirty = true;
       } catch (const std::exception& e) {
@@ -92,58 +133,6 @@ bool PartitionReplication::replicate() {
 
   return success;
 }
-
-//uint64_t Partition::replicateTo(const String& addr, uint64_t offset) {
-//  size_t batch_size = 1024;
-//  util::BinaryMessageWriter batch;
-//
-//  auto start_offset = records_.firstOffset();
-//  if (start_offset > offset) {
-//    offset = start_offset;
-//  }
-//
-//  size_t n = 0;
-//  records_.fetchRecords(offset, batch_size, [this, &batch, &n] (
-//      const SHA1Hash& record_id,
-//      const void* record_data,
-//      size_t record_size) {
-//    ++n;
-//
-//    batch.append(record_id.data(), record_id.size());
-//    batch.appendVarUInt(record_size);
-//    batch.append(record_data, record_size);
-//  });
-//
-//  stx::logDebug(
-//      "tsdb.replication",
-//      "Replicating to $0; stream='$1' partition='$2' offset=$3",
-//      addr,
-//      stream_key_,
-//      key_.toString(),
-//      offset);
-//
-//  URI uri(StringUtil::format(
-//      "http://$0/tsdb/replicate?stream=$1&chunk=$2",
-//      addr,
-//      URI::urlEncode(stream_key_),
-//      URI::urlEncode(key_.toString())));
-//
-//  http::HTTPRequest req(http::HTTPMessage::M_POST, uri.pathAndQuery());
-//  req.addHeader("Host", uri.hostAndPort());
-//  req.addHeader("Content-Type", "application/fnord-msg");
-//  req.addBody(batch.data(), batch.size());
-//
-//  auto res = node_->http->executeRequest(req);
-//  res.wait();
-//
-//  const auto& r = res.get();
-//  if (r.statusCode() != 201) {
-//    RAISEF(kRuntimeError, "received non-201 response: $0", r.body().toString());
-//  }
-//
-//  return offset + n;
-//*/
-//}
 
 ReplicationState PartitionReplication::fetchReplicationState() const {
   auto filepath = FileUtil::joinPaths(snap_->base_path, kStateFileName);

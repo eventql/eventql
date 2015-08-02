@@ -23,6 +23,14 @@ public:
 
   PartitionReader(RefPtr<PartitionSnapshot> head);
 
+  void fetchRecords(
+      size_t offset,
+      size_t limit,
+      Function<void (
+          const SHA1Hash& record_id,
+          const void* record_data,
+          size_t record_size)> fn);
+
   void fetchRecords(Function<void (const Buffer& record)> fn);
 
   void fetchRecordsWithSampling(
