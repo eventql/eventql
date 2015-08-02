@@ -114,11 +114,6 @@ int main(int argc, const char** argv) {
   stx::http::HTTPServer http_server(&http_router, &ev);
   http_server.listen(flags.getInt("http_port"));
 
-  auto repl_scheme = mkRef(new dproc::FixedReplicationScheme());
-  for (const auto& r : repl_targets) {
-    repl_scheme->addHost(r);
-  }
-
   tsdb::PartitionMap pmap(dir);
   pmap.open();
 

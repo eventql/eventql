@@ -32,6 +32,7 @@ add_library(tsdb-server OBJECT
     LazyPartition.cc
     Table.cc
     ReplicationWorker.cc
+    ReplicationScheme.cc
     ${PROTO_SRCS})
 
 add_executable(test-recordset

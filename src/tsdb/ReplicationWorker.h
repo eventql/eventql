@@ -12,6 +12,7 @@
 #include <stx/stdtypes.h>
 #include <tsdb/PartitionMap.h>
 #include <tsdb/PartitionReplication.h>
+#include <tsdb/ReplicationScheme.h>
 
 using namespace stx;
 
