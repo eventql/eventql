@@ -19,6 +19,7 @@ namespace tsdb {
 
 class PartitionReplication {
 public:
+  static const char kStateFileName[];
 
   PartitionReplication(
       RefPtr<Partition> partition,
@@ -36,7 +37,7 @@ protected:
   void replicateTo(const ReplicaRef& replica);
 
   ReplicationState fetchReplicationState() const;
-  void commitReplicationState(ReplicationState& state);
+  void commitReplicationState(const ReplicationState& state);
 
   RefPtr<Partition> partition_;
   RefPtr<PartitionSnapshot> snap_;

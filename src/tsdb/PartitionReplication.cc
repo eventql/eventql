@@ -17,6 +17,8 @@ using namespace stx;
 
 namespace tsdb {
 
+const char PartitionReplication::kStateFileName[] = "_repl";
+
 PartitionReplication::PartitionReplication(
     RefPtr<Partition> partition,
     RefPtr<ReplicationScheme> repl_scheme) :
@@ -144,7 +146,7 @@ bool PartitionReplication::replicate() {
 //}
 
 ReplicationState PartitionReplication::fetchReplicationState() const {
-  auto filepath = FileUtil::joinPaths(snap_->base_path, "_repl");
+  auto filepath = FileUtil::joinPaths(snap_->base_path, kStateFileName);
 
   if (FileUtil::exists(filepath)) {
     return msg::decode<ReplicationState>(FileUtil::read(filepath));
@@ -154,6 +156,22 @@ ReplicationState PartitionReplication::fetchReplicationState() const {
     state.set_uuid(uuid.data(), uuid.size());
     return state;
   }
+}
+
+void PartitionReplication::commitReplicationState(
+    const ReplicationState& state) {
+  auto filepath = FileUtil::joinPaths(snap_->base_path, kStateFileName);
+  auto buf = msg::encode(state);
+
+  {
+    auto file = File::openFile(
+        filepath + "~",
+        File::O_WRITE | File::O_CREATEOROPEN | File::O_TRUNCATE);
+
+    file.write(buf->data(), buf->size());
+  }
+
+  FileUtil::mv(filepath + "~", filepath);
 }
 
 } // namespace tdsb
