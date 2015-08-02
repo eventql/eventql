@@ -50,22 +50,6 @@ void ReplicationWorker::enqueuePartition(RefPtr<Partition> partition) {
   cv_.notify_all();
 }
 
-void ReplicationWorker::maybeEnqueuePartition(RefPtr<Partition> partition) {
-  // FIXME check if partition needs replication, then enqueue
-}
-
-void ReplicationWorker::replicate(RefPtr<Partition> partition) {
-  auto snap = partition->getSnapshot();
-  auto table = partition->getTable();
-
-  logDebug(
-      "tsdb",
-      "Replicating partition $0/$1/$2",
-      snap->state.tsdb_namespace(),
-      table->name(),
-      snap->key.toString());
-}
-
 void ReplicationWorker::start() {
   running_ = true;
 
@@ -113,7 +97,7 @@ void ReplicationWorker::work() {
     lk.unlock();
 
     try {
-      replicate(partition);
+      PartitionReplication::replicate(partition);
     } catch (const StandardException& e) {
       logError("tsdb", e, "ReplicationWorker error");
 
@@ -125,7 +109,10 @@ void ReplicationWorker::work() {
 
     lk.lock();
     waitset_.erase(partition->uuid());
-    maybeEnqueuePartition(partition);
+
+    if (PartitionReplication::needsReplication(partition)) {
+      enqueuePartition(partition);
+    }
   }
 }
 

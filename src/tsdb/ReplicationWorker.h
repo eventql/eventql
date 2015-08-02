@@ -11,6 +11,7 @@
 #include <thread>
 #include <stx/stdtypes.h>
 #include <tsdb/PartitionMap.h>
+#include <tsdb/PartitionReplication.h>
 
 using namespace stx;
 
@@ -23,11 +24,8 @@ public:
   ~ReplicationWorker();
 
   void enqueuePartition(RefPtr<Partition> partition);
-  void maybeEnqueuePartition(RefPtr<Partition> partition);
 
 protected:
-
-  void replicate(RefPtr<Partition> partition);
 
   void start();
   void stop();

@@ -18,7 +18,8 @@ using namespace stx;
 namespace tsdb {
 class Partition;
 
-struct PartitionReader : public RefCounted {
+class PartitionReader : public RefCounted {
+public:
 
   PartitionReader(RefPtr<PartitionSnapshot> head);
 
