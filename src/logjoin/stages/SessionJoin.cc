@@ -125,12 +125,12 @@ void SessionJoin::process(RefPtr<SessionContext> ctx) {
         SHA1::compute(ctx->uuid + "~" + ci.item.docID().docid),
         "cart_items")->obj;
 
-    ciobj.addUInt32Field("time", ci.time.unixMicros() / kMicrosPerSecond);
+    ciobj.addField("time", StringUtil::toString(ci.time.unixMicros()));
     ciobj.addField("item_id", ci.item.docID().docid);
-    ciobj.addUInt32Field("quantity", ci.quantity);
-    ciobj.addUInt32Field("price_cents", ci.price_cents);
+    ciobj.addField("quantity", StringUtil::toString(ci.quantity));
+    ciobj.addField("price_cents", StringUtil::toString(ci.price_cents);
     ciobj.addUInt32Field("currency", (uint32_t) currencyFromString(ci.currency));
-    ciobj.addUInt32Field("checkout_step", ci.checkout_step);
+    ciobj.addField("checkout_step", StringUtil::toString(ci.checkout_step));
   }
 
   for (const auto& q : queries) {
@@ -139,7 +139,7 @@ void SessionJoin::process(RefPtr<SessionContext> ctx) {
         SHA1::compute(ctx->uuid + "~" + q.clickid),
         "search_query")->obj;
 
-    qobj.addUInt32Field("time", q.time.unixMicros() / kMicrosPerSecond);
+    qobj.addField("time", StringUtil::toString(q.time.unixMicros()));
     qobj.addUInt32Field("language", (uint32_t) cm::extractLanguage(q.attrs));
 
     auto qstr = cm::extractQueryString(q.attrs);
@@ -195,12 +195,12 @@ void SessionJoin::process(RefPtr<SessionContext> ctx) {
 
     qobj.addUInt32Field("device_type", (uint32_t) extractDeviceType(q.attrs));
     qobj.addUInt32Field("page_type", (uint32_t) page_type);
-    qobj.addStringField("query_type", query_type);
+    qobj.addField("query_type", query_type);
 
     for (const auto& item : q.items) {
       qobj.addObject("result_items", [&item] (msg::DynamicMessage* ev) {
-        ev->addUInt32Field("position", item.position);
-        ev->addStringField("item_id", item.item.docID().docid);
+        ev->addField("position", StringUtil::toString(item.position));
+        ev->addField("item_id", item.item.docID().docid);
         ev->addBoolField("clicked", item.clicked);
         ev->addBoolField("seen", item.seen);
       });
@@ -213,7 +213,7 @@ void SessionJoin::process(RefPtr<SessionContext> ctx) {
         SHA1::compute(ctx->uuid + "~" + iv.clickid),
         "page_view")->obj;
 
-    ivobj.addUInt32Field("time", iv.time.unixMicros() / kMicrosPerSecond);
+    ivobj.addField("time", StringUtil::toString(iv.time.unixMicros()));
     ivobj.addField("item_id", iv.item.docID().docid);
   }
 
