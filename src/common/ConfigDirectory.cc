@@ -19,8 +19,10 @@ namespace cm {
 
 ConfigDirectory::ConfigDirectory(
     const String& path,
-    const InetAddr master_addr) :
+    const InetAddr master_addr,
+    uint64_t topics) :
     master_addr_(master_addr),
+    topics_(topics),
     watcher_running_(false) {
   mdb::MDBOptions mdb_opts;
   mdb_opts.data_filename = "cdb.db",
@@ -29,15 +31,22 @@ ConfigDirectory::ConfigDirectory(
 
   db_ = mdb::MDB::open(path, mdb_opts);
 
-  listCustomers([this] (const CustomerConfig& cfg) {
-    customers_.emplace(cfg.customer(), new CustomerConfigRef(cfg));
-  });
+  if (topics_ & ConfigTopic::CUSTOMERS) {
+    listCustomers([this] (const CustomerConfig& cfg) {
+      customers_.emplace(cfg.customer(), new CustomerConfigRef(cfg));
+    });
+  }
+
 
   sync();
 }
 
 RefPtr<CustomerConfigRef> ConfigDirectory::configFor(
     const String& customer_key) const {
+  if ((topics_ & ConfigTopic::CUSTOMERS) == 0) {
+    RAISE(kRuntimeError, "config topic not enabled: CUSTOMERS");
+  }
+
   std::unique_lock<std::mutex> lk(mutex_);
 
   auto iter = customers_.find(customer_key);
@@ -50,6 +59,10 @@ RefPtr<CustomerConfigRef> ConfigDirectory::configFor(
 
 void ConfigDirectory::listCustomers(
     Function<void (const CustomerConfig& cfg)> fn) const {
+  if ((topics_ & ConfigTopic::CUSTOMERS) == 0) {
+    RAISE(kRuntimeError, "config topic not enabled: CUSTOMERS");
+  }
+
   auto prefix = "cfg~";
 
   Buffer key;
@@ -78,11 +91,19 @@ void ConfigDirectory::listCustomers(
 
 void ConfigDirectory::onCustomerConfigChange(
     Function<void (const CustomerConfig& cfg)> fn) {
+  if ((topics_ & ConfigTopic::CUSTOMERS) == 0) {
+    RAISE(kRuntimeError, "config topic not enabled: CUSTOMERS");
+  }
+
   std::unique_lock<std::mutex> lk(mutex_);
   on_customer_change_.emplace_back(fn);
 }
 
 void ConfigDirectory::updateTableDefinition(const TableDefinition& table) {
+  if ((topics_ & ConfigTopic::TABLES) == 0) {
+    RAISE(kRuntimeError, "config topic not enabled: TABLES");
+  }
+
   if (!StringUtil::isShellSafe(table.table_name())) {
     RAISEF(
         kIllegalArgumentError,
@@ -114,6 +135,10 @@ void ConfigDirectory::updateTableDefinition(const TableDefinition& table) {
 
 void ConfigDirectory::listTableDefinitions(
     Function<void (const TableDefinition& table)> fn) const {
+  if ((topics_ & ConfigTopic::TABLES) == 0) {
+    RAISE(kRuntimeError, "config topic not enabled: TABLES");
+  }
+
   auto prefix = "tbl~";
 
   Buffer key;
@@ -142,6 +167,10 @@ void ConfigDirectory::listTableDefinitions(
 
 void ConfigDirectory::onTableDefinitionChange(
     Function<void (const TableDefinition& tbl)> fn) {
+  if ((topics_ & ConfigTopic::TABLES) == 0) {
+    RAISE(kRuntimeError, "config topic not enabled: TABLES");
+  }
+
   std::unique_lock<std::mutex> lk(mutex_);
   on_table_change_.emplace_back(fn);
 }
@@ -175,14 +204,20 @@ void ConfigDirectory::sync() {
 void ConfigDirectory::syncObject(const String& obj) {
   logDebug("analyticsd", "Syncing config object '$0' from master", obj);
 
-  static const String kCustomerPrefix = "customers/";
-  if (StringUtil::beginsWith(obj, kCustomerPrefix)) {
-    syncCustomerConfig(obj.substr(kCustomerPrefix.size()));
+  if (topics_ & ConfigTopic::CUSTOMERS) {
+    static const String kCustomerPrefix = "customers/";
+    if (StringUtil::beginsWith(obj, kCustomerPrefix)) {
+      syncCustomerConfig(obj.substr(kCustomerPrefix.size()));
+      return;
+    }
   }
 
-  static const String kTablesPrefix = "tables/";
-  if (StringUtil::beginsWith(obj, kTablesPrefix)) {
-    syncTableDefinitions(obj.substr(kTablesPrefix.size()));
+  if (topics_ & ConfigTopic::TABLES) {
+    static const String kTablesPrefix = "tables/";
+    if (StringUtil::beginsWith(obj, kTablesPrefix)) {
+      syncTableDefinitions(obj.substr(kTablesPrefix.size()));
+      return;
+    }
   }
 }
 
