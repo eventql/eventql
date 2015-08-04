@@ -24,6 +24,12 @@ public:
   CustomerConfig fetchCustomerConfig(const String& customer_key) const;
   void updateCustomerConfig(CustomerConfig config);
 
+  TableDefinition fetchTableDefinition(
+      const String& customer_key,
+      const String& table_key);
+
+  void updateTableDefinition(const TableDefinition& table);
+
   Vector<Pair<String, uint64_t>> heads() const;
 
 protected:

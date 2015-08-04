@@ -92,6 +92,82 @@ void ConfigDirectoryMaster::updateCustomerConfig(CustomerConfig config) {
 
   FileUtil::mv(vtmppath, vpath);
   FileUtil::mv(htmppath, hpath);
+  heads_["customers/" + config.customer()] = head_version;
+}
+
+void ConfigDirectoryMaster::updateTableDefinition(const TableDefinition& td) {
+  std::unique_lock<std::mutex> lk(mutex_);
+  uint64_t head_version = 0;
+
+  auto customer_key = td.customer();
+  auto cpath = FileUtil::joinPaths(db_path_, customer_key);
+  auto hpath = FileUtil::joinPaths(cpath, "tables.HEAD");
+
+  TableDefinitionList tables;
+  if (FileUtil::exists(cpath)) {
+    if (FileUtil::exists(hpath)) {
+      auto head_version_str = FileUtil::read(hpath);
+      head_version = std::stoull(head_version_str.toString());
+      tables = msg::decode<TableDefinitionList>(
+          FileUtil::read(
+              FileUtil::joinPaths(
+                  cpath,
+                  StringUtil::format("tables.$0", head_version))));
+    }
+  } else {
+    FileUtil::mkdir(cpath);
+  }
+
+  TableDefinition* head_td = nullptr;
+  for (auto& tbl : *tables.mutable_tables()) {
+    if (tbl.table_name() == td.table_name()) {
+      head_td = &tbl;
+    }
+  }
+
+  if (head_td == nullptr) {
+    head_td = tables.add_tables();
+  }
+
+  if (td.version() != head_td->version()) {
+    RAISE(
+        kRuntimeError,
+        "VERSION MISMATCH: can't update table definition because the update is" \
+        " out of date (i.e. it is not based on the latest head version)");
+  }
+
+  *head_td = td;
+  head_td->set_version(td.version() + 1);
+  ++head_version;
+
+  logInfo(
+      "dxa-master",
+      "Updating table config; customer=$0 table=$1 head=$2",
+      customer_key,
+      head_td->table_name(),
+      head_td->version());
+
+  auto td_buf = msg::encode(tables);
+
+  auto vpath = FileUtil::joinPaths(
+      cpath,
+      StringUtil::format("tables.$0", head_version));
+
+  auto vtmppath = vpath + "~tmp." + Random::singleton()->hex64();
+  {
+    auto tmpfile = File::openFile(vtmppath, File::O_CREATE | File::O_WRITE);
+    tmpfile.write(td_buf->data(), td_buf->size());
+  }
+
+  auto htmppath = hpath + "~tmp." + Random::singleton()->hex64();
+  {
+    auto tmpfile = File::openFile(htmppath, File::O_CREATE | File::O_WRITE);
+    tmpfile.write(StringUtil::toString(head_version));
+  }
+
+  FileUtil::mv(vtmppath, vpath);
+  FileUtil::mv(htmppath, hpath);
+  heads_["tables/" + customer_key] = head_version;
 }
 
 Vector<Pair<String, uint64_t>> ConfigDirectoryMaster::heads() const {
@@ -107,10 +183,20 @@ Vector<Pair<String, uint64_t>> ConfigDirectoryMaster::heads() const {
 
 void ConfigDirectoryMaster::loadHeads() {
   FileUtil::ls(db_path_, [this] (const String& customer) -> bool {
-    auto hpath = FileUtil::joinPaths(db_path_, customer + "/config.HEAD");
-    if (FileUtil::exists(hpath)) {
-      heads_["customers/" + customer] =
-          std::stoull(FileUtil::read(hpath).toString());
+    {
+      auto hpath = FileUtil::joinPaths(db_path_, customer + "/config.HEAD");
+      if (FileUtil::exists(hpath)) {
+        heads_["customers/" + customer] =
+            std::stoull(FileUtil::read(hpath).toString());
+      }
+    }
+
+    {
+      auto hpath = FileUtil::joinPaths(db_path_, customer + "/tables.HEAD");
+      if (FileUtil::exists(hpath)) {
+        heads_["tables/" + customer] =
+            std::stoull(FileUtil::read(hpath).toString());
+      }
     }
 
     return true;
