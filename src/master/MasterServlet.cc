@@ -17,7 +17,7 @@ using namespace stx;
 namespace cm {
 
 MasterServlet::MasterServlet(
-    CustomerDirectoryMaster* cdb) :
+    ConfigDirectoryMaster* cdb) :
     cdb_(cdb) {}
 
 void MasterServlet::handleHTTPRequest(

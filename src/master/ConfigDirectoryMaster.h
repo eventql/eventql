@@ -16,10 +16,10 @@ using namespace stx;
 
 namespace cm {
 
-class CustomerDirectoryMaster {
+class ConfigDirectoryMaster {
 public:
 
-  CustomerDirectoryMaster(const String& path);
+  ConfigDirectoryMaster(const String& path);
 
   CustomerConfig fetchCustomerConfig(const String& customer_key) const;
   void updateCustomerConfig(CustomerConfig config);

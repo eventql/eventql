@@ -15,7 +15,7 @@
 #include "stx/http/httpserver.h"
 #include "stx/thread/eventloop.h"
 #include "stx/thread/threadpool.h"
-#include "master/CustomerDirectoryMaster.h"
+#include "master/ConfigDirectoryMaster.h"
 #include "master/MasterServlet.h"
 
 using namespace stx;
@@ -78,7 +78,7 @@ int main(int argc, const char** argv) {
     FileUtil::mkdir_p(cdb_dir);
   }
 
-  CustomerDirectoryMaster customer_dir(cdb_dir);
+  ConfigDirectoryMaster customer_dir(cdb_dir);
 
   MasterServlet master_servlet(&customer_dir);
   http_router.addRouteByPrefixMatch(

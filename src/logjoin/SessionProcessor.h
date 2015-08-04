@@ -13,7 +13,7 @@
 #include "stx/thread/DelayedQueue.h"
 #include "logjoin/TrackedSession.h"
 #include "logjoin/SessionContext.h"
-#include "common/CustomerDirectory.h"
+#include "common/ConfigDirectory.h"
 
 using namespace stx;
 
@@ -24,7 +24,7 @@ public:
   typedef Function<void (RefPtr<SessionContext> ctx)> PipelineStageFn;
 
   SessionProcessor(
-      CustomerDirectory* customer_dir,
+      ConfigDirectory* customer_dir,
       const String& spool_path);
 
   void addPipelineStage(PipelineStageFn fn);
@@ -40,7 +40,7 @@ protected:
   void processSession(const SHA1Hash& skey);
   void processSession(const TrackedSession& session);
 
-  CustomerDirectory* customer_dir_;
+  ConfigDirectory* customer_dir_;
   String spool_path_;
   Vector<PipelineStageFn> stages_;
   thread::DelayedQueue<SHA1Hash> queue_;
