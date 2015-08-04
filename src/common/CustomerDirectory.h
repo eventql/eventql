@@ -47,6 +47,7 @@ protected:
 
   void syncObject(const String& obj);
   void syncCustomerConfig(const String& customer);
+  void commitCustomerConfig(const CustomerConfig& config);
 
   InetAddr master_addr_;
   RefPtr<mdb::MDB> db_;
