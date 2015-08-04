@@ -8,3 +8,7 @@ add_library(customerdirectory OBJECT
     TableDefinition.cc
     ${PROTO_SRCS})
 
+
+add_library(auth OBJECT
+    AnalyticsAuth.cc)
+
