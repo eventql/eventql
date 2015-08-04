@@ -143,4 +143,17 @@ void MasterServlet::fetchTableDefinition(
   res->addBody(*body);
 }
 
+void MasterServlet::updateTableDefinition(
+    const URI& uri,
+    http::HTTPRequest* req,
+    http::HTTPResponse* res) {
+  if (req->method() != http::HTTPMessage::M_POST) {
+    RAISE(kIllegalArgumentError, "expected HTTP POST request");
+  }
+
+  auto td = msg::decode<TableDefinition>(req->body());
+  cdb_->updateTableDefinition(td);
+  res->setStatus(stx::http::kStatusCreated);
+}
+
 }
