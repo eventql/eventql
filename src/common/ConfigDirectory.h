@@ -32,7 +32,6 @@ public:
       Function<void (const CustomerConfig& cfg)> fn) const;
   void onCustomerConfigChange(Function<void (const CustomerConfig& cfg)> fn);
 
-  void addTableDefinition(const TableDefinition& table);
   void updateTableDefinition(const TableDefinition& table);
   void listTableDefinitions(
       Function<void (const TableDefinition& tbl)> fn) const;

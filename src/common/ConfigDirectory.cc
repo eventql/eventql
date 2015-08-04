@@ -82,44 +82,7 @@ void ConfigDirectory::onCustomerConfigChange(
   on_customer_change_.emplace_back(fn);
 }
 
-void ConfigDirectory::addTableDefinition(const TableDefinition& table) {
-  std::unique_lock<std::mutex> lk(mutex_);
-
-  if (!StringUtil::isShellSafe(table.table_name())) {
-    RAISEF(
-        kIllegalArgumentError,
-        "invalid table name: '$0'",
-        table.table_name());
-  }
-
-  if (!table.has_schema_name() && !table.has_schema_inline()) {
-    RAISEF(
-        kIllegalArgumentError,
-        "can't add table without a schema: '$0'",
-        table.table_name());
-  }
-
-  auto db_key = StringUtil::format(
-      "tbl~$0~$1",
-      table.customer(),
-      table.table_name());
-
-  auto buf = msg::encode(table);
-
-  auto txn = db_->startTransaction(false);
-  txn->autoAbort();
-
-  txn->insert(db_key.data(), db_key.size(), buf->data(), buf->size());
-  txn->commit();
-
-  for (const auto& cb : on_table_change_) {
-    cb(table);
-  }
-}
-
 void ConfigDirectory::updateTableDefinition(const TableDefinition& table) {
-  std::unique_lock<std::mutex> lk(mutex_);
-
   if (!StringUtil::isShellSafe(table.table_name())) {
     RAISEF(
         kIllegalArgumentError,
@@ -130,14 +93,13 @@ void ConfigDirectory::updateTableDefinition(const TableDefinition& table) {
   if (!table.has_schema_name() && !table.has_schema_inline()) {
     RAISEF(
         kIllegalArgumentError,
-        "can't add table without a schema: '$0'",
+        "can't update table without a schema: '$0'",
         table.table_name());
   }
 
   auto buf = msg::encode(table);
 
   RAISE(kNotYetImplementedError);
-
 }
 
 void ConfigDirectory::listTableDefinitions(
