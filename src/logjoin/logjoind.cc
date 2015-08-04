@@ -178,6 +178,15 @@ int main(int argc, const char** argv) {
       "<name>");
 
   flags.defineFlag(
+      "master",
+      cli::FlagParser::T_STRING,
+      true,
+      NULL,
+      NULL,
+      "url",
+      "<addr>");
+
+  flags.defineFlag(
       "loglevel",
       stx::cli::FlagParser::T_STRING,
       false,
@@ -212,7 +221,18 @@ int main(int argc, const char** argv) {
   auto shard = shard_map.getShard(flags.getString("shard"));
 
   /* open customer directory */
-  CustomerDirectory customer_dir(flags.getString("cdb"));
+  auto cdb_dir = FileUtil::joinPaths(
+      flags.getString("datadir"),
+      shard.shard_name + "/cdb");
+
+  if (!FileUtil::exists(cdb_dir)) {
+    FileUtil::mkdir(cdb_dir);
+  }
+
+  CustomerDirectory customer_dir(
+      cdb_dir,
+      InetAddr::resolve(flags.getString("master")));
+
   customer_dir.updateCustomerConfig(createCustomerConfig("dawanda"));
 
   HashMap<String, URI> input_feeds;

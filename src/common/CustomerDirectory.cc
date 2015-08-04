@@ -14,7 +14,10 @@ using namespace stx;
 
 namespace cm {
 
-CustomerDirectory::CustomerDirectory(const String& path) {
+CustomerDirectory::CustomerDirectory(
+    const String& path,
+    const InetAddr master_addr) :
+    master_addr_(master_addr) {
   mdb::MDBOptions mdb_opts;
   mdb_opts.data_filename = "cdb.db",
   mdb_opts.lock_filename = "cdb.db.lck";

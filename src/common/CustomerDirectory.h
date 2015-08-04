@@ -10,6 +10,7 @@
 #include <stx/stdtypes.h>
 #include <stx/SHA1.h>
 #include <stx/mdb/MDB.h>
+#include <stx/net/inetaddr.h>
 #include <common/CustomerConfig.h>
 #include <common/TableDefinition.h>
 
@@ -20,7 +21,9 @@ namespace cm {
 class CustomerDirectory {
 public:
 
-  CustomerDirectory(const String& path);
+  CustomerDirectory(
+      const String& path,
+      InetAddr master_addr);
 
   RefPtr<CustomerConfigRef> configFor(const String& customer_key) const;
   void updateCustomerConfig(CustomerConfig config);
@@ -34,10 +37,13 @@ public:
       Function<void (const TableDefinition& tbl)> fn) const;
   void onTableDefinitionChange(Function<void (const TableDefinition& tbl)> fn);
 
+  void sync();
+
 protected:
 
   void loadCustomerConfigs();
 
+  InetAddr master_addr_;
   RefPtr<mdb::MDB> db_;
   mutable std::mutex mutex_;
   HashMap<String, RefPtr<CustomerConfigRef>> customers_;
