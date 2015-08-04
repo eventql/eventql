@@ -6,7 +6,7 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-#include "common/CustomerDirectoryServlet.h"
+#include "master/CustomerDirectoryServlet.h"
 
 using namespace stx;
 
