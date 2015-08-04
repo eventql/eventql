@@ -35,6 +35,11 @@ protected:
       http::HTTPRequest* req,
       http::HTTPResponse* res);
 
+  void updateCustomerConfig(
+      const URI& uri,
+      http::HTTPRequest* request,
+      http::HTTPResponse* response);
+
   void createCustomer(
       const URI& uri,
       http::HTTPRequest* request,

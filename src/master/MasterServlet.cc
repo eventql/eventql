@@ -34,16 +34,20 @@ void MasterServlet::handleHTTPRequest(
       return fetchCustomerConfig(uri, req, res);
     }
 
+    if (StringUtil::endsWith(uri.path(), "/analytics/master/update_customer_config")) {
+      return updateCustomerConfig(uri, req, res);
+    }
+
+    if (StringUtil::endsWith(uri.path(), "/analytics/master/create_customer")) {
+      return createCustomer(uri, req, res);
+    }
+
     if (StringUtil::endsWith(uri.path(), "/analytics/master/fetch_table_definition")) {
       return fetchTableDefinition(uri, req, res);
     }
 
     if (StringUtil::endsWith(uri.path(), "/analytics/master/update_table_definition")) {
       return updateTableDefinition(uri, req, res);
-    }
-
-    if (StringUtil::endsWith(uri.path(), "/analytics/master/create_customer")) {
-      return createCustomer(uri, req, res);
     }
   } catch (const StandardException& e) {
     logError("dxa-master", e, "error while handling HTTP request");
@@ -93,6 +97,19 @@ void MasterServlet::fetchCustomerConfig(
 
   res->setStatus(stx::http::kStatusOK);
   res->addBody(*body);
+}
+
+void MasterServlet::updateCustomerConfig(
+    const URI& uri,
+    http::HTTPRequest* req,
+    http::HTTPResponse* res) {
+  if (req->method() != http::HTTPMessage::M_POST) {
+    RAISE(kIllegalArgumentError, "expected HTTP POST request");
+  }
+
+  auto config = msg::decode<CustomerConfig>(req->body());
+  cdb_->updateCustomerConfig(config);
+  res->setStatus(stx::http::kStatusCreated);
 }
 
 void MasterServlet::createCustomer(
