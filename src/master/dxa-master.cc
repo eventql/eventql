@@ -15,7 +15,7 @@
 #include "stx/http/httpserver.h"
 #include "stx/thread/eventloop.h"
 #include "stx/thread/threadpool.h"
-#include "common/CustomerDirectory.h"
+#include "master/CustomerDirectoryMaster.h"
 #include "master/CustomerDirectoryServlet.h"
 
 using namespace stx;
@@ -70,12 +70,15 @@ int main(int argc, const char** argv) {
   http_server.listen(flags.getInt("http_port"));
 
   /* customer directory */
-  auto cdb_dir = FileUtil::joinPaths(flags.getString("datadir"), "cdb");
+  auto cdb_dir = FileUtil::joinPaths(
+      flags.getString("datadir"),
+      "master/customers");
+
   if (!FileUtil::exists(cdb_dir)) {
     FileUtil::mkdir(cdb_dir);
   }
 
-  CustomerDirectory customer_dir(cdb_dir);
+  CustomerDirectoryMaster customer_dir(cdb_dir);
   CustomerDirectoryServlet customer_dir_servlet(&customer_dir);
   http_router.addRouteByPrefixMatch("/cdb", &customer_dir_servlet, &tpool);
 

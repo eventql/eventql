@@ -8,7 +8,7 @@
  */
 #pragma once
 #include "stx/http/httpservice.h"
-#include "common/CustomerDirectory.h"
+#include "master/CustomerDirectoryMaster.h"
 
 using namespace stx;
 
@@ -17,7 +17,7 @@ namespace cm {
 class CustomerDirectoryServlet : public stx::http::HTTPService {
 public:
 
-  CustomerDirectoryServlet(CustomerDirectory* cdb);
+  CustomerDirectoryServlet(CustomerDirectoryMaster* cdb);
 
   void handleHTTPRequest(
       stx::http::HTTPRequest* req,
@@ -30,7 +30,7 @@ protected:
       http::HTTPRequest* request,
       http::HTTPResponse* response);
 
-  CustomerDirectory* cdb_;
+  CustomerDirectoryMaster* cdb_;
 };
 
 }

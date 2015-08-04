@@ -12,9 +12,8 @@ using namespace stx;
 
 namespace cm {
 
-
 CustomerDirectoryServlet::CustomerDirectoryServlet(
-    CustomerDirectory* cdb) : 
+    CustomerDirectoryMaster* cdb) :
     cdb_(cdb) {}
 
 void CustomerDirectoryServlet::handleHTTPRequest(
