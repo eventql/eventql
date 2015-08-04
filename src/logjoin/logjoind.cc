@@ -320,6 +320,7 @@ int main(int argc, const char** argv) {
       shard.end,
       cm::LogJoinShard::modulo);
 
+  customer_dir.startWatcher();
   session_proc.start();
   logjoin.processClickstream(
       input_feeds,
@@ -332,6 +333,7 @@ int main(int argc, const char** argv) {
   session_proc.stop();
   ev.shutdown();
   evloop_thread.join();
+  customer_dir.stopWatcher();
   sessdb->sync();
   exit(0);
 }
