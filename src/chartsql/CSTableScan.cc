@@ -12,6 +12,7 @@
 #include <chartsql/runtime/defaultruntime.h>
 #include <chartsql/runtime/compile.h>
 #include <stx/ieee754.h>
+#include <stx/logging.h>
 
 using namespace stx;
 
@@ -31,6 +32,8 @@ void CSTableScan::execute(
     ExecutionContext* context,
     Function<bool (int argc, const SValue* argv)> fn) {
   context->incrNumSubtasksTotal(1);
+
+  logDebug("sql", "Scanning cstable: $0", cstable_filename_);
 
   Set<String> column_names;
   for (const auto& slnode : stmt_->selectList()) {
