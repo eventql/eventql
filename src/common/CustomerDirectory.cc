@@ -220,23 +220,34 @@ void CustomerDirectory::syncObject(const String& obj) {
 }
 
 void CustomerDirectory::syncCustomerConfig(const String& customer) {
+  auto uri = URI(
+      StringUtil::format(
+          "http://$0/analytics/master/customer_config?customer=$1",
+          master_addr_.hostAndPort(),
+          URI::urlEncode(customer)));
 
-  iputs("get customer config for: $0", customer);
+  http::HTTPClient http;
+  auto res = http.executeRequest(http::HTTPRequest::mkGet(uri));
+  if (res.statusCode() != 200) {
+    RAISEF(kRuntimeError, "error: $0", res.body().toString());
+  }
+
+  const auto& buf = res.body();
+  auto config = msg::decode<CustomerConfig>(buf);
+  auto db_key = StringUtil::format("cfg~$0", config.customer());
+
   std::unique_lock<std::mutex> lk(mutex_);
-  //auto db_key = StringUtil::format("cfg~$0", config.customer());
-  //auto buf = msg::encode(config);
+  auto txn = db_->startTransaction(false);
+  txn->autoAbort();
 
-  //auto txn = db_->startTransaction(false);
-  //txn->autoAbort();
+  txn->update(db_key.data(), db_key.size(), buf.data(), buf.size());
+  txn->commit();
 
-  //txn->update(db_key.data(), db_key.size(), buf->data(), buf->size());
-  //txn->commit();
+  customers_.emplace(config.customer(), new CustomerConfigRef(config));
 
-  //customers_.emplace(config.customer(), new CustomerConfigRef(config));
-
-  //for (const auto& cb : on_customer_change_) {
-  //  cb(config);
-  //}
+  for (const auto& cb : on_customer_change_) {
+    cb(config);
+  }
 }
 
 
