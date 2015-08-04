@@ -47,7 +47,7 @@ Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildSequentialScan(
         node->tableName());
   }
 
-  auto cstable = cstable_index_->fetchCSTable(
+  auto cstable = cstable_index_->fetchCSTableFilename(
       tsdb_namespace_,
       table_ref.table_key,
       table_ref.partition_key.get());
@@ -61,7 +61,7 @@ Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildSequentialScan(
       mkScoped(
           new csql::CSTableScan(
               node,
-              mkScoped(new cstable::CSTableReader(cstable.get())),
+              cstable.get(),
               runtime)));
 }
 

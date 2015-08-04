@@ -28,6 +28,20 @@ Option<RefPtr<VFSFile>> CSTableIndex::fetchCSTable(
     const String& tsdb_namespace,
     const String& table,
     const SHA1Hash& partition) const {
+  auto filepath = fetchCSTableFilename(tsdb_namespace, table, partition);
+
+  if (filepath.isEmpty()) {
+    return None<RefPtr<VFSFile>>();
+  } else {
+    return Some<RefPtr<VFSFile>>(
+        new io::MmappedFile(File::openFile(filepath.get(), File::O_READ)));
+  }
+}
+
+Option<String> CSTableIndex::fetchCSTableFilename(
+    const String& tsdb_namespace,
+    const String& table,
+    const SHA1Hash& partition) const {
   auto filepath = FileUtil::joinPaths(
       db_path_,
       StringUtil::format(
@@ -37,10 +51,9 @@ Option<RefPtr<VFSFile>> CSTableIndex::fetchCSTable(
           partition.toString()));
 
   if (FileUtil::exists(filepath)) {
-    return Some<RefPtr<VFSFile>>(
-        new io::MmappedFile(File::openFile(filepath, File::O_READ)));
+    return Some(filepath);
   } else {
-    return None<RefPtr<VFSFile>>();
+    return None<String>();
   }
 }
 

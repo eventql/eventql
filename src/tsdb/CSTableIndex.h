@@ -26,6 +26,11 @@ public:
       const String& table,
       const SHA1Hash& partition) const;
 
+  Option<String> fetchCSTableFilename(
+      const String& tsdb_namespace,
+      const String& table,
+      const SHA1Hash& partition) const;
+
   void buildCSTable(RefPtr<Partition> partition);
 
 protected:
