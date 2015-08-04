@@ -23,6 +23,8 @@ public:
 
   void updateCustomerConfig(CustomerConfig config);
 
+  Vector<Pair<String, uint64_t>> heads() const;
+
 protected:
 
   void loadHeads();
