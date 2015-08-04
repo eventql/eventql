@@ -14,10 +14,10 @@ using namespace stx;
 
 namespace cm {
 
-class CustomerDirectoryServlet : public stx::http::HTTPService {
+class MasterServlet : public stx::http::HTTPService {
 public:
 
-  CustomerDirectoryServlet(CustomerDirectoryMaster* cdb);
+  MasterServlet(CustomerDirectoryMaster* cdb);
 
   void handleHTTPRequest(
       stx::http::HTTPRequest* req,

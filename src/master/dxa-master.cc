@@ -16,7 +16,7 @@
 #include "stx/thread/eventloop.h"
 #include "stx/thread/threadpool.h"
 #include "master/CustomerDirectoryMaster.h"
-#include "master/CustomerDirectoryServlet.h"
+#include "master/MasterServlet.h"
 
 using namespace stx;
 using namespace cm;
@@ -79,7 +79,7 @@ int main(int argc, const char** argv) {
   }
 
   CustomerDirectoryMaster customer_dir(cdb_dir);
-  CustomerDirectoryServlet customer_dir_servlet(&customer_dir);
+  MasterServlet customer_dir_servlet(&customer_dir);
   http_router.addRouteByPrefixMatch("/cdb", &customer_dir_servlet, &tpool);
 
   ev.run();
