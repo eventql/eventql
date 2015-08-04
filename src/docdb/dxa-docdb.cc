@@ -78,7 +78,7 @@ int main(int argc, const char** argv) {
   DocumentDBServlet docdb_servlet(&docdb, &auth);
 
   http_router.addRouteByPrefixMatch(
-      "/analytics/api/v1/documents",
+      "/",
       &docdb_servlet,
       &tpool);
 
