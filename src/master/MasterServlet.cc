@@ -46,6 +46,10 @@ void MasterServlet::handleHTTPRequest(
       return fetchTableDefinition(uri, req, res);
     }
 
+    if (StringUtil::endsWith(uri.path(), "/analytics/master/fetch_table_definitions")) {
+      return fetchTableDefinitions(uri, req, res);
+    }
+
     if (StringUtil::endsWith(uri.path(), "/analytics/master/update_table_definition")) {
       return updateTableDefinition(uri, req, res);
     }
@@ -110,6 +114,7 @@ void MasterServlet::updateCustomerConfig(
   auto config = msg::decode<CustomerConfig>(req->body());
   cdb_->updateCustomerConfig(config);
   res->setStatus(stx::http::kStatusCreated);
+  res->addBody(*msg::encode(config));
 }
 
 void MasterServlet::createCustomer(
@@ -160,6 +165,26 @@ void MasterServlet::fetchTableDefinition(
   res->addBody(*body);
 }
 
+void MasterServlet::fetchTableDefinitions(
+    const URI& uri,
+    http::HTTPRequest* req,
+    http::HTTPResponse* res) {
+  const auto& params = uri.queryParams();
+
+  String customer;
+  if (!stx::URI::getParam(params, "customer", &customer)) {
+    res->addBody("error: missing ?customer=... parameter");
+    res->setStatus(http::kStatusBadRequest);
+    return;
+  }
+
+  auto tables = cdb_->fetchTableDefinitions(customer);
+  auto body = msg::encode(tables);
+
+  res->setStatus(stx::http::kStatusOK);
+  res->addBody(*body);
+}
+
 void MasterServlet::updateTableDefinition(
     const URI& uri,
     http::HTTPRequest* req,
@@ -171,6 +196,7 @@ void MasterServlet::updateTableDefinition(
   auto td = msg::decode<TableDefinition>(req->body());
   cdb_->updateTableDefinition(td);
   res->setStatus(stx::http::kStatusCreated);
+  res->addBody(*msg::encode(td));
 }
 
 }
