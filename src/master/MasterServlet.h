@@ -25,6 +25,11 @@ public:
 
 protected:
 
+  void listHeads(
+      const URI& uri,
+      http::HTTPRequest* request,
+      http::HTTPResponse* response);
+
   void createCustomer(
       const URI& uri,
       http::HTTPRequest* request,
