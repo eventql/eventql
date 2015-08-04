@@ -76,8 +76,9 @@ RefPtr<Partition> Partition::reopen(
   auto nrecs = 0;
   const auto& files = state.sstable_files();
   for (const auto& f : files) {
-    sstable::SSTableReader reader(FileUtil::joinPaths(pdir, f));
-    nrecs += reader.countRows();
+    auto is = FileInputStream::openFile(FileUtil::joinPaths(pdir, f));
+    auto header = sstable::FileHeaderReader::readMetaPage(is.get());
+    nrecs += header.rowCount();
   }
 
   stx::logDebug(
