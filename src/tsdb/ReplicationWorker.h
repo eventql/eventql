@@ -21,6 +21,7 @@ namespace tsdb {
 
 class ReplicationWorker {
 public:
+  static const uint64_t kReplicationCorkWindowMicros = 10 * kMicrosPerSecond;
 
   ReplicationWorker(
       RefPtr<ReplicationScheme> repl_scheme,

@@ -49,7 +49,10 @@ void ReplicationWorker::enqueuePartition(RefPtr<Partition> partition) {
     return;
   }
 
-  queue_.emplace(WallClock::unixMicros(), partition);
+  queue_.emplace(
+      WallClock::unixMicros() + kReplicationCorkWindowMicros,
+      partition);
+
   waitset_.emplace(uuid);
   cv_.notify_all();
 }
