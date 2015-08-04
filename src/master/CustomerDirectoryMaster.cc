@@ -46,8 +46,8 @@ void CustomerDirectoryMaster::updateCustomerConfig(CustomerConfig config) {
         " out of date (i.e. it is not based on the latest head version)");
   }
 
+  config.set_version(++head_version);
   auto config_buf = msg::encode(config);
-  ++head_version;
 
   logInfo(
       "dxa-master",
@@ -73,6 +73,17 @@ void CustomerDirectoryMaster::updateCustomerConfig(CustomerConfig config) {
 
   FileUtil::mv(vtmppath, vpath);
   FileUtil::mv(htmppath, hpath);
+}
+
+Vector<Pair<String, uint64_t>> CustomerDirectoryMaster::heads() const {
+  std::unique_lock<std::mutex> lk(mutex_);
+  Vector<Pair<String, uint64_t>> heads;
+
+  for (const auto& h : heads_) {
+    heads.emplace_back(h);
+  }
+
+  return heads;
 }
 
 void CustomerDirectoryMaster::loadHeads() {
