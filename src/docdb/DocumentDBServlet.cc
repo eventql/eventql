@@ -44,6 +44,9 @@ void DocumentDBServlet::handleHTTPRequest(
     documentREST(uri, session, req, res);
     return;
   }
+
+  res->setStatus(stx::http::kStatusNotFound);
+  res->addBody("not found: ", req->uri());
 }
 
 void DocumentDBServlet::documentREST(
