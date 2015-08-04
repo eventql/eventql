@@ -40,6 +40,16 @@ protected:
       http::HTTPRequest* request,
       http::HTTPResponse* response);
 
+  void fetchTableDefinition(
+      const URI& uri,
+      http::HTTPRequest* req,
+      http::HTTPResponse* res);
+
+  void updateTableDefinition(
+      const URI& uri,
+      http::HTTPRequest* req,
+      http::HTTPResponse* res);
+
   ConfigDirectoryMaster* cdb_;
 };
 
