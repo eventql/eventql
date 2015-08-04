@@ -30,8 +30,16 @@ void MasterServlet::handleHTTPRequest(
       return listHeads(uri, req, res);
     }
 
-    if (StringUtil::endsWith(uri.path(), "/analytics/master/customer_config")) {
+    if (StringUtil::endsWith(uri.path(), "/analytics/master/fetch_customer_config")) {
       return fetchCustomerConfig(uri, req, res);
+    }
+
+    if (StringUtil::endsWith(uri.path(), "/analytics/master/fetch_table_definition")) {
+      return fetchTableDefinition(uri, req, res);
+    }
+
+    if (StringUtil::endsWith(uri.path(), "/analytics/master/update_table_definition")) {
+      return updateTableDefinition(uri, req, res);
     }
 
     if (StringUtil::endsWith(uri.path(), "/analytics/master/create_customer")) {
@@ -106,6 +114,33 @@ void MasterServlet::createCustomer(
 
   cdb_->updateCustomerConfig(createCustomerConfig(customer));
   res->setStatus(stx::http::kStatusCreated);
+}
+
+void MasterServlet::fetchTableDefinition(
+    const URI& uri,
+    http::HTTPRequest* req,
+    http::HTTPResponse* res) {
+  const auto& params = uri.queryParams();
+
+  String customer;
+  if (!stx::URI::getParam(params, "customer", &customer)) {
+    res->addBody("error: missing ?customer=... parameter");
+    res->setStatus(http::kStatusBadRequest);
+    return;
+  }
+
+  String table_name;
+  if (!stx::URI::getParam(params, "table_name", &table_name)) {
+    res->addBody("error: missing ?table_name=... parameter");
+    res->setStatus(http::kStatusBadRequest);
+    return;
+  }
+
+  auto td = cdb_->fetchTableDefinition(customer, table_name);
+  auto body = msg::encode(td);
+
+  res->setStatus(stx::http::kStatusOK);
+  res->addBody(*body);
 }
 
 }
