@@ -481,11 +481,11 @@ void LogJoin::processClickstream(
         uint64_t offset = 0;
 
         if (input_feed.first == "tracker_log.feedserver03.production.fnrd.net") {
-          offset = "86325404806";
+          offset = 86325404806llu;
         }
 
         if (input_feed.first == "tracker_log.feedserver02.nue01.production.fnrd.net") {
-          offset = "275512545617";
+          offset = 275512545617llu;
         }
 
         auto last_offset = txn->get(
