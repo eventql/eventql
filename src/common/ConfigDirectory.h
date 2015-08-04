@@ -19,12 +19,18 @@ using namespace stx;
 
 namespace cm {
 
+enum ConfigTopic : uint64_t {
+  CUSTOMERS = 1,
+  TABLES = 2
+};
+
 class ConfigDirectory {
 public:
 
   ConfigDirectory(
       const String& path,
-      InetAddr HashMap);
+      InetAddr master_addr,
+      uint64_t topics);
 
   RefPtr<CustomerConfigRef> configFor(const String& customer_key) const;
   void updateCustomerConfig(CustomerConfig config);
@@ -55,6 +61,7 @@ protected:
   void commitTableDefinition(const TableDefinition& tbl);
 
   InetAddr master_addr_;
+  uint64_t topics_;
   RefPtr<mdb::MDB> db_;
   mutable std::mutex mutex_;
   HashMap<String, RefPtr<CustomerConfigRef>> customers_;

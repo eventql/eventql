@@ -213,7 +213,8 @@ int main(int argc, const char** argv) {
 
   ConfigDirectory customer_dir(
       cdb_dir,
-      InetAddr::resolve(flags.getString("master")));
+      InetAddr::resolve(flags.getString("master")),
+      ConfigTopic::CUSTOMERS);
 
   HashMap<String, URI> input_feeds;
   input_feeds.emplace(
