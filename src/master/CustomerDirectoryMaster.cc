@@ -12,6 +12,7 @@
 #include <stx/random.h>
 #include <stx/protobuf/msg.h>
 #include <stx/logging.h>
+#include <stx/inspect.h>
 
 using namespace stx;
 
@@ -19,7 +20,9 @@ namespace cm {
 
 CustomerDirectoryMaster::CustomerDirectoryMaster(
     const String& path) :
-    db_path_(path) {}
+    db_path_(path) {
+  loadHeads();
+}
 
 void CustomerDirectoryMaster::updateCustomerConfig(CustomerConfig config) {
   std::unique_lock<std::mutex> lk(mutex_);
@@ -70,6 +73,18 @@ void CustomerDirectoryMaster::updateCustomerConfig(CustomerConfig config) {
 
   FileUtil::mv(vtmppath, vpath);
   FileUtil::mv(htmppath, hpath);
+}
+
+void CustomerDirectoryMaster::loadHeads() {
+  FileUtil::ls(db_path_, [this] (const String& customer) -> bool {
+    auto hkey = customer + "/config";
+    auto hpath = FileUtil::joinPaths(db_path_, hkey + ".HEAD");
+    if (FileUtil::exists(hpath)) {
+      heads_[hkey] = std::stoull(FileUtil::read(hpath).toString());
+    }
+
+    return true;
+  });
 }
 
 } // namespace cm
