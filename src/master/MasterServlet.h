@@ -50,6 +50,11 @@ protected:
       http::HTTPRequest* req,
       http::HTTPResponse* res);
 
+  void fetchTableDefinitions(
+      const URI& uri,
+      http::HTTPRequest* req,
+      http::HTTPResponse* res);
+
   void updateTableDefinition(
       const URI& uri,
       http::HTTPRequest* req,

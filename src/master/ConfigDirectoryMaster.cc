@@ -98,6 +98,18 @@ void ConfigDirectoryMaster::updateCustomerConfig(CustomerConfig config) {
 TableDefinition ConfigDirectoryMaster::fetchTableDefinition(
     const String& customer_key,
     const String& table_name) {
+  auto tables = fetchTableDefinitions(customer_key);
+  for (auto& tbl : tables.tables()) {
+    if (tbl.table_name() == table_name) {
+      return tbl;
+    }
+  }
+
+  RAISEF(kNotFoundError, "table not found: $0", table_name);
+}
+
+TableDefinitionList ConfigDirectoryMaster::fetchTableDefinitions(
+    const String& customer_key) {
   std::unique_lock<std::mutex> lk(mutex_);
   auto cpath = FileUtil::joinPaths(db_path_, customer_key);
   auto hpath = FileUtil::joinPaths(cpath, "tables.HEAD");
@@ -107,19 +119,12 @@ TableDefinition ConfigDirectoryMaster::fetchTableDefinition(
   }
 
   auto head_version = FileUtil::read(hpath).toString();
-  auto tables = msg::decode<TableDefinitionList>(
+
+  return msg::decode<TableDefinitionList>(
       FileUtil::read(
           FileUtil::joinPaths(
               cpath,
               StringUtil::format("tables.$0", head_version))));
-
-  for (auto& tbl : tables.tables()) {
-    if (tbl.table_name() == table_name) {
-      return tbl;
-    }
-  }
-
-  RAISEF(kNotFoundError, "table not found: $0", table_name);
 }
 
 void ConfigDirectoryMaster::updateTableDefinition(const TableDefinition& td) {
