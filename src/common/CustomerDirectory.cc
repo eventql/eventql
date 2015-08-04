@@ -7,7 +7,9 @@
  * permission is obtained.
  */
 #include <stx/exception.h>
+#include <stx/uri.h>
 #include <stx/protobuf/msg.h>
+#include <stx/csv/CSVInputStream.h>
 #include <common/CustomerDirectory.h>
 
 using namespace stx;
@@ -28,6 +30,8 @@ CustomerDirectory::CustomerDirectory(
   listCustomers([this] (const CustomerConfig& cfg) {
     customers_.emplace(cfg.customer(), new CustomerConfigRef(cfg));
   });
+
+  sync();
 }
 
 RefPtr<CustomerConfigRef> CustomerDirectory::configFor(
@@ -197,6 +201,40 @@ void CustomerDirectory::onTableDefinitionChange(
     Function<void (const TableDefinition& tbl)> fn) {
   std::unique_lock<std::mutex> lk(mutex_);
   on_table_change_.emplace_back(fn);
+}
+
+void CustomerDirectory::sync() {
+  auto master_heads = fetchMasterHeads();
+
+  for (const auto& head : master_heads) {
+  }
+}
+
+HashMap<String, uint64_t> CustomerDirectory::fetchMasterHeads() const {
+  auto uri = URI(
+      StringUtil::format(
+          "http://$0/analytics/master/heads",
+          master_addr_.hostAndPort()));
+
+  http::HTTPClient http;
+  auto res = http.executeRequest(http::HTTPRequest::mkGet(uri));
+  if (res.statusCode() != 200) {
+    RAISEF(kRuntimeError, "error: $0", res.body().toString());
+  }
+
+  DefaultCSVInputStream csv(BufferInputStream::fromBuffer(&res.body()), '=');
+
+  HashMap<String, uint64_t> heads;
+  Vector<String> row;
+  while (csv.readNextRow(&row)) {
+    if (row.size() != 2) {
+      RAISE(kRuntimeError, "invalid response");
+    }
+
+    heads[row[0]] = std::stoull(row[1]);
+  }
+
+  return heads;
 }
 
 } // namespace cm
