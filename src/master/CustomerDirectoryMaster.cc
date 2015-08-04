@@ -88,10 +88,10 @@ Vector<Pair<String, uint64_t>> CustomerDirectoryMaster::heads() const {
 
 void CustomerDirectoryMaster::loadHeads() {
   FileUtil::ls(db_path_, [this] (const String& customer) -> bool {
-    auto hkey = customer + "/config";
-    auto hpath = FileUtil::joinPaths(db_path_, hkey + ".HEAD");
+    auto hpath = FileUtil::joinPaths(db_path_, customer + "/config.HEAD");
     if (FileUtil::exists(hpath)) {
-      heads_[hkey] = std::stoull(FileUtil::read(hpath).toString());
+      heads_["customers/" + customer] =
+          std::stoull(FileUtil::read(hpath).toString());
     }
 
     return true;
