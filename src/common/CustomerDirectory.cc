@@ -6,6 +6,7 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
+#include <unistd.h>
 #include <stx/exception.h>
 #include <stx/uri.h>
 #include <stx/protobuf/msg.h>
@@ -19,7 +20,8 @@ namespace cm {
 CustomerDirectory::CustomerDirectory(
     const String& path,
     const InetAddr master_addr) :
-    master_addr_(master_addr) {
+    master_addr_(master_addr),
+    watcher_running_(false) {
   mdb::MDBOptions mdb_opts;
   mdb_opts.data_filename = "cdb.db",
   mdb_opts.lock_filename = "cdb.db.lck";
@@ -237,7 +239,7 @@ void CustomerDirectory::syncCustomerConfig(const String& customer) {
 
 void CustomerDirectory::commitCustomerConfig(const CustomerConfig& config) {
   auto db_key = StringUtil::format("cfg~$0", config.customer());
-  auto hkey = StringUtil::format("head~customers/", config.customer());
+  auto hkey = StringUtil::format("head~customers/$0", config.customer());
   auto buf = msg::encode(config);
   auto vstr = StringUtil::toString(config.version());
 
@@ -245,7 +247,7 @@ void CustomerDirectory::commitCustomerConfig(const CustomerConfig& config) {
   auto txn = db_->startTransaction(false);
   txn->autoAbort();
   txn->update(db_key.data(), db_key.size(), buf->data(), buf->size());
-  //txn->update(hkey.data(), hkey.size(), vstr.data(), vstr.size());
+  txn->update(hkey.data(), hkey.size(), vstr.data(), vstr.size());
   txn->commit();
 
   customers_.emplace(config.customer(), new CustomerConfigRef(config));
@@ -254,7 +256,6 @@ void CustomerDirectory::commitCustomerConfig(const CustomerConfig& config) {
     cb(config);
   }
 }
-
 
 HashMap<String, uint64_t> CustomerDirectory::fetchMasterHeads() const {
   auto uri = URI(
@@ -281,6 +282,31 @@ HashMap<String, uint64_t> CustomerDirectory::fetchMasterHeads() const {
   }
 
   return heads;
+}
+
+void CustomerDirectory::startWatcher() {
+  watcher_running_ = true;
+
+  watcher_thread_ = std::thread([this] {
+    while (watcher_running_.load()) {
+      try {
+        sync();
+      } catch (const StandardException& e) {
+        logCritical("analyticsd", e, "error during master sync");
+      }
+
+      usleep(500000);
+    }
+  });
+}
+
+void CustomerDirectory::stopWatcher() {
+  if (!watcher_running_) {
+    return;
+  }
+
+  watcher_running_ = false;
+  watcher_thread_.join();
 }
 
 } // namespace cm

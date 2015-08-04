@@ -40,6 +40,9 @@ public:
 
   void sync();
 
+  void startWatcher();
+  void stopWatcher();
+
 protected:
 
   void loadCustomerConfigs();
@@ -56,6 +59,9 @@ protected:
 
   Vector<Function<void (const CustomerConfig& cfg)>> on_customer_change_;
   Vector<Function<void (const TableDefinition& cfg)>> on_table_change_;
+
+  std::atomic<bool> watcher_running_;
+  std::thread watcher_thread_;
 };
 
 } // namespace cm
