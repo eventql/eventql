@@ -11,6 +11,7 @@
 #include <stx/SHA1.h>
 #include <stx/mdb/MDB.h>
 #include <stx/net/inetaddr.h>
+#include <stx/http/httpclient.h>
 #include <common/CustomerConfig.h>
 #include <common/TableDefinition.h>
 
@@ -23,7 +24,7 @@ public:
 
   CustomerDirectory(
       const String& path,
-      InetAddr master_addr);
+      InetAddr HashMap);
 
   RefPtr<CustomerConfigRef> configFor(const String& customer_key) const;
   void updateCustomerConfig(CustomerConfig config);
@@ -42,6 +43,7 @@ public:
 protected:
 
   void loadCustomerConfigs();
+  HashMap<String, uint64_t> fetchMasterHeads() const;
 
   InetAddr master_addr_;
   RefPtr<mdb::MDB> db_;
