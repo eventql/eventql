@@ -219,7 +219,6 @@ void ConfigDirectory::commitCustomerConfig(const CustomerConfig& config) {
   }
 
   if (last_version >= config.version()) {
-    logDebug("cdb", "refusing to commit outdated version");
     return;
   }
 
@@ -281,7 +280,6 @@ void ConfigDirectory::commitTableDefinition(const TableDefinition& tbl) {
   }
 
   if (last_version >= tbl.version()) {
-    logDebug("cdb", "refusing to commit outdated version");
     return;
   }
 

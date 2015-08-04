@@ -43,7 +43,8 @@ CustomerConfig ConfigDirectoryMaster::fetchCustomerConfig(
   return msg::decode<CustomerConfig>(FileUtil::read(vpath));
 }
 
-void ConfigDirectoryMaster::updateCustomerConfig(CustomerConfig config) {
+CustomerConfig ConfigDirectoryMaster::updateCustomerConfig(
+    CustomerConfig config) {
   std::unique_lock<std::mutex> lk(mutex_);
   uint64_t head_version = 0;
 
@@ -93,6 +94,8 @@ void ConfigDirectoryMaster::updateCustomerConfig(CustomerConfig config) {
   FileUtil::mv(vtmppath, vpath);
   FileUtil::mv(htmppath, hpath);
   heads_["customers/" + config.customer()] = head_version;
+
+  return config;
 }
 
 TableDefinition ConfigDirectoryMaster::fetchTableDefinition(
@@ -120,14 +123,18 @@ TableDefinitionList ConfigDirectoryMaster::fetchTableDefinitions(
 
   auto head_version = FileUtil::read(hpath).toString();
 
-  return msg::decode<TableDefinitionList>(
+  auto tables = msg::decode<TableDefinitionList>(
       FileUtil::read(
           FileUtil::joinPaths(
               cpath,
               StringUtil::format("tables.$0", head_version))));
+
+  tables.set_version(std::stoull(head_version));
+  return tables;
 }
 
-void ConfigDirectoryMaster::updateTableDefinition(const TableDefinition& td) {
+TableDefinition ConfigDirectoryMaster::updateTableDefinition(
+    const TableDefinition& td) {
   std::unique_lock<std::mutex> lk(mutex_);
   uint64_t head_version = 0;
 
@@ -200,6 +207,8 @@ void ConfigDirectoryMaster::updateTableDefinition(const TableDefinition& td) {
   FileUtil::mv(vtmppath, vpath);
   FileUtil::mv(htmppath, hpath);
   heads_["tables/" + customer_key] = head_version;
+
+  return *head_td;
 }
 
 Vector<Pair<String, uint64_t>> ConfigDirectoryMaster::heads() const {

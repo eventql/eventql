@@ -112,9 +112,9 @@ void MasterServlet::updateCustomerConfig(
   }
 
   auto config = msg::decode<CustomerConfig>(req->body());
-  cdb_->updateCustomerConfig(config);
+  auto updated_config = cdb_->updateCustomerConfig(config);
   res->setStatus(stx::http::kStatusCreated);
-  res->addBody(*msg::encode(config));
+  res->addBody(*msg::encode(updated_config));
 }
 
 void MasterServlet::createCustomer(
@@ -193,10 +193,10 @@ void MasterServlet::updateTableDefinition(
     RAISE(kIllegalArgumentError, "expected HTTP POST request");
   }
 
-  auto td = msg::decode<TableDefinition>(req->body());
-  cdb_->updateTableDefinition(td);
+  auto tbl = msg::decode<TableDefinition>(req->body());
+  auto updated_tbl = cdb_->updateTableDefinition(tbl);
   res->setStatus(stx::http::kStatusCreated);
-  res->addBody(*msg::encode(td));
+  res->addBody(*msg::encode(updated_tbl));
 }
 
 }

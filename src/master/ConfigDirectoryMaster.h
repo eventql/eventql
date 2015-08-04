@@ -22,13 +22,13 @@ public:
   ConfigDirectoryMaster(const String& path);
 
   CustomerConfig fetchCustomerConfig(const String& customer_key) const;
-  void updateCustomerConfig(CustomerConfig config);
+  CustomerConfig updateCustomerConfig(CustomerConfig config);
 
   TableDefinition fetchTableDefinition(
       const String& customer_key,
       const String& table_key);
   TableDefinitionList fetchTableDefinitions(const String& customer_key);
-  void updateTableDefinition(const TableDefinition& table);
+  TableDefinition updateTableDefinition(const TableDefinition& table);
 
   Vector<Pair<String, uint64_t>> heads() const;
 
