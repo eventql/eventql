@@ -19,61 +19,67 @@ namespace csql {
 
 CSTableScan::CSTableScan(
     RefPtr<SequentialScanNode> stmt,
-    ScopedPtr<cstable::CSTableReader> cstable,
+    const String& cstable_filename,
     QueryBuilder* runtime) :
-    cstable_(std::move(cstable)),
+    stmt_(stmt),
+    cstable_filename_(cstable_filename),
+    runtime_(runtime),
     colindex_(0),
-    aggr_strategy_(stmt->aggregationStrategy()) {
-  Set<String> column_names;
-  for (const auto& slnode : stmt->selectList()) {
-    findColumns(slnode->expression(), &column_names);
-    column_names_.emplace_back(slnode->columnName());
-  }
-
-  auto where_expr = stmt->whereExpression();
-  if (!where_expr.isEmpty()) {
-    findColumns(where_expr.get(), &column_names);
-  }
-
-  for (const auto& col : column_names) {
-    if (cstable_->hasColumn(col)) {
-      columns_.emplace(
-          col,
-          ColumnRef(cstable_->getColumnReader(col), colindex_++));
-    }
-  }
-
-  for (auto& slnode : stmt->selectList()) {
-    resolveColumns(slnode->expression());
-  }
-
-  for (const auto& slnode : stmt->selectList()) {
-    select_list_.emplace_back(
-        findMaxRepetitionLevel(slnode->expression()),
-        runtime->buildValueExpression(slnode->expression()),
-        &scratch_);
-  }
-
-  if (!where_expr.isEmpty()) {
-    resolveColumns(where_expr.get());
-    where_expr_ = runtime->buildValueExpression(where_expr.get());
-  }
-}
+    aggr_strategy_(stmt_->aggregationStrategy()) {}
 
 void CSTableScan::execute(
     ExecutionContext* context,
     Function<bool (int argc, const SValue* argv)> fn) {
   context->incrNumSubtasksTotal(1);
 
-  if (columns_.empty()) {
-    scanWithoutColumns(fn);
-  } else {
-    scan(fn);
+  Set<String> column_names;
+  for (const auto& slnode : stmt_->selectList()) {
+    findColumns(slnode->expression(), &column_names);
+    column_names_.emplace_back(slnode->columnName());
   }
+
+  auto where_expr = stmt_->whereExpression();
+  if (!where_expr.isEmpty()) {
+    findColumns(where_expr.get(), &column_names);
+  }
+
+  cstable::CSTableReader cstable(cstable_filename_);
+
+  for (const auto& col : column_names) {
+    if (cstable.hasColumn(col)) {
+      columns_.emplace(
+          col,
+          ColumnRef(cstable.getColumnReader(col), colindex_++));
+    }
+  }
+
+  for (auto& slnode : stmt_->selectList()) {
+    resolveColumns(slnode->expression());
+  }
+
+  for (const auto& slnode : stmt_->selectList()) {
+    select_list_.emplace_back(
+        findMaxRepetitionLevel(slnode->expression()),
+        runtime_->buildValueExpression(slnode->expression()),
+        &scratch_);
+  }
+
+  if (!where_expr.isEmpty()) {
+    resolveColumns(where_expr.get());
+    where_expr_ = runtime_->buildValueExpression(where_expr.get());
+  }
+
+  if (columns_.empty()) {
+    scanWithoutColumns(&cstable, fn);
+  } else {
+    scan(&cstable, fn);
+  }
+
   context->incrNumSubtasksCompleted(1);
 }
 
 void CSTableScan::scan(
+    cstable::CSTableReader* cstable,
     Function<bool (int argc, const SValue* argv)> fn) {
   uint64_t select_level = 0;
   uint64_t fetch_level = 0;
@@ -82,7 +88,7 @@ void CSTableScan::scan(
   Vector<SValue> out_row(select_list_.size(), SValue{});
 
   size_t num_records = 0;
-  size_t total_records = cstable_->numRecords();
+  size_t total_records = cstable->numRecords();
   while (num_records < total_records) {
     uint64_t next_level = 0;
 
@@ -262,10 +268,11 @@ void CSTableScan::scan(
 }
 
 void CSTableScan::scanWithoutColumns(
+    cstable::CSTableReader* cstable,
     Function<bool (int argc, const SValue* argv)> fn) {
   Vector<SValue> out_row(select_list_.size(), SValue{});
 
-  size_t total_records = cstable_->numRecords();
+  size_t total_records = cstable->numRecords();
   for (size_t i = 0; i < total_records; ++i) {
     bool where_pred = true;
     if (where_expr_.get() != nullptr) {

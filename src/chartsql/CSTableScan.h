@@ -25,7 +25,7 @@ public:
 
   CSTableScan(
       RefPtr<SequentialScanNode> stmt,
-      ScopedPtr<cstable::CSTableReader> cstable,
+      const String& cstable_filename,
       QueryBuilder* runtime);
 
   virtual Vector<String> columnNames() const override;
@@ -58,8 +58,13 @@ protected:
     ValueExpression::Instance instance;
   };
 
-  void scan(Function<bool (int argc, const SValue* argv)> fn);
-  void scanWithoutColumns(Function<bool (int argc, const SValue* argv)> fn);
+  void scan(
+      cstable::CSTableReader* cstable,
+      Function<bool (int argc, const SValue* argv)> fn);
+
+  void scanWithoutColumns(
+      cstable::CSTableReader* cstable,
+      Function<bool (int argc, const SValue* argv)> fn);
 
   void findColumns(
       RefPtr<ValueExpressionNode> expr,
@@ -73,7 +78,9 @@ protected:
 
   Vector<String> column_names_;
   ScratchMemory scratch_;
-  ScopedPtr<cstable::CSTableReader> cstable_;
+  RefPtr<SequentialScanNode> stmt_;
+  String cstable_filename_;
+  QueryBuilder* runtime_;
   HashMap<String, ColumnRef> columns_;
   Vector<ExpressionRef> select_list_;
   ScopedPtr<ValueExpression> where_expr_;
