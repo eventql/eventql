@@ -96,8 +96,7 @@ Partition::Partition(
     RefPtr<PartitionSnapshot> head,
     RefPtr<Table> table) :
     head_(head),
-    table_(table),
-    writer_(new PartitionWriter(&head_)) {}
+    table_(table) {}
 
 SHA1Hash Partition::uuid() const {
   auto snap = head_.getSnapshot();
@@ -105,7 +104,13 @@ SHA1Hash Partition::uuid() const {
 }
 
 RefPtr<PartitionWriter> Partition::getWriter() {
-  return writer_;
+  std::unique_lock<std::mutex> lk(writer_lock_);
+  if (writer_.get() == nullptr) {
+    writer_ = mkRef(new PartitionWriter(&head_));
+  }
+
+  auto writer = writer_;
+  return writer;
 }
 
 RefPtr<PartitionReader> Partition::getReader() {

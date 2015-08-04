@@ -63,6 +63,7 @@ protected:
   PartitionSnapshotRef head_;
   RefPtr<Table> table_;
   RefPtr<PartitionWriter> writer_;
+  std::mutex writer_lock_;
 };
 
 }
