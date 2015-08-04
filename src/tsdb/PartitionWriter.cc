@@ -69,11 +69,13 @@ Set<SHA1Hash> PartitionWriter::insertRecords(const Vector<RecordRef>& records) {
 
 
   ScopedPtr<sstable::SSTableWriter> writer;
+  bool snap_dirty = false;
   if (filename.empty()) {
     filename = StringUtil::format("$0.sst", Random::singleton()->hex64());
     snap->state.add_sstable_files(filename);
     writer = sstable::SSTableWriter::create(
         FileUtil::joinPaths(snap->base_path, filename), nullptr, 0);
+    snap_dirty = true;
   } else {
     writer = sstable::SSTableWriter::reopen(
         FileUtil::joinPaths(snap->base_path, filename));
@@ -94,7 +96,10 @@ Set<SHA1Hash> PartitionWriter::insertRecords(const Vector<RecordRef>& records) {
   writer->commit();
 
   snap->nrecs += record_ids.size();
-  snap->writeToDisk();
+  if (snap_dirty) {
+    snap->writeToDisk();
+  }
+
   head_->setSnapshot(snap);
 
   return record_ids;
