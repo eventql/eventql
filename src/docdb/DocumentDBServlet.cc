@@ -21,6 +21,7 @@ DocumentDBServlet::DocumentDBServlet(
 void DocumentDBServlet::handleHTTPRequest(
     stx::http::HTTPRequest* req,
     stx::http::HTTPResponse* res) {
+  logDebug("docdb", "HTTP req: $0", req->uri());
   URI uri(req->uri());
 
   /* auth */
