@@ -10,6 +10,7 @@
 #include "stx/io/outputstream.h"
 #include "stx/io/BufferedOutputStream.h"
 #include "stx/logging.h"
+#include "stx/protobuf/msg.h"
 
 using namespace stx;
 
@@ -27,6 +28,10 @@ void MasterServlet::handleHTTPRequest(
 
     if (StringUtil::endsWith(uri.path(), "/analytics/master/heads")) {
       return listHeads(uri, req, res);
+    }
+
+    if (StringUtil::endsWith(uri.path(), "/analytics/master/customer_config")) {
+      return fetchCustomerConfig(uri, req, res);
     }
 
     if (StringUtil::endsWith(uri.path(), "/analytics/master/create_customer")) {
@@ -60,6 +65,26 @@ void MasterServlet::listHeads(
 
   res->setStatus(stx::http::kStatusOK);
   res->addBody(body);
+}
+
+void MasterServlet::fetchCustomerConfig(
+    const URI& uri,
+    http::HTTPRequest* req,
+    http::HTTPResponse* res) {
+  const auto& params = uri.queryParams();
+
+  String customer;
+  if (!stx::URI::getParam(params, "customer", &customer)) {
+    res->addBody("error: missing ?customer=... parameter");
+    res->setStatus(http::kStatusBadRequest);
+    return;
+  }
+
+  auto config = cdb_->fetchCustomerConfig(customer);
+  auto body = msg::encode(config);
+
+  res->setStatus(stx::http::kStatusOK);
+  res->addBody(*body);
 }
 
 void MasterServlet::createCustomer(

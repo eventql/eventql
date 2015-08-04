@@ -233,8 +233,6 @@ int main(int argc, const char** argv) {
       cdb_dir,
       InetAddr::resolve(flags.getString("master")));
 
-  customer_dir.updateCustomerConfig(createCustomerConfig("dawanda"));
-
   HashMap<String, URI> input_feeds;
   input_feeds.emplace(
       "tracker_log.feedserver02.nue01.production.fnrd.net",

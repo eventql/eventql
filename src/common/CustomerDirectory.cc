@@ -46,25 +46,6 @@ RefPtr<CustomerConfigRef> CustomerDirectory::configFor(
   return iter->second;
 }
 
-void CustomerDirectory::updateCustomerConfig(CustomerConfig config) {
-  std::unique_lock<std::mutex> lk(mutex_);
-
-  auto db_key = StringUtil::format("cfg~$0", config.customer());
-  auto buf = msg::encode(config);
-
-  auto txn = db_->startTransaction(false);
-  txn->autoAbort();
-
-  txn->update(db_key.data(), db_key.size(), buf->data(), buf->size());
-  txn->commit();
-
-  customers_.emplace(config.customer(), new CustomerConfigRef(config));
-
-  for (const auto& cb : on_customer_change_) {
-    cb(config);
-  }
-}
-
 void CustomerDirectory::listCustomers(
     Function<void (const CustomerConfig& cfg)> fn) const {
   auto prefix = "cfg~";
@@ -231,7 +212,33 @@ void CustomerDirectory::sync() {
 
 void CustomerDirectory::syncObject(const String& obj) {
   logDebug("analyticsd", "Syncing config object '$0' from master", obj);
+
+  static const String kCustomerPrefix = "customers/";
+  if (StringUtil::beginsWith(obj, kCustomerPrefix)) {
+    syncCustomerConfig(obj.substr(kCustomerPrefix.size()));
+  }
 }
+
+void CustomerDirectory::syncCustomerConfig(const String& customer) {
+
+  iputs("get customer config for: $0", customer);
+  std::unique_lock<std::mutex> lk(mutex_);
+  //auto db_key = StringUtil::format("cfg~$0", config.customer());
+  //auto buf = msg::encode(config);
+
+  //auto txn = db_->startTransaction(false);
+  //txn->autoAbort();
+
+  //txn->update(db_key.data(), db_key.size(), buf->data(), buf->size());
+  //txn->commit();
+
+  //customers_.emplace(config.customer(), new CustomerConfigRef(config));
+
+  //for (const auto& cb : on_customer_change_) {
+  //  cb(config);
+  //}
+}
+
 
 HashMap<String, uint64_t> CustomerDirectory::fetchMasterHeads() const {
   auto uri = URI(
