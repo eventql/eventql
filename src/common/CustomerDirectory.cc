@@ -232,15 +232,20 @@ void CustomerDirectory::syncCustomerConfig(const String& customer) {
     RAISEF(kRuntimeError, "error: $0", res.body().toString());
   }
 
-  const auto& buf = res.body();
-  auto config = msg::decode<CustomerConfig>(buf);
+  commitCustomerConfig(msg::decode<CustomerConfig>(res.body()));
+}
+
+void CustomerDirectory::commitCustomerConfig(const CustomerConfig& config) {
   auto db_key = StringUtil::format("cfg~$0", config.customer());
+  auto hkey = StringUtil::format("head~customers/", config.customer());
+  auto buf = msg::encode(config);
+  auto vstr = StringUtil::toString(config.version());
 
   std::unique_lock<std::mutex> lk(mutex_);
   auto txn = db_->startTransaction(false);
   txn->autoAbort();
-
-  txn->update(db_key.data(), db_key.size(), buf.data(), buf.size());
+  txn->update(db_key.data(), db_key.size(), buf->data(), buf->size());
+  //txn->update(hkey.data(), hkey.size(), vstr.data(), vstr.size());
   txn->commit();
 
   customers_.emplace(config.customer(), new CustomerConfigRef(config));
