@@ -224,7 +224,7 @@ void ConfigDirectory::syncObject(const String& obj) {
 void ConfigDirectory::syncCustomerConfig(const String& customer) {
   auto uri = URI(
       StringUtil::format(
-          "http://$0/analytics/master/customer_config?customer=$1",
+          "http://$0/analytics/master/fetch_customer_config?customer=$1",
           master_addr_.hostAndPort(),
           URI::urlEncode(customer)));
 
@@ -245,6 +245,17 @@ void ConfigDirectory::commitCustomerConfig(const CustomerConfig& config) {
 
   std::unique_lock<std::mutex> lk(mutex_);
   auto txn = db_->startTransaction(false);
+
+  auto last_version = 0;
+  auto last_version_str = txn->get(hkey);
+  if (!last_version_str.isEmpty()) {
+    last_version = std::stoull(last_version_str.get().toString());
+  }
+
+  if (last_version >= config.version()) {
+    RAISE(kRuntimeError, "refusing to commit outdated version");
+  }
+
   txn->autoAbort();
   txn->update(db_key.data(), db_key.size(), buf->data(), buf->size());
   txn->update(hkey.data(), hkey.size(), vstr.data(), vstr.size());
