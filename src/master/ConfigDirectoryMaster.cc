@@ -95,6 +95,33 @@ void ConfigDirectoryMaster::updateCustomerConfig(CustomerConfig config) {
   heads_["customers/" + config.customer()] = head_version;
 }
 
+TableDefinition ConfigDirectoryMaster::fetchTableDefinition(
+    const String& customer_key,
+    const String& table_name) {
+  std::unique_lock<std::mutex> lk(mutex_);
+  auto cpath = FileUtil::joinPaths(db_path_, customer_key);
+  auto hpath = FileUtil::joinPaths(cpath, "tables.HEAD");
+
+  if (!FileUtil::exists(cpath) || !FileUtil::exists(hpath)) {
+    RAISEF(kNotFoundError, "customer not found: $0", customer_key);
+  }
+
+  auto head_version = FileUtil::read(hpath).toString();
+  auto tables = msg::decode<TableDefinitionList>(
+      FileUtil::read(
+          FileUtil::joinPaths(
+              cpath,
+              StringUtil::format("tables.$0", head_version))));
+
+  for (auto& tbl : tables.tables()) {
+    if (tbl.table_name() == table_name) {
+      return tbl;
+    }
+  }
+
+  RAISEF(kNotFoundError, "table not found: $0", table_name);
+}
+
 void ConfigDirectoryMaster::updateTableDefinition(const TableDefinition& td) {
   std::unique_lock<std::mutex> lk(mutex_);
   uint64_t head_version = 0;
