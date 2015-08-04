@@ -377,7 +377,8 @@ void HTTPParser::processHeader(
     }
   }
 
-  if (expect_body_ &&
+  if (mode_ == PARSE_HTTP_RESPONSE &&
+      expect_body_ &&
       key_len == strlen(kConnectionHeader) &&
       strncasecmp(key, kConnectionHeader, key_len) == 0 &&
       val_len == strlen("Close") &&
