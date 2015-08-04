@@ -7,6 +7,7 @@
  * permission is obtained.
  */
 #include "master/MasterServlet.h"
+#include "stx/logging.h"
 
 using namespace stx;
 
@@ -19,10 +20,17 @@ MasterServlet::MasterServlet(
 void MasterServlet::handleHTTPRequest(
     http::HTTPRequest* req,
     http::HTTPResponse* res) {
-  URI uri(req->uri());
+  try {
+    URI uri(req->uri());
 
-  if (StringUtil::endsWith(uri.path(), "/cdb/create_customer")) {
-    return createCustomer(uri, req, res);
+    if (StringUtil::endsWith(uri.path(), "/analytics/master/create_customer")) {
+      return createCustomer(uri, req, res);
+    }
+  } catch (const StandardException& e) {
+    logError("dxa-master", e, "error while handling HTTP request");
+    res->setStatus(stx::http::kStatusInternalServerError);
+    res->addBody(StringUtil::format("error: $0", e.what()));
+    return;
   }
 
   res->setStatus(stx::http::kStatusNotFound);
@@ -43,6 +51,7 @@ void MasterServlet::createCustomer(
   }
 
   cdb_->updateCustomerConfig(createCustomerConfig(customer));
+  res->setStatus(stx::http::kStatusCreated);
 }
 
 }

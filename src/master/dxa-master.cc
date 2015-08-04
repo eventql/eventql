@@ -79,8 +79,12 @@ int main(int argc, const char** argv) {
   }
 
   CustomerDirectoryMaster customer_dir(cdb_dir);
-  MasterServlet customer_dir_servlet(&customer_dir);
-  http_router.addRouteByPrefixMatch("/cdb", &customer_dir_servlet, &tpool);
+
+  MasterServlet master_servlet(&customer_dir);
+  http_router.addRouteByPrefixMatch(
+      "/analytics/master",
+      &master_servlet,
+      &tpool);
 
   ev.run();
   stx::logInfo("dxa-master", "Exiting...");
