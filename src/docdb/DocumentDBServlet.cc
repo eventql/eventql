@@ -6,54 +6,29 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-#include <thread>
-
 #include "DocumentDBServlet.h"
-#include "analytics/CTRCounter.h"
-#include "stx/Language.h"
-#include "stx/wallclock.h"
-#include "stx/io/fileutil.h"
-#include "stx/util/Base64.h"
-#include "stx/logging.h"
-#include "stx/http/cookies.h"
-#include "stx/protobuf/DynamicMessage.h"
-#include "stx/protobuf/MessageEncoder.h"
-#include "stx/csv/CSVInputStream.h"
-#include "stx/csv/BinaryCSVInputStream.h"
-#include "analytics/TrafficSegment.h"
-#include "analytics/AnalyticsQuery.h"
-#include "analytics/AnalyticsQueryResult.h"
-#include "analytics/AnalyticsQueryReducer.h"
-#include "analytics/Report.h"
-#include "analytics/StaticTableBuilder.h"
-#include "analytics/AnalyticsQueryParams.pb.h"
-#include "analytics/PipelineInfo.h"
-#include "common/TableDefinition.h"
-#include "chartsql/runtime/ASCIITableFormat.h"
-#include "chartsql/runtime/JSONSSEStreamFormat.h"
-#include "tsdb/TimeWindowPartitioner.h"
 
 using namespace stx;
 
 namespace cm {
 
 DocumentDBServlet::DocumentDBServlet(
-    DocumentDB* docdb) :
-    dodocumentdb_(docdb) {}
+    DocumentDB* docdb,
+    AnalyticsAuth* auth) :
+    docdb_(docdb),
+    auth_(auth) {}
 
 void DocumentDBServlet::handleHTTPRequest(
     stx::http::HTTPRequest* req,
-    stx::http::HTTPResponse* res) override;
-  URI uri(req.uri());
+    stx::http::HTTPResponse* res) {
+  URI uri(req->uri());
 
   /* auth */
-  auto session_opt = auth_->authenticateRequest(req_stream->request());
+  auto session_opt = auth_->authenticateRequest(*req);
   if (session_opt.isEmpty()) {
-    req_stream->readBody();
-    res.addHeader("WWW-Authenticate", "Token");
-    res.setStatus(http::kStatusUnauthorized);
-    res.addBody("authorization required");
-    res_stream->writeResponse(res);
+    res->addHeader("WWW-Authenticate", "Token");
+    res->setStatus(http::kStatusUnauthorized);
+    res->addBody("authorization required");
     return;
   }
 
@@ -187,7 +162,7 @@ void DocumentDBServlet::listDocuments(
   json.beginArray();
 
   size_t i = 0;
-  documentdb_->listDocuments(
+  docdb_->listDocuments(
       session.customer(),
       session.userid(),
       [&i, &json, &session] (const Document& doc) -> bool {
@@ -227,7 +202,7 @@ void DocumentDBServlet::fetchSQLQuery(
     const http::HTTPRequest* req,
     http::HTTPResponse* res) {
   Document doc;
-  if (documentdb_->fetchDocument(session.customer(), session.userid(), uuid, &doc)) {
+  if (docdb_->fetchDocument(session.customer(), session.userid(), uuid, &doc)) {
     Buffer buf;
     renderSQLQuery(doc, &buf);
     res->setStatus(http::kStatusOK);
@@ -256,7 +231,7 @@ void DocumentDBServlet::createSQLQuery(
 
   setDefaultDocumentACLs(&doc, session.userid());
 
-  documentdb_->createDocument(session.customer(), doc);
+  docdb_->createDocument(session.customer(), doc);
 
   Buffer buf;
   renderSQLQuery(doc, &buf);
@@ -279,7 +254,7 @@ void DocumentDBServlet::updateSQLQuery(
     if (p.first == "content") {
       if (!p.second.empty()) {
         tx.emplace_back([this, &session, &uuid, p] () {
-          documentdb_->updateDocumentContent(
+          docdb_->updateDocumentContent(
               session.customer(),
               session.userid(),
               uuid,
@@ -293,7 +268,7 @@ void DocumentDBServlet::updateSQLQuery(
     if (p.first == "name") {
       if (!p.second.empty()) {
         tx.emplace_back([this, &session, &uuid, p] () {
-          documentdb_->updateDocumentName(
+          docdb_->updateDocumentName(
               session.customer(),
               session.userid(),
               uuid,

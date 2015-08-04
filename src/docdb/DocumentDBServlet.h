@@ -7,21 +7,12 @@
  * permission is obtained.
  */
 #pragma once
-#include "stx/VFS.h"
 #include "stx/http/httpservice.h"
-#include "stx/http/HTTPSSEStream.h"
 #include "stx/json/json.h"
-#include "stx/web/SecureCookie.h"
-#include "dproc/DispatchService.h"
-#include "analytics/AnalyticsApp.h"
-#include "analytics/ReportParams.pb.h"
-#include "analytics/EventIngress.h"
-#include "analytics/docs/DocumentDB.h"
-#include "analytics/AnalyticsSession.pb.h"
-#include "chartsql/runtime/runtime.h"
+#include "stx/random.h"
 #include "common/AnalyticsAuth.h"
 #include "common/ConfigDirectory.h"
-#include "tsdb/TSDBService.h"
+#include "docdb/DocumentDB.h"
 
 using namespace stx;
 
@@ -32,7 +23,7 @@ struct AnalyticsQuery;
 class DocumentDBServlet : public stx::http::HTTPService {
 public:
 
-  DocumentDBServlet(DocumentDB* docdb);
+  DocumentDBServlet(DocumentDB* docdb, AnalyticsAuth* auth);
 
   void handleHTTPRequest(
       stx::http::HTTPRequest* req,
@@ -94,6 +85,7 @@ protected:
   void renderSQLQuery(const Document& doc, Buffer* buf);
 
   DocumentDB* docdb_;
+  AnalyticsAuth* auth_;
 };
 
 }
