@@ -206,8 +206,31 @@ void CustomerDirectory::onTableDefinitionChange(
 void CustomerDirectory::sync() {
   auto master_heads = fetchMasterHeads();
 
-  for (const auto& head : master_heads) {
+  Set<String> needs_update;
+  {
+    auto txn = db_->startTransaction(true);
+    txn->autoAbort();
+
+    for (const auto& head : master_heads) {
+      auto db_key = StringUtil::format("head~$0", head.first);
+      auto vstr = StringUtil::toString(head.second);
+
+      auto lastver = txn->get(db_key);
+      if (lastver.isEmpty() || lastver.get().toString() != vstr) {
+        needs_update.emplace(head.first);
+      }
+    }
+
+    txn->abort();
   }
+
+  for (const auto& obj : needs_update) {
+    syncObject(obj);
+  }
+}
+
+void CustomerDirectory::syncObject(const String& obj) {
+  logDebug("analyticsd", "Syncing config object '$0' from master", obj);
 }
 
 HashMap<String, uint64_t> CustomerDirectory::fetchMasterHeads() const {
