@@ -70,30 +70,12 @@ int main(int argc, const char** argv) {
   //    "<path>");
 
   flags.defineFlag(
-      "cdb",
-      cli::FlagParser::T_STRING,
-      true,
-      NULL,
-      NULL,
-      "data dir",
-      "<path>");
-
-  flags.defineFlag(
       "datadir",
       cli::FlagParser::T_STRING,
       true,
       NULL,
       NULL,
       "data dir",
-      "<path>");
-
-  flags.defineFlag(
-      "index",
-      cli::FlagParser::T_STRING,
-      false,
-      NULL,
-      NULL,
-      "index directory",
       "<path>");
 
   flags.defineFlag(
