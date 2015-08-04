@@ -75,13 +75,14 @@ int main(int argc, const char** argv) {
       "master/customers");
 
   if (!FileUtil::exists(cdb_dir)) {
-    FileUtil::mkdir(cdb_dir);
+    FileUtil::mkdir_p(cdb_dir);
   }
 
   CustomerDirectoryMaster customer_dir(cdb_dir);
   CustomerDirectoryServlet customer_dir_servlet(&customer_dir);
   http_router.addRouteByPrefixMatch("/cdb", &customer_dir_servlet, &tpool);
 
+  ev.run();
   stx::logInfo("dxa-master", "Exiting...");
 
   exit(0);
