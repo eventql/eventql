@@ -30,6 +30,11 @@ protected:
       http::HTTPRequest* request,
       http::HTTPResponse* response);
 
+  void fetchCustomerConfig(
+      const URI& uri,
+      http::HTTPRequest* req,
+      http::HTTPResponse* res);
+
   void createCustomer(
       const URI& uri,
       http::HTTPRequest* request,

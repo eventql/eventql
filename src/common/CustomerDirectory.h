@@ -44,7 +44,9 @@ protected:
 
   void loadCustomerConfigs();
   HashMap<String, uint64_t> fetchMasterHeads() const;
+
   void syncObject(const String& obj);
+  void syncCustomerConfig(const String& customer);
 
   InetAddr master_addr_;
   RefPtr<mdb::MDB> db_;

@@ -21,6 +21,7 @@ public:
 
   CustomerDirectoryMaster(const String& path);
 
+  CustomerConfig fetchCustomerConfig(const String& customer_key) const;
   void updateCustomerConfig(CustomerConfig config);
 
   Vector<Pair<String, uint64_t>> heads() const;
