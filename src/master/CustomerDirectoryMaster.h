@@ -24,8 +24,12 @@ public:
   void updateCustomerConfig(CustomerConfig config);
 
 protected:
+
+  void loadHeads();
+
   mutable std::mutex mutex_;
   String db_path_;
+  HashMap<String, uint64_t> heads_;
 };
 
 } // namespace cm
