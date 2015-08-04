@@ -24,6 +24,25 @@ CustomerDirectoryMaster::CustomerDirectoryMaster(
   loadHeads();
 }
 
+CustomerConfig CustomerDirectoryMaster::fetchCustomerConfig(
+    const String& customer_key) const {
+  std::unique_lock<std::mutex> lk(mutex_);
+
+  auto cpath = FileUtil::joinPaths(db_path_, customer_key);
+  auto hpath = FileUtil::joinPaths(cpath, "config.HEAD");
+
+  if (!FileUtil::exists(hpath)) {
+    RAISEF(kNotFoundError, "customer not found: $0", customer_key);
+  }
+
+  auto head_version = std::stoull(FileUtil::read(hpath).toString());
+  auto vpath = FileUtil::joinPaths(
+      cpath,
+      StringUtil::format("config.$0", head_version));
+
+  return msg::decode<CustomerConfig>(FileUtil::read(vpath));
+}
+
 void CustomerDirectoryMaster::updateCustomerConfig(CustomerConfig config) {
   std::unique_lock<std::mutex> lk(mutex_);
   uint64_t head_version = 0;
