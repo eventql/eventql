@@ -7,6 +7,8 @@
  * permission is obtained.
  */
 #include "master/MasterServlet.h"
+#include "stx/io/outputstream.h"
+#include "stx/io/BufferedOutputStream.h"
 #include "stx/logging.h"
 
 using namespace stx;
@@ -23,6 +25,10 @@ void MasterServlet::handleHTTPRequest(
   try {
     URI uri(req->uri());
 
+    if (StringUtil::endsWith(uri.path(), "/analytics/master/heads")) {
+      return listHeads(uri, req, res);
+    }
+
     if (StringUtil::endsWith(uri.path(), "/analytics/master/create_customer")) {
       return createCustomer(uri, req, res);
     }
@@ -37,10 +43,33 @@ void MasterServlet::handleHTTPRequest(
   res->addBody("not found");
 }
 
+void MasterServlet::listHeads(
+    const URI& uri,
+    http::HTTPRequest* req,
+    http::HTTPResponse* res) {
+  auto heads = cdb_->heads();
+
+  Buffer body;
+  BufferedOutputStream os(BufferOutputStream::fromBuffer(&body));
+
+  for (const auto& h : heads) {
+    os.appendString(StringUtil::format("$0=$1\n", h.first, h.second));
+  }
+
+  os.flush();
+
+  res->setStatus(stx::http::kStatusOK);
+  res->addBody(body);
+}
+
 void MasterServlet::createCustomer(
     const URI& uri,
     http::HTTPRequest* req,
     http::HTTPResponse* res) {
+  if (req->method() != http::HTTPMessage::M_POST) {
+    RAISE(kIllegalArgumentError, "expected HTTP POST request");
+  }
+
   const auto& params = uri.queryParams();
 
   String customer;
