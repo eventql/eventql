@@ -16,7 +16,7 @@ using namespace stx;
 namespace cm {
 
 SessionProcessor::SessionProcessor(
-    CustomerDirectory* customer_dir,
+    ConfigDirectory* customer_dir,
     const String& spool_path) :
     customer_dir_(customer_dir),
     spool_path_(spool_path),

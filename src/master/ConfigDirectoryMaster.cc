@@ -6,7 +6,7 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-#include <master/CustomerDirectoryMaster.h>
+#include <master/ConfigDirectoryMaster.h>
 #include <stx/io/file.h>
 #include <stx/io/fileutil.h>
 #include <stx/random.h>
@@ -18,13 +18,13 @@ using namespace stx;
 
 namespace cm {
 
-CustomerDirectoryMaster::CustomerDirectoryMaster(
+ConfigDirectoryMaster::ConfigDirectoryMaster(
     const String& path) :
     db_path_(path) {
   loadHeads();
 }
 
-CustomerConfig CustomerDirectoryMaster::fetchCustomerConfig(
+CustomerConfig ConfigDirectoryMaster::fetchCustomerConfig(
     const String& customer_key) const {
   std::unique_lock<std::mutex> lk(mutex_);
 
@@ -43,7 +43,7 @@ CustomerConfig CustomerDirectoryMaster::fetchCustomerConfig(
   return msg::decode<CustomerConfig>(FileUtil::read(vpath));
 }
 
-void CustomerDirectoryMaster::updateCustomerConfig(CustomerConfig config) {
+void ConfigDirectoryMaster::updateCustomerConfig(CustomerConfig config) {
   std::unique_lock<std::mutex> lk(mutex_);
   uint64_t head_version = 0;
 
@@ -94,7 +94,7 @@ void CustomerDirectoryMaster::updateCustomerConfig(CustomerConfig config) {
   FileUtil::mv(htmppath, hpath);
 }
 
-Vector<Pair<String, uint64_t>> CustomerDirectoryMaster::heads() const {
+Vector<Pair<String, uint64_t>> ConfigDirectoryMaster::heads() const {
   std::unique_lock<std::mutex> lk(mutex_);
   Vector<Pair<String, uint64_t>> heads;
 
@@ -105,7 +105,7 @@ Vector<Pair<String, uint64_t>> CustomerDirectoryMaster::heads() const {
   return heads;
 }
 
-void CustomerDirectoryMaster::loadHeads() {
+void ConfigDirectoryMaster::loadHeads() {
   FileUtil::ls(db_path_, [this] (const String& customer) -> bool {
     auto hpath = FileUtil::joinPaths(db_path_, customer + "/config.HEAD");
     if (FileUtil::exists(hpath)) {

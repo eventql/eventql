@@ -10,7 +10,7 @@ add_executable(dxa-master
     $<TARGET_OBJECTS:stx-protobuf>
     $<TARGET_OBJECTS:customerdirectory>
 #    ${PROTO_SRCS}
-    CustomerDirectoryMaster.cc
+    ConfigDirectoryMaster.cc
     MasterServlet.cc
     dxa-master.cc)
 

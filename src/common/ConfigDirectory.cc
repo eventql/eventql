@@ -11,13 +11,13 @@
 #include <stx/uri.h>
 #include <stx/protobuf/msg.h>
 #include <stx/csv/CSVInputStream.h>
-#include <common/CustomerDirectory.h>
+#include <common/ConfigDirectory.h>
 
 using namespace stx;
 
 namespace cm {
 
-CustomerDirectory::CustomerDirectory(
+ConfigDirectory::ConfigDirectory(
     const String& path,
     const InetAddr master_addr) :
     master_addr_(master_addr),
@@ -36,7 +36,7 @@ CustomerDirectory::CustomerDirectory(
   sync();
 }
 
-RefPtr<CustomerConfigRef> CustomerDirectory::configFor(
+RefPtr<CustomerConfigRef> ConfigDirectory::configFor(
     const String& customer_key) const {
   std::unique_lock<std::mutex> lk(mutex_);
 
@@ -48,7 +48,7 @@ RefPtr<CustomerConfigRef> CustomerDirectory::configFor(
   return iter->second;
 }
 
-void CustomerDirectory::listCustomers(
+void ConfigDirectory::listCustomers(
     Function<void (const CustomerConfig& cfg)> fn) const {
   auto prefix = "cfg~";
 
@@ -76,13 +76,13 @@ void CustomerDirectory::listCustomers(
   cursor->close();
 }
 
-void CustomerDirectory::onCustomerConfigChange(
+void ConfigDirectory::onCustomerConfigChange(
     Function<void (const CustomerConfig& cfg)> fn) {
   std::unique_lock<std::mutex> lk(mutex_);
   on_customer_change_.emplace_back(fn);
 }
 
-void CustomerDirectory::addTableDefinition(const TableDefinition& table) {
+void ConfigDirectory::addTableDefinition(const TableDefinition& table) {
   std::unique_lock<std::mutex> lk(mutex_);
 
   if (!StringUtil::isShellSafe(table.table_name())) {
@@ -117,7 +117,7 @@ void CustomerDirectory::addTableDefinition(const TableDefinition& table) {
   }
 }
 
-void CustomerDirectory::updateTableDefinition(const TableDefinition& table) {
+void ConfigDirectory::updateTableDefinition(const TableDefinition& table) {
   std::unique_lock<std::mutex> lk(mutex_);
 
   if (!StringUtil::isShellSafe(table.table_name())) {
@@ -152,7 +152,7 @@ void CustomerDirectory::updateTableDefinition(const TableDefinition& table) {
   }
 }
 
-void CustomerDirectory::listTableDefinitions(
+void ConfigDirectory::listTableDefinitions(
     Function<void (const TableDefinition& table)> fn) const {
   auto prefix = "tbl~";
 
@@ -180,13 +180,13 @@ void CustomerDirectory::listTableDefinitions(
   cursor->close();
 }
 
-void CustomerDirectory::onTableDefinitionChange(
+void ConfigDirectory::onTableDefinitionChange(
     Function<void (const TableDefinition& tbl)> fn) {
   std::unique_lock<std::mutex> lk(mutex_);
   on_table_change_.emplace_back(fn);
 }
 
-void CustomerDirectory::sync() {
+void ConfigDirectory::sync() {
   auto master_heads = fetchMasterHeads();
 
   Set<String> needs_update;
@@ -212,7 +212,7 @@ void CustomerDirectory::sync() {
   }
 }
 
-void CustomerDirectory::syncObject(const String& obj) {
+void ConfigDirectory::syncObject(const String& obj) {
   logDebug("analyticsd", "Syncing config object '$0' from master", obj);
 
   static const String kCustomerPrefix = "customers/";
@@ -221,7 +221,7 @@ void CustomerDirectory::syncObject(const String& obj) {
   }
 }
 
-void CustomerDirectory::syncCustomerConfig(const String& customer) {
+void ConfigDirectory::syncCustomerConfig(const String& customer) {
   auto uri = URI(
       StringUtil::format(
           "http://$0/analytics/master/customer_config?customer=$1",
@@ -237,7 +237,7 @@ void CustomerDirectory::syncCustomerConfig(const String& customer) {
   commitCustomerConfig(msg::decode<CustomerConfig>(res.body()));
 }
 
-void CustomerDirectory::commitCustomerConfig(const CustomerConfig& config) {
+void ConfigDirectory::commitCustomerConfig(const CustomerConfig& config) {
   auto db_key = StringUtil::format("cfg~$0", config.customer());
   auto hkey = StringUtil::format("head~customers/$0", config.customer());
   auto buf = msg::encode(config);
@@ -257,7 +257,7 @@ void CustomerDirectory::commitCustomerConfig(const CustomerConfig& config) {
   }
 }
 
-HashMap<String, uint64_t> CustomerDirectory::fetchMasterHeads() const {
+HashMap<String, uint64_t> ConfigDirectory::fetchMasterHeads() const {
   auto uri = URI(
       StringUtil::format(
           "http://$0/analytics/master/heads",
@@ -284,7 +284,7 @@ HashMap<String, uint64_t> CustomerDirectory::fetchMasterHeads() const {
   return heads;
 }
 
-void CustomerDirectory::startWatcher() {
+void ConfigDirectory::startWatcher() {
   watcher_running_ = true;
 
   watcher_thread_ = std::thread([this] {
@@ -300,7 +300,7 @@ void CustomerDirectory::startWatcher() {
   });
 }
 
-void CustomerDirectory::stopWatcher() {
+void ConfigDirectory::stopWatcher() {
   if (!watcher_running_) {
     return;
   }

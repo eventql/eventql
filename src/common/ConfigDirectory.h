@@ -19,10 +19,10 @@ using namespace stx;
 
 namespace cm {
 
-class CustomerDirectory {
+class ConfigDirectory {
 public:
 
-  CustomerDirectory(
+  ConfigDirectory(
       const String& path,
       InetAddr HashMap);
 

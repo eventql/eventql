@@ -41,7 +41,7 @@
 #include "inventory/DocIndex.h"
 #include <inventory/ItemRef.h>
 #include <fnord-fts/Analyzer.h>
-#include "common/CustomerDirectory.h"
+#include "common/ConfigDirectory.h"
 #include "common/SessionSchema.h"
 #include "common.h"
 
@@ -211,7 +211,7 @@ int main(int argc, const char** argv) {
     FileUtil::mkdir(cdb_dir);
   }
 
-  CustomerDirectory customer_dir(
+  ConfigDirectory customer_dir(
       cdb_dir,
       InetAddr::resolve(flags.getString("master")));
 
