@@ -134,22 +134,10 @@ void ConfigDirectory::updateTableDefinition(const TableDefinition& table) {
         table.table_name());
   }
 
-  auto db_key = StringUtil::format(
-      "tbl~$0~$1",
-      table.customer(),
-      table.table_name());
-
   auto buf = msg::encode(table);
 
-  auto txn = db_->startTransaction(false);
-  txn->autoAbort();
+  RAISE(kNotYetImplementedError);
 
-  txn->update(db_key.data(), db_key.size(), buf->data(), buf->size());
-  txn->commit();
-
-  for (const auto& cb : on_table_change_) {
-    cb(table);
-  }
 }
 
 void ConfigDirectory::listTableDefinitions(
@@ -219,6 +207,11 @@ void ConfigDirectory::syncObject(const String& obj) {
   if (StringUtil::beginsWith(obj, kCustomerPrefix)) {
     syncCustomerConfig(obj.substr(kCustomerPrefix.size()));
   }
+
+  static const String kTablesPrefix = "tables/";
+  if (StringUtil::beginsWith(obj, kTablesPrefix)) {
+    syncTableDefinitions(obj.substr(kTablesPrefix.size()));
+  }
 }
 
 void ConfigDirectory::syncCustomerConfig(const String& customer) {
@@ -245,6 +238,7 @@ void ConfigDirectory::commitCustomerConfig(const CustomerConfig& config) {
 
   std::unique_lock<std::mutex> lk(mutex_);
   auto txn = db_->startTransaction(false);
+  txn->autoAbort();
 
   auto last_version = 0;
   auto last_version_str = txn->get(hkey);
@@ -253,10 +247,10 @@ void ConfigDirectory::commitCustomerConfig(const CustomerConfig& config) {
   }
 
   if (last_version >= config.version()) {
-    RAISE(kRuntimeError, "refusing to commit outdated version");
+    logDebug("cdb", "refusing to commit outdated version");
+    return;
   }
 
-  txn->autoAbort();
   txn->update(db_key.data(), db_key.size(), buf->data(), buf->size());
   txn->update(hkey.data(), hkey.size(), vstr.data(), vstr.size());
   txn->commit();
@@ -265,6 +259,65 @@ void ConfigDirectory::commitCustomerConfig(const CustomerConfig& config) {
 
   for (const auto& cb : on_customer_change_) {
     cb(config);
+  }
+}
+
+void ConfigDirectory::syncTableDefinitions(const String& customer) {
+  auto uri = URI(
+      StringUtil::format(
+          "http://$0/analytics/master/fetch_table_definitions?customer=$1",
+          master_addr_.hostAndPort(),
+          URI::urlEncode(customer)));
+
+  http::HTTPClient http;
+  auto res = http.executeRequest(http::HTTPRequest::mkGet(uri));
+  if (res.statusCode() != 200) {
+    RAISEF(kRuntimeError, "error: $0", res.body().toString());
+  }
+
+  auto tables = msg::decode<TableDefinitionList>(res.body());
+  for (const auto& tbl : tables.tables()) {
+    commitTableDefinition(tbl);
+  }
+
+  auto hkey = StringUtil::format("head~tables/$0", customer);
+  auto vstr = StringUtil::toString(tables.version());
+
+  std::unique_lock<std::mutex> lk(mutex_);
+  auto txn = db_->startTransaction(false);
+  txn->autoAbort();
+  txn->update(hkey.data(), hkey.size(), vstr.data(), vstr.size());
+  txn->commit();
+}
+
+void ConfigDirectory::commitTableDefinition(const TableDefinition& tbl) {
+  auto db_key = StringUtil::format(
+      "tbl~$0~$1",
+      tbl.customer(),
+      tbl.table_name());
+
+  auto buf = msg::encode(tbl);
+
+  std::unique_lock<std::mutex> lk(mutex_);
+  auto txn = db_->startTransaction(false);
+  txn->autoAbort();
+
+  auto last_version = 0;
+  auto last_td = txn->get(db_key);
+  if (!last_td.isEmpty()) {
+    last_version = msg::decode<TableDefinition>(last_td.get()).version();
+  }
+
+  if (last_version >= tbl.version()) {
+    logDebug("cdb", "refusing to commit outdated version");
+    return;
+  }
+
+  txn->update(db_key.data(), db_key.size(), buf->data(), buf->size());
+  txn->commit();
+
+  for (const auto& cb : on_table_change_) {
+    cb(tbl);
   }
 }
 

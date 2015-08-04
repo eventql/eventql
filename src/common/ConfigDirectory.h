@@ -52,6 +52,9 @@ protected:
   void syncCustomerConfig(const String& customer);
   void commitCustomerConfig(const CustomerConfig& config);
 
+  void syncTableDefinitions(const String& customer);
+  void commitTableDefinition(const TableDefinition& tbl);
+
   InetAddr master_addr_;
   RefPtr<mdb::MDB> db_;
   mutable std::mutex mutex_;
