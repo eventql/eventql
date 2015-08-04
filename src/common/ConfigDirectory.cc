@@ -97,9 +97,19 @@ void ConfigDirectory::updateTableDefinition(const TableDefinition& table) {
         table.table_name());
   }
 
-  auto buf = msg::encode(table);
+  auto body = msg::encode(table);
+  auto uri = URI(
+      StringUtil::format(
+          "http://$0/analytics/master/update_table_definition",
+          master_addr_.hostAndPort()));
 
-  RAISE(kNotYetImplementedError);
+  http::HTTPClient http;
+  auto res = http.executeRequest(http::HTTPRequest::mkPost(uri, *body));
+  if (res.statusCode() != 201) {
+    RAISEF(kRuntimeError, "error: $0", res.body().toString());
+  }
+
+  commitTableDefinition(msg::decode<TableDefinition>(res.body()));
 }
 
 void ConfigDirectory::listTableDefinitions(
