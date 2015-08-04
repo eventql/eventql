@@ -6,17 +6,17 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-#include "master/CustomerDirectoryServlet.h"
+#include "master/MasterServlet.h"
 
 using namespace stx;
 
 namespace cm {
 
-CustomerDirectoryServlet::CustomerDirectoryServlet(
+MasterServlet::MasterServlet(
     CustomerDirectoryMaster* cdb) :
     cdb_(cdb) {}
 
-void CustomerDirectoryServlet::handleHTTPRequest(
+void MasterServlet::handleHTTPRequest(
     http::HTTPRequest* req,
     http::HTTPResponse* res) {
   URI uri(req->uri());
@@ -29,7 +29,7 @@ void CustomerDirectoryServlet::handleHTTPRequest(
   res->addBody("not found");
 }
 
-void CustomerDirectoryServlet::createCustomer(
+void MasterServlet::createCustomer(
     const URI& uri,
     http::HTTPRequest* req,
     http::HTTPResponse* res) {

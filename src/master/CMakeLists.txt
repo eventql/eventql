@@ -11,7 +11,7 @@ add_executable(dxa-master
     $<TARGET_OBJECTS:customerdirectory>
 #    ${PROTO_SRCS}
     CustomerDirectoryMaster.cc
-    CustomerDirectoryServlet.cc
+    MasterServlet.cc
     dxa-master.cc)
 
 target_link_libraries(dxa-master
