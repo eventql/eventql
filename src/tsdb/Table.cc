@@ -34,11 +34,6 @@ Duration Table::partitionSize() const {
   return 4 * kMicrosPerHour;
 }
 
-Duration Table::compactionInterval() const {
-  std::unique_lock<std::mutex> lk(mutex_);
-  return config_.config().compaction_interval();
-}
-
 size_t Table::sstableSize() const {
   std::unique_lock<std::mutex> lk(mutex_);
   return config_.config().sstable_size();

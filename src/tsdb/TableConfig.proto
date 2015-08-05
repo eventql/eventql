@@ -55,11 +55,6 @@ message TableConfig {
    */
   required TableStorage storage = 3;
 
-  /**
-   * The partition size in microseconds (only applicable for time partitioned
-   * tables)
-   */
-  //optional uint64 partition_size = 4;
 
   /**
    * The maximum sstable size in bytes
@@ -67,13 +62,17 @@ message TableConfig {
   optional uint64 sstable_size = 5 [default = 536870912];
 
   /**
-   * The compaction interval in microseconds
-   */
-  optional uint64 compaction_interval = 6;
-
-  /**
    * The number of shards for this table
    */
   optional uint64 num_shards = 7;
+
+};
+
+message TimeseriesPartitionerConfig {
+
+  /**
+   * The partition size in microseconds
+   */
+  //optional uint64 partition_size = 4;
 
 };

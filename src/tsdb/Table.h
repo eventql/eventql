@@ -29,8 +29,6 @@ public:
 
   Duration partitionSize() const;
 
-  Duration compactionInterval() const;
-
   size_t sstableSize() const;
 
   RefPtr<msg::MessageSchema> schema() const;
