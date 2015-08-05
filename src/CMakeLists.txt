@@ -5,35 +5,35 @@
 # the terms of the GNU General Public License v3.0. You should have received a
 # copy of the GNU General Public License along with this program. If not, see
 # <http://www.gnu.org/licenses/>.
-file(GLOB PROTO_FILES *.proto)
+file(GLOB PROTO_FILES tsdb/*.proto)
 PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS ${PROTO_FILES})
 
 add_library(tsdb-client OBJECT
-    TSDBClient.cc
-    TimeWindowPartitioner.cc
+    tsdb/TSDBClient.cc
+    tsdb/TimeWindowPartitioner.cc
     ${PROTO_SRCS})
 
 add_library(tsdb-server OBJECT
-    TSDBClient.cc
-    TimeWindowPartitioner.cc
-    CSTableIndex.cc
-    SQLEngine.cc
-    TSDBService.cc
-    TSDBServlet.cc
-    TSDBTableProvider.cc
-    TSDBTableRef.cc
-    RecordSet.cc
-    Partition.cc
-    PartitionMap.cc
-    PartitionReader.cc
-    PartitionWriter.cc
-    PartitionSnapshot.cc
-    PartitionReplication.cc
-    LazyPartition.cc
-    Table.cc
-    ReplicationWorker.cc
-    ReplicationScheme.cc
-    ReplicationState.cc
+    tsdb/TSDBClient.cc
+    tsdb/TimeWindowPartitioner.cc
+    tsdb/CSTableIndex.cc
+    tsdb/SQLEngine.cc
+    tsdb/TSDBService.cc
+    tsdb/TSDBServlet.cc
+    tsdb/TSDBTableProvider.cc
+    tsdb/TSDBTableRef.cc
+    tsdb/RecordSet.cc
+    tsdb/Partition.cc
+    tsdb/PartitionMap.cc
+    tsdb/PartitionReader.cc
+    tsdb/PartitionWriter.cc
+    tsdb/PartitionSnapshot.cc
+    tsdb/PartitionReplication.cc
+    tsdb/LazyPartition.cc
+    tsdb/Table.cc
+    tsdb/ReplicationWorker.cc
+    tsdb/ReplicationScheme.cc
+    tsdb/ReplicationState.cc
     ${PROTO_SRCS})
 
 add_executable(test-recordset
@@ -48,7 +48,7 @@ add_executable(test-recordset
     $<TARGET_OBJECTS:sstable>
     $<TARGET_OBJECTS:dproc>
     $<TARGET_OBJECTS:chartsql-lib>
-    RecordSet_test.cc)
+    tsdb/RecordSet_test.cc)
 
 target_link_libraries(test-recordset ${FNORD_LIBS})
 
@@ -64,7 +64,7 @@ add_executable(test-tsdb-timewindowpartitioner
     $<TARGET_OBJECTS:sstable>
     $<TARGET_OBJECTS:dproc>
     $<TARGET_OBJECTS:chartsql-lib>
-    TimeWindowPartitioner_test.cc)
+    tsdb/TimeWindowPartitioner_test.cc)
 
 target_link_libraries(test-tsdb-timewindowpartitioner ${CMAKE_THREAD_LIBS_INIT} ${FNORD_LIBS})
 
@@ -80,7 +80,7 @@ add_executable(tsdbd
     $<TARGET_OBJECTS:sstable>
     $<TARGET_OBJECTS:dproc>
     $<TARGET_OBJECTS:chartsql-lib>
-    tsdbd.cc)
+    tsdb/tsdbd.cc)
 
 target_link_libraries(tsdbd ${FNORD_LIBS})
 

@@ -59,7 +59,7 @@ void PartitionMap::configureTable(const TableDefinition& table) {
       stream_ns_key,
       new Table(
           table,
-          msg::MessageSchema::decode(table.schema())));
+          msg::MessageSchema::decode(table.config().schema())));
 }
 
 void PartitionMap::open() {

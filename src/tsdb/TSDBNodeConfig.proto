@@ -8,7 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 package tsdb;
-import "TableConfig.proto";
+import "tsdb/TableConfig.proto";
 
 message TSDBNodeConfig {
 

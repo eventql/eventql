@@ -31,17 +31,17 @@ String Table::tsdbNamespace() const {
 
 Duration Table::partitionSize() const {
   std::unique_lock<std::mutex> lk(mutex_);
-  return config_.partition_size();
+  return config_.config().partition_size();
 }
 
 Duration Table::compactionInterval() const {
   std::unique_lock<std::mutex> lk(mutex_);
-  return config_.compaction_interval();
+  return config_.config().compaction_interval();
 }
 
 size_t Table::sstableSize() const {
   std::unique_lock<std::mutex> lk(mutex_);
-  return config_.sstable_size();
+  return config_.config().sstable_size();
 }
 
 RefPtr<msg::MessageSchema> Table::schema() const {

@@ -12,4 +12,4 @@ set(TSDB_INCLUDE ${MODULE_INCLUDE} PARENT_SCOPE)
 
 # DEPENDENCIES
 find_package(Threads)
-add_subdirectory(src/tsdb)
+add_subdirectory(src)
