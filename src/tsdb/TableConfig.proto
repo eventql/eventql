@@ -9,6 +9,18 @@
  */
 package tsdb;
 
+enum TablePartitioner {
+  TBL_TIMESERIES = 0;
+  TBL_FIXED = 1;
+};
+
+enum TableStorage {
+  TBL_LOG_PROTOBUF = 0;
+  TBL_LOG_PLAINTEXT = 1;
+  TBL_CONST_CSTABLE = 2;
+  //TBL_BTREE_PROTOBUF = 3;
+};
+
 message TableConfig {
 
   /**
@@ -28,7 +40,18 @@ message TableConfig {
   optional string table_name = 1;
 
   /**
-   * The partition size in microseconds
+   * The partitioner for this table
+   */
+  optional TablePartitioner partitioner = 9;
+
+  /**
+   * What kind of data is stored in this table?
+   */
+  optional TableStorage storage = 10;
+
+  /**
+   * The partition size in microseconds (only applicable for time partitioned
+   * tables)
    */
   optional uint64 partition_size = 8;
 
@@ -41,5 +64,10 @@ message TableConfig {
    * The compaction interval in microseconds
    */
   optional uint64 compaction_interval = 5;
+
+  /**
+   * The number of shards for this table
+   */
+  optional uint64 num_shards = 11;
 
 };
