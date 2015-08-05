@@ -9,6 +9,11 @@ add_executable(dxa-master
     $<TARGET_OBJECTS:stx-rpc>
     $<TARGET_OBJECTS:stx-protobuf>
     $<TARGET_OBJECTS:customerdirectory>
+    $<TARGET_OBJECTS:tsdb-server>
+    $<TARGET_OBJECTS:libcstable>
+    $<TARGET_OBJECTS:sstable>
+    $<TARGET_OBJECTS:chartsql-lib>
+    $<TARGET_OBJECTS:fnord-chart>
 #    ${PROTO_SRCS}
     ConfigDirectoryMaster.cc
     MasterServlet.cc
