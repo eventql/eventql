@@ -42,6 +42,12 @@ public:
       const SHA1Hash& record_id,
       const Buffer& record);
 
+  void updatePartition(
+      const String& tsdb_namespace,
+      const String& stream_key,
+      const SHA1Hash& partition_key,
+      const RefPtr<VFSFile> data);
+
   void fetchPartition(
       const String& tsdb_namespace,
       const String& stream_key,
@@ -66,6 +72,14 @@ public:
       const String& tsdb_namespace,
       const String& table_key,
       const SHA1Hash& partition_key);
+
+  Option<RefPtr<msg::MessageSchema>> tableSchema(
+      const String& tsdb_namespace,
+      const String& table_key);
+
+  Option<TableDefinition> tableConfig(
+      const String& tsdb_namespace,
+      const String& table_key);
 
 protected:
   PartitionMap* pmap_;

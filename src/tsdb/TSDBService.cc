@@ -130,6 +130,34 @@ Option<PartitionInfo> TSDBService::partitionInfo(
   }
 }
 
+Option<RefPtr<msg::MessageSchema>> TSDBService::tableSchema(
+    const String& tsdb_namespace,
+    const String& table_key) {
+  auto table = pmap_->findTable(
+      tsdb_namespace,
+      table_key);
+
+  if (table.isEmpty()) {
+    return None<RefPtr<msg::MessageSchema>>();
+  } else {
+    return Some(table.get()->schema());
+  }
+}
+
+Option<TableDefinition> TSDBService::tableConfig(
+    const String& tsdb_namespace,
+    const String& table_key) {
+  auto table = pmap_->findTable(
+      tsdb_namespace,
+      table_key);
+
+  if (table.isEmpty()) {
+    return None<TableDefinition>();
+  } else {
+    return Some(table.get()->config());
+  }
+}
+
 //const String& TSDBService::dbPath() const {
 //  return db_path_;
 //}
