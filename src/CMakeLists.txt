@@ -11,6 +11,7 @@ PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS ${PROTO_FILES})
 add_library(tsdb-client OBJECT
     tsdb/TSDBClient.cc
     tsdb/TimeWindowPartitioner.cc
+    tsdb/FixedShardPartitioner.cc
     ${PROTO_SRCS})
 
 add_library(tsdb-server OBJECT
