@@ -10,8 +10,8 @@ package cm;
 
 message AnalyticsPrivileges {
   optional bool allow_web_access = 1;
-  optional bool allow_api_write_access = 2;
-  optional bool allow_api_read_access = 3;
+  optional bool allow_private_api_write_access = 2;
+  optional bool allow_private_api_read_access = 3;
 };
 
 message AnalyticsSession {
