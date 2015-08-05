@@ -51,7 +51,7 @@ Option<RefPtr<Table>> PartitionMap::findTableWithLock(
   }
 }
 
-void PartitionMap::configureTable(const TableConfig& table) {
+void PartitionMap::configureTable(const TableDefinition& table) {
   std::unique_lock<std::mutex> lk(mutex_);
   auto stream_ns_key = table.tsdb_namespace() + "~" + table.table_name();
 

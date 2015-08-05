@@ -14,7 +14,7 @@ using namespace stx;
 namespace tsdb {
 
 Table::Table(
-    const TableConfig& config,
+    const TableDefinition& config,
     RefPtr<msg::MessageSchema> schema) :
     config_(config),
     schema_(schema) {}
@@ -49,7 +49,7 @@ RefPtr<msg::MessageSchema> Table::schema() const {
   return schema_;
 }
 
-TableConfig Table::config() const {
+TableDefinition Table::config() const {
   std::unique_lock<std::mutex> lk(mutex_);
   return config_;
 }
@@ -59,7 +59,7 @@ void Table::updateSchema(RefPtr<msg::MessageSchema> new_schema) {
   schema_ = new_schema;
 }
 
-void Table::updateConfig(TableConfig new_config) {
+void Table::updateConfig(TableDefinition new_config) {
   std::unique_lock<std::mutex> lk(mutex_);
   config_ = new_config;
 }

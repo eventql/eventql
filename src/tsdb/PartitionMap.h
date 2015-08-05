@@ -29,7 +29,7 @@ class PartitionMap {
 public:
   PartitionMap(const String& db_path);
 
-  void configureTable(const TableConfig& config);
+  void configureTable(const TableDefinition& config);
   void open();
 
   Option<RefPtr<Table>> findTable(

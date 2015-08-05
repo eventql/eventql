@@ -19,7 +19,7 @@ namespace tsdb {
 struct TSDBTableInfo {
   String table_name;
   RefPtr<msg::MessageSchema> schema;
-  TableConfig config;
+  TableDefinition config;
 };
 
 }

@@ -21,7 +21,7 @@ namespace tsdb {
 class Table : public RefCounted{
 public:
 
-  Table(const TableConfig& config, RefPtr<msg::MessageSchema> schema);
+  Table(const TableDefinition& config, RefPtr<msg::MessageSchema> schema);
 
   String name() const;
 
@@ -35,15 +35,15 @@ public:
 
   RefPtr<msg::MessageSchema> schema() const;
 
-  TableConfig config() const;
+  TableDefinition config() const;
 
   void updateSchema(RefPtr<msg::MessageSchema> new_schema);
 
-  void updateConfig(TableConfig new_config);
+  void updateConfig(TableDefinition new_config);
 
 protected:
   mutable std::mutex mutex_;
-  TableConfig config_;
+  TableDefinition config_;
   RefPtr<msg::MessageSchema> schema_;
 };
 

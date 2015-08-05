@@ -31,7 +31,7 @@ public:
 
   TSDBService(PartitionMap* pmap);
 
-  void createTable(const TableConfig& config);
+  void createTable(const TableDefinition& config);
 
   void insertRecords(const RecordEnvelopeList& records);
 

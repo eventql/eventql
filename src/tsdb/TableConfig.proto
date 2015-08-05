@@ -21,7 +21,7 @@ enum TableStorage {
   //TBL_BTREE_PROTOBUF = 3;
 };
 
-message TableConfig {
+message TableDefinition {
 
   /**
    * The tsdb namespace to be configured

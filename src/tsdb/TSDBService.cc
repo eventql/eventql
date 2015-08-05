@@ -21,7 +21,7 @@ namespace tsdb {
 
 TSDBService::TSDBService(PartitionMap* pmap) : pmap_(pmap) {}
 
-void TSDBService::createTable(const TableConfig& table) {
+void TSDBService::createTable(const TableDefinition& table) {
   pmap_->configureTable(table);
 }
 
