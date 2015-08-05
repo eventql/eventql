@@ -31,7 +31,7 @@ String Table::tsdbNamespace() const {
 
 Duration Table::partitionSize() const {
   std::unique_lock<std::mutex> lk(mutex_);
-  return config_.config().partition_size();
+  return 4 * kMicrosPerHour;
 }
 
 Duration Table::compactionInterval() const {
