@@ -42,11 +42,11 @@ public:
       const SHA1Hash& record_id,
       const Buffer& record);
 
-  void updatePartition(
+  void updatePartitionCSTable(
       const String& tsdb_namespace,
       const String& stream_key,
       const SHA1Hash& partition_key,
-      const RefPtr<VFSFile> data);
+      cstable::CSTableBuilder* cstable);
 
   void fetchPartition(
       const String& tsdb_namespace,
