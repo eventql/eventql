@@ -39,6 +39,7 @@ add_library(tsdb-server OBJECT
     tsdb/ReplicationScheme.cc
     tsdb/ReplicationState.cc
     tsdb/StaticPartitionWriter.cc
+    tsdb/StaticPartitionReplication.cc
     ${PROTO_SRCS})
 
 add_executable(test-recordset

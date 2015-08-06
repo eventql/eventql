@@ -21,6 +21,7 @@
 #include <tsdb/LogPartitionWriter.h>
 #include <tsdb/LogPartitionReplication.h>
 #include <tsdb/StaticPartitionWriter.h>
+#include <tsdb/StaticPartitionReplication.h>
 
 using namespace stx;
 
@@ -167,7 +168,11 @@ RefPtr<PartitionReplication> Partition::getReplicationStrategy(
           repl_scheme,
           http);
 
-    //case tsdb::TBL_CONST_CSTABLE:
+    case tsdb::TBL_CONST_CSTABLE:
+      return new StaticPartitionReplication(
+          this,
+          repl_scheme,
+          http);
 
     default:
       RAISE(kRuntimeError, "invalid storage class");
