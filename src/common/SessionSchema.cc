@@ -83,8 +83,8 @@ Vector<TableDefinition> SessionSchema::tableDefinitionsForCustomer(
     td.set_table_name("sessions." + evschema.evtype());
     auto tblcfg = td.mutable_config();
     tblcfg->set_schema(evschema.schema());
-    tblcfg->set_partitioner(tsdb::TBL_TIMESERIES);
-    tblcfg->set_storage(tsdb::TBL_LOG_PROTOBUF);
+    tblcfg->set_partitioner(tsdb::TBL_PARTITION_TIMEWINDOW);
+    tblcfg->set_storage(tsdb::TBL_STORAGE_LOG);
     tbls.emplace_back(td);
   }
 
@@ -94,8 +94,8 @@ Vector<TableDefinition> SessionSchema::tableDefinitionsForCustomer(
     td.set_table_name("sessions");
     auto tblcfg = td.mutable_config();
     tblcfg->set_schema(SessionSchema::forCustomer(cfg)->encode().toString());
-    tblcfg->set_partitioner(tsdb::TBL_TIMESERIES);
-    tblcfg->set_storage(tsdb::TBL_LOG_PROTOBUF);
+    tblcfg->set_partitioner(tsdb::TBL_PARTITION_TIMEWINDOW);
+    tblcfg->set_storage(tsdb::TBL_STORAGE_LOG);
     tbls.emplace_back(td);
   }
 
