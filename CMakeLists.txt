@@ -7,6 +7,7 @@ project(cmapp)
 
 option(ENABLE_TESTS "Build unit tests [default: ON]" ON)
 
+set(PROTOC_ARGS --proto_path ${CMAKE_SOURCE_DIR}/3rdparty/tsdb/src)
 include(3rdparty/libstx/cmake/libstx.cmake)
 
 add_subdirectory(3rdparty/libcstable)

@@ -10,6 +10,11 @@ add_executable(dxa-docdb
     $<TARGET_OBJECTS:stx-protobuf>
     $<TARGET_OBJECTS:customerdirectory>
     $<TARGET_OBJECTS:auth>
+    $<TARGET_OBJECTS:tsdb-server>
+    $<TARGET_OBJECTS:libcstable>
+    $<TARGET_OBJECTS:sstable>
+    $<TARGET_OBJECTS:chartsql-lib>
+    $<TARGET_OBJECTS:fnord-chart>
     ${PROTO_SRCS}
     Document.cc
     DocumentDB.cc

@@ -111,13 +111,6 @@ void ConfigDirectory::updateTableDefinition(const TableDefinition& table) {
         table.table_name());
   }
 
-  if (!table.has_schema_name() && !table.has_schema_inline()) {
-    RAISEF(
-        kIllegalArgumentError,
-        "can't update table without a schema: '$0'",
-        table.table_name());
-  }
-
   auto body = msg::encode(table);
   auto uri = URI(
       StringUtil::format(
