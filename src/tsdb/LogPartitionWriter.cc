@@ -55,30 +55,19 @@ Set<SHA1Hash> LogPartitionWriter::insertRecords(const Vector<RecordRef>& records
     return record_ids;
   }
 
-  String filename;
-  const auto& old_files = snap->state.sstable_files();
-  if (old_files.size() > 0) {
-    auto last_file = *(old_files.end() + - 1);
-    auto last_file_size = FileUtil::size(
-        FileUtil::joinPaths(snap->base_path, last_file));
-
-    if (last_file_size < max_datafile_size_) {
-      filename = last_file;
-    }
-  }
-
-
-  ScopedPtr<sstable::SSTableWriter> writer;
   bool snap_dirty = false;
-  if (filename.empty()) {
-    filename = StringUtil::format("$0.sst", Random::singleton()->hex64());
-    snap->state.add_sstable_files(filename);
-    writer = sstable::SSTableWriter::create(
-        FileUtil::joinPaths(snap->base_path, filename), nullptr, 0);
+  ScopedPtr<sstable::SSTableWriter> writer;
+  if (snap->state.sstable_files().size() == 0) {
+    snap->state.add_sstable_files("_log");
     snap_dirty = true;
+
+    writer = sstable::SSTableWriter::create(
+        FileUtil::joinPaths(snap->base_path, "_log"), nullptr, 0);
   } else {
     writer = sstable::SSTableWriter::reopen(
-        FileUtil::joinPaths(snap->base_path, filename));
+        FileUtil::joinPaths(
+            snap->base_path,
+            *(snap->state.sstable_files().end() - 1)));
   }
 
   for (const auto& r : records) {
