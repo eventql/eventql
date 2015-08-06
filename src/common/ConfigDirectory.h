@@ -38,7 +38,7 @@ public:
       Function<void (const CustomerConfig& cfg)> fn) const;
   void onCustomerConfigChange(Function<void (const CustomerConfig& cfg)> fn);
 
-  void updateTableDefinition(const TableDefinition& table);
+  void updateTableDefinition(const TableDefinition& table, bool force = false);
   void listTableDefinitions(
       Function<void (const TableDefinition& tbl)> fn) const;
   void onTableDefinitionChange(Function<void (const TableDefinition& tbl)> fn);
