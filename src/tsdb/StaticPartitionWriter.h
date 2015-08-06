@@ -29,6 +29,8 @@ public:
   Set<SHA1Hash> insertRecords(
       const Vector<RecordRef>& records) override;
 
+  void updateCSTable(cstable::CSTableBuilder* cstable) override;
+
 };
 
 } // namespace tdsb

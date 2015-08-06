@@ -105,4 +105,8 @@ Set<SHA1Hash> LogPartitionWriter::insertRecords(const Vector<RecordRef>& records
   return record_ids;
 }
 
+void LogPartitionWriter::updateCSTable(cstable::CSTableBuilder* cstable) {
+  RAISE(kNotImplementedError);
+}
+
 } // namespace tdsb

@@ -12,6 +12,7 @@
 #include <stx/autoref.h>
 #include <tsdb/PartitionSnapshot.h>
 #include <tsdb/RecordRef.h>
+#include <cstable/CSTableBuilder.h>
 
 using namespace stx;
 
@@ -29,6 +30,8 @@ public:
 
   virtual Set<SHA1Hash> insertRecords(
       const Vector<RecordRef>& records) = 0;
+
+  virtual void updateCSTable(cstable::CSTableBuilder* cstable) = 0;
 
 protected:
   PartitionSnapshotRef* head_;
