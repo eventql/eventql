@@ -99,5 +99,14 @@ void Queue<T>::wakeup() {
   wakeup_.notify_all();
 }
 
+template <typename T>
+void Queue<T>::waitUntilEmpty() const {
+  std::unique_lock<std::mutex> lk(mutex_);
+
+  while (queue_.size() > 0) {
+    wakeup_.wait(lk);
+  }
+}
+
 }
 }

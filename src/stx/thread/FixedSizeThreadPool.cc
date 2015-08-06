@@ -37,13 +37,17 @@ FixedSizeThreadPool::FixedSizeThreadPool(
     block_(block) {}
 
 void FixedSizeThreadPool::start() {
+  running_ = true;
+
   for (int i = 0; i < nthreads_; ++i) {
     threads_.emplace_back([this] () {
-      while (true) {
-        auto job = queue_.pop();
+      while (running_.load()) {
+        auto job = queue_.interruptiblePop();
 
         try {
-          job();
+          if (!job.isEmpty()) {
+            job.get()();
+          }
         } catch (const std::exception& e) {
           error_handler_->onException(e);
         }
@@ -53,7 +57,13 @@ void FixedSizeThreadPool::start() {
 }
 
 void FixedSizeThreadPool::stop() {
-  // FIXPAUL
+  queue_.waitUntilEmpty();
+  running_ = false;
+  queue_.wakeup();
+
+  for (auto& t : threads_) {
+    t.join();
+  }
 }
 
 void FixedSizeThreadPool::run(std::function<void()> task) {

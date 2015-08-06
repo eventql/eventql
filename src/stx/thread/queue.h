@@ -35,10 +35,12 @@ public:
   size_t length() const;
   void wakeup();
 
+  void waitUntilEmpty() const;
+
 protected:
   std::deque<T> queue_;
   mutable std::mutex mutex_;
-  std::condition_variable wakeup_;
+  mutable std::condition_variable wakeup_;
   size_t max_size_;
   size_t length_;
 };
