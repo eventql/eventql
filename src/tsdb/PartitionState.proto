@@ -40,4 +40,9 @@ message PartitionState {
    */
   required bytes uuid = 5;
 
+  /**
+   * Partition Version, only used for static partitions
+   */
+  optional uint64 version = 6;
+
 };

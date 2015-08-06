@@ -17,9 +17,16 @@ message ReplicaState {
   required bytes replica_id = 1;
 
   /**
-   * Up to which offset have we uploaded the partition to this replica
+   * Up to which offset have we uploaded the partition to this replica (used
+   * for log partition replication)
    */
   optional uint64 replicated_offset = 2;
+
+  /**
+   * Which is the newest version have we uploaded the partition to this replica
+   * (used for static partition replication)
+   */
+  optional uint64 version = 6;
 
 };
 
