@@ -219,7 +219,7 @@ Option<PartitionInfo> TSDBClient::partitionInfo(
   res.wait();
 
   const auto& r = res.get();
-  if (r.statusCode() == 400) {
+  if (r.statusCode() == 404) {
     return None<PartitionInfo>();
   }
 
