@@ -31,6 +31,8 @@ public:
 
   size_t sstableSize() const;
 
+  size_t numShards() const;
+
   RefPtr<msg::MessageSchema> schema() const;
 
   TableDefinition config() const;

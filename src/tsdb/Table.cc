@@ -39,6 +39,11 @@ size_t Table::sstableSize() const {
   return config_.config().sstable_size();
 }
 
+size_t Table::numShards() const {
+  std::unique_lock<std::mutex> lk(mutex_);
+  return config_.config().num_shards();
+}
+
 RefPtr<msg::MessageSchema> Table::schema() const {
   std::unique_lock<std::mutex> lk(mutex_);
   return schema_;
