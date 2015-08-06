@@ -32,7 +32,7 @@ public:
       const Vector<RecordRef>& records) = 0;
 
   void updateCSTable(
-      cstable::CSTableBuilder* cstable,
+      const String& tmpfile,
       uint64_t version);
 
 protected:

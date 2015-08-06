@@ -22,7 +22,7 @@ PartitionWriter::PartitionWriter(
     head_(head) {}
 
 void PartitionWriter::updateCSTable(
-    cstable::CSTableBuilder* cstable,
+    const String& tmpfile,
     uint64_t version) {
   std::unique_lock<std::mutex> lk(mutex_);
   auto snap = head_->getSnapshot()->clone();
@@ -35,7 +35,7 @@ void PartitionWriter::updateCSTable(
       snap->key.toString());
 
   auto filepath = FileUtil::joinPaths(snap->base_path, "_cstable");
-  cstable->write(filepath);
+  FileUtil::mv(tmpfile, filepath);
 
   snap->state.set_cstable_version(version);
   snap->writeToDisk();
