@@ -99,7 +99,9 @@ void ConfigDirectory::onCustomerConfigChange(
   on_customer_change_.emplace_back(fn);
 }
 
-void ConfigDirectory::updateTableDefinition(const TableDefinition& table) {
+void ConfigDirectory::updateTableDefinition(
+    const TableDefinition& table,
+    bool force /* = false */) {
   if ((topics_ & ConfigTopic::TABLES) == 0) {
     RAISE(kRuntimeError, "config topic not enabled: TABLES");
   }
@@ -112,10 +114,13 @@ void ConfigDirectory::updateTableDefinition(const TableDefinition& table) {
   }
 
   auto body = msg::encode(table);
-  auto uri = URI(
-      StringUtil::format(
-          "http://$0/analytics/master/update_table_definition",
-          master_addr_.hostAndPort()));
+  auto uri = StringUtil::format(
+        "http://$0/analytics/master/update_table_definition",
+        master_addr_.hostAndPort());
+
+  if (force) {
+    uri += "?force=true";
+  }
 
   http::HTTPClient http;
   auto res = http.executeRequest(http::HTTPRequest::mkPost(uri, *body));
