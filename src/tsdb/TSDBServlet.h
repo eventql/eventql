@@ -21,7 +21,9 @@ namespace tsdb {
 class TSDBServlet : public stx::http::StreamingHTTPService {
 public:
 
-  TSDBServlet(TSDBService* node);
+  TSDBServlet(
+      TSDBService* node,
+      const String& tmpdir);
 
   void handleHTTPRequest(
       RefPtr<http::HTTPRequestStream> req_stream,

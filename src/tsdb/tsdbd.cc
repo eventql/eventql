@@ -119,7 +119,7 @@ int main(int argc, const char** argv) {
 
   tsdb::TSDBService tsdb_node(&pmap);
 
-  tsdb::TSDBServlet tsdb_servlet(&tsdb_node);
+  tsdb::TSDBServlet tsdb_servlet(&tsdb_node, "/tmp");
   http_router.addRouteByPrefixMatch("/tsdb", &tsdb_servlet, &tpool);
 
   ev.run();
