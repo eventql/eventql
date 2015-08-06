@@ -147,7 +147,7 @@ int main(int argc, const char** argv) {
   tsdb::TSDBService tsdb_node(dir + "/tsdb", repl_scheme.get(), &http);
 
   {
-    tsdb::TableConfig config;
+    tsdb::TableDefinition config;
     config.set_table_name("joined_sessions.");
     config.set_max_sstable_size(1024 * 1024 * 512);
     config.set_compaction_interval(1800 * kMicrosPerSecond);
@@ -157,7 +157,7 @@ int main(int argc, const char** argv) {
   }
 
   {
-    tsdb::TableConfig config;
+    tsdb::TableDefinition config;
     config.set_table_name("metricd.sensors.");
     config.set_max_sstable_size(1024 * 1024 * 512);
     config.set_compaction_interval(10 * kMicrosPerSecond);
@@ -167,7 +167,7 @@ int main(int argc, const char** argv) {
   }
 
   {
-    tsdb::TableConfig config;
+    tsdb::TableDefinition config;
     config.set_table_name("metricd.metrics.");
     config.set_max_sstable_size(1024 * 1024 * 512);
     config.set_compaction_interval(10 * kMicrosPerSecond);
