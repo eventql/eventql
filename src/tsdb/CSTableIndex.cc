@@ -58,8 +58,12 @@ Option<String> CSTableIndex::fetchCSTableFilename(
 }
 
 void CSTableIndex::buildCSTable(RefPtr<Partition> partition) {
-  auto snap = partition->getSnapshot();
   auto table = partition->getTable();
+  if (table->storage() == tsdb::TBL_CONST_CSTABLE) {
+    return;
+  }
+
+  auto snap = partition->getSnapshot();
   auto schema = table->schema();
 
   auto metapath = FileUtil::joinPaths(snap->base_path, "_cstable_meta");
