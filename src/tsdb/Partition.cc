@@ -19,6 +19,8 @@
 #include <cstable/CSTableBuilder.h>
 #include <sstable/sstablereader.h>
 #include <tsdb/LogPartitionWriter.h>
+#include <tsdb/StaticPartitionWriter.h>
+
 
 using namespace stx;
 
@@ -108,7 +110,20 @@ SHA1Hash Partition::uuid() const {
 RefPtr<PartitionWriter> Partition::getWriter() {
   std::unique_lock<std::mutex> lk(writer_lock_);
   if (writer_.get() == nullptr) {
-    writer_ = mkRef<PartitionWriter>(new LogPartitionWriter(&head_));
+    switch (table_->storage()) {
+
+      case tsdb::TBL_LOG_PROTOBUF:
+        writer_ = mkRef<PartitionWriter>(new LogPartitionWriter(&head_));
+        break;
+
+      case tsdb::TBL_CONST_CSTABLE:
+        writer_ = mkRef<PartitionWriter>(new StaticPartitionWriter(&head_));
+        break;
+
+      default:
+        RAISE(kRuntimeError, "invalid storage class");
+
+    }
   }
 
   auto writer = writer_;
