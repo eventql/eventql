@@ -10,6 +10,7 @@
 #include <tsdb/SQLEngine.h>
 #include <tsdb/TSDBService.h>
 #include <tsdb/TimeWindowPartitioner.h>
+#include <tsdb/FixedShardPartitioner.h>
 #include <chartsql/defaults.h>
 
 namespace tsdb {
@@ -70,24 +71,42 @@ void SQLEngine::replaceSequentialScanWithUnion(
     return;
   }
 
-  if (partition_map->findTable(tsdb_namespace, table_ref.table_key).isEmpty()) {
+  auto table = partition_map->findTable(tsdb_namespace, table_ref.table_key);
+  if (table.isEmpty()) {
     return;
   }
 
-  if (table_ref.timerange_begin.isEmpty() ||
-      table_ref.timerange_limit.isEmpty()) {
-    RAISEF(
-        kRuntimeError,
-        "invalid reference to timeseries table '$0' without timerange. " \
-        "try appending .last30days to the table name",
-        table_ref.table_key);
-  }
+  Vector<SHA1Hash> partitions;
+  switch (table.get()->partitioner()) {
 
-  auto partitions = TimeWindowPartitioner::partitionKeysFor(
-      table_ref.table_key,
-      table_ref.timerange_begin.get(),
-      table_ref.timerange_limit.get(),
-      4 * kMicrosPerHour);
+    case TBL_PARTITION_TIMEWINDOW: {
+      if (table_ref.timerange_begin.isEmpty() ||
+          table_ref.timerange_limit.isEmpty()) {
+        RAISEF(
+            kRuntimeError,
+            "invalid reference to timeseries table '$0' without timerange. " \
+            "try appending .last30days to the table name",
+            table_ref.table_key);
+      }
+
+      partitions = TimeWindowPartitioner::partitionKeysFor(
+          table_ref.table_key,
+          table_ref.timerange_begin.get(),
+          table_ref.timerange_limit.get(),
+          4 * kMicrosPerHour);
+
+      break;
+    }
+
+    case TBL_PARTITION_FIXED: {
+      partitions = FixedShardPartitioner::partitionKeysFor(
+          table_ref.table_key,
+          table.get()->numShards());
+
+      break;
+    }
+
+  }
 
   Vector<RefPtr<csql::QueryTreeNode>> union_tables;
   for (const auto& partition : partitions) {

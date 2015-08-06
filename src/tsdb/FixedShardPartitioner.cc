@@ -26,4 +26,16 @@ SHA1Hash FixedShardPartitioner::partitionKeyFor(
   return SHA1::compute(buf.data(), buf.size());
 }
 
+Vector<SHA1Hash> FixedShardPartitioner::partitionKeysFor(
+    const String& stream_key,
+    size_t nshards) {
+  Vector<SHA1Hash> partitions;
+
+  for (size_t shard = 0; shard < nshards; ++shard) {
+    partitions.emplace_back(partitionKeyFor(stream_key, shard));
+  }
+
+  return partitions;
+}
+
 }

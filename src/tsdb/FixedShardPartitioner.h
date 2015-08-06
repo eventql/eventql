@@ -23,7 +23,11 @@ public:
 
   static SHA1Hash partitionKeyFor(
       const String& stream_key,
-      size_t nshard);
+      size_t shard);
+
+  static Vector<SHA1Hash> partitionKeysFor(
+      const String& stream_key,
+      size_t nshards);
 
 };
 
