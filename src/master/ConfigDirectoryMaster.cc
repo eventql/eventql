@@ -134,7 +134,8 @@ TableDefinitionList ConfigDirectoryMaster::fetchTableDefinitions(
 }
 
 TableDefinition ConfigDirectoryMaster::updateTableDefinition(
-    const TableDefinition& td) {
+    TableDefinition td,
+    bool force /* = false */) {
   std::unique_lock<std::mutex> lk(mutex_);
   uint64_t head_version = 0;
 
@@ -166,6 +167,10 @@ TableDefinition ConfigDirectoryMaster::updateTableDefinition(
 
   if (head_td == nullptr) {
     head_td = tables.add_tables();
+  }
+
+  if (force) {
+    td.set_version(head_td->version());
   }
 
   if (td.version() != head_td->version()) {
