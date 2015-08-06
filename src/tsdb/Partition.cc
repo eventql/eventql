@@ -19,8 +19,8 @@
 #include <cstable/CSTableBuilder.h>
 #include <sstable/sstablereader.h>
 #include <tsdb/LogPartitionWriter.h>
+#include <tsdb/LogPartitionReplication.h>
 #include <tsdb/StaticPartitionWriter.h>
-
 
 using namespace stx;
 
@@ -154,6 +154,25 @@ PartitionInfo Partition::getInfo() const {
   pi.set_checksum(checksum.toString());
   pi.set_exists(true);
   return pi;
+}
+
+RefPtr<PartitionReplication> Partition::getReplicationStrategy(
+    RefPtr<ReplicationScheme> repl_scheme,
+    http::HTTPConnectionPool* http) {
+  switch (table_->storage()) {
+
+    case tsdb::TBL_LOG_PROTOBUF:
+      return new LogPartitionReplication(
+          this,
+          repl_scheme,
+          http);
+
+    //case tsdb::TBL_CONST_CSTABLE:
+
+    default:
+      RAISE(kRuntimeError, "invalid storage class");
+
+  }
 }
 
 }

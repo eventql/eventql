@@ -32,6 +32,7 @@ add_library(tsdb-server OBJECT
     tsdb/PartitionSnapshot.cc
     tsdb/PartitionReplication.cc
     tsdb/LogPartitionWriter.cc
+    tsdb/LogPartitionReplication.cc
     tsdb/LazyPartition.cc
     tsdb/Table.cc
     tsdb/ReplicationWorker.cc
