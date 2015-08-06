@@ -9,41 +9,36 @@
  */
 #pragma once
 #include <stx/stdtypes.h>
-#include <stx/http/httpconnectionpool.h>
-#include <tsdb/Partition.h>
-#include <tsdb/ReplicationScheme.h>
-#include <tsdb/ReplicationState.h>
-#include <tsdb/RecordEnvelope.pb.h>
+#include <tsdb/PartitionReplication.h>
 
 using namespace stx;
 
 namespace tsdb {
 
-class PartitionReplication : public RefCounted {
+class LogPartitionReplication : public PartitionReplication {
 public:
-  static const char kStateFileName[];
+  static const size_t kBatchSize;
 
-  PartitionReplication(
+  LogPartitionReplication(
       RefPtr<Partition> partition,
       RefPtr<ReplicationScheme> repl_scheme,
       http::HTTPConnectionPool* http);
 
-  virtual bool needsReplication() const = 0;
+  bool needsReplication() const override;
 
   /**
    * Returns true on success, false on error
    */
-  virtual bool replicate() = 0;
+  bool replicate() override;
 
 protected:
 
-  ReplicationState fetchReplicationState() const;
-  void commitReplicationState(const ReplicationState& state);
+  void replicateTo(const ReplicaRef& replica, uint64_t replicated_offset);
 
-  RefPtr<Partition> partition_;
-  RefPtr<PartitionSnapshot> snap_;
-  RefPtr<ReplicationScheme> repl_scheme_;
-  http::HTTPConnectionPool* http_;
+  void uploadBatchTo(
+      const ReplicaRef& replica,
+      const RecordEnvelopeList& batch);
+
 };
 
 } // namespace tdsb

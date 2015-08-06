@@ -103,15 +103,13 @@ void ReplicationWorker::work() {
     queue_.erase(queue_.begin());
     auto repl_scheme = repl_scheme_;
 
-    ScopedPtr<PartitionReplication> repl;
+    RefPtr<PartitionReplication> repl;
     bool success = true;
     {
       lk.unlock();
 
       try {
-        repl = mkScoped(
-            new PartitionReplication(partition, repl_scheme, http_));
-
+        repl = partition->getReplicationStrategy(repl_scheme, http_);
         success = repl->replicate();
       } catch (const StandardException& e) {
         logError("tsdb", e, "ReplicationWorker error");

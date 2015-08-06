@@ -13,18 +13,21 @@
 #include <stx/option.h>
 #include <stx/UnixTime.h>
 #include <stx/protobuf/MessageSchema.h>
+#include <stx/http/httpconnectionpool.h>
 #include <tsdb/Table.h>
 #include <tsdb/RecordRef.h>
 #include <tsdb/PartitionInfo.pb.h>
 #include <tsdb/PartitionSnapshot.h>
 #include <tsdb/PartitionWriter.h>
 #include <tsdb/PartitionReader.h>
+#include <tsdb/ReplicationScheme.h>
 #include <cstable/CSTableReader.h>
 
 using namespace stx;
 
 namespace tsdb {
 class Table;
+class PartitionReplication;
 
 using PartitionKey =
     std::tuple<
@@ -58,6 +61,10 @@ public:
   RefPtr<PartitionSnapshot> getSnapshot();
   RefPtr<Table> getTable();
   PartitionInfo getInfo() const;
+
+  RefPtr<PartitionReplication> getReplicationStrategy(
+      RefPtr<ReplicationScheme> repl_scheme,
+      http::HTTPConnectionPool* http);
 
 protected:
   PartitionSnapshotRef head_;

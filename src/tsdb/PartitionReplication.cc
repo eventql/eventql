@@ -18,7 +18,6 @@ using namespace stx;
 namespace tsdb {
 
 const char PartitionReplication::kStateFileName[] = "_repl";
-const size_t PartitionReplication::kBatchSize = 512;
 
 PartitionReplication::PartitionReplication(
     RefPtr<Partition> partition,
@@ -28,123 +27,6 @@ PartitionReplication::PartitionReplication(
     snap_(partition_->getSnapshot()),
     repl_scheme_(repl_scheme),
     http_(http) {}
-
-bool PartitionReplication::needsReplication() const {
-  auto replicas = repl_scheme_->replicasFor(snap_->key);
-  if (replicas.size() == 0) {
-    return false;
-  }
-
-  auto repl_state = fetchReplicationState();
-  auto head_offset = snap_->nrecs;
-  for (const auto& r : replicas) {
-    const auto& replica_offset = replicatedOffsetFor(repl_state, r.unique_id);
-    if (replica_offset < head_offset) {
-      return true;
-    }
-  }
-
-  return false;
-}
-
-void PartitionReplication::replicateTo(
-    const ReplicaRef& replica,
-    uint64_t replicated_offset) {
-  PartitionReader reader(snap_);
-
-  RecordEnvelopeList batch;
-  reader.fetchRecords(
-      replicated_offset,
-      size_t(-1),
-      [this, &batch, &replica, &replicated_offset] (
-          const SHA1Hash& record_id,
-          const void* record_data,
-          size_t record_size) {
-    auto rec = batch.add_records();
-    rec->set_tsdb_namespace(snap_->state.tsdb_namespace());
-    rec->set_stream_key(snap_->state.table_key());
-    rec->set_partition_key(snap_->key.toString());
-    rec->set_record_id(record_id.toString());
-    rec->set_record_data(record_data, record_size);
-
-    if (batch.records().size() > kBatchSize) {
-      uploadBatchTo(replica, batch);
-      batch.mutable_records()->Clear();
-    }
-  });
-
-  if (batch.records().size() > 0) {
-    uploadBatchTo(replica, batch);
-  }
-}
-
-void PartitionReplication::uploadBatchTo(
-    const ReplicaRef& replica,
-    const RecordEnvelopeList& batch) {
-  auto body = msg::encode(batch);
-  URI uri(StringUtil::format("http://$0/tsdb/insert", replica.addr));
-  http::HTTPRequest req(http::HTTPMessage::M_POST, uri.pathAndQuery());
-  req.addHeader("Host", uri.hostAndPort());
-  req.addHeader("Content-Type", "application/fnord-msg");
-  req.addBody(body->data(), body->size());
-
-  auto res = http_->executeRequest(req);
-  res.wait();
-
-  const auto& r = res.get();
-  if (r.statusCode() != 201) {
-    RAISEF(kRuntimeError, "received non-201 response: $0", r.body().toString());
-  }
-}
-
-bool PartitionReplication::replicate() {
-  auto replicas = repl_scheme_->replicasFor(snap_->key);
-  if (replicas.size() == 0) {
-    return true;
-  }
-
-  auto repl_state = fetchReplicationState();
-  auto head_offset = snap_->nrecs;
-  bool dirty = false;
-  bool success = true;
-
-  for (const auto& r : replicas) {
-    const auto& replica_offset = replicatedOffsetFor(repl_state, r.unique_id);
-
-    if (replica_offset < head_offset) {
-      logDebug(
-          "tsdb",
-          "Replicating partition $0/$1/$2 to $3",
-          snap_->state.tsdb_namespace(),
-          snap_->state.table_key(),
-          snap_->key.toString(),
-          r.addr);
-
-      try {
-        replicateTo(r, replica_offset);
-        setReplicatedOffsetFor(&repl_state, r.unique_id, head_offset);
-        dirty = true;
-      } catch (const std::exception& e) {
-        success = false;
-
-        stx::logError(
-          "tsdb",
-          e,
-          "Error while replicating partition $0/$1/$2 to $3",
-          snap_->state.tsdb_namespace(),
-          snap_->state.table_key(),
-          snap_->key.toString(),
-          r.addr);
-      }
-    }
-  }
-
-  if (dirty) {
-    commitReplicationState(repl_state);
-  }
-
-  return success;
-}
 
 ReplicationState PartitionReplication::fetchReplicationState() const {
   auto filepath = FileUtil::joinPaths(snap_->base_path, kStateFileName);
