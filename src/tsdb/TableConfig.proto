@@ -10,14 +10,14 @@
 package tsdb;
 
 enum TablePartitioner {
-  TBL_TIMESERIES = 0;
-  TBL_FIXED = 1;
+  TBL_PARTITION_TIMEWINDOW = 0;
+  TBL_PARTITION_FIXED = 1;
 };
 
 enum TableStorage {
-  TBL_LOG_PROTOBUF = 0;
-  TBL_CONST_CSTABLE = 2;
-  //TBL_BTREE_PROTOBUF = 3;
+  TBL_STORAGE_LOG = 0;
+  TBL_STORAGE_STATIC = 2;
+  //TBL_STORAGE_BTREE = 3;
 };
 
 message TableDefinition {

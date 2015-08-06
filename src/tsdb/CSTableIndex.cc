@@ -59,7 +59,7 @@ Option<String> CSTableIndex::fetchCSTableFilename(
 
 void CSTableIndex::buildCSTable(RefPtr<Partition> partition) {
   auto table = partition->getTable();
-  if (table->storage() == tsdb::TBL_CONST_CSTABLE) {
+  if (table->storage() == tsdb::TBL_STORAGE_STATIC) {
     return;
   }
 

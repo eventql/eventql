@@ -113,11 +113,11 @@ RefPtr<PartitionWriter> Partition::getWriter() {
   if (writer_.get() == nullptr) {
     switch (table_->storage()) {
 
-      case tsdb::TBL_LOG_PROTOBUF:
+      case tsdb::TBL_STORAGE_LOG:
         writer_ = mkRef<PartitionWriter>(new LogPartitionWriter(&head_));
         break;
 
-      case tsdb::TBL_CONST_CSTABLE:
+      case tsdb::TBL_STORAGE_STATIC:
         writer_ = mkRef<PartitionWriter>(new StaticPartitionWriter(&head_));
         break;
 
@@ -162,13 +162,13 @@ RefPtr<PartitionReplication> Partition::getReplicationStrategy(
     http::HTTPConnectionPool* http) {
   switch (table_->storage()) {
 
-    case tsdb::TBL_LOG_PROTOBUF:
+    case tsdb::TBL_STORAGE_LOG:
       return new LogPartitionReplication(
           this,
           repl_scheme,
           http);
 
-    case tsdb::TBL_CONST_CSTABLE:
+    case tsdb::TBL_STORAGE_STATIC:
       return new StaticPartitionReplication(
           this,
           repl_scheme,
