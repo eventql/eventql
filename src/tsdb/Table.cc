@@ -49,6 +49,16 @@ TableDefinition Table::config() const {
   return config_;
 }
 
+TableStorage Table::storage() const {
+  std::unique_lock<std::mutex> lk(mutex_);
+  return config_.config().storage();
+}
+
+TablePartitioner Table::partitioner() const {
+  std::unique_lock<std::mutex> lk(mutex_);
+  return config_.config().partitioner();
+}
+
 void Table::updateSchema(RefPtr<msg::MessageSchema> new_schema) {
   std::unique_lock<std::mutex> lk(mutex_);
   schema_ = new_schema;

@@ -35,6 +35,10 @@ public:
 
   TableDefinition config() const;
 
+  TableStorage storage() const;
+
+  TablePartitioner partitioner() const;
+
   void updateSchema(RefPtr<msg::MessageSchema> new_schema);
 
   void updateConfig(TableDefinition new_config);

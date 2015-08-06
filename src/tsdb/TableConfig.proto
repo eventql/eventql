@@ -16,7 +16,6 @@ enum TablePartitioner {
 
 enum TableStorage {
   TBL_LOG_PROTOBUF = 0;
-  TBL_LOG_PLAINTEXT = 1;
   TBL_CONST_CSTABLE = 2;
   //TBL_BTREE_PROTOBUF = 3;
 };
