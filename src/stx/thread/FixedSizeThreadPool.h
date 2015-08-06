@@ -73,11 +73,11 @@ public:
       long generation) override;
 
 protected:
-
   size_t nthreads_;
   std::unique_ptr<stx::ExceptionHandler> error_handler_;
   Queue<std::function<void()>> queue_;
   bool block_;
+  std::atomic<bool> running_;
   Vector<std::thread> threads_;
 };
 
