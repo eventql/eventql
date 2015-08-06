@@ -80,6 +80,20 @@ void TSDBService::insertRecord(
   }
 }
 
+void TSDBService::updatePartition(
+    const String& tsdb_namespace,
+    const String& stream_key,
+    const SHA1Hash& partition_key,
+    const RefPtr<VFSFile> data) {
+  auto partition = pmap_->findOrCreatePartition(
+      tsdb_namespace,
+      stream_key,
+      partition_key);
+
+  auto writer = partition->getWriter();
+
+}
+
 void TSDBService::fetchPartition(
     const String& tsdb_namespace,
     const String& stream_key,

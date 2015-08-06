@@ -18,6 +18,7 @@
 #include <stx/protobuf/msg.h>
 #include <cstable/CSTableBuilder.h>
 #include <sstable/sstablereader.h>
+#include <tsdb/LogPartitionWriter.h>
 
 using namespace stx;
 
@@ -107,7 +108,7 @@ SHA1Hash Partition::uuid() const {
 RefPtr<PartitionWriter> Partition::getWriter() {
   std::unique_lock<std::mutex> lk(writer_lock_);
   if (writer_.get() == nullptr) {
-    writer_ = mkRef(new PartitionWriter(&head_));
+    writer_ = mkRef<PartitionWriter>(new LogPartitionWriter(&head_));
   }
 
   auto writer = writer_;

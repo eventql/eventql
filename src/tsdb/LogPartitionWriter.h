@@ -10,29 +10,29 @@
 #pragma once
 #include <stx/stdtypes.h>
 #include <stx/autoref.h>
-#include <tsdb/PartitionSnapshot.h>
-#include <tsdb/RecordRef.h>
+#include <tsdb/PartitionWriter.h>
+#include <stx/util/PersistentHashSet.h>
 
 using namespace stx;
 
 namespace tsdb {
 
-class PartitionWriter : public RefCounted {
+class LogPartitionWriter : public PartitionWriter {
 public:
   static const size_t kDefaultMaxDatafileSize = 1024 * 1024 * 128;
 
-  PartitionWriter(PartitionSnapshotRef* head);
+  LogPartitionWriter(PartitionSnapshotRef* head);
 
-  virtual bool insertRecord(
+  bool insertRecord(
       const SHA1Hash& record_id,
-      const Buffer& record) = 0;
+      const Buffer& record) override;
 
-  virtual Set<SHA1Hash> insertRecords(
-      const Vector<RecordRef>& records) = 0;
+  Set<SHA1Hash> insertRecords(
+      const Vector<RecordRef>& records) override;
 
 protected:
-  PartitionSnapshotRef* head_;
-  std::mutex mutex_;
+  PersistentHashSet idset_;
+  size_t max_datafile_size_;
 };
 
 } // namespace tdsb

@@ -17,6 +17,7 @@ add_library(tsdb-client OBJECT
 add_library(tsdb-server OBJECT
     tsdb/TSDBClient.cc
     tsdb/TimeWindowPartitioner.cc
+    tsdb/FixedShardPartitioner.cc
     tsdb/CSTableIndex.cc
     tsdb/SQLEngine.cc
     tsdb/TSDBService.cc
@@ -30,6 +31,7 @@ add_library(tsdb-server OBJECT
     tsdb/PartitionWriter.cc
     tsdb/PartitionSnapshot.cc
     tsdb/PartitionReplication.cc
+    tsdb/LogPartitionWriter.cc
     tsdb/LazyPartition.cc
     tsdb/Table.cc
     tsdb/ReplicationWorker.cc
