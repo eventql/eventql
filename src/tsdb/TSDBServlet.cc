@@ -87,7 +87,6 @@ void TSDBServlet::handleHTTPRequest(
     }
 
     if (uri.path() == "/tsdb/update_cstable") {
-      req_stream->readBody();
       updateCSTable(uri, req_stream.get(), &res);
       res_stream->writeResponse(res);
       return;
