@@ -28,7 +28,9 @@ public:
       const String& customer_key,
       const String& table_key);
   TableDefinitionList fetchTableDefinitions(const String& customer_key);
-  TableDefinition updateTableDefinition(const TableDefinition& table);
+  TableDefinition updateTableDefinition(
+      TableDefinition table,
+      bool force = false);
 
   Vector<Pair<String, uint64_t>> heads() const;
 

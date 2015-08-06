@@ -137,7 +137,7 @@ void MasterServlet::createCustomer(
   auto cfg = createCustomerConfig(customer);
 
   String force;
-  if (stx::URI::getParam(params, "force_reset", &force) && force == "YES") {
+  if (stx::URI::getParam(params, "force_reset", &force) && force == "true") {
     auto head_cfg = cdb_->fetchCustomerConfig(customer);
     cfg.set_version(head_cfg.version());
   }
@@ -197,12 +197,20 @@ void MasterServlet::updateTableDefinition(
     const URI& uri,
     http::HTTPRequest* req,
     http::HTTPResponse* res) {
+  const auto& params = uri.queryParams();
+
   if (req->method() != http::HTTPMessage::M_POST) {
     RAISE(kIllegalArgumentError, "expected HTTP POST request");
   }
 
+  bool force = false;
+  String force_str;
+  if (stx::URI::getParam(params, "force", &force_str) && force_str == "true") {
+    force = true;
+  }
+
   auto tbl = msg::decode<TableDefinition>(req->body());
-  auto updated_tbl = cdb_->updateTableDefinition(tbl);
+  auto updated_tbl = cdb_->updateTableDefinition(tbl, force);
   res->setStatus(stx::http::kStatusCreated);
   res->addBody(*msg::encode(updated_tbl));
 }
