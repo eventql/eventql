@@ -31,17 +31,18 @@ TSDBServlet::TSDBServlet(TSDBService* node) : node_(node) {}
 void TSDBServlet::handleHTTPRequest(
     RefPtr<http::HTTPRequestStream> req_stream,
     RefPtr<http::HTTPResponseStream> res_stream) {
-  req_stream->readBody();
   const auto& req = req_stream->request();
   URI uri(req.uri());
 
   http::HTTPResponse res;
   res.populateFromRequest(req);
+
   res.addHeader("Access-Control-Allow-Origin", "*");
   res.addHeader("Access-Control-Allow-Methods", "GET, POST");
   res.addHeader("Access-Control-Allow-Headers", "X-TSDB-Namespace");
 
   if (req.method() == http::HTTPMessage::M_OPTIONS) {
+    req_stream->readBody();
     res.setStatus(http::kStatusOK);
     res_stream->writeResponse(res);
     return;
@@ -49,30 +50,42 @@ void TSDBServlet::handleHTTPRequest(
 
   try {
     if (uri.path() == "/tsdb/insert") {
+      req_stream->readBody();
       insertRecords(&req, &res, &uri);
       res_stream->writeResponse(res);
       return;
     }
 
     if (uri.path() == "/tsdb/stream") {
+      req_stream->readBody();
       streamPartition(&req, &res, res_stream, &uri);
       return;
     }
 
     if (uri.path() == "/tsdb/partition_info") {
+      req_stream->readBody();
       fetchPartitionInfo(&req, &res, &uri);
       res_stream->writeResponse(res);
       return;
     }
 
     if (uri.path() == "/tsdb/sql") {
+      req_stream->readBody();
       executeSQL(&req, &res, &uri);
       res_stream->writeResponse(res);
       return;
     }
 
     if (uri.path() == "/tsdb/sql_stream") {
+      req_stream->readBody();
       executeSQLStream(&req, &res, res_stream, &uri);
+      return;
+    }
+
+    if (uri.path() == "/tsdb/update_cstable") {
+      req_stream->readBody();
+      updateCSTable(uri, req_stream.get(), &res);
+      res_stream->writeResponse(res);
       return;
     }
 
@@ -277,6 +290,63 @@ void TSDBServlet::executeSQLStream(
 
   sse_stream.finish();
 }
+
+void TSDBServlet::updateCSTable(
+    const URI& uri,
+    http::HTTPRequestStream* req_stream,
+    http::HTTPResponse* res) {
+  const auto& params = uri.queryParams();
+
+  String tsdb_namespace;
+  if (!URI::getParam(params, "namespace", &tsdb_namespace)) {
+    RAISE(kRuntimeError, "missing ?namespace=... parameter");
+  }
+
+  String table_name;
+  if (!URI::getParam(params, "table", &table_name)) {
+    res->setStatus(http::kStatusBadRequest);
+    res->addBody("error: missing ?table=... parameter");
+    return;
+  }
+
+  String partition_key;
+  if (!URI::getParam(params, "partition", &partition_key)) {
+    res->setStatus(stx::http::kStatusBadRequest);
+    res->addBody("missing ?partition=... parameter");
+    return;
+  }
+
+  String version;
+  if (!URI::getParam(params, "version", &version)) {
+    res->setStatus(http::kStatusBadRequest);
+    res->addBody("error: missing ?version=... parameter");
+    return;
+  }
+
+  auto tmpfile_path = FileUtil::joinPaths(
+      tmpdir_,
+      StringUtil::format("upload_$0.tmp", Random::singleton()->hex128()));
+
+  {
+    auto tmpfile = File::openFile(
+        tmpfile_path,
+        File::O_CREATE | File::O_READ | File::O_WRITE);
+
+    req_stream->readBody([&tmpfile] (const void* data, size_t size) {
+      tmpfile.write(data, size);
+    });
+  }
+
+  node_->updatePartitionCSTable(
+      tsdb_namespace,
+      table_name,
+      SHA1Hash::fromHexString(partition_key),
+      tmpfile_path,
+      std::stoull(version));
+
+  res->setStatus(http::kStatusCreated);
+}
+
 
 
 }
