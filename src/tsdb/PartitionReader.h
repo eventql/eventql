@@ -38,7 +38,7 @@ public:
       size_t sample_index,
       Function<void (const Buffer& record)> fn);
 
-  Option<RefPtr<VFSFile>> fetchSecondaryIndex(const String& index) const;
+  Option<String> cstableFilename() const;
 
 protected:
   RefPtr<PartitionSnapshot> snap_;

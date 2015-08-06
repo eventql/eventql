@@ -19,4 +19,6 @@ message PartitionInfo {
 
   optional string checksum = 6;
 
+  optional uint64 cstable_version = 7;
+
 };

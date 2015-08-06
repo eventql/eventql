@@ -153,6 +153,7 @@ PartitionInfo Partition::getInfo() const {
   pi.set_partition_key(snap->key.toString());
   pi.set_stream_key(table_->name());
   pi.set_checksum(checksum.toString());
+  pi.set_cstable_version(snap->state.cstable_version());
   pi.set_exists(true);
   return pi;
 }

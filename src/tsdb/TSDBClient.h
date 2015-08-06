@@ -58,10 +58,10 @@ public:
       size_t sample_index,
       Function<void (const Buffer& record)> fn);
 
-  //PartitionInfo fetchPartitionInfo(
-  //    const String& tsdb_namespace,
-  //    const String& stream_key,
-  //    const SHA1Hash& partition_key);
+  Option<PartitionInfo> partitionInfo(
+      const String& tsdb_namespace,
+      const String& stream_key,
+      const SHA1Hash& partition_key);
 
   //Buffer fetchDerivedDataset(
   //    const String& stream_key,

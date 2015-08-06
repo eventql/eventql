@@ -203,29 +203,33 @@ void TSDBClient::fetchPartitionWithSampling(
   }
 }
 
-//PartitionInfo TSDBClient::fetchPartitionInfo(
-//    const String& tsdb_namespace,
-//    const String& stream_key,
-//    const SHA1Hash& partition_key) {
-//  auto uri = StringUtil::format(
-//      "$0/partition_info?namespace=$1&stream=$2&partition=$3",
-//      uri_,
-//      URI::urlEncode(tsdb_namespace),
-//      URI::urlEncode(stream_key),
-//      partition_key.toString());
-//
-//  auto req = http::HTTPRequest::mkGet(uri);
-//  auto res = http_->executeRequest(req);
-//  res.wait();
-//
-//  const auto& r = res.get();
-//  if (r.statusCode() != 200) {
-//    RAISEF(kRuntimeError, "received non-200 response: $0", r.body().toString());
-//  }
-//
-//  return msg::decode<PartitionInfo>(r.body());
-//}
-//
+Option<PartitionInfo> TSDBClient::partitionInfo(
+    const String& tsdb_namespace,
+    const String& stream_key,
+    const SHA1Hash& partition_key) {
+  auto uri = StringUtil::format(
+      "$0/partition_info?namespace=$1&stream=$2&partition=$3",
+      uri_,
+      URI::urlEncode(tsdb_namespace),
+      URI::urlEncode(stream_key),
+      partition_key.toString());
+
+  auto req = http::HTTPRequest::mkGet(uri);
+  auto res = http_->executeRequest(req);
+  res.wait();
+
+  const auto& r = res.get();
+  if (r.statusCode() == 400) {
+    return None<PartitionInfo>();
+  }
+
+  if (r.statusCode() != 200) {
+    RAISEF(kRuntimeError, "received non-200 response: $0", r.body().toString());
+  }
+
+  return Some(msg::decode<PartitionInfo>(r.body()));
+}
+
 //Buffer TSDBClient::fetchDerivedDataset(
 //    const String& stream_key,
 //    const String& partition,

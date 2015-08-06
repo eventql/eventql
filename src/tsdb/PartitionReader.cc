@@ -126,9 +126,14 @@ void PartitionReader::fetchRecordsWithSampling(
   }
 }
 
-Option<RefPtr<VFSFile>> PartitionReader::fetchSecondaryIndex(
-    const String& index) const {
-  return None<RefPtr<VFSFile>>();
+Option<String> PartitionReader::cstableFilename() const {
+  auto filepath = FileUtil::joinPaths(snap_->base_path, "_cstable");
+
+  if (FileUtil::exists(filepath)) {
+    return Some(filepath);
+  } else {
+    return None<String>();
+  }
 }
 
 } // namespace tdsb

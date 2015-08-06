@@ -30,6 +30,10 @@ public:
    */
   bool replicate() override;
 
+protected:
+
+  void replicateTo(const ReplicaRef& replica, uint64_t head_version);
+
 };
 
 } // namespace tdsb

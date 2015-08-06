@@ -9,6 +9,7 @@
  */
 #include <tsdb/StaticPartitionReplication.h>
 #include <tsdb/ReplicationScheme.h>
+#include <tsdb/TSDBClient.h>
 #include <stx/logging.h>
 #include <stx/io/fileutil.h>
 #include <stx/protobuf/msg.h>
@@ -41,8 +42,95 @@ bool StaticPartitionReplication::needsReplication() const {
   return false;
 }
 
+void StaticPartitionReplication::replicateTo(
+    const ReplicaRef& replica,
+    uint64_t head_version) {
+  tsdb::TSDBClient tsdb_client(
+      StringUtil::format("http://$0/tsdb", replica.addr),
+      http_);
+
+  auto pinfo = tsdb_client.partitionInfo(
+      snap_->state.tsdb_namespace(),
+      snap_->state.table_key(),
+      snap_->key);
+
+  if (!pinfo.isEmpty() && pinfo.get().cstable_version() >= head_version) {
+    return;
+  }
+
+  auto reader = partition_->getReader();
+  auto cstable_file = reader->cstableFilename();
+
+  if (cstable_file.isEmpty()) {
+    return;
+  }
+
+  URI uri(
+      StringUtil::format(
+          "http://$0/tsdb/update_cstable?version=$1",
+          replica.addr,
+          head_version));
+
+  http::HTTPRequest req(http::HTTPMessage::M_POST, uri.pathAndQuery());
+  req.addHeader("Host", uri.hostAndPort());
+  req.addBody(FileUtil::read(cstable_file.get())); // FIXME use FileUpload
+
+  auto res = http_->executeRequest(req);
+  res.wait();
+
+  const auto& r = res.get();
+  if (r.statusCode() != 201) {
+    RAISEF(kRuntimeError, "received non-201 response: $0", r.body().toString());
+  }
+}
+
 bool StaticPartitionReplication::replicate() {
-  return true;
+  auto replicas = repl_scheme_->replicasFor(snap_->key);
+  if (replicas.size() == 0) {
+    return true;
+  }
+
+  auto repl_state = fetchReplicationState();
+  auto head_version = snap_->state.cstable_version();
+  bool dirty = false;
+  bool success = true;
+
+  for (const auto& r : replicas) {
+    const auto& replica_version = replicatedVersionFor(repl_state, r.unique_id);
+
+    if (replica_version < head_version) {
+      logDebug(
+          "tsdb",
+          "Replicating partition $0/$1/$2 to $3",
+          snap_->state.tsdb_namespace(),
+          snap_->state.table_key(),
+          snap_->key.toString(),
+          r.addr);
+
+      try {
+        replicateTo(r, head_version);
+        setReplicatedVersionFor(&repl_state, r.unique_id, head_version);
+        dirty = true;
+      } catch (const std::exception& e) {
+        success = false;
+
+        stx::logError(
+          "tsdb",
+          e,
+          "Error while replicating partition $0/$1/$2 to $3",
+          snap_->state.tsdb_namespace(),
+          snap_->state.table_key(),
+          snap_->key.toString(),
+          r.addr);
+      }
+    }
+  }
+
+  if (dirty) {
+    commitReplicationState(repl_state);
+  }
+
+  return success;
 }
 
 } // namespace tdsb
