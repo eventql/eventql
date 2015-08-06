@@ -45,9 +45,8 @@ bool StaticPartitionReplication::needsReplication() const {
 void StaticPartitionReplication::replicateTo(
     const ReplicaRef& replica,
     uint64_t head_version) {
-  tsdb::TSDBClient tsdb_client(
-      StringUtil::format("http://$0/tsdb", replica.addr),
-      http_);
+  auto tsdb_url = StringUtil::format("http://$0/tsdb", replica.addr);
+  tsdb::TSDBClient tsdb_client(tsdb_url, http_);
 
   auto pinfo = tsdb_client.partitionInfo(
       snap_->state.tsdb_namespace(),
@@ -65,10 +64,13 @@ void StaticPartitionReplication::replicateTo(
     return;
   }
 
-  URI uri(
+  auto uri = URI(
       StringUtil::format(
-          "http://$0/tsdb/update_cstable?version=$1",
-          replica.addr,
+          "$0/update_cstable?namespace=$1&table=$2&partition=$3&version=$4",
+          tsdb_url,
+          URI::urlEncode(snap_->state.tsdb_namespace()),
+          URI::urlEncode(snap_->state.table_key()),
+          snap_->key.toString(),
           head_version));
 
   http::HTTPRequest req(http::HTTPMessage::M_POST, uri.pathAndQuery());
