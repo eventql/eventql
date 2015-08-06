@@ -44,6 +44,20 @@ RefPtr<msg::MessageSchema> SessionSchema::forCustomer(
                 false,
                 true),
             msg::MessageSchemaField(
+                72,
+                "device_id",
+                msg::FieldType::STRING,
+                0,
+                false,
+                true),
+            msg::MessageSchemaField(
+                72,
+                "user_id",
+                msg::FieldType::STRING,
+                0,
+                false,
+                true),
+            msg::MessageSchemaField(
                 53,
                 "first_seen_time",
                 msg::FieldType::DATETIME,

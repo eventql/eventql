@@ -134,7 +134,15 @@ void MasterServlet::createCustomer(
     return;
   }
 
-  cdb_->updateCustomerConfig(createCustomerConfig(customer));
+  auto cfg = createCustomerConfig(customer);
+
+  String force;
+  if (stx::URI::getParam(params, "force_reset", &force) && force == "YES") {
+    auto head_cfg = cdb_->fetchCustomerConfig(customer);
+    cfg.set_version(head_cfg.version());
+  }
+
+  cdb_->updateCustomerConfig(cfg);
   res->setStatus(stx::http::kStatusCreated);
 }
 
