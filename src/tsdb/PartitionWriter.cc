@@ -21,4 +21,25 @@ PartitionWriter::PartitionWriter(
     PartitionSnapshotRef* head) :
     head_(head) {}
 
+void PartitionWriter::updateCSTable(
+    cstable::CSTableBuilder* cstable,
+    uint64_t version) {
+  std::unique_lock<std::mutex> lk(mutex_);
+  auto snap = head_->getSnapshot()->clone();
+
+  logDebug(
+      "tsdb",
+      "Updating cstable for partition $0/$1/$2",
+      snap->state.tsdb_namespace(),
+      snap->state.table_key(),
+      snap->key.toString());
+
+  auto filepath = FileUtil::joinPaths(snap->base_path, "_cstable");
+  cstable->write(filepath);
+
+  snap->state.set_cstable_version(version);
+  snap->writeToDisk();
+  head_->setSnapshot(snap);
+}
+
 } // namespace tdsb

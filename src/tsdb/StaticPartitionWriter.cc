@@ -36,19 +36,4 @@ Set<SHA1Hash> StaticPartitionWriter::insertRecords(
       "can't insert individual records because partition is STATIC");
 }
 
-void StaticPartitionWriter::updateCSTable(cstable::CSTableBuilder* cstable) {
-  std::unique_lock<std::mutex> lk(mutex_);
-  auto snap = head_->getSnapshot()->clone();
-
-  logDebug(
-      "tsdb",
-      "Updating cstable for partition $0/$1/$2",
-      snap->state.tsdb_namespace(),
-      snap->state.table_key(),
-      snap->key.toString());
-
-  auto filepath = FileUtil::joinPaths(snap->base_path, "_cstable");
-  cstable->write(filepath);
-}
-
 } // namespace tdsb

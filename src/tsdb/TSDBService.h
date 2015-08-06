@@ -46,7 +46,8 @@ public:
       const String& tsdb_namespace,
       const String& stream_key,
       const SHA1Hash& partition_key,
-      cstable::CSTableBuilder* cstable);
+      cstable::CSTableBuilder* cstable,
+      uint64_t version);
 
   void fetchPartition(
       const String& tsdb_namespace,

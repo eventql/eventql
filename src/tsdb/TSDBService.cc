@@ -84,14 +84,15 @@ void TSDBService::updatePartitionCSTable(
     const String& tsdb_namespace,
     const String& stream_key,
     const SHA1Hash& partition_key,
-    cstable::CSTableBuilder* cstable) {
+    cstable::CSTableBuilder* cstable,
+    uint64_t version) {
   auto partition = pmap_->findOrCreatePartition(
       tsdb_namespace,
       stream_key,
       partition_key);
 
   auto writer = partition->getWriter();
-  writer->updateCSTable(cstable);
+  writer->updateCSTable(cstable, version);
 
   auto change = mkRef(new PartitionChangeNotification());
   change->partition = partition;

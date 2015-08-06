@@ -31,7 +31,9 @@ public:
   virtual Set<SHA1Hash> insertRecords(
       const Vector<RecordRef>& records) = 0;
 
-  virtual void updateCSTable(cstable::CSTableBuilder* cstable) = 0;
+  void updateCSTable(
+      cstable::CSTableBuilder* cstable,
+      uint64_t version);
 
 protected:
   PartitionSnapshotRef* head_;
