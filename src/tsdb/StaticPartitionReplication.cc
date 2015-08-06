@@ -24,6 +24,20 @@ StaticPartitionReplication::StaticPartitionReplication(
     PartitionReplication(partition, repl_scheme, http) {}
 
 bool StaticPartitionReplication::needsReplication() const {
+  auto replicas = repl_scheme_->replicasFor(snap_->key);
+  if (replicas.size() == 0) {
+    return false;
+  }
+
+  auto repl_state = fetchReplicationState();
+  auto head_version = snap_->state.cstable_version();
+  for (const auto& r : replicas) {
+    const auto& replica_version = replicatedVersionFor(repl_state, r.unique_id);
+    if (replica_version < head_version) {
+      return true;
+    }
+  }
+
   return false;
 }
 

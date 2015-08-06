@@ -25,5 +25,14 @@ void setReplicatedOffsetFor(
     const SHA1Hash& replica_id,
     uint64_t replicated_offset);
 
+uint64_t replicatedVersionFor(
+    const ReplicationState& repl_state,
+    const SHA1Hash& replica_id);
+
+void setReplicatedVersionFor(
+    ReplicationState* repl_state,
+    const SHA1Hash& replica_id,
+    uint64_t version);
+
 } // namespace tdsb
 
