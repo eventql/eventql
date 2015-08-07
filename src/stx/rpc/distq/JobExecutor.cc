@@ -7,17 +7,24 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#pragma once
-#include "stx/stdtypes.h"
+#include "stx/rpc/distq/JobExecutor.h"
 
 namespace stx {
+namespace distq {
 
-template <class ProtoType>
-struct ProtoRef : public Serializable, public RefCounted {
-  ProtoRef();
-  ProtoRef(const ProtoRef<ProtoType>& other);
-  ProtoType proto;
-};
+RefPtr<Job> LocalExecutor::getJob(
+    const String& method,
+    const Serializable& params) {
+  std::unique_lock<std::mutex> lk(mutex_);
 
+  auto iter = jobs_.find(method);
+  if (iter == jobs_.end()) {
+    RAISEF(kNotFoundError, "job not found: $0", method);
+  }
+
+  return iter->second.ctor_ref(params);
+}
+
+} // namespace distq
 } // namespace stx
 
