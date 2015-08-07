@@ -13,21 +13,21 @@
 namespace stx {
 namespace rpc {
 
-JobContext::JobContext(Job* job) : job_(job) {}
+RPCContext::RPCContext(RPCRequest* rpc) : rpc_(rpc) {}
 
-bool JobContext::isCancelled() const {
-  std::unique_lock<std::mutex> lk(job_->mutex_);
-  return job_->error_ != nullptr;
+bool RPCContext::isCancelled() const {
+  std::unique_lock<std::mutex> lk(rpc_->mutex_);
+  return rpc_->error_ != nullptr;
 }
 
-void JobContext::onCancel(Function<void ()> fn) {
-  std::unique_lock<std::mutex> lk(job_->mutex_);
+void RPCContext::onCancel(Function<void ()> fn) {
+  std::unique_lock<std::mutex> lk(rpc_->mutex_);
 
-  if (job_->error_ != nullptr) {
+  if (rpc_->error_ != nullptr) {
     lk.unlock();
     fn();
   } else {
-    job_->on_cancel_ = fn;
+    rpc_->on_cancel_ = fn;
   }
 }
 

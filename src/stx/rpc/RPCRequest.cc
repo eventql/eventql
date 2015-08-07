@@ -8,19 +8,20 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include "stx/stdtypes.h"
-#include "stx/rpc/Job.h"
+#include "stx/rpc/RPCRequest.h"
+#include "stx/rpc/RPCContext.h"
 
 namespace stx {
 namespace rpc {
 
-Job::Job(
-    Function<void (JobContext* ctx)> call_fn) :
+RPCRequest::RPCRequest(
+    Function<void (RPCContext* ctx)> call_fn) :
     call_fn_(call_fn),
     ready_(false),
     error_(nullptr),
     running_(false) {}
 
-void Job::run() {
+void RPCRequest::run() {
   {
     std::unique_lock<std::mutex> lk(mutex_);
     if (ready_ || running_) {
@@ -30,7 +31,7 @@ void Job::run() {
     running_ = true;
   }
 
-  JobContext ctx(this);
+  RPCContext ctx(this);
   try {
     call_fn_(&ctx);
   } catch (const StandardException& e) {
@@ -41,7 +42,7 @@ void Job::run() {
   return returnSuccess();
 }
 
-void Job::returnSuccess() {
+void RPCRequest::returnSuccess() {
   {
     std::unique_lock<std::mutex> lk(mutex_);
     ready_ = true;
@@ -58,7 +59,7 @@ void Job::returnSuccess() {
   on_event_.clear();
 }
 
-void Job::returnError(const StandardException& e) {
+void RPCRequest::returnError(const StandardException& e) {
   try {
     auto rte = dynamic_cast<const stx::Exception&>(e);
     returnError(rte.getType(), rte.getMessage());
@@ -67,7 +68,7 @@ void Job::returnError(const StandardException& e) {
   }
 }
 
-void Job::returnError(ExceptionType error_type, const String& message) {
+void RPCRequest::returnError(ExceptionType error_type, const String& message) {
   std::unique_lock<std::mutex> lk(mutex_);
   if (ready_) {
     RAISE(kRuntimeError, "refusing to send an error to a finished job");
@@ -89,14 +90,14 @@ void Job::returnError(ExceptionType error_type, const String& message) {
   on_event_.clear();
 }
 
-void Job::cancel() {
+void RPCRequest::cancel() {
   std::unique_lock<std::mutex> lk(mutex_);
   if (ready_) {
     return;
   }
 
   error_ = kCancelledError;
-  error_message_ =  "Job cancelled";
+  error_message_ =  "RPCRequest cancelled";
   ready_ = true;
   lk.unlock();
 
@@ -115,7 +116,7 @@ void Job::cancel() {
   on_event_.clear();
 }
 
-void Job::wait() const {
+void RPCRequest::wait() const {
   std::unique_lock<std::mutex> lk(mutex_);
 
   while (!ready_) {
@@ -123,7 +124,7 @@ void Job::wait() const {
   }
 }
 
-bool Job::waitFor(const Duration& timeout) const {
+bool RPCRequest::waitFor(const Duration& timeout) const {
   std::unique_lock<std::mutex> lk(mutex_);
 
   if (ready_) {

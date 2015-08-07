@@ -14,63 +14,21 @@
 #include "stx/exception.h"
 #include "stx/Serializable.h"
 #include "stx/io/inputstream.h"
-#include "stx/rpc/Job.h"
+#include "stx/rpc/RPCRequest.h"
 
 namespace stx {
 namespace rpc {
 
-class JobExecutor {
+class RPCStub {
 public:
 
-  virtual ~JobExecutor() {}
+  virtual ~RPCStub() {}
 
-  virtual RefPtr<Job> getJob(
+  virtual RefPtr<RPCRequest> getRPC(
       const String& method,
       const Serializable& params) = 0;
 
 };
-
-
-class LocalExecutor : public JobExecutor {
-public:
-
-  RefPtr<Job> getJob(
-      const String& method,
-      const Serializable& params) override;
-
-  template <class ParamType>
-  void registerJob(
-      const String& job_name,
-      Function<void (const ParamType& params, JobContext* ctx)> fn);
-
-protected:
-
-  struct JobFactoryMethods {
-    Function<RefPtr<Job> (const Serializable& params)> ctor_ref;
-    Function<RefPtr<Job> (InputStream* is)> ctor_io;
-  };
-
-  mutable std::mutex mutex_;
-  HashMap<String, JobFactoryMethods> jobs_;
-};
-
-template <class ParamType>
-void LocalExecutor::registerJob(
-    const String& job_name,
-    Function<void (const ParamType& params, JobContext* ctx)> fn) {
-  JobFactoryMethods fmethods;
-
-  fmethods.ctor_ref = [fn] (const Serializable& any_params) -> RefPtr<Job> {
-    const auto& params = dynamic_cast<const ParamType&>(any_params);
-    return new Job([fn, params] (JobContext* ctx) {
-      fn(params, ctx);
-    });
-  };
-
-  std::unique_lock<std::mutex> lk(mutex_);
-  jobs_.emplace(job_name, fmethods);
-}
-
 
 } // namespace rpc
 } // namespace stx

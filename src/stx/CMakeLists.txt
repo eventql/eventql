@@ -142,8 +142,10 @@ add_library(stx-base OBJECT
     net/inetaddr.cc
     net/tcpconnection.cc
     random.cc
-    rpc/Job.cc
-    rpc/JobExecutor.cc
+    rpc/RPCRequest.cc
+    rpc/RPCContext.cc
+    rpc/RPCStub.cc
+    rpc/LocalStub.cc
     SHA1.cc
     StackTrace.cc
     status.cc
