@@ -10,8 +10,6 @@
 #include "stx/stdtypes.h"
 #include "stx/rpc/distq/Job.h"
 
-using namespace stx;
-
 namespace stx {
 namespace distq {
 
@@ -42,21 +40,6 @@ void Job::cancel() {
   }
 }
 
-bool Job::isCancelled() const {
-  std::unique_lock<std::mutex> lk(mutex_);
-  return error_;
-}
-
-void Job::onCancel(Function<void ()> fn) {
-  std::unique_lock<std::mutex> lk(mutex_);
-
-  if (error_) {
-    lk.unlock();
-    fn();
-  } else {
-    on_cancel_ = fn;
-  }
-}
 
 void Job::wait() const {
   std::unique_lock<std::mutex> lk(mutex_);
@@ -96,20 +79,38 @@ double Job::getCounter(const String& counter) const {
 //double getProgress() const;
 //void onProgress(Function<void (double progress)> fn);
 
-void Job::sendError(const String& error) {
-  std::unique_lock<std::mutex> lk(mutex_);
-  if (ready_) {
+JobContext::JobContext(RefPtr<Job> job) : job_(job) {}
+
+bool JobContext::isCancelled() const {
+  std::unique_lock<std::mutex> lk(job_->mutex_);
+  return job_->error_;
+}
+
+void JobContext::onCancel(Function<void ()> fn) {
+  std::unique_lock<std::mutex> lk(job_->mutex_);
+
+  if (job_->error_) {
+    lk.unlock();
+    fn();
+  } else {
+    job_->on_cancel_ = fn;
+  }
+}
+
+void JobContext::sendError(const String& error) {
+  std::unique_lock<std::mutex> lk(job_->mutex_);
+  if (job_->ready_) {
     RAISE(kRuntimeError, "refusing to send an error to a finished job");
   }
 
-  ready_ = true;
-  error_ = true;
+  job_->ready_ = true;
+  job_->error_ = true;
   lk.unlock();
 
-  cv_.notify_all();
+  job_->cv_.notify_all();
 
-  if (on_error_) {
-    on_error_(error);
+  if (job_->on_error_) {
+    job_->on_error_(error);
   }
 }
 
