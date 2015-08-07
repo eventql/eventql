@@ -14,8 +14,8 @@ namespace stx {
 namespace distq {
 
 Job::Job(
-    const String& job_name) :
-    name_(job_name),
+    Function<void (JobContext* ctx)> call_fn) :
+    call_fn_(call_fn),
     ready_(false),
     error_(false) {}
 
