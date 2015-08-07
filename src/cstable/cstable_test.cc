@@ -15,6 +15,7 @@
 #include <cstable/CSTableReader.h>
 #include <cstable/BitPackedIntColumnWriter.h>
 #include <cstable/BooleanColumnWriter.h>
+#include <cstable/DoubleColumnWriter.h>
 
 using namespace stx;
 
@@ -124,6 +125,48 @@ TEST_CASE(CSTableTest, TestBooleanColumnWriter, [] () {
     EXPECT_EQ(*val, v);
   }
 });
+
+TEST_CASE(CSTableTest, TestDoubleColumnWriter, [] () {
+  const String& filename = "/tmp/__fnord__cstabletest4.cstable";
+  const uint64_t num_records = 100;
+
+  FileUtil::rm(filename);
+
+  RefPtr<cstable::DoubleColumnWriter> column_writer = mkRef(
+    new cstable::DoubleColumnWriter(1, 1));
+
+  double v = 1.1;
+  for (uint32_t i = 0; i < 10; i++) {
+    column_writer->addDatum(1, 1, &v, sizeof(v));
+  }
+
+
+  auto tbl_writer = cstable::CSTableWriter(
+    filename,
+    num_records);
+  tbl_writer.addColumn("key1", column_writer.get());
+  tbl_writer.commit();
+
+
+  cstable::CSTableReader tbl_reader(filename);
+  RefPtr<cstable::ColumnReader> column_reader = tbl_reader.getColumnReader("key1");
+
+  EXPECT_EQ(column_reader->type() == msg::FieldType::DOUBLE, true);
+
+  uint64_t rep_level;
+  uint64_t def_level;
+  void* data;
+  double* val;
+  size_t size;
+
+  for (uint32_t i = 0; i < 10; i++) {
+    EXPECT_EQ(column_reader->next(&rep_level, &def_level, &data, &size), true);
+    val = static_cast<double*>(data);
+    EXPECT_EQ(size, sizeof(v));
+    EXPECT_EQ(*val, v);
+  }
+});
+
 
 
 
