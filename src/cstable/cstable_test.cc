@@ -73,9 +73,13 @@ TEST_CASE(CSTableTest, TestBitPackedIntColumnWriter, [] () {
   uint64_t def_level;
   void* data;
   size_t size;
+  uint32_t* val;
 
   for (uint32_t i = 0; i < 10; i++) {
     EXPECT_EQ(column_reader->next(&rep_level, &def_level, &data, &size), true);
+    EXPECT_EQ(size, sizeof(v));
+    val = static_cast<uint32_t*>(data);
+    EXPECT_EQ(*val, v);
   }
 });
 
@@ -110,10 +114,14 @@ TEST_CASE(CSTableTest, TestBooleanColumnWriter, [] () {
   uint64_t rep_level;
   uint64_t def_level;
   void* data;
+  uint8_t* val;
   size_t size;
 
   for (uint32_t i = 0; i < 10; i++) {
     EXPECT_EQ(column_reader->next(&rep_level, &def_level, &data, &size), true);
+    val = static_cast<uint8_t*>(data);
+    EXPECT_EQ(size, sizeof(v));
+    EXPECT_EQ(*val, v);
   }
 });
 
