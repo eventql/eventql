@@ -134,25 +134,6 @@ bool Job::waitFor(const Duration& timeout) const {
   return ready_;
 }
 
-JobContext::JobContext(Job* job) : job_(job) {}
-
-bool JobContext::isCancelled() const {
-  std::unique_lock<std::mutex> lk(job_->mutex_);
-  return job_->error_ != nullptr;
-}
-
-void JobContext::onCancel(Function<void ()> fn) {
-  std::unique_lock<std::mutex> lk(job_->mutex_);
-
-  if (job_->error_ != nullptr) {
-    lk.unlock();
-    fn();
-  } else {
-    job_->on_cancel_ = fn;
-  }
-}
-
-
 } // namespace rpc
 } // namespace stx
 
