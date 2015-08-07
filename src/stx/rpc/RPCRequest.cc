@@ -42,6 +42,16 @@ void RPCRequest::run() {
   return returnSuccess();
 }
 
+void RPCRequest::onReady(Function<void ()> fn) {
+  std::unique_lock<std::mutex> lk(mutex_);
+
+  if (ready_) {
+    fn();
+  } else {
+    on_ready_ = fn;
+  }
+}
+
 void RPCRequest::returnSuccess() {
   {
     std::unique_lock<std::mutex> lk(mutex_);
