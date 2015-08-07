@@ -29,7 +29,7 @@ public:
    * Execute on the local thread pool (returns immediately)
    */
   template <typename ParamType, typename ResultType>
-  void executeLocal(RefPtr<TypedQueryContext<ParamType, ResultType>> ctx);
+  void executePool(RefPtr<TypedQueryContext<ParamType, ResultType>> ctx);
 
   /**
    * Execute on some remote machine (returns immediately)
@@ -47,6 +47,14 @@ public:
       const String& method,
       Function<void (RefPtr<TypedQueryContext<ParamType, ResultType>> fn);
 
+protected:
+
+  struct QueryFactory {
+    Function<void (RefPtr<QueryContext> ctx)> call_;
+    Function<RefPtr<QueryContext> (InputStream* is))> build_;
+  };
+
+  HashMap<String, QueryFactory> methods_;
 };
 
 } // namespace distq
