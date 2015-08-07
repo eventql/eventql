@@ -1,3 +1,4 @@
+
 /**
  * This file is part of the "libstx" project
  *   Copyright (c) 2015 Paul Asmuth, FnordCorp B.V.
@@ -7,26 +8,22 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#pragma once
+#include "stx/rpc/RPCService.h"
 
 namespace stx {
 namespace rpc {
 
-template <class ParamType>
-void LocalStub::registerMethod(
-    const String& job_name,
-    Function<void (const ParamType& params, RPCContext* ctx)> fn) {
-  RPCFactoryMethods fmethods;
-
-  fmethods.ctor_ref = [fn] (const Serializable& any_params) -> RefPtr<RPCRequest> {
-    const auto& params = dynamic_cast<const ParamType&>(any_params);
-    return new RPCRequest([fn, params] (RPCContext* ctx) {
-      fn(params, ctx);
-    });
-  };
-
+RefPtr<RPCRequest> RPCService::getRPC(
+    const String& method,
+    const Serializable& params) {
   std::unique_lock<std::mutex> lk(mutex_);
-  methods_.emplace(job_name, fmethods);
+
+  auto iter = methods_.find(method);
+  if (iter == methods_.end()) {
+    RAISEF(kNotFoundError, "job not found: $0", method);
+  }
+
+  return iter->second.ctor_ref(params);
 }
 
 } // namespace rpc

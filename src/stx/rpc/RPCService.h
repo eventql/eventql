@@ -19,7 +19,7 @@
 namespace stx {
 namespace rpc {
 
-class LocalStub : public RPCStub {
+class RPCService : public RPCStub {
 public:
 
   RefPtr<RPCRequest> getRPC(
@@ -45,4 +45,4 @@ protected:
 } // namespace rpc
 } // namespace stx
 
-#include "LocalStub_impl.h"
+#include "RPCService_impl.h"

@@ -30,6 +30,22 @@ public:
 
 };
 
+class RPCStubMap {
+public:
+
+  RefPtr<RPCRequest> getRPC(
+      const String& endpoint,
+      const String& method,
+      const Serializable& params);
+
+  void registerEndpoint(
+      const String& endpoint,
+      ScopedPtr<RPCStub> stub);
+
+protected:
+  HashMap<String, ScopedPtr<RPCStub>> endpoints_;
+};
+
 } // namespace rpc
 } // namespace stx
 
