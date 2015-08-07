@@ -8,18 +8,20 @@
  * <http://www.gnu.org/licenses/>.
  */
 #pragma once
-#include "stx/stdtypes.h"
 
 namespace stx {
 
 template <class ProtoType>
-struct ProtoRef : public Serializable, public RefCounted {
-  ProtoRef();
-  ProtoRef(const ProtoType& proto);
-  ProtoRef(const ProtoRef<ProtoType>& other);
-  ProtoType proto;
-};
+ProtoRef<ProtoType>::ProtoRef() {}
+
+template <class ProtoType>
+ProtoRef<ProtoType>::ProtoRef(const ProtoType& _proto) :
+  proto(_proto) {}
+
+template <class ProtoType>
+ProtoRef<ProtoType>::ProtoRef(
+    const ProtoRef<ProtoType>& other) :
+    proto(other.proto) {}
 
 } // namespace stx
 
-#include "ProtoRef_impl.h"
