@@ -41,10 +41,15 @@ public:
   void onResult(Function<void (const ResultType& res)> fn);
 
 protected:
+
+  void returnSuccess();
+  void returnError(const String& error);
+
   Function<void (JobContext* ctx)> call_fn_;
   bool cancelled_;
   bool ready_;
   bool error_;
+  bool running_;
   Function<void (const Serializable& result)> on_result_;
   Function<void ()> on_ready_;
   Function<void (String)> on_error_;

@@ -17,11 +17,58 @@ Job::Job(
     Function<void (JobContext* ctx)> call_fn) :
     call_fn_(call_fn),
     ready_(false),
-    error_(false) {}
+    error_(false),
+    running_(false) {}
 
 void Job::run() {
+  {
+    std::unique_lock<std::mutex> lk(mutex_);
+    if (ready_ || running_) {
+      RAISE(kRuntimeError, "refusing to run a finished/running job");
+    }
+
+    running_ = true;
+  }
+
   JobContext ctx(this);
-  call_fn_(&ctx);
+  try {
+    call_fn_(&ctx);
+  } catch (const StandardException& e) {
+    returnError(e.what());
+    return;
+  }
+
+  return returnSuccess();
+}
+
+void Job::returnSuccess() {
+  {
+    std::unique_lock<std::mutex> lk(mutex_);
+    ready_ = true;
+  }
+
+  cv_.notify_all();
+
+  if (on_ready_) {
+    on_ready_();
+  }
+}
+
+void Job::returnError(const String& error) {
+  std::unique_lock<std::mutex> lk(mutex_);
+  if (ready_) {
+    RAISE(kRuntimeError, "refusing to send an error to a finished job");
+  }
+
+  ready_ = true;
+  error_ = true;
+  lk.unlock();
+
+  cv_.notify_all();
+
+  if (on_error_) {
+    on_error_(error);
+  }
 }
 
 void Job::cancel() {
@@ -103,20 +150,7 @@ void JobContext::onCancel(Function<void ()> fn) {
 }
 
 void JobContext::sendError(const String& error) {
-  std::unique_lock<std::mutex> lk(job_->mutex_);
-  if (job_->ready_) {
-    RAISE(kRuntimeError, "refusing to send an error to a finished job");
-  }
-
-  job_->ready_ = true;
-  job_->error_ = true;
-  lk.unlock();
-
-  job_->cv_.notify_all();
-
-  if (job_->on_error_) {
-    job_->on_error_(error);
-  }
+  job_->returnError(error);
 }
 
 } // namespace rpc
