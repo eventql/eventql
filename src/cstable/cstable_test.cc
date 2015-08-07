@@ -42,41 +42,47 @@ TEST_CASE(CSTableTest, TestCSTableContainer, [] () {
   EXPECT_EQ(tbl_reader.hasColumn("key2"), true);
 });
 
-TEST_CASE(CSTableTest, TestCSTableBitPacked, [] () {
+TEST_CASE(CSTableTest, TestBitPackedIntColumnWriter, [] () {
   const String& filename = "/tmp/__fnord__cstabletest2.cstable";
-  const uint64_t num_records = 1000;
+  const uint64_t num_records = 100;
 
   FileUtil::rm(filename);
 
   RefPtr<cstable::BitPackedIntColumnWriter> column_writer = mkRef(
-    new cstable::BitPackedIntColumnWriter(10, 10));
+    new cstable::BitPackedIntColumnWriter(1, 1));
+
+  uint32_t v = 10;
+  for (uint32_t i = 0; i < 10; i++) {
+    column_writer->addDatum(1, 1, &v, sizeof(v));
+  }
+
+
   auto tbl_writer = cstable::CSTableWriter(
     filename,
     num_records);
-
   tbl_writer.addColumn("key1", column_writer.get());
   tbl_writer.commit();
 
-  /*for (uint32_t i = 0; i < 10; i++) {
-    column_writer->addDatum(1, 1, i);
-  }*/
-
-  column_writer->addDatum(1, 1, 10);
 
   cstable::CSTableReader tbl_reader(filename);
   RefPtr<cstable::ColumnReader> column_reader = tbl_reader.getColumnReader("key1");
 
-  /*uint64_t rep_level;
+  EXPECT_EQ(column_reader->type() == msg::FieldType::UINT32, true);
+
+  uint64_t rep_level;
   uint64_t def_level;
   void* data;
-  size_t size;*/
+  size_t size;
 
-  //column_reader->next(&rep_level, &def_level, &data, &size);
+  for (uint32_t i = 0; i < 10; i++) {
+    EXPECT_EQ(column_reader->next(&rep_level, &def_level, &data, &size), true);
+  }
 });
+
 
 TEST_CASE(CSTableTest, TestBooleanColumnWriter, [] () {
   const String& filename = "/tmp/__fnord__cstabletest3.cstable";
-  const uint64_t num_records = 1000;
+  const uint64_t num_records = 100;
 
   FileUtil::rm(filename);
 
