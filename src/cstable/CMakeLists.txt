@@ -50,3 +50,13 @@ add_executable(cstable
     cstable.cc)
 
 target_link_libraries(cstable ${CMAKE_THREAD_LIBS_INIT} ${FNORD_LIBS})
+
+add_executable(test-cstable
+    $<TARGET_OBJECTS:stx-base>
+    $<TARGET_OBJECTS:stx-protobuf>
+    $<TARGET_OBJECTS:stx-http>
+    $<TARGET_OBJECTS:stx-json>
+    $<TARGET_OBJECTS:libcstable>
+    cstable_test.cc)
+
+target_link_libraries(test-cstable  ${CMAKE_THREAD_LIBS_INIT} ${FNORD_LIBS})
