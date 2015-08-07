@@ -20,10 +20,10 @@ namespace rpc {
 class RPCContext;
 
 class RPCRequest : public RefCounted {
-  friend class JobContext;
+  friend class RPCContext;
 public:
 
-  Job(Function<void (JobContext* ctx)> call_fn);
+  RPCRequest(Function<void (RPCContext* ctx)> call_fn);
 
   void run();
   void cancel();
@@ -44,7 +44,7 @@ protected:
   void returnError(const StandardException& e);
   void returnError(const ExceptionType type, const String& message);
 
-  Function<void (JobContext* ctx)> call_fn_;
+  Function<void (RPCContext* ctx)> call_fn_;
   bool cancelled_;
   bool ready_;
   const char* error_;

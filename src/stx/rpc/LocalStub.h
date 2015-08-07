@@ -14,26 +14,35 @@
 #include "stx/exception.h"
 #include "stx/Serializable.h"
 #include "stx/io/inputstream.h"
-#include "stx/rpc/RPCRequest.h"
+#include "stx/rpc/RPCStub.h"
 
 namespace stx {
 namespace rpc {
 
-class RPCContext {
+class LocalStub : public RPCStub {
 public:
 
-  RPCContext(RPCRequest* rpc);
+  RefPtr<RPCRequest> getRPC(
+      const String& method,
+      const Serializable& params) override;
 
-  bool isCancelled() const;
-  void onCancel(Function<void ()> fn);
-
-  template <typename EventType>
-  void sendEvent(const String& event_name, const EventType& data);
+  template <class ParamType>
+  void registerMethod(
+      const String& job_name,
+      Function<void (const ParamType& params, RPCContext* ctx)> fn);
 
 protected:
-  RPCRequest* rpc_;
+
+  struct RPCFactoryMethods {
+    Function<RefPtr<RPCRequest> (const Serializable& params)> ctor_ref;
+    Function<RefPtr<RPCRequest> (InputStream* is)> ctor_io;
+  };
+
+  mutable std::mutex mutex_;
+  HashMap<String, RPCFactoryMethods> methods_;
 };
 
 } // namespace rpc
 } // namespace stx
 
+#include "LocalStub_impl.h"
