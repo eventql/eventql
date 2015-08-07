@@ -17,9 +17,9 @@
 
 namespace stx {
 namespace rpc {
-class JobContext;
+class RPCContext;
 
-class Job : public RefCounted {
+class RPCRequest : public RefCounted {
   friend class JobContext;
 public:
 
@@ -57,20 +57,6 @@ protected:
   mutable std::condition_variable cv_;
 };
 
-class JobContext {
-public:
-
-  JobContext(Job* job);
-
-  bool isCancelled() const;
-  void onCancel(Function<void ()> fn);
-
-  template <typename EventType>
-  void sendEvent(const String& event_name, const EventType& data);
-
-protected:
-  Job* job_;
-};
 
 } // namespace rpc
 } // namespace stx
