@@ -19,6 +19,11 @@ Job::Job(
     ready_(false),
     error_(false) {}
 
+void Job::run() {
+  JobContext ctx(this);
+  call_fn_(&ctx);
+}
+
 void Job::cancel() {
   std::unique_lock<std::mutex> lk(mutex_);
   if (ready_) {
@@ -79,7 +84,7 @@ double Job::getCounter(const String& counter) const {
 //double getProgress() const;
 //void onProgress(Function<void (double progress)> fn);
 
-JobContext::JobContext(RefPtr<Job> job) : job_(job) {}
+JobContext::JobContext(Job* job) : job_(job) {}
 
 bool JobContext::isCancelled() const {
   std::unique_lock<std::mutex> lk(job_->mutex_);
