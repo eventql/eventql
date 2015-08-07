@@ -8,10 +8,10 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include "stx/stdtypes.h"
-#include "stx/rpc/distq/Job.h"
+#include "stx/rpc/Job.h"
 
 namespace stx {
-namespace distq {
+namespace rpc {
 
 Job::Job(
     Function<void (JobContext* ctx)> call_fn) :
@@ -119,6 +119,6 @@ void JobContext::sendError(const String& error) {
   }
 }
 
-} // namespace distq
+} // namespace rpc
 } // namespace stx
 
