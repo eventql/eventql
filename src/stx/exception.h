@@ -18,6 +18,7 @@
 const char kAccessDeniedError[] = "AccessDeniedError";
 const char kBufferOverflowError[] = "BufferOverflowError";
 const char kEncodingError[] = "EncodingError";
+const char kCancelledError[] = "CancelledError";
 const char kConcurrentModificationError[] = "ConcurrentModificationError";
 const char kDivideByZeroError[] = "DivideByZeroError";
 const char kEOFError[] = "EOFError";
@@ -77,17 +78,19 @@ namespace stx {
 class OutputStream;
 
 using StandardException = std::exception;
+using ExceptionType = const char*;
 
 class Exception : public StandardException {
 public:
   Exception();
-  Exception(const char* message, ...);
+  Exception(ExceptionType message, ...);
   Exception(const std::string& message);
   Exception(const Exception& other);
   Exception& operator=(const Exception& other) = delete;
 
   void debugPrint(OutputStream* os = nullptr) const;
   std::string getMessage() const;
+  ExceptionType getType() const;
   std::string getTypeName() const;
   std::string method() const;
   std::string file() const;

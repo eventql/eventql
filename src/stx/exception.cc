@@ -129,6 +129,10 @@ std::string Exception::getMessage() const {
   return std::string(message_);
 }
 
+ExceptionType Exception::getType() const {
+  return type_name_;
+}
+
 std::string Exception::getTypeName() const {
   return std::string(type_name_);
 }
