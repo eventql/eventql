@@ -17,7 +17,7 @@ Job::Job(
     Function<void (JobContext* ctx)> call_fn) :
     call_fn_(call_fn),
     ready_(false),
-    error_(false),
+    error_(nullptr),
     running_(false) {}
 
 void Job::run() {
@@ -34,7 +34,7 @@ void Job::run() {
   try {
     call_fn_(&ctx);
   } catch (const StandardException& e) {
-    returnError(e.what());
+    returnError(e);
     return;
   }
 
@@ -52,23 +52,41 @@ void Job::returnSuccess() {
   if (on_ready_) {
     on_ready_();
   }
+
+  on_ready_ = nullptr;
+  on_cancel_ = nullptr;
+  on_event_.clear();
 }
 
-void Job::returnError(const String& error) {
+void Job::returnError(const StandardException& e) {
+  try {
+    auto rte = dynamic_cast<const stx::Exception&>(e);
+    returnError(rte.getType(), rte.getMessage());
+  } catch (const std::exception& cast_error) {
+    returnError(kRuntimeError, e.what());
+  }
+}
+
+void Job::returnError(ExceptionType error_type, const String& message) {
   std::unique_lock<std::mutex> lk(mutex_);
   if (ready_) {
     RAISE(kRuntimeError, "refusing to send an error to a finished job");
   }
 
+  error_ = error_type;
+  error_message_ = message;
   ready_ = true;
-  error_ = true;
   lk.unlock();
 
   cv_.notify_all();
 
-  if (on_error_) {
-    on_error_(error);
+  if (on_ready_) {
+    on_ready_();
   }
+
+  on_ready_ = nullptr;
+  on_cancel_ = nullptr;
+  on_event_.clear();
 }
 
 void Job::cancel() {
@@ -77,7 +95,8 @@ void Job::cancel() {
     return;
   }
 
-  error_ = true;
+  error_ = kCancelledError;
+  error_message_ =  "Job cancelled";
   ready_ = true;
   lk.unlock();
 
@@ -87,11 +106,14 @@ void Job::cancel() {
     on_cancel_();
   }
 
-  if (on_error_) {
-    on_error_("Job cancelled");
+  if (on_ready_) {
+    on_ready_();
   }
-}
 
+  on_ready_ = nullptr;
+  on_cancel_ = nullptr;
+  on_event_.clear();
+}
 
 void Job::wait() const {
   std::unique_lock<std::mutex> lk(mutex_);
@@ -112,36 +134,17 @@ bool Job::waitFor(const Duration& timeout) const {
   return ready_;
 }
 
-HashMap<String, double> Job::getCounters() const {
-  std::unique_lock<std::mutex> lk(mutex_);
-  return counters_;
-}
-
-double Job::getCounter(const String& counter) const {
-  std::unique_lock<std::mutex> lk(mutex_);
-
-  auto iter = counters_.find(counter);
-  if (iter == counters_.end()) {
-    return 0;
-  } else {
-    return iter->second;
-  }
-}
-
-//double getProgress() const;
-//void onProgress(Function<void (double progress)> fn);
-
 JobContext::JobContext(Job* job) : job_(job) {}
 
 bool JobContext::isCancelled() const {
   std::unique_lock<std::mutex> lk(job_->mutex_);
-  return job_->error_;
+  return job_->error_ != nullptr;
 }
 
 void JobContext::onCancel(Function<void ()> fn) {
   std::unique_lock<std::mutex> lk(job_->mutex_);
 
-  if (job_->error_) {
+  if (job_->error_ != nullptr) {
     lk.unlock();
     fn();
   } else {
@@ -149,9 +152,6 @@ void JobContext::onCancel(Function<void ()> fn) {
   }
 }
 
-void JobContext::sendError(const String& error) {
-  job_->returnError(error);
-}
 
 } // namespace rpc
 } // namespace stx
