@@ -7,10 +7,10 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include "stx/rpc/distq/JobExecutor.h"
+#include "stx/rpc/JobExecutor.h"
 
 namespace stx {
-namespace distq {
+namespace rpc {
 
 RefPtr<Job> LocalExecutor::getJob(
     const String& method,
@@ -25,6 +25,6 @@ RefPtr<Job> LocalExecutor::getJob(
   return iter->second.ctor_ref(params);
 }
 
-} // namespace distq
+} // namespace rpc
 } // namespace stx
 

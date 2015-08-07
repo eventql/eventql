@@ -16,7 +16,7 @@
 #include "stx/io/inputstream.h"
 
 namespace stx {
-namespace distq {
+namespace rpc {
 class JobContext;
 
 class Job : public RefCounted {
@@ -74,6 +74,6 @@ protected:
   Job* job_;
 };
 
-} // namespace distq
+} // namespace rpc
 } // namespace stx
 

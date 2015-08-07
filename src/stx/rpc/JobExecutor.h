@@ -14,10 +14,10 @@
 #include "stx/exception.h"
 #include "stx/Serializable.h"
 #include "stx/io/inputstream.h"
-#include "stx/rpc/distq/Job.h"
+#include "stx/rpc/Job.h"
 
 namespace stx {
-namespace distq {
+namespace rpc {
 
 class JobExecutor {
 public:
@@ -72,6 +72,6 @@ void LocalExecutor::registerJob(
 }
 
 
-} // namespace distq
+} // namespace rpc
 } // namespace stx
 
