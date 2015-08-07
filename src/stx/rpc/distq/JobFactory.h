@@ -10,6 +10,7 @@
 #pragma once
 #include "stx/stdtypes.h"
 #include "stx/rpc/distq/Job.h"
+#include "stx/Serializable.h"
 
 using namespace stx;
 
@@ -21,21 +22,21 @@ public:
 
   RefPtr<Job> getJob(
       const String& job_name,
-      const Buffer& params) const;
+      const Serializable& params) const;
 
   /**
    * Register job
    */
-  template <class ParamType, class ResultType>
+  template <class ParamType>
   void registerJob(
       const String& job_name,
-      Function<void (RefPtr<TypedJob<ParamType, ResultType>> fn);
+      Function<RefPtr<Job> (const ParamType& params)> fn);
 
 protected:
 
   struct JobFactoryMethods {
-    //Function<void (RefPtr<QueryContext> ctx)> call_;
-    //Function<RefPtr<QueryContext> (InputStream* is))> build_;
+    Function<RefPtr<Job> (const Serializable& params)> build_local_;
+    Function<RefPtr<Job> (InputStream* is)> build_remote_;
   };
 
   mutable std::mutex mutex_;
