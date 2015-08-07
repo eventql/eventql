@@ -43,7 +43,7 @@ TEST_CASE(CSTableTest, TestCSTableContainer, [] () {
   EXPECT_EQ(tbl_reader.hasColumn("key2"), true);
 });
 
-TEST_CASE(CSTableTest, TestBitPackedIntColumnWriter, [] () {
+TEST_CASE(CSTableTest, TestBitPackedIntColumnWriterReader, [] () {
   const String& filename = "/tmp/__fnord__cstabletest2.cstable";
   const uint64_t num_records = 100;
 
@@ -85,7 +85,7 @@ TEST_CASE(CSTableTest, TestBitPackedIntColumnWriter, [] () {
 });
 
 
-TEST_CASE(CSTableTest, TestBooleanColumnWriter, [] () {
+TEST_CASE(CSTableTest, TestBooleanColumnWriterReader, [] () {
   const String& filename = "/tmp/__fnord__cstabletest3.cstable";
   const uint64_t num_records = 100;
 
@@ -126,7 +126,7 @@ TEST_CASE(CSTableTest, TestBooleanColumnWriter, [] () {
   }
 });
 
-TEST_CASE(CSTableTest, TestDoubleColumnWriter, [] () {
+TEST_CASE(CSTableTest, TestDoubleColumnWriterReader, [] () {
   const String& filename = "/tmp/__fnord__cstabletest4.cstable";
   const uint64_t num_records = 100;
 
