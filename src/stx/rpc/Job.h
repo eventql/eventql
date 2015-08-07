@@ -31,30 +31,28 @@ public:
   void wait() const;
   bool waitFor(const Duration& timeout) const;
 
-  HashMap<String, double> getCounters() const;
-  double getCounter(const String& counter) const;
+  void onReady(Function<void ()> on_ready);
 
-  double getProgress() const;
-  void onProgress(Function<void (double progress)> fn);
-
-  template <typename ResultType>
-  void onResult(Function<void (const ResultType& res)> fn);
+  template <typename EventType>
+  void onEvent(
+      const String& event_name,
+      const EventType& event);
 
 protected:
 
   void returnSuccess();
-  void returnError(const String& error);
+  void returnError(const StandardException& e);
+  void returnError(const ExceptionType type, const String& message);
 
   Function<void (JobContext* ctx)> call_fn_;
   bool cancelled_;
   bool ready_;
-  bool error_;
+  const char* error_;
+  String error_message_;
   bool running_;
-  Function<void (const Serializable& result)> on_result_;
+  HashMap<String, Function<void (const Serializable& result)>> on_event_;
   Function<void ()> on_ready_;
-  Function<void (String)> on_error_;
   Function<void ()> on_cancel_;
-  HashMap<String, double> counters_;
   mutable std::mutex mutex_;
   mutable std::condition_variable cv_;
 };
@@ -67,13 +65,8 @@ public:
   bool isCancelled() const;
   void onCancel(Function<void ()> fn);
 
-  template <typename ResultType>
-  void sendResult(const ResultType& res);
-
-  void sendError(const String& error);
-  void sendProgress(double progress);
-
-  void incrCounter(const String& counter, double value);
+  template <typename EventType>
+  void sendEvent(const String& event_name, const EventType& data);
 
 protected:
   Job* job_;
