@@ -9,18 +9,19 @@
  */
 #ifndef _STX_STDTYPES_H
 #define _STX_STDTYPES_H
+#include <condition_variable>
 #include <ctime>
 #include <deque>
 #include <inttypes.h>
 #include <limits>
 #include <list>
+#include <map>
 #include <memory>
 #include <mutex>
 #include <set>
 #include <stack>
 #include <string>
 #include <unordered_map>
-#include <map>
 #include <vector>
 
 namespace stx {
