@@ -43,8 +43,7 @@ protected:
   bool cancelled_;
   bool ready_;
   bool error_;
-  std::function<void (const Serializable& result)> on_local_result_;
-  std::function<void (InputStream* is)> on_remote_result_;
+  std::function<void (const Serializable& result)> on_result_;
   std::function<void ()> on_ready_;
   std::function<void (String)> on_error_;
   std::function<void ()> on_cancel_;
