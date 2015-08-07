@@ -57,7 +57,7 @@ protected:
 class JobContext {
 public:
 
-  JobContext(RefPtr<Job> job);
+  JobContext(Job* job);
 
   bool isCancelled() const;
   void onCancel(Function<void ()> fn);
@@ -71,7 +71,7 @@ public:
   void incrCounter(const String& counter, double value);
 
 protected:
-  RefPtr<Job> job_;
+  Job* job_;
 };
 
 } // namespace distq
