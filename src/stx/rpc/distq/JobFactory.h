@@ -28,9 +28,7 @@ public:
    * Register job
    */
   template <class ParamType>
-  void registerJob(
-      const String& job_name,
-      Function<RefPtr<Job> (const ParamType& params)> fn);
+  void registerJob(const String& job_name);
 
 protected:
 

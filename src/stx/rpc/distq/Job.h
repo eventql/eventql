@@ -17,13 +17,15 @@
 
 namespace stx {
 namespace distq {
+class JobContext;
 
 class Job : public RefCounted {
   friend class JobContext;
 public:
 
-  Job(const String& job_name);
+  Job(Function<void (JobContext* ctx)> call_fn);
 
+  void run();
   void cancel();
 
   void wait() const;
@@ -39,14 +41,14 @@ public:
   void onResult(Function<void (const ResultType& res)> fn);
 
 protected:
-  String name_;
+  Function<void (JobContext* ctx)> call_fn_;
   bool cancelled_;
   bool ready_;
   bool error_;
-  std::function<void (const Serializable& result)> on_result_;
-  std::function<void ()> on_ready_;
-  std::function<void (String)> on_error_;
-  std::function<void ()> on_cancel_;
+  Function<void (const Serializable& result)> on_result_;
+  Function<void ()> on_ready_;
+  Function<void (String)> on_error_;
+  Function<void ()> on_cancel_;
   HashMap<String, double> counters_;
   mutable std::mutex mutex_;
   mutable std::condition_variable cv_;
@@ -70,15 +72,6 @@ public:
 
 protected:
   RefPtr<Job> job_;
-};
-
-class JobExcutor {
-public:
-
-  virtual ~JobExcutor() {}
-
-  virtual bool execute(JobContext job) = 0;
-
 };
 
 } // namespace distq
