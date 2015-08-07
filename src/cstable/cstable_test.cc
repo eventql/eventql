@@ -12,6 +12,7 @@
 #include <stx/io/file.h>
 #include <stx/test/unittest.h>
 #include <cstable/CSTableWriter.h>
+#include <cstable/CSTableReader.h>
 #include <cstable/BitPackedIntColumnWriter.h>
 
 using namespace stx;
@@ -19,13 +20,22 @@ using namespace stx;
 UNIT_TEST(CSTableTest);
 
 TEST_CASE(CSTableTest, TestCSTableWriter, [] () {
-  FileUtil::rm("/tmp/__fnord__cstabletest1.sstable");
+  const String& filename = "/tmp/__fnord__cstabletest1.cstable";
+  const uint64_t num_records = 10;
 
-  RefPtr<cstable::ColumnWriter> columns_;
+  FileUtil::rm(filename);
 
-  auto tbl = cstable::CSTableWriter(
-    "/tmp/__fnord__cstabletest1.sstable",
-    10);
+  RefPtr<cstable::BitPackedIntColumnWriter> column_writer = mkRef(new cstable::BitPackedIntColumnWriter(10, 10));
+  auto tbl_writer = cstable::CSTableWriter(
+    filename,
+    num_records);
 
-  //tbl->addColumn("date",  new cstable::BitPackedIntColumnWriter(10, 10));
+  tbl_writer.addColumn("date", column_writer.get());
+  tbl_writer.commit();
+
+  cstable::CSTableReader cstable(filename);
+
+  EXPECT_EQ(cstable.numRecords(), num_records);
 });
+
+
