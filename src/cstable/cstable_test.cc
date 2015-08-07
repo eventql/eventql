@@ -19,23 +19,50 @@ using namespace stx;
 
 UNIT_TEST(CSTableTest);
 
-TEST_CASE(CSTableTest, TestCSTableWriter, [] () {
+TEST_CASE(CSTableTest, TestCSTableContainer, [] () {
   const String& filename = "/tmp/__fnord__cstabletest1.cstable";
   const uint64_t num_records = 10;
 
   FileUtil::rm(filename);
 
-  RefPtr<cstable::BitPackedIntColumnWriter> column_writer = mkRef(new cstable::BitPackedIntColumnWriter(10, 10));
+  RefPtr<cstable::BitPackedIntColumnWriter> column_writer = mkRef(
+    new cstable::BitPackedIntColumnWriter(10, 10));
   auto tbl_writer = cstable::CSTableWriter(
     filename,
     num_records);
 
-  tbl_writer.addColumn("date", column_writer.get());
+  tbl_writer.addColumn("key1", column_writer.get());
+  tbl_writer.addColumn("key2", column_writer.get());
   tbl_writer.commit();
 
-  cstable::CSTableReader cstable(filename);
+  cstable::CSTableReader tbl_reader(filename);
+  EXPECT_EQ(tbl_reader.numRecords(), num_records);
+  EXPECT_EQ(tbl_reader.hasColumn("key1"), true);
+  EXPECT_EQ(tbl_reader.hasColumn("key2"), true);
 
-  EXPECT_EQ(cstable.numRecords(), num_records);
+
+  RefPtr<cstable::ColumnReader> column_reader = tbl_reader.getColumnReader("key1");
 });
+
+TEST_CASE(CSTableTest, TestCSTable, [] () {
+  const String& filename = "/tmp/__fnord__cstabletest2.cstable";
+  const uint64_t num_records = 10;
+
+  FileUtil::rm(filename);
+
+  RefPtr<cstable::BitPackedIntColumnWriter> column_writer = mkRef(
+    new cstable::BitPackedIntColumnWriter(10, 10));
+  auto tbl_writer = cstable::CSTableWriter(
+    filename,
+    num_records);
+
+  tbl_writer.addColumn("key1", column_writer.get());
+
+  for (uint32_t i = 0; i < 1000; i++) {
+    column_writer->addDatum(1, 1, i);
+  }
+});
+
+
 
 
