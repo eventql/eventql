@@ -145,7 +145,7 @@ add_library(stx-base OBJECT
     rpc/RPCRequest.cc
     rpc/RPCContext.cc
     rpc/RPCStub.cc
-    rpc/LocalStub.cc
+    rpc/RPCService.cc
     SHA1.cc
     StackTrace.cc
     status.cc
