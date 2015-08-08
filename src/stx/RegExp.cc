@@ -37,7 +37,7 @@ RegExp::RegExp(const std::string& pattern) : pattern_(pattern) {
 
   pcre_handle_ = pcre_compile(
       pattern_.c_str(),
-      PCRE_CASELESS | PCRE_EXTENDED,
+      0,
       &error_msg,
       &error_pos,
       0);
