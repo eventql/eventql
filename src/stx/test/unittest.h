@@ -174,14 +174,12 @@ public:
 
     fprintf(stderr, "%s\n", name_);
 
-    const TestCase* current_test_case = nullptr;
     int num_tests_passed = 0;
     std::unordered_map<const TestCase*, stx::Exception> errors;
 
     for (auto test_case : cases_) {
       fprintf(stderr, "    %s::%s", name_, test_case->name_);
       fflush(stderr);
-      current_test_case = test_case;
 
       try {
         test_case->lambda_();
