@@ -104,8 +104,8 @@ void TSDBUploadStage::serializeSession(
 
   auto r = records->add_records();
   r->set_tsdb_namespace(ctx->customer_key);
-  r->set_stream_key(stream_key);
-  r->set_partition_key(partition_key.toString());
+  r->set_table_name(stream_key);
+  r->set_partition_sha1(partition_key.toString());
   r->set_record_id(record_id.toString());
   r->set_record_data(record_data.data(), record_data.size());
 }
@@ -130,8 +130,8 @@ void TSDBUploadStage::serializeEvent(
 
   auto r = records->add_records();
   r->set_tsdb_namespace(ctx->customer_key);
-  r->set_stream_key(stream_key);
-  r->set_partition_key(partition_key.toString());
+  r->set_table_name(stream_key);
+  r->set_partition_sha1(partition_key.toString());
   r->set_record_id(record_id.toString());
   r->set_record_data(record_data.data(), record_data.size());
 }
