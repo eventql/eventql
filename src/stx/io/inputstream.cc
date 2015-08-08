@@ -95,7 +95,7 @@ bool InputStream::readLine(std::string* target) {
     }
   }
 
-  return false;
+  return length > 0;
 }
 
 uint8_t InputStream::readUInt8() {
