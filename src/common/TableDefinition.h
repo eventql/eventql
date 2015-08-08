@@ -9,7 +9,7 @@
 #pragma once
 #include <stx/stdtypes.h>
 #include <common/TableDefinition.pb.h>
-#include <tsdb/TableDefinition.pb.h>
+#include <tsdb/TableConfig.pb.h>
 
 using namespace stx;
 
