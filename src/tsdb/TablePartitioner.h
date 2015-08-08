@@ -19,7 +19,7 @@ using namespace stx;
 
 namespace tsdb {
 
-class Partitioner : public RefCounted {
+class TablePartitioner : public RefCounted {
 public:
 
   virtual SHA1Hash partitionKeyFor(const String& partition_key) const = 0;

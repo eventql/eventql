@@ -66,7 +66,7 @@ TablePartitionerType Table::partitionerType() const {
   return config_.config().partitioner();
 }
 
-RefPtr<Partitioner> Table::partitioner() const {
+RefPtr<TablePartitioner> Table::partitioner() const {
   std::unique_lock<std::mutex> lk(mutex_);
   return partitioner_;
 }
@@ -83,12 +83,12 @@ void Table::loadConfig() {
   switch (config_.config().partitioner()) {
 
     case TBL_PARTITION_TIMEWINDOW:
-      partitioner_ = RefPtr<Partitioner>(
+      partitioner_ = RefPtr<TablePartitioner>(
           new TimeWindowPartitioner(config_.table_name()));
       break;
 
     case TBL_PARTITION_FIXED:
-      partitioner_ = RefPtr<Partitioner>(
+      partitioner_ = RefPtr<TablePartitioner>(
           new FixedShardPartitioner(config_.table_name()));
       break;
 

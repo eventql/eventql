@@ -13,13 +13,13 @@
 #include <stx/UnixTime.h>
 #include <stx/duration.h>
 #include <stx/SHA1.h>
-#include <tsdb/Partitioner.h>
+#include <tsdb/TablePartitioner.h>
 
 using namespace stx;
 
 namespace tsdb {
 
-class FixedShardPartitioner : public Partitioner {
+class FixedShardPartitioner : public TablePartitioner {
 public:
 
   FixedShardPartitioner(const String& table_name);

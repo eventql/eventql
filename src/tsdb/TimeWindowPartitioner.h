@@ -13,13 +13,13 @@
 #include <stx/UnixTime.h>
 #include <stx/duration.h>
 #include <stx/SHA1.h>
-#include <tsdb/Partitioner.h>
+#include <tsdb/TablePartitioner.h>
 
 using namespace stx;
 
 namespace tsdb {
 
-class TimeWindowPartitioner : public Partitioner {
+class TimeWindowPartitioner : public TablePartitioner {
 public:
 
   TimeWindowPartitioner(const String& table_name);

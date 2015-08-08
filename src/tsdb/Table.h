@@ -11,7 +11,7 @@
 #include <stx/stdtypes.h>
 #include <stx/duration.h>
 #include <tsdb/Partition.h>
-#include <tsdb/Partitioner.h>
+#include <tsdb/TablePartitioner.h>
 #include <stx/protobuf/MessageSchema.h>
 #include <tsdb/TableConfig.pb.h>
 
@@ -42,7 +42,7 @@ public:
 
   TablePartitionerType partitionerType() const;
 
-  RefPtr<Partitioner> partitioner() const;
+  RefPtr<TablePartitioner> partitioner() const;
 
   void updateConfig(TableDefinition new_config);
 
@@ -53,7 +53,7 @@ protected:
   mutable std::mutex mutex_;
   TableDefinition config_;
   RefPtr<msg::MessageSchema> schema_;
-  RefPtr<Partitioner> partitioner_;
+  RefPtr<TablePartitioner> partitioner_;
 };
 
 }
