@@ -17,6 +17,8 @@ message RecordEnvelope {
 
   optional string partition_sha1 = 2;
 
+  optional string partition_key = 6;
+
   required string record_id = 3;
 
   required bytes record_data = 4;
