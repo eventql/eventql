@@ -57,7 +57,7 @@ SHA1Hash TimeWindowPartitioner::partitionKeyFor(
   return partitionKeyFor(
       table_name_,
       UnixTime(std::stoull(partition_key)),
-      4 * kMicrosPerSecond);
+      4 * kMicrosPerHour);
 }
 
 
