@@ -18,6 +18,12 @@
 #include "stx/exceptionhandler.h"
 #include "stx/thread/signalhandler.h"
 
+void* __clock_gettime_glibc_2_2_5(void *, const void *, size_t);
+asm(".symver __clock_gettime_glibc_2_2_5, clock_gettime@GLIBC_2.2.5");
+void* __wrap_clock_gettime(void *dest, const void *src, size_t n) {
+  return __clock_gettime_glibc_2_2_5(dest, src, n); 
+}
+
 namespace stx {
 
 void Application::init() {
