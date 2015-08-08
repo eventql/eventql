@@ -58,8 +58,8 @@ void LogPartitionReplication::replicateTo(
           size_t record_size) {
     auto rec = batch.add_records();
     rec->set_tsdb_namespace(snap_->state.tsdb_namespace());
-    rec->set_stream_key(snap_->state.table_key());
-    rec->set_partition_key(snap_->key.toString());
+    rec->set_table_name(snap_->state.table_key());
+    rec->set_partition_sha1(snap_->key.toString());
     rec->set_record_id(record_id.toString());
     rec->set_record_data(record_data, record_size);
 

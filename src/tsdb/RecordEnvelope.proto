@@ -13,9 +13,9 @@ message RecordEnvelope {
 
   optional string tsdb_namespace = 5;
 
-  optional string stream_key = 1;
+  optional string table_name = 1;
 
-  optional string partition_key = 2;
+  optional string partition_sha1 = 2;
 
   required string record_id = 3;
 

@@ -35,8 +35,8 @@ void TSDBClient::insertRecord(
 
   auto record = records.add_records();
   record->set_tsdb_namespace(tsdb_namespace);
-  record->set_stream_key(stream_key);
-  record->set_partition_key(partition_key.toString());
+  record->set_table_name(stream_key);
+  record->set_partition_sha1(partition_key.toString());
   record->set_record_id(record_id.toString());
   record->set_record_data(record_data.toString());
 

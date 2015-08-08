@@ -31,8 +31,8 @@ void TSDBService::insertRecords(const RecordEnvelopeList& record_list) {
   for (const auto& record : record_list.records()) {
     auto partition = pmap_->findOrCreatePartition(
         record.tsdb_namespace(),
-        record.stream_key(),
-        SHA1Hash::fromHexString(record.partition_key()));
+        record.table_name(),
+        SHA1Hash::fromHexString(record.partition_sha1()));
 
     auto record_data = record.record_data().data();
     auto record_size = record.record_data().size();

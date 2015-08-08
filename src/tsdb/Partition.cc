@@ -52,7 +52,7 @@ RefPtr<Partition> Partition::create(
 
   PartitionState state;
   state.set_tsdb_namespace(tsdb_namespace);
-  state.set_partition_key(partition_key.data(), partition_key.size());
+  state.set_partition_sha1(partition_key.data(), partition_key.size());
   state.set_table_key(table->name());
   state.set_uuid(uuid.data(), uuid.size());
 
@@ -150,8 +150,8 @@ PartitionInfo Partition::getInfo() const {
       StringUtil::format("$0~$1", snap->key.toString(), snap->nrecs));
 
   PartitionInfo pi;
-  pi.set_partition_key(snap->key.toString());
-  pi.set_stream_key(table_->name());
+  pi.set_partition_sha1(snap->key.toString());
+  pi.set_table_name(table_->name());
   pi.set_checksum(checksum.toString());
   pi.set_cstable_version(snap->state.cstable_version());
   pi.set_exists(true);
