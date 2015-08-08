@@ -142,6 +142,7 @@ add_library(stx-base OBJECT
     net/inetaddr.cc
     net/tcpconnection.cc
     random.cc
+    RegExp.cc
     rpc/RPCRequest.cc
     rpc/RPCContext.cc
     rpc/RPCStub.cc
