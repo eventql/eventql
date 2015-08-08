@@ -15,6 +15,7 @@
 #include <string>
 #include "stx/time_constants.h"
 #include "stx/CivilTime.h"
+#include "stx/option.h"
 
 namespace stx {
 
@@ -46,7 +47,7 @@ public:
    * @param str the string to parse
    * @param fmt the strftime format string (optional)
    */
-  static UnixTime parseString(
+  static Option<UnixTime> parseString(
       const String& str,
       const char* fmt = "%Y-%m-%d %H:%M:%S");
 
@@ -57,7 +58,7 @@ public:
    * @param strlen the size of the string to parse
    * @param fmt the strftime format string (optional)
    */
-  static UnixTime parseString(
+  static Option<UnixTime> parseString(
       const char* str,
       size_t strlen,
       const char* fmt = "%Y-%m-%d %H:%M:%S");

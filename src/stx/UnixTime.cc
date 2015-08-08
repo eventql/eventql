@@ -103,17 +103,22 @@ std::string UnixTime::toString(const char* fmt) const {
   return std::string(buf);
 }
 
-UnixTime UnixTime::parseString(
+Option<UnixTime> UnixTime::parseString(
     const String& str,
     const char* fmt /* = "%Y-%m-%d %H:%M:%S" */) {
-  return UnixTime(CivilTime::parseString(str.data(), str.size(), fmt));
+  return UnixTime::parseString(str.data(), str.size(), fmt);
 }
 
-UnixTime UnixTime::parseString(
+Option<UnixTime> UnixTime::parseString(
     const char* str,
     size_t strlen,
     const char* fmt /* = "%Y-%m-%d %H:%M:%S" */) {
-  return UnixTime(CivilTime::parseString(str, strlen, fmt));
+  auto ct = CivilTime::parseString(str, strlen, fmt);
+  if (ct.isEmpty()) {
+    return None<UnixTime>();
+  } else {
+    return Some(UnixTime(ct.get()));
+  }
 }
 
 template <>
