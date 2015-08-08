@@ -12,3 +12,4 @@ add_library(customerdirectory OBJECT
 add_library(auth OBJECT
     AnalyticsAuth.cc)
 
+add_dependencies(auth customerdirectory)
