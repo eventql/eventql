@@ -112,6 +112,16 @@ bool RegExp::match(const char* cstring, Result* result) const {
   return match(cstring, strlen(cstring), result);
 }
 
+size_t RegExp::getNamedCaptureIndex(const String& name) {
+  auto res = pcre_get_stringnumber(pcre_handle_, name.c_str());
+
+  if (res == PCRE_ERROR_NOSUBSTRING) {
+    return size_t(-1);
+  } else {
+    return res;
+  }
+}
+
 const char* RegExp::c_str() const {
   return pattern_.c_str();
 }
