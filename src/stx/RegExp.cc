@@ -1,23 +1,18 @@
-// This file is part of the "libcortex" project
+// This file is part of the "libstx" project
 //   (c) 2009-2015 Christian Parpart <https://github.com/christianparpart>
 //   (c) 2014-2015 Paul Asmuth <https://github.com/paulasmuth>
 //
-// libcortex is free software: you can redistribute it and/or modify it under
-// the terms of the GNU Affero General Public License v3.0.
+// libstx is free software: you can redistribute it and/or modify it under
+// the terms of the GNU General Public License v3.0.
 // You should have received a copy of the GNU Affero General Public License
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
-
-#include <cortex-base/RegExp.h>
-#include <cortex-base/Buffer.h>
+#include <stx/RegExp.h>
 #include <cstring>
 #include <pcre.h>
 
-namespace cortex {
+namespace stx {
 
-RegExp::RegExp()
-    : pattern_(),
-      re_(nullptr) {
-}
+RegExp::RegExp() : pattern_(), re_(nullptr) {}
 
 RegExp::RegExp(const RegExp& v) : pattern_(v.pattern_), re_() {
   // there's no pcre_clone() unfortunately ^^
@@ -85,8 +80,12 @@ bool RegExp::match(const char* buffer, size_t size, Result* result) const {
   return rc > 0;
 }
 
-bool RegExp::match(const BufferRef& buffer, Result* result) const {
-  return match(buffer.data(), buffer.size(), result);
+bool RegExp::match(const String& subject, Result* result) const {
+  return match(subject.data(), subject.size(), result);
+}
+
+bool RegExp::match(const Buffer& subject, Result* result) const {
+  return match((char*) subject.data(), subject.size(), result);
 }
 
 bool RegExp::match(const char* cstring, Result* result) const {
@@ -97,13 +96,4 @@ const char* RegExp::c_str() const {
   return pattern_.c_str();
 }
 
-RegExpContext::RegExpContext()
-    : regexMatch_(nullptr) {
-}
-
-RegExpContext::~RegExpContext() {
-  if (regexMatch_ != nullptr)
-    delete regexMatch_;
-}
-
-}  // namespace cortex
+}  // namespace stx
