@@ -8,6 +8,8 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <tsdb/Table.h>
+#include <tsdb/TimeWindowPartitioner.h>
+#include <tsdb/FixedShardPartitioner.h>
 
 using namespace stx;
 
@@ -17,7 +19,9 @@ Table::Table(
     const TableDefinition& config,
     RefPtr<msg::MessageSchema> schema) :
     config_(config),
-    schema_(schema) {}
+    schema_(schema) {
+  loadConfig();
+}
 
 String Table::name() const {
   std::unique_lock<std::mutex> lk(mutex_);
@@ -64,6 +68,11 @@ TablePartitioner Table::partitionerType() const {
   return config_.config().partitioner();
 }
 
+RefPtr<Partitioner> Table::partitioner() const {
+  std::unique_lock<std::mutex> lk(mutex_);
+  return partitioner_;
+}
+
 void Table::updateSchema(RefPtr<msg::MessageSchema> new_schema) {
   std::unique_lock<std::mutex> lk(mutex_);
   schema_ = new_schema;
@@ -72,6 +81,21 @@ void Table::updateSchema(RefPtr<msg::MessageSchema> new_schema) {
 void Table::updateConfig(TableDefinition new_config) {
   std::unique_lock<std::mutex> lk(mutex_);
   config_ = new_config;
+  loadConfig();
+}
+
+void Table::loadConfig() {
+  switch (config_.config().partitioner()) {
+
+    case TBL_PARTITION_TIMEWINDOW:
+      partitioner_ = RefPtr<Partitioner>(new TimeWindowPartitioner());
+      break;
+
+    case TBL_PARTITION_FIXED:
+      partitioner_ = RefPtr<Partitioner>(new FixedShardPartitioner());
+      break;
+
+  }
 }
 
 }

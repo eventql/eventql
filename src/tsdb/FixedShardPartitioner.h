@@ -13,12 +13,13 @@
 #include <stx/UnixTime.h>
 #include <stx/duration.h>
 #include <stx/SHA1.h>
+#include <tsdb/Partitioner.h>
 
 using namespace stx;
 
 namespace tsdb {
 
-class FixedShardPartitioner : public RefCounted {
+class FixedShardPartitioner : public Partitioner {
 public:
 
   static SHA1Hash partitionKeyFor(
@@ -28,6 +29,8 @@ public:
   static Vector<SHA1Hash> partitionKeysFor(
       const String& table_name,
       size_t nshards);
+
+  SHA1Hash partitionKeyFor(const String& partition_key) override;
 
 };
 

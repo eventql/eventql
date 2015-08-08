@@ -42,16 +42,20 @@ public:
 
   TablePartitioner partitionerType() const;
 
-  RefPtr<Partitioner> partitioner();
+  RefPtr<Partitioner> partitioner() const;
 
   void updateSchema(RefPtr<msg::MessageSchema> new_schema);
 
   void updateConfig(TableDefinition new_config);
 
 protected:
+
+  void loadConfig();
+
   mutable std::mutex mutex_;
   TableDefinition config_;
   RefPtr<msg::MessageSchema> schema_;
+  RefPtr<Partitioner> partitioner_;
 };
 
 }

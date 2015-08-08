@@ -13,12 +13,13 @@
 #include <stx/UnixTime.h>
 #include <stx/duration.h>
 #include <stx/SHA1.h>
+#include <tsdb/Partitioner.h>
 
 using namespace stx;
 
 namespace tsdb {
 
-class TimeWindowPartitioner : public RefCounted {
+class TimeWindowPartitioner : public Partitioner {
 public:
 
   static SHA1Hash partitionKeyFor(
@@ -31,6 +32,8 @@ public:
       UnixTime from,
       UnixTime until,
       Duration window_size);
+
+  SHA1Hash partitionKeyFor(const String& partition_key) override;
 
 };
 
