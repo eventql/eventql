@@ -71,15 +71,14 @@ TEST_CASE(CSTableTest, TestCSTableColumnWriterReader, [] () {
   RefPtr<cstable::UInt64ColumnWriter> uint64_writer = mkRef(
     new cstable::UInt64ColumnWriter(rep_max, def_max));
 
-  uint8_t boolean_v;
-  double double_v;
-  const String& string_v = "value";
-  uint64_t uint64_v = 0;
+  
 
   for (auto i = 0; i < num_records; i++) {
-    boolean_v = i % 2;
-    double_v = i * 1.1;
-    uint64_v = static_cast<uint64_t>(i);
+    uint8_t boolean_v = i % 2;
+    double double_v = i * 1.1;
+    uint64_t uint64_v = static_cast<uint64_t>(i);
+    const String& string_v = "value";
+
     bitpacked_writer->addDatum(rep_max, def_max, &i, sizeof(i));
     boolean_writer->addDatum(rep_max, def_max, &boolean_v, sizeof(boolean_v));
     double_writer->addDatum(rep_max, def_max, &double_v, sizeof(double_v));
@@ -139,6 +138,8 @@ TEST_CASE(CSTableTest, TestCSTableColumnWriterReader, [] () {
   uint64_t* uint64_val;
 
   for (auto i = 0; i < num_records; i++) {
+    const String& string_v = "value";
+
     EXPECT_EQ(
       bitpacked_reader->next(&rep_level, &def_level, &data, &size),
       true);
