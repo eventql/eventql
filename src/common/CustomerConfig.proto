@@ -49,6 +49,6 @@ message CustomerConfig {
 
   required LogJoinConfig logjoin_config = 2;
 
-  required LogfileImportConfig logfile_import_config = 3;
+  optional LogfileImportConfig logfile_import_config = 3;
 
 };
