@@ -130,6 +130,14 @@ bool DynamicMessage::addDateTimeField(const String& name, const UnixTime& val) {
   }
 
   auto field_id = schema_->fieldId(name);
+  return addDateTimeField(field_id, val);
+}
+
+bool DynamicMessage::addDateTimeField(uint32_t field_id, const UnixTime& val) {
+  if (!schema_->hasField(field_id)) {
+    return false;
+  }
+
   if (schema_->fieldType(field_id) != msg::FieldType::DATETIME) {
     return false;
   }
