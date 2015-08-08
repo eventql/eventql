@@ -56,6 +56,141 @@ CustomerConfig createCustomerConfig(const String& customer) {
 
   conf.mutable_logjoin_config()->set_session_schema_next_field_id(74);
 
+  {
+    auto liconf = conf.mutable_logfile_import_config();
+    auto lidef = liconf->add_logfiles();
+    lidef->set_name("nginx_access_log");
+    lidef->set_regex(R"(^(?<http_status>[^|]*)\|(?<loveos_region>[^|]*)\|(?<loveos_cluster>[^|]*)\|(?<forwarded_for>[^|]*)\|(?<dawanda_session>[^|]*)\|(?<bytes_sent>[^|]*)\|(?<request_time>[^|]*)\|(?<upstream_response_time>[^|]*)\|(?<http_method>[^| ]*) ?(?<path>[^| ]*) ?(?<http_version>[^|]*)\|(?<rails_runtime_ms>[^|]*)\|(?<remote_addr>[^|]*)\|(?<time>[^|]*)\|(?<host>[^|]*)\|(?<referrer>[^|]*)\|(?<user_agent>[^|]*)\|(?<upstream_addr>[^|\n]*))");
+
+    {
+      auto f = lidef->add_source_fields();
+      f->set_name("datacenter");
+      f->set_id(2);
+      f->set_type("STRING");
+    }
+    {
+      auto f = lidef->add_source_fields();
+      f->set_name("rack");
+      f->set_id(3);
+      f->set_type("STRING");
+    }
+    {
+      auto f = lidef->add_source_fields();
+      f->set_name("host");
+      f->set_id(4);
+      f->set_type("STRING");
+    }
+
+    {
+      auto f = lidef->add_source_fields();
+      f->set_name("http_status");
+      f->set_id(5);
+      f->set_type("UINT64");
+    }
+    {
+      auto f = lidef->add_source_fields();
+      f->set_name("loveos_region");
+      f->set_id(7);
+      f->set_type("STRING");
+    }
+    {
+      auto f = lidef->add_source_fields();
+      f->set_name("loveos_cluster");
+      f->set_id(8);
+      f->set_type("STRING");
+    }
+    {
+      auto f = lidef->add_source_fields();
+      f->set_name("forwarded_for");
+      f->set_id(9);
+      f->set_type("STRING");
+    }
+    {
+      auto f = lidef->add_source_fields();
+      f->set_name("dawanda_session");
+      f->set_id(10);
+      f->set_type("STRING");
+    }
+    {
+      auto f = lidef->add_source_fields();
+      f->set_name("bytes_sent");
+      f->set_id(11);
+      f->set_type("UINT64");
+    }
+    {
+      auto f = lidef->add_source_fields();
+      f->set_name("request_time");
+      f->set_id(12);
+      f->set_type("DOUBLE");
+    }
+    {
+      auto f = lidef->add_source_fields();
+      f->set_name("upstream_response_time");
+      f->set_id(13);
+      f->set_type("DOUBLE");
+    }
+    {
+      auto f = lidef->add_source_fields();
+      f->set_name("http_method");
+      f->set_id(14);
+      f->set_type("STRING");
+    }
+    {
+      auto f = lidef->add_source_fields();
+      f->set_name("path");
+      f->set_id(15);
+      f->set_type("STRING");
+    }
+    {
+      auto f = lidef->add_source_fields();
+      f->set_name("http_version");
+      f->set_id(16);
+      f->set_type("STRING");
+    }
+    {
+      auto f = lidef->add_source_fields();
+      f->set_name("rails_runtime_ms");
+      f->set_id(17);
+      f->set_type("DOUBLE");
+    }
+    {
+      auto f = lidef->add_source_fields();
+      f->set_name("remote_addr");
+      f->set_id(18);
+      f->set_type("STRING");
+    }
+    {
+      auto f = lidef->add_source_fields();
+      f->set_name("time");
+      f->set_id(19);
+      f->set_type("DATETIME");
+    }
+    {
+      auto f = lidef->add_source_fields();
+      f->set_name("host");
+      f->set_id(20);
+      f->set_type("STRING");
+    }
+    {
+      auto f = lidef->add_source_fields();
+      f->set_name("referrer");
+      f->set_id(21);
+      f->set_type("STRING");
+    }
+    {
+      auto f = lidef->add_source_fields();
+      f->set_name("user_agent");
+      f->set_id(22);
+      f->set_type("STRING");
+    }
+    {
+      auto f = lidef->add_source_fields();
+      f->set_name("upstream_addr");
+      f->set_id(23);
+      f->set_type("STRING");
+    }
+  }
+
   return conf;
 }
 
