@@ -41,6 +41,28 @@ public:
   UnixTime(const CivilTime& civil);
 
   /**
+   * Parse time from the provided string
+   *
+   * @param str the string to parse
+   * @param fmt the strftime format string (optional)
+   */
+  static UnixTime parseString(
+      const String& str,
+      const char* fmt = "%Y-%m-%d %H:%M:%S");
+
+  /**
+   * Parse time from the provided string
+   *
+   * @param str the string to parse
+   * @param strlen the size of the string to parse
+   * @param fmt the strftime format string (optional)
+   */
+  static UnixTime parseString(
+      const char* str,
+      size_t strlen,
+      const char* fmt = "%Y-%m-%d %H:%M:%S");
+
+  /**
    * Return a representation of the date as a string (strftime)
    *
    * @param fmt the strftime format string (optional)
