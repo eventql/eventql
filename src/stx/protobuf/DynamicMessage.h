@@ -27,6 +27,8 @@ public:
   bool addStringField(const String& name, const String& val);
   bool addBoolField(const String& name, bool val);
 
+  bool addField(uint32_t id, const String& val);
+
   bool addObject(const String& name, Function<void (DynamicMessage* msg)> fn);
 
   void toJSON(json::JSONOutputStream* json) const;

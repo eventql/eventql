@@ -25,6 +25,14 @@ bool DynamicMessage::addField(const String& name, const String& value) {
   }
 
   auto field_id = schema_->fieldId(name);
+  return addField(field_id, value);
+}
+
+bool DynamicMessage::addField(uint32_t field_id, const String& value) {
+  if (!schema_->hasField(field_id)) {
+    return false;
+  }
+
   switch (schema_->fieldType(field_id)) {
 
     case msg::FieldType::BOOLEAN: {
