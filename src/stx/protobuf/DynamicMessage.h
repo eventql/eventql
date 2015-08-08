@@ -21,13 +21,14 @@ public:
   DynamicMessage(RefPtr<msg::MessageSchema> schema);
 
   bool addField(const String& name, const String& val);
+  bool addField(uint32_t id, const String& val);
   bool addUInt32Field(const String& name, uint32_t val);
   bool addUInt64Field(const String& name, uint64_t val);
   bool addDateTimeField(const String& name, const UnixTime& val);
+  bool addDateTimeField(uint32_t id, const UnixTime& val);
   bool addStringField(const String& name, const String& val);
   bool addBoolField(const String& name, bool val);
 
-  bool addField(uint32_t id, const String& val);
 
   bool addObject(const String& name, Function<void (DynamicMessage* msg)> fn);
 
