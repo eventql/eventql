@@ -40,7 +40,7 @@ public:
 
   TableStorage storage() const;
 
-  TablePartitioner partitionerType() const;
+  TablePartitionerType partitionerType() const;
 
   RefPtr<Partitioner> partitioner() const;
 

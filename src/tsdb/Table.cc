@@ -61,7 +61,7 @@ TableStorage Table::storage() const {
   return config_.config().storage();
 }
 
-TablePartitioner Table::partitionerType() const {
+TablePartitionerType Table::partitionerType() const {
   std::unique_lock<std::mutex> lk(mutex_);
   return config_.config().partitioner();
 }

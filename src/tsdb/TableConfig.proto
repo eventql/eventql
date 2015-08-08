@@ -9,7 +9,7 @@
  */
 package tsdb;
 
-enum TablePartitioner {
+enum TablePartitionerType {
   TBL_PARTITION_TIMEWINDOW = 0;
   TBL_PARTITION_FIXED = 1;
 };
@@ -47,7 +47,7 @@ message TableConfig {
   /**
    * The partitioner for this table
    */
-  required TablePartitioner partitioner = 2;
+  required TablePartitionerType partitioner = 2;
 
   /**
    * What kind of data is stored in this table?
