@@ -164,6 +164,7 @@ CustomerConfig createCustomerConfig(const String& customer) {
       f->set_name("time");
       f->set_id(19);
       f->set_type("DATETIME");
+      f->set_format("%d/%b/%Y:%H:%M:%S");
     }
     {
       auto f = lidef->add_row_fields();
