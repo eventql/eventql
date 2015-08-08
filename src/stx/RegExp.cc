@@ -12,49 +12,69 @@
 
 namespace stx {
 
-RegExp::RegExp() : pattern_(), re_(nullptr) {}
+RegExp::RegExp() : pcre_handle_(nullptr) {}
 
-RegExp::RegExp(const RegExp& v) : pattern_(v.pattern_), re_() {
-  // there's no pcre_clone() unfortunately ^^
-  const char* errMsg = "";
-  int errOfs = 0;
+RegExp::RegExp(const RegExp& other) : pattern_(other.pattern_) {
+  // there's no pcpcre_handle_clone() unfortunately ^^
+  const char* error_msg = "";
+  int error_pos = 0;
 
-  re_ = pcre_compile(pattern_.c_str(), PCRE_CASELESS | PCRE_EXTENDED, &errMsg,
-                     &errOfs, 0);
+  pcre_handle_ = pcre_compile(
+      pattern_.c_str(),
+      PCRE_CASELESS | PCRE_EXTENDED,
+      &error_msg,
+      &error_pos,
+      0);
+
+  if (!pcre_handle_) {
+    RAISEF(kParseError, "Invalid regex: $0", error_msg);
+  }
 }
 
-RegExp::RegExp(const std::string& pattern) : pattern_(pattern), re_() {
-  const char* errMsg = "";
-  int errOfs = 0;
+RegExp::RegExp(const std::string& pattern) : pattern_(pattern) {
+  const char* error_msg = "";
+  int error_pos = 0;
 
-  re_ = pcre_compile(pattern_.c_str(), PCRE_CASELESS | PCRE_EXTENDED, &errMsg,
-                     &errOfs, 0);
+  pcre_handle_ = pcre_compile(
+      pattern_.c_str(),
+      PCRE_CASELESS | PCRE_EXTENDED,
+      &error_msg,
+      &error_pos,
+      0);
+
+  if (!pcre_handle_) {
+    RAISEF(kParseError, "Invalid regex: $0", error_msg);
+  }
 }
 
 RegExp::~RegExp() {
-  pcre_free(re_);
-}
-
-RegExp::RegExp(RegExp&& v)
-    : pattern_(std::move(v.pattern_)),
-      re_(v.re_) {
-  v.re_ = nullptr;
-}
-
-RegExp& RegExp::operator=(RegExp&& v) {
-  pattern_ = std::move(v.pattern_);
-
-  if (re_) {
-    pcre_free(re_);
+  if (pcre_handle_) {
+    pcre_free(pcre_handle_);
   }
-  re_ = v.re_;
-  v.re_ = nullptr;
+}
+
+RegExp::RegExp(
+    RegExp&& other) :
+    pattern_(std::move(other.pattern_)),
+    pcre_handle_(other.pcre_handle_) {
+  other.pcre_handle_ = nullptr;
+}
+
+RegExp& RegExp::operator=(RegExp&& other) {
+  pattern_ = std::move(other.pattern_);
+
+  if (pcre_handle_) {
+    pcre_free(pcre_handle_);
+  }
+
+  pcre_handle_ = other.pcre_handle_;
+  other.pcre_handle_ = nullptr;
 
   return *this;
 }
 
 bool RegExp::match(const char* buffer, size_t size, Result* result) const {
-  if (!re_) return false;
+  if (!pcre_handle_) return false;
 
   const size_t OV_COUNT = 3 * 36;
   int ov[OV_COUNT];
@@ -64,7 +84,7 @@ bool RegExp::match(const char* buffer, size_t size, Result* result) const {
     ov[i] = 1337;
 #endif
 
-  int rc = pcre_exec(re_, nullptr, buffer, size, 0, 0, ov, OV_COUNT);
+  int rc = pcre_exec(pcre_handle_, nullptr, buffer, size, 0, 0, ov, OV_COUNT);
   if (result) {
     result->clear();
     if (rc > 0) {
