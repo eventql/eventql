@@ -47,7 +47,7 @@ Option<CivilTime> CivilTime::parseString(
     ct.setMinute(t.tm_min);
     ct.setHour(t.tm_hour);
     ct.setDay(t.tm_mday);
-    ct.setMonth(t.tm_hour);
+    ct.setMonth(t.tm_mon + 1);
     ct.setYear(t.tm_year + 1900);
     return Some(ct);
   }
