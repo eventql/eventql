@@ -30,6 +30,7 @@ message LogfileField {
   required string name = 1;
   required uint64 id = 2;
   required string type = 3;
+  optional string format = 4;
 }
 
 message LogfileDefinition {
