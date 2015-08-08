@@ -135,7 +135,7 @@ std::vector<std::string> StackTrace::symbols() const {
               sizeof(buf),
               "<%p> in %s",
               info.dli_fname,
-              frames_[i]);
+              (char*) frames_[i]);
           output.push_back(std::string(buf, n));
         }
       } else {
