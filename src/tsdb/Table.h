@@ -11,6 +11,7 @@
 #include <stx/stdtypes.h>
 #include <stx/duration.h>
 #include <tsdb/Partition.h>
+#include <tsdb/Partitioner.h>
 #include <stx/protobuf/MessageSchema.h>
 #include <tsdb/TableConfig.pb.h>
 
@@ -39,7 +40,9 @@ public:
 
   TableStorage storage() const;
 
-  TablePartitioner partitioner() const;
+  TablePartitioner partitionerType() const;
+
+  RefPtr<Partitioner> partitioner();
 
   void updateSchema(RefPtr<msg::MessageSchema> new_schema);
 

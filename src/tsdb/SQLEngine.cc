@@ -77,7 +77,7 @@ void SQLEngine::replaceSequentialScanWithUnion(
   }
 
   Vector<SHA1Hash> partitions;
-  switch (table.get()->partitioner()) {
+  switch (table.get()->partitionerType()) {
 
     case TBL_PARTITION_TIMEWINDOW: {
       if (table_ref.timerange_begin.isEmpty() ||

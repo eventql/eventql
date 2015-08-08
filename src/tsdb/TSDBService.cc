@@ -29,10 +29,27 @@ void TSDBService::insertRecords(const RecordEnvelopeList& record_list) {
   Vector<RefPtr<Partition>> partition_refs;
   HashMap<Partition*, Vector<RecordRef>> grouped;
   for (const auto& record : record_list.records()) {
+    SHA1Hash partition_key;
+
+    if (record.has_partition_sha1()) {
+      partition_key = SHA1Hash::fromHexString(record.partition_sha1());
+    } else {
+      auto table = pmap_->findTable(
+          record.tsdb_namespace(),
+          record.table_name());
+
+      if (table.isEmpty()) {
+        RAISEF(kNotFoundError, "table not found: $0", record.table_name());
+      }
+
+      partition_key = table.get()->partitioner()->partitionKeyFor(
+          record.partition_key());
+    }
+
     auto partition = pmap_->findOrCreatePartition(
         record.tsdb_namespace(),
         record.table_name(),
-        SHA1Hash::fromHexString(record.partition_sha1()));
+        partition_key);
 
     auto record_data = record.record_data().data();
     auto record_size = record.record_data().size();
@@ -64,7 +81,6 @@ void TSDBService::insertRecord(
     const SHA1Hash& partition_key,
     const SHA1Hash& record_id,
     const Buffer& record) {
-
   auto partition = pmap_->findOrCreatePartition(
       tsdb_namespace,
       table_name,
