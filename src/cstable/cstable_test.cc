@@ -79,7 +79,7 @@ TEST_CASE(CSTableTest, TestCSTableColumnWriterReader, [] () {
   for (auto i = 0; i < num_records; i++) {
     boolean_v = i % 2;
     double_v = i * 1.1;
-    uint64_v++;
+    uint64_v = static_cast<uint64_t>(i);
     bitpacked_writer->addDatum(rep_max, def_max, &i, sizeof(i));
     boolean_writer->addDatum(rep_max, def_max, &boolean_v, sizeof(boolean_v));
     double_writer->addDatum(rep_max, def_max, &double_v, sizeof(double_v));
@@ -126,17 +126,61 @@ TEST_CASE(CSTableTest, TestCSTableColumnWriterReader, [] () {
   EXPECT_EQ(uint32_reader->type() == msg::FieldType::UINT32, true);
   EXPECT_EQ(uint64_reader->type() == msg::FieldType::UINT64, true);
 
-  /*uint64_t rep_level;
+  uint64_t rep_level;
   uint64_t def_level;
   size_t size;
-  void* bitpacked_data;
+  void* data;
   uint32_t* bitpacked_val;
-  void* boolean_data;
   uint8_t* boolean_val;
+  double* double_val;
+  uint64_t* leb128_val;
+  String* string_val;
+  uint32_t* uint32_val;
+  uint64_t* uint64_val;
 
   for (auto i = 0; i < num_records; i++) {
-    
-  }*/
+    EXPECT_EQ(
+      bitpacked_reader->next(&rep_level, &def_level, &data, &size),
+      true);
+    bitpacked_val = static_cast<uint32_t*>(data);
+    EXPECT_EQ(*bitpacked_val, i);
+
+    EXPECT_EQ(
+      boolean_reader->next(&rep_level, &def_level, &data, &size),
+      true);
+    boolean_val = static_cast<uint8_t*>(data);
+    EXPECT_EQ(*boolean_val, i % 2);
+
+    EXPECT_EQ(
+      double_reader->next(&rep_level, &def_level, &data, &size),
+      true);
+    double_val = static_cast<double*>(data);
+    EXPECT_EQ(*double_val, i * 1.1);
+
+    EXPECT_EQ(
+      leb128_reader->next(&rep_level, &def_level, &data, &size),
+      true);
+    leb128_val = static_cast<uint64_t*>(data);
+    EXPECT_EQ(*leb128_val, i);
+
+    EXPECT_EQ(
+      string_reader->next(&rep_level, &def_level, &data, &size),
+      true);
+    string_val = static_cast<String*>(data);
+    EXPECT_EQ(*string_val, string_v);
+
+    EXPECT_EQ(
+      uint32_reader->next(&rep_level, &def_level, &data, &size),
+      true);
+    uint32_val = static_cast<uint32_t*>(data);
+    EXPECT_EQ(*uint32_val, i);
+
+    EXPECT_EQ(
+      uint64_reader->next(&rep_level, &def_level, &data, &size),
+      true);
+    uint64_val = static_cast<uint64_t*>(data);
+    EXPECT_EQ(*uint64_val, static_cast<uint64_t>(i));
+  }
 });
 
 
