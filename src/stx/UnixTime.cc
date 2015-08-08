@@ -103,6 +103,19 @@ std::string UnixTime::toString(const char* fmt) const {
   return std::string(buf);
 }
 
+UnixTime UnixTime::parseString(
+    const String& str,
+    const char* fmt /* = "%Y-%m-%d %H:%M:%S" */) {
+  return UnixTime(CivilTime::parseString(str.data(), str.size(), fmt));
+}
+
+UnixTime UnixTime::parseString(
+    const char* str,
+    size_t strlen,
+    const char* fmt /* = "%Y-%m-%d %H:%M:%S" */) {
+  return UnixTime(CivilTime::parseString(str, strlen, fmt));
+}
+
 template <>
 std::string StringUtil::toString(UnixTime value) {
   return value.toString();
