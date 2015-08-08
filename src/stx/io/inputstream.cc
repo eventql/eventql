@@ -83,6 +83,21 @@ size_t InputStream::readUntilEOF(std::string* target) {
   return length;
 }
 
+bool InputStream::readLine(std::string* target) {
+  char byte;
+  size_t length;
+
+  for (length = 0; readNextByte(&byte); ++length) {
+    *target += byte;
+
+    if (byte == '\n') {
+      return true;
+    }
+  }
+
+  return false;
+}
+
 uint8_t InputStream::readUInt8() {
   uint8_t val;
   if (readNextBytes(&val, sizeof(uint8_t)) != sizeof(uint8_t)) {
