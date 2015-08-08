@@ -53,13 +53,14 @@ Option<RefPtr<Table>> PartitionMap::findTableWithLock(
 
 void PartitionMap::configureTable(const TableDefinition& table) {
   std::unique_lock<std::mutex> lk(mutex_);
-  auto stream_ns_key = table.tsdb_namespace() + "~" + table.table_name();
+  auto tbl_key = table.tsdb_namespace() + "~" + table.table_name();
 
-  tables_.emplace(
-      stream_ns_key,
-      new Table(
-          table,
-          msg::MessageSchema::decode(table.config().schema())));
+  auto iter = tables_.find(tbl_key);
+  if (iter == tables_.end()) {
+    tables_.emplace(tbl_key, new Table(table));
+  } else {
+    iter->second->updateConfig(table);
+  }
 }
 
 void PartitionMap::open() {

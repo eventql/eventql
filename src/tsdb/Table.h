@@ -22,7 +22,7 @@ namespace tsdb {
 class Table : public RefCounted{
 public:
 
-  Table(const TableDefinition& config, RefPtr<msg::MessageSchema> schema);
+  Table(const TableDefinition& config);
 
   String name() const;
 
@@ -43,8 +43,6 @@ public:
   TablePartitioner partitionerType() const;
 
   RefPtr<Partitioner> partitioner() const;
-
-  void updateSchema(RefPtr<msg::MessageSchema> new_schema);
 
   void updateConfig(TableDefinition new_config);
 

@@ -16,10 +16,8 @@ using namespace stx;
 namespace tsdb {
 
 Table::Table(
-    const TableDefinition& config,
-    RefPtr<msg::MessageSchema> schema) :
-    config_(config),
-    schema_(schema) {
+    const TableDefinition& config) :
+    config_(config) {
   loadConfig();
 }
 
@@ -73,11 +71,6 @@ RefPtr<Partitioner> Table::partitioner() const {
   return partitioner_;
 }
 
-void Table::updateSchema(RefPtr<msg::MessageSchema> new_schema) {
-  std::unique_lock<std::mutex> lk(mutex_);
-  schema_ = new_schema;
-}
-
 void Table::updateConfig(TableDefinition new_config) {
   std::unique_lock<std::mutex> lk(mutex_);
   config_ = new_config;
@@ -85,6 +78,8 @@ void Table::updateConfig(TableDefinition new_config) {
 }
 
 void Table::loadConfig() {
+  schema_ = msg::MessageSchema::decode(config_.config().schema());
+
   switch (config_.config().partitioner()) {
 
     case TBL_PARTITION_TIMEWINDOW:
