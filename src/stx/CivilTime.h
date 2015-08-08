@@ -9,14 +9,18 @@
  */
 #pragma once
 #include "stx/stdtypes.h"
+#include "stx/option.h"
 
 namespace stx {
 
+/**
+ * Class representing an instance of time in the gregorian calendar
+ */
 class CivilTime {
 public:
 
   /**
-   * Create a new CivilTime instance with time = now
+   * Create a new CivilTime instance with all fields set to zero
    */
   CivilTime();
 
@@ -25,13 +29,66 @@ public:
    */
   CivilTime(std::nullptr_t);
 
+  /**
+   * Parse time from the provided string
+   *
+   * @param str the string to parse
+   * @param fmt the strftime format string (optional)
+   */
+  static Option<CivilTime> parseString(
+      const String& str,
+      const char* fmt = "%Y-%m-%d %H:%M:%S");
+
+  /**
+   * Parse time from the provided string
+   *
+   * @param str the string to parse
+   * @param strlen the size of the string to parse
+   * @param fmt the strftime format string (optional)
+   */
+  static Option<CivilTime> parseString(
+      const char* str,
+      size_t strlen,
+      const char* fmt = "%Y-%m-%d %H:%M:%S");
+
+  /**
+   * Year including century / A.D. (eg. 1999)
+   */
   uint16_t year() const;
+
+  /**
+   * Month [1-12]
+   */
   uint8_t month() const;
+
+  /**
+   * Day of the month [1-31]
+   */
   uint8_t day() const;
+
+  /**
+   * Hour [0-23]
+   */
   uint8_t hour() const;
+
+  /**
+   * Hour [0-59]
+   */
   uint8_t minute() const;
+
+  /**
+   * Second [0-60]
+   */
   uint8_t second() const;
+
+  /**
+   * Millisecond [0-999]
+   */
   uint16_t millisecond() const;
+
+  /**
+   * Timezone offset to UTC in seconds
+   */
   int32_t offset() const;
 
   void setYear(uint16_t value);

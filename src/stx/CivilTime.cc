@@ -8,11 +8,12 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include "stx/CivilTime.h"
+#include <string>
+#include <ctime>
 
 namespace stx {
 
-CivilTime::CivilTime(
-    std::nullptr_t) :
+CivilTime::CivilTime() :
     year_(0),
     month_(0),
     day_(0),
@@ -21,6 +22,36 @@ CivilTime::CivilTime(
     second_(0),
     millisecond_(0),
     offset_(0) {}
+
+
+CivilTime::CivilTime(std::nullptr_t) : CivilTime() {}
+
+Option<CivilTime> CivilTime::parseString(
+    const String& str,
+    const char* fmt /* = "%Y-%m-%d %H:%M:%S" */) {
+  return CivilTime::parseString(str.data(), str.size(), fmt);
+}
+
+Option<CivilTime> CivilTime::parseString(
+    const char* str,
+    size_t strlen,
+    const char* fmt /* = "%Y-%m-%d %H:%M:%S" */) {
+  struct tm t;
+
+  // FIXME strptime doesn't handle time zone offsets
+  if (strptime(str, fmt, &t) == NULL) {
+    return None<CivilTime>();
+  } else {
+    CivilTime ct;
+    ct.setSecond(t.tm_sec);
+    ct.setMinute(t.tm_min);
+    ct.setHour(t.tm_hour);
+    ct.setDay(t.tm_mday);
+    ct.setMonth(t.tm_hour);
+    ct.setYear(t.tm_year + 1900);
+    return Some(ct);
+  }
+}
 
 uint16_t CivilTime::year() const {
   return year_;
