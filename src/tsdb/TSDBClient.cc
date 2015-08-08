@@ -27,7 +27,7 @@ TSDBClient::TSDBClient(
 
 void TSDBClient::insertRecord(
     const String& tsdb_namespace,
-    const String& stream_key,
+    const String& table_name,
     const SHA1Hash& partition_key,
     const SHA1Hash& record_id,
     const Buffer& record_data) {
@@ -35,7 +35,7 @@ void TSDBClient::insertRecord(
 
   auto record = records.add_records();
   record->set_tsdb_namespace(tsdb_namespace);
-  record->set_table_name(stream_key);
+  record->set_table_name(table_name);
   record->set_partition_sha1(partition_key.toString());
   record->set_record_id(record_id.toString());
   record->set_record_data(record_data.toString());
@@ -88,13 +88,13 @@ void TSDBClient::insertRecordsToHost(
 }
 
 //Vector<String> TSDBClient::listPartitions(
-//    const String& stream_key,
+//    const String& table_name,
 //    const UnixTime& from,
 //    const UnixTime& until) {
 //  auto uri = StringUtil::format(
 //      "$0/list_chunks?stream=$1&from=$2&until=$3",
 //      uri_,
-//      URI::urlEncode(stream_key),
+//      URI::urlEncode(table_name),
 //      from.unixMicros(),
 //      until.unixMicros());
 //
@@ -119,12 +119,12 @@ void TSDBClient::insertRecordsToHost(
 
 void TSDBClient::fetchPartition(
     const String& tsdb_namespace,
-    const String& stream_key,
+    const String& table_name,
     const SHA1Hash& partition_key,
     Function<void (const Buffer& record)> fn) {
   fetchPartitionWithSampling(
       tsdb_namespace,
-      stream_key,
+      table_name,
       partition_key,
       0,
       0,
@@ -133,7 +133,7 @@ void TSDBClient::fetchPartition(
 
 void TSDBClient::fetchPartitionWithSampling(
     const String& tsdb_namespace,
-    const String& stream_key,
+    const String& table_name,
     const SHA1Hash& partition_key,
     size_t sample_modulo,
     size_t sample_index,
@@ -144,7 +144,7 @@ void TSDBClient::fetchPartitionWithSampling(
       "$0/stream?namespace=$1&stream=$2&partition=$3",
       uri_,
       URI::urlEncode(tsdb_namespace),
-      URI::urlEncode(stream_key),
+      URI::urlEncode(table_name),
       partition_key.toString());
 
   if (sample_modulo > 0) {
@@ -205,13 +205,13 @@ void TSDBClient::fetchPartitionWithSampling(
 
 Option<PartitionInfo> TSDBClient::partitionInfo(
     const String& tsdb_namespace,
-    const String& stream_key,
+    const String& table_name,
     const SHA1Hash& partition_key) {
   auto uri = StringUtil::format(
       "$0/partition_info?namespace=$1&stream=$2&partition=$3",
       uri_,
       URI::urlEncode(tsdb_namespace),
-      URI::urlEncode(stream_key),
+      URI::urlEncode(table_name),
       partition_key.toString());
 
   auto req = http::HTTPRequest::mkGet(uri);
@@ -231,7 +231,7 @@ Option<PartitionInfo> TSDBClient::partitionInfo(
 }
 
 //Buffer TSDBClient::fetchDerivedDataset(
-//    const String& stream_key,
+//    const String& table_name,
 //    const String& partition,
 //    const String& derived_dataset_name) {
 //  auto uri = StringUtil::format(

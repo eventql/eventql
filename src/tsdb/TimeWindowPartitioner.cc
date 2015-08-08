@@ -16,15 +16,15 @@ using namespace stx;
 namespace tsdb {
 
 SHA1Hash TimeWindowPartitioner::partitionKeyFor(
-    const String& stream_key,
+    const String& table_name,
     UnixTime time,
     Duration window_size) {
-  util::BinaryMessageWriter buf(stream_key.size() + 32);
+  util::BinaryMessageWriter buf(table_name.size() + 32);
 
   auto cs = window_size.microseconds();
   auto ts = (time.unixMicros() / cs) * cs / kMicrosPerSecond;
 
-  buf.append(stream_key.data(), stream_key.size());
+  buf.append(table_name.data(), table_name.size());
   buf.appendUInt8(27);
   buf.appendVarUInt(ts);
 
@@ -32,7 +32,7 @@ SHA1Hash TimeWindowPartitioner::partitionKeyFor(
 }
 
 Vector<SHA1Hash> TimeWindowPartitioner::partitionKeysFor(
-    const String& stream_key,
+    const String& table_name,
     UnixTime from,
     UnixTime until,
     Duration window_size) {
@@ -42,7 +42,7 @@ Vector<SHA1Hash> TimeWindowPartitioner::partitionKeysFor(
 
   Vector<SHA1Hash> res;
   for (auto t = first_chunk; t <= last_chunk; t += cs) {
-    res.emplace_back(partitionKeyFor(stream_key, t, window_size));
+    res.emplace_back(partitionKeyFor(table_name, t, window_size));
   }
 
   return res;

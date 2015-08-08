@@ -15,11 +15,11 @@ using namespace stx;
 namespace tsdb {
 
 SHA1Hash FixedShardPartitioner::partitionKeyFor(
-    const String& stream_key,
+    const String& table_name,
     size_t shard) {
-  util::BinaryMessageWriter buf(stream_key.size() + 32);
+  util::BinaryMessageWriter buf(table_name.size() + 32);
 
-  buf.append(stream_key.data(), stream_key.size());
+  buf.append(table_name.data(), table_name.size());
   buf.appendUInt8(27);
   buf.appendVarUInt(shard);
 
@@ -27,12 +27,12 @@ SHA1Hash FixedShardPartitioner::partitionKeyFor(
 }
 
 Vector<SHA1Hash> FixedShardPartitioner::partitionKeysFor(
-    const String& stream_key,
+    const String& table_name,
     size_t nshards) {
   Vector<SHA1Hash> partitions;
 
   for (size_t shard = 0; shard < nshards; ++shard) {
-    partitions.emplace_back(partitionKeyFor(stream_key, shard));
+    partitions.emplace_back(partitionKeyFor(table_name, shard));
   }
 
   return partitions;

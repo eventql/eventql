@@ -46,12 +46,12 @@ public:
 
   Option<RefPtr<Partition>> findPartition(
       const String& tsdb_namespace,
-      const String& stream_key,
+      const String& table_name,
       const SHA1Hash& partition_key);
 
   RefPtr<Partition> findOrCreatePartition(
       const String& tsdb_namespace,
-      const String& stream_key,
+      const String& table_name,
       const SHA1Hash& partition_key);
 
   void subscribeToPartitionChanges(PartitionChangeCallbackFn fn);

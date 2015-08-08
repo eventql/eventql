@@ -69,7 +69,7 @@ void TSDBTableScan<ScanletType>::scanWithoutIndex(
     dproc::TaskContext* context) {
   tsdb_->fetchPartition(
       params_.tsdb_namespace(),
-      params_.stream_key(),
+      params_.table_name(),
       SHA1Hash::fromHexString(params_.partition_key()),
       std::bind(
           &TSDBTableScan<ScanletType>::onRow,
@@ -112,7 +112,7 @@ Option<String> TSDBTableScan<ScanletType>::cacheKey() const {
             "$0~$1~$2~$3~$4",
             ckey.get(),
             params_.tsdb_namespace(),
-            params_.stream_key(),
+            params_.table_name(),
             params_.partition_key(),
             params_.version()));
   }

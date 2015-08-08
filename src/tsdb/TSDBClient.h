@@ -34,25 +34,25 @@ public:
 
   void insertRecord(
       const String& tsdb_namespace,
-      const String& stream_key,
+      const String& table_name,
       const SHA1Hash& partition_key,
       const SHA1Hash& record_id,
       const Buffer& record_data);
 
   //Vector<String> listPartitions(
-  //    const String& stream_key,
+  //    const String& table_name,
   //    const UnixTime& from,
   //    const UnixTime& until);
 
   void fetchPartition(
       const String& tsdb_namespace,
-      const String& stream_key,
+      const String& table_name,
       const SHA1Hash& partition_key,
       Function<void (const Buffer& record)> fn);
 
   void fetchPartitionWithSampling(
       const String& tsdb_namespace,
-      const String& stream_key,
+      const String& table_name,
       const SHA1Hash& partition_key,
       size_t sample_modulo,
       size_t sample_index,
@@ -60,11 +60,11 @@ public:
 
   Option<PartitionInfo> partitionInfo(
       const String& tsdb_namespace,
-      const String& stream_key,
+      const String& table_name,
       const SHA1Hash& partition_key);
 
   //Buffer fetchDerivedDataset(
-  //    const String& stream_key,
+  //    const String& table_name,
   //    const String& partition,
   //    const String& derived_dataset_name);
 

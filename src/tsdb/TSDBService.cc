@@ -60,14 +60,14 @@ void TSDBService::insertRecords(const RecordEnvelopeList& record_list) {
 
 void TSDBService::insertRecord(
     const String& tsdb_namespace,
-    const String& stream_key,
+    const String& table_name,
     const SHA1Hash& partition_key,
     const SHA1Hash& record_id,
     const Buffer& record) {
 
   auto partition = pmap_->findOrCreatePartition(
       tsdb_namespace,
-      stream_key,
+      table_name,
       partition_key);
 
   auto writer = partition->getWriter();
@@ -82,13 +82,13 @@ void TSDBService::insertRecord(
 
 void TSDBService::updatePartitionCSTable(
     const String& tsdb_namespace,
-    const String& stream_key,
+    const String& table_name,
     const SHA1Hash& partition_key,
     const String& tmpfile_path,
     uint64_t version) {
   auto partition = pmap_->findOrCreatePartition(
       tsdb_namespace,
-      stream_key,
+      table_name,
       partition_key);
 
   auto writer = partition->getWriter();
@@ -101,12 +101,12 @@ void TSDBService::updatePartitionCSTable(
 
 void TSDBService::fetchPartition(
     const String& tsdb_namespace,
-    const String& stream_key,
+    const String& table_name,
     const SHA1Hash& partition_key,
     Function<void (const Buffer& record)> fn) {
   fetchPartitionWithSampling(
       tsdb_namespace,
-      stream_key,
+      table_name,
       partition_key,
       0,
       0,
@@ -115,14 +115,14 @@ void TSDBService::fetchPartition(
 
 void TSDBService::fetchPartitionWithSampling(
     const String& tsdb_namespace,
-    const String& stream_key,
+    const String& table_name,
     const SHA1Hash& partition_key,
     size_t sample_modulo,
     size_t sample_index,
     Function<void (const Buffer& record)> fn) {
   auto partition = pmap_->findPartition(
       tsdb_namespace,
-      stream_key,
+      table_name,
       partition_key);
 
   if (partition.isEmpty()) {

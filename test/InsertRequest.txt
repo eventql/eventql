@@ -1,6 +1,6 @@
 records {
   tsdb_namespace: "test",
-  stream_key: "test_stream"
+  table_name: "test_stream"
   partition_key: "91f1adbbe14377eb6c0deb3ca9ef22662c02d4bb",
   record_id: "4e1243bd22c66e76c2ba9eddc1f91394e57f9f83",
   record_data: "hello world"

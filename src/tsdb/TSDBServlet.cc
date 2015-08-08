@@ -130,8 +130,8 @@ void TSDBServlet::streamPartition(
     return;
   }
 
-  String stream_key;
-  if (!URI::getParam(params, "stream", &stream_key)) {
+  String table_name;
+  if (!URI::getParam(params, "stream", &table_name)) {
     res->setStatus(stx::http::kStatusBadRequest);
     res->addBody("missing ?stream=... parameter");
     res_stream->writeResponse(*res);
@@ -169,7 +169,7 @@ void TSDBServlet::streamPartition(
 
   node_->fetchPartitionWithSampling(
       tsdb_namespace,
-      stream_key,
+      table_name,
       SHA1Hash::fromHexString(partition_key),
       sample_mod,
       sample_idx,
@@ -205,8 +205,8 @@ void TSDBServlet::fetchPartitionInfo(
     return;
   }
 
-  String stream_key;
-  if (!URI::getParam(params, "stream", &stream_key)) {
+  String table_name;
+  if (!URI::getParam(params, "stream", &table_name)) {
     res->setStatus(stx::http::kStatusBadRequest);
     res->addBody("missing ?stream=... parameter");
     return;
@@ -221,7 +221,7 @@ void TSDBServlet::fetchPartitionInfo(
 
   auto pinfo = node_->partitionInfo(
       tsdb_namespace,
-      stream_key,
+      table_name,
       SHA1Hash::fromHexString(partition_key));
 
   if (pinfo.isEmpty()) {

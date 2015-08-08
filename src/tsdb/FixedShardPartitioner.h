@@ -22,11 +22,11 @@ class FixedShardPartitioner : public RefCounted {
 public:
 
   static SHA1Hash partitionKeyFor(
-      const String& stream_key,
+      const String& table_name,
       size_t shard);
 
   static Vector<SHA1Hash> partitionKeysFor(
-      const String& stream_key,
+      const String& table_name,
       size_t nshards);
 
 };

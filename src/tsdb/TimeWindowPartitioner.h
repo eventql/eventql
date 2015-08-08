@@ -22,12 +22,12 @@ class TimeWindowPartitioner : public RefCounted {
 public:
 
   static SHA1Hash partitionKeyFor(
-      const String& stream_key,
+      const String& table_name,
       UnixTime time,
       Duration window_size);
 
   static Vector<SHA1Hash> partitionKeysFor(
-      const String& stream_key,
+      const String& table_name,
       UnixTime from,
       UnixTime until,
       Duration window_size);

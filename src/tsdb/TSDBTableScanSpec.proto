@@ -11,7 +11,7 @@ package tsdb;
 
 message TSDBTableScanSpec {
   required string tsdb_namespace = 10;
-  required string stream_key = 6;
+  required string table_name = 6;
   required string partition_key = 2;
   optional string schema_name = 7;
   optional bytes scanlet_params = 5;

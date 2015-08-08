@@ -33,15 +33,15 @@ PartitionMap::PartitionMap(const String& db_path) :
 
 Option<RefPtr<Table>> PartitionMap::findTable(
     const String& stream_ns,
-    const String& stream_key) const {
+    const String& table_name) const {
   std::unique_lock<std::mutex> lk(mutex_);
-  return findTableWithLock(stream_ns, stream_key);
+  return findTableWithLock(stream_ns, table_name);
 }
 
 Option<RefPtr<Table>> PartitionMap::findTableWithLock(
     const String& stream_ns,
-    const String& stream_key) const {
-  auto stream_ns_key = stream_ns + "~" + stream_key;
+    const String& table_name) const {
+  auto stream_ns_key = stream_ns + "~" + table_name;
 
   const auto& iter = tables_.find(stream_ns_key);
   if (iter == tables_.end()) {
@@ -144,7 +144,7 @@ void PartitionMap::loadPartitions(const Vector<PartitionKey>& partitions) {
 
 RefPtr<Partition> PartitionMap::findOrCreatePartition(
     const String& tsdb_namespace,
-    const String& stream_key,
+    const String& table_name,
     const SHA1Hash& partition_key) {
   auto db_key = tsdb_namespace + "~";
   db_key.append((char*) partition_key.data(), partition_key.size());
@@ -157,9 +157,9 @@ RefPtr<Partition> PartitionMap::findOrCreatePartition(
     }
   }
 
-  auto table = findTableWithLock(tsdb_namespace, stream_key);
+  auto table = findTableWithLock(tsdb_namespace, table_name);
   if (table.isEmpty()) {
-    RAISEF(kNotFoundError, "table not found: $0", stream_key);
+    RAISEF(kNotFoundError, "table not found: $0", table_name);
   }
 
   if (iter != partitions_.end()) {
@@ -186,8 +186,8 @@ RefPtr<Partition> PartitionMap::findOrCreatePartition(
   txn->update(
       db_key.data(),
       db_key.size(),
-      stream_key.data(),
-      stream_key.size());
+      table_name.data(),
+      table_name.size());
 
   txn->commit();
   lk.unlock();
@@ -201,7 +201,7 @@ RefPtr<Partition> PartitionMap::findOrCreatePartition(
 
 Option<RefPtr<Partition>> PartitionMap::findPartition(
     const String& tsdb_namespace,
-    const String& stream_key,
+    const String& table_name,
     const SHA1Hash& partition_key) {
   auto db_key = tsdb_namespace + "~";
   db_key.append((char*) partition_key.data(), partition_key.size());
@@ -215,9 +215,9 @@ Option<RefPtr<Partition>> PartitionMap::findPartition(
       return Some(iter->second->getPartition());
     }
 
-    auto table = findTableWithLock(tsdb_namespace, stream_key);
+    auto table = findTableWithLock(tsdb_namespace, table_name);
     if (table.isEmpty()) {
-      RAISEF(kNotFoundError, "table not found: $0", stream_key);
+      RAISEF(kNotFoundError, "table not found: $0", table_name);
     }
 
     auto partition = iter->second.get();

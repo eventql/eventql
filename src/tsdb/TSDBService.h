@@ -37,27 +37,27 @@ public:
 
   void insertRecord(
       const String& tsdb_namespace,
-      const String& stream_key,
+      const String& table_name,
       const SHA1Hash& partition_key,
       const SHA1Hash& record_id,
       const Buffer& record);
 
   void updatePartitionCSTable(
       const String& tsdb_namespace,
-      const String& stream_key,
+      const String& table_name,
       const SHA1Hash& partition_key,
       const String& tmpfile_path,
       uint64_t version);
 
   void fetchPartition(
       const String& tsdb_namespace,
-      const String& stream_key,
+      const String& table_name,
       const SHA1Hash& partition_key,
       Function<void (const Buffer& record)> fn);
 
   void fetchPartitionWithSampling(
       const String& tsdb_namespace,
-      const String& stream_key,
+      const String& table_name,
       const SHA1Hash& partition_key,
       size_t sample_modulo,
       size_t sample_index,

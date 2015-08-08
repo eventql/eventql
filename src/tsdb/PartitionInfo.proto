@@ -13,7 +13,7 @@ message PartitionInfo {
 
   required string partition_key = 1;
 
-  optional string stream_key = 2;
+  optional string table_name = 2;
 
   optional bool exists = 5;
 
