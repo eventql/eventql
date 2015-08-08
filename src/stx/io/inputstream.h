@@ -79,6 +79,19 @@ public:
   virtual size_t readUntilEOF(std::string* target);
 
   /**
+   * Read from the stream until the next '\n' character and copy the data into
+   * the provided string. Returns the number of bytes read.
+   *
+   * WARNING: this method might never return if the input stream does not
+   * contain '\n' characters and does not have an EOF!
+   *
+   * Returns false if the EOF was reached and true if it wasn't.
+   *
+   * @param target the string to copy the data into
+   */
+  virtual bool readLine(std::string* target);
+
+  /**
    * Reads a uint8 from the stream. Throws an exception on error
    */
   virtual uint8_t readUInt8();
