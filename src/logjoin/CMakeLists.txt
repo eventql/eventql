@@ -5,6 +5,8 @@ add_library(logjoin-common OBJECT
     common.cc
     ${PROTO_SRCS})
 
+add_dependencies(logjoin-common customerdirectory)
+
 add_library(logjoin-base OBJECT
     common.cc
     ${PROTO_SRCS}
@@ -23,6 +25,8 @@ add_library(logjoin-base OBJECT
     stages/TSDBUploadStage.cc
     stages/DeliverWebhookStage.cc
     LogJoinShard.cc)
+
+add_dependencies(logjoin-base customerdirectory)
 
 add_executable(logjoind
     $<TARGET_OBJECTS:stx-base>
