@@ -22,6 +22,8 @@ namespace tsdb {
 class TimeWindowPartitioner : public Partitioner {
 public:
 
+  TimeWindowPartitioner(const String& table_name);
+
   static SHA1Hash partitionKeyFor(
       const String& table_name,
       UnixTime time,
@@ -33,8 +35,10 @@ public:
       UnixTime until,
       Duration window_size);
 
-  SHA1Hash partitionKeyFor(const String& partition_key) override;
+  SHA1Hash partitionKeyFor(const String& partition_key) const override;
 
+protected:
+  String table_name_;
 };
 
 }

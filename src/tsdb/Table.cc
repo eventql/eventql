@@ -83,11 +83,13 @@ void Table::loadConfig() {
   switch (config_.config().partitioner()) {
 
     case TBL_PARTITION_TIMEWINDOW:
-      partitioner_ = RefPtr<Partitioner>(new TimeWindowPartitioner());
+      partitioner_ = RefPtr<Partitioner>(
+          new TimeWindowPartitioner(config_.table_name()));
       break;
 
     case TBL_PARTITION_FIXED:
-      partitioner_ = RefPtr<Partitioner>(new FixedShardPartitioner());
+      partitioner_ = RefPtr<Partitioner>(
+          new FixedShardPartitioner(config_.table_name()));
       break;
 
   }

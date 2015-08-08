@@ -15,6 +15,10 @@ using namespace stx;
 
 namespace tsdb {
 
+TimeWindowPartitioner::TimeWindowPartitioner(
+    const String& table_name) :
+    table_name_(table_name) {}
+
 SHA1Hash TimeWindowPartitioner::partitionKeyFor(
     const String& table_name,
     UnixTime time,
@@ -46,6 +50,14 @@ Vector<SHA1Hash> TimeWindowPartitioner::partitionKeysFor(
   }
 
   return res;
+}
+
+SHA1Hash TimeWindowPartitioner::partitionKeyFor(
+    const String& partition_key) const {
+  return partitionKeyFor(
+      table_name_,
+      UnixTime(std::stoull(partition_key)),
+      4 * kMicrosPerSecond);
 }
 
 

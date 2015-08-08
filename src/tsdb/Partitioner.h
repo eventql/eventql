@@ -22,7 +22,7 @@ namespace tsdb {
 class Partitioner : public RefCounted {
 public:
 
-  virtual SHA1Hash partitionKeyFor(const String& partition_key) = 0;
+  virtual SHA1Hash partitionKeyFor(const String& partition_key) const = 0;
 
 };
 
