@@ -16,6 +16,8 @@
 #include <cstable/BitPackedIntColumnWriter.h>
 #include <cstable/BooleanColumnWriter.h>
 #include <cstable/DoubleColumnWriter.h>
+#include <cstable/LEB128ColumnWriter.h>
+
 
 using namespace stx;
 
@@ -166,6 +168,48 @@ TEST_CASE(CSTableTest, TestDoubleColumnWriterReader, [] () {
     EXPECT_EQ(*val, v);
   }
 });
+
+TEST_CASE(CSTableTest, TestLEB128ColumnWriterReader, [] () {
+  const String& filename = "/tmp/__fnord__cstabletest5.cstable";
+  const uint64_t num_records = 100;
+
+  FileUtil::rm(filename);
+
+  RefPtr<cstable::LEB128ColumnWriter> column_writer = mkRef(
+    new cstable::LEB128ColumnWriter(1, 1));
+
+  uint64_t v = 10;
+  for (uint32_t i = 0; i < 10; i++) {
+    column_writer->addDatum(1, 1, &v, sizeof(v));
+  }
+
+
+  auto tbl_writer = cstable::CSTableWriter(
+    filename,
+    num_records);
+  tbl_writer.addColumn("key1", column_writer.get());
+  tbl_writer.commit();
+
+
+  cstable::CSTableReader tbl_reader(filename);
+  RefPtr<cstable::ColumnReader> column_reader = tbl_reader.getColumnReader("key1");
+
+  EXPECT_EQ(column_reader->type() == msg::FieldType::UINT64, true);
+
+  uint64_t rep_level;
+  uint64_t def_level;
+  void* data;
+  uint64_t* val;
+  size_t size;
+
+  for (uint32_t i = 0; i < 10; i++) {
+    EXPECT_EQ(column_reader->next(&rep_level, &def_level, &data, &size), true);
+    val = static_cast<uint64_t*>(data);
+    EXPECT_EQ(size, sizeof(v));
+    EXPECT_EQ(*val, v);
+  }
+});
+
 
 
 
