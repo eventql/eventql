@@ -33,6 +33,12 @@ public:
   bool match(const char* buffer, size_t size, Result* result = nullptr) const;
   bool match(const char* cstring, Result* result = nullptr) const;
 
+  /**
+   * Returns the index of a named capture in the regex or size_t(-1) if there
+   * is no such named capture group in the regular expressin
+   */
+  size_t getNamedCaptureIndex(const String& name);
+
   const std::string& pattern() const { return pattern_; }
   const char* c_str() const;
 
