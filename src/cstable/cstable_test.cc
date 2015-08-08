@@ -48,46 +48,62 @@ TEST_CASE(CSTableTest, TestCSTableContainer, [] () {
   EXPECT_EQ(tbl_reader.hasColumn("key2"), true);
 });
 
-TEST_CASE(CSTableTest, TestBitPackedIntColumnWriterReader, [] () {
+TEST_CASE(CSTableTest, TestCSTableColumnWriterReader, [] () {
   const String& filename = "/tmp/__fnord__cstabletest2.cstable";
-  const uint64_t num_records = 100;
+  const uint64_t num_records = 4;
+  uint64_t rep_max = 1;
+  uint64_t def_max = 1;
 
   FileUtil::rm(filename);
 
-  RefPtr<cstable::BitPackedIntColumnWriter> column_writer = mkRef(
-    new cstable::BitPackedIntColumnWriter(1, 1));
+  RefPtr<cstable::BitPackedIntColumnWriter> bitpacked_writer = mkRef(
+    new cstable::BitPackedIntColumnWriter(rep_max, def_max));
+  RefPtr<cstable::BooleanColumnWriter> boolean_writer = mkRef(
+    new cstable::BooleanColumnWriter(rep_max, def_max));
+  RefPtr<cstable::DoubleColumnWriter> double_writer = mkRef(
+    new cstable::DoubleColumnWriter(rep_max, def_max));
+  RefPtr<cstable::LEB128ColumnWriter> leb128_writer = mkRef(
+    new cstable::LEB128ColumnWriter(rep_max, def_max));
+  RefPtr<cstable::StringColumnWriter> string_writer = mkRef(
+    new cstable::StringColumnWriter(rep_max, def_max));
+  RefPtr<cstable::UInt32ColumnWriter> uint32_writer = mkRef(
+    new cstable::UInt32ColumnWriter(rep_max, def_max));
+  RefPtr<cstable::UInt64ColumnWriter> uint64_writer = mkRef(
+    new cstable::UInt64ColumnWriter(rep_max, def_max));
 
-  uint32_t v = 10;
-  for (uint32_t i = 0; i < 10; i++) {
-    column_writer->addDatum(1, 1, &v, sizeof(v));
+  uint8_t boolean_v;
+  double double_v;
+  const String& string_v = "value";
+  uint64_t uint64_v = 0;
+
+  for (auto i = 0; i < num_records; i++) {
+    boolean_v = i % 2;
+    double_v = i * 1.1;
+    uint64_v++;
+    bitpacked_writer->addDatum(rep_max, def_max, &i, sizeof(i));
+    boolean_writer->addDatum(rep_max, def_max, &boolean_v, sizeof(boolean_v));
+    double_writer->addDatum(rep_max, def_max, &double_v, sizeof(double_v));
+    leb128_writer->addDatum(rep_max, def_max, &i, sizeof(i));
+    string_writer->addDatum(rep_max, def_max, &string_v, sizeof(string_v));
+    uint32_writer->addDatum(rep_max, def_max, &i, sizeof(i));
+    uint64_writer->addDatum(rep_max, def_max, &uint64_v, sizeof(uint64_v));
   }
-
 
   auto tbl_writer = cstable::CSTableWriter(
     filename,
     num_records);
-  tbl_writer.addColumn("key1", column_writer.get());
+  tbl_writer.addColumn("bitpacked", bitpacked_writer.get());
+  tbl_writer.addColumn("boolean", boolean_writer.get());
+  tbl_writer.addColumn("double", double_writer.get());
+  tbl_writer.addColumn("leb128", leb128_writer.get());
+  tbl_writer.addColumn("string", string_writer.get());
+  tbl_writer.addColumn("uint32", uint32_writer.get());
+  tbl_writer.addColumn("uint64", uint64_writer.get());
   tbl_writer.commit();
 
-
-  cstable::CSTableReader tbl_reader(filename);
-  RefPtr<cstable::ColumnReader> column_reader = tbl_reader.getColumnReader("key1");
-
-  EXPECT_EQ(column_reader->type() == msg::FieldType::UINT32, true);
-
-  uint64_t rep_level;
-  uint64_t def_level;
-  void* data;
-  size_t size;
-  uint32_t* val;
-
-  for (uint32_t i = 0; i < 10; i++) {
-    EXPECT_EQ(column_reader->next(&rep_level, &def_level, &data, &size), true);
-    EXPECT_EQ(size, sizeof(v));
-    val = static_cast<uint32_t*>(data);
-    EXPECT_EQ(*val, v);
-  }
 });
+
+
 
 
 TEST_CASE(CSTableTest, TestBooleanColumnWriterReader, [] () {
