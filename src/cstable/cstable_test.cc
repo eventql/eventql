@@ -50,7 +50,7 @@ TEST_CASE(CSTableTest, TestCSTableContainer, [] () {
 
 TEST_CASE(CSTableTest, TestCSTableColumnWriterReader, [] () {
   const String& filename = "/tmp/__fnord__cstabletest2.cstable";
-  const uint64_t num_records = 4;
+  const uint64_t num_records = 4000;
   uint64_t rep_max = 1;
   uint64_t def_max = 1;
 
@@ -101,6 +101,42 @@ TEST_CASE(CSTableTest, TestCSTableColumnWriterReader, [] () {
   tbl_writer.addColumn("uint64", uint64_writer.get());
   tbl_writer.commit();
 
+  cstable::CSTableReader tbl_reader(filename);
+  RefPtr<cstable::ColumnReader> bitpacked_reader = tbl_reader.getColumnReader(
+    "bitpacked");
+  RefPtr<cstable::ColumnReader> boolean_reader = tbl_reader.getColumnReader(
+    "boolean");
+  RefPtr<cstable::ColumnReader> double_reader = tbl_reader.getColumnReader(
+    "double");
+  RefPtr<cstable::ColumnReader> leb128_reader = tbl_reader.getColumnReader(
+    "leb128");
+  RefPtr<cstable::ColumnReader> string_reader = tbl_reader.getColumnReader(
+    "string");
+  RefPtr<cstable::ColumnReader> uint32_reader = tbl_reader.getColumnReader(
+    "uint32");
+  RefPtr<cstable::ColumnReader> uint64_reader = tbl_reader.getColumnReader(
+    "uint64");
+
+
+  EXPECT_EQ(bitpacked_reader->type() == msg::FieldType::UINT32, true);
+  EXPECT_EQ(boolean_reader->type() == msg::FieldType::BOOLEAN, true);
+  EXPECT_EQ(double_reader->type() == msg::FieldType::DOUBLE, true);
+  EXPECT_EQ(leb128_reader->type() == msg::FieldType::UINT64, true);
+  EXPECT_EQ(string_reader->type() == msg::FieldType::STRING, true);
+  EXPECT_EQ(uint32_reader->type() == msg::FieldType::UINT32, true);
+  EXPECT_EQ(uint64_reader->type() == msg::FieldType::UINT64, true);
+
+  /*uint64_t rep_level;
+  uint64_t def_level;
+  size_t size;
+  void* bitpacked_data;
+  uint32_t* bitpacked_val;
+  void* boolean_data;
+  uint8_t* boolean_val;
+
+  for (auto i = 0; i < num_records; i++) {
+    
+  }*/
 });
 
 
@@ -133,7 +169,7 @@ TEST_CASE(CSTableTest, TestBooleanColumnWriterReader, [] () {
 
   EXPECT_EQ(column_reader->type() == msg::FieldType::BOOLEAN, true);
 
-  uint64_t rep_level;
+uint64_t rep_level;
   uint64_t def_level;
   void* data;
   uint8_t* val;
