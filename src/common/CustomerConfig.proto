@@ -29,11 +29,14 @@ message LogJoinConfig {
 message LogfileField {
   required string name = 1;
   required uint64 id = 2;
+  required string type = 3;
 }
 
 message LogfileDefinition {
-  required string regex = 1;
-  repeated LogfileField row_fields = 2;
+  required string name = 1;
+  required string regex = 2;
+  repeated LogfileField source_fields = 3;
+  repeated LogfileField row_fields = 4;
 };
 
 message LogfileImportConfig {
