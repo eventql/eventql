@@ -21,11 +21,12 @@ public:
 
   explicit RegExp(const std::string& pattern);
   RegExp();
-  RegExp(const RegExp& v);
+  RegExp(const RegExp& other);
   ~RegExp();
 
   RegExp(RegExp&& v);
-  RegExp& operator=(RegExp&& v);
+  RegExp& operator=(const RegExp& other) = delete;
+  RegExp& operator=(RegExp&& other);
 
   bool match(const Buffer& subject, Result* result = nullptr) const;
   bool match(const String& subject, Result* result = nullptr) const;
@@ -63,7 +64,7 @@ public:
 
 private:
   std::string pattern_;
-  pcre* re_;
+  pcre* pcre_handle_;
 };
 
 }  // namespace stx
