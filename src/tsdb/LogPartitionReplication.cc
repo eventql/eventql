@@ -17,7 +17,7 @@ using namespace stx;
 
 namespace tsdb {
 
-const size_t LogPartitionReplication::kBatchSize = 512;
+const size_t LogPartitionReplication::kBatchSize = 1024 * 1024 * 50; // 50 MB
 
 LogPartitionReplication::LogPartitionReplication(
     RefPtr<Partition> partition,
@@ -48,11 +48,12 @@ void LogPartitionReplication::replicateTo(
     uint64_t replicated_offset) {
   PartitionReader reader(snap_);
 
+  size_t batch_size = 0;
   RecordEnvelopeList batch;
   reader.fetchRecords(
       replicated_offset,
       size_t(-1),
-      [this, &batch, &replica, &replicated_offset] (
+      [this, &batch, &replica, &replicated_offset, &batch_size] (
           const SHA1Hash& record_id,
           const void* record_data,
           size_t record_size) {
@@ -63,9 +64,12 @@ void LogPartitionReplication::replicateTo(
     rec->set_record_id(record_id.toString());
     rec->set_record_data(record_data, record_size);
 
-    if (batch.records().size() > kBatchSize) {
+    batch_size += record_size;
+
+    if (batch_size > kBatchSize) {
       uploadBatchTo(replica, batch);
       batch.mutable_records()->Clear();
+      batch_size = 0;
     }
   });
 
