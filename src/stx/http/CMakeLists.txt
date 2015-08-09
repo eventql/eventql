@@ -33,7 +33,7 @@ add_library(stx-http OBJECT
     #streaminghttpservice_example/WriteStreamServlet.cc)
 
 add_executable(test-http
-    $<TARGET_OBJECTS:stx-base>
+    
     $<TARGET_OBJECTS:stx-http>
     http_test.cc)
 

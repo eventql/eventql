@@ -20,7 +20,7 @@ add_library(stx-json OBJECT
     jsonutil.cc)
 
 add_executable(test-json
-    $<TARGET_OBJECTS:stx-base>
+    
     $<TARGET_OBJECTS:stx-http>
     $<TARGET_OBJECTS:stx-json>
     json_test.cc)
