@@ -74,10 +74,10 @@ Exception Exception::setErrno(int posix_errno) {
     char buf[4096];
     char* errstr = buf;
 
-#ifdef _GNU_SOURCE
-    errstr = strerror_r(posix_errno, buf, sizeof(buf));
-#else
+#if !_GNU_SOURCE || (_POSIX_C_SOURCE >= 200112L || _XOPEN_SOURCE >= 600)
     strerror_r(posix_errno, buf, sizeof(buf));
+#else
+    errstr = strerror_r(posix_errno, buf, sizeof(buf));
 #endif
 
     size_t pos = strlen(message_);
