@@ -60,6 +60,24 @@ size_t Parser::parse(const char* query, size_t len) {
   return true;
 }
 
+size_t Parser::parseValueExpression(const char* query, size_t len) {
+  const char* cur = query;
+  const char* end = cur + len;
+
+  tokenizeQuery(&cur, end, &token_list_);
+
+  if (token_list_.size() == 0) {
+    RAISE(kRuntimeError, "SQL value expression doesn't contain any tokens");
+  }
+
+  token_list_.emplace_back(Token::T_EOF);
+  cur_token_ = token_list_.data();
+  token_list_end_ = cur_token_ + token_list_.size();
+  root_.appendChild(expectAndConsumeValueExpr());
+
+  return true;
+}
+
 ASTNode* Parser::expr(int precedence /* = 0 */) {
   auto lhs = unaryExpr();
 

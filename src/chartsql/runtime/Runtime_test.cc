@@ -35,7 +35,7 @@ TEST_CASE(RuntimeTest, TestStaticExpression, [] () {
 
   auto t0 = WallClock::unixMicros();
   SValue out;
-  for (int i = 0; i < 1000000; ++i) {
+  for (int i = 0; i < 1000; ++i) {
     out = runtime->evaluateStaticExpression(expr.get());
   }
   auto t1 = WallClock::unixMicros();
@@ -43,3 +43,12 @@ TEST_CASE(RuntimeTest, TestStaticExpression, [] () {
   EXPECT_EQ(out.getInteger(), 3);
 });
 
+TEST_CASE(RuntimeTest, TestExecuteIfStatement, [] () {
+  auto runtime = Runtime::getDefaultRuntime();
+
+  auto out_a = runtime->evaluateStaticExpression("if(1 = 1, 42, 23)");
+  EXPECT_EQ(out_a.getInteger(), 42);
+
+  auto out_b = runtime->evaluateStaticExpression("if(1 = 2, 42, 23)");
+  EXPECT_EQ(out_b.getInteger(), 23);
+});
