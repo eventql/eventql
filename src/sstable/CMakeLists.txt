@@ -7,7 +7,7 @@
 # <http://www.gnu.org/licenses/>.
 
 # sstable
-add_library(sstable OBJECT
+add_library(sstable STATIC
     cursor.cc
     MetaPage.cc
     fileheaderreader.cc
@@ -25,16 +25,8 @@ add_library(sstable OBJECT
     SSTableColumnWriter.cc
     SSTableWriter.cc)
 
-add_executable(fn-sstablescan
-    $<TARGET_OBJECTS:stx-base>
-    $<TARGET_OBJECTS:sstable>
-    fn-sstablescan.cc)
+add_executable(fn-sstablescan fn-sstablescan.cc)
+target_link_libraries(fn-sstablescan stx-base sstable)
 
-target_link_libraries(fn-sstablescan ${CMAKE_THREAD_LIBS_INIT})
-
-add_executable(test-sstable
-    $<TARGET_OBJECTS:stx-base>
-    $<TARGET_OBJECTS:sstable>
-    sstable_test.cc)
-
-target_link_libraries(test-sstable ${CMAKE_THREAD_LIBS_INIT})
+add_executable(test-sstable sstable_test.cc)
+target_link_libraries(test-sstable stx-base sstable)
