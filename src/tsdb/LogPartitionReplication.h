@@ -17,8 +17,8 @@ namespace tsdb {
 
 class LogPartitionReplication : public PartitionReplication {
 public:
-  static const size_t kBatchSizeBytes;
-  static const size_t kBatchSizeRows;
+  static const size_t kMaxBatchSizeBytes;
+  static const size_t kMaxBatchSizeRows;
 
   LogPartitionReplication(
       RefPtr<Partition> partition,
