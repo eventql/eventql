@@ -47,7 +47,6 @@ add_library(stx-base OBJECT
     io/mmappedfile.cc
     io/pagemanager.cc
     ISO8601.cc
-    Currency.cc
     CivilTime.cc
     Language.cc
     logging.cc
@@ -129,6 +128,7 @@ add_library(stx-protobuf OBJECT
     ../../3rdparty/google/protobuf/stubs/structurally_valid.cc
     ../../3rdparty/google/protobuf/stubs/strutil.cc
     ../../3rdparty/google/protobuf/stubs/substitute.cc
+    Currency.cc # FIXME
     protobuf/MessageDecoder.cc
     protobuf/MessageEncoder.cc
     protobuf/MessagePrinter.cc
