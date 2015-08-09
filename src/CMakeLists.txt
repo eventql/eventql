@@ -72,21 +72,6 @@ if(HAVE_BZLIB_H)
   set(BZIP2_LIBRARIES bz2)
 endif(HAVE_BZLIB_H)
 
-# PCRE
-option(ENABLE_PCRE "With PCRE support [default: on]" ON)
-if(ENABLE_PCRE)
-  pkg_check_modules(PCRE REQUIRED libpcre>=7.0)
-else()
-  pkg_check_modules(PCRE libpcre>=7.0)
-endif()
-
-if(PCRE_FOUND)
-  message(STATUS "PCRE found")
-  set(STX_LDFLAGS "${STX_LDFLAGS} -lpcre")
-else()
-  message(STATUS "PCRE not found")
-endif()
-
 # required for shm_open/shm_unlink
 if(APPLE)
   set(RT_LIBRARIES)
