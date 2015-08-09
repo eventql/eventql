@@ -10,4 +10,4 @@ add_executable(dxa-master
     MasterServlet.cc
     dxa-master.cc)
 
-target_link_libraries(dxa-master stx-base stx-http stx-protobuf stx-json stx-json sstable cstable chartsql cplot)
+target_link_libraries(dxa-master stx-http stx-base stx-protobuf stx-json stx-json sstable cstable chartsql cplot)

@@ -13,4 +13,4 @@ add_executable(dxa-docdb
     DocumentDBServlet.cc
     dxa-docdb.cc)
 
-target_link_libraries(dxa-docdb stx-base stx-http stx-protobuf stx-json sstable cstable chartsql cplot)
+target_link_libraries(dxa-docdb stx-http stx-base stx-protobuf stx-json sstable cstable chartsql cplot)
