@@ -91,6 +91,8 @@ add_library(stx-base STATIC
     wallclock.cc
     web/SecureCookie.cc)
 
+add_dependencies(stx-base pcre)
+
 file(GLOB PROTO_FILES *.proto)
 PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS ${PROTO_FILES})
 set(PROTOC_ARGS --proto_path ${CMAKE_CURRENT_SOURCE_DIR}/ PARENT_SCOPE)
