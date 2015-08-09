@@ -165,29 +165,8 @@ target_link_libraries(test-secure-cookie stx-base)
 add_executable(test-sha1 SHA1_test.cc)
 target_link_libraries(test-sha1 stx-base)
 
-add_executable(test-protobuf
-    
-    
-    
-    protobuf/protobuf_test.cc)
+add_executable(test-protobuf protobuf/protobuf_test.cc)
 target_link_libraries(test-protobuf stx-base)
 
 add_executable(test-persistenthashset util/PersistentHashSet_test.cc)
 target_link_libraries(test-persistenthashset stx-base)
-
-## redis
-#add_library(fnord-redis OBJECT
-#    ../3rdparty/hiredis/async.c
-#    ../3rdparty/hiredis/dict.c
-#    ../3rdparty/hiredis/hiredis.c
-#    ../3rdparty/hiredis/net.c
-#    ../3rdparty/hiredis/sds.c
-#    net/redis/redisconnection.cc
-#    net/redis/redisqueue.cc)
-
-#add_executable(tests/test-redis
-#    
-#    $<TARGET_OBJECTS:fnord-comm>
-#    $<TARGET_OBJECTS:fnord-net>
-#    $<TARGET_OBJECTS:fnord-redis>
-#    net/redis/redis_test.cc)
