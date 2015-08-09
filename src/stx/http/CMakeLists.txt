@@ -6,7 +6,7 @@
 # copy of the GNU General Public License along with this program. If not, see
 # <http://www.gnu.org/licenses/>.
 
-add_library(stx-http OBJECT
+add_library(stx-http STATIC
     cookies.cc
     httpclient.cc
     httpclientconnection.cc
@@ -32,10 +32,6 @@ add_library(stx-http OBJECT
     #streaminghttpservice_example/SSEStreamServlet.cc
     #streaminghttpservice_example/WriteStreamServlet.cc)
 
-add_executable(test-http
-    
-    $<TARGET_OBJECTS:stx-http>
-    http_test.cc)
-
-target_link_libraries(test-http ${CMAKE_THREAD_LIBS_INIT})
+add_executable(test-http http_test.cc)
+target_link_libraries(test-http stx-base stx-http stx-json)
 

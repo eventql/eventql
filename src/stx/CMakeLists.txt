@@ -164,10 +164,11 @@ add_executable(test-sha1 SHA1_test.cc)
 target_link_libraries(test-sha1 stx-base)
 
 add_executable(test-protobuf
-    $<TARGET_OBJECTS:stx-json>
-    $<TARGET_OBJECTS:stx-http>
+    
+    
+    
     protobuf/protobuf_test.cc)
-target_link_libraries(test-protobuf stx-base stx-protobuf)
+target_link_libraries(test-protobuf stx-base)
 
 add_executable(test-persistenthashset util/PersistentHashSet_test.cc)
 target_link_libraries(test-persistenthashset stx-base)
