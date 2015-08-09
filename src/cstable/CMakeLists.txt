@@ -7,7 +7,7 @@
 # <http://www.gnu.org/licenses/>.
 
 # cstable
-add_library(libcstable OBJECT
+add_library(cstable STATIC
     BitPackedIntColumnReader.cc
     BitPackedIntColumnWriter.cc
     BooleanColumnReader.cc
@@ -28,25 +28,8 @@ add_library(libcstable OBJECT
     UInt64ColumnReader.cc
     UInt64ColumnWriter.cc)
 
-add_executable(test-recordmaterializer
-    $<TARGET_OBJECTS:stx-base>
-    $<TARGET_OBJECTS:stx-protobuf>
-    $<TARGET_OBJECTS:stx-http>
-    $<TARGET_OBJECTS:stx-json>
-    $<TARGET_OBJECTS:libcstable>
-    RecordMaterializer_test.cc)
+add_executable(test-cstable-recordmaterializer RecordMaterializer_test.cc)
+target_link_libraries(test-cstable-recordmaterializer cstable stx-base stx-protobuf)
 
-target_link_libraries(
-    test-recordmaterializer
-    ${CMAKE_THREAD_LIBS_INIT}
-    ${FNORD_LIBS})
-
-add_executable(cstable
-    $<TARGET_OBJECTS:stx-base>
-    $<TARGET_OBJECTS:stx-protobuf>
-    $<TARGET_OBJECTS:stx-http>
-    $<TARGET_OBJECTS:stx-json>
-    $<TARGET_OBJECTS:libcstable>
-    cstable.cc)
-
-target_link_libraries(cstable ${CMAKE_THREAD_LIBS_INIT} ${FNORD_LIBS})
+add_executable(cstable-tool cstable.cc)
+target_link_libraries(cstable-tool cstable stx-base stx-protobuf )
