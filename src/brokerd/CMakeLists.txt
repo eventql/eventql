@@ -24,7 +24,7 @@ add_executable(brokerd
     BrokerServlet.cc
     brokerd.cc)
 
-target_link_libraries(brokerd stx-base stx-http stx-protobuf stx-json sstable)
+target_link_libraries(brokerd stx-http stx-base stx-protobuf stx-json sstable)
 
 add_executable(brokerctl
     $<TARGET_OBJECTS:stx-mdb>
@@ -32,4 +32,4 @@ add_executable(brokerctl
     $<TARGET_OBJECTS:brokerd-client>
     brokerctl.cc)
 
-target_link_libraries(brokerctl stx-base stx-http stx-protobuf stx-json sstable)
+target_link_libraries(brokerctl stx-http stx-base stx-protobuf stx-json sstable)
