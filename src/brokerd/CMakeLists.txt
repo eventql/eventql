@@ -18,25 +18,18 @@ add_library(brokerd-client OBJECT
     ${PROTO_SRCS})
 
 add_executable(brokerd
-    $<TARGET_OBJECTS:stx-base>
-    $<TARGET_OBJECTS:stx-protobuf>
-    $<TARGET_OBJECTS:stx-http>
     $<TARGET_OBJECTS:stx-mdb>
-    $<TARGET_OBJECTS:stx-json>
     $<TARGET_OBJECTS:stx-rpc>
-    $<TARGET_OBJECTS:sstable>
     $<TARGET_OBJECTS:brokerd-client>
     BrokerServlet.cc
     brokerd.cc)
 
+target_link_libraries(brokerd stx-base stx-http stx-protobuf stx-json sstable)
+
 add_executable(brokerctl
-    $<TARGET_OBJECTS:stx-base>
-    $<TARGET_OBJECTS:stx-protobuf>
-    $<TARGET_OBJECTS:stx-http>
     $<TARGET_OBJECTS:stx-mdb>
-    $<TARGET_OBJECTS:stx-json>
     $<TARGET_OBJECTS:stx-rpc>
-    $<TARGET_OBJECTS:sstable>
     $<TARGET_OBJECTS:brokerd-client>
     brokerctl.cc)
 
+target_link_libraries(brokerctl stx-base stx-http stx-protobuf stx-json sstable)
