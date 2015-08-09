@@ -48,7 +48,7 @@ add_executable(test-recordset
     $<TARGET_OBJECTS:dproc>
     tsdb/RecordSet_test.cc)
 
-target_link_libraries(test-recordset stx-http stx-base stx-protobuf stx-json sstable cstable chartsql cplot)
+target_link_libraries(test-recordset chartsql cplot sstable cstable stx-http stx-protobuf stx-json stx-base)
 
 add_executable(test-tsdb-timewindowpartitioner
     $<TARGET_OBJECTS:stx-mdb>
@@ -56,7 +56,7 @@ add_executable(test-tsdb-timewindowpartitioner
     $<TARGET_OBJECTS:dproc>
     tsdb/TimeWindowPartitioner_test.cc)
 
-target_link_libraries(test-tsdb-timewindowpartitioner stx-http stx-base stx-protobuf stx-json sstable cstable chartsql cplot)
+target_link_libraries(test-tsdb-timewindowpartitioner chartsql cplot sstable cstable stx-http stx-protobuf stx-json stx-base)
 
 add_executable(tsdbd
     $<TARGET_OBJECTS:stx-mdb>
@@ -64,6 +64,6 @@ add_executable(tsdbd
     $<TARGET_OBJECTS:dproc>
     tsdb/tsdbd.cc)
 
-target_link_libraries(tsdbd stx-http stx-base stx-protobuf stx-json sstable cstable chartsql cplot)
+target_link_libraries(tsdbd chartsql cplot sstable cstable stx-http stx-protobuf stx-json stx-base)
 
 
