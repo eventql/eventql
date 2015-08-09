@@ -21,4 +21,4 @@ add_library(stx-json STATIC
 
 add_executable(test-json json_test.cc)
 
-target_link_libraries(test-json stx-base stx-http stx-json)
+target_link_libraries(test-json stx-http stx-base stx-json)

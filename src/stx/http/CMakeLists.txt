@@ -33,5 +33,5 @@ add_library(stx-http STATIC
     #streaminghttpservice_example/WriteStreamServlet.cc)
 
 add_executable(test-http http_test.cc)
-target_link_libraries(test-http stx-base stx-http stx-json)
+target_link_libraries(test-http stx-http stx-base stx-json)
 
