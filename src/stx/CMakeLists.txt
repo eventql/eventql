@@ -113,6 +113,21 @@ add_library(stx-protobuf OBJECT
     ../../3rdparty/google/protobuf/unknown_field_set.cc
     ../../3rdparty/google/protobuf/wire_format.cc
     ../../3rdparty/google/protobuf/wire_format_lite.cc
+    ../../3rdparty/google/protobuf/io/coded_stream.cc
+    ../../3rdparty/google/protobuf/io/gzip_stream.cc
+    ../../3rdparty/google/protobuf/io/printer.cc
+    ../../3rdparty/google/protobuf/io/tokenizer.cc
+    ../../3rdparty/google/protobuf/io/zero_copy_stream.cc
+    ../../3rdparty/google/protobuf/io/zero_copy_stream_impl.cc
+    ../../3rdparty/google/protobuf/io/zero_copy_stream_impl_lite.cc
+    ../../3rdparty/google/protobuf/stubs/atomicops_internals_x86_gcc.cc
+    ../../3rdparty/google/protobuf/stubs/atomicops_internals_x86_msvc.cc
+    ../../3rdparty/google/protobuf/stubs/common.cc
+    ../../3rdparty/google/protobuf/stubs/once.cc
+    ../../3rdparty/google/protobuf/stubs/stringprintf.cc
+    ../../3rdparty/google/protobuf/stubs/structurally_valid.cc
+    ../../3rdparty/google/protobuf/stubs/strutil.cc
+    ../../3rdparty/google/protobuf/stubs/substitute.cc
     protobuf/MessageDecoder.cc
     protobuf/MessageEncoder.cc
     protobuf/MessagePrinter.cc
