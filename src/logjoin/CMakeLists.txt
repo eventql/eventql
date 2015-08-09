@@ -41,7 +41,7 @@ add_executable(logjoind
     $<TARGET_OBJECTS:logjoin-base>
     logjoind.cc)
 
-target_link_libraries(logjoind stx-http stx-base stx-protobuf stx-json sstable cstable chartsql cplot)
+target_link_libraries(logjoind stx-http stx-protobuf stx-json sstable cstable chartsql cplot stx-base)
 
 add_executable(test-logjoin
     $<TARGET_OBJECTS:brokerd-client>
@@ -56,4 +56,4 @@ add_executable(test-logjoin
     $<TARGET_OBJECTS:logjoin-base>
     LogJoin_test.cc)
 
-target_link_libraries(test-logjoin stx-http stx-base stx-protobuf stx-json sstable cstable chartsql cplot)
+target_link_libraries(test-logjoin stx-http stx-protobuf stx-json sstable cstable chartsql cplot stx-base)
