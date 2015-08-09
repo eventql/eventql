@@ -19,6 +19,7 @@ add_library(brokerd-client OBJECT
 
 add_executable(brokerd
     $<TARGET_OBJECTS:stx-base>
+    $<TARGET_OBJECTS:stx-protobuf>
     $<TARGET_OBJECTS:stx-http>
     $<TARGET_OBJECTS:stx-mdb>
     $<TARGET_OBJECTS:stx-json>
@@ -28,10 +29,9 @@ add_executable(brokerd
     BrokerServlet.cc
     brokerd.cc)
 
-target_link_libraries(brokerd ${CMAKE_THREAD_LIBS_INIT} ${FNORD_LIBS})
-
 add_executable(brokerctl
     $<TARGET_OBJECTS:stx-base>
+    $<TARGET_OBJECTS:stx-protobuf>
     $<TARGET_OBJECTS:stx-http>
     $<TARGET_OBJECTS:stx-mdb>
     $<TARGET_OBJECTS:stx-json>
@@ -40,21 +40,3 @@ add_executable(brokerctl
     $<TARGET_OBJECTS:brokerd-client>
     brokerctl.cc)
 
-target_link_libraries(brokerctl ${CMAKE_THREAD_LIBS_INIT} ${FNORD_LIBS})
-
-#add_executable(fnord-logstream-service-example
-#    $<TARGET_OBJECTS:stx-base>
-#    $<TARGET_OBJECTS:fnord-feeds>
-#    $<TARGET_OBJECTS:stx-http>
-#    $<TARGET_OBJECTS:stx-json>
-#    $<TARGET_OBJECTS:sstable>
-#    feeds_example.cc)
-#
-#add_executable(tests/test-logstream-service
-#    $<TARGET_OBJECTS:stx-base>
-#    $<TARGET_OBJECTS:fnord-feeds>
-#    $<TARGET_OBJECTS:stx-http>
-#    $<TARGET_OBJECTS:stx-json>
-#    $<TARGET_OBJECTS:sstable>
-#    feeds_test.cc)
-#
