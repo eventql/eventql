@@ -67,6 +67,14 @@
 #cmakedefine HAVE_SYS_UTSNAME_H
 #cmakedefine HAVE_SECURITY_PAM_APPL_H
 
+#cmakedefine HASH_MAP_H @HASH_MAP_H@
+#cmakedefine HASH_NAMESPACE @HASH_NAMESPACE@
+#cmakedefine HASH_SET_H @HASH_SET_H@
+#cmakedefine HAVE_HASH_MAP
+#cmakedefine HAVE_HASH_SET
+#cmakedefine HASH_MAP_CLASS @HASH_MAP_CLASS@
+#cmakedefine HASH_SET_CLASS @HASH_SET_CLASS@
+
 // --------------------------------------------------------------------------
 // functional tests
 

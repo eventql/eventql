@@ -10,9 +10,6 @@ configure_file(
     ${CMAKE_CURRENT_SOURCE_DIR}/sysconfig.h.cmake
     ${CMAKE_CURRENT_BINARY_DIR}/sysconfig.h)
 
-file(GLOB PROTO_FILES *.proto)
-PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS ${PROTO_FILES})
-
 # base
 add_library(stx-base OBJECT
     ../../3rdparty/simdcomp/simdbitpacking.c
@@ -92,8 +89,39 @@ add_library(stx-base OBJECT
     util/PersistentHashSet.cc
     VFS.cc
     wallclock.cc
-    web/SecureCookie.cc
-    ${PROTO_SRCS})
+    web/SecureCookie.cc)
+
+file(GLOB PROTO_FILES *.proto)
+PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS ${PROTO_FILES})
+set(PROTOC_ARGS --proto_path ${CMAKE_CURRENT_SOURCE_DIR}/ PARENT_SCOPE)
+
+add_library(stx-protobuf OBJECT
+    ../../3rdparty/google/protobuf/descriptor.cc
+    ../../3rdparty/google/protobuf/descriptor.pb.cc
+    ../../3rdparty/google/protobuf/descriptor_database.cc
+    ../../3rdparty/google/protobuf/dynamic_message.cc
+    ../../3rdparty/google/protobuf/extension_set.cc
+    ../../3rdparty/google/protobuf/extension_set_heavy.cc
+    ../../3rdparty/google/protobuf/generated_message_reflection.cc
+    ../../3rdparty/google/protobuf/generated_message_util.cc
+    ../../3rdparty/google/protobuf/message.cc
+    ../../3rdparty/google/protobuf/message_lite.cc
+    ../../3rdparty/google/protobuf/reflection_ops.cc
+    ../../3rdparty/google/protobuf/repeated_field.cc
+    ../../3rdparty/google/protobuf/service.cc
+    ../../3rdparty/google/protobuf/text_format.cc
+    ../../3rdparty/google/protobuf/unknown_field_set.cc
+    ../../3rdparty/google/protobuf/wire_format.cc
+    ../../3rdparty/google/protobuf/wire_format_lite.cc
+    protobuf/MessageDecoder.cc
+    protobuf/MessageEncoder.cc
+    protobuf/MessagePrinter.cc
+    protobuf/MessageObject.cc
+    protobuf/MessageSchema.cc
+    protobuf/DynamicMessage.cc
+    protobuf/JSONEncoder.cc)
+
+add_dependencies(stx-protobuf stx-base)
 
 add_executable(test-inputstream
     $<TARGET_OBJECTS:stx-base>

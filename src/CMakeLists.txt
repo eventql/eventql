@@ -50,8 +50,10 @@ CHECK_LIBRARY_EXISTS(dl dlopen "" COMPILER_RT_HAS_LIBDL)
 CHECK_LIBRARY_EXISTS(pthread pthread_create "" COMPILER_RT_HAS_LIBPTHREAD)
 
 if(NOT COMPILER_RT_HAS_LIBSTDCXX)
-  message(FATAL_ERROR "libstc++ not found")
+  message(FATAL_ERROR "libstdc++ not found")
 endif()
+
+include(../cmake/FindCXX11HashMapAndSet.cmake)
 
 CHECK_INCLUDE_FILES(sys/inotify.h HAVE_SYS_INOTIFY_H)
 if(HAVE_SYS_INOTIFY_H)
@@ -117,11 +119,7 @@ set(MODULE_INCLUDE
 
 include_directories(${MODULE_INCLUDE})
 
-# DEPENDENCIES
-
 set(STX_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
-
-add_subdirectory(stx/protobuf)
 set(STX_LDFLAGS "${STX_LDFLAGS} ${STX_PROTOBUF_LIBS}")
 set(CMAKE_CXX_LINK_EXECUTABLE "${CMAKE_CXX_LINK_EXECUTABLE} ${STX_LDFLAGS}")
 message(STATUS "libSTX ldflags: ${STX_LDFLAGS}")
