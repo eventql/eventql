@@ -95,12 +95,15 @@ include(../cmake/CompileProtobuf.cmake)
 #PCRE
 add_subdirectory(../3rdparty/pcre pcre)
 
+message(STATUS "PCRE INCLUDE: ${CMAKE_CURRENT_BINARY_DIR}/pcre")
+
 # INCLUDES
 set(STX_INCLUDE
     ${PROJECT_BINARY_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/../
     ${CMAKE_CURRENT_SOURCE_DIR}/../3rdparty
     ${CMAKE_CURRENT_SOURCE_DIR}/../3rdparty/pcre
+    ${CMAKE_CURRENT_BINARY_DIR}/pcre
     ${CMAKE_CURRENT_BINARY_DIR}
     ${CMAKE_CURRENT_BINARY_DIR}/stx
     ${CMAKE_CURRENT_SOURCE_DIR})
