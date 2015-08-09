@@ -71,6 +71,25 @@ SValue Runtime::evaluateStaticExpression(ASTNode* expr) {
   return out;
 }
 
+SValue Runtime::evaluateStaticExpression(const String& expr) {
+  csql::Parser parser;
+  parser.parseValueExpression(expr.data(), expr.size());
+
+  auto stmts = parser.getStatements();
+  if (stmts.size() != 1) {
+    RAISE(
+        kParseError,
+        "static expression must consist of exactly one statement");
+  }
+
+  auto val_expr = mkRef(query_plan_builder_->buildValueExpression(stmts[0]));
+  auto compiled = query_builder_->buildValueExpression(val_expr);
+
+  SValue out;
+  compiled->evaluate(0, nullptr, &out);
+  return out;
+}
+
 SValue Runtime::evaluateStaticExpression(RefPtr<ValueExpressionNode> expr) {
   auto compiled = query_builder_->buildValueExpression(expr);
 

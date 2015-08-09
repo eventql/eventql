@@ -64,6 +64,12 @@ public:
    */
   size_t parse(const char* query, size_t len);
 
+  /**
+   * Parse a single SQL scalar/value expression from the input string. Returns
+   * true on success and false if an error occurred.
+   */
+  size_t parseValueExpression(const char* query, size_t len);
+
   const std::vector<ASTNode*>& getStatements() const;
   const std::vector<Token>& getTokenList() const;
 
