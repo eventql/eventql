@@ -5,7 +5,7 @@
 # the terms of the GNU General Public License v3.0. You should have received a
 # copy of the GNU General Public License along with this program. If not, see
 # <http://www.gnu.org/licenses/>.
-add_library(chartsql-lib OBJECT
+add_library(chartsql STATIC
     svalue.cc
     SFunction.cc
     format.cc
@@ -89,33 +89,15 @@ add_library(chartsql-lib OBJECT
     defaults.cc)
 
 add_executable(test-chartsql-runtime
-    $<TARGET_OBJECTS:stx-base>
-    $<TARGET_OBJECTS:fnord-chart>
-    $<TARGET_OBJECTS:stx-protobuf>
-    $<TARGET_OBJECTS:stx-http>
-    $<TARGET_OBJECTS:stx-json>
-    $<TARGET_OBJECTS:stx-mdb>
-    $<TARGET_OBJECTS:sstable>
-    $<TARGET_OBJECTS:libcstable>
     $<TARGET_OBJECTS:dproc>
-    $<TARGET_OBJECTS:chartsql-lib>
     $<TARGET_OBJECTS:tsdb-client>
     runtime/Runtime_test.cc)
 
-target_link_libraries(test-chartsql-runtime ${CMAKE_THREAD_LIBS_INIT} ${FNORD_LIBS})
+target_link_libraries(test-chartsql-runtime stx-base cplot chartsql)
 
 add_executable(test-chartsql-parser
-    $<TARGET_OBJECTS:stx-base>
-    $<TARGET_OBJECTS:fnord-chart>
-    $<TARGET_OBJECTS:stx-protobuf>
-    $<TARGET_OBJECTS:stx-http>
-    $<TARGET_OBJECTS:stx-json>
-    $<TARGET_OBJECTS:stx-mdb>
-    $<TARGET_OBJECTS:sstable>
-    $<TARGET_OBJECTS:libcstable>
     $<TARGET_OBJECTS:dproc>
-    $<TARGET_OBJECTS:chartsql-lib>
     $<TARGET_OBJECTS:tsdb-client>
     parser/Parser_test.cc)
 
-target_link_libraries(test-chartsql-parser ${CMAKE_THREAD_LIBS_INIT} ${FNORD_LIBS})
+target_link_libraries(test-chartsql-parser stx-base cplot chartsql)
