@@ -10,6 +10,7 @@ option(ENABLE_TESTS "Build unit tests [default: ON]" ON)
 
 set(PROTOC_ARGS --proto_path ${CMAKE_SOURCE_DIR}/3rdparty/tsdb/src)
 include(3rdparty/libstx/cmake/libstx.cmake)
+set(CMAKE_CXX_LINK_EXECUTABLE "${CMAKE_CXX_LINK_EXECUTABLE} -static")
 
 add_subdirectory(3rdparty/libcstable)
 include_directories(${CSTABLE_INCLUDE})
@@ -55,8 +56,6 @@ add_library(hunspell OBJECT
 
 include_directories(src/)
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/src)
-
-set(CMAKE_CXX_LINK_EXECUTABLE "${CMAKE_CXX_LINK_EXECUTABLE} -static")
 
 add_subdirectory(src/common)
 add_subdirectory(src/analytics)
