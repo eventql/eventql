@@ -245,6 +245,24 @@ bool FileInputStream::readNextByte(char* target) {
   }
 }
 
+size_t FileInputStream::skipNextBytes(size_t nbytes) {
+  auto buf_remaining = buf_len_ - buf_pos_;
+
+  if (nbytes <= buf_remaining) {
+    buf_pos_ += nbytes;
+    return nbytes;
+  }
+
+  buf_pos_ = 0;
+  buf_len_ = 0;
+
+  if (lseek(fd_, nbytes - buf_remaining, SEEK_CUR) == -1) {
+    RAISE_ERRNO("seek() failed");
+  }
+
+  return nbytes;
+}
+
 bool FileInputStream::eof() {
   if (buf_pos_ >= buf_len_) {
     readNextChunk();
@@ -305,6 +323,16 @@ bool StringInputStream::readNextByte(char* target) {
   }
 }
 
+size_t StringInputStream::skipNextBytes(size_t n_bytes) {
+  auto nskipped = n_bytes;
+  if (cur_ + n_bytes > str_.size()) {
+    nskipped = str_.size() - cur_;
+  }
+
+  cur_ += nskipped;
+  return nskipped;
+}
+
 bool StringInputStream::eof() {
   return cur_ >= str_.size();
 }
@@ -333,6 +361,16 @@ bool BufferInputStream::readNextByte(char* target) {
   }
 }
 
+size_t BufferInputStream::skipNextBytes(size_t n_bytes) {
+  auto nskipped = n_bytes;
+  if (cur_ + n_bytes > buf_->size()) {
+    nskipped = buf_->size() - cur_;
+  }
+
+  cur_ += nskipped;
+  return nskipped;
+}
+
 bool BufferInputStream::eof() {
   return cur_ >= buf_->size();
 }
@@ -355,6 +393,16 @@ bool MemoryInputStream::readNextByte(char* target) {
   } else {
     return false;
   }
+}
+
+size_t MemoryInputStream::skipNextBytes(size_t n_bytes) {
+  auto nskipped = n_bytes;
+  if (cur_ + n_bytes > size_) {
+    nskipped = size_ - cur_;
+  }
+
+  cur_ += nskipped;
+  return nskipped;
 }
 
 bool MemoryInputStream::eof() {
