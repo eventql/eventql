@@ -112,7 +112,7 @@ bool LogPartitionReplication::replicate() {
     const auto& replica_offset = replicatedOffsetFor(repl_state, r.unique_id);
 
     if (replica_offset < head_offset) {
-      logDebug(
+      logTrace(
           "tsdb",
           "Replicating partition $0/$1/$2 to $3",
           snap_->state.tsdb_namespace(),

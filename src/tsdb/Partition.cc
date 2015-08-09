@@ -85,7 +85,7 @@ RefPtr<Partition> Partition::reopen(
     nrecs += header.rowCount();
   }
 
-  stx::logDebug(
+  stx::logTrace(
       "tsdb",
       "Loading partition $0/$1/$2 ($3 records)",
       tsdb_namespace,

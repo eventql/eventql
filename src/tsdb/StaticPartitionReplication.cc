@@ -101,7 +101,7 @@ bool StaticPartitionReplication::replicate() {
     const auto& replica_version = replicatedVersionFor(repl_state, r.unique_id);
 
     if (replica_version < head_version) {
-      logDebug(
+      logTrace(
           "tsdb",
           "Replicating partition $0/$1/$2 to $3",
           snap_->state.tsdb_namespace(),
