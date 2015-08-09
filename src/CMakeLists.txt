@@ -98,6 +98,14 @@ else()
   message(STATUS "OpenSSL not found")
 endif()
 
+# PROTOBUF
+find_program(PROTOBUF_PROTOC_EXECUTABLE NAMES protoc)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../3rdparty)
+set(PROTOBUF_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../3rdparty)
+include(../cmake/CompileProtobuf.cmake)
+
+message(STATUS "pdir: ${PROTOBUF_INCLUDE_DIR}")
+
 # INCLUDES
 set(MODULE_INCLUDE
     ${PROJECT_BINARY_DIR}
