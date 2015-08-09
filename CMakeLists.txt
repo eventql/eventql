@@ -8,7 +8,7 @@ project(cmapp)
 
 option(ENABLE_TESTS "Build unit tests [default: ON]" ON)
 
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static")
+#set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static")
 #set(CMAKE_STATIC_LINKER_FLAGS "${CMAKE_STATIC_LINKER_FLAGS} -static")
 
 set(PROTOC_ARGS --proto_path ${CMAKE_SOURCE_DIR}/3rdparty/tsdb/src)
