@@ -48,6 +48,7 @@ public:
    * Returns the number of bytes read.
    *
    * @param target the string to copy the data into
+   * @param n_bytes the number of bytes to read
    */
   virtual size_t readNextBytes(std::string* target, size_t n_bytes);
 
@@ -56,6 +57,7 @@ public:
    * Returns the number of bytes read.
    *
    * @param target the string to copy the data into
+   * @param n_bytes the number of bytes to read
    */
   virtual size_t readNextBytes(Buffer* target, size_t n_bytes);
 
@@ -64,8 +66,16 @@ public:
    * Returns the number of bytes read.
    *
    * @param target the string to copy the data into
+   * @param n_bytes the number of bytes to read
    */
   virtual size_t readNextBytes(void* target, size_t n_bytes);
+
+  /**
+   * Skip the next N bytes in the stream. Returns the number of bytes skipped.
+   *
+   * @param n_bytes the number of bytes to skip
+   */
+  virtual size_t skipNextBytes(size_t n_bytes) = 0;
 
   /**
    * Read from the stream until EOF and copy the data into the provided string.
@@ -224,6 +234,13 @@ public:
   bool readNextByte(char* target) override;
 
   /**
+   * Skip the next N bytes in the stream. Returns the number of bytes skipped.
+   *
+   * @param n_bytes the number of bytes to skip
+   */
+  size_t skipNextBytes(size_t n_bytes) override;
+
+  /**
    * Check if the end of this input stream was reached. Returns true if the
    * end was reached, false otherwise
    */
@@ -275,6 +292,13 @@ public:
   bool readNextByte(char* target) override;
 
   /**
+   * Skip the next N bytes in the stream. Returns the number of bytes skipped.
+   *
+   * @param n_bytes the number of bytes to skip
+   */
+  size_t skipNextBytes(size_t n_bytes) override;
+
+  /**
    * Check if the end of this input stream was reached. Returns true if the
    * end was reached, false otherwise
    */
@@ -316,6 +340,13 @@ public:
   bool readNextByte(char* target) override;
 
   /**
+   * Skip the next N bytes in the stream. Returns the number of bytes skipped.
+   *
+   * @param n_bytes the number of bytes to skip
+   */
+  size_t skipNextBytes(size_t n_bytes) override;
+
+  /**
    * Check if the end of this input stream was reached. Returns true if the
    * end was reached, false otherwise
    */
@@ -348,6 +379,13 @@ public:
    * @param target the target char pointer
    */
   bool readNextByte(char* target) override;
+
+  /**
+   * Skip the next N bytes in the stream. Returns the number of bytes skipped.
+   *
+   * @param n_bytes the number of bytes to skip
+   */
+  size_t skipNextBytes(size_t n_bytes) override;
 
   /**
    * Check if the end of this input stream was reached. Returns true if the
