@@ -160,6 +160,7 @@ add_executable(test-hmac
 
 add_executable(test-human
     $<TARGET_OBJECTS:stx-base>
+    $<TARGET_OBJECTS:pcre>
     human_test.cc)
 
 add_executable(test-secure-cookie
