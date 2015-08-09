@@ -134,9 +134,8 @@ add_library(stx-protobuf OBJECT
     protobuf/MessageObject.cc
     protobuf/MessageSchema.cc
     protobuf/DynamicMessage.cc
-    protobuf/JSONEncoder.cc)
-
-add_dependencies(stx-protobuf stx-base)
+    protobuf/JSONEncoder.cc
+    ${PROTO_SRCS})
 
 add_executable(test-inputstream
     $<TARGET_OBJECTS:stx-base>
