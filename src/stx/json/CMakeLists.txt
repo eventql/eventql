@@ -6,7 +6,7 @@
 # copy of the GNU General Public License along with this program. If not, see
 # <http://www.gnu.org/licenses/>.
 
-add_library(stx-json OBJECT
+add_library(stx-json STATIC
     flatjsonreader.cc
     json.cc
     jsondocument.cc
@@ -19,10 +19,6 @@ add_library(stx-json OBJECT
     jsonrpcresponse.cc
     jsonutil.cc)
 
-add_executable(test-json
-    
-    $<TARGET_OBJECTS:stx-http>
-    $<TARGET_OBJECTS:stx-json>
-    json_test.cc)
+add_executable(test-json json_test.cc)
 
-target_link_libraries(test-json ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(test-json stx-base stx-http stx-json)
