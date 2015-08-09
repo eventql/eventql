@@ -95,7 +95,7 @@ file(GLOB PROTO_FILES *.proto)
 PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS ${PROTO_FILES})
 set(PROTOC_ARGS --proto_path ${CMAKE_CURRENT_SOURCE_DIR}/ PARENT_SCOPE)
 
-add_library(stx-protobuf OBJECT
+add_library(stx-protobuf STATIC
     ../../3rdparty/google/protobuf/compiler/parser.cc
     ../../3rdparty/google/protobuf/descriptor.cc
     ../../3rdparty/google/protobuf/descriptor.pb.cc
@@ -164,11 +164,10 @@ add_executable(test-sha1 SHA1_test.cc)
 target_link_libraries(test-sha1 stx-base)
 
 add_executable(test-protobuf
-    $<TARGET_OBJECTS:stx-protobuf>
     $<TARGET_OBJECTS:stx-json>
     $<TARGET_OBJECTS:stx-http>
     protobuf/protobuf_test.cc)
-target_link_libraries(test-protobuf stx-base)
+target_link_libraries(test-protobuf stx-base stx-protobuf)
 
 add_executable(test-persistenthashset util/PersistentHashSet_test.cc)
 target_link_libraries(test-persistenthashset stx-base)
