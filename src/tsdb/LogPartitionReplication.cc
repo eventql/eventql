@@ -17,7 +17,8 @@ using namespace stx;
 
 namespace tsdb {
 
-const size_t LogPartitionReplication::kBatchSize = 1024 * 1024 * 50; // 50 MB
+const size_t LogPartitionReplication::kMaxBatchSizeRows = 8192;
+const size_t LogPartitionReplication::kMaxBatchSizeBytes = 1024 * 1024 * 50; // 50 MB
 
 LogPartitionReplication::LogPartitionReplication(
     RefPtr<Partition> partition,
@@ -66,7 +67,8 @@ void LogPartitionReplication::replicateTo(
 
     batch_size += record_size;
 
-    if (batch_size > kBatchSize) {
+    if (batch_size > kMaxBatchSizeBytes ||
+        batch.records().size() > kMaxBatchSizeRows) {
       uploadBatchTo(replica, batch);
       batch.mutable_records()->Clear();
       batch_size = 0;
