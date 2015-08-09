@@ -573,3 +573,31 @@ TEST_INITIALIZER(ParserTest, InitializeComplexQueries, [] () {
         });
   }
 });
+
+TEST_CASE(ParserTest, TestParseIfStatement, [] () {
+  auto parser = parseTestQuery(" SELECT if(1, 2, 3) from asd;");
+  EXPECT(parser.getStatements().size() == 1);
+  const auto& stmt = parser.getStatements()[0];
+  EXPECT(*stmt == ASTNode::T_SELECT);
+  EXPECT(stmt->getChildren().size() == 2);
+  const auto& sl = stmt->getChildren()[0];
+  EXPECT(*sl == ASTNode::T_SELECT_LIST);
+  EXPECT(sl->getChildren().size() == 1);
+  auto derived = sl->getChildren()[0];
+  EXPECT(*derived == ASTNode::T_DERIVED_COLUMN);
+  EXPECT(derived->getChildren().size() == 1);
+  auto expr = derived->getChildren()[0];
+  EXPECT(*expr == ASTNode::T_IF_EXPR);
+  EXPECT(expr->getChildren().size() == 3);
+  EXPECT(*expr->getChildren()[0] == ASTNode::T_LITERAL);
+  EXPECT(*expr->getChildren()[0]->getToken() == Token::T_NUMERIC);
+  EXPECT(*expr->getChildren()[0]->getToken() == "1");
+  EXPECT(*expr->getChildren()[1] == ASTNode::T_LITERAL);
+  EXPECT(*expr->getChildren()[1]->getToken() == Token::T_NUMERIC);
+  EXPECT(*expr->getChildren()[1]->getToken() == "2");
+  EXPECT(*expr->getChildren()[2] == ASTNode::T_LITERAL);
+  EXPECT(*expr->getChildren()[2]->getToken() == Token::T_NUMERIC);
+  EXPECT(*expr->getChildren()[2]->getToken() == "3");
+  const auto& from = stmt->getChildren()[1];
+  EXPECT(*from == ASTNode::T_FROM);
+});
