@@ -1,5 +1,4 @@
-cmake_minimum_required(VERSION 2.8.8)
-include(FindPkgConfig)
+
 include(CheckIncludeFile)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/modules/") 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
@@ -56,6 +55,9 @@ add_library(hunspell OBJECT
 
 include_directories(src/)
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/src)
+
+set(CMAKE_CXX_LINK_EXECUTABLE "${CMAKE_CXX_LINK_EXECUTABLE} -static")
+
 add_subdirectory(src/common)
 add_subdirectory(src/analytics)
 add_subdirectory(src/logjoin)
