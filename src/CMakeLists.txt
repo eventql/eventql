@@ -89,9 +89,8 @@ endif()
 find_program(PROTOBUF_PROTOC_EXECUTABLE NAMES protoc)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../3rdparty)
 set(PROTOBUF_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../3rdparty)
+set(PROTOBUF_INCLUDE_DIR ${PROTOBUF_INCLUDE_DIR} PARENT_SCOPE)
 include(../cmake/CompileProtobuf.cmake)
-
-message(STATUS "pdir: ${PROTOBUF_INCLUDE_DIR}")
 
 # INCLUDES
 set(MODULE_INCLUDE
