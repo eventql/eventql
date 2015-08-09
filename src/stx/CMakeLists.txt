@@ -11,7 +11,8 @@ configure_file(
     ${CMAKE_CURRENT_BINARY_DIR}/sysconfig.h)
 
 # base
-add_library(stx-base OBJECT
+add_library(stx-base STATIC
+    $<TARGET_OBJECTS:pcre>
     ../../3rdparty/simdcomp/simdbitpacking.c
     ../../3rdparty/simdcomp/simdintegratedbitpacking.c
     ../../3rdparty/simdcomp/simdcomputil.c
@@ -138,51 +139,39 @@ add_library(stx-protobuf OBJECT
     protobuf/JSONEncoder.cc
     ${PROTO_SRCS})
 
-add_executable(test-inputstream
-    $<TARGET_OBJECTS:stx-base>
-    io/inputstream_test.cc)
+add_executable(test-inputstream io/inputstream_test.cc)
+target_link_libraries(test-inputstream stx-base)
 
-add_executable(test-uri
-    $<TARGET_OBJECTS:stx-base>
-    uri_test.cc)
+add_executable(test-uri uri_test.cc)
+target_link_libraries(test-uri stx-base)
 
-add_executable(test-stringutil
-    $<TARGET_OBJECTS:stx-base>
-    stringutil_test.cc)
+add_executable(test-stringutil stringutil_test.cc)
+target_link_libraries(test-stringutil stx-base)
 
-add_executable(test-internmap
-    $<TARGET_OBJECTS:stx-base>
-    InternMap_test.cc)
+add_executable(test-internmap InternMap_test.cc)
+target_link_libraries(test-internmap stx-base)
 
-add_executable(test-hmac
-    $<TARGET_OBJECTS:stx-base>
-    HMAC_test.cc)
+add_executable(test-hmac HMAC_test.cc)
+target_link_libraries(test-hmac stx-base)
 
-add_executable(test-human
-    $<TARGET_OBJECTS:stx-base>
-    $<TARGET_OBJECTS:pcre>
-    human_test.cc)
+add_executable(test-human human_test.cc)
+target_link_libraries(test-human stx-base)
 
-add_executable(test-secure-cookie
-    $<TARGET_OBJECTS:stx-base>
-    web/SecureCookie_test.cc)
+add_executable(test-secure-cookie web/SecureCookie_test.cc)
+target_link_libraries(test-secure-cookie stx-base)
 
-add_executable(test-sha1
-    $<TARGET_OBJECTS:stx-base>
-    SHA1_test.cc)
+add_executable(test-sha1 SHA1_test.cc)
+target_link_libraries(test-sha1 stx-base)
 
 add_executable(test-protobuf
-    $<TARGET_OBJECTS:stx-base>
     $<TARGET_OBJECTS:stx-protobuf>
     $<TARGET_OBJECTS:stx-json>
     $<TARGET_OBJECTS:stx-http>
     protobuf/protobuf_test.cc)
+target_link_libraries(test-protobuf stx-base)
 
-add_executable(test-persistenthashset
-    $<TARGET_OBJECTS:stx-base>
-    util/PersistentHashSet_test.cc)
-
-target_link_libraries(test-persistenthashset ${FNORD_LIBS})
+add_executable(test-persistenthashset util/PersistentHashSet_test.cc)
+target_link_libraries(test-persistenthashset stx-base)
 
 ## redis
 #add_library(fnord-redis OBJECT
@@ -195,7 +184,7 @@ target_link_libraries(test-persistenthashset ${FNORD_LIBS})
 #    net/redis/redisqueue.cc)
 
 #add_executable(tests/test-redis
-#    $<TARGET_OBJECTS:stx-base>
+#    
 #    $<TARGET_OBJECTS:fnord-comm>
 #    $<TARGET_OBJECTS:fnord-net>
 #    $<TARGET_OBJECTS:fnord-redis>
