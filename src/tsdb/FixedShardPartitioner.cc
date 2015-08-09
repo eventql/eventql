@@ -15,8 +15,10 @@ using namespace stx;
 namespace tsdb {
 
 FixedShardPartitioner::FixedShardPartitioner(
-    const String& table_name) :
-    table_name_(table_name) {}
+    const String& table_name,
+    size_t num_shards) :
+    table_name_(table_name),
+    num_shards_(num_shards) {}
 
 SHA1Hash FixedShardPartitioner::partitionKeyFor(
     const String& table_name,
@@ -45,6 +47,11 @@ Vector<SHA1Hash> FixedShardPartitioner::partitionKeysFor(
 SHA1Hash FixedShardPartitioner::partitionKeyFor(
     const String& partition_key) const {
   return partitionKeyFor(table_name_, std::stoull(partition_key));
+}
+
+Vector<SHA1Hash> FixedShardPartitioner::partitionKeysFor(
+    const TSDBTableRef& table_ref) const {
+  return partitionKeysFor(table_ref.table_key, num_shards_);
 }
 
 }

@@ -42,6 +42,9 @@ public:
 
   SHA1Hash partitionKeyFor(const String& partition_key) const override;
 
+  Vector<SHA1Hash> partitionKeysFor(
+      const TSDBTableRef& table_ref) const override;
+
 protected:
   String table_name_;
   TimeWindowPartitionerConfig config_;

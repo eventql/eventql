@@ -13,7 +13,7 @@
 #include <stx/UnixTime.h>
 #include <stx/duration.h>
 #include <stx/SHA1.h>
-#include <tsdb/RecordEnvelope.pb.h>
+#include <tsdb/TSDBTableRef.h>
 
 using namespace stx;
 
@@ -23,6 +23,9 @@ class TablePartitioner : public RefCounted {
 public:
 
   virtual SHA1Hash partitionKeyFor(const String& partition_key) const = 0;
+
+  virtual Vector<SHA1Hash> partitionKeysFor(
+      const TSDBTableRef& table_ref) const = 0;
 
 };
 

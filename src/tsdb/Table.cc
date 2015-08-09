@@ -96,7 +96,9 @@ void Table::loadConfig() {
 
     case TBL_PARTITION_FIXED:
       partitioner_ = RefPtr<TablePartitioner>(
-          new FixedShardPartitioner(config_.table_name()));
+          new FixedShardPartitioner(
+              config_.table_name(),
+              config_.config().num_shards()));
       break;
 
   }

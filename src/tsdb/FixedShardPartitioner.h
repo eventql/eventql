@@ -22,7 +22,7 @@ namespace tsdb {
 class FixedShardPartitioner : public TablePartitioner {
 public:
 
-  FixedShardPartitioner(const String& table_name);
+  FixedShardPartitioner(const String& table_name, size_t num_shards);
 
   static SHA1Hash partitionKeyFor(
       const String& table_name,
@@ -34,8 +34,12 @@ public:
 
   SHA1Hash partitionKeyFor(const String& partition_key) const override;
 
+  Vector<SHA1Hash> partitionKeysFor(
+      const TSDBTableRef& table_ref) const override;
+
 protected:
   String table_name_;
+  size_t num_shards_;
 };
 
 }

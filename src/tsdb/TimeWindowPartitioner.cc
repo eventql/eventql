@@ -68,5 +68,13 @@ SHA1Hash TimeWindowPartitioner::partitionKeyFor(
       config_.partition_size());
 }
 
+Vector<SHA1Hash> TimeWindowPartitioner::partitionKeysFor(
+    const TSDBTableRef& table_ref) const {
+  return partitionKeysFor(
+        table_ref.table_key,
+        table_ref.timerange_begin.get(),
+        table_ref.timerange_limit.get(),
+        config_.partition_size());
+}
 
 }
