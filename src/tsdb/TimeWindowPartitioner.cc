@@ -54,13 +54,10 @@ Vector<SHA1Hash> TimeWindowPartitioner::partitionKeysFor(
 
 SHA1Hash TimeWindowPartitioner::partitionKeyFor(
     const String& partition_key) const {
-  auto pkey =  partitionKeyFor(
+  return partitionKeyFor(
       table_name_,
       UnixTime(std::stoull(partition_key)),
       4 * kMicrosPerHour);
-  iputs("build pkey: $0 // $1 -> $2", table_name_, partition_key, pkey.toString());
-
-  return pkey;
 }
 
 
