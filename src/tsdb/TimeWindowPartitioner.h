@@ -14,6 +14,7 @@
 #include <stx/duration.h>
 #include <stx/SHA1.h>
 #include <tsdb/TablePartitioner.h>
+#include <tsdb/TableConfig.pb.h>
 
 using namespace stx;
 
@@ -23,6 +24,10 @@ class TimeWindowPartitioner : public TablePartitioner {
 public:
 
   TimeWindowPartitioner(const String& table_name);
+
+  TimeWindowPartitioner(
+      const String& table_name,
+      const TimeWindowPartitionerConfig& config);
 
   static SHA1Hash partitionKeyFor(
       const String& table_name,
@@ -39,6 +44,7 @@ public:
 
 protected:
   String table_name_;
+  TimeWindowPartitionerConfig config_;
 };
 
 }

@@ -20,6 +20,12 @@ enum TableStorage {
   //TBL_STORAGE_BTREE = 3;
 };
 
+message TimeWindowPartitionerConfig {
+
+  required uint64 partition_size = 1;
+
+};
+
 message TableDefinition {
 
   /**
@@ -64,6 +70,8 @@ message TableConfig {
    * The number of shards for this table
    */
   optional uint64 num_shards = 7;
+
+  optional TimeWindowPartitionerConfig time_window_partitioner_config = 8;
 
 };
 

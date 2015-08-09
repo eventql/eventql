@@ -17,7 +17,15 @@ namespace tsdb {
 
 TimeWindowPartitioner::TimeWindowPartitioner(
     const String& table_name) :
-    table_name_(table_name) {}
+    table_name_(table_name) {
+  config_.set_partition_size(4 * kMicrosPerHour);
+}
+
+TimeWindowPartitioner::TimeWindowPartitioner(
+    const String& table_name,
+    const TimeWindowPartitionerConfig& config) :
+    table_name_(table_name),
+    config_(config) {}
 
 SHA1Hash TimeWindowPartitioner::partitionKeyFor(
     const String& table_name,
@@ -57,7 +65,7 @@ SHA1Hash TimeWindowPartitioner::partitionKeyFor(
   return partitionKeyFor(
       table_name_,
       UnixTime(std::stoull(partition_key)),
-      4 * kMicrosPerHour);
+      config_.partition_size());
 }
 
 
