@@ -63,6 +63,16 @@ size_t FileUtil::size(const std::string& filename) {
   return fstat.st_size;
 }
 
+uint64_t FileUtil::inodeID(const std::string& path) {
+  struct stat st;
+
+  if (stat(path.c_str(), &st) < 0) {
+    RAISE_ERRNO(kIOError, "fstat('%s') failed", path.c_str());
+  }
+
+  return (uint64_t) st.st_ino;
+}
+
 uint64_t FileUtil::mtime(const std::string& filename) {
   struct stat fstat;
 

@@ -48,6 +48,11 @@ public:
   static uint64_t mtime(const std::string& filename);
 
   /**
+   * Return the inode number of the file
+   */
+  static uint64_t inodeID(const std::string& filename);
+
+  /**
    * Return the last access time of the file
    */
   static uint64_t atime(const std::string& filename);
