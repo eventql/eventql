@@ -96,6 +96,7 @@ PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS ${PROTO_FILES})
 set(PROTOC_ARGS --proto_path ${CMAKE_CURRENT_SOURCE_DIR}/ PARENT_SCOPE)
 
 add_library(stx-protobuf OBJECT
+    ../../3rdparty/google/protobuf/compiler/parser.cc
     ../../3rdparty/google/protobuf/descriptor.cc
     ../../3rdparty/google/protobuf/descriptor.pb.cc
     ../../3rdparty/google/protobuf/descriptor_database.cc
