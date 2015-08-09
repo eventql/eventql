@@ -93,11 +93,11 @@ add_executable(test-chartsql-runtime
     $<TARGET_OBJECTS:tsdb-client>
     runtime/Runtime_test.cc)
 
-target_link_libraries(test-chartsql-runtime stx-http stx-base stx-protobuf stx-json cplot chartsql)
+target_link_libraries(test-chartsql-runtime chartsql cplot stx-http stx-protobuf stx-json stx-base)
 
 add_executable(test-chartsql-parser
     $<TARGET_OBJECTS:dproc>
     $<TARGET_OBJECTS:tsdb-client>
     parser/Parser_test.cc)
 
-target_link_libraries(test-chartsql-parser stx-http stx-base stx-protobuf stx-json cplot chartsql)
+target_link_libraries(test-chartsql-parser chartsql cplot stx-http stx-protobuf stx-json stx-base)
