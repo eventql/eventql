@@ -69,7 +69,7 @@ message TableConfig {
    * changed in microseconds (this is basically a rate-limit for the
    * CSTableIndex subprocess)
    */
-  optional uint64 cstable_build_interval = 9;
+  optional uint64 cstable_build_interval = 9 [default = 10000000];
 
   optional TimeWindowPartitionerConfig time_window_partitioner_config = 8;
 
