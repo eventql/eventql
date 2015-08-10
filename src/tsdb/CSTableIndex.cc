@@ -11,8 +11,10 @@
 #include <stx/logging.h>
 #include <stx/io/fileutil.h>
 #include <stx/io/mmappedfile.h>
+#include <stx/protobuf/msg.h>
 #include <stx/wallclock.h>
 #include <tsdb/CSTableIndex.h>
+#include <tsdb/CSTableIndexBuildState.pb.h>
 #include <tsdb/RecordSet.h>
 #include <stx/protobuf/MessageDecoder.h>
 #include <cstable/CSTableBuilder.h>
@@ -75,6 +77,26 @@ Option<String> CSTableIndex::fetchCSTableFilename(
   //}
 }
 
+bool CSTableIndex::needsUpdate(
+    RefPtr<PartitionSnapshot> snap) const {
+  String tbl_uuid((char*) snap->uuid().data(), snap->uuid().size());
+
+  auto metapath = FileUtil::joinPaths(snap->base_path, "_cstable_state");
+  //auto metapath_tmp = metapath + "." + Random::singleton()->hex128();
+
+  if (FileUtil::exists(metapath)) {
+    auto metadata = msg::decode<CSTableIndexBuildState>(
+        FileUtil::read(metapath));
+
+    if (metadata.uuid() == tbl_uuid &&
+        metadata.offset() >= snap->nrecs) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
 void CSTableIndex::buildCSTable(RefPtr<Partition> partition) {
   auto table = partition->getTable();
   if (table->storage() == tsdb::TBL_STORAGE_STATIC) {
@@ -82,17 +104,9 @@ void CSTableIndex::buildCSTable(RefPtr<Partition> partition) {
   }
 
   auto snap = partition->getSnapshot();
-  auto schema = table->schema();
 
-  auto metapath = FileUtil::joinPaths(snap->base_path, "_cstable_meta");
-  auto metapath_tmp = metapath + "." + Random::singleton()->hex128();
-  if (FileUtil::exists(metapath)) {
-    auto metadata = FileUtil::read(metapath);
-    auto last_offset = std::stoull(metadata.toString());
-
-    if (last_offset >= snap->nrecs) {
-      return; // cstable is up to date...
-    }
+  if (!needsUpdate(snap)) {
+    return;
   }
 
   logDebug(
@@ -104,6 +118,7 @@ void CSTableIndex::buildCSTable(RefPtr<Partition> partition) {
 
   auto filepath = FileUtil::joinPaths(snap->base_path, "_cstable");
   auto filepath_tmp = filepath + "." + Random::singleton()->hex128();
+  auto schema = table->schema();
 
   {
     cstable::CSTableBuilder cstable(schema.get());
@@ -118,12 +133,19 @@ void CSTableIndex::buildCSTable(RefPtr<Partition> partition) {
     cstable.write(filepath_tmp);
   }
 
+  auto metapath = FileUtil::joinPaths(snap->base_path, "_cstable_state");
+  auto metapath_tmp = metapath + "." + Random::singleton()->hex128();
   {
     auto metafile = File::openFile(
         metapath_tmp,
         File::O_CREATE | File::O_WRITE);
 
-    metafile.write(StringUtil::toString(snap->nrecs));
+    CSTableIndexBuildState metadata;
+    metadata.set_offset(snap->nrecs);
+    metadata.set_uuid(snap->uuid().data(), snap->uuid().size());
+
+    auto buf = msg::encode(metadata);
+    metafile.write(buf->data(), buf->size());
   }
 
   FileUtil::mv(filepath_tmp, filepath);
@@ -210,9 +232,9 @@ void CSTableIndex::work() {
     if (success) {
       waitset_.erase(partition->uuid());
 
-      //if (repl->needsReplication()) {
-      //  enqueuePartition(partition);
-      //}
+      if (needsUpdate(partition->getSnapshot())) {
+        enqueuePartition(partition);
+      }
     } else {
       auto delay = 30 * kMicrosPerSecond; // FIXPAUL increasing delay..
       queue_.emplace(now + delay, partition);

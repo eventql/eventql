@@ -39,6 +39,8 @@ protected:
 
   void buildCSTable(RefPtr<Partition> partition);
 
+  bool needsUpdate(RefPtr<PartitionSnapshot> snap) const;
+
   void start();
   void stop();
   void work();
