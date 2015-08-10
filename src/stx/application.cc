@@ -210,7 +210,10 @@ void Application::daemonize() {
 #error "Application::daemonize() not yet implemented for windows"
 
 #elif defined(__APPLE__) && defined(__MACH__)
-#error "Application::daemonize() not yet implemented for OSX"
+  // FIXME: deprecated on OSX
+  if (::daemon(true /*no chdir*/, true /*no close*/) < 0) {
+    RAISE_ERRNO("daemon() failed");
+  }
 
 #elif defined(__linux__) || defined(__linux) || defined(linux) || defined(__gnu_linux__)
   if (::daemon(true /*no chdir*/, true /*no close*/) < 0) {
