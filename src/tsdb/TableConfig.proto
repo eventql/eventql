@@ -20,12 +20,6 @@ enum TableStorage {
   //TBL_STORAGE_BTREE = 3;
 };
 
-message TimeWindowPartitionerConfig {
-
-  required uint64 partition_size = 1;
-
-};
-
 message TableDefinition {
 
   /**
@@ -60,7 +54,6 @@ message TableConfig {
    */
   required TableStorage storage = 3;
 
-
   /**
    * The maximum sstable size in bytes
    */
@@ -71,15 +64,22 @@ message TableConfig {
    */
   optional uint64 num_shards = 7;
 
+  /**
+   * How often should we re-build the cstable indexes if the partition has
+   * changed in microseconds (this is basically a rate-limit for the
+   * CSTableIndex subprocess)
+   */
+  optional uint64 cstable_build_interval = 9;
+
   optional TimeWindowPartitionerConfig time_window_partitioner_config = 8;
 
 };
 
-message TimeseriesPartitionerConfig {
+message TimeWindowPartitionerConfig {
 
   /**
    * The partition size in microseconds
    */
-  //optional uint64 partition_size = 4;
+  required uint64 partition_size = 1;
 
 };
