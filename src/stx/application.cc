@@ -108,6 +108,8 @@ size_t Application::getCurrentMemoryUsage() {
 
   fclose(fp);
   return (size_t) rss * (size_t) sysconf(_SC_PAGESIZE);
+#else
+#error Unsupported OS
 #endif
 }
 
@@ -140,6 +142,8 @@ size_t Application::getPeakMemoryUsage() {
 #else
   return rusage.ru_maxrss * 1024L;
 #endif
+#else
+#error Unsupported OS
 #endif
 }
 
@@ -194,22 +198,28 @@ void Application::dropPrivileges(const std::string& username,
   }
 
   if (!::getuid() || !::geteuid() || !::getgid() || !::getegid()) {
-#if defined(X0_RELEASE)
-    logError("application",
-        "Service is not allowed to run with administrative permissionsService "
-        "is still running with administrative permissions.");
-#else
-    logWarning("application",
-        "Service is still running with administrative permissions.");
-#endif
+    RAISE(
+        kRuntimeError,
+        "dropping privileges failed; process is still running with " \
+        "administrative permissions.");
   }
 }
 
 void Application::daemonize() {
-  // XXX raises a warning on OS/X, but heck, how do you do it then on OS/X?
+#if defined(_WIN32)
+#error "Application::daemonize() not yet implemented for windows"
+
+#elif defined(__APPLE__) && defined(__MACH__)
+#error "Application::daemonize() not yet implemented for OSX"
+
+#elif defined(__linux__) || defined(__linux) || defined(linux) || defined(__gnu_linux__)
   if (::daemon(true /*no chdir*/, true /*no close*/) < 0) {
     RAISE_ERRNO("daemon() failed");
   }
+
+#else
+#error Unsupported OS
+#endif
 }
 
 }
