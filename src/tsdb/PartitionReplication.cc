@@ -30,15 +30,20 @@ PartitionReplication::PartitionReplication(
 
 ReplicationState PartitionReplication::fetchReplicationState() const {
   auto filepath = FileUtil::joinPaths(snap_->base_path, kStateFileName);
+  String tbl_uuid((char*) snap_->uuid().data(), snap_->uuid().size());
 
   if (FileUtil::exists(filepath)) {
-    return msg::decode<ReplicationState>(FileUtil::read(filepath));
-  } else {
-    ReplicationState state;
-    auto uuid = snap_->uuid();
-    state.set_uuid(uuid.data(), uuid.size());
-    return state;
+    auto disk_state = msg::decode<ReplicationState>(FileUtil::read(filepath));
+
+    if (disk_state.uuid() == tbl_uuid) {
+      return disk_state;
+    }
   }
+
+  ReplicationState state;
+  auto uuid = snap_->uuid();
+  state.set_uuid(tbl_uuid);
+  return state;
 }
 
 void PartitionReplication::commitReplicationState(
