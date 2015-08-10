@@ -27,6 +27,7 @@ public:
   static void init();
 
   static void logToStderr(LogLevel min_log_level = LogLevel::kInfo);
+
   /**
    * Retrieves the user-name this application is running under.
    */
@@ -36,6 +37,16 @@ public:
    * Retrieves the group-name this application is running under.
    */
   static std::string groupName();
+
+  /**
+   * Returns the current resident set size in bytes.
+   */
+  static size_t getCurrentMemoryUsage();
+
+  /**
+   * Returns the peak resident set size in bytes.
+   */
+  static size_t getPeakMemoryUsage();
 
   /**
    * Drops privileges to given @p user and @p group.
