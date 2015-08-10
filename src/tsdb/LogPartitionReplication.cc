@@ -17,7 +17,7 @@ using namespace stx;
 
 namespace tsdb {
 
-const size_t LogPartitionReplication::kMaxBatchSizeRows = 512;
+const size_t LogPartitionReplication::kMaxBatchSizeRows = 8192;
 const size_t LogPartitionReplication::kMaxBatchSizeBytes = 1024 * 1024 * 50; // 50 MB
 
 LogPartitionReplication::LogPartitionReplication(
