@@ -26,7 +26,7 @@ namespace http {
 
 class HTTPServerConnection : public RefCounted {
 public:
-  static const size_t kMinBufferSize = 4096;
+  static const size_t kMinBufferSize = 1024 * 1024;
 
   /**
    * Start a new HTTP connection. conn must be an opened and valid TCP
