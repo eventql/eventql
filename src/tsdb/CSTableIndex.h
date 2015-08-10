@@ -8,6 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #pragma once
+#include <thread>
 #include <stx/stdtypes.h>
 #include <tsdb/TSDBService.h>
 #include <stx/random.h>
@@ -19,7 +20,8 @@ namespace tsdb {
 class CSTableIndex {
 public:
 
-  CSTableIndex(const String& db_path);
+  CSTableIndex(PartitionMap* pmap);
+  ~CSTableIndex();
 
   Option<RefPtr<VFSFile>> fetchCSTable(
       const String& tsdb_namespace,
@@ -31,10 +33,27 @@ public:
       const String& table,
       const SHA1Hash& partition) const;
 
-  void buildCSTable(RefPtr<Partition> partition);
+  void enqueuePartition(RefPtr<Partition> partition);
 
 protected:
-  const String db_path_;
+
+  void buildCSTable(RefPtr<Partition> partition);
+
+  void start();
+  void stop();
+  void work();
+
+  Set<SHA1Hash> waitset_;
+  std::multiset<
+      Pair<uint64_t, RefPtr<Partition>>,
+      Function<bool (
+          const Pair<uint64_t, RefPtr<Partition>>&,
+          const Pair<uint64_t, RefPtr<Partition>>&)>> queue_;
+
+  std::atomic<bool> running_;
+  Vector<std::thread> threads_;
+  mutable std::mutex mutex_;
+  std::condition_variable cv_;
 };
 
 }

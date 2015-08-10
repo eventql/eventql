@@ -11,6 +11,7 @@
 #include <stx/logging.h>
 #include <stx/io/fileutil.h>
 #include <stx/io/mmappedfile.h>
+#include <stx/wallclock.h>
 #include <tsdb/CSTableIndex.h>
 #include <tsdb/RecordSet.h>
 #include <stx/protobuf/MessageDecoder.h>
@@ -20,9 +21,24 @@ using namespace stx;
 
 namespace tsdb {
 
-CSTableIndex::CSTableIndex(
-    const String& db_path) :
-    db_path_(db_path) {}
+CSTableIndex::CSTableIndex(PartitionMap* pmap) :
+    queue_([] (
+        const Pair<uint64_t, RefPtr<Partition>>& a,
+        const Pair<uint64_t, RefPtr<Partition>>& b) {
+      return a.first < b.first;
+    }),
+    running_(false) {
+  pmap->subscribeToPartitionChanges([this] (
+      RefPtr<tsdb::PartitionChangeNotification> change) {
+    enqueuePartition(change->partition);
+  });
+
+  start();
+}
+
+CSTableIndex::~CSTableIndex() {
+  stop();
+}
 
 Option<RefPtr<VFSFile>> CSTableIndex::fetchCSTable(
     const String& tsdb_namespace,
@@ -42,19 +58,21 @@ Option<String> CSTableIndex::fetchCSTableFilename(
     const String& tsdb_namespace,
     const String& table,
     const SHA1Hash& partition) const {
-  auto filepath = FileUtil::joinPaths(
-      db_path_,
-      StringUtil::format(
-          "$0/$1/$2/_cstable",
-          tsdb_namespace,
-          SHA1::compute(table).toString(),
-          partition.toString()));
+  RAISE(kNotImplementedError);
 
-  if (FileUtil::exists(filepath)) {
-    return Some(filepath);
-  } else {
-    return None<String>();
-  }
+  //auto filepath = FileUtil::joinPaths(
+  //    db_path_,
+  //    StringUtil::format(
+  //        "$0/$1/$2/_cstable",
+  //        tsdb_namespace,
+  //        SHA1::compute(table).toString(),
+  //        partition.toString()));
+
+  //if (FileUtil::exists(filepath)) {
+  //  return Some(filepath);
+  //} else {
+  //  return None<String>();
+  //}
 }
 
 void CSTableIndex::buildCSTable(RefPtr<Partition> partition) {
@@ -110,6 +128,96 @@ void CSTableIndex::buildCSTable(RefPtr<Partition> partition) {
 
   FileUtil::mv(filepath_tmp, filepath);
   FileUtil::mv(metapath_tmp, metapath);
+}
+
+void CSTableIndex::enqueuePartition(RefPtr<Partition> partition) {
+  auto interval = partition->getTable()->cstableBuildInterval();
+
+  std::unique_lock<std::mutex> lk(mutex_);
+
+  auto uuid = partition->uuid();
+  if (waitset_.count(uuid) > 0) {
+    return;
+  }
+
+  queue_.emplace(
+      WallClock::unixMicros() + interval.microseconds(),
+      partition);
+
+  waitset_.emplace(uuid);
+  cv_.notify_all();
+}
+
+void CSTableIndex::start() {
+  running_ = true;
+
+  for (int i = 0; i < 4; ++i) {
+    threads_.emplace_back(std::bind(&CSTableIndex::work, this));
+  }
+}
+
+void CSTableIndex::stop() {
+  if (!running_) {
+    return;
+  }
+
+  running_ = false;
+  cv_.notify_all();
+
+  for (auto& t : threads_) {
+    t.join();
+  }
+}
+
+void CSTableIndex::work() {
+  std::unique_lock<std::mutex> lk(mutex_);
+
+  while (running_) {
+    if (queue_.size() == 0) {
+      cv_.wait(lk);
+    }
+
+    if (queue_.size() == 0) {
+      continue;
+    }
+
+    auto now = WallClock::unixMicros();
+    if (now < queue_.begin()->first) {
+      cv_.wait_for(
+          lk,
+          std::chrono::microseconds(queue_.begin()->first - now));
+
+      continue;
+    }
+
+    auto partition = queue_.begin()->second;
+    queue_.erase(queue_.begin());
+
+    bool success = true;
+    {
+      lk.unlock();
+
+      try {
+        buildCSTable(partition);
+      } catch (const StandardException& e) {
+        logError("tsdb", e, "CSTableIndex error");
+        success = false;
+      }
+
+      lk.lock();
+    }
+
+    if (success) {
+      waitset_.erase(partition->uuid());
+
+      //if (repl->needsReplication()) {
+      //  enqueuePartition(partition);
+      //}
+    } else {
+      auto delay = 30 * kMicrosPerSecond; // FIXPAUL increasing delay..
+      queue_.emplace(now + delay, partition);
+    }
+  }
 }
 
 } // namespace tsdb
