@@ -36,9 +36,7 @@ TEST_CASE(CSTableTest, TestCSTableContainer, [] () {
     new cstable::BitPackedIntColumnWriter(10, 10));
   RefPtr<cstable::BitPackedIntColumnWriter> column2_writer = mkRef(
     new cstable::BitPackedIntColumnWriter(10, 10));
-  cstable::CSTableWriter tbl_writer = cstable::CSTableWriter(
-    filename,
-    num_records);
+  cstable::CSTableWriter tbl_writer(filename, num_records);
 
   tbl_writer.addColumn("key1", column1_writer.get());
   tbl_writer.addColumn("key2", column2_writer.get());
@@ -89,9 +87,7 @@ TEST_CASE(CSTableTest, TestCSTableColumnWriterReader, [] () {
     uint64_writer->addDatum(rep_max, def_max, &uint64_v, sizeof(uint64_v));
   }
 
-  cstable::CSTableWriter tbl_writer = cstable::CSTableWriter(
-    filename,
-    num_records);
+  cstable::CSTableWriter tbl_writer(filename, num_records);
   tbl_writer.addColumn("bitpacked", bitpacked_writer.get());
   tbl_writer.addColumn("boolean", boolean_writer.get());
   tbl_writer.addColumn("double", double_writer.get());
