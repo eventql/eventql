@@ -34,7 +34,7 @@ TEST_CASE(CSTableTest, TestCSTableContainer, [] () {
 
   RefPtr<cstable::BitPackedIntColumnWriter> column_writer = mkRef(
     new cstable::BitPackedIntColumnWriter(10, 10));
-  auto tbl_writer = cstable::CSTableWriter(
+  cstable::CSTableWriter tbl_writer = cstable::CSTableWriter(
     filename,
     num_records);
 
@@ -87,7 +87,7 @@ TEST_CASE(CSTableTest, TestCSTableColumnWriterReader, [] () {
     uint64_writer->addDatum(rep_max, def_max, &uint64_v, sizeof(uint64_v));
   }
 
-  auto tbl_writer = cstable::CSTableWriter(
+  cstable::CSTableWriter tbl_writer = cstable::CSTableWriter(
     filename,
     num_records);
   tbl_writer.addColumn("bitpacked", bitpacked_writer.get());
