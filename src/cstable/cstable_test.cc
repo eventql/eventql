@@ -27,15 +27,13 @@ using namespace stx;
 UNIT_TEST(CSTableTest);
 
 TEST_CASE(CSTableTest, TestCSTableContainer, [] () {
-  const String filename = "/tmp/__fnord__cstabletest1.cstable";
+  auto filename = "/tmp/__fnord__cstabletest1.cstable";
   auto num_records = 10;
 
   FileUtil::rm(filename);
 
-  RefPtr<cstable::BitPackedIntColumnWriter> column1_writer = mkRef(
-    new cstable::BitPackedIntColumnWriter(10, 10));
-  RefPtr<cstable::BitPackedIntColumnWriter> column2_writer = mkRef(
-    new cstable::BitPackedIntColumnWriter(10, 10));
+  auto column1_writer = mkRef(new cstable::BitPackedIntColumnWriter(10, 10));
+  auto column2_writer = mkRef(new cstable::BitPackedIntColumnWriter(10, 10));
   cstable::CSTableWriter tbl_writer(filename, num_records);
 
   tbl_writer.addColumn("key1", column1_writer.get());
@@ -49,26 +47,26 @@ TEST_CASE(CSTableTest, TestCSTableContainer, [] () {
 });
 
 TEST_CASE(CSTableTest, TestCSTableColumnWriterReader, [] () {
-  const String filename = "/tmp/__fnord__cstabletest2.cstable";
+  auto filename = "/tmp/__fnord__cstabletest2.cstable";
   auto num_records = 4000;
   auto rep_max = 1;
   auto def_max = 1;
 
   FileUtil::rm(filename);
 
-  RefPtr<cstable::BitPackedIntColumnWriter> bitpacked_writer = mkRef(
+  auto bitpacked_writer = mkRef(
     new cstable::BitPackedIntColumnWriter(rep_max, def_max));
-  RefPtr<cstable::BooleanColumnWriter> boolean_writer = mkRef(
+  auto boolean_writer = mkRef(
     new cstable::BooleanColumnWriter(rep_max, def_max));
-  RefPtr<cstable::DoubleColumnWriter> double_writer = mkRef(
+  auto double_writer = mkRef(
     new cstable::DoubleColumnWriter(rep_max, def_max));
-  RefPtr<cstable::LEB128ColumnWriter> leb128_writer = mkRef(
+  auto leb128_writer = mkRef(
     new cstable::LEB128ColumnWriter(rep_max, def_max));
-  RefPtr<cstable::StringColumnWriter> string_writer = mkRef(
+  auto string_writer = mkRef(
     new cstable::StringColumnWriter(rep_max, def_max));
-  RefPtr<cstable::UInt32ColumnWriter> uint32_writer = mkRef(
+  auto uint32_writer = mkRef(
     new cstable::UInt32ColumnWriter(rep_max, def_max));
-  RefPtr<cstable::UInt64ColumnWriter> uint64_writer = mkRef(
+  auto uint64_writer = mkRef(
     new cstable::UInt64ColumnWriter(rep_max, def_max));
 
 
