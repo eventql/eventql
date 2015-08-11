@@ -27,7 +27,7 @@ using namespace stx;
 UNIT_TEST(CSTableTest);
 
 TEST_CASE(CSTableTest, TestCSTableContainer, [] () {
-  const String& filename = "/tmp/__fnord__cstabletest1.cstable";
+  const String filename = "/tmp/__fnord__cstabletest1.cstable";
   auto num_records = 10;
 
   FileUtil::rm(filename);
@@ -49,7 +49,7 @@ TEST_CASE(CSTableTest, TestCSTableContainer, [] () {
 });
 
 TEST_CASE(CSTableTest, TestCSTableColumnWriterReader, [] () {
-  const String& filename = "/tmp/__fnord__cstabletest2.cstable";
+  const String filename = "/tmp/__fnord__cstabletest2.cstable";
   auto num_records = 4000;
   auto rep_max = 1;
   auto def_max = 1;
@@ -76,7 +76,7 @@ TEST_CASE(CSTableTest, TestCSTableColumnWriterReader, [] () {
     uint8_t boolean_v = i % 2;
     double double_v = i * 1.1;
     uint64_t uint64_v = static_cast<uint64_t>(i);
-    const String& string_v = "value";
+    const String string_v = "value";
 
     bitpacked_writer->addDatum(rep_max, def_max, &i, sizeof(i));
     boolean_writer->addDatum(rep_max, def_max, &boolean_v, sizeof(boolean_v));
