@@ -32,14 +32,16 @@ TEST_CASE(CSTableTest, TestCSTableContainer, [] () {
 
   FileUtil::rm(filename);
 
-  RefPtr<cstable::BitPackedIntColumnWriter> column_writer = mkRef(
+  RefPtr<cstable::BitPackedIntColumnWriter> column1_writer = mkRef(
+    new cstable::BitPackedIntColumnWriter(10, 10));
+  RefPtr<cstable::BitPackedIntColumnWriter> column2_writer = mkRef(
     new cstable::BitPackedIntColumnWriter(10, 10));
   cstable::CSTableWriter tbl_writer = cstable::CSTableWriter(
     filename,
     num_records);
 
-  tbl_writer.addColumn("key1", column_writer.get());
-  tbl_writer.addColumn("key2", column_writer.get());
+  tbl_writer.addColumn("key1", column1_writer.get());
+  tbl_writer.addColumn("key2", column2_writer.get());
   tbl_writer.commit();
 
   cstable::CSTableReader tbl_reader(filename);
@@ -124,9 +126,9 @@ TEST_CASE(CSTableTest, TestCSTableColumnWriterReader, [] () {
   EXPECT_EQ(uint32_reader->type() == msg::FieldType::UINT32, true);
   EXPECT_EQ(uint64_reader->type() == msg::FieldType::UINT64, true);
 
-  auto rep_level;
-  auto def_level;
-  auto size;
+  uint64_t rep_level;
+  uint64_t def_level;
+  size_t size;
   void* data;
   uint32_t* bitpacked_val;
   uint8_t* boolean_val;
