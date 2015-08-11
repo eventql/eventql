@@ -98,20 +98,13 @@ TEST_CASE(CSTableTest, TestCSTableColumnWriterReader, [] () {
   tbl_writer.commit();
 
   cstable::CSTableReader tbl_reader(filename);
-  RefPtr<cstable::ColumnReader> bitpacked_reader = tbl_reader.getColumnReader(
-    "bitpacked");
-  RefPtr<cstable::ColumnReader> boolean_reader = tbl_reader.getColumnReader(
-    "boolean");
-  RefPtr<cstable::ColumnReader> double_reader = tbl_reader.getColumnReader(
-    "double");
-  RefPtr<cstable::ColumnReader> leb128_reader = tbl_reader.getColumnReader(
-    "leb128");
-  RefPtr<cstable::ColumnReader> string_reader = tbl_reader.getColumnReader(
-    "string");
-  RefPtr<cstable::ColumnReader> uint32_reader = tbl_reader.getColumnReader(
-    "uint32");
-  RefPtr<cstable::ColumnReader> uint64_reader = tbl_reader.getColumnReader(
-    "uint64");
+  auto bitpacked_reader = tbl_reader.getColumnReader("bitpacked");
+  auto boolean_reader = tbl_reader.getColumnReader("boolean");
+  auto double_reader = tbl_reader.getColumnReader("double");
+  auto leb128_reader = tbl_reader.getColumnReader("leb128");
+  auto string_reader = tbl_reader.getColumnReader("string");
+  auto uint32_reader = tbl_reader.getColumnReader("uint32");
+  auto uint64_reader = tbl_reader.getColumnReader("uint64");
 
 
   EXPECT_EQ(bitpacked_reader->type() == msg::FieldType::UINT32, true);
