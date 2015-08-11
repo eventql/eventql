@@ -28,7 +28,7 @@ UNIT_TEST(CSTableTest);
 
 TEST_CASE(CSTableTest, TestCSTableContainer, [] () {
   const String& filename = "/tmp/__fnord__cstabletest1.cstable";
-  const uint64_t num_records = 10;
+  auto num_records = 10;
 
   FileUtil::rm(filename);
 
@@ -50,9 +50,9 @@ TEST_CASE(CSTableTest, TestCSTableContainer, [] () {
 
 TEST_CASE(CSTableTest, TestCSTableColumnWriterReader, [] () {
   const String& filename = "/tmp/__fnord__cstabletest2.cstable";
-  const uint64_t num_records = 4000;
-  uint64_t rep_max = 1;
-  uint64_t def_max = 1;
+  auto num_records = 4000;
+  auto rep_max = 1;
+  auto def_max = 1;
 
   FileUtil::rm(filename);
 
@@ -71,7 +71,6 @@ TEST_CASE(CSTableTest, TestCSTableColumnWriterReader, [] () {
   RefPtr<cstable::UInt64ColumnWriter> uint64_writer = mkRef(
     new cstable::UInt64ColumnWriter(rep_max, def_max));
 
-  
 
   for (auto i = 0; i < num_records; i++) {
     uint8_t boolean_v = i % 2;
@@ -125,9 +124,9 @@ TEST_CASE(CSTableTest, TestCSTableColumnWriterReader, [] () {
   EXPECT_EQ(uint32_reader->type() == msg::FieldType::UINT32, true);
   EXPECT_EQ(uint64_reader->type() == msg::FieldType::UINT64, true);
 
-  uint64_t rep_level;
-  uint64_t def_level;
-  size_t size;
+  auto rep_level;
+  auto def_level;
+  auto size;
   void* data;
   uint32_t* bitpacked_val;
   uint8_t* boolean_val;
