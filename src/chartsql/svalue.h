@@ -48,7 +48,6 @@ public:
   explicit SValue(FloatType float_value);
   explicit SValue(BoolType bool_value);
   explicit SValue(TimeType time_value);
-  explicit SValue(const char* str_value, size_t len, bool copy);
 
   SValue(const SValue& copy);
   SValue& operator=(const SValue& copy);
