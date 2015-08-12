@@ -42,47 +42,11 @@ CSTableIndex::~CSTableIndex() {
   stop();
 }
 
-Option<RefPtr<VFSFile>> CSTableIndex::fetchCSTable(
-    const String& tsdb_namespace,
-    const String& table,
-    const SHA1Hash& partition) const {
-  auto filepath = fetchCSTableFilename(tsdb_namespace, table, partition);
-
-  if (filepath.isEmpty()) {
-    return None<RefPtr<VFSFile>>();
-  } else {
-    return Some<RefPtr<VFSFile>>(
-        new io::MmappedFile(File::openFile(filepath.get(), File::O_READ)));
-  }
-}
-
-Option<String> CSTableIndex::fetchCSTableFilename(
-    const String& tsdb_namespace,
-    const String& table,
-    const SHA1Hash& partition) const {
-  RAISE(kNotImplementedError);
-
-  //auto filepath = FileUtil::joinPaths(
-  //    db_path_,
-  //    StringUtil::format(
-  //        "$0/$1/$2/_cstable",
-  //        tsdb_namespace,
-  //        SHA1::compute(table).toString(),
-  //        partition.toString()));
-
-  //if (FileUtil::exists(filepath)) {
-  //  return Some(filepath);
-  //} else {
-  //  return None<String>();
-  //}
-}
-
 bool CSTableIndex::needsUpdate(
     RefPtr<PartitionSnapshot> snap) const {
   String tbl_uuid((char*) snap->uuid().data(), snap->uuid().size());
 
   auto metapath = FileUtil::joinPaths(snap->base_path, "_cstable_state");
-  //auto metapath_tmp = metapath + "." + Random::singleton()->hex128();
 
   if (FileUtil::exists(metapath)) {
     auto metadata = msg::decode<CSTableIndexBuildState>(

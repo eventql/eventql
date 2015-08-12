@@ -23,16 +23,6 @@ public:
   CSTableIndex(PartitionMap* pmap);
   ~CSTableIndex();
 
-  Option<RefPtr<VFSFile>> fetchCSTable(
-      const String& tsdb_namespace,
-      const String& table,
-      const SHA1Hash& partition) const;
-
-  Option<String> fetchCSTableFilename(
-      const String& tsdb_namespace,
-      const String& table,
-      const SHA1Hash& partition) const;
-
   void enqueuePartition(RefPtr<Partition> partition);
 
 protected:

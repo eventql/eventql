@@ -20,6 +20,26 @@ PartitionReader::PartitionReader(
     RefPtr<PartitionSnapshot> head) :
     snap_(head) {}
 
+Option<RefPtr<VFSFile>> PartitionReader::fetchCSTable() const {
+  auto filepath = fetchCSTableFilename();
+
+  if (filepath.isEmpty()) {
+    return None<RefPtr<VFSFile>>();
+  } else {
+    return Some<RefPtr<VFSFile>>(
+        new io::MmappedFile(File::openFile(filepath.get(), File::O_READ)));
+  }
+}
+
+Option<String> PartitionReader::fetchCSTableFilename() const {
+  auto filepath = FileUtil::joinPaths(snap_->base_path, "_cstable");
+
+  if (FileUtil::exists(filepath)) {
+    return Some(filepath);
+  } else {
+    return None<String>();
+  }
+}
 void PartitionReader::fetchRecords(
     size_t offset,
     size_t limit,

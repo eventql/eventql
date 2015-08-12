@@ -23,6 +23,9 @@ public:
 
   PartitionReader(RefPtr<PartitionSnapshot> head);
 
+  Option<RefPtr<VFSFile>> fetchCSTable() const;
+  Option<String> fetchCSTableFilename() const;
+
   void fetchRecords(
       size_t offset,
       size_t limit,

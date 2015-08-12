@@ -47,11 +47,18 @@ Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildSequentialScan(
         node->tableName());
   }
 
-  auto cstable = cstable_index_->fetchCSTableFilename(
+  auto partition = partition_map_->findPartition(
       tsdb_namespace_,
       table_ref.table_key,
       table_ref.partition_key.get());
 
+  if (partition.isEmpty()) {
+    return Option<ScopedPtr<csql::TableExpression>>(
+        mkScoped(new csql::EmptyTable()));
+  }
+
+  auto reader = partition.get()->getReader();
+  auto cstable = reader->fetchCSTableFilename();
   if (cstable.isEmpty()) {
     return Option<ScopedPtr<csql::TableExpression>>(
         mkScoped(new csql::EmptyTable()));
