@@ -103,6 +103,7 @@ void CSTableIndex::buildCSTable(RefPtr<Partition> partition) {
     return;
   }
 
+  auto t0 = WallClock::unixMicros();
   auto snap = partition->getSnapshot();
 
   if (!needsUpdate(snap)) {
@@ -150,6 +151,15 @@ void CSTableIndex::buildCSTable(RefPtr<Partition> partition) {
 
   FileUtil::mv(filepath_tmp, filepath);
   FileUtil::mv(metapath_tmp, metapath);
+
+  auto t1 = WallClock::unixMicros();
+  logDebug(
+      "tsdb",
+      "Commiting CSTable index for partition $0/$1/$2, building took $3s",
+      snap->state.tsdb_namespace(),
+      table->name(),
+      snap->key.toString(),
+      (double) (t1 - t0) / 1000000.0f);
 }
 
 void CSTableIndex::enqueuePartition(RefPtr<Partition> partition) {
