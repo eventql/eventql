@@ -49,7 +49,7 @@ SValue::SValue(const SValue::StringType& string_value) {
 
   memcpy(
       data_.u.t_string.ptr,
-      string_value.c_str(),
+      string_value.data(),
       data_.u.t_string.len);
 }
 
