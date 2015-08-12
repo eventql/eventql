@@ -93,6 +93,7 @@ SValue::SValue(const SValue& copy) {
           data_.u.t_string.ptr,
           copy.data_.u.t_string.ptr,
           data_.u.t_string.len);
+      break;
 
     default:
       memcpy(&data_, &copy.data_, sizeof(data_));
@@ -103,7 +104,16 @@ SValue::SValue(const SValue& copy) {
 }
 
 SValue& SValue::operator=(const SValue& copy) {
-  // FIXPAUL free old string!
+  switch (data_.type) {
+
+    case T_STRING:
+      free(data_.u.t_string.ptr);
+      break;
+
+    default:
+      break;
+
+  }
 
   switch (copy.data_.type) {
 
@@ -120,6 +130,7 @@ SValue& SValue::operator=(const SValue& copy) {
           data_.u.t_string.ptr,
           copy.data_.u.t_string.ptr,
           data_.u.t_string.len);
+      break;
 
     default:
       memcpy(&data_, &copy.data_, sizeof(data_));
