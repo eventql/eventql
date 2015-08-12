@@ -38,6 +38,7 @@ public:
 protected:
 
   void buildCSTable(RefPtr<Partition> partition);
+  void enqueuePartitionWithLock(RefPtr<Partition> partition);
 
   bool needsUpdate(RefPtr<PartitionSnapshot> snap) const;
 

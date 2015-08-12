@@ -163,9 +163,12 @@ void CSTableIndex::buildCSTable(RefPtr<Partition> partition) {
 }
 
 void CSTableIndex::enqueuePartition(RefPtr<Partition> partition) {
-  auto interval = partition->getTable()->cstableBuildInterval();
-
   std::unique_lock<std::mutex> lk(mutex_);
+  enqueuePartition(partition);
+}
+
+void CSTableIndex::enqueuePartitionWithLock(RefPtr<Partition> partition) {
+  auto interval = partition->getTable()->cstableBuildInterval();
 
   auto uuid = partition->uuid();
   if (waitset_.count(uuid) > 0) {
@@ -243,7 +246,7 @@ void CSTableIndex::work() {
       waitset_.erase(partition->uuid());
 
       if (needsUpdate(partition->getSnapshot())) {
-        enqueuePartition(partition);
+        enqueuePartitionWithLock(partition);
       }
     } else {
       auto delay = 30 * kMicrosPerSecond; // FIXPAUL increasing delay..
