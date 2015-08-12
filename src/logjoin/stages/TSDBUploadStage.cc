@@ -96,16 +96,16 @@ void TSDBUploadStage::serializeSession(
 
   /* add to record list */
   auto record_id = SHA1::compute(ctx->uuid);
-  auto stream_key = "sessions";
+  auto table_name = "sessions";
   auto partition_key = tsdb::TimeWindowPartitioner::partitionKeyFor(
-      stream_key,
+      table_name,
       ctx->time,
       4 * kMicrosPerHour);
 
   auto r = records->add_records();
   r->set_tsdb_namespace(ctx->customer_key);
-  r->set_stream_key(stream_key);
-  r->set_partition_key(partition_key.toString());
+  r->set_table_name(table_name);
+  r->set_partition_sha1(partition_key.toString());
   r->set_record_id(record_id.toString());
   r->set_record_data(record_data.data(), record_data.size());
 }
@@ -122,16 +122,16 @@ void TSDBUploadStage::serializeEvent(
 
   /* add to record list */
   auto record_id = ev->evid;
-  auto stream_key = "sessions." + ev->obj.schema()->name();
+  auto table_name = "sessions." + ev->obj.schema()->name();
   auto partition_key = tsdb::TimeWindowPartitioner::partitionKeyFor(
-      stream_key,
+      table_name,
       ev->time,
       4 * kMicrosPerHour);
 
   auto r = records->add_records();
   r->set_tsdb_namespace(ctx->customer_key);
-  r->set_stream_key(stream_key);
-  r->set_partition_key(partition_key.toString());
+  r->set_table_name(table_name);
+  r->set_partition_sha1(partition_key.toString());
   r->set_record_id(record_id.toString());
   r->set_record_data(record_data.data(), record_data.size());
 }

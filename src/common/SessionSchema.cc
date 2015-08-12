@@ -44,6 +44,20 @@ RefPtr<msg::MessageSchema> SessionSchema::forCustomer(
                 false,
                 true),
             msg::MessageSchemaField(
+                72,
+                "device_id",
+                msg::FieldType::STRING,
+                0,
+                false,
+                true),
+            msg::MessageSchemaField(
+                72,
+                "user_id",
+                msg::FieldType::STRING,
+                0,
+                false,
+                true),
+            msg::MessageSchemaField(
                 53,
                 "first_seen_time",
                 msg::FieldType::DATETIME,
@@ -81,8 +95,10 @@ Vector<TableDefinition> SessionSchema::tableDefinitionsForCustomer(
     TableDefinition td;
     td.set_customer(cfg.customer());
     td.set_table_name("sessions." + evschema.evtype());
-    td.set_type(TBL_LOGTABLE);
-    td.set_schema_inline(evschema.schema());
+    auto tblcfg = td.mutable_config();
+    tblcfg->set_schema(evschema.schema());
+    tblcfg->set_partitioner(tsdb::TBL_PARTITION_TIMEWINDOW);
+    tblcfg->set_storage(tsdb::TBL_STORAGE_LOG);
     tbls.emplace_back(td);
   }
 
@@ -90,8 +106,10 @@ Vector<TableDefinition> SessionSchema::tableDefinitionsForCustomer(
     TableDefinition td;
     td.set_customer(cfg.customer());
     td.set_table_name("sessions");
-    td.set_type(TBL_LOGTABLE);
-    td.set_schema_inline(SessionSchema::forCustomer(cfg)->encode().toString());
+    auto tblcfg = td.mutable_config();
+    tblcfg->set_schema(SessionSchema::forCustomer(cfg)->encode().toString());
+    tblcfg->set_partitioner(tsdb::TBL_PARTITION_TIMEWINDOW);
+    tblcfg->set_storage(tsdb::TBL_STORAGE_LOG);
     tbls.emplace_back(td);
   }
 

@@ -7,11 +7,7 @@
  * permission is obtained.
  */
 package cm;
-
-enum TableType {
-  TBL_LOGTABLE = 0;
-  TBL_STATIC = 1;
-};
+import 'tsdb/TableConfig.proto';
 
 message TableDefinition {
 
@@ -19,12 +15,16 @@ message TableDefinition {
 
   required string table_name = 2;
 
-  required TableType type = 5;
+  optional uint64 version = 3;
 
-  optional string schema_name = 3;
+  required tsdb.TableConfig config = 4;
 
-  optional bytes schema_inline = 4;
+};
 
-  optional uint64 num_shards = 6;
+message TableDefinitionList {
+
+  repeated TableDefinition tables = 1;
+
+  optional uint64 version = 2;
 
 };

@@ -112,8 +112,8 @@ int main(int argc, const char** argv) {
         List<dproc::TaskDependency> map_chunks;
         for (const auto& part : partitions) {
           AnalyticsTableScanMapperParams map_chunk_params;
-          map_chunk_params.set_stream_key(stream);
-          map_chunk_params.set_partition_key(part);
+          map_chunk_params.set_table_name(stream);
+          map_chunk_params.set_partition_sha1(part);
 
           map_chunks.emplace_back(dproc::TaskDependency {
             .task_name = "ItemBoostMapper",
