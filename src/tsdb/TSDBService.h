@@ -82,6 +82,10 @@ public:
       const String& tsdb_namespace,
       const String& table_key);
 
+  Option<RefPtr<TablePartitioner>> tablePartitioner(
+      const String& tsdb_namespace,
+      const String& table_key);
+
 protected:
   PartitionMap* pmap_;
 };

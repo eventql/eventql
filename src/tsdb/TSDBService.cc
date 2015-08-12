@@ -193,6 +193,20 @@ Option<TableDefinition> TSDBService::tableConfig(
   }
 }
 
+Option<RefPtr<TablePartitioner>> TSDBService::tablePartitioner(
+    const String& tsdb_namespace,
+    const String& table_key) {
+  auto table = pmap_->findTable(
+      tsdb_namespace,
+      table_key);
+
+  if (table.isEmpty()) {
+    return None<RefPtr<TablePartitioner>>();
+  } else {
+    return Some(table.get()->partitioner());
+  }
+}
+
 //const String& TSDBService::dbPath() const {
 //  return db_path_;
 //}
