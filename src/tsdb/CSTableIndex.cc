@@ -164,7 +164,7 @@ void CSTableIndex::buildCSTable(RefPtr<Partition> partition) {
 
 void CSTableIndex::enqueuePartition(RefPtr<Partition> partition) {
   std::unique_lock<std::mutex> lk(mutex_);
-  enqueuePartition(partition);
+  enqueuePartitionWithLock(partition);
 }
 
 void CSTableIndex::enqueuePartitionWithLock(RefPtr<Partition> partition) {
