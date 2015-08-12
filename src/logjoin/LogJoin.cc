@@ -480,6 +480,14 @@ void LogJoin::processClickstream(
       for (const auto& input_feed : input_feeds) {
         uint64_t offset = 0;
 
+        if (input_feed.first == "tracker_log.feedserver03.production.fnrd.net") {
+          offset = 86325404806llu;
+        }
+
+        if (input_feed.first == "tracker_log.feedserver02.nue01.production.fnrd.net") {
+          offset = 275512545617llu;
+        }
+
         auto last_offset = txn->get(
             StringUtil::format("__logjoin_offset~$0", input_feed.first));
 

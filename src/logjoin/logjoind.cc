@@ -41,7 +41,7 @@
 #include "inventory/DocIndex.h"
 #include <inventory/ItemRef.h>
 #include <fnord-fts/Analyzer.h>
-#include "common/CustomerDirectory.h"
+#include "common/ConfigDirectory.h"
 #include "common/SessionSchema.h"
 #include "common.h"
 
@@ -70,30 +70,12 @@ int main(int argc, const char** argv) {
   //    "<path>");
 
   flags.defineFlag(
-      "cdb",
-      cli::FlagParser::T_STRING,
-      true,
-      NULL,
-      NULL,
-      "data dir",
-      "<path>");
-
-  flags.defineFlag(
       "datadir",
       cli::FlagParser::T_STRING,
       true,
       NULL,
       NULL,
       "data dir",
-      "<path>");
-
-  flags.defineFlag(
-      "index",
-      cli::FlagParser::T_STRING,
-      false,
-      NULL,
-      NULL,
-      "index directory",
       "<path>");
 
   flags.defineFlag(
@@ -178,6 +160,15 @@ int main(int argc, const char** argv) {
       "<name>");
 
   flags.defineFlag(
+      "master",
+      cli::FlagParser::T_STRING,
+      true,
+      NULL,
+      NULL,
+      "url",
+      "<addr>");
+
+  flags.defineFlag(
       "loglevel",
       stx::cli::FlagParser::T_STRING,
       false,
@@ -212,8 +203,18 @@ int main(int argc, const char** argv) {
   auto shard = shard_map.getShard(flags.getString("shard"));
 
   /* open customer directory */
-  CustomerDirectory customer_dir(flags.getString("cdb"));
-  customer_dir.updateCustomerConfig(createCustomerConfig("dawanda"));
+  auto cdb_dir = FileUtil::joinPaths(
+      flags.getString("datadir"),
+      shard.shard_name + "/cdb");
+
+  if (!FileUtil::exists(cdb_dir)) {
+    FileUtil::mkdir(cdb_dir);
+  }
+
+  ConfigDirectory customer_dir(
+      cdb_dir,
+      InetAddr::resolve(flags.getString("master")),
+      ConfigTopic::CUSTOMERS);
 
   HashMap<String, URI> input_feeds;
   input_feeds.emplace(
@@ -302,6 +303,7 @@ int main(int argc, const char** argv) {
       shard.end,
       cm::LogJoinShard::modulo);
 
+  customer_dir.startWatcher();
   session_proc.start();
   logjoin.processClickstream(
       input_feeds,
@@ -314,6 +316,7 @@ int main(int argc, const char** argv) {
   session_proc.stop();
   ev.shutdown();
   evloop_thread.join();
+  customer_dir.stopWatcher();
   sessdb->sync();
   exit(0);
 }
