@@ -26,7 +26,16 @@ SValue::SValue() {
 }
 
 SValue::~SValue() {
-  // FIXPAUL free string!
+  switch (data_.type) {
+
+    case T_STRING:
+      free(data_.u.t_string.ptr);
+      break;
+
+    default:
+      break;
+
+  }
 }
 
 SValue::SValue(const SValue::StringType& string_value) {
