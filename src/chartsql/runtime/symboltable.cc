@@ -35,6 +35,8 @@ void SymbolTable::registerFunction(
   sym.init = fn.init;
   sym.free = fn.free;
   sym.merge = fn.merge;
+  sym.loadstate = fn.loadstate;
+  sym.savestate = fn.savestate;
   registerFunction(symbol, SFunction(sym));
 }
 

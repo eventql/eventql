@@ -40,6 +40,14 @@ void countExprMerge(void* scratchpad, const void* other) {
   *(uint64_t*) scratchpad += *(uint64_t*) other;
 }
 
+void countExprSave(void* scratchpad, OutputStream* os) {
+  os->appendVarUInt(*(uint64_t*) scratchpad);
+}
+
+void countExprLoad(void* scratchpad, InputStream* is) {
+  *(uint64_t*) scratchpad = is->readVarUInt();
+}
+
 const AggregateFunction kCountExpr {
   .scratch_size = sizeof(uint64_t),
   .accumulate = &countExprAcc,
@@ -47,7 +55,9 @@ const AggregateFunction kCountExpr {
   .reset = &countExprReset,
   .init = &countExprReset,
   .free = nullptr,
-  .merge = &countExprMerge
+  .merge = &countExprMerge,
+  .savestate = &countExprSave,
+  .loadstate = &countExprLoad
 };
 
 
