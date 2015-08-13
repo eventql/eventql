@@ -39,4 +39,15 @@ RefPtr<QueryTreeNode> GroupByMergeNode::deepCopy() const {
   return new GroupByMergeNode(*this);
 }
 
+String GroupByMergeNode::toString() const {
+  String str = "(group-merge";
+
+  for (const auto& tbl : tables_) {
+    str += " (subexpr " + tbl->toString() + ")";
+  }
+
+  str += ")";
+  return str;
+}
+
 } // namespace csql
