@@ -526,6 +526,55 @@ bool SValue::tryTimeConversion() {
   return true;
 }
 
+void SValue::encode(OutputStream* os) const {
+  os->appendUInt8(data_.type);
+
+  switch (data_.type) {
+    case T_STRING:
+      os->appendLenencString(data_.u.t_string.ptr, data_.u.t_string.len);
+      return;
+    case T_FLOAT:
+      os->appendDouble(data_.u.t_float);
+      return;
+    case T_INTEGER:
+      os->appendUInt64(data_.u.t_integer);
+      return;
+    case T_BOOL:
+      os->appendUInt8(data_.u.t_bool ? 1 : 0);
+      return;
+    case T_TIMESTAMP:
+      os->appendUInt64(data_.u.t_timestamp);
+      return;
+    case T_NULL:
+      return;
+  }
+}
+
+void SValue::decode(InputStream* is) {
+  auto type = is->readUInt8();
+
+  switch (type) {
+    case T_STRING:
+      *this = SValue(is->readLenencString());
+      return;
+    case T_FLOAT:
+      *this = SValue(SValue::FloatType(is->readDouble()));
+      return;
+    case T_INTEGER:
+      *this = SValue(SValue::IntegerType(is->readUInt64()));
+      return;
+    case T_BOOL:
+      *this = SValue(SValue::BoolType(is->readUInt8() == 1));
+      return;
+    case T_TIMESTAMP:
+      *this = SValue(SValue::TimeType(is->readUInt64()));
+      return;
+    case T_NULL:
+      *this = SValue();
+      return;
+  }
+}
+
 }
 
 namespace stx {
