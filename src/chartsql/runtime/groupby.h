@@ -15,6 +15,7 @@
 namespace csql {
 
 class GroupByExpression : public TableExpression {
+public:
 
   virtual void accumulate(
       HashMap<String, Vector<ValueExpression::Instance>>* groups,
