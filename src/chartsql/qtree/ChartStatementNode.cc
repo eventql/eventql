@@ -35,4 +35,15 @@ RefPtr<QueryTreeNode> ChartStatementNode::deepCopy() const {
   return new ChartStatementNode(*this);
 }
 
+String ChartStatementNode::toString() const {
+  String str = "(chart";
+
+  for (const auto& stmt : draw_stmts_) {
+    str += stmt->toString();
+  }
+
+  str += ")";
+  return str;
+}
+
 } // namespace csql
