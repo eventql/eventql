@@ -42,15 +42,61 @@ void GroupByMerge::execute(
     Function<bool (int argc, const SValue* argv)> fn) {
   HashMap<String, Vector<ValueExpression::Instance>> groups;
   ScratchMemory scratch;
+  std::mutex mutex;
+  std::condition_variable cv;
+  auto sem = sources_.size();
+  bool error = false;
 
-  try {
-    for (auto& source : sources_) {
+  for (auto& s : sources_) {
+    auto source = s.get();
+
+    context->runAsync([
+        context,
+        &scratch,
+        &groups,
+        source,
+        &mutex,
+        &cv,
+        &sem,
+        &error] {
       HashMap<String, Vector<ValueExpression::Instance>> tgroups;
       ScratchMemory tscratch;
-      source->accumulate(&tgroups, &tscratch, context);
-      source->mergeResult(&tgroups, &groups, &scratch);
-    }
+      bool terror = false;
 
+      try {
+        source->accumulate(&tgroups, &tscratch, context);
+      } catch (...) {
+        terror = true;
+      }
+
+      std::unique_lock<std::mutex> lk(mutex);
+      if (terror) {
+        error = true;
+      } else {
+        try {
+          source->mergeResult(&tgroups, &groups, &scratch);
+        } catch (...) {
+          error = true;
+        }
+      }
+
+      --sem;
+      lk.unlock();
+      cv.notify_all();
+    });
+  }
+
+  std::unique_lock<std::mutex> lk(mutex);
+  while (sem > 0) {
+    cv.wait(lk);
+  }
+
+  if (error) {
+    sources_[0]->freeResult(&groups);
+    RAISE(kRuntimeError, "SQL subtree execution failed");
+  }
+
+  try {
     sources_[0]->getResult(&groups, fn);
   } catch (...) {
     sources_[0]->freeResult(&groups);
