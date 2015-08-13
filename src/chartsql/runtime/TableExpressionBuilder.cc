@@ -105,7 +105,8 @@ ScopedPtr<TableExpression> TableExpressionBuilder::buildGroupBy(
           std::move(next),
           column_names,
           std::move(select_expressions),
-          std::move(group_expressions)));
+          std::move(group_expressions),
+          SHA1::compute(node->toString())));
 }
 
 ScopedPtr<TableExpression> TableExpressionBuilder::buildSequentialScan(

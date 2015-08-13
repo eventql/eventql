@@ -15,11 +15,13 @@ GroupBy::GroupBy(
     ScopedPtr<TableExpression> source,
     const Vector<String>& column_names,
     Vector<ScopedPtr<ValueExpression>> select_expressions,
-    Vector<ScopedPtr<ValueExpression>> group_expressions) :
+    Vector<ScopedPtr<ValueExpression>> group_expressions,
+    SHA1Hash qtree_fingerprint) :
     source_(std::move(source)),
     column_names_(column_names),
     select_exprs_(std::move(select_expressions)),
-    group_exprs_(std::move(group_expressions)) {}
+    group_exprs_(std::move(group_expressions)),
+    qtree_fingerprint_(qtree_fingerprint) {}
 
 void GroupBy::execute(
     ExecutionContext* context,
@@ -126,5 +128,20 @@ Vector<String> GroupBy::columnNames() const {
 size_t GroupBy::numColumns() const {
   return column_names_.size();
 }
+
+Option<SHA1Hash> GroupBy::cacheKey() const {
+  auto source_key = source_->cacheKey();
+  if (source_key.isEmpty()) {
+    return None<SHA1Hash>();
+  }
+
+  return Some(
+      SHA1::compute(
+          StringUtil::format(
+              "$0~$1",
+              source_key.get().toString(),
+              qtree_fingerprint_.toString())));
+}
+
 
 }
