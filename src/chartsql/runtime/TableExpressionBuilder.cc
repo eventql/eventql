@@ -9,6 +9,7 @@
  */
 #include <chartsql/runtime/TableExpressionBuilder.h>
 #include <chartsql/runtime/groupby.h>
+#include <chartsql/runtime/GroupByMerge.h>
 #include <chartsql/runtime/Union.h>
 #include <chartsql/runtime/SelectExpression.h>
 #include <chartsql/runtime/limitclause.h>
@@ -35,6 +36,13 @@ ScopedPtr<TableExpression> TableExpressionBuilder::build(
 
   if (dynamic_cast<GroupByNode*>(node.get())) {
     return buildGroupBy(node.asInstanceOf<GroupByNode>(), runtime, tables);
+  }
+
+  if (dynamic_cast<GroupByMergeNode*>(node.get())) {
+    return buildGroupMerge(
+        node.asInstanceOf<GroupByMergeNode>(),
+        runtime,
+        tables);
   }
 
   if (dynamic_cast<UnionNode*>(node.get())) {
@@ -112,6 +120,19 @@ ScopedPtr<TableExpression> TableExpressionBuilder::buildSequentialScan(
   }
 
   return std::move(seqscan.get());
+}
+
+ScopedPtr<TableExpression> TableExpressionBuilder::buildGroupMerge(
+    RefPtr<GroupByMergeNode> node,
+    QueryBuilder* runtime,
+    TableProvider* tables) {
+  Vector<ScopedPtr<TableExpression>> shards;
+
+  for (const auto& table : node->inputTables()) {
+    shards.emplace_back(build(table, runtime, tables));
+  }
+
+  return mkScoped(new GroupByMerge(std::move(shards)));
 }
 
 ScopedPtr<TableExpression> TableExpressionBuilder::buildUnion(

@@ -13,6 +13,7 @@
 #include <stx/option.h>
 #include <chartsql/qtree/QueryTreeNode.h>
 #include <chartsql/qtree/GroupByNode.h>
+#include <chartsql/qtree/GroupByMergeNode.h>
 #include <chartsql/qtree/UnionNode.h>
 #include <chartsql/qtree/LimitNode.h>
 #include <chartsql/qtree/OrderByNode.h>
@@ -41,6 +42,11 @@ protected:
 
   ScopedPtr<TableExpression> buildGroupBy(
       RefPtr<GroupByNode> node,
+      QueryBuilder* runtime,
+      TableProvider* tables);
+
+  ScopedPtr<TableExpression> buildGroupMerge(
+      RefPtr<GroupByMergeNode> node,
       QueryBuilder* runtime,
       TableProvider* tables);
 
