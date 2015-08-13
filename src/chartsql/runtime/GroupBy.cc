@@ -32,6 +32,12 @@ GroupBy::~GroupBy() {
 void GroupBy::execute(
     ExecutionContext* context,
     Function<bool (int argc, const SValue* argv)> fn) {
+  accumulate(context);
+  getResult(fn);
+}
+
+void GroupBy::accumulate(
+    ExecutionContext* context) {
   source_->execute(
       context,
       std::bind(
@@ -39,7 +45,10 @@ void GroupBy::execute(
           this,
           std::placeholders::_1,
           std::placeholders::_2));
+}
 
+void GroupBy::getResult(
+    Function<bool (int argc, const SValue* argv)> fn) {
   Vector<SValue> out_row(select_exprs_.size(), SValue{});
   for (auto& group : groups_) {
     for (size_t i = 0; i < select_exprs_.size(); ++i) {

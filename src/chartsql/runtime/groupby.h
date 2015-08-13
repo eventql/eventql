@@ -15,6 +15,13 @@
 namespace csql {
 
 class GroupByExpression : public TableExpression {
+
+  virtual void accumulate(
+      ExecutionContext* context) = 0;
+
+  virtual void getResult(
+      Function<bool (int argc, const SValue* argv)> fn) = 0;
+
 };
 
 class GroupBy : public GroupByExpression {
@@ -30,6 +37,12 @@ public:
 
   void execute(
       ExecutionContext* context,
+      Function<bool (int argc, const SValue* argv)> fn) override;
+
+  void accumulate(
+      ExecutionContext* context) override;
+
+  void getResult(
       Function<bool (int argc, const SValue* argv)> fn) override;
 
   Vector<String> columnNames() const override;
