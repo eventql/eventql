@@ -138,6 +138,21 @@ size_t GroupBy::numColumns() const {
   return column_names_.size();
 }
 
+void GroupBy::encode(
+    const HashMap<String, Vector<ValueExpression::Instance>>* groups,
+    OutputStream* os) const {
+  os->appendVarUInt(groups->size());
+  os->appendVarUInt(select_exprs_.size());
+
+  for (auto& group : *groups) {
+    os->appendLenencString(group.first);
+
+    for (size_t i = 0; i < select_exprs_.size(); ++i) {
+      select_exprs_[i]->saveState(&group.second[i], os);
+    }
+  }
+}
+
 Option<SHA1Hash> GroupBy::cacheKey() const {
   auto source_key = source_->cacheKey();
   if (source_key.isEmpty()) {
