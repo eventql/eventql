@@ -566,9 +566,10 @@ void SValue::decode(InputStream* is) {
     case T_BOOL:
       *this = SValue(SValue::BoolType(is->readUInt8() == 1));
       return;
-    case T_TIMESTAMP:
-      *this = SValue(SValue::TimeType(is->readUInt64()));
+    case T_TIMESTAMP: {
+      *this = SValue(SValue::TimeType(is->readUInt64() * kMicrosPerSecond));
       return;
+    }
     case T_NULL:
       *this = SValue();
       return;
