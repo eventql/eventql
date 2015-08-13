@@ -44,11 +44,15 @@ public:
   SValue evaluateStaticExpression(ASTNode* expr);
   SValue evaluateStaticExpression(RefPtr<ValueExpressionNode> expr);
 
+  Option<String> cacheDir() const;
+  void setCacheDir(const String& cachedir);
+
 protected:
   RefPtr<SymbolTable> symbol_table_;
   RefPtr<QueryBuilder> query_builder_;
   RefPtr<QueryPlanBuilder> query_plan_builder_;
   thread::ThreadPool tpool_;
+  Option<String> cachedir_;
 };
 
 }
