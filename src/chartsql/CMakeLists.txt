@@ -68,6 +68,7 @@ add_library(chartsql STATIC
     runtime/orderby.cc
     runtime/limitclause.cc
     runtime/GroupBy.cc
+    runtime/GroupByMerge.cc
     runtime/Union.cc
     runtime/SelectExpression.cc
     runtime/EmptyTable.cc
