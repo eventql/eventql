@@ -44,6 +44,11 @@ void GroupBy::accumulate(
     HashMap<String, Vector<ValueExpression::Instance>>* groups,
     ScratchMemory* scratch,
     ExecutionContext* context) {
+  auto cache_key = cacheKey();
+  if (!cache_key.isEmpty()) {
+    // load cache
+  }
+
   source_->execute(
       context,
       std::bind(
@@ -53,6 +58,10 @@ void GroupBy::accumulate(
           scratch,
           std::placeholders::_1,
           std::placeholders::_2));
+
+  if (!cache_key.isEmpty()) {
+    // write cache
+  }
 }
 
 void GroupBy::getResult(
