@@ -29,4 +29,8 @@ const String& DescribeTableNode::tableName() const {
   return table_name_;
 }
 
+String DescribeTableNode::toString() const {
+  return StringUtil::format("(describe-table $0)", table_name_);;
+}
+
 } // namespace csql
