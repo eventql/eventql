@@ -43,6 +43,8 @@ public:
   void incrNumSubtasksCompleted(size_t n);
   void incrNumRowsScanned(size_t n);
 
+  void runAsync(Function<void ()> fn);
+
 protected:
 
   void statusChanged();
