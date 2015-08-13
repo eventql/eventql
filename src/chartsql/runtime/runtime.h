@@ -13,6 +13,7 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <stx/thread/threadpool.h>
 #include <chartsql/parser/parser.h>
 #include <chartsql/runtime/queryplan.h>
 #include <chartsql/runtime/queryplanbuilder.h>
@@ -47,6 +48,7 @@ protected:
   RefPtr<SymbolTable> symbol_table_;
   RefPtr<QueryBuilder> query_builder_;
   RefPtr<QueryPlanBuilder> query_plan_builder_;
+  thread::ThreadPool tpool_;
 };
 
 }
