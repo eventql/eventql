@@ -42,5 +42,13 @@ size_t LimitNode::offset() const {
   return offset_;
 }
 
+String LimitNode::toString() const {
+  return StringUtil::format(
+      "(limit $0 $1 (subexpr $2))",
+      limit_,
+      offset_,
+      table_->toString());
+}
+
 
 } // namespace csql
