@@ -10,6 +10,7 @@
 #pragma once
 #include <stx/stdtypes.h>
 #include <stx/autoref.h>
+#include <stx/thread/TaskScheduler.h>
 #include <chartsql/svalue.h>
 
 using namespace stx;
@@ -31,7 +32,9 @@ struct ExecutionStatus {
 class ExecutionContext : public RefCounted {
 public:
 
-  ExecutionContext();
+  ExecutionContext(
+      TaskScheduler* sched,
+      size_t max_concurrent_tasks = 8);
 
   void onStatusChange(Function<void (const ExecutionStatus& status)> fn);
 
@@ -46,14 +49,19 @@ public:
   void runAsync(Function<void ()> fn);
 
 protected:
-
   void statusChanged();
+
+
+  TaskScheduler* sched_;
+  size_t max_concurrent_tasks_;
 
   ExecutionStatus status_;
   mutable std::mutex mutex_;
+  std::condition_variable cv_;
   Function<void (const ExecutionStatus& status)> on_status_change_;
   Function<void ()> on_cancel_;
   bool cancelled_;
+  size_t running_tasks_;
 };
 
 }

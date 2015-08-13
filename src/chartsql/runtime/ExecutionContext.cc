@@ -13,7 +13,13 @@ using namespace stx;
 
 namespace csql {
 
-ExecutionContext::ExecutionContext() : cancelled_(false) {}
+ExecutionContext::ExecutionContext(
+    TaskScheduler* sched,
+    size_t max_concurrent_tasks /* = 8 */) :
+    sched_(sched),
+    max_concurrent_tasks_(max_concurrent_tasks),
+    cancelled_(false),
+    running_tasks_(1) {}
 
 void ExecutionContext::onStatusChange(
     Function<void (const ExecutionStatus& status)> fn) {
@@ -38,6 +44,31 @@ void ExecutionContext::cancel() {
 
 bool ExecutionContext::isCancelled() const {
   return cancelled_;
+}
+
+void ExecutionContext::runAsync(Function<void ()> fn) {
+  std::unique_lock<std::mutex> lk(mutex_);
+
+  while (running_tasks_ >= max_concurrent_tasks_) {
+    cv_.wait(lk);
+  }
+
+  sched_->run([this, fn] {
+    try {
+      fn();
+    } catch (...) {
+      std::unique_lock<std::mutex> lk(mutex_);
+      --running_tasks_;
+      cv_.notify_all();
+      throw;
+    }
+
+    std::unique_lock<std::mutex> lk(mutex_);
+    --running_tasks_;
+    cv_.notify_all();
+  });
+
+  ++running_tasks_;
 }
 
 void ExecutionContext::incrNumSubtasksTotal(size_t n) {

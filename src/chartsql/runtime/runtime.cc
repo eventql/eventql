@@ -58,7 +58,7 @@ void Runtime::executeQuery(
           this));
 
   /* execute query and format results */
-  csql::ExecutionContext context;
+  csql::ExecutionContext context(&tpool_);
   result_format->formatResults(query_plan, &context);
 }
 
