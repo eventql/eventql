@@ -208,6 +208,7 @@ void ValueExpression::evaluate(
             evaluate(instance, cur, argc, argv, stackp++);
           }
 
+          expr->vtable.t_pure.call(stackn, stackv, out);
         } catch (...) {
           for (int i = 0; i < stackn; ++i) {
             (stackv + i)->~SValue();
@@ -221,7 +222,6 @@ void ValueExpression::evaluate(
         }
       }
 
-      expr->vtable.t_pure.call(stackn, stackv, out);
       return;
     }
 
