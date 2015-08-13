@@ -107,6 +107,7 @@ void GroupByMerge::execute(
 }
 
 Vector<String> GroupByMerge::columnNames() const {
+  iputs("col names: $0",  sources_[0]->columnNames());
   return sources_[0]->columnNames();
 }
 
