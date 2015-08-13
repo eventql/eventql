@@ -153,7 +153,7 @@ void CSTableIndex::enqueuePartitionWithLock(RefPtr<Partition> partition) {
 void CSTableIndex::start() {
   running_ = true;
 
-  for (int i = 0; i < 1; ++i) {
+  for (int i = 0; i < nthreads_; ++i) {
     threads_.emplace_back(std::bind(&CSTableIndex::work, this));
   }
 }
