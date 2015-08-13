@@ -113,4 +113,12 @@ double ExecutionStatus::progress() const {
   return num_subtasks_completed / (double) num_subtasks_total;
 }
 
+Option<String> ExecutionContext::cacheDir() const {
+  return cachedir_;
+}
+
+void ExecutionContext::setCacheDir(const String& cachedir) {
+  cachedir_ = Some(cachedir);
+}
+
 }
