@@ -51,4 +51,29 @@ TEST_CASE(RuntimeTest, TestExecuteIfStatement, [] () {
 
   auto out_b = runtime->evaluateStaticExpression("if(1 = 2, 42, 23)");
   EXPECT_EQ(out_b.getInteger(), 23);
+
+  {
+    auto v = runtime->evaluateStaticExpression("if(1 = 1, 'fnord', 'blah')");
+    EXPECT_EQ(v.toString(), "fnord");
+  }
+
+  {
+    auto v = runtime->evaluateStaticExpression("if(1 = 2, 'fnord', 'blah')");
+    EXPECT_EQ(v.toString(), "blah");
+  }
+
+  {
+    auto v = runtime->evaluateStaticExpression("if('fnord' = 'blah', 1, 2)");
+    EXPECT_EQ(v.toString(), "2");
+  }
+
+  {
+    auto v = runtime->evaluateStaticExpression("if('fnord' = 'fnord', 1, 2)");
+    EXPECT_EQ(v.toString(), "1");
+  }
+
+  {
+    auto v = runtime->evaluateStaticExpression("if('fnord' = '', 1, 2)");
+    EXPECT_EQ(v.toString(), "2");
+  }
 });
