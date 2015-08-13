@@ -9,6 +9,7 @@
  */
 #pragma once
 #include <stx/stdtypes.h>
+#include <chartsql/runtime/groupby.h>
 #include <chartsql/runtime/TableExpression.h>
 #include <chartsql/runtime/defaultruntime.h>
 
@@ -17,7 +18,7 @@ namespace csql {
 class GroupByMerge : public TableExpression {
 public:
 
-  GroupByMerge(Vector<ScopedPtr<TableExpression>> sources);
+  GroupByMerge(Vector<ScopedPtr<GroupByExpression>> sources);
 
   void execute(
       ExecutionContext* context,
@@ -28,7 +29,7 @@ public:
   size_t numColumns() const override;
 
 protected:
-  Vector<ScopedPtr<TableExpression>> sources_;
+  Vector<ScopedPtr<GroupByExpression>> sources_;
 };
 
 }
