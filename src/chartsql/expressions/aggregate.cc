@@ -36,13 +36,18 @@ void countExprReset(void* scratchpad) {
   memset(scratchpad, 0, sizeof(uint64_t));
 }
 
+void countExprMerge(void* scratchpad, const void* other) {
+  *(uint64_t*) scratchpad += *(uint64_t*) other;
+}
+
 const AggregateFunction kCountExpr {
   .scratch_size = sizeof(uint64_t),
   .accumulate = &countExprAcc,
   .get = &countExprGet,
   .reset = &countExprReset,
   .init = &countExprReset,
-  .free = nullptr
+  .free = nullptr,
+  .merge = &countExprMerge
 };
 
 

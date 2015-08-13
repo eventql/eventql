@@ -96,6 +96,11 @@ protected:
   void initProgram(Instruction* e);
   void freeProgram(Instruction* e) const;
 
+  void mergeInstance(
+      Instruction* e,
+      Instance* dst,
+      const Instance* src) const;
+
   Instruction* entry_;
   ScratchMemory static_storage_;
   size_t dynamic_storage_size_;
