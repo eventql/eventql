@@ -10,7 +10,7 @@
 #pragma once
 #include <stx/stdtypes.h>
 #include <stx/autoref.h>
-#include <stx/thread/TaskScheduler.h>
+#include <stx/thread/taskscheduler.h>
 #include <chartsql/svalue.h>
 
 using namespace stx;
