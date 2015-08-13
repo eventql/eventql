@@ -7,6 +7,8 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
+#include <stx/io/BufferedOutputStream.h>
+#include <stx/io/fileutil.h>
 #include <chartsql/runtime/groupby.h>
 
 namespace csql {
@@ -45,8 +47,9 @@ void GroupBy::accumulate(
     ScratchMemory* scratch,
     ExecutionContext* context) {
   auto cache_key = cacheKey();
+  String cache_filename;
   if (!cache_key.isEmpty()) {
-    // load cache
+    cache_filename = cache_key.get().toString() + ".qcache";
   }
 
   source_->execute(
@@ -60,7 +63,14 @@ void GroupBy::accumulate(
           std::placeholders::_2));
 
   if (!cache_key.isEmpty()) {
-    // write cache
+    BufferedOutputStream fos(
+        FileOutputStream::fromFile(
+            File::openFile(
+                cache_filename + "~",
+                File::O_CREATEOROPEN | File::O_WRITE | File::O_TRUNCATE)));
+
+    encode(groups, &fos);
+    FileUtil::mv(cache_filename + "~", cache_filename);
   }
 }
 
