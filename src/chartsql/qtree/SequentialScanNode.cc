@@ -65,4 +65,40 @@ RefPtr<QueryTreeNode> SequentialScanNode::deepCopy() const {
   return new SequentialScanNode(*this);
 }
 
+String SequentialScanNode::toString() const {
+  String aggr;
+  switch (aggr_strategy_) {
+
+    case AggregationStrategy::NO_AGGREGATION:
+      aggr = "NO_AGGREGATION";
+      break;
+
+    case AggregationStrategy::AGGREGATE_WITHIN_RECORD:
+      aggr = "AGGREGATE_WITHIN_RECORD";
+      break;
+
+    case AggregationStrategy::AGGREGATE_ALL:
+      aggr = "AGGREGATE_ALL";
+      break;
+
+  };
+
+  auto str = StringUtil::format(
+      "(seqscan (table $0) (aggregate $1) (select-list",
+      table_name_,
+      aggr);
+
+  for (const auto& e : select_list_) {
+    str += " " + e->toString();
+  }
+  str += ")";
+
+  if (!where_expr_.isEmpty()) {
+    str += StringUtil::format(" (where $0)", where_expr_.get()->toString());
+  }
+
+  str += ")";
+  return str;
+}
+
 } // namespace csql
