@@ -31,4 +31,15 @@ RefPtr<QueryTreeNode> SelectExpressionNode::deepCopy() const {
   return new SelectExpressionNode(args);
 }
 
+String SelectExpressionNode::toString() const {
+  String str = "(select-expr";
+
+  for (const auto& e : select_list_) {
+    str += " " + e->toString();
+  }
+
+  str += ")";
+  return str;
+}
+
 } // namespace csql
