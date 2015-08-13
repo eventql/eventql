@@ -13,7 +13,7 @@
 namespace csql {
 
 GroupByMerge::GroupByMerge(
-    Vector<ScopedPtr<TableExpression>> sources) :
+    Vector<ScopedPtr<GroupByExpression>> sources) :
     sources_(std::move(sources)) {
   if (sources_.size() == 0) {
     RAISE(kRuntimeError, "GROUP MERGE must have at least one source table");

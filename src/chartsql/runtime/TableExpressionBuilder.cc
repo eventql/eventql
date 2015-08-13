@@ -126,10 +126,18 @@ ScopedPtr<TableExpression> TableExpressionBuilder::buildGroupMerge(
     RefPtr<GroupByMergeNode> node,
     QueryBuilder* runtime,
     TableProvider* tables) {
-  Vector<ScopedPtr<TableExpression>> shards;
+  Vector<ScopedPtr<GroupByExpression>> shards;
 
   for (const auto& table : node->inputTables()) {
-    shards.emplace_back(build(table, runtime, tables));
+    auto shard = build(table, runtime, tables);
+    auto tshard = dynamic_cast<GroupByExpression*>(shard.get());
+    if (tshard) {
+      shard.release();
+    } else {
+      RAISE(kIllegalStateError, "GROUP MERGE subexpression must be a GROUP BY");
+    }
+
+    shards.emplace_back(mkScoped(tshard));
   }
 
   return mkScoped(new GroupByMerge(std::move(shards)));

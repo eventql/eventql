@@ -14,7 +14,10 @@
 
 namespace csql {
 
-class GroupBy : public TableExpression {
+class GroupByExpression : public TableExpression {
+};
+
+class GroupBy : public GroupByExpression {
 public:
 
   GroupBy(
