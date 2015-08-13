@@ -81,7 +81,18 @@ void GroupBy::mergeResult(
     HashMap<String, Vector<ValueExpression::Instance>>* src,
     HashMap<String, Vector<ValueExpression::Instance>>* dst,
     ScratchMemory* scratch) {
+  for (const auto& src_group : *src) {
+    auto& dst_group = (*dst)[src_group.first];
+    if (dst_group.size() == 0) {
+      for (const auto& e : select_exprs_) {
+        dst_group.emplace_back(e->allocInstance(scratch));
+      }
+    }
 
+    for (size_t i = 0; i < select_exprs_.size(); ++i) {
+      //select_exprs_[i]->accumulate(&group[i], row_len, row);
+    }
+  }
 }
 
 bool GroupBy::nextRow(
