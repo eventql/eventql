@@ -39,6 +39,7 @@ add_library(chartsql STATIC
     qtree/TableExpressionNode.cc
     qtree/SelectListNode.cc
     qtree/GroupByNode.cc
+    qtree/GroupByMergeNode.cc
     qtree/UnionNode.cc
     qtree/LimitNode.cc
     qtree/OrderByNode.cc
