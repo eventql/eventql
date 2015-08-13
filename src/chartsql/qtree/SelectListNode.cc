@@ -22,7 +22,14 @@ RefPtr<ValueExpressionNode> SelectListNode::expression() const {
 }
 
 RefPtr<QueryTreeNode> SelectListNode::deepCopy() const {
-  return new SelectListNode(expr_->deepCopyAs<ValueExpressionNode>());
+  auto copy = mkRef(
+      new SelectListNode(expr_->deepCopyAs<ValueExpressionNode>()));
+
+  if (!alias_.isEmpty()) {
+    copy->setAlias(alias_.get());
+  }
+
+  return copy.get();
 }
 
 String SelectListNode::columnName() const {
