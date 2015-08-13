@@ -31,13 +31,19 @@ public:
 
 protected:
 
-  static void replaceAllSequentialScansWithUnions(
+  static void insertPartitionSubqueries(
       PartitionMap* partition_map,
       CSTableIndex* cstable_index,
       const String& tsdb_namespace,
       RefPtr<csql::QueryTreeNode>* node);
 
   static void replaceSequentialScanWithUnion(
+      PartitionMap* partition_map,
+      CSTableIndex* cstable_index,
+      const String& tsdb_namespace,
+      RefPtr<csql::QueryTreeNode>* node);
+
+  static void shardGroupBy(
       PartitionMap* partition_map,
       CSTableIndex* cstable_index,
       const String& tsdb_namespace,
