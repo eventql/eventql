@@ -86,8 +86,12 @@ void OutputStream::appendString(const std::string& string) {
 }
 
 void OutputStream::appendLenencString(const std::string& string) {
-  appendVarUInt(string.size());
-  write(string.data(), string.size());
+  appendLenencString(string.data(), string.size());
+}
+
+void OutputStream::appendLenencString(const void* data, size_t size) {
+  appendVarUInt(size);
+  write((char*) data, size);
 }
 
 void OutputStream::appendVarUInt(uint64_t value) {

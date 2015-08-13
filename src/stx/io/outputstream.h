@@ -85,6 +85,7 @@ public:
    * Writes a LEB128 prefix-length-encoded string to the stream.
    */
   void appendLenencString(const std::string& string);
+  void appendLenencString(const void* data, size_t size);
 
   /**
    * Publicly accessible mutex that may be used to synchronize writes to this
