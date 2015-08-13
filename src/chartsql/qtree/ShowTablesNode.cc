@@ -21,4 +21,8 @@ RefPtr<QueryTreeNode> ShowTablesNode::deepCopy() const {
   return new ShowTablesNode();
 }
 
+String ShowTablesNode::toString() const {
+  return "(show-tables)";
+}
+
 } // namespace csql
