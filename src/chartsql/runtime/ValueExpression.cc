@@ -90,7 +90,11 @@ void ValueExpression::evaluate(
 void ValueExpression::merge(
     Instance* dst,
     const Instance* src) const {
-  mergeInstance(entry_, dst, src);
+  if (has_aggregate_) {
+    mergeInstance(entry_, dst, src);
+  } else {
+    *(SValue*) dst->scratch = *(SValue*) src->scratch;
+  }
 }
 
 void ValueExpression::mergeInstance(
