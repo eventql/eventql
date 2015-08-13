@@ -45,7 +45,10 @@ void GroupByMerge::execute(
 
   try {
     for (auto& source : sources_) {
-      source->accumulate(&groups, &scratch, context);
+      HashMap<String, Vector<ValueExpression::Instance>> tgroups;
+      ScratchMemory tscratch;
+      source->accumulate(&tgroups, &tscratch, context);
+      source->mergeResult(&tgroups, &groups, &scratch);
     }
 
     sources_[0]->getResult(&groups, fn);

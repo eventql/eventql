@@ -77,6 +77,13 @@ void GroupBy::freeResult(
   }
 }
 
+void GroupBy::mergeResult(
+    HashMap<String, Vector<ValueExpression::Instance>>* src,
+    HashMap<String, Vector<ValueExpression::Instance>>* dst,
+    ScratchMemory* scratch) {
+
+}
+
 bool GroupBy::nextRow(
     HashMap<String, Vector<ValueExpression::Instance>>* groups,
     ScratchMemory* scratch,
