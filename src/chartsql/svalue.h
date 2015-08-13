@@ -12,8 +12,8 @@
 #include <string>
 #include <string.h>
 #include <vector>
-#include <stx/io/InputStream.h>
-#include <stx/io/OutputStream.h>
+#include <stx/io/inputstream.h>
+#include <stx/io/outputstream.h>
 #include <stx/stdtypes.h>
 #include <stx/UnixTime.h>
 #include <stx/exception.h>
