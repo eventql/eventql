@@ -42,4 +42,18 @@ RefPtr<QueryTreeNode> OrderByNode::deepCopy() const {
       table_->deepCopy().asInstanceOf<QueryTreeNode>());
 }
 
+String OrderByNode::toString() const {
+  String str = "(order-by";
+  for (const auto& spec : sort_specs_) {
+    str += StringUtil::format(
+        " (sort-spec $0 $1)",
+        spec.column,
+        spec.descending ? "DESC" : "ASC");
+  }
+
+  str += " (subexpr " + table_->toString() + "))";
+
+  return str;
+}
+
 } // namespace csql
