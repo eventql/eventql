@@ -43,6 +43,8 @@ struct AggregateFunction {
   void (*init)(void* scratch);
   void (*free)(void* scratch);
   void (*merge)(void* scratch, const void* other);
+  void (*savestate)(void* scratch, OutputStream* os);
+  void (*loadstate)(void* scratch, InputStream* is);
 };
 
 struct SFunction {

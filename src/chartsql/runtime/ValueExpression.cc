@@ -353,4 +353,44 @@ void ValueExpression::loadState(
   }
 }
 
+void ValueExpression::saveInstance(
+    Instruction* e,
+    const Instance* instance,
+    OutputStream* os) const {
+  switch (e->type) {
+    case X_CALL_AGGREGATE:
+      e->vtable.t_aggregate.savestate(
+          (char *) instance->scratch + (size_t) e->arg0,
+          os);
+      break;
+
+    default:
+      break;
+  }
+
+  for (auto cur = e->child; cur != nullptr; cur = cur->next) {
+    saveInstance(cur, instance, os);
+  }
+}
+
+void ValueExpression::loadInstance(
+    Instruction* e,
+    Instance* instance,
+    InputStream* os) const {
+  switch (e->type) {
+    case X_CALL_AGGREGATE:
+      e->vtable.t_aggregate.loadstate(
+          (char *) instance->scratch + (size_t) e->arg0,
+          os);
+      break;
+
+    default:
+      break;
+  }
+
+  for (auto cur = e->child; cur != nullptr; cur = cur->next) {
+    loadInstance(cur, instance, os);
+  }
+}
+
 }
