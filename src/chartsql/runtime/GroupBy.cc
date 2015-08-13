@@ -49,8 +49,11 @@ void GroupBy::accumulate(
   auto cache_key = cacheKey();
   String cache_filename;
   bool from_cache = false;
-  if (!cache_key.isEmpty()) {
-    cache_filename = cache_key.get().toString() + ".qcache";
+  auto cachedir = context->cacheDir();
+  if (!cache_key.isEmpty() && !cachedir.isEmpty()) {
+    cache_filename = FileUtil::joinPaths(
+        cachedir.get(),
+        cache_key.get().toString() + ".qcache");
 
     if (FileUtil::exists(cache_filename)) {
       auto fis = FileInputStream::openFile(cache_filename);
@@ -70,7 +73,7 @@ void GroupBy::accumulate(
             std::placeholders::_2));
   }
 
-  if (!cache_key.isEmpty()) {
+  if (!cache_key.isEmpty() && !cachedir.isEmpty()) {
     BufferedOutputStream fos(
         FileOutputStream::fromFile(
             File::openFile(

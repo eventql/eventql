@@ -48,6 +48,8 @@ public:
 
   void runAsync(Function<void ()> fn);
 
+  Option<String> cacheDir() const;
+
 protected:
   void statusChanged();
 
