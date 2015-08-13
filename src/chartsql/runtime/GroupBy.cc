@@ -48,19 +48,27 @@ void GroupBy::accumulate(
     ExecutionContext* context) {
   auto cache_key = cacheKey();
   String cache_filename;
+  bool from_cache = false;
   if (!cache_key.isEmpty()) {
     cache_filename = cache_key.get().toString() + ".qcache";
+
+    if (FileUtil::exists(cache_filename)) {
+      auto fis = FileInputStream::openFile(cache_filename);
+      from_cache = decode(groups, scratch, fis.get());
+    }
   }
 
-  source_->execute(
-      context,
-      std::bind(
-          &GroupBy::nextRow,
-          this,
-          groups,
-          scratch,
-          std::placeholders::_1,
-          std::placeholders::_2));
+  if (!from_cache) {
+    source_->execute(
+        context,
+        std::bind(
+            &GroupBy::nextRow,
+            this,
+            groups,
+            scratch,
+            std::placeholders::_1,
+            std::placeholders::_2));
+  }
 
   if (!cache_key.isEmpty()) {
     BufferedOutputStream fos(
@@ -161,6 +169,33 @@ void GroupBy::encode(
       select_exprs_[i]->saveState(&group.second[i], os);
     }
   }
+}
+
+bool GroupBy::decode(
+    HashMap<String, Vector<ValueExpression::Instance>>* groups,
+    ScratchMemory* scratch,
+    InputStream* is) const {
+  auto ngroups = is->readVarUInt();
+  auto nexprs = is->readVarUInt();
+
+  if (select_exprs_.size() != nexprs) {
+    return false;
+  }
+
+  for (size_t j = 0; j < ngroups; ++j) {
+    auto group_key = is->readLenencString();
+
+    auto& group = (*groups)[group_key];
+    for (const auto& e : select_exprs_) {
+      group.emplace_back(e->allocInstance(scratch));
+    }
+
+    for (size_t i = 0; i < select_exprs_.size(); ++i) {
+      select_exprs_[i]->loadState(&group[i], is);
+    }
+  }
+
+  return true;
 }
 
 Option<SHA1Hash> GroupBy::cacheKey() const {

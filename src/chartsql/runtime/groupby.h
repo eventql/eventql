@@ -80,6 +80,11 @@ protected:
       const HashMap<String, Vector<ValueExpression::Instance>>* groups,
       OutputStream* os) const;
 
+  bool decode(
+      HashMap<String, Vector<ValueExpression::Instance>>* groups,
+      ScratchMemory* scratch,
+      InputStream* is) const;
+
   bool nextRow(
       HashMap<String, Vector<ValueExpression::Instance>>* groups,
       ScratchMemory* scratch,
