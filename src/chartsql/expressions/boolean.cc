@@ -27,10 +27,10 @@ void eqExpr(int argc, SValue* argv, SValue* out) {
   SValue* lhs = argv;
   SValue* rhs = argv + 1;
 
-  switch(lhs->testTypeWithNumericConversion()) {
+  switch(lhs->getType()) {
     case SValue::T_INTEGER:
     case SValue::T_TIMESTAMP:
-      switch(rhs->testTypeWithNumericConversion()) {
+      switch(rhs->getType()) {
         case SValue::T_INTEGER:
         case SValue::T_TIMESTAMP:
           *out = SValue(lhs->getInteger() == rhs->getInteger());
@@ -46,7 +46,7 @@ void eqExpr(int argc, SValue* argv, SValue* out) {
       }
       break;
     case SValue::T_FLOAT:
-      switch(rhs->testTypeWithNumericConversion()) {
+      switch(rhs->getType()) {
         case SValue::T_INTEGER:
         case SValue::T_FLOAT:
         case SValue::T_TIMESTAMP:
@@ -155,7 +155,7 @@ void negExpr(int argc, SValue* argv, SValue* out) {
 
   SValue* val = argv;
 
-  switch(val->testTypeWithNumericConversion()) {
+  switch(val->getType()) {
     case SValue::T_INTEGER:
       *out = SValue(val->getInteger() * -1);
       return;
@@ -186,10 +186,10 @@ void ltExpr(int argc, SValue* argv, SValue* out) {
   SValue* lhs = argv;
   SValue* rhs = argv + 1;
 
-  switch(lhs->testTypeWithNumericConversion()) {
+  switch(lhs->getType()) {
     case SValue::T_INTEGER:
     case SValue::T_TIMESTAMP:
-      switch(rhs->testTypeWithNumericConversion()) {
+      switch(rhs->getType()) {
         case SValue::T_INTEGER:
         case SValue::T_TIMESTAMP:
           *out = SValue(lhs->getInteger() < rhs->getInteger());
@@ -205,7 +205,7 @@ void ltExpr(int argc, SValue* argv, SValue* out) {
       }
       break;
     case SValue::T_FLOAT:
-      switch(rhs->testTypeWithNumericConversion()) {
+      switch(rhs->getType()) {
         case SValue::T_INTEGER:
         case SValue::T_FLOAT:
         case SValue::T_TIMESTAMP:
@@ -219,7 +219,7 @@ void ltExpr(int argc, SValue* argv, SValue* out) {
       }
       break;
     case SValue::T_NULL:
-      switch(rhs->testTypeWithNumericConversion()) {
+      switch(rhs->getType()) {
         case SValue::T_INTEGER:
         case SValue::T_FLOAT:
         case SValue::T_TIMESTAMP:
@@ -256,10 +256,10 @@ void lteExpr(int argc, SValue* argv, SValue* out) {
   SValue* lhs = argv;
   SValue* rhs = argv + 1;
 
-  switch(lhs->testTypeWithNumericConversion()) {
+  switch(lhs->getType()) {
     case SValue::T_INTEGER:
     case SValue::T_TIMESTAMP:
-      switch(rhs->testTypeWithNumericConversion()) {
+      switch(rhs->getType()) {
         case SValue::T_INTEGER:
         case SValue::T_TIMESTAMP:
           *out = SValue(lhs->getInteger() <= rhs->getInteger());
@@ -275,7 +275,7 @@ void lteExpr(int argc, SValue* argv, SValue* out) {
       }
       break;
     case SValue::T_FLOAT:
-      switch(rhs->testTypeWithNumericConversion()) {
+      switch(rhs->getType()) {
         case SValue::T_INTEGER:
         case SValue::T_FLOAT:
         case SValue::T_TIMESTAMP:
@@ -289,7 +289,7 @@ void lteExpr(int argc, SValue* argv, SValue* out) {
       }
       break;
     case SValue::T_NULL:
-      switch(rhs->testTypeWithNumericConversion()) {
+      switch(rhs->getType()) {
         case SValue::T_INTEGER:
         case SValue::T_FLOAT:
         case SValue::T_TIMESTAMP:
@@ -326,10 +326,10 @@ void gtExpr(int argc, SValue* argv, SValue* out) {
   SValue* lhs = argv;
   SValue* rhs = argv + 1;
 
-  switch(lhs->testTypeWithNumericConversion()) {
+  switch(lhs->getType()) {
     case SValue::T_INTEGER:
     case SValue::T_TIMESTAMP:
-      switch(rhs->testTypeWithNumericConversion()) {
+      switch(rhs->getType()) {
         case SValue::T_INTEGER:
         case SValue::T_TIMESTAMP:
           *out = SValue(lhs->getInteger() > rhs->getInteger());
@@ -345,7 +345,7 @@ void gtExpr(int argc, SValue* argv, SValue* out) {
       }
       break;
     case SValue::T_FLOAT:
-      switch(rhs->testTypeWithNumericConversion()) {
+      switch(rhs->getType()) {
         case SValue::T_INTEGER:
         case SValue::T_FLOAT:
         case SValue::T_TIMESTAMP:
@@ -359,7 +359,7 @@ void gtExpr(int argc, SValue* argv, SValue* out) {
       }
       break;
     case SValue::T_NULL:
-      switch(rhs->testTypeWithNumericConversion()) {
+      switch(rhs->getType()) {
         case SValue::T_INTEGER:
         case SValue::T_FLOAT:
         case SValue::T_TIMESTAMP:
@@ -396,10 +396,10 @@ void gteExpr(int argc, SValue* argv, SValue* out) {
   SValue* lhs = argv;
   SValue* rhs = argv + 1;
 
-  switch(lhs->testTypeWithNumericConversion()) {
+  switch(lhs->getType()) {
     case SValue::T_INTEGER:
     case SValue::T_TIMESTAMP:
-      switch(rhs->testTypeWithNumericConversion()) {
+      switch(rhs->getType()) {
         case SValue::T_INTEGER:
         case SValue::T_TIMESTAMP:
           *out = SValue(lhs->getInteger() >= rhs->getInteger());
@@ -415,7 +415,7 @@ void gteExpr(int argc, SValue* argv, SValue* out) {
       }
       break;
     case SValue::T_FLOAT:
-      switch(rhs->testTypeWithNumericConversion()) {
+      switch(rhs->getType()) {
         case SValue::T_INTEGER:
         case SValue::T_FLOAT:
         case SValue::T_TIMESTAMP:
@@ -429,7 +429,7 @@ void gteExpr(int argc, SValue* argv, SValue* out) {
       }
       break;
     case SValue::T_NULL:
-      switch(rhs->testTypeWithNumericConversion()) {
+      switch(rhs->getType()) {
         case SValue::T_INTEGER:
         case SValue::T_FLOAT:
         case SValue::T_TIMESTAMP:
