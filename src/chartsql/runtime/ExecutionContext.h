@@ -49,13 +49,15 @@ public:
   void runAsync(Function<void ()> fn);
 
   Option<String> cacheDir() const;
+  void setCacheDir(const String& cachedir);
 
 protected:
-  void statusChanged();
 
+  void statusChanged();
 
   TaskScheduler* sched_;
   size_t max_concurrent_tasks_;
+  Option<String> cachedir_;
 
   ExecutionStatus status_;
   mutable std::mutex mutex_;
