@@ -54,7 +54,7 @@ void GroupBy::accumulate(
 }
 
 void GroupBy::getResult(
-    HashMap<String, Vector<ValueExpression::Instance>>* groups,
+    const HashMap<String, Vector<ValueExpression::Instance>>* groups,
     Function<bool (int argc, const SValue* argv)> fn) {
   Vector<SValue> out_row(select_exprs_.size(), SValue{});
   for (auto& group : *groups) {
@@ -78,7 +78,7 @@ void GroupBy::freeResult(
 }
 
 void GroupBy::mergeResult(
-    HashMap<String, Vector<ValueExpression::Instance>>* src,
+    const HashMap<String, Vector<ValueExpression::Instance>>* src,
     HashMap<String, Vector<ValueExpression::Instance>>* dst,
     ScratchMemory* scratch) {
   for (const auto& src_group : *src) {
@@ -90,7 +90,7 @@ void GroupBy::mergeResult(
     }
 
     for (size_t i = 0; i < select_exprs_.size(); ++i) {
-      //select_exprs_[i]->accumulate(&group[i], row_len, row);
+      select_exprs_[i]->merge(&dst_group[i], &src_group.second[i]);
     }
   }
 }

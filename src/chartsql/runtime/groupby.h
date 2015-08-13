@@ -23,14 +23,14 @@ public:
       ExecutionContext* context) = 0;
 
   virtual void getResult(
-      HashMap<String, Vector<ValueExpression::Instance>>* groups,
+      const HashMap<String, Vector<ValueExpression::Instance>>* groups,
       Function<bool (int argc, const SValue* argv)> fn) = 0;
 
   virtual void freeResult(
       HashMap<String, Vector<ValueExpression::Instance>>* groups) = 0;
 
   virtual void mergeResult(
-      HashMap<String, Vector<ValueExpression::Instance>>* src,
+      const HashMap<String, Vector<ValueExpression::Instance>>* src,
       HashMap<String, Vector<ValueExpression::Instance>>* dst,
       ScratchMemory* scratch) = 0;
 
@@ -55,14 +55,14 @@ public:
       ExecutionContext* context) override;
 
   void getResult(
-      HashMap<String, Vector<ValueExpression::Instance>>* groups,
+      const HashMap<String, Vector<ValueExpression::Instance>>* groups,
       Function<bool (int argc, const SValue* argv)> fn) override;
 
   void freeResult(
       HashMap<String, Vector<ValueExpression::Instance>>* groups) override;
 
   void mergeResult(
-      HashMap<String, Vector<ValueExpression::Instance>>* src,
+      const HashMap<String, Vector<ValueExpression::Instance>>* src,
       HashMap<String, Vector<ValueExpression::Instance>>* dst,
       ScratchMemory* scratch) override;
 
