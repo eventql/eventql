@@ -30,6 +30,8 @@ public:
 
   void setAlias(const String& alias);
 
+  String toString() const override;
+
 protected:
   Option<String> alias_;
   RefPtr<ValueExpressionNode> expr_;

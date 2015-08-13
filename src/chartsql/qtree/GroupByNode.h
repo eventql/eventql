@@ -33,6 +33,8 @@ public:
 
   RefPtr<QueryTreeNode> deepCopy() const override;
 
+  String toString() const override;
+
 protected:
   Vector<RefPtr<SelectListNode>> select_list_;
   Vector<RefPtr<ValueExpressionNode>> group_exprs_;

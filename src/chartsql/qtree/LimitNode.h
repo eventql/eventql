@@ -31,6 +31,8 @@ public:
 
   RefPtr<QueryTreeNode> deepCopy() const override;
 
+  String toString() const override;
+
 protected:
   size_t limit_;
   size_t offset_;

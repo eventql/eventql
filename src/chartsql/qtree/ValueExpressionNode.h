@@ -22,6 +22,10 @@ public:
 
   virtual String toSQL() const = 0;
 
+  virtual String toString() const override {
+    return toSQL();
+  }
+
 };
 
 } // namespace csql
