@@ -331,7 +331,26 @@ void ValueExpression::accumulate(
     }
 
   }
+}
 
+void ValueExpression::saveState(
+    const Instance* instance,
+    OutputStream* os) const {
+  if (has_aggregate_) {
+    saveInstance(entry_, instance, os);
+  } else {
+    ((SValue*) instance->scratch)->encode(os);
+  }
+}
+
+void ValueExpression::loadState(
+    Instance* instance,
+    InputStream* is) const {
+  if (has_aggregate_) {
+    loadInstance(entry_, instance, is);
+  } else {
+    ((SValue*) instance->scratch)->decode(is);
+  }
 }
 
 }
