@@ -40,14 +40,21 @@ GroupByMerge::GroupByMerge(
 void GroupByMerge::execute(
     ExecutionContext* context,
     Function<bool (int argc, const SValue* argv)> fn) {
+  HashMap<String, Vector<ValueExpression::Instance>> groups;
+  ScratchMemory scratch;
 
-  for (auto& source : sources_) {
-    source->execute(
-        context,
-        [fn] (int sargc, const SValue* sargv) -> bool {
-      return fn(sargc, sargv);
-    });
+  try {
+    for (auto& source : sources_) {
+      source->accumulate(&groups, &scratch, context);
+    }
+
+    sources_[0]->getResult(&groups, fn);
+  } catch (...) {
+    sources_[0]->freeResult(&groups);
+    throw;
   }
+
+  sources_[0]->freeResult(&groups);
 }
 
 Vector<String> GroupByMerge::columnNames() const {
