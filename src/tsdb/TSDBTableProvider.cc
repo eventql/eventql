@@ -57,6 +57,7 @@ Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildSequentialScan(
         mkScoped(new csql::EmptyTable()));
   }
 
+  auto snap = partition.get()->getSnapshot();
   auto reader = partition.get()->getReader();
   auto cstable = reader->fetchCSTableFilename();
   if (cstable.isEmpty()) {
@@ -64,14 +65,15 @@ Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildSequentialScan(
         mkScoped(new csql::EmptyTable()));
   }
 
-  return Option<ScopedPtr<csql::TableExpression>>(
-      mkScoped(
-          new csql::CSTableScan(
-              node,
-              cstable.get(),
-              runtime)));
-}
+  auto scan = mkScoped(
+      new csql::CSTableScan(
+          node,
+          cstable.get(),
+          runtime));
 
+  scan->setCacheKey(SHA1::compute(snap->state.cstable_version()));
+  return Option<ScopedPtr<csql::TableExpression>>(std::move(scan));
+}
 
 void TSDBTableProvider::listTables(
     Function<void (const csql::TableInfo& table)> fn) const {
