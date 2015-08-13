@@ -9,8 +9,8 @@
  */
 #pragma once
 #include <stx/stdtypes.h>
-#include <stx/io/InputStream.h>
-#include <stx/io/OutputStream.h>
+#include <stx/io/inputstream.h>
+#include <stx/io/outputstream.h>
 #include <chartsql/svalue.h>
 #include <chartsql/SFunction.h>
 #include <chartsql/runtime/ScratchMemory.h>
