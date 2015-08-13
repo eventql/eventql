@@ -67,6 +67,8 @@ public:
 
   RefPtr<QueryTreeNode> deepCopy() const override;
 
+  String toString() const override;
+
 protected:
   String table_name_;
   Vector<RefPtr<SelectListNode>> select_list_;

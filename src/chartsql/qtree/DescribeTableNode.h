@@ -26,6 +26,8 @@ public:
 
   const String& tableName() const;
 
+  String toString() const override;
+
 protected:
   String table_name_;
 };

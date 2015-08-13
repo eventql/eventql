@@ -25,6 +25,8 @@ public:
 
   RefPtr<QueryTreeNode> deepCopy() const override;
 
+  String toString() const override;
+
 protected:
   Vector<RefPtr<QueryTreeNode>> tables_;
 };

@@ -33,6 +33,8 @@ public:
 
   RefPtr<QueryTreeNode>* mutableChild(size_t index);
 
+  virtual String toString() const = 0;
+
 protected:
 
   void addChild(RefPtr<QueryTreeNode>* table);

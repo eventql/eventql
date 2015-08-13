@@ -22,6 +22,8 @@ public:
 
   RefPtr<QueryTreeNode> deepCopy() const override;
 
+  String toString() const override;
+
 };
 
 } // namespace csql

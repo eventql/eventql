@@ -36,6 +36,8 @@ public:
 
   RefPtr<QueryTreeNode> deepCopy() const override;
 
+  String toString() const override;
+
 protected:
   Vector<SortSpec> sort_specs_;
   size_t max_output_column_index_;
