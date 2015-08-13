@@ -197,15 +197,27 @@ void ValueExpression::evaluate(
       SValue* stackv = nullptr;
       auto stackn = expr->argn;
       if (stackn > 0) {
-        // FIXPAUL free...
         stackv = reinterpret_cast<SValue*>(alloca(sizeof(SValue) * expr->argn));
         for (int i = 0; i < stackn; ++i) {
           new (stackv + i) SValue();
         }
 
-        auto stackp = stackv;
-        for (auto cur = expr->child; cur != nullptr; cur = cur->next) {
-          evaluate(instance, cur, argc, argv, stackp++);
+        try {
+          auto stackp = stackv;
+          for (auto cur = expr->child; cur != nullptr; cur = cur->next) {
+            evaluate(instance, cur, argc, argv, stackp++);
+          }
+
+        } catch (...) {
+          for (int i = 0; i < stackn; ++i) {
+            (stackv + i)->~SValue();
+          }
+
+          throw;
+        };
+
+        for (int i = 0; i < stackn; ++i) {
+          (stackv + i)->~SValue();
         }
       }
 
