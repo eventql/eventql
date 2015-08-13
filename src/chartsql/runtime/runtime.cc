@@ -59,6 +59,10 @@ void Runtime::executeQuery(
 
   /* execute query and format results */
   csql::ExecutionContext context(&tpool_);
+  if (!cachedir_.isEmpty()) {
+    context.setCacheDir(cachedir_.get());
+  }
+
   result_format->formatResults(query_plan, &context);
 }
 
@@ -96,6 +100,14 @@ SValue Runtime::evaluateStaticExpression(RefPtr<ValueExpressionNode> expr) {
   SValue out;
   compiled->evaluate(0, nullptr, &out);
   return out;
+}
+
+Option<String> Runtime::cacheDir() const {
+  return cachedir_;
+}
+
+void Runtime::setCacheDir(const String& cachedir) {
+  cachedir_ = Some(cachedir);
 }
 
 }
