@@ -36,6 +36,9 @@ public:
       ExecutionContext* context,
       Function<bool (int argc, const SValue* argv)> fn) override;
 
+  Option<SHA1Hash> cacheKey() const override;
+  void setCacheKey(const SHA1Hash& key);
+
 protected:
 
   struct ColumnRef {
@@ -86,6 +89,7 @@ protected:
   ScopedPtr<ValueExpression> where_expr_;
   size_t colindex_;
   AggregationStrategy aggr_strategy_;
+  Option<SHA1Hash> cache_key_;
 };
 
 
