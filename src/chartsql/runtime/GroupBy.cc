@@ -73,7 +73,7 @@ void GroupBy::accumulate(
             std::placeholders::_2));
   }
 
-  if (!cache_key.isEmpty() && !cachedir.isEmpty()) {
+  if (!from_cache && !cache_key.isEmpty() && !cachedir.isEmpty()) {
     BufferedOutputStream fos(
         FileOutputStream::fromFile(
             File::openFile(
@@ -189,12 +189,10 @@ bool GroupBy::decode(
     auto group_key = is->readLenencString();
 
     auto& group = (*groups)[group_key];
-    for (const auto& e : select_exprs_) {
-      group.emplace_back(e->allocInstance(scratch));
-    }
-
     for (size_t i = 0; i < select_exprs_.size(); ++i) {
-      select_exprs_[i]->loadState(&group[i], is);
+      const auto& e = select_exprs_[i];
+      group.emplace_back(e->allocInstance(scratch));
+      e->loadState(&group[i], is);
     }
   }
 
