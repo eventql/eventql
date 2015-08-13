@@ -21,36 +21,43 @@ GroupBy::GroupBy(
     select_exprs_(std::move(select_expressions)),
     group_exprs_(std::move(group_expressions)) {}
 
-GroupBy::~GroupBy() {
-  for (auto& group : groups_) {
-    for (size_t i = 0; i < select_exprs_.size(); ++i) {
-      select_exprs_[i]->freeInstance(&group.second[i]);
-    }
-  }
-}
-
 void GroupBy::execute(
     ExecutionContext* context,
     Function<bool (int argc, const SValue* argv)> fn) {
-  accumulate(context);
-  getResult(fn);
+  HashMap<String, Vector<ValueExpression::Instance>> groups;
+  ScratchMemory scratch;
+
+  try {
+    accumulate(&groups, &scratch, context);
+    getResult(&groups, fn);
+  } catch (...) {
+    freeResult(&groups);
+    throw;
+  }
+
+  freeResult(&groups);
 }
 
 void GroupBy::accumulate(
+    HashMap<String, Vector<ValueExpression::Instance>>* groups,
+    ScratchMemory* scratch,
     ExecutionContext* context) {
   source_->execute(
       context,
       std::bind(
           &GroupBy::nextRow,
           this,
+          groups,
+          scratch,
           std::placeholders::_1,
           std::placeholders::_2));
 }
 
 void GroupBy::getResult(
+    HashMap<String, Vector<ValueExpression::Instance>>* groups,
     Function<bool (int argc, const SValue* argv)> fn) {
   Vector<SValue> out_row(select_exprs_.size(), SValue{});
-  for (auto& group : groups_) {
+  for (auto& group : *groups) {
     for (size_t i = 0; i < select_exprs_.size(); ++i) {
       select_exprs_[i]->result(&group.second[i], &out_row[i]);
     }
@@ -61,17 +68,29 @@ void GroupBy::getResult(
   }
 }
 
-bool GroupBy::nextRow(int row_len, const SValue* row) {
-  Vector<SValue> groups(group_exprs_.size(), SValue{});
+void GroupBy::freeResult(
+    HashMap<String, Vector<ValueExpression::Instance>>* groups) {
+  for (auto& group : (*groups)) {
+    for (size_t i = 0; i < select_exprs_.size(); ++i) {
+      select_exprs_[i]->freeInstance(&group.second[i]);
+    }
+  }
+}
+
+bool GroupBy::nextRow(
+    HashMap<String, Vector<ValueExpression::Instance>>* groups,
+    ScratchMemory* scratch,
+    int row_len, const SValue* row) {
+  Vector<SValue> gkey(group_exprs_.size(), SValue{});
   for (size_t i = 0; i < group_exprs_.size(); ++i) {
-    group_exprs_[i]->evaluate(row_len, row, &groups[i]);
+    group_exprs_[i]->evaluate(row_len, row, &gkey[i]);
   }
 
-  auto group_key = SValue::makeUniqueKey(groups.data(), groups.size());
-  auto& group = groups_[group_key];
+  auto group_key = SValue::makeUniqueKey(gkey.data(), gkey.size());
+  auto& group = (*groups)[group_key];
   if (group.size() == 0) {
     for (const auto& e : select_exprs_) {
-      group.emplace_back(e->allocInstance(&scratch_));
+      group.emplace_back(e->allocInstance(scratch));
     }
   }
 
