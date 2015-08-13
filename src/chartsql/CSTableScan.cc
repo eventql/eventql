@@ -392,6 +392,14 @@ size_t CSTableScan::numColumns() const {
   return column_names_.size();
 }
 
+Option<SHA1Hash> CSTableScan::cacheKey() const {
+  return cache_key_;
+}
+
+void CSTableScan::setCacheKey(const SHA1Hash& key) {
+  cache_key_ = Some(key);
+}
+
 CSTableScan::ColumnRef::ColumnRef(
     RefPtr<cstable::ColumnReader> r,
     size_t i) :
