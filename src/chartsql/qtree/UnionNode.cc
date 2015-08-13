@@ -39,4 +39,15 @@ RefPtr<QueryTreeNode> UnionNode::deepCopy() const {
   return new UnionNode(*this);
 }
 
+String UnionNode::toString() const {
+  String str = "(union";
+
+  for (const auto& tbl : tables_) {
+    str += " (subexpr " + tbl->toString() + ")";
+  }
+
+  str += ")";
+  return str;
+}
+
 } // namespace csql
