@@ -31,7 +31,7 @@ public:
   typedef bool BoolType;
   typedef stx::UnixTime TimeType;
 
-  enum kSValueType {
+  enum kSValueType : uint8_t {
     T_NULL = 0,
     T_STRING = 1,
     T_FLOAT = 2,
