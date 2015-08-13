@@ -86,4 +86,15 @@ RefPtr<QueryTreeNode> DrawStatementNode::deepCopy() const {
   return new DrawStatementNode(*this);
 }
 
+String DrawStatementNode::toString() const {
+  String str = "(draw";
+
+  for (const auto& tbl : tables_) {
+    str += " (subexpr " + tbl->toString() + ")";
+  }
+
+  str += ")";
+  return str;
+}
+
 } // namespace csql
