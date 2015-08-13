@@ -66,8 +66,12 @@ public:
       const SValue* argv) const;
 
   void result(
-      Instance* instance,
+      const Instance* instance,
       SValue* out) const;
+
+  void merge(
+      Instance* dst,
+      const Instance* src) const;
 
   void reset(Instance* instance) const;
 

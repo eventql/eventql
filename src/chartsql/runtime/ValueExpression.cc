@@ -60,10 +60,10 @@ void ValueExpression::reset(Instance* instance) const {
 }
 
 void ValueExpression::result(
-    Instance* instance,
+    const Instance* instance,
     SValue* out) const {
   if (has_aggregate_) {
-    return evaluate(instance, entry_, 0, nullptr, out);
+    return evaluate(const_cast<Instance*>(instance), entry_, 0, nullptr, out);
   } else {
     *out = *((SValue*) instance->scratch);
   }
