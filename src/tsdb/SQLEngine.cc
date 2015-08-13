@@ -21,13 +21,11 @@ RefPtr<csql::QueryTreeNode> SQLEngine::rewriteQuery(
     CSTableIndex* cstable_index,
     const String& tsdb_namespace,
     RefPtr<csql::QueryTreeNode> query) {
-  iputs("pre rewrite: $0", query->toString());
   insertPartitionSubqueries(
       partition_map,
       cstable_index,
       tsdb_namespace,
       &query);
-  iputs("post rewrite: $0", query->toString());
   return query;
 }
 
