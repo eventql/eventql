@@ -9,6 +9,7 @@
  */
 #pragma once
 #include <stx/stdtypes.h>
+#include <stx/SHA1.h>
 #include <chartsql/runtime/TableExpression.h>
 #include <chartsql/runtime/defaultruntime.h>
 
@@ -43,7 +44,8 @@ public:
       ScopedPtr<TableExpression> source,
       const Vector<String>& column_names,
       Vector<ScopedPtr<ValueExpression>> select_expressions,
-      Vector<ScopedPtr<ValueExpression>> group_expressions);
+      Vector<ScopedPtr<ValueExpression>> group_expressions,
+      SHA1Hash qtree_fingerprint);
 
   void execute(
       ExecutionContext* context,
@@ -70,6 +72,8 @@ public:
 
   size_t numColumns() const override;
 
+  Option<SHA1Hash> cacheKey() const override;
+
 protected:
 
   bool nextRow(
@@ -82,6 +86,7 @@ protected:
   Vector<String> column_names_;
   Vector<ScopedPtr<ValueExpression>> select_exprs_;
   Vector<ScopedPtr<ValueExpression>> group_exprs_;
+  SHA1Hash qtree_fingerprint_;
 };
 
 }

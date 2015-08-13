@@ -10,6 +10,7 @@
 #pragma once
 #include <stx/stdtypes.h>
 #include <stx/autoref.h>
+#include <stx/SHA1.h>
 #include <chartsql/svalue.h>
 #include <chartsql/runtime/ExecutionContext.h>
 #include <chartsql/runtime/Statement.h>
@@ -31,6 +32,9 @@ public:
       ExecutionContext* context,
       Function<bool (int argc, const SValue* argv)> fn) = 0;
 
+  virtual Option<SHA1Hash> cacheKey() const {
+    return None<SHA1Hash>();
+  }
 
 };
 
