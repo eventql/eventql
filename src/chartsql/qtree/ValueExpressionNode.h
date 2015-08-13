@@ -23,7 +23,7 @@ public:
   virtual String toSQL() const = 0;
 
   virtual String toString() const override {
-    return toSQL();
+    return StringUtil::format("(expr $0)", toSQL());
   }
 
 };
