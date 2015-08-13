@@ -12,6 +12,8 @@
 #include <string>
 #include <string.h>
 #include <vector>
+#include <stx/io/InputStream.h>
+#include <stx/io/OutputStream.h>
 #include <stx/stdtypes.h>
 #include <stx/UnixTime.h>
 #include <stx/exception.h>
@@ -69,6 +71,9 @@ public:
   std::string toString() const;
   bool tryNumericConversion();
   bool tryTimeConversion();
+
+  void encode(OutputStream* os) const;
+  void decode(InputStream* is);
 
   String toSQL() const;
 

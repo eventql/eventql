@@ -111,6 +111,16 @@ protected:
       Instance* dst,
       const Instance* src) const;
 
+  void saveInstance(
+      Instruction* e,
+      const Instance* instance,
+      OutputStream* os) const;
+
+  void loadInstance(
+      Instruction* e,
+      Instance* instance,
+      InputStream* is) const;
+
   Instruction* entry_;
   ScratchMemory static_storage_;
   size_t dynamic_storage_size_;
