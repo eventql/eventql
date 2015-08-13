@@ -37,4 +37,16 @@ void SelectListNode::setAlias(const String& alias) {
   alias_ = Some(alias);
 }
 
+String SelectListNode::toString() const {
+  String str = "(column-ref ";
+  str += expr_->toString();
+
+  if (!alias_.isEmpty()) {
+    str += StringUtil::format(" (alias $0)", alias_.get());
+  }
+
+  str += ")";
+  return str;
+}
+
 } // namespace csql
