@@ -87,6 +87,32 @@ void ValueExpression::evaluate(
   return evaluate(nullptr, entry_, argc, argv, out);
 }
 
+void ValueExpression::merge(
+    Instance* dst,
+    const Instance* src) const {
+  mergeInstance(entry_, dst, src);
+}
+
+void ValueExpression::mergeInstance(
+    Instruction* e,
+    Instance* dst,
+    const Instance* src) const {
+  switch (e->type) {
+    case X_CALL_AGGREGATE:
+      e->vtable.t_aggregate.merge(
+          (char *) dst->scratch + (size_t) e->arg0,
+          (char *) src->scratch + (size_t) e->arg0);
+      break;
+
+    default:
+      break;
+  }
+
+  for (auto cur = e->child; cur != nullptr; cur = cur->next) {
+    mergeInstance(cur, dst, src);
+  }
+}
+
 void ValueExpression::initInstance(Instruction* e, Instance* instance) const {
   switch (e->type) {
     case X_CALL_AGGREGATE:

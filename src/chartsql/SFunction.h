@@ -42,6 +42,7 @@ struct AggregateFunction {
   void (*reset)(void* scratch);
   void (*init)(void* scratch);
   void (*free)(void* scratch);
+  void (*merge)(void* scratch, const void* other);
 };
 
 struct SFunction {
