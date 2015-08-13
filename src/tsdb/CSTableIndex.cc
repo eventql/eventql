@@ -23,7 +23,10 @@ using namespace stx;
 
 namespace tsdb {
 
-CSTableIndex::CSTableIndex(PartitionMap* pmap) :
+CSTableIndex::CSTableIndex(
+    PartitionMap* pmap,
+    size_t nthreads) :
+    nthreads_(nthreads),
     queue_([] (
         const Pair<uint64_t, RefPtr<Partition>>& a,
         const Pair<uint64_t, RefPtr<Partition>>& b) {

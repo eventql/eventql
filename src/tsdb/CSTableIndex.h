@@ -20,7 +20,7 @@ namespace tsdb {
 class CSTableIndex {
 public:
 
-  CSTableIndex(PartitionMap* pmap);
+  CSTableIndex(PartitionMap* pmap, size_t nthreads);
   ~CSTableIndex();
 
   void enqueuePartition(RefPtr<Partition> partition);
@@ -36,6 +36,7 @@ protected:
   void stop();
   void work();
 
+  size_t nthreads_;
   Set<SHA1Hash> waitset_;
   std::multiset<
       Pair<uint64_t, RefPtr<Partition>>,
