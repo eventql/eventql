@@ -52,4 +52,21 @@ RefPtr<QueryTreeNode> GroupByNode::deepCopy() const {
       table_->deepCopyAs<QueryTreeNode>());
 }
 
+String GroupByNode::toString() const {
+  String str = "(group-by (select-list";
+
+  for (const auto& e : select_list_) {
+    str += " " + e->toString();
+  }
+
+  str += ") (group-list";
+  for (const auto& e : group_exprs_) {
+    str += " " + e->toString();
+  }
+
+  str += ") (subexpr " + table_->toString() + "))";
+
+  return str;
+}
+
 } // namespace csql
