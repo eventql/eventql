@@ -9,6 +9,8 @@
  */
 #pragma once
 #include <stx/stdtypes.h>
+#include <stx/io/InputStream.h>
+#include <stx/io/OutputStream.h>
 #include <chartsql/svalue.h>
 #include <chartsql/SFunction.h>
 #include <chartsql/runtime/ScratchMemory.h>
@@ -74,6 +76,14 @@ public:
       const Instance* src) const;
 
   void reset(Instance* instance) const;
+
+  void saveState(
+      const Instance* instance,
+      OutputStream* os) const;
+
+  void loadState(
+      Instance* instance,
+      InputStream* os) const;
 
 protected:
 

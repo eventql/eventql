@@ -76,6 +76,10 @@ public:
 
 protected:
 
+  void encode(
+      const HashMap<String, Vector<ValueExpression::Instance>>* groups,
+      OutputStream* os) const;
+
   bool nextRow(
       HashMap<String, Vector<ValueExpression::Instance>>* groups,
       ScratchMemory* scratch,
