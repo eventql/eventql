@@ -10,9 +10,11 @@
 #pragma once
 #include <stdlib.h>
 #include <vector>
+#include <chartsql/runtime/ScratchMemory.h>
 
 namespace csql {
 class SValue;
+class ScratchMemory;
 
 class VM {
 public:

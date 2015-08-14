@@ -13,6 +13,7 @@
 #include <chartsql/runtime/ValueExpressionBuilder.h>
 #include <chartsql/runtime/TableExpressionBuilder.h>
 #include <chartsql/runtime/charts/ChartStatement.h>
+#include <chartsql/runtime/ValueExpression.h>
 
 using namespace stx;
 
