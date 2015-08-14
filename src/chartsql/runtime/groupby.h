@@ -43,8 +43,8 @@ public:
   GroupBy(
       ScopedPtr<TableExpression> source,
       const Vector<String>& column_names,
-      Vector<ScopedPtr<ValueExpression>> select_expressions,
-      Vector<ScopedPtr<ValueExpression>> group_expressions,
+      Vector<ValueExpression> select_expressions,
+      Vector<ValueExpression> group_expressions,
       SHA1Hash qtree_fingerprint);
 
   void execute(
@@ -93,8 +93,8 @@ protected:
 
   ScopedPtr<TableExpression> source_;
   Vector<String> column_names_;
-  Vector<ScopedPtr<ValueExpression>> select_exprs_;
-  Vector<ScopedPtr<ValueExpression>> group_exprs_;
+  Vector<ValueExpression> select_exprs_;
+  Vector<ValueExpression> group_exprs_;
   SHA1Hash qtree_fingerprint_;
 };
 

@@ -24,7 +24,7 @@ VM::Instruction* ValueExpressionBuilder::compile(ASTNode* ast, size_t* dynamic_s
   RAISE(kNotImplementedError, "deprecated");
 }
 
-ScopedPtr<ValueExpression> ValueExpressionBuilder::compile(
+ValueExpression ValueExpressionBuilder::compile(
     RefPtr<ValueExpressionNode> node) {
   ScratchMemory static_storage;
   size_t dynamic_storage_size = 0;
@@ -34,13 +34,12 @@ ScopedPtr<ValueExpression> ValueExpressionBuilder::compile(
       &dynamic_storage_size,
       &static_storage);
 
-  return mkScoped(
-      new ValueExpression(
-          mkScoped(
-              new VM::Program(
-                  expr,
-                  std::move(static_storage),
-                  dynamic_storage_size))));
+  return ValueExpression(
+      mkScoped(
+          new VM::Program(
+              expr,
+              std::move(static_storage),
+              dynamic_storage_size)));
 }
 
 VM::Instruction* ValueExpressionBuilder::compileValueExpression(

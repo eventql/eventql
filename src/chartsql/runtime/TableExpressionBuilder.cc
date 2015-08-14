@@ -84,8 +84,8 @@ ScopedPtr<TableExpression> TableExpressionBuilder::buildGroupBy(
     QueryBuilder* runtime,
     TableProvider* tables) {
   Vector<String> column_names;
-  Vector<ScopedPtr<ValueExpression>> select_expressions;
-  Vector<ScopedPtr<ValueExpression>> group_expressions;
+  Vector<ValueExpression> select_expressions;
+  Vector<ValueExpression> group_expressions;
 
   for (const auto& slnode : node->selectList()) {
     column_names.emplace_back(slnode->columnName());
@@ -184,7 +184,7 @@ ScopedPtr<TableExpression> TableExpressionBuilder::buildSelectExpression(
     QueryBuilder* runtime,
     TableProvider* tables) {
   Vector<String> column_names;
-  Vector<ScopedPtr<ValueExpression>> select_expressions;
+  Vector<ValueExpression> select_expressions;
 
   for (const auto& slnode : node->selectList()) {
     column_names.emplace_back(slnode->columnName());

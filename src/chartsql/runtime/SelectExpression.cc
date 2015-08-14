@@ -13,7 +13,7 @@ namespace csql {
 
 SelectExpression::SelectExpression(
     const Vector<String>& column_names,
-    Vector<ScopedPtr<ValueExpression>> select_expressions) :
+    Vector<ValueExpression> select_expressions) :
     column_names_(column_names),
     select_exprs_(std::move(select_expressions)) {}
 
@@ -23,7 +23,7 @@ void SelectExpression::execute(
   Vector<SValue> out_row(select_exprs_.size(), SValue{});
 
   for (int i = 0; i < select_exprs_.size(); ++i) {
-    VM::evaluate(select_exprs_[i]->program(), 0, nullptr,  &out_row[i]);
+    VM::evaluate(select_exprs_[i].program(), 0, nullptr,  &out_row[i]);
   }
 
   fn(out_row.size(), out_row.data());

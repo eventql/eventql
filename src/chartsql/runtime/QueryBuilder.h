@@ -26,7 +26,7 @@ public:
       RefPtr<ValueExpressionBuilder> scalar_exp_builder,
       RefPtr<TableExpressionBuilder> table_exp_builder);
 
-  ScopedPtr<ValueExpression> buildValueExpression(
+  ValueExpression buildValueExpression(
       RefPtr<ValueExpressionNode> expression);
 
   ScopedPtr<TableExpression> buildTableExpression(
