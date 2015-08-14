@@ -134,7 +134,7 @@ protected:
       Instance* instance);
 
   static void initProgram(
-      const Program* program,
+      Program* program,
       Instruction* e);
 
   static void freeProgram(
