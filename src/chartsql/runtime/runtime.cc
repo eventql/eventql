@@ -114,6 +114,10 @@ RefPtr<QueryBuilder> Runtime::queryBuilder() const {
   return query_builder_;
 }
 
+RefPtr<QueryPlanBuilder> Runtime::queryPlanBuilder() const {
+  return query_plan_builder_;
+}
+
 TaskScheduler* Runtime::scheduler() {
   return &tpool_;
 }
