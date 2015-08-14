@@ -37,7 +37,7 @@ ScopedPtr<ValueExpression> ValueExpressionBuilder::compile(
   return mkScoped(
       new ValueExpression(
           mkScoped(
-              new Program(
+              new VM::Program(
                   expr,
                   std::move(static_storage),
                   dynamic_storage_size)));
@@ -82,7 +82,7 @@ VM::Instruction* ValueExpressionBuilder::compileLiteral(
     size_t* dynamic_storage_size,
     ScratchMemory* static_storage) {
   auto ins = static_storage->construct<VM::Instruction>();
-  ins->type = X_LITERAL;
+  ins->type = VM::X_LITERAL;
   ins->arg0 = static_storage->construct<SValue>(node->value());
   ins->child = nullptr;
   ins->next  = nullptr;
@@ -97,14 +97,14 @@ VM::Instruction* ValueExpressionBuilder::compileColumnReference(
 
   if (col_idx == size_t(-1)) {
     auto ins = static_storage->construct<VM::Instruction>();
-    ins->type = X_LITERAL;
+    ins->type = VM::X_LITERAL;
     ins->arg0 = static_storage->construct<SValue>();
     ins->child = nullptr;
     ins->next  = nullptr;
     return ins;
   } else {
     auto ins = static_storage->construct<VM::Instruction>();
-    ins->type = X_INPUT;
+    ins->type = VM::X_INPUT;
     ins->arg0 = (void *) col_idx;
     ins->argn = 0;
     ins->child = nullptr;
@@ -128,11 +128,11 @@ VM::Instruction* ValueExpressionBuilder::compileMethodCall(
 
   switch (symbol.type) {
     case FN_PURE:
-      op->type = X_CALL_PURE;
+      op->type = VM::X_CALL_PURE;
       op->vtable.t_pure = symbol.vtable.t_pure;
       break;
     case FN_AGGREGATE:
-      op->type = X_CALL_AGGREGATE;
+      op->type = VM::X_CALL_AGGREGATE;
       op->arg0 = (void *) *dynamic_storage_size;
       op->vtable.t_aggregate = symbol.vtable.t_aggregate;
       *dynamic_storage_size += symbol.vtable.t_aggregate.scratch_size;
@@ -160,7 +160,7 @@ VM::Instruction* ValueExpressionBuilder::compileIfStatement(
   const auto& args = node->arguments();
 
   auto op = static_storage->construct<VM::Instruction>();
-  op->type = X_IF;
+  op->type = VM::X_IF;
   op->arg0  = nullptr;
   op->argn  = args.size();
   op->child = nullptr;
