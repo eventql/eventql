@@ -18,4 +18,8 @@ ValueExpression::ValueExpression(
     ScopedPtr<VM::Program> program) :
     program_(std::move(program)) {}
 
+VM::Program* ValueExpression::program() const {
+  return program_.get();
+}
+
 }
