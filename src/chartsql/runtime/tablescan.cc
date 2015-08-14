@@ -28,30 +28,31 @@ void TableScan::execute() {
 }
 
 bool TableScan::nextRow(SValue* row, int row_len) {
-  auto pred_bool = true;
-  auto continue_bool = true;
+  RAISE(kNotImplementedError);
+  //auto pred_bool = true;
+  //auto continue_bool = true;
 
-  SValue out[128]; // FIXPAUL
-  int out_len;
+  //SValue out[128]; // FIXPAUL
+  //int out_len;
 
-  if (where_expr_ != nullptr) {
-    executeExpression(where_expr_, nullptr, row_len, row, &out_len, out);
+  //if (where_expr_ != nullptr) {
+  //  executeExpression(where_expr_, nullptr, row_len, row, &out_len, out);
 
-    if (out_len != 1) {
-      RAISE(
-          kRuntimeError,
-          "WHERE predicate expression evaluation did not return a result");
-    }
+  //  if (out_len != 1) {
+  //    RAISE(
+  //        kRuntimeError,
+  //        "WHERE predicate expression evaluation did not return a result");
+  //  }
 
-    pred_bool = out[0].getBool();
-  }
+  //  pred_bool = out[0].getBool();
+  //}
 
-  if (pred_bool) {
-    executeExpression(select_expr_, nullptr, row_len, row, &out_len, out);
-    continue_bool = emitRow(out, out_len);
-  }
+  //if (pred_bool) {
+  //  executeExpression(select_expr_, nullptr, row_len, row, &out_len, out);
+  //  continue_bool = emitRow(out, out_len);
+  //}
 
-  return continue_bool;
+  //return continue_bool;
 }
 
 size_t TableScan::getNumCols() const {
