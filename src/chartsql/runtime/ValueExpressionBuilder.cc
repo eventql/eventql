@@ -40,7 +40,7 @@ ScopedPtr<ValueExpression> ValueExpressionBuilder::compile(
               new VM::Program(
                   expr,
                   std::move(static_storage),
-                  dynamic_storage_size)));
+                  dynamic_storage_size))));
 }
 
 VM::Instruction* ValueExpressionBuilder::compileValueExpression(
