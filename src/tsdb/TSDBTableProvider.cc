@@ -71,7 +71,11 @@ Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildSequentialScan(
           cstable.get(),
           runtime));
 
-  scan->setCacheKey(SHA1::compute(snap->state.cstable_version()));
+  auto cstable_version = reader->cstableVersion();
+  if (!cstable_version.isEmpty()) {
+    scan->setCacheKey(cstable_version.get());
+  }
+
   return Option<ScopedPtr<csql::TableExpression>>(std::move(scan));
 }
 

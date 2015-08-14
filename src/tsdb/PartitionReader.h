@@ -25,6 +25,7 @@ public:
 
   Option<RefPtr<VFSFile>> fetchCSTable() const;
   Option<String> fetchCSTableFilename() const;
+  Option<SHA1Hash> cstableVersion() const;
 
   void fetchRecords(
       size_t offset,

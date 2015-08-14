@@ -156,5 +156,20 @@ Option<String> PartitionReader::cstableFilename() const {
   }
 }
 
+Option<SHA1Hash> PartitionReader::cstableVersion() const {
+  auto metapath = FileUtil::joinPaths(snap_->base_path, "_cstable_state");
+
+  if (FileUtil::exists(metapath)) {
+    return Some(SHA1::compute(FileUtil::read(metapath)));
+  }
+
+  if (snap_->state.has_cstable_version()) {
+    return Some(
+        SHA1::compute(StringUtil::toString(snap_->state.cstable_version())));
+  }
+
+  return None<SHA1Hash>();
+}
+
 } // namespace tdsb
 
