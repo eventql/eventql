@@ -56,48 +56,49 @@ void GroupOverTimewindow::execute() {
 }
 
 bool GroupOverTimewindow::nextRow(SValue* row, int row_len) {
-  SValue out[128]; // FIXPAUL
-  int out_len;
+  RAISE(kNotImplementedError);
+  //SValue out[128]; // FIXPAUL
+  //int out_len;
 
-  /* execute group expression */
-  if (group_expr_ != nullptr) {
-    executeExpression(group_expr_, nullptr, row_len, row, &out_len, out);
-  }
+  ///* execute group expression */
+  //if (group_expr_ != nullptr) {
+  //  executeExpression(group_expr_, nullptr, row_len, row, &out_len, out);
+  //}
 
-  /* stringify expression results into group key */
-  auto key_str = SValue::makeUniqueKey(out, out_len);
+  ///* stringify expression results into group key */
+  //auto key_str = SValue::makeUniqueKey(out, out_len);
 
-  /* get group */
-  Group* group = nullptr;
+  ///* get group */
+  //Group* group = nullptr;
 
-  auto group_iter = groups_.find(key_str);
-  if (group_iter == groups_.end()) {
-    group = &groups_[key_str];
-  } else {
-    group = &group_iter->second;
-  }
+  //auto group_iter = groups_.find(key_str);
+  //if (group_iter == groups_.end()) {
+  //  group = &groups_[key_str];
+  //} else {
+  //  group = &group_iter->second;
+  //}
 
-  /* execute time expression */
-  executeExpression(time_expr_, nullptr, row_len, row, &out_len, out);
-  if (out_len != 1) {
-    RAISE(
-        kRuntimeError,
-        "time_expr in GROUP OVER TIMEWINDOW clause must return exactly one"
-        " value, got %i",
-        (int) out_len);
-  }
+  ///* execute time expression */
+  //executeExpression(time_expr_, nullptr, row_len, row, &out_len, out);
+  //if (out_len != 1) {
+  //  RAISE(
+  //      kRuntimeError,
+  //      "time_expr in GROUP OVER TIMEWINDOW clause must return exactly one"
+  //      " value, got %i",
+  //      (int) out_len);
+  //}
 
-  auto time = static_cast<uint64_t>(out[0].getTimestamp());
+  //auto time = static_cast<uint64_t>(out[0].getTimestamp());
 
-  /* add row to group */
-  std::vector<SValue> row_vec;
-  for (int i = 0; i < row_len; i++) {
-    row_vec.push_back(row[i]);
-  }
+  ///* add row to group */
+  //std::vector<SValue> row_vec;
+  //for (int i = 0; i < row_len; i++) {
+  //  row_vec.push_back(row[i]);
+  //}
 
-  group->rows.emplace_back(time, row_vec);
+  //group->rows.emplace_back(time, row_vec);
 
-  return true;
+  //return true;
 }
 
 void GroupOverTimewindow::emitGroup(Group* group) {
@@ -153,38 +154,39 @@ void GroupOverTimewindow::emitWindow(
     std::vector<std::pair<uint64_t, std::vector<SValue>>>::iterator
         window_end) {
 
-  SValue out[128]; // FIXPAUL
-  int out_len;
+  RAISE(kNotImplementedError);
+  //SValue out[128]; // FIXPAUL
+  //int out_len;
 
-  memset(scratchpad_, 0, scratchpad_size_);
+  //memset(scratchpad_, 0, scratchpad_size_);
 
-  if (window_begin == window_end) {
-    std::vector<SValue> row(input_row_size_, SValue());
-    row[input_row_time_index_] = SValue(stx::UnixTime(window_time));
+  //if (window_begin == window_end) {
+  //  std::vector<SValue> row(input_row_size_, SValue());
+  //  row[input_row_time_index_] = SValue(stx::UnixTime(window_time));
 
-    executeExpression(
-        select_expr_,
-        scratchpad_,
-        row.size(),
-        row.data(),
-        &out_len,
-        out);
-  } else {
-    for (; window_begin != window_end; window_begin++) {
-      auto& row = window_begin->second;
-      row[input_row_time_index_] = SValue(stx::UnixTime(window_time));
+  //  executeExpression(
+  //      select_expr_,
+  //      scratchpad_,
+  //      row.size(),
+  //      row.data(),
+  //      &out_len,
+  //      out);
+  //} else {
+  //  for (; window_begin != window_end; window_begin++) {
+  //    auto& row = window_begin->second;
+  //    row[input_row_time_index_] = SValue(stx::UnixTime(window_time));
 
-      executeExpression(
-          select_expr_,
-          scratchpad_,
-          row.size(),
-          row.data(),
-          &out_len,
-          out);
-    }
-  }
+  //    executeExpression(
+  //        select_expr_,
+  //        scratchpad_,
+  //        row.size(),
+  //        row.data(),
+  //        &out_len,
+  //        out);
+  //  }
+  //}
 
-  emitRow(out, out_len);
+  //emitRow(out, out_len);
 }
 
 size_t GroupOverTimewindow::getNumCols() const {

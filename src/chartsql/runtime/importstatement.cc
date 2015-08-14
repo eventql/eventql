@@ -17,20 +17,21 @@
 namespace csql {
 
 ImportStatement::ImportStatement(ASTNode* ast, ValueExpressionBuilder* compiler) {
-  if (ast->getChildren().size() < 2) {
-    RAISE(kRuntimeError, "corrupt ast: ASTNode::Import\n");
-  }
+  RAISE(kNotImplementedError);
+  //if (ast->getChildren().size() < 2) {
+  //  RAISE(kRuntimeError, "corrupt ast: ASTNode::Import\n");
+  //}
 
-  auto source_uri_sval = executeSimpleConstExpression(
-      compiler,
-      ast->getChildren().back());
+  //auto source_uri_sval = executeSimpleConstExpression(
+  //    compiler,
+  //    ast->getChildren().back());
 
-  source_uri_ = source_uri_sval.toString();
+  //source_uri_ = source_uri_sval.toString();
 
-  const auto& children = ast->getChildren();
-  for (int i = 0; i < children.size() - 1; ++i) {
-    tables_.emplace_back(children[i]->getToken()->getString());
-  }
+  //const auto& children = ast->getChildren();
+  //for (int i = 0; i < children.size() - 1; ++i) {
+  //  tables_.emplace_back(children[i]->getToken()->getString());
+  //}
 }
 
 const std::string& ImportStatement::source_uri() const {
