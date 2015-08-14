@@ -84,8 +84,8 @@ int main(int argc, const char** argv) {
   sched.start();
 
   TSDBTableScanSpec params;
-  params.set_stream_key("joined_sessions.dawanda");
-  params.set_partition_key("am9pbmVkX3Nlc3Npb25zLmRhd2FuZGEbgK2LqwU=");
+  params.set_table_name("joined_sessions.dawanda");
+  params.set_partition_sha1("am9pbmVkX3Nlc3Npb25zLmRhd2FuZGEbgK2LqwU=");
   params.set_sample_modulo(32);
   params.set_sample_index(1);
 
