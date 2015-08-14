@@ -10,7 +10,7 @@
 #include <chartsql/CSTableScan.h>
 #include <chartsql/qtree/ColumnReferenceNode.h>
 #include <chartsql/runtime/defaultruntime.h>
-#include <chartsql/runtime/compile.h>
+#include <chartsql/runtime/compiler.h>
 #include <stx/ieee754.h>
 #include <stx/logging.h>
 

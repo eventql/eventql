@@ -11,7 +11,7 @@
 #include <stx/stdtypes.h>
 #include <stx/protobuf/MessageSchema.h>
 #include <chartsql/qtree/SequentialScanNode.h>
-#include <chartsql/runtime/compile.h>
+#include <chartsql/runtime/compiler.h>
 #include <chartsql/runtime/defaultruntime.h>
 #include <chartsql/runtime/TableExpression.h>
 #include <cstable/CSTableReader.h>

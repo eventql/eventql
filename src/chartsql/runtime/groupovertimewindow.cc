@@ -8,8 +8,8 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <chartsql/runtime/groupovertimewindow.h>
-#include <chartsql/runtime/compile.h>
-#include <chartsql/runtime/execute.h>
+#include <chartsql/runtime/compiler.h>
+#include <chartsql/runtime/vm.h>
 
 namespace csql {
 

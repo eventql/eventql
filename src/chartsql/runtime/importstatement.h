@@ -12,7 +12,7 @@
 #include <stdlib.h>
 #include <vector>
 #include <chartsql/parser/astnode.h>
-#include <chartsql/runtime/compile.h>
+#include <chartsql/runtime/compiler.h>
 
 namespace csql {
 

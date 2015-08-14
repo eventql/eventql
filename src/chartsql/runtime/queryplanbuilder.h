@@ -13,7 +13,7 @@
 #include <chartsql/parser/token.h>
 #include <chartsql/parser/astnode.h>
 #include <chartsql/runtime/queryplan.h>
-#include <chartsql/runtime/compile.h>
+#include <chartsql/runtime/compiler.h>
 
 namespace csql {
 class QueryPlanNode;

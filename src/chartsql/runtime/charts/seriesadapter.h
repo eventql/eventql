@@ -16,8 +16,8 @@
 #include <cplot/barchart.h>
 #include <cplot/series.h>
 #include <stx/exception.h>
-#include <chartsql/runtime/compile.h>
-#include <chartsql/runtime/execute.h>
+#include <chartsql/runtime/compiler.h>
+#include <chartsql/runtime/vm.h>
 #include <chartsql/runtime/rowsink.h>
 #include <chartsql/runtime/queryplannode.h>
 
