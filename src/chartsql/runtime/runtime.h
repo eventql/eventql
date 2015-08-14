@@ -48,6 +48,7 @@ public:
   void setCacheDir(const String& cachedir);
 
   RefPtr<QueryBuilder> queryBuilder() const;
+  RefPtr<QueryPlanBuilder> queryPlanBuilder() const;
 
   TaskScheduler* scheduler();
 
