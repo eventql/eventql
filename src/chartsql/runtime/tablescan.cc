@@ -15,8 +15,8 @@ namespace csql {
 TableScan::TableScan(
     TableRef* tbl_ref,
     std::vector<std::string>&& columns,
-    Instruction* select_expr,
-    Instruction* where_expr):
+    VM::Instruction* select_expr,
+    VM::Instruction* where_expr):
     tbl_ref_(tbl_ref),
     columns_(std::move(columns)),
     select_expr_(select_expr),
