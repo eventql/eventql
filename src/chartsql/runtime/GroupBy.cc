@@ -28,7 +28,7 @@ GroupBy::GroupBy(
 void GroupBy::execute(
     ExecutionContext* context,
     Function<bool (int argc, const SValue* argv)> fn) {
-  HashMap<String, Vector<ValueExpression::Instance>> groups;
+  HashMap<String, Vector<VM::Instance >> groups;
   ScratchMemory scratch;
 
   try {
@@ -43,7 +43,7 @@ void GroupBy::execute(
 }
 
 void GroupBy::accumulate(
-    HashMap<String, Vector<ValueExpression::Instance>>* groups,
+    HashMap<String, Vector<VM::Instance >>* groups,
     ScratchMemory* scratch,
     ExecutionContext* context) {
   auto cache_key = cacheKey();
@@ -86,7 +86,7 @@ void GroupBy::accumulate(
 }
 
 void GroupBy::getResult(
-    const HashMap<String, Vector<ValueExpression::Instance>>* groups,
+    const HashMap<String, Vector<VM::Instance >>* groups,
     Function<bool (int argc, const SValue* argv)> fn) {
   Vector<SValue> out_row(select_exprs_.size(), SValue{});
   for (auto& group : *groups) {
@@ -101,7 +101,7 @@ void GroupBy::getResult(
 }
 
 void GroupBy::freeResult(
-    HashMap<String, Vector<ValueExpression::Instance>>* groups) {
+    HashMap<String, Vector<VM::Instance >>* groups) {
   for (auto& group : (*groups)) {
     for (size_t i = 0; i < select_exprs_.size(); ++i) {
       select_exprs_[i]->freeInstance(&group.second[i]);
@@ -110,8 +110,8 @@ void GroupBy::freeResult(
 }
 
 void GroupBy::mergeResult(
-    const HashMap<String, Vector<ValueExpression::Instance>>* src,
-    HashMap<String, Vector<ValueExpression::Instance>>* dst,
+    const HashMap<String, Vector<VM::Instance >>* src,
+    HashMap<String, Vector<VM::Instance >>* dst,
     ScratchMemory* scratch) {
   for (const auto& src_group : *src) {
     auto& dst_group = (*dst)[src_group.first];
@@ -128,7 +128,7 @@ void GroupBy::mergeResult(
 }
 
 bool GroupBy::nextRow(
-    HashMap<String, Vector<ValueExpression::Instance>>* groups,
+    HashMap<String, Vector<VM::Instance >>* groups,
     ScratchMemory* scratch,
     int row_len, const SValue* row) {
   Vector<SValue> gkey(group_exprs_.size(), SValue{});
@@ -160,7 +160,7 @@ size_t GroupBy::numColumns() const {
 }
 
 void GroupBy::encode(
-    const HashMap<String, Vector<ValueExpression::Instance>>* groups,
+    const HashMap<String, Vector<VM::Instance >>* groups,
     OutputStream* os) const {
   os->appendVarUInt(groups->size());
   os->appendVarUInt(select_exprs_.size());
@@ -175,7 +175,7 @@ void GroupBy::encode(
 }
 
 bool GroupBy::decode(
-    HashMap<String, Vector<ValueExpression::Instance>>* groups,
+    HashMap<String, Vector<VM::Instance >>* groups,
     ScratchMemory* scratch,
     InputStream* is) const {
   auto ngroups = is->readVarUInt();

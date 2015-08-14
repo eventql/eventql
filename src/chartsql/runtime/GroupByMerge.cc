@@ -40,7 +40,7 @@ GroupByMerge::GroupByMerge(
 void GroupByMerge::execute(
     ExecutionContext* context,
     Function<bool (int argc, const SValue* argv)> fn) {
-  HashMap<String, Vector<ValueExpression::Instance>> groups;
+  HashMap<String, Vector<VM::Instance >> groups;
   ScratchMemory scratch;
   std::mutex mutex;
   std::condition_variable cv;
@@ -59,7 +59,7 @@ void GroupByMerge::execute(
         &cv,
         &sem,
         &error] {
-      HashMap<String, Vector<ValueExpression::Instance>> tgroups;
+      HashMap<String, Vector<VM::Instance >> tgroups;
       ScratchMemory tscratch;
       bool terror = false;
 
