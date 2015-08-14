@@ -119,6 +119,32 @@ void sumExprReset(void* scratchpad) {
   memset(scratchpad, 0, sizeof(sum_expr_scratchpad));
 }
 
+void sumExprMerge(void* scratchpad, const void* other) {
+  auto this_data = (sum_expr_scratchpad*) scratchpad;
+  auto other_data = (const sum_expr_scratchpad*) other;
+
+  if (this_data->type == SValue::T_INTEGER &&
+      other_data->type == SValue::T_INTEGER) {
+    this_data->type = SValue::T_INTEGER;
+  } else {
+    this_data->type = SValue::T_FLOAT;
+  }
+
+  this_data->val += other_data->val;
+}
+
+void sumExprSave(void* scratchpad, OutputStream* os) {
+  auto data = (sum_expr_scratchpad*) scratchpad;
+  os->appendVarUInt(data->type);
+  os->appendDouble(data->val);
+}
+
+void sumExprLoad(void* scratchpad, InputStream* is) {
+  auto data = (sum_expr_scratchpad*) scratchpad;
+  data->type = (SValue::kSValueType) is->readVarUInt();
+  data->val = is->readDouble();
+}
+
 const AggregateFunction kSumExpr {
   .scratch_size = sizeof(sum_expr_scratchpad),
   .accumulate = &sumExprAcc,
@@ -126,6 +152,9 @@ const AggregateFunction kSumExpr {
   .reset = &sumExprReset,
   .init = &sumExprReset,
   .free = nullptr,
+  .merge = &sumExprMerge,
+  .savestate = &sumExprSave,
+  .loadstate = &sumExprLoad
 };
 
 /**
