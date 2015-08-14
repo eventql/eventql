@@ -75,6 +75,7 @@ add_library(chartsql STATIC
     runtime/ShowTablesStatement.cc
     runtime/DescribeTableStatement.cc
     runtime/vm.cc
+    runtime/compiler.cc
     runtime/ExecutionContext.cc
     runtime/ExecutionStrategy.cc
     runtime/TableExpression.cc
