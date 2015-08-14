@@ -23,7 +23,7 @@ void SelectExpression::execute(
   Vector<SValue> out_row(select_exprs_.size(), SValue{});
 
   for (int i = 0; i < select_exprs_.size(); ++i) {
-    select_exprs_[i]->evaluate(0, nullptr,  &out_row[i]);
+    VM::evaluate(select_exprs_[i]->program(), 0, nullptr,  &out_row[i]);
   }
 
   fn(out_row.size(), out_row.data());
