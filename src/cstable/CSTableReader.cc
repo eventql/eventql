@@ -41,6 +41,8 @@ CSTableReader::CSTableReader(const RefPtr<VFSFile> file) : file_(file) {
   num_records_ = *header.readUInt64();
   num_columns_ = *header.readUInt32();
 
+  (void) flags; // make gcc happy
+
   for (int i = 0; i < num_columns_; ++i) {
     auto type = *header.readUInt32();
     auto name_len = *header.readUInt32();
