@@ -20,7 +20,7 @@ ValueExpressionBuilder::ValueExpressionBuilder(
     SymbolTable* symbol_table) :
     symbol_table_(symbol_table) {}
 
-Instruction* ValueExpressionBuilder::compile(ASTNode* ast, size_t* dynamic_storage_size) {
+VM::Instruction* ValueExpressionBuilder::compile(ASTNode* ast, size_t* dynamic_storage_size) {
   RAISE(kNotImplementedError, "deprecated");
 }
 
@@ -36,12 +36,14 @@ ScopedPtr<ValueExpression> ValueExpressionBuilder::compile(
 
   return mkScoped(
       new ValueExpression(
-          expr,
-          std::move(static_storage),
-          dynamic_storage_size));
+          mkScoped(
+              new Program(
+                  expr,
+                  std::move(static_storage),
+                  dynamic_storage_size)));
 }
 
-Instruction* ValueExpressionBuilder::compileValueExpression(
+VM::Instruction* ValueExpressionBuilder::compileValueExpression(
    RefPtr<ValueExpressionNode> node,
    size_t* dynamic_storage_size,
    ScratchMemory* static_storage) {
@@ -75,11 +77,11 @@ Instruction* ValueExpressionBuilder::compileValueExpression(
   RAISE(kRuntimeError, "internal error: can't compile expression");
 }
 
-Instruction* ValueExpressionBuilder::compileLiteral(
+VM::Instruction* ValueExpressionBuilder::compileLiteral(
     RefPtr<LiteralExpressionNode> node,
     size_t* dynamic_storage_size,
     ScratchMemory* static_storage) {
-  auto ins = static_storage->construct<Instruction>();
+  auto ins = static_storage->construct<VM::Instruction>();
   ins->type = X_LITERAL;
   ins->arg0 = static_storage->construct<SValue>(node->value());
   ins->child = nullptr;
@@ -88,20 +90,20 @@ Instruction* ValueExpressionBuilder::compileLiteral(
   return ins;
 }
 
-Instruction* ValueExpressionBuilder::compileColumnReference(
+VM::Instruction* ValueExpressionBuilder::compileColumnReference(
     RefPtr<ColumnReferenceNode> node,
     ScratchMemory* static_storage) {
   auto col_idx = node->columnIndex();
 
   if (col_idx == size_t(-1)) {
-    auto ins = static_storage->construct<Instruction>();
+    auto ins = static_storage->construct<VM::Instruction>();
     ins->type = X_LITERAL;
     ins->arg0 = static_storage->construct<SValue>();
     ins->child = nullptr;
     ins->next  = nullptr;
     return ins;
   } else {
-    auto ins = static_storage->construct<Instruction>();
+    auto ins = static_storage->construct<VM::Instruction>();
     ins->type = X_INPUT;
     ins->arg0 = (void *) col_idx;
     ins->argn = 0;
@@ -111,14 +113,14 @@ Instruction* ValueExpressionBuilder::compileColumnReference(
   }
 }
 
-Instruction* ValueExpressionBuilder::compileMethodCall(
+VM::Instruction* ValueExpressionBuilder::compileMethodCall(
     RefPtr<CallExpressionNode> node,
     size_t* dynamic_storage_size,
     ScratchMemory* static_storage) {
   auto symbol = symbol_table_->lookup(node->symbol());
   const auto& args = node->arguments();
 
-  auto op = static_storage->construct<Instruction>();
+  auto op = static_storage->construct<VM::Instruction>();
   op->arg0  = nullptr;
   op->argn  = args.size();
   op->child = nullptr;
@@ -151,13 +153,13 @@ Instruction* ValueExpressionBuilder::compileMethodCall(
   return op;
 }
 
-Instruction* ValueExpressionBuilder::compileIfStatement(
+VM::Instruction* ValueExpressionBuilder::compileIfStatement(
     RefPtr<IfExpressionNode> node,
     size_t* dynamic_storage_size,
     ScratchMemory* static_storage) {
   const auto& args = node->arguments();
 
-  auto op = static_storage->construct<Instruction>();
+  auto op = static_storage->construct<VM::Instruction>();
   op->type = X_IF;
   op->arg0  = nullptr;
   op->argn  = args.size();

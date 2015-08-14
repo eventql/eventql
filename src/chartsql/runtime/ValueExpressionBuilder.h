@@ -16,6 +16,8 @@
 #include <chartsql/qtree/IfExpressionNode.h>
 #include <chartsql/runtime/symboltable.h>
 #include <chartsql/runtime/ValueExpression.h>
+#include <chartsql/runtime/vm.h>
+#include <chartsql/runtime/ScratchMemory.h>
 #include <chartsql/svalue.h>
 
 using namespace stx;
@@ -23,12 +25,12 @@ using namespace stx;
 namespace csql {
 class ASTNode;
 
-class ValueExpressionBuilder : public RefCounted{
+class ValueExpressionBuilder : public RefCounted {
 public:
 
   ValueExpressionBuilder(SymbolTable* symbol_table);
 
-  Instruction* compile(ASTNode* ast, size_t* dynamic_storage_size);
+  VM::Instruction* compile(ASTNode* ast, size_t* dynamic_storage_size);
 
   ScopedPtr<ValueExpression> compile(RefPtr<ValueExpressionNode> node);
 
@@ -36,26 +38,26 @@ public:
 
 protected:
 
-  Instruction* compileIfStatement(
+  VM::Instruction* compileIfStatement(
       RefPtr<IfExpressionNode> node,
       size_t* dynamic_storage_size,
       ScratchMemory* static_storage);
 
-  Instruction* compileValueExpression(
+  VM::Instruction* compileValueExpression(
       RefPtr<ValueExpressionNode> node,
       size_t* dynamic_storage_size,
       ScratchMemory* static_storage);
 
-  Instruction* compileLiteral(
+  VM::Instruction* compileLiteral(
       RefPtr<LiteralExpressionNode> node,
       size_t* dynamic_storage_size,
       ScratchMemory* static_storage);
 
-  Instruction* compileColumnReference(
+  VM::Instruction* compileColumnReference(
       RefPtr<ColumnReferenceNode> node,
       ScratchMemory* static_storage);
 
-  Instruction* compileMethodCall(
+  VM::Instruction* compileMethodCall(
       RefPtr<CallExpressionNode> node,
       size_t* dynamic_storage_size,
       ScratchMemory* static_storage);
