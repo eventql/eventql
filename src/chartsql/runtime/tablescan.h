@@ -29,8 +29,8 @@ public:
   TableScan(
       TableRef* tbl_ref,
       std::vector<std::string>&& columns,
-      Instruction* select_expr,
-      Instruction* where_expr);
+      VM::Instruction* select_expr,
+      VM::Instruction* where_expr);
 
   void execute() override;
   bool nextRow(SValue* row, int row_len) override;
@@ -43,8 +43,8 @@ protected:
 
   TableRef* const tbl_ref_;
   const std::vector<std::string> columns_;
-  Instruction* const select_expr_;
-  Instruction* const where_expr_;
+  VM::Instruction* const select_expr_;
+  VM::Instruction* const where_expr_;
 };
 
 }

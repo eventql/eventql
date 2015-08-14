@@ -29,13 +29,13 @@ public:
 
   GroupOverTimewindow(
       std::vector<std::string>&& columns,
-      Instruction* time_expr,
+      VM::Instruction* time_expr,
       SValue::IntegerType window,
       SValue::IntegerType step,
       size_t input_row_size,
       size_t input_row_time_index,
-      Instruction* select_expr,
-      Instruction* group_expr,
+      VM::Instruction* select_expr,
+      VM::Instruction* group_expr,
       size_t scratchpad_size,
       QueryPlanNode* child);
 
@@ -63,13 +63,13 @@ protected:
           window_end);
 
   std::vector<std::string> columns_;
-  Instruction* time_expr_;
+  VM::Instruction* time_expr_;
   SValue::IntegerType window_;
   SValue::IntegerType step_;
   size_t input_row_size_;
   size_t input_row_time_index_;
-  Instruction* select_expr_;
-  Instruction* group_expr_;
+  VM::Instruction* select_expr_;
+  VM::Instruction* group_expr_;
   size_t scratchpad_size_;
   QueryPlanNode* child_;
   void* scratchpad_;

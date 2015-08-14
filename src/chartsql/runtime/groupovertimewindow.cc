@@ -15,13 +15,13 @@ namespace csql {
 
 GroupOverTimewindow::GroupOverTimewindow(
     std::vector<std::string>&& columns,
-    Instruction* time_expr,
+    VM::Instruction* time_expr,
     SValue::IntegerType window,
     SValue::IntegerType step,
     size_t input_row_size,
     size_t input_row_time_index,
-    Instruction* select_expr,
-    Instruction* group_expr,
+    VM::Instruction* select_expr,
+    VM::Instruction* group_expr,
     size_t scratchpad_size,
     QueryPlanNode* child) :
     time_expr_(time_expr),
