@@ -8,7 +8,9 @@ add_library(customerdirectory OBJECT
     TableDefinition.cc
     ${PROTO_SRCS})
 
+add_dependencies(customerdirectory tsdb-server)
 
 add_library(auth OBJECT
     AnalyticsAuth.cc)
 
+add_dependencies(auth customerdirectory)

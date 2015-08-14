@@ -26,9 +26,23 @@ message LogJoinConfig {
   required uint32 session_schema_next_field_id = 4;
 };
 
+message LogfileField {
+  required string name = 1;
+  required uint64 id = 2;
+  required string type = 3;
+  optional string format = 4;
+}
+
 message LogfileDefinition {
-  
+  required string name = 1;
+  required string regex = 2;
+  repeated LogfileField source_fields = 3;
+  repeated LogfileField row_fields = 4;
 };
+
+message LogfileImportConfig {
+  repeated LogfileDefinition logfiles = 1;
+}
 
 message CustomerConfig {
   required string customer = 1;
@@ -36,6 +50,6 @@ message CustomerConfig {
 
   required LogJoinConfig logjoin_config = 2;
 
-  repeated LogfileDefinition logfile_definitions = 3;
+  optional LogfileImportConfig logfile_import_config = 3;
 
 };

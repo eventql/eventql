@@ -1,11 +1,15 @@
-cmake_minimum_required(VERSION 2.8.8)
-include(FindPkgConfig)
+
 include(CheckIncludeFile)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/modules/") 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 project(cmapp)
 
 option(ENABLE_TESTS "Build unit tests [default: ON]" ON)
+
+#set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static")
+#set(CMAKE_STATIC_LINKER_FLAGS "${CMAKE_STATIC_LINKER_FLAGS} -static")
 
 set(PROTOC_ARGS --proto_path ${CMAKE_SOURCE_DIR}/3rdparty/tsdb/src)
 include(3rdparty/libstx/cmake/libstx.cmake)
@@ -54,6 +58,7 @@ add_library(hunspell OBJECT
 
 include_directories(src/)
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/src)
+
 add_subdirectory(src/common)
 add_subdirectory(src/analytics)
 add_subdirectory(src/logjoin)
