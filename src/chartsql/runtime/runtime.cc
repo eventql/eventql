@@ -110,4 +110,9 @@ void Runtime::setCacheDir(const String& cachedir) {
   cachedir_ = Some(cachedir);
 }
 
+RefPtr<QueryBuilder> Runtime::queryBuilder() const {
+  return query_builder_;
+}
+
+
 }

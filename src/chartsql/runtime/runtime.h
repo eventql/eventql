@@ -47,6 +47,8 @@ public:
   Option<String> cacheDir() const;
   void setCacheDir(const String& cachedir);
 
+  RefPtr<QueryBuilder> queryBuilder() const;
+
 protected:
   RefPtr<SymbolTable> symbol_table_;
   RefPtr<QueryBuilder> query_builder_;
