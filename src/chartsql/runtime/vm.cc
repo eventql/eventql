@@ -25,21 +25,21 @@ VM::Program::Program(
     static_storage_(std::move(static_storage)),
     dynamic_storage_size_(dynamic_storage_size),
     has_aggregate_(false) {
-  VM::initProgram(entry_);
+  VM::initProgram(this, entry_);
 }
 
 VM::Program::~Program() {
-  VM::freeProgram(entry_);
+  VM::freeProgram(this, entry_);
 }
 
 VM::Instance VM::allocInstance(
     const Program* program,
-    ScratchMemory* scratch) const {
+    ScratchMemory* scratch) {
   Instance that;
 
   if (program->has_aggregate_) {
     that.scratch = scratch->alloc(program->dynamic_storage_size_);
-    initInstance(program->entry_, &that);
+    initInstance(program, program->entry_, &that);
   } else {
     that.scratch = scratch->construct<SValue>();
   }
@@ -49,9 +49,9 @@ VM::Instance VM::allocInstance(
 
 void VM::freeInstance(
     const Program* program,
-    Instance* instance) const {
+    Instance* instance) {
   if (program->has_aggregate_) {
-    freeInstance(program->entry_, instance);
+    freeInstance(program, program->entry_, instance);
   } else {
     ((SValue*) instance->scratch)->~SValue();
   }
@@ -59,9 +59,9 @@ void VM::freeInstance(
 
 void VM::reset(
     const Program* program,
-    Instance* instance) const {
+    Instance* instance) {
   if (program->has_aggregate_) {
-    resetInstance(program->entry_, instance);
+    resetInstance(program, program->entry_, instance);
   } else {
     *((SValue*) instance->scratch) = SValue();
   }
@@ -70,9 +70,15 @@ void VM::reset(
 void VM::result(
     const Program* program,
     const Instance* instance,
-    SValue* out) const {
+    SValue* out) {
   if (program->has_aggregate_) {
-    return evaluate(const_cast<Instance*>(instance), program->entry_, 0, nullptr, out);
+    return evaluate(
+        program,
+        const_cast<Instance*>(instance),
+        program->entry_,
+        0,
+        nullptr,
+        out);
   } else {
     *out = *((SValue*) instance->scratch);
   }
@@ -82,11 +88,17 @@ void VM::accumulate(
     const Program* program,
     Instance* instance,
     int argc,
-    const SValue* argv) const {
+    const SValue* argv) {
   if (program->has_aggregate_) {
-    return accumulate(instance, program->entry_, argc, argv);
+    return accumulate(program, instance, program->entry_, argc, argv);
   } else {
-    return evaluate(nullptr, program->entry_, argc, argv, (SValue*) instance->scratch);
+    return evaluate(
+        program,
+        nullptr,
+        program->entry_,
+        argc,
+        argv,
+        (SValue*) instance->scratch);
   }
 }
 
@@ -94,16 +106,16 @@ void VM::evaluate(
     const Program* program,
     int argc,
     const SValue* argv,
-    SValue* out) const {
-  return evaluate(nullptr, program->entry_, argc, argv, out);
+    SValue* out) {
+  return evaluate(program, nullptr, program->entry_, argc, argv, out);
 }
 
 void VM::merge(
     const Program* program,
     Instance* dst,
-    const Instance* src) const {
+    const Instance* src) {
   if (program->has_aggregate_) {
-    mergeInstance(program->entry_, dst, src);
+    mergeInstance(program, program->entry_, dst, src);
   } else {
     *(SValue*) dst->scratch = *(SValue*) src->scratch;
   }
@@ -113,7 +125,7 @@ void VM::mergeInstance(
     const Program* program,
     Instruction* e,
     Instance* dst,
-    const Instance* src) const {
+    const Instance* src) {
   switch (e->type) {
     case X_CALL_AGGREGATE:
       e->vtable.t_aggregate.merge(
@@ -126,14 +138,14 @@ void VM::mergeInstance(
   }
 
   for (auto cur = e->child; cur != nullptr; cur = cur->next) {
-    mergeInstance(cur, dst, src);
+    mergeInstance(program, cur, dst, src);
   }
 }
 
 void VM::initInstance(
     const Program* program,
     Instruction* e,
-    Instance* instance) const {
+    Instance* instance) {
   switch (e->type) {
     case X_CALL_AGGREGATE:
       if (e->vtable.t_aggregate.init) {
@@ -147,14 +159,14 @@ void VM::initInstance(
   }
 
   for (auto cur = e->child; cur != nullptr; cur = cur->next) {
-    initInstance(cur, instance);
+    initInstance(program, cur, instance);
   }
 }
 
 void VM::freeInstance(
     const Program* program,
     Instruction* e,
-    Instance* instance) const {
+    Instance* instance) {
   switch (e->type) {
     case X_CALL_AGGREGATE:
       if (e->vtable.t_aggregate.free) {
@@ -168,14 +180,14 @@ void VM::freeInstance(
   }
 
   for (auto cur = e->child; cur != nullptr; cur = cur->next) {
-    freeInstance(cur, instance);
+    freeInstance(program, cur, instance);
   }
 }
 
 void VM::resetInstance(
     const Program* program,
     Instruction* e,
-    Instance* instance) const {
+    Instance* instance) {
   switch (e->type) {
     case X_CALL_AGGREGATE:
       e->vtable.t_aggregate.reset(
@@ -187,12 +199,12 @@ void VM::resetInstance(
   }
 
   for (auto cur = e->child; cur != nullptr; cur = cur->next) {
-    resetInstance(cur, instance);
+    resetInstance(program, cur, instance);
   }
 }
 
 void VM::initProgram(
-    const Program* program,
+    Program* program,
     Instruction* e) {
   switch (e->type) {
     case X_CALL_AGGREGATE:
@@ -204,13 +216,13 @@ void VM::initProgram(
   }
 
   for (auto cur = e->child; cur != nullptr; cur = cur->next) {
-    initProgram(cur);
+    initProgram(program, cur);
   }
 }
 
 void VM::freeProgram(
     const Program* program,
-    Instruction* e) const {
+    Instruction* e) {
   switch (e->type) {
     case X_LITERAL:
       ((SValue*) e->arg0)->~SValue();
@@ -221,7 +233,7 @@ void VM::freeProgram(
   }
 
   for (auto cur = e->child; cur != nullptr; cur = cur->next) {
-    freeProgram(cur);
+    freeProgram(program, cur);
   }
 }
 
@@ -231,7 +243,7 @@ void VM::evaluate(
     Instruction* expr,
     int argc,
     const SValue* argv,
-    SValue* out) const {
+    SValue* out) {
 
   /* execute expression */
   switch (expr->type) {
@@ -239,14 +251,14 @@ void VM::evaluate(
     case X_IF: {
       SValue cond;
       auto cond_expr = expr->child;
-      evaluate(instance, cond_expr, argc, argv, &cond);
+      evaluate(program, instance, cond_expr, argc, argv, &cond);
 
       auto branch = cond_expr->next;
       if (!cond.getBoolWithConversion()) {
         branch = branch->next;
       }
 
-      evaluate(instance, branch, argc, argv, out);
+      evaluate(program, instance, branch, argc, argv, out);
       return;
     }
 
@@ -262,7 +274,7 @@ void VM::evaluate(
         try {
           auto stackp = stackv;
           for (auto cur = expr->child; cur != nullptr; cur = cur->next) {
-            evaluate(instance, cur, argc, argv, stackp++);
+            evaluate(program, instance, cur, argc, argv, stackp++);
           }
 
           expr->vtable.t_pure.call(stackn, stackv, out);
@@ -319,7 +331,7 @@ void VM::accumulate(
     Instance* instance,
     Instruction* expr,
     int argc,
-    const SValue* argv) const {
+    const SValue* argv) {
 
   switch (expr->type) {
 
@@ -337,6 +349,7 @@ void VM::accumulate(
         auto stackp = stackv;
         for (auto cur = expr->child; cur != nullptr; cur = cur->next) {
           evaluate(
+              program,
               instance,
               cur,
               argc,
@@ -352,7 +365,7 @@ void VM::accumulate(
 
     default: {
       for (auto cur = expr->child; cur != nullptr; cur = cur->next) {
-        accumulate(instance, cur, argc, argv);
+        accumulate(program, instance, cur, argc, argv);
       }
 
       return;
@@ -364,9 +377,9 @@ void VM::accumulate(
 void VM::saveState(
     const Program* program,
     const Instance* instance,
-    OutputStream* os) const {
+    OutputStream* os) {
   if (program->has_aggregate_) {
-    saveInstance(program->entry_, instance, os);
+    saveInstance(program, program->entry_, instance, os);
   } else {
     ((SValue*) instance->scratch)->encode(os);
   }
@@ -375,9 +388,9 @@ void VM::saveState(
 void VM::loadState(
     const Program* program,
     Instance* instance,
-    InputStream* is) const {
+    InputStream* is) {
   if (program->has_aggregate_) {
-    loadInstance(program->entry_, instance, is);
+    loadInstance(program, program->entry_, instance, is);
   } else {
     ((SValue*) instance->scratch)->decode(is);
   }
@@ -387,7 +400,7 @@ void VM::saveInstance(
     const Program* program,
     Instruction* e,
     const Instance* instance,
-    OutputStream* os) const {
+    OutputStream* os) {
   switch (e->type) {
     case X_CALL_AGGREGATE:
       e->vtable.t_aggregate.savestate(
@@ -400,7 +413,7 @@ void VM::saveInstance(
   }
 
   for (auto cur = e->child; cur != nullptr; cur = cur->next) {
-    saveInstance(cur, instance, os);
+    saveInstance(program, cur, instance, os);
   }
 }
 
@@ -408,7 +421,7 @@ void VM::loadInstance(
     const Program* program,
     Instruction* e,
     Instance* instance,
-    InputStream* os) const {
+    InputStream* os) {
   switch (e->type) {
     case X_CALL_AGGREGATE:
       e->vtable.t_aggregate.loadstate(
@@ -421,7 +434,7 @@ void VM::loadInstance(
   }
 
   for (auto cur = e->child; cur != nullptr; cur = cur->next) {
-    loadInstance(cur, instance, os);
+    loadInstance(program, cur, instance, os);
   }
 }
 
