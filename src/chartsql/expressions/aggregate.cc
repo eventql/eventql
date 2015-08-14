@@ -160,14 +160,14 @@ const AggregateFunction kSumExpr {
 /**
  * MEAN() expression
  */
-union mean_expr_scratchpad {
+struct mean_expr_scratchpad {
   double sum;
   int count;
 };
 
-void meanExpr(void* scratchpad, int argc, SValue* argv, SValue* out) {
+void meanExprAcc(void* scratchpad, int argc, SValue* argv) {
   SValue* val = argv;
-  union mean_expr_scratchpad* data = (union mean_expr_scratchpad*) scratchpad;
+  auto data = (mean_expr_scratchpad*) scratchpad;
 
   if (argc != 1) {
     RAISE(
@@ -183,9 +183,17 @@ void meanExpr(void* scratchpad, int argc, SValue* argv, SValue* out) {
     default:
       data->sum += val->getFloat();
       data->count += 1;
-      *out = SValue(data->sum / data->count);
       return;
   }
+}
+
+void meanExprGet(void* scratchpad, SValue* out) {
+  auto data = (mean_expr_scratchpad*) scratchpad;
+  *out = SValue(data->sum / data->count);
+}
+
+void meanExprReset(void* scratchpad) {
+  memset(scratchpad, 0, sizeof(mean_expr_scratchpad));
 }
 
 void meanExprFree(void* scratchpad) {
@@ -193,8 +201,40 @@ void meanExprFree(void* scratchpad) {
 }
 
 size_t meanExprScratchpadSize() {
-  return sizeof(union mean_expr_scratchpad);
+  return sizeof(mean_expr_scratchpad);
 }
+
+void meanExprMerge(void* scratchpad, const void* other) {
+  auto this_data = (mean_expr_scratchpad*) scratchpad;
+  auto other_data = (const mean_expr_scratchpad*) other;
+
+  this_data->sum += other_data->sum;
+  this_data->count += other_data->count;
+}
+
+void meanExprSave(void* scratchpad, OutputStream* os) {
+  auto data = (mean_expr_scratchpad*) scratchpad;
+  os->appendVarUInt(data->count);
+  os->appendDouble(data->sum);
+}
+
+void meanExprLoad(void* scratchpad, InputStream* is) {
+  auto data = (mean_expr_scratchpad*) scratchpad;
+  data->count = is->readVarUInt();
+  data->sum = is->readDouble();
+}
+
+const AggregateFunction kMeanExpr {
+  .scratch_size = sizeof(mean_expr_scratchpad),
+  .accumulate = &meanExprAcc,
+  .get = &meanExprGet,
+  .reset = &meanExprReset,
+  .init = &meanExprReset,
+  .free = nullptr,
+  .merge = &meanExprMerge,
+  .savestate = &meanExprSave,
+  .loadstate = &meanExprLoad
+};
 
 /**
  * MAX() expression
