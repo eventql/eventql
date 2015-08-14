@@ -32,7 +32,7 @@ public:
 
   VM::Instruction* compile(ASTNode* ast, size_t* dynamic_storage_size);
 
-  ScopedPtr<ValueExpression> compile(RefPtr<ValueExpressionNode> node);
+  ValueExpression compile(RefPtr<ValueExpressionNode> node);
 
   SymbolTable* symbolTable() { return symbol_table_; }
 

@@ -19,7 +19,7 @@ public:
 
   SelectExpression(
       const Vector<String>& column_names,
-      Vector<ScopedPtr<ValueExpression>> select_expressions);
+      Vector<ValueExpression> select_expressions);
 
   void execute(
       ExecutionContext* context,
@@ -31,7 +31,7 @@ public:
 
 protected:
   Vector<String> column_names_;
-  Vector<ScopedPtr<ValueExpression>> select_exprs_;
+  Vector<ValueExpression> select_exprs_;
 };
 
 }

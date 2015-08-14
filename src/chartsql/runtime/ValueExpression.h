@@ -23,7 +23,11 @@ namespace csql {
 class ValueExpression {
 public:
 
+  ValueExpression();
   ValueExpression(ScopedPtr<VM::Program> program);
+  ValueExpression(ValueExpression&& move);
+
+  ValueExpression& operator=(ValueExpression&& other);
 
   VM::Program* program() const;
 

@@ -14,9 +14,20 @@ using namespace stx;
 
 namespace csql {
 
+ValueExpression::ValueExpression() : program_(nullptr) {}
+
 ValueExpression::ValueExpression(
     ScopedPtr<VM::Program> program) :
     program_(std::move(program)) {}
+
+ValueExpression::ValueExpression(
+    ValueExpression&& move) :
+    program_(std::move(move.program_)) {}
+
+ValueExpression& ValueExpression::operator=(ValueExpression&& other) {
+  program_.reset(other.program_.release());
+  return *this;
+}
 
 VM::Program* ValueExpression::program() const {
   return program_.get();

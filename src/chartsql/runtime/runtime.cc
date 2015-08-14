@@ -71,7 +71,7 @@ SValue Runtime::evaluateStaticExpression(ASTNode* expr) {
   auto compiled = query_builder_->buildValueExpression(val_expr);
 
   SValue out;
-  VM::evaluate(compiled->program(), 0, nullptr, &out);
+  VM::evaluate(compiled.program(), 0, nullptr, &out);
   return out;
 }
 
@@ -90,7 +90,7 @@ SValue Runtime::evaluateStaticExpression(const String& expr) {
   auto compiled = query_builder_->buildValueExpression(val_expr);
 
   SValue out;
-  VM::evaluate(compiled->program(), 0, nullptr, &out);
+  VM::evaluate(compiled.program(), 0, nullptr, &out);
   return out;
 }
 
@@ -98,7 +98,7 @@ SValue Runtime::evaluateStaticExpression(RefPtr<ValueExpressionNode> expr) {
   auto compiled = query_builder_->buildValueExpression(expr);
 
   SValue out;
-  VM::evaluate(compiled->program(), 0, nullptr, &out);
+  VM::evaluate(compiled.program(), 0, nullptr, &out);
   return out;
 }
 

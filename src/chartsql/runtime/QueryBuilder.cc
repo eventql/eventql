@@ -20,7 +20,7 @@ QueryBuilder::QueryBuilder(
     scalar_exp_builder_(scalar_exp_builder),
     table_exp_builder_(table_exp_builder) {}
 
-ScopedPtr<ValueExpression> QueryBuilder::buildValueExpression(
+ValueExpression QueryBuilder::buildValueExpression(
     RefPtr<ValueExpressionNode> node) {
   return scalar_exp_builder_->compile(node);
 }

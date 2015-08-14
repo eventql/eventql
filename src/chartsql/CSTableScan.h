@@ -53,14 +53,14 @@ protected:
   struct ExpressionRef {
     ExpressionRef(
         size_t _rep_level,
-        ScopedPtr<ValueExpression> _compiled,
+        ValueExpression _compiled,
         ScratchMemory* scratch);
 
     ExpressionRef(ExpressionRef&& other);
     ~ExpressionRef();
 
     size_t rep_level;
-    ScopedPtr<ValueExpression> compiled;
+    ValueExpression compiled;
     VM::Instance instance;
   };
 
@@ -89,7 +89,7 @@ protected:
   QueryBuilder* runtime_;
   HashMap<String, ColumnRef> columns_;
   Vector<ExpressionRef> select_list_;
-  ScopedPtr<ValueExpression> where_expr_;
+  ValueExpression where_expr_;
   size_t colindex_;
   AggregationStrategy aggr_strategy_;
   Option<SHA1Hash> cache_key_;
