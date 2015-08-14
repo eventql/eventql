@@ -49,6 +49,8 @@ public:
 
   RefPtr<QueryBuilder> queryBuilder() const;
 
+  TaskScheduler* scheduler();
+
 protected:
   RefPtr<SymbolTable> symbol_table_;
   RefPtr<QueryBuilder> query_builder_;
