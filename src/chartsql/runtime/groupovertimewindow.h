@@ -20,7 +20,7 @@
 #include <chartsql/parser/token.h>
 #include <chartsql/runtime/queryplannode.h>
 #include <chartsql/runtime/symboltable.h>
-#include <chartsql/runtime/compile.h>
+#include <chartsql/runtime/compiler.h>
 
 namespace csql {
 

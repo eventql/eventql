@@ -17,8 +17,8 @@
 #include <chartsql/parser/astnode.h>
 #include <chartsql/runtime/queryplannode.h>
 #include <chartsql/runtime/tablerepository.h>
-#include <chartsql/runtime/compile.h>
-#include <chartsql/runtime/execute.h>
+#include <chartsql/runtime/compiler.h>
+#include <chartsql/runtime/vm.h>
 #include <stx/exception.h>
 
 namespace csql {

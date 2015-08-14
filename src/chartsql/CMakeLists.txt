@@ -74,7 +74,7 @@ add_library(chartsql STATIC
     runtime/groupovertimewindow.cc
     runtime/ShowTablesStatement.cc
     runtime/DescribeTableStatement.cc
-    runtime/execute.cc
+    runtime/vm.cc
     runtime/ExecutionContext.cc
     runtime/ExecutionStrategy.cc
     runtime/TableExpression.cc

@@ -11,8 +11,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <chartsql/parser/parser.h>
-#include <chartsql/runtime/compile.h>
-#include <chartsql/runtime/execute.h>
+#include <chartsql/runtime/compiler.h>
+#include <chartsql/runtime/vm.h>
 #include <chartsql/runtime/runtime.h>
 #include <chartsql/svalue.h>
 #include <util/unittest.h>
