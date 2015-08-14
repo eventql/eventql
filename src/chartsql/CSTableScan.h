@@ -39,6 +39,8 @@ public:
   Option<SHA1Hash> cacheKey() const override;
   void setCacheKey(const SHA1Hash& key);
 
+  size_t rowsScanned() const;
+
 protected:
 
   struct ColumnRef {
@@ -90,6 +92,7 @@ protected:
   size_t colindex_;
   AggregationStrategy aggr_strategy_;
   Option<SHA1Hash> cache_key_;
+  size_t rows_scanned_;
 };
 
 

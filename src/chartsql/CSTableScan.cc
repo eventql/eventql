@@ -26,7 +26,8 @@ CSTableScan::CSTableScan(
     cstable_filename_(cstable_filename),
     runtime_(runtime),
     colindex_(0),
-    aggr_strategy_(stmt_->aggregationStrategy()) {}
+    aggr_strategy_(stmt_->aggregationStrategy()),
+    rows_scanned_(0) {}
 
 void CSTableScan::execute(
     ExecutionContext* context,
@@ -93,6 +94,7 @@ void CSTableScan::scan(
   size_t num_records = 0;
   size_t total_records = cstable->numRecords();
   while (num_records < total_records) {
+    ++rows_scanned_;
     uint64_t next_level = 0;
 
     if (fetch_level == 0) {
@@ -398,6 +400,10 @@ Option<SHA1Hash> CSTableScan::cacheKey() const {
 
 void CSTableScan::setCacheKey(const SHA1Hash& key) {
   cache_key_ = Some(key);
+}
+
+size_t CSTableScan::rowsScanned() const {
+  return rows_scanned_;
 }
 
 CSTableScan::ColumnRef::ColumnRef(
