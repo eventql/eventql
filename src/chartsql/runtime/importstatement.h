@@ -13,6 +13,7 @@
 #include <vector>
 #include <chartsql/parser/astnode.h>
 #include <chartsql/runtime/compiler.h>
+#include <chartsql/runtime/ValueExpressionBuilder.h>
 
 namespace csql {
 
