@@ -14,6 +14,7 @@
 #include <chartsql/runtime/compiler.h>
 #include <chartsql/runtime/defaultruntime.h>
 #include <chartsql/runtime/TableExpression.h>
+#include <chartsql/runtime/ValueExpression.h>
 #include <cstable/CSTableReader.h>
 
 using namespace stx;
@@ -60,7 +61,7 @@ protected:
 
     size_t rep_level;
     ScopedPtr<ValueExpression> compiled;
-    ValueExpression::Instance instance;
+    VM::Instance instance;
   };
 
   void scan(
