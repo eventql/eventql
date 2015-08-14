@@ -189,14 +189,20 @@ void CSTableScan::scan(
     bool where_pred = true;
     if (where_expr_.get() != nullptr) {
       SValue where_tmp;
-      where_expr_->evaluate(in_row.size(), in_row.data(), &where_tmp);
+      VM::evaluate(
+          where_expr_->program(),
+          in_row.size(),
+          in_row.data(),
+          &where_tmp);
+
       where_pred = where_tmp.getBoolWithConversion();
     }
 
     if (where_pred) {
       for (int i = 0; i < select_list_.size(); ++i) {
         if (select_list_[i].rep_level >= select_level) {
-          select_list_[i].compiled->accumulate(
+          VM::accumulate(
+              select_list_[i].compiled->program(),
               &select_list_[i].instance,
               in_row.size(),
               in_row.data());
@@ -214,11 +220,14 @@ void CSTableScan::scan(
           }
 
           for (int i = 0; i < select_list_.size(); ++i) {
-            select_list_[i].compiled->result(
+            VM::result(
+                select_list_[i].compiled->program(),
                 &select_list_[i].instance,
                 &out_row[i]);
 
-            select_list_[i].compiled->reset(&select_list_[i].instance);
+            VM::reset(
+                select_list_[i].compiled->program(),
+                &select_list_[i].instance);
           }
 
           if (!fn(out_row.size(), out_row.data())) {
@@ -229,7 +238,8 @@ void CSTableScan::scan(
 
         case AggregationStrategy::NO_AGGREGATION:
           for (int i = 0; i < select_list_.size(); ++i) {
-            select_list_[i].compiled->evaluate(
+            VM::evaluate(
+                select_list_[i].compiled->program(),
                 in_row.size(),
                 in_row.data(),
                 &out_row[i]);
@@ -258,7 +268,8 @@ void CSTableScan::scan(
   switch (aggr_strategy_) {
     case AggregationStrategy::AGGREGATE_ALL:
       for (int i = 0; i < select_list_.size(); ++i) {
-        select_list_[i].compiled->result(
+        VM::result(
+            select_list_[i].compiled->program(),
             &select_list_[i].instance,
             &out_row[i]);
       }
@@ -282,7 +293,7 @@ void CSTableScan::scanWithoutColumns(
     bool where_pred = true;
     if (where_expr_.get() != nullptr) {
       SValue where_tmp;
-      where_expr_->evaluate(0, nullptr, &where_tmp);
+      VM::evaluate(where_expr_->program(), 0, nullptr, &where_tmp);
       where_pred = where_tmp.getBoolWithConversion();
     }
 
@@ -291,7 +302,8 @@ void CSTableScan::scanWithoutColumns(
 
         case AggregationStrategy::AGGREGATE_ALL:
           for (int i = 0; i < select_list_.size(); ++i) {
-            select_list_[i].compiled->accumulate(
+            VM::accumulate(
+                select_list_[i].compiled->program(),
                 &select_list_[i].instance,
                 0,
                 nullptr);
@@ -301,7 +313,8 @@ void CSTableScan::scanWithoutColumns(
         case AggregationStrategy::AGGREGATE_WITHIN_RECORD:
         case AggregationStrategy::NO_AGGREGATION:
           for (int i = 0; i < select_list_.size(); ++i) {
-            select_list_[i].compiled->evaluate(
+            VM::evaluate(
+                select_list_[i].compiled->program(),
                 0,
                 nullptr,
                 &out_row[i]);
@@ -318,7 +331,8 @@ void CSTableScan::scanWithoutColumns(
   switch (aggr_strategy_) {
     case AggregationStrategy::AGGREGATE_ALL:
       for (int i = 0; i < select_list_.size(); ++i) {
-        select_list_[i].compiled->result(
+        VM::result(
+            select_list_[i].compiled->program(),
             &select_list_[i].instance,
             &out_row[i]);
       }
@@ -418,7 +432,7 @@ CSTableScan::ExpressionRef::ExpressionRef(
     ScratchMemory* smem) :
     rep_level(_rep_level),
     compiled(std::move(_compiled)),
-    instance(compiled->allocInstance(smem)) {}
+    instance(VM::allocInstance(compiled->program(), smem)) {}
 
 CSTableScan::ExpressionRef::ExpressionRef(
     ExpressionRef&& other) :
@@ -430,7 +444,7 @@ CSTableScan::ExpressionRef::ExpressionRef(
 
 CSTableScan::ExpressionRef::~ExpressionRef() {
   if (instance.scratch) {
-    compiled->freeInstance(&instance);
+    VM::freeInstance(compiled->program(), &instance);
   }
 }
 
