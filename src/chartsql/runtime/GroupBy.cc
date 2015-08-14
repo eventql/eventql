@@ -91,7 +91,7 @@ void GroupBy::getResult(
   Vector<SValue> out_row(select_exprs_.size(), SValue{});
   for (auto& group : *groups) {
     for (size_t i = 0; i < select_exprs_.size(); ++i) {
-      select_exprs_[i]->result(&group.second[i], &out_row[i]);
+      VM::result(select_exprs_[i]->program(), &group.second[i], &out_row[i]);
     }
 
     if (!fn(out_row.size(), out_row.data())) {
@@ -104,7 +104,7 @@ void GroupBy::freeResult(
     HashMap<String, Vector<VM::Instance >>* groups) {
   for (auto& group : (*groups)) {
     for (size_t i = 0; i < select_exprs_.size(); ++i) {
-      select_exprs_[i]->freeInstance(&group.second[i]);
+      VM::freeInstance(select_exprs_[i]->program(), &group.second[i]);
     }
   }
 }
@@ -117,12 +117,15 @@ void GroupBy::mergeResult(
     auto& dst_group = (*dst)[src_group.first];
     if (dst_group.size() == 0) {
       for (const auto& e : select_exprs_) {
-        dst_group.emplace_back(e->allocInstance(scratch));
+        dst_group.emplace_back(VM::allocInstance(e->program(), scratch));
       }
     }
 
     for (size_t i = 0; i < select_exprs_.size(); ++i) {
-      select_exprs_[i]->merge(&dst_group[i], &src_group.second[i]);
+      VM::merge(
+          select_exprs_[i]->program(),
+          &dst_group[i],
+          &src_group.second[i]);
     }
   }
 }
@@ -133,19 +136,19 @@ bool GroupBy::nextRow(
     int row_len, const SValue* row) {
   Vector<SValue> gkey(group_exprs_.size(), SValue{});
   for (size_t i = 0; i < group_exprs_.size(); ++i) {
-    group_exprs_[i]->evaluate(row_len, row, &gkey[i]);
+    VM::evaluate(group_exprs_[i]->program(), row_len, row, &gkey[i]);
   }
 
   auto group_key = SValue::makeUniqueKey(gkey.data(), gkey.size());
   auto& group = (*groups)[group_key];
   if (group.size() == 0) {
     for (const auto& e : select_exprs_) {
-      group.emplace_back(e->allocInstance(scratch));
+      group.emplace_back(VM::allocInstance(e->program(), scratch));
     }
   }
 
   for (size_t i = 0; i < select_exprs_.size(); ++i) {
-    select_exprs_[i]->accumulate(&group[i], row_len, row);
+    VM::accumulate(select_exprs_[i]->program(), &group[i], row_len, row);
   }
 
   return true;
@@ -169,7 +172,7 @@ void GroupBy::encode(
     os->appendLenencString(group.first);
 
     for (size_t i = 0; i < select_exprs_.size(); ++i) {
-      select_exprs_[i]->saveState(&group.second[i], os);
+      VM::saveState(select_exprs_[i]->program(), &group.second[i], os);
     }
   }
 }
@@ -191,8 +194,8 @@ bool GroupBy::decode(
     auto& group = (*groups)[group_key];
     for (size_t i = 0; i < select_exprs_.size(); ++i) {
       const auto& e = select_exprs_[i];
-      group.emplace_back(e->allocInstance(scratch));
-      e->loadState(&group[i], is);
+      group.emplace_back(VM::allocInstance(e->program(), scratch));
+      VM::loadState(e->program(), &group[i], is);
     }
   }
 
