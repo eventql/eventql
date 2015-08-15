@@ -59,7 +59,7 @@ CustomerConfig createCustomerConfig(const String& customer) {
   {
     auto liconf = conf.mutable_logfile_import_config();
     auto lidef = liconf->add_logfiles();
-    lidef->set_name("nginx_access_log");
+    lidef->set_name("access_log");
     lidef->set_regex(R"(^(?<http_status>[^|]*)\|(?<loveos_region>[^|]*)\|(?<loveos_cluster>[^|]*)\|(?<forwarded_for>[^|]*)\|(?<dawanda_session>[^|]*)\|(?<bytes_sent>[^|]*)\|(?<request_time>[^|]*)\|(?<upstream_response_time>[^|]*)\|(?<http_method>[^| ]*) ?(?<path>[^ ]*) ?(?<http_version>HTTP\/[102\.]+)\|(?<rails_runtime_ms>[^|]*)\|(?<remote_addr>[^|]*)\|(?<time>[^|]*)\|(?<http_host>[^|]*)\|(?<referrer>[^|]*)\|(?<user_agent>[^|]*)\|(?<upstream_addr>[^|\n]*))");
 
     {
