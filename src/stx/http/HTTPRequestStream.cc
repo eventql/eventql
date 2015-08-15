@@ -46,5 +46,9 @@ void HTTPRequestStream::readBody() {
   });
 }
 
+void HTTPRequestStream::discardBody() {
+  readBody([this] (const void* data, size_t size) {});
+}
+
 }
 }
