@@ -41,8 +41,12 @@ public:
    */
   void readBody();
 
-protected:
+  /**
+   * Discard the http request body
+   */
+  void discardBody();
 
+protected:
   HTTPRequest req_;
   HTTPServerConnection* conn_;
 };
