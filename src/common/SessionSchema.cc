@@ -91,16 +91,16 @@ Vector<TableDefinition> SessionSchema::tableDefinitionsForCustomer(
     const CustomerConfig& cfg) {
   Vector<TableDefinition> tbls;
 
-  for (const auto& evschema : cfg.logjoin_config().session_event_schemas()) {
-    TableDefinition td;
-    td.set_customer(cfg.customer());
-    td.set_table_name("sessions." + evschema.evtype());
-    auto tblcfg = td.mutable_config();
-    tblcfg->set_schema(evschema.schema());
-    tblcfg->set_partitioner(tsdb::TBL_PARTITION_TIMEWINDOW);
-    tblcfg->set_storage(tsdb::TBL_STORAGE_LOG);
-    tbls.emplace_back(td);
-  }
+  //for (const auto& evschema : cfg.logjoin_config().session_event_schemas()) {
+  //  TableDefinition td;
+  //  td.set_customer(cfg.customer());
+  //  td.set_table_name("sessions." + evschema.evtype());
+  //  auto tblcfg = td.mutable_config();
+  //  tblcfg->set_schema(evschema.schema());
+  //  tblcfg->set_partitioner(tsdb::TBL_PARTITION_TIMEWINDOW);
+  //  tblcfg->set_storage(tsdb::TBL_STORAGE_LOG);
+  //  tbls.emplace_back(td);
+  //}
 
   {
     TableDefinition td;
