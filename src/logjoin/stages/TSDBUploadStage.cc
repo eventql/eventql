@@ -26,9 +26,9 @@ void TSDBUploadStage::process(
   tsdb::RecordEnvelopeList records;
   serializeSession(ctx, &records);
 
-  for (const auto& ev : ctx->outputEvents()) {
-    serializeEvent(ctx, ev, &records);
-  }
+  //for (const auto& ev : ctx->outputEvents()) {
+  //  serializeEvent(ctx, ev, &records);
+  //}
 
   URI uri(StringUtil::format("http://$0/tsdb/insert", tsdb_addr));
   http::HTTPRequest req(http::HTTPMessage::M_POST, uri.pathAndQuery());
