@@ -35,4 +35,16 @@ bool FixedReplicationScheme::hasLocalReplica(const String& key) {
   return true;
 }
 
+FrontendReplicationScheme::FrontendReplicationScheme(
+    Vector<ReplicaRef> replicas) :
+    replicas_(replicas) {}
+
+Vector<ReplicaRef> FrontendReplicationScheme::replicasFor(const SHA1Hash& key) {
+  return replicas_;
+}
+
+bool FrontendReplicationScheme::hasLocalReplica(const String& key) {
+  return false;
+}
+
 } // namespace tsdb

@@ -60,5 +60,24 @@ protected:
 };
 
 
+/**
+ * Data is replicated on N remote nodes (every remote host has a full copy
+ * of the data) but the local node doesn't store any data
+ */
+class FrontendReplicationScheme : public ReplicationScheme {
+public:
+
+  FrontendReplicationScheme(Vector<ReplicaRef> replicas);
+
+  Vector<ReplicaRef> replicasFor(const SHA1Hash& key) override;
+
+  bool hasLocalReplica(const String& key) override;
+
+protected:
+  Vector<ReplicaRef> replicas_;
+};
+
+
+
 } // namespace tsdb
 
