@@ -139,7 +139,9 @@ uint64_t InputStream::readVarUInt() {
 
   for (int i = 0; ; ++i) {
     unsigned char b;
-    readNextByte((char*) &b);
+    if (!readNextByte((char*) &b)) {
+      RAISE(kEOFError, "unexpected end of stream");
+    }
 
     val |= (b & 0x7fULL) << (7 * i);
 
