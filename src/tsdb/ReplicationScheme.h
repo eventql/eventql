@@ -13,20 +13,27 @@
 #include <stx/autoref.h>
 #include <stx/random.h>
 #include <stx/option.h>
+#include <stx/net/inetaddr.h>
 
 using namespace stx;
 
 namespace tsdb {
 
 struct ReplicaRef {
+  ReplicaRef(
+      SHA1Hash _unique_id,
+      InetAddr _addr);
+
   SHA1Hash unique_id;
-  String addr;
+  InetAddr addr;
 };
 
 class ReplicationScheme : public RefCounted {
 public:
 
   virtual Vector<ReplicaRef> replicasFor(const SHA1Hash& key) = 0;
+
+  Vector<InetAddr> replicaAddrsFor(const SHA1Hash& key);
 
   virtual bool hasLocalReplica(const SHA1Hash& key) = 0;
 

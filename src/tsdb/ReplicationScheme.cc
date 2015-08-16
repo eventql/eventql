@@ -14,6 +14,12 @@ using namespace stx;
 
 namespace tsdb {
 
+ReplicaRef::ReplicaRef(
+    SHA1Hash _unique_id,
+    InetAddr _addr) :
+    unique_id(_unique_id),
+    addr(_addr) {}
+
 Vector<ReplicaRef> StandaloneReplicationScheme::replicasFor(
     const SHA1Hash& key) {
   return Vector<ReplicaRef>{};

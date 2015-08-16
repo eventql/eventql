@@ -84,7 +84,7 @@ void LogPartitionReplication::uploadBatchTo(
     const ReplicaRef& replica,
     const RecordEnvelopeList& batch) {
   auto body = msg::encode(batch);
-  URI uri(StringUtil::format("http://$0/tsdb/insert", replica.addr));
+  URI uri(StringUtil::format("http://$0/tsdb/insert", replica.addr.hostAndPort()));
   http::HTTPRequest req(http::HTTPMessage::M_POST, uri.pathAndQuery());
   req.addHeader("Host", uri.hostAndPort());
   req.addHeader("Content-Type", "application/fnord-msg");
@@ -120,7 +120,7 @@ bool LogPartitionReplication::replicate() {
           snap_->state.tsdb_namespace(),
           snap_->state.table_key(),
           snap_->key.toString(),
-          r.addr);
+          r.addr.hostAndPort());
 
       try {
         replicateTo(r, replica_offset);
@@ -136,7 +136,7 @@ bool LogPartitionReplication::replicate() {
           snap_->state.tsdb_namespace(),
           snap_->state.table_key(),
           snap_->key.toString(),
-          r.addr);
+          r.addr.hostAndPort());
       }
     }
   }

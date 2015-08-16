@@ -45,7 +45,7 @@ bool StaticPartitionReplication::needsReplication() const {
 void StaticPartitionReplication::replicateTo(
     const ReplicaRef& replica,
     uint64_t head_version) {
-  auto tsdb_url = StringUtil::format("http://$0/tsdb", replica.addr);
+  auto tsdb_url = StringUtil::format("http://$0/tsdb", replica.addr.hostAndPort());
   tsdb::TSDBClient tsdb_client(tsdb_url, http_);
 
   auto pinfo = tsdb_client.partitionInfo(
@@ -107,7 +107,7 @@ bool StaticPartitionReplication::replicate() {
           snap_->state.tsdb_namespace(),
           snap_->state.table_key(),
           snap_->key.toString(),
-          r.addr);
+          r.addr.hostAndPort());
 
       try {
         replicateTo(r, head_version);
@@ -123,7 +123,7 @@ bool StaticPartitionReplication::replicate() {
           snap_->state.tsdb_namespace(),
           snap_->state.table_key(),
           snap_->key.toString(),
-          r.addr);
+          r.addr.hostAndPort());
       }
     }
   }
