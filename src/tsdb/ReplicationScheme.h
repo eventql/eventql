@@ -28,7 +28,7 @@ public:
 
   virtual Vector<ReplicaRef> replicasFor(const SHA1Hash& key) = 0;
 
-  virtual bool hasLocalReplica(const String& key) = 0;
+  virtual bool hasLocalReplica(const SHA1Hash& key) = 0;
 
 };
 
@@ -39,7 +39,7 @@ class StandaloneReplicationScheme : public ReplicationScheme {
 public:
   Vector<ReplicaRef> replicasFor(const SHA1Hash& key) override;
 
-  bool hasLocalReplica(const String& key) override;
+  bool hasLocalReplica(const SHA1Hash& key) override;
 
 };
 
@@ -53,7 +53,7 @@ public:
 
   Vector<ReplicaRef> replicasFor(const SHA1Hash& key) override;
 
-  bool hasLocalReplica(const String& key) override;
+  bool hasLocalReplica(const SHA1Hash& key) override;
 
 protected:
   Vector<ReplicaRef> replicas_;
@@ -71,7 +71,7 @@ public:
 
   Vector<ReplicaRef> replicasFor(const SHA1Hash& key) override;
 
-  bool hasLocalReplica(const String& key) override;
+  bool hasLocalReplica(const SHA1Hash& key) override;
 
 protected:
   Vector<ReplicaRef> replicas_;

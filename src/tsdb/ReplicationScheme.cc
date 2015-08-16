@@ -19,7 +19,7 @@ Vector<ReplicaRef> StandaloneReplicationScheme::replicasFor(
   return Vector<ReplicaRef>{};
 }
 
-bool StandaloneReplicationScheme::hasLocalReplica(const String& key) {
+bool StandaloneReplicationScheme::hasLocalReplica(const SHA1Hash& key) {
   return true;
 }
 
@@ -31,7 +31,7 @@ Vector<ReplicaRef> FixedReplicationScheme::replicasFor(const SHA1Hash& key) {
   return replicas_;
 }
 
-bool FixedReplicationScheme::hasLocalReplica(const String& key) {
+bool FixedReplicationScheme::hasLocalReplica(const SHA1Hash& key) {
   return true;
 }
 
@@ -43,7 +43,7 @@ Vector<ReplicaRef> FrontendReplicationScheme::replicasFor(const SHA1Hash& key) {
   return replicas_;
 }
 
-bool FrontendReplicationScheme::hasLocalReplica(const String& key) {
+bool FrontendReplicationScheme::hasLocalReplica(const SHA1Hash& key) {
   return false;
 }
 
