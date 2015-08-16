@@ -245,16 +245,6 @@ void ConfigDirectory::commitCustomerConfig(const CustomerConfig& config) {
   auto txn = db_->startTransaction(false);
   txn->autoAbort();
 
-  auto last_version = 0;
-  auto last_version_str = txn->get(hkey);
-  if (!last_version_str.isEmpty()) {
-    last_version = std::stoull(last_version_str.get().toString());
-  }
-
-  if (last_version >= config.version()) {
-    return;
-  }
-
   txn->update(db_key.data(), db_key.size(), buf->data(), buf->size());
   txn->update(hkey.data(), hkey.size(), vstr.data(), vstr.size());
   txn->commit();
