@@ -19,12 +19,20 @@ Vector<ReplicaRef> StandaloneReplicationScheme::replicasFor(
   return Vector<ReplicaRef>{};
 }
 
+bool StandaloneReplicationScheme::hasLocalReplica(const String& key) {
+  return true;
+}
+
 FixedReplicationScheme::FixedReplicationScheme(
     Vector<ReplicaRef> replicas) :
     replicas_(replicas) {}
 
 Vector<ReplicaRef> FixedReplicationScheme::replicasFor(const SHA1Hash& key) {
   return replicas_;
+}
+
+bool FixedReplicationScheme::hasLocalReplica(const String& key) {
+  return true;
 }
 
 } // namespace tsdb
