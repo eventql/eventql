@@ -20,6 +20,17 @@ ReplicaRef::ReplicaRef(
     unique_id(_unique_id),
     addr(_addr) {}
 
+Vector<InetAddr> ReplicationScheme::replicaAddrsFor(const SHA1Hash& key) {
+  Vector<InetAddr> addrs;
+
+  for (const auto& r : replicasFor(key)) {
+    addrs.emplace_back(r.addr);
+  }
+
+  return addrs;
+}
+
+
 Vector<ReplicaRef> StandaloneReplicationScheme::replicasFor(
     const SHA1Hash& key) {
   return Vector<ReplicaRef>{};
