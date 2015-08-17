@@ -65,6 +65,11 @@ protected:
       http::HTTPRequest* req,
       http::HTTPResponse* res);
 
+  void createUser(
+      const URI& uri,
+      http::HTTPRequest* req,
+      http::HTTPResponse* res);
+
   ConfigDirectoryMaster* cdb_;
 };
 
