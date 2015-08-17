@@ -70,17 +70,17 @@ int main(int argc, const char** argv) {
   stx::http::HTTPServer http_server(&http_router, &ev);
   http_server.listen(flags.getInt("http_port"));
 
-  /* auth */
-  AnalyticsAuth auth;
+  ///* auth */
+  //AnalyticsAuth auth;
 
-  /* DocumentDB */
-  DocumentDB docdb(flags.getString("datadir"));
-  DocumentDBServlet docdb_servlet(&docdb, &auth);
+  ///* DocumentDB */
+  //DocumentDB docdb(flags.getString("datadir"));
+  //DocumentDBServlet docdb_servlet(&docdb, &auth);
 
-  http_router.addRouteByPrefixMatch(
-      "/",
-      &docdb_servlet,
-      &tpool);
+  //http_router.addRouteByPrefixMatch(
+  //    "/",
+  //    &docdb_servlet,
+  //    &tpool);
 
   ev.run();
   stx::logInfo("dxa-docdb", "Exiting...");
