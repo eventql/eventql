@@ -178,7 +178,7 @@ Option<UserConfig> ConfigDirectory::findUser(
   auto txn = db_->startTransaction(true);
   txn->autoAbort();
 
-  auto db_key = StringUtil::format("user~$1", userid);
+  auto db_key = StringUtil::format("user~$0", userid);
   auto usercfg = txn->get(db_key);
 
   if (usercfg.isEmpty()) {
@@ -363,7 +363,7 @@ void ConfigDirectory::syncUserDB() {
 }
 
 void ConfigDirectory::commitUserConfig(const UserConfig& usr) {
-  auto db_key = StringUtil::format("user~$1", usr.userid());
+  auto db_key = StringUtil::format("user~$0", usr.userid());
   auto buf = msg::encode(usr);
 
   std::unique_lock<std::mutex> lk(mutex_);
