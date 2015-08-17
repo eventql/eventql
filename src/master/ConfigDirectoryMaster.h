@@ -33,10 +33,10 @@ public:
       bool force = false);
 
   UserDB fetchUserDB(const String& customer_key);
-  UserConfig fetchUser(
+  UserConfig fetchUserConfig(
       const String& customer_key,
       const String& userid);
-  UserConfig updateUser(
+  UserConfig updateUserConfig(
       UserConfig table,
       bool force = false);
 
