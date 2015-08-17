@@ -11,6 +11,7 @@
 #include "stx/io/BufferedOutputStream.h"
 #include "stx/logging.h"
 #include "stx/protobuf/msg.h"
+#include "stx/random.h"
 
 using namespace stx;
 
@@ -162,9 +163,21 @@ void MasterServlet::createUser(
     return;
   }
 
+  String password;
+  if (!stx::URI::getParam(params, "password", &password)) {
+    res->addBody("error: missing ?password=... parameter");
+    res->setStatus(http::kStatusBadRequest);
+    return;
+  }
+
+  auto pwsalt = Random::singleton()->hex128();
+  auto pwhash = SHA1::compute(pwsalt + password);
+
   UserConfig user;
   user.set_customer(customer);
   user.set_userid(userid);
+  user.set_password_hash(pwhash.toString());
+  user.set_password_salt(pwsalt);
 
   String force;
   if (stx::URI::getParam(params, "force_reset", &force) && force == "true") {
