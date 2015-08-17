@@ -20,7 +20,10 @@ namespace cm {
 
 ConfigDirectoryMaster::ConfigDirectoryMaster(
     const String& path) :
-    db_path_(path) {
+    customerdb_path_(FileUtil::joinPaths(path, "customers")),
+    userdb_path_(FileUtil::joinPaths(path, "userdb")) {
+  FileUtil::mkdir_p(customerdb_path_);
+  FileUtil::mkdir_p(userdb_path_);
   loadHeads();
 }
 
@@ -28,7 +31,7 @@ CustomerConfig ConfigDirectoryMaster::fetchCustomerConfig(
     const String& customer_key) const {
   std::unique_lock<std::mutex> lk(mutex_);
 
-  auto cpath = FileUtil::joinPaths(db_path_, customer_key);
+  auto cpath = FileUtil::joinPaths(customerdb_path_, customer_key);
   auto hpath = FileUtil::joinPaths(cpath, "config.HEAD");
 
   if (!FileUtil::exists(hpath)) {
@@ -48,7 +51,7 @@ CustomerConfig ConfigDirectoryMaster::updateCustomerConfig(
   std::unique_lock<std::mutex> lk(mutex_);
   uint64_t head_version = 0;
 
-  auto cpath = FileUtil::joinPaths(db_path_, config.customer());
+  auto cpath = FileUtil::joinPaths(customerdb_path_, config.customer());
   auto hpath = FileUtil::joinPaths(cpath, "config.HEAD");
   if (FileUtil::exists(cpath)) {
     if (FileUtil::exists(hpath)) {
@@ -114,7 +117,7 @@ TableDefinition ConfigDirectoryMaster::fetchTableDefinition(
 TableDefinitionList ConfigDirectoryMaster::fetchTableDefinitions(
     const String& customer_key) {
   std::unique_lock<std::mutex> lk(mutex_);
-  auto cpath = FileUtil::joinPaths(db_path_, customer_key);
+  auto cpath = FileUtil::joinPaths(customerdb_path_, customer_key);
   auto hpath = FileUtil::joinPaths(cpath, "tables.HEAD");
 
   if (!FileUtil::exists(cpath) || !FileUtil::exists(hpath)) {
@@ -140,7 +143,7 @@ TableDefinition ConfigDirectoryMaster::updateTableDefinition(
   uint64_t head_version = 0;
 
   auto customer_key = td.customer();
-  auto cpath = FileUtil::joinPaths(db_path_, customer_key);
+  auto cpath = FileUtil::joinPaths(customerdb_path_, customer_key);
   auto hpath = FileUtil::joinPaths(cpath, "tables.HEAD");
 
   TableDefinitionList tables;
@@ -230,15 +233,14 @@ UserConfig ConfigDirectoryMaster::fetchUserConfig(
 
 UserDB ConfigDirectoryMaster::fetchUserDB() {
   std::unique_lock<std::mutex> lk(mutex_);
-  auto cpath = FileUtil::joinPaths(db_path_, "userdb");
-  auto hpath = FileUtil::joinPaths(cpath, "users.HEAD");
+  auto hpath = FileUtil::joinPaths(userdb_path_, "users.HEAD");
 
   auto head_version = FileUtil::read(hpath).toString();
 
   auto users = msg::decode<UserDB>(
       FileUtil::read(
           FileUtil::joinPaths(
-              cpath,
+              userdb_path_,
               StringUtil::format("users.$0", head_version))));
 
   users.set_version(std::stoull(head_version));
@@ -251,22 +253,17 @@ UserConfig ConfigDirectoryMaster::updateUserConfig(
   std::unique_lock<std::mutex> lk(mutex_);
   uint64_t head_version = 0;
 
-  auto cpath = FileUtil::joinPaths(db_path_, "users");
-  auto hpath = FileUtil::joinPaths(cpath, "users.HEAD");
+  auto hpath = FileUtil::joinPaths(userdb_path_, "users.HEAD");
 
   UserDB users;
-  if (FileUtil::exists(cpath)) {
-    if (FileUtil::exists(hpath)) {
-      auto head_version_str = FileUtil::read(hpath);
-      head_version = std::stoull(head_version_str.toString());
-      users = msg::decode<UserDB>(
-          FileUtil::read(
-              FileUtil::joinPaths(
-                  cpath,
-                  StringUtil::format("users.$0", head_version))));
-    }
-  } else {
-    FileUtil::mkdir(cpath);
+  if (FileUtil::exists(hpath)) {
+    auto head_version_str = FileUtil::read(hpath);
+    head_version = std::stoull(head_version_str.toString());
+    users = msg::decode<UserDB>(
+        FileUtil::read(
+            FileUtil::joinPaths(
+                userdb_path_,
+                StringUtil::format("users.$0", head_version))));
   }
 
   UserConfig* head_cfg = nullptr;
@@ -304,7 +301,7 @@ UserConfig ConfigDirectoryMaster::updateUserConfig(
   auto td_buf = msg::encode(users);
 
   auto vpath = FileUtil::joinPaths(
-      cpath,
+      userdb_path_,
       StringUtil::format("users.$0", head_version));
 
   auto vtmppath = vpath + "~tmp." + Random::singleton()->hex64();
@@ -338,13 +335,9 @@ Vector<Pair<String, uint64_t>> ConfigDirectoryMaster::heads() const {
 }
 
 void ConfigDirectoryMaster::loadHeads() {
-  FileUtil::ls(db_path_, [this] (const String& customer) -> bool {
-    if (customer == "userdb") {
-      return true;;
-    }
-
+  FileUtil::ls(customerdb_path_, [this] (const String& customer) -> bool {
     {
-      auto hpath = FileUtil::joinPaths(db_path_, customer + "/config.HEAD");
+      auto hpath = FileUtil::joinPaths(customerdb_path_, customer + "/config.HEAD");
       if (FileUtil::exists(hpath)) {
         heads_["customers/" + customer] =
             std::stoull(FileUtil::read(hpath).toString());
@@ -352,7 +345,7 @@ void ConfigDirectoryMaster::loadHeads() {
     }
 
     {
-      auto hpath = FileUtil::joinPaths(db_path_, customer + "/tables.HEAD");
+      auto hpath = FileUtil::joinPaths(customerdb_path_, customer + "/tables.HEAD");
       if (FileUtil::exists(hpath)) {
         heads_["tables/" + customer] =
             std::stoull(FileUtil::read(hpath).toString());
@@ -363,7 +356,7 @@ void ConfigDirectoryMaster::loadHeads() {
   });
 
   {
-    auto hpath = FileUtil::joinPaths(db_path_, "userdb/users.HEAD");
+    auto hpath = FileUtil::joinPaths(userdb_path_, "users.HEAD");
     if (FileUtil::exists(hpath)) {
       heads_["userdb"] =
           std::stoull(FileUtil::read(hpath).toString());

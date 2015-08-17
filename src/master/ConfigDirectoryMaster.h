@@ -46,7 +46,8 @@ protected:
   void loadHeads();
 
   mutable std::mutex mutex_;
-  String db_path_;
+  String customerdb_path_;
+  String userdb_path_;
   HashMap<String, uint64_t> heads_;
 };
 

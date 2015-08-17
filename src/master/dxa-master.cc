@@ -72,7 +72,7 @@ int main(int argc, const char** argv) {
   /* customer directory */
   auto cdb_dir = FileUtil::joinPaths(
       flags.getString("datadir"),
-      "master/customers");
+      "master");
 
   if (!FileUtil::exists(cdb_dir)) {
     FileUtil::mkdir_p(cdb_dir);
