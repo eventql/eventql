@@ -42,6 +42,10 @@ void MasterServlet::handleHTTPRequest(
       return fetchUserDB(uri, req, res);
     }
 
+    if (StringUtil::endsWith(uri.path(), "/analytics/master/create_user")) {
+      return createUser(uri, req, res);
+    }
+
     if (StringUtil::endsWith(uri.path(), "/analytics/master/create_customer")) {
       return createCustomer(uri, req, res);
     }
@@ -140,6 +144,45 @@ void MasterServlet::fetchUserDB(
   res->setStatus(stx::http::kStatusOK);
   res->addBody(*body);
 }
+
+void MasterServlet::createUser(
+    const URI& uri,
+    http::HTTPRequest* req,
+    http::HTTPResponse* res) {
+  if (req->method() != http::HTTPMessage::M_POST) {
+    RAISE(kIllegalArgumentError, "expected HTTP POST request");
+  }
+
+  const auto& params = uri.queryParams();
+
+  String customer;
+  if (!stx::URI::getParam(params, "customer", &customer)) {
+    res->addBody("error: missing ?customer=... parameter");
+    res->setStatus(http::kStatusBadRequest);
+    return;
+  }
+
+  String userid;
+  if (!stx::URI::getParam(params, "userid", &userid)) {
+    res->addBody("error: missing ?userid=... parameter");
+    res->setStatus(http::kStatusBadRequest);
+    return;
+  }
+
+  UserConfig user;
+  user.set_customer(customer);
+  user.set_userid(userid);
+
+  String force;
+  if (stx::URI::getParam(params, "force_reset", &force) && force == "true") {
+    auto head_cfg = cdb_->fetchUserConfig(customer, userid);
+    user.set_version(head_cfg.version());
+  }
+
+  cdb_->updateUserConfig(user);
+  res->setStatus(stx::http::kStatusCreated);
+}
+
 
 void MasterServlet::createCustomer(
     const URI& uri,
