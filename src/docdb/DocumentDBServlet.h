@@ -25,7 +25,7 @@ public:
 
   void handle(
       const AnalyticsSession& session,
-      stx::http::HTTPRequest* req,
+      const stx::http::HTTPRequest* req,
       stx::http::HTTPResponse* res);
 
 protected:
