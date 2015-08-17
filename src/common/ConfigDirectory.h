@@ -21,7 +21,8 @@ namespace cm {
 
 enum ConfigTopic : uint64_t {
   CUSTOMERS = 1,
-  TABLES = 2
+  TABLES = 2,
+  USERDB = 3
 };
 
 class ConfigDirectory {

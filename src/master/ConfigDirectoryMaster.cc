@@ -216,6 +216,124 @@ TableDefinition ConfigDirectoryMaster::updateTableDefinition(
   return *head_td;
 }
 
+UserConfig ConfigDirectoryMaster::fetchUserConfig(
+    const String& customer_key,
+    const String& user_name) {
+  auto users = fetchUserDB(customer_key);
+  for (auto& usr : users.users()) {
+    if (usr.userid() == user_name) {
+      return usr;
+    }
+  }
+
+  RAISEF(kNotFoundError, "user not found: $0", user_name);
+}
+
+UserDB ConfigDirectoryMaster::fetchUserDB(
+    const String& customer_key) {
+  std::unique_lock<std::mutex> lk(mutex_);
+  auto cpath = FileUtil::joinPaths(db_path_, customer_key);
+  auto hpath = FileUtil::joinPaths(cpath, "users.HEAD");
+
+  if (!FileUtil::exists(cpath) || !FileUtil::exists(hpath)) {
+    RAISEF(kNotFoundError, "customer not found: $0", customer_key);
+  }
+
+  auto head_version = FileUtil::read(hpath).toString();
+
+  auto users = msg::decode<UserDB>(
+      FileUtil::read(
+          FileUtil::joinPaths(
+              cpath,
+              StringUtil::format("users.$0", head_version))));
+
+  users.set_version(std::stoull(head_version));
+  return users;
+}
+
+UserConfig ConfigDirectoryMaster::updateUserConfig(
+    UserConfig td,
+    bool force /* = false */) {
+  std::unique_lock<std::mutex> lk(mutex_);
+  uint64_t head_version = 0;
+
+  auto customer_key = td.customer();
+  auto cpath = FileUtil::joinPaths(db_path_, customer_key);
+  auto hpath = FileUtil::joinPaths(cpath, "users.HEAD");
+
+  UserDB users;
+  if (FileUtil::exists(cpath)) {
+    if (FileUtil::exists(hpath)) {
+      auto head_version_str = FileUtil::read(hpath);
+      head_version = std::stoull(head_version_str.toString());
+      users = msg::decode<UserDB>(
+          FileUtil::read(
+              FileUtil::joinPaths(
+                  cpath,
+                  StringUtil::format("users.$0", head_version))));
+    }
+  } else {
+    FileUtil::mkdir(cpath);
+  }
+
+  UserConfig* head_cfg = nullptr;
+  for (auto& usr : *users.mutable_users()) {
+    if (usr.userid() == td.userid()) {
+      head_cfg = &usr;
+    }
+  }
+
+  if (head_cfg == nullptr) {
+    head_cfg = users.add_users();
+  }
+
+  if (force) {
+    td.set_version(head_cfg->version());
+  }
+
+  if (td.version() != head_cfg->version()) {
+    RAISE(
+        kRuntimeError,
+        "VERSION MISMATCH: can't update user definition because the update is" \
+        " out of date (i.e. it is not based on the latest head version)");
+  }
+
+  *head_cfg = td;
+  head_cfg->set_version(td.version() + 1);
+  ++head_version;
+
+  logInfo(
+      "dxa-master",
+      "Updating user config; customer=$0 user=$1 head=$2",
+      customer_key,
+      head_cfg->userid(),
+      head_cfg->version());
+
+  auto td_buf = msg::encode(users);
+
+  auto vpath = FileUtil::joinPaths(
+      cpath,
+      StringUtil::format("users.$0", head_version));
+
+  auto vtmppath = vpath + "~tmp." + Random::singleton()->hex64();
+  {
+    auto tmpfile = File::openFile(vtmppath, File::O_CREATE | File::O_WRITE);
+    tmpfile.write(td_buf->data(), td_buf->size());
+  }
+
+  auto htmppath = hpath + "~tmp." + Random::singleton()->hex64();
+  {
+    auto tmpfile = File::openFile(htmppath, File::O_CREATE | File::O_WRITE);
+    tmpfile.write(StringUtil::toString(head_version));
+  }
+
+  FileUtil::mv(vtmppath, vpath);
+  FileUtil::mv(htmppath, hpath);
+  heads_["users/" + customer_key] = head_version;
+
+  return *head_cfg;
+}
+
 Vector<Pair<String, uint64_t>> ConfigDirectoryMaster::heads() const {
   std::unique_lock<std::mutex> lk(mutex_);
   Vector<Pair<String, uint64_t>> heads;
