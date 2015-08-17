@@ -84,6 +84,9 @@ protected:
 
   void renderSQLQuery(const Document& doc, Buffer* buf);
 
+  Option<AnalyticsSession> authenticateRequest(
+      const http::HTTPRequest& request) const;
+
   DocumentDB* docdb_;
   AnalyticsAuth* auth_;
 };
