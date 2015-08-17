@@ -173,6 +173,22 @@ void ConfigDirectory::onTableDefinitionChange(
   on_table_change_.emplace_back(fn);
 }
 
+Option<UserConfig> ConfigDirectory::findUser(
+    const String& customer,
+    const String& userid) {
+  auto txn = db_->startTransaction(true);
+  txn->autoAbort();
+
+  auto db_key = StringUtil::format("user~$0~$1", customer, userid);
+  auto usercfg = txn->get(db_key);
+
+  if (usercfg.isEmpty()) {
+    return None<UserConfig>();
+  } else {
+    return Some(msg::decode<UserConfig>(usercfg.get()));
+  }
+}
+
 void ConfigDirectory::sync() {
   auto master_heads = fetchMasterHeads();
 

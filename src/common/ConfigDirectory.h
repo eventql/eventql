@@ -44,6 +44,10 @@ public:
       Function<void (const TableDefinition& tbl)> fn) const;
   void onTableDefinitionChange(Function<void (const TableDefinition& tbl)> fn);
 
+  Option<UserConfig> findUser(
+      const String& customer,
+      const String& userid);
+
   void sync();
 
   void startWatcher();
