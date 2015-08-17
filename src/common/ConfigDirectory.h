@@ -44,9 +44,7 @@ public:
       Function<void (const TableDefinition& tbl)> fn) const;
   void onTableDefinitionChange(Function<void (const TableDefinition& tbl)> fn);
 
-  Option<UserConfig> findUser(
-      const String& customer,
-      const String& userid);
+  Option<UserConfig> findUser(const String& userid);
 
   void sync();
 
@@ -65,7 +63,7 @@ protected:
   void syncTableDefinitions(const String& customer);
   void commitTableDefinition(const TableDefinition& tbl);
 
-  void syncUserDB(const String& customer);
+  void syncUserDB();
   void commitUserConfig(const UserConfig& usr);
 
   InetAddr master_addr_;
