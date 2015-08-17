@@ -18,16 +18,15 @@ using namespace stx;
 
 namespace cm {
 
-struct AnalyticsQuery;
-
-class DocumentDBServlet : public stx::http::HTTPService {
+class DocumentDBServlet {
 public:
 
-  DocumentDBServlet(DocumentDB* docdb, AnalyticsAuth* auth);
+  DocumentDBServlet(DocumentDB* docdb);
 
-  void handleHTTPRequest(
+  void handle(
+      const AnalyticsSession& session,
       stx::http::HTTPRequest* req,
-      stx::http::HTTPResponse* res) override;
+      stx::http::HTTPResponse* res);
 
 protected:
 
@@ -84,11 +83,7 @@ protected:
 
   void renderSQLQuery(const Document& doc, Buffer* buf);
 
-  Option<AnalyticsSession> authenticateRequest(
-      const http::HTTPRequest& request) const;
-
   DocumentDB* docdb_;
-  AnalyticsAuth* auth_;
 };
 
 }

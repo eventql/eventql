@@ -13,29 +13,15 @@ using namespace stx;
 namespace cm {
 
 DocumentDBServlet::DocumentDBServlet(
-    DocumentDB* docdb,
-    AnalyticsAuth* auth) :
-    docdb_(docdb),
-    auth_(auth) {}
+    DocumentDB* docdb) :
+    docdb_(docdb) {}
 
-void DocumentDBServlet::handleHTTPRequest(
+void DocumentDBServlet::handle(
+    const AnalyticsSession& session,
     stx::http::HTTPRequest* req,
     stx::http::HTTPResponse* res) {
-  logDebug("docdb", "HTTP req: $0", req->uri());
   URI uri(req->uri());
 
-  /* auth */
-  auto session_opt = auth_->authenticateRequest(*req);
-  if (session_opt.isEmpty()) {
-    res->addHeader("WWW-Authenticate", "Token");
-    res->setStatus(http::kStatusUnauthorized);
-    res->addBody("authorization required");
-    return;
-  }
-
-  const auto& session = session_opt.get();
-
-  /* authenticated actions */
   if (uri.path() == "/analytics/api/v1/documents") {
     listDocuments(session, req, res);
     return;
