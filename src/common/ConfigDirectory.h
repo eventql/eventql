@@ -61,6 +61,9 @@ protected:
   void syncTableDefinitions(const String& customer);
   void commitTableDefinition(const TableDefinition& tbl);
 
+  void syncUserDB(const String& customer);
+  void commitUserConfig(const UserConfig& usr);
+
   InetAddr master_addr_;
   uint64_t topics_;
   RefPtr<mdb::MDB> db_;
@@ -69,6 +72,7 @@ protected:
 
   Vector<Function<void (const CustomerConfig& cfg)>> on_customer_change_;
   Vector<Function<void (const TableDefinition& cfg)>> on_table_change_;
+  Vector<Function<void (const UserConfig& cfg)>> on_user_change_;
 
   std::atomic<bool> watcher_running_;
   std::thread watcher_thread_;
