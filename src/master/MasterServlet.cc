@@ -38,6 +38,10 @@ void MasterServlet::handleHTTPRequest(
       return updateCustomerConfig(uri, req, res);
     }
 
+    if (StringUtil::endsWith(uri.path(), "/analytics/master/fetch_userdb")) {
+      return fetchUserDB(uri, req, res);
+    }
+
     if (StringUtil::endsWith(uri.path(), "/analytics/master/create_customer")) {
       return createCustomer(uri, req, res);
     }
@@ -115,6 +119,26 @@ void MasterServlet::updateCustomerConfig(
   auto updated_config = cdb_->updateCustomerConfig(config);
   res->setStatus(stx::http::kStatusCreated);
   res->addBody(*msg::encode(updated_config));
+}
+
+void MasterServlet::fetchUserDB(
+    const URI& uri,
+    http::HTTPRequest* req,
+    http::HTTPResponse* res) {
+  const auto& params = uri.queryParams();
+
+  String customer;
+  if (!stx::URI::getParam(params, "customer", &customer)) {
+    res->addBody("error: missing ?customer=... parameter");
+    res->setStatus(http::kStatusBadRequest);
+    return;
+  }
+
+  auto users = cdb_->fetchUserDB(customer);
+  auto body = msg::encode(users);
+
+  res->setStatus(stx::http::kStatusOK);
+  res->addBody(*body);
 }
 
 void MasterServlet::createCustomer(

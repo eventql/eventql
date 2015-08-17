@@ -8,6 +8,15 @@
  */
 package cm;
 
+message UserConfig {
+  required string userid = 1;
+};
+
+message UserDB {
+  repeated UserConfig users = 1;
+  optional uint64 version = 2;
+};
+
 message EventDefinition {
   required string evtype = 1;
   required bytes schema = 2;
