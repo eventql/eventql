@@ -32,9 +32,8 @@ public:
       TableDefinition table,
       bool force = false);
 
-  UserDB fetchUserDB(const String& customer_key);
+  UserDB fetchUserDB();
   UserConfig fetchUserConfig(
-      const String& customer_key,
       const String& userid);
   UserConfig updateUserConfig(
       UserConfig table,

@@ -174,12 +174,11 @@ void ConfigDirectory::onTableDefinitionChange(
 }
 
 Option<UserConfig> ConfigDirectory::findUser(
-    const String& customer,
     const String& userid) {
   auto txn = db_->startTransaction(true);
   txn->autoAbort();
 
-  auto db_key = StringUtil::format("user~$0~$1", customer, userid);
+  auto db_key = StringUtil::format("user~$1", userid);
   auto usercfg = txn->get(db_key);
 
   if (usercfg.isEmpty()) {
@@ -234,12 +233,10 @@ void ConfigDirectory::syncObject(const String& obj) {
     }
   }
 
-  if (topics_ & ConfigTopic::USERDB) {
-    static const String kTablesPrefix = "users/";
-    if (StringUtil::beginsWith(obj, kTablesPrefix)) {
-      syncUserDB(obj.substr(kTablesPrefix.size()));
-      return;
-    }
+  if ((topics_ & ConfigTopic::USERDB) &&
+      obj == "userdb") {
+    syncUserDB();
+    return;
   }
 }
 
@@ -338,12 +335,11 @@ void ConfigDirectory::commitTableDefinition(const TableDefinition& tbl) {
   }
 }
 
-void ConfigDirectory::syncUserDB(const String& customer) {
+void ConfigDirectory::syncUserDB() {
   auto uri = URI(
       StringUtil::format(
-          "http://$0/analytics/master/fetch_userdb?customer=$1",
-          master_addr_.hostAndPort(),
-          URI::urlEncode(customer)));
+          "http://$0/analytics/master/fetch_userdb",
+          master_addr_.hostAndPort()));
 
   http::HTTPClient http;
   auto res = http.executeRequest(http::HTTPRequest::mkGet(uri));
@@ -356,7 +352,7 @@ void ConfigDirectory::syncUserDB(const String& customer) {
     commitUserConfig(usr);
   }
 
-  auto hkey = StringUtil::format("head~users/$0", customer);
+  String hkey = "head~userdb";
   auto vstr = StringUtil::toString(users.version());
 
   std::unique_lock<std::mutex> lk(mutex_);
@@ -367,11 +363,7 @@ void ConfigDirectory::syncUserDB(const String& customer) {
 }
 
 void ConfigDirectory::commitUserConfig(const UserConfig& usr) {
-  auto db_key = StringUtil::format(
-      "user~$0~$1",
-      usr.customer(),
-      usr.userid());
-
+  auto db_key = StringUtil::format("user~$1", usr.userid());
   auto buf = msg::encode(usr);
 
   std::unique_lock<std::mutex> lk(mutex_);

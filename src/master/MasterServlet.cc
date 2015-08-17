@@ -131,14 +131,7 @@ void MasterServlet::fetchUserDB(
     http::HTTPResponse* res) {
   const auto& params = uri.queryParams();
 
-  String customer;
-  if (!stx::URI::getParam(params, "customer", &customer)) {
-    res->addBody("error: missing ?customer=... parameter");
-    res->setStatus(http::kStatusBadRequest);
-    return;
-  }
-
-  auto users = cdb_->fetchUserDB(customer);
+  auto users = cdb_->fetchUserDB();
   auto body = msg::encode(users);
 
   res->setStatus(stx::http::kStatusOK);
@@ -175,7 +168,7 @@ void MasterServlet::createUser(
 
   String force;
   if (stx::URI::getParam(params, "force_reset", &force) && force == "true") {
-    auto head_cfg = cdb_->fetchUserConfig(customer, userid);
+    auto head_cfg = cdb_->fetchUserConfig(userid);
     user.set_version(head_cfg.version());
   }
 

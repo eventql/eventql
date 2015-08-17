@@ -217,9 +217,8 @@ TableDefinition ConfigDirectoryMaster::updateTableDefinition(
 }
 
 UserConfig ConfigDirectoryMaster::fetchUserConfig(
-    const String& customer_key,
     const String& user_name) {
-  auto users = fetchUserDB(customer_key);
+  auto users = fetchUserDB();
   for (auto& usr : users.users()) {
     if (usr.userid() == user_name) {
       return usr;
@@ -229,15 +228,10 @@ UserConfig ConfigDirectoryMaster::fetchUserConfig(
   RAISEF(kNotFoundError, "user not found: $0", user_name);
 }
 
-UserDB ConfigDirectoryMaster::fetchUserDB(
-    const String& customer_key) {
+UserDB ConfigDirectoryMaster::fetchUserDB() {
   std::unique_lock<std::mutex> lk(mutex_);
-  auto cpath = FileUtil::joinPaths(db_path_, customer_key);
+  auto cpath = FileUtil::joinPaths(db_path_, "userdb");
   auto hpath = FileUtil::joinPaths(cpath, "users.HEAD");
-
-  if (!FileUtil::exists(cpath) || !FileUtil::exists(hpath)) {
-    RAISEF(kNotFoundError, "customer not found: $0", customer_key);
-  }
 
   auto head_version = FileUtil::read(hpath).toString();
 
@@ -257,8 +251,7 @@ UserConfig ConfigDirectoryMaster::updateUserConfig(
   std::unique_lock<std::mutex> lk(mutex_);
   uint64_t head_version = 0;
 
-  auto customer_key = td.customer();
-  auto cpath = FileUtil::joinPaths(db_path_, customer_key);
+  auto cpath = FileUtil::joinPaths(db_path_, "users");
   auto hpath = FileUtil::joinPaths(cpath, "users.HEAD");
 
   UserDB users;
@@ -304,8 +297,7 @@ UserConfig ConfigDirectoryMaster::updateUserConfig(
 
   logInfo(
       "dxa-master",
-      "Updating user config; customer=$0 user=$1 head=$2",
-      customer_key,
+      "Updating user config; user=$1 head=$2",
       head_cfg->userid(),
       head_cfg->version());
 
@@ -329,7 +321,7 @@ UserConfig ConfigDirectoryMaster::updateUserConfig(
 
   FileUtil::mv(vtmppath, vpath);
   FileUtil::mv(htmppath, hpath);
-  heads_["users/" + customer_key] = head_version;
+  heads_["userdb"] = head_version;
 
   return *head_cfg;
 }
@@ -347,6 +339,10 @@ Vector<Pair<String, uint64_t>> ConfigDirectoryMaster::heads() const {
 
 void ConfigDirectoryMaster::loadHeads() {
   FileUtil::ls(db_path_, [this] (const String& customer) -> bool {
+    if (customer == "userdb") {
+      return true;;
+    }
+
     {
       auto hpath = FileUtil::joinPaths(db_path_, customer + "/config.HEAD");
       if (FileUtil::exists(hpath)) {
@@ -365,6 +361,15 @@ void ConfigDirectoryMaster::loadHeads() {
 
     return true;
   });
+
+  {
+    auto hpath = FileUtil::joinPaths(db_path_, "userdb/users.HEAD");
+    if (FileUtil::exists(hpath)) {
+      heads_["userdb"] =
+          std::stoull(FileUtil::read(hpath).toString());
+    }
+  }
+
 }
 
 } // namespace cm
