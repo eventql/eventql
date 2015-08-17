@@ -217,6 +217,14 @@ void ConfigDirectory::syncObject(const String& obj) {
       return;
     }
   }
+
+  if (topics_ & ConfigTopic::USERDB) {
+    static const String kTablesPrefix = "users/";
+    if (StringUtil::beginsWith(obj, kTablesPrefix)) {
+      syncUserDB(obj.substr(kTablesPrefix.size()));
+      return;
+    }
+  }
 }
 
 void ConfigDirectory::syncCustomerConfig(const String& customer) {
@@ -311,6 +319,64 @@ void ConfigDirectory::commitTableDefinition(const TableDefinition& tbl) {
 
   for (const auto& cb : on_table_change_) {
     cb(tbl);
+  }
+}
+
+void ConfigDirectory::syncUserDB(const String& customer) {
+  auto uri = URI(
+      StringUtil::format(
+          "http://$0/analytics/master/fetch_userdb?customer=$1",
+          master_addr_.hostAndPort(),
+          URI::urlEncode(customer)));
+
+  http::HTTPClient http;
+  auto res = http.executeRequest(http::HTTPRequest::mkGet(uri));
+  if (res.statusCode() != 200) {
+    RAISEF(kRuntimeError, "error: $0", res.body().toString());
+  }
+
+  auto users = msg::decode<UserDB>(res.body());
+  for (const auto& usr : users.users()) {
+    commitUserConfig(usr);
+  }
+
+  auto hkey = StringUtil::format("head~users/$0", customer);
+  auto vstr = StringUtil::toString(users.version());
+
+  std::unique_lock<std::mutex> lk(mutex_);
+  auto txn = db_->startTransaction(false);
+  txn->autoAbort();
+  txn->update(hkey.data(), hkey.size(), vstr.data(), vstr.size());
+  txn->commit();
+}
+
+void ConfigDirectory::commitUserConfig(const UserConfig& usr) {
+  auto db_key = StringUtil::format(
+      "user~$0~$1",
+      usr.customer(),
+      usr.userid());
+
+  auto buf = msg::encode(usr);
+
+  std::unique_lock<std::mutex> lk(mutex_);
+  auto txn = db_->startTransaction(false);
+  txn->autoAbort();
+
+  auto last_version = 0;
+  auto last_td = txn->get(db_key);
+  if (!last_td.isEmpty()) {
+    last_version = msg::decode<UserConfig>(last_td.get()).version();
+  }
+
+  if (last_version >= usr.version()) {
+    return;
+  }
+
+  txn->update(db_key.data(), db_key.size(), buf->data(), buf->size());
+  txn->commit();
+
+  for (const auto& cb : on_user_change_) {
+    cb(usr);
   }
 }
 
