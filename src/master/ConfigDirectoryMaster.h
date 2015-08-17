@@ -32,6 +32,14 @@ public:
       TableDefinition table,
       bool force = false);
 
+  UserDB fetchUserDB(const String& customer_key);
+  UserConfig fetchUser(
+      const String& customer_key,
+      const String& userid);
+  UserConfig updateUser(
+      UserConfig table,
+      bool force = false);
+
   Vector<Pair<String, uint64_t>> heads() const;
 
 protected:
