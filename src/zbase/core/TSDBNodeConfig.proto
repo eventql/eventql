@@ -7,8 +7,8 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-package tsdb;
-import "tsdb/TableConfig.proto";
+package cm;
+import "core/TableConfig.proto";
 
 message TSDBNodeConfig {
 
