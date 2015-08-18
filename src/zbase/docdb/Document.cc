@@ -6,51 +6,35 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-#include <zbase/docdb/Document.h>
+#include "Document.h"
+#include <stx/inspect.h>
 
 using namespace stx;
 
 namespace zbase {
 
-Option<DocumentACL> findDocumentACLForUser(
-    const Document& doc,
-    const String& userid) {
-  for (const auto& acl : doc.acls()) {
-    if (acl.userid() == userid) {
-      return Some(acl);
-    }
+Document::Document(const DocID& id) : id_(id) {}
+
+const DocID& Document::docID() const {
+  return id_;
+}
+
+const HashMap<String, String>& Document::fields() const {
+  return fields_;
+}
+
+void Document::setField(const String& field, const String& value) {
+  fields_[field] = value;
+}
+
+void Document::debugPrint() const {
+  stx::iputs("------ BEGIN DOC -------\n    id=$0", id_.docid);
+  for (const auto& f : fields_) {
+    String abbr = f.second.substr(0, 80);
+    StringUtil::replaceAll(&abbr, "\n", " ");
+    stx::iputs("    $0=$1", f.first, abbr);
   }
-
-  return None<DocumentACL>();
+  stx::iputs("------- END DOC --------", 0);
 }
 
-bool isDocumentReadableForUser(const Document& doc, const String& userid) {
-  switch (doc.acl_policy()) {
-    case ACLPOLICY_PUBLIC_INTERNET:
-    case ACLPOLICY_PUBLIC_ORGANIZATION:
-      return true;
-    default:
-      break;
-  }
-
-  auto acls = findDocumentACLForUser(doc, userid);
-  return !acls.isEmpty() && acls.get().allow_read();
-}
-
-bool isDocumentWritableForUser(const Document& doc, const String& userid) {
-  auto acls = findDocumentACLForUser(doc, userid);
-  return !acls.isEmpty() && acls.get().allow_write();
-}
-
-void setDefaultDocumentACLs(Document* doc, const String& userid) {
-  doc->set_acl_policy(ACLPOLICY_PRIVATE);
-
-  auto owner_acl = doc->add_acls();
-  owner_acl->set_userid(userid);
-  owner_acl->set_is_owner(true);
-  owner_acl->set_allow_read(true);
-  owner_acl->set_allow_write(true);
-  owner_acl->set_allow_share(true);
-}
-
-}
+} // namespace zbase
