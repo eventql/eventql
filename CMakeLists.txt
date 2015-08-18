@@ -11,6 +11,8 @@ option(ENABLE_TESTS "Build unit tests [default: ON]" ON)
 #set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static")
 #set(CMAKE_STATIC_LINKER_FLAGS "${CMAKE_STATIC_LINKER_FLAGS} -static")
 
+set(PROTOC_ARGS --proto_path ${CMAKE_SOURCE_DIR}/src/zbase/core)
+
 add_library(hunspell OBJECT
     3rdparty/hunspell/affentry.cxx
     3rdparty/hunspell/affixmgr.cxx
@@ -31,8 +33,7 @@ add_library(hunspell OBJECT
 include_directories(src/)
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/src)
 
-set(PROTOC_ARGS --proto_path ${CMAKE_SOURCE_DIR}/src/zbase/core)
-include(3rdparty/libstx/cmake/libstx.cmake)
+include(src/stx/cmake/libstx.cmake)
 
 add_subdirectory(src/sstable)
 add_subdirectory(src/cstable)
