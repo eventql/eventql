@@ -14,7 +14,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 struct OutputEvent : public RefCounted {
   OutputEvent(
@@ -57,4 +57,4 @@ protected:
   HashMap<String, String> attributes_;
 };
 
-} // namespace cm
+} // namespace zbase

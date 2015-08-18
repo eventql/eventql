@@ -14,7 +14,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 class AnalyticsTableScanPlanner {
 public:
@@ -25,7 +25,7 @@ public:
       const UnixTime& until,
       const String& task_name,
       const Buffer& task_params,
-      tsdb::TSDBService* tsdb);
+      zbase::TSDBService* tsdb);
 
   static List<dproc::TaskDependency> mapShards(
       const String& customer,
@@ -35,10 +35,10 @@ public:
       const UnixTime& until,
       const String& task_name,
       const Buffer& task_params,
-      tsdb::TSDBService* tsdb);
+      zbase::TSDBService* tsdb);
 
 
 };
 
-} // namespace cm
+} // namespace zbase
 

@@ -15,7 +15,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 class CSVSink : public ReportSink {
 public:
@@ -36,6 +36,6 @@ protected:
   File file_;
 };
 
-} // namespace cm
+} // namespace zbase
 
 #endif

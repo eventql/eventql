@@ -15,7 +15,7 @@
 
 using namespace stx;
 
-namespace tsdb {
+namespace zbase {
 
 struct TSDBTableRef {
   static TSDBTableRef parse(const String& table_ref);

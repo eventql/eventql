@@ -11,7 +11,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 LogfileScanResult::LogfileScanResult(
     size_t max_lines /* = 1000 */) :
@@ -125,4 +125,4 @@ void LogfileScanResult::decode(InputStream* is) {
   }
 }
 
-} // namespace cm
+} // namespace zbase

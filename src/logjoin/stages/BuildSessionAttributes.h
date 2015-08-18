@@ -12,7 +12,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 class BuildSessionAttributes {
 public:
@@ -26,5 +26,5 @@ protected:
 
 };
 
-} // namespace cm
+} // namespace zbase
 

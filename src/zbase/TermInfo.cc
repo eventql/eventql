@@ -11,7 +11,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 void TermInfo::merge(const TermInfo& other) {
   score += other.score;
@@ -47,5 +47,5 @@ SortedTermInfo::SortedTermInfo(const TermInfo& ti) : score(ti.score) {
   });
 }
 
-} // namespace cm
+} // namespace zbase
 

@@ -13,7 +13,7 @@
 #include <stx/UnixTime.h>
 #include <stx/reflect/reflect.h>
 
-namespace cm {
+namespace zbase {
 
 struct CrawlRequest {
   CrawlRequest() : follow_redirects(false) {}
@@ -25,11 +25,11 @@ struct CrawlRequest {
 
   template <typename T>
   static void reflect(T* meta) {
-    meta->prop(&cm::CrawlRequest::url, 1, "url", false);
-    meta->prop(&cm::CrawlRequest::target_feed, 2, "target_feed", false);
-    meta->prop(&cm::CrawlRequest::userdata, 3, "userdata", false);
+    meta->prop(&zbase::CrawlRequest::url, 1, "url", false);
+    meta->prop(&zbase::CrawlRequest::target_feed, 2, "target_feed", false);
+    meta->prop(&zbase::CrawlRequest::userdata, 3, "userdata", false);
     meta->prop(
-        &cm::CrawlRequest::follow_redirects,
+        &zbase::CrawlRequest::follow_redirects,
         4,
         "follow_redirects",
         false);

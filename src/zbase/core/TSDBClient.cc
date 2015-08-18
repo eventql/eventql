@@ -17,7 +17,7 @@
 
 using namespace stx;
 
-namespace tsdb {
+namespace zbase {
 
 TSDBClient::TSDBClient(
     const String& uri,

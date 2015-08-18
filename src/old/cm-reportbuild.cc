@@ -49,7 +49,7 @@
 #include "zbase/TermInfoMergeReducer.h"
 
 using namespace stx;
-using namespace cm;
+using namespace zbase;
 
 
 Set<uint64_t> mkGenerations(
@@ -127,11 +127,11 @@ int main(int argc, const char** argv) {
   auto dir = flags.getString("artifacts");
 
   /* open index */
-  auto index_reader = cm::IndexReader::openIndex(index_path);
+  auto index_reader = zbase::IndexReader::openIndex(index_path);
   auto analyzer = RefPtr<fts::Analyzer>(new fts::Analyzer(conf_path));
 
   /* set up reportbuilder */
-  cm::ReportBuilder report_builder;
+  zbase::ReportBuilder report_builder;
 
   /* 4 hourly reports */
   for (const auto& g : mkGenerations(

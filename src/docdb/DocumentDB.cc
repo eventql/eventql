@@ -11,7 +11,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 DocumentDB::DocumentDB(const String& path) {
   mdb::MDBOptions mdb_opts;
@@ -185,5 +185,5 @@ void DocumentDB::updateDocumentACLPolicy(
 //    Document* document);
 
 
-} // namespace cm
+} // namespace zbase
 

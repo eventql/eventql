@@ -16,7 +16,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 void DeliverWebhookStage::process(RefPtr<SessionContext> ctx) {
   const auto& logjoin_config = ctx->customer_config->config.logjoin_config();
@@ -72,5 +72,5 @@ void DeliverWebhookStage::process(RefPtr<SessionContext> ctx) {
   }
 }
 
-} // namespace cm
+} // namespace zbase
 

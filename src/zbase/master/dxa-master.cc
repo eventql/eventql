@@ -19,7 +19,7 @@
 #include "zbase/master/MasterServlet.h"
 
 using namespace stx;
-using namespace cm;
+using namespace zbase;
 
 stx::thread::EventLoop ev;
 

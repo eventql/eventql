@@ -22,7 +22,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 struct IndexChangeRequestStruct {
   String customer;

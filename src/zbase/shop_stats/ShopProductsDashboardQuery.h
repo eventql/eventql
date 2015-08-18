@@ -18,22 +18,22 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 class ShopProductsDashboardQuery :  public dproc::BlobRDD {
 public:
 
   ShopProductsDashboardQuery(
       const ReportParams& params,
-      tsdb::TSDBService* tsdb);
+      zbase::TSDBService* tsdb);
 
   RefPtr<VFSFile> computeBlob(dproc::TaskContext* ctx) override;
   List<dproc::TaskDependency> dependencies() const override;
 
 protected:
   ReportParams params_;
-  tsdb::TSDBService* tsdb_;
+  zbase::TSDBService* tsdb_;
   ShopProductsTable source_;
 };
 
-} // namespace cm
+} // namespace zbase

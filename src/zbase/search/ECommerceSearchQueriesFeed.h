@@ -16,7 +16,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 class ECommerceSearchQueriesFeed : public ReportRDD {
 public:
@@ -38,6 +38,6 @@ protected:
   RefPtr<JSONSink> output_;
 };
 
-} // namespace cm
+} // namespace zbase
 
 #endif

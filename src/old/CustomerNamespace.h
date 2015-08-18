@@ -16,7 +16,7 @@
 #include <stx/random.h>
 #include <stx/http/httphandler.h>
 
-namespace cm {
+namespace zbase {
 
 class CustomerNamespace  {
 public:
@@ -36,5 +36,5 @@ protected:
   std::vector<std::string> vhosts_;
 };
 
-} // namespace cm
+} // namespace zbase
 #endif

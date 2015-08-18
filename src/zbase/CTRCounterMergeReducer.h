@@ -18,7 +18,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 /**
  * INPUT: CTR_COUNTER
@@ -41,6 +41,6 @@ protected:
   HashMap<String, CTRCounterData> counters_;
 };
 
-} // namespace cm
+} // namespace zbase
 
 #endif

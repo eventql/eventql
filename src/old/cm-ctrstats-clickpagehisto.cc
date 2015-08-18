@@ -40,9 +40,9 @@ struct PageInfo {
 
 
 void indexJoinedQuery(
-    const cm::JoinedQuery& query,
+    const zbase::JoinedQuery& query,
     HashMap<uint32_t, PageInfo>* counters) {
-  auto pg_str = cm::extractAttr(query.attrs, "pg");
+  auto pg_str = zbase::extractAttr(query.attrs, "pg");
   if (pg_str.isEmpty()) {
     return;
   }
@@ -87,7 +87,7 @@ int main(int argc, const char** argv) {
 
   auto start_time = std::numeric_limits<uint64_t>::max();
   auto end_time = std::numeric_limits<uint64_t>::min();
-  auto eligibility = cm::ItemEligibility::DAWANDA_ALL_NOBOTS;
+  auto eligibility = zbase::ItemEligibility::DAWANDA_ALL_NOBOTS;
 
 
   util::SimpleRateLimitedFn print_results(kMicrosPerSecond * 10, [&] () {
@@ -179,10 +179,10 @@ int main(int argc, const char** argv) {
       print_results.runMaybe();
 
       auto val = cursor->getDataBuffer();
-      Option<cm::JoinedQuery> q;
+      Option<zbase::JoinedQuery> q;
 
       try {
-        q = Some(json::fromJSON<cm::JoinedQuery>(val));
+        q = Some(json::fromJSON<zbase::JoinedQuery>(val));
       } catch (const Exception& e) {
         stx::logWarning("cm.ctrstats", e, "invalid json: $0", val.toString());
       }

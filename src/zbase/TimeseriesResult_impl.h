@@ -10,7 +10,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 template <typename PointType>
 void TimeseriesResult<PointType>::merge(
@@ -285,5 +285,5 @@ void TimeseriesBreakdownResult<PointType>::applyTimeRange(
 }
 
 
-} // namespace cm
+} // namespace zbase
 

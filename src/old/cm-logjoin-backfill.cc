@@ -29,7 +29,7 @@
 #include "common.h"
 #include "schemas.h"
 
-using namespace cm;
+using namespace zbase;
 using namespace stx;
 
 stx::thread::EventLoop ev;
@@ -234,7 +234,7 @@ int main(int argc, const char** argv) {
 
 
   /* open index */
-  auto index = cm::IndexReader::openIndex(index_path);
+  auto index = zbase::IndexReader::openIndex(index_path);
 
 
   /* backfill fn */
@@ -344,7 +344,7 @@ int main(int argc, const char** argv) {
 
 
   /* run backfill */
-  cm::LogJoinBackfill backfill(
+  zbase::LogJoinBackfill backfill(
       table,
       backfill_fn,
       "logjoin-backfill-state",

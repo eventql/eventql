@@ -64,7 +64,7 @@ using namespace stx;
  *
  */
 
-namespace cm {
+namespace zbase {
 
 enum class DeviceType : uint32_t {
   UNKNOWN = 0,

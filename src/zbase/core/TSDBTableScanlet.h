@@ -13,7 +13,7 @@
 
 using namespace stx;
 
-namespace tsdb {
+namespace zbase {
 
 template <typename _RowType, typename _ParamType, typename _ResultType>
 class TSDBTableScanlet : public RefCounted {
@@ -43,4 +43,4 @@ protected:
   ResultType result_;
 };
 
-} // namespace tsdb
+} // namespace zbase

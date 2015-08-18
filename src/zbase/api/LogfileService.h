@@ -21,7 +21,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 class LogfileService {
 public:
@@ -29,9 +29,9 @@ public:
   LogfileService(
       ConfigDirectory* cdir,
       AnalyticsAuth* auth,
-      tsdb::TSDBService* tsdb,
-      tsdb::PartitionMap* pmap,
-      tsdb::ReplicationScheme* repl,
+      zbase::TSDBService* tsdb,
+      zbase::PartitionMap* pmap,
+      zbase::ReplicationScheme* repl,
       csql::Runtime* sql);
 
   /**
@@ -104,10 +104,10 @@ public:
 protected:
   ConfigDirectory* cdir_;
   AnalyticsAuth* auth_;
-  tsdb::TSDBService* tsdb_;
-  tsdb::PartitionMap* pmap_;
-  tsdb::ReplicationScheme* repl_;
+  zbase::TSDBService* tsdb_;
+  zbase::PartitionMap* pmap_;
+  zbase::ReplicationScheme* repl_;
   csql::Runtime* sql_;
 };
 
-} // namespace cm
+} // namespace zbase

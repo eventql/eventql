@@ -12,7 +12,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 class MasterServlet : public stx::http::HTTPService {
 public:

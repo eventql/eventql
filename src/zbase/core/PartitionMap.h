@@ -23,7 +23,7 @@
 
 using namespace stx;
 
-namespace tsdb {
+namespace zbase {
 
 class PartitionMap {
 public:

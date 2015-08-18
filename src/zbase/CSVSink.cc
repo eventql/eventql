@@ -13,7 +13,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 CSVSink::CSVSink(
     const String& tempdir) :
@@ -41,5 +41,5 @@ RefPtr<VFSFile> CSVSink::finalize() {
       File::openFile(filename_, File::O_READ | File::O_AUTODELETE));
 }
 
-} // namespace cm
+} // namespace zbase
 

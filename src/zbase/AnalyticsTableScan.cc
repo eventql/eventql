@@ -10,7 +10,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 AnalyticsTableScan::AnalyticsTableScan() : rows_scanned_(0) {}
 
@@ -341,5 +341,5 @@ String AnalyticsTableScan::ColumnRef::getString() const {
   return String((char*) cur_data, cur_size);
 }
 
-} // namespace cm
+} // namespace zbase
 

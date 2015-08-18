@@ -24,7 +24,7 @@
 
 using namespace stx;
 
-namespace tsdb {
+namespace zbase {
 
 TSDBServlet::TSDBServlet(
     TSDBService* node,

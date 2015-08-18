@@ -19,7 +19,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 struct ECommerceKPIs {
   ECommerceKPIs();
@@ -72,6 +72,6 @@ protected:
   uint64_t window_secs_;
 };
 
-} // namespace cm
+} // namespace zbase
 
 #endif

@@ -21,7 +21,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 struct CatalogCategoryDashboardResult :
     public AnalyticsQueryResult::SubQueryResult {
@@ -35,6 +35,6 @@ struct CatalogCategoryDashboardResult :
   GroupResult<uint32_t, SearchCTRStats> children;
 };
 
-} // namespace cm
+} // namespace zbase
 
 #endif

@@ -17,7 +17,7 @@
 
 using namespace stx;
 
-namespace tsdb {
+namespace zbase {
 
 class TablePartitioner : public RefCounted {
 public:

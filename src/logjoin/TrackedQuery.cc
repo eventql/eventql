@@ -14,7 +14,7 @@
 #include "common.h"
 #include "logjoin/TrackedQuery.h"
 
-namespace cm {
+namespace zbase {
 
 TrackedQuery::TrackedQuery() :
     nitems(0),

@@ -14,7 +14,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 JSONExportRDD::JSONExportRDD(RefPtr<VTableSource> source) : source_(source) {}
 

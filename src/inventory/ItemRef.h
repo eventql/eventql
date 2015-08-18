@@ -18,7 +18,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 struct ItemRef {
   std::string set_id;
@@ -50,6 +50,6 @@ struct ItemRefWithPosition {
   }
 };
 
-} // namespace cm
+} // namespace zbase
 
 #endif

@@ -10,7 +10,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 Vector<PipelineInfo> PipelineInfo::forCustomer(const CustomerConfig& cfg) {
   Vector<PipelineInfo> pipelines;
@@ -68,4 +68,4 @@ Vector<PipelineInfo> PipelineInfo::forCustomer(const CustomerConfig& cfg) {
   return pipelines;
 }
 
-} // namespace cm
+} // namespace zbase

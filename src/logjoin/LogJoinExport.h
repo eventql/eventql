@@ -15,7 +15,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 class LogJoinExport {
 public:
@@ -32,5 +32,5 @@ protected:
   feeds::BrokerClient broker_;
 };
 
-} // namespace cm
+} // namespace zbase
 #endif

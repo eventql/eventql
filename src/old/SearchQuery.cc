@@ -13,7 +13,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 SearchQuery::SearchQuery() : total_hits_(0) {
   results_ = fts::TopScoreDocCollector::create(500, false);

@@ -7,7 +7,7 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-package cm;
+package zbase;
 import "core/TableConfig.proto";
 
 message TSDBNodeConfig {

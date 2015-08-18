@@ -12,7 +12,7 @@
 #include <stx/uri.h>
 #include "common.h"
 
-namespace cm {
+namespace zbase {
 
 bool isReservedPixelParam(const std::string p) {
   return p == "c" || p == "e" || p == "i" || p == "is" || p == "v";

@@ -18,7 +18,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 class AnalyticsTableScan {
 public:
@@ -71,6 +71,6 @@ protected:
   size_t rows_scanned_;
 };
 
-} // namespace cm
+} // namespace zbase
 
 #endif

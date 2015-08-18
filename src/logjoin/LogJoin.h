@@ -34,7 +34,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 class CustomerNamespace;
 
 /**
@@ -128,6 +128,6 @@ protected:
 
   Random rnd_;
 };
-} // namespace cm
+} // namespace zbase
 
 #endif

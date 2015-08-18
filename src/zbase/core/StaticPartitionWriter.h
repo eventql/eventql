@@ -15,7 +15,7 @@
 
 using namespace stx;
 
-namespace tsdb {
+namespace zbase {
 
 class StaticPartitionWriter : public PartitionWriter {
 public:

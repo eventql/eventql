@@ -10,13 +10,13 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 TopSearchTermsApp::TopSearchTermsApp(
-    tsdb::TSDBClient* tsdb) :
+    zbase::TSDBClient* tsdb) :
     dproc::DefaultApplication("cm.shopstats"),
     tsdb_(tsdb) {
 
 }
 
-} // namespace cm
+} // namespace zbase

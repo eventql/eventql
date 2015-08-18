@@ -13,7 +13,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 template <typename ProtoType>
 struct ProtoCRDT {
@@ -42,6 +42,6 @@ void ProtoCRDT<ProtoType>::encode(
 }
 
 
-} // namespace cm
+} // namespace zbase
 
 #endif

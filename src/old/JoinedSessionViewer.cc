@@ -1,7 +1,7 @@
 #include "JoinedSessionViewer.h"
 
 using namespace stx;
-namespace cm {
+namespace zbase {
 
 void JoinedSessionViewer::handleHTTPRequest(
   stx::http::HTTPRequest* req,

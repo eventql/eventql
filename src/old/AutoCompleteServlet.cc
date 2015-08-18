@@ -15,7 +15,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 AutoCompleteServlet::AutoCompleteServlet(
     ModelCache* models) :

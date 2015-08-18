@@ -16,7 +16,7 @@
 
 using namespace stx;
 
-namespace tsdb {
+namespace zbase {
 
 class PartitionWriter : public RefCounted {
 public:

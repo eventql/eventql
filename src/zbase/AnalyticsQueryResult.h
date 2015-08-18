@@ -16,7 +16,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 struct AnalyticsSubQuery;
 
@@ -59,6 +59,6 @@ struct AnalyticsSubQuery : public RefCounted {
 
 };
 
-} // namespace cm
+} // namespace zbase
 
 #endif

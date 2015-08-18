@@ -10,7 +10,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 RelatedTermsMapper::RelatedTermsMapper(
     RefPtr<AnalyticsTableScanSource> input,
@@ -54,5 +54,5 @@ void RelatedTermsMapper::onFinish() {
   }
 }
 
-} // namespace cm
+} // namespace zbase
 

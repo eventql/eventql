@@ -15,7 +15,7 @@
 
 using namespace stx;
 
-namespace tsdb {
+namespace zbase {
 
 template <typename ScanletType>
 typename ScanletType::ResultType TSDBTableScan<ScanletType>::mergeResults(
@@ -201,4 +201,4 @@ typename TSDBTableScan<ScanletType>::ResultType*
 //  }
 //}
 
-} // namespace tsdb
+} // namespace zbase

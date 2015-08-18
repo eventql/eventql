@@ -12,7 +12,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 struct PipelineInfo {
   static Vector<PipelineInfo> forCustomer(const CustomerConfig& cfg);
@@ -24,4 +24,4 @@ struct PipelineInfo {
   String status;
 };
 
-} // namespace cm
+} // namespace zbase

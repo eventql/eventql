@@ -15,7 +15,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 class TopCategoriesByTermReport : public ReportRDD {
 public:
@@ -33,4 +33,4 @@ protected:
   RefPtr<CSVSink> output_table_;
 };
 
-} // namespace cm
+} // namespace zbase

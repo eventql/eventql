@@ -32,7 +32,7 @@
 using namespace stx;
 
 typedef Tuple<String, uint64_t, double> OutputRow;
-typedef HashMap<String, HashMap<uint64_t, cm::CTRCounterData>> CounterMap;
+typedef HashMap<String, HashMap<uint64_t, zbase::CTRCounterData>> CounterMap;
 
 /* read all input sstables */
 void importInputTables(

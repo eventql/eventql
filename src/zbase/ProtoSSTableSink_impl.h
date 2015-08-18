@@ -10,7 +10,7 @@
 #include <stx/random.h>
 #include <stx/io/fileutil.h>
 
-namespace cm {
+namespace zbase {
 
 template <typename T>
 ProtoSSTableSink<T>::ProtoSSTableSink(
@@ -51,5 +51,5 @@ RefPtr<VFSFile> ProtoSSTableSink<T>::finalize() {
       File::openFile(output_file_, File::O_READ | File::O_AUTODELETE));
 }
 
-} // namespace cm
+} // namespace zbase
 

@@ -15,7 +15,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 TopSearchTermsReport::TopSearchTermsReport(
     const ReportParams& params,

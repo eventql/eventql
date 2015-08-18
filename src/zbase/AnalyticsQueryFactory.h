@@ -18,7 +18,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 class AnalyticsQueryFactory {
 public:
@@ -42,5 +42,5 @@ protected:
   HashMap<String, QueryFactoryFn> query_factories_;
 };
 
-} // namespace cm
+} // namespace zbase
 

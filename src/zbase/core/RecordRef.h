@@ -14,7 +14,7 @@
 
 using namespace stx;
 
-namespace tsdb {
+namespace zbase {
 
 struct RecordRef {
   RecordRef(const SHA1Hash& _record_id, const Buffer& _record);

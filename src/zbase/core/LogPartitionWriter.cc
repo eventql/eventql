@@ -15,7 +15,7 @@
 
 using namespace stx;
 
-namespace tsdb {
+namespace zbase {
 
 LogPartitionWriter::LogPartitionWriter(
     PartitionSnapshotRef* head) :

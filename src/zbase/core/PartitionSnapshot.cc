@@ -15,7 +15,7 @@
 
 using namespace stx;
 
-namespace tsdb {
+namespace zbase {
 
 PartitionSnapshot::PartitionSnapshot(
     const PartitionState& _state,

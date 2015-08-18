@@ -19,7 +19,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 class CTRByResultItemCategoryQuery : public AnalyticsSubQuery {
 public:
@@ -43,6 +43,6 @@ protected:
   RefPtr<AnalyticsTableScan::ColumnRef> cat3_col_;
 };
 
-} // namespace cm
+} // namespace zbase
 
 #endif

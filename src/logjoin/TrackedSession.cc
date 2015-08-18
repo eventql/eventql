@@ -12,7 +12,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 TrackedEvent::TrackedEvent(
     UnixTime _time,
@@ -110,4 +110,4 @@ void TrackedSession::decode(InputStream* is) {
   }
 }
 
-} // namespace cm
+} // namespace zbase

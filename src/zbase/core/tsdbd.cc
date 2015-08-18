@@ -105,7 +105,7 @@ int main(int argc, const char** argv) {
 
   /* conf */
   auto conf_data = FileUtil::read(flags.getString("conf"));
-  auto conf = msg::parseText<tsdb::TSDBNodeConfig>(conf_data);
+  auto conf = msg::parseText<zbase::TSDBNodeConfig>(conf_data);
 
   /* start http server and worker pools */
   stx::thread::ThreadPool tpool;
@@ -114,12 +114,12 @@ int main(int argc, const char** argv) {
   stx::http::HTTPServer http_server(&http_router, &ev);
   http_server.listen(flags.getInt("http_port"));
 
-  tsdb::PartitionMap pmap(dir);
+  zbase::PartitionMap pmap(dir);
   pmap.open();
 
-  tsdb::TSDBService tsdb_node(&pmap);
+  zbase::TSDBService tsdb_node(&pmap);
 
-  tsdb::TSDBServlet tsdb_servlet(&tsdb_node, "/tmp");
+  zbase::TSDBServlet tsdb_servlet(&tsdb_node, "/tmp");
   http_router.addRouteByPrefixMatch("/tsdb", &tsdb_servlet, &tpool);
 
   ev.run();

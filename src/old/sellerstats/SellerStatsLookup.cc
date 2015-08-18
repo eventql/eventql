@@ -11,7 +11,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 String SellerStatsLookup::lookup(
     const String& shopid,
@@ -90,5 +90,5 @@ String SellerStatsLookup::lookup(
   return out;
 }
 
-} // namespace cm
+} // namespace zbase
 

@@ -17,7 +17,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 enum ConfigTopic : uint64_t {
   CUSTOMERS = 1,
@@ -80,4 +80,4 @@ protected:
   std::thread watcher_thread_;
 };
 
-} // namespace cm
+} // namespace zbase

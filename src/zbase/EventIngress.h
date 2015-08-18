@@ -13,7 +13,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 class EventIngress {
 public:
@@ -32,7 +32,7 @@ public:
     const Buffer data;
   };
 
-  EventIngress(tsdb::TSDBClient* tsdb);
+  EventIngress(zbase::TSDBClient* tsdb);
 
   void insertEvents(
       const String& customer,
@@ -50,8 +50,8 @@ protected:
       const String& table_name,
       const List<Event>& events);
 
-  tsdb::TSDBClient* tsdb_;
+  zbase::TSDBClient* tsdb_;
 };
 
 
-} // namespace cm
+} // namespace zbase

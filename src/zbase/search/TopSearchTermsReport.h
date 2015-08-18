@@ -12,7 +12,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 class TopSearchTermsReport : public dproc::BlobRDD {
 public:
@@ -31,4 +31,4 @@ protected:
   Option<String> segments_;
 };
 
-} // namespace cm
+} // namespace zbase

@@ -11,7 +11,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 ShopCTRStatsScan::ShopCTRStatsScan(
     RefPtr<TSDBTableScanSource<JoinedSession>> input,
@@ -211,5 +211,5 @@ ShopKPIs* ShopCTRStatsScan::getKPIs(const String& shop_id, const UnixTime& time)
 }
 
 
-} // namespace cm
+} // namespace zbase
 

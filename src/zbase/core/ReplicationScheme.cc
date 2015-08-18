@@ -12,7 +12,7 @@
 
 using namespace stx;
 
-namespace tsdb {
+namespace zbase {
 
 ReplicaRef::ReplicaRef(
     SHA1Hash _unique_id,
@@ -64,4 +64,4 @@ bool FrontendReplicationScheme::hasLocalReplica(const SHA1Hash& key) {
   return false;
 }
 
-} // namespace tsdb
+} // namespace zbase

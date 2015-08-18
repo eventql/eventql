@@ -20,7 +20,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 class CTRCounterTableSink : public ReportSink {
 public:
@@ -42,6 +42,6 @@ protected:
   sstable::SSTableColumnSchema sstable_schema_;
 };
 
-} // namespace cm
+} // namespace zbase
 
 #endif

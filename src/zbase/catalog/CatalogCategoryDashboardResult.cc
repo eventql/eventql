@@ -10,7 +10,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 void CatalogCategoryDashboardResult::merge(
     const AnalyticsQueryResult::SubQueryResult& o) {
@@ -102,5 +102,5 @@ void CatalogCategoryDashboardResult::applyTimeRange(
   parent.applyTimeRange(from, until);
 }
 
-} // namespace cm
+} // namespace zbase
 

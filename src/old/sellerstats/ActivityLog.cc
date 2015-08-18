@@ -10,7 +10,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 void ActivityLog::append(
     const String& shopid,
@@ -106,5 +106,5 @@ size_t ActivityLog::fetch(
   return n;
 }
 
-} // namespace cm
+} // namespace zbase
 

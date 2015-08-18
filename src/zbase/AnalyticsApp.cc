@@ -62,13 +62,13 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 AnalyticsApp::AnalyticsApp(
-    tsdb::TSDBService* tsdb_node,
-    tsdb::PartitionMap* partition_map,
-    tsdb::ReplicationScheme* replication_scheme,
-    tsdb::CSTableIndex* cstable_index,
+    zbase::TSDBService* tsdb_node,
+    zbase::PartitionMap* partition_map,
+    zbase::ReplicationScheme* replication_scheme,
+    zbase::CSTableIndex* cstable_index,
     ConfigDirectory* cdb,
     AnalyticsAuth* auth,
     csql::Runtime* sql,
@@ -107,24 +107,24 @@ AnalyticsApp::AnalyticsApp(
   });
 
   queries_.registerQuery("discovery.CTRByPositionQuery", [] (
-      const cm::AnalyticsQuery& query,
-      const cm::AnalyticsQuery::SubQueryParams params,
-      const Vector<RefPtr<cm::TrafficSegment>>& segments,
-      cm::AnalyticsTableScan* scan) {
-    return new cm::CTRByPositionQuery(scan, segments);
+      const zbase::AnalyticsQuery& query,
+      const zbase::AnalyticsQuery::SubQueryParams params,
+      const Vector<RefPtr<zbase::TrafficSegment>>& segments,
+      zbase::AnalyticsTableScan* scan) {
+    return new zbase::CTRByPositionQuery(scan, segments);
   });
 
   queries_.registerQuery("discovery.CTRByPageQuery", [] (
-      const cm::AnalyticsQuery& query,
-      const cm::AnalyticsQuery::SubQueryParams params,
-      const Vector<RefPtr<cm::TrafficSegment>>& segments,
-      cm::AnalyticsTableScan* scan) {
-    return new cm::CTRByPageQuery(scan, segments);
+      const zbase::AnalyticsQuery& query,
+      const zbase::AnalyticsQuery::SubQueryParams params,
+      const Vector<RefPtr<zbase::TrafficSegment>>& segments,
+      zbase::AnalyticsTableScan* scan) {
+    return new zbase::CTRByPageQuery(scan, segments);
   });
 
-  registerProtoRDDFactory<tsdb::TSDBTableScanSpec>(
+  registerProtoRDDFactory<zbase::TSDBTableScanSpec>(
       "discovery.ItemBoostMapper",
-      [this] (const tsdb::TSDBTableScanSpec& params)
+      [this] (const zbase::TSDBTableScanSpec& params)
           -> RefPtr<dproc::Task> {
         auto report = new ItemBoostMapper(
             new AnalyticsTableScanSource(params, tsdb_node_),
@@ -177,20 +177,20 @@ AnalyticsApp::AnalyticsApp(
 
 
   queries_.registerQuery("search.CTRByResultItemCategoryQuery", [] (
-      const cm::AnalyticsQuery& query,
-      const cm::AnalyticsQuery::SubQueryParams params,
-      const Vector<RefPtr<cm::TrafficSegment>>& segments,
-      cm::AnalyticsTableScan* scan) {
-    return new cm::CTRByResultItemCategoryQuery(scan, segments);
+      const zbase::AnalyticsQuery& query,
+      const zbase::AnalyticsQuery::SubQueryParams params,
+      const Vector<RefPtr<zbase::TrafficSegment>>& segments,
+      zbase::AnalyticsTableScan* scan) {
+    return new zbase::CTRByResultItemCategoryQuery(scan, segments);
   });
 
 
   queries_.registerQuery("search.SearchDashboardQuery", [] (
-      const cm::AnalyticsQuery& query,
-      const cm::AnalyticsQuery::SubQueryParams params,
-      const Vector<RefPtr<cm::TrafficSegment>>& segments,
-      cm::AnalyticsTableScan* scan) {
-    return new cm::SearchDashboardQuery(
+      const zbase::AnalyticsQuery& query,
+      const zbase::AnalyticsQuery::SubQueryParams params,
+      const Vector<RefPtr<zbase::TrafficSegment>>& segments,
+      zbase::AnalyticsTableScan* scan) {
+    return new zbase::SearchDashboardQuery(
         scan,
         segments,
         query.start_time,
@@ -199,11 +199,11 @@ AnalyticsApp::AnalyticsApp(
   });
 
   queries_.registerQuery("catalog.CatalogDashboardQuery", [] (
-      const cm::AnalyticsQuery& query,
-      const cm::AnalyticsQuery::SubQueryParams params,
-      const Vector<RefPtr<cm::TrafficSegment>>& segments,
-      cm::AnalyticsTableScan* scan) {
-    return new cm::CatalogDashboardQuery(
+      const zbase::AnalyticsQuery& query,
+      const zbase::AnalyticsQuery::SubQueryParams params,
+      const Vector<RefPtr<zbase::TrafficSegment>>& segments,
+      zbase::AnalyticsTableScan* scan) {
+    return new zbase::CatalogDashboardQuery(
         scan,
         segments,
         query.start_time,
@@ -212,11 +212,11 @@ AnalyticsApp::AnalyticsApp(
   });
 
   queries_.registerQuery("catalog.CatalogCategoryE0DashboardQuery", [] (
-      const cm::AnalyticsQuery& query,
-      const cm::AnalyticsQuery::SubQueryParams params,
-      const Vector<RefPtr<cm::TrafficSegment>>& segments,
-      cm::AnalyticsTableScan* scan) {
-    return new cm::CatalogCategoryDashboardQuery(
+      const zbase::AnalyticsQuery& query,
+      const zbase::AnalyticsQuery::SubQueryParams params,
+      const Vector<RefPtr<zbase::TrafficSegment>>& segments,
+      zbase::AnalyticsTableScan* scan) {
+    return new zbase::CatalogCategoryDashboardQuery(
         scan,
         segments,
         query.start_time,
@@ -227,11 +227,11 @@ AnalyticsApp::AnalyticsApp(
   });
 
   queries_.registerQuery("catalog.CatalogCategoryE1DashboardQuery", [] (
-      const cm::AnalyticsQuery& query,
-      const cm::AnalyticsQuery::SubQueryParams params,
-      const Vector<RefPtr<cm::TrafficSegment>>& segments,
-      cm::AnalyticsTableScan* scan) {
-    return new cm::CatalogCategoryDashboardQuery(
+      const zbase::AnalyticsQuery& query,
+      const zbase::AnalyticsQuery::SubQueryParams params,
+      const Vector<RefPtr<zbase::TrafficSegment>>& segments,
+      zbase::AnalyticsTableScan* scan) {
+    return new zbase::CatalogCategoryDashboardQuery(
         scan,
         segments,
         query.start_time,
@@ -242,11 +242,11 @@ AnalyticsApp::AnalyticsApp(
   });
 
   queries_.registerQuery("catalog.CatalogCategoryE2DashboardQuery", [] (
-      const cm::AnalyticsQuery& query,
-      const cm::AnalyticsQuery::SubQueryParams params,
-      const Vector<RefPtr<cm::TrafficSegment>>& segments,
-      cm::AnalyticsTableScan* scan) {
-    return new cm::CatalogCategoryDashboardQuery(
+      const zbase::AnalyticsQuery& query,
+      const zbase::AnalyticsQuery::SubQueryParams params,
+      const Vector<RefPtr<zbase::TrafficSegment>>& segments,
+      zbase::AnalyticsTableScan* scan) {
+    return new zbase::CatalogCategoryDashboardQuery(
         scan,
         segments,
         query.start_time,
@@ -257,11 +257,11 @@ AnalyticsApp::AnalyticsApp(
   });
 
   queries_.registerQuery("catalog.CatalogCategoryE3DashboardQuery", [] (
-      const cm::AnalyticsQuery& query,
-      const cm::AnalyticsQuery::SubQueryParams params,
-      const Vector<RefPtr<cm::TrafficSegment>>& segments,
-      cm::AnalyticsTableScan* scan) {
-    return new cm::CatalogCategoryDashboardQuery(
+      const zbase::AnalyticsQuery& query,
+      const zbase::AnalyticsQuery::SubQueryParams params,
+      const Vector<RefPtr<zbase::TrafficSegment>>& segments,
+      zbase::AnalyticsTableScan* scan) {
+    return new zbase::CatalogCategoryDashboardQuery(
         scan,
         segments,
         query.start_time,
@@ -272,19 +272,19 @@ AnalyticsApp::AnalyticsApp(
   });
 
   queries_.registerQuery("search.TopSearchTermsQuery", [] (
-      const cm::AnalyticsQuery& query,
-      const cm::AnalyticsQuery::SubQueryParams params,
-      const Vector<RefPtr<cm::TrafficSegment>>& segments,
-      cm::AnalyticsTableScan* scan) {
-    return new cm::TopSearchTermsQuery(scan, segments, params);
+      const zbase::AnalyticsQuery& query,
+      const zbase::AnalyticsQuery::SubQueryParams params,
+      const Vector<RefPtr<zbase::TrafficSegment>>& segments,
+      zbase::AnalyticsTableScan* scan) {
+    return new zbase::TopSearchTermsQuery(scan, segments, params);
   });
 
   queries_.registerQuery("ecommerce.ECommerceDashboardQuery", [] (
-      const cm::AnalyticsQuery& query,
-      const cm::AnalyticsQuery::SubQueryParams params,
-      const Vector<RefPtr<cm::TrafficSegment>>& segments,
-      cm::AnalyticsTableScan* scan) {
-    return new cm::ECommerceKPIQuery(
+      const zbase::AnalyticsQuery& query,
+      const zbase::AnalyticsQuery::SubQueryParams params,
+      const Vector<RefPtr<zbase::TrafficSegment>>& segments,
+      zbase::AnalyticsTableScan* scan) {
+    return new zbase::ECommerceKPIQuery(
         scan,
         segments,
         query.start_time,
@@ -293,11 +293,11 @@ AnalyticsApp::AnalyticsApp(
   });
 
   queries_.registerQuery("reco_engine.RecoEngineStatsQuery", [] (
-      const cm::AnalyticsQuery& query,
-      const cm::AnalyticsQuery::SubQueryParams params,
-      const Vector<RefPtr<cm::TrafficSegment>>& segments,
-      cm::AnalyticsTableScan* scan) {
-    return new cm::RecoEngineStatsQuery(
+      const zbase::AnalyticsQuery& query,
+      const zbase::AnalyticsQuery::SubQueryParams params,
+      const Vector<RefPtr<zbase::TrafficSegment>>& segments,
+      zbase::AnalyticsTableScan* scan) {
+    return new zbase::RecoEngineStatsQuery(
         scan,
         segments,
         query.start_time,
@@ -306,11 +306,11 @@ AnalyticsApp::AnalyticsApp(
   });
 
   queries_.registerQuery("reco_engine.RecoEngineStatsBreakdownQuery", [] (
-      const cm::AnalyticsQuery& query,
-      const cm::AnalyticsQuery::SubQueryParams params,
-      const Vector<RefPtr<cm::TrafficSegment>>& segments,
-      cm::AnalyticsTableScan* scan) {
-    return new cm::RecoEngineStatsBreakdownQuery(
+      const zbase::AnalyticsQuery& query,
+      const zbase::AnalyticsQuery::SubQueryParams params,
+      const Vector<RefPtr<zbase::TrafficSegment>>& segments,
+      zbase::AnalyticsTableScan* scan) {
+    return new zbase::RecoEngineStatsBreakdownQuery(
         scan,
         segments,
         query.start_time,
@@ -318,9 +318,9 @@ AnalyticsApp::AnalyticsApp(
         params);
   });
 
-  registerProtoRDDFactory<tsdb::TSDBTableScanSpec>(
+  registerProtoRDDFactory<zbase::TSDBTableScanSpec>(
       "reco_engine.ECommercePreferenceSetsFeed",
-      [this] (const tsdb::TSDBTableScanSpec& params)
+      [this] (const zbase::TSDBTableScanSpec& params)
           -> RefPtr<dproc::Task> {
         auto report = new ECommercePreferenceSetsFeed(
             new TSDBTableScanSource<JoinedSession>(params, tsdb_node_),
@@ -330,9 +330,9 @@ AnalyticsApp::AnalyticsApp(
       });
 
 
-  registerProtoRDDFactory<tsdb::TSDBTableScanSpec>(
+  registerProtoRDDFactory<zbase::TSDBTableScanSpec>(
       "reco_engine.ECommerceRecoQueriesFeed",
-      [this] (const tsdb::TSDBTableScanSpec& params)
+      [this] (const zbase::TSDBTableScanSpec& params)
           -> RefPtr<dproc::Task> {
         auto report = new ECommerceRecoQueriesFeed(
             new TSDBTableScanSource<JoinedSession>(params, tsdb_node_),
@@ -341,9 +341,9 @@ AnalyticsApp::AnalyticsApp(
         return report;
       });
 
-  registerProtoRDDFactory<tsdb::TSDBTableScanSpec>(
+  registerProtoRDDFactory<zbase::TSDBTableScanSpec>(
       "search.ECommerceSearchQueriesFeed",
-      [this] (const tsdb::TSDBTableScanSpec& params)
+      [this] (const zbase::TSDBTableScanSpec& params)
           -> RefPtr<dproc::Task> {
         auto report = new ECommerceSearchQueriesFeed(
             new TSDBTableScanSource<JoinedSession>(params, tsdb_node_),
@@ -382,9 +382,9 @@ AnalyticsApp::AnalyticsApp(
         )")));
   });
 
-  registerProtoRDDFactory<tsdb::TSDBTableScanSpec>(
+  registerProtoRDDFactory<zbase::TSDBTableScanSpec>(
       "search.RelatedTermsMapper",
-      [this] (const tsdb::TSDBTableScanSpec& params) -> RefPtr<dproc::Task> {
+      [this] (const zbase::TSDBTableScanSpec& params) -> RefPtr<dproc::Task> {
         auto report = new RelatedTermsMapper(
             new AnalyticsTableScanSource(params, tsdb_node_),
             new TermInfoTableSink());
@@ -416,9 +416,9 @@ AnalyticsApp::AnalyticsApp(
             new CSVSink());
       });
 
-  registerProtoRDDFactory<tsdb::TSDBTableScanSpec>(
+  registerProtoRDDFactory<zbase::TSDBTableScanSpec>(
       "search.TopTermsByCategoryMapper",
-      [this] (const tsdb::TSDBTableScanSpec& params) -> RefPtr<dproc::Task> {
+      [this] (const zbase::TSDBTableScanSpec& params) -> RefPtr<dproc::Task> {
         auto rparams = msg::decode<ReportParams>(
             params.scanlet_params().data(),
             params.scanlet_params().size());
@@ -521,9 +521,9 @@ AnalyticsApp::AnalyticsApp(
     return new RecoEngineStatsReport(msg::decode<ReportParams>(params));
   });
 
-  registerProtoRDDFactory<tsdb::TSDBTableScanSpec>(
+  registerProtoRDDFactory<zbase::TSDBTableScanSpec>(
       "shop_stats.ShopCTRStatsScan",
-      [this] (const tsdb::TSDBTableScanSpec& params) -> RefPtr<dproc::Task> {
+      [this] (const zbase::TSDBTableScanSpec& params) -> RefPtr<dproc::Task> {
     return new ShopCTRStatsScan(
             new TSDBTableScanSource<JoinedSession>(params, tsdb_node_),
             new ProtoSSTableSink<ShopKPIs>(),
@@ -532,9 +532,9 @@ AnalyticsApp::AnalyticsApp(
                 params.scanlet_params().size()));
   });
 
-  registerProtoRDDFactory<tsdb::TSDBTableScanSpec>(
+  registerProtoRDDFactory<zbase::TSDBTableScanSpec>(
       "shop_stats.ShopECommerceStatsScan",
-      [this] (const tsdb::TSDBTableScanSpec& params) -> RefPtr<dproc::Task> {
+      [this] (const zbase::TSDBTableScanSpec& params) -> RefPtr<dproc::Task> {
     return new ShopECommerceStatsScan(
             new TSDBTableScanSource<ECommerceTransaction>(params, tsdb_node_),
             new ProtoSSTableSink<ShopKPIs>(),
@@ -543,9 +543,9 @@ AnalyticsApp::AnalyticsApp(
                 params.scanlet_params().size()));
   });
 
-  registerProtoRDDFactory<tsdb::TSDBTableScanSpec>(
+  registerProtoRDDFactory<zbase::TSDBTableScanSpec>(
       "shop_stats.ShopProductCTRStatsScan",
-      [this] (const tsdb::TSDBTableScanSpec& params) -> RefPtr<dproc::Task> {
+      [this] (const zbase::TSDBTableScanSpec& params) -> RefPtr<dproc::Task> {
     return new ShopProductCTRStatsScan(
             new TSDBTableScanSource<JoinedSession>(params, tsdb_node_),
             new ProtoSSTableSink<ShopProductKPIs>(),
@@ -554,9 +554,9 @@ AnalyticsApp::AnalyticsApp(
                 params.scanlet_params().size()));
   });
 
-  registerProtoRDDFactory<tsdb::TSDBTableScanSpec>(
+  registerProtoRDDFactory<zbase::TSDBTableScanSpec>(
       "shop_stats.ShopProductECommerceStatsScan",
-      [this] (const tsdb::TSDBTableScanSpec& params) -> RefPtr<dproc::Task> {
+      [this] (const zbase::TSDBTableScanSpec& params) -> RefPtr<dproc::Task> {
     return new ShopProductECommerceStatsScan(
             new TSDBTableScanSource<ECommerceTransaction>(params, tsdb_node_),
             new ProtoSSTableSink<ShopProductKPIs>(),
@@ -601,9 +601,9 @@ AnalyticsApp::AnalyticsApp(
     return new ShopProductsDashboardQuery(params, tsdb_node_);
   });
 
-  registerProtoRDDFactory<tsdb::TSDBTableScanSpec>(
+  registerProtoRDDFactory<zbase::TSDBTableScanSpec>(
       "AnalyticsQueryMapper",
-      [this] (const tsdb::TSDBTableScanSpec& params) -> RefPtr<dproc::Task> {
+      [this] (const zbase::TSDBTableScanSpec& params) -> RefPtr<dproc::Task> {
     return new AnalyticsQueryMapper(params, partition_map_, &queries_);
   });
 
@@ -733,12 +733,12 @@ dproc::TaskSpec AnalyticsApp::buildFeedQuery(
   //    cfg.partition_size() * (sequence / cfg.num_shards());
 
   //auto table_name = cfg.table_name();
-  //auto partition_key = tsdb::TimeWindowPartitioner::partitionKeyFor(
+  //auto partition_key = zbase::TimeWindowPartitioner::partitionKeyFor(
   //    table_name,
   //    ts,
   //    cfg.partition_size());
 
-  //tsdb::TSDBTableScanSpec params;
+  //zbase::TSDBTableScanSpec params;
   //params.set_tsdb_namespace(customer);
   //params.set_table_name(table_name);
   //params.set_partition_sha1(partition_key.toString());
@@ -760,14 +760,14 @@ RefPtr<csql::ExecutionStrategy> AnalyticsApp::getExecutionStrategy(
   auto strategy = mkRef(new csql::DefaultExecutionStrategy());
 
   strategy->addTableProvider(
-      tsdb::SQLEngine::tableProviderForNamespace(
+      zbase::SQLEngine::tableProviderForNamespace(
           partition_map_,
           cstable_index_,
           customer));
 
   strategy->addQueryTreeRewriteRule(
       std::bind(
-          &tsdb::SQLEngine::rewriteQuery,
+          &zbase::SQLEngine::rewriteQuery,
           partition_map_,
           cstable_index_,
           customer,
@@ -785,7 +785,7 @@ void AnalyticsApp::updateTable(const TableDefinition& tbl, bool force) {
 }
 
 void AnalyticsApp::configureTable(const TableDefinition& tbl) {
-  tsdb::TableDefinition td;
+  zbase::TableDefinition td;
   td.set_tsdb_namespace(tbl.customer());
   td.set_table_name(tbl.table_name());
   *td.mutable_config() = tbl.config();
@@ -807,7 +807,7 @@ void AnalyticsApp::insertMetric(
     const String& metric,
     const UnixTime& time,
     const String& value) {
-  RefPtr<tsdb::Table> table;
+  RefPtr<zbase::Table> table;
   auto table_opt = partition_map_->findTable(customer, metric);
   if (table_opt.isEmpty()) {
     auto schema = msg::MessageSchema(
@@ -834,8 +834,8 @@ void AnalyticsApp::insertMetric(
     td.set_table_name(metric);
     auto tblcfg = td.mutable_config();
     tblcfg->set_schema(schema.encode().toString());
-    tblcfg->set_partitioner(tsdb::TBL_PARTITION_TIMEWINDOW);
-    tblcfg->set_storage(tsdb::TBL_STORAGE_LOG);
+    tblcfg->set_partitioner(zbase::TBL_PARTITION_TIMEWINDOW);
+    tblcfg->set_storage(zbase::TBL_STORAGE_LOG);
     createTable(td);
     table = partition_map_->findTable(customer, metric).get();
   } else {
@@ -852,7 +852,7 @@ void AnalyticsApp::insertMetric(
   tsdb_node_->insertRecord(
       customer,
       metric,
-      tsdb::TimeWindowPartitioner::partitionKeyFor(
+      zbase::TimeWindowPartitioner::partitionKeyFor(
           metric,
           time,
           table->partitionSize()),
@@ -864,4 +864,4 @@ LogfileService* AnalyticsApp::logfileService() {
   return &logfile_service_;
 }
 
-} // namespace cm
+} // namespace zbase

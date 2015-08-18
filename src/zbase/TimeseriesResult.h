@@ -19,7 +19,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 template <typename PointType>
 struct TimeseriesResult : public AnalyticsQueryResult::SubQueryResult {
@@ -59,7 +59,7 @@ struct TimeseriesBreakdownResult : public AnalyticsQueryResult::SubQueryResult {
 
 
 
-} // namespace cm
+} // namespace zbase
 
 #include "TimeseriesResult_impl.h"
 #endif

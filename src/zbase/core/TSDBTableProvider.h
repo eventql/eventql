@@ -18,7 +18,7 @@
 
 using namespace stx;
 
-namespace tsdb {
+namespace zbase {
 class TSDBService;
 
 struct TSDBTableProvider : public csql::TableProvider {

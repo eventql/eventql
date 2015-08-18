@@ -12,7 +12,7 @@
 #include "zbase/JoinedSession.pb.h"
 
 using namespace stx;
-using namespace cm;
+using namespace zbase;
 
 unsigned char test_session_bin[1759] = {
   0x82, 0x01, 0x89, 0x0b, 0x08, 0x01, 0x10, 0x02, 0x1a, 0x0d, 0x65, 0x2d,

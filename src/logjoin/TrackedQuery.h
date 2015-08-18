@@ -20,7 +20,7 @@
 
 #include <inventory/ItemRef.h>
 
-namespace cm {
+namespace zbase {
 class CustomerNamespace;
 
 struct TrackedQueryItem {
@@ -54,5 +54,5 @@ struct TrackedQuery {
   String joinedExperiments() const;
 };
 
-} // namespace cm
+} // namespace zbase
 #endif

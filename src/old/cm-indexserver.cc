@@ -92,7 +92,7 @@ int main(int argc, const char** argv) {
   auto conf_path = flags.getString("conf");
 
   /* open index */
-  auto index_reader = cm::IndexReader::openIndex(index_path);
+  auto index_reader = zbase::IndexReader::openIndex(index_path);
   auto analyzer = RefPtr<fts::Analyzer>(new fts::Analyzer(conf_path));
 
   /* start http server */
@@ -102,7 +102,7 @@ int main(int argc, const char** argv) {
   http_server.listen(flags.getInt("http_port"));
 
   /* index servlet */
-  cm::IndexServlet index_servlet(index_reader, analyzer);
+  zbase::IndexServlet index_servlet(index_reader, analyzer);
   http_router.addRouteByPrefixMatch("/index", &index_servlet);
 
   ev.run();

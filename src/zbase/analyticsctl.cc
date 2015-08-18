@@ -62,13 +62,13 @@ void cmd_import_session_sstable(const cli::FlagParser& flags) {
       flags.getString("sstable"));
 
   http::HTTPConnectionPool http(&ev);
-  tsdb::TSDBClient tsdb("http://localhost:8000/tsdb", &http);
+  zbase::TSDBClient tsdb("http://localhost:8000/tsdb", &http);
 
   sstable::SSTableReader reader(flags.getString("sstable"));
   auto cursor = reader.getCursor();
 
   auto batch_size = 100;
-  tsdb::RecordEnvelopeList batch;
+  zbase::RecordEnvelopeList batch;
   auto upload_batch = [&tsdb, &batch] {
     stx::logInfo(
         "analyticsctl",
@@ -88,7 +88,7 @@ void cmd_import_session_sstable(const cli::FlagParser& flags) {
     auto record_id = SHA1::compute(cursor->getKeyBuffer());
     auto record_data = cursor->getDataBuffer();
 
-    auto session = msg::decode<cm::JoinedSession>(record_data);
+    auto session = msg::decode<zbase::JoinedSession>(record_data);
     auto time = UnixTime(session.first_seen_time() * kMicrosPerSecond);
     if (time.unixMicros() == 0) {
       RAISE(kRuntimeError, "session has no time");
@@ -96,7 +96,7 @@ void cmd_import_session_sstable(const cli::FlagParser& flags) {
 
     auto tsdb_ns = "dawanda";
     auto table_name = "logjoin.joined_sessions";
-    auto partition_key = tsdb::TimeWindowPartitioner::partitionKeyFor(
+    auto partition_key = zbase::TimeWindowPartitioner::partitionKeyFor(
         table_name,
         time,
         4 * kMicrosPerHour);
@@ -144,13 +144,13 @@ void cmd_backfill_session_sstable(const cli::FlagParser& flags) {
       flags.getString("sstable"));
 
   http::HTTPConnectionPool http(&ev);
-  tsdb::TSDBClient tsdb("http://nue05.prod.fnrd.net:7004/tsdb", &http);
+  zbase::TSDBClient tsdb("http://nue05.prod.fnrd.net:7004/tsdb", &http);
 
   sstable::SSTableReader reader(flags.getString("sstable"));
   auto cursor = reader.getCursor();
 
   auto batch_size = 100;
-  tsdb::RecordEnvelopeList batch;
+  zbase::RecordEnvelopeList batch;
   auto upload_batch = [&tsdb, &batch] {
     stx::logInfo(
         "analyticsctl",
@@ -172,12 +172,12 @@ void cmd_backfill_session_sstable(const cli::FlagParser& flags) {
     auto record_id = SHA1::compute(cursor->getKeyBuffer());
     auto record_data = cursor->getDataBuffer();
 
-    auto old_session = msg::decode<cm::JoinedSession>(record_data);
+    auto old_session = msg::decode<zbase::JoinedSession>(record_data);
     if (old_session.last_seen_time() == 0) {
       RAISE(kRuntimeError, "last seen time is empty");
     }
 
-    cm::NewJoinedSession new_session;
+    zbase::NewJoinedSession new_session;
 
     size_t n = 0;
     for (const auto& old_ev : old_session.search_queries()) {
@@ -189,7 +189,7 @@ void cmd_backfill_session_sstable(const cli::FlagParser& flags) {
       auto evkey = table_name + ".search_query";
       auto evid = SHA1::compute(
           record_id.toString() + StringUtil::toString(++n));
-      auto partition_key = tsdb::TimeWindowPartitioner::partitionKeyFor(
+      auto partition_key = zbase::TimeWindowPartitioner::partitionKeyFor(
           evkey,
           old_ev.time() * kMicrosPerSecond,
           4 * kMicrosPerHour);
@@ -211,7 +211,7 @@ void cmd_backfill_session_sstable(const cli::FlagParser& flags) {
       auto evkey = table_name + ".page_view";
       auto evid = SHA1::compute(
           record_id.toString() + StringUtil::toString(++n));
-      auto partition_key = tsdb::TimeWindowPartitioner::partitionKeyFor(
+      auto partition_key = zbase::TimeWindowPartitioner::partitionKeyFor(
           evkey,
           old_ev.time() * kMicrosPerSecond,
           4 * kMicrosPerHour);
@@ -233,7 +233,7 @@ void cmd_backfill_session_sstable(const cli::FlagParser& flags) {
       auto evkey = table_name + ".cart_items";
       auto evid = SHA1::compute(
           record_id.toString() + StringUtil::toString(++n));
-      auto partition_key = tsdb::TimeWindowPartitioner::partitionKeyFor(
+      auto partition_key = zbase::TimeWindowPartitioner::partitionKeyFor(
           evkey,
           old_ev.time() * kMicrosPerSecond,
           4 * kMicrosPerHour);
@@ -263,7 +263,7 @@ void cmd_backfill_session_sstable(const cli::FlagParser& flags) {
 
     {
       auto time = UnixTime(old_session.last_seen_time() * kMicrosPerSecond);
-      auto partition_key = tsdb::TimeWindowPartitioner::partitionKeyFor(
+      auto partition_key = zbase::TimeWindowPartitioner::partitionKeyFor(
           table_name,
           time,
           4 * kMicrosPerHour);

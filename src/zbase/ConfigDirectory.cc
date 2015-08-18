@@ -15,7 +15,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 ConfigDirectory::ConfigDirectory(
     const String& path,
@@ -440,4 +440,4 @@ void ConfigDirectory::stopWatcher() {
   watcher_thread_.join();
 }
 
-} // namespace cm
+} // namespace zbase

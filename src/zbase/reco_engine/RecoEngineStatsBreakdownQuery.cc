@@ -12,7 +12,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 RecoEngineStatsBreakdownQuery::RecoEngineStatsBreakdownQuery(
     AnalyticsTableScan* query,
@@ -130,5 +130,5 @@ Function<String ()> RecoEngineStatsBreakdownQuery::getDimension(
   }
 }
 
-} // namespace cm
+} // namespace zbase
 

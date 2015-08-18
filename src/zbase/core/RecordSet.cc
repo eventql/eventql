@@ -17,7 +17,7 @@
 
 using namespace stx;
 
-namespace tsdb {
+namespace zbase {
 
 RecordRef::RecordRef(
     const SHA1Hash& _record_id,
@@ -521,5 +521,5 @@ SHA1Hash RecordSet::calculateChecksum(const Set<SHA1Hash>& id_set) const {
   return SHA1::compute(id_set_concat);
 }
 
-} // namespace tsdb
+} // namespace zbase
 

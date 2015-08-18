@@ -30,7 +30,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 class IndexWriter : public RefCounted {
 public:
@@ -68,6 +68,6 @@ protected:
   stx::stats::Counter<uint64_t> stat_documents_indexed_fts_;
 };
 
-} // namespace cm
+} // namespace zbase
 
 #endif

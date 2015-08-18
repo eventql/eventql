@@ -15,21 +15,21 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 template <typename ProtoType>
 class TSDBTableScanSource : public ReportSource {
 public:
 
   static List<RefPtr<TSDBTableScanSource>> mapStream(
-      tsdb::TSDBService* tsdb,
+      zbase::TSDBService* tsdb,
       const String& stream,
       const UnixTime& from,
       const UnixTime& until);
 
   TSDBTableScanSource(
-      const tsdb::TSDBTableScanSpec& params,
-      tsdb::TSDBService* tsdb);
+      const zbase::TSDBTableScanSpec& params,
+      zbase::TSDBService* tsdb);
 
   void read(dproc::TaskContext* context) override;
   AnalyticsTableScan* tableScan();
@@ -47,14 +47,14 @@ protected:
   void scanWithoutIndex(dproc::TaskContext* context);
   void scanWithCSTableIndex(dproc::TaskContext* context);
 
-  tsdb::TSDBTableScanSpec params_;
-  tsdb::TSDBService* tsdb_;
+  zbase::TSDBTableScanSpec params_;
+  zbase::TSDBService* tsdb_;
   AnalyticsTableScan scan_;
   Function <void (const ProtoType&)> fn_;
   Set<String> required_fields_;
 };
 
-} // namespace cm
+} // namespace zbase
 
 #include "TSDBTableScanSource_impl.h"
 #endif

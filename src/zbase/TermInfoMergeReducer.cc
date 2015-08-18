@@ -10,7 +10,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 TermInfoMergeReducer::TermInfoMergeReducer(
     RefPtr<TermInfoTableSource> input,
@@ -37,5 +37,5 @@ void TermInfoMergeReducer::onFinish() {
   }
 }
 
-} // namespace cm
+} // namespace zbase
 

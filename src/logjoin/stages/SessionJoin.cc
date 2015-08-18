@@ -11,7 +11,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 void SessionJoin::process(RefPtr<SessionContext> ctx) {
 
@@ -140,14 +140,14 @@ void SessionJoin::process(RefPtr<SessionContext> ctx) {
         "search_query")->obj;
 
     qobj.addField("time", StringUtil::toString(q.time.unixMicros()));
-    qobj.addUInt32Field("language", (uint32_t) cm::extractLanguage(q.attrs));
+    qobj.addUInt32Field("language", (uint32_t) zbase::extractLanguage(q.attrs));
 
-    auto qstr = cm::extractQueryString(q.attrs);
+    auto qstr = zbase::extractQueryString(q.attrs);
     if (!qstr.isEmpty()) {
       qobj.addStringField("query_string", qstr.get());
     }
 
-    auto slrid = cm::extractAttr(q.attrs, "slrid");
+    auto slrid = zbase::extractAttr(q.attrs, "slrid");
     if (!slrid.isEmpty()) {
       qobj.addField("shop_id", slrid.get());
     }
@@ -161,34 +161,34 @@ void SessionJoin::process(RefPtr<SessionContext> ctx) {
     qobj.addUInt32Field("num_order_items", q.num_order_items);
     qobj.addUInt32Field("gmv_eurcents", q.gmv_eurcents);
 
-    auto pg_str = cm::extractAttr(q.attrs, "pg");
+    auto pg_str = zbase::extractAttr(q.attrs, "pg");
     if (!pg_str.isEmpty()) {
       qobj.addField("ab_page", pg_str.get());
     }
 
-    auto abgrp = cm::extractABTestGroup(q.attrs);
+    auto abgrp = zbase::extractABTestGroup(q.attrs);
     if (!abgrp.isEmpty()) {
       qobj.addField("ab_test_group", StringUtil::toString(abgrp.get()));
     }
 
-    auto qcat1 = cm::extractAttr(q.attrs, "q_cat1");
+    auto qcat1 = zbase::extractAttr(q.attrs, "q_cat1");
     if (!qcat1.isEmpty()) {
       qobj.addField("category1", qcat1.get());
     }
 
-    auto qcat2 = cm::extractAttr(q.attrs, "q_cat2");
+    auto qcat2 = zbase::extractAttr(q.attrs, "q_cat2");
     if (!qcat2.isEmpty()) {
       qobj.addField("category2", qcat2.get());
     }
 
-    auto qcat3 = cm::extractAttr(q.attrs, "q_cat3");
+    auto qcat3 = zbase::extractAttr(q.attrs, "q_cat3");
     if (!qcat3.isEmpty()) {
       qobj.addField("category3", qcat3.get());
     }
 
     auto page_type = extractPageType(q.attrs);
     String query_type = pageTypeToString((PageType) page_type);
-    auto qtype_attr = cm::extractAttr(q.attrs, "qt");
+    auto qtype_attr = zbase::extractAttr(q.attrs, "qt");
     if (!qtype_attr.isEmpty()) {
       query_type = qtype_attr.get();
     }
@@ -293,5 +293,5 @@ void SessionJoin::processCartItemsEvent(
   }
 }
 
-} // namespace cm
+} // namespace zbase
 

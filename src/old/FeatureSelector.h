@@ -17,7 +17,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 class FeatureSelector {
 public:
@@ -34,6 +34,6 @@ protected:
   stx::fts::Analyzer* analyzer_;
 };
 
-} // namespace cm
+} // namespace zbase
 
 #endif

@@ -18,18 +18,18 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 class TopSearchTermsApp : public dproc::DefaultApplication {
 public:
 
-  TopSearchTermsApp(tsdb::TSDBClient* tsdb);
+  TopSearchTermsApp(zbase::TSDBClient* tsdb);
 
 protected:
 
-  tsdb::TSDBClient* tsdb_;
+  zbase::TSDBClient* tsdb_;
 };
 
-} // namespace cm
+} // namespace zbase
 
 #endif

@@ -22,7 +22,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 class CustomerNamespace;
 
 typedef Pair<UnixTime, json::JSONObject> ActivityLogEntry;
@@ -48,6 +48,6 @@ public:
       mdb::MDBTransaction* sellerstatsdb_txn);
 
 };
-} // namespace cm
+} // namespace zbase
 
 #endif

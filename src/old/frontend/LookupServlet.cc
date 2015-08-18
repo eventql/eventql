@@ -11,7 +11,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 LookupServlet::LookupServlet(const String& cmdata) : cmdata_(cmdata) {}
 

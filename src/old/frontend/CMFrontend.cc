@@ -24,7 +24,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 const unsigned char pixel_gif[42] = {
   0x47, 0x49, 0x46, 0x38, 0x39, 0x61, 0x01, 0x00, 0x01, 0x00, 0x80, 0x00,
@@ -243,4 +243,4 @@ void CMFrontend::recordLogLine(
   tracker_log_feed_->appendEntry(feedline);
 }
 
-} // namespace cm
+} // namespace zbase

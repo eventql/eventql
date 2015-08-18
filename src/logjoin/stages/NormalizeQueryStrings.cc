@@ -11,7 +11,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 void NormalizeQueryStrings::process(
       NormalizeFn normalize_fn,
@@ -28,5 +28,5 @@ void NormalizeQueryStrings::process(
   //}
 }
 
-} // namespace cm
+} // namespace zbase
 

@@ -15,7 +15,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 /**
  * The max time after which a click on a query result is considered a click
@@ -43,5 +43,5 @@ protected:
 
 };
 
-} // namespace cm
+} // namespace zbase
 

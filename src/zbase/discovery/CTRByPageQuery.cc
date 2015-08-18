@@ -11,7 +11,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 CTRByPageQuery::CTRByPageQuery(
     AnalyticsTableScan* query,
@@ -52,5 +52,5 @@ RefPtr<AnalyticsQueryResult::SubQueryResult> CTRByPageQuery::result() {
   return result_.get();
 }
 
-} // namespace cm
+} // namespace zbase
 

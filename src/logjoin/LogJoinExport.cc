@@ -11,7 +11,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 LogJoinExport::LogJoinExport(
     http::HTTPConnectionPool* http) :
@@ -56,4 +56,4 @@ void LogJoinExport::exportPreferenceSetFeed(const JoinedSession& session) {
 void LogJoinExport::exportQueryFeed(const JoinedSession& session) {
 }
 
-} // namespace cm
+} // namespace zbase

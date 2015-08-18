@@ -15,13 +15,13 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 class IndexServlet : public stx::http::HTTPService {
 public:
 
   IndexServlet(
-      RefPtr<cm::IndexReader> index,
+      RefPtr<zbase::IndexReader> index,
       RefPtr<fts::Analyzer> r);
 
   void handleHTTPRequest(
@@ -45,7 +45,7 @@ protected:
       http::HTTPResponse* response,
       URI* uri);
 
-  RefPtr<cm::IndexReader> index_;
+  RefPtr<zbase::IndexReader> index_;
   RefPtr<fts::Analyzer> analyzer_;
 };
 

@@ -10,7 +10,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 //size_t VTableRDD::rowCount() const {
 //  return rows_.size();
@@ -37,4 +37,4 @@ void VTableRDD::decode(RefPtr<VFSFile> src) {
   RAISE(kNotYetImplementedError);
 }
 
-} // namespace cm
+} // namespace zbase

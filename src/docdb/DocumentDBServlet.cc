@@ -10,7 +10,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 DocumentDBServlet::DocumentDBServlet(
     DocumentDB* docdb) :
@@ -321,4 +321,4 @@ void DocumentDBServlet::renderSQLQuery(const Document& doc, Buffer* buf) {
   json.endObject();
 }
 
-} // namespace cm
+} // namespace zbase

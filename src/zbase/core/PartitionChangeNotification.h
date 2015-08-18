@@ -15,7 +15,7 @@
 
 using namespace stx;
 
-namespace tsdb {
+namespace zbase {
 
 struct PartitionChangeNotification : public RefCounted {
   RefPtr<Partition> partition;

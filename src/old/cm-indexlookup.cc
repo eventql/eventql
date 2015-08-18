@@ -42,7 +42,7 @@
 #include "IndexChangeRequest.h"
 #include "IndexReader.h"
 
-using namespace cm;
+using namespace zbase;
 using namespace stx;
 
 int main(int argc, const char** argv) {
@@ -94,7 +94,7 @@ int main(int argc, const char** argv) {
 
   auto index_path = flags.getString("index");
 
-  auto index_reader = cm::IndexReader::openIndex(index_path);
+  auto index_reader = zbase::IndexReader::openIndex(index_path);
   stx::fts::Analyzer analyzer("./conf");
 
   if (flags.isSet("docid")) {
@@ -114,7 +114,7 @@ int main(int argc, const char** argv) {
 
     /* open full index  */
     auto fullindex_path = StringUtil::format("$0/docs", index_path);
-    cm::DocStore full_index(fullindex_path);
+    zbase::DocStore full_index(fullindex_path);
 
     auto doc = full_index.findDocument(docid);
     doc->debugPrint();

@@ -10,7 +10,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 RelatedTermsReport::RelatedTermsReport(
     RefPtr<TermInfoTableSource> input,
@@ -50,5 +50,5 @@ void RelatedTermsReport::onTermInfo(const String& term, const TermInfo& ti) {
 void RelatedTermsReport::onFinish() {
 }
 
-} // namespace cm
+} // namespace zbase
 

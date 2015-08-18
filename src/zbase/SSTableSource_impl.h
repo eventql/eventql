@@ -6,7 +6,7 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-namespace cm {
+namespace zbase {
 
 template <typename T>
 SSTableSource<T>::SSTableSource(
@@ -76,5 +76,5 @@ List<dproc::TaskDependency> SSTableSource<T>::dependencies() const {
   return deps_;
 }
 
-} // namespace cm
+} // namespace zbase
 

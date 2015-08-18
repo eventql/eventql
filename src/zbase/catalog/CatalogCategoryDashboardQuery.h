@@ -20,7 +20,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 class CatalogCategoryDashboardQuery : public AnalyticsSubQuery {
 public:
@@ -62,6 +62,6 @@ protected:
   uint64_t window_secs_;
 };
 
-} // namespace cm
+} // namespace zbase
 
 #endif

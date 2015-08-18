@@ -15,7 +15,7 @@
 #include "zbase/core/TimeWindowPartitioner.h"
 
 using namespace stx;
-using namespace tsdb;
+using namespace zbase;
 
 // FIXPAUL rename to TimeWindowPartitionerTest
 UNIT_TEST(TimeWindowPartitionerTest);

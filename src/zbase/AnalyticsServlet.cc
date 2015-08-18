@@ -36,7 +36,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 const char AnalyticsServlet::kSessionCookieKey[] = "__dxa_session";
 const uint64_t AnalyticsServlet::kSessionLifetimeMicros = 365 * kMicrosPerDay;
@@ -48,7 +48,7 @@ AnalyticsServlet::AnalyticsServlet(
     const String& cachedir,
     AnalyticsAuth* auth,
     csql::Runtime* sql,
-    tsdb::TSDBService* tsdb,
+    zbase::TSDBService* tsdb,
     ConfigDirectory* customer_dir,
     DocumentDB* docdb) :
     app_(app),
@@ -639,8 +639,8 @@ void AnalyticsServlet::createTable(
 
     auto tblcfg = td.mutable_config();
     tblcfg->set_schema(schema.encode().toString());
-    tblcfg->set_partitioner(tsdb::TBL_PARTITION_FIXED);
-    tblcfg->set_storage(tsdb::TBL_STORAGE_STATIC);
+    tblcfg->set_partitioner(zbase::TBL_PARTITION_FIXED);
+    tblcfg->set_storage(zbase::TBL_STORAGE_STATIC);
     tblcfg->set_num_shards(num_shards.isEmpty() ? 1 : num_shards.get());
 
     auto update_param = json::objectGetBool(jreq, "update");
@@ -690,7 +690,7 @@ void AnalyticsServlet::uploadTable(
       cachedir_,
       StringUtil::format("upload_$0.tmp", Random::singleton()->hex128()));
 
-  auto partition_key = tsdb::FixedShardPartitioner::partitionKeyFor(
+  auto partition_key = zbase::FixedShardPartitioner::partitionKeyFor(
       table_name,
       shard);
 
@@ -1091,4 +1091,4 @@ void AnalyticsServlet::performLogin(
 }
 
 
-} // namespace cm
+} // namespace zbase

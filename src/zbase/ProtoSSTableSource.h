@@ -13,7 +13,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 template <typename T>
 class AbstractProtoSSTableSource : public ReportSource {
@@ -42,6 +42,6 @@ protected:
   List<dproc::TaskDependency> deps_;
 };
 
-} // namespace cm
+} // namespace zbase
 
 #include "ProtoSSTableSource_impl.h"

@@ -9,7 +9,7 @@
 #include "zbase/Report.h"
 #include "zbase/shop_stats/ShopStats.h"
 
-namespace cm {
+namespace zbase {
 
 static double mkRate(double num, double div) {
   if (div == 0 || num == 0) {
@@ -252,4 +252,4 @@ void ShopStats::toRow(const ShopProductKPIs& src, Vector<csql::SValue>* dst) {
       mkRate(src.ad_clicks(), src.ad_impressions())));
 }
 
-} // namespace cm
+} // namespace zbase

@@ -11,7 +11,7 @@
 
 using namespace stx;
 
-namespace tsdb {
+namespace zbase {
 
 uint64_t replicatedOffsetFor(
     const ReplicationState& repl_state,

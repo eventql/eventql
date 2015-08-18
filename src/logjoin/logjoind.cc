@@ -45,11 +45,11 @@
 #include "zbase/SessionSchema.h"
 #include "common.h"
 
-using namespace cm;
+using namespace zbase;
 using namespace stx;
 
 stx::thread::EventLoop ev;
-cm::LogJoin* logjoin_instance;
+zbase::LogJoin* logjoin_instance;
 
 void quit(int n) {
   logjoin_instance->shutdown();
@@ -199,7 +199,7 @@ int main(int argc, const char** argv) {
   statsd_agent.start();
 
   /* get logjoin shard */
-  cm::LogJoinShardMap shard_map;
+  zbase::LogJoinShardMap shard_map;
   auto shard = shard_map.getShard(flags.getString("shard"));
 
   /* open customer directory */
@@ -231,7 +231,7 @@ int main(int argc, const char** argv) {
       shard.shard_name + "/spool");
 
   FileUtil::mkdir_p(spool_path);
-  cm::SessionProcessor session_proc(&customer_dir, spool_path);
+  zbase::SessionProcessor session_proc(&customer_dir, spool_path);
 
   /* pipeline stage: session join */
   session_proc.addPipelineStage(
@@ -280,7 +280,7 @@ int main(int argc, const char** argv) {
   auto sessdb = mdb::MDB::open(flags.getString("datadir"), mdb_opts);
 
   /* setup logjoin */
-  cm::LogJoin logjoin(shard, dry_run, sessdb, &session_proc, &ev);
+  zbase::LogJoin logjoin(shard, dry_run, sessdb, &session_proc, &ev);
   logjoin.exportStats("/logjoind/global");
   logjoin.exportStats(StringUtil::format("/logjoind/$0", shard.shard_name));
 
@@ -301,7 +301,7 @@ int main(int argc, const char** argv) {
       shard.shard_name,
       shard.begin,
       shard.end,
-      cm::LogJoinShard::modulo);
+      zbase::LogJoinShard::modulo);
 
   customer_dir.startWatcher();
   session_proc.start();

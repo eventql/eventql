@@ -20,7 +20,7 @@
 #include <stx/http/httpconnectionpool.h>
 #include "crawler/crawlrequest.h"
 
-namespace cm {
+namespace zbase {
 
 class Crawler {
 public:
@@ -51,5 +51,5 @@ protected:
   std::mutex enqueue_lock_;
 };
 
-} // namespace cm
+} // namespace zbase
 #endif

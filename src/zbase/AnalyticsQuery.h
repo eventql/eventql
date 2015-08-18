@@ -16,7 +16,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 struct AnalyticsQueryStatus : public RefCounted {
   AnalyticsQueryStatus();
@@ -57,6 +57,6 @@ struct AnalyticsQuery {
   void loadSegmentsJSON(const json::JSONObject& json);
 };
 
-} // namespace cm
+} // namespace zbase
 
 #endif

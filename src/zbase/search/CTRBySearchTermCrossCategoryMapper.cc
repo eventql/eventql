@@ -10,7 +10,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 CTRBySearchTermCrossCategoryMapper::CTRBySearchTermCrossCategoryMapper(
     RefPtr<AnalyticsTableScanSource> input,
@@ -78,5 +78,5 @@ void CTRBySearchTermCrossCategoryMapper::onFinish() {
 }
 
 
-} // namespace cm
+} // namespace zbase
 

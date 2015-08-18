@@ -25,7 +25,7 @@
 
 using namespace stx;
 
-namespace tsdb {
+namespace zbase {
 
 RefPtr<Partition> Partition::create(
     const String& tsdb_namespace,
@@ -113,11 +113,11 @@ RefPtr<PartitionWriter> Partition::getWriter() {
   if (writer_.get() == nullptr) {
     switch (table_->storage()) {
 
-      case tsdb::TBL_STORAGE_LOG:
+      case zbase::TBL_STORAGE_LOG:
         writer_ = mkRef<PartitionWriter>(new LogPartitionWriter(&head_));
         break;
 
-      case tsdb::TBL_STORAGE_STATIC:
+      case zbase::TBL_STORAGE_STATIC:
         writer_ = mkRef<PartitionWriter>(new StaticPartitionWriter(&head_));
         break;
 
@@ -163,13 +163,13 @@ RefPtr<PartitionReplication> Partition::getReplicationStrategy(
     http::HTTPConnectionPool* http) {
   switch (table_->storage()) {
 
-    case tsdb::TBL_STORAGE_LOG:
+    case zbase::TBL_STORAGE_LOG:
       return new LogPartitionReplication(
           this,
           repl_scheme,
           http);
 
-    case tsdb::TBL_STORAGE_STATIC:
+    case zbase::TBL_STORAGE_STATIC:
       return new StaticPartitionReplication(
           this,
           repl_scheme,

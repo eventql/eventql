@@ -15,7 +15,7 @@
 
 using namespace stx;
 
-namespace tsdb {
+namespace zbase {
 class Table;
 
 struct PartitionSnapshot : public RefCounted {

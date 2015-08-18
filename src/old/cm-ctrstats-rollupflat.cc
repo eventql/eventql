@@ -41,7 +41,7 @@ typedef Tuple<
     double,
     double,
     double> OutputRow;
-typedef HashMap<String, cm::CTRCounterData> CounterMap;
+typedef HashMap<String, zbase::CTRCounterData> CounterMap;
 
 /* read all input sstables */
 void importInputTables(const Vector<String> sstables, CounterMap* counters) {
@@ -207,7 +207,7 @@ int main(int argc, const char** argv) {
       strToLogLevel(flags.getString("loglevel")));
 
   /* read input tables */
-  HashMap<String, cm::CTRCounterData> counters;
+  HashMap<String, zbase::CTRCounterData> counters;
   importInputTables(flags.getArgv(), &counters);
 
   /* aggregate counters */

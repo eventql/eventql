@@ -11,7 +11,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 FeatureSelector::FeatureSelector(
       FeatureIndex* feature_index,
@@ -113,5 +113,5 @@ void FeatureSelector::featuresFor(
   }
 }
 
-} // namespace cm
+} // namespace zbase
 

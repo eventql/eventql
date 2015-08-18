@@ -27,7 +27,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 struct AnalyticsQuery;
 
@@ -43,7 +43,7 @@ public:
       const String& cachedir,
       AnalyticsAuth* auth,
       csql::Runtime* sql,
-      tsdb::TSDBService* tsdb,
+      zbase::TSDBService* tsdb,
       ConfigDirectory* customer_dir,
       DocumentDB* docdb);
 
@@ -158,7 +158,7 @@ protected:
   String cachedir_;
   AnalyticsAuth* auth_;
   csql::Runtime* sql_;
-  tsdb::TSDBService* tsdb_;
+  zbase::TSDBService* tsdb_;
   ConfigDirectory* customer_dir_;
 
   LogfileAPIServlet logfile_api_;

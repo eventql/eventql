@@ -9,7 +9,7 @@
 import "CodingOptions.proto";
 import "Currency.proto";
 
-package cm;
+package zbase;
 
 enum ProtoLanguage {
   LANGUAGE_UNKNOWN_LANGUAGE = 0;

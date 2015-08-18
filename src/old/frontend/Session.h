@@ -16,7 +16,7 @@
 #include <inventory/ItemRef.h>
 #include "trackedquery.h"
 
-namespace cm {
+namespace zbase {
 
 class Session {
   Session();
@@ -25,5 +25,5 @@ protected:
   std::unordered_map<std::string, TrackedQuery> queries_;
 };
 
-} // namespace cm
+} // namespace zbase
 #endif

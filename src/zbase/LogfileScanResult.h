@@ -14,7 +14,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 struct LogfileScanLine {
   UnixTime time;
@@ -70,4 +70,4 @@ protected:
   Vector<String> columns_;
 };
 
-} // namespace cm
+} // namespace zbase

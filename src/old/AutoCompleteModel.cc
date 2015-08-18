@@ -13,7 +13,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 RefPtr<AutoCompleteModel> AutoCompleteModel::fromCache(
     const String& customer,

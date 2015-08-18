@@ -15,12 +15,12 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 template <typename ProtoType>
 TSDBTableScanSource<ProtoType>::TSDBTableScanSource(
-    const tsdb::TSDBTableScanSpec& params,
-    tsdb::TSDBService* tsdb) :
+    const zbase::TSDBTableScanSpec& params,
+    zbase::TSDBService* tsdb) :
     params_(params),
     tsdb_(tsdb) {}
 
@@ -67,7 +67,7 @@ template <typename ProtoType>
 void TSDBTableScanSource<ProtoType>::scanWithCSTableIndex(
     dproc::TaskContext* context) {
   //auto schema = msg::MessageSchema::fromProtobuf(ProtoType::descriptor());
-  //auto dep = context->getDependency(0)->getInstanceAs<tsdb::CSTableIndex>();
+  //auto dep = context->getDependency(0)->getInstanceAs<zbase::CSTableIndex>();
   //auto data = dep->encode();
 
   //cstable::CSTableReader reader(data);
@@ -119,5 +119,5 @@ String TSDBTableScanSource<ProtoType>::cacheKey() const {
         params_.version());
 }
 
-} // namespace cm
+} // namespace zbase
 

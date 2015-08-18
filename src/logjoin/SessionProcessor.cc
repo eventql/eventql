@@ -13,7 +13,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 SessionProcessor::SessionProcessor(
     ConfigDirectory* customer_dir,
@@ -117,5 +117,5 @@ void SessionProcessor::processSession(const TrackedSession& session) {
   }
 }
 
-} // namespace cm
+} // namespace zbase
 

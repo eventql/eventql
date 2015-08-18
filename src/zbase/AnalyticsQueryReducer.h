@@ -22,7 +22,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 class AnalyticsApp;
 
 class AnalyticsQueryReducer : public dproc::RDD {
@@ -30,7 +30,7 @@ public:
 
   AnalyticsQueryReducer(
       const AnalyticsQuerySpec& query,
-      tsdb::TSDBService* tsdb,
+      zbase::TSDBService* tsdb,
       AnalyticsQueryFactory* factory);
 
   void compute(dproc::TaskContext* context) override;
@@ -52,12 +52,12 @@ public:
 protected:
   AnalyticsQuerySpec spec_;
   AnalyticsQuery query_;
-  tsdb::TSDBService* tsdb_;
+  zbase::TSDBService* tsdb_;
   AnalyticsQueryFactory* factory_;
   AnalyticsTableScan scan_;
   RefPtr<AnalyticsQueryResult> result_;
 };
 
-} // namespace cm
+} // namespace zbase
 
 #endif

@@ -16,7 +16,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 CTRStatsServlet::CTRStatsServlet(VFS* vfs) : vfs_(vfs) {}
 

@@ -18,7 +18,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 class CTRCounterTableSource : public ReportSource {
 public:
@@ -37,6 +37,6 @@ protected:
   List<CallbackFn> callbacks_;
 };
 
-} // namespace cm
+} // namespace zbase
 
 #endif

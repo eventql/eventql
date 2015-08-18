@@ -14,7 +14,7 @@
 
 using namespace stx;
 
-namespace tsdb {
+namespace zbase {
 
 TSDBTableRef TSDBTableRef::parse(const String& table_ref) {
   TSDBTableRef ref;

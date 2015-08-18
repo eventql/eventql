@@ -12,7 +12,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 CTRCounterTableSource::CTRCounterTableSource(
     const List<dproc::TaskDependency>& deps) :
@@ -67,5 +67,5 @@ List<dproc::TaskDependency> CTRCounterTableSource::dependencies() const {
   return deps_;
 }
 
-} // namespace cm
+} // namespace zbase
 

@@ -11,7 +11,7 @@
 #include <stx/io/fileutil.h>
 #include "CustomerNamespace.h"
 
-namespace cm {
+namespace zbase {
 
 CustomerNamespace::CustomerNamespace(
     const std::string& key) :
@@ -37,4 +37,4 @@ void CustomerNamespace::loadTrackingJS(const std::string& filename) {
   tracking_js_ = stx::Assets::getAsset(filename);
 }
 
-} // namespace cm
+} // namespace zbase

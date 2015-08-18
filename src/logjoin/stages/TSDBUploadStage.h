@@ -14,7 +14,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 class TSDBUploadStage {
 public:
@@ -28,14 +28,14 @@ private:
 
   static void serializeSession(
       RefPtr<SessionContext> session,
-      tsdb::RecordEnvelopeList* records);
+      zbase::RecordEnvelopeList* records);
 
   static void serializeEvent(
       RefPtr<SessionContext> ctx,
       RefPtr<OutputEvent> ev,
-      tsdb::RecordEnvelopeList* records);
+      zbase::RecordEnvelopeList* records);
 
 };
 
-} // namespace cm
+} // namespace zbase
 

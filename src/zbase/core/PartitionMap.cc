@@ -18,7 +18,7 @@
 
 using namespace stx;
 
-namespace tsdb {
+namespace zbase {
 
 static mdb::MDBOptions tsdb_mdb_opts() {
   mdb::MDBOptions opts;

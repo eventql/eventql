@@ -17,7 +17,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 class IndexFeedUpload {
 public:
@@ -50,6 +50,6 @@ protected:
   std::thread thread_;
   RefPtr<msg::MessageSchema> schema_;
 };
-} // namespace cm
+} // namespace zbase
 
 #endif

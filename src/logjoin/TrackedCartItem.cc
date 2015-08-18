@@ -15,7 +15,7 @@
 #include "common.h"
 #include "logjoin/TrackedCartItem.h"
 
-namespace cm {
+namespace zbase {
 
 Vector<TrackedCartItem> TrackedCartItem::fromParams(
   const stx::URI::ParamList& params) {

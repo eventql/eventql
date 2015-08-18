@@ -18,7 +18,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 class ShopProductsTable :
     public VTableSource,
@@ -27,7 +27,7 @@ public:
 
   ShopProductsTable(
       const ReportParams& params,
-      tsdb::TSDBService* tsdb);
+      zbase::TSDBService* tsdb);
 
   Vector<String> columns() const override;
   void forEach(
@@ -40,9 +40,9 @@ public:
 
 protected:
   ReportParams params_;
-  tsdb::TSDBService* tsdb_;
+  zbase::TSDBService* tsdb_;
   Function<bool (const Vector<csql::SValue>&)> foreach_;
   ShopProductKPIs aggr_;
 };
 
-} // namespace cm
+} // namespace zbase

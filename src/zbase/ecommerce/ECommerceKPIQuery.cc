@@ -12,7 +12,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 ECommerceKPIQuery::ECommerceKPIQuery(
     AnalyticsTableScan* query,
@@ -285,5 +285,5 @@ void ECommerceKPIQuery::setDrilldownFn(
   }
 }
 
-} // namespace cm
+} // namespace zbase
 

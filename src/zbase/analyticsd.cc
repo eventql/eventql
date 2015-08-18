@@ -52,7 +52,7 @@
 #include "zbase/ConfigDirectory.h"
 
 using namespace stx;
-using namespace cm;
+using namespace zbase;
 
 stx::thread::EventLoop ev;
 
@@ -141,7 +141,7 @@ int main(int argc, const char** argv) {
 
   /* conf */
   //auto conf_data = FileUtil::read(flags.getString("conf"));
-  //auto conf = msg::parseText<tsdb::TSDBNodeConfig>(conf_data);
+  //auto conf = msg::parseText<zbase::TSDBNodeConfig>(conf_data);
 
 
   /* thread pools */
@@ -178,17 +178,17 @@ int main(int argc, const char** argv) {
   DocumentDB docdb(flags.getString("datadir"));
 
   /* tsdb */
-  RefPtr<tsdb::ReplicationScheme> repl_scheme;
+  RefPtr<zbase::ReplicationScheme> repl_scheme;
 
   auto repl_targets = flags.getStrings("replicate_to");
   if (repl_targets.empty()) {
-    repl_scheme = RefPtr<tsdb::ReplicationScheme>(
-        new tsdb::StandaloneReplicationScheme());
+    repl_scheme = RefPtr<zbase::ReplicationScheme>(
+        new zbase::StandaloneReplicationScheme());
   } else {
-    Vector<tsdb::ReplicaRef> replicas;
+    Vector<zbase::ReplicaRef> replicas;
 
     for (const auto& r : repl_targets) {
-      tsdb::ReplicaRef rref(
+      zbase::ReplicaRef rref(
           SHA1::compute(r),
           InetAddr::resolve(r));
 
@@ -202,11 +202,11 @@ int main(int argc, const char** argv) {
     }
 
     if (flags.isSet("frontend")) {
-      repl_scheme = RefPtr<tsdb::ReplicationScheme>(
-          new tsdb::FrontendReplicationScheme(replicas));
+      repl_scheme = RefPtr<zbase::ReplicationScheme>(
+          new zbase::FrontendReplicationScheme(replicas));
     } else {
-      repl_scheme = RefPtr<tsdb::ReplicationScheme>(
-          new tsdb::FixedReplicationScheme(replicas));
+      repl_scheme = RefPtr<zbase::ReplicationScheme>(
+          new zbase::FixedReplicationScheme(replicas));
     }
   }
 
@@ -215,17 +215,17 @@ int main(int argc, const char** argv) {
     FileUtil::mkdir(tsdb_dir);
   }
 
-  tsdb::PartitionMap partition_map(tsdb_dir);
-  tsdb::TSDBService tsdb_node(&partition_map);
-  tsdb::ReplicationWorker tsdb_replication(
+  zbase::PartitionMap partition_map(tsdb_dir);
+  zbase::TSDBService tsdb_node(&partition_map);
+  zbase::ReplicationWorker tsdb_replication(
       repl_scheme.get(),
       &partition_map,
       &http);
 
-  tsdb::TSDBServlet tsdb_servlet(&tsdb_node, flags.getString("cachedir"));
+  zbase::TSDBServlet tsdb_servlet(&tsdb_node, flags.getString("cachedir"));
   http_router.addRouteByPrefixMatch("/tsdb", &tsdb_servlet, &tpool);
 
-  tsdb::CSTableIndex cstable_index(
+  zbase::CSTableIndex cstable_index(
       &partition_map,
       flags.getInt("indexbuild_threads"));
 
@@ -250,7 +250,7 @@ int main(int argc, const char** argv) {
   dproc::DispatchService dproc;
   dproc.registerApp(analytics_app.get(), local_scheduler.get());
 
-  cm::AnalyticsServlet analytics_servlet(
+  zbase::AnalyticsServlet analytics_servlet(
       analytics_app,
       &dproc,
       nullptr,

@@ -19,7 +19,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 class Document : public RefCounted {
 public:
@@ -38,6 +38,6 @@ protected:
   DocID id_;
 };
 
-} // namespace cm
+} // namespace zbase
 
 #endif

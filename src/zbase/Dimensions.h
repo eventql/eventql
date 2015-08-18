@@ -15,7 +15,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 struct TimeDimension : public csql::PureFunction {
   TimeDimension(const Duration& w) : window(w) {};

@@ -13,7 +13,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 TermInfoTableSink::TermInfoTableSink(
     const String& tempdir) :
@@ -68,5 +68,5 @@ RefPtr<VFSFile> TermInfoTableSink::finalize() {
       File::openFile(output_file_, File::O_READ | File::O_AUTODELETE));
 }
 
-} // namespace cm
+} // namespace zbase
 

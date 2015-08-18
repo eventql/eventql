@@ -33,20 +33,20 @@
 using namespace stx;
 
 typedef Tuple<String, uint64_t, uint64_t> OutputRow;
-typedef HashMap<void*, cm::CTRCounterData> CounterMap;
+typedef HashMap<void*, zbase::CTRCounterData> CounterMap;
 
 InternMap intern_map;
 
 void indexJoinedQuery(
-    const cm::JoinedQuery& query,
+    const zbase::JoinedQuery& query,
     const String& feature_name,
-    cm::ItemEligibility eligibility,
+    zbase::ItemEligibility eligibility,
     CounterMap* counters) {
   if (!isQueryEligible(eligibility, query)) {
     return;
   }
 
-  auto fstr_opt = cm::extractAttr(query.attrs, feature_name);
+  auto fstr_opt = zbase::extractAttr(query.attrs, feature_name);
   if (fstr_opt.isEmpty()) {
     return;
   }
@@ -60,12 +60,12 @@ void indexJoinedQuery(
 
     case FeaturePrep::BAGOFWORDS_DE: {
       Set<String> tokens;
-      cm::tokenizeAndStem(
-          cm::Language::GERMAN,
+      zbase::tokenizeAndStem(
+          zbase::Language::GERMAN,
           fstr,
           &tokens);
 
-      fstr = cm::joinBagOfWords(tokens);
+      fstr = zbase::joinBagOfWords(tokens);
       break;
     }
   }
@@ -228,10 +228,10 @@ int main(int argc, const char** argv) {
       status_line.runMaybe();
 
       auto val = cursor->getDataBuffer();
-      Option<cm::JoinedQuery> q;
+      Option<zbase::JoinedQuery> q;
 
       try {
-        q = Some(json::fromJSON<cm::JoinedQuery>(val));
+        q = Some(json::fromJSON<zbase::JoinedQuery>(val));
       } catch (const Exception& e) {
         //stx::logWarning("cm.ctrstats", e, "invalid json: $0", val.toString());
       }
@@ -240,7 +240,7 @@ int main(int argc, const char** argv) {
         indexJoinedQuery(
             q.get(),
             query_feature,
-            cm::ItemEligibility::DAWANDA_ALL_NOBOTS,
+            zbase::ItemEligibility::DAWANDA_ALL_NOBOTS,
             &counters);
       }
 

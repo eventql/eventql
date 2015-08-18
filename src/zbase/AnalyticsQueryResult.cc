@@ -10,7 +10,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 AnalyticsQueryResult::AnalyticsQueryResult(
     const AnalyticsQuery& q) :
@@ -93,5 +93,5 @@ void AnalyticsQueryResult::decode(util::BinaryMessageReader* reader) {
   }
 }
 
-} // namespace cm
+} // namespace zbase
 

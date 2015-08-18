@@ -41,7 +41,7 @@
 #include "sellerstats/ActivityLog.h"
 #include "sellerstats/SellerStatsLookup.h"
 
-using namespace cm;
+using namespace zbase;
 using namespace stx;
 
 int main(int argc, const char** argv) {

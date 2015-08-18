@@ -11,7 +11,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 RefPtr<IndexWriter> IndexWriter::openIndex(
     const String& index_path,
@@ -245,4 +245,4 @@ void IndexWriter::exportStats(const String& prefix) {
 }
 
 
-} // namespace cm
+} // namespace zbase

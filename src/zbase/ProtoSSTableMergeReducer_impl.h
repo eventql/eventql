@@ -6,7 +6,7 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-namespace cm {
+namespace zbase {
 
 template <typename T>
 ProtoSSTableMergeReducer<T>::ProtoSSTableMergeReducer(
@@ -39,6 +39,6 @@ void ProtoSSTableMergeReducer<T>::onFinish() {
   }
 }
 
-} // namespace cm
+} // namespace zbase
 
 

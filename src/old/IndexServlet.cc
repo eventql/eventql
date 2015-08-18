@@ -12,10 +12,10 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 IndexServlet::IndexServlet(
-    RefPtr<cm::IndexReader> index,
+    RefPtr<zbase::IndexReader> index,
     RefPtr<fts::Analyzer> analyzer) :
     index_(index),
     analyzer_(analyzer) {}

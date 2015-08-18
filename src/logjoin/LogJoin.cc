@@ -28,7 +28,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 LogJoin::LogJoin(
     LogJoinShard shard,
@@ -602,4 +602,4 @@ void LogJoin::shutdown() {
   shutdown_ = true;
 }
 
-} // namespace cm
+} // namespace zbase

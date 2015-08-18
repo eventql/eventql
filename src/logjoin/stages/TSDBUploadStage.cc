@@ -17,13 +17,13 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 void TSDBUploadStage::process(
     RefPtr<SessionContext> ctx,
     const String& tsdb_addr,
     http::HTTPConnectionPool* http) {
-  tsdb::RecordEnvelopeList records;
+  zbase::RecordEnvelopeList records;
   serializeSession(ctx, &records);
 
   //for (const auto& ev : ctx->outputEvents()) {
@@ -49,7 +49,7 @@ void TSDBUploadStage::process(
 
 void TSDBUploadStage::serializeSession(
     RefPtr<SessionContext> ctx,
-    tsdb::RecordEnvelopeList* records) {
+    zbase::RecordEnvelopeList* records) {
   const auto& logjoin_cfg = ctx->customer_config->config.logjoin_config();
 
   HashMap<String, uint32_t> event_ids;
@@ -97,7 +97,7 @@ void TSDBUploadStage::serializeSession(
   /* add to record list */
   auto record_id = SHA1::compute(ctx->uuid);
   auto table_name = "sessions";
-  auto partition_key = tsdb::TimeWindowPartitioner::partitionKeyFor(
+  auto partition_key = zbase::TimeWindowPartitioner::partitionKeyFor(
       table_name,
       ctx->time,
       4 * kMicrosPerHour);
@@ -113,7 +113,7 @@ void TSDBUploadStage::serializeSession(
 void TSDBUploadStage::serializeEvent(
     RefPtr<SessionContext> ctx,
     RefPtr<OutputEvent> ev,
-    tsdb::RecordEnvelopeList* records) {
+    zbase::RecordEnvelopeList* records) {
   Buffer record_data;
   msg::MessageEncoder::encode(
       ev->obj.data(),
@@ -123,7 +123,7 @@ void TSDBUploadStage::serializeEvent(
   /* add to record list */
   auto record_id = ev->evid;
   auto table_name = "sessions." + ev->obj.schema()->name();
-  auto partition_key = tsdb::TimeWindowPartitioner::partitionKeyFor(
+  auto partition_key = zbase::TimeWindowPartitioner::partitionKeyFor(
       table_name,
       ev->time,
       4 * kMicrosPerHour);
@@ -136,5 +136,5 @@ void TSDBUploadStage::serializeEvent(
   r->set_record_data(record_data.data(), record_data.size());
 }
 
-} // namespace cm
+} // namespace zbase
 

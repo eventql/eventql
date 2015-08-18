@@ -17,7 +17,7 @@
 
 using namespace stx;
 
-namespace tsdb {
+namespace zbase {
 
 template <typename ScanletType>
 class TSDBTableScan : public dproc::RDD {
@@ -64,6 +64,6 @@ protected:
 };
 
 
-} // namespace tsdb
+} // namespace zbase
 
 #include "TSDBTableScan_impl.h"

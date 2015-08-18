@@ -15,7 +15,7 @@
 
 using namespace stx;
 
-namespace tsdb {
+namespace zbase {
 
 const char PartitionReplication::kStateFileName[] = "_repl";
 

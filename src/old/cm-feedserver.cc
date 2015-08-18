@@ -103,7 +103,7 @@ int main(int argc, const char** argv) {
   http_server.stats()->exportStats(
       "/cm-feedserver/global/http/inbound");
   http_server.stats()->exportStats(
-      StringUtil::format("/cm-feedserver/$0/http/inbound", cm::cmHostname()));
+      StringUtil::format("/cm-feedserver/$0/http/inbound", zbase::cmHostname()));
 
   stx::stats::StatsHTTPServlet stats_servlet;
   http_router.addRouteByPrefixMatch("/stats", &stats_servlet);

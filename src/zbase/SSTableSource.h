@@ -15,7 +15,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 template <typename T>
 class SSTableSource : public ReportSource {
@@ -34,7 +34,7 @@ protected:
   List<CallbackFn> callbacks_;
 };
 
-} // namespace cm
+} // namespace zbase
 
 #include "SSTableSource_impl.h"
 #endif

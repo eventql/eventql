@@ -14,7 +14,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 class VTable {
 public:
@@ -53,4 +53,4 @@ protected:
   List<Vector<csql::SValue>> rows_;
 };
 
-} // namespace cm
+} // namespace zbase

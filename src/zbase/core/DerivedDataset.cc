@@ -11,7 +11,7 @@
 
 using namespace stx;
 
-namespace tsdb {
+namespace zbase {
 
 DerivedDatasetState::DerivedDatasetState() : last_offset(0) {}
 

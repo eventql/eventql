@@ -26,7 +26,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 class CustomerNamespace;
 
 class DocIndex : public RefCounted {
@@ -76,6 +76,6 @@ protected:
   HashMap<String, uint32_t> field_ids_;
 };
 
-} // namespace cm
+} // namespace zbase
 
 #endif
