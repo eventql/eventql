@@ -9,8 +9,8 @@
 #pragma once
 #include <stx/stdtypes.h>
 #include <stx/autoref.h>
-#include <chartsql/svalue.h>
-#include <chartsql/SFunction.h>
+#include <csql/svalue.h>
+#include <csql/SFunction.h>
 
 using namespace stx;
 

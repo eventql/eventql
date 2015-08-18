@@ -9,7 +9,7 @@
  */
 #pragma once
 #include <stx/stdtypes.h>
-#include <chartsql/runtime/tablerepository.h>
+#include <csql/runtime/tablerepository.h>
 #include <zbase/core/TSDBTableRef.h>
 #include <zbase/core/PartitionMap.h>
 #include <zbase/core/CSTableIndex.h>

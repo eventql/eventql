@@ -15,9 +15,9 @@
 #include "stx/protobuf/MessagePrinter.h"
 #include "stx/protobuf/MessageEncoder.h"
 #include "stx/protobuf/DynamicMessage.h"
-#include "chartsql/qtree/SelectListNode.h"
-#include "chartsql/qtree/ColumnReferenceNode.h"
-#include "chartsql/CSTableScan.h"
+#include "csql/qtree/SelectListNode.h"
+#include "csql/qtree/ColumnReferenceNode.h"
+#include "csql/CSTableScan.h"
 #include "zbase/core/TimeWindowPartitioner.h"
 
 using namespace stx;

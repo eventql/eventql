@@ -28,8 +28,8 @@
 #include "zbase/AnalyticsQueryParams.pb.h"
 #include "zbase/PipelineInfo.h"
 #include "zbase/TableDefinition.h"
-#include "chartsql/runtime/ASCIITableFormat.h"
-#include "chartsql/runtime/JSONSSEStreamFormat.h"
+#include "csql/runtime/ASCIITableFormat.h"
+#include "csql/runtime/JSONSSEStreamFormat.h"
 #include "zbase/core/TimeWindowPartitioner.h"
 #include "zbase/core/FixedShardPartitioner.h"
 #include <cstable/CSTableBuilder.h>

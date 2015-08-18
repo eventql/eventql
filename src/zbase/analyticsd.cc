@@ -48,7 +48,7 @@
 #include "zbase/core/TSDBService.h"
 #include "zbase/core/TSDBServlet.h"
 #include "zbase/core/ReplicationWorker.h"
-#include "chartsql/defaults.h"
+#include "csql/defaults.h"
 #include "zbase/ConfigDirectory.h"
 
 using namespace stx;
