@@ -32,7 +32,7 @@
 #include "stx/stats/statsdagent.h"
 #include "stx/mdb/MDB.h"
 #include "CustomerNamespace.h"
-#include "logjoin/LogJoin.h"
+#include "zbase/logjoin/LogJoin.h"
 
 using namespace stx;
 
