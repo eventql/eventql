@@ -1,0 +1,48 @@
+/**
+ * This file is part of the "tsdb" project
+ *   Copyright (c) 2015 Paul Asmuth, FnordCorp B.V.
+ *
+ * FnordMetric is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License v3.0. You should have received a
+ * copy of the GNU General Public License along with this program. If not, see
+ * <http://www.gnu.org/licenses/>.
+ */
+package tsdb;
+
+message PartitionState {
+
+  /**
+   * This partition's tsdb namespace
+   */
+  required string tsdb_namespace = 1;
+
+  /**
+   * SHA1 sum (20 bytes) containing this partition's key
+   */
+  required bytes partition_key = 2;
+
+  /**
+   * The table to which this partition belongs
+   */
+  required string table_key = 3;
+
+  /**
+   * The sstable files that contain the partition records/data
+   */
+  repeated string sstable_files = 4;
+
+  /**
+   * SHA1 sum (20 bytes) containing this partition's uuid. The uuid is used
+   * to prevent A/B/A scenarios when a partition is created, deleted and
+   * recreated. The uuid id is uniqe per PartitionState instanc. I.e. each
+   * time the same partition is created it will have a different uuid (and
+   * the same partition will have different uuids on each host).
+   */
+  required bytes uuid = 5;
+
+  /**
+   * CSTable version
+   */
+  optional uint64 cstable_version = 6;
+
+};

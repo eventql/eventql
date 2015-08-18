@@ -11,7 +11,7 @@ option(ENABLE_TESTS "Build unit tests [default: ON]" ON)
 #set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static")
 #set(CMAKE_STATIC_LINKER_FLAGS "${CMAKE_STATIC_LINKER_FLAGS} -static")
 
-set(PROTOC_ARGS --proto_path ${CMAKE_SOURCE_DIR}/3rdparty/tsdb/src)
+set(PROTOC_ARGS --proto_path ${CMAKE_SOURCE_DIR}/src/zbase/core)
 include(3rdparty/libstx/cmake/libstx.cmake)
 
 add_subdirectory(3rdparty/libcstable)
@@ -31,9 +31,6 @@ include_directories(${CPLOT_INCLUDE})
 
 add_subdirectory(3rdparty/chartsql)
 include_directories(${CHARTSQL_INCLUDE})
-
-add_subdirectory(3rdparty/tsdb)
-include_directories(${TSDB_INCLUDE})
 
 add_subdirectory(3rdparty/fnord-fts)
 include_directories(3rdparty/fnord-fts)

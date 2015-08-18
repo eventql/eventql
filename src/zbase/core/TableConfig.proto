@@ -1,0 +1,85 @@
+/**
+ * This file is part of the "libfnord" project
+ *   Copyright (c) 2015 Paul Asmuth
+ *
+ * FnordMetric is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License v3.0. You should have received a
+ * copy of the GNU General Public License along with this program. If not, see
+ * <http://www.gnu.org/licenses/>.
+ */
+package tsdb;
+
+enum TablePartitionerType {
+  TBL_PARTITION_TIMEWINDOW = 0;
+  TBL_PARTITION_FIXED = 1;
+};
+
+enum TableStorage {
+  TBL_STORAGE_LOG = 0;
+  TBL_STORAGE_STATIC = 2;
+  //TBL_STORAGE_BTREE = 3;
+};
+
+message TableDefinition {
+
+  /**
+   * The tsdb namespace to be configured
+   */
+  required string tsdb_namespace = 1;
+
+  /**
+   * The stream key prefix for which this config should be applied/. (empty
+   * matches all streams, longest prefix wins)
+   */
+  optional string table_name = 2;
+
+  required TableConfig config = 3;
+
+};
+
+message TableConfig {
+
+  /**
+   * The schema for this table
+   */
+  required bytes schema = 1;
+
+  /**
+   * The partitioner for this table
+   */
+  required TablePartitionerType partitioner = 2;
+
+  /**
+   * What kind of data is stored in this table?
+   */
+  required TableStorage storage = 3;
+
+  /**
+   * The maximum sstable size in bytes
+   */
+  optional uint64 sstable_size = 5 [default = 536870912];
+
+  /**
+   * The number of shards for this table
+   */
+  optional uint64 num_shards = 7;
+
+  /**
+   * How often should we re-build the cstable indexes if the partition has
+   * changed in microseconds (this is basically a rate-limit for the
+   * CSTableIndex subprocess)
+   */
+  optional uint64 cstable_build_interval = 9 [default = 10000000];
+
+  optional TimeWindowPartitionerConfig time_window_partitioner_config = 8;
+
+};
+
+message TimeWindowPartitionerConfig {
+
+  /**
+   * The partition size in microseconds
+   */
+  required uint64 partition_size = 1;
+
+};
