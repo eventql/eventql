@@ -1,5 +1,57 @@
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/)
 
+add_library(tsdb-client OBJECT
+    core/TSDBClient.cc
+    core/TimeWindowPartitioner.cc
+    core/FixedShardPartitioner.cc
+    ${COREPROTO_SRCS})
+
+add_library(tsdb-server OBJECT
+    core/TSDBClient.cc
+    core/TimeWindowPartitioner.cc
+    core/FixedShardPartitioner.cc
+    core/CSTableIndex.cc
+    core/SQLEngine.cc
+    core/TSDBService.cc
+    core/TSDBServlet.cc
+    core/TSDBTableProvider.cc
+    core/TSDBTableRef.cc
+    core/RecordSet.cc
+    core/Partition.cc
+    core/PartitionMap.cc
+    core/PartitionReader.cc
+    core/PartitionWriter.cc
+    core/PartitionSnapshot.cc
+    core/PartitionReplication.cc
+    core/LogPartitionWriter.cc
+    core/LogPartitionReplication.cc
+    core/LazyPartition.cc
+    core/Table.cc
+    core/ReplicationWorker.cc
+    core/ReplicationScheme.cc
+    core/ReplicationState.cc
+    core/StaticPartitionWriter.cc
+    core/StaticPartitionReplication.cc
+    ${COREPROTO_SRCS})
+
+add_executable(test-recordset
+    $<TARGET_OBJECTS:stx-mdb>
+    $<TARGET_OBJECTS:tsdb-server>
+    $<TARGET_OBJECTS:dproc>
+    core/RecordSet_test.cc)
+
+target_link_libraries(test-recordset chartsql cplot sstable cstable stx-http stx-protobuf stx-json stx-base)
+
+add_executable(test-tsdb-timewindowpartitioner
+    $<TARGET_OBJECTS:stx-mdb>
+    $<TARGET_OBJECTS:tsdb-server>
+    $<TARGET_OBJECTS:dproc>
+    core/TimeWindowPartitioner_test.cc)
+
+target_link_libraries(test-tsdb-timewindowpartitioner chartsql cplot sstable cstable stx-http stx-protobuf stx-json stx-base)
+
+
+
 file(GLOB PROTO_FILES *.proto */*.proto)
 PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS ${PROTO_FILES})
 

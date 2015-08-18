@@ -1,0 +1,31 @@
+/**
+ * This file is part of the "libfnord" project
+ *   Copyright (c) 2015 Paul Asmuth
+ *
+ * FnordMetric is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License v3.0. You should have received a
+ * copy of the GNU General Public License along with this program. If not, see
+ * <http://www.gnu.org/licenses/>.
+ */
+package tsdb;
+
+message RecordEnvelope {
+
+  optional string tsdb_namespace = 5;
+
+  optional string table_name = 1;
+
+  optional string partition_sha1 = 2;
+
+  optional string partition_key = 6;
+
+  required string record_id = 3;
+
+  required bytes record_data = 4;
+
+};
+
+message RecordEnvelopeList {
+  repeated RecordEnvelope records = 1;
+}
+
