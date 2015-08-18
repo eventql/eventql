@@ -17,7 +17,7 @@
 #include "stx/thread/threadpool.h"
 #include "docdb/DocumentDB.h"
 #include "docdb/DocumentDBServlet.h"
-#include "common/AnalyticsAuth.h"
+#include "zbase/AnalyticsAuth.h"
 
 using namespace stx;
 using namespace cm;

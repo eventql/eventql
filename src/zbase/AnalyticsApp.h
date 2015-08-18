@@ -23,9 +23,9 @@
 #include "zbase/FeedConfig.pb.h"
 #include "zbase/ReportParams.pb.h"
 #include "zbase/api/LogfileService.h"
-#include "common/AnalyticsSession.pb.h"
+#include "zbase/AnalyticsSession.pb.h"
 #include "chartsql/runtime/ExecutionStrategy.h"
-#include "common/ConfigDirectory.h"
+#include "zbase/ConfigDirectory.h"
 
 using namespace stx;
 

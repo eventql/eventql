@@ -10,8 +10,8 @@
 #include "stx/http/httpservice.h"
 #include "stx/json/json.h"
 #include "stx/random.h"
-#include "common/AnalyticsAuth.h"
-#include "common/ConfigDirectory.h"
+#include "zbase/AnalyticsAuth.h"
+#include "zbase/ConfigDirectory.h"
 #include "docdb/DocumentDB.h"
 
 using namespace stx;

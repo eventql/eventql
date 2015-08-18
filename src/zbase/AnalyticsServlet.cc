@@ -27,7 +27,7 @@
 #include "zbase/Report.h"
 #include "zbase/AnalyticsQueryParams.pb.h"
 #include "zbase/PipelineInfo.h"
-#include "common/TableDefinition.h"
+#include "zbase/TableDefinition.h"
 #include "chartsql/runtime/ASCIITableFormat.h"
 #include "chartsql/runtime/JSONSSEStreamFormat.h"
 #include "tsdb/TimeWindowPartitioner.h"

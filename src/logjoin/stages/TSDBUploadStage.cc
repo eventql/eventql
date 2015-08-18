@@ -12,7 +12,7 @@
 #include "stx/protobuf/MessagePrinter.h"
 #include "logjoin/stages/TSDBUploadStage.h"
 #include "logjoin/common.h"
-#include "common/SessionSchema.h"
+#include "zbase/SessionSchema.h"
 #include "tsdb/TimeWindowPartitioner.h"
 
 using namespace stx;

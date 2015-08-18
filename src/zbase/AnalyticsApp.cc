@@ -17,12 +17,12 @@
 #include "zbase/CTRCounterMergeReducer.h"
 #include "zbase/ProtoSSTableMergeReducer.h"
 #include "zbase/ProtoSSTableSink.h"
-#include "common/AnalyticsSession.pb.h"
+#include "zbase/AnalyticsSession.pb.h"
 #include <tsdb/TSDBTableScanSpec.pb.h>
 #include "tsdb/TimeWindowPartitioner.h"
 #include <tsdb/CSTableIndex.h>
 #include "tsdb/SQLEngine.h"
-#include "common/SessionSchema.h"
+#include "zbase/SessionSchema.h"
 #include "stx/protobuf/DynamicMessage.h"
 #include "stx/protobuf/MessageEncoder.h"
 

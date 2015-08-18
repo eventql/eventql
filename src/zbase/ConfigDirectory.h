@@ -12,8 +12,8 @@
 #include <stx/mdb/MDB.h>
 #include <stx/net/inetaddr.h>
 #include <stx/http/httpclient.h>
-#include <common/CustomerConfig.h>
-#include <common/TableDefinition.h>
+#include <zbase/CustomerConfig.h>
+#include <zbase/TableDefinition.h>
 
 using namespace stx;
 

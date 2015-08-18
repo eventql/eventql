@@ -41,8 +41,8 @@
 #include "inventory/DocIndex.h"
 #include <inventory/ItemRef.h>
 #include <fnord-fts/Analyzer.h>
-#include "common/ConfigDirectory.h"
-#include "common/SessionSchema.h"
+#include "zbase/ConfigDirectory.h"
+#include "zbase/SessionSchema.h"
 #include "common.h"
 
 using namespace cm;

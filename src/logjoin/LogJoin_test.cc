@@ -12,7 +12,7 @@
 #include "stx/exception.h"
 #include "stx/test/unittest.h"
 #include "stx/protobuf/msg.h"
-#include "common/JoinedSession.pb.h"
+#include "zbase/JoinedSession.pb.h"
 #include "logjoin/stages/SessionJoin.h"
 #include "logjoin/stages/BuildSessionAttributes.h"
 #include "logjoin/stages/NormalizeQueryStrings.h"

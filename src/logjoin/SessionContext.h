@@ -10,7 +10,7 @@
 #include "stx/protobuf/DynamicMessage.h"
 #include "stx/SHA1.h"
 #include "logjoin/TrackedSession.h"
-#include "common/CustomerConfig.h"
+#include "zbase/CustomerConfig.h"
 
 using namespace stx;
 

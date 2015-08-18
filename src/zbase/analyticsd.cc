@@ -43,13 +43,13 @@
 #include "zbase/ReportFactory.h"
 #include "zbase/AnalyticsApp.h"
 #include "zbase/EventIngress.h"
-#include "common/TableDefinition.h"
-#include "common/JoinedSession.pb.h"
+#include "zbase/TableDefinition.h"
+#include "zbase/JoinedSession.pb.h"
 #include "tsdb/TSDBService.h"
 #include "tsdb/TSDBServlet.h"
 #include "tsdb/ReplicationWorker.h"
 #include "chartsql/defaults.h"
-#include "common/ConfigDirectory.h"
+#include "zbase/ConfigDirectory.h"
 
 using namespace stx;
 using namespace cm;
