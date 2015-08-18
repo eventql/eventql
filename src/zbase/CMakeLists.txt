@@ -1,5 +1,22 @@
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/)
 
+file(GLOB COMMONPROTO_FILES *.proto)
+PROTOBUF_GENERATE_CPP(COMMONPROTO_SRCS COMMONPROTO_HDRS ${COMMONPROTO_FILES})
+
+add_library(customerdirectory OBJECT
+    CustomerConfig.cc
+    ConfigDirectory.cc
+    SessionSchema.cc
+    TableDefinition.cc
+    ${COMMONPROTO_SRCS})
+
+add_dependencies(customerdirectory tsdb-server)
+
+add_library(auth OBJECT
+    AnalyticsAuth.cc)
+
+add_dependencies(auth customerdirectory)
+
 add_library(tsdb-client OBJECT
     core/TSDBClient.cc
     core/TimeWindowPartitioner.cc
