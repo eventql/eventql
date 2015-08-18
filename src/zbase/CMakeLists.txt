@@ -1,21 +1,5 @@
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/)
 
-file(GLOB COMMONPROTO_FILES *.proto)
-PROTOBUF_GENERATE_CPP(COMMONPROTO_SRCS COMMONPROTO_HDRS ${COMMONPROTO_FILES})
-
-add_library(customerdirectory OBJECT
-    CustomerConfig.cc
-    ConfigDirectory.cc
-    SessionSchema.cc
-    TableDefinition.cc
-    ${COMMONPROTO_SRCS})
-
-add_dependencies(customerdirectory tsdb-server)
-
-add_library(auth OBJECT
-    AnalyticsAuth.cc)
-
-add_dependencies(auth customerdirectory)
 
 file(GLOB COREPROTO_FILES core/*.proto)
 PROTOBUF_GENERATE_CPP(COREPROTO_SRCS COREPROTO_HDRS ${COREPROTO_FILES})
@@ -72,8 +56,22 @@ target_link_libraries(test-tsdb-timewindowpartitioner chartsql cplot sstable cst
 
 
 
-file(GLOB PROTO_FILES *.proto */*.proto)
+file(GLOB PROTO_FILES *.proto)
 PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS ${PROTO_FILES})
+
+add_library(customerdirectory OBJECT
+    CustomerConfig.cc
+    ConfigDirectory.cc
+    SessionSchema.cc
+    TableDefinition.cc
+    ${PROTO_SRCS})
+
+add_dependencies(customerdirectory tsdb-server)
+
+add_library(auth OBJECT
+    AnalyticsAuth.cc)
+
+add_dependencies(auth customerdirectory)
 
 add_executable(analyticsd
     $<TARGET_OBJECTS:stx-mdb>
@@ -155,7 +153,6 @@ add_executable(analyticsd
     reco_engine/RecoEngineStatsBreakdownQuery.cc
     reco_engine/RecoEngineStatsReport.cc
     reco_engine/RecoStats.cc
-    ${PROTO_SRCS}
     analyticsd.cc)
 
 target_link_libraries(analyticsd chartsql cplot sstable cstable stx-http stx-json stx-protobuf stx-base)
@@ -170,22 +167,22 @@ add_executable(analyticsctl
     #$<TARGET_OBJECTS:fnord-afx>
     $<TARGET_OBJECTS:dproc>
     #sstable/SSTableServlet.cc
-    ${PROTO_SRCS}
     analyticsctl.cc)
 
 target_link_libraries(analyticsctl chartsql cplot sstable cstable stx-http stx-json stx-protobuf stx-base)
 
-add_executable(zen-csv-upload ${PROTO_SRCS} zen-csv-upload.cc)
+add_executable(zen-csv-upload ${COREPROTO_SRCS} zen-csv-upload.cc)
 target_link_libraries(zen-csv-upload stx-http stx-protobuf stx-json stx-base)
 
-add_executable(zen-logfile-upload ${PROTO_SRCS} zen-logfile-upload.cc)
+add_executable(zen-logfile-upload ${COREPROTO_SRCS} zen-logfile-upload.cc)
 target_link_libraries(zen-logfile-upload stx-http stx-protobuf stx-json stx-base)
 
-add_executable(zen-statsd-upload ${PROTO_SRCS} zen-statsd-upload.cc)
+add_executable(zen-statsd-upload ${COREPROTO_SRCS} zen-statsd-upload.cc)
 target_link_libraries(zen-statsd-upload stx-http stx-protobuf stx-json stx-base)
 
 add_executable(zen-mysql-upload
     $<TARGET_OBJECTS:stx-mysql>
+    $<TARGET_OBJECTS:tsdb-client>
     ${PROTO_SRCS}
     zen-mysql-upload.cc)
 
