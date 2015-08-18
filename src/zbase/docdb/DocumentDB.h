@@ -10,7 +10,7 @@
 #include "stx/stdtypes.h"
 #include "stx/SHA1.h"
 #include "stx/mdb/MDB.h"
-#include "docdb/Document.h"
+#include "zbase/docdb/Document.h"
 
 using namespace stx;
 

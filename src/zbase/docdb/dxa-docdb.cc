@@ -15,8 +15,8 @@
 #include "stx/http/httpserver.h"
 #include "stx/thread/eventloop.h"
 #include "stx/thread/threadpool.h"
-#include "docdb/DocumentDB.h"
-#include "docdb/DocumentDBServlet.h"
+#include "zbase/docdb/DocumentDB.h"
+#include "zbase/docdb/DocumentDBServlet.h"
 #include "zbase/AnalyticsAuth.h"
 
 using namespace stx;

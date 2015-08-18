@@ -12,7 +12,7 @@
 #include "stx/random.h"
 #include "zbase/AnalyticsAuth.h"
 #include "zbase/ConfigDirectory.h"
-#include "docdb/DocumentDB.h"
+#include "zbase/docdb/DocumentDB.h"
 
 using namespace stx;
 

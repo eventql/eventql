@@ -22,8 +22,8 @@
 #include "zbase/ConfigDirectory.h"
 #include "zbase/core/TSDBService.h"
 #include "zbase/api/LogfileAPIServlet.h"
-#include "docdb/DocumentDB.h"
-#include "docdb/DocumentDBServlet.h"
+#include "zbase/docdb/DocumentDB.h"
+#include "zbase/docdb/DocumentDBServlet.h"
 
 using namespace stx;
 

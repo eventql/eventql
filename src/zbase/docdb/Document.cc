@@ -6,7 +6,7 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-#include <docdb/Document.h>
+#include <zbase/docdb/Document.h>
 
 using namespace stx;
 

@@ -9,7 +9,7 @@
 #pragma once
 #include <stx/stdtypes.h>
 #include <stx/option.h>
-#include <docdb/Document.pb.h>
+#include <zbase/docdb/Document.pb.h>
 
 using namespace stx;
 

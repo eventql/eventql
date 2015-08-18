@@ -7,7 +7,7 @@
  * permission is obtained.
  */
 #include "stx/protobuf/msg.h"
-#include "docdb/DocumentDB.h"
+#include "zbase/docdb/DocumentDB.h"
 
 using namespace stx;
 
