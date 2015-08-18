@@ -7,7 +7,7 @@
  * permission is obtained.
  */
 #include "stx/json/json.h"
-#include "logjoin/LogJoinExport.h"
+#include "zbase/logjoin/LogJoinExport.h"
 
 using namespace stx;
 

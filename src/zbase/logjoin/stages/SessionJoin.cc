@@ -6,8 +6,8 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-#include "logjoin/stages/SessionJoin.h"
-#include "logjoin/common.h"
+#include "zbase/logjoin/stages/SessionJoin.h"
+#include "zbase/logjoin/common.h"
 
 using namespace stx;
 

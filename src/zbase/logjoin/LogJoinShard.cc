@@ -8,7 +8,7 @@
  */
 #include <stx/fnv.h>
 #include <stx/exception.h>
-#include "logjoin/LogJoinShard.h"
+#include "zbase/logjoin/LogJoinShard.h"
 
 namespace zbase {
 

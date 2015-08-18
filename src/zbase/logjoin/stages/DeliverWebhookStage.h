@@ -8,20 +8,16 @@
  */
 #pragma once
 #include "stx/stdtypes.h"
-#include "stx/Language.h"
-#include "logjoin/SessionContext.h"
+#include "zbase/logjoin/SessionContext.h"
 
 using namespace stx;
 
 namespace zbase {
 
-class NormalizeQueryStrings {
+class DeliverWebhookStage {
 public:
-  typedef Function<String (Language l, const String& s)> NormalizeFn;
 
-  static void process(
-      NormalizeFn normalize_fn,
-      RefPtr<SessionContext> session);
+  static void process(RefPtr<SessionContext> session);
 
 };
 

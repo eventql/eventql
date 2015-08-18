@@ -12,7 +12,7 @@
 #include <stx/json/json.h>
 #include "zbase/TrafficSegment.h"
 #include "zbase/AnalyticsQueryParams.pb.h"
-#include <logjoin/common.h>
+#include <zbase/logjoin/common.h>
 
 using namespace stx;
 

@@ -13,10 +13,10 @@
 #include "stx/test/unittest.h"
 #include "stx/protobuf/msg.h"
 #include "zbase/JoinedSession.pb.h"
-#include "logjoin/stages/SessionJoin.h"
-#include "logjoin/stages/BuildSessionAttributes.h"
-#include "logjoin/stages/NormalizeQueryStrings.h"
-#include "logjoin/stages/DebugPrintStage.h"
+#include "zbase/logjoin/stages/SessionJoin.h"
+#include "zbase/logjoin/stages/BuildSessionAttributes.h"
+#include "zbase/logjoin/stages/NormalizeQueryStrings.h"
+#include "zbase/logjoin/stages/DebugPrintStage.h"
 
 using namespace stx;
 using namespace zbase;

@@ -11,8 +11,8 @@
 #include "stx/protobuf/msg.h"
 #include "stx/protobuf/JSONEncoder.h"
 #include "stx/protobuf/MessageDecoder.h"
-#include "logjoin/stages/DeliverWebhookStage.h"
-#include "logjoin/common.h"
+#include "zbase/logjoin/stages/DeliverWebhookStage.h"
+#include "zbase/logjoin/common.h"
 
 using namespace stx;
 

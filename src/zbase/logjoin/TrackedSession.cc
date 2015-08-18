@@ -7,7 +7,7 @@
  * permission is obtained.
  */
 #include <stx/inspect.h>
-#include "logjoin/TrackedSession.h"
+#include "zbase/logjoin/TrackedSession.h"
 #include "common.h"
 
 using namespace stx;

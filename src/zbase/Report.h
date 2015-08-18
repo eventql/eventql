@@ -25,7 +25,7 @@
 #include "dproc/Task.h"
 #include "dproc/BlobRDD.h"
 #include <zbase/docdb/ItemRef.h>
-#include <logjoin/common.h>
+#include <zbase/logjoin/common.h>
 #include <chartsql/svalue.h>
 #include "zbase/ReportParams.pb.h"
 

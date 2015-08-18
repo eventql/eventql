@@ -8,10 +8,10 @@
  */
 #pragma once
 #include "stx/stdtypes.h"
-#include "logjoin/SessionContext.h"
-#include "logjoin/TrackedItemVisit.h"
-#include "logjoin/TrackedCartItem.h"
-#include "logjoin/TrackedQuery.h"
+#include "zbase/logjoin/SessionContext.h"
+#include "zbase/logjoin/TrackedItemVisit.h"
+#include "zbase/logjoin/TrackedCartItem.h"
+#include "zbase/logjoin/TrackedQuery.h"
 
 using namespace stx;
 

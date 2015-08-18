@@ -6,9 +6,8 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-#include "stx/protobuf/MessagePrinter.h"
-#include "logjoin/stages/DebugPrintStage.h"
-#include "logjoin/common.h"
+#include "zbase/logjoin/stages/DebugPrintStage.h"
+#include "zbase/logjoin/common.h"
 
 using namespace stx;
 
@@ -19,7 +18,7 @@ void DebugPrintStage::process(RefPtr<SessionContext> ctx) {
 
   for (const auto& ev : ctx->events) {
     stx::iputs(
-        "    > input_event evtype=$1 time=$0 eid=$2 data=$3$4",
+        "    > event time=$0 evtype=$1 eid=$2 data=$3$4",
         ev.time,
         ev.evtype,
         ev.evid,
@@ -27,19 +26,7 @@ void DebugPrintStage::process(RefPtr<SessionContext> ctx) {
         String(ev.data.size() > 40 ? "[...]" : ""));
   }
 
-  for (const auto& attr : ctx->attributes()) {
-    stx::iputs(
-        "    > output_attr key=$0 value=$1",
-        attr.first,
-        attr.second);
-  }
-
-  for (const auto& ev : ctx->outputEvents()) {
-    stx::iputs(
-        "    > output_event evtype=$0\n$1",
-        ev->obj.schema()->name(),
-        msg::MessagePrinter::print(ev->obj.data(), *ev->obj.schema()));
-  }
+  stx::iputs("$0", ctx->session.DebugString());
 }
 
 } // namespace zbase

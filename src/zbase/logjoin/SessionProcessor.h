@@ -11,8 +11,8 @@
 #include "stx/random.h"
 #include "stx/thread/FixedSizeThreadPool.h"
 #include "stx/thread/DelayedQueue.h"
-#include "logjoin/TrackedSession.h"
-#include "logjoin/SessionContext.h"
+#include "zbase/logjoin/TrackedSession.h"
+#include "zbase/logjoin/SessionContext.h"
 #include "zbase/ConfigDirectory.h"
 
 using namespace stx;

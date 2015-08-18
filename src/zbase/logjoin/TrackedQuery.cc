@@ -12,7 +12,7 @@
 #include <stx/stringutil.h>
 #include <stx/uri.h>
 #include "common.h"
-#include "logjoin/TrackedQuery.h"
+#include "zbase/logjoin/TrackedQuery.h"
 
 namespace zbase {
 

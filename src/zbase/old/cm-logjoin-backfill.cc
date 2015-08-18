@@ -23,7 +23,7 @@
 #include "fnord-logtable/LogTableTail.h"
 #include "stx/protobuf/MessageEncoder.h"
 #include "stx/protobuf/MessagePrinter.h"
-#include "logjoin/LogJoinBackfill.h"
+#include "zbase/logjoin/LogJoinBackfill.h"
 #include "IndexReader.h"
 
 #include "common.h"

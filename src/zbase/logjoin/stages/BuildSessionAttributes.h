@@ -8,16 +8,21 @@
  */
 #pragma once
 #include "stx/stdtypes.h"
-#include "logjoin/SessionContext.h"
+#include "zbase/logjoin/SessionContext.h"
 
 using namespace stx;
 
 namespace zbase {
 
-class DeliverWebhookStage {
+class BuildSessionAttributes {
 public:
 
   static void process(RefPtr<SessionContext> session);
+
+protected:
+
+  static Option<UnixTime> firstSeenTime(SessionContext* session);
+  static Option<UnixTime> lastSeenTime(SessionContext* session);
 
 };
 
