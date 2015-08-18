@@ -20,8 +20,8 @@
 #include "common.h"
 #include "schemas.h"
 #include "CustomerNamespace.h"
-#include "analytics/CTRCounter.h"
-#include "analytics/ShopStatsApp.h"
+#include "zbase/CTRCounter.h"
+#include "zbase/ShopStatsApp.h"
 
 using namespace stx;
 using namespace cm;

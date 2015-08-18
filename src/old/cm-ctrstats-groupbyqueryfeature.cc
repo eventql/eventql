@@ -28,7 +28,7 @@
 #include "CustomerNamespace.h"
 
 #
-#include "analytics/CTRCounter.h"
+#include "zbase/CTRCounter.h"
 
 using namespace stx;
 

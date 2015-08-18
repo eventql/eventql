@@ -7,8 +7,8 @@
  * permission is obtained.
  */
 #include <stx/logging.h>
-#include "analytics/TermInfo.h"
-#include "analytics/TermInfoTableSource.h"
+#include "zbase/TermInfo.h"
+#include "zbase/TermInfoTableSource.h"
 #include "AutoCompleteModel.h"
 
 using namespace stx;

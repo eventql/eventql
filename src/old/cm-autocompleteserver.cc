@@ -39,7 +39,7 @@
 #include "ModelCache.h"
 #include "AutoCompleteServlet.h"
 #include "AutoCompleteModel.h"
-#include "analytics/TermInfoTableSource.h"
+#include "zbase/TermInfoTableSource.h"
 
 using namespace cm;
 using namespace stx;
