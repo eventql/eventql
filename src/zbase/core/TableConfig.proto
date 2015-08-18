@@ -7,7 +7,7 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-package tsdb;
+package cm;
 
 enum TablePartitionerType {
   TBL_PARTITION_TIMEWINDOW = 0;
@@ -18,23 +18,6 @@ enum TableStorage {
   TBL_STORAGE_LOG = 0;
   TBL_STORAGE_STATIC = 2;
   //TBL_STORAGE_BTREE = 3;
-};
-
-message TableDefinition {
-
-  /**
-   * The tsdb namespace to be configured
-   */
-  required string tsdb_namespace = 1;
-
-  /**
-   * The stream key prefix for which this config should be applied/. (empty
-   * matches all streams, longest prefix wins)
-   */
-  optional string table_name = 2;
-
-  required TableConfig config = 3;
-
 };
 
 message TableConfig {
@@ -81,5 +64,30 @@ message TimeWindowPartitionerConfig {
    * The partition size in microseconds
    */
   required uint64 partition_size = 1;
+
+};
+
+message TableDefinition {
+
+  required string customer = 1;
+
+  /**
+   * The tsdb namespace to be configured
+   */
+  required string tsdb_namespace = 5;
+
+  required string table_name = 2;
+
+  optional uint64 version = 3;
+
+  required TableConfig config = 4;
+
+};
+
+message TableDefinitionList {
+
+  repeated TableDefinition tables = 1;
+
+  optional uint64 version = 2;
 
 };

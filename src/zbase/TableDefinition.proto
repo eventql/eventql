@@ -7,24 +7,5 @@
  * permission is obtained.
  */
 package cm;
-import 'tsdb/TableConfig.proto';
+import 'core/TableConfig.proto';
 
-message TableDefinition {
-
-  required string customer = 1;
-
-  required string table_name = 2;
-
-  optional uint64 version = 3;
-
-  required tsdb.TableConfig config = 4;
-
-};
-
-message TableDefinitionList {
-
-  repeated TableDefinition tables = 1;
-
-  optional uint64 version = 2;
-
-};

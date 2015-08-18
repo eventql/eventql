@@ -17,6 +17,9 @@ add_library(auth OBJECT
 
 add_dependencies(auth customerdirectory)
 
+file(GLOB COREPROTO_FILES core/*.proto)
+PROTOBUF_GENERATE_CPP(COREPROTO_SRCS COREPROTO_HDRS ${COREPROTO_FILES})
+
 add_library(tsdb-client OBJECT
     core/TSDBClient.cc
     core/TimeWindowPartitioner.cc
