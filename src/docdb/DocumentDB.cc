@@ -156,7 +156,22 @@ void DocumentDB::updateDocumentName(
   });
 }
 
+void DocumentDB::updateDocumentACLPolicy(
+    const String& db_namespace,
+    const String& userid,
+    const SHA1Hash& uuid,
+    DocumentACLPolicy policy) {
+  updateDocument(
+    db_namespace,
+    uuid,
+    [&userid, &policy] (Document* doc) {
+    if (!isDocumentWritableForUser(*doc, userid)) {
+      RAISE(kAccessDeniedError, "access denied");
+    }
 
+    doc->set_acl_policy(policy);
+  });
+}
 
 //void createDocument(
 //    const String& db_namespace,
