@@ -31,7 +31,7 @@
 #include "dproc/LocalScheduler.h"
 #include "dproc/DispatchService.h"
 #include "sstable/sstablereader.h"
-#include "common/JoinedSession.pb.h"
+#include "zbase/JoinedSession.pb.h"
 #include "tsdb/TimeWindowPartitioner.h"
 #include "tsdb/TSDBClient.h"
 #include "chartsql/qtree/SequentialScanNode.h"

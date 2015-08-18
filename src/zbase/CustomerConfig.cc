@@ -7,8 +7,8 @@
  * permission is obtained.
  */
 #include "stx/protobuf/MessageSchema.h"
-#include "common/CustomerConfig.h"
-#include "common/JoinedSession.pb.h"
+#include "zbase/CustomerConfig.h"
+#include "zbase/JoinedSession.pb.h"
 
 using namespace stx;
 

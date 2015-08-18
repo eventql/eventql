@@ -7,7 +7,7 @@
  * permission is obtained.
  */
 #include <stx/duration.h>
-#include <common/TableDefinition.h>
+#include <zbase/TableDefinition.h>
 
 using namespace stx;
 

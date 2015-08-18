@@ -7,7 +7,7 @@
  * permission is obtained.
  */
 #include "schemas.h"
-#include "common/JoinedSession.pb.h"
+#include "zbase/JoinedSession.pb.h"
 #include "IndexChangeRequest.pb.h"
 
 using namespace cm;

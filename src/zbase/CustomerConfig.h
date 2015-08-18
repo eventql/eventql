@@ -9,7 +9,7 @@
 #pragma once
 #include "stx/stdtypes.h"
 #include "stx/autoref.h"
-#include "common/CustomerConfig.pb.h"
+#include "zbase/CustomerConfig.pb.h"
 
 using namespace stx;
 

@@ -17,7 +17,7 @@
 #include "zbase/AnalyticsQueryResult.h"
 #include "zbase/TimeseriesResult.h"
 #include "zbase/search/SearchCTRStats.h"
-#include "common/JoinedSession.pb.h"
+#include "zbase/JoinedSession.pb.h"
 
 using namespace stx;
 

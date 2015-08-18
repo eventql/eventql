@@ -9,8 +9,8 @@
 #pragma once
 #include <stx/stdtypes.h>
 #include <stx/SHA1.h>
-#include <common/CustomerConfig.h>
-#include <common/TableDefinition.h>
+#include <zbase/CustomerConfig.h>
+#include <zbase/TableDefinition.h>
 
 using namespace stx;
 

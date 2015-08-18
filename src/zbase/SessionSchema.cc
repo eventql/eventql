@@ -6,7 +6,7 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-#include "common/SessionSchema.h"
+#include "zbase/SessionSchema.h"
 
 using namespace stx;
 

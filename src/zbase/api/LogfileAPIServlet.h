@@ -10,7 +10,7 @@
 #include "stx/stdtypes.h"
 #include "stx/http/httpservice.h"
 #include "stx/http/HTTPSSEStream.h"
-#include "common/AnalyticsSession.pb.h"
+#include "zbase/AnalyticsSession.pb.h"
 #include "zbase/api/LogfileService.h"
 
 using namespace stx;

@@ -14,7 +14,7 @@
 #include "zbase/ProtoSSTableSource.h"
 #include "zbase/ShopStats.pb.h"
 #include "zbase/shop_stats/ShopCTRStatsScan.h"
-#include "common/JoinedSession.pb.h"
+#include "zbase/JoinedSession.pb.h"
 
 using namespace stx;
 

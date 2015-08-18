@@ -8,8 +8,8 @@
  */
 #pragma once
 #include "stx/protobuf/MessageSchema.h"
-#include "common/CustomerConfig.h"
-#include "common/TableDefinition.h"
+#include "zbase/CustomerConfig.h"
+#include "zbase/TableDefinition.h"
 
 using namespace stx;
 

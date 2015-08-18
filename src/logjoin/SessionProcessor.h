@@ -13,7 +13,7 @@
 #include "stx/thread/DelayedQueue.h"
 #include "logjoin/TrackedSession.h"
 #include "logjoin/SessionContext.h"
-#include "common/ConfigDirectory.h"
+#include "zbase/ConfigDirectory.h"
 
 using namespace stx;
 

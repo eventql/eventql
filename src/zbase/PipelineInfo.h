@@ -7,8 +7,8 @@
  * permission is obtained.
  */
 #pragma once
-#include "common/CustomerConfig.h"
-#include "common/TableDefinition.h"
+#include "zbase/CustomerConfig.h"
+#include "zbase/TableDefinition.h"
 
 using namespace stx;
 

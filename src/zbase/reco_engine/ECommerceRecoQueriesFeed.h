@@ -9,7 +9,7 @@
 #ifndef _CM_ECOMMERCERECOQUERIESFEED_H
 #define _CM_ECOMMERCERECOQUERIESFEED_H
 
-#include "common/JoinedSession.pb.h"
+#include "zbase/JoinedSession.pb.h"
 #include "zbase/Report.h"
 #include "zbase/TSDBTableScanSource.h"
 #include "zbase/JSONSink.h"

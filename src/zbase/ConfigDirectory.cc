@@ -11,7 +11,7 @@
 #include <stx/uri.h>
 #include <stx/protobuf/msg.h>
 #include <stx/csv/CSVInputStream.h>
-#include <common/ConfigDirectory.h>
+#include <zbase/ConfigDirectory.h>
 
 using namespace stx;
 
