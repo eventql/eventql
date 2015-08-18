@@ -86,8 +86,17 @@ template <>
 std::string StringUtil::toString(double value) {
   char buf[128]; // FIXPAUL
   *buf = 0;
-  snprintf(buf, sizeof(buf), "%f", value);
-  return buf;
+
+  auto len = snprintf(buf, sizeof(buf), "%f", value);
+  if (len < 0) {
+    RAISE(kRuntimeError, "snprintf() failed");
+  }
+
+  while (len > 2 && buf[len - 1] == '0' && buf[len - 2] != '.') {
+    buf[len--] = 0;
+  }
+
+  return String(buf, len);
 }
 
 template <>
