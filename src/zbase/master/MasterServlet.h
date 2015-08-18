@@ -8,7 +8,7 @@
  */
 #pragma once
 #include "stx/http/httpservice.h"
-#include "master/ConfigDirectoryMaster.h"
+#include "zbase/master/ConfigDirectoryMaster.h"
 
 using namespace stx;
 

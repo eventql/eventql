@@ -6,7 +6,7 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-#include "master/MasterServlet.h"
+#include "zbase/master/MasterServlet.h"
 #include "stx/io/outputstream.h"
 #include "stx/io/BufferedOutputStream.h"
 #include "stx/logging.h"
