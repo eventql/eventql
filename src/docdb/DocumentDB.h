@@ -48,6 +48,12 @@ public:
       const SHA1Hash& uuid,
       const String& name);
 
+  void updateDocumentACLPolicy(
+      const String& db_namespace,
+      const String& userid,
+      const SHA1Hash& uuid,
+      DocumentACLPolicy policy);
+
 protected:
 
   void updateDocument(

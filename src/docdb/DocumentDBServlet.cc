@@ -269,6 +269,27 @@ void DocumentDBServlet::updateSQLQuery(
       continue;
     }
 
+    if (p.first == "acl_policy") {
+      if (!p.second.empty()) {
+        DocumentACLPolicy policy;
+        if (!DocumentACLPolicy_Parse(p.second, &policy)) {
+          res->setStatus(http::kStatusBadRequest);
+          res->addBody(StringUtil::format("invalid policy: '$0'", p.second));
+          return;
+        }
+
+        tx.emplace_back([this, &session, &uuid, policy] () {
+          docdb_->updateDocumentACLPolicy(
+              session.customer(),
+              session.userid(),
+              uuid,
+              policy);
+        });
+      }
+
+      continue;
+    }
+
     res->setStatus(http::kStatusBadRequest);
     res->addBody(StringUtil::format("invalid parameter: '$0'", p.first));
     return;
