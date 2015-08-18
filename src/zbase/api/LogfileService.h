@@ -17,7 +17,7 @@
 #include "zbase/LogfileScanResult.h"
 #include "zbase/AnalyticsSession.pb.h"
 #include "zbase/LogfileScanParams.pb.h"
-#include "chartsql/runtime/runtime.h"
+#include "csql/runtime/runtime.h"
 
 using namespace stx;
 

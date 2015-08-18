@@ -8,8 +8,8 @@
  * <http://www.gnu.org/licenses/>.
  */
 #pragma once
-#include <chartsql/runtime/runtime.h>
-#include <chartsql/runtime/ResultFormat.h>
+#include <csql/runtime/runtime.h>
+#include <csql/runtime/ResultFormat.h>
 #include <zbase/core/TSDBTableProvider.h>
 
 namespace zbase {

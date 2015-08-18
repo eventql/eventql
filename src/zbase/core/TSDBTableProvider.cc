@@ -10,8 +10,8 @@
 #include <stx/SHA1.h>
 #include <zbase/core/TSDBTableProvider.h>
 #include <zbase/core/TSDBService.h>
-#include <chartsql/CSTableScan.h>
-#include <chartsql/runtime/EmptyTable.h>
+#include <csql/CSTableScan.h>
+#include <csql/runtime/EmptyTable.h>
 
 using namespace stx;
 

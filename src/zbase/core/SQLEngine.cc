@@ -11,8 +11,8 @@
 #include <zbase/core/TSDBService.h>
 #include <zbase/core/TimeWindowPartitioner.h>
 #include <zbase/core/FixedShardPartitioner.h>
-#include <chartsql/defaults.h>
-#include <chartsql/qtree/GroupByMergeNode.h>
+#include <csql/defaults.h>
+#include <csql/qtree/GroupByMergeNode.h>
 
 namespace zbase {
 
