@@ -7,7 +7,7 @@
  * permission is obtained.
  */
 #include "AutoCompleteServlet.h"
-#include "analytics/CTRCounter.h"
+#include "zbase/CTRCounter.h"
 #include "stx/Language.h"
 #include "stx/logging.h"
 #include "stx/wallclock.h"

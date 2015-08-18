@@ -10,7 +10,7 @@
 #define _CM_AUTOCOMPLETEMODEL_H
 #include "stx/json/json.h"
 #include "ModelCache.h"
-#include "analytics/TermInfo.h"
+#include "zbase/TermInfo.h"
 #include <fnord-fts/fts.h>
 #include <fnord-fts/fts_common.h>
 #include <fnord-fts/Analyzer.h>

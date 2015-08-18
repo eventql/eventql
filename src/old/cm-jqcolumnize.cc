@@ -50,9 +50,9 @@
 #include "common.h"
 #include "schemas.h"
 #include "CustomerNamespace.h"
-#include "analytics/CTRCounter.h"
-#include "analytics/AnalyticsTableScan.h"
-#include "analytics/CTRByPositionQuery.h"
+#include "zbase/CTRCounter.h"
+#include "zbase/AnalyticsTableScan.h"
+#include "zbase/CTRByPositionQuery.h"
 
 using namespace cm;
 using namespace stx;

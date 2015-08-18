@@ -18,7 +18,7 @@
 #include <dproc/Application.h>
 #include <dproc/LocalScheduler.h>
 #include <tsdb/TSDBClient.h>
-#include "analytics/FeedExportApp.h"
+#include "zbase/FeedExportApp.h"
 
 using namespace stx;
 using namespace cm;

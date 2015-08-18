@@ -18,10 +18,10 @@
 #include <dproc/Application.h>
 #include <dproc/LocalScheduler.h>
 #include <tsdb/TSDBClient.h>
-#include "analytics/ItemBoostMapper.h"
-#include "analytics/ItemBoostMerge.h"
-#include "analytics/ItemBoostExport.h"
-#include "analytics/ProtoSSTableMergeReducer.h"
+#include "zbase/ItemBoostMapper.h"
+#include "zbase/ItemBoostMerge.h"
+#include "zbase/ItemBoostExport.h"
+#include "zbase/ProtoSSTableMergeReducer.h"
 
 using namespace stx;
 using namespace cm;
