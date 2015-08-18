@@ -46,7 +46,7 @@ void DocumentDB::listDocuments(
     }
 
     auto doc = msg::decode<Document>(value);
-    if (isDocumentReadableForUser(doc, userid)) {
+    if (!isDocumentReadableForUser(doc, userid)) {
       continue;
     }
 
