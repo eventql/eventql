@@ -13,7 +13,7 @@
 #include <stx/util/binarymessagewriter.h>
 #include <sstable/SSTableEditor.h>
 #include <sstable/sstablereader.h>
-#include <tsdb/RecordSet.h>
+#include <zbase/core/RecordSet.h>
 
 using namespace stx;
 

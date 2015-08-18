@@ -10,8 +10,8 @@
 #define _CM_TSDBTABLESCANSOURCE_H
 #include "zbase/Report.h"
 #include "zbase/AnalyticsTableScan.h"
-#include <tsdb/TSDBService.h>
-#include "tsdb/TSDBTableScanSpec.pb.h"
+#include <zbase/core/TSDBService.h>
+#include "zbase/core/TSDBTableScanSpec.pb.h"
 
 using namespace stx;
 

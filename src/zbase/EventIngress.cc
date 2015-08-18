@@ -7,7 +7,7 @@
  * permission is obtained.
  */
 #include <zbase/EventIngress.h>
-#include <tsdb/TimeWindowPartitioner.h>
+#include <zbase/core/TimeWindowPartitioner.h>
 #include <stx/json/json.h>
 #include <stx/logging.h>
 #include <stx/protobuf/msg.h>

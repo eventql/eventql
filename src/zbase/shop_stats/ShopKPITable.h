@@ -8,7 +8,7 @@
  */
 #pragma once
 #include "stx/stdtypes.h"
-#include "tsdb/TSDBTableScan.h"
+#include "zbase/core/TSDBTableScan.h"
 #include "zbase/Report.h"
 #include "zbase/VTable.h"
 #include "zbase/ProtoSSTableSource.h"

@@ -11,7 +11,7 @@
 #include <stx/stdtypes.h>
 #include <stx/autoref.h>
 #include <stx/SHA1.h>
-#include <tsdb/PartitionState.pb.h>
+#include <zbase/core/PartitionState.pb.h>
 
 using namespace stx;
 

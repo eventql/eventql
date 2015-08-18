@@ -10,7 +10,7 @@
 #include <stx/fnv.h>
 #include <stx/io/fileutil.h>
 #include <sstable/sstablereader.h>
-#include <tsdb/PartitionReader.h>
+#include <zbase/core/PartitionReader.h>
 
 using namespace stx;
 

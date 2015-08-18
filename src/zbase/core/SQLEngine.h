@@ -10,7 +10,7 @@
 #pragma once
 #include <chartsql/runtime/runtime.h>
 #include <chartsql/runtime/ResultFormat.h>
-#include <tsdb/TSDBTableProvider.h>
+#include <zbase/core/TSDBTableProvider.h>
 
 namespace tsdb {
 class TSDBService;

@@ -9,7 +9,7 @@
 #pragma once
 #include "stx/protobuf/MessageSchema.h"
 #include "stx/io/inputstream.h"
-#include "tsdb/TSDBService.h"
+#include "zbase/core/TSDBService.h"
 #include "zbase/AnalyticsAuth.h"
 #include "zbase/CustomerConfig.h"
 #include "zbase/ConfigDirectory.h"

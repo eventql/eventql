@@ -8,7 +8,7 @@
  */
 #include "zbase/TSDBTableScanSource.h"
 #include <stx/fnv.h>
-#include <tsdb/CSTableIndex.h>
+#include <zbase/core/CSTableIndex.h>
 #include <cstable/CSTableReader.h>
 #include <cstable/RecordMaterializer.h>
 #include <stx/protobuf/MessageEncoder.h>

@@ -17,7 +17,7 @@
 #include <stx/http/httpconnectionpool.h>
 #include <dproc/Application.h>
 #include <dproc/LocalScheduler.h>
-#include <tsdb/TSDBClient.h>
+#include <zbase/core/TSDBClient.h>
 #include "zbase/ItemBoostMapper.h"
 #include "zbase/ItemBoostMerge.h"
 #include "zbase/ItemBoostExport.h"

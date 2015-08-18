@@ -7,10 +7,10 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <tsdb/SQLEngine.h>
-#include <tsdb/TSDBService.h>
-#include <tsdb/TimeWindowPartitioner.h>
-#include <tsdb/FixedShardPartitioner.h>
+#include <zbase/core/SQLEngine.h>
+#include <zbase/core/TSDBService.h>
+#include <zbase/core/TimeWindowPartitioner.h>
+#include <zbase/core/FixedShardPartitioner.h>
 #include <chartsql/defaults.h>
 #include <chartsql/qtree/GroupByMergeNode.h>
 

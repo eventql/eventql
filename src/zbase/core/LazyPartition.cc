@@ -7,8 +7,8 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <tsdb/LazyPartition.h>
-#include <tsdb/PartitionMap.h>
+#include <zbase/core/LazyPartition.h>
+#include <zbase/core/PartitionMap.h>
 
 using namespace stx;
 

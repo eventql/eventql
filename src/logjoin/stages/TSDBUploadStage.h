@@ -10,7 +10,7 @@
 #include "stx/stdtypes.h"
 #include "stx/http/httpconnectionpool.h"
 #include "logjoin/SessionContext.h"
-#include "tsdb/RecordEnvelope.pb.h"
+#include "zbase/core/RecordEnvelope.pb.h"
 
 using namespace stx;
 

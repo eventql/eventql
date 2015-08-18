@@ -10,8 +10,8 @@
 #include "unistd.h"
 #include <stx/logging.h>
 #include <stx/wallclock.h>
-#include <tsdb/ReplicationWorker.h>
-#include <tsdb/Partition.h>
+#include <zbase/core/ReplicationWorker.h>
+#include <zbase/core/Partition.h>
 
 using namespace stx;
 

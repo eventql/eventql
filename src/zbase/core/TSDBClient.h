@@ -14,8 +14,8 @@
 #include <stx/option.h>
 #include <stx/SHA1.h>
 #include <stx/http/httpconnectionpool.h>
-#include <tsdb/PartitionInfo.pb.h>
-#include <tsdb/RecordEnvelope.pb.h>
+#include <zbase/core/PartitionInfo.pb.h>
+#include <zbase/core/RecordEnvelope.pb.h>
 
 using namespace stx;
 

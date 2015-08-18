@@ -9,7 +9,7 @@
  */
 #include <stx/util/binarymessagereader.h>
 #include <stx/util/binarymessagewriter.h>
-#include <tsdb/TimeWindowPartitioner.h>
+#include <zbase/core/TimeWindowPartitioner.h>
 
 using namespace stx;
 

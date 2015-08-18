@@ -10,7 +10,7 @@
 #pragma once
 #include <stx/stdtypes.h>
 #include <stx/SHA1.h>
-#include <tsdb/ReplicationState.pb.h>
+#include <zbase/core/ReplicationState.pb.h>
 
 using namespace stx;
 

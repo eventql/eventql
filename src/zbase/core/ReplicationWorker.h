@@ -11,9 +11,9 @@
 #include <thread>
 #include <condition_variable>
 #include <stx/stdtypes.h>
-#include <tsdb/PartitionMap.h>
-#include <tsdb/PartitionReplication.h>
-#include <tsdb/ReplicationScheme.h>
+#include <zbase/core/PartitionMap.h>
+#include <zbase/core/PartitionReplication.h>
+#include <zbase/core/ReplicationScheme.h>
 
 using namespace stx;
 

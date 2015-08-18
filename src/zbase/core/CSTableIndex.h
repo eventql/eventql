@@ -10,7 +10,7 @@
 #pragma once
 #include <thread>
 #include <stx/stdtypes.h>
-#include <tsdb/TSDBService.h>
+#include <zbase/core/TSDBService.h>
 #include <stx/random.h>
 
 using namespace stx;

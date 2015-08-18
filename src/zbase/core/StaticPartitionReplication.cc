@@ -7,9 +7,9 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <tsdb/StaticPartitionReplication.h>
-#include <tsdb/ReplicationScheme.h>
-#include <tsdb/TSDBClient.h>
+#include <zbase/core/StaticPartitionReplication.h>
+#include <zbase/core/ReplicationScheme.h>
+#include <zbase/core/TSDBClient.h>
 #include <stx/logging.h>
 #include <stx/io/fileutil.h>
 #include <stx/protobuf/msg.h>

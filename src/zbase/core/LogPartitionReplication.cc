@@ -7,8 +7,8 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <tsdb/LogPartitionReplication.h>
-#include <tsdb/ReplicationScheme.h>
+#include <zbase/core/LogPartitionReplication.h>
+#include <zbase/core/ReplicationScheme.h>
 #include <stx/logging.h>
 #include <stx/io/fileutil.h>
 #include <stx/protobuf/msg.h>

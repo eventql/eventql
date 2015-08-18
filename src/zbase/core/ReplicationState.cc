@@ -7,7 +7,7 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <tsdb/ReplicationState.h>
+#include <zbase/core/ReplicationState.h>
 
 using namespace stx;
 

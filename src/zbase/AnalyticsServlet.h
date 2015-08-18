@@ -20,7 +20,7 @@
 #include "chartsql/runtime/runtime.h"
 #include "zbase/AnalyticsAuth.h"
 #include "zbase/ConfigDirectory.h"
-#include "tsdb/TSDBService.h"
+#include "zbase/core/TSDBService.h"
 #include "zbase/api/LogfileAPIServlet.h"
 #include "docdb/DocumentDB.h"
 #include "docdb/DocumentDBServlet.h"

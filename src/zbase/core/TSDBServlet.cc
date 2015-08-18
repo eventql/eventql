@@ -8,8 +8,8 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include "stx/util/binarymessagewriter.h"
-#include "tsdb/TSDBServlet.h"
-#include "tsdb/RecordEnvelope.pb.h"
+#include "zbase/core/TSDBServlet.h"
+#include "zbase/core/RecordEnvelope.pb.h"
 #include "stx/json/json.h"
 #include <stx/wallclock.h>
 #include <stx/thread/wakeup.h>

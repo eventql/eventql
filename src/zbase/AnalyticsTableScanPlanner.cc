@@ -8,8 +8,8 @@
  */
 #include <stx/wallclock.h>
 #include <zbase/AnalyticsTableScanPlanner.h>
-#include <tsdb/TimeWindowPartitioner.h>
-#include <tsdb/TSDBTableScanSpec.pb.h>
+#include <zbase/core/TimeWindowPartitioner.h>
+#include <zbase/core/TSDBTableScanSpec.pb.h>
 
 using namespace stx;
 

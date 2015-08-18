@@ -13,7 +13,7 @@
 #include <stx/UnixTime.h>
 #include <stx/duration.h>
 #include <stx/SHA1.h>
-#include <tsdb/TablePartitioner.h>
+#include <zbase/core/TablePartitioner.h>
 
 using namespace stx;
 

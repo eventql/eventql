@@ -18,7 +18,7 @@
 #include "chartsql/qtree/SelectListNode.h"
 #include "chartsql/qtree/ColumnReferenceNode.h"
 #include "chartsql/CSTableScan.h"
-#include "tsdb/TimeWindowPartitioner.h"
+#include "zbase/core/TimeWindowPartitioner.h"
 
 using namespace stx;
 

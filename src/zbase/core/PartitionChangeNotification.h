@@ -10,8 +10,8 @@
 #pragma once
 #include <stx/stdtypes.h>
 #include <stx/autoref.h>
-#include <tsdb/PartitionSnapshot.h>
-#include <tsdb/Table.h>
+#include <zbase/core/PartitionSnapshot.h>
+#include <zbase/core/Table.h>
 
 using namespace stx;
 

@@ -10,7 +10,7 @@
 #pragma once
 #include <stx/stdtypes.h>
 #include <stx/autoref.h>
-#include <tsdb/PartitionWriter.h>
+#include <zbase/core/PartitionWriter.h>
 #include <stx/util/PersistentHashSet.h>
 
 using namespace stx;

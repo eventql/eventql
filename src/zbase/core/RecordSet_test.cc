@@ -13,7 +13,7 @@
 #include "stx/test/unittest.h"
 #include "stx/protobuf/MessageDecoder.h"
 #include "stx/protobuf/MessageEncoder.h"
-#include "tsdb/RecordSet.h"
+#include "zbase/core/RecordSet.h"
 
 using namespace stx;
 using namespace tsdb;

@@ -8,7 +8,7 @@
  */
 #pragma once
 #include <stx/stdtypes.h>
-#include <tsdb/TSDBClient.h>
+#include <zbase/core/TSDBClient.h>
 #include <zbase/ECommerceTransaction.pb.h>
 
 using namespace stx;

@@ -8,8 +8,8 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <stx/io/fileutil.h>
-#include <tsdb/Partition.h>
-#include <tsdb/StaticPartitionWriter.h>
+#include <zbase/core/Partition.h>
+#include <zbase/core/StaticPartitionWriter.h>
 #include <stx/logging.h>
 #include <sstable/SSTableWriter.h>
 
