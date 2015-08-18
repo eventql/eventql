@@ -7,8 +7,8 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <tsdb/TSDBClient.h>
-#include <tsdb/RecordEnvelope.pb.h>
+#include <zbase/core/TSDBClient.h>
+#include <zbase/core/RecordEnvelope.pb.h>
 #include <stx/util/binarymessagereader.h>
 #include <stx/util/binarymessagewriter.h>
 #include <stx/protobuf/msg.h>

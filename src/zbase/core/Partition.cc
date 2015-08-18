@@ -7,7 +7,7 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <tsdb/Partition.h>
+#include <zbase/core/Partition.h>
 #include <stx/io/fileutil.h>
 #include <stx/uri.h>
 #include <stx/logging.h>
@@ -18,10 +18,10 @@
 #include <stx/protobuf/msg.h>
 #include <cstable/CSTableBuilder.h>
 #include <sstable/sstablereader.h>
-#include <tsdb/LogPartitionWriter.h>
-#include <tsdb/LogPartitionReplication.h>
-#include <tsdb/StaticPartitionWriter.h>
-#include <tsdb/StaticPartitionReplication.h>
+#include <zbase/core/LogPartitionWriter.h>
+#include <zbase/core/LogPartitionReplication.h>
+#include <zbase/core/StaticPartitionWriter.h>
+#include <zbase/core/StaticPartitionReplication.h>
 
 using namespace stx;
 

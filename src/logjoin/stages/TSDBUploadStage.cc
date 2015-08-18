@@ -13,7 +13,7 @@
 #include "logjoin/stages/TSDBUploadStage.h"
 #include "logjoin/common.h"
 #include "zbase/SessionSchema.h"
-#include "tsdb/TimeWindowPartitioner.h"
+#include "zbase/core/TimeWindowPartitioner.h"
 
 using namespace stx;
 

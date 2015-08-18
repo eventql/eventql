@@ -11,8 +11,8 @@
 #include <stx/stdtypes.h>
 #include <stx/wallclock.h>
 #include <dproc/Task.h>
-#include <tsdb/TSDBService.h>
-#include <tsdb/TSDBTableScanSpec.pb.h>
+#include <zbase/core/TSDBService.h>
+#include <zbase/core/TSDBTableScanSpec.pb.h>
 #include "zbase/AnalyticsQueryParams.pb.h"
 #include "zbase/AnalyticsQueryFactory.h"
 

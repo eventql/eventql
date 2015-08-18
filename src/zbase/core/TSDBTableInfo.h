@@ -10,7 +10,7 @@
 #pragma once
 #include <stx/stdtypes.h>
 #include <stx/protobuf/MessageSchema.h>
-#include <tsdb/TableConfig.pb.h>
+#include <zbase/core/TableConfig.pb.h>
 
 using namespace stx;
 

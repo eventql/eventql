@@ -7,7 +7,7 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <tsdb/TSDBTableRef.h>
+#include <zbase/core/TSDBTableRef.h>
 #include <stx/uri.h>
 #include <stx/wallclock.h>
 #include <stx/human.h>

@@ -12,14 +12,14 @@
 #include <stx/random.h>
 #include <stx/option.h>
 #include <stx/mdb/MDB.h>
-#include <tsdb/TableConfig.pb.h>
-#include <tsdb/Partition.h>
-#include <tsdb/LazyPartition.h>
-#include <tsdb/TSDBNodeConfig.pb.h>
-#include <tsdb/TSDBTableInfo.h>
-#include <tsdb/PartitionInfo.pb.h>
-#include <tsdb/PartitionChangeNotification.h>
-#include <tsdb/RecordEnvelope.pb.h>
+#include <zbase/core/TableConfig.pb.h>
+#include <zbase/core/Partition.h>
+#include <zbase/core/LazyPartition.h>
+#include <zbase/core/TSDBNodeConfig.pb.h>
+#include <zbase/core/TSDBTableInfo.h>
+#include <zbase/core/PartitionInfo.pb.h>
+#include <zbase/core/PartitionChangeNotification.h>
+#include <zbase/core/RecordEnvelope.pb.h>
 
 using namespace stx;
 

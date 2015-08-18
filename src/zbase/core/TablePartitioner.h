@@ -13,7 +13,7 @@
 #include <stx/UnixTime.h>
 #include <stx/duration.h>
 #include <stx/SHA1.h>
-#include <tsdb/TSDBTableRef.h>
+#include <zbase/core/TSDBTableRef.h>
 
 using namespace stx;
 

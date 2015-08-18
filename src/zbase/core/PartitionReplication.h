@@ -10,10 +10,10 @@
 #pragma once
 #include <stx/stdtypes.h>
 #include <stx/http/httpconnectionpool.h>
-#include <tsdb/Partition.h>
-#include <tsdb/ReplicationScheme.h>
-#include <tsdb/ReplicationState.h>
-#include <tsdb/RecordEnvelope.pb.h>
+#include <zbase/core/Partition.h>
+#include <zbase/core/ReplicationScheme.h>
+#include <zbase/core/ReplicationState.h>
+#include <zbase/core/RecordEnvelope.pb.h>
 
 using namespace stx;
 

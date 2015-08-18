@@ -13,9 +13,9 @@
 #include <stx/io/mmappedfile.h>
 #include <stx/protobuf/msg.h>
 #include <stx/wallclock.h>
-#include <tsdb/CSTableIndex.h>
-#include <tsdb/CSTableIndexBuildState.pb.h>
-#include <tsdb/RecordSet.h>
+#include <zbase/core/CSTableIndex.h>
+#include <zbase/core/CSTableIndexBuildState.pb.h>
+#include <zbase/core/RecordSet.h>
 #include <stx/protobuf/MessageDecoder.h>
 #include <cstable/CSTableBuilder.h>
 

@@ -12,8 +12,8 @@
 #include <stx/protobuf/msg.h>
 #include <stx/io/fileutil.h>
 #include <sstable/sstablereader.h>
-#include <tsdb/TSDBService.h>
-#include <tsdb/PartitionState.pb.h>
+#include <zbase/core/TSDBService.h>
+#include <zbase/core/PartitionState.pb.h>
 
 using namespace stx;
 

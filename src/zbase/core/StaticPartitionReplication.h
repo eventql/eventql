@@ -9,7 +9,7 @@
  */
 #pragma once
 #include <stx/stdtypes.h>
-#include <tsdb/PartitionReplication.h>
+#include <zbase/core/PartitionReplication.h>
 
 using namespace stx;
 

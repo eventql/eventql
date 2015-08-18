@@ -16,7 +16,7 @@
 #include <stx/util/binarymessagereader.h>
 #include <stx/util/binarymessagewriter.h>
 #include <stx/random.h>
-#include <tsdb/RecordRef.h>
+#include <zbase/core/RecordRef.h>
 
 using namespace stx;
 

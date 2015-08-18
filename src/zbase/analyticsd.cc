@@ -45,9 +45,9 @@
 #include "zbase/EventIngress.h"
 #include "zbase/TableDefinition.h"
 #include "zbase/JoinedSession.pb.h"
-#include "tsdb/TSDBService.h"
-#include "tsdb/TSDBServlet.h"
-#include "tsdb/ReplicationWorker.h"
+#include "zbase/core/TSDBService.h"
+#include "zbase/core/TSDBServlet.h"
+#include "zbase/core/ReplicationWorker.h"
 #include "chartsql/defaults.h"
 #include "zbase/ConfigDirectory.h"
 

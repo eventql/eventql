@@ -8,8 +8,8 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <stx/SHA1.h>
-#include <tsdb/TSDBTableProvider.h>
-#include <tsdb/TSDBService.h>
+#include <zbase/core/TSDBTableProvider.h>
+#include <zbase/core/TSDBService.h>
 #include <chartsql/CSTableScan.h>
 #include <chartsql/runtime/EmptyTable.h>
 

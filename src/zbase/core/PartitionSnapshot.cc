@@ -10,8 +10,8 @@
 #include <stx/io/file.h>
 #include <stx/io/fileutil.h>
 #include <stx/protobuf/msg.h>
-#include <tsdb/PartitionSnapshot.h>
-#include <tsdb/Table.h>
+#include <zbase/core/PartitionSnapshot.h>
+#include <zbase/core/Table.h>
 
 using namespace stx;
 

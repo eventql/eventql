@@ -10,7 +10,7 @@
 #include <stx/stdtypes.h>
 #include <stx/UnixTime.h>
 #include <dproc/Task.h>
-#include <tsdb/TSDBService.h>
+#include <zbase/core/TSDBService.h>
 
 using namespace stx;
 

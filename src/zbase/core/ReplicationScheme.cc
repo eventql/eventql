@@ -7,7 +7,7 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <tsdb/ReplicationScheme.h>
+#include <zbase/core/ReplicationScheme.h>
 #include <stx/fnv.h>
 
 using namespace stx;

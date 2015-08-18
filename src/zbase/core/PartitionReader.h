@@ -11,7 +11,7 @@
 #include <stx/stdtypes.h>
 #include <stx/autoref.h>
 #include <stx/option.h>
-#include <tsdb/PartitionSnapshot.h>
+#include <zbase/core/PartitionSnapshot.h>
 
 using namespace stx;
 

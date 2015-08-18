@@ -34,9 +34,9 @@
 #include "stx/mdb/MDBUtil.h"
 #include "stx/protobuf/msg.h"
 #include "stx/protobuf/MessageSchema.h"
-#include "tsdb/TSDBService.h"
-#include "tsdb/TSDBServlet.h"
-#include "tsdb/TSDBNodeConfig.pb.h"
+#include "zbase/core/TSDBService.h"
+#include "zbase/core/TSDBServlet.h"
+#include "zbase/core/TSDBNodeConfig.pb.h"
 
 using namespace stx;
 

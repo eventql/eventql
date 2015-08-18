@@ -12,7 +12,7 @@
 #include "dproc/TaskResultFuture.h"
 #include "dproc/DispatchService.h"
 #include "stx/protobuf/MessageSchema.h"
-#include "tsdb/TSDBClient.h"
+#include "zbase/core/TSDBClient.h"
 #include "zbase/AnalyticsQuery.h"
 #include "zbase/AnalyticsQueryResult.h"
 

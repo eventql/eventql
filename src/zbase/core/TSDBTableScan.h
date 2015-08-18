@@ -11,9 +11,9 @@
 #include <stx/stdtypes.h>
 #include <stx/protobuf/MessageSchema.h>
 #include <dproc/Task.h>
-#include <tsdb/TSDBTableScanSpec.pb.h>
-#include <tsdb/TSDBTableScanlet.h>
-#include <tsdb/TSDBClient.h>
+#include <zbase/core/TSDBTableScanSpec.pb.h>
+#include <zbase/core/TSDBTableScanlet.h>
+#include <zbase/core/TSDBClient.h>
 
 using namespace stx;
 

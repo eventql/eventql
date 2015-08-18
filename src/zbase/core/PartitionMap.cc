@@ -13,8 +13,8 @@
 #include <stx/protobuf/msg.h>
 #include <stx/io/fileutil.h>
 #include <sstable/sstablereader.h>
-#include <tsdb/PartitionMap.h>
-#include <tsdb/PartitionState.pb.h>
+#include <zbase/core/PartitionMap.h>
+#include <zbase/core/PartitionState.pb.h>
 
 using namespace stx;
 

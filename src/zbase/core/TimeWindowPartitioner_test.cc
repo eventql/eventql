@@ -11,8 +11,8 @@
 #include <stdio.h>
 #include <string.h>
 #include "stx/test/unittest.h"
-#include "tsdb/Partition.h"
-#include "tsdb/TimeWindowPartitioner.h"
+#include "zbase/core/Partition.h"
+#include "zbase/core/TimeWindowPartitioner.h"
 
 using namespace stx;
 using namespace tsdb;

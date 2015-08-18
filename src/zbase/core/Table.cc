@@ -7,9 +7,9 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <tsdb/Table.h>
-#include <tsdb/TimeWindowPartitioner.h>
-#include <tsdb/FixedShardPartitioner.h>
+#include <zbase/core/Table.h>
+#include <zbase/core/TimeWindowPartitioner.h>
+#include <zbase/core/FixedShardPartitioner.h>
 
 using namespace stx;
 

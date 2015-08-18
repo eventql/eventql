@@ -14,13 +14,13 @@
 #include <stx/UnixTime.h>
 #include <stx/protobuf/MessageSchema.h>
 #include <stx/http/httpconnectionpool.h>
-#include <tsdb/Table.h>
-#include <tsdb/RecordRef.h>
-#include <tsdb/PartitionInfo.pb.h>
-#include <tsdb/PartitionSnapshot.h>
-#include <tsdb/PartitionWriter.h>
-#include <tsdb/PartitionReader.h>
-#include <tsdb/ReplicationScheme.h>
+#include <zbase/core/Table.h>
+#include <zbase/core/RecordRef.h>
+#include <zbase/core/PartitionInfo.pb.h>
+#include <zbase/core/PartitionSnapshot.h>
+#include <zbase/core/PartitionWriter.h>
+#include <zbase/core/PartitionReader.h>
+#include <zbase/core/ReplicationScheme.h>
 #include <cstable/CSTableReader.h>
 
 using namespace stx;

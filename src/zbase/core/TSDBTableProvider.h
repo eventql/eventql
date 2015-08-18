@@ -10,11 +10,11 @@
 #pragma once
 #include <stx/stdtypes.h>
 #include <chartsql/runtime/tablerepository.h>
-#include <tsdb/TSDBTableRef.h>
-#include <tsdb/PartitionMap.h>
-#include <tsdb/CSTableIndex.h>
-#include <tsdb/TableConfig.pb.h>
-#include <tsdb/TSDBTableInfo.h>
+#include <zbase/core/TSDBTableRef.h>
+#include <zbase/core/PartitionMap.h>
+#include <zbase/core/CSTableIndex.h>
+#include <zbase/core/TableConfig.pb.h>
+#include <zbase/core/TSDBTableInfo.h>
 
 using namespace stx;
 

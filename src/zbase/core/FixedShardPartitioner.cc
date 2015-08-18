@@ -8,7 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <stx/util/binarymessagewriter.h>
-#include <tsdb/FixedShardPartitioner.h>
+#include <zbase/core/FixedShardPartitioner.h>
 
 using namespace stx;
 

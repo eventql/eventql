@@ -30,8 +30,8 @@
 #include "zbase/TableDefinition.h"
 #include "chartsql/runtime/ASCIITableFormat.h"
 #include "chartsql/runtime/JSONSSEStreamFormat.h"
-#include "tsdb/TimeWindowPartitioner.h"
-#include "tsdb/FixedShardPartitioner.h"
+#include "zbase/core/TimeWindowPartitioner.h"
+#include "zbase/core/FixedShardPartitioner.h"
 #include <cstable/CSTableBuilder.h>
 
 using namespace stx;

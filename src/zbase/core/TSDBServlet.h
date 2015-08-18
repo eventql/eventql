@@ -11,7 +11,7 @@
 #define _FNORD_TSDB_TSDBSERVLET_H
 #include "stx/http/httpservice.h"
 #include <stx/random.h>
-#include <tsdb/TSDBService.h>
+#include <zbase/core/TSDBService.h>
 #include <stx/http/HTTPSSEStream.h>
 
 using namespace stx;

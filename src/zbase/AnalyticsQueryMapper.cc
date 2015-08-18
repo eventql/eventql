@@ -9,8 +9,8 @@
 #include "stx/logging.h"
 #include "stx/fnv.h"
 #include "cstable/CSTableReader.h"
-#include <tsdb/TSDBTableScanSpec.pb.h>
-#include <tsdb/CSTableIndex.h>
+#include <zbase/core/TSDBTableScanSpec.pb.h>
+#include <zbase/core/CSTableIndex.h>
 #include "zbase/AnalyticsApp.h"
 #include "zbase/AnalyticsQueryMapper.h"
 #include "zbase/AnalyticsQuery.h"

@@ -11,7 +11,7 @@
 #include "zbase/AnalyticsQuery.h"
 #include "zbase/AnalyticsQueryResult.h"
 #include "zbase/AnalyticsQueryMapper.h"
-#include <tsdb/TimeWindowPartitioner.h>
+#include <zbase/core/TimeWindowPartitioner.h>
 
 using namespace stx;
 

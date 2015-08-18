@@ -10,10 +10,10 @@
 #pragma once
 #include <stx/stdtypes.h>
 #include <stx/duration.h>
-#include <tsdb/Partition.h>
-#include <tsdb/TablePartitioner.h>
+#include <zbase/core/Partition.h>
+#include <zbase/core/TablePartitioner.h>
 #include <stx/protobuf/MessageSchema.h>
-#include <tsdb/TableConfig.pb.h>
+#include <zbase/core/TableConfig.pb.h>
 
 using namespace stx;
 
