@@ -17,6 +17,7 @@ void installDefaultSymbols(SymbolTable* rt) {
   /* expressions/aggregate.h */
   rt->registerFunction("count", expressions::kCountExpr);
   rt->registerFunction("sum", expressions::kSumExpr);
+  rt->registerFunction("mean", expressions::kMeanExpr);
 
   //rt->registerSymbol(
   //    "mean",
