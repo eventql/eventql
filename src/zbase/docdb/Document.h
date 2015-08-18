@@ -6,25 +6,38 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-#pragma once
-#include <stx/stdtypes.h>
-#include <stx/option.h>
-#include <zbase/docdb/Document.pb.h>
+#ifndef _CM_DOCUMENT_H
+#define _CM_DOCUMENT_H
+#include <mutex>
+#include <stdlib.h>
+#include <set>
+#include <string>
+#include <unordered_map>
+#include <stx/autoref.h>
+#include "DocID.h"
+#include "IndexChangeRequest.h"
 
 using namespace stx;
 
 namespace zbase {
 
-Option<DocumentACL> findDocumentACLForUser(
-    const Document& doc,
-    const String& userid);
+class Document : public RefCounted {
+public:
 
-bool isDocumentReadableForUser(const Document& doc, const String& userid);
+  Document(const DocID& id);
 
-bool isDocumentWritableForUser(const Document& doc, const String& userid);
+  const DocID& docID() const;
+  const HashMap<String, String>& fields() const;
 
-bool isDocumentShareableForUser(const Document& doc, const String& userid);
+  void setField(const String& field, const String& value);
 
-void setDefaultDocumentACLs(Document* doc, const String& userid);
+  void debugPrint() const;
 
-}
+protected:
+  HashMap<String, String> fields_;
+  DocID id_;
+};
+
+} // namespace zbase
+
+#endif
