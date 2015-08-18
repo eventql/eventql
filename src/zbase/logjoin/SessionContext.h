@@ -9,7 +9,7 @@
 #pragma once
 #include "stx/protobuf/DynamicMessage.h"
 #include "stx/SHA1.h"
-#include "logjoin/TrackedSession.h"
+#include "zbase/logjoin/TrackedSession.h"
 #include "zbase/CustomerConfig.h"
 
 using namespace stx;

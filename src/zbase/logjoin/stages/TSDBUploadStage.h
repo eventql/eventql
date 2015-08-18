@@ -9,7 +9,7 @@
 #pragma once
 #include "stx/stdtypes.h"
 #include "stx/http/httpconnectionpool.h"
-#include "logjoin/SessionContext.h"
+#include "zbase/logjoin/SessionContext.h"
 #include "zbase/core/RecordEnvelope.pb.h"
 
 using namespace stx;

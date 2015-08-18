@@ -8,7 +8,7 @@
  */
 #pragma once
 #include "stx/stdtypes.h"
-#include "logjoin/SessionContext.h"
+#include "zbase/logjoin/SessionContext.h"
 
 using namespace stx;
 

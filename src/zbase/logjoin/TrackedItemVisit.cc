@@ -11,7 +11,7 @@
 #include <stx/inspect.h>
 #include <stx/stringutil.h>
 #include "common.h"
-#include "logjoin/TrackedItemVisit.h"
+#include "zbase/logjoin/TrackedItemVisit.h"
 
 namespace zbase {
 

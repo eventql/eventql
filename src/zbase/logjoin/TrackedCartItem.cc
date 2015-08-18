@@ -13,7 +13,7 @@
 #include <stx/logging.h>
 #include <stx/uri.h>
 #include "common.h"
-#include "logjoin/TrackedCartItem.h"
+#include "zbase/logjoin/TrackedCartItem.h"
 
 namespace zbase {
 

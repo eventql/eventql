@@ -9,7 +9,7 @@
 #include <unistd.h>
 #include "stx/wallclock.h"
 #include "stx/io/fileutil.h"
-#include "logjoin/SessionProcessor.h"
+#include "zbase/logjoin/SessionProcessor.h"
 
 using namespace stx;
 

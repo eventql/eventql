@@ -24,7 +24,7 @@
 #include <brokerd/RemoteFeedFactory.h>
 #include <brokerd/RemoteFeedWriter.h>
 #include <zbase/docdb/ItemRef.h>
-#include "logjoin/LogJoin.h"
+#include "zbase/logjoin/LogJoin.h"
 
 using namespace stx;
 

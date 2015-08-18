@@ -27,10 +27,10 @@
 #include "stx/stats/stats.h"
 #include "stx/thread/eventloop.h"
 #include <zbase/docdb/ItemRef.h>
-#include "logjoin/TrackedSession.h"
-#include "logjoin/TrackedQuery.h"
-#include "logjoin/LogJoinShard.h"
-#include "logjoin/SessionProcessor.h"
+#include "zbase/logjoin/TrackedSession.h"
+#include "zbase/logjoin/TrackedQuery.h"
+#include "zbase/logjoin/LogJoinShard.h"
+#include "zbase/logjoin/SessionProcessor.h"
 
 using namespace stx;
 

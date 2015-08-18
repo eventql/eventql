@@ -10,8 +10,8 @@
 #include "stx/protobuf/msg.h"
 #include "stx/protobuf/MessageEncoder.h"
 #include "stx/protobuf/MessagePrinter.h"
-#include "logjoin/stages/TSDBUploadStage.h"
-#include "logjoin/common.h"
+#include "zbase/logjoin/stages/TSDBUploadStage.h"
+#include "zbase/logjoin/common.h"
 #include "zbase/SessionSchema.h"
 #include "zbase/core/TimeWindowPartitioner.h"
 

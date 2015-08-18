@@ -7,7 +7,7 @@
  * permission is obtained.
  */
 #include "stx/protobuf/JSONEncoder.h"
-#include "logjoin/SessionContext.h"
+#include "zbase/logjoin/SessionContext.h"
 
 using namespace stx;
 
