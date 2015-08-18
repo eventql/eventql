@@ -46,9 +46,7 @@ void DocumentDB::listDocuments(
     }
 
     auto doc = msg::decode<Document>(value);
-
-    auto acl = findDocumentACLForUser(doc, userid);
-    if (acl.isEmpty() || !acl.get().allow_read()) {
+    if (isDocumentReadableForUser(doc, userid)) {
       continue;
     }
 
