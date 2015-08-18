@@ -42,12 +42,8 @@ add_subdirectory(src/sstable)
 add_subdirectory(src/cstable)
 add_subdirectory(src/cplot)
 add_subdirectory(src/csql)
-
-add_subdirectory(3rdparty/fnord-fts)
-include_directories(3rdparty/fnord-fts)
-include_directories(3rdparty/)
-
 add_subdirectory(src/zbase)
+add_subdirectory(src/zbase/util)
 add_subdirectory(src/zbase/master)
 add_subdirectory(src/zbase/docdb)
 add_subdirectory(src/zbase/logjoin)
