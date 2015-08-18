@@ -34,11 +34,8 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR}/src)
 set(PROTOC_ARGS --proto_path ${CMAKE_SOURCE_DIR}/src/zbase/core)
 include(3rdparty/libstx/cmake/libstx.cmake)
 
-add_subdirectory(3rdparty/libcstable)
-include_directories(${CSTABLE_INCLUDE})
-
 add_subdirectory(src/sstable)
-include_directories(${SSTABLE_INCLUDE})
+add_subdirectory(src/cstable)
 
 add_subdirectory(3rdparty/libdproc)
 include_directories(${DPROC_INCLUDE})
