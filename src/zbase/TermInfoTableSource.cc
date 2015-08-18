@@ -12,7 +12,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 TermInfoTableSource::TermInfoTableSource(
     const List<dproc::TaskDependency>& deps) :
@@ -82,5 +82,5 @@ List<dproc::TaskDependency> TermInfoTableSource::dependencies() const {
   return deps_;
 }
 
-} // namespace cm
+} // namespace zbase
 

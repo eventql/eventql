@@ -18,7 +18,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 template <typename GroupKeyType, typename GroupValueType>
 struct GroupResult : public AnalyticsQueryResult::SubQueryResult {
@@ -31,7 +31,7 @@ struct GroupResult : public AnalyticsQueryResult::SubQueryResult {
   Vector<String> segment_keys;
 };
 
-} // namespace cm
+} // namespace zbase
 
 #include "GroupResult_impl.h"
 #endif

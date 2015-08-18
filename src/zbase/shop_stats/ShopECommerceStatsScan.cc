@@ -11,7 +11,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 ShopECommerceStatsScan::ShopECommerceStatsScan(
     RefPtr<TSDBTableScanSource<ECommerceTransaction>> input,
@@ -120,5 +120,5 @@ ShopKPIs* ShopECommerceStatsScan::getKPIs(const String& shop_id, const UnixTime&
 }
 
 
-} // namespace cm
+} // namespace zbase
 

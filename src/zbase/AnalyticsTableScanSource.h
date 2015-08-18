@@ -15,14 +15,14 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 class AnalyticsTableScanSource : public ReportSource {
 public:
 
   AnalyticsTableScanSource(
-      const tsdb::TSDBTableScanSpec& params,
-      tsdb::TSDBService* tsdb);
+      const zbase::TSDBTableScanSpec& params,
+      zbase::TSDBService* tsdb);
 
   void read(dproc::TaskContext* context) override;
   AnalyticsTableScan* tableScan();
@@ -31,13 +31,13 @@ public:
 
 protected:
   void readTables();
-  tsdb::TSDBTableScanSpec params_;
-  tsdb::TSDBService* tsdb_;
+  zbase::TSDBTableScanSpec params_;
+  zbase::TSDBService* tsdb_;
   String cstable_file_;
   AnalyticsTableScan scan_;
 };
 
 
-} // namespace cm
+} // namespace zbase
 
 #endif

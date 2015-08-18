@@ -110,10 +110,10 @@ int main(int argc, const char** argv) {
   stx::redis::RedisQueue queue("cm.crawler.workqueue", std::move(redis));
 
   /* start the crawler */
-  cm::Crawler crawler(&feeds, concurrency, &ev);
+  zbase::Crawler crawler(&feeds, concurrency, &ev);
   for (;;) {
     auto job = queue.leaseJob().waitAndGet();
-    auto req = stx::json::fromJSON<cm::CrawlRequest>(job.job_data);
+    auto req = stx::json::fromJSON<zbase::CrawlRequest>(job.job_data);
     crawler.enqueue(req);
     queue.commitJob(job, stx::Status::success());
   }

@@ -12,7 +12,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 SearchDashboardQuery::SearchDashboardQuery(
     AnalyticsTableScan* query,
@@ -207,5 +207,5 @@ void SearchDashboardQuery::setDrilldownFn(
   }
 }
 
-} // namespace cm
+} // namespace zbase
 

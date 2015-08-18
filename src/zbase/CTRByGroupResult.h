@@ -13,14 +13,14 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 template <typename GroupKeyType>
 struct CTRByGroupResult : public GroupResult<GroupKeyType, CTRCounterData> {
   void toJSON(json::JSONOutputStream* json) const;
 };
 
-} // namespace cm
+} // namespace zbase
 
 #include "CTRByGroupResult_impl.h"
 #endif

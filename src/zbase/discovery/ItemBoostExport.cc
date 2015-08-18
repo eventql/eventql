@@ -11,7 +11,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 ItemBoostExport::ItemBoostExport(
     RefPtr<ProtoSSTableSource<ItemBoostRow>> input,
@@ -148,5 +148,5 @@ void ItemBoostExport::onFinish() {
   }
 }
 
-} // namespace cm
+} // namespace zbase
 

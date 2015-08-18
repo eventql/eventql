@@ -10,7 +10,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 ItemBoostScanlet::ItemBoostScanlet(
   const ItemBoostParams& params) :

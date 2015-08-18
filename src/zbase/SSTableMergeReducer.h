@@ -14,7 +14,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 template <typename T>
 class SSTableMergeReducer : public ReportRDD {
@@ -34,7 +34,7 @@ protected:
   HashMap<String, T> counters_;
 };
 
-} // namespace cm
+} // namespace zbase
 
 #include "SSTableMergeReducer_impl.h"
 #endif

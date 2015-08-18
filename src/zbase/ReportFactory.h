@@ -15,7 +15,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 class ReportFactory : public RefCounted {
 public:
@@ -31,4 +31,4 @@ protected:
   HashMap<String, FactoryFn> reports_;
 };
 
-} // namespace cm
+} // namespace zbase

@@ -14,7 +14,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 struct DrilldownTreeNode : public RefCounted {
   HashMap<csql::SValue, RefPtr<DrilldownTreeNode>> groups;

@@ -12,7 +12,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 DiscoveryDashboardQuery::DiscoveryDashboardQuery(
     AnalyticsTableScan* query,
@@ -118,5 +118,5 @@ RefPtr<AnalyticsQueryResult::SubQueryResult> DiscoveryDashboardQuery::result() {
   return result_.get();
 }
 
-} // namespace cm
+} // namespace zbase
 

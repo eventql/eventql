@@ -22,14 +22,14 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 LogfileService::LogfileService(
     ConfigDirectory* cdir,
     AnalyticsAuth* auth,
-    tsdb::TSDBService* tsdb,
-    tsdb::PartitionMap* pmap,
-    tsdb::ReplicationScheme* repl,
+    zbase::TSDBService* tsdb,
+    zbase::PartitionMap* pmap,
+    zbase::ReplicationScheme* repl,
     csql::Runtime* sql) :
     cdir_(cdir),
     auth_(auth),
@@ -61,7 +61,7 @@ void LogfileService::scanLogfile(
       time > lookback_limit;
       time -= partition_size) {
 
-    auto partition = tsdb::TimeWindowPartitioner::partitionKeyFor(
+    auto partition = zbase::TimeWindowPartitioner::partitionKeyFor(
         table_name,
         time,
         partition_size);
@@ -479,8 +479,8 @@ Vector<TableDefinition> LogfileService::getTableDefinitions(
     td.set_table_name("logs." + logfile.name());
     auto tblcfg = td.mutable_config();
     tblcfg->set_schema(getSchema(logfile)->encode().toString());
-    tblcfg->set_partitioner(tsdb::TBL_PARTITION_TIMEWINDOW);
-    tblcfg->set_storage(tsdb::TBL_STORAGE_LOG);
+    tblcfg->set_partitioner(zbase::TBL_PARTITION_TIMEWINDOW);
+    tblcfg->set_storage(zbase::TBL_STORAGE_LOG);
 
     auto partcfg = tblcfg->mutable_time_window_partitioner_config();
     partcfg->set_partition_size(10 * kMicrosPerMinute);
@@ -491,4 +491,4 @@ Vector<TableDefinition> LogfileService::getTableDefinitions(
   return tbls;
 }
 
-} // namespace cm
+} // namespace zbase

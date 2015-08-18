@@ -12,7 +12,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 CTRByResultItemCategoryQuery::CTRByResultItemCategoryQuery(
     AnalyticsTableScan* query,
@@ -105,5 +105,5 @@ RefPtr<AnalyticsQueryResult::SubQueryResult> CTRByResultItemCategoryQuery::resul
   return result_.get();
 }
 
-} // namespace cm
+} // namespace zbase
 

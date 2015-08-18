@@ -10,7 +10,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 void ItemBoostMerge::merge(ItemBoostRow* dst, const ItemBoostRow& src) {
   dst->set_num_impressions(dst->num_impressions() + src.num_impressions());
@@ -32,4 +32,4 @@ void ItemBoostMerge::merge(ItemBoostRow* dst, const ItemBoostRow& src) {
   }
 }
 
-} // namespace cm
+} // namespace zbase

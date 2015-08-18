@@ -14,11 +14,11 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 ShopProductsDashboardQuery::ShopProductsDashboardQuery(
     const ReportParams& params,
-    tsdb::TSDBService* tsdb) :
+    zbase::TSDBService* tsdb) :
     source_(params, tsdb) {}
 
 RefPtr<VFSFile> ShopProductsDashboardQuery::computeBlob(dproc::TaskContext* context) {
@@ -59,5 +59,5 @@ List<dproc::TaskDependency> ShopProductsDashboardQuery::dependencies() const {
   return source_.dependencies();
 }
 
-} // namespace cm
+} // namespace zbase
 

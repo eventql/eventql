@@ -11,7 +11,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 AnalyticsQueryStatus::AnalyticsQueryStatus() :
     total_chunks(0),
@@ -213,5 +213,5 @@ void AnalyticsQuery::loadSegmentsJSON(const json::JSONObject& json) {
   }
 }
 
-} // namespace cm
+} // namespace zbase
 

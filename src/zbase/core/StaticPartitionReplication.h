@@ -13,7 +13,7 @@
 
 using namespace stx;
 
-namespace tsdb {
+namespace zbase {
 
 class StaticPartitionReplication : public PartitionReplication {
 public:

@@ -12,11 +12,11 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 AnalyticsTableScanSource::AnalyticsTableScanSource(
-    const tsdb::TSDBTableScanSpec& params,
-    tsdb::TSDBService* tsdb) :
+    const zbase::TSDBTableScanSpec& params,
+    zbase::TSDBService* tsdb) :
     params_(params),
     tsdb_(tsdb) {}
 
@@ -40,5 +40,5 @@ List<dproc::TaskDependency> AnalyticsTableScanSource::dependencies() const {
   };
 }
 
-} // namespace cm
+} // namespace zbase
 

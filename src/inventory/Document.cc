@@ -11,7 +11,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 Document::Document(const DocID& id) : id_(id) {}
 
@@ -37,4 +37,4 @@ void Document::debugPrint() const {
   stx::iputs("------- END DOC --------", 0);
 }
 
-} // namespace cm
+} // namespace zbase

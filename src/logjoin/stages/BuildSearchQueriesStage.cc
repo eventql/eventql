@@ -11,7 +11,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 void DebugPrintStage::process(RefPtr<SessionContext> ctx) {
   stx::iputs("\n\n==== SESSION  $0/$1 ====", ctx->customer_key, ctx->uuid);
@@ -29,5 +29,5 @@ void DebugPrintStage::process(RefPtr<SessionContext> ctx) {
   stx::iputs("$0", ctx->session.DebugString());
 }
 
-} // namespace cm
+} // namespace zbase
 

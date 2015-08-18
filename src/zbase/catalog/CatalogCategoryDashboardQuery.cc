@@ -12,7 +12,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 CatalogCategoryDashboardQuery::CatalogCategoryDashboardQuery(
     AnalyticsTableScan* query,
@@ -145,5 +145,5 @@ RefPtr<AnalyticsQueryResult::SubQueryResult>
   return result_.get();
 }
 
-} // namespace cm
+} // namespace zbase
 

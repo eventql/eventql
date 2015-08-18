@@ -15,7 +15,7 @@
 
 using namespace stx;
 
-namespace tsdb {
+namespace zbase {
 
 ReplicationWorker::ReplicationWorker(
     RefPtr<ReplicationScheme> repl_scheme,
@@ -30,7 +30,7 @@ ReplicationWorker::ReplicationWorker(
     }),
     running_(false) {
   pmap->subscribeToPartitionChanges([this] (
-      RefPtr<tsdb::PartitionChangeNotification> change) {
+      RefPtr<zbase::PartitionChangeNotification> change) {
     enqueuePartition(change->partition);
   });
 
@@ -132,4 +132,4 @@ void ReplicationWorker::work() {
   }
 }
 
-} // namespace tsdb
+} // namespace zbase

@@ -16,7 +16,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 class JSONSink : public ReportSink {
 public:
@@ -37,6 +37,6 @@ protected:
   json::JSONOutputStream json_;
 };
 
-} // namespace cm
+} // namespace zbase
 
 #endif

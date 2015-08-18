@@ -15,7 +15,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 template <typename T>
 class ProtoSSTableSink : public ReportSink {
@@ -36,6 +36,6 @@ protected:
   std::unique_ptr<sstable::SSTableEditor> sstable_writer_;
 };
 
-} // namespace cm
+} // namespace zbase
 
 #include "ProtoSSTableSink_impl.h"

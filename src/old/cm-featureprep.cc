@@ -103,10 +103,10 @@ int main(int argc, const char** argv) {
   StringUtil::replaceAll(&file_prefix, ".sstable", "");
   auto output_data_file = file_prefix + "_features.sstable";
   auto output_meta_file = file_prefix + "_features_meta.sstable";
-  auto eligibility = cm::ItemEligibility::DAWANDA_ALL_NOBOTS;
+  auto eligibility = zbase::ItemEligibility::DAWANDA_ALL_NOBOTS;
 
   /* set up feature schema */
-  cm::FeatureSchema feature_schema;
+  zbase::FeatureSchema feature_schema;
   feature_schema.registerFeature("shop_id", 1, 1);
   feature_schema.registerFeature("category1", 2, 1);
   feature_schema.registerFeature("category2", 3, 1);
@@ -125,13 +125,13 @@ int main(int argc, const char** argv) {
   /* open featuredb */
   auto featuredb_path = flags.getString("featuredb_path");
   auto featuredb = mdb::MDB::open(featuredb_path, true);
-  cm::FeatureIndex feature_index(featuredb, &feature_schema);
+  zbase::FeatureIndex feature_index(featuredb, &feature_schema);
 
   /* set up analyzer */
   stx::fts::Analyzer analyzer(flags.getString("conf"));
 
   /* feature selector */
-  cm::FeatureSelector feature_select(&feature_index, &analyzer);
+  zbase::FeatureSelector feature_select(&feature_index, &analyzer);
   HashMap<String, Pair<uint32_t, uint32_t>> feature_counts;
 
   /* open output sstable */
@@ -199,7 +199,7 @@ int main(int argc, const char** argv) {
     auto val = cursor->getDataBuffer();
 
     try {
-      auto q = json::fromJSON<cm::JoinedQuery>(val);
+      auto q = json::fromJSON<zbase::JoinedQuery>(val);
 
       if (isQueryEligible(eligibility, q)) {
         for (const auto& item : q.items) {

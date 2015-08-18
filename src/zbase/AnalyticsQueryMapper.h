@@ -18,15 +18,15 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 class AnalyticsApp;
 
 class AnalyticsQueryMapper : public dproc::RDD {
 public:
 
   AnalyticsQueryMapper(
-      const tsdb::TSDBTableScanSpec& params,
-      tsdb::PartitionMap* pmap,
+      const zbase::TSDBTableScanSpec& params,
+      zbase::PartitionMap* pmap,
       AnalyticsQueryFactory* factory);
 
   void compute(dproc::TaskContext* context) override;
@@ -41,8 +41,8 @@ public:
   RefPtr<AnalyticsQueryResult> queryResult() const;
 
 protected:
-  tsdb::TSDBTableScanSpec params_;
-  tsdb::PartitionMap* pmap_;
+  zbase::TSDBTableScanSpec params_;
+  zbase::PartitionMap* pmap_;
   AnalyticsQuerySpec spec_;
   AnalyticsQuery query_;
   AnalyticsQueryFactory* factory_;
@@ -50,6 +50,6 @@ protected:
   RefPtr<AnalyticsQueryResult> result_;
 };
 
-} // namespace cm
+} // namespace zbase
 
 #endif

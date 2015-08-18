@@ -19,7 +19,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 class CTRByPositionQuery : public AnalyticsSubQuery {
 public:
@@ -39,6 +39,6 @@ protected:
   RefPtr<AnalyticsTableScan::ColumnRef> clicked_col_;
 };
 
-} // namespace cm
+} // namespace zbase
 
 #endif

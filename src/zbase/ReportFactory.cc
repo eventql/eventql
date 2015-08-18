@@ -10,7 +10,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 dproc::TaskSpec ReportFactory::getReport(
     const String& name,
@@ -28,4 +28,4 @@ void ReportFactory::registerReportFactory(const String& name, FactoryFn fn) {
 }
 
 
-} // namespace cm
+} // namespace zbase

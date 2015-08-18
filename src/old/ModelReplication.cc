@@ -13,7 +13,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 ModelReplication::ModelReplication() :
     interval_(kMicrosPerSecond),
@@ -89,5 +89,5 @@ void ModelReplication::run() {
 }
 
 
-} // namespace cm
+} // namespace zbase
 

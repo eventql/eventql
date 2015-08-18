@@ -20,7 +20,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 class RecoEngineStatsQuery : public AnalyticsSubQuery {
 public:
@@ -59,6 +59,6 @@ protected:
   Vector<size_t> query_num_reco_items_clicked_;
 };
 
-} // namespace cm
+} // namespace zbase
 
 #endif

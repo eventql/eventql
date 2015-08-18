@@ -13,7 +13,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 CTRCounterTableSink::CTRCounterTableSink(
     const String& tempdir) :
@@ -49,5 +49,5 @@ RefPtr<VFSFile> CTRCounterTableSink::finalize() {
 
 
 
-} // namespace cm
+} // namespace zbase
 

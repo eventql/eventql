@@ -29,7 +29,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 class IndexReader : public RefCounted {
 public:
@@ -52,6 +52,6 @@ protected:
   std::shared_ptr<fts::IndexSearcher> fts_searcher_;
 };
 
-} // namespace cm
+} // namespace zbase
 
 #endif

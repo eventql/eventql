@@ -13,7 +13,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 struct TermInfo {
   TermInfo() : score(0.0f) {}
@@ -33,6 +33,6 @@ struct SortedTermInfo {
   Vector<Pair<String, double>> top_categories;
 };
 
-} // namespace cm
+} // namespace zbase
 
 #endif

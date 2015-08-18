@@ -14,7 +14,7 @@
 
 using namespace stx;
 
-namespace tsdb {
+namespace zbase {
 
 PartitionReader::PartitionReader(
     RefPtr<PartitionSnapshot> head) :

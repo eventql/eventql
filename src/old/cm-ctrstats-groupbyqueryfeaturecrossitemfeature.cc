@@ -31,15 +31,15 @@
 #include "zbase/CTRCounter.h"
 
 using namespace stx;
-using namespace cm;
+using namespace zbase;
 
 typedef Tuple<String, uint64_t, uint64_t> OutputRow;
-typedef HashMap<String, cm::CTRCounterData> CounterMap;
+typedef HashMap<String, zbase::CTRCounterData> CounterMap;
 
 InternMap intern_map;
 
 void indexJoinedQuery(
-    const cm::JoinedQuery& query,
+    const zbase::JoinedQuery& query,
     const String& query_feature,
     const String& item_feature,
     ItemEligibility eligibility,
@@ -49,7 +49,7 @@ void indexJoinedQuery(
     return;
   }
 
-  auto fstr_opt = cm::extractAttr(query.attrs, query_feature);
+  auto fstr_opt = zbase::extractAttr(query.attrs, query_feature);
   if (fstr_opt.isEmpty()) {
     return;
   }
@@ -64,12 +64,12 @@ void indexJoinedQuery(
 
     case FeaturePrep::BAGOFWORDS_DE: {
       Set<String> tokens;
-      cm::tokenizeAndStem(
-          cm::Language::GERMAN,
+      zbase::tokenizeAndStem(
+          zbase::Language::GERMAN,
           fstr,
           &tokens);
 
-      fstr = cm::joinBagOfWords(tokens);
+      fstr = zbase::joinBagOfWords(tokens);
       break;
     }
   }
@@ -250,7 +250,7 @@ int main(int argc, const char** argv) {
   auto end_time = std::numeric_limits<uint64_t>::min();
 
   /* set up feature schema */
-  cm::FeatureSchema feature_schema;
+  zbase::FeatureSchema feature_schema;
   feature_schema.registerFeature("shop_id", 1, 1);
   feature_schema.registerFeature("category1", 2, 1);
   feature_schema.registerFeature("category2", 3, 1);
@@ -260,7 +260,7 @@ int main(int argc, const char** argv) {
   /* open featuredb db */
   auto featuredb_path = flags.getString("featuredb_path");
   auto featuredb = mdb::MDB::open(featuredb_path, true);
-  cm::FeatureIndex feature_index(featuredb, &feature_schema);
+  zbase::FeatureIndex feature_index(featuredb, &feature_schema);
 
   /* read input tables */
   auto sstables = flags.getArgv();
@@ -316,10 +316,10 @@ int main(int argc, const char** argv) {
       status_line.runMaybe();
 
       auto val = cursor->getDataBuffer();
-      Option<cm::JoinedQuery> q;
+      Option<zbase::JoinedQuery> q;
 
       try {
-        q = Some(json::fromJSON<cm::JoinedQuery>(val));
+        q = Some(json::fromJSON<zbase::JoinedQuery>(val));
       } catch (const Exception& e) {
         //stx::logWarning("cm.ctrstats", e, "invalid json: $0", val.toString());
       }
@@ -329,7 +329,7 @@ int main(int argc, const char** argv) {
             q.get(),
             query_feature,
             item_feature,
-            cm::ItemEligibility::DAWANDA_ALL_NOBOTS,
+            zbase::ItemEligibility::DAWANDA_ALL_NOBOTS,
             &feature_index,
             &counters);
       }

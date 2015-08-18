@@ -12,7 +12,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 sstable::SSTableColumnSchema CTRCounterData::sstableSchema() {
   sstable::SSTableColumnSchema schema;

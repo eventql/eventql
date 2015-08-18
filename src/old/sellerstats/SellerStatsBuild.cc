@@ -12,7 +12,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 SellerStatsBuild::SellerStatsBuild(
     FeatureSchema* feature_schema) :
@@ -71,5 +71,5 @@ void SellerStatsBuild::writeItemVisitToActivityLog(
 }
 
 
-} // namespace cm
+} // namespace zbase
 

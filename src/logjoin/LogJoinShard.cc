@@ -10,7 +10,7 @@
 #include <stx/exception.h>
 #include "logjoin/LogJoinShard.h"
 
-namespace cm {
+namespace zbase {
 
 bool LogJoinShard::testUID(const String& uid) {
   stx::FNV<uint64_t> fnv;

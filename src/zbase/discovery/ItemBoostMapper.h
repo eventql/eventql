@@ -17,7 +17,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 class ItemBoostMapper : public ReportRDD {
 public:
@@ -50,6 +50,6 @@ protected:
   Vector<String> cur_terms_;
 };
 
-} // namespace cm
+} // namespace zbase
 
 #endif

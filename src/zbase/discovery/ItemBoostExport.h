@@ -17,7 +17,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 class ItemBoostExport : public ReportRDD {
 public:
@@ -37,6 +37,6 @@ protected:
   Vector<Pair<String, ItemBoostRow>> rows_;
 };
 
-} // namespace cm
+} // namespace zbase
 
 #endif

@@ -14,7 +14,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 TopSearchTermsQuery::TopSearchTermsQuery(
     AnalyticsTableScan* query,
@@ -442,5 +442,5 @@ void TopSearchQueriesResult::toCSV(CSVOutputStream* csv) const {
   }
 }
 
-} // namespace cm
+} // namespace zbase
 

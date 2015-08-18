@@ -23,7 +23,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 class CustomerNamespace;
 
 class SellerStatsBuild {
@@ -51,6 +51,6 @@ protected:
 
   stx::stats::Counter<uint64_t> stat_processed_item_visits_;
 };
-} // namespace cm
+} // namespace zbase
 
 #endif

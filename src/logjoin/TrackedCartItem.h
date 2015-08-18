@@ -19,7 +19,7 @@
 #include <stx/reflect/reflect.h>
 #include <inventory/ItemRef.h>
 
-namespace cm {
+namespace zbase {
 
 struct TrackedCartItem {
   TrackedCartItem() :
@@ -39,12 +39,12 @@ struct TrackedCartItem {
 
   template <typename T>
   static void reflect(T* meta) {
-    meta->prop(&cm::TrackedCartItem::time, 1, "t", false);
-    meta->prop(&cm::TrackedCartItem::item, 3, "i", false);
-    meta->prop(&cm::TrackedCartItem::quantity, 4, "q", false);
-    meta->prop(&cm::TrackedCartItem::price_cents, 5, "p", false);
-    meta->prop(&cm::TrackedCartItem::currency, 6, "c", false);
-    meta->prop(&cm::TrackedCartItem::checkout_step, 7, "s", false);
+    meta->prop(&zbase::TrackedCartItem::time, 1, "t", false);
+    meta->prop(&zbase::TrackedCartItem::item, 3, "i", false);
+    meta->prop(&zbase::TrackedCartItem::quantity, 4, "q", false);
+    meta->prop(&zbase::TrackedCartItem::price_cents, 5, "p", false);
+    meta->prop(&zbase::TrackedCartItem::currency, 6, "c", false);
+    meta->prop(&zbase::TrackedCartItem::checkout_step, 7, "s", false);
   };
 };
 

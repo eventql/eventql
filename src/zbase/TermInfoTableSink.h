@@ -20,7 +20,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 class TermInfoTableSink : public ReportSink {
 public:
@@ -41,6 +41,6 @@ protected:
   sstable::SSTableColumnSchema sstable_schema_;
 };
 
-} // namespace cm
+} // namespace zbase
 
 #endif

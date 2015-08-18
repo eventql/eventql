@@ -12,7 +12,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 JSONSink::JSONSink() :
     buf_(new Buffer{}),
@@ -29,5 +29,5 @@ RefPtr<VFSFile> JSONSink::finalize() {
 }
 
 
-} // namespace cm
+} // namespace zbase
 

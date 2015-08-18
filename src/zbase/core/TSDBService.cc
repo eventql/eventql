@@ -17,7 +17,7 @@
 
 using namespace stx;
 
-namespace tsdb {
+namespace zbase {
 
 TSDBService::TSDBService(PartitionMap* pmap) : pmap_(pmap) {}
 

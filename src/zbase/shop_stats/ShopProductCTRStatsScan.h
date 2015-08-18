@@ -18,7 +18,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 class ShopProductCTRStatsScan : public ReportRDD {
 public:
@@ -45,4 +45,4 @@ protected:
   OrderedMap<String, ShopProductKPIs> products_map_;
 };
 
-} // namespace cm
+} // namespace zbase

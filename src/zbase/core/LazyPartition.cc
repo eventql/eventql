@@ -12,7 +12,7 @@
 
 using namespace stx;
 
-namespace tsdb {
+namespace zbase {
 
 LazyPartition::LazyPartition() {}
 

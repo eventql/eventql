@@ -10,10 +10,10 @@
 #include "zbase/JoinedSession.pb.h"
 #include "IndexChangeRequest.pb.h"
 
-using namespace cm;
+using namespace zbase;
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 
 }

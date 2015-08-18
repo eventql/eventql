@@ -18,11 +18,11 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 AnalyticsQueryMapper::AnalyticsQueryMapper(
-      const tsdb::TSDBTableScanSpec& params,
-      tsdb::PartitionMap* pmap,
+      const zbase::TSDBTableScanSpec& params,
+      zbase::PartitionMap* pmap,
       AnalyticsQueryFactory* factory) :
       params_(params),
       pmap_(pmap),
@@ -42,7 +42,7 @@ AnalyticsQueryMapper::AnalyticsQueryMapper(
 //List<dproc::TaskDependency> AnalyticsQueryMapper::dependencies() const {
   //List<dproc::TaskDependency> deps;
 
-  //tsdb::TSDBTableScanSpec dparams;
+  //zbase::TSDBTableScanSpec dparams;
   //dparams.set_schema_name("cm.JoinedSession");
   //dparams.set_version(params_.version());
 
@@ -142,5 +142,5 @@ RefPtr<AnalyticsQueryResult> AnalyticsQueryMapper::queryResult() const {
   return result_;
 }
 
-} // namespace cm
+} // namespace zbase
 

@@ -13,7 +13,7 @@
 #include "common.h"
 #include "logjoin/TrackedItemVisit.h"
 
-namespace cm {
+namespace zbase {
 
 void TrackedItemVisit::fromParams(const stx::URI::ParamList& params) {
   std::string item_id_str;

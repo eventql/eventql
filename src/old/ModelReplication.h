@@ -21,7 +21,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 class ModelReplication {
 public:
@@ -49,6 +49,6 @@ protected:
   List<Pair<String, Function<void()>>> jobs_;
 };
 
-} // namespace cm
+} // namespace zbase
 
 #endif

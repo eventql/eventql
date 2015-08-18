@@ -54,7 +54,7 @@
 #include "zbase/AnalyticsTableScan.h"
 #include "zbase/CTRByPositionQuery.h"
 
-using namespace cm;
+using namespace zbase;
 using namespace stx;
 
 stx::thread::EventLoop ev;

@@ -19,7 +19,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 struct CTRCounterData {
   static CTRCounterData load(const String& buf);

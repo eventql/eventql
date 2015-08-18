@@ -14,7 +14,7 @@
 #include <chartsql/defaults.h>
 #include <chartsql/qtree/GroupByMergeNode.h>
 
-namespace tsdb {
+namespace zbase {
 
 RefPtr<csql::QueryTreeNode> SQLEngine::rewriteQuery(
     PartitionMap* partition_map,

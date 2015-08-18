@@ -10,7 +10,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 CTRCounterMergeReducer::CTRCounterMergeReducer(
     RefPtr<CTRCounterTableSource> input,
@@ -37,5 +37,5 @@ void CTRCounterMergeReducer::onFinish() {
   }
 }
 
-} // namespace cm
+} // namespace zbase
 

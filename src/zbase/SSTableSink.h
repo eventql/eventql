@@ -17,7 +17,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 template <typename T>
 class SSTableSink : public ReportSink {
@@ -38,7 +38,7 @@ protected:
   std::unique_ptr<sstable::SSTableEditor> sstable_writer_;
 };
 
-} // namespace cm
+} // namespace zbase
 
 #include "SSTableSink_impl.h"
 #endif

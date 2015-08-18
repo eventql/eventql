@@ -17,7 +17,7 @@
 
 using namespace stx;
 
-namespace tsdb {
+namespace zbase {
 
 struct ReplicaRef {
   ReplicaRef(
@@ -86,5 +86,5 @@ protected:
 
 
 
-} // namespace tsdb
+} // namespace zbase
 

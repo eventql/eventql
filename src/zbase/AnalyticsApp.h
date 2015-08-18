@@ -29,16 +29,16 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 class AnalyticsApp : public dproc::DefaultApplication {
 public:
 
   AnalyticsApp(
-      tsdb::TSDBService* tsdb_node,
-      tsdb::PartitionMap* partition_map,
-      tsdb::ReplicationScheme* replication_scheme,
-      tsdb::CSTableIndex* cstable_index,
+      zbase::TSDBService* tsdb_node,
+      zbase::PartitionMap* partition_map,
+      zbase::ReplicationScheme* replication_scheme,
+      zbase::CSTableIndex* cstable_index,
       ConfigDirectory* cdb,
       AnalyticsAuth* auth,
       csql::Runtime* sql,
@@ -97,9 +97,9 @@ protected:
   void configureCustomer(const CustomerConfig& customer);
   void configureTable(const TableDefinition& tbl);
 
-  tsdb::TSDBService* tsdb_node_;
-  tsdb::PartitionMap* partition_map_;
-  tsdb::CSTableIndex* cstable_index_;
+  zbase::TSDBService* tsdb_node_;
+  zbase::PartitionMap* partition_map_;
+  zbase::CSTableIndex* cstable_index_;
   AnalyticsQueryFactory queries_;
   HashMap<String, FeedConfig> feeds_;
   ConfigDirectory* cdb_;
@@ -108,8 +108,8 @@ protected:
   LogfileService logfile_service_;
 };
 
-tsdb::TableDefinition tableDefinitionToTableConfig(const TableDefinition& tbl);
+zbase::TableDefinition tableDefinitionToTableConfig(const TableDefinition& tbl);
 
-} // namespace cm
+} // namespace zbase
 
 #endif

@@ -13,7 +13,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 LogfileAPIServlet::LogfileAPIServlet(
     LogfileService* service,

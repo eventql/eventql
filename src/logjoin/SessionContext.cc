@@ -11,7 +11,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 OutputEvent::OutputEvent(
     UnixTime _time,
@@ -61,4 +61,4 @@ const Vector<RefPtr<OutputEvent>>& SessionContext::outputEvents() const {
   return output_events_;
 }
 
-} // namespace cm
+} // namespace zbase

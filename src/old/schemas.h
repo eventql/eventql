@@ -11,10 +11,10 @@
 #include "common.h"
 #include "stx/protobuf/MessageSchema.h"
 
-using namespace cm;
+using namespace zbase;
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 void loadDefaultSchemas(msg::MessageSchemaRepository* repo);
 

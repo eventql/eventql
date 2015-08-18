@@ -11,7 +11,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 TopTermsByCategoryReport::TopTermsByCategoryReport(
     RefPtr<CTRCounterTableSource> input,
@@ -76,5 +76,5 @@ void TopTermsByCategoryReport::onFinish() {
   counters_.clear();
 }
 
-} // namespace cm
+} // namespace zbase
 

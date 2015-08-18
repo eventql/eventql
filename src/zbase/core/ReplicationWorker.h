@@ -17,7 +17,7 @@
 
 using namespace stx;
 
-namespace tsdb {
+namespace zbase {
 
 class ReplicationWorker {
 public:
@@ -56,5 +56,5 @@ protected:
   std::condition_variable cv_;
 };
 
-} // namespace tsdb
+} // namespace zbase
 

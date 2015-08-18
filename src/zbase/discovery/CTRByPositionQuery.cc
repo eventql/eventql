@@ -11,7 +11,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 CTRByPositionQuery::CTRByPositionQuery(
     AnalyticsTableScan* query,
@@ -51,5 +51,5 @@ RefPtr<AnalyticsQueryResult::SubQueryResult> CTRByPositionQuery::result() {
   return result_.get();
 }
 
-} // namespace cm
+} // namespace zbase
 

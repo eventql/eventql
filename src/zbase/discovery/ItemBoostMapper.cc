@@ -10,7 +10,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 ItemBoostMapper::ItemBoostMapper(
     RefPtr<AnalyticsTableScanSource> input,
@@ -114,5 +114,5 @@ void ItemBoostMapper::onFinish() {
   }
 }
 
-} // namespace cm
+} // namespace zbase
 

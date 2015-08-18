@@ -17,7 +17,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 /**
  * INPUT: CTR_COUNTER (key=<lang>~<term>~category)
@@ -42,4 +42,4 @@ protected:
   HashMap<String, TermInfo> counters_;
 };
 
-} // namespace cm
+} // namespace zbase

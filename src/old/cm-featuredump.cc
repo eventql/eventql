@@ -331,7 +331,7 @@ int main(int argc, const char** argv) {
       auto val = cursor->getDataBuffer();
       sstable::SSTableColumnReader cols(&schema, val);
 
-      cm::Example ex;
+      zbase::Example ex;
 #ifndef FNORD_NODEBUG
       Set<String> dbg_features;
 #endif

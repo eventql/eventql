@@ -12,7 +12,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 DocIndex::DocIndex(
     const String& db_path,
@@ -414,5 +414,5 @@ RefPtr<mdb::MDB> DocIndex::getDBHanndle() const {
 //}
 
 
-} // namespace cm
+} // namespace zbase
 

@@ -10,7 +10,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 void AnalyticsQueryFactory::registerQuery(
     const String& query_type,
@@ -23,7 +23,7 @@ RefPtr<AnalyticsQueryResult> AnalyticsQueryFactory::buildQuery(
     AnalyticsTableScan* scan) {
   auto res = mkRef(new AnalyticsQueryResult(query));
 
-  Vector<RefPtr<cm::TrafficSegment>> segs;
+  Vector<RefPtr<zbase::TrafficSegment>> segs;
   for (const auto& s : query.segments) {
     segs.emplace_back(new TrafficSegment(s, scan));
   }
@@ -46,6 +46,6 @@ RefPtr<AnalyticsQueryResult> AnalyticsQueryFactory::buildQuery(
   return res;
 }
 
-} // namespace cm
+} // namespace zbase
 
 

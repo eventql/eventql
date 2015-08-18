@@ -11,7 +11,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 template <typename GroupKeyType>
 void CTRByGroupResult<GroupKeyType>::toJSON(
@@ -81,6 +81,6 @@ void CTRByGroupResult<GroupKeyType>::toJSON(
   json->endArray();
 }
 
-} // namespace cm
+} // namespace zbase
 
 #endif

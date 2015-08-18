@@ -13,7 +13,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 List<dproc::TaskDependency> AnalyticsTableScanPlanner::mapShards(
     const String& customer,
@@ -21,7 +21,7 @@ List<dproc::TaskDependency> AnalyticsTableScanPlanner::mapShards(
     const UnixTime& until,
     const String& task_name,
     const Buffer& task_params,
-    tsdb::TSDBService* tsdb) {
+    zbase::TSDBService* tsdb) {
   return mapShards(
       customer,
       "sessions",
@@ -41,7 +41,7 @@ List<dproc::TaskDependency> AnalyticsTableScanPlanner::mapShards(
     const UnixTime& until,
     const String& task_name,
     const Buffer& task_params,
-    tsdb::TSDBService* tsdb) {
+    zbase::TSDBService* tsdb) {
   auto cs = 4 * kMicrosPerHour;
   auto first_chunk = (from.unixMicros() / cs) * cs;
   auto last_chunk = (until.unixMicros() / cs) * cs;
@@ -49,7 +49,7 @@ List<dproc::TaskDependency> AnalyticsTableScanPlanner::mapShards(
 
   List<dproc::TaskDependency> deps;
   for (auto t = first_chunk; t <= last_chunk; t += cs) {
-    auto partition = tsdb::TimeWindowPartitioner::partitionKeyFor(
+    auto partition = zbase::TimeWindowPartitioner::partitionKeyFor(
         table_name,
         t,
         cs);
@@ -63,7 +63,7 @@ List<dproc::TaskDependency> AnalyticsTableScanPlanner::mapShards(
       continue;
     }
 
-    tsdb::TSDBTableScanSpec spec;
+    zbase::TSDBTableScanSpec spec;
     spec.set_tsdb_namespace(customer);
     spec.set_table_name(table_name);
     spec.set_partition_key(partition.toString());
@@ -81,5 +81,5 @@ List<dproc::TaskDependency> AnalyticsTableScanPlanner::mapShards(
   return deps;
 }
 
-} // namespace cm
+} // namespace zbase
 

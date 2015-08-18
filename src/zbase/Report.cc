@@ -10,7 +10,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 ReportRDD::ReportRDD(
     RefPtr<ReportSource> input,
@@ -81,5 +81,5 @@ void rowToJSON(
   json->endObject();
 }
 
-} // namespace cm
+} // namespace zbase
 

@@ -15,7 +15,7 @@
 
 using namespace stx;
 
-namespace tsdb {
+namespace zbase {
 
 TSDBTableProvider::TSDBTableProvider(
     const String& tsdb_namespace,

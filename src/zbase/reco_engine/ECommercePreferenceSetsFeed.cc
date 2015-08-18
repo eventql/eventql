@@ -11,7 +11,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 ECommercePreferenceSetsFeed::ECommercePreferenceSetsFeed(
     RefPtr<TSDBTableScanSource<JoinedSession>> input,
@@ -78,5 +78,5 @@ String ECommercePreferenceSetsFeed::contentType() const {
   return "application/json; charset=utf-8";
 }
 
-} // namespace cm
+} // namespace zbase
 

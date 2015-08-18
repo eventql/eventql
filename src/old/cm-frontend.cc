@@ -33,7 +33,7 @@
 #include "frontend/IndexFeedUpload.h"
 #include "schemas.h"
 
-using namespace cm;
+using namespace zbase;
 using namespace stx;
 
 int main(int argc, const char** argv) {
@@ -113,10 +113,10 @@ int main(int argc, const char** argv) {
 
   /* set up frontend */
   thread::Queue<IndexChangeRequest> indexfeed(8192);
-  cm::CMFrontend frontend(&tracker_log_feed, &indexfeed);
+  zbase::CMFrontend frontend(&tracker_log_feed, &indexfeed);
 
   /* set up dawanda */
-  auto dwn_ns = new cm::CustomerNamespace("dawanda");
+  auto dwn_ns = new zbase::CustomerNamespace("dawanda");
   dwn_ns->addVHost("dwnapps.net");
   dwn_ns->loadTrackingJS("customers/dawanda/track.min.js");
 
@@ -149,7 +149,7 @@ int main(int argc, const char** argv) {
   http_server.stats()->exportStats(
       StringUtil::format(
           "/cm-frontend/by-host/$0/http/inbound",
-          cm::cmHostname()));
+          zbase::cmHostname()));
 
 
   /* start index feed upload */

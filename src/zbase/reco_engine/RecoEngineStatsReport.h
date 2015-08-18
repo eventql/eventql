@@ -12,7 +12,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 class RecoEngineStatsReport : public dproc::BlobRDD {
 public:
@@ -28,4 +28,4 @@ protected:
   ReportParams params_;
 };
 
-} // namespace cm
+} // namespace zbase

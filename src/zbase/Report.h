@@ -34,7 +34,7 @@ using namespace stx;
 #define pb_incr(P, F, V) (P).set_##F((P).F() + (V));
 #define pb_nmerge(D, S, F) (D).set_##F((D).F() + (S).F());
 
-namespace cm {
+namespace zbase {
 
 class ReportSource : public RefCounted {
 public:
@@ -88,6 +88,6 @@ void rowToJSON(
     const Vector<csql::SValue>& row,
     json::JSONOutputStream* json);
 
-} // namespace cm
+} // namespace zbase
 
 #endif

@@ -9,7 +9,7 @@
 #pragma once
 #include <stx/logging.h>
 
-namespace cm {
+namespace zbase {
 
 template <typename T>
 AbstractProtoSSTableSource<T>::AbstractProtoSSTableSource() :
@@ -90,5 +90,5 @@ List<dproc::TaskDependency> ProtoSSTableSource<T>::dependencies() const {
   return deps_;
 }
 
-} // namespace cm
+} // namespace zbase
 

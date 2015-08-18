@@ -7,7 +7,7 @@
 
 
 using namespace stx;
-namespace cm {
+namespace zbase {
 
 class JoinedSessionViewer : public stx::http::HTTPService {
 public:

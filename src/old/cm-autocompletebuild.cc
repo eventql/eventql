@@ -46,7 +46,7 @@
 #include "zbase/TermInfoMergeReducer.h"
 
 using namespace stx;
-using namespace cm;
+using namespace zbase;
 
 int main(int argc, const char** argv) {
   stx::Application::init();
@@ -126,7 +126,7 @@ int main(int argc, const char** argv) {
   auto datadir = flags.getString("datadir");
 
   thread::ThreadPool tpool;
-  cm::ReportBuilder report_builder(&tpool);
+  zbase::ReportBuilder report_builder(&tpool);
 
   Random rnd;
   auto buildid = rnd.hex128();

@@ -14,7 +14,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 class ConfigDirectoryMaster {
 public:
@@ -51,4 +51,4 @@ protected:
   HashMap<String, uint64_t> heads_;
 };
 
-} // namespace cm
+} // namespace zbase

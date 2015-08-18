@@ -16,7 +16,7 @@
 #include "zbase/core/RecordSet.h"
 
 using namespace stx;
-using namespace tsdb;
+using namespace zbase;
 
 UNIT_TEST(RecordSetTest);
 

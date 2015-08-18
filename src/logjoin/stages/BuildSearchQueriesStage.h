@@ -12,7 +12,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 class BuildSearchQueriesStage {
 public:
@@ -21,5 +21,5 @@ public:
 
 };
 
-} // namespace cm
+} // namespace zbase
 

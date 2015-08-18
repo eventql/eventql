@@ -24,7 +24,7 @@
 #include "zbase/ProtoSSTableMergeReducer.h"
 
 using namespace stx;
-using namespace cm;
+using namespace zbase;
 
 stx::thread::EventLoop ev;
 
@@ -81,7 +81,7 @@ int main(int argc, const char** argv) {
   });
 
   http::HTTPConnectionPool http(&ev);
-  tsdb::TSDBClient tsdb("http://nue03.prod.fnrd.net:7003/tsdb", &http);
+  zbase::TSDBClient tsdb("http://nue03.prod.fnrd.net:7003/tsdb", &http);
 
   dproc::DefaultApplication app("cm.itemboost");
 

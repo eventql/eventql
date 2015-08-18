@@ -21,7 +21,7 @@
 
 using namespace stx;
 
-namespace tsdb {
+namespace zbase {
 
 CSTableIndex::CSTableIndex(
     PartitionMap* pmap,
@@ -34,7 +34,7 @@ CSTableIndex::CSTableIndex(
     }),
     running_(false) {
   pmap->subscribeToPartitionChanges([this] (
-      RefPtr<tsdb::PartitionChangeNotification> change) {
+      RefPtr<zbase::PartitionChangeNotification> change) {
     enqueuePartition(change->partition);
   });
 
@@ -66,7 +66,7 @@ bool CSTableIndex::needsUpdate(
 
 void CSTableIndex::buildCSTable(RefPtr<Partition> partition) {
   auto table = partition->getTable();
-  if (table->storage() == tsdb::TBL_STORAGE_STATIC) {
+  if (table->storage() == zbase::TBL_STORAGE_STATIC) {
     return;
   }
 
@@ -222,4 +222,4 @@ void CSTableIndex::work() {
   }
 }
 
-} // namespace tsdb
+} // namespace zbase

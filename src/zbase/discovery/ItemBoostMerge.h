@@ -13,12 +13,12 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 struct ItemBoostMerge {
   static void merge(ItemBoostRow* dst, const ItemBoostRow& src);
 };
 
-} // namespace cm
+} // namespace zbase
 
 #endif

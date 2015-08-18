@@ -11,7 +11,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 RecoStats::RecoStats() :
     num_queries(0),
@@ -107,5 +107,5 @@ void RecoStats::toJSON(json::JSONOutputStream* json) const {
 }
 
 
-} // namespace cm
+} // namespace zbase
 

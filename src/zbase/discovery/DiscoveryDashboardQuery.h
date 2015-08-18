@@ -20,7 +20,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 class DiscoveryDashboardQuery : public AnalyticsSubQuery {
 public:
@@ -54,6 +54,6 @@ protected:
   bool new_session_;
 };
 
-} // namespace cm
+} // namespace zbase
 
 #endif

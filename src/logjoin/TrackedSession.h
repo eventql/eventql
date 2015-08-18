@@ -16,7 +16,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 struct TrackedEvent {
   TrackedEvent(
@@ -47,4 +47,4 @@ struct TrackedSession {
 
 };
 
-} // namespace cm
+} // namespace zbase

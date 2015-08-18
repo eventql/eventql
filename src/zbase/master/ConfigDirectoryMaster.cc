@@ -16,7 +16,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 ConfigDirectoryMaster::ConfigDirectoryMaster(
     const String& path) :
@@ -365,4 +365,4 @@ void ConfigDirectoryMaster::loadHeads() {
 
 }
 
-} // namespace cm
+} // namespace zbase

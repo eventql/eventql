@@ -18,7 +18,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 class ShopECommerceStatsScan : public ReportRDD {
 public:
@@ -46,4 +46,4 @@ protected:
   Option<Duration> time_window_;
 };
 
-} // namespace cm
+} // namespace zbase

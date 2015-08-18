@@ -13,7 +13,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 DocStore::DocStore(const String& path) : path_(path) {}
 
@@ -100,5 +100,5 @@ void DocStore::listDocuments(Function<bool (const DocID& doc)> fn) const {
   });
 }
 
-} // namespace cm
+} // namespace zbase
 

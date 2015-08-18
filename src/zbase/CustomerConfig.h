@@ -13,7 +13,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 struct CustomerConfigRef : public RefCounted {
   CustomerConfigRef(CustomerConfig _config) : config(_config) {}
@@ -22,5 +22,5 @@ struct CustomerConfigRef : public RefCounted {
 
 CustomerConfig createCustomerConfig(const String& customer);
 
-} // namespace cm
+} // namespace zbase
 

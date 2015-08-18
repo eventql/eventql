@@ -41,7 +41,7 @@
 #include "AutoCompleteModel.h"
 #include "zbase/TermInfoTableSource.h"
 
-using namespace cm;
+using namespace zbase;
 using namespace stx;
 
 int main(int argc, const char** argv) {
@@ -113,7 +113,7 @@ int main(int argc, const char** argv) {
   // preheat
   models.getModel("AutoCompleteModel", "termstats", "termstats-dawanda");
 
-  cm::AutoCompleteServlet acservlet(&models);
+  zbase::AutoCompleteServlet acservlet(&models);
 
   /* start http server */
   stx::thread::EventLoop ev;

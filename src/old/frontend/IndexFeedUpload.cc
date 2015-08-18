@@ -20,7 +20,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 IndexFeedUpload::IndexFeedUpload(
     const String& target_url,
@@ -139,5 +139,5 @@ void IndexFeedUpload::run() {
 }
 
 
-} // namespace cm
+} // namespace zbase
 

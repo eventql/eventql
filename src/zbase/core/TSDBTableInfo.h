@@ -14,7 +14,7 @@
 
 using namespace stx;
 
-namespace tsdb {
+namespace zbase {
 
 struct TSDBTableInfo {
   String table_name;

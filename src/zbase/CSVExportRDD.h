@@ -15,7 +15,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 class CSVExportRDD : public dproc::BlobRDD {
 public:
@@ -32,5 +32,5 @@ protected:
   RefPtr<VTableSource> source_;
 };
 
-} // namespace cm
+} // namespace zbase
 

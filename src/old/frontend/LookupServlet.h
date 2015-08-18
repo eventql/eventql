@@ -14,7 +14,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 class LookupServlet : public http::HTTPService {
 public:

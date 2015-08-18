@@ -13,7 +13,7 @@
 #include <stx/UnixTime.h>
 #include <stx/reflect/reflect.h>
 
-namespace cm {
+namespace zbase {
 
 struct CrawlResult {
   stx::UnixTime time;
@@ -22,9 +22,9 @@ struct CrawlResult {
 
   template <typename T>
   static void reflect(T* meta) {
-    meta->prop(&cm::CrawlResult::time, 1, "time", false);
-    meta->prop(&cm::CrawlResult::url, 2, "url", false);
-    meta->prop(&cm::CrawlResult::userdata, 3, "userdata", false);
+    meta->prop(&zbase::CrawlResult::time, 1, "time", false);
+    meta->prop(&zbase::CrawlResult::url, 2, "url", false);
+    meta->prop(&zbase::CrawlResult::userdata, 3, "userdata", false);
   };
 };
 

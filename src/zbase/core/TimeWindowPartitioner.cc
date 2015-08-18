@@ -13,7 +13,7 @@
 
 using namespace stx;
 
-namespace tsdb {
+namespace zbase {
 
 TimeWindowPartitioner::TimeWindowPartitioner(
     const String& table_name) :

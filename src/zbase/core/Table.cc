@@ -13,7 +13,7 @@
 
 using namespace stx;
 
-namespace tsdb {
+namespace zbase {
 
 Table::Table(
     const TableDefinition& config) :

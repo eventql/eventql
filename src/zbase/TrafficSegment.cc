@@ -11,7 +11,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 TrafficSegment::TrafficSegment(
     const TrafficSegmentParams& params,
@@ -171,4 +171,4 @@ String trafficSegmentOpToString(TrafficSegmentOp op) {
   }
 }
 
-} // namespace cm
+} // namespace zbase

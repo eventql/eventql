@@ -13,7 +13,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 class NormalizeQueryStrings {
 public:
@@ -25,5 +25,5 @@ public:
 
 };
 
-} // namespace cm
+} // namespace zbase
 

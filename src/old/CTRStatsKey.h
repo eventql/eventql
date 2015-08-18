@@ -21,7 +21,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 typedef Vector<String> CTRStatsKey;
 

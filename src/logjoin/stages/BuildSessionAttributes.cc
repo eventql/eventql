@@ -11,7 +11,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 void BuildSessionAttributes::process(RefPtr<SessionContext> ctx) {
   auto first_seen = firstSeenTime(ctx.get());
@@ -93,5 +93,5 @@ Option<UnixTime> BuildSessionAttributes::lastSeenTime(SessionContext* sess) {
   }
 }
 
-} // namespace cm
+} // namespace zbase
 

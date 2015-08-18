@@ -41,7 +41,7 @@
 #include "IndexChangeRequest.h"
 #include "schemas.h"
 
-using namespace cm;
+using namespace zbase;
 using namespace stx;
 
 stx::thread::EventLoop ev;

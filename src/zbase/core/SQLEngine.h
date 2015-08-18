@@ -12,7 +12,7 @@
 #include <chartsql/runtime/ResultFormat.h>
 #include <zbase/core/TSDBTableProvider.h>
 
-namespace tsdb {
+namespace zbase {
 class TSDBService;
 
 class SQLEngine {

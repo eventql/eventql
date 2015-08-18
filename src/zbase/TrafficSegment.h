@@ -17,7 +17,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 enum class TrafficSegmentOp {
   MATCHES,
@@ -59,6 +59,6 @@ protected:
   List<Function<bool()>> predicates_;
 };
 
-} // namespace cm
+} // namespace zbase
 
 #endif

@@ -19,7 +19,7 @@
 #include <stx/reflect/reflect.h>
 #include <inventory/ItemRef.h>
 
-namespace cm {
+namespace zbase {
 
 struct TrackedItemVisit {
   stx::UnixTime time;
@@ -32,10 +32,10 @@ struct TrackedItemVisit {
 
   template <typename T>
   static void reflect(T* meta) {
-    meta->prop(&cm::TrackedItemVisit::time, 1, "t", false);
-    meta->prop(&cm::TrackedItemVisit::clickid, 2, "e", false);
-    meta->prop(&cm::TrackedItemVisit::item, 3, "i", false);
-    meta->prop(&cm::TrackedItemVisit::attrs, 4, "a", false);
+    meta->prop(&zbase::TrackedItemVisit::time, 1, "t", false);
+    meta->prop(&zbase::TrackedItemVisit::clickid, 2, "e", false);
+    meta->prop(&zbase::TrackedItemVisit::item, 3, "i", false);
+    meta->prop(&zbase::TrackedItemVisit::attrs, 4, "a", false);
   };
 };
 

@@ -13,7 +13,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 ModelCache::ModelCache(const String& datadir) : datadir_(datadir) {}
 
@@ -136,5 +136,5 @@ RefPtr<logtable::ArtifactIndex> ModelCache::getArtifactIndex(
   return index;
 }
 
-} // namespace cm
+} // namespace zbase
 

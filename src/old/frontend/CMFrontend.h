@@ -26,7 +26,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 class CustomerNamespace;
 
 class CMFrontend : public stx::http::HTTPService {
@@ -73,5 +73,5 @@ protected:
   stats::Counter<uint64_t> stat_index_requests_written_failure_;
 };
 
-} // namespace cm
+} // namespace zbase
 #endif

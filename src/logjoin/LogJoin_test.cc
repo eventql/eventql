@@ -19,7 +19,7 @@
 #include "logjoin/stages/DebugPrintStage.h"
 
 using namespace stx;
-using namespace cm;
+using namespace zbase;
 
 UNIT_TEST(LogJoinTest);
 

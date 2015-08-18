@@ -14,11 +14,11 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 ShopProductsTable::ShopProductsTable(
     const ReportParams& params,
-    tsdb::TSDBService* tsdb) :
+    zbase::TSDBService* tsdb) :
     params_(params),
     tsdb_(tsdb) {
   URI::ParamList p;
@@ -107,5 +107,5 @@ const ShopProductKPIs& ShopProductsTable::aggregates() const {
 }
 
 
-} // namespace cm
+} // namespace zbase
 

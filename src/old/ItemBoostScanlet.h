@@ -12,7 +12,7 @@
 #include "zbase/CTRCounter.h"
 #include "ItemBoost.pb.h"
 
-namespace cm {
+namespace zbase {
 
 class ItemBoostScanlet : public AnalyticsTableScanlet<
     ItemBoostParams,

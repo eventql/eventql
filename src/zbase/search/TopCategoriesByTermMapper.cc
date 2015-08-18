@@ -10,7 +10,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 TopCategoriesByTermMapper::TopCategoriesByTermMapper(
     RefPtr<CTRCounterTableSource> input,
@@ -49,5 +49,5 @@ void TopCategoriesByTermMapper::onFinish() {
   }
 }
 
-} // namespace cm
+} // namespace zbase
 

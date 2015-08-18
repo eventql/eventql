@@ -17,7 +17,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 /**
  * INPUT: JOINED_QUERY
@@ -53,6 +53,6 @@ protected:
   String cur_lang_;
 };
 
-} // namespace cm
+} // namespace zbase
 
 #endif

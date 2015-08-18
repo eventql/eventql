@@ -15,11 +15,11 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 AnalyticsQueryReducer::AnalyticsQueryReducer(
       const AnalyticsQuerySpec& spec,
-      tsdb::TSDBService* tsdb,
+      zbase::TSDBService* tsdb,
       AnalyticsQueryFactory* factory) :
       spec_(spec),
       tsdb_(tsdb),
@@ -39,7 +39,7 @@ List<dproc::TaskDependency> AnalyticsQueryReducer::dependencies() const {
       tsdb_);
 
   for (auto cur = shards.begin(); cur != shards.end(); ) {
-    auto p = msg::decode<tsdb::TSDBTableScanSpec>(cur->params);
+    auto p = msg::decode<zbase::TSDBTableScanSpec>(cur->params);
 
     if (p.use_cstable_index()) {
       ++cur;
@@ -115,5 +115,5 @@ RefPtr<AnalyticsQueryResult> AnalyticsQueryReducer::queryResult() {
 //
 //  return buf.get();
 
-} // namespace cm
+} // namespace zbase
 

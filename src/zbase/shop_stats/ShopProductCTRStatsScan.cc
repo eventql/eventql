@@ -11,7 +11,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 ShopProductCTRStatsScan::ShopProductCTRStatsScan(
     RefPtr<TSDBTableScanSource<JoinedSession>> input,
@@ -142,5 +142,5 @@ ShopProductKPIs* ShopProductCTRStatsScan::getKPIs(
   return &products_map_[key];
 }
 
-} // namespace cm
+} // namespace zbase
 

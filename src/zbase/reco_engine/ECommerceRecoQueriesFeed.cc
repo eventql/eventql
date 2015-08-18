@@ -10,7 +10,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 ECommerceRecoQueriesFeed::ECommerceRecoQueriesFeed(
     RefPtr<TSDBTableScanSource<JoinedSession>> input,
@@ -95,5 +95,5 @@ String ECommerceRecoQueriesFeed::contentType() const {
   return "application/json; charset=utf-8";
 }
 
-} // namespace cm
+} // namespace zbase
 

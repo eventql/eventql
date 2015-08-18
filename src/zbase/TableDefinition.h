@@ -13,6 +13,6 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 }

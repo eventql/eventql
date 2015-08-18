@@ -12,7 +12,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 struct LogJoinShard {
   static const uint64_t modulo = 8192;
@@ -32,6 +32,6 @@ protected:
   HashMap<String, LogJoinShard> shards_;
 };
 
-} // namespace cm
+} // namespace zbase
 
 #endif

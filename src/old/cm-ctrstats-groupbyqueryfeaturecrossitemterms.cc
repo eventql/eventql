@@ -34,15 +34,15 @@
 #include <fnord-fts/fts_common.h>
 
 using namespace stx;
-using namespace cm;
+using namespace zbase;
 
 typedef Tuple<String, uint64_t, uint64_t> OutputRow;
-typedef HashMap<String, cm::CTRCounterData> CounterMap;
+typedef HashMap<String, zbase::CTRCounterData> CounterMap;
 
 InternMap intern_map;
 
 void indexJoinedQuery(
-    const cm::JoinedQuery& query,
+    const zbase::JoinedQuery& query,
     const String& query_feature_name,
     mdb::MDB* featuredb,
     FeatureIndex* feature_index,
@@ -55,7 +55,7 @@ void indexJoinedQuery(
     return;
   }
 
-  auto fstr_opt = cm::extractAttr(query.attrs, query_feature_name);
+  auto fstr_opt = zbase::extractAttr(query.attrs, query_feature_name);
   if (fstr_opt.isEmpty()) {
     return;
   }
@@ -257,7 +257,7 @@ int main(int argc, const char** argv) {
   stx::fts::Analyzer analyzer(flags.getString("conf"));
 
   /* set up feature schema */
-  cm::FeatureSchema feature_schema;
+  zbase::FeatureSchema feature_schema;
   feature_schema.registerFeature("shop_id", 1, 1);
   feature_schema.registerFeature("category1", 2, 1);
   feature_schema.registerFeature("category2", 3, 1);
@@ -267,7 +267,7 @@ int main(int argc, const char** argv) {
   /* open featuredb db */
   auto featuredb_path = flags.getString("featuredb_path");
   auto featuredb = mdb::MDB::open(featuredb_path, true);
-  cm::FeatureIndex feature_index(featuredb, &feature_schema);
+  zbase::FeatureIndex feature_index(featuredb, &feature_schema);
 
   /* read input tables */
   auto sstables = flags.getArgv();
@@ -323,10 +323,10 @@ int main(int argc, const char** argv) {
       status_line.runMaybe();
 
       auto val = cursor->getDataBuffer();
-      Option<cm::JoinedQuery> q;
+      Option<zbase::JoinedQuery> q;
 
       try {
-        q = Some(json::fromJSON<cm::JoinedQuery>(val));
+        q = Some(json::fromJSON<zbase::JoinedQuery>(val));
       } catch (const Exception& e) {
         //stx::logWarning("cm.ctrstats", e, "invalid json: $0", val.toString());
       }
@@ -338,7 +338,7 @@ int main(int argc, const char** argv) {
             featuredb.get(),
             &feature_index,
             feature_schema.featureID(flags.getString("item_feature")).get(),
-            cm::ItemEligibility::DAWANDA_ALL_NOBOTS,
+            zbase::ItemEligibility::DAWANDA_ALL_NOBOTS,
             &analyzer,
             lang,
             &counters);

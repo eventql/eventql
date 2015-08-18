@@ -17,7 +17,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 /**
  * INPUT: CTR_COUNTER (key=<lang>~<search_query>)
@@ -44,5 +44,5 @@ protected:
   RefPtr<AnalyticsTableScan::ColumnRef> lang_col_;
 };
 
-} // namespace cm
+} // namespace zbase
 

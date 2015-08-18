@@ -14,7 +14,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 RecoEngineStatsReport::RecoEngineStatsReport(
     const ReportParams& params) :

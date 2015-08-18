@@ -20,7 +20,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 class ModelCache {
 public:
@@ -57,6 +57,6 @@ protected:
   HashMap<String, Function<RefCounted* (const String& filename)>> factories_;
 };
 
-} // namespace cm
+} // namespace zbase
 
 #endif

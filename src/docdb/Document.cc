@@ -10,7 +10,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 Option<DocumentACL> findDocumentACLForUser(
     const Document& doc,

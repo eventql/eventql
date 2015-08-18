@@ -10,7 +10,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 TopCategoriesByTermReport::TopCategoriesByTermReport(
     RefPtr<TermInfoTableSource> input,
@@ -46,5 +46,5 @@ void TopCategoriesByTermReport::onTermInfo(const String& term, const TermInfo& t
 void TopCategoriesByTermReport::onFinish() {
 }
 
-} // namespace cm
+} // namespace zbase
 

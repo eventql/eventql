@@ -12,7 +12,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 SearchCTRStats::SearchCTRStats() :
     num_sessions(0),
@@ -209,5 +209,5 @@ void SearchCTRStats::toJSON(json::JSONOutputStream* json) const {
 }
 
 
-} // namespace cm
+} // namespace zbase
 

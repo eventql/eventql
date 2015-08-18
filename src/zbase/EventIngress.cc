@@ -14,9 +14,9 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
-EventIngress::EventIngress(tsdb::TSDBClient* tsdb) : tsdb_(tsdb) {}
+EventIngress::EventIngress(zbase::TSDBClient* tsdb) : tsdb_(tsdb) {}
 
 void EventIngress::insertEvents(
     const String& customer,
@@ -115,9 +115,9 @@ void EventIngress::insertEvents(
       customer,
       table_name);
 
-  tsdb::RecordEnvelopeList records;
+  zbase::RecordEnvelopeList records;
   for (const auto& e : events) {
-    auto partition_key = tsdb::TimeWindowPartitioner::partitionKeyFor(
+    auto partition_key = zbase::TimeWindowPartitioner::partitionKeyFor(
         table_name,
         e.time,
         4 * kMicrosPerHour); // FIXPAUL
@@ -133,4 +133,4 @@ void EventIngress::insertEvents(
   tsdb_->insertRecords(records);
 }
 
-} // namespace cm
+} // namespace zbase

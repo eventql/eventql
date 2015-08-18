@@ -21,7 +21,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 class DocStore : public RefCounted {
 public:
@@ -44,6 +44,6 @@ protected:
   String path_;
 };
 
-} // namespace cm
+} // namespace zbase
 
 #endif

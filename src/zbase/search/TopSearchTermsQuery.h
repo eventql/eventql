@@ -19,7 +19,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 struct TopSearchQueriesResult : public CTRByGroupResult<String> {
   void toJSON(json::JSONOutputStream* json) const;
@@ -60,6 +60,6 @@ protected:
   RefPtr<AnalyticsTableScan::ColumnRef> cart_value_col_;
 };
 
-} // namespace cm
+} // namespace zbase
 
 #endif

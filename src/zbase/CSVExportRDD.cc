@@ -13,7 +13,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 CSVExportRDD::CSVExportRDD(RefPtr<VTableSource> source) : source_(source) {}
 

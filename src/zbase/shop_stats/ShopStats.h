@@ -12,7 +12,7 @@
 #include "zbase/ShopStats.pb.h"
 #include "zbase/ShopStats.pb.h"
 
-namespace cm {
+namespace zbase {
 
 struct ShopStats {
 
@@ -26,4 +26,4 @@ struct ShopStats {
 
 };
 
-} // namespace cm
+} // namespace zbase

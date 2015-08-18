@@ -18,7 +18,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 /**
  * INPUT: TERM_INFO (key=<lang>~<term>)
@@ -41,6 +41,6 @@ protected:
   HashMap<String, TermInfo> counters_;
 };
 
-} // namespace cm
+} // namespace zbase
 
 #endif

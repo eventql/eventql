@@ -15,7 +15,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 struct RecoStats {
   RecoStats();
@@ -34,6 +34,6 @@ struct RecoStats {
   void decode(util::BinaryMessageReader* reader);
 };
 
-} // namespace cm
+} // namespace zbase
 
 #endif

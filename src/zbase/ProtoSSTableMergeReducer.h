@@ -14,7 +14,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 template <typename T>
 class ProtoSSTableMergeReducer : public ReportRDD {
@@ -36,7 +36,7 @@ protected:
   Function<void (T*, const T&)> merge_;
 };
 
-} // namespace cm
+} // namespace zbase
 
 #include "ProtoSSTableMergeReducer_impl.h"
 #endif

@@ -11,7 +11,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 template <typename GroupKeyType, typename GroupValueType>
 void GroupResult<GroupKeyType, GroupValueType>::merge(
@@ -103,6 +103,6 @@ void GroupResult<GroupKeyType, GroupValueType>::decode(util::BinaryMessageReader
 }
 
 
-} // namespace cm
+} // namespace zbase
 
 #endif

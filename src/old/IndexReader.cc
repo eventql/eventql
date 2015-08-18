@@ -11,7 +11,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 RefPtr<IndexReader> IndexReader::openIndex(const String& index_path) {
   if (!FileUtil::exists(index_path) || !FileUtil::isDirectory(index_path)) {
@@ -51,4 +51,4 @@ RefPtr<DocIndex> IndexReader::docIndex() {
   return doc_idx_;
 }
 
-} // namespace cm
+} // namespace zbase

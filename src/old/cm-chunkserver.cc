@@ -144,39 +144,39 @@ int main(int argc, const char** argv) {
     repl_scheme->addHost(r);
   }
 
-  tsdb::TSDBService tsdb_node(dir + "/tsdb", repl_scheme.get(), &http);
+  zbase::TSDBService tsdb_node(dir + "/tsdb", repl_scheme.get(), &http);
 
   {
-    tsdb::TableDefinition config;
+    zbase::TableDefinition config;
     config.set_table_name("joined_sessions.");
     config.set_max_sstable_size(1024 * 1024 * 512);
     config.set_compaction_interval(1800 * kMicrosPerSecond);
-    config.set_partitioner(tsdb::TIME_WINDOW);
+    config.set_partitioner(zbase::TIME_WINDOW);
     config.set_partition_window(3600 * 4 * kMicrosPerSecond);
     tsdb_node.configurePrefix("dawanda", config);
   }
 
   {
-    tsdb::TableDefinition config;
+    zbase::TableDefinition config;
     config.set_table_name("metricd.sensors.");
     config.set_max_sstable_size(1024 * 1024 * 512);
     config.set_compaction_interval(10 * kMicrosPerSecond);
-    config.set_partitioner(tsdb::TIME_WINDOW);
+    config.set_partitioner(zbase::TIME_WINDOW);
     config.set_partition_window(600 * kMicrosPerSecond);
     tsdb_node.configurePrefix("dawanda", config);
   }
 
   {
-    tsdb::TableDefinition config;
+    zbase::TableDefinition config;
     config.set_table_name("metricd.metrics.");
     config.set_max_sstable_size(1024 * 1024 * 512);
     config.set_compaction_interval(10 * kMicrosPerSecond);
-    config.set_partitioner(tsdb::TIME_WINDOW);
+    config.set_partitioner(zbase::TIME_WINDOW);
     config.set_partition_window(600 * kMicrosPerSecond);
     tsdb_node.configurePrefix("dawanda", config);
   }
 
-  tsdb::TSDBServlet tsdb_servlet(&tsdb_node);
+  zbase::TSDBServlet tsdb_servlet(&tsdb_node);
   http_router.addRouteByPrefixMatch("/tsdb", &tsdb_servlet, &tpool);
 
   tsdb_node.start();

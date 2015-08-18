@@ -17,7 +17,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 class SessionProcessor {
 public:
@@ -48,5 +48,5 @@ protected:
   std::atomic<bool> running_;
 };
 
-} // namespace cm
+} // namespace zbase
 

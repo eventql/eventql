@@ -19,7 +19,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 
 struct SearchCTRStats {
   SearchCTRStats();
@@ -44,6 +44,6 @@ struct SearchCTRStats {
   void decode(util::BinaryMessageReader* reader);
 };
 
-} // namespace cm
+} // namespace zbase
 
 #endif

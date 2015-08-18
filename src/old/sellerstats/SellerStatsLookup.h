@@ -22,7 +22,7 @@
 
 using namespace stx;
 
-namespace cm {
+namespace zbase {
 class CustomerNamespace;
 
 class SellerStatsLookup {
@@ -39,6 +39,6 @@ public:
       const String& customer);
 
 };
-} // namespace cm
+} // namespace zbase
 
 #endif

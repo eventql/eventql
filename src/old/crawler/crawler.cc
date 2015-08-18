@@ -12,7 +12,7 @@
 #include "crawler/crawler.h"
 #include "crawler/crawlresult.h"
 
-namespace cm {
+namespace zbase {
 
 const char Crawler::kUserAgent[] = "cm-crawler (http://fnrd.net/)";
 
@@ -115,4 +115,4 @@ void Crawler::requestReady(
   stx::logDebug("cm.crawler", "successfully crawled $0", req.url);
 }
 
-} // namespace cm
+} // namespace zbase

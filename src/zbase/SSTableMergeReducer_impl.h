@@ -6,7 +6,7 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-namespace cm {
+namespace zbase {
 
 template <typename T>
 SSTableMergeReducer<T>::SSTableMergeReducer(
@@ -37,6 +37,6 @@ void SSTableMergeReducer<T>::onFinish() {
   }
 }
 
-} // namespace cm
+} // namespace zbase
 
 

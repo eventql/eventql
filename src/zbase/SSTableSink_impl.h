@@ -10,7 +10,7 @@
 #include <stx/util/binarymessagereader.h>
 #include <stx/util/binarymessagewriter.h>
 
-namespace cm {
+namespace zbase {
 
 template <typename T>
 SSTableSink<T>::SSTableSink(
@@ -54,5 +54,5 @@ RefPtr<VFSFile> SSTableSink<T>::finalize() {
       File::openFile(output_file_, File::O_READ | File::O_AUTODELETE));
 }
 
-} // namespace cm
+} // namespace zbase
 
