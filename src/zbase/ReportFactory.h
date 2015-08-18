@@ -11,7 +11,7 @@
 #include "stx/exception.h"
 #include "stx/uri.h"
 #include "stx/autoref.h"
-#include "dproc/TaskSpec.pb.h"
+#include "zbase/dproc/TaskSpec.pb.h"
 
 using namespace stx;
 

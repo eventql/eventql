@@ -9,8 +9,8 @@
 #pragma once
 #include <stx/stdtypes.h>
 #include <stx/wallclock.h>
-#include <dproc/Task.h>
-#include <dproc/BlobRDD.h>
+#include <zbase/dproc/Task.h>
+#include <zbase/dproc/BlobRDD.h>
 #include "zbase/VTable.h"
 
 using namespace stx;

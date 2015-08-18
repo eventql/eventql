@@ -11,7 +11,7 @@
 #include <stx/stdtypes.h>
 #include <stx/wallclock.h>
 #include <stx/csv/CSVOutputStream.h>
-#include <dproc/Task.h>
+#include <zbase/dproc/Task.h>
 #include <zbase/core/TSDBService.h>
 #include <zbase/core/TSDBTableScanSpec.pb.h>
 #include "zbase/AnalyticsQuery.h"

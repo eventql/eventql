@@ -13,7 +13,7 @@
 #include "cstable/CSTableReader.h"
 #include "cstable/ColumnReader.h"
 #include "cstable/BitPackedIntColumnReader.h"
-#include "dproc/Task.h"
+#include "zbase/dproc/Task.h"
 #include "zbase/CTRCounter.h"
 
 using namespace stx;

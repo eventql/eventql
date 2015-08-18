@@ -8,9 +8,9 @@
  */
 #pragma once
 #include <stx/stdtypes.h>
-#include "dproc/Task.h"
-#include "dproc/TaskResultFuture.h"
-#include "dproc/DispatchService.h"
+#include "zbase/dproc/Task.h"
+#include "zbase/dproc/TaskResultFuture.h"
+#include "zbase/dproc/DispatchService.h"
 #include "stx/protobuf/MessageSchema.h"
 #include "zbase/core/TSDBClient.h"
 #include "zbase/AnalyticsQuery.h"

@@ -15,8 +15,8 @@
 #include <stx/thread/eventloop.h>
 #include <stx/thread/threadpool.h>
 #include <stx/http/httpconnectionpool.h>
-#include <dproc/Application.h>
-#include <dproc/LocalScheduler.h>
+#include <zbase/dproc/Application.h>
+#include <zbase/dproc/LocalScheduler.h>
 #include <zbase/core/TSDBClient.h>
 #include "zbase/ItemBoostMapper.h"
 #include "zbase/ItemBoostMerge.h"

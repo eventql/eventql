@@ -9,7 +9,7 @@
 #pragma once
 #include <stx/stdtypes.h>
 #include <zbase/Report.h>
-#include <dproc/Task.h>
+#include <zbase/dproc/Task.h>
 #include <chartsql/svalue.h>
 
 using namespace stx;
