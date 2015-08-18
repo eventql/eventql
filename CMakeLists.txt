@@ -17,7 +17,7 @@ include(3rdparty/libstx/cmake/libstx.cmake)
 add_subdirectory(3rdparty/libcstable)
 include_directories(${CSTABLE_INCLUDE})
 
-add_subdirectory(3rdparty/libsstable)
+add_subdirectory(src/sstable)
 include_directories(${SSTABLE_INCLUDE})
 
 add_subdirectory(3rdparty/libdproc)
