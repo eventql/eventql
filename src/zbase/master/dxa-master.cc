@@ -15,8 +15,8 @@
 #include "stx/http/httpserver.h"
 #include "stx/thread/eventloop.h"
 #include "stx/thread/threadpool.h"
-#include "master/ConfigDirectoryMaster.h"
-#include "master/MasterServlet.h"
+#include "zbase/master/ConfigDirectoryMaster.h"
+#include "zbase/master/MasterServlet.h"
 
 using namespace stx;
 using namespace cm;

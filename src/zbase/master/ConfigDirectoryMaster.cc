@@ -6,7 +6,7 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-#include <master/ConfigDirectoryMaster.h>
+#include <zbase/master/ConfigDirectoryMaster.h>
 #include <stx/io/file.h>
 #include <stx/io/fileutil.h>
 #include <stx/random.h>
