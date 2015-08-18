@@ -17,8 +17,8 @@
 #include <stx/UnixTime.h>
 #include <stx/uri.h>
 #include <stx/reflect/reflect.h>
-#include <inventory/ItemRef.h>
-#include <inventory/IndexChangeRequest.pb.h>
+#include <zbase/docdb/ItemRef.h>
+#include <zbase/docdb/IndexChangeRequest.pb.h>
 
 using namespace stx;
 

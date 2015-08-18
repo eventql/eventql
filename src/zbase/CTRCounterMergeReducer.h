@@ -13,7 +13,7 @@
 #include "zbase/CTRCounterTableSource.h"
 #
 #include "zbase/CTRCounter.h"
-#include <inventory/ItemRef.h>
+#include <zbase/docdb/ItemRef.h>
 
 
 using namespace stx;

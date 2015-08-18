@@ -36,10 +36,10 @@
 #include "logjoin/stages/DebugPrintStage.h"
 #include "logjoin/stages/DeliverWebhookStage.h"
 #include "logjoin/stages/TSDBUploadStage.h"
-#include "inventory/DocStore.h"
-#include "inventory/IndexChangeRequest.h"
-#include "inventory/DocIndex.h"
-#include <inventory/ItemRef.h>
+#include "zbase/docdb/DocStore.h"
+#include "zbase/docdb/IndexChangeRequest.h"
+#include "zbase/docdb/DocIndex.h"
+#include <zbase/docdb/ItemRef.h>
 #include <fnord-fts/Analyzer.h>
 #include "zbase/ConfigDirectory.h"
 #include "zbase/SessionSchema.h"

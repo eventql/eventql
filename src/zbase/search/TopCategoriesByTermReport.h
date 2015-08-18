@@ -11,7 +11,7 @@
 #include "zbase/TermInfoTableSource.h"
 #include "zbase/CSVSink.h"
 #include "zbase/TermInfo.h"
-#include <inventory/ItemRef.h>
+#include <zbase/docdb/ItemRef.h>
 
 using namespace stx;
 

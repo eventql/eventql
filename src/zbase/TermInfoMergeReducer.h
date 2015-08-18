@@ -13,7 +13,7 @@
 #include "TermInfoTableSink.h"
 #include "TermInfoTableSource.h"
 #include "TermInfo.h"
-#include <inventory/ItemRef.h>
+#include <zbase/docdb/ItemRef.h>
 
 
 using namespace stx;

@@ -7,7 +7,7 @@
  * permission is obtained.
  */
 #pragma once
-#include <inventory/ItemRef.h>
+#include <zbase/docdb/ItemRef.h>
 #include "zbase/Report.h"
 #include "zbase/CTRCounterTableSource.h"
 #include "zbase/TermInfoTableSink.h"

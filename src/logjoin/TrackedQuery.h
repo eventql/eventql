@@ -18,7 +18,7 @@
 #include <stx/UnixTime.h>
 #include <stx/uri.h>
 
-#include <inventory/ItemRef.h>
+#include <zbase/docdb/ItemRef.h>
 
 namespace zbase {
 class CustomerNamespace;

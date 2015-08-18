@@ -8,7 +8,7 @@
  */
 #ifndef _CM_TERMINFO_H
 #define _CM_TERMINFO_H
-#include <inventory/ItemRef.h>
+#include <zbase/docdb/ItemRef.h>
 
 
 using namespace stx;
