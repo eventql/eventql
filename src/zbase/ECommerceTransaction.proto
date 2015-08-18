@@ -1,0 +1,66 @@
+/**
+ * Copyright (c) 2015 - The CM Authors <legal@clickmatcher.com>
+ *   All Rights Reserved.
+ *
+ * This file is CONFIDENTIAL -- Distribution or duplication of this material or
+ * the information contained herein is strictly forbidden unless prior written
+ * permission is obtained.
+ */
+import "CodingOptions.proto";
+import "Currency.proto";
+
+package cm;
+
+message ECommerceTransactionItem {
+
+  /**
+   * The item id / product ID
+   */
+  required string item_id = 1
+      [(stx.coding) = { maxval: 1024 }];
+
+  /**
+   * The price in cents and currency
+   */
+  required uint32 price_cents = 2
+      [(stx.coding) = { maxval: 4294967295 encoding: "LEB128" }];
+
+  optional stx.Currency currency = 3;
+
+  /**
+   * If applicable, the product's/item's shop id (DaWanda user id)
+   */
+  optional uint32 shop_id = 4
+      [(stx.coding) = { maxval: 4294967295 encoding: "LEB128" }];
+
+  /**
+   * True if this item was refundend
+   */
+  optional bool refunded = 5;
+
+}
+
+enum ECommerceTransactionType {
+  ECOMMERCE_TX_UNKNOWN = 0;
+  ECOMMERCE_TX_PURCHASE = 1;
+  ECOMMERCE_TX_REFUND = 2;
+}
+
+message ECommerceTransaction {
+
+  /**
+   * Transaction id
+   */
+  required string transaction_id = 1
+      [(stx.coding) = { maxval: 1024 }];
+
+  optional ECommerceTransactionType transaction_type = 4;
+
+  /**
+   * The time of this transaction
+   */
+  required uint64 time = 2;
+
+  repeated ECommerceTransactionItem items = 3;
+
+}

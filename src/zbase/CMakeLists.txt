@@ -1,0 +1,120 @@
+include_directories(${CMAKE_CURRENT_BINARY_DIR}/)
+
+file(GLOB PROTO_FILES *.proto */*.proto)
+PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS ${PROTO_FILES})
+
+add_executable(analyticsd
+    $<TARGET_OBJECTS:stx-mdb>
+    $<TARGET_OBJECTS:stx-rpc>
+    $<TARGET_OBJECTS:brokerd-client>
+    $<TARGET_OBJECTS:logjoin-common>
+    $<TARGET_OBJECTS:dxa-docdb>
+    $<TARGET_OBJECTS:tsdb-server>
+    $<TARGET_OBJECTS:customerdirectory>
+    #$<TARGET_OBJECTS:fnord-afx>
+    $<TARGET_OBJECTS:dproc>
+    $<TARGET_OBJECTS:auth>
+    #sstable/SSTableServlet.cc
+    api/LogfileService.cc
+    api/LogfileAPIServlet.cc
+    LogfileScanResult.cc
+    Report.cc
+    AnalyticsTableScan.cc
+    AnalyticsTableScanPlanner.cc
+    TrafficSegment.cc
+    CTRStatsServlet.cc
+    AnalyticsServlet.cc
+    JSONSink.cc
+    AnalyticsApp.cc
+    AnalyticsQuery.cc
+    AnalyticsQueryResult.cc
+    AnalyticsQueryFactory.cc
+    AnalyticsQueryMapper.cc
+    AnalyticsQueryReducer.cc
+    AnalyticsTableScanSource.cc
+    DrilldownTree.cc
+    EventIngress.cc
+    ReportFactory.cc
+    CSVExportRDD.cc
+    JSONExportRDD.cc
+    CSVSink.cc
+    CTRCounter.cc
+    CTRCounterTableSink.cc
+    CTRCounterTableSource.cc
+    CTRCounterMergeReducer.cc
+    PipelineInfo.cc
+    TermInfoTableSource.cc
+    TermInfoTableSink.cc
+    VTable.cc
+    ecommerce/ECommerceKPIQuery.cc
+    discovery/CTRByPageQuery.cc
+    discovery/CTRByPositionQuery.cc
+    discovery/DiscoveryDashboardQuery.cc
+    discovery/ItemBoostMapper.cc
+    discovery/ItemBoostMerge.cc
+    discovery/ItemBoostExport.cc
+    search/CTRByResultItemCategoryQuery.cc
+    search/TopSearchTermsQuery.cc
+    search/TopCategoriesByTermMapper.cc
+    search/SearchCTRStats.cc
+    search/SearchDashboardQuery.cc
+    search/ECommerceSearchQueriesFeed.cc
+    search/TopSearchTermsReport.cc
+    search/TopTermsByCategoryReport.cc
+    search/TopCategoriesByTermReport.cc
+    search/CTRBySearchTermCrossCategoryMapper.cc
+    search/RelatedTermsMapper.cc
+    search/RelatedTermsReport.cc
+    catalog/CatalogDashboardQuery.cc
+    catalog/CatalogCategoryDashboardQuery.cc
+    catalog/CatalogCategoryDashboardResult.cc
+    shop_stats/ShopStats.cc
+    shop_stats/ShopProductsTable.cc
+    shop_stats/ShopProductCTRStatsScan.cc
+    shop_stats/ShopProductECommerceStatsScan.cc
+    shop_stats/ShopKPITable.cc
+    shop_stats/ShopCTRStatsScan.cc
+    shop_stats/ShopECommerceStatsScan.cc
+    shop_stats/ShopKPIDashboardQuery.cc
+    shop_stats/ShopProductsDashboardQuery.cc
+    reco_engine/ECommerceRecoQueriesFeed.cc
+    reco_engine/ECommercePreferenceSetsFeed.cc
+    reco_engine/RecoEngineStatsQuery.cc
+    reco_engine/RecoEngineStatsBreakdownQuery.cc
+    reco_engine/RecoEngineStatsReport.cc
+    reco_engine/RecoStats.cc
+    ${PROTO_SRCS}
+    analyticsd.cc)
+
+target_link_libraries(analyticsd chartsql cplot sstable cstable stx-http stx-json stx-protobuf stx-base)
+
+add_executable(analyticsctl
+    $<TARGET_OBJECTS:stx-mdb>
+    $<TARGET_OBJECTS:stx-rpc>
+    $<TARGET_OBJECTS:brokerd-client>
+    $<TARGET_OBJECTS:logjoin-common>
+    $<TARGET_OBJECTS:tsdb-server>
+    $<TARGET_OBJECTS:customerdirectory>
+    #$<TARGET_OBJECTS:fnord-afx>
+    $<TARGET_OBJECTS:dproc>
+    #sstable/SSTableServlet.cc
+    ${PROTO_SRCS}
+    analyticsctl.cc)
+
+target_link_libraries(analyticsctl chartsql cplot sstable cstable stx-http stx-json stx-protobuf stx-base)
+
+add_executable(zen-csv-upload ${PROTO_SRCS} zen-csv-upload.cc)
+target_link_libraries(zen-csv-upload stx-http stx-protobuf stx-json stx-base)
+
+add_executable(zen-logfile-upload ${PROTO_SRCS} zen-logfile-upload.cc)
+target_link_libraries(zen-logfile-upload stx-http stx-protobuf stx-json stx-base)
+
+add_executable(zen-statsd-upload ${PROTO_SRCS} zen-statsd-upload.cc)
+target_link_libraries(zen-statsd-upload stx-http stx-protobuf stx-json stx-base)
+
+add_executable(zen-mysql-upload
+    $<TARGET_OBJECTS:stx-mysql>
+    ${PROTO_SRCS}
+    zen-mysql-upload.cc)
+
+target_link_libraries(zen-mysql-upload stx-http stx-protobuf stx-json stx-base ${MYSQL_LIB} z)

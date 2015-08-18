@@ -1,0 +1,55 @@
+/**
+ * Copyright (c) 2015 - The CM Authors <legal@clickmatcher.com>
+ *   All Rights Reserved.
+ *
+ * This file is CONFIDENTIAL -- Distribution or duplication of this material or
+ * the information contained herein is strictly forbidden unless prior written
+ * permission is obtained.
+ */
+#ifndef _CM_ANALYTICSQUERYMAPPER_H
+#define _CM_ANALYTICSQUERYMAPPER_H
+#include <stx/stdtypes.h>
+#include <stx/wallclock.h>
+#include <dproc/Task.h>
+#include <tsdb/TSDBService.h>
+#include <tsdb/TSDBTableScanSpec.pb.h>
+#include "zbase/AnalyticsQueryParams.pb.h"
+#include "zbase/AnalyticsQueryFactory.h"
+
+using namespace stx;
+
+namespace cm {
+class AnalyticsApp;
+
+class AnalyticsQueryMapper : public dproc::RDD {
+public:
+
+  AnalyticsQueryMapper(
+      const tsdb::TSDBTableScanSpec& params,
+      tsdb::PartitionMap* pmap,
+      AnalyticsQueryFactory* factory);
+
+  void compute(dproc::TaskContext* context) override;
+
+  //List<dproc::TaskDependency> dependencies() const override;
+
+  RefPtr<VFSFile> encode() const override;
+  void decode(RefPtr<VFSFile> data) override;
+
+  Option<String> cacheKey() const override;
+
+  RefPtr<AnalyticsQueryResult> queryResult() const;
+
+protected:
+  tsdb::TSDBTableScanSpec params_;
+  tsdb::PartitionMap* pmap_;
+  AnalyticsQuerySpec spec_;
+  AnalyticsQuery query_;
+  AnalyticsQueryFactory* factory_;
+  AnalyticsTableScan scan_;
+  RefPtr<AnalyticsQueryResult> result_;
+};
+
+} // namespace cm
+
+#endif

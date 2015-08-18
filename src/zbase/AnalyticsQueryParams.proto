@@ -1,0 +1,27 @@
+/**
+ * Copyright (c) 2015 - The CM Authors <legal@clickmatcher.com>
+ *   All Rights Reserved.
+ *
+ * This file is CONFIDENTIAL -- Distribution or duplication of this material or
+ * the information contained herein is strictly forbidden unless prior written
+ * permission is obtained.
+ */
+package cm;
+
+message AnalyticsSubQueryParam {
+  required string key = 1;
+  required string value = 2;
+}
+
+message AnalyticsSubQuerySpec {
+  optional string query = 1;
+  repeated AnalyticsSubQueryParam params = 2;
+}
+
+message AnalyticsQuerySpec {
+  required string customer = 1;
+  required uint64 start_time = 2;
+  required uint64 end_time = 3;
+  repeated AnalyticsSubQuerySpec subqueries = 5;
+  optional string segments = 6;
+}

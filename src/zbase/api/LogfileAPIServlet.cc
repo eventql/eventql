@@ -1,0 +1,316 @@
+/**
+ * Copyright (c) 2015 - The CM Authors <legal@clickmatcher.com>
+ *   All Rights Reserved.
+ *
+ * This file is CONFIDENTIAL -- Distribution or duplication of this material or
+ * the information contained herein is strictly forbidden unless prior written
+ * permission is obtained.
+ */
+#include "stx/wallclock.h"
+#include "stx/protobuf/msg.h"
+#include "stx/io/BufferedOutputStream.h"
+#include "zbase/api/LogfileAPIServlet.h"
+
+using namespace stx;
+
+namespace cm {
+
+LogfileAPIServlet::LogfileAPIServlet(
+    LogfileService* service,
+    const String& cachedir) :
+    service_(service),
+    cachedir_(cachedir) {}
+
+void LogfileAPIServlet::handle(
+    const AnalyticsSession& session,
+    RefPtr<stx::http::HTTPRequestStream> req_stream,
+    RefPtr<stx::http::HTTPResponseStream> res_stream) {
+  const auto& req = req_stream->request();
+  URI uri(req.uri());
+
+  http::HTTPResponse res;
+  res.populateFromRequest(req);
+
+  if (uri.path() == "/analytics/api/v1/logfiles/scan") {
+    scanLogfile(session, uri, req_stream.get(), res_stream.get());
+    return;
+  }
+
+  if (uri.path() == "/analytics/api/v1/logfiles/scan_partition") {
+    scanLogfilePartition(session, uri, req_stream.get(), res_stream.get());
+    return;
+  }
+
+  if (uri.path() == "/analytics/api/v1/logfiles/upload") {
+    uploadLogfile(session, uri, req_stream.get(), &res);
+    res_stream->writeResponse(res);
+    return;
+  }
+
+  res.setStatus(http::kStatusNotFound);
+  res.addBody("not found");
+  res_stream->writeResponse(res);
+}
+
+void LogfileAPIServlet::scanLogfile(
+    const AnalyticsSession& session,
+    const URI& uri,
+    http::HTTPRequestStream* req_stream,
+    http::HTTPResponseStream* res_stream) {
+  req_stream->readBody();
+
+  const auto& params = uri.queryParams();
+
+  String logfile_name;
+  if (!URI::getParam(params, "logfile", &logfile_name)) {
+    http::HTTPResponse res;
+    res.populateFromRequest(req_stream->request());
+    res.setStatus(http::kStatusBadRequest);
+    res.addBody("error: missing ?logfile=... parameter");
+    res_stream->writeResponse(res);
+    return;
+  }
+
+  LogfileScanParams scan_params;
+  scan_params.set_end_time(WallClock::unixMicros());
+  scan_params.set_scan_type(LOGSCAN_ALL);
+
+  String time_str;
+  if (URI::getParam(params, "time", &time_str)) {
+    scan_params.set_end_time(std::stoull(time_str));
+  }
+
+  size_t limit = 1000;
+  String limit_str;
+  if (URI::getParam(params, "limit", &limit_str)) {
+    limit = std::stoull(limit_str);
+  }
+
+  String raw_str;
+  if (URI::getParam(params, "raw", &limit_str)) {
+    scan_params.set_return_raw (true);
+  }
+
+  String columns_str;
+  if (URI::getParam(params, "columns", &columns_str)) {
+    if (columns_str == "__all__") {
+      scan_params.set_all_columns(true);
+      scan_params.set_return_raw(true);
+    } else {
+      for (const auto& c : StringUtil::split(columns_str, ",")) {
+        *scan_params.add_columns() = c;
+      }
+    }
+  }
+
+  String filter_sql_str;
+  if (URI::getParam(params, "filter_sql", &filter_sql_str)) {
+    scan_params.set_scan_type(LOGSCAN_SQL);
+    scan_params.set_condition(filter_sql_str);
+  }
+
+  LogfileScanResult result(limit);
+
+  http::HTTPSSEStream sse_stream(req_stream, res_stream);
+  sse_stream.start();
+
+  auto send_status_update = [&sse_stream, &result, &scan_params] (bool done) {
+    Buffer buf;
+    json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
+    json.beginObject();
+    json.addObjectEntry("status");
+    json.addString(done ? "finished" : "running");
+    json.addComma();
+    json.addObjectEntry("scanned_until");
+    json.addInteger(result.scannedUntil().unixMicros());
+    json.addComma();
+    json.addObjectEntry("rows_scanned");
+    json.addInteger(result.rowScanned());
+    json.addComma();
+    json.addObjectEntry("columns");
+    json::toJSON(result.columns(), &json);
+    json.addComma();
+    json.addObjectEntry("result");
+    json.beginArray();
+
+    size_t nline = 0;
+    for (const auto& l : result.lines()) {
+      if (++nline > 1) {
+        json.addComma();
+      }
+
+      json.beginObject();
+      json.addObjectEntry("time");
+      json.addInteger(l.time.unixMicros());
+      json.addComma();
+
+      if (scan_params.return_raw()) {
+        json.addObjectEntry("raw");
+        json.addString(l.raw);
+        json.addComma();
+      }
+
+      json.addObjectEntry("columns");
+      json::toJSON(l.columns, &json);
+      json.endObject();
+    }
+
+    json.endArray();
+    json.endObject();
+
+    sse_stream.sendEvent(buf, None<String>());
+  };
+
+  service_->scanLogfile(
+      session,
+      logfile_name,
+      scan_params,
+      &result,
+      send_status_update);
+
+  sse_stream.finish();
+}
+
+void LogfileAPIServlet::scanLogfilePartition(
+    const AnalyticsSession& session,
+    const URI& uri,
+    http::HTTPRequestStream* req_stream,
+    http::HTTPResponseStream* res_stream) {
+  req_stream->readBody();
+
+  const auto& params = uri.queryParams();
+
+  String table;
+  if (!URI::getParam(params, "table", &table)) {
+    http::HTTPResponse res;
+    res.populateFromRequest(req_stream->request());
+    res.setStatus(http::kStatusBadRequest);
+    res.addBody("error: missing ?table=... parameter");
+    res_stream->writeResponse(res);
+    return;
+  }
+
+  String partition;
+  if (!URI::getParam(params, "partition", &partition)) {
+    http::HTTPResponse res;
+    res.populateFromRequest(req_stream->request());
+    res.setStatus(http::kStatusBadRequest);
+    res.addBody("error: missing ?partition=... parameter");
+    res_stream->writeResponse(res);
+    return;
+  }
+
+  String limit_str;
+  if (!URI::getParam(params, "limit", &limit_str)) {
+    http::HTTPResponse res;
+    res.populateFromRequest(req_stream->request());
+    res.setStatus(http::kStatusBadRequest);
+    res.addBody("error: missing ?limit=... parameter");
+    res_stream->writeResponse(res);
+    return;
+  }
+
+  auto limit = std::stoull(limit_str);
+  auto scan_params = msg::decode<LogfileScanParams>(
+      req_stream->request().body());
+
+  LogfileScanResult result(limit);
+
+  service_->scanLocalLogfilePartition(
+      session,
+      table,
+      SHA1Hash::fromHexString(partition),
+      scan_params,
+      &result);
+
+  Buffer res_body;
+  {
+    BufferedOutputStream res_os(BufferOutputStream::fromBuffer(&res_body));
+    result.encode(&res_os);
+  }
+
+  http::HTTPResponse res;
+  res.populateFromRequest(req_stream->request());
+  res.setStatus(http::kStatusOK);
+  res.addBody(res_body);
+  res_stream->writeResponse(res);
+}
+
+void LogfileAPIServlet::uploadLogfile(
+    const AnalyticsSession& session,
+    const URI& uri,
+    http::HTTPRequestStream* req_stream,
+    http::HTTPResponse* res) {
+  const auto& params = uri.queryParams();
+
+  if (req_stream->request().method() != http::HTTPMessage::M_POST) {
+    req_stream->discardBody();
+    res->setStatus(http::kStatusBadRequest);
+    res->addBody("error: expected HTTP POST request");
+    return;
+  }
+
+  String logfile_name;
+  if (!URI::getParam(params, "logfile", &logfile_name)) {
+    req_stream->discardBody();
+    res->setStatus(http::kStatusBadRequest);
+    res->addBody("error: missing ?logfile=... parameter");
+    return;
+  }
+
+  auto logfile_def = service_->findLogfileDefinition(
+      session.customer(),
+      logfile_name);
+
+  if (logfile_def.isEmpty()) {
+    req_stream->discardBody();
+    res->setStatus(http::kStatusNotFound);
+    res->addBody("error: logfile not found");
+    return;
+  }
+
+  Vector<Pair<String, String>> source_fields;
+  for (const auto& source_field : logfile_def.get().source_fields()) {
+    String field_val;
+
+    if (!URI::getParam(params, source_field.name(), &field_val)) {
+      req_stream->discardBody();
+      res->setStatus(http::kStatusBadRequest);
+      res->addBody(
+          StringUtil::format(
+              "error: missing ?$0=... parameter",
+              source_field.name()));
+      return;
+    }
+
+    source_fields.emplace_back(source_field.name(), field_val);
+  }
+
+  auto tmpfile_path = FileUtil::joinPaths(
+      cachedir_,
+      StringUtil::format("upload_$0.tmp", Random::singleton()->hex128()));
+
+  auto tmpfile = File::openFile(
+      tmpfile_path,
+      File::O_CREATE | File::O_READ | File::O_WRITE | File::O_AUTODELETE);
+
+  size_t body_size = 0;
+  req_stream->readBody([&tmpfile, &body_size] (const void* data, size_t size) {
+    tmpfile.write(data, size);
+    body_size += size;
+  });
+
+  tmpfile.seekTo(0);
+
+  auto is = FileInputStream::fromFile(std::move(tmpfile));
+
+  service_->insertLoglines(
+      session.customer(),
+      logfile_def.get(),
+      source_fields,
+      is.get());
+
+  res->setStatus(http::kStatusCreated);
+}
+
+}

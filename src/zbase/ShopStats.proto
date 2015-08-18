@@ -1,0 +1,61 @@
+/**
+ * Copyright (c) 2015 - The CM Authors <legal@clickmatcher.com>
+ *   All Rights Reserved.
+ *
+ * This file is CONFIDENTIAL -- Distribution or duplication of this material or
+ * the information contained herein is strictly forbidden unless prior written
+ * permission is obtained.
+ */
+package cm;
+
+message ShopKPIs {
+  optional uint64 product_page_impressions = 2;
+
+  optional uint64 catalog_impressions = 3;
+  optional uint64 catalog_listview_impressions = 4;
+  optional uint64 catalog_clicks = 5;
+  optional uint64 catalog_listview_clicks = 6;
+
+  optional uint64 search_impressions = 7;
+  optional uint64 search_listview_impressions = 8;
+  optional uint64 search_clicks = 9;
+  optional uint64 search_listview_clicks = 10;
+
+  optional uint64 shop_page_impressions = 11;
+  optional uint64 shop_page_listview_impressions = 12;
+  optional uint64 shop_page_clicks = 13;
+  optional uint64 shop_page_listview_clicks = 14;
+
+  optional uint64 ad_impressions = 15;
+  optional uint64 ad_clicks = 16;
+
+  optional uint64 unique_purchases = 17;
+  optional uint64 refunded_purchases = 23;
+  optional uint64 gmv_eurcent = 18;
+  optional uint64 refunded_gmv_eurcent = 24;
+  optional uint64 order_items_count = 20;
+  optional uint64 refunded_order_items_count = 25;
+  optional uint64 cart_items_count = 21;
+}
+
+message ShopProductKPIs {
+  optional uint64 product_page_impressions = 2;
+
+  optional uint64 catalog_listview_impressions = 4;
+  optional uint64 catalog_listview_clicks = 6;
+
+  optional uint64 search_listview_impressions = 8;
+  optional uint64 search_listview_clicks = 10;
+
+  optional uint64 shop_page_listview_impressions = 12;
+  optional uint64 shop_page_listview_clicks = 14;
+
+  optional uint64 ad_impressions = 15;
+  optional uint64 ad_clicks = 16;
+
+  optional uint64 unique_purchases = 17;
+  optional uint64 refunded_purchases = 23;
+  optional uint64 gmv_eurcent = 18;
+  optional uint64 refunded_gmv_eurcent = 24;
+  optional uint64 cart_items_count = 21;
+}
