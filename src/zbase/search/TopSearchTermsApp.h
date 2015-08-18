@@ -8,7 +8,7 @@
  */
 #ifndef _CM_TOPSEARCHTERMSAPP_H
 #define _CM_TOPSEARCHTERMSAPP_H
-#include "dproc/Application.h"
+#include "zbase/dproc/Application.h"
 #include "zbase/AnalyticsTableScanSource.h"
 #include "zbase/CTRCounterMergeReducer.h"
 #include "zbase/CTRBySearchTermCrossCategoryMapper.h"

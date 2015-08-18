@@ -21,9 +21,9 @@
 #include "stx/csv/CSVOutputStream.h"
 #include "stx/uri.h"
 #include "stx/json/json.h"
-#include "dproc/TaskSpec.pb.h"
-#include "dproc/Task.h"
-#include "dproc/BlobRDD.h"
+#include "zbase/dproc/TaskSpec.pb.h"
+#include "zbase/dproc/Task.h"
+#include "zbase/dproc/BlobRDD.h"
 #include <zbase/docdb/ItemRef.h>
 #include <zbase/logjoin/common.h>
 #include <chartsql/svalue.h>

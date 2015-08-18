@@ -10,7 +10,7 @@
 #pragma once
 #include <stx/stdtypes.h>
 #include <stx/protobuf/MessageSchema.h>
-#include <dproc/Task.h>
+#include <zbase/dproc/Task.h>
 #include <zbase/core/TSDBTableScanSpec.pb.h>
 #include <zbase/core/TSDBTableScanlet.h>
 #include <zbase/core/TSDBClient.h>

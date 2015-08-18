@@ -12,7 +12,7 @@
 #include "stx/http/HTTPSSEStream.h"
 #include "stx/json/json.h"
 #include "stx/web/SecureCookie.h"
-#include "dproc/DispatchService.h"
+#include "zbase/dproc/DispatchService.h"
 #include "zbase/AnalyticsApp.h"
 #include "zbase/ReportParams.pb.h"
 #include "zbase/EventIngress.h"

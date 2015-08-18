@@ -8,10 +8,10 @@
  */
 #ifndef _CM_ANALYTICSAPP_H
 #define _CM_ANALYTICSAPP_H
-#include "dproc/Application.h"
-#include "dproc/Task.h"
-#include "dproc/TaskResultFuture.h"
-#include "dproc/DispatchService.h"
+#include "zbase/dproc/Application.h"
+#include "zbase/dproc/Task.h"
+#include "zbase/dproc/TaskResultFuture.h"
+#include "zbase/dproc/DispatchService.h"
 #include "stx/protobuf/MessageSchema.h"
 #include "zbase/core/TSDBClient.h"
 #include "zbase/core/TSDBService.h"
