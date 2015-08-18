@@ -12,7 +12,7 @@
 #include "zbase/AnalyticsTableScanSource.h"
 #include "zbase/CTRCounterTableSink.h"
 #include "zbase/CTRCounter.h"
-#include <inventory/ItemRef.h>
+#include <zbase/docdb/ItemRef.h>
 
 
 using namespace stx;

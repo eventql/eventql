@@ -25,7 +25,7 @@
 #include "DocStore.h"
 #include "IndexChangeRequest.h"
 #include "DocIndex.h"
-#include <inventory/ItemRef.h>
+#include <zbase/docdb/ItemRef.h>
 
 using namespace stx;
 

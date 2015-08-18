@@ -9,7 +9,7 @@
 #pragma once
 #include "zbase/Report.h"
 
-#include <inventory/ItemRef.h>
+#include <zbase/docdb/ItemRef.h>
 #include "sstable/sstablereader.h"
 #include "sstable/SSTableEditor.h"
 

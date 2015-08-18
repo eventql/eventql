@@ -24,7 +24,7 @@
 #include "dproc/TaskSpec.pb.h"
 #include "dproc/Task.h"
 #include "dproc/BlobRDD.h"
-#include <inventory/ItemRef.h>
+#include <zbase/docdb/ItemRef.h>
 #include <logjoin/common.h>
 #include <chartsql/svalue.h>
 #include "zbase/ReportParams.pb.h"

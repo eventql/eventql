@@ -23,7 +23,7 @@
 #include "stx/util/binarymessagewriter.h"
 #include <brokerd/RemoteFeedFactory.h>
 #include <brokerd/RemoteFeedWriter.h>
-#include <inventory/ItemRef.h>
+#include <zbase/docdb/ItemRef.h>
 #include "logjoin/LogJoin.h"
 
 using namespace stx;

@@ -15,7 +15,7 @@
 #include "stx/mdb/MDB.h"
 #include "stx/stats/stats.h"
 #include "stx/json/json.h"
-#include <inventory/ItemRef.h>
+#include <zbase/docdb/ItemRef.h>
 #include "JoinedItemVisit.h"
 #include "FeatureIndex.h"
 

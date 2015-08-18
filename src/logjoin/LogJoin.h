@@ -26,7 +26,7 @@
 #include "stx/mdb/MDB.h"
 #include "stx/stats/stats.h"
 #include "stx/thread/eventloop.h"
-#include <inventory/ItemRef.h>
+#include <zbase/docdb/ItemRef.h>
 #include "logjoin/TrackedSession.h"
 #include "logjoin/TrackedQuery.h"
 #include "logjoin/LogJoinShard.h"

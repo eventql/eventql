@@ -7,7 +7,7 @@
  * permission is obtained.
  */
 #include <stx/inspect.h>
-#include <inventory/ItemRef.h>
+#include <zbase/docdb/ItemRef.h>
 
 namespace zbase {
 

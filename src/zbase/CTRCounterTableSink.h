@@ -10,7 +10,7 @@
 #define _CM_CTRCOUNTERSSTABLESINK_H
 #include "zbase/Report.h"
 #include "zbase/CTRCounter.h"
-#include <inventory/ItemRef.h>
+#include <zbase/docdb/ItemRef.h>
 
 #include "sstable/sstablereader.h"
 #include "sstable/SSTableEditor.h"

@@ -15,7 +15,7 @@
 #include "stx/mdb/MDB.h"
 #include "stx/stats/stats.h"
 #include <stx/autoref.h>
-#include <inventory/ItemRef.h>
+#include <zbase/docdb/ItemRef.h>
 #include "Document.h"
 #include "IndexChangeRequest.h"
 

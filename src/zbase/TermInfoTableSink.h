@@ -10,7 +10,7 @@
 #define _CM_TERMINFOTABLESINK_H
 #include "zbase/Report.h"
 
-#include <inventory/ItemRef.h>
+#include <zbase/docdb/ItemRef.h>
 #include "zbase/TermInfo.h"
 #include "sstable/sstablereader.h"
 #include "sstable/SSTableEditor.h"

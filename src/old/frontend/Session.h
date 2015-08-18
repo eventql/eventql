@@ -13,7 +13,7 @@
 #include <set>
 #include <string>
 #include <unordered_map>
-#include <inventory/ItemRef.h>
+#include <zbase/docdb/ItemRef.h>
 #include "trackedquery.h"
 
 namespace zbase {

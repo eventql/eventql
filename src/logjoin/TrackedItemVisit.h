@@ -17,7 +17,7 @@
 #include <stx/UnixTime.h>
 #include <stx/uri.h>
 #include <stx/reflect/reflect.h>
-#include <inventory/ItemRef.h>
+#include <zbase/docdb/ItemRef.h>
 
 namespace zbase {
 
