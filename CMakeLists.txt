@@ -35,16 +35,13 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR}/src)
 
 include(src/stx/cmake/libstx.cmake)
 
-add_subdirectory(src/sstable)
-add_subdirectory(src/cstable)
-add_subdirectory(src/cplot)
-
 add_subdirectory(3rdparty/brokerd)
 include_directories(${BROKERD_INCLUDE})
 
-
-add_subdirectory(3rdparty/chartsql)
-include_directories(${CHARTSQL_INCLUDE})
+add_subdirectory(src/sstable)
+add_subdirectory(src/cstable)
+add_subdirectory(src/cplot)
+add_subdirectory(src/csql)
 
 add_subdirectory(3rdparty/fnord-fts)
 include_directories(3rdparty/fnord-fts)
