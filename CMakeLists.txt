@@ -1,4 +1,5 @@
 project(ZenBase)
+cmake_minimum_required(VERSION 2.8)
 
 include(CheckIncludeFile)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/modules/") 
@@ -29,6 +30,9 @@ add_library(hunspell OBJECT
     3rdparty/hunspell/hnjalloc.c
     3rdparty/hunspell/hnjalloc.c
     3rdparty/hunspell/hyphen.c)
+
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/src/zbase/util/mysql")
+find_package(MySQL REQUIRED)
 
 include_directories(3rdparty/)
 include_directories(src/)
