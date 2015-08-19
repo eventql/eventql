@@ -70,6 +70,10 @@ add_executable(test-tsdb-timewindowpartitioner
 
 target_link_libraries(test-tsdb-timewindowpartitioner chartsql cplot sstable cstable stx-http stx-protobuf stx-json stx-base)
 
+add_subdirectory(util)
+add_subdirectory(util/mysql)
+add_subdirectory(util/mdb)
+
 add_executable(zbase
     $<TARGET_OBJECTS:stx-mdb>
     $<TARGET_OBJECTS:stx-rpc>
@@ -195,4 +199,4 @@ add_executable(zen-mysql-upload
     ${PROTO_SRCS}
     zen-mysql-upload.cc)
 
-target_link_libraries(zen-mysql-upload stx-http stx-protobuf stx-json stx-base ${MYSQL_LIB} z)
+target_link_libraries(zen-mysql-upload stx-http stx-protobuf stx-json stx-base ${MYSQL_CLIENT_LIBS} z)

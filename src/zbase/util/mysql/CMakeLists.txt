@@ -13,7 +13,7 @@ if(MYSQL_FOUND)
   add_definitions(-DSTX_ENABLE_MYSQL)
   set(STX_MYSQL_LIBS ${MYSQL_CLIENT_LIBS} PARENT_SCOPE)
 else()
-  message("WARNING: libmysqlclient not found, libstx will be compiled without MySQL support")
+  message("WARNING: libmysqlclient not found")
 endif()
 
 add_library(stx-mysql OBJECT
