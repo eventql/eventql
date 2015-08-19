@@ -59,7 +59,7 @@ AnalyticsServlet::AnalyticsServlet(
     sql_(sql),
     tsdb_(tsdb),
     customer_dir_(customer_dir),
-    logfile_api_(app->logfileService(), cachedir),
+    logfile_api_(app->logfileService(), customer_dir, cachedir),
     documents_api_(docdb) {}
 
 void AnalyticsServlet::handleHTTPRequest(

@@ -22,6 +22,7 @@ public:
 
   LogfileAPIServlet(
       LogfileService* service,
+      ConfigDirectory* cdir,
       const String& cachedir);
 
   void handle(
@@ -30,6 +31,12 @@ public:
       RefPtr<stx::http::HTTPResponseStream> res_stream);
 
 protected:
+
+  void listLogfiles(
+      const AnalyticsSession& session,
+      const URI& uri,
+      const http::HTTPRequest* req,
+      http::HTTPResponse* res);
 
   void scanLogfile(
       const AnalyticsSession& session,
@@ -43,7 +50,6 @@ protected:
       http::HTTPRequestStream* req_stream,
       http::HTTPResponseStream* res_stream);
 
-
   void uploadLogfile(
       const AnalyticsSession& session,
       const URI& uri,
@@ -51,6 +57,7 @@ protected:
       http::HTTPResponse* res);
 
   LogfileService* service_;
+  ConfigDirectory* cdir_;
   String cachedir_;
 };
 

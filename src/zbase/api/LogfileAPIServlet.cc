@@ -17,8 +17,10 @@ namespace zbase {
 
 LogfileAPIServlet::LogfileAPIServlet(
     LogfileService* service,
+    ConfigDirectory* cdir,
     const String& cachedir) :
     service_(service),
+    cdir_(cdir),
     cachedir_(cachedir) {}
 
 void LogfileAPIServlet::handle(
@@ -30,6 +32,13 @@ void LogfileAPIServlet::handle(
 
   http::HTTPResponse res;
   res.populateFromRequest(req);
+
+  if (uri.path() == "/analytics/api/v1/logfiles") {
+    req_stream->readBody();
+    listLogfiles(session, uri, &req, &res);
+    res_stream->writeResponse(res);
+    return;
+  }
 
   if (uri.path() == "/analytics/api/v1/logfiles/scan") {
     scanLogfile(session, uri, req_stream.get(), res_stream.get());
@@ -50,6 +59,82 @@ void LogfileAPIServlet::handle(
   res.setStatus(http::kStatusNotFound);
   res.addBody("not found");
   res_stream->writeResponse(res);
+}
+
+void LogfileAPIServlet::listLogfiles(
+    const AnalyticsSession& session,
+    const URI& uri,
+    const http::HTTPRequest* req,
+    http::HTTPResponse* res) {
+  auto customer_conf = cdir_->configFor(session.customer());
+  const auto& logfile_cfg = customer_conf->config.logfile_import_config();
+
+  Buffer buf;
+  json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
+  json.beginObject();
+  json.addObjectEntry("logfile_definitions");
+  json.beginArray();
+
+  size_t nlogs = 0;
+  for (const auto& logfile : logfile_cfg.logfiles()) {
+    if (++nlogs > 1) {
+      json.addComma();
+    }
+
+    json.beginObject();
+
+    json.addObjectEntry("name");
+    json.addString(logfile.name());
+    json.addComma();
+
+    json.addObjectEntry("regex");
+    json.addString(logfile.regex());
+    json.addComma();
+
+    json.addObjectEntry("source_fields");
+    json.beginArray();
+    {
+      size_t nfields = 0;
+      for (const auto& field : logfile.source_fields()) {
+        if (++nfields > 1) {
+          json.addComma();
+        }
+
+        json.beginObject();
+
+        json.addObjectEntry("name");
+        json.addString(field.name());
+        json.addComma();
+
+        json.addObjectEntry("id");
+        json.addInteger(field.id());
+        json.addComma();
+
+        json.addObjectEntry("type");
+        json.addString(field.type());
+        json.addComma();
+
+        json.addObjectEntry("format");
+        json.addString(field.format());
+
+        json.endObject();
+      }
+    }
+    json.endArray();
+
+    json.addObjectEntry("row_fields");
+    json.beginArray();
+    json.endArray();
+
+    json.endObject();
+  }
+
+  json.endArray();
+  json.endObject();
+
+  res->setStatus(http::kStatusOK);
+  res->setHeader("Content-Type", "application/json; charset=utf-8");
+  res->addBody(buf);
 }
 
 void LogfileAPIServlet::scanLogfile(
