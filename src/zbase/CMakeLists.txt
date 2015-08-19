@@ -70,7 +70,7 @@ add_executable(test-tsdb-timewindowpartitioner
 
 target_link_libraries(test-tsdb-timewindowpartitioner chartsql cplot sstable cstable stx-http stx-protobuf stx-json stx-base)
 
-add_executable(analyticsd
+add_executable(zbase
     $<TARGET_OBJECTS:stx-mdb>
     $<TARGET_OBJECTS:stx-rpc>
     $<TARGET_OBJECTS:brokerd-client>
@@ -151,11 +151,11 @@ add_executable(analyticsd
     reco_engine/RecoEngineStatsBreakdownQuery.cc
     reco_engine/RecoEngineStatsReport.cc
     reco_engine/RecoStats.cc
-    analyticsd.cc)
+    zbase.cc)
 
-target_link_libraries(analyticsd chartsql cplot sstable cstable stx-http stx-json stx-protobuf stx-base)
+target_link_libraries(zbase chartsql cplot sstable cstable stx-http stx-json stx-protobuf stx-base)
 
-add_executable(analyticsctl
+add_executable(zbasectl
     $<TARGET_OBJECTS:stx-mdb>
     $<TARGET_OBJECTS:stx-rpc>
     $<TARGET_OBJECTS:brokerd-client>
@@ -165,9 +165,20 @@ add_executable(analyticsctl
     #$<TARGET_OBJECTS:fnord-afx>
     $<TARGET_OBJECTS:dproc>
     #sstable/SSTableServlet.cc
-    analyticsctl.cc)
+    zbasectl.cc)
 
-target_link_libraries(analyticsctl chartsql cplot sstable cstable stx-http stx-json stx-protobuf stx-base)
+target_link_libraries(zbasectl chartsql cplot sstable cstable stx-http stx-json stx-protobuf stx-base)
+
+add_executable(zmaster
+    $<TARGET_OBJECTS:stx-mdb>
+    $<TARGET_OBJECTS:stx-rpc>
+    $<TARGET_OBJECTS:customerdirectory>
+    $<TARGET_OBJECTS:tsdb-server>
+    master/ConfigDirectoryMaster.cc
+    master/MasterServlet.cc
+    zmaster.cc)
+
+target_link_libraries(zmaster chartsql cplot sstable cstable stx-http stx-protobuf stx-json stx-json stx-base)
 
 add_executable(zen-csv-upload ${COREPROTO_SRCS} zen-csv-upload.cc)
 target_link_libraries(zen-csv-upload stx-http stx-protobuf stx-json stx-base)
