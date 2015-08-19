@@ -278,13 +278,9 @@ target_link_libraries(test-protobuf stx-base)
 add_executable(test-persistenthashset util/PersistentHashSet_test.cc)
 target_link_libraries(test-persistenthashset stx-base)
 
-add_subdirectory(mdb)
 add_subdirectory(http)
 add_subdirectory(json)
 add_subdirectory(rpc)
-
-add_subdirectory(net/mysql)
-set(STX_MYSQL_LIBS ${STX_MYSQL_LIBS} PARENT_SCOPE)
 
 set(STX_INCLUDE ${STX_INCLUDE} PARENT_SCOPE)
 set(STX_LDFLAGS ${STX_LDFLAGS} PARENT_SCOPE)
