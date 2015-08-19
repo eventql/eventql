@@ -38,6 +38,12 @@ protected:
       const http::HTTPRequest* req,
       http::HTTPResponse* res);
 
+  void fetchLogfileDefinition(
+      const AnalyticsSession& session,
+      const URI& uri,
+      const http::HTTPRequest* req,
+      http::HTTPResponse* res);
+
   void scanLogfile(
       const AnalyticsSession& session,
       const URI& uri,
@@ -55,6 +61,10 @@ protected:
       const URI& uri,
       http::HTTPRequestStream* req_stream,
       http::HTTPResponse* res);
+
+  void renderLogfileDefinition(
+      const LogfileDefinition* logfile_def,
+      json::JSONOutputStream* json);
 
   LogfileService* service_;
   ConfigDirectory* cdir_;
