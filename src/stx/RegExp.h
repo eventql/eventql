@@ -9,6 +9,7 @@
 #pragma once
 #include <stx/stdtypes.h>
 #include <stx/buffer.h>
+#include <stx/sysconfig.h>
 #include <string>
 #include <vector>
 
