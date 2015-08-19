@@ -124,6 +124,33 @@ void LogfileAPIServlet::listLogfiles(
 
     json.addObjectEntry("row_fields");
     json.beginArray();
+    {
+      size_t nfields = 0;
+      for (const auto& field : logfile.row_fields()) {
+        if (++nfields > 1) {
+          json.addComma();
+        }
+
+        json.beginObject();
+
+        json.addObjectEntry("name");
+        json.addString(field.name());
+        json.addComma();
+
+        json.addObjectEntry("id");
+        json.addInteger(field.id());
+        json.addComma();
+
+        json.addObjectEntry("type");
+        json.addString(field.type());
+        json.addComma();
+
+        json.addObjectEntry("format");
+        json.addString(field.format());
+
+        json.endObject();
+      }
+    }
     json.endArray();
 
     json.endObject();
