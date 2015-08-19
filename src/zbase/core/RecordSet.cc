@@ -487,6 +487,7 @@ void RecordSet::RecordSetState::encode(
 
 void RecordSet::RecordSetState::decode(util::BinaryMessageReader* reader) {
   auto v = reader->readVarUInt();
+  (void) v;
 
   auto num_datafiles = reader->readVarUInt();
   for (size_t i = 0; i < num_datafiles; ++i) {
