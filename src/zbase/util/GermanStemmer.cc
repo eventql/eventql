@@ -8,7 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include "stx/UTF8.h"
-#include "fnord-fts/GermanStemmer.h"
+#include "zbase/util/GermanStemmer.h"
 
 namespace stx {
 namespace fts {

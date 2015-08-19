@@ -10,9 +10,9 @@
 #ifndef _FNORD_FTS_GERMANSTEMMER_H
 #define _FNORD_FTS_GERMANSTEMMER_H
 #include "stx/stdtypes.h"
-#include "fnord-fts/Stemmer.h"
-#include "fnord-fts/Hunspell.h"
-#include "fnord-fts/SynonymDictionary.h"
+#include "zbase/util/Stemmer.h"
+#include "zbase/util/Hunspell.h"
+#include "zbase/util/SynonymDictionary.h"
 
 namespace stx {
 namespace fts {

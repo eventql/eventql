@@ -11,10 +11,10 @@
 #define _FNORD_FTS_ANALYZER_H
 #include <stx/stdtypes.h>
 #include <stx/autoref.h>
-#include "fnord-fts/SimpleTokenizer.h"
-#include "fnord-fts/StopwordDictionary.h"
-#include "fnord-fts/SynonymDictionary.h"
-#include "fnord-fts/GermanStemmer.h"
+#include "zbase/util/SimpleTokenizer.h"
+#include "zbase/util/StopwordDictionary.h"
+#include "zbase/util/SynonymDictionary.h"
+#include "zbase/util/GermanStemmer.h"
 
 namespace stx {
 namespace fts {

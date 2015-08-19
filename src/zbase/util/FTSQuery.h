@@ -9,10 +9,10 @@
  */
 #ifndef _FNORD_FTS_FTSQUERY_H
 #define _FNORD_FTS_FTSQUERY_H
-#include "fnord-fts/fts.h"
-#include "fnord-fts/fts_common.h"
-#include "fnord-fts/Analyzer.h"
-#include "fnord-fts/search/DisjunctionMaxQuery.h"
+#include "zbase/util/fts.h"
+#include "zbase/util/fts_common.h"
+#include "zbase/util/Analyzer.h"
+#include "zbase/util/search/DisjunctionMaxQuery.h"
 
 namespace stx {
 namespace fts {

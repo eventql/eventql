@@ -10,7 +10,7 @@
 #define _CM_INDEXSERVLET_H
 #include "stx/autoref.h"
 #include "stx/http/httpservice.h"
-#include "fnord-fts/Analyzer.h"
+#include "zbase/util/Analyzer.h"
 #include "IndexReader.h"
 
 using namespace stx;

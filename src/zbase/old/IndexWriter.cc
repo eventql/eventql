@@ -7,7 +7,7 @@
  * permission is obtained.
  */
 #include "IndexWriter.h"
-#include <fnord-fts/AnalyzerAdapter.h>
+#include <zbase/util/AnalyzerAdapter.h>
 
 using namespace stx;
 

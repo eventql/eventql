@@ -8,7 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include "stx/UTF8.h"
-#include "fnord-fts/SimpleTokenizer.h"
+#include "zbase/util/SimpleTokenizer.h"
 
 namespace stx {
 namespace fts {

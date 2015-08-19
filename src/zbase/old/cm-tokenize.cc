@@ -16,8 +16,8 @@
 #include "stx/logging.h"
 #include "stx/cli/flagparser.h"
 #include "common.h"
-#include <fnord-fts/fts.h>
-#include <fnord-fts/fts_common.h>
+#include <zbase/util/fts.h>
+#include <zbase/util/fts_common.h>
 
 using namespace stx;
 

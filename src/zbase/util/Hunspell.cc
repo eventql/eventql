@@ -8,7 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include "stx/inspect.h"
-#include "fnord-fts/Hunspell.h"
+#include "zbase/util/Hunspell.h"
 
 namespace stx {
 namespace fts {

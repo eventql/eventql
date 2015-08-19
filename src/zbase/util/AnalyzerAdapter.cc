@@ -9,10 +9,10 @@
 */
 #include "stx/inspect.h"
 #include "stx/UTF8.h"
-#include "fnord-fts/fts.h"
-#include "fnord-fts/fts_common.h"
-#include "fnord-fts/document/Fieldable.h"
-#include "fnord-fts/AnalyzerAdapter.h"
+#include "zbase/util/fts.h"
+#include "zbase/util/fts_common.h"
+#include "zbase/util/document/Fieldable.h"
+#include "zbase/util/AnalyzerAdapter.h"
 
 namespace stx {
 namespace fts {

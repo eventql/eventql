@@ -1,5 +1,21 @@
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/)
 
+file(GLOB PROTO_FILES *.proto)
+PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS ${PROTO_FILES})
+
+add_library(customerdirectory OBJECT
+    CustomerConfig.cc
+    ConfigDirectory.cc
+    SessionSchema.cc
+    TableDefinition.cc
+    ${PROTO_SRCS})
+
+add_dependencies(customerdirectory tsdb-server)
+
+add_library(auth OBJECT
+    AnalyticsAuth.cc)
+
+add_dependencies(auth customerdirectory)
 
 file(GLOB COREPROTO_FILES core/*.proto)
 PROTOBUF_GENERATE_CPP(COREPROTO_SRCS COREPROTO_HDRS ${COREPROTO_FILES})
@@ -53,25 +69,6 @@ add_executable(test-tsdb-timewindowpartitioner
     core/TimeWindowPartitioner_test.cc)
 
 target_link_libraries(test-tsdb-timewindowpartitioner chartsql cplot sstable cstable stx-http stx-protobuf stx-json stx-base)
-
-
-
-file(GLOB PROTO_FILES *.proto)
-PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS ${PROTO_FILES})
-
-add_library(customerdirectory OBJECT
-    CustomerConfig.cc
-    ConfigDirectory.cc
-    SessionSchema.cc
-    TableDefinition.cc
-    ${PROTO_SRCS})
-
-add_dependencies(customerdirectory tsdb-server)
-
-add_library(auth OBJECT
-    AnalyticsAuth.cc)
-
-add_dependencies(auth customerdirectory)
 
 add_executable(analyticsd
     $<TARGET_OBJECTS:stx-mdb>

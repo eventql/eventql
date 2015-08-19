@@ -45,8 +45,8 @@
 #include "stx/protobuf/MessageEncoder.h"
 #include "stx/protobuf/MessageDecoder.h"
 #include "stx/protobuf/MessagePrinter.h"
-#include <fnord-fts/fts.h>
-#include <fnord-fts/fts_common.h>
+#include <zbase/util/fts.h>
+#include <zbase/util/fts_common.h>
 #include "common.h"
 #include "schemas.h"
 #include "CustomerNamespace.h"

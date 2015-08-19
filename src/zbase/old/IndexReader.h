@@ -17,8 +17,8 @@
 #include <queue>
 #include "stx/stdtypes.h"
 #include "stx/thread/taskscheduler.h"
-#include <fnord-fts/fts.h>
-#include <fnord-fts/fts_common.h>
+#include <zbase/util/fts.h>
+#include <zbase/util/fts_common.h>
 #include "stx/mdb/MDB.h"
 #include "stx/stats/stats.h"
 #include "FeatureIndex.h"
