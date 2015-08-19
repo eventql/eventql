@@ -23,7 +23,7 @@
 #include "stx/rpc/RPC.h"
 #include "stx/rpc/RPCClient.h"
 #include "stx/thread/taskscheduler.h"
-#include "stx/mdb/MDB.h"
+#include "zbase/util/mdb/MDB.h"
 #include "stx/stats/stats.h"
 #include "stx/thread/eventloop.h"
 #include <zbase/docdb/ItemRef.h>

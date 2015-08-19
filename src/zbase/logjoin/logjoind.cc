@@ -27,7 +27,7 @@
 #include "stx/http/httpserver.h"
 #include "stx/stats/statsdagent.h"
 #include "stx/http/httpconnectionpool.h"
-#include "stx/mdb/MDB.h"
+#include "zbase/util/mdb/MDB.h"
 #include "zbase/logjoin/LogJoin.h"
 #include "zbase/logjoin/SessionProcessor.h"
 #include "zbase/logjoin/stages/SessionJoin.h"

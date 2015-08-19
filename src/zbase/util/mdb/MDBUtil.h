@@ -9,7 +9,7 @@
  */
 #ifndef _STX_MDBUTIL_H
 #define _STX_MDBUTIL_H
-#include "stx/mdb/MDBTransaction.h"
+#include "zbase/util/mdb/MDBTransaction.h"
 
 namespace stx {
 namespace mdb {

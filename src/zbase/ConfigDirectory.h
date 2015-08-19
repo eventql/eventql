@@ -9,7 +9,7 @@
 #pragma once
 #include <stx/stdtypes.h>
 #include <stx/SHA1.h>
-#include <stx/mdb/MDB.h>
+#include <zbase/util/mdb/MDB.h>
 #include <stx/net/inetaddr.h>
 #include <stx/http/httpclient.h>
 #include <zbase/CustomerConfig.h>

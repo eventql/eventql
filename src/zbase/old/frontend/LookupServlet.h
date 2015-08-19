@@ -10,7 +10,7 @@
 #define _CM_LOOKUPSERVLET_H
 #include "stx/http/httpservice.h"
 #include "stx/json/json.h"
-#include "stx/mdb/MDB.h"
+#include "zbase/util/mdb/MDB.h"
 
 using namespace stx;
 

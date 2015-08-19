@@ -19,7 +19,7 @@
 #include "stx/thread/taskscheduler.h"
 #include <zbase/util/fts.h>
 #include <zbase/util/fts_common.h>
-#include "stx/mdb/MDB.h"
+#include "zbase/util/mdb/MDB.h"
 #include "stx/stats/stats.h"
 #include "FeatureIndex.h"
 #include "DocStore.h"

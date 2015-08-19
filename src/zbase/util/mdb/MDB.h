@@ -14,7 +14,7 @@
 #include <liblmdb/lmdb.h>
 #include "stx/logging.h"
 #include "stx/autoref.h"
-#include "stx/mdb/MDBTransaction.h"
+#include "zbase/util/mdb/MDBTransaction.h"
 
 namespace stx {
 namespace mdb {
