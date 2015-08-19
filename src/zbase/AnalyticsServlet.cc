@@ -32,14 +32,13 @@
 #include "csql/runtime/JSONSSEStreamFormat.h"
 #include "zbase/core/TimeWindowPartitioner.h"
 #include "zbase/core/FixedShardPartitioner.h"
+#include "zbase/HTTPAuth.h"
 #include <cstable/CSTableBuilder.h>
 
 using namespace stx;
 
 namespace zbase {
 
-const char AnalyticsServlet::kSessionCookieKey[] = "__dxa_session";
-const uint64_t AnalyticsServlet::kSessionLifetimeMicros = 365 * kMicrosPerDay;
 
 AnalyticsServlet::AnalyticsServlet(
     RefPtr<AnalyticsApp> app,
@@ -92,7 +91,10 @@ void AnalyticsServlet::handleHTTPRequest(
     return;
   }
 
-  auto session_opt = authenticateRequest(req_stream->request());
+  auto session_opt = HTTPAuth::authenticateRequest(
+      req_stream->request(),
+      auth_);
+
   if (session_opt.isEmpty()) {
     req_stream->readBody();
     res.addHeader("WWW-Authenticate", "Token");
@@ -1017,35 +1019,6 @@ void AnalyticsServlet::sessionTrackingEventInfo(
   res->addBody("not found");
 }
 
-Option<AnalyticsSession> AnalyticsServlet::authenticateRequest(
-    const http::HTTPRequest& request) const {
-  try {
-    String cookie;
-
-    if (request.hasHeader("Authorization")) {
-      static const String hdrprefix = "Token ";
-      auto hdrval = request.getHeader("Authorization");
-      if (StringUtil::beginsWith(hdrval, hdrprefix)) {
-        cookie = URI::urlDecode(hdrval.substr(hdrprefix.size()));
-      }
-    }
-
-    if (cookie.empty()) {
-      const auto& cookies = request.cookies();
-      http::Cookies::getCookie(cookies, kSessionCookieKey, &cookie);
-    }
-
-    if (cookie.empty()) {
-      return None<AnalyticsSession>();
-    }
-
-    return auth_->decodeAuthToken(cookie);
-  } catch (const StandardException& e) {
-    logDebug("analyticsd", e, "authentication failed because of error");
-    return None<AnalyticsSession>();
-  }
-}
-
 void AnalyticsServlet::performLogin(
     const URI& uri,
     const http::HTTPRequest* req,
@@ -1076,9 +1049,9 @@ void AnalyticsServlet::performLogin(
     auto token = auth_->encodeAuthToken(session.get());
 
     res->addCookie(
-        kSessionCookieKey,
+        HTTPAuth::kSessionCookieKey,
         token,
-        WallClock::unixMicros() + kSessionLifetimeMicros,
+        WallClock::unixMicros() + HTTPAuth::kSessionLifetimeMicros,
         "/",
         ".zbase.io",
         false, // FIXPAUL https only...
