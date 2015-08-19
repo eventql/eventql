@@ -24,7 +24,7 @@ RegExp::RegExp() {
 
 RegExp::RegExp(const RegExp& other) :
   pattern_(other.pattern_) {
-#ifdef PCRE
+#ifdef HAVE_PCRE
   // there's no pcpcre_handle_clone() unfortunately ^^
   const char* error_msg = "";
   int error_pos = 0;
@@ -45,7 +45,7 @@ RegExp::RegExp(const RegExp& other) :
 }
 
 RegExp::RegExp(const std::string& pattern) : pattern_(pattern) {
-#ifdef PCRE
+#ifdef HAVE_PCRE
   const char* error_msg = "";
   int error_pos = 0;
 
@@ -65,7 +65,7 @@ RegExp::RegExp(const std::string& pattern) : pattern_(pattern) {
 }
 
 RegExp::~RegExp() {
-#ifdef PCRE
+#ifdef HAVE_PCRE
   if (pcre_handle_) {
     pcre_free(pcre_handle_);
   }
@@ -75,9 +75,9 @@ RegExp::~RegExp() {
 RegExp::RegExp(
     RegExp&& other) :
     pattern_(std::move(other.pattern_)) {
-#ifdef PCRE
+#ifdef HAVE_PCRE
   pcre_handle_ = other.pcre_handle_;
-  other.pcre_handle_ = nullptr;,
+  other.pcre_handle_ = nullptr;
 #else
   re_ = std::move(other.re_);
 #endif
@@ -86,7 +86,7 @@ RegExp::RegExp(
 RegExp& RegExp::operator=(RegExp&& other) {
   pattern_ = std::move(other.pattern_);
 
-#ifdef PCRE
+#ifdef HAVE_PCRE
   if (pcre_handle_) {
     pcre_free(pcre_handle_);
   }
@@ -100,7 +100,7 @@ RegExp& RegExp::operator=(RegExp&& other) {
   return *this;
 }
 
-#ifdef PCRE
+#ifdef HAVE_PCRE
 
 bool RegExp::match(const char* buffer, size_t size, Result* result) const {
   if (!pcre_handle_) return false;
