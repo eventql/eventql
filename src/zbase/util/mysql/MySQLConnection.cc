@@ -8,7 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <stx/logging.h>
-#include <stx/net/mysql/MySQLConnection.h>
+#include <zbase/util/mysql//MySQLConnection.h>
 
 namespace stx {
 namespace mysql {

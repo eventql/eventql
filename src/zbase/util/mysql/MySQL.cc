@@ -7,7 +7,7 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <stx/net/mysql/MySQL.h>
+#include <zbase/util/mysql//MySQL.h>
 #include <mutex>
 
 namespace stx {
