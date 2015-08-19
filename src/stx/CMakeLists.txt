@@ -72,6 +72,22 @@ if(HAVE_BZLIB_H)
   set(BZIP2_LIBRARIES bz2)
 endif(HAVE_BZLIB_H)
 
+option(ENABLE_PCRE "With PCRE support [default: on]" ON)
+if(NOT HAVE_PCRE)
+  if(EMABLE_PCRE)
+    find_package(pcre)
+    if (PCRE_FOUND)
+      set(HAVE_PCRE 1)
+    endif()
+  endif()
+endif()
+
+if (HAVE_PCRE)
+  message(STATUS "PCRE found")
+else()
+  message(STATUS "PCRE not found")
+endif()
+
 # required for shm_open/shm_unlink
 if(APPLE)
   set(RT_LIBRARIES)
@@ -112,7 +128,6 @@ configure_file(
 
 # base
 add_library(stx-base STATIC
-    $<TARGET_OBJECTS:pcre>
     3rdparty/simdcomp/simdbitpacking.c
     3rdparty/simdcomp/simdintegratedbitpacking.c
     3rdparty/simdcomp/simdcomputil.c

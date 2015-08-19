@@ -9,9 +9,14 @@
 #pragma once
 #include <stx/stdtypes.h>
 #include <stx/buffer.h>
-#include <pcre.h>
 #include <string>
 #include <vector>
+
+#ifdef HAVE_PCRE
+#include <pcre.h>
+#else
+#include <regex>
+#endif
 
 namespace stx {
 
@@ -28,6 +33,7 @@ public:
   RegExp& operator=(const RegExp& other) = delete;
   RegExp& operator=(RegExp&& other);
 
+#ifdef PCRE
   bool match(const Buffer& subject, Result* result = nullptr) const;
   bool match(const String& subject, Result* result = nullptr) const;
   bool match(const char* buffer, size_t size, Result* result = nullptr) const;
@@ -38,6 +44,7 @@ public:
    * is no such named capture group in the regular expressin
    */
   size_t getNamedCaptureIndex(const String& name);
+#endif
 
   const std::string& pattern() const { return pattern_; }
   const char* c_str() const;
@@ -70,7 +77,11 @@ public:
 
 private:
   std::string pattern_;
+#ifdef HAVE_PCRE
   pcre* pcre_handle_;
+#else
+  std::regex re_;
+#endif
 };
 
 }  // namespace stx
