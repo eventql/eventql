@@ -32,7 +32,7 @@ add_library(hunspell OBJECT
     3rdparty/hunspell/hyphen.c)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/src/zbase/util/mysql")
-find_package(MySQL REQUIRED)
+find_package(MySQL)
 
 include_directories(3rdparty/)
 include_directories(src/)
