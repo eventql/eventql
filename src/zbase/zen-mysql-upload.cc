@@ -19,8 +19,8 @@
 #include "stx/http/httpclient.h"
 #include "stx/util/SimpleRateLimit.h"
 #include "stx/protobuf/MessageSchema.h"
-#include "stx/net/mysql/MySQL.h"
-#include "stx/net/mysql/MySQLConnection.h"
+#include "zbase/util/mysql//MySQL.h"
+#include "zbase/util/mysql//MySQLConnection.h"
 
 using namespace stx;
 
