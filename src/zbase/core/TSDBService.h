@@ -13,7 +13,7 @@
 #include <stx/random.h>
 #include <stx/option.h>
 #include <stx/thread/queue.h>
-#include <stx/mdb/MDB.h>
+#include <zbase/util/mdb/MDB.h>
 #include <zbase/core/TableConfig.pb.h>
 #include <zbase/core/Partition.h>
 #include <zbase/core/TSDBNodeConfig.pb.h>

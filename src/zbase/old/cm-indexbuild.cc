@@ -33,7 +33,7 @@
 #include "sstable/sstablereader.h"
 #include "fnord-logtable/RemoteTableReader.h"
 #include "fnord-logtable/LogTableTail.h"
-#include "stx/mdb/MDB.h"
+#include "zbase/util/mdb/MDB.h"
 #include "stx/protobuf/MessagePrinter.h"
 #include "CustomerNamespace.h"
 

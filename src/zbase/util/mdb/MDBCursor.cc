@@ -8,7 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <assert.h>
-#include "stx/mdb/MDBCursor.h"
+#include "zbase/util/mdb/MDBCursor.h"
 
 namespace stx {
 namespace mdb {

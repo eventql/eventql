@@ -8,8 +8,8 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <assert.h>
-#include "stx/mdb/MDB.h"
-#include "stx/mdb/MDBTransaction.h"
+#include "zbase/util/mdb/MDB.h"
+#include "zbase/util/mdb/MDBTransaction.h"
 
 namespace stx {
 namespace mdb {

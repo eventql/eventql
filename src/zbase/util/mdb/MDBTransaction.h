@@ -15,7 +15,7 @@
 #include "stx/autoref.h"
 #include "stx/logging.h"
 #include "stx/option.h"
-#include "stx/mdb/MDBCursor.h"
+#include "zbase/util/mdb/MDBCursor.h"
 
 namespace stx {
 namespace mdb {

@@ -18,8 +18,8 @@
 #include "stx/util/SimpleRateLimit.h"
 #include "stx/InternMap.h"
 #include "stx/json/json.h"
-#include "stx/mdb/MDB.h"
-#include "stx/mdb/MDBUtil.h"
+#include "zbase/util/mdb/MDB.h"
+#include "zbase/util/mdb/MDBUtil.h"
 #include <zbase/util/fts.h>
 #include <zbase/util/fts_common.h>
 #include "sstable/sstablereader.h"
