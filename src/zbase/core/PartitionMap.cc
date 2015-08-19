@@ -53,7 +53,7 @@ Option<RefPtr<Table>> PartitionMap::findTableWithLock(
 
 void PartitionMap::configureTable(const TableDefinition& table) {
   std::unique_lock<std::mutex> lk(mutex_);
-  auto tbl_key = table.tsdb_namespace() + "~" + table.table_name();
+  auto tbl_key = table.customer() + "~" + table.table_name();
 
   auto iter = tables_.find(tbl_key);
   if (iter == tables_.end()) {
