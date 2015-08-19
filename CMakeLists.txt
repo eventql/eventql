@@ -31,6 +31,7 @@ add_library(hunspell OBJECT
     3rdparty/hunspell/hyphen.c)
 
 include_directories(3rdparty/)
+add_subdirectory(3rdparty/pcre)
 include_directories(src/)
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/src)
 
