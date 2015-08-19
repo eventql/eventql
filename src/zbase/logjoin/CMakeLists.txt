@@ -33,7 +33,7 @@ add_executable(logjoind
     $<TARGET_OBJECTS:inventoryd-client>
     $<TARGET_OBJECTS:stx-mdb>
     $<TARGET_OBJECTS:stx-rpc>
-    $<TARGET_OBJECTS:fnord-fts>
+    $<TARGET_OBJECTS:nlputil>
     $<TARGET_OBJECTS:hunspell>
     $<TARGET_OBJECTS:tsdb-client>
     $<TARGET_OBJECTS:dproc>
@@ -48,7 +48,7 @@ add_executable(test-logjoin
     $<TARGET_OBJECTS:inventoryd-client>
     $<TARGET_OBJECTS:stx-mdb>
     $<TARGET_OBJECTS:stx-rpc>
-    $<TARGET_OBJECTS:fnord-fts>
+    $<TARGET_OBJECTS:nlputil>
     $<TARGET_OBJECTS:hunspell>
     $<TARGET_OBJECTS:tsdb-client>
     $<TARGET_OBJECTS:dproc>

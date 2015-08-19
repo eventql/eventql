@@ -24,4 +24,4 @@ set(FNORD_FTS_LIBS
 set(FNORD_FTS_INCLUDE
     PARENT_SCOPE)
 
-add_library(fnord-fts OBJECT ${FNORD_FTS_SOURCES})
+add_library(nlputil OBJECT ${FNORD_FTS_SOURCES})

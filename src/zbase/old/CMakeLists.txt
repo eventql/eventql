@@ -75,7 +75,7 @@ add_executable(cm-logjoin
     $<TARGET_OBJECTS:stx-mdb>
     $<TARGET_OBJECTS:stx-rpc>
     
-    $<TARGET_OBJECTS:fnord-fts>
+    $<TARGET_OBJECTS:nlputil>
     logjoin/TrackedCartItem.cc
     logjoin/TrackedItemVisit.cc
     logjoin/TrackedQuery.cc
@@ -101,7 +101,7 @@ add_executable(tests/test-logjoin
     $<TARGET_OBJECTS:stx-mdb>
     $<TARGET_OBJECTS:stx-rpc>
     
-    $<TARGET_OBJECTS:fnord-fts>
+    $<TARGET_OBJECTS:nlputil>
     logjoin/TrackedCartItem.cc
     logjoin/TrackedItemVisit.cc
     logjoin/TrackedQuery.cc
@@ -120,7 +120,7 @@ target_link_libraries(tests/test-logjoin ${CMAKE_THREAD_LIBS_INIT} ${FNORD_LIBS}
 #    $<TARGET_OBJECTS:stx-rpc>
 #    
 #    
-#    $<TARGET_OBJECTS:fnord-fts>
+#    $<TARGET_OBJECTS:nlputil>
 #    
 #    3rdparty/libfnord/fnord-logtable/TableReader.cc
 #    3rdparty/libfnord/fnord-logtable/TableArena.cc
@@ -145,7 +145,7 @@ target_link_libraries(tests/test-logjoin ${CMAKE_THREAD_LIBS_INIT} ${FNORD_LIBS}
 #    
 #    
 #    
-#    $<TARGET_OBJECTS:fnord-fts>
+#    $<TARGET_OBJECTS:nlputil>
 #    $<TARGET_OBJECTS:fnord-feeds>
 #    $<TARGET_OBJECTS:stx-rpc>
 #    $<TARGET_OBJECTS:stx-mdb>
@@ -175,7 +175,7 @@ target_link_libraries(tests/test-logjoin ${CMAKE_THREAD_LIBS_INIT} ${FNORD_LIBS}
 #    
 #    
 #    
-#    $<TARGET_OBJECTS:fnord-fts>
+#    $<TARGET_OBJECTS:nlputil>
 #    $<TARGET_OBJECTS:fnord-feeds>
 #    $<TARGET_OBJECTS:stx-rpc>
 #    $<TARGET_OBJECTS:stx-mdb>
@@ -193,7 +193,7 @@ target_link_libraries(tests/test-logjoin ${CMAKE_THREAD_LIBS_INIT} ${FNORD_LIBS}
 #    
 #    
 #    
-#    $<TARGET_OBJECTS:fnord-fts>
+#    $<TARGET_OBJECTS:nlputil>
 #    $<TARGET_OBJECTS:fnord-feeds>
 #    $<TARGET_OBJECTS:stx-rpc>
 #    $<TARGET_OBJECTS:stx-mdb>
@@ -244,7 +244,7 @@ target_link_libraries(tests/test-logjoin ${CMAKE_THREAD_LIBS_INIT} ${FNORD_LIBS}
 #    
 #    $<TARGET_OBJECTS:stx-rpc>
 #    
-#    $<TARGET_OBJECTS:fnord-fts>
+#    $<TARGET_OBJECTS:nlputil>
 #    FeatureSelector.cc
 #    cm-featureprep.cc)
 #
@@ -260,7 +260,7 @@ target_link_libraries(tests/test-logjoin ${CMAKE_THREAD_LIBS_INIT} ${FNORD_LIBS}
 #    
 #    $<TARGET_OBJECTS:stx-rpc>
 #    
-#    $<TARGET_OBJECTS:fnord-fts>
+#    $<TARGET_OBJECTS:nlputil>
 #    cm-ctrstats-builditemboost.cc)
 #
 #target_link_libraries(cm-ctrstats-builditemboost
@@ -275,7 +275,7 @@ target_link_libraries(tests/test-logjoin ${CMAKE_THREAD_LIBS_INIT} ${FNORD_LIBS}
 #    
 #    $<TARGET_OBJECTS:stx-rpc>
 #    
-#    $<TARGET_OBJECTS:fnord-fts>
+#    $<TARGET_OBJECTS:nlputil>
 #    IndexReader.cc
 #    IndexWriter.cc
 #    DocIndex.cc
@@ -309,7 +309,7 @@ target_link_libraries(tests/test-logjoin ${CMAKE_THREAD_LIBS_INIT} ${FNORD_LIBS}
 #    $<TARGET_OBJECTS:stx-rpc>
 #    
 #    
-#    $<TARGET_OBJECTS:fnord-fts>
+#    $<TARGET_OBJECTS:nlputil>
 #    
 #    3rdparty/libfnord/fnord-logtable/TableReader.cc
 #    3rdparty/libfnord/fnord-logtable/TableArena.cc
@@ -354,7 +354,7 @@ target_link_libraries(tests/test-logjoin ${CMAKE_THREAD_LIBS_INIT} ${FNORD_LIBS}
 #     $<TARGET_OBJECTS:stx-rpc>
 #     
 #     
-#     $<TARGET_OBJECTS:fnord-fts>
+#     $<TARGET_OBJECTS:nlputil>
 #     
 #     $<TARGET_OBJECTS:tsdb-client>
 #     $<TARGET_OBJECTS:dproc>
@@ -401,7 +401,7 @@ target_link_libraries(tests/test-logjoin ${CMAKE_THREAD_LIBS_INIT} ${FNORD_LIBS}
 #     $<TARGET_OBJECTS:stx-rpc>
 #     
 #     
-#     $<TARGET_OBJECTS:fnord-fts>
+#     $<TARGET_OBJECTS:nlputil>
 #     
 #     $<TARGET_OBJECTS:tsdb-client>
 #     $<TARGET_OBJECTS:dproc>
@@ -544,7 +544,7 @@ target_link_libraries(analyticsd
 #     
 #     $<TARGET_OBJECTS:stx-rpc>
 #     
-#     $<TARGET_OBJECTS:fnord-fts>
+#     $<TARGET_OBJECTS:nlputil>
 #     3rdparty/libfnord/fnord-logtable/ArtifactIndex.cc
 #     analytics/Report.cc
 #     analytics/TermInfoTableSource.cc
@@ -561,7 +561,7 @@ target_link_libraries(analyticsd
 #    $<TARGET_OBJECTS:cm-common>
 #    
 #    $<TARGET_OBJECTS:stx-mdb>
-#    $<TARGET_OBJECTS:fnord-fts>
+#    $<TARGET_OBJECTS:nlputil>
 #    
 #    
 #    
@@ -581,7 +581,7 @@ target_link_libraries(analyticsd
 #    
 #    
 #    
-#    $<TARGET_OBJECTS:fnord-fts>
+#    $<TARGET_OBJECTS:nlputil>
 #    schemas.cc
 #    analytics/AnalyticsTableScan.cc
 #    analytics/TrafficSegment.cc
