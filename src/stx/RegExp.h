@@ -34,7 +34,7 @@ public:
   RegExp& operator=(const RegExp& other) = delete;
   RegExp& operator=(RegExp&& other);
 
-#ifdef PCRE
+#ifdef HAVE_PCRE
   bool match(const Buffer& subject, Result* result = nullptr) const;
   bool match(const String& subject, Result* result = nullptr) const;
   bool match(const char* buffer, size_t size, Result* result = nullptr) const;

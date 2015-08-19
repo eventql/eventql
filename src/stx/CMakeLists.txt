@@ -1,5 +1,7 @@
-cmake_minimum_required(VERSION 2.8.8)
 project(libstx)
+cmake_minimum_required(VERSION 2.8.8)
+
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 find_package(Threads)
 include(CheckIncludeFiles)
@@ -74,8 +76,8 @@ endif(HAVE_BZLIB_H)
 
 option(ENABLE_PCRE "With PCRE support [default: on]" ON)
 if(NOT HAVE_PCRE)
-  if(EMABLE_PCRE)
-    find_package(pcre)
+  if(ENABLE_PCRE)
+    find_package(PCRE)
     if (PCRE_FOUND)
       set(HAVE_PCRE 1)
     endif()
@@ -205,8 +207,6 @@ add_library(stx-base STATIC
     VFS.cc
     wallclock.cc
     web/SecureCookie.cc)
-
-add_dependencies(stx-base pcre)
 
 file(GLOB PROTO_FILES *.proto)
 PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS ${PROTO_FILES})
