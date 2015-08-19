@@ -81,6 +81,7 @@ add_executable(analyticsd
     #$<TARGET_OBJECTS:fnord-afx>
     $<TARGET_OBJECTS:dproc>
     $<TARGET_OBJECTS:auth>
+    $<TARGET_OBJECTS:pcre>
     #sstable/SSTableServlet.cc
     api/LogfileService.cc
     api/LogfileAPIServlet.cc
