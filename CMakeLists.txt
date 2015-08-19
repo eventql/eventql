@@ -45,6 +45,8 @@ include_directories(${BROKERD_INCLUDE})
 
 add_subdirectory(src/zbase)
 add_subdirectory(src/zbase/util)
+add_subdirectory(src/zbase/util/mysql)
+add_subdirectory(src/zbase/util/mdb)
 add_subdirectory(src/zbase/master)
 add_subdirectory(src/zbase/docdb)
 add_subdirectory(src/zbase/logjoin)
