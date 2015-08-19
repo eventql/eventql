@@ -261,7 +261,7 @@ int main(int argc, const char** argv) {
       &customer_dir,
       &docdb);
 
-  http_router.addRouteByPrefixMatch("/analytics", &analytics_servlet, &tpool);
+  http_router.addRouteByPrefixMatch("/", &analytics_servlet, &tpool);
 
   {
     FeedConfig fc;

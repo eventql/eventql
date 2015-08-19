@@ -24,6 +24,7 @@
 #include "zbase/api/LogfileAPIServlet.h"
 #include "zbase/docdb/DocumentDB.h"
 #include "zbase/docdb/DocumentDBServlet.h"
+#include "zbase/webui/WebUIServlet.h"
 
 using namespace stx;
 
@@ -33,8 +34,6 @@ struct AnalyticsQuery;
 
 class AnalyticsServlet : public stx::http::StreamingHTTPService {
 public:
-  static const char kSessionCookieKey[];
-  static const uint64_t kSessionLifetimeMicros;
 
   AnalyticsServlet(
       RefPtr<AnalyticsApp> app,
@@ -137,9 +136,6 @@ protected:
       const AnalyticsSession& session,
       const http::HTTPRequest* req,
       http::HTTPResponse* res);
-
-  Option<AnalyticsSession> authenticateRequest(
-      const http::HTTPRequest& request) const;
 
   void performLogin(
       const URI& uri,
