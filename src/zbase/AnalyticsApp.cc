@@ -785,11 +785,7 @@ void AnalyticsApp::updateTable(const TableDefinition& tbl, bool force) {
 }
 
 void AnalyticsApp::configureTable(const TableDefinition& tbl) {
-  zbase::TableDefinition td;
-  td.set_tsdb_namespace(tbl.customer());
-  td.set_table_name(tbl.table_name());
-  *td.mutable_config() = tbl.config();
-  tsdb_node_->createTable(td);
+  tsdb_node_->createTable(tbl);
 }
 
 void AnalyticsApp::configureCustomer(const CustomerConfig& config) {

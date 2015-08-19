@@ -28,7 +28,7 @@ String Table::name() const {
 
 String Table::tsdbNamespace() const {
   std::unique_lock<std::mutex> lk(mutex_);
-  return config_.tsdb_namespace();
+  return config_.customer();
 }
 
 Duration Table::partitionSize() const {
