@@ -39,12 +39,13 @@ add_subdirectory(src/sstable)
 add_subdirectory(src/cstable)
 add_subdirectory(src/cplot)
 add_subdirectory(src/csql)
+
+add_subdirectory(3rdparty/brokerd)
+include_directories(${BROKERD_INCLUDE})
+
 add_subdirectory(src/zbase)
 add_subdirectory(src/zbase/util)
 add_subdirectory(src/zbase/master)
 add_subdirectory(src/zbase/docdb)
 add_subdirectory(src/zbase/logjoin)
 add_subdirectory(src/zbase/dproc)
-
-add_subdirectory(3rdparty/brokerd)
-include_directories(${BROKERD_INCLUDE})
