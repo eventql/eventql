@@ -39,8 +39,8 @@
 #include "stx/stats/statsdagent.h"
 #include "stx/RadixTree.h"
 #include "stx/mdb/MDB.h"
-#include <fnord-fts/fts.h>
-#include <fnord-fts/fts_common.h>
+#include <zbase/util/fts.h>
+#include <zbase/util/fts_common.h>
 #include "common.h"
 #include "CustomerNamespace.h"
 

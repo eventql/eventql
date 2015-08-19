@@ -30,9 +30,9 @@
 #include "brokerd/RemoteFeedFactory.h"
 #include "brokerd/RemoteFeedReader.h"
 #include "stx/stats/statsdagent.h"
-#include "fnord-fts/fts.h"
-#include "fnord-fts/fts_common.h"
-#include "fnord-fts/FTSQuery.h"
+#include "zbase/util/fts.h"
+#include "zbase/util/fts_common.h"
+#include "zbase/util/FTSQuery.h"
 #include "stx/mdb/MDB.h"
 #include "CustomerNamespace.h"
 

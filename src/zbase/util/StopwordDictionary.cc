@@ -7,7 +7,7 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include "fnord-fts/StopwordDictionary.h"
+#include "zbase/util/StopwordDictionary.h"
 #include "stx/io/mmappedfile.h"
 
 namespace stx {

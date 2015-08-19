@@ -9,10 +9,10 @@
  */
 #include <algorithm>
 #include <stx/io/fileutil.h>
-#include <fnord-fts/GermanStemmer.h>
-#include <fnord-fts/StopwordDictionary.h>
-#include <fnord-fts/SynonymDictionary.h>
-#include <fnord-fts/Analyzer.h>
+#include <zbase/util/GermanStemmer.h>
+#include <zbase/util/StopwordDictionary.h>
+#include <zbase/util/SynonymDictionary.h>
+#include <zbase/util/Analyzer.h>
 
 namespace stx {
 namespace fts {

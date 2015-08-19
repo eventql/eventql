@@ -9,9 +9,9 @@
 #ifndef _CM_SEARCHQUERY_H
 #define _CM_SEARCHQUERY_H
 #include "stx/json/json.h"
-#include "fnord-fts/fts.h"
-#include "fnord-fts/fts_common.h"
-#include "fnord-fts/Analyzer.h"
+#include "zbase/util/fts.h"
+#include "zbase/util/fts_common.h"
+#include "zbase/util/Analyzer.h"
 #include "IndexReader.h"
 
 using namespace stx;

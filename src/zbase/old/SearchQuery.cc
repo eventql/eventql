@@ -6,9 +6,9 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-#include "fnord-fts/fts.h"
-#include "fnord-fts/fts_common.h"
-#include "fnord-fts/search/DisjunctionMaxQuery.h"
+#include "zbase/util/fts.h"
+#include "zbase/util/fts_common.h"
+#include "zbase/util/search/DisjunctionMaxQuery.h"
 #include "SearchQuery.h"
 
 using namespace stx;

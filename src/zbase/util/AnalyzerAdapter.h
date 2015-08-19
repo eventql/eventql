@@ -11,9 +11,9 @@
 #define _FNORD_FTS_ANALZERADAPTER_H
 
 #include "stx/autoref.h"
-#include "fnord-fts/Analyzer.h"
-#include "fnord-fts/analysis/TokenStream.h"
-#include "fnord-fts/util/CloseableThreadLocal.h"
+#include "zbase/util/Analyzer.h"
+#include "zbase/util/analysis/TokenStream.h"
+#include "zbase/util/util/CloseableThreadLocal.h"
 
 namespace stx {
 namespace fts {

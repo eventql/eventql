@@ -7,6 +7,8 @@ add_library(dxa-docdb OBJECT
     DocumentDB.cc
     DocumentDBServlet.cc)
 
+add_dependencies(dxa-docdb customerdirectory)
+
 file(GLOB INVPROTO_FILES *.proto)
 PROTOBUF_GENERATE_CPP(INVPROTO_SRCS INVPROTO_HDRS ${INVPROTO_FILES})
 
@@ -15,3 +17,5 @@ add_library(inventoryd-client OBJECT
     ItemRef.cc
     Document.cc
     ${INVPROTO_SRCS})
+
+add_dependencies(inventoryd-client customerdirectory)

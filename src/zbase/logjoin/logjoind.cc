@@ -40,7 +40,7 @@
 #include "zbase/docdb/IndexChangeRequest.h"
 #include "zbase/docdb/DocIndex.h"
 #include <zbase/docdb/ItemRef.h>
-#include <fnord-fts/Analyzer.h>
+#include <zbase/util/Analyzer.h>
 #include "zbase/ConfigDirectory.h"
 #include "zbase/SessionSchema.h"
 #include "common.h"

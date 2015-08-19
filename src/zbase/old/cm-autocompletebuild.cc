@@ -28,8 +28,8 @@
 #include "sstable/SSTableColumnReader.h"
 #include "sstable/SSTableColumnWriter.h"
 #include "fnord-afx/ArtifactIndex.h"
-#include <fnord-fts/fts.h>
-#include <fnord-fts/fts_common.h>
+#include <zbase/util/fts.h>
+#include <zbase/util/fts_common.h>
 #include "fnord-logtable/TableReader.h"
 #include "common.h"
 #include "schemas.h"

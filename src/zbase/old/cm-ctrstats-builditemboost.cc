@@ -20,8 +20,8 @@
 #include "stx/json/json.h"
 #include "stx/mdb/MDB.h"
 #include "stx/mdb/MDBUtil.h"
-#include <fnord-fts/fts.h>
-#include <fnord-fts/fts_common.h>
+#include <zbase/util/fts.h>
+#include <zbase/util/fts_common.h>
 #include "sstable/sstablereader.h"
 #include "sstable/SSTableEditor.h"
 #include "sstable/SSTableColumnSchema.h"

@@ -29,8 +29,8 @@
  *   HP aCC rejects string_parse_tree <> in string_parse_tree.hpp
  *   https://svn.boost.org/trac/boost/ticket/2792
  */
-#include "fnord-fts/util/boost_string_parse_tree_fix.h"
-#include "fnord-fts/util/boost_shared_ptr_adapter.h"
+#include "zbase/util/util/boost_string_parse_tree_fix.h"
+#include "zbase/util/util/boost_shared_ptr_adapter.h"
 
 #endif
 
@@ -740,7 +740,7 @@ DECLARE_SHARED_PTR(UTF16Decoder)
 }
 }
 
-#include "fnord-fts/util/LuceneAllocator.h"
+#include "zbase/util/util/LuceneAllocator.h"
 
 namespace boost {
 
@@ -778,14 +778,14 @@ typedef std::shared_ptr<std::locale> localePtr;
 }
 }
 
-#include "fnord-fts/util/LuceneException.h"
-#include "fnord-fts/util/Array.h"
-#include "fnord-fts/util/Collection.h"
-#include "fnord-fts/util/Map.h"
-#include "fnord-fts/util/Set.h"
-#include "fnord-fts/util/HashMap.h"
-#include "fnord-fts/util/HashSet.h"
-#include "fnord-fts/util/Constants.h"
+#include "zbase/util/util/LuceneException.h"
+#include "zbase/util/util/Array.h"
+#include "zbase/util/util/Collection.h"
+#include "zbase/util/util/Map.h"
+#include "zbase/util/util/Set.h"
+#include "zbase/util/util/HashMap.h"
+#include "zbase/util/util/HashSet.h"
+#include "zbase/util/util/Constants.h"
 
 namespace stx {
 namespace fts {
@@ -916,8 +916,8 @@ typedef std::shared_ptr<TermInfoCache> TermInfoCachePtr;
 }
 }
 
-#include "fnord-fts/util/Synchronize.h"
-#include "fnord-fts/util/CycleCheck.h"
+#include "zbase/util/util/Synchronize.h"
+#include "zbase/util/util/CycleCheck.h"
 #if defined(LPP_BUILDING_LIB) || defined(LPP_EXPOSE_INTERNAL)
 #define INTERNAL public
 #else

@@ -25,8 +25,8 @@
 #include "sstable/SSTableColumnSchema.h"
 #include "sstable/SSTableColumnReader.h"
 #include "sstable/SSTableColumnWriter.h"
-#include <fnord-fts/fts.h>
-#include <fnord-fts/fts_common.h>
+#include <zbase/util/fts.h>
+#include <zbase/util/fts_common.h>
 #include "common.h"
 #include "CustomerNamespace.h"
 

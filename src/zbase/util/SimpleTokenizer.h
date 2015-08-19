@@ -11,8 +11,8 @@
 #define _FNORD_FTS_QUERYANALYZER_H
 #include "stx/stdtypes.h"
 #include "stx/Language.h"
-#include "fnord-fts/Stemmer.h"
-#include "fnord-fts/StopwordDictionary.h"
+#include "zbase/util/Stemmer.h"
+#include "zbase/util/StopwordDictionary.h"
 
 namespace stx {
 namespace fts {
