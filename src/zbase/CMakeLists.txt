@@ -193,10 +193,12 @@ target_link_libraries(zen-logfile-upload stx-http stx-protobuf stx-json stx-base
 add_executable(zen-statsd-upload ${COREPROTO_SRCS} zen-statsd-upload.cc)
 target_link_libraries(zen-statsd-upload stx-http stx-protobuf stx-json stx-base)
 
-add_executable(zen-mysql-upload
-    $<TARGET_OBJECTS:stx-mysql>
-    $<TARGET_OBJECTS:tsdb-client>
-    ${PROTO_SRCS}
-    zen-mysql-upload.cc)
+if(MYSQL_FOUND)
+  add_executable(zen-mysql-upload
+      $<TARGET_OBJECTS:stx-mysql>
+      $<TARGET_OBJECTS:tsdb-client>
+      ${PROTO_SRCS}
+      zen-mysql-upload.cc)
 
-target_link_libraries(zen-mysql-upload stx-http stx-protobuf stx-json stx-base ${MYSQL_CLIENT_LIBS} z)
+  target_link_libraries(zen-mysql-upload stx-http stx-protobuf stx-json stx-base ${MYSQL_CLIENT_LIBS} z)
+endif()
