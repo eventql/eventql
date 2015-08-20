@@ -187,6 +187,7 @@ var ZBase = (function() {
     registerView: registerView,
     navigateTo: navigateTo,
     getConfig: getConfig,
+    updateConfig: updateConfig,
     util: {}
   };
 })();
