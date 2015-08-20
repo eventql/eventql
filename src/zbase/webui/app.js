@@ -7,6 +7,17 @@ var ZBase = (function() {
   var views = {};
   var config;
 
+  var registerPopstateHandler = function() {
+    window.onpopstate = function(e) {
+      e.preventDefault();
+      if (e.state && e.state.path) {
+        changeNavigation(e.state.path);
+      } else {
+        changeNavigation(window.location.pathname + window.location.search);
+      }
+    };
+  };
+
   var findRoute = function(path) {
     for (var i = 0; i < config.routes.length; i++) {
       if (path.indexOf(config.routes[i].path_prefix) == 0) {
@@ -41,7 +52,7 @@ var ZBase = (function() {
     current_view.loadView({path: current_path, config: config});
   };
 
-  var navigateTo = function(path) {
+  var changeNavigation = function(path) {
     var route = findRoute(path);
     if (route == null) {
       showFatalError();
@@ -56,9 +67,15 @@ var ZBase = (function() {
     });
   };
 
+  var navigateTo = function(path) {
+    history.pushState({path: path}, "", path);
+    changeNavigation(path);
+  };
+
   var init = function(_config) {
     config = _config;
-    navigateTo(window.location.pathname + window.location.search);
+    changeNavigation(window.location.pathname + window.location.search);
+    registerPopstateHandler();
   };
 
   var finishModuleDownload = function(module) {
