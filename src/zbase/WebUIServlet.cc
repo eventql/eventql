@@ -50,7 +50,6 @@ void WebUIServlet::handleHTTPRequest(
 
     // FIXME check that module if module is public/private
 
-    iputs("serve module: $0", module_name);
     String module_html;
 
     for (const auto& file : module_cfg.html_file()) {
