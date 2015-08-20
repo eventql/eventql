@@ -1,6 +1,7 @@
 var ZBase = (function() {
   var modules_status = {};
   var modules_waitlist = [];
+  var views = {};
   var config;
 
   var findRoute = function(path) {
@@ -21,7 +22,11 @@ var ZBase = (function() {
     alert("Fatal Error, please reload the page");
   };
 
-  var onNavigationChange = function(path) {
+  var applyNavigationChange = function() {
+
+  };
+
+  var navigateTo = function(path) {
     var route = findRoute(path);
     if (route == null) {
       redirectToDefaultRoute();
@@ -29,13 +34,14 @@ var ZBase = (function() {
     }
 
     loadModules(route.modules, function() {
+      loadView(route.view);
       console.log("loaded modules for view");
     });
   };
 
   var init = function(_config) {
     config = _config;
-    onNavigationChange(window.location.pathname + window.location.search);
+    navigateTo(window.location.pathname + window.location.search);
   };
 
   var finishModuleDownload = function(module) {
@@ -106,11 +112,16 @@ var ZBase = (function() {
     startModulesDownload(download_modules);
   };
 
+  var registerView = function(name, vtable) {
+    views[name] = vtable;
+  };
+
 
   return {
     init: init,
     loadModules: loadModules,
-    moduleReady: finishModuleDownload
+    moduleReady: finishModuleDownload,
+    registerView: registerView
   };
 })();
 
