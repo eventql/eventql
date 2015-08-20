@@ -1,4 +1,6 @@
 var ZBase = (function() {
+  var current_route;
+  var current_view;
   var modules_status = {};
   var modules_waitlist = [];
   var views = {};
@@ -14,28 +16,25 @@ var ZBase = (function() {
     return null;
   };
 
-  var redirectToDefaultRoute = function() {
-    alert("Not Found, redirect to default");
-  };
-
   var showFatalError = function() {
     alert("Fatal Error, please reload the page");
   };
 
   var applyNavigationChange = function() {
-
+    console.log("load route", current_route);
   };
 
   var navigateTo = function(path) {
     var route = findRoute(path);
     if (route == null) {
-      redirectToDefaultRoute();
+      showFatalError();
       return;
     }
 
+    current_route = route;
+
     loadModules(route.modules, function() {
-      loadView(route.view);
-      console.log("loaded modules for view");
+      applyNavigationChange();
     });
   };
 
