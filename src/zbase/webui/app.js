@@ -3,12 +3,24 @@ var ZBase = (function() {
   var modules_waitlist = [];
   var config;
 
-  var findView = function(path) {
+  var findRoute = function(path) {
+    for (var i = 0; i < config.routes.length; i++) {
+      if (path.indexOf(config.routes[i].path_prefix) == 0) {
+        return config_routes[i];
+      }
+    }
 
+    return null;
   };
 
   var onNavigationChange = function(path) {
-    console.log("nav change", path);
+    var route = findRoute(path);
+    if (route == null) {
+      alert("Not Found");
+      return;
+    }
+
+
   };
 
   var init = function(_config) {
