@@ -10,6 +10,7 @@
 #include <stx/stdtypes.h>
 #include <stx/http/httpservice.h>
 #include <zbase/AnalyticsSession.pb.h>
+#include <zbase/AnalyticsAuth.h>
 
 using namespace stx;
 namespace zbase {
@@ -17,10 +18,14 @@ namespace zbase {
 class WebUIServlet : public stx::http::HTTPService {
 public:
 
+  WebUIServlet(AnalyticsAuth* auth);
+
   void handleHTTPRequest(
       http::HTTPRequest* request,
       http::HTTPResponse* response) override;
 
+protected:
+  AnalyticsAuth* auth_;
 };
 
 }
