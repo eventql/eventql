@@ -163,7 +163,7 @@ void SessionJoin::process(RefPtr<SessionContext> ctx) {
 
     auto pg_str = zbase::extractAttr(q.attrs, "pg");
     if (!pg_str.isEmpty()) {
-      qobj.addField("ab_page", pg_str.get());
+      qobj.addField("page", pg_str.get());
     }
 
     auto abgrp = zbase::extractABTestGroup(q.attrs);
