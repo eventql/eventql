@@ -7,7 +7,7 @@
  * permission is obtained.
  */
 #include <stx/protobuf/msg.h>
-#include <zbase/webui/WebUIServlet.h>
+#include <zbase/WebUIServlet.h>
 #include <zbase/WebUIModuleConfig.pb.h>
 #include <zbase/HTTPAuth.h>
 
