@@ -250,6 +250,12 @@ int main(int argc, const char** argv) {
   dproc::DispatchService dproc;
   dproc.registerApp(analytics_app.get(), local_scheduler.get());
 
+
+  /* web ui */
+  WebUIServlet webui_servlet(&auth);
+  http_router.addRouteByPrefixMatch("/a/", &webui_servlet, &tpool);
+
+  /* api */
   zbase::AnalyticsServlet analytics_servlet(
       analytics_app,
       &dproc,

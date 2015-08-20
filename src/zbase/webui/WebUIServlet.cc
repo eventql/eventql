@@ -35,7 +35,21 @@ void WebUIServlet::handleHTTPRequest(
   }
 
   response->setStatus(http::kStatusOK);
-  response->addBody("hello world: ");
+  response->addHeader("Content-Type", "text/html; charset=utf-8");
+
+  auto app_html = FileUtil::read("src/zbase/webui/app.html").toString();
+
+  StringUtil::replaceAll(
+      &app_html,
+      "{{app_css}}",
+      FileUtil::read("src/zbase/webui/app.css").toString());
+
+  StringUtil::replaceAll(
+      &app_html,
+      "{{app_js}}",
+      FileUtil::read("src/zbase/webui/app.js").toString());
+
+  response->addBody(app_html);
 }
 
 }
