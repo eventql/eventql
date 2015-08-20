@@ -125,13 +125,13 @@ h2.pagetitle.border_bottom {
 
 
 /* .zbase_wrap, .zbase_viewport */
-.zbase_wrap {
+#zbase_viewport {
   min-width: 1000px;
   min-height: 100%;
   padding-top: 38px;
 }
 
-.zbase_viewport {
+#zbase_viewport > .zbase_content_pane {
   min-width: 1000px;
   min-height: 100%;
   margin: auto;

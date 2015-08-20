@@ -55,25 +55,21 @@
       </div>
     </div>
 
-    <div class="zbase_wrap">
-      <div class="zbase_viewport">
-        hello world
-      </div>
-    </div>
+    <div id="zbase_viewport"></div>
 
-  <script type="text/javascript">{{app_js}}</script>
+    <script type="text/javascript">{{app_js}}</script>
 
-  <script type="text/javascript">
-    ZBase.init({
-      routes: [
-        {path_prefix: "/a/sql", view: "sql_editor", modules: ["sql_editor"]},
-        {path_prefix: "/a/logviewer", view: "logviewer", modules: ["logviewer"]},
-        {path_match: "/a/", view: "appstore", modules: ["appstore"]}
-      ],
+    <script type="text/javascript">
+      ZBase.init({
+        routes: [
+          {path_prefix: "/a/sql", view: "sql_editor", modules: ["sql_editor"]},
+          {path_prefix: "/a/logviewer", view: "logviewer", modules: ["logviewer"]},
+          {path_match: "/a/", view: "appstore", modules: ["appstore"]}
+        ],
 
-      default_route: "/a/"
-    });
-  </script>
+        default_route: "/a/"
+      });
+    </script>
   </body>
 </html>
 
