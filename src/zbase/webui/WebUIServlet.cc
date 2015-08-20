@@ -7,13 +7,20 @@
  * permission is obtained.
  */
 #include <zbase/webui/WebUIServlet.h>
+#include <zbase/HTTPAuth.h>
 
 namespace zbase {
+
+WebUIServlet::WebUIServlet(
+    AnalyticsAuth* auth) :
+    auth_(auth) {}
 
 void WebUIServlet::handleHTTPRequest(
     http::HTTPRequest* request,
     http::HTTPResponse* response) {
   URI uri(request->uri());
+
+  auto session = HTTPAuth::authenticateRequest(*request, auth_);
 
   static const String kAssetsPathPrefix = "/a/__assets__/";
   if (StringUtil::beginsWith(uri.path(), kAssetsPathPrefix)) {
@@ -27,26 +34,8 @@ void WebUIServlet::handleHTTPRequest(
     iputs("serve module: $0", module_name);
   }
 
-  //serveModule("app_main");
-
-  //if (path == "/") {
-  //  response->setStatus(http::kStatusFound);
-  //  response->addHeader("Content-Type", "text/html; charset=utf-8");
-  //  response->addHeader("Location", path_prefix_);
-  //  return;
-  //}
-
-  //if (path == "/fontawesome.woff") {
-  //  request->setURI(
-  //      StringUtil::format(
-  //          "$0/__components__/fnord/3rdparty/fontawesome.woff",
-  //          path_prefix_));
-  //}
-
-  //webui_mount_.handleHTTPRequest(request, response);
   response->setStatus(http::kStatusOK);
-  response->addBody("hello world");
+  response->addBody("hello world: ");
 }
-
 
 }
