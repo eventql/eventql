@@ -59,7 +59,7 @@ var ZBase = (function() {
 
     var route = findRoute(path);
     if (route == null) {
-      window.location.href = config.default_route;
+      navigateTo(config.default_route);
       return;
     }
 
