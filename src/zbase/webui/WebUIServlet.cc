@@ -32,6 +32,11 @@ void WebUIServlet::handleHTTPRequest(
   if (StringUtil::beginsWith(uri.path(), kModulesPathPrefix)) {
     auto module_name = uri.path().substr(kModulesPathPrefix.size());
     iputs("serve module: $0", module_name);
+    response->setStatus(http::kStatusOK);
+    response->addHeader("Content-Type", "text/html; charset=utf-8");
+    response->addBody(
+        FileUtil::read("src/zbase/webui/modules/" +  module_name + ".html").toString()); // FIXME
+    return;
   }
 
   response->setStatus(http::kStatusOK);
