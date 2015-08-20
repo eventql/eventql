@@ -140,7 +140,7 @@ var ZBase = (function() {
       window.setTimeout(function() {
         var link = document.createElement('link');
         link.rel = 'import';
-        link.href = "/modules/" + module + ".html";
+        link.href = "/a/__modules__/" + module;
         link.onerror = function(e) {
           console.log(">> Error while loading module >" + module + "<, aborting");
           showFatalError();
