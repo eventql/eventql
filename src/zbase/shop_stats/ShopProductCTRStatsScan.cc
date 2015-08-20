@@ -14,7 +14,7 @@ using namespace stx;
 namespace zbase {
 
 ShopProductCTRStatsScan::ShopProductCTRStatsScan(
-    RefPtr<TSDBTableScanSource<JoinedSession>> input,
+    RefPtr<TSDBTableScanSource<NewJoinedSession>> input,
     RefPtr<ProtoSSTableSink<ShopProductKPIs>> output,
     const ReportParams& params) :
     ReportRDD(input.get(), output.get()),
@@ -23,23 +23,23 @@ ShopProductCTRStatsScan::ShopProductCTRStatsScan(
     params_(params) {
   input_->setRequiredFields(
       Set<String> {
-        "page_views.time",
-        "page_views.item_id",
-        "page_views.shop_id",
-        "search_queries.time",
-        "search_queries.page_type",
-        "search_queries.result_items.item_id",
-        "search_queries.result_items.position",
-        "search_queries.result_items.clicked",
-        "search_queries.result_items.shop_id",
-        "search_queries.shop_id",
-        "cart_items.time",
-        "cart_items.item_id",
-        "cart_items.shop_id",
-        "cart_items.price_cents",
-        "cart_items.quantity",
-        "cart_items.currency",
-        "cart_items.checkout_step"
+        "event.page_view.time",
+        "event.page_view.item_id",
+        "event.page_view.shop_id",
+        "event.search_query.time",
+        "event.search_query.page_type",
+        "event.search_query.result_items.item_id",
+        "event.search_query.result_items.position",
+        "event.search_query.result_items.clicked",
+        "event.search_query.result_items.shop_id",
+        "event.search_query.shop_id",
+        "eventcart_items.time",
+        "eventcart_items.item_id",
+        "eventcart_items.shop_id",
+        "eventcart_items.price_cents",
+        "eventcart_items.quantity",
+        "eventcart_items.currency",
+        "eventcart_items.checkout_step"
       });
 }
 
@@ -57,8 +57,8 @@ void ShopProductCTRStatsScan::onFinish() {
   }
 }
 
-void ShopProductCTRStatsScan::onSession(const JoinedSession& row) {
-  for (const auto& sq : row.search_queries()) {
+void ShopProductCTRStatsScan::onSession(const NewJoinedSession& row) {
+  for (const auto& sq : row.event().search_query()) {
 
     // N.B. this is a hack that we had to put in b/c shop page detection wasn't
     // implemented in the logjoin  for the first runs. remove as soon as that
@@ -98,7 +98,7 @@ void ShopProductCTRStatsScan::onSession(const JoinedSession& row) {
     }
   }
 
-  for (const auto& iv : row.page_views()) {
+  for (const auto& iv : row.event().page_view()) {
     auto prod = getKPIs(
         StringUtil::toString(iv.shop_id()),
         iv.item_id());
@@ -110,7 +110,7 @@ void ShopProductCTRStatsScan::onSession(const JoinedSession& row) {
     pb_incr(*prod, product_page_impressions, 1);
   }
 
-  for (const auto& ci : row.cart_items()) {
+  for (const auto& ci : row.event().cart_items()) {
     auto prod = getKPIs(
         StringUtil::toString(ci.shop_id()),
         ci.item_id());
