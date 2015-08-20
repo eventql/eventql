@@ -202,6 +202,10 @@ h2.pagetitle.border_bottom {
   display: table;
 }
 
+.zbase_loader.hidden {
+  display: none;
+}
+
 .zbase_loader.fullscreen {
   position: fixed;
   background: rgba(255, 255, 255, .8);
