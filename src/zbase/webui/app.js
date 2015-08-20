@@ -6,21 +6,31 @@ var ZBase = (function() {
   var findRoute = function(path) {
     for (var i = 0; i < config.routes.length; i++) {
       if (path.indexOf(config.routes[i].path_prefix) == 0) {
-        return config_routes[i];
+        return config.routes[i];
       }
     }
 
     return null;
   };
 
+  var redirectToDefaultRoute = function() {
+    alert("Not Found, redirect to default");
+  };
+
+  var showFatalError = function() {
+    alert("Fatal Error, please reload the page");
+  };
+
   var onNavigationChange = function(path) {
     var route = findRoute(path);
     if (route == null) {
-      alert("Not Found");
+      redirectToDefaultRoute();
       return;
     }
 
-
+    loadModules(route.modules, function() {
+      console.log("loaded modules for view");
+    });
   };
 
   var init = function(_config) {
