@@ -56,7 +56,7 @@ TopSearchTermsQuery::TopSearchTermsQuery(
 
 void TopSearchTermsQuery::onQuery() {
   auto page = page_col_->getUInt32();
-  if (page != 1) {
+  if (page != 1 && page > 0) {
     return;
   }
 
