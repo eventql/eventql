@@ -24,7 +24,7 @@ TopSearchTermsQuery::TopSearchTermsQuery(
     segments_(segments),
     time_col_(query->fetchColumn("search_queries.time")),
     page_col_(query->fetchColumn("search_queries.page")),
-    qstr_col_(query->fetchColumn("search_queries.query_string_normalized")),
+    qstr_col_(query->fetchColumn("search_queries.query_string")),
     clicks_col_(query->fetchColumn("search_queries.num_result_items_clicked")),
     gmv_col_(query->fetchColumn("search_queries.gmv_eurcents")),
     cart_value_col_(query->fetchColumn("search_queries.cart_value_eurcents")) {
