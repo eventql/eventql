@@ -318,40 +318,6 @@ AnalyticsApp::AnalyticsApp(
         params);
   });
 
-  registerProtoRDDFactory<zbase::TSDBTableScanSpec>(
-      "reco_engine.ECommercePreferenceSetsFeed",
-      [this] (const zbase::TSDBTableScanSpec& params)
-          -> RefPtr<dproc::Task> {
-        auto report = new ECommercePreferenceSetsFeed(
-            new TSDBTableScanSource<JoinedSession>(params, tsdb_node_),
-            new JSONSink());
-
-        return report;
-      });
-
-
-  registerProtoRDDFactory<zbase::TSDBTableScanSpec>(
-      "reco_engine.ECommerceRecoQueriesFeed",
-      [this] (const zbase::TSDBTableScanSpec& params)
-          -> RefPtr<dproc::Task> {
-        auto report = new ECommerceRecoQueriesFeed(
-            new TSDBTableScanSource<JoinedSession>(params, tsdb_node_),
-            new JSONSink());
-
-        return report;
-      });
-
-  registerProtoRDDFactory<zbase::TSDBTableScanSpec>(
-      "search.ECommerceSearchQueriesFeed",
-      [this] (const zbase::TSDBTableScanSpec& params)
-          -> RefPtr<dproc::Task> {
-        auto report = new ECommerceSearchQueriesFeed(
-            new TSDBTableScanSource<JoinedSession>(params, tsdb_node_),
-            new JSONSink());
-
-        return report;
-      });
-
   registerProtoRDDFactory<ReportParams>(
       "search.TopSearchTermsReport",
       [this] (const ReportParams& params) -> RefPtr<dproc::Task> {
@@ -525,7 +491,7 @@ AnalyticsApp::AnalyticsApp(
       "shop_stats.ShopCTRStatsScan",
       [this] (const zbase::TSDBTableScanSpec& params) -> RefPtr<dproc::Task> {
     return new ShopCTRStatsScan(
-            new TSDBTableScanSource<JoinedSession>(params, tsdb_node_),
+            new TSDBTableScanSource<NewJoinedSession>(params, partition_map_),
             new ProtoSSTableSink<ShopKPIs>(),
             msg::decode<ReportParams>(
                 params.scanlet_params().data(),
@@ -536,7 +502,7 @@ AnalyticsApp::AnalyticsApp(
       "shop_stats.ShopECommerceStatsScan",
       [this] (const zbase::TSDBTableScanSpec& params) -> RefPtr<dproc::Task> {
     return new ShopECommerceStatsScan(
-            new TSDBTableScanSource<ECommerceTransaction>(params, tsdb_node_),
+            new TSDBTableScanSource<ECommerceTransaction>(params, partition_map_),
             new ProtoSSTableSink<ShopKPIs>(),
             msg::decode<ReportParams>(
                 params.scanlet_params().data(),
@@ -547,7 +513,7 @@ AnalyticsApp::AnalyticsApp(
       "shop_stats.ShopProductCTRStatsScan",
       [this] (const zbase::TSDBTableScanSpec& params) -> RefPtr<dproc::Task> {
     return new ShopProductCTRStatsScan(
-            new TSDBTableScanSource<JoinedSession>(params, tsdb_node_),
+            new TSDBTableScanSource<NewJoinedSession>(params, partition_map_),
             new ProtoSSTableSink<ShopProductKPIs>(),
             msg::decode<ReportParams>(
                 params.scanlet_params().data(),
@@ -558,7 +524,7 @@ AnalyticsApp::AnalyticsApp(
       "shop_stats.ShopProductECommerceStatsScan",
       [this] (const zbase::TSDBTableScanSpec& params) -> RefPtr<dproc::Task> {
     return new ShopProductECommerceStatsScan(
-            new TSDBTableScanSource<ECommerceTransaction>(params, tsdb_node_),
+            new TSDBTableScanSource<ECommerceTransaction>(params, partition_map_),
             new ProtoSSTableSink<ShopProductKPIs>(),
             msg::decode<ReportParams>(
                 params.scanlet_params().data(),

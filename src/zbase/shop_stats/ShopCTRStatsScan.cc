@@ -14,7 +14,7 @@ using namespace stx;
 namespace zbase {
 
 ShopCTRStatsScan::ShopCTRStatsScan(
-    RefPtr<TSDBTableScanSource<JoinedSession>> input,
+    RefPtr<TSDBTableScanSource<NewJoinedSession>> input,
     RefPtr<ProtoSSTableSink<ShopKPIs>> output,
     const ReportParams& params) :
     ReportRDD(input.get(), output.get()),
@@ -32,23 +32,23 @@ ShopCTRStatsScan::ShopCTRStatsScan(
 
   input_->setRequiredFields(
       Set<String> {
-        "page_views.time",
-        "page_views.item_id",
-        "page_views.shop_id",
-        "search_queries.time",
-        "search_queries.page_type",
-        "search_queries.result_items.item_id",
-        "search_queries.result_items.position",
-        "search_queries.result_items.clicked",
-        "search_queries.result_items.shop_id",
-        "search_queries.shop_id",
-        "cart_items.time",
-        "cart_items.item_id",
-        "cart_items.shop_id",
-        "cart_items.price_cents",
-        "cart_items.quantity",
-        "cart_items.currency",
-        "cart_items.checkout_step"
+        "event.page_view.time",
+        "event.page_view.item_id",
+        "event.page_view.shop_id",
+        "event.search_query.time",
+        "event.search_query.page_type",
+        "event.search_query.result_items.item_id",
+        "event.search_query.result_items.position",
+        "event.search_query.result_items.clicked",
+        "event.search_query.result_items.shop_id",
+        "event.search_query.shop_id",
+        "event.cart_items.time",
+        "event.cart_items.item_id",
+        "event.cart_items.shop_id",
+        "event.cart_items.price_cents",
+        "event.cart_items.quantity",
+        "event.cart_items.currency",
+        "event.cart_items.checkout_step"
       });
 }
 
@@ -66,8 +66,8 @@ void ShopCTRStatsScan::onFinish() {
   }
 }
 
-void ShopCTRStatsScan::onSession(const JoinedSession& row) {
-  for (const auto& sq : row.search_queries()) {
+void ShopCTRStatsScan::onSession(const NewJoinedSession& row) {
+  for (const auto& sq : row.event().search_query()) {
     Set<ShopKPIs*> all_shops;
     Set<ShopKPIs*> all_clicked_shops;
 
@@ -165,7 +165,7 @@ void ShopCTRStatsScan::onSession(const JoinedSession& row) {
 
   }
 
-  for (const auto& ci : row.cart_items()) {
+  for (const auto& ci : row.event().cart_items()) {
     auto shop = getKPIs(
         StringUtil::toString(ci.shop_id()),
         ci.time() * kMicrosPerSecond);
@@ -177,7 +177,7 @@ void ShopCTRStatsScan::onSession(const JoinedSession& row) {
     pb_incr(*shop, cart_items_count, 1);
   }
 
-  for (const auto& iv : row.page_views()) {
+  for (const auto& iv : row.event().page_view()) {
     auto shop = getKPIs(StringUtil::toString(iv.shop_id()), iv.time() * kMicrosPerSecond);
     if (!shop) {
       continue;
