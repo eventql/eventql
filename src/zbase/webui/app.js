@@ -92,7 +92,11 @@ var ZBase = (function() {
 
     var route = findRoute(path);
     if (route == null) {
-      navigateTo(config.default_route);
+      if (path.indexOf("/a/") == 0) {
+        navigateTo(config.default_route);
+      } else {
+        window.location.href = path;
+      }
       return;
     }
 
