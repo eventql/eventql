@@ -60,7 +60,15 @@ var ZBase = (function() {
       modules_status[module] = "loading";
 
       window.setTimeout(function() {
-        finishModuleDownload(module);
+        var link = document.createElement('link');
+        link.rel = 'import';
+        link.href = "/modules/" + module + ".html";
+        link.onerror = function(e) {
+          console.log("Loading Module " + module + " failed!");
+          showFatalError();
+        };
+
+        document.body.appendChild(link);
       }, 0);
     });
   };
@@ -101,7 +109,8 @@ var ZBase = (function() {
 
   return {
     init: init,
-    loadModules: loadModules
+    loadModules: loadModules,
+    moduleReady: finishModuleDownload
   };
 })();
 
