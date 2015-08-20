@@ -35,6 +35,7 @@ var ZBase = (function() {
   var applyNavigationChange = function() {
     if (current_view && current_view.name == current_route.view) {
       current_view.handleNavigationChange(current_path);
+      hideLoader();
       return;
     }
 
@@ -49,10 +50,12 @@ var ZBase = (function() {
     }
 
     current_view.loadView({path: current_path, config: config});
+    hideLoader();
   };
 
   var changeNavigation = function(path) {
     console.log(">> Navigate to: ", path);
+    showLoader();
 
     var route = findRoute(path);
     if (route == null) {
@@ -149,6 +152,14 @@ var ZBase = (function() {
 
   var registerView = function(view) {
     views[view.name] = view;
+  };
+
+  var showLoader = function() {
+    document.getElementById("zbase_main_loader").classList.remove("hidden");
+  };
+
+  var hideLoader = function() {
+    document.getElementById("zbase_main_loader").classList.add("hidden");
   };
 
 
