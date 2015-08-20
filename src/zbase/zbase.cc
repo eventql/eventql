@@ -254,7 +254,7 @@ int main(int argc, const char** argv) {
 
   /* web ui */
   WebUIServlet webui_servlet(&auth);
-  http_router.addRouteByPrefixMatch("/a/", &webui_servlet, &tpool);
+  http_router.addRouteByPrefixMatch("/a/", &webui_servlet);
 
   /* api */
   zbase::AnalyticsServlet analytics_servlet(
