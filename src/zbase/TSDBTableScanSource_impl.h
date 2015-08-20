@@ -126,12 +126,27 @@ List<dproc::TaskDependency> TSDBTableScanSource<ProtoType>::dependencies() const
 
 template <typename ProtoType>
 String TSDBTableScanSource<ProtoType>::cacheKey() const {
-    return StringUtil::format(
-        "tsdbtablescansource~$0~$1~$2~$3",
+  String version;
+
+  auto partition = tsdb_->findPartition(
         params_.tsdb_namespace(),
         params_.table_name(),
-        params_.partition_key(),
-        params_.version());
+        SHA1Hash::fromHexString(params_.partition_key()));
+
+  if (!partition.isEmpty()) {
+    auto preader = partition.get()->getReader();
+    auto cstable_ver = preader->cstableVersion();
+    if (!cstable_ver.isEmpty()) {
+      version = cstable_ver.get().toString();
+    }
+  }
+
+  return StringUtil::format(
+      "tsdbtablescansource~$0~$1~$2~$3",
+      params_.tsdb_namespace(),
+      params_.table_name(),
+      params_.partition_key(),
+      version);
 }
 
 } // namespace zbase
