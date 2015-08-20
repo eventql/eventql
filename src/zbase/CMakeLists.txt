@@ -156,7 +156,7 @@ add_executable(zbase
     reco_engine/RecoEngineStatsBreakdownQuery.cc
     reco_engine/RecoEngineStatsReport.cc
     reco_engine/RecoStats.cc
-    webui/WebUIServlet.cc
+    WebUIServlet.cc
     zbase.cc)
 
 target_link_libraries(zbase chartsql cplot sstable cstable stx-http stx-json stx-protobuf stx-base)

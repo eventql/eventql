@@ -40,6 +40,7 @@
 #include "zbase/util/mdb/MDB.h"
 #include "zbase/util/mdb/MDBUtil.h"
 #include "zbase/AnalyticsServlet.h"
+#include "zbase/WebUIServlet.h"
 #include "zbase/ReportFactory.h"
 #include "zbase/AnalyticsApp.h"
 #include "zbase/EventIngress.h"

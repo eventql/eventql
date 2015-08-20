@@ -24,7 +24,6 @@
 #include "zbase/api/LogfileAPIServlet.h"
 #include "zbase/docdb/DocumentDB.h"
 #include "zbase/docdb/DocumentDBServlet.h"
-#include "zbase/webui/WebUIServlet.h"
 
 using namespace stx;
 
