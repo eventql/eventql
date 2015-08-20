@@ -33,7 +33,6 @@ var ZBase = (function() {
   };
 
   var applyNavigationChange = function() {
-    console.log("load route", current_route);
     if (current_view && current_view.name == current_route.view) {
       current_view.handleNavigationChange(current_path);
       return;
@@ -53,6 +52,8 @@ var ZBase = (function() {
   };
 
   var changeNavigation = function(path) {
+    console.log(">> Navigate to: ", path);
+
     var route = findRoute(path);
     if (route == null) {
       showFatalError();
@@ -96,7 +97,7 @@ var ZBase = (function() {
 
   var startModulesDownload = function(modules) {
     modules.forEach(function(module) {
-      console.log("Loading Module: ", module);
+      console.log(">> Loading module: ", module);
       modules_status[module] = "loading";
 
       window.setTimeout(function() {
@@ -104,7 +105,7 @@ var ZBase = (function() {
         link.rel = 'import';
         link.href = "/modules/" + module + ".html";
         link.onerror = function(e) {
-          console.log("Loading Module " + module + " failed!");
+          console.log(">> Error while loading module >" + module + "<, aborting");
           showFatalError();
         };
 
