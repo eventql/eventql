@@ -25,6 +25,9 @@ public:
       http::HTTPResponse* response) override;
 
 protected:
+
+  String loadFile(const String& filename);
+
   AnalyticsAuth* auth_;
 };
 
