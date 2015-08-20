@@ -6,7 +6,9 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
+#include <stx/protobuf/msg.h>
 #include <zbase/webui/WebUIServlet.h>
+#include <zbase/WebUIModuleConfig.pb.h>
 #include <zbase/HTTPAuth.h>
 
 namespace zbase {
@@ -22,7 +24,7 @@ void WebUIServlet::handleHTTPRequest(
 
   auto session = HTTPAuth::authenticateRequest(*request, auth_);
 
-  static const String kAssetsPathPrefix = "/a/__assets__/";
+  static const String kAssetsPathPrefix = "/a/__/";
   if (StringUtil::beginsWith(uri.path(), kAssetsPathPrefix)) {
     auto asset_path = uri.path().substr(kAssetsPathPrefix.size());
 
@@ -34,14 +36,43 @@ void WebUIServlet::handleHTTPRequest(
     return;
   }
 
-  static const String kModulesPathPrefix = "/a/__modules__/";
+  static const String kModulesPathPrefix = "/a/_/";
   if (StringUtil::beginsWith(uri.path(), kModulesPathPrefix)) {
     auto module_name = uri.path().substr(kModulesPathPrefix.size());
+
+    // FIXME cache module config
+    auto module_cfg = msg::parseText<WebUIModuleConfig>(
+        loadFile(StringUtil::format("modules/$0/MANIFEST", module_name)));
+
+    // FIXME check that module if module is public/private
+
     iputs("serve module: $0", module_name);
+    String module_html;
+
+    for (const auto& file : module_cfg.html_file()) {
+      module_html +=
+          loadFile(StringUtil::format("modules/$0/$1", module_name, file));
+    }
+
+    for (const auto& file : module_cfg.css_file()) {
+      module_html += StringUtil::format(
+        "<style type='text/css'>$0</style>",
+        loadFile(StringUtil::format("modules/$0/$1", module_name, file)));
+    }
+
+    for (const auto& file : module_cfg.js_file()) {
+      module_html += StringUtil::format(
+        "<script type='text/javascript'>$0</script>",
+        loadFile(StringUtil::format("modules/$0/$1", module_name, file)));
+    }
+
+    module_html += StringUtil::format(
+        "<script type='text/javascript'>ZBase.moduleReady('$0');</script>",
+        module_name);
+
     response->setStatus(http::kStatusOK);
     response->addHeader("Content-Type", "text/html; charset=utf-8");
-    response->addBody(
-        FileUtil::read("src/zbase/webui/modules/" +  module_name + ".html").toString()); // FIXME
+    response->addBody(module_html);
     return;
   }
 
