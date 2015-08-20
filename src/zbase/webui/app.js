@@ -43,7 +43,12 @@ var ZBase = (function() {
 
   var findRoute = function(path) {
     for (var i = 0; i < config.routes.length; i++) {
-      if (path.indexOf(config.routes[i].path_prefix) == 0) {
+      if (config.routes[i].path_prefix &&
+          path.indexOf(config.routes[i].path_prefix) == 0) {
+        return config.routes[i];
+      }
+
+      if (config.routes[i].path_match == path) {
         return config.routes[i];
       }
     }

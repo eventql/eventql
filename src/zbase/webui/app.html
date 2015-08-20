@@ -67,10 +67,11 @@
     ZBase.init({
       routes: [
         {path_prefix: "/a/sql", view: "sql_editor", modules: ["sql_editor"]},
-        {path_prefix: "/a/logviewer", view: "logviewer", modules: ["logviewer"]}
+        {path_prefix: "/a/logviewer", view: "logviewer", modules: ["logviewer"]},
+        {path_match: "/a/", view: "appstore", modules: ["appstore"]}
       ],
 
-      default_route: "/a/sql"
+      default_route: "/a/"
     });
   </script>
   </body>
