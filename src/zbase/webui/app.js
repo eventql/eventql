@@ -79,6 +79,7 @@ var ZBase = (function() {
 
     if (current_view) {
       current_view.unloadView();
+      document.getElementById("zbase_viewport").innerHTML = "";
     }
 
     current_view = views[current_route.view];
@@ -146,6 +147,7 @@ var ZBase = (function() {
         var link = document.createElement('link');
         link.rel = 'import';
         link.href = "/a/_/" + module;
+        link.setAttribute("data-module", module);
         link.onerror = function(e) {
           console.log(">> Error while loading module >" + module + "<, aborting");
           showFatalError();
@@ -189,6 +191,28 @@ var ZBase = (function() {
     startModulesDownload(download_modules);
   };
 
+  var getTemplate = function(module, template_id) {
+    var template_selector = "#" + template_id;
+
+    var template = document.querySelector(template_selector);
+    if (!template) {
+      var template_import = document.querySelector(
+          "link[data-module='" + module + "']");
+
+      if (!template_import) {
+        return null;
+      }
+
+      template = template_import.import.querySelector(template_selector);
+    }
+
+    if (!template) {
+      return null;
+    }
+
+    return document.importNode(template.content, true);
+  };
+
   return {
     init: init,
     loadModules: loadModules,
@@ -197,6 +221,7 @@ var ZBase = (function() {
     navigateTo: navigateTo,
     getConfig: getConfig,
     updateConfig: updateConfig,
+    getTemplate: getTemplate,
     util: {}
   };
 })();
@@ -212,3 +237,24 @@ ZBase.util.header_widget = (function() {
   };
 
 })();
+
+ZBase.util.install_link_handlers = function(elem) {
+  var click_fn = (function() {
+    return function(e) {
+      var href = this.getAttribute("href");
+
+      if (href.indexOf("/a/") == 0) {
+        ZBase.navigateTo(href);
+        e.preventDefault();
+        return false;
+      } else {
+        return true;
+      }
+    };
+  })();
+
+  var elems = elem.querySelectorAll("a");
+  for (var i = 0; i < elems.length; ++i) {
+    elems[i].addEventListener("click", click_fn);
+  }
+};
