@@ -73,7 +73,7 @@ void AnalyticsServlet::handleHTTPRequest(
   //res.addHeader("Access-Control-Allow-Origin", "*"); // FIXME
   //res.addHeader("Access-Control-Allow-Methods", "GET, POST");
 
-  logDebug("analyticsd", "HTTP Request: $0 $1", req.method(), req.uri());
+  logDebug("zbase", "HTTP Request: $0 $1", req.method(), req.uri());
 
   if (req.method() == http::HTTPMessage::M_OPTIONS) {
     req_stream->readBody();
@@ -317,7 +317,7 @@ void AnalyticsServlet::executeQuery(
   auto future = task_future->result();
   do {
     if (res_stream->isClosed()) {
-      stx::logDebug("analyticsd", "Aborting Query...");
+      stx::logDebug("zbase", "Aborting Query...");
       task_future->cancel();
       return;
     }
@@ -456,7 +456,7 @@ void AnalyticsServlet::generateReport(
   auto future = task_future->result();
   do {
     if (res_stream->isClosed()) {
-      stx::logDebug("analyticsd", "Aborting Query...");
+      stx::logDebug("zbase", "Aborting Query...");
       task_future->cancel();
       return;
     }
@@ -604,7 +604,7 @@ void AnalyticsServlet::insertIntoMetric(
 
   auto time = WallClock::unixMicros();
 
-  stx::logTrace("analyticsd", "Insert into metric '$0' -> $1", metric, value);
+  stx::logTrace("zbase", "Insert into metric '$0' -> $1", metric, value);
   app_->insertMetric(session.customer(), metric, time, value);
   res->setStatus(http::kStatusCreated);
 }
@@ -648,7 +648,7 @@ void AnalyticsServlet::createTable(
 
     app_->updateTable(td, force);
   } catch (const StandardException& e) {
-    stx::logError("analyticsd", e, "error");
+    stx::logError("zbase", e, "error");
     res->setStatus(http::kStatusInternalServerError);
     res->addBody(StringUtil::format("error: $0", e.what()));
     return;
@@ -711,7 +711,7 @@ void AnalyticsServlet::uploadTable(
       tmpfile.seekTo(0);
 
       stx::logDebug(
-          "analyticsd",
+          "zbase",
           "Uploading static table; customer=$0, table=$1, shard=$2, size=$3MB",
           session.customer(),
           table_name,
@@ -730,7 +730,7 @@ void AnalyticsServlet::uploadTable(
         tmpfile_path + ".cst",
         WallClock::unixMicros());
   } catch (const StandardException& e) {
-    stx::logError("analyticsd", e, "error");
+    stx::logError("zbase", e, "error");
     res->setStatus(http::kStatusInternalServerError);
     res->addBody(StringUtil::format("error: $0", e.what()));
     return;
@@ -1041,7 +1041,7 @@ Option<AnalyticsSession> AnalyticsServlet::authenticateRequest(
 
     return auth_->decodeAuthToken(cookie);
   } catch (const StandardException& e) {
-    logDebug("analyticsd", e, "authentication failed because of error");
+    logDebug("zbase", e, "authentication failed because of error");
     return None<AnalyticsSession>();
   }
 }

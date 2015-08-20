@@ -193,7 +193,7 @@ int main(int argc, const char** argv) {
           InetAddr::resolve(r));
 
       logInfo(
-          "analyticsd",
+          "zbase",
           "Adding Remote Replica: $0 ($1)",
           rref.addr.hostAndPort(),
           rref.unique_id.toString());
@@ -302,7 +302,7 @@ int main(int argc, const char** argv) {
   auto rusage_t = std::thread([] () {
     for (;; usleep(1000000)) {
       logDebug(
-          "analyticsd",
+          "zbase",
           "Using $0MB of memory (peak $1)",
           Application::getCurrentMemoryUsage() / 1000000.0,
           Application::getPeakMemoryUsage() / 1000000.0);
@@ -316,10 +316,10 @@ int main(int argc, const char** argv) {
     customer_dir.startWatcher();
     ev.run();
   } catch (const StandardException& e) {
-    logAlert("analyticsd", e, "FATAL ERROR");
+    logAlert("zbase", e, "FATAL ERROR");
   }
 
-  stx::logInfo("analyticsd", "Exiting...");
+  stx::logInfo("zbase", "Exiting...");
 
   local_scheduler->stop();
   customer_dir.stopWatcher();
