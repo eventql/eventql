@@ -20,17 +20,17 @@ namespace zbase {
 template <typename ProtoType>
 TSDBTableScanSource<ProtoType>::TSDBTableScanSource(
     const zbase::TSDBTableScanSpec& params,
-    zbase::TSDBService* tsdb) :
+    zbase::PartitionMap* tsdb) :
     params_(params),
     tsdb_(tsdb) {}
 
 template <typename ProtoType>
 void TSDBTableScanSource<ProtoType>::read(dproc::TaskContext* context) {
-  //if (params_.use_cstable_index() && !required_fields_.empty()) {
-  //  scanWithCSTableIndex(context);
-  //} else {
+  if (params_.use_cstable_index() && !required_fields_.empty()) {
+    scanWithCSTableIndex(context);
+  } else {
     scanWithoutIndex(context);
-  //}
+  }
 }
 
 template <typename ProtoType>
@@ -48,10 +48,18 @@ void TSDBTableScanSource<ProtoType>::setRequiredFields(
 template <typename ProtoType>
 void TSDBTableScanSource<ProtoType>::scanWithoutIndex(
     dproc::TaskContext* context) {
-  tsdb_->fetchPartitionWithSampling(
-      params_.tsdb_namespace(),
-      params_.table_name(),
-      SHA1Hash::fromHexString(params_.partition_key()),
+  auto partition = tsdb_->findPartition(
+        params_.tsdb_namespace(),
+        params_.table_name(),
+        SHA1Hash::fromHexString(params_.partition_key()));
+
+  if (partition.isEmpty()) {
+    return;
+  }
+
+  auto preader = partition.get()->getReader();
+
+  preader->fetchRecordsWithSampling(
       params_.sample_modulo(),
       params_.sample_index(),
       [this, context] (const Buffer& buf) {
@@ -66,57 +74,79 @@ void TSDBTableScanSource<ProtoType>::scanWithoutIndex(
 template <typename ProtoType>
 void TSDBTableScanSource<ProtoType>::scanWithCSTableIndex(
     dproc::TaskContext* context) {
-  //auto schema = msg::MessageSchema::fromProtobuf(ProtoType::descriptor());
-  //auto dep = context->getDependency(0)->getInstanceAs<zbase::CSTableIndex>();
-  //auto data = dep->encode();
+  auto table = tsdb_->findTable(
+        params_.tsdb_namespace(),
+        params_.table_name());
 
-  //cstable::CSTableReader reader(data);
-  //cstable::RecordMaterializer materializer(
-  //    schema.get(),
-  //    &reader,
-  //    required_fields_);
+  auto partition = tsdb_->findPartition(
+        params_.tsdb_namespace(),
+        params_.table_name(),
+        SHA1Hash::fromHexString(params_.partition_key()));
 
-  //auto rec_count = reader.numRecords();
-  //// FIXPAUL soooo sloooooowww
-  //for (size_t i = 0; i < rec_count; ++i) {
-  //  if (i % 1000 == 0) {
-  //    if (context->isCancelled()) {
-  //      RAISE(kRuntimeError, "task cancelled");
-  //    }
-  //  }
+  if (partition.isEmpty()) {
+    return;
+  }
 
-  //  msg::MessageObject robj;
-  //  materializer.nextRecord(&robj);
-  //  Buffer buf;
-  //  msg::MessageEncoder::encode(robj, *schema, &buf);
-  //  fn_(msg::decode<ProtoType>(buf));
-  //}
+  auto preader = partition.get()->getReader();
+  auto cstable = preader->fetchCSTableFilename();
+  if (cstable.isEmpty()) {
+    return;
+  }
+
+  auto schema = table.get()->schema();
+
+  cstable::CSTableReader reader(cstable.get());
+  cstable::RecordMaterializer materializer(
+      schema.get(),
+      &reader,
+      required_fields_);
+
+  auto rec_count = reader.numRecords();
+  // FIXPAUL soooo sloooooowww
+  for (size_t i = 0; i < rec_count; ++i) {
+    if (i % 1000 == 0) {
+      if (context->isCancelled()) {
+        RAISE(kRuntimeError, "task cancelled");
+      }
+    }
+
+    msg::MessageObject robj;
+    materializer.nextRecord(&robj);
+    Buffer buf;
+    msg::MessageEncoder::encode(robj, *schema, &buf);
+    fn_(msg::decode<ProtoType>(buf));
+  }
 }
 
 template <typename ProtoType>
 List<dproc::TaskDependency> TSDBTableScanSource<ProtoType>::dependencies() const {
   List<dproc::TaskDependency> deps;
-
-  if (params_.use_cstable_index() && !required_fields_.empty()) {
-    auto dparams = params_;
-
-    deps.emplace_back(dproc::TaskDependency {
-      .task_name = "CSTableIndex",
-      .params = *msg::encode(dparams)
-    });
-  }
-
   return deps;
 }
 
 template <typename ProtoType>
 String TSDBTableScanSource<ProtoType>::cacheKey() const {
-    return StringUtil::format(
-        "tsdbtablescansource~$0~$1~$2~$3",
+  String version;
+
+  auto partition = tsdb_->findPartition(
         params_.tsdb_namespace(),
         params_.table_name(),
-        params_.partition_key(),
-        params_.version());
+        SHA1Hash::fromHexString(params_.partition_key()));
+
+  if (!partition.isEmpty()) {
+    auto preader = partition.get()->getReader();
+    auto cstable_ver = preader->cstableVersion();
+    if (!cstable_ver.isEmpty()) {
+      version = cstable_ver.get().toString();
+    }
+  }
+
+  return StringUtil::format(
+      "tsdbtablescansource~$0~$1~$2~$3",
+      params_.tsdb_namespace(),
+      params_.table_name(),
+      params_.partition_key(),
+      version);
 }
 
 } // namespace zbase

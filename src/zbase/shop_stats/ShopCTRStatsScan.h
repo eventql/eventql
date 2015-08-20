@@ -24,7 +24,7 @@ class ShopCTRStatsScan : public ReportRDD {
 public:
 
   ShopCTRStatsScan(
-      RefPtr<TSDBTableScanSource<JoinedSession>> input,
+      RefPtr<TSDBTableScanSource<NewJoinedSession>> input,
       RefPtr<ProtoSSTableSink<ShopKPIs>> output,
       const ReportParams& params);
 
@@ -35,10 +35,10 @@ public:
 
 protected:
 
-  void onSession(const JoinedSession& row);
+  void onSession(const NewJoinedSession& row);
   ShopKPIs* getKPIs(const String& shop_id, const UnixTime& time);
 
-  RefPtr<TSDBTableScanSource<JoinedSession>> input_;
+  RefPtr<TSDBTableScanSource<NewJoinedSession>> input_;
   RefPtr<ProtoSSTableSink<ShopKPIs>> output_;
   ReportParams params_;
 

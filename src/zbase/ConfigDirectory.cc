@@ -215,7 +215,7 @@ void ConfigDirectory::sync() {
 }
 
 void ConfigDirectory::syncObject(const String& obj) {
-  logDebug("analyticsd", "Syncing config object '$0' from master", obj);
+  logDebug("zbase", "Syncing config object '$0' from master", obj);
 
   if (topics_ & ConfigTopic::CUSTOMERS) {
     static const String kCustomerPrefix = "customers/";
@@ -423,7 +423,7 @@ void ConfigDirectory::startWatcher() {
       try {
         sync();
       } catch (const StandardException& e) {
-        logCritical("analyticsd", e, "error during master sync");
+        logCritical("zbase", e, "error during master sync");
       }
 
       usleep(500000);

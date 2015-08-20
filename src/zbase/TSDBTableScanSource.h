@@ -10,7 +10,7 @@
 #define _CM_TSDBTABLESCANSOURCE_H
 #include "zbase/Report.h"
 #include "zbase/AnalyticsTableScan.h"
-#include <zbase/core/TSDBService.h>
+#include <zbase/core/PartitionMap.h>
 #include "zbase/core/TSDBTableScanSpec.pb.h"
 
 using namespace stx;
@@ -22,14 +22,14 @@ class TSDBTableScanSource : public ReportSource {
 public:
 
   static List<RefPtr<TSDBTableScanSource>> mapStream(
-      zbase::TSDBService* tsdb,
+      zbase::PartitionMap* tsdb,
       const String& stream,
       const UnixTime& from,
       const UnixTime& until);
 
   TSDBTableScanSource(
       const zbase::TSDBTableScanSpec& params,
-      zbase::TSDBService* tsdb);
+      zbase::PartitionMap* tsdb);
 
   void read(dproc::TaskContext* context) override;
   AnalyticsTableScan* tableScan();
@@ -48,7 +48,7 @@ protected:
   void scanWithCSTableIndex(dproc::TaskContext* context);
 
   zbase::TSDBTableScanSpec params_;
-  zbase::TSDBService* tsdb_;
+  zbase::PartitionMap* tsdb_;
   AnalyticsTableScan scan_;
   Function <void (const ProtoType&)> fn_;
   Set<String> required_fields_;

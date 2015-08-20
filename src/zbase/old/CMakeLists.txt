@@ -458,7 +458,7 @@ add_executable(cm-chunkserver
 target_link_libraries(cm-chunkserver
     ${CMAKE_THREAD_LIBS_INIT} ${FNORD_LIBS})
 
-add_executable(analyticsd
+add_executable(zbase
     $<TARGET_OBJECTS:cm-common>
     
     $<TARGET_OBJECTS:fnord-feeds>
@@ -529,9 +529,9 @@ add_executable(analyticsd
     analytics/reports/RecoEngineStatsReport.cc
     ../3rdparty/chartsql/src/chartsql/svalue.cc
     schemas.cc
-    analyticsd.cc)
+    zbase.cc)
 
-target_link_libraries(analyticsd
+target_link_libraries(zbase
     ${CMAKE_THREAD_LIBS_INIT} ${FNORD_LIBS} ${FNORD_FTS_LIBS})
 
 
