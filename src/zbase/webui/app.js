@@ -54,13 +54,17 @@ var ZBase = (function() {
     }
   };
 
-  var startModuleDownload = function(module) {
-    modules_status[module] = "loading";
-    console.log("Loading Module: ", module);
+  var startModulesDownload = function(unloaded_modules) {
+    unloaded_modules.forEach(function(module) {
+      if (modules_status[module] != "loading") {
+        modules_status[module] = "loading";
+        console.log("Loading Module: ", module);
 
-    window.setTimeout(function() {
-      finishModuleDownload(module);
-    }, 0);
+        window.setTimeout(function() {
+          finishModuleDownload(module);
+        }, 0);
+      }
+    });
   };
 
   var loadModules = function(modules, on_loaded) {
@@ -86,11 +90,7 @@ var ZBase = (function() {
     });
 
     // start loading missing modules
-    unloaded_modules.forEach(function(module) {
-      if (modules_status[module] != "loading") {
-        startModuleDownload(module);
-      }
-    });
+    startModulesDownload(unloaded_modules);
   };
 
 
