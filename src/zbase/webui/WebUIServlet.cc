@@ -25,7 +25,13 @@ void WebUIServlet::handleHTTPRequest(
   static const String kAssetsPathPrefix = "/a/__assets__/";
   if (StringUtil::beginsWith(uri.path(), kAssetsPathPrefix)) {
     auto asset_path = uri.path().substr(kAssetsPathPrefix.size());
-    iputs("asset path: $0", asset_path);
+
+    // FIXME validate path
+
+    response->setStatus(http::kStatusOK);
+    //response->addHeader("Content-Type", "text/html; charset=utf-8");
+    response->addBody(loadFile("assets/" + asset_path)); // FIXME
+    return;
   }
 
   static const String kModulesPathPrefix = "/a/__modules__/";
@@ -39,22 +45,17 @@ void WebUIServlet::handleHTTPRequest(
     return;
   }
 
+  auto app_html = loadFile("app.html");
+  StringUtil::replaceAll(&app_html, "{{app_css}}", loadFile("app.css"));
+  StringUtil::replaceAll(&app_html, "{{app_js}}", loadFile("app.js"));
+
   response->setStatus(http::kStatusOK);
   response->addHeader("Content-Type", "text/html; charset=utf-8");
-
-  auto app_html = FileUtil::read("src/zbase/webui/app.html").toString();
-
-  StringUtil::replaceAll(
-      &app_html,
-      "{{app_css}}",
-      FileUtil::read("src/zbase/webui/app.css").toString());
-
-  StringUtil::replaceAll(
-      &app_html,
-      "{{app_js}}",
-      FileUtil::read("src/zbase/webui/app.js").toString());
-
   response->addBody(app_html);
+}
+
+String WebUIServlet::loadFile(const String& filename) {
+  return FileUtil::read("src/zbase/webui/" + filename).toString();
 }
 
 }

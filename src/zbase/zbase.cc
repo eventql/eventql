@@ -67,7 +67,7 @@ int main(int argc, const char** argv) {
       stx::cli::FlagParser::T_INTEGER,
       false,
       NULL,
-      "7004",
+      "8080",
       "Start the public http server on this port",
       "<port>");
 
