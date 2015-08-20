@@ -27,11 +27,11 @@ void AnalyticsTableScan::scanTable(cstable::CSTableReader* reader) {
             ? "attr." + c.first
             : "event." + c.first;
 
-    if (!reader->hasColumn(colname)) {
-      continue;
-    }
-
     if (StringUtil::beginsWith(colname, "event.cart_items.")) {
+      if (!reader->hasColumn(colname)) {
+        continue;
+      }
+
       per_cartitem_.emplace_back(
           c.second.get(),
           reader->getColumnReader(colname));
@@ -40,6 +40,10 @@ void AnalyticsTableScan::scanTable(cstable::CSTableReader* reader) {
 
     if (StringUtil::beginsWith(colname, "event.search_queries.result_items.")) {
       StringUtil::replaceAll(&colname, "event.search_queries.", "event.search_query.");
+
+      if (!reader->hasColumn(colname)) {
+        continue;
+      }
 
       per_queryitem_.emplace_back(
           c.second.get(),
@@ -50,6 +54,10 @@ void AnalyticsTableScan::scanTable(cstable::CSTableReader* reader) {
     if (StringUtil::beginsWith(colname, "event.search_queries.")) {
       StringUtil::replaceAll(&colname, "event.search_queries.", "event.search_query.");
 
+      if (!reader->hasColumn(colname)) {
+        continue;
+      }
+
       per_query_.emplace_back(
           c.second.get(),
           reader->getColumnReader(colname));
@@ -59,11 +67,20 @@ void AnalyticsTableScan::scanTable(cstable::CSTableReader* reader) {
     if (StringUtil::beginsWith(colname, "event.item_visits.")) {
       StringUtil::replaceAll(&colname, "event.item_visits.", "event.page_view.");
 
+      if (!reader->hasColumn(colname)) {
+        continue;
+      }
+
       per_itemvisit_.emplace_back(
           c.second.get(),
           reader->getColumnReader(colname));
       continue;
     }
+
+    if (!reader->hasColumn(colname)) {
+      continue;
+    }
+
 
     per_session_.emplace_back(
         c.second.get(),
