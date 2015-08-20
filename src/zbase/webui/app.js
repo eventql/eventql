@@ -1,4 +1,5 @@
 var ZBase = (function() {
+  var current_path;
   var current_route;
   var current_view;
   var modules_status = {};
@@ -22,6 +23,22 @@ var ZBase = (function() {
 
   var applyNavigationChange = function() {
     console.log("load route", current_route);
+    if (current_view && current_view.name == current_route.view) {
+      current_view.handleNavigationChange(current_path);
+      return;
+    }
+
+    if (current_view) {
+      current_view.unloadView();
+    }
+
+    current_view = views[current_route.view];
+    if (!current_view) {
+      showFatalError();
+      return;
+    }
+
+    current_view.loadView({path: current_path, config: config});
   };
 
   var navigateTo = function(path) {
@@ -32,6 +49,7 @@ var ZBase = (function() {
     }
 
     current_route = route;
+    current_path = path;
 
     loadModules(route.modules, function() {
       applyNavigationChange();
@@ -111,8 +129,8 @@ var ZBase = (function() {
     startModulesDownload(download_modules);
   };
 
-  var registerView = function(name, vtable) {
-    views[name] = vtable;
+  var registerView = function(view) {
+    views[view.name] = view;
   };
 
 
@@ -120,7 +138,8 @@ var ZBase = (function() {
     init: init,
     loadModules: loadModules,
     moduleReady: finishModuleDownload,
-    registerView: registerView
+    registerView: registerView,
+    navigateTo: navigateTo
   };
 })();
 
