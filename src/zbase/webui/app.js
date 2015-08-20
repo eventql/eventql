@@ -7,15 +7,38 @@ var ZBase = (function() {
   var views = {};
   var config;
 
-  var registerPopstateHandler = function() {
-    window.onpopstate = function(e) {
-      e.preventDefault();
-      if (e.state && e.state.path) {
-        changeNavigation(e.state.path);
-      } else {
-        changeNavigation(window.location.pathname + window.location.search);
-      }
-    };
+  var init = function(_config) {
+    config = _config;
+    changeNavigation(window.location.pathname + window.location.search);
+    registerPopstateHandler();
+
+    ZBase.util.header_widget.render();
+  };
+
+  var getConfig = function() {
+    return config;
+  };
+
+  var updateConfig = function(new_config) {
+    config = new_config;
+
+    ZBase.util.header_widget.render();
+  };
+
+  var showFatalError = function() {
+    alert("Fatal Error, please reload the page");
+  };
+
+  var showLoader = function() {
+    document.getElementById("zbase_main_loader").classList.remove("hidden");
+  };
+
+  var hideLoader = function() {
+    document.getElementById("zbase_main_loader").classList.add("hidden");
+  };
+
+  var registerView = function(view) {
+    views[view.name] = view;
   };
 
   var findRoute = function(path) {
@@ -28,8 +51,18 @@ var ZBase = (function() {
     return null;
   };
 
-  var showFatalError = function() {
-    alert("Fatal Error, please reload the page");
+  /**
+   * Navigation
+   */
+  var registerPopstateHandler = function() {
+    window.onpopstate = function(e) {
+      e.preventDefault();
+      if (e.state && e.state.path) {
+        changeNavigation(e.state.path);
+      } else {
+        changeNavigation(window.location.pathname + window.location.search);
+      }
+    };
   };
 
   var applyNavigationChange = function() {
@@ -76,12 +109,9 @@ var ZBase = (function() {
     changeNavigation(path);
   };
 
-  var init = function(_config) {
-    config = _config;
-    changeNavigation(window.location.pathname + window.location.search);
-    registerPopstateHandler();
-  };
-
+  /**
+   * Module loading
+   */
   var finishModuleDownload = function(module) {
     modules_status[module] = "loaded";
     // fire all finished callbacks
@@ -150,25 +180,25 @@ var ZBase = (function() {
     startModulesDownload(download_modules);
   };
 
-  var registerView = function(view) {
-    views[view.name] = view;
-  };
-
-  var showLoader = function() {
-    document.getElementById("zbase_main_loader").classList.remove("hidden");
-  };
-
-  var hideLoader = function() {
-    document.getElementById("zbase_main_loader").classList.add("hidden");
-  };
-
-
   return {
     init: init,
     loadModules: loadModules,
     moduleReady: finishModuleDownload,
     registerView: registerView,
-    navigateTo: navigateTo
+    navigateTo: navigateTo,
+    getConfig: getConfig,
+    util: {}
   };
 })();
 
+ZBase.util.header_widget = (function() {
+
+  var render = function() {
+    console.log("render header...", ZBase.getConfig());
+  };
+
+  return {
+    render: render
+  };
+
+})();
