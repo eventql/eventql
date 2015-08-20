@@ -149,7 +149,7 @@ h2.pagetitle.border_bottom {
   height: 40px;
   line-height: 30px;
   overflow: hidden;
-  position: absolute;
+  position: fixed;
   z-index: 99999;
 }
 
