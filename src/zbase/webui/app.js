@@ -56,7 +56,7 @@ var ZBase = (function() {
 
     var route = findRoute(path);
     if (route == null) {
-      showFatalError();
+      window.location.href = config.default_route;
       return;
     }
 

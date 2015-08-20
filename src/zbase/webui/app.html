@@ -63,10 +63,14 @@
 
   <script src="/app.js" type="text/javascript" ></script>
   <script type="text/javascript">
-    ZBase.init({routes: [
-      {path_prefix: "/a/sql", view: "sql_editor", modules: ["sql_editor"]},
-      {path_prefix: "/a/logviewer", view: "logviewer", modules: ["logviewer"]}
-    ]});
+    ZBase.init({
+      routes: [
+        {path_prefix: "/a/sql", view: "sql_editor", modules: ["sql_editor"]},
+        {path_prefix: "/a/logviewer", view: "logviewer", modules: ["logviewer"]}
+      ],
+
+      default_route: "/a/sql"
+    });
   </script>
   </body>
 </html>
