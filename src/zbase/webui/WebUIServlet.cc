@@ -30,6 +30,10 @@ void WebUIServlet::handleHTTPRequest(
 
     // FIXME validate path
 
+    //"css" => "text/css; charset=utf-8",
+    //"png" => "image/png",
+    //"html" => "text/html; charset=utf-8",
+    //"js" => "application/javascript; charset=utf-8"
     response->setStatus(http::kStatusOK);
     //response->addHeader("Content-Type", "text/html; charset=utf-8");
     response->addBody(loadFile("assets/" + asset_path)); // FIXME
