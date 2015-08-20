@@ -54,23 +54,20 @@ var ZBase = (function() {
     }
   };
 
-  var startModulesDownload = function(unloaded_modules) {
-    unloaded_modules.forEach(function(module) {
-      if (modules_status[module] != "loading") {
-        modules_status[module] = "loading";
-        console.log("Loading Module: ", module);
+  var startModulesDownload = function(modules) {
+    modules.forEach(function(module) {
+      console.log("Loading Module: ", module);
+      modules_status[module] = "loading";
 
-        window.setTimeout(function() {
-          finishModuleDownload(module);
-        }, 0);
-      }
+      window.setTimeout(function() {
+        finishModuleDownload(module);
+      }, 0);
     });
   };
 
   var loadModules = function(modules, on_loaded) {
+    // search for modules that have not finished loading
     var unloaded_modules = [];
-
-    // search for missing modules
     modules.forEach(function(module) {
       if (modules_status[module] != "loaded") {
         unloaded_modules.push(module);
@@ -89,8 +86,16 @@ var ZBase = (function() {
       on_loaded: on_loaded
     });
 
-    // start loading missing modules
-    startModulesDownload(unloaded_modules);
+    // search for modules that haven't started downloading yet
+    var download_modules = [];
+    unloaded_modules.forEach(function(module) {
+      if (modules_status[module] != "loading") {
+        download_modules.push(module);
+      }
+    });
+
+    // start downloading missing modules
+    startModulesDownload(download_modules);
   };
 
 
