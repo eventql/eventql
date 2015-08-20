@@ -5,6 +5,7 @@ ZBase.registerView((function() {
     var page = ZBase.getTemplate("appstore", "zbase_appstore_main_tpl");
     ZBase.util.install_link_handlers(page);
 
+    viewport.innerHTML = "";
     viewport.appendChild(page);
   };
 
