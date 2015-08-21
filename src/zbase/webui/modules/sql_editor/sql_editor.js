@@ -30,8 +30,9 @@ ZBase.registerView((function() {
     documents.forEach(function(doc) {
       var url = "/a/sql/" + doc.uuid;
       var tr = document.createElement("tr");
-      tr.innerHTML = "<td><a href='" + url + "'>" + doc.name + "</td><td>" +
-        doc.type + "</td><td>&mdash;</td>";
+      tr.innerHTML = "<td><a href='" + url + "'>" + doc.name + "</a></td><td>" +
+        "<a href='" + url + "'>" + doc.type + "</a></td><td><a href='" + 
+        url + "'>&mdash;</a></td>";
       tbody.appendChild(tr);
 
       tr.addEventListener("click", function() {
