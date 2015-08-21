@@ -9,11 +9,25 @@ var ZBase = (function() {
 
   /* feature detection */
   var __enable_html5_import = 'import' in document.createElement('link');
+  var __enable_html5_templates = ("content" in document.createElement("template"));
+  var __enable_html5_importnode = 'importNode' in document;
+
+  try {
+    document.importNode(document.createElement('div'));
+  } catch (e) {
+    __enable_html5_importnode = false;
+  }
 
   var init = function(_config) {
     config = _config;
     changeNavigation(window.location.pathname + window.location.search);
     registerPopstateHandler();
+
+    console.log(">> Features:", {
+      html5_templates: __enable_html5_templates,
+      html5_import: __enable_html5_import,
+      html5_importnode: __enable_html5_importnode
+    });
 
     renderLayout();
   };
@@ -224,11 +238,50 @@ var ZBase = (function() {
     startModulesDownload(download_modules);
   };
 
+  function importNodeFallback(node, allChildren) {
+    var a, i, il, doc = document;
+
+    switch (node.nodeType) {
+      case document.DOCUMENT_FRAGMENT_NODE:
+        var newNode = document.createDocumentFragment();
+        while (child = node.firstChild) {
+          newNode.appendChild(node);
+        }
+        return newNode;
+
+      case document.ELEMENT_NODE:
+        var newNode = doc.createElementNS(node.namespaceURI, node.nodeName);
+        if (node.attributes && node.attributes.length > 0) {
+          for (i = 0, il = node.attributes.length; i < il; i++) {
+            a = node.attributes[i];
+            try {
+              newNode.setAttributeNS(
+                  a.namespaceURI,
+                  a.nodeName,
+                  node.getAttribute(a.nodeName));
+            } catch (err) {}
+          }
+        }
+        if (allChildren && node.childNodes && node.childNodes.length > 0) {
+          for (i = 0, il = node.childNodes.length; i < il; i++) {
+            newNode.appendChild(importNodeFallback(node.childNodes[i], allChildren));
+          }
+        }
+        return newNode;
+
+      case document.TEXT_NODE:
+      case document.CDATA_SECTION_NODE:
+      case document.COMMENT_NODE:
+        return doc.createTextNode(node.nodeValue);
+    }
+  }
+
   var getTemplate = function(module, template_id) {
     var template_selector = "#" + template_id;
 
     var template = document.querySelector(template_selector);
-    if (!template) {
+
+    if (!template && __enable_html5_import) {
       var template_import = document.querySelector(
           "link[data-module='" + module + "']");
 
@@ -239,11 +292,35 @@ var ZBase = (function() {
       template = template_import.import.querySelector(template_selector);
     }
 
+    if (!template && __enable_html5_import) {
+      var template_imports = document.querySelectorAll("link[rel='import']");
+
+      for (var i = 0; !template && i < template_imports.length; ++i) {
+        template = template_imports.import[i].querySelector(template_selector);
+      }
+    }
+
     if (!template) {
       return null;
     }
 
-    return document.importNode(template.content, true);
+    var content;
+    if (__enable_html5_templates) {
+      content = template.content;
+    } else {
+      content = document.createDocumentFragment();
+      var children = template.children;
+
+      for (var j = 0; j < children.length; j++) {
+        content.appendChild(children[j].cloneNode(true));
+      }
+    }
+
+    if (__enable_html5_importnode) {
+      return document.importNode(content, true);
+    } else {
+      return importNodeFallback(content, true);
+    }
   };
 
   var renderLayout = function() {
