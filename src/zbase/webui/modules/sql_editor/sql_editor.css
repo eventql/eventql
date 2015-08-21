@@ -19,6 +19,10 @@
   margin-bottom: 10px;
 }
 
+.zbase_sql_editor .zbase_sql_editor_sidebar a.link {
+  font-size: 13px;
+}
+
 .zbase_sql_editor .zbase_sql_editor_content {
   margin-left: 20px;
   margin-right: 340px;

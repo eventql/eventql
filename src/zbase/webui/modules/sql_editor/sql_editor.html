@@ -52,7 +52,7 @@
     <div class="zbase_sql_editor">
       <div class="zbase_sql_editor_sidebar">
         <div>
-          <a><i class="fa fa-copy"></i>&nbsp;Clone tis query</a>
+          <a class="link"><i class="fa fa-copy"></i>&nbsp;Clone tis query</a>
         </div>
         <section class="sidebar_section">
           <h3 class="sidebar_title">
@@ -61,7 +61,7 @@
         </section>
       </div>
 
-      <div class="zbase_sql_editor_content zbase_sql_editor">
+      <div class="zbase_sql_editor_content zbase_sql_editor_pane">
 
         <div class="zbase_loader fullscreen">
           <div class="spinner_outer">
@@ -74,20 +74,19 @@
             </div>
           </div>
         </div>
+
+        <section class="zbase_sql_editor_title">
+          <button class="zbase_button zbase_primary_button" data-action="new-query">
+            <i class="fa fa-bolt"></i>
+            &nbsp;Execute
+          </button>
+          <button class="zbase_button zbase_secondary_button" data-action="new-query">
+            <i class="fa fa-share-alt"></i>
+            &nbsp;Share
+          </button>
+          <h2 class="pagetitle">SQL Editor</h2>
+        </section>
       </div>
-
-      <section class="zbase_sql_editor_title">
-        <button class="zbase_button zbase_primary_button" data-action="new-query">
-          <i class="fa fa-bolt"></i>
-          &nbsp;Execute
-        </button>
-        <button class="zbase_button" data-action="new-query">
-          <i class="fa fa-share-alt"></i>
-          &nbsp;Share
-        </button>
-        <h2 class="pagetitle">SQL Editor</h2>
-      </section>
-
     </div>
   </div>
 </template>
