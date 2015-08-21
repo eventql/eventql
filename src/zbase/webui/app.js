@@ -12,7 +12,7 @@ var ZBase = (function() {
     changeNavigation(window.location.pathname + window.location.search);
     registerPopstateHandler();
 
-    ZBase.util.header_widget.render();
+    renderLayout();
   };
 
   var getConfig = function() {
@@ -22,7 +22,7 @@ var ZBase = (function() {
   var updateConfig = function(new_config) {
     config = new_config;
 
-    ZBase.util.header_widget.render();
+    renderLayout();
   };
 
   var showFatalError = function() {
@@ -213,6 +213,22 @@ var ZBase = (function() {
     return document.importNode(template.content, true);
   };
 
+  var renderLayout = function() {
+    var conf = ZBase.getConfig();
+    var elem = document.querySelector("#zbase_header");
+
+    if (conf.current_user) {
+      ZBase.loadModules(["header_widget"], function() {
+        ZBase.util.header_widget.render();
+      });
+    } else {
+      elem.classList.remove("hidden");
+      elem.innerHTML = "";
+      elem.appendChild(ZBase.getTemplate("", "zbase_header_default_tpl"))
+      ZBase.util.install_link_handlers(elem);
+    }
+  };
+
   return {
     init: init,
     loadModules: loadModules,
@@ -224,39 +240,6 @@ var ZBase = (function() {
     getTemplate: getTemplate,
     util: {}
   };
-})();
-
-ZBase.util.header_widget = (function() {
-
-  var render = function() {
-    var conf = ZBase.getConfig();
-    var elem = document.querySelector("#zbase_header .navigation_inner");
-
-    if (conf.current_user) {
-      renderLoggedIn(elem, conf);
-    } else {
-      renderLoggedOut(elem, conf);
-    }
-  };
-
-  var renderLoggedIn = function(elem, config) {
-    elem.innerHTML = "";
-    elem.appendChild(ZBase.getTemplate("", "zbase_header_loggedin_tpl"))
-    elem.querySelector(".userid_info").innerHTML = config.current_user.userid;
-    elem.querySelector(".namespace_info").innerHTML = config.current_user.namespace;
-    ZBase.util.install_link_handlers(elem);
-  };
-
-  var renderLoggedOut = function(elem, config) {
-    elem.innerHTML = "";
-    elem.appendChild(ZBase.getTemplate("", "zbase_header_loggedout_tpl"))
-    ZBase.util.install_link_handlers(elem);
-  };
-
-  return {
-    render: render
-  };
-
 })();
 
 ZBase.util.install_link_handlers = function(elem) {
