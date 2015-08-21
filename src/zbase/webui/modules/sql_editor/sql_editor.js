@@ -115,16 +115,15 @@ ZBase.registerView((function() {
     });
 
     source.addEventListener('error', function(e) {
-      Editorr.source_handler.close(id);
-      queryStatus.stop(true);
-      result_pane.style.display = "none";
-      document.getElementById('exec_info').classList.add("hidden");
+      Editor.source_handler.close(id);
+      //result_pane.style.display = "none";
       try {
-        document.getElementById('error_text').innerHTML = JSON.parse(e.data).error;
+        document.querySelector('.zbase_sql_editor_pane .error_text').innerHTML = JSON.parse(e.data).error;
       } catch (e) {
-        document.getElementById('error_text').innerHTML = e.data;
+        document.getElementById('.zbase_sql_editor_pane .error_text').innerHTML = e.data;
       }
-      Analytics.displayMessage('error');
+      document.querySelector('.zbase_sql_editor_pane .error_message')
+        .classList.remove("hidden");
     });
 
   };
