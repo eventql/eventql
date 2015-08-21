@@ -1,15 +1,18 @@
 <template id="zbase_login_form_tpl">
   <div class="zbase_login" style="min-height: 900px; margin-top: 100px;">
+    <img src="/a/_/a/android-icon-36x36.png" />
+    <h1>Sign in to ZenBase</h1>
+
     <div class="error_message hidden"></div>
 
     <form class="login_pane" method="POST">
-      <div class="input_title">User</div>
       <input class="zbase_input" name="userid" tabindex="1" autofocus="" placeholder="me@company.com" value="">
 
-      <div class="input_title">Password</div>
-      <input class="zbase_input" tabindex="2" type="password" name="password">
+      <input class="zbase_input" tabindex="2" type="password" name="password" placeholder="•••••••••••">
 
-      <input type="submit" tabindex="3" value="Login" class="zbase_button">
+      <input type="submit" tabindex="3" value="Login" class="zbase_button zbase_primary_button">
     </form>
+
+    <a class="forgot_pw" href="/a/login/reset_password">Forgot your password?</a>
   </div>
 </template>

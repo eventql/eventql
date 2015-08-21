@@ -1,33 +1,52 @@
 .zbase_login {
-  height: calc(100% - 120px);
+  text-align: center;
+}
+
+.zbase_login img {
+  margin-bottom: 20px;
+}
+
+.zbase_login h1 {
+  font-weight: 300;
+  font-size: 22px;
+  color: #333;
 }
 
 .zbase_login .login_pane {
-  width: 300px;
+  text-align: left;
+  border: 1px solid #c9d0d4;
+  border-radius: 4px;
+  padding: 20px;
+  box-shadow: 0 0 1px rgba(0,0,0,.2);
+  width: 340px;
   margin: auto;
   margin-top: 30px;
-}
-
-.zbase_login .login_pane .input_title {
-  font-size: 14px;
-  font-weight: 600;
-  margin-top: 15px;
+  background-color: #f0f6f8;
+  margin-bottom: 20px;
 }
 
 .zbase_login .login_pane input.zbase_input {
-  font-size: 14px;
+  font-size: 16px;
+  margin-bottom: 15px;
+  border: 1px solid #bbb;
+  box-shadow: inset 1px 1px 1px rgba(0,0,0,.1);
 }
 
-.zbase_login .login_pane .fn-button {
-  float: right;
-  margin-top: 15px;
+.zbase_login .login_pane .zbase_button {
+  margin-top: 5px;
+  width: 100%;
+  display: block;
+}
+
+.zbase_login a.forgot_pw {
+  color: #1c99d6;
+  font-size: 14px;
 }
 
 .zbase_login .error_message {
   display: block;
   position: relative;
   min-height: 1em;
-  margin: 1em 0em;
   padding: 1em 1.5em;
   line-height: 1.3;
   color: rgba(0, 0, 0, 0.8);
@@ -39,7 +58,8 @@
   font-family: 'Helvetica Neue', Arial, Helvetica, sans-serif;
   width: 380px;
   margin: auto;
-  margin-top:20px;
+  margin-top: 30px;
+  margin-bottom: -10px;
   font-size: 14px;
   background: #fff0f0;
   color: #a94442;

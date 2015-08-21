@@ -21,6 +21,12 @@ route {
 }
 
 route {
+  path_match: "/a/logout"
+  view: "logout"
+  require_module: "login"
+}
+
+route {
   path_match: "/a/"
   view: "appstore"
   require_module: "appstore"
