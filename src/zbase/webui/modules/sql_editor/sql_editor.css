@@ -45,6 +45,9 @@
   float:left;
 }
 
+/**
+  * Overview
+  */
 .zbase_sql_editor .zbase_sql_editor_overview table.zbase_table {
   border-top: 1px solid #e1e1e1;
 }
@@ -52,3 +55,22 @@
 .zbase_sql_editor .zbase_sql_editor_overview table.zbase_table tbody {
   font-size: 12px;
 }
+
+/**
+  * Editor
+  */
+.zbase_sql_editor .zbase_sql_editor_pane /deep/ .CodeMirror-gutters {
+  background: #f0f6f8;
+}
+
+.zbase_sql_editor .zbase_sql_editor_pane /deep/ .CodeMirror {
+  border-left: none;
+  border-right: none;
+  border-bottom: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  -o-user-select: none;
+  user-select: none;
+}
+
