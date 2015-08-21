@@ -1,4 +1,5 @@
 var ZBase = (function() {
+  var fatal_error = false;
   var current_path;
   var current_route;
   var current_view;
@@ -45,6 +46,12 @@ var ZBase = (function() {
   var showFatalError = function(msg) {
     console.log(">> FATAL ERROR: " + msg);
 
+    if (fatal_error) {
+      return;
+    }
+
+    showLoader();
+
     var error_elem = document.createElement("div");
     error_elem.classList.add("zbase_fatal_error");
     error_elem.innerHTML =
@@ -56,6 +63,7 @@ var ZBase = (function() {
         "</span>";
 
     document.body.appendChild(error_elem);
+    fatal_error = true;
   };
 
   var showLoader = function() {
@@ -117,7 +125,7 @@ var ZBase = (function() {
 
     current_view = views[current_route.view];
     if (!current_view) {
-      showFatalError();
+      showFatalError("view not found: " + current_view.view);
       return;
     }
 
@@ -187,8 +195,7 @@ var ZBase = (function() {
           link.setAttribute("data-module", module);
           link.setAttribute("async", "async");
           link.onerror = function(e) {
-            console.log(">> Error while loading module >" + module + "<, aborting");
-            showFatalError();
+            showFatalError("Error while loading module: " + module);
           };
 
           document.body.appendChild(link);
@@ -213,8 +220,7 @@ var ZBase = (function() {
                 document.head.appendChild(script);
               }
             } else {
-              console.log(">> Error while loading module >" + module + "<, aborting");
-              showFatalError();
+              showFatalError("Error while loading module: " + module);
               return;
             }
           });
@@ -366,6 +372,7 @@ var ZBase = (function() {
     getConfig: getConfig,
     updateConfig: updateConfig,
     getTemplate: getTemplate,
+    fatalError: showFatalError,
     util: {}
   };
 })();
