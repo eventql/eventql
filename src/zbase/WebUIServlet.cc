@@ -93,9 +93,15 @@ void WebUIServlet::handleHTTPRequest(
     return;
   }
 
+  Buffer app_config;
+  json::JSONOutputStream app_config_json(
+      BufferOutputStream::fromBuffer(&app_config));
+  renderConfig(session, &app_config_json);
+
   auto app_html = loadFile("app.html");
   StringUtil::replaceAll(&app_html, "{{app_css}}", loadFile("app.css"));
   StringUtil::replaceAll(&app_html, "{{app_js}}", loadFile("app.js"));
+  StringUtil::replaceAll(&app_html, "{{config_json}}", app_config.toString());
 
   response->setStatus(http::kStatusOK);
   response->addHeader("Content-Type", "text/html; charset=utf-8");
