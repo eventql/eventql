@@ -125,7 +125,7 @@ var ZBase = (function() {
 
     current_view = views[current_route.view];
     if (!current_view) {
-      showFatalError("view not found: " + current_view.view);
+      showFatalError("view not found: " + current_route.view);
       return;
     }
 

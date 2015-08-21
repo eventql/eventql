@@ -91,6 +91,15 @@ void AnalyticsServlet::handleHTTPRequest(
     return;
   }
 
+  if (uri.path() == "/analytics/api/v1/auth/logout") {
+    expectHTTPPost(req);
+    req_stream->readBody();
+    performLogout(uri, &req, &res);
+    res_stream->writeResponse(res);
+    return;
+  }
+
+
   auto session_opt = HTTPAuth::authenticateRequest(
       req_stream->request(),
       auth_);
@@ -1068,6 +1077,16 @@ void AnalyticsServlet::performLogin(
     res->addBody(token);
   }
 }
+
+void AnalyticsServlet::performLogout(
+    const URI& uri,
+    const http::HTTPRequest* req,
+    http::HTTPResponse* res) {
+  res->addCookie(HTTPAuth::kSessionCookieKey, "", 0, "/");
+  res->setStatus(http::kStatusOK);
+  res->addBody("goodbye");
+}
+
 
 
 } // namespace zbase

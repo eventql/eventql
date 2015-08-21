@@ -1,3 +1,4 @@
 html_file: "login.html"
 js_file: "login.js"
+js_file: "logout.js"
 css_file: "login.css"
