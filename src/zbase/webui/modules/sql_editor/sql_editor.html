@@ -75,6 +75,7 @@
           </div>
         </div>
 
+        <div class="zbase_sql_editor_infobar hidden"></div>
         <section class="zbase_sql_editor_title">
           <button class="zbase_button zbase_primary_button" data-action="new-query">
             <i class="fa fa-bolt"></i>
@@ -84,8 +85,14 @@
             <i class="fa fa-share-alt"></i>
             &nbsp;Share
           </button>
-          <h2 class="pagetitle">SQL Editor</h2>
+          <h2 class="pagetitle editable" data-action='edit-query-name'></h2>
         </section>
+
+        <fn-codeeditor data-language="text/x-chartsql" data-content='query_content' style="height: 250px;"></fn-codeeditor>
+
+        <div class='zbase_resizer_tooltip' draggable="true"></div>
+
+        
       </div>
     </div>
   </div>
