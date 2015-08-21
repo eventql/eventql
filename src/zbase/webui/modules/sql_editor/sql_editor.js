@@ -1,5 +1,9 @@
 ZBase.registerView((function() {
 
+  var renderSqlEditor = function() {
+    
+  };
+
   var renderOverview = function() {
     var viewport = document.getElementById("zbase_viewport");
     var page = ZBase.getTemplate(
@@ -8,6 +12,35 @@ ZBase.registerView((function() {
 
     viewport.innerHTML = "";
     viewport.appendChild(page);
+
+    loadOverviewTable();
+  };
+
+  var renderOverviewTable = function(documents) {
+    var tbody = document.querySelector(".zbase_sql_editor_overview tbody");
+    documents.forEach(function(doc) {
+      var url = "/a/sql/" + doc.uuid;
+      var tr = document.createElement("tr");
+      tr.innerHTML = "<td><a href='" + url + "'>" + doc.name + "</td><td>" +
+        doc.type + "</td><td>&mdash;</td>";
+      tbody.appendChild(tr);
+
+      tr.addEventListener("click", function() {
+        window.location.href = url;
+      });
+    });
+  };
+
+  var loadOverviewTable = function() {
+    ZBase.util.httpGet("/analytics/api/v1/documents", function(r) {
+      console.log(r);
+      if (r.status == 200) {
+        var documents = JSON.parse(r.response).documents;
+        renderOverviewTable(documents);
+      } else {
+        //TODO render error message
+      }
+    });
   };
 
   var render = function(path) {
