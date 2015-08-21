@@ -133,23 +133,24 @@ ZBase.registerView((function() {
     var table = document.createElement("table");
     table.className = 'zbase_table';
 
-    table.innerHTML = "<thead><tr>";
-
+    innerHTML = "<thead><tr>";
     columns.forEach(function(column) {
-      table.innerHTML += "<th>" + column + "</th>";
+      innerHTML += "<th>" + column + "</th>";
     });
 
-    table.innerHTML += "</tr></thead><tbody>";
+    innerHTML += "</tr></thead><tbody>";
 
     rows.forEach(function(row) {
-      table.innerHTML += "<tr>";
+      innerHTML += "<tr>";
       row.forEach(function(cell) {
-        table.innerHTML += "<td>" + cell, "</td>";
+        innerHTML += "<td>" + cell + "</td>";
       });
-      table.innerHTML += "</tr>";
+      innerHTML += "</tr>";
     });
 
-    table.innerHTML += "</tbody";
+    innerHTML += "</tbody>";
+    table.innerHTML = innerHTML;
+    console.log(innerHTML);
     return table;
   };
 
