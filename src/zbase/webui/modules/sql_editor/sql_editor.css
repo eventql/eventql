@@ -45,6 +45,27 @@
   float:left;
 }
 
+.zbase_sql_editor .zbase_sql_editor_infobar {
+  background-color: #f0f6f8;
+  border-bottom: 1px solid #c9d0d4;
+  box-shadow: 0 1px 1px rgba(0,0,0,0.1);
+  padding: 10px 20px;
+  font-size: 13px;
+  font-weight: 400;
+  color: rgba(10,10,10,0.65);
+  display: block;
+}
+
+.zbase_sql_editor .zbase_sql_editor_infobar em {
+  font-weight: 500;
+  font-style: normal;
+  color: rgba(10,10,10,0.7);
+}
+
+.zbase_sql_editor .zbase_sql_editor_infobar.hidden {
+  display: none;
+}
+
 /**
   * Overview
   */
