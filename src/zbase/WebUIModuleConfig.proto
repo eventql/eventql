@@ -17,3 +17,22 @@ message WebUIModuleConfig {
   repeated string js_file = 3;
 
 };
+
+message WebUIRoute {
+
+  optional bool is_public = 5;
+
+  optional string path_prefix = 1;
+  optional string path_match = 2;
+
+  required string view = 3;
+
+  repeated string require_module = 4;
+
+};
+
+message WebUIAppConfig {
+
+  repeated WebUIRoute route = 1;
+
+};

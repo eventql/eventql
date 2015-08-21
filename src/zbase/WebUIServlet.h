@@ -9,6 +9,7 @@
 #pragma once
 #include <stx/stdtypes.h>
 #include <stx/http/httpservice.h>
+#include <stx/json/json.h>
 #include <zbase/AnalyticsSession.pb.h>
 #include <zbase/AnalyticsAuth.h>
 
@@ -27,6 +28,10 @@ public:
 protected:
 
   String loadFile(const String& filename);
+
+  void renderConfig(
+      const Option<AnalyticsSession>& session,
+      json::JSONOutputStream* json);
 
   AnalyticsAuth* auth_;
 };
