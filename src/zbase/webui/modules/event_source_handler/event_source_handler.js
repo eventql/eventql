@@ -1,7 +1,9 @@
 EventSourceHandler = function() {
   var sources = {};
 
+
   function get(id, url) {
+    // set sources entry
     if (!sources.hasOwnProperty[id]) {
       sources[id] = {
         running: false,
@@ -9,7 +11,7 @@ EventSourceHandler = function() {
       };
     }
 
-    //close still running source
+    // if source with same id is already running close this source
     if (sources[id].running) {
       sources[id].source.close();
       sources[id].source = null;
@@ -28,17 +30,15 @@ EventSourceHandler = function() {
     }
   };
 
-  function onUnload() {
+  function closeAll() {
     for (var id in sources) {
       close(id);
     }
-    window.removeEventListener('beforeunload', onUnload);
   }
-
-  window.addEventListener('beforeunload', onUnload);
 
   return {
     get: get,
-    close: close
+    close: close,
+    closeAll: closeAll
   }
 };
