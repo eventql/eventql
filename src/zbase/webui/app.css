@@ -638,7 +638,6 @@ table.zbase_table {
   width: 100%;
   border-collapse: collapse;
   border-spacing: 0;
-  font-size: 14px;
 }
 
 table.zbase_table thead th {
@@ -655,9 +654,6 @@ table.zbase_table thead th {
   line-height: 1em;
 }
 
-table.zbase_table tbody {
-  font-size: 13px;
-}
 
 table.zbase_table tbody tr td {
   border-top: 1px solid #e1e1e1;
