@@ -1,0 +1,50 @@
+.zbase_sql_editor_overview .zbase_sql_editor_overview_sidebar {
+  padding: 20px 20px 0;
+  float: right;
+  width: 340px;
+  height: 200px;
+}
+
+.zbase_sql_editor_overview .zbase_sql_editor_overview_sidebar .sidebar_section {
+  margin-top: 20px;
+  border-top: 1px solid #eee;
+  font-size: 13px;
+  line-height: 21px;
+}
+
+.zbase_sql_editor_overview .zbase_sql_editor_overview_sidebar .sidebar_title {
+  font-weight: 500;
+  color: #333;
+  font-size: 13px;
+  margin-bottom: 10px;
+}
+
+.zbase_sql_editor_overview .zbase_sql_editor_overview_content {
+  margin-left: 20px;
+  margin-right: 340px;
+  border-left: 1px solid #ddd;
+  border-right: 1px solid #ddd;
+}
+
+.zbase_sql_editor_overview .zbase_sql_editor_overview_title {
+  padding: 0 20px;
+  overflow: auto;
+}
+
+.zbase_sql_editor_overview .zbase_sql_editor_overview_title .zbase_primary_button {
+  float: right;
+  margin-top: 15px;
+  margin-left: 10px;
+}
+
+.zbase_sql_editor_overview .zbase_sql_editor_overview_title .pagetitle {
+  float:left;
+}
+
+.zbase_sql_editor_overview table.zbase_table {
+  border-top: 1px solid #e1e1e1;
+}
+
+.zbase_sql_editor_overview table.zbase_table tbody {
+  font-size: 12px;
+}
