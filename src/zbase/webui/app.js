@@ -320,3 +320,15 @@ ZBase.util.jsonRPC = function(url, method, params, callback) {
     }
   }
 };
+
+ZBase.util.buildQueryString = function(params) {
+  var qs = "";
+
+  for (var key in params) {
+    var value = params[key];
+    qs += encodeURIComponent(key) + "=" + encodeURIComponent(value) + "&";
+  }
+
+  return qs;
+}
+
