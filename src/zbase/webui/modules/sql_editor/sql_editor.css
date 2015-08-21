@@ -67,15 +67,15 @@
   display: none;
 }
 
+.zbase_sql_editor table.zbase_table {
+  font-size: 12px;
+}
+
 /**
   * Overview
   */
 .zbase_sql_editor .zbase_sql_editor_overview table.zbase_table {
   border-top: 1px solid #e1e1e1;
-}
-
-.zbase_sql_editor .zbase_sql_editor_overview table.zbase_table tbody {
-  font-size: 12px;
 }
 
 /**
@@ -138,3 +138,14 @@
 .zbase_sql_editor_result_pane .zbase_result_pane_bar.clickable:hover label {
   opacity: 1;
 }
+
+.zbase_sql_editor_result_pane table.zbase_table {
+  border-bottom: 1px solid #e6e8e9;
+}
+
+.zbase_sql_editor_result_pane table.zbase_table thead th:first-child,
+.zbase_sql_editor_result_pane table.zbase_table tbody td:first-child {
+  padding-left: 20px;
+}
+
+
