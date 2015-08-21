@@ -150,13 +150,12 @@ ZBase.registerView((function() {
 
     innerHTML += "</tbody>";
     table.innerHTML = innerHTML;
-    console.log(innerHTML);
     return table;
   };
 
   Editor.renderResultChart = function(svg) {
     var elem = document.createElement("div");
-    elem.className = "result_chart result_content";
+    elem.className = "zbase_sql_chart";
     elem.innerHTML = svg;
     return elem;
   };
@@ -164,20 +163,21 @@ ZBase.registerView((function() {
   Editor.renderResultBar = function(index, multiple_results) {
     var bar = document.createElement("div");
     bar.className = "zbase_result_pane_bar";
-    bar.setAttribute('data-index', index);
     bar.setAttribute('data-active', 'active');
     bar.innerHTML =
       "<label>Result " + (index + 1) + "</label>";
+
     if (multiple_results) {
       bar.className += " clickable";
       bar.addEventListener('click', function() {
         if (this.hasAttribute('data-active')) {
           this.removeAttribute('data-active');
-          return;
+        } else {
+          this.setAttribute('data-active', 'active');
         }
-        this.setAttribute('data-active', 'active');
       }, false);
     }
+
     return bar;
   };
 
