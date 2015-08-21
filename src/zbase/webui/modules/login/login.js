@@ -22,7 +22,6 @@ ZBase.registerView((function() {
       password: this.querySelector("input[name='password']").value
     });
 
-    console.log(postdata);
     ZBase.util.httpPost("/analytics/api/v1/auth/login", postdata, function(http) {
       if (http.status == 200) {
         finishLogin();
@@ -54,14 +53,20 @@ ZBase.registerView((function() {
   };
 
   var render = function(path) {
+    var conf = ZBase.getConfig();
+    if (conf.current_user) {
+      ZBase.navigateTo("/a/");
+      return;
+    }
+
     var viewport = document.getElementById("zbase_viewport");
     var page = ZBase.getTemplate("login", "zbase_login_form_tpl");
 
-    var form = page.querySelector("form");
-    form.addEventListener("submit", submitForm);
-
     viewport.innerHTML = "";
     viewport.appendChild(page);
+
+    var form = viewport.querySelector("form");
+    form.addEventListener("submit", submitForm);
   };
 
   return {

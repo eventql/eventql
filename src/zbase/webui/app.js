@@ -1,4 +1,5 @@
 var ZBase = (function() {
+  var fatal_error = false;
   var current_path;
   var current_route;
   var current_view;
@@ -7,11 +8,28 @@ var ZBase = (function() {
   var views = {};
   var config;
 
+  /* feature detection */
+  var __enable_html5_import = 'import' in document.createElement('link');
+  var __enable_html5_templates = ("content" in document.createElement("template"));
+  var __enable_html5_importnode = 'importNode' in document;
+
+  try {
+    document.importNode(document.createElement('div'));
+  } catch (e) {
+    __enable_html5_importnode = false;
+  }
+
   var init = function(_config) {
     config = _config;
-    changeNavigation(window.location.pathname + window.location.search);
-    registerPopstateHandler();
 
+    console.log(
+      ">> Initializing ZBase UI, detected features: " +
+      "html5_templates=" + (__enable_html5_templates ? "yes" : "no") + ", " +
+      "html5_imports=" + (__enable_html5_import ? "yes" : "no") + ", " +
+      "html5_importnode=" + (__enable_html5_importnode ? "yes" : "no"));
+
+    registerPopstateHandler();
+    changeNavigation(window.location.pathname + window.location.search);
     renderLayout();
   };
 
@@ -25,8 +43,27 @@ var ZBase = (function() {
     renderLayout();
   };
 
-  var showFatalError = function() {
-    alert("Fatal Error, please reload the page");
+  var showFatalError = function(msg) {
+    console.log(">> FATAL ERROR: " + msg);
+
+    if (fatal_error) {
+      return;
+    }
+
+    showLoader();
+
+    var error_elem = document.createElement("div");
+    error_elem.classList.add("zbase_fatal_error");
+    error_elem.innerHTML =
+        "<span>" +
+        "<h1>We're sorry</h1>" +
+        "Something went wrong and ZenBase crashed &mdash; please reload the " +
+        "page or contact support if the problem persists." +
+        "<a href='/a/'>Reload</a>"
+        "</span>";
+
+    document.body.appendChild(error_elem);
+    fatal_error = true;
   };
 
   var showLoader = function() {
@@ -60,14 +97,18 @@ var ZBase = (function() {
    * Navigation
    */
   var registerPopstateHandler = function() {
-    window.onpopstate = function(e) {
-      e.preventDefault();
-      if (e.state && e.state.path) {
-        changeNavigation(e.state.path);
-      } else {
-        changeNavigation(window.location.pathname + window.location.search);
-      }
-    };
+    window.addEventListener('load', function() {
+      setTimeout(function() {
+        window.addEventListener('popstate', function(e) {
+          e.preventDefault();
+          if (e.state && e.state.path) {
+            changeNavigation(e.state.path);
+          } else {
+            changeNavigation(window.location.pathname + window.location.search);
+          }
+        }, false);
+      }, 0);
+    }, false);
   };
 
   var applyNavigationChange = function() {
@@ -84,7 +125,7 @@ var ZBase = (function() {
 
     current_view = views[current_route.view];
     if (!current_view) {
-      showFatalError();
+      showFatalError("view not found: " + current_view.view);
       return;
     }
 
@@ -115,6 +156,7 @@ var ZBase = (function() {
   };
 
   var navigateTo = function(path) {
+    console.log(">> Navigate to called ", path);
     history.pushState({path: path}, "", path);
     changeNavigation(path);
   };
@@ -144,17 +186,45 @@ var ZBase = (function() {
       modules_status[module] = "loading";
 
       window.setTimeout(function() {
-        var link = document.createElement('link');
-        link.rel = 'import';
-        link.href = "/a/_/m/" + module;
-        link.setAttribute("data-module", module);
-        link.setAttribute("async", "async");
-        link.onerror = function(e) {
-          console.log(">> Error while loading module >" + module + "<, aborting");
-          showFatalError();
-        };
+        var import_url = "/a/_/m/" + module;
 
-        document.body.appendChild(link);
+        if (__enable_html5_import) {
+          var link = document.createElement('link');
+          link.rel = 'import';
+          link.href = import_url;
+          link.setAttribute("data-module", module);
+          link.setAttribute("async", "async");
+          link.onerror = function(e) {
+            showFatalError("Error while loading module: " + module);
+          };
+
+          document.body.appendChild(link);
+        } else {
+          ZBase.util.httpGet(import_url, function(http) {
+            if (http.status == 200) {
+              var dummy = document.createElement("div");
+              dummy.innerHTML = http.responseText;
+              dummy.style.display = "none";
+              document.body.appendChild(dummy);
+
+              var scripts = dummy.getElementsByTagName('script');
+              for (var i = 0; i < scripts.length; i++) {
+                var script = document.createElement('script');
+                script.type = scripts[i].type;
+                if (scripts[i].src) {
+                  script.src = scripts[i].src;
+                } else {
+                  script.innerHTML = scripts[i].innerHTML;
+                }
+
+                document.head.appendChild(script);
+              }
+            } else {
+              showFatalError("Error while loading module: " + module);
+              return;
+            }
+          });
+        }
       }, 0);
     });
   };
@@ -192,11 +262,50 @@ var ZBase = (function() {
     startModulesDownload(download_modules);
   };
 
+  function importNodeFallback(node, allChildren) {
+    var a, i, il, doc = document;
+
+    switch (node.nodeType) {
+      case document.DOCUMENT_FRAGMENT_NODE:
+        var newNode = document.createDocumentFragment();
+        while (child = node.firstChild) {
+          newNode.appendChild(node);
+        }
+        return newNode;
+
+      case document.ELEMENT_NODE:
+        var newNode = doc.createElementNS(node.namespaceURI, node.nodeName);
+        if (node.attributes && node.attributes.length > 0) {
+          for (i = 0, il = node.attributes.length; i < il; i++) {
+            a = node.attributes[i];
+            try {
+              newNode.setAttributeNS(
+                  a.namespaceURI,
+                  a.nodeName,
+                  node.getAttribute(a.nodeName));
+            } catch (err) {}
+          }
+        }
+        if (allChildren && node.childNodes && node.childNodes.length > 0) {
+          for (i = 0, il = node.childNodes.length; i < il; i++) {
+            newNode.appendChild(importNodeFallback(node.childNodes[i], allChildren));
+          }
+        }
+        return newNode;
+
+      case document.TEXT_NODE:
+      case document.CDATA_SECTION_NODE:
+      case document.COMMENT_NODE:
+        return doc.createTextNode(node.nodeValue);
+    }
+  }
+
   var getTemplate = function(module, template_id) {
     var template_selector = "#" + template_id;
 
     var template = document.querySelector(template_selector);
-    if (!template) {
+
+    if (!template && __enable_html5_import) {
       var template_import = document.querySelector(
           "link[data-module='" + module + "']");
 
@@ -207,11 +316,35 @@ var ZBase = (function() {
       template = template_import.import.querySelector(template_selector);
     }
 
+    if (!template && __enable_html5_import) {
+      var template_imports = document.querySelectorAll("link[rel='import']");
+
+      for (var i = 0; !template && i < template_imports.length; ++i) {
+        template = template_imports.import[i].querySelector(template_selector);
+      }
+    }
+
     if (!template) {
       return null;
     }
 
-    return document.importNode(template.content, true);
+    var content;
+    if (__enable_html5_templates) {
+      content = template.content;
+    } else {
+      content = document.createDocumentFragment();
+      var children = template.children;
+
+      for (var j = 0; j < children.length; j++) {
+        content.appendChild(children[j].cloneNode(true));
+      }
+    }
+
+    if (__enable_html5_importnode) {
+      return document.importNode(content, true);
+    } else {
+      return importNodeFallback(content, true);
+    }
   };
 
   var renderLayout = function() {
@@ -239,6 +372,7 @@ var ZBase = (function() {
     getConfig: getConfig,
     updateConfig: updateConfig,
     getTemplate: getTemplate,
+    fatalError: showFatalError,
     util: {}
   };
 })();
@@ -288,40 +422,6 @@ ZBase.util.httpGet = function(url, callback) {
   http.onreadystatechange = function() {
     if (http.readyState == 4) {
       callback(http);
-    }
-  }
-};
-
-ZBase.util.jsonRPC = function(url, method, params, callback) {
-  var req = {
-    "jsonrpc": "2.0",
-    "method": method,
-    "params": params,
-    "id": 0
-  };
-
-  var http = new XMLHttpRequest();
-  http.open("POST", url, true);
-  var start = (new Date()).getTime();
-  http.send(JSON.stringify(req));
-
-  http.onreadystatechange = function() {
-    if (http.readyState == 4) {
-      var end = (new Date()).getTime();
-      var duration = end - start;
-
-      if (http.status != 200) {
-        console.log("RPC failed", http.responseText);
-        return;
-      }
-
-      var resp = JSON.parse(http.responseText);
-      if (resp.error) {
-        console.log("RPC failed", resp.error);
-        return;
-      }
-
-      callback(resp.result);
     }
   }
 };
