@@ -3,7 +3,14 @@ ZBase.registerView((function() {
   var Editor = {};
 
   Editor.render = function() {
-    
+    var viewport = document.getElementById("zbase_viewport");
+    var page = ZBase.getTemplate(
+      "sql_editor", "zbase_sql_editor_main_tpl");
+    ZBase.util.install_link_handlers(page);
+
+    viewport.innerHTML = "";
+    viewport.appendChild(page);
+
   };
 
   Overview.render = function() {
@@ -21,7 +28,7 @@ ZBase.registerView((function() {
 
   Overview.handleNewQueryButton = function() {
     document.querySelector(
-      ".zbase_sql_editor_overview button[data-action='new-query']")
+      ".zbase_sql_editor button[data-action='new-query']")
       .addEventListener("click", function() {
         ZBase.util.httpPost("/analytics/api/v1/documents/sql_queries", "", function(r) {
           var response = JSON.parse(r.response);
