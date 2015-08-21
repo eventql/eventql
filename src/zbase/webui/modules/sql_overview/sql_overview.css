@@ -40,3 +40,11 @@
 .zbase_sql_overview .zbase_sql_overview_title .pagetitle {
   float:left;
 }
+
+.zbase_sql_overview table.zbase_table {
+  border-top: 1px solid #e1e1e1;
+}
+
+.zbase_sql_overview table.zbase_table tbody {
+  font-size: 12px;
+}
