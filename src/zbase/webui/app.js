@@ -229,7 +229,28 @@ var ZBase = (function() {
 ZBase.util.header_widget = (function() {
 
   var render = function() {
-    console.log("render header...", ZBase.getConfig());
+    var conf = ZBase.getConfig();
+    var elem = document.querySelector("#zbase_header .navigation_inner");
+
+    if (conf.current_user) {
+      renderLoggedIn(elem, conf);
+    } else {
+      renderLoggedOut(elem, conf);
+    }
+  };
+
+  var renderLoggedIn = function(elem, config) {
+    elem.innerHTML = "";
+    elem.appendChild(ZBase.getTemplate("", "zbase_header_loggedin_tpl"))
+    elem.querySelector(".userid_info").innerHTML = config.current_user.userid;
+    elem.querySelector(".namespace_info").innerHTML = config.current_user.namespace;
+    ZBase.util.install_link_handlers(elem);
+  };
+
+  var renderLoggedOut = function(elem, config) {
+    elem.innerHTML = "";
+    elem.appendChild(ZBase.getTemplate("", "zbase_header_loggedout_tpl"))
+    ZBase.util.install_link_handlers(elem);
   };
 
   return {
