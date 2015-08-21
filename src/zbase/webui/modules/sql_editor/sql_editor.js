@@ -74,6 +74,7 @@ ZBase.registerView((function() {
     unloadView: function() {
     },
     handleNavigationChange: function(url){
+      render(url);
     }
   };
 
