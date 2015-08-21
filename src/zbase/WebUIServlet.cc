@@ -7,6 +7,7 @@
  * permission is obtained.
  */
 #include <stx/protobuf/msg.h>
+#include <stx/json/json.h>
 #include <zbase/WebUIServlet.h>
 #include <zbase/WebUIModuleConfig.pb.h>
 #include <zbase/HTTPAuth.h>
@@ -24,7 +25,7 @@ void WebUIServlet::handleHTTPRequest(
 
   auto session = HTTPAuth::authenticateRequest(*request, auth_);
 
-  static const String kAssetsPathPrefix = "/a/__/";
+  static const String kAssetsPathPrefix = "/a/_/a/";
   if (StringUtil::beginsWith(uri.path(), kAssetsPathPrefix)) {
     auto asset_path = uri.path().substr(kAssetsPathPrefix.size());
 
@@ -40,7 +41,20 @@ void WebUIServlet::handleHTTPRequest(
     return;
   }
 
-  static const String kModulesPathPrefix = "/a/_/";
+  static const String kConfigPath = "/a/_/c";
+  if (uri.path() == kConfigPath) {
+    Buffer buf;
+    json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
+
+    renderConfig(session, &json);
+
+    response->setStatus(http::kStatusOK);
+    response->addHeader("Content-Type", "application/json; charset=utf-8");
+    response->addBody(buf);
+    return;
+  }
+
+  static const String kModulesPathPrefix = "/a/_/m/";
   if (StringUtil::beginsWith(uri.path(), kModulesPathPrefix)) {
     auto module_name = uri.path().substr(kModulesPathPrefix.size());
 
@@ -79,9 +93,15 @@ void WebUIServlet::handleHTTPRequest(
     return;
   }
 
+  Buffer app_config;
+  json::JSONOutputStream app_config_json(
+      BufferOutputStream::fromBuffer(&app_config));
+  renderConfig(session, &app_config_json);
+
   auto app_html = loadFile("app.html");
   StringUtil::replaceAll(&app_html, "{{app_css}}", loadFile("app.css"));
   StringUtil::replaceAll(&app_html, "{{app_js}}", loadFile("app.js"));
+  StringUtil::replaceAll(&app_html, "{{config_json}}", app_config.toString());
 
   response->setStatus(http::kStatusOK);
   response->addHeader("Content-Type", "text/html; charset=utf-8");
@@ -90,6 +110,65 @@ void WebUIServlet::handleHTTPRequest(
 
 String WebUIServlet::loadFile(const String& filename) {
   return FileUtil::read("src/zbase/webui/" + filename).toString();
+}
+
+void WebUIServlet::renderConfig(
+    const Option<AnalyticsSession>& session,
+    json::JSONOutputStream* json) {
+  auto app_cfg = msg::parseText<WebUIAppConfig>(loadFile("MANIFEST"));
+
+  json->beginObject();
+
+  // routes
+  json->addObjectEntry("routes");
+  json->beginArray();
+
+  size_t nroute = 0;
+  for (const auto& route : app_cfg.route()) {
+    if (!route.is_public() && session.isEmpty()) {
+      continue;
+    }
+
+    Vector<String> modules(
+        route.require_module().begin(),
+        route.require_module().end());
+
+    if (++nroute > 1) {
+      json->addComma();
+    }
+
+    json->beginObject();
+
+    json->addObjectEntry("view");
+    json->addString(route.view());
+
+    if (route.has_path_prefix()) {
+      json->addComma();
+      json->addObjectEntry("path_prefix");
+      json->addString(route.path_prefix());
+    }
+
+    if (route.has_path_match()) {
+      json->addComma();
+      json->addObjectEntry("path_match");
+      json->addString(route.path_match());
+    }
+
+    json->addComma();
+    json->addObjectEntry("modules");
+    json::toJSON(modules, json);
+
+    json->endObject();
+  }
+
+  json->endArray();
+  json->addComma();
+
+  // default route
+  json->addObjectEntry("default_route");
+  json->addString(session.isEmpty() ? "/a/login" : "/a/");
+
+  json->endObject();
 }
 
 }

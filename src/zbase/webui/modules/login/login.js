@@ -1,5 +1,19 @@
 ZBase.registerView((function() {
 
+  var kServerErrorMsg = "Server Error; please try again and contact support if the problem persists.";
+
+  var finishLogin = function() {
+    ZBase.util.httpGet("/a/_/c", function(http) {
+      if (http.status != 200) {
+        showErrorMessage(kServerErrorMsg);
+        return;
+      }
+
+      ZBase.updateConfig(JSON.parse(http.responseText));
+      ZBase.navigateTo("/a/");
+    });
+  };
+
   var submitForm = function(e) {
     e.preventDefault();
 
@@ -11,7 +25,7 @@ ZBase.registerView((function() {
     console.log(postdata);
     ZBase.util.httpPost("/analytics/api/v1/auth/login", postdata, function(http) {
       if (http.status == 200) {
-        ZBase.navigateTo("/a/");
+        finishLogin();
         return;
       }
 
@@ -20,7 +34,7 @@ ZBase.registerView((function() {
         return;
       }
 
-      showErrorMessage("Server Error; please try again and contact support if the problem persists.");
+      showErrorMessage(kServerErrorMsg);
     });
 
     return false;

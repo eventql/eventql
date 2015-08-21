@@ -146,7 +146,7 @@ var ZBase = (function() {
       window.setTimeout(function() {
         var link = document.createElement('link');
         link.rel = 'import';
-        link.href = "/a/_/" + module;
+        link.href = "/a/_/m/" + module;
         link.setAttribute("data-module", module);
         link.onerror = function(e) {
           console.log(">> Error while loading module >" + module + "<, aborting");
