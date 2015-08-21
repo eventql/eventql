@@ -39,6 +39,7 @@ include_directories(src/)
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/src)
 
 add_subdirectory(3rdparty/pcre)
+include_directories(3rdparty/pcre)
 set(HAVE_PCRE true)
 
 include(src/stx/cmake/libstx.cmake)
