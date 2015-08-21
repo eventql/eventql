@@ -19,8 +19,24 @@
   margin-bottom: 10px;
 }
 
-.zbase_sql_overview .content_with_sidebar {
+.zbase_sql_overview .zbase_sql_overview_content {
   margin-left: 20px;
+  margin-right: 340px;
   border-left: 1px solid #ddd;
   border-right: 1px solid #ddd;
+}
+
+.zbase_sql_overview .zbase_sql_overview_title {
+  padding: 0 20px;
+  overflow: auto;
+}
+
+.zbase_sql_overview .zbase_sql_overview_title .zbase_primary_button {
+  float: right;
+  margin-top: 15px;
+  margin-left: 10px;
+}
+
+.zbase_sql_overview .zbase_sql_overview_title .pagetitle {
+  float:left;
 }
