@@ -660,6 +660,7 @@ table.zbase_table tbody tr td {
   padding: .7em .8em;
   text-align: left;
   vertical-align: middle;
+  line-height: 1em;
 }
 
 table.zbase_table tbody tr:first-child td {
