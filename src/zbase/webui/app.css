@@ -236,7 +236,7 @@ h2.pagetitle.border_bottom {
   text-align: center;
   font-size: 16px;
   text-shadow: 0 0 1px rgba(0,0,0,.6);
-  font-weight: 500;
+  font-weight: 300;
 }
 
 .zbase_fatal_error a {
