@@ -39,6 +39,9 @@ ZBase.registerView((function() {
         window.location.href = url;
       });
     });
+
+    document.querySelector(".zbase_sql_editor_overview .zbase_loader")
+      .classList.add("hidden");
   };
 
   var loadOverviewTable = function() {
