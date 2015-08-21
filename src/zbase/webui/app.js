@@ -145,8 +145,6 @@ var ZBase = (function() {
    * Module loading
    */
   var finishModuleDownload = function(module) {
-    console.log("done", module);
-
     modules_status[module] = "loaded";
     // fire all finished callbacks
     for (var j = modules_waitlist.length - 1; j >= 0; j--) {
@@ -183,32 +181,31 @@ var ZBase = (function() {
 
           document.body.appendChild(link);
         } else {
-          //ZBase.util.httpGet(import_url, function(http) {
-          //  if (http.status == 200) {
-          //    var dummy = document.createElement("div");
-          //    dummy.innerHTML = http.responseText;
-          //    dummy.style.display = "none";
-          //    document.body.appendChild(dummy);
+          ZBase.util.httpGet(import_url, function(http) {
+            if (http.status == 200) {
+              var dummy = document.createElement("div");
+              dummy.innerHTML = http.responseText;
+              dummy.style.display = "none";
+              document.body.appendChild(dummy);
 
-          //    var scripts = dummy.getElementsByTagName('script');
-          //    for (var i = 0; i < scripts.length; i ++) {
-          //      var script = document.createElement('script');
-          //      script.type = scripts[i].type;
-          //      if (scripts[i].src) {
-          //        script.src = scripts[i].src;
-          //      } else {
-          //        script.innerHTML = scripts[i].innerHTML;
-          //      }
+              var scripts = dummy.getElementsByTagName('script');
+              for (var i = 0; i < scripts.length; i++) {
+                var script = document.createElement('script');
+                script.type = scripts[i].type;
+                if (scripts[i].src) {
+                  script.src = scripts[i].src;
+                } else {
+                  script.innerHTML = scripts[i].innerHTML;
+                }
 
-          //      //scripts[i].parentNode.removeChild(scripts[i]);
-          //      //document.head.appendChild(script);
-          //    }
-          //  } else {
-          //    console.log(">> Error while loading module >" + module + "<, aborting");
-          //    showFatalError();
-          //    return;
-          //  }
-          //});
+                document.head.appendChild(script);
+              }
+            } else {
+              console.log(">> Error while loading module >" + module + "<, aborting");
+              showFatalError();
+              return;
+            }
+          });
         }
       }, 0);
     });
