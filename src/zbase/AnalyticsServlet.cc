@@ -1052,10 +1052,16 @@ void AnalyticsServlet::performLogin(
         HTTPAuth::kSessionCookieKey,
         token,
         WallClock::unixMicros() + HTTPAuth::kSessionLifetimeMicros,
-        "/",
-        ".zbase.io",
-        false, // FIXPAUL https only...
-        true);
+        "/");
+
+    //res->addCookie(
+    //    HTTPAuth::kSessionCookieKey,
+    //    token,
+    //    WallClock::unixMicros() + HTTPAuth::kSessionLifetimeMicros,
+    //    "/",
+    //    ".zbase.io",
+    //    false, // FIXPAUL https only...
+    //    true);
 
     res->addHeader("X-AuthToken", token);
     res->setStatus(http::kStatusOK);
