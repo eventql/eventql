@@ -110,7 +110,8 @@ ZBase.registerView((function() {
       var end = (new Date()).getTime();
       Editor.source_handler.close(id);
       var data = JSON.parse(e.data);
-      //document.querySelector(".message[name='error']").classList.add("hidden");
+      document.querySelector('.zbase_sql_editor_pane .error_message')
+        .classList.add("hidden");
       Editor.renderResults(data.results);
     });
 
