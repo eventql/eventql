@@ -1,10 +1,12 @@
 ZBase.registerView((function() {
+  var Overview = {};
+  var Editor = {};
 
-  var renderSqlEditor = function() {
+  Editor.render = function() {
     
   };
 
-  var renderOverview = function() {
+  Overview.render = function() {
     var viewport = document.getElementById("zbase_viewport");
     var page = ZBase.getTemplate(
       "sql_editor", "zbase_sql_editor_overview_main_tpl");
@@ -13,8 +15,11 @@ ZBase.registerView((function() {
     viewport.innerHTML = "";
     viewport.appendChild(page);
 
-    loadOverviewTable();
+    Overview.load();
+    Overview.handleNewQueryButton();
+  };
 
+  Overview.handleNewQueryButton = function() {
     document.querySelector(
       ".zbase_sql_editor_overview button[data-action='new-query']")
       .addEventListener("click", function() {
@@ -25,7 +30,7 @@ ZBase.registerView((function() {
       });
   };
 
-  var renderOverviewTable = function(documents) {
+  Overview.renderTable = function(documents) {
     var tbody = document.querySelector(".zbase_sql_editor_overview tbody");
     documents.forEach(function(doc) {
       var url = "/a/sql/" + doc.uuid;
@@ -44,11 +49,11 @@ ZBase.registerView((function() {
       .classList.add("hidden");
   };
 
-  var loadOverviewTable = function() {
+  Overview.load = function() {
     ZBase.util.httpGet("/analytics/api/v1/documents", function(r) {
       if (r.status == 200) {
         var documents = JSON.parse(r.response).documents;
-        renderOverviewTable(documents);
+        Overview.renderTable(documents);
       } else {
         //TODO render error message
       }
@@ -57,11 +62,12 @@ ZBase.registerView((function() {
 
   var render = function(path) {
     var path_parts = path.split("/");
+    var view;
     // render view
     if (path_parts.length == 4 && path_parts[3].length > 0) {
-      renderSqlEditor();
+      Editor.render();
     } else {
-      renderOverview();
+      Overview.render();
     }
   };
 
