@@ -1,0 +1,26 @@
+.zbase_sql_overview .zbase_sql_overview_sidebar {
+  padding: 20px 20px 0;
+  float: right;
+  width: 340px;
+  height: 200px;
+}
+
+.zbase_sql_overview .zbase_sql_overview_sidebar .sidebar_section {
+  margin-top: 20px;
+  border-top: 1px solid #eee;
+  font-size: 13px;
+  line-height: 21px;
+}
+
+.zbase_sql_overview .zbase_sql_overview_sidebar .sidebar_title {
+  font-weight: 500;
+  color: #333;
+  font-size: 13px;
+  margin-bottom: 10px;
+}
+
+.zbase_sql_overview .content_with_sidebar {
+  margin-left: 20px;
+  border-left: 1px solid #ddd;
+  border-right: 1px solid #ddd;
+}
