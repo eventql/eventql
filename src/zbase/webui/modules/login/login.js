@@ -57,11 +57,11 @@ ZBase.registerView((function() {
     var viewport = document.getElementById("zbase_viewport");
     var page = ZBase.getTemplate("login", "zbase_login_form_tpl");
 
-    var form = page.querySelector("form");
-    form.addEventListener("submit", submitForm);
-
     viewport.innerHTML = "";
     viewport.appendChild(page);
+
+    var form = viewport.querySelector("form");
+    form.addEventListener("submit", submitForm);
   };
 
   return {
