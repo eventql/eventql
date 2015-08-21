@@ -1,6 +1,7 @@
 ZBase.registerView((function() {
   var Overview = {};
   var Editor = {};
+  var path_parts;
 
   Editor.render = function() {
     var viewport = document.getElementById("zbase_viewport");
@@ -11,8 +12,33 @@ ZBase.registerView((function() {
     viewport.innerHTML = "";
     viewport.appendChild(page);
 
+    Editor.validateAndFetchDocument();
+    Editor.doc_sync = new DocSync(function() {
+      return "content=" + encodeURIComponent(document.querySelector("[data-content='query_content']").getValue()) +
+      "&name=" + encodeURIComponent(document.querySelector("[data-content='query_name']").getValue())
+      },
+      "/analytics/api/v1/sql_queries/" + Editor.doc_id
+    );
+
     document.querySelector(".zbase_sql_editor_pane .zbase_loader")
       .classList.add("hidden");
+  };
+
+  Editor.validateAndFetchDocument = function() {
+    Editor.doc_id = path_parts[3];
+    if (!/^[A-Za-z0-9]+$/.test(Editor.doc_id)) {
+      //TODO redirect and display message
+      alert("invalid docid");
+      return;
+    }
+
+    ZBase.util.httpGet("/analytics/api/v1/documents/sql_queries/" + Editor.doc_id, function(r) {
+      if (r.status == 200) {
+        Editor.doc = JSON.parse(r.response);
+        
+        console.log(Editor.doc);
+      }
+    });
   };
 
   Overview.render = function() {
@@ -70,7 +96,7 @@ ZBase.registerView((function() {
   };
 
   var render = function(path) {
-    var path_parts = path.split("/");
+    path_parts = path.split("/");
     var view;
     // render view
     if (path_parts.length == 4 && path_parts[3].length > 0) {
