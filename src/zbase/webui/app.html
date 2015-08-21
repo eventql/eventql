@@ -4,26 +4,26 @@
     <title>ZenBase</title>
     <meta content="text/html; charset=utf-8" http-equiv="Content-type">
 
-    <link rel="apple-touch-icon" sizes="57x57"   href="/a/__/apple-icon-57x57.png">
-    <link rel="apple-touch-icon" sizes="60x60"   href="/a/__/apple-icon-60x60.png">
-    <link rel="apple-touch-icon" sizes="72x72"   href="/a/__/apple-icon-72x72.png">
-    <link rel="apple-touch-icon" sizes="76x76"   href="/a/__/apple-icon-76x76.png">
-    <link rel="apple-touch-icon" sizes="114x114" href="/a/__/apple-icon-114x114.png">
-    <link rel="apple-touch-icon" sizes="120x120" href="/a/__/apple-icon-120x120.png">
-    <link rel="apple-touch-icon" sizes="144x144" href="/a/__/apple-icon-144x144.png">
-    <link rel="apple-touch-icon" sizes="152x152" href="/a/__/apple-icon-152x152.png">
-    <link rel="apple-touch-icon" sizes="180x180" href="/a/__assets/apple-icon-180x180.png">
-    <link rel="icon" type="image/png" sizes="192x192"  href="/a/__/android-icon-192x192.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/a/__/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="96x96" href="/a/__/favicon-96x96.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/a/__/favicon-16x16.png">
-    <meta name="msapplication-TileImage" content="/a/__/assets/ms-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="57x57"   href="/a/_/a/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60"   href="/a/_/a/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72"   href="/a/_/a/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76"   href="/a/_/a/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/a/_/a/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/a/_/a/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/a/_/a/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/a/_/a/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/a/_/aassets/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" sizes="192x192"  href="/a/_/a/android-icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/a/_/a/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="/a/_/a/favicon-96x96.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/a/_/a/favicon-16x16.png">
+    <meta name="msapplication-TileImage" content="/a/_/a/assets/ms-icon-144x144.png">
 
     <style type="text/css">
      @font-face {
         font-family: 'FontAwesome';
-        src: url('/a/__/fontawesome-webfont.eot?v=4.3.0');
-        src: url('/a/__/fontawesome-webfont.eot?#iefix&v=4.3.0') format('embedded-opentype'), url('/a/__/fontawesome-webfont.woff2?v=4.3.0') format('woff2'), url('/a/__/fontawesome-webfont.woff?v=4.3.0') format('woff'), url('/a/__/fontawesome-webfont.ttf?v=4.3.0') format('truetype'), url('/a/__/fontawesome-webfont.svg?v=4.3.0#fontawesomeregular') format('svg');
+        src: url('/a/_/a/fontawesome-webfont.eot?v=4.3.0');
+        src: url('/a/_/a/fontawesome-webfont.eot?#iefix&v=4.3.0') format('embedded-opentype'), url('/a/_/a/fontawesome-webfont.woff2?v=4.3.0') format('woff2'), url('/a/_/a/fontawesome-webfont.woff?v=4.3.0') format('woff'), url('/a/_/a/fontawesome-webfont.ttf?v=4.3.0') format('truetype'), url('/a/_/a/fontawesome-webfont.svg?v=4.3.0#fontawesomeregular') format('svg');
         font-weight: normal;
         font-style: normal;
       }
@@ -34,12 +34,12 @@
   </head>
   <body>
     <script type="text/javascript">
-      (new FontFace("FontAwesome", "url(/a/__/fontawesome-webfont.woff2?v=4.3.0)")).load();
+      (new FontFace("FontAwesome", "url(/a/_/a/fontawesome-webfont.woff2?v=4.3.0)")).load();
     </script>
 
     <nav class="zbase_header">
       <div class="navigation_inner">
-        <a href="/a/" class="logo_app"><img src="/a/__/favicon-32x32.png" height="22" alt="ZenBase"></a>
+        <a href="/a/" class="logo_app"><img src="/a/_/a/favicon-32x32.png" height="22" alt="ZenBase"></a>
       </div>
     </nav>
 
@@ -58,19 +58,7 @@
     <div id="zbase_viewport"></div>
 
     <script type="text/javascript">{{app_js}}</script>
-
-    <script type="text/javascript">
-      ZBase.init({
-        routes: [
-          {path_prefix: "/a/sql", view: "sql_editor", modules: ["sql_editor"]},
-          {path_prefix: "/a/logviewer", view: "logviewer", modules: ["logviewer"]},
-          {path_match: "/a/login", view: "login", modules: ["login"]},
-          {path_match: "/a/", view: "appstore", modules: ["appstore"]}
-        ],
-
-        default_route: "/a/"
-      });
-    </script>
+    <script type="text/javascript">ZBase.init({{config_json}});</script>
   </body>
 </html>
 
