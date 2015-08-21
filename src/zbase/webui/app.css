@@ -552,6 +552,8 @@ zbase_input.csv zbase_input-value i {
   border-radius: 3px;
   background: transparent;
   border: 0;
+  font-weight: 400;
+  font-size: 13px;
 }
 
 /**
@@ -560,8 +562,19 @@ zbase_input.csv zbase_input-value i {
 .zbase_button.zbase_primary_button {
   background: #1c99d6;
   color: #fff;
-  font-weight: 400;
-  font-size: 13px;
+}
+
+/**
+  * zbase_secondary_button
+  */
+.zbase_button.zbase_secondary_button {
+  color: #888;
+  border: 1px solid #eee;
+}
+
+.zbase_button.zbase_secondary_button:hover {
+  background: #fafafa;
+  box-shadow: 0px 0px 0px 1px rgba(39, 41, 43, 0.15) inset, 0px 0px 0px 0px rgba(39, 41, 43, 0.15) inset;
 }
 
 /**
