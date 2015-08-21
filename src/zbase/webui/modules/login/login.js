@@ -73,6 +73,10 @@ ZBase.registerView((function() {
         displayNamespacePrompt(authdata);
         break;
 
+      case "2fa":
+        displayTwoFactorAuthPrompt(authdata);
+        break;
+
       default:
         ZBase.fatalError("invalid auth step: " + next_step);
         break;
@@ -122,6 +126,23 @@ ZBase.registerView((function() {
       return false;
     });
   }
+
+  var displayTwoFactorAuthPrompt = function(authdata) {
+    var viewport = document.getElementById("zbase_viewport");
+    var page = ZBase.getTemplate("login", "zbase_login_2fa_prompt_tpl");
+
+    viewport.innerHTML = "";
+    viewport.appendChild(page);
+
+    var form = viewport.querySelector("form");
+    form.addEventListener("submit", function(e) {
+      e.preventDefault();
+      authdata["2fa_token"] = this.querySelector("input[name='2fa_token']").value;
+      tryLogin(authdata);
+      return false;
+    });
+  }
+
 
   var render = function(path) {
     var conf = ZBase.getConfig();
