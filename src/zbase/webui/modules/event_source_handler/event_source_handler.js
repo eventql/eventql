@@ -1,4 +1,4 @@
-EventSourceHandler = function() {
+var EventSourceHandler = function() {
   var sources = {};
 
 
