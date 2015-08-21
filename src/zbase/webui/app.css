@@ -608,7 +608,6 @@ zbase_input.csv zbase_input-value i {
   background: transparent;
   border: 0;
   font-weight: 400;
-  font-size: 13px;
 }
 
 /**
@@ -688,3 +687,4 @@ table.zbase_table.zbase_clickable_table tr:hover td {
   cursor: row-resize;
   border-bottom: 1px solid #c9d0d4;
 }
+
