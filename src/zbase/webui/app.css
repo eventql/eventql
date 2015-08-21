@@ -239,11 +239,28 @@ h2.pagetitle.border_bottom {
   font-weight: 500;
 }
 
+.zbase_fatal_error a {
+  display: block;
+  margin: auto;
+  width: 80px;
+  color: #fff;
+  margin-top: 30px;
+  border: 1px solid rgba(255,255,255,.5);
+  border-radius: 4px;
+  padding: 5px 5px;
+  font-weight: 500;
+}
+
+.zbase_fatal_error a:hover {
+  border: 1px solid rgba(255,255,255,1);
+  background: rgba(255,255,255,0.06);
+}
+
 .zbase_fatal_error h1 {
   color: #fff;
   font-size: 44px;
   font-weight: 500;
-  margin-bottom: 25px;
+  margin-bottom: 28px;
   text-shadow: 0 0 1px rgba(0,0,0,.8);
 }
 
