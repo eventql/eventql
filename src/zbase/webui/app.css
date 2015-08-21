@@ -147,7 +147,9 @@ h2.pagetitle.border_bottom {
 #zbase_viewport {
   min-width: 1000px;
   min-height: 100%;
-  padding-top: 39px;
+  width: 100%;
+  top: 39px;
+  position: absolute;
 }
 
 #zbase_viewport > .zbase_content_pane {
@@ -190,6 +192,21 @@ h2.pagetitle.border_bottom {
 
 .zbase_header.hidden {
   display: none;
+}
+
+.zbase_header ul {
+  float: left;
+  list-style: none;
+  margin-right: 20px;
+  text-align: center;
+  color: #808A95;
+  margin: 0;
+  padding: 0;
+  font-size: 14px;
+}
+
+.zbase_header ul li {
+  display: inline-block;
 }
 
 /**

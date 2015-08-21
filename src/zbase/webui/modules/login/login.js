@@ -56,6 +56,8 @@ ZBase.registerView((function() {
     var viewport = document.getElementById("zbase_viewport");
     var page = ZBase.getTemplate("login", "zbase_login_form_tpl");
 
+    console.log("RENDER");
+
     viewport.innerHTML = "";
     viewport.appendChild(page);
 
