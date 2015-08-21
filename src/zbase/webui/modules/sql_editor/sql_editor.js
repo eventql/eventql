@@ -162,7 +162,7 @@ ZBase.registerView((function() {
 
   Editor.renderResultBar = function(index, multiple_results) {
     var bar = document.createElement("div");
-    bar.className = "result_pane_bar";
+    bar.className = "zbase_result_pane_bar";
     bar.setAttribute('data-index', index);
     bar.setAttribute('data-active', 'active');
     bar.innerHTML =

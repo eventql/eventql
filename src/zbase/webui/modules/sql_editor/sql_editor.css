@@ -96,3 +96,45 @@
   user-select: none;
 }
 
+.zbase_sql_editor_result_pane .zbase_result_pane_bar {
+  background-color: #f0f6f8;
+  border-bottom: 1px solid #c9d0d4;
+  box-shadow: 0 1px 1px rgba(0,0,0,0.04);
+  height: 38px;
+  overflow: hidden;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  -o-user-select: none;
+  user-select: none;
+}
+
+.zbase_sql_editor_result_pane .zbase_result_pane_bar label {
+  float:left;
+  line-height: 40px;
+  padding: 0 12px;
+  font-size: 13px;
+}
+
+.zbase_sql_editor_result_pane .zbase_result_pane_bar.clickable:before {
+  font-family: FontAwesome;
+  content: "\f0da";
+  float: left;
+  margin-left: 20px;
+  line-height: 38px;
+  width: 10px;
+  opacity: 0.9;
+}
+
+.zbase_sql_editor_result_pane .zbase_result_pane_bar.clickable[data-active]:before {
+  content: "\f0d7";
+}
+
+.zbase_sql_editor_result_pane .zbase_result_pane_bar.clickable:hover {
+  cursor: pointer;
+}
+
+.zbase_sql_editor_result_pane .zbase_result_pane_bar.clickable[data-active] label,
+.zbase_sql_editor_result_pane .zbase_result_pane_bar.clickable:hover label {
+  opacity: 1;
+}
