@@ -373,6 +373,8 @@ var ZBase = (function() {
     updateConfig: updateConfig,
     getTemplate: getTemplate,
     fatalError: showFatalError,
+    showLoader: showLoader,
+    hideLoader: hideLoader,
     util: {}
   };
 })();

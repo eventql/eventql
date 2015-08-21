@@ -3,7 +3,9 @@ ZBase.registerView((function() {
   var kServerErrorMsg = "Server Error; please try again and contact support if the problem persists.";
 
   var finishLogin = function() {
+    ZBase.showLoader();
     ZBase.util.httpGet("/a/_/c", function(http) {
+      ZBase.hideLoader();
       if (http.status != 200) {
         showErrorMessage(kServerErrorMsg);
         return;
@@ -22,7 +24,10 @@ ZBase.registerView((function() {
       password: this.querySelector("input[name='password']").value
     });
 
+    ZBase.showLoader();
     ZBase.util.httpPost("/analytics/api/v1/auth/login", postdata, function(http) {
+      ZBase.hideLoader();
+
       if (http.status == 200) {
         finishLogin();
         return;
