@@ -64,6 +64,7 @@
         routes: [
           {path_prefix: "/a/sql", view: "sql_editor", modules: ["sql_editor"]},
           {path_prefix: "/a/logviewer", view: "logviewer", modules: ["logviewer"]},
+          {path_match: "/a/login", view: "login", modules: ["login"]},
           {path_match: "/a/", view: "appstore", modules: ["appstore"]}
         ],
 
