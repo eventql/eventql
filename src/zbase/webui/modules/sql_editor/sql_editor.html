@@ -77,11 +77,11 @@
 
         <div class="zbase_sql_editor_infobar hidden"></div>
         <section class="zbase_sql_editor_title">
-          <button class="zbase_button zbase_primary_button" data-action="new-query">
+          <button class="zbase_button zbase_primary_button" data-action="execute-query">
             <i class="fa fa-bolt"></i>
             &nbsp;Execute
           </button>
-          <button class="zbase_button zbase_secondary_button" data-action="new-query">
+          <button class="zbase_button zbase_secondary_button" data-action="share-query">
             <i class="fa fa-share-alt"></i>
             &nbsp;Share
           </button>
@@ -92,7 +92,11 @@
 
         <div class='zbase_resizer_tooltip' draggable="true"></div>
 
-        
+        <fn-modal-dimmer style="display: none;">
+          <fn-modal>
+            <input name="doc_name" />
+          </fn-modal>
+        </fn-modal-dimmer>
       </div>
     </div>
   </div>
