@@ -162,9 +162,25 @@ void WebUIServlet::renderConfig(
   }
 
   json->endArray();
-  json->addComma();
+
+  // current user
+  if (!session.isEmpty()) {
+    json->addComma();
+    json->addObjectEntry("current_user");
+    json->beginObject();
+
+    json->addObjectEntry("userid");
+    json->addString(session.get().userid());
+    json->addComma();
+
+    json->addObjectEntry("namespace");
+    json->addString(session.get().customer());
+
+    json->endObject();
+  }
 
   // default route
+  json->addComma();
   json->addObjectEntry("default_route");
   json->addString(session.isEmpty() ? "/a/login" : "/a/");
 
