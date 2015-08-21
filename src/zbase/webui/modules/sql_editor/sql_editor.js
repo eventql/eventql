@@ -14,6 +14,15 @@ ZBase.registerView((function() {
     viewport.appendChild(page);
 
     loadOverviewTable();
+
+    document.querySelector(
+      ".zbase_sql_editor_overview button[data-action='new-query']")
+      .addEventListener("click", function() {
+        ZBase.util.httpPost("/analytics/api/v1/documents/sql_queries", "", function(r) {
+          var response = JSON.parse(r.response);
+          window.location.href = "/a/sql/" + response.uuid;
+        });
+      });
   };
 
   var renderOverviewTable = function(documents) {
@@ -33,7 +42,6 @@ ZBase.registerView((function() {
 
   var loadOverviewTable = function() {
     ZBase.util.httpGet("/analytics/api/v1/documents", function(r) {
-      console.log(r);
       if (r.status == 200) {
         var documents = JSON.parse(r.response).documents;
         renderOverviewTable(documents);
