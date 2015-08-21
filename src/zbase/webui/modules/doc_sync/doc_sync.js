@@ -1,4 +1,4 @@
-var DocSync = function(getPostBody, save_url) {
+var DocSync = function(getPostBody, save_url, infobar) {
   this.cur_version = 0;
 
   var retry_delay = 5000;
@@ -121,16 +121,15 @@ var DocSync = function(getPostBody, save_url) {
   };
 
   function updateInfobar(text) {
-    var infobar = document.querySelector(".infobar");
     infobar.innerHTML = text;
   };
 
   function showInfobar() {
-    document.querySelector(".infobar").classList.remove('hidden');
+    infobar.classList.remove('hidden');
   };
 
   function hideInfobar() {
-    document.querySelector(".infobar").classList.add('hidden');
+    infobar.classList.add('hidden');
   };
 
 
