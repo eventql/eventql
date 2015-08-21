@@ -38,6 +38,33 @@
   display: block;
 }
 
+.zbase_login ul.namespace_list {
+  list-style-type: none;
+  text-align: left;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-shadow: 0 0 1px rgba(0,0,0,.2);
+  width: 340px;
+  margin: auto;
+  margin-top: 30px;
+  margin-bottom: 20px;
+  padding: 0;
+}
+
+.zbase_login ul.namespace_list li {
+  border-bottom: 1px solid #eee;
+  padding: 10px 20px;
+  font-size: 14px;
+}
+
+.zbase_login ul.namespace_list li:hover {
+  background-color: #f0f6f8;
+  margin-top: -1px;
+  border-top: 1px solid #c9d0d4;
+  border-bottom: 1px solid #c9d0d4;
+  cursor: pointer;
+}
+
 .zbase_login a.forgot_pw {
   color: #1c99d6;
   font-size: 14px;
