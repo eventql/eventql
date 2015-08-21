@@ -3,17 +3,33 @@ ZBase.registerView((function() {
   var submitForm = function(e) {
     e.preventDefault();
 
-    var username = this.querySelector("input[name='userid']").value;
-    var password = this.querySelector("input[name='password']").value;
+    var postdata = ZBase.util.buildQueryString({
+      userid: this.querySelector("input[name='userid']").value,
+      password: this.querySelector("input[name='password']").value
+    });
 
-    console.log("login", username, password);
+    console.log(postdata);
+    ZBase.util.httpPost("/analytics/api/v1/auth/login", postdata, function(http) {
+      if (http.status == 200) {
+        ZBase.navigateTo("/a/");
+        return;
+      }
 
-    ZBase.util.httpPost("/api/v1/auth/login", "", function(http) {
-      //if (http.status == 200) {
-      showErrorMessage("Invalid Credentials");
+      if (http.status == 401) {
+        showErrorMessage("Invalid Credentials");
+        return;
+      }
+
+      showErrorMessage("Server Error; please try again and contact support if the problem persists.");
     });
 
     return false;
+  };
+
+  var hideErrorMessage = function() {
+    var viewport = document.getElementById("zbase_viewport");
+    var elem = viewport.querySelector(".zbase_login .error_message");
+    elem.classList.add("hidden");
   };
 
   var showErrorMessage = function(msg) {
