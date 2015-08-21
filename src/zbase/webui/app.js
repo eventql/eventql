@@ -12,7 +12,7 @@ var ZBase = (function() {
     changeNavigation(window.location.pathname + window.location.search);
     registerPopstateHandler();
 
-    ZBase.util.header_widget.render();
+    renderLayout();
   };
 
   var getConfig = function() {
@@ -22,7 +22,7 @@ var ZBase = (function() {
   var updateConfig = function(new_config) {
     config = new_config;
 
-    ZBase.util.header_widget.render();
+    renderLayout();
   };
 
   var showFatalError = function() {
@@ -148,6 +148,7 @@ var ZBase = (function() {
         link.rel = 'import';
         link.href = "/a/_/m/" + module;
         link.setAttribute("data-module", module);
+        link.setAttribute("async", "async");
         link.onerror = function(e) {
           console.log(">> Error while loading module >" + module + "<, aborting");
           showFatalError();
@@ -213,6 +214,22 @@ var ZBase = (function() {
     return document.importNode(template.content, true);
   };
 
+  var renderLayout = function() {
+    var conf = ZBase.getConfig();
+    var elem = document.querySelector("#zbase_header");
+
+    if (conf.current_user) {
+      ZBase.loadModules(["header_widget"], function() {
+        ZBase.util.header_widget.render();
+      });
+    } else {
+      elem.classList.remove("hidden");
+      elem.innerHTML = "";
+      elem.appendChild(ZBase.getTemplate("", "zbase_header_default_tpl"))
+      ZBase.util.install_link_handlers(elem);
+    }
+  };
+
   return {
     init: init,
     loadModules: loadModules,
@@ -224,18 +241,6 @@ var ZBase = (function() {
     getTemplate: getTemplate,
     util: {}
   };
-})();
-
-ZBase.util.header_widget = (function() {
-
-  var render = function() {
-    console.log("render header...", ZBase.getConfig());
-  };
-
-  return {
-    render: render
-  };
-
 })();
 
 ZBase.util.install_link_handlers = function(elem) {

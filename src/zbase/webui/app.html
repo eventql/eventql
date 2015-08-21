@@ -33,15 +33,13 @@
     <meta name="google" content="notranslate" />
   </head>
   <body>
-    <script type="text/javascript">
-      (new FontFace("FontAwesome", "url(/a/_/a/fontawesome-webfont.woff2?v=4.3.0)")).load();
-    </script>
+    <nav class="zbase_header hidden" id="zbase_header"></nav>
 
-    <nav class="zbase_header">
+    <template id="zbase_header_default_tpl">
       <div class="navigation_inner">
-        <a href="/a/" class="logo_app"><img src="/a/_/a/favicon-32x32.png" height="22" alt="ZenBase"></a>
+        <a href="/a/" class="logo_app"><img id="zbase_logo" src="/a/_/a/logo_32.png" height="22" alt="ZenBase"></a>
       </div>
-    </nav>
+    </template>
 
     <div class="zbase_loader fullscreen" id="zbase_main_loader">
       <div class="spinner_outer">
