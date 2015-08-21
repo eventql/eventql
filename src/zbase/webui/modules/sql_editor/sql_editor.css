@@ -134,9 +134,26 @@
   cursor: pointer;
 }
 
-.zbase_sql_editor_result_pane .zbase_result_pane_bar.clickable[data-active] label,
 .zbase_sql_editor_result_pane .zbase_result_pane_bar.clickable:hover label {
   opacity: 1;
+  cursor: pointer;
+}
+
+.zbase_sql_editor_result_pane .zbase_result_pane_bar.clickable[data-active] label {
+  opacity: 1;
+}
+
+.zbase_sql_editor_result_pane .zbase_result_pane_bar + table.zbase_sql_chart,
+.zbase_sql_editor_result_pane .zbase_result_pane_bar + table.zbase_table {
+  display: none;
+}
+
+.zbase_sql_editor_result_pane .zbase_result_pane_bar[data-active] + table.zbase_table {
+  display: table;
+}
+
+.zbase_sql_editor_result_pane .zbase_result_pane_bar[data-active] + table.zbase_sql_chart {
+  display: block;
 }
 
 .zbase_sql_editor_result_pane table.zbase_table {
