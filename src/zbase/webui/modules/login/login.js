@@ -22,7 +22,6 @@ ZBase.registerView((function() {
       password: this.querySelector("input[name='password']").value
     });
 
-    console.log(postdata);
     ZBase.util.httpPost("/analytics/api/v1/auth/login", postdata, function(http) {
       if (http.status == 200) {
         finishLogin();

@@ -20,15 +20,15 @@ var ZBase = (function() {
 
   var init = function(_config) {
     config = _config;
-    changeNavigation(window.location.pathname + window.location.search);
+
+    console.log(
+      ">> Initializing ZBase UI, detected features: " +
+      "html5_templates=" + (__enable_html5_templates ? "yes" : "no") + ", " +
+      "html5_imports=" + (__enable_html5_import ? "yes" : "no") + ", " +
+      "html5_importnode=" + (__enable_html5_importnode ? "yes" : "no"));
+
     registerPopstateHandler();
-
-    console.log(">> Features:", {
-      html5_templates: __enable_html5_templates,
-      html5_import: __enable_html5_import,
-      html5_importnode: __enable_html5_importnode
-    });
-
+    changeNavigation(window.location.pathname + window.location.search);
     renderLayout();
   };
 
@@ -397,40 +397,6 @@ ZBase.util.httpGet = function(url, callback) {
   http.onreadystatechange = function() {
     if (http.readyState == 4) {
       callback(http);
-    }
-  }
-};
-
-ZBase.util.jsonRPC = function(url, method, params, callback) {
-  var req = {
-    "jsonrpc": "2.0",
-    "method": method,
-    "params": params,
-    "id": 0
-  };
-
-  var http = new XMLHttpRequest();
-  http.open("POST", url, true);
-  var start = (new Date()).getTime();
-  http.send(JSON.stringify(req));
-
-  http.onreadystatechange = function() {
-    if (http.readyState == 4) {
-      var end = (new Date()).getTime();
-      var duration = end - start;
-
-      if (http.status != 200) {
-        console.log("RPC failed", http.responseText);
-        return;
-      }
-
-      var resp = JSON.parse(http.responseText);
-      if (resp.error) {
-        console.log("RPC failed", resp.error);
-        return;
-      }
-
-      callback(resp.result);
     }
   }
 };
