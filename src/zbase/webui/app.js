@@ -42,8 +42,19 @@ var ZBase = (function() {
     renderLayout();
   };
 
-  var showFatalError = function() {
-    alert("Fatal Error, please reload the page");
+  var showFatalError = function(msg) {
+    console.log(">> FATAL ERROR: " + msg);
+
+    var error_elem = document.createElement("div");
+    error_elem.classList.add("zbase_fatal_error");
+    error_elem.innerHTML =
+        "<span>" +
+        "<h1>We're sorry</h1>" +
+        "Something went wrong and ZenBase crashed, please reload the page and " +
+        "contact support if the problem persists" +
+        "</span>";
+
+    document.body.appendChild(error_elem);
   };
 
   var showLoader = function() {

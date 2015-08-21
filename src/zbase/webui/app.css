@@ -86,6 +86,10 @@ h1 {
   background: #a8d1ff;
 }
 
+template {
+  display: none;
+}
+
 .clearfix {
   clear: both;
 }
@@ -207,6 +211,40 @@ h2.pagetitle.border_bottom {
 
 .zbase_header ul li {
   display: inline-block;
+}
+
+/**
+ * fatal error
+ */
+.zbase_fatal_error {
+  position: fixed;
+  background: rgba(50, 0, 0, .9);
+  z-index: 999999;
+  height: 100%;
+  width: 100%;
+  color: #fff;
+}
+
+.zbase_fatal_error > span {
+  display: block;
+  height: 100px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin: -90px 0 0 -250px;
+  width: 500px;
+  text-align: center;
+  font-size: 16px;
+  text-shadow: 0 0 1px rgba(0,0,0,.6);
+  font-weight: 500;
+}
+
+.zbase_fatal_error h1 {
+  color: #fff;
+  font-size: 44px;
+  font-weight: 500;
+  margin-bottom: 25px;
+  text-shadow: 0 0 1px rgba(0,0,0,.8);
 }
 
 /**
