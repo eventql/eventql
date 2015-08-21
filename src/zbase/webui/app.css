@@ -175,7 +175,7 @@ h2.pagetitle.border_bottom {
   height: 40px;
   line-height: 30px;
   overflow: hidden;
-  position: fixed;
+  position: absolute;
   z-index: 99999;
 }
 
