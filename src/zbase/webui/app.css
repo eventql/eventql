@@ -607,6 +607,7 @@ zbase_input.csv zbase_input-value i {
   border-radius: 3px;
   background: transparent;
   border: 0;
+  font-weight: 400;
 }
 
 /**
@@ -615,8 +616,19 @@ zbase_input.csv zbase_input-value i {
 .zbase_button.zbase_primary_button {
   background: #1c99d6;
   color: #fff;
-  font-weight: 400;
-  font-size: 13px;
+}
+
+/**
+  * zbase_secondary_button
+  */
+.zbase_button.zbase_secondary_button {
+  color: #888;
+  border: 1px solid #eee;
+}
+
+.zbase_button.zbase_secondary_button:hover {
+  background: #fafafa;
+  box-shadow: 0px 0px 0px 1px rgba(39, 41, 43, 0.15) inset, 0px 0px 0px 0px rgba(39, 41, 43, 0.15) inset;
 }
 
 /**
@@ -665,3 +677,14 @@ table.zbase_table.zbase_clickable_table tr:hover td {
   background: #f0f6f8;
   cursor: pointer;
 }
+
+/**
+  * zbase_resizer_tooltip
+  */
+.zbase_resizer_tooltip {
+  height: 20px;
+  background: url(data:image/gif;base64,R0lGODlhZwABAJEAAPD2+Nve3////////yH5BAEAAAMALAAAAABnAAEAAAINhI+py60hopy02otrAQA7) left center repeat-y #fff;
+  cursor: row-resize;
+  border-bottom: 1px solid #c9d0d4;
+}
+
