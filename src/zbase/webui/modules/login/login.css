@@ -1,0 +1,31 @@
+.zbase_login {
+  height: calc(100% - 120px);
+}
+
+.zbase_login .login_pane {
+  width: 300px;
+  margin: auto;
+  margin-top: 30px;
+}
+
+.zbase_login .login_pane .input_title {
+  font-size: 14px;
+  font-weight: 600;
+  margin-top: 15px;
+}
+
+.zbase_login .login_pane input.zbase_input {
+  font-size: 14px;
+}
+
+.zbase_login .login_pane .fn-button {
+  float: right;
+  margin-top: 15px;
+}
+
+.zbase_login fn-message {
+  width: 380px;
+  margin: auto;
+  margin-top:20px;
+  font-size: 14px;
+}
