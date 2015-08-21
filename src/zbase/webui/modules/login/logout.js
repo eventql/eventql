@@ -1,8 +1,11 @@
 ZBase.registerView((function() {
 
   var render = function(path) {
+    ZBase.showLoader();
     ZBase.util.httpPost("/analytics/api/v1/auth/logout", "", function() {
       ZBase.util.httpGet("/a/_/c", function(http) {
+        ZBase.hideLoader();
+
         if (http.status != 200) {
           ZBase.fatalError("logout failed");
           return;
