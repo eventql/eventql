@@ -258,3 +258,18 @@ ZBase.util.install_link_handlers = function(elem) {
     elems[i].addEventListener("click", click_fn);
   }
 };
+
+ZBase.util.httpPost = function(url, request, callback) {
+  var http = new XMLHttpRequest();
+  http.open("POST", url, true);
+  var start = (new Date()).getTime();
+  http.send(request);
+
+  http.onreadystatechange = function() {
+    if (http.readyState == 4) {
+      var end = (new Date()).getTime();
+      var duration = end - start;
+      callback(http, duration);
+    }
+  }
+};
