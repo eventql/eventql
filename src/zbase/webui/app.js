@@ -273,3 +273,50 @@ ZBase.util.httpPost = function(url, request, callback) {
     }
   }
 };
+
+ZBase.util.httpGet = function(url, callback) {
+  var http = new XMLHttpRequest();
+  http.open("GET", url, true);
+  http.send();
+
+  var base = this;
+  http.onreadystatechange = function() {
+    if (http.readyState == 4) {
+      callback(http);
+    }
+  }
+};
+
+ZBase.util.jsonRPC = function(url, method, params, callback) {
+  var req = {
+    "jsonrpc": "2.0",
+    "method": method,
+    "params": params,
+    "id": 0
+  };
+
+  var http = new XMLHttpRequest();
+  http.open("POST", url, true);
+  var start = (new Date()).getTime();
+  http.send(JSON.stringify(req));
+
+  http.onreadystatechange = function() {
+    if (http.readyState == 4) {
+      var end = (new Date()).getTime();
+      var duration = end - start;
+
+      if (http.status != 200) {
+        console.log("RPC failed", http.responseText);
+        return;
+      }
+
+      var resp = JSON.parse(http.responseText);
+      if (resp.error) {
+        console.log("RPC failed", resp.error);
+        return;
+      }
+
+      callback(resp.result);
+    }
+  }
+};
