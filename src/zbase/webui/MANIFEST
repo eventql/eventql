@@ -2,6 +2,7 @@ route {
   path_prefix: "/a/sql"
   view: "sql_editor"
   require_module: "sql_editor"
+  require_module: "fn-codeeditor"
 }
 
 route {
