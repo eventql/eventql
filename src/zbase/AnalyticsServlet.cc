@@ -1032,29 +1032,33 @@ void AnalyticsServlet::performLogin(
     const URI& uri,
     const http::HTTPRequest* req,
     http::HTTPResponse* res) {
-  URI::ParamList params;
-  URI::parseQueryString(req->body().toString(), &params);
+  String next_step;
+  auto session = auth_->performLogin(req->body().toString(), &next_step);
 
-  String userid;
-  if (!URI::getParam(params, "userid", &userid)) {
-    res->setStatus(http::kStatusBadRequest);
-    res->addBody("missing ?userid=... parameter");
-    return;
-  }
-
-  String password;
-  if (!URI::getParam(params, "password", &password)) {
-    res->setStatus(http::kStatusBadRequest);
-    res->addBody("missing ?password=... parameter");
-    return;
-  }
-
-  auto session = auth_->performLogin(userid, password);
-
+  // login failed, invalid credentials or missing data
   if (session.isEmpty()) {
+    Buffer buf;
+    json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
+
+    json.beginObject();
+    json.addObjectEntry("success");
+    json.addFalse();
+
+    if (!next_step.empty()) {
+      json.addComma();
+      json.addObjectEntry("next_step");
+      json.addString(next_step);
+    }
+
+    json.endObject();
+
     res->addHeader("WWW-Authenticate", "Token");
     res->setStatus(http::kStatusUnauthorized);
-  } else {
+    res->addBody(buf);
+  }
+
+  // login successful
+  if (!session.isEmpty()) {
     auto token = auth_->encodeAuthToken(session.get());
 
     res->addCookie(
@@ -1071,10 +1075,20 @@ void AnalyticsServlet::performLogin(
     //    ".zbase.io",
     //    false, // FIXPAUL https only...
     //    true);
+    Buffer buf;
+    json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
+
+    json.beginObject();
+    json.addObjectEntry("success");
+    json.addTrue();
+    json.addComma();
+    json.addObjectEntry("auth_token");
+    json.addString(token);
+    json.endObject();
 
     res->addHeader("X-AuthToken", token);
     res->setStatus(http::kStatusOK);
-    res->addBody(token);
+    res->addBody(buf);
   }
 }
 
