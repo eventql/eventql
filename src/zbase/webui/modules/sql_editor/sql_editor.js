@@ -11,6 +11,8 @@ ZBase.registerView((function() {
     viewport.innerHTML = "";
     viewport.appendChild(page);
 
+    document.querySelector(".zbase_sql_editor_pane .zbase_loader")
+      .classList.add("hidden");
   };
 
   Overview.render = function() {
