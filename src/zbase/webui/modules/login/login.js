@@ -53,6 +53,12 @@ ZBase.registerView((function() {
   };
 
   var render = function(path) {
+    var conf = ZBase.getConfig();
+    if (conf.current_user) {
+      ZBase.navigateTo("/a/");
+      return;
+    }
+
     var viewport = document.getElementById("zbase_viewport");
     var page = ZBase.getTemplate("login", "zbase_login_form_tpl");
 
