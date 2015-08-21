@@ -19,11 +19,13 @@ html {
   background:#fff;
   overflow-y: scroll;
 }
-html, body{ 
+
+html, body{
   min-height: 100%;
   height: auto;
   overflow-x:hidden;
 }
+
 body{
   padding:0;
   margin:0;
@@ -66,6 +68,7 @@ h2 i {
   font-style: normal;
   font-weight: 500;
 }
+
 h1 {
   color: #666;
   font-size: 18px;
@@ -78,6 +81,7 @@ h1 {
 ::selection {
   background: #a8d1ff; 
 }
+
 ::-moz-selection {
   background: #a8d1ff;
 }
@@ -169,6 +173,14 @@ h2.pagetitle.border_bottom {
   z-index: 99999;
 }
 
+.zbase_header .navigation_inner {
+  margin: auto;
+  max-width: 1700px;
+  min-width: 1000px;
+  box-sizing: border-box;
+  padding: 0 20px;
+}
+
 .zbase_header .button {
   margin-left: 40px;
 }
@@ -207,6 +219,13 @@ h2.pagetitle.border_bottom {
 
 .zbase_header .button {
   float: right;
+}
+
+.zbase_header .logo_app {
+  margin-top: 9px;
+  display: block;
+  float: left;
+  width: 30px;
 }
 
 /**
