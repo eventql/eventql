@@ -141,6 +141,11 @@ protected:
       const http::HTTPRequest* req,
       http::HTTPResponse* res);
 
+  void performLogout(
+      const URI& uri,
+      const http::HTTPRequest* req,
+      http::HTTPResponse* res);
+
   inline void expectHTTPPost(const http::HTTPRequest& req) {
     if (req.method() != http::HTTPMessage::M_POST) {
       RAISE(kIllegalArgumentError, "expected HTTP POST request");
