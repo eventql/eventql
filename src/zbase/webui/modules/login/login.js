@@ -78,6 +78,21 @@ ZBase.registerView((function() {
 
     viewport.innerHTML = "";
     viewport.appendChild(page);
+
+    var list = viewport.querySelector("ul.namespace_list");
+    list.addEventListener("click", function(e) {
+      e.preventDefault();
+
+      var namespace = e.target.getAttribute("data-namespace");
+      if (namespace) {
+        console.log(namespace);
+      }
+
+      authdata["namespace"] = namespace;
+      tryLogin(authdata);
+
+      return false;
+    });
   }
 
   var render = function(path) {
