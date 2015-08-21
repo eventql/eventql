@@ -86,6 +86,10 @@ h1 {
   background: #a8d1ff;
 }
 
+template {
+  display: none;
+}
+
 .clearfix {
   clear: both;
 }
@@ -147,7 +151,9 @@ h2.pagetitle.border_bottom {
 #zbase_viewport {
   min-width: 1000px;
   min-height: 100%;
-  padding-top: 39px;
+  width: 100%;
+  top: 39px;
+  position: absolute;
 }
 
 #zbase_viewport > .zbase_content_pane {
@@ -190,6 +196,72 @@ h2.pagetitle.border_bottom {
 
 .zbase_header.hidden {
   display: none;
+}
+
+.zbase_header ul {
+  float: left;
+  list-style: none;
+  margin-right: 20px;
+  text-align: center;
+  color: #808A95;
+  margin: 0;
+  padding: 0;
+  font-size: 14px;
+}
+
+.zbase_header ul li {
+  display: inline-block;
+}
+
+/**
+ * fatal error
+ */
+.zbase_fatal_error {
+  position: fixed;
+  background: rgba(50, 0, 0, .9);
+  z-index: 999999;
+  height: 100%;
+  width: 100%;
+  color: #fff;
+}
+
+.zbase_fatal_error > span {
+  display: block;
+  height: 100px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin: -90px 0 0 -250px;
+  width: 500px;
+  text-align: center;
+  font-size: 16px;
+  text-shadow: 0 0 1px rgba(0,0,0,.6);
+  font-weight: 300;
+}
+
+.zbase_fatal_error a {
+  display: block;
+  margin: auto;
+  width: 80px;
+  color: #fff;
+  margin-top: 30px;
+  border: 1px solid rgba(255,255,255,.5);
+  border-radius: 4px;
+  padding: 5px 5px;
+  font-weight: 500;
+}
+
+.zbase_fatal_error a:hover {
+  border: 1px solid rgba(255,255,255,1);
+  background: rgba(255,255,255,0.06);
+}
+
+.zbase_fatal_error h1 {
+  color: #fff;
+  font-size: 44px;
+  font-weight: 500;
+  margin-bottom: 28px;
+  text-shadow: 0 0 1px rgba(0,0,0,.8);
 }
 
 /**
