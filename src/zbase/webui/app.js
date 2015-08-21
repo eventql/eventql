@@ -7,6 +7,9 @@ var ZBase = (function() {
   var views = {};
   var config;
 
+  /* feature detection */
+  var __enable_html5_import = 'import' in document.createElement('link');
+
   var init = function(_config) {
     config = _config;
     changeNavigation(window.location.pathname + window.location.search);
@@ -144,17 +147,46 @@ var ZBase = (function() {
       modules_status[module] = "loading";
 
       window.setTimeout(function() {
-        var link = document.createElement('link');
-        link.rel = 'import';
-        link.href = "/a/_/m/" + module;
-        link.setAttribute("data-module", module);
-        link.setAttribute("async", "async");
-        link.onerror = function(e) {
-          console.log(">> Error while loading module >" + module + "<, aborting");
-          showFatalError();
-        };
+        var import_url = "/a/_/m/" + module;
 
-        document.body.appendChild(link);
+        if (__enable_html5_import) {
+          var link = document.createElement('link');
+          link.rel = 'import';
+          link.href = import_url;
+          link.setAttribute("data-module", module);
+          link.setAttribute("async", "async");
+          link.onerror = function(e) {
+            console.log(">> Error while loading module >" + module + "<, aborting");
+            showFatalError();
+          };
+
+          document.body.appendChild(link);
+        } else {
+          ZBase.util.httpGet(import_url, function(http) {
+            if (http.status == 200) {
+              var dummy = document.createElement("div");
+              dummy.innerHTML = http.responseText;
+              document.body.appendChild(dummy);
+
+              var scripts = dummy.getElementsByTagName('script');
+              for (var i = 0; i < scripts.length; i ++) {
+                var script = document.createElement('script');
+                script.type = scripts[i].type;
+                if (scripts[i].src) {
+                  script.src = scripts[i].src;
+                } else {
+                  script.innerHTML = scripts[i].innerHTML;
+                }
+
+                document.body.appendChild(script);
+              }
+            } else {
+              console.log(">> Error while loading module >" + module + "<, aborting");
+              showFatalError();
+              return;
+            }
+          });
+        }
       }, 0);
     });
   };
