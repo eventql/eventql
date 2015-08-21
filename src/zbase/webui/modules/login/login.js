@@ -25,13 +25,27 @@ ZBase.registerView((function() {
       hideErrorMessage();
 
       if (http.status == 200) {
-        finishLogin();
+        var resp = JSON.parse(http.responseText);
+
+        if (resp.success) {
+          finishLogin();
+        } else {
+          showErrorMessage(kServerErrorMsg);
+        }
+
         return;
       }
 
       if (http.status == 401) {
-        displayUserPrompt();
-        showErrorMessage("Invalid Credentials");
+        var resp = JSON.parse(http.responseText);
+
+        if (resp.next_step) {
+          displayNextStep(resp.next_step, authdata);
+        } else {
+          displayUserPrompt();
+          showErrorMessage("Invalid Credentials");
+        }
+
         return;
       }
 
@@ -51,6 +65,20 @@ ZBase.registerView((function() {
     elem.innerHTML = msg;
     elem.classList.remove("hidden");
   };
+
+  var displayNextStep = function(next_step, authdata) {
+    switch (next_step) {
+
+      case "choose_namespace":
+        displayNamespacePrompt(authdata);
+        break;
+
+      default:
+        ZBase.fatalError("invalid auth step: " + next_step);
+        break;
+
+    };
+  }
 
   var displayUserPrompt = function() {
     var viewport = document.getElementById("zbase_viewport");
