@@ -313,3 +313,27 @@ h2.pagetitle.border_bottom {
   display: inline-block;
   opacity: .9;
 }
+
+/**
+  * zbase_button
+  */
+.zbase_button {
+  cursor: pointer;
+  display: inline-block;
+  box-shadow: 0 0 0 1px rgba(39,41,43,0.15) inset;
+  padding: .78571em 1.5em .78571em;
+  line-height: 1;
+  border-radius: 3px;
+  background: transparent;
+  border: 0;
+}
+
+/**
+  * zbase_primary_button
+  */
+.zbase_button.zbase_primary_button {
+  background: #1c99d6;
+  color: #fff;
+  font-weight: 400;
+  font-size: 13px;
+}
