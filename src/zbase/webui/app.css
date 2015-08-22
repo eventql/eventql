@@ -154,7 +154,7 @@ h2.pagetitle.border_bottom {
   margin-top: 39px;
 }
 
-#zbase_viewport > .zbase_content_pane {
+#zbase_viewport .zbase_content_pane {
   min-width: 960px;
   min-height: 100%;
   margin: auto;
@@ -164,7 +164,7 @@ h2.pagetitle.border_bottom {
 
 @media (max-width: 1700px) {
 
-  #zbase_viewport > .zbase_content_pane.fullwidth {
+  #zbase_viewport .zbase_content_pane.fullwidth {
     padding: 0;
   }
 }
@@ -285,7 +285,12 @@ h2.pagetitle.border_bottom {
 }
 
 .zbase_loader.fullscreen {
+  top: 42px;
+  right: 0;
+  bottom: 0;
+  left: 0;
   position: fixed;
+  overflow: hidden;
   background: rgba(255, 255, 255, .8);
   z-index: 99990;
 }
@@ -359,7 +364,7 @@ h2.pagetitle.border_bottom {
 }
 
 .zbase_page_title > div {
-  padding: 0 18px;
+  padding: 0 20px;
   margin: auto;
   max-width: 1700px;
   min-width: 960px;

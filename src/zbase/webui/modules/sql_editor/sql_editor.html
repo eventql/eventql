@@ -1,65 +1,57 @@
 <template id="zbase_sql_editor_overview_main_tpl">
-  <div class="zbase_content_pane fullwidth">
-    <div class="zbase_sql_editor zbase_sql_editor_overview">
-      <div class="zbase_sql_editor_sidebar">
-        <section class="sidebar_section">
-          <h3 class="sidebar_title">
-            <i class="fa fa-database"></i>&nbsp; Tables
-          </h3>
-
-          <ul class="zbase_sql_editor_table_list">
-          </ul>
-        </section>
+  <div class="zbase_sql_editor">
+    <section class='zbase_page_title'>
+      <div>
+            <button class="zbase_button zbase_primary_button" data-action="new-query">
+              <i class="fa fa-plus"></i>
+              &nbsp;New Query
+            </button>
+        <h1>SQL Editor</h1>
       </div>
+    </section>
+    <div class="zbase_content_pane fullwidth">
+      <div class="zbase_sql_editor_overview">
 
-      <div class="zbase_sql_editor_content">
+        <div class="zbase_sql_editor_content">
+          <table class="zbase_table zbase_clickable_table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Type</th>
+                <th>Last opened by me</th>
+              </tr>
+            </thead>
+            <tbody>
+            </tbody>
+          </table>
 
-        <section class="zbase_sql_editor_title">
-          <button class="zbase_button zbase_primary_button" data-action="new-query">
-            <i class="fa fa-plus"></i>
-            &nbsp;New Query
-          </button>
-          <h2 class="pagetitle">SQL Editor</h2>
-        </section>
-
-        <table class="zbase_table zbase_clickable_table">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Type</th>
-              <th>Last opened by me</th>
-            </tr>
-          </thead>
-          <tbody>
-          </tbody>
-        </table>
-
-        <fn-modal-dimmer>
-          <fn-modal class="zbase_sql_editor_modal table_descr">
-            <fn-modal-close-icon></fn-modal-close-icon>
-            <div class="zbase_modal_header"></div>
-            <div class="zbase_modal_content">
-              <div class="zbase_loader">
-                <div class="spinner_outer">
-                  <div class="spinner">
-                    <div class="rect1"></div>
-                    <div class="rect2"></div>
-                    <div class="rect3"></div>
-                    <div class="rect4"></div>
-                    <div class="rect5"></div>
+          <fn-modal-dimmer>
+            <fn-modal class="zbase_sql_editor_modal table_descr">
+              <fn-modal-close-icon></fn-modal-close-icon>
+              <div class="zbase_modal_header"></div>
+              <div class="zbase_modal_content">
+                <div class="zbase_loader">
+                  <div class="spinner_outer">
+                    <div class="spinner">
+                      <div class="rect1"></div>
+                      <div class="rect2"></div>
+                      <div class="rect3"></div>
+                      <div class="rect4"></div>
+                      <div class="rect5"></div>
+                    </div>
                   </div>
                 </div>
+
+                <div class="error_message"></div>
+
+                <table class="zbase_table">
+                  <thead><tr></tr></thead>
+                  <tbody></tbody>
+                </table>
               </div>
-
-              <div class="error_message"></div>
-
-              <table class="zbase_table">
-                <thead><tr></tr></thead>
-                <tbody></tbody>
-              </table>
-            </div>
-          </fn-modal>
-        </fn-modal-dimmer>
+            </fn-modal>
+          </fn-modal-dimmer>
+        </div>
       </div>
     </div>
   </div>
