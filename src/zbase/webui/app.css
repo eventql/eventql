@@ -645,6 +645,10 @@ table.zbase_table {
   border-spacing: 0;
 }
 
+table.zbase_table.hidden {
+  display: none;
+}
+
 table.zbase_table thead th {
   background: transparent;
   box-shadow: 0 1px 2px rgba(0,0,0,.09);
