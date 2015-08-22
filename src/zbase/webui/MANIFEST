@@ -5,6 +5,7 @@ route {
   require_module: "sql_editor"
   require_module: "fn-codeeditor"
   require_module: "event_source_handler"
+  require_module: "fn-modal"
 }
 
 route {
