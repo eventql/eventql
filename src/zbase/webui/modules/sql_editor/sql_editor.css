@@ -48,7 +48,8 @@
   font-size: 13px;
   font-weight: 500;
   float: right;
-  margin-top: 12px;
+  margin-top: 20px;
+  margin-right: 3px;
 }
 
 .zbase_sql_editor .zbase_sql_editor_infobar {
@@ -87,6 +88,11 @@
 
 .zbase_sql_editor table.zbase_table tbody tr a {
   color: #888;
+}
+
+.zbase_sql_editor table.zbase_table thead tr th:first-child,
+.zbase_sql_editor table.zbase_table tbody tr td:first-child {
+  padding-left: 20px;
 }
 
 .zbase_sql_editor table.zbase_table tbody tr td:first-child a {
