@@ -19,6 +19,17 @@
   margin-bottom: 10px;
 }
 
+.zbase_sql_editor .zbase_sql_editor_sidebar ul.zbase_sql_editor_table_list {
+  padding: 0;
+  margin: 0;
+  list-style-type: none;
+}
+
+.zbase_sql_editor .zbase_sql_editor_sidebar ul.zbase_sql_editor_table_list li {
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+
 .zbase_sql_editor .zbase_sql_editor_sidebar a.link {
   font-size: 13px;
 }
@@ -104,6 +115,18 @@
   margin-top: 0;
 }
 
+.zbase_sql_editor .resizer_tooltip {
+  height: 20px;
+  background: url(data:image/gif;base64,R0lGODlhZwABAJEAAPD2+Nve3////////yH5BAEAAAMALAAAAABnAAEAAAINhI+py60hopy02otrAQA7) left center repeat-y #fff;
+  cursor: row-resize;
+  border-bottom: 1px solid #c9d0d4;
+}
+
+.zbase_sql_editor .zbase_sql_editor_modal.table_descr .zbase_modal_content {
+  height: 300px;
+  overflow: auto;
+}
+
 /**
   * Overview
   */
@@ -114,11 +137,11 @@
 /**
   * Editor
   */
-.zbase_sql_editor .zbase_sql_editor_pane /deep/ .CodeMirror-gutters {
+.zbase_sql_editor_pane /deep/ .CodeMirror-gutters {
   background: #f0f6f8;
 }
 
-.zbase_sql_editor .zbase_sql_editor_pane /deep/ .CodeMirror {
+.zbase_sql_editor_pane /deep/ .CodeMirror {
   border-left: none;
   border-right: none;
   border-bottom: none;
@@ -127,6 +150,10 @@
   -ms-user-select: none;
   -o-user-select: none;
   user-select: none;
+}
+
+.zbase_sql_editor_result_pane.hidden {
+  display: none;
 }
 
 .zbase_sql_editor_result_pane .zbase_result_pane_bar {
@@ -198,17 +225,25 @@
   padding-left: 20px;
 }
 
-.zbase_sql_editor_modal .modal_content h4 {
+.zbase_sql_editor_modal .zbase_modal_content h4 {
   margin: 5px 0 10px;
   font-weight: 400;
   font-size: 14px;
 }
 
-.zbase_sql_editor_modal .modal_content input.zbase_input {
+.zbase_sql_editor_modal .zbase_modal_content input.zbase_input {
   font-size: 14px;
   width: 40%;
 }
 
-.zbase_sql_editor_modal .modal_footer .zbase_button {
+.zbase_sql_editor_modal .zbase_modal_footer .zbase_button {
   float: right;
+}
+
+.zbase_loader.zbase_sql_result_loader {
+  min-height: 200px;
+}
+
+.zbase_loader.zbase_sql_result_loader.hidden {
+  display: none;
 }

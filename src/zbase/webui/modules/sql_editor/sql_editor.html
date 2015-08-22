@@ -1,15 +1,29 @@
 <template id="zbase_sql_editor_overview_main_tpl">
   <div class="zbase_content_pane">
-    <div class="zbase_sql_editor">
+    <div class="zbase_sql_editor zbase_sql_editor_overview">
       <div class="zbase_sql_editor_sidebar">
         <section class="sidebar_section">
           <h3 class="sidebar_title">
             <i class="fa fa-database"></i>&nbsp; Tables
           </h3>
+
+          <div class="zbase_loader">
+            <div class="spinner_outer">
+              <div class="spinner">
+                <div class="rect1"></div>
+                <div class="rect2"></div>
+                <div class="rect3"></div>
+                <div class="rect4"></div>
+                <div class="rect5"></div>
+              </div>
+            </div>
+          </div>
+
+          <ul class="zbase_sql_editor_table_list" style="display:none;"></ul>
         </section>
       </div>
 
-      <div class="zbase_sql_editor_content zbase_sql_editor_overview">
+      <div class="zbase_sql_editor_content">
 
         <div class="zbase_loader fullscreen">
           <div class="spinner_outer">
@@ -42,6 +56,33 @@
           <tbody>
           </tbody>
         </table>
+
+        <fn-modal-dimmer>
+          <fn-modal class="zbase_sql_editor_modal table_descr">
+            <fn-modal-close-icon></fn-modal-close-icon>
+            <div class="zbase_modal_header"></div>
+            <div class="zbase_modal_content">
+              <div class="zbase_loader">
+                <div class="spinner_outer">
+                  <div class="spinner">
+                    <div class="rect1"></div>
+                    <div class="rect2"></div>
+                    <div class="rect3"></div>
+                    <div class="rect4"></div>
+                    <div class="rect5"></div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="error_message"></div>
+
+              <table class="zbase_table">
+                <thead><tr></tr></thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </fn-modal>
+        </fn-modal-dimmer>
       </div>
     </div>
   </div>
@@ -49,7 +90,7 @@
 
 <template id="zbase_sql_editor_main_tpl">
   <div class="zbase_content_pane">
-    <div class="zbase_sql_editor">
+    <div class="zbase_sql_editor zbase_sql_editor_pane">
       <div class="zbase_sql_editor_sidebar">
         <div>
           <a class="link"><i class="fa fa-copy"></i>&nbsp;Clone tis query</a>
@@ -58,10 +99,24 @@
           <h3 class="sidebar_title">
             <i class="fa fa-database"></i>&nbsp;Tables
           </h3>
+
+          <div class="zbase_loader">
+            <div class="spinner_outer">
+              <div class="spinner">
+                <div class="rect1"></div>
+                <div class="rect2"></div>
+                <div class="rect3"></div>
+                <div class="rect4"></div>
+                <div class="rect5"></div>
+              </div>
+            </div>
+          </div>
+
+          <ul class="zbase_sql_editor_table_list" style="display:none;"></ul>
         </section>
       </div>
 
-      <div class="zbase_sql_editor_content zbase_sql_editor_pane">
+      <div class="zbase_sql_editor_content">
 
         <div class="zbase_loader fullscreen">
           <div class="spinner_outer">
@@ -90,7 +145,19 @@
 
         <fn-codeeditor data-language="text/x-chartsql" data-content='query_content' style="height: 250px;"></fn-codeeditor>
 
-        <div class='zbase_resizer_tooltip' draggable="true"></div>
+        <div class='resizer_tooltip' draggable="true"></div>
+
+        <div class="zbase_loader zbase_sql_result_loader hidden">
+          <div class="spinner_outer">
+            <div class="spinner">
+              <div class="rect1"></div>
+              <div class="rect2"></div>
+              <div class="rect3"></div>
+              <div class="rect4"></div>
+              <div class="rect5"></div>
+            </div>
+          </div>
+        </div>
 
         <div class="error_message hidden">
           <h3>Error</h3>
@@ -101,19 +168,44 @@
         </div>
 
         <fn-modal-dimmer>
-          <fn-modal class="zbase_sql_editor_modal">
+          <fn-modal class="zbase_sql_editor_modal rename_query">
             <fn-modal-close-icon></fn-modal-close-icon>
-            <div class="zbase_inner_modal">
-              <div class="modal_header">Rename Query</div>
-              <div class="modal_content">
-                <h4>Enter a new query name</h4>
-                <input class="zbase_input" name="doc_name" />
+            <div class="zbase_modal_header">Rename Query</div>
+            <div class="zbase_modal_content">
+              <h4>Enter a new query name</h4>
+              <input class="zbase_input" name="doc_name" />
+            </div>
+            <div class="zbase_modal_footer">
+              <button class="zbase_button zbase_primary_button" data-action="submit">
+                Save
+              </button>
+            </div>
+          </fn-modal>
+        </fn-modal-dimmer>
+
+        <fn-modal-dimmer>
+          <fn-modal class="zbase_sql_editor_modal table_descr">
+            <fn-modal-close-icon></fn-modal-close-icon>
+            <div class="zbase_modal_header"></div>
+            <div class="zbase_modal_content">
+              <div class="zbase_loader">
+                <div class="spinner_outer">
+                  <div class="spinner">
+                    <div class="rect1"></div>
+                    <div class="rect2"></div>
+                    <div class="rect3"></div>
+                    <div class="rect4"></div>
+                    <div class="rect5"></div>
+                  </div>
+                </div>
               </div>
-              <div class="modal_footer">
-                <button class="zbase_button zbase_primary_button">
-                  Save
-                </button>
-              </div>
+
+              <div class="error_message"></div>
+
+              <table class="zbase_table">
+                <thead><tr></tr></thead>
+                <tbody></tbody>
+              </table>
             </div>
           </fn-modal>
         </fn-modal-dimmer>
