@@ -92,9 +92,29 @@
 
         <div class='zbase_resizer_tooltip' draggable="true"></div>
 
-        <fn-modal-dimmer style="display: none;">
-          <fn-modal>
-            <input name="doc_name" />
+        <div class="error_message hidden">
+          <h3>Error</h3>
+          <div class="error_text"></div>
+        </div>
+
+        <div class="zbase_sql_editor_result_pane">
+        </div>
+
+        <fn-modal-dimmer>
+          <fn-modal class="zbase_sql_editor_modal">
+            <fn-modal-close-icon></fn-modal-close-icon>
+            <div class="zbase_inner_modal">
+              <div class="modal_header">Rename Query</div>
+              <div class="modal_content">
+                <h4>Enter a new query name</h4>
+                <input class="zbase_input" name="doc_name" />
+              </div>
+              <div class="modal_footer">
+                <button class="zbase_button zbase_primary_button">
+                  Save
+                </button>
+              </div>
+            </div>
           </fn-modal>
         </fn-modal-dimmer>
       </div>
