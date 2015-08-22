@@ -347,69 +347,72 @@ ZBase.registerView((function() {
     }, false);
   };
 
-
-  /**
-    * SQL Editor Overview
-    */
-  var renderQueryListView = function() {
-    var viewport = document.getElementById("zbase_viewport");
-    var page = ZBase.getTemplate(
-      "sql_editor", "zbase_sql_editor_overview_main_tpl");
-
-    viewport.innerHTML = "";
-    viewport.appendChild(page);
-
-    //Overview.load();
-    //Overview.handleNewQueryButton();
-    //renderTableList(document.querySelector(".zbase_sql_editor_overview"));
-  };
-
-  Overview.handleNewQueryButton = function() {
-    document.querySelector(
-      ".zbase_sql_editor button[data-action='new-query']")
-      .addEventListener("click", function() {
-        ZBase.util.httpPost("/api/v1/documents/sql_queries", "", function(r) {
-          var response = JSON.parse(r.response);
-          window.location.href = "/a/sql/" + response.uuid;
-        });
-      });
-  };
-
-  Overview.renderTable = function(documents) {
-    var tbody = document.querySelector(".zbase_sql_editor_overview tbody");
-    documents.forEach(function(doc) {
-      var url = "/a/sql/" + doc.uuid;
-      var tr = document.createElement("tr");
-      tr.innerHTML = "<td><a href='" + url + "'>" + doc.name + "</a></td><td>" +
-        "<a href='" + url + "'>" + doc.type + "</a></td><td><a href='" + 
-        url + "'>&mdash;</a></td>";
-      tbody.appendChild(tr);
-
-      tr.addEventListener("click", function() {
-        window.location.href = url;
-      });
-    });
-
-    document.querySelector(".zbase_sql_editor_overview .zbase_loader.fullscreen")
-      .classList.add("hidden");
-  };
-
-  Overview.load = function() {
-    ZBase.util.httpGet("/api/v1/documents", function(r) {
+  var createNewQuery = function() {
+    ZBase.util.httpPost("/api/v1/documents/sql_queries", "", function(r) {
       if (r.status == 200) {
-        var documents = JSON.parse(r.response).documents;
-        Overview.renderTable(documents);
+        var response = JSON.parse(r.response);
+        ZBase.navigateTo("/a/sql/" + response.uuid);
       } else {
         //TODO render error message
       }
     });
   };
 
+  var renderQueryListView = function(documents) {
+    var viewport = document.getElementById("zbase_viewport");
+    var page = ZBase.getTemplate(
+      "sql_editor", "zbase_sql_editor_overview_main_tpl");
+
+    // render documents list
+    var documents_table = page.querySelector(".zbase_sql_editor_overview tbody");
+    documents.forEach(function(doc) {
+      var url = "/a/sql/" + doc.uuid;
+      var tr = document.createElement("tr");
+      tr.innerHTML = "<td><a href='" + url + "'>" + doc.name + "</a></td><td>" +
+        "<a href='" + url + "'>" + doc.type + "</a></td><td><a href='" + 
+        url + "'>&mdash;</a></td>";
+
+      tr.addEventListener("click", function(e) {
+        e.preventDefault();
+        ZBase.navigateTo(url);
+        return false;
+      });
+
+      documents_table.appendChild(tr);
+    });
+
+    // install new query button click handler
+    var new_query_button =
+        page.querySelector(".zbase_sql_editor button[data-action='new-query']");
+
+    new_query_button.addEventListener("click", function(e) {
+      e.preventDefault();
+      createNewQuery();
+      return false;
+    });
+
+    ZBase.util.install_link_handlers(page);
+    viewport.innerHTML = "";
+    viewport.appendChild(page);
+  };
+
+  var displayQueryListView = function() {
+    ZBase.util.httpGet("/api/v1/documents", function(r) {
+      if (r.status == 200) {
+        var documents = JSON.parse(r.response).documents;
+        renderQueryListView(documents);
+      } else {
+        //TODO render error message
+      }
+    });
+  }
+
   var render = function(path) {
     if (path == "/a/sql") {
-      renderQueryListView();
+      displayQueryListView();
     } else {
-      Editor.render();
+      //renderQueryEditor("id");
+      //Editor.render();
     }
   };
 
