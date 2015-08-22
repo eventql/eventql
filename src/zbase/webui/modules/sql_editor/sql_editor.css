@@ -47,10 +47,10 @@
 .zbase_sql_editor .zbase_button {
   font-size: 13px;
   font-weight: 500;
+  float: right;
 }
 
 .zbase_sql_editor .zbase_page_title .zbase_button {
-  float: right;
   margin-top: 20px;
   margin-right: 3px;
 }
