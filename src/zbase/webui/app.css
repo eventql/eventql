@@ -610,6 +610,11 @@ zbase_input.csv zbase_input-value i {
   font-weight: 400;
 }
 
+.zbase_button.disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+
 /**
   * zbase_primary_button
   */
