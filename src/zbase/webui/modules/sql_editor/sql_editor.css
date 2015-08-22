@@ -35,30 +35,20 @@
 }
 
 .zbase_sql_editor .zbase_sql_editor_content {
-  margin-right: 320px;
   border-left: 1px solid #ddd;
   border-right: 1px solid #ddd;
   min-height: 900px; /* FIXME */
 }
 
-.zbase_sql_editor .zbase_sql_editor_title {
-  padding: 0 20px;
-  overflow: auto;
-  border-bottom: 1px solid #ddd;
+.zbase_sql_editor .zbase_sql_editor_content.with_sidebar {
+  margin-right: 320px;
 }
 
-.zbase_sql_editor .zbase_button {
+.zbase_sql_editor .zbase_page_title .zbase_button {
   font-size: 13px;
-}
-
-.zbase_sql_editor .zbase_sql_editor_title .zbase_button {
+  font-weight: 500;
   float: right;
-  margin-top: 15px;
-  margin-left: 10px;
-}
-
-.zbase_sql_editor .zbase_sql_editor_title .pagetitle {
-  float:left;
+  margin-top: 12px;
 }
 
 .zbase_sql_editor .zbase_sql_editor_infobar {
@@ -83,7 +73,21 @@
 }
 
 .zbase_sql_editor table.zbase_table {
-  font-size: 12px;
+  font-size: 14px;
+}
+
+.zbase_sql_editor table.zbase_table thead th {
+  font-weight: 400;
+  color: #888;
+}
+
+.zbase_sql_editor table.zbase_table tbody tr td {
+  line-height: 24px;
+}
+
+.zbase_sql_editor table.zbase_table tbody tr td:first-child a {
+  font-weight: 500;
+  color: #444;
 }
 
 .zbase_sql_editor .error_message {
