@@ -10,6 +10,8 @@ package zbase;
 
 message WebUIModuleConfig {
 
+  optional bool is_public = 4;
+
   repeated string html_file = 1;
 
   repeated string css_file = 2;
