@@ -220,6 +220,8 @@ h2.pagetitle.border_bottom {
   z-index: 999999;
   height: 100%;
   width: 100%;
+  top: 0px;
+  left: 0px;
   color: #fff;
 }
 
