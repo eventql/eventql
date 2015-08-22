@@ -22,6 +22,20 @@ void WebUIServlet::handleHTTPRequest(
     http::HTTPRequest* request,
     http::HTTPResponse* response) {
   URI uri(request->uri());
+  try {
+    handle(request, response);
+  } catch (const StandardException& e) {
+    logError("zbase", e, "error while handling HTTP request");
+    response->setStatus(http::kStatusInternalServerError);
+    response->addHeader("Content-Type", "text/html; charset=utf-8");
+    response->addBody(FileUtil::read("src/zbase/webui/500.html"));
+  }
+}
+
+void WebUIServlet::handle(
+    http::HTTPRequest* request,
+    http::HTTPResponse* response) {
+  URI uri(request->uri());
 
   auto session = HTTPAuth::authenticateRequest(*request, auth_);
 
