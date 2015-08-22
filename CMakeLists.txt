@@ -7,6 +7,11 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
+set(ZBASE_BUILD_ID $ENV{ZBASE_BUILD_ID})
+if(NOT ZBASE_BUILD_ID)
+  set(ZBASE_BUILD_ID "devel")
+endif()
+
 option(ENABLE_TESTS "Build unit tests [default: ON]" ON)
 
 #set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static")
@@ -37,8 +42,11 @@ find_package(MySQL)
 include_directories(3rdparty/)
 include_directories(src/)
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/src)
+include_directories(${CMAKE_CURRENT_BINARY_DIR}/3rdparty/)
+include_directories(${CMAKE_CURRENT_BINARY_DIR}/3rdparty/pcre)
 
 add_subdirectory(3rdparty/pcre)
+include_directories(3rdparty/pcre)
 set(HAVE_PCRE true)
 
 include(src/stx/cmake/libstx.cmake)

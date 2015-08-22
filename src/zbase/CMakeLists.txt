@@ -10,6 +10,10 @@ add_library(customerdirectory OBJECT
     TableDefinition.cc
     ${PROTO_SRCS})
 
+configure_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/buildconfig.h.cmake
+    ${CMAKE_CURRENT_BINARY_DIR}/buildconfig.h)
+
 add_dependencies(customerdirectory tsdb-server)
 
 add_library(auth OBJECT
@@ -96,6 +100,7 @@ add_executable(zbase
     TrafficSegment.cc
     CTRStatsServlet.cc
     AnalyticsServlet.cc
+    HTTPAuth.cc
     JSONSink.cc
     AnalyticsApp.cc
     AnalyticsQuery.cc
@@ -118,6 +123,7 @@ add_executable(zbase
     TermInfoTableSource.cc
     TermInfoTableSink.cc
     VTable.cc
+    DefaultServlet.cc
     ecommerce/ECommerceKPIQuery.cc
     discovery/CTRByPageQuery.cc
     discovery/CTRByPositionQuery.cc
@@ -155,6 +161,7 @@ add_executable(zbase
     reco_engine/RecoEngineStatsBreakdownQuery.cc
     reco_engine/RecoEngineStatsReport.cc
     reco_engine/RecoStats.cc
+    WebUIServlet.cc
     zbase.cc)
 
 target_link_libraries(zbase chartsql cplot sstable cstable stx-http stx-json stx-protobuf stx-base)

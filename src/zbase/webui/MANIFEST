@@ -1,0 +1,34 @@
+route {
+  path_prefix: "/a/sql"
+  view: "sql_editor"
+  require_module: "doc_sync"
+  require_module: "sql_editor"
+  require_module: "fn-codeeditor"
+  require_module: "event_source_handler"
+  require_module: "fn-modal"
+}
+
+route {
+  path_prefix: "/a/logviewer"
+  view: "logviewer"
+  require_module: "logviewer"
+}
+
+route {
+  is_public: true
+  path_match: "/a/login"
+  view: "login"
+  require_module: "login"
+}
+
+route {
+  path_match: "/a/logout"
+  view: "logout"
+  require_module: "login"
+}
+
+route {
+  path_match: "/a/"
+  view: "appstore"
+  require_module: "appstore"
+}
