@@ -350,9 +350,13 @@ var ZBase = (function() {
   var renderLayout = function() {
     var conf = ZBase.getConfig();
 
+    // viewport min height
+    document.getElementById("zbase_viewport").style.height = window.innerHeight + "px";
+
     // render footer
-    document.querySelector("#zbase_build_id").innerHTML = conf.zbase_build_id;
-    document.querySelector("#zbase_domain").innerHTML = conf.zbase_domain;
+    document.getElementById("zbase_build_id").innerHTML = conf.zbase_build_id;
+    document.getElementById("zbase_domain").innerHTML = conf.zbase_domain;
+    document.getElementById("zbase_footer").classList.remove("hidden");
 
     // render header
     if (conf.current_user) {
