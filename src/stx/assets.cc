@@ -7,12 +7,15 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include <stdlib.h>
 #include "stx/assets.h"
 #include "stx/exception.h"
-#include "stx/io/inputstream.h"
+#include "stx/io/fileutil.h"
 
 namespace stx {
+
+#ifndef _NDEBUG
+static String __asset_search_path;
+#endif
 
 Assets::AssetMap* Assets::globalMap() {
   static AssetMap map;
@@ -35,18 +38,19 @@ void Assets::registerAsset(
   asset_map->assets.emplace(filename, std::make_pair(data, size));
 }
 
+void Assets::setSearchPath(const String& search_path) {
+#ifndef _NDEBUG
+  __asset_search_path = search_path;
+#endif
+}
+
 std::string Assets::getAsset(const std::string& filename) {
 #ifndef _NDEBUG
-  auto dev_asset_path = getenv("DEV_ASSET_PATH");
-
-  if (dev_asset_path != nullptr) {
-    // FIXPAUL check that file exists
-    auto file = FileInputStream::openFile(
-        std::string(dev_asset_path) + "/" + filename);
-
-    std::string asset_str;
-    file->readUntilEOF(&asset_str);
-    return asset_str;
+  if (!__asset_search_path.empty()) {
+    auto fpath = FileUtil::joinPaths(__asset_search_path, filename);
+    if (FileUtil::exists(fpath)) {
+      return FileUtil::read(fpath).toString();
+    }
   }
 #endif
 
