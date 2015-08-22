@@ -207,6 +207,7 @@ ZBase.registerView((function() {
 
     name_elem.addEventListener("click", function() {
       console.log("open update name modal");
+      document.querySelector(".zbase_sql_editor_pane fn-modal").show();
     }, false);
   };
 
