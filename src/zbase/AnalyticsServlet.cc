@@ -64,15 +64,31 @@ AnalyticsServlet::AnalyticsServlet(
 void AnalyticsServlet::handleHTTPRequest(
     RefPtr<http::HTTPRequestStream> req_stream,
     RefPtr<http::HTTPResponseStream> res_stream) {
+  try {
+    handle(req_stream, res_stream);
+  } catch (const StandardException& e) {
+    logError("zbase", e, "error while handling HTTP request");
+    req_stream->discardBody();
+
+    http::HTTPResponse res;
+    res.populateFromRequest(req_stream->request());
+    res.setStatus(http::kStatusInternalServerError);
+    res.addHeader("Content-Type", "text/html; charset=utf-8");
+    res.addBody(FileUtil::read("src/zbase/webui/500.html"));
+    res_stream->writeResponse(res);
+  }
+}
+
+void AnalyticsServlet::handle(
+    RefPtr<http::HTTPRequestStream> req_stream,
+    RefPtr<http::HTTPResponseStream> res_stream) {
   const auto& req = req_stream->request();
   URI uri(req.uri());
 
+  logDebug("zbase", "HTTP Request: $0 $1", req.method(), req.uri());
+
   http::HTTPResponse res;
   res.populateFromRequest(req);
-  //res.addHeader("Access-Control-Allow-Origin", "*"); // FIXME
-  //res.addHeader("Access-Control-Allow-Methods", "GET, POST");
-
-  logDebug("analyticsd", "HTTP Request: $0 $1", req.method(), req.uri());
 
   if (req.method() == http::HTTPMessage::M_OPTIONS) {
     req_stream->readBody();
@@ -80,7 +96,6 @@ void AnalyticsServlet::handleHTTPRequest(
     res_stream->writeResponse(res);
     return;
   }
-
 
   /* AUTH METHODS */
   if (uri.path() == "/api/v1/auth/login") {
@@ -106,9 +121,10 @@ void AnalyticsServlet::handleHTTPRequest(
 
   if (session_opt.isEmpty()) {
     req_stream->readBody();
-    res.addHeader("WWW-Authenticate", "Token");
     res.setStatus(http::kStatusUnauthorized);
-    res.addBody("authorization required");
+    res.addHeader("WWW-Authenticate", "Token");
+    res.addHeader("Content-Type", "text/html; charset=utf-8");
+    res.addBody(FileUtil::read("src/zbase/webui/401.html"));
     res_stream->writeResponse(res);
     return;
   }
@@ -140,7 +156,6 @@ void AnalyticsServlet::handleHTTPRequest(
     res_stream->writeResponse(res);
     return;
   }
-
 
 
   if (uri.path() == "/api/v1/query") {
@@ -251,10 +266,9 @@ void AnalyticsServlet::handleHTTPRequest(
     return;
   }
 
-
-
   res.setStatus(http::kStatusNotFound);
-  res.addBody("not found");
+  res.addHeader("Content-Type", "text/html; charset=utf-8");
+  res.addBody(FileUtil::read("src/zbase/webui/404.html"));
   res_stream->writeResponse(res);
 }
 

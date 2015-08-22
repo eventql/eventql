@@ -51,6 +51,10 @@ public:
 
 protected:
 
+  void handle(
+      RefPtr<stx::http::HTTPRequestStream> req_stream,
+      RefPtr<stx::http::HTTPResponseStream> res_stream);
+
   void getAuthInfo(
       const AnalyticsSession& session,
       const http::HTTPRequest* req,
