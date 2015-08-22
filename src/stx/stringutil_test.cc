@@ -101,6 +101,9 @@ TEST_CASE(StringUtilTest, TestFormat, [] () {
   auto str3 = StringUtil::format("$0 + $1 = $2", 2.5, 6.5, 9);
   EXPECT_EQ(str3, "2.5 + 6.5 = 9");
 
+  auto str5 = StringUtil::format("$0, $1", 1.0, 0.0625);
+  EXPECT_EQ(str5, "1.0, 0.0625");
+
   auto str4 = StringUtil::format("$1$1$1$1$1 $0", "Batman", "Na");
   EXPECT_EQ(str4, "NaNaNaNaNa Batman");
 });

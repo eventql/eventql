@@ -1,5 +1,7 @@
-cmake_minimum_required(VERSION 2.8.8)
 project(libstx)
+cmake_minimum_required(VERSION 2.8.8)
+
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 find_package(Threads)
 include(CheckIncludeFiles)
@@ -72,6 +74,22 @@ if(HAVE_BZLIB_H)
   set(BZIP2_LIBRARIES bz2)
 endif(HAVE_BZLIB_H)
 
+option(ENABLE_PCRE "With PCRE support [default: on]" ON)
+if(NOT HAVE_PCRE)
+  if(ENABLE_PCRE)
+    find_package(PCRE)
+    if (PCRE_FOUND)
+      set(HAVE_PCRE 1)
+    endif()
+  endif()
+endif()
+
+if (HAVE_PCRE)
+  message(STATUS "PCRE found")
+else()
+  message(STATUS "PCRE not found")
+endif()
+
 # required for shm_open/shm_unlink
 if(APPLE)
   set(RT_LIBRARIES)
@@ -92,17 +110,10 @@ set(PROTOBUF_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty)
 set(PROTOBUF_INCLUDE_DIR ${PROTOBUF_INCLUDE_DIR} PARENT_SCOPE)
 include(cmake/CompileProtobuf.cmake)
 
-#PCRE
-add_subdirectory(3rdparty/pcre pcre)
-
-message(STATUS "PCRE INCLUDE: ${CMAKE_CURRENT_BINARY_DIR}/pcre")
-
 # INCLUDES
 set(STX_INCLUDE
     ${PROJECT_BINARY_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty
-    ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/pcre
-    ${CMAKE_CURRENT_BINARY_DIR}/pcre
     ${CMAKE_CURRENT_BINARY_DIR}
     ${CMAKE_CURRENT_BINARY_DIR}/stx
     ${CMAKE_CURRENT_SOURCE_DIR})
@@ -119,7 +130,6 @@ configure_file(
 
 # base
 add_library(stx-base STATIC
-    $<TARGET_OBJECTS:pcre>
     3rdparty/simdcomp/simdbitpacking.c
     3rdparty/simdcomp/simdintegratedbitpacking.c
     3rdparty/simdcomp/simdcomputil.c
@@ -197,8 +207,6 @@ add_library(stx-base STATIC
     VFS.cc
     wallclock.cc
     web/SecureCookie.cc)
-
-add_dependencies(stx-base pcre)
 
 file(GLOB PROTO_FILES *.proto)
 PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS ${PROTO_FILES})
@@ -278,13 +286,9 @@ target_link_libraries(test-protobuf stx-base)
 add_executable(test-persistenthashset util/PersistentHashSet_test.cc)
 target_link_libraries(test-persistenthashset stx-base)
 
-add_subdirectory(mdb)
 add_subdirectory(http)
 add_subdirectory(json)
 add_subdirectory(rpc)
-
-add_subdirectory(net/mysql)
-set(STX_MYSQL_LIBS ${STX_MYSQL_LIBS} PARENT_SCOPE)
 
 set(STX_INCLUDE ${STX_INCLUDE} PARENT_SCOPE)
 set(STX_LDFLAGS ${STX_LDFLAGS} PARENT_SCOPE)
