@@ -391,6 +391,10 @@ h2.pagetitle.border_bottom {
   height: 75px;
 }
 
+.zbase_page_title.small {
+  height: 41px;
+}
+
 section.zbase_page_title zbase-breadcrumbs {
   font-size: 0.75em;
   margin: 8px 0 0 0;
