@@ -255,7 +255,7 @@ ZBase.registerView((function() {
       if (name.length == 0) {
         return;
       }
-      title.innerHTML = name;
+      name_elem.innerHTML = name;
       modal.close();
       Editor.doc_sync.cur_version++;
       Editor.doc_sync.documentChanged("content_changed");
