@@ -8,7 +8,8 @@ add_library(customerdirectory OBJECT
     ConfigDirectory.cc
     SessionSchema.cc
     TableDefinition.cc
-    ${PROTO_SRCS})
+    ${PROTO_SRCS}
+    ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/zbase_assets.cc)
 
 configure_file(
     ${CMAKE_CURRENT_SOURCE_DIR}/buildconfig.h.cmake
