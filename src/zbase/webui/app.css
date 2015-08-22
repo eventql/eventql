@@ -753,6 +753,10 @@ table.zbase_table.zbase_clickable_table tr:hover td {
   float: right;
 }
 
+.zbase_footer.hidden {
+  display: none;
+}
+
 
 /*******************************
            Breadcrumb
