@@ -75,7 +75,7 @@ void AnalyticsServlet::handleHTTPRequest(
     res.populateFromRequest(req_stream->request());
     res.setStatus(http::kStatusInternalServerError);
     res.addHeader("Content-Type", "text/html; charset=utf-8");
-    res.addBody(FileUtil::read("src/zbase/webui/500.html"));
+    res.addBody(Assets::getAsset("zbase/webui/500.html"));
     res_stream->writeResponse(res);
   }
 }
@@ -125,7 +125,7 @@ void AnalyticsServlet::handle(
     res.setStatus(http::kStatusUnauthorized);
     res.addHeader("WWW-Authenticate", "Token");
     res.addHeader("Content-Type", "text/html; charset=utf-8");
-    res.addBody(FileUtil::read("src/zbase/webui/401.html"));
+    res.addBody(Assets::getAsset("zbase/webui/401.html"));
     res_stream->writeResponse(res);
     return;
   }
@@ -269,7 +269,7 @@ void AnalyticsServlet::handle(
 
   res.setStatus(http::kStatusNotFound);
   res.addHeader("Content-Type", "text/html; charset=utf-8");
-  res.addBody(Assets::getAsset("zbase/404.html"));
+  res.addBody(Assets::getAsset("zbase/webui/404.html"));
   res_stream->writeResponse(res);
 }
 

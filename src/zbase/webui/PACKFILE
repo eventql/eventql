@@ -1,8 +1,8 @@
-zbase/400.html:src/zbase/webui/404.html
-zbase/401.html:src/zbase/webui/404.html
-zbase/403.html:src/zbase/webui/404.html
-zbase/404.html:src/zbase/webui/404.html
-zbase/500.html:src/zbase/webui/404.html
+zbase/webui/400.html:src/zbase/webui/404.html
+zbase/webui/401.html:src/zbase/webui/404.html
+zbase/webui/403.html:src/zbase/webui/404.html
+zbase/webui/404.html:src/zbase/webui/404.html
+zbase/webui/500.html:src/zbase/webui/404.html
 zbase/webui/MANIFEST:src/zbase/webui/MANIFEST
 zbase/webui/app.html:src/zbase/webui/app.html
 zbase/webui/app.css:src/zbase/webui/app.css
