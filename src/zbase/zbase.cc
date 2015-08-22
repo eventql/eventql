@@ -49,6 +49,7 @@
 #include "zbase/core/TSDBService.h"
 #include "zbase/core/TSDBServlet.h"
 #include "zbase/core/ReplicationWorker.h"
+#include "zbase/DefaultServlet.h"
 #include "csql/defaults.h"
 #include "zbase/ConfigDirectory.h"
 
@@ -251,12 +252,8 @@ int main(int argc, const char** argv) {
   dproc::DispatchService dproc;
   dproc.registerApp(analytics_app.get(), local_scheduler.get());
 
+  zbase::WebUIServlet webui_servlet(&auth);
 
-  /* web ui */
-  WebUIServlet webui_servlet(&auth);
-  http_router.addRouteByPrefixMatch("/a/", &webui_servlet);
-
-  /* api */
   zbase::AnalyticsServlet analytics_servlet(
       analytics_app,
       &dproc,
@@ -268,7 +265,11 @@ int main(int argc, const char** argv) {
       &customer_dir,
       &docdb);
 
+  zbase::DefaultServlet default_servlet;
+
+  http_router.addRouteByPrefixMatch("/a/", &webui_servlet);
   http_router.addRouteByPrefixMatch("/api/", &analytics_servlet, &tpool);
+  http_router.addRouteByPrefixMatch("/", &default_servlet);
 
   {
     FeedConfig fc;

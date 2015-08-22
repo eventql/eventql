@@ -119,6 +119,7 @@ add_executable(zbase
     TermInfoTableSource.cc
     TermInfoTableSink.cc
     VTable.cc
+    DefaultServlet.cc
     ecommerce/ECommerceKPIQuery.cc
     discovery/CTRByPageQuery.cc
     discovery/CTRByPositionQuery.cc
