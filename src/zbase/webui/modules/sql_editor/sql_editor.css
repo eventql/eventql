@@ -122,6 +122,11 @@
   border-bottom: 1px solid #c9d0d4;
 }
 
+.zbase_sql_editor .zbase_sql_editor_modal.table_descr .zbase_modal_content {
+  height: 300px;
+  overflow: auto;
+}
+
 /**
   * Overview
   */
