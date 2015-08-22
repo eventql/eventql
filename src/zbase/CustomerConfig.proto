@@ -8,12 +8,18 @@
  */
 package zbase;
 
+enum UserAuthTwoFactorMethod {
+  USERAUTH_2FA_NONE = 0;
+  USERAUTH_2FA_U2F = 1;
+};
+
 message UserConfig {
   required string userid = 1;
   required string customer = 2;
   optional uint64 version = 3;
   required string password_hash = 4;
   required string password_salt = 5;
+  optional UserAuthTwoFactorMethod two_factor_method = 6;
 };
 
 message UserDB {
