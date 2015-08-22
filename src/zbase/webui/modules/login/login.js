@@ -69,11 +69,11 @@ ZBase.registerView((function() {
   var displayNextStep = function(next_step, authdata) {
     switch (next_step) {
 
-      case "choose_namespace":
+      case "CHOOSE_NAMESPACE":
         displayNamespacePrompt(authdata);
         break;
 
-      case "2fa":
+      case "2FA":
         displayTwoFactorAuthPrompt(authdata);
         break;
 
