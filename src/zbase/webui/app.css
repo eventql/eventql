@@ -162,6 +162,13 @@ h2.pagetitle.border_bottom {
   padding: 0 20px;
 }
 
+@media (max-width: 1700px) {
+
+  #zbase_viewport > .zbase_content_pane.fullwidth {
+    padding: 0;
+  }
+}
+
 /**
  * zbase_header
  */

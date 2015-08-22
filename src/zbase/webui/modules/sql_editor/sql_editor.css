@@ -1,7 +1,7 @@
 .zbase_sql_editor .zbase_sql_editor_sidebar {
   padding: 20px 20px 0;
   float: right;
-  width: 340px;
+  width: 320px;
   height: 200px;
 }
 
@@ -35,15 +35,16 @@
 }
 
 .zbase_sql_editor .zbase_sql_editor_content {
-  margin-left: 20px;
-  margin-right: 340px;
+  margin-right: 320px;
   border-left: 1px solid #ddd;
   border-right: 1px solid #ddd;
+  min-height: 900px; /* FIXME */
 }
 
 .zbase_sql_editor .zbase_sql_editor_title {
   padding: 0 20px;
   overflow: auto;
+  border-bottom: 1px solid #ddd;
 }
 
 .zbase_sql_editor .zbase_button {

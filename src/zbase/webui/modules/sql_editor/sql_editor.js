@@ -3,7 +3,9 @@ ZBase.registerView((function() {
   var Editor = {};
   var path_parts;
 
-  function renderTableList(source_handler, pane) {
+  var source_handler;
+
+  function renderTableList(pane) {
     var ul = pane.querySelector(".zbase_sql_editor_table_list");
     var source_id = "tables";
     var source = source_handler.get(
@@ -19,7 +21,7 @@ ZBase.registerView((function() {
         li.innerHTML = table[0];
         ul.appendChild(li);
         li.addEventListener('click', function() {
-          renderTableDescriptionModal(source_handler, table[0]);
+          renderTableDescriptionModal(table[0]);
         }, false);
       });
       pane.querySelector(".sidebar_section .zbase_loader").classList.add("hidden");
@@ -27,7 +29,7 @@ ZBase.registerView((function() {
     });
   };
 
-  function renderTableDescriptionModal(source_handler, table) {
+  function renderTableDescriptionModal(table) {
     var modal = document.querySelector(".zbase_sql_editor_modal.table_descr");
     var loader = modal.querySelector(".zbase_loader");
     var source_id = "table_descr";
@@ -103,10 +105,7 @@ ZBase.registerView((function() {
       document.querySelector(".zbase_sql_editor_pane .zbase_sql_editor_infobar")
     );
 
-    Editor.source_handler = new EventSourceHandler();
-    renderTableList(
-      Editor.source_handler,
-      document.querySelector(".zbase_sql_editor_pane"));
+    renderTableList(document.querySelector(".zbase_sql_editor_pane"));
   };
 
   Editor.validateAndFetchDocument = function() {
@@ -186,22 +185,22 @@ ZBase.registerView((function() {
     var id = "query";
 
     Editor.setResultVisibility("loading");
-    Editor.source_handler.close(id);
-    var source = Editor.source_handler.get(
+    source_handler.close(id);
+    var source = source_handler.get(
       id,
       "/api/v1/sql_stream?query=" + encodeURIComponent(query));
 
 
     source.addEventListener('result', function(e) {
       var end = (new Date()).getTime();
-      Editor.source_handler.close(id);
+      source_handler.close(id);
       var data = JSON.parse(e.data);
       Editor.renderResults(data.results);
       Editor.setResultVisibility("result");
     });
 
     source.addEventListener('error', function(e) {
-      Editor.source_handler.close(id);
+      source_handler.close(id);
       try {
         document.querySelector('.zbase_sql_editor_pane .error_text').innerHTML = JSON.parse(e.data).error;
       } catch (e) {
@@ -352,21 +351,17 @@ ZBase.registerView((function() {
   /**
     * SQL Editor Overview
     */
-  Overview.render = function() {
+  var renderQueryListView = function() {
     var viewport = document.getElementById("zbase_viewport");
     var page = ZBase.getTemplate(
       "sql_editor", "zbase_sql_editor_overview_main_tpl");
-    ZBase.util.install_link_handlers(page);
 
     viewport.innerHTML = "";
     viewport.appendChild(page);
 
-    Overview.source_handler = new EventSourceHandler();
-    Overview.load();
-    Overview.handleNewQueryButton();
-    renderTableList(
-      Overview.source_handler,
-      document.querySelector(".zbase_sql_editor_overview"));
+    //Overview.load();
+    //Overview.handleNewQueryButton();
+    //renderTableList(document.querySelector(".zbase_sql_editor_overview"));
   };
 
   Overview.handleNewQueryButton = function() {
@@ -411,32 +406,31 @@ ZBase.registerView((function() {
   };
 
   var render = function(path) {
-    path_parts = path.split("/");
-    var view;
-    // render view
-    if (path_parts.length == 4 && path_parts[3].length > 0) {
-      Editor.render();
+    if (path == "/a/sql") {
+      renderQueryListView();
     } else {
-      Overview.render();
+      Editor.render();
     }
+  };
+
+  var init = function() {
+    source_handler = new EventSourceHandler();
+  };
+
+  var destroy = function() {
+    source_handler.closeAll();
   };
 
   return {
     name: "sql_editor",
 
     loadView: function(params) {
+      init();
       render(params.path);
     },
-    unloadView: function() {
-      if (Editor.source_handler) {
-        Editor.source_handler.closeAll();
-      } else if (Overview.source_handler) {
-        Overview.source_handler.closeAll();
-      }
-    },
-    handleNavigationChange: function(url){
-      render(url);
-    }
+
+    unloadView: destroy,
+    handleNavigationChange: render
   };
 
 })());
