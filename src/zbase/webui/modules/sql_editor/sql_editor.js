@@ -205,12 +205,32 @@ ZBase.registerView((function() {
     var name_elem = document.querySelector(".zbase_sql_editor_pane .pagetitle");
     var modal = document.querySelector(".zbase_sql_editor_pane fn-modal");
     var input = modal.querySelector("input");
+    var submit_btn = modal.querySelector("button[data-action='submit']");
     name_elem.innerHTML = doc_name;
 
     name_elem.addEventListener("click", function() {
       input.value = name_elem.innerText;
       modal.show();
       input.focus();
+    }, false);
+
+    input.addEventListener('keyup', function() {
+      if (input.value.length == 0) {
+        submit_btn.classList.add('disabled');
+      } else if (update_btn.classList.contains('disabled')) {
+        submit_btn.classList.remove("disabled");
+      }
+    }, false);
+
+    submit_btn.addEventListener('click', function() {
+      var name = input.value;
+      if (name.length == 0) {
+        return;
+      }
+      title.innerHTML = name;
+      modal.close();
+      Editor.doc_sync.cur_version++;
+      Editor.doc_sync.documentChanged("content_changed");
     }, false);
   };
 
