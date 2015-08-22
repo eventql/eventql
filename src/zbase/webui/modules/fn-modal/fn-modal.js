@@ -40,7 +40,6 @@ var ModalComponent = function() {
   };
 
   this.show = function() {
-    console.log("show modal");
     var dimmer = this.parentNode;
     if (dimmer && dimmer.tagName == 'FN-MODAL-DIMMER') {
       dimmer.setAttribute('data-active', 'active');
