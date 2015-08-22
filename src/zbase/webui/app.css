@@ -610,6 +610,11 @@ zbase_input.csv zbase_input-value i {
   font-weight: 400;
 }
 
+.zbase_button.disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+
 /**
   * zbase_primary_button
   */
@@ -638,6 +643,10 @@ table.zbase_table {
   width: 100%;
   border-collapse: collapse;
   border-spacing: 0;
+}
+
+table.zbase_table.hidden {
+  display: none;
 }
 
 table.zbase_table thead th {
@@ -676,26 +685,16 @@ table.zbase_table.zbase_clickable_table tr:hover td {
 }
 
 /**
-  * zbase_resizer_tooltip
+  * zbase_modal
   */
-.zbase_resizer_tooltip {
-  height: 20px;
-  background: url(data:image/gif;base64,R0lGODlhZwABAJEAAPD2+Nve3////////yH5BAEAAAMALAAAAABnAAEAAAINhI+py60hopy02otrAQA7) left center repeat-y #fff;
-  cursor: row-resize;
-  border-bottom: 1px solid #c9d0d4;
-}
-
-/**
-  * zbase_inner_modal
-  */
-.zbase_inner_modal .modal_header {
+.zbase_modal_header {
   padding: 1em 15px;
   border-bottom: 1px solid #d0d0d0;
   background-color: #f7f7f9;
   box-shadow: 0 1px 1px rgba(0,0,0,0.1);
 }
 
-.zbase_inner_modal .modal_footer {
+.zbase_modal_footer {
   border-top: 1px solid #d0d0d0;
   background-color: #f7f7f9;
   box-shadow: 0 -6px 6px -6px rgba(0,0,0,0.1);
@@ -703,7 +702,7 @@ table.zbase_table.zbase_clickable_table tr:hover td {
   padding: 5px 15px;
 }
 
-.zbase_inner_modal .modal_content {
+.zbase_modal_content {
   padding: 0.8em 15px 1.2em;
 }
 

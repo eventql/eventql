@@ -1,6 +1,5 @@
 var CodeEditorComponent = function() {
   this.createdCallback = function() {
-    console.log("code editor component");
     var shadow = this.createShadowRoot();
     var tpl = document.getTemplateByID("fn-codeeditor-base-tpl");
     shadow.appendChild(tpl);
