@@ -35,6 +35,10 @@
   overflow: auto;
 }
 
+.zbase_sql_editor .zbase_button {
+  font-size: 13px;
+}
+
 .zbase_sql_editor .zbase_sql_editor_title .zbase_button {
   float: right;
   margin-top: 15px;
@@ -66,15 +70,45 @@
   display: none;
 }
 
+.zbase_sql_editor table.zbase_table {
+  font-size: 12px;
+}
+
+.zbase_sql_editor .error_message {
+  display: block;
+  position: relative;
+  min-height: 1em;
+  padding: 1em 1.5em;
+  line-height: 1.3;
+  color: rgba(0, 0, 0, 0.8);
+  -webkit-transition: opacity 0.2s ease, color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+          transition: opacity 0.2s ease, color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+  border-radius: 0.2857rem;
+  box-shadow: 0px 0px 0px 1px rgba(39, 41, 43, 0.15) inset, 0px 0px 0px 0px transparent;
+  font-size: 1em;
+  font-family: 'Helvetica Neue', Arial, Helvetica, sans-serif;
+  width: 380px;
+  margin: auto;
+  margin-top: 30px;
+  margin-bottom: -10px;
+  font-size: 14px;
+  background: #fff0f0;
+  color: #a94442;
+}
+
+.zbase_sql_editor .error_message.hidden {
+  display: none;
+}
+
+.zbase_sql_editor .error_message h3 {
+  margin-top: 0;
+}
+
 /**
   * Overview
   */
 .zbase_sql_editor .zbase_sql_editor_overview table.zbase_table {
   border-top: 1px solid #e1e1e1;
-}
-
-.zbase_sql_editor .zbase_sql_editor_overview table.zbase_table tbody {
-  font-size: 12px;
 }
 
 /**
@@ -95,3 +129,86 @@
   user-select: none;
 }
 
+.zbase_sql_editor_result_pane .zbase_result_pane_bar {
+  background-color: #f0f6f8;
+  border-bottom: 1px solid #c9d0d4;
+  box-shadow: 0 1px 1px rgba(0,0,0,0.04);
+  height: 38px;
+  overflow: hidden;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  -o-user-select: none;
+  user-select: none;
+}
+
+.zbase_sql_editor_result_pane .zbase_result_pane_bar label {
+  float:left;
+  line-height: 40px;
+  padding: 0 12px;
+  font-size: 13px;
+}
+
+.zbase_sql_editor_result_pane .zbase_result_pane_bar.clickable:before {
+  font-family: FontAwesome;
+  content: "\f0da";
+  float: left;
+  margin-left: 20px;
+  line-height: 38px;
+  width: 10px;
+  opacity: 0.9;
+}
+
+.zbase_sql_editor_result_pane .zbase_result_pane_bar.clickable[data-active]:before {
+  content: "\f0d7";
+}
+
+.zbase_sql_editor_result_pane .zbase_result_pane_bar.clickable:hover {
+  cursor: pointer;
+}
+
+.zbase_sql_editor_result_pane .zbase_result_pane_bar.clickable:hover label {
+  opacity: 1;
+  cursor: pointer;
+}
+
+.zbase_sql_editor_result_pane .zbase_result_pane_bar.clickable[data-active] label {
+  opacity: 1;
+}
+
+.zbase_sql_editor_result_pane .zbase_result_pane_bar + table.zbase_sql_chart,
+.zbase_sql_editor_result_pane .zbase_result_pane_bar + table.zbase_table {
+  display: none;
+}
+
+.zbase_sql_editor_result_pane .zbase_result_pane_bar[data-active] + table.zbase_table {
+  display: table;
+}
+
+.zbase_sql_editor_result_pane .zbase_result_pane_bar[data-active] + table.zbase_sql_chart {
+  display: block;
+}
+
+.zbase_sql_editor_result_pane table.zbase_table {
+  border-bottom: 1px solid #e6e8e9;
+}
+
+.zbase_sql_editor_result_pane table.zbase_table thead th:first-child,
+.zbase_sql_editor_result_pane table.zbase_table tbody td:first-child {
+  padding-left: 20px;
+}
+
+.zbase_sql_editor_modal .modal_content h4 {
+  margin: 5px 0 10px;
+  font-weight: 400;
+  font-size: 14px;
+}
+
+.zbase_sql_editor_modal .modal_content input.zbase_input {
+  font-size: 14px;
+  width: 40%;
+}
+
+.zbase_sql_editor_modal .modal_footer .zbase_button {
+  float: right;
+}

@@ -638,7 +638,6 @@ table.zbase_table {
   width: 100%;
   border-collapse: collapse;
   border-spacing: 0;
-  font-size: 14px;
 }
 
 table.zbase_table thead th {
@@ -655,15 +654,13 @@ table.zbase_table thead th {
   line-height: 1em;
 }
 
-table.zbase_table tbody {
-  font-size: 13px;
-}
 
 table.zbase_table tbody tr td {
   border-top: 1px solid #e1e1e1;
   padding: .7em .8em;
   text-align: left;
   vertical-align: middle;
+  line-height: 1em;
 }
 
 table.zbase_table tbody tr:first-child td {
@@ -688,3 +685,24 @@ table.zbase_table.zbase_clickable_table tr:hover td {
   border-bottom: 1px solid #c9d0d4;
 }
 
+/**
+  * zbase_inner_modal
+  */
+.zbase_inner_modal .modal_header {
+  padding: 1em 15px;
+  border-bottom: 1px solid #d0d0d0;
+  background-color: #f7f7f9;
+  box-shadow: 0 1px 1px rgba(0,0,0,0.1);
+}
+
+.zbase_inner_modal .modal_footer {
+  border-top: 1px solid #d0d0d0;
+  background-color: #f7f7f9;
+  box-shadow: 0 -6px 6px -6px rgba(0,0,0,0.1);
+  overflow: auto;
+  padding: 5px 15px;
+}
+
+.zbase_inner_modal .modal_content {
+  padding: 0.8em 15px 1.2em;
+}
