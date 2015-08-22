@@ -156,6 +156,25 @@ protected:
     }
   }
 
+  String getCookieDomain(const http::HTTPRequest& req) {
+    auto domain = req.getHeader("Host");
+    auto ppos = domain.find(":");
+    if (ppos != String::npos) {
+      domain.erase(domain.begin() + ppos, domain.end());
+    }
+
+    auto parts = StringUtil::split(domain, ".");
+    if (parts.size() > 2) {
+      parts.erase(parts.begin(), parts.end() - 2);
+    }
+
+    if (parts.size() == 2) {
+      return "." + StringUtil::join(parts, ".");
+    } else {
+      return "";
+    }
+  }
+
   RefPtr<AnalyticsApp> app_;
   dproc::DispatchService* dproc_;
   EventIngress* ingress_;

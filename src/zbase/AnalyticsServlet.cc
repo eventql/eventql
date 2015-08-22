@@ -1079,16 +1079,11 @@ void AnalyticsServlet::performLogin(
         HTTPAuth::kSessionCookieKey,
         token,
         WallClock::unixMicros() + HTTPAuth::kSessionLifetimeMicros,
-        "/");
+        "/",
+        getCookieDomain(*req),
+        false,
+        true);
 
-    //res->addCookie(
-    //    HTTPAuth::kSessionCookieKey,
-    //    token,
-    //    WallClock::unixMicros() + HTTPAuth::kSessionLifetimeMicros,
-    //    "/",
-    //    ".zbase.io",
-    //    false, // FIXPAUL https only...
-    //    true);
     Buffer buf;
     json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
 
@@ -1110,7 +1105,13 @@ void AnalyticsServlet::performLogout(
     const URI& uri,
     const http::HTTPRequest* req,
     http::HTTPResponse* res) {
-  res->addCookie(HTTPAuth::kSessionCookieKey, "", 0, "/");
+  res->addCookie(
+      HTTPAuth::kSessionCookieKey,
+      "",
+      0,
+      "/",
+      getCookieDomain(*req));
+
   res->setStatus(http::kStatusOK);
   res->addBody("goodbye");
 }
