@@ -15,6 +15,7 @@
 #include "stx/io/fileutil.h"
 #include "stx/util/Base64.h"
 #include "stx/logging.h"
+#include "stx/assets.h"
 #include "stx/http/cookies.h"
 #include "stx/protobuf/DynamicMessage.h"
 #include "stx/protobuf/MessageEncoder.h"
@@ -268,7 +269,7 @@ void AnalyticsServlet::handle(
 
   res.setStatus(http::kStatusNotFound);
   res.addHeader("Content-Type", "text/html; charset=utf-8");
-  res.addBody(FileUtil::read("src/zbase/webui/404.html"));
+  res.addBody(Assets::getAsset("zbase/404.html"));
   res_stream->writeResponse(res);
 }
 
