@@ -64,7 +64,8 @@ void LogfileAPIServlet::handle(
   }
 
   res.setStatus(http::kStatusNotFound);
-  res.addBody("not found");
+  res.addHeader("Content-Type", "text/html; charset=utf-8");
+  res.addBody(FileUtil::read("src/zbase/webui/404.html"));
   res_stream->writeResponse(res);
 }
 
