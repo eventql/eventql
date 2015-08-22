@@ -103,7 +103,7 @@ ZBase.registerView((function() {
     Editor.source_handler.close(id);
     var source = Editor.source_handler.get(
       id,
-      "/analytics/api/v1/sql_stream?query=" + encodeURIComponent(query));
+      "/api/v1/sql_stream?query=" + encodeURIComponent(query));
 
 
     source.addEventListener('result', function(e) {
@@ -121,7 +121,7 @@ ZBase.registerView((function() {
       try {
         document.querySelector('.zbase_sql_editor_pane .error_text').innerHTML = JSON.parse(e.data).error;
       } catch (e) {
-        document.getElementById('.zbase_sql_editor_pane .error_text').innerHTML = e.data;
+        document.querySelector('.zbase_sql_editor_pane .error_text').innerHTML = e.data;
       }
       document.querySelector('.zbase_sql_editor_pane .error_message')
         .classList.remove("hidden");
