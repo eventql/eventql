@@ -209,18 +209,18 @@
   padding-left: 20px;
 }
 
-.zbase_sql_editor_modal .modal_content h4 {
+.zbase_sql_editor_modal .zbase_modal_content h4 {
   margin: 5px 0 10px;
   font-weight: 400;
   font-size: 14px;
 }
 
-.zbase_sql_editor_modal .modal_content input.zbase_input {
+.zbase_sql_editor_modal .zbase_modal_content input.zbase_input {
   font-size: 14px;
   width: 40%;
 }
 
-.zbase_sql_editor_modal .modal_footer .zbase_button {
+.zbase_sql_editor_modal .zbase_modal_footer .zbase_button {
   float: right;
 }
 
