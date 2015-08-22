@@ -1,0 +1,25 @@
+.zbase_header .button {
+  margin-left: 40px;
+}
+
+.zbase_header ul li .nav {
+  font-size: 13px;
+  display: block;
+  text-decoration: none;
+  padding: 0 10px;
+  line-height: 42px;
+  color: #808A95;
+}
+
+.zbase_header ul li a.active {
+  color: #37485C;
+}
+
+.zbase_header ul li a:hover {
+  color: #486780;
+}
+
+.zbase_header .button {
+  float: right;
+}
+

@@ -33,38 +33,39 @@ void LogfileAPIServlet::handle(
   http::HTTPResponse res;
   res.populateFromRequest(req);
 
-  if (uri.path() == "/analytics/api/v1/logfiles") {
+  if (uri.path() == "/api/v1/logfiles") {
     req_stream->readBody();
     listLogfiles(session, uri, &req, &res);
     res_stream->writeResponse(res);
     return;
   }
 
-  if (uri.path() == "/analytics/api/v1/logfiles/get_definition") {
+  if (uri.path() == "/api/v1/logfiles/get_definition") {
     req_stream->readBody();
     fetchLogfileDefinition(session, uri, &req, &res);
     res_stream->writeResponse(res);
     return;
   }
 
-  if (uri.path() == "/analytics/api/v1/logfiles/scan") {
+  if (uri.path() == "/api/v1/logfiles/scan") {
     scanLogfile(session, uri, req_stream.get(), res_stream.get());
     return;
   }
 
-  if (uri.path() == "/analytics/api/v1/logfiles/scan_partition") {
+  if (uri.path() == "/api/v1/logfiles/scan_partition") {
     scanLogfilePartition(session, uri, req_stream.get(), res_stream.get());
     return;
   }
 
-  if (uri.path() == "/analytics/api/v1/logfiles/upload") {
+  if (uri.path() == "/api/v1/logfiles/upload") {
     uploadLogfile(session, uri, req_stream.get(), &res);
     res_stream->writeResponse(res);
     return;
   }
 
   res.setStatus(http::kStatusNotFound);
-  res.addBody("not found");
+  res.addHeader("Content-Type", "text/html; charset=utf-8");
+  res.addBody(FileUtil::read("src/zbase/webui/404.html"));
   res_stream->writeResponse(res);
 }
 

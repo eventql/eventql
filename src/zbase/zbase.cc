@@ -40,6 +40,7 @@
 #include "zbase/util/mdb/MDB.h"
 #include "zbase/util/mdb/MDBUtil.h"
 #include "zbase/AnalyticsServlet.h"
+#include "zbase/WebUIServlet.h"
 #include "zbase/ReportFactory.h"
 #include "zbase/AnalyticsApp.h"
 #include "zbase/EventIngress.h"
@@ -48,6 +49,7 @@
 #include "zbase/core/TSDBService.h"
 #include "zbase/core/TSDBServlet.h"
 #include "zbase/core/ReplicationWorker.h"
+#include "zbase/DefaultServlet.h"
 #include "csql/defaults.h"
 #include "zbase/ConfigDirectory.h"
 
@@ -67,7 +69,7 @@ int main(int argc, const char** argv) {
       stx::cli::FlagParser::T_INTEGER,
       false,
       NULL,
-      "7004",
+      "8080",
       "Start the public http server on this port",
       "<port>");
 
@@ -250,6 +252,8 @@ int main(int argc, const char** argv) {
   dproc::DispatchService dproc;
   dproc.registerApp(analytics_app.get(), local_scheduler.get());
 
+  zbase::WebUIServlet webui_servlet(&auth);
+
   zbase::AnalyticsServlet analytics_servlet(
       analytics_app,
       &dproc,
@@ -261,7 +265,11 @@ int main(int argc, const char** argv) {
       &customer_dir,
       &docdb);
 
-  http_router.addRouteByPrefixMatch("/analytics", &analytics_servlet, &tpool);
+  zbase::DefaultServlet default_servlet;
+
+  http_router.addRouteByPrefixMatch("/a/", &webui_servlet);
+  http_router.addRouteByPrefixMatch("/api/", &analytics_servlet, &tpool);
+  http_router.addRouteByPrefixMatch("/", &default_servlet);
 
   {
     FeedConfig fc;

@@ -1,0 +1,120 @@
+.zbase_appstore {
+  margin-top: 2px;
+}
+
+.zbase_appstore .zbase_appstore_section {
+  margin-bottom: 20px;
+}
+
+.zbase_appstore .app_card {
+  width: 220px;
+  height: 180px;
+  padding-top: 15px;
+  margin-top: 10px;
+  float: left;
+  text-align: center;
+  border-right: 1px solid #eee;
+}
+
+.zbase_appstore .app_card .app_title {
+  display: block;
+  font-size: 16px;
+  font-weight: 500;
+  padding-top: 15px;
+  color: #1c99d6;
+}
+
+.zbase_appstore .app_card .app_subtitle {
+  color: #666;
+  font-size: 14px;
+}
+
+.zbase_appstore .app_card:hover .hexagon {
+  background-color: #f0f6f8;
+}
+
+.zbase_appstore .app_card:hover .app_title {
+  color: #333;
+}
+
+.zbase_appstore .app_card .hexagon {
+  position: relative;
+  width: 72px; 
+  height: 41.57px;
+  margin: 20.78px auto;
+  /*background-image: url(http://xxx);*/
+  background-color: #fff;
+  background-size: auto 76.2102px;
+  background-position: center;
+  box-shadow: 0 0 4px rgba(0,0,0,0.55);
+  border-left: solid 3px #1c99d6;
+  border-right: solid 3px #1c99d6;
+}
+
+.zbase_appstore .app_card .hexTop,
+.zbase_appstore .app_card .hexBottom {
+  position: absolute;
+  z-index: 1;
+  width: 50.91px;
+  height: 50.91px;
+  overflow: hidden;
+  -webkit-transform: scaleY(0.5774) rotate(-45deg);
+  -ms-transform: scaleY(0.5774) rotate(-45deg);
+  transform: scaleY(0.5774) rotate(-45deg);
+  background: inherit;
+  left: 7.54px;
+  box-shadow: 0 0 4px rgba(0,0,0,0.55);
+}
+
+/*counter transform the bg image on the caps*/
+.zbase_appstore .app_card .hexTop:after,
+.zbase_appstore .app_card .hexBottom:after {
+  content: "";
+  position: absolute;
+  width: 66.0000px;
+  height: 38.1051177665153px;
+  -webkit-transform:  rotate(45deg) scaleY(1.7321) translateY(-19.0526px);
+  -ms-transform:      rotate(45deg) scaleY(1.7321) translateY(-19.0526px);
+  transform:          rotate(45deg) scaleY(1.7321) translateY(-19.0526px);
+  -webkit-transform-origin: 0 0;
+  -ms-transform-origin: 0 0;
+  transform-origin: 0 0;
+  background: inherit;
+}
+
+.zbase_appstore .app_card .hexTop {
+  top: -25.4558px;
+  border-top: solid 4.2426px #1c99d6;
+  border-right: solid 4.2426px #1c99d6;
+}
+
+.zbase_appstore .app_card .hexTop:after {
+  background-position: center top;
+}
+
+.zbase_appstore .app_card .hexBottom {
+  bottom: -25.4558px;
+  border-bottom: solid 4.2426px #1c99d6;
+  border-left: solid 4.2426px #1c99d6;
+}
+
+.zbase_appstore .app_card .hexBottom:after {
+  background-position: center bottom;
+}
+
+.zbase_appstore .app_card .hexagon:after {
+  content: "";
+  position: absolute;
+  top: 1.7321px;
+  left: 0;
+  width: 66.0000px;
+  height: 38.1051px;
+  z-index: 2;
+  background: inherit;
+}
+
+.zbase_appstore h2.app_category {
+  font-size: 16px;
+  font-weight: 500;
+  padding: 0;
+}

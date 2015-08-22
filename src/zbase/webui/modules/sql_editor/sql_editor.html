@@ -1,0 +1,123 @@
+<template id="zbase_sql_editor_overview_main_tpl">
+  <div class="zbase_content_pane">
+    <div class="zbase_sql_editor">
+      <div class="zbase_sql_editor_sidebar">
+        <section class="sidebar_section">
+          <h3 class="sidebar_title">
+            <i class="fa fa-database"></i>&nbsp; Tables
+          </h3>
+        </section>
+      </div>
+
+      <div class="zbase_sql_editor_content zbase_sql_editor_overview">
+
+        <div class="zbase_loader fullscreen">
+          <div class="spinner_outer">
+            <div class="spinner">
+              <div class="rect1"></div>
+              <div class="rect2"></div>
+              <div class="rect3"></div>
+              <div class="rect4"></div>
+              <div class="rect5"></div>
+            </div>
+          </div>
+        </div>
+
+        <section class="zbase_sql_editor_title">
+          <button class="zbase_button zbase_primary_button" data-action="new-query">
+            <i class="fa fa-plus"></i>
+            &nbsp;New Query
+          </button>
+          <h2 class="pagetitle">SQL Editor</h2>
+        </section>
+
+        <table class="zbase_table zbase_clickable_table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Type</th>
+              <th>Last opened by me</th>
+            </tr>
+          </thead>
+          <tbody>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</template>
+
+<template id="zbase_sql_editor_main_tpl">
+  <div class="zbase_content_pane">
+    <div class="zbase_sql_editor">
+      <div class="zbase_sql_editor_sidebar">
+        <div>
+          <a class="link"><i class="fa fa-copy"></i>&nbsp;Clone tis query</a>
+        </div>
+        <section class="sidebar_section">
+          <h3 class="sidebar_title">
+            <i class="fa fa-database"></i>&nbsp;Tables
+          </h3>
+        </section>
+      </div>
+
+      <div class="zbase_sql_editor_content zbase_sql_editor_pane">
+
+        <div class="zbase_loader fullscreen">
+          <div class="spinner_outer">
+            <div class="spinner">
+              <div class="rect1"></div>
+              <div class="rect2"></div>
+              <div class="rect3"></div>
+              <div class="rect4"></div>
+              <div class="rect5"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="zbase_sql_editor_infobar hidden"></div>
+        <section class="zbase_sql_editor_title">
+          <button class="zbase_button zbase_primary_button" data-action="execute-query">
+            <i class="fa fa-bolt"></i>
+            &nbsp;Execute
+          </button>
+          <button class="zbase_button zbase_secondary_button" data-action="share-query">
+            <i class="fa fa-share-alt"></i>
+            &nbsp;Share
+          </button>
+          <h2 class="pagetitle editable" data-action='edit-query-name'></h2>
+        </section>
+
+        <fn-codeeditor data-language="text/x-chartsql" data-content='query_content' style="height: 250px;"></fn-codeeditor>
+
+        <div class='zbase_resizer_tooltip' draggable="true"></div>
+
+        <div class="error_message hidden">
+          <h3>Error</h3>
+          <div class="error_text"></div>
+        </div>
+
+        <div class="zbase_sql_editor_result_pane">
+        </div>
+
+        <fn-modal-dimmer>
+          <fn-modal class="zbase_sql_editor_modal">
+            <fn-modal-close-icon></fn-modal-close-icon>
+            <div class="zbase_inner_modal">
+              <div class="modal_header">Rename Query</div>
+              <div class="modal_content">
+                <h4>Enter a new query name</h4>
+                <input class="zbase_input" name="doc_name" />
+              </div>
+              <div class="modal_footer">
+                <button class="zbase_button zbase_primary_button">
+                  Save
+                </button>
+              </div>
+            </div>
+          </fn-modal>
+        </fn-modal-dimmer>
+      </div>
+    </div>
+  </div>
+</template>
