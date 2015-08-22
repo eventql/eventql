@@ -85,9 +85,13 @@
   line-height: 24px;
 }
 
+.zbase_sql_editor table.zbase_table tbody tr a {
+  color: #888;
+}
+
 .zbase_sql_editor table.zbase_table tbody tr td:first-child a {
-  font-weight: 500;
-  color: #444;
+  font-weight: 400;
+  color: #000;
 }
 
 .zbase_sql_editor .error_message {
