@@ -113,8 +113,8 @@ var ZBase = (function() {
 
   var applyNavigationChange = function() {
     if (current_view && current_view.name == current_route.view) {
-      current_view.handleNavigationChange(current_path);
       hideLoader();
+      current_view.handleNavigationChange(current_path);
       return;
     }
 
@@ -129,8 +129,8 @@ var ZBase = (function() {
       return;
     }
 
-    current_view.loadView({path: current_path, config: config});
     hideLoader();
+    current_view.loadView({path: current_path, config: config});
   };
 
   var changeNavigation = function(path) {

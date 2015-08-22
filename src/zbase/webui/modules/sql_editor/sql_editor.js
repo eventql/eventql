@@ -394,9 +394,11 @@ ZBase.registerView((function() {
     ZBase.util.install_link_handlers(page);
     viewport.innerHTML = "";
     viewport.appendChild(page);
+    ZBase.hideLoader();
   };
 
   var displayQueryListView = function() {
+    ZBase.showLoader();
     ZBase.util.httpGet("/api/v1/documents", function(r) {
       if (r.status == 200) {
         var documents = JSON.parse(r.response).documents;
