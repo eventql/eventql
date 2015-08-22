@@ -87,14 +87,6 @@ ZBase.registerView((function() {
     * SQL Editor
     */
   Editor.render = function() {
-    var viewport = document.getElementById("zbase_viewport");
-    var page = ZBase.getTemplate(
-      "sql_editor", "zbase_sql_editor_main_tpl");
-    ZBase.util.install_link_handlers(page);
-
-    viewport.innerHTML = "";
-    viewport.appendChild(page);
-
     Editor.validateAndFetchDocument();
 
     Editor.doc_sync = new DocSync(function() {
@@ -358,6 +350,18 @@ ZBase.registerView((function() {
     });
   };
 
+  var displayQueryEditor = function(query_id) {
+    var viewport = document.getElementById("zbase_viewport");
+    var page = ZBase.getTemplate(
+      "sql_editor", "zbase_sql_editor_main_tpl");
+    ZBase.util.install_link_handlers(page);
+
+    viewport.innerHTML = "";
+    viewport.appendChild(page);
+
+    
+  };
+
   var renderQueryListView = function(documents) {
     var viewport = document.getElementById("zbase_viewport");
     var page = ZBase.getTemplate(
@@ -413,8 +417,8 @@ ZBase.registerView((function() {
     if (path == "/a/sql") {
       displayQueryListView();
     } else {
-      //renderQueryEditor("id");
-      //Editor.render();
+      var path_prefix = "/a/sql/"
+      displayQueryEditor(path.substr(path_prefix.length));
     }
   };
 
