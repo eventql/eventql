@@ -3,13 +3,17 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR}/)
 file(GLOB PROTO_FILES *.proto)
 PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS ${PROTO_FILES})
 
+if(CMAKE_BUILD_TYPE MATCHES Release)
+  set(ZBASE_ASSETS_SRCS "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/zbase_assets.cc")
+endif()
+
 add_library(customerdirectory OBJECT
     CustomerConfig.cc
     ConfigDirectory.cc
     SessionSchema.cc
     TableDefinition.cc
     ${PROTO_SRCS}
-    ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/zbase_assets.cc)
+    ${ZBASE_ASSETS_SRCS})
 
 configure_file(
     ${CMAKE_CURRENT_SOURCE_DIR}/buildconfig.h.cmake
