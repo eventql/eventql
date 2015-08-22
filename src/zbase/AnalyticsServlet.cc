@@ -83,7 +83,7 @@ void AnalyticsServlet::handleHTTPRequest(
 
 
   /* AUTH METHODS */
-  if (uri.path() == "/analytics/api/v1/auth/login") {
+  if (uri.path() == "/api/v1/auth/login") {
     expectHTTPPost(req);
     req_stream->readBody();
     performLogin(uri, &req, &res);
@@ -91,7 +91,7 @@ void AnalyticsServlet::handleHTTPRequest(
     return;
   }
 
-  if (uri.path() == "/analytics/api/v1/auth/logout") {
+  if (uri.path() == "/api/v1/auth/logout") {
     expectHTTPPost(req);
     req_stream->readBody();
     performLogout(uri, &req, &res);
@@ -115,26 +115,26 @@ void AnalyticsServlet::handleHTTPRequest(
 
   const auto& session = session_opt.get();
 
-  if (StringUtil::beginsWith(uri.path(), "/analytics/api/v1/logfiles")) {
+  if (StringUtil::beginsWith(uri.path(), "/api/v1/logfiles")) {
     logfile_api_.handle(session, req_stream, res_stream);
     return;
   }
 
-  if (StringUtil::beginsWith(uri.path(), "/analytics/api/v1/documents")) {
+  if (StringUtil::beginsWith(uri.path(), "/api/v1/documents")) {
     req_stream->readBody();
     documents_api_.handle(session, &req, &res);
     res_stream->writeResponse(res);
     return;
   }
 
-  if (uri.path() == "/analytics/api/v1/auth/info") {
+  if (uri.path() == "/api/v1/auth/info") {
     req_stream->readBody();
     getAuthInfo(session, &req, &res);
     res_stream->writeResponse(res);
     return;
   }
 
-  if (uri.path() == "/analytics/api/v1/auth/private_api_token") {
+  if (uri.path() == "/api/v1/auth/private_api_token") {
     req_stream->readBody();
     getPrivateAPIToken(session, &req, &res);
     res_stream->writeResponse(res);
@@ -143,39 +143,39 @@ void AnalyticsServlet::handleHTTPRequest(
 
 
 
-  if (uri.path() == "/analytics/api/v1/query") {
+  if (uri.path() == "/api/v1/query") {
     req_stream->readBody();
     executeQuery(session, uri, req_stream.get(), res_stream.get());
     return;
   }
 
-  if (uri.path() == "/analytics/api/v1/feeds/fetch") {
+  if (uri.path() == "/api/v1/feeds/fetch") {
     req_stream->readBody();
     fetchFeed(uri, &req, &res);
     res_stream->writeResponse(res);
     return;
   }
 
-  if (uri.path() == "/analytics/api/v1/reports/generate") {
+  if (uri.path() == "/api/v1/reports/generate") {
     req_stream->readBody();
     generateReport(uri, req_stream.get(), res_stream.get());
     return;
   }
 
-  if (uri.path() == "/analytics/api/v1/reports/download") {
+  if (uri.path() == "/api/v1/reports/download") {
     req_stream->readBody();
     downloadReport(uri, req_stream.get(), res_stream.get());
     return;
   }
 
-  if (uri.path() == "/analytics/api/v1/push_events") {
+  if (uri.path() == "/api/v1/push_events") {
     req_stream->readBody();
     pushEvents(uri, &req, &res);
     res_stream->writeResponse(res);
     return;
   }
 
-  if (uri.path() == "/analytics/api/v1/pipeline_info") {
+  if (uri.path() == "/api/v1/pipeline_info") {
     req_stream->readBody();
     pipelineInfo(session, &req, &res);
     res_stream->writeResponse(res);
@@ -184,21 +184,21 @@ void AnalyticsServlet::handleHTTPRequest(
 
 
   /* SESSION TRACKING */
-  if (uri.path() == "/analytics/api/v1/session_tracking/events") {
+  if (uri.path() == "/api/v1/session_tracking/events") {
     req_stream->readBody();
     sessionTrackingListEvents(session, &req, &res);
     res_stream->writeResponse(res);
     return;
   }
 
-  if (uri.path() == "/analytics/api/v1/session_tracking/event_info") {
+  if (uri.path() == "/api/v1/session_tracking/event_info") {
     req_stream->readBody();
     sessionTrackingEventInfo(session, &req, &res);
     res_stream->writeResponse(res);
     return;
   }
 
-  if (uri.path() == "/analytics/api/v1/session_tracking/attributes") {
+  if (uri.path() == "/api/v1/session_tracking/attributes") {
     req_stream->readBody();
     sessionTrackingListAttributes(session, &req, &res);
     res_stream->writeResponse(res);
@@ -207,7 +207,7 @@ void AnalyticsServlet::handleHTTPRequest(
 
 
   /* METRICS */
-  if (uri.path() == "/analytics/api/v1/metrics") {
+  if (uri.path() == "/api/v1/metrics") {
     req_stream->readBody();
     switch (req.method()) {
       case http::HTTPMessage::M_POST:
@@ -221,7 +221,7 @@ void AnalyticsServlet::handleHTTPRequest(
 
 
   /* TABLES */
-  if (uri.path() == "/analytics/api/v1/tables/create_table") {
+  if (uri.path() == "/api/v1/tables/create_table") {
     expectHTTPPost(req);
     req_stream->readBody();
     createTable(session, &req, &res);
@@ -229,7 +229,7 @@ void AnalyticsServlet::handleHTTPRequest(
     return;
   }
 
-  if (uri.path() == "/analytics/api/v1/tables/upload_table") {
+  if (uri.path() == "/api/v1/tables/upload_table") {
     expectHTTPPost(req);
     uploadTable(uri, session, req_stream.get(), &res);
     res_stream->writeResponse(res);
@@ -238,14 +238,14 @@ void AnalyticsServlet::handleHTTPRequest(
 
 
   /* SQL */
-  if (uri.path() == "/analytics/api/v1/sql") {
+  if (uri.path() == "/api/v1/sql") {
     req_stream->readBody();
     executeSQL(session, &req, &res);
     res_stream->writeResponse(res);
     return;
   }
 
-  if (uri.path() == "/analytics/api/v1/sql_stream") {
+  if (uri.path() == "/api/v1/sql_stream") {
     req_stream->readBody();
     executeSQLStream(uri, session, &req, &res, res_stream);
     return;
