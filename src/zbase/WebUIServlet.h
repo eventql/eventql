@@ -27,6 +27,10 @@ public:
 
 protected:
 
+  void handle(
+      http::HTTPRequest* request,
+      http::HTTPResponse* response);
+
   String loadFile(const String& filename);
 
   void renderConfig(
