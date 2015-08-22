@@ -149,7 +149,7 @@ h2.pagetitle.border_bottom {
 
 /* .zbase_wrap, .zbase_viewport */
 #zbase_viewport {
-  min-width: 1000px;
+  min-width: 960px;
   min-height: 100%;
   width: 100%;
   top: 39px;
@@ -157,7 +157,7 @@ h2.pagetitle.border_bottom {
 }
 
 #zbase_viewport > .zbase_content_pane {
-  min-width: 1000px;
+  min-width: 960px;
   min-height: 100%;
   margin: auto;
   max-width: 1700px;
@@ -182,7 +182,7 @@ h2.pagetitle.border_bottom {
 .zbase_header .navigation_inner {
   margin: auto;
   max-width: 1700px;
-  min-width: 1000px;
+  min-width: 960px;
   box-sizing: border-box;
   padding: 0 20px;
 }
@@ -355,7 +355,7 @@ h2.pagetitle.border_bottom {
   padding: 0 18px;
   margin: auto;
   max-width: 1700px;
-  min-width: 1000px;
+  min-width: 960px;
 }
 
 .zbase_page_title h1 {
