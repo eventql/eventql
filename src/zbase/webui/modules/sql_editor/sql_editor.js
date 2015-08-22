@@ -134,7 +134,7 @@ ZBase.registerView((function() {
 
   Editor.setQueryContent = function(query) {
     document.querySelector(".zbase_sql_editor_pane fn-codeeditor").setValue(query);
-    if (query != "-- SELECT ... FROM ...;" && query.length > 0) {
+    if (query.length > 0) {
       Editor.executeQuery(query);
     }
   };

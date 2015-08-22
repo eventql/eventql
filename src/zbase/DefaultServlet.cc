@@ -7,6 +7,7 @@
  * permission is obtained.
  */
 #include <stx/http/cookies.h>
+#include <stx/assets.h>
 #include <zbase/DefaultServlet.h>
 #include <zbase/HTTPAuth.h>
 
@@ -40,7 +41,7 @@ void DefaultServlet::handleHTTPRequest(
 
   response->setStatus(http::kStatusNotFound);
   response->addHeader("Content-Type", "text/html; charset=utf-8");
-  response->addBody(FileUtil::read("src/zbase/webui/404.html"));
+  response->addBody(Assets::getAsset("zbase/webui/404.html"));
 }
 
 }

@@ -29,7 +29,7 @@ void WebUIServlet::handleHTTPRequest(
     logError("zbase", e, "error while handling HTTP request");
     response->setStatus(http::kStatusInternalServerError);
     response->addHeader("Content-Type", "text/html; charset=utf-8");
-    response->addBody(FileUtil::read("src/zbase/webui/500.html"));
+    response->addBody(Assets::getAsset("zbase/webui/500.html"));
   }
 }
 
@@ -80,7 +80,7 @@ void WebUIServlet::handle(
     if (session.isEmpty() && !module_cfg.is_public()) {
       response->setStatus(http::kStatusForbidden);
       response->addHeader("Content-Type", "text/html; charset=utf-8");
-      response->addBody(FileUtil::read("src/zbase/webui/403.html"));
+      response->addBody(Assets::getAsset("zbase/webui/403.html"));
       return;
     }
 
@@ -129,7 +129,7 @@ void WebUIServlet::handle(
 }
 
 String WebUIServlet::loadFile(const String& filename) {
-  return FileUtil::read("src/zbase/webui/" + filename).toString();
+  return Assets::getAsset("zbase/webui/" + filename);
 }
 
 void WebUIServlet::renderConfig(
