@@ -341,9 +341,10 @@ ZBase.registerView((function() {
 
   var createNewQuery = function() {
     ZBase.util.httpPost("/api/v1/documents/sql_queries", "", function(r) {
-      if (r.status == 200) {
+      if (r.status == 201) {
         var response = JSON.parse(r.response);
         ZBase.navigateTo("/a/sql/" + response.uuid);
+        return;
       } else {
         //TODO render error message
       }
@@ -358,8 +359,6 @@ ZBase.registerView((function() {
 
     viewport.innerHTML = "";
     viewport.appendChild(page);
-
-    
   };
 
   var renderQueryListView = function(documents) {
