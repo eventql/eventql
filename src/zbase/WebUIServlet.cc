@@ -11,6 +11,7 @@
 #include <zbase/WebUIServlet.h>
 #include <zbase/WebUIModuleConfig.pb.h>
 #include <zbase/HTTPAuth.h>
+#include <zbase/buildconfig.h>
 
 namespace zbase {
 
@@ -202,6 +203,11 @@ void WebUIServlet::renderConfig(
   json->addComma();
   json->addObjectEntry("default_route");
   json->addString(session.isEmpty() ? "/a/login" : "/a/");
+  json->addComma();
+
+  json->addObjectEntry("zbase_build_id");
+  json->addString(ZBASE_BUILD_ID);
+  json->addComma();
 
   json->endObject();
 }

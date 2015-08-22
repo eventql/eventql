@@ -10,6 +10,10 @@ add_library(customerdirectory OBJECT
     TableDefinition.cc
     ${PROTO_SRCS})
 
+configure_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/buildconfig.h.cmake
+    ${CMAKE_CURRENT_BINARY_DIR}/buildconfig.h)
+
 add_dependencies(customerdirectory tsdb-server)
 
 add_library(auth OBJECT
