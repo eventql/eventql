@@ -80,6 +80,10 @@ ZBase.registerView((function() {
     });
   };
 
+
+  /**
+    * SQL Editor
+    */
   Editor.render = function() {
     var viewport = document.getElementById("zbase_viewport");
     var page = ZBase.getTemplate(
@@ -344,6 +348,10 @@ ZBase.registerView((function() {
     }, false);
   };
 
+
+  /**
+    * SQL Editor Overview
+    */
   Overview.render = function() {
     var viewport = document.getElementById("zbase_viewport");
     var page = ZBase.getTemplate(
@@ -353,8 +361,12 @@ ZBase.registerView((function() {
     viewport.innerHTML = "";
     viewport.appendChild(page);
 
+    Overview.source_handler = new EventSourceHandler();
     Overview.load();
     Overview.handleNewQueryButton();
+    renderTableList(
+      Overview.source_handler,
+      document.querySelector(".zbase_sql_editor_overview"));
   };
 
   Overview.handleNewQueryButton = function() {
@@ -383,7 +395,7 @@ ZBase.registerView((function() {
       });
     });
 
-    document.querySelector(".zbase_sql_editor_overview .zbase_loader")
+    document.querySelector(".zbase_sql_editor_overview .zbase_loader.fullscreen")
       .classList.add("hidden");
   };
 
@@ -418,6 +430,8 @@ ZBase.registerView((function() {
     unloadView: function() {
       if (Editor.source_handler) {
         Editor.source_handler.closeAll();
+      } else if (Overview.source_handler) {
+        Overview.source_handler.closeAll();
       }
     },
     handleNavigationChange: function(url){
