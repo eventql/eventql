@@ -203,11 +203,14 @@ ZBase.registerView((function() {
 
   Editor.handleNameEditing = function(doc_name) {
     var name_elem = document.querySelector(".zbase_sql_editor_pane .pagetitle");
+    var modal = document.querySelector(".zbase_sql_editor_pane fn-modal");
+    var input = modal.querySelector("input");
     name_elem.innerHTML = doc_name;
 
     name_elem.addEventListener("click", function() {
-      console.log("open update name modal");
-      document.querySelector(".zbase_sql_editor_pane fn-modal").show();
+      input.value = name_elem.innerText;
+      modal.show();
+      input.focus();
     }, false);
   };
 
