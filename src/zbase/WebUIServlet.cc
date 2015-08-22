@@ -62,7 +62,12 @@ void WebUIServlet::handleHTTPRequest(
     auto module_cfg = msg::parseText<WebUIModuleConfig>(
         loadFile(StringUtil::format("modules/$0/MANIFEST", module_name)));
 
-    // FIXME check that module if module is public/private
+    if (session.isEmpty() && !module_cfg.is_public()) {
+      response->setStatus(http::kStatusForbidden);
+      response->addHeader("Content-Type", "text/html; charset=utf-8");
+      response->addBody(FileUtil::read("src/zbase/webui/403.html"));
+      return;
+    }
 
     String module_html;
 
