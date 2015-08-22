@@ -450,20 +450,6 @@ ZBase.util.buildQueryString = function(params) {
 
 
 document.getTemplateByID = function(template_name) {
-  var template_selector = "#" + template_name;
-
-  var template = document.querySelector(template_selector);
-  if (!template) {
-    var imports = document.querySelectorAll("link[rel=import]");
-    for (var i = 0; !template && i < imports.length; ++i) {
-      template = imports[i].import.querySelector(template_selector);
-    }
-  }
-
-  if (!template) {
-    return null;
-  }
-
-  return document.importNode(template.content, true);
+  return ZBase.getTemplate("", template_name);
 };
 
