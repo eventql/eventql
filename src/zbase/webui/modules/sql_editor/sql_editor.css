@@ -136,6 +136,10 @@
   user-select: none;
 }
 
+.zbase_sql_editor_result_pane.hidden {
+  display: none;
+}
+
 .zbase_sql_editor_result_pane .zbase_result_pane_bar {
   background-color: #f0f6f8;
   border-bottom: 1px solid #c9d0d4;
@@ -220,4 +224,10 @@
   float: right;
 }
 
+.zbase_loader.zbase_sql_result_loader {
+  min-height: 200px;
+}
 
+.zbase_loader.zbase_sql_result_loader.hidden {
+  display: none;
+}

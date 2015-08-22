@@ -100,6 +100,7 @@ ZBase.registerView((function() {
   Editor.executeQuery = function(query) {
     var id = "query";
 
+    Editor.setResultVisibility("loading");
     Editor.source_handler.close(id);
     var source = Editor.source_handler.get(
       id,
@@ -110,23 +111,50 @@ ZBase.registerView((function() {
       var end = (new Date()).getTime();
       Editor.source_handler.close(id);
       var data = JSON.parse(e.data);
-      document.querySelector('.zbase_sql_editor_pane .error_message')
-        .classList.add("hidden");
       Editor.renderResults(data.results);
+      Editor.setResultVisibility("result");
     });
 
     source.addEventListener('error', function(e) {
       Editor.source_handler.close(id);
-      //result_pane.style.display = "none";
       try {
         document.querySelector('.zbase_sql_editor_pane .error_text').innerHTML = JSON.parse(e.data).error;
       } catch (e) {
         document.querySelector('.zbase_sql_editor_pane .error_text').innerHTML = e.data;
       }
-      document.querySelector('.zbase_sql_editor_pane .error_message')
-        .classList.remove("hidden");
+      Editor.setResultVisibility("error");
     });
 
+  };
+
+  Editor.setResultVisibility = function(state) {
+    switch (state) {
+      case "loading":
+        document.querySelector('.zbase_sql_editor_result_pane')
+          .classList.add("hidden");
+        document.querySelector('.zbase_sql_editor_pane .error_message')
+          .classList.add("hidden");
+        document.querySelector(".zbase_sql_result_loader")
+          .classList.remove("hidden");
+        return;
+
+      case "error":
+        document.querySelector('.zbase_sql_editor_pane .error_message')
+          .classList.remove("hidden");
+        document.querySelector(".zbase_sql_result_loader")
+          .classList.add("hidden");
+        return;
+
+      case "result":
+        document.querySelector('.zbase_sql_editor_result_pane')
+          .classList.remove("hidden");
+        document.querySelector(".zbase_sql_result_loader")
+          .classList.add("hidden");
+      return;
+
+      default:
+        break;
+    }
   };
 
   Editor.renderResultTable = function(rows, columns) {
