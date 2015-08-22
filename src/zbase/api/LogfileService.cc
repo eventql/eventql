@@ -259,7 +259,7 @@ bool LogfileService::scanRemoteLogfilePartition(
       host.hostAndPort());
 
   auto url = StringUtil::format(
-      "http://$0/analytics/api/v1/logfiles/scan_partition?table=$1&partition=$2&limit=$3",
+      "http://$0/api/v1/logfiles/scan_partition?table=$1&partition=$2&limit=$3",
       host.hostAndPort(),
       URI::urlEncode(table_name),
       partition_key.toString(),

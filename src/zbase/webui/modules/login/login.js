@@ -20,7 +20,7 @@ ZBase.registerView((function() {
     var postdata = ZBase.util.buildQueryString(authdata);
 
     ZBase.showLoader();
-    ZBase.util.httpPost("/analytics/api/v1/auth/login", postdata, function(http) {
+    ZBase.util.httpPost("/api/v1/auth/login", postdata, function(http) {
       ZBase.hideLoader();
       hideErrorMessage();
 

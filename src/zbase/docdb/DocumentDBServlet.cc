@@ -22,12 +22,12 @@ void DocumentDBServlet::handle(
     stx::http::HTTPResponse* res) {
   URI uri(req->uri());
 
-  if (uri.path() == "/analytics/api/v1/documents") {
+  if (uri.path() == "/api/v1/documents") {
     listDocuments(session, req, res);
     return;
   }
 
-  if (StringUtil::beginsWith(uri.path(), "/analytics/api/v1/documents/")) {
+  if (StringUtil::beginsWith(uri.path(), "/api/v1/documents/")) {
     documentREST(uri, session, req, res);
     return;
   }
@@ -41,7 +41,7 @@ void DocumentDBServlet::documentREST(
     const AnalyticsSession& session,
     const http::HTTPRequest* req,
     http::HTTPResponse* res) {
-  static String prefix = "/analytics/api/v1/documents/";
+  static String prefix = "/api/v1/documents/";
   auto path_parts = StringUtil::split(uri.path().substr(prefix.size()), "/");
 
   switch (req->method()) {
