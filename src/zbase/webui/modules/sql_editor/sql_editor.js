@@ -99,7 +99,7 @@ ZBase.registerView((function() {
       return "content=" + encodeURIComponent(document.querySelector(".zbase_sql_editor_pane fn-codeeditor").getValue()) +
       "&name=" + encodeURIComponent(document.querySelector(".zbase_sql_editor_pane input[name='doc_name']").value)
       },
-      "/api/v1/sql_queries/" + Editor.doc_id,
+      "/api/v1/documents/sql_queries/" + Editor.doc_id,
       document.querySelector(".zbase_sql_editor_pane .zbase_sql_editor_infobar")
     );
 
@@ -176,8 +176,8 @@ ZBase.registerView((function() {
       var new_value = editor.getValue();
       if (value == new_value) {return;}
       value = new_value;
-      /*Editor.doc_sync.cur_version++;
-      Editor.doc_sync.documentChanged("content_changed");*/
+      Editor.doc_sync.cur_version++;
+      Editor.doc_sync.documentChanged("content_changed");
     }, false);
 
   };
@@ -331,7 +331,7 @@ ZBase.registerView((function() {
     input.addEventListener('keyup', function() {
       if (input.value.length == 0) {
         submit_btn.classList.add('disabled');
-      } else if (update_btn.classList.contains('disabled')) {
+      } else if (submit_btn.classList.contains('disabled')) {
         submit_btn.classList.remove("disabled");
       }
     }, false);
