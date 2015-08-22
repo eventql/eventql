@@ -34,8 +34,19 @@ protected:
   String loadFile(const String& filename);
 
   void renderConfig(
+      http::HTTPRequest* request,
       const Option<AnalyticsSession>& session,
       json::JSONOutputStream* json);
+
+  String getDomain(const http::HTTPRequest& req) {
+    auto domain = req.getHeader("Host");
+    auto ppos = domain.find(":");
+    if (ppos != String::npos) {
+      domain.erase(domain.begin() + ppos, domain.end());
+    }
+
+    return domain;
+  }
 
   AnalyticsAuth* auth_;
 };

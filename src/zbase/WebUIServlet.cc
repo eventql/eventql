@@ -61,7 +61,7 @@ void WebUIServlet::handle(
     Buffer buf;
     json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
 
-    renderConfig(session, &json);
+    renderConfig(request, session, &json);
 
     response->setStatus(http::kStatusOK);
     response->addHeader("Content-Type", "application/json; charset=utf-8");
@@ -116,7 +116,7 @@ void WebUIServlet::handle(
   Buffer app_config;
   json::JSONOutputStream app_config_json(
       BufferOutputStream::fromBuffer(&app_config));
-  renderConfig(session, &app_config_json);
+  renderConfig(request, session, &app_config_json);
 
   auto app_html = loadFile("app.html");
   StringUtil::replaceAll(&app_html, "{{app_css}}", loadFile("app.css"));
@@ -133,6 +133,7 @@ String WebUIServlet::loadFile(const String& filename) {
 }
 
 void WebUIServlet::renderConfig(
+    http::HTTPRequest* request,
     const Option<AnalyticsSession>& session,
     json::JSONOutputStream* json) {
   auto app_cfg = msg::parseText<WebUIAppConfig>(loadFile("MANIFEST"));
@@ -205,9 +206,12 @@ void WebUIServlet::renderConfig(
   json->addString(session.isEmpty() ? "/a/login" : "/a/");
   json->addComma();
 
+  json->addObjectEntry("zbase_domain");
+  json->addString(getDomain(*request));
+  json->addComma();
+
   json->addObjectEntry("zbase_build_id");
   json->addString(ZBASE_BUILD_ID);
-  json->addComma();
 
   json->endObject();
 }

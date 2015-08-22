@@ -21,8 +21,7 @@ html {
 }
 
 html, body{
-  min-height: 100%;
-  height: auto;
+  height: 100%;
   overflow-x:hidden;
 }
 
@@ -152,8 +151,7 @@ h2.pagetitle.border_bottom {
   min-width: 960px;
   min-height: 100%;
   width: 100%;
-  top: 39px;
-  position: absolute;
+  margin-top: 39px;
 }
 
 #zbase_viewport > .zbase_content_pane {
@@ -706,3 +704,21 @@ table.zbase_table.zbase_clickable_table tr:hover td {
 .zbase_inner_modal .modal_content {
   padding: 0.8em 15px 1.2em;
 }
+
+/**
+ * zbase_footer
+ */
+.zbase_footer {
+  border-top: 1px solid #eee;
+  clear: both;
+  font-size: 70%;
+  padding: 6px 14px 6px 14px;
+  opacity: 0.8;
+  width: 100%;
+  margin-bottom: 0;
+}
+
+.zbase_footer a {
+  float: right;
+}
+

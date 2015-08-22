@@ -349,13 +349,18 @@ var ZBase = (function() {
 
   var renderLayout = function() {
     var conf = ZBase.getConfig();
-    var elem = document.querySelector("#zbase_header");
 
+    // render footer
+    document.querySelector("#zbase_build_id").innerHTML = conf.zbase_build_id;
+    document.querySelector("#zbase_domain").innerHTML = conf.zbase_domain;
+
+    // render header
     if (conf.current_user) {
       ZBase.loadModules(["header_widget"], function() {
         ZBase.util.header_widget.render();
       });
     } else {
+      var elem = document.querySelector("#zbase_header");
       elem.classList.remove("hidden");
       elem.innerHTML = "";
       elem.appendChild(ZBase.getTemplate("", "zbase_header_default_tpl"))
