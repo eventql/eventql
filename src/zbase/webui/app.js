@@ -464,6 +464,12 @@ $.buildQueryString = function(params) {
   return qs;
 }
 
+$.replaceViewport = function(new_content) {
+  var viewport = document.getElementById("zbase_viewport");
+  viewport.innerHTML = "";
+  viewport.appendChild(new_content);
+}
+
 document.getTemplateByID = function(template_name) {
   return $.getTemplate("", template_name);
 };
