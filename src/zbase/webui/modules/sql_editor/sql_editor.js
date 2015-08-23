@@ -110,7 +110,7 @@ ZBase.registerView((function() {
     }
 
     // fetch document
-    ZBase.util.httpGet("/api/v1/documents/sql_queries/" + Editor.doc_id, function(r) {
+    $.httpGet("/api/v1/documents/sql_queries/" + Editor.doc_id, function(r) {
       if (r.status == 200) {
         var doc = JSON.parse(r.response);
         Editor.handleNameEditing(doc.name);
@@ -340,10 +340,10 @@ ZBase.registerView((function() {
   };
 
   var createNewQuery = function() {
-    ZBase.util.httpPost("/api/v1/documents/sql_queries", "", function(r) {
+    $.httpPost("/api/v1/documents/sql_queries", "", function(r) {
       if (r.status == 201) {
         var response = JSON.parse(r.response);
-        ZBase.navigateTo("/a/sql/" + response.uuid);
+        $.navigateTo("/a/sql/" + response.uuid);
         return;
       } else {
         //TODO render error message
@@ -353,7 +353,7 @@ ZBase.registerView((function() {
 
   var displayQueryEditor = function(query_id) {
     var viewport = document.getElementById("zbase_viewport");
-    var page = ZBase.getTemplate(
+    var page = $.getTemplate(
       "sql_editor", "zbase_sql_editor_main_tpl");
     $.handleLinks(page);
 
@@ -363,7 +363,7 @@ ZBase.registerView((function() {
 
   var renderQueryListView = function(documents) {
     var viewport = document.getElementById("zbase_viewport");
-    var page = ZBase.getTemplate(
+    var page = $.getTemplate(
       "sql_editor", "zbase_sql_editor_overview_main_tpl");
 
     // render documents list
@@ -377,7 +377,7 @@ ZBase.registerView((function() {
 
       tr.addEventListener("click", function(e) {
         e.preventDefault();
-        ZBase.navigateTo(url);
+        $.navigateTo(url);
         return false;
       });
 
@@ -392,12 +392,12 @@ ZBase.registerView((function() {
     $.handleLinks(page);
     viewport.innerHTML = "";
     viewport.appendChild(page);
-    ZBase.hideLoader();
+    $.hideLoader();
   };
 
   var displayQueryListView = function() {
-    ZBase.showLoader();
-    ZBase.util.httpGet("/api/v1/documents", function(r) {
+    $.showLoader();
+    $.httpGet("/api/v1/documents", function(r) {
       if (r.status == 200) {
         var documents = JSON.parse(r.response).documents;
         renderQueryListView(documents);
