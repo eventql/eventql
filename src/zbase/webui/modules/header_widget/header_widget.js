@@ -10,7 +10,7 @@ ZBase.util.header_widget = (function() {
     elem.querySelector(".namespace_info").innerHTML = conf.current_user.namespace;
     elem.classList.remove("hidden");
 
-    ZBase.util.install_link_handlers(elem);
+    $.handleLinks(elem);
   };
 
   return {

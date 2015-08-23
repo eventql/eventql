@@ -368,7 +368,7 @@ var ZBase = (function() {
       elem.classList.remove("hidden");
       elem.innerHTML = "";
       elem.appendChild(ZBase.getTemplate("", "zbase_header_default_tpl"))
-      ZBase.util.install_link_handlers(elem);
+      $.handleLinks(elem);
     }
   };
 
@@ -388,7 +388,7 @@ var ZBase = (function() {
   };
 })();
 
-ZBase.util.install_link_handlers = function(elem) {
+$.handleLinks = function(elem) {
   var click_fn = (function() {
     return function(e) {
       var href = this.getAttribute("href");
