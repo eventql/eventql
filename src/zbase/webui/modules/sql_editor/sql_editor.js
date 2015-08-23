@@ -385,14 +385,9 @@ ZBase.registerView((function() {
     });
 
     // install new query button click handler
-    var new_query_button =
-        page.querySelector(".zbase_sql_editor button[data-action='new-query']");
-
-    new_query_button.addEventListener("click", function(e) {
-      e.preventDefault();
-      createNewQuery();
-      return false;
-    });
+    $.onClick(
+        page.querySelector(".zbase_sql_editor button[data-action='new-query']"),
+        createNewQuery);
 
     ZBase.util.install_link_handlers(page);
     viewport.innerHTML = "";

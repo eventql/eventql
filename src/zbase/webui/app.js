@@ -409,6 +409,14 @@ ZBase.util.install_link_handlers = function(elem) {
   }
 };
 
+ZBase.util.onClick = function(elem, fn) {
+  elem.addEventListener("click", function(e) {
+    e.preventDefault();
+    fn();
+    return false;
+  });
+};
+
 ZBase.util.httpPost = function(url, request, callback) {
   var http = new XMLHttpRequest();
   http.open("POST", url, true);
@@ -448,6 +456,7 @@ ZBase.util.buildQueryString = function(params) {
   return qs;
 }
 
+var $ = ZBase.util;
 
 document.getTemplateByID = function(template_name) {
   return ZBase.getTemplate("", template_name);
