@@ -355,7 +355,7 @@ ZBase.registerView((function() {
     var viewport = document.getElementById("zbase_viewport");
     var page = ZBase.getTemplate(
       "sql_editor", "zbase_sql_editor_main_tpl");
-    ZBase.util.install_link_handlers(page);
+    $.handleLinks(page);
 
     viewport.innerHTML = "";
     viewport.appendChild(page);
@@ -389,7 +389,7 @@ ZBase.registerView((function() {
         page.querySelector(".zbase_sql_editor button[data-action='new-query']"),
         createNewQuery);
 
-    ZBase.util.install_link_handlers(page);
+    $.handleLinks(page);
     viewport.innerHTML = "";
     viewport.appendChild(page);
     ZBase.hideLoader();
