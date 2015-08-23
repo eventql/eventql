@@ -200,7 +200,7 @@ var ZBase = (function() {
 
           document.body.appendChild(link);
         } else {
-          ZBase.util.httpGet(import_url, function(http) {
+          $.httpGet(import_url, function(http) {
             if (http.status == 200) {
               var dummy = document.createElement("div");
               dummy.innerHTML = http.responseText;
@@ -348,7 +348,7 @@ var ZBase = (function() {
   };
 
   var renderLayout = function() {
-    var conf = ZBase.getConfig();
+    var conf = $.getConfig();
 
     // viewport min height
     document.getElementById("zbase_viewport").style.minHeight = window.innerHeight + "px";
@@ -361,13 +361,13 @@ var ZBase = (function() {
     // render header
     if (conf.current_user) {
       ZBase.loadModules(["header_widget"], function() {
-        ZBase.util.header_widget.render();
+        HeaderWidget.render();
       });
     } else {
       var elem = document.querySelector("#zbase_header");
       elem.classList.remove("hidden");
       elem.innerHTML = "";
-      elem.appendChild(ZBase.getTemplate("", "zbase_header_default_tpl"))
+      elem.appendChild($.getTemplate("", "zbase_header_default_tpl"))
       $.handleLinks(elem);
     }
   };
@@ -383,10 +383,18 @@ var ZBase = (function() {
     getTemplate: getTemplate,
     fatalError: showFatalError,
     showLoader: showLoader,
-    hideLoader: hideLoader,
-    util: {}
+    hideLoader: hideLoader
   };
 })();
+
+var $ = {
+  navigateTo: ZBase.navigateTo,
+  getConfig: ZBase.getConfig,
+  getTemplate: ZBase.getTemplate,
+  fatalError: ZBase.showFatalError,
+  showLoader: ZBase.showLoader,
+  hideLoader: ZBase.hideLoader
+};
 
 $.handleLinks = function(elem) {
   var click_fn = (function() {
@@ -394,7 +402,7 @@ $.handleLinks = function(elem) {
       var href = this.getAttribute("href");
 
       if (href.indexOf("/a/") == 0) {
-        ZBase.navigateTo(href);
+        $.navigateTo(href);
         e.preventDefault();
         return false;
       } else {
@@ -409,7 +417,7 @@ $.handleLinks = function(elem) {
   }
 };
 
-ZBase.util.onClick = function(elem, fn) {
+$.onClick = function(elem, fn) {
   elem.addEventListener("click", function(e) {
     e.preventDefault();
     fn();
@@ -417,7 +425,7 @@ ZBase.util.onClick = function(elem, fn) {
   });
 };
 
-ZBase.util.httpPost = function(url, request, callback) {
+$.httpPost = function(url, request, callback) {
   var http = new XMLHttpRequest();
   http.open("POST", url, true);
   var start = (new Date()).getTime();
@@ -432,7 +440,7 @@ ZBase.util.httpPost = function(url, request, callback) {
   }
 };
 
-ZBase.util.httpGet = function(url, callback) {
+$.httpGet = function(url, callback) {
   var http = new XMLHttpRequest();
   http.open("GET", url, true);
   http.send();
@@ -445,7 +453,7 @@ ZBase.util.httpGet = function(url, callback) {
   }
 };
 
-ZBase.util.buildQueryString = function(params) {
+$.buildQueryString = function(params) {
   var qs = "";
 
   for (var key in params) {
@@ -456,9 +464,7 @@ ZBase.util.buildQueryString = function(params) {
   return qs;
 }
 
-var $ = ZBase.util;
-
 document.getTemplateByID = function(template_name) {
-  return ZBase.getTemplate("", template_name);
+  return $.getTemplate("", template_name);
 };
 

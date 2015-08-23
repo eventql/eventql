@@ -3,25 +3,25 @@ ZBase.registerView((function() {
   var kServerErrorMsg = "Server Error; please try again and contact support if the problem persists.";
 
   var finishLogin = function() {
-    ZBase.showLoader();
-    ZBase.util.httpGet("/a/_/c", function(http) {
-      ZBase.hideLoader();
+    $.showLoader();
+    $.httpGet("/a/_/c", function(http) {
+      $.hideLoader();
       if (http.status != 200) {
         showErrorMessage(kServerErrorMsg);
         return;
       }
 
       ZBase.updateConfig(JSON.parse(http.responseText));
-      ZBase.navigateTo("/a/");
+      $.navigateTo("/a/");
     });
   };
 
   var tryLogin = function(authdata) {
-    var postdata = ZBase.util.buildQueryString(authdata);
+    var postdata = $.buildQueryString(authdata);
 
-    ZBase.showLoader();
-    ZBase.util.httpPost("/api/v1/auth/login", postdata, function(http) {
-      ZBase.hideLoader();
+    $.showLoader();
+    $.httpPost("/api/v1/auth/login", postdata, function(http) {
+      $.hideLoader();
       hideErrorMessage();
 
       if (http.status == 200) {
@@ -78,7 +78,7 @@ ZBase.registerView((function() {
         break;
 
       default:
-        ZBase.fatalError("invalid auth step: " + next_step);
+        $.fatalError("invalid auth step: " + next_step);
         break;
 
     };
@@ -86,7 +86,7 @@ ZBase.registerView((function() {
 
   var displayUserPrompt = function() {
     var viewport = document.getElementById("zbase_viewport");
-    var page = ZBase.getTemplate("login", "zbase_login_user_prompt_tpl");
+    var page = $.getTemplate("login", "zbase_login_user_prompt_tpl");
 
     viewport.innerHTML = "";
     viewport.appendChild(page);
@@ -106,7 +106,7 @@ ZBase.registerView((function() {
 
   var displayNamespacePrompt = function(authdata) {
     var viewport = document.getElementById("zbase_viewport");
-    var page = ZBase.getTemplate("login", "zbase_login_namespace_prompt_tpl");
+    var page = $.getTemplate("login", "zbase_login_namespace_prompt_tpl");
 
     viewport.innerHTML = "";
     viewport.appendChild(page);
@@ -129,7 +129,7 @@ ZBase.registerView((function() {
 
   var displayTwoFactorAuthPrompt = function(authdata) {
     var viewport = document.getElementById("zbase_viewport");
-    var page = ZBase.getTemplate("login", "zbase_login_2fa_prompt_tpl");
+    var page = $.getTemplate("login", "zbase_login_2fa_prompt_tpl");
 
     viewport.innerHTML = "";
     viewport.appendChild(page);
@@ -145,9 +145,9 @@ ZBase.registerView((function() {
 
 
   var render = function(path) {
-    var conf = ZBase.getConfig();
+    var conf = $.getConfig();
     if (conf.current_user) {
-      ZBase.navigateTo("/a/");
+      $.navigateTo("/a/");
       return;
     }
 
