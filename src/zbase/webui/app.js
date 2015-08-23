@@ -262,41 +262,45 @@ var ZBase = (function() {
     startModulesDownload(download_modules);
   };
 
-  function importNodeFallback(node, allChildren) {
+  function importNodeFallback(node, deep) {
     var a, i, il, doc = document;
 
     switch (node.nodeType) {
+
       case document.DOCUMENT_FRAGMENT_NODE:
-        var newNode = document.createDocumentFragment();
+        var new_node = document.createDocumentFragment();
         while (child = node.firstChild) {
-          newNode.appendChild(node);
+          new_node.appendChild(node);
         }
-        return newNode;
+        return new_node;
 
       case document.ELEMENT_NODE:
-        var newNode = doc.createElementNS(node.namespaceURI, node.nodeName);
+        var new_node = doc.createElementNS(node.namespaceURI, node.nodeName);
         if (node.attributes && node.attributes.length > 0) {
           for (i = 0, il = node.attributes.length; i < il; i++) {
             a = node.attributes[i];
             try {
-              newNode.setAttributeNS(
+              new_node.setAttributeNS(
                   a.namespaceURI,
                   a.nodeName,
                   node.getAttribute(a.nodeName));
             } catch (err) {}
           }
         }
-        if (allChildren && node.childNodes && node.childNodes.length > 0) {
+        if (deep && node.childNodes && node.childNodes.length > 0) {
           for (i = 0, il = node.childNodes.length; i < il; i++) {
-            newNode.appendChild(importNodeFallback(node.childNodes[i], allChildren));
+            new_node.appendChild(
+                importNodeFallback(node.childNodes[i],
+                deep));
           }
         }
-        return newNode;
+        return new_node;
 
       case document.TEXT_NODE:
       case document.CDATA_SECTION_NODE:
       case document.COMMENT_NODE:
         return doc.createTextNode(node.nodeValue);
+
     }
   }
 
@@ -351,7 +355,8 @@ var ZBase = (function() {
     var conf = $.getConfig();
 
     // viewport min height
-    document.getElementById("zbase_viewport").style.minHeight = window.innerHeight + "px";
+    document.getElementById("zbase_viewport").style.minHeight =
+        window.innerHeight + "px";
 
     // render footer
     document.getElementById("zbase_build_id").innerHTML = conf.zbase_build_id;
