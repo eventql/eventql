@@ -51,6 +51,10 @@ ZBase.registerView((function() {
     });
   };
 
+  var executeQuery = function(e) {
+    console.log(e);
+  }
+
   var renderQueryListView = function(documents) {
     var page = $.getTemplate(
         "views/sql_editor",
@@ -88,9 +92,21 @@ ZBase.registerView((function() {
         "views/sql_editor",
         "zbase_sql_editor_main_tpl");
 
+    var editor = _("z-codeeditor", page);
+    editor.setValue(doc.query);
+    editor.addEventListener("execute", executeQuery);
 
-    
-    //(_("z-codeeditor", page)).setValue(doc.query);
+    $.onClick(_("button[data-action='execute-query']", page), function() {
+      editor.execute();
+    });
+
+    //Editor.doc_sync = new DocSync(function() {
+    //  return "content=" + encodeURIComponent(document.querySelector(".zbase_sql_editor_pane fn-codeeditor").getValue()) +
+    //  "&name=" + encodeURIComponent(document.querySelector(".zbase_sql_editor_pane input[name='doc_name']").value)
+    //  },
+    //  "/api/v1/sql_queries/" + Editor.doc_id,
+    //  document.querySelector(".zbase_sql_editor_pane .zbase_sql_editor_infobar")
+    //);
 
     $.handleLinks(page);
     $.replaceViewport(page);
