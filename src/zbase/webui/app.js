@@ -324,7 +324,7 @@ var ZBase = (function() {
       var template_imports = document.querySelectorAll("link[rel='import']");
 
       for (var i = 0; !template && i < template_imports.length; ++i) {
-        template = template_imports.import[i].querySelector(template_selector);
+        template = template_imports[i].import.querySelector(template_selector);
       }
     }
 
