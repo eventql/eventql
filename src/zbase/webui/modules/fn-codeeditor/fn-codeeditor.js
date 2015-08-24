@@ -1,9 +1,11 @@
 var CodeEditorComponent = function() {
   this.createdCallback = function() {
-    var shadow = this.createShadowRoot();
-    var tpl = document.getTemplateByID("fn-codeeditor-base-tpl");
-    shadow.appendChild(tpl);
-    var textarea = this.shadowRoot.querySelector("textarea");
+    var tpl = $.getTemplate("fn-codeeditor-base-tpl");
+
+    var textarea = document.createElement("textarea");
+    textarea.setAttribute("autofocus", "autofocus");
+
+    this.appendChild(textarea);
 
     var codemirror = CodeMirror.fromTextArea(
         textarea,
@@ -20,7 +22,7 @@ var CodeEditorComponent = function() {
     // completed rendering
     var poll = (function(base){
       return function() {
-        if (base.shadowRoot.querySelector(".CodeMirror-gutter").offsetWidth == 0) {
+        if (_(".CodeMirror-gutter", base).offsetWidth == 0) {
           codemirror.refresh();
           window.setTimeout(poll, 1);
         }

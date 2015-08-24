@@ -88,6 +88,10 @@ ZBase.registerView((function() {
         "sql_editor",
         "zbase_sql_editor_main_tpl");
 
+
+    
+    //(_("fn-codeeditor", page)).setValue(doc.query);
+
     $.handleLinks(page);
     $.replaceViewport(page);
   };
