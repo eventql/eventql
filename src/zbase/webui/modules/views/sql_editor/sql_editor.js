@@ -56,7 +56,7 @@ ZBase.registerView((function() {
   };
 
   var executeQuery = function(e) {
-    showQueryLoader();
+    renderQueryProgress();
 
     var query_string = e.value;
     var query = query_mgr.get(
@@ -67,8 +67,7 @@ ZBase.registerView((function() {
       query_mgr.close("sql_query");
 
       var data = JSON.parse(e.data);
-      renderQueryResult(data.results);
-      hideQueryLoader();
+      //renderQueryResult(data.results);
     });
 
     query.addEventListener('error', function(e) {
@@ -79,8 +78,6 @@ ZBase.registerView((function() {
       } catch (e) {
         renderQueryError(e.data);
       }
-
-      hideQueryLoader();
     });
   }
 
@@ -161,12 +158,10 @@ ZBase.registerView((function() {
     $.replaceContent($(".zbase_sql_editor_result_pane"), error_msg);
   }
 
-  var showQueryLoader = function() {
-    console.log("show loader");
-  }
-
-  var hideQueryLoader = function() {
-    console.log("hide loader");
+  var renderQueryProgress = function(progress) {
+    QueryProgressWidget.render(
+        $(".zbase_sql_editor_result_pane"),
+        progress);
   }
 
   return {
