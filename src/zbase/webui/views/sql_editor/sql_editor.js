@@ -126,7 +126,7 @@ ZBase.registerView((function() {
         "views/sql_editor",
         "zbase_sql_editor_main_tpl");
 
-    // docsync
+    // setup docsync
     docsync = DocSync(
         getDocument,
         "/api/v1/documents/sql_queries/" + doc.uuid,
@@ -150,6 +150,7 @@ ZBase.registerView((function() {
 
     // document name + name editing
     setDocumentTitle(doc.name);
+    $.onClick($(".zbase_sql_editor_title h2"), openDocumentNameEditModal);
 
     // execute query
     if (doc.sql_query.length > 0) {
@@ -175,6 +176,16 @@ ZBase.registerView((function() {
     QueryProgressWidget.render(
         $(".zbase_sql_editor_result_pane"),
         progress);
+  }
+
+  var openDocumentNameEditModal = function() {
+    var modal = $(".zbase_sql_editor_pane z-modal.rename_query");
+
+    $.onClick($("button[data-action='submit']", modal), function() {
+      modal.close();
+    });
+
+    modal.show();
   }
 
   var setDocumentTitle = function(title) {
