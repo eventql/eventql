@@ -145,6 +145,11 @@ ZBase.registerView((function() {
 
     // document name + name editing
     setDocumentTitle(doc.name);
+
+    // execute query
+    if (editor.getValue().length > 0) {
+      editor.execute();
+    }
   };
 
   var renderQueryResult = function(res) {
