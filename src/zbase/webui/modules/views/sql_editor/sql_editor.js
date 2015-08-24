@@ -148,7 +148,8 @@ ZBase.registerView((function() {
   };
 
   var renderQueryResult = function(res) {
-    console.log("render result");
+    var result_list = SQLEditorResultList(res);
+    result_list.render($(".zbase_sql_editor_result_pane"));
   }
 
   var renderQueryError = function(error) {
