@@ -14,7 +14,7 @@ var ModalComponent = function() {
 
     //customisable
     this.closeElems = [
-      this.querySelector("fn-modal-close-icon"), this.parentNode
+      this.querySelector("z-modal-close-icon"), this.parentNode
     ];
 
     this.closeElems.forEach(function(elem) {
@@ -72,4 +72,4 @@ var ModalComponent = function() {
 
 var proto = Object.create(HTMLElement.prototype);
 ModalComponent.apply(proto);
-document.registerElement("fn-modal", { prototype: proto });
+document.registerElement("z-modal", { prototype: proto });

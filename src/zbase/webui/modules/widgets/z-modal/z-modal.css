@@ -3,7 +3,7 @@
  *   https://github.com/Semantic-Org/Semantic-UI
  *   http://www.semantic-ui.com/
  */
-fn-modal {
+z-modal {
   display: none;
   position: fixed;
   z-index: 1001;
@@ -21,23 +21,23 @@ fn-modal {
           user-select: text;
 }
 
-fn-modal-dimmer[data-active] fn-modal,
-fn-modal[data-active] {
+z-modal-dimmer[data-active] z-modal,
+z-modal[data-active] {
   display: block;
 }
 
-fn-modal > :first-child:not(fn-modal-close-icon),
-fn-modal > fn-modal-close-icon:first-child + * {
+z-modal > :first-child:not(z-modal-close-icon),
+z-modal > z-modal-close-icon:first-child + * {
   border-top-left-radius: 0.2857rem;
   border-top-right-radius: 0.2857rem;
 }
 
-fn-modal > :last-child {
+z-modal > :last-child {
   border-bottom-left-radius: 0.2857rem;
   border-bottom-right-radius: 0.2857rem;
 }
 
-fn-modal-dimmer {
+z-modal-dimmer {
   display: none;
   position: fixed;
   top: 0em;
@@ -56,11 +56,11 @@ fn-modal-dimmer {
   z-index: 100000;
 }
 
-fn-modal-dimmer[data-active] {
+z-modal-dimmer[data-active] {
   display: block;
 }
 
-fn-modal-close-icon {
+z-modal-close-icon {
   cursor: pointer;
   position: absolute;
   top: -2.5rem;
@@ -73,35 +73,35 @@ fn-modal-close-icon {
   padding: 0.625rem 0rem 0rem 0rem;
 }
 
-fn-modal-close-icon:after {
+z-modal-close-icon:after {
   font-family: FontAwesome;
   content: "\f00d";
 }
 
-fn-modal-close-icon:hover {
+z-modal-close-icon:hover {
   opacity: 1;
 }
 
 @media only screen and (min-width: 768px) {
-  fn-modal {
+  z-modal {
     width: 88%;
     margin: 0em 0em 0em -44%;
   }
 }
 @media only screen and (min-width: 992px) {
-  fn-modal {
+  z-modal {
     width: 74%;
     margin: 0em 0em 0em -37%;
   }
 }
 @media only screen and (min-width: 1400px) {
-  fn-modal {
+  z-modal {
     width: 56%;
     margin: 0em 0em 0em -28%;
   }
 }
 @media only screen and (min-width: 1920px) {
-  fn-modal {
+  z-modal {
     width: 42%;
     margin: 0em 0em 0em -21%;
   }
