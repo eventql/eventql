@@ -6,6 +6,15 @@
   min-height: 600px;
 }
 
+.zbase_query_progress > h3 {
+  text-align: center;
+  font-size: 36px;
+  color: #333;
+  line-height: 42px;
+  font-weight: 500;
+  margin-bottom: 10px;
+}
+
 .zbase_query_progress h5 {
   text-align: center;
   font-size: 14px;
@@ -17,18 +26,18 @@
   margin-bottom: 50px;
 }
 
-.zbase_query_progress fn-progressbar /deep/ .label {
+.zbase_query_progress z-progressbar /deep/ .label {
   margin-top: 17px;
   font-weight: normal;
   font-style: normal;
   color:#545758;
 }
 
-.zbase_query_progress fn-progressbar /deep/ .bar {
+.zbase_query_progress z-progressbar /deep/ .bar {
   background: #61b7e1;
 }
 
-.zbase_query_progress fn-progressbar {
+.zbase_query_progress z-progressbar {
   height: 35px;
   background: #f0f6f8;
   border: 1px solid #c9d0d4;
