@@ -21,7 +21,7 @@ var CodeEditorComponent = function() {
         }
       };
     })(this);
-    //poll();
+    poll();
 
     return codemirror;
   }
