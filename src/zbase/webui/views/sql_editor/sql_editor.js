@@ -180,15 +180,14 @@ ZBase.registerView((function() {
 
   var initDocumentNameEditModal = function() {
     var modal = $(".zbase_sql_editor_pane z-modal.rename_query");
-      modal.show();
 
     $.onClick($(".zbase_sql_editor_title h2"), function() {
-      console.log("show");
       modal.show();
     });
 
     $.onClick($("button[data-action='submit']", modal), function() {
-      console.log("hide");
+      setDocumentTitle($(".zbase_sql_editor_pane input[name='doc_name']").value);
+      docsync.saveDocument();
       modal.close();
     });
   }
