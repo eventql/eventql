@@ -7,6 +7,7 @@ ZBase.registerView((function() {
   var initial_end_time = (new Date()).getTime() * 1000;
 
   var init = function(params) {
+    $.showLoader();
     query_mgr = EventSourceHandler();
 
     $.httpGet("/api/v1/logfiles", function(r) {
@@ -17,6 +18,8 @@ ZBase.registerView((function() {
       } else {
         $.fatalError();
       }
+
+      $.hideLoader();
     });
   };
 
