@@ -14,6 +14,7 @@ route {
 route {
   path_prefix: "/a/logviewer"
   view: "logviewer"
+  require_module: "widgets/z-dropdown"
   require_module: "widgets/zbase-header"
   require_module: "views/logviewer"
 }

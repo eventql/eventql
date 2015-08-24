@@ -863,6 +863,105 @@ zbase-breadcrumbs zbase-breadcrumbs-section[data-link]:hover,
   color: #00b2f3;
 }
 
+z-dropdown-items,
+fn-segment-editor z-dropdown-items {
+  max-height: 200px;
+}
+
+z-dropdown.input z-dropdown-header {
+  min-width: 165px;
+  max-width: 170px;
+}
+
+z-dropdown.input z-dropdown-items {
+  margin-top: -3px;
+}
+
+z-dropdown.input.wide z-dropdown-items {
+  margin-top: -4px;
+}
+
+fn-segment-editor fn-input input,
+fn-segment-editor z-dropdown {
+  font-size: 13px;
+}
+
+z-dropdown z-dropdown-header {
+  color: #333;
+  border: 1px solid #bbbb;
+  font-weight: 600;
+  font-size: 12px;
+  line-height: 28px;
+  padding: 0 11px;
+  height: 29px;
+}
+
+z-dropdown-header-value {
+  max-width: 100%;
+}
+
+z-dropdown {
+  font-size: 12px;
+}
+
+z-dropdown,
+fn-date-select,
+fn-segment-editor {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+z-dropdown.input z-dropdown-header,
+fn-segment-editor fn-segment-editor-field,
+fn-segment-flyout fn-segment-footer fn-button,
+fn-button.gradient,
+fn-date-select fn-date-select-field {
+  background-color: #F4F4F4;
+  background-image: -webkit-gradient(linear, left top, left bottom, from(#fefefe), to(#e9e9e9));
+  background-image: -webkit-linear-gradient(top, #fefefe, #e9e9e9);
+  background-image: -moz-linear-gradient(top, #fefefe, #e9e9e9);
+  background-image: -ms-linear-gradient(top, #fefefe, #e9e9e9);
+  background-image: -o-linear-gradient(top, #fefefe, #e9e9e9);
+  background-image: linear-gradient(top, #fefefe, #e9e9e9);
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorStr='#fefefe', EndColorStr='#e9e9e9');
+  color: #333;
+  border: 1px solid #bbb;
+  box-shadow: 0 0 2px rgba(0,0,0,.1);
+  font-weight: 600;
+  font-size: 12px;
+  line-height: 28px;
+  padding: 0 11px;
+  height: 29px;
+}
+
+z-dropdown.input z-dropdown-header:hover,
+fn-segment-editor fn-segment-editor-field:hover,
+fn-date-select fn-date-select-field:hover {
+  background-image: -webkit-gradient(linear, left top, left bottom, from(#f4f4f4), to(#e0e0e0));
+  background-image: -webkit-linear-gradient(top, #f4f4f4, #e0e0e0);
+  background-image: -moz-linear-gradient(top, #f4f4f4, #e0e0e0);
+  background-image: -ms-linear-gradient(top, #f4f4f4, #e0e0e0);
+  background-image: -o-linear-gradient(top, #f4f4f4, #e0e0e0);
+  background-image: linear-gradient(top, #f4f4f4, #e0e0e0);
+  box-shadow: 0 0 2px rgba(0,0,0,.2);
+}
+
+z-dropdown.input z-dropdown-header:active,
+fn-segment-editor fn-segment-editor-field:active,
+fn-date-select fn-date-select-field:active {
+  background-image: -webkit-gradient(linear, left top, left bottom, from(#e1e1e1), to(#e9e9e9));
+  background-image: -webkit-linear-gradient(top, #e1e1e1, #e9e9e9);
+  background-image: -moz-linear-gradient(top, #e1e1e1, #e9e9e9);
+  background-image: -ms-linear-gradient(top, #e1e1e1, #e9e9e9);
+  background-image: -o-linear-gradient(top, #e1e1e1, #e9e9e9);
+  background-image: linear-gradient(top, #e1e1e1, #e9e9e9);
+  box-shadow: 0 0 2px rgba(0,0,0,.1);
+}
+
 /* fontawesome */
 .fa {
   display: inline-block;
