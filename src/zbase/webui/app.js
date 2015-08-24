@@ -156,7 +156,6 @@ var ZBase = (function() {
   };
 
   var navigateTo = function(path) {
-    console.log(">> Navigate to called ", path);
     history.pushState({path: path}, "", path);
     changeNavigation(path);
   };
