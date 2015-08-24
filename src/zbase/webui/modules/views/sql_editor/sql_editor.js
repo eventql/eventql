@@ -1,10 +1,14 @@
 ZBase.registerView((function() {
 
+  var query_mgr;
+
   var init = function(params) {
+    query_mgr = EventSourceHandler();
     render(params.path);
   };
 
   var destroy = function() {
+    query_mgr.closeAll();
   };
 
   var render = function(path) {
@@ -52,7 +56,32 @@ ZBase.registerView((function() {
   };
 
   var executeQuery = function(e) {
-    console.log(e);
+    showQueryLoader();
+
+    var query_string = e.value;
+    var query = query_mgr.get(
+      "sql_query",
+      "/api/v1/sql_stream?query=" + encodeURIComponent(query_string));
+
+    query.addEventListener('result', function(e) {
+      query_mgr.close("sql_query");
+
+      var data = JSON.parse(e.data);
+      renderQueryResult(data.results);
+      hideQueryLoader();
+    });
+
+    query.addEventListener('error', function(e) {
+      query_mgr.close("sql_query");
+
+      try {
+        renderQueryError(JSON.parse(e.data).error);
+      } catch (e) {
+        renderQueryError(e.data);
+      }
+
+      hideQueryLoader();
+    });
   }
 
   var renderQueryListView = function(documents) {
@@ -92,13 +121,19 @@ ZBase.registerView((function() {
         "views/sql_editor",
         "zbase_sql_editor_main_tpl");
 
+    // code editor
     var editor = $("z-codeeditor", page);
     editor.setValue(doc.query);
     editor.addEventListener("execute", executeQuery);
 
+    // execute button
     $.onClick($("button[data-action='execute-query']", page), function() {
       editor.execute();
     });
+
+    // document name + name editing
+    // FIXME html escaping
+    $(".zbase_sql_editor_title h2", page).innerHTML = doc.title;
 
     //Editor.doc_sync = new DocSync(function() {
     //  return "content=" + encodeURIComponent(document.querySelector(".zbase_sql_editor_pane fn-codeeditor").getValue()) +
@@ -111,6 +146,22 @@ ZBase.registerView((function() {
     $.handleLinks(page);
     $.replaceViewport(page);
   };
+
+  var renderQueryResult = function(res) {
+    console.log("render result");
+  }
+
+  var renderQueryError = function(error) {
+    console.log("render error");
+  }
+
+  var showQueryLoader = function() {
+    console.log("show loader");
+  }
+
+  var hideQueryLoader = function() {
+    console.log("hide loader");
+  }
 
   return {
     name: "sql_editor",
