@@ -403,7 +403,7 @@ var $ = function(selector, elem) {
 $.navigateTo = ZBase.navigateTo;
 $.getConfig = ZBase.getConfig;
 $.getTemplate = ZBase.getTemplate;
-$.fatalError = ZBase.showFatalError;
+$.fatalError = ZBase.fatalError;
 $.showLoader = ZBase.showLoader;
 $.hideLoader = ZBase.hideLoader;
 
