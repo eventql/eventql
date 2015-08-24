@@ -36,7 +36,6 @@ DateUtil.humanMonth =  [
   "December"
 ];
 
-
 /**
   * Returns the timestamp at midnight of the given timestamp
   *
@@ -92,24 +91,24 @@ DateUtil.getDateTimeDescr = function(date) {
 
   var descr =
     date.year + "-" +
-    Fnord.appendLeadingZero(date.month + 1) + "-" +
-    Fnord.appendLeadingZero(date.date);
+    DateUtil.appendLeadingZero(date.month + 1) + "-" +
+    DateUtil.appendLeadingZero(date.date);
 
   if (date.precision == 'date') {
     return descr;
   }
 
-  descr += " " + Fnord.appendLeadingZero(date.hours);
+  descr += " " + DateUtil.appendLeadingZero(date.hours);
   if (date.precision == 'hour') {
     return descr;
   }
 
-  descr += ":" + Fnord.appendLeadingZero(date.minutes);
+  descr += ":" + DateUtil.appendLeadingZero(date.minutes);
   if (date.precision == 'minute') {
     return descr;
   }
 
-  descr += ":" + Fnord.appendLeadingZero(date.seconds);
+  descr += ":" + DateUtil.appendLeadingZero(date.seconds);
   return descr;
 };
 
@@ -336,3 +335,24 @@ DateUtil.getTimestampFromTimeObj = function(timeObj) {
 
   return timestamp;
 };
+
+DateUtil.printTimestamp = function(ts) {
+  var date = new Date(Math.floor(ts / 1000));
+  return [
+    date.getFullYear(), "-",
+    DateUtil.appendLeadingZero(date.getMonth() + 1), "-",
+    DateUtil.appendLeadingZero(date.getDate()), " ",
+    DateUtil.appendLeadingZero(date.getHours()), ":",
+    DateUtil.appendLeadingZero(date.getMinutes()), ":",
+    DateUtil.appendLeadingZero(date.getSeconds()), ".",
+    DateUtil.appendLeadingZero(date.getMilliseconds())].join("");
+};
+
+DateUtil.appendLeadingZero = function (num) {
+  var num = num;
+  if (typeof num == 'string') {
+    return (num.length > 1)? num : "0" + num;
+  }
+  return (num > 9)? num : "0" + num;
+};
+

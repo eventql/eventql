@@ -18,6 +18,7 @@ route {
   path_prefix: "/a/logviewer"
   view: "logviewer"
   require_module: "util/z-date-util"
+  require_module: "util/event_source_handler"
   require_module: "widgets/z-checkbox"
   require_module: "widgets/z-dropdown"
   require_module: "widgets/z-input"

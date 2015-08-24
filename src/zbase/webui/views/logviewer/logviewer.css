@@ -226,6 +226,10 @@
   color: rgba(10,10,10,0.65);
 }
 
+.zbase_logviewer .loading_bar.hidden {
+  display: none;
+}
+
 .zbase_logviewer .loading_bar em {
   font-weight: 500;
   font-style: normal;
