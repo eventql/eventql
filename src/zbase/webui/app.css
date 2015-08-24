@@ -661,6 +661,11 @@ zbase_input.csv zbase_input-value i {
   color: #fff;
 }
 
+.zbase_button.zbase_primary_button:active {
+  background: #0d4f6f;
+  color: #fff;
+}
+
 /**
   * zbase_secondary_button
   */
