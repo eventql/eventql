@@ -29,11 +29,11 @@
               </z-dropdown-items>
             </z-dropdown>
 
-            <fn-search style="display: block; margin-left:80px" name='logviewer-filter'>
-              <fn-input class="icon" data-placeholder="Filter by SQL" style="margin-top: 1px; display: block;">
-                <fn-input-icon><i class='fa fa-search'></i></fn-input-icon>
-              </fn-input>
-            </fn-search>
+            <z-search style="display: block; margin-left:80px" name='logviewer-filter'>
+              <z-input class="icon" data-placeholder="Filter by SQL" style="position: relative; top: 1px; display: block;">
+                <z-input-icon><i class='fa fa-search'></i></z-input-icon>
+              </z-input>
+            </z-search>
 
             <div class='error_note hidden' name='logviewer-filter'>
               Filter cannot be blank - Please add a filter
@@ -52,15 +52,15 @@
               </div>
 
               <label>End Time</label>
-              <input class="fn-input clickable" id="logviewer_time_control" readonly />
+              <input class="z-input clickable" id="logviewer_time_control" readonly />
 
               <div class="date_select_widget hidden" id="logviewer_date_widget">
                 <div class="time_inputs">
-                  <input data-factor="3600000" data-value="hours" class="left fn-input" maxlength="2" placeholder="00"/>
+                  <input data-factor="3600000" data-value="hours" class="left z-input" maxlength="2" placeholder="00"/>
                   <b class="left">:</b>
-                  <input data-factor="60000" data-value="minutes" class="left fn-input"  maxlength="2" placeholder="00"/>
+                  <input data-factor="60000" data-value="minutes" class="left z-input"  maxlength="2" placeholder="00"/>
                   <b class="left">:</b>
-                  <input data-factor="1000" data-value="seconds" class="left fn-input"  maxlength="2" placeholder="00"/>
+                  <input data-factor="1000" data-value="seconds" class="left z-input"  maxlength="2" placeholder="00"/>
                 </div>
 
                 <fn-calendar data-selectable="past"></fn-calendar>

@@ -2,8 +2,6 @@
   margin-top: 20px;
   overflow: hidden;
   margin-bottom: 20px;
-  padding-left: 20px;
-  padding-right: 20px;
 }
 
 .zbase_logviewer .logviewer_pane .result_pane {
@@ -137,12 +135,12 @@
   }
 }
 
-.zbase_logviewer .control_pane fn-search {
+.zbase_logviewer .control_pane z-search {
   vertical-align: top;
 }
 
-.zbase_logviewer .control_pane .fn-input,
-.zbase_logviewer .control_pane fn-input {
+.zbase_logviewer .control_pane .z-input,
+.zbase_logviewer .control_pane z-input {
   font-size: 13px;
   vertical-align: top;
   width: auto;
@@ -190,6 +188,14 @@
   z-index: 11111;
 }
 
+.zbase_logviewer .date_select_widget.hidden {
+  display: none;
+}
+
+.zbase_logviewer .right {
+  float: right;
+}
+
 .zbase_logviewer .date_select_widget .time_inputs {
   padding-left: 27px;
   margin-bottom: 5px;
@@ -209,3 +215,122 @@
   font-size: 12px;
   margin-top: 5px;
 }
+
+.zbase_logviewer .loading_bar {
+  background-color: #f0f6f8;
+  border-bottom: 1px solid #c9d0d4;
+  box-shadow: 0 1px 1px rgba(0,0,0,0.1);
+  padding: 10px 20px;
+  font-size: 13px;
+  font-weight: 400;
+  color: rgba(10,10,10,0.65);
+}
+
+.zbase_logviewer .loading_bar em {
+  font-weight: 500;
+  font-style: normal;
+  color: rgba(10,10,10,0.7);
+}
+
+.zbase_logviewer .loading_bar h3 {
+  margin: 0;
+  color: #1c99d6;
+  line-height: 18px;
+}
+
+.zbase_logviewer .loading_bar_info {
+  font-weight: 400;
+  white-space: nowrap
+}
+
+.zbase_logviewer .z-table.logs tr.folded td {
+  font-size: 13px;
+  border-top: none;
+  padding: 5px 0 16px 32px;
+}
+
+
+.zbase_logviewer .z-table.logs tr td {
+  word-wrap: break-word;
+  border-top: 1px solid #e7e7e7;
+  font-size: 13px;
+  padding: 4px 9px;
+  vertical-align: top;
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  -o-user-select: text;
+  user-select: text;
+}
+
+.zbase_logviewer .z-table.logs tr td span {
+  word-wrap: break-word;
+  display: block;
+  width: auto;
+}
+
+.zbase_logviewer .z-table.logs .fn-table.log_fields tr td {
+  border-top: none;
+  padding: 0.5em;
+}
+
+.zbase_logviewer .z-table.logs {
+  font-family: "Droid Sans Mono", "Courier", monospace;
+  background: transparent;
+  color: #000;
+  width: auto;
+  width: 100%;
+}
+
+.zbase_logviewer .z-table.logs tr td.time {
+  min-width: 190px;
+}
+
+.zbase_logviewer .z-table.paginated tr {
+  display: none;
+}
+
+.zbase_logviewer .z-table.paginated tr[data-active] {
+  display: table-row;
+}
+
+
+.zbase_logviewer .z-table.logs tr.folding td.fold_icon {
+  min-width: 24px;
+  max-width: 24px;
+  width: 24px;
+}
+
+.zbase_logviewer .z-table.logs tr.folding td.fold_icon i {
+  margin-left: 5px;
+  font-size: 16px;
+  color: #999;
+}
+
+.zbase_logviewer .z-table.logs tr.folding td.fold_icon i:hover {
+  cursor: pointer;
+  color: #1c99d6;
+}
+
+.zbase_logviewer .z-table.logs tr.folding td.fold_icon i:before {
+  font-family: FontAwesome;
+  content: "\f0da";
+}
+
+.zbase_logviewer .z-table.logs tr.folding[data-active] td.fold_icon i:before {
+  content: "\f0d7";
+}
+
+.zbase_logviewer .z-table.logs tr.folded td {
+  border-top: none;
+  padding-top: 0;
+}
+
+.zbase_logviewer .z-table.logs tr.folded {
+  display: none;
+}
+
+.zbase_logviewer .z-table.logs tr.folding[data-active] + tr.folded{
+  display: table-row;
+}
+
