@@ -8,6 +8,7 @@ var CodeEditorComponent = function() {
     };
 
     var codemirror = CodeMirror.fromTextArea(textarea, codemirror_opts);
+    codemirror.setOption("mode", this.getAttribute("data-language"));
 
     // FIXME horrible horrible hack to work around a bug in codemirror where
     // the editor can't be rendered properly before the browser has actually
