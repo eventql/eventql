@@ -21,7 +21,7 @@
         <div class='control_pane'>
 
           <div class="control_pane_bar">
-            <z-dropdown class='input logviewer_filter_control' name='logviewer-filter' style="position:absolute;">
+            <z-dropdown class='input filter_type_control' style="position:absolute;">
               <z-dropdown-items>
                 <z-dropdown-item data-value="sql" data-text="SQL"><i class="fa fa-filter" style="font-weight:normal; margin-right: 5px;"></i> SQL</z-dropdown-item>
                 <z-dropdown-item data-value="regex" data-text="Regex">Regex</z-dropdown-item>
@@ -29,14 +29,13 @@
               </z-dropdown-items>
             </z-dropdown>
 
-            <z-search style="display: block; margin-left:80px" name='logviewer-filter'>
+            <z-search style="display: block; margin-left:80px" class='filter_control'>
               <z-input class="icon" data-placeholder="Filter by SQL" style="position: relative; top: 1px; display: block;">
                 <z-input-icon><i class='fa fa-search'></i></z-input-icon>
               </z-input>
             </z-search>
 
-            <div class='error_note hidden' name='logviewer-filter'>
-              Filter cannot be blank - Please add a filter
+            <div class='error_note hidden' class="filter_error">
             </div>
           </div>
 
@@ -52,7 +51,7 @@
               </div>
 
               <label>End Time</label>
-              <input class="z-input clickable" id="logviewer_time_control" readonly />
+              <input class="z-input clickable logviewer_time_control" readonly />
 
               <div class="date_select_widget hidden" id="logviewer_date_widget">
                 <div class="time_inputs">
@@ -70,7 +69,7 @@
 
             <div class="control_pane_item">
               <label>Logfile:</label>
-              <z-dropdown class='inline logfile-select'>
+              <z-dropdown class='inline logfile_control'>
                 <z-dropdown-items>
                 </z-dropdown-items>
               </z-dropdown>

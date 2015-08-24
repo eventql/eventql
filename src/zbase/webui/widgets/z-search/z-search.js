@@ -72,6 +72,11 @@ var SearchComponent = function() {
     return 1;
   }
 
+  this.setValue = function(val) {
+    var input = this.querySelector("z-input");
+    return input.setValue(val);
+  };
+
   this.getValue = function() {
     var input = this.querySelector("z-input");
     return input.getValue();
