@@ -404,62 +404,6 @@ h2.pagetitle.border_bottom {
   border-bottom: 1px solid #ddd;
 }
 
-
-/**
-  * zbase_button
-  */
-.zbase_button {
-  cursor: pointer;
-  display: inline-block;
-  box-shadow: 0 0 0 1px rgba(39,41,43,0.15) inset;
-  padding: .78571em 1.5em .78571em;
-  line-height: 1;
-  border-radius: 3px;
-  background: transparent;
-  border: 0;
-  font-weight: 400;
-}
-
-.zbase_button.disabled {
-  cursor: default;
-  opacity: 0.5;
-}
-
-/**
-  * zbase_primary_button
-  */
-.zbase_button.zbase_primary_button {
-  background: #1c99d6;
-  color: #fff;
-}
-
-.zbase_button.zbase_primary_button:hover {
-  background: #21aaed;
-}
-
-.zbase_button.zbase_primary_button:active {
-  background: #0d4f6f;
-  color: #fff;
-}
-
-/**
-  * zbase_secondary_button
-  */
-.zbase_button.zbase_secondary_button {
-  color: #888;
-  border: 1px solid #eee;
-}
-
-.zbase_button.zbase_secondary_button:hover {
-  background: #f0f6f8;
-  box-shadow: 0px 0px 0px 1px rgba(39, 41, 43, 0.15) inset, 0px 0px 0px 0px rgba(39, 41, 43, 0.15) inset;
-}
-
-.zbase_button.zbase_secondary_button:active {
-  background: #cee1e8;
-  color: #333;
-}
-
 /**
   * zbase_table
   */

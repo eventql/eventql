@@ -32,7 +32,7 @@
   box-shadow: inset 1px 1px 1px rgba(0,0,0,.1);
 }
 
-.zbase_login .login_pane .zbase_button {
+.zbase_login .login_pane .z-button {
   margin-top: 5px;
   width: 100%;
   display: block;
