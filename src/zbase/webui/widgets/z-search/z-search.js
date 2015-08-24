@@ -10,14 +10,14 @@
  */
 var SearchComponent = function() {
   this.createdCallback = function() {
-    var input = this.querySelector("fn-input");
-    var icon = this.querySelector("fn-input-icon");
+    var input = this.querySelector("z-input");
+    var icon = this.querySelector("z-input-icon");
     var base = this;
 
     var value_length = 0;
 
     if (!input) {
-      input = document.createElement("fn-input");
+      input = document.createElement("z-input");
       this.insertBefore(input, this.firstChild);
     }
 
@@ -73,7 +73,7 @@ var SearchComponent = function() {
   }
 
   this.getValue = function() {
-    var input = this.querySelector("fn-input");
+    var input = this.querySelector("z-input");
     return input.getValue();
   };
 
@@ -165,7 +165,7 @@ var SearchComponent = function() {
 
   this.submitSearch = function(value) {
     var active_elem = this.getActiveListElem();
-    var input = this.querySelector("fn-input");
+    var input = this.querySelector("z-input");
     var updateInput = true;
 
     if (!value) {
@@ -242,13 +242,13 @@ var SearchComponent = function() {
   };
 
   this.autocomplete = function(term, items) {
-    if (term.toLowerCase() == this.querySelector("fn-input").getValue().toLowerCase() && items.length > 0) {
+    if (term.toLowerCase() == this.querySelector("z-input").getValue().toLowerCase() && items.length > 0) {
       this.renderDropdown(items);
     }
   };
 
   this.fireAutocompleteEvent = function(value) {
-    var autocompleteEvent = new CustomEvent('fn-search-autocomplete', {
+    var autocompleteEvent = new CustomEvent('z-search-autocomplete', {
       'detail' : {'value' : value},
       cancelable: true,
       bubbles: true
@@ -258,7 +258,7 @@ var SearchComponent = function() {
   };
 
   this.fireSubmitEvent = function(value) {
-    var submitEvent = new CustomEvent('fn-search-submit', {
+    var submitEvent = new CustomEvent('z-search-submit', {
       'detail' : {'value' : value},
       cancelable: true,
       bubbles: true

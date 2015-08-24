@@ -211,7 +211,7 @@
   margin: 0 4px;
 }
 
-.zbase_logviewer .date_select_widget fn-button.primary {
+.zbase_logviewer .date_select_widget z-button.primary {
   font-size: 12px;
   margin-top: 5px;
 }
@@ -269,7 +269,7 @@
   width: auto;
 }
 
-.zbase_logviewer .z-table.logs .fn-table.log_fields tr td {
+.zbase_logviewer .z-table.logs .z-table.log_fields tr td {
   border-top: none;
   padding: 0.5em;
 }

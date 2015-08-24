@@ -205,7 +205,7 @@ var DropDownComponent = function() {
     this.fireCloseEvent();
 
     //remove global event listener
-    if (!this.querySelector("fn-input")) {
+    if (!this.querySelector("z-input")) {
       this.unsetKeyNavigation(window);
     }
   };
@@ -262,7 +262,7 @@ var DropDownComponent = function() {
     }
 
     //set global event listener if not searchable
-    if (!this.querySelector("fn-input")) {
+    if (!this.querySelector("z-input")) {
       this.setKeyNavigation(window);
     }
   };
@@ -322,7 +322,7 @@ var DropDownComponent = function() {
       return;
     }
 
-    var input_elem = this.querySelector("fn-input");
+    var input_elem = this.querySelector("z-input");
     var selected = true;
 
     //multi-selectable dropdown with checkboxes
@@ -402,7 +402,7 @@ var DropDownComponent = function() {
 
   /*********************** Key Navigation **********************************/
   this.onKeyDown = function(e) {
-    var input = this.querySelector("fn-input");
+    var input = this.querySelector("z-input");
     var visibleScrollbar = this.visibleScrollbar();
 
     switch (e.keyCode) {
@@ -529,7 +529,7 @@ var DropDownComponent = function() {
     }
 
     var base = this;
-    var input = document.createElement("fn-input");
+    var input = document.createElement("z-input");
     var placeholder = dropdown_input.getAttribute('data-placeholder');
     var selected_item = this.querySelector("z-dropdown-item[data-selected");
 

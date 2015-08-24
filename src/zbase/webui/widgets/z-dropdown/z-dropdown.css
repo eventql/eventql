@@ -235,10 +235,10 @@ z-dropdown-label,
 /*-----------------
   Item With Input
 -------------------*/
-z-dropdown-item input.fn-input,
-.z-dropdown-item input.fn-input,
-z-dropdown-item fn-input input,
-.z-dropdown-item .fn-input input {
+z-dropdown-item input.z-input,
+.z-dropdown-item input.z-input,
+z-dropdown-item z-input input,
+.z-dropdown-item .z-input input {
   padding: 0.6em 1em;
   margin-top: 0.5em;
   font-size: 0.92em;
