@@ -53,7 +53,7 @@ ZBase.registerView((function() {
 
   var renderQueryListView = function(documents) {
     var page = $.getTemplate(
-        "sql_editor",
+        "views/sql_editor",
         "zbase_sql_editor_overview_main_tpl");
 
     renderDocumentsList(
@@ -85,7 +85,7 @@ ZBase.registerView((function() {
 
   var renderQueryEditorView = function(doc) {
     var page = $.getTemplate(
-        "sql_editor",
+        "views/sql_editor",
         "zbase_sql_editor_main_tpl");
 
 

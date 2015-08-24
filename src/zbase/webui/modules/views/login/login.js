@@ -86,7 +86,7 @@ ZBase.registerView((function() {
 
   var displayUserPrompt = function() {
     var viewport = document.getElementById("zbase_viewport");
-    var page = $.getTemplate("login", "zbase_login_user_prompt_tpl");
+    var page = $.getTemplate("views/login", "zbase_login_user_prompt_tpl");
 
     viewport.innerHTML = "";
     viewport.appendChild(page);
@@ -106,7 +106,7 @@ ZBase.registerView((function() {
 
   var displayNamespacePrompt = function(authdata) {
     var viewport = document.getElementById("zbase_viewport");
-    var page = $.getTemplate("login", "zbase_login_namespace_prompt_tpl");
+    var page = $.getTemplate("views/login", "zbase_login_namespace_prompt_tpl");
 
     viewport.innerHTML = "";
     viewport.appendChild(page);
@@ -129,7 +129,7 @@ ZBase.registerView((function() {
 
   var displayTwoFactorAuthPrompt = function(authdata) {
     var viewport = document.getElementById("zbase_viewport");
-    var page = $.getTemplate("login", "zbase_login_2fa_prompt_tpl");
+    var page = $.getTemplate("views/login", "zbase_login_2fa_prompt_tpl");
 
     viewport.innerHTML = "";
     viewport.appendChild(page);

@@ -1,6 +1,6 @@
 var CodeEditorComponent = function() {
   this.createdCallback = function() {
-    var tpl = $.getTemplate("z-codeeditor-base-tpl");
+    var tpl = $.getTemplate("widgets/z-codeeditor", "z-codeeditor-base-tpl");
 
     var textarea = document.createElement("textarea");
     textarea.setAttribute("autofocus", "autofocus");
