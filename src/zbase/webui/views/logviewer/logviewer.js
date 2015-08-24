@@ -92,7 +92,7 @@ ZBase.registerView((function() {
 
   var getQueryParams = function() {
     var params = {
-      logfile: "access_log",
+      logfile: $(".zbase_logviewer z-dropdown.logfile-select").getValue(),
       limit: "100",
       // + "&columns=" + this.columns;
     };
