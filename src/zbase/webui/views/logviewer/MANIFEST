@@ -1,0 +1,3 @@
+html_file: "logviewer.html"
+js_file: "logviewer.js"
+css_file: "logviewer.css"
