@@ -64,7 +64,7 @@
 
       loader.classList.add("hidden");
       modal.querySelector(".error_message").classList.add("hidden");
-      modal.querySelector(".zbase_table").classList.remove("hidden");
+      modal.querySelector(".z-table").classList.remove("hidden");
     });
 
     source.addEventListener("error", function(e) {
@@ -77,7 +77,7 @@
       }
 
       loader.classList.add("hidden");
-      modal.querySelector(".zbase_table").classList.add("hidden");
+      modal.querySelector(".z-table").classList.add("hidden");
       error_message.classList.remove("hidden");
     });
   };
