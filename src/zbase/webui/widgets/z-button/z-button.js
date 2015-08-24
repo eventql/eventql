@@ -11,7 +11,7 @@
 var ButtonComponent = function() {
   this.createdCallback = function() {
     this.addEventListener("click", function() {
-      var ev = new CustomEvent("fn-button-click", {
+      var ev = new CustomEvent("z-button-click", {
         bubbles: true,
         cancelable: true
       });
