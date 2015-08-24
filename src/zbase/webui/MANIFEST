@@ -7,6 +7,7 @@ route {
   require_module: "widgets/z-button"
   require_module: "widgets/z-codeeditor"
   require_module: "widgets/z-modal"
+  require_module: "widgets/z-table"
   require_module: "widgets/z-progressbar"
   require_module: "widgets/zbase-header"
   require_module: "widgets/zbase-query-progress"
@@ -20,6 +21,7 @@ route {
   require_module: "widgets/z-input"
   require_module: "widgets/z-search"
   require_module: "widgets/z-pager"
+  require_module: "widgets/z-table"
   require_module: "widgets/zbase-header"
   require_module: "views/logviewer"
 }

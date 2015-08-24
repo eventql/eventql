@@ -2,7 +2,7 @@ var SQLEditorResultList = function(results) {
 
   var renderResultTable = function(elem, rows, columns) {
     var table = document.createElement("table");
-    table.className = 'zbase_table';
+    table.className = 'z-table';
 
     innerHTML = "<thead><tr>";
     columns.forEach(function(column) {

@@ -77,29 +77,29 @@
   display: none;
 }
 
-.zbase_sql_editor table.zbase_table {
+.zbase_sql_editor table.z-table {
   font-size: 14px;
 }
 
-.zbase_sql_editor table.zbase_table thead th {
+.zbase_sql_editor table.z-table thead th {
   font-weight: 400;
   color: #888;
 }
 
-.zbase_sql_editor table.zbase_table tbody tr td {
+.zbase_sql_editor table.z-table tbody tr td {
   line-height: 24px;
 }
 
-.zbase_sql_editor table.zbase_table tbody tr a {
+.zbase_sql_editor table.z-table tbody tr a {
   color: #888;
 }
 
-.zbase_sql_editor table.zbase_table thead tr th:first-child,
-.zbase_sql_editor table.zbase_table tbody tr td:first-child {
+.zbase_sql_editor table.z-table thead tr th:first-child,
+.zbase_sql_editor table.z-table tbody tr td:first-child {
   padding-left: 20px;
 }
 
-.zbase_sql_editor table.zbase_table tbody tr td:first-child a {
+.zbase_sql_editor table.z-table tbody tr td:first-child a {
   font-weight: 400;
   color: #000;
 }
@@ -141,7 +141,7 @@
 /**
   * Overview
   */
-.zbase_sql_editor .zbase_sql_editor_overview table.zbase_table {
+.zbase_sql_editor .zbase_sql_editor_overview table.z-table {
   border-top: 1px solid #e1e1e1;
 }
 
@@ -215,11 +215,11 @@
 }
 
 .zbase_sql_editor_result_pane .zbase_result_pane_bar + table.zbase_sql_chart,
-.zbase_sql_editor_result_pane .zbase_result_pane_bar + table.zbase_table {
+.zbase_sql_editor_result_pane .zbase_result_pane_bar + table.z-table {
   display: none;
 }
 
-.zbase_sql_editor_result_pane .zbase_result_pane_bar[data-active] + table.zbase_table {
+.zbase_sql_editor_result_pane .zbase_result_pane_bar[data-active] + table.z-table {
   display: table;
 }
 
@@ -227,12 +227,12 @@
   display: block;
 }
 
-.zbase_sql_editor_result_pane table.zbase_table {
+.zbase_sql_editor_result_pane table.z-table {
   border-bottom: 1px solid #e6e8e9;
 }
 
-.zbase_sql_editor_result_pane table.zbase_table thead th:first-child,
-.zbase_sql_editor_result_pane table.zbase_table tbody td:first-child {
+.zbase_sql_editor_result_pane table.z-table thead th:first-child,
+.zbase_sql_editor_result_pane table.z-table tbody td:first-child {
   padding-left: 20px;
 }
 
