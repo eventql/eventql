@@ -29,12 +29,14 @@ ZBase.registerView((function() {
   }
 
   var displayQueryEditor = function(query_id) {
-    var page = $.getTemplate(
-        "sql_editor",
-        "zbase_sql_editor_main_tpl");
-
-    $.handleLinks(page);
-    $.replaceViewport(page);
+    $.httpGet("/api/v1/documents/sql_queries/" + query_id, function(r) {
+      if (r.status == 200) {
+        var doc = JSON.parse(r.response);
+        renderQueryEditorView(doc);
+      } else {
+        $.fatalError();
+      }
+    });
   };
 
   var createNewQuery = function() {
@@ -79,6 +81,15 @@ ZBase.registerView((function() {
       $.onClick(tr, function() { $.navigateTo(url); });
       tbody_elem.appendChild(tr);
     });
+  };
+
+  var renderQueryEditorView = function(doc) {
+    var page = $.getTemplate(
+        "sql_editor",
+        "zbase_sql_editor_main_tpl");
+
+    $.handleLinks(page);
+    $.replaceViewport(page);
   };
 
   return {
