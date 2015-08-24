@@ -140,7 +140,6 @@ ZBase.registerView((function() {
       docsync.saveDocument();
     });
 
-    // execute button
     $.onClick($("button[data-action='execute-query']", page), function() {
       editor.execute();
     });
@@ -180,13 +179,15 @@ ZBase.registerView((function() {
 
   var initDocumentNameEditModal = function() {
     var modal = $(".zbase_sql_editor_pane z-modal.rename_query");
+    var name_input = $(".zbase_sql_editor_pane input[name='doc_name']");
 
     $.onClick($(".zbase_sql_editor_title h2"), function() {
       modal.show();
+      name_input.focus();
     });
 
     $.onClick($("button[data-action='submit']", modal), function() {
-      setDocumentTitle($(".zbase_sql_editor_pane input[name='doc_name']").value);
+      setDocumentTitle(name_input.value);
       docsync.saveDocument();
       modal.close();
     });
