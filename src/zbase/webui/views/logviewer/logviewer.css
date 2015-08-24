@@ -48,16 +48,21 @@
   margin-top: 8px;
 }
 
-.zbase_logviewer .logviewer_pane .logviewer_filter_control {
+.zbase_logviewer .logviewer_pane .filter_control z-input input {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.zbase_logviewer .logviewer_pane .filter_type_control {
   width: 60px;
 }
 
-.zbase_logviewer .logviewer_pane .logviewer_filter_control z-dropdown-header {
+.zbase_logviewer .logviewer_pane .filter_type_control z-dropdown-header {
   height: 35px;
   line-height: 34px;
 }
 
-.zbase_logviewer .logviewer_pane #logviewer_time_control {
+.zbase_logviewer .logviewer_pane .logviewer_time_control {
   margin-right: 20px;
   margin-left: 4px;
   border: none;

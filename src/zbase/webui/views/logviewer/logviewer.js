@@ -1,10 +1,6 @@
 ZBase.registerView((function() {
 
-  //var rowsPerPage = 50;
-  //var visibleLoader = true;
   var query_mgr;
-  var page_times = [];
-  var initial_end_time = (new Date()).getTime() * 1000;
 
   var init = function(params) {
     $.showLoader();
@@ -14,7 +10,7 @@ ZBase.registerView((function() {
       if (r.status == 200) {
         var logfiles = JSON.parse(r.response).logfile_definitions;
         render(logfiles);
-        updateQueryParams(params.path);
+        applyQueryParams(params.path);
       } else {
         $.fatalError();
       }
@@ -27,31 +23,36 @@ ZBase.registerView((function() {
     query_mgr.closeAll();
   };
 
-  var updateQueryParams = function(url) {
-      //if (UrlUtil.getParamValue(window.location.href, "until") == null) {
-      //  this.updateEndtime();
-      //} else {
-      //  this.showUpdateEndtimeControl();
-      //}
+  var applyQueryParams = function(url) {
+    // param: logfile
     var logfile = UrlUtil.getParamValue(url, "logfile");
-    $(".zbase_logviewer z-dropdown.logfile-select").setValue([logfile]);
+    $(".zbase_logviewer .logfile_control").setValue([logfile]);
 
-      var filter_type = UrlUtil.getParamValue(url, "filter_type");
-      if (!filter_type) {
-        filter_type = "SQL";
-      }
+    // param: end time
+    var end_time = UrlUtil.getParamValue(url, "time");
+    if (end_time) {
+      end_time = parseInt(end_time, 10);
+    } else {
+      end_time = (new Date()).getTime() * 1000;
+    }
 
-      var filter = UrlUtil.getParamValue(url, "filter");
-      var end_time = UrlUtil.getParamValue(url, "until");
-      var columns = UrlUtil.getParamValue(url, "columns");
-      var raw = UrlUtil.getParamValue(url, "raw");
-      this.logfile = UrlUtil.getParamValue(url, "logfile");
+    var time_control = $(".zbase_logviewer .logviewer_time_control");
+    time_control.setAttribute("data-timestamp", end_time);
+    time_control.value = DateUtil.printTimestamp(end_time);
 
-      //var filter_dropdown = this.pane.querySelector(
-      //  "z-dropdown.logviewer_filter_control");
-      //var filter_dropdown_item = filter_dropdown.querySelector(
-      //  "[data-value='" + this.filter_type + "']")
-      //var filter_input = this.pane.querySelector("fn-search input");
+    // param: filter type
+    var filter_type = UrlUtil.getParamValue(url, "filter_type");
+    if (!filter_type) filter_type = "sql";
+    $(".zbase_logviewer .filter_type_control").setValue([filter_type]);
+
+    // param: filter
+    var filter = UrlUtil.getParamValue(url, "filter");
+    $(".zbase_logviewer .filter_control").setValue(filter);
+
+    var columns = UrlUtil.getParamValue(url, "columns");
+    var raw = UrlUtil.getParamValue(url, "raw");
+
+    executeQuery();
 
       //filter_input.value = decodeURIComponent(this.filter);
       //filter_input.placeholder =
@@ -85,17 +86,29 @@ ZBase.registerView((function() {
       //  this.raw = (this.columns == "__all__")? "true": "false";
       //}
 
-    page_times = [initial_end_time];
-    executeQuery(initial_end_time, true);
+    //page_times = [initial_end_time];
     //this.handlePagination();
   };
 
   var getQueryParams = function() {
-    var params = {
-      logfile: $(".zbase_logviewer z-dropdown.logfile-select").getValue(),
-      limit: "100",
-      // + "&columns=" + this.columns;
-    };
+    var params = {};
+
+    // param: logfile
+    params.logfile = $(".zbase_logviewer z-dropdown.logfile_control").getValue();
+
+    // param: time
+    var time_control = $(".zbase_logviewer .logviewer_time_control");
+    params.time =  time_control.getAttribute("data-timestamp");
+
+    // param: filter
+    var filter_type = $(".zbase_logviewer .filter_type_control").getValue();
+    var filter_str = $(".zbase_logviewer .filter_control").getValue();
+    params["filter_" + filter_type] = filter_str;
+
+    // param: limit
+    params.limit = "100";
+
+    // + "&columns=" + this.columns;
     //if (this.filter.length > 0) {
     //  url += "&filter_" + this.filter_type + "=" + this.filter;
     //}
@@ -107,12 +120,12 @@ ZBase.registerView((function() {
     return params;
   };
 
-  var executeQuery = function(end_time, append) {
+  var executeQuery = function() {
     //this.updateTimeControl(end_time);
-    showLoadingBar(0, end_time);
+    showLoadingBar(0);
 
     var params = getQueryParams();
-    params.time = end_time;
+    console.log(params);
 
     var url = "/api/v1/logfiles/scan?" + $.buildQueryString(params);
     var query = query_mgr.get("logfile_query", url);
@@ -122,7 +135,7 @@ ZBase.registerView((function() {
       var result = data.result;
 
       if (result.length > 0) {
-        showLoadingBar(data.rows_scanned, result[result.length - 1].time);
+        showLoadingBar(data.rows_scanned);
 
         //if (_this.isRawView()) {
         //  _this.renderRaw(result);
@@ -171,7 +184,7 @@ ZBase.registerView((function() {
   };
 
   var renderLogfileSelect = function(elem, logfiles) {
-    var dropdown = $("z-dropdown.logfile-select", elem);
+    var dropdown = $("z-dropdown.logfile_control", elem);
     var items = $("z-dropdown-items", dropdown);
 
     logfiles.forEach(function(logfile) {
@@ -191,7 +204,7 @@ ZBase.registerView((function() {
     //});
   };
 
-  var showLoadingBar = function(num_rows, time) {
+  var showLoadingBar = function(num_rows) {
     $(".zbase_logviewer table").classList.add("loading");
     var elem = $(".zbase_logviewer .loglines_loading_bar");
     elem.classList.remove("hidden");
@@ -209,7 +222,7 @@ ZBase.registerView((function() {
     name: "logviewer",
     loadView: init,
     unloadView: destroy,
-    handleNavigationChange: updateQueryParams
+    handleNavigationChange: applyQueryParams
   };
 
 })());
@@ -219,7 +232,7 @@ ZBase.registerView((function() {
       this.setInitialParams();
 
       if (this.logfile == null) {
-        this.pane = document.querySelector("[name='logviewer_logfile_select']");
+        this.pane = document.querySelector("[name='logviewer_logfile_control']");
         this.hideLoader();
         this.loadLogfiles();
       } else {
@@ -618,23 +631,6 @@ ZBase.registerView((function() {
     };
 
     this.updateTimeControl = function(end_time) {
-      var time = Math.floor(end_time / 1000);
-      var date = new Date(time);
-      var widget = document.getElementById("logviewer_date_widget");
-
-      document.getElementById("logviewer_time_control").value =
-        DateUtil.printTimestamp(end_time);
-      widget.querySelector("input[data-value='hours']").value =
-        Fnord.appendLeadingZero(date.getHours());
-      widget.querySelector("input[data-value='minutes']").value =
-        Fnord.appendLeadingZero(date.getMinutes());
-      widget.querySelector("input[data-value='seconds']").value =
-        Fnord.appendLeadingZero(date.getSeconds());
-      //set to start of utc day
-      widget.querySelector("fn-calendar").setAttribute(
-        "data-selected",
-        DateUtil.getStartOfDay(time) +
-        date.getTimezoneOffset() * DateUtil.millisPerMinute);
     };
 
 
