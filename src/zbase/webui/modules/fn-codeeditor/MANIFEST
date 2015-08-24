@@ -1,7 +1,7 @@
-html_file: "fn-codeeditor.html"
-js_file: "fn-codeeditor.js"
+html_file: "z-codeeditor.html"
+js_file: "z-codeeditor.js"
 js_file: "codemirror.js"
 js_file: "codemirror-sql.js"
-css_file: "fn-codeeditor.css"
+css_file: "z-codeeditor.css"
 css_file: "codemirror.css"
 

@@ -90,7 +90,7 @@ ZBase.registerView((function() {
 
 
     
-    //(_("fn-codeeditor", page)).setValue(doc.query);
+    //(_("z-codeeditor", page)).setValue(doc.query);
 
     $.handleLinks(page);
     $.replaceViewport(page);
