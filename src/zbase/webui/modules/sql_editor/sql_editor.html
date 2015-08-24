@@ -58,14 +58,9 @@
       <div class="zbase_sql_editor_pane">
         <div class="zbase_sql_editor_sidebar">
           <div>
-            <a class="link"><i class="fa fa-copy"></i>&nbsp;Clone tis query</a>
+            <!--<a class="link"><i class="fa fa-copy"></i>&nbsp;Clone tis query</a>-->
           </div>
-          <section class="sidebar_section">
-            <h3 class="sidebar_title">
-              <i class="fa fa-database"></i>&nbsp;Tables
-            </h3>
-
-            <ul class="zbase_sql_editor_table_list" style="display:none;"></ul>
+          <section class="sidebar_section" class="sql_editor_table_list">
           </section>
         </div>
 
@@ -83,7 +78,7 @@
             <h2 class="pagetitle editable" data-action='edit-query-name'></h2>
           </section>
 
-          <!--<fn-codeeditor data-language="text/x-chartsql" data-content='query_content' style="height: 250px;"></fn-codeeditor>-->
+          <fn-codeeditor data-language="text/x-chartsql" data-content='query_content' style="height: 250px;"></fn-codeeditor>
 
           <div class='resizer_tooltip' draggable="true"></div>
 

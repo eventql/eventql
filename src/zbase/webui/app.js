@@ -479,3 +479,10 @@ document.getTemplateByID = function(template_name) {
   return $.getTemplate("", template_name);
 };
 
+function _(selector, elem) {
+  if (!elem) {
+    elem = document;
+  }
+
+  return elem.querySelector(selector);
+};
