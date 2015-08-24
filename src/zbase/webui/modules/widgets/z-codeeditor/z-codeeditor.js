@@ -15,7 +15,7 @@ var CodeEditorComponent = function() {
     // completed rendering
     var poll = (function(base){
       return function() {
-        if (_(".CodeMirror-gutter", base).offsetWidth == 0) {
+        if ($(".CodeMirror-gutter", base).offsetWidth == 0) {
           codemirror.refresh();
           window.setTimeout(poll, 1);
         }

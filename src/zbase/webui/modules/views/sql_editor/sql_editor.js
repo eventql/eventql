@@ -92,11 +92,11 @@ ZBase.registerView((function() {
         "views/sql_editor",
         "zbase_sql_editor_main_tpl");
 
-    var editor = _("z-codeeditor", page);
+    var editor = $("z-codeeditor", page);
     editor.setValue(doc.query);
     editor.addEventListener("execute", executeQuery);
 
-    $.onClick(_("button[data-action='execute-query']", page), function() {
+    $.onClick($("button[data-action='execute-query']", page), function() {
       editor.execute();
     });
 
