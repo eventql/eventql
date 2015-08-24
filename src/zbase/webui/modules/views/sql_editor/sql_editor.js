@@ -153,7 +153,12 @@ ZBase.registerView((function() {
   }
 
   var renderQueryError = function(error) {
-    console.log("render error");
+    var error_msg = $.getTemplate(
+        "views/sql_editor",
+        "zbase_sql_editor_error_msg_tpl");
+
+    $(".error_text", error_msg).innerHTML = error;
+    $.replaceContent($(".zbase_sql_editor_result_pane"), error_msg);
   }
 
   var showQueryLoader = function() {
