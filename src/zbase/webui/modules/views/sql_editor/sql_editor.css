@@ -265,3 +265,12 @@
 .zbase_loader.zbase_sql_result_loader.hidden {
   display: none;
 }
+
+.zbase_sql_editor .zbase_sql_editor_title {
+  padding: 0 20px;
+}
+
+.zbase_sql_editor .zbase_sql_editor_title .zbase_button {
+  margin-top: 14px;
+  margin-left: 16px;
+}
