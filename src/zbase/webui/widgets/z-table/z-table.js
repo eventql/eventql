@@ -136,7 +136,7 @@ var TableComponent = function() {
       if (is_selectable) {
         var select_input = document.createElement("input");
         select_input.setAttribute("type", "checkbox");
-        select_input.className = "fn-checkbox";
+        select_input.className = "z-checkbox";
         select_input.addEventListener("click", onRowSelectClick, false);
 
         if (row.getAttribute("data-selected") != null) {
