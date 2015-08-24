@@ -132,10 +132,6 @@ ZBase.registerView((function() {
       editor.execute();
     });
 
-    // document name + name editing
-    // FIXME html escaping
-    $(".zbase_sql_editor_title h2", page).innerHTML = doc.title;
-
     //Editor.doc_sync = new DocSync(function() {
     //  return "content=" + encodeURIComponent(document.querySelector(".zbase_sql_editor_pane fn-codeeditor").getValue()) +
     //  "&name=" + encodeURIComponent(document.querySelector(".zbase_sql_editor_pane input[name='doc_name']").value)
@@ -146,6 +142,9 @@ ZBase.registerView((function() {
 
     $.handleLinks(page);
     $.replaceViewport(page);
+
+    // document name + name editing
+    setDocumentTitle(doc.name);
   };
 
   var renderQueryResult = function(res) {
@@ -166,6 +165,12 @@ ZBase.registerView((function() {
     QueryProgressWidget.render(
         $(".zbase_sql_editor_result_pane"),
         progress);
+  }
+
+  var setDocumentTitle = function(title) {
+    // FIXME html escaping
+    $(".zbase_sql_editor_title h2").innerHTML = title;
+    $(".sql_document_name_crumb").innerHTML = title;
   }
 
   return {
