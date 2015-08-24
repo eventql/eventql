@@ -365,7 +365,7 @@ var ZBase = (function() {
 
     // render header
     if (conf.current_user) {
-      ZBase.loadModules(["header_widget"], function() {
+      ZBase.loadModules(["widgets/zbase-header"], function() {
         HeaderWidget.render();
       });
     } else {
