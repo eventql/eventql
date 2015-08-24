@@ -28,7 +28,7 @@ var SQLEditorResultList = function(results) {
     var chart = document.createElement("div");
     chart.className = "zbase_sql_chart";
     chart.innerHTML = svg;
-    chart.appendChild(chart);
+    elem.appendChild(chart);
   };
 
   var renderResultBar = function(elem, result_index) {
