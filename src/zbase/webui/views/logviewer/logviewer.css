@@ -89,6 +89,7 @@
   display: block;
   text-align: center;
   font-size: 10px;
+  overflow: hidden;
 }
 
 .zbase_logviewer .logviewer_pane .loaderanim > div {
