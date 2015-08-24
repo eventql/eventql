@@ -168,7 +168,7 @@
   margin-top: 1px;
 }
 
-.zbase_logviewer .control_pane .control_pane_item > fn-checkbox {
+.zbase_logviewer .control_pane .control_pane_item > z-checkbox {
   vertical-align: top;
   margin-top: 11px;
 }

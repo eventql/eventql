@@ -62,7 +62,7 @@ var DropDownComponent = function() {
       if (item) {
         item.setAttribute('data-selected', 'selected');
 
-        var checkbox = item.querySelector("fn-checkbox");
+        var checkbox = item.querySelector("z-checkbox");
 
         if (checkbox) {
           checkbox.setAttribute('data-active', 'active');
@@ -89,7 +89,7 @@ var DropDownComponent = function() {
     }
 
     //render header value
-    if (!header_elem.querySelector("fn-drodpown-header-value")) {
+    if (!header_elem.querySelector("z-drodpown-header-value")) {
       header_elem.appendChild(document.createElement(
         "z-dropdown-header-value"));
     }
@@ -290,7 +290,7 @@ var DropDownComponent = function() {
       }, false);
 
       var input = input_items[i].querySelector("input");
-      var checkbox = input_items[i].querySelector("fn-checkbox");
+      var checkbox = input_items[i].querySelector("z-checkbox");
       var check = input_items[i].querySelector("[data-check]");
       if (check) {
         console.log(check);
@@ -327,7 +327,7 @@ var DropDownComponent = function() {
 
     //multi-selectable dropdown with checkboxes
     if (this.classList.contains('checkbox')) {
-      var checkbox = item.querySelector("fn-checkbox") || item.querySelector("[data-check]");
+      var checkbox = item.querySelector("z-checkbox") || item.querySelector("[data-check]");
 
       if (item.hasAttribute('data-selected')) {
         selected = false;
@@ -343,7 +343,7 @@ var DropDownComponent = function() {
 
           if (default_select) {
             default_select.setAttribute('data-selected', 'selected');
-            checkbox = default_select.querySelector('fn-checkbox');
+            checkbox = default_select.querySelector('z-checkbox');
 
             if (checkbox) {
               checkbox.setAttribute('data-active', 'active');
