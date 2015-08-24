@@ -1,6 +1,6 @@
 var CodeEditorComponent = function() {
   this.createdCallback = function() {
-    var tpl = $.getTemplate("fn-codeeditor-base-tpl");
+    var tpl = $.getTemplate("z-codeeditor-base-tpl");
 
     var textarea = document.createElement("textarea");
     textarea.setAttribute("autofocus", "autofocus");
@@ -43,4 +43,4 @@ var CodeEditorComponent = function() {
 
 var proto = Object.create(HTMLElement.prototype);
 CodeEditorComponent.apply(proto);
-document.registerElement("fn-codeeditor", { prototype: proto });
+document.registerElement("z-codeeditor", { prototype: proto });
