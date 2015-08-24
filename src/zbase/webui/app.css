@@ -97,59 +97,6 @@ template {
   clear: both;
 }
 
-/**
- * h2.pagetitle
- */
-h2.pagetitle {
-  margin: 0;
-  padding: 0;
-}
-
-h2.pagetitle, h2.pagetitle a {
-  line-height: 60px;
-  font-size: 19px;
-  font-weight: 300;
-  color: #454545;
-}
-
-h2.pagetitle a:hover {
-  color: #1c99d6;
-}
-
-h2.pagetitle.editable {
-  line-height: 26px;
-  margin: 17px 0;
-  display: inline-block;
-  padding: 0 3px;
-}
-
-h2.pagetitle.editable:hover {
-  cursor: pointer;
-  background: #f0f6f8;
-}
-
-h2.pagetitle i.sep:after {
-  display: inline-block;
-  opacity: .5;
-  color: rgba(0,0,0,.4);
-  line-height: 1;
-  font-weight: bold;
-  margin: 0 5px;
-  font-family: FontAwesome;
-  content: "\f105";
-}
-
-
-h2.pagetitle em {
-  font-style: normal;
-  font-weight: 400;
-}
-
-h2.pagetitle.border_bottom {
-  border-bottom: 1px solid #ddd;
-}
-
-
 /* .zbase_wrap, .zbase_viewport */
 #zbase_viewport {
   min-width: 960px;
@@ -167,7 +114,6 @@ h2.pagetitle.border_bottom {
 }
 
 @media (max-width: 1700px) {
-
   #zbase_viewport .zbase_content_pane.fullwidth {
     padding: 0;
   }
@@ -407,6 +353,58 @@ section.zbase_page_title zbase-breadcrumbs {
   display: block;
 }
 
+/**
+ * h2.pagetitle
+ */
+h2.pagetitle {
+  margin: 0;
+  padding: 0;
+}
+
+h2.pagetitle, h2.pagetitle a {
+  line-height: 60px;
+  font-size: 19px;
+  font-weight: 300;
+  color: #454545;
+}
+
+h2.pagetitle a:hover {
+  color: #1c99d6;
+}
+
+h2.pagetitle.editable {
+  line-height: 26px;
+  margin: 17px 0;
+  display: inline-block;
+  padding: 0 3px;
+}
+
+h2.pagetitle.editable:hover {
+  cursor: pointer;
+  background: #f0f6f8;
+}
+
+h2.pagetitle i.sep:after {
+  display: inline-block;
+  opacity: .5;
+  color: rgba(0,0,0,.4);
+  line-height: 1;
+  font-weight: bold;
+  margin: 0 5px;
+  font-family: FontAwesome;
+  content: "\f105";
+}
+
+
+h2.pagetitle em {
+  font-style: normal;
+  font-weight: 400;
+}
+
+h2.pagetitle.border_bottom {
+  border-bottom: 1px solid #ddd;
+}
+
 
 /**
   * zbase_button
@@ -509,28 +507,6 @@ table.zbase_table tbody tr:first-child td {
 table.zbase_table.zbase_clickable_table tr:hover td {
   background: #f0f6f8;
   cursor: pointer;
-}
-
-/**
-  * zbase_modal
-  */
-.zbase_modal_header {
-  padding: 1em 15px;
-  border-bottom: 1px solid #d0d0d0;
-  background-color: #f7f7f9;
-  box-shadow: 0 1px 1px rgba(0,0,0,0.1);
-}
-
-.zbase_modal_footer {
-  border-top: 1px solid #d0d0d0;
-  background-color: #f7f7f9;
-  box-shadow: 0 -6px 6px -6px rgba(0,0,0,0.1);
-  overflow: auto;
-  padding: 5px 15px;
-}
-
-.zbase_modal_content {
-  padding: 0.8em 15px 1.2em;
 }
 
 /**

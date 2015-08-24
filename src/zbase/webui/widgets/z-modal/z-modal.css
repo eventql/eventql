@@ -106,3 +106,22 @@ z-modal-close-icon:hover {
     margin: 0em 0em 0em -21%;
   }
 }
+
+.z-modal-header {
+  padding: 1em 15px;
+  border-bottom: 1px solid #d0d0d0;
+  background-color: #f7f7f9;
+  box-shadow: 0 1px 1px rgba(0,0,0,0.1);
+}
+
+.z-modal-footer {
+  border-top: 1px solid #d0d0d0;
+  background-color: #f7f7f9;
+  box-shadow: 0 -6px 6px -6px rgba(0,0,0,0.1);
+  overflow: auto;
+  padding: 5px 15px;
+}
+
+.z-modal-content {
+  padding: 0.8em 15px 1.2em;
+}
