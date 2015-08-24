@@ -334,3 +334,9 @@
   display: table-row;
 }
 
+.zbase_logviewer .z-pager {
+  margin-top: 5px;
+  font-size: 13px;
+}
+
+
