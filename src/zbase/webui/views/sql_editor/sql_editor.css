@@ -242,7 +242,7 @@
   font-size: 14px;
 }
 
-.zbase_sql_editor_modal .zbase_modal_content input.zbase_input {
+.zbase_sql_editor_modal .zbase_modal_content input.z-input {
   font-size: 14px;
   width: 40%;
 }
