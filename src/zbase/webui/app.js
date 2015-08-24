@@ -392,14 +392,20 @@ var ZBase = (function() {
   };
 })();
 
-var $ = {
-  navigateTo: ZBase.navigateTo,
-  getConfig: ZBase.getConfig,
-  getTemplate: ZBase.getTemplate,
-  fatalError: ZBase.showFatalError,
-  showLoader: ZBase.showLoader,
-  hideLoader: ZBase.hideLoader
+var $ = function(selector, elem) {
+  if (!elem) {
+    elem = document;
+  }
+
+  return elem.querySelector(selector);
 };
+
+$.navigateTo = ZBase.navigateTo;
+$.getConfig = ZBase.getConfig;
+$.getTemplate = ZBase.getTemplate;
+$.fatalError = ZBase.showFatalError;
+$.showLoader = ZBase.showLoader;
+$.hideLoader = ZBase.hideLoader;
 
 $.handleLinks = function(elem) {
   var click_fn = (function() {
@@ -477,12 +483,4 @@ $.replaceViewport = function(new_content) {
 
 document.getTemplateByID = function(template_name) {
   return $.getTemplate("", template_name);
-};
-
-function _(selector, elem) {
-  if (!elem) {
-    elem = document;
-  }
-
-  return elem.querySelector(selector);
 };
