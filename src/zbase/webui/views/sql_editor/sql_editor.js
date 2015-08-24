@@ -1,6 +1,7 @@
 ZBase.registerView((function() {
 
   var query_mgr;
+  var docsync;
 
   var init = function(params) {
     query_mgr = EventSourceHandler();
@@ -9,6 +10,10 @@ ZBase.registerView((function() {
 
   var destroy = function() {
     query_mgr.closeAll();
+
+    if (docsync) {
+      docsync.close();
+    }
   };
 
   var render = function(path) {
@@ -55,10 +60,9 @@ ZBase.registerView((function() {
     });
   };
 
-  var executeQuery = function(e) {
+  var executeQuery = function(query_string) {
     renderQueryProgress();
 
-    var query_string = e.value;
     var query = query_mgr.get(
       "sql_query",
       "/api/v1/sql_stream?query=" + encodeURIComponent(query_string));
@@ -122,23 +126,24 @@ ZBase.registerView((function() {
         "views/sql_editor",
         "zbase_sql_editor_main_tpl");
 
+    // docsync
+    docsync = DocSync(
+        getDocument,
+        "/api/v1/documents/sql_queries/" + doc.uuid,
+        $(".zbase_sql_editor_infobar", page));
+
     // code editor
     var editor = $("z-codeeditor", page);
     editor.setValue(doc.sql_query);
-    editor.addEventListener("execute", executeQuery);
+    editor.addEventListener("execute", function(e) {
+      executeQuery(e.value);
+      docsync.saveDocument();
+    });
 
     // execute button
     $.onClick($("button[data-action='execute-query']", page), function() {
       editor.execute();
     });
-
-    //Editor.doc_sync = new DocSync(function() {
-    //  return "content=" + encodeURIComponent(document.querySelector(".zbase_sql_editor_pane fn-codeeditor").getValue()) +
-    //  "&name=" + encodeURIComponent(document.querySelector(".zbase_sql_editor_pane input[name='doc_name']").value)
-    //  },
-    //  "/api/v1/sql_queries/" + Editor.doc_id,
-    //  document.querySelector(".zbase_sql_editor_pane .zbase_sql_editor_infobar")
-    //);
 
     $.handleLinks(page);
     $.replaceViewport(page);
@@ -147,8 +152,8 @@ ZBase.registerView((function() {
     setDocumentTitle(doc.name);
 
     // execute query
-    if (editor.getValue().length > 0) {
-      editor.execute();
+    if (doc.sql_query.length > 0) {
+      executeQuery(doc.sql_query);
     }
   };
 
@@ -176,6 +181,14 @@ ZBase.registerView((function() {
     // FIXME html escaping
     $(".zbase_sql_editor_title h2").innerHTML = title;
     $(".sql_document_name_crumb").innerHTML = title;
+    $(".zbase_sql_editor_pane input[name='doc_name']").value = title;
+  }
+
+  var getDocument = function() {
+    return {
+      content: $(".zbase_sql_editor_pane z-codeeditor").getValue(),
+      name: $(".zbase_sql_editor_pane input[name='doc_name']").value
+    };
   }
 
   return {

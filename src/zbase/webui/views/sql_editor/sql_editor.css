@@ -56,8 +56,9 @@
 }
 
 .zbase_sql_editor .zbase_sql_editor_infobar {
-  background-color: #f0f6f8;
-  border-bottom: 1px solid #c9d0d4;
+  border-bottom: 1px solid #edc3c3;
+  background: #fff0f0;
+  color: #a94442;
   box-shadow: 0 1px 1px rgba(0,0,0,0.1);
   padding: 10px 20px;
   font-size: 13px;

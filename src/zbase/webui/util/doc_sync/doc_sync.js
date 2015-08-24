@@ -1,6 +1,5 @@
-var DocSync = function(getPostBody, save_url, infobar) {
-  this.cur_version = 0;
-
+var DocSync = function(getPostBody, save_url, infobar_elem) {
+  var cur_version = 0;
   var retry_delay = 5000;
 
   var state = "idle";
@@ -8,14 +7,19 @@ var DocSync = function(getPostBody, save_url, infobar) {
   var last_failure = null;
   var running_timer = null;
 
-  this.documentChanged = function(cur_event) {
+  var saveDocument = function() {
+    cur_version++;
+    documentChanged("content_changed");
+  }
+
+  var documentChanged = function(cur_event) {
     switch (state) {
 
       case "idle":
         switch (cur_event) {
 
           case "content_changed":
-            this.syncToBackend();
+            syncToBackend();
             return;
 
         }
@@ -25,19 +29,19 @@ var DocSync = function(getPostBody, save_url, infobar) {
         switch (cur_event) {
 
           case "saved_success":
-            if (sync_version == this.cur_version) {
+            if (sync_version == cur_version) {
               state = "idle";
               hideInfobar();
               return;
             } else {
-              this.syncToBackend();
+              syncToBackend();
               return;
             }
 
           case "saved_failure":
             last_failure = (new Date()).getTime();
             state = "retry";
-            this.documentChanged(null);
+            documentChanged(null);
             return;
 
         }
@@ -48,7 +52,7 @@ var DocSync = function(getPostBody, save_url, infobar) {
 
           case "content_changed":
             cancelTimer();
-            this.syncToBackend();
+            syncToBackend();
             return;
 
           default:
@@ -56,12 +60,11 @@ var DocSync = function(getPostBody, save_url, infobar) {
 
             if (last_failure + retry_delay > now) {
               var retry_in = Math.ceil((last_failure + retry_delay - now) / 1000);
-              var _this = this;
               updateInfobar("Saving Failed! Retrying in " + retry_in + " seconds");
               showInfobar();
-              runTimer(function() { _this.documentChanged(null); }, 300);
+              runTimer(function() { documentChanged(null); }, 300);
             } else {
-              this.syncToBackend();
+              syncToBackend();
             }
 
             return;
@@ -73,9 +76,8 @@ var DocSync = function(getPostBody, save_url, infobar) {
 
   }
 
-  this.syncToBackend = function() {
-    var _this = this;
-    var syncing_version = this.cur_version;
+  var syncToBackend = function() {
+    var syncing_version = cur_version;
     updateInfobar("Saving...");
 
     state = "saving";
@@ -83,16 +85,15 @@ var DocSync = function(getPostBody, save_url, infobar) {
     var http = new XMLHttpRequest();
     http.open("POST", save_url, true);
     http.timeout = 4000;
-
-    http.send(getPostBody());
+    http.send($.buildQueryString(getPostBody()));
 
     http.onreadystatechange = function() {
       if (http.readyState == 4) {
         if (http.status == 201) {
           sync_version = syncing_version;
-          return _this.documentChanged("saved_success");
+          return documentChanged("saved_success");
         } else {
-          return _this.documentChanged("saved_failure");
+          return documentChanged("saved_failure");
         }
       }
     };
@@ -103,13 +104,13 @@ var DocSync = function(getPostBody, save_url, infobar) {
     //};
   };
 
-  function cancelTimer() {
+  var cancelTimer = function() {
     if (running_timer) {
       window.clearTimeout(running_timer);
     }
   }
 
-  function runTimer(fn, timeout) {
+  var runTimer = function(fn, timeout) {
     if (running_timer) {
       window.clearTimeout(running_timer);
     }
@@ -120,17 +121,26 @@ var DocSync = function(getPostBody, save_url, infobar) {
     }, timeout);
   };
 
-  function updateInfobar(text) {
-    infobar.innerHTML = text;
+  var updateInfobar = function(text) {
+    infobar_elem.innerHTML = text;
   };
 
-  function showInfobar() {
-    infobar.classList.remove('hidden');
+  var showInfobar = function() {
+    infobar_elem.classList.remove('hidden');
   };
 
-  function hideInfobar() {
-    infobar.classList.add('hidden');
+  var hideInfobar = function() {
+    infobar_elem.classList.add('hidden');
   };
 
+  var close = function() {
+    if (running_timer) {
+      window.clearTimeout(running_timer);
+    }
+  }
 
+  return {
+    saveDocument: saveDocument,
+    close: close
+  }
 };
