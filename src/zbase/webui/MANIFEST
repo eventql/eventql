@@ -26,6 +26,7 @@ route {
   is_public: true
   path_match: "/a/login"
   view: "login"
+  require_module: "widgets/z-input"
   require_module: "views/login"
 }
 
