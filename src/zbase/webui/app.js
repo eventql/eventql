@@ -481,6 +481,11 @@ $.replaceViewport = function(new_content) {
   viewport.appendChild(new_content);
 }
 
+$.replaceContent = function(elem, new_content) {
+  elem.innerHTML = "";
+  elem.appendChild(new_content);
+}
+
 document.getTemplateByID = function(template_name) {
   return $.getTemplate("", template_name);
 };
