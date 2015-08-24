@@ -22,6 +22,7 @@ route {
   require_module: "widgets/z-search"
   require_module: "widgets/z-pager"
   require_module: "widgets/z-table"
+  require_module: "widgets/z-calendar"
   require_module: "widgets/zbase-header"
   require_module: "views/logviewer"
 }
