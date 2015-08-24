@@ -10,9 +10,8 @@
  */
 var CalendarComponent = function() {
   this.createdCallback = function() {
-    var shadow = this.createShadowRoot();
-    var tpl = Fnord.getTemplate("z-calendar", "base");
-    shadow.appendChild(tpl);
+    var tpl = $.getTemplate("widgets/z-calendar", "z-calendar-base-tpl");
+    this.appendChild(tpl);
 
     this.init();
   };
@@ -42,12 +41,12 @@ var CalendarComponent = function() {
   //render previous/next month onclick
   this.observeMonthSelectors = function() {
     var base = this;
-    this.shadowRoot.querySelector(".fa-chevron-left").onclick = function() {
+    this.querySelector(".fa-chevron-left").onclick = function() {
       base.render(
         DateUtil.getMonthTimestamp(base.date.month, base.date.year, -1));
     };
 
-    this.shadowRoot.querySelector(".fa-chevron-right").onclick = function() {
+    this.querySelector(".fa-chevron-right").onclick = function() {
       base.render(
         DateUtil.getMonthTimestamp(base.date.month, base.date.year, 1));
     };
@@ -77,12 +76,12 @@ var CalendarComponent = function() {
     ];
 
     if (this.getAttribute('data-month-header') != "false") {
-      this.shadowRoot.getElementById('month_header').innerHTML = 
+      this.querySelector('.month_header').innerHTML = 
         human_month[this.date.month] + " " + this.date.year;
     } else {
       //without month header
-      this.shadowRoot.querySelector("table tbody").removeChild(
-        this.shadowRoot.querySelector("tr[name='month_header']")
+      this.querySelector("table tbody").removeChild(
+        this.querySelector("tr[name='month_header']")
       );
     }
   };
@@ -91,7 +90,7 @@ var CalendarComponent = function() {
     var current_date = this.renderFirstWeek();
 
     for (var week = 1; week < 6; week++) {
-      var tr_elem = this.shadowRoot.getElementById("week" + week);
+      var tr_elem = this.querySelector(".week" + week);
       tr_elem.innerHTML = "";
 
       for (var day = 0; day < 7; day++) {
@@ -119,7 +118,7 @@ var CalendarComponent = function() {
 
     var prev_dates = this.datesOfPrevMonth(prev_month);
     var current_date = 1;
-    var tr_elem = this.shadowRoot.getElementById("week0");
+    var tr_elem = this.querySelector(".week0");
     tr_elem.innerHTML = '';
 
     //render last days of previous month
@@ -157,7 +156,7 @@ var CalendarComponent = function() {
 
     //render week with days of next month
     for (week++; week < 6; week++) {
-      var tr_elem = this.shadowRoot.getElementById("week" + week);
+      var tr_elem = this.querySelector(".week" + week);
       tr_elem.innerHTML = "";
 
       for (day = 0; day < 7; day++) {
