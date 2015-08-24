@@ -395,7 +395,6 @@ h2.pagetitle i.sep:after {
   content: "\f105";
 }
 
-
 h2.pagetitle em {
   font-style: normal;
   font-weight: 400;
@@ -564,10 +563,6 @@ zbase-breadcrumbs:last-child,
   margin-bottom: 0em;
 }
 
-/*******************************
-          Content
-*******************************/
-/* Section */
 zbase-breadcrumbs zbase-breadcrumbs-section,
 .zbase-breadcrumbs .zbase-breadcrumbs-section{
   display: inline-block;
