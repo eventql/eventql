@@ -124,7 +124,7 @@ ZBase.registerView((function() {
 
     // code editor
     var editor = $("z-codeeditor", page);
-    editor.setValue(doc.query);
+    editor.setValue(doc.sql_query);
     editor.addEventListener("execute", executeQuery);
 
     // execute button
