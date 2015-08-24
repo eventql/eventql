@@ -10,63 +10,32 @@
 **/
 var ModalComponent = function() {
   this.createdCallback = function() {
-    var base = this;
-
-    //customisable
-    this.closeElems = [
-      this.querySelector("z-modal-close-icon"), this.parentNode
-    ];
-
-    this.closeElems.forEach(function(elem) {
-      if (elem) {
-        elem.onclick = function() {
-          base.close();
-        }
-      }
-    });
-
     this.onclick = function(e) {
       e.stopPropagation();
     };
   };
 
-  this.keyListener;
-
-  this.listener = function(e) {
-    //ESC
-    if (e.keyCode == 27) {
-      this.close();
-    }
-  };
-
   this.show = function() {
-    var dimmer = this.parentNode;
-    if (dimmer && dimmer.tagName == 'FN-MODAL-DIMMER') {
-      dimmer.setAttribute('data-active', 'active');
-    } else {
-      this.setAttribute('data-active', 'active');
-    }
+    this.setAttribute('data-active', 'active');
+    console.log("show", this);
+
+    var on_escape = function(e) {
+      if (e.keyCode == 27) {
+        this.close();
+      }
+    };
 
     //place modal
     var height = this.getBoundingClientRect().height;
-    var mtop = ((window.innerHeight - height) / 4);
-    this.style.marginTop = mtop + "px";
+    this.style.top = ((window.innerHeight - height) / 4) + "px";
 
-    var _this = this;
-    this.keyListener = this.listener.bind(this);
-    document.addEventListener('keyup', _this.keyListener, false);
+    this.escape_listener = on_escape.bind(this);
+    document.addEventListener('keyup', this.escape_listener, false);
   };
 
   this.close = function() {
-    var dimmer = this.parentNode;
-    if (dimmer) {
-      dimmer.removeAttribute('data-active');
-    } else {
-      this.removeAttribute('data-active');
-    }
-
-    var _this = this;
-    document.removeEventListener('keyup', _this.keyListener, false);
+    this.setAttribute('data-active', "");
+    document.removeEventListener('keyup', this.escape_listener, false);
   };
 };
 

@@ -21,8 +21,8 @@ z-modal {
           user-select: text;
 }
 
-z-modal-dimmer[data-active] z-modal,
-z-modal[data-active] {
+z-modal-dimmer[data-active="active"] z-modal,
+z-modal[data-active="active"] {
   display: block;
 }
 
@@ -56,7 +56,7 @@ z-modal-dimmer {
   z-index: 100000;
 }
 
-z-modal-dimmer[data-active] {
+z-modal-dimmer[data-active="active"] {
   display: block;
 }
 

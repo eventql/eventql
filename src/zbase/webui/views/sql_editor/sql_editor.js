@@ -150,7 +150,7 @@ ZBase.registerView((function() {
 
     // document name + name editing
     setDocumentTitle(doc.name);
-    $.onClick($(".zbase_sql_editor_title h2"), openDocumentNameEditModal);
+    initDocumentNameEditModal();
 
     // execute query
     if (doc.sql_query.length > 0) {
@@ -178,14 +178,19 @@ ZBase.registerView((function() {
         progress);
   }
 
-  var openDocumentNameEditModal = function() {
+  var initDocumentNameEditModal = function() {
     var modal = $(".zbase_sql_editor_pane z-modal.rename_query");
+      modal.show();
 
-    $.onClick($("button[data-action='submit']", modal), function() {
-      modal.close();
+    $.onClick($(".zbase_sql_editor_title h2"), function() {
+      console.log("show");
+      modal.show();
     });
 
-    modal.show();
+    $.onClick($("button[data-action='submit']", modal), function() {
+      console.log("hide");
+      modal.close();
+    });
   }
 
   var setDocumentTitle = function(title) {
