@@ -511,7 +511,7 @@ z-menu.zbase_default_menu z-menu-section z-menu-title a {
   text-transform: uppercase;
   font-size: 90%;
   font-weight: 500;
-  letter-spacing: 1.1px;
+  letter-spacing: 0.8px;
   margin-bottom: 10px;
 }
 
@@ -520,7 +520,7 @@ z-menu.zbase_default_menu z-menu-section z-menu-item.link {
 }
 
 z-menu.zbase_default_menu z-menu-section z-menu-item a {
-  font-size: 115%;
+  font-size: 109%;
   color: #464646;
   padding: 0 10px;
   line-height: 34px;
