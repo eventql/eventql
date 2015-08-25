@@ -260,6 +260,8 @@ var DropDownComponent = function() {
     }
 
     header.innerHTML = innerHTML;
+    var checkbox = header.querySelector("z-checkbox");
+    if (checkbox) checkbox.remove();
   };
 
   this.__onItemClick = function(item) {

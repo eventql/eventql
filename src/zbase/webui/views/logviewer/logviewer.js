@@ -4,6 +4,7 @@ ZBase.registerView((function() {
 
   var query_mgr;
   var logfiles;
+  var default_end_time = (new Date()).getTime() * 1000;
   var next_page_time;
   var pagination_history = [];
 
@@ -73,7 +74,10 @@ ZBase.registerView((function() {
 
     // param: time
     var time_control = $(".zbase_logviewer .time_control");
-    params.time =  time_control.getAttribute("data-timestamp");
+    var time = time_control.getAttribute("data-timestamp");
+    if (time != default_end_time) {
+      params.time = time;
+    }
 
     // param: filter
     params.filter_type = $(".zbase_logviewer .filter_type_control").getValue();
@@ -109,7 +113,7 @@ ZBase.registerView((function() {
 
     //pagination
     setPagination();
-    setHistoricalDataHint();
+    setHistoricalDataHint(end_time != default_end_time);
   };
 
   var setLogfileParam = function(logfile) {
@@ -132,7 +136,7 @@ ZBase.registerView((function() {
     }
 
     if (!end_time) {
-      end_time = (new Date()).getTime() * 1000;
+      end_time = default_end_time;
     }
 
     var time_control = $(".zbase_logviewer .time_control");
@@ -188,7 +192,7 @@ ZBase.registerView((function() {
     }
   }
 
-  var setHistoricalDataHint = function() {
+  var setHistoricalDataHint = function(is_historic) {
     // FIXME: display "showing historical data" message
   }
 
