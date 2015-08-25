@@ -342,35 +342,35 @@ var DropDownComponent = function() {
     this.dispatchEvent(change_ev);
   };
 
-  this.__onKeyDown = function(e) {
-    var input = this.querySelector("z-input");
-
-    switch (e.keyCode) {
-      case 38:
-        this.__keyNavigation('up');
-        break;
-      case 40:
-        this.__keyNavigation('down');
-        break;
-      case 13:
-        this.__onItemClick(this.querySelector("z-dropdown-item.hover"), true);
-        break;
-      default:
-        if (input) {
-          this.showFilteredDropdownItems(input.getValue());
-        }
-        break;
-    }
-  }
-
   this.__setKeyNavigation = function() {
-    var that = this;
+    var base = this;
     this.__unsetKeyNavigation();
 
     this.keydown_handler = function(e) {
-      that.__onKeyDown.apply(that, [e]);
-      e.preventDefault();
-      return false;
+      switch (e.keyCode) {
+        case 38:
+          base.__keyNavigation('up');
+          e.preventDefault();
+          return false;
+
+        case 40:
+          base.__keyNavigation('down');
+          e.preventDefault();
+          return false;
+
+        case 13:
+          base.__onItemClick(base.querySelector("z-dropdown-item.hover"), true);
+          e.preventDefault();
+          return false;
+
+        case 27:
+          base.hideDropdown();
+          e.preventDefault();
+          return false;
+
+        default:
+          return true;
+      }
     };
 
     window.addEventListener('keydown', this.keydown_handler, false);
