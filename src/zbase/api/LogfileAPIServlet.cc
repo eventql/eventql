@@ -252,18 +252,12 @@ void LogfileAPIServlet::scanLogfile(
     limit = std::stoull(limit_str);
   }
 
-  String raw_str;
-  if (URI::getParam(params, "raw", &limit_str)) {
-    scan_params.set_return_raw (true);
-  }
-
   String columns_str;
   if (URI::getParam(params, "columns", &columns_str)) {
-    if (columns_str == "__all__") {
-      scan_params.set_all_columns(true);
-      scan_params.set_return_raw(true);
-    } else {
-      for (const auto& c : StringUtil::split(columns_str, ",")) {
+    for (const auto& c : StringUtil::split(columns_str, ",")) {
+      if (c == "__raw__") {
+        scan_params.set_return_raw(true);
+      } else {
         *scan_params.add_columns() = c;
       }
     }

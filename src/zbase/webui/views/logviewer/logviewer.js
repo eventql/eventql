@@ -35,6 +35,7 @@ ZBase.registerView((function() {
     showLoadingBar(0);
 
     var params = getQueryParams();
+    params.limit = 100;
     console.log(params);
 
     var url = "/api/v1/logfiles/scan?" + $.buildQueryString(params);
@@ -80,9 +81,6 @@ ZBase.registerView((function() {
 
     // param: columns
     params.columns = $(".zbase_logviewer .columns_control").getValue();
-
-    // param: limit
-    params.limit = "100";
 
     return params;
   };
