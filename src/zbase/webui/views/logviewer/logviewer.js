@@ -210,6 +210,10 @@ ZBase.registerView((function() {
   }
 
   var goToNextPage = function() {
+    if (!next_page_time) {
+      return;
+    }
+
     var params = getQueryParams();
     params.time = next_page_time;
     var url = getQueryURL(params);
