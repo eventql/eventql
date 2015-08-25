@@ -226,9 +226,9 @@ ZBase.registerView((function() {
     next_page_time = null;
     pagination_history = [];
     default_end_time = (new Date()).getTime() * 1000;
+    setTimeParam(default_end_time);
 
     var params = getQueryParams();
-    params.time = default_end_time;
     var url = getQueryURL(params);
 
     $.navigateTo(url);
