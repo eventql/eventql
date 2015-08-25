@@ -25,7 +25,6 @@ SearchDashboardQuery::SearchDashboardQuery(
     result_(new TimeseriesDrilldownResult<SearchCTRStats>()),
     segments_(segments),
     time_col_(query->fetchColumn("search_queries.time")),
-    pagetype_col_(query->fetchColumn("search_queries.page_type")),
     num_items_col_(query->fetchColumn("search_queries.num_result_items")),
     num_itemclicks_col_(query->fetchColumn("search_queries.num_result_items_clicked")),
     num_adimprs_col_(query->fetchColumn("search_queries.num_ad_impressions")),
@@ -62,7 +61,6 @@ void SearchDashboardQuery::onSession() {
 
 void SearchDashboardQuery::onQuery() {
   auto time = time_col_->getUInt32();
-  auto pagetype = (PageType) pagetype_col_->getUInt32();
   auto num_items = num_items_col_->getUInt32();
   auto num_clicks = num_itemclicks_col_->getUInt32();
   auto num_ad_imprs = num_adimprs_col_->getUInt32();
