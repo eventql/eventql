@@ -1,3 +1,5 @@
+html_file: "logfile_table.html"
 html_file: "logviewer.html"
+js_file: "logfile_table.js"
 js_file: "logviewer.js"
 css_file: "logviewer.css"
