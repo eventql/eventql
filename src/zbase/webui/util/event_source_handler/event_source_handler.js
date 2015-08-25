@@ -1,32 +1,16 @@
 var EventSourceHandler = function() {
   var sources = {};
 
-
   function get(id, url) {
-    // set sources entry
-    if (!sources.hasOwnProperty[id]) {
-      sources[id] = {
-        running: false,
-        source: null
-      };
-    }
-
-    // if source with same id is already running close this source
-    if (sources[id].running) {
-      sources[id].source.close();
-      sources[id].source = null;
-    }
-
-    sources[id].running = true;
-    sources[id].source = new EventSource(url);
-
-    return sources[id].source;
+    close(id);
+    sources[id] = new EventSource(url);
+    return sources[id];
   };
 
   function close(id) {
-    if (sources[id] && sources[id].running) {
-      sources[id].source.close();
-      sources[id].running = false;
+    if (sources[id]) {
+      sources[id].close();
+      delete sources[id];
     }
   };
 

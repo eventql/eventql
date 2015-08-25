@@ -1,4 +1,6 @@
 html_file: "sql_editor.html"
+html_file: "query_list.html"
 js_file: "result_list.js"
+js_file: "query_list.js"
 js_file: "sql_editor.js"
 css_file: "sql_editor.css"

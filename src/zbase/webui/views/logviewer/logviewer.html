@@ -7,7 +7,7 @@
             <a href="/a/">Applications</a>
           </zbase-breadcrumbs-section>
           <zbase-breadcrumbs-section>
-            <a href="/a/logviewer">Log Viewer</a>
+            <a href="/a/logviewer">Logfile Viewer</a>
           </zbase-breadcrumbs-section>
           <zbase-breadcrumbs-section>
             <a href="/a/logviewer" class="logfile_name_crumb">-</a>
@@ -16,7 +16,7 @@
       </div>
     </section>
 
-    <div class="zbase_content_pane fullwidth">
+    <div class="zbase_content_pane">
       <div class="logviewer_pane hidden" name="logviewer_pane">
         <div class='control_pane'>
 
@@ -39,60 +39,39 @@
             </div>
           </div>
 
-          <div class="control_pane_bar" style="height: 37px; margin-top: 8px;">
+          <div class="control_pane_bar" style="height: 37px; margin-top: 8px; padding-top: 1px;">
             <div class="z-pager right">
-              <div class="z-pager-tooltip-back" data-disabled data-action="show-prev-loglines"></div>
-              <div class="z-pager-tooltip-for" data-action="show-next-loglines"></div>
+              <div class="z-pager-tooltip-back prev" data-disabled data-action="show-prev-loglines"></div>
+              <div class="z-pager-tooltip-for next" data-action="show-next-loglines"></div>
             </div>
             <div class="right">
-              <div class="control_pane_item" id="update_endtime_control" style="display: none;">
-                <label>Historical &mdash;</label>
-                <a class="link">Show Latest</a>
+              <div class="control_pane_item go_to_recent hidden" id="update_endtime_control">
+                <div class="box">
+                  <label>Showing Historical Data &mdash;</label>
+                  <a class="link">Show Latest</a>
+                </div>
               </div>
 
               <label>End Time</label>
-              <input class="z-input clickable logviewer_time_control" readonly />
-
-              <div class="date_select_widget hidden" id="logviewer_date_widget">
-                <div class="time_inputs">
-                  <input data-factor="3600000" data-value="hours" class="left z-input" maxlength="2" placeholder="00"/>
-                  <b class="left">:</b>
-                  <input data-factor="60000" data-value="minutes" class="left z-input"  maxlength="2" placeholder="00"/>
-                  <b class="left">:</b>
-                  <input data-factor="1000" data-value="seconds" class="left z-input"  maxlength="2" placeholder="00"/>
-                </div>
-
-                <z-calendar data-selectable="past"></z-calendar>
-                <z-button class='primary right' data-action="set-logviewer-date">Apply</z-button>
-              </div>
+              <input class="z-input clickable time_control" readonly />
             </div>
 
             <div class="control_pane_item">
               <label>Logfile:</label>
-              <z-dropdown class='inline logfile_control'>
+              <z-dropdown data-force-select class='inline logfile_control'>
                 <z-dropdown-items>
+                  <z-dropdown-item>-</z-dropdown-item>
                 </z-dropdown-items>
               </z-dropdown>
             </div>
 
             <div class="control_pane_item">
-              <label>Columns</label>
-              <z-dropdown class='inline checkbox button' data-open-onclick data-force-select data-action='logfile-columns-select'>
+              <label>Columns:</label>
+              <z-dropdown class='inline checkbox button columns_control' data-force-select data-multiselect data-action='logfile-columns-select'>
                 <z-dropdown-items>
-                  <div style="display: list-item; overflow: auto; border-bottom: 1px solid rgba(0, 0, 0, 0.05);">
-                    <z-button class="primary right">Apply</z-button>
-                  </div>
-                  <z-dropdown-item data-value="__all__">
-                    <z-checkbox></z-checkbox>
-                    Full Row
-                  </z-dropdown-item>
+                  <z-dropdown-item>-</z-dropdown-item>
                 </z-dropdown-items>
               </z-dropdown>
-            </div>
-
-            <div class="control_pane_item" style="display: none;" name="column_selection_check">
-              <z-checkbox></z-checkbox>
-              <label>Include Raw Log Line</label>
             </div>
           </div>
         </div>
@@ -115,14 +94,16 @@
               </div>
             </h3>
           </div>
-          <div class="table_container">
-            <table class='z-table logs' name="loglines">
-              <tbody>
-              </tbody>
-            </table>
-          </div>
+          <div class="table_container"></div>
         </div>
       </div>
     </div>
+  </div>
+</template>
+
+<template id="zbase_logviewer_error_msg_tpl">
+  <div class="error_message">
+    <h3>Error</h3>
+    <div class="error_text"></div>
   </div>
 </template>
