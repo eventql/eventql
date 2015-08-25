@@ -62,7 +62,6 @@ ZBase.registerView((function() {
     query.addEventListener("error", function(e) {
       query_mgr.close("logfile_query");
       hideLoadingBar();
-      renderError("Server Error");
     });
   };
 
