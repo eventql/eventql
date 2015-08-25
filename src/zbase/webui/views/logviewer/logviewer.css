@@ -61,7 +61,7 @@
   line-height: 34px;
 }
 
-.zbase_logviewer .logviewer_pane .logviewer_time_control {
+.zbase_logviewer .logviewer_pane .time_control {
   margin-right: 20px;
   margin-left: 4px;
   border: none;
@@ -150,6 +150,10 @@
   vertical-align: top;
   width: auto;
   display: inline-block;
+}
+
+.zbase_logviewer .control_pane .time_control.z-input {
+  font-size: 12px;
 }
 
 .zbase_logviewer .control_pane label {

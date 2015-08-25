@@ -24,22 +24,6 @@ var DropDownComponent = function() {
     this.initHeaderItem();
   };
 
-  this.onDocumentClick = function() {
-    this.hideDropdown();
-  };
-
-  this.setDropdownItems = function(items) {
-    var items = $("z-dropdown-items", this);
-    items.innerHTML = "";
-
-    items.forEach(function(item) {
-      var item = document.createElement("z-dropdown-item");
-      item.innerHTML = item;
-      item.setAttribute("data-value", item);
-      items.appendChild(item);
-    });
-  }
-
   /**
     * Returns either the selected items data-value attr or text content
     *
@@ -229,8 +213,8 @@ var DropDownComponent = function() {
     var active_items = document.querySelectorAll("[data-active]");
 
     for (var i = 0; i < active_items.length; i++) {
-      if (typeof active_items[i].onDocumentClick == 'function') {
-        active_items[i].onDocumentClick();
+      if (typeof active_items[i].hideDropdown == 'function') {
+        active_items[i].hideDropdown();
       }
     }
 
