@@ -113,17 +113,16 @@ ZBase.registerView((function() {
   };
 
   var setLogfileParam = function(logfile) {
-    var dropdown = $(".zbase_logviewer z-dropdown.logfile_control");
-    var items = $("z-dropdown-items", dropdown);
-    items.innerHTML = "";
-
+    var items = [];
     logfiles.forEach(function(logfile) {
       var item = document.createElement("z-dropdown-item");
       item.innerHTML = logfile.name;
       item.setAttribute("data-value", logfile.name);
-      items.appendChild(item);
+      items.push(item);
     });
 
+    var dropdown = $(".zbase_logviewer z-dropdown.logfile_control");
+    dropdown.setDropdownItems(items);
     dropdown.setValue([logfile]);
   };
 
@@ -155,25 +154,25 @@ ZBase.registerView((function() {
       columns_str = "__raw__";
     }
 
-    var dropdown = $(".zbase_logviewer .columns_control");
     var columns = listLogfileColumns(logfile);
-    var items = $("z-dropdown-items", dropdown);
-    items.innerHTML = "";
+    var items = [];
 
     {
       var item = document.createElement("z-dropdown-item");
       item.innerHTML = "<z-checkbox></z-checkbox> " + "Raw Logline";
       item.setAttribute("data-value", "__raw__");
-      items.appendChild(item);
+      items.push(item);
     }
 
     columns.forEach(function(column) {
       var item = document.createElement("z-dropdown-item");
       item.innerHTML = "<z-checkbox></z-checkbox> " + column;
       item.setAttribute("data-value", column);
-      items.appendChild(item);
+      items.push(item);
     });
 
+    var dropdown = $(".zbase_logviewer .columns_control");
+    dropdown.setDropdownItems(items);
     dropdown.setValue(columns_str.split(","));
   }
 
