@@ -61,7 +61,7 @@ ZBase.registerView((function() {
     query.addEventListener("error", function(e) {
       query_mgr.close("logfile_query");
       hideLoadingBar();
-      renderError();
+      renderError("Server Error");
     });
   };
 
@@ -265,7 +265,12 @@ ZBase.registerView((function() {
   }
 
   var renderError = function(error) {
-    console.log("render error", error); // FIXME
+    var error_msg = $.getTemplate(
+        "views/logviewer",
+        "zbase_logviewer_error_msg_tpl");
+
+    $(".error_text", error_msg).innerHTML = error;
+    $.replaceContent($(".zbase_logviewer .table_container"), error_msg);
   }
 
   var showLoadingBar = function(num_rows) {
