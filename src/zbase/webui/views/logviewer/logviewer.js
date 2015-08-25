@@ -79,6 +79,7 @@ ZBase.registerView((function() {
       params.time = time;
     }
 
+
     // param: filter
     params.filter_type = $(".zbase_logviewer .filter_type_control").getValue();
     params.filter = $(".zbase_logviewer .filter_control").getValue();
@@ -113,7 +114,10 @@ ZBase.registerView((function() {
 
     //pagination
     setPagination();
-    setHistoricalDataHint(end_time != default_end_time);
+
+    // "showing historic data" hint
+    var is_historical = end_time && end_time != default_end_time;
+    setHistoricalDataHint(is_historical);
   };
 
   var setLogfileParam = function(logfile) {
@@ -185,15 +189,22 @@ ZBase.registerView((function() {
   }
 
   var setPagination = function() {
+    var prev_elem = $(".zbase_logviewer .z-pager .prev");
+
     if (pagination_history.length == 0) {
-      $(".zbase_logviewer .z-pager .prev").setAttribute("data-disabled", true);
+      prev_elem.setAttribute("data-disabled", true);
     } else {
-      $(".zbase_logviewer .z-pager .prev").removeAttribute("data-disabled");
+      prev_elem.removeAttribute("data-disabled");
     }
   }
 
   var setHistoricalDataHint = function(is_historic) {
-    // FIXME: display "showing historical data" message
+    var elem = $(".zbase_logviewer .go_to_recent");
+    if (is_historic) {
+      elem.classList.remove("hidden");
+    } else {
+      elem.classList.add("hidden");
+    }
   }
 
   var getQueryURL = function(params) {
@@ -208,6 +219,18 @@ ZBase.registerView((function() {
     pagination_history = [];
 
     var url = getQueryURL(getQueryParams());
+    $.navigateTo(url);
+  }
+
+  var goToMostRecentPage = function() {
+    next_page_time = null;
+    pagination_history = [];
+    default_end_time = (new Date()).getTime() * 1000;
+
+    var params = getQueryParams();
+    params.time = default_end_time;
+    var url = getQueryURL(params);
+
     $.navigateTo(url);
   }
 
@@ -270,6 +293,7 @@ ZBase.registerView((function() {
     $(".time_control", page).addEventListener("change", submitControls);
     $(".z-pager .next", page).addEventListener("click", goToNextPage);
     $(".z-pager .prev", page).addEventListener("click", goToPreviousPage);
+    $(".go_to_recent a", page).addEventListener("click", goToMostRecentPage);
     $(".filter_control", page).addEventListener("change", submitControls);
     $(".filter_control", page).addEventListener("keyup", function(e) {
       if (e.keyCode == 13) submitControls();

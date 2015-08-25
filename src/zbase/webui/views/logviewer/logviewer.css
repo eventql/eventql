@@ -391,6 +391,29 @@
   margin-top: 0;
 }
 
+.zbase_logviewer .go_to_recent.hidden {
+  display: none;
+}
+
+.zbase_logviewer .go_to_recent .box {
+  background-color: #f0f6f8;
+  border-radius: 3px;
+  margin-top: 3px;
+  height: 31px;
+  padding: 0 10px;
+  border: 1px solid #c9d0d4;
+  margin-right: 10px;
+}
+
+.zbase_logviewer .go_to_recent .box label {
+  color: #333;
+}
+
+.zbase_logviewer .go_to_recent .box > * {
+  position: relative;
+  top: -4px;
+}
+
 .zbase_logviewer .logfile_list {
   border-left: 1px solid #ddd;
   border-right: 1px solid #ddd;
