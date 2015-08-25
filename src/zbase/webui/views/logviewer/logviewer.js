@@ -38,7 +38,6 @@ ZBase.registerView((function() {
 
     var params = getQueryParams();
     params.limit = 100;
-    console.log(params);
 
     var url = "/api/v1/logfiles/scan?" + $.buildQueryString(params);
     var query = query_mgr.get("logfile_query", url);
@@ -257,7 +256,6 @@ ZBase.registerView((function() {
   }
 
   var render = function() {
-    console.log("render");
     var page = $.getTemplate("views/logviewer", "zbase_logviewer_main_tpl");
 
     $(".logfile_control", page).addEventListener("change", submitControls);
@@ -287,7 +285,7 @@ ZBase.registerView((function() {
   }
 
   var showLoadingBar = function(num_rows) {
-    $(".zbase_logviewer table").classList.add("loading");
+    $(".zbase_logviewer").classList.add("loading");
     var elem = $(".zbase_logviewer .loglines_loading_bar");
     elem.classList.remove("hidden");
     $(".loading_bar_info", elem).style.visibility = 
@@ -296,7 +294,7 @@ ZBase.registerView((function() {
   };
 
   var hideLoadingBar = function() {
-    $(".zbase_logviewer table").classList.remove("loading");
+    $(".zbase_logviewer").classList.remove("loading");
     $(".zbase_logviewer .loglines_loading_bar").classList.add("hidden");
   };
 
