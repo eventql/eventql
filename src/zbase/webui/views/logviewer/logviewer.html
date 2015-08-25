@@ -51,7 +51,7 @@
               </div>
 
               <label>End Time</label>
-              <input class="z-input clickable logviewer_time_control" readonly />
+              <input class="z-input clickable time_control" readonly />
 
               <div class="date_select_widget hidden" id="logviewer_date_widget">
                 <div class="time_inputs">
@@ -71,21 +71,16 @@
               <label>Logfile:</label>
               <z-dropdown class='inline logfile_control'>
                 <z-dropdown-items>
+                  <z-dropdown-item>-</z-dropdown-item>
                 </z-dropdown-items>
               </z-dropdown>
             </div>
 
             <div class="control_pane_item">
               <label>Columns</label>
-              <z-dropdown class='inline checkbox button columns_control' data-open-onclick data-force-select data-action='logfile-columns-select'>
+              <z-dropdown class='inline checkbox button columns_control' data-multiselect data-action='logfile-columns-select'>
                 <z-dropdown-items>
-                  <div style="display: list-item; overflow: auto; border-bottom: 1px solid rgba(0, 0, 0, 0.05);">
-                    <z-button class="primary right">Apply</z-button>
-                  </div>
-                  <z-dropdown-item data-value="__all__">
-                    <z-checkbox></z-checkbox>
-                    Full Row
-                  </z-dropdown-item>
+                  <z-dropdown-item>-</z-dropdown-item>
                 </z-dropdown-items>
               </z-dropdown>
             </div>

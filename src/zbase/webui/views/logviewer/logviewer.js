@@ -11,8 +11,7 @@ ZBase.registerView((function() {
       if (r.status == 200) {
         logfiles = JSON.parse(r.response).logfile_definitions;
         render();
-        applyQueryParams(params.path);
-        executeQuery();
+        updateQuery(params.path);
       } else {
         $.fatalError();
       }
@@ -25,11 +24,15 @@ ZBase.registerView((function() {
     query_mgr.closeAll();
   };
 
+  var updateQuery = function(url) {
+    setQueryParams(url);
+    executeQuery();
+  }
+
   var executeQuery = function() {
-    //this.updateTimeControl(end_time);
     showLoadingBar(0);
 
-    var params = getQueryParams();
+    var params = getServerQueryParams();
     console.log(params);
 
     var url = "/api/v1/logfiles/scan?" + $.buildQueryString(params);
@@ -85,86 +88,58 @@ ZBase.registerView((function() {
     params.logfile = $(".zbase_logviewer z-dropdown.logfile_control").getValue();
 
     // param: time
-    var time_control = $(".zbase_logviewer .logviewer_time_control");
+    var time_control = $(".zbase_logviewer .time_control");
     params.time =  time_control.getAttribute("data-timestamp");
 
     // param: filter
     params.filter_type = $(".zbase_logviewer .filter_type_control").getValue();
     params.filter_str = $(".zbase_logviewer .filter_control").getValue();
 
+    // param: columns
+    params.columns = $(".zbase_logviewer .columns_control").getValue();
+
     // param: limit
     params.limit = "100";
-
-    // + "&columns=" + this.columns;
-    //if (this.filter.length > 0) {
-    //  url += "&filter_" + this.filter_type + "=" + this.filter;
-    //}
-
-    //if (this.raw.toString() == "true") {
-    //  url += "&raw=true";
-    //}
 
     return params;
   };
 
-  var applyQueryParams = function(url) {
+  // FIXME remove this fn as soon as the server understands filter_type/filter_str
+  var getServerQueryParams = function() {
+    var params = getQueryParams();
+
+    if (params.filter_type || params.filter_str) {
+      params["filter_" + params.filter_type] = params.filter_str;
+      delete params.filter_type;
+      delete params.filter_str;
+    }
+
+    return params;
+  }
+
+  var setQueryParams = function(url) {
     // param: logfile
     var logfile = UrlUtil.getParamValue(url, "logfile");
-    applyLogfileParam(logfile);
+    setLogfileParam(logfile);
 
     // param: end time
     var end_time = UrlUtil.getParamValue(url, "time");
-    applyTimeParam(end_time);
+    setTimeParam(end_time);
 
     // param: filter type
     var filter_type = UrlUtil.getParamValue(url, "filter_type");
     var filter = UrlUtil.getParamValue(url, "filter");
-    applyFilterParam(filter_type, filter);
+    setFilterParam(filter_type, filter);
 
     // param: columns
     var columns = UrlUtil.getParamValue(url, "columns");
-    applyColumnsParam(logfile, columns);
+    setColumnsParam(logfile, columns);
 
     // param: raw
     var raw = UrlUtil.getParamValue(url, "raw");
-
-      //filter_input.value = decodeURIComponent(this.filter);
-      //filter_input.placeholder =
-      //  "Filter By " + filter_dropdown_item.getAttribute("data-text");
-      //filter_dropdown_item.setAttribute("data-selected", "selected");
-      //filter_dropdown.setAttribute("data-resolved", "resolved");
-
-      //if (this.isRawView()) {
-      //  this.pane.querySelector(".control_pane_item[name='column_selection_check']")
-      //    .style.display = "none";
-      //} else {
-      //  this.pane.querySelector(".control_pane_item[name='column_selection_check']")
-      //    .style.display = "inline-block";
-      //}
-
-      //this.updateRawParam(true);
-      //this.updateColumnSelectView();
-      //this.filter = (filter != null ) ?
-      //  encodeURIComponent(filter) : "";
-      //this.filter_type = (filter_type != null) ?
-      //  filter_type : "sql";
-
-      ////FIXME handle timezone
-      //this.initial_end_time = (end_time != null) ?
-      //  end_time : Date.now() * 1000;
-
-      //this.columns = (columns != null) ? columns : "__all__";
-      //if (raw != null) {
-      //  this.raw = raw;
-      //} else {
-      //  this.raw = (this.columns == "__all__")? "true": "false";
-      //}
-
-    //page_times = [initial_end_time];
-    //this.handlePagination();
   };
 
-  var applyLogfileParam = function(logfile) {
+  var setLogfileParam = function(logfile) {
     var dropdown = $(".zbase_logviewer z-dropdown.logfile_control");
     var items = $("z-dropdown-items", dropdown);
     items.innerHTML = "";
@@ -179,7 +154,7 @@ ZBase.registerView((function() {
     dropdown.setValue([logfile]);
   };
 
-  var applyTimeParam = function(end_time) {
+  var setTimeParam = function(end_time) {
     if (typeof end_time == "string") {
       end_time = parseInt(end_time, 10);
     }
@@ -188,12 +163,12 @@ ZBase.registerView((function() {
       end_time = (new Date()).getTime() * 1000;
     }
 
-    var time_control = $(".zbase_logviewer .logviewer_time_control");
+    var time_control = $(".zbase_logviewer .time_control");
     time_control.setAttribute("data-timestamp", end_time);
     time_control.value = DateUtil.printTimestamp(end_time);
   }
 
-  var applyFilterParam = function(filter_type, filter_str) {
+  var setFilterParam = function(filter_type, filter_str) {
     if (!filter_type) {
       filter_type = "sql";
     }
@@ -202,7 +177,7 @@ ZBase.registerView((function() {
     $(".zbase_logviewer .filter_control").setValue(filter_str);
   }
 
-  var applyColumnsParam = function(logfile, columns_str) {
+  var setColumnsParam = function(logfile, columns_str) {
     if (!columns_str) {
       columns_str = "__all__";
     }
@@ -215,6 +190,7 @@ ZBase.registerView((function() {
     {
       var item = document.createElement("z-dropdown-item");
       item.innerHTML = "<z-checkbox></z-checkbox> " + "All Columns";
+      item.setAttribute("data-mutually-exclusive", "yes");
       item.setAttribute("data-value", "__all__");
       items.appendChild(item);
     }
@@ -283,7 +259,7 @@ ZBase.registerView((function() {
     name: "logviewer",
     loadView: init,
     unloadView: destroy,
-    handleNavigationChange: applyQueryParams
+    handleNavigationChange: updateQuery
   };
 
 })());
@@ -673,7 +649,7 @@ ZBase.registerView((function() {
 
     this.handleTimeControl = function() {
       var _this = this;
-      var control_input = document.getElementById("logviewer_time_control");
+      var control_input = document.getElementById("time_control");
       var widget = document.getElementById("logviewer_date_widget");
       var inputs = widget.querySelectorAll("input");
       var apply_button = document.querySelector(
