@@ -1,4 +1,35 @@
+.zbase_logviewer .date_select_widget {
+  font-size: 13px;
+  padding: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  position: absolute;
+  background: #fff;
+  z-index: 11111;
+}
 
+.zbase_logviewer .date_select_widget.hidden {
+  display: none;
+}
+
+.zbase_logviewer .date_select_widget .time_inputs {
+  padding-left: 27px;
+  margin-bottom: 5px;
+  overflow: auto;
+}
+
+.zbase_logviewer .date_select_widget .time_inputs input {
+  width: 44px;
+}
+
+.zbase_logviewer .date_select_widget .time_inputs b {
+  line-height: 34px;
+  margin: 0 4px;
+}
+
+.zbase_logviewer .date_select_widget z-button.primary {
+  font-size: 12px;
+  margin-top: 5px;
+}
 
               <div class="date_select_widget hidden" id="logviewer_date_widget">
                 <div class="time_inputs">

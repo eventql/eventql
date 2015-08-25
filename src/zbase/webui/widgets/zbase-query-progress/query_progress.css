@@ -26,20 +26,23 @@
   margin-bottom: 50px;
 }
 
-.zbase_query_progress z-progressbar /deep/ .label {
+.zbase_query_progress z-progressbar .label {
   margin-top: 17px;
   font-weight: normal;
   font-style: normal;
   color:#545758;
 }
 
-.zbase_query_progress z-progressbar /deep/ .bar {
+.zbase_query_progress z-progressbar .bar {
   background: #61b7e1;
 }
 
 .zbase_query_progress z-progressbar {
-  height: 35px;
   background: #f0f6f8;
   border: 1px solid #c9d0d4;
 }
 
+.zbase_query_progress z-progressbar .progress{
+  font-weight: 500;
+  font-size: 14px;
+}

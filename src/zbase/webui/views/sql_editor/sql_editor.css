@@ -78,7 +78,7 @@
 }
 
 .zbase_sql_editor table.z-table {
-  font-size: 14px;
+  font-size: 13px;
 }
 
 .zbase_sql_editor table.z-table thead th {
@@ -268,3 +268,8 @@
   margin-left: 16px;
   margin-right: 0;
 }
+
+.zbase_sql_editor .zbase_sql_chart {
+  padding: 20px;
+}
+

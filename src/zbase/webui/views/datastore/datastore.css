@@ -1,0 +1,62 @@
+.zbase_datastore .datastore_sidebar {
+  position: absolute;
+  width: 186px;
+}
+
+.zbase_datastore .datastore_viewport {
+  margin-left: 186px;
+  border-left: 1px solid #ddd;
+  min-height: 900px; /* FIXME */
+  padding-left: 20px;
+}
+
+.zbase_datastore  .datastore_sidebar z-menu z-menu-section z-menu-item,
+.zbase_datastore  .datastore_sidebar z-menu z-menu-section z-menu-title {
+  margin-left: 0;
+}
+
+.zbase_datastore  .datastore_sidebar z-menu z-menu-section z-menu-title a {
+  text-transform: uppercase;
+  font-size: 90%;
+  font-weight: 500;
+  letter-spacing: 1.1px;
+  margin-bottom: 10px;
+}
+
+.zbase_datastore  .datastore_sidebar z-menu z-menu-section z-menu-item {
+  padding-left: 0;
+}
+
+.zbase_datastore  .datastore_sidebar z-menu z-menu-section z-menu-item a {
+  font-size: 115%;
+  color: #464646;
+  padding: 0 10px;
+  line-height: 34px;
+  font-weight: 400;
+  padding-left: 15px;
+}
+
+.zbase_datastore  .datastore_sidebar z-menu-item[data-active] {
+  background: #f0f6f8;
+  box-shadow: none;
+}
+
+.zbase_datastore  .datastore_sidebar z-menu-item[data-active] a {
+  color: #1c99d6;
+}
+
+.zbase_datastore  .datastore_sidebar z-menu-section {
+  margin: 0;
+  padding: 0;
+  margin-left: 10px;
+}
+
+.zbase_datastore .datastore_sidebar z-menu-section {
+  border-bottom: 2px solid #eee;
+  padding-bottom: 18px;
+  padding-top: 2px;
+}
+
+.zbase_datastore .datastore_sidebar z-menu-section:last-child {
+  border-bottom: none;
+}
