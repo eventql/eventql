@@ -370,9 +370,19 @@ var DropDownComponent = function() {
 
     this.fireClickEvent(item, selected);
 
-    if (!this.hasAttribute('data-open-onclick')) {
-      this.hideDropdown();
-    }
+    // FIXME: don't fire this here for data-multiselect
+    this.hideDropdown();
+
+    var change_ev = new CustomEvent(
+        "change", {
+          detail : {
+            value: this.getValue()
+          },
+          bubbles: true,
+          cancelable: true
+        });
+
+    this.dispatchEvent(change_ev);
   };
 
   this.fireClickEvent = function(item, selected) {
@@ -384,18 +394,6 @@ var DropDownComponent = function() {
       cancelable: true
     });
     item.dispatchEvent(ev);
-
-    // FIXME: don't fire this here for data-multiselect
-    var change_ev = new CustomEvent(
-        "change", {
-          detail : {
-            value: this.getValue()
-          },
-          bubbles: true,
-          cancelable: true
-        });
-
-    this.dispatchEvent(change_ev);
   };
 
   this.fireCloseEvent = function() {
