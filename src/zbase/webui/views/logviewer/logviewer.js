@@ -2,6 +2,8 @@ ZBase.registerView((function() {
 
   var query_mgr;
   var logfiles;
+  var next_page_time;
+  var pagination_depth = 0;
 
   var init = function(params) {
     $.showLoader();
@@ -69,7 +71,8 @@ ZBase.registerView((function() {
       if (data.status == "finished") {
         query_mgr.close("logfile_query");
         hideLoadingBar();
-        //_this.renderPager();
+
+        next_page_time = result[result.length - 1].time;
       }
     });
 
@@ -193,12 +196,34 @@ ZBase.registerView((function() {
     dropdown.setValue(columns_str.split(","));
   }
 
-  var goToNextPage = function() {
+  var submitControls = function() {
+    next_page_time = null;
+    pagination_depth = 0;
 
+    var params = getQueryParams();
+    var url = "/a/logviewer?" + $.buildQueryString(params);
+    $.navigateTo(url);
+  }
+
+  var goToNextPage = function() {
+    if (!next_page_time) {
+      return;
+    }
+
+    ++pagination_depth;
+    var params = getQueryParams();
+    params.time = next_page_time;
+    var url = "/a/logviewer?" + $.buildQueryString(params);
+    $.navigateTo(url);
   };
 
   var goToPreviousPage = function() {
+    if (pagination_depth <= 0) {
+      return;
+    }
 
+    --pagination_depth;
+    $.navigateBack();
   };
 
   var findLogfileDefinition = function(logfile_name) {
@@ -230,12 +255,6 @@ ZBase.registerView((function() {
     return columns;
   }
 
-  var submitControls = function() {
-    var params = getQueryParams();
-    var url = "/a/logviewer?" + $.buildQueryString(params);
-    $.navigateTo(url);
-  }
-
   var render = function() {
     console.log("render");
     var page = $.getTemplate("views/logviewer", "zbase_logviewer_main_tpl");
@@ -245,6 +264,8 @@ ZBase.registerView((function() {
     $(".filter_control", page).addEventListener("change", submitControls);
     $(".columns_control", page).addEventListener("change", submitControls);
     $(".time_control", page).addEventListener("change", submitControls);
+    $(".z-pager .next", page).addEventListener("click", goToNextPage);
+    $(".z-pager .prev", page).addEventListener("click", goToPreviousPage);
 
     $.handleLinks(page);
     $.replaceViewport(page);
