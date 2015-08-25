@@ -27,7 +27,6 @@ ZBase.registerView((function() {
   };
 
   var updateQuery = function(url) {
-    console.log("update query");
     setQueryParams(url);
     executeQuery();
   }
@@ -108,6 +107,9 @@ ZBase.registerView((function() {
 
     // param: raw
     var raw = UrlUtil.getParamValue(url, "raw");
+
+    //pagination
+    setPagination();
   };
 
   var setLogfileParam = function(logfile) {
@@ -176,6 +178,16 @@ ZBase.registerView((function() {
     dropdown.setValue(columns_str.split(","));
   }
 
+  var setPagination = function() {
+    if (pagination_history.length == 0) {
+      $(".zbase_logviewer .z-pager .prev").setAttribute("data-disabled", true);
+    } else {
+      $(".zbase_logviewer .z-pager .prev").removeAttribute("data-disabled");
+    }
+
+    // FIXME: display "showing historical data" message if 
+  }
+
   var submitControls = function() {
     next_page_time = null;
     pagination_history.clear();
@@ -186,24 +198,16 @@ ZBase.registerView((function() {
   }
 
   var goToNextPage = function() {
-    if (!next_page_time) {
-      return;
-    }
-
-    $(".zbase_logviewer .z-pager .prev").removeAttribute("data-disabled");
-
     var params = getQueryParams();
     params.time = next_page_time;
     var url = "/a/logviewer?" + $.buildQueryString(params);
+
     pagination_history.push(url);
     $.navigateTo(url);
   };
 
   var goToPreviousPage = function() {
     var url = pagination_history.pop();
-    if (pagination_history.length == 0) {
-      $(".zbase_logviewer .z-pager .prev").setAttribute("data-disabled", true);
-    }
 
     if (url) {
       $.navigateTo(url);
