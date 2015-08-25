@@ -540,7 +540,6 @@ z-menu.zbase_default_menu z-menu-item[data-active] a {
 z-menu.zbase_default_menu z-menu-section {
   margin: 0;
   padding: 0;
-  margin-left: 10px;
 }
 
 z-menu.zbase_default_menu z-menu-section {

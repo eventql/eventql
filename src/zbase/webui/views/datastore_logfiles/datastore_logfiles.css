@@ -1,0 +1,13 @@
+.zbase_datastore_logfiles h2.pagetitle {
+  padding-left: 20px;
+}
+
+.zbase_datastore_logfiles table.z-table {
+  font-size: 13px;
+}
+
+.zbase_datastore_logfiles table.z-table tr td:first-child,
+.zbase_datastore_logfiles table.z-table tr th:first-child {
+  padding-left: 20px;
+}
+
