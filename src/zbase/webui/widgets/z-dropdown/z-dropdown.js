@@ -374,10 +374,17 @@ var DropDownComponent = function() {
     };
 
     window.addEventListener('keydown', this.keydown_handler, false);
+
+    this.click_handler = function(e) {
+      base.hideDropdown();
+    };
+
+    window.addEventListener('click', this.click_handler, false);
   };
 
   this.__unsetKeyNavigation = function() {
     window.removeEventListener('keydown', this.keydown_handler, false);
+    window.removeEventListener('click', this.click_handler, false);
   };
 
   this.__keyNavigation = function(direction) {
