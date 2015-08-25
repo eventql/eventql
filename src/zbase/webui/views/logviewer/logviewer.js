@@ -2,7 +2,6 @@ ZBase.registerView((function() {
 
   var query_mgr;
   var logfiles;
-  var pagination_history = [];
 
   var init = function(params) {
     $.showLoader();
@@ -26,6 +25,7 @@ ZBase.registerView((function() {
   };
 
   var updateQuery = function(url) {
+    console.log("update query");
     setQueryParams(url);
     executeQuery();
   }
@@ -94,7 +94,7 @@ ZBase.registerView((function() {
 
     // param: filter
     params.filter_type = $(".zbase_logviewer .filter_type_control").getValue();
-    params.filter_str = $(".zbase_logviewer .filter_control").getValue();
+    params.filter = $(".zbase_logviewer .filter_control").getValue();
 
     // param: columns
     params.columns = $(".zbase_logviewer .columns_control").getValue();
@@ -105,14 +105,14 @@ ZBase.registerView((function() {
     return params;
   };
 
-  // FIXME remove this fn as soon as the server understands filter_type/filter_str
+  // FIXME remove this fn as soon as the server understands filter_type/filter
   var getServerQueryParams = function() {
     var params = getQueryParams();
 
-    if (params.filter_type || params.filter_str) {
-      params["filter_" + params.filter_type] = params.filter_str;
+    if (params.filter_type || params.filter) {
+      params["filter_" + params.filter_type] = params.filter;
       delete params.filter_type;
-      delete params.filter_str;
+      delete params.filter;
     }
 
     return params;
@@ -169,13 +169,13 @@ ZBase.registerView((function() {
     time_control.value = DateUtil.printTimestamp(end_time);
   }
 
-  var setFilterParam = function(filter_type, filter_str) {
+  var setFilterParam = function(filter_type, filter) {
     if (!filter_type) {
       filter_type = "sql";
     }
 
     $(".zbase_logviewer .filter_type_control").setValue([filter_type]);
-    $(".zbase_logviewer .filter_control").setValue(filter_str);
+    $(".zbase_logviewer .filter_control").setValue(filter);
   }
 
   var setColumnsParam = function(logfile, columns_str) {
@@ -243,14 +243,21 @@ ZBase.registerView((function() {
     return columns;
   }
 
+  var submitControls = function() {
+    var params = getQueryParams();
+    var url = "/a/logviewer?" + $.buildQueryString(params);
+    $.navigateTo(url);
+  }
+
   var render = function() {
+    console.log("render");
     var page = $.getTemplate("views/logviewer", "zbase_logviewer_main_tpl");
 
-    $(".logfile_control", page).addEventListener("change", executeQuery);
-    $(".filter_type_control", page).addEventListener("change", executeQuery);
-    $(".filter_control", page).addEventListener("change", executeQuery);
-    $(".columns_control", page).addEventListener("change", executeQuery);
-    $(".time_control", page).addEventListener("change", executeQuery);
+    $(".logfile_control", page).addEventListener("change", submitControls);
+    $(".filter_type_control", page).addEventListener("change", submitControls);
+    $(".filter_control", page).addEventListener("change", submitControls);
+    $(".columns_control", page).addEventListener("change", submitControls);
+    $(".time_control", page).addEventListener("change", submitControls);
 
     $.handleLinks(page);
     $.replaceViewport(page);
