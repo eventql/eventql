@@ -42,4 +42,5 @@ ZBase.registerView((function() {
     unloadView: function() {},
     handleNavigationChange: load
   };
+
 })());
