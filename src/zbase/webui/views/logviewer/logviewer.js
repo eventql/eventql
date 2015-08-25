@@ -262,11 +262,14 @@ ZBase.registerView((function() {
 
     $(".logfile_control", page).addEventListener("change", submitControls);
     $(".filter_type_control", page).addEventListener("change", submitControls);
-    $(".filter_control", page).addEventListener("change", submitControls);
     $(".columns_control", page).addEventListener("change", submitControls);
     $(".time_control", page).addEventListener("change", submitControls);
     $(".z-pager .next", page).addEventListener("click", goToNextPage);
     $(".z-pager .prev", page).addEventListener("click", goToPreviousPage);
+    $(".filter_control", page).addEventListener("change", submitControls);
+    $(".filter_control", page).addEventListener("keyup", function(e) {
+      if (e.keyCode == 13) submitControls();
+    });
 
     $.handleLinks(page);
     $.replaceViewport(page);
