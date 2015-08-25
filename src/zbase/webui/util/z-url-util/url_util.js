@@ -135,6 +135,9 @@ UrlUtil.removeUrlParam = function(url, key) {
   return url;
 };
 
+UrlUtil.getPath = function(url) {
+  return url.split("?")[0]; // FIXME
+};
 
 UrlUtil.getParam = function(url, key) {
   var url_parts = url.split("?");

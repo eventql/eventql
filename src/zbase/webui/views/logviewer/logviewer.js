@@ -1,5 +1,7 @@
 ZBase.registerView((function() {
 
+  var kBasePath = "/a/logviewer/";
+
   var query_mgr;
   var logfiles;
   var next_page_time;
@@ -87,7 +89,7 @@ ZBase.registerView((function() {
 
   var setQueryParams = function(url) {
     // param: logfile
-    var logfile = UrlUtil.getParamValue(url, "logfile");
+    var logfile = UrlUtil.getPath(url).substr(kBasePath.length);
     setLogfileParam(logfile);
 
     // param: end time
@@ -188,19 +190,25 @@ ZBase.registerView((function() {
     // FIXME: display "showing historical data" message
   }
 
+  var getQueryURL = function(params) {
+    var url = kBasePath + params.logfile;
+    delete params.logfile;
+    url += "?" + $.buildQueryString(params);
+    return url;
+  }
+
   var submitControls = function() {
     next_page_time = null;
     pagination_history = [];
 
-    var params = getQueryParams();
-    var url = "/a/logviewer?" + $.buildQueryString(params);
+    var url = getQueryURL(getQueryParams());
     $.navigateTo(url);
   }
 
   var goToNextPage = function() {
     var params = getQueryParams();
     params.time = next_page_time;
-    var url = "/a/logviewer?" + $.buildQueryString(params);
+    var url = getQueryURL(params);
 
     pagination_history.push(url);
     $.navigateTo(url);
