@@ -15,7 +15,7 @@ ZBase.registerView((function() {
         render();
         updateQuery(params.path);
       } else {
-        $.fatalError();
+        renderError("Server Error");
       }
 
       $.hideLoader();
