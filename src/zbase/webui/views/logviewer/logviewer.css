@@ -5,6 +5,7 @@
 
 .zbase_logviewer .logviewer_pane .result_pane {
   background: #f9f9f9;
+  border-bottom: 1px solid #ddd;
 }
 
 @media (max-width: 1700px) {
@@ -274,7 +275,7 @@
   word-wrap: break-word;
   border-top: 1px solid #e7e7e7;
   font-size: 13px;
-  padding: 6px 9px 3px 9px;
+  padding: 7px 9px 7px 9px;
   vertical-align: top;
   -webkit-user-select: text;
   -moz-user-select: text;
