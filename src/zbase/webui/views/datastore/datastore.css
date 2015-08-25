@@ -8,13 +8,15 @@
 .zbase_datastore .datastore_viewport {
   margin-left: 186px;
   border-left: 1px solid #ddd;
-  border-right: 1px solid #ddd;
   min-height: 900px; /* FIXME */
-  padding-right: 20px;
   padding-left: 20px;
 }
 
 @media (max-width: 1700px) {
+  .zbase_datastore .datastore_viewport {
+    padding-right: 20px;
+  }
+
   .zbase_datastore .datastore_sidebar z-menu {
     width: 162px;
     margin-left: 10px;
