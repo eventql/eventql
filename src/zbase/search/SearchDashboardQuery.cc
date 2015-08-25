@@ -80,11 +80,12 @@ void SearchDashboardQuery::onQuery() {
   //  return;
   //}
 
+  logDebug("zbase", "scan search query time: $0", time);
+
   auto drilldown_dim = drilldown_fn_();
 
   for (int i = 0; i < segments_.size(); ++i) {
-    auto& series = result_->timeseries.series[i];
-    auto& tpoint = series[(time / window_secs_) * window_secs_];
+    auto& tpoint = result_->timeseries.series[i][(time / window_secs_) * window_secs_];
     auto& dpoint = result_->drilldown.counters[i][drilldown_dim];
 
     if (!segments_[i]->checkPredicates()) {
