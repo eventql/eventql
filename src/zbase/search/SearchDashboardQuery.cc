@@ -9,6 +9,7 @@
 #include "SearchDashboardQuery.h"
 
 #include <stx/uri.h>
+#include <stx/logging.h>
 
 using namespace stx;
 
