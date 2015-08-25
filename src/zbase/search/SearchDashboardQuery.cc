@@ -80,6 +80,10 @@ void SearchDashboardQuery::onQuery() {
     last_time_ = time;
   }
 
+  if (time > 1440509413) {
+    time = time / kMicrosPerSecond;
+  }
+
   if (pagetype != PageType::SEARCH_PAGE) {
     return;
   }
