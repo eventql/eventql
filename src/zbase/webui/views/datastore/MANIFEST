@@ -1,5 +1,4 @@
 html_file: "datastore.html"
-html_file: "datastore_menu.html"
-js_file: "datastore.js"
-js_file: "datastore_menu.js"
 css_file: "datastore.css"
+html_file: "datastore_menu.html"
+js_file: "datastore_menu.js"
