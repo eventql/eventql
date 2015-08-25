@@ -91,6 +91,7 @@ ZBase.registerView((function() {
     // param: logfile
     var logfile = UrlUtil.getPath(url).substr(kBasePath.length);
     setLogfileParam(logfile);
+    setLogfileName(logfile);
 
     // param: end time
     var end_time = UrlUtil.getParamValue(url, "time");
@@ -176,6 +177,10 @@ ZBase.registerView((function() {
     });
 
     dropdown.setValue(columns_str.split(","));
+  }
+
+  var setLogfileName = function(logfile) {
+    $(".zbase_logviewer .logfile_name_crumb").innerHTML = logfile;
   }
 
   var setPagination = function() {
