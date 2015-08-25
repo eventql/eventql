@@ -9,23 +9,68 @@
  * <http://www.gnu.org/licenses/>.
  */
 var DropDownComponent = function() {
+
   this.createdCallback = function() {
     var base = this;
 
-    this.initHeaderItem();
+    // dropdown items
+    var items = this.querySelector("z-dropdown-items");
+    if (items) {
+      var cloned = items.cloneNode(true);
+      this.setDropdownItems(cloned.children);
+    }
+
+    // header
+    var header_elem = this.querySelector("z-dropdown-header");
+    if (!header_elem) {
+      header_elem = document.createElement("z-dropdown-header");
+      this.insertBefore(header_elem, this.firstChild);
+    }
+
+    //render header value
+    if (!header_elem.querySelector("z-drodpown-header-value")) {
+      header_elem.appendChild(document.createElement(
+        "z-dropdown-header-value"));
+    }
+
+    //render header icon
+    if (!header_elem.querySelector("z-dropdown-header-icon")) {
+      var icon = document.createElement("z-dropdown-header-icon");
+      icon.innerHTML = "<i class='fa fa-caret-down'></i>";
+      header_elem.appendChild(icon);
+    }
+
+    header_elem.addEventListener('click', function(e) {
+      e.stopPropagation();
+      base.toggleDropdown();
+    }, false);
+
+    if (this.hasAttribute('data-hover')) {
+      this.addEventListener(
+        'mouseover',
+        base.showDropdown.bind(base),
+        false);
+
+      this.addEventListener(
+        'mouseout',
+        base.hideDropdown.bind(base),
+        false);
+    }
 
     //close dropdown only if click event is outside
     this.addEventListener('click', function(e) {
       e.stopPropagation();
     }, false);
+
+    this.__applyAttributes();
   };
+
+  this.detachedCallback = function() {
+    this.hideDropdown();
+  }
 
   this.attributeChangedCallback = function(attr, old_val, new_val) {
-    this.initHeaderItem();
-  };
-
-  this.onDocumentClick = function() {
-    this.hideDropdown();
+    this.__applyAttributes();
   };
 
   /**
@@ -70,62 +115,92 @@ var DropDownComponent = function() {
       }
     });
 
-    this.setHeaderValue();
+    this.__setHeaderValue();
   }
 
-  // Checks if a header_elem exists and renders one if not
-  this.initHeaderItem = function() {
-    if (this.querySelector("z-dropdown-input")) {
-      return this.renderSearchable();
-    }
-
+  this.setDropdownItems = function(items) {
     var base = this;
-    var selected_item = this.querySelector("z-dropdown-item[data-selected]");
-    var header_elem = this.querySelector("z-dropdown-header");
 
-    if (!header_elem) {
-      header_elem = document.createElement("z-dropdown-header");
-      this.insertBefore(header_elem, this.firstChild);
-    }
+    var elem = this.querySelector("z-dropdown-items");
+    elem.innerHTML = "";
 
-    //render header value
-    if (!header_elem.querySelector("z-drodpown-header-value")) {
-      header_elem.appendChild(document.createElement(
-        "z-dropdown-header-value"));
-    }
+    for (var i = 0; i < items.length; i++) {
+      items[i].addEventListener('click', function(e) {
+        e.stopPropagation;
+        base.__onItemClick(this);
+      }, false);
 
-    //render header icon
-    if (!header_elem.querySelector("z-dropdown-header-icon")) {
-      var icon = document.createElement("z-dropdown-header-icon");
-      icon.innerHTML = "<i class='fa fa-caret-down'></i>";
-      header_elem.appendChild(icon);
-    }
-
-    var onClick = function(e) {
-      e.stopPropagation();
-      base.toggleDropdown();
-    };
-
-    if (!header_elem.hasAttribute('data-blank')) {
-      this.setHeaderValue();
-    }
-    header_elem.addEventListener('click', onClick, false);
-
-    if (this.hasAttribute('data-hover')) {
-      this.addEventListener(
-        'mouseover',
-        base.showDropdown.bind(base),
-        false);
-
-      this.addEventListener(
-        'mouseout',
-        base.hideDropdown.bind(base),
-        false);
+      elem.appendChild(items[i]);
     }
   };
 
+  this.toggleDropdown = function() {
+    if (this.hasAttribute('data-active')) {
+      this.hideDropdown();
+    } else {
+      this.showDropdown();
+    }
+  };
+
+  this.showDropdown = function() {
+    if (this.classList.contains("disabled")) {
+      return;
+    }
+
+    if (this.getAttribute('data-active') == 'active') {
+      return;
+    }
+
+    this.closeAllDropdowns();
+    this.setAttribute('data-active', 'active');
+    //this.setXValue();
+
+    this.__setKeyNavigation();
+  };
+
+  this.hideDropdown = function() {
+    if (this.getAttribute('data-active') != 'active') {
+      return;
+    }
+
+    this.__unsetKeyNavigation();
+    this.removeAttribute('data-active');
+
+    var ev = new CustomEvent('z-dropdown-close', {
+      bubbles: true,
+      cancelable: true
+    });
+
+    this.dispatchEvent(ev);
+  };
+
+  /**
+    * Close all open dropdowns
+    */
+  this.closeAllDropdowns = function(callback) {
+    var active_items = document.querySelectorAll("z-dropdown[data-active]");
+
+    for (var i = 0; i < active_items.length; i++) {
+      if (typeof active_items[i].hideDropdown == 'function') {
+        active_items[i].hideDropdown();
+      }
+    }
+
+    if (callback) callback();
+  };
+
+  this.findItemByValue = function(value) {
+    return (this.querySelector("z-dropdown-item[data-value='" + value + "']"));
+  };
+
+  /*************************** PRIVATE **********************************/
+
+  this.__applyAttributes = function() {
+    this.__setHeaderValue();
+  }
+
   // Copies the selected items html to the header_elem
-  this.setHeaderValue = function() {
+  this.__setHeaderValue = function() {
     var header = this.querySelector("z-dropdown-header-value");
 
     if (header.hasAttribute('data-static')) {
@@ -134,40 +209,33 @@ var DropDownComponent = function() {
 
     var innerHTML = "";
 
-    //multi selectable dropdown
-    if (this.classList.contains('checkbox')) {
-      var selected_items = this.querySelectorAll("z-dropdown-item[data-selected]");
+    var selected_items = this.querySelectorAll("z-dropdown-item[data-selected]");
+    if (selected_items.length == 0) {
+      var preselection = this.getAttribute('data-preselected');
+      //set preselected item
+      if (preselection) {
+        var preselected_item = this.findItemByValue(preselection);
 
-      for (var i = 0; i < selected_items.length; i++) {
-        if (i > 0) {
-          innerHTML += ", ";
+        preselected_item.setAttribute('data-selected', 'selected');
+        innerHTML = preselected_item.innerHTML;
+
+      } else {
+        //z-dropdown has initial not selectable header
+        if (header.innerHTML.length > 0) {
+          return;
         }
 
-        innerHTML += selected_items[i].innerText || selected_items[i].textContent;
+        //set first z-dropdown-item as header value
+        var first_item = this.querySelector("z-dropdown-item");
+        if (first_item) {
+          innerHTML = first_item.innerHTML;
+        }
       }
+    }
 
-    } else {
-
-      var selected_item = this.querySelector("z-dropdown-item[data-selected]");
+    if (selected_items.length == 1) {
+      var selected_item = selected_items[0];
       if (!selected_item) {
-
-        var preselection = this.getAttribute('data-preselected');
-        //set preselected item
-        if (preselection) {
-          var preselected_item = this.findItemByValue(preselection);
-
-          preselected_item.setAttribute('data-selected', 'selected');
-          innerHTML = preselected_item.innerHTML;
-
-        } else {
-          //z-dropdown has initial not selectable header
-          if (header.innerHTML.length > 0) {
-            return;
-          }
-
-          //set first z-dropdown-item as header value
-         innerHTML = this.querySelector("z-dropdown-item").innerHTML;
-        }
       } else {
         //set items input value as html header
         if (selected_item.hasAttribute('data-input-select')) {
@@ -181,143 +249,22 @@ var DropDownComponent = function() {
       }
     }
 
+    if (selected_items.length > 1) {
+      for (var i = 0; i < selected_items.length; i++) {
+        if (i > 0) {
+          innerHTML += ", ";
+        }
+
+        innerHTML += selected_items[i].innerText || selected_items[i].textContent;
+      }
+    }
+
     header.innerHTML = innerHTML;
+    var checkbox = header.querySelector("z-checkbox");
+    if (checkbox) checkbox.remove();
   };
 
-
-  this.toggleDropdown = function() {
-    if (this.hasAttribute('data-active')) {
-      this.hideDropdown();
-    } else {
-      this.showDropdown();
-    }
-  };
-
-  this.hideDropdown = function() {
-    var hover_item = this.querySelector("z-dropdown-item.hover");
-
-    this.removeAttribute('data-active');
-
-    if (hover_item) {
-      hover_item.classList.remove('hover');
-    }
-
-    this.fireCloseEvent();
-
-    //remove global event listener
-    if (!this.querySelector("z-input")) {
-      this.unsetKeyNavigation(window);
-    }
-  };
-
-  /**
-    * Close open Items (e.g. dropdowns) on editor click
-    */
-  this.closeActiveItems = function(callback) {
-    var active_items = document.querySelectorAll("[data-active]");
-
-    for (var i = 0; i < active_items.length; i++) {
-      if (typeof active_items[i].onDocumentClick == 'function') {
-        active_items[i].onDocumentClick();
-      }
-    }
-
-    callback();
-  };
-
-  this.setXValue = function() {
-    var items = this.querySelector("z-dropdown-items");
-    var pos = items.getBoundingClientRect();
-    var margin;
-
-
-    if (document.body.offsetWidth < pos.right) {
-      margin = pos.right - document.body.offsetWidth;
-
-      //visible y-scrollbar
-      if (items.scrollHeight > pos.height) {
-        margin += 17;
-      }
-
-      items.style.marginLeft = "-" + margin + "px";
-    }
-  }
-
-  this.showDropdown = function() {
-    if (this.classList.contains("disabled")) {
-      return;
-    }
-
-    var _this = this;
-
-    this.closeActiveItems(function() {
-      _this.setAttribute('data-active', 'active');
-      _this.setXValue();
-    });
-
-
-    if (!this.eventListeners) {
-      //set eventListeners only once
-      this.setItemEventListeners();
-    }
-
-    //set global event listener if not searchable
-    if (!this.querySelector("z-input")) {
-      this.setKeyNavigation(window);
-    }
-  };
-
-  this.findItemByValue = function(value) {
-    return (this.querySelector(
-      "z-dropdown-item[data-value='" + value + "']"));
-  };
-
-  this.setItemEventListeners = function() {
-    var base = this;
-    var items = this.querySelectorAll("z-dropdown-item:not([data-input-select])");
-    var input_items = this.querySelectorAll('z-dropdown-item[data-input-select]');
-
-    for (var i = 0; i < items.length; i++) {
-      items[i].onclick = function() {
-        base.onItemClick(this);
-      }
-    }
-
-
-    for (var i = 0; i < input_items.length; i++) {
-      input_items[i].addEventListener('click', function(e) {
-        e.stopPropagation;
-      }, false);
-
-      var input = input_items[i].querySelector("input");
-      var checkbox = input_items[i].querySelector("z-checkbox");
-      var check = input_items[i].querySelector("[data-check]");
-      if (check) {
-        console.log(check);
-      }
-      var item = input_items[i];
-
-      if (input) {
-        input.addEventListener('keydown', function(e) {
-          e.stopPropagation();
-
-          if (e.keyCode == 13) {
-            if (checkbox) {
-              checkbox.setAttribute('data-active', 'active');
-            }
-
-            base.onItemClick(item);
-
-          }
-        }, false);
-      }
-    }
-
-    this.eventListeners = true;
-  };
-
-
-  this.onItemClick = function(item) {
+  this.__onItemClick = function(item) {
     if (!item) {
       return;
     }
@@ -332,7 +279,6 @@ var DropDownComponent = function() {
       if (item.hasAttribute('data-selected')) {
         selected = false;
         item.removeAttribute('data-selected');
-        console.log(checkbox);
         checkbox.removeAttribute('data-active');
 
         //not completely unselectable dropdown
@@ -369,83 +315,84 @@ var DropDownComponent = function() {
     if (input_elem) {
       input_elem.setAttribute('data-value', item.innerHTML);
     } else {
-      this.setHeaderValue();
+      this.__setHeaderValue();
     }
 
-    this.fireClickEvent(item, selected);
+    var click_ev = new CustomEvent(
+        (selected) ? "z-dropdown-item-click" : "z-dropdown-item-unselect",
+        {
+            detail : {'text' : item.textContent},
+            bubbles: true,
+            cancelable: true
+        });
 
-    if (!this.hasAttribute('data-open-onclick')) {
-      this.hideDropdown();
-    }
+    item.dispatchEvent(click_ev);
+
+    // FIXME: abort if this is a multiselect
+    this.hideDropdown();
+
+    var change_ev = new CustomEvent(
+        "change",
+        {
+          detail : {
+            value: this.getValue()
+          },
+          bubbles: true,
+          cancelable: true
+        });
+
+    this.dispatchEvent(change_ev);
   };
 
-  this.fireClickEvent = function(item, selected) {
-    var name = (selected) ? "z-dropdown-item-click" : "z-dropdown-item-unselect";
+  this.__setKeyNavigation = function() {
+    var base = this;
+    this.__unsetKeyNavigation();
 
-    var ev = new CustomEvent(name, {
-      detail : {'text' : item.textContent},
-      bubbles: true,
-      cancelable: true
-    });
-    item.dispatchEvent(ev);
-  };
-
-  this.fireCloseEvent = function() {
-    var ev = new CustomEvent('z-dropdown-close', {
-      bubbles: true,
-      cancelable: true
-    });
-
-    this.dispatchEvent(ev);
-  }
-
-
-  /*********************** Key Navigation **********************************/
-  this.onKeyDown = function(e) {
-    var input = this.querySelector("z-input");
-    var visibleScrollbar = this.visibleScrollbar();
-
-    switch (e.keyCode) {
-      case 38:
-        this.keyNavigation('up', visibleScrollbar);
-        break;
-      case 40:
-        this.keyNavigation('down', visibleScrollbar);
-        break;
-      case 13:
-        this.onItemClick(this.querySelector("z-dropdown-item.hover"), true);
-        break;
-      default:
-        if (input) {
-          this.showFilteredDropdownItems(input.getValue());
-        }
-        break;
-    }
-  }
-
-  this.setKeyNavigation = function(elem) {
-    var that = this;
     this.keydown_handler = function(e) {
-      that.onKeyDown.apply(that, [e]);
-      e.preventDefault();
-      return false;
+      switch (e.keyCode) {
+        case 38:
+          base.__keyNavigation('up');
+          e.preventDefault();
+          return false;
+
+        case 40:
+          base.__keyNavigation('down');
+          e.preventDefault();
+          return false;
+
+        case 13:
+          base.__onItemClick(base.querySelector("z-dropdown-item.hover"), true);
+          e.preventDefault();
+          return false;
+
+        case 27:
+          base.hideDropdown();
+          e.preventDefault();
+          return false;
+
+        default:
+          return true;
+      }
     };
 
-    elem.addEventListener('keydown', this.keydown_handler, false);
+    window.addEventListener('keydown', this.keydown_handler, false);
+
+    this.click_handler = function(e) {
+      base.hideDropdown();
+    };
+
+    window.addEventListener('click', this.click_handler, false);
   };
 
-  this.unsetKeyNavigation = function(elem) {
-    elem.removeEventListener('keydown', this.keydown_handler, false);
+  this.__unsetKeyNavigation = function() {
+    window.removeEventListener('keydown', this.keydown_handler, false);
+    window.removeEventListener('click', this.click_handler, false);
   };
 
-  this.visibleScrollbar = function() {
+  this.__keyNavigation = function(direction) {
     var items = this.querySelector("z-dropdown-items");
+    var visibleScrollbar = items.scrollHeight > items.offsetHeight;
 
-    return items.scrollHeight > items.offsetHeight;
-  };
-
-
-  this.keyNavigation = function(direction, visibleScrollbar) {
     var hover_elem = this.querySelector("z-dropdown-item.hover");
     var ref_elem;
     var elem = null;
@@ -522,49 +469,66 @@ var DropDownComponent = function() {
 
   /******************** Searchable Dropdown *************************/
 
-  this.renderSearchable = function() {
-    var dropdown_input = this.querySelector("z-dropdown-input");
-    if (!dropdown_input) {
-      return;
-    }
+  //this.renderSearchable = function() {
+  //  var dropdown_input = this.querySelector("z-dropdown-input");
+  //  if (!dropdown_input) {
+  //    return;
+  //  }
 
-    var base = this;
-    var input = document.createElement("z-input");
-    var placeholder = dropdown_input.getAttribute('data-placeholder');
-    var selected_item = this.querySelector("z-dropdown-item[data-selected");
+  //  var base = this;
+  //  var input = document.createElement("z-input");
+  //  var placeholder = dropdown_input.getAttribute('data-placeholder');
+  //  var selected_item = this.querySelector("z-dropdown-item[data-selected");
 
-    if (placeholder) {
-      input.setAttribute('data-placeholder', placeholder);
-    }
+  //  if (placeholder) {
+  //    input.setAttribute('data-placeholder', placeholder);
+  //  }
 
-    if (selected_item) {
-      input.setAttribute('data-value', selected_item.textContent);
-    }
+  //  if (selected_item) {
+  //    input.setAttribute('data-value', selected_item.textContent);
+  //  }
 
-    dropdown_input.appendChild(input);
-    input.addEventListener('click', function(e) {
-      e.stopPropagation();
-      this.setAttribute('data-value', "");
-      base.showDropdown();
-    }, false);
+  //  dropdown_input.appendChild(input);
+  //  input.addEventListener('click', function(e) {
+  //    e.stopPropagation();
+  //    this.setAttribute('data-value', "");
+  //    base.showDropdown();
+  //  }, false);
 
-    this.setKeyNavigation(input);
-  };
+  //  this.setKeyNavigation(input);
+  //};
 
-  this.showFilteredDropdownItems = function(value) {
-    var items = this.querySelectorAll("z-dropdown-item");
-    var value = value.toLowerCase();
+  //this.showFilteredDropdownItems = function(value) {
+  //  var items = this.querySelectorAll("z-dropdown-item");
+  //  var value = value.toLowerCase();
 
-    for (var i = 0; i < items.length; i++) {
-      if (items[i].textContent.toLowerCase().indexOf(value) > -1) {
-        items[i].classList.remove('hidden');
-      } else {
-        items[i].classList.add('hidden');
-      }
-    }
+  //  for (var i = 0; i < items.length; i++) {
+  //    if (items[i].textContent.toLowerCase().indexOf(value) > -1) {
+  //      items[i].classList.remove('hidden');
+  //    } else {
+  //      items[i].classList.add('hidden');
+  //    }
+  //  }
 
-    this.showDropdown();
-  };
+  //  this.showDropdown();
+  //};
+
+  //this.setXValue = function() {
+  //  var items = this.querySelector("z-dropdown-items");
+  //  var pos = items.getBoundingClientRect();
+  //  var margin;
+
+  //  if (document.body.offsetWidth < pos.right) {
+  //    margin = pos.right - document.body.offsetWidth;
+
+  //    //visible y-scrollbar
+  //    if (items.scrollHeight > pos.height) {
+  //      margin += 17;
+  //    }
+
+  //    items.style.marginLeft = "-" + margin + "px";
+  //  }
+  //}
 };
 
 var proto = Object.create(HTMLElement.prototype);

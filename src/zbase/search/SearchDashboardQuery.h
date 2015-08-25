@@ -42,6 +42,7 @@ protected:
   Vector<RefPtr<TrafficSegment>> segments_;
   uint64_t start_time_;
   uint64_t end_time_;
+  uint64_t last_time_;
   RefPtr<TimeseriesDrilldownResult<SearchCTRStats>> result_;
   RefPtr<AnalyticsTableScan::ColumnRef> time_col_;
   RefPtr<AnalyticsTableScan::ColumnRef> pagetype_col_;

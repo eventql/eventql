@@ -1,0 +1,37 @@
+<template id="zbase_sql_editor_overview_main_tpl">
+  <div class="zbase_sql_editor">
+    <section class='zbase_page_title large'>
+      <div>
+        <button class="z-button primary" data-action="new-query">
+          <i class="fa fa-plus"></i> &nbsp;New Query
+        </button>
+        <zbase-breadcrumbs>
+          <zbase-breadcrumbs-section>
+            <a href="/a/">Applications</a>
+          </zbase-breadcrumbs-section>
+          <zbase-breadcrumbs-section>
+            <a href="/a/sql">SQL Editor</a>
+          </zbase-breadcrumbs-section>
+        </zbase-breadcrumbs>
+        <h1>SQL Queries</h1>
+      </div>
+    </section>
+    <div class="zbase_content_pane fullwidth">
+      <div class="zbase_sql_editor_overview">
+        <div class="zbase_sql_editor_content">
+          <table class="z-table zbase_clickable_table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Type</th>
+                <th>Last opened by me</th>
+              </tr>
+            </thead>
+            <tbody>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
