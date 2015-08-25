@@ -384,6 +384,18 @@ var DropDownComponent = function() {
       cancelable: true
     });
     item.dispatchEvent(ev);
+
+    // FIXME: don't fire this here for data-multiselect
+    var change_ev = new CustomEvent(
+        "change", {
+          detail : {
+            value: this.getValue()
+          },
+          bubbles: true,
+          cancelable: true
+        });
+
+    this.dispatchEvent(change_ev);
   };
 
   this.fireCloseEvent = function() {
