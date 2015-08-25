@@ -1,10 +1,37 @@
 <template id="zbase_datastore_main_tpl">
   <section class='zbase_page_title'>
     <div>
-      <h1>Datatstore</h1>
+      <h1>Datastore</h1>
     </div>
   </section>
 
-  <div class="zbase_content_pane">
+  <div class="zbase_content_pane zbase_datastore">
+
+    <div class="datastore_sidebar">
+      <z-menu data-option='accordion' name="main" class="main left main">
+        <z-menu-section>
+          <z-menu-title class="link">
+            <a>Datastore</a>
+          </z-menu-title>
+          <z-menu-item class="link">
+            <a>All Tables</a>
+          </z-menu-item>
+          <z-menu-item class="link">
+            <a>Events</a>
+          </z-menu-item>
+          <z-menu-item class="link">
+            <a>Metrics</a>
+          </z-menu-item>
+          <z-menu-item class="link">
+            <a>Logfiles</a>
+          </z-menu-item>
+        </z-menu-section>
+      </z-menu>
+    </div>
+
+    <div class="datastore_viewport">
+      test
+    </div>
+
   </div>
 </template>

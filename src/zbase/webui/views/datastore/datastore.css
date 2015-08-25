@@ -1,0 +1,11 @@
+.zbase_datastore .datastore_sidebar {
+  position: absolute;
+  width: 186px;
+}
+
+.zbase_datastore .datastore_viewport {
+  margin-left: 186px;
+  border-left: 1px solid #ddd;
+  min-height: 900px; /* FIXME */
+  padding-left: 20px;
+}
