@@ -485,6 +485,12 @@ $.replaceContent = function(elem, new_content) {
   elem.appendChild(new_content);
 }
 
+$.escapeHTML = function(str) {
+  var div = document.createElement('div');
+  div.appendChild(document.createTextNode(str));
+  return div.innerHTML;
+};
+
 document.getTemplateByID = function(template_name) {
   return $.getTemplate("", template_name);
 };
