@@ -113,8 +113,8 @@ var ZBase = (function() {
 
   var applyNavigationChange = function() {
     if (current_view && current_view.name == current_route.view) {
-      current_view.handleNavigationChange(current_path);
       hideLoader();
+      current_view.handleNavigationChange(current_path);
       return;
     }
 
@@ -129,8 +129,8 @@ var ZBase = (function() {
       return;
     }
 
-    current_view.loadView({path: current_path, config: config});
     hideLoader();
+    current_view.loadView({path: current_path, config: config});
   };
 
   var changeNavigation = function(path) {
@@ -156,7 +156,6 @@ var ZBase = (function() {
   };
 
   var navigateTo = function(path) {
-    console.log(">> Navigate to called ", path);
     history.pushState({path: path}, "", path);
     changeNavigation(path);
   };
@@ -200,7 +199,7 @@ var ZBase = (function() {
 
           document.body.appendChild(link);
         } else {
-          ZBase.util.httpGet(import_url, function(http) {
+          $.httpGet(import_url, function(http) {
             if (http.status == 200) {
               var dummy = document.createElement("div");
               dummy.innerHTML = http.responseText;
@@ -262,41 +261,45 @@ var ZBase = (function() {
     startModulesDownload(download_modules);
   };
 
-  function importNodeFallback(node, allChildren) {
+  function importNodeFallback(node, deep) {
     var a, i, il, doc = document;
 
     switch (node.nodeType) {
+
       case document.DOCUMENT_FRAGMENT_NODE:
-        var newNode = document.createDocumentFragment();
+        var new_node = document.createDocumentFragment();
         while (child = node.firstChild) {
-          newNode.appendChild(node);
+          new_node.appendChild(node);
         }
-        return newNode;
+        return new_node;
 
       case document.ELEMENT_NODE:
-        var newNode = doc.createElementNS(node.namespaceURI, node.nodeName);
+        var new_node = doc.createElementNS(node.namespaceURI, node.nodeName);
         if (node.attributes && node.attributes.length > 0) {
           for (i = 0, il = node.attributes.length; i < il; i++) {
             a = node.attributes[i];
             try {
-              newNode.setAttributeNS(
+              new_node.setAttributeNS(
                   a.namespaceURI,
                   a.nodeName,
                   node.getAttribute(a.nodeName));
             } catch (err) {}
           }
         }
-        if (allChildren && node.childNodes && node.childNodes.length > 0) {
+        if (deep && node.childNodes && node.childNodes.length > 0) {
           for (i = 0, il = node.childNodes.length; i < il; i++) {
-            newNode.appendChild(importNodeFallback(node.childNodes[i], allChildren));
+            new_node.appendChild(
+                importNodeFallback(node.childNodes[i],
+                deep));
           }
         }
-        return newNode;
+        return new_node;
 
       case document.TEXT_NODE:
       case document.CDATA_SECTION_NODE:
       case document.COMMENT_NODE:
         return doc.createTextNode(node.nodeValue);
+
     }
   }
 
@@ -320,7 +323,7 @@ var ZBase = (function() {
       var template_imports = document.querySelectorAll("link[rel='import']");
 
       for (var i = 0; !template && i < template_imports.length; ++i) {
-        template = template_imports.import[i].querySelector(template_selector);
+        template = template_imports[i].import.querySelector(template_selector);
       }
     }
 
@@ -348,23 +351,28 @@ var ZBase = (function() {
   };
 
   var renderLayout = function() {
-    var conf = ZBase.getConfig();
+    var conf = $.getConfig();
+
+    // viewport min height
+    document.getElementById("zbase_viewport").style.minHeight =
+        window.innerHeight + "px";
 
     // render footer
-    document.querySelector("#zbase_build_id").innerHTML = conf.zbase_build_id;
-    document.querySelector("#zbase_domain").innerHTML = conf.zbase_domain;
+    document.getElementById("zbase_build_id").innerHTML = conf.zbase_build_id;
+    document.getElementById("zbase_domain").innerHTML = conf.zbase_domain;
+    document.getElementById("zbase_footer").classList.remove("hidden");
 
     // render header
     if (conf.current_user) {
-      ZBase.loadModules(["header_widget"], function() {
-        ZBase.util.header_widget.render();
+      ZBase.loadModules(["widgets/zbase-header"], function() {
+        HeaderWidget.render();
       });
     } else {
       var elem = document.querySelector("#zbase_header");
       elem.classList.remove("hidden");
       elem.innerHTML = "";
-      elem.appendChild(ZBase.getTemplate("", "zbase_header_default_tpl"))
-      ZBase.util.install_link_handlers(elem);
+      elem.appendChild($.getTemplate("", "zbase_header_default_tpl"))
+      $.handleLinks(elem);
     }
   };
 
@@ -379,18 +387,32 @@ var ZBase = (function() {
     getTemplate: getTemplate,
     fatalError: showFatalError,
     showLoader: showLoader,
-    hideLoader: hideLoader,
-    util: {}
+    hideLoader: hideLoader
   };
 })();
 
-ZBase.util.install_link_handlers = function(elem) {
+var $ = function(selector, elem) {
+  if (!elem) {
+    elem = document;
+  }
+
+  return elem.querySelector(selector);
+};
+
+$.navigateTo = ZBase.navigateTo;
+$.getConfig = ZBase.getConfig;
+$.getTemplate = ZBase.getTemplate;
+$.fatalError = ZBase.fatalError;
+$.showLoader = ZBase.showLoader;
+$.hideLoader = ZBase.hideLoader;
+
+$.handleLinks = function(elem) {
   var click_fn = (function() {
     return function(e) {
       var href = this.getAttribute("href");
 
       if (href.indexOf("/a/") == 0) {
-        ZBase.navigateTo(href);
+        $.navigateTo(href);
         e.preventDefault();
         return false;
       } else {
@@ -405,7 +427,15 @@ ZBase.util.install_link_handlers = function(elem) {
   }
 };
 
-ZBase.util.httpPost = function(url, request, callback) {
+$.onClick = function(elem, fn) {
+  elem.addEventListener("click", function(e) {
+    e.preventDefault();
+    fn();
+    return false;
+  });
+};
+
+$.httpPost = function(url, request, callback) {
   var http = new XMLHttpRequest();
   http.open("POST", url, true);
   var start = (new Date()).getTime();
@@ -420,7 +450,7 @@ ZBase.util.httpPost = function(url, request, callback) {
   }
 };
 
-ZBase.util.httpGet = function(url, callback) {
+$.httpGet = function(url, callback) {
   var http = new XMLHttpRequest();
   http.open("GET", url, true);
   http.send();
@@ -433,7 +463,7 @@ ZBase.util.httpGet = function(url, callback) {
   }
 };
 
-ZBase.util.buildQueryString = function(params) {
+$.buildQueryString = function(params) {
   var qs = "";
 
   for (var key in params) {
@@ -444,22 +474,17 @@ ZBase.util.buildQueryString = function(params) {
   return qs;
 }
 
+$.replaceViewport = function(new_content) {
+  var viewport = document.getElementById("zbase_viewport");
+  viewport.innerHTML = "";
+  viewport.appendChild(new_content);
+}
+
+$.replaceContent = function(elem, new_content) {
+  elem.innerHTML = "";
+  elem.appendChild(new_content);
+}
 
 document.getTemplateByID = function(template_name) {
-  var template_selector = "#" + template_name;
-
-  var template = document.querySelector(template_selector);
-  if (!template) {
-    var imports = document.querySelectorAll("link[rel=import]");
-    for (var i = 0; !template && i < imports.length; ++i) {
-      template = imports[i].import.querySelector(template_selector);
-    }
-  }
-
-  if (!template) {
-    return null;
-  }
-
-  return document.importNode(template.content, true);
+  return $.getTemplate("", template_name);
 };
-

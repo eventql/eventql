@@ -1,0 +1,45 @@
+.zbase_query_progress {
+  padding: 100px 40px 0 40px;
+  margin: auto;
+  cursor: wait;
+  height: 100%;
+  min-height: 600px;
+}
+
+.zbase_query_progress > h3 {
+  text-align: center;
+  font-size: 36px;
+  color: #333;
+  line-height: 42px;
+  font-weight: 500;
+  margin-bottom: 10px;
+}
+
+.zbase_query_progress h5 {
+  text-align: center;
+  font-size: 14px;
+  color:#545758;
+  line-height: 21px;
+  font-weight: 400;
+  margin-top: 0;
+  font-style: italic;
+  margin-bottom: 50px;
+}
+
+.zbase_query_progress z-progressbar /deep/ .label {
+  margin-top: 17px;
+  font-weight: normal;
+  font-style: normal;
+  color:#545758;
+}
+
+.zbase_query_progress z-progressbar /deep/ .bar {
+  background: #61b7e1;
+}
+
+.zbase_query_progress z-progressbar {
+  height: 35px;
+  background: #f0f6f8;
+  border: 1px solid #c9d0d4;
+}
+

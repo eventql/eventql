@@ -10,6 +10,7 @@
 #include <stx/stdtypes.h>
 #include <stx/http/httpservice.h>
 #include <stx/json/json.h>
+#include <stx/assets.h>
 #include <zbase/AnalyticsSession.pb.h>
 #include <zbase/AnalyticsAuth.h>
 

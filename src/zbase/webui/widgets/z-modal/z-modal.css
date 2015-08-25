@@ -1,0 +1,127 @@
+/**
+ * Adapted from: Semantic UI:
+ *   https://github.com/Semantic-Org/Semantic-UI
+ *   http://www.semantic-ui.com/
+ */
+z-modal {
+  display: none;
+  position: fixed;
+  z-index: 1001;
+  left: 50%;
+  text-align: left;
+  width: 90%;
+  margin-left: -45%;
+  background: #ffffff;
+  border: none;
+  box-shadow: 0 1px 4px 1px rgba(0, 0, 0, 0.3);
+  border-radius: 0.2857rem;
+  -webkit-user-select: text;
+     -moz-user-select: text;
+      -ms-user-select: text;
+          user-select: text;
+}
+
+z-modal-dimmer[data-active="active"] z-modal,
+z-modal[data-active="active"] {
+  display: block;
+}
+
+z-modal > :first-child:not(z-modal-close-icon),
+z-modal > z-modal-close-icon:first-child + * {
+  border-top-left-radius: 0.2857rem;
+  border-top-right-radius: 0.2857rem;
+}
+
+z-modal > :last-child {
+  border-bottom-left-radius: 0.2857rem;
+  border-bottom-right-radius: 0.2857rem;
+}
+
+z-modal-dimmer {
+  display: none;
+  position: fixed;
+  top: 0em;
+  left: 0em;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  vertical-align: middle;
+  background: rgba(0, 0, 0, 0.85);
+  opacity: 1;
+  line-height: 1;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+      -ms-user-select: none;
+          user-select: none;
+  z-index: 100000;
+}
+
+z-modal-dimmer[data-active="active"] {
+  display: block;
+}
+
+z-modal-close-icon {
+  cursor: pointer;
+  position: absolute;
+  top: -2.5rem;
+  right: -2.5rem;
+  opacity: 0.8;
+  font-size: 1.25em;
+  color: #ffffff;
+  width: 2.25rem;
+  height: 2.25rem;
+  padding: 0.625rem 0rem 0rem 0rem;
+}
+
+z-modal-close-icon:after {
+  font-family: FontAwesome;
+  content: "\f00d";
+}
+
+z-modal-close-icon:hover {
+  opacity: 1;
+}
+
+@media only screen and (min-width: 768px) {
+  z-modal {
+    width: 88%;
+    margin: 0em 0em 0em -44%;
+  }
+}
+@media only screen and (min-width: 992px) {
+  z-modal {
+    width: 74%;
+    margin: 0em 0em 0em -37%;
+  }
+}
+@media only screen and (min-width: 1400px) {
+  z-modal {
+    width: 56%;
+    margin: 0em 0em 0em -28%;
+  }
+}
+@media only screen and (min-width: 1920px) {
+  z-modal {
+    width: 42%;
+    margin: 0em 0em 0em -21%;
+  }
+}
+
+.z-modal-header {
+  padding: 1em 15px;
+  border-bottom: 1px solid #d0d0d0;
+  background-color: #f7f7f9;
+  box-shadow: 0 1px 1px rgba(0,0,0,0.1);
+}
+
+.z-modal-footer {
+  border-top: 1px solid #d0d0d0;
+  background-color: #f7f7f9;
+  box-shadow: 0 -6px 6px -6px rgba(0,0,0,0.1);
+  overflow: auto;
+  padding: 5px 15px;
+}
+
+.z-modal-content {
+  padding: 0.8em 15px 1.2em;
+}

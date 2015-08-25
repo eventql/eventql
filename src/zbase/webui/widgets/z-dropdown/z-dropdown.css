@@ -1,0 +1,492 @@
+/**
+ * Adapted from: Semantic UI:
+ *   https://github.com/Semantic-Org/Semantic-UI
+ *   http://www.semantic-ui.com/
+ */
+ /*******************************
+            Dropdown
+*******************************/
+z-dropdown,
+.z-dropdown {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  position: relative;
+  cursor: pointer;
+  display: inline-block;
+  line-height: 1.3em;
+  outline: none;
+  text-align: left;
+  color: rgba(0,0,0,.8);
+  tap-highlight-color: transparent;
+  -webkit-tap-highlight-color: transparent;
+
+
+}
+
+
+/*******************************
+        Content
+*******************************/
+/*--------------
+  Header Elem
+---------------*/
+z-dropdown-header {
+  display: block;
+}
+
+z-dropdown-header::-moz-selection {
+  background: transparent;
+}
+
+z-dropdown-header::selection {
+  background: transparent;
+}
+
+z-dropdown-header-value::-moz-selection {
+  background: transparent;
+}
+
+z-dropdown-header-value::selection {
+  background: transparent;
+}
+
+
+z-dropdown-header-icon,
+.z-dropdown-header-icon {
+  font-size: inherit;
+  float: right;
+  display: block;
+  line-height: inherit;
+  font-weight: 401;
+  font-style: normal;
+  text-align: center;
+  width: auto;
+  max-width:5%;
+  margin: 0 0 0 0.5em;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  vertical-align:middle;
+}
+
+z-dropdown-header-value,
+.z-dropdown-header-value {
+  display: block;
+  float:left;
+  overflow: hidden;
+  white-space: nowrap;
+  max-width: 90%;
+}
+
+
+/*--------------
+    Items
+---------------*/
+z-dropdown-items,
+.z-dropdown-items {
+  width: auto;
+  display: none;
+  list-style: none;
+  cursor: pointer;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  padding: 0;
+  white-space: nowrap;
+  text-shadow: none;
+  text-align: left;
+  border: 1px solid rgba(39,41,43,.15);
+  border-radius: 0 0 .2857rem .2857rem;
+
+
+  z-index: 11;
+  background-color: #fff;
+  overflow-y: auto;
+  -webkit-backface-visibility: hidden;
+          backface-visibility: hidden;
+  -webkit-overflow-scrolling: touch;
+  margin: 0px 1px;
+  outline: none;
+  box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.08);
+
+
+}
+
+z-dropdown-items.wide,
+.z-dropdown-items.wide {
+  overflow-y: scroll;
+}
+
+
+z-dropdown[data-active] z-dropdown-items,
+.z-dropdown[data-active] .z-dropdown-items{
+  display: inline-block;
+}
+
+
+/*--------------
+    Item
+---------------*/
+z-dropdown-item,
+.z-dropdown-item {
+  display: list-item;
+  list-style: none;
+  position: relative;
+  cursor: pointer;
+  border: none;
+  height: auto;
+  color: rgba(0, 0, 0, 0.8);
+  padding: 0.65em 1.1em 0.65em 1.1em!important;
+  text-transform: none;
+  font-weight: normal;
+  box-shadow: none;
+  -webkit-touch-callout: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font: inherit;
+  line-height: inherit;
+  vertical-align: baseline;
+  overflow: hidden;
+  text-align:left;
+  white-space: nowrap;
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+  padding-left: 1.1em !important;
+
+/* Add in spacing for scroll bar */
+  padding-right:  !important;
+  padding-right:  !important;
+  white-space: nowrap;
+  word-wrap: normal;
+}
+
+z-dropdown-item:first-child,
+.z-dropdown-item:first-child,
+z-dropdown-label + z-dropdown-item,
+.z-dropdown-label + .z-dropdown-item {
+  border-top: none;
+}
+
+z-dropdown-item[data-selected],
+.z-dropdown-item[data-selected] {
+  font-weight: bold !important;
+  color: rgba(0, 0, 0, 0.8) !important;
+}
+
+z-dropdown-item:hover,
+z-dropdown-item.hover,
+.z-dropdown-item:hover,
+.z-dropdown-item.hover {
+  background-color: rgba(0, 0, 0, 0.05);
+  color: rgba(0, 0, 0, 0.8);
+  box-shadow: 0px 0px 2px 0px rgba(0, 0, 0, 0.05);
+}
+
+z-dropdown-item.hidden,
+.z-dropdown-item.hidden {
+  display: none;
+}
+
+
+/*--------------
+   Icon Item
+---------------*/
+z-dropdown-icon,
+.z-dropdown-icon {
+  display: inline-block;
+  opacity: 1;
+  margin: 0 .25rem 0 0;
+  width: 1.23em;
+  height: .9em;
+  font-family: Icons;
+  font-style: normal;
+  line-height: 1;
+  font-weight: 400;
+  text-decoration: inherit;
+  text-align: center;
+  speak: none;
+  font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+z-dropdown-descr,
+.z-dropdown-descr {
+  margin: 0em 0em 0em 1em;
+  color: rgba(0, 0, 0, 0.4);
+}
+
+/*--------------
+  Label
+---------------*/
+z-dropdown-label,
+.z-dropdown-label {
+  display: list-item;
+  margin: 1rem 0rem 0.75rem;
+  padding: 0em 1.25rem;
+  color: rgba(0, 0, 0, 0.85);
+  font-size: 0.8em;
+  font-weight: bold;
+  text-transform: uppercase;
+  cursor: default;
+}
+
+/*-----------------
+  Item With Input
+-------------------*/
+z-dropdown-item input.z-input,
+.z-dropdown-item input.z-input,
+z-dropdown-item z-input input,
+.z-dropdown-item .z-input input {
+  padding: 0.6em 1em;
+  margin-top: 0.5em;
+  font-size: 0.92em;
+}
+
+
+/*******************************
+      Dropdown Styles
+*******************************/
+
+/*--------------
+  Input like
+---------------*/
+
+/* Displays like a input/select box */
+z-dropdown.input z-dropdown-header,
+.z-dropdown.input .z-dropdown-header {
+  word-wrap: break-word;
+  white-space: normal;
+  outline: 0;
+  -webkit-transform: rotateZ(0deg);
+  transform: rotateZ(0deg);
+  background: #fff;
+  display: inline-block;
+  box-shadow: none;
+  border: 1px solid rgba(39,41,43,.15);
+  border-radius: .2857rem;
+
+
+  min-width: 180px;
+  padding: 0.65em 1.1em;
+  line-height: 1.3em;
+  height: 2.6em;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+
+z-dropdown.input z-dropdown-header:hover,
+.z-dropdown.input .z-dropdown-header:hover {
+  border-color: rgba(39, 41, 43, 0.3);
+  box-shadow: 0px 0px 4px 0px rgba(0, 0, 0, 0.08);
+}
+
+/* Search Icon */
+z-dropdown.input z-dropdown-header:after,
+.z-dropdown.input .z-dropdown-header:after {
+  float:right;
+}
+
+z-dropdown.input:not(.wide) z-dropdown-items,
+.z-dropdown.input:not(.wide) .z-dropdown-items {
+  border-top: none !important;
+}
+
+z-dropdown.input z-dropdown-items,
+.z-dropdown.input .z-dropdown-items {
+  min-width: calc(100% - 1px);
+}
+
+z-dropdown.input.wide z-dropdown-items,
+.z-dropdown.input.wide .z-dropdown-items {
+  margin-top: -1px;
+}
+
+/*--------------
+  Inline
+---------------*/
+z-dropdown.inline,
+.z-dropdown.inline{
+  cursor: pointer;
+  display: inline-block;
+  color: inherit;
+}
+
+z-dropdown.inline z-dropdown-header,
+.z-dropdown.inline .z-dropdown-header {
+  font-weight: bold;
+}
+
+z-dropdown.inline z-dropdown-items,
+.z-dropdown.inline .z-dropdown-items {
+  cursor: auto;
+  margin-top: 0.25em;
+  border-radius: 0.2857rem;
+}
+
+/*--------------
+  Searchable
+---------------*/
+z-dropdown.search z-dropdown-items,
+.z-dropdown.search .z-dropdown-items{
+  width: 100%;
+}
+
+
+
+/*******************************
+      Dropdown States
+*******************************/
+/*--------------------
+        Error
+----------------------*/
+z-dropdown.error z-dropdown-header,
+.z-dropdown.error .z-dropdown-header {
+  color: #a94442;
+}
+
+z-dropdown.input.error z-dropdown-header,
+.z-dropdown.input.error .z-dropdown-header  {
+  background: #fff0f0;
+  border-color: #dbb1b1;
+}
+
+z-dropdown.error z-dropdown-header:hover,
+.z-dropdown.error .z-dropdown-header:hover {
+  border-color: #dbb1b1 !important;
+}
+
+z-dropdown.error z-dropdown-items,
+.z-dropdown.error .z-dropdown-items {
+  border-color: #dbb1b1;
+}
+
+z-dropdown.error z-dropdown-item,
+.z-dropdown.error .z-dropdown-item {
+  color: #d95c5c;
+}
+
+z-dropdown.error z-dropdown-item :hover,
+z-dropdown.error z-dropdown-item.hover {
+  background-color: #fff2f2;
+}
+
+z-dropdown.error z-dropdown-item[data-selected],
+.z-dropdown.error .z-dropdown-item[data-selected]{
+  background-color: #fdcfcf;
+}
+
+/*--------------
+  Disabled
+---------------*/
+z-dropdown.disabled,
+.z-dropdown.disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+
+z-dropdown.input z-dropdown-header:hover,
+z-dropdown.input .z-dropdown-header:hover {
+  border-color: rgba(39,41,43,.15);
+  box-shadow: none;
+}
+
+[data-check] {
+  visibility: hidden;
+}
+
+[data-check][data-active] {
+  visibility: visible;
+}
+
+.zbase_app z-dropdown-items,
+.zbase_app fn-segment-editor z-dropdown-items {
+  max-height: 200px;
+}
+
+.zbase_app z-dropdown.input z-dropdown-header {
+  min-width: 165px;
+  max-width: 170px;
+}
+
+.zbase_app z-dropdown.input z-dropdown-items {
+  margin-top: -3px;
+}
+
+.zbase_app z-dropdown.input.wide z-dropdown-items {
+  margin-top: -4px;
+}
+
+.zbase_app z-dropdown z-dropdown-header {
+  color: #333;
+  border: 1px solid #bbbb;
+  font-weight: 600;
+  font-size: 12px;
+  line-height: 28px;
+  padding: 0 11px;
+  height: 29px;
+}
+
+.zbase_app z-dropdown-header-value {
+  max-width: 100%;
+}
+
+.zbase_app z-dropdown {
+  font-size: 12px;
+}
+
+.zbase_app z-dropdown,
+.zbase_app fn-date-select {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.zbase_app z-dropdown.input z-dropdown-header,
+.zbase_app fn-button.gradient,
+.zbase_app fn-date-select fn-date-select-field {
+  background-color: #F4F4F4;
+  background-image: -webkit-gradient(linear, left top, left bottom, from(#fefefe), to(#e9e9e9));
+  background-image: -webkit-linear-gradient(top, #fefefe, #e9e9e9);
+  background-image: -moz-linear-gradient(top, #fefefe, #e9e9e9);
+  background-image: -ms-linear-gradient(top, #fefefe, #e9e9e9);
+  background-image: -o-linear-gradient(top, #fefefe, #e9e9e9);
+  background-image: linear-gradient(top, #fefefe, #e9e9e9);
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorStr='#fefefe', EndColorStr='#e9e9e9');
+  color: #333;
+  border: 1px solid #bbb;
+  box-shadow: 0 0 2px rgba(0,0,0,.1);
+  font-weight: 600;
+  font-size: 12px;
+  line-height: 28px;
+  padding: 0 11px;
+  height: 29px;
+}
+
+.zbase_app z-dropdown.input z-dropdown-header:hover,
+.zbase_app fn-date-select fn-date-select-field:hover {
+  background-image: -webkit-gradient(linear, left top, left bottom, from(#f4f4f4), to(#e0e0e0));
+  background-image: -webkit-linear-gradient(top, #f4f4f4, #e0e0e0);
+  background-image: -moz-linear-gradient(top, #f4f4f4, #e0e0e0);
+  background-image: -ms-linear-gradient(top, #f4f4f4, #e0e0e0);
+  background-image: -o-linear-gradient(top, #f4f4f4, #e0e0e0);
+  background-image: linear-gradient(top, #f4f4f4, #e0e0e0);
+  box-shadow: 0 0 2px rgba(0,0,0,.2);
+}
+
+.zbase_app z-dropdown.input z-dropdown-header:active,
+.zbase_app fn-date-select fn-date-select-field:active {
+  background-image: -webkit-gradient(linear, left top, left bottom, from(#e1e1e1), to(#e9e9e9));
+  background-image: -webkit-linear-gradient(top, #e1e1e1, #e9e9e9);
+  background-image: -moz-linear-gradient(top, #e1e1e1, #e9e9e9);
+  background-image: -ms-linear-gradient(top, #e1e1e1, #e9e9e9);
+  background-image: -o-linear-gradient(top, #e1e1e1, #e9e9e9);
+  background-image: linear-gradient(top, #e1e1e1, #e9e9e9);
+  box-shadow: 0 0 2px rgba(0,0,0,.1);
+}
+

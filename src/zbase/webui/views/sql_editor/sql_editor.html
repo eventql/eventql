@@ -1,0 +1,114 @@
+<template id="zbase_sql_editor_overview_main_tpl">
+  <div class="zbase_sql_editor">
+    <section class='zbase_page_title large'>
+      <div>
+        <button class="z-button primary" data-action="new-query">
+          <i class="fa fa-plus"></i> &nbsp;New Query
+        </button>
+        <zbase-breadcrumbs>
+          <zbase-breadcrumbs-section>
+            <a href="/a/">Applications</a>
+          </zbase-breadcrumbs-section>
+          <zbase-breadcrumbs-section>
+            <a href="/a/sql">SQL Editor</a>
+          </zbase-breadcrumbs-section>
+        </zbase-breadcrumbs>
+        <h1>SQL Queries</h1>
+      </div>
+    </section>
+    <div class="zbase_content_pane fullwidth">
+      <div class="zbase_sql_editor_overview">
+        <div class="zbase_sql_editor_content">
+          <table class="z-table zbase_clickable_table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Type</th>
+                <th>Last opened by me</th>
+              </tr>
+            </thead>
+            <tbody>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<template id="zbase_sql_editor_main_tpl">
+  <div class="zbase_sql_editor">
+    <section class='zbase_page_title small'>
+      <div>
+        <zbase-breadcrumbs>
+          <zbase-breadcrumbs-section>
+            <a href="/a/">Applications</a>
+          </zbase-breadcrumbs-section>
+          <zbase-breadcrumbs-section>
+            <a href="/a/sql">SQL Editor</a>
+          </zbase-breadcrumbs-section>
+          <zbase-breadcrumbs-section>
+            <a href="/a/sql" class="sql_document_name_crumb"></a>
+          </zbase-breadcrumbs-section>
+        </zbase-breadcrumbs>
+      </div>
+    </section>
+
+    <div class="zbase_content_pane fullwidth">
+      <div class="zbase_sql_editor_pane">
+        <div class="zbase_sql_editor_sidebar">
+          <div>
+            <!--<a class="link"><i class="fa fa-copy"></i>&nbsp;Clone tis query</a>-->
+          </div>
+          <section class="sidebar_section" class="sql_editor_table_list">
+          </section>
+        </div>
+
+        <div class="zbase_sql_editor_content with_sidebar">
+          <div class="zbase_sql_editor_infobar hidden"></div>
+          <section class="zbase_sql_editor_title">
+            <button class="z-button primary" data-action="execute-query">
+              <i class="fa fa-bolt"></i>
+              &nbsp;Execute
+            </button>
+            <button class="z-button secondary" data-action="share-query">
+              <i class="fa fa-share-alt"></i>
+              &nbsp;Share
+            </button>
+            <h2 class="pagetitle editable" data-action='edit-query-name'></h2>
+          </section>
+
+          <z-codeeditor data-language="text/x-chartsql" data-content='query_content' style="height: 250px;"></z-codeeditor>
+
+          <div class='resizer_tooltip' draggable="true"></div>
+
+          <div class="zbase_sql_editor_result_pane">
+          </div>
+
+          <z-modal class="zbase_sql_editor_modal rename_query">
+            <z-modal-close-icon></z-modal-close-icon>
+            <div class="z-modal-header">Rename Query</div>
+            <div class="z-modal-content">
+              <h4>Enter a new query name</h4>
+              <input class="z-input" name="doc_name" />
+            </div>
+            <div class="z-modal-footer">
+              <button class="z-button primary" data-action="submit">
+                Save
+              </button>
+            </div>
+          </z-modal>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<template id="zbase_sql_editor_error_msg_tpl">
+  <div class="error_message">
+    <h3>Error</h3>
+    <div class="error_text"></div>
+  </div>
+</template>
+

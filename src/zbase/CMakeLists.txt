@@ -3,12 +3,23 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR}/)
 file(GLOB PROTO_FILES *.proto)
 PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS ${PROTO_FILES})
 
+set(ZBASE_ASSETS_PACK "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/zbase_assets.cc")
+if(EXISTS ${ZBASE_ASSETS_PACK})
+  set(ZBASE_ASSETS_SRCS "${ZBASE_ASSETS_PACK}")
+  set(ZBASE_HAS_ASSET_BUNDLE TRUE)
+else()
+  if (NOT ZBASE_BUILD_ID MATCHES "devel")
+    message(FATAL_ERROR "ZBase release build with dynamic assets is not allowed")
+  endif()
+endif()
+
 add_library(customerdirectory OBJECT
     CustomerConfig.cc
     ConfigDirectory.cc
     SessionSchema.cc
     TableDefinition.cc
-    ${PROTO_SRCS})
+    ${PROTO_SRCS}
+    ${ZBASE_ASSETS_SRCS})
 
 configure_file(
     ${CMAKE_CURRENT_SOURCE_DIR}/buildconfig.h.cmake

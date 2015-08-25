@@ -7,6 +7,7 @@
  * permission is obtained.
  */
 #include "stx/wallclock.h"
+#include "stx/assets.h"
 #include "stx/protobuf/msg.h"
 #include "stx/io/BufferedOutputStream.h"
 #include "zbase/api/LogfileAPIServlet.h"
@@ -65,7 +66,7 @@ void LogfileAPIServlet::handle(
 
   res.setStatus(http::kStatusNotFound);
   res.addHeader("Content-Type", "text/html; charset=utf-8");
-  res.addBody(FileUtil::read("src/zbase/webui/404.html"));
+  res.addBody(Assets::getAsset("zbase/webui/404.html"));
   res_stream->writeResponse(res);
 }
 

@@ -100,6 +100,17 @@ int main(int argc, const char** argv) {
       "datadir path",
       "<path>");
 
+#ifndef ZBASE_HAS_ASSET_BUNDLE
+  flags.defineFlag(
+      "asset_path",
+      cli::FlagParser::T_STRING,
+      false,
+      NULL,
+      "src/",
+      "assets path",
+      "<path>");
+#endif
+
   flags.defineFlag(
       "indexbuild_threads",
       cli::FlagParser::T_INTEGER,
@@ -141,10 +152,13 @@ int main(int argc, const char** argv) {
   Logger::get()->setMinimumLogLevel(
       strToLogLevel(flags.getString("loglevel")));
 
+#ifndef ZBASE_HAS_ASSET_BUNDLE
+  Assets::setSearchPath(flags.getString("asset_path"));
+#endif
+
   /* conf */
   //auto conf_data = FileUtil::read(flags.getString("conf"));
   //auto conf = msg::parseText<zbase::TSDBNodeConfig>(conf_data);
-
 
   /* thread pools */
   stx::thread::ThreadPool tpool;

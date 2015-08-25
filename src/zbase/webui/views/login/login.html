@@ -1,0 +1,55 @@
+<template id="zbase_login_user_prompt_tpl">
+  <div class="zbase_login" style="min-height: 900px; margin-top: 100px;">
+    <img src="/a/_/a/android-icon-36x36.png" />
+    <h1>Sign in to ZenBase</h1>
+
+    <div class="error_message hidden"></div>
+
+    <form class="login_pane" method="POST">
+      <input class="z-input" name="userid" tabindex="1" autofocus="" placeholder="me@company.com" value="">
+
+      <input class="z-input" tabindex="2" type="password" name="password" placeholder="•••••••••••">
+
+      <input type="submit" tabindex="3" value="Login" class="z-button primary">
+    </form>
+
+    <a class="forgot_pw" href="/a/login/reset_password">Forgot your password?</a>
+  </div>
+</template>
+
+<template id="zbase_login_namespace_prompt_tpl">
+  <div class="zbase_login" style="min-height: 900px; margin-top: 100px;">
+    <img src="/a/_/a/android-icon-36x36.png" />
+    <h1>Select a Namespace</h1>
+
+    <div class="error_message hidden"></div>
+
+    <ul class="namespace_list">
+      <li data-namespace="dawanda">dawanda</li>
+      <li data-namespace="dawanda">dawanda</li>
+      <li data-namespace="dawanda">dawanda</li>
+      <li data-namespace="dawanda">dawanda</li>
+      <li data-namespace="dawanda">dawanda</li>
+      <li data-namespace="dawanda">dawanda</li>
+      <li data-namespace="dawanda">dawanda</li>
+    </ul>
+
+    <a class="forgot_pw" href="/a/login">Go back</a>
+  </div>
+</template>
+
+<template id="zbase_login_2fa_prompt_tpl">
+  <div class="zbase_login" style="min-height: 900px; margin-top: 100px;">
+    <img src="/a/_/a/android-icon-36x36.png" />
+    <h1>Two-Factor Auth</h1>
+
+    <div class="error_message hidden"></div>
+
+    <form class="login_pane" method="POST">
+      <input class="z-input" name="2fa_token" tabindex="1" type="password"autofocus="" placeholder="•••••••••••" />
+      <input type="submit" tabindex="3" value="Login" class="z-button primary" />
+    </form>
+
+    <a class="forgot_pw" href="/a/login">Go Back</a>
+  </div>
+</template>

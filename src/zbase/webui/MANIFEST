@@ -1,34 +1,54 @@
 route {
   path_prefix: "/a/sql"
   view: "sql_editor"
-  require_module: "doc_sync"
-  require_module: "sql_editor"
-  require_module: "fn-codeeditor"
-  require_module: "event_source_handler"
-  require_module: "fn-modal"
+  require_module: "util/doc_sync"
+  require_module: "util/event_source_handler"
+  require_module: "widgets/z-input"
+  require_module: "widgets/z-button"
+  require_module: "widgets/z-codeeditor"
+  require_module: "widgets/z-modal"
+  require_module: "widgets/z-table"
+  require_module: "widgets/z-progressbar"
+  require_module: "widgets/zbase-header"
+  require_module: "widgets/zbase-query-progress"
+  require_module: "views/sql_editor"
 }
 
 route {
   path_prefix: "/a/logviewer"
   view: "logviewer"
-  require_module: "logviewer"
+  require_module: "util/z-date-util"
+  require_module: "util/z-url-util"
+  require_module: "util/event_source_handler"
+  require_module: "widgets/z-checkbox"
+  require_module: "widgets/z-dropdown"
+  require_module: "widgets/z-input"
+  require_module: "widgets/z-search"
+  require_module: "widgets/z-pager"
+  require_module: "widgets/z-table"
+  require_module: "widgets/z-calendar"
+  require_module: "widgets/zbase-header"
+  require_module: "views/logviewer"
 }
 
 route {
   is_public: true
   path_match: "/a/login"
   view: "login"
-  require_module: "login"
+  require_module: "widgets/z-input"
+  require_module: "widgets/z-button"
+  require_module: "views/login"
 }
 
 route {
   path_match: "/a/logout"
   view: "logout"
-  require_module: "login"
+  require_module: "views/login"
 }
 
 route {
   path_match: "/a/"
   view: "appstore"
-  require_module: "appstore"
+  require_module: "widgets/zbase-header"
+  require_module: "views/appstore"
 }

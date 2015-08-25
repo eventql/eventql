@@ -32,8 +32,12 @@
     <style type="text/css">{{app_css}}</style>
     <meta name="google" content="notranslate" />
   </head>
-  <body>
-    <nav class="zbase_header hidden" id="zbase_header"></nav>
+  <body class="zbase_app">
+    <nav class="zbase_header" id="zbase_header">
+      <div class="navigation_inner">
+        <a href="/a/" class="logo_app"><img id="zbase_logo" src="/a/_/a/favicon-32x32.png" height="22" alt="ZenBase"></a>
+      </div>
+    </nav>
 
     <template id="zbase_header_default_tpl" style="display:none;">
       <div class="navigation_inner">
@@ -55,7 +59,7 @@
 
     <div id="zbase_viewport"></div>
 
-    <div class="zbase_footer">
+    <div class="zbase_footer hidden" id="zbase_footer">
       <div class="footer_inner">
         <span>ZBase build-<span id="zbase_build_id">-</span></span>
         <a href="/"><span id="zbase_domain">-</span></a>
