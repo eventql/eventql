@@ -1,6 +1,7 @@
 ZBase.registerView((function() {
 
   var query_mgr;
+  var logfiles;
 
   var init = function(params) {
     $.showLoader();
@@ -8,8 +9,8 @@ ZBase.registerView((function() {
 
     $.httpGet("/api/v1/logfiles", function(r) {
       if (r.status == 200) {
-        var logfiles = JSON.parse(r.response).logfile_definitions;
-        render(logfiles);
+        logfiles = JSON.parse(r.response).logfile_definitions;
+        render();
         applyQueryParams(params.path);
       } else {
         $.fatalError();
@@ -49,6 +50,7 @@ ZBase.registerView((function() {
     var filter = UrlUtil.getParamValue(url, "filter");
     $(".zbase_logviewer .filter_control").setValue(filter);
 
+    // param: columns
     var columns = UrlUtil.getParamValue(url, "columns");
     var raw = UrlUtil.getParamValue(url, "raw");
 
@@ -88,6 +90,19 @@ ZBase.registerView((function() {
 
     //page_times = [initial_end_time];
     //this.handlePagination();
+  };
+
+  var renderLogfileSelect = function(elem) {
+    var dropdown = $("z-dropdown.logfile_control", elem);
+    var items = $("z-dropdown-items", dropdown);
+
+    logfiles.forEach(function(logfile) {
+      var item = document.createElement("z-dropdown-item");
+      item.innerHTML = logfile.name;
+      item.setAttribute("data-value", logfile.name);
+      items.appendChild(item);
+    });
+
   };
 
   var getQueryParams = function() {
@@ -171,37 +186,6 @@ ZBase.registerView((function() {
       //_this.hideLoader();
       //_this.pane.querySelector("[name='result_pane']").classList.add("hidden");
     });
-  };
-
-
-  var render = function(logfiles) {
-    var page = $.getTemplate("views/logviewer", "zbase_logviewer_main_tpl");
-
-    renderLogfileSelect(page, logfiles);
-
-    $.handleLinks(page);
-    $.replaceViewport(page);
-  };
-
-  var renderLogfileSelect = function(elem, logfiles) {
-    var dropdown = $("z-dropdown.logfile_control", elem);
-    var items = $("z-dropdown-items", dropdown);
-
-    logfiles.forEach(function(logfile) {
-      var item = document.createElement("z-dropdown-item");
-      item.innerHTML = logfile.name;
-      item.setAttribute("data-value", logfile.name);
-      items.appendChild(item);
-    });
-
-    //dropdown.setAttribute("data-resolved", "resolved");
-    //dropdown.addEventListener("z-dropdown-item-click", function(e) {
-    //  var target = e.srcElement || e.target;
-    //  window.location.href = UrlUtil.addOrModifyUrlParam(
-    //    window.location.href,
-    //    "logfile",
-    //    target.getAttribute("data-value"));
-    //});
   };
 
   var showLoadingBar = function(num_rows) {
