@@ -62,7 +62,7 @@ void SearchDashboardQuery::onSession() {
 }
 
 void SearchDashboardQuery::onQuery() {
-  auto time = time_col_->getUInt32();
+  auto time = time_col_->getUInt64();
   auto num_items = num_items_col_->getUInt32();
   auto num_clicks = num_itemclicks_col_->getUInt32();
   auto num_ad_imprs = num_adimprs_col_->getUInt32();
