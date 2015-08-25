@@ -1,12 +1,9 @@
 ZBase.registerView((function() {
 
   var render = function(path) {
-    var viewport = document.getElementById("zbase_viewport");
     var page = $.getTemplate("views/appstore", "zbase_appstore_main_tpl");
     $.handleLinks(page);
-
-    viewport.innerHTML = "";
-    viewport.appendChild(page);
+    $.replaceViewport(page);
   };
 
   return {
