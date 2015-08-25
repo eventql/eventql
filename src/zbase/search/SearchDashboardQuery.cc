@@ -34,7 +34,8 @@ SearchDashboardQuery::SearchDashboardQuery(
     qcartvalue_col_(query->fetchColumn("search_queries.cart_value_eurcents")),
     qgmv_col_(query->fetchColumn("search_queries.gmv_eurcents")),
     new_session_(false),
-    window_secs_(kSecondsPerDay) {
+    window_secs_(kSecondsPerDay),
+    last_time_(0) {
   query->onSession(std::bind(&SearchDashboardQuery::onSession, this));
   query->onQuery(std::bind(&SearchDashboardQuery::onQuery, this));
 
@@ -70,6 +71,11 @@ void SearchDashboardQuery::onQuery() {
   auto qcart_value_eurcent = qcartvalue_col_->getUInt32();
   auto qgmv_eurcent = qgmv_col_->getUInt32();
 
+  if (time == 0) {
+    time = last_time_;
+  } else {
+    last_time_ = time;
+  }
   //if (pagetype != PageType::SEARCH_PAGE) {
   //  return;
   //}
