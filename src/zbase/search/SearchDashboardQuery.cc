@@ -9,6 +9,7 @@
 #include "SearchDashboardQuery.h"
 
 #include <stx/uri.h>
+#include <stx/logging.h>
 
 using namespace stx;
 
@@ -35,7 +36,8 @@ SearchDashboardQuery::SearchDashboardQuery(
     qcartvalue_col_(query->fetchColumn("search_queries.cart_value_eurcents")),
     qgmv_col_(query->fetchColumn("search_queries.gmv_eurcents")),
     new_session_(false),
-    window_secs_(kSecondsPerDay) {
+    window_secs_(kSecondsPerDay),
+    last_time_(0) {
   query->onSession(std::bind(&SearchDashboardQuery::onSession, this));
   query->onQuery(std::bind(&SearchDashboardQuery::onQuery, this));
 
@@ -61,7 +63,7 @@ void SearchDashboardQuery::onSession() {
 }
 
 void SearchDashboardQuery::onQuery() {
-  auto time = time_col_->getUInt32();
+  auto time = time_col_->getUInt64();
   auto pagetype = (PageType) pagetype_col_->getUInt32();
   auto num_items = num_items_col_->getUInt32();
   auto num_clicks = num_itemclicks_col_->getUInt32();
@@ -72,6 +74,16 @@ void SearchDashboardQuery::onQuery() {
   auto qcart_value_eurcent = qcartvalue_col_->getUInt32();
   auto qgmv_eurcent = qgmv_col_->getUInt32();
 
+  if (time == 0) {
+    time = last_time_;
+  } else {
+    last_time_ = time;
+  }
+
+  if (time > 1440509413) {
+    time = time / kMicrosPerSecond;
+  }
+
   if (pagetype != PageType::SEARCH_PAGE) {
     return;
   }
@@ -79,8 +91,7 @@ void SearchDashboardQuery::onQuery() {
   auto drilldown_dim = drilldown_fn_();
 
   for (int i = 0; i < segments_.size(); ++i) {
-    auto& series = result_->timeseries.series[i];
-    auto& tpoint = series[(time / window_secs_) * window_secs_];
+    auto& tpoint = result_->timeseries.series[i][(time / window_secs_) * window_secs_];
     auto& dpoint = result_->drilldown.counters[i][drilldown_dim];
 
     if (!segments_[i]->checkPredicates()) {
