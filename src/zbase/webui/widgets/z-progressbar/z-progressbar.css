@@ -43,7 +43,7 @@ z-progressbar[data-state='unknown'] .bar {
   width: 0;
 }
 
-.bar {
+z-progressbar .bar {
   display: block;
   height: 1.75em;
   line-height: 1;
@@ -54,7 +54,7 @@ z-progressbar[data-state='unknown'] .bar {
   border-radius: .2857rem;
 }
 
-.bar::after {
+z-progressbar .bar::after {
   content: '';
   opacity: 0;
   position: absolute;
@@ -68,7 +68,7 @@ z-progressbar[data-state='unknown'] .bar {
   animation: progress-active 2s ease infinite;
 }
 
-.bar > .progress {
+z-progressbar .bar > .progress {
   white-space: nowrap;
   position: absolute;
   width: auto;
@@ -86,7 +86,7 @@ z-progressbar[data-state='unknown'] .bar {
   line-height: 1;
 }
 
-.label {
+z-progressbar .label {
   position: absolute;
   width: 100%;
   font-size: 1em;
