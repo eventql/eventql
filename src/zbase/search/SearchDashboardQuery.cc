@@ -72,9 +72,9 @@ void SearchDashboardQuery::onQuery() {
   auto qcart_value_eurcent = qcartvalue_col_->getUInt32();
   auto qgmv_eurcent = qgmv_col_->getUInt32();
 
-  if (pagetype != PageType::SEARCH_PAGE) {
-    return;
-  }
+  //if (pagetype != PageType::SEARCH_PAGE) {
+  //  return;
+  //}
 
   auto drilldown_dim = drilldown_fn_();
 
