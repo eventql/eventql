@@ -2,6 +2,7 @@ ZBase.registerView((function() {
 
   var query_mgr;
   var logfiles;
+  var pagination_history = [];
 
   var init = function(params) {
     $.showLoader();
@@ -205,6 +206,14 @@ ZBase.registerView((function() {
     dropdown.setValue(columns_str.split(","));
   }
 
+  var goToNextPage = function() {
+
+  };
+
+  var goToPreviousPage = function() {
+
+  };
+
   var findLogfileDefinition = function(logfile_name) {
     for (var i = 0; i < logfiles.length; ++i) {
       if (logfiles[i].name == logfile_name) {
@@ -236,6 +245,12 @@ ZBase.registerView((function() {
 
   var render = function() {
     var page = $.getTemplate("views/logviewer", "zbase_logviewer_main_tpl");
+
+    $(".logfile_control", page).addEventListener("change", executeQuery);
+    $(".filter_type_control", page).addEventListener("change", executeQuery);
+    $(".filter_control", page).addEventListener("change", executeQuery);
+    $(".columns_control", page).addEventListener("change", executeQuery);
+    $(".time_control", page).addEventListener("change", executeQuery);
 
     $.handleLinks(page);
     $.replaceViewport(page);
