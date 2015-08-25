@@ -1,0 +1,99 @@
+/**
+ * Partially Adapted from: Semantic UI:
+ *   https://github.com/Semantic-Org/Semantic-UI
+ *   http://www.semantic-ui.com/
+ */
+ /*******************************
+            Dropdown
+*******************************/
+z-search,
+.z-search {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  position: relative;
+  cursor: pointer;
+  display: inline-block;
+  line-height: 1em;
+  outline: none;
+  text-align: left;
+  color: rgba(0,0,0,.8);
+  tap-highlight-color: rgba(0, 0, 0, 0);
+
+
+}
+
+z-search z-input,
+.z-search .z-input {
+  width: 100%;
+}
+
+z-search z-input z-input-icon:hover,
+.z-search .z-input .z-input-icon:hover {
+  cursor:pointer;
+}
+
+z-search ul,
+.z-search ul {
+  display: none;
+  list-style: none;
+  cursor: pointer;
+  position: absolute;
+  outline: 0;
+  top: 100%;
+  left: 0;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  white-space: nowrap;
+  text-shadow: none;
+  text-align: left;
+  box-shadow: 0 1px 4px 0 rgba(0,0,0,.15);
+  border: 1px solid rgba(39,41,43,.15);
+  border-radius: 0 0 .2857rem .2857rem;
+
+
+  z-index: 11;
+  background-color: #fff;
+  will-change: transform,opacity;
+}
+
+z-search ul[data-active],
+.z-search ul[data-active] {
+  display: block;
+}
+
+z-search ul li,
+.z-search ul li {
+  border: none;
+  height: auto;
+  border-top: none;
+  color: rgba(0, 0, 0, 0.8);
+  padding: 0.65em 0.7em 0.65em 0.7em;
+  text-transform: none;
+  font-weight: normal;
+  box-shadow: none;
+  -webkit-touch-callout: none;
+  margin: 0;
+  border: 0;
+  font: inherit;
+  line-height: inherit;
+  vertical-align: baseline;
+  overflow: hidden;
+  text-align:left;
+}
+
+z-search ul li[data-selected],
+.z-search ul li[data-selected] {
+  font-weight: bold !important;
+  color: rgba(0, 0, 0, 0.8) !important;
+}
+
+z-search ul li:hover,
+z-search ul li.hover,
+.z-search ul li:hover,
+.z-search ul li.hover {
+  background-color: rgba(0, 0, 0, 0.05);
+  color: rgba(0, 0, 0, 0.8);
+}
+

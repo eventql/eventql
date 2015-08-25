@@ -39,6 +39,10 @@ add_library(hunspell OBJECT
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/src/zbase/util/mysql")
 find_package(MySQL)
 
+if(MYSQL_FOUND)
+  SET(STX_ENABLE_MYSQL TRUE)
+endif()
+
 include_directories(3rdparty/)
 include_directories(src/)
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/src)

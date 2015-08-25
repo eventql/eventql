@@ -29,7 +29,7 @@ void WebUIServlet::handleHTTPRequest(
     logError("zbase", e, "error while handling HTTP request");
     response->setStatus(http::kStatusInternalServerError);
     response->addHeader("Content-Type", "text/html; charset=utf-8");
-    response->addBody(FileUtil::read("src/zbase/webui/500.html"));
+    response->addBody(Assets::getAsset("zbase/webui/500.html"));
   }
 }
 
@@ -75,12 +75,12 @@ void WebUIServlet::handle(
 
     // FIXME cache module config
     auto module_cfg = msg::parseText<WebUIModuleConfig>(
-        loadFile(StringUtil::format("modules/$0/MANIFEST", module_name)));
+        loadFile(StringUtil::format("$0/MANIFEST", module_name)));
 
     if (session.isEmpty() && !module_cfg.is_public()) {
       response->setStatus(http::kStatusForbidden);
       response->addHeader("Content-Type", "text/html; charset=utf-8");
-      response->addBody(FileUtil::read("src/zbase/webui/403.html"));
+      response->addBody(Assets::getAsset("zbase/webui/403.html"));
       return;
     }
 
@@ -88,19 +88,19 @@ void WebUIServlet::handle(
 
     for (const auto& file : module_cfg.html_file()) {
       module_html +=
-          loadFile(StringUtil::format("modules/$0/$1", module_name, file));
+          loadFile(StringUtil::format("$0/$1", module_name, file));
     }
 
     for (const auto& file : module_cfg.css_file()) {
       module_html += StringUtil::format(
         "<style type='text/css'>$0</style>",
-        loadFile(StringUtil::format("modules/$0/$1", module_name, file)));
+        loadFile(StringUtil::format("$0/$1", module_name, file)));
     }
 
     for (const auto& file : module_cfg.js_file()) {
       module_html += StringUtil::format(
         "<script type='text/javascript'>$0</script>",
-        loadFile(StringUtil::format("modules/$0/$1", module_name, file)));
+        loadFile(StringUtil::format("$0/$1", module_name, file)));
     }
 
     module_html += StringUtil::format(
@@ -129,7 +129,7 @@ void WebUIServlet::handle(
 }
 
 String WebUIServlet::loadFile(const String& filename) {
-  return FileUtil::read("src/zbase/webui/" + filename).toString();
+  return Assets::getAsset("zbase/webui/" + filename);
 }
 
 void WebUIServlet::renderConfig(
