@@ -58,7 +58,7 @@ ZBase.registerView((function() {
     });
 
     query.addEventListener('status', function(e) {
-      renderQueryProgress(e);
+      renderQueryProgress(JSON.parse(e.data));
     });
   }
 
