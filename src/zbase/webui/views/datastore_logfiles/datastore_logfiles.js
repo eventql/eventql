@@ -14,6 +14,10 @@ ZBase.registerView((function() {
     });
   }
 
+  var createNewLogfile = function() {
+    alert("not yet implemented");
+  }
+
   var render = function(logfiles) {
     var layout = $.getTemplate("views/datastore", "zbase_datastore_main_tpl");
 
@@ -25,22 +29,49 @@ ZBase.registerView((function() {
         "zbase_datastore_logfiles_list_tpl");
 
     var tbody = $("tbody", page);
-    logfiles.forEach(function(def) {
-      var url = "/a/logviewer/" + def.name;
-      var tr = document.createElement("tr");
-      tr.innerHTML = 
-          "<td><a href='" + url + "'>" + def.name + "</a></td>" +
-          "<td><a href='" + url + "'>&mdash;</a></td>" +
-          "<td><a href='" + url + "'>&mdash;</a></td>";
-
-      $.onClick(tr, function() { $.navigateTo(url); });
-      tbody.appendChild(tr);
+    logfiles.forEach(function(logfile) {
+      renderRow(tbody, logfile);
     });
+
+    $.onClick($(".add_logfile_definition", page), createNewLogfile);
 
     $.replaceContent($(".datastore_viewport", layout), page);
     $.handleLinks(layout);
     $.replaceViewport(layout);
   };
+
+  var renderRow = function(tbody, logfile) {
+    var elem = $.getTemplate(
+        "views/datastore_logfiles",
+        "zbase_datastore_logfiles_list_row_tpl");
+
+    var url = "/a/logviewer/" + logfile.name;
+
+    var source_field_names = logfile.source_fields.map(function(f) {
+      return f.name;
+    });
+
+    var row_field_names = logfile.row_fields.map(function(f) {
+      return f.name;
+    });
+
+    $(".logfile_name a", elem).innerHTML = logfile.name;
+    $(".logfile_name a", elem).href = url;
+    $(".edit_link", elem).href = url;
+    $(".logfile_format", elem).innerHTML = $.wrapText(logfile.regex);
+    $(".logfile_source_fields", elem).innerHTML = source_field_names.join(", ");
+    $(".logfile_row_fields", elem).innerHTML = row_field_names.join(", ");
+
+    console.log(logfile);
+    //var tr = document.createElement("tr");
+    //tr.innerHTML = 
+    //    "<td><a href='" + url + "'>" + logfile.name + "</a></td>" +
+    //    "<td><a href='" + url + "'>&mdash;</a></td>" +
+    //    "<td><a href='" + url + "'>&mdash;</a></td>";
+
+    //$.onClick(elem, function() { $.navigateTo(url); });
+    tbody.appendChild(elem);
+  }
 
   return {
     name: "datastore_logfiles",
