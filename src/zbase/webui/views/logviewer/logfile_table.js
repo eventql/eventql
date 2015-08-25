@@ -13,6 +13,18 @@ var LogfileTable = function(rows) {
     $.replaceContent(elem, tpl);
   }
 
+  var wrapText = function(str) {
+    var new_str = "";
+    var partlen = 10;
+
+    for (var pos = 0; pos < str.length; pos += partlen) {
+      if (pos > 0) new_str += "&#8203;"
+      new_str += $.escapeHTML(str.substr(pos, partlen));
+    }
+
+    return new_str;
+  }
+
   // FIXME combine the three renderRow methods below into 1 or 2 methods
 
   var renderRow = function(tbody, row) {
@@ -36,10 +48,10 @@ var LogfileTable = function(rows) {
     tr.innerHTML =
         "<td class='fold_icon'><i class='fa'></i></td><td class='time'>" +
         DateUtil.printTimestamp(row.time) +
-        "</td><td><span>" + row.raw + "</span></td>";
+        "</td><td><span>" + wrapText(row.raw) + "</span></td>";
 
     row.columns.forEach(function(column) {
-      folded_tr.innerHTML += "<td>" + column + "</td>";
+      folded_tr.innerHTML += "<td>" + wrapText(column) + "</td>";
     });
 
     tbody.appendChild(tr);
@@ -64,13 +76,13 @@ var LogfileTable = function(rows) {
       DateUtil.printTimestamp(row.time) +"</td>";
 
     row.columns.forEach(function(column) {
-      tr.innerHTML += "<td><span>" + column + "</span></td>";
+      tr.innerHTML += "<td><span>" + wrapText(column) + "</span></td>";
     });
 
     folded_tr.className = "folded";
     folded_tr.innerHTML = 
       "<td colspan='" + (row.columns.length + 2) + "'><span>" +
-      row.raw + "</span></td>";
+      wrapText(row.raw) + "</span></td>";
     tbody.appendChild(tr);
     tbody.appendChild(folded_tr);
 
@@ -89,7 +101,7 @@ var LogfileTable = function(rows) {
         "<td class='time'>" + DateUtil.printTimestamp(row.time) +"</td>";
 
     row.columns.forEach(function(column) {
-      tr.innerHTML += "<td><span>" + column + "</span></td>";
+      tr.innerHTML += "<td><span>" + wrapText(column) + "</span></td>";
     });
 
     tbody.appendChild(tr);
