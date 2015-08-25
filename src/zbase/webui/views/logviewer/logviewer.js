@@ -33,7 +33,7 @@ ZBase.registerView((function() {
   var executeQuery = function() {
     showLoadingBar(0);
 
-    var params = getServerQueryParams();
+    var params = getQueryParams();
     console.log(params);
 
     var url = "/api/v1/logfiles/scan?" + $.buildQueryString(params);
@@ -104,19 +104,6 @@ ZBase.registerView((function() {
 
     return params;
   };
-
-  // FIXME remove this fn as soon as the server understands filter_type/filter
-  var getServerQueryParams = function() {
-    var params = getQueryParams();
-
-    if (params.filter_type || params.filter) {
-      params["filter_" + params.filter_type] = params.filter;
-      delete params.filter_type;
-      delete params.filter;
-    }
-
-    return params;
-  }
 
   var setQueryParams = function(url) {
     // param: logfile
