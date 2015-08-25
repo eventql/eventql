@@ -110,6 +110,7 @@ ZBase.registerView((function() {
 
     //pagination
     setPagination();
+    setHistoricalDataHint();
   };
 
   var setLogfileParam = function(logfile) {
@@ -152,7 +153,7 @@ ZBase.registerView((function() {
 
   var setColumnsParam = function(logfile, columns_str) {
     if (!columns_str) {
-      columns_str = "__all__";
+      columns_str = "__raw__";
     }
 
     var dropdown = $(".zbase_logviewer .columns_control");
@@ -162,9 +163,8 @@ ZBase.registerView((function() {
 
     {
       var item = document.createElement("z-dropdown-item");
-      item.innerHTML = "<z-checkbox></z-checkbox> " + "All Columns";
-      item.setAttribute("data-mutually-exclusive", "yes");
-      item.setAttribute("data-value", "__all__");
+      item.innerHTML = "<z-checkbox></z-checkbox> " + "Raw Logline";
+      item.setAttribute("data-value", "__raw__");
       items.appendChild(item);
     }
 
@@ -184,8 +184,10 @@ ZBase.registerView((function() {
     } else {
       $(".zbase_logviewer .z-pager .prev").removeAttribute("data-disabled");
     }
+  }
 
-    // FIXME: display "showing historical data" message if 
+  var setHistoricalDataHint = function() {
+    // FIXME: display "showing historical data" message
   }
 
   var submitControls = function() {
