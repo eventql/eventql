@@ -6,7 +6,6 @@ var QueryProgressWidget = (function() {
         "zbase_query_progress_main_tpl");
 
     var pbar = $("z-progressbar", tpl);
-    console.log("render progress", data);
     if (data && data.status == "running") {
       pbar.setAttribute("data-progress", (data.progress * 100));
       pbar.setAttribute("data-label", data.message);

@@ -44,7 +44,7 @@ ZBase.registerView((function() {
       query_mgr.close("sql_query");
 
       var data = JSON.parse(e.data);
-      renderQueryResult(data.results);
+      //renderQueryResult(data.results);
     });
 
     query.addEventListener('error', function(e) {
