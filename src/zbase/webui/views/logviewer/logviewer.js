@@ -211,6 +211,8 @@ ZBase.registerView((function() {
     }
 
     ++pagination_depth;
+    $(".zbase_logviewer .z-pager .prev").removeAttribute("data-disabled");
+
     var params = getQueryParams();
     params.time = next_page_time;
     var url = "/a/logviewer?" + $.buildQueryString(params);
@@ -222,7 +224,10 @@ ZBase.registerView((function() {
       return;
     }
 
-    --pagination_depth;
+    if (--pagination_depth == 0) {
+      $(".zbase_logviewer .z-pager .prev").setAttribute("data-disabled", true);
+    }
+
     $.navigateBack();
   };
 
