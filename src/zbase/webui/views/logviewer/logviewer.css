@@ -83,7 +83,7 @@
   font-weight: 500;
   line-height: 38px;
   padding: 0;
-  width: 134px;
+  width: 142px;
 }
 
 .zbase_logviewer .logviewer_pane .control_pane a.link {
@@ -357,7 +357,7 @@
 }
 
 .zbase_logviewer .z-pager {
-  margin-top: 5px;
+  margin-top: 4px;
   font-size: 13px;
 }
 
