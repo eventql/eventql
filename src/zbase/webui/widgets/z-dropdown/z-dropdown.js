@@ -209,43 +209,33 @@ var DropDownComponent = function() {
 
     var innerHTML = "";
 
-    //multi selectable dropdown
-    if (this.classList.contains('checkbox')) {
-      var selected_items = this.querySelectorAll("z-dropdown-item[data-selected]");
+    var selected_items = this.querySelectorAll("z-dropdown-item[data-selected]");
+    if (selected_items.length == 0) {
+      var preselection = this.getAttribute('data-preselected');
+      //set preselected item
+      if (preselection) {
+        var preselected_item = this.findItemByValue(preselection);
 
-      for (var i = 0; i < selected_items.length; i++) {
-        if (i > 0) {
-          innerHTML += ", ";
+        preselected_item.setAttribute('data-selected', 'selected');
+        innerHTML = preselected_item.innerHTML;
+
+      } else {
+        //z-dropdown has initial not selectable header
+        if (header.innerHTML.length > 0) {
+          return;
         }
 
-        innerHTML += selected_items[i].innerText || selected_items[i].textContent;
+        //set first z-dropdown-item as header value
+        var first_item = this.querySelector("z-dropdown-item");
+        if (first_item) {
+          innerHTML = first_item.innerHTML;
+        }
       }
+    }
 
-    } else {
-
-      var selected_item = this.querySelector("z-dropdown-item[data-selected]");
+    if (selected_items.length == 1) {
+      var selected_item = selected_items[0];
       if (!selected_item) {
-
-        var preselection = this.getAttribute('data-preselected');
-        //set preselected item
-        if (preselection) {
-          var preselected_item = this.findItemByValue(preselection);
-
-          preselected_item.setAttribute('data-selected', 'selected');
-          innerHTML = preselected_item.innerHTML;
-
-        } else {
-          //z-dropdown has initial not selectable header
-          if (header.innerHTML.length > 0) {
-            return;
-          }
-
-          //set first z-dropdown-item as header value
-          var first_item = this.querySelector("z-dropdown-item");
-          if (first_item) {
-            innerHTML = first_item.innerHTML;
-          }
-        }
       } else {
         //set items input value as html header
         if (selected_item.hasAttribute('data-input-select')) {
@@ -256,6 +246,16 @@ var DropDownComponent = function() {
           //set selected_item's html as header (standard case)
           innerHTML = selected_item.innerHTML;
         }
+      }
+    }
+
+    if (selected_items.length > 1) {
+      for (var i = 0; i < selected_items.length; i++) {
+        if (i > 0) {
+          innerHTML += ", ";
+        }
+
+        innerHTML += selected_items[i].innerText || selected_items[i].textContent;
       }
     }
 
