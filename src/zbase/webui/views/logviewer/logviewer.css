@@ -29,7 +29,7 @@
 }
 
 
-.zbase_logviewer .logviewer_pane table.loading {
+.zbase_logviewer.loading .logviewer_pane table {
   opacity: 0.5;
 }
 
