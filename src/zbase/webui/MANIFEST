@@ -68,6 +68,7 @@ route {
   path_prefix: "/a/datastore"
   view: "datastore"
   require_module: "widgets/zbase-header"
+  require_module: "widgets/z-menu"
   require_module: "views/datastore"
 }
 
