@@ -47,25 +47,7 @@ ZBase.registerView((function() {
 
       if (result.length > 0) {
         showLoadingBar(data.rows_scanned);
-
-        //if (_this.isRawView()) {
-        //  _this.renderRaw(result);
-        //} else {
-        //  if (_this.raw.toString() == "true") {
-        //    _this.renderStructuredWithRaw(result);
-        //  } else {
-        //    _this.renderStructured(result);
-        //  }
-        //}
-
-        //if (append && data.status == "finished") {
-        //  var this_time = result[result.length - 1].time;
-        //  var last_time = _this.page_times[_this.page_times.length - 1];
-
-        //  if (this_time < last_time) {
-        //    _this.page_times.push(this_time);
-        //  }
-        //}
+        renderResult(result);
       }
 
       if (data.status == "finished") {
@@ -79,9 +61,7 @@ ZBase.registerView((function() {
     query.addEventListener("error", function(e) {
       query_mgr.close("logfile_query");
       hideLoadingBar();
-      //Analytics.displayMessage("error");
-      //_this.hideLoader();
-      //_this.pane.querySelector("[name='result_pane']").classList.add("hidden");
+      renderError();
     });
   };
 
@@ -275,6 +255,14 @@ ZBase.registerView((function() {
     $.handleLinks(page);
     $.replaceViewport(page);
   };
+
+  var renderResult = function(result) {
+    console.log("render result", result);
+  }
+
+  var renderError = function(error) {
+    console.log("render error", error);
+  }
 
   var showLoadingBar = function(num_rows) {
     $(".zbase_logviewer table").classList.add("loading");
