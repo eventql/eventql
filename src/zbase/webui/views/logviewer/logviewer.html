@@ -52,19 +52,6 @@
 
               <label>End Time</label>
               <input class="z-input clickable time_control" readonly />
-
-              <div class="date_select_widget hidden" id="logviewer_date_widget">
-                <div class="time_inputs">
-                  <input data-factor="3600000" data-value="hours" class="left z-input" maxlength="2" placeholder="00"/>
-                  <b class="left">:</b>
-                  <input data-factor="60000" data-value="minutes" class="left z-input"  maxlength="2" placeholder="00"/>
-                  <b class="left">:</b>
-                  <input data-factor="1000" data-value="seconds" class="left z-input"  maxlength="2" placeholder="00"/>
-                </div>
-
-                <z-calendar data-selectable="past"></z-calendar>
-                <z-button class='primary right' data-action="set-logviewer-date">Apply</z-button>
-              </div>
             </div>
 
             <div class="control_pane_item">
