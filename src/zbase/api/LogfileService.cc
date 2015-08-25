@@ -51,14 +51,11 @@ void LogfileService::scanLogfile(
   }
 
   auto table_name = "logs." + logfile_name;
-  auto lookback_limit = params.end_time() - 1 * kMicrosPerDay;
+  auto lookback_limit = params.end_time() - 90 * kMicrosPerDay;
   auto partition_size = 10 * kMicrosPerMinute;
 
   result->setColumns(
       Vector<String>(params.columns().begin(), params.columns().end()));
-
-
-  iputs("end time: $0", UnixTime(params.end_time()));
 
   for (auto time = params.end_time();
       time > lookback_limit;
@@ -68,8 +65,6 @@ void LogfileService::scanLogfile(
         table_name,
         time,
         partition_size);
-
-    iputs("scan time: $0 -> $1", UnixTime(time), partition.toString());
 
     if (repl_->hasLocalReplica(partition)) {
       scanLocalLogfilePartition(
@@ -283,7 +278,6 @@ bool LogfileService::scanRemoteLogfilePartition(
   auto res = http_client.executeRequest(req);
 
   if (res.statusCode() == 404) {
-    iputs("got 404..", 1);
     return false;
   }
 
@@ -293,7 +287,6 @@ bool LogfileService::scanRemoteLogfilePartition(
         "received non-200 response: $0", res.body().toString());
   }
 
-  iputs("got $0 bytes", res.body().size());
   auto body_is = BufferInputStream::fromBuffer(&res.body());
   result->decode(body_is.get());
 
