@@ -1,24 +1,19 @@
 ZBase.registerView((function() {
 
-  var init = function(params) {
-    renderLayout();
-    openPage(params.path);
-  };
-
-  var renderLayout = function() {
+  var render = function(url) {
     var page = $.getTemplate("views/datastore", "zbase_datastore_main_tpl");
+
+    var menu = DatastoreMenu();
+    menu.render($(".datastore_sidebar", page));
+
     $.handleLinks(page);
     $.replaceViewport(page);
-  }
-
-  var openPage = function(path) {
-
-  }
+  };
 
   return {
     name: "datastore",
-    loadView: init,
+    loadView: function(params) { render(params.url); },
     unloadView: function() {},
-    handleNavigationChange: openPage
+    handleNavigationChange: render
   };
 })());
