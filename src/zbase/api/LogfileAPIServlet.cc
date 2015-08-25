@@ -269,10 +269,10 @@ void LogfileAPIServlet::scanLogfile(
     }
   }
 
-  String filter_sql_str;
-  if (URI::getParam(params, "filter_sql", &filter_sql_str)) {
+  String filter_str;
+  if (URI::getParam(params, "filter", &filter_str) && !filter_str.empty()) {
+    scan_params.set_condition(filter_str);
     scan_params.set_scan_type(LOGSCAN_SQL);
-    scan_params.set_condition(filter_sql_str);
   }
 
   LogfileScanResult result(limit);
