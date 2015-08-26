@@ -18,6 +18,7 @@ ZBase.registerView((function() {
         render();
         updateQuery(params.path);
       } else {
+        render();
         renderError("Server Error");
       }
 
