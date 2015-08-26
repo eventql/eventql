@@ -26,7 +26,6 @@ ZBase.registerView((function() {
     });
   };
 
-
   var destroy = function() {
     query_mgr.closeAll();
   };
