@@ -55,7 +55,10 @@ protected:
       const http::HTTPRequest* req,
       http::HTTPResponse* res);
 
-  void renderDocument(const Document& doc, Buffer* buf);
+  void renderDocument(
+      const AnalyticsSession& session,
+      const Document& doc,
+      Buffer* buf);
 
   DocumentDB* docdb_;
 };

@@ -70,7 +70,7 @@ void DocumentDBServlet::fetchDocument(
   Document doc;
   if (docdb_->fetchDocument(session.customer(), session.userid(), uuid, &doc)) {
     Buffer buf;
-    renderDocument(doc, &buf);
+    renderDocument(session, doc, &buf);
     res->setStatus(http::kStatusOK);
     res->addBody(buf);
   } else {
@@ -115,7 +115,7 @@ void DocumentDBServlet::createDocument(
   docdb_->createDocument(session.customer(), doc);
 
   Buffer buf;
-  renderDocument(doc, &buf);
+  renderDocument(session, doc, &buf);
   res->setStatus(http::kStatusCreated);
   res->addBody(buf);
 }
@@ -240,7 +240,10 @@ void DocumentDBServlet::listDocuments(
   res->addBody(buf);
 }
 
-void DocumentDBServlet::renderDocument(const Document& doc, Buffer* buf) {
+void DocumentDBServlet::renderDocument(
+    const AnalyticsSession& session,
+    const Document& doc,
+    Buffer* buf) {
   json::JSONOutputStream json(BufferOutputStream::fromBuffer(buf));
 
   json.beginObject();
@@ -251,6 +254,14 @@ void DocumentDBServlet::renderDocument(const Document& doc, Buffer* buf) {
 
   json.addObjectEntry("name");
   json.addString(doc.name());
+  json.addComma();
+
+  json.addObjectEntry("is_readable");
+  json.addBool(isDocumentReadableForUser(doc, session.userid()));
+  json.addComma();
+
+  json.addObjectEntry("is_writable");
+  json.addBool(isDocumentWritableForUser(doc, session.userid()));
   json.addComma();
 
   json.addObjectEntry("content");
