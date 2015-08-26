@@ -26,6 +26,7 @@ ZBase.registerView((function() {
     });
   };
 
+
   var destroy = function() {
     query_mgr.closeAll();
   };
@@ -146,7 +147,7 @@ ZBase.registerView((function() {
 
     var time_control = $(".zbase_logviewer .time_control");
     time_control.setAttribute("data-timestamp", end_time);
-    time_control.value = DateUtil.printTimestamp(end_time);
+    var datepicker = new DateTimePicker($(".zbase_logviewer .time_control"));
   }
 
   var setFilterParam = function(filter_type, filter) {
@@ -299,6 +300,9 @@ ZBase.registerView((function() {
     $(".filter_control", page).addEventListener("keyup", function(e) {
       if (e.keyCode == 13) submitControls();
     });
+    $(".time_control", page).addEventListener("z-datetimepicker-change", function() {
+      console.log("datetimepicker change");
+    }, false);
 
     $.handleLinks(page);
     $.replaceViewport(page);
