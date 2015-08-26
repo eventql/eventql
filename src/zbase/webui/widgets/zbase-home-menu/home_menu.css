@@ -15,10 +15,5 @@
 @media (max-width: 1700px) {
   .zbase_home_menu_sidebar z-menu {
     width: 162px;
-    margin-left: 10px;
-  }
-
-  .zbase_home_menu_content {
-    padding-right: 20px;
   }
 }
