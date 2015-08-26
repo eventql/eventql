@@ -430,9 +430,16 @@ $.handleLinks = function(elem) {
 $.onClick = function(elem, fn) {
   elem.addEventListener("click", function(e) {
     e.preventDefault();
+    e.stopPropagation();
     fn();
     return false;
   });
+};
+
+$.stopEventPropagation = function(elem, event_name) {
+  elem.addEventListener(event_name, function(e) {
+    e.stopPropagation();
+  }, false);
 };
 
 $.httpPost = function(url, request, callback) {
