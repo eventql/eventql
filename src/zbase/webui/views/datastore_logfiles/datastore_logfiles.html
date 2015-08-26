@@ -1,24 +1,45 @@
 <template id="zbase_datastore_logfiles_list_tpl">
-  <div class="zbase_datastore_logfiles">
-    <h2 class="pagetitle">Datastore <i class="sep"></i> <em>Logfiles</em></h2>
-
-    <table class="z-table" data-clickable= name="logfile_table">
-      <thead>
-        <tr>
-          <th style="width: 250px;">Logfile</th>
-          <th>Settings</th>
-          <th style="width: 54px;"></th>
-        </tr>
-      </thead>
-
-      <tbody></tbody>
-    </table>
-
-    <div class="add_logfile_definition">
-      <a class="link">
-        <i class="fa fa-plus"></i> Add Logfile Definition
-      </a>
+  <section class='zbase_page_title small'>
+    <div>
+      <zbase-breadcrumbs>
+        <zbase-breadcrumbs-section>
+          <a href="/a/">Datastore</a>
+        </zbase-breadcrumbs-section>
+        <zbase-breadcrumbs-section>
+          <a href="/a/">-</a>
+        </zbase-breadcrumbs-section>
+      </zbase-breadcrumbs>
     </div>
+  </section>
+
+  <div class="zbase_content_pane zbase_datastore fullwidth">
+    <div class="zbase_home_menu_sidebar">
+    </div>
+
+    <div class="zbase_home_menu_content">
+      <div class="zbase_datastore_logfiles">
+        <h2 class="pagetitle">Datastore <i class="sep"></i> <em>Logfiles</em></h2>
+
+        <table class="z-table" data-clickable= name="logfile_table">
+          <thead>
+            <tr>
+              <th style="width: 250px;">Logfile</th>
+              <th>Settings</th>
+              <th style="width: 54px;"></th>
+            </tr>
+          </thead>
+
+          <tbody></tbody>
+        </table>
+
+        <div class="add_logfile_definition">
+          <a class="link">
+            <i class="fa fa-plus"></i> Add Logfile Definition
+          </a>
+        </div>
+      </div>
+    </div>
+
   </div>
 </template>
 

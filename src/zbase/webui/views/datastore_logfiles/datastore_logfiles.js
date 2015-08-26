@@ -19,14 +19,12 @@ ZBase.registerView((function() {
   }
 
   var render = function(logfiles) {
-    var layout = $.getTemplate("views/datastore", "zbase_datastore_main_tpl");
-
-    var menu = DatastoreMenu();
-    menu.render($(".datastore_sidebar", layout));
-
     var page = $.getTemplate(
         "views/datastore_logfiles",
         "zbase_datastore_logfiles_list_tpl");
+
+    var menu = HomeMenu();
+    menu.render($(".zbase_home_menu_sidebar", page));
 
     var tbody = $("tbody", page);
     logfiles.forEach(function(logfile) {
@@ -35,9 +33,8 @@ ZBase.registerView((function() {
 
     $.onClick($(".add_logfile_definition", page), createNewLogfile);
 
-    $.replaceContent($(".datastore_viewport", layout), page);
-    $.handleLinks(layout);
-    $.replaceViewport(layout);
+    $.handleLinks(page);
+    $.replaceViewport(page);
   };
 
   var renderRow = function(tbody, logfile) {
