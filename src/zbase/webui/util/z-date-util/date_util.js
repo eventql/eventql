@@ -356,3 +356,27 @@ DateUtil.appendLeadingZero = function (num) {
   return (num > 9)? num : "0" + num;
 };
 
+
+//FIXME implement different time zones
+DateUtil.getHours = function(time, timezone) {
+  var start_of_day = DateUtil.getStartOfDay(time);
+  return Math.floor((time - start_of_day) / DateUtil.millisPerHour);
+};
+
+//FIXME implement different time zones
+DateUtil.getMinutes = function(time, timezone) {
+  time -= DateUtil.getStartOfDay(time);
+  var hours = Math.floor(time / DateUtil.millisPerHour);
+  time -= hours * DateUtil.millisPerHour;
+  return Math.floor(time / DateUtil.millisPerMinute);
+};
+
+//FIXME implement different time zones
+DateUtil.getSeconds = function(time, timezone) {
+  time -= DateUtil.getStartOfDay(time);
+  var hours = Math.floor(time / DateUtil.millisPerHour);
+  time -= hours * DateUtil.millisPerHour;
+  var minutes = Math.floor(time / DateUtil.millisPerMinute);
+  time -= minutes * DateUtil.millisPerMinute;
+  return Math.floor(time / DateUtil.millisPerSecond);
+};
