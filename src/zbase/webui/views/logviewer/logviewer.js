@@ -286,7 +286,7 @@ ZBase.registerView((function() {
 
   var render = function() {
     var page = $.getTemplate("views/logviewer", "zbase_logviewer_main_tpl");
-    var datepicker = new DateTimePicker($(".time_control", page));
+    var datepicker = DateTimePicker($(".time_control", page));
 
     $(".logfile_control", page).addEventListener("change", submitControls);
     $(".filter_type_control", page).addEventListener("change", submitControls);

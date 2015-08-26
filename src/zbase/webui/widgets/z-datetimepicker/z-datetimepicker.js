@@ -3,18 +3,38 @@
   * require_module: "z-button"
  **/
 function DateTimePicker(input) {
-  var tpl = $.getTemplate("widgets/z-datetimepicker", "z-datetimepicker-base-tpl");
   var flyout;
 
-  if (input.tagName == "Z-INPUT") {
-    input = input.querySelector("input");
-  }
+  var init = function() {
+    if (input.tagName == "Z-INPUT") {
+      input = input.querySelector("input");
+    }
 
-  // no input provided
-  if (input.tagName != "INPUT") {
-    console.log("DateTimePicker Error: no input provided");
-    return;
-  }
+    // no input provided
+    if (input.tagName != "INPUT") {
+      console.log("DateTimePicker Error: no input provided");
+      return;
+    }
+
+    var tpl = $.getTemplate("widgets/z-datetimepicker", "z-datetimepicker-base-tpl");
+    // insert tpl after input
+    input.style.cursor = "pointer";
+    input.parentNode.insertBefore(tpl, input.nextSibling);
+    //FIXME
+    flyout = input.nextElementSibling;
+
+    // don't close on click within datetimepicker
+    flyout.addEventListener("click", function(e) {
+      e.stopPropagation();
+    }, false);
+
+    flyout.querySelector("button").addEventListener("click", function(e) {
+      apply();
+    }, false);
+
+    handleVisibility();
+    controlTimeInput();
+  };
 
   var hide = function() {
     flyout.removeAttribute("data-active");
@@ -43,25 +63,7 @@ function DateTimePicker(input) {
 
   /*************************** PRIVATE **********************************/
 
-  var init = function() {
-    // insert tpl after input
-    input.style.cursor = "pointer";
-    input.parentNode.insertBefore(tpl, input.nextSibling);
-    //FIXME
-    flyout = input.nextElementSibling;
-
-    // don't close on click within datetimepicker
-    flyout.addEventListener("click", function(e) {
-      e.stopPropagation();
-    }, false);
-
-    flyout.querySelector("button").addEventListener("click", function(e) {
-      apply();
-    }, false);
-
-    handleVisibility();
-    controlTimeInput();
-  };
+  
 
 
   var handleVisibility = function() {
