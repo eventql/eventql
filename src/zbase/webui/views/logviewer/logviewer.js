@@ -17,7 +17,6 @@ ZBase.registerView((function() {
         logfiles = JSON.parse(r.response).logfile_definitions;
         render();
         updateQuery(params.path);
-        initDatePicker();
       } else {
         render();
         renderError("Server Error");
@@ -148,6 +147,7 @@ ZBase.registerView((function() {
 
     var time_control = $(".zbase_logviewer .time_control");
     time_control.setAttribute("data-timestamp", end_time);
+    time_control.value = DateUtil.printTimestamp(end_time);
   };
 
   var setFilterParam = function(filter_type, filter) {
@@ -305,6 +305,7 @@ ZBase.registerView((function() {
 
     $.handleLinks(page);
     $.replaceViewport(page);
+    initDatePicker();
   };
 
   var renderResult = function(result) {
