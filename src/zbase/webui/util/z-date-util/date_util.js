@@ -337,7 +337,7 @@ DateUtil.getTimestampFromTimeObj = function(timeObj) {
 };
 
 DateUtil.printTimestamp = function(ts) {
-  var date = new Date(Math.floor(ts / 1000));
+  var date = new Date(ts);
   return [
     date.getFullYear(), "-",
     DateUtil.appendLeadingZero(date.getMonth() + 1), "-",
@@ -379,4 +379,11 @@ DateUtil.getSeconds = function(time, timezone) {
   var minutes = Math.floor(time / DateUtil.millisPerMinute);
   time -= minutes * DateUtil.millisPerMinute;
   return Math.floor(time / DateUtil.millisPerSecond);
+};
+
+DateUtil.fromCivilTime = function(hours, minutes, seconds) {
+  return (
+      parseInt(hours, 10) * this.millisPerHour +
+      parseInt(minutes, 10) * this.millisPerMinute +
+      parseInt(seconds, 10) * this.millisPerSecond);
 };
