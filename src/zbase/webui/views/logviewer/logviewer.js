@@ -80,7 +80,6 @@ ZBase.registerView((function() {
       params.time = time;
     }
 
-
     // param: filter
     params.filter_type = $(".zbase_logviewer .filter_type_control").getValue();
     params.filter = $(".zbase_logviewer .filter_control").getValue();
@@ -305,7 +304,6 @@ ZBase.registerView((function() {
 
     $.handleLinks(page);
     $.replaceViewport(page);
-    initDatePicker();
   };
 
   var renderResult = function(result) {
