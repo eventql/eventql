@@ -22,7 +22,7 @@ ZBase.registerView((function() {
     var query_id = path.substr(kPathPrefix.length);
 
     $.showLoader();
-    $.httpGet("/api/v1/documents/sql_queries/" + query_id, function(r) {
+    $.httpGet("/api/v1/documents/" + query_id, function(r) {
       if (r.status == 200) {
         var doc = JSON.parse(r.response);
         renderQueryEditor(doc);
@@ -70,12 +70,12 @@ ZBase.registerView((function() {
     // setup docsync
     docsync = DocSync(
         getDocument,
-        "/api/v1/documents/sql_queries/" + doc.uuid,
+        "/api/v1/documents/" + doc.uuid,
         $(".zbase_sql_editor_infobar", page));
 
     // code editor
     var editor = $("z-codeeditor", page);
-    editor.setValue(doc.sql_query);
+    editor.setValue(doc.content);
     editor.addEventListener("execute", function(e) {
       executeQuery(e.value);
       docsync.saveDocument();
@@ -93,8 +93,8 @@ ZBase.registerView((function() {
     initDocumentNameEditModal();
 
     // execute query
-    if (doc.sql_query.length > 0) {
-      executeQuery(doc.sql_query);
+    if (doc.content.length > 0) {
+      executeQuery(doc.content);
     }
   };
 
