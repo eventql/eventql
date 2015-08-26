@@ -6,8 +6,15 @@
 var DateTimePicker = function(input) {
   var tpl = $.getTemplate("widgets/z-datetimepicker", "z-datetimepicker-base-tpl");
   var proto;
+
   if (input.tagName == "Z-INPUT") {
     input = input.querySelector("input");
+  }
+
+  // no input provided
+  if (input.tagName != "INPUT") {
+    console.log("DateTimePicker Error: no input provided");
+    return;
   }
 
   this.hide = function() {
