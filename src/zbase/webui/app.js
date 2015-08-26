@@ -491,6 +491,18 @@ $.escapeHTML = function(str) {
   return div.innerHTML;
 };
 
+$.wrapText = function(str) {
+  var new_str = "";
+  var partlen = 10;
+
+  for (var pos = 0; pos < str.length; pos += partlen) {
+    if (pos > 0) new_str += "&#8203;"
+    new_str += $.escapeHTML(str.substr(pos, partlen));
+  }
+
+  return new_str;
+}
+
 document.getTemplateByID = function(template_name) {
   return $.getTemplate("", template_name);
 };
