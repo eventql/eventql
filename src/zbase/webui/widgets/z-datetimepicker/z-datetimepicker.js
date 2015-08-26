@@ -47,7 +47,7 @@ function DateTimePicker(input) {
 
     var pos = input.getBoundingClientRect();
     flyout.setAttribute("data-active", "active");
-    flyout.style.top = (pos.top + pos.height) + "px";
+    flyout.style.top = (pos.top + pos.height + window.scrollY) + "px";
     flyout.style.left = (pos.left - (flyout.offsetWidth - pos.width) / 2) + "px";
 
     window.addEventListener("click", hideFlyout, false);
