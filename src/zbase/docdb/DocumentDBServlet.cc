@@ -256,6 +256,10 @@ void DocumentDBServlet::renderDocument(
   json->addString(doc.name());
   json->addComma();
 
+  json->addObjectEntry("type");
+  json->addString(doc.type());
+  json->addComma();
+
   json->addObjectEntry("acl_policy");
   json->addString(DocumentACLPolicy_Name(doc.acl_policy()));
   json->addComma();
