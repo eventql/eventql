@@ -1,3 +1,8 @@
+/**
+  * require_module: "z-calendar"
+  * require_module: "z-button"
+ **/
+
 var DateTimePicker = function(input) {
   if (input.tagName == "Z-INPUT") {
     input = input.querySelector("input");
