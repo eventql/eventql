@@ -30,14 +30,7 @@ public:
 
 protected:
 
-  void documentREST(
-      const URI& uri,
-      const AnalyticsSession& session,
-      const http::HTTPRequest* req,
-      http::HTTPResponse* res);
-
   void fetchDocument(
-      const String& type,
       const SHA1Hash& uuid,
       const URI& uri,
       const AnalyticsSession& session,
@@ -45,14 +38,12 @@ protected:
       http::HTTPResponse* res);
 
   void createDocument(
-      const String& type,
       const URI& uri,
       const AnalyticsSession& session,
       const http::HTTPRequest* req,
       http::HTTPResponse* res);
 
   void updateDocument(
-      const String& type,
       const SHA1Hash& uuid,
       const URI& uri,
       const AnalyticsSession& session,
@@ -64,24 +55,7 @@ protected:
       const http::HTTPRequest* req,
       http::HTTPResponse* res);
 
-  void fetchSQLQuery(
-      const SHA1Hash& uuid,
-      const AnalyticsSession& session,
-      const http::HTTPRequest* req,
-      http::HTTPResponse* res);
-
-  void createSQLQuery(
-      const AnalyticsSession& session,
-      const http::HTTPRequest* req,
-      http::HTTPResponse* res);
-
-  void updateSQLQuery(
-      const SHA1Hash& uuid,
-      const AnalyticsSession& session,
-      const http::HTTPRequest* req,
-      http::HTTPResponse* res);
-
-  void renderSQLQuery(const Document& doc, Buffer* buf);
+  void renderDocument(const Document& doc, Buffer* buf);
 
   DocumentDB* docdb_;
 };
