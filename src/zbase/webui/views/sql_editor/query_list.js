@@ -52,8 +52,8 @@ ZBase.registerView((function() {
       var url = "/a/sql/" + doc.uuid;
       var tr = document.createElement("tr");
       tr.innerHTML = 
-          "<td><a href='" + url + "'>" + doc.name + "</a></td>" +
-          "<td><a href='" + url + "'>" + doc.type + "</a></td>" +
+          "<td><a href='" + url + "'>" + $.escapeHTML(doc.name) + "</a></td>" +
+          "<td><a href='" + url + "'>" + $.escapeHTML(doc.type) + "</a></td>" +
           "<td><a href='" + url + "'>&mdash;</a></td>";
 
       $.onClick(tr, function() { $.navigateTo(url); });
