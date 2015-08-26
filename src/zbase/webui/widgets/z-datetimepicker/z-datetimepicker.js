@@ -4,19 +4,45 @@
  **/
 
 var DateTimePicker = function(input) {
+  var tpl = $.getTemplate("widgets/z-datetimepicker", "z-datetimepicker-base-tpl");
+  var proto;
   if (input.tagName == "Z-INPUT") {
     input = input.querySelector("input");
   }
 
-  this.render = function() {
-    var tpl = $.getTemplate("widgets/z-datetimepicker", "z-datetimepicker-base-tpl");
+  this.hide = function() {
+    proto.removeAttribute("data-active");
+  };
+
+  this.show = function() {
+    proto.setAttribute("data-active", "active");
+  };
+
+  /*************************** PRIVATE **********************************/
+  this.__render = function() {
     // insert tpl after input
     input.parentNode.insertBefore(tpl, input.nextSibling);
+    //FIXME
+    proto = input.nextElementSibling;
+
+    this.__handleVisibility();
+  };
+
+  this.__handleVisibility = function() {
+    var _this = this;
+
+    input.addEventListener("click", function() {
+      if (proto.hasAttribute("data-active")) {
+        _this.hide();
+      } else {
+        _this.show();
+      }
+    }, false);
   };
 
 
   // init
-  this.render();
+  this.__render();
 };
 
 /*var proto = Object.create(HTMLElement.prototype);
