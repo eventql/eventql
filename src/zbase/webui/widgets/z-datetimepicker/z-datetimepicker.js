@@ -5,7 +5,7 @@
 
 var DateTimePicker = function(input) {
   var tpl = $.getTemplate("widgets/z-datetimepicker", "z-datetimepicker-base-tpl");
-  var widget;
+  var flyout;
 
   if (input.tagName == "Z-INPUT") {
     input = input.querySelector("input");
@@ -18,7 +18,7 @@ var DateTimePicker = function(input) {
   }
 
   this.hide = function() {
-    widget.removeAttribute("data-active");
+    flyout.removeAttribute("data-active");
 
     window.removeEventListener("click", this.__onWindowClick, false);
   };
@@ -28,10 +28,10 @@ var DateTimePicker = function(input) {
     this.__onTimeChange();
     var pos = input.getBoundingClientRect();
 
-    // set widget top and left position
-    widget.style.top = (pos.top + pos.height) + "px";
-    widget.setAttribute("data-active", "active");
-    widget.style.left = (pos.left - (widget.offsetWidth - pos.width) / 2) + "px";
+    // set flyout top and left position
+    flyout.style.top = (pos.top + pos.height) + "px";
+    flyout.setAttribute("data-active", "active");
+    flyout.style.left = (pos.left - (flyout.offsetWidth - pos.width) / 2) + "px";
 
     var _this = this;
     this.__onWindowClick = function() {
@@ -49,15 +49,15 @@ var DateTimePicker = function(input) {
     input.style.cursor = "pointer";
     input.parentNode.insertBefore(tpl, input.nextSibling);
     //FIXME
-    widget = input.nextElementSibling;
+    flyout = input.nextElementSibling;
     var _this = this;
 
     // don't close on click within datetimepicker
-    widget.addEventListener("click", function(e) {
+    flyout.addEventListener("click", function(e) {
       e.stopPropagation();
     }, false);
 
-    widget.querySelector("button").addEventListener("click", function(e) {
+    flyout.querySelector("button").addEventListener("click", function(e) {
       _this.__apply();
     }, false);
 
@@ -71,7 +71,7 @@ var DateTimePicker = function(input) {
 
     input.addEventListener("click", function(e) {
       e.stopPropagation();
-      if (widget.hasAttribute("data-active")) {
+      if (flyout.hasAttribute("data-active")) {
         _this.hide();
       } else {
         _this.show();
@@ -81,7 +81,7 @@ var DateTimePicker = function(input) {
 
 
   this.__controlTimeInput = function() {
-    var inputs = widget.querySelectorAll("input");
+    var inputs = flyout.querySelectorAll("input");
     var _this = this;
 
     for (var i = 0; i < inputs.length; i++) {
@@ -139,8 +139,8 @@ var DateTimePicker = function(input) {
     time_control.classList.remove("error");
 
     // if only correct input values enable apply button
-    if (widget.querySelector("input.error") == null) {
-      widget.querySelector("button").removeAttribute("data-state");
+    if (flyout.querySelector("input.error") == null) {
+      flyout.querySelector("button").removeAttribute("data-state");
     }
   };
 
@@ -149,18 +149,18 @@ var DateTimePicker = function(input) {
     time_control.classList.add("error");
 
     // disable apply button
-    widget.querySelector("button").setAttribute("data-state", "disabled");
+    flyout.querySelector("button").setAttribute("data-state", "disabled");
   };
 
 
   this.__renderErrorMessage = function() {
-    widget.querySelector("z-datetimepicker-error")
+    flyout.querySelector("z-datetimepicker-error")
       .setAttribute("data-active", "active");
   };
 
 
   this.__removeErrorMessage = function() {
-    widget.querySelector("z-datetimepicker-error")
+    flyout.querySelector("z-datetimepicker-error")
         .removeAttribute("data-active", "active");
   };
 
@@ -179,15 +179,15 @@ var DateTimePicker = function(input) {
       date.getTimezoneOffset() * DateUtil.millisPerMinute;
 
     // set z-calendar selection
-    widget.querySelector("z-calendar").setAttribute("data-selected", utc_day_start);
+    flyout.querySelector("z-calendar").setAttribute("data-selected", utc_day_start);
     // set hours input value
-    widget.querySelector("input[data-value='hours']").value =
+    flyout.querySelector("input[data-value='hours']").value =
       DateUtil.appendLeadingZero(date.getHours());
     // set minutes input value
-    widget.querySelector("input[data-value='minutes']").value =
+    flyout.querySelector("input[data-value='minutes']").value =
       DateUtil.appendLeadingZero(date.getMinutes());
     // set seconds input value
-    widget.querySelector("input[data-value='seconds']").value =
+    flyout.querySelector("input[data-value='seconds']").value =
       DateUtil.appendLeadingZero(date.getSeconds());
   };
 
@@ -195,10 +195,10 @@ var DateTimePicker = function(input) {
   // get selected datetime as timestamp
   this.__getTimeValue = function() {
     var timestamp = DateUtil.parseTimestamp(
-      parseInt(widget.querySelector("z-calendar")
+      parseInt(flyout.querySelector("z-calendar")
         .getAttribute("data-selected"), 10));
 
-    var inputs = widget.querySelectorAll("input");
+    var inputs = flyout.querySelectorAll("input");
     for (var i = 0; i < inputs.length; i++) {
       var value = parseInt(inputs[i].value, 10);
       timestamp += value * parseInt(inputs[i].getAttribute("data-factor"), 10);
