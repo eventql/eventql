@@ -67,10 +67,18 @@ void DocumentDBServlet::fetchDocument(
     const AnalyticsSession& session,
     const http::HTTPRequest* req,
     http::HTTPResponse* res) {
+  const auto& params = uri.queryParams();
+
+  bool return_content = true;
+  String no_content_str;
+  if (URI::getParam(params, "no_content", &no_content_str)) {
+    return_content = false;
+  }
+
   Document doc;
   if (docdb_->fetchDocument(session.customer(), session.userid(), uuid, &doc)) {
     Buffer buf;
-    renderDocument(session, doc, &buf);
+    renderDocument(session, doc, &buf, return_content);
     res->setStatus(http::kStatusOK);
     res->addBody(buf);
   } else {
@@ -243,7 +251,8 @@ void DocumentDBServlet::listDocuments(
 void DocumentDBServlet::renderDocument(
     const AnalyticsSession& session,
     const Document& doc,
-    Buffer* buf) {
+    Buffer* buf,
+    bool return_content /* = true */) {
   json::JSONOutputStream json(BufferOutputStream::fromBuffer(buf));
 
   json.beginObject();
@@ -262,10 +271,12 @@ void DocumentDBServlet::renderDocument(
 
   json.addObjectEntry("is_writable");
   json.addBool(isDocumentWritableForUser(doc, session.userid()));
-  json.addComma();
 
-  json.addObjectEntry("content");
-  json.addString(doc.content());
+  if (return_content) {
+    json.addComma();
+    json.addObjectEntry("content");
+    json.addString(doc.content());
+  }
 
   json.endObject();
 }
