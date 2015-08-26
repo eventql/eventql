@@ -17,6 +17,7 @@ ZBase.registerView((function() {
         logfiles = JSON.parse(r.response).logfile_definitions;
         render();
         updateQuery(params.path);
+        initDatePicker();
       } else {
         render();
         renderError("Server Error");
@@ -147,8 +148,7 @@ ZBase.registerView((function() {
 
     var time_control = $(".zbase_logviewer .time_control");
     time_control.setAttribute("data-timestamp", end_time);
-    var datepicker = new DateTimePicker($(".zbase_logviewer .time_control"));
-  }
+  };
 
   var setFilterParam = function(filter_type, filter) {
     if (!filter_type) {
@@ -297,12 +297,11 @@ ZBase.registerView((function() {
     $(".z-pager .prev", page).addEventListener("click", goToPreviousPage);
     $(".go_to_recent a", page).addEventListener("click", goToMostRecentPage);
     $(".filter_control", page).addEventListener("change", submitControls);
+    $(".time_control", page).addEventListener(
+      "z-datetimepicker-change", submitControls);
     $(".filter_control", page).addEventListener("keyup", function(e) {
       if (e.keyCode == 13) submitControls();
     });
-    $(".time_control", page).addEventListener("z-datetimepicker-change", function() {
-      console.log("datetimepicker change");
-    }, false);
 
     $.handleLinks(page);
     $.replaceViewport(page);
@@ -334,6 +333,10 @@ ZBase.registerView((function() {
   var hideLoadingBar = function() {
     $(".zbase_logviewer").classList.remove("loading");
     $(".zbase_logviewer .loglines_loading_bar").classList.add("hidden");
+  };
+
+  var initDatePicker = function() {
+    var datepicker = new DateTimePicker($(".zbase_logviewer .time_control"));
   };
 
   return {
