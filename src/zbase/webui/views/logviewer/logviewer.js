@@ -143,7 +143,6 @@ ZBase.registerView((function() {
       end_time = default_end_time;
     }
 
-    var time_control = $(".zbase_logviewer .time_control");
     datepicker.setTime(Math.floor(end_time / 1000));
   };
 
