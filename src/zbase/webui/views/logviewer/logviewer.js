@@ -287,6 +287,7 @@ ZBase.registerView((function() {
 
   var render = function() {
     var page = $.getTemplate("views/logviewer", "zbase_logviewer_main_tpl");
+    var datepicker = new DateTimePicker($(".time_control", page));
 
     $(".logfile_control", page).addEventListener("change", submitControls);
     $(".filter_type_control", page).addEventListener("change", submitControls);
@@ -333,10 +334,6 @@ ZBase.registerView((function() {
   var hideLoadingBar = function() {
     $(".zbase_logviewer").classList.remove("loading");
     $(".zbase_logviewer .loglines_loading_bar").classList.add("hidden");
-  };
-
-  var initDatePicker = function() {
-    var datepicker = new DateTimePicker($(".zbase_logviewer .time_control"));
   };
 
   return {
