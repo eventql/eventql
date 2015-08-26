@@ -78,7 +78,8 @@ void DocumentDBServlet::fetchDocument(
   Document doc;
   if (docdb_->fetchDocument(session.customer(), session.userid(), uuid, &doc)) {
     Buffer buf;
-    renderDocument(session, doc, &buf, return_content);
+    json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
+    renderDocument(session, doc, &json, return_content);
     res->setStatus(http::kStatusOK);
     res->addBody(buf);
   } else {
@@ -123,7 +124,8 @@ void DocumentDBServlet::createDocument(
   docdb_->createDocument(session.customer(), doc);
 
   Buffer buf;
-  renderDocument(session, doc, &buf);
+  json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
+  renderDocument(session, doc, &json);
   res->setStatus(http::kStatusCreated);
   res->addBody(buf);
 }
@@ -217,25 +219,16 @@ void DocumentDBServlet::listDocuments(
   docdb_->listDocuments(
       session.customer(),
       session.userid(),
-      [&i, &json, &session] (const Document& doc) -> bool {
+      [this, &i, &json, &session] (const Document& doc) -> bool {
     if (++i > 1) {
       json.addComma();
     }
 
-    json.beginObject();
-
-    json.addObjectEntry("uuid");
-    json.addString(doc.uuid());
-    json.addComma();
-
-    json.addObjectEntry("name");
-    json.addString(doc.name());
-    json.addComma();
-
-    json.addObjectEntry("type");
-    json.addString(doc.type());
-
-    json.endObject();
+    renderDocument(
+        session,
+        doc,
+        &json,
+        false);
 
     return true;
   });
@@ -251,38 +244,48 @@ void DocumentDBServlet::listDocuments(
 void DocumentDBServlet::renderDocument(
     const AnalyticsSession& session,
     const Document& doc,
-    Buffer* buf,
+    json::JSONOutputStream* json,
     bool return_content /* = true */) {
-  json::JSONOutputStream json(BufferOutputStream::fromBuffer(buf));
+  json->beginObject();
 
-  json.beginObject();
+  json->addObjectEntry("uuid");
+  json->addString(doc.uuid());
+  json->addComma();
 
-  json.addObjectEntry("uuid");
-  json.addString(doc.uuid());
-  json.addComma();
+  json->addObjectEntry("name");
+  json->addString(doc.name());
+  json->addComma();
 
-  json.addObjectEntry("name");
-  json.addString(doc.name());
-  json.addComma();
+  json->addObjectEntry("acl_policy");
+  json->addString(DocumentACLPolicy_Name(doc.acl_policy()));
+  json->addComma();
 
-  json.addObjectEntry("acl_policy");
-  json.addString(DocumentACLPolicy_Name(doc.acl_policy()));
-  json.addComma();
+  json->addObjectEntry("is_readable");
+  json->addBool(isDocumentReadableForUser(doc, session.userid()));
+  json->addComma();
 
-  json.addObjectEntry("is_readable");
-  json.addBool(isDocumentReadableForUser(doc, session.userid()));
-  json.addComma();
+  json->addObjectEntry("is_writable");
+  json->addBool(isDocumentWritableForUser(doc, session.userid()));
+  json->addComma();
 
-  json.addObjectEntry("is_writable");
-  json.addBool(isDocumentWritableForUser(doc, session.userid()));
+  json->addObjectEntry("ctime");
+  json->addInteger(doc.ctime());
+  json->addComma();
+
+  json->addObjectEntry("mtime");
+  json->addInteger(doc.mtime());
+  json->addComma();
+
+  json->addObjectEntry("atime");
+  json->addInteger(doc.atime());
 
   if (return_content) {
-    json.addComma();
-    json.addObjectEntry("content");
-    json.addString(doc.content());
+    json->addComma();
+    json->addObjectEntry("content");
+    json->addString(doc.content());
   }
 
-  json.endObject();
+  json->endObject();
 }
 
 } // namespace zbase
