@@ -145,7 +145,7 @@ ZBase.registerView((function() {
     }
 
     var time_control = $(".zbase_logviewer .time_control");
-    datepicker.setTime(Math.floor(end_time));
+    datepicker.setTime(Math.floor(end_time / 1000));
   };
 
   var setFilterParam = function(filter_type, filter) {
