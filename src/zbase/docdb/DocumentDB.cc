@@ -7,6 +7,7 @@
  * permission is obtained.
  */
 #include "stx/protobuf/msg.h"
+#include "stx/wallclock.h"
 #include "zbase/docdb/DocumentDB.h"
 
 using namespace stx;
@@ -114,6 +115,7 @@ void DocumentDB::updateDocument(
 
   auto doc = msg::decode<Document>(data, data_size);
   fn(&doc);
+  doc.set_mtime(WallClock::unixMicros());
 
   auto doc_buf = msg::encode<Document>(doc);
   txn->update(db_key.data(), db_key.size(), doc_buf->data(), doc_buf->size());
