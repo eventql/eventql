@@ -265,6 +265,10 @@ void DocumentDBServlet::renderDocument(
   json.addString(doc.name());
   json.addComma();
 
+  json.addObjectEntry("acl_policy");
+  json.addString(DocumentACLPolicy_Name(doc.acl_policy()));
+  json.addComma();
+
   json.addObjectEntry("is_readable");
   json.addBool(isDocumentReadableForUser(doc, session.userid()));
   json.addComma();
