@@ -13,7 +13,12 @@ ZBase.registerView((function() {
   }
 
   var createNewQuery = function() {
-    $.httpPost("/api/v1/documents/sql_queries", "", function(r) {
+    var postdata = $.buildQueryString({
+      name: "Unnamed SQL Query",
+      type: "sql_query"
+    });
+
+    $.httpPost("/api/v1/documents", postdata, function(r) {
       if (r.status == 201) {
         var response = JSON.parse(r.response);
         $.navigateTo("/a/sql/" + response.uuid);
