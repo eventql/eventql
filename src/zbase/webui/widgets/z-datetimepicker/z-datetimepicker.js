@@ -1,13 +1,22 @@
-var DateTimePickerComponent = function() {
-  console.log("date time picker");
-  this.createdCallback = function() {
-    
+var DateTimePicker = function(input) {
+  if (input.tagName == "Z-INPUT") {
+    input = input.querySelector("input");
+  }
+
+  this.render = function() {
+    var tpl = $.getTemplate("widgets/z-datetimepicker", "z-datetimepicker-base-tpl");
+    // insert tpl after input
+    input.parentNode.insertBefore(tpl, input.nextSibling);
   };
+
+
+  // init
+  this.render();
 };
 
-var proto = Object.create(HTMLElement.prototype);
-DateTimePickerComponent.apply(proto);
-document.registerElement("z-datetimepicker", { prototype: proto });
+/*var proto = Object.create(HTMLElement.prototype);
+DateTimePicker.apply(proto);
+document.registerElement("z-datetimepicker", { prototype: proto });*/
 /*
 
     this.handleTimeControl = function() {
