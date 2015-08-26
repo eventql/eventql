@@ -336,16 +336,17 @@ DateUtil.getTimestampFromTimeObj = function(timeObj) {
   return timestamp;
 };
 
-DateUtil.printTimestamp = function(ts) {
+//FIXME implement different time zones
+DateUtil.printTimestamp = function(ts, timezone) {
   var date = new Date(ts);
   return [
     date.getFullYear(), "-",
-    DateUtil.appendLeadingZero(date.getMonth() + 1), "-",
-    DateUtil.appendLeadingZero(date.getDate()), " ",
-    DateUtil.appendLeadingZero(date.getHours()), ":",
-    DateUtil.appendLeadingZero(date.getMinutes()), ":",
-    DateUtil.appendLeadingZero(date.getSeconds()), ".",
-    DateUtil.appendLeadingZero(date.getMilliseconds())].join("");
+    this.appendLeadingZero(date.getMonth() + 1), "-",
+    this.appendLeadingZero(date.getDate()), " ",
+    this.appendLeadingZero(this.getHours(ts, timezone)), ":",
+    this.appendLeadingZero(this.getMinutes(ts, timezone)), ":",
+    this.appendLeadingZero(this.getSeconds(ts, timezone)), ".",
+    this.appendLeadingZero(this.getMilliSeconds(ts, timezone))].join("");
 };
 
 DateUtil.appendLeadingZero = function (num) {
@@ -359,26 +360,37 @@ DateUtil.appendLeadingZero = function (num) {
 
 //FIXME implement different time zones
 DateUtil.getHours = function(time, timezone) {
-  var start_of_day = DateUtil.getStartOfDay(time);
-  return Math.floor((time - start_of_day) / DateUtil.millisPerHour);
+  var start_of_day = this.getStartOfDay(time);
+  return Math.floor((time - start_of_day) / this.millisPerHour);
 };
 
 //FIXME implement different time zones
 DateUtil.getMinutes = function(time, timezone) {
-  time -= DateUtil.getStartOfDay(time);
-  var hours = Math.floor(time / DateUtil.millisPerHour);
-  time -= hours * DateUtil.millisPerHour;
-  return Math.floor(time / DateUtil.millisPerMinute);
+  time -= this.getStartOfDay(time);
+  var hours = Math.floor(time / this.millisPerHour);
+  time -= hours * this.millisPerHour;
+  return Math.floor(time / this.millisPerMinute);
 };
 
 //FIXME implement different time zones
 DateUtil.getSeconds = function(time, timezone) {
-  time -= DateUtil.getStartOfDay(time);
-  var hours = Math.floor(time / DateUtil.millisPerHour);
-  time -= hours * DateUtil.millisPerHour;
-  var minutes = Math.floor(time / DateUtil.millisPerMinute);
-  time -= minutes * DateUtil.millisPerMinute;
-  return Math.floor(time / DateUtil.millisPerSecond);
+  time -= this.getStartOfDay(time);
+  var hours = Math.floor(time / this.millisPerHour);
+  time -= hours * this.millisPerHour;
+  var minutes = Math.floor(time / this.millisPerMinute);
+  time -= minutes * this.millisPerMinute;
+  return Math.floor(time / this.millisPerSecond);
+};
+
+//FIXME implement different time zones
+DateUtil.getMilliSeconds = function(time, timezone) {
+  time -= this.getStartOfDay(time);
+  var hours = Math.floor(time / this.millisPerHour);
+  time -= hours * this.millisPerHour;
+  var minutes = Math.floor(time / this.millisPerMinute);
+  time -= minutes * this.millisPerMinute;
+  var seconds = Math.floor(time / this.millisPerSecond);
+  return time - seconds * this.millisPerSecond;
 };
 
 DateUtil.fromCivilTime = function(hours, minutes, seconds) {
