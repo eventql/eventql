@@ -58,7 +58,8 @@ protected:
   void renderDocument(
       const AnalyticsSession& session,
       const Document& doc,
-      Buffer* buf);
+      Buffer* buf,
+      bool return_content = true);
 
   DocumentDB* docdb_;
 };
