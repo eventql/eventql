@@ -2,8 +2,7 @@
   * require_module: "z-calendar"
   * require_module: "z-button"
  **/
-
-var DateTimePicker = function(input) {
+function DateTimePicker(input) {
   var tpl = $.getTemplate("widgets/z-datetimepicker", "z-datetimepicker-base-tpl");
   var flyout;
 
@@ -17,15 +16,15 @@ var DateTimePicker = function(input) {
     return;
   }
 
-  this.hide = function() {
+  var hide = function() {
     flyout.removeAttribute("data-active");
 
-    window.removeEventListener("click", this.__onWindowClick, false);
+    window.removeEventListener("click", onWindowClick, false);
   };
 
 
-  this.show = function() {
-    this.__onTimeChange();
+  var show = function() {
+    onTimeChange();
     var pos = input.getBoundingClientRect();
 
     // set flyout top and left position
@@ -33,24 +32,23 @@ var DateTimePicker = function(input) {
     flyout.setAttribute("data-active", "active");
     flyout.style.left = (pos.left - (flyout.offsetWidth - pos.width) / 2) + "px";
 
-    var _this = this;
-    this.__onWindowClick = function() {
-      _this.hide();
-    };
 
-    window.addEventListener("click", this.__onWindowClick, false);
+    window.addEventListener("click", onWindowClick, false);
+  };
+
+  var onWindowClick = function() {
+    hide();
   };
 
 
   /*************************** PRIVATE **********************************/
 
-  this.__init = function() {
+  var init = function() {
     // insert tpl after input
     input.style.cursor = "pointer";
     input.parentNode.insertBefore(tpl, input.nextSibling);
     //FIXME
     flyout = input.nextElementSibling;
-    var _this = this;
 
     // don't close on click within datetimepicker
     flyout.addEventListener("click", function(e) {
@@ -58,31 +56,29 @@ var DateTimePicker = function(input) {
     }, false);
 
     flyout.querySelector("button").addEventListener("click", function(e) {
-      _this.__apply();
+      apply();
     }, false);
 
-    this.__handleVisibility();
-    this.__controlTimeInput();
+    handleVisibility();
+    controlTimeInput();
   };
 
 
-  this.__handleVisibility = function() {
-    var _this = this;
+  var handleVisibility = function() {
 
     input.addEventListener("click", function(e) {
       e.stopPropagation();
       if (flyout.hasAttribute("data-active")) {
-        _this.hide();
+        hide();
       } else {
-        _this.show();
+        show();
       }
     }, false);
   };
 
 
-  this.__controlTimeInput = function() {
+  var controlTimeInput = function() {
     var inputs = flyout.querySelectorAll("input");
-    var _this = this;
 
     for (var i = 0; i < inputs.length; i++) {
       inputs[i].addEventListener("blur", function() {
@@ -97,17 +93,17 @@ var DateTimePicker = function(input) {
             var value = parseInt(this.value, 10);
             // non-integer value
             if (isNaN(value)) {
-              _this.__renderTimeControlError(this);
+              renderTimeControlError(this);
               return;
             }
-            this.value = Fnord.appendLeadingZero(value);
+            this.value = DateUtil.appendLeadingZero(value);
             break;
 
           case 2:
             // non-integer value
             if (isNaN(parseInt(this.value[0], 10)) ||
                 isNaN(parseInt(this.value[1], 10))) {
-              _this.__renderTimeControlError(this);
+              renderTimeControlError(this);
               return;
             }
             break;
@@ -117,25 +113,25 @@ var DateTimePicker = function(input) {
         if (this.getAttribute("data-factor") == "3600") {
           // hours value > 24
           if (value > 23) {
-            _this.__renderTimeControlError(this);
+            renderTimeControlError(this);
             return;
           }
         } else {
           // minutes or seconds value > 59
           if (value > 59) {
-            _this.__renderTimeControlError(this);
+           renderTimeControlError(this);
             return;
           }
         }
 
         // correct input value
-        _this.__removeTimeControlError(this);
+        removeTimeControlError(this);
       }, false);
     }
   };
 
 
-  this.__removeTimeControlError = function(time_control) {
+  var removeTimeControlError = function(time_control) {
     time_control.classList.remove("error");
 
     // if only correct input values enable apply button
@@ -145,7 +141,7 @@ var DateTimePicker = function(input) {
   };
 
 
-  this.__renderTimeControlError = function(time_control) {
+  var renderTimeControlError = function(time_control) {
     time_control.classList.add("error");
 
     // disable apply button
@@ -153,20 +149,20 @@ var DateTimePicker = function(input) {
   };
 
 
-  this.__renderErrorMessage = function() {
+  var renderErrorMessage = function() {
     flyout.querySelector("z-datetimepicker-error")
       .setAttribute("data-active", "active");
   };
 
 
-  this.__removeErrorMessage = function() {
+  var removeErrorMessage = function() {
     flyout.querySelector("z-datetimepicker-error")
         .removeAttribute("data-active", "active");
   };
 
 
   // set time value and human formatted time string
-  this.__onTimeChange = function() {
+  var onTimeChange = function() {
     var timestamp = Math.floor(
       parseInt(input.getAttribute("data-timestamp"), 10));
 
@@ -193,7 +189,7 @@ var DateTimePicker = function(input) {
 
 
   // get selected datetime as timestamp
-  this.__getTimeValue = function() {
+  var getTimeValue = function() {
     var timestamp = DateUtil.parseTimestamp(
       parseInt(flyout.querySelector("z-calendar")
         .getAttribute("data-selected"), 10));
@@ -210,29 +206,29 @@ var DateTimePicker = function(input) {
 
 
   // checks if the selected date is in the past
-  this.__isValidTimeValue = function(timestamp) {
+  var isValidTimeValue = function(timestamp) {
     // error -> future datetime
     if (Math.floor(timestamp / 1000) > Date.now()) {
-      this.__renderErrorMessage();
+      renderErrorMessage();
       return false;
     }
 
-    this.__removeErrorMessage();
+    removeErrorMessage();
     return true;
   };
 
 
-  this.__apply = function() {
-    var timestamp = this.__getTimeValue();
+  var apply = function() {
+    var timestamp = getTimeValue();
 
     // invalid timestamp
-    if (!this.__isValidTimeValue(timestamp)) {
+    if (!isValidTimeValue(timestamp)) {
       return;
     }
 
     input.setAttribute("data-timestamp", timestamp);
-    this.__onTimeChange();
-    this.hide();
+    onTimeChange();
+    hide();
 
     // fire change event on input
     var evt = new CustomEvent("z-datetimepicker-change");
@@ -240,6 +236,9 @@ var DateTimePicker = function(input) {
   };
 
 
-  // init
-  this.__init();
+  init();
+  return {
+    show: show,
+    hide: hide
+  };
 };
