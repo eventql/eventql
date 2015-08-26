@@ -29,6 +29,11 @@
   display: inline-block;
 }
 
+.zbase_logviewer .control_pane z-input  input {
+  border: 1px solid #bdbdbd;
+  box-shadow: inset 1px 1px 1px rgba(0,0,0,.1);
+}
+
 
 .zbase_logviewer.loading .logviewer_pane table {
   opacity: 0.5;
