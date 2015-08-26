@@ -13,12 +13,12 @@ ZBase.registerView((function() {
     query_mgr = EventSourceHandler();
 
     $.httpGet("/api/v1/logfiles", function(r) {
+      render();
+
       if (r.status == 200) {
         logfiles = JSON.parse(r.response).logfile_definitions;
-        render();
         updateQuery(params.path);
       } else {
-        render();
         renderError("Server Error");
       }
 
