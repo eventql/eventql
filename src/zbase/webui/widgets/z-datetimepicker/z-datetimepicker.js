@@ -25,6 +25,8 @@ var DateTimePicker = function(input) {
 
 
   this.show = function() {
+    var pos = input.getBoundingClientRect();
+    console.log(pos);
     proto.setAttribute("data-active", "active");
 
     var _this = this;
@@ -40,10 +42,17 @@ var DateTimePicker = function(input) {
 
   this.__init = function() {
     // insert tpl after input
+    input.style.cursor = "pointer";
     input.parentNode.insertBefore(tpl, input.nextSibling);
     //FIXME
     proto = input.nextElementSibling;
     var _this = this;
+
+    // don't close on click within datetimepicker
+    proto.addEventListener("click", function(e) {
+      e.stopPropagation();
+    }, false);
+
     proto.querySelector("button").addEventListener("click", function(e) {
       _this.__apply();
     }, false);
