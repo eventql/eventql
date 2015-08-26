@@ -5,7 +5,7 @@
 
 var DateTimePicker = function(input) {
   var tpl = $.getTemplate("widgets/z-datetimepicker", "z-datetimepicker-base-tpl");
-  var proto;
+  var widget;
 
   if (input.tagName == "Z-INPUT") {
     input = input.querySelector("input");
@@ -18,7 +18,7 @@ var DateTimePicker = function(input) {
   }
 
   this.hide = function() {
-    proto.removeAttribute("data-active");
+    widget.removeAttribute("data-active");
 
     window.removeEventListener("click", this.__onWindowClick, false);
   };
@@ -28,9 +28,9 @@ var DateTimePicker = function(input) {
     var pos = input.getBoundingClientRect();
 
     // set widget top and left position
-    proto.style.top = (pos.top + pos.height) + "px";
-    proto.setAttribute("data-active", "active");
-    proto.style.left = (pos.left - (proto.offsetWidth - pos.width) / 2) + "px";
+    widget.style.top = (pos.top + pos.height) + "px";
+    widget.setAttribute("data-active", "active");
+    widget.style.left = (pos.left - (widget.offsetWidth - pos.width) / 2) + "px";
 
     var _this = this;
     this.__onWindowClick = function() {
@@ -48,15 +48,15 @@ var DateTimePicker = function(input) {
     input.style.cursor = "pointer";
     input.parentNode.insertBefore(tpl, input.nextSibling);
     //FIXME
-    proto = input.nextElementSibling;
+    widget = input.nextElementSibling;
     var _this = this;
 
     // don't close on click within datetimepicker
-    proto.addEventListener("click", function(e) {
+    widget.addEventListener("click", function(e) {
       e.stopPropagation();
     }, false);
 
-    proto.querySelector("button").addEventListener("click", function(e) {
+    widget.querySelector("button").addEventListener("click", function(e) {
       _this.__apply();
     }, false);
 
@@ -72,7 +72,7 @@ var DateTimePicker = function(input) {
 
     input.addEventListener("click", function(e) {
       e.stopPropagation();
-      if (proto.hasAttribute("data-active")) {
+      if (widget.hasAttribute("data-active")) {
         _this.hide();
       } else {
         _this.show();
@@ -82,7 +82,7 @@ var DateTimePicker = function(input) {
 
 
   this.__controlTimeInput = function() {
-    var inputs = proto.querySelectorAll("input");
+    var inputs = widget.querySelectorAll("input");
     var _this = this;
 
     for (var i = 0; i < inputs.length; i++) {
@@ -139,8 +139,8 @@ var DateTimePicker = function(input) {
   this.__removeTimeControlError = function(time_control) {
     time_control.classList.remove("error");
     // if only correct input values enable apply button
-    if (proto.querySelector("input.error") == null) {
-      proto.querySelector("button").removeAttribute("data-state");
+    if (widget.querySelector("input.error") == null) {
+      widget.querySelector("button").removeAttribute("data-state");
     }
   };
 
@@ -148,7 +148,7 @@ var DateTimePicker = function(input) {
   this.__renderTimeControlError = function(time_control) {
     time_control.classList.add("error");
     // disable apply button
-    proto.querySelector("button").setAttribute("data-state", "disabled");
+    widget.querySelector("button").setAttribute("data-state", "disabled");
   };
 
 
@@ -166,15 +166,15 @@ var DateTimePicker = function(input) {
       date.getTimezoneOffset() * DateUtil.millisPerMinute;
 
     // set z-calendar selection
-    proto.querySelector("z-calendar").setAttribute("data-selected", utc_day_start);
+    widget.querySelector("z-calendar").setAttribute("data-selected", utc_day_start);
     // set hours input value
-    proto.querySelector("input[data-value='hours']").value =
+    widget.querySelector("input[data-value='hours']").value =
       DateUtil.appendLeadingZero(date.getHours());
     // set minutes input value
-    proto.querySelector("input[data-value='minutes']").value =
+    widget.querySelector("input[data-value='minutes']").value =
       DateUtil.appendLeadingZero(date.getMinutes());
     // set seconds input value
-    proto.querySelector("input[data-value='seconds']").value =
+    widget.querySelector("input[data-value='seconds']").value =
       DateUtil.appendLeadingZero(date.getSeconds());
   };
 
@@ -182,10 +182,10 @@ var DateTimePicker = function(input) {
   // get selected datetime as timestamp
   this.__getTimeValue = function() {
     var timestamp = DateUtil.parseTimestamp(
-      parseInt(proto.querySelector("z-calendar")
+      parseInt(widget.querySelector("z-calendar")
         .getAttribute("data-selected"), 10));
 
-    var inputs = proto.querySelectorAll("input");
+    var inputs = widget.querySelectorAll("input");
     for (var i = 0; i < inputs.length; i++) {
       var value = parseInt(inputs[i].value, 10);
       timestamp += value * parseInt(inputs[i].getAttribute("data-factor"), 10);
