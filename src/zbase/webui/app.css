@@ -499,6 +499,59 @@ zbase-breadcrumbs zbase-breadcrumbs-section[data-link]:hover,
   color: #00b2f3;
 }
 
+/**
+ * z-menu.zbase_default_menu
+ */
+z-menu.zbase_default_menu z-menu-section z-menu-item.link,
+z-menu.zbase_default_menu z-menu-section z-menu-title {
+  margin-left: 0;
+}
+
+z-menu.zbase_default_menu z-menu-section z-menu-title a {
+  text-transform: uppercase;
+  font-size: 90%;
+  font-weight: 500;
+  letter-spacing: 0.8px;
+  margin-bottom: 10px;
+}
+
+z-menu.zbase_default_menu z-menu-section z-menu-item.link {
+  padding-left: 0;
+}
+
+z-menu.zbase_default_menu z-menu-section z-menu-item a {
+  font-size: 109%;
+  color: #464646;
+  padding: 0 10px;
+  line-height: 34px;
+  font-weight: 400;
+  padding-left: 15px;
+}
+
+z-menu.zbase_default_menu z-menu-item[data-active] {
+  background: #f0f6f8;
+  box-shadow: none;
+}
+
+z-menu.zbase_default_menu z-menu-item[data-active] a {
+  color: #1c99d6;
+}
+
+z-menu.zbase_default_menu z-menu-section {
+  margin: 0;
+  padding: 0;
+}
+
+z-menu.zbase_default_menu z-menu-section {
+  border-bottom: 2px solid #eee;
+  padding-bottom: 18px;
+  padding-top: 2px;
+}
+
+z-menu.zbase_default_menu z-menu-section:last-child {
+  border-bottom: none;
+}
+
 /* fontawesome */
 .fa {
   display: inline-block;
