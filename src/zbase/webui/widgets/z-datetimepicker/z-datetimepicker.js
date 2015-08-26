@@ -26,8 +26,11 @@ var DateTimePicker = function(input) {
 
   this.show = function() {
     var pos = input.getBoundingClientRect();
-    console.log(pos);
+
+    // set widget top and left position
+    proto.style.top = (pos.top + pos.height) + "px";
     proto.setAttribute("data-active", "active");
+    proto.style.left = (pos.left - (proto.offsetWidth - pos.width) / 2) + "px";
 
     var _this = this;
     this.__onWindowClick = function() {
