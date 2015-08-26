@@ -100,6 +100,17 @@ route {
 }
 
 route {
+  path_match: "/a/documents"
+  view: "documents"
+  require_module: "util/z-date-util"
+  require_module: "widgets/zbase-header"
+  require_module: "widgets/zbase-home-menu"
+  require_module: "widgets/z-menu"
+  require_module: "widgets/z-table"
+  require_module: "views/documents"
+}
+
+route {
   is_public: true
   path_match: "/a/login"
   view: "login"
