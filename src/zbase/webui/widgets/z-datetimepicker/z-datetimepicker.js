@@ -36,36 +36,6 @@ function DateTimePicker(input) {
     controlTimeInput();
   };
 
-  var hide = function() {
-    flyout.removeAttribute("data-active");
-
-    window.removeEventListener("click", onWindowClick, false);
-  };
-
-
-  var show = function() {
-    onTimeChange();
-    var pos = input.getBoundingClientRect();
-
-    // set flyout top and left position
-    flyout.style.top = (pos.top + pos.height) + "px";
-    flyout.setAttribute("data-active", "active");
-    flyout.style.left = (pos.left - (flyout.offsetWidth - pos.width) / 2) + "px";
-
-
-    window.addEventListener("click", onWindowClick, false);
-  };
-
-  var onWindowClick = function() {
-    hide();
-  };
-
-
-  /*************************** PRIVATE **********************************/
-
-  
-
-
   var handleVisibility = function() {
 
     input.addEventListener("click", function(e) {
@@ -235,6 +205,31 @@ function DateTimePicker(input) {
     // fire change event on input
     var evt = new CustomEvent("z-datetimepicker-change");
     input.dispatchEvent(evt);
+  };
+
+
+  var hide = function() {
+    flyout.removeAttribute("data-active");
+
+    window.removeEventListener("click", onWindowClick, false);
+  };
+
+
+  var show = function() {
+    onTimeChange();
+    var pos = input.getBoundingClientRect();
+
+    // set flyout top and left position
+    flyout.style.top = (pos.top + pos.height) + "px";
+    flyout.setAttribute("data-active", "active");
+    flyout.style.left = (pos.left - (flyout.offsetWidth - pos.width) / 2) + "px";
+
+
+    window.addEventListener("click", onWindowClick, false);
+  };
+
+  var onWindowClick = function() {
+    hide();
   };
 
 
