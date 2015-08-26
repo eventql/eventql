@@ -12,10 +12,19 @@ var DateTimePicker = function(input) {
 
   this.hide = function() {
     proto.removeAttribute("data-active");
+
+    window.removeEventListener("click", this.__onWindowClick, false);
   };
 
   this.show = function() {
     proto.setAttribute("data-active", "active");
+
+    var _this = this;
+    this.__onWindowClick = function() {
+      _this.hide();
+    };
+
+    window.addEventListener("click", this.__onWindowClick, false);
   };
 
   /*************************** PRIVATE **********************************/
@@ -25,9 +34,10 @@ var DateTimePicker = function(input) {
     //FIXME
     proto = input.nextElementSibling;
     var _this = this;
-    proto.querySelector("button").addEventListener("click", function() {
+    proto.querySelector("button").addEventListener("click", function(e) {
       _this.__apply();
     }, false);
+
 
     this.__onTimeChange();
     this.__handleVisibility();
@@ -37,7 +47,8 @@ var DateTimePicker = function(input) {
   this.__handleVisibility = function() {
     var _this = this;
 
-    input.addEventListener("click", function() {
+    input.addEventListener("click", function(e) {
+      e.stopPropagation();
       if (proto.hasAttribute("data-active")) {
         _this.hide();
       } else {
@@ -94,12 +105,12 @@ var DateTimePicker = function(input) {
           }
         }
 
-
         // correct input value
         _this.__removeTimeControlError(this);
       }, false);
     }
   };
+
 
   this.__removeTimeControlError = function(time_control) {
     time_control.classList.remove("error");
@@ -109,11 +120,13 @@ var DateTimePicker = function(input) {
     }
   };
 
+
   this.__renderTimeControlError = function(time_control) {
     time_control.classList.add("error");
     // disable apply button
     proto.querySelector("button").setAttribute("data-state", "disabled");
   };
+
 
   this.__onTimeChange = function() {
     var timestamp = Math.floor(
@@ -124,9 +137,11 @@ var DateTimePicker = function(input) {
 
     timestamp = Math.floor(timestamp / 1000);
     var date = new Date(timestamp);
+    var utc_day_start = DateUtil.getStartOfDay(timestamp) +
+      date.getTimezoneOffset() * DateUtil.millisPerMinute;
 
     // set z-calendar selection
-    proto.querySelector("z-calendar").setAttribute("data-selected", timestamp);
+    proto.querySelector("z-calendar").setAttribute("data-selected", utc_day_start);
     // set hours input value
     proto.querySelector("input[data-value='hours']").value =
       DateUtil.appendLeadingZero(date.getHours());
@@ -138,13 +153,29 @@ var DateTimePicker = function(input) {
       DateUtil.appendLeadingZero(date.getSeconds());
   };
 
+  this.__getTimeValue = function() {
+    var timestamp = DateUtil.parseTimestamp(
+      parseInt(proto.querySelector("z-calendar")
+        .getAttribute("data-selected"), 10));
+
+    var inputs = proto.querySelectorAll("input");
+    for (var i = 0; i < inputs.length; i++) {
+      var value = parseInt(inputs[i].value, 10);
+      timestamp += value * parseInt(inputs[i].getAttribute("data-factor"), 10);
+    }
+
+    timestamp = timestamp * 1000;
+    return timestamp;
+  };
+
   this.__apply = function() {
-    
+    input.setAttribute("data-timestamp", this.__getTimeValue());
+    this.__onTimeChange();
+    this.hide();
 
     // fire change event on input
     var evt = new CustomEvent("z-datetimepicker-change");
     input.dispatchEvent(evt);
-    console.log("apply");
   };
 
 
@@ -152,75 +183,13 @@ var DateTimePicker = function(input) {
   this.__init();
 };
 
+
 /*var proto = Object.create(HTMLElement.prototype);
 DateTimePicker.apply(proto);
 document.registerElement("z-datetimepicker", { prototype: proto });*/
 /*
 
     this.handleTimeControl = function() {
-      var _this = this;
-      var control_input = document.getElementById("time_control");
-      var widget = document.getElementById("logviewer_date_widget");
-      var inputs = widget.querySelectorAll("input");
-      var apply_button = document.querySelector(
-        "fn-button[data-action='set-logviewer-date']");
-
-      control_input.addEventListener("click", function() {
-        if (widget.classList.contains("hidden")) {
-          widget.classList.remove("hidden");
-        } else {
-          widget.classList.add("hidden")
-        }
-      }, false);
-
-
-      for (var i = 0; i < inputs.length; i++) {
-        inputs[i].addEventListener("blur", function() {
-          switch (this.value.length) {
-            case 0:
-              this.value = "00";
-              break;
-
-            case 1:
-              var value = parseInt(this.value, 10);
-              if (isNaN(value)) {
-                this.classList.add("error");
-                apply_button.setAttribute("data-state", "disabled");
-                return;
-              }
-              this.value = Fnord.appendLeadingZero(value);
-              break;
-
-            case 2:
-              if (isNaN(parseInt(this.value[0], 10)) ||
-                  isNaN(parseInt(this.value[1], 10))) {
-                this.classList.add("error");
-                apply_button.setAttribute("data-state", "disabled");
-                return;
-              }
-          }
-
-          var value = parseInt(this.value, 10);
-          if (this.getAttribute("data-factor") == "3600") {
-            if (value > 23) {
-              this.classList.add("error");
-              apply_button.setAttribute("data-state", "disabled");
-              return;
-            }
-          } else {
-            if (value > 59) {
-              this.classList.add("error");
-              apply_button.setAttribute("data-state", "disabled");
-              return;
-            }
-          }
-
-          this.classList.remove("error");
-          if (widget.querySelector("input.error") == null) {
-            apply_button.removeAttribute("data-state");
-          }
-        }, false);
-      }
 
       apply_button.addEventListener("click", function() {
         var timestamp = DateUtil.parseTimestamp(
