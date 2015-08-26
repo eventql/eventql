@@ -16,6 +16,7 @@ var DateTimePicker = function(input) {
     window.removeEventListener("click", this.__onWindowClick, false);
   };
 
+
   this.show = function() {
     proto.setAttribute("data-active", "active");
 
@@ -27,7 +28,9 @@ var DateTimePicker = function(input) {
     window.addEventListener("click", this.__onWindowClick, false);
   };
 
+
   /*************************** PRIVATE **********************************/
+
   this.__init = function() {
     // insert tpl after input
     input.parentNode.insertBefore(tpl, input.nextSibling);
@@ -44,6 +47,7 @@ var DateTimePicker = function(input) {
     this.__controlTimeInput();
   };
 
+
   this.__handleVisibility = function() {
     var _this = this;
 
@@ -56,6 +60,7 @@ var DateTimePicker = function(input) {
       }
     }, false);
   };
+
 
   this.__controlTimeInput = function() {
     var inputs = proto.querySelectorAll("input");
@@ -128,11 +133,12 @@ var DateTimePicker = function(input) {
   };
 
 
+  // set time value and human formatted time string
   this.__onTimeChange = function() {
     var timestamp = Math.floor(
       parseInt(input.getAttribute("data-timestamp"), 10));
 
-    // set input value
+    // set input value as human formatted string
     input.value = DateUtil.printTimestamp(timestamp);
 
     timestamp = Math.floor(timestamp / 1000);
@@ -153,6 +159,8 @@ var DateTimePicker = function(input) {
       DateUtil.appendLeadingZero(date.getSeconds());
   };
 
+
+  // get selected datetime as timestamp
   this.__getTimeValue = function() {
     var timestamp = DateUtil.parseTimestamp(
       parseInt(proto.querySelector("z-calendar")
@@ -168,6 +176,7 @@ var DateTimePicker = function(input) {
     return timestamp;
   };
 
+
   this.__apply = function() {
     input.setAttribute("data-timestamp", this.__getTimeValue());
     this.__onTimeChange();
@@ -182,34 +191,3 @@ var DateTimePicker = function(input) {
   // init
   this.__init();
 };
-
-
-/*var proto = Object.create(HTMLElement.prototype);
-DateTimePicker.apply(proto);
-document.registerElement("z-datetimepicker", { prototype: proto });*/
-/*
-
-    this.handleTimeControl = function() {
-
-      apply_button.addEventListener("click", function() {
-        var timestamp = DateUtil.parseTimestamp(
-          parseInt(widget.querySelector("fn-calendar")
-            .getAttribute("data-selected"), 10));
-        for (var i = 0; i < inputs.length; i++) {
-          var value = parseInt(inputs[i].value, 10);
-          timestamp += value * parseInt(inputs[i].getAttribute("data-factor"), 10);
-        }
-
-        timestamp = timestamp * 1000;
-        _this.initial_end_time = timestamp;
-        _this.updateParams();
-        widget.classList.add("hidden");
-        history.pushState(
-          {param: "until", value: timestamp},
-          "Until",
-          UrlUtil.addOrModifyUrlParam(
-            window.location.href, "until", timestamp));
-      }, false);
-    };
-
-  */
