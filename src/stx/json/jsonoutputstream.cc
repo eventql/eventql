@@ -177,6 +177,14 @@ void JSONOutputStream::addNull() {
   output_->write("null");
 }
 
+void JSONOutputStream::addBool(bool val) {
+  if (val) {
+    addTrue();
+  } else {
+    addFalse();
+  }
+}
+
 void JSONOutputStream::addTrue() {
   output_->write("true");
 }
