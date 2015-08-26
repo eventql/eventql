@@ -25,6 +25,7 @@ var DateTimePicker = function(input) {
 
 
   this.show = function() {
+    this.__onTimeChange();
     var pos = input.getBoundingClientRect();
 
     // set widget top and left position
@@ -60,8 +61,6 @@ var DateTimePicker = function(input) {
       _this.__apply();
     }, false);
 
-
-    this.__onTimeChange();
     this.__handleVisibility();
     this.__controlTimeInput();
   };
