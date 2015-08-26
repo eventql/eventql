@@ -138,6 +138,7 @@ var DateTimePicker = function(input) {
 
   this.__removeTimeControlError = function(time_control) {
     time_control.classList.remove("error");
+
     // if only correct input values enable apply button
     if (widget.querySelector("input.error") == null) {
       widget.querySelector("button").removeAttribute("data-state");
@@ -147,8 +148,21 @@ var DateTimePicker = function(input) {
 
   this.__renderTimeControlError = function(time_control) {
     time_control.classList.add("error");
+
     // disable apply button
     widget.querySelector("button").setAttribute("data-state", "disabled");
+  };
+
+
+  this.__renderErrorMessage = function() {
+    widget.querySelector("z-datetimepicker-error")
+      .setAttribute("data-active", "active");
+  };
+
+
+  this.__removeErrorMessage = function() {
+    widget.querySelector("z-datetimepicker-error")
+        .removeAttribute("data-active", "active");
   };
 
 
@@ -196,8 +210,28 @@ var DateTimePicker = function(input) {
   };
 
 
+  // checks if the selected date is in the past
+  this.__isValidTimeValue = function(timestamp) {
+    // error -> future datetime
+    if (Math.floor(timestamp / 1000) > Date.now()) {
+      this.__renderErrorMessage();
+      return false;
+    }
+
+    this.__removeErrorMessage();
+    return true;
+  };
+
+
   this.__apply = function() {
-    input.setAttribute("data-timestamp", this.__getTimeValue());
+    var timestamp = this.__getTimeValue();
+
+    // invalid timestamp
+    if (!this.__isValidTimeValue(timestamp)) {
+      return;
+    }
+
+    input.setAttribute("data-timestamp", timestamp);
     this.__onTimeChange();
     this.hide();
 
