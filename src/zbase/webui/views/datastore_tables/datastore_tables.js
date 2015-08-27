@@ -54,7 +54,9 @@ ZBase.registerView((function() {
 
     var url = "/a/table/" + table[0];
 
-    $(".table_name", elem).innerHTML = table[0];
+    var table_name = $(".table_name", elem);
+    table_name.innerHTML = table[0];
+    table_name.href = url;
     $(".table_description", elem).innerHTML = table[1];
 
     tbody.appendChild(elem);
