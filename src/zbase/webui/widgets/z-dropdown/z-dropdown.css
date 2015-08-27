@@ -490,3 +490,16 @@ z-dropdown.input .z-dropdown-header:hover {
   box-shadow: 0 0 2px rgba(0,0,0,.1);
 }
 
+.zbase_app z-dropdown.input.primary z-dropdown-header {
+  background-color: #1c99d6;
+  background-image: -webkit-gradient(linear, left top, left bottom, from(#1c99d6), to(#1c99d6));
+  background-image: -webkit-linear-gradient(top, #1c99d6, #1c99d6);
+  background-image: -moz-linear-gradient(top, #1c99d6, #1c99d6);
+  background-image: -ms-linear-gradient(top, #1c99d6, #1c99d6);
+  background-image: -o-linear-gradient(top, #1c99d6, #1c99d6);
+  background-image: linear-gradient(top, #1c99d6, #1c99d6);
+  color: #fff;
+  box-shadow: 0 0 2px #A4C1D2;
+  border: 1px solid #3078A2;
+}
+
