@@ -92,6 +92,9 @@ ZBase.registerView((function() {
     setDocumentTitle(doc.name);
     initDocumentNameEditModal();
 
+    // document sharing settings
+    initDocumentSharingModal(page);
+
     // execute query
     if (doc.content.length > 0) {
       executeQuery(doc.content);
@@ -132,7 +135,11 @@ ZBase.registerView((function() {
       docsync.saveDocument();
       modal.close();
     });
-  }
+  };
+
+  var initDocumentSharingModal = function(page) {
+    var modal = ShareDocModal(page);
+  };
 
   var setDocumentTitle = function(title) {
     $(".zbase_sql_editor_title h2").innerHTML = $.escapeHTML(title);
