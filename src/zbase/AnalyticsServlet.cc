@@ -237,6 +237,13 @@ void AnalyticsServlet::handle(
 
 
   /* TABLES */
+  if (uri.path() == "/api/v1/tables") {
+    req_stream->readBody();
+    listTables(session, &req, &res);
+    res_stream->writeResponse(res);
+    return;
+  }
+
   if (uri.path() == "/api/v1/tables/create_table") {
     expectHTTPPost(req);
     req_stream->readBody();
@@ -633,6 +640,40 @@ void AnalyticsServlet::insertIntoMetric(
   stx::logTrace("analyticsd", "Insert into metric '$0' -> $1", metric, value);
   app_->insertMetric(session.customer(), metric, time, value);
   res->setStatus(http::kStatusCreated);
+}
+
+void AnalyticsServlet::listTables(
+    const AnalyticsSession& session,
+    const http::HTTPRequest* req,
+    http::HTTPResponse* res) {
+  Buffer buf;
+  json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
+
+  json.beginObject();
+  json.addObjectEntry("tables");
+  json.beginArray();
+
+  auto table_provider = app_->getTableProvider(session.customer());
+  size_t ntable = 0;
+  table_provider->listTables([&json, &ntable] (const csql::TableInfo table) {
+    if (++ntable > 1) {
+      json.addComma();
+    }
+
+    json.beginObject();
+
+    json.addObjectEntry("name");
+    json.addString(table.table_name);
+
+    json.endObject();
+  });
+
+  json.endArray();
+  json.endObject();
+
+  res->setStatus(http::kStatusOK);
+  res->setHeader("Content-Type", "application/json; charset=utf-8");
+  res->addBody(buf);
 }
 
 void AnalyticsServlet::createTable(
