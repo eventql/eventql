@@ -79,6 +79,7 @@ public:
   void configureFeed(const FeedConfig& cfg);
 
   RefPtr<csql::ExecutionStrategy> getExecutionStrategy(const String& customer);
+  RefPtr<csql::TableProvider> getTableProvider(const String& customer) const;
 
   void insertMetric(
       const String& customer,

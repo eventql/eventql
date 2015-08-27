@@ -97,6 +97,11 @@ protected:
       const http::HTTPRequest* req,
       http::HTTPResponse* res);
 
+  void listTables(
+      const AnalyticsSession& session,
+      const http::HTTPRequest* req,
+      http::HTTPResponse* res);
+
   void createTable(
       const AnalyticsSession& session,
       const http::HTTPRequest* req,
