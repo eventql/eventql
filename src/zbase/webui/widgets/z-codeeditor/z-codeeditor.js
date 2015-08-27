@@ -7,6 +7,10 @@ var CodeEditorComponent = function() {
       lineWrapping: true
     };
 
+    if (this.hasAttribute("data-readonly")) {
+      console.log("readonly");
+    }
+
     var codemirror = CodeMirror.fromTextArea(textarea, codemirror_opts);
     codemirror.setOption("mode", this.getAttribute("data-language"));
 
@@ -26,6 +30,7 @@ var CodeEditorComponent = function() {
 
     return codemirror;
   }
+
 
   var setupKeyPressHandlers = function() {
     var base = this;
@@ -76,6 +81,11 @@ var CodeEditorComponent = function() {
       this.dispatchEvent(ev);
     }
   };
+
+  var attributeChangedCallback = function(attr) {
+
+  };
+
 };
 
 var proto = Object.create(HTMLElement.prototype);
