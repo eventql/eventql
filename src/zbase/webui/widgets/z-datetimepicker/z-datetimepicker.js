@@ -33,7 +33,15 @@ function DateTimePicker(input) {
 
   var hideFlyout = function() {
     window.removeEventListener("click", hideFlyout, false);
+    document.removeEventListener("keyup", hideFlyoutOnEsc, false);
     flyout.removeAttribute("data-active");
+  };
+
+  var hideFlyoutOnEsc = function(e) {
+    //ESC key
+    if (e.keyCode == 27) {
+      hideFlyout();
+    }
   };
 
   var showFlyout = function() {
@@ -51,7 +59,9 @@ function DateTimePicker(input) {
     flyout.style.left = (pos.left - (flyout.offsetWidth - pos.width) / 2) + "px";
 
     window.addEventListener("click", hideFlyout, false);
+    document.addEventListener("keyup", hideFlyoutOnEsc, false);
   };
+
 
   var submit = function() {
     var date = DateUtil.getStartOfDay(
