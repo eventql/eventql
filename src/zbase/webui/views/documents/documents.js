@@ -24,6 +24,12 @@ ZBase.registerView((function() {
         page.querySelector(".zbase_documents tbody"),
         documents);
 
+    var new_doc_dropdown = $("z-dropdown", page);
+    new_doc_dropdown.addEventListener("z-dropdown-item-click", function(e) {
+      var target = e.srcElement || e.target;
+      createNewDocument(target.getAttribute("data-type"));
+    });
+
     $.handleLinks(page);
     $.replaceViewport(page)
     $.hideLoader();
@@ -42,6 +48,32 @@ ZBase.registerView((function() {
       $.onClick(tr, function() { $.navigateTo(url); });
       tbody_elem.appendChild(tr);
     });
+  };
+
+  var createNewDocument = function(data_type) {
+    var postdata;
+    var path_prefix;
+
+    switch (data_type) {
+      case "sql":
+        postdata = $.buildQueryString({
+          name: "Unnamed SQL Query",
+          type: "sql_query"
+        });
+        path_prefix = "/a/sql/";
+        break;
+    }
+
+    $.httpPost("/api/v1/documents", postdata, function(r) {
+      if (r.status == 201) {
+        var response = JSON.parse(r.response);
+        $.navigateTo(path_prefix + response.uuid);
+        return;
+      } else {
+        $.fatalError();
+      }
+    });
+
   };
 
   return {
