@@ -1,0 +1,57 @@
+<template id="zbase-share-doc-modal-main-tpl">
+  <z-modal id='share-doc-modal' class='share_doc'>
+    <z-modal-close-icon></z-modal-close-icon>
+    <div class='z-modal-header'>
+      Sharing Settings
+    </div>
+
+    <div class='z-modal-content'>
+      <div class="infobar hidden"></div>
+
+      <h4>Link to share</h4>
+      <input class="z-input" readonly name="link" />
+
+      <h4 style="margin-top: 30px;">Who has access</h4>
+      <div class='selection_block clickable' data-selected data-value='ACLPOLICY_PRIVATE'>
+        <div class='inner'><span style="font-weight:500;">Private</span> &mdash; Only I have access</div>
+      </div>
+
+      <div class='selection_block clickable last' data-value='ACLPOLICY_PUBLIC_ORGANIZATION'>
+        <div class='inner'><span style="font-weight:500;">Everybody at <?= $company_name ?></span> &mdash; Everbody at <?= $company_name ?> has access</div>
+      </div>
+
+      <div class='invite_controls hidden'>
+        <h4>Invite People</h4>
+        <input class="z-input" placeholder='Enter Email addresses' />
+        <z-dropdown data-resolved class='input left'>
+          <z-dropdown-items>
+            <z-dropdown-item>Can Edit</z-dropdown-item>
+            <z-dropdown-item>Can View</z-dropdown-item>
+          </z-dropdown-items>
+        </z-dropdown>
+
+        <div style="clear: both;"></div>
+        <div class='options hidden'>
+          <div>
+            <input type="checkbox" checked />
+            Notify people via eMail &#151; <span class='link'>Add message</span>
+          </div>
+
+          <textarea class='fn-textarea' placeholder="Optional: Add a personal message"></textarea>
+
+          <div class='button_container'>
+            <button class='z-button primary'>Send</button>
+            <button class='z-button secondary'>Cancel</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class='z-modal-footer'>
+      <button class='z-button primary' data-action='update-sharing-settings'>
+        Done
+      </button>
+    </div>
+
+  </z-modal>
+</template>
