@@ -725,11 +725,7 @@ RefPtr<csql::ExecutionStrategy> AnalyticsApp::getExecutionStrategy(
     const String& customer) {
   auto strategy = mkRef(new csql::DefaultExecutionStrategy());
 
-  strategy->addTableProvider(
-      zbase::SQLEngine::tableProviderForNamespace(
-          partition_map_,
-          cstable_index_,
-          customer));
+  strategy->addTableProvider(getTableProvider(customer));
 
   strategy->addQueryTreeRewriteRule(
       std::bind(
@@ -740,6 +736,14 @@ RefPtr<csql::ExecutionStrategy> AnalyticsApp::getExecutionStrategy(
           std::placeholders::_1));
 
   return strategy.get();
+}
+
+RefPtr<csql::TableProvider> AnalyticsApp::getTableProvider(
+    const String& customer) const {
+  return zbase::SQLEngine::tableProviderForNamespace(
+        partition_map_,
+        cstable_index_,
+        customer);
 }
 
 void AnalyticsApp::createTable(const TableDefinition& tbl) {

@@ -336,8 +336,9 @@ DateUtil.getTimestampFromTimeObj = function(timeObj) {
   return timestamp;
 };
 
+
 //FIXME implement different time zones
-DateUtil.printTimestamp = function(ts, timezone) {
+DateUtil.printTimestamp = function(ts) {
   var date = new Date(ts);
   return [
     date.getFullYear(), "-",

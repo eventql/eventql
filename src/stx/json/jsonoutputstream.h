@@ -41,6 +41,7 @@ public:
   void addFloat(double value);
   void addInteger(int64_t value);
   void addNull();
+  void addBool(bool val);
   void addTrue();
   void addFalse();
 
