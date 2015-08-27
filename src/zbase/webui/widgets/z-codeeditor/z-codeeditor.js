@@ -2,13 +2,14 @@ var CodeEditorComponent = function() {
 
   var initCodeMirror = function(textarea) {
     var codemirror_opts = {
-      autofocus: false,
+      autofocus: true,
       lineNumbers: true,
       lineWrapping: true
     };
 
     if (this.hasAttribute("data-readonly")) {
-      console.log("readonly");
+      codemirror_opts.readOnly = true;
+      codemirror_opts.autofocus = false;
     }
 
     var codemirror = CodeMirror.fromTextArea(textarea, codemirror_opts);
@@ -60,7 +61,7 @@ var CodeEditorComponent = function() {
     var tpl = $.getTemplate("widgets/z-codeeditor", "z-codeeditor-base-tpl");
 
     var textarea = document.createElement("textarea");
-    textarea.setAttribute("autofocus", "autofocus");
+    //textarea.setAttribute("autofocus", "autofocus");
     this.appendChild(textarea);
 
     var codemirror = initCodeMirror.call(this, textarea);
@@ -80,12 +81,23 @@ var CodeEditorComponent = function() {
       ev.value = this.getValue();
       this.dispatchEvent(ev);
     }
+
+    this.setReadonly = function() {
+      codemirror.options.readOnly= true;
+      codemirror.options.autofocus = false;
+    };
   };
 
-  var attributeChangedCallback = function(attr) {
+  this.attributeChangedCallback = function(attr) {
+    switch (attr) {
+      case "data-readonly":
+        this.setReadonly();
+      break;
 
+      default:
+        break;
+    }
   };
-
 };
 
 var proto = Object.create(HTMLElement.prototype);
