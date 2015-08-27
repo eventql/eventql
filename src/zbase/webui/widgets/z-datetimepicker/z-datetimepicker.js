@@ -21,7 +21,6 @@ function DateTimePicker(input) {
 
     input.setAttribute("data-timestamp", new_time);
     input.value = DateUtil.printTimestamp(new_time);
-    console.log("set tiem");
   };
 
   var toggleFlyout = function() {
