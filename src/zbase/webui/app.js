@@ -431,7 +431,7 @@ $.handleLinks = function(elem) {
 $.onClick = function(elem, fn) {
   elem.addEventListener("click", function(e) {
     e.preventDefault();
-    fn();
+    fn.bind(this)();
     return false;
   });
 };
