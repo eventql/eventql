@@ -7,7 +7,6 @@ ZBase.registerView((function() {
   var default_end_time = (new Date()).getTime() * 1000;
   var next_page_time;
   var pagination_history = [];
-  var datepicker;
 
   var init = function(params) {
     $.showLoader();
@@ -75,7 +74,8 @@ ZBase.registerView((function() {
     params.logfile = $(".zbase_logviewer z-dropdown.logfile_control").getValue();
 
     // param: time
-    var time = datepicker.getTime() * 1000;
+    var time_control = $(".zbase_logviewer .time_control");
+    var time = parseInt(time_control.getAttribute("data-timestamp"), 10) * 1000;
     if (time != default_end_time) {
       params.time = time;
     }
@@ -143,7 +143,8 @@ ZBase.registerView((function() {
       end_time = default_end_time;
     }
 
-    datepicker.setTime(Math.floor(end_time / 1000));
+    var time_control = $(".zbase_logviewer .time_control");
+    time_control.setAttribute("data-timestamp", Math.floor(end_time / 1000));
   };
 
   var setFilterParam = function(filter_type, filter) {
@@ -284,7 +285,7 @@ ZBase.registerView((function() {
 
   var render = function() {
     var page = $.getTemplate("views/logviewer", "zbase_logviewer_main_tpl");
-    datepicker = DateTimePicker($(".time_control", page));
+    var datepicker = DateTimePicker($(".time_control", page));
 
     $(".logfile_control", page).addEventListener("change", submitControls);
     $(".filter_type_control", page).addEventListener("change", submitControls);
