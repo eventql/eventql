@@ -292,3 +292,7 @@
   opacity: 1.0;
   cursor: default;
 }
+
+.zbase_sql_editor .readonly_hint.hidden {
+  display: none;
+}
