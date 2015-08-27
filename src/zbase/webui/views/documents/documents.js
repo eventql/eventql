@@ -37,7 +37,7 @@ ZBase.registerView((function() {
 
   var renderDocumentsList = function(tbody_elem, documents) {
     documents.forEach(function(doc) {
-      var url = "#";
+      var url = getUrlForDocument(doc.type, doc.uuid);
 
       var tr = document.createElement("tr");
       tr.innerHTML = 
@@ -50,30 +50,43 @@ ZBase.registerView((function() {
     });
   };
 
-  var createNewDocument = function(data_type) {
-    var postdata;
-    var path_prefix;
+  var getUrlForDocument = function(doc_type, uuid) {
+    switch (doc_type) {
+      case "sql_query":
+        return "/a/sql/" + uuid;
 
-    switch (data_type) {
-      case "sql":
-        postdata = $.buildQueryString({
-          name: "Unnamed SQL Query",
-          type: "sql_query"
-        });
-        path_prefix = "/a/sql/";
+      default:
+        return "#";
+    }
+  };
+
+  var createNewDocument = function(doc_type) {
+    var name;
+
+    switch (doc_type) {
+      case "sql_query":
+        name = "Unnamed SQL Query";
+        break;
+
+      default:
+        name = "";
         break;
     }
+
+    var postdata = $.buildQueryString({
+      name: "Unnamed SQL Query",
+      type: doc_type
+    });
 
     $.httpPost("/api/v1/documents", postdata, function(r) {
       if (r.status == 201) {
         var response = JSON.parse(r.response);
-        $.navigateTo(path_prefix + response.uuid);
+        $.navigateTo(getUrlForDocument(doc_type, response.uuid));
         return;
       } else {
         $.fatalError();
       }
     });
-
   };
 
   return {
