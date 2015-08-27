@@ -93,7 +93,7 @@ ZBase.registerView((function() {
     initDocumentNameEditModal();
 
     // document sharing settings
-    initDocumentSharingModal(page);
+    initDocumentSharingModal(doc.uuid);
 
     // execute query
     if (doc.content.length > 0) {
@@ -137,8 +137,13 @@ ZBase.registerView((function() {
     });
   };
 
-  var initDocumentSharingModal = function(page) {
-    var modal = ShareDocModal(page);
+  var initDocumentSharingModal = function(doc_id) {
+    var modal = ShareDocModal($(".zbase_sql_editor"));
+
+    $.onClick($("button[data-action='share-query']"), function() {
+      modal.show(doc_id, "/a/sql/" + doc_id);
+    });
+
   };
 
   var setDocumentTitle = function(title) {
