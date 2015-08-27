@@ -20,9 +20,33 @@
       <div class="zbase_datastore_tables">
         <h2 class="pagetitle">Datastore <i class="sep"></i> <em>Tables</em></h2>
 
+        <table class="z-table" data-clickable>
+          <thead>
+            <tr>
+              <th style="width: 250px;">Table</th>
+              <th>Settings</th>
+            </tr>
+          </thead>
+
+          <tbody></tbody>
+        </table>
 
       </div>
     </div>
 
   </div>
+</template>
+
+<template id="zbase_datastore_tables_list_row_tpl">
+  <tr class="table_definition">
+    <td>
+      <div class="table_name"><a href=""></a></div>
+    </td>
+    <td>
+      <div class="table_config">
+        <span style="line-height: 20px; font-size:12px; font-weight: 500;">Description:</span>
+        <pre class="table_description"></pre>
+      </div>
+    </td>
+  </tr>
 </template>
