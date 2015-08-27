@@ -25,17 +25,6 @@ z-menu::after,
   visibility: hidden;
 }
 
-z-menu:first-child,
-.z-menu:first-child {
-  margin-top: 0em;
-  border-top:none;
-}
-
-z-menu:last-child,
-.z-menu:last-child{
-  margin-bottom: 0em;
-}
-
 /*--------------
  Menu Item
 ---------------*/

@@ -1,0 +1,28 @@
+.zbase_documents table.z-table {
+  font-size: 13px;
+  border-top: 1px solid #ddd;
+  border-bottom: 1px solid #ddd;
+}
+
+.zbase_documents table.z-table thead th {
+  font-weight: 400;
+  color: #888;
+}
+
+.zbase_documents table.z-table tbody tr td {
+  line-height: 24px;
+}
+
+.zbase_documents table.z-table tbody tr a {
+  color: #888;
+}
+
+.zbase_documents table.z-table thead tr th:first-child,
+.zbase_documents table.z-table tbody tr td:first-child {
+  padding-left: 20px;
+}
+
+.zbase_documents table.z-table tbody tr td:first-child a {
+  font-weight: 400;
+  color: #000;
+}
