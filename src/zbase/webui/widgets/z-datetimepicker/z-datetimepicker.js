@@ -21,6 +21,7 @@ function DateTimePicker(input) {
 
     input.setAttribute("data-timestamp", new_time);
     input.value = DateUtil.printTimestamp(new_time);
+    console.log("set tiem");
   };
 
   var toggleFlyout = function() {
@@ -57,7 +58,7 @@ function DateTimePicker(input) {
     var date = DateUtil.getStartOfDay(
         $("z-calendar", flyout).getAttribute("data-selected"));
 
-    var time = DateUtil.fromCivilTime(
+    var time = DateUtil.milliSecondsSinceMidnight(
         $(".hours_control", flyout).value,
         $(".minutes_control", flyout).value,
         $(".seconds_control", flyout).value);

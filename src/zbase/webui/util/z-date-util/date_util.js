@@ -393,7 +393,7 @@ DateUtil.getMilliSeconds = function(time, timezone) {
   return time - seconds * this.millisPerSecond;
 };
 
-DateUtil.fromCivilTime = function(hours, minutes, seconds) {
+DateUtil.milliSecondsSinceMidnight = function(hours, minutes, seconds) {
   return (
       parseInt(hours, 10) * this.millisPerHour +
       parseInt(minutes, 10) * this.millisPerMinute +
