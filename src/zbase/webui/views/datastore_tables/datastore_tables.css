@@ -1,0 +1,27 @@
+.zbase_datastore_tables table.z-table {
+  font-size: 13px;
+  border-top: 1px solid #d4d4d4;
+  table-layout: fixed;
+}
+
+.zbase_datastore_tables .table_definition td {
+  vertical-align: top;
+  padding-top: 16px;
+}
+
+.zbase_datastore_tables .table_definition .table_name {
+  background-color: #f0f6f8;
+  border-bottom: 1px solid #c9d0d4;
+  position: absolute;
+  padding: 6px 10px;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  color: rgba(10,10,10,0.8);
+  line-height: 18px;
+}
+
+.zbase_datastore_tables .table_definition .table_config {
+  padding: 2px 0 20px 0;
+  word-wrap: break-word;
+}
