@@ -20,15 +20,40 @@ void DocumentDBServlet::handle(
     const AnalyticsSession& session,
     const stx::http::HTTPRequest* req,
     stx::http::HTTPResponse* res) {
+  static const String kPathPrefix = "/api/v1/documents";
   URI uri(req->uri());
 
-  if (uri.path() == "/api/v1/documents") {
+  // LIST
+  if (req->method() == http::HTTPMessage::M_GET &&
+      uri.path() == kPathPrefix) {
     listDocuments(session, req, res);
     return;
   }
 
-  if (StringUtil::beginsWith(uri.path(), "/api/v1/documents/")) {
-    documentREST(uri, session, req, res);
+  // GET
+  if (req->method() == http::HTTPMessage::M_GET &&
+      StringUtil::beginsWith(uri.path(), kPathPrefix)) {
+    auto docid = SHA1Hash::fromHexString(
+        uri.path().substr(kPathPrefix.size() + 1));
+
+    fetchDocument(docid, uri, session, req, res);
+    return;
+  }
+
+  // CREATE
+  if (req->method() == http::HTTPMessage::M_POST &&
+      uri.path() == kPathPrefix) {
+    createDocument(uri, session, req, res);
+    return;
+  }
+
+  // UPDATE
+  if (req->method() == http::HTTPMessage::M_POST &&
+      StringUtil::beginsWith(uri.path(), kPathPrefix)) {
+    auto docid = SHA1Hash::fromHexString(
+        uri.path().substr(kPathPrefix.size() + 1));
+
+    updateDocument(docid, uri, session, req, res);
     return;
   }
 
@@ -36,165 +61,25 @@ void DocumentDBServlet::handle(
   res->addBody("not found");
 }
 
-void DocumentDBServlet::documentREST(
-    const URI& uri,
-    const AnalyticsSession& session,
-    const http::HTTPRequest* req,
-    http::HTTPResponse* res) {
-  static String prefix = "/api/v1/documents/";
-  auto path_parts = StringUtil::split(uri.path().substr(prefix.size()), "/");
-
-  switch (req->method()) {
-
-    case http::HTTPMessage::M_GET:
-      switch (path_parts.size()) {
-        case 1:
-          //listDocuments(path_parts[0], uri, req, res);
-          return;
-        case 2:
-          fetchDocument(
-              path_parts[0],
-              SHA1Hash::fromHexString(path_parts[1]),
-              uri,
-              session,
-              req,
-              res);
-          return;
-        default:
-          break;
-      }
-      break;
-
-    case http::HTTPMessage::M_POST:
-      switch (path_parts.size()) {
-        case 1:
-          createDocument(path_parts[0], uri, session, req, res);
-          return;
-        case 2:
-          updateDocument(
-              path_parts[0],
-              SHA1Hash::fromHexString(path_parts[1]),
-              uri,
-              session,
-              req,
-              res);
-          return;
-        default:
-          break;
-      }
-      break;
-
-    default:
-      break;
-
-  }
-
-  res->setStatus(http::kStatusBadRequest);
-  res->addBody("invalid request");
-}
-
 void DocumentDBServlet::fetchDocument(
-    const String& type,
     const SHA1Hash& uuid,
     const URI& uri,
     const AnalyticsSession& session,
     const http::HTTPRequest* req,
     http::HTTPResponse* res) {
-  if (type == "sql_queries") {
-    fetchSQLQuery(uuid, session, req, res);
-    return;
+  const auto& params = uri.queryParams();
+
+  bool return_content = true;
+  String no_content_str;
+  if (URI::getParam(params, "no_content", &no_content_str)) {
+    return_content = false;
   }
 
-  res->setStatus(http::kStatusBadRequest);
-  res->addBody("invalid request");
-}
-
-void DocumentDBServlet::createDocument(
-    const String& type,
-    const URI& uri,
-    const AnalyticsSession& session,
-    const http::HTTPRequest* req,
-    http::HTTPResponse* res) {
-  if (type == "sql_queries") {
-    createSQLQuery(session, req, res);
-    return;
-  }
-
-  res->setStatus(http::kStatusBadRequest);
-  res->addBody("invalid request");
-}
-
-void DocumentDBServlet::updateDocument(
-    const String& type,
-    const SHA1Hash& uuid,
-    const URI& uri,
-    const AnalyticsSession& session,
-    const http::HTTPRequest* req,
-    http::HTTPResponse* res) {
-  if (type == "sql_queries") {
-    updateSQLQuery(uuid, session, req, res);
-    return;
-  }
-
-  res->setStatus(http::kStatusBadRequest);
-  res->addBody("invalid request");
-}
-
-void DocumentDBServlet::listDocuments(
-    const AnalyticsSession& session,
-    const http::HTTPRequest* req,
-    http::HTTPResponse* res) {
-  Buffer buf;
-  json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
-
-  json.beginObject();
-  json.addObjectEntry("documents");
-  json.beginArray();
-
-  size_t i = 0;
-  docdb_->listDocuments(
-      session.customer(),
-      session.userid(),
-      [&i, &json, &session] (const Document& doc) -> bool {
-    if (++i > 1) {
-      json.addComma();
-    }
-
-    json.beginObject();
-
-    json.addObjectEntry("uuid");
-    json.addString(doc.uuid());
-    json.addComma();
-
-    json.addObjectEntry("name");
-    json.addString(doc.name());
-    json.addComma();
-
-    json.addObjectEntry("type");
-    json.addString(doc.type());
-
-    json.endObject();
-
-    return true;
-  });
-
-  json.endArray();
-  json.endObject();
-
-  res->setStatus(http::kStatusOK);
-  res->setHeader("Content-Type", "application/json; charset=utf-8");
-  res->addBody(buf);
-}
-
-void DocumentDBServlet::fetchSQLQuery(
-    const SHA1Hash& uuid,
-    const AnalyticsSession& session,
-    const http::HTTPRequest* req,
-    http::HTTPResponse* res) {
   Document doc;
   if (docdb_->fetchDocument(session.customer(), session.userid(), uuid, &doc)) {
     Buffer buf;
-    renderSQLQuery(doc, &buf);
+    json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
+    renderDocument(session, doc, &json, return_content);
     res->setStatus(http::kStatusOK);
     res->addBody(buf);
   } else {
@@ -203,17 +88,32 @@ void DocumentDBServlet::fetchSQLQuery(
   }
 }
 
-void DocumentDBServlet::createSQLQuery(
+void DocumentDBServlet::createDocument(
+    const URI& uri,
     const AnalyticsSession& session,
     const http::HTTPRequest* req,
     http::HTTPResponse* res) {
-  auto db_namespace = req->getHeader("X-Analytics-Namespace");
+  URI::ParamList params;
+  URI::parseQueryString(req->body().toString(), &params);
+
+  String name;
+  if (!URI::getParam(params, "name", &name)) {
+    res->setStatus(http::kStatusBadRequest);
+    res->addBody("missing ?name=... parameter");
+  }
+
+  String type;
+  if (!URI::getParam(params, "type", &type)) {
+    res->setStatus(http::kStatusBadRequest);
+    res->addBody("missing ?type=... parameter");
+  }
+
   auto now = WallClock::unixMicros();
 
   Document doc;
   doc.set_uuid(Random::singleton()->sha1().toString());
-  doc.set_name("Unnamed SQL Query"); // FIXPAUL include number
-  doc.set_type("sql_query");
+  doc.set_name(name);
+  doc.set_type(type);
   doc.set_version(0);
   doc.set_ctime(now);
   doc.set_mtime(now);
@@ -224,13 +124,15 @@ void DocumentDBServlet::createSQLQuery(
   docdb_->createDocument(session.customer(), doc);
 
   Buffer buf;
-  renderSQLQuery(doc, &buf);
+  json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
+  renderDocument(session, doc, &json);
   res->setStatus(http::kStatusCreated);
   res->addBody(buf);
 }
 
-void DocumentDBServlet::updateSQLQuery(
+void DocumentDBServlet::updateDocument(
     const SHA1Hash& uuid,
+    const URI& uri,
     const AnalyticsSession& session,
     const http::HTTPRequest* req,
     http::HTTPResponse* res) {
@@ -302,23 +204,92 @@ void DocumentDBServlet::updateSQLQuery(
   res->setStatus(http::kStatusCreated);
 }
 
-void DocumentDBServlet::renderSQLQuery(const Document& doc, Buffer* buf) {
-  json::JSONOutputStream json(BufferOutputStream::fromBuffer(buf));
+void DocumentDBServlet::listDocuments(
+    const AnalyticsSession& session,
+    const http::HTTPRequest* req,
+    http::HTTPResponse* res) {
+  Buffer buf;
+  json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
 
   json.beginObject();
+  json.addObjectEntry("documents");
+  json.beginArray();
 
-  json.addObjectEntry("uuid");
-  json.addString(doc.uuid());
-  json.addComma();
+  size_t i = 0;
+  docdb_->listDocuments(
+      session.customer(),
+      session.userid(),
+      [this, &i, &json, &session] (const Document& doc) -> bool {
+    if (++i > 1) {
+      json.addComma();
+    }
 
-  json.addObjectEntry("name");
-  json.addString(doc.name());
-  json.addComma();
+    renderDocument(
+        session,
+        doc,
+        &json,
+        false);
 
-  json.addObjectEntry("sql_query");
-  json.addString(doc.content());
+    return true;
+  });
 
+  json.endArray();
   json.endObject();
+
+  res->setStatus(http::kStatusOK);
+  res->setHeader("Content-Type", "application/json; charset=utf-8");
+  res->addBody(buf);
+}
+
+void DocumentDBServlet::renderDocument(
+    const AnalyticsSession& session,
+    const Document& doc,
+    json::JSONOutputStream* json,
+    bool return_content /* = true */) {
+  json->beginObject();
+
+  json->addObjectEntry("uuid");
+  json->addString(doc.uuid());
+  json->addComma();
+
+  json->addObjectEntry("name");
+  json->addString(doc.name());
+  json->addComma();
+
+  json->addObjectEntry("type");
+  json->addString(doc.type());
+  json->addComma();
+
+  json->addObjectEntry("acl_policy");
+  json->addString(DocumentACLPolicy_Name(doc.acl_policy()));
+  json->addComma();
+
+  json->addObjectEntry("is_readable");
+  json->addBool(isDocumentReadableForUser(doc, session.userid()));
+  json->addComma();
+
+  json->addObjectEntry("is_writable");
+  json->addBool(isDocumentWritableForUser(doc, session.userid()));
+  json->addComma();
+
+  json->addObjectEntry("ctime");
+  json->addInteger(doc.ctime());
+  json->addComma();
+
+  json->addObjectEntry("mtime");
+  json->addInteger(doc.mtime());
+  json->addComma();
+
+  json->addObjectEntry("atime");
+  json->addInteger(doc.atime());
+
+  if (return_content) {
+    json->addComma();
+    json->addObjectEntry("content");
+    json->addString(doc.content());
+  }
+
+  json->endObject();
 }
 
 } // namespace zbase
