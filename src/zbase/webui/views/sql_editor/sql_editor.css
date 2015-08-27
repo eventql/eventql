@@ -273,3 +273,22 @@
   padding: 20px;
 }
 
+.zbase_sql_editor .readonly_hint {
+  font-size: 12px;
+  float: right;
+  line-height: 64px;
+  height: 60px;
+  overflow: hidden;
+  margin-right: 20px;
+  opacity: 0.8;
+}
+
+.zbase_sql_editor .readonly_hint i {
+  margin-right: 2px;
+  opacity: 0.8;
+}
+
+.zbase_sql_editor .readonly_hint:hover {
+  opacity: 1.0;
+  cursor: default;
+}

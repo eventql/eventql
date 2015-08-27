@@ -33,11 +33,12 @@
               <i class="fa fa-bolt"></i>
               &nbsp;Execute
             </button>
-            <button class="z-button secondary" data-action="share-query">
+            <button class="z-button secondary share_button" data-action="share-query">
               <i class="fa fa-share-alt"></i>
               &nbsp;Share
             </button>
-            <h2 class="pagetitle editable" data-action='edit-query-name'></h2>
+            <span class="readonly_hint hidden"><i class="fa fa-lock"></i> Read-Only</span>
+            <h2 class="pagetitle document_name" data-action='edit-query-name'></h2>
           </section>
 
           <z-codeeditor data-language="text/x-chartsql" data-content='query_content' style="height: 250px;"></z-codeeditor>
