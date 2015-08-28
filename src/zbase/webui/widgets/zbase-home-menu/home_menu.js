@@ -12,16 +12,11 @@ var HomeMenu = function() {
   };
 
   var setActiveMenuItem = function(tpl) {
-    var active_item = $("z-menu-item[data-active]", tpl);
-    if (active_item) {
-      active_item.removeAttribute("data-active");
-    }
-
-    var new_active_link = $(
+    var active_link = $(
         "z-menu-item a[href='" + window.location.pathname + "']",
         tpl);
-    if (new_active_link) {
-      new_active_link.parentNode.setAttribute("data-active", "active");
+    if (active_link) {
+      active_link.parentNode.setAttribute("data-active", "active");
     }
   };
 
