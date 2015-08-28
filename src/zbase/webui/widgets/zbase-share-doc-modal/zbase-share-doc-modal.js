@@ -76,7 +76,7 @@ var ShareDocModal = function(elem) {
   var access_selections = modal.querySelectorAll(".access_selection");
   for (var i = 0; i < access_selections.length; i++) {
     $.onClick(access_selections[i], function() {
-      setAccessSelection(this.getAttribute("data-policy"));
+      renderAccessSelection(this.getAttribute("data-policy"));
     });
   }
 
