@@ -318,3 +318,7 @@ z-codeeditor code {
   padding: 20px;
   word-break: break-all;
 }
+
+z-codeeditor[data-readonly] .CodeMirror .CodeMirror-cursor {
+  visibility: hidden;
+}
