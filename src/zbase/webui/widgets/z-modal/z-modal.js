@@ -10,9 +10,19 @@
 **/
 var ModalComponent = function() {
   this.createdCallback = function() {
+    var _this = this;
     this.onclick = function(e) {
+      _this.close();
+    };
+
+    this.querySelector("z-modal-close-icon").onclick = function() {
+      _this.close();
+    };
+
+    this.querySelector("z-modal-box").onclick = function(e) {
       e.stopPropagation();
     };
+
   };
 
   this.show = function() {
