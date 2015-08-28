@@ -17,7 +17,6 @@ var ModalComponent = function() {
 
   this.show = function() {
     this.setAttribute('data-active', 'active');
-    console.log("show", this);
 
     var on_escape = function(e) {
       if (e.keyCode == 27) {
