@@ -4,3 +4,10 @@
   margin-left: -8px;
   margin-top: 6px;
 }
+
+.zbase_settings_menu_content {
+  margin-left: 186px;
+  border-left: 1px solid #ddd;
+  min-height: 900px; /* FIXME */
+  padding-left: 20px;
+}
