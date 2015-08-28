@@ -10,7 +10,8 @@ var ShareDocModal = function(elem) {
       if (r.status == 200) {
         var response = JSON.parse(r.response);
         $(".zbase_share_doc_link", modal).value = doc_url;
-        setAccessSelection(response.acl_policy);
+        renderAccessSelection(response.acl_policy);
+        renderNamespaceInfo();
       } else {
         $.fatalError();
       }
@@ -21,7 +22,7 @@ var ShareDocModal = function(elem) {
     return $(".access_selection[data-selected]", modal).getAttribute("data-policy");
   };
 
-  var setAccessSelection = function(acl_policy) {
+  var renderAccessSelection = function(acl_policy) {
     var selection = $(".access_selection[data-selected]", modal);
     if (selection) {
       selection.removeAttribute("data-selected");
@@ -29,6 +30,15 @@ var ShareDocModal = function(elem) {
 
     $(".access_selection[data-policy='" + acl_policy + "']", modal)
         .setAttribute("data-selected", "selected");
+  };
+
+  var renderNamespaceInfo = function() {
+    var config = $.getConfig();
+
+    var info_elems = modal.querySelectorAll(".namespace_info");
+    for (var i = 0; i < info_elems.length; i++) {
+      info_elems[i].innerHTML = config.current_user.namespace;
+    }
   };
 
   var updateSettings = function() {
