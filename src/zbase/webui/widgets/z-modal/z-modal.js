@@ -24,9 +24,10 @@ var ModalComponent = function() {
       }
     };
 
-    //place modal
-    var height = this.getBoundingClientRect().height;
-    this.style.top = ((window.innerHeight - height) / 4) + "px";
+    //place modal box
+    var modal_box = this.querySelector("z-modal-box");
+    var height = modal_box.getBoundingClientRect().height;
+    modal_box.style.top = ((window.innerHeight - height) / 4) + "px";
 
     this.escape_listener = on_escape.bind(this);
     document.addEventListener('keyup', this.escape_listener, false);
