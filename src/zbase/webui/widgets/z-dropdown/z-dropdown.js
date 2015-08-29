@@ -326,28 +326,27 @@ var DropDownComponent = function() {
       this.__setHeaderValue();
     }
 
-    var click_ev = new CustomEvent(
-        (selected) ? "z-dropdown-item-click" : "z-dropdown-item-unselect",
-        {
-            detail : {'text' : item.textContent},
-            bubbles: true,
-            cancelable: true
-        });
-
-    item.dispatchEvent(click_ev);
-
-    // FIXME: abort if this is a multiselect
+    this.__fireItemChangedEvent({selected: selected}, item);
     if (this.hasAttribute("data-multiselect")) {
       return;
     }
 
-    this.__onApply();
+    this.hideDropdown();
+    this.__fireChangedEvent();
   };
 
-  this.__onApply = function() {
-    this.hideDropdown();
+  this.__fireItemChangedEvent = function(detail, item) {
+    var click_ev = new CustomEvent("z-dropdown-item-changed", {
+      detail: detail,
+      bubbles: true,
+      cancelable: true
+    });
 
-    var change_ev = new CustomEvent("change", {
+    item.dispatchEvent(click_ev);
+  };
+
+  this.__fireChangedEvent = function() {
+    var change_ev = new CustomEvent("z-dropdown-changed", {
       detail : {value: this.getValue()},
       bubbles: true,
       cancelable: true
