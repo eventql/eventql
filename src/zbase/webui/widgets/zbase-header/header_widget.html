@@ -10,13 +10,22 @@
 
     <ul style="float: right;">
       <li>
-        <span class="nav" style="color: #888;">
-          <a href="" style="color: #444;">
+        <span class="nav dropdown" style="">
+          <span href="" style="color: #444;">
             <i class="fa fa-user" style="margin-right: 3px;"></i>
-              <span class="userid_info"></span> (<span class="namespace_info"></span>)
-            </a>
-            &mdash;
-            <a class="link" style="color: #888;" href="/a/logout">Logout</a>
+            <span class="userid_info"></span> (<span class="namespace_info"></span>)
+            <i class="fa fa-caret-down" style="margin-right: 3px;"></i>
+            <i class="fa fa-caret-up" style="margin-right: 3px;"></i>
+            <span style="display: block"></span>
+          </span>
+          <ul class="dropdown_panel">
+            <li>
+              <span id="change_namespace" style="color: #888;" href="">Change namespace</span>
+            </li>
+            <li>
+              <a class="link" style="color: #888;" href="/a/logout">Logout</a>
+            </li>
+          </ul>
         </span>
       </li>
     </ul>
