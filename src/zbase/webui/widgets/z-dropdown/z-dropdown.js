@@ -129,6 +129,8 @@ var DropDownComponent = function() {
       button.className = "z-button primary"
       button.innerHTML = "Apply";
       elem.appendChild(button);
+
+      button.addEventListener("click", base.__onApply.bind(base));
     }
 
     for (var i = 0; i < items.length; i++) {
@@ -143,6 +145,10 @@ var DropDownComponent = function() {
 
   this.toggleDropdown = function() {
     if (this.hasAttribute('data-active')) {
+      if (this.hasAttribute("data-multiselect")) {
+        this.__onApply();
+        return;
+      }
       this.hideDropdown();
     } else {
       this.showDropdown();
@@ -331,8 +337,7 @@ var DropDownComponent = function() {
       return;
     }
 
-    this.hideDropdown();
-    this.__fireChangedEvent();
+    this.__onApply();
   };
 
   this.__fireItemChangedEvent = function(detail, item) {
@@ -345,7 +350,8 @@ var DropDownComponent = function() {
     item.dispatchEvent(click_ev);
   };
 
-  this.__fireChangedEvent = function() {
+  this.__onApply = function() {
+    this.hideDropdown();
     var change_ev = new CustomEvent("z-dropdown-changed", {
       detail : {value: this.getValue()},
       bubbles: true,
