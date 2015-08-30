@@ -70,6 +70,7 @@ ZBase.registerView((function() {
 
       default:
         $.fatalError();
+        return;
     }
 
     var postdata = $.buildQueryString({
