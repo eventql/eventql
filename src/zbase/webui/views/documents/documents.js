@@ -25,9 +25,8 @@ ZBase.registerView((function() {
         documents);
 
     var new_doc_dropdown = $("z-dropdown", page);
-    new_doc_dropdown.addEventListener("z-dropdown-item-click", function(e) {
-      var target = e.srcElement || e.target;
-      createNewDocument(target.getAttribute("data-type"));
+    new_doc_dropdown.addEventListener("changed", function(e) {
+      createNewDocument(e.detail.value);
     });
 
     $.handleLinks(page);
