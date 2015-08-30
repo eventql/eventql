@@ -19,17 +19,6 @@
   margin-bottom: 10px;
 }
 
-.zbase_sql_editor .zbase_sql_editor_sidebar ul.zbase_sql_editor_table_list {
-  padding: 0;
-  margin: 0;
-  list-style-type: none;
-}
-
-.zbase_sql_editor .zbase_sql_editor_sidebar ul.zbase_sql_editor_table_list li {
-  margin-bottom: 10px;
-  cursor: pointer;
-}
-
 .zbase_sql_editor .zbase_sql_editor_sidebar a.link {
   font-size: 13px;
 }
