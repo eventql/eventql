@@ -1,10 +1,11 @@
-var TableListWidget = function() {
+var TableListWidget = function(elem) {
+  var elem = elem;
+  //var schema_modal = TableSchemaModalWidget(elem);
 
-
-  var loadTableList = function(elem) {
+  var loadTableList = function() {
     $.httpGet("/api/v1/tables", function(r) {
       if (r.status == 200) {
-        renderTableList(elem, JSON.parse(r.response).tables);
+        renderTableList(JSON.parse(r.response).tables);
       } else {
         //TODO handle error
       }
@@ -12,7 +13,7 @@ var TableListWidget = function() {
 
   };
 
-  var renderTableList = function(elem, tables) {
+  var renderTableList = function(tables) {
     var tpl = $.getTemplate(
       "widgets/zbase-table-list",
       "zbase_table_list_tpl");
@@ -22,6 +23,10 @@ var TableListWidget = function() {
       var li_elem = document.createElement("li");
       li_elem.innerHTML = table.name;
       ul_elem.appendChild(li_elem);
+
+      li_elem.addEventListener("li_elem", function() {
+        schema_modal.render(table);
+      }, false);
     });
 
     elem.appendChild(tpl);
@@ -29,7 +34,7 @@ var TableListWidget = function() {
   };
 
   return {
-    render: loadTableList,
+    render: loadTableList
   }
 };
 
