@@ -27,7 +27,11 @@ CSTableScan::CSTableScan(
     runtime_(runtime),
     colindex_(0),
     aggr_strategy_(stmt_->aggregationStrategy()),
-    rows_scanned_(0) {}
+    rows_scanned_(0) {
+  for (const auto& slnode : stmt_->selectList()) {
+    column_names_.emplace_back(slnode->columnName());
+  }
+}
 
 void CSTableScan::execute(
     ExecutionContext* context,
@@ -39,7 +43,6 @@ void CSTableScan::execute(
   Set<String> column_names;
   for (const auto& slnode : stmt_->selectList()) {
     findColumns(slnode->expression(), &column_names);
-    column_names_.emplace_back(slnode->columnName());
   }
 
   auto where_expr = stmt_->whereExpression();

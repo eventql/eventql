@@ -7,15 +7,17 @@ ZBase.registerView((function() {
   var default_end_time = (new Date()).getTime() * 1000;
   var next_page_time;
   var pagination_history = [];
+  var datepicker;
 
   var init = function(params) {
     $.showLoader();
     query_mgr = EventSourceHandler();
 
     $.httpGet("/api/v1/logfiles", function(r) {
+      render();
+
       if (r.status == 200) {
         logfiles = JSON.parse(r.response).logfile_definitions;
-        render();
         updateQuery(params.path);
       } else {
         renderError("Server Error");
@@ -73,12 +75,10 @@ ZBase.registerView((function() {
     params.logfile = $(".zbase_logviewer z-dropdown.logfile_control").getValue();
 
     // param: time
-    var time_control = $(".zbase_logviewer .time_control");
-    var time = time_control.getAttribute("data-timestamp");
+    var time = datepicker.getTime() * 1000;
     if (time != default_end_time) {
       params.time = time;
     }
-
 
     // param: filter
     params.filter_type = $(".zbase_logviewer .filter_type_control").getValue();
@@ -143,10 +143,8 @@ ZBase.registerView((function() {
       end_time = default_end_time;
     }
 
-    var time_control = $(".zbase_logviewer .time_control");
-    time_control.setAttribute("data-timestamp", end_time);
-    time_control.value = DateUtil.printTimestamp(end_time);
-  }
+    datepicker.setTime(Math.floor(end_time / 1000));
+  };
 
   var setFilterParam = function(filter_type, filter) {
     if (!filter_type) {
@@ -286,6 +284,7 @@ ZBase.registerView((function() {
 
   var render = function() {
     var page = $.getTemplate("views/logviewer", "zbase_logviewer_main_tpl");
+    datepicker = DateTimePicker($(".time_control", page));
 
     $(".logfile_control", page).addEventListener("change", submitControls);
     $(".filter_type_control", page).addEventListener("change", submitControls);
@@ -295,6 +294,8 @@ ZBase.registerView((function() {
     $(".z-pager .prev", page).addEventListener("click", goToPreviousPage);
     $(".go_to_recent a", page).addEventListener("click", goToMostRecentPage);
     $(".filter_control", page).addEventListener("change", submitControls);
+    $(".time_control", page).addEventListener(
+      "z-datetimepicker-change", submitControls);
     $(".filter_control", page).addEventListener("keyup", function(e) {
       if (e.keyCode == 13) submitControls();
     });
