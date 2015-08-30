@@ -404,3 +404,29 @@ DateUtil.milliSecondsSinceMidnight = function(hours, minutes, seconds) {
       parseInt(minutes, 10) * this.millisPerMinute +
       parseInt(seconds, 10) * this.millisPerSecond);
 };
+
+DateUtil.printTimeAgo = function(timestamp) {
+  var now = Date.now();
+  var date = new Date(timestamp);
+  var offset = Math.floor((now - timestamp / 1000) / 1000);
+
+  if (offset < 10) {
+    return "just now";
+  } else if (offset < 60) {
+    var label = (offset == 1)? " second ago" : " seconds ago";
+    return offset + label;
+  } else if (offset < 3600) {
+    var time = Math.floor(offset / 60);
+    var label = (time == 1)? " minute ago" : " minutes ago";
+    return time + label;
+  } else if (offset < 86400) {
+    var time =  Math.floor(offset / 3600);
+    var label = (time == 1)? " hour ago" : " hours ago";
+    return time + label;
+  } else {
+    var time = Math.floor(offset / 86400);
+    var label = (time == 1)? " day ago" : " days ago";
+    return time + label;
+  }
+}
+
