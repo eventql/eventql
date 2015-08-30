@@ -87,16 +87,18 @@ var CodeEditorComponent = function() {
         benchmark_y = e.clientY;
       }, false);
 
-      resizer.addEventListener('drag', function(e) {
-        e.preventDefault();
-        this.style.background = "";
-        this.style.border = "";
-        var offset = benchmark_y - e.clientY;
-        _this.style.height = (_this.offsetHeight - offset) + "px";
-        gutters.style.height = (_this.offsetHeight - offset) + "px";
-        benchmark_y = e.clientY;
-      }, false);
-    };
+      resizer.addEventListener('drag', function(elem) {
+        return function(e) {
+          e.preventDefault();
+          this.style.background = "";
+          this.style.border = "";
+          var offset = benchmark_y - e.clientY;
+          elem.style.height = (elem.offsetHeight - offset) + "px";
+          gutters.style.height = (elem.offsetHeight - offset) + "px";
+          benchmark_y = e.clientY;
+        };
+      });
+    }
   };
 };
 
