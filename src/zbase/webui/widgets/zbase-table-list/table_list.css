@@ -1,3 +1,9 @@
+.zbase_table_list h3 {
+  font-weight: 500;
+  color: #333;
+  margin: 0 0 10px;
+}
+
 .zbase_table_list ul {
   padding: 0;
   margin: 0;
