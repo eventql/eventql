@@ -141,6 +141,7 @@ add_library(stx-base STATIC
     cli/flagparser.cc
     cli/CLI.cc
     cli/CLICommand.cc
+    cli/term.cc
     csv/CSVOutputStream.cc
     csv/BinaryCSVOutputStream.cc
     csv/CSVInputStream.cc
