@@ -1,0 +1,35 @@
+======================= INFRA // CORE =======================
+
+>> Documentation
+
+>> Metrics Support
+
+>> SQL JOIN impl
+
+>> Chart Builder
+
+>> Metric Explorer
+
+>> Cohort Analysis
+
+>> Funnel Analysis
+
+>> JavaScript Mapreduce
+
+>> Trigger Scripts
+
+>> Editable Reports
+
+>> Editable Dashboards
+
+>> Web CSV Upload Wizard
+
+>> Export to google sheets
+
+>> Monitoring
+
+>> System Mails
+
+>> Scheduled Reports from SQL via mail/pdf/etc
+
+=========================== APPS ===========================
