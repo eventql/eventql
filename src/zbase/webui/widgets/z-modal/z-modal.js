@@ -10,14 +10,23 @@
 **/
 var ModalComponent = function() {
   this.createdCallback = function() {
+    var _this = this;
     this.onclick = function(e) {
+      _this.close();
+    };
+
+    this.querySelector("z-modal-close-icon").onclick = function() {
+      _this.close();
+    };
+
+    this.querySelector("z-modal-box").onclick = function(e) {
       e.stopPropagation();
     };
+
   };
 
   this.show = function() {
     this.setAttribute('data-active', 'active');
-    console.log("show", this);
 
     var on_escape = function(e) {
       if (e.keyCode == 27) {
@@ -25,9 +34,10 @@ var ModalComponent = function() {
       }
     };
 
-    //place modal
-    var height = this.getBoundingClientRect().height;
-    this.style.top = ((window.innerHeight - height) / 4) + "px";
+    //place modal box
+    var modal_box = this.querySelector("z-modal-box");
+    var height = modal_box.getBoundingClientRect().height;
+    modal_box.style.top = ((window.innerHeight - height) / 4) + "px";
 
     this.escape_listener = on_escape.bind(this);
     document.addEventListener('keyup', this.escape_listener, false);
