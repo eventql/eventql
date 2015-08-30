@@ -123,6 +123,19 @@ z-dropdown[data-active] z-dropdown-items,
   display: inline-block;
 }
 
+/*-----------------------
+    Items Apply Button
+-----------------------*/
+z-dropdown z-dropdown-items button.z-button {
+  font-size: inherit;
+  float: right;
+  margin: 4px 3px;
+}
+
+z-dropdown z-dropdown-items button.z-button + z-dropdown-item {
+  clear:both;
+  border-top: none;
+}
 
 /*--------------
     Item
