@@ -380,7 +380,7 @@ int main(int argc, const char** argv) {
       stx::cli::FlagParser::T_STRING,
       false,
       NULL,
-      "api.zbase.io"
+      "api.zbase.io",
       "DeepAnalytics API Host",
       "<host>");
 
