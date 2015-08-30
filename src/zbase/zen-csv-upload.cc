@@ -25,7 +25,7 @@ void run(const cli::FlagParser& flags) {
   auto table_name = flags.getString("table_name");
   auto input_file = flags.getString("input_file");
   auto api_token = flags.getString("api_token");
-  String api_url = "http://api.zbase.io/api/v1";
+  auto api_host = flags.getString("api_host");
   auto shard_size = flags.getInt("shard_size");
 
   stx::logInfo("dx-csv-upload", "Opening CSV file '$0'", input_file);
@@ -186,7 +186,7 @@ void run(const cli::FlagParser& flags) {
 
   auto create_res = http_client.executeRequest(
       http::HTTPRequest::mkPost(
-          api_url + "/tables/create_table",
+          "http://" + api_host + "/api/v1/tables/create_table",
           create_req,
           auth_headers));
 
@@ -224,8 +224,8 @@ void run(const cli::FlagParser& flags) {
     }
 
     auto upload_uri = StringUtil::format(
-        "$0/tables/upload_table?table=$1&shard=$2",
-        api_url,
+        "http://$0/api/v1/tables/upload_table?table=$1&shard=$2",
+        api_host,
         URI::urlEncode(table_name),
         nshard);
 
@@ -285,6 +285,15 @@ int main(int argc, const char** argv) {
       NULL,
       "DeepAnalytics API Token",
       "<token>");
+
+  flags.defineFlag(
+      "api_host",
+      stx::cli::FlagParser::T_STRING,
+      false,
+      NULL,
+      "api.zbase.io"
+      "DeepAnalytics API Host",
+      "<host>");
 
   flags.defineFlag(
       "shard_size",
