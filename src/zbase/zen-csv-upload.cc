@@ -31,17 +31,25 @@ void run(const cli::FlagParser& flags) {
 
   stx::logInfo("dx-csv-upload", "Opening CSV file '$0'", input_file);
 
-  auto csv = CSVInputStream::openFile(
-      input_file,
-      '\t',
-      '\n');
+  auto is = FileInputStream::openFile(input_file);
+  auto bom = is->readByteOrderMark();
+  switch (bom) {
+    case FileInputStream::BOM_UTF16:
+      RAISE(kNotYetImplementedError, "UTF-16 encoded files are not yet supported");
+
+    case FileInputStream::BOM_UTF8:
+    case FileInputStream::BOM_UNKNOWN:
+      break;
+  };
+
+  DefaultCSVInputStream csv(std::move(is), '\t', '\n');
 
   stx::logInfo(
       "dx-csv-upload",
       "Analyzing the input file. This might take a few minutes...");
 
   Vector<String> columns;
-  csv->readNextRow(&columns);
+  csv.readNextRow(&columns);
 
   HashMap<String, HumanDataType> column_types;
   for (const auto& hdr : columns) {
@@ -51,7 +59,7 @@ void run(const cli::FlagParser& flags) {
   Vector<String> row;
   size_t num_rows = 0;
   size_t num_rows_uploaded = 0;
-  while (csv->readNextRow(&row)) {
+  while (csv.readNextRow(&row)) {
     ++num_rows;
 
     for (size_t i = 0; i < row.size() && i < columns.size(); ++i) {
@@ -152,7 +160,7 @@ void run(const cli::FlagParser& flags) {
     }
   }
 
-  csv->rewind();
+  csv.rewind();
 
   auto schema = mkRef(new msg::MessageSchema("<anonymous>", schema_fields));
   stx::logDebug("dx-csv-upload", "Detected schema:\n$0", schema->toString());
@@ -207,7 +215,7 @@ void run(const cli::FlagParser& flags) {
         num_rows);
   });
 
-  csv->skipNextRow();
+  csv.skipNextRow();
 
   for (size_t nshard = 0; num_rows_uploaded < num_rows; ++nshard) {
     Buffer shard_data;
@@ -217,7 +225,7 @@ void run(const cli::FlagParser& flags) {
     shard_csv.appendRow(columns);
 
     size_t num_rows_shard = 0;
-    while (num_rows_shard < shard_size && csv->readNextRow(&row)) {
+    while (num_rows_shard < shard_size && csv.readNextRow(&row)) {
       ++num_rows_uploaded;
       ++num_rows_shard;
 
