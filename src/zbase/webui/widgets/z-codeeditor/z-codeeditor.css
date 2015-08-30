@@ -318,3 +318,16 @@ z-codeeditor code {
   padding: 20px;
   word-break: break-all;
 }
+
+/* Resizer Tooltip */
+z-codeeditor z-codeeditor-resizer-tooltip {
+  height: 20px;
+  background: url(data:image/gif;base64,R0lGODlhZwABAJEAAPD2+Nve3////////yH5BAEAAAMALAAAAABnAAEAAAINhI+py60hopy02otrAQA7) left center repeat-y #fff;
+  cursor: row-resize;
+  border-bottom: 1px solid #c9d0d4;
+  display: none;
+}
+
+z-codeeditor[data-resizable] z-codeeditor-resizer-tooltip {
+  display: block;
+}
