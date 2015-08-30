@@ -69,8 +69,7 @@ ZBase.registerView((function() {
         break;
 
       default:
-        name = "";
-        break;
+        $.fatalError();
     }
 
     var postdata = $.buildQueryString({
