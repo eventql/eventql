@@ -432,7 +432,7 @@ $.onClick = function(elem, fn) {
   elem.addEventListener("click", function(e) {
     e.preventDefault();
     e.stopPropagation();
-    fn.bind(this)();
+    fn.call(this, e);
     return false;
   });
 };
