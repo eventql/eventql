@@ -15,6 +15,7 @@
 #include "stx/io/file.h"
 #include "stx/inspect.h"
 #include "stx/human.h"
+#include "stx/UTF8.h"
 #include "stx/http/httpclient.h"
 #include "stx/util/SimpleRateLimit.h"
 #include "stx/protobuf/MessageSchema.h"
@@ -219,6 +220,13 @@ void run(const cli::FlagParser& flags) {
     while (num_rows_shard < shard_size && csv->readNextRow(&row)) {
       ++num_rows_uploaded;
       ++num_rows_shard;
+
+      for (const auto& c : row) {
+        if (!UTF8::isValidUTF8(c)) {
+          RAISEF(kRuntimeError, "not a valid UTF8 string: '$0'", c);
+        }
+      }
+
       shard_csv.appendRow(row);
       status_line.runMaybe();
     }
