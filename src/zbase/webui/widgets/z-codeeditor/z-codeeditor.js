@@ -91,6 +91,7 @@ var CodeEditorComponent = function() {
   this.attributeChangedCallback = function(attr) {
     switch (attr) {
       case "data-readonly":
+        // FIXME: handle the case where the readonly attribute was removed
         this.setReadonly();
       break;
 
