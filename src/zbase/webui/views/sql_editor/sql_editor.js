@@ -79,10 +79,12 @@ ZBase.registerView((function() {
     // code editor
     var editor = $("z-codeeditor", page);
     editor.setValue(doc.content);
+    editor.setupResizing($(".resizer_tooltip", page));
     editor.addEventListener("execute", function(e) {
       executeQuery(e.value);
       if (docsync) docsync.saveDocument();
     });
+
 
     $.onClick($("button[data-action='execute-query']", page), function() {
       editor.execute();
