@@ -51,15 +51,45 @@ var CodeEditorComponent = function() {
     }, false);
   };
 
+  var setupResizer = function() {
+    var resizer = this.querySelector("z-codeeditor-resizer-tooltip");
+    var gutters = this.querySelector(".CodeMirror-gutters");
+    var codemirror = this.querySelector(".CodeMirror");
+    var benchmark_y;
+    codemirror.style.height = (this.offsetHeight - resizer.offsetHeight) + "px";
+
+    //TODO handle horizontal resizing
+    resizer.addEventListener('dragstart', function(e) {
+      this.style.background = "transparent";
+      this.style.border = "none";
+      benchmark_y = e.clientY;
+    }, false);
+
+    resizer.addEventListener('drag', (function(elem) {
+      return function(e) {
+        e.preventDefault();
+        this.style.background = "";
+        this.style.border = "";
+        var offset = benchmark_y - e.clientY;
+        var height = elem.offsetHeight - offset;
+        elem.style.height = height + "px";
+        codemirror.style.height = (height - resizer.offsetHeight) + "px";
+        gutters.style.height = height + "px";
+        benchmark_y = e.clientY;
+      }
+    })(this));
+  };
+
   this.createdCallback = function() {
     var tpl = $.getTemplate("widgets/z-codeeditor", "z-codeeditor-base-tpl");
+    this.appendChild(tpl);
 
-    var textarea = document.createElement("textarea");
-    textarea.setAttribute("autofocus", "autofocus");
-    this.appendChild(textarea);
-
-    var codemirror = initCodeMirror.call(this, textarea);
+    var codemirror = initCodeMirror.call(this, this.querySelector("textarea"));
     setupKeyPressHandlers.call(this);
+
+    if (this.hasAttribute("data-resizable")) {
+      window.setTimeout(setupResizer.bind(this));
+    }
 
     this.getValue = function() {
       return codemirror.getValue();
@@ -74,29 +104,6 @@ var CodeEditorComponent = function() {
       var ev = new Event('execute');
       ev.value = this.getValue();
       this.dispatchEvent(ev);
-    }
-
-    this.setupResizing = function(resizer) {
-      var gutters = this.querySelector(".CodeMirror-gutters");
-      var benchmark_y;
-
-      resizer.addEventListener('dragstart', function(e) {
-        this.style.background = "transparent";
-        this.style.border = "none";
-        benchmark_y = e.clientY;
-      }, false);
-
-      resizer.addEventListener('drag', (function(elem) {
-        return function(e) {
-          e.preventDefault();
-          this.style.background = "";
-          this.style.border = "";
-          var offset = benchmark_y - e.clientY;
-          elem.style.height = (elem.offsetHeight - offset) + "px";
-          gutters.style.height = (elem.offsetHeight - offset) + "px";
-          benchmark_y = e.clientY;
-        }
-      })(this));
     }
   };
 };
