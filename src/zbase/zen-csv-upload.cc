@@ -31,6 +31,37 @@ void run(const cli::FlagParser& flags) {
   auto shard_size = flags.getInt("shard_size");
   bool confirm_schema = !flags.isSet("skip_confirmation");
 
+  char col_sep = '\t';
+  char row_sep = '\n';
+  char quote_char = '"';
+
+  if (flags.isSet("column_separator")) {
+    auto s = flags.getString("column_separator");
+    if (s.size() != 1) {
+      RAISEF(kIllegalArgumentError, "invalid column separator: $0", s);
+    }
+
+    col_sep = s[0];
+  }
+
+  if (flags.isSet("row_separator")) {
+    auto s = flags.getString("row_separator");
+    if (s.size() != 1) {
+      RAISEF(kIllegalArgumentError, "invalid row separator: $0", s);
+    }
+
+    row_sep = s[0];
+  }
+
+  if (flags.isSet("quote_char")) {
+    auto s = flags.getString("quote_char");
+    if (s.size() != 1) {
+      RAISEF(kIllegalArgumentError, "invalid quote char: $0", s);
+    }
+
+    quote_char = s[0];
+  }
+
   stx::logInfo("dx-csv-upload", "Opening CSV file '$0'", input_file);
 
   auto is = FileInputStream::openFile(input_file);
@@ -44,7 +75,7 @@ void run(const cli::FlagParser& flags) {
       break;
   };
 
-  DefaultCSVInputStream csv(std::move(is), '\t', '\n');
+  DefaultCSVInputStream csv(std::move(is), col_sep, row_sep, quote_char);
 
   stx::logInfo(
       "dx-csv-upload",
@@ -307,6 +338,33 @@ int main(int argc, const char** argv) {
       NULL,
       "table name",
       "<name>");
+
+  flags.defineFlag(
+      "column_separator",
+      stx::cli::FlagParser::T_STRING,
+      false,
+      NULL,
+      "\t",
+      "CSV column separator (default: '\\t')",
+      "<char>");
+
+  flags.defineFlag(
+      "row_separator",
+      stx::cli::FlagParser::T_STRING,
+      false,
+      NULL,
+      "\n",
+      "CSV row separator (default: '\\n')",
+      "<char>");
+
+  flags.defineFlag(
+      "quote_char",
+      stx::cli::FlagParser::T_STRING,
+      false,
+      NULL,
+      "\"",
+      "CSV quote char (default: '\"')",
+      "<char>");
 
   flags.defineFlag(
       "api_token",
