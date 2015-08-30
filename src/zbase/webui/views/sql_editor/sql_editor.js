@@ -94,9 +94,12 @@ ZBase.registerView((function() {
     if (readonly) {
       $(".share_button", page).remove();
     } else {
-      var modal = ShareDocModal($(".zbase_sql_editor", page));
+      var modal = ShareDocModal(
+          $(".zbase_sql_editor", page),
+          doc.uuid,
+          "/a/sql/" + doc.uuid);
       $.onClick($("button[data-action='share-query']", page), function() {
-        modal.show(doc_id, "/a/sql/" + doc_id);
+        modal.show();
       });
     }
 
