@@ -64,6 +64,7 @@ ZBase.registerView((function() {
 
   var renderQueryEditor = function(doc) {
     var readonly = !doc.is_writable;
+    //readonly = true;
     var page = $.getTemplate(
         "views/sql_editor",
         "zbase_sql_editor_main_tpl");
@@ -93,7 +94,10 @@ ZBase.registerView((function() {
     if (readonly) {
       $(".share_button", page).remove();
     } else {
-      // init sharing widget
+      var modal = ShareDocModal($(".zbase_sql_editor", page));
+      $.onClick($("button[data-action='share-query']", page), function() {
+        modal.show(doc_id, "/a/sql/" + doc_id);
+      });
     }
 
     $.handleLinks(page);
@@ -108,8 +112,6 @@ ZBase.registerView((function() {
       $(".zbase_sql_editor .readonly_hint").classList.remove("hidden");
     }
 
-    // document sharing settings
-    initDocumentSharingModal(doc.uuid);
 
     // execute query
     if (doc.content.length > 0) {
@@ -151,15 +153,6 @@ ZBase.registerView((function() {
       docsync.saveDocument();
       modal.close();
     });
-  };
-
-  var initDocumentSharingModal = function(doc_id) {
-    var modal = ShareDocModal($(".zbase_sql_editor"));
-
-    $.onClick($("button[data-action='share-query']"), function() {
-      modal.show(doc_id, "/a/sql/" + doc_id);
-    });
-
   };
 
   var setDocumentTitle = function(title) {
