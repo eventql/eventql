@@ -79,7 +79,6 @@ var CodeEditorComponent = function() {
     this.setupResizing = function(resizer) {
       var gutters = this.querySelector(".CodeMirror-gutters");
       var benchmark_y;
-      var _this = this;
 
       resizer.addEventListener('dragstart', function(e) {
         this.style.background = "transparent";
@@ -87,7 +86,7 @@ var CodeEditorComponent = function() {
         benchmark_y = e.clientY;
       }, false);
 
-      resizer.addEventListener('drag', function(elem) {
+      resizer.addEventListener('drag', (function(elem) {
         return function(e) {
           e.preventDefault();
           this.style.background = "";
@@ -96,8 +95,8 @@ var CodeEditorComponent = function() {
           elem.style.height = (elem.offsetHeight - offset) + "px";
           gutters.style.height = (elem.offsetHeight - offset) + "px";
           benchmark_y = e.clientY;
-        };
-      });
+        }
+      })(this));
     }
   };
 };
