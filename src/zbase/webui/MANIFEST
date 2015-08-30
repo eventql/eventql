@@ -11,6 +11,7 @@ route {
   require_module: "widgets/z-progressbar"
   require_module: "widgets/zbase-header"
   require_module: "widgets/zbase-query-progress"
+  require_module: "widgets/zbase-share-doc-modal"
   require_module: "views/sql_editor"
 }
 
