@@ -341,7 +341,7 @@ var DropDownComponent = function() {
   };
 
   this.__fireItemChangedEvent = function(detail, item) {
-    var click_ev = new CustomEvent("item-changed", {
+    var click_ev = new CustomEvent("item-change", {
       detail: detail,
       bubbles: true,
       cancelable: true
@@ -352,7 +352,7 @@ var DropDownComponent = function() {
 
   this.__onApply = function() {
     this.hideDropdown();
-    var change_ev = new CustomEvent("changed", {
+    var change_ev = new CustomEvent("change", {
       detail : {value: this.getValue()},
       bubbles: true,
       cancelable: true
