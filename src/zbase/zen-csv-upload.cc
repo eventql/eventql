@@ -10,6 +10,7 @@
 #include "stx/application.h"
 #include "stx/cli/flagparser.h"
 #include "stx/cli/CLI.h"
+#include "stx/cli/term.h"
 #include "stx/csv/CSVInputStream.h"
 #include "stx/csv/BinaryCSVOutputStream.h"
 #include "stx/io/file.h"
@@ -28,6 +29,7 @@ void run(const cli::FlagParser& flags) {
   auto api_token = flags.getString("api_token");
   auto api_host = flags.getString("api_host");
   auto shard_size = flags.getInt("shard_size");
+  bool confirm_schema = !flags.isSet("skip_confirmation");
 
   stx::logInfo("dx-csv-upload", "Opening CSV file '$0'", input_file);
 
@@ -163,7 +165,14 @@ void run(const cli::FlagParser& flags) {
   csv.rewind();
 
   auto schema = mkRef(new msg::MessageSchema("<anonymous>", schema_fields));
-  stx::logDebug("dx-csv-upload", "Detected schema:\n$0", schema->toString());
+  stx::logInfo("dx-csv-upload", "Detected columns:\n$0", schema->toString());
+  if (confirm_schema) {
+    stx::logInfo("dx-csv-upload", "Is this information correct? [y/n]");
+    if (!stx::Term::readConfirmation()) {
+      stx::logInfo("dx-csv-upload", "Aborting...");
+      return;
+    }
+  }
 
   auto num_shards = (num_rows + shard_size - 1) / shard_size;
   stx::logDebug("dx-csv-upload", "Splitting into $0 shards", num_shards);
@@ -319,6 +328,15 @@ int main(int argc, const char** argv) {
       "262144",
       "shard size",
       "<num>");
+
+  flags.defineFlag(
+      "skip_confirmation",
+      stx::cli::FlagParser::T_SWITCH,
+      false,
+      "y",
+      NULL,
+      "yes to all",
+      "<switch>");
 
   flags.parseArgv(argc, argv);
 
