@@ -1,38 +1,41 @@
 var TableListWidget = function(elem) {
-  var elem = elem;
   var schema_modal = TableSchemaModalWidget(elem);
+  var tpl = $.getTemplate(
+    "widgets/zbase-table-list",
+    "zbase_table_list_tpl");
 
-  var loadTableList = function() {
+  var renderTableList = function() {
+    elem.appendChild(tpl);
+
     $.httpGet("/api/v1/tables", function(r) {
       if (r.status == 200) {
-        renderTableList(JSON.parse(r.response).tables);
+        var ul_elem = $(".zbase_table_list ul", elem);
+        var tables = JSON.parse(r.response).tables;
+
+        tables.forEach(function(table) {
+          var li_elem = document.createElement("li");
+          li_elem.innerHTML = table.name;
+          ul_elem.appendChild(li_elem);
+
+          $.onClick(li_elem, function() {
+            schema_modal.render(table.name);
+          });
+        });
+
       } else {
         //TODO handle error
       }
+
+      hideLoader();
     });
   };
 
-  var renderTableList = function(tables) {
-    var tpl = $.getTemplate(
-      "widgets/zbase-table-list",
-      "zbase_table_list_tpl");
-
-    var ul_elem = $("ul", tpl);
-    tables.forEach(function(table) {
-      var li_elem = document.createElement("li");
-      li_elem.innerHTML = table.name;
-      ul_elem.appendChild(li_elem);
-
-      $.onClick(li_elem, function() {
-        schema_modal.render(table.name);
-      });
-    });
-
-    elem.appendChild(tpl);
-    return;
+  var hideLoader = function() {
+    $(".zbase_table_list ul", elem).classList.remove("hidden");
+    $(".zbase_table_list .zbase_loader", elem).classList.add("hidden");
   };
 
   return {
-    render: loadTableList
+    render: renderTableList
   }
 };
