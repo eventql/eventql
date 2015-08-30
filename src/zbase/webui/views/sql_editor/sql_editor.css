@@ -104,6 +104,14 @@
   color: #000;
 }
 
+.zbase_sql_editor .zbase_sql_editor_result_pane table.z-table {
+  font-size: 12px;
+}
+
+.zbase_sql_editor .zbase_sql_editor_result_pane table.z-table tr td {
+  line-height: 14px;
+}
+
 .zbase_sql_editor .error_message {
   display: block;
   position: relative;
@@ -182,9 +190,10 @@
 
 .zbase_sql_editor_result_pane .zbase_result_pane_bar label {
   float:left;
-  line-height: 40px;
+  line-height: 38px;
   padding: 0 12px;
   font-size: 13px;
+  font-weight: 500;
 }
 
 .zbase_sql_editor_result_pane .zbase_result_pane_bar.clickable:before {
@@ -296,3 +305,4 @@
 .zbase_sql_editor .readonly_hint.hidden {
   display: none;
 }
+
