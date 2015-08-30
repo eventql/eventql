@@ -1,0 +1,10 @@
+ul.zbase_table_list {
+  padding: 0;
+  margin: 0;
+  list-style-type: none;
+}
+
+ul.zbase_table_list li {
+  margin-bottom: 10px;
+  cursor: pointer;
+}
