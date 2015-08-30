@@ -85,7 +85,6 @@ ZBase.registerView((function() {
       if (docsync) docsync.saveDocument();
     });
 
-
     $.onClick($("button[data-action='execute-query']", page), function() {
       editor.execute();
     });
