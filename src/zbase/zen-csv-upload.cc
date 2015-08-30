@@ -165,7 +165,13 @@ void run(const cli::FlagParser& flags) {
   csv.rewind();
 
   auto schema = mkRef(new msg::MessageSchema("<anonymous>", schema_fields));
-  stx::logInfo("dx-csv-upload", "Detected columns:\n$0", schema->toString());
+  stx::logInfo(
+      "dx-csv-upload",
+      "Found $0 row(s) and $1 column(s):\n    - $2",
+      num_rows,
+      columns.size(),
+      StringUtil::join(columns, "\n    - "));
+
   if (confirm_schema) {
     stx::logInfo("dx-csv-upload", "Is this information correct? [y/n]");
     if (!stx::Term::readConfirmation()) {
