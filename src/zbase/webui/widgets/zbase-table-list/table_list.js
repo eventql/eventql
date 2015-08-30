@@ -1,35 +1,39 @@
+var TableListWidget = function() {
 
-            <h3 class="sidebar_title">
-              <i class="fa fa-database"></i>&nbsp;Tables
-            </h3>
 
-            <ul class="zbase_sql_editor_table_list" style="display:none;"></ul>
-
-  function renderTableList(pane) {
-    var ul = pane.querySelector(".zbase_sql_editor_table_list");
-    var source_id = "tables";
-    var source = source_handler.get(
-      source_id,
-      "/api/v1/sql_stream?query=" + encodeURIComponent("SHOW TABLES;"));
-
-    source.addEventListener('result', function(e) {
-      source_handler.close(source_id);
-
-      var data = JSON.parse(e.data);
-      data.results[0].rows.forEach(function(table) {
-        var li = document.createElement("li");
-        li.innerHTML = table[0];
-        ul.appendChild(li);
-        li.addEventListener('click', function() {
-          renderTableDescriptionModal(table[0]);
-        }, false);
-      });
-      pane.querySelector(".sidebar_section .zbase_loader").classList.add("hidden");
-      ul.style.display = "block";
+  var loadTableList = function(elem) {
+    $.httpGet("/api/v1/tables", function(r) {
+      if (r.status == 200) {
+        renderTableList(elem, JSON.parse(r.response).tables);
+      } else {
+        //TODO handle error
+      }
     });
+
   };
 
-  function renderTableDescriptionModal(table) {
+  var renderTableList = function(elem, tables) {
+    var tpl = $.getTemplate(
+      "widgets/zbase-table-list",
+      "zbase_table_list_tpl");
+
+    var ul_elem = $("ul", tpl);
+    tables.forEach(function(table) {
+      var li_elem = document.createElement("li");
+      li_elem.innerHTML = table.name;
+      ul_elem.appendChild(li_elem);
+    });
+
+    elem.appendChild(tpl);
+    return;
+  };
+
+  return {
+    render: loadTableList,
+  }
+};
+
+  /*function renderTableDescriptionModal(table) {
     var modal = document.querySelector(".zbase_sql_editor_modal.table_descr");
     var loader = modal.querySelector(".zbase_loader");
     var source_id = "table_descr";
@@ -80,5 +84,6 @@
       modal.querySelector(".z-table").classList.add("hidden");
       error_message.classList.remove("hidden");
     });
-  };
+  };*/
+
 
