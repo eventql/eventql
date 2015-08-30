@@ -73,6 +73,10 @@ var ShareDocModal = function(elem, id, link) {
     updateSettings();
   });
 
+  $.onClick($(".zbase_share_doc_link", modal), function() {
+    this.select();
+  });
+
   var access_selections = modal.querySelectorAll(".access_selection");
   for (var i = 0; i < access_selections.length; i++) {
     $.onClick(access_selections[i], function() {
