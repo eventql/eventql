@@ -23,9 +23,9 @@ var TableListWidget = function(elem) {
       li_elem.innerHTML = table.name;
       ul_elem.appendChild(li_elem);
 
-      li_elem.addEventListener("li_elem", function() {
-        schema_modal.render(table);
-      }, false);
+      $.onClick(li_elem, function() {
+        schema_modal.render(table.name);
+      });
     });
 
     elem.appendChild(tpl);
