@@ -79,6 +79,7 @@ ZBase.registerView((function() {
     // code editor
     var editor = $("z-codeeditor", page);
     editor.setValue(doc.content);
+    if (readonly) editor.setAttribute("data-readonly", "readonly");
     editor.addEventListener("execute", function(e) {
       executeQuery(e.value);
       if (docsync) docsync.saveDocument();

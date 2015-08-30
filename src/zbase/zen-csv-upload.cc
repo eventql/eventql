@@ -15,6 +15,7 @@
 #include "stx/io/file.h"
 #include "stx/inspect.h"
 #include "stx/human.h"
+#include "stx/UTF8.h"
 #include "stx/http/httpclient.h"
 #include "stx/util/SimpleRateLimit.h"
 #include "stx/protobuf/MessageSchema.h"
@@ -25,22 +26,30 @@ void run(const cli::FlagParser& flags) {
   auto table_name = flags.getString("table_name");
   auto input_file = flags.getString("input_file");
   auto api_token = flags.getString("api_token");
-  String api_url = "http://api.zbase.io/api/v1";
+  auto api_host = flags.getString("api_host");
   auto shard_size = flags.getInt("shard_size");
 
   stx::logInfo("dx-csv-upload", "Opening CSV file '$0'", input_file);
 
-  auto csv = CSVInputStream::openFile(
-      input_file,
-      '\t',
-      '\n');
+  auto is = FileInputStream::openFile(input_file);
+  auto bom = is->readByteOrderMark();
+  switch (bom) {
+    case FileInputStream::BOM_UTF16:
+      RAISE(kNotYetImplementedError, "UTF-16 encoded files are not yet supported");
+
+    case FileInputStream::BOM_UTF8:
+    case FileInputStream::BOM_UNKNOWN:
+      break;
+  };
+
+  DefaultCSVInputStream csv(std::move(is), '\t', '\n');
 
   stx::logInfo(
       "dx-csv-upload",
       "Analyzing the input file. This might take a few minutes...");
 
   Vector<String> columns;
-  csv->readNextRow(&columns);
+  csv.readNextRow(&columns);
 
   HashMap<String, HumanDataType> column_types;
   for (const auto& hdr : columns) {
@@ -50,7 +59,7 @@ void run(const cli::FlagParser& flags) {
   Vector<String> row;
   size_t num_rows = 0;
   size_t num_rows_uploaded = 0;
-  while (csv->readNextRow(&row)) {
+  while (csv.readNextRow(&row)) {
     ++num_rows;
 
     for (size_t i = 0; i < row.size() && i < columns.size(); ++i) {
@@ -151,7 +160,7 @@ void run(const cli::FlagParser& flags) {
     }
   }
 
-  csv->rewind();
+  csv.rewind();
 
   auto schema = mkRef(new msg::MessageSchema("<anonymous>", schema_fields));
   stx::logDebug("dx-csv-upload", "Detected schema:\n$0", schema->toString());
@@ -186,7 +195,7 @@ void run(const cli::FlagParser& flags) {
 
   auto create_res = http_client.executeRequest(
       http::HTTPRequest::mkPost(
-          api_url + "/tables/create_table",
+          "http://" + api_host + "/api/v1/tables/create_table",
           create_req,
           auth_headers));
 
@@ -206,7 +215,7 @@ void run(const cli::FlagParser& flags) {
         num_rows);
   });
 
-  csv->skipNextRow();
+  csv.skipNextRow();
 
   for (size_t nshard = 0; num_rows_uploaded < num_rows; ++nshard) {
     Buffer shard_data;
@@ -216,16 +225,23 @@ void run(const cli::FlagParser& flags) {
     shard_csv.appendRow(columns);
 
     size_t num_rows_shard = 0;
-    while (num_rows_shard < shard_size && csv->readNextRow(&row)) {
+    while (num_rows_shard < shard_size && csv.readNextRow(&row)) {
       ++num_rows_uploaded;
       ++num_rows_shard;
+
+      for (const auto& c : row) {
+        if (!UTF8::isValidUTF8(c)) {
+          RAISEF(kRuntimeError, "not a valid UTF8 string: '$0'", c);
+        }
+      }
+
       shard_csv.appendRow(row);
       status_line.runMaybe();
     }
 
     auto upload_uri = StringUtil::format(
-        "$0/tables/upload_table?table=$1&shard=$2",
-        api_url,
+        "http://$0/api/v1/tables/upload_table?table=$1&shard=$2",
+        api_host,
         URI::urlEncode(table_name),
         nshard);
 
@@ -285,6 +301,15 @@ int main(int argc, const char** argv) {
       NULL,
       "DeepAnalytics API Token",
       "<token>");
+
+  flags.defineFlag(
+      "api_host",
+      stx::cli::FlagParser::T_STRING,
+      false,
+      NULL,
+      "api.zbase.io"
+      "DeepAnalytics API Host",
+      "<host>");
 
   flags.defineFlag(
       "shard_size",
