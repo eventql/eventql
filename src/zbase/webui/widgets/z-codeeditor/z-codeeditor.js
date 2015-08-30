@@ -75,6 +75,28 @@ var CodeEditorComponent = function() {
       ev.value = this.getValue();
       this.dispatchEvent(ev);
     }
+
+    this.setupResizing = function(resizer) {
+      var gutters = this.querySelector(".CodeMirror-gutters");
+      var benchmark_y;
+      var _this = this;
+
+      resizer.addEventListener('dragstart', function(e) {
+        this.style.background = "transparent";
+        this.style.border = "none";
+        benchmark_y = e.clientY;
+      }, false);
+
+      resizer.addEventListener('drag', function(e) {
+        e.preventDefault();
+        this.style.background = "";
+        this.style.border = "";
+        var offset = benchmark_y - e.clientY;
+        _this.style.height = (_this.offsetHeight - offset) + "px";
+        gutters.style.height = (_this.offsetHeight - offset) + "px";
+        benchmark_y = e.clientY;
+      }, false);
+    };
   };
 };
 
