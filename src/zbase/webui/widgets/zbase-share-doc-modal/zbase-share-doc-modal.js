@@ -9,7 +9,7 @@ var ShareDocModal = function(elem, id, link) {
       if (r.status == 200) {
         var response = JSON.parse(r.response);
         $(".zbase_share_doc_link", modal).value = share_link;
-        renderAccessSelection(response.acl_policy);
+        renderACLPolicy(response.acl_policy);
         renderNamespaceInfo();
       } else {
         $.fatalError();
@@ -17,11 +17,11 @@ var ShareDocModal = function(elem, id, link) {
     });
   };
 
-  var getAccessSelection = function() {
+  var getACLPolicy = function() {
     return $(".access_selection[data-selected]", modal).getAttribute("data-policy");
   };
 
-  var renderAccessSelection = function(acl_policy) {
+  var renderACLPolicy = function(acl_policy) {
     var selection = $(".access_selection[data-selected]", modal);
     if (selection) {
       selection.removeAttribute("data-selected");
@@ -45,7 +45,7 @@ var ShareDocModal = function(elem, id, link) {
     infobar.innerHTML = "Saving...";
     infobar.classList.remove("hidden");
 
-    var post_body = "acl_policy=" + encodeURIComponent(getAccessSelection());
+    var post_body = "acl_policy=" + encodeURIComponent(getACLPolicy());
     $.httpPost("/api/v1/documents/" + doc_id, post_body, function(r) {
       if (r.status == 201) {
         hideModal();
@@ -76,7 +76,7 @@ var ShareDocModal = function(elem, id, link) {
   var access_selections = modal.querySelectorAll(".access_selection");
   for (var i = 0; i < access_selections.length; i++) {
     $.onClick(access_selections[i], function() {
-      renderAccessSelection(this.getAttribute("data-policy"));
+      renderACLPolicy(this.getAttribute("data-policy"));
     });
   }
 
