@@ -12,6 +12,7 @@ route {
   require_module: "widgets/zbase-header"
   require_module: "widgets/zbase-query-progress"
   require_module: "widgets/zbase-table-list"
+  require_module: "widgets/zbase-share-doc-modal"
   require_module: "views/sql_editor"
 }
 
@@ -45,6 +46,8 @@ route {
   require_module: "widgets/z-pager"
   require_module: "widgets/z-table"
   require_module: "widgets/z-calendar"
+  require_module: "widgets/z-button"
+  require_module: "widgets/z-datetimepicker"
   require_module: "widgets/zbase-header"
   require_module: "views/logviewer"
 }
