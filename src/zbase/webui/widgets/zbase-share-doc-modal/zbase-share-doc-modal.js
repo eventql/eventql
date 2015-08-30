@@ -1,15 +1,14 @@
-var ShareDocModal = function(elem) {
-  var showModal = function(id, doc_url) {
-    doc_id = id;
-    loadSettings(doc_url);
+var ShareDocModal = function(elem, id, link) {
+  var showModal = function() {
+    loadSettings();
     modal.show();
   };
 
-  var loadSettings = function(doc_url) {
+  var loadSettings = function() {
     $.httpGet("/api/v1/documents/" + doc_id + "?no_content=true", function(r) {
       if (r.status == 200) {
         var response = JSON.parse(r.response);
-        $(".zbase_share_doc_link", modal).value = doc_url;
+        $(".zbase_share_doc_link", modal).value = share_link;
         renderAccessSelection(response.acl_policy);
         renderNamespaceInfo();
       } else {
@@ -61,7 +60,8 @@ var ShareDocModal = function(elem) {
     modal.close();
   };
 
-  var doc_id;
+  var doc_id = id;
+  var share_link = link;
   var tpl = $.getTemplate(
     "widgets/zbase-share-doc-modal",
     "zbase-share-doc-modal-main-tpl");
