@@ -2,10 +2,15 @@ var CodeEditorComponent = function() {
 
   var initCodeMirror = function(textarea) {
     var codemirror_opts = {
-      autofocus: false,
+      autofocus: true,
       lineNumbers: true,
       lineWrapping: true
     };
+
+    if (this.hasAttribute("data-readonly")) {
+      codemirror_opts.readOnly = true;
+      codemirror_opts.autofocus = false;
+    }
 
     var codemirror = CodeMirror.fromTextArea(textarea, codemirror_opts);
     codemirror.setOption("mode", this.getAttribute("data-language"));
@@ -26,6 +31,7 @@ var CodeEditorComponent = function() {
 
     return codemirror;
   }
+
 
   var setupKeyPressHandlers = function() {
     var base = this;
@@ -104,6 +110,23 @@ var CodeEditorComponent = function() {
       var ev = new Event('execute');
       ev.value = this.getValue();
       this.dispatchEvent(ev);
+    }
+
+    this.setReadonly = function() {
+      codemirror.options.readOnly= true;
+      codemirror.options.autofocus = false;
+    };
+  };
+
+  this.attributeChangedCallback = function(attr) {
+    switch (attr) {
+      case "data-readonly":
+        // FIXME: handle the case where the readonly attribute was removed
+        this.setReadonly();
+      break;
+
+      default:
+        break;
     }
   };
 };

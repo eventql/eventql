@@ -275,11 +275,28 @@ bool FileInputStream::eof() {
 
 // FIXPAUL move somwhere else...
 FileInputStream::kByteOrderMark FileInputStream::readByteOrderMark() {
-  static char kByteOrderMarkUTF8[] = "\xEF\xBB\xBF";
-  if (buf_pos_ + 2 < buf_len_ &&
-      strncmp(buf_ + buf_pos_, kByteOrderMarkUTF8, 3) == 0) {
-    buf_pos_ += 3;
+  if (buf_pos_ >= buf_len_) {
+    readNextChunk();
+  }
+
+  static char kByteOrderMarkUTF8[] = { '\xEF', '\xBB', '\xBF' };
+  if (buf_pos_ + sizeof(kByteOrderMarkUTF8) <= buf_len_ &&
+      strncmp(
+          buf_ + buf_pos_,
+          kByteOrderMarkUTF8,
+          sizeof(kByteOrderMarkUTF8)) == 0) {
+    buf_pos_ += sizeof(kByteOrderMarkUTF8);
     return BOM_UTF8;
+  }
+
+  static char kByteOrderMarkUTF16[] = { '\xFF', '\xFE' };
+  if (buf_pos_ + sizeof(kByteOrderMarkUTF16) <= buf_len_ &&
+      strncmp(
+          buf_ + buf_pos_,
+          kByteOrderMarkUTF16,
+          sizeof(kByteOrderMarkUTF16)) == 0) {
+    buf_pos_ += sizeof(kByteOrderMarkUTF16);
+    return BOM_UTF16;
   }
 
   return BOM_UNKNOWN;

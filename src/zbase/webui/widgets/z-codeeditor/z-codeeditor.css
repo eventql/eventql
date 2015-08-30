@@ -331,3 +331,7 @@ z-codeeditor z-codeeditor-resizer-tooltip {
 z-codeeditor[data-resizable] z-codeeditor-resizer-tooltip {
   display: block;
 }
+
+z-codeeditor[data-readonly] .CodeMirror .CodeMirror-cursor {
+  visibility: hidden;
+}

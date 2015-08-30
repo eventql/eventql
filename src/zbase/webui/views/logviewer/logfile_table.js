@@ -35,7 +35,7 @@ var LogfileTable = function(rows) {
 
     tr.innerHTML =
         "<td class='fold_icon'><i class='fa'></i></td><td class='time'>" +
-        DateUtil.printTimestamp(row.time) +
+        DateUtil.printTimestamp(row.time / 1000) +
         "</td><td><span>" + $.wrapText(row.raw) + "</span></td>";
 
     row.columns.forEach(function(column) {
@@ -61,7 +61,7 @@ var LogfileTable = function(rows) {
 
     tr.innerHTML =
       "<td class='fold_icon'><i class='fa'></i></td><td class='time'>" +
-      DateUtil.printTimestamp(row.time) +"</td>";
+      DateUtil.printTimestamp(row.time / 1000) +"</td>";
 
     row.columns.forEach(function(column) {
       tr.innerHTML += "<td><span>" + $.wrapText(column) + "</span></td>";
@@ -86,7 +86,7 @@ var LogfileTable = function(rows) {
   this.renderStructuredRow = function(tbody, row) {
     var tr = document.createElement('tr');
     tr.innerHTML =
-        "<td class='time'>" + DateUtil.printTimestamp(row.time) +"</td>";
+        "<td class='time'>" + DateUtil.printTimestamp(row.time / 1000) +"</td>";
 
     row.columns.forEach(function(column) {
       tr.innerHTML += "<td><span>" + $.wrapText(column) + "</span></td>";
