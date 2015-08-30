@@ -24,6 +24,12 @@ ZBase.registerView((function() {
         page.querySelector(".zbase_documents tbody"),
         documents);
 
+    var new_doc_dropdown = $("z-dropdown", page);
+    new_doc_dropdown.addEventListener("z-dropdown-item-click", function(e) {
+      var target = e.srcElement || e.target;
+      createNewDocument(target.getAttribute("data-type"));
+    });
+
     $.handleLinks(page);
     $.replaceViewport(page)
     $.hideLoader();
@@ -31,7 +37,7 @@ ZBase.registerView((function() {
 
   var renderDocumentsList = function(tbody_elem, documents) {
     documents.forEach(function(doc) {
-      var url = "#";
+      var url = getUrlForDocument(doc.type, doc.uuid);
 
       var tr = document.createElement("tr");
       tr.innerHTML = 
@@ -41,6 +47,45 @@ ZBase.registerView((function() {
 
       $.onClick(tr, function() { $.navigateTo(url); });
       tbody_elem.appendChild(tr);
+    });
+  };
+
+  var getUrlForDocument = function(doc_type, uuid) {
+    switch (doc_type) {
+      case "sql_query":
+        return "/a/sql/" + uuid;
+
+      default:
+        return "#";
+    }
+  };
+
+  var createNewDocument = function(doc_type) {
+    var name;
+
+    switch (doc_type) {
+      case "sql_query":
+        name = "Unnamed SQL Query";
+        break;
+
+      default:
+        $.fatalError();
+        return;
+    }
+
+    var postdata = $.buildQueryString({
+      name: "Unnamed SQL Query",
+      type: doc_type
+    });
+
+    $.httpPost("/api/v1/documents", postdata, function(r) {
+      if (r.status == 201) {
+        var response = JSON.parse(r.response);
+        $.navigateTo(getUrlForDocument(doc_type, response.uuid));
+        return;
+      } else {
+        $.fatalError();
+      }
     });
   };
 
