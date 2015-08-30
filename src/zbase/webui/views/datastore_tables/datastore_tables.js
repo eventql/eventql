@@ -13,6 +13,10 @@ ZBase.registerView((function() {
     });
   };
 
+  var destroy = function() {
+    //abort http request
+  };
+
   var render = function(tables) {
     var page = $.getTemplate(
         "views/datastore_tables",
@@ -51,7 +55,7 @@ ZBase.registerView((function() {
   return {
     name: "datastore_tables",
     loadView: function(params) { load(params.url); },
-    unloadView: function() {},
+    unloadView: destroy,
     handleNavigationChange: render
   };
 })());
