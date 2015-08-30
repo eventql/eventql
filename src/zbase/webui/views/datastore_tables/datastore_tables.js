@@ -1,31 +1,16 @@
 ZBase.registerView((function() {
-  var query_mgr;
 
   var load = function(url) {
     $.showLoader();
-    query_mgr = EventSourceHandler();
 
-    var query = query_mgr.get(
-        "tables_list",
-        "/api/v1/sql_stream?query=" + encodeURIComponent("SHOW TABLES;"));
-
-    query.addEventListener("result", function(e) {
-      query_mgr.close("tables_list");
-      render(JSON.parse(e.data).results[0].rows);
+    $.httpGet("/api/v1/tables", function(r) {
+      if (r.status == 200) {
+        render(JSON.parse(r.response).tables);
+      } else {
+        $.fatalError();
+      }
       $.hideLoader();
     });
-
-    query.addEventListener("error", function(e) {
-      $.fatalError();
-      $.hideLoader();
-    });
-
-  };
-
-  var destroy = function() {
-    if (query_mgr) {
-      query_mgr.closeAll();
-    }
   };
 
   var render = function(tables) {
@@ -52,12 +37,12 @@ ZBase.registerView((function() {
         "views/datastore_tables",
         "zbase_datastore_tables_list_row_tpl");
 
-    var url = "/a/table/" + table[0];
+    var url = "/a/table/" + table.name;
 
     var table_name = $(".table_name", elem);
-    table_name.innerHTML = table[0];
+    table_name.innerHTML = table.name;
     table_name.href = url;
-    $(".table_description", elem).innerHTML = table[1];
+    //$(".table_description", elem).innerHTML = table[1];
 
     tbody.appendChild(elem);
   };
@@ -66,7 +51,7 @@ ZBase.registerView((function() {
   return {
     name: "datastore_tables",
     loadView: function(params) { load(params.url); },
-    unloadView: destroy,
+    unloadView: function() {},
     handleNavigationChange: render
   };
 })());
