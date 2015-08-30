@@ -1,6 +1,6 @@
 var TableListWidget = function(elem) {
   var elem = elem;
-  //var schema_modal = TableSchemaModalWidget(elem);
+  var schema_modal = TableSchemaModalWidget(elem);
 
   var loadTableList = function() {
     $.httpGet("/api/v1/tables", function(r) {
@@ -10,7 +10,6 @@ var TableListWidget = function(elem) {
         //TODO handle error
       }
     });
-
   };
 
   var renderTableList = function(tables) {
