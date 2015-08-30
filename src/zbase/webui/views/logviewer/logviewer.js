@@ -75,7 +75,7 @@ ZBase.registerView((function() {
     params.logfile = $(".zbase_logviewer z-dropdown.logfile_control").getValue();
 
     // param: time
-    var time = datepicker.getTime * 1000;
+    var time = datepicker.getTime() * 1000;
     if (time != default_end_time) {
       params.time = time;
     }
