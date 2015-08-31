@@ -51,7 +51,7 @@ var DropDownComponent = function() {
         button_container,
         items);
 
-      button.addEventListener("click", base.__onApply.bind(base));
+      button.addEventListener("click", base.hideDropdown.bind(base), false);
     }
 
     header_elem.addEventListener('click', function(e) {
@@ -150,11 +150,7 @@ var DropDownComponent = function() {
 
   this.toggleDropdown = function() {
     if (this.hasAttribute('data-active')) {
-      if (this.hasAttribute("data-multiselect")) {
-        this.__onApply();
-        return;
-      }
-      this.hideDropdown();
+     this.hideDropdown();
     } else {
       this.showDropdown();
     }
@@ -191,6 +187,9 @@ var DropDownComponent = function() {
     });
 
     this.dispatchEvent(ev);
+    if (this.hasAttribute("data-multiselect")) {
+      this.__fireChangeEvent();
+    }
   };
 
   /**
@@ -343,7 +342,8 @@ var DropDownComponent = function() {
       return;
     }
 
-    this.__onApply();
+    this.hideDropdown();
+    this.__fireChangeEvent();
   };
 
   this.__fireItemChangedEvent = function(detail, item) {
@@ -356,14 +356,14 @@ var DropDownComponent = function() {
     item.dispatchEvent(click_ev);
   };
 
-  this.__onApply = function() {
-    this.hideDropdown();
+  this.__fireChangeEvent = function() {
     var change_ev = new CustomEvent("change", {
       detail : {value: this.getValue()},
       bubbles: true,
       cancelable: true
     });
 
+    console.log(change_ev);
     this.dispatchEvent(change_ev);
   };
 
