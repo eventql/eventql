@@ -285,7 +285,7 @@ z-dropdown.input z-dropdown-header,
   display: inline-block;
   box-shadow: none;
   border: 1px solid rgba(39,41,43,.15);
-  border-radius: .2857rem;
+  border-radius: 3px;
 
 
   min-width: 180px;
