@@ -109,11 +109,11 @@ template {
   min-width: 960px;
   min-height: 100%;
   margin: auto;
-  max-width: 1700px;
+  max-width: 2048px;
   padding: 0 20px;
 }
 
-@media (max-width: 1700px) {
+@media (max-width: 2048px) {
   #zbase_viewport .zbase_content_pane.fullwidth {
     padding: 0;
   }
@@ -136,7 +136,7 @@ template {
 
 .zbase_header .navigation_inner {
   margin: auto;
-  max-width: 1700px;
+  max-width: 2048px;
   min-width: 960px;
   box-sizing: border-box;
   padding: 0 20px;
@@ -316,7 +316,7 @@ template {
 .zbase_page_title > div {
   padding: 1px 20px;
   margin: auto;
-  max-width: 1700px;
+  max-width: 2048px;
   min-width: 960px;
 }
 

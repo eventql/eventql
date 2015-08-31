@@ -8,7 +8,7 @@
   border-bottom: 1px solid #ddd;
 }
 
-@media (max-width: 1700px) {
+@media (max-width: 2048px) {
   .zbase_logviewer .logviewer_pane .result_pane {
     margin-left: -20px;
     margin-right: -20px;
@@ -227,7 +227,7 @@
   white-space: nowrap
 }
 
-@media (max-width: 1700px) {
+@media (max-width: 2048px) {
   .zbase_logviewer .loading_bar {
     margin-left: -10px;
     margin-right: -10px;
@@ -349,7 +349,7 @@
   color: #a94442;
 }
 
-@media (max-width: 1700px) {
+@media (max-width: 2048px) {
   .zbase_logviewer .error_message {
     margin-left: -10px;
     margin-right: -10px;
