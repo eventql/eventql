@@ -1,35 +1,22 @@
-======================= INFRA // CORE =======================
 
->> Documentation
+### v0
 
->> Metrics Support
+- [ ] Documentation
+- [ ] Metrics Support [in progress]
+- [ ] Reports [in progress]
+- [ ] Metric Explorer [in progress]
+- [ ] Chart Builder [in progress]
+- [ ] SQL JOIN impl
+- [ ] Cohort Analysis
+- [ ] Funnel Analysis
+- [ ] JavaScript Mapreduce // UDF
+- [ ] Trigger Scripts
+- [ ] Dashboards
+- [ ] Web CSV Upload Wizard
+- [ ] Export to google sheets
+- [ ] Monitoring
+- [ ] System Mails
+- [ ] Scheduled Reports from SQL via mail/pdf/etc
 
->> SQL JOIN impl
+### backlog
 
->> Chart Builder
-
->> Metric Explorer
-
->> Cohort Analysis
-
->> Funnel Analysis
-
->> JavaScript Mapreduce // UDF
-
->> Trigger Scripts
-
->> Editable Reports
-
->> Editable Dashboards
-
->> Web CSV Upload Wizard
-
->> Export to google sheets
-
->> Monitoring
-
->> System Mails
-
->> Scheduled Reports from SQL via mail/pdf/etc
-
-=========================== APPS ===========================
