@@ -17,13 +17,7 @@
   color: #888;
 }
 
-.zbase_documents table.z-table thead tr th:first-child,
-.zbase_documents table.z-table tbody tr td:first-child {
-  padding-left: 20px;
-}
-
 .zbase_documents table.z-table tbody tr td:first-child a {
-  font-weight: 400;
   color: #000;
 }
 

@@ -442,7 +442,7 @@ z-dropdown.input .z-dropdown-header:hover {
 .zbase_app z-dropdown z-dropdown-header {
   color: #333;
   border: 1px solid #bbbb;
-  font-weight: 600;
+  font-weight: 500;
   font-size: 12px;
   line-height: 28px;
   padding: 0 11px;
@@ -481,7 +481,7 @@ z-dropdown.input .z-dropdown-header:hover {
   color: #333;
   border: 1px solid #bbb;
   box-shadow: 0 0 2px rgba(0,0,0,.1);
-  font-weight: 600;
+  font-weight: 500;
   font-size: 12px;
   line-height: 28px;
   padding: 0 11px;
@@ -521,7 +521,7 @@ z-dropdown.input .z-dropdown-header:hover {
   color: #fff;
   border: none;
   box-shadow: rgba(39, 41, 43, 0.14902) 0px 0px 0px 1px inset;
-  font-weight: 600;
+  font-weight: 500;
   line-height: 34px;
 }
 
