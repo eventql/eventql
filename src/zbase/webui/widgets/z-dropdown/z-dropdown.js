@@ -304,6 +304,15 @@ var DropDownComponent = function() {
     }
   };
 
+  this.__forceSelect = function() {
+    var default_selection =
+      this.querySelector('z-dropdown-item[data-default]') ||
+      this.querySelector('z-dropdown-item');
+
+    this.selectItem(default_selection);
+    this.__fireItemChangedEvent({selected: false}, default_selection);
+  }
+
 
   this.__onItemClick = function(item) {
     if (!item) {
@@ -326,20 +335,19 @@ var DropDownComponent = function() {
       this.unselectItem(this.querySelector("z-dropdown-item[data-selected]"));
     }
 
-    //force select
-    if (!this.hasAttribute("data-allow-empty") &&
-        !this.querySelector('z-dropdown-item[data-selected]')) {
-          var default_selection =
-            this.querySelector('z-dropdown-item[data-default]') ||
-            this.querySelector('z-dropdown-item');
-          //this.selectItem(default_selection);
-    }
-
     if (selected) {
       this.selectItem(item);
     }
 
     this.__fireItemChangedEvent({selected: selected}, item);
+
+    // don't check it previously to maintain correct item-change event order
+    if (!selected &&
+        !this.hasAttribute("data-allow-empty") &&
+        !this.querySelector('z-dropdown-item[data-selected]')) {
+          this.__forceSelect();
+    }
+
     if (this.hasAttribute("data-multiselect")) {
       return;
     }
@@ -365,7 +373,6 @@ var DropDownComponent = function() {
       cancelable: true
     });
 
-    console.log(change_ev);
     this.dispatchEvent(change_ev);
   };
 
