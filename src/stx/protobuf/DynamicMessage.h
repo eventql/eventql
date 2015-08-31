@@ -33,6 +33,9 @@ public:
   bool addObject(const String& name, Function<void (DynamicMessage* msg)> fn);
 
   void toJSON(json::JSONOutputStream* json) const;
+  void fromJSON(
+      json::JSONObject::const_iterator begin,
+      json::JSONObject::const_iterator end);
 
   const msg::MessageObject& data() const;
   RefPtr<msg::MessageSchema> schema() const;
