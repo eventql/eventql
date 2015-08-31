@@ -282,7 +282,7 @@ add_executable(test-sha1 SHA1_test.cc)
 target_link_libraries(test-sha1 stx-base)
 
 add_executable(test-protobuf protobuf/protobuf_test.cc)
-target_link_libraries(test-protobuf stx-base stx-protobuf stx-json)
+target_link_libraries(test-protobuf stx-protobuf stx-json stx-base )
 
 add_executable(test-persistenthashset util/PersistentHashSet_test.cc)
 target_link_libraries(test-persistenthashset stx-base)
