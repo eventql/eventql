@@ -9,17 +9,17 @@
 -- at this point we can rebuild the old dashboards in the UI without any code --
 
 - [ ] Documentation
-- [ ] SQL JOIN impl
-- [ ] Cohort Analysis
-- [ ] Funnel Analysis
-- [ ] JavaScript Mapreduce // UDF
+- [ ] SQL v0 impl
 - [ ] Dashboards
-- [ ] Web CSV Upload Wizard
 - [ ] System Mails
-- [ ] Scheduled Reports from SQL via mail/pdf/etc
 
 ### backlog
 
+- [ ] Scheduled Reports from SQL via mail/pdf/etc
+- [ ] Web CSV Upload Wizard
+- [ ] Cohort Analysis
+- [ ] Funnel Analysis
+- [ ] JavaScript Mapreduce // UDF
 - [ ] Export to google sheets
 - [ ] Monitoring
 - [ ] Trigger Scripts
