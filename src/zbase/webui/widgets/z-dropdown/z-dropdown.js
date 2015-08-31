@@ -282,30 +282,46 @@ var DropDownComponent = function() {
     if (checkbox) checkbox.remove();
   };
 
+  this.unselectItem = function(item) {
+    if (!item) {return;}
+    item.removeAttribute('data-selected');
+    var checkbox = item.querySelector("z-checkbox");
+    if (checkbox) {
+      checkbox.removeAttribute('data-active');
+    }
+  };
+
+  this.selectItem = function(item) {
+    if (!item) {return;}
+    item.setAttribute('data-selected', 'selected');
+    var checkbox = item.querySelector("z-checkbox");
+    if (checkbox) {
+      checkbox.setAttribute('data-active', 'active');
+    }
+  };
+
 
   this.__onItemClick = function(item) {
     if (!item) {
       return;
     }
 
-    var input_elem = this.querySelector("z-input");
     var selected = true;
+    var checkbox =
+      item.querySelector("z-checkbox") || item.querySelector("[data-check]");
 
     //multi-selectable dropdown with checkboxes
-    if (this.classList.contains('checkbox')) {
-      var checkbox = item.querySelector("z-checkbox") || item.querySelector("[data-check]");
-
+    if (checkbox != null) {
+      //unselect item
       if (item.hasAttribute('data-selected')) {
         selected = false;
-        item.removeAttribute('data-selected');
-        checkbox.removeAttribute('data-active');
+        this.unselectItem(item);
 
         //not completely unselectable dropdown
         if (this.hasAttribute('data-force-select') &&
             !this.querySelector('z-dropdown-item[data-selected]')) {
 
           var default_select = this.querySelector('z-dropdown-item[data-default]');
-
           if (default_select) {
             default_select.setAttribute('data-selected', 'selected');
             checkbox = default_select.querySelector('z-checkbox');
@@ -315,26 +331,14 @@ var DropDownComponent = function() {
             }
           }
         }
-      } else {
-        checkbox.setAttribute('data-active', 'active');
       }
-
     } else {
-      var prev_item = this.querySelector("z-dropdown-item[data-selected]");
-
-      if (prev_item) {
-        prev_item.removeAttribute('data-selected');
-      }
+      //unselect previously selected item
+      this.unselectItem(this.querySelector("z-dropdown-item[data-selected]"));
     }
 
     if (selected) {
-      item.setAttribute("data-selected", 'selected');
-    }
-
-    if (input_elem) {
-      input_elem.setAttribute('data-value', item.innerHTML);
-    } else {
-      this.__setHeaderValue();
+      this.selectItem(item);
     }
 
     this.__fireItemChangedEvent({selected: selected}, item);
