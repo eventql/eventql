@@ -28,7 +28,7 @@ var DropDownComponent = function() {
     }
 
     //render header value
-    if (!header_elem.querySelector("z-drodpown-header-value")) {
+    if (!header_elem.querySelector("z-dropdown-header-value")) {
       header_elem.appendChild(document.createElement(
         "z-dropdown-header-value"));
     }
