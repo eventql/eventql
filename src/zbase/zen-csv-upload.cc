@@ -171,6 +171,15 @@ void run(const cli::FlagParser& flags) {
 
         case HumanDataType::DATETIME:
         case HumanDataType::DATETIME_NULLABLE:
+          schema_fields.emplace_back(
+              ++field_num,
+              col,
+              msg::FieldType::DATETIME,
+              0,
+              false,
+              true);
+          break;
+
         case HumanDataType::URL:
         case HumanDataType::URL_NULLABLE:
         case HumanDataType::CURRENCY:
