@@ -1,28 +1,32 @@
 var TableSchemaModalWidget = function(elem) {
   var renderModal = function(table) {
-    $(".z-modal-header", modal).innerHTML = table;
+    $(".z-modal-header", modal).innerHTML =
+        "Schema for Table: " + $.escapeHTML(table);
+
     showLoader();
     modal.show();
 
     $.httpGet("/api/v1/tables/" + table, function(r) {
       if (r.status == 200) {
-        var response = JSON.parse(r.response);
-        var thead = $("thead tr", modal);
+        var response = JSON.parse(r.response).table;
         var tbody = $("tbody", modal);
 
-        thead.innerHTML = "";
-        response.columns.forEach(function(column) {
-          thead.innerHTML += "<th>" + column + "</th>";
-        });
-
         tbody.innerHTML = "";
-        response.rows.forEach(function(row) {
+        response.columns.forEach(function(col) {
           var tr = document.createElement("tr");
-          row.forEach(function(cell) {
-            var td = document.createElement("td");
-            td.innerHTML = cell;
-            tr.appendChild(td);
-          });
+
+          var name_td = document.createElement("td");
+          name_td.innerHTML = $.escapeHTML(col.column_name);
+          tr.appendChild(name_td);
+
+          var type_td = document.createElement("td");
+          type_td.innerHTML = $.escapeHTML(col.type);
+          tr.appendChild(type_td);
+
+          var nullable_td = document.createElement("td");
+          nullable_td.innerHTML = $.escapeHTML(col.is_nullable);
+          tr.appendChild(nullable_td);
+
           tbody.appendChild(tr);
         });
       } else {
