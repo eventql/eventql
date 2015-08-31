@@ -36,7 +36,7 @@ RefPtr<msg::MessageSchema> testSchema() {
       });
 }
 
-TEST_CASE(ProtobufTest, TestToJSON, [] () {
+TEST_CASE(ProtobufTest, TestDynamicMessageToJSON, [] () {
   msg::DynamicMessage msg(testSchema());
   msg.addField("one", "fnord");
   msg.addField("two", "23.5");
@@ -48,4 +48,22 @@ TEST_CASE(ProtobufTest, TestToJSON, [] () {
   EXPECT_EQ(
       json.toString(),
       R"({"one": "fnord","two": 23.5})");
+});
+
+TEST_CASE(ProtobufTest, TestDynamicMessageFromJSON, [] () {
+  msg::DynamicMessage msg(testSchema());
+
+  auto orig_json = R"({"one": "fnord","two": 23.5})";
+
+  {
+    auto j = json::parseJSON(orig_json);
+    msg.fromJSON(j.begin(), j.end());
+  }
+
+  {
+    Buffer json;
+    json::JSONOutputStream jsons(BufferOutputStream::fromBuffer(&json));
+    msg.toJSON(&jsons);
+    EXPECT_EQ(json.toString(), orig_json);
+  }
 });
