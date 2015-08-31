@@ -243,11 +243,11 @@ void AnalyticsServlet::handle(
     res_stream->writeResponse(res);
     return;
   }
-
-  if (uri.path() == "/api/v1/tables/create_table") {
-    expectHTTPPost(req);
+  
+  /* TABLES */
+  if (uri.path() == "/api/v1/tables") {
     req_stream->readBody();
-    createTable(session, &req, &res);
+    listTables(session, &req, &res);
     res_stream->writeResponse(res);
     return;
   }
@@ -255,6 +255,18 @@ void AnalyticsServlet::handle(
   if (uri.path() == "/api/v1/tables/upload_table") {
     expectHTTPPost(req);
     uploadTable(uri, session, req_stream.get(), &res);
+    res_stream->writeResponse(res);
+    return;
+  }
+
+  static const String kTablesPathPrefix = "/api/v1/tables/";
+  if (StringUtil::beginsWith(uri.path(), kTablesPathPrefix)) {
+    req_stream->readBody();
+    fetchTableDefinition(
+        session,
+        uri.path().substr(kTablesPathPrefix.size()),
+        &req,
+        &res);
     res_stream->writeResponse(res);
     return;
   }
@@ -669,6 +681,67 @@ void AnalyticsServlet::listTables(
   });
 
   json.endArray();
+  json.endObject();
+
+  res->setStatus(http::kStatusOK);
+  res->setHeader("Content-Type", "application/json; charset=utf-8");
+  res->addBody(buf);
+}
+
+void AnalyticsServlet::fetchTableDefinition(
+    const AnalyticsSession& session,
+    const String& table_name,
+    const http::HTTPRequest* req,
+    http::HTTPResponse* res) {
+
+  auto table_provider = app_->getTableProvider(session.customer());
+  auto table_opt = table_provider->describe(table_name);
+  if (table_opt.isEmpty()) {
+    res->setStatus(http::kStatusNotFound);
+    res->addBody("table not found");
+    return;
+  }
+
+  const auto& table = table_opt.get();
+
+  Buffer buf;
+  json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
+
+  json.beginObject();
+  json.addObjectEntry("table");
+  json.beginObject();
+
+  json.addObjectEntry("name");
+  json.addString(table.table_name);
+  json.addComma();
+
+  json.addObjectEntry("columns");
+  json.beginArray();
+  for (size_t i = 0; i < table.columns.size(); ++i) {
+    const auto& col = table.columns[i];
+
+    if (i > 0) {
+      json.addComma();
+    }
+
+    json.beginObject();
+
+    json.addObjectEntry("column_name");
+    json.addString(col.column_name);
+    json.addComma();
+
+    json.addObjectEntry("type");
+    json.addString(col.type);
+    json.addComma();
+
+    json.addObjectEntry("is_nullable");
+    json.addBool(col.is_nullable);
+
+    json.endObject();
+  }
+  json.endArray();
+
+  json.endObject();
   json.endObject();
 
   res->setStatus(http::kStatusOK);
