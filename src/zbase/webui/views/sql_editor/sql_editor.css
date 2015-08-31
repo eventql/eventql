@@ -223,7 +223,7 @@
   opacity: 1;
 }
 
-.zbase_sql_editor_result_pane .zbase_result_pane_bar + table.zbase_sql_chart,
+.zbase_sql_editor_result_pane .zbase_result_pane_bar + .zbase_sql_chart,
 .zbase_sql_editor_result_pane .zbase_result_pane_bar + table.z-table {
   display: none;
 }
@@ -232,7 +232,7 @@
   display: table;
 }
 
-.zbase_sql_editor_result_pane .zbase_result_pane_bar[data-active] + table.zbase_sql_chart {
+.zbase_sql_editor_result_pane .zbase_result_pane_bar[data-active] + .zbase_sql_chart {
   display: block;
 }
 
