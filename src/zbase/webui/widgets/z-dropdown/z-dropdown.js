@@ -171,7 +171,6 @@ var DropDownComponent = function() {
 
     this.closeAllDropdowns();
     this.setAttribute('data-active', 'active');
-
     //this.setXValue();
 
     this.__setKeyNavigation();
