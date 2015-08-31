@@ -120,6 +120,16 @@ route {
 }
 
 route {
+  path_match: "/a/settings"
+  view: "settings_api_token"
+  require_module: "widgets/z-menu"
+  require_module: "widgets/zbase-header"
+  require_module: "widgets/z-input"
+  require_module: "widgets/zbase-settings-menu"
+  require_module: "views/settings_api_token"
+}
+
+route {
   is_public: true
   path_match: "/a/login"
   view: "login"
