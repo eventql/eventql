@@ -156,6 +156,10 @@
 /**
   * Editor
   */
+.zbase_sql_editor_pane z-codeeditor {
+  border-bottom: 2px solid #ddd;
+}
+
 .zbase_sql_editor_pane .CodeMirror-gutters {
   background: rgba(63,144,170,.08);
   background-color: none;
