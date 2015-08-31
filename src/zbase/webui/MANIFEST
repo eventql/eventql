@@ -130,6 +130,15 @@ route {
 }
 
 route {
+  path_match: "/a/settings/session_tracking"
+  view: "settings_session_tracking"
+  require_module: "widgets/z-menu"
+  require_module: "widgets/zbase-header"
+  require_module: "widgets/zbase-settings-menu"
+  require_module: "views/settings_session_tracking"
+}
+
+route {
   is_public: true
   path_match: "/a/login"
   view: "login"
