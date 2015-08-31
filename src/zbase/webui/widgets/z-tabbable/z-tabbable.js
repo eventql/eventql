@@ -9,44 +9,23 @@
 */
 
 var TabbableComponent = function() {
-  this.createdCallback = function() {
-    this.init();
-  };
-  this.attributeChangedCallback = function(attr, old_val, new_val) {
-    if (attr == 'data-content-attached') {
-      this.init();
-    }
-  }
-  this.init = function() {
-    var active_tab = this.querySelector("z-tab[data-active]");
-    if (active_tab == null) {
-      var tabs = this.querySelectorAll("z-tab");
-      if (tabs && tabs[0]) {
-        tabs[0].setAttribute('data-active', 'active');
-        active_tab = tabs[0];
-      }
-    }
-    if (this.hasAttribute('data-content-attached')) {
-      var index = active_tab.getAttribute('data-index');
-      this.setContent(index);
-    }
-    if (this.hasAttribute('data-evenly-sized')) {
-      this.setTabWidth();
-    }
-    this.observeTabs();
-  }
-  this.setContent = function(index) {
+  this.setContent = function() {
     var active_content = this.querySelector("z-tab-content[data-active]");
     if (active_content) {
       active_content.removeAttribute('data-active');
     }
+
+    var tab = getActiveTab.call(this);
+    var index = tab.getAttribute("data-index");
     var tab_content =
       this.querySelector("z-tab-content[data-index='" + index + "']");
     if (tab_content) {
       tab_content.setAttribute('data-active', 'active');
     }
   };
-  this.setTabWidth = function() {
+
+
+  var setTabWidth = function() {
     var tabs = this.querySelectorAll("z-tab");
     if (tabs.length == 0) {
       return;
@@ -55,31 +34,71 @@ var TabbableComponent = function() {
     for (var i = 0; i < tabs.length; i++) {
       tabs[i].style.width = width + "%";
     }
-  }
-  this.observeTabs = function() {
-    var base = this;
-    var tabs = this.querySelectorAll("z-tab");
-    for (var i = 0; i < tabs.length; i++) {
-      tabs[i].addEventListener('click', function() {
-        var current_tab = base.querySelector("z-tab[data-active]");
-        current_tab.removeAttribute("data-active");
-        this.setAttribute("data-active", "active");
-        if (base.hasAttribute('data-content-attached')) {
-          var index = this.getAttribute('data-index');
-          if (index) {
-            base.setContent(index);
-          }
-        }
-        base.fireClickTabEvent(this);
-      }, false);
+  };
+
+
+  var onTabClick = function(tab) {
+    var current_active_tab = this.querySelector("z-tab[data-active]");
+    current_active_tab.removeAttribute("data-active");
+    tab.setAttribute("data-active", "active");
+
+    if (this.hasAttribute("data-content-attached")) {
+      this.setContent(tab.getAttribute('data-index'));
     }
-  }
-  this.fireClickTabEvent = function(elem) {
-    var ev = new CustomEvent('z-tabbable-click', {
+
+    var click_event = new CustomEvent("tab-click", {
       bubbles: true,
       cancelable: true});
-    elem.dispatchEvent(ev);
+    tab.dispatchEvent(click_event);
   };
+
+
+  var getActiveTab = function() {
+    var active_tab = this.querySelector("z-tab[data-active]");
+    if (active_tab != null) {
+      return active_tab;
+    }
+
+    // set first tab active
+    active_tab = this.querySelector("z-tab");
+    if (active_tab) {
+      active_tab.setAttribute('data-active', 'active');
+    }
+
+    return active_tab;
+  };
+
+
+  var init = function() {
+    if (this.hasAttribute('data-content-attached')) {
+      this.setContent();
+    }
+
+    if (this.hasAttribute('data-evenly-sized')) {
+      setTabWidth.call(this);
+    }
+
+    var tabs = this.querySelectorAll("z-tab");
+    for (var i = 0; i < tabs.length; i++) {
+      tabs[i].addEventListener('click', (function(_this) {
+        return function(e) {
+          onTabClick.call(_this, this);
+        }
+      })(this));
+    }
+  };
+
+
+  this.createdCallback = function() {
+    init.call(this);
+  };
+
+  this.attributeChangedCallback = function(attr, old_val, new_val) {
+    if (attr == 'data-content-attached') {
+      this.setContent();
+    }
+  };
+
 };
 
 var proto = Object.create(HTMLElement.prototype);
