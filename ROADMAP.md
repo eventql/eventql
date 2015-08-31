@@ -1,11 +1,14 @@
 
 ### v0
 
-- [ ] Documentation
 - [ ] Metrics Support [in progress]
 - [ ] Reports [in progress]
 - [ ] Metric Explorer [in progress]
 - [ ] Chart Builder [in progress]
+
+-- at this point we can rebuild the old dashboards in the UI without any code
+
+- [ ] Documentation
 - [ ] SQL JOIN impl
 - [ ] Cohort Analysis
 - [ ] Funnel Analysis
