@@ -8,6 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include "stx/human.h"
+#include "stx/ISO8601.h"
 #include "stx/test/unittest.h"
 
 using namespace stx;
@@ -69,3 +70,17 @@ TEST_CASE(HumanTest, TestParseHumanTime, [] () {
   auto t15 = Human::parseTime("2014-11-02T18:23:10+00:00");
   EXPECT_EQ(t15.get().unixMicros(), 1414952590 * kMicrosPerSecond);
 });
+
+
+TEST_CASE(HumanTest, RejectInvalidISO8601TimeValues, [] () {
+  {
+    auto t = ISO8601::parse("0,44");
+    EXPECT_TRUE(t.isEmpty());
+  }
+
+  {
+    auto t = ISO8601::parse("59,89%");
+    EXPECT_TRUE(t.isEmpty());
+  }
+});
+
