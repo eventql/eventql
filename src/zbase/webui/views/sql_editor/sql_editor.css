@@ -1,8 +1,17 @@
+.zbase_sql_editor .zbase_sql_editor_pane {
+  display: table;
+  table-layout: fixed;
+  width: 100%;
+  min-height: 900px; /* FIXME */
+}
+
+
 .zbase_sql_editor .zbase_sql_editor_sidebar {
   padding: 20px 20px 0;
-  float: right;
   width: 320px;
-  height: 200px;
+  min-height: 200px;
+  display: table-cell;
+  vertical-align: top;
 }
 
 .zbase_sql_editor .zbase_sql_editor_sidebar .sidebar_section {
@@ -27,11 +36,12 @@
 .zbase_sql_editor .zbase_sql_editor_content {
   border-left: 1px solid #ddd;
   border-right: 1px solid #ddd;
-  min-height: 900px; /* FIXME */
 }
 
 .zbase_sql_editor .zbase_sql_editor_content.with_sidebar {
-  margin-right: 320px;
+  display: table-cell;
+  vertical-align: top;
+  width: auto;
 }
 
 .zbase_sql_editor .z-button {
