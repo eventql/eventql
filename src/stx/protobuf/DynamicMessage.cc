@@ -205,6 +205,12 @@ void DynamicMessage::toJSON(json::JSONOutputStream* json) const {
   msg::JSONEncoder::encode(data_, *schema_, json);
 }
 
+void DynamicMessage::fromJSON(
+    json::JSONObject::const_iterator begin,
+    json::JSONObject::const_iterator end) {
+
+}
+
 const msg::MessageObject& DynamicMessage::data() const {
   return data_;
 }
