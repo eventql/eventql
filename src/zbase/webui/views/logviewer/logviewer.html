@@ -22,11 +22,13 @@
 
           <div class="control_pane_bar">
             <z-dropdown class='input filter_type_control' style="position:absolute;">
-              <z-dropdown-items>
-                <z-dropdown-item data-value="sql" data-text="SQL"><i class="fa fa-filter" style="font-weight:normal; margin-right: 5px;"></i> SQL</z-dropdown-item>
-                <z-dropdown-item data-value="regex" data-text="Regex">Regex</z-dropdown-item>
-                <z-dropdown-item data-value="fulltext" data-text="Fulltext">Fulltext</z-dropdown-item>
-              </z-dropdown-items>
+              <z-dropdown-flyout>
+                <z-dropdown-items>
+                  <z-dropdown-item data-value="sql" data-text="SQL"><i class="fa fa-filter" style="font-weight:normal; margin-right: 5px;"></i> SQL</z-dropdown-item>
+                  <z-dropdown-item data-value="regex" data-text="Regex">Regex</z-dropdown-item>
+                  <z-dropdown-item data-value="fulltext" data-text="Fulltext">Fulltext</z-dropdown-item>
+                </z-dropdown-items>
+              </z-dropdown-flyout>
             </z-dropdown>
 
             <z-search style="display: block; margin-left:80px" class='filter_control'>
@@ -59,18 +61,22 @@
             <div class="control_pane_item">
               <label>Logfile:</label>
               <z-dropdown data-force-select class='inline logfile_control'>
-                <z-dropdown-items>
-                  <z-dropdown-item>-</z-dropdown-item>
-                </z-dropdown-items>
+                <z-dropdown-flyout>
+                  <z-dropdown-items>
+                    <z-dropdown-item>-</z-dropdown-item>
+                  </z-dropdown-items>
+                </z-dropdown-flyout>
               </z-dropdown>
             </div>
 
             <div class="control_pane_item">
               <label>Columns:</label>
-              <z-dropdown class='inline checkbox button columns_control' data-force-select data-multiselect data-action='logfile-columns-select'>
-                <z-dropdown-items>
-                  <z-dropdown-item>-</z-dropdown-item>
-                </z-dropdown-items>
+              <z-dropdown class='inline checkbox button columns_control' data-multiselect data-action='logfile-columns-select'>
+                <z-dropdown-flyout>
+                  <z-dropdown-items>
+                    <z-dropdown-item>-</z-dropdown-item>
+                  </z-dropdown-items>
+                </z-dropdown-flyout>
               </z-dropdown>
             </div>
           </div>
