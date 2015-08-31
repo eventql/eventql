@@ -519,7 +519,10 @@ z-dropdown.input .z-dropdown-header:hover {
   background-image: -o-linear-gradient(top, #1c99d6, #1c99d6);
   background-image: linear-gradient(top, #1c99d6, #1c99d6);
   color: #fff;
-  box-shadow: 0 0 2px #A4C1D2;
-  border: 1px solid #3078A2;
+  border: none;
+  box-shadow: rgba(39, 41, 43, 0.14902) 0px 0px 0px 1px inset;
+  font-weight: 600;
+  line-height: 34px;
 }
+
 

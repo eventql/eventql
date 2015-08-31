@@ -38,8 +38,3 @@
   height: 34px;
   min-width: 133px;
 }
-
-.zbase_documents z-dropdown.input z-dropdown-header z-dropdown-header-value,
-.zbase_documents z-dropdown.input z-dropdown-header z-dropdown-header-icon {
-  line-height: 32px;
-}
