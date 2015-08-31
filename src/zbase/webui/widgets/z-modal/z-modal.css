@@ -43,13 +43,13 @@ z-modal[data-active="active"] {
   display: block;
 }
 
-z-modal > :first-child:not(z-modal-close-icon),
-z-modal > z-modal-close-icon:first-child + * {
+z-modal :first-child:not(z-modal-close-icon),
+z-modal z-modal-close-icon:first-child + * {
   border-top-left-radius: 0.2857rem;
   border-top-right-radius: 0.2857rem;
 }
 
-z-modal > :last-child {
+z-modal :last-child {
   border-bottom-left-radius: 0.2857rem;
   border-bottom-right-radius: 0.2857rem;
 }
