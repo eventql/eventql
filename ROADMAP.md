@@ -12,6 +12,7 @@
 - [ ] SQL v0 impl
 - [ ] Dashboards
 - [ ] System Mails
+- [ ] new Tracking Pixel API
 
 ### backlog
 
