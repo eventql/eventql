@@ -40,6 +40,20 @@ var DropDownComponent = function() {
       header_elem.appendChild(icon);
     }
 
+    //render apply button
+    if (this.hasAttribute("data-multiselect")) {
+      var button_container = document.createElement("z-dropdown-button");
+      var button = document.createElement("button");
+      button.className = "z-button primary"
+      button.innerHTML = "Apply";
+      button_container.appendChild(button);
+      this.querySelector("z-dropdown-flyout").insertBefore(
+        button_container,
+        items);
+
+      button.addEventListener("click", base.__onApply.bind(base));
+    }
+
     header_elem.addEventListener('click', function(e) {
       e.stopPropagation();
       base.toggleDropdown();
@@ -122,28 +136,15 @@ var DropDownComponent = function() {
     var base = this;
 
     var elem = this.querySelector("z-dropdown-items");
-    var container = document.createElement("div");
     elem.innerHTML = "";
 
-    if (this.hasAttribute("data-multiselect")) {
-      var button_container = document.createElement("z-dropdown-button");
-      var button = document.createElement("button");
-      button.className = "z-button primary"
-      button.innerHTML = "Apply";
-      button_container.appendChild(button);
-      elem.appendChild(button_container);
-
-      button.addEventListener("click", base.__onApply.bind(base));
-    }
-
-    elem.appendChild(container);
     for (var i = 0; i < items.length; i++) {
       items[i].addEventListener('click', function(e) {
         e.stopPropagation;
         base.__onItemClick(this);
       }, false);
 
-      container.appendChild(items[i]);
+      elem.appendChild(items[i]);
     }
   };
 
@@ -170,6 +171,7 @@ var DropDownComponent = function() {
 
     this.closeAllDropdowns();
     this.setAttribute('data-active', 'active');
+
     //this.setXValue();
 
     this.__setKeyNavigation();

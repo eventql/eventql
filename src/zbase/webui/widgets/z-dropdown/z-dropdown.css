@@ -80,10 +80,10 @@ z-dropdown-header-value,
 
 
 /*--------------
-    Items
+    Flyout
 ---------------*/
-z-dropdown-items,
-.z-dropdown-items {
+z-dropdown-flyout,
+.z-dropdown-flyout {
   width: auto;
   display: none;
   list-style: none;
@@ -107,39 +107,39 @@ z-dropdown-items,
   box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.08);
 }
 
-z-dropdown-items > div,
-.z-dropdown-items > div {
+z-dropdown-flyout z-dropdown-items,
+.z-dropdown-flyout > .z-dropdown-items {
   overflow-y: auto;
-  max-height: inherit;
+  display: block;
 }
 
-z-dropdown-items.wide,
-.z-dropdown-items.wide {
+z-dropdown-flyout.wide,
+.z-dropdown-flyout.wide {
   overflow-y: scroll;
 }
 
 
-z-dropdown[data-active] z-dropdown-items,
-.z-dropdown[data-active] .z-dropdown-items{
+z-dropdown[data-active] z-dropdown-flyout,
+.z-dropdown[data-active] .z-dropdown-flyout{
   display: inline-block;
 }
 
 /*-----------------------
     Items Apply Button
 -----------------------*/
-z-dropdown z-dropdown-items z-dropdown-button {
+z-dropdown z-dropdown-flyout z-dropdown-button {
   display: block;
   overflow: auto;
   border-bottom: 1px solid rgba(0, 0, 0, 0.05);
 }
 
-z-dropdown z-dropdown-items button.z-button {
+z-dropdown z-dropdown-flyout button.z-button {
   font-size: inherit;
   float: right;
   margin: 4px 3px;
 }
 
-z-dropdown z-dropdown-items button.z-button + z-dropdown-item {
+z-dropdown z-dropdown-flyout button.z-button + z-dropdown-item {
   clear:both;
   border-top: none;
 }
@@ -309,18 +309,18 @@ z-dropdown.input z-dropdown-header:after,
   float:right;
 }
 
-z-dropdown.input:not(.wide) z-dropdown-items,
-.z-dropdown.input:not(.wide) .z-dropdown-items {
+z-dropdown.input:not(.wide) z-dropdown-flyout,
+.z-dropdown.input:not(.wide) .z-dropdown-flyout {
   border-top: none !important;
 }
 
-z-dropdown.input z-dropdown-items,
-.z-dropdown.input .z-dropdown-items {
+z-dropdown.input z-dropdown-flyout,
+.z-dropdown.input .z-dropdown-flyout {
   min-width: calc(100% - 1px);
 }
 
-z-dropdown.input.wide z-dropdown-items,
-.z-dropdown.input.wide .z-dropdown-items {
+z-dropdown.input.wide z-dropdown-flyout,
+.z-dropdown.input.wide .z-dropdown-flyout {
   margin-top: -1px;
 }
 
@@ -339,8 +339,8 @@ z-dropdown.inline z-dropdown-header,
   font-weight: bold;
 }
 
-z-dropdown.inline z-dropdown-items,
-.z-dropdown.inline .z-dropdown-items {
+z-dropdown.inline z-dropdown-flyout,
+.z-dropdown.inline .z-dropdown-flyout {
   cursor: auto;
   margin-top: 0.25em;
   border-radius: 0.2857rem;
@@ -349,8 +349,8 @@ z-dropdown.inline z-dropdown-items,
 /*--------------
   Searchable
 ---------------*/
-z-dropdown.search z-dropdown-items,
-.z-dropdown.search .z-dropdown-items{
+z-dropdown.search z-dropdown-flyout,
+.z-dropdown.search .z-dropdown-flyout{
   width: 100%;
 }
 
@@ -378,8 +378,8 @@ z-dropdown.error z-dropdown-header:hover,
   border-color: #dbb1b1 !important;
 }
 
-z-dropdown.error z-dropdown-items,
-.z-dropdown.error .z-dropdown-items {
+z-dropdown.error z-dropdown-flyout,
+.z-dropdown.error .z-dropdown-flyout {
   border-color: #dbb1b1;
 }
 
@@ -431,11 +431,11 @@ z-dropdown.input .z-dropdown-header:hover {
   max-width: 170px;
 }
 
-.zbase_app z-dropdown.input z-dropdown-items {
+.zbase_app z-dropdown.input z-dropdown-flyout {
   margin-top: -3px;
 }
 
-.zbase_app z-dropdown.input.wide z-dropdown-items {
+.zbase_app z-dropdown.input.wide z-dropdown-flyout {
   margin-top: -4px;
 }
 
