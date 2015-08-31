@@ -12,22 +12,12 @@
   line-height: 21px;
 }
 
-.zbase_sql_editor .zbase_sql_editor_sidebar .sidebar_title {
-  font-weight: 500;
-  color: #333;
+.zbase_sql_editor .zbase_sql_editor_sidebar .zbase_table_list {
+  margin-top: 18px;
+}
+
+.zbase_sql_editor .zbase_sql_editor_sidebar .zbase_table_list h3 {
   font-size: 13px;
-  margin-bottom: 10px;
-}
-
-.zbase_sql_editor .zbase_sql_editor_sidebar ul.zbase_sql_editor_table_list {
-  padding: 0;
-  margin: 0;
-  list-style-type: none;
-}
-
-.zbase_sql_editor .zbase_sql_editor_sidebar ul.zbase_sql_editor_table_list li {
-  margin-bottom: 10px;
-  cursor: pointer;
 }
 
 .zbase_sql_editor .zbase_sql_editor_sidebar a.link {
