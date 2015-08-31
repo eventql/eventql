@@ -2,7 +2,7 @@
   padding: 20px 20px 0;
   float: right;
   width: 320px;
-  height: 200px;
+  min-height: 200px;
 }
 
 .zbase_sql_editor .zbase_sql_editor_sidebar .sidebar_section {
