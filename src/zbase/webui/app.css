@@ -507,9 +507,10 @@ z-menu.zbase_default_menu z-menu-section z-menu-title {
   margin-left: 0;
 }
 
+z-menu.zbase_default_menu z-menu-section z-menu-title,
 z-menu.zbase_default_menu z-menu-section z-menu-title a {
   text-transform: uppercase;
-  font-size: 90%;
+  font-size: 12px;
   font-weight: 500;
   letter-spacing: 0.8px;
   margin-bottom: 10px;
