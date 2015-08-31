@@ -523,6 +523,7 @@ z-dropdown.input .z-dropdown-header:hover {
   box-shadow: rgba(39, 41, 43, 0.14902) 0px 0px 0px 1px inset;
   font-weight: 500;
   line-height: 34px;
+  height: 34px;
 }
 
 
