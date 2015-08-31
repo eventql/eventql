@@ -1,28 +1,31 @@
+
+
 .zbase_appstore .zbase_appstore_section {
-  margin-bottom: 20px;
+  display: inline-block;
+  vertical-align: top;
+  margin-right: 40px;
+  margin-bottom: 40px;
 }
 
 .zbase_appstore .app_card {
   width: 220px;
-  height: 180px;
-  padding-top: 15px;
-  margin-top: 10px;
-  float: left;
-  text-align: center;
-  border-right: 1px solid #eee;
+  height: 64px;
+  overflow: hidden;
+  display: block;
 }
 
 .zbase_appstore .app_card .app_title {
   display: block;
   font-size: 16px;
   font-weight: 500;
-  padding-top: 15px;
+  padding-top: 16px;
   color: #1c99d6;
+  margin-bottom: -1px;
 }
 
 .zbase_appstore .app_card .app_subtitle {
   color: #666;
-  font-size: 14px;
+  font-size: 12px;
 }
 
 .zbase_appstore .app_card:hover .hexagon {
@@ -34,6 +37,7 @@
 }
 
 .zbase_appstore .app_card .hexagon {
+  display: none;
   position: relative;
   width: 72px; 
   height: 41.57px;
@@ -45,6 +49,11 @@
   box-shadow: 0 0 4px rgba(0,0,0,0.55);
   border-left: solid 3px #1c99d6;
   border-right: solid 3px #1c99d6;
+  float: left;
+  top: -3px;
+  left: -13px;
+  margin-right: -10px;
+  -webkit-transform: scale(0.55);
 }
 
 .zbase_appstore .app_card .hexTop,
@@ -109,8 +118,13 @@
   background: inherit;
 }
 
-.zbase_appstore h2.app_category {
-  font-size: 16px;
-  font-weight: 500;
+.zbase_appstore_section h2 {
+  font-size: 14px;
+  line-height: 22px;
+  font-weight: 300;
   padding: 0;
+  margin-bottom: -6px;
+  border-bottom: 2px solid #eee;
+  padding-bottom: 6px;
+  margin-bottom: 2px;
 }
