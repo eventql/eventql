@@ -153,6 +153,7 @@ var ZBase = (function() {
 
     loadModules(route.modules, function() {
       applyNavigationChange();
+      HeaderWidget.setActiveItem();
     });
   };
 
