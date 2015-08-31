@@ -526,4 +526,7 @@ z-dropdown.input .z-dropdown-header:hover {
   height: 34px;
 }
 
+.zbase_app z-dropdown.input.primary:hover z-dropdown-header {
+  background: #21aaed;
+}
 
