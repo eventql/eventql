@@ -14,7 +14,7 @@
 
 >> Funnel Analysis
 
->> JavaScript Mapreduce
+>> JavaScript Mapreduce // UDF
 
 >> Trigger Scripts
 
