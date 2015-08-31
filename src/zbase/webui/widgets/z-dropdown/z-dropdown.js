@@ -122,24 +122,28 @@ var DropDownComponent = function() {
     var base = this;
 
     var elem = this.querySelector("z-dropdown-items");
+    var container = document.createElement("div");
     elem.innerHTML = "";
 
     if (this.hasAttribute("data-multiselect")) {
+      var button_container = document.createElement("z-dropdown-button");
       var button = document.createElement("button");
       button.className = "z-button primary"
       button.innerHTML = "Apply";
-      elem.appendChild(button);
+      button_container.appendChild(button);
+      elem.appendChild(button_container);
 
       button.addEventListener("click", base.__onApply.bind(base));
     }
 
+    elem.appendChild(container);
     for (var i = 0; i < items.length; i++) {
       items[i].addEventListener('click', function(e) {
         e.stopPropagation;
         base.__onItemClick(this);
       }, false);
 
-      elem.appendChild(items[i]);
+      container.appendChild(items[i]);
     }
   };
 

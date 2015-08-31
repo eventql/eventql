@@ -97,19 +97,20 @@ z-dropdown-items,
   text-align: left;
   border: 1px solid rgba(39,41,43,.15);
   border-radius: 0 0 .2857rem .2857rem;
-
-
   z-index: 11;
   background-color: #fff;
-  overflow-y: auto;
   -webkit-backface-visibility: hidden;
           backface-visibility: hidden;
   -webkit-overflow-scrolling: touch;
   margin: 0px 1px;
   outline: none;
   box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.08);
+}
 
-
+z-dropdown-items > div,
+.z-dropdown-items > div {
+  overflow-y: auto;
+  max-height: inherit;
 }
 
 z-dropdown-items.wide,
@@ -126,6 +127,12 @@ z-dropdown[data-active] z-dropdown-items,
 /*-----------------------
     Items Apply Button
 -----------------------*/
+z-dropdown z-dropdown-items z-dropdown-button {
+  display: block;
+  overflow: auto;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
 z-dropdown z-dropdown-items button.z-button {
   font-size: inherit;
   float: right;
