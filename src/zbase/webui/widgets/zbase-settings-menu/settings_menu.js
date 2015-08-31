@@ -6,7 +6,7 @@ var SettingsMenu = function() {
         "zbase_settings_menu_main_tpl");
 
     elem.innerHTML = "";
-    elem.appendChild(tpl)
+    elem.appendChild(tpl);
   };
 
   return {
