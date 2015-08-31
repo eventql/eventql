@@ -4,7 +4,6 @@ z-tabbable,
   border-bottom: 1px solid #d4d4d5;
   border-radius: 0em;
   box-shadow: none;
-  margin: 1rem 0;
   background: #fff;
   font-weight: 400;
   display: block;
@@ -109,4 +108,23 @@ z-tabbable[data-content-attached] z-tab-content,
 z-tabbable[data-content-attached] z-tab-content[data-active],
 .z-tabbable[data-content-attached] .z-tab-content[data-active] {
   display: block;
+}
+
+/* ZBase App */
+.zbase_app z-tabbable.open_tabs {
+  border-top: none;
+}
+
+.zbase_app z-tabbable.open_tabs z-tab {
+  border-radius: 0;
+  border-top: 2px solid transparent;
+  height: 41px;
+}
+
+.zbase_app z-tabbable.open_tabs z-tab[data-active] {
+  border-top: 2px solid #1c99d6;
+  border-left: 1px solid #ddd;
+  border-right: 1px solid #ddd;
+  background: #fff;
+  height: 41px;
 }
