@@ -152,6 +152,25 @@ var DropDownComponent = function() {
     }
   };
 
+  this.unselectItem = function(item) {
+    if (!item) {return;}
+    item.removeAttribute('data-selected');
+    var checkbox = item.querySelector("z-checkbox");
+    if (checkbox) {
+      checkbox.removeAttribute('data-active');
+    }
+  };
+
+  this.selectItem = function(item) {
+    if (!item) {return;}
+    item.setAttribute('data-selected', 'selected');
+    var checkbox = item.querySelector("z-checkbox");
+    if (checkbox) {
+      checkbox.setAttribute('data-active', 'active');
+    }
+  };
+
+
   this.toggleDropdown = function() {
     if (this.hasAttribute('data-active')) {
      this.hideDropdown();
@@ -283,24 +302,6 @@ var DropDownComponent = function() {
     header.innerHTML = innerHTML;
     var checkbox = header.querySelector("z-checkbox");
     if (checkbox) checkbox.remove();
-  };
-
-  this.unselectItem = function(item) {
-    if (!item) {return;}
-    item.removeAttribute('data-selected');
-    var checkbox = item.querySelector("z-checkbox");
-    if (checkbox) {
-      checkbox.removeAttribute('data-active');
-    }
-  };
-
-  this.selectItem = function(item) {
-    if (!item) {return;}
-    item.setAttribute('data-selected', 'selected');
-    var checkbox = item.querySelector("z-checkbox");
-    if (checkbox) {
-      checkbox.setAttribute('data-active', 'active');
-    }
   };
 
   this.__forceSelect = function() {
