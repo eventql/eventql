@@ -202,13 +202,7 @@ bool DynamicMessage::addObject(
 }
 
 void DynamicMessage::toJSON(json::JSONOutputStream* json) const {
-  json->beginObject();
-  json->addObjectEntry("type");
-  json->addString(schema_->name());
-  json->addComma();
-  json->addObjectEntry("data");
   msg::JSONEncoder::encode(data_, *schema_, json);
-  json->endObject();
 }
 
 const msg::MessageObject& DynamicMessage::data() const {

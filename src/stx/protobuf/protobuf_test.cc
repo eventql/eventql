@@ -9,11 +9,43 @@
  */
 #include "stx/HMAC.h"
 #include "stx/test/unittest.h"
+#include "stx/protobuf/DynamicMessage.h"
 
 using namespace stx;
 
 UNIT_TEST(ProtobufTest);
 
-TEST_CASE(ProtobufTest, TestToJSON, [] () {
+RefPtr<msg::MessageSchema> testSchema() {
+  return new msg::MessageSchema(
+      "TestSchema",
+      Vector<msg::MessageSchemaField> {
+        msg::MessageSchemaField(
+            1,
+            "one",
+            msg::FieldType::STRING,
+            250,
+            false,
+            false),
+        msg::MessageSchemaField(
+            2,
+            "two",
+            msg::FieldType::DOUBLE,
+            0,
+            false,
+            false)
+      });
+}
 
+TEST_CASE(ProtobufTest, TestToJSON, [] () {
+  msg::DynamicMessage msg(testSchema());
+  msg.addField("one", "fnord");
+  msg.addField("two", "23.5");
+
+  Buffer json;
+  json::JSONOutputStream jsons(BufferOutputStream::fromBuffer(&json));
+  msg.toJSON(&jsons);
+
+  EXPECT_EQ(
+      json.toString(),
+      R"({"one": "fnord","two": 23.5})");
 });
