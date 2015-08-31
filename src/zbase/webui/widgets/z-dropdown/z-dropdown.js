@@ -16,8 +16,13 @@ var DropDownComponent = function() {
     // dropdown items
     var items = this.querySelector("z-dropdown-items");
     if (items) {
-      var cloned = items.cloneNode(true);
-      this.setDropdownItems(cloned.children);
+      var item_nodes = items.querySelectorAll("z-dropdown-item");
+      for (var i = 0; i < item_nodes.length; i++) {
+        item_nodes[i].addEventListener('click', function(e) {
+          e.stopPropagation;
+          base.__onItemClick(this);
+        }, false);
+      }
     }
 
     // header
@@ -134,7 +139,6 @@ var DropDownComponent = function() {
 
   this.setDropdownItems = function(items) {
     var base = this;
-
     var elem = this.querySelector("z-dropdown-items");
     elem.innerHTML = "";
 
@@ -316,25 +320,19 @@ var DropDownComponent = function() {
       if (item.hasAttribute('data-selected')) {
         selected = false;
         this.unselectItem(item);
-
-        //not completely unselectable dropdown
-        if (this.hasAttribute('data-force-select') &&
-            !this.querySelector('z-dropdown-item[data-selected]')) {
-
-          var default_select = this.querySelector('z-dropdown-item[data-default]');
-          if (default_select) {
-            default_select.setAttribute('data-selected', 'selected');
-            checkbox = default_select.querySelector('z-checkbox');
-
-            if (checkbox) {
-              checkbox.setAttribute('data-active', 'active');
-            }
-          }
-        }
       }
     } else {
       //unselect previously selected item
       this.unselectItem(this.querySelector("z-dropdown-item[data-selected]"));
+    }
+
+    //force select
+    if (!this.hasAttribute("data-allow-empty") &&
+        !this.querySelector('z-dropdown-item[data-selected]')) {
+          var default_selection =
+            this.querySelector('z-dropdown-item[data-default]') ||
+            this.querySelector('z-dropdown-item');
+          //this.selectItem(default_selection);
     }
 
     if (selected) {
