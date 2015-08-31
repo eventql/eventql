@@ -44,7 +44,9 @@ z-codeeditor .CodeMirror-gutters {
   border-right: 1px solid #dbdedf;
   background: rgba(0,0,0,.3);
   white-space: nowrap;
+  background-color: none;
 }
+
 z-codeeditor .CodeMirror-linenumbers {}
 z-codeeditor .CodeMirror-linenumber {
   padding: 0 25px 0 6px;

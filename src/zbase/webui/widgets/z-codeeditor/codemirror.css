@@ -29,7 +29,6 @@
 
 .CodeMirror-gutters {
   border-right: 1px solid #dbdedf;
-  background-color: #edf0f2;
   white-space: nowrap;
 }
 .CodeMirror-linenumbers {}
