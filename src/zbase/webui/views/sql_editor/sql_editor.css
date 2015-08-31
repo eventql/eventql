@@ -157,7 +157,7 @@
   * Editor
   */
 .zbase_sql_editor_pane /deep/ .CodeMirror-gutters {
-  background: #f0f6f8;
+  background: rgba(63,144,170,.08);
 }
 
 .zbase_sql_editor_pane /deep/ .CodeMirror {

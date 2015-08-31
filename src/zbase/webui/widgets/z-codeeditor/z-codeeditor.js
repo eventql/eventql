@@ -58,11 +58,10 @@ var CodeEditorComponent = function() {
   };
 
   var setupResizer = function() {
-    var resizer = this.querySelector("z-codeeditor-resizer-tooltip");
+    var resizer = this.querySelector("z-codeeditor-resizer-tooltip")
     var gutters = this.querySelector(".CodeMirror-gutters");
     var codemirror = this.querySelector(".CodeMirror");
     var benchmark_y;
-    codemirror.style.height = (this.offsetHeight - resizer.offsetHeight) + "px";
 
     //TODO handle horizontal resizing
     resizer.addEventListener('dragstart', function(e) {
@@ -79,7 +78,7 @@ var CodeEditorComponent = function() {
         var offset = benchmark_y - e.clientY;
         var height = elem.offsetHeight - offset;
         elem.style.height = height + "px";
-        codemirror.style.height = (height - resizer.offsetHeight) + "px";
+        codemirror.style.height = height + "px";
         gutters.style.height = height + "px";
         benchmark_y = e.clientY;
       }
