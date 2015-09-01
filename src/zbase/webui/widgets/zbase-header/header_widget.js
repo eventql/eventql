@@ -31,7 +31,9 @@ var HeaderWidget = (function() {
       }
     }
 
-    active_item.classList.add("active");
+    if (active_item) {
+      active_item.classList.add("active");
+    }
   };
 
   return {
