@@ -1,5 +1,7 @@
 ZBase.registerView((function() {
   var render = function(path) {
+    $.showLoader();
+
     var page = $.getTemplate(
         "views/settings_session_tracking",
         "zbase_settings_session_tracking_main_tpl");
@@ -7,33 +9,21 @@ ZBase.registerView((function() {
     var menu = SettingsMenu();
     menu.render($(".zbase_settings_menu_sidebar", page));
 
-    renderView(path);
-
-    $.handleLinks(page);
-    $.replaceViewport(page);
-    $.hideLoader();
-  };
-
-  var renderView = function(path) {
-    if (path.indexOf("attributes") > 0) {
-      
-    } else {
-      loadEvents();
-    }
-  };
-
-  var loadEvents = function() {
     $.httpGet("/api/v1/session_tracking/events", function(r) {
       if(r.status == 200) {
         renderEvents(JSON.parse(r.response).session_events);
       } else {
         $.fatalError();
       }
+      $.hideLoader();
     });
+
+    $.handleLinks(page);
+    $.replaceViewport(page);
   };
 
   var renderEvents = function(events) {
-    var tbody = $("table.session_tracking_events tbody");
+    var tbody = $("table.events tbody");
     var tpl = $.getTemplate(
       "views/settings_session_tracking",
       "zbase_settings_session_tracking_event_row_tpl");
@@ -49,7 +39,7 @@ ZBase.registerView((function() {
   };
 
   return {
-    name: "settings_session_tracking",
+    name: "session_tracking_events",
     loadView: function(params) { render(params.path); },
     unloadView: function() {},
     handleNavigationChange: render
