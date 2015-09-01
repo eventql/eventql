@@ -24,6 +24,10 @@ ZBase.registerView((function() {
       $.hideLoader();
     });
 
+    $.onClick($(".add_session_event .link", page), function() {
+      alert("not yet implemented");
+    });
+
     $.handleLinks(page);
     $.replaceViewport(page);
   };
