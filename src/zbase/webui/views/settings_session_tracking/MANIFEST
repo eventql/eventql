@@ -1,3 +1,3 @@
-js_file: "settings_session_tracking.js"
-html_file: "settings_session_tracking.html"
-css_file: "settings_session_tracking.css"
+js_file: "session_tracking_events.js"
+html_file: "session_tracking_events.html"
+css_file: "session_tracking_events.css"

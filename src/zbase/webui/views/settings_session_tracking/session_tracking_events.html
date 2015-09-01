@@ -3,10 +3,10 @@
     <div>
       <zbase-breadcrumbs>
         <zbase-breadcrumbs-section>
-          <a href="/a/settings">Settings</a>
+          <a href="/a/settings">Integrations</a>
         </zbase-breadcrumbs-section>
         <zbase-breadcrumbs-section>
-          <a href="/a/settings">API Access</a>
+          <a href="/a/settings/session_tracking">Session Tracking</a>
         </zbase-breadcrumbs-section>
       </zbase-breadcrumbs>
     </div>
@@ -17,7 +17,7 @@
     </div>
 
     <div class="zbase_settings_menu_content">
-      <h2 class="pagetitle">Session Tracking</h2>
+      <h2 class="pagetitle">Integrations <i class="sep"></i> <em>Session Tracking</em></h2>
       <z-tabbable class="open_tabs" data-content-attached>
         <z-tab data-index='0'>Events</z-tab>
         <z-tab data-index='1'>Attributes</z-tab>
@@ -25,7 +25,7 @@
           <div class='zbase_settings'>
             <h3 class='zbase_settings_title'>Session Events</h3>
 
-            <table class='z-table session_tracking_events'>
+            <table class='z-table events'>
               <thead>
                 <tr>
                   <th>Event</th>
@@ -35,8 +35,16 @@
               </thead>
               <tbody></tbody>
             </table>
+
+            <div class="add_session_event">
+              <a class="link">
+                <i class="fa fa-plus"></i> Add Session Event
+              </a>
+            </div>
+
           </div>
         </z-tab-content>
+
         <z-tab-content data-index='1'>
           Attributes
         </z-tab-content>
