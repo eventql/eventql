@@ -415,7 +415,7 @@ $.handleLinks = function(elem) {
     return function(e) {
       var href = this.getAttribute("href");
 
-      if (href.indexOf("/a/") == 0) {
+      if (href && href.indexOf("/a/") == 0) {
         $.navigateTo(href);
         e.preventDefault();
         return false;
