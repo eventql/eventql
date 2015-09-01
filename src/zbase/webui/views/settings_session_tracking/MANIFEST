@@ -1,3 +1,4 @@
 js_file: "session_tracking_events.js"
+html_file: "session_tracking.html"
 html_file: "session_tracking_events.html"
 css_file: "session_tracking_events.css"
