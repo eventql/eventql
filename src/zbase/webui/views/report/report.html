@@ -1,0 +1,47 @@
+<template id="zbase_report_main_tpl">
+  <section class='zbase_page_title small'>
+    <div>
+      <zbase-breadcrumbs>
+        <zbase-breadcrumbs-section>
+          <a href="/a/documents">Documents</a>
+        </zbase-breadcrumbs-section>
+        <zbase-breadcrumbs-section>
+          <a href="/a/documents">Reports</a>
+        </zbase-breadcrumbs-section>
+        <zbase-breadcrumbs-section class="report_name">
+        </zbase-breadcrumbs-section>
+      </zbase-breadcrumbs>
+    </div>
+  </section>
+
+  <div class="zbase_content_pane fullwidth">
+    <div class="zbase_report_pane">
+
+      <div class="zbase_report_sidebar">
+        <h3 class="sidebar_title">
+          Report: <span class="report_name editable"></span>
+        </h3>
+
+        <div class="sidebar_subtitle">
+          Last refreshed <span class="report_activity_info"></span>
+        </div>
+
+        <div class="sidebar_content">
+          <h4 class="sidebar_content_title">Description</h4>
+          <div class="report_description"></div>
+        </div>
+
+        <div class="sidebar_content">
+          <h4 class="sidebar_content_title">
+            In which format is this report available?
+          </h4>
+          <div class="report_format"></div>
+        </div>
+      </div>
+
+      <div class="zbase_report_content">
+      </div>
+    </div>
+  </div>
+
+</template>
