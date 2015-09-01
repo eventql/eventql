@@ -1,5 +1,5 @@
 ZBase.registerView((function() {
-  var render = function(path) {
+  var load = function() {
     $.showLoader();
 
     var page = $.getTemplate(
@@ -50,9 +50,9 @@ ZBase.registerView((function() {
 
   return {
     name: "session_tracking_events",
-    loadView: function(params) { render(params.path); },
+    loadView: function(params) { load(); },
     unloadView: function() {},
-    handleNavigationChange: render
+    handleNavigationChange: load
   };
 
 })());
