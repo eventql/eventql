@@ -21,7 +21,41 @@
       <z-tabbable class="open_tabs" data-content-attached>
         <z-tab data-index='0'>Events</z-tab>
         <z-tab data-index='1'>Attributes</z-tab>
+        <z-tab-content data-index='0'>
+          <div class='zbase_settings'>
+            <h3 class='zbase_settings_title'>Session Events</h3>
+
+            <table class='z-table session_tracking_events'>
+              <thead>
+                <tr>
+                  <th>Event</th>
+                  <th>Schema</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </z-tab-content>
+        <z-tab-content data-index='1'>
+          Attributes
+        </z-tab-content>
       </z-tabbable>
     </div>
   </div>
+</template>
+
+<template id="zbase_settings_session_tracking_event_row_tpl">
+  <tr class="event">
+    <td style="width: 300px">
+      <div class='event_name'><a></a></div>
+    </td>
+    <td>
+      <div class='event_schema'>
+        <pre></pre>
+      </div>
+    </td>
+    <td class='text_right attr_icon'>
+      <a data-action='edit'><i class='fa fa-cog'></i></a>
+    </td>
+  </tr>
 </template>
