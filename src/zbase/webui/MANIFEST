@@ -120,6 +120,13 @@ route {
 }
 
 route {
+  path_prefix: "/a/reports"
+  view: "report"
+  require_module: "widgets/zbase-header"
+  require_module: "views/report"
+}
+
+route {
   path_match: "/a/settings"
   view: "settings_api_token"
   require_module: "widgets/z-menu"
