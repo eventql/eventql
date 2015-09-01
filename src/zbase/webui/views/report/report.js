@@ -1,6 +1,7 @@
 ZBase.registerView((function() {
   var kPathPrefix = "/a/reports/";
-  var doc_sync;
+
+  var docsync;
 
   var loadReport = function(params) {
     var query_id = params.path.substr(kPathPrefix.length);
@@ -60,10 +61,22 @@ ZBase.registerView((function() {
 
   };
 
+
+  var getDocument = function() {
+
+  };
+
+
+  var destroy = function() {
+    if (docsync) {
+      docsync.close();
+    }
+  };
+
   return {
     name: "report",
     loadView: loadReport,
-    unloadView: function() {},
+    unloadView: destroy,
     handleNavigationChange: loadReport
   };
 
