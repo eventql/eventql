@@ -34,6 +34,18 @@ z-tabbable z-tab,
   user-select: none;
 }
 
+z-tabbable z-tab.link,
+.z-tabbable .z-tab.link {
+  padding: 0;
+}
+
+z-tabbable z-tab.link a,
+.z-tabbable .z-tab.link a {
+  padding: .76em 1.4em;
+  display: block;
+}
+
+
 z-tabbable z-tab:first-child,
 .z-tabbable .z-tab:first-child {
   margin-left: 0;
@@ -73,6 +85,12 @@ z-tabbable z-tab[data-active],
   box-shadow: none;
   border-radius: 5px 5px 0px 0px;
 }
+
+z-tabbable z-tab[data-active] a,
+.z-tabbable .z-tab[data-active] a {
+  font-weight: 500;
+}
+
 
 /* Coupling with segment for attachment */
 z-tabbable[data-content-attached],
