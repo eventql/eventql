@@ -1,3 +1,15 @@
 .zbase_settings_session_tracking z-tabbable {
   font-size: 14px;
 }
+
+.zbase_settings_session_tracking .zbase_settings_title {
+  font-weight: 500;
+  font-size: 18px;
+  color: #444;
+  margin-bottom: 5px;
+}
+
+.zbase_settings_session_tracking table {
+  margin-top: 22px;
+  border-top: 1px solid #eee;
+}
