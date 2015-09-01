@@ -1,0 +1,119 @@
+.zbase_settings_session_tracking z-tabbable {
+  font-size: 14px;
+}
+
+.zbase_settings_session_tracking .zbase_settings_title {
+  font-weight: 500;
+  font-size: 18px;
+  color: #444;
+  margin: 25px 0 5px 10px;
+}
+
+.zbase_settings_session_tracking .add_session_event,
+.zbase_settings_session_tracking .add_session_attribute {
+  border-bottom: 2px solid #ddd;
+  border-top: 1px solid #d4d4d4;
+  padding: 20px 20px;
+  text-align: center;
+  font-size: 14px;
+  background: rgba(0, 0, 0, 0.03)
+}
+
+.zbase_settings_session_tracking .add_session_attribute.hidden {
+  display: none;
+}
+
+.zbase_settings_session_tracking table {
+  margin-top: 22px;
+  border-top: 1px solid #eee;
+}
+
+.zbase_settings_session_tracking table td.icon {
+  width: 64px;
+  text-align: center;
+}
+
+.zbase_settings_session_tracking table td.icon i {
+  font-size: 14px;
+  color: #999;
+  padding: 10px;
+}
+
+.zbase_settings_session_tracking table td.icon i:hover {
+  cursor: pointer;
+  color: #1c99d6;
+}
+
+.zbase_settings_session_tracking table.z-table.events tbody tr:hover {
+  cursor: pointer;
+}
+
+.zbase_settings_session_tracking table.z-table.events tbody tr td {
+  vertical-align: top;
+  padding-top: 16px;
+}
+
+.zbase_settings_session_tracking table.events .event_name a {
+  background-color: #f0f6f8;
+  border-bottom: 1px solid #c9d0d4;
+  position: absolute;
+  padding: 6px 10px;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  color: rgba(10,10,10,0.8);
+  line-height: 18px;
+}
+
+.zbase_settings_session_tracking table.events .event_schema {
+  padding: 2px 0 20px 0;
+}
+
+.zbase_settings_session_tracking table.events .event_schema pre {
+  font-family: "Droid Sans Mono", "Courier", monospace;
+  font-size: 12px;
+  line-height: 120%;
+  color: #000;
+  opacity: 0.9;
+}
+
+
+.zbase_settings_session_tracking table.attributes .attribute_name {
+  color: #111;
+  font-weight: 500;
+}
+
+.zbase_settings_session_tracking table.attributes .attribute_type {
+  font-size: 12px;
+  color: #999;
+}
+
+.zbase_settings_session_tracking table.add_attribute {
+  margin-top: 0px;
+  border-top: 1px solid #d4d4d4;
+  border-bottom: 2px solid #ddd;
+}
+
+.zbase_settings_session_tracking table.add_attribute.hidden {
+  display: none;
+}
+
+.zbase_settings_session_tracking table.add_attribute td {
+  background: rgba(0,0,0,0.03);
+  height: 60px;
+}
+
+.zbase_settings_session_tracking table.add_attribute button,
+.zbase_settings_session_tracking table.add_attribute input {
+  font-size: 13px;
+}
+
+.zbase_settings_session_tracking table.add_attribute .error_note {
+  font-size: 12px;
+  color: #d95c5c;
+  font-style: italic;
+}
+
+.zbase_settings_session_tracking table.add_attribute .error_note.hidden {
+  display: none;
+}
