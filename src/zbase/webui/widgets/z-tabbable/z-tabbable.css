@@ -111,6 +111,14 @@ z-tabbable[data-content-attached] z-tab-content[data-active],
 }
 
 /* ZBase App */
+.zbase_app z-tabbable[data-content-attached] z-tab-content {
+  border-left: 0;
+  border-right: 0;
+  border-bottom: 0;
+  border-top: 1px solid #ddd;
+  padding: 0;
+}
+
 .zbase_app z-tabbable.open_tabs {
   border-top: none;
 }
