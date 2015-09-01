@@ -9,7 +9,7 @@ var ZBase = (function() {
   var config;
 
   /* feature detection */
-  var __enable_html5_import = 'import' in document.createElement('link');
+  var __enable_html5_import = false; // google only technology, not even properly documented :(
   var __enable_html5_templates = ("content" in document.createElement("template"));
   var __enable_html5_importnode = 'importNode' in document;
 
