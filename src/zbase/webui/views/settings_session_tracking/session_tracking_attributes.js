@@ -14,15 +14,7 @@ ZBase.registerView((function() {
         "zbase_session_tracking_attributes_tpl");
     $(".zbase_settings_menu_content", page).appendChild(content);
 
-    $.httpGet("/api/v1/session_tracking/attributes", function(r) {
-      if(r.status == 200) {
-        renderAttributes(JSON.parse(r.response).session_attributes);
-        //$.handleLinks(page); //call?
-      } else {
-        $.fatalError();
-      }
-      $.hideLoader();
-    });
+    loadAttributes();
 
     $.onClick($(".add_session_attribute .link", page), function() {
       renderAddAttributePane();
@@ -32,12 +24,25 @@ ZBase.registerView((function() {
     $.replaceViewport(page);
   };
 
+  var loadAttributes = function() {
+    $.httpGet("/api/v1/session_tracking/attributes", function(r) {
+      if(r.status == 200) {
+        renderAttributes(JSON.parse(r.response).session_attributes);
+        //$.handleLinks(page); //call?
+      } else {
+        $.fatalError();
+      }
+      $.hideLoader();
+    });
+  };
+
   var renderAttributes = function(attributes) {
     var tbody = $(".zbase_settings table.attributes tbody");
     var tpl = $.getTemplate(
       "views/settings_session_tracking",
       "zbase_session_tracking_attribute_row_tpl");
 
+    tbody.innerHTML = "";
     attributes.columns.forEach(function(attr) {
       var html = tpl.cloneNode(true);
       $(".attribute_name", html).innerHTML = attr.name;
@@ -70,16 +75,20 @@ ZBase.registerView((function() {
 
   var addAttribute = function() {
     var attribute = {};
-    attribute.name = $("table.add_attribute input").value;
+    attribute.name = $.escapeHTML($("table.add_attribute input").value);
 
     if (attribute.name.length == 0) {
       $("table.add_attribute .error_note").classList.remove("hidden");
       return;
     }
 
-    attribute.type = $("table.add_attribute z-dropdown").getValue();
+    attribute.type= $("table.add_attribute z-dropdown").getValue();
     alert("POST new attribute");
+    $.showLoader();
     hideAddAttributePane();
+    //move into post
+    loadAttributes();
+    $.hideLoader();
   }
 
   var hideAddAttributePane = function() {
