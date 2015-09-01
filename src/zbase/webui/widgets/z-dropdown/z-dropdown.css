@@ -285,7 +285,7 @@ z-dropdown.input z-dropdown-header,
   display: inline-block;
   box-shadow: none;
   border: 1px solid rgba(39,41,43,.15);
-  border-radius: .2857rem;
+  border-radius: 3px;
 
 
   min-width: 180px;
@@ -442,7 +442,7 @@ z-dropdown.input .z-dropdown-header:hover {
 .zbase_app z-dropdown z-dropdown-header {
   color: #333;
   border: 1px solid #bbbb;
-  font-weight: 600;
+  font-weight: 500;
   font-size: 12px;
   line-height: 28px;
   padding: 0 11px;
@@ -481,7 +481,7 @@ z-dropdown.input .z-dropdown-header:hover {
   color: #333;
   border: 1px solid #bbb;
   box-shadow: 0 0 2px rgba(0,0,0,.1);
-  font-weight: 600;
+  font-weight: 500;
   font-size: 12px;
   line-height: 28px;
   padding: 0 11px;
@@ -519,7 +519,14 @@ z-dropdown.input .z-dropdown-header:hover {
   background-image: -o-linear-gradient(top, #1c99d6, #1c99d6);
   background-image: linear-gradient(top, #1c99d6, #1c99d6);
   color: #fff;
-  box-shadow: 0 0 2px #A4C1D2;
-  border: 1px solid #3078A2;
+  border: none;
+  box-shadow: rgba(39, 41, 43, 0.14902) 0px 0px 0px 1px inset;
+  font-weight: 500;
+  line-height: 34px;
+  height: 34px;
+}
+
+.zbase_app z-dropdown.input.primary:hover z-dropdown-header {
+  background: #21aaed;
 }
 

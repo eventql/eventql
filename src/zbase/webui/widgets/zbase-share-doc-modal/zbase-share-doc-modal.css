@@ -3,7 +3,7 @@ z-modal.zbase_share_doc .z-modal-content {
 }
 
 .zbase_share_doc .share_doc_access_settings {
-  margin: 30px 0 10px;
+  margin: 10px 0 0 0;
 }
 
 .zbase_share_doc .access_selection {
@@ -12,16 +12,24 @@ z-modal.zbase_share_doc .z-modal-content {
   border-left: 1px solid rgba(0, 0, 0, 0.15);
   border-right: 1px solid rgba(0, 0, 0, 0.15);
   border-top: 1px solid rgba(0, 0, 0, 0.15);
+  color: #000;
 }
 
-.zbase_share_doc .access_selection:hover {
+.zbase_share_doc .access_selection:hover,
+.zbase_share_doc .access_selection[data-selected] {
   cursor: pointer;
   background: #f0f6f8;
 }
 
-.zbase_share_doc .access_selection[data-selected] .inner:after {
+.zbase_share_doc .access_selection .inner:before {
+  width: 18px;
+  min-height: 1px;
+  display: inline-block;
+  content: "";
+}
+
+.zbase_share_doc .access_selection[data-selected] .inner:before {
   font-family: FontAwesome;
-  margin-left: 5px;
   content: "\f00c";
   color: #1c99d6;
 }
@@ -51,4 +59,19 @@ z-modal.zbase_share_doc .z-modal-content {
 
 .zbase_share_doc .share_doc_infobar.hidden {
   display: none;
+}
+
+.zbase_share_doc h4 {
+  font-weight: 400;
+  line-height: 34px;
+}
+
+.zbase_share_doc .zbase_share_doc_link,
+.zbase_share_doc .zbase_share_doc_link:active,
+.zbase_share_doc .zbase_share_doc_link:focus {
+  border: none;
+  font: 12px monospace;
+  background: #f0f6f8;
+  line-height: 22px;
+  padding: 8px 16px;
 }

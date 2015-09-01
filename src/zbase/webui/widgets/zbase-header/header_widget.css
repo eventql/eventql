@@ -9,10 +9,18 @@
   padding: 0 10px;
   line-height: 42px;
   color: #808A95;
+  line-height: 40px;
+  height: 40px;
+  display: block;
+}
+
+.zbase_header ul li .nav:hover {
+  color: #1c99d6;
 }
 
 .zbase_header ul li a.active {
   color: #37485C;
+  font-weight: 500;
 }
 
 .zbase_header ul li a:hover {

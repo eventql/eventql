@@ -101,7 +101,7 @@ ZBase.registerView((function() {
       var modal = ShareDocModal(
           $(".zbase_sql_editor", page),
           doc.uuid,
-          "/a/sql/" + doc.uuid);
+          "http://zbase.io/a/sql/" + doc.uuid);
       $.onClick($("button[data-action='share-query']", page), function() {
         modal.show();
       });
