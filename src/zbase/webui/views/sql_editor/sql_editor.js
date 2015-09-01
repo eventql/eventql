@@ -64,7 +64,6 @@ ZBase.registerView((function() {
 
   var renderQueryEditor = function(doc) {
     var readonly = !doc.is_writable;
-    //readonly = true;
     var page = $.getTemplate(
         "views/sql_editor",
         "zbase_sql_editor_main_tpl");
