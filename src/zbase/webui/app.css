@@ -33,7 +33,7 @@ body{
   padding:0;
   margin:0;
   color:#545758;
-  text-rendering: geometricPrecision;
+  text-rendering: optimizeLegibility;
   -webkit-font-smoothing: subpixel-antialiased;
   -webkit-user-select: none;
   -moz-user-select: none;
@@ -125,7 +125,7 @@ template {
 .zbase_header {
   width: 100%;
   background: #fff;
-  border-bottom: 1px solid #e1e1e1;
+  border-bottom: 1px solid #c9d0d4;
   box-shadow: 0 0 2px rgba(0,0,0,.2);
   height: 40px;
   line-height: 30px;
@@ -142,11 +142,18 @@ template {
   padding: 0 20px;
 }
 
+.zbase_header .sep {
+  height: 42px;
+  width: 1px;
+  float: left;
+}
+
 .zbase_header .logo_app {
   margin-top: 9px;
   display: block;
   float: left;
   width: 30px;
+  margin-right: 4px;
 }
 
 .zbase_header.hidden {
