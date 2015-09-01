@@ -1,0 +1,46 @@
+.zbase_report_pane {
+  display: table;
+  table-layout: fixed;
+  width: 100%;
+  min-height: 900px; /* FIXME */
+}
+
+.zbase_report_pane .zbase_report_sidebar {
+  display: table-cell;
+  vertical-align: top;
+  width: 320px;
+  padding: 20px 20px 0;
+}
+
+.zbase_report_pane .zbase_report_sidebar h3.sidebar_title {
+  margin: 0;
+}
+
+.zbase_report_pane .zbase_report_sidebar h3.sidebar_title .editable {
+  padding: 5px 3px;
+}
+
+.zbase_report_pane .editable:hover {
+  cursor: pointer;
+  background: #f0f6f8;
+}
+
+.zbase_report_pane .zbase_report_sidebar .sidebar_subtitle {
+  margin: 5px 0 15px 0;
+  font-size: 12px;
+  color: #999;
+}
+
+.zbase_report_pane .zbase_report_sidebar .sidebar_content {
+  border-top: 1px solid #eee;
+  padding: 15px 0px 18px 0;
+  font-size: 12px;
+}
+
+.zbase_report_pane .zbase_report_content {
+  display: table-cell;
+  vertical-align: top;
+  width: auto;
+  border-left: 1px solid #ddd;
+  border-right: 1px solid #ddd;
+}
