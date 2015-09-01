@@ -54,6 +54,9 @@ ZBase.registerView((function() {
       case "sql_query":
         return "/a/sql/" + uuid;
 
+      case "report":
+        return "/a/reports/" + uuid;
+
       default:
         return "#";
     }
@@ -67,13 +70,17 @@ ZBase.registerView((function() {
         name = "Unnamed SQL Query";
         break;
 
+      case "report":
+        name = "Unnamed Report";
+        break;
+
       default:
         $.fatalError();
         return;
     }
 
     var postdata = $.buildQueryString({
-      name: "Unnamed SQL Query",
+      name: name,
       type: doc_type
     });
 
