@@ -1,0 +1,70 @@
+<template id="zbase_session_tracking_attributes_tpl">
+  <z-tabbable class="open_tabs" data-content-attached>
+    <z-tab data-index='0'>Events</z-tab>
+    <z-tab data-index='1' data-active>Attributes</z-tab>
+    <z-tab-content data-index='1'>
+      <div class='zbase_settings'>
+        <h3 class='zbase_settings_title'>Session Attributes</h3>
+
+        <table class='z-table attributes'>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Type</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+
+        <table class="z-table add_attribute hidden">
+        </table>
+
+        <div class="add_session_attribute">
+          <a class="link">
+            <i class="fa fa-plus"></i> Add Session Attribute
+          </a>
+        </div>
+
+
+      </div>
+    </z-tab-content>
+  </z-tabbable>
+</template>
+
+<template id="zbase_session_tracking_add_attribute_tpl">
+  <tbody>
+    <tr>
+      <td>
+        <input class='z-input' style="width: 250px;" />
+        <span class='error_note hidden'>Please enter an attribute name</span>
+      </td>
+      <td>
+        <z-dropdown class='input' data-resolved>
+          <z-dropdown-flyout>
+            <z-dropdown-items>
+              <z-dropdown-item data-value='string' data-selected>STRING</z-dropdown-item>
+              <z-dropdown-item data-value='uint32'>UINT32</z-dropdown-item>
+              <z-dropdown-item data-value='uint64'>UINT64</z-dropdown-item>
+              <z-dropdown-item data-value='boolean'>BOOLEAN</z-dropdown-item>
+            </z-dropdown-items>
+          </z-dropdown-flyout>
+        </z-dropdown>
+      </td>
+      <td class="icon">
+        <button class="z-button primary" data-action="add-attribute">Add</button>
+      </td>
+    </tr>
+  </tbody>
+</template>
+
+<template id="zbase_session_tracking_attribute_row_tpl">
+  <tr>
+    <td class="attribute_name">
+      <h3></h3>
+    </td>
+    <td class="attribute_type">
+    </td>
+    <td class="icon"><i class='fa fa-times'></i></td>
+  </tr>
+</template>
