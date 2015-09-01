@@ -123,6 +123,7 @@ route {
   path_prefix: "/a/reports"
   view: "report"
   require_module: "widgets/zbase-header"
+  require_module: "util/doc_sync"
   require_module: "views/report"
 }
 
