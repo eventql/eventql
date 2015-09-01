@@ -4,14 +4,20 @@ ZBase.registerView((function() {
 
     var page = $.getTemplate(
         "views/settings_session_tracking",
-        "zbase_settings_session_tracking_main_tpl");
+        "zbase_session_tracking_main_tpl");
 
     var menu = SettingsMenu();
     menu.render($(".zbase_settings_menu_sidebar", page));
 
+    var content = $.getTemplate(
+        "views/settings_session_tracking",
+        "zbase_session_tracking_events_tpl");
+    $(".zbase_settings_menu_content", page).appendChild(content);
+
     $.httpGet("/api/v1/session_tracking/events", function(r) {
       if(r.status == 200) {
         renderEvents(JSON.parse(r.response).session_events);
+        //$.handleLinks(page); //call?
       } else {
         $.fatalError();
       }
@@ -35,6 +41,10 @@ ZBase.registerView((function() {
       $(".event_schema pre", html).innerHTML = ev.schema_debug;
 
       tbody.appendChild(html);
+    });
+
+    $.onClick(tbody, function(e) {
+      console.log("open edit event");
     });
   };
 
