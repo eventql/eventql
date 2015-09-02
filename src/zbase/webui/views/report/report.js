@@ -33,11 +33,6 @@ ZBase.registerView((function() {
     }
 
 
-    //report name
-    $(".report_name", page).innerHTML = doc.name;
-    var report_title = $(".zbase_report_pane .report_name", page)
-    report_title.innerHTML = doc.name;
-
     //FIXME stub
     doc.content = {
       description: "Top On-Site Search Terms per Language that were referred by Google"
@@ -47,11 +42,8 @@ ZBase.registerView((function() {
     report_description.innerHTML = doc.content.description;
 
     if (!readonly) {
-      report_title.classList.add("editable");
+      $(".zbase_report_pane .report_name", page).classList.add("editable");
       report_description.classList.add("editable");
-
-      initShareDocModal();
-      initEditing();
     } else {
       $(".readonly_hint", page).classList.remove("hidden");
       $(".writable_report_actions", page).classList.add("hidden");
@@ -59,19 +51,60 @@ ZBase.registerView((function() {
 
     $.handleLinks(page);
     $.replaceViewport(page);
+
+    //report name
+    setDocumentName(doc.name);
+
+    if (!readonly) {
+      //init edit actions
+      initNameEditing(page);
+      initDescriptionEditing(page);
+      initShareDocModal(page);
+      initContentJsonEditing(page);
+    }
   };
 
-  var initShareDocModal = function() {
+  var initShareDocModal = function(page) {
+  };
+
+  var initNameEditing = function() {
+    var modal = $(".zbase_report_pane z-modal.rename_report");
+    var name_input = $("input.report_name", modal);
+
+    $.onClick($(".zbase_report_pane .report_name.editable"), function() {
+      modal.show();
+      name_input.focus();
+    });
+
+    $.onClick($("button.submit", modal), function() {
+      setDocumentName($.escapeHTML(name_input.value));
+      docsync.saveDocument();
+      modal.close();
+    });
 
   };
 
-  var initEditing = function() {
-    
+  var setDocumentName = function(name) {
+    var escaped_name = $.escapeHTML(name);
+    $("zbase-breadcrumbs-section.report_name").innerHTML = escaped_name;
+    $(".zbase_report_pane .report_name").innerHTML = escaped_name;
+    $(".zbase_report_pane z-modal input.report_name").value = escaped_name;
+  };
+
+  var initDescriptionEditing = function(page) {
+
+  };
+
+  var initContentJsonEditing = function(page) {
+
   };
 
 
   var getDocument = function() {
-
+    return {
+      content: "",
+      name: $(".zbase_report_pane input.report_name").value
+    };
   };
 
 
