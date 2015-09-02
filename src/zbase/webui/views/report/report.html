@@ -15,6 +15,7 @@
   </section>
 
   <div class="zbase_content_pane fullwidth">
+    <div class="zbase_report_infobar hidden"></div>
     <div class="zbase_report_pane">
 
       <div class="zbase_report_sidebar">
@@ -25,8 +26,8 @@
 
         <div class="sidebar_subtitle">
           <div class="writable_report_actions">
-            <a class="link">Share</a>
-            <a class="link">Edit</a>
+            <a class="link share">Share</a>
+            <a class="link edit">Edit</a>
           </div>
 
           Last refreshed <span class="report_activity_info"></span>
@@ -47,7 +48,26 @@
 
       <div class="zbase_report_content">
       </div>
+
+      <z-modal class="zbase_sql_editor_modal rename_report edit">
+        <z-modal-box>
+          <z-modal-close-icon></z-modal-close-icon>
+          <div class="z-modal-header">Rename Report</div>
+          <div class="z-modal-content">
+            <h3>Enter a new report name</h3>
+            <input class="z-input report_name" />
+          </div>
+          <div class="z-modal-footer">
+            <button class="z-button primary submit">
+              Save
+            </button>
+          </div>
+        </z-modal-box>
+      </z-modal>
     </div>
   </div>
+
+
+
 
 </template>
