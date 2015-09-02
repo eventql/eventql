@@ -117,6 +117,7 @@ ZBase.registerView((function() {
       updateReportContent();
       edit_pane.classList.add("hidden");
       report_ui.classList.remove("hidden");
+      $(".error_note", edit_pane).classList.add("hidden");
     };
 
     $.onClick($(".zbase_report_pane .link.edit"), function() {
@@ -131,7 +132,7 @@ ZBase.registerView((function() {
         docsync.saveDocument();
         closeEditPane();
       } catch (e) {
-        //TODO handle invalid json
+        $(".error_note", edit_pane).classList.remove("hidden");
       }
     });
     $.onClick($(".close", edit_pane), closeEditPane);
