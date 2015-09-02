@@ -50,7 +50,7 @@ ZBase.registerView((function() {
     try {
       var content = JSON.parse(doc.content);
       description = content.description;
-      setReportDescription(content.description, readonly);
+      setReportContent(doc.content);
     } catch(e) {}
     setReportDescription(description, readonly);
 
@@ -90,13 +90,6 @@ ZBase.registerView((function() {
     });
   };
 
-  var setReportName = function(name) {
-    var escaped_name = $.escapeHTML(name);
-    $("zbase-breadcrumbs-section.report_name").innerHTML = escaped_name;
-    $(".zbase_report_pane .report_name").innerHTML = escaped_name;
-    $(".zbase_report_pane z-modal input.report_name").value = escaped_name;
-  };
-
   var initDescriptionEditing = function() {
     var modal = $(".zbase_report_pane z-modal.edit_description");
     var textarea = $("textarea.report_description", modal);
@@ -110,25 +103,10 @@ ZBase.registerView((function() {
     $.onClick($(".zbase_report_pane .link.add_description"), showModal);
 
     $.onClick($("button.submit", modal), function() {
-      setReportDescription($.escapeHTML(textarea.value));
+      setReportDescription($.escapeHTML(textarea.value), false);
       docsync.saveDocument();
       modal.close();
     });
-  };
-
-  var setReportDescription = function(description, readonly) {
-    if (!readonly && description.length == 0) {
-      $(".zbase_report_pane .sidebar_content .link.add_description")
-        .classList.remove("hidden");
-    } else {
-      $(".zbase_report_pane .sidebar_content .link.add_description")
-        .classList.add("hidden");
-    }
-
-    var escaped_description = $.escapeHTML(description);
-    $(".zbase_report_pane .report_description").innerHTML = escaped_description;
-    $(".zbase_report_pane z-modal textarea.report_description").innerHTML =
-      escaped_description;
   };
 
   var initContentEditing = function(page) {
@@ -145,16 +123,54 @@ ZBase.registerView((function() {
       edit_pane.classList.remove("hidden");
     });
 
+    $.onClick($(".submit", edit_pane), function() {
+      var content = $.escapeHTML($("z-codeeditor", edit_pane).getValue());
+      try {
+        var content_obj = JSON.parse(content);
+        setReportDescription(content_obj.description, false);
+        setReportContent(content);
+        docsync.saveDocument();
+        closeEditPane();
+      } catch (e) {
+        //TODO handle invalid json
+      }
+    });
     $.onClick($(".close", edit_pane), closeEditPane);
   };
 
-  var getDocument = function() {
-    var content = {
-      description:
-          $(".zbase_report_pane z-modal textarea.report_description").value
+  var setReportName = function(name) {
+    var escaped_name = $.escapeHTML(name);
+    $("zbase-breadcrumbs-section.report_name").innerHTML = escaped_name;
+    $(".zbase_report_pane .report_name").innerHTML = escaped_name;
+    $(".zbase_report_pane z-modal input.report_name").value = escaped_name;
+  };
+
+  var setReportDescription = function(description, readonly) {
+    var escaped_description = (description == undefined ||description.length == 0) ?
+        "" : $.escapeHTML(description);
+
+    //display link if no description
+    if (!readonly && escaped_description.length == 0) {
+      $(".zbase_report_pane .sidebar_content .link.add_description")
+        .classList.remove("hidden");
+    } else {
+      $(".zbase_report_pane .sidebar_content .link.add_description")
+        .classList.add("hidden");
     }
+
+    $(".zbase_report_pane .report_description").innerHTML = escaped_description;
+    $(".zbase_report_pane z-modal textarea.report_description").innerHTML =
+      escaped_description;
+  };
+
+
+  var setReportContent = function(content) {
+    $(".zbase_report_pane .edit_content_pane z-codeeditor").setValue(content);
+  };
+
+  var getDocument = function() {
     return {
-      content: JSON.stringify(content),
+      content: $(".zbase_report_pane .edit_content_pane z-codeeditor").getValue(),
       name: $(".zbase_report_pane input.report_name").value
     };
   };
