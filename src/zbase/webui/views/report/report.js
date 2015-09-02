@@ -59,7 +59,7 @@ ZBase.registerView((function() {
       initNameEditing();
       initDescriptionEditing();
       initShareDocModal(doc.uuid);
-      initContentJsonEditing();
+      initContentEditing();
     }
   };
 
@@ -131,10 +131,22 @@ ZBase.registerView((function() {
       escaped_description;
   };
 
-  var initContentJsonEditing = function(page) {
+  var initContentEditing = function(page) {
+    var edit_pane = $(".zbase_report_pane .edit_content_pane");
+    var report_ui = $(".zbase_report_pane .report_ui");
 
+    var closeEditPane = function() {
+      edit_pane.classList.add("hidden");
+      report_ui.classList.remove("hidden");
+    };
+
+    $.onClick($(".zbase_report_pane .link.edit"), function() {
+      report_ui.classList.add("hidden");
+      edit_pane.classList.remove("hidden");
+    });
+
+    $.onClick($(".close", edit_pane), closeEditPane);
   };
-
 
   var getDocument = function() {
     var content = {
@@ -146,7 +158,6 @@ ZBase.registerView((function() {
       name: $(".zbase_report_pane input.report_name").value
     };
   };
-
 
   var destroy = function() {
     if (docsync) {

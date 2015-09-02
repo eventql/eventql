@@ -38,16 +38,20 @@
           <a class="link hidden add_description">Add Description</a>
           <div class="report_description"></div>
         </div>
-
-        <div class="sidebar_content">
-          <h4 class="sidebar_content_title">
-            In which format is this report available?
-          </h4>
-          <div class="report_format"></div>
-        </div>
       </div>
 
       <div class="zbase_report_content">
+        <div class="edit_content_pane">
+          <i class='fa fa-times close'></i>
+          <button class="z-button primary submit">
+            Save
+          </button>
+          
+          <h2 class="pagetitle">Edit Report Content</h2>
+          <z-codeeditor data-language="text/json" data-resizable='vertical' style="height: 250px;"></z-codeeditor>
+        </div>
+
+        <div class="report_ui"></div>
       </div>
 
       <z-modal class="zbase_sql_editor_modal rename_report edit">
