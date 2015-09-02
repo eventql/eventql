@@ -29,29 +29,15 @@ var LogfileTable = function(rows) {
 
   var renderRawRow = function(tbody, row) {
     var tr = document.createElement('tr');
-    var folded_tr = document.createElement("tr");
     tr.className = "folding";
-    folded_tr.className = "folded";
 
     tr.innerHTML =
-        "<td class='fold_icon'><i class='fa'></i></td><td class='time'>" +
+        "<td class='time'>" +
         DateUtil.printTimestamp(row.time / 1000) +
         "</td><td><span>" + $.wrapText(row.raw) + "</span></td>";
 
-    row.columns.forEach(function(column) {
-      folded_tr.innerHTML += "<td>" + $.wrapText(column) + "</td>";
-    });
 
     tbody.appendChild(tr);
-    tbody.appendChild(folded_tr);
-
-    tr.addEventListener("click", function() {
-      if (this.hasAttribute("data-active")) {
-        this.removeAttribute("data-active");
-      } else {
-        this.setAttribute("data-active", "active");
-      }
-    }, false);
   };
 
   var renderStructuredWithRawRow = function(tbody, row) {
