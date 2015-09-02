@@ -1,6 +1,5 @@
 ZBase.registerView((function() {
   var kPathPrefix = "/a/reports/";
-
   var docsync;
 
   var loadReport = function(params) {
@@ -32,18 +31,9 @@ ZBase.registerView((function() {
           $(".zbase_report_infobar", page));
     }
 
-
-    //FIXME stub
-    doc.content = {
-      description: "Top On-Site Search Terms per Language that were referred by Google"
-    };
-    //report description
-    var report_description = $(".zbase_report_pane .report_description", page);
-    report_description.innerHTML = doc.content.description;
-
     if (!readonly) {
       $(".zbase_report_pane .report_name", page).classList.add("editable");
-      report_description.classList.add("editable");
+      $(".zbase_report_pane .report_description", page).classList.add("editable");
     } else {
       $(".readonly_hint", page).classList.remove("hidden");
       $(".writable_report_actions", page).classList.add("hidden");
@@ -53,7 +43,16 @@ ZBase.registerView((function() {
     $.replaceViewport(page);
 
     //report name
-    setDocumentName(doc.name);
+    setReportName(doc.name);
+
+    //report description
+    var description = "";
+    try {
+      var content = JSON.parse(doc.content);
+      description = content.description;
+      setReportDescription(content.description, readonly);
+    } catch(e) {}
+    setReportDescription(description, readonly);
 
     if (!readonly) {
       //init edit actions
@@ -77,22 +76,51 @@ ZBase.registerView((function() {
     });
 
     $.onClick($("button.submit", modal), function() {
-      setDocumentName($.escapeHTML(name_input.value));
+      setReportName($.escapeHTML(name_input.value));
       docsync.saveDocument();
       modal.close();
     });
-
   };
 
-  var setDocumentName = function(name) {
+  var setReportName = function(name) {
     var escaped_name = $.escapeHTML(name);
     $("zbase-breadcrumbs-section.report_name").innerHTML = escaped_name;
     $(".zbase_report_pane .report_name").innerHTML = escaped_name;
     $(".zbase_report_pane z-modal input.report_name").value = escaped_name;
   };
 
-  var initDescriptionEditing = function(page) {
+  var initDescriptionEditing = function() {
+    var modal = $(".zbase_report_pane z-modal.edit_description");
+    var textarea = $("textarea.report_description", modal);
 
+    var showModal = function() {
+      modal.show();
+      textarea.focus();
+    };
+
+    $.onClick($(".zbase_report_pane .report_description.editable"), showModal);
+    $.onClick($(".zbase_report_pane .link.add_description"), showModal);
+
+    $.onClick($("button.submit", modal), function() {
+      setReportDescription($.escapeHTML(textarea.value));
+      docsync.saveDocument();
+      modal.close();
+    });
+  };
+
+  var setReportDescription = function(description, readonly) {
+    if (!readonly && description.length == 0) {
+      $(".zbase_report_pane .sidebar_content .link.add_description")
+        .classList.remove("hidden");
+    } else {
+      $(".zbase_report_pane .sidebar_content .link.add_description")
+        .classList.add("hidden");
+    }
+
+    var escaped_description = $.escapeHTML(description);
+    $(".zbase_report_pane .report_description").innerHTML = escaped_description;
+    $(".zbase_report_pane z-modal textarea.report_description").innerHTML =
+      escaped_description;
   };
 
   var initContentJsonEditing = function(page) {
@@ -101,8 +129,12 @@ ZBase.registerView((function() {
 
 
   var getDocument = function() {
+    var content = {
+      description:
+          $(".zbase_report_pane z-modal textarea.report_description").value
+    }
     return {
-      content: "",
+      content: JSON.stringify(content),
       name: $(".zbase_report_pane input.report_name").value
     };
   };

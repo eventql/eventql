@@ -70,6 +70,10 @@
   font-size: 12px;
 }
 
+.zbase_report_pane .zbase_report_sidebar .link.add_description.hidden {
+  display: none;
+}
+
 .zbase_report_pane .zbase_report_content {
   display: table-cell;
   vertical-align: top;
@@ -88,6 +92,11 @@
 
 .zbase_report_pane z-modal.edit button.z-button {
   float: right;
+  font-size: 13px;
+}
+
+.zbase_report_pane z-modal.edit textarea.z-textarea {
+  width: 100%;
   font-size: 13px;
 }
 
