@@ -35,6 +35,7 @@
 
         <div class="sidebar_content">
           <h4 class="sidebar_content_title">Description</h4>
+          <a class="link hidden add_description">Add Description</a>
           <div class="report_description"></div>
         </div>
 
@@ -56,6 +57,22 @@
           <div class="z-modal-content">
             <h3>Enter a new report name</h3>
             <input class="z-input report_name" />
+          </div>
+          <div class="z-modal-footer">
+            <button class="z-button primary submit">
+              Save
+            </button>
+          </div>
+        </z-modal-box>
+      </z-modal>
+
+      <z-modal class="zbase_sql_editor_modal edit edit_description">
+        <z-modal-box>
+          <z-modal-close-icon></z-modal-close-icon>
+          <div class="z-modal-header">Edit Report Description</div>
+          <div class="z-modal-content">
+            <h3>Enter a new report description</h3>
+            <textarea class="z-textarea report_description" rows="4"></textarea>
           </div>
           <div class="z-modal-footer">
             <button class="z-button primary submit">
