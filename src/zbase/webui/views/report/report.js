@@ -56,14 +56,22 @@ ZBase.registerView((function() {
 
     if (!readonly) {
       //init edit actions
-      initNameEditing(page);
-      initDescriptionEditing(page);
-      initShareDocModal(page);
-      initContentJsonEditing(page);
+      initNameEditing();
+      initDescriptionEditing();
+      initShareDocModal(doc.uuid);
+      initContentJsonEditing();
     }
   };
 
-  var initShareDocModal = function(page) {
+  var initShareDocModal = function(doc_id) {
+    var modal = ShareDocModal(
+        $(".zbase_report_pane"),
+        doc_id,
+        "http://zbase.io/a/report/" + doc_id);
+
+    $.onClick($(".zbase_report_pane .link.share"), function() {
+      modal.show();
+    });
   };
 
   var initNameEditing = function() {
