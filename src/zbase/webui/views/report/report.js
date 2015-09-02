@@ -114,6 +114,7 @@ ZBase.registerView((function() {
     var report_ui = $(".zbase_report_pane .report_ui");
 
     var closeEditPane = function() {
+      updateReportContent();
       edit_pane.classList.add("hidden");
       report_ui.classList.remove("hidden");
     };
@@ -127,7 +128,6 @@ ZBase.registerView((function() {
       var new_content = $.escapeHTML($("z-codeeditor", edit_pane).getValue());
       try {
         content = JSON.parse(new_content);
-        updateReportContent();
         docsync.saveDocument();
         closeEditPane();
       } catch (e) {
