@@ -1,6 +1,8 @@
 ZBase.registerView((function() {
   var kPathPrefix = "/a/reports/";
+  var content = {};
   var docsync;
+  var readonly;
 
   var loadReport = function(params) {
     var query_id = params.path.substr(kPathPrefix.length);
@@ -18,7 +20,7 @@ ZBase.registerView((function() {
   };
 
   var renderReport = function(doc) {
-    var readonly = !doc.is_writable;
+    readonly = !doc.is_writable;
     var page = $.getTemplate(
         "views/report",
         "zbase_report_main_tpl");
@@ -45,14 +47,11 @@ ZBase.registerView((function() {
     //report name
     setReportName(doc.name);
 
-    //report description
-    var description = "";
+    //report content
     try {
-      var content = JSON.parse(doc.content);
-      description = content.description;
-      setReportContent(doc.content);
+      content = JSON.parse(doc.content);
     } catch(e) {}
-    setReportDescription(description, readonly);
+    updateReportContent();
 
     if (!readonly) {
       //init edit actions
@@ -103,7 +102,8 @@ ZBase.registerView((function() {
     $.onClick($(".zbase_report_pane .link.add_description"), showModal);
 
     $.onClick($("button.submit", modal), function() {
-      setReportDescription($.escapeHTML(textarea.value), false);
+      content.description = $.escapeHTML(textarea.value);
+      updateReportContent();
       docsync.saveDocument();
       modal.close();
     });
@@ -124,11 +124,10 @@ ZBase.registerView((function() {
     });
 
     $.onClick($(".submit", edit_pane), function() {
-      var content = $.escapeHTML($("z-codeeditor", edit_pane).getValue());
+      var new_content = $.escapeHTML($("z-codeeditor", edit_pane).getValue());
       try {
-        var content_obj = JSON.parse(content);
-        setReportDescription(content_obj.description, false);
-        setReportContent(content);
+        content = JSON.parse(new_content);
+        updateReportContent();
         docsync.saveDocument();
         closeEditPane();
       } catch (e) {
@@ -145,12 +144,11 @@ ZBase.registerView((function() {
     $(".zbase_report_pane z-modal input.report_name").value = escaped_name;
   };
 
-  var setReportDescription = function(description, readonly) {
-    var escaped_description = (description == undefined ||description.length == 0) ?
-        "" : $.escapeHTML(description);
+  var setReportDescription = function() {
+    var escaped_description = $.escapeHTML(content.description);
 
-    //display link if no description
     if (!readonly && escaped_description.length == 0) {
+      // display edit link
       $(".zbase_report_pane .sidebar_content .link.add_description")
         .classList.remove("hidden");
     } else {
@@ -164,13 +162,19 @@ ZBase.registerView((function() {
   };
 
 
-  var setReportContent = function(content) {
-    $(".zbase_report_pane .edit_content_pane z-codeeditor").setValue(content);
+  var setReportContent = function() {
+    $(".zbase_report_pane .edit_content_pane z-codeeditor").setValue(
+        JSON.stringify(content));
+  };
+
+  var updateReportContent = function(readonly) {
+    setReportContent();
+    setReportDescription(readonly);
   };
 
   var getDocument = function() {
     return {
-      content: $(".zbase_report_pane .edit_content_pane z-codeeditor").getValue(),
+      content: JSON.stringify(content),
       name: $(".zbase_report_pane input.report_name").value
     };
   };
