@@ -38,27 +38,35 @@ ZBase.registerView((function() {
     var report_title = $(".zbase_report_pane .report_name", page)
     report_title.innerHTML = doc.name;
 
-    if (!readonly) {
-      report_title.classList.add("editable");
-      initNameEditModal();
-    }
-
-    //stub
+    //FIXME stub
     doc.content = {
       description: "Top On-Site Search Terms per Language that were referred by Google"
     };
     //report description
-    $(".zbase_report_pane .report_description", page).innerHTML =
-      doc.content.description;
+    var report_description = $(".zbase_report_pane .report_description", page);
+    report_description.innerHTML = doc.content.description;
 
+    if (!readonly) {
+      report_title.classList.add("editable");
+      report_description.classList.add("editable");
 
+      initShareDocModal();
+      initEditing();
+    } else {
+      $(".readonly_hint", page).classList.remove("hidden");
+      $(".writable_report_actions", page).classList.add("hidden");
+    }
 
     $.handleLinks(page);
     $.replaceViewport(page);
   };
 
-  var initNameEditModal = function() {
+  var initShareDocModal = function() {
 
+  };
+
+  var initEditing = function() {
+    
   };
 
 

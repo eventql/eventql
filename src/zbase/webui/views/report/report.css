@@ -2,7 +2,7 @@
   display: table;
   table-layout: fixed;
   width: 100%;
-  min-height: 900px; /* FIXME */
+  min-height: 900px; /* FIXME  firefox ignores min-height*/
 }
 
 .zbase_report_pane .zbase_report_sidebar {
@@ -20,15 +20,48 @@
   padding: 5px 3px;
 }
 
+.zbase_report_pane .zbase_report_sidebar h3.sidebar_title .readonly_hint {
+  font-size: 12px;
+  float: right;
+  overflow: hidden;
+  opacity: 0.8;
+}
+
+.zbase_report_pane .zbase_report_sidebar h3.sidebar_title .readonly_hint i {
+  opacity: 0.8;
+}
+
+.zbase_report_pane .zbase_report_sidebar h3.sidebar_title .readonly_hint:hover {
+  opacity: 1.0;
+  cursor: default;
+}
+
+.zbase_report_pane .zbase_report_sidebar h3.sidebar_title .readonly_hint.hidden {
+  display: none;
+}
+
 .zbase_report_pane .editable:hover {
   cursor: pointer;
   background: #f0f6f8;
 }
 
 .zbase_report_pane .zbase_report_sidebar .sidebar_subtitle {
-  margin: 5px 0 15px 0;
+  margin: 2px 0 15px 0;
   font-size: 12px;
   color: #999;
+}
+
+.zbase_report_pane .zbase_report_sidebar .writable_report_actions {
+  margin-bottom: 8px;
+}
+
+.zbase_report_pane .zbase_report_sidebar .writable_report_actions.hidden {
+  display: none;
+}
+
+.zbase_report_pane .zbase_report_sidebar .writable_report_actions .link {
+  font-weight: 500;
+  margin-right: 5px;
 }
 
 .zbase_report_pane .zbase_report_sidebar .sidebar_content {
