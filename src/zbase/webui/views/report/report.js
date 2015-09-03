@@ -3,6 +3,7 @@ ZBase.registerView((function() {
   var content = {};
   var docsync;
   var readonly;
+  var widget_list;
 
   var loadReport = function(params) {
     var query_id = params.path.substr(kPathPrefix.length);
@@ -25,40 +26,62 @@ ZBase.registerView((function() {
         "views/report",
         "zbase_report_main_tpl");
 
-    if (!readonly) {
-      // setup docsync
-      docsync = DocSync(
-          getDocument,
-          "/api/v1/documents/" + doc.uuid,
-          $(".zbase_report_infobar", page));
-    }
+    try {
+      content = JSON.parse(doc.content);
+    } catch(e) {}
 
-    if (!readonly) {
-      $(".zbase_report_pane .report_name", page).classList.add("editable");
-      $(".zbase_report_pane .report_description", page).classList.add("editable");
-    } else {
-      $(".readonly_hint", page).classList.remove("hidden");
-      $(".writable_report_actions", page).classList.add("hidden");
-    }
+    widget_list = WidgetList();
+    widget_list.init($(".zbase_report_pane"), page);
+    widget_list.setJSON(content.parts);
 
     $.handleLinks(page);
     $.replaceViewport(page);
+
+    setupEditing(readonly, doc.uuid);
 
     //report name
     setReportName(doc.name);
 
     //report content
-    try {
-      content = JSON.parse(doc.content);
-    } catch(e) {}
     updateReportContent();
+  };
 
-    if (!readonly) {
-      //init edit actions
-      initNameEditing();
-      initDescriptionEditing();
-      initShareDocModal(doc.uuid);
-      initContentEditing();
+  var setupEditing = function(readonly, doc_id) {
+    if (readonly) {
+      $(".readonly_hint").classList.remove("hidden");
+      return;
+    }
+
+    // setup docsync
+    docsync = DocSync(
+        getDocument,
+        "/api/v1/documents/" + doc_id,
+        $(".zbase_report_pane .zbase_report_infobar"));
+
+    var mode_dropdown = $(".zbase_report z-dropdown.mode");
+    mode_dropdown.classList.remove("hidden");
+    mode_dropdown.addEventListener("change", function() {
+      setEditable(this.getValue() == "editing");
+    }, false);
+
+    setEditable(true);
+
+    //init edit actions
+    initNameEditing();
+    initDescriptionEditing();
+    initShareDocModal(doc_id);
+    initContentEditing();
+  };
+
+  var setEditable = function(is_editable) {
+    if (is_editable) {
+      $(".writable_report_actions").classList.remove("hidden");
+      $(".zbase_report_pane .report_name").classList.add("editable");
+      $(".zbase_report_pane .report_description").classList.add("editable");
+    } else {
+      $(".writable_report_actions").classList.add("hidden");
+      $(".zbase_report_pane .report_name").classList.remove("editable");
+      $(".zbase_report_pane .report_description").classList.remove("editable");
     }
   };
 
