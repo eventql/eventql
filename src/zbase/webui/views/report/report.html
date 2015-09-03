@@ -1,5 +1,5 @@
 <template id="zbase_report_main_tpl">
-  <section class='zbase_page_title small'>
+  <section class='zbase_page_title small zbase_report'>
     <div>
       <zbase-breadcrumbs>
         <zbase-breadcrumbs-section>
@@ -11,6 +11,19 @@
         <zbase-breadcrumbs-section class="report_name">
         </zbase-breadcrumbs-section>
       </zbase-breadcrumbs>
+
+      <z-dropdown data-resolved class="input hidden mode">
+        <z-dropdown-flyout>
+          <z-dropdown-items>
+            <z-dropdown-item data-value='editing' data-selected>
+              <i class='fa fa-pencil'></i>Editing
+            </z-dropdown-item>
+            <z-dropdown-item data-value='viewing'>
+              <i class='fa fa-eye'></i>Viewing
+            </z-dropdown-item>
+          </z-dropdown-items>
+        </z-dropdown-flyout>
+      </z-dropdown>
     </div>
   </section>
 
@@ -25,7 +38,7 @@
         </h3>
 
         <div class="sidebar_subtitle">
-          <div class="writable_report_actions">
+          <div class="writable_report_actions hidden">
             <a class="link share">Share</a>
             <a class="link edit">Edit</a>
           </div>
