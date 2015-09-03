@@ -21,6 +21,7 @@
 #include <csql/runtime/symboltable.h>
 #include <csql/runtime/ResultFormat.h>
 #include <csql/runtime/ExecutionStrategy.h>
+#include <csql/runtime/resultlist.h>
 
 namespace csql {
 
@@ -35,10 +36,18 @@ public:
       RefPtr<QueryBuilder> query_builder,
       RefPtr<QueryPlanBuilder> query_plan_builder);
 
+  RefPtr<QueryPlan> buildQueryPlan(
+      const String& query,
+      RefPtr<ExecutionStrategy> execution_strategy);
+
   void executeQuery(
       const String& query,
       RefPtr<ExecutionStrategy> execution_strategy,
       RefPtr<ResultFormat> result_format);
+
+  void executeStatement(
+      ScopedPtr<Statement> statement,
+      ResultList* result);
 
   SValue evaluateStaticExpression(const String& expr);
   SValue evaluateStaticExpression(ASTNode* expr);

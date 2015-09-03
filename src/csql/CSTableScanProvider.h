@@ -27,6 +27,13 @@ public:
         RefPtr<SequentialScanNode> node,
         QueryBuilder* runtime) const override;
 
+  void listTables(
+      Function<void (const csql::TableInfo& table)> fn) const override;
+
+  Option<csql::TableInfo> describe(const String& table_name) const override;
+
+  csql::TableInfo tableInfo() const;
+
 protected:
   const String table_name_;
   const String cstable_file_;
