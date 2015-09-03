@@ -1,3 +1,4 @@
 js_file: "report.js"
+js_file: "widget_list.js"
 html_file: "report.html"
 css_file: "report.css"
