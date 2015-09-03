@@ -35,22 +35,9 @@ var CodeEditorComponent = function() {
 
   var setupKeyPressHandlers = function() {
     var base = this;
-
-    var cmd_pressed = false;
     this.addEventListener('keydown', function(e) {
-      if (e.keyCode == 17 || e.keyCode == 91) {
-        cmd_pressed = true;
-      }
-    }, false);
-
-    this.addEventListener('keyup', function(e) {
-      if (e.keyCode == 17 || e.keyCode == 91) {
-        cmd_pressed = false;
-      }
-    }, false);
-
-    this.addEventListener('keydown', function(e) {
-      if (e.keyCode == 13 && cmd_pressed) {
+      //metaKey is cmd key on mac and windows key on windows
+      if (e.keyCode == 13 && (e.ctrlKey || e.metaKey)) {
         e.preventDefault();
         base.execute.call(base);
       }
