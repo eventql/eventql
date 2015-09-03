@@ -37,7 +37,7 @@ var CodeEditorComponent = function() {
     var base = this;
     this.addEventListener('keydown', function(e) {
       //metaKey is cmd key on mac and windows key on windows
-      if (e.keyCode == 13 && e.ctrlKey || e.keyCode == 13 && e.metaKey) {
+      if (e.keyCode == 13 && (e.ctrlKey || e.metaKey)) {
         e.preventDefault();
         base.execute.call(base);
       }
