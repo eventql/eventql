@@ -300,14 +300,14 @@ TEST_CASE(ParserTest, TestSelectDerivedColumnWithTableName, [] () {
   EXPECT(*derived == ASTNode::T_DERIVED_COLUMN);
   EXPECT(derived->getChildren().size() == 2);
   auto tbl = derived->getChildren()[0];
-  EXPECT(*tbl == ASTNode::T_TABLE_NAME);
+  EXPECT(*tbl == ASTNode::T_COLUMN_NAME);
   EXPECT(*tbl->getToken() == Token::T_IDENTIFIER);
   EXPECT(*tbl->getToken() == "tbl");
   EXPECT(tbl->getChildren().size() == 1);
   auto col = tbl->getChildren()[0];
   EXPECT(*col->getToken() == Token::T_IDENTIFIER);
   EXPECT(*col->getToken() == "col");
-  EXPECT(*derived->getChildren()[0] == ASTNode::T_TABLE_NAME);
+  EXPECT(*derived->getChildren()[0] == ASTNode::T_COLUMN_NAME);
   EXPECT(*derived->getChildren()[0]->getToken() == Token::T_IDENTIFIER);
   EXPECT(*derived->getChildren()[0]->getToken() == "tbl");
   EXPECT(*derived->getChildren()[1] == ASTNode::T_COLUMN_ALIAS);

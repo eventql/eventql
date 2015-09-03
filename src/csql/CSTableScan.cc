@@ -100,10 +100,6 @@ void CSTableScan::scan(
     ++rows_scanned_;
     uint64_t next_level = 0;
 
-    if (fetch_level == 0) {
-      ++num_records;
-    }
-
     for (auto& col : columns_) {
       auto nextr = col.second.reader->nextRepetitionLevel();
 
@@ -188,6 +184,9 @@ void CSTableScan::scan(
     }
 
     fetch_level = next_level;
+    if (fetch_level == 0) {
+      ++num_records;
+    }
 
     bool where_pred = true;
     if (where_expr_.program() != nullptr) {

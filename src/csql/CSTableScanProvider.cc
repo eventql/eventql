@@ -33,4 +33,36 @@ Option<ScopedPtr<TableExpression>>
               runtime)));
 }
 
+void CSTableScanProvider::listTables(
+    Function<void (const csql::TableInfo& table)> fn) const {
+  fn(tableInfo());
+}
+
+Option<csql::TableInfo> CSTableScanProvider::describe(
+    const String& table_name) const {
+  if (table_name == table_name_) {
+    return Some(tableInfo());
+  } else {
+    return None<csql::TableInfo>();
+  }
+}
+
+csql::TableInfo CSTableScanProvider::tableInfo() const {
+  csql::TableInfo ti;
+  ti.table_name = table_name_;
+
+  // FIXME
+  //for (const auto& col : table.schema->columns()) {
+  //  csql::ColumnInfo ci;
+  //  ci.column_name = col.first;
+  //  ci.type = col.second.typeName();
+  //  ci.type_size = col.second.typeSize();
+  //  ci.is_nullable = col.second.optional;
+
+  //  ti.columns.emplace_back(ci);
+  //}
+
+  return ti;
+}
+
 } // namespace csql
