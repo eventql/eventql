@@ -57,7 +57,7 @@
   display: none;
 }
 
-.zbase_report_pane .editable:hover {
+.zbase_report_pane .zbase_report_sidebar .editable:hover {
   cursor: pointer;
   background: #f0f6f8;
 }
@@ -208,4 +208,23 @@
 .zbase_report_pane .zbase_report_content .edit_content_pane i.close:hover {
   cursor: pointer;
   color: #1c99d6;
+}
+
+.zbase_report_pane .zbase_report_widget {
+  
+}
+
+.zbase_report_pane .zbase_report_widget .zbase_report_widget_edit_header {
+  padding: 10px;
+  display: none;
+  overflow: auto;
+}
+
+.zbase_report_pane .zbase_report_widget.editable .zbase_report_widget_edit_header {
+  display: block;
+}
+
+.zbase_report_pane .zbase_report_widget .zbase_report_widget_edit_header button {
+  font-size: 12px;
+  float: right;
 }

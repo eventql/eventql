@@ -27,7 +27,7 @@ ZBase.registerView((function() {
         "zbase_report_main_tpl");
 
     widget_list = WidgetList();
-    widget_list.init($(".zbase_report_pane"), page);
+    widget_list.init($(".zbase_report_widgets", page));
 
     try {
       var content = JSON.parse(doc.content);
