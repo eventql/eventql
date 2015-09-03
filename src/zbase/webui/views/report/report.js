@@ -1,9 +1,9 @@
 ZBase.registerView((function() {
   var kPathPrefix = "/a/reports/";
-  var content = {};
   var docsync;
   var readonly;
   var widget_list;
+  var description = "";
 
   var loadReport = function(params) {
     var query_id = params.path.substr(kPathPrefix.length);
@@ -26,13 +26,14 @@ ZBase.registerView((function() {
         "views/report",
         "zbase_report_main_tpl");
 
-    try {
-      content = JSON.parse(doc.content);
-    } catch(e) {}
-
     widget_list = WidgetList();
     widget_list.init($(".zbase_report_pane"), page);
-    widget_list.setJSON(content.widgets);
+
+    try {
+      var content = JSON.parse(doc.content);
+      description = content.description;
+      widget_list.setJSON(content.widgets);
+    } catch(e) {}
 
     $.handleLinks(page);
     $.replaceViewport(page);
@@ -127,7 +128,7 @@ ZBase.registerView((function() {
     $.onClick($(".zbase_report_pane .link.add_description"), showModal);
 
     $.onClick($("button.submit", modal), function() {
-      content.description = $.escapeHTML(textarea.value);
+      description = $.escapeHTML(textarea.value);
       updateReportContent();
       docsync.saveDocument();
       modal.close();
@@ -151,9 +152,11 @@ ZBase.registerView((function() {
     });
 
     $.onClick($(".submit", edit_pane), function() {
-      var new_content = $.escapeHTML($("z-codeeditor", edit_pane).getValue());
       try {
-        content = JSON.parse(new_content);
+        var content = JSON.parse(
+            $.escapeHTML($("z-codeeditor", edit_pane).getValue()));
+        description = content.description;
+        widget_list.setJSON(content.widgets);
         docsync.saveDocument();
         closeEditPane();
       } catch (e) {
@@ -171,7 +174,7 @@ ZBase.registerView((function() {
   };
 
   var setReportDescription = function() {
-    var escaped_description = $.escapeHTML(content.description);
+    var escaped_description = $.escapeHTML(description);
 
     if (!readonly && escaped_description.length == 0) {
       // display edit link
@@ -189,16 +192,26 @@ ZBase.registerView((function() {
 
 
   var setReportContent = function() {
+    var content = {
+      description: description,
+      widgets: widget_list.getJSON()
+    };
+
     $(".zbase_report_pane .edit_content_pane z-codeeditor").setValue(
         JSON.stringify(content));
   };
 
-  var updateReportContent = function(readonly) {
+  var updateReportContent = function() {
     setReportContent();
-    setReportDescription(readonly);
+    setReportDescription();
   };
 
   var getDocument = function() {
+    var content = {
+      description: $(".zbase_report_pane .report_description").innerText,
+      widgets: widget_list.getJSON()
+    };
+
     return {
       content: JSON.stringify(content),
       name: $(".zbase_report_pane input.report_name").value

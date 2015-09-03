@@ -7,12 +7,11 @@ var WidgetList = function() {
   };
 
   var getJSON = function() {
-    return {widgets: widgets};
+    return widgets;
   };
 
-  var setJSON = function(new_json) {
-    json = new_json;
-    console.log(json);
+  var setJSON = function(new_widgets) {
+    widgets = new_widgets;
   };
 
   var setEditable = function(is_editable) {
