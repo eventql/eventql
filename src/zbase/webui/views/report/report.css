@@ -1,0 +1,194 @@
+.zbase_report_pane {
+  display: table;
+  table-layout: fixed;
+  width: 100%;
+  min-height: 900px; /* FIXME  firefox ignores min-height*/
+}
+
+.zbase_report_pane .zbase_report_sidebar {
+  display: table-cell;
+  vertical-align: top;
+  width: 320px;
+  padding: 20px 20px 0;
+}
+
+.zbase_report_pane .zbase_report_sidebar h3.sidebar_title {
+  margin: 0;
+}
+
+.zbase_report_pane .zbase_report_sidebar h3.sidebar_title .editable {
+  padding: 5px 3px;
+}
+
+.zbase_report_pane .zbase_report_sidebar h3.sidebar_title .readonly_hint {
+  font-size: 12px;
+  float: right;
+  overflow: hidden;
+  opacity: 0.8;
+}
+
+.zbase_report_pane .zbase_report_sidebar h3.sidebar_title .readonly_hint i {
+  opacity: 0.8;
+}
+
+.zbase_report_pane .zbase_report_sidebar h3.sidebar_title .readonly_hint:hover {
+  opacity: 1.0;
+  cursor: default;
+}
+
+.zbase_report_pane .zbase_report_sidebar h3.sidebar_title .readonly_hint.hidden {
+  display: none;
+}
+
+.zbase_report_pane .editable:hover {
+  cursor: pointer;
+  background: #f0f6f8;
+}
+
+.zbase_report_pane .zbase_report_sidebar .sidebar_subtitle {
+  margin: 2px 0 15px 0;
+  font-size: 12px;
+  color: #999;
+}
+
+.zbase_report_pane .zbase_report_sidebar .writable_report_actions {
+  margin-bottom: 8px;
+}
+
+.zbase_report_pane .zbase_report_sidebar .writable_report_actions.hidden {
+  display: none;
+}
+
+.zbase_report_pane .zbase_report_sidebar .writable_report_actions .link {
+  font-weight: 500;
+  margin-right: 5px;
+}
+
+.zbase_report_pane .zbase_report_sidebar .sidebar_content {
+  border-top: 1px solid #eee;
+  padding: 15px 0px 18px 0;
+  font-size: 12px;
+}
+
+.zbase_report_pane .zbase_report_sidebar .link.add_description.hidden {
+  display: none;
+}
+
+.zbase_report_pane .zbase_report_content {
+  display: table-cell;
+  vertical-align: top;
+  width: auto;
+  border-left: 1px solid #ddd;
+  border-right: 1px solid #ddd;
+}
+
+.zbase_report_pane z-modal.edit h3 {
+  margin: 5px 0 10px 0;
+}
+
+.zbase_report_pane z-modal.edit input.z-input {
+  font-size: 13px;
+}
+
+.zbase_report_pane z-modal button.z-button {
+  float: right;
+  font-size: 13px;
+}
+
+.zbase_report_pane z-modal.edit textarea.z-textarea {
+  width: 100%;
+  font-size: 13px;
+}
+
+.zbase_report_infobar {
+  border-bottom: 1px solid #edc3c3;
+  background: #fff0f0;
+  color: #a94442;
+  box-shadow: 0 1px 1px rgba(0,0,0,0.1);
+  padding: 10px 20px;
+  font-size: 13px;
+  font-weight: 400;
+  color: rgba(10,10,10,0.65);
+  display: block;
+}
+
+.zbase_report_infobar em {
+  font-weight: 500;
+  font-style: normal;
+  color: rgba(10,10,10,0.7);
+}
+
+.zbase_report_infobar.hidden {
+  display: none;
+}
+
+/**
+  * Editor
+  */
+.zbase_report_pane z-codeeditor {
+  border-top: 1px solid #c9d0d4;
+  border-bottom: 1px solid #c9d0d4;
+}
+
+.zbase_report_pane .CodeMirror-gutters {
+  background: rgba(63,144,170,.08);
+  background-color: none;
+}
+
+.zbase_report_pane .CodeMirror {
+  border-left: none;
+  border-right: none;
+  border-bottom: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  -o-user-select: none;
+  user-select: none;
+}
+
+.zbase_report_pane .zbase_report_content .report_ui.hidden,
+.zbase_report_pane .zbase_report_content .edit_content_pane.hidden {
+  display: none;
+}
+
+.zbase_report_pane .zbase_report_content .edit_content_pane {
+  overflow: auto;
+}
+
+.zbase_report_pane .zbase_report_content .edit_content_pane h2.pagetitle {
+  margin-left: 20px;
+  float: left;
+}
+
+.zbase_report_pane .zbase_report_content .edit_content_pane .error_note {
+  color: #a94442;
+  font-size: 13px;
+  font-weight: 400;
+  float: left;
+  margin: 13px 0 0 15px;
+  background: #fff0f0;
+  box-shadow: 0 1px 1px rgba(0,0,0,0.1);
+  padding: 5px 20px;
+}
+
+.zbase_report_pane .zbase_report_content .edit_content_pane .error_note.hidden {
+  display: none;
+}
+
+.zbase_report_pane .zbase_report_content .edit_content_pane button.z-button {
+  margin: 14px 20px 0 0;
+  float: right;
+  font-size: 13px;
+}
+
+.zbase_report_pane .zbase_report_content .edit_content_pane i.close {
+  float: right;
+  padding: 5px;
+  margin-right: 3px;
+  color: #999;
+}
+
+.zbase_report_pane .zbase_report_content .edit_content_pane i.close:hover {
+  cursor: pointer;
+  color: #1c99d6;
+}

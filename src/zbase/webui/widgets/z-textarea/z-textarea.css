@@ -1,0 +1,51 @@
+/**
+ * Adapted from: Semantic UI:
+ *   https://github.com/Semantic-Org/Semantic-UI
+ *   http://www.semantic-ui.com/
+ */
+
+.z-textarea {
+  tap-highlight-color: rgba(255, 255, 255, 0);
+  padding: 0.78571em 1em;
+  background: #ffffff;
+  border: 1px solid rgba(39, 41, 43, 0.15);
+  outline: none;
+  color: rgba(0, 0, 0, 0.8);
+  border-radius: 3px;
+  box-shadow: 0em 0em 0em 0em transparent inset;
+  line-height: 1.2857;
+}
+
+.z-textarea::-webkit-input-placeholder {
+  color: rgba(0, 0, 0, 0.5);
+}
+.z-textarea:-moz-placeholder {
+  color: rgba(0, 0, 0, 0.5);
+}
+.z-textarea::-moz-placeholder {
+  color: rgba(0, 0, 0, 0.5);
+}
+.z-textarea:-ms-input-placeholder {
+  color: rgba(0, 0, 0, 0.5);
+}
+
+.z-textarea:focus {
+  color: rgba(0, 0, 0, 0.85);
+  border-color: rgba(39, 41, 43, 0.3);
+  background: #ffffff;
+  box-shadow: 1px 0em 0em 0em rgba(39, 41, 43, 0.3) inset;
+}
+
+.z-textarea.error {
+  background: #fff0f0;
+  border-color: #dbb1b1;
+  color: #d95c5c;;
+  box-shadow: 2px 0em 0em 0em #d95c5c inset
+}
+
+.z-textarea.error:focus {
+  background: #fff0f0;
+  border-color: #dbb1b1;
+  color: #dc6868;
+  box-shadow: 2px 0em 0em 0em #dc6868 inset;
+}

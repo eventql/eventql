@@ -497,6 +497,9 @@ $.replaceContent = function(elem, new_content) {
 }
 
 $.escapeHTML = function(str) {
+  if (str == undefined || str == null || str.length == 0) {
+    return "";
+  }
   var div = document.createElement('div');
   div.appendChild(document.createTextNode(str));
   return div.innerHTML;
