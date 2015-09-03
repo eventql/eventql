@@ -1,0 +1,96 @@
+<template id="zbase_report_main_tpl">
+  <section class='zbase_page_title small'>
+    <div>
+      <zbase-breadcrumbs>
+        <zbase-breadcrumbs-section>
+          <a href="/a/documents">Documents</a>
+        </zbase-breadcrumbs-section>
+        <zbase-breadcrumbs-section>
+          <a href="/a/documents">Reports</a>
+        </zbase-breadcrumbs-section>
+        <zbase-breadcrumbs-section class="report_name">
+        </zbase-breadcrumbs-section>
+      </zbase-breadcrumbs>
+    </div>
+  </section>
+
+  <div class="zbase_content_pane fullwidth">
+    <div class="zbase_report_infobar hidden"></div>
+    <div class="zbase_report_pane">
+
+      <div class="zbase_report_sidebar">
+        <h3 class="sidebar_title">
+          Report: <span class="report_name editable"></span>
+          <span class="readonly_hint hidden"><i class="fa fa-lock"></i> Read-Only</span>
+        </h3>
+
+        <div class="sidebar_subtitle">
+          <div class="writable_report_actions">
+            <a class="link share">Share</a>
+            <a class="link edit">Edit</a>
+          </div>
+
+          Last refreshed <span class="report_activity_info"></span>
+        </div>
+
+        <div class="sidebar_content">
+          <h4 class="sidebar_content_title">Description</h4>
+          <a class="link hidden add_description">Add Description</a>
+          <div class="report_description"></div>
+        </div>
+      </div>
+
+      <div class="zbase_report_content">
+        <div class="edit_content_pane hidden">
+          <i class='fa fa-times close'></i>
+          <button class="z-button primary submit">
+            Save
+          </button>
+          <h2 class="pagetitle">
+            Edit Report Content
+          </h2>
+          <span class="error_note hidden">Invalid JSON -- Please review the content</span>
+          <z-codeeditor data-language="text/json" data-resizable='vertical' style="height: 250px;"></z-codeeditor>
+        </div>
+
+        <div class="report_ui"></div>
+      </div>
+
+      <z-modal class="zbase_sql_editor_modal rename_report edit">
+        <z-modal-box>
+          <z-modal-close-icon></z-modal-close-icon>
+          <div class="z-modal-header">Rename Report</div>
+          <div class="z-modal-content">
+            <h3>Enter a new report name</h3>
+            <input class="z-input report_name" />
+          </div>
+          <div class="z-modal-footer">
+            <button class="z-button primary submit">
+              Save
+            </button>
+          </div>
+        </z-modal-box>
+      </z-modal>
+
+      <z-modal class="zbase_sql_editor_modal edit edit_description">
+        <z-modal-box>
+          <z-modal-close-icon></z-modal-close-icon>
+          <div class="z-modal-header">Edit Report Description</div>
+          <div class="z-modal-content">
+            <h3>Enter a new report description</h3>
+            <textarea class="z-textarea report_description" rows="4"></textarea>
+          </div>
+          <div class="z-modal-footer">
+            <button class="z-button primary submit">
+              Save
+            </button>
+          </div>
+        </z-modal-box>
+      </z-modal>
+    </div>
+  </div>
+
+
+
+
+</template>
