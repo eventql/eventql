@@ -32,7 +32,7 @@ ZBase.registerView((function() {
 
     widget_list = WidgetList();
     widget_list.init($(".zbase_report_pane"), page);
-    widget_list.setJSON(content.parts);
+    widget_list.setJSON(content.widgets);
 
     $.handleLinks(page);
     $.replaceViewport(page);
@@ -56,7 +56,7 @@ ZBase.registerView((function() {
     docsync = DocSync(
         getDocument,
         "/api/v1/documents/" + doc_id,
-        $(".zbase_report_pane .zbase_report_infobar"));
+        $(".zbase_report_infobar"));
 
     var mode_dropdown = $(".zbase_report z-dropdown.mode");
     mode_dropdown.classList.remove("hidden");
@@ -74,6 +74,8 @@ ZBase.registerView((function() {
   };
 
   var setEditable = function(is_editable) {
+    widget_list.setEditable(is_editable);
+
     if (is_editable) {
       $(".writable_report_actions").classList.remove("hidden");
       $(".zbase_report_pane .report_name").classList.add("editable");
