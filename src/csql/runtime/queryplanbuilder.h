@@ -42,6 +42,12 @@ protected:
   bool hasUnexpandedColumns(ASTNode* ast) const;
 
   /**
+   * Returns true if the ast is a SELECT statement that has columns in its
+   * select list that are not explicitly named (expr AS name).
+   */
+  bool hasImplicitlyNamedColumns(ASTNode* ast) const;
+
+  /**
    * Returns true if the ast is a SELECT statement that has a join
    */
   bool hasJoin(ASTNode* ast) const;
@@ -124,6 +130,11 @@ protected:
    * expand all column names + wildcard to tablename->columnanme
    */
   void expandColumns(ASTNode* ast, RefPtr<TableProvider> tables);
+
+  /**
+   * assign explicit column names to all output columns
+   */
+  void assignExplicitColumnNames(ASTNode* ast, RefPtr<TableProvider> tables);
 
   /**
    * Recursively walk the provided ast and search for column references. For

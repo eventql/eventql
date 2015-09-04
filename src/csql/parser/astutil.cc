@@ -61,4 +61,195 @@ std::vector<std::string> ASTUtil::columnNamesFromSelectList(
   return column_names;
 }
 
+String ASTUtil::columnNameForExpression(ASTNode* expr) {
+  switch (expr->getType()) {
+
+    case ASTNode::T_LITERAL:
+      return expr->getToken()->getString();
+
+    case ASTNode::T_COLUMN_NAME:
+    case ASTNode::T_RESOLVED_COLUMN: {
+      auto str = expr->getToken()->getString();
+      for (const auto& c : expr->getChildren()) {
+        str += "." + columnNameForExpression(c);
+      }
+
+      return str;
+    }
+
+    case ASTNode::T_RESOLVED_CALL:
+    case ASTNode::T_METHOD_CALL: {
+      Vector<String> args;
+      for (const auto& c : expr->getChildren()) {
+        args.emplace_back(columnNameForExpression(c));
+      }
+
+      return StringUtil::format(
+          "$0($1)",
+          expr->getToken()->getString(),
+          StringUtil::join(args, ", "));
+    }
+
+    case ASTNode::T_METHOD_CALL_WITHIN_RECORD: {
+      Vector<String> args;
+      for (const auto& c : expr->getChildren()) {
+        args.emplace_back(columnNameForExpression(c));
+      }
+
+      return StringUtil::format(
+          "$0($1) WITHIN RECORD",
+          expr->getToken()->getString(),
+          StringUtil::join(args, ", "));
+    }
+
+    case ASTNode::T_IF_EXPR: {
+      Vector<String> args;
+      for (const auto& c : expr->getChildren()) {
+        args.emplace_back(columnNameForExpression(c));
+      }
+
+      return StringUtil::format("if($0)", StringUtil::join(args, ", "));
+    }
+
+    case ASTNode::T_EQ_EXPR: {
+      Vector<String> args;
+      for (const auto& c : expr->getChildren()) {
+        args.emplace_back(columnNameForExpression(c));
+      }
+
+      return StringUtil::format("($0)", StringUtil::join(args, " == "));
+    }
+
+    case ASTNode::T_NEQ_EXPR: {
+      Vector<String> args;
+      for (const auto& c : expr->getChildren()) {
+        args.emplace_back(columnNameForExpression(c));
+      }
+
+      return StringUtil::format("($0)", StringUtil::join(args, " != "));
+    }
+
+    case ASTNode::T_LT_EXPR: {
+      Vector<String> args;
+      for (const auto& c : expr->getChildren()) {
+        args.emplace_back(columnNameForExpression(c));
+      }
+
+      return StringUtil::format("($0)", StringUtil::join(args, " < "));
+    }
+
+    case ASTNode::T_LTE_EXPR: {
+      Vector<String> args;
+      for (const auto& c : expr->getChildren()) {
+        args.emplace_back(columnNameForExpression(c));
+      }
+
+      return StringUtil::format("($0)", StringUtil::join(args, " <= "));
+    }
+
+    case ASTNode::T_GT_EXPR: {
+      Vector<String> args;
+      for (const auto& c : expr->getChildren()) {
+        args.emplace_back(columnNameForExpression(c));
+      }
+
+      return StringUtil::format("($0)", StringUtil::join(args, " > "));
+    }
+
+    case ASTNode::T_GTE_EXPR: {
+      Vector<String> args;
+      for (const auto& c : expr->getChildren()) {
+        args.emplace_back(columnNameForExpression(c));
+      }
+
+      return StringUtil::format("($0)", StringUtil::join(args, " >= "));
+    }
+
+    case ASTNode::T_AND_EXPR: {
+      Vector<String> args;
+      for (const auto& c : expr->getChildren()) {
+        args.emplace_back(columnNameForExpression(c));
+      }
+
+      return StringUtil::format("($0)", StringUtil::join(args, " AND "));
+    }
+
+    case ASTNode::T_OR_EXPR: {
+      Vector<String> args;
+      for (const auto& c : expr->getChildren()) {
+        args.emplace_back(columnNameForExpression(c));
+      }
+
+      return StringUtil::format("($0)", StringUtil::join(args, " OR "));
+    }
+
+    case ASTNode::T_NEGATE_EXPR: {
+      Vector<String> args;
+      for (const auto& c : expr->getChildren()) {
+        args.emplace_back(columnNameForExpression(c));
+      }
+
+      return StringUtil::format("!($0)", StringUtil::join(args, ", "));
+    }
+
+    case ASTNode::T_ADD_EXPR: {
+      Vector<String> args;
+      for (const auto& c : expr->getChildren()) {
+        args.emplace_back(columnNameForExpression(c));
+      }
+
+      return StringUtil::format("($0)", StringUtil::join(args, " + "));
+    }
+
+    case ASTNode::T_SUB_EXPR: {
+      Vector<String> args;
+      for (const auto& c : expr->getChildren()) {
+        args.emplace_back(columnNameForExpression(c));
+      }
+
+      return StringUtil::format("($0)", StringUtil::join(args, " - "));
+    }
+
+    case ASTNode::T_MUL_EXPR: {
+      Vector<String> args;
+      for (const auto& c : expr->getChildren()) {
+        args.emplace_back(columnNameForExpression(c));
+      }
+
+      return StringUtil::format("($0)", StringUtil::join(args, " * "));
+    }
+
+    case ASTNode::T_DIV_EXPR: {
+      Vector<String> args;
+      for (const auto& c : expr->getChildren()) {
+        args.emplace_back(columnNameForExpression(c));
+      }
+
+      return StringUtil::format("($0)", StringUtil::join(args, " / "));
+    }
+
+    case ASTNode::T_MOD_EXPR: {
+      Vector<String> args;
+      for (const auto& c : expr->getChildren()) {
+        args.emplace_back(columnNameForExpression(c));
+      }
+
+      return StringUtil::format("($0)", StringUtil::join(args, " % "));
+    }
+
+    case ASTNode::T_POW_EXPR: {
+      Vector<String> args;
+      for (const auto& c : expr->getChildren()) {
+        args.emplace_back(columnNameForExpression(c));
+      }
+
+      return StringUtil::format("($0)", StringUtil::join(args, " ^ "));
+    }
+
+    default:
+      return "<expr>";
+
+  }
+}
+
 }

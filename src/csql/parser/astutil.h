@@ -7,10 +7,10 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#ifndef _FNORDMETRIC_SQL_ASTUTIL_H
-#define _FNORDMETRIC_SQL_ASTUTIL_H
-#include <string>
-#include <vector>
+#pragma once
+#include <stx/stdtypes.h>
+
+using namespace stx;
 
 namespace csql {
 class ASTNode;
@@ -23,7 +23,8 @@ public:
       ASTNode* select_list,
       TableRef* tbl_ref = nullptr);
 
+  static String columnNameForExpression(ASTNode* expr);
+
 };
 
 }
-#endif

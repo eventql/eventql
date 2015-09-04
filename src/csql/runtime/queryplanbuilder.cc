@@ -38,6 +38,11 @@ RefPtr<QueryTreeNode> QueryPlanBuilder::build(
     expandColumns(ast, tables);
   }
 
+  /* assign explicit column names to all output columns */
+  if (hasImplicitlyNamedColumns(ast)) {
+    assignExplicitColumnNames(ast, tables);
+  }
+
   /* internal nodes: multi table query (joins), order, aggregation, limit */
   if ((node = buildLimitClause(ast, tables)) != nullptr) {
     return node;
@@ -204,6 +209,31 @@ bool QueryPlanBuilder::hasUnexpandedColumns(ASTNode* ast) const {
         col->getChildren()[0]->getChildren().size() != 1 ||
         col->getChildren()[0]->getChildren()[0]->getType() !=
         ASTNode::T_COLUMN_NAME) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+bool QueryPlanBuilder::hasImplicitlyNamedColumns(ASTNode* ast) const {
+  if (ast->getType() != ASTNode::T_SELECT &&
+      ast->getType() != ASTNode::T_SELECT_DEEP) {
+    return false;
+  }
+
+  if (ast->getChildren().size() < 1 ||
+      ast->getChildren()[0]->getType() != ASTNode::T_SELECT_LIST) {
+    RAISE(kRuntimeError, "corrupt AST");
+  }
+
+  if (ast->getChildren().size() == 1) {
+    return false;
+  }
+
+  for (const auto& col : ast->getChildren()[0]->getChildren()) {
+    if (col->getType() == ASTNode::T_DERIVED_COLUMN &&
+        col->getChildren().size() == 1) {
       return true;
     }
   }
@@ -385,9 +415,31 @@ void QueryPlanBuilder::expandColumns(
       continue;
     }
   }
-
 }
 
+void QueryPlanBuilder::assignExplicitColumnNames(
+    ASTNode* ast,
+    RefPtr<TableProvider> tables) {
+  if (ast->getChildren().size() < 1) {
+    RAISE(kRuntimeError, "corrupt AST");
+  }
+
+  auto select_list = ast->getChildren()[0];
+  if (select_list->getType() != ASTNode::T_SELECT_LIST) {
+    RAISE(kRuntimeError, "corrupt AST");
+  }
+
+  for (const auto& col : select_list->getChildren()) {
+    if (col->getType() == ASTNode::T_DERIVED_COLUMN &&
+        col->getChildren().size() == 1) {
+      auto alias = col->appendChild(ASTNode::T_COLUMN_ALIAS);
+      alias->setToken(
+          new Token(
+              Token::T_IDENTIFIER,
+              ASTUtil::columnNameForExpression(col->getChildren()[0])));
+    }
+  }
+}
 
 QueryTreeNode* QueryPlanBuilder::buildGroupBy(
     ASTNode* ast,

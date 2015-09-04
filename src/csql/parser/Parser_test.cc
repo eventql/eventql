@@ -265,6 +265,32 @@ TEST_CASE(ParserTest, TestSelectTableWildcard, [] () {
   EXPECT(*from == ASTNode::T_FROM);
 });
 
+TEST_CASE(ParserTest, TestQuotedTableName, [] () {
+  auto parser = parseTestQuery("SELECT * FROM `some.table`;");
+  EXPECT(parser.getStatements().size() == 1);
+  const auto& stmt = parser.getStatements()[0];
+  EXPECT(*stmt == ASTNode::T_SELECT);
+  EXPECT(stmt->getChildren().size() == 2);
+  const auto& from = stmt->getChildren()[1];
+  EXPECT(*from == ASTNode::T_FROM);
+  EXPECT(from->getChildren().size() == 1);
+  const auto& tlbname = from->getChildren()[0];
+  EXPECT_EQ(tlbname->getToken()->getString(), "some.table");
+});
+
+TEST_CASE(ParserTest, TestNestedTableName, [] () {
+  auto parser = parseTestQuery("SELECT * FROM some.tbl;");
+  EXPECT(parser.getStatements().size() == 1);
+  const auto& stmt = parser.getStatements()[0];
+  EXPECT(*stmt == ASTNode::T_SELECT);
+  EXPECT(stmt->getChildren().size() == 2);
+  const auto& from = stmt->getChildren()[1];
+  EXPECT(*from == ASTNode::T_FROM);
+  EXPECT(from->getChildren().size() == 1);
+  const auto& tlbname = from->getChildren()[0];
+  EXPECT_EQ(tlbname->getToken()->getString(), "some.tbl");
+});
+
 TEST_CASE(ParserTest, TestSelectDerivedColumn, [] () {
   auto parser = parseTestQuery("SELECT somecol AS another FROM sometable;");
   EXPECT(parser.getStatements().size() == 1);
@@ -600,4 +626,24 @@ TEST_CASE(ParserTest, TestParseIfStatement, [] () {
   EXPECT(*expr->getChildren()[2]->getToken() == "3");
   const auto& from = stmt->getChildren()[1];
   EXPECT(*from == ASTNode::T_FROM);
+});
+
+TEST_CASE(ParserTest, TestCompareASTs, [] () {
+  auto parser = parseTestQuery(R"(
+      SELECT if(1, 2, 3) from asd;
+      SELECT if(2, 3, 4) from asd;
+      SELECT if(1, 2, 3) from asd;
+  )");
+
+  EXPECT(parser.getStatements().size() == 3);
+  const auto a = parser.getStatements()[0];
+  const auto b = parser.getStatements()[1];
+  const auto c = parser.getStatements()[2];
+
+  EXPECT_FALSE(a->compare(b));
+  EXPECT_FALSE(b->compare(a));
+  EXPECT_FALSE(b->compare(c));
+  EXPECT_FALSE(c->compare(b));
+  EXPECT_TRUE(a->compare(c));
+  EXPECT_TRUE(c->compare(c));
 });
