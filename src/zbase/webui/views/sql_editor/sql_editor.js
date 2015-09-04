@@ -47,7 +47,7 @@ ZBase.registerView((function() {
       renderQueryResult(data.results);
     });
 
-    query.addEventListener('error', function(e) {
+    query.addEventListener('query_error', function(e) {
       query_mgr.close("sql_query");
 
       try {
@@ -55,6 +55,11 @@ ZBase.registerView((function() {
       } catch (e) {
         renderQueryError(e.data);
       }
+    });
+
+    query.addEventListener('error', function(e) {
+      query_mgr.close("sql_query");
+      renderQueryError("Server Error");
     });
 
     query.addEventListener('status', function(e) {
