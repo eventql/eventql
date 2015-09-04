@@ -33,7 +33,9 @@ ZBase.registerView((function() {
       var content = JSON.parse(doc.content);
       description = content.description;
       widget_list.setJSON(content.widgets);
-    } catch(e) {}
+    } catch(e) {
+      console.log(e);
+    }
 
     $.handleLinks(page);
     $.replaceViewport(page);

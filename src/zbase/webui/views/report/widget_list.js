@@ -18,14 +18,15 @@ var WidgetList = function() {
           "views/report",
           "zbase_report_widget_main_tpl");
 
-    widgets.forEach(function(widget) {
+    widgets.forEach(function(name) {
       var elem = tpl.cloneNode(true);
-      //widget.render(elem)
+      var widget = getWidget(name);
+      widget.renderContent(elem);
 
-      $.onClick($("button.edit", elem), function() {
+      /*$.onClick($("button.edit", elem), function() {
         console.log("render widget edit view");
         //widget.editView();
-      });
+      });*/
       pane.appendChild(elem);
     });
   };
@@ -40,6 +41,18 @@ var WidgetList = function() {
         widget_elems[i].classList.remove("editable");
       }
     }
+  };
+
+  var getWidget = function(name) {
+    var widget_classes = {
+      'sql_editor': SqlEditorWidget()
+    };
+
+    if (widget_classes.hasOwnProperty(name)) {
+      return widget_classes[name];
+    }
+
+    return null;
   };
 
 
