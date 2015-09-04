@@ -1,6 +1,4 @@
-var SqlEditorWidget = function() {
-  
-
+var SqlReportWidget = function() {
   var render = function(elem) {
     var tpl = $.getTemplate(
       "views/report",
@@ -10,7 +8,9 @@ var SqlEditorWidget = function() {
   };
 
   return {
-    renderContent: render
-
+    renderContent: render,
+    editView: SqlEditorEditWidget()
   }
 };
+
+ReportWidgetFactory.registerWidget(SqlReportWidget);
