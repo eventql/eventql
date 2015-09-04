@@ -1,65 +1,59 @@
-var WidgetList = function() {
-  var pane;
+var WidgetList = function(elem, widget_definitions) {
   var widgets = [];
 
-  var init = function(elem) {
-    pane = elem;
-    console.log("init");
-    
-  };
-
   var getJSON = function() {
-    return widgets;
+    //foreach widget getJson
+    //return widgets;
   };
 
-  var setJSON = function(new_widgets) {
-    widgets = new_widgets;
-    var tpl = $.getTemplate(
-          "views/report",
-          "zbase_report_widget_main_tpl");
+  //var setJSON = function(new_widgets) {
+  //  widgets = new_widgets;
+  //  var tpl = $.getTemplate(
+  //        "views/report",
+  //        "zbase_report_widget_main_tpl");
 
-    widgets.forEach(function(name) {
-      var elem = tpl.cloneNode(true);
-      var widget = getWidget(name);
-      widget.renderContent(elem);
+  //  pane.innerHTML = "";
+  //  widgets.forEach(function(name) {
+  //    var elem = tpl.cloneNode(true);
+  //    var widget = getWidget(name);
+  //    widget.renderContent($(".zbase_report_widget_pane", elem));
 
-      /*$.onClick($("button.edit", elem), function() {
-        console.log("render widget edit view");
-        //widget.editView();
-      });*/
-      pane.appendChild(elem);
-    });
-  };
+
+  //    $.onClick($(".zbase_report_widget_header .edit", elem), function() {
+  //      renderEditView(widget);
+  //    });
+
+  //    pane.appendChild(elem);
+  //  });
+  //};
 
   var setEditable = function(is_editable) {
-    var widget_elems = document.querySelectorAll(".zbase_report_widget");
+    //var widget_elems = document.querySelectorAll(".zbase_report_widget");
 
-    for (var i = 0; i < widget_elems.length; i++) {
-      if (is_editable) {
-        widget_elems[i].classList.add("editable");
-      } else {
-        widget_elems[i].classList.remove("editable");
-      }
-    }
+    //for (var i = 0; i < widget_elems.length; i++) {
+    //  if (is_editable) {
+    //    widget_elems[i].classList.add("editable");
+    //  } else {
+    //    widget_elems[i].classList.remove("editable");
+    //  }
+    //}
   };
 
-  var getWidget = function(name) {
-    var widget_classes = {
-      'sql_editor': SqlEditorWidget()
-    };
+  //var renderEditView = function(widget) {
+  //  var tpl = $.getTemplate(
+  //      "views/report",
+  //      "zbase_report_edit_widget_tpl");
 
-    if (widget_classes.hasOwnProperty(name)) {
-      return widget_classes[name];
-    }
+  //  var view = widget.editView;
 
-    return null;
-  };
+  //  pane.innerHTML = "";
+  //  view.render($(".zbase_report_widget_pane", tpl));
+  //  pane.appendChild(tpl);
+  //};
 
 
   return {
-    init: init,
     getJSON: getJSON,
-    setJSON: setJSON,
     setEditable: setEditable
   }
 };

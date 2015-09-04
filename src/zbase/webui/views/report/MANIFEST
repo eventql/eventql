@@ -1,7 +1,6 @@
 js_file: "report.js"
 js_file: "widget_list.js"
-js_file: "sql_editor_widget.js"
+js_file: "report_widget_factory.js"
 html_file: "report.html"
 html_file: "widget.html"
-html_file: "sql_editor_widget.html"
 css_file: "report.css"

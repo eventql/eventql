@@ -1,19 +1,35 @@
 ZBase.registerView((function() {
-  var kPathPrefix = "/a/reports/";
-  var docsync;
-  var readonly;
-  var widget_list;
-  var description = "";
+  var widget_list = null;
 
-  var loadReport = function(params) {
-    var query_id = params.path.substr(kPathPrefix.length);
+  // REMOVEME
+  var goToURL = function(path) {
+    var kPathPrefix = "/a/reports/";
+    var report_id = path.substr(kPathPrefix.length);
+    loadReport(report_id);
+  }
+  // REMOVEME END
+
+  var loadReport = function(report_id) {
+    if (widget_list) {
+      //widget_list.unload();
+      widget_list = null;
+    }
 
     $.showLoader();
-    $.httpGet("/api/v1/documents/" + query_id, function(r) {
+    $.httpGet("/api/v1/documents/" + report_id, function(r) {
       if (r.status == 200) {
         var doc = JSON.parse(r.response);
-        renderReport(doc);
-        $.hideLoader();
+        if (doc.content.length == 0) {
+          doc.content = null;
+        } else {
+          doc.content = JSON.parse(doc.content);
+        }
+
+        var required_widgets = findRequiredWidgets(doc);
+        ReportWidgetFactory.loadWidgets(required_widgets, function() {
+          renderReport(doc);
+          $.hideLoader();
+        });
       } else {
         $.fatalError();
       }
@@ -26,40 +42,12 @@ ZBase.registerView((function() {
         "views/report",
         "zbase_report_main_tpl");
 
-    widget_list = WidgetList();
-    widget_list.init($(".zbase_report_widgets", page));
-
-    try {
-      var content = JSON.parse(doc.content);
-      description = content.description;
-      widget_list.setJSON(content.widgets);
-    } catch(e) {
-      console.log(e);
-    }
+    widget_list = WidgetList($(".zbase_report_widgets", page), doc.content.widgets);
 
     $.handleLinks(page);
     $.replaceViewport(page);
 
-    setupEditing(readonly, doc.uuid);
-
-    //report name
     setReportName(doc.name);
-
-    //report content
-    updateReportContent();
-  };
-
-  var setupEditing = function(readonly, doc_id) {
-    if (readonly) {
-      $(".readonly_hint").classList.remove("hidden");
-      return;
-    }
-
-    // setup docsync
-    docsync = DocSync(
-        getDocument,
-        "/api/v1/documents/" + doc_id,
-        $(".zbase_report_infobar"));
 
     var mode_dropdown = $(".zbase_report z-dropdown.mode");
     mode_dropdown.classList.remove("hidden");
@@ -67,28 +55,53 @@ ZBase.registerView((function() {
       setEditable(this.getValue() == "editing");
     }, false);
 
-    setEditable(true);
+    if (readonly) {
+      $(".readonly_hint").classList.remove("hidden");
+    } else {
+      initNameEditing();
+      initDescriptionEditing();
+      initShareDocModal(doc_id);
+    }
+
+    //// setup docsync
+    //docsync = DocSync(
+    //    getDocument,
+    //    "/api/v1/documents/" + doc_id,
+    //    $(".zbase_report_infobar"));
+
+    //setEditable(true);
 
     //init edit actions
-    initNameEditing();
-    initDescriptionEditing();
-    initShareDocModal(doc_id);
-    initContentEditing();
+    //initContentEditing();
   };
 
-  var setEditable = function(is_editable) {
-    widget_list.setEditable(is_editable);
+  var findRequiredWidgets = function(doc) {
+    var widgets = [];
 
-    if (is_editable) {
-      $(".writable_report_actions").classList.remove("hidden");
-      $(".zbase_report_pane .report_name").classList.add("editable");
-      $(".zbase_report_pane .report_description").classList.add("editable");
-    } else {
-      $(".writable_report_actions").classList.add("hidden");
-      $(".zbase_report_pane .report_name").classList.remove("editable");
-      $(".zbase_report_pane .report_description").classList.remove("editable");
+    if (doc.content.hasOwnProperty("widgets")) {
+      for (var i = 0; i < doc.content.widgets.length; i++) {
+        if (widgets.indexOf(doc.content.widgets[i].type) == -1) {
+          widgets.push(doc.content.widgets[i].type);
+        }
+      }
     }
-  };
+
+    return widgets;
+  }
+
+  //var setEditable = function(is_editable) {
+  //  widget_list.setEditable(is_editable);
+
+  //  if (is_editable) {
+  //    $(".writable_report_actions").classList.remove("hidden");
+  //    $(".zbase_report_pane .report_name").classList.add("editable");
+  //    $(".zbase_report_pane .report_description").classList.add("editable");
+  //  } else {
+  //    $(".writable_report_actions").classList.add("hidden");
+  //    $(".zbase_report_pane .report_name").classList.remove("editable");
+  //    $(".zbase_report_pane .report_description").classList.remove("editable");
+  //  }
+  //};
 
   var initShareDocModal = function(doc_id) {
     var modal = ShareDocModal(
@@ -137,36 +150,36 @@ ZBase.registerView((function() {
     });
   };
 
-  var initContentEditing = function(page) {
-    var edit_pane = $(".zbase_report_pane .edit_content_pane");
-    var report_ui = $(".zbase_report_pane .report_ui");
+  //var initContentEditing = function(page) {
+  //  var edit_pane = $(".zbase_report_pane .edit_content_pane");
+  //  var report_ui = $(".zbase_report_pane .report_ui");
 
-    var closeEditPane = function() {
-      updateReportContent();
-      edit_pane.classList.add("hidden");
-      report_ui.classList.remove("hidden");
-      $(".error_note", edit_pane).classList.add("hidden");
-    };
+  //  var closeEditPane = function() {
+  //    updateReportContent();
+  //    edit_pane.classList.add("hidden");
+  //    report_ui.classList.remove("hidden");
+  //    $(".error_note", edit_pane).classList.add("hidden");
+  //  };
 
-    $.onClick($(".zbase_report_pane .link.edit"), function() {
-      report_ui.classList.add("hidden");
-      edit_pane.classList.remove("hidden");
-    });
+  //  $.onClick($(".zbase_report_pane .link.edit"), function() {
+  //    report_ui.classList.add("hidden");
+  //    edit_pane.classList.remove("hidden");
+  //  });
 
-    $.onClick($(".submit", edit_pane), function() {
-      try {
-        var content = JSON.parse(
-            $.escapeHTML($("z-codeeditor", edit_pane).getValue()));
-        description = content.description;
-        widget_list.setJSON(content.widgets);
-        docsync.saveDocument();
-        closeEditPane();
-      } catch (e) {
-        $(".error_note", edit_pane).classList.remove("hidden");
-      }
-    });
-    $.onClick($(".close", edit_pane), closeEditPane);
-  };
+  //  $.onClick($(".submit", edit_pane), function() {
+  //    try {
+  //      var content = JSON.parse(
+  //          $.escapeHTML($("z-codeeditor", edit_pane).getValue()));
+  //      description = content.description;
+  //      widget_list.setJSON(content.widgets);
+  //      docsync.saveDocument();
+  //      closeEditPane();
+  //    } catch (e) {
+  //      $(".error_note", edit_pane).classList.remove("hidden");
+  //    }
+  //  });
+  //  $.onClick($(".close", edit_pane), closeEditPane);
+  //};
 
   var setReportName = function(name) {
     var escaped_name = $.escapeHTML(name);
@@ -192,45 +205,48 @@ ZBase.registerView((function() {
       escaped_description;
   };
 
+  //var setReportContent = function() {
+  //  var content = {
+  //    description: description,
+  //    widgets: widget_list.getJSON()
+  //  };
 
-  var setReportContent = function() {
-    var content = {
-      description: description,
-      widgets: widget_list.getJSON()
-    };
+  //  $(".zbase_report_pane .edit_content_pane z-codeeditor").setValue(
+  //      JSON.stringify(content));
+  //};
 
-    $(".zbase_report_pane .edit_content_pane z-codeeditor").setValue(
-        JSON.stringify(content));
-  };
+  //var updateReportContent = function() {
+  //  setReportContent();
+  //  setReportDescription();
+  //};
 
-  var updateReportContent = function() {
-    setReportContent();
-    setReportDescription();
-  };
+  //var getDocument = function() {
+  //  var content = {
+  //    description: $(".zbase_report_pane .report_description").innerText,
+  //    widgets: widget_list.getJSON()
+  //  };
 
-  var getDocument = function() {
-    var content = {
-      description: $(".zbase_report_pane .report_description").innerText,
-      widgets: widget_list.getJSON()
-    };
-
-    return {
-      content: JSON.stringify(content),
-      name: $(".zbase_report_pane input.report_name").value
-    };
-  };
+  //  return {
+  //    content: JSON.stringify(content),
+  //    name: $(".zbase_report_pane input.report_name").value
+  //  };
+  //};
 
   var destroy = function() {
-    if (docsync) {
-      docsync.close();
+    //if (docsync) {
+    //  docsync.close();
+    //}
+
+    if (widget_list) {
+      //widget_list.unload();
     }
   };
 
   return {
     name: "report",
-    loadView: loadReport,
+    loadView: function(params) { goToURL(params.path); },
     unloadView: destroy,
-    handleNavigationChange: loadReport
+    handleNavigationChange: goToURL
   };
 
 })());
