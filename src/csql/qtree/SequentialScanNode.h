@@ -60,6 +60,7 @@ public:
   void setTableName(const String& table_name);
 
   Vector<RefPtr<SelectListNode>> selectList() const;
+  Set<String> selectedColumns() const;
 
   Option<RefPtr<ValueExpressionNode>> whereExpression() const;
 

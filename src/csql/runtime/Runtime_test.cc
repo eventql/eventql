@@ -360,7 +360,6 @@ TEST_CASE(RuntimeTest, TestTableNamesWithDots, [] () {
     EXPECT_EQ(result.getNumRows(), 1);
     EXPECT_EQ(result.getRow(0)[0], "213");
   }
-
 });
 
 TEST_CASE(RuntimeTest, SelectFloatIntegerDivision, [] () {
@@ -427,4 +426,21 @@ TEST_CASE(RuntimeTest, SelectFloatIntegerSubtraction, [] () {
     auto v = runtime->evaluateStaticExpression("10.0 - 5");
     EXPECT_EQ(v.toString(), "5.000000");
   }
+});
+
+TEST_CASE(RuntimeTest, TestSelectInvalidColumn, [] () {
+  EXPECT_EXCEPTION("column(s) not found: fnord", [] () {
+    auto runtime = Runtime::getDefaultRuntime();
+
+    auto estrat = mkRef(new DefaultExecutionStrategy());
+    estrat->addTableProvider(
+        new CSTableScanProvider(
+            "test.tbl",
+            "src/csql/testdata/testtbl.cst"));
+
+    ResultList result;
+    auto query = R"(select fnord from 'test.tbl';)";
+    auto qplan = runtime->buildQueryPlan(query, estrat.get());
+    runtime->executeStatement(qplan->buildStatement(0), &result);
+  });
 });
