@@ -36,6 +36,10 @@ bool ASTNode::operator==(const ASTNode& other) const {
   }
 }
 
+bool ASTNode::compare(const ASTNode* other) {
+  return false;
+}
+
 ASTNode* ASTNode::appendChild(ASTNode::kASTNodeType type) {
   auto child = new ASTNode(type);
   children_.push_back(child);
@@ -81,6 +85,10 @@ const std::vector<ASTNode*>& ASTNode::getChildren() const {
 
 void ASTNode::setToken(const Token* token) {
   token_ = token;
+}
+
+void ASTNode::clearToken() {
+  token_ = nullptr;
 }
 
 const Token* ASTNode::getToken() const {
@@ -237,6 +245,11 @@ void ASTNode::debugPrint(int indent /* = 0 */) const {
         Token::getTypeName(token_->getType()),
         token_->getString().c_str());
   }
+
+  if (id_ != -1) {
+    printf(" <%lli>", id_);
+  }
+
   printf("\n");
 
   for (const auto child : children_) {

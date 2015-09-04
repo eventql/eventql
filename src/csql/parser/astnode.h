@@ -37,6 +37,7 @@ public:
     T_VOID,
 
     T_SELECT,
+    T_SELECT_DEEP,
     T_SELECT_LIST,
     T_ALL,
     T_FROM,
@@ -84,6 +85,10 @@ public:
   ASTNode(kASTNodeType type);
   bool operator==(kASTNodeType type) const;
   bool operator==(const ASTNode& other) const;
+
+  // compare asts recursively. returns true if both ast trees are equal
+  bool compare(const ASTNode* other);
+
   ASTNode* appendChild(ASTNode::kASTNodeType type);
   void appendChild(ASTNode* node);
   void appendChild(ASTNode* node, size_t index);
@@ -93,6 +98,7 @@ public:
   void clearChildren();
   const std::vector<ASTNode*>& getChildren() const;
   void setToken(const Token* token);
+  void clearToken();
   const Token* getToken() const;
   kASTNodeType getType() const;
   void setType(kASTNodeType type);

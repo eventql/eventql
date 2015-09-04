@@ -216,11 +216,12 @@ void CSTableScan::scan(
         case AggregationStrategy::AGGREGATE_ALL:
           break;
 
-        case AggregationStrategy::AGGREGATE_WITHIN_RECORD:
+        case AggregationStrategy::AGGREGATE_WITHIN_RECORD_FLAT:
           if (next_level != 0) {
             break;
           }
 
+        case AggregationStrategy::AGGREGATE_WITHIN_RECORD_DEEP:
           for (int i = 0; i < select_list_.size(); ++i) {
             VM::result(
                 select_list_[i].compiled.program(),
@@ -312,7 +313,8 @@ void CSTableScan::scanWithoutColumns(
           }
           break;
 
-        case AggregationStrategy::AGGREGATE_WITHIN_RECORD:
+        case AggregationStrategy::AGGREGATE_WITHIN_RECORD_DEEP:
+        case AggregationStrategy::AGGREGATE_WITHIN_RECORD_FLAT:
         case AggregationStrategy::NO_AGGREGATION:
           for (int i = 0; i < select_list_.size(); ++i) {
             VM::evaluate(

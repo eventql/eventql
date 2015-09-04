@@ -41,7 +41,8 @@ namespace csql {
  */
 enum class AggregationStrategy {
   NO_AGGREGATION,
-  AGGREGATE_WITHIN_RECORD,
+  AGGREGATE_WITHIN_RECORD_FLAT,
+  AGGREGATE_WITHIN_RECORD_DEEP,
   AGGREGATE_ALL
 };
 
