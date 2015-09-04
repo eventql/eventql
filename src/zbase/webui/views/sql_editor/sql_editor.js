@@ -49,12 +49,7 @@ ZBase.registerView((function() {
 
     query.addEventListener('query_error', function(e) {
       query_mgr.close("sql_query");
-
-      try {
-        renderQueryError(JSON.parse(e.data).error);
-      } catch (e) {
-        renderQueryError(e.data);
-      }
+      renderQueryError(JSON.parse(e.data).error);
     });
 
     query.addEventListener('error', function(e) {
