@@ -974,8 +974,6 @@ void AnalyticsServlet::executeSQLStream(
         new csql::JSONSSEStreamFormat(&sse_stream));
 
   } catch (const StandardException& e) {
-    stx::logError("sql", e, "SQL execution failed");
-
     Buffer buf;
     json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
     json.beginObject();
@@ -983,7 +981,7 @@ void AnalyticsServlet::executeSQLStream(
     json.addString(e.what());
     json.endObject();
 
-    sse_stream.sendEvent(buf, Some(String("error")));
+    sse_stream.sendEvent(buf, Some(String("query_error")));
   }
 
   sse_stream.finish();
