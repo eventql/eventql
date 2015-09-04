@@ -11,7 +11,7 @@ ZBase.registerView((function() {
 
   var loadReport = function(report_id) {
     if (widget_list) {
-      //widget_list.unload();
+      widget_list.destroy();
       widget_list = null;
     }
 
@@ -42,8 +42,6 @@ ZBase.registerView((function() {
         "views/report",
         "zbase_report_main_tpl");
 
-    widget_list = WidgetList($(".zbase_report_widgets", page), doc.content.widgets);
-
     $.handleLinks(page);
     $.replaceViewport(page);
 
@@ -63,6 +61,9 @@ ZBase.registerView((function() {
       initShareDocModal(doc_id);
     }
 
+    widget_list = WidgetList($(".zbase_report_widgets", page), doc.content.widgets);
+    widget_list.setEditable(true);
+    
     //// setup docsync
     //docsync = DocSync(
     //    getDocument,
@@ -238,7 +239,7 @@ ZBase.registerView((function() {
     //}
 
     if (widget_list) {
-      //widget_list.unload();
+      widget_list.destroy();
     }
   };
 
