@@ -37,7 +37,26 @@ bool ASTNode::operator==(const ASTNode& other) const {
 }
 
 bool ASTNode::compare(const ASTNode* other) {
-  return false;
+  if (type_ != other->type_) {
+    return false;
+  }
+
+  if (!((token_ == nullptr && other->token_ == nullptr) ||
+      (token_ && other->token_ && *token_ == *other->token_))) {
+    return false;
+  }
+
+  if (children_.size() != other->children_.size()) {
+    return false;
+  }
+
+  for (size_t i = 0; i < children_.size(); ++i) {
+    if (!children_[i]->compare(other->children_[i])) {
+      return false;
+    }
+  }
+
+  return true;
 }
 
 ASTNode* ASTNode::appendChild(ASTNode::kASTNodeType type) {
