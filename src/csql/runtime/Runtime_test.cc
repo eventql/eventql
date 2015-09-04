@@ -444,3 +444,17 @@ TEST_CASE(RuntimeTest, TestSelectInvalidColumn, [] () {
     runtime->executeStatement(qplan->buildStatement(0), &result);
   });
 });
+
+TEST_CASE(RuntimeTest, TestFromTimestampExpr, [] () {
+  auto runtime = Runtime::getDefaultRuntime();
+
+  {
+    auto v = runtime->evaluateStaticExpression("FROM_TIMESTAMP(1441408424)");
+    EXPECT_EQ(v.toString(), "2015-09-04 23:13:44");
+  }
+
+  {
+    auto v = runtime->evaluateStaticExpression("FROM_TIMESTAMP(1441408424.0)");
+    EXPECT_EQ(v.toString(), "2015-09-04 23:13:44");
+  }
+});
