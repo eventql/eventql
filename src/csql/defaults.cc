@@ -72,6 +72,8 @@ void installDefaultSymbols(SymbolTable* rt) {
   rt->registerFunction("mod", PureFunction(&expressions::modExpr));
   rt->registerFunction("pow", PureFunction(&expressions::powExpr));
 
+  rt->registerFunction("round", PureFunction(&expressions::roundExpr));
+  rt->registerFunction("truncate", PureFunction(&expressions::truncateExpr));
 }
 
 } // namespace csql
