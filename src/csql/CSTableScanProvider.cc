@@ -48,19 +48,44 @@ Option<csql::TableInfo> CSTableScanProvider::describe(
 }
 
 csql::TableInfo CSTableScanProvider::tableInfo() const {
+  cstable::CSTableReader cstable(cstable_file_);
+
   csql::TableInfo ti;
   ti.table_name = table_name_;
 
-  // FIXME
-  //for (const auto& col : table.schema->columns()) {
-  //  csql::ColumnInfo ci;
-  //  ci.column_name = col.first;
-  //  ci.type = col.second.typeName();
-  //  ci.type_size = col.second.typeSize();
-  //  ci.is_nullable = col.second.optional;
+  for (const auto& col : cstable.columns()) {
+    csql::ColumnInfo ci;
+    ci.column_name = col;
+    ci.type_size = 0;
+    ci.is_nullable = true;
 
-  //  ti.columns.emplace_back(ci);
-  //}
+    switch (cstable.getColumnType(col)) {
+      case cstable::ColumnType::BOOLEAN:
+        ci.type =  "bool";
+        break;
+
+      case cstable::ColumnType::UINT32_BITPACKED:
+      case cstable::ColumnType::UINT32_PLAIN:
+        ci.type =  "uint32";
+        break;
+
+      case cstable::ColumnType::UINT64_PLAIN:
+      case cstable::ColumnType::UINT64_LEB128:
+        ci.type =  "uint64";
+        break;
+
+      case cstable::ColumnType::DOUBLE:
+        ci.type =  "double";
+        break;
+
+      case cstable::ColumnType::STRING_PLAIN:
+        ci.type =  "string";
+        break;
+
+    }
+
+    ti.columns.emplace_back(ci);
+  }
 
   return ti;
 }

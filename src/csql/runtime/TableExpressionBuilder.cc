@@ -115,6 +115,25 @@ ScopedPtr<TableExpression> TableExpressionBuilder::buildSequentialScan(
     TableProvider* tables) {
   const auto& table_name = node->tableName();
 
+  {
+    auto cols = node->selectedColumns();
+    auto tinfo = tables->describe(node->tableName());
+    if (tinfo.isEmpty()) {
+      RAISEF(kRuntimeError, "table not found: $0", table_name);
+    }
+
+    for (const auto& c : tinfo.get().columns) {
+      cols.erase(c.column_name);
+    }
+
+    if (!cols.empty()) {
+      RAISEF(
+          kRuntimeError,
+          "column(s) not found: $0",
+          StringUtil::join(cols, ", "));
+    }
+  }
+
   auto seqscan = tables->buildSequentialScan(node, runtime);
   if (seqscan.isEmpty()) {
     RAISEF(kRuntimeError, "table not found: $0", table_name);

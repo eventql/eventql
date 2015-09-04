@@ -8,6 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <csql/qtree/SequentialScanNode.h>
+#include <csql/qtree/ColumnReferenceNode.h>
 
 using namespace stx;
 
@@ -51,6 +52,29 @@ void SequentialScanNode::setTableName(const String& table_name) {
 Vector<RefPtr<SelectListNode>> SequentialScanNode::selectList()
     const {
   return select_list_;
+}
+
+static void findSelectedColumnNames(
+    RefPtr<ValueExpressionNode> expr,
+    Set<String>* columns) {
+  auto colname = dynamic_cast<ColumnReferenceNode*>(expr.get());
+  if (colname) {
+    columns->emplace(colname->fieldName());
+  }
+
+  for (const auto& a : expr->arguments()) {
+    findSelectedColumnNames(a, columns);
+  }
+}
+
+Set<String> SequentialScanNode::selectedColumns() const {
+  Set<String> columns;
+
+  for (const auto& sl : select_list_) {
+    findSelectedColumnNames(sl->expression(), &columns);
+  }
+
+  return columns;
 }
 
 AggregationStrategy SequentialScanNode::aggregationStrategy() const {
