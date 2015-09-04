@@ -458,3 +458,17 @@ TEST_CASE(RuntimeTest, TestFromTimestampExpr, [] () {
     EXPECT_EQ(v.toString(), "2015-09-04 23:13:44");
   }
 });
+
+TEST_CASE(RuntimeTest, TestTruncateExpr, [] () {
+  auto runtime = Runtime::getDefaultRuntime();
+
+  {
+    auto v = runtime->evaluateStaticExpression("TRUNCATE(23.3)");
+    EXPECT_EQ(v.toString(), "23");
+  }
+
+  {
+    auto v = runtime->evaluateStaticExpression("TRUNCATE(23.7)");
+    EXPECT_EQ(v.toString(), "23");
+  }
+});
