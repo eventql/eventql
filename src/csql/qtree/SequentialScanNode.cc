@@ -73,8 +73,12 @@ String SequentialScanNode::toString() const {
       aggr = "NO_AGGREGATION";
       break;
 
-    case AggregationStrategy::AGGREGATE_WITHIN_RECORD:
-      aggr = "AGGREGATE_WITHIN_RECORD";
+    case AggregationStrategy::AGGREGATE_WITHIN_RECORD_FLAT:
+      aggr = "AGGREGATE_WITHIN_RECORD_FLAT";
+      break;
+
+    case AggregationStrategy::AGGREGATE_WITHIN_RECORD_DEEP:
+      aggr = "AGGREGATE_WITHIN_RECORD_DEEP";
       break;
 
     case AggregationStrategy::AGGREGATE_ALL:

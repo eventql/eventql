@@ -86,6 +86,7 @@ Vector<RefPtr<QueryTreeNode>> QueryPlanBuilder::build(
     switch (statements[i]->getType()) {
 
       case ASTNode::T_SELECT:
+      case ASTNode::T_SELECT_DEEP:
       case ASTNode::T_SHOW_TABLES:
       case ASTNode::T_DESCRIBE_TABLE:
         nodes.emplace_back(build(statements[i], tables));
@@ -102,6 +103,7 @@ Vector<RefPtr<QueryTreeNode>> QueryPlanBuilder::build(
           for (++i; i < statements.size(); ) {
             switch (statements[i]->getType()) {
               case ASTNode::T_SELECT:
+              case ASTNode::T_SELECT_DEEP:
                 subselects.emplace_back(build(statements[i++], tables));
                 continue;
               case ASTNode::T_DRAW:
@@ -181,7 +183,8 @@ Vector<RefPtr<QueryTreeNode>> QueryPlanBuilder::build(
 //
 
 bool QueryPlanBuilder::hasUnexpandedColumns(ASTNode* ast) const {
-  if (ast->getType() != ASTNode::T_SELECT) {
+  if (ast->getType() != ASTNode::T_SELECT &&
+      ast->getType() != ASTNode::T_SELECT_DEEP) {
     return false;
   }
 
@@ -262,7 +265,8 @@ bool QueryPlanBuilder::hasJoin(ASTNode* ast) const {
 }
 
 bool QueryPlanBuilder::hasOrderByClause(ASTNode* ast) const {
-  if (!(*ast == ASTNode::T_SELECT) || ast->getChildren().size() < 2) {
+  if (!(*ast == ASTNode::T_SELECT || *ast == ASTNode::T_SELECT_DEEP) ||
+      ast->getChildren().size() < 2) {
     return false;
   }
 
@@ -276,7 +280,8 @@ bool QueryPlanBuilder::hasOrderByClause(ASTNode* ast) const {
 }
 
 bool QueryPlanBuilder::hasAggregationInSelectList(ASTNode* ast) const {
-  if (!(*ast == ASTNode::T_SELECT) || ast->getChildren().size() < 2) {
+  if (!(*ast == ASTNode::T_SELECT || *ast == ASTNode::T_SELECT_DEEP) ||
+      ast->getChildren().size() < 2) {
     return false;
   }
 
@@ -400,6 +405,10 @@ QueryTreeNode* QueryPlanBuilder::buildGroupBy(
 
   /* copy ast for child and swap out select lists*/
   auto child_ast = ast->deepCopy();
+  if (child_ast->getType() == ASTNode::T_SELECT) {
+    child_ast->setType(ASTNode::T_SELECT_DEEP);
+  }
+
   child_ast->removeChildByIndex(0);
   child_ast->appendChild(child_sl, 0);
 
@@ -578,6 +587,7 @@ bool QueryPlanBuilder::buildInternalSelectList(
       node->setType(ASTNode::T_RESOLVED_COLUMN);
       node->setID(col_index);
       node->clearChildren();
+      node->clearToken();
       return true;
     }
 
@@ -591,9 +601,7 @@ bool QueryPlanBuilder::buildInternalSelectList(
         if (candidates[i]->getType() == ASTNode::T_DERIVED_COLUMN) {
           if (candidates[i]->getChildren().size() == 1) {
             auto colname = candidates[i]->getChildren()[0];
-            if (colname->getType() == ASTNode::T_COLUMN_NAME &&
-                node->getToken()->getString() ==
-                    colname->getToken()->getString()) {
+            if (node->compare(colname)) {
               col_index = i;
               break;
             }
@@ -611,6 +619,8 @@ bool QueryPlanBuilder::buildInternalSelectList(
 
       node->setType(ASTNode::T_RESOLVED_COLUMN);
       node->setID(col_index);
+      node->clearChildren();
+      node->clearToken();
       return true;
     }
 
@@ -630,7 +640,8 @@ bool QueryPlanBuilder::buildInternalSelectList(
 QueryTreeNode* QueryPlanBuilder::buildLimitClause(
     ASTNode* ast,
     RefPtr<TableProvider> tables) {
-  if (!(*ast == ASTNode::T_SELECT) || ast->getChildren().size() < 3) {
+  if (!(*ast == ASTNode::T_SELECT || *ast == ASTNode::T_SELECT_DEEP) ||
+      ast->getChildren().size() < 3) {
     return nullptr;
   }
 
@@ -757,7 +768,7 @@ QueryTreeNode* QueryPlanBuilder::buildOrderByClause(
 }
 
 QueryTreeNode* QueryPlanBuilder::buildSequentialScan(ASTNode* ast) {
-  if (!(*ast == ASTNode::T_SELECT)) {
+  if (!(*ast == ASTNode::T_SELECT || *ast == ASTNode::T_SELECT_DEEP)) {
     return nullptr;
   }
 
@@ -870,14 +881,17 @@ QueryTreeNode* QueryPlanBuilder::buildSequentialScan(ASTNode* ast) {
 
   if (has_aggregation_within_record) {
     seqscan->setAggregationStrategy(
-        AggregationStrategy::AGGREGATE_WITHIN_RECORD);
+        *ast == ASTNode::T_SELECT_DEEP ?
+            AggregationStrategy::AGGREGATE_WITHIN_RECORD_DEEP :
+            AggregationStrategy::AGGREGATE_WITHIN_RECORD_FLAT);
   }
 
   return seqscan;
 }
 
 QueryTreeNode* QueryPlanBuilder::buildSelectExpression(ASTNode* ast) {
-  if (!(*ast == ASTNode::T_SELECT) || ast->getChildren().size() != 1) {
+  if (!(*ast == ASTNode::T_SELECT || *ast == ASTNode::T_SELECT_DEEP)
+      || ast->getChildren().size() != 1) {
     return nullptr;
   }
 
