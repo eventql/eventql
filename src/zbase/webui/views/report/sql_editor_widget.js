@@ -1,5 +1,6 @@
-var SqlReportWidget = function() {
-  var render = function(elem) {
+var ReportSQLWidgetDisplay = function(elem, conf) {
+
+  var init = function() {
     var tpl = $.getTemplate(
       "views/report",
       "zbase_report_sql_editor_widget_main_tpl");
@@ -7,10 +8,20 @@ var SqlReportWidget = function() {
     elem.appendChild(tpl);
   };
 
+  var destroy = function() {
+
+  };
+
   return {
-    renderContent: render,
-    editView: SqlEditorEditWidget()
-  }
+    init: init,
+    destroy: destroy
+  };
+
 };
 
-ReportWidgetFactory.registerWidget(SqlReportWidget);
+var ReportSQLWidgetEditor = null;
+
+ReportWidgetFactory.registerWidget(
+    ReportSQLWidgetDisplay,
+    ReportSQLWidgetEditor);
+
