@@ -2,9 +2,17 @@ var WidgetList = function(elem, widget_definitions) {
   var widgets = [];
   var widget_edit_callbacks = [];
 
+  widget_definitions.forEach(function(conf) {
+    widgets.push({
+      conf: conf,
+      container: null,
+      display_obj: null
+    });
+  });
+
 
   var render = function() {
-    widget_definitions.forEach(function(conf) {
+    widgets.forEach(function(widget) {
       var container = $(
             ".zbase_report_widget",
             $.getTemplate(
@@ -12,21 +20,17 @@ var WidgetList = function(elem, widget_definitions) {
               "zbase_report_widget_main_tpl"));
 
       var display_obj = ReportWidgetFactory.renderWidgetDisplay(
-          conf.type,
+          widget.conf.type,
           container,
-          conf);
+          widget.conf);
 
       $.onClick($(".zbase_report_widget_header .edit", container), function() {
-        triggerWidgetEdit(conf.uuid);
+        triggerWidgetEdit(widget.conf.uuid);
       });
 
       elem.appendChild(container);
-
-      widgets.push({
-        conf: conf,
-        container: container,
-        display_obj: display_obj
-      });
+      widget.container = container;
+      widget.display_obj = display_obj;
     });
   };
 
@@ -51,6 +55,10 @@ var WidgetList = function(elem, widget_definitions) {
     }
 
     return null;
+  };
+
+  var updateWidgetConfig = function(widget_id, conf) {
+    //for (var i = 0; i < widgets.length 
   };
 
   //var setJSON = function(new_widgets) {
@@ -99,6 +107,7 @@ var WidgetList = function(elem, widget_definitions) {
     render: render,
     getJSON: getJSON,
     getWidgetConfig: getWidgetConfig,
+    updateWidgetConfig: updateWidgetConfig,
     setEditable: setEditable,
     onWidgetEdit: onWidgetEdit,
     destroy: destroy
