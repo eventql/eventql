@@ -3,6 +3,7 @@
   table-layout: fixed;
   width: 100%;
   min-height: 900px; /* FIXME */
+  border-bottom: 1px solid #ddd;
 }
 
 

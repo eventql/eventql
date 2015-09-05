@@ -426,14 +426,15 @@ h2.pagetitle.border_bottom {
   clear: both;
   font-size: 70%;
   padding: 6px 20px;
-  opacity: 0.4;
   width: 100%;
   margin-bottom: 0;
   background: #f9f9f9;
+  color: #aaa;
 }
 
 .zbase_footer a {
   float: right;
+  color: #aaa;
 }
 
 .zbase_footer.hidden {
