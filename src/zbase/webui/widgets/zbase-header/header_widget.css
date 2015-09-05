@@ -25,6 +25,7 @@
 
 .zbase_header .dropdown {
   cursor: pointer;
+  display: block;
 }
 
 .zbase_header .dropdown:not(.open) .fa-caret-up {
@@ -35,27 +36,47 @@
   display: none;
 }
 
+.zbase_header .dropdown .dropdown_header fa {
+  margin-right: 3px;
+}
+
+.zbase_header .dropdown .dropdown_header {
+  display: block;
+  padding: 0 10px;
+  color: #444;
+}
+
 .zbase_header .dropdown .dropdown_panel {
   display: none;
 }
 
 .zbase_header .dropdown.open .dropdown_panel {
   display: block;
-  position: absolute;
+  width: 100%;
   font-size: 13px;
   margin-top: -3px;
   background-color: #fff;
   border-bottom-right-radius: 3px;
-  botder-bottom-left-radius: 3px;
+  border-bottom-left-radius: 3px;
   border-bottom: 2px solid #e1e1e1;
 }
 
-.zbase_header .dropdown_panel a, .zbase_header .dropdown_panel span {
-  color: #444 !important;
+.zbase_header .dropdown_panel li {
+  display: block;
+}
+
+.zbase_header .dropdown_panel a,
+.zbase_header .dropdown_panel span {
+  display: block;
+  width: 100%;
+  color: #444;
   text-decoration: none;
-  clear: both;
-  margin: 0 10px;
   cursor: pointer;
+}
+
+.zbase_header .dropdown_panel a:hover,
+.zbase_header .dropdown_panel span:hover {
+  color: #111;
 }
 
 /* Namespace popup */
