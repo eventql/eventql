@@ -22,14 +22,18 @@ var ReportWidgetFactory = (function() {
   };
 
 
-  var get = function() {
+  var renderWidgetEditor = function(type, container, conf) {
+    var widget_editor = widgets[type].editor(container, conf);
+    widget_editor.render();
 
+    return widget_editor;
   };
+
 
   return {
     loadWidgets: loadWidgets,
     registerWidget: register,
-    getWidget: get,
-    renderWidgetDisplay: renderWidgetDisplay
+    renderWidgetDisplay: renderWidgetDisplay,
+    renderWidgetEditor: renderWidgetEditor
   };
 })();
