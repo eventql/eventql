@@ -13,24 +13,26 @@ var WidgetList = function(elem, widget_definitions) {
 
   var render = function() {
     widgets.forEach(function(widget) {
-      var container = $(
+      if (widget.display_obj) {
+        widget.display_obj.destroy();
+      }
+
+      widget.container = $(
             ".zbase_report_widget",
             $.getTemplate(
               "views/report",
               "zbase_report_widget_main_tpl"));
 
-      var display_obj = ReportWidgetFactory.renderWidgetDisplay(
+      widget.display_obj = ReportWidgetFactory.renderWidgetDisplay(
           widget.conf.type,
-          container,
+          widget.container,
           widget.conf);
 
-      $.onClick($(".zbase_report_widget_header .edit", container), function() {
+      $.onClick($(".zbase_report_widget_header .edit", widget.container), function() {
         triggerWidgetEdit(widget.conf.uuid);
       });
 
-      elem.appendChild(container);
-      widget.container = container;
-      widget.display_obj = display_obj;
+      elem.appendChild(widget.container);
     });
   };
 
