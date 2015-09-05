@@ -113,7 +113,8 @@ ZBase.registerView((function() {
 
     $.onClick($("button.save", container), function() {
       editor_obj.onSave(function(config) {
-        console.log("update widget config", config);
+        widget_list.updateWidgetConfig(widget_id, config);
+        showReportView();
       });
     });
 
