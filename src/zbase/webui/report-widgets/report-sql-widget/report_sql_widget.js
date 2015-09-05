@@ -124,7 +124,6 @@ var ReportSQLWidgetDisplay = function(elem, conf) {
 
 var ReportSQLWidgetEditor = function(elem, conf) {
   var render = function() {
-    console.log(elem, conf);
     var tpl = $.getTemplate(
       "views/report",
       "zbase_report_sql_widget_editor_main_tpl");
@@ -132,8 +131,19 @@ var ReportSQLWidgetEditor = function(elem, conf) {
     elem.appendChild(tpl);
   };
 
+  var onSave = function(callback) {
+    //get new config
+    callback(/*config*/);
+  };
+
+  var onCancel = function(callback) {
+    callback();
+  };
+
   return {
-    render: render
+    render: render,
+    onSave: onSave,
+    onCancel: onCancel
   }
 };
 
