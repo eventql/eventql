@@ -147,6 +147,7 @@ var ReportSQLWidgetEditor = function(elem, conf) {
 
   return {
     render: render,
+    destroy: function() {},
     onSave: onSave,
     onCancel: onCancel
   }
