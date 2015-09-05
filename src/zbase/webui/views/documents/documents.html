@@ -1,46 +1,38 @@
 <template id="zbase_documents_main_tpl">
-  <section class='zbase_page_title small'>
-    <div>
-      <zbase-breadcrumbs>
-        <zbase-breadcrumbs-section>
-          <a href="/a/documents">Documents</a>
-        </zbase-breadcrumbs-section>
-        <zbase-breadcrumbs-section>
-          <a href="/a/documents">All Documents</a>
-        </zbase-breadcrumbs-section>
-      </zbase-breadcrumbs>
-    </div>
-  </section>
   <div class="zbase_content_pane zbase_documents">
-    <div class="zbase_home_menu_sidebar">
-    </div>
 
-    <div class="zbase_home_menu_content">
-      <z-dropdown class="input primary" data-resolved data-hover>
-        <z-dropdown-header>
-          <z-dropdown-header-value data-static>
-              <span style="margin-left:4px; margin-right: 10px;">New Document</span>
-          </z-dropdown-header-value>
-        </z-dropdown-header>
-        <z-dropdown-flyout>
-          <z-dropdown-items>
-            <z-dropdown-item data-value='sql_query'>SQL Query</z-dropdown-item>
-            <z-dropdown-item data-value='report'>Report</z-dropdown-item>
-          </z-dropdown-items>
-        </z-dropdown-flyout>
-      </z-dropdown>
-      <h2 class="pagetitle">My Documents</h2>
-      <table class="z-table zbase_clickable_table">
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Type</th>
-            <th>Last modified</th>
-          </tr>
-        </thead>
-        <tbody>
-        </tbody>
-      </table>
+    <z-dropdown class="input primary" data-resolved data-hover style="margin-top: 14px;">
+      <z-dropdown-header>
+        <z-dropdown-header-value data-static>
+            <span style="margin-left:4px; margin-right: 10px;">New Document</span>
+        </z-dropdown-header-value>
+      </z-dropdown-header>
+      <z-dropdown-flyout>
+        <z-dropdown-items>
+          <z-dropdown-item data-value='sql_query'>SQL Query</z-dropdown-item>
+          <z-dropdown-item data-value='report'>Report</z-dropdown-item>
+        </z-dropdown-items>
+      </z-dropdown-flyout>
+    </z-dropdown>
+
+    <h2 class="pagetitle">My Documents</h2>
+
+    <div class="zbase_card">
+      <div class="docs_sidebar">
+      </div>
+      <div class="docs_list">
+        <table class="z-table zbase_clickable_table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Type</th>
+              <th>Last modified</th>
+            </tr>
+          </thead>
+          <tbody>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 </template>
