@@ -57,13 +57,13 @@ ZBase.registerView((function() {
       $(".readonly_hint").classList.remove("hidden");
     } else {
       initNameEditing();
-      initDescriptionEditing();
-      initShareDocModal(doc_id);
+      //initDescriptionEditing();
+      initShareDocModal(doc.uuid);
     }
 
-    widget_list = WidgetList($(".zbase_report_widgets", page), doc.content.widgets);
+    widget_list = WidgetList($(".zbase_report_widgets"), doc.content.widgets);
     widget_list.setEditable(true);
-    
+
     //// setup docsync
     //docsync = DocSync(
     //    getDocument,
