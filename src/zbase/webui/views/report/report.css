@@ -145,6 +145,12 @@
 /**
   * Widget
   */
+
+.zbase_report_pane .zbase_report_widgets.hidden,
+.zbase_report_pane .zbase_report_widget_editor.hidden {
+  display: none;
+}
+
 .zbase_report_pane .zbase_report_widget {
   
 }
