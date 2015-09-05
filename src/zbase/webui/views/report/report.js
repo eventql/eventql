@@ -96,7 +96,7 @@ ZBase.registerView((function() {
   var showReportView = function(doc) {
 
     //clear viewport
-    //widget_list.render();
+    widget_list.render();
     widget_list.setEditable(true);
   };
 
