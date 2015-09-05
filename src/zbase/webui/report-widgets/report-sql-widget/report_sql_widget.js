@@ -8,18 +8,18 @@ var ReportSQLWidgetDisplay = function(elem, conf) {
 
     var result_pane = $(".zbase_report_sql_result_pane", tpl);
     var query = query_mgr.get(
-      "sql_query",
+      "report_sql",
       "/api/v1/sql_stream?query=" + encodeURIComponent(conf.query));
 
     query.addEventListener('result', function(e) {
-      query_mgr.close("sql_query");
+      query_mgr.close("report_sql");
 
       var data = JSON.parse(e.data);
       renderQueryResult(result_pane, data.results);
     });
 
     query.addEventListener('error', function(e) {
-      query_mgr.close("sql_query");
+      query_mgr.close("report_sql");
 
       try {
         renderQueryError(result_pane, JSON.parse(e.data).error);
@@ -110,7 +110,9 @@ var ReportSQLWidgetDisplay = function(elem, conf) {
   };
 
   var destroy = function() {
-
+    if (query_mgr) {
+      query_mgr.closeAll();
+    }
   };
 
   return {
@@ -120,7 +122,20 @@ var ReportSQLWidgetDisplay = function(elem, conf) {
 
 };
 
-var ReportSQLWidgetEditor = null;
+var ReportSQLWidgetEditor = function(elem, conf) {
+  var render = function() {
+    console.log(elem, conf);
+    var tpl = $.getTemplate(
+      "views/report",
+      "zbase_report_sql_widget_editor_main_tpl");
+
+    elem.appendChild(tpl);
+  };
+
+  return {
+    render: render
+  }
+};
 
 ReportWidgetFactory.registerWidget(
     "sql-widget",
