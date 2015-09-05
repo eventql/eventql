@@ -99,11 +99,20 @@ ZBase.registerView((function() {
     var viewport = $(".zbase_report_viewport");
     viewport.innerHTML = "";
 
-    widget_list.render(viewport);
-    widget_list.setEditable(true);
+    if (widget_list) {
+      widget_list.render(viewport);
+      widget_list.setEditable(true);
+    } else {
+      $.fatalError();
+    }
   };
 
   var showWidgetEditor = function(widget_id) {
+    if (!widget_list) {
+      $.fatalError();
+      return;
+    }
+
     var conf = widget_list.getWidgetConfig(widget_id);
     edit_view = ReportWidgetFactory.getWidgetEditor(conf);
 
@@ -272,13 +281,15 @@ ZBase.registerView((function() {
   //};
 
   var getDocument = function() {
-    var content = {
-      description: $(".zbase_report_pane .report_description").innerText,
-      widgets: widget_list.getJSON()
-    };
+    var widgets = [];
+    if (widget_list) {
+      widgets = widget_list.getJSON();
+    }
 
     return {
-      content: JSON.stringify(content),
+      content: JSON.stringify({
+          description: $(".zbase_report_pane .report_description").innerText,
+          widgets: widgets}),
       name: $(".zbase_report_pane input.report_name").value
     };
   };
