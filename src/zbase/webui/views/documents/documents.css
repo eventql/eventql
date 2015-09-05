@@ -42,3 +42,7 @@
   border-top: 1px solid #ddd;
   border-left: 1px solid #ddd;
 }
+
+#zbase_viewport .zbase_content_pane.zbase_documents {
+  padding-bottom: 8px;
+}
