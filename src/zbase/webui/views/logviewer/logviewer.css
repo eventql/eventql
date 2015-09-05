@@ -1,6 +1,9 @@
+.zbase_logviewer {
+  background: #fff;
+}
+
 .zbase_logviewer .logviewer_pane {
   margin-top: 20px;
-  margin-bottom: 20px;
 }
 
 .zbase_logviewer .logviewer_pane .result_pane {
