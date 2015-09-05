@@ -46,6 +46,10 @@ ZBase.registerView((function() {
     if (widget_list) {
       widget_list.destroy();
     }
+
+    if (edit_view) {
+      edit_view.destroy();
+    }
   };
 
   var render = function(doc) {
@@ -89,6 +93,9 @@ ZBase.registerView((function() {
 
   var showReportView = function(doc) {
     //showLoader?
+    if (edit_view) {
+      edit_view.destroy();
+    }
     var viewport = $(".zbase_report_widgets");
     viewport.innerHTML = "";
 
@@ -105,21 +112,21 @@ ZBase.registerView((function() {
         "views/report",
         "zbase_report_widget_editor_main_tpl");
 
-    var editor_obj = ReportWidgetFactory.getWidgetEditor(
+    edit_view = ReportWidgetFactory.getWidgetEditor(
         container,
         conf);
 
-    showEditView(editor_obj);
+    showEditView();
 
     $.onClick($("button.save", container), function() {
-      editor_obj.onSave(function(config) {
+      edit_view.onSave(function(config) {
         widget_list.updateWidgetConfig(widget_id, config);
         showReportView();
       });
     });
 
     $.onClick($("button.cancel", container), function() {
-      editor_obj.onCancel(function(config) {
+      edit_view.onCancel(function(config) {
         showReportView();
       });
     });
@@ -127,10 +134,11 @@ ZBase.registerView((function() {
     $.replaceContent($(".zbase_report_widget_editor"), container);
   };
 
-  var showEditView = function(editor_obj) {
+  var showEditView = function() {
     $(".zbase_report_widgets").classList.add("hidden");
     $(".zbase_report_widget_editor").classList.remove("hidden");
-    editor_obj.render();
+
+    edit_view.render();
   };
 
   var findRequiredWidgets = function(doc) {
