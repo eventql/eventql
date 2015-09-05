@@ -1,5 +1,10 @@
 .zbase_login {
   text-align: center;
+  padding-top: 100px;
+  width: 100%;
+  height: 100%;
+  background: #fff;
+  padding-bottom: 100%;
 }
 
 .zbase_login img {
