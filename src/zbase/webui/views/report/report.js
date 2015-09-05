@@ -64,6 +64,11 @@ ZBase.registerView((function() {
     setReportName(doc.name);
     setReportDescription(doc.content.description);
 
+    widget_list = WidgetList(doc.content.widgets);
+    widget_list.onWidgetEdit(function(widget_id) {
+      showWidgetEditor(widget_id);
+    });
+
     // handle display mode
     $(".zbase_report z-dropdown.mode").addEventListener("change", function() {
       widget_list.setEditable(this.getValue() == "editing");
@@ -76,11 +81,6 @@ ZBase.registerView((function() {
       initDescriptionEditing();
       initShareDocModal(doc.uuid);
     }
-
-    widget_list = WidgetList(doc.content.widgets);
-    widget_list.onWidgetEdit(function(widget_id) {
-      showWidgetEditor(widget_id);
-    });
 
     showReportView();
 
