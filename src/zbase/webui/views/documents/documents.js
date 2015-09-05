@@ -17,6 +17,9 @@ ZBase.registerView((function() {
         "views/documents",
         "zbase_documents_main_tpl");
 
+    var menu = DocsMenu();
+    menu.render($(".docs_sidebar", page));
+
     renderDocumentsList(
         page.querySelector(".zbase_documents tbody"),
         documents);
