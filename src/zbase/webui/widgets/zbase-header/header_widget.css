@@ -19,7 +19,7 @@
 }
 
 .zbase_header ul li a.active {
-  color: #37485C;
+  color: #1c99d6;
   font-weight: 500;
 }
 
@@ -31,3 +31,18 @@
   float: right;
 }
 
+.zbase_header .main_menu li:first-child {
+  border-left: 1px solid #eee;
+  margin-left: 8px;
+}
+
+.zbase_header .main_menu li {
+  border-right: 1px solid #eee;
+  padding: 0 8px 0 6px;
+  vertical-align: middle;
+}
+
+.zbase_header .main_menu li i {
+  margin-right: 3px;
+  vertical-align: 0;
+}
