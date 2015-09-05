@@ -197,7 +197,7 @@
 }
 
 .zbase_logviewer .loading_bar {
-  background-color: #f0f6f8;
+  background-color: #f2f8fa;
   border-bottom: 1px solid #c9d0d4;
   box-shadow: 0 1px 1px rgba(0,0,0,0.1);
   padding: 10px 20px;
@@ -369,7 +369,7 @@
 }
 
 .zbase_logviewer .go_to_recent .box {
-  background-color: #f0f6f8;
+  background-color: #f2f8fa;
   border-radius: 3px;
   margin-top: 3px;
   height: 31px;

@@ -26,7 +26,7 @@
   width: 340px;
   margin: auto;
   margin-top: 30px;
-  background-color: #f0f6f8;
+  background-color: #f2f8fa;
   margin-bottom: 20px;
 }
 
@@ -63,7 +63,7 @@
 }
 
 .zbase_login ul.namespace_list li:hover {
-  background-color: #f0f6f8;
+  background-color: #f2f8fa;
   margin-top: -1px;
   border-top: 1px solid #c9d0d4;
   border-bottom: 1px solid #c9d0d4;
