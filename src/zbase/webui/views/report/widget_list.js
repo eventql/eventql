@@ -17,7 +17,7 @@ var WidgetList = function(elem, widget_definitions) {
           conf);
 
       $.onClick($(".zbase_report_widget_header .edit", container), function() {
-        triggerWidgetEdit();
+        triggerWidgetEdit(conf.uuid);
       });
 
       elem.appendChild(container);
@@ -44,7 +44,13 @@ var WidgetList = function(elem, widget_definitions) {
   };
 
   var getWidgetConfig = function(widget_id) {
-    
+    for (var i = 0; i < widgets.length; i++) {
+      if (widgets[i].conf.uuid == widget_id) {
+        return widgets[i].conf;
+      }
+    }
+
+    return null;
   };
 
   //var setJSON = function(new_widgets) {
@@ -81,9 +87,9 @@ var WidgetList = function(elem, widget_definitions) {
     widget_edit_callbacks.push(callback);
   };
 
-  var triggerWidgetEdit = function() {
+  var triggerWidgetEdit = function(widget_id) {
     widget_edit_callbacks.forEach(function(callback) {
-      callback();
+      callback(widget_id);
     });
   };
 
@@ -92,6 +98,7 @@ var WidgetList = function(elem, widget_definitions) {
   return {
     render: render,
     getJSON: getJSON,
+    getWidgetConfig: getWidgetConfig,
     setEditable: setEditable,
     onWidgetEdit: onWidgetEdit,
     destroy: destroy
