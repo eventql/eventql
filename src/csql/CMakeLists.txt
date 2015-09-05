@@ -25,6 +25,7 @@ add_library(chartsql STATIC
     expressions/boolean.cc
     expressions/datetime.cc
     expressions/math.cc
+    expressions/internal.cc
     parser/astnode.cc
     parser/astutil.cc
     parser/parser.cc

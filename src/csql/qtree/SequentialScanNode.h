@@ -39,11 +39,11 @@ namespace csql {
  *        one output row
  *
  */
-enum class AggregationStrategy {
-  NO_AGGREGATION,
-  AGGREGATE_WITHIN_RECORD_FLAT,
-  AGGREGATE_WITHIN_RECORD_DEEP,
-  AGGREGATE_ALL
+enum class AggregationStrategy : uint8_t {
+  NO_AGGREGATION = 0,
+  AGGREGATE_WITHIN_RECORD_FLAT = 1,
+  AGGREGATE_WITHIN_RECORD_DEEP = 2,
+  AGGREGATE_ALL = 3
 };
 
 class SequentialScanNode : public TableExpressionNode {

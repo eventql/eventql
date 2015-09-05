@@ -253,7 +253,6 @@ TEST_CASE(RuntimeTest, TestMultiLevelNestedCSTableAggregate, [] () {
   }
 });
 
-
 TEST_CASE(RuntimeTest, TestMultiLevelNestedCSTableAggrgateWithGroup, [] () {
   auto runtime = Runtime::getDefaultRuntime();
 
@@ -319,6 +318,35 @@ TEST_CASE(RuntimeTest, TestMultiLevelNestedCSTableAggrgateWithGroup, [] () {
     EXPECT_EQ(result.getRow(6)[0], "6");
     EXPECT_EQ(result.getRow(6)[1], "688");
     EXPECT_EQ(result.getRow(6)[2], "2");
+  }
+});
+
+TEST_CASE(RuntimeTest, TestMultiLevelNestedCSTableAggrgateWithMultiLevelGroup, [] () {
+  auto runtime = Runtime::getDefaultRuntime();
+
+  auto estrat = mkRef(new DefaultExecutionStrategy());
+  estrat->addTableProvider(
+      new CSTableScanProvider(
+          "testtable",
+          "src/csql/testdata/testtbl.cst"));
+
+  {
+    ResultList result;
+    auto query = R"(
+        select
+          FROM_TIMESTAMP(TRUNCATE(time / 86400000000) *  86400),
+          sum(if(event.cart_items.checkout_step = 1, event.cart_items.price_cents, 0)) / 100.0 as gmv_eur,
+          sum(if(event.cart_items.checkout_step = 1, event.cart_items.price_cents, 0)) / sum(count(event.page_view.item_id) WITHIN RECORD) as fu
+          from testtable
+          group by TRUNCATE(time / 86400000000)
+          order by time desc;)";
+
+    auto qplan = runtime->buildQueryPlan(query, estrat.get());
+    runtime->executeStatement(qplan->buildStatement(0), &result);
+    EXPECT_EQ(result.getNumColumns(), 3);
+    EXPECT_EQ(result.getNumRows(), 1);
+    EXPECT_EQ(result.getRow(0)[0], "2015-07-28 00:00:00");
+    EXPECT_EQ(result.getRow(0)[1], "28.150000");
   }
 });
 
