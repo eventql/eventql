@@ -1,0 +1,12 @@
+.zbase_report_sql_result_pane table.z-table thead th:first-child,
+.zbase_report_sql_result_pane table.z-table tbody td:first-child {
+  padding-left: 20px;
+}
+
+.zbase_report_sql_result_pane table.z-table {
+  border-top: 1px solid #e6e8e9;
+  border-bottom: 1px solid #e6e8e9;
+  font-size: 13px;
+}
+
+
