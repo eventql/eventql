@@ -22,11 +22,8 @@ var ReportWidgetFactory = (function() {
   };
 
 
-  var renderWidgetEditor = function(type, container, conf) {
-    var widget_editor = widgets[type].editor(container, conf);
-    widget_editor.render();
-
-    return widget_editor;
+  var getWidgetEditor = function(container, conf) {
+    return widgets[conf.type].editor(container, conf);
   };
 
 
@@ -34,6 +31,6 @@ var ReportWidgetFactory = (function() {
     loadWidgets: loadWidgets,
     registerWidget: register,
     renderWidgetDisplay: renderWidgetDisplay,
-    renderWidgetEditor: renderWidgetEditor
+    getWidgetEditor: getWidgetEditor
   };
 })();
