@@ -10,9 +10,17 @@ var ReportWidgetFactory = (function() {
     ZBase.loadModules(widget_modules, on_loaded);
   };
 
-  var register = function(widget) {
-
+  var register = function(widget_type, display, editor) {
+    widgets[widget_type] = {display: display, editor: editor};
   };
+
+  var renderWidgetDisplay = function(type, container, conf) {
+    var widget_display = widgets[type].display(container, conf);
+    widget_display.render();
+
+    return widget_display;
+  };
+
 
   var get = function() {
 
@@ -21,6 +29,7 @@ var ReportWidgetFactory = (function() {
   return {
     loadWidgets: loadWidgets,
     registerWidget: register,
-    getWidget: get
+    getWidget: get,
+    renderWidgetDisplay: renderWidgetDisplay
   };
 })();
