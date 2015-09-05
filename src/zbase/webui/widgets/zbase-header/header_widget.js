@@ -53,6 +53,15 @@ var HeaderWidget = (function() {
     elem.querySelector(".namespace_info").innerHTML = conf.current_user.namespace;
     elem.classList.remove("hidden");
 
+    document.addEventListener("click", function(event) {
+      if ((function getParentWithClass(el, className) {
+        while ((el = el.parentElement) && !el.classList.contains(className));
+        return el;
+      })(event.target, "dropdown")) return;
+
+      elem.querySelector(".dropdown").classList.remove("open");
+    });
+
     $.handleLinks(elem);
   };
 
