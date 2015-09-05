@@ -25,6 +25,7 @@ ZBase.registerView((function() {
           doc.content = JSON.parse(doc.content);
         }
 
+        // load required widgets
         var required_widgets = findRequiredWidgets(doc);
         ReportWidgetFactory.loadWidgets(required_widgets, function() {
           renderReport(doc);
@@ -48,9 +49,8 @@ ZBase.registerView((function() {
     setReportName(doc.name);
     setReportDescription(doc.content.description);
 
-    var mode_dropdown = $(".zbase_report z-dropdown.mode");
-    mode_dropdown.classList.remove("hidden");
-    mode_dropdown.addEventListener("change", function() {
+    // handle display mode
+    $(".zbase_report z-dropdown.mode").addEventListener("change", function() {
       widget_list.setEditable(this.getValue() == "editing");
     }, false);
 
@@ -71,9 +71,7 @@ ZBase.registerView((function() {
     //    "/api/v1/documents/" + doc_id,
     //    $(".zbase_report_infobar"));
 
-    //setEditable(true);
 
-    //init edit actions
     //initContentEditing();
   };
 
