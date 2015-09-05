@@ -48,9 +48,11 @@ var WidgetList = function(elem, widget_definitions) {
   var setEditable = function(is_editable) {
     for (var i = 0; i < widgets.length; i++) {
       if (is_editable) {
-        widgets[i].container.classList.add("editable");
+        //FIXME
+        //widgets[i].container.classList.add("editable");
       } else {
-        widgets[i].container.classList.remove("editable");
+        //FIXME
+        //widgets[i].container.classList.remove("editable");
       }
     }
   };
