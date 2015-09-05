@@ -43,8 +43,12 @@ var WidgetList = function(elem, widget_definitions) {
   };
 
   var getJSON = function() {
-    //foreach widget getJson
-    //return widgets;
+    var json = [];
+    widgets.forEach(function(widget) {
+      json.push(widget.conf);
+    });
+
+    return json;
   };
 
   var getWidgetConfig = function(widget_id) {
