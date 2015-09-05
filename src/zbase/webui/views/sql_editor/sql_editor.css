@@ -36,6 +36,7 @@
 .zbase_sql_editor .zbase_sql_editor_content {
   border-left: 1px solid #ddd;
   border-right: 1px solid #ddd;
+  background: #fff;
 }
 
 .zbase_sql_editor .zbase_sql_editor_content.with_sidebar {
@@ -274,8 +275,14 @@
   display: none;
 }
 
+.zbase_sql_editor zbase-breadcrumbs {
+  font-size: 12px;
+  padding: 15px 20px 0 20px;
+}
+
 .zbase_sql_editor .zbase_sql_editor_title {
   padding: 0 20px;
+  background: #fff;
 }
 
 .zbase_sql_editor .zbase_sql_editor_title .z-button {

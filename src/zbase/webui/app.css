@@ -320,10 +320,11 @@ template {
  * zbase_page_title
  */
 .zbase_page_title {
-  background-color: #f0f6f8;
+  background-color: #f9f9f9;
   border-bottom: 1px solid #c9d0d4;
   box-shadow: 0 1px 1px rgba(0,0,0,0.1);
   height: 54px;
+  position: relative;
 }
 
 .zbase_page_title > div {
