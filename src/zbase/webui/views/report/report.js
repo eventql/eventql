@@ -75,7 +75,6 @@ ZBase.registerView((function() {
 
     widget_list = WidgetList($(".zbase_report_widgets"), doc.content.widgets);
     widget_list.onWidgetEdit(function(widget_id) {
-      console.log("edit widget");
       showWidgetEditor(widget_id);
     });
 
@@ -86,42 +85,51 @@ ZBase.registerView((function() {
     //    getDocument,
     //    "/api/v1/documents/" + doc_id,
     //    $(".zbase_report_infobar"));
-
-    //setEditable(true);
-
-    //init edit actions
-    //initContentEditing();
   };
 
   var showReportView = function(doc) {
+    //showLoader?
+    var viewport = $(".zbase_report_widgets");
+    viewport.innerHTML = "";
 
-    //clear viewport
     widget_list.render();
     widget_list.setEditable(true);
+
+    $(".zbase_report_widget_editor").classList.add("hidden");
+    viewport.classList.remove("hidden");
   };
 
   var showWidgetEditor = function(widget_id) {
-    //widget_list.getWidgetConfig(widget_id);
-    //holt sich fuer aktuellese widget json aus widget list
+    var conf = widget_list.getWidgetConfig(widget_id);
+    var container = $.getTemplate(
+        "views/report",
+        "zbase_report_widget_editor_main_tpl");
 
-    //holt sich von widet factory edit view object
-    //widget_factory.
+    var editor_obj = ReportWidgetFactory.getWidgetEditor(
+        container,
+        conf);
 
-    //view_object.onSave(function(config) {
-      //widget_list.updateWidgetConfig(widget_id, config)
-    //});
+    showEditView(editor_obj);
 
-    //view_object.onCancel(function() {
-      //showReportView
-    //});
+    $.onClick($("button.save", container), function() {
+      editor_obj.onSave(function(config) {
+        console.log("update widget config", config);
+      });
+    });
 
+    $.onClick($("button.cancel", container), function() {
+      editor_obj.onCancel(function(config) {
+        showReportView();
+      });
+    });
 
-    //call showEditView(view_object)
+    $.replaceContent($(".zbase_report_widget_editor"), container);
   };
 
-  var showEditView = function(view) {
-    //clear viewport content
-    //view.render
+  var showEditView = function(editor_obj) {
+    $(".zbase_report_widgets").classList.add("hidden");
+    $(".zbase_report_widget_editor").classList.remove("hidden");
+    editor_obj.render();
   };
 
   var findRequiredWidgets = function(doc) {
