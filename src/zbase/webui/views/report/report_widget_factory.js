@@ -22,8 +22,8 @@ var ReportWidgetFactory = (function() {
   };
 
 
-  var getWidgetEditor = function(container, conf) {
-    return widgets[conf.type].editor(container, conf);
+  var getWidgetEditor = function(conf) {
+    return widgets[conf.type].editor(conf);
   };
 
 
