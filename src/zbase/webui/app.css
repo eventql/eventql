@@ -395,7 +395,7 @@ h2.pagetitle.editable {
 
 h2.pagetitle.editable:hover {
   cursor: pointer;
-  background: #f0f6f8;
+  background: #f2f8fa;
 }
 
 h2.pagetitle i.sep:after {
@@ -546,7 +546,7 @@ z-menu.zbase_default_menu z-menu-section z-menu-item a {
 }
 
 z-menu.zbase_default_menu z-menu-item[data-active] {
-  background: #f0f6f8;
+  background: #f2f8fa;
   box-shadow: none;
 }
 

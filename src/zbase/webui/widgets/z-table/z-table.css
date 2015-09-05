@@ -381,6 +381,6 @@ table.z-table tbody tr:first-child td {
   * zbase_clickable_table
   */
 table.z-table.zbase_clickable_table tr:hover td {
-  background: #f0f6f8;
+  background: #f2f8fa;
   cursor: pointer;
 }

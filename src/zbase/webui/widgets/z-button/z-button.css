@@ -215,7 +215,7 @@ z-button[data-size='big']  {
 }
 
 .z-button.secondary:hover {
-  background: #f0f6f8;
+  background: #f2f8fa;
   box-shadow: 0px 0px 0px 1px rgba(39, 41, 43, 0.15) inset, 0px 0px 0px 0px rgba(39, 41, 43, 0.15) inset;
 }
 

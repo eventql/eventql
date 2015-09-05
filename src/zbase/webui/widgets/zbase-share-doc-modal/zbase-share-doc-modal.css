@@ -18,7 +18,7 @@ z-modal.zbase_share_doc .z-modal-content {
 .zbase_share_doc .access_selection:hover,
 .zbase_share_doc .access_selection[data-selected] {
   cursor: pointer;
-  background: #f0f6f8;
+  background: #f2f8fa;
 }
 
 .zbase_share_doc .access_selection .inner:before {
@@ -71,7 +71,7 @@ z-modal.zbase_share_doc .z-modal-content {
 .zbase_share_doc .zbase_share_doc_link:focus {
   border: none;
   font: 12px monospace;
-  background: #f0f6f8;
+  background: #f2f8fa;
   line-height: 22px;
   padding: 8px 16px;
 }
