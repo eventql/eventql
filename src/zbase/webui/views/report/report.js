@@ -279,17 +279,17 @@ ZBase.registerView((function() {
   //  setReportDescription();
   //};
 
-  //var getDocument = function() {
-  //  var content = {
-  //    description: $(".zbase_report_pane .report_description").innerText,
-  //    widgets: widget_list.getJSON()
-  //  };
+  var getDocument = function() {
+    var content = {
+      description: $(".zbase_report_pane .report_description").innerText,
+      widgets: widget_list.getJSON()
+    };
 
-  //  return {
-  //    content: JSON.stringify(content),
-  //    name: $(".zbase_report_pane input.report_name").value
-  //  };
-  //};
+    return {
+      content: JSON.stringify(content),
+      name: $(".zbase_report_pane input.report_name").value
+    };
+  };
 
   
   return {
