@@ -1,5 +1,6 @@
 ZBase.registerView((function() {
   var widget_list = null;
+  var edit_view = null;
 
   // REMOVEME
   var goToURL = function(path) {
@@ -28,7 +29,7 @@ ZBase.registerView((function() {
         // load required widgets
         var required_widgets = findRequiredWidgets(doc);
         ReportWidgetFactory.loadWidgets(required_widgets, function() {
-          renderReport(doc);
+          render(doc);
           $.hideLoader();
         });
       } else {
@@ -37,8 +38,18 @@ ZBase.registerView((function() {
     });
   };
 
-  var renderReport = function(doc) {
-    readonly = !doc.is_writable;
+  var destroy = function() {
+    //if (docsync) {
+    //  docsync.close();
+    //}
+
+    if (widget_list) {
+      widget_list.destroy();
+    }
+  };
+
+  var render = function(doc) {
+    var readonly = !doc.is_writable;
     var page = $.getTemplate(
         "views/report",
         "zbase_report_main_tpl");
@@ -63,7 +74,12 @@ ZBase.registerView((function() {
     }
 
     widget_list = WidgetList($(".zbase_report_widgets"), doc.content.widgets);
-    widget_list.setEditable(true);
+    widget_list.onWidgetEdit(function(widget_id) {
+      console.log("edit widget");
+      showWidgetEditor(widget_id);
+    });
+
+    showReportView();
 
     //// setup docsync
     //docsync = DocSync(
@@ -71,8 +87,41 @@ ZBase.registerView((function() {
     //    "/api/v1/documents/" + doc_id,
     //    $(".zbase_report_infobar"));
 
+    //setEditable(true);
 
+    //init edit actions
     //initContentEditing();
+  };
+
+  var showReportView = function(doc) {
+
+    //clear viewport
+    //widget_list.render();
+    widget_list.setEditable(true);
+  };
+
+  var showWidgetEditor = function(widget_id) {
+    //widget_list.getWidgetConfig(widget_id);
+    //holt sich fuer aktuellese widget json aus widget list
+
+    //holt sich von widet factory edit view object
+    //widget_factory.
+
+    //view_object.onSave(function(config) {
+      //widget_list.updateWidgetConfig(widget_id, config)
+    //});
+
+    //view_object.onCancel(function() {
+      //showReportView
+    //});
+
+
+    //call showEditView(view_object)
+  };
+
+  var showEditView = function(view) {
+    //clear viewport content
+    //view.render
   };
 
   var findRequiredWidgets = function(doc) {
@@ -87,7 +136,7 @@ ZBase.registerView((function() {
     }
 
     return widgets;
-  }
+  };
 
   //var setEditable = function(is_editable) {
   //  widget_list.setEditable(is_editable);
@@ -190,6 +239,8 @@ ZBase.registerView((function() {
   var setReportDescription = function(description) {
     var escaped_description = $.escapeHTML(description);
 
+    //FIXME
+    var readonly = false;
     if (!readonly && escaped_description.length == 0) {
       // display edit link
       $(".zbase_report_pane .sidebar_content .link.add_description")
@@ -231,16 +282,7 @@ ZBase.registerView((function() {
   //  };
   //};
 
-  var destroy = function() {
-    //if (docsync) {
-    //  docsync.close();
-    //}
-
-    if (widget_list) {
-      widget_list.destroy();
-    }
-  };
-
+  
   return {
     name: "report",
     loadView: function(params) { goToURL(params.path); },
