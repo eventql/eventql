@@ -1,4 +1,4 @@
-var WidgetList = function(elem, widget_definitions) {
+var WidgetList = function(widget_definitions) {
   var widgets = [];
   var widget_edit_callbacks = [];
 
@@ -11,7 +11,7 @@ var WidgetList = function(elem, widget_definitions) {
   });
 
 
-  var render = function() {
+  var render = function(elem) {
     widgets.forEach(function(widget) {
       if (widget.display_obj) {
         widget.display_obj.destroy();

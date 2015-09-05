@@ -73,7 +73,7 @@ ZBase.registerView((function() {
       initShareDocModal(doc.uuid);
     }
 
-    widget_list = WidgetList($(".zbase_report_widgets"), doc.content.widgets);
+    widget_list = WidgetList(doc.content.widgets);
     widget_list.onWidgetEdit(function(widget_id) {
       showWidgetEditor(widget_id);
     });
@@ -92,7 +92,7 @@ ZBase.registerView((function() {
     var viewport = $(".zbase_report_widgets");
     viewport.innerHTML = "";
 
-    widget_list.render();
+    widget_list.render($(".zbase_report_widgets"));
     widget_list.setEditable(true);
 
     $(".zbase_report_widget_editor").classList.add("hidden");
