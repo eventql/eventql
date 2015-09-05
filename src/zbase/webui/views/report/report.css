@@ -1,3 +1,21 @@
+/** Page Title */
+.zbase_page_title.zbase_report zbase-breadcrumbs {
+  float: left;
+}
+
+.zbase_page_title.zbase_report z-dropdown {
+  float: right;
+  margin-top: 5px;
+}
+
+.zbase_page_title.zbase_report z-dropdown.hidden {
+  display: none;
+}
+
+.zbase_page_title.zbase_report z-dropdown i {
+  margin-right: 3px;
+}
+
 .zbase_report_pane {
   display: table;
   table-layout: fixed;
@@ -5,6 +23,7 @@
   min-height: 900px; /* FIXME  firefox ignores min-height*/
 }
 
+/** Sidebar **/
 .zbase_report_pane .zbase_report_sidebar {
   display: table-cell;
   vertical-align: top;
@@ -40,7 +59,7 @@
   display: none;
 }
 
-.zbase_report_pane .editable:hover {
+.zbase_report_pane .zbase_report_sidebar .editable:hover {
   cursor: pointer;
   background: #f2f8fa;
 }
@@ -74,6 +93,7 @@
   display: none;
 }
 
+/** Content **/
 .zbase_report_pane .zbase_report_content {
   display: table-cell;
   vertical-align: top;
@@ -123,6 +143,81 @@
 }
 
 /**
+  * Widget
+  */
+
+.zbase_report_pane .zbase_report_widgets.hidden,
+.zbase_report_pane .zbase_report_widget_editor.hidden {
+  display: none;
+}
+
+.zbase_report_pane .zbase_report_widget {
+  
+}
+
+/**
+  * Widget Header
+  */
+.zbase_report_pane .zbase_report_widget_header {
+  padding: 0 20px;
+  height: 60px;
+  overflow: auto;
+}
+
+.zbase_report_pane .zbase_report_widget_header h2.pagetitle {
+  float: left;
+}
+
+.zbase_report_pane .zbase_report_widget_header button.z-button {
+  margin: 14px 5px 0 0;
+  float: right;
+  font-size: 13px;
+}
+
+.zbase_report_pane .zbase_report_widget_header i.close {
+  float: right;
+  padding: 5px;
+  margin-right: 3px;
+  color: #999;
+}
+
+.zbase_report_pane .zbase_report_widget_header i.close:hover {
+  cursor: pointer;
+  color: #1c99d6;
+}
+
+.zbase_report_pane .zbase_report_widget_header .error_note {
+  float: left;
+  margin: 13px 0 0 15px;
+}
+
+.zbase_report_pane .zbase_report_widgets .zbase_report_widget_edit_actions {
+  float: right;
+  display: none;
+}
+
+.zbase_report_pane .zbase_report_widgets.editable .zbase_report_widget_edit_actions {
+  display: block;
+}
+
+/**
+  * Error Note
+  */
+.zbase_report_pane .error_note {
+  color: #a94442;
+  font-size: 13px;
+  font-weight: 400;
+  background: #fff0f0;
+  box-shadow: 0 1px 1px rgba(0,0,0,0.1);
+  padding: 5px 20px;
+}
+
+.zbase_report_pane .error_note.hidden {
+  display: none;
+}
+
+
+/**
   * Editor
   */
 .zbase_report_pane z-codeeditor {
@@ -151,44 +246,5 @@
   display: none;
 }
 
-.zbase_report_pane .zbase_report_content .edit_content_pane {
-  overflow: auto;
-}
 
-.zbase_report_pane .zbase_report_content .edit_content_pane h2.pagetitle {
-  margin-left: 20px;
-  float: left;
-}
 
-.zbase_report_pane .zbase_report_content .edit_content_pane .error_note {
-  color: #a94442;
-  font-size: 13px;
-  font-weight: 400;
-  float: left;
-  margin: 13px 0 0 15px;
-  background: #fff0f0;
-  box-shadow: 0 1px 1px rgba(0,0,0,0.1);
-  padding: 5px 20px;
-}
-
-.zbase_report_pane .zbase_report_content .edit_content_pane .error_note.hidden {
-  display: none;
-}
-
-.zbase_report_pane .zbase_report_content .edit_content_pane button.z-button {
-  margin: 14px 20px 0 0;
-  float: right;
-  font-size: 13px;
-}
-
-.zbase_report_pane .zbase_report_content .edit_content_pane i.close {
-  float: right;
-  padding: 5px;
-  margin-right: 3px;
-  color: #999;
-}
-
-.zbase_report_pane .zbase_report_content .edit_content_pane i.close:hover {
-  cursor: pointer;
-  color: #1c99d6;
-}
