@@ -107,29 +107,22 @@ ZBase.registerView((function() {
     var conf = widget_list.getWidgetConfig(widget_id);
     edit_view = ReportWidgetFactory.getWidgetEditor(conf);
 
-    /*$.onClick($("button.save", container), function() {
-      edit_view.onSave(function(config) {
-        widget_list.updateWidgetConfig(widget_id, config);
-        showReportView();
-      });
+    edit_view.onSave(function(config) {
+      widget_list.updateWidgetConfig(widget_id, config);
+      showReportView();
     });
 
-    $.onClick($("button.cancel", container), function() {
-      edit_view.onCancel(function(config) {
-        showReportView();
-      });
-    });*/
+    edit_view.onCancel(function() {
+      showReportView();
+    });
 
     showEditView();
   };
 
   var showEditView = function() {
-    var container = $.getTemplate(
-        "views/report",
-        "zbase_report_widget_editor_main_tpl");
-
-    edit_view.render(container);
-    $.replaceContent($(".zbase_report_viewport"), container);
+    var viewport = $(".zbase_report_viewport");
+    viewport.innerHTML = "";
+    edit_view.render(viewport);
   };
 
   var findRequiredWidgets = function(doc) {

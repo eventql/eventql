@@ -124,6 +124,9 @@ var ReportSQLWidgetDisplay = function(elem, conf) {
 
 var ReportSQLWidgetEditor = function(conf) {
   var editor;
+  var save_callbacks = [];
+  var cancel_callbacks = [];
+
   var render = function(elem) {
     var tpl = $.getTemplate(
       "views/report",
@@ -133,16 +136,36 @@ var ReportSQLWidgetEditor = function(conf) {
     editor = $("z-codeeditor", tpl);
     editor.setValue(conf.query);
 
+    $.onClick($("button.save", tpl), function() {
+      conf.query = editor.getValue();
+      triggerSave();
+    });
+
+    $.onClick($("button.cancel", tpl), function() {
+      triggerCancel();
+    });
+
     elem.appendChild(tpl);
   };
 
   var onSave = function(callback) {
-    conf.query = editor.getValue();
-    callback(conf);
+    save_callbacks.push(callback);
   };
 
   var onCancel = function(callback) {
-    callback();
+    cancel_callbacks.push(callback);
+  };
+
+  var triggerSave = function() {
+    save_callbacks.forEach(function(callback) {
+      callback(conf);
+    });
+  };
+
+  var triggerCancel = function() {
+    cancel_callbacks.forEach(function(callback) {
+      callback();
+    });
   };
 
   return {
