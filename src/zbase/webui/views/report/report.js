@@ -46,6 +46,7 @@ ZBase.registerView((function() {
     $.replaceViewport(page);
 
     setReportName(doc.name);
+    setReportDescription(doc.content.description);
 
     var mode_dropdown = $(".zbase_report z-dropdown.mode");
     mode_dropdown.classList.remove("hidden");
@@ -57,7 +58,7 @@ ZBase.registerView((function() {
       $(".readonly_hint").classList.remove("hidden");
     } else {
       initNameEditing();
-      //initDescriptionEditing();
+      initDescriptionEditing();
       initShareDocModal(doc.uuid);
     }
 
@@ -144,8 +145,7 @@ ZBase.registerView((function() {
     $.onClick($(".zbase_report_pane .link.add_description"), showModal);
 
     $.onClick($("button.submit", modal), function() {
-      description = $.escapeHTML(textarea.value);
-      updateReportContent();
+      setReportDescription($.escapeHTML(textarea.value));
       docsync.saveDocument();
       modal.close();
     });
@@ -189,7 +189,7 @@ ZBase.registerView((function() {
     $(".zbase_report_pane z-modal input.report_name").value = escaped_name;
   };
 
-  var setReportDescription = function() {
+  var setReportDescription = function(description) {
     var escaped_description = $.escapeHTML(description);
 
     if (!readonly && escaped_description.length == 0) {
