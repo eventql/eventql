@@ -2,9 +2,11 @@ var WidgetList = function(elem, widget_definitions) {
   var widgets = [];
 
   widget_definitions.forEach(function(conf) {
-    var container = $.getTemplate(
-          "views/report",
-          "zbase_report_widget_main_tpl");
+    var container = $(
+          ".zbase_report_widget", 
+          $.getTemplate(
+            "views/report",
+            "zbase_report_widget_main_tpl"));
 
     var display_obj = ReportWidgetFactory.renderWidgetDisplay(
         conf.type,
@@ -48,11 +50,9 @@ var WidgetList = function(elem, widget_definitions) {
   var setEditable = function(is_editable) {
     for (var i = 0; i < widgets.length; i++) {
       if (is_editable) {
-        //FIXME
-        //widgets[i].container.classList.add("editable");
+        widgets[i].container.classList.add("editable");
       } else {
-        //FIXME
-        //widgets[i].container.classList.remove("editable");
+        widgets[i].container.classList.remove("editable");
       }
     }
   };
