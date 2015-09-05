@@ -74,6 +74,9 @@ void installDefaultSymbols(SymbolTable* rt) {
 
   rt->registerFunction("round", PureFunction(&expressions::roundExpr));
   rt->registerFunction("truncate", PureFunction(&expressions::truncateExpr));
+
+  /* expressions/internal.h */
+  rt->registerFunction("repeat_value", expressions::kRepeatValueExpr);
 }
 
 } // namespace csql
