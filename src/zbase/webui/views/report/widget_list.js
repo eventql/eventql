@@ -58,7 +58,13 @@ var WidgetList = function(elem, widget_definitions) {
   };
 
   var updateWidgetConfig = function(widget_id, conf) {
-    //for (var i = 0; i < widgets.length 
+    for (var i = 0; i < widgets.length; i++) {
+      if (widgets[i].conf.uuid == widget_id) {
+        widgets[i].conf = conf;
+        return;
+      }
+    }
+    //handle error?
   };
 
   //var setJSON = function(new_widgets) {
