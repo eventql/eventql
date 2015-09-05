@@ -11,5 +11,18 @@
 </template>
 
 <template id="zbase_report_sql_widget_editor_main_tpl">
-  <z-codeeditor data-language="text/x-chartsql" data-resizable='vertical' style="height: 250px;"></z-codeeditor>
+  <div class="zbase_report_widget">
+    <div class="zbase_report_widget_header">
+      <button class="z-button primary save">
+        <i class="fa fa-floppy-o"></i>&nbsp;Save
+      </button>
+      <button class="z-button secondary cancel">
+        <i class="fa fa-arrow-left"></i>&nbsp;Back
+      </button>
+
+      <h2 class="pagetitle widget_title">Edit Report SQL Query</h2>
+    </div>
+
+    <z-codeeditor data-language="text/x-chartsql" data-resizable='vertical' style="height: 250px;"></z-codeeditor>
+  </div>
 </template>
