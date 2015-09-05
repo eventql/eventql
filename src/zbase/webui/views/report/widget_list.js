@@ -1,29 +1,34 @@
 var WidgetList = function(elem, widget_definitions) {
   var widgets = [];
+  var widget_edit_callbacks = [];
 
-  widget_definitions.forEach(function(conf) {
-    var container = $(
-          ".zbase_report_widget", 
-          $.getTemplate(
-            "views/report",
-            "zbase_report_widget_main_tpl"));
 
-    var display_obj = ReportWidgetFactory.renderWidgetDisplay(
-        conf.type,
-        container,
-        conf);
+  var render = function() {
+    widget_definitions.forEach(function(conf) {
+      var container = $(
+            ".zbase_report_widget", 
+            $.getTemplate(
+              "views/report",
+              "zbase_report_widget_main_tpl"));
 
-    //$.onClick($(".zbase_report_widget_header .edit", elem), function() {
-    //  renderEditView(widget);
-    //});
+      var display_obj = ReportWidgetFactory.renderWidgetDisplay(
+          conf.type,
+          container,
+          conf);
 
-    elem.appendChild(container);
+      $.onClick($(".zbase_report_widget_header .edit", container), function() {
+        triggerWidgetEdit();
+      });
 
-    widgets.push({
-      container: container,
-      display_obj: display_obj
+      elem.appendChild(container);
+
+      widgets.push({
+        conf: conf,
+        container: container,
+        display_obj: display_obj
+      });
     });
-  });
+  };
 
   var destroy = function() {
     for (var i = 0; i < widgets.length; i++) {
@@ -36,6 +41,10 @@ var WidgetList = function(elem, widget_definitions) {
   var getJSON = function() {
     //foreach widget getJson
     //return widgets;
+  };
+
+  var getWidgetConfig = function(widget_id) {
+    
   };
 
   //var setJSON = function(new_widgets) {
@@ -68,11 +77,23 @@ var WidgetList = function(elem, widget_definitions) {
   //  view.render($(".zbase_report_widget_pane", tpl));
   //  pane.appendChild(tpl);
   //};
+  var onWidgetEdit = function(callback) {
+    widget_edit_callbacks.push(callback);
+  };
 
+  var triggerWidgetEdit = function() {
+    widget_edit_callbacks.forEach(function(callback) {
+      callback();
+    });
+  };
+
+  //unrender
 
   return {
+    render: render,
     getJSON: getJSON,
     setEditable: setEditable,
+    onWidgetEdit: onWidgetEdit,
     destroy: destroy
   }
 };
