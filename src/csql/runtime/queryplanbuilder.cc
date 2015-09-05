@@ -409,6 +409,8 @@ void QueryPlanBuilder::expandColumns(
         column_name->setToken(new Token(Token::T_IDENTIFIER, column.column_name));
         derived_col->appendChild(derived_table_name);
         derived_table_name->appendChild(column_name);
+        auto column_alias = derived_col->appendChild(ASTNode::T_COLUMN_ALIAS);
+        column_alias->setToken(new Token(Token::T_IDENTIFIER, column.column_name));
         select_list->appendChild(derived_col);
       }
 

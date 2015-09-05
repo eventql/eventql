@@ -68,6 +68,7 @@ String ASTUtil::columnNameForExpression(ASTNode* expr) {
       return expr->getToken()->getString();
 
     case ASTNode::T_COLUMN_NAME:
+    case ASTNode::T_TABLE_NAME:
     case ASTNode::T_RESOLVED_COLUMN: {
       auto str = expr->getToken()->getString();
       for (const auto& c : expr->getChildren()) {

@@ -500,3 +500,24 @@ TEST_CASE(RuntimeTest, TestTruncateExpr, [] () {
     EXPECT_EQ(v.toString(), "23");
   }
 });
+
+TEST_CASE(RuntimeTest, TestWildcardSelect, [] () {
+  auto runtime = Runtime::getDefaultRuntime();
+
+  auto estrat = mkRef(new DefaultExecutionStrategy());
+  estrat->addTableProvider(
+      new CSTableScanProvider(
+          "testtable",
+          "src/csql/testdata/testtbl.cst"));
+
+  {
+    ResultList result;
+    auto query = R"(select * from testtable order by time desc limit 1;)";
+    auto qplan = runtime->buildQueryPlan(query, estrat.get());
+    runtime->executeStatement(qplan->buildStatement(0), &result);
+    EXPECT_EQ(result.getNumColumns(), 63);
+    EXPECT_EQ(result.getColumns()[0], "attr.ab_test_group");
+    EXPECT_EQ(result.getColumns()[62], "user_id");
+    EXPECT_EQ(result.getNumRows(), 1);
+  }
+});
