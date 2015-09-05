@@ -40,7 +40,6 @@ body{
   -ms-user-select: none;
   -o-user-select: none;
   user-select: none;
-  background: #f9f9f9;
 }
 body, input, textarea, button{ font:16px/24px 'Helvetica Neue', Helvetica, Arial, sans-serif; font-weight:400; }
 h1,h2,h3{ font-weight: normal; }
@@ -104,6 +103,7 @@ template {
   min-height: 100%;
   width: 100%;
   margin-top: 39px;
+  background: #f9f9f9;
 }
 
 #zbase_viewport .zbase_content_pane {
@@ -429,6 +429,7 @@ h2.pagetitle.border_bottom {
   opacity: 0.4;
   width: 100%;
   margin-bottom: 0;
+  background: #f9f9f9;
 }
 
 .zbase_footer a {
