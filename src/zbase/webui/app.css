@@ -103,6 +103,7 @@ template {
   min-height: 100%;
   width: 100%;
   margin-top: 39px;
+  background: #f9f9f9;
 }
 
 #zbase_viewport .zbase_content_pane {
@@ -117,6 +118,11 @@ template {
   #zbase_viewport .zbase_content_pane.fullwidth {
     padding: 0;
   }
+}
+
+.zbase_card {
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(0,0,0,.2);
 }
 
 /**
@@ -416,11 +422,10 @@ h2.pagetitle.border_bottom {
  * zbase_footer
  */
 .zbase_footer {
-  border-top: 1px solid #eee;
   clear: both;
   font-size: 70%;
-  padding: 6px 14px 6px 14px;
-  opacity: 0.8;
+  padding: 6px 20px;
+  opacity: 0.4;
   width: 100%;
   margin-bottom: 0;
 }

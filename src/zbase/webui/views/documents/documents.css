@@ -1,7 +1,5 @@
 .zbase_documents table.z-table {
   font-size: 13px;
-  border-top: 1px solid #ddd;
-  border-bottom: 1px solid #ddd;
 }
 
 .zbase_documents table.z-table thead th {
@@ -31,4 +29,16 @@
   line-height: 34px;
   height: 34px;
   min-width: 133px;
+}
+
+.zbase_documents .docs_sidebar {
+  border-top: 1px solid #ddd;
+  width: 180px;
+  position: absolute;
+}
+
+.zbase_documents .docs_list {
+  margin-left: 180px;
+  border-top: 1px solid #ddd;
+  border-left: 1px solid #ddd;
 }
