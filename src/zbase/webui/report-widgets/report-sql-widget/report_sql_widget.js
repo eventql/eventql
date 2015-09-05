@@ -122,9 +122,9 @@ var ReportSQLWidgetDisplay = function(elem, conf) {
 
 };
 
-var ReportSQLWidgetEditor = function(elem, conf) {
+var ReportSQLWidgetEditor = function(conf) {
   var editor;
-  var render = function() {
+  var render = function(elem) {
     var tpl = $.getTemplate(
       "views/report",
       "zbase_report_sql_widget_editor_main_tpl");

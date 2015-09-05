@@ -105,17 +105,9 @@ ZBase.registerView((function() {
 
   var showWidgetEditor = function(widget_id) {
     var conf = widget_list.getWidgetConfig(widget_id);
-    var container = $.getTemplate(
-        "views/report",
-        "zbase_report_widget_editor_main_tpl");
+    edit_view = ReportWidgetFactory.getWidgetEditor(conf);
 
-    edit_view = ReportWidgetFactory.getWidgetEditor(
-        container,
-        conf);
-
-    showEditView();
-
-    $.onClick($("button.save", container), function() {
+    /*$.onClick($("button.save", container), function() {
       edit_view.onSave(function(config) {
         widget_list.updateWidgetConfig(widget_id, config);
         showReportView();
@@ -126,15 +118,18 @@ ZBase.registerView((function() {
       edit_view.onCancel(function(config) {
         showReportView();
       });
-    });
+    });*/
 
-    $.replaceContent($(".zbase_report_viewport"), container);
+    showEditView();
   };
 
   var showEditView = function() {
+    var container = $.getTemplate(
+        "views/report",
+        "zbase_report_widget_editor_main_tpl");
 
-
-    edit_view.render();
+    edit_view.render(container);
+    $.replaceContent($(".zbase_report_viewport"), container);
   };
 
   var findRequiredWidgets = function(doc) {
