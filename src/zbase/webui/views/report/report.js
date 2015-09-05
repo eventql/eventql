@@ -51,7 +51,7 @@ ZBase.registerView((function() {
     var mode_dropdown = $(".zbase_report z-dropdown.mode");
     mode_dropdown.classList.remove("hidden");
     mode_dropdown.addEventListener("change", function() {
-      setEditable(this.getValue() == "editing");
+      widget_list.setEditable(this.getValue() == "editing");
     }, false);
 
     if (readonly) {
