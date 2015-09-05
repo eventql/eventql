@@ -451,6 +451,7 @@ zbase-breadcrumbs,
   line-height: 1.33;
   padding: 0;
   color: rgba(0,0,0,.8);
+  font-size: 12px;
 }
 
 ul.zbase-breadcrumbs {
