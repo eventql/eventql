@@ -123,17 +123,22 @@ var ReportSQLWidgetDisplay = function(elem, conf) {
 };
 
 var ReportSQLWidgetEditor = function(elem, conf) {
+  var editor;
   var render = function() {
     var tpl = $.getTemplate(
       "views/report",
       "zbase_report_sql_widget_editor_main_tpl");
 
+    // code editor
+    editor = $("z-codeeditor", tpl);
+    editor.setValue(conf.query);
+
     elem.appendChild(tpl);
   };
 
   var onSave = function(callback) {
-    //get new config
-    callback(/*config*/);
+    conf.query = editor.getValue();
+    callback(conf);
   };
 
   var onCancel = function(callback) {
