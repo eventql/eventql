@@ -1,4 +1,5 @@
 var WidgetList = function(widget_definitions) {
+  var elem;
   var widgets = [];
   var widget_edit_callbacks = [];
 
@@ -11,17 +12,16 @@ var WidgetList = function(widget_definitions) {
   });
 
 
-  var render = function(elem) {
+  var render = function(viewport) {
+    elem = viewport;
     widgets.forEach(function(widget) {
       if (widget.display_obj) {
         widget.display_obj.destroy();
       }
 
-      widget.container = $(
-            ".zbase_report_widget",
-            $.getTemplate(
-              "views/report",
-              "zbase_report_widget_main_tpl"));
+      widget.container = $.getTemplate(
+          "views/report",
+          "zbase_report_widget_main_tpl");
 
       widget.display_obj = ReportWidgetFactory.renderWidgetDisplay(
           widget.conf.type,
@@ -83,11 +83,11 @@ var WidgetList = function(widget_definitions) {
   //};
 
   var setEditable = function(is_editable) {
-    for (var i = 0; i < widgets.length; i++) {
+    if (elem) {
       if (is_editable) {
-        widgets[i].container.classList.add("editable");
+        elem.classList.add("editable");
       } else {
-        widgets[i].container.classList.remove("editable");
+        elem.classList.remove("editable");
       }
     }
   };
