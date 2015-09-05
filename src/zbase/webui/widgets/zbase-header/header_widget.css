@@ -65,6 +65,8 @@
   cursor: pointer;
 }
 
+/* Namespace popup */
+
 #namespace_popup {
   position: fixed;
   background-color: rgba(0, 0, 0, 0.3);
@@ -73,9 +75,14 @@
   top: 0;
   left: 0;
   z-index: 100000;
+  text-align: center;
 }
 
-#namespace_popup .zbase_login {
+#namespace_popup img {
+  margin-bottom: 20px;
+}
+
+#namespace_popup .namespace_prompt {
   background-color: #fff;
   width: 500px;
   min-height: 0 !important;
@@ -83,4 +90,36 @@
   margin: 0px auto;
   margin-top: 50px !important;
   border-radius: 10px;
+}
+
+#namespace_popup ul.namespace_list {
+  list-style-type: none;
+  text-align: left;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-shadow: 0 0 1px rgba(0,0,0,.2);
+  width: 340px;
+  margin: auto;
+  margin-top: 30px;
+  margin-bottom: 20px;
+  padding: 0;
+}
+
+#namespace_popup ul.namespace_list li {
+  border-bottom: 1px solid #eee;
+  padding: 10px 20px;
+  font-size: 14px;
+}
+
+#namespace_popup ul.namespace_list li:hover {
+  background-color: #f0f6f8;
+  margin-top: -1px;
+  border-top: 1px solid #c9d0d4;
+  border-bottom: 1px solid #c9d0d4;
+  cursor: pointer;
+}
+
+#namespace_popup a.go_back {
+  color: #1c99d6;
+  font-size: 14px;
 }

@@ -5,11 +5,11 @@ var HeaderWidget = (function() {
   }
 
   var popup = function() {
-    var tpl = $.getTemplate("views/login", "zbase_login_namespace_prompt_tpl");
+    var tpl = $.getTemplate("widgets/zbase-header", "zbase_header_namespace_prompt_tpl");
     var elem = document.body.appendChild(document.createElement("div"));
     elem.setAttribute("id", "namespace_popup");
     elem.appendChild(tpl);
-    elem.querySelector(".forgot_pw").addEventListener("click", function(e) {
+    elem.querySelector(".go_back").addEventListener("click", function(e) {
       e.preventDefault();
       document.body.removeChild(elem);
     });
