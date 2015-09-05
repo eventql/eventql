@@ -1,7 +1,3 @@
-.zbase_header {
-  overflow: visible; /* TODO: Change at source instead */
-}
-
 .zbase_header .button {
   margin-left: 40px;
 }
@@ -29,9 +25,6 @@
 
 .zbase_header .dropdown {
   cursor: pointer;
-}
-
-.zbase_header .dropdown .fa-caret-up, .zbase_header .dropdown .fa-caret-down {
 }
 
 .zbase_header .dropdown:not(.open) .fa-caret-up {
