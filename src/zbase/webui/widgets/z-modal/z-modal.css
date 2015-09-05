@@ -138,3 +138,25 @@ z-modal-close-icon:hover {
 .z-modal-content {
   padding: 0.8em 15px 1.2em;
 }
+
+
+/** zbase specific styles */
+.z-modal-header {
+  background: #222;
+  color: #fff;
+  font-size: 14px!important;
+  border-radius: 0!important;
+}
+
+.z-modal-footer {
+  border-radius: 0!important;
+}
+
+z-modal-close-icon {
+  top: 0;
+  right: 0;
+  font-size: 16px;
+  padding-top: 0.8em;
+  opacity: 1.0;
+  margin-right: -3px;
+}
