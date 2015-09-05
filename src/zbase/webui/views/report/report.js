@@ -96,14 +96,11 @@ ZBase.registerView((function() {
     if (edit_view) {
       edit_view.destroy();
     }
-    var viewport = $(".zbase_report_widgets");
+    var viewport = $(".zbase_report_viewport");
     viewport.innerHTML = "";
 
-    widget_list.render($(".zbase_report_widgets"));
+    widget_list.render(viewport);
     widget_list.setEditable(true);
-
-    $(".zbase_report_widget_editor").classList.add("hidden");
-    viewport.classList.remove("hidden");
   };
 
   var showWidgetEditor = function(widget_id) {
@@ -131,12 +128,11 @@ ZBase.registerView((function() {
       });
     });
 
-    $.replaceContent($(".zbase_report_widget_editor"), container);
+    $.replaceContent($(".zbase_report_viewport"), container);
   };
 
   var showEditView = function() {
-    $(".zbase_report_widgets").classList.add("hidden");
-    $(".zbase_report_widget_editor").classList.remove("hidden");
+
 
     edit_view.render();
   };
