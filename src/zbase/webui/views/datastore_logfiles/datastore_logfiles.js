@@ -23,9 +23,6 @@ ZBase.registerView((function() {
         "views/datastore_logfiles",
         "zbase_datastore_logfiles_list_tpl");
 
-    var menu = HomeMenu();
-    menu.render($(".zbase_home_menu_sidebar", page));
-
     var tbody = $("tbody", page);
     logfiles.forEach(function(logfile) {
       renderRow(tbody, logfile);
