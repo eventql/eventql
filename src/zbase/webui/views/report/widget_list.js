@@ -6,7 +6,7 @@ var WidgetList = function(elem, widget_definitions) {
   var render = function() {
     widget_definitions.forEach(function(conf) {
       var container = $(
-            ".zbase_report_widget", 
+            ".zbase_report_widget",
             $.getTemplate(
               "views/report",
               "zbase_report_widget_main_tpl"));
