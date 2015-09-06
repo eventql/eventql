@@ -1,4 +1,5 @@
 var ReportSQLWidgetDisplay = function(elem, conf) {
+  console.log(conf);
   var query_mgr = EventSourceHandler();
 
   var loadQuery = function() {
@@ -119,7 +120,14 @@ var ReportSQLWidgetDisplay = function(elem, conf) {
     render: loadQuery,
     destroy: destroy
   };
+};
 
+ReportSQLWidgetDisplay.getInitialConfig = function() {
+  return {
+    type: "sql-widget",
+    uuid: $.uuid(),
+    query: ""
+  }
 };
 
 var ReportSQLWidgetEditor = function(conf) {
@@ -175,6 +183,8 @@ var ReportSQLWidgetEditor = function(conf) {
     onCancel: onCancel
   }
 };
+
+
 
 ReportWidgetFactory.registerWidget(
     "sql-widget",
