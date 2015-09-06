@@ -73,6 +73,14 @@ var WidgetList = function(widget_definitions) {
     //handle error?
   };
 
+  var addNewWidget = function(widget_type) {
+    widgets.push({
+      conf: ReportWidgetFactory.getWidgetDisplayInitialConf(widget_type),
+      container: null,
+      display_obj: null
+    });
+  };
+
   //var setJSON = function(new_widgets) {
   //  widgets = new_widgets;
   //  var tpl = $.getTemplate(
@@ -120,6 +128,7 @@ var WidgetList = function(widget_definitions) {
     getJSON: getJSON,
     getWidgetConfig: getWidgetConfig,
     updateWidgetConfig: updateWidgetConfig,
+    addNewWidget: addNewWidget,
     setEditable: setEditable,
     onWidgetEdit: onWidgetEdit,
     destroy: destroy
