@@ -19,9 +19,11 @@ var WidgetList = function(widget_definitions) {
         widget.display_obj.destroy();
       }
 
-      widget.container = $.getTemplate(
-          "views/report",
-          "zbase_report_widget_main_tpl");
+      widget.container = $(
+          ".zbase_report_widget",
+          $.getTemplate(
+              "views/report",
+              "zbase_report_widget_main_tpl"));
 
       widget.display_obj = ReportWidgetFactory.renderWidgetDisplay(
           widget.conf.type,

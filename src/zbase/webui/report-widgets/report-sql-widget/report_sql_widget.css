@@ -27,6 +27,10 @@
   margin-top: 0;
 }
 
+.zbase_report_sql_editor {
+  background: #fff;
+}
+
 .zbase_report_sql_editor z-codeeditor {
   border-top: 1px solid #c9d0d4;
   border-bottom: 1px solid #c9d0d4;
