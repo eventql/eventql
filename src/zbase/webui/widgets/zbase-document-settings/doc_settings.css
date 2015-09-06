@@ -20,6 +20,19 @@
   display: inline-block;
 }
 
+.zbase_doc_settings .doc_setting .doc_setting_title.with_dropdown {
+  width: 89px;
+}
+
+.zbase_doc_settings .doc_setting .doc_setting_value z-dropdown {
+  line-height: 28px;
+  vertical-align: middle;
+}
+
+.zbase_doc_settings .doc_setting .doc_setting_value z-dropdown z-dropdown-item {
+  line-height: 16px;
+}
+
 .zbase_doc_settings .doc_setting .link {
   font-weight: 500;
 }
