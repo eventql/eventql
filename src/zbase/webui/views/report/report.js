@@ -149,10 +149,13 @@ ZBase.registerView((function() {
         return;
       }
       var content = JSON.parse(json);
-      widget_list.setJSON(content.widgets);
       setReportDescription(content.description);
-      showReportView();
-      save();
+      $.showLoader();
+      widget_list.setJSON(content.widgets, function() {
+        save();
+        showReportView();
+        $.hideLoader();
+      });
     });
 
     editor.onCancel(showReportView);
@@ -244,7 +247,7 @@ ZBase.registerView((function() {
           $.fatalError();
           return;
         }
-        widget_list.addNewWidget(widget_type);
+        widget_list.addNewEmptyWidget(widget_type);
         save();
         showReportView();
         $.hideLoader();
