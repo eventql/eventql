@@ -46,6 +46,12 @@ var ModalComponent = function() {
   this.close = function() {
     this.setAttribute('data-active', "");
     document.removeEventListener('keyup', this.escape_listener, false);
+    var ev = new CustomEvent("z-modal-close", {
+      bubbles: true,
+      cancelable: true
+    });
+
+    this.dispatchEvent(ev);
   };
 };
 
