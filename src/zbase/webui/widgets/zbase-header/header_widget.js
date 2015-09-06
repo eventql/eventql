@@ -53,7 +53,8 @@ var HeaderWidget = (function() {
     elem.innerHTML = "";
     elem.appendChild(tpl);
     $.onClick($(".dropdown", elem), toggleDropdown);
-    $.onClick($(".change_namespace", elem), showSelectNamespacePopup);
+    $(".change_namespace", elem).addEventListener("click", showSelectNamespacePopup);
+
     elem.querySelector(".userid_info").innerHTML = conf.current_user.userid;
     elem.querySelector(".namespace_info").innerHTML = conf.current_user.namespace;
     elem.classList.remove("hidden");

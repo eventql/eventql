@@ -52,18 +52,33 @@
 }
 
 .zbase_header .dropdown.open .dropdown_panel {
+  box-sizing: content-box;
   display: block;
   width: 100%;
   font-size: 13px;
-  margin-top: -3px;
+  margin-top: -1px;
+  margin-left: -11px;
+  padding-right: 11px;
   background-color: #fff;
   border-bottom-right-radius: 3px;
   border-bottom-left-radius: 3px;
-  border-bottom: 2px solid #e1e1e1;
+  border: 1px solid #d2d2d2;
+  border-top: none;
+  box-shadow: 0 2px 3px rgba(0,0,0,.1);
 }
 
 .zbase_header .dropdown_panel li {
   display: block;
+  margin-right: -11px;
+}
+
+.zbase_header .dropdown_panel li:hover {
+  background: #f2f8fa;
+}
+
+.zbase_header .dropdown_panel li:hover a,
+.zbase_header .dropdown_panel li:hover span {
+  color: #1c99d6;
 }
 
 .zbase_header .dropdown_panel a,
@@ -73,6 +88,8 @@
   color: #444;
   text-decoration: none;
   cursor: pointer;
+  text-align: left;
+  padding-left: 20px;
 }
 
 .zbase_header .dropdown_panel a:hover,
@@ -146,4 +163,15 @@
 .zbase_header .main_menu > li i {
   margin-right: 3px;
   vertical-align: 0;
+}
+
+.zbase_header .main_menu > li.user_info {
+  border-left: none;
+  border-right: none;
+  padding: 0;
+}
+
+.zbase_header .main_menu > li.user_info .nav {
+  padding: 0;
+  margin-left: 6px;
 }
