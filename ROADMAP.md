@@ -1,21 +1,19 @@
 
 ### v0
 
-- [ ] Metrics Support [in progress]
-- [ ] Reports [in progress]
-- [ ] Metric Explorer [in progress]
-- [ ] Chart Builder [in progress]
-
--- at this point we can rebuild the old dashboards in the UI without any code --
-
-- [ ] Documentation
+- [x] Reports [in progress]
+- [x] Documentation [in progress]
+- [ ] Metrics Support
+- [ ] Metric Explorer
+- [ ] Chart Editor
+- [ ] Map Reduce Support
 - [ ] SQL v0 impl
-- [ ] Dashboards
-- [ ] System Mails
 - [ ] new Tracking Pixel API
 
 ### backlog
 
+- [ ] Dashboards
+- [ ] System Mails
 - [ ] Scheduled Reports from SQL via mail/pdf/etc
 - [ ] Web CSV Upload Wizard
 - [ ] Cohort Analysis
