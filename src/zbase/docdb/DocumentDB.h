@@ -54,6 +54,12 @@ public:
       const SHA1Hash& uuid,
       DocumentACLPolicy policy);
 
+  void updateDocumentPublishingStatus(
+      const String& db_namespace,
+      const String& userid,
+      const SHA1Hash& uuid,
+      DocumentPublishingStatus pstatus);
+
 protected:
 
   void updateDocument(
