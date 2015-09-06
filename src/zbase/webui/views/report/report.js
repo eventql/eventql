@@ -62,9 +62,18 @@ ZBase.registerView((function() {
     $.replaceViewport(page);
 
     setReportName(doc.name);
-    setReportDescription(doc.content.description);
 
-    widget_list = WidgetList(doc.content.widgets);
+    var description = "";
+    if (doc.content != null && doc.content.hasOwnProperty("description")) {
+      description = doc.content.description;
+    }
+    setReportDescription(description);
+
+    var widgets = [];
+    if (doc.content != null && doc.content.hasOwnProperty("widgets")) {
+      widgets = doc.content.widgets;
+    }
+    widget_list = WidgetList(widgets);
     widget_list.onWidgetEdit(function(widget_id) {
       showWidgetEditor(widget_id);
     });
@@ -80,6 +89,7 @@ ZBase.registerView((function() {
       initNameEditing();
       initDescriptionEditing();
       initShareDocModal(doc.uuid);
+      initWidgetAdding();
     }
 
     showReportView();
@@ -137,7 +147,7 @@ ZBase.registerView((function() {
   var findRequiredWidgets = function(doc) {
     var widgets = [];
 
-    if (doc.content.hasOwnProperty("widgets")) {
+    if (doc.content != null && doc.content.hasOwnProperty("widgets")) {
       for (var i = 0; i < doc.content.widgets.length; i++) {
         if (widgets.indexOf(doc.content.widgets[i].type) == -1) {
           widgets.push(doc.content.widgets[i].type);
@@ -205,6 +215,33 @@ ZBase.registerView((function() {
       setReportDescription($.escapeHTML(textarea.value));
       docsync.saveDocument();
       modal.close();
+    });
+  };
+
+  var initWidgetAdding = function() {
+    var modal = $(".zbase_report_pane z-modal.add_widget");
+    $.onClick($(".zbase_report_pane .link.add_widget"), function() {
+      //FIXME get available report widgets and render selection
+      modal.show();
+    });
+
+    $.onClick($("button.submit", modal), function() {
+      var widget_type = $(".widget_selection[data-selected", modal)
+          .getAttribute("data-widget");
+
+      modal.close();
+      $.showLoader();
+      ReportWidgetFactory.loadWidgets([widget_type], function() {
+        //post
+        if (!widget_list) {
+          $.fatalError();
+          return;
+        }
+        widget_list.addNewWidget(widget_type);
+        save();
+        showReportView();
+        $.hideLoader();
+      });
     });
   };
 
@@ -280,6 +317,21 @@ ZBase.registerView((function() {
   //  setReportDescription();
   //};
 
+  //FIXME save via doc_sync?
+  var save = function() {
+    //FIXME
+    var kPathPrefix = "/a/reports/";
+    var report_id = window.location.pathname.substr(kPathPrefix.length);
+    var save_url = "/api/v1/documents/" + report_id;
+    var postbody = $.buildQueryString(getDocument());
+
+    $.httpPost(save_url, postbody, function(r) {
+      if (r.status != 201) {
+        $.fatalError("Saving Document Failed");
+      }
+    });
+  };
+
   var getDocument = function() {
     var widgets = [];
     if (widget_list) {
@@ -294,7 +346,7 @@ ZBase.registerView((function() {
     };
   };
 
-  
+
   return {
     name: "report",
     loadView: function(params) { goToURL(params.path); },
