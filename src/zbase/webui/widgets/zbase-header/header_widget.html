@@ -22,7 +22,7 @@
             <span style="display: block"></span>
           </span>
           <ul class="dropdown_panel">
-            <li id="change_namespace">
+            <li class="change_namespace">
               <span href="">Change namespace</span>
             </li>
             <li>
@@ -36,15 +36,17 @@
 </template>
 
 <template id="zbase_header_namespace_prompt_tpl">
-  <div class="namespace_prompt" style="min-height: 900px; margin-top: 100px;">
-    <img src="/a/_/a/android-icon-36x36.png" />
-    <h1>Select a Namespace</h1>
+  <z-modal class='zbase_share_doc'>
+    <z-modal-box>
+      <z-modal-close-icon></z-modal-close-icon>
+      <div class='z-modal-header'>
+        Select a Namespace
+      </div>
 
-    <div class="error_message hidden"></div>
+      <div class="error_message hidden"></div>
 
-    <ul class="namespace_list">
-    </ul>
-
-    <a class="go_back" href="/a/login">Go back</a>
-  </div>
+      <ul class="namespace_list">
+      </ul>
+    </z-modal-box>
+  </z-modal>
 </template>
