@@ -9,6 +9,24 @@
   font-size: 13px;
 }
 
+.zbase_report_sql_error_message {
+  display: block;
+  position: relative;
+  min-height: 1em;
+  padding: 1em 1.5em;
+  line-height: 1.3;
+  color: rgba(0, 0, 0, 0.8);
+  font-size: 1em;
+  font-family: 'Helvetica Neue', Arial, Helvetica, sans-serif;
+  font-size: 14px;
+  background: #fff0f0;
+  color: #a94442;
+}
+
+.zbase_report_sql_error_message h3 {
+  margin-top: 0;
+}
+
 .zbase_report_sql_editor z-codeeditor {
   border-top: 1px solid #c9d0d4;
   border-bottom: 1px solid #c9d0d4;
