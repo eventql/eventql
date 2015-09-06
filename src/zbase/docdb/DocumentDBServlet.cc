@@ -192,6 +192,28 @@ void DocumentDBServlet::updateDocument(
       continue;
     }
 
+    if (p.first == "publishing_status") {
+      if (!p.second.empty()) {
+        DocumentPublishingStatus pstatus;
+        if (!DocumentPublishingStatus_Parse(p.second, &pstatus)) {
+          res->setStatus(http::kStatusBadRequest);
+          res->addBody(
+              StringUtil::format("invalid publishing status: '$0'", p.second));
+          return;
+        }
+
+        tx.emplace_back([this, &session, &uuid, pstatus] () {
+          docdb_->updateDocumentPublishingStatus(
+              session.customer(),
+              session.userid(),
+              uuid,
+              pstatus);
+        });
+      }
+
+      continue;
+    }
+
     res->setStatus(http::kStatusBadRequest);
     res->addBody(StringUtil::format("invalid parameter: '$0'", p.first));
     return;
