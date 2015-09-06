@@ -244,6 +244,16 @@ void DocumentDBServlet::listDocuments(
     const AnalyticsSession& session,
     const http::HTTPRequest* req,
     http::HTTPResponse* res) {
+  URI uri(req->uri());
+  const auto& params = uri.queryParams();
+
+  Set<String> categories;
+  bool return_categories = false;
+  String with_categories_str;
+  if (URI::getParam(params, "with_categories", &with_categories_str)) {
+    return_categories = true;
+  }
+
   Buffer buf;
   json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
 
@@ -255,7 +265,9 @@ void DocumentDBServlet::listDocuments(
   docdb_->listDocuments(
       session.customer(),
       session.userid(),
-      [this, &i, &json, &session] (const Document& doc) -> bool {
+      [this, &i, &json, &session, &categories] (const Document& doc) -> bool {
+    categories.emplace(doc.category());
+
     if (++i > 1) {
       json.addComma();
     }
@@ -270,6 +282,13 @@ void DocumentDBServlet::listDocuments(
   });
 
   json.endArray();
+
+  if (return_categories) {
+    json.addComma();
+    json.addObjectEntry("categories");
+    json::toJSON(categories, &json);
+  }
+
   json.endObject();
 
   res->setStatus(http::kStatusOK);
