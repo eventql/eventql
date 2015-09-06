@@ -14,6 +14,7 @@ route {
   require_module: "widgets/zbase-table-list"
   require_module: "widgets/zbase-table-schema-modal"
   require_module: "widgets/zbase-share-doc-modal"
+  require_module: "widgets/zbase-document-settings"
   require_module: "views/sql_editor"
 }
 
