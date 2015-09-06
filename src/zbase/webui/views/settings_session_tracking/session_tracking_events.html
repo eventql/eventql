@@ -1,0 +1,45 @@
+<template id="zbase_session_tracking_events_tpl">
+  <z-tabbable class="open_tabs" data-content-attached>
+    <z-tab data-index='0' data-active><a href="/a/settings/session_tracking">Events</a></z-tab>
+    <z-tab data-index='1'><a href="/a/settings/session_tracking/attributes">Attributes</a></z-tab>
+    <z-tab-content data-index='0'>
+      <div class='zbase_settings'>
+        <h3 class='zbase_settings_title'>Session Events</h3>
+
+        <table class='z-table events'>
+          <thead>
+            <tr>
+              <th>Event</th>
+              <th>Schema</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+
+        <div class="add_session_event">
+          <a class="link">
+            <i class="fa fa-plus"></i> Add Session Event
+          </a>
+        </div>
+
+      </div>
+    </z-tab-content>
+  </z-tabbable>
+</template>
+
+<template id="zbase_settings_session_tracking_event_row_tpl">
+  <tr class="event">
+    <td style="width: 300px">
+      <div class='event_name'><a></a></div>
+    </td>
+    <td>
+      <div class='event_schema'>
+        <pre></pre>
+      </div>
+    </td>
+    <td class='icon'>
+      <a data-action='edit'><i class='fa fa-cog'></i></a>
+    </td>
+  </tr>
+</template>

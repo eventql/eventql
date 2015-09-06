@@ -141,6 +141,7 @@ add_library(stx-base STATIC
     cli/flagparser.cc
     cli/CLI.cc
     cli/CLICommand.cc
+    cli/term.cc
     csv/CSVOutputStream.cc
     csv/BinaryCSVOutputStream.cc
     csv/CSVInputStream.cc
@@ -281,7 +282,7 @@ add_executable(test-sha1 SHA1_test.cc)
 target_link_libraries(test-sha1 stx-base)
 
 add_executable(test-protobuf protobuf/protobuf_test.cc)
-target_link_libraries(test-protobuf stx-base)
+target_link_libraries(test-protobuf stx-protobuf stx-json stx-base )
 
 add_executable(test-persistenthashset util/PersistentHashSet_test.cc)
 target_link_libraries(test-persistenthashset stx-base)

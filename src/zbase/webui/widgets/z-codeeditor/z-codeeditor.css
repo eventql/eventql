@@ -1,17 +1,25 @@
 z-codeeditor {
   display:block;
+  overflow: hidden;
+  position:relative;
+  width: 100%;
+  border-top: 1px solid #ddd;
+  border-bottom: 1px solid #ddd;
 }
 
 /* BASICS */
-
 z-codeeditor .CodeMirror {
   /* Set height, width, borders, and global font properties here */
   font: 14px monospace;
   height: 100%;
   width: 100%;
-  border: 1px solid #ddd;
   box-sizing: border-box;
+  position: relative;
+  overflow: hidden;
+  height: 100%;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,.1);
 }
+
 z-codeeditor .CodeMirror-scroll {
   /* Set scrolling behaviour here */
   overflow: auto;
@@ -30,15 +38,15 @@ z-codeeditor .CodeMirror-scrollbar-filler, z-codeeditor .CodeMirror-gutter-fille
   background-color: white; /* The little square between H and V scrollbars */
 }
 
-
-
 /* GUTTER */
 
 z-codeeditor .CodeMirror-gutters {
   border-right: 1px solid #dbdedf;
-  background-color: #edf0f2;
+  background: rgba(0,0,0,.3);
   white-space: nowrap;
+  background-color: none;
 }
+
 z-codeeditor .CodeMirror-linenumbers {}
 z-codeeditor .CodeMirror-linenumber {
   padding: 0 25px 0 6px;
@@ -317,4 +325,23 @@ z-codeeditor code {
   display: block;
   padding: 20px;
   word-break: break-all;
+}
+
+/* Resizer Tooltip */
+z-codeeditor z-codeeditor-resizer-tooltip {
+  height: 20px;
+  cursor: row-resize;
+  display: none;
+  position: relative;
+  top: -20px;
+  z-index: 999;
+  background: transparent;
+}
+
+z-codeeditor[data-resizable] z-codeeditor-resizer-tooltip {
+  display: block;
+}
+
+z-codeeditor[data-readonly] .CodeMirror .CodeMirror-cursor {
+  visibility: hidden;
 }

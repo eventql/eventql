@@ -7,18 +7,16 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef xzero_sysconfig_h
-#define xzero_sysconfig_h (1)
+#ifndef libstx_sysconfig_h
+#define libstx_sysconfig_h (1)
 
-//#include <base/sysconfig.h>
-
-#cmakedefine LIBCORTEX_VERSION "@LIBCORTEX_VERSION@"
+#cmakedefine LIBSTX_VERSION "@LIBSTX_VERSION@"
 
 // --------------------------------------------------------------------------
 // feature tests
 
 // Build with inotify support
-#cmakedefine CORTEX_ENABLE_INOTIFY
+#cmakedefine STX_ENABLE_INOTIFY
 
 #cmakedefine ENABLE_ACCEPT4
 #cmakedefine ENABLE_PIPE2
@@ -34,12 +32,12 @@
 
 // Try to open temporary files with O_TMPFILE flag before falling back
 // to the standard behaviour.
-#cmakedefine CORTEX_ENABLE_O_TMPFILE
+#cmakedefine STX_ENABLE_O_TMPFILE
 
-#cmakedefine CORTEX_ENABLE_NOEXCEPT
+#cmakedefine STX_ENABLE_NOEXCEPT
 
 // Builds with support for opportunistic write() calls to client sockets
-#cmakedefine CORTEX_OPPORTUNISTIC_WRITE 1
+#cmakedefine STX_OPPORTUNISTIC_WRITE 1
 
 // --------------------------------------------------------------------------
 // header tests

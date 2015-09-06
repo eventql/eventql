@@ -11,6 +11,9 @@ route {
   require_module: "widgets/z-progressbar"
   require_module: "widgets/zbase-header"
   require_module: "widgets/zbase-query-progress"
+  require_module: "widgets/zbase-table-list"
+  require_module: "widgets/zbase-table-schema-modal"
+  require_module: "widgets/zbase-share-doc-modal"
   require_module: "views/sql_editor"
 }
 
@@ -44,6 +47,8 @@ route {
   require_module: "widgets/z-pager"
   require_module: "widgets/z-table"
   require_module: "widgets/z-calendar"
+  require_module: "widgets/z-button"
+  require_module: "widgets/z-datetimepicker"
   require_module: "widgets/zbase-header"
   require_module: "views/logviewer"
 }
@@ -94,20 +99,64 @@ route {
 route {
   path_match: "/a/datastore/tables"
   view: "datastore_tables"
-  require_module: "widgets/zbase-header"
-  require_module: "widgets/z-menu"
-  require_module: "views/datastore_tables"
-}
-
-route {
-  path_match: "/a/documents"
-  view: "documents"
-  require_module: "util/z-date-util"
+  require_module: "util/event_source_handler"
   require_module: "widgets/zbase-header"
   require_module: "widgets/zbase-home-menu"
   require_module: "widgets/z-menu"
   require_module: "widgets/z-table"
-  require_module: "views/documents"
+  require_module: "views/datastore_tables"
+}
+
+route {
+  path_prefix: "/a/reports"
+  view: "report"
+  require_module: "util/doc_sync"
+  require_module: "util/event_source_handler"
+  require_module: "widgets/z-table"
+  require_module: "widgets/z-modal"
+  require_module: "widgets/z-button"
+  require_module: "widgets/z-input"
+  require_module: "widgets/z-textarea"
+  require_module: "widgets/z-codeeditor"
+  require_module: "widgets/z-dropdown"
+  require_module: "widgets/zbase-header"
+  require_module: "widgets/zbase-share-doc-modal"
+  require_module: "views/report"
+}
+
+route {
+  path_match: "/a/settings"
+  view: "settings_api_token"
+  require_module: "widgets/z-menu"
+  require_module: "widgets/zbase-header"
+  require_module: "widgets/z-input"
+  require_module: "widgets/zbase-settings-menu"
+  require_module: "views/settings_api_token"
+}
+
+route {
+  path_match: "/a/settings/session_tracking"
+  view: "session_tracking_events"
+  require_module: "widgets/z-menu"
+  require_module: "widgets/z-tabbable"
+  require_module: "widgets/z-table"
+  require_module: "widgets/zbase-header"
+  require_module: "widgets/zbase-settings-menu"
+  require_module: "views/settings_session_tracking"
+}
+
+route {
+  path_match: "/a/settings/session_tracking/attributes"
+  view: "session_tracking_attributes"
+  require_module: "widgets/z-menu"
+  require_module: "widgets/z-tabbable"
+  require_module: "widgets/z-table"
+  require_module: "widgets/z-dropdown"
+  require_module: "widgets/z-input"
+  require_module: "widgets/z-button"
+  require_module: "widgets/zbase-header"
+  require_module: "widgets/zbase-settings-menu"
+  require_module: "views/settings_session_tracking"
 }
 
 route {
@@ -127,9 +176,12 @@ route {
 
 route {
   path_match: "/a/"
-  view: "appstore"
-  require_module: "widgets/z-menu"
+  view: "documents"
+  require_module: "util/z-date-util"
   require_module: "widgets/zbase-header"
   require_module: "widgets/zbase-home-menu"
-  require_module: "views/appstore"
+  require_module: "widgets/z-menu"
+  require_module: "widgets/z-table"
+  require_module: "widgets/z-dropdown"
+  require_module: "views/documents"
 }

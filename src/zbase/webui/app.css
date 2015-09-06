@@ -33,7 +33,7 @@ body{
   padding:0;
   margin:0;
   color:#545758;
-  text-rendering: geometricPrecision;
+  text-rendering: optimizeLegibility;
   -webkit-font-smoothing: subpixel-antialiased;
   -webkit-user-select: none;
   -moz-user-select: none;
@@ -103,20 +103,26 @@ template {
   min-height: 100%;
   width: 100%;
   margin-top: 39px;
+  background: #f9f9f9;
 }
 
 #zbase_viewport .zbase_content_pane {
   min-width: 960px;
   min-height: 100%;
   margin: auto;
-  max-width: 1700px;
+  max-width: 2048px;
   padding: 0 20px;
 }
 
-@media (max-width: 1700px) {
+@media (max-width: 2048px) {
   #zbase_viewport .zbase_content_pane.fullwidth {
     padding: 0;
   }
+}
+
+.zbase_card {
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(0,0,0,.2);
 }
 
 /**
@@ -125,7 +131,7 @@ template {
 .zbase_header {
   width: 100%;
   background: #fff;
-  border-bottom: 1px solid #e1e1e1;
+  border-bottom: 1px solid #c9d0d4;
   box-shadow: 0 0 2px rgba(0,0,0,.2);
   height: 40px;
   line-height: 30px;
@@ -135,10 +141,16 @@ template {
 
 .zbase_header .navigation_inner {
   margin: auto;
-  max-width: 1700px;
+  max-width: 2048px;
   min-width: 960px;
   box-sizing: border-box;
   padding: 0 20px;
+}
+
+.zbase_header .sep {
+  height: 42px;
+  width: 1px;
+  float: left;
 }
 
 .zbase_header .logo_app {
@@ -146,6 +158,7 @@ template {
   display: block;
   float: left;
   width: 30px;
+  margin-right: 4px;
 }
 
 .zbase_header.hidden {
@@ -306,16 +319,17 @@ template {
  * zbase_page_title
  */
 .zbase_page_title {
-  background-color: #f0f6f8;
+  background-color: #f9f9f9;
   border-bottom: 1px solid #c9d0d4;
   box-shadow: 0 1px 1px rgba(0,0,0,0.1);
   height: 54px;
+  position: relative;
 }
 
 .zbase_page_title > div {
   padding: 1px 20px;
   margin: auto;
-  max-width: 1700px;
+  max-width: 2048px;
   min-width: 960px;
 }
 
@@ -380,7 +394,7 @@ h2.pagetitle.editable {
 
 h2.pagetitle.editable:hover {
   cursor: pointer;
-  background: #f0f6f8;
+  background: #f2f8fa;
 }
 
 h2.pagetitle i.sep:after {
@@ -408,17 +422,18 @@ h2.pagetitle.border_bottom {
  * zbase_footer
  */
 .zbase_footer {
-  border-top: 1px solid #eee;
   clear: both;
   font-size: 70%;
-  padding: 6px 14px 6px 14px;
-  opacity: 0.8;
+  padding: 6px 20px;
   width: 100%;
   margin-bottom: 0;
+  background: #f9f9f9;
+  color: #aaa;
 }
 
 .zbase_footer a {
   float: right;
+  color: #aaa;
 }
 
 .zbase_footer.hidden {
@@ -437,6 +452,7 @@ zbase-breadcrumbs,
   line-height: 1.33;
   padding: 0;
   color: rgba(0,0,0,.8);
+  font-size: 12px;
 }
 
 ul.zbase-breadcrumbs {
@@ -506,9 +522,10 @@ z-menu.zbase_default_menu z-menu-section z-menu-title {
   margin-left: 0;
 }
 
+z-menu.zbase_default_menu z-menu-section z-menu-title,
 z-menu.zbase_default_menu z-menu-section z-menu-title a {
   text-transform: uppercase;
-  font-size: 90%;
+  font-size: 12px;
   font-weight: 500;
   letter-spacing: 0.8px;
   margin-bottom: 10px;
@@ -528,7 +545,7 @@ z-menu.zbase_default_menu z-menu-section z-menu-item a {
 }
 
 z-menu.zbase_default_menu z-menu-item[data-active] {
-  background: #f0f6f8;
+  background: #f2f8fa;
   box-shadow: none;
 }
 

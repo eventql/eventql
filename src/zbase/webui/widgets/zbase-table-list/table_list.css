@@ -1,0 +1,29 @@
+.zbase_table_list h3 {
+  font-weight: 500;
+  color: #333;
+  margin: 0 0 10px;
+}
+
+.zbase_table_list ul {
+  padding: 0;
+  margin: 0;
+  list-style-type: none;
+}
+
+.zbase_table_list ul.hidden {
+  display: none;
+}
+
+.zbase_table_list ul li {
+  margin: 0;
+  cursor: pointer;
+  line-height: 28px;
+  padding-left: 10px;
+  margin-left: -10px;
+}
+
+.zbase_table_list ul li:hover {
+  background: #eee;
+  color: #1c99d6;
+  background: #f2f8fa;
+}

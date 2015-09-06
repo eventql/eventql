@@ -247,6 +247,7 @@ static bool parseYear(const char* begin, const char* end, CivilTime* date) {
     return false;
   }
 
+
   try {
     date->setYear(std::stoi(String(year_begin, year_end)));
   } catch (const std::exception&) {
@@ -268,7 +269,7 @@ Option<CivilTime> ISO8601::parse(const String& str) {
   CivilTime date(nullptr);
 
   if (!parseYear(str.c_str(), str.c_str() + str.size(), &date)) {
-    None<CivilTime>();
+    return None<CivilTime>();
   }
 
   return Some(date);

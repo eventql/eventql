@@ -65,8 +65,31 @@ var HeaderWidget = (function() {
     $.handleLinks(elem);
   };
 
+  var setActiveMenuItem = function() {
+    var path = window.location.pathname;
+    var elem = $("#zbase_header");
+    var items = elem.querySelectorAll(".nav");
+    var prev_active_item = $(".nav.active", elem);
+    var active_item;
+
+    if (prev_active_item) {
+      prev_active_item.classList.remove("active");
+    }
+
+    for (var i = 0; i < items.length; i++) {
+      if (path.indexOf(items[i].getAttribute("href")) == 0) {
+        active_item = items[i];
+      }
+    }
+
+    if (active_item) {
+      active_item.classList.add("active");
+    }
+  };
+
   return {
-    render: render
+    render: render,
+    setActiveItem: setActiveMenuItem
   };
 
 })();

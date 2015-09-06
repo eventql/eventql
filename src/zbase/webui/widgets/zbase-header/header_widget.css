@@ -9,10 +9,18 @@
   padding: 0 10px;
   line-height: 42px;
   color: #808A95;
+  line-height: 40px;
+  height: 40px;
+  display: block;
+}
+
+.zbase_header ul li .nav:hover {
+  color: #1c99d6;
 }
 
 .zbase_header ul li a.active {
-  color: #37485C;
+  color: #1c99d6;
+  font-weight: 500;
 }
 
 .zbase_header ul li a:hover {
@@ -136,4 +144,20 @@
 #namespace_popup a.go_back {
   color: #1c99d6;
   font-size: 14px;
+}
+
+.zbase_header .main_menu li:first-child {
+  border-left: 1px solid #eee;
+  margin-left: 8px;
+}
+
+.zbase_header .main_menu li {
+  border-right: 1px solid #eee;
+  padding: 0 8px 0 6px;
+  vertical-align: middle;
+}
+
+.zbase_header .main_menu li i {
+  margin-right: 3px;
+  vertical-align: 0;
 }

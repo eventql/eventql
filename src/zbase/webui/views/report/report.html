@@ -1,0 +1,141 @@
+<template id="zbase_report_main_tpl">
+  <section class='zbase_page_title small zbase_report'>
+    <div>
+      <zbase-breadcrumbs>
+        <zbase-breadcrumbs-section>
+          <a href="/a/documents">Documents</a>
+        </zbase-breadcrumbs-section>
+        <zbase-breadcrumbs-section>
+          <a href="/a/documents">Reports</a>
+        </zbase-breadcrumbs-section>
+        <zbase-breadcrumbs-section class="report_name">
+        </zbase-breadcrumbs-section>
+      </zbase-breadcrumbs>
+
+      
+    </div>
+  </section>
+
+  <div class="zbase_content_pane fullwidth">
+    <div class="zbase_report_infobar hidden"></div>
+    <div class="zbase_report_pane">
+
+      <div class="zbase_report_sidebar">
+        <h3 class="sidebar_title">
+          <span class="readonly_hint hidden"><i class="fa fa-lock"></i> Read-Only</span>
+          Report: <span class="report_name editable"></span>
+        </h3>
+
+        <div class="sidebar_subtitle">
+          <div class="writable_report_actions">
+            <a class="link share">Share</a>
+            <a class="link edit">Edit</a>
+            <z-dropdown data-resolved class="mode">
+              <z-dropdown-flyout>
+                <z-dropdown-items>
+                  <z-dropdown-item data-value='editing' data-selected>
+                    <i class='fa fa-pencil'></i>Editing
+                  </z-dropdown-item>
+                  <z-dropdown-item data-value='viewing'>
+                    <i class='fa fa-eye'></i>Viewing
+                  </z-dropdown-item>
+                </z-dropdown-items>
+              </z-dropdown-flyout>
+            </z-dropdown>
+          </div>
+
+          Last refreshed <span class="report_activity_info"></span>
+        </div>
+
+        <div class="sidebar_content">
+          <h4 class="sidebar_content_title">Description</h4>
+          <a class="link hidden add_description">Add Description</a>
+          <div class="report_description editable"></div>
+        </div>
+      </div>
+
+      <div class="zbase_report_content">
+        <div class="zbase_report_viewport"></div>
+
+        <div class="link add_widget">
+          <i class="fa fa-plus"></i>&nbsp;Add Report Element
+        </div>
+      </div>
+
+      <z-modal class="zbase_sql_editor_modal add_widget">
+        <z-modal-box>
+          <z-modal-close-icon></z-modal-close-icon>
+          <div class="z-modal-header">Add Report Element</div>
+          <div class="z-modal-content">
+            <h4>Please choose an element type</h4>
+            <div class="widget_selections">
+              <div class="widget_selection" data-widget="sql-widget" data-selected>
+                <div class="inner">Report SQL</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="z-modal-footer">
+            <button class="z-button primary submit">Save</button>
+          </div>
+        </z-modal-box>
+      </z-modal>
+
+      <z-modal class="zbase_sql_editor_modal rename_report edit">
+        <z-modal-box>
+          <z-modal-close-icon></z-modal-close-icon>
+          <div class="z-modal-header">Rename Report</div>
+          <div class="z-modal-content">
+            <h3>Enter a new report name</h3>
+            <input class="z-input report_name" />
+          </div>
+          <div class="z-modal-footer">
+            <button class="z-button primary submit">
+              Save
+            </button>
+          </div>
+        </z-modal-box>
+      </z-modal>
+
+      <z-modal class="zbase_sql_editor_modal edit edit_description">
+        <z-modal-box>
+          <z-modal-close-icon></z-modal-close-icon>
+          <div class="z-modal-header">Edit Report Description</div>
+          <div class="z-modal-content">
+            <h3>Enter a new report description</h3>
+            <textarea class="z-textarea report_description" rows="4"></textarea>
+          </div>
+          <div class="z-modal-footer">
+            <button class="z-button primary submit">
+              Save
+            </button>
+          </div>
+        </z-modal-box>
+      </z-modal>
+    </div>
+  </div>
+</template>
+
+<template>
+          <div class="edit_content_pane hidden">
+
+          <div class="zbase_report_widget_header">
+            <button class="z-button primary submit">
+              <i class="fa fa-floppy-o"></i>&nbsp;Save
+            </button>
+            <button class="z-button secondary cancel">
+              <i class="fa fa-arrow-left"></i>&nbsp;Back
+            </button>
+            <h2 class="pagetitle">
+              Edit Report Content
+            </h2>
+            <span class="error_note hidden">Invalid JSON -- Please review the content</span>
+          </div>
+
+          <z-codeeditor data-language="text/json" data-resizable='vertical' style="height: 250px;"></z-codeeditor>
+        </div>
+
+        <div class="report_ui"></div>
+      </div>
+
+</template>

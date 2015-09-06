@@ -268,7 +268,7 @@ SValue::TimeType SValue::getTimestamp() const {
     default:
       RAISE(
          kTypeError,
-          "can't convert %s '%s' to Timestamp",
+          "can't convert %s '%s' to DateTime",
           SValue::getTypeName(data_.type),
           toString().c_str());
 
@@ -519,7 +519,22 @@ bool SValue::tryTimeConversion() {
     return false;
   }
 
-  time_t ts = getInteger();
+  uint64_t ts;
+  switch (data_.type) {
+    case SValue::T_INTEGER:
+      ts = getInteger();
+      break;
+    case SValue::T_FLOAT:
+      ts = getFloat();
+      break;
+    default:
+      RAISE(
+         kTypeError,
+          "can't convert %s '%s' to DateTime",
+          SValue::getTypeName(data_.type),
+          toString().c_str());
+  }
+
   data_.type = T_TIMESTAMP;
   // FIXPAUL take a smart guess if this is milli, micro, etc
   data_.u.t_timestamp = ts;
