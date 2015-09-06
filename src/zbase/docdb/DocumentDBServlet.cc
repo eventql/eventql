@@ -260,6 +260,10 @@ void DocumentDBServlet::renderDocument(
   json->addString(doc.type());
   json->addComma();
 
+  json->addObjectEntry("publishing_status");
+  json->addString(DocumentPublishingStatus_Name(doc.publishing_status()));
+  json->addComma();
+
   json->addObjectEntry("acl_policy");
   json->addString(DocumentACLPolicy_Name(doc.acl_policy()));
   json->addComma();
