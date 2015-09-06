@@ -80,7 +80,7 @@
   color: #111;
 }
 
-#namespace_popup {
+.zbase_select_namespace_modal {
   position: fixed;
   background-color: rgba(0, 0, 0, 0.3);
   width: 100%;
@@ -91,11 +91,11 @@
   text-align: center;
 }
 
-#namespace_popup img {
+.zbase_select_namespace_modal img {
   margin-bottom: 20px;
 }
 
-#namespace_popup .namespace_prompt {
+.zbase_select_namespace_modal .namespace_prompt {
   background-color: #fff;
   width: 500px;
   min-height: 0 !important;
@@ -105,26 +105,20 @@
   border-radius: 10px;
 }
 
-#namespace_popup ul.namespace_list {
+.zbase_select_namespace_modal ul.namespace_list {
   list-style-type: none;
   text-align: left;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  box-shadow: 0 0 1px rgba(0,0,0,.2);
-  width: 340px;
-  margin: auto;
-  margin-top: 30px;
-  margin-bottom: 20px;
+  margin: 0;
   padding: 0;
 }
 
-#namespace_popup ul.namespace_list li {
+.zbase_select_namespace_modal ul.namespace_list li {
   border-bottom: 1px solid #eee;
   padding: 10px 20px;
   font-size: 14px;
 }
 
-#namespace_popup ul.namespace_list li:hover {
+.zbase_select_namespace_modal ul.namespace_list li:hover {
   background-color: #f0f6f8;
   margin-top: -1px;
   border-top: 1px solid #c9d0d4;
@@ -132,7 +126,7 @@
   cursor: pointer;
 }
 
-#namespace_popup a.go_back {
+.zbase_select_namespace_modal a.go_back {
   color: #1c99d6;
   font-size: 14px;
 }
