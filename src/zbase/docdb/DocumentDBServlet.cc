@@ -171,6 +171,20 @@ void DocumentDBServlet::updateDocument(
       continue;
     }
 
+    if (p.first == "category") {
+      if (!p.second.empty()) {
+        tx.emplace_back([this, &session, &uuid, p] () {
+          docdb_->updateDocumentCategory(
+              session.customer(),
+              session.userid(),
+              uuid,
+              p.second);
+        });
+      }
+
+      continue;
+    }
+
     if (p.first == "acl_policy") {
       if (!p.second.empty()) {
         DocumentACLPolicy policy;
@@ -186,6 +200,28 @@ void DocumentDBServlet::updateDocument(
               session.userid(),
               uuid,
               policy);
+        });
+      }
+
+      continue;
+    }
+
+    if (p.first == "publishing_status") {
+      if (!p.second.empty()) {
+        DocumentPublishingStatus pstatus;
+        if (!DocumentPublishingStatus_Parse(p.second, &pstatus)) {
+          res->setStatus(http::kStatusBadRequest);
+          res->addBody(
+              StringUtil::format("invalid publishing status: '$0'", p.second));
+          return;
+        }
+
+        tx.emplace_back([this, &session, &uuid, pstatus] () {
+          docdb_->updateDocumentPublishingStatus(
+              session.customer(),
+              session.userid(),
+              uuid,
+              pstatus);
         });
       }
 
@@ -258,6 +294,14 @@ void DocumentDBServlet::renderDocument(
 
   json->addObjectEntry("type");
   json->addString(doc.type());
+  json->addComma();
+
+  json->addObjectEntry("publishing_status");
+  json->addString(DocumentPublishingStatus_Name(doc.publishing_status()));
+  json->addComma();
+
+  json->addObjectEntry("category");
+  json->addString(doc.category());
   json->addComma();
 
   json->addObjectEntry("acl_policy");
