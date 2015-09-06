@@ -1,5 +1,4 @@
 var ReportSQLWidgetDisplay = function(elem, conf) {
-  console.log(conf);
   var query_mgr = EventSourceHandler();
 
   var loadQuery = function() {
