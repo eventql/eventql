@@ -93,6 +93,10 @@ ZBase.registerView((function() {
     var table_list = TableListWidget($(".sidebar_section", page));
     table_list.render();
 
+    //preferences
+    var settings_widget = DocumentSettingsWidget(doc.uuid);
+    settings_widget.render($(".document_settings", page));
+
     // sharing widget/button
     if (readonly) {
       $(".share_button", page).remove();
