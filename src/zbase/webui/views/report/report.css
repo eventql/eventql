@@ -102,12 +102,12 @@
   border-right: 1px solid #ddd;
 }
 
-.zbase_report_pane .zbase_report_content .link.add_element {
+.zbase_report_pane .zbase_report_content .link.add_widget {
   text-align: center;
   margin-top: 60px;
 }
 
-.zbase_report_pane .zbase_report_content .link.add_element:hover {
+.zbase_report_pane .zbase_report_content .link.add_widget:hover {
   text-decoration: underline;
 }
 
@@ -127,6 +127,43 @@
 .zbase_report_pane z-modal.edit textarea.z-textarea {
   width: 100%;
   font-size: 13px;
+}
+
+.zbase_report_pane z-modal.add_widget h4 {
+  font-weight: 400;
+  line-height: 34px;
+  font-size: 14px;
+}
+
+.zbase_report_pane z-modal.add_widget .widget_selections {
+  margin: 10px 0 0 0;
+}
+
+.zbase_report_pane z-modal.add_widget .widget_selection {
+  width: 100%;
+  padding: 12px 10px;
+  border-left: 1px solid rgba(0, 0, 0, 0.15);
+  border-right: 1px solid rgba(0, 0, 0, 0.15);
+  border-top: 1px solid rgba(0, 0, 0, 0.15);
+  color: #000;
+  font-size: 14px;
+}
+
+.zbase_report_pane z-modal.add_widget .widget_selection:last-child {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+}
+
+.zbase_report_pane z-modal.add_widget .widget_selection[data-selected],
+.zbase_report_pane z-modal.add_widget .widget_selection:hover {
+  cursor: pointer;
+  background: #f2f8fa
+}
+
+.zbase_report_pane z-modal.add_widget .widget_selection[data-selected] .inner:before {
+  font-family: FontAwesome;
+  content: "\f00c";
+  color: #1c99d6;
+  margin-right: 5px;
 }
 
 .zbase_report_infobar {

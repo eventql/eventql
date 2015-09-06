@@ -56,10 +56,29 @@
       <div class="zbase_report_content">
         <div class="zbase_report_viewport"></div>
 
-        <div class="link add_element">
+        <div class="link add_widget">
           <i class="fa fa-plus"></i>&nbsp;Add Report Element
         </div>
       </div>
+
+      <z-modal class="zbase_sql_editor_modal add_widget">
+        <z-modal-box>
+          <z-modal-close-icon></z-modal-close-icon>
+          <div class="z-modal-header">Add Report Element</div>
+          <div class="z-modal-content">
+            <h4>Please choose an element type</h4>
+            <div class="widget_selections">
+              <div class="widget_selection" data-widget="sql-widget" data-selected>
+                <div class="inner">Report SQL</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="z-modal-footer">
+            <button class="z-button primary submit">Save</button>
+          </div>
+        </z-modal-box>
+      </z-modal>
 
       <z-modal class="zbase_sql_editor_modal rename_report edit">
         <z-modal-box>
