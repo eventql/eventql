@@ -73,11 +73,7 @@ var WidgetList = function(widget_definitions) {
       destroyWidget(id);
     };
   };
-    //alle aktuellen widget ids
-    //if bestehend update
-    // if new create
-        //--> id aus set loeaschen
-      // am ende durch alle urbig gebliebenen destroyen
+
 
   var getWidgetConfig = function(widget_id) {
     for (var i = 0; i < widgets.length; i++) {
@@ -108,14 +104,6 @@ var WidgetList = function(widget_definitions) {
     });
   };
 
-  //var setJSON = function(new_widgets) {
-  //  widgets = new_widgets;
-  //  var tpl = $.getTemplate(
-  //        "views/report",
-  //        "zbase_report_widget_main_tpl");
-
-  //  });
-  //};
   var destroyWidget = function(widget_id) {
     for (var i = 0; i < widgets.length; i++) {
       if (widgets[i].conf.uuid == widget_id) {
@@ -136,17 +124,6 @@ var WidgetList = function(widget_definitions) {
     }
   };
 
-  //var renderEditView = function(widget) {
-  //  var tpl = $.getTemplate(
-  //      "views/report",
-  //      "zbase_report_edit_widget_tpl");
-
-  //  var view = widget.editView;
-
-  //  pane.innerHTML = "";
-  //  view.render($(".zbase_report_widget_pane", tpl));
-  //  pane.appendChild(tpl);
-  //};
   var onWidgetEdit = function(callback) {
     widget_edit_callbacks.push(callback);
   };
@@ -157,7 +134,7 @@ var WidgetList = function(widget_definitions) {
     });
   };
 
-  //unrender
+  //TODO unrender
 
   return {
     render: render,
