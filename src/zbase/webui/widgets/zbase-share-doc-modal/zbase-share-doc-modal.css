@@ -1,0 +1,77 @@
+z-modal.zbase_share_doc .z-modal-content {
+  font-size: 14px
+}
+
+.zbase_share_doc .share_doc_access_settings {
+  margin: 10px 0 0 0;
+}
+
+.zbase_share_doc .access_selection {
+  width: 100%;
+  padding: 12px 10px;
+  border-left: 1px solid rgba(0, 0, 0, 0.15);
+  border-right: 1px solid rgba(0, 0, 0, 0.15);
+  border-top: 1px solid rgba(0, 0, 0, 0.15);
+  color: #000;
+}
+
+.zbase_share_doc .access_selection:hover,
+.zbase_share_doc .access_selection[data-selected] {
+  cursor: pointer;
+  background: #f2f8fa;
+}
+
+.zbase_share_doc .access_selection .inner:before {
+  width: 18px;
+  min-height: 1px;
+  display: inline-block;
+  content: "";
+}
+
+.zbase_share_doc .access_selection[data-selected] .inner:before {
+  font-family: FontAwesome;
+  content: "\f00c";
+  color: #1c99d6;
+}
+
+
+.zbase_share_doc .share_doc_access_settings .access_selection:first-child {
+  border-top-left-radius: 3px;
+  border-top-right-radius: 3px;
+}
+
+.zbase_share_doc .share_doc_access_settings .access_selection:last-child {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+  border-bottom-left-radius: 3px;
+  border-bottom-right-radius: 3px;
+}
+
+.zbase_share_doc .share_doc_infobar {
+  border-bottom: 1px solid #edc3c3;
+  background: #fff0f0;
+  box-shadow: 0 1px 1px rgba(0,0,0,0.1);
+  padding: 10px 20px;
+  font-size: 13px;
+  font-weight: 400;
+  color: rgba(10,10,10,0.65);
+  display: block;
+}
+
+.zbase_share_doc .share_doc_infobar.hidden {
+  display: none;
+}
+
+.zbase_share_doc h4 {
+  font-weight: 400;
+  line-height: 34px;
+}
+
+.zbase_share_doc .zbase_share_doc_link,
+.zbase_share_doc .zbase_share_doc_link:active,
+.zbase_share_doc .zbase_share_doc_link:focus {
+  border: none;
+  font: 12px monospace;
+  background: #f2f8fa;
+  line-height: 22px;
+  padding: 8px 16px;
+}

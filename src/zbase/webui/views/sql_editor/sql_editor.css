@@ -1,8 +1,18 @@
+.zbase_sql_editor .zbase_sql_editor_pane {
+  display: table;
+  table-layout: fixed;
+  width: 100%;
+  min-height: 900px; /* FIXME */
+  border-bottom: 1px solid #ddd;
+}
+
+
 .zbase_sql_editor .zbase_sql_editor_sidebar {
   padding: 20px 20px 0;
-  float: right;
   width: 320px;
-  height: 200px;
+  min-height: 200px;
+  display: table-cell;
+  vertical-align: top;
 }
 
 .zbase_sql_editor .zbase_sql_editor_sidebar .sidebar_section {
@@ -12,22 +22,12 @@
   line-height: 21px;
 }
 
-.zbase_sql_editor .zbase_sql_editor_sidebar .sidebar_title {
-  font-weight: 500;
-  color: #333;
+.zbase_sql_editor .zbase_sql_editor_sidebar .zbase_table_list {
+  margin-top: 18px;
+}
+
+.zbase_sql_editor .zbase_sql_editor_sidebar .zbase_table_list h3 {
   font-size: 13px;
-  margin-bottom: 10px;
-}
-
-.zbase_sql_editor .zbase_sql_editor_sidebar ul.zbase_sql_editor_table_list {
-  padding: 0;
-  margin: 0;
-  list-style-type: none;
-}
-
-.zbase_sql_editor .zbase_sql_editor_sidebar ul.zbase_sql_editor_table_list li {
-  margin-bottom: 10px;
-  cursor: pointer;
 }
 
 .zbase_sql_editor .zbase_sql_editor_sidebar a.link {
@@ -37,11 +37,13 @@
 .zbase_sql_editor .zbase_sql_editor_content {
   border-left: 1px solid #ddd;
   border-right: 1px solid #ddd;
-  min-height: 900px; /* FIXME */
+  background: #fff;
 }
 
 .zbase_sql_editor .zbase_sql_editor_content.with_sidebar {
-  margin-right: 320px;
+  display: table-cell;
+  vertical-align: top;
+  width: auto;
 }
 
 .zbase_sql_editor .z-button {
@@ -104,6 +106,14 @@
   color: #000;
 }
 
+.zbase_sql_editor .zbase_sql_editor_result_pane table.z-table {
+  font-size: 12px;
+}
+
+.zbase_sql_editor .zbase_sql_editor_result_pane table.z-table tr td {
+  line-height: 14px;
+}
+
 .zbase_sql_editor .error_message {
   display: block;
   position: relative;
@@ -148,11 +158,17 @@
 /**
   * Editor
   */
-.zbase_sql_editor_pane /deep/ .CodeMirror-gutters {
-  background: #f0f6f8;
+.zbase_sql_editor_pane z-codeeditor {
+  border-top: 1px solid #c9d0d4;
+  border-bottom: 1px solid #c9d0d4;
 }
 
-.zbase_sql_editor_pane /deep/ .CodeMirror {
+.zbase_sql_editor_pane .CodeMirror-gutters {
+  background: rgba(63,144,170,.08);
+  background-color: none;
+}
+
+.zbase_sql_editor_pane .CodeMirror {
   border-left: none;
   border-right: none;
   border-bottom: none;
@@ -168,7 +184,7 @@
 }
 
 .zbase_sql_editor_result_pane .zbase_result_pane_bar {
-  background-color: #f0f6f8;
+  background-color: #f2f8fa;
   border-bottom: 1px solid #c9d0d4;
   box-shadow: 0 1px 1px rgba(0,0,0,0.04);
   height: 38px;
@@ -182,9 +198,10 @@
 
 .zbase_sql_editor_result_pane .zbase_result_pane_bar label {
   float:left;
-  line-height: 40px;
+  line-height: 38px;
   padding: 0 12px;
   font-size: 13px;
+  font-weight: 500;
 }
 
 .zbase_sql_editor_result_pane .zbase_result_pane_bar.clickable:before {
@@ -214,7 +231,7 @@
   opacity: 1;
 }
 
-.zbase_sql_editor_result_pane .zbase_result_pane_bar + table.zbase_sql_chart,
+.zbase_sql_editor_result_pane .zbase_result_pane_bar + .zbase_sql_chart,
 .zbase_sql_editor_result_pane .zbase_result_pane_bar + table.z-table {
   display: none;
 }
@@ -223,7 +240,7 @@
   display: table;
 }
 
-.zbase_sql_editor_result_pane .zbase_result_pane_bar[data-active] + table.zbase_sql_chart {
+.zbase_sql_editor_result_pane .zbase_result_pane_bar[data-active] + .zbase_sql_chart {
   display: block;
 }
 
@@ -259,8 +276,14 @@
   display: none;
 }
 
+.zbase_sql_editor zbase-breadcrumbs {
+  font-size: 12px;
+  padding: 15px 20px 0 20px;
+}
+
 .zbase_sql_editor .zbase_sql_editor_title {
   padding: 0 20px;
+  background: #fff;
 }
 
 .zbase_sql_editor .zbase_sql_editor_title .z-button {
@@ -271,5 +294,29 @@
 
 .zbase_sql_editor .zbase_sql_chart {
   padding: 20px;
+}
+
+.zbase_sql_editor .readonly_hint {
+  font-size: 12px;
+  float: right;
+  line-height: 64px;
+  height: 60px;
+  overflow: hidden;
+  margin-right: 20px;
+  opacity: 0.8;
+}
+
+.zbase_sql_editor .readonly_hint i {
+  margin-right: 2px;
+  opacity: 0.8;
+}
+
+.zbase_sql_editor .readonly_hint:hover {
+  opacity: 1.0;
+  cursor: default;
+}
+
+.zbase_sql_editor .readonly_hint.hidden {
+  display: none;
 }
 

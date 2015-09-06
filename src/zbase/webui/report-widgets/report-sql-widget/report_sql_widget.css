@@ -1,0 +1,49 @@
+.zbase_report_sql_result_pane table.z-table thead th:first-child,
+.zbase_report_sql_result_pane table.z-table tbody td:first-child {
+  padding-left: 20px;
+}
+
+.zbase_report_sql_result_pane table.z-table {
+  border-top: 1px solid #e6e8e9;
+  border-bottom: 1px solid #e6e8e9;
+  font-size: 13px;
+}
+
+.zbase_report_sql_error_message {
+  display: block;
+  position: relative;
+  min-height: 1em;
+  padding: 1em 1.5em;
+  line-height: 1.3;
+  color: rgba(0, 0, 0, 0.8);
+  font-size: 1em;
+  font-family: 'Helvetica Neue', Arial, Helvetica, sans-serif;
+  font-size: 14px;
+  background: #fff0f0;
+  color: #a94442;
+}
+
+.zbase_report_sql_error_message h3 {
+  margin-top: 0;
+}
+
+.zbase_report_sql_editor z-codeeditor {
+  border-top: 1px solid #c9d0d4;
+  border-bottom: 1px solid #c9d0d4;
+}
+
+.zbase_report_sql_editor .CodeMirror-gutters {
+  background: rgba(63,144,170,.08);
+  background-color: none;
+}
+
+.zbase_report_sql_editor .CodeMirror {
+  border-left: none;
+  border-right: none;
+  border-bottom: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  -o-user-select: none;
+  user-select: none;
+}

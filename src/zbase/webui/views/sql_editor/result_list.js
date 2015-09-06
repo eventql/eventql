@@ -6,7 +6,7 @@ var SQLEditorResultList = function(results) {
 
     innerHTML = "<thead><tr>";
     columns.forEach(function(column) {
-      innerHTML += "<th>" + column + "</th>";
+      innerHTML += "<th>" + $.escapeHTML(column) + "</th>";
     });
 
     innerHTML += "</tr></thead><tbody>";
@@ -14,7 +14,7 @@ var SQLEditorResultList = function(results) {
     rows.forEach(function(row) {
       innerHTML += "<tr>";
       row.forEach(function(cell) {
-        innerHTML += "<td>" + cell + "</td>";
+        innerHTML += "<td>" + $.escapeHTML(cell) + "</td>";
       });
       innerHTML += "</tr>";
     });

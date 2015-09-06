@@ -102,6 +102,12 @@ protected:
       const http::HTTPRequest* req,
       http::HTTPResponse* res);
 
+  void fetchTableDefinition(
+      const AnalyticsSession& session,
+      const String& table_name,
+      const http::HTTPRequest* req,
+      http::HTTPResponse* res);
+
   void createTable(
       const AnalyticsSession& session,
       const http::HTTPRequest* req,

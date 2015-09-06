@@ -18,8 +18,9 @@
 
 namespace csql {
 
-class ResultList : public RowSink {
+class ResultList {
 public:
+
   ResultList() {}
   ResultList(const ResultList& copy) = delete;
   ResultList& operator=(const ResultList& copy) = delete;
@@ -62,20 +63,13 @@ public:
     columns_ = columns;
   }
 
-  void addRow() {
-    rows_.emplace_back();
-  }
-
-  void addColumn(const std::string& value) {
-    rows_.back().push_back(value);
-  }
-
-  bool nextRow(csql::SValue* row, int row_len) override {
-    addRow();
+  void addRow(const csql::SValue* row, int row_len) {
+    Vector<String> str_row;
     for (int i = 0; i < row_len; ++i) {
-      addColumn(row[i].toString());
+      str_row.emplace_back(row[i].toString());
     }
-    return true;
+
+    rows_.emplace_back(str_row);
   }
 
   void debugPrint() const {

@@ -47,14 +47,14 @@ ZBase.registerView((function() {
       renderQueryResult(data.results);
     });
 
+    query.addEventListener('query_error', function(e) {
+      query_mgr.close("sql_query");
+      renderQueryError(JSON.parse(e.data).error);
+    });
+
     query.addEventListener('error', function(e) {
       query_mgr.close("sql_query");
-
-      try {
-        renderQueryError(JSON.parse(e.data).error);
-      } catch (e) {
-        renderQueryError(e.data);
-      }
+      renderQueryError("Server Error");
     });
 
     query.addEventListener('status', function(e) {
@@ -63,34 +63,61 @@ ZBase.registerView((function() {
   }
 
   var renderQueryEditor = function(doc) {
+    var readonly = !doc.is_writable;
     var page = $.getTemplate(
         "views/sql_editor",
         "zbase_sql_editor_main_tpl");
 
-    // setup docsync
-    docsync = DocSync(
-        getDocument,
-        "/api/v1/documents/" + doc.uuid,
-        $(".zbase_sql_editor_infobar", page));
+    if (!readonly) {
+      // setup docsync
+      docsync = DocSync(
+          getDocument,
+          "/api/v1/documents/" + doc.uuid,
+          $(".zbase_sql_editor_infobar", page));
+    }
 
     // code editor
     var editor = $("z-codeeditor", page);
     editor.setValue(doc.content);
+    if (readonly) editor.setAttribute("data-readonly", "readonly");
     editor.addEventListener("execute", function(e) {
       executeQuery(e.value);
-      docsync.saveDocument();
+      if (docsync) docsync.saveDocument();
     });
 
     $.onClick($("button[data-action='execute-query']", page), function() {
       editor.execute();
     });
 
+    //table_list
+    var table_list = TableListWidget($(".sidebar_section", page));
+    table_list.render();
+
+    // sharing widget/button
+    if (readonly) {
+      $(".share_button", page).remove();
+    } else {
+      var modal = ShareDocModal(
+          $(".zbase_sql_editor", page),
+          doc.uuid,
+          "http://zbase.io/a/sql/" + doc.uuid);
+      $.onClick($("button[data-action='share-query']", page), function() {
+        modal.show();
+      });
+    }
+
     $.handleLinks(page);
     $.replaceViewport(page);
 
     // document name + name editing
     setDocumentTitle(doc.name);
-    initDocumentNameEditModal();
+    if (!readonly) {
+      $(".zbase_sql_editor .document_name").classList.add("editable");
+      initDocumentNameEditModal();
+    } else {
+      $(".zbase_sql_editor .readonly_hint").classList.remove("hidden");
+    }
+
 
     // execute query
     if (doc.content.length > 0) {
@@ -132,7 +159,7 @@ ZBase.registerView((function() {
       docsync.saveDocument();
       modal.close();
     });
-  }
+  };
 
   var setDocumentTitle = function(title) {
     $(".zbase_sql_editor_title h2").innerHTML = $.escapeHTML(title);

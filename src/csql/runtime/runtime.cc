@@ -32,11 +32,9 @@ Runtime::Runtime(
     query_builder_(query_builder),
     query_plan_builder_(query_plan_builder) {}
 
-void Runtime::executeQuery(
+RefPtr<QueryPlan> Runtime::buildQueryPlan(
     const String& query,
-    RefPtr<ExecutionStrategy> execution_strategy,
-    RefPtr<ResultFormat> result_format) {
-
+    RefPtr<ExecutionStrategy> execution_strategy) {
   /* parse query */
   csql::Parser parser;
   parser.parse(query.data(), query.size());
@@ -50,12 +48,19 @@ void Runtime::executeQuery(
     stmt = execution_strategy->rewriteQueryTree(stmt);
   }
 
-  auto query_plan = mkRef(
+  return mkRef(
       new QueryPlan(
           statements,
           execution_strategy->tableProvider(),
           query_builder_.get(),
           this));
+}
+
+void Runtime::executeQuery(
+    const String& query,
+    RefPtr<ExecutionStrategy> execution_strategy,
+    RefPtr<ResultFormat> result_format) {
+  auto query_plan = buildQueryPlan(query, execution_strategy);
 
   /* execute query and format results */
   csql::ExecutionContext context(&tpool_);
@@ -65,6 +70,29 @@ void Runtime::executeQuery(
 
   result_format->formatResults(query_plan, &context);
 }
+
+void Runtime::executeStatement(
+    ScopedPtr<Statement> statement,
+    ResultList* result) {
+  csql::ExecutionContext context(&tpool_);
+  if (!cachedir_.isEmpty()) {
+    context.setCacheDir(cachedir_.get());
+  }
+
+  auto table_expr = dynamic_cast<TableExpression*>(statement.get());
+  if (!table_expr) {
+    RAISE(kRuntimeError, "statement must be a table expression");
+  }
+
+  result->addHeader(table_expr->columnNames());
+  table_expr->execute(
+      &context,
+      [result] (int argc, const csql::SValue* argv) -> bool {
+        result->addRow(argv, argc);
+        return true;
+      });
+}
+
 
 SValue Runtime::evaluateStaticExpression(ASTNode* expr) {
   auto val_expr = mkRef(query_plan_builder_->buildValueExpression(expr));

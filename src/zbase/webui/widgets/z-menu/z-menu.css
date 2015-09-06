@@ -344,6 +344,7 @@ z-menu z-menu-item:before {
   display: none;
 }
 
+z-menu z-menu-title,
 z-menu z-menu-title a,
 z-menu z-menu-item a {
   text-decoration: none;

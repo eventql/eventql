@@ -1,0 +1,28 @@
+<template id="zbase_report_sql_widget_main_tpl">
+  <div class="zbase_report_sql_result_pane">
+  </div>
+</template>
+
+<template id="zbase_report_sql_error_msg_tpl">
+  <div class="zbase_report_sql_error_message">
+    <h3>Error</h3>
+    <div class="error_text"></div>
+  </div>
+</template>
+
+<template id="zbase_report_sql_widget_editor_main_tpl">
+  <div class="zbase_report_widget zbase_report_sql_editor">
+    <div class="zbase_report_widget_header">
+      <button class="z-button primary save">
+        <i class="fa fa-floppy-o"></i>&nbsp;Save
+      </button>
+      <button class="z-button secondary cancel">
+        <i class="fa fa-arrow-left"></i>&nbsp;Back
+      </button>
+
+      <h2 class="pagetitle widget_title">Edit Report SQL Query</h2>
+    </div>
+
+    <z-codeeditor data-language="text/x-chartsql" data-resizable='vertical' style="height: 250px;"></z-codeeditor>
+  </div>
+</template>

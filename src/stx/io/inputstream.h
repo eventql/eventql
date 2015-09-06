@@ -171,7 +171,8 @@ class FileInputStream : public RewindableInputStream {
 public:
   enum kByteOrderMark {
     BOM_UNKNOWN,
-    BOM_UTF8
+    BOM_UTF8,
+    BOM_UTF16
   };
 
   /**

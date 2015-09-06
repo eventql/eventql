@@ -16,8 +16,13 @@ var DropDownComponent = function() {
     // dropdown items
     var items = this.querySelector("z-dropdown-items");
     if (items) {
-      var cloned = items.cloneNode(true);
-      this.setDropdownItems(cloned.children);
+      var item_nodes = items.querySelectorAll("z-dropdown-item");
+      for (var i = 0; i < item_nodes.length; i++) {
+        item_nodes[i].addEventListener('click', function(e) {
+          e.stopPropagation;
+          base.__onItemClick(this);
+        }, false);
+      }
     }
 
     // header
@@ -28,7 +33,7 @@ var DropDownComponent = function() {
     }
 
     //render header value
-    if (!header_elem.querySelector("z-drodpown-header-value")) {
+    if (!header_elem.querySelector("z-dropdown-header-value")) {
       header_elem.appendChild(document.createElement(
         "z-dropdown-header-value"));
     }
@@ -38,6 +43,20 @@ var DropDownComponent = function() {
       var icon = document.createElement("z-dropdown-header-icon");
       icon.innerHTML = "<i class='fa fa-caret-down'></i>";
       header_elem.appendChild(icon);
+    }
+
+    //render apply button
+    if (this.hasAttribute("data-multiselect")) {
+      var button_container = document.createElement("z-dropdown-button");
+      var button = document.createElement("button");
+      button.className = "z-button primary"
+      button.innerHTML = "Apply";
+      button_container.appendChild(button);
+      this.querySelector("z-dropdown-flyout").insertBefore(
+        button_container,
+        items);
+
+      button.addEventListener("click", base.hideDropdown.bind(base), false);
     }
 
     header_elem.addEventListener('click', function(e) {
@@ -120,7 +139,6 @@ var DropDownComponent = function() {
 
   this.setDropdownItems = function(items) {
     var base = this;
-
     var elem = this.querySelector("z-dropdown-items");
     elem.innerHTML = "";
 
@@ -134,9 +152,28 @@ var DropDownComponent = function() {
     }
   };
 
+  this.unselectItem = function(item) {
+    if (!item) {return;}
+    item.removeAttribute('data-selected');
+    var checkbox = item.querySelector("z-checkbox");
+    if (checkbox) {
+      checkbox.removeAttribute('data-active');
+    }
+  };
+
+  this.selectItem = function(item) {
+    if (!item) {return;}
+    item.setAttribute('data-selected', 'selected');
+    var checkbox = item.querySelector("z-checkbox");
+    if (checkbox) {
+      checkbox.setAttribute('data-active', 'active');
+    }
+  };
+
+
   this.toggleDropdown = function() {
     if (this.hasAttribute('data-active')) {
-      this.hideDropdown();
+     this.hideDropdown();
     } else {
       this.showDropdown();
     }
@@ -172,6 +209,9 @@ var DropDownComponent = function() {
     });
 
     this.dispatchEvent(ev);
+    if (this.hasAttribute("data-multiselect")) {
+      this.__fireChangeEvent();
+    }
   };
 
   /**
@@ -264,85 +304,78 @@ var DropDownComponent = function() {
     if (checkbox) checkbox.remove();
   };
 
+  this.__forceSelect = function() {
+    var default_selection =
+      this.querySelector('z-dropdown-item[data-default]') ||
+      this.querySelector('z-dropdown-item');
+
+    this.selectItem(default_selection);
+    this.__fireItemChangedEvent({selected: false}, default_selection);
+  }
+
+
   this.__onItemClick = function(item) {
     if (!item) {
       return;
     }
 
-    var input_elem = this.querySelector("z-input");
     var selected = true;
+    var checkbox =
+      item.querySelector("z-checkbox") || item.querySelector("[data-check]");
 
     //multi-selectable dropdown with checkboxes
-    if (this.classList.contains('checkbox')) {
-      var checkbox = item.querySelector("z-checkbox") || item.querySelector("[data-check]");
-
+    if (checkbox != null) {
+      //unselect item
       if (item.hasAttribute('data-selected')) {
         selected = false;
-        item.removeAttribute('data-selected');
-        checkbox.removeAttribute('data-active');
-
-        //not completely unselectable dropdown
-        if (this.hasAttribute('data-force-select') &&
-            !this.querySelector('z-dropdown-item[data-selected]')) {
-
-          var default_select = this.querySelector('z-dropdown-item[data-default]');
-
-          if (default_select) {
-            default_select.setAttribute('data-selected', 'selected');
-            checkbox = default_select.querySelector('z-checkbox');
-
-            if (checkbox) {
-              checkbox.setAttribute('data-active', 'active');
-            }
-          }
-        }
-      } else {
-        checkbox.setAttribute('data-active', 'active');
+        this.unselectItem(item);
       }
-
     } else {
-      var prev_item = this.querySelector("z-dropdown-item[data-selected]");
-
-      if (prev_item) {
-        prev_item.removeAttribute('data-selected');
-      }
+      //unselect previously selected item
+      this.unselectItem(this.querySelector("z-dropdown-item[data-selected]"));
     }
 
     if (selected) {
-      item.setAttribute("data-selected", 'selected');
+      this.selectItem(item);
     }
 
-    if (input_elem) {
-      input_elem.setAttribute('data-value', item.innerHTML);
-    } else {
-      this.__setHeaderValue();
+    this.__fireItemChangedEvent({selected: selected}, item);
+
+    // don't check it previously to maintain correct item-change event order
+    if (!selected &&
+        !this.hasAttribute("data-allow-empty") &&
+        !this.querySelector('z-dropdown-item[data-selected]')) {
+          this.__forceSelect();
     }
 
-    var click_ev = new CustomEvent(
-        (selected) ? "z-dropdown-item-click" : "z-dropdown-item-unselect",
-        {
-            detail : {'text' : item.textContent},
-            bubbles: true,
-            cancelable: true
-        });
+    if (this.hasAttribute("data-multiselect")) {
+      return;
+    }
+
+    this.hideDropdown();
+    this.__fireChangeEvent();
+  };
+
+  this.__fireItemChangedEvent = function(detail, item) {
+    var click_ev = new CustomEvent("item-change", {
+      detail: detail,
+      bubbles: true,
+      cancelable: true
+    });
 
     item.dispatchEvent(click_ev);
+  };
 
-    // FIXME: abort if this is a multiselect
-    this.hideDropdown();
-
-    var change_ev = new CustomEvent(
-        "change",
-        {
-          detail : {
-            value: this.getValue()
-          },
-          bubbles: true,
-          cancelable: true
-        });
+  this.__fireChangeEvent = function() {
+    var change_ev = new CustomEvent("change", {
+      detail : {value: this.getValue()},
+      bubbles: true,
+      cancelable: true
+    });
 
     this.dispatchEvent(change_ev);
   };
+
 
   this.__setKeyNavigation = function() {
     var base = this;
@@ -467,69 +500,7 @@ var DropDownComponent = function() {
     }
   };
 
-  /******************** Searchable Dropdown *************************/
-
-  //this.renderSearchable = function() {
-  //  var dropdown_input = this.querySelector("z-dropdown-input");
-  //  if (!dropdown_input) {
-  //    return;
-  //  }
-
-  //  var base = this;
-  //  var input = document.createElement("z-input");
-  //  var placeholder = dropdown_input.getAttribute('data-placeholder');
-  //  var selected_item = this.querySelector("z-dropdown-item[data-selected");
-
-  //  if (placeholder) {
-  //    input.setAttribute('data-placeholder', placeholder);
-  //  }
-
-  //  if (selected_item) {
-  //    input.setAttribute('data-value', selected_item.textContent);
-  //  }
-
-  //  dropdown_input.appendChild(input);
-  //  input.addEventListener('click', function(e) {
-  //    e.stopPropagation();
-  //    this.setAttribute('data-value', "");
-  //    base.showDropdown();
-  //  }, false);
-
-  //  this.setKeyNavigation(input);
-  //};
-
-  //this.showFilteredDropdownItems = function(value) {
-  //  var items = this.querySelectorAll("z-dropdown-item");
-  //  var value = value.toLowerCase();
-
-  //  for (var i = 0; i < items.length; i++) {
-  //    if (items[i].textContent.toLowerCase().indexOf(value) > -1) {
-  //      items[i].classList.remove('hidden');
-  //    } else {
-  //      items[i].classList.add('hidden');
-  //    }
-  //  }
-
-  //  this.showDropdown();
-  //};
-
-  //this.setXValue = function() {
-  //  var items = this.querySelector("z-dropdown-items");
-  //  var pos = items.getBoundingClientRect();
-  //  var margin;
-
-  //  if (document.body.offsetWidth < pos.right) {
-  //    margin = pos.right - document.body.offsetWidth;
-
-  //    //visible y-scrollbar
-  //    if (items.scrollHeight > pos.height) {
-  //      margin += 17;
-  //    }
-
-  //    items.style.marginLeft = "-" + margin + "px";
-  //  }
-  //}
-};
+ };
 
 var proto = Object.create(HTMLElement.prototype);
 DropDownComponent.apply(proto);

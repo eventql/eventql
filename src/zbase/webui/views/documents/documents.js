@@ -17,12 +17,17 @@ ZBase.registerView((function() {
         "views/documents",
         "zbase_documents_main_tpl");
 
-    var menu = HomeMenu();
-    menu.render($(".zbase_home_menu_sidebar", page));
+    var menu = DocsMenu();
+    menu.render($(".docs_sidebar", page));
 
     renderDocumentsList(
         page.querySelector(".zbase_documents tbody"),
         documents);
+
+    var new_doc_dropdown = $("z-dropdown", page);
+    new_doc_dropdown.addEventListener("change", function(e) {
+      createNewDocument(e.detail.value);
+    });
 
     $.handleLinks(page);
     $.replaceViewport(page)
@@ -31,7 +36,7 @@ ZBase.registerView((function() {
 
   var renderDocumentsList = function(tbody_elem, documents) {
     documents.forEach(function(doc) {
-      var url = "#";
+      var url = getUrlForDocument(doc.type, doc.uuid);
 
       var tr = document.createElement("tr");
       tr.innerHTML = 
@@ -41,6 +46,52 @@ ZBase.registerView((function() {
 
       $.onClick(tr, function() { $.navigateTo(url); });
       tbody_elem.appendChild(tr);
+    });
+  };
+
+  var getUrlForDocument = function(doc_type, uuid) {
+    switch (doc_type) {
+      case "sql_query":
+        return "/a/sql/" + uuid;
+
+      case "report":
+        return "/a/reports/" + uuid;
+
+      default:
+        return "#";
+    }
+  };
+
+  var createNewDocument = function(doc_type) {
+    var name;
+
+    switch (doc_type) {
+      case "sql_query":
+        name = "Unnamed SQL Query";
+        break;
+
+      case "report":
+        name = "Unnamed Report";
+        break;
+
+      default:
+        $.fatalError();
+        return;
+    }
+
+    var postdata = $.buildQueryString({
+      name: name,
+      type: doc_type
+    });
+
+    $.httpPost("/api/v1/documents", postdata, function(r) {
+      if (r.status == 201) {
+        var response = JSON.parse(r.response);
+        $.navigateTo(getUrlForDocument(doc_type, response.uuid));
+        return;
+      } else {
+        $.fatalError();
+      }
     });
   };
 

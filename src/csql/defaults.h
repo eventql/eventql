@@ -14,6 +14,7 @@
 #include <csql/expressions/boolean.h>
 #include <csql/expressions/datetime.h>
 #include <csql/expressions/math.h>
+#include <csql/expressions/internal.h>
 
 using namespace stx;
 

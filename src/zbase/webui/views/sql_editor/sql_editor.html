@@ -1,6 +1,6 @@
 <template id="zbase_sql_editor_main_tpl">
   <div class="zbase_sql_editor">
-    <section class='zbase_page_title small'>
+    <section class='zbase_page_title small' style="none">
       <div>
         <zbase-breadcrumbs>
           <zbase-breadcrumbs-section>
@@ -15,17 +15,8 @@
         </zbase-breadcrumbs>
       </div>
     </section>
-
     <div class="zbase_content_pane fullwidth">
       <div class="zbase_sql_editor_pane">
-        <div class="zbase_sql_editor_sidebar">
-          <div>
-            <!--<a class="link"><i class="fa fa-copy"></i>&nbsp;Clone tis query</a>-->
-          </div>
-          <section class="sidebar_section" class="sql_editor_table_list">
-          </section>
-        </div>
-
         <div class="zbase_sql_editor_content with_sidebar">
           <div class="zbase_sql_editor_infobar hidden"></div>
           <section class="zbase_sql_editor_title">
@@ -33,36 +24,47 @@
               <i class="fa fa-bolt"></i>
               &nbsp;Execute
             </button>
-            <button class="z-button secondary" data-action="share-query">
+            <button class="z-button secondary share_button" data-action="share-query">
               <i class="fa fa-share-alt"></i>
               &nbsp;Share
             </button>
-            <h2 class="pagetitle editable" data-action='edit-query-name'></h2>
+            <span class="readonly_hint hidden"><i class="fa fa-lock"></i> Read-Only</span>
+            <h2 class="pagetitle document_name" data-action='edit-query-name'></h2>
           </section>
 
-          <z-codeeditor data-language="text/x-chartsql" data-content='query_content' style="height: 250px;"></z-codeeditor>
-
-          <div class='resizer_tooltip' draggable="true"></div>
+          <z-codeeditor data-language="text/x-chartsql" data-content='query_content' data-resizable='vertical' style="height: 250px;"></z-codeeditor>
 
           <div class="zbase_sql_editor_result_pane">
           </div>
 
           <z-modal class="zbase_sql_editor_modal rename_query">
-            <z-modal-close-icon></z-modal-close-icon>
-            <div class="z-modal-header">Rename Query</div>
-            <div class="z-modal-content">
-              <h4>Enter a new query name</h4>
-              <input class="z-input" name="doc_name" />
-            </div>
-            <div class="z-modal-footer">
-              <button class="z-button primary" data-action="submit">
-                Save
-              </button>
-            </div>
+            <z-modal-box>
+              <z-modal-close-icon></z-modal-close-icon>
+              <div class="z-modal-header">Rename Query</div>
+              <div class="z-modal-content">
+                <h4>Enter a new query name</h4>
+                <input class="z-input" name="doc_name" />
+              </div>
+              <div class="z-modal-footer">
+                <button class="z-button primary" data-action="submit">
+                  Save
+                </button>
+              </div>
+            </z-modal-box>
           </z-modal>
 
         </div>
+
+        <div class="zbase_sql_editor_sidebar">
+          <div>
+            <!--<a class="link"><i class="fa fa-copy"></i>&nbsp;Clone tis query</a>-->
+          </div>
+          <section class="sidebar_section">
+          </section>
+        </div>
+
       </div>
+      
     </div>
   </div>
 </template>

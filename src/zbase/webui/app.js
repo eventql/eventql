@@ -9,7 +9,7 @@ var ZBase = (function() {
   var config;
 
   /* feature detection */
-  var __enable_html5_import = 'import' in document.createElement('link');
+  var __enable_html5_import = false; // google only technology, not even properly documented :(
   var __enable_html5_templates = ("content" in document.createElement("template"));
   var __enable_html5_importnode = 'importNode' in document;
 
@@ -153,6 +153,9 @@ var ZBase = (function() {
 
     loadModules(route.modules, function() {
       applyNavigationChange();
+      if (config.current_user) {
+        HeaderWidget.setActiveItem();
+      }
     });
   };
 
@@ -412,7 +415,7 @@ $.handleLinks = function(elem) {
     return function(e) {
       var href = this.getAttribute("href");
 
-      if (href.indexOf("/a/") == 0) {
+      if (href && href.indexOf("/a/") == 0) {
         $.navigateTo(href);
         e.preventDefault();
         return false;
@@ -431,9 +434,16 @@ $.handleLinks = function(elem) {
 $.onClick = function(elem, fn) {
   elem.addEventListener("click", function(e) {
     e.preventDefault();
-    fn();
+    e.stopPropagation();
+    fn.call(this, e);
     return false;
   });
+};
+
+$.stopEventPropagation = function(elem, event_name) {
+  elem.addEventListener(event_name, function(e) {
+    e.stopPropagation();
+  }, false);
 };
 
 $.httpPost = function(url, request, callback) {
@@ -487,6 +497,9 @@ $.replaceContent = function(elem, new_content) {
 }
 
 $.escapeHTML = function(str) {
+  if (str == undefined || str == null || str.length == 0) {
+    return "";
+  }
   var div = document.createElement('div');
   div.appendChild(document.createTextNode(str));
   return div.innerHTML;
@@ -503,6 +516,16 @@ $.wrapText = function(str) {
 
   return new_str;
 }
+
+$.uuid = function() {
+  function s4() {
+    return Math.floor((1 + Math.random()) * 0x10000)
+      .toString(16)
+      .substring(1);
+  }
+  return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
+    s4() + '-' + s4() + s4() + s4();
+};
 
 document.getTemplateByID = function(template_name) {
   return $.getTemplate("", template_name);
