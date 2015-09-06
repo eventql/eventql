@@ -28,11 +28,11 @@ var ReportJSONEditor = function(json) {
   };
 
   var addCancelCallback = function(callback) {
-    save_callbacks.push(callback);
+    cancel_callbacks.push(callback);
   };
 
   var addSaveCallback = function(callback) {
-    cancel_callbacks.push(callback);
+    save_callbacks.push(callback);
   };
 
   var triggerCancel = function() {
