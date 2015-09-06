@@ -68,6 +68,7 @@
 .zbase_report_pane .zbase_report_sidebar z-dropdown.mode {
   float: right;
   font-weight: 400;
+  margin-top: -3px;
 }
 
 .zbase_report_pane .zbase_report_sidebar z-dropdown.hidden {
