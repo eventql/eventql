@@ -64,7 +64,11 @@ ZBase.registerView((function() {
     setReportName(doc.name);
     setReportDescription(doc.content.description);
 
-    widget_list = WidgetList(doc.content.widgets);
+    var widgets = [];
+    if (doc.content.hasOwnProperty("widgets")) {
+      widgets = doc.content.widgets;
+    }
+    widget_list = WidgetList(widgets);
     widget_list.onWidgetEdit(function(widget_id) {
       showWidgetEditor(widget_id);
     });
