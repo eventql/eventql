@@ -70,7 +70,7 @@ ZBase.registerView((function() {
     });
 
     // handle display mode
-    $(".zbase_report z-dropdown.mode").addEventListener("change", function() {
+    $(".zbase_report_pane z-dropdown.mode").addEventListener("change", function() {
       widget_list.setEditable(this.getValue() == "editing");
     }, false);
 
