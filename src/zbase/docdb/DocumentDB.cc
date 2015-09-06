@@ -156,6 +156,23 @@ void DocumentDB::updateDocumentName(
   });
 }
 
+void DocumentDB::updateDocumentCategory(
+    const String& db_namespace,
+    const String& userid,
+    const SHA1Hash& uuid,
+    const String& category) {
+  updateDocument(
+    db_namespace,
+    uuid,
+    [&userid, &category] (Document* doc) {
+    if (!isDocumentWritableForUser(*doc, userid)) {
+      RAISE(kAccessDeniedError, "access denied");
+    }
+
+    doc->set_category(category);
+  });
+}
+
 void DocumentDB::updateDocumentACLPolicy(
     const String& db_namespace,
     const String& userid,
