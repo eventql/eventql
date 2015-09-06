@@ -2,22 +2,25 @@ ZBase.registerView((function() {
 
   var load = function() {
     $.showLoader();
-    $.httpGet("/api/v1/documents", function(r) {
+    $.httpGet("/api/v1/documents?with_categories=1", function(r) {
       if (r.status == 200) {
-        var documents = JSON.parse(r.response).documents;
-        render(documents);
+        render(JSON.parse(r.response));
       } else {
         $.fatalError();
       }
     });
   }
 
-  var render = function(documents) {
+  var render = function(data) {
+    console.log(data);
+    var documents = data.documents;
+    var categories = data.categories;
+
     var page = $.getTemplate(
         "views/documents",
         "zbase_documents_main_tpl");
 
-    var menu = DocsMenu();
+    var menu = DocsMenu(categories);
     menu.render($(".docs_sidebar", page));
 
     renderDocumentsList(
