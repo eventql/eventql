@@ -233,6 +233,7 @@ ZBase.registerView((function() {
           return;
         }
         widget_list.addNewWidget(widget_type);
+        save();
         showReportView();
         $.hideLoader();
       });
@@ -311,7 +312,20 @@ ZBase.registerView((function() {
   //  setReportDescription();
   //};
 
+  //FIXME save via doc_sync?
+  var save = function() {
+    //FIXME
+    var kPathPrefix = "/a/reports/";
+    var report_id = window.location.pathname.substr(kPathPrefix.length);
+    var save_url = "/api/v1/documents/" + report_id;
+    var postbody = $.buildQueryString(getDocument());
 
+    $.httpPost(save_url, postbody, function(r) {
+      if (r.status != 201) {
+        $.fatalError("Saving Document Failed");
+      }
+    });
+  };
 
   var getDocument = function() {
     var widgets = [];
