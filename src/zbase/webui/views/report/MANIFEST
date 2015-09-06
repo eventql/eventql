@@ -1,6 +1,8 @@
 js_file: "report.js"
 js_file: "widget_list.js"
 js_file: "report_widget_factory.js"
+js_file: "report_json_editor.js"
 html_file: "report.html"
 html_file: "widget.html"
+html_file: "report_json_editor.html"
 css_file: "report.css"
