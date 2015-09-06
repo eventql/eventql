@@ -162,7 +162,9 @@
 
 .zbase_header .main_menu > li i {
   margin-right: 3px;
-  vertical-align: 0;
+  width: 14px;
+  vertical-align: -2px;
+  overflow: hidden;
 }
 
 .zbase_header .main_menu > li.user_info {
