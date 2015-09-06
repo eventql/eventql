@@ -1,24 +1,26 @@
 <template id="zbase_datastore_tables_list_tpl">
-  <section class='zbase_page_title small'>
+  <section class='zbase_page_title medium'>
     <div>
-      <zbase-breadcrumbs>
-        <zbase-breadcrumbs-section>
-          <a href="/a/">Datastore</a>
-        </zbase-breadcrumbs-section>
-        <zbase-breadcrumbs-section>
-          <a href="/a/datastore/tables">Tables</a>
-        </zbase-breadcrumbs-section>
-      </zbase-breadcrumbs>
+      <h2 class="pagetitle zbase_datastore_menu_pagetitle">Datastore</h2>
     </div>
   </section>
 
   <div class="zbase_content_pane zbase_datastore">
-    <div class="zbase_home_menu_sidebar">
+    <div class="zbase_datastore_menu_sidebar">
     </div>
 
-    <div class="zbase_home_menu_content">
+    <div class="zbase_datastore_menu_content">
       <div class="zbase_datastore_tables">
-        <h2 class="pagetitle">Datastore <i class="sep"></i> <em>Tables</em></h2>
+        <zbase-breadcrumbs>
+          <zbase-breadcrumbs-section>
+            <a href="/a/datastore">Datastore</a>
+          </zbase-breadcrumbs-section>
+          <zbase-breadcrumbs-section>
+            <a href="/a/datastore/tables">Tables</a>
+          </zbase-breadcrumbs-section>
+        </zbase-breadcrumbs>
+        <h2 class="pagetitle"><em>Tables</em></h2>
+
 
         <table class="z-table" data-clickable>
           <thead>
