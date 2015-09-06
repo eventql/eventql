@@ -62,10 +62,15 @@ ZBase.registerView((function() {
     $.replaceViewport(page);
 
     setReportName(doc.name);
-    setReportDescription(doc.content.description);
+
+    var description = "";
+    if (doc.content != null && doc.content.hasOwnProperty("description")) {
+      description = doc.content.description;
+    }
+    setReportDescription(description);
 
     var widgets = [];
-    if (doc.content.hasOwnProperty("widgets")) {
+    if (doc.content != null && doc.content.hasOwnProperty("widgets")) {
       widgets = doc.content.widgets;
     }
     widget_list = WidgetList(widgets);
@@ -142,7 +147,7 @@ ZBase.registerView((function() {
   var findRequiredWidgets = function(doc) {
     var widgets = [];
 
-    if (doc.content.hasOwnProperty("widgets")) {
+    if (doc.content != null && doc.content.hasOwnProperty("widgets")) {
       for (var i = 0; i < doc.content.widgets.length; i++) {
         if (widgets.indexOf(doc.content.widgets[i].type) == -1) {
           widgets.push(doc.content.widgets[i].type);
@@ -341,7 +346,7 @@ ZBase.registerView((function() {
     };
   };
 
-  
+
   return {
     name: "report",
     loadView: function(params) { goToURL(params.path); },
