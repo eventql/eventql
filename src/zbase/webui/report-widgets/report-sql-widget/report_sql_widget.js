@@ -137,7 +137,7 @@ var ReportSQLWidgetEditor = function(conf) {
     editor.setValue(conf.query);
 
     $.onClick($("button.save", tpl), function() {
-      conf.query = editor.getValue();
+      conf.query = $.escapeHTML(editor.getValue());
       triggerSave();
     });
 
