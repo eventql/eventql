@@ -1,0 +1,39 @@
+<template id="zbase_doc_settings_main_tpl">
+  <div class="zbase_doc_settings">
+    <h4><i class="fa fa-file-o"></i>&nbsp;Document Settings</h4>
+
+    <div class="doc_setting">
+      <div class="doc_setting_title">Status</div>
+      <div class="doc_setting_value status">&#8211;</div>
+    </div>
+
+    <div class="doc_setting">
+      <div class="doc_setting_title">Access</div>
+      <div class="doc_setting_value acl_policy">&#8211;</div>
+    </div>
+
+    <div class="doc_setting">
+      <div class="doc_setting_title">Category</div>
+      <div class="doc_setting_value category">&#8211;</div>
+    </div>
+
+    <div class="doc_setting">
+      <div class="link trash">Move To Trash</div>
+    </div>
+
+    <div class="doc_setting">
+      <div class="link clone">Clone Document</div>
+    </div>
+  </div>
+</template>
+
+<template id="zbase_doc_settings_status_inner_tpl">
+  <z-dropdown class="status">
+    <z-dropdown-flyout>
+      <z-dropdown-items>
+        <z-dropdown-item data-value='published'>Published</z-dropdown-item>
+        <z-dropdown-item data-value='draft'>Draft</z-dropdown-item>
+      </z-dropdown-items>
+    </z-dropdown-flyout>
+  </z-dropdown>
+</template>
