@@ -119,7 +119,14 @@ var ReportSQLWidgetDisplay = function(elem, conf) {
     render: loadQuery,
     destroy: destroy
   };
+};
 
+ReportSQLWidgetDisplay.getInitialConfig = function() {
+  return {
+    type: "sql-widget",
+    uuid: $.uuid(),
+    query: ""
+  }
 };
 
 var ReportSQLWidgetEditor = function(conf) {
@@ -175,6 +182,8 @@ var ReportSQLWidgetEditor = function(conf) {
     onCancel: onCancel
   }
 };
+
+
 
 ReportWidgetFactory.registerWidget(
     "sql-widget",

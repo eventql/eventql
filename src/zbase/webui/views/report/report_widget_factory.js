@@ -21,16 +21,22 @@ var ReportWidgetFactory = (function() {
     return widget_display;
   };
 
+  var getWidgetDisplayInitialConf = function(type) {
+    return widgets[type].display.getInitialConfig();
+  };
+
 
   var getWidgetEditor = function(conf) {
     return widgets[conf.type].editor(conf);
   };
 
 
+
   return {
     loadWidgets: loadWidgets,
     registerWidget: register,
     renderWidgetDisplay: renderWidgetDisplay,
+    getWidgetDisplayInitialConf: getWidgetDisplayInitialConf,
     getWidgetEditor: getWidgetEditor
   };
 })();
