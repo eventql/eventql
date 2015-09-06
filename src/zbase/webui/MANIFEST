@@ -101,7 +101,7 @@ route {
   view: "datastore_tables"
   require_module: "util/event_source_handler"
   require_module: "widgets/zbase-header"
-  require_module: "widgets/zbase-home-menu"
+  require_module: "widgets/zbase-datastore-menu"
   require_module: "widgets/z-menu"
   require_module: "widgets/z-table"
   require_module: "views/datastore_tables"
