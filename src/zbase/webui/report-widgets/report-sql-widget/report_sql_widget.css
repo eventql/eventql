@@ -9,4 +9,23 @@
   font-size: 13px;
 }
 
+.zbase_report_sql_editor z-codeeditor {
+  border-top: 1px solid #c9d0d4;
+  border-bottom: 1px solid #c9d0d4;
+}
 
+.zbase_report_sql_editor .CodeMirror-gutters {
+  background: rgba(63,144,170,.08);
+  background-color: none;
+}
+
+.zbase_report_sql_editor .CodeMirror {
+  border-left: none;
+  border-right: none;
+  border-bottom: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  -o-user-select: none;
+  user-select: none;
+}
