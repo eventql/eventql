@@ -266,7 +266,9 @@ void DocumentDBServlet::listDocuments(
       session.customer(),
       session.userid(),
       [this, &i, &json, &session, &categories] (const Document& doc) -> bool {
-    categories.emplace(doc.category());
+    if (!doc.category().empty()) {
+      categories.emplace(doc.category());
+    }
 
     if (++i > 1) {
       json.addComma();

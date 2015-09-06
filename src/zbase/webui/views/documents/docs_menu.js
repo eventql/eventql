@@ -1,10 +1,11 @@
-var DocsMenu = function() {
+var DocsMenu = function(categories) {
 
   var render = function(elem) {
     var tpl = $.getTemplate(
         "views/documents",
         "zbase_documents_menu_main_tpl");
 
+    console.log("categories:", categories);
     setActiveMenuItem(tpl);
 
     elem.innerHTML = "";
