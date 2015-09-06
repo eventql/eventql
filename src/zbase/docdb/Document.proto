@@ -75,6 +75,8 @@ message Document {
 
   optional DocumentPublishingStatus publishing_status = 12;
 
+  optional string category = 13;
+
   optional bytes content = 11;
 
 }

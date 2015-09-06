@@ -286,6 +286,10 @@ void DocumentDBServlet::renderDocument(
   json->addString(DocumentPublishingStatus_Name(doc.publishing_status()));
   json->addComma();
 
+  json->addObjectEntry("category");
+  json->addString(doc.category());
+  json->addComma();
+
   json->addObjectEntry("acl_policy");
   json->addString(DocumentACLPolicy_Name(doc.acl_policy()));
   json->addComma();
