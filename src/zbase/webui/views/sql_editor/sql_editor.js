@@ -94,8 +94,10 @@ ZBase.registerView((function() {
     table_list.render();
 
     //preferences
-    var settings_widget = DocumentSettingsWidget(doc.uuid);
-    settings_widget.render($(".document_settings", page));
+    var settings_widget = DocumentSettingsWidget(
+        $(".document_settings", page),
+        doc.uuid);
+    settings_widget.render();
 
     // sharing widget/button
     if (readonly) {
