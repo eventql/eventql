@@ -53,6 +53,32 @@ var WidgetList = function(widget_definitions) {
     return json;
   };
 
+  var setJSON = function(json) {
+    var widget_ids = {};
+    widgets.forEach(function(widget) {
+      widget_ids[widget.conf.uuid] = true;
+    });
+
+    json.forEach(function(widget_conf) {
+      if (widget_conf.hasOwnProperty("uuid") &&
+          widget_ids.hasOwnProperty(widget_conf.uuid)) {
+              updateWidgetConfig(widget_conf.uuid, widget_conf);
+              delete widget_ids[widget_conf.uuid];
+      } else {
+        addNewWidget(widget_conf.type);
+      }
+    });
+
+    for (var id in widget_ids) {
+      destroyWidget(id);
+    };
+  };
+    //alle aktuellen widget ids
+    //if bestehend update
+    // if new create
+        //--> id aus set loeaschen
+      // am ende durch alle urbig gebliebenen destroyen
+
   var getWidgetConfig = function(widget_id) {
     for (var i = 0; i < widgets.length; i++) {
       if (widgets[i].conf.uuid == widget_id) {
@@ -74,6 +100,7 @@ var WidgetList = function(widget_definitions) {
   };
 
   var addNewWidget = function(widget_type) {
+    //FIXME loadWidget(widget_type)
     widgets.push({
       conf: ReportWidgetFactory.getWidgetDisplayInitialConf(widget_type),
       container: null,
@@ -89,6 +116,15 @@ var WidgetList = function(widget_definitions) {
 
   //  });
   //};
+  var destroyWidget = function(widget_id) {
+    for (var i = 0; i < widgets.length; i++) {
+      if (widgets[i].conf.uuid == widget_id) {
+        widgets[i].display_obj.destroy();
+        widgets.splice(i, 1);
+        return;
+      }
+    }
+  };
 
   var setEditable = function(is_editable) {
     if (elem) {
@@ -126,6 +162,7 @@ var WidgetList = function(widget_definitions) {
   return {
     render: render,
     getJSON: getJSON,
+    setJSON: setJSON,
     getWidgetConfig: getWidgetConfig,
     updateWidgetConfig: updateWidgetConfig,
     addNewWidget: addNewWidget,
