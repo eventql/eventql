@@ -12,7 +12,6 @@ ZBase.registerView((function() {
   }
 
   var render = function(data) {
-    console.log(data);
     var documents = data.documents;
     var categories = data.categories;
 
