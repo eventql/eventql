@@ -220,17 +220,17 @@
 /**
   * Editor
   */
-.zbase_report_pane z-codeeditor {
+.zbase_report_pane .edit_content_pane z-codeeditor {
   border-top: 1px solid #c9d0d4;
   border-bottom: 1px solid #c9d0d4;
 }
 
-.zbase_report_pane .CodeMirror-gutters {
+.zbase_report_pane .edit_content_pane  .CodeMirror-gutters {
   background: rgba(63,144,170,.08);
   background-color: none;
 }
 
-.zbase_report_pane .CodeMirror {
+.zbase_report_pane .edit_content_pane  .CodeMirror {
   border-left: none;
   border-right: none;
   border-bottom: none;
@@ -240,11 +240,5 @@
   -o-user-select: none;
   user-select: none;
 }
-
-.zbase_report_pane .zbase_report_content .report_ui.hidden,
-.zbase_report_pane .zbase_report_content .edit_content_pane.hidden {
-  display: none;
-}
-
 
 
