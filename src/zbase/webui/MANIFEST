@@ -90,7 +90,7 @@ route {
   path_match: "/a/datastore/logfiles"
   view: "datastore_logfiles"
   require_module: "widgets/zbase-header"
-  require_module: "widgets/zbase-home-menu"
+  require_module: "widgets/zbase-datastore-menu"
   require_module: "widgets/z-menu"
   require_module: "widgets/z-table"
   require_module: "views/datastore_logfiles"

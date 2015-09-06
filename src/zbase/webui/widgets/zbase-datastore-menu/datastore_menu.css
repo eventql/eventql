@@ -1,0 +1,24 @@
+
+.zbase_datastore_menu_pagetitle {
+}
+
+.zbase_datastore_menu_sidebar z-menu {
+  position: absolute;
+  width: 176px;
+  margin-left: -8px;
+  margin-top: 6px;
+}
+
+.zbase_datastore_menu_content {
+  margin-left: 186px;
+  min-height: 900px; /* FIXME */
+  padding: 0 20px;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(0,0,0,.2);
+}
+
+.zbase_datastore_menu_content zbase-breadcrumbs {
+  padding: 0;
+  margin: 12px 0 -6px 0;
+  opacity: 0.6;
+}

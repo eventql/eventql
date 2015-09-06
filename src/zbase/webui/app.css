@@ -354,6 +354,10 @@ template {
   height: 75px;
 }
 
+.zbase_page_title.medium {
+  height: 63px;
+}
+
 .zbase_page_title.small {
   height: 41px;
 }
