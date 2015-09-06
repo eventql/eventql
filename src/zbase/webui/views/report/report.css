@@ -1,21 +1,3 @@
-/** Page Title */
-.zbase_page_title.zbase_report zbase-breadcrumbs {
-  float: left;
-}
-
-.zbase_page_title.zbase_report z-dropdown {
-  float: right;
-  margin-top: 5px;
-}
-
-.zbase_page_title.zbase_report z-dropdown.hidden {
-  display: none;
-}
-
-.zbase_page_title.zbase_report z-dropdown i {
-  margin-right: 3px;
-}
-
 .zbase_report_pane {
   display: table;
   table-layout: fixed;
@@ -81,6 +63,19 @@
 .zbase_report_pane .zbase_report_sidebar .writable_report_actions .link {
   font-weight: 500;
   margin-right: 5px;
+}
+
+.zbase_report_pane .zbase_report_sidebar z-dropdown.mode {
+  float: right;
+  font-weight: 400;
+}
+
+.zbase_report_pane .zbase_report_sidebar z-dropdown.hidden {
+  display: none;
+}
+
+.zbase_report_pane .zbase_report_sidebar z-dropdown i {
+  margin-right: 3px;
 }
 
 .zbase_report_pane .zbase_report_sidebar .sidebar_content {
