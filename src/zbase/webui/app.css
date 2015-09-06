@@ -82,7 +82,7 @@ h1 {
 }
 
 ::selection {
-  background: #a8d1ff; 
+  background: #a8d1ff;
 }
 
 ::-moz-selection {
@@ -135,7 +135,6 @@ template {
   box-shadow: 0 0 2px rgba(0,0,0,.2);
   height: 40px;
   line-height: 30px;
-  overflow: hidden;
   position: absolute;
   z-index: 99999;
 }
@@ -302,15 +301,15 @@ template {
 }
 
 @-webkit-keyframes zbase_loader_anim {
-  0%, 40%, 100% { -webkit-transform: scaleY(0.4) }  
+  0%, 40%, 100% { -webkit-transform: scaleY(0.4) }
   20% { -webkit-transform: scaleY(1.0) }
 }
 
 @keyframes zbase_loader_anim {
-  0%, 40%, 100% { 
+  0%, 40%, 100% {
     transform: scaleY(0.4);
     -webkit-transform: scaleY(0.4);
-  }  20% { 
+  }  20% {
     transform: scaleY(1.0);
     -webkit-transform: scaleY(1.0);
   }
