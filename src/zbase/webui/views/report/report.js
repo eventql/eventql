@@ -84,6 +84,7 @@ ZBase.registerView((function() {
       initNameEditing();
       initDescriptionEditing();
       initShareDocModal(doc.uuid);
+      initWidgetAdding();
     }
 
     showReportView();
@@ -212,6 +213,32 @@ ZBase.registerView((function() {
     });
   };
 
+  var initWidgetAdding = function() {
+    var modal = $(".zbase_report_pane z-modal.add_widget");
+    $.onClick($(".zbase_report_pane .link.add_widget"), function() {
+      //FIXME get available report widgets and render selection
+      modal.show();
+    });
+
+    $.onClick($("button.submit", modal), function() {
+      var widget_type = $(".widget_selection[data-selected", modal)
+          .getAttribute("data-widget");
+
+      modal.close();
+      $.showLoader();
+      ReportWidgetFactory.loadWidgets([widget_type], function() {
+        //post
+        if (!widget_list) {
+          $.fatalError();
+          return;
+        }
+        widget_list.addNewWidget(widget_type);
+        showReportView();
+        $.hideLoader();
+      });
+    });
+  };
+
   //var initContentEditing = function(page) {
   //  var edit_pane = $(".zbase_report_pane .edit_content_pane");
   //  var report_ui = $(".zbase_report_pane .report_ui");
@@ -283,6 +310,8 @@ ZBase.registerView((function() {
   //  setReportContent();
   //  setReportDescription();
   //};
+
+
 
   var getDocument = function() {
     var widgets = [];
