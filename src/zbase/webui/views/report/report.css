@@ -102,6 +102,15 @@
   border-right: 1px solid #ddd;
 }
 
+.zbase_report_pane .zbase_report_content .link.add_element {
+  text-align: center;
+  margin-top: 60px;
+}
+
+.zbase_report_pane .zbase_report_content .link.add_element:hover {
+  text-decoration: underline;
+}
+
 .zbase_report_pane z-modal.edit h3 {
   margin: 5px 0 10px 0;
 }
