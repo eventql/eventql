@@ -171,6 +171,20 @@ void DocumentDBServlet::updateDocument(
       continue;
     }
 
+    if (p.first == "category") {
+      if (!p.second.empty()) {
+        tx.emplace_back([this, &session, &uuid, p] () {
+          docdb_->updateDocumentCategory(
+              session.customer(),
+              session.userid(),
+              uuid,
+              p.second);
+        });
+      }
+
+      continue;
+    }
+
     if (p.first == "acl_policy") {
       if (!p.second.empty()) {
         DocumentACLPolicy policy;
