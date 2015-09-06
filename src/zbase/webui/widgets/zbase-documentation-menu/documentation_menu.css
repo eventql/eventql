@@ -1,0 +1,27 @@
+.zbase_documentation_menu_sidebar z-menu {
+  position: absolute;
+  width: 300px;
+  margin-left: -8px;
+  margin-top: 6px;
+}
+
+.zbase_documentation_menu_content {
+  margin-left: 300px;
+  border-left: 1px solid #ddd;
+  min-height: 900px;
+  padding-left: 20px;
+}
+
+.zbase_documentation_menu_sidebar z-menu-item.doc_section {
+  margin: 10px 0 10px 20px !important;
+  padding-right: 0 !important;
+}
+
+.zbase_documentation_menu_sidebar z-menu-item.doc_section a {
+  line-height: 20px;
+}
+
+.zbase_documentation_menu_sidebar z-menu-item.doc_section span.index {
+  font-weight: 700;
+  margin-right: 5px;
+}
