@@ -14,15 +14,38 @@
     <ul style="float: right;" class="main_menu">
       <li><a href="/a/documentation" class="nav"><i class="fa fa-question-circle"></i> Docs</a></li>
       <li>
-        <span class="nav" style="color: #888;">
-          <a href="" style="color: #444;">
-            <i class="fa fa-user" style="margin-right: 3px;"></i>
-              <span class="userid_info"></span> (<span class="namespace_info"></span>)
-            </a>
-            &mdash;
-            <a class="link" style="color: #888;" href="/a/logout">Logout</a>
+        <span class="nav dropdown" style="">
+          <span class="dropdown_header" href="">
+            <i class="fa fa-user"></i>
+            <span class="userid_info"></span> (<span class="namespace_info"></span>)
+            <i class="fa fa-caret-down"></i>
+            <i class="fa fa-caret-up"></i>
+            <span style="display: block"></span>
+          </span>
+          <ul class="dropdown_panel">
+            <li id="change_namespace">
+              <span href="">Change namespace</span>
+            </li>
+            <li>
+              <a class="link" href="/a/logout">Logout</a>
+            </li>
+          </ul>
         </span>
       </li>
     </ul>
+  </div>
+</template>
+
+<template id="zbase_header_namespace_prompt_tpl">
+  <div class="namespace_prompt" style="min-height: 900px; margin-top: 100px;">
+    <img src="/a/_/a/android-icon-36x36.png" />
+    <h1>Select a Namespace</h1>
+
+    <div class="error_message hidden"></div>
+
+    <ul class="namespace_list">
+    </ul>
+
+    <a class="go_back" href="/a/login">Go back</a>
   </div>
 </template>
