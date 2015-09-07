@@ -52,14 +52,8 @@
   cursor: default;
 }
 
-.zbase_report_pane .zbase_report_sidebar h3.sidebar_title .readonly_hint.hidden {
-  display: none;
-}
 
-.zbase_report_pane .zbase_report_sidebar .editable:hover {
-  cursor: pointer;
-  background: #f2f8fa;
-}
+
 
 .zbase_report_pane .zbase_report_sidebar .sidebar_subtitle {
   margin: 2px 0 15px 0;
@@ -69,10 +63,6 @@
 
 .zbase_report_pane .zbase_report_sidebar .writable_report_actions {
   margin-bottom: 8px;
-}
-
-.zbase_report_pane .zbase_report_sidebar .writable_report_actions.hidden {
-  display: none;
 }
 
 .zbase_report_pane .zbase_report_sidebar .writable_report_actions .link {
@@ -98,10 +88,6 @@
   border-top: 1px solid #eee;
   padding: 15px 0px 18px 0;
   font-size: 12px;
-}
-
-.zbase_report_pane .zbase_report_sidebar .link.add_description.hidden {
-  display: none;
 }
 
 .zbase_report_pane .zbase_report_sidebar .report_description {
@@ -234,6 +220,34 @@
   display: none;
 }
 
+/** Display Mode **/
+.zbase_report_pane .zbase_report_sidebar h3.sidebar_title .readonly_hint,
+.zbase_report_pane .link.add_widget,
+.zbase_report_pane .zbase_report_widget_edit_actions,
+.zbase_report_pane .link.add_description {
+  display: none;
+}
+
+.zbase_report_pane.editable:not(.readonly) .link.add_widget,
+.zbase_report_pane.editable:not(.readonly) .zbase_report_widget_edit_actions,
+.zbase_report_pane.editable:not(.readonly) .link.add_description:not(.hidden) {
+  display: block;
+}
+
+.zbase_report_pane.editable:not(.readonly) .zbase_report_sidebar .editable:hover {
+  cursor: pointer;
+  background: #f2f8fa;
+}
+
+.zbase_report_pane.readonly .zbase_report_sidebar h3.sidebar_title .readonly_hint {
+  display: block;
+}
+
+.zbase_report_pane.readonly .zbase_report_sidebar .writable_report_actions {
+  display: none;
+}
+
+
 /**
   * Widget
   */
@@ -296,13 +310,7 @@
   display: none;
 }
 
-.zbase_report_pane .zbase_report_viewport .zbase_report_widget_edit_actions {
-  display: none;
-}
 
-.zbase_report_pane .zbase_report_viewport.editable .zbase_report_widget_edit_actions {
-  display: block;
-}
 
 
 
