@@ -9,7 +9,7 @@ var DocumentSettingsWidget = function(elem, docid, share_modal) {
       if (r.status == 200) {
         var doc = JSON.parse(r.response);
         console.log(doc);
-        renderStatus(doc.publishing_status);
+        initStatusUpdate(doc.publishing_status);
         setAclPolicy(doc.acl_policy);
         setCategory(doc.category);
       } else {
@@ -25,14 +25,8 @@ var DocumentSettingsWidget = function(elem, docid, share_modal) {
       share_modal.show();
     });
 
-    $.onClick($(".link.clone", elem), function() {
-      alert("Not yet implemented");
-    });
-
-    $.onClick($(".link.delete", elem), function() {
-      //deleted = true
-      alert("Not yet implemented");
-    });
+    $.onClick($(".link.clone", elem), cloneDocument);
+    $.onClick($(".link.delete", elem), deleteDocument);
   };
 
   var initCategoryUpdate = function() {
@@ -63,7 +57,7 @@ var DocumentSettingsWidget = function(elem, docid, share_modal) {
     });
   };
 
-  var renderStatus = function(doc_status) {
+  var initStatusUpdate = function(doc_status) {
     var tpl = $.getTemplate(
         "widgets/zbase-document-settings",
         "zbase_doc_settings_status_inner_tpl");
@@ -76,8 +70,32 @@ var DocumentSettingsWidget = function(elem, docid, share_modal) {
     $.replaceContent($(".doc_setting_value.status", elem), tpl);
 
     dropdown.addEventListener("change", function() {
-      updateSettings("publishing_status=" + encodeURIComponent(dropdown.getValue()));
+      var new_status = dropdown.getValue();
+      var postbody = "publishing_status=" + encodeURIComponent(new_status);
+      //showInfobar
+      $.httpPost("/api/v1/documents/" + docid, postbody, function(r) {
+        if (r.status == 201) {
+          doc_status = new_status;
+        } else {
+          dropdown.setValue([doc_status]);
+          //showInfobar with error
+        }
+      });
     }, false);
+  };
+
+  var deleteDocument = function() {
+    $.httpPost("/api/v1/documents/" + docid, "deleted=true", function(r) {
+      if (r.status == 201) {
+        $.navigateTo("/a/");
+      } else {
+        //show infobar with error
+      }
+    });
+  };
+
+  var cloneDocument = function() {
+    alert("Not yet implemented");
   };
 
 
@@ -99,18 +117,6 @@ var DocumentSettingsWidget = function(elem, docid, share_modal) {
       $(".doc_setting_value.category", elem).innerHTML = category;
     }
   };
-
-  var updateSettings = function(postbody) {
-    //showInfobar
-    $.httpPost("/api/v1/documents/" + docid, postbody, function(r) {
-      if (r.status == 201) {
-        //showInfobar
-      } else {
-        //showInfobar with error
-      }
-    });
-  };
-
 
   return {
     render: init
