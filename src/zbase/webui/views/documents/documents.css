@@ -1,3 +1,7 @@
+.zbase_documents .docs_header {
+  margin: 0 20px;
+}
+
 .zbase_documents table.z-table {
   table-layout: fixed;
   font-size: 13px;
