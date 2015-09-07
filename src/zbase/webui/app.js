@@ -79,7 +79,13 @@ var ZBase = (function() {
     views[view.name] = view;
   };
 
-  var findRoute = function(path) {
+  var findRoute = function(full_path) {
+    var path = full_path;
+    var end = path.indexOf("?");
+    if (end >= 0) {
+      path = path.substring(0, end);
+    }
+
     for (var i = 0; i < config.routes.length; i++) {
       if (config.routes[i].path_prefix &&
           path.indexOf(config.routes[i].path_prefix) == 0) {
