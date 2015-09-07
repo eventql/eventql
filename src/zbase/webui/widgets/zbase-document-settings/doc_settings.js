@@ -17,24 +17,49 @@ var DocumentSettingsWidget = function(elem, docid, share_modal) {
       }
     });
 
+    initCategoryUpdate();
+
     //sharing widget
     share_modal.onUpdate(setAclPolicy);
     $.onClick($(".doc_setting_value.acl_policy", elem), function() {
       share_modal.show();
     });
 
-    var category_modal = $("z-modal.zbase_doc_settings_modal", elem);
-    var category_input = $("input", category_modal);
-    $.onClick($(".doc_setting_value.category", elem), function() {
-      category_input.value = this.innerText;
-      category_modal.show();
+    $.onClick($(".link.clone", elem), function() {
+      alert("Not yet implemented");
     });
 
-    $.onClick($("button.submit", category_modal), function() {
-      var category = category_input.value;
-      updateSettings("category=" + encodeURIComponent(category));
-      setCategory(category);
-      category_modal.close();
+    $.onClick($(".link.delete", elem), function() {
+      //deleted = true
+      alert("Not yet implemented");
+    });
+  };
+
+  var initCategoryUpdate = function() {
+    var modal = $("z-modal.zbase_doc_settings_modal", elem);
+    var input = $("input", modal);
+    var infobar = $(".doc_settings_infobar", modal);
+
+    $.onClick($(".doc_setting_value.category", elem), function() {
+      infobar.classList.add("hidden");
+      input.value = this.innerText;
+      modal.show();
+      input.focus();
+    });
+
+    $.onClick($("button.submit", modal), function() {
+      var category = input.value;
+      var postbody = "category=" + encodeURIComponent(category);
+      infobar.innerHTML = "Saving...";
+      infobar.classList.remove("hidden");
+      $.httpPost("/api/v1/documents/" + docid, postbody, function(r) {
+        if (r.status == 201) {
+          setCategory(category);
+          modal.close();
+        } else {
+          infobar.innerHTML = "Saving Failed";
+        }
+      });
     });
   };
 
@@ -73,10 +98,6 @@ var DocumentSettingsWidget = function(elem, docid, share_modal) {
     } else {
       $(".doc_setting_value.category", elem).innerHTML = category;
     }
-  };
-
-  var updateCategory = function() {
-    
   };
 
   var updateSettings = function(postbody) {
