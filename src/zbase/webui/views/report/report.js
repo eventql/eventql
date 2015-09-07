@@ -131,6 +131,7 @@ ZBase.registerView((function() {
     }
     var viewport = $(".zbase_report_viewport");
     viewport.innerHTML = "";
+    viewport.classList.remove("editor");
 
     if (widget_list) {
       widget_list.render(viewport);
@@ -196,6 +197,7 @@ ZBase.registerView((function() {
     edit_view = editor;
     var viewport = $(".zbase_report_viewport");
     viewport.innerHTML = "";
+    viewport.classList.add("editor");
     edit_view.render(viewport);
   };
 
