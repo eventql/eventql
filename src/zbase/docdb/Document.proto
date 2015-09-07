@@ -69,6 +69,8 @@ message Document {
 
   optional uint64 atime = 7;
 
+  optional bool deleted = 14;
+
   required DocumentACLPolicy acl_policy = 8;
 
   repeated DocumentACL acls = 9;
