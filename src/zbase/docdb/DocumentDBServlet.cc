@@ -271,6 +271,7 @@ void DocumentDBServlet::listDocuments(
   URI uri(req->uri());
   const auto& params = uri.queryParams();
 
+  /* param: with_categories */
   Set<String> categories;
   bool return_categories = false;
   String with_categories_str;
@@ -278,6 +279,23 @@ void DocumentDBServlet::listDocuments(
     return_categories = true;
   }
 
+  /* param: publishing_status */
+  Option<DocumentPublishingStatus> pstatus_filter;
+  String pstatus_filter_str;
+  if (URI::getParam(params, "publishing_status", &pstatus_filter_str)) {
+    DocumentPublishingStatus pstatus;
+    if (!DocumentPublishingStatus_Parse(pstatus_filter_str, &pstatus)) {
+      res->setStatus(http::kStatusBadRequest);
+      res->addBody(StringUtil::format(
+          "invalid publishing status: '$0'",
+          pstatus_filter_str));
+      return;
+    }
+
+    pstatus_filter = Some(pstatus);
+  }
+
+  /* scan documents */
   Buffer buf;
   json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
 
@@ -289,9 +307,14 @@ void DocumentDBServlet::listDocuments(
   docdb_->listDocuments(
       session.customer(),
       session.userid(),
-      [this, &i, &json, &session, &categories] (const Document& doc) -> bool {
+      [&] (const Document& doc) -> bool {
     if (!doc.category().empty()) {
       categories.emplace(doc.category());
+    }
+
+    if (!pstatus_filter.isEmpty() &&
+        doc.publishing_status() != pstatus_filter.get()) {
+      return true;
     }
 
     if (++i > 1) {
