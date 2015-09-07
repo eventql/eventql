@@ -30,7 +30,7 @@ z-menu.zbase_documents_menu > z-menu-section > z-menu-title > a {
   line-height: 32px;
   height: 32px;
   display: block;
-  padding: 0 20px;
+  padding: 0 20px 0 14px;
   font-weight: 400;
   color: #737373;
 }
