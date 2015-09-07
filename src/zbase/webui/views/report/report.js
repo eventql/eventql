@@ -78,6 +78,12 @@ ZBase.registerView((function() {
     widget_list.onWidgetEdit(function(widget_id) {
       showWidgetEditor(widget_id);
     });
+    
+    //setup docsync
+    docsync = DocSync(
+        getDocument,
+        "/api/v1/documents/" + doc.uuid,
+        $(".zbase_report_infobar"));
 
     // handle display mode
     $(".zbase_report_pane z-dropdown.mode").addEventListener("change", function() {
@@ -95,14 +101,8 @@ ZBase.registerView((function() {
     }
 
     showReportView();
-
-    //setup docsync
-    docsync = DocSync(
-        getDocument,
-        "/api/v1/documents/" + doc.uuid,
-        $(".zbase_report_infobar"));
   };
-
+  
   var showReportView = function(doc) {
     //showLoader?
     if (edit_view) {
