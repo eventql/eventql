@@ -20,6 +20,14 @@
 }
 
 .zbase_report_pane .zbase_report_sidebar h3.sidebar_title .editable {
+  margin-left: -3px;
+  font-weight: 500;
+  font-size: 15px;
+  line-height: 160%;
+  margin-bottom: 4px;
+  display: block;
+  margin-top: -5px;
+  margin-left: -3px;
   padding: 5px 3px;
 }
 
