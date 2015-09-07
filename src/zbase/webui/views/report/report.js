@@ -78,7 +78,7 @@ ZBase.registerView((function() {
     widget_list.onWidgetEdit(function(widget_id) {
       showWidgetEditor(widget_id);
     });
-    
+
     //setup docsync
     docsync = DocSync(
         getDocument,
@@ -270,7 +270,7 @@ ZBase.registerView((function() {
   };
 
   var setReportDescription = function(description) {
-    var escaped_description = $.escapeHTML(description);
+    var escaped_description = $.nl2br($.escapeHTML(description));
 
     //FIXME
     var readonly = false;
@@ -285,7 +285,7 @@ ZBase.registerView((function() {
 
     $(".zbase_report_pane .report_description").innerHTML = escaped_description;
     $(".zbase_report_pane z-modal textarea.report_description").innerHTML =
-      escaped_description;
+      description;
   };
 
   var getContentJSON = function() {
@@ -295,7 +295,7 @@ ZBase.registerView((function() {
     }
 
     return JSON.stringify({
-        description: $(".zbase_report_pane .report_description").innerText,
+        description: $(".zbase_report_pane textarea.report_description").innerHTML,
         widgets: widgets});
   };
 
