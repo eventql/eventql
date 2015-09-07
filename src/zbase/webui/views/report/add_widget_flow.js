@@ -1,6 +1,32 @@
 var AddReportWidgetFlow = function(elem) {
   var render = function() {
     //FIXME load all selectable widget types
+    var selectable_widgets = [{type: "sql-widget", name: "SQL Editor"}];
+
+    var tpl = $.getTemplate(
+      "views/report",
+      "zbase_report_add_widget_flow_selection_tpl");
+
+    var container = $(".widget_selections", modal);
+    container.innerHTML = "";
+
+    for (var i = 0; i < selectable_widgets.length; i++) {
+      var item = $(".widget_selection", tpl.cloneNode(true));
+      if (i == 0) {
+        item.setAttribute("data-selected", "selected")
+      }
+
+      $(".inner", item).innerHTML = selectable_widgets[i].name;
+      item.setAttribute("data-widget", selectable_widgets[i].type);
+
+      $.onClick(item, function() {
+        $(".widget_selection[data-selected]", container)
+            .removeAttribute("data-selected");
+        this.setAttribute("data-selected", "selected");
+      });
+      container.appendChild(item);
+    };
+
     modal.show();
   };
 
