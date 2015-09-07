@@ -59,6 +59,30 @@ z-menu.zbase_documents_menu > z-menu-section[data-active] > z-menu-item {
   border-radius: 0;
 }
 
+z-menu.zbase_documents_menu > z-menu-section[data-active] > z-menu-item[data-active]:before {
+  font: normal normal normal 12px/1 FontAwesome;
+  font-weight: 400;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  text-rendering: auto;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  content: "\f105";
+  font-weight: bold;
+  font-size: 15px;
+  display: block;
+  width: 8px;
+  padding-left: 2px;
+  padding-right: 2px;
+  height: 16px;
+  position: absolute;
+  margin-left: -4px;
+  margin-top: 5px;
+  background: #fff;
+  color: #1c99d6;
+}
+
 z-menu.zbase_documents_menu > z-menu-section[data-active] > z-menu-title {
   margin-bottom: 8px;
 }
