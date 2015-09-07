@@ -115,13 +115,7 @@ var WidgetList = function(widget_definitions) {
   };
 
   var setEditable = function(is_editable) {
-    if (elem) {
-      if (is_editable) {
-        elem.classList.add("editable");
-      } else {
-        elem.classList.remove("editable");
-      }
-    }
+
   };
 
   var onWidgetEdit = function(callback) {
