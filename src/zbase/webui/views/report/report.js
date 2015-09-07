@@ -96,8 +96,24 @@ ZBase.registerView((function() {
       initNameEditing();
       initDescriptionEditing();
       initShareDocModal(doc.uuid);
-      initWidgetAdding();
       $.onClick($(".zbase_report_pane .link.edit_source"), showRawJSONEditor);
+
+      //add widget flow
+      var add_widget_flow = AddReportWidgetFlow(
+          $(".zbase_report_pane"));
+      add_widget_flow.onWidgetAdded(function(widget_type) {
+        if (!widget_list || !docsync) {
+          $.fatalError();
+          return;
+        }
+        widget_list.addNewEmptyWidget(widget_type);
+        docsync.saveDocument();
+        showReportView();
+        $.hideLoader();
+      });
+      $.onClick($(".zbase_report_pane .link.add_widget"), function() {
+        add_widget_flow.render();
+      });
     }
 
     showReportView();
@@ -243,33 +259,6 @@ ZBase.registerView((function() {
       setReportDescription($.escapeHTML(textarea.value));
       docsync.saveDocument();
       modal.close();
-    });
-  };
-
-  var initWidgetAdding = function() {
-    var modal = $(".zbase_report_pane z-modal.add_widget");
-    $.onClick($(".zbase_report_pane .link.add_widget"), function() {
-      //FIXME get available report widgets and render selection
-      modal.show();
-    });
-
-    $.onClick($("button.submit", modal), function() {
-      var widget_type = $(".widget_selection[data-selected", modal)
-          .getAttribute("data-widget");
-
-      modal.close();
-      $.showLoader();
-      ReportWidgetFactory.loadWidgets([widget_type], function() {
-        //post
-        if (!widget_list || !docsync) {
-          $.fatalError();
-          return;
-        }
-        widget_list.addNewEmptyWidget(widget_type);
-        docsync.saveDocument();
-        showReportView();
-        $.hideLoader();
-      });
     });
   };
 
