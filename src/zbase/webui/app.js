@@ -146,7 +146,8 @@ var ZBase = (function() {
 
     var route = findRoute(path);
     if (route == null) {
-      if (path.indexOf("/a/") == 0) {
+      if (path.indexOf("/a/") == 0 &&
+          path.indexOf("/a/dashboards/") == -1 /* HACK remove me once dashboard migration finished */) {
         navigateTo(config.default_route);
       } else {
         window.location.href = path;
