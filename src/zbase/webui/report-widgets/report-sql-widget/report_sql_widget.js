@@ -11,7 +11,14 @@ var ReportSQLWidgetDisplay = function(elem, conf) {
       "report_sql",
       "/api/v1/sql_stream?query=" + encodeURIComponent(conf.query));
 
+    if (!conf.hasOwnProperty("name")) {
+      conf.name = "Unnamed SQL Query";
+    }
+    $(".report_widget_title", elem).innerHTML = conf.name;
+
     elem.appendChild(tpl);
+
+
     query.addEventListener('result', function(e) {
       query_mgr.close("report_sql");
 
@@ -123,6 +130,7 @@ var ReportSQLWidgetDisplay = function(elem, conf) {
 ReportSQLWidgetDisplay.getInitialConfig = function() {
   return {
     type: "sql-widget",
+    name: "Unnamed SQL Query",
     uuid: $.uuid(),
     query: ""
   }
@@ -142,17 +150,41 @@ var ReportSQLWidgetEditor = function(conf) {
     editor = $("z-codeeditor", tpl);
     editor.setValue(conf.query);
 
+    //query name
+    var title = $(".report_widget_title em", tpl);
+    var name_modal = $("z-modal.zbase_report_sql_modal", tpl);
+    var name_input = $("input", name_modal);
+    var query_name = conf.hasOwnProperty("name")? conf.name : "";
+    name_input.value = query_name;
+    title.innerHTML = query_name;
+
+    $.onClick(title, function() {
+      name_modal.show();
+      name_input.focus();
+    });
+
+    $.onClick($("button.submit", name_modal), function() {
+      query_name = name_input.value;
+      name_input.value = query_name;
+      title.innerHTML = query_name;
+      name_modal.close();
+    });
+
+    //save
     $.onClick($("button.save", tpl), function() {
       conf.query = editor.getValue();
+      conf.name = query_name;
       triggerSave();
     });
 
+    //cancel
     $.onClick($("button.cancel", tpl), function() {
       triggerCancel();
     });
 
     elem.appendChild(tpl);
   };
+
 
   var onSave = function(callback) {
     save_callbacks.push(callback);
