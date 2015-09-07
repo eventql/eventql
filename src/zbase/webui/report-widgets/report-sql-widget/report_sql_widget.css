@@ -23,7 +23,8 @@
 }
 
 .zbase_report_sql_result_pane .zbase_sql_chart {
-  margin: 10px 20px;
+  padding: 20px;
+  border-top: 1px solid #eee;
 }
 
 .zbase_report_sql_result_pane .zbase_loader {
