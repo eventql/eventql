@@ -47,7 +47,7 @@ protected:
 };
 
 template <typename T>
-using AutoPtr = RefPtr<T>;
+using AutoRef = RefPtr<T>;
 
 template <typename T>
 using RefPtrVector = Vector<RefPtr<T>>;
