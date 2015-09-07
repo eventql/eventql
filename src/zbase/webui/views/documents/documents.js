@@ -5,12 +5,12 @@ ZBase.registerView((function() {
       with_categories: true
     };
 
-    var category_param = UrlUtil.getParam(url, "category");
+    var category_param = UrlUtil.getParamValue(url, "category");
     if (category_param) {
       qparams.category_prefix = category_param;
     }
 
-    var pstatus_param = UrlUtil.getParam(url, "publishing_status");
+    var pstatus_param = UrlUtil.getParamValue(url, "publishing_status");
     if (pstatus_param) {
       qparams.publishing_status = pstatus_param;
     }
