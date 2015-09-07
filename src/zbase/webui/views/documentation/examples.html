@@ -1,0 +1,69 @@
+<template id="documentation_page_examples">
+<h1>Experiments API</h1>
+
+<p>The Experiments API allows you to tag traffic (i.e. user sessions, search queries or
+result items) as being part of an “experiment”</p>
+
+<h3>Basic Usage</h3>
+
+<p>Anywhere in your page, before including the DeepCortex tracking pixel, define the cmxdata
+object:</p>
+
+<p><code>
+var cmxdata = {
+  // ...
+};
+</code></p>
+
+<p>If the current page view is part of an experiment, include the additional experiments property:</p>
+
+<p><code>
+var cmxdata = {
+  “experiments”: [
+    { &quot;key&quot; =&gt; &quot;my_user_based_experiment&quot;, &quot;type&quot; =&gt; &quot;user&quot; },
+    { &quot;key&quot; =&gt; &quot;my_query_based_experiment&quot;, &quot;type&quot; =&gt; &quot;search&quot; }
+  ]
+};
+</code></p>
+
+<p>You can define an arbitrary number of experiments per page view</p>
+
+<h3>Search experiments</h3>
+
+<p>Search experiments should be used if you want to analyze a change in your internal search
+engine. The experiments property must be set on any search query result page that is
+modified by the experiment.
+A simple example:
+Let’s suppose you are testing a new ranking algorithm called ‘mysuperanker’. You serve
+50% of your users with the old algorithm, and 50% of your users with the new algorithm.
+All you need to do in this case would be to include this snipped on every search result page
+that was created using the new algorithm (and <em>not</em> include it on search result pages that
+are still using the old algorithm:</p>
+
+<p><code>
+var cmxdata = {
+  “experiments”: [
+    { &quot;key&quot; =&gt; &quot;‘mysuperanker’&quot;, &quot;type&quot; =&gt; &quot;search&quot; }
+  ]
+};
+</code></p>
+
+<h3>User experiments</h3>
+
+<p>Search experiments should be used if you want to analyze an experiment in which you
+modify some content or behaviour on a per-user basis.
+A simple example:
+Let’s suppose you are testing a new “add to cart button” color. 50% of users will see the old
+color, 50% of users will see the new color on a session basis. I.e. once a user has seen
+either the new or old color, they will always see that color.
+All you need to do in this case would be to include this snipped on every page that shows
+the new color:</p>
+
+<p><code>
+var cmxdata = {
+  “experiments”: [
+    { &quot;key&quot; =&gt; &quot;mynewbuttoncolor&quot;, &quot;type&quot; =&gt; &quot;user&quot; }
+  ]
+};
+</code></p>
+</template>

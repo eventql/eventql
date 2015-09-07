@@ -1,3 +1,9 @@
-.zbase_documentation {
+.zbase_documentation_content {
+  margin-left: 300px;
+  padding: 10px;
+}
 
+.zbase_documentation_content h1 {
+  color: #333;
+  height: initial;
 }
