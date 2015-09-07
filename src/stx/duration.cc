@@ -1,5 +1,6 @@
 /**
  * This file is part of the "libstx" project
+ *   Copyright (c) 2015 Christian Parpart
  *   Copyright (c) 2014 Paul Asmuth, Google Inc.
  *
  * libstx is free software: you can redistribute it and/or modify it under
@@ -13,12 +14,16 @@ namespace stx {
 
 Duration::Duration(uint64_t microseconds) : micros_(microseconds) {}
 
-uint64_t Duration::microseconds() const {
+uint64_t Duration::microseconds() const noexcept {
   return micros_;
 }
 
-uint64_t Duration::seconds() const {
-  return micros_ / kMicrosPerSecond;
+uint64_t Duration::seconds() const noexcept {
+  return micros_ / MicrosPerSecond;
+}
+
+Duration Duration::operator+(const Duration& other) const {
+  return Duration(micros_ + other.micros_);
 }
 
 }
