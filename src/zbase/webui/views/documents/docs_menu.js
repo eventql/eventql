@@ -11,6 +11,7 @@ var DocsMenu = function(categories) {
       insertMenuItem([], c.split("~"), menu);
     });
 
+    $.handleLinks(elem);
     elem.innerHTML = "";
     elem.appendChild(tpl);
   };
@@ -76,6 +77,7 @@ var DocsMenu = function(categories) {
       if (!item) {
         item = document.createElement("z-menu-item");
         item.setAttribute("data-key", key);
+        $.onClick(item, function() { ZBase.navigateTo(href); });
         elem.appendChild(item);
 
         var link = document.createElement("a");
