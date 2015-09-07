@@ -1,8 +1,22 @@
 ZBase.registerView((function() {
 
-  var load = function() {
+  var load = function(url) {
+    var qparams = {
+      with_categories: true
+    };
+
+    var category_param = UrlUtil.getParam(url, "category");
+    if (category_param) {
+      qparams.category_prefix = category_param;
+    }
+
+    var pstatus_param = UrlUtil.getParam(url, "publishing_status");
+    if (pstatus_param) {
+      qparams.publishing_status = pstatus_param;
+    }
+
     $.showLoader();
-    $.httpGet("/api/v1/documents?with_categories=1", function(r) {
+    $.httpGet("/api/v1/documents?" + $.buildQueryString(qparams), function(r) {
       if (r.status == 200) {
         render(JSON.parse(r.response));
       } else {
@@ -99,7 +113,7 @@ ZBase.registerView((function() {
 
   return {
     name: "documents",
-    loadView: function(params) { load(); },
+    loadView: function(params) { load(params.path); },
     unloadView: function() {},
     handleNavigationChange: load
   };
