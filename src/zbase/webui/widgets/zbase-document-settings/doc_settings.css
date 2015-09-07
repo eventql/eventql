@@ -2,8 +2,11 @@
   font-size: 13px;
 }
 
-.zbase_doc_settings h4 {
-  margin-bottom: 10px;
+.zbase_doc_settings h3 {
+  font-weight: 500;
+  color: #333;
+  margin: 0 0 10px;
+  font-size: 13px;
 }
 
 .zbase_doc_settings .doc_setting {
