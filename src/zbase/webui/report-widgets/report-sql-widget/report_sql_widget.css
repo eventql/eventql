@@ -13,6 +13,10 @@
   margin: 10px 20px;
 }
 
+.zbase_report_sql_result_pane .zbase_loader {
+  height: 70px;
+}
+
 .zbase_report_sql_error_message {
   display: block;
   position: relative;
