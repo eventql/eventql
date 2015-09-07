@@ -16,6 +16,10 @@
   overflow: hidden;
 }
 
+.zbase_doc_settings .doc_setting.visible_overflow {
+  overflow: visible;
+}
+
 .zbase_doc_settings .doc_setting .doc_setting_title {
   display: inline-block;
   width: 64px;
