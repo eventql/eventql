@@ -7,7 +7,7 @@
  * permission is obtained.
  */
 #include "DocumentDBServlet.h"
-#include "stx/Human.h"
+#include "stx/human.h"
 
 using namespace stx;
 
