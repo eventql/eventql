@@ -11,8 +11,6 @@
         <zbase-breadcrumbs-section class="report_name">
         </zbase-breadcrumbs-section>
       </zbase-breadcrumbs>
-
-      
     </div>
   </section>
 
@@ -29,7 +27,6 @@
         <div class="sidebar_subtitle">
           <div class="writable_report_actions">
             <a class="link share">Share</a>
-            <a class="link edit_source">Edit Source JSON</a>
             <z-dropdown data-resolved class="mode">
               <z-dropdown-flyout>
                 <z-dropdown-items>
@@ -54,7 +51,12 @@
           <div class="report_description editable"></div>
         </div>
 
-        <div class="sidebar_content document_settings"></div>
+        <div class="sidebar_content secondary_section">
+          <div class="document_settings"></div>
+          <div style="border-top: 1px dotted #eee; line-height: 28px;">
+            <a class="link edit_source"><i class="fa fa-code" style="margin-right: 3px;"></i> Edit Source</a>
+          </div>
+        </div>
       </div>
 
       <div class="zbase_report_content">

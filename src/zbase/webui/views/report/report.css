@@ -117,12 +117,26 @@
   display: none;
 }
 
-.zbase_report_pane .zbase_report_sidebar .document_settings {
+.zbase_report_pane .zbase_report_sidebar .secondary_section {
   background: #f9f9f9;
   margin-left: -20px;
   padding-left: 20px;
   margin-right: -20px;
   border-bottom: 1px solid #eee;
+}
+
+.zbase_report_pane a.link {
+  display: inline-block;
+  font-weight: 400;
+  margin-left: -10px;
+  padding-left: 10px;
+  padding-right: 20px;
+}
+
+.zbase_report_pane a.link:hover {
+  background: #1c99d6;
+  color: #fff;
+  text-decoration: none;
 }
 
 /** Content **/
