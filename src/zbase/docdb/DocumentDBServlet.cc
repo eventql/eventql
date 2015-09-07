@@ -408,7 +408,7 @@ void DocumentDBServlet::renderDocument(
   json->addObjectEntry("atime");
   json->addInteger(doc.atime());
 
-  if (return_content) {
+  if (return_content || doc.type() == "application") {
     json->addComma();
     json->addObjectEntry("content");
     json->addString(doc.content());

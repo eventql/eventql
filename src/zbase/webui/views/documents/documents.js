@@ -54,7 +54,7 @@ ZBase.registerView((function() {
 
   var renderDocumentsList = function(tbody_elem, documents) {
     documents.forEach(function(doc) {
-      var url = getUrlForDocument(doc.type, doc.uuid);
+      var url = getUrlForDocument(doc);
 
       var tr = document.createElement("tr");
       tr.innerHTML = 
@@ -67,13 +67,16 @@ ZBase.registerView((function() {
     });
   };
 
-  var getUrlForDocument = function(doc_type, uuid) {
-    switch (doc_type) {
+  var getUrlForDocument = function(doc) {
+    switch (doc.type) {
       case "sql_query":
-        return "/a/sql/" + uuid;
+        return "/a/sql/" + doc.uuid;
 
       case "report":
-        return "/a/reports/" + uuid;
+        return "/a/reports/" + doc.uuid;
+
+      case "application":
+        return JSON.parse(doc.content).url;
 
       default:
         return "#";
