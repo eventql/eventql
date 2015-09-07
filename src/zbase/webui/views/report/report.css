@@ -219,7 +219,7 @@
 }
 
 /** Display Mode **/
-.zbase_report_pane .zbase_report_sidebar h3.sidebar_title .readonly_hint,
+.zbase_report_pane .zbase_report_sidebar .readonly_hint,
 .zbase_report_pane .link.add_widget,
 .zbase_report_pane .zbase_report_widget_edit_actions,
 .zbase_report_pane .link.add_description {
@@ -237,7 +237,7 @@
   background: #f2f8fa;
 }
 
-.zbase_report_pane.readonly .zbase_report_sidebar h3.sidebar_title .readonly_hint {
+.zbase_report_pane.readonly .zbase_report_sidebar .readonly_hint {
   display: block;
 }
 
