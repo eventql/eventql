@@ -90,7 +90,7 @@ ZBase.registerView((function() {
     });
 
     //table_list
-    var table_list = TableListWidget($(".sidebar_section", page));
+    var table_list = TableListWidget($(".table_list", page));
     table_list.render();
 
     //sharing modal
