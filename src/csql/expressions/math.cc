@@ -185,31 +185,9 @@ void divExpr(int argc, SValue* argv, SValue* out) {
 
   switch(lhs->testTypeWithNumericConversion()) {
     case SValue::T_INTEGER:
-      switch(rhs->testTypeWithNumericConversion()) {
-        case SValue::T_INTEGER:
-          *out = SValue(int64_t(
-               rhs->getInteger() == 0
-                    ? 0
-                    : lhs->getInteger() / rhs->getInteger()));
-          return;
-        case SValue::T_FLOAT:
-          *out = SValue((double) (lhs->getInteger() / rhs->getFloat()));
-          return;
-        case SValue::T_NULL:
-          *out = SValue();
-          return;
-        default:
-          break;
-      }
-      break;
     case SValue::T_FLOAT:
       switch(rhs->testTypeWithNumericConversion()) {
         case SValue::T_INTEGER:
-          *out = SValue(int64_t(
-               rhs->getInteger() == 0
-                    ? 0
-                    : lhs->getFloat() / rhs->getInteger()));
-          return;
         case SValue::T_FLOAT:
           *out = SValue((double) (lhs->getFloat() / rhs->getFloat()));
           return;
@@ -337,6 +315,55 @@ void powExpr(int argc, SValue* argv, SValue* out) {
       lhs->getTypeName(),
       rhs->getTypeName());
 }
+
+void roundExpr(int argc, SValue* argv, SValue* out) {
+  switch (argc) {
+
+    // round to integer
+    case 1:
+      RAISE(kNotYetImplementedError);
+
+    // round to arbitrary precision float
+    case 2:
+      RAISE(kNotYetImplementedError);
+
+    default:
+      RAISE(
+          kRuntimeError,
+          "wrong number of arguments for ROUND. expected: 1 or 2, got: %i", argc);
+  }
+}
+
+void truncateExpr(int argc, SValue* argv, SValue* out) {
+  switch (argc) {
+
+    // truncate to integer
+    case 1: {
+      SValue* val = argv;
+      switch(val->testTypeWithNumericConversion()) {
+        case SValue::T_INTEGER:
+        case SValue::T_FLOAT:
+          *out = SValue(SValue::IntegerType(val->getFloat()));
+          return;
+        case SValue::T_NULL:
+          *out = SValue();
+          return;
+        default:
+          RAISE(kRuntimeError, "can't TRUNCATE %s", val->getTypeName());
+      }
+    }
+
+    // truncate to specified number of decimal places
+    case 2:
+      RAISE(kNotYetImplementedError);
+
+    default:
+      RAISE(
+          kRuntimeError,
+          "wrong number of arguments for TRUNCATE. expected: 1 or 2, got: %i", argc);
+  }
+}
+
 
 }
 }

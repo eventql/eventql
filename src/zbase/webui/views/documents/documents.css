@@ -1,0 +1,66 @@
+.zbase_documents .docs_header {
+  margin: 0 20px;
+}
+
+.zbase_documents table.z-table {
+  table-layout: fixed;
+  font-size: 13px;
+}
+
+.zbase_documents table.z-table thead th {
+  font-weight: 400;
+  color: #888;
+}
+
+.zbase_documents table.z-table tbody tr td {
+  line-height: 24px;
+}
+
+.zbase_documents table.z-table tbody tr a {
+  color: #888;
+}
+
+.zbase_documents table.z-table tbody tr td:first-child a {
+  color: #000;
+}
+
+.zbase_documents z-dropdown.input {
+  float: right;
+  margin-top: 12px;
+}
+
+.zbase_documents z-dropdown.input z-dropdown-header {
+  font-size: 13px;
+  line-height: 34px;
+  height: 34px;
+  min-width: 133px;
+}
+
+.zbase_documents_wrap {
+  table-layout: fixed;
+  width: 100%;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(0,0,0,.2);
+}
+
+.zbase_documents .docs_sidebar {
+  display: table-cell;
+  vertical-align: top;
+  width: 220px;
+  border-top: 1px solid #ddd;
+}
+
+.zbase_documents .docs_sidebar z-menu {
+  position: relative;
+}
+
+.zbase_documents .docs_list {
+  display: table-cell;
+  vertical-align: top;
+  border-top: 1px solid #ddd;
+  border-left: 1px solid #ddd;
+}
+
+#zbase_viewport .zbase_content_pane.zbase_documents {
+  padding-bottom: 8px;
+}

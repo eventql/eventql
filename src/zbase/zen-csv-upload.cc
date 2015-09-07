@@ -10,11 +10,13 @@
 #include "stx/application.h"
 #include "stx/cli/flagparser.h"
 #include "stx/cli/CLI.h"
+#include "stx/cli/term.h"
 #include "stx/csv/CSVInputStream.h"
 #include "stx/csv/BinaryCSVOutputStream.h"
 #include "stx/io/file.h"
 #include "stx/inspect.h"
 #include "stx/human.h"
+#include "stx/UTF8.h"
 #include "stx/http/httpclient.h"
 #include "stx/util/SimpleRateLimit.h"
 #include "stx/protobuf/MessageSchema.h"
@@ -25,22 +27,62 @@ void run(const cli::FlagParser& flags) {
   auto table_name = flags.getString("table_name");
   auto input_file = flags.getString("input_file");
   auto api_token = flags.getString("api_token");
-  String api_url = "http://api.zbase.io/api/v1";
+  auto api_host = flags.getString("api_host");
   auto shard_size = flags.getInt("shard_size");
+  bool confirm_schema = !flags.isSet("skip_confirmation");
+
+  char col_sep = '\t';
+  char row_sep = '\n';
+  char quote_char = '"';
+
+  if (flags.isSet("column_separator")) {
+    auto s = flags.getString("column_separator");
+    if (s.size() != 1) {
+      RAISEF(kIllegalArgumentError, "invalid column separator: $0", s);
+    }
+
+    col_sep = s[0];
+  }
+
+  if (flags.isSet("row_separator")) {
+    auto s = flags.getString("row_separator");
+    if (s.size() != 1) {
+      RAISEF(kIllegalArgumentError, "invalid row separator: $0", s);
+    }
+
+    row_sep = s[0];
+  }
+
+  if (flags.isSet("quote_char")) {
+    auto s = flags.getString("quote_char");
+    if (s.size() != 1) {
+      RAISEF(kIllegalArgumentError, "invalid quote char: $0", s);
+    }
+
+    quote_char = s[0];
+  }
 
   stx::logInfo("dx-csv-upload", "Opening CSV file '$0'", input_file);
 
-  auto csv = CSVInputStream::openFile(
-      input_file,
-      '\t',
-      '\n');
+  auto is = FileInputStream::openFile(input_file);
+  auto bom = is->readByteOrderMark();
+  switch (bom) {
+    case FileInputStream::BOM_UTF16:
+      RAISE(kNotYetImplementedError, "UTF-16 encoded files are not yet supported");
+
+    case FileInputStream::BOM_UTF8:
+    case FileInputStream::BOM_UNKNOWN:
+      break;
+  };
+
+  DefaultCSVInputStream csv(std::move(is), col_sep, row_sep, quote_char);
 
   stx::logInfo(
       "dx-csv-upload",
       "Analyzing the input file. This might take a few minutes...");
 
   Vector<String> columns;
-  csv->readNextRow(&columns);
+  csv.readNextRow(&columns);
 
   HashMap<String, HumanDataType> column_types;
   for (const auto& hdr : columns) {
@@ -50,7 +92,7 @@ void run(const cli::FlagParser& flags) {
   Vector<String> row;
   size_t num_rows = 0;
   size_t num_rows_uploaded = 0;
-  while (csv->readNextRow(&row)) {
+  while (csv.readNextRow(&row)) {
     ++num_rows;
 
     for (size_t i = 0; i < row.size() && i < columns.size(); ++i) {
@@ -129,6 +171,15 @@ void run(const cli::FlagParser& flags) {
 
         case HumanDataType::DATETIME:
         case HumanDataType::DATETIME_NULLABLE:
+          schema_fields.emplace_back(
+              ++field_num,
+              col,
+              msg::FieldType::DATETIME,
+              0,
+              false,
+              true);
+          break;
+
         case HumanDataType::URL:
         case HumanDataType::URL_NULLABLE:
         case HumanDataType::CURRENCY:
@@ -151,10 +202,23 @@ void run(const cli::FlagParser& flags) {
     }
   }
 
-  csv->rewind();
+  csv.rewind();
 
   auto schema = mkRef(new msg::MessageSchema("<anonymous>", schema_fields));
-  stx::logDebug("dx-csv-upload", "Detected schema:\n$0", schema->toString());
+  stx::logInfo(
+      "dx-csv-upload",
+      "Found $0 row(s) and $1 column(s):\n    - $2",
+      num_rows,
+      columns.size(),
+      StringUtil::join(columns, "\n    - "));
+
+  if (confirm_schema) {
+    stx::logInfo("dx-csv-upload", "Is this information correct? [y/n]");
+    if (!stx::Term::readConfirmation()) {
+      stx::logInfo("dx-csv-upload", "Aborting...");
+      return;
+    }
+  }
 
   auto num_shards = (num_rows + shard_size - 1) / shard_size;
   stx::logDebug("dx-csv-upload", "Splitting into $0 shards", num_shards);
@@ -186,7 +250,7 @@ void run(const cli::FlagParser& flags) {
 
   auto create_res = http_client.executeRequest(
       http::HTTPRequest::mkPost(
-          api_url + "/tables/create_table",
+          "http://" + api_host + "/api/v1/tables/create_table",
           create_req,
           auth_headers));
 
@@ -206,7 +270,7 @@ void run(const cli::FlagParser& flags) {
         num_rows);
   });
 
-  csv->skipNextRow();
+  csv.skipNextRow();
 
   for (size_t nshard = 0; num_rows_uploaded < num_rows; ++nshard) {
     Buffer shard_data;
@@ -216,16 +280,23 @@ void run(const cli::FlagParser& flags) {
     shard_csv.appendRow(columns);
 
     size_t num_rows_shard = 0;
-    while (num_rows_shard < shard_size && csv->readNextRow(&row)) {
+    while (num_rows_shard < shard_size && csv.readNextRow(&row)) {
       ++num_rows_uploaded;
       ++num_rows_shard;
+
+      for (const auto& c : row) {
+        if (!UTF8::isValidUTF8(c)) {
+          RAISEF(kRuntimeError, "not a valid UTF8 string: '$0'", c);
+        }
+      }
+
       shard_csv.appendRow(row);
       status_line.runMaybe();
     }
 
     auto upload_uri = StringUtil::format(
-        "$0/tables/upload_table?table=$1&shard=$2",
-        api_url,
+        "http://$0/api/v1/tables/upload_table?table=$1&shard=$2",
+        api_host,
         URI::urlEncode(table_name),
         nshard);
 
@@ -278,6 +349,33 @@ int main(int argc, const char** argv) {
       "<name>");
 
   flags.defineFlag(
+      "column_separator",
+      stx::cli::FlagParser::T_STRING,
+      false,
+      NULL,
+      "\t",
+      "CSV column separator (default: '\\t')",
+      "<char>");
+
+  flags.defineFlag(
+      "row_separator",
+      stx::cli::FlagParser::T_STRING,
+      false,
+      NULL,
+      "\n",
+      "CSV row separator (default: '\\n')",
+      "<char>");
+
+  flags.defineFlag(
+      "quote_char",
+      stx::cli::FlagParser::T_STRING,
+      false,
+      NULL,
+      "\"",
+      "CSV quote char (default: '\"')",
+      "<char>");
+
+  flags.defineFlag(
       "api_token",
       stx::cli::FlagParser::T_STRING,
       true,
@@ -287,6 +385,15 @@ int main(int argc, const char** argv) {
       "<token>");
 
   flags.defineFlag(
+      "api_host",
+      stx::cli::FlagParser::T_STRING,
+      false,
+      NULL,
+      "api.zbase.io",
+      "DeepAnalytics API Host",
+      "<host>");
+
+  flags.defineFlag(
       "shard_size",
       stx::cli::FlagParser::T_INTEGER,
       false,
@@ -294,6 +401,15 @@ int main(int argc, const char** argv) {
       "262144",
       "shard size",
       "<num>");
+
+  flags.defineFlag(
+      "skip_confirmation",
+      stx::cli::FlagParser::T_SWITCH,
+      false,
+      "y",
+      NULL,
+      "yes to all",
+      "<switch>");
 
   flags.parseArgv(argc, argv);
 

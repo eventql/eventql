@@ -160,6 +160,21 @@ String StringUtil::join(const Vector<String>& list, const String& join) {
   return out;
 }
 
+String StringUtil::join(const Set<String>& list, const String& join) {
+  String out;
+
+  size_t i = 0;
+  for (const auto& item : list) {
+    if (++i > 1) {
+      out += join;
+    }
+
+    out += item;
+  }
+
+  return out;
+}
+
 bool StringUtil::beginsWith(const std::string& str, const std::string& prefix) {
   if (str.length() < prefix.length()) {
     return false;

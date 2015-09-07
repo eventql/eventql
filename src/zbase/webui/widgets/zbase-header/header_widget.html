@@ -1,0 +1,56 @@
+<template id="zbase_header_tpl">
+  <div class="navigation_inner">
+    <a href="/a/" class="logo_app"><img id="zbase_logo" src="/a/_/a/favicon-32x32.png" height="22" alt="ZenBase"></a>
+
+    <div class="sep"></div>
+
+    <ul class="main_menu">
+      <li><a href="/a/" class="nav"><i class="fa fa-bar-chart"></i> Query</a></li>
+      <li><a href="/a/datastore/tables" class="nav"><i class="fa fa-database"></i> Datastore</a></li>
+      <!--
+      <li><a href="/a/pipelines" class="nav"><i class="fa fa-industry"></i> Pipelines</a></li>
+      <li><a href="/a/settings" class="nav"><i class="fa fa-bell"></i> Monitor</a></li>
+      -->
+      <li><a href="/a/settings" class="nav"><i class="fa fa-cog" style="margin-right:1px;"></i> Settings</a></li>
+    </ul>
+
+
+    <ul style="float: right;" class="main_menu">
+      <li><a href="/a/documentation" class="nav"><i class="fa fa-question-circle"></i> Docs</a></li>
+      <li class="user_info">
+        <span class="nav dropdown" style="">
+          <span class="dropdown_header" href="">
+            <i class="fa fa-user"></i>
+            <span class="userid_info"></span> (<span class="namespace_info"></span>)
+            <i class="fa fa-caret-down"></i>
+            <span style="display: block"></span>
+          </span>
+          <ul class="dropdown_panel">
+            <li class="change_namespace">
+              <span href="">Change namespace</span>
+            </li>
+            <li>
+              <a class="link" href="/a/logout">Logout</a>
+            </li>
+          </ul>
+        </span>
+      </li>
+    </ul>
+  </div>
+</template>
+
+<template id="zbase_header_namespace_prompt_tpl">
+  <z-modal class='zbase_select_namespace_modal'>
+    <z-modal-box>
+      <z-modal-close-icon></z-modal-close-icon>
+      <div class='z-modal-header'>
+        Select a Namespace
+      </div>
+
+      <div class="error_message hidden"></div>
+
+      <ul class="namespace_list">
+      </ul>
+    </z-modal-box>
+  </z-modal>
+</template>

@@ -1,0 +1,6 @@
+html_file: "documents.html"
+html_file: "docs_menu.html"
+js_file: "documents.js"
+js_file: "docs_menu.js"
+css_file: "documents.css"
+css_file: "docs_menu.css"

@@ -1,0 +1,69 @@
+<template id="zbase_datastore_logfiles_list_tpl">
+  <section class='zbase_page_title medium'>
+    <div>
+      <h2 class="pagetitle zbase_datastore_menu_pagetitle">Datastore</h2>
+    </div>
+  </section>
+  <div class="zbase_content_pane zbase_datastore">
+    <div class="zbase_datastore_logfiles">
+      <div class="zbase_datastore_menu_sidebar">
+      </div>
+
+      <div class="zbase_datastore_menu_content">
+        <zbase-breadcrumbs>
+          <zbase-breadcrumbs-section>
+            <a href="/a/datastore">Datastore</a>
+          </zbase-breadcrumbs-section>
+          <zbase-breadcrumbs-section>
+            <a href="/a/datastore/logfiles">Logfiles</a>
+          </zbase-breadcrumbs-section>
+        </zbase-breadcrumbs>
+        <h2 class="pagetitle"><em>Logfiles</em></h2>
+
+        <table class="z-table" data-clickable name="logfile_table">
+          <thead>
+            <tr>
+              <th style="width: 250px;">Logfile</th>
+              <th>Settings</th>
+              <th style="width: 54px;"></th>
+            </tr>
+          </thead>
+
+          <tbody></tbody>
+        </table>
+
+        <div class="add_logfile_definition">
+          <a class="link">
+            <i class="fa fa-plus"></i> Add Logfile Definition
+          </a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</template>
+
+<template id="zbase_datastore_logfiles_list_row_tpl">
+  <tr class="logfile_definition">
+    <td>
+      <div class="logfile_name"><a href=""></a></div>
+    </td>
+    <td>
+      <div class="logfile_config">
+        <span style="line-height: 20px; font-size:12px; font-weight: 500;">Format:</span>
+        <pre class="logfile_format"></pre>
+        <br>
+
+        <span style="line-height: 20px; font-size:12px; font-weight: 500;">Per-Source Fields:</span>
+        <pre class="logfile_source_fields"></pre>
+        <br>
+
+        <span style="line-height: 20px; font-size:12px; font-weight: 500;">Per-Row Fields:</span>
+        <pre class="logfile_row_fields"></pre>
+      </div>
+    </td>
+    <td class="text_right attr_icon">
+      <a class="edit_link" href=""><i class="fa fa-cog"></i></a>
+    </td>
+  </tr>
+</template>

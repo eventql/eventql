@@ -14,6 +14,7 @@
 #include <stx/exception.h>
 #include <stx/protobuf/MessageSchema.h>
 #include <functional>
+#include <zbase/buildconfig.h>
 #ifdef STX_ENABLE_MYSQL
 #include <mysql.h>
 #endif

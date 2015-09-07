@@ -1,0 +1,379 @@
+/**
+ * Adapted from: Semantic UI:
+ *   https://github.com/Semantic-Org/Semantic-UI
+ *   http://www.semantic-ui.com/
+ */
+
+z-menu,
+.z-menu {
+  display: block;
+  margin: 1em 0em;
+  background: #ffffff;
+  font-weight: normal;
+  box-shadow: 0px 0px 0px 1px rgba(39, 41, 43, 0.15), 0px 1px 2px 0 rgba(0, 0, 0, 0.05);
+  border-radius: 0.2857em;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+z-menu::after,
+.z-menu::after {
+  content: '';
+  display: block;
+  height: 0px;
+  clear: both;
+  visibility: hidden;
+}
+
+/*--------------
+ Menu Item
+---------------*/
+z-menu-item,
+.z-menu-item {
+  background: none;
+  display: block;
+  height: auto!important;
+  border-top: none;
+  border-left: 0 solid transparent;
+  border-right: none;
+  position: relative;
+  display: block;
+  padding: 0.78571em 0.95em;
+  border-top: none;
+  background: none;
+  vertical-align: middle;
+  line-height: 1;
+  text-decoration: none;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+      -ms-user-select: none;
+          user-select: none;
+
+
+  font-size: 1em;
+  line-height: 1.3;
+  font-weight: 500;
+}
+
+z-menu-item:first-child::before,
+.z-menu-item:first-child::before {
+  height: 0px;
+}
+
+z-menu-item::before,
+.z-menu-item::before {
+  position: absolute;
+  content: '';
+  top: 0%;
+  left: 0px;
+  width: 100%;
+  background: -webkit-linear-gradient(left, rgba(0, 0, 0, 0.03) 0%, rgba(0, 0, 0, 0.1) 1.5em, rgba(0, 0, 0, 0.03) 100%);
+  background: linear-gradient(to right, rgba(0, 0, 0, 0.03) 0%, rgba(0, 0, 0, 0.1) 1.5em, rgba(0, 0, 0, 0.03) 100%);
+  height: 1px;
+}
+
+z-menu-item:hover,
+.z-menu-item:hover {
+  cursor: pointer;
+  background: rgba(0, 0, 0, 0.03);
+  color: rgba(0, 0, 0, 0.8);
+}
+
+z-menu-item[data-active],
+.z-menu-item[data-active] {
+  background: rgba(0,0,0,.03);
+  border-radius: 0;
+  box-shadow: 2px 0 0 inset;
+}
+
+/*--------------
+ Menu Section
+---------------*/
+z-menu-section,
+.z-menu-section {
+  position: relative;
+  display:block;
+  padding: .78571em .95em;
+}
+
+z-menu-section:first-child,
+.z-menu-section:first-child {
+  border-radius: 0.2857em 0.2857em 0px 0px;
+}
+
+z-menu-section:last-child,
+.z-menu-section:last-child {
+  border-radius: 0px 0px 0.2857em 0.2857em;
+}
+
+z-menu-section::before,
+.z-menu-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background: -webkit-linear-gradient(left, rgba(0, 0, 0, 0.03) 0%, rgba(0, 0, 0, 0.1) 1.5em, rgba(0, 0, 0, 0.03) 100%);
+  background: linear-gradient(to right, rgba(0, 0, 0, 0.03) 0%, rgba(0, 0, 0, 0.1) 1.5em, rgba(0, 0, 0, 0.03) 100%);
+  height: 1px;
+}
+
+z-menu-section:first-child::before,
+.z-menu-section:first-child::before {
+  height: 0px;
+}
+
+/*--------------
+ Menu Title
+---------------*/
+z-menu-title,
+.z-menu-title {
+  padding-bottom: 4px;
+  line-height: 1.3;
+  font-weight: 500;
+  font-size: 1em;
+  background: none;
+  display: block;
+  height: auto!important;
+  border-top: none;
+  border-left: 0 solid transparent;
+  border-right: none;
+  position: relative;
+  display: block;
+  border-top: none;
+  background: none;
+  vertical-align: middle;
+  line-height: 1;
+  text-decoration: none;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+      -ms-user-select: none;
+          user-select: none;
+
+
+}
+
+/*--------------------
+ Menu Section Items
+--------------------*/
+z-menu-section z-menu-item,
+z-menu-section .z-menu-item,
+.z-menu-section .z-menu-item {
+  background: 0 0;
+  padding: .5em 1em;
+  font-size: .9em;
+  color: rgba(0,0,0,.5);
+}
+
+z-menu-section z-menu-item[data-active],
+z-menu-section .z-menu-item[data-active],
+.z-menu-section .z-menu-item[data-active] {
+  color: rgba(0,0,0,.8);
+  font-weight: 500;
+  background: transparent;
+  box-shadow: none;
+}
+
+z-menu-section z-menu-item:hover,
+z-menu-section .z-menu-item:hover,
+.z-menu-section .z-menu-item:hover {
+  color: rgba(0, 0, 0, 0.85);
+  cursor: pointer;
+  background: #fff;
+}
+
+z-menu-section z-menu-item::before,
+z-menu-section .z-menu-item::before,
+.z-menu-section .z-menu-item::before {
+  height: 0px;
+}
+
+/*--------------------
+  Subsection
+---------------------*/
+z-menu-subsection,
+.z-menu-subsection {
+  display: block;
+  padding: .5em 1em;
+  position: relative;
+}
+
+z-menu-subsection z-menu-title,
+.z-menu-subsection .z-menu-title,
+.z-menu-subsection z-menu-title {
+  font-size: 0.95em;
+  color: rgba(0,0,0,.7);
+}
+
+z-menu-title + z-menu-subsection,
+.z-menu-title + .z-menu-subsection,
+z-menu-title + .z-menu-subsection{
+  margin-top: .3em;
+}
+
+
+/*--------------------
+ Accordion Menu Section
+--------------------*/
+z-menu[data-option='accordion'] z-menu-section z-menu-item,
+.z-menu[data-option='accordion'] .z-menu-section .z-menu-item{
+  display:none;
+}
+
+z-menu[data-option='accordion'] z-menu-section[data-active] z-menu-item,
+.z-menu[data-option='accordion'] .z-menu-section[data-active] .z-menu-item{
+  display:block;
+}
+
+z-menu[data-option='accordion'] z-menu-section,
+.z-menu[data-option='accordion'] .z-menu-section{
+  padding: 0;
+}
+
+z-menu[data-option='accordion'] z-menu-title,
+.z-menu[data-option='accordion'] .z-menu-title {
+  padding: 0.78571em 0.95em;
+}
+
+z-menu[data-option='accordion'] z-menu-title:hover,
+.z-menu[data-option='accordion'] .z-menu-title:hover{
+  cursor: pointer;
+  background: rgba(0, 0, 0, 0.03);
+  color: rgba(0, 0, 0, 0.8);
+}
+
+z-menu[data-option='accordion'] z-menu-section z-menu-item,
+.z-menu[data-option='accordion'] .z-menu-section .z-menu-item{
+  padding: .5em 1em .5em 2em;
+}
+
+z-menu ul.menu li.submenu[data-option='accordion'] > ul {
+  padding-bottom: .95em;
+}
+
+z-menu {
+  background:transparent;
+  box-shadow: none;
+  position: absolute;
+}
+
+z-menu {
+  width: 168px;
+  font-size: 14px;
+  border-top-right-radius: 0;
+  margin-top: 14px;
+}
+
+z-menu z-menu-section:before {
+  background: none;
+}
+z-menu z-menu-section .z-menu-item,
+z-menu z-menu-section z-menu-item {
+  transition: none;
+  padding: 5px 0 5px 0;
+  color: #000;
+  font-weight: 400;
+  font-size: 12px;
+}
+
+z-menu z-menu-section .z-menu-item:hover:after,
+z-menu z-menu-section .z-menu-item:hover {
+  background: transparent;
+  color: #1c99d6;
+}
+
+z-menu z-menu-section .z-menu-item[data-active]:after,
+z-menu z-menu-section .z-menu-item[data-active] {
+  color: #1c99d6;
+}
+
+z-menu z-menu-section .z-menu-item:after {
+  display: block;
+  content: "\f105";
+  font: normal normal normal 14px/1 FontAwesome;
+  float: right;
+  color: #bbb;
+}
+
+z-menu z-menu-title, z-menu .z-menu-title {
+  font-size: 13px;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 5px;
+  margin-left: -15px;
+  margin-right: -10px;
+  padding: 15px 0 0 15px;
+  line-height: 22px;
+}
+
+z-menu z-menu-subsection z-menu-title {
+  font-size: 11.5px;
+  font-weight: 500;
+  color: #666;
+  margin-top: 3px;
+  margin-bottom: 0;
+  line-height: 22px;
+  background: transparent;
+  border-top: none;
+  border-bottom: none;
+}
+
+z-menu z-menu-subsection {
+  padding: 3px 0;
+}
+
+z-menu z-menu-title,
+z-menu z-menu-item {
+  margin-left: 10px;
+  padding-left: 10px;
+  transition: none;
+  border-radius: 3px;
+}
+
+z-menu z-menu-title.link,
+z-menu z-menu-item.link {
+  padding: 0;
+}
+
+z-menu z-menu-title:before,
+z-menu z-menu-item:before {
+  display: none;
+}
+
+z-menu z-menu-title,
+z-menu z-menu-title a,
+z-menu z-menu-item a {
+  text-decoration: none;
+  color: #9a9fa7;
+  display: block;
+  line-height: 1.3;
+  font-size: 14px;
+}
+
+z-menu z-menu-title.link a,
+z-menu z-menu-item.link a {
+  padding: 0.78571em 0.95em;
+  padding-left: 10px;
+}
+
+
+z-menu > z-menu-item[data-active] {
+  background: none;
+  box-shadow: none;
+}
+
+z-menu z-menu-section[data-active] z-menu-title a,
+z-menu z-menu-section z-menu-item[data-active] a,
+z-menu > z-menu-item[data-active] a {
+  font-weight: 500;
+  color: #333;
+}
+
+z-menu z-menu-section z-menu-item.link {
+  padding: 0 20px;
+}
+

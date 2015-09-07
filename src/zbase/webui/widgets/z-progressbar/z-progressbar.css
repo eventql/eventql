@@ -1,0 +1,126 @@
+z-progressbar {
+  position: relative;
+  display: block;
+  max-width: 100%;
+  border: 1px solid rgba(39,41,43,.15);
+  margin: 1em 0 2.5em;
+  box-shadow: none;
+  background: rgba(0,0,0,.03);
+  padding: .2857em;
+  border-radius: .2857rem;
+  font-size: 1rem;
+}
+
+z-progressbar[data-state='disabled'] {
+  opacity: .35;
+}
+
+z-progressbar[data-state='success'].bar {
+  background-color: #5bbd72!important;
+}
+
+z-progressbar[data-state='warning'].bar {
+  background-color: #f2c037!important;
+}
+
+z-progressbar[data-state='error'].bar {
+  background-color: #d95c5c!important;
+}
+
+z-progressbar[data-state='success'] .label {
+  color : #356e36;
+}
+
+z-progressbar[data-state='warning'] .label {
+  color : #825c01;
+}
+
+z-progressbar[data-state='error'] .label {
+  color : #d95c5c;
+}
+
+z-progressbar[data-state='unknown'] .bar {
+  width: 0;
+}
+
+z-progressbar .bar {
+  display: block;
+  height: 1.75em;
+  line-height: 1;
+  position: relative;
+  width: 0;
+  min-width: 2em;
+  background: #888;
+  border-radius: .2857rem;
+}
+
+z-progressbar .bar::after {
+  content: '';
+  opacity: 0;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #fff;
+  border-radius: .2857rem;
+  -webkit-animation: progress-active 2s ease infinite;
+  animation: progress-active 2s ease infinite;
+}
+
+z-progressbar .bar > .progress {
+  white-space: nowrap;
+  position: absolute;
+  width: auto;
+  font-size: .9em;
+  top: 50%;
+  right: .5em;
+  left: auto;
+  bottom: auto;
+  color: rgba(255,255,255,.8);
+  text-shadow: none;
+  margin-top: -.5em;
+  font-weight: 700;
+  text-align: left;
+  font-family: Lato,'Helvetica Neue',Arial,Helvetica,sans-serif;
+  line-height: 1;
+}
+
+z-progressbar .label {
+  position: absolute;
+  width: 100%;
+  font-size: 1em;
+  top: 100%;
+  right: auto;
+  left: 0;
+  bottom: auto;
+  color: rgba(0,0,0,.8);
+  font-weight: 700;
+  text-shadow: none;
+  margin-top: .2em;
+  text-align: center;
+
+
+}
+
+@-webkit-keyframes progress-active {
+  0% {
+    opacity: 0.3;
+    width: 0;
+  }
+  100% {
+    opacity: 0;
+    width: 100%;
+  }
+}
+
+@keyframes progress-active {
+  0% {
+    opacity: 0.3;
+    width: 0;
+  }
+  100% {
+    opacity: 0;
+    width: 100%;
+  }
+}

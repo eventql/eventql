@@ -1,0 +1,326 @@
+.zbase_sql_editor .zbase_sql_editor_pane {
+  display: table;
+  table-layout: fixed;
+  width: 100%;
+  min-height: 900px; /* FIXME */
+  border-bottom: 1px solid #ddd;
+}
+
+
+.zbase_sql_editor .zbase_sql_editor_sidebar {
+  width: 320px;
+  min-height: 200px;
+  display: table-cell;
+  vertical-align: top;
+}
+
+.zbase_sql_editor .zbase_sql_editor_sidebar .sidebar_section:first-child {
+  border-top: none;
+}
+
+.zbase_sql_editor .zbase_sql_editor_sidebar .sidebar_section {
+  padding: 0 20px;
+  font-size: 13px;
+  line-height: 21px;
+  border-top: 1px solid #eee;
+}
+
+.zbase_sql_editor .zbase_sql_editor_sidebar .sidebar_section.document_settings {
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+.zbase_sql_editor .zbase_sql_editor_sidebar .zbase_table_list {
+  margin-top: 18px;
+}
+
+.zbase_sql_editor .zbase_sql_editor_sidebar .zbase_table_list h3 {
+  margin-bottom: 3px;
+}
+
+.zbase_sql_editor .zbase_sql_editor_content {
+  border-left: 1px solid #ddd;
+  border-right: 1px solid #ddd;
+  background: #fff;
+}
+
+.zbase_sql_editor .zbase_sql_editor_content.with_sidebar {
+  display: table-cell;
+  vertical-align: top;
+  width: auto;
+}
+
+.zbase_sql_editor .z-button {
+  font-size: 13px;
+  font-weight: 500;
+  float: right;
+}
+
+.zbase_sql_editor .zbase_page_title .z-button {
+  margin-top: 20px;
+  margin-right: 3px;
+}
+
+.zbase_sql_editor .zbase_sql_editor_infobar {
+  border-bottom: 1px solid #edc3c3;
+  background: #fff0f0;
+  color: #a94442;
+  box-shadow: 0 1px 1px rgba(0,0,0,0.1);
+  padding: 10px 20px;
+  font-size: 13px;
+  font-weight: 400;
+  color: rgba(10,10,10,0.65);
+  display: block;
+}
+
+.zbase_sql_editor .zbase_sql_editor_infobar em {
+  font-weight: 500;
+  font-style: normal;
+  color: rgba(10,10,10,0.7);
+}
+
+.zbase_sql_editor .zbase_sql_editor_infobar.hidden {
+  display: none;
+}
+
+.zbase_sql_editor table.z-table {
+  font-size: 13px;
+}
+
+.zbase_sql_editor table.z-table thead th {
+  font-weight: 400;
+  color: #888;
+}
+
+.zbase_sql_editor table.z-table tbody tr td {
+  line-height: 24px;
+}
+
+.zbase_sql_editor table.z-table tbody tr a {
+  color: #888;
+}
+
+.zbase_sql_editor table.z-table thead tr th:first-child,
+.zbase_sql_editor table.z-table tbody tr td:first-child {
+  padding-left: 20px;
+}
+
+.zbase_sql_editor table.z-table tbody tr td:first-child a {
+  font-weight: 400;
+  color: #000;
+}
+
+.zbase_sql_editor .zbase_sql_editor_result_pane table.z-table {
+  font-size: 12px;
+}
+
+.zbase_sql_editor .zbase_sql_editor_result_pane table.z-table tr td {
+  line-height: 14px;
+}
+
+.zbase_sql_editor .error_message {
+  display: block;
+  position: relative;
+  min-height: 1em;
+  padding: 1em 1.5em;
+  line-height: 1.3;
+  color: rgba(0, 0, 0, 0.8);
+  font-size: 1em;
+  font-family: 'Helvetica Neue', Arial, Helvetica, sans-serif;
+  font-size: 14px;
+  background: #fff0f0;
+  color: #a94442;
+}
+
+.zbase_sql_editor .error_message.hidden {
+  display: none;
+}
+
+.zbase_sql_editor .error_message h3 {
+  margin-top: 0;
+}
+
+.zbase_sql_editor .resizer_tooltip {
+  height: 20px;
+  background: url(data:image/gif;base64,R0lGODlhZwABAJEAAPD2+Nve3////////yH5BAEAAAMALAAAAABnAAEAAAINhI+py60hopy02otrAQA7) left center repeat-y #fff;
+  cursor: row-resize;
+  border-bottom: 1px solid #c9d0d4;
+}
+
+.zbase_sql_editor .zbase_sql_editor_modal.table_descr .zbase_modal_content {
+  height: 300px;
+  overflow: auto;
+}
+
+/**
+  * Overview
+  */
+.zbase_sql_editor .zbase_sql_editor_overview table.z-table {
+  border-top: 1px solid #e1e1e1;
+}
+
+/**
+  * Editor
+  */
+.zbase_sql_editor_pane z-codeeditor {
+  border-top: 1px solid #c9d0d4;
+  border-bottom: 1px solid #c9d0d4;
+}
+
+.zbase_sql_editor_pane .CodeMirror-gutters {
+  background: rgba(63,144,170,.08);
+  background-color: none;
+}
+
+.zbase_sql_editor_pane .CodeMirror {
+  border-left: none;
+  border-right: none;
+  border-bottom: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  -o-user-select: none;
+  user-select: none;
+}
+
+.zbase_sql_editor_result_pane.hidden {
+  display: none;
+}
+
+.zbase_sql_editor_result_pane .zbase_result_pane_bar {
+  background-color: #f2f8fa;
+  border-bottom: 1px solid #c9d0d4;
+  box-shadow: 0 1px 1px rgba(0,0,0,0.04);
+  height: 38px;
+  overflow: hidden;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  -o-user-select: none;
+  user-select: none;
+}
+
+.zbase_sql_editor_result_pane .zbase_result_pane_bar label {
+  float:left;
+  line-height: 38px;
+  padding: 0 12px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.zbase_sql_editor_result_pane .zbase_result_pane_bar.clickable:before {
+  font-family: FontAwesome;
+  content: "\f0da";
+  float: left;
+  margin-left: 20px;
+  line-height: 38px;
+  width: 10px;
+  opacity: 0.9;
+}
+
+.zbase_sql_editor_result_pane .zbase_result_pane_bar.clickable[data-active]:before {
+  content: "\f0d7";
+}
+
+.zbase_sql_editor_result_pane .zbase_result_pane_bar.clickable:hover {
+  cursor: pointer;
+}
+
+.zbase_sql_editor_result_pane .zbase_result_pane_bar.clickable:hover label {
+  opacity: 1;
+  cursor: pointer;
+}
+
+.zbase_sql_editor_result_pane .zbase_result_pane_bar.clickable[data-active] label {
+  opacity: 1;
+}
+
+.zbase_sql_editor_result_pane .zbase_result_pane_bar + .zbase_sql_chart,
+.zbase_sql_editor_result_pane .zbase_result_pane_bar + table.z-table {
+  display: none;
+}
+
+.zbase_sql_editor_result_pane .zbase_result_pane_bar[data-active] + table.z-table {
+  display: table;
+}
+
+.zbase_sql_editor_result_pane .zbase_result_pane_bar[data-active] + .zbase_sql_chart {
+  display: block;
+}
+
+.zbase_sql_editor_result_pane table.z-table {
+  border-bottom: 1px solid #e6e8e9;
+}
+
+.zbase_sql_editor_result_pane table.z-table thead th:first-child,
+.zbase_sql_editor_result_pane table.z-table tbody td:first-child {
+  padding-left: 20px;
+}
+
+.zbase_sql_editor_modal .zbase_modal_content h4 {
+  margin: 5px 0 10px;
+  font-weight: 400;
+  font-size: 14px;
+}
+
+.zbase_sql_editor_modal .zbase_modal_content input.z-input {
+  font-size: 14px;
+  width: 40%;
+}
+
+.zbase_sql_editor_modal .zbase_modal_footer .z-button {
+  float: right;
+}
+
+.zbase_loader.zbase_sql_result_loader {
+  min-height: 200px;
+}
+
+.zbase_loader.zbase_sql_result_loader.hidden {
+  display: none;
+}
+
+.zbase_sql_editor zbase-breadcrumbs {
+  font-size: 12px;
+  padding: 15px 20px 0 20px;
+}
+
+.zbase_sql_editor .zbase_sql_editor_title {
+  padding: 0 20px;
+  background: #fff;
+}
+
+.zbase_sql_editor .zbase_sql_editor_title .z-button {
+  margin-top: 14px;
+  margin-left: 16px;
+  margin-right: 0;
+}
+
+.zbase_sql_editor .zbase_sql_chart {
+  padding: 20px;
+}
+
+.zbase_sql_editor .readonly_hint {
+  font-size: 12px;
+  float: right;
+  line-height: 64px;
+  height: 60px;
+  overflow: hidden;
+  margin-right: 20px;
+  opacity: 0.8;
+}
+
+.zbase_sql_editor .readonly_hint i {
+  margin-right: 2px;
+  opacity: 0.8;
+}
+
+.zbase_sql_editor .readonly_hint:hover {
+  opacity: 1.0;
+  cursor: default;
+}
+
+.zbase_sql_editor .readonly_hint.hidden {
+  display: none;
+}
+

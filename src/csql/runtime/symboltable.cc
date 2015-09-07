@@ -41,7 +41,10 @@ void SymbolTable::registerFunction(
 }
 
 void SymbolTable::registerFunction(const String& symbol, SFunction fn) {
-  syms_.emplace(symbol, fn);
+  std::string symbol_downcase = symbol;
+  StringUtil::toLower(&symbol_downcase);
+
+  syms_.emplace(symbol_downcase, fn);
 }
 
 void SymbolTable::registerSymbol(
@@ -66,11 +69,7 @@ void SymbolTable::registerSymbol(
     size_t scratchpad_size,
     void (*free_method)(void*)) {
   std::string symbol_downcase = symbol;
-  std::transform(
-      symbol_downcase.begin(),
-      symbol_downcase.end(),
-      symbol_downcase.begin(),
-      ::tolower);
+  StringUtil::toLower(&symbol_downcase);
 
   symbols_.emplace(
       std::make_pair(
@@ -85,11 +84,7 @@ void SymbolTable::registerSymbol(
 SymbolTableEntry const* SymbolTable::lookupSymbol(const std::string& symbol)
     const {
   std::string symbol_downcase = symbol;
-  std::transform(
-      symbol_downcase.begin(),
-      symbol_downcase.end(),
-      symbol_downcase.begin(),
-      ::tolower);
+  StringUtil::toLower(&symbol_downcase);
 
   auto iter = symbols_.find(symbol_downcase);
 
@@ -102,8 +97,10 @@ SymbolTableEntry const* SymbolTable::lookupSymbol(const std::string& symbol)
 }
 
 SFunction SymbolTable::lookup(const String& symbol) const {
-  auto iter = syms_.find(symbol);
+  std::string symbol_downcase = symbol;
+  StringUtil::toLower(&symbol_downcase);
 
+  auto iter = syms_.find(symbol_downcase);
   if (iter == syms_.end()) {
     RAISEF(kRuntimeError, "symbol not found: $0", symbol);
   }

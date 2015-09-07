@@ -159,6 +159,11 @@ HumanDataType Human::detectDataType(const String& value) {
     return HumanDataType::BOOLEAN;
   }
 
+  auto time = parseTime(value);
+  if (!time.isEmpty()) {
+    return HumanDataType::DATETIME;
+  }
+
   if (UTF8::isValidUTF8(value)) {
     return HumanDataType::TEXT;
   }

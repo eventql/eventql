@@ -24,6 +24,10 @@
 
 using namespace stx;
 
+#ifndef STX_ENABLE_MYSQL
+#error zen-mysql-upload needs libmysqlclient
+#endif
+
 void run(const cli::FlagParser& flags) {
   auto source_table = flags.getString("source_table");
   auto destination_table = flags.getString("destination_table");

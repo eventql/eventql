@@ -70,6 +70,7 @@ bool DefaultCSVInputStream::readNextRow(std::vector<std::string>* target) {
 
       if (byte == quote_char_) {
         quoted = !quoted;
+        continue;
       }
 
       column += byte;

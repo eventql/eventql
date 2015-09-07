@@ -15,6 +15,7 @@
 #include "stx/io/fileutil.h"
 #include "stx/util/Base64.h"
 #include "stx/logging.h"
+#include "stx/assets.h"
 #include "stx/http/cookies.h"
 #include "stx/protobuf/DynamicMessage.h"
 #include "stx/protobuf/MessageEncoder.h"
@@ -32,14 +33,13 @@
 #include "csql/runtime/JSONSSEStreamFormat.h"
 #include "zbase/core/TimeWindowPartitioner.h"
 #include "zbase/core/FixedShardPartitioner.h"
+#include "zbase/HTTPAuth.h"
 #include <cstable/CSTableBuilder.h>
 
 using namespace stx;
 
 namespace zbase {
 
-const char AnalyticsServlet::kSessionCookieKey[] = "__dxa_session";
-const uint64_t AnalyticsServlet::kSessionLifetimeMicros = 365 * kMicrosPerDay;
 
 AnalyticsServlet::AnalyticsServlet(
     RefPtr<AnalyticsApp> app,
@@ -65,15 +65,31 @@ AnalyticsServlet::AnalyticsServlet(
 void AnalyticsServlet::handleHTTPRequest(
     RefPtr<http::HTTPRequestStream> req_stream,
     RefPtr<http::HTTPResponseStream> res_stream) {
+  try {
+    handle(req_stream, res_stream);
+  } catch (const StandardException& e) {
+    logError("zbase", e, "error while handling HTTP request");
+    req_stream->discardBody();
+
+    http::HTTPResponse res;
+    res.populateFromRequest(req_stream->request());
+    res.setStatus(http::kStatusInternalServerError);
+    res.addHeader("Content-Type", "text/html; charset=utf-8");
+    res.addBody(Assets::getAsset("zbase/webui/500.html"));
+    res_stream->writeResponse(res);
+  }
+}
+
+void AnalyticsServlet::handle(
+    RefPtr<http::HTTPRequestStream> req_stream,
+    RefPtr<http::HTTPResponseStream> res_stream) {
   const auto& req = req_stream->request();
   URI uri(req.uri());
 
+  logDebug("zbase", "HTTP Request: $0 $1", req.method(), req.uri());
+
   http::HTTPResponse res;
   res.populateFromRequest(req);
-  //res.addHeader("Access-Control-Allow-Origin", "*"); // FIXME
-  //res.addHeader("Access-Control-Allow-Methods", "GET, POST");
-
-  logDebug("zbase", "HTTP Request: $0 $1", req.method(), req.uri());
 
   if (req.method() == http::HTTPMessage::M_OPTIONS) {
     req_stream->readBody();
@@ -82,9 +98,8 @@ void AnalyticsServlet::handleHTTPRequest(
     return;
   }
 
-
   /* AUTH METHODS */
-  if (uri.path() == "/analytics/api/v1/auth/login") {
+  if (uri.path() == "/api/v1/auth/login") {
     expectHTTPPost(req);
     req_stream->readBody();
     performLogin(uri, &req, &res);
@@ -92,38 +107,51 @@ void AnalyticsServlet::handleHTTPRequest(
     return;
   }
 
-  auto session_opt = authenticateRequest(req_stream->request());
+  if (uri.path() == "/api/v1/auth/logout") {
+    expectHTTPPost(req);
+    req_stream->readBody();
+    performLogout(uri, &req, &res);
+    res_stream->writeResponse(res);
+    return;
+  }
+
+
+  auto session_opt = HTTPAuth::authenticateRequest(
+      req_stream->request(),
+      auth_);
+
   if (session_opt.isEmpty()) {
     req_stream->readBody();
-    res.addHeader("WWW-Authenticate", "Token");
     res.setStatus(http::kStatusUnauthorized);
-    res.addBody("authorization required");
+    res.addHeader("WWW-Authenticate", "Token");
+    res.addHeader("Content-Type", "text/html; charset=utf-8");
+    res.addBody(Assets::getAsset("zbase/webui/401.html"));
     res_stream->writeResponse(res);
     return;
   }
 
   const auto& session = session_opt.get();
 
-  if (StringUtil::beginsWith(uri.path(), "/analytics/api/v1/logfiles")) {
+  if (StringUtil::beginsWith(uri.path(), "/api/v1/logfiles")) {
     logfile_api_.handle(session, req_stream, res_stream);
     return;
   }
 
-  if (StringUtil::beginsWith(uri.path(), "/analytics/api/v1/documents")) {
+  if (StringUtil::beginsWith(uri.path(), "/api/v1/documents")) {
     req_stream->readBody();
     documents_api_.handle(session, &req, &res);
     res_stream->writeResponse(res);
     return;
   }
 
-  if (uri.path() == "/analytics/api/v1/auth/info") {
+  if (uri.path() == "/api/v1/auth/info") {
     req_stream->readBody();
     getAuthInfo(session, &req, &res);
     res_stream->writeResponse(res);
     return;
   }
 
-  if (uri.path() == "/analytics/api/v1/auth/private_api_token") {
+  if (uri.path() == "/api/v1/auth/private_api_token") {
     req_stream->readBody();
     getPrivateAPIToken(session, &req, &res);
     res_stream->writeResponse(res);
@@ -131,40 +159,39 @@ void AnalyticsServlet::handleHTTPRequest(
   }
 
 
-
-  if (uri.path() == "/analytics/api/v1/query") {
+  if (uri.path() == "/api/v1/query") {
     req_stream->readBody();
     executeQuery(session, uri, req_stream.get(), res_stream.get());
     return;
   }
 
-  if (uri.path() == "/analytics/api/v1/feeds/fetch") {
+  if (uri.path() == "/api/v1/feeds/fetch") {
     req_stream->readBody();
     fetchFeed(uri, &req, &res);
     res_stream->writeResponse(res);
     return;
   }
 
-  if (uri.path() == "/analytics/api/v1/reports/generate") {
+  if (uri.path() == "/api/v1/reports/generate") {
     req_stream->readBody();
     generateReport(uri, req_stream.get(), res_stream.get());
     return;
   }
 
-  if (uri.path() == "/analytics/api/v1/reports/download") {
+  if (uri.path() == "/api/v1/reports/download") {
     req_stream->readBody();
     downloadReport(uri, req_stream.get(), res_stream.get());
     return;
   }
 
-  if (uri.path() == "/analytics/api/v1/push_events") {
+  if (uri.path() == "/api/v1/push_events") {
     req_stream->readBody();
     pushEvents(uri, &req, &res);
     res_stream->writeResponse(res);
     return;
   }
 
-  if (uri.path() == "/analytics/api/v1/pipeline_info") {
+  if (uri.path() == "/api/v1/pipeline_info") {
     req_stream->readBody();
     pipelineInfo(session, &req, &res);
     res_stream->writeResponse(res);
@@ -173,21 +200,21 @@ void AnalyticsServlet::handleHTTPRequest(
 
 
   /* SESSION TRACKING */
-  if (uri.path() == "/analytics/api/v1/session_tracking/events") {
+  if (uri.path() == "/api/v1/session_tracking/events") {
     req_stream->readBody();
     sessionTrackingListEvents(session, &req, &res);
     res_stream->writeResponse(res);
     return;
   }
 
-  if (uri.path() == "/analytics/api/v1/session_tracking/event_info") {
+  if (uri.path() == "/api/v1/session_tracking/event_info") {
     req_stream->readBody();
     sessionTrackingEventInfo(session, &req, &res);
     res_stream->writeResponse(res);
     return;
   }
 
-  if (uri.path() == "/analytics/api/v1/session_tracking/attributes") {
+  if (uri.path() == "/api/v1/session_tracking/attributes") {
     req_stream->readBody();
     sessionTrackingListAttributes(session, &req, &res);
     res_stream->writeResponse(res);
@@ -196,7 +223,7 @@ void AnalyticsServlet::handleHTTPRequest(
 
 
   /* METRICS */
-  if (uri.path() == "/analytics/api/v1/metrics") {
+  if (uri.path() == "/api/v1/metrics") {
     req_stream->readBody();
     switch (req.method()) {
       case http::HTTPMessage::M_POST:
@@ -210,40 +237,58 @@ void AnalyticsServlet::handleHTTPRequest(
 
 
   /* TABLES */
-  if (uri.path() == "/analytics/api/v1/tables/create_table") {
-    expectHTTPPost(req);
+  if (uri.path() == "/api/v1/tables") {
     req_stream->readBody();
-    createTable(session, &req, &res);
+    listTables(session, &req, &res);
+    res_stream->writeResponse(res);
+    return;
+  }
+  
+  /* TABLES */
+  if (uri.path() == "/api/v1/tables") {
+    req_stream->readBody();
+    listTables(session, &req, &res);
     res_stream->writeResponse(res);
     return;
   }
 
-  if (uri.path() == "/analytics/api/v1/tables/upload_table") {
+  if (uri.path() == "/api/v1/tables/upload_table") {
     expectHTTPPost(req);
     uploadTable(uri, session, req_stream.get(), &res);
     res_stream->writeResponse(res);
     return;
   }
 
+  static const String kTablesPathPrefix = "/api/v1/tables/";
+  if (StringUtil::beginsWith(uri.path(), kTablesPathPrefix)) {
+    req_stream->readBody();
+    fetchTableDefinition(
+        session,
+        uri.path().substr(kTablesPathPrefix.size()),
+        &req,
+        &res);
+    res_stream->writeResponse(res);
+    return;
+  }
+
 
   /* SQL */
-  if (uri.path() == "/analytics/api/v1/sql") {
+  if (uri.path() == "/api/v1/sql") {
     req_stream->readBody();
     executeSQL(session, &req, &res);
     res_stream->writeResponse(res);
     return;
   }
 
-  if (uri.path() == "/analytics/api/v1/sql_stream") {
+  if (uri.path() == "/api/v1/sql_stream") {
     req_stream->readBody();
     executeSQLStream(uri, session, &req, &res, res_stream);
     return;
   }
 
-
-
   res.setStatus(http::kStatusNotFound);
-  res.addBody("not found");
+  res.addHeader("Content-Type", "text/html; charset=utf-8");
+  res.addBody(Assets::getAsset("zbase/webui/404.html"));
   res_stream->writeResponse(res);
 }
 
@@ -317,7 +362,7 @@ void AnalyticsServlet::executeQuery(
   auto future = task_future->result();
   do {
     if (res_stream->isClosed()) {
-      stx::logDebug("zbase", "Aborting Query...");
+      stx::logDebug("analyticsd", "Aborting Query...");
       task_future->cancel();
       return;
     }
@@ -456,7 +501,7 @@ void AnalyticsServlet::generateReport(
   auto future = task_future->result();
   do {
     if (res_stream->isClosed()) {
-      stx::logDebug("zbase", "Aborting Query...");
+      stx::logDebug("analyticsd", "Aborting Query...");
       task_future->cancel();
       return;
     }
@@ -604,9 +649,104 @@ void AnalyticsServlet::insertIntoMetric(
 
   auto time = WallClock::unixMicros();
 
-  stx::logTrace("zbase", "Insert into metric '$0' -> $1", metric, value);
+  stx::logTrace("analyticsd", "Insert into metric '$0' -> $1", metric, value);
   app_->insertMetric(session.customer(), metric, time, value);
   res->setStatus(http::kStatusCreated);
+}
+
+void AnalyticsServlet::listTables(
+    const AnalyticsSession& session,
+    const http::HTTPRequest* req,
+    http::HTTPResponse* res) {
+  Buffer buf;
+  json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
+
+  json.beginObject();
+  json.addObjectEntry("tables");
+  json.beginArray();
+
+  auto table_provider = app_->getTableProvider(session.customer());
+  size_t ntable = 0;
+  table_provider->listTables([&json, &ntable] (const csql::TableInfo table) {
+    if (++ntable > 1) {
+      json.addComma();
+    }
+
+    json.beginObject();
+
+    json.addObjectEntry("name");
+    json.addString(table.table_name);
+
+    json.endObject();
+  });
+
+  json.endArray();
+  json.endObject();
+
+  res->setStatus(http::kStatusOK);
+  res->setHeader("Content-Type", "application/json; charset=utf-8");
+  res->addBody(buf);
+}
+
+void AnalyticsServlet::fetchTableDefinition(
+    const AnalyticsSession& session,
+    const String& table_name,
+    const http::HTTPRequest* req,
+    http::HTTPResponse* res) {
+
+  auto table_provider = app_->getTableProvider(session.customer());
+  auto table_opt = table_provider->describe(table_name);
+  if (table_opt.isEmpty()) {
+    res->setStatus(http::kStatusNotFound);
+    res->addBody("table not found");
+    return;
+  }
+
+  const auto& table = table_opt.get();
+
+  Buffer buf;
+  json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
+
+  json.beginObject();
+  json.addObjectEntry("table");
+  json.beginObject();
+
+  json.addObjectEntry("name");
+  json.addString(table.table_name);
+  json.addComma();
+
+  json.addObjectEntry("columns");
+  json.beginArray();
+  for (size_t i = 0; i < table.columns.size(); ++i) {
+    const auto& col = table.columns[i];
+
+    if (i > 0) {
+      json.addComma();
+    }
+
+    json.beginObject();
+
+    json.addObjectEntry("column_name");
+    json.addString(col.column_name);
+    json.addComma();
+
+    json.addObjectEntry("type");
+    json.addString(col.type);
+    json.addComma();
+
+    json.addObjectEntry("is_nullable");
+    json.addBool(col.is_nullable);
+
+    json.endObject();
+  }
+  json.endArray();
+
+  json.endObject();
+  json.endObject();
+
+  res->setStatus(http::kStatusOK);
+  res->setHeader("Content-Type", "application/json; charset=utf-8");
+  res->addBody(buf);
 }
 
 void AnalyticsServlet::createTable(
@@ -648,7 +788,7 @@ void AnalyticsServlet::createTable(
 
     app_->updateTable(td, force);
   } catch (const StandardException& e) {
-    stx::logError("zbase", e, "error");
+    stx::logError("analyticsd", e, "error");
     res->setStatus(http::kStatusInternalServerError);
     res->addBody(StringUtil::format("error: $0", e.what()));
     return;
@@ -711,7 +851,7 @@ void AnalyticsServlet::uploadTable(
       tmpfile.seekTo(0);
 
       stx::logDebug(
-          "zbase",
+          "analyticsd",
           "Uploading static table; customer=$0, table=$1, shard=$2, size=$3MB",
           session.customer(),
           table_name,
@@ -730,7 +870,7 @@ void AnalyticsServlet::uploadTable(
         tmpfile_path + ".cst",
         WallClock::unixMicros());
   } catch (const StandardException& e) {
-    stx::logError("zbase", e, "error");
+    stx::logError("analyticsd", e, "error");
     res->setStatus(http::kStatusInternalServerError);
     res->addBody(StringUtil::format("error: $0", e.what()));
     return;
@@ -834,8 +974,6 @@ void AnalyticsServlet::executeSQLStream(
         new csql::JSONSSEStreamFormat(&sse_stream));
 
   } catch (const StandardException& e) {
-    stx::logError("sql", e, "SQL execution failed");
-
     Buffer buf;
     json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
     json.beginObject();
@@ -843,7 +981,7 @@ void AnalyticsServlet::executeSQLStream(
     json.addString(e.what());
     json.endObject();
 
-    sse_stream.sendEvent(buf, Some(String("error")));
+    sse_stream.sendEvent(buf, Some(String("query_error")));
   }
 
   sse_stream.finish();
@@ -1017,78 +1155,80 @@ void AnalyticsServlet::sessionTrackingEventInfo(
   res->addBody("not found");
 }
 
-Option<AnalyticsSession> AnalyticsServlet::authenticateRequest(
-    const http::HTTPRequest& request) const {
-  try {
-    String cookie;
-
-    if (request.hasHeader("Authorization")) {
-      static const String hdrprefix = "Token ";
-      auto hdrval = request.getHeader("Authorization");
-      if (StringUtil::beginsWith(hdrval, hdrprefix)) {
-        cookie = URI::urlDecode(hdrval.substr(hdrprefix.size()));
-      }
-    }
-
-    if (cookie.empty()) {
-      const auto& cookies = request.cookies();
-      http::Cookies::getCookie(cookies, kSessionCookieKey, &cookie);
-    }
-
-    if (cookie.empty()) {
-      return None<AnalyticsSession>();
-    }
-
-    return auth_->decodeAuthToken(cookie);
-  } catch (const StandardException& e) {
-    logDebug("zbase", e, "authentication failed because of error");
-    return None<AnalyticsSession>();
-  }
-}
-
 void AnalyticsServlet::performLogin(
     const URI& uri,
     const http::HTTPRequest* req,
     http::HTTPResponse* res) {
-  URI::ParamList params;
-  URI::parseQueryString(req->body().toString(), &params);
+  String next_step;
+  auto session = auth_->performLogin(req->body().toString(), &next_step);
 
-  String userid;
-  if (!URI::getParam(params, "userid", &userid)) {
-    res->setStatus(http::kStatusBadRequest);
-    res->addBody("missing ?userid=... parameter");
-    return;
-  }
-
-  String password;
-  if (!URI::getParam(params, "password", &password)) {
-    res->setStatus(http::kStatusBadRequest);
-    res->addBody("missing ?password=... parameter");
-    return;
-  }
-
-  auto session = auth_->performLogin(userid, password);
-
+  // login failed, invalid credentials or missing data
   if (session.isEmpty()) {
+    Buffer buf;
+    json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
+
+    json.beginObject();
+    json.addObjectEntry("success");
+    json.addFalse();
+
+    if (!next_step.empty()) {
+      json.addComma();
+      json.addObjectEntry("next_step");
+      json.addString(next_step);
+    }
+
+    json.endObject();
+
     res->addHeader("WWW-Authenticate", "Token");
     res->setStatus(http::kStatusUnauthorized);
-  } else {
+    res->addBody(buf);
+  }
+
+  // login successful
+  if (!session.isEmpty()) {
     auto token = auth_->encodeAuthToken(session.get());
 
     res->addCookie(
-        kSessionCookieKey,
+        HTTPAuth::kSessionCookieKey,
         token,
-        WallClock::unixMicros() + kSessionLifetimeMicros,
+        WallClock::unixMicros() + HTTPAuth::kSessionLifetimeMicros,
         "/",
-        ".zbase.io",
-        false, // FIXPAUL https only...
+        getCookieDomain(*req),
+        false,
         true);
+
+    Buffer buf;
+    json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
+
+    json.beginObject();
+    json.addObjectEntry("success");
+    json.addTrue();
+    json.addComma();
+    json.addObjectEntry("auth_token");
+    json.addString(token);
+    json.endObject();
 
     res->addHeader("X-AuthToken", token);
     res->setStatus(http::kStatusOK);
-    res->addBody(token);
+    res->addBody(buf);
   }
 }
+
+void AnalyticsServlet::performLogout(
+    const URI& uri,
+    const http::HTTPRequest* req,
+    http::HTTPResponse* res) {
+  res->addCookie(
+      HTTPAuth::kSessionCookieKey,
+      "",
+      0,
+      "/",
+      getCookieDomain(*req));
+
+  res->setStatus(http::kStatusOK);
+  res->addBody("goodbye");
+}
+
 
 
 } // namespace zbase
