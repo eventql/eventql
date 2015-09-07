@@ -1,5 +1,6 @@
 z-menu.zbase_documents_menu {
   margin-left: -10px;
+  width: auto;
 }
 
 z-menu.zbase_documents_menu z-menu-item,
@@ -53,6 +54,8 @@ z-menu.zbase_documents_menu > z-menu-section[data-active] > z-menu-item {
   border-left: 2px solid #ddd;
   margin-left: 30px;
   padding-left: 16px;
+  padding-top: 6px;
+  padding-bottom: 6px;
   border-radius: 0;
 }
 
