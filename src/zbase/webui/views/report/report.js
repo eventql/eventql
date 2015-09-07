@@ -273,37 +273,6 @@ ZBase.registerView((function() {
     });
   };
 
-  //var initContentEditing = function(page) {
-  //  var edit_pane = $(".zbase_report_pane .edit_content_pane");
-  //  var report_ui = $(".zbase_report_pane .report_ui");
-
-  //  var closeEditPane = function() {
-  //    updateReportContent();
-  //    edit_pane.classList.add("hidden");
-  //    report_ui.classList.remove("hidden");
-  //    $(".error_note", edit_pane).classList.add("hidden");
-  //  };
-
-  //  $.onClick($(".zbase_report_pane .link.edit"), function() {
-  //    report_ui.classList.add("hidden");
-  //    edit_pane.classList.remove("hidden");
-  //  });
-
-  //  $.onClick($(".submit", edit_pane), function() {
-  //    try {
-  //      var content = JSON.parse(
-  //          $.escapeHTML($("z-codeeditor", edit_pane).getValue()));
-  //      description = content.description;
-  //      widget_list.setJSON(content.widgets);
-  //      docsync.saveDocument();
-  //      closeEditPane();
-  //    } catch (e) {
-  //      $(".error_note", edit_pane).classList.remove("hidden");
-  //    }
-  //  });
-  //  $.onClick($(".close", edit_pane), closeEditPane);
-  //};
-
   var setReportName = function(name) {
     var escaped_name = $.escapeHTML(name);
     $("zbase-breadcrumbs-section.report_name").innerHTML = escaped_name;
@@ -329,23 +298,6 @@ ZBase.registerView((function() {
     $(".zbase_report_pane z-modal textarea.report_description").innerHTML =
       escaped_description;
   };
-
-  //var setReportContent = function() {
-  //  var content = {
-  //    description: description,
-  //    widgets: widget_list.getJSON()
-  //  };
-
-  //  $(".zbase_report_pane .edit_content_pane z-codeeditor").setValue(
-  //      JSON.stringify(content));
-  //};
-
-  //var updateReportContent = function() {
-  //  setReportContent();
-  //  setReportDescription();
-  //};
-
-
 
   var getContentJSON = function() {
     var widgets = [];
