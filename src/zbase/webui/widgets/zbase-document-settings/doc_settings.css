@@ -65,3 +65,18 @@
   font-weight: 400;
   margin: 0;
 }
+
+.zbase_doc_settings .doc_settings_infobar {
+  border-bottom: 1px solid #edc3c3;
+  background: #fff0f0;
+  box-shadow: 0 1px 1px rgba(0,0,0,0.1);
+  padding: 10px 20px;
+  font-size: 13px;
+  font-weight: 400;
+  color: rgba(10,10,10,0.65);
+  display: block;
+}
+
+.zbase_doc_settings .doc_settings_infobar.hidden {
+  display: none;
+}
