@@ -1,4 +1,4 @@
-var DocumentSettingsWidget = function(elem, docid) {
+var DocumentSettingsWidget = function(elem, docid, share_modal) {
   var init = function() {
     var tpl = $.getTemplate(
         "widgets/zbase-document-settings",
@@ -9,16 +9,16 @@ var DocumentSettingsWidget = function(elem, docid) {
       if (r.status == 200) {
         var doc = JSON.parse(r.response);
         console.log(doc);
-        setStatus(doc.publishing_status);
-        setAclPolicy(doc.acl_policy);
-        setCategory(doc.category);
+        renderStatus(doc.publishing_status);
+        renderAclPolicy(doc.acl_policy);
+        renderCategory(doc.category);
       } else {
         $.fatalError();
       }
     });
   };
 
-  var setStatus = function(doc_status) {
+  var renderStatus = function(doc_status) {
     var tpl = $.getTemplate(
         "widgets/zbase-document-settings",
         "zbase_doc_settings_status_inner_tpl");
@@ -35,17 +35,28 @@ var DocumentSettingsWidget = function(elem, docid) {
     }, false);
   };
 
+  var renderAclPolicy = function(acl_policy) {
+    //FIXME share link
+    share_modal.onUpdate(setAclPolicy);
+    $.onClick($(".doc_setting_value.acl_policy", elem), function() {
+      share_modal.show();
+    });
+
+    setAclPolicy(acl_policy);
+  };
+
   var setAclPolicy = function(acl_policy) {
-    var value = $(".doc_setting_value.acl_policy", elem);
     if (acl_policy == "ACLPOLICY_PRIVATE") {
-      value.innerHTML = "Private"
+      $(".doc_setting_value.acl_policy", elem).innerHTML = "Private"
     } else {
       var config = $.getConfig();
-      value.innerHTML = "Everybody at " + config.current_user.namespace;
+      $(".doc_setting_value.acl_policy", elem).innerHTML =
+          "Everybody at " + config.current_user.namespace;
     }
   };
 
-  var setCategory = function(category) {
+
+  var renderCategory = function(category) {
     $(".doc_setting_value.category", elem).innerHTML = category;
   }
 
