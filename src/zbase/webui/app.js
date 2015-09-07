@@ -505,6 +505,10 @@ $.escapeHTML = function(str) {
   return div.innerHTML;
 };
 
+$.nl2br = function(str) {
+  return str.replace(/\n/g, "<br />");
+};
+
 $.wrapText = function(str) {
   var new_str = "";
   var partlen = 10;
