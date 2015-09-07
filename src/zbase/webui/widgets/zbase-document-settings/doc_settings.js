@@ -8,8 +8,7 @@ var DocumentSettingsWidget = function(elem, docid, share_modal) {
     $.httpGet("/api/v1/documents/" + docid + "?no_content=true", function(r) {
       if (r.status == 200) {
         var doc = JSON.parse(r.response);
-        console.log(doc);
-        initStatusUpdate(doc.publishing_status);
+        setupStatusUpdate(doc.publishing_status);
         setAclPolicy(doc.acl_policy);
         setCategory(doc.category);
       } else {
@@ -17,7 +16,8 @@ var DocumentSettingsWidget = function(elem, docid, share_modal) {
       }
     });
 
-    initCategoryUpdate();
+    setupCategoryUpdate();
+    setupDocumentDeletion();
 
     //sharing widget
     share_modal.onUpdate(setAclPolicy);
@@ -26,11 +26,10 @@ var DocumentSettingsWidget = function(elem, docid, share_modal) {
     });
 
     $.onClick($(".link.clone", elem), cloneDocument);
-    $.onClick($(".link.delete", elem), deleteDocument);
   };
 
-  var initCategoryUpdate = function() {
-    var modal = $("z-modal.zbase_doc_settings_modal", elem);
+  var setupCategoryUpdate = function() {
+    var modal = $("z-modal.zbase_doc_settings_modal.category", elem);
     var input = $("input", modal);
     var infobar = $(".doc_settings_infobar", modal);
 
@@ -57,7 +56,7 @@ var DocumentSettingsWidget = function(elem, docid, share_modal) {
     });
   };
 
-  var initStatusUpdate = function(doc_status) {
+  var setupStatusUpdate = function(doc_status) {
     var tpl = $.getTemplate(
         "widgets/zbase-document-settings",
         "zbase_doc_settings_status_inner_tpl");
@@ -84,13 +83,19 @@ var DocumentSettingsWidget = function(elem, docid, share_modal) {
     }, false);
   };
 
-  var deleteDocument = function() {
-    $.httpPost("/api/v1/documents/" + docid, "deleted=true", function(r) {
-      if (r.status == 201) {
-        $.navigateTo("/a/");
-      } else {
-        //show infobar with error
-      }
+  var setupDocumentDeletion = function() {
+    var modal = $("z-modal.zbase_doc_settings_modal.delete_confirmation", elem);
+    $.onClick($(".link.delete", elem), function() {modal.show();});
+    $.onClick($("button.close", modal), function() {modal.close();});
+
+    $.onClick($("button.submit", modal), function() {
+      $.httpPost("/api/v1/documents/" + docid, "deleted=true", function(r) {
+        if (r.status == 201) {
+          $.navigateTo("/a/");
+        } else {
+          //show infobar with error
+        }
+      });
     });
   };
 
@@ -108,7 +113,6 @@ var DocumentSettingsWidget = function(elem, docid, share_modal) {
           "Everybody at " + config.current_user.namespace;
     }
   };
-
 
   var setCategory = function(category) {
     if (category.length == 0) {
