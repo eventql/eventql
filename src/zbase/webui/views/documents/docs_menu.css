@@ -31,8 +31,8 @@ z-menu.zbase_documents_menu > z-menu-section > z-menu-title > a {
   height: 32px;
   display: block;
   padding: 0 20px;
-  font-weight: 500;
-  color: #606369;
+  font-weight: 400;
+  color: #737373;
 }
 
 z-menu.zbase_documents_menu > z-menu-item[data-active] > a,
@@ -133,9 +133,9 @@ z-menu.zbase_documents_menu > z-menu-section[data-active] z-menu-item z-menu-ite
   padding: 2px 0;
 }
 
-z-menu.zbase_documents_menu > z-menu-section[data-active] z-menu-item[data-active] a {
+z-menu.zbase_documents_menu > z-menu-section[data-active] z-menu-item a {
   font-weight: normal;
-  color: #9a9fa7;
+  color: #737373;
 }
 
 z-menu.zbase_documents_menu > z-menu-section[data-active] z-menu-item[data-active] > a {
@@ -145,4 +145,9 @@ z-menu.zbase_documents_menu > z-menu-section[data-active] z-menu-item[data-activ
 
 z-menu.zbase_documents_menu > z-menu-section[data-active] z-menu-section z-menu-title {
   display: none;
+}
+
+z-menu.zbase_documents_menu > z-menu-item a {
+  color: #000;
+  font-weight: 500;
 }
