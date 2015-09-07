@@ -15,7 +15,7 @@ var ReportJSONEditor = function(json) {
 
     $.onClick($("button.cancel", tpl), triggerCancel);
     $.onClick($("button.submit", tpl), function() {
-      var new_json = $.escapeHTML(editor.getValue());
+      var new_json = editor.getValue();
       if (isValidJSON(new_json)) {
         json = new_json;
         triggerSave();
