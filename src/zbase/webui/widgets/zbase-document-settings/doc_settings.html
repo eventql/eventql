@@ -35,11 +35,22 @@
           <input class="z-input" type="text" placeholder="Document Category" />
         </div>
         <div class='z-modal-footer'>
-          <button class='z-button primary submit'>
-            Done
-          </button>
+          <button class='z-button primary submit'>Save</button>
         </div>
       </z-modal-box>
+    </z-modal>
+
+    <z-modal class="zbase_doc_settings_modal delete_confirmation">
+      <z-modal-box>
+        <z-modal-close-icon></z-modal-close-icon>
+        <div class='z-modal-header'>Delete Document</div>
+        <div class='z-modal-content'>
+          <h4>Are you sure you want to move this document to the trash?</h4>
+        </div>
+        <div class='z-modal-footer'>
+          <button class='z-button primary submit'>Yes</button>
+          <button class="z-button secondary close">Cancel</button>
+        </div>
     </z-modal>
   </div>
 </template>
