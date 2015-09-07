@@ -1,38 +1,40 @@
 var DocsMenu = function(categories) {
+  var menu;
 
   var render = function(elem) {
     var tpl = $.getTemplate(
         "views/documents",
         "zbase_documents_menu_main_tpl");
 
-    var menu = $("z-menu", tpl);
+    menu = $("z-menu", tpl);
     categories.forEach(function(c) {
       insertMenuItem([], c.split("~"), menu);
     });
-
-    setActiveMenuItem(tpl);
 
     elem.innerHTML = "";
     elem.appendChild(tpl);
   };
 
-  var setActiveMenuItem = function(tpl) {
-    var path = window.location.pathname;
-    var items = tpl.querySelectorAll("z-menu-item a[href]");
-    var active_path_length = 0;
-    var active_item;
-
-    //longest prefix match
-    for (var i = 0; i < items.length; i++) {
-      var current_path = items[i].getAttribute("href");
-      if (path.indexOf(current_path) == 0 &&
-          current_path.length > active_path_length) {
-              active_item = items[i];
-              active_path_length = current_path.length;
-      }
+  var setActiveMenuItem = function(raw_key) {
+    var key = encodeURIComponent(raw_key);
+    if (!menu) {
+      return;
     }
 
-    active_item.parentNode.setAttribute("data-active", "active");
+    var items = menu.querySelectorAll("z-menu-item, z-menu-section");
+    if (!items) {
+      return;
+    }
+
+    for (var i = 0; i < items.length; ++i) {
+      var e = items[i];
+
+      if (e.getAttribute("data-key") == key) {
+        e.setAttribute("data-active", "active");
+      } else {
+        e.removeAttribute("data-active");
+      }
+    }
   };
 
   var insertMenuItem = function(path, tail, elem) {
@@ -41,6 +43,7 @@ var DocsMenu = function(categories) {
     }
 
     path.push(tail[0]);
+    var key = encodeURIComponent(path.join("~"));
     var href = "/a/?" + $.buildQueryString({
       publishing_status: "PUBSTATUS_PUBLISHED",
       category: path.join("~")
@@ -48,12 +51,10 @@ var DocsMenu = function(categories) {
 
     if (tail.length == 1) {
       var item_title = tail[0];
-      var item = elem.querySelector(
-          "z-menu-item[data-key='" + item_title + "']"); // FIXME escaping
-
+      var item = elem.querySelector("z-menu-item[data-key='" + key + "']");
       if (!item) {
         item = document.createElement("z-menu-item");
-        item.setAttribute("data-key", item_title);
+        item.setAttribute("data-key", key);
         elem.appendChild(item);
 
         var link = document.createElement("a");
@@ -64,11 +65,11 @@ var DocsMenu = function(categories) {
     } else {
       var section_title = tail.shift();
       var section = elem.querySelector(
-          "z-menu-section[data-key='" + section_title + "']"); // FIXME escaping
+          "z-menu-section[data-key='" + key + "']");
 
       if (!section) {
         section = document.createElement("z-menu-section");
-        section.setAttribute("data-key", section_title);
+        section.setAttribute("data-key", key);
         elem.appendChild(section);
 
         var title = document.createElement("z-menu-title");
@@ -85,7 +86,8 @@ var DocsMenu = function(categories) {
   }
 
   return {
-    render: render
+    render: render,
+    setActiveMenuItem: setActiveMenuItem
   };
 
 };
