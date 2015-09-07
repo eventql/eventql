@@ -1,3 +1,12 @@
+.zbase_report_sql_editor .report_widget_title em.editable {
+  padding: 5px 3px;
+}
+
+.zbase_report_sql_editor .report_widget_title em.editable:hover {
+  cursor: pointer;
+  background: #f2f8fa;
+}
+
 .zbase_report_sql_result_pane table.z-table thead th:first-child,
 .zbase_report_sql_result_pane table.z-table tbody td:first-child {
   padding-left: 20px;
@@ -58,4 +67,14 @@
   -ms-user-select: none;
   -o-user-select: none;
   user-select: none;
+}
+
+.zbase_report_sql_editor z-modal.zbase_report_sql_modal {
+  font-size: 14px;
+}
+
+.zbase_report_sql_editor z-modal.zbase_report_sql_modal h3 {
+  font-weight: 400;
+  margin: 0;
+  line-height: 34px;
 }
