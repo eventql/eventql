@@ -509,6 +509,14 @@ $.nl2br = function(str) {
   return str.replace(/\n/g, "<br />");
 };
 
+$.nl2p = function(str) {
+  var lines = str.split("\n\n");
+
+  return lines.map(function(s) {
+    return "<p>" + s.replace(/\n/g, "<br />")  + "</p>";
+  }).join("\n");
+};
+
 $.wrapText = function(str) {
   var new_str = "";
   var partlen = 10;

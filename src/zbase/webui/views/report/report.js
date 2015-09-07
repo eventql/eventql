@@ -270,7 +270,7 @@ ZBase.registerView((function() {
   };
 
   var setReportDescription = function(description) {
-    var escaped_description = $.nl2br($.escapeHTML(description));
+    var escaped_description = $.nl2p($.escapeHTML(description));
 
     //FIXME
     var readonly = false;
