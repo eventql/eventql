@@ -295,6 +295,10 @@ void DocumentDBServlet::listDocuments(
     pstatus_filter = Some(pstatus);
   }
 
+  /* param: category_prefix */
+  String category_prefix_filter;
+  URI::getParam(params, "category_prefix", &category_prefix_filter);
+
   /* scan documents */
   Buffer buf;
   json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
@@ -314,6 +318,11 @@ void DocumentDBServlet::listDocuments(
 
     if (!pstatus_filter.isEmpty() &&
         doc.publishing_status() != pstatus_filter.get()) {
+      return true;
+    }
+
+    if (!category_prefix_filter.empty() &&
+        !StringUtil::beginsWith(doc.category(), category_prefix_filter)) {
       return true;
     }
 
