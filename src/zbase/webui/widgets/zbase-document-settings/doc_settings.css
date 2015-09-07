@@ -19,6 +19,7 @@
 .zbase_doc_settings .doc_setting .doc_setting_value {
   display: inline-block;
   font-weight: 500;
+  color: #333;
 }
 
 .zbase_doc_settings .doc_setting .doc_setting_title.with_dropdown {
