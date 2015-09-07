@@ -236,6 +236,7 @@
   display: inline-block;
 }
 
+.zbase_report_pane.readonly .hide_when_readonly,
 .zbase_report_pane.readonly .zbase_report_sidebar .writable_report_actions {
   display: none;
 }
