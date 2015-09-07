@@ -24,25 +24,24 @@
         </h3>
 
         <div class="sidebar_subtitle">
-          <div class="writable_report_actions">
-            <a class="link share">Share</a>
-            <span class="readonly_hint hidden"><i class="fa fa-lock"></i> Read-Only</span>
-            <z-dropdown data-resolved class="mode">
-              <z-dropdown-flyout>
-                <z-dropdown-items>
-                  <z-dropdown-item data-value='editing' data-selected>
-                    <i class='fa fa-pencil'></i>Editing
-                  </z-dropdown-item>
-                  <z-dropdown-item data-value='viewing'>
-                    <i class='fa fa-eye'></i>Viewing
-                  </z-dropdown-item>
-                </z-dropdown-items>
-              </z-dropdown-flyout>
-            </z-dropdown>
+          <a class="link share hide_when_readonly">Share</a>
+          <span class="readonly_hint hidden"><i class="fa fa-lock"></i> Read-Only</span>
+          <z-dropdown data-resolved class="mode" class="hide_when_readonly">
+            <z-dropdown-flyout>
+              <z-dropdown-items>
+                <z-dropdown-item data-value='editing' data-selected>
+                  <i class='fa fa-pencil'></i>Editing
+                </z-dropdown-item>
+                <z-dropdown-item data-value='viewing'>
+                  <i class='fa fa-eye'></i>Viewing
+                </z-dropdown-item>
+              </z-dropdown-items>
+            </z-dropdown-flyout>
+          </z-dropdown>
+
+          <div style="margin-top: 8px;">
+            Last refreshed: <span class="report_activity_info">Just now</span>
           </div>
-
-
-          Last refreshed <span class="report_activity_info"></span>
         </div>
 
         <div class="sidebar_content">
