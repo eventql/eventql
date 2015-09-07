@@ -2,12 +2,22 @@
   <div class="zbase_report_widget">
     <div class="zbase_report_widget_header">
       <div class="zbase_report_widget_edit_actions">
-        <button class="z-button secondary remove" style="display: none;">
-          <i class="fa fa-times"></i>&nbsp;Remove
-        </button>
-        <button class="z-button secondary edit">
-          <i class="fa fa-pencil"></i>&nbsp;Edit
-        </button>
+        <z-dropdown class="edit" data-resolved data-hover>
+          <z-dropdown-header>
+            <z-dropdown-header-value data-static>
+              <i class="fa fa-circle"></i>
+              <i class="fa fa-circle"></i>
+              <i class="fa fa-circle"></i>
+            </z-dropdown-header-value>
+            <z-dropdown-header-icon></z-dropdown-header-icon>
+          </z-dropdown-header>
+          <z-dropdown-flyout>
+            <z-dropdown-items>
+              <z-dropdown-item data-value='edit'>Edit</z-dropdown-item>
+              <z-dropdown-item data-value='delete'>Remove</z-dropdown-item>
+            </z-dropdown-items>
+          </z-dropdown-flyout>
+        </z-dropdown>
       </div>
 
       <h2 class="pagetitle report_widget_title"></h2>

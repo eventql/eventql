@@ -265,11 +265,26 @@
 .zbase_report_pane .zbase_report_widget_header {
   padding: 0 20px;
   height: 60px;
-  overflow: auto;
+  overflow: visible;
 }
 
 .zbase_report_pane .zbase_report_widget_header h2.pagetitle {
   float: left;
+}
+
+.zbase_report_pane .zbase_report_widget_header z-dropdown {
+  float: right;
+  margin-top: 15px;
+  height: 24px;
+}
+
+.zbase_report_pane .zbase_report_widget_header z-dropdown i.fa-circle {
+  font-size: 7px;
+  color: #888;
+}
+
+.zbase_report_pane .zbase_report_widget_header z-dropdown-header:hover i.fa-circle {
+  color: #1c99d6;
 }
 
 .zbase_report_pane .zbase_report_widget_header button.z-button {
