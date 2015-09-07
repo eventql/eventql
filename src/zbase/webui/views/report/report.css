@@ -296,9 +296,15 @@
   display: none;
 }
 
-.zbase_report_pane .zbase_report_widgets.editable .zbase_report_widget_edit_actions {
+.zbase_report_pane .zbase_report_viewport .zbase_report_widget_edit_actions {
+  display: none;
+}
+
+.zbase_report_pane .zbase_report_viewport.editable .zbase_report_widget_edit_actions {
   display: block;
 }
+
+
 
 /**
   * Error Note
