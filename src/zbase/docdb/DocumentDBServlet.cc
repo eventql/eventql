@@ -7,6 +7,7 @@
  * permission is obtained.
  */
 #include "DocumentDBServlet.h"
+#include "stx/Human.h"
 
 using namespace stx;
 
@@ -227,6 +228,29 @@ void DocumentDBServlet::updateDocument(
 
       continue;
     }
+
+    if (p.first == "deleted") {
+      if (!p.second.empty()) {
+        auto deleted = Human::parseBoolean(p.second);
+        if (deleted.isEmpty()) {
+          res->setStatus(http::kStatusBadRequest);
+          res->addBody(
+              StringUtil::format("invalid deleted status: '$0'", p.second));
+          return;
+        }
+
+        tx.emplace_back([this, &session, &uuid, deleted] () {
+          docdb_->updateDocumentDeletedStatus(
+              session.customer(),
+              session.userid(),
+              uuid,
+              deleted.get());
+        });
+      }
+
+      continue;
+    }
+
 
     res->setStatus(http::kStatusBadRequest);
     res->addBody(StringUtil::format("invalid parameter: '$0'", p.first));
