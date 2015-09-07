@@ -32,7 +32,7 @@ z-menu.zbase_documents_menu > z-menu-section > z-menu-title > a {
   display: block;
   padding: 0 20px;
   font-weight: 500;
-  color: #777;
+  color: #606369;
 }
 
 z-menu.zbase_documents_menu > z-menu-item[data-active] > a,
@@ -81,6 +81,16 @@ z-menu.zbase_documents_menu > z-menu-section[data-active] > z-menu-item {
 z-menu.zbase_documents_menu > z-menu-section[data-active] z-menu-item z-menu-item {
   margin: 2px 0 2px 16px;
   padding: 2px 0;
+}
+
+z-menu.zbase_documents_menu > z-menu-section[data-active] z-menu-item[data-active] a {
+  font-weight: normal;
+  color: #9a9fa7;
+}
+
+z-menu.zbase_documents_menu > z-menu-section[data-active] z-menu-item[data-active] > a {
+  font-weight: 500;
+  color: #000;
 }
 
 z-menu.zbase_documents_menu > z-menu-section[data-active] z-menu-section z-menu-title {

@@ -29,7 +29,7 @@ var DocsMenu = function(categories) {
     for (var i = 0; i < items.length; ++i) {
       var e = items[i];
 
-      if (e.getAttribute("data-key") == key) {
+      if (key.indexOf(e.getAttribute("data-key")) == 0) {
         e.setAttribute("data-active", "active");
       } else {
         e.removeAttribute("data-active");
