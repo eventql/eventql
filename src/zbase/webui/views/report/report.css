@@ -237,6 +237,11 @@
   font-size: 13px;
 }
 
+.zbase_report_pane .zbase_report_widget_header button.cancel {
+  float: left;
+  margin-right: 18px;
+}
+
 .zbase_report_pane .zbase_report_widget_header i.close {
   float: right;
   padding: 5px;
