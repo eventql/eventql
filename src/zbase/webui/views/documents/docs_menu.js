@@ -41,15 +41,15 @@ var DocsMenu = function(categories) {
     }
 
     path.push(tail[0]);
-    var href =
-        "/a/?publishing_status=PUBSTATUS_PUBLISHED&category=" +
-        encodeURIComponent(path.join("~"));
+    var href = "/a/?" + $.buildQueryString({
+      publishing_status: "PUBSTATUS_PUBLISHED",
+      category: path.join("~")
+    });
 
     if (tail.length == 1) {
       var item_title = tail[0];
       var item = elem.querySelector(
           "z-menu-item[data-key='" + item_title + "']"); // FIXME escaping
-
 
       if (!item) {
         item = document.createElement("z-menu-item");
