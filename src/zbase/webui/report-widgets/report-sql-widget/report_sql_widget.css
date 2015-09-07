@@ -9,6 +9,10 @@
   font-size: 13px;
 }
 
+.zbase_report_sql_result_pane .zbase_sql_chart {
+  margin: 10px 20px;
+}
+
 .zbase_report_sql_error_message {
   display: block;
   position: relative;
