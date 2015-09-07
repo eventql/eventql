@@ -1,0 +1,115 @@
+<template id="zbase_logviewer_main_tpl">
+  <div class="zbase_logviewer">
+    <section class='zbase_page_title small'>
+      <div>
+        <zbase-breadcrumbs>
+          <zbase-breadcrumbs-section>
+            <a href="/a/">Applications</a>
+          </zbase-breadcrumbs-section>
+          <zbase-breadcrumbs-section>
+            <a href="/a/logviewer">Logfile Viewer</a>
+          </zbase-breadcrumbs-section>
+          <zbase-breadcrumbs-section>
+            <a href="/a/logviewer" class="logfile_name_crumb">-</a>
+          </zbase-breadcrumbs-section>
+        </zbase-breadcrumbs>
+      </div>
+    </section>
+
+    <div class="zbase_content_pane">
+      <div class="logviewer_pane hidden" name="logviewer_pane">
+        <div class='control_pane'>
+
+          <div class="control_pane_bar">
+            <z-dropdown class='input filter_type_control' style="position:absolute;">
+              <z-dropdown-flyout>
+                <z-dropdown-items>
+                  <z-dropdown-item data-value="sql" data-text="SQL"><i class="fa fa-filter" style="font-weight:normal; margin-right: 5px;"></i> SQL</z-dropdown-item>
+                  <z-dropdown-item data-value="regex" data-text="Regex">Regex</z-dropdown-item>
+                  <z-dropdown-item data-value="fulltext" data-text="Fulltext">Fulltext</z-dropdown-item>
+                </z-dropdown-items>
+              </z-dropdown-flyout>
+            </z-dropdown>
+
+            <z-search style="display: block; margin-left:80px" class='filter_control'>
+              <z-input class="icon" data-placeholder="Filter by SQL" style="position: relative; top: 1px; display: block;">
+                <z-input-icon><i class='fa fa-search'></i></z-input-icon>
+              </z-input>
+            </z-search>
+
+            <div class='error_note hidden' class="filter_error">
+            </div>
+          </div>
+
+          <div class="control_pane_bar" style="height: 37px; margin-top: 8px; padding-top: 1px;">
+            <div class="z-pager right">
+              <div class="z-pager-tooltip-back prev" data-disabled data-action="show-prev-loglines"></div>
+              <div class="z-pager-tooltip-for next" data-action="show-next-loglines"></div>
+            </div>
+            <div class="right">
+              <div class="control_pane_item go_to_recent hidden" id="update_endtime_control">
+                <div class="box">
+                  <label>Showing Historical Data &mdash;</label>
+                  <a class="link">Show Latest</a>
+                </div>
+              </div>
+
+              <label>End Time</label>
+              <input class="z-input clickable time_control" readonly />
+            </div>
+
+            <div class="control_pane_item">
+              <label>Logfile:</label>
+              <z-dropdown data-force-select class='inline logfile_control'>
+                <z-dropdown-flyout>
+                  <z-dropdown-items>
+                    <z-dropdown-item>-</z-dropdown-item>
+                  </z-dropdown-items>
+                </z-dropdown-flyout>
+              </z-dropdown>
+            </div>
+
+            <div class="control_pane_item">
+              <label>Columns:</label>
+              <z-dropdown class='inline checkbox button columns_control' data-multiselect data-action='logfile-columns-select'>
+                <z-dropdown-flyout>
+                  <z-dropdown-items>
+                    <z-dropdown-item>-</z-dropdown-item>
+                  </z-dropdown-items>
+                </z-dropdown-flyout>
+              </z-dropdown>
+            </div>
+          </div>
+        </div>
+
+        <div name="result_pane" class="result_pane">
+          <div class="loading_bar loglines_loading_bar hidden">
+            <h3>
+              <div class="loaderanim-outer">
+                <div class="loaderanim">
+                  <div class="rect1"></div>
+                  <div class="rect2"></div>
+                  <div class="rect3"></div>
+                  <div class="rect4"></div>
+                  <div class="rect5"></div>
+                </div>
+              </div>
+              Scanning...
+              <div class="loading_bar_info right" style="font-size: 12px;">
+                <span style="font-weight:500;"><span class="num_rows"></span></span> rows scanned
+              </div>
+            </h3>
+          </div>
+          <div class="table_container"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<template id="zbase_logviewer_error_msg_tpl">
+  <div class="error_message">
+    <h3>Error</h3>
+    <div class="error_text"></div>
+  </div>
+</template>

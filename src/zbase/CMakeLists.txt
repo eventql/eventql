@@ -3,12 +3,27 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR}/)
 file(GLOB PROTO_FILES *.proto)
 PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS ${PROTO_FILES})
 
+set(ZBASE_ASSETS_PACK "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/zbase_assets.cc")
+if(EXISTS ${ZBASE_ASSETS_PACK})
+  set(ZBASE_ASSETS_SRCS "${ZBASE_ASSETS_PACK}")
+  set(ZBASE_HAS_ASSET_BUNDLE TRUE)
+else()
+  if (NOT ZBASE_BUILD_ID MATCHES "devel")
+    message(FATAL_ERROR "ZBase release build with dynamic assets is not allowed")
+  endif()
+endif()
+
 add_library(customerdirectory OBJECT
     CustomerConfig.cc
     ConfigDirectory.cc
     SessionSchema.cc
     TableDefinition.cc
-    ${PROTO_SRCS})
+    ${PROTO_SRCS}
+    ${ZBASE_ASSETS_SRCS})
+
+configure_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/buildconfig.h.cmake
+    ${CMAKE_CURRENT_BINARY_DIR}/buildconfig.h)
 
 add_dependencies(customerdirectory tsdb-server)
 
@@ -96,6 +111,7 @@ add_executable(zbase
     TrafficSegment.cc
     CTRStatsServlet.cc
     AnalyticsServlet.cc
+    HTTPAuth.cc
     JSONSink.cc
     AnalyticsApp.cc
     AnalyticsQuery.cc
@@ -118,6 +134,7 @@ add_executable(zbase
     TermInfoTableSource.cc
     TermInfoTableSink.cc
     VTable.cc
+    DefaultServlet.cc
     ecommerce/ECommerceKPIQuery.cc
     discovery/CTRByPageQuery.cc
     discovery/CTRByPositionQuery.cc
@@ -155,6 +172,7 @@ add_executable(zbase
     reco_engine/RecoEngineStatsBreakdownQuery.cc
     reco_engine/RecoEngineStatsReport.cc
     reco_engine/RecoStats.cc
+    WebUIServlet.cc
     zbase.cc)
 
 target_link_libraries(zbase chartsql cplot sstable cstable stx-http stx-json stx-protobuf stx-base)

@@ -27,7 +27,11 @@ CSTableScan::CSTableScan(
     runtime_(runtime),
     colindex_(0),
     aggr_strategy_(stmt_->aggregationStrategy()),
-    rows_scanned_(0) {}
+    rows_scanned_(0) {
+  for (const auto& slnode : stmt_->selectList()) {
+    column_names_.emplace_back(slnode->columnName());
+  }
+}
 
 void CSTableScan::execute(
     ExecutionContext* context,
@@ -39,7 +43,6 @@ void CSTableScan::execute(
   Set<String> column_names;
   for (const auto& slnode : stmt_->selectList()) {
     findColumns(slnode->expression(), &column_names);
-    column_names_.emplace_back(slnode->columnName());
   }
 
   auto where_expr = stmt_->whereExpression();
@@ -96,10 +99,6 @@ void CSTableScan::scan(
   while (num_records < total_records) {
     ++rows_scanned_;
     uint64_t next_level = 0;
-
-    if (fetch_level == 0) {
-      ++num_records;
-    }
 
     for (auto& col : columns_) {
       auto nextr = col.second.reader->nextRepetitionLevel();
@@ -185,6 +184,9 @@ void CSTableScan::scan(
     }
 
     fetch_level = next_level;
+    if (fetch_level == 0) {
+      ++num_records;
+    }
 
     bool where_pred = true;
     if (where_expr_.program() != nullptr) {
@@ -214,11 +216,12 @@ void CSTableScan::scan(
         case AggregationStrategy::AGGREGATE_ALL:
           break;
 
-        case AggregationStrategy::AGGREGATE_WITHIN_RECORD:
+        case AggregationStrategy::AGGREGATE_WITHIN_RECORD_FLAT:
           if (next_level != 0) {
             break;
           }
 
+        case AggregationStrategy::AGGREGATE_WITHIN_RECORD_DEEP:
           for (int i = 0; i < select_list_.size(); ++i) {
             VM::result(
                 select_list_[i].compiled.program(),
@@ -310,7 +313,8 @@ void CSTableScan::scanWithoutColumns(
           }
           break;
 
-        case AggregationStrategy::AGGREGATE_WITHIN_RECORD:
+        case AggregationStrategy::AGGREGATE_WITHIN_RECORD_DEEP:
+        case AggregationStrategy::AGGREGATE_WITHIN_RECORD_FLAT:
         case AggregationStrategy::NO_AGGREGATION:
           for (int i = 0; i < select_list_.size(); ++i) {
             VM::evaluate(

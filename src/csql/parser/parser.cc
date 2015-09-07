@@ -812,8 +812,16 @@ ASTNode* Parser::tableName() {
 
   }
 
+  auto name_str = consumeToken()->getString();
+  while (lookahead(0, Token::T_DOT)) {
+    consumeToken();
+    assertExpectation(Token::T_IDENTIFIER);
+    name_str += "." + cur_token_->getString();
+    consumeToken();
+  }
+
   auto name = new ASTNode(ASTNode::T_TABLE_NAME);
-  name->setToken(consumeToken());
+  name->setToken(new Token(Token::T_IDENTIFIER, name_str));
   return name;
 }
 

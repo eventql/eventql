@@ -21,6 +21,9 @@ void divExpr(int argc, SValue* argv, SValue* out);
 void modExpr(int argc, SValue* argv, SValue* out);
 void powExpr(int argc, SValue* argv, SValue* out);
 
+void roundExpr(int argc, SValue* argv, SValue* out);
+void truncateExpr(int argc, SValue* argv, SValue* out);
+
 }
 }
 #endif

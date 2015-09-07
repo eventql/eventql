@@ -178,6 +178,7 @@ void MasterServlet::createUser(
   user.set_userid(userid);
   user.set_password_hash(pwhash.toString());
   user.set_password_salt(pwsalt);
+  user.set_two_factor_method(USERAUTH_2FA_NONE);
 
   String force;
   if (stx::URI::getParam(params, "force_reset", &force) && force == "true") {

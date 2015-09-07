@@ -1,0 +1,33 @@
+.zbase_datastore_tables table.z-table {
+  font-size: 13px;
+  table-layout: fixed;
+  border-top: 1px solid #d4d4d4;
+  border-bottom: 2px solid #d4d4d4;
+  margin-bottom: 20px;
+}
+
+.zbase_datastore_tables .table_definition .table_config {
+  padding: 2px 0 20px 0;
+  word-wrap: break-word;
+}
+
+.zbase_datastore_tables table.z-table {
+  font-size: 13px;
+}
+
+.zbase_datastore_tables table.z-table thead th {
+  font-weight: 400;
+  color: #888;
+}
+
+.zbase_datastore_tables table.z-table tbody tr td {
+  line-height: 24px;
+}
+
+.zbase_datastore_tables table.z-table tbody tr a {
+  color: #888;
+}
+
+.zbase_datastore_tables table.z-table tbody tr td:first-child a {
+  color: #000;
+}

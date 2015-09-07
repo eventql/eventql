@@ -33,8 +33,6 @@ struct AnalyticsQuery;
 
 class AnalyticsServlet : public stx::http::StreamingHTTPService {
 public:
-  static const char kSessionCookieKey[];
-  static const uint64_t kSessionLifetimeMicros;
 
   AnalyticsServlet(
       RefPtr<AnalyticsApp> app,
@@ -52,6 +50,10 @@ public:
       RefPtr<stx::http::HTTPResponseStream> res_stream);
 
 protected:
+
+  void handle(
+      RefPtr<stx::http::HTTPRequestStream> req_stream,
+      RefPtr<stx::http::HTTPResponseStream> res_stream);
 
   void getAuthInfo(
       const AnalyticsSession& session,
@@ -92,6 +94,17 @@ protected:
   void insertIntoMetric(
       const URI& uri,
       const AnalyticsSession& session,
+      const http::HTTPRequest* req,
+      http::HTTPResponse* res);
+
+  void listTables(
+      const AnalyticsSession& session,
+      const http::HTTPRequest* req,
+      http::HTTPResponse* res);
+
+  void fetchTableDefinition(
+      const AnalyticsSession& session,
+      const String& table_name,
       const http::HTTPRequest* req,
       http::HTTPResponse* res);
 
@@ -138,10 +151,12 @@ protected:
       const http::HTTPRequest* req,
       http::HTTPResponse* res);
 
-  Option<AnalyticsSession> authenticateRequest(
-      const http::HTTPRequest& request) const;
-
   void performLogin(
+      const URI& uri,
+      const http::HTTPRequest* req,
+      http::HTTPResponse* res);
+
+  void performLogout(
       const URI& uri,
       const http::HTTPRequest* req,
       http::HTTPResponse* res);
@@ -149,6 +164,25 @@ protected:
   inline void expectHTTPPost(const http::HTTPRequest& req) {
     if (req.method() != http::HTTPMessage::M_POST) {
       RAISE(kIllegalArgumentError, "expected HTTP POST request");
+    }
+  }
+
+  String getCookieDomain(const http::HTTPRequest& req) {
+    auto domain = req.getHeader("Host");
+    auto ppos = domain.find(":");
+    if (ppos != String::npos) {
+      domain.erase(domain.begin() + ppos, domain.end());
+    }
+
+    auto parts = StringUtil::split(domain, ".");
+    if (parts.size() > 2) {
+      parts.erase(parts.begin(), parts.end() - 2);
+    }
+
+    if (parts.size() == 2) {
+      return "." + StringUtil::join(parts, ".");
+    } else {
+      return "";
     }
   }
 

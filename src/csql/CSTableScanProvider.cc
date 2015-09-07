@@ -33,4 +33,61 @@ Option<ScopedPtr<TableExpression>>
               runtime)));
 }
 
+void CSTableScanProvider::listTables(
+    Function<void (const csql::TableInfo& table)> fn) const {
+  fn(tableInfo());
+}
+
+Option<csql::TableInfo> CSTableScanProvider::describe(
+    const String& table_name) const {
+  if (table_name == table_name_) {
+    return Some(tableInfo());
+  } else {
+    return None<csql::TableInfo>();
+  }
+}
+
+csql::TableInfo CSTableScanProvider::tableInfo() const {
+  cstable::CSTableReader cstable(cstable_file_);
+
+  csql::TableInfo ti;
+  ti.table_name = table_name_;
+
+  for (const auto& col : cstable.columns()) {
+    csql::ColumnInfo ci;
+    ci.column_name = col;
+    ci.type_size = 0;
+    ci.is_nullable = true;
+
+    switch (cstable.getColumnType(col)) {
+      case cstable::ColumnType::BOOLEAN:
+        ci.type =  "bool";
+        break;
+
+      case cstable::ColumnType::UINT32_BITPACKED:
+      case cstable::ColumnType::UINT32_PLAIN:
+        ci.type =  "uint32";
+        break;
+
+      case cstable::ColumnType::UINT64_PLAIN:
+      case cstable::ColumnType::UINT64_LEB128:
+        ci.type =  "uint64";
+        break;
+
+      case cstable::ColumnType::DOUBLE:
+        ci.type =  "double";
+        break;
+
+      case cstable::ColumnType::STRING_PLAIN:
+        ci.type =  "string";
+        break;
+
+    }
+
+    ti.columns.emplace_back(ci);
+  }
+
+  return ti;
+}
+
 } // namespace csql

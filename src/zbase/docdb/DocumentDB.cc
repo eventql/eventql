@@ -7,6 +7,7 @@
  * permission is obtained.
  */
 #include "stx/protobuf/msg.h"
+#include "stx/wallclock.h"
 #include "zbase/docdb/DocumentDB.h"
 
 using namespace stx;
@@ -114,6 +115,7 @@ void DocumentDB::updateDocument(
 
   auto doc = msg::decode<Document>(data, data_size);
   fn(&doc);
+  doc.set_mtime(WallClock::unixMicros());
 
   auto doc_buf = msg::encode<Document>(doc);
   txn->update(db_key.data(), db_key.size(), doc_buf->data(), doc_buf->size());
@@ -154,20 +156,71 @@ void DocumentDB::updateDocumentName(
   });
 }
 
+void DocumentDB::updateDocumentCategory(
+    const String& db_namespace,
+    const String& userid,
+    const SHA1Hash& uuid,
+    const String& category) {
+  updateDocument(
+    db_namespace,
+    uuid,
+    [&userid, &category] (Document* doc) {
+    if (!isDocumentWritableForUser(*doc, userid)) {
+      RAISE(kAccessDeniedError, "access denied");
+    }
+
+    doc->set_category(category);
+  });
+}
+
 void DocumentDB::updateDocumentACLPolicy(
     const String& db_namespace,
     const String& userid,
     const SHA1Hash& uuid,
     DocumentACLPolicy policy) {
   updateDocument(
-    db_namespace,
-    uuid,
-    [&userid, &policy] (Document* doc) {
+      db_namespace,
+      uuid,
+      [&userid, &policy] (Document* doc) {
     if (!isDocumentWritableForUser(*doc, userid)) {
       RAISE(kAccessDeniedError, "access denied");
     }
 
     doc->set_acl_policy(policy);
+  });
+}
+
+void DocumentDB::updateDocumentPublishingStatus(
+    const String& db_namespace,
+    const String& userid,
+    const SHA1Hash& uuid,
+    DocumentPublishingStatus pstatus) {
+  updateDocument(
+      db_namespace,
+      uuid,
+      [&userid, &pstatus] (Document* doc) {
+    if (!isDocumentWritableForUser(*doc, userid)) {
+      RAISE(kAccessDeniedError, "access denied");
+    }
+
+    doc->set_publishing_status(pstatus);
+  });
+}
+
+void DocumentDB::updateDocumentDeletedStatus(
+    const String& db_namespace,
+    const String& userid,
+    const SHA1Hash& uuid,
+    bool deleted) {
+  updateDocument(
+      db_namespace,
+      uuid,
+      [&userid, &deleted] (Document* doc) {
+    if (!isDocumentWritableForUser(*doc, userid)) {
+      RAISE(kAccessDeniedError, "access denied");
+    }
+
+    doc->set_deleted(deleted);
   });
 }
 

@@ -7,12 +7,8 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#ifndef _libstx_WEB_ASSETS_H
-#define _libstx_WEB_ASSETS_H
-#include <string>
-#include <unordered_map>
-#include <vector>
-#include <mutex>
+#pragma once
+#include <stx/stdtypes.h>
 
 namespace stx {
 
@@ -33,6 +29,11 @@ public:
 
   static std::string getAsset(const std::string& filename);
 
+  /**
+   * Not thread safe, debug build only
+   */
+  static void setSearchPath(const String& search_path);
+
 protected:
 
   struct AssetMap {
@@ -43,9 +44,7 @@ protected:
   };
 
   static AssetMap* globalMap();
-
 };
 
 } // namespace stx
 
-#endif

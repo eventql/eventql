@@ -52,4 +52,12 @@ ScopedPtr<Statement> QueryPlan::buildStatement(size_t stmt_idx) const {
       "cannot figure out how to execute this query plan");
 }
 
+RefPtr<QueryTreeNode> QueryPlan::getStatementQTree(size_t stmt_idx) const {
+  if (stmt_idx >= statements_.size()) {
+    RAISE(kIndexError, "invalid statement index");
+  }
+
+  return statements_[stmt_idx];
+}
+
 }

@@ -38,6 +38,11 @@ RefPtr<QueryTreeNode> QueryPlanBuilder::build(
     expandColumns(ast, tables);
   }
 
+  /* assign explicit column names to all output columns */
+  if (hasImplicitlyNamedColumns(ast)) {
+    assignExplicitColumnNames(ast, tables);
+  }
+
   /* internal nodes: multi table query (joins), order, aggregation, limit */
   if ((node = buildLimitClause(ast, tables)) != nullptr) {
     return node;
@@ -86,6 +91,7 @@ Vector<RefPtr<QueryTreeNode>> QueryPlanBuilder::build(
     switch (statements[i]->getType()) {
 
       case ASTNode::T_SELECT:
+      case ASTNode::T_SELECT_DEEP:
       case ASTNode::T_SHOW_TABLES:
       case ASTNode::T_DESCRIBE_TABLE:
         nodes.emplace_back(build(statements[i], tables));
@@ -102,6 +108,7 @@ Vector<RefPtr<QueryTreeNode>> QueryPlanBuilder::build(
           for (++i; i < statements.size(); ) {
             switch (statements[i]->getType()) {
               case ASTNode::T_SELECT:
+              case ASTNode::T_SELECT_DEEP:
                 subselects.emplace_back(build(statements[i++], tables));
                 continue;
               case ASTNode::T_DRAW:
@@ -181,7 +188,8 @@ Vector<RefPtr<QueryTreeNode>> QueryPlanBuilder::build(
 //
 
 bool QueryPlanBuilder::hasUnexpandedColumns(ASTNode* ast) const {
-  if (ast->getType() != ASTNode::T_SELECT) {
+  if (ast->getType() != ASTNode::T_SELECT &&
+      ast->getType() != ASTNode::T_SELECT_DEEP) {
     return false;
   }
 
@@ -201,6 +209,31 @@ bool QueryPlanBuilder::hasUnexpandedColumns(ASTNode* ast) const {
         col->getChildren()[0]->getChildren().size() != 1 ||
         col->getChildren()[0]->getChildren()[0]->getType() !=
         ASTNode::T_COLUMN_NAME) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+bool QueryPlanBuilder::hasImplicitlyNamedColumns(ASTNode* ast) const {
+  if (ast->getType() != ASTNode::T_SELECT &&
+      ast->getType() != ASTNode::T_SELECT_DEEP) {
+    return false;
+  }
+
+  if (ast->getChildren().size() < 1 ||
+      ast->getChildren()[0]->getType() != ASTNode::T_SELECT_LIST) {
+    RAISE(kRuntimeError, "corrupt AST");
+  }
+
+  if (ast->getChildren().size() == 1) {
+    return false;
+  }
+
+  for (const auto& col : ast->getChildren()[0]->getChildren()) {
+    if (col->getType() == ASTNode::T_DERIVED_COLUMN &&
+        col->getChildren().size() == 1) {
       return true;
     }
   }
@@ -262,7 +295,8 @@ bool QueryPlanBuilder::hasJoin(ASTNode* ast) const {
 }
 
 bool QueryPlanBuilder::hasOrderByClause(ASTNode* ast) const {
-  if (!(*ast == ASTNode::T_SELECT) || ast->getChildren().size() < 2) {
+  if (!(*ast == ASTNode::T_SELECT || *ast == ASTNode::T_SELECT_DEEP) ||
+      ast->getChildren().size() < 2) {
     return false;
   }
 
@@ -276,7 +310,8 @@ bool QueryPlanBuilder::hasOrderByClause(ASTNode* ast) const {
 }
 
 bool QueryPlanBuilder::hasAggregationInSelectList(ASTNode* ast) const {
-  if (!(*ast == ASTNode::T_SELECT) || ast->getChildren().size() < 2) {
+  if (!(*ast == ASTNode::T_SELECT || *ast == ASTNode::T_SELECT_DEEP) ||
+      ast->getChildren().size() < 2) {
     return false;
   }
 
@@ -374,15 +409,39 @@ void QueryPlanBuilder::expandColumns(
         column_name->setToken(new Token(Token::T_IDENTIFIER, column.column_name));
         derived_col->appendChild(derived_table_name);
         derived_table_name->appendChild(column_name);
+        auto column_alias = derived_col->appendChild(ASTNode::T_COLUMN_ALIAS);
+        column_alias->setToken(new Token(Token::T_IDENTIFIER, column.column_name));
         select_list->appendChild(derived_col);
       }
 
       continue;
     }
   }
-
 }
 
+void QueryPlanBuilder::assignExplicitColumnNames(
+    ASTNode* ast,
+    RefPtr<TableProvider> tables) {
+  if (ast->getChildren().size() < 1) {
+    RAISE(kRuntimeError, "corrupt AST");
+  }
+
+  auto select_list = ast->getChildren()[0];
+  if (select_list->getType() != ASTNode::T_SELECT_LIST) {
+    RAISE(kRuntimeError, "corrupt AST");
+  }
+
+  for (const auto& col : select_list->getChildren()) {
+    if (col->getType() == ASTNode::T_DERIVED_COLUMN &&
+        col->getChildren().size() == 1) {
+      auto alias = col->appendChild(ASTNode::T_COLUMN_ALIAS);
+      alias->setToken(
+          new Token(
+              Token::T_IDENTIFIER,
+              ASTUtil::columnNameForExpression(col->getChildren()[0])));
+    }
+  }
+}
 
 QueryTreeNode* QueryPlanBuilder::buildGroupBy(
     ASTNode* ast,
@@ -396,10 +455,14 @@ QueryTreeNode* QueryPlanBuilder::buildGroupBy(
 
   /* generate select list for child */
   auto child_sl = new ASTNode(ASTNode::T_SELECT_LIST);
-  buildInternalSelectList(select_list, child_sl);
+  buildInternalSelectList(select_list, child_sl, false);
 
   /* copy ast for child and swap out select lists*/
   auto child_ast = ast->deepCopy();
+  if (child_ast->getType() == ASTNode::T_SELECT) {
+    child_ast->setType(ASTNode::T_SELECT_DEEP);
+  }
+
   child_ast->removeChildByIndex(0);
   child_ast->appendChild(child_sl, 0);
 
@@ -416,7 +479,7 @@ QueryTreeNode* QueryPlanBuilder::buildGroupBy(
     /* copy all group expressions and add required field to child select list */
     for (const auto& group_expr : child->getChildren()) {
       auto e = group_expr->deepCopy();
-      buildInternalSelectList(e, child_sl);
+      buildInternalSelectList(e, child_sl, false);
 
       if (hasAggregationExpression(e)) {
         RAISE(kRuntimeError, "GROUP clause can only contain pure functions");
@@ -565,7 +628,8 @@ QueryTreeNode* QueryPlanBuilder::buildGroupBy(
 //
 bool QueryPlanBuilder::buildInternalSelectList(
     ASTNode* node,
-    ASTNode* target_select_list) {
+    ASTNode* target_select_list,
+    bool in_aggregation) {
   /* search recursively */
   switch (node->getType()) {
 
@@ -578,45 +642,58 @@ bool QueryPlanBuilder::buildInternalSelectList(
       node->setType(ASTNode::T_RESOLVED_COLUMN);
       node->setID(col_index);
       node->clearChildren();
+      node->clearToken();
       return true;
     }
 
     /* push down referenced columns into the child select list */
     case ASTNode::T_COLUMN_NAME: {
-      auto col_index = -1;
+      auto derived = new ASTNode(ASTNode::T_DERIVED_COLUMN);
+      if (in_aggregation) {
+        derived->appendChild(node->deepCopy());
+      } else {
+        auto mcall = derived->appendChild(ASTNode::T_METHOD_CALL_WITHIN_RECORD);
+        mcall->setToken(new Token(Token::T_IDENTIFIER, "repeat_value"));
+        mcall->appendChild(node->deepCopy());
+      }
 
       /* check if this column already exists in the select list */
+      auto col_index = -1;
       const auto& candidates = target_select_list->getChildren();
       for (int i = 0; i < candidates.size(); ++i) {
-        if (candidates[i]->getType() == ASTNode::T_DERIVED_COLUMN) {
-          if (candidates[i]->getChildren().size() == 1) {
-            auto colname = candidates[i]->getChildren()[0];
-            if (colname->getType() == ASTNode::T_COLUMN_NAME &&
-                node->getToken()->getString() ==
-                    colname->getToken()->getString()) {
-              col_index = i;
-              break;
-            }
-          }
+        if (derived->compare(candidates[i])) {
+          col_index = i;
+          break;
         }
       }
 
       /* otherwise add this column to the select list */
       if (col_index < 0) {
-        auto derived = new ASTNode(ASTNode::T_DERIVED_COLUMN);
-        derived->appendChild(node->deepCopy());
         target_select_list->appendChild(derived);
         col_index = target_select_list->getChildren().size() - 1;
       }
 
       node->setType(ASTNode::T_RESOLVED_COLUMN);
       node->setID(col_index);
+      node->clearChildren();
+      node->clearToken();
       return true;
     }
 
+    case ASTNode::T_METHOD_CALL:
+      if (node->getToken() == nullptr) {
+        RAISE(kRuntimeError, "corrupt AST");
+      }
+
+      if (symbol_table_->isAggregateFunction(node->getToken()->getString())) {
+        in_aggregation = true;
+      }
+
+      /* fallthrough */
+
     default: {
       for (const auto& child : node->getChildren()) {
-        if (!buildInternalSelectList(child, target_select_list)) {
+        if (!buildInternalSelectList(child, target_select_list, in_aggregation)) {
           return false;
         }
       }
@@ -630,7 +707,8 @@ bool QueryPlanBuilder::buildInternalSelectList(
 QueryTreeNode* QueryPlanBuilder::buildLimitClause(
     ASTNode* ast,
     RefPtr<TableProvider> tables) {
-  if (!(*ast == ASTNode::T_SELECT) || ast->getChildren().size() < 3) {
+  if (!(*ast == ASTNode::T_SELECT || *ast == ASTNode::T_SELECT_DEEP) ||
+      ast->getChildren().size() < 3) {
     return nullptr;
   }
 
@@ -757,7 +835,7 @@ QueryTreeNode* QueryPlanBuilder::buildOrderByClause(
 }
 
 QueryTreeNode* QueryPlanBuilder::buildSequentialScan(ASTNode* ast) {
-  if (!(*ast == ASTNode::T_SELECT)) {
+  if (!(*ast == ASTNode::T_SELECT || *ast == ASTNode::T_SELECT_DEEP)) {
     return nullptr;
   }
 
@@ -870,14 +948,17 @@ QueryTreeNode* QueryPlanBuilder::buildSequentialScan(ASTNode* ast) {
 
   if (has_aggregation_within_record) {
     seqscan->setAggregationStrategy(
-        AggregationStrategy::AGGREGATE_WITHIN_RECORD);
+        *ast == ASTNode::T_SELECT_DEEP ?
+            AggregationStrategy::AGGREGATE_WITHIN_RECORD_DEEP :
+            AggregationStrategy::AGGREGATE_WITHIN_RECORD_FLAT);
   }
 
   return seqscan;
 }
 
 QueryTreeNode* QueryPlanBuilder::buildSelectExpression(ASTNode* ast) {
-  if (!(*ast == ASTNode::T_SELECT) || ast->getChildren().size() != 1) {
+  if (!(*ast == ASTNode::T_SELECT || *ast == ASTNode::T_SELECT_DEEP)
+      || ast->getChildren().size() != 1) {
     return nullptr;
   }
 

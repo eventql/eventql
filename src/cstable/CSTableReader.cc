@@ -93,6 +93,15 @@ RefPtr<ColumnReader> CSTableReader::getColumnReader(const String& column_name) {
   RAISEF(kIllegalStateError, "invalid column type: $0", (uint32_t) c.type);
 }
 
+ColumnType CSTableReader::getColumnType(const String& column_name) {
+  auto col = columns_.find(column_name);
+  if (col == columns_.end()) {
+    RAISEF(kIndexError, "unknown column: $0", column_name);
+  }
+
+  return col->second.type;
+}
+
 bool CSTableReader::hasColumn(const String& column_name) const {
   auto col = columns_.find(column_name);
   return col != columns_.end();
@@ -113,6 +122,16 @@ void CSTableReader::getColumn(
 
 size_t CSTableReader::numRecords() const {
   return num_records_;
+}
+
+Set<String> CSTableReader::columns() const {
+  Set<String> cols;
+
+  for (const auto& p : columns_) {
+    cols.emplace(p.first);
+  }
+
+  return cols;
 }
 
 } // namespace cstable

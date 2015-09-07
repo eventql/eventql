@@ -169,6 +169,7 @@ public:
    * Join the provided string array with the provided join string
    */
   static String join(const Vector<String>& list, const String& join);
+  static String join(const Set<String>& list, const String& join);
 
   /**
    * Converts the provided string to all lowercase

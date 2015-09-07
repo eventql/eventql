@@ -67,7 +67,7 @@ void JSONSSEStreamFormat::formatResults(
     json.addString(e.what());
     json.endObject();
 
-    output_->sendEvent(buf, Some(String("error")));
+    output_->sendEvent(buf, Some(String("query_error")));
   }
 }
 

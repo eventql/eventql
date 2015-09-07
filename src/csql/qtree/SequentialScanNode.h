@@ -39,10 +39,11 @@ namespace csql {
  *        one output row
  *
  */
-enum class AggregationStrategy {
-  NO_AGGREGATION,
-  AGGREGATE_WITHIN_RECORD,
-  AGGREGATE_ALL
+enum class AggregationStrategy : uint8_t {
+  NO_AGGREGATION = 0,
+  AGGREGATE_WITHIN_RECORD_FLAT = 1,
+  AGGREGATE_WITHIN_RECORD_DEEP = 2,
+  AGGREGATE_ALL = 3
 };
 
 class SequentialScanNode : public TableExpressionNode {
@@ -59,6 +60,7 @@ public:
   void setTableName(const String& table_name);
 
   Vector<RefPtr<SelectListNode>> selectList() const;
+  Set<String> selectedColumns() const;
 
   Option<RefPtr<ValueExpressionNode>> whereExpression() const;
 

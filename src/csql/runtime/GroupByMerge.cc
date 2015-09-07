@@ -45,7 +45,7 @@ void GroupByMerge::execute(
   std::mutex mutex;
   std::condition_variable cv;
   auto sem = sources_.size();
-  bool error = false;
+  Vector<String> errors;
 
   for (auto& s : sources_) {
     auto source = s.get();
@@ -58,26 +58,26 @@ void GroupByMerge::execute(
         &mutex,
         &cv,
         &sem,
-        &error] {
+        &errors] {
       HashMap<String, Vector<VM::Instance >> tgroups;
       ScratchMemory tscratch;
-      bool terror = false;
 
+      String terror;
       try {
         source->accumulate(&tgroups, &tscratch, context);
-      } catch (...) {
-        terror = true;
+      } catch (const StandardException& e) {
+        terror = e.what();
       }
 
       std::unique_lock<std::mutex> lk(mutex);
-      if (terror) {
-        error = true;
-      } else {
+      if (terror.empty()) {
         try {
           source->mergeResult(&tgroups, &groups, &scratch);
-        } catch (...) {
-          error = true;
+        } catch (const StandardException& e) {
+          errors.emplace_back(e.what());
         }
+      } else {
+        errors.emplace_back(terror);
       }
 
       --sem;
@@ -91,9 +91,12 @@ void GroupByMerge::execute(
     cv.wait(lk);
   }
 
-  if (error) {
+  if (!errors.empty()) {
     sources_[0]->freeResult(&groups);
-    RAISE(kRuntimeError, "SQL subtree execution failed");
+    RAISEF(
+        kRuntimeError,
+        "SQL subtree execution failed: $0",
+        StringUtil::join(errors, "; "));
   }
 
   try {

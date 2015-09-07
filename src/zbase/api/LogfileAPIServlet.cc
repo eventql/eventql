@@ -7,6 +7,7 @@
  * permission is obtained.
  */
 #include "stx/wallclock.h"
+#include "stx/assets.h"
 #include "stx/protobuf/msg.h"
 #include "stx/io/BufferedOutputStream.h"
 #include "zbase/api/LogfileAPIServlet.h"
@@ -33,38 +34,39 @@ void LogfileAPIServlet::handle(
   http::HTTPResponse res;
   res.populateFromRequest(req);
 
-  if (uri.path() == "/analytics/api/v1/logfiles") {
+  if (uri.path() == "/api/v1/logfiles") {
     req_stream->readBody();
     listLogfiles(session, uri, &req, &res);
     res_stream->writeResponse(res);
     return;
   }
 
-  if (uri.path() == "/analytics/api/v1/logfiles/get_definition") {
+  if (uri.path() == "/api/v1/logfiles/get_definition") {
     req_stream->readBody();
     fetchLogfileDefinition(session, uri, &req, &res);
     res_stream->writeResponse(res);
     return;
   }
 
-  if (uri.path() == "/analytics/api/v1/logfiles/scan") {
+  if (uri.path() == "/api/v1/logfiles/scan") {
     scanLogfile(session, uri, req_stream.get(), res_stream.get());
     return;
   }
 
-  if (uri.path() == "/analytics/api/v1/logfiles/scan_partition") {
+  if (uri.path() == "/api/v1/logfiles/scan_partition") {
     scanLogfilePartition(session, uri, req_stream.get(), res_stream.get());
     return;
   }
 
-  if (uri.path() == "/analytics/api/v1/logfiles/upload") {
+  if (uri.path() == "/api/v1/logfiles/upload") {
     uploadLogfile(session, uri, req_stream.get(), &res);
     res_stream->writeResponse(res);
     return;
   }
 
   res.setStatus(http::kStatusNotFound);
-  res.addBody("not found");
+  res.addHeader("Content-Type", "text/html; charset=utf-8");
+  res.addBody(Assets::getAsset("zbase/webui/404.html"));
   res_stream->writeResponse(res);
 }
 
@@ -250,27 +252,21 @@ void LogfileAPIServlet::scanLogfile(
     limit = std::stoull(limit_str);
   }
 
-  String raw_str;
-  if (URI::getParam(params, "raw", &limit_str)) {
-    scan_params.set_return_raw (true);
-  }
-
   String columns_str;
   if (URI::getParam(params, "columns", &columns_str)) {
-    if (columns_str == "__all__") {
-      scan_params.set_all_columns(true);
-      scan_params.set_return_raw(true);
-    } else {
-      for (const auto& c : StringUtil::split(columns_str, ",")) {
+    for (const auto& c : StringUtil::split(columns_str, ",")) {
+      if (c == "__raw__") {
+        scan_params.set_return_raw(true);
+      } else {
         *scan_params.add_columns() = c;
       }
     }
   }
 
-  String filter_sql_str;
-  if (URI::getParam(params, "filter_sql", &filter_sql_str)) {
+  String filter_str;
+  if (URI::getParam(params, "filter", &filter_str) && !filter_str.empty()) {
+    scan_params.set_condition(filter_str);
     scan_params.set_scan_type(LOGSCAN_SQL);
-    scan_params.set_condition(filter_sql_str);
   }
 
   LogfileScanResult result(limit);
