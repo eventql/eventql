@@ -91,6 +91,14 @@
   display: none;
 }
 
+.zbase_report_pane .zbase_report_sidebar .report_description {
+  margin-top: 2px;
+}
+
+.zbase_report_pane .zbase_report_sidebar .report_description p {
+  line-height: 190%;
+}
+
 /** Content **/
 .zbase_report_pane .zbase_report_content {
   display: table-cell;
