@@ -66,6 +66,12 @@ public:
       const SHA1Hash& uuid,
       DocumentPublishingStatus pstatus);
 
+  void updateDocumentDeletedStatus(
+      const String& db_namespace,
+      const String& userid,
+      const SHA1Hash& uuid,
+      bool deleted);
+
 protected:
 
   void updateDocument(
