@@ -1,0 +1,85 @@
+z-menu.zbase_documents_menu {
+  margin-left: -10px;
+}
+
+z-menu.zbase_documents_menu z-menu-item,
+z-menu.zbase_documents_menu z-menu-title,
+z-menu.zbase_documents_menu z-menu-title a {
+  font-size: 12px;
+  margin-bottom: 0;
+}
+
+z-menu.zbase_documents_menu z-menu-section {
+  padding: 0;
+}
+
+z-menu.zbase_documents_menu z-menu-item a,
+z-menu.zbase_documents_menu z-menu-section z-menu-item a {
+  font-size: inherit;
+  padding: 0;
+}
+
+z-menu.zbase_documents_menu > z-menu-item,
+z-menu.zbase_documents_menu > z-menu-section > z-menu-title {
+  padding: 0;
+}
+
+z-menu.zbase_documents_menu > z-menu-item > a,
+z-menu.zbase_documents_menu > z-menu-section > z-menu-title > a {
+  line-height: 32px;
+  height: 32px;
+  display: block;
+  padding: 0 20px;
+  font-weight: 500;
+  color: #777;
+}
+
+z-menu.zbase_documents_menu > z-menu-item[data-active] > a,
+z-menu.zbase_documents_menu > z-menu-section[data-active] > z-menu-title > a {
+  background: #1c99d6;
+  color: #fff;
+}
+
+z-menu.zbase_documents_menu > z-menu-section > z-menu-item {
+  display: none;
+}
+
+z-menu.zbase_documents_menu > z-menu-section z-menu-section {
+  display: none;
+}
+
+z-menu.zbase_documents_menu > z-menu-section[data-active] > z-menu-item {
+  display: block;
+  border-left: 2px solid #ddd;
+  margin-left: 30px;
+  padding-left: 16px;
+  border-radius: 0;
+}
+
+z-menu.zbase_documents_menu > z-menu-section[data-active] > z-menu-title {
+  margin-bottom: 8px;
+}
+
+z-menu.zbase_documents_menu > z-menu-section[data-active] {
+  margin-bottom: 10px;
+}
+
+z-menu.zbase_documents_menu > z-menu-section[data-active] z-menu-section {
+  display: block;
+}
+
+z-menu.zbase_documents_menu > z-menu-section[data-active] > z-menu-section {
+  margin-left: 10px;
+}
+
+z-menu.zbase_documents_menu > z-menu-section[data-active] > z-menu-item {
+}
+
+z-menu.zbase_documents_menu > z-menu-section[data-active] z-menu-item z-menu-item {
+  margin: 2px 0 2px 16px;
+  padding: 2px 0;
+}
+
+z-menu.zbase_documents_menu > z-menu-section[data-active] z-menu-section z-menu-title {
+  display: none;
+}
