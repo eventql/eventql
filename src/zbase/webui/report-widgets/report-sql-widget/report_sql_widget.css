@@ -18,6 +18,10 @@
   font-size: 13px;
 }
 
+.zbase_report_sql_result_pane table.z-table thead th {
+  background: #f6f6f6;
+}
+
 .zbase_report_sql_result_pane .zbase_sql_chart {
   margin: 10px 20px;
 }
