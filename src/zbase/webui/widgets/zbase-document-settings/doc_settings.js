@@ -8,7 +8,8 @@ var DocumentSettingsWidget = function(elem, docid) {
     $.httpGet("/api/v1/documents/" + docid + "?no_content=true", function(r) {
       if (r.status == 200) {
         var doc = JSON.parse(r.response);
-        setStatus(doc.status);
+        console.log(doc);
+        setStatus(doc.publishing_status);
         setAclPolicy(doc.acl_policy);
         setCategory(doc.category);
       } else {
@@ -18,12 +19,6 @@ var DocumentSettingsWidget = function(elem, docid) {
   };
 
   var setStatus = function(doc_status) {
-    //REMOVEME
-    if (doc_status == undefined) {
-      doc_status = "published";
-    }
-    //REMOVEME END
-
     var tpl = $.getTemplate(
         "widgets/zbase-document-settings",
         "zbase_doc_settings_status_inner_tpl");
@@ -36,7 +31,7 @@ var DocumentSettingsWidget = function(elem, docid) {
     $.replaceContent($(".doc_setting_value.status", elem), tpl);
 
     dropdown.addEventListener("change", function() {
-      updateSettings("status=" + encodeURIComponent(dropdown.getValue()));
+      updateSettings("publishing_status=" + encodeURIComponent(dropdown.getValue()));
     }, false);
   };
 
