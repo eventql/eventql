@@ -18,6 +18,7 @@
 
 .zbase_doc_settings .doc_setting .doc_setting_value {
   display: inline-block;
+  font-weight: 500;
 }
 
 .zbase_doc_settings .doc_setting .doc_setting_title.with_dropdown {
@@ -33,11 +34,8 @@
   line-height: 16px;
 }
 
-.zbase_doc_settings .doc_setting .doc_setting_value.acl_policy {
-  font-weight: 500;
-}
 
-.zbase_doc_settings .doc_setting .doc_setting_value.acl_policy:after {
+.zbase_doc_settings .doc_setting .doc_setting_value.with_icon:after {
   content: "\f0d7";
   font: normal normal normal 12px/1 FontAwesome;
   font-weight: 400;
@@ -49,10 +47,21 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-.zbase_doc_settings .doc_setting .doc_setting_value.acl_policy:hover {
+.zbase_doc_settings .doc_setting .doc_setting_value.with_icon:hover {
   cursor: pointer;
 }
 
 .zbase_doc_settings .doc_setting .link {
   font-weight: 500;
+}
+
+.zbase_doc_settings .zbase_doc_settings_modal {
+  font-size: 14px;
+}
+
+.zbase_doc_settings .zbase_doc_settings_modal h4 {
+  font-size: 14px;
+  line-height: 34px;
+  font-weight: 400;
+  margin: 0;
 }
