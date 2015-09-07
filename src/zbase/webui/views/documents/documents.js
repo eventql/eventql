@@ -18,14 +18,14 @@ ZBase.registerView((function() {
     $.showLoader();
     $.httpGet("/api/v1/documents?" + $.buildQueryString(qparams), function(r) {
       if (r.status == 200) {
-        render(JSON.parse(r.response));
+        render(JSON.parse(r.response), qparams);
       } else {
         $.fatalError();
       }
     });
   }
 
-  var render = function(data) {
+  var render = function(data, qparams) {
     var documents = data.documents;
     var categories = data.categories;
 
@@ -35,6 +35,8 @@ ZBase.registerView((function() {
 
     var menu = DocsMenu(categories);
     menu.render($(".docs_sidebar", page));
+    menu.setActiveMenuItem(
+        qparams.category_prefix ? qparams.category_prefix : "all_documents");
 
     renderDocumentsList(
         page.querySelector(".zbase_documents tbody"),
