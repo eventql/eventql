@@ -59,6 +59,12 @@ ZBase.registerView((function() {
         "views/report",
         "zbase_report_main_tpl");
 
+    //doc settings
+    var settings_widget = DocumentSettingsWidget(
+        $(".document_settings", page),
+        doc.uuid);
+    settings_widget.render();
+
     $.handleLinks(page);
     $.replaceViewport(page);
 
@@ -118,7 +124,7 @@ ZBase.registerView((function() {
 
     showReportView();
   };
-  
+
   var showReportView = function(doc) {
     //showLoader?
     if (edit_view) {
