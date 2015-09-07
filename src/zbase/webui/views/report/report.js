@@ -76,20 +76,30 @@ ZBase.registerView((function() {
     }
     setReportDescription(description);
 
-    var widgets = [];
-    if (doc.content != null && doc.content.hasOwnProperty("widgets")) {
-      widgets = doc.content.widgets;
-    }
-    widget_list = WidgetList(widgets);
-    widget_list.onWidgetEdit(function(widget_id) {
-      showWidgetEditor(widget_id);
-    });
-
     //setup docsync
     docsync = DocSync(
         getDocument,
         "/api/v1/documents/" + doc.uuid,
         $(".zbase_report_infobar"));
+
+    var widgets = [];
+    if (doc.content != null && doc.content.hasOwnProperty("widgets")) {
+      widgets = doc.content.widgets;
+    }
+
+    widget_list = WidgetList(widgets);
+    widget_list.onWidgetEdit(function(widget_id) {
+      showWidgetEditor(widget_id);
+    });
+
+    widget_list.onWidgetDelete(function() {
+      if (!docsync) {
+        $.fatalError();
+        return;
+      }
+      docsync.saveDocument();
+      showReportView();
+    });
 
 
     if (readonly) {
@@ -124,7 +134,7 @@ ZBase.registerView((function() {
     showReportView();
   };
 
-  var showReportView = function(doc) {
+  var showReportView = function() {
     //showLoader?
     if (edit_view) {
       edit_view.destroy();
