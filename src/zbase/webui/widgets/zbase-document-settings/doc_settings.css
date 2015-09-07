@@ -12,6 +12,8 @@
 .zbase_doc_settings .doc_setting {
   border-top: 1px dotted #eee;
   line-height: 28px;
+  white-space: nowrap;
+  overflow: hidden;
 }
 
 .zbase_doc_settings .doc_setting .doc_setting_title {
