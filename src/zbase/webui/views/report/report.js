@@ -91,13 +91,9 @@ ZBase.registerView((function() {
         "/api/v1/documents/" + doc.uuid,
         $(".zbase_report_infobar"));
 
-    // handle display mode
-    $(".zbase_report_pane z-dropdown.mode").addEventListener("change", function() {
-      widget_list.setEditable(this.getValue() == "editing");
-    }, false);
 
     if (readonly) {
-      $(".readonly_hint").classList.remove("hidden");
+      $(".zbase_report_pane").classList.add("readonly");
     } else {
       initNameEditing();
       initDescriptionEditing();
@@ -120,6 +116,9 @@ ZBase.registerView((function() {
       $.onClick($(".zbase_report_pane .link.add_widget"), function() {
         add_widget_flow.render();
       });
+
+      // handle display mode
+      $(".zbase_report_pane z-dropdown.mode").addEventListener("change", setEditable);
     }
 
     showReportView();
@@ -200,19 +199,21 @@ ZBase.registerView((function() {
     edit_view.render(viewport);
   };
 
-  //var setEditable = function(is_editable) {
-  //  widget_list.setEditable(is_editable);
+  var setEditable = function() {
+    if (!widget_list) {
+      $.fatalError();
+      return;
+    }
 
-  //  if (is_editable) {
-  //    $(".writable_report_actions").classList.remove("hidden");
-  //    $(".zbase_report_pane .report_name").classList.add("editable");
-  //    $(".zbase_report_pane .report_description").classList.add("editable");
-  //  } else {
-  //    $(".writable_report_actions").classList.add("hidden");
-  //    $(".zbase_report_pane .report_name").classList.remove("editable");
-  //    $(".zbase_report_pane .report_description").classList.remove("editable");
-  //  }
-  //};
+    if (this.getValue() == "editing") {
+      $(".zbase_report_pane").classList.add("editable");
+      widget_list.setEditable(true);
+    } else {
+      $(".zbase_report_pane").classList.remove("editable");
+      widget_list.setEditable(false);
+    }
+  };
+
 
   var initShareDocModal = function(doc_id) {
     var modal = ShareDocModal(
@@ -226,12 +227,15 @@ ZBase.registerView((function() {
   };
 
   var initNameEditing = function() {
-    var modal = $(".zbase_report_pane z-modal.rename_report");
+    var report_pane = $(".zbase_report_pane");
+    var modal = $("z-modal.rename_report", report_pane);
     var name_input = $("input.report_name", modal);
 
-    $.onClick($(".zbase_report_pane .report_name.editable"), function() {
-      modal.show();
-      name_input.focus();
+    $.onClick($(".report_name.editable", report_pane), function() {
+      if (report_pane.classList.contains("editable")) {
+        modal.show();
+        name_input.focus();
+      }
     });
 
     $.onClick($("button.submit", modal), function() {
@@ -246,16 +250,19 @@ ZBase.registerView((function() {
   };
 
   var initDescriptionEditing = function() {
-    var modal = $(".zbase_report_pane z-modal.edit_description");
+    var report_pane = $(".zbase_report_pane");
+    var modal = $("z-modal.edit_description", report_pane);
     var textarea = $("textarea.report_description", modal);
 
     var showModal = function() {
-      modal.show();
-      textarea.focus();
+      if (report_pane.classList.contains("editable")) {
+        modal.show();
+        textarea.focus();
+      }
     };
 
-    $.onClick($(".zbase_report_pane .report_description.editable"), showModal);
-    $.onClick($(".zbase_report_pane .link.add_description"), showModal);
+    $.onClick($(".report_description.editable", report_pane), showModal);
+    $.onClick($(".link.add_description", report_pane), showModal);
 
     $.onClick($("button.submit", modal), function() {
       if (!docsync) {
@@ -278,15 +285,11 @@ ZBase.registerView((function() {
   var setReportDescription = function(description) {
     var escaped_description = $.nl2p($.escapeHTML(description));
 
-    //FIXME
-    var readonly = false;
-    if (!readonly && escaped_description.length == 0) {
+    if (description.length == 0) {
       // display edit link
-      $(".zbase_report_pane .sidebar_content .link.add_description")
-        .classList.remove("hidden");
+      $(".zbase_report_pane .link.add_description").classList.remove("hidden");
     } else {
-      $(".zbase_report_pane .sidebar_content .link.add_description")
-        .classList.add("hidden");
+      $(".zbase_report_pane .link.add_description").classList.add("hidden");
     }
 
     $(".zbase_report_pane .report_description").innerHTML = escaped_description;
