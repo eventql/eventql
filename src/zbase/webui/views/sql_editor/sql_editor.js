@@ -93,22 +93,25 @@ ZBase.registerView((function() {
     var table_list = TableListWidget($(".sidebar_section", page));
     table_list.render();
 
+    //sharing modal
+    var share_modal = ShareDocModal(
+          $(".zbase_sql_editor", page),
+          doc.uuid,
+          "http://zbase.io/a/sql/" + doc.uuid);
+
     //preferences
     var settings_widget = DocumentSettingsWidget(
         $(".document_settings", page),
-        doc.uuid);
+        doc.uuid,
+        share_modal);
     settings_widget.render();
 
     // sharing widget/button
     if (readonly) {
       $(".share_button", page).remove();
     } else {
-      var modal = ShareDocModal(
-          $(".zbase_sql_editor", page),
-          doc.uuid,
-          "http://zbase.io/a/sql/" + doc.uuid);
       $.onClick($("button[data-action='share-query']", page), function() {
-        modal.show();
+        share_modal.show();
       });
     }
 
