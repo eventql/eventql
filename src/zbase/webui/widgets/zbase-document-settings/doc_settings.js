@@ -1,8 +1,14 @@
-var DocumentSettingsWidget = function(elem, docid, share_modal) {
+var DocumentSettingsWidget = function(elem, docid) {
   var init = function() {
     var tpl = $.getTemplate(
         "widgets/zbase-document-settings",
         "zbase_doc_settings_main_tpl");
+
+    //FIXME share_link
+    var share_modal = ShareDocModal(
+        tpl,
+        docid,
+        "http://zbase.io" + window.location.pathname);
     elem.appendChild(tpl);
 
     $.httpGet("/api/v1/documents/" + docid + "?no_content=true", function(r) {
@@ -19,7 +25,6 @@ var DocumentSettingsWidget = function(elem, docid, share_modal) {
     setupCategoryUpdate();
     setupDocumentDeletion();
 
-    //sharing widget
     share_modal.onUpdate(setAclPolicy);
     $.onClick($(".doc_setting_value.acl_policy", elem), function() {
       share_modal.show();
