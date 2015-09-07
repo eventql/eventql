@@ -49,20 +49,8 @@ var DocsMenu = function(categories) {
       category: path.join("~")
     });
 
-    if (tail.length == 1) {
-      var item_title = tail[0];
-      var item = elem.querySelector("z-menu-item[data-key='" + key + "']");
-      if (!item) {
-        item = document.createElement("z-menu-item");
-        item.setAttribute("data-key", key);
-        elem.appendChild(item);
-
-        var link = document.createElement("a");
-        link.innerHTML = $.escapeHTML(item_title);
-        link.href = href;
-        item.appendChild(link);
-      }
-    } else {
+    // insert section
+    if (path.length == 1) {
       var section_title = tail.shift();
       var section = elem.querySelector(
           "z-menu-section[data-key='" + key + "']");
@@ -82,6 +70,21 @@ var DocsMenu = function(categories) {
       }
 
       insertMenuItem(path, tail, section);
+    } else {
+      var item_title = tail.shift();
+      var item = elem.querySelector("z-menu-item[data-key='" + key + "']");
+      if (!item) {
+        item = document.createElement("z-menu-item");
+        item.setAttribute("data-key", key);
+        elem.appendChild(item);
+
+        var link = document.createElement("a");
+        link.innerHTML = $.escapeHTML(item_title);
+        link.href = href;
+        item.appendChild(link);
+      }
+
+      insertMenuItem(path, tail, item);
     }
   }
 
