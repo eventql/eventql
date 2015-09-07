@@ -9,12 +9,12 @@
 
     <div class="doc_setting">
       <div class="doc_setting_title">Access</div>
-      <div class="doc_setting_value acl_policy">&#8211;</div>
+      <div class="doc_setting_value acl_policy with_icon">&#8211;</div>
     </div>
 
     <div class="doc_setting">
       <div class="doc_setting_title">Category</div>
-      <div class="doc_setting_value category">&#8211;</div>
+      <div class="doc_setting_value category with_icon">&#8211;</div>
     </div>
 
     <div class="doc_setting">
@@ -24,6 +24,23 @@
     <div class="doc_setting">
       <div class="link clone">Clone Document</div>
     </div>
+
+    <z-modal class="zbase_doc_settings_modal category">
+      <z-modal-box>
+        <z-modal-close-icon></z-modal-close-icon>
+        <div class='z-modal-header'>Edit Category</div>
+        <div class="doc_settings_infobar hidden"></div>
+        <div class='z-modal-content'>
+          <h4>Enter the document's category</h4>
+          <input class="z-input" type="text" placeholder="Document Category" />
+        </div>
+        <div class='z-modal-footer'>
+          <button class='z-button primary submit'>
+            Done
+          </button>
+        </div>
+      </z-modal-box>
+    </z-modal>
   </div>
 </template>
 

@@ -10,11 +10,31 @@ var DocumentSettingsWidget = function(elem, docid, share_modal) {
         var doc = JSON.parse(r.response);
         console.log(doc);
         renderStatus(doc.publishing_status);
-        renderAclPolicy(doc.acl_policy);
-        renderCategory(doc.category);
+        setAclPolicy(doc.acl_policy);
+        setCategory(doc.category);
       } else {
         $.fatalError();
       }
+    });
+
+    //sharing widget
+    share_modal.onUpdate(setAclPolicy);
+    $.onClick($(".doc_setting_value.acl_policy", elem), function() {
+      share_modal.show();
+    });
+
+    var category_modal = $("z-modal.zbase_doc_settings_modal", elem);
+    var category_input = $("input", category_modal);
+    $.onClick($(".doc_setting_value.category", elem), function() {
+      category_input.value = this.innerText;
+      category_modal.show();
+    });
+
+    $.onClick($("button.submit", category_modal), function() {
+      var category = category_input.value;
+      updateSettings("category=" + encodeURIComponent(category));
+      setCategory(category);
+      category_modal.close();
     });
   };
 
@@ -35,15 +55,6 @@ var DocumentSettingsWidget = function(elem, docid, share_modal) {
     }, false);
   };
 
-  var renderAclPolicy = function(acl_policy) {
-    //FIXME share link
-    share_modal.onUpdate(setAclPolicy);
-    $.onClick($(".doc_setting_value.acl_policy", elem), function() {
-      share_modal.show();
-    });
-
-    setAclPolicy(acl_policy);
-  };
 
   var setAclPolicy = function(acl_policy) {
     if (acl_policy == "ACLPOLICY_PRIVATE") {
@@ -56,9 +67,17 @@ var DocumentSettingsWidget = function(elem, docid, share_modal) {
   };
 
 
-  var renderCategory = function(category) {
-    $(".doc_setting_value.category", elem).innerHTML = category;
-  }
+  var setCategory = function(category) {
+    if (category.length == 0) {
+      $(".doc_setting_value.category", elem).innerHTML = "No Category";
+    } else {
+      $(".doc_setting_value.category", elem).innerHTML = category;
+    }
+  };
+
+  var updateCategory = function() {
+    
+  };
 
   var updateSettings = function(postbody) {
     //showInfobar
