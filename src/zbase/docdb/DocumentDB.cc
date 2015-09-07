@@ -207,6 +207,23 @@ void DocumentDB::updateDocumentPublishingStatus(
   });
 }
 
+void DocumentDB::updateDocumentDeletedStatus(
+    const String& db_namespace,
+    const String& userid,
+    const SHA1Hash& uuid,
+    bool deleted) {
+  updateDocument(
+      db_namespace,
+      uuid,
+      [&userid, &deleted] (Document* doc) {
+    if (!isDocumentWritableForUser(*doc, userid)) {
+      RAISE(kAccessDeniedError, "access denied");
+    }
+
+    doc->set_deleted(deleted);
+  });
+}
+
 //void createDocument(
 //    const String& db_namespace,
 //    const Document& document);

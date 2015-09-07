@@ -7,6 +7,7 @@
  * permission is obtained.
  */
 #include "DocumentDBServlet.h"
+#include "stx/Human.h"
 
 using namespace stx;
 
@@ -228,6 +229,29 @@ void DocumentDBServlet::updateDocument(
       continue;
     }
 
+    if (p.first == "deleted") {
+      if (!p.second.empty()) {
+        auto deleted = Human::parseBoolean(p.second);
+        if (deleted.isEmpty()) {
+          res->setStatus(http::kStatusBadRequest);
+          res->addBody(
+              StringUtil::format("invalid deleted status: '$0'", p.second));
+          return;
+        }
+
+        tx.emplace_back([this, &session, &uuid, deleted] () {
+          docdb_->updateDocumentDeletedStatus(
+              session.customer(),
+              session.userid(),
+              uuid,
+              deleted.get());
+        });
+      }
+
+      continue;
+    }
+
+
     res->setStatus(http::kStatusBadRequest);
     res->addBody(StringUtil::format("invalid parameter: '$0'", p.first));
     return;
@@ -244,6 +268,16 @@ void DocumentDBServlet::listDocuments(
     const AnalyticsSession& session,
     const http::HTTPRequest* req,
     http::HTTPResponse* res) {
+  URI uri(req->uri());
+  const auto& params = uri.queryParams();
+
+  Set<String> categories;
+  bool return_categories = false;
+  String with_categories_str;
+  if (URI::getParam(params, "with_categories", &with_categories_str)) {
+    return_categories = true;
+  }
+
   Buffer buf;
   json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
 
@@ -255,7 +289,11 @@ void DocumentDBServlet::listDocuments(
   docdb_->listDocuments(
       session.customer(),
       session.userid(),
-      [this, &i, &json, &session] (const Document& doc) -> bool {
+      [this, &i, &json, &session, &categories] (const Document& doc) -> bool {
+    if (!doc.category().empty()) {
+      categories.emplace(doc.category());
+    }
+
     if (++i > 1) {
       json.addComma();
     }
@@ -270,6 +308,13 @@ void DocumentDBServlet::listDocuments(
   });
 
   json.endArray();
+
+  if (return_categories) {
+    json.addComma();
+    json.addObjectEntry("categories");
+    json::toJSON(categories, &json);
+  }
+
   json.endObject();
 
   res->setStatus(http::kStatusOK);
@@ -314,6 +359,10 @@ void DocumentDBServlet::renderDocument(
 
   json->addObjectEntry("is_writable");
   json->addBool(isDocumentWritableForUser(doc, session.userid()));
+  json->addComma();
+
+  json->addObjectEntry("deleted");
+  json->addBool(doc.deleted());
   json->addComma();
 
   json->addObjectEntry("ctime");
