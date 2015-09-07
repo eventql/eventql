@@ -212,7 +212,7 @@ ZBase.registerView((function() {
     var modal = ShareDocModal(
         $(".zbase_report_pane"),
         doc_id,
-        "http://zbase.io/a/report/" + doc_id);
+        "http://zbase.io/a/reports/" + doc_id);
 
     $.onClick($(".zbase_report_pane .link.share"), function() {
       modal.show();
