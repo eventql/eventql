@@ -2,6 +2,7 @@ var WidgetList = function(widget_definitions) {
   var elem;
   var widgets = [];
   var widget_edit_callbacks = [];
+  var widget_delete_callbacks = [];
 
   widget_definitions.forEach(function(conf) {
     widgets.push({
@@ -29,8 +30,19 @@ var WidgetList = function(widget_definitions) {
           widget.container,
           widget.conf);
 
-      $.onClick($(".zbase_report_widget_header .edit", widget.container), function() {
-        triggerWidgetEdit(widget.conf.uuid);
+      //handle edit/remove
+      var dropdown = $(".zbase_report_widget_header z-dropdown", widget.container);
+      dropdown.addEventListener("change", function() {
+        switch (this.getValue()) {
+          case "edit":
+            triggerWidgetEdit(widget.conf.uuid);
+            break;
+
+          case "delete":
+            destroyWidget(widget.conf.uuid);
+            triggerWidgetDelete();
+            break;
+        }
       });
 
       elem.appendChild(widget.container);
@@ -122,6 +134,10 @@ var WidgetList = function(widget_definitions) {
     widget_edit_callbacks.push(callback);
   };
 
+  var onWidgetDelete = function(callback) {
+    widget_delete_callbacks.push(callback);
+  };
+
 
   /********************************* PRIVATE **********************************/
   var addNewWidgets = function(new_widgets, callback) {
@@ -169,6 +185,12 @@ var WidgetList = function(widget_definitions) {
     });
   };
 
+  var triggerWidgetDelete = function() {
+    widget_delete_callbacks.forEach(function(callback) {
+      callback();
+    });
+  };
+
   //TODO unrender
 
   return {
@@ -180,6 +202,7 @@ var WidgetList = function(widget_definitions) {
     addNewEmptyWidget: addNewEmptyWidget,
     setEditable: setEditable,
     onWidgetEdit: onWidgetEdit,
+    onWidgetDelete: onWidgetDelete,
     destroy: destroy
   }
 };
