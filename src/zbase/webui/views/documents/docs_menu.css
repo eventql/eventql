@@ -41,6 +41,33 @@ z-menu.zbase_documents_menu > z-menu-section[data-active] > z-menu-title > a {
   color: #fff;
 }
 
+z-menu.zbase_documents_menu > z-menu-section > z-menu-title > a:after {
+  font: normal normal normal 12px/1 FontAwesome;
+  font-weight: 400;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  text-rendering: auto;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  content: "\f105";
+  font-weight: bold;
+  font-size: 15px;
+  display: block;
+  width: 16px;
+  height: 16px;
+  text-align: center;
+  position: relative;
+  float: right;
+  color: #ccc;
+  top: 7px;
+}
+
+z-menu.zbase_documents_menu > z-menu-section[data-active] > z-menu-title > a:after {
+  color: #fff;
+  content: "\f107";
+  top: 8px;
+}
+
 z-menu.zbase_documents_menu > z-menu-section > z-menu-item {
   display: none;
 }
@@ -67,7 +94,6 @@ z-menu.zbase_documents_menu > z-menu-section[data-active] > z-menu-item[data-act
   text-rendering: auto;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-
   content: "\f105";
   font-weight: bold;
   font-size: 15px;
