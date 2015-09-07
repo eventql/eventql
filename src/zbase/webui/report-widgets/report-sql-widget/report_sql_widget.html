@@ -31,9 +31,22 @@
         <i class="fa fa-arrow-left"></i>&nbsp;Back
       </button>
 
-      <h2 class="pagetitle widget_title">Edit Report SQL Query</h2>
+      <h2 class="pagetitle report_widget_title">Edit Query: <em class="clickable"></em></h2>
     </div>
 
     <z-codeeditor data-language="text/x-chartsql" data-resizable='vertical' style="height: 250px;"></z-codeeditor>
+
+    <z-modal class="zbase_report_sql_modal">
+      <z-modal-box>
+        <z-modal-close-icon></z-modal-close-icon>
+        <div class="z-modal-header">Rename Query</div>
+        <div class="z-modal-content">
+          <h3>Enter a new query name</h3>
+          <input class="z-input" type="text" placeholder="Query Name" />
+        </div>
+        <div class="z-modal-footer">
+          <button class="z-button primary submit">Save</button>
+        </div>
+    </z-modal>
   </div>
 </template>

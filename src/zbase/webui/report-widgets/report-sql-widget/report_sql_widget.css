@@ -59,3 +59,13 @@
   -o-user-select: none;
   user-select: none;
 }
+
+.zbase_report_sql_editor z-modal.zbase_report_sql_modal {
+  font-size: 14px;
+}
+
+.zbase_report_sql_editor z-modal.zbase_report_sql_modal h3 {
+  font-weight: 400;
+  margin: 0;
+  line-height: 34px;
+}
