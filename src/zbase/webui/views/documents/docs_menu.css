@@ -1,5 +1,5 @@
 z-menu.zbase_documents_menu {
-  margin-left: -10px;
+  margin-right: 10px;
   width: auto;
 }
 
@@ -60,6 +60,7 @@ z-menu.zbase_documents_menu > z-menu-section > z-menu-title > a:after {
   float: right;
   color: #ccc;
   top: 7px;
+  right: 6px;
 }
 
 z-menu.zbase_documents_menu > z-menu-section[data-active] > z-menu-title > a:after {
@@ -150,4 +151,14 @@ z-menu.zbase_documents_menu > z-menu-section[data-active] z-menu-section z-menu-
 z-menu.zbase_documents_menu > z-menu-item a {
   color: #000;
   font-weight: 500;
+}
+
+z-menu.zbase_documents_menu > z-menu-item span {
+  float: right;
+  font-weight: 400;
+  color: #aaa;
+}
+
+z-menu.zbase_documents_menu > z-menu-item[data-active] span {
+  color: rgba(255,255,255,.7);
 }
