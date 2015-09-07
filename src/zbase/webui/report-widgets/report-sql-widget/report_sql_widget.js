@@ -11,11 +11,12 @@ var ReportSQLWidgetDisplay = function(elem, conf) {
       "report_sql",
       "/api/v1/sql_stream?query=" + encodeURIComponent(conf.query));
 
+    elem.appendChild(tpl);
     query.addEventListener('result', function(e) {
       query_mgr.close("report_sql");
 
       var data = JSON.parse(e.data);
-      renderQueryResult(result_pane, data.results);
+      renderQueryResult(result_pane, data.results)
     });
 
     query.addEventListener('error', function(e) {
@@ -27,8 +28,6 @@ var ReportSQLWidgetDisplay = function(elem, conf) {
         renderQueryError(result_pane, e.data);
       }
     });
-
-    elem.appendChild(tpl);
   };
 
 
