@@ -337,6 +337,10 @@ void DocumentDBServlet::renderDocument(
   json->addBool(isDocumentWritableForUser(doc, session.userid()));
   json->addComma();
 
+  json->addObjectEntry("deleted");
+  json->addBool(doc.deleted());
+  json->addComma();
+
   json->addObjectEntry("ctime");
   json->addInteger(doc.ctime());
   json->addComma();
