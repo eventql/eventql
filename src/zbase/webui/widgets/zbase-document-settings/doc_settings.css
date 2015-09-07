@@ -1,32 +1,44 @@
 .zbase_doc_settings {
-  font-size: 13px;
+  font-size: 12px;
 }
 
 .zbase_doc_settings h3 {
   font-weight: 500;
   color: #333;
-  margin: 0 0 10px;
-  font-size: 13px;
+  margin: 0 0 7px 0;
+  font-size: 12px;
 }
 
 .zbase_doc_settings .doc_setting {
-  border-top: 1px solid #eee;
+  border-top: 1px dotted #eee;
   line-height: 28px;
 }
 
 .zbase_doc_settings .doc_setting .doc_setting_title {
   display: inline-block;
-  width: 100px;
+  width: 64px;
+  color: #777;
 }
 
 .zbase_doc_settings .doc_setting .doc_setting_value {
   display: inline-block;
   font-weight: 500;
   color: #333;
+  padding: 0 10px;
+  cursor: pointer;
 }
 
-.zbase_doc_settings .doc_setting .doc_setting_title.with_dropdown {
-  width: 89px;
+.zbase_doc_settings .doc_setting .doc_setting_value:hover {
+  background: #1c99d6;
+  color: #fff;
+}
+
+.zbase_doc_settings .doc_setting .doc_setting_value:hover z-dropdown-header {
+  color: #fff;
+}
+
+.zbase_doc_settings .doc_setting .doc_setting_value z-dropdown {
+  margin-left: -11px;
 }
 
 .zbase_doc_settings .doc_setting .doc_setting_value z-dropdown {
@@ -38,9 +50,8 @@
   line-height: 16px;
 }
 
-
-.zbase_doc_settings .doc_setting .doc_setting_value.with_icon:after {
-  content: "\f0d7";
+.zbase_doc_settings .doc_setting .doc_setting_value.with_dropdown_icon:after,
+.zbase_doc_settings .doc_setting .doc_setting_value.with_edit_icon:after {
   font: normal normal normal 12px/1 FontAwesome;
   font-weight: 400;
   margin-left: 0.5em;
@@ -51,12 +62,25 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-.zbase_doc_settings .doc_setting .doc_setting_value.with_icon:hover {
-  cursor: pointer;
+.zbase_doc_settings .doc_setting .doc_setting_value.with_dropdown_icon:after {
+  content: "\f0d7";
+}
+
+.zbase_doc_settings .doc_setting .doc_setting_value.with_edit_icon:hover:after {
+  content: "\f040";
 }
 
 .zbase_doc_settings .doc_setting .link {
-  font-weight: 500;
+  display: inline-block;
+  font-weight: 400;
+  margin-left: -10px;
+  padding-left: 10px;
+  padding-right: 20px;
+}
+
+.zbase_doc_settings .doc_setting .link:hover {
+  background: #1c99d6;
+  color: #fff;
 }
 
 .zbase_doc_settings .zbase_doc_settings_modal {

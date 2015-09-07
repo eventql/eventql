@@ -15,6 +15,11 @@
   box-shadow: 0 0 2px rgba(0,0,0,0.4);
 }
 
+.zbase_report_pane .zbase_report_sidebar h4 {
+  font-weight: 500;
+  color: #333;
+}
+
 .zbase_report_pane .zbase_report_sidebar h3.sidebar_title {
   margin: 0;
 }
@@ -101,10 +106,23 @@
 
 .zbase_report_pane .zbase_report_sidebar .report_description {
   margin-top: 2px;
+  padding-bottom: 30px;
 }
 
 .zbase_report_pane .zbase_report_sidebar .report_description p {
   line-height: 190%;
+}
+
+.zbase_report_pane .zbase_report_sidebar .zbase_doc_settings h3 i {
+  display: none;
+}
+
+.zbase_report_pane .zbase_report_sidebar .document_settings {
+  background: #f9f9f9;
+  margin-left: -20px;
+  padding-left: 20px;
+  margin-right: -20px;
+  border-bottom: 1px solid #eee;
 }
 
 /** Content **/
