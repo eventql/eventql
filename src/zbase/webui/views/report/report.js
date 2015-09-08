@@ -162,6 +162,13 @@ ZBase.registerView((function() {
     var conf = widget_list.getWidgetConfig(widget_id);
     var editor = ReportWidgetFactory.getWidgetEditor(conf);
 
+    //switch to edit mode
+    var mode_dropdown = $(".zbase_report_pane z-dropdown.mode");
+    if (mode_dropdown.getValue() != "editing") {
+      mode_dropdown.setValue(["editing"]);
+      setEditable.call(mode_dropdown);
+    }
+
     editor.onSave(function(config) {
       if (!docsync) {
         $.fatalError();
