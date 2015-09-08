@@ -299,6 +299,30 @@ void DocumentDBServlet::listDocuments(
   String category_prefix_filter;
   URI::getParam(params, "category_prefix", &category_prefix_filter);
 
+  /* param: owner */
+  String owner_filter;
+  URI::getParam(params, "owner", &owner_filter);
+
+  if (owner_filter == "all") {
+    owner_filter.clear();
+  }
+
+  if (owner_filter == "self") {
+    owner_filter = session.userid();
+  }
+
+  /* param: author */
+  String author_filter;
+  URI::getParam(params, "author", &author_filter);
+
+  if (author_filter == "all") {
+    owner_filter.clear();
+  }
+
+  if (author_filter == "self") {
+    owner_filter = session.userid();
+  }
+
   /* scan documents */
   Buffer buf;
   json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
@@ -316,6 +340,9 @@ void DocumentDBServlet::listDocuments(
       [&] (const Document& doc) -> bool {
     if (isDocumentReadableForUser(doc, session.userid())) {
       ++num_docs_total;
+    }
+
+    if (isDocumentAuthoredByUser(doc, session.userid())) {
       ++num_docs_user;
     }
 
@@ -330,6 +357,15 @@ void DocumentDBServlet::listDocuments(
 
     if (!category_prefix_filter.empty() &&
         !StringUtil::beginsWith(doc.category(), category_prefix_filter)) {
+      return true;
+    }
+
+    if (!owner_filter.empty() && !isDocumentOwnedByUser(doc, owner_filter)) {
+      return true;
+    }
+
+    if (!author_filter.empty() &&
+        !isDocumentAuthoredByUser(doc, author_filter)) {
       return true;
     }
 
