@@ -42,6 +42,15 @@ bool isDocumentWritableForUser(const Document& doc, const String& userid) {
   return !acls.isEmpty() && acls.get().allow_write();
 }
 
+bool isDocumentOwnedByUser(const Document& doc, const String& userid) {
+  auto acls = findDocumentACLForUser(doc, userid);
+  return !acls.isEmpty() && acls.get().is_owner();
+}
+
+bool isDocumentAuthoredByUser(const Document& doc, const String& userid) {
+  return isDocumentOwnedByUser(doc, userid);
+}
+
 void setDefaultDocumentACLs(Document* doc, const String& userid) {
   doc->set_acl_policy(ACLPOLICY_PRIVATE);
 
