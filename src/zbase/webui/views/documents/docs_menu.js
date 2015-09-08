@@ -7,7 +7,7 @@ var DocsMenu = function(categories, num_documents) {
         "zbase_documents_menu_main_tpl");
 
     menu = $("z-menu", tpl);
-    $(".num_documents", menu).innerHTML = num_documents;
+    $(".num_documents", menu).innerHTML = toHumanNumber(num_documents);
     categories.forEach(function(c) {
       insertMenuItem([], c.split("~"), menu);
     });
@@ -89,7 +89,18 @@ var DocsMenu = function(categories, num_documents) {
 
       insertMenuItem(path, tail, item);
     }
-  }
+  };
+
+  var toHumanNumber = function(number) {
+    if (number < 1000) {
+      return number;
+    }
+
+    var number_str = number.toString();
+    var hundred_tail = number_str.substr(number_str.length - 3);
+    var head = number_str.substr(0, number_str.length - 3);
+    return head + "," + hundred_tail;
+  };
 
   return {
     render: render,
