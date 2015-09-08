@@ -99,6 +99,16 @@ route {
 }
 
 route {
+  path_prefix: "/a/datastore/tables/"
+  view: "table"
+  require_module: "widgets/zbase-header"
+  require_module: "widgets/zbase-datastore-menu"
+  require_module: "widgets/z-menu"
+  require_module: "widgets/z-table"
+  require_module: "views/table"
+}
+
+route {
   path_match: "/a/datastore/tables"
   view: "datastore_tables"
   require_module: "util/event_source_handler"
