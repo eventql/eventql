@@ -1,5 +1,7 @@
 var ReportSQLWidgetDisplay = function(elem, conf) {
   var query_mgr = EventSourceHandler();
+  var edit_callbacks = [];
+  var delete_callbacks = [];
 
   var loadQuery = function() {
     var tpl = $.getTemplate(
@@ -14,7 +16,24 @@ var ReportSQLWidgetDisplay = function(elem, conf) {
     if (!conf.hasOwnProperty("name")) {
       conf.name = "Unnamed SQL Query";
     }
-    $(".report_widget_title", elem).innerHTML = conf.name;
+    $(".report_widget_title", tpl).innerHTML = conf.name;
+
+
+    $(".zbase_report_widget_header z-dropdown", tpl).addEventListener("change", function() {
+      switch (this.getValue()) {
+        case "edit":
+          triggerEdit();
+          break;
+
+        case "delete":
+          triggerDelete();
+          break;
+
+        case "open_query":
+          openQueryInSQLEditor();
+          break;
+      }
+    }, false);
 
     elem.appendChild(tpl);
 
@@ -35,6 +54,20 @@ var ReportSQLWidgetDisplay = function(elem, conf) {
         renderQueryError(result_pane, e.data);
       }
     });
+  };
+
+  var destroy = function() {
+    if (query_mgr) {
+      query_mgr.closeAll();
+    }
+  };
+
+  var onEdit = function(callback) {
+    edit_callbacks.push(callback);
+  };
+
+  var onDelete = function(callback) {
+    delete_callbacks.push(callback);
   };
 
 
@@ -115,15 +148,53 @@ var ReportSQLWidgetDisplay = function(elem, conf) {
     $.replaceContent(result_pane, error_msg);
   };
 
-  var destroy = function() {
-    if (query_mgr) {
-      query_mgr.closeAll();
-    }
+  var openQueryInSQLEditor = function() {
+    var postdata = $.buildQueryString({
+      name: conf.name,
+      type: "sql_query",
+      content: conf.query
+    });
+    var contentdata = $.buildQueryString({
+      content: conf.query
+    });
+
+    $.showLoader();
+    $.httpPost("/api/v1/documents", postdata, function(r) {
+      if (r.status == 201) {
+        var doc = JSON.parse(r.response);
+
+        $.httpPost("/api/v1/documents/" + doc.uuid, contentdata, function(r) {
+          if (r.status == 201) {
+            $.navigateTo("/a/sql/" + doc.uuid);
+            return;
+          } else {
+            $.fatalError();
+          }
+        });
+      } else {
+        $.fatalError();
+      }
+    });
   };
+
+  var triggerDelete = function() {
+    delete_callbacks.forEach(function(callback) {
+      callback();
+    });
+  };
+
+  var triggerEdit = function() {
+    edit_callbacks.forEach(function(callback) {
+      callback();
+    });
+  };
+
 
   return {
     render: loadQuery,
-    destroy: destroy
+    destroy: destroy,
+    onEdit: onEdit,
+    onDelete: onDelete
   };
 };
 

@@ -76,20 +76,30 @@ ZBase.registerView((function() {
     }
     setReportDescription(description);
 
-    var widgets = [];
-    if (doc.content != null && doc.content.hasOwnProperty("widgets")) {
-      widgets = doc.content.widgets;
-    }
-    widget_list = WidgetList(widgets);
-    widget_list.onWidgetEdit(function(widget_id) {
-      showWidgetEditor(widget_id);
-    });
-
     //setup docsync
     docsync = DocSync(
         getDocument,
         "/api/v1/documents/" + doc.uuid,
         $(".zbase_report_infobar"));
+
+    var widgets = [];
+    if (doc.content != null && doc.content.hasOwnProperty("widgets")) {
+      widgets = doc.content.widgets;
+    }
+
+    widget_list = WidgetList(widgets);
+    widget_list.onWidgetEdit(function(widget_id) {
+      showWidgetEditor(widget_id);
+    });
+
+    widget_list.onWidgetDelete(function() {
+      if (!docsync) {
+        $.fatalError();
+        return;
+      }
+      docsync.saveDocument();
+      showReportView();
+    });
 
 
     if (readonly) {
@@ -118,13 +128,15 @@ ZBase.registerView((function() {
       });
 
       // handle display mode
-      $(".zbase_report_pane z-dropdown.mode").addEventListener("change", setEditable);
+      $(".zbase_report_pane z-dropdown.mode").addEventListener(
+          "change",
+          setEditable);
     }
 
     showReportView();
   };
 
-  var showReportView = function(doc) {
+  var showReportView = function() {
     //showLoader?
     if (edit_view) {
       edit_view.destroy();
@@ -149,6 +161,13 @@ ZBase.registerView((function() {
 
     var conf = widget_list.getWidgetConfig(widget_id);
     var editor = ReportWidgetFactory.getWidgetEditor(conf);
+
+    //switch to edit mode
+    var mode_dropdown = $(".zbase_report_pane z-dropdown.mode");
+    if (mode_dropdown.getValue() != "editing") {
+      mode_dropdown.setValue(["editing"]);
+      setEditable.call(mode_dropdown);
+    }
 
     editor.onSave(function(config) {
       if (!docsync) {
