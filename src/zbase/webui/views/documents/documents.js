@@ -3,12 +3,17 @@ ZBase.registerView((function() {
   var load = function(url) {
     var qparams = {
       with_categories: true,
-      owner: "self"
+      author: "self"
     };
 
     var owner_param = UrlUtil.getParamValue(url, "owner");
     if (owner_param) {
       qparams.owner = owner_param;
+    }
+
+    var author_param = UrlUtil.getParamValue(url, "author");
+    if (author_param) {
+      qparams.author = author_param;
     }
 
     var category_param = UrlUtil.getParamValue(url, "category");
@@ -44,7 +49,7 @@ ZBase.registerView((function() {
     menu.render($(".docs_sidebar", page));
     menu.setActiveMenuItem(
         qparams.category_prefix ? qparams.category_prefix :
-            qparams.owner == "self" ? "my_documents" : "all_documents");
+            qparams.author == "self" ? "my_documents" : "all_documents");
 
     renderDocumentsList(
         page.querySelector(".zbase_documents tbody"),
