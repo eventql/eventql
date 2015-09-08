@@ -41,7 +41,7 @@ ZBase.registerView((function() {
         "views/datastore_tables",
         "zbase_datastore_tables_list_row_tpl");
 
-    var url = "/a/table/" + table.name;
+    var url = "/a/datastore/tables/" + table.name;
 
     var table_name = $(".table_name", elem);
     table_name.innerHTML = table.name;
