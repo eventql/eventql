@@ -28,8 +28,11 @@ var ReportSQLWidgetDisplay = function(elem, conf) {
         case "delete":
           triggerDelete();
           break;
-      }
 
+        case "open_query":
+          openQueryInSQLEditor();
+          break;
+      }
     }, false);
 
     elem.appendChild(tpl);
@@ -145,6 +148,35 @@ var ReportSQLWidgetDisplay = function(elem, conf) {
     $.replaceContent(result_pane, error_msg);
   };
 
+  var openQueryInSQLEditor = function() {
+    var postdata = $.buildQueryString({
+      name: conf.name,
+      type: "sql_query",
+      content: conf.query
+    });
+    var contentdata = $.buildQueryString({
+      content: conf.query
+    });
+
+    $.showLoader();
+    $.httpPost("/api/v1/documents", postdata, function(r) {
+      if (r.status == 201) {
+        var doc = JSON.parse(r.response);
+
+        $.httpPost("/api/v1/documents/" + doc.uuid, contentdata, function(r) {
+          if (r.status == 201) {
+            $.navigateTo("/a/sql/" + doc.uuid);
+            return;
+          } else {
+            $.fatalError();
+          }
+        });
+      } else {
+        $.fatalError();
+      }
+    });
+  };
+
   var triggerDelete = function() {
     delete_callbacks.forEach(function(callback) {
       callback();
@@ -158,7 +190,6 @@ var ReportSQLWidgetDisplay = function(elem, conf) {
   };
 
 
-  
   return {
     render: loadQuery,
     destroy: destroy,
