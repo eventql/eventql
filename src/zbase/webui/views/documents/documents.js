@@ -2,8 +2,14 @@ ZBase.registerView((function() {
 
   var load = function(url) {
     var qparams = {
-      with_categories: true
+      with_categories: true,
+      owner: "self"
     };
+
+    var owner_param = UrlUtil.getParamValue(url, "owner");
+    if (owner_param) {
+      qparams.owner = owner_param;
+    }
 
     var category_param = UrlUtil.getParamValue(url, "category");
     if (category_param) {
@@ -14,6 +20,7 @@ ZBase.registerView((function() {
     if (pstatus_param) {
       qparams.publishing_status = pstatus_param;
     }
+
 
     $.showLoader();
     $.httpGet("/api/v1/documents?" + $.buildQueryString(qparams), function(r) {
@@ -33,10 +40,11 @@ ZBase.registerView((function() {
         "views/documents",
         "zbase_documents_main_tpl");
 
-    var menu = DocsMenu(categories);
+    var menu = DocsMenu(categories, data.num_docs_total, data.num_docs_user);
     menu.render($(".docs_sidebar", page));
     menu.setActiveMenuItem(
-        qparams.category_prefix ? qparams.category_prefix : "all_documents");
+        qparams.category_prefix ? qparams.category_prefix :
+            qparams.owner == "self" ? "my_documents" : "all_documents");
 
     renderDocumentsList(
         page.querySelector(".zbase_documents tbody"),
