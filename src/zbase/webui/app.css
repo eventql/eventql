@@ -526,9 +526,14 @@ zbase-breadcrumbs zbase-breadcrumbs-section[data-link]:hover,
 /**
  * z-menu.zbase_default_menu
  */
-z-menu.zbase_default_menu z-menu-section z-menu-item.link,
+z-menu.zbase_default_menu z-menu-section z-menu-item.link {
+  margin-left: 2px;
+  padding-left: 0;
+}
+
 z-menu.zbase_default_menu z-menu-section z-menu-title {
   margin-left: 0;
+  padding-left: 0;
 }
 
 z-menu.zbase_default_menu z-menu-section z-menu-title,
@@ -544,35 +549,32 @@ z-menu.zbase_default_menu z-menu-section z-menu-item.link {
   padding: 0;
 }
 
+z-menu.zbase_default_menu z-menu-section z-menu-item {
+  border-left: 2px solid #ddd;
+  border-radius: 0;
+}
+
 z-menu.zbase_default_menu z-menu-section z-menu-item a {
   font-size: 109%;
-  color: #666;
+  color: #737373;
   padding: 0 10px;
-  line-height: 34px;
-  font-weight: 500;
+  line-height: 30px;
+  font-weight: 400;
   padding-left: 15px;
 }
 
+z-menu.zbase_default_menu z-menu-section z-menu-item[data-active],
 z-menu.zbase_default_menu z-menu-section z-menu-item:hover {
   background: transparent;
+  border-left: 2px solid #666;
 }
 
 z-menu.zbase_default_menu z-menu-section z-menu-item:hover a {
   color: #000;
 }
 
-z-menu.zbase_default_menu z-menu-section z-menu-item[data-active]:hover a {
-  color: #fff;
-}
-
 z-menu.zbase_default_menu z-menu-item[data-active] {
   box-shadow: none;
-}
-
-z-menu.zbase_default_menu z-menu-item[data-active] a {
-  background: #464646;
-  color: #fff;
-  font-weight: 500;
 }
 
 z-menu.zbase_default_menu z-menu-section {
