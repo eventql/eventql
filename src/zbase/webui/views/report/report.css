@@ -216,13 +216,11 @@
 /** Display Mode **/
 .zbase_report_pane .zbase_report_sidebar .readonly_hint,
 .zbase_report_pane .link.add_widget,
-.zbase_report_pane .zbase_report_widget_edit_actions,
 .zbase_report_pane .link.add_description {
   display: none;
 }
 
 .zbase_report_pane.editable:not(.readonly) .link.add_widget,
-.zbase_report_pane.editable:not(.readonly) .zbase_report_widget_edit_actions,
 .zbase_report_pane.editable:not(.readonly) .link.add_description:not(.hidden) {
   display: block;
 }
@@ -236,8 +234,7 @@
   display: inline-block;
 }
 
-.zbase_report_pane.readonly .hide_when_readonly,
-.zbase_report_pane.readonly .zbase_report_sidebar .writable_report_actions {
+.zbase_report_pane.readonly .hide_when_readonly {
   display: none;
 }
 
