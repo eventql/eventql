@@ -108,7 +108,7 @@ ZBase.registerView((function() {
     $.httpPost("/api/v1/documents", postdata, function(r) {
       if (r.status == 201) {
         var response = JSON.parse(r.response);
-        $.navigateTo(getUrlForDocument(doc_type, response.uuid));
+        $.navigateTo(getUrlForDocument(response));
         return;
       } else {
         $.fatalError();

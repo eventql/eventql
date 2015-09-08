@@ -9,6 +9,7 @@
 - [ ] Map Reduce Support
 - [ ] SQL v0 impl
 - [ ] new Tracking Pixel API
+- [ ] first free-standing complete/complex "app" [maybe docker monitoring because we know it? or the automated marketing campaign manager?]
 
 ### backlog
 
