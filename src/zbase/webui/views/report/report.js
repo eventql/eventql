@@ -128,7 +128,9 @@ ZBase.registerView((function() {
       });
 
       // handle display mode
-      $(".zbase_report_pane z-dropdown.mode").addEventListener("change", setEditable);
+      $(".zbase_report_pane z-dropdown.mode").addEventListener(
+          "change",
+          setEditable);
     }
 
     showReportView();
