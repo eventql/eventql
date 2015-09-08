@@ -1,4 +1,4 @@
-var DocsMenu = function(categories, num_documents) {
+var DocsMenu = function(categories, num_documents_total, num_documents_user) {
   var menu;
 
   var render = function(elem) {
@@ -7,7 +7,8 @@ var DocsMenu = function(categories, num_documents) {
         "zbase_documents_menu_main_tpl");
 
     menu = $("z-menu", tpl);
-    $(".num_documents", menu).innerHTML = toHumanNumber(num_documents);
+    $(".num_documents_total", menu).innerHTML = toHumanNumber(num_documents_total);
+    $(".num_documents_user", menu).innerHTML = toHumanNumber(num_documents_user);
     categories.forEach(function(c) {
       insertMenuItem([], c.split("~"), menu);
     });

@@ -33,10 +33,10 @@ ZBase.registerView((function() {
         "views/documents",
         "zbase_documents_main_tpl");
 
-    var menu = DocsMenu(categories, documents.length);
+    var menu = DocsMenu(categories, data.num_docs_total, data.num_docs_user);
     menu.render($(".docs_sidebar", page));
     menu.setActiveMenuItem(
-        qparams.category_prefix ? qparams.category_prefix : "all_documents");
+        qparams.category_prefix ? qparams.category_prefix : "my_documents");
 
     renderDocumentsList(
         page.querySelector(".zbase_documents tbody"),
