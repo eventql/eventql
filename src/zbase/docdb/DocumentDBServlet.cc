@@ -307,11 +307,18 @@ void DocumentDBServlet::listDocuments(
   json.addObjectEntry("documents");
   json.beginArray();
 
-  size_t i = 0;
+  size_t num_docs = 0;
+  size_t num_docs_total = 0;
+  size_t num_docs_user = 0;
   docdb_->listDocuments(
       session.customer(),
       session.userid(),
       [&] (const Document& doc) -> bool {
+    if (isDocumentReadableForUser(doc, session.userid())) {
+      ++num_docs_total;
+      ++num_docs_user;
+    }
+
     if (!doc.category().empty()) {
       categories.emplace(doc.category());
     }
@@ -326,7 +333,7 @@ void DocumentDBServlet::listDocuments(
       return true;
     }
 
-    if (++i > 1) {
+    if (++num_docs > 1) {
       json.addComma();
     }
 
@@ -340,6 +347,18 @@ void DocumentDBServlet::listDocuments(
   });
 
   json.endArray();
+  json.addComma();
+
+  json.addObjectEntry("num_docs");
+  json.addInteger(num_docs);
+  json.addComma();
+
+  json.addObjectEntry("num_docs_total");
+  json.addInteger(num_docs_total);
+  json.addComma();
+
+  json.addObjectEntry("num_docs_user");
+  json.addInteger(num_docs_user);
 
   if (return_categories) {
     json.addComma();
