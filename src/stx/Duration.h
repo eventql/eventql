@@ -22,18 +22,6 @@ namespace stx {
 
 class Duration {
 public:
-  static constexpr const uint64_t MicrosPerSecond = 1000000;
-  static constexpr const uint64_t MillisPerSecond = 1000;
-  static constexpr const uint64_t SecondsPerMinute = 60;
-  static constexpr const uint64_t MinutesPerHour = 60;
-  static constexpr const uint64_t SecondsPerHour = SecondsPerMinute * MinutesPerHour;
-  static constexpr const uint64_t MillisPerHour = SecondsPerHour * MillisPerSecond;
-  static constexpr const uint64_t MicrosPerHour = SecondsPerHour * MicrosPerSecond;
-  static constexpr const uint64_t HoursPerDay = 24;
-  static constexpr const uint64_t SecondsPerDay = SecondsPerHour * HoursPerDay;
-  static constexpr const uint64_t MillisPerDay = SecondsPerDay * MillisPerSecond;
-  static constexpr const uint64_t MicrosPerDay = SecondsPerDay * MicrosPerSecond;
-
   /**
    * Create a new Duration
    *
