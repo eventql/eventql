@@ -1,13 +1,39 @@
 <template id="zbase_report_sql_widget_main_tpl">
-  <div class="zbase_report_sql_result_pane">
-    <div class="zbase_loader">
-      <div class="spinner_outer">
-        <div class="spinner">
-          <div class="rect1"></div>
-          <div class="rect2"></div>
-          <div class="rect3"></div>
-          <div class="rect4"></div>
-          <div class="rect5"></div>
+  <div class="zbase_report_widget">
+    <div class="zbase_report_widget_header">
+      <div class="zbase_report_widget_edit_actions">
+        <z-dropdown class="edit" data-resolved data-hover>
+          <z-dropdown-header>
+            <z-dropdown-header-value data-static>
+              <i class="fa fa-circle"></i>
+              <i class="fa fa-circle"></i>
+              <i class="fa fa-circle"></i>
+            </z-dropdown-header-value>
+            <z-dropdown-header-icon></z-dropdown-header-icon>
+          </z-dropdown-header>
+          <z-dropdown-flyout>
+            <z-dropdown-items>
+              <z-dropdown-item data-value='edit' class="hide_when_readonly">Edit</z-dropdown-item>
+              <z-dropdown-item data-value='open_query'>Open in SQL Editor</z-dropdown-item>
+              <z-dropdown-item data-value='delete' class="hide_when_readonly">Remove</z-dropdown-item>
+            </z-dropdown-items>
+          </z-dropdown-flyout>
+        </z-dropdown>
+      </div>
+
+      <h2 class="pagetitle report_widget_title"></h2>
+    </div>
+
+    <div class="zbase_report_sql_result_pane">
+      <div class="zbase_loader">
+        <div class="spinner_outer">
+          <div class="spinner">
+            <div class="rect1"></div>
+            <div class="rect2"></div>
+            <div class="rect3"></div>
+            <div class="rect4"></div>
+            <div class="rect5"></div>
+          </div>
         </div>
       </div>
     </div>
