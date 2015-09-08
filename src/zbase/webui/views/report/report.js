@@ -108,9 +108,9 @@ ZBase.registerView((function() {
           $.fatalError();
           return;
         }
-        widget_list.addNewEmptyWidget(widget_type);
+        var widget_id = widget_list.addNewEmptyWidget(widget_type);
         docsync.saveDocument();
-        showReportView();
+        showWidgetEditor(widget_id);
         $.hideLoader();
       });
       $.onClick($(".zbase_report_pane .link.add_widget"), function() {

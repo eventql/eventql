@@ -107,11 +107,14 @@ var WidgetList = function(widget_definitions) {
 
   //widget already loaded
   var addNewEmptyWidget = function(widget_type) {
+    var widget_conf = ReportWidgetFactory.getWidgetDisplayInitialConf(widget_type);
     widgets.push({
-      conf: ReportWidgetFactory.getWidgetDisplayInitialConf(widget_type),
+      conf: widget_conf,
       container: null,
       display_obj: null
     });
+
+    return widget_conf.uuid;
   };
 
   var setEditable = function(is_editable) {
