@@ -2,6 +2,7 @@ var WidgetList = function(widget_definitions) {
   var elem;
   var widgets = [];
   var widget_edit_callbacks = [];
+  var widget_delete_callbacks = [];
 
   widget_definitions.forEach(function(conf) {
     widgets.push({
@@ -18,19 +19,22 @@ var WidgetList = function(widget_definitions) {
         widget.display_obj.destroy();
       }
 
-      widget.container = $(
-          ".zbase_report_widget",
-          $.getTemplate(
-              "views/report",
-              "zbase_report_widget_main_tpl"));
+      widget.container = $.getTemplate(
+          "views/report",
+          "zbase_report_widget_main_tpl");
 
       widget.display_obj = ReportWidgetFactory.renderWidgetDisplay(
           widget.conf.type,
           widget.container,
           widget.conf);
 
-      $.onClick($(".zbase_report_widget_header .edit", widget.container), function() {
+      widget.display_obj.onEdit(function() {
         triggerWidgetEdit(widget.conf.uuid);
+      });
+
+      widget.display_obj.onDelete(function() {
+        destroyWidget(widget.conf.uuid);
+        triggerWidgetDelete()
       });
 
       elem.appendChild(widget.container);
@@ -107,11 +111,14 @@ var WidgetList = function(widget_definitions) {
 
   //widget already loaded
   var addNewEmptyWidget = function(widget_type) {
+    var widget_conf = ReportWidgetFactory.getWidgetDisplayInitialConf(widget_type);
     widgets.push({
-      conf: ReportWidgetFactory.getWidgetDisplayInitialConf(widget_type),
+      conf: widget_conf,
       container: null,
       display_obj: null
     });
+
+    return widget_conf.uuid;
   };
 
   var setEditable = function(is_editable) {
@@ -120,6 +127,10 @@ var WidgetList = function(widget_definitions) {
 
   var onWidgetEdit = function(callback) {
     widget_edit_callbacks.push(callback);
+  };
+
+  var onWidgetDelete = function(callback) {
+    widget_delete_callbacks.push(callback);
   };
 
 
@@ -169,6 +180,12 @@ var WidgetList = function(widget_definitions) {
     });
   };
 
+  var triggerWidgetDelete = function() {
+    widget_delete_callbacks.forEach(function(callback) {
+      callback();
+    });
+  };
+
   //TODO unrender
 
   return {
@@ -180,6 +197,7 @@ var WidgetList = function(widget_definitions) {
     addNewEmptyWidget: addNewEmptyWidget,
     setEditable: setEditable,
     onWidgetEdit: onWidgetEdit,
+    onWidgetDelete: onWidgetDelete,
     destroy: destroy
   }
 };
