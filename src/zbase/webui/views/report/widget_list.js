@@ -19,30 +19,22 @@ var WidgetList = function(widget_definitions) {
         widget.display_obj.destroy();
       }
 
-      widget.container = $(
-          ".zbase_report_widget",
-          $.getTemplate(
-              "views/report",
-              "zbase_report_widget_main_tpl"));
+      widget.container = $.getTemplate(
+          "views/report",
+          "zbase_report_widget_main_tpl");
 
       widget.display_obj = ReportWidgetFactory.renderWidgetDisplay(
           widget.conf.type,
           widget.container,
           widget.conf);
 
-      //handle edit/remove
-      var dropdown = $(".zbase_report_widget_header z-dropdown", widget.container);
-      dropdown.addEventListener("change", function() {
-        switch (this.getValue()) {
-          case "edit":
-            triggerWidgetEdit(widget.conf.uuid);
-            break;
+      widget.display_obj.onEdit(function() {
+        triggerWidgetEdit(widget.conf.uuid);
+      });
 
-          case "delete":
-            destroyWidget(widget.conf.uuid);
-            triggerWidgetDelete();
-            break;
-        }
+      widget.display_obj.onDelete(function() {
+        destroyWidget(widget.conf.uuid);
+        triggerWidgetDelete()
       });
 
       elem.appendChild(widget.container);
