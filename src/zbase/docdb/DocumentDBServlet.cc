@@ -316,11 +316,11 @@ void DocumentDBServlet::listDocuments(
   URI::getParam(params, "author", &author_filter);
 
   if (author_filter == "all") {
-    owner_filter.clear();
+    author_filter.clear();
   }
 
   if (author_filter == "self") {
-    owner_filter = session.userid();
+    author_filter = session.userid();
   }
 
   /* scan documents */
