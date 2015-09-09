@@ -7,11 +7,11 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-#include <cortex-base/executor/DirectExecutor.h>
-#include <cortex-base/logging.h>
+#include <stx/executor/DirectExecutor.h>
+#include <stx/logging.h>
 #include <stdio.h>
 
-namespace cortex {
+namespace stx {
 
 #ifndef NDEBUG
 #define TRACE(msg...) logTrace("executor.DirectExecutor", msg)
@@ -55,4 +55,4 @@ std::string DirectExecutor::toString() const {
   return buf;
 }
 
-} // namespace cortex
+} // namespace stx

@@ -7,14 +7,14 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-#include <cortex-base/executor/ThreadPool.h>
-#include <cortex-base/executor/PosixScheduler.h>
-#include <cortex-base/thread/Wakeup.h>
-#include <cortex-base/RuntimeError.h>
-#include <cortex-base/WallClock.h>
-#include <cortex-base/DateTime.h>
-#include <cortex-base/logging.h>
-#include <cortex-base/sysconfig.h>
+#include <stx/executor/ThreadPool.h>
+#include <stx/executor/PosixScheduler.h>
+#include <stx/thread/Wakeup.h>
+#include <stx/RuntimeError.h>
+#include <stx/WallClock.h>
+#include <stx/DateTime.h>
+#include <stx/logging.h>
+#include <stx/sysconfig.h>
 #include <system_error>
 #include <thread>
 #include <exception>
@@ -24,7 +24,7 @@
 #include <unistd.h>
 #endif
 
-namespace cortex {
+namespace stx {
 
 #define ERROR(msg...) logError("ThreadPool", msg)
 
@@ -148,49 +148,49 @@ void ThreadPool::execute(Task task) {
   condition_.notify_all();
 }
 
-ThreadPool::HandleRef ThreadPool::executeOnReadable(int fd, Task task) {
-  HandleRef hr(new Handle(task, nullptr));
+ThreadPool::HandleRef ThreadPool::executeOnReadable(int fd, Task task, Duration tmo, Task tcb) {
+  HandleRef hr(new Handle(nullptr));
   activeReaders_++;
-  execute([this, hr, fd] {
+  execute([this, task, hr, fd] {
     PosixScheduler::waitForReadable(fd);
-    hr->fire();
+    safeCall([&] { hr->fire(task); });
     activeReaders_--;
   });
   return nullptr;
 }
 
-ThreadPool::HandleRef ThreadPool::executeOnWritable(int fd, Task task) {
-  HandleRef hr(new Handle(task, nullptr));
+ThreadPool::HandleRef ThreadPool::executeOnWritable(int fd, Task task, Duration tmo, Task tcb) {
+  HandleRef hr(new Handle(nullptr));
   activeWriters_++;
-  execute([this, hr, fd] {
+  execute([this, task, hr, fd] {
     PosixScheduler::waitForWritable(fd);
-    hr->fire();
+    safeCall([&] { hr->fire(task); });
     activeWriters_--;
   });
   return hr;
 }
 
-ThreadPool::HandleRef ThreadPool::executeAfter(TimeSpan delay, Task task) {
-  HandleRef hr(new Handle(task, nullptr));
+ThreadPool::HandleRef ThreadPool::executeAfter(Duration delay, Task task) {
+  HandleRef hr(new Handle(nullptr));
   activeTimers_++;
-  execute([this, hr, delay] {
+  execute([this, task, hr, delay] {
     WallClock::sleep(delay);
-    hr->fire();
+    safeCall([&] { hr->fire(task); });
     activeTimers_--;
   });
   return hr;
 }
 
 ThreadPool::HandleRef ThreadPool::executeAt(DateTime dt, Task task) {
-  HandleRef hr(new Handle(task, nullptr));
+  HandleRef hr(new Handle(nullptr));
   activeTimers_++;
-  execute([this, hr, dt] {
+  execute([this, task, hr, dt] {
     DateTime now = WallClock::system()->get();
     if (dt > now) {
-      TimeSpan delay = dt - now;
+      Duration delay = dt - now;
       WallClock::sleep(delay);
     }
-    hr->fire();
+    safeCall([&] { hr->fire(task); });
     activeTimers_--;
   });
   return hr;
@@ -254,4 +254,4 @@ std::string ThreadPool::toString() const {
   return std::string(buf, n);
 }
 
-} // namespace cortex
+} // namespace stx

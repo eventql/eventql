@@ -1,4 +1,4 @@
-// This file is part of the "libcortex" project
+// This file is part of the "libstx" project
 //   (c) 2009-2015 Christian Parpart <https://github.com/christianparpart>
 //   (c) 2014-2015 Paul Asmuth <https://github.com/paulasmuth>
 //
@@ -9,58 +9,55 @@
 
 #pragma once
 
-#include <cortex-base/Api.h>
-#include <cortex-base/TimeSpan.h>
-#include <cortex-base/DateTime.h>
-#include <cortex-base/executor/Executor.h>
+#include <stx/Duration.h>
+#include <stx/MonotonicTime.h>
+#include <stx/UnixTime.h>
+#include <stx/RefCounted.h>
+#include <stx/RefPtr.h>
+#include <stx/executor/Executor.h>
 #include <vector>
 #include <functional>
 #include <memory>
 #include <mutex>
 #include <atomic>
 
-namespace cortex {
+namespace stx {
 
 class Wakeup;
 
 /**
  * Interface for scheduling tasks.
  */
-class CORTEX_API Scheduler : public Executor {
+class Scheduler : public Executor {
  public:
-  /**
-   * It basically supports 2 actions, fire and cancellation.
-   */
-  class CORTEX_API Handle {
+  struct Handle : public RefCounted { // {{{
    public:
-    Handle(Task onFire, std::function<void(Handle*)> onCancel);
+    Handle()
+        : Handle(nullptr) {}
 
-    /** Tests if the interest behind this handle was cancelled already. */
-    bool isCancelled() const { return isCancelled_.load(); }
+    explicit Handle(Task onCancel)
+        : mutex_(),
+          isCancelled_(false),
+          onCancel_(onCancel) {}
 
-    /**
-     * Cancels the interest, causing the callback not to be fired.
-     */
+    bool isCancelled() const;
+
     void cancel();
+    void fire(Task task);
 
-    /**
-     * This method is invoked internally when the given intended event fired.
-     *
-     * Do not use this explicitely unless your code can deal with it.
-     *
-     * This method will not invoke the fire-callback if @c cancel() was invoked
-     * already.
-     */
-    void fire();
+    void reset(Task onCancel);
+
+    void setCancelHandler(Task task);
 
    private:
     std::mutex mutex_;
-    Task onFire_;
-    std::function<void(Handle*)> onCancel_;
     std::atomic<bool> isCancelled_;
-  };
+    Task onCancel_;
+  }; // }}}
 
-  typedef std::shared_ptr<Handle> HandleRef;
+  typedef RefPtr<Handle> HandleRef;
+  //typedef std::shared_ptr<Handle> HandleRef;
+  //typedef Handle* HandleRef;
 
   Scheduler(std::function<void(const std::exception&)> eh)
       : Executor(eh) {}
@@ -71,22 +68,54 @@ class CORTEX_API Scheduler : public Executor {
    * @param task the actual task to be executed.
    * @param delay the timespan to wait before actually executing the task.
    */
-  virtual HandleRef executeAfter(TimeSpan delay, Task task) = 0;
+  virtual HandleRef executeAfter(Duration delay, Task task) = 0;
 
   /**
    * Runs given task at given time.
    */
-  virtual HandleRef executeAt(DateTime dt, Task task) = 0;
+  virtual HandleRef executeAt(UnixTime ts, Task task) = 0;
 
   /**
    * Runs given task when given selectable is non-blocking readable.
+   *
+   * @param fd file descriptor to watch for non-blocking readability.
+   * @param task Task to execute upon given event.
+   * @param timeout timeout to wait for readability. When the timeout is hit
+   *                and no readable-event was generated yet, an
+   *                the task isstill fired but fd will raise with ETIMEDOUT.
    */
-  virtual HandleRef executeOnReadable(int fd, Task task) = 0;
+  virtual HandleRef executeOnReadable(
+      int fd, Task task,
+      Duration timeout, Task onTimeout) = 0;
+
+  /**
+   * Runs given task when given selectable is non-blocking readable.
+   *
+   * @param fd file descriptor to watch for non-blocking readability.
+   * @param task Task to execute upon given event.
+   */
+  HandleRef executeOnReadable(int fd, Task task);
 
   /**
    * Runs given task when given selectable is non-blocking writable.
+   *
+   * @param fd file descriptor to watch for non-blocking readability.
+   * @param task Task to execute upon given event.
+   * @param timeout timeout to wait for readability. When the timeout is hit
+   *                and no readable-event was generated yet, an
+   *                the task isstill fired but fd will raise with ETIMEDOUT.
    */
-  virtual HandleRef executeOnWritable(int fd, Task task) = 0;
+  virtual HandleRef executeOnWritable(
+      int fd, Task task,
+      Duration timeout, Task onTimeout) = 0;
+
+  /**
+   * Runs given task when given selectable is non-blocking writable.
+   *
+   * @param fd file descriptor to watch for non-blocking readability.
+   * @param task Task to execute upon given event.
+   */
+  HandleRef executeOnWritable(int fd, Task task);
 
   /**
    * Executes @p task  when given @p wakeup triggered a wakeup event
@@ -111,8 +140,8 @@ class CORTEX_API Scheduler : public Executor {
   /**
    * Retrieves the number of active timers.
    *
-   * @see executeAt(DateTime dt, Task task)
-   * @see executeAfter(TimeSpan ts, Task task)
+   * @see executeAt(UnixTime dt, Task task)
+   * @see executeAfter(Duration ts, Task task)
    */
   virtual size_t timerCount() = 0;
 
@@ -154,17 +183,14 @@ class CORTEX_API Scheduler : public Executor {
   virtual void breakLoop() = 0;
 
  protected:
-  void safeCallEach(std::vector<HandleRef>& handles) {
-    for (HandleRef& handle: handles)
-      safeCall(std::bind(&Handle::fire, handle));
-  }
-
-  void safeCallEach(const std::deque<Task>& tasks) {
+  template<typename Container>
+  void safeCallEach(const Container& tasks) {
     for (Task task: tasks) {
       safeCall(task);
     }
   }
-
 };
 
-}  // namespace cortex
+}  // namespace stx
+
+#include <stx/executor/Scheduler-inl.h>

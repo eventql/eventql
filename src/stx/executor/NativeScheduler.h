@@ -9,10 +9,10 @@
 
 #pragma once
 
-#include <cortex-base/sysconfig.h>
-#include <cortex-base/executor/PosixScheduler.h>
+#include <stx/sysconfig.h>
+#include <stx/executor/PosixScheduler.h>
 
-namespace cortex {
+namespace stx {
 
 #if defined(__linux__)
 // TODO using NativeScheduler = LinuxScheduler;
@@ -21,5 +21,5 @@ using NativeScheduler = PosixScheduler;
 using NativeScheduler = PosixScheduler;
 #endif
 
-} // namespace cortex
+} // namespace stx
 

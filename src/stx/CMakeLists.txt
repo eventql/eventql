@@ -150,6 +150,13 @@ add_library(stx-base STATIC
     Duration.cc
     exception.cc
     exceptionhandler.cc
+    executor/SafeCall.cc
+    executor/Executor.cc
+    executor/DirectExecutor.cc
+    executor/PosixScheduler.cc
+    executor/Scheduler.cc
+    executor/ThreadedExecutor.cc
+    executor/ThreadPool.cc
     fnv.cc
     HMAC.cc
     human.cc

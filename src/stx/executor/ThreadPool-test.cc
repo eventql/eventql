@@ -7,8 +7,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-#include <cortex-base/executor/ThreadPool.h>
-#include <cortex-base/DateTime.h>
+#include <stx/executor/ThreadPool.h>
+#include <stx/DateTime.h>
 #include <chrono>
 #include <gtest/gtest.h>
 

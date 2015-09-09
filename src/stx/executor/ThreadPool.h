@@ -9,21 +9,20 @@
 
 #pragma once
 
-#include <cortex-base/Api.h>
-#include <cortex-base/sysconfig.h>
-#include <cortex-base/executor/Scheduler.h>
+#include <stx/sysconfig.h>
+#include <stx/executor/Scheduler.h>
 #include <condition_variable>
 #include <mutex>
 #include <thread>
 #include <atomic>
 #include <deque>
 
-namespace cortex {
+namespace stx {
 
 /**
  * Standard thread-safe thread pool.
  */
-class CORTEX_API ThreadPool : public Scheduler {
+class ThreadPool : public Scheduler {
  public:
   /**
    * Initializes this thread pool as many threads as CPU cores are available.
@@ -74,10 +73,10 @@ class CORTEX_API ThreadPool : public Scheduler {
 
   // overrides
   void execute(Task task) override;
-  HandleRef executeAfter(TimeSpan delay, Task task) override;
+  HandleRef executeAfter(Duration delay, Task task) override;
   HandleRef executeAt(DateTime dt, Task task) override;
-  HandleRef executeOnReadable(int fd, Task task) override;
-  HandleRef executeOnWritable(int fd, Task task) override;
+  HandleRef executeOnReadable(int fd, Task task, Duration tmo, Task tcb) override;
+  HandleRef executeOnWritable(int fd, Task task, Duration tmo, Task tcb) override;
   void executeOnWakeup(Task task, Wakeup* wakeup, long generation) override;
   size_t timerCount() override;
   size_t readerCount() override;
@@ -103,4 +102,4 @@ class CORTEX_API ThreadPool : public Scheduler {
   std::atomic<size_t> activeWriters_;
 };
 
-} // namespace cortex
+} // namespace stx

@@ -7,9 +7,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-#include <cortex-base/executor/Executor.h>
+#include <stx/executor/Executor.h>
 
-namespace cortex {
+namespace stx {
 
 Executor::Executor(std::function<void(const std::exception&)> eh)
     : SafeCall(eh) {
@@ -18,4 +18,4 @@ Executor::Executor(std::function<void(const std::exception&)> eh)
 Executor::~Executor() {
 }
 
-} // namespace cortex
+} // namespace stx

@@ -7,14 +7,16 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-#include <cortex-base/executor/SafeCall.h>
-#include <cortex-base/RuntimeError.h>
+#include <stx/executor/SafeCall.h>
+#include <stx/logging.h>
+#include <stx/exceptionhandler.h>
 #include <exception>
 
-namespace cortex {
+namespace stx {
 
 SafeCall::SafeCall()
-    : SafeCall(std::bind(&logAndPass, std::placeholders::_1)) {
+    : SafeCall(std::bind(CatchAndLogExceptionHandler("SafeCall"),
+                         std::placeholders::_1)) {
 }
 
 SafeCall::SafeCall(std::function<void(const std::exception&)> eh)
@@ -27,7 +29,7 @@ void SafeCall::setExceptionHandler(
   exceptionHandler_ = eh;
 }
 
-void SafeCall::safeCall(std::function<void()> task) CORTEX_NOEXCEPT {
+void SafeCall::safeCall(std::function<void()> task) noexcept {
   try {
     if (task) {
       task();
@@ -38,7 +40,7 @@ void SafeCall::safeCall(std::function<void()> task) CORTEX_NOEXCEPT {
   }
 }
 
-void SafeCall::handleException(const std::exception& e) CORTEX_NOEXCEPT {
+void SafeCall::handleException(const std::exception& e) noexcept {
   if (exceptionHandler_) {
     try {
       exceptionHandler_(e);
@@ -47,4 +49,4 @@ void SafeCall::handleException(const std::exception& e) CORTEX_NOEXCEPT {
   }
 }
 
-} // namespace cortex
+} // namespace stx

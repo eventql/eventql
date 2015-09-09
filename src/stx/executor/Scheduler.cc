@@ -7,36 +7,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-#include <cortex-base/executor/Scheduler.h>
-#include <cortex-base/thread/Wakeup.h>
+#include <stx/executor/Scheduler.h>
+#include <stx/thread/Wakeup.h>
 
-namespace cortex {
-
-Scheduler::Handle::Handle(Task onFire, std::function<void(Handle*)> onCancel)
-    : mutex_(),
-      onFire_(onFire),
-      onCancel_(onCancel),
-      isCancelled_(false) {
-}
-
-void Scheduler::Handle::cancel() {
-  std::lock_guard<std::mutex> lk(mutex_);
-
-  isCancelled_.store(true);
-
-  if (onCancel_) {
-    auto cancelThat = std::move(onCancel_);
-    cancelThat(this);
-  }
-}
-
-void Scheduler::Handle::fire() {
-  std::lock_guard<std::mutex> lk(mutex_);
-
-  if (!isCancelled_.load()) {
-    onFire_();
-  }
-}
+namespace stx {
 
 /**
  * Run the provided task when the wakeup handle is woken up
@@ -52,4 +26,4 @@ void Scheduler::executeOnFirstWakeup(Task task, Wakeup* wakeup) {
   executeOnWakeup(task, wakeup, 0);
 }
 
-}  // namespace cortex
+}  // namespace stx
