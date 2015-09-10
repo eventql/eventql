@@ -8,7 +8,6 @@
  */
 package zbase;
 
-
 /**
  * Describes the ACL policy used for a document.
  *
@@ -27,6 +26,11 @@ enum DocumentACLPolicy {
   ACLPOLICY_PRIVATE = 1;
   ACLPOLICY_PUBLIC_ORGANIZATION = 2;
   ACLPOLICY_PUBLIC_INTERNET = 3;
+};
+
+enum DocumentPublishingStatus {
+  PUBSTATUS_DRAFT = 1;
+  PUBSTATUS_PUBLISHED = 2;
 };
 
 message DocumentACL {
@@ -65,11 +69,15 @@ message Document {
 
   optional uint64 atime = 7;
 
+  optional bool deleted = 14;
+
   required DocumentACLPolicy acl_policy = 8;
 
   repeated DocumentACL acls = 9;
 
-  repeated DocumentReference references = 10;
+  optional DocumentPublishingStatus publishing_status = 12;
+
+  optional string category = 13;
 
   optional bytes content = 11;
 

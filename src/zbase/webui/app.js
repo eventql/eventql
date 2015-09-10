@@ -79,7 +79,13 @@ var ZBase = (function() {
     views[view.name] = view;
   };
 
-  var findRoute = function(path) {
+  var findRoute = function(full_path) {
+    var path = full_path;
+    var end = path.indexOf("?");
+    if (end >= 0) {
+      path = path.substring(0, end);
+    }
+
     for (var i = 0; i < config.routes.length; i++) {
       if (config.routes[i].path_prefix &&
           path.indexOf(config.routes[i].path_prefix) == 0) {
@@ -140,7 +146,8 @@ var ZBase = (function() {
 
     var route = findRoute(path);
     if (route == null) {
-      if (path.indexOf("/a/") == 0) {
+      if (path.indexOf("/a/") == 0 &&
+          path.indexOf("/a/dashboards/") == -1 /* HACK remove me once dashboard migration finished */) {
         navigateTo(config.default_route);
       } else {
         window.location.href = path;
@@ -503,6 +510,18 @@ $.escapeHTML = function(str) {
   var div = document.createElement('div');
   div.appendChild(document.createTextNode(str));
   return div.innerHTML;
+};
+
+$.nl2br = function(str) {
+  return str.replace(/\n/g, "<br />");
+};
+
+$.nl2p = function(str) {
+  var lines = str.split("\n\n");
+
+  return lines.map(function(s) {
+    return "<p>" + s.replace(/\n/g, "<br />")  + "</p>";
+  }).join("\n");
 };
 
 $.wrapText = function(str) {

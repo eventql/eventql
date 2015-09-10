@@ -7,6 +7,7 @@
  * permission is obtained.
  */
 #include "DocumentDBServlet.h"
+#include "stx/human.h"
 
 using namespace stx;
 
@@ -171,6 +172,20 @@ void DocumentDBServlet::updateDocument(
       continue;
     }
 
+    if (p.first == "category") {
+      if (!p.second.empty()) {
+        tx.emplace_back([this, &session, &uuid, p] () {
+          docdb_->updateDocumentCategory(
+              session.customer(),
+              session.userid(),
+              uuid,
+              p.second);
+        });
+      }
+
+      continue;
+    }
+
     if (p.first == "acl_policy") {
       if (!p.second.empty()) {
         DocumentACLPolicy policy;
@@ -192,6 +207,51 @@ void DocumentDBServlet::updateDocument(
       continue;
     }
 
+    if (p.first == "publishing_status") {
+      if (!p.second.empty()) {
+        DocumentPublishingStatus pstatus;
+        if (!DocumentPublishingStatus_Parse(p.second, &pstatus)) {
+          res->setStatus(http::kStatusBadRequest);
+          res->addBody(
+              StringUtil::format("invalid publishing status: '$0'", p.second));
+          return;
+        }
+
+        tx.emplace_back([this, &session, &uuid, pstatus] () {
+          docdb_->updateDocumentPublishingStatus(
+              session.customer(),
+              session.userid(),
+              uuid,
+              pstatus);
+        });
+      }
+
+      continue;
+    }
+
+    if (p.first == "deleted") {
+      if (!p.second.empty()) {
+        auto deleted = Human::parseBoolean(p.second);
+        if (deleted.isEmpty()) {
+          res->setStatus(http::kStatusBadRequest);
+          res->addBody(
+              StringUtil::format("invalid deleted status: '$0'", p.second));
+          return;
+        }
+
+        tx.emplace_back([this, &session, &uuid, deleted] () {
+          docdb_->updateDocumentDeletedStatus(
+              session.customer(),
+              session.userid(),
+              uuid,
+              deleted.get());
+        });
+      }
+
+      continue;
+    }
+
+
     res->setStatus(http::kStatusBadRequest);
     res->addBody(StringUtil::format("invalid parameter: '$0'", p.first));
     return;
@@ -208,6 +268,62 @@ void DocumentDBServlet::listDocuments(
     const AnalyticsSession& session,
     const http::HTTPRequest* req,
     http::HTTPResponse* res) {
+  URI uri(req->uri());
+  const auto& params = uri.queryParams();
+
+  /* param: with_categories */
+  Set<String> categories;
+  bool return_categories = false;
+  String with_categories_str;
+  if (URI::getParam(params, "with_categories", &with_categories_str)) {
+    return_categories = true;
+  }
+
+  /* param: publishing_status */
+  Option<DocumentPublishingStatus> pstatus_filter;
+  String pstatus_filter_str;
+  if (URI::getParam(params, "publishing_status", &pstatus_filter_str)) {
+    DocumentPublishingStatus pstatus;
+    if (!DocumentPublishingStatus_Parse(pstatus_filter_str, &pstatus)) {
+      res->setStatus(http::kStatusBadRequest);
+      res->addBody(StringUtil::format(
+          "invalid publishing status: '$0'",
+          pstatus_filter_str));
+      return;
+    }
+
+    pstatus_filter = Some(pstatus);
+  }
+
+  /* param: category_prefix */
+  String category_prefix_filter;
+  URI::getParam(params, "category_prefix", &category_prefix_filter);
+
+  /* param: owner */
+  String owner_filter;
+  URI::getParam(params, "owner", &owner_filter);
+
+  if (owner_filter == "all") {
+    owner_filter.clear();
+  }
+
+  if (owner_filter == "self") {
+    owner_filter = session.userid();
+  }
+
+  /* param: author */
+  String author_filter;
+  URI::getParam(params, "author", &author_filter);
+
+  if (author_filter == "all") {
+    author_filter.clear();
+  }
+
+  if (author_filter == "self") {
+    author_filter = session.userid();
+  }
+
+  /* scan documents */
   Buffer buf;
   json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
 
@@ -215,12 +331,45 @@ void DocumentDBServlet::listDocuments(
   json.addObjectEntry("documents");
   json.beginArray();
 
-  size_t i = 0;
+  size_t num_docs = 0;
+  size_t num_docs_total = 0;
+  size_t num_docs_user = 0;
   docdb_->listDocuments(
       session.customer(),
       session.userid(),
-      [this, &i, &json, &session] (const Document& doc) -> bool {
-    if (++i > 1) {
+      [&] (const Document& doc) -> bool {
+    if (isDocumentReadableForUser(doc, session.userid())) {
+      ++num_docs_total;
+    }
+
+    if (isDocumentAuthoredByUser(doc, session.userid())) {
+      ++num_docs_user;
+    }
+
+    if (!doc.category().empty()) {
+      categories.emplace(doc.category());
+    }
+
+    if (!pstatus_filter.isEmpty() &&
+        doc.publishing_status() != pstatus_filter.get()) {
+      return true;
+    }
+
+    if (!category_prefix_filter.empty() &&
+        !StringUtil::beginsWith(doc.category(), category_prefix_filter)) {
+      return true;
+    }
+
+    if (!owner_filter.empty() && !isDocumentOwnedByUser(doc, owner_filter)) {
+      return true;
+    }
+
+    if (!author_filter.empty() &&
+        !isDocumentAuthoredByUser(doc, author_filter)) {
+      return true;
+    }
+
+    if (++num_docs > 1) {
       json.addComma();
     }
 
@@ -234,6 +383,25 @@ void DocumentDBServlet::listDocuments(
   });
 
   json.endArray();
+  json.addComma();
+
+  json.addObjectEntry("num_docs");
+  json.addInteger(num_docs);
+  json.addComma();
+
+  json.addObjectEntry("num_docs_total");
+  json.addInteger(num_docs_total);
+  json.addComma();
+
+  json.addObjectEntry("num_docs_user");
+  json.addInteger(num_docs_user);
+
+  if (return_categories) {
+    json.addComma();
+    json.addObjectEntry("categories");
+    json::toJSON(categories, &json);
+  }
+
   json.endObject();
 
   res->setStatus(http::kStatusOK);
@@ -260,6 +428,14 @@ void DocumentDBServlet::renderDocument(
   json->addString(doc.type());
   json->addComma();
 
+  json->addObjectEntry("publishing_status");
+  json->addString(DocumentPublishingStatus_Name(doc.publishing_status()));
+  json->addComma();
+
+  json->addObjectEntry("category");
+  json->addString(doc.category());
+  json->addComma();
+
   json->addObjectEntry("acl_policy");
   json->addString(DocumentACLPolicy_Name(doc.acl_policy()));
   json->addComma();
@@ -270,6 +446,10 @@ void DocumentDBServlet::renderDocument(
 
   json->addObjectEntry("is_writable");
   json->addBool(isDocumentWritableForUser(doc, session.userid()));
+  json->addComma();
+
+  json->addObjectEntry("deleted");
+  json->addBool(doc.deleted());
   json->addComma();
 
   json->addObjectEntry("ctime");
@@ -283,7 +463,7 @@ void DocumentDBServlet::renderDocument(
   json->addObjectEntry("atime");
   json->addInteger(doc.atime());
 
-  if (return_content) {
+  if (return_content || doc.type() == "application") {
     json->addComma();
     json->addObjectEntry("content");
     json->addString(doc.content());
