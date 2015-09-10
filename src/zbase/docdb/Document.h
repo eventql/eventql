@@ -25,6 +25,10 @@ bool isDocumentWritableForUser(const Document& doc, const String& userid);
 
 bool isDocumentShareableForUser(const Document& doc, const String& userid);
 
+bool isDocumentOwnedByUser(const Document& doc, const String& userid);
+
+bool isDocumentAuthoredByUser(const Document& doc, const String& userid);
+
 void setDefaultDocumentACLs(Document* doc, const String& userid);
 
 }

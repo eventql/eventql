@@ -90,19 +90,26 @@ ZBase.registerView((function() {
     });
 
     //table_list
-    var table_list = TableListWidget($(".sidebar_section", page));
+    var table_list = TableListWidget($(".table_list", page));
     table_list.render();
+
+
+    //preferences
+    var settings_widget = DocumentSettingsWidget(
+        $(".document_settings", page),
+        doc.uuid);
+    settings_widget.render();
 
     // sharing widget/button
     if (readonly) {
       $(".share_button", page).remove();
     } else {
-      var modal = ShareDocModal(
+      var share_modal = ShareDocModal(
           $(".zbase_sql_editor", page),
           doc.uuid,
           "http://zbase.io/a/sql/" + doc.uuid);
       $.onClick($("button[data-action='share-query']", page), function() {
-        modal.show();
+        share_modal.show();
       });
     }
 

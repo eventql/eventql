@@ -17,6 +17,21 @@ var ShareDocModal = function(elem, id, link) {
     });
   };
 
+  var hideModal = function() {
+    modal.close();
+  };
+
+  var saveUpdateCallback = function(callback) {
+    update_callbacks.push(callback);
+  };
+
+  var triggerUpdate = function() {
+    var policy = getACLPolicy();
+    update_callbacks.forEach(function(callback) {
+      callback(policy);
+    });
+  };
+
   var getACLPolicy = function() {
     return $(".access_selection[data-selected]", modal).getAttribute("data-policy");
   };
@@ -48,6 +63,7 @@ var ShareDocModal = function(elem, id, link) {
     var post_body = "acl_policy=" + encodeURIComponent(getACLPolicy());
     $.httpPost("/api/v1/documents/" + doc_id, post_body, function(r) {
       if (r.status == 201) {
+        triggerUpdate();
         hideModal();
         infobar.classList.add("hidden");
       } else {
@@ -56,10 +72,8 @@ var ShareDocModal = function(elem, id, link) {
     });
   };
 
-  var hideModal = function() {
-    modal.close();
-  };
 
+  var update_callbacks = [];
   var doc_id = id;
   var share_link = link;
   var tpl = $.getTemplate(
@@ -86,6 +100,7 @@ var ShareDocModal = function(elem, id, link) {
 
   return {
     show: showModal,
-    hide: hideModal
+    hide: hideModal,
+    onUpdate: saveUpdateCallback
   }
 };

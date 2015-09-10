@@ -1,24 +1,55 @@
 ZBase.registerView((function() {
 
-  var load = function() {
+  var load = function(url) {
+    var qparams = {
+      with_categories: true,
+      author: "self"
+    };
+
+    var owner_param = UrlUtil.getParamValue(url, "owner");
+    if (owner_param) {
+      qparams.owner = owner_param;
+    }
+
+    var author_param = UrlUtil.getParamValue(url, "author");
+    if (author_param) {
+      qparams.author = author_param;
+    }
+
+    var category_param = UrlUtil.getParamValue(url, "category");
+    if (category_param) {
+      qparams.category_prefix = category_param;
+    }
+
+    var pstatus_param = UrlUtil.getParamValue(url, "publishing_status");
+    if (pstatus_param) {
+      qparams.publishing_status = pstatus_param;
+    }
+
+
     $.showLoader();
-    $.httpGet("/api/v1/documents", function(r) {
+    $.httpGet("/api/v1/documents?" + $.buildQueryString(qparams), function(r) {
       if (r.status == 200) {
-        var documents = JSON.parse(r.response).documents;
-        render(documents);
+        render(JSON.parse(r.response), qparams);
       } else {
         $.fatalError();
       }
     });
   }
 
-  var render = function(documents) {
+  var render = function(data, qparams) {
+    var documents = data.documents;
+    var categories = data.categories;
+
     var page = $.getTemplate(
         "views/documents",
         "zbase_documents_main_tpl");
 
-    var menu = DocsMenu();
+    var menu = DocsMenu(categories, data.num_docs_total, data.num_docs_user);
     menu.render($(".docs_sidebar", page));
+    menu.setActiveMenuItem(
+        qparams.category_prefix ? qparams.category_prefix :
+            qparams.author == "self" ? "my_documents" : "all_documents");
 
     renderDocumentsList(
         page.querySelector(".zbase_documents tbody"),
@@ -36,7 +67,7 @@ ZBase.registerView((function() {
 
   var renderDocumentsList = function(tbody_elem, documents) {
     documents.forEach(function(doc) {
-      var url = getUrlForDocument(doc.type, doc.uuid);
+      var url = getUrlForDocument(doc);
 
       var tr = document.createElement("tr");
       tr.innerHTML = 
@@ -49,13 +80,16 @@ ZBase.registerView((function() {
     });
   };
 
-  var getUrlForDocument = function(doc_type, uuid) {
-    switch (doc_type) {
+  var getUrlForDocument = function(doc) {
+    switch (doc.type) {
       case "sql_query":
-        return "/a/sql/" + uuid;
+        return "/a/sql/" + doc.uuid;
 
       case "report":
-        return "/a/reports/" + uuid;
+        return "/a/reports/" + doc.uuid;
+
+      case "application":
+        return JSON.parse(doc.content).url;
 
       default:
         return "#";
@@ -87,7 +121,7 @@ ZBase.registerView((function() {
     $.httpPost("/api/v1/documents", postdata, function(r) {
       if (r.status == 201) {
         var response = JSON.parse(r.response);
-        $.navigateTo(getUrlForDocument(doc_type, response.uuid));
+        $.navigateTo(getUrlForDocument(response));
         return;
       } else {
         $.fatalError();
@@ -97,7 +131,7 @@ ZBase.registerView((function() {
 
   return {
     name: "documents",
-    loadView: function(params) { load(); },
+    loadView: function(params) { load(params.path); },
     unloadView: function() {},
     handleNavigationChange: load
   };

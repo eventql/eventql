@@ -120,18 +120,14 @@ var DropDownComponent = function() {
   this.setValue = function(values) {
     var _this = this;
 
+    var selected_items = this.querySelectorAll("z-dropdown-item[data-selected");
+    for (var i = 0; i < selected_items.length; i++) {
+      this.unselectItem(selected_items[i]);
+    }
+
     values.forEach(function(v) {
-      var item = _this.querySelector("z-dropdown-item[data-value='" + v + "']");
-
-      if (item) {
-        item.setAttribute('data-selected', 'selected');
-
-        var checkbox = item.querySelector("z-checkbox");
-
-        if (checkbox) {
-          checkbox.setAttribute('data-active', 'active');
-        }
-      }
+      _this.selectItem(
+          _this.querySelector("z-dropdown-item[data-value='" + v + "']"));
     });
 
     this.__setHeaderValue();

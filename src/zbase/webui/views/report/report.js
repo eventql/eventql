@@ -1,6 +1,7 @@
 ZBase.registerView((function() {
   var widget_list = null;
   var edit_view = null;
+  var docsync = null;
 
   // REMOVEME
   var goToURL = function(path) {
@@ -39,9 +40,9 @@ ZBase.registerView((function() {
   };
 
   var destroy = function() {
-    //if (docsync) {
-    //  docsync.close();
-    //}
+    if (docsync) {
+      docsync.close();
+    }
 
     if (widget_list) {
       widget_list.destroy();
@@ -58,6 +59,12 @@ ZBase.registerView((function() {
         "views/report",
         "zbase_report_main_tpl");
 
+    //doc settings
+    var settings_widget = DocumentSettingsWidget(
+        $(".document_settings", page),
+        doc.uuid);
+    settings_widget.render();
+
     $.handleLinks(page);
     $.replaceViewport(page);
 
@@ -69,45 +76,74 @@ ZBase.registerView((function() {
     }
     setReportDescription(description);
 
+    //setup docsync
+    docsync = DocSync(
+        getDocument,
+        "/api/v1/documents/" + doc.uuid,
+        $(".zbase_report_infobar"));
+
     var widgets = [];
     if (doc.content != null && doc.content.hasOwnProperty("widgets")) {
       widgets = doc.content.widgets;
     }
+
     widget_list = WidgetList(widgets);
     widget_list.onWidgetEdit(function(widget_id) {
       showWidgetEditor(widget_id);
     });
 
-    // handle display mode
-    $(".zbase_report_pane z-dropdown.mode").addEventListener("change", function() {
-      widget_list.setEditable(this.getValue() == "editing");
-    }, false);
+    widget_list.onWidgetDelete(function() {
+      if (!docsync) {
+        $.fatalError();
+        return;
+      }
+      docsync.saveDocument();
+      showReportView();
+    });
+
 
     if (readonly) {
-      $(".readonly_hint").classList.remove("hidden");
+      $(".zbase_report_pane").classList.add("readonly");
     } else {
       initNameEditing();
       initDescriptionEditing();
       initShareDocModal(doc.uuid);
-      initWidgetAdding();
+      $.onClick($(".zbase_report_pane .link.edit_source"), showRawJSONEditor);
+
+      //add widget flow
+      var add_widget_flow = AddReportWidgetFlow(
+          $(".zbase_report_pane"));
+      add_widget_flow.onWidgetAdded(function(widget_type) {
+        if (!widget_list || !docsync) {
+          $.fatalError();
+          return;
+        }
+        var widget_id = widget_list.addNewEmptyWidget(widget_type);
+        docsync.saveDocument();
+        showWidgetEditor(widget_id);
+        $.hideLoader();
+      });
+      $.onClick($(".zbase_report_pane .link.add_widget"), function() {
+        add_widget_flow.render();
+      });
+
+      // handle display mode
+      $(".zbase_report_pane z-dropdown.mode").addEventListener(
+          "change",
+          setEditable);
     }
 
     showReportView();
-
-    //// setup docsync
-    //docsync = DocSync(
-    //    getDocument,
-    //    "/api/v1/documents/" + doc_id,
-    //    $(".zbase_report_infobar"));
   };
 
-  var showReportView = function(doc) {
+  var showReportView = function() {
     //showLoader?
     if (edit_view) {
       edit_view.destroy();
     }
     var viewport = $(".zbase_report_viewport");
     viewport.innerHTML = "";
+    viewport.classList.remove("editor");
 
     if (widget_list) {
       widget_list.render(viewport);
@@ -124,24 +160,180 @@ ZBase.registerView((function() {
     }
 
     var conf = widget_list.getWidgetConfig(widget_id);
-    edit_view = ReportWidgetFactory.getWidgetEditor(conf);
+    var editor = ReportWidgetFactory.getWidgetEditor(conf);
 
-    edit_view.onSave(function(config) {
+    //switch to edit mode
+    var mode_dropdown = $(".zbase_report_pane z-dropdown.mode");
+    if (mode_dropdown.getValue() != "editing") {
+      mode_dropdown.setValue(["editing"]);
+      setEditable.call(mode_dropdown);
+    }
+
+    editor.onSave(function(config) {
+      if (!docsync) {
+        $.fatalError();
+        return;
+      }
       widget_list.updateWidgetConfig(widget_id, config);
+      docsync.saveDocument();
       showReportView();
     });
 
-    edit_view.onCancel(function() {
+    editor.onCancel(function() {
       showReportView();
     });
 
-    showEditView();
+    showEditView(editor);
   };
 
-  var showEditView = function() {
+  var showRawJSONEditor = function() {
+    var editor = ReportJSONEditor(getContentJSON());
+    showEditView(editor);
+
+    editor.onSave(function(json) {
+      if (!widget_list) {
+        $.fatalError();
+        return;
+      }
+      var content = JSON.parse(json);
+      setReportDescription(content.description);
+      $.showLoader();
+      widget_list.setJSON(content.widgets, function() {
+        if (!docsync) {
+          $.fatalError();
+          return;
+        }
+        docsync.saveDocument();
+        showReportView();
+        $.hideLoader();
+      });
+    });
+
+    editor.onCancel(showReportView);
+  };
+
+  var showEditView = function(editor) {
+    edit_view = editor;
     var viewport = $(".zbase_report_viewport");
     viewport.innerHTML = "";
+    viewport.classList.add("editor");
     edit_view.render(viewport);
+  };
+
+  var setEditable = function() {
+    if (!widget_list) {
+      $.fatalError();
+      return;
+    }
+
+    if (this.getValue() == "editing") {
+      $(".zbase_report_pane").classList.add("editable");
+      widget_list.setEditable(true);
+    } else {
+      $(".zbase_report_pane").classList.remove("editable");
+      widget_list.setEditable(false);
+    }
+  };
+
+
+  var initShareDocModal = function(doc_id) {
+    var modal = ShareDocModal(
+        $(".zbase_report_pane"),
+        doc_id,
+        "http://zbase.io/a/reports/" + doc_id);
+
+    $.onClick($(".zbase_report_pane .link.share"), function() {
+      modal.show();
+    });
+  };
+
+  var initNameEditing = function() {
+    var report_pane = $(".zbase_report_pane");
+    var modal = $("z-modal.rename_report", report_pane);
+    var name_input = $("input.report_name", modal);
+
+    $.onClick($(".report_name.editable", report_pane), function() {
+      if (report_pane.classList.contains("editable")) {
+        modal.show();
+        name_input.focus();
+      }
+    });
+
+    $.onClick($("button.submit", modal), function() {
+      if (!docsync) {
+        $.fatalError();
+        return;
+      }
+      setReportName($.escapeHTML(name_input.value));
+      docsync.saveDocument();
+      modal.close();
+    });
+  };
+
+  var initDescriptionEditing = function() {
+    var report_pane = $(".zbase_report_pane");
+    var modal = $("z-modal.edit_description", report_pane);
+    var textarea = $("textarea.report_description", modal);
+
+    var showModal = function() {
+      if (report_pane.classList.contains("editable")) {
+        modal.show();
+        textarea.focus();
+      }
+    };
+
+    $.onClick($(".report_description.editable", report_pane), showModal);
+    $.onClick($(".link.add_description", report_pane), showModal);
+
+    $.onClick($("button.submit", modal), function() {
+      if (!docsync) {
+        $.fatalError();
+        return;
+      }
+      setReportDescription($.escapeHTML(textarea.value));
+      docsync.saveDocument();
+      modal.close();
+    });
+  };
+
+  var setReportName = function(name) {
+    var escaped_name = $.escapeHTML(name);
+    $("zbase-breadcrumbs-section.report_name").innerHTML = escaped_name;
+    $(".zbase_report_pane .report_name").innerHTML = escaped_name;
+    $(".zbase_report_pane z-modal input.report_name").value = escaped_name;
+  };
+
+  var setReportDescription = function(description) {
+    var escaped_description = $.nl2p($.escapeHTML(description));
+
+    if (description.length == 0) {
+      // display edit link
+      $(".zbase_report_pane .link.add_description").classList.remove("hidden");
+    } else {
+      $(".zbase_report_pane .link.add_description").classList.add("hidden");
+    }
+
+    $(".zbase_report_pane .report_description").innerHTML = escaped_description;
+    $(".zbase_report_pane z-modal textarea.report_description").innerHTML =
+      description;
+  };
+
+  var getContentJSON = function() {
+    var widgets = [];
+    if (widget_list) {
+      widgets = widget_list.getJSON();
+    }
+
+    return JSON.stringify({
+        description: $(".zbase_report_pane textarea.report_description").innerHTML,
+        widgets: widgets});
+  };
+
+  var getDocument = function() {
+    return {
+      content: getContentJSON(),
+      name: $(".zbase_report_pane input.report_name").value
+    };
   };
 
   var findRequiredWidgets = function(doc) {
@@ -156,194 +348,6 @@ ZBase.registerView((function() {
     }
 
     return widgets;
-  };
-
-  //var setEditable = function(is_editable) {
-  //  widget_list.setEditable(is_editable);
-
-  //  if (is_editable) {
-  //    $(".writable_report_actions").classList.remove("hidden");
-  //    $(".zbase_report_pane .report_name").classList.add("editable");
-  //    $(".zbase_report_pane .report_description").classList.add("editable");
-  //  } else {
-  //    $(".writable_report_actions").classList.add("hidden");
-  //    $(".zbase_report_pane .report_name").classList.remove("editable");
-  //    $(".zbase_report_pane .report_description").classList.remove("editable");
-  //  }
-  //};
-
-  var initShareDocModal = function(doc_id) {
-    var modal = ShareDocModal(
-        $(".zbase_report_pane"),
-        doc_id,
-        "http://zbase.io/a/report/" + doc_id);
-
-    $.onClick($(".zbase_report_pane .link.share"), function() {
-      modal.show();
-    });
-  };
-
-  var initNameEditing = function() {
-    var modal = $(".zbase_report_pane z-modal.rename_report");
-    var name_input = $("input.report_name", modal);
-
-    $.onClick($(".zbase_report_pane .report_name.editable"), function() {
-      modal.show();
-      name_input.focus();
-    });
-
-    $.onClick($("button.submit", modal), function() {
-      setReportName($.escapeHTML(name_input.value));
-      docsync.saveDocument();
-      modal.close();
-    });
-  };
-
-  var initDescriptionEditing = function() {
-    var modal = $(".zbase_report_pane z-modal.edit_description");
-    var textarea = $("textarea.report_description", modal);
-
-    var showModal = function() {
-      modal.show();
-      textarea.focus();
-    };
-
-    $.onClick($(".zbase_report_pane .report_description.editable"), showModal);
-    $.onClick($(".zbase_report_pane .link.add_description"), showModal);
-
-    $.onClick($("button.submit", modal), function() {
-      setReportDescription($.escapeHTML(textarea.value));
-      docsync.saveDocument();
-      modal.close();
-    });
-  };
-
-  var initWidgetAdding = function() {
-    var modal = $(".zbase_report_pane z-modal.add_widget");
-    $.onClick($(".zbase_report_pane .link.add_widget"), function() {
-      //FIXME get available report widgets and render selection
-      modal.show();
-    });
-
-    $.onClick($("button.submit", modal), function() {
-      var widget_type = $(".widget_selection[data-selected", modal)
-          .getAttribute("data-widget");
-
-      modal.close();
-      $.showLoader();
-      ReportWidgetFactory.loadWidgets([widget_type], function() {
-        //post
-        if (!widget_list) {
-          $.fatalError();
-          return;
-        }
-        widget_list.addNewWidget(widget_type);
-        save();
-        showReportView();
-        $.hideLoader();
-      });
-    });
-  };
-
-  //var initContentEditing = function(page) {
-  //  var edit_pane = $(".zbase_report_pane .edit_content_pane");
-  //  var report_ui = $(".zbase_report_pane .report_ui");
-
-  //  var closeEditPane = function() {
-  //    updateReportContent();
-  //    edit_pane.classList.add("hidden");
-  //    report_ui.classList.remove("hidden");
-  //    $(".error_note", edit_pane).classList.add("hidden");
-  //  };
-
-  //  $.onClick($(".zbase_report_pane .link.edit"), function() {
-  //    report_ui.classList.add("hidden");
-  //    edit_pane.classList.remove("hidden");
-  //  });
-
-  //  $.onClick($(".submit", edit_pane), function() {
-  //    try {
-  //      var content = JSON.parse(
-  //          $.escapeHTML($("z-codeeditor", edit_pane).getValue()));
-  //      description = content.description;
-  //      widget_list.setJSON(content.widgets);
-  //      docsync.saveDocument();
-  //      closeEditPane();
-  //    } catch (e) {
-  //      $(".error_note", edit_pane).classList.remove("hidden");
-  //    }
-  //  });
-  //  $.onClick($(".close", edit_pane), closeEditPane);
-  //};
-
-  var setReportName = function(name) {
-    var escaped_name = $.escapeHTML(name);
-    $("zbase-breadcrumbs-section.report_name").innerHTML = escaped_name;
-    $(".zbase_report_pane .report_name").innerHTML = escaped_name;
-    $(".zbase_report_pane z-modal input.report_name").value = escaped_name;
-  };
-
-  var setReportDescription = function(description) {
-    var escaped_description = $.escapeHTML(description);
-
-    //FIXME
-    var readonly = false;
-    if (!readonly && escaped_description.length == 0) {
-      // display edit link
-      $(".zbase_report_pane .sidebar_content .link.add_description")
-        .classList.remove("hidden");
-    } else {
-      $(".zbase_report_pane .sidebar_content .link.add_description")
-        .classList.add("hidden");
-    }
-
-    $(".zbase_report_pane .report_description").innerHTML = escaped_description;
-    $(".zbase_report_pane z-modal textarea.report_description").innerHTML =
-      escaped_description;
-  };
-
-  //var setReportContent = function() {
-  //  var content = {
-  //    description: description,
-  //    widgets: widget_list.getJSON()
-  //  };
-
-  //  $(".zbase_report_pane .edit_content_pane z-codeeditor").setValue(
-  //      JSON.stringify(content));
-  //};
-
-  //var updateReportContent = function() {
-  //  setReportContent();
-  //  setReportDescription();
-  //};
-
-  //FIXME save via doc_sync?
-  var save = function() {
-    //FIXME
-    var kPathPrefix = "/a/reports/";
-    var report_id = window.location.pathname.substr(kPathPrefix.length);
-    var save_url = "/api/v1/documents/" + report_id;
-    var postbody = $.buildQueryString(getDocument());
-
-    $.httpPost(save_url, postbody, function(r) {
-      if (r.status != 201) {
-        $.fatalError("Saving Document Failed");
-      }
-    });
-  };
-
-  var getDocument = function() {
-    var widgets = [];
-    if (widget_list) {
-      widgets = widget_list.getJSON();
-    }
-
-    return {
-      content: JSON.stringify({
-          description: $(".zbase_report_pane .report_description").innerText,
-          widgets: widgets}),
-      name: $(".zbase_report_pane input.report_name").value
-    };
   };
 
 

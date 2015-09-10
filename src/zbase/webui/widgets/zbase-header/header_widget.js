@@ -5,6 +5,7 @@ var HeaderWidget = (function() {
   }
 
   var showSelectNamespacePopup = function() {
+    ZBase.showLoader();
     ZBase.loadModules(["widgets/z-modal"], function() {
       var tpl = $.getTemplate(
           "widgets/zbase-header",
@@ -39,6 +40,7 @@ var HeaderWidget = (function() {
           })(namespace));
 
           list.appendChild(namespaceElem);
+          ZBase.hideLoader();
           modal.show();
         });
       });

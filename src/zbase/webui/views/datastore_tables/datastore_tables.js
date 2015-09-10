@@ -22,8 +22,8 @@ ZBase.registerView((function() {
         "views/datastore_tables",
         "zbase_datastore_tables_list_tpl");
 
-    var menu = HomeMenu();
-    menu.render($(".zbase_home_menu_sidebar", page));
+    var menu = DatastoreMenu();
+    menu.render($(".zbase_datastore_menu_sidebar", page));
 
     var tbody = $("tbody", page);
     tables.forEach(function(table) {
@@ -41,7 +41,7 @@ ZBase.registerView((function() {
         "views/datastore_tables",
         "zbase_datastore_tables_list_row_tpl");
 
-    var url = "/a/table/" + table.name;
+    var url = "/a/datastore/tables/" + table.name;
 
     var table_name = $(".table_name", elem);
     table_name.innerHTML = table.name;

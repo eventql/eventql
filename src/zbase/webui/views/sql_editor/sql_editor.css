@@ -8,18 +8,26 @@
 
 
 .zbase_sql_editor .zbase_sql_editor_sidebar {
-  padding: 20px 20px 0;
   width: 320px;
   min-height: 200px;
   display: table-cell;
   vertical-align: top;
 }
 
+.zbase_sql_editor .zbase_sql_editor_sidebar .sidebar_section:first-child {
+  border-top: none;
+}
+
 .zbase_sql_editor .zbase_sql_editor_sidebar .sidebar_section {
-  margin-top: 20px;
-  border-top: 1px solid #eee;
+  padding: 0 20px;
   font-size: 13px;
   line-height: 21px;
+  border-top: 1px solid #eee;
+}
+
+.zbase_sql_editor .zbase_sql_editor_sidebar .sidebar_section.document_settings {
+  margin-top: 20px;
+  margin-bottom: 20px;
 }
 
 .zbase_sql_editor .zbase_sql_editor_sidebar .zbase_table_list {
@@ -27,11 +35,7 @@
 }
 
 .zbase_sql_editor .zbase_sql_editor_sidebar .zbase_table_list h3 {
-  font-size: 13px;
-}
-
-.zbase_sql_editor .zbase_sql_editor_sidebar a.link {
-  font-size: 13px;
+  margin-bottom: 3px;
 }
 
 .zbase_sql_editor .zbase_sql_editor_content {
