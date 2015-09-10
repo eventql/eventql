@@ -119,6 +119,7 @@ set(STX_INCLUDE
     ${CMAKE_CURRENT_SOURCE_DIR})
 
 include_directories(${STX_INCLUDE})
+include_directories(${STX_INCLUDE}/compat)
 set(STX_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
 set(STX_LDFLAGS "${STX_LDFLAGS} ${STX_PROTOBUF_LIBS}")
 set(CMAKE_CXX_LINK_EXECUTABLE "${CMAKE_CXX_LINK_EXECUTABLE} ${STX_LDFLAGS}")
@@ -134,7 +135,6 @@ add_library(stx-base STATIC
     3rdparty/simdcomp/simdintegratedbitpacking.c
     3rdparty/simdcomp/simdcomputil.c
     application.cc
-    autoref.cc
     assets.cc
     buffer.cc
     bufferutil.cc
@@ -147,7 +147,7 @@ add_library(stx-base STATIC
     csv/CSVInputStream.cc
     csv/BinaryCSVInputStream.cc
     UnixTime.cc
-    duration.cc
+    Duration.cc
     exception.cc
     exceptionhandler.cc
     fnv.cc
@@ -177,6 +177,7 @@ add_library(stx-base STATIC
     net/inetaddr.cc
     net/tcpconnection.cc
     random.cc
+    RefCounted.cc
     RegExp.cc
     rpc/RPCRequest.cc
     rpc/RPCContext.cc

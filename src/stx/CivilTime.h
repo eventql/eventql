@@ -22,12 +22,12 @@ public:
   /**
    * Create a new CivilTime instance with all fields set to zero
    */
-  CivilTime();
+  constexpr CivilTime();
 
   /**
    * Create a new CivilTime instance with all fields set to zero
    */
-  CivilTime(std::nullptr_t);
+  constexpr CivilTime(std::nullptr_t);
 
   /**
    * Parse time from the provided string
@@ -54,42 +54,42 @@ public:
   /**
    * Year including century / A.D. (eg. 1999)
    */
-  uint16_t year() const;
+  constexpr uint16_t year() const;
 
   /**
    * Month [1-12]
    */
-  uint8_t month() const;
+  constexpr uint8_t month() const;
 
   /**
    * Day of the month [1-31]
    */
-  uint8_t day() const;
+  constexpr uint8_t day() const;
 
   /**
    * Hour [0-23]
    */
-  uint8_t hour() const;
+  constexpr uint8_t hour() const;
 
   /**
    * Hour [0-59]
    */
-  uint8_t minute() const;
+  constexpr uint8_t minute() const;
 
   /**
    * Second [0-60]
    */
-  uint8_t second() const;
+  constexpr uint8_t second() const;
 
   /**
    * Millisecond [0-999]
    */
-  uint16_t millisecond() const;
+  constexpr uint16_t millisecond() const;
 
   /**
    * Timezone offset to UTC in seconds
    */
-  int32_t offset() const;
+  constexpr int32_t offset() const;
 
   void setYear(uint16_t value);
   void setMonth(uint8_t value);
@@ -112,3 +112,5 @@ protected:
 };
 
 }
+
+#include <stx/CivilTime_impl.h>

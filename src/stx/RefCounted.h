@@ -7,18 +7,29 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#include "stx/duration.h"
+
+#ifndef _STX_BASE_REFCOUNTED_H
+#define _STX_BASE_REFCOUNTED_H
+
+#include <atomic>
+#include <stx/RefPtr.h>
 
 namespace stx {
 
-Duration::Duration(uint64_t microseconds) : micros_(microseconds) {}
+class RefCounted {
+public:
+  RefCounted();
+  virtual ~RefCounted() {}
 
-uint64_t Duration::microseconds() const {
-  return micros_;
-}
+  void incRef();
+  bool decRef();
 
-uint64_t Duration::seconds() const {
-  return micros_ / kMicrosPerSecond;
-}
+protected:
+  mutable std::atomic<unsigned> refcount_;
+};
 
-}
+using AnyRef = RefPtr<RefCounted>;
+
+} // namespace stx
+
+#endif
