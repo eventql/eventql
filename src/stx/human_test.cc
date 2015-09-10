@@ -69,6 +69,10 @@ TEST_CASE(HumanTest, TestParseHumanTime, [] () {
 
   auto t15 = Human::parseTime("2014-11-02T18:23:10+00:00");
   EXPECT_EQ(t15.get().unixMicros(), 1414952590 * kMicrosPerSecond);
+
+  auto t16 = Human::parseTime("2006-09-15 20:50:06");
+  EXPECT_FALSE(t16.isEmpty());
+  EXPECT_EQ(t16.get().unixMicros(), 1158346206 * kMicrosPerSecond);
 });
 
 
