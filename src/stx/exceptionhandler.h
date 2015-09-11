@@ -18,6 +18,8 @@ class ExceptionHandler {
 public:
   virtual ~ExceptionHandler() {}
   virtual void onException(const std::exception& error) const = 0;
+
+  void operator()(const std::exception& e) const { onException(e); }
 };
 
 class CatchAndLogExceptionHandler : public ExceptionHandler {
