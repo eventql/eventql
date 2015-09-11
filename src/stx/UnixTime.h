@@ -32,7 +32,7 @@ public:
    *
    * @param timestamp the UTC microsecond timestamp
    */
-  UnixTime(uint64_t utc_time);
+  constexpr UnixTime(uint64_t utc_time);
 
   /**
    * Create a new UTC UnixTime instance from a civil time reference
@@ -72,33 +72,33 @@ public:
 
   UnixTime& operator=(const UnixTime& other);
 
-  bool operator==(const UnixTime& other) const;
-  bool operator<(const UnixTime& other) const;
-  bool operator>(const UnixTime& other) const;
-  bool operator<=(const UnixTime& other) const;
-  bool operator>=(const UnixTime& other) const;
+  constexpr bool operator==(const UnixTime& other) const;
+  constexpr bool operator<(const UnixTime& other) const;
+  constexpr bool operator>(const UnixTime& other) const;
+  constexpr bool operator<=(const UnixTime& other) const;
+  constexpr bool operator>=(const UnixTime& other) const;
 
   /**
    * Cast the UnixTime object to a UTC unix microsecond timestamp represented as
    * an uint64_t
    */
-  explicit operator uint64_t() const;
+  constexpr explicit operator uint64_t() const;
 
   /**
    * Cast the UnixTime object to a UTC unix microsecond timestamp represented as
    * a double
    */
-  explicit operator double() const;
+  constexpr explicit operator double() const;
 
   /**
    * Return the represented date/time as a UTC unix microsecond timestamp
    */
-  uint64_t unixMicros() const;
+  constexpr uint64_t unixMicros() const;
 
   /**
    * Return a new UnixTime instance with time 00:00:00 UTC, 1 Jan. 1970
    */
-  static UnixTime epoch();
+  static constexpr UnixTime epoch();
 
   /**
    * Return a new UnixTime instance with time = now
@@ -116,12 +116,6 @@ protected:
    * The utc microsecond timestamp of the represented moment in time
    */
   uint64_t utc_micros_;
-
-  /**
-   * The time zone offset to UTC in seconds
-   */
-  uint32_t tz_offset_;
-
 };
 
 }
@@ -134,4 +128,5 @@ public:
 };
 }
 
+#include <stx/UnixTime_impl.h>
 #endif
