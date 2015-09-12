@@ -313,8 +313,13 @@
   display: none;
 }
 
-
-
+.zbase_report_pane .zbase_report_widget z-modal h4 {
+  font-size: 14px;
+  line-height: 34px;
+  font-weight: 500;
+  color: #333;
+  margin: 0;
+}
 
 
 /**
