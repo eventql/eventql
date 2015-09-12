@@ -113,6 +113,14 @@ bool StaticPartitionReplication::replicate() {
         replicateTo(r, head_version);
         setReplicatedVersionFor(&repl_state, r.unique_id, head_version);
         dirty = true;
+
+        logTrace(
+            "tsdb",
+            "Replicating done: $0/$1/$2 to $3",
+            snap_->state.tsdb_namespace(),
+            snap_->state.table_key(),
+            snap_->key.toString(),
+            r.addr.hostAndPort());
       } catch (const std::exception& e) {
         success = false;
 
