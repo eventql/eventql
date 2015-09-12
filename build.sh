@@ -14,6 +14,7 @@ BUILD_OS=${BUILD_OS:-$(uname | tr '[:upper:]' '[:lower:]')}
 BUILD_NCPUS=${BUILD_NCPUS:-$[ $(getconf _NPROCESSORS_ONLN) / 2 ]}
 BUILD_DOCUMENTATION=${BUILD_DOCUMENTATION:-true}
 BUILD_ASSETS=${BUILD_ASSETS:-true}
+BUILD_ARTIFACTS=${BUILD_ARTIFACTS:-true}
 
 if [[ "${BUILD_ARCH}" == "x86" ]]; then
   ARCHFLAGS="-m32 -march=i386";
@@ -73,12 +74,11 @@ if [[ $BUILD_DOCUMENTATION == "true" ]]; then
         ${TARGET_DIR}/docs/${page_name}.md \
         ${TARGET_DIR}/docs/${page_name}.html
   done
+
+  (cd $TARGET_DIR && find docs -type f) | \
+      while read f; do echo zbase/docs/${f/docs\//}:${TARGET_DIR}/$f; done | \
+     ./src/stx/assets.sh ${TARGET_DIR}/zbase_documentation_assets.cc
 fi
-
-(cd $TARGET_DIR && find docs -type f) | \
-    while read f; do echo zbase/docs/${f/docs\//}:${TARGET_DIR}/$f; done | \
-   ./src/stx/assets.sh ${TARGET_DIR}/zbase_documentation_assets.cc
-
 
 # build c++ with make
 if [[ $MAKETOOL == "make" ]]; then
@@ -109,47 +109,52 @@ else
   exit 1
 fi
 
-# zbase-core
-tar cz -C ${TARGET_DIR} zbase zbasectl \
-    > ${ARTIFACTS_DIR}/zbase-core-${TARGET_LBL}.tgz
+# test
+find ${TARGET_DIR} -name "test-*" -type f -exec ./{} \;
 
-# zbase-master
-tar cz -C ${TARGET_DIR} zmaster \
-    > ${ARTIFACTS_DIR}/zbase-master-${TARGET_LBL}.tgz
+# pack artifacts
+if [[ $BUILD_ARTIFACTS == "true" ]]; then
+  # zbase-core
+  tar cz -C ${TARGET_DIR} zbase zbasectl \
+      > ${ARTIFACTS_DIR}/zbase-core-${TARGET_LBL}.tgz
 
-# zbase-logjoin
-tar cz -C ${TARGET_DIR} logjoind \
-    > ${ARTIFACTS_DIR}/zbase-logjoin-${TARGET_LBL}.tgz
+  # zbase-master
+  tar cz -C ${TARGET_DIR} zmaster \
+      > ${ARTIFACTS_DIR}/zbase-master-${TARGET_LBL}.tgz
 
-# zen-utils
-if [[ "${BUILD_TYPE}" == "release" ]]; then
-  strip ${TARGET_DIR}/zen-csv-upload
+  # zbase-logjoin
+  tar cz -C ${TARGET_DIR} logjoind \
+      > ${ARTIFACTS_DIR}/zbase-logjoin-${TARGET_LBL}.tgz
+
+  # zen-utils
+  if [[ "${BUILD_TYPE}" == "release" ]]; then
+    strip ${TARGET_DIR}/zen-csv-upload
+  fi
+
+  tar cz -C ${TARGET_DIR} zen-csv-upload \
+      > ${ARTIFACTS_DIR}/zen-csv-upload-${TARGET_LBL}.tgz
+
+  if [[ "${BUILD_TYPE}" == "release" ]]; then
+    strip ${TARGET_DIR}/zen-mysql-upload
+  fi
+
+  tar cz -C ${TARGET_DIR} zen-mysql-upload \
+      > ${ARTIFACTS_DIR}/zen-mysql-upload-${TARGET_LBL}.tgz
+
+  if [[ "${BUILD_TYPE}" == "release" ]]; then
+    strip ${TARGET_DIR}/zen-statsd-upload
+  fi
+
+  tar cz -C ${TARGET_DIR} zen-statsd-upload \
+      > ${ARTIFACTS_DIR}/zen-statsd-upload-${TARGET_LBL}.tgz
+
+  if [[ "${BUILD_TYPE}" == "release" ]]; then
+    strip ${TARGET_DIR}/zen-logfile-upload
+  fi
+
+  tar cz -C ${TARGET_DIR} zen-logfile-upload \
+      > ${ARTIFACTS_DIR}/zen-logfile-upload-${TARGET_LBL}.tgz
+
+  tar cz -C ${TARGET_DIR} zen-csv-upload zen-mysql-upload zen-statsd-upload \
+      > ${ARTIFACTS_DIR}/zen-utils-${TARGET_LBL}.tgz
 fi
-
-tar cz -C ${TARGET_DIR} zen-csv-upload \
-    > ${ARTIFACTS_DIR}/zen-csv-upload-${TARGET_LBL}.tgz
-
-if [[ "${BUILD_TYPE}" == "release" ]]; then
-  strip ${TARGET_DIR}/zen-mysql-upload
-fi
-
-tar cz -C ${TARGET_DIR} zen-mysql-upload \
-    > ${ARTIFACTS_DIR}/zen-mysql-upload-${TARGET_LBL}.tgz
-
-if [[ "${BUILD_TYPE}" == "release" ]]; then
-  strip ${TARGET_DIR}/zen-statsd-upload
-fi
-
-tar cz -C ${TARGET_DIR} zen-statsd-upload \
-    > ${ARTIFACTS_DIR}/zen-statsd-upload-${TARGET_LBL}.tgz
-
-if [[ "${BUILD_TYPE}" == "release" ]]; then
-  strip ${TARGET_DIR}/zen-logfile-upload
-fi
-
-tar cz -C ${TARGET_DIR} zen-logfile-upload \
-    > ${ARTIFACTS_DIR}/zen-logfile-upload-${TARGET_LBL}.tgz
-
-tar cz -C ${TARGET_DIR} zen-csv-upload zen-mysql-upload zen-statsd-upload \
-    > ${ARTIFACTS_DIR}/zen-utils-${TARGET_LBL}.tgz
-
