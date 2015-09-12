@@ -16,26 +16,29 @@ var WidgetList = function(widget_definitions) {
     elem = viewport;
     widgets.forEach(function(widget) {
       if (widget.display_obj) {
-        widget.display_obj.destroy();
+        widget.display_obj.render(widget.container, widget.conf);
+      } else {
+        //init widget display_obj
+        widget.container = $(
+          ".zbase_report_widget_container",
+          $.getTemplate(
+              "views/report",
+              "zbase_report_widget_main_tpl"));
+
+        widget.display_obj = ReportWidgetFactory.renderWidgetDisplay(
+            widget.conf.type,
+            widget.container,
+            widget.conf);
+
+        widget.display_obj.onEdit(function() {
+          triggerWidgetEdit(widget.conf.uuid);
+        });
+
+        widget.display_obj.onDelete(function() {
+          destroyWidget(widget.conf.uuid);
+          triggerWidgetDelete()
+        });
       }
-
-      widget.container = $.getTemplate(
-          "views/report",
-          "zbase_report_widget_main_tpl");
-
-      widget.display_obj = ReportWidgetFactory.renderWidgetDisplay(
-          widget.conf.type,
-          widget.container,
-          widget.conf);
-
-      widget.display_obj.onEdit(function() {
-        triggerWidgetEdit(widget.conf.uuid);
-      });
-
-      widget.display_obj.onDelete(function() {
-        destroyWidget(widget.conf.uuid);
-        triggerWidgetDelete()
-      });
 
       elem.appendChild(widget.container);
     });

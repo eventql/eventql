@@ -1,23 +1,21 @@
-var ReportSQLWidgetDisplay = function(elem, conf) {
+var ReportSQLWidgetDisplay = function() {
   var query_mgr = EventSourceHandler();
+  var query_str = "";
+  var query_result = [];
   var edit_callbacks = [];
   var delete_callbacks = [];
 
-  var loadQuery = function() {
+  var render = function(elem, conf) {
     var tpl = $.getTemplate(
       "views/report",
       "zbase_report_sql_widget_main_tpl");
 
     var result_pane = $(".zbase_report_sql_result_pane", tpl);
-    var query = query_mgr.get(
-      "report_sql",
-      "/api/v1/sql_stream?query=" + encodeURIComponent(conf.query));
 
     if (!conf.hasOwnProperty("name")) {
       conf.name = "Unnamed SQL Query";
     }
     $(".report_widget_title", tpl).innerHTML = conf.name;
-
 
     $(".zbase_report_widget_header z-dropdown", tpl).addEventListener("change", function() {
       switch (this.getValue()) {
@@ -30,23 +28,43 @@ var ReportSQLWidgetDisplay = function(elem, conf) {
           break;
 
         case "open_query":
-          openQueryInSQLEditor();
+          openQueryInSQLEditor(conf);
           break;
       }
     }, false);
 
-    elem.appendChild(tpl);
+    $.replaceContent(elem, tpl);
 
+    if (conf.query == query_str) {
+      //display cached result
+      renderQueryResult(result_pane, query_result);
+    } else {
+      //load new query
+      loadQuery(result_pane, conf);
+    }
+  };
+
+
+  var loadQuery = function(result_pane, conf) {
+    destroy();
+
+    var query = query_mgr.get(
+      "report_sql",
+      "/api/v1/sql_stream?query=" + encodeURIComponent(conf.query));
 
     query.addEventListener('result', function(e) {
       query_mgr.close("report_sql");
 
       var data = JSON.parse(e.data);
-      renderQueryResult(result_pane, data.results)
+      renderQueryResult(result_pane, data.results);
+      query_str = conf.query;
+      query_result = data.results;
     });
 
     query.addEventListener('error', function(e) {
       query_mgr.close("report_sql");
+      query_str = "";
+      query_result = [];
 
       try {
         renderQueryError(result_pane, JSON.parse(e.data).error);
@@ -148,7 +166,7 @@ var ReportSQLWidgetDisplay = function(elem, conf) {
     $.replaceContent(result_pane, error_msg);
   };
 
-  var openQueryInSQLEditor = function() {
+  var openQueryInSQLEditor = function(conf) {
     var postdata = $.buildQueryString({
       name: conf.name,
       type: "sql_query",
@@ -191,7 +209,7 @@ var ReportSQLWidgetDisplay = function(elem, conf) {
 
 
   return {
-    render: loadQuery,
+    render: render,
     destroy: destroy,
     onEdit: onEdit,
     onDelete: onDelete
@@ -254,6 +272,7 @@ var ReportSQLWidgetEditor = function(conf) {
     });
 
     elem.appendChild(tpl);
+    editor.focus();
   };
 
 

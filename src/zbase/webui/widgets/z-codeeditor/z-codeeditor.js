@@ -102,6 +102,10 @@ var CodeEditorComponent = function() {
       codemirror.options.readOnly= true;
       codemirror.options.autofocus = false;
     };
+
+    this.focus = function() {
+      codemirror.focus();
+    };
   };
 
   this.attributeChangedCallback = function(attr) {
