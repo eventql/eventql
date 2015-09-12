@@ -15,7 +15,7 @@
             <z-dropdown-items>
               <z-dropdown-item data-value='edit' class="hide_when_readonly">Edit</z-dropdown-item>
               <z-dropdown-item data-value='open_query'>Open in SQL Editor</z-dropdown-item>
-              <z-dropdown-item data-value='delete' class="hide_when_readonly">Remove</z-dropdown-item>
+              <z-dropdown-item data-value='delete' class="hide_when_readonly">Delete</z-dropdown-item>
             </z-dropdown-items>
           </z-dropdown-flyout>
         </z-dropdown>
@@ -37,6 +37,20 @@
         </div>
       </div>
     </div>
+
+    <z-modal class="delete_confirmation">
+      <z-modal-box>
+        <z-modal-close-icon></z-modal-close-icon>
+        <div class="z-modal-header">Delete SQL Query</div>
+        <div class="z-modal-content">
+          <h4>Are you sure you want to delete <em class="query_name"></em> ?</h4>
+        </div>
+        <div class="z-modal-footer">
+          <button class="z-button primary submit">Yes</button>
+          <button class="z-button secondary cancel">Cancel</button>
+        </div>
+      </z-modal-box>
+    </z-modal>
   </div>
 </template>
 
