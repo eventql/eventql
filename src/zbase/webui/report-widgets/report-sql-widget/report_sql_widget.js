@@ -254,6 +254,7 @@ var ReportSQLWidgetEditor = function(conf) {
     });
 
     elem.appendChild(tpl);
+    editor.focus();
   };
 
 
