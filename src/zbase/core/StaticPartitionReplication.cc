@@ -73,12 +73,16 @@ void StaticPartitionReplication::replicateTo(
           snap_->key.toString(),
           head_version));
 
+  logTrace("tsdb", "Uploading partition data to $0", uri.toString());
+
   http::HTTPRequest req(http::HTTPMessage::M_POST, uri.pathAndQuery());
   req.addHeader("Host", uri.hostAndPort());
   req.addBody(FileUtil::read(cstable_file.get())); // FIXME use FileUpload
 
   auto res = http_->executeRequest(req);
   res.wait();
+
+  logTrace("tsdb", "Uploading to $0 done", uri.toString());
 
   const auto& r = res.get();
   if (r.statusCode() != 201) {
@@ -111,8 +115,6 @@ bool StaticPartitionReplication::replicate() {
 
       try {
         replicateTo(r, head_version);
-        setReplicatedVersionFor(&repl_state, r.unique_id, head_version);
-        dirty = true;
 
         logTrace(
             "tsdb",
@@ -121,6 +123,9 @@ bool StaticPartitionReplication::replicate() {
             snap_->state.table_key(),
             snap_->key.toString(),
             r.addr.hostAndPort());
+
+        setReplicatedVersionFor(&repl_state, r.unique_id, head_version);
+        dirty = true;
       } catch (const std::exception& e) {
         success = false;
 
