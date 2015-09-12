@@ -15,8 +15,8 @@ var ReportWidgetFactory = (function() {
   };
 
   var renderWidgetDisplay = function(type, container, conf) {
-    var widget_display = widgets[type].display(container, conf);
-    widget_display.render();
+    var widget_display = widgets[type].display();
+    widget_display.render(container, conf);
 
     return widget_display;
   };
