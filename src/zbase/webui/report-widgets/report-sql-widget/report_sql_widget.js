@@ -10,12 +10,13 @@ var ReportSQLWidgetDisplay = function() {
       "views/report",
       "zbase_report_sql_widget_main_tpl");
 
-    var result_pane = $(".zbase_report_sql_result_pane", tpl);
-
     if (!conf.hasOwnProperty("name")) {
       conf.name = "Unnamed SQL Query";
     }
     $(".report_widget_title", tpl).innerHTML = conf.name;
+
+    var result_pane = $(".zbase_report_sql_result_pane", tpl);
+    var delete_confirmation_modal = $("z-modal.delete_confirmation", tpl);
 
     $(".zbase_report_widget_header z-dropdown", tpl).addEventListener("change", function() {
       switch (this.getValue()) {
@@ -24,14 +25,24 @@ var ReportSQLWidgetDisplay = function() {
           break;
 
         case "delete":
-          triggerDelete();
+          $(".query_name", delete_confirmation_modal).innerHTML = conf.name;
+          delete_confirmation_modal.show();
+          this.setValue([]);
           break;
 
         case "open_query":
           openQueryInSQLEditor(conf);
           break;
+
+        default:
+          break;
       }
     }, false);
+
+    $.onClick($("button.submit", delete_confirmation_modal), triggerDelete);
+    $.onClick($("button.cancel", delete_confirmation_modal), function() {
+      delete_confirmation_modal.close();
+    });
 
     $.replaceContent(elem, tpl);
 
