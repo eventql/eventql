@@ -15,6 +15,7 @@ BUILD_NCPUS=${BUILD_NCPUS:-$[ $(getconf _NPROCESSORS_ONLN) / 2 ]}
 BUILD_DOCUMENTATION=${BUILD_DOCUMENTATION:-true}
 BUILD_ASSETS=${BUILD_ASSETS:-true}
 BUILD_ARTIFACTS=${BUILD_ARTIFACTS:-true}
+RUN_TESTS=${RUN_TESTS:-true}
 
 if [[ "${BUILD_ARCH}" == "x86" ]]; then
   ARCHFLAGS="-m32 -march=i386";
@@ -110,7 +111,9 @@ else
 fi
 
 # test
-find ${TARGET_DIR} -name "test-*" -type f -exec ./{} \;
+if [[ $RUN_TESTS == "true" ]]; then
+  find ${TARGET_DIR} -name "test-*" -type f -exec ./{} \;
+fi
 
 # pack artifacts
 if [[ $BUILD_ARTIFACTS == "true" ]]; then
