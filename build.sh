@@ -61,6 +61,7 @@ fi
 
 # build documentation
 if [[ $BUILD_DOCUMENTATION == "true" ]]; then
+  rm -rf $TARGET_DIR/docs
   cp -r doc/ $TARGET_DIR/docs
 
   (cd $TARGET_DIR && find docs -name "*.md") | while read filename; do
