@@ -1,41 +1,4 @@
 var DocumentationMenu = function() {
-  /*
-  // Another simpler format that we may want to use.
-  // It wouldn't allow inclusion of the markdown filenames but those could be
-  // derived by converting names to lowercase and adding underscores.
-  var tempJson = {
-    "Format": {
-      "Output": {},
-      "Readme and Introduction": {},
-      "Chapters and Subchapters": {},
-      "Markdown": {},
-      "AsciiDoc": {},
-      "Cover": {},
-      "Multi-Languages": {},
-      "Glossary": {},
-      "Templating": {},
-      "Content References": {},
-      "Ignoring files and folders": {},
-      "Configuration": {},
-      "Plugins": {}
-    },
-    "Build": {
-      "Update with GIT": {},
-      "Common Errors": {},
-      "ebook-convert": {}
-    },
-    "Test": {
-      "Deep": {
-        "Deeper": {
-          "Deepest": {
-            "Actual deepest": {}
-          }
-        }
-      }
-    }
-  }
-  */
-
   var tempJson = [
     {
       key: "format",
@@ -44,12 +7,12 @@ var DocumentationMenu = function() {
         {
           key: "output",
           title: "Output",
-          file: "output.md"
+          file: "output.html"
         },
         {
           key: "readme_and_introduction",
           title: "Readme and Introduction",
-          file: "readme_and_introduction.md"
+          file: "readme_and_introduction.html"
         }
       ]
     },
@@ -60,7 +23,7 @@ var DocumentationMenu = function() {
         {
           key: "update_with_git",
           title: "Update with Git",
-          file: "update_with_git.md"
+          file: "update_with_git.html"
         }
       ]
     }
@@ -101,9 +64,10 @@ var DocumentationMenu = function() {
     elem.innerHTML = "";
     elem.appendChild(tpl);
 
-    $.httpGet("/a/_d", function(res) {
-      // var docStructure = JSON.parse(res);
+    $.httpGet("/a/_/d/toc.json", function(res) {
+      //var docStructure = JSON.parse(res.response);
       var docStructure = tempJson;
+      console.log(res.response);
 
       createMenuItems($("z-menu-section", elem), docStructure, []);
     });
