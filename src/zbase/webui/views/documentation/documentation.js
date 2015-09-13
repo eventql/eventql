@@ -1,6 +1,7 @@
 ZBase.registerView((function() {
 
-  var render = function() {
+  var render = function(path) {
+
     var page = $.getTemplate(
         "views/documentation",
         "documentation_main_tpl");
@@ -11,13 +12,14 @@ ZBase.registerView((function() {
     $.replaceViewport(page);
 
     var content = $(".zbase_documentation_content");
-    var example = $.getTemplate(
-        "views/documentation",
-        "documentation_page_examples");
-        console.log(content);
-    content.appendChild(example);
 
-    var path = window.location.pathname;
+    if(path) {
+      var key = path.split("/").pop();
+      $.httpGet("/a/_/d/" + key, function(res) {
+        //content.innerHTML = res.response;
+        content.innerHTML = key;
+      });
+    }
 
     $.hideLoader();
   };

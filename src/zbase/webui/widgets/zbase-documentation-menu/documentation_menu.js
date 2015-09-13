@@ -31,7 +31,6 @@ var DocumentationMenu = function() {
 
   // Recursively add z-menu-items to the sidebar using tempJson.
   var createMenuItems = function(parent, items, index) {
-    console.log(item);
 
     for(var i in items) {
       var item = items[i];
@@ -59,7 +58,6 @@ var DocumentationMenu = function() {
 
   var render = function(elem) {
     var tpl = $.getTemplate("widgets/zbase-documentation-menu", "zbase_documentation_menu_main_tpl");
-    setActiveMenuItem(tpl);
 
     elem.innerHTML = "";
     elem.appendChild(tpl);
@@ -67,31 +65,13 @@ var DocumentationMenu = function() {
     $.httpGet("/a/_/d/toc.json", function(res) {
       //var docStructure = JSON.parse(res.response);
       var docStructure = tempJson;
-      console.log(res.response);
 
-      createMenuItems($("z-menu-section", elem), docStructure, []);
+      var menuSection = $("z-menu-section", elem);
+
+      createMenuItems(menuSection, docStructure, []);
+
+      $.handleLinks(menuSection);
     });
-  };
-
-  var setActiveMenuItem = function(tpl) {
-    /*
-    var path = window.location.pathname;
-    var items = tpl.querySelectorAll("z-menu-item a[href]");
-    var active_path_length = 0;
-    var active_item;
-
-    //longest prefix match
-    for (var i = 0; i < items.length; i++) {
-      var current_path = items[i].getAttribute("href");
-      if (path.indexOf(current_path) == 0 &&
-          current_path.length > active_path_length) {
-              active_item = items[i];
-              active_path_length = current_path.length;
-      }
-    }
-
-    active_item.parentNode.setAttribute("data-active", "active");
-    */
   };
 
 
