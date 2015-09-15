@@ -74,7 +74,7 @@ class ThreadPool : public Scheduler {
   // overrides
   void execute(Task task) override;
   HandleRef executeAfter(Duration delay, Task task) override;
-  HandleRef executeAt(DateTime dt, Task task) override;
+  HandleRef executeAt(UnixTime dt, Task task) override;
   HandleRef executeOnReadable(int fd, Task task, Duration tmo, Task tcb) override;
   HandleRef executeOnWritable(int fd, Task task, Duration tmo, Task tcb) override;
   void executeOnWakeup(Task task, Wakeup* wakeup, long generation) override;

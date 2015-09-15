@@ -267,6 +267,9 @@ add_library(stx-protobuf STATIC
     protobuf/JSONEncoder.cc
     ${PROTO_SRCS})
 
+add_executable(test-executor-PosixScheduler executor/PosixScheduler-test.cc)
+target_link_libraries(test-executor-PosixScheduler stx-base)
+
 add_executable(test-inputstream io/inputstream_test.cc)
 target_link_libraries(test-inputstream stx-base)
 

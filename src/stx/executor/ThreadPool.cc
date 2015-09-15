@@ -10,9 +10,9 @@
 #include <stx/executor/ThreadPool.h>
 #include <stx/executor/PosixScheduler.h>
 #include <stx/thread/Wakeup.h>
-#include <stx/RuntimeError.h>
+#include <stx/exception.h>
 #include <stx/WallClock.h>
-#include <stx/DateTime.h>
+#include <stx/UnixTime.h>
 #include <stx/logging.h>
 #include <stx/sysconfig.h>
 #include <system_error>
@@ -174,21 +174,21 @@ ThreadPool::HandleRef ThreadPool::executeAfter(Duration delay, Task task) {
   HandleRef hr(new Handle(nullptr));
   activeTimers_++;
   execute([this, task, hr, delay] {
-    WallClock::sleep(delay);
+    usleep(delay.microseconds());
     safeCall([&] { hr->fire(task); });
     activeTimers_--;
   });
   return hr;
 }
 
-ThreadPool::HandleRef ThreadPool::executeAt(DateTime dt, Task task) {
+ThreadPool::HandleRef ThreadPool::executeAt(UnixTime dt, Task task) {
   HandleRef hr(new Handle(nullptr));
   activeTimers_++;
   execute([this, task, hr, dt] {
-    DateTime now = WallClock::system()->get();
+    UnixTime now = WallClock::now();
     if (dt > now) {
       Duration delay = dt - now;
-      WallClock::sleep(delay);
+      usleep(delay.microseconds());
     }
     safeCall([&] { hr->fire(task); });
     activeTimers_--;

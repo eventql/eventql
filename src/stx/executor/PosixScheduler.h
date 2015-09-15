@@ -10,6 +10,7 @@
 #pragma once
 
 #include <stx/RefPtr.h>
+#include <stx/MonotonicTime.h>
 #include <stx/executor/Scheduler.h>
 #include <sys/select.h>
 #include <set>
@@ -19,23 +20,21 @@
 
 namespace stx {
 
-class WallClock;
-
 class PosixScheduler : public Scheduler {
  public:
   PosixScheduler(
       std::function<void(const std::exception&)> errorLogger,
-      WallClock* clock,
       std::function<void()> preInvoke,
       std::function<void()> postInvoke);
 
   explicit PosixScheduler(
-      std::function<void(const std::exception&)> errorLogger,
-      WallClock* clock);
+      std::function<void(const std::exception&)> errorLogger);
 
   PosixScheduler();
 
   ~PosixScheduler();
+
+  MonotonicTime now() const;
 
   using Scheduler::executeOnReadable;
   using Scheduler::executeOnWritable;
@@ -43,7 +42,7 @@ class PosixScheduler : public Scheduler {
   void execute(Task task) override;
   std::string toString() const override;
   HandleRef executeAfter(Duration delay, Task task) override;
-  HandleRef executeAt(DateTime dt, Task task) override;
+  HandleRef executeAt(UnixTime dt, Task task) override;
   HandleRef executeOnReadable(int fd, Task task, Duration tmo, Task tcb) override;
   HandleRef executeOnWritable(int fd, Task task, Duration tmo, Task tcb) override;
   void executeOnWakeup(Task task, Wakeup* wakeup, long generation) override;
@@ -81,31 +80,31 @@ class PosixScheduler : public Scheduler {
     int fd;
     Mode mode;
     Task onIO;
-    DateTime timeout;
+    MonotonicTime timeout;
     Task onTimeout;
 
     Watcher* prev; //!< predecessor by timeout ASC
     Watcher* next; //!< successor by timeout ASC
 
     Watcher()
-        : Watcher(-1, Mode::READABLE, nullptr, DateTime(0.0), nullptr) {}
+        : Watcher(-1, Mode::READABLE, nullptr, MonotonicTime(0), nullptr) {}
 
     Watcher(const Watcher& w)
         : Watcher(w.fd, w.mode, w.onIO, w.timeout, w.onTimeout) {}
 
     Watcher(int _fd, Mode _mode, Task _onIO,
-            DateTime _timeout, Task _onTimeout)
+            MonotonicTime _timeout, Task _onTimeout)
         : fd(_fd), mode(_mode), onIO(_onIO),
           timeout(_timeout), onTimeout(_onTimeout),
           prev(nullptr), next(nullptr) {
       // Manually ref because we're not holding it in a
       // RefPtr<Watcher> vector in PosixScheduler.
       // - Though, no need to manually unref() either.
-      ref();
+      incRef();
     }
 
     void reset(int _fd, Mode _mode, Task _onIO,
-            DateTime _timeout, Task _onTimeout) {
+            MonotonicTime _timeout, Task _onTimeout) {
       fd = _fd;
       mode = _mode;
       onIO = _onIO;
@@ -120,7 +119,7 @@ class PosixScheduler : public Scheduler {
 
     void clear() {
       fd = -1;
-      timeout = DateTime(0.0);
+      timeout = MonotonicTime(0);
       prev = nullptr;
       next = nullptr;
     }
@@ -130,12 +129,12 @@ class PosixScheduler : public Scheduler {
     }
   }; // }}}
   struct Timer : public Handle { // {{{
-    DateTime when;
+    MonotonicTime when;
     Task action;
 
     Timer() : Handle(), when(), action() {}
-    Timer(DateTime dt, Task t) : Handle(), when(dt), action(t) {}
-    Timer(DateTime dt, Task t, Task c) : Handle(c), when(dt), action(t) {}
+    Timer(MonotonicTime dt, Task t) : Handle(), when(dt), action(t) {}
+    Timer(MonotonicTime dt, Task t, Task c) : Handle(c), when(dt), action(t) {}
     Timer(const Timer&) = default;
     Timer& operator=(const Timer&) = default;
   }; // }}}
@@ -149,7 +148,7 @@ class PosixScheduler : public Scheduler {
    *
    * @note The caller must protect the access itself.
    */
-  HandleRef insertIntoTimersList(DateTime dt, Task task);
+  HandleRef insertIntoTimersList(MonotonicTime dt, Task task);
 
   void collectTimeouts(std::list<Task>* result);
 
@@ -199,7 +198,6 @@ class PosixScheduler : public Scheduler {
   friend std::string inspect(const PosixScheduler&);
 
  private:
-  WallClock* clock_;
   std::mutex lock_;
   int wakeupPipe_[2];
 

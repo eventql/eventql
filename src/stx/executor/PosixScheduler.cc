@@ -8,12 +8,16 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #include <stx/executor/PosixScheduler.h>
+#include <stx/MonotonicClock.h>
 #include <stx/thread/Wakeup.h>
-#include <stx/RuntimeError.h>
+#include <stx/exception.h>
 #include <stx/WallClock.h>
 #include <stx/StringUtil.h>
-#include <stx/sysconfig.h>
+#include <stx/wallclock.h>
+#include <stx/exceptionhandler.h>
 #include <stx/logging.h>
+#include <stx/sysconfig.h>
+
 #include <algorithm>
 #include <vector>
 #include <sstream>
@@ -38,11 +42,9 @@ namespace stx {
 
 PosixScheduler::PosixScheduler(
     std::function<void(const std::exception&)> errorLogger,
-    WallClock* clock,
     std::function<void()> preInvoke,
     std::function<void()> postInvoke)
     : Scheduler(errorLogger),
-      clock_(clock ? clock : WallClock::monotonic()),
       lock_(),
       wakeupPipe_(),
       onPreInvokePending_(preInvoke),
@@ -54,34 +56,35 @@ PosixScheduler::PosixScheduler(
       firstWatcher_(nullptr),
       lastWatcher_(nullptr) {
   if (pipe(wakeupPipe_) < 0) {
-    RAISE_ERRNO(errno);
+    RAISE_ERRNO("Could not create pipe");
   }
   fcntl(wakeupPipe_[0], F_SETFL, O_NONBLOCK);
   fcntl(wakeupPipe_[1], F_SETFL, O_NONBLOCK);
 
-  TRACE("ctor: wakeupPipe {read=%d, write=%d}, clock=@%p",
+  TRACE("ctor: wakeupPipe {read=%d, write=%d}",
       wakeupPipe_[PIPE_READ_END],
-      wakeupPipe_[PIPE_WRITE_END],
-      clock_);
+      wakeupPipe_[PIPE_WRITE_END]);
 }
 
 PosixScheduler::PosixScheduler(
-    std::function<void(const std::exception&)> errorLogger,
-    WallClock* clock)
-    : PosixScheduler(errorLogger, clock, nullptr, nullptr) {
+    std::function<void(const std::exception&)> errorLogger)
+    : PosixScheduler(errorLogger, nullptr, nullptr) {
 }
 
 PosixScheduler::PosixScheduler()
-    : PosixScheduler(std::bind(&logAndPass, std::placeholders::_1),
-                     WallClock::monotonic(),
-                     nullptr,
-                     nullptr) {
+    : PosixScheduler(std::bind(CatchAndLogExceptionHandler("PosixScheduler"),
+                               std::placeholders::_1)) {
 }
 
 PosixScheduler::~PosixScheduler() {
   TRACE("~dtor");
   ::close(wakeupPipe_[PIPE_READ_END]);
   ::close(wakeupPipe_[PIPE_WRITE_END]);
+}
+
+MonotonicTime PosixScheduler::now() const {
+  // later to provide cachable value
+  return MonotonicClock::now();
 }
 
 void PosixScheduler::execute(Task task) {
@@ -99,14 +102,14 @@ std::string PosixScheduler::toString() const {
 }
 
 Scheduler::HandleRef PosixScheduler::executeAfter(Duration delay, Task task) {
-  return insertIntoTimersList(clock_->get() + delay, task);
+  return insertIntoTimersList(now() + delay, task);
 }
 
-Scheduler::HandleRef PosixScheduler::executeAt(DateTime when, Task task) {
-  return insertIntoTimersList(when, task);
+Scheduler::HandleRef PosixScheduler::executeAt(UnixTime when, Task task) {
+  return executeAfter(when - WallClock::now(), task);
 }
 
-Scheduler::HandleRef PosixScheduler::insertIntoTimersList(DateTime dt,
+Scheduler::HandleRef PosixScheduler::insertIntoTimersList(MonotonicTime dt,
                                                           Task task) {
   RefPtr<Timer> t(new Timer(dt, task));
 
@@ -116,7 +119,7 @@ Scheduler::HandleRef PosixScheduler::insertIntoTimersList(DateTime dt,
 
     while (i != e) {
       i--;
-      if (*i == t) {
+      if (i->get() == t.get()) {
         timers_.erase(i);
         break;
       }
@@ -154,9 +157,7 @@ Scheduler::HandleRef PosixScheduler::insertIntoTimersList(DateTime dt,
 }
 
 void PosixScheduler::collectTimeouts(std::list<Task>* result) {
-  const DateTime now = clock_->get();
-
-  for (Watcher* w = firstWatcher_; w && w->timeout <= now; ) {
+  for (Watcher* w = firstWatcher_; w && w->timeout <= now(); ) {
     TRACE("collectTimeouts: timeouting %s", inspect(*w).c_str());
     result->push_back([w] { w->fire(w->onTimeout); });
     switch (w->mode) {
@@ -172,7 +173,7 @@ void PosixScheduler::collectTimeouts(std::list<Task>* result) {
 
     const RefPtr<Timer>& job = timers_.front();
 
-    if (job->when > now)
+    if (job->when > now())
       break;
 
     result->push_back([job] { job->fire(job->action); });
@@ -239,7 +240,7 @@ PosixScheduler::HandleRef PosixScheduler::setupWatcher(
   TRACE("setupWatcher(%d, %s, %s)",
       fd, inspect(mode).c_str(), inspect(tmo).c_str());
 
-  DateTime timeout = clock_->get() + tmo;
+  MonotonicTime timeout = now() + tmo;
 
   if (fd >= watchers_.size()) {
     watchers_.resize(fd + 1);
@@ -248,7 +249,8 @@ PosixScheduler::HandleRef PosixScheduler::setupWatcher(
   Watcher* w = &watchers_[fd];
 
   if (w->fd >= 0)
-    RAISE_STATUS(AlreadyWatchingOnResource);
+    RAISE("AlreadyWatchingOnResource", "Already watching on resource");
+    // TODO RAISE_STATUS(AlreadyWatchingOnResource);
 
   w->reset(fd, mode, task, timeout, tcb);
 
@@ -369,8 +371,8 @@ void PosixScheduler::runLoopOnce() {
     }
 
     const Duration timeout = nextTimeout();
-    tv.tv_sec = static_cast<time_t>(timeout.totalSeconds()),
-    tv.tv_usec = timeout.microseconds();
+    tv.tv_sec = static_cast<time_t>(timeout.seconds()),
+    tv.tv_usec = timeout.microseconds() % kMicrosPerSecond;
   }
 
   FD_SET(wakeupPipe_[PIPE_READ_END], &input);
@@ -383,10 +385,10 @@ void PosixScheduler::runLoopOnce() {
   do rv = ::select(wmark + 1, &input, &output, &error, &tv);
   while (rv < 0 && errno == EINTR);
 
-  TRACE("runLoopOnce: select returned %i", rv);
-
   if (rv < 0)
-    RAISE_ERRNO(errno);
+    RAISE_ERRNO("select failed");
+
+  TRACE("runLoopOnce: select returned %i", rv);
 
   if (FD_ISSET(wakeupPipe_[PIPE_READ_END], &input)) {
     bool consumeMore = true;
@@ -414,14 +416,12 @@ Duration PosixScheduler::nextTimeout() const {
   if (!tasks_.empty())
     return Duration::Zero;
 
-  const DateTime now = clock_->get();
-
   const Duration a = !timers_.empty()
-                 ? timers_.front()->when - now
+                 ? timers_.front()->when - now()
                  : Duration::fromSeconds(5);
 
   const Duration b = firstWatcher_ != nullptr
-                 ? firstWatcher_->timeout - now
+                 ? firstWatcher_->timeout - now()
                  : Duration::fromSeconds(6);
 
   return std::min(a, b);
@@ -439,18 +439,16 @@ void PosixScheduler::waitForReadable(int fd, Duration timeout) {
   FD_ZERO(&output);
   FD_SET(fd, &input);
 
-  struct timeval tv;
-  tv.tv_sec = timeout.totalSeconds();
-  tv.tv_usec = timeout.totalMicroseconds();
+  struct timeval tv = timeout;
 
   int res = select(fd + 1, &input, &output, &input, &tv);
 
   if (res == 0) {
-    RAISE(IOError, "unexpected timeout while select()ing");
+    RAISE(kIOError, "unexpected timeout while select()ing");
   }
 
   if (res == -1) {
-    RAISE_ERRNO(errno);
+    RAISE_ERRNO("select failed");
   }
 }
 
@@ -464,11 +462,11 @@ void PosixScheduler::waitForReadable(int fd) {
   int res = select(fd + 1, &input, &output, &input, nullptr);
 
   if (res == 0) {
-    RAISE(IOError, "unexpected timeout while select()ing");
+    RAISE(kIOError, "unexpected timeout while select()ing");
   }
 
   if (res == -1) {
-    RAISE_ERRNO(errno);
+    RAISE_ERRNO("select failed");
   }
 }
 
@@ -480,18 +478,16 @@ void PosixScheduler::waitForWritable(int fd, Duration timeout) {
   FD_ZERO(&output);
   FD_SET(fd, &output);
 
-  struct timeval tv;
-  tv.tv_sec = timeout.totalSeconds();
-  tv.tv_usec = timeout.totalMicroseconds();
+  struct timeval tv = timeout;
 
   int res = select(fd + 1, &input, &output, &input, &tv);
 
   if (res == 0) {
-    RAISE(IOError, "unexpected timeout while select()ing");
+    RAISE(kIOError, "unexpected timeout while select()ing");
   }
 
   if (res == -1) {
-    RAISE_ERRNO(errno);
+    RAISE_ERRNO("select failed");
   }
 }
 
@@ -506,11 +502,11 @@ void PosixScheduler::waitForWritable(int fd) {
   int res = select(fd + 1, &input, &output, &input, nullptr);
 
   if (res == 0) {
-    RAISE(IOError, "unexpected timeout while select()ing");
+    RAISE(kIOError, "unexpected timeout while select()ing");
   }
 
   if (res == -1) {
-    RAISE_ERRNO(errno);
+    RAISE_ERRNO("select failed");
   }
 }
 

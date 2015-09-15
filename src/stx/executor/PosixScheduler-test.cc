@@ -8,12 +8,15 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #include <stx/executor/PosixScheduler.h>
-#include <stx/WallClock.h>
-#include <stx/DateTime.h>
-#include <stx/RuntimeError.h>
+#include <stx/MonotonicTime.h>
+#include <stx/MonotonicClock.h>
+#include <stx/exception.h>
 #include <stx/logging.h>
-#include <gtest/gtest.h>
+#include <stx/test/unittest.h>
 #include <memory>
+
+#include <fcntl.h>
+#include <unistd.h>
 
 using namespace stx;
 
@@ -54,29 +57,35 @@ class SystemPipe { // {{{
   int fds_[2];
 }; // }}}
 
-TEST(PosixScheduler, executeAfter_without_handle) {
-  WallClock* clock = WallClock::monotonic();
+static stx::test::UnitTest PosixSchedulerTest("PosixSchedulerTest");
+int main() {
+  auto& t = PosixSchedulerTest;
+  return t.run();
+}
+
+TEST_CASE(PosixSchedulerTest, executeAfter_without_handle, [] () {
   PosixScheduler scheduler;
-  DateTime start, firedAt;
+  MonotonicTime start;
+  MonotonicTime firedAt;
   int fireCount = 0;
 
-  scheduler.executeAfter(Duration::fromMilliseconds(500), [&](){
-    firedAt = clock->get();
+  scheduler.executeAfter(Duration::fromMilliseconds(50), [&](){
+    firedAt = MonotonicClock::now();
     fireCount++;
   });
 
-  start = clock->get();
+  start = MonotonicClock::now();
   firedAt = start;
 
   scheduler.runLoopOnce();
 
-  float diff = firedAt.value() - start.value();
+  Duration diff = firedAt - start;
 
   EXPECT_EQ(1, fireCount);
-  EXPECT_NEAR(0.5, diff, 0.05);
-}
+  EXPECT_NEAR(50, diff.milliseconds(), 10);
+});
 
-TEST(PosixScheduler, executeAfter_cancel_beforeRun) {
+TEST_CASE(PosixSchedulerTest, executeAfter_cancel_beforeRun, [] () {
   PosixScheduler scheduler;
   int fireCount = 0;
 
@@ -85,13 +94,13 @@ TEST(PosixScheduler, executeAfter_cancel_beforeRun) {
     fireCount++;
   });
 
-  ASSERT_EQ(1, scheduler.timerCount());
+  EXPECT_EQ(1, scheduler.timerCount());
   handle->cancel();
   EXPECT_EQ(0, scheduler.timerCount());
   EXPECT_EQ(0, fireCount);
-}
+});
 
-TEST(PosixScheduler, executeAfter_cancel_beforeRun2) {
+TEST_CASE(PosixSchedulerTest, executeAfter_cancel_beforeRun2, [] () {
   PosixScheduler scheduler;
   int fire1Count = 0;
   int fire2Count = 0;
@@ -104,17 +113,17 @@ TEST(PosixScheduler, executeAfter_cancel_beforeRun2) {
     fire2Count++;
   });
 
-  ASSERT_EQ(2, scheduler.timerCount());
+  EXPECT_EQ(2, scheduler.timerCount());
   handle1->cancel();
-  ASSERT_EQ(1, scheduler.timerCount());
+  EXPECT_EQ(1, scheduler.timerCount());
 
   scheduler.runLoopOnce();
 
-  ASSERT_EQ(0, fire1Count);
-  ASSERT_EQ(1, fire2Count);
-}
+  EXPECT_EQ(0, fire1Count);
+  EXPECT_EQ(1, fire2Count);
+});
 
-TEST(PosixScheduler, executeOnReadable) {
+TEST_CASE(PosixSchedulerTest, executeOnReadable, [] () {
   // executeOnReadable: test cancellation after fire
   // executeOnReadable: test fire
   // executeOnReadable: test timeout
@@ -134,34 +143,32 @@ TEST(PosixScheduler, executeOnReadable) {
       Duration::Zero,
       [&] { timeoutCount++; } );
 
-  ASSERT_EQ(0, fireCount);
-  ASSERT_EQ(0, timeoutCount);
+  EXPECT_EQ(0, fireCount);
+  EXPECT_EQ(0, timeoutCount);
 
   sched.runLoopOnce();
 
-  ASSERT_EQ(1, fireCount);
-  ASSERT_EQ(0, timeoutCount);
-}
+  EXPECT_EQ(1, fireCount);
+  EXPECT_EQ(0, timeoutCount);
+});
 
-TEST(PosixScheduler, executeOnReadable_timeout) {
+TEST_CASE(PosixSchedulerTest, executeOnReadable_timeout, [] () {
   PosixScheduler sched;
   SystemPipe pipe;
 
   int fireCount = 0;
   int timeoutCount = 0;
   auto onFire = [&] { fireCount++; };
-  auto onTimeout = [&] {
-    printf("onTimeout!\n");
-    timeoutCount++; };
+  auto onTimeout = [&] { timeoutCount++; };
 
   sched.executeOnReadable(pipe.readerFd(), onFire, Duration::fromMilliseconds(500), onTimeout);
   sched.runLoopOnce();
 
-  ASSERT_EQ(0, fireCount);
-  ASSERT_EQ(1, timeoutCount);
-}
+  EXPECT_EQ(0, fireCount);
+  EXPECT_EQ(1, timeoutCount);
+});
 
-TEST(PosixScheduler, executeOnReadable_timeout_on_cancelled) {
+TEST_CASE(PosixSchedulerTest, executeOnReadable_timeout_on_cancelled, [] () {
   PosixScheduler sched;
   SystemPipe pipe;
 
@@ -178,22 +185,27 @@ TEST(PosixScheduler, executeOnReadable_timeout_on_cancelled) {
   handle->cancel();
   sched.runLoopOnce();
 
-  ASSERT_EQ(0, fireCount);
-  ASSERT_EQ(0, timeoutCount);
-}
+  EXPECT_EQ(0, fireCount);
+  EXPECT_EQ(0, timeoutCount);
+});
 
-TEST(PosixScheduler, executeOnReadable_twice_on_same_fd) {
+TEST_CASE(PosixSchedulerTest, executeOnReadable_twice_on_same_fd, [] () {
   PosixScheduler sched;
   SystemPipe pipe;
 
-  sched.executeOnReadable(pipe.readerFd(), [] {});
+  sched.executeOnReadable(pipe.readerFd(), [] () {});
 
-  ASSERT_THROW(
-      sched.executeOnReadable(pipe.readerFd(), [] {}),
-      RuntimeError); // AlreadyWatchingOnResource
-}
+  EXPECT_EXCEPTION("Already watching on resource", [&]() {
+    sched.executeOnReadable(pipe.readerFd(), [] () {});
+  });
 
-TEST(PosixScheduler, executeOnWritable) {
+  // FIXME
+  // EXPECT_THROW(
+  //     sched.executeOnReadable(pipe.readerFd(), [] () {}),
+  //     AlreadyWatchingOnResource);
+});
+
+TEST_CASE(PosixSchedulerTest, executeOnWritable, [] () {
   PosixScheduler sched;
 
   SystemPipe pipe;
@@ -205,24 +217,23 @@ TEST(PosixScheduler, executeOnWritable) {
 
   sched.executeOnWritable(pipe.writerFd(), onFire, timeout, onTimeout);
 
-  ASSERT_EQ(0, fireCount);
-  ASSERT_EQ(0, timeoutCount);
+  EXPECT_EQ(0, fireCount);
+  EXPECT_EQ(0, timeoutCount);
 
   sched.runLoopOnce();
 
-  ASSERT_EQ(1, fireCount);
-  ASSERT_EQ(0, timeoutCount);
-}
+  EXPECT_EQ(1, fireCount);
+  EXPECT_EQ(0, timeoutCount);
+});
 
-TEST(PosixScheduler, waitForReadable) { // TODO
-}
-
-TEST(PosixScheduler, waitForWritable) { // TODO
-}
-
-TEST(PosixScheduler, waitForReadable_timed) { // TODO
-}
-
-TEST(PosixScheduler, waitForWritable_timed) { // TODO
-}
-
+// TEST_CASE(PosixSchedulerTest, waitForReadable, [] () { // TODO
+// });
+// 
+// TEST_CASE(PosixSchedulerTest, waitForWritable, [] () { // TODO
+// });
+// 
+// TEST_CASE(PosixSchedulerTest, waitForReadable_timed, [] () { // TODO
+// });
+// 
+// TEST_CASE(PosixSchedulerTest, waitForWritable_timed, [] () { // TODO
+// });
