@@ -231,7 +231,7 @@ SValue::BoolType SValue::getBool() const {
   return data_.u.t_bool;
 }
 
-SValue::BoolType SValue::getBoolWithConversion() const {
+SValue::BoolType SValue::toBool() const {
   switch (data_.type) {
 
     case T_INTEGER:

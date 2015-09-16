@@ -254,7 +254,7 @@ void VM::evaluate(
       evaluate(program, instance, cond_expr, argc, argv, &cond);
 
       auto branch = cond_expr->next;
-      if (!cond.getBoolWithConversion()) {
+      if (!cond.toBool()) {
         branch = branch->next;
       }
 
