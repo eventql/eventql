@@ -44,6 +44,32 @@ TEST_CASE(RuntimeTest, TestStaticExpression, [] () {
   EXPECT_EQ(out.getInteger(), 3);
 });
 
+TEST_CASE(RuntimeTest, TestComparisons, [] () {
+  auto runtime = Runtime::getDefaultRuntime();
+
+  {
+    auto v = runtime->evaluateStaticExpression("true = true");
+    EXPECT_EQ(v.toString(), "true");
+  }
+
+  {
+    auto v = runtime->evaluateStaticExpression("false = false");
+    EXPECT_EQ(v.toString(), "true");
+  }
+
+  {
+    auto v = runtime->evaluateStaticExpression("false = true");
+    EXPECT_EQ(v.toString(), "false");
+  }
+
+  {
+    auto v = runtime->evaluateStaticExpression("true = false");
+    EXPECT_EQ(v.toString(), "false");
+  }
+
+
+});
+
 TEST_CASE(RuntimeTest, TestExecuteIfStatement, [] () {
   auto runtime = Runtime::getDefaultRuntime();
 

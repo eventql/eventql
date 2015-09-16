@@ -197,7 +197,7 @@ void CSTableScan::scan(
           in_row.data(),
           &where_tmp);
 
-      where_pred = where_tmp.getBoolWithConversion();
+      where_pred = where_tmp.toBool();
     }
 
     if (where_pred) {
@@ -297,7 +297,7 @@ void CSTableScan::scanWithoutColumns(
     if (where_expr_.program() != nullptr) {
       SValue where_tmp;
       VM::evaluate(where_expr_.program(), 0, nullptr, &where_tmp);
-      where_pred = where_tmp.getBoolWithConversion();
+      where_pred = where_tmp.toBool();
     }
 
     if (where_pred) {
