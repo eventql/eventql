@@ -204,9 +204,15 @@ int main(int argc, const char** argv) {
     Vector<zbase::ReplicaRef> replicas;
 
     for (const auto& r : repl_targets) {
+      auto addr = r;
+      auto addr_end = StringUtil::find(addr, '+');
+      if (addr_end != String::npos) {
+        addr = addr.substr(0, addr_end);
+      }
+
       zbase::ReplicaRef rref(
           SHA1::compute(r),
-          InetAddr::resolve(r));
+          InetAddr::resolve(addr));
 
       logInfo(
           "zbase",

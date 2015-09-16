@@ -69,6 +69,17 @@ void WebUIServlet::handle(
     return;
   }
 
+  static const String kDocumentationPathPrefix = "/a/_/d/";
+  if (StringUtil::beginsWith(uri.path(), kDocumentationPathPrefix)) {
+    auto asset_path = uri.path().substr(kDocumentationPathPrefix.size());
+
+    // FIXME validate path
+    response->setStatus(http::kStatusOK);
+    //response->addHeader("Content-Type", "text/html; charset=utf-8");
+    response->addBody(Assets::getAsset("zbase/docs/" + asset_path)); // FIXME
+    return;
+  }
+
   static const String kModulesPathPrefix = "/a/_/m/";
   if (StringUtil::beginsWith(uri.path(), kModulesPathPrefix)) {
     auto module_name = uri.path().substr(kModulesPathPrefix.size());

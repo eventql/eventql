@@ -116,6 +116,10 @@ ZBase.registerView((function() {
     $.handleLinks(page);
     $.replaceViewport(page);
 
+    if (!readonly) {
+      editor.focus();
+    }
+
     // document name + name editing
     setDocumentTitle(doc.name);
     if (!readonly) {
