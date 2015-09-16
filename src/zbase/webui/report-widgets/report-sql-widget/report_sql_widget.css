@@ -18,6 +18,12 @@
   font-size: 13px;
 }
 
+.zbase_report_sql_result_pane table.z-table tbody {
+  -moz-user-select: text;
+  -webkit-user-select: text;
+  -ms-user-select: text;
+}
+
 .zbase_report_sql_result_pane table.z-table thead th {
   background: #f6f6f6;
 }
