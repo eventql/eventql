@@ -25,6 +25,7 @@ var ReportJSONEditor = function(json) {
     });
 
     elem.appendChild(tpl);
+    editor.focus();
   };
 
   var addCancelCallback = function(callback) {
