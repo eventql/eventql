@@ -350,6 +350,45 @@ TEST_CASE(RuntimeTest, TestMultiLevelNestedCSTableAggrgateWithMultiLevelGroup, [
   }
 });
 
+TEST_CASE(RuntimeTest, TestMultiLevelNestedCSTableAggrgateWithWhere, [] () {
+  auto runtime = Runtime::getDefaultRuntime();
+
+  auto estrat = mkRef(new DefaultExecutionStrategy());
+  estrat->addTableProvider(
+      new CSTableScanProvider(
+          "testtable",
+          "src/csql/testdata/testtbl.cst"));
+
+  {
+    ResultList result;
+    auto query = R"(
+      select
+        FROM_TIMESTAMP(TRUNCATE(event.search_query.time / 86400000000) * 86400) as time,
+        event.search_query.result_items.position,
+        sum(count(event.search_query.result_items.position) WITHIN RECORD) as number_impressions,
+        sum(sum(if(event.search_query.result_items.clicked, 1, 0)) WITHIN RECORD) as number_result_clicked,
+        (
+          sum(sum(if(event.search_query.result_items.clicked, 1, 0)) WITHIN RECORD) / 
+          sum(count(event.search_query.result_items.position) WITHIN RECORD)
+        ) as ctr
+      from testtable
+      where event.search_query.result_items.position = 9
+      group by TRUNCATE(event.search_query.time / 86400000000);
+    )";
+
+    auto qplan = runtime->buildQueryPlan(query, estrat.get());
+    runtime->executeStatement(qplan->buildStatement(0), &result);
+    EXPECT_EQ(result.getNumColumns(), 5);
+    result.debugPrint();
+    EXPECT_EQ(result.getNumRows(), 1);
+    EXPECT_EQ(result.getRow(0)[0], "2015-07-28 00:00:00");
+    EXPECT_EQ(result.getRow(0)[1], "9");
+    EXPECT_EQ(result.getRow(0)[2], "679");
+    EXPECT_EQ(result.getRow(0)[3], "4");
+    EXPECT_EQ(result.getRow(0)[4], "0.005891");
+  }
+});
+
 TEST_CASE(RuntimeTest, TestTableNamesWithDots, [] () {
   auto runtime = Runtime::getDefaultRuntime();
 
