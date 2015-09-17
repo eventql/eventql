@@ -170,6 +170,7 @@ add_library(stx-base STATIC
     Language.cc
     logging.cc
     logging/logoutputstream.cc
+    MonotonicClock.cc
     net/dnscache.cc
     net/tcpserver.cc
     net/udpserver.cc
