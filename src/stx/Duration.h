@@ -21,7 +21,17 @@
 namespace stx {
 
 class Duration {
+private:
+  enum class ZeroType { Zero };
+
 public:
+  static constexpr ZeroType Zero = ZeroType::Zero;
+
+  /**
+   * Creates a new Duration of zero microseconds.
+   */
+  constexpr Duration(ZeroType);
+
   /**
    * Create a new Duration
    *

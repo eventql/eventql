@@ -11,6 +11,9 @@
 
 namespace stx {
 
+inline constexpr Duration::Duration(ZeroType)
+    : micros_(0) {}
+
 inline constexpr Duration::Duration(uint64_t microseconds)
     : micros_(microseconds) {}
 

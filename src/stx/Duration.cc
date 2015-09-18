@@ -12,4 +12,10 @@
 
 namespace stx {
 
+Duration duration_test() {
+  Duration x = Duration::Zero;
+
+  return x;
+}
+
 }
