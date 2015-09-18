@@ -39,6 +39,9 @@ public:
   T* get() const;
   T* release();
 
+  template<typename U>
+  RefPtr<U> as() const;
+
   template <typename T_>
   RefPtr<T_> asInstanceOf() const;
 

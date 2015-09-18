@@ -77,6 +77,12 @@ T* RefPtr<T>::release() {
 }
 
 template <typename T>
+template<typename U>
+RefPtr<U> RefPtr<T>::as() const {
+  return RefPtr<U>(static_cast<U*>(ref_));
+}
+
+template <typename T>
 template <typename T_>
 RefPtr<T_> RefPtr<T>::asInstanceOf() const {
   auto cast = dynamic_cast<T_*>(ref_);
