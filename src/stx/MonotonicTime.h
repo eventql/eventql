@@ -17,6 +17,13 @@ public:
   constexpr uint64_t nanoseconds() const;
 
   constexpr Duration operator-(const MonotonicTime& other) const;
+
+  constexpr bool operator==(const MonotonicTime& other) const;
+  constexpr bool operator!=(const MonotonicTime& other) const;
+  constexpr bool operator<=(const MonotonicTime& other) const;
+  constexpr bool operator>=(const MonotonicTime& other) const;
+  constexpr bool operator<(const MonotonicTime& other) const;
+  constexpr bool operator>(const MonotonicTime& other) const;
   
 private:
   uint64_t nanosecs_;
