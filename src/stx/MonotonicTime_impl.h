@@ -33,6 +33,10 @@ inline constexpr Duration MonotonicTime::operator-(const MonotonicTime& other) c
   return Duration::fromMicroseconds(microseconds() - other.microseconds());
 }
 
+inline constexpr MonotonicTime MonotonicTime::operator+(const Duration& other) const {
+  return MonotonicTime(nanosecs_ + other.microseconds() * 1000);
+}
+
 inline constexpr bool MonotonicTime::operator==(const MonotonicTime& other) const {
   return nanosecs_ == other.nanosecs_;
 }
