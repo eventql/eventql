@@ -40,4 +40,10 @@ inline constexpr UnixTime UnixTime::epoch() {
   return UnixTime(0);
 }
 
+inline constexpr Duration UnixTime::operator-(const UnixTime& other) const {
+  return *this > other
+      ? Duration::fromMicroseconds(utc_micros_ - other.utc_micros_)
+      : Duration::fromMicroseconds(other.utc_micros_ - utc_micros_);
+}
+
 } // namespace stx

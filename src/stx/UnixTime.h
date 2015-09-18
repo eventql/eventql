@@ -15,6 +15,7 @@
 #include <string>
 #include "stx/time_constants.h"
 #include "stx/CivilTime.h"
+#include "stx/Duration.h"
 #include "stx/option.h"
 
 namespace stx {
@@ -77,6 +78,15 @@ public:
   constexpr bool operator>(const UnixTime& other) const;
   constexpr bool operator<=(const UnixTime& other) const;
   constexpr bool operator>=(const UnixTime& other) const;
+
+  /**
+   * Calculates the duration between this time and the other.
+   *
+   * @param other the other time to calculate the difference from.
+   *
+   * @return the difference between this and the other time.
+   */
+  constexpr Duration operator-(const UnixTime& other) const;
 
   /**
    * Cast the UnixTime object to a UTC unix microsecond timestamp represented as
