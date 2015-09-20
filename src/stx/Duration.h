@@ -40,6 +40,7 @@ public:
   constexpr Duration(uint64_t microseconds);
 
   constexpr bool operator==(const Duration& other) const;
+  constexpr bool operator!=(const Duration& other) const;
   constexpr bool operator<(const Duration& other) const;
   constexpr bool operator>(const Duration& other) const;
   constexpr bool operator<=(const Duration& other) const;
