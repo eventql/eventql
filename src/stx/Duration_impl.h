@@ -41,6 +41,10 @@ constexpr bool Duration::operator>=(const Duration& other) const {
   return micros_ >= other.micros_;
 }
 
+constexpr bool Duration::operator!() const {
+  return micros_ == 0;
+}
+
 inline constexpr uint64_t Duration::microseconds() const noexcept {
   return micros_;
 }

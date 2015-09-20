@@ -45,6 +45,7 @@ public:
   constexpr bool operator>(const Duration& other) const;
   constexpr bool operator<=(const Duration& other) const;
   constexpr bool operator>=(const Duration& other) const;
+  constexpr bool operator!() const;
 
   constexpr Duration operator+(const Duration& other) const;
 
