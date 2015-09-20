@@ -46,4 +46,12 @@ inline constexpr Duration UnixTime::operator-(const UnixTime& other) const {
       : Duration::fromMicroseconds(other.utc_micros_ - utc_micros_);
 }
 
+inline constexpr UnixTime UnixTime::operator+(const Duration& duration) const {
+  return UnixTime(utc_micros_ + duration.microseconds());
+}
+
+inline constexpr UnixTime UnixTime::operator-(const Duration& duration) const {
+  return UnixTime(utc_micros_ - duration.microseconds());
+}
+
 } // namespace stx

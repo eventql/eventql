@@ -88,6 +88,9 @@ public:
    */
   constexpr Duration operator-(const UnixTime& other) const;
 
+  constexpr UnixTime operator+(const Duration& duration) const;
+  constexpr UnixTime operator-(const Duration& duration) const;
+
   /**
    * Cast the UnixTime object to a UTC unix microsecond timestamp represented as
    * an uint64_t
