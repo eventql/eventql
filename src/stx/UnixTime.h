@@ -74,6 +74,7 @@ public:
   UnixTime& operator=(const UnixTime& other);
 
   constexpr bool operator==(const UnixTime& other) const;
+  constexpr bool operator!=(const UnixTime& other) const;
   constexpr bool operator<(const UnixTime& other) const;
   constexpr bool operator>(const UnixTime& other) const;
   constexpr bool operator<=(const UnixTime& other) const;
