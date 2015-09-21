@@ -9,13 +9,12 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <stx/Duration.h>
+#include <stx/StringUtil.h>
 
 namespace stx {
 
-Duration duration_test() {
-  Duration x = Duration::Zero;
-
-  return x;
+std::string inspect(const Duration& value) {
+  return StringUtil::format("$1ms", value.microseconds());
 }
 
 }

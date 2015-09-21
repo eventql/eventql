@@ -103,6 +103,8 @@ protected:
   const uint64_t micros_;
 };
 
+std::string inspect(const Duration& value);
+
 }
 
 #include <stx/Duration_impl.h>
