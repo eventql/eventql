@@ -30,6 +30,8 @@ private:
   uint64_t nanosecs_;
 };
 
+std::string inspect(const MonotonicTime& value);
+
 } // namespace stx
 
 #include <stx/MonotonicTime_impl.h>
