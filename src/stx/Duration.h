@@ -45,14 +45,14 @@ public:
    *
    * @param value duration as @c timeval.
    */
-  constexpr Duration(const struct timeval& value);
+  Duration(const struct timeval& value);
 
   /**
    * Creates a new Duration out of a @c timespec struct.
    *
    * @param value duration as @c timespec.
    */
-  constexpr Duration(const struct timespec& value);
+  Duration(const struct timespec& value);
 
   constexpr bool operator==(const Duration& other) const;
   constexpr bool operator!=(const Duration& other) const;

@@ -9,6 +9,8 @@
  * <http://www.gnu.org/licenses/>.
  */
 
+#include <stx/defines.h>
+
 namespace stx {
 
 inline constexpr Duration::Duration(ZeroType)
@@ -17,10 +19,10 @@ inline constexpr Duration::Duration(ZeroType)
 inline constexpr Duration::Duration(uint64_t microseconds)
     : micros_(microseconds) {}
 
-inline constexpr Duration::Duration(const timeval& value)
+inline Duration::Duration(const timeval& value)
     : micros_(value.tv_sec + value.tv_usec * kMicrosPerSecond) {}
 
-inline constexpr Duration::Duration(const timespec& value)
+inline Duration::Duration(const timespec& value)
     : micros_(value.tv_sec + value.tv_nsec * kMicrosPerSecond / 1000) {}
 
 constexpr bool Duration::operator==(const Duration& other) const {
