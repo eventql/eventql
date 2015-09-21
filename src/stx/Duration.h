@@ -16,6 +16,7 @@
 #include <inttypes.h>
 #include <limits>
 #include <string>
+#include <time.h>                   // struct timeval; struct timespec;
 #include <stx/time_constants.h>
 
 namespace stx {
@@ -39,6 +40,20 @@ public:
    */
   constexpr Duration(uint64_t microseconds);
 
+  /**
+   * Creates a new Duration out of a @c timeval struct.
+   *
+   * @param value duration as @c timeval.
+   */
+  Duration(const struct timeval& value);
+
+  /**
+   * Creates a new Duration out of a @c timespec struct.
+   *
+   * @param value duration as @c timespec.
+   */
+  Duration(const struct timespec& value);
+
   constexpr bool operator==(const Duration& other) const;
   constexpr bool operator!=(const Duration& other) const;
   constexpr bool operator<(const Duration& other) const;
@@ -48,6 +63,9 @@ public:
   constexpr bool operator!() const;
 
   constexpr Duration operator+(const Duration& other) const;
+
+  constexpr operator struct timeval() const;
+  constexpr operator struct timespec() const;
 
   /**
    * Return the represented duration in microseconds

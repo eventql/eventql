@@ -9,6 +9,8 @@
  * <http://www.gnu.org/licenses/>.
  */
 
+#include <stx/defines.h>
+
 namespace stx {
 
 inline constexpr Duration::Duration(ZeroType)
@@ -16,6 +18,12 @@ inline constexpr Duration::Duration(ZeroType)
 
 inline constexpr Duration::Duration(uint64_t microseconds)
     : micros_(microseconds) {}
+
+inline Duration::Duration(const timeval& value)
+    : micros_(value.tv_sec + value.tv_usec * kMicrosPerSecond) {}
+
+inline Duration::Duration(const timespec& value)
+    : micros_(value.tv_sec + value.tv_nsec * kMicrosPerSecond / 1000) {}
 
 constexpr bool Duration::operator==(const Duration& other) const {
   return micros_ == other.micros_;
@@ -43,6 +51,28 @@ constexpr bool Duration::operator>=(const Duration& other) const {
 
 constexpr bool Duration::operator!() const {
   return micros_ == 0;
+}
+
+inline constexpr Duration::operator struct timeval() const {
+#if defined(STX_OS_DARWIN)
+  // OS/X plays in it's own universe. ;(
+  return { static_cast<time_t>(micros_ / kMicrosPerSecond),
+           static_cast<__darwin_suseconds_t>(micros_ % kMicrosPerSecond) };
+#else
+  return { static_cast<time_t>(micros_ / kMicrosPerSecond),
+           static_cast<long>(micros_ % kMicrosPerSecond) };
+#endif
+}
+
+inline constexpr Duration::operator struct timespec() const {
+#if defined(STX_OS_DARWIN)
+  // OS/X plays in it's own universe. ;(
+  return { static_cast<time_t>(micros_ / kMicrosPerSecond),
+           (static_cast<__darwin_suseconds_t>(micros_ % kMicrosPerSecond) * 1000) };
+#else
+  return { static_cast<time_t>(micros_ / kMicrosPerSecond),
+           (static_cast<long>(micros_ % kMicrosPerSecond) * 1000) };
+#endif
 }
 
 inline constexpr uint64_t Duration::microseconds() const noexcept {
