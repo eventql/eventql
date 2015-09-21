@@ -5,7 +5,7 @@ inline constexpr UnixTime::UnixTime(uint64_t utc_time) :
 }
 
 inline constexpr bool UnixTime::operator==(const UnixTime& other) const {
-  return utc_micros_ < other.utc_micros_;
+  return utc_micros_ == other.utc_micros_;
 }
 
 inline constexpr bool UnixTime::operator<(const UnixTime& other) const {
