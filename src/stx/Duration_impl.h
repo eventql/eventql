@@ -79,6 +79,10 @@ inline constexpr uint64_t Duration::microseconds() const noexcept {
   return micros_;
 }
 
+inline constexpr uint64_t Duration::milliseconds() const noexcept {
+  return micros_ / kMillisPerSecond;
+}
+
 inline constexpr uint64_t Duration::seconds() const noexcept {
   return micros_ / kMicrosPerSecond;
 }

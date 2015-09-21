@@ -83,6 +83,11 @@ public:
   constexpr uint64_t microseconds() const noexcept;
 
   /**
+   * Return the represented duration in milliseconds
+   */
+  constexpr uint64_t milliseconds() const noexcept;
+
+  /**
    * Return the represented duration in seconds
    */
   constexpr uint64_t seconds() const noexcept;
