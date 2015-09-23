@@ -28,9 +28,8 @@ static std::mutex m;
 #define TRACE(msg...) do { } while (0)
 #endif
 
-ThreadedExecutor::ThreadedExecutor(
-    std::function<void(const std::exception&)> eh)
-    : Executor(eh),
+ThreadedExecutor::ThreadedExecutor(std::unique_ptr<stx::ExceptionHandler> eh)
+    : Executor(std::move(eh)),
       threads_() {
 }
 

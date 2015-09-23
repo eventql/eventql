@@ -14,6 +14,7 @@
 #include <stx/UnixTime.h>
 #include <stx/RefCounted.h>
 #include <stx/RefPtr.h>
+#include <stx/exceptionhandler.h>
 #include <stx/executor/Executor.h>
 #include <vector>
 #include <functional>
@@ -59,8 +60,8 @@ class Scheduler : public Executor {
   //typedef std::shared_ptr<Handle> HandleRef;
   //typedef Handle* HandleRef;
 
-  Scheduler(std::function<void(const std::exception&)> eh)
-      : Executor(eh) {}
+  Scheduler(std::unique_ptr<stx::ExceptionHandler> eh)
+      : Executor(std::move(eh)) {}
 
   /**
    * Schedules given task to be run after given delay.

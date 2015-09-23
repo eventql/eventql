@@ -21,8 +21,8 @@ namespace stx {
 
 DirectExecutor::DirectExecutor(
     bool recursive,
-    std::function<void(const std::exception&)> eh)
-    : Executor(eh),
+    std::unique_ptr<stx::ExceptionHandler> eh)
+    : Executor(std::move(eh)),
       recursive_(recursive),
       running_(0),
       deferred_() {

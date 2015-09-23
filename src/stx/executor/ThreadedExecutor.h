@@ -26,7 +26,7 @@ namespace stx {
 class ThreadedExecutor : public Executor {
  public:
   ThreadedExecutor() : ThreadedExecutor(nullptr) {}
-  explicit ThreadedExecutor(std::function<void(const std::exception&)> eh);
+  explicit ThreadedExecutor(std::unique_ptr<stx::ExceptionHandler> eh);
   ~ThreadedExecutor();
 
   void execute(const std::string& name, Task task);

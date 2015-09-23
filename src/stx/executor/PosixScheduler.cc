@@ -41,10 +41,10 @@ namespace stx {
 #endif
 
 PosixScheduler::PosixScheduler(
-    std::function<void(const std::exception&)> errorLogger,
+    std::unique_ptr<stx::ExceptionHandler> eh,
     std::function<void()> preInvoke,
     std::function<void()> postInvoke)
-    : Scheduler(errorLogger),
+    : Scheduler(std::move(eh)),
       lock_(),
       wakeupPipe_(),
       onPreInvokePending_(preInvoke),
@@ -66,14 +66,12 @@ PosixScheduler::PosixScheduler(
       wakeupPipe_[PIPE_WRITE_END]);
 }
 
-PosixScheduler::PosixScheduler(
-    std::function<void(const std::exception&)> errorLogger)
-    : PosixScheduler(errorLogger, nullptr, nullptr) {
+PosixScheduler::PosixScheduler(std::unique_ptr<stx::ExceptionHandler> eh)
+    : PosixScheduler(std::move(eh), nullptr, nullptr) {
 }
 
 PosixScheduler::PosixScheduler()
-    : PosixScheduler(std::bind(CatchAndLogExceptionHandler("PosixScheduler"),
-                               std::placeholders::_1)) {
+    : PosixScheduler(std::unique_ptr<ExceptionHandler>(new CatchAndLogExceptionHandler("PosixScheduler"))) {
 }
 
 PosixScheduler::~PosixScheduler() {

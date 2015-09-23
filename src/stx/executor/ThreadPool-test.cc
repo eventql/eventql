@@ -8,42 +8,51 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #include <stx/executor/ThreadPool.h>
-#include <stx/DateTime.h>
+#include <stx/MonotonicClock.h>
+#include <stx/MonotonicTime.h>
+#include <stx/test/unittest.h>
 #include <chrono>
-#include <gtest/gtest.h>
 
-using cortex::DateTime;
+using namespace stx;
 
-TEST(ThreadPool, simple) {
-  cortex::ThreadPool tp(2);
+UNIT_TEST(ThreadPoolTest);
+
+TEST_CASE(ThreadPoolTest, simple, []() -> void {
+  stx::ThreadPool tp(2);
   bool e1 = false;
   bool e2 = false;
   bool e3 = false;
 
-  DateTime startTime, end1, end2, end3;
+  MonotonicTime startTime;
+  MonotonicTime end1;
+  MonotonicTime end2;
+  MonotonicTime end3;
+
   tp.execute([&]() {
     std::this_thread::sleep_for(std::chrono::seconds(1));
     e1 = true;
-    end1 = DateTime();
+    end1 = MonotonicClock::now();
   });
+
   tp.execute([&]() {
     std::this_thread::sleep_for(std::chrono::seconds(1));
     e2 = true;
-    end2 = DateTime();
+    end2 = MonotonicClock::now();
   });
+
   tp.execute([&]() {
     std::this_thread::sleep_for(std::chrono::seconds(1));
     e3 = true;
-    end3 = DateTime();
+    end3 = MonotonicClock::now();
   });
 
   tp.wait(); // wait until all pending & active tasks have been executed
 
-  ASSERT_EQ(true, e1);
-  ASSERT_EQ(true, e1);
-  ASSERT_EQ(true, e3); // FIXME: where is the race, why does this fail sometimes
+  EXPECT_EQ(true, e1);
+  EXPECT_EQ(true, e1);
+  EXPECT_EQ(true, e3); // FIXME: where is the race, why does this fail sometimes
 
-  ASSERT_EQ(1, (end1 - startTime).totalSeconds()); // executed instantly
-  ASSERT_EQ(1, (end2 - startTime).totalSeconds()); // executed instantly
-  ASSERT_EQ(2, (end3 - startTime).totalSeconds()); // executed
-}
+  EXPECT_EQ(1, (end1 - startTime).seconds()); // executed instantly
+  EXPECT_EQ(1, (end2 - startTime).seconds()); // executed instantly
+  EXPECT_EQ(2, (end3 - startTime).seconds()); // executed
+});

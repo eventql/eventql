@@ -31,7 +31,8 @@ namespace stx {
  */
 class Executor : protected SafeCall {
  public:
-  explicit Executor(std::function<void(const std::exception&)> eh);
+  explicit Executor(std::unique_ptr<stx::ExceptionHandler> eh);
+
   virtual ~Executor();
 
   typedef std::function<void()> Task;

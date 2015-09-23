@@ -11,8 +11,8 @@
 
 namespace stx {
 
-Executor::Executor(std::function<void(const std::exception&)> eh)
-    : SafeCall(eh) {
+Executor::Executor(std::unique_ptr<stx::ExceptionHandler> eh)
+    : SafeCall(std::move(eh)) {
 }
 
 Executor::~Executor() {

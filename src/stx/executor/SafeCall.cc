@@ -15,18 +15,15 @@
 namespace stx {
 
 SafeCall::SafeCall()
-    : SafeCall(std::bind(CatchAndLogExceptionHandler("SafeCall"),
-                         std::placeholders::_1)) {
+    : SafeCall(std::unique_ptr<ExceptionHandler>(new CatchAndLogExceptionHandler("SafeCall"))) {
 }
 
-SafeCall::SafeCall(std::function<void(const std::exception&)> eh)
-    : exceptionHandler_(eh) {
+SafeCall::SafeCall(std::unique_ptr<ExceptionHandler> eh)
+    : exceptionHandler_(std::move(eh)) {
 }
 
-void SafeCall::setExceptionHandler(
-    std::function<void(const std::exception&)> eh) {
-
-  exceptionHandler_ = eh;
+void SafeCall::setExceptionHandler(std::unique_ptr<ExceptionHandler> eh) {
+  exceptionHandler_ = std::move(eh);
 }
 
 void SafeCall::safeCall(std::function<void()> task) noexcept {
@@ -43,7 +40,7 @@ void SafeCall::safeCall(std::function<void()> task) noexcept {
 void SafeCall::handleException(const std::exception& e) noexcept {
   if (exceptionHandler_) {
     try {
-      exceptionHandler_(e);
+      exceptionHandler_->onException(e);
     } catch (...) {
     }
   }

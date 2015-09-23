@@ -23,12 +23,12 @@ namespace stx {
 class PosixScheduler : public Scheduler {
  public:
   PosixScheduler(
-      std::function<void(const std::exception&)> errorLogger,
+      std::unique_ptr<stx::ExceptionHandler> eh,
       std::function<void()> preInvoke,
       std::function<void()> postInvoke);
 
   explicit PosixScheduler(
-      std::function<void(const std::exception&)> errorLogger);
+      std::unique_ptr<stx::ExceptionHandler> eh);
 
   PosixScheduler();
 

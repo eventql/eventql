@@ -10,6 +10,7 @@
 #pragma once
 
 #include <stx/sysconfig.h>
+#include <stx/exceptionhandler.h>
 
 #include <exception>
 #include <deque>
@@ -28,12 +29,13 @@ namespace stx {
 class SafeCall {
  public:
   SafeCall();
-  explicit SafeCall(std::function<void(const std::exception&)> eh);
+
+  explicit SafeCall(std::unique_ptr<ExceptionHandler> eh);
 
   /**
    * Configures exception handler.
    */
-  void setExceptionHandler(std::function<void(const std::exception&)> eh);
+  void setExceptionHandler(std::unique_ptr<ExceptionHandler> eh);
 
   /**
    * Savely invokes given task within the callers context.
@@ -60,7 +62,7 @@ class SafeCall {
   void handleException(const std::exception& e) noexcept;
 
  private:
-  std::function<void(const std::exception&)> exceptionHandler_;
+  std::unique_ptr<ExceptionHandler> exceptionHandler_;
 };
 
 } // namespace stx

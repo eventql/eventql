@@ -34,14 +34,21 @@ namespace stx {
 #define TRACE(msg...) do {} while (0)
 #endif
 
-ThreadPool::ThreadPool(std::function<void(const std::exception&)> eh)
-    : ThreadPool(processorCount(), eh) {
+ThreadPool::ThreadPool()
+    : ThreadPool(processorCount(), nullptr) {
 }
 
-ThreadPool::ThreadPool(
-    size_t num_threads,
-    std::function<void(const std::exception&)> eh)
-    : Scheduler(eh),
+ThreadPool::ThreadPool(size_t num_threads)
+    : ThreadPool(num_threads, nullptr) {
+}
+
+ThreadPool::ThreadPool(std::unique_ptr<stx::ExceptionHandler> eh)
+    : ThreadPool(processorCount(), std::move(eh)) {
+}
+
+ThreadPool::ThreadPool(size_t num_threads,
+                       std::unique_ptr<stx::ExceptionHandler> eh)
+    : Scheduler(std::move(eh)),
       active_(true),
       threads_(),
       mutex_(),
@@ -149,6 +156,7 @@ void ThreadPool::execute(Task task) {
 }
 
 ThreadPool::HandleRef ThreadPool::executeOnReadable(int fd, Task task, Duration tmo, Task tcb) {
+  // TODO: honor timeout
   HandleRef hr(new Handle(nullptr));
   activeReaders_++;
   execute([this, task, hr, fd] {
@@ -160,6 +168,7 @@ ThreadPool::HandleRef ThreadPool::executeOnReadable(int fd, Task task, Duration 
 }
 
 ThreadPool::HandleRef ThreadPool::executeOnWritable(int fd, Task task, Duration tmo, Task tcb) {
+  // TODO: honor timeout
   HandleRef hr(new Handle(nullptr));
   activeWriters_++;
   execute([this, task, hr, fd] {
@@ -252,6 +261,24 @@ std::string ThreadPool::toString() const {
                    this);
 
   return std::string(buf, n);
+}
+
+void ThreadPool::run(std::function<void()> task) {
+  execute(task);
+}
+
+void ThreadPool::runOnReadable(std::function<void()> task, int fd) {
+  executeOnReadable(fd, task);
+}
+
+void ThreadPool::runOnWritable(std::function<void()> task, int fd) {
+  executeOnWritable(fd, task);
+}
+
+void ThreadPool::runOnWakeup(std::function<void()> task,
+                             Wakeup* wakeup,
+                             long generation) {
+  executeOnWakeup(task, wakeup, generation);
 }
 
 } // namespace stx

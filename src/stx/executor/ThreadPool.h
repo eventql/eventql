@@ -11,6 +11,7 @@
 
 #include <stx/sysconfig.h>
 #include <stx/executor/Scheduler.h>
+#include <stx/exceptionhandler.h>
 #include <condition_variable>
 #include <mutex>
 #include <thread>
@@ -27,25 +28,26 @@ class ThreadPool : public Scheduler {
   /**
    * Initializes this thread pool as many threads as CPU cores are available.
    */
-  ThreadPool() : ThreadPool(nullptr) {}
+  ThreadPool();
 
   /**
    * Initializes this thread pool.
    * @param num_threads number of threads to allocate.
    */
-  explicit ThreadPool(size_t num_threads) : ThreadPool(num_threads, nullptr) {}
+  explicit ThreadPool(size_t num_threads);
 
   /**
    * Initializes this thread pool as many threads as CPU cores are available.
    */
-  explicit ThreadPool(std::function<void(const std::exception&)> eh);
+  explicit ThreadPool(std::unique_ptr<stx::ExceptionHandler> eh);
 
   /**
    * Initializes this thread pool.
    *
    * @param num_threads number of threads to allocate.
    */
-  ThreadPool(size_t num_threads, std::function<void(const std::exception&)> eh);
+  ThreadPool(size_t num_threads,
+             std::unique_ptr<stx::ExceptionHandler> error_handler);
 
   ~ThreadPool();
 
@@ -71,6 +73,9 @@ class ThreadPool : public Scheduler {
    */
   void wait();
 
+  using Scheduler::executeOnReadable;
+  using Scheduler::executeOnWritable;
+
   // overrides
   void execute(Task task) override;
   HandleRef executeAfter(Duration delay, Task task) override;
@@ -86,6 +91,14 @@ class ThreadPool : public Scheduler {
   void runLoopOnce() override;
   void breakLoop() override;
   std::string toString() const override;
+
+  // compatibility layer to old ThreadPool API
+  STX_DEPRECATED void run(std::function<void()> task);
+  STX_DEPRECATED void runOnReadable(std::function<void()> task, int fd);
+  STX_DEPRECATED void runOnWritable(std::function<void()> task, int fd);
+  STX_DEPRECATED void runOnWakeup(std::function<void()> task,
+                                  Wakeup* wakeup,
+                                  long generation);
 
  private:
   void work(int workerId);

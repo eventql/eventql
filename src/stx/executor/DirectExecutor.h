@@ -24,7 +24,7 @@ class DirectExecutor : public Executor {
  public:
   DirectExecutor(
     bool recursive = false,
-    std::function<void(const std::exception&)> eh = nullptr);
+    std::unique_ptr<stx::ExceptionHandler> eh = nullptr);
 
   void execute(Task task) override;
   std::string toString() const override;

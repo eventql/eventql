@@ -202,7 +202,6 @@ add_library(stx-base STATIC
     stringutil.cc
     thread/eventloop.cc
     thread/signalhandler.cc
-    thread/threadpool.cc
     thread/FixedSizeThreadPool.cc
     thread/wakeup.cc
     uri.cc
@@ -269,6 +268,9 @@ add_library(stx-protobuf STATIC
 
 add_executable(test-executor-PosixScheduler executor/PosixScheduler-test.cc)
 target_link_libraries(test-executor-PosixScheduler stx-base)
+
+add_executable(test-executor-ThreadPool executor/ThreadPool-test.cc)
+target_link_libraries(test-executor-ThreadPool stx-base)
 
 add_executable(test-inputstream io/inputstream_test.cc)
 target_link_libraries(test-inputstream stx-base)
