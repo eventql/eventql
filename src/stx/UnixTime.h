@@ -112,17 +112,17 @@ public:
   /**
    * Return a new UnixTime instance with time 00:00:00 UTC, 1 Jan. 1970
    */
-  static UnixTime epoch();
+  static inline UnixTime epoch();
 
   /**
    * Return a new UnixTime instance with time = now
    */
-  static UnixTime now();
+  static inline UnixTime now();
 
   /**
    * Return a new UnixTime instance with time = now + days
    */
-  static UnixTime daysFromNow(double days);
+  static inline UnixTime daysFromNow(double days);
 
 protected:
 
