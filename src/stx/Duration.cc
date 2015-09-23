@@ -14,7 +14,7 @@
 namespace stx {
 
 std::string inspect(const Duration& value) {
-  return StringUtil::format("$1ms", value.microseconds());
+  return StringUtil::format("$0ms", value.milliseconds());
 }
 
 }

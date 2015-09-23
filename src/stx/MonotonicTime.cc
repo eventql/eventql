@@ -4,7 +4,7 @@
 namespace stx {
 
 std::string inspect(const MonotonicTime& value) {
-  return StringUtil::format("$1ms", value.microseconds());
+  return StringUtil::format("$0ms", value.milliseconds());
 }
 
 } // namespace stx
