@@ -65,12 +65,12 @@ void EXPECT_FALSE(bool val) {
 
 template <typename T1, typename T2, typename T3>
 void EXPECT_NEAR(T1 expected, T2 actual, T3 diff) {
-  if ((actual - diff) < expected || (actual + diff) > actual) {
+  if (actual < (expected - diff) || actual > (expected + diff)) {
     RAISE(
         kExpectationFailed,
-        "expectation failed: %s near %s (diff: %s)",
-        stx::inspect<T1>(expected).c_str(),
+        "expectation failed: actual %s near expected %s, diff %s",
         stx::inspect<T2>(actual).c_str(),
+        stx::inspect<T1>(expected).c_str(),
         stx::inspect<T3>(diff).c_str());
   }
 }
