@@ -103,31 +103,31 @@ inline constexpr uint64_t Duration::days() const noexcept {
   return hours() / kHoursPerDay;
 }
 
-inline constexpr Duration Duration::fromDays(uint64_t v) {
+Duration Duration::fromDays(uint64_t v) {
   return Duration(v * kMicrosPerSecond * kSecondsPerDay);
 }
 
-inline constexpr Duration Duration::fromHours(uint64_t v) {
+Duration Duration::fromHours(uint64_t v) {
   return Duration(v * kMicrosPerSecond * kSecondsPerHour);
 }
 
-inline constexpr Duration Duration::fromMinutes(uint64_t v) {
+Duration Duration::fromMinutes(uint64_t v) {
   return Duration(v * kMicrosPerSecond * kSecondsPerMinute);
 }
 
-inline constexpr Duration Duration::fromSeconds(uint64_t v) {
+Duration Duration::fromSeconds(uint64_t v) {
   return Duration(v * kMicrosPerSecond);
 }
 
-inline constexpr Duration Duration::fromMilliseconds(uint64_t v) {
+Duration Duration::fromMilliseconds(uint64_t v) {
   return Duration(v * 1000);
 }
 
-inline constexpr Duration Duration::fromMicroseconds(uint64_t v) {
+Duration Duration::fromMicroseconds(uint64_t v) {
   return Duration(v);
 }
 
-inline constexpr Duration Duration::fromNanoseconds(uint64_t v) {
+Duration Duration::fromNanoseconds(uint64_t v) {
   return Duration(v / 1000);
 }
 

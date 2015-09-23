@@ -112,7 +112,7 @@ public:
   /**
    * Return a new UnixTime instance with time 00:00:00 UTC, 1 Jan. 1970
    */
-  static constexpr UnixTime epoch();
+  static UnixTime epoch();
 
   /**
    * Return a new UnixTime instance with time = now

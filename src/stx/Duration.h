@@ -26,7 +26,7 @@ private:
   enum class ZeroType { Zero };
 
 public:
-  static constexpr ZeroType Zero = ZeroType::Zero;
+  constexpr static ZeroType Zero = ZeroType::Zero;
 
   /**
    * Creates a new Duration of zero microseconds.
@@ -96,13 +96,13 @@ public:
   constexpr uint64_t hours() const noexcept;
   constexpr uint64_t days() const noexcept;
 
-  static constexpr Duration fromDays(uint64_t v);
-  static constexpr Duration fromHours(uint64_t v);
-  static constexpr Duration fromMinutes(uint64_t v);
-  static constexpr Duration fromSeconds(uint64_t v);
-  static constexpr Duration fromMilliseconds(uint64_t v);
-  static constexpr Duration fromMicroseconds(uint64_t v);
-  static constexpr Duration fromNanoseconds(uint64_t v);
+  static Duration fromDays(uint64_t v);
+  static Duration fromHours(uint64_t v);
+  static Duration fromMinutes(uint64_t v);
+  static Duration fromSeconds(uint64_t v);
+  static Duration fromMilliseconds(uint64_t v);
+  static Duration fromMicroseconds(uint64_t v);
+  static Duration fromNanoseconds(uint64_t v);
 
 protected:
   const uint64_t micros_;
