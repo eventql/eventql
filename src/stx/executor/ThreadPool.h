@@ -82,6 +82,7 @@ class ThreadPool : public Scheduler {
   HandleRef executeAt(UnixTime dt, Task task) override;
   HandleRef executeOnReadable(int fd, Task task, Duration tmo, Task tcb) override;
   HandleRef executeOnWritable(int fd, Task task, Duration tmo, Task tcb) override;
+  void cancelFD(int fd) override;
   void executeOnWakeup(Task task, Wakeup* wakeup, long generation) override;
   size_t timerCount() override;
   size_t readerCount() override;

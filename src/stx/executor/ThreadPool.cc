@@ -179,6 +179,9 @@ ThreadPool::HandleRef ThreadPool::executeOnWritable(int fd, Task task, Duration 
   return hr;
 }
 
+void ThreadPool::cancelFD(int fd) {
+}
+
 ThreadPool::HandleRef ThreadPool::executeAfter(Duration delay, Task task) {
   HandleRef hr(new Handle(nullptr));
   activeTimers_++;
