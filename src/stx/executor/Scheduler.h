@@ -118,6 +118,8 @@ class Scheduler : public Executor {
    */
   HandleRef executeOnWritable(int fd, Task task);
 
+  virtual void cancelFD(int fd) = 0;
+
   /**
    * Executes @p task  when given @p wakeup triggered a wakeup event
    * for >= @p generation.

@@ -246,6 +246,14 @@ Scheduler::HandleRef PosixScheduler::executeOnWritable(int fd, Task task, Durati
   return setupWatcher(fd, Mode::WRITABLE, task, tmo, tcb);
 }
 
+void PosixScheduler::cancelFD(int fd) {
+  std::lock_guard<std::mutex> lk(lock_);
+  if (fd < watchers_.size()) {
+    Watcher* w = &watchers_[fd];
+    w->cancel();
+  }
+}
+
 PosixScheduler::HandleRef PosixScheduler::setupWatcher(
     int fd, Mode mode, Task task,
     Duration tmo, Task tcb) {
