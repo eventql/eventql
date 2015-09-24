@@ -10,11 +10,60 @@
  */
 #include <stx/Duration.h>
 #include <stx/StringUtil.h>
+#include <sstream>
 
 namespace stx {
 
 std::string inspect(const Duration& value) {
-  return StringUtil::format("$0ms", value.milliseconds());
+  unsigned years = value.days() / kDaysPerYear;
+  unsigned days = value.days() % kDaysPerYear;;
+  unsigned hours = value.hours() % kHoursPerDay;
+  unsigned minutes = value.minutes() % kMinutesPerHour;
+  unsigned seconds = value.seconds() % kSecondsPerMinute;
+  unsigned msecs = value.milliseconds () % kMillisPerSecond;
+
+  std::stringstream sstr;
+  int i = 0;
+
+  if (years)
+    sstr << years << " years";
+
+  if (days) {
+    if (i++) sstr << ' ';
+    sstr << days << " days";
+  }
+
+  if (hours) {
+    if (i++) sstr << ' ';
+    sstr << hours << " hours";
+  }
+
+  if (minutes) {
+    if (i++) sstr << ' ';
+    sstr << minutes << " minutes";
+  }
+
+  if (seconds) {
+    if (i++) sstr << ' ';
+    sstr << seconds << " seconds";
+  }
+
+  if (msecs) {
+    if (i) sstr << ' ';
+    sstr << msecs << "ms";
+  }
+
+  return sstr.str();
+}
+
+template<>
+std::string StringUtil::toString<Duration>(Duration duration) {
+  return inspect(duration);
+}
+
+template<>
+std::string StringUtil::toString<const Duration&>(const Duration& duration) {
+  return inspect(duration);
 }
 
 }
