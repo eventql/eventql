@@ -96,13 +96,13 @@ public:
   constexpr uint64_t hours() const noexcept;
   constexpr uint64_t days() const noexcept;
 
-  static Duration fromDays(uint64_t v);
-  static Duration fromHours(uint64_t v);
-  static Duration fromMinutes(uint64_t v);
-  static Duration fromSeconds(uint64_t v);
-  static Duration fromMilliseconds(uint64_t v);
-  static Duration fromMicroseconds(uint64_t v);
-  static Duration fromNanoseconds(uint64_t v);
+  static inline Duration fromDays(uint64_t v);
+  static inline Duration fromHours(uint64_t v);
+  static inline Duration fromMinutes(uint64_t v);
+  static inline Duration fromSeconds(uint64_t v);
+  static inline Duration fromMilliseconds(uint64_t v);
+  static inline Duration fromMicroseconds(uint64_t v);
+  static inline Duration fromNanoseconds(uint64_t v);
 
 protected:
   const uint64_t micros_;
