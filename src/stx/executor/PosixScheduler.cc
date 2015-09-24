@@ -40,6 +40,21 @@ namespace stx {
 #define TRACE(msg...) do {} while (0)
 #endif
 
+template<>
+std::string StringUtil::toString<PosixScheduler::Mode>(PosixScheduler::Mode mode) {
+  return inspect(mode);
+}
+
+template<>
+std::string StringUtil::toString<PosixScheduler::Watcher>(PosixScheduler::Watcher w) {
+  return inspect(w);
+}
+
+template<>
+std::string StringUtil::toString<const PosixScheduler&>(const PosixScheduler& s) {
+  return inspect(s);
+}
+
 PosixScheduler::PosixScheduler(
     std::unique_ptr<stx::ExceptionHandler> eh,
     std::function<void()> preInvoke,
@@ -61,7 +76,7 @@ PosixScheduler::PosixScheduler(
   fcntl(wakeupPipe_[0], F_SETFL, O_NONBLOCK);
   fcntl(wakeupPipe_[1], F_SETFL, O_NONBLOCK);
 
-  TRACE("ctor: wakeupPipe {read=%d, write=%d}",
+  TRACE("ctor: wakeupPipe {read=$0, write=$1}",
       wakeupPipe_[PIPE_READ_END],
       wakeupPipe_[PIPE_WRITE_END]);
 }
@@ -156,7 +171,7 @@ Scheduler::HandleRef PosixScheduler::insertIntoTimersList(MonotonicTime dt,
 
 void PosixScheduler::collectTimeouts(std::list<Task>* result) {
   for (Watcher* w = firstWatcher_; w && w->timeout <= now(); ) {
-    TRACE("collectTimeouts: timeouting %s", inspect(*w).c_str());
+    TRACE("collectTimeouts: timeouting $0", *w);
     result->push_back([w] { w->fire(w->onTimeout); });
     switch (w->mode) {
       case Mode::READABLE: readerCount_--; break;
@@ -235,8 +250,7 @@ PosixScheduler::HandleRef PosixScheduler::setupWatcher(
     int fd, Mode mode, Task task,
     Duration tmo, Task tcb) {
 
-  TRACE("setupWatcher(%d, %s, %s)",
-      fd, inspect(mode).c_str(), inspect(tmo).c_str());
+  TRACE("setupWatcher($0, $1, $2)", fd, mode, tmo);
 
   MonotonicTime timeout = now() + tmo;
 
@@ -281,18 +295,18 @@ void PosixScheduler::collectActiveHandles(const fd_set* input,
 
   while (w != nullptr) {
     if (FD_ISSET(w->fd, input)) {
-      TRACE("collectActiveHandles: + active fd %d READABLE", w->fd);
+      TRACE("collectActiveHandles: + active fd $0 READABLE", w->fd);
       readerCount_--;
       result->push_back(w->onIO);
       w = unlinkWatcher(w);
     }
     else if (FD_ISSET(w->fd, output)) {
-      TRACE("collectActiveHandles: + active fd %d WRITABLE", w->fd);
+      TRACE("collectActiveHandles: + active fd $0 WRITABLE", w->fd);
       writerCount_--;
       result->push_back(w->onIO);
       w = unlinkWatcher(w);
     } else {
-      TRACE("collectActiveHandles: - skip fd %d", w->fd);
+      TRACE("collectActiveHandles: - skip fd $0", w->fd);
       w = w->next;
     }
   }
@@ -375,9 +389,9 @@ void PosixScheduler::runLoopOnce() {
 
   FD_SET(wakeupPipe_[PIPE_READ_END], &input);
 
-  TRACE("runLoopOnce(): select(wmark=%d, in=%d, out=%d, err=%d, tmo=%ds)",
-      wmark + 1, incount, outcount, errcount, tv.tv_sec);
-  TRACE("runLoopOnce: %s", inspect(*this).c_str());
+  TRACE("runLoopOnce(): select(wmark=$0, in=$1, out=$2, err=$3, tmo=$4)",
+        wmark + 1, incount, outcount, errcount, Duration(tv));
+  TRACE("runLoopOnce: $0", inspect(*this).c_str());
 
   int rv;
   do rv = ::select(wmark + 1, &input, &output, &error, &tv);
@@ -386,7 +400,7 @@ void PosixScheduler::runLoopOnce() {
   if (rv < 0)
     RAISE_ERRNO("select failed");
 
-  TRACE("runLoopOnce: select returned %i", rv);
+  TRACE("runLoopOnce: select returned $0", rv);
 
   if (FD_ISSET(wakeupPipe_[PIPE_READ_END], &input)) {
     bool consumeMore = true;
@@ -539,7 +553,7 @@ std::string inspect(PosixScheduler::Mode mode) {
 
 std::string inspect(const PosixScheduler::Watcher& w) {
   return StringUtil::format("{$0, $1, $2}",
-                            w.fd, inspect(w.mode), inspect(w.timeout));
+                            w.fd, w.mode, w.timeout);
 }
 
 std::string inspect(const PosixScheduler& s) {

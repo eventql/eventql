@@ -11,7 +11,7 @@
 #include <stx/MonotonicClock.h>
 #include <stx/MonotonicTime.h>
 #include <stx/test/unittest.h>
-#include <chrono>
+#include <unistd.h> // usleep()
 
 using namespace stx;
 
@@ -28,20 +28,22 @@ TEST_CASE(ThreadPoolTest, simple, []() -> void {
   MonotonicTime end2;
   MonotonicTime end3;
 
+  startTime = MonotonicClock::now();
+
   tp.execute([&]() {
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+    usleep(Duration::fromMilliseconds(100).microseconds());
     e1 = true;
     end1 = MonotonicClock::now();
   });
 
   tp.execute([&]() {
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+    usleep(Duration::fromMilliseconds(100).microseconds());
     e2 = true;
     end2 = MonotonicClock::now();
   });
 
   tp.execute([&]() {
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+    usleep(Duration::fromMilliseconds(100).microseconds());
     e3 = true;
     end3 = MonotonicClock::now();
   });
@@ -52,7 +54,7 @@ TEST_CASE(ThreadPoolTest, simple, []() -> void {
   EXPECT_EQ(true, e1);
   EXPECT_EQ(true, e3); // FIXME: where is the race, why does this fail sometimes
 
-  EXPECT_EQ(1, (end1 - startTime).seconds()); // executed instantly
-  EXPECT_EQ(1, (end2 - startTime).seconds()); // executed instantly
-  EXPECT_EQ(2, (end3 - startTime).seconds()); // executed
+  EXPECT_NEAR(100, (end1 - startTime).milliseconds(), 10); // executed instantly
+  EXPECT_NEAR(100, (end2 - startTime).milliseconds(), 10); // executed instantly
+  EXPECT_NEAR(200, (end3 - startTime).milliseconds(), 10); // executed queued
 });

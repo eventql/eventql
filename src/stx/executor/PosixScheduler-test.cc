@@ -10,6 +10,7 @@
 #include <stx/executor/PosixScheduler.h>
 #include <stx/MonotonicTime.h>
 #include <stx/MonotonicClock.h>
+#include <stx/application.h>
 #include <stx/exception.h>
 #include <stx/logging.h>
 #include <stx/test/unittest.h>
@@ -62,6 +63,10 @@ int main() {
   auto& t = PosixSchedulerTest;
   return t.run();
 }
+
+TEST_INITIALIZER(PosixSchedulerTest, logging, []() {
+  Application::logToStderr(LogLevel::kTrace);
+});
 
 TEST_CASE(PosixSchedulerTest, executeAfter_without_handle, [] () {
   PosixScheduler scheduler;
