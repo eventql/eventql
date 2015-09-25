@@ -61,25 +61,25 @@ csql::TableInfo CSTableScanProvider::tableInfo() const {
 
     switch (cstable.getColumnType(col)) {
       case cstable::ColumnType::BOOLEAN:
-        ci.type =  "bool";
+        ci.type = "bool";
         break;
 
       case cstable::ColumnType::UINT32_BITPACKED:
       case cstable::ColumnType::UINT32_PLAIN:
-        ci.type =  "uint32";
+        ci.type = "uint32";
         break;
 
       case cstable::ColumnType::UINT64_PLAIN:
       case cstable::ColumnType::UINT64_LEB128:
-        ci.type =  "uint64";
+        ci.type = "uint64";
         break;
 
       case cstable::ColumnType::DOUBLE:
-        ci.type =  "double";
+        ci.type = "double";
         break;
 
       case cstable::ColumnType::STRING_PLAIN:
-        ci.type =  "string";
+        ci.type = "string";
         break;
 
     }

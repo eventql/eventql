@@ -30,7 +30,7 @@ if which ninja > /dev/null; then
   MAKETOOL="ninja"
 fi
 
-echo    "====================  ZenBase Build ====================="
+echo    "======================  zScale Z1 ======================="
 echo -e "                                                         "
 echo -e "    Build-ID:      ${BUILD_ID}"
 echo -e "    Build-Type:    ${BUILD_TYPE}"
