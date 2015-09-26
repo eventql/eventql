@@ -80,20 +80,7 @@ void TrackerServlet::handleHTTPRequest(
     stx::http::HTTPResponse* response) {
   stx::URI uri(request->uri());
 
-  /* find namespace */
-  CustomerNamespace* ns = nullptr;
-  const auto hostname = request->getHeader("host");
-
-  auto ns_iter = vhosts_.find(hostname);
-  if (ns_iter == vhosts_.end()) {
-    response->setStatus(stx::http::kStatusNotFound);
-    response->addBody("not found");
-    return;
-  } else {
-    ns = ns_iter->second;
-  }
-
-  if (uri.path() == "/track/app.js") {
+  if (uri.path() == "/track/api.js") {
     response->setStatus(stx::http::kStatusOK);
     response->addHeader("Content-Type", "application/javascript");
     response->addHeader("Cache-Control", "no-cache, no-store, must-revalidate");

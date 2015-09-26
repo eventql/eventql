@@ -48,14 +48,14 @@ int main(int argc, const char** argv) {
       "Start the public http server on this port",
       "<port>");
 
-  flags.defineFlag(
-      "publish_to",
-      stx::cli::FlagParser::T_STRING,
-      true,
-      NULL,
-      NULL,
-      "upload target url",
-      "<addr>");
+  //flags.defineFlag(
+  //    "publish_to",
+  //    stx::cli::FlagParser::T_STRING,
+  //    true,
+  //    NULL,
+  //    NULL,
+  //    "upload target url",
+  //    "<addr>");
 
   flags.defineFlag(
       "loglevel",
@@ -93,15 +93,15 @@ int main(int argc, const char** argv) {
 //      "tracker_log.feedserver01.nue01.production.fnrd.net",
 //      16);
 
-  tracker_log_feed.addTargetFeed(
-      URI("http://s02.nue01.production.fnrd.net:7001/rpc"),
-      "tracker_log.feedserver02.nue01.production.fnrd.net",
-      16);
+  //tracker_log_feed.addTargetFeed(
+  //    URI("http://s02.nue01.production.fnrd.net:7001/rpc"),
+  //    "tracker_log.feedserver02.nue01.production.fnrd.net",
+  //    16);
 
-  tracker_log_feed.addTargetFeed(
-      URI("http://nue03.prod.fnrd.net:7001/rpc"),
-      "tracker_log.feedserver03.production.fnrd.net",
-      16);
+  //tracker_log_feed.addTargetFeed(
+  //    URI("http://nue03.prod.fnrd.net:7001/rpc"),
+  //    "tracker_log.feedserver03.production.fnrd.net",
+  //    16);
 
   tracker_log_feed.exportStats("/cm-frontend/global/tracker_log_writer");
 
