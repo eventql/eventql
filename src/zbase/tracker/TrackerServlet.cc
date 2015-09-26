@@ -10,6 +10,7 @@
 #include <stx/inspect.h>
 #include "stx/logging.h"
 #include <stx/wallclock.h>
+#include <stx/assets.h>
 #include <stx/http/cookies.h>
 #include "stx/http/httprequest.h"
 #include "stx/http/httpresponse.h"
@@ -86,7 +87,7 @@ void TrackerServlet::handleHTTPRequest(
     response->addHeader("Cache-Control", "no-cache, no-store, must-revalidate");
     response->addHeader("Pragma", "no-cache");
     response->addHeader("Expires", "0");
-    //response->addBody(ns->trackingJS());
+    response->addBody(Assets::getAsset("zbase/tracker/track.js"));
     return;
   }
 
