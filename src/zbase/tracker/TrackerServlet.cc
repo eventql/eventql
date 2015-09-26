@@ -33,8 +33,7 @@ const unsigned char pixel_gif[42] = {
 
 TrackerServlet::TrackerServlet(
     feeds::RemoteFeedWriter* tracker_log_feed) :
-    tracker_log_feed_(tracker_log_feed),
-    indexfeed_(indexfeed) {
+    tracker_log_feed_(tracker_log_feed) {
   exportStats("/ztracker/global");
   //exportStats(StringUtil::format("/ztracker/by-host/$0", cmHostname()));
 }
@@ -100,7 +99,7 @@ void TrackerServlet::handleHTTPRequest(
     response->addHeader("Cache-Control", "no-cache, no-store, must-revalidate");
     response->addHeader("Pragma", "no-cache");
     response->addHeader("Expires", "0");
-    response->addBody(ns->trackingJS());
+    //response->addBody(ns->trackingJS());
     return;
   }
 
@@ -129,21 +128,6 @@ void TrackerServlet::handleHTTPRequest(
   response->addBody("not found");
 }
 
-
-void TrackerServlet::addCustomer(
-    CustomerNamespace* customer,
-    RefPtr<feeds::RemoteFeedWriter> index_request_feed_writer) {
-  for (const auto& vhost : customer->vhosts()) {
-    if (vhosts_.count(vhost) != 0) {
-      RAISEF(kRuntimeError, "hostname is already registered: $0", vhost);
-    }
-
-    vhosts_[vhost] = customer;
-  }
-
-  index_request_feeds_.emplace(customer->key(), index_request_feed_writer);
-}
-
 void TrackerServlet::pushEvent(
     CustomerNamespace* customer,
     const std::string& logline) {
@@ -169,13 +153,13 @@ void TrackerServlet::pushEvent(
     RAISEF(kRuntimeError, "invalid pixel version: $0", pixel_ver);
   }
 
-  auto feedline = stx::StringUtil::format(
-      "$0|$1|$2",
-      customer->key(),
-      stx::WallClock::unixSeconds(),
-      logline);
+  //auto feedline = stx::StringUtil::format(
+  //    "$0|$1|$2",
+  //    customer->key(),
+  //    stx::WallClock::unixSeconds(),
+  //    logline);
 
-  tracker_log_feed_->appendEntry(feedline);
+  //tracker_log_feed_->appendEntry(feedline);
 }
 
 } // namespace zbase
