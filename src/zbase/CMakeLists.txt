@@ -230,4 +230,4 @@ if(MYSQL_FOUND)
   target_link_libraries(zen-mysql-upload stx-http stx-protobuf stx-json stx-base ${MYSQL_CLIENT_LIBS} z)
 endif()
 
-include_directories(tracker)
+add_subdirectory(tracker)

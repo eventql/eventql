@@ -28,10 +28,7 @@
 #include "stx/http/statshttpservlet.h"
 #include "stx/stats/statsdagent.h"
 #include "stx/rpc/RPCClient.h"
-#include "CustomerNamespace.h"
-#include "frontend/CMFrontend.h"
-#include "frontend/IndexFeedUpload.h"
-#include "schemas.h"
+#include "zbase/tracker/TrackerServlet.h"
 
 using namespace zbase;
 using namespace stx;
@@ -84,9 +81,6 @@ int main(int argc, const char** argv) {
       strToLogLevel(flags.getString("loglevel")));
 
   /* load schemas */
-  msg::MessageSchemaRepository schemas;
-  loadDefaultSchemas(&schemas);
-
   thread::EventLoop event_loop;
   thread::ThreadPool tpool;
   http::HTTPConnectionPool http_client(&event_loop);
@@ -112,31 +106,7 @@ int main(int argc, const char** argv) {
   tracker_log_feed.exportStats("/cm-frontend/global/tracker_log_writer");
 
   /* set up frontend */
-  thread::Queue<IndexChangeRequest> indexfeed(8192);
-  zbase::CMFrontend frontend(&tracker_log_feed, &indexfeed);
-
-  /* set up dawanda */
-  auto dwn_ns = new zbase::CustomerNamespace("dawanda");
-  dwn_ns->addVHost("dwnapps.net");
-  dwn_ns->loadTrackingJS("customers/dawanda/track.min.js");
-
-  RefPtr<feeds::RemoteFeedWriter> dwn_index_request_feed(
-      new feeds::RemoteFeedWriter(&rpc_client));
-
-///  dwn_index_request_feed->addTargetFeed(
-///      URI("http://s01.nue01.production.fnrd.net:7001/rpc"),
-///      "index_requests.feedserver01.nue01.production.fnrd.net",
-///      16);
-///
-  dwn_index_request_feed->addTargetFeed(
-      URI("http://s02.nue01.production.fnrd.net:7001/rpc"),
-      "index_requests.feedserver02.nue01.production.fnrd.net",
-      16);
-
-  dwn_index_request_feed->exportStats(
-      "/cm-frontend/global/index_request_writer");
-
-  frontend.addCustomer(dwn_ns, dwn_index_request_feed);
+  zbase::TrackerServlet frontend(&tracker_log_feed);
 
   /* set up public http server */
   http::HTTPRouter http_router;
@@ -144,21 +114,11 @@ int main(int argc, const char** argv) {
 
   http::HTTPServer http_server(&http_router, &event_loop);
   http_server.listen(flags.getInt("http_port"));
-  http_server.stats()->exportStats(
-      "/cm-frontend/global/http/inbound");
-  http_server.stats()->exportStats(
-      StringUtil::format(
-          "/cm-frontend/by-host/$0/http/inbound",
-          zbase::cmHostname()));
-
-
-  /* start index feed upload */
-  IndexFeedUpload indexfeed_upload(
-      flags.getString("publish_to"),
-      &indexfeed,
-      &http_client,
-      schemas.getSchema("cm.IndexChangeRequest"));
-  indexfeed_upload.start();
+  http_server.stats()->exportStats("/ztracker/global/http/inbound");
+  //http_server.stats()->exportStats(
+  //    StringUtil::format(
+  //        "/cm-frontend/by-host/$0/http/inbound",
+  //        zbase::cmHostname()));
 
 
   /* stats reporting */
@@ -168,7 +128,6 @@ int main(int argc, const char** argv) {
 
   statsd_agent.start();
   event_loop.run();
-  indexfeed_upload.stop();
 
   return 0;
 }
