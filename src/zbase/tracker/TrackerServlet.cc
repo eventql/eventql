@@ -18,9 +18,7 @@
 #include "stx/json/json.h"
 #include "stx/json/jsonrpcrequest.h"
 #include "stx/json/jsonrpcresponse.h"
-#include "CustomerNamespace.h"
-#include "IndexChangeRequest.h"
-#include "frontend/CMFrontend.h"
+#include "zbase/tracker/TrackerServlet.h"
 
 using namespace stx;
 
@@ -33,17 +31,15 @@ const unsigned char pixel_gif[42] = {
   0x00, 0x02, 0x01, 0x44, 0x00, 0x3b
 };
 
-CMFrontend::CMFrontend(
-    feeds::RemoteFeedWriter* tracker_log_feed,
-    thread::Queue<IndexChangeRequest>* indexfeed) :
+TrackerServlet::TrackerServlet(
+    feeds::RemoteFeedWriter* tracker_log_feed) :
     tracker_log_feed_(tracker_log_feed),
     indexfeed_(indexfeed) {
-  //pixel_log_feed_ = feed_factory->getFeed("cm.tracker.log");
-  exportStats("/cm-frontend/global");
-  exportStats(StringUtil::format("/cm-frontend/by-host/$0", cmHostname()));
+  exportStats("/ztracker/global");
+  //exportStats(StringUtil::format("/ztracker/by-host/$0", cmHostname()));
 }
 
-void CMFrontend::exportStats(const std::string& prefix) {
+void TrackerServlet::exportStats(const std::string& prefix) {
   exportStat(
       StringUtil::format("$0/$1", prefix, "rpc_requests_total"),
       &stat_rpc_requests_total_,
@@ -78,24 +74,9 @@ void CMFrontend::exportStats(const std::string& prefix) {
       StringUtil::format("$0/$1", prefix, "loglines_written_failure"),
       &stat_loglines_written_failure_,
       stx::stats::ExportMode::EXPORT_DELTA);
-
-  exportStat(
-      StringUtil::format("$0/$1", prefix, "index_requests_total"),
-      &stat_index_requests_total_,
-      stx::stats::ExportMode::EXPORT_DELTA);
-
-  exportStat(
-      StringUtil::format("$0/$1", prefix, "index_requests_written_success"),
-      &stat_index_requests_written_success_,
-      stx::stats::ExportMode::EXPORT_DELTA);
-
-  exportStat(
-      StringUtil::format("$0/$1", prefix, "index_requests_written_failure"),
-      &stat_index_requests_written_failure_,
-      stx::stats::ExportMode::EXPORT_DELTA);
 }
 
-void CMFrontend::handleHTTPRequest(
+void TrackerServlet::handleHTTPRequest(
     stx::http::HTTPRequest* request,
     stx::http::HTTPResponse* response) {
   stx::URI uri(request->uri());
@@ -113,7 +94,7 @@ void CMFrontend::handleHTTPRequest(
     ns = ns_iter->second;
   }
 
-  if (uri.path() == "/t.js") {
+  if (uri.path() == "/track/app.js") {
     response->setStatus(stx::http::kStatusOK);
     response->addHeader("Content-Type", "application/javascript");
     response->addHeader("Cache-Control", "no-cache, no-store, must-revalidate");
@@ -123,16 +104,17 @@ void CMFrontend::handleHTTPRequest(
     return;
   }
 
-  if (uri.path() == "/t.gif") {
-    try {
-      recordLogLine(ns, uri.query());
-    } catch (const std::exception& e) {
-      auto msg = stx::StringUtil::format(
-          "invalid tracking pixel url: $0",
-          uri.query());
+  if (uri.path() == "/track/push") {
+    iputs("incoming logline...", 1);
+    //try {
+    //  pushEvent(ns, uri.query());
+    //} catch (const std::exception& e) {
+    //  auto msg = stx::StringUtil::format(
+    //      "invalid tracking pixel url: $0",
+    //      uri.query());
 
-      stx::logDebug("cm.frontend", e, msg);
-    }
+    //  stx::logDebug("cm.frontend", e, msg);
+    //}
 
     response->setStatus(stx::http::kStatusOK);
     response->addHeader("Content-Type", "image/gif");
@@ -143,59 +125,12 @@ void CMFrontend::handleHTTPRequest(
     return;
   }
 
-  if (uri.path() == "/rpc") {
-    stat_rpc_requests_total_.incr(1);
-    response->setStatus(http::kStatusOK);
-    json::JSONRPCResponse res(response->getBodyOutputStream());
-
-    if (request->method() != http::HTTPRequest::M_POST) {
-      res.error(
-          json::JSONRPCResponse::kJSONRPCPInvalidRequestError,
-          "HTTP method must be POST");
-      return;
-    }
-
-    try {
-      json::JSONRPCRequest req(json::parseJSON(request->body()));
-      res.setID(req.id());
-      dispatchRPC(&req, &res);
-    } catch (const stx::Exception& e) {
-      stat_rpc_errors_total_.incr(1);
-      res.error(
-          json::JSONRPCResponse::kJSONRPCPInternalError,
-          e.getMessage());
-    }
-
-    return;
-  }
-
   response->setStatus(stx::http::kStatusNotFound);
   response->addBody("not found");
 }
 
 
-void CMFrontend::dispatchRPC(
-    json::JSONRPCRequest* req,
-    json::JSONRPCResponse* res) {
-  if (req->method() == "index_document") {
-    auto index_req = req->getArg<IndexChangeRequestStruct>(0, "index_request");
-    stat_index_requests_total_.incr(1);
-    indexfeed_->insert(index_req.toIndexChangeRequest());
-
-    res->success([] (json::JSONOutputStream* jos) {
-      jos->addTrue();
-    });
-
-    return;
-  }
-
-  stat_rpc_errors_total_.incr(1);
-  res->error(
-      json::JSONRPCResponse::kJSONRPCPMethodNotFoundError,
-      "invalid method");
-}
-
-void CMFrontend::addCustomer(
+void TrackerServlet::addCustomer(
     CustomerNamespace* customer,
     RefPtr<feeds::RemoteFeedWriter> index_request_feed_writer) {
   for (const auto& vhost : customer->vhosts()) {
@@ -209,7 +144,7 @@ void CMFrontend::addCustomer(
   index_request_feeds_.emplace(customer->key(), index_request_feed_writer);
 }
 
-void CMFrontend::recordLogLine(
+void TrackerServlet::pushEvent(
     CustomerNamespace* customer,
     const std::string& logline) {
   stx::URI::ParamList params;
