@@ -231,7 +231,7 @@ SValue::BoolType SValue::getBool() const {
   return data_.u.t_bool;
 }
 
-SValue::BoolType SValue::getBoolWithConversion() const {
+SValue::BoolType SValue::toBool() const {
   switch (data_.type) {
 
     case T_INTEGER:
@@ -264,6 +264,9 @@ SValue::TimeType SValue::getTimestamp() const {
 
     case T_TIMESTAMP:
       return data_.u.t_timestamp * kMicrosPerSecond;
+
+    case T_NULL:
+      return 0;
 
     default:
       RAISE(

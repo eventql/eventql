@@ -57,7 +57,7 @@ var ZBase = (function() {
     error_elem.innerHTML =
         "<span>" +
         "<h1>We're sorry</h1>" +
-        "Something went wrong and ZenBase crashed &mdash; please reload the " +
+        "Something went wrong and the application crashed &mdash; please reload the " +
         "page or contact support if the problem persists." +
         "<a href='/a/'>Reload</a>"
         "</span>";

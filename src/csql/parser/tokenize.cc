@@ -295,7 +295,7 @@ next:
   }
 
   if (token == "FALSE") {
-    token_list->emplace_back(Token::T_TRUE);
+    token_list->emplace_back(Token::T_FALSE);
     goto next;
   }
 
