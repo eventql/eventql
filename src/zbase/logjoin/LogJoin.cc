@@ -159,6 +159,16 @@ void LogJoin::insertLogline(
       evtype,
       evdata);
 
+//    if (!shard_.testUID(uid)) {
+//#ifndef NDEBUG
+//      stx::logTrace(
+//          "logjoind",
+//          "dropping logline with uid=$0 because it does not match my shard",
+//          uid);
+//#endif
+//      return;
+//    }
+
   appendToSession(customer_key, time, uid, evid, evtype, evdata, txn);
 }
 
@@ -339,7 +349,11 @@ void LogJoin::flushSession(
       if (StringUtil::endsWith(key_str, "~cust")) {
         session.customer_key = value.toString();
       } else {
-        auto evtype = key_str.substr(uid.length() + 1).substr(0, 1);
+        auto evtype = key_str.substr(uid.length() + 1);
+        auto evtype_end = evtype.find("~");
+        if (evtype_end != String::npos) {
+          evtype = evtype.substr(0, evtype_end);
+        }
 
         util::BinaryMessageReader reader(value.data(), value.size());
         auto time = reader.readVarUInt() * kMicrosPerSecond;
