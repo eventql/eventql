@@ -15,9 +15,12 @@ ZBase.registerView((function() {
 
     if(path) {
       var key = path.split("/").pop();
-      $.httpGet("/a/_/d/" + key, function(res) {
-        //content.innerHTML = res.response;
-        content.innerHTML = key;
+      $.httpGet("/a/_/d/" + key + ".html", function(res) {
+        if(res.status != 500) {
+          content.innerHTML = res.response;
+        } else {
+          content.innerHTML = key;
+        }
       });
     }
 
