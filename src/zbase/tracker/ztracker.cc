@@ -48,14 +48,14 @@ int main(int argc, const char** argv) {
       "Start the public http server on this port",
       "<port>");
 
-  //flags.defineFlag(
-  //    "publish_to",
-  //    stx::cli::FlagParser::T_STRING,
-  //    true,
-  //    NULL,
-  //    NULL,
-  //    "upload target url",
-  //    "<addr>");
+  flags.defineFlag(
+      "publish_to",
+      stx::cli::FlagParser::T_STRING,
+      false,
+      NULL,
+      NULL,
+      "upload target url",
+      "<addr>");
 
   flags.defineFlag(
       "loglevel",
@@ -88,20 +88,19 @@ int main(int argc, const char** argv) {
 
   /* set up tracker log feed writer */
   feeds::RemoteFeedWriter tracker_log_feed(&rpc_client);
-//  tracker_log_feed.addTargetFeed(
-//      URI("http://s01.nue01.production.fnrd.net:7001/rpc"),
-//      "tracker_log.feedserver01.nue01.production.fnrd.net",
-//      16);
 
-  //tracker_log_feed.addTargetFeed(
-  //    URI("http://s02.nue01.production.fnrd.net:7001/rpc"),
-  //    "tracker_log.feedserver02.nue01.production.fnrd.net",
-  //    16);
+  for (const auto& addr : flags.getStrings("publish_to")) {
+    auto addr_parts = StringUtil::split(addr, "@");
+    if (addr_parts.size() != 2) {
+      RAISEF(
+          kIllegalArgumentError,
+          "illegal value for --publish_to: '$0', format is "
+              "<feed_name>@<broker_addr>",
+          addr);
+    }
 
-  //tracker_log_feed.addTargetFeed(
-  //    URI("http://nue03.prod.fnrd.net:7001/rpc"),
-  //    "tracker_log.feedserver03.production.fnrd.net",
-  //    16);
+    tracker_log_feed.addTargetFeed(URI(addr_parts[1]), addr_parts[0], 16);
+  }
 
   tracker_log_feed.exportStats("/cm-frontend/global/tracker_log_writer");
 

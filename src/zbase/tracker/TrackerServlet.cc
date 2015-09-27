@@ -150,10 +150,11 @@ void TrackerServlet::pushEvent(
     const String& customer,
     const std::string& ev) {
   iputs("incoming logline: $0 => $1", customer, ev);
+
+  stat_loglines_total_.incr(1);
+
   //stx::URI::ParamList params;
   //stx::URI::parseQueryString(logline, &params);
-
-  //stat_loglines_total_.incr(1);
 
   //std::string pixel_ver;
   //if (!stx::URI::getParam(params, "v", &pixel_ver)) {
@@ -172,13 +173,13 @@ void TrackerServlet::pushEvent(
   //  RAISEF(kRuntimeError, "invalid pixel version: $0", pixel_ver);
   //}
 
-  ////auto feedline = stx::StringUtil::format(
-  ////    "$0|$1|$2",
-  ////    customer->key(),
-  ////    stx::WallClock::unixSeconds(),
-  ////    logline);
+  auto feedline = stx::StringUtil::format(
+     "$0|$1|$2",
+     customer,
+     stx::WallClock::unixSeconds(),
+     ev);
 
-  ////tracker_log_feed_->appendEntry(feedline);
+  tracker_log_feed_->appendEntry(feedline);
 }
 
 } // namespace zbase
