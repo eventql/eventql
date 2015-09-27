@@ -174,7 +174,7 @@ void TrackerServlet::pushEvent(
   //}
 
   auto feedline = stx::StringUtil::format(
-     "$0|$1|$2",
+     "$0|$1|1|$2",
      customer,
      stx::WallClock::unixSeconds(),
      ev);

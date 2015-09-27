@@ -76,6 +76,7 @@ LogJoin::LogJoin(
   addPixelParamID("qstr~it", 104);
   addPixelParamID("qstr~nl", 105);
   addPixelParamID("qstr~es", 106);
+  addPixelParamID("__evdata", 200);
 
   feed_reader_.setMaxSpread(10 * kMicrosPerSecond);
   feed_reader_.setTimeBackfill([] (const feeds::FeedEntry& entry) -> UnixTime {
@@ -117,10 +118,51 @@ void LogJoin::insertLogline(
   auto timestr = log_line.substr(c_end + 1, t_end - c_end - 1);
   stx::UnixTime time(std::stoul(timestr) * stx::kMicrosPerSecond);
 
-  insertLogline(customer_key, time, body, txn);
+  if (StringUtil::beginsWith(body, "1|")) {
+    insertLogline(customer_key, time, body.substr(2), txn);
+  } else {
+    insertLegacyLogline(customer_key, time, body, txn);
+  }
 }
 
 void LogJoin::insertLogline(
+    const std::string& customer_key,
+    const stx::UnixTime& time,
+    const std::string& log_line,
+    mdb::MDBTransaction* txn) {
+
+  auto uid_end = log_line.find("~");
+  if (uid_end == std::string::npos) {
+    RAISEF(kRuntimeError, "invalid logline: $0", log_line);
+  }
+
+  auto evid_end = log_line.find("~", uid_end + 1);
+  if (evid_end == std::string::npos) {
+    RAISEF(kRuntimeError, "invalid logline: $0", log_line);
+  }
+
+  auto evtype_end = log_line.find("~", evid_end + 1);
+  if (evtype_end == std::string::npos) {
+    RAISEF(kRuntimeError, "invalid logline: $0", log_line);
+  }
+
+  auto uid = log_line.substr(0, uid_end);
+  auto evid = log_line.substr(uid_end + 1, evid_end - uid_end - 1);
+  auto evtype = log_line.substr(evid_end + 1, evtype_end - evid_end - 1);
+  auto evdata = log_line.substr(evtype_end + 1);
+
+  iputs("logline: $0 / $1 / $2 / $3 / $4 / $5 ",
+      customer_key,
+      time,
+      uid,
+      evid,
+      evtype,
+      evdata);
+
+  appendToSession(customer_key, time, uid, evid, evtype, evdata, txn);
+}
+
+void LogJoin::insertLegacyLogline(
     const std::string& customer_key,
     const stx::UnixTime& time,
     const std::string& log_line,
@@ -195,6 +237,27 @@ void LogJoin::insertLogline(
     stat_loglines_invalid_.incr(1);
     throw;
   }
+}
+
+void LogJoin::appendToSession(
+    const std::string& customer_key,
+    const stx::UnixTime& time,
+    const std::string& uid,
+    const std::string& evid,
+    const std::string& evtype,
+    const String& evdata,
+    mdb::MDBTransaction* txn) {
+  Vector<Pair<String, String>> logline;
+  logline.emplace_back("__evdata",  evdata);
+
+  appendToSession(
+      customer_key,
+      time,
+      uid,
+      evid,
+      evtype,
+      logline,
+      txn);
 }
 
 void LogJoin::appendToSession(
