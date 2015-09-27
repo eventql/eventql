@@ -5,7 +5,7 @@ var DocumentationMenu = function() {
 
     for(var i in items) {
       var item = i;
-      var key = item.toLowerCase().replace(/ /, "_");
+      var key = item.toLowerCase().replace(/[ /]/g, "_");
 
       var section = document.createElement("z-menu-item");
       section.classList.add("link", "doc_section");
