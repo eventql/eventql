@@ -1,57 +1,29 @@
 var DocumentationMenu = function() {
-  var tempJson = [
-    {
-      key: "format",
-      title: "Format",
-      chapters: [
-        {
-          key: "output",
-          title: "Output",
-          file: "output.html"
-        },
-        {
-          key: "readme_and_introduction",
-          title: "Readme and Introduction",
-          file: "readme_and_introduction.html"
-        }
-      ]
-    },
-    {
-      key: "build",
-      title: "Build",
-      chapters: [
-        {
-          key: "update_with_git",
-          title: "Update with Git",
-          file: "update_with_git.html"
-        }
-      ]
-    }
-  ];
 
-  // Recursively add z-menu-items to the sidebar using tempJson.
   var createMenuItems = function(parent, items, index) {
+    var j = 0;
 
     for(var i in items) {
-      var item = items[i];
+      var item = i;
+      var key = item.toLowerCase().replace(/ /, "_");
 
       var section = document.createElement("z-menu-item");
       section.classList.add("link", "doc_section");
       parent.appendChild(section);
 
       var link = document.createElement("a");
-      link.href = "/a/documentation/" + item.key;
+      link.href = "/a/documentation/" + key;
       var indexSpan = document.createElement("span");
       var textSpan = document.createElement("span");
       indexSpan.classList.add("index");
-      indexSpan.innerHTML = index.concat(+i + 1).join(".");
-      textSpan.innerHTML = item.title;
+      indexSpan.innerHTML = index.concat(++j).join(".");
+      textSpan.innerHTML = item;
       link.appendChild(indexSpan);
       link.appendChild(textSpan);
       section.appendChild(link);
 
-      if(item.chapters) {
-        createMenuItems(section, item.chapters, index.concat(+i + 1));
+      if(Object.keys(items[i]).length > 0) {
+        createMenuItems(section, items[i], index.concat(+j));
       }
     }
   };
@@ -63,12 +35,11 @@ var DocumentationMenu = function() {
     elem.appendChild(tpl);
 
     $.httpGet("/a/_/d/toc.json", function(res) {
-      //var docStructure = JSON.parse(res.response);
-      var docStructure = tempJson;
+      var docStructure = JSON.parse(res.response);
 
       var menuSection = $("z-menu-section", elem);
-
-      createMenuItems(menuSection, docStructure, []);
+      qax = docStructure;
+      createMenuItems(menuSection, docStructure.toc, []);
 
       $.handleLinks(menuSection);
     });
