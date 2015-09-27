@@ -18,3 +18,10 @@ add_executable(ztracker
 
 add_dependencies(ztracker ztracker-assets)
 target_link_libraries(ztracker chartsql cplot sstable cstable stx-http stx-protobuf stx-json stx-json stx-base)
+
+
+add_executable(test-ztrackid
+    ztrackid.cc
+    ztrackid_test.cc)
+
+target_link_libraries(test-ztrackid stx-base)
