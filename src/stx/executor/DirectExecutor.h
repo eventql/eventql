@@ -9,23 +9,22 @@
 
 #pragma once
 
-#include <cortex-base/Api.h>
-#include <cortex-base/sysconfig.h>
-#include <cortex-base/executor/Executor.h>
+#include <stx/sysconfig.h>
+#include <stx/executor/Executor.h>
 #include <deque>
 
-namespace cortex {
+namespace stx {
 
 /**
  * Executor to directly invoke the tasks being passed by the caller.
  *
  * @note Not thread-safe.
  */
-class CORTEX_API DirectExecutor : public Executor {
+class DirectExecutor : public Executor {
  public:
   DirectExecutor(
     bool recursive = false,
-    std::function<void(const std::exception&)> eh = nullptr);
+    std::unique_ptr<stx::ExceptionHandler> eh = nullptr);
 
   void execute(Task task) override;
   std::string toString() const override;
@@ -48,4 +47,4 @@ class CORTEX_API DirectExecutor : public Executor {
   std::deque<Task> deferred_;
 };
 
-} // namespace cortex
+} // namespace stx

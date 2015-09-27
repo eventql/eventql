@@ -9,15 +9,15 @@
 
 #pragma once
 
-#include <cortex-base/Api.h>
-#include <cortex-base/sysconfig.h>
+#include <stx/sysconfig.h>
+#include <stx/exceptionhandler.h>
 
 #include <exception>
 #include <deque>
 #include <functional>
 #include <string>
 
-namespace cortex {
+namespace stx {
 
 /**
  * helper class for safely invoking callbacks with regards to unhandled
@@ -26,15 +26,16 @@ namespace cortex {
  * Unhandled exceptions will be caught and passed to the exception handler,
  * i.e. to log them.
  */
-class CORTEX_API SafeCall {
+class SafeCall {
  public:
   SafeCall();
-  explicit SafeCall(std::function<void(const std::exception&)> eh);
+
+  explicit SafeCall(std::unique_ptr<ExceptionHandler> eh);
 
   /**
    * Configures exception handler.
    */
-  void setExceptionHandler(std::function<void(const std::exception&)> eh);
+  void setExceptionHandler(std::unique_ptr<ExceptionHandler> eh);
 
   /**
    * Savely invokes given task within the callers context.
@@ -43,14 +44,14 @@ class CORTEX_API SafeCall {
    *
    * @see setExceptionHandler(std::function<void(const std::exception&)>)
    */
-  void safeCall(std::function<void()> callee) CORTEX_NOEXCEPT;
+  void safeCall(std::function<void()> callee) noexcept;
 
   /**
    * Convinience call operator.
    *
    * @see void safeCall(std::function<void()> callee)
    */
-  void operator()(std::function<void()> callee) CORTEX_NOEXCEPT {
+  void operator()(std::function<void()> callee) noexcept {
     safeCall(callee);
   }
 
@@ -58,10 +59,10 @@ class CORTEX_API SafeCall {
   /**
    * Handles uncaught exception.
    */
-  void handleException(const std::exception& e) CORTEX_NOEXCEPT;
+  void handleException(const std::exception& e) noexcept;
 
  private:
-  std::function<void(const std::exception&)> exceptionHandler_;
+  std::unique_ptr<ExceptionHandler> exceptionHandler_;
 };
 
-} // namespace cortex
+} // namespace stx

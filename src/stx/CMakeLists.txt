@@ -150,6 +150,13 @@ add_library(stx-base STATIC
     Duration.cc
     exception.cc
     exceptionhandler.cc
+    executor/SafeCall.cc
+    executor/Executor.cc
+    executor/DirectExecutor.cc
+    executor/PosixScheduler.cc
+    executor/Scheduler.cc
+    executor/ThreadedExecutor.cc
+    executor/ThreadPool.cc
     fnv.cc
     HMAC.cc
     human.cc
@@ -195,7 +202,6 @@ add_library(stx-base STATIC
     stringutil.cc
     thread/eventloop.cc
     thread/signalhandler.cc
-    thread/threadpool.cc
     thread/FixedSizeThreadPool.cc
     thread/wakeup.cc
     uri.cc
@@ -259,6 +265,12 @@ add_library(stx-protobuf STATIC
     protobuf/DynamicMessage.cc
     protobuf/JSONEncoder.cc
     ${PROTO_SRCS})
+
+add_executable(test-executor-PosixScheduler executor/PosixScheduler-test.cc)
+target_link_libraries(test-executor-PosixScheduler stx-base)
+
+add_executable(test-executor-ThreadPool executor/ThreadPool-test.cc)
+target_link_libraries(test-executor-ThreadPool stx-base)
 
 add_executable(test-inputstream io/inputstream_test.cc)
 target_link_libraries(test-inputstream stx-base)

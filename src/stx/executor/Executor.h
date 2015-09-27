@@ -9,16 +9,15 @@
 
 #pragma once
 
-#include <cortex-base/Api.h>
-#include <cortex-base/executor/SafeCall.h>
-#include <cortex-base/sysconfig.h>
+#include <stx/executor/SafeCall.h>
+#include <stx/sysconfig.h>
 
 #include <exception>
 #include <deque>
 #include <functional>
 #include <string>
 
-namespace cortex {
+namespace stx {
 
 /**
  * Closure Execution Service API.
@@ -30,9 +29,10 @@ namespace cortex {
  * @see DirectExecutor
  * @see ThreadPool
  */
-class CORTEX_API Executor : protected SafeCall {
+class Executor : protected SafeCall {
  public:
-  explicit Executor(std::function<void(const std::exception&)> eh);
+  explicit Executor(std::unique_ptr<stx::ExceptionHandler> eh);
+
   virtual ~Executor();
 
   typedef std::function<void()> Task;
@@ -50,4 +50,4 @@ class CORTEX_API Executor : protected SafeCall {
   virtual std::string toString() const = 0;
 };
 
-} // namespace cortex
+} // namespace stx

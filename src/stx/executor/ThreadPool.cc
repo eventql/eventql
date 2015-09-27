@@ -7,14 +7,14 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-#include <cortex-base/executor/ThreadPool.h>
-#include <cortex-base/executor/PosixScheduler.h>
-#include <cortex-base/thread/Wakeup.h>
-#include <cortex-base/RuntimeError.h>
-#include <cortex-base/WallClock.h>
-#include <cortex-base/DateTime.h>
-#include <cortex-base/logging.h>
-#include <cortex-base/sysconfig.h>
+#include <stx/executor/ThreadPool.h>
+#include <stx/executor/PosixScheduler.h>
+#include <stx/thread/Wakeup.h>
+#include <stx/exception.h>
+#include <stx/WallClock.h>
+#include <stx/UnixTime.h>
+#include <stx/logging.h>
+#include <stx/sysconfig.h>
 #include <system_error>
 #include <thread>
 #include <exception>
@@ -24,7 +24,7 @@
 #include <unistd.h>
 #endif
 
-namespace cortex {
+namespace stx {
 
 #define ERROR(msg...) logError("ThreadPool", msg)
 
@@ -34,14 +34,21 @@ namespace cortex {
 #define TRACE(msg...) do {} while (0)
 #endif
 
-ThreadPool::ThreadPool(std::function<void(const std::exception&)> eh)
-    : ThreadPool(processorCount(), eh) {
+ThreadPool::ThreadPool()
+    : ThreadPool(processorCount(), nullptr) {
 }
 
-ThreadPool::ThreadPool(
-    size_t num_threads,
-    std::function<void(const std::exception&)> eh)
-    : Scheduler(eh),
+ThreadPool::ThreadPool(size_t num_threads)
+    : ThreadPool(num_threads, nullptr) {
+}
+
+ThreadPool::ThreadPool(std::unique_ptr<stx::ExceptionHandler> eh)
+    : ThreadPool(processorCount(), std::move(eh)) {
+}
+
+ThreadPool::ThreadPool(size_t num_threads,
+                       std::unique_ptr<stx::ExceptionHandler> eh)
+    : Scheduler(std::move(eh)),
       active_(true),
       threads_(),
       mutex_(),
@@ -78,18 +85,18 @@ size_t ThreadPool::activeCount() const {
 }
 
 void ThreadPool::wait() {
-  TRACE("%p wait()", this);
+  TRACE("$0 wait()", (void*) this);
   std::unique_lock<std::mutex> lock(mutex_);
 
   if (pendingTasks_.empty() && activeTasks_ == 0) {
-    TRACE("%p wait: pending=%zu, active=%zu (immediate return)", this,
-          pendingTasks_.size(), activeTasks_.load());
+    TRACE("$0 wait: pending=$1, active=$2 (immediate return)",
+          (void*) this, pendingTasks_.size(), activeTasks_.load());
     return;
   }
 
   condition_.wait(lock, [&]() -> bool {
-    TRACE("%p wait: pending=%zu, active=%zu", this, pendingTasks_.size(),
-          activeTasks_.load());
+    TRACE("$0 wait: pending=$1, active=$2",
+          (void*) this, pendingTasks_.size(), activeTasks_.load());
     return pendingTasks_.empty() && activeTasks_.load() == 0;
   });
 }
@@ -112,7 +119,7 @@ size_t ThreadPool::processorCount() {
 }
 
 void ThreadPool::work(int workerId) {
-  TRACE("%p worker[%d] enter", this, workerId);
+  TRACE("$0 worker[$1] enter", (void*) this, workerId);
 
   while (active_) {
     Task task;
@@ -123,7 +130,7 @@ void ThreadPool::work(int workerId) {
       if (!active_)
         break;
 
-      TRACE("%p work[%d]: task received", this, workerId);
+      TRACE("$0 work[$1]: task received", (void*) this, workerId);
       task = std::move(pendingTasks_.front());
       pendingTasks_.pop_front();
     }
@@ -136,61 +143,66 @@ void ThreadPool::work(int workerId) {
     condition_.notify_all();
   }
 
-  TRACE("%p worker[%d] leave", this, workerId);
+  TRACE("$0 worker[$1] leave", (void*) this, workerId);
 }
 
 void ThreadPool::execute(Task task) {
   {
     std::unique_lock<std::mutex> lock(mutex_);
-    TRACE("%p execute: enqueue task & notify_all", this);
+    TRACE("$0 execute: enqueue task & notify_all", (void*) this);
     pendingTasks_.emplace_back(std::move(task));
   }
   condition_.notify_all();
 }
 
-ThreadPool::HandleRef ThreadPool::executeOnReadable(int fd, Task task) {
-  HandleRef hr(new Handle(task, nullptr));
+ThreadPool::HandleRef ThreadPool::executeOnReadable(int fd, Task task, Duration tmo, Task tcb) {
+  // TODO: honor timeout
+  HandleRef hr(new Handle(nullptr));
   activeReaders_++;
-  execute([this, hr, fd] {
+  execute([this, task, hr, fd] {
     PosixScheduler::waitForReadable(fd);
-    hr->fire();
+    safeCall([&] { hr->fire(task); });
     activeReaders_--;
   });
   return nullptr;
 }
 
-ThreadPool::HandleRef ThreadPool::executeOnWritable(int fd, Task task) {
-  HandleRef hr(new Handle(task, nullptr));
+ThreadPool::HandleRef ThreadPool::executeOnWritable(int fd, Task task, Duration tmo, Task tcb) {
+  // TODO: honor timeout
+  HandleRef hr(new Handle(nullptr));
   activeWriters_++;
-  execute([this, hr, fd] {
+  execute([this, task, hr, fd] {
     PosixScheduler::waitForWritable(fd);
-    hr->fire();
+    safeCall([&] { hr->fire(task); });
     activeWriters_--;
   });
   return hr;
 }
 
-ThreadPool::HandleRef ThreadPool::executeAfter(TimeSpan delay, Task task) {
-  HandleRef hr(new Handle(task, nullptr));
+void ThreadPool::cancelFD(int fd) {
+}
+
+ThreadPool::HandleRef ThreadPool::executeAfter(Duration delay, Task task) {
+  HandleRef hr(new Handle(nullptr));
   activeTimers_++;
-  execute([this, hr, delay] {
-    WallClock::sleep(delay);
-    hr->fire();
+  execute([this, task, hr, delay] {
+    usleep(delay.microseconds());
+    safeCall([&] { hr->fire(task); });
     activeTimers_--;
   });
   return hr;
 }
 
-ThreadPool::HandleRef ThreadPool::executeAt(DateTime dt, Task task) {
-  HandleRef hr(new Handle(task, nullptr));
+ThreadPool::HandleRef ThreadPool::executeAt(UnixTime dt, Task task) {
+  HandleRef hr(new Handle(nullptr));
   activeTimers_++;
-  execute([this, hr, dt] {
-    DateTime now = WallClock::system()->get();
+  execute([this, task, hr, dt] {
+    UnixTime now = WallClock::now();
     if (dt > now) {
-      TimeSpan delay = dt - now;
-      WallClock::sleep(delay);
+      Duration delay = dt - now;
+      usleep(delay.microseconds());
     }
-    hr->fire();
+    safeCall([&] { hr->fire(task); });
     activeTimers_--;
   });
   return hr;
@@ -254,4 +266,22 @@ std::string ThreadPool::toString() const {
   return std::string(buf, n);
 }
 
-} // namespace cortex
+void ThreadPool::run(std::function<void()> task) {
+  execute(task);
+}
+
+void ThreadPool::runOnReadable(std::function<void()> task, int fd) {
+  executeOnReadable(fd, task);
+}
+
+void ThreadPool::runOnWritable(std::function<void()> task, int fd) {
+  executeOnWritable(fd, task);
+}
+
+void ThreadPool::runOnWakeup(std::function<void()> task,
+                             Wakeup* wakeup,
+                             long generation) {
+  executeOnWakeup(task, wakeup, generation);
+}
+
+} // namespace stx

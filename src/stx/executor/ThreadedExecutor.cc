@@ -7,14 +7,14 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-#include <cortex-base/executor/ThreadedExecutor.h>
-#include <cortex-base/sysconfig.h>
+#include <stx/executor/ThreadedExecutor.h>
+#include <stx/sysconfig.h>
 #include <memory>
 #include <algorithm>
 #include <limits>
 #include <pthread.h>
 
-namespace cortex {
+namespace stx {
 
 #if 0 //!defined(NDEBUG)
 static std::mutex m;
@@ -28,9 +28,8 @@ static std::mutex m;
 #define TRACE(msg...) do { } while (0)
 #endif
 
-ThreadedExecutor::ThreadedExecutor(
-    std::function<void(const std::exception&)> eh)
-    : Executor(eh),
+ThreadedExecutor::ThreadedExecutor(std::unique_ptr<stx::ExceptionHandler> eh)
+    : Executor(std::move(eh)),
       threads_() {
 }
 
@@ -114,4 +113,4 @@ std::string ThreadedExecutor::toString() const {
   return buf;
 }
 
-} // namespace cortex
+} // namespace stx

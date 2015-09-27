@@ -7,19 +7,15 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-#pragma once
+#include <stx/executor/Executor.h>
 
-#include <cortex-base/sysconfig.h>
-#include <cortex-base/executor/PosixScheduler.h>
+namespace stx {
 
-namespace cortex {
+Executor::Executor(std::unique_ptr<stx::ExceptionHandler> eh)
+    : SafeCall(std::move(eh)) {
+}
 
-#if defined(__linux__)
-// TODO using NativeScheduler = LinuxScheduler;
-using NativeScheduler = PosixScheduler;
-#else
-using NativeScheduler = PosixScheduler;
-#endif
+Executor::~Executor() {
+}
 
-} // namespace cortex
-
+} // namespace stx

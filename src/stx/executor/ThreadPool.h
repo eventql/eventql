@@ -9,44 +9,45 @@
 
 #pragma once
 
-#include <cortex-base/Api.h>
-#include <cortex-base/sysconfig.h>
-#include <cortex-base/executor/Scheduler.h>
+#include <stx/sysconfig.h>
+#include <stx/executor/Scheduler.h>
+#include <stx/exceptionhandler.h>
 #include <condition_variable>
 #include <mutex>
 #include <thread>
 #include <atomic>
 #include <deque>
 
-namespace cortex {
+namespace stx {
 
 /**
  * Standard thread-safe thread pool.
  */
-class CORTEX_API ThreadPool : public Scheduler {
+class ThreadPool : public Scheduler {
  public:
   /**
    * Initializes this thread pool as many threads as CPU cores are available.
    */
-  ThreadPool() : ThreadPool(nullptr) {}
+  ThreadPool();
 
   /**
    * Initializes this thread pool.
    * @param num_threads number of threads to allocate.
    */
-  explicit ThreadPool(size_t num_threads) : ThreadPool(num_threads, nullptr) {}
+  explicit ThreadPool(size_t num_threads);
 
   /**
    * Initializes this thread pool as many threads as CPU cores are available.
    */
-  explicit ThreadPool(std::function<void(const std::exception&)> eh);
+  explicit ThreadPool(std::unique_ptr<stx::ExceptionHandler> eh);
 
   /**
    * Initializes this thread pool.
    *
    * @param num_threads number of threads to allocate.
    */
-  ThreadPool(size_t num_threads, std::function<void(const std::exception&)> eh);
+  ThreadPool(size_t num_threads,
+             std::unique_ptr<stx::ExceptionHandler> error_handler);
 
   ~ThreadPool();
 
@@ -72,12 +73,16 @@ class CORTEX_API ThreadPool : public Scheduler {
    */
   void wait();
 
+  using Scheduler::executeOnReadable;
+  using Scheduler::executeOnWritable;
+
   // overrides
   void execute(Task task) override;
-  HandleRef executeAfter(TimeSpan delay, Task task) override;
-  HandleRef executeAt(DateTime dt, Task task) override;
-  HandleRef executeOnReadable(int fd, Task task) override;
-  HandleRef executeOnWritable(int fd, Task task) override;
+  HandleRef executeAfter(Duration delay, Task task) override;
+  HandleRef executeAt(UnixTime dt, Task task) override;
+  HandleRef executeOnReadable(int fd, Task task, Duration tmo, Task tcb) override;
+  HandleRef executeOnWritable(int fd, Task task, Duration tmo, Task tcb) override;
+  void cancelFD(int fd) override;
   void executeOnWakeup(Task task, Wakeup* wakeup, long generation) override;
   size_t timerCount() override;
   size_t readerCount() override;
@@ -87,6 +92,14 @@ class CORTEX_API ThreadPool : public Scheduler {
   void runLoopOnce() override;
   void breakLoop() override;
   std::string toString() const override;
+
+  // compatibility layer to old ThreadPool API
+  STX_DEPRECATED void run(std::function<void()> task);
+  STX_DEPRECATED void runOnReadable(std::function<void()> task, int fd);
+  STX_DEPRECATED void runOnWritable(std::function<void()> task, int fd);
+  STX_DEPRECATED void runOnWakeup(std::function<void()> task,
+                                  Wakeup* wakeup,
+                                  long generation);
 
  private:
   void work(int workerId);
@@ -103,4 +116,4 @@ class CORTEX_API ThreadPool : public Scheduler {
   std::atomic<size_t> activeWriters_;
 };
 
-} // namespace cortex
+} // namespace stx

@@ -9,14 +9,13 @@
 
 #pragma once
 
-#include <cortex-base/Api.h>
-#include <cortex-base/sysconfig.h>
-#include <cortex-base/executor/Executor.h>
+#include <stx/sysconfig.h>
+#include <stx/executor/Executor.h>
 #include <deque>
 #include <pthread.h>
 #include <mutex>
 
-namespace cortex {
+namespace stx {
 
 /**
  * Executor Service using threads.
@@ -24,10 +23,10 @@ namespace cortex {
  * Every executed task will be getting its own dedicated
  * system thread.
  */
-class CORTEX_API ThreadedExecutor : public Executor {
+class ThreadedExecutor : public Executor {
  public:
   ThreadedExecutor() : ThreadedExecutor(nullptr) {}
-  explicit ThreadedExecutor(std::function<void(const std::exception&)> eh);
+  explicit ThreadedExecutor(std::unique_ptr<stx::ExceptionHandler> eh);
   ~ThreadedExecutor();
 
   void execute(const std::string& name, Task task);
@@ -43,5 +42,5 @@ class CORTEX_API ThreadedExecutor : public Executor {
   std::mutex mutex_;
 };
 
-} // namespace cortex
+} // namespace stx
 
