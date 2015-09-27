@@ -92,16 +92,15 @@ void TrackerServlet::handleHTTPRequest(
   }
 
   if (uri.path() == "/track/push") {
-    iputs("incoming logline...", 1);
-    //try {
-    //  pushEvent(ns, uri.query());
-    //} catch (const std::exception& e) {
-    //  auto msg = stx::StringUtil::format(
-    //      "invalid tracking pixel url: $0",
-    //      uri.query());
+    try {
+      pushEvent(uri.query());
+    } catch (const std::exception& e) {
+      auto msg = stx::StringUtil::format(
+          "invalid tracking pixel url: $0",
+          uri.query());
 
-    //  stx::logDebug("cm.frontend", e, msg);
-    //}
+      stx::logDebug("cm.frontend", e, msg);
+    }
 
     response->setStatus(stx::http::kStatusOK);
     response->addHeader("Content-Type", "image/gif");
@@ -116,38 +115,37 @@ void TrackerServlet::handleHTTPRequest(
   response->addBody("not found");
 }
 
-void TrackerServlet::pushEvent(
-    CustomerNamespace* customer,
-    const std::string& logline) {
-  stx::URI::ParamList params;
-  stx::URI::parseQueryString(logline, &params);
+void TrackerServlet::pushEvent(const std::string& ev) {
+  iputs("incoming logline: $0", ev);
+  //stx::URI::ParamList params;
+  //stx::URI::parseQueryString(logline, &params);
 
-  stat_loglines_total_.incr(1);
+  //stat_loglines_total_.incr(1);
 
-  std::string pixel_ver;
-  if (!stx::URI::getParam(params, "v", &pixel_ver)) {
-    stat_loglines_invalid_.incr(1);
-    RAISE(kRuntimeError, "missing v parameter");
-  }
+  //std::string pixel_ver;
+  //if (!stx::URI::getParam(params, "v", &pixel_ver)) {
+  //  stat_loglines_invalid_.incr(1);
+  //  RAISE(kRuntimeError, "missing v parameter");
+  //}
 
-  try {
-    if (std::stoi(pixel_ver) < kMinPixelVersion) {
-      stat_loglines_versiontooold_.incr(1);
-      stat_loglines_invalid_.incr(1);
-      RAISEF(kRuntimeError, "pixel version too old: $0", pixel_ver);
-    }
-  } catch (const std::exception& e) {
-    stat_loglines_invalid_.incr(1);
-    RAISEF(kRuntimeError, "invalid pixel version: $0", pixel_ver);
-  }
+  //try {
+  //  if (std::stoi(pixel_ver) < kMinPixelVersion) {
+  //    stat_loglines_versiontooold_.incr(1);
+  //    stat_loglines_invalid_.incr(1);
+  //    RAISEF(kRuntimeError, "pixel version too old: $0", pixel_ver);
+  //  }
+  //} catch (const std::exception& e) {
+  //  stat_loglines_invalid_.incr(1);
+  //  RAISEF(kRuntimeError, "invalid pixel version: $0", pixel_ver);
+  //}
 
-  //auto feedline = stx::StringUtil::format(
-  //    "$0|$1|$2",
-  //    customer->key(),
-  //    stx::WallClock::unixSeconds(),
-  //    logline);
+  ////auto feedline = stx::StringUtil::format(
+  ////    "$0|$1|$2",
+  ////    customer->key(),
+  ////    stx::WallClock::unixSeconds(),
+  ////    logline);
 
-  //tracker_log_feed_->appendEntry(feedline);
+  ////tracker_log_feed_->appendEntry(feedline);
 }
 
 } // namespace zbase

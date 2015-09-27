@@ -42,7 +42,7 @@ public:
 
 protected:
 
-  void pushEvent(CustomerNamespace* customer, const std::string& logline);
+  void pushEvent(const std::string& logline);
 
   feeds::RemoteFeedWriter* tracker_log_feed_;
 
