@@ -101,9 +101,15 @@ void TrackerServlet::handleHTTPRequest(
     return;
   }
 
-  if (uri.path() == "/push") {
+  static const String kPushAPIPrefix = "/push-";
+  if (StringUtil::beginsWith(uri.path(), kPushAPIPrefix)) {
+    auto ztrackid = uri.path().substr(
+        kPushAPIPrefix.size(),
+        uri.path().size() - kPushAPIPrefix.size());
+    auto customer = ztrackid_decode(ztrackid);
+
     try {
-      pushEvent(uri.query());
+      pushEvent(customer, uri.query());
     } catch (const std::exception& e) {
       auto msg = stx::StringUtil::format(
           "invalid tracking pixel url: $0",
@@ -125,8 +131,10 @@ void TrackerServlet::handleHTTPRequest(
   response->addBody("not found");
 }
 
-void TrackerServlet::pushEvent(const std::string& ev) {
-  iputs("incoming logline: $0", ev);
+void TrackerServlet::pushEvent(
+    const String& customer,
+    const std::string& ev) {
+  iputs("incoming logline: $0 => $1", customer, ev);
   //stx::URI::ParamList params;
   //stx::URI::parseQueryString(logline, &params);
 
