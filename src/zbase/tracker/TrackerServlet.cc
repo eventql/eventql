@@ -20,6 +20,7 @@
 #include "stx/json/jsonrpcrequest.h"
 #include "stx/json/jsonrpcresponse.h"
 #include "zbase/tracker/TrackerServlet.h"
+#include "zbase/tracker/ztrackid.h"
 
 using namespace stx;
 
@@ -81,7 +82,16 @@ void TrackerServlet::handleHTTPRequest(
     stx::http::HTTPResponse* response) {
   stx::URI uri(request->uri());
 
-  if (uri.path() == "/track/api.js") {
+  static const String kJSAPIPrefix = "/api-";
+  static const String kJSAPISuffix = ".js";
+  if (StringUtil::beginsWith(uri.path(), kJSAPIPrefix) &&
+      StringUtil::endsWith(uri.path(), kJSAPISuffix)) {
+    auto ztrackid = uri.path().substr(
+        kJSAPIPrefix.size(),
+        uri.path().size() - kJSAPIPrefix.size() - kJSAPISuffix.size());
+    auto customer = ztrackid_decode(ztrackid);
+    iputs("get pixel for $0 => $1", ztrackid, customer);
+
     response->setStatus(stx::http::kStatusOK);
     response->addHeader("Content-Type", "application/javascript");
     response->addHeader("Cache-Control", "no-cache, no-store, must-revalidate");
@@ -91,7 +101,7 @@ void TrackerServlet::handleHTTPRequest(
     return;
   }
 
-  if (uri.path() == "/track/push") {
+  if (uri.path() == "/push") {
     try {
       pushEvent(uri.query());
     } catch (const std::exception& e) {

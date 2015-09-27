@@ -14,6 +14,7 @@ add_executable(ztracker
     $<TARGET_OBJECTS:tsdb-server>
     ${CMAKE_CURRENT_BINARY_DIR}/ztracker_assets.cc
     TrackerServlet.cc
+    ztrackid.cc
     ztracker.cc)
 
 add_dependencies(ztracker ztracker-assets)
