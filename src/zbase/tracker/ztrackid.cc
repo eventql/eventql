@@ -47,6 +47,8 @@ String ztrackid_decode(const String& encoded) {
       v += c;
     }
 
+    v ^= 0xB16B00B5B16B00B5;
+
     do {
       auto chr = base36[v % 36];
 
