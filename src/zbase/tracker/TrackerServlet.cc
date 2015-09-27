@@ -82,6 +82,14 @@ void TrackerServlet::handleHTTPRequest(
     stx::http::HTTPResponse* response) {
   stx::URI uri(request->uri());
 
+  response->addHeader("Access-Control-Allow-Origin", "*"); // FIXME
+  response->addHeader("Access-Control-Allow-Methods", "GET, POST");
+
+  if (request->method() == http::HTTPMessage::M_OPTIONS) {
+    response->setStatus(http::kStatusOK);
+    return;
+  }
+
   static const String kJSAPIPrefix = "/api-";
   static const String kJSAPISuffix = ".js";
   if (StringUtil::beginsWith(uri.path(), kJSAPIPrefix) &&
@@ -108,12 +116,19 @@ void TrackerServlet::handleHTTPRequest(
         uri.path().size() - kPushAPIPrefix.size());
     auto customer = ztrackid_decode(ztrackid);
 
+    String pixeldata;
+    if (request->method() == http::HTTPMessage::M_POST) {
+      pixeldata = request->body().toString();
+    } else {
+      pixeldata = uri.query();
+    }
+
     try {
-      pushEvent(customer, uri.query());
+      pushEvent(customer, pixeldata);
     } catch (const std::exception& e) {
       auto msg = stx::StringUtil::format(
-          "invalid tracking pixel url: $0",
-          uri.query());
+          "invalid tracking pixel data: $0",
+          pixeldata);
 
       stx::logDebug("cm.frontend", e, msg);
     }
