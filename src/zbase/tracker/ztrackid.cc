@@ -27,7 +27,8 @@ String ztrackid_decode(const String& encoded) {
   auto end = begin + len;
   auto out = decoded + len;
   char lastchr = 0;
-  for (auto cur = begin + (len / 13) * 13; cur >= begin; end = cur, cur -= 13) {
+  for (auto cur = begin + len - 1 - (len - 1) % 13; cur >= begin;
+      end = cur, cur -= 13) {
     uint64_t v = 0;
 
     for (auto chr = cur; chr < end; ++chr) {
@@ -61,6 +62,7 @@ String ztrackid_decode(const String& encoded) {
             continue;
 
           case 'x':
+          case '0':
             continue;
 
         }

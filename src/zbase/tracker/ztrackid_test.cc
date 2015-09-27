@@ -26,6 +26,16 @@ TEST_CASE(ZTrackIDTest, TestDecode, [] () {
   }
 
   {
+    auto v = ztrackid_decode("1TKHR0JNJIDJQ1TKHR0JMQPOJF16DII8V");
+    EXPECT_EQ(v, "000000-production");
+  }
+
+  {
+    auto v = ztrackid_decode("1tkhr0jnjidjq1tkhr0jmqpojf16dii8v");
+    EXPECT_EQ(v, "000000-production");
+  }
+
+  {
     auto v = ztrackid_decode("1X3P9JHTF0CE116DII8V");
     EXPECT_EQ(v, "zscale-production");
   }
