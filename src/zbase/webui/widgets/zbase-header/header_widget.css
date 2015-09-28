@@ -15,11 +15,11 @@
 }
 
 .zbase_header ul li .nav:hover {
-  color: #1c99d6;
+  color: #3498db;
 }
 
 .zbase_header ul li a.active {
-  color: #1c99d6;
+  color: #3498db;
   font-weight: 500;
 }
 
@@ -78,7 +78,7 @@
 
 .zbase_header .dropdown_panel li:hover a,
 .zbase_header .dropdown_panel li:hover span {
-  color: #1c99d6;
+  color: #3498db;
 }
 
 .zbase_header .dropdown_panel a,
@@ -144,7 +144,7 @@
 }
 
 .zbase_select_namespace_modal a.go_back {
-  color: #1c99d6;
+  color: #3498db;
   font-size: 14px;
 }
 
