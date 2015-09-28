@@ -134,9 +134,7 @@ template {
 .zbase_header {
   width: 100%;
   background: #fff;
-  border-bottom: 1px solid #c9d0d4;
-  box-shadow: 0 0 2px rgba(0,0,0,.2);
-  height: 40px;
+  height: 39px;]
   line-height: 30px;
   position: absolute;
   z-index: 99999;
@@ -323,7 +321,7 @@ template {
  * zbase_page_title
  */
 .zbase_page_title {
-  background-color: #f9f9f9;
+  background-color: #3498db;
   border-bottom: 1px solid #c9d0d4;
   box-shadow: 0 1px 1px rgba(0,0,0,0.1);
   height: 54px;
@@ -343,9 +341,13 @@ template {
   margin: 15px 0 0 0;
   font-size: 18px;
   font-weight: 400;
-  color: #333;
+  color: #fff;
   display: inline-block;
   opacity: .9;
+}
+
+.zbase_page_title h2.pagetitle {
+  color: #fff;
 }
 
 .zbase_page_title.large h1 {
@@ -376,6 +378,10 @@ section.zbase_page_title zbase-breadcrumbs {
   padding: 0;
   line-height: 24px;
   display: block;
+}
+section.zbase_page_title zbase-breadcrumbs,
+section.zbase_page_title zbase-breadcrumbs a {
+  color: #fff;
 }
 
 /**
