@@ -1240,9 +1240,13 @@ void AnalyticsServlet::sessionTrackingEventAddField(
     return;
   }
 
+  auto customer_conf = customer_dir_->configFor(session.customer())->config;
+  auto logjoin_conf = customer_conf.mutable_logjoin_config();
+
   auto field_type = msg::fieldTypeFromString(field_type_str);
   bool field_optional = false;
   bool field_repeated = false;
+  auto field_id = logjoin_conf->session_schema_next_field_id();
 
   String repeated_str;
   if (URI::getParam(params, "repeated", &repeated_str) &&
@@ -1256,9 +1260,6 @@ void AnalyticsServlet::sessionTrackingEventAddField(
     field_optional = true;
   }
 
-  auto customer_conf = customer_dir_->configFor(session.customer())->config;
-  auto logjoin_conf = customer_conf.mutable_logjoin_config();
-
   for (auto& ev_def : *logjoin_conf->mutable_session_event_schemas()) {
     if (ev_def.evtype() != event_name) {
       continue;
@@ -1267,10 +1268,12 @@ void AnalyticsServlet::sessionTrackingEventAddField(
     eventDefinitonAddField(
         &ev_def,
         field_name,
+        field_id,
         field_type,
         field_repeated,
         field_optional);
 
+    logjoin_conf->set_session_schema_next_field_id(field_id + 1);
     customer_dir_->updateCustomerConfig(customer_conf);
     res->setStatus(http::kStatusCreated);
     res->addBody("ok");
