@@ -31,6 +31,7 @@
 #include "zbase/logjoin/LogJoin.h"
 #include "zbase/logjoin/SessionProcessor.h"
 #include "zbase/logjoin/stages/SessionJoin.h"
+#include "zbase/logjoin/stages/BuildEventsStage.h"
 #include "zbase/logjoin/stages/BuildSessionAttributes.h"
 #include "zbase/logjoin/stages/NormalizeQueryStrings.h"
 #include "zbase/logjoin/stages/DebugPrintStage.h"
@@ -248,6 +249,10 @@ int main(int argc, const char** argv) {
   FileUtil::mkdir_p(spool_path);
   zbase::SessionProcessor session_proc(&customer_dir, spool_path);
 
+  /* pipeline stage: build events */
+  session_proc.addPipelineStage(
+      std::bind(&BuildEventsStage::process, std::placeholders::_1));
+
   /* pipeline stage: session join */
   session_proc.addPipelineStage(
       std::bind(&SessionJoin::process, std::placeholders::_1));
@@ -269,10 +274,7 @@ int main(int argc, const char** argv) {
   //                std::placeholders::_2)),
   //        std::placeholders::_1));
 
-  if (dry_run) {
-    session_proc.addPipelineStage(
-        std::bind(&DebugPrintStage::process, std::placeholders::_1));
-  } else {
+  if (!dry_run) {
     /* pipeline stage: TSDBUpload */
     session_proc.addPipelineStage(
         std::bind(
