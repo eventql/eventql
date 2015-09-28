@@ -34,14 +34,17 @@
 }
 
 .zbase_appstore .app_card img {
-  margin-top: 30px;
+  margin-top: 36px;
+  opacity: 0.9;
+  height: 48px;
+  width: 48px;
 }
 
 .zbase_appstore .app_card .app_title {
   display: block;
   font-size: 14px;
   font-weight: 500;
-  padding-top: 16px;
+  padding-top: 12px;
   color: #111;
   margin-bottom: -1px;
   font-family: "Roboto", "Helvetica Neue", Helvetica, Arial, sans-serif;
