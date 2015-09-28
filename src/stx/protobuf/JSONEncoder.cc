@@ -49,10 +49,6 @@ void JSONEncoder::encode(
       }
 
       encodeField(fields[idx], field, json);
-
-      if (field.repeated) {
-        break;
-      }
     }
 
     if (field.repeated) {

@@ -32,6 +32,13 @@ RefPtr<msg::MessageSchema> testSchema() {
             msg::FieldType::DOUBLE,
             0,
             false,
+            false),
+        msg::MessageSchemaField(
+            3,
+            "three",
+            msg::FieldType::STRING,
+            0,
+            true,
             false)
       });
 }
@@ -40,6 +47,8 @@ TEST_CASE(ProtobufTest, TestDynamicMessageToJSON, [] () {
   msg::DynamicMessage msg(testSchema());
   msg.addField("one", "fnord");
   msg.addField("two", "23.5");
+  msg.addField("three", "blah");
+  msg.addField("three", "fubar");
 
   Buffer json;
   json::JSONOutputStream jsons(BufferOutputStream::fromBuffer(&json));
@@ -47,7 +56,7 @@ TEST_CASE(ProtobufTest, TestDynamicMessageToJSON, [] () {
 
   EXPECT_EQ(
       json.toString(),
-      R"({"one": "fnord","two": 23.5})");
+      R"({"one": "fnord","two": 23.5,"three": ["blah","fubar"]})");
 });
 
 TEST_CASE(ProtobufTest, TestDynamicMessageFromJSON, [] () {
