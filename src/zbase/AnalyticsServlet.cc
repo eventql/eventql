@@ -207,6 +207,22 @@ void AnalyticsServlet::handle(
     return;
   }
 
+  if (uri.path() == "/api/v1/session_tracking/events/add_field") {
+    expectHTTPPost(req);
+    req_stream->readBody();
+    sessionTrackingEventAddField(session, &req, &res);
+    res_stream->writeResponse(res);
+    return;
+  }
+
+  if (uri.path() == "/api/v1/session_tracking/events/remove_field") {
+    expectHTTPPost(req);
+    req_stream->readBody();
+    sessionTrackingEventRemoveField(session, &req, &res);
+    res_stream->writeResponse(res);
+    return;
+  }
+
   if (uri.path() == "/api/v1/session_tracking/event_info") {
     req_stream->readBody();
     sessionTrackingEventInfo(session, &req, &res);
@@ -1153,6 +1169,56 @@ void AnalyticsServlet::sessionTrackingEventInfo(
 
   res->setStatus(http::kStatusNotFound);
   res->addBody("not found");
+}
+
+void AnalyticsServlet::sessionTrackingEventRemoveField(
+    const AnalyticsSession& session,
+    const http::HTTPRequest* req,
+    http::HTTPResponse* res) {
+  URI uri(req->uri());
+  const auto& params = uri.queryParams();
+
+  String event_name;
+  if (!URI::getParam(params, "event", &event_name)) {
+    res->setStatus(http::kStatusBadRequest);
+    res->addBody("missing ?event=... parameter");
+    return;
+  }
+
+  String field_name;
+  if (!URI::getParam(params, "field", &field_name)) {
+    res->setStatus(http::kStatusBadRequest);
+    res->addBody("missing ?field=... parameter");
+    return;
+  }
+
+  res->setStatus(http::kStatusCreated);
+  res->addBody("ok");
+}
+
+void AnalyticsServlet::sessionTrackingEventAddField(
+    const AnalyticsSession& session,
+    const http::HTTPRequest* req,
+    http::HTTPResponse* res) {
+  URI uri(req->uri());
+  const auto& params = uri.queryParams();
+
+  String event_name;
+  if (!URI::getParam(params, "event", &event_name)) {
+    res->setStatus(http::kStatusBadRequest);
+    res->addBody("missing ?event=... parameter");
+    return;
+  }
+
+  String field_name;
+  if (!URI::getParam(params, "field", &field_name)) {
+    res->setStatus(http::kStatusBadRequest);
+    res->addBody("missing ?field=... parameter");
+    return;
+  }
+
+  res->setStatus(http::kStatusCreated);
+  res->addBody("ok");
 }
 
 void AnalyticsServlet::performLogin(
