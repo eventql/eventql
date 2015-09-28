@@ -60,7 +60,7 @@ a{ font-weight:normal; text-decoration:none; cursor:pointer; color:#333; }
 a:hover {color:#333;}
 a.link,
 .link {
-  color: #1c99d6;
+  color: #3498db;
   text-decoration: none
 }
 a.link:hover { text-decoration: underline; }
@@ -400,7 +400,7 @@ h2.pagetitle, h2.pagetitle a {
 }
 
 h2.pagetitle a:hover {
-  color: #1c99d6;
+  color: #3498db;
 }
 
 h2.pagetitle.editable {
