@@ -22,5 +22,7 @@ struct CustomerConfigRef : public RefCounted {
 
 CustomerConfig createCustomerConfig(const String& customer);
 
+void eventDefinitonRemoveField(EventDefinition* def, const String& field);
+
 } // namespace zbase
 

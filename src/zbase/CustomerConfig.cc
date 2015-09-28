@@ -195,5 +195,9 @@ CustomerConfig createCustomerConfig(const String& customer) {
   return conf;
 }
 
+void eventDefinitonRemoveField(EventDefinition* def, const String& field) {
+
+}
+
 } // namespace zbase
 
