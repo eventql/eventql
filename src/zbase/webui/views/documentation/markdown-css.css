@@ -1,7 +1,9 @@
 .zbase_documentation_content {
-  margin-left: 300px;
-  padding: 10px;
+  max-width: 800px;
+  margin: 0 auto;
   color: #333;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  line-height: 1.6;
 }
 
 .zbase_documentation_content > *:first-child {
@@ -11,8 +13,12 @@
 .zbase_documentation_content h1 {
   padding-bottom: .3em;
   font-size: 2.25em;
-  color: #333;
-  height: initial;
+  line-height: 1.2;
+  margin: .67em 0;
+}
+
+.zbase_documentation_content h4 {
+  font-size: 1.25em;
 }
 
 .zbase_documentation_content a {
@@ -25,12 +31,16 @@
 .zbase_documentation_content h4,
 .zbase_documentation_content h5,
 .zbase_documentation_content h6 {
-  color: #f00;
+  color: #333;
+  position: relative;
+  margin-bottom: 16px;
+  font-weight: bold;
+  height: initial;
 }
 
 .zbase_documentation_content h1,
 .zbase_documentation_content h2 {
-  border-color: #333;
+  border-bottom: 1px solid #eee;
 }
 
 .zbase_documentation_content h6 {
@@ -47,9 +57,16 @@
 
 .zbase_documentation_content pre,
 .zbase_documentation_content code {
+  display: block;
   background: #f3f3f3;
   color: #000;
   border-color: #000;
+  border-radius: 3px;
+  font-size: 85%;
+  padding: 16px;
+  line-height: 1.45;
+  margin-bottom: 16px;
+  font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
 }
 
 .zbase_documentation_content .highlight {
@@ -72,5 +89,5 @@
 }
 
 .zbase_documentation_content tr:nth-child(2n) {
-  background-color: @page-table-row-odd-background-1;
+
 }
