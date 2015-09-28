@@ -6,13 +6,11 @@ ZBase.registerView((function() {
         "views/settings_session_tracking",
         "zbase_session_tracking_main_tpl");
 
-    var menu = SettingsMenu();
-    menu.render($(".zbase_settings_menu_sidebar", page));
-
     var content = $.getTemplate(
         "views/settings_session_tracking",
         "zbase_session_tracking_events_tpl");
-    $(".zbase_settings_menu_content", page).appendChild(content);
+
+    $(".zbase_content_pane", page).appendChild(content);
 
     $.httpGet("/api/v1/session_tracking/events", function(r) {
       if(r.status == 200) {
