@@ -1192,8 +1192,24 @@ void AnalyticsServlet::sessionTrackingEventRemoveField(
     return;
   }
 
-  res->setStatus(http::kStatusCreated);
-  res->addBody("ok");
+  auto customer_conf = customer_dir_->configFor(session.customer())->config;
+  auto logjoin_conf = customer_conf.mutable_logjoin_config();
+
+  for (auto& ev_def : *logjoin_conf->mutable_session_event_schemas()) {
+    if (ev_def.evtype() != event_name) {
+      continue;
+    }
+
+    eventDefinitonRemoveField(&ev_def, field_name);
+
+    customer_dir_->updateCustomerConfig(customer_conf);
+    res->setStatus(http::kStatusCreated);
+    res->addBody("ok");
+    return;
+  }
+
+  res->setStatus(http::kStatusNotFound);
+  res->addBody("event not found");
 }
 
 void AnalyticsServlet::sessionTrackingEventAddField(
