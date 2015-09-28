@@ -87,6 +87,15 @@ int main(int argc, const char** argv) {
       "upload target url",
       "<addr>");
 
+  flags.defineFlag(
+      "input_feed",
+      stx::cli::FlagParser::T_STRING,
+      false,
+      NULL,
+      NULL,
+      "upload target url",
+      "<addr>");
+
   //flags.defineFlag(
   //    "broker_addr",
   //    stx::cli::FlagParser::T_STRING,
@@ -217,13 +226,19 @@ int main(int argc, const char** argv) {
       ConfigTopic::CUSTOMERS);
 
   HashMap<String, URI> input_feeds;
-  input_feeds.emplace(
-      "tracker_log.feedserver02.nue01.production.fnrd.net",
-      URI("http://s02.nue01.production.fnrd.net:7001/rpc"));
 
-  input_feeds.emplace(
-      "tracker_log.feedserver03.production.fnrd.net",
-      URI("http://nue03.prod.fnrd.net:7001/rpc"));
+  for (const auto& addr : flags.getStrings("input_feed")) {
+    auto addr_parts = StringUtil::split(addr, "@");
+    if (addr_parts.size() != 2) {
+      RAISEF(
+          kIllegalArgumentError,
+          "illegal value for --input_feed: '$0', format is "
+              "<feed_name>@<broker_addr>",
+          addr);
+    }
+
+    input_feeds.emplace(addr_parts[0], URI(addr_parts[1]));
+  }
 
   /* set up session processing pipeline */
   auto spool_path = FileUtil::joinPaths(
