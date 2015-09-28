@@ -290,7 +290,7 @@ void ConfigDirectory::commitCustomerConfig(const CustomerConfig& config) {
   txn->update(hkey.data(), hkey.size(), vstr.data(), vstr.size());
   txn->commit();
 
-  customers_.emplace(config.customer(), new CustomerConfigRef(config));
+  customers_[config.customer()] = new CustomerConfigRef(config);
 
   for (const auto& cb : on_customer_change_) {
     cb(config);
