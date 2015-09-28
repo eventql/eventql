@@ -215,8 +215,26 @@ void DynamicMessage::fromJSON(
       continue;
     }
 
-
     switch (field_data->type) {
+
+      case json::JSON_ARRAY_BEGIN: {
+        auto aend = std::min(end, field_data + field_data->size);
+        for (field_data++; field_data < aend; field_data += field_data->size) {
+          switch (field_data->type) {
+
+            case json::JSON_STRING:
+            case json::JSON_NUMBER:
+            case json::JSON_TRUE:
+            case json::JSON_FALSE:
+              addField(field.name, field_data->data);
+
+            default:
+              break;
+
+          }
+        }
+        break;
+      }
 
       case json::JSON_STRING:
       case json::JSON_NUMBER:

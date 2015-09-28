@@ -62,7 +62,7 @@ TEST_CASE(ProtobufTest, TestDynamicMessageToJSON, [] () {
 TEST_CASE(ProtobufTest, TestDynamicMessageFromJSON, [] () {
   msg::DynamicMessage msg(testSchema());
 
-  auto orig_json = R"({"one": "fnord","two": 23.5})";
+  auto orig_json = R"({"one": "fnord","two": 23.5,"three": ["blah","fubar"]})";
 
   {
     auto j = json::parseJSON(orig_json);
