@@ -196,7 +196,22 @@ CustomerConfig createCustomerConfig(const String& customer) {
 }
 
 void eventDefinitonRemoveField(EventDefinition* def, const String& field) {
+  auto schema = msg::MessageSchema::decode(def->schema());
 
+  auto cur_schema = schema;
+  auto cur_field = field;
+  while (StringUtil::includes(cur_field, ".")) {
+    auto prefix_len = cur_field.find('.');
+    auto prefix = field.substr(0, prefix_len);
+
+    cur_field = cur_field.substr(prefix_len + 1);
+    cur_schema = cur_schema->fieldSchema(cur_schema->fieldId(prefix));
+  }
+
+  auto edit_id = cur_schema->fieldId(cur_field);
+  cur_schema->removeField(edit_id);
+
+  def->set_schema(schema->encode().toString());
 }
 
 } // namespace zbase
