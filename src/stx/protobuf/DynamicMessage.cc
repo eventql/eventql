@@ -209,6 +209,26 @@ void DynamicMessage::fromJSON(
     json::JSONObject::const_iterator begin,
     json::JSONObject::const_iterator end) {
 
+  for (const auto& field : schema_->fields()) {
+    auto field_data = json::objectLookup(begin, end, field.name);
+    if (field_data == end) {
+      continue;
+    }
+
+
+    switch (field_data->type) {
+
+      case json::JSON_STRING:
+      case json::JSON_NUMBER:
+      case json::JSON_TRUE:
+      case json::JSON_FALSE:
+        addField(field.name, field_data->data);
+
+      default:
+        continue;
+
+    }
+  }
 }
 
 const msg::MessageObject& DynamicMessage::data() const {
