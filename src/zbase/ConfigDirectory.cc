@@ -99,6 +99,26 @@ void ConfigDirectory::onCustomerConfigChange(
   on_customer_change_.emplace_back(fn);
 }
 
+void ConfigDirectory::updateCustomerConfig(CustomerConfig cfg) {
+  if ((topics_ & ConfigTopic::CUSTOMERS) == 0) {
+    RAISE(kRuntimeError, "config topic not enabled: CUSTOMERS");
+  }
+
+  auto body = msg::encode(cfg);
+  auto uri = StringUtil::format(
+        "http://$0/analytics/master/update_customer_config",
+        master_addr_.hostAndPort());
+
+  http::HTTPClient http;
+  auto res = http.executeRequest(http::HTTPRequest::mkPost(uri, *body));
+  if (res.statusCode() != 201) {
+    RAISEF(kRuntimeError, "error: $0", res.body().toString());
+  }
+
+  commitCustomerConfig(msg::decode<CustomerConfig>(res.body()));
+}
+
+
 void ConfigDirectory::updateTableDefinition(
     const TableDefinition& table,
     bool force /* = false */) {
