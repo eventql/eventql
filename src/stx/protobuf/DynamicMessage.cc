@@ -222,6 +222,15 @@ void DynamicMessage::fromJSON(
         for (field_data++; field_data < aend; field_data += field_data->size) {
           switch (field_data->type) {
 
+            case json::JSON_OBJECT_BEGIN: {
+              auto oend = std::min(end, field_data + field_data->size);
+              addObject(
+                  field.name,
+                  [field_data, oend] (msg::DynamicMessage* cld) {
+                cld->fromJSON(field_data, oend);
+              });
+            }
+
             case json::JSON_STRING:
             case json::JSON_NUMBER:
             case json::JSON_TRUE:
@@ -234,6 +243,15 @@ void DynamicMessage::fromJSON(
           }
         }
         break;
+      }
+
+      case json::JSON_OBJECT_BEGIN: {
+        auto oend = std::min(end, field_data + field_data->size);
+        addObject(
+            field.name,
+            [field_data, oend] (msg::DynamicMessage* cld) {
+          cld->fromJSON(field_data, oend);
+        });
       }
 
       case json::JSON_STRING:
