@@ -1233,8 +1233,52 @@ void AnalyticsServlet::sessionTrackingEventAddField(
     return;
   }
 
-  res->setStatus(http::kStatusCreated);
-  res->addBody("ok");
+  String field_type_str;
+  if (!URI::getParam(params, "type", &field_type_str)) {
+    res->setStatus(http::kStatusBadRequest);
+    res->addBody("missing ?type=... parameter");
+    return;
+  }
+
+  auto field_type = msg::fieldTypeFromString(field_type_str);
+  bool field_optional = false;
+  bool field_repeated = false;
+
+  String repeated_str;
+  if (URI::getParam(params, "repeated", &repeated_str) &&
+      repeated_str == "true") {
+    field_repeated = true;
+  }
+
+  String optional_str;
+  if (URI::getParam(params, "optional", &optional_str) &&
+      optional_str == "true") {
+    field_optional = true;
+  }
+
+  auto customer_conf = customer_dir_->configFor(session.customer())->config;
+  auto logjoin_conf = customer_conf.mutable_logjoin_config();
+
+  for (auto& ev_def : *logjoin_conf->mutable_session_event_schemas()) {
+    if (ev_def.evtype() != event_name) {
+      continue;
+    }
+
+    eventDefinitonAddField(
+        &ev_def,
+        field_name,
+        field_type,
+        field_repeated,
+        field_optional);
+
+    customer_dir_->updateCustomerConfig(customer_conf);
+    res->setStatus(http::kStatusCreated);
+    res->addBody("ok");
+    return;
+  }
+
+  res->setStatus(http::kStatusNotFound);
+  res->addBody("event not found");
 }
 
 void AnalyticsServlet::performLogin(

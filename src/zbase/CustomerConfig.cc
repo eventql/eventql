@@ -214,5 +214,14 @@ void eventDefinitonRemoveField(EventDefinition* def, const String& field) {
   def->set_schema(schema->encode().toString());
 }
 
+void eventDefinitonAddField(
+    EventDefinition* def,
+    const String& field,
+    msg::FieldType type,
+    bool repeated,
+    bool optional) {
+
+}
+
 } // namespace zbase
 
