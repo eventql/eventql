@@ -28,6 +28,7 @@ void eventDefinitonRemoveField(EventDefinition* def, const String& field);
 void eventDefinitonAddField(
     EventDefinition* def,
     const String& field,
+    uint32_t id,
     msg::FieldType type,
     bool repeated,
     bool optional);

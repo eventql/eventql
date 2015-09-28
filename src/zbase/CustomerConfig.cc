@@ -217,10 +217,36 @@ void eventDefinitonRemoveField(EventDefinition* def, const String& field) {
 void eventDefinitonAddField(
     EventDefinition* def,
     const String& field,
+    uint32_t id,
     msg::FieldType type,
     bool repeated,
     bool optional) {
+  auto schema = msg::MessageSchema::decode(def->schema());
 
+  auto cur_schema = schema;
+  auto cur_field = field;
+  while (StringUtil::includes(cur_field, ".")) {
+    auto prefix_len = cur_field.find('.');
+    auto prefix = field.substr(0, prefix_len);
+
+    cur_field = cur_field.substr(prefix_len + 1);
+    cur_schema = cur_schema->fieldSchema(cur_schema->fieldId(prefix));
+  }
+
+  if (type == msg::FieldType::OBJECT) {
+    cur_schema->addField(
+        msg::MessageSchemaField::mkObjectField(
+            id,
+            cur_field,
+            repeated,
+            optional,
+            new msg::MessageSchema(nullptr)));
+  } else {
+    cur_schema->addField(
+        msg::MessageSchemaField(id, cur_field, type, 0, repeated, optional));
+  }
+
+  def->set_schema(schema->encode().toString());
 }
 
 } // namespace zbase
