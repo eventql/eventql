@@ -43,7 +43,7 @@ void EventsService::scanTable(
     const AnalyticsSession& session,
     const String& table_name,
     const EventScanParams& params,
-    EventScanResult* result,
+    Function<void (const msg::DynamicMessage& event)> on_row,
     Function<void (bool done)> on_progress) {
 
   auto table = pmap_->findTable(session.customer(), table_name);
@@ -70,11 +70,13 @@ void EventsService::scanTable(
     partition_size = 4 * kMicrosPerHour;
   }
 
-  result->setSchema(schema);
-
+  size_t remaining = params.limit();
   for (auto time = params.end_time();
       time > lookback_limit;
       time -= partition_size) {
+
+    EventScanResult result(remaining);
+    result.setSchema(schema);
 
     auto partition = zbase::TimeWindowPartitioner::partitionKeyFor(
         table_name,
@@ -87,7 +89,7 @@ void EventsService::scanTable(
           table_name,
           partition,
           params,
-          result);
+          &result);
     } else {
       scanRemoteTablePartition(
           session,
@@ -95,15 +97,23 @@ void EventsService::scanTable(
           partition,
           params,
           repl_->replicaAddrsFor(partition),
-          result);
+          &result);
     }
 
-    result->setScannedUntil(time);
+    auto num_result_rows = result.rows().size();
+    if (num_result_rows > remaining) {
+      RAISE(kIllegalStateError);
+    }
 
-    bool done = result->isFull();
-    on_progress(done);
+    for (const auto& r : result.rows()) {
+      on_row(r.obj);
+    }
 
-    if (done) {
+    remaining -= num_result_rows;
+
+    on_progress(remaining == 0);
+
+    if (remaining == 0) {
       break;
     }
   }

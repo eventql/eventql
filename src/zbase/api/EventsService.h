@@ -42,7 +42,7 @@ public:
       const AnalyticsSession& session,
       const String& table_name,
       const EventScanParams& params,
-      EventScanResult* result,
+      Function<void (const msg::DynamicMessage& event)> on_row,
       Function<void (bool done)> on_progress);
 
   /**
