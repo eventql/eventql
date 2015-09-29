@@ -262,8 +262,8 @@ int main(int argc, const char** argv) {
       std::bind(&BuildSessionAttributes::process, std::placeholders::_1));
 
   /* pipeline stage: debug print */
-  session_proc.addPipelineStage(
-      std::bind(&DebugPrintStage::process, std::placeholders::_1));
+  //session_proc.addPipelineStage(
+  //    std::bind(&DebugPrintStage::process, std::placeholders::_1));
 
   /* pipeline stage: NormalizeQueryStrings */
   //stx::fts::Analyzer analyzer(flags.getString("conf"));

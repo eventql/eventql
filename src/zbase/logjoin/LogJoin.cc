@@ -151,23 +151,15 @@ void LogJoin::insertLogline(
   auto evtype = log_line.substr(evid_end + 1, evtype_end - evid_end - 1);
   auto evdata = log_line.substr(evtype_end + 1);
 
-  iputs("logline: $0 / $1 / $2 / $3 / $4 / $5 ",
-      customer_key,
-      time,
-      uid,
-      evid,
-      evtype,
-      evdata);
-
-//    if (!shard_.testUID(uid)) {
-//#ifndef NDEBUG
-//      stx::logTrace(
-//          "logjoind",
-//          "dropping logline with uid=$0 because it does not match my shard",
-//          uid);
-//#endif
-//      return;
-//    }
+  if (!shard_.testUID(uid)) {
+#ifndef NDEBUG
+    stx::logTrace(
+        "logjoind",
+        "dropping logline with uid=$0 because it does not match my shard",
+        uid);
+#endif
+    return;
+  }
 
   appendToSession(customer_key, time, uid, evid, evtype, evdata, txn);
 }
