@@ -288,8 +288,8 @@ int main(int argc, const char** argv) {
             &http));
 
     /* pipeline stage: DeliverWebHook */
-    session_proc.addPipelineStage(
-        std::bind(&DeliverWebhookStage::process, std::placeholders::_1));
+    //session_proc.addPipelineStage(
+    //    std::bind(&DeliverWebhookStage::process, std::placeholders::_1));
   }
 
   /* open session db */
