@@ -121,6 +121,11 @@ void EventsAPIServlet::scanTable(
       json.beginObject();
       json.addObjectEntry("time");
       json.addInteger(l.time.unixMicros());
+      json.addComma();
+
+      json.addObjectEntry("time");
+      l.obj.toJSON(&json);
+
       json.endObject();
     }
 
