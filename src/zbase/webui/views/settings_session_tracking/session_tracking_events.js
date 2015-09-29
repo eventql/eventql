@@ -10,7 +10,10 @@ ZBase.registerView((function() {
         "views/settings_session_tracking",
         "zbase_session_tracking_events_tpl");
 
-    $(".zbase_content_pane", page).appendChild(content);
+    var menu = SessionTrackingMenu();
+    menu.render($(".zbase_content_pane .session_tracking_sidebar", page));
+
+    $(".zbase_content_pane .session_tracking_content", page).appendChild(content);
 
     $.httpGet("/api/v1/session_tracking/events", function(r) {
       if(r.status == 200) {
