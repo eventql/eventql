@@ -1,20 +1,22 @@
 <template id="zbase_session_tracking_edit_event_tpl">
   <h3 class='zbase_settings_title'>Event <span></span></h3>
 
-  <table class="z-table edit_event">
-    <thead>
-      <tr>
-        <th>Attributes</th>
-        <th style="width: 64px;"></th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
+  <div class="table_container">
+    <table class="z-table edit_event">
+      <thead>
+        <tr>
+          <th>Attributes</th>
+          <th style="width: 64px;"></th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
 </template>
 
 <template id="zbase_session_tracking_edit_event_table_tpl">
-  <tr >
-    <td colspan="2" class="table_attached">
+  <tr class="table_attached">
+    <td colspan="2" >
       <table class="z-table">
         <tbody></tbody>
       </table>
@@ -29,7 +31,22 @@
       <span class="type"></span>
     </td>
     <td class='icon'>
-      <a data-action='edit'><i class='fa fa-cog'></i></a>
+      <z-dropdown data-resolved data-hover>
+        <z-dropdown-header>
+          <z-dropdown-header-value data-static>
+            <i class='fa fa-cog'></i>
+          </z-dropdown-header-value>
+          <z-dropdown-header-icon></z-dropdown-header-icon>
+        </z-dropdown-header>
+
+        <z-dropdown-flyout>
+          <z-dropdown-items>
+            <z-dropdown-item data-value="edit">Edit</z-dropdown-item>
+            <z-dropdown-item data-value="add">Add</z-dropdown-item>
+            <z-dropdown-item data-value="delete">Delete</z-dropown-item>
+          </z-dropdown-items>
+        </z-dropdown-flyout>
+      </z-dropdown>
     </td>
   </tr>
 </template>
