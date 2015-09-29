@@ -1,5 +1,4 @@
 js_file: "documentation.js"
 html_file: "documentation.html"
-html_file: "examples.html"
 css_file: "documentation.css"
 css_file: "markdown-css.css"

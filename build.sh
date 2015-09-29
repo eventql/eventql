@@ -125,6 +125,10 @@ if [[ $BUILD_ARTIFACTS == "true" ]]; then
   tar cz -C ${TARGET_DIR} zmaster \
       > ${ARTIFACTS_DIR}/zbase-master-${TARGET_LBL}.tgz
 
+  # ztracker
+  tar cz -C ${TARGET_DIR} ztracker \
+      > ${ARTIFACTS_DIR}/ztracker-${TARGET_LBL}.tgz
+
   # zbase-logjoin
   tar cz -C ${TARGET_DIR} logjoind \
       > ${ARTIFACTS_DIR}/zbase-logjoin-${TARGET_LBL}.tgz

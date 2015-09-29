@@ -22,6 +22,7 @@
 #include "zbase/ConfigDirectory.h"
 #include "zbase/core/TSDBService.h"
 #include "zbase/api/LogfileAPIServlet.h"
+#include "zbase/api/EventsAPIServlet.h"
 #include "zbase/docdb/DocumentDB.h"
 #include "zbase/docdb/DocumentDBServlet.h"
 
@@ -206,6 +207,7 @@ protected:
   ConfigDirectory* customer_dir_;
 
   LogfileAPIServlet logfile_api_;
+  EventsAPIServlet events_api_;
   DocumentDBServlet documents_api_;
 };
 

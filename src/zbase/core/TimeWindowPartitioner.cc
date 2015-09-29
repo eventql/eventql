@@ -34,6 +34,10 @@ SHA1Hash TimeWindowPartitioner::partitionKeyFor(
   util::BinaryMessageWriter buf(table_name.size() + 32);
 
   auto cs = window_size.microseconds();
+  if (cs == 0) {
+    RAISE(kIllegalArgumentError, "time_window must be > 0");
+  }
+
   auto ts = (time.unixMicros() / cs) * cs / kMicrosPerSecond;
 
   buf.append(table_name.data(), table_name.size());
