@@ -112,34 +112,6 @@ void EventsAPIServlet::scanTable(
     json.beginObject();
     json.addObjectEntry("status");
     json.addString(done ? "finished" : "running");
-    //json.addComma();
-    //json.addObjectEntry("scanned_until");
-    //json.addInteger(result.scannedUntil().unixMicros());
-    //json.addComma();
-    //json.addObjectEntry("rows_scanned");
-    //json.addInteger(result.rowScanned());
-    //json.addComma();
-    //json.addObjectEntry("results");
-    //json.beginArray();
-
-    //size_t nline = 0;
-    //for (const auto& l : result.rows()) {
-    //  if (++nline > 1) {
-    //    json.addComma();
-    //  }
-
-    //  json.beginObject();
-    //  json.addObjectEntry("time");
-    //  json.addInteger(l.time.unixMicros());
-    //  json.addComma();
-
-    //  json.addObjectEntry("data");
-    //  l.obj.toJSON(&json);
-
-    //  json.endObject();
-    //}
-
-    //json.endArray();
     json.endObject();
 
     sse_stream.sendEvent(buf, Some<String>("progress"));
