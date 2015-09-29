@@ -47,7 +47,7 @@ var DocsMenu = function(categories, num_documents_total, num_documents_user) {
 
     path.push(tail[0]);
     var key = encodeURIComponent(path.join("~"));
-    var href = "/a/?" + $.buildQueryString({
+    var href = "/a/reports?" + $.buildQueryString({
       author: "all",
       publishing_status: "PUBSTATUS_PUBLISHED",
       category: path.join("~")
