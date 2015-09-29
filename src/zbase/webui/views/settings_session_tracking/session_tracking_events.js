@@ -1,5 +1,5 @@
 ZBase.registerView((function() {
-  var load = function() {
+  var load = function(path) {
     $.showLoader();
 
     var page = $.getTemplate(
@@ -10,7 +10,7 @@ ZBase.registerView((function() {
         "views/settings_session_tracking",
         "zbase_session_tracking_events_tpl");
 
-    var menu = SessionTrackingMenu();
+    var menu = SessionTrackingMenu(path);
     menu.render($(".zbase_content_pane .session_tracking_sidebar", page));
 
     $(".zbase_content_pane .session_tracking_content", page).appendChild(content);
@@ -55,7 +55,7 @@ ZBase.registerView((function() {
 
   return {
     name: "session_tracking_events",
-    loadView: function(params) { load(); },
+    loadView: function(params) { load(params.path); },
     unloadView: function() {},
     handleNavigationChange: load
   };
