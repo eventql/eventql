@@ -8,14 +8,14 @@ ZBase.registerView((function() {
     var menu = SessionTrackingMenu(path);
     menu.render($(".zbase_content_pane .session_tracking_sidebar", page));
 
-    $(".zbase_content_pane .session_tracking_content", page).innerHTML  = "inspect";
+    $(".zbase_content_pane .session_tracking_content", page).innerHTML  = "journey_viewer";
 
     $.handleLinks(page);
     $.replaceViewport(page);
   };
 
   return {
-    name: "session_tracking_inspect",
+    name: "session_tracking_journey_viewer",
     loadView: function(params) { load(params.path); },
     unloadView: function() {},
     handleNavigationChange: load
