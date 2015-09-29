@@ -346,6 +346,10 @@ void DocumentDBServlet::listDocuments(
       session.customer(),
       session.userid(),
       [&] (const Document& doc) -> bool {
+    if (!type_filter.empty() && doc.type() != type_filter) {
+      return true;
+    }
+
     if (isDocumentReadableForUser(doc, session.userid())) {
       ++num_docs_total;
     }
@@ -356,10 +360,6 @@ void DocumentDBServlet::listDocuments(
 
     if (!doc.category().empty()) {
       categories.emplace(doc.category());
-    }
-
-    if (!type_filter.empty() && doc.type() != type_filter) {
-      return true;
     }
 
     if (!pstatus_filter.isEmpty() &&
