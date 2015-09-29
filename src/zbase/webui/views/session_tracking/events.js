@@ -37,7 +37,7 @@ ZBase.registerView((function() {
     var tbody = $("table.events tbody");
     var tpl = $.getTemplate(
       "views/settings_session_tracking",
-      "zbase_settings_session_tracking_event_row_tpl");
+      "zbase_session_tracking_event_row_tpl");
 
     events.forEach(function(ev) {
       var html = tpl.cloneNode(true);
