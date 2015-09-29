@@ -45,11 +45,11 @@ ZBase.registerView((function() {
       event_name.innerHTML = ev.event;
       $(".event_schema pre", html).innerHTML = ev.schema_debug;
 
-      tbody.appendChild(html);
-    });
+      $.onClick($("tr", html), function() {
+        $.navigateTo("/a/session_tracking/settings/events/" + ev.event);
+      });
 
-    $.onClick(tbody, function(e) {
-      console.log("open edit event");
+      tbody.appendChild(html);
     });
   };
 
