@@ -69,7 +69,7 @@ ZBase.registerView((function() {
     if (!events_rendered) {
       window.setTimeout(function() {
         renderAttributes(attrs);
-      }, 5);
+      }, 1);
       return;
     }
 
