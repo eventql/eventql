@@ -53,6 +53,14 @@ EventScanRow* EventScanResult::addRow(UnixTime time) {
   return &*line;
 }
 
+RefPtr<msg::MessageSchema> EventScanResult::schema() const {
+  return schema_;
+}
+
+void EventScanResult::setSchema(RefPtr<msg::MessageSchema> schema) {
+  schema_ = schema;
+}
+
 const List<EventScanRow>& EventScanResult::rows() const {
   return rows_;
 }

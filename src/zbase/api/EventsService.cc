@@ -44,19 +44,23 @@ void EventsService::scanTable(
     const EventScanParams& params,
     EventScanResult* result,
     Function<void (bool done)> on_progress) {
-  /*
-  auto table_definition = findEventsDefinition(
-      session.customer(), table_name);
-  if (table_definition.isEmpty()) {
+
+  auto table = pmap_->findTable(session.customer(), table_name);
+  if (table.isEmpty()) {
     RAISEF(kNotFoundError, "table not found: $0", table_name);
   }
 
-  auto table_name = "logs." + table_name;
-  auto lookback_limit = params.end_time() - 90 * kMicrosPerDay;
-  auto partition_size = 10 * kMicrosPerMinute;
+  if (table.get()->partitionerType() != TBL_PARTITION_TIMEWINDOW) {
+    RAISEF(kNotFoundError, "table '$0' is not a  timeseries", table_name);
+  }
 
-  result->setColumns(
-      Vector<String>(params.columns().begin(), params.columns().end()));
+  const auto& table_cfg = table.get()->config().config();
+
+  auto lookback_limit = params.end_time() - 90 * kMicrosPerDay;
+  auto partition_size =
+      table_cfg.time_window_partitioner_config().partition_size();
+
+  result->setSchema(table.get()->schema());
 
   for (auto time = params.end_time();
       time > lookback_limit;
@@ -68,7 +72,7 @@ void EventsService::scanTable(
         partition_size);
 
     if (repl_->hasLocalReplica(partition)) {
-      scanLocalEventsPartition(
+      scanLocalTablePartition(
           session,
           table_name,
           partition,
@@ -93,7 +97,6 @@ void EventsService::scanTable(
       break;
     }
   }
-  */
 }
 
 void EventsService::scanLocalTablePartition(
