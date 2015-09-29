@@ -13,6 +13,8 @@ using namespace stx;
 
 namespace zbase {
 
+EventScanRow::EventScanRow(RefPtr<msg::MessageSchema> schema) : obj(schema) {}
+
 EventScanResult::EventScanResult(
     size_t max_rows /* = 1000 */) :
     max_rows_(max_rows),
@@ -26,7 +28,7 @@ EventScanRow* EventScanResult::addRow(UnixTime time) {
   if (nrows > 0 &&
       time.unixMicros() <= rows_.back().time.unixMicros()) {
     if (nrows < max_rows_) {
-      rows_.emplace_back();
+      rows_.emplace_back(schema_);
       auto line = &rows_.back();
       line->time = time;
       return line;
@@ -41,7 +43,7 @@ EventScanRow* EventScanResult::addRow(UnixTime time) {
     ++cur;
   }
 
-  auto line = rows_.emplace(cur);
+  auto line = rows_.emplace(cur, schema_);
   line->time = time;
 
   while (rows_.size() > max_rows_) {
@@ -77,14 +79,6 @@ size_t EventScanResult::rowScanned() const {
 
 void EventScanResult::incrRowsScanned(size_t nrows) {
   rows_scanned_ += nrows;
-}
-
-const Vector<String> EventScanResult::columns() const {
-  return columns_;
-}
-
-void EventScanResult::setColumns(const Vector<String> cols) {
-  columns_ = cols;
 }
 
 void EventScanResult::encode(OutputStream* os) const {

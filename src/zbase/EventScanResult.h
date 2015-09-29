@@ -10,6 +10,7 @@
 #include "stx/stdtypes.h"
 #include "stx/io/inputstream.h"
 #include "stx/io/outputstream.h"
+#include "stx/protobuf/DynamicMessage.h"
 #include "stx/UnixTime.h"
 
 using namespace stx;
@@ -17,9 +18,9 @@ using namespace stx;
 namespace zbase {
 
 struct EventScanRow {
+  EventScanRow(RefPtr<msg::MessageSchema> schema);
   UnixTime time;
-  String raw;
-  Vector<String> columns;
+  msg::DynamicMessage obj;
 };
 
 class EventScanResult {
@@ -56,8 +57,8 @@ public:
   size_t rowScanned() const;
   void incrRowsScanned(size_t nrows);
 
-  const Vector<String> columns() const;
-  void setColumns(const Vector<String> cols);
+  const RefPtr<msg::MessageSchema> schema() const;
+  void setSchema(RefPtr<msg::MessageSchema> schema);
 
   void encode(OutputStream* os) const;
   void decode(InputStream* os);
@@ -67,7 +68,7 @@ protected:
   List<EventScanRow> rows_;
   UnixTime scanned_until_;
   size_t rows_scanned_;
-  Vector<String> columns_;
+  RefPtr<msg::MessageSchema> schema_;
 };
 
 } // namespace zbase
