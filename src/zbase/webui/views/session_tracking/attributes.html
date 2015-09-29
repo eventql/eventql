@@ -1,35 +1,31 @@
 <template id="zbase_session_tracking_attributes_tpl">
-  <z-tabbable class="open_tabs" data-content-attached>
-    <z-tab class="link" data-index='0'><a href="/a/settings/session_tracking">Events</a></z-tab>
-    <z-tab class="link" data-index='1' data-active><a href="/a/settings/session_tracking/attributes">Attributes</a></z-tab>
-    <z-tab-content data-index='1'>
-      <div class='zbase_settings'>
-        <h3 class='zbase_settings_title'>Session Attributes</h3>
 
-        <table class='z-table attributes'>
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Type</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
+  <div class='zbase_settings'>
+    <h3 class='zbase_settings_title'>Session Attributes</h3>
 
-        <table class="z-table add_attribute hidden">
-        </table>
+    <table class='z-table attributes'>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
 
-        <div class="add_session_attribute">
-          <a class="link">
-            <i class="fa fa-plus"></i> Add Session Attribute
-          </a>
-        </div>
+    <table class="z-table add_attribute hidden">
+    </table>
+
+    <div class="add_session_attribute">
+      <a class="link">
+        <i class="fa fa-plus"></i> Add Session Attribute
+      </a>
+    </div>
 
 
-      </div>
-    </z-tab-content>
-  </z-tabbable>
+  </div>
+
 </template>
 
 <template id="zbase_session_tracking_add_attribute_tpl">
