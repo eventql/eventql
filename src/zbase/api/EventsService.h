@@ -49,7 +49,7 @@ public:
    * Scan a single logfile partition. This method must be executed on a host
    * that actually stores this partition
    */
-  void scanTablePartition(
+  void scanLocalTablePartition(
       const AnalyticsSession& session,
       const String& table_name,
       const SHA1Hash& partition,

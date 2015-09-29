@@ -113,6 +113,7 @@ add_executable(zbase
     #sstable/SSTableServlet.cc
     api/LogfileService.cc
     api/LogfileAPIServlet.cc
+    api/EventsAPIServlet.cc
     LogfileScanResult.cc
     Report.cc
     AnalyticsTableScan.cc
