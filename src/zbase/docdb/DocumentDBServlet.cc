@@ -323,6 +323,14 @@ void DocumentDBServlet::listDocuments(
     author_filter = session.userid();
   }
 
+  /* param: type */
+  String type_filter;
+  URI::getParam(params, "type", &type_filter);
+
+  if (type_filter == "all") {
+    type_filter.clear();
+  }
+
   /* scan documents */
   Buffer buf;
   json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
@@ -348,6 +356,10 @@ void DocumentDBServlet::listDocuments(
 
     if (!doc.category().empty()) {
       categories.emplace(doc.category());
+    }
+
+    if (!type_filter.empty() && doc.type() != type_filter) {
+      return true;
     }
 
     if (!pstatus_filter.isEmpty() &&
