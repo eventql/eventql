@@ -81,9 +81,10 @@ class Scheduler : public Executor {
    *
    * @param fd file descriptor to watch for non-blocking readability.
    * @param task Task to execute upon given event.
-   * @param timeout timeout to wait for readability. When the timeout is hit
-   *                and no readable-event was generated yet, an
-   *                the task isstill fired but fd will raise with ETIMEDOUT.
+   * @param timeout Duration to wait for readability.
+   *                When this timeout is hit and no readable-event was
+   *                generated yet, the @p onTimeout task will be invoked
+   *                instead and the selectable will no longer be watched on.
    */
   virtual HandleRef executeOnReadable(
       int fd, Task task,
