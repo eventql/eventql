@@ -109,9 +109,6 @@ void EventsAPIServlet::scanTable(
     json.addObjectEntry("rows_scanned");
     json.addInteger(result.rowScanned());
     json.addComma();
-    json.addObjectEntry("columns");
-    json::toJSON(result.columns(), &json);
-    json.addComma();
     json.addObjectEntry("result");
     json.beginArray();
 
