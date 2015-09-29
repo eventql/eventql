@@ -160,10 +160,39 @@ route {
   require_module: "views/settings_api_token"
 }
 
+route {
+  path_match: "/a/session_tracking"
+  view: "session_tracking_dashboard"
+  require_module: "widgets/z-menu"
+  require_module: "widgets/z-tabbable"
+  require_module: "widgets/z-table"
+  require_module: "widgets/zbase-header"
+  require_module: "views/session_tracking"
+}
+
+route {
+  path_match: "/a/session_tracking/inspect"
+  view: "session_tracking_inspect"
+  require_module: "widgets/z-menu"
+  require_module: "widgets/z-tabbable"
+  require_module: "widgets/z-table"
+  require_module: "widgets/zbase-header"
+  require_module: "views/session_tracking"
+}
 
 route {
   path_match: "/a/session_tracking/settings/schema"
   view: "session_tracking_schema"
+  require_module: "widgets/z-menu"
+  require_module: "widgets/z-tabbable"
+  require_module: "widgets/z-table"
+  require_module: "widgets/zbase-header"
+  require_module: "views/session_tracking"
+}
+
+route {
+  path_match: "/a/session_tracking/settings/tracking_pixel"
+  view: "session_tracking_tracking_pixel"
   require_module: "widgets/z-menu"
   require_module: "widgets/z-tabbable"
   require_module: "widgets/z-table"
