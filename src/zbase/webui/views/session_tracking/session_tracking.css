@@ -138,7 +138,37 @@
   color: rgba(10,10,10,0.8);
   line-height: 18px;
 }*/
+.zbase_session_tracking table.edit_event {
+  margin-bottom: 50px;
+  table-layout: fixed;
+}
 
+.zbase_session_tracking table.edit_event tr:hover {
+  cursor: pointer;
+}
+
+.zbase_session_tracking table.edit_event tr td {
+  line-height: 28px;
+}
+
+.zbase_session_tracking table.edit_event tr td .name {
+  color: #000;
+}
+
+.zbase_session_tracking table.edit_event tr td .type {
+  color: #888;
+}
+
+
+.zbase_session_tracking table.edit_event tr td.table_attached {
+  padding: 0 0 0 80px;
+}
+
+.zbase_session_tracking table.edit_event table {
+  margin: 0;
+  border-top: none;
+  border-bottom: none;
+}
 
 .zbase_session_tracking table.add_attribute {
   margin-top: 0px;

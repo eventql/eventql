@@ -22,7 +22,7 @@ ZBase.registerView((function() {
 
     $.httpGet(info_url, function(r) {
       if (r.status == 200) {
-        render(JSON.parse(r.response).event);
+        render(JSON.parse(r.response).event.schema.columns);
       } else {
         $.fatalError();
       }
@@ -34,9 +34,34 @@ ZBase.registerView((function() {
   };
 
 
-  var render = function(event_info) {
-    console.log(event_info.schema.columns);
+  var render = function(columns) {
+    renderTable(columns, $(".zbase_session_tracking table.edit_event tbody"));
   };
+
+  var renderTable = function(columns, tbody) {
+    var row_tpl = $.getTemplate(
+        "views/session_tracking",
+        "zbase_session_tracking_edit_event_row_tpl");
+
+    var table_tpl = $.getTemplate(
+        "views/session_tracking",
+        "zbase_session_tracking_edit_event_table_tpl");
+
+    columns.forEach(function(col) {
+      var html = $("tr", row_tpl.cloneNode(true));
+      $(".name", html).innerHTML = col.name;
+      $(".type", html).innerHTML = "[" + col.type.toLowerCase() + "]";
+      tbody.appendChild(html);
+
+      if (col.repeated) {
+        var table = table_tpl.cloneNode(true);
+        renderTable(col.schema.columns, $("tbody", table));
+        tbody.appendChild(table);
+        console.log(table);
+      }
+    });
+  };
+
 
   return {
     name: "edit_session_tracking_event",
