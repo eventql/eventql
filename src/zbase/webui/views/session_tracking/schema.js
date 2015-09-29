@@ -1,14 +1,15 @@
 ZBase.registerView((function() {
+  var events_rendered = false;
   var load = function(path) {
     $.showLoader();
 
     var page = $.getTemplate(
-        "views/settings_session_tracking",
+        "views/session_tracking",
         "zbase_session_tracking_main_tpl");
 
     var content = $.getTemplate(
-        "views/settings_session_tracking",
-        "zbase_session_tracking_events_tpl");
+        "views/session_tracking",
+        "zbase_session_tracking_schemas_tpl");
 
     var menu = SessionTrackingMenu(path);
     menu.render($(".zbase_content_pane .session_tracking_sidebar", page));
@@ -25,6 +26,16 @@ ZBase.registerView((function() {
       $.hideLoader();
     });
 
+    $.httpGet("/api/v1/session_tracking/attributes", function(r) {
+      if(r.status == 200) {
+        renderAttributes(JSON.parse(r.response).session_attributes);
+        //$.handleLinks(page); //call?
+      } else {
+        $.fatalError();
+      }
+      $.hideLoader();
+    });
+
     $.onClick($(".add_session_event .link", page), function() {
       alert("not yet implemented");
     });
@@ -34,16 +45,15 @@ ZBase.registerView((function() {
   };
 
   var renderEvents = function(events) {
-    var tbody = $("table.events tbody");
+    var tbody = $("table.schemas tbody");
     var tpl = $.getTemplate(
-      "views/settings_session_tracking",
-      "zbase_session_tracking_event_row_tpl");
+      "views/session_tracking",
+      "zbase_session_tracking_schema_row_tpl");
 
     events.forEach(function(ev) {
       var html = tpl.cloneNode(true);
-      var event_name = $(".event_name a", html);
-      event_name.innerHTML = ev.event;
-      $(".event_schema pre", html).innerHTML = ev.schema_debug;
+      $(".name", html).innerHTML = ev.event;
+      $(".type", html).innerHTML = "Event";
 
       $.onClick($("tr", html), function() {
         $.navigateTo("/a/session_tracking/settings/events/" + ev.event);
@@ -51,10 +61,33 @@ ZBase.registerView((function() {
 
       tbody.appendChild(html);
     });
+
+    events_rendered = true;
+  };
+
+  var renderAttributes = function(attrs) {
+    if (!events_rendered) {
+      window.setTimeout(function() {
+        renderAttributes(attrs);
+      }, 5);
+    }
+
+    var tbody = $("table.schemas tbody");
+    var tpl = $.getTemplate(
+      "views/session_tracking",
+      "zbase_session_tracking_schema_row_tpl");
+
+    attrs.columns.forEach(function(attr) {
+      var html = tpl.cloneNode(true);
+      $(".name", html).innerHTML = attr.name;
+      $(".type", html).innerHTML = attr.type;
+
+      tbody.appendChild(html);
+    });
   };
 
   return {
-    name: "session_tracking_events",
+    name: "session_tracking_schema",
     loadView: function(params) { load(params.path); },
     unloadView: function() {},
     handleNavigationChange: load

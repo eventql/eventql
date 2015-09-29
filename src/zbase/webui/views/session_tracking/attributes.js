@@ -3,11 +3,11 @@ ZBase.registerView((function() {
     $.showLoader();
 
     var page = $.getTemplate(
-        "views/settings_session_tracking",
+        "views/session_tracking",
         "zbase_session_tracking_main_tpl");
 
     var content = $.getTemplate(
-        "views/settings_session_tracking",
+        "views/session_tracking",
         "zbase_session_tracking_attributes_tpl");
 
     var menu = SessionTrackingMenu(path);
@@ -40,7 +40,7 @@ ZBase.registerView((function() {
   var renderAttributes = function(attributes) {
     var tbody = $(".zbase_settings table.attributes tbody");
     var tpl = $.getTemplate(
-      "views/settings_session_tracking",
+      "views/session_tracking",
       "zbase_session_tracking_attribute_row_tpl");
 
     tbody.innerHTML = "";
@@ -59,7 +59,7 @@ ZBase.registerView((function() {
   var renderAddAttributePane = function() {
     var pane = $("table.add_attribute");
     var tpl = $.getTemplate(
-        "views/settings_session_tracking",
+        "views/session_tracking",
         "zbase_session_tracking_add_attribute_tpl");
 
     $("tr td", tpl).style.width = $("table.attributes tr td").offsetWidth + "px";

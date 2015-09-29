@@ -1,12 +1,12 @@
-<template id="zbase_session_tracking_events_tpl">
+<template id="zbase_session_tracking_schemas_tpl">
   <div class='zbase_settings'>
-    <h3 class='zbase_settings_title'>Session Events</h3>
+    <h3 class='zbase_settings_title'>Session Tracking Schema</h3>
 
-    <table class='z-table events'>
+    <table class='z-table schemas'>
       <thead>
         <tr>
-          <th>Event</th>
-          <th>Schema</th>
+          <th>Name</th>
+          <th>Type</th>
           <th></th>
         </tr>
       </thead>
@@ -22,15 +22,11 @@
   </div>
 </template>
 
-<template id="zbase_session_tracking_event_row_tpl">
+<template id="zbase_session_tracking_schema_row_tpl">
   <tr class="event">
-    <td style="width: 300px">
-      <div class='event_name'><a></a></div>
+    <td class="name">
     </td>
-    <td>
-      <div class='event_schema'>
-        <pre></pre>
-      </div>
+    <td class="type">
     </td>
     <td class='icon'>
       <a data-action='edit'><i class='fa fa-cog'></i></a>
