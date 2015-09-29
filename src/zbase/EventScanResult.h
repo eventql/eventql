@@ -57,7 +57,7 @@ public:
   size_t rowScanned() const;
   void incrRowsScanned(size_t nrows);
 
-  const RefPtr<msg::MessageSchema> schema() const;
+  RefPtr<msg::MessageSchema> schema() const;
   void setSchema(RefPtr<msg::MessageSchema> schema);
 
   void encode(OutputStream* os) const;
