@@ -38,6 +38,8 @@ public:
       json::JSONObject::const_iterator end);
 
   const msg::MessageObject& data() const;
+  void setData(msg::MessageObject data);
+
   RefPtr<msg::MessageSchema> schema() const;
 
 protected:
