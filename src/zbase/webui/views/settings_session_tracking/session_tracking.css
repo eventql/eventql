@@ -1,3 +1,14 @@
+.zbase_settings_session_tracking .session_tracking_sidebar {
+  display: table-cell;
+  width: 220px;
+  vertical-align: top;
+}
+
+.zbase_settings_session_tracking .session_tracking_content {
+  display: table-cell;
+  vertical-align: top;
+}
+
 .zbase_settings_session_tracking z-tabbable {
   font-size: 14px;
 }
