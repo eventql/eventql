@@ -32,7 +32,7 @@ public:
    * and returns a null pointer if the line was not inserted (e.g. if the
    * result list is already full and this line is too old
    */
-  EventScanRow* adRow(UnixTime time);
+  EventScanRow* addRow(UnixTime time);
 
   /**
    * Returns the rows in the result list sorted from newest (first) to oldest

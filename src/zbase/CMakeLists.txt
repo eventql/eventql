@@ -116,6 +116,7 @@ add_executable(zbase
     api/EventsService.cc
     api/EventsAPIServlet.cc
     LogfileScanResult.cc
+    EventScanResult.cc
     Report.cc
     AnalyticsTableScan.cc
     AnalyticsTableScanPlanner.cc
