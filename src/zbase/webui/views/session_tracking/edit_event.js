@@ -1,10 +1,9 @@
 ZBase.registerView((function() {
+  var path_prefix = "/a/session_tracking/settings/schema/events/";
   var event_name;
 
   var init = function(path) {
-    var path_prefix = "/a/session_tracking/settings/schema/events/";
     event_name = path.substr(path_prefix.length);
-
     load();
   };
 
@@ -15,14 +14,13 @@ ZBase.registerView((function() {
         "views/session_tracking",
         "zbase_session_tracking_main_tpl");
 
-    var menu = SessionTrackingMenu(path);
+    var menu = SessionTrackingMenu(path_prefix);
     menu.render($(".zbase_content_pane .session_tracking_sidebar", page));
 
     var content = $.getTemplate(
         "views/session_tracking",
         "zbase_session_tracking_edit_event_tpl");
 
-    $("h3 span", content).innerHTML = event_name;
     $(".zbase_content_pane .session_tracking_content", page).appendChild(content);
 
     var info_url = "/api/v1/session_tracking/event_info?event=" + event_name;
@@ -34,6 +32,10 @@ ZBase.registerView((function() {
       }
       $.hideLoader();
     });
+
+    $("h3 span", page).innerHTML = event_name;
+
+    $.onClick($("button.add_field", page), renderAdd);
 
     $.handleLinks(page);
     $.replaceViewport(page);
@@ -60,7 +62,7 @@ ZBase.registerView((function() {
 
       if (field.repeated) {
         var table = table_tpl.cloneNode(true);
-        renderTable(field.schema.fieldumns, $("tbody", table));
+        renderTable(field.schema.columns, $("tbody", table));
         tbody.appendChild(table);
       }
 
@@ -78,6 +80,12 @@ ZBase.registerView((function() {
       }, false);
 
     });
+  };
+
+  var renderAdd = function(field_prefix) {
+    var modal = $(".zbase_session_tracking z-modal.add_field");
+
+    modal.show();
   };
 
   var renderDelete = function(field_name) {
