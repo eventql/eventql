@@ -9,6 +9,43 @@
   vertical-align: top;
 }
 
+.zbase_settings_session_tracking .session_tracking_sidebar z-menu {
+  position: relative;
+  margin-right: 10px;
+  width: auto;
+}
+
+.zbase_settings_session_tracking .session_tracking_sidebar z-menu-section {
+  padding: 0;
+  margin-left: 10px;
+  margin-bottom: 20px;
+}
+
+.zbase_settings_session_tracking .session_tracking_sidebar z-menu-title {
+  margin: 0;
+  line-height: 32px;
+  padding: 0 20px 0 14px;
+  font-size: 12px;
+  color: #000;
+}
+
+.zbase_settings_session_tracking .session_tracking_sidebar z-menu-item {
+  margin: 0;
+  padding: 0;
+}
+
+.zbase_settings_session_tracking .session_tracking_sidebar z-menu-item a {
+  line-height: 32px;
+  padding: 0 0 0 28px;
+  font-size: 12px;
+  color: #737373;
+}
+
+.zbase_settings_session_tracking .session_tracking_sidebar z-menu-item[data-active] a {
+  background: #3498db;
+  color: #fff;
+}
+
 .zbase_settings_session_tracking z-tabbable {
   font-size: 14px;
 }
