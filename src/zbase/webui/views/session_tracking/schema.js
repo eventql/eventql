@@ -56,7 +56,7 @@ ZBase.registerView((function() {
       $(".type", html).innerHTML = "Event";
 
       $.onClick($("tr", html), function() {
-        $.navigateTo("/a/session_tracking/settings/events/" + ev.event);
+        $.navigateTo("/a/session_tracking/settings/schema/events/" + ev.event);
       });
 
       tbody.appendChild(html);
