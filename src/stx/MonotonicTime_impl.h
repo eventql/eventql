@@ -61,4 +61,8 @@ inline constexpr bool MonotonicTime::operator>(const MonotonicTime& other) const
   return nanosecs_ > other.nanosecs_;
 }
 
+inline constexpr bool MonotonicTime::operator!() const {
+  return nanosecs_ == 0;
+}
+
 } // namespace stx

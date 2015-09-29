@@ -25,6 +25,8 @@ public:
   constexpr bool operator>=(const MonotonicTime& other) const;
   constexpr bool operator<(const MonotonicTime& other) const;
   constexpr bool operator>(const MonotonicTime& other) const;
+
+  constexpr bool operator!() const;
   
 private:
   uint64_t nanosecs_;
