@@ -14,6 +14,7 @@
 #include "stx/protobuf/MessageSchema.h"
 #include "stx/protobuf/MessagePrinter.h"
 #include "stx/protobuf/MessageEncoder.h"
+#include "stx/protobuf/MessageDecoder.h"
 #include "stx/protobuf/DynamicMessage.h"
 #include "csql/qtree/SelectListNode.h"
 #include "csql/qtree/ColumnReferenceNode.h"
@@ -54,7 +55,12 @@ void EventsService::scanTable(
     RAISEF(kNotFoundError, "table '$0' is not a  timeseries", table_name);
   }
 
+  auto schema = table.get()->schema();
   const auto& table_cfg = table.get()->config().config();
+
+  if (!schema->hasField("time")) {
+    RAISEF(kNotFoundError, "table '$0' has no 'time' column", table_name);
+  }
 
   auto lookback_limit = params.end_time() - 90 * kMicrosPerDay;
   auto partition_size =
@@ -64,7 +70,7 @@ void EventsService::scanTable(
     partition_size = 4 * kMicrosPerHour;
   }
 
-  result->setSchema(table.get()->schema());
+  result->setSchema(schema);
 
   for (auto time = params.end_time();
       time > lookback_limit;
@@ -109,7 +115,11 @@ void EventsService::scanLocalTablePartition(
     const SHA1Hash& partition_key,
     const EventScanParams& params,
     EventScanResult* result) {
-  /*
+  auto table = pmap_->findTable(session.customer(), table_name);
+  if (table.isEmpty()) {
+    RAISEF(kNotFoundError, "table not found: $0", table_name);
+  }
+
   auto partition = pmap_->findPartition(
       session.customer(),
       table_name,
@@ -126,94 +136,30 @@ void EventsService::scanLocalTablePartition(
       table_name,
       partition_key.toString());
 
-  Vector<RefPtr<csql::SelectListNode>> select_list;
-  select_list.emplace_back(
-      new csql::SelectListNode(
-          new csql::ColumnReferenceNode("time")));
-
-  if (params.return_raw()) {
-    select_list.emplace_back(
-        new csql::SelectListNode(
-            new csql::ColumnReferenceNode("raw")));
-  }
-
-  for (const auto& c : params.columns()) {
-    select_list.emplace_back(
-        new csql::SelectListNode(
-            new csql::ColumnReferenceNode(c)));
-  }
-
-  Option<RefPtr<csql::ValueExpressionNode>> where_cond;
-  switch (params.scan_type()) {
-
-    case LOGSCAN_SQL: {
-      const auto& sql_str = params.condition();
-
-      csql::Parser parser;
-      parser.parseValueExpression(sql_str.data(), sql_str.size());
-
-      auto stmts = parser.getStatements();
-      if (stmts.size() != 1) {
-        RAISE(
-            kParseError,
-            "SQL filter expression must consist of exactly one statement");
-      }
-
-      where_cond = Some(
-          mkRef(sql_->queryPlanBuilder()->buildValueExpression(stmts[0])));
-
-      break;
-    }
-
-  }
-
-  auto seqscan = mkRef(
-      new csql::SequentialScanNode(
-          table_name,
-          select_list,
-          where_cond));
-
   auto reader = partition.get()->getReader();
-  auto cstable_filename = reader->cstableFilename();
-  if (cstable_filename.isEmpty()) {
-    return;
-  }
+  auto schema = table.get()->schema();
+  auto time_field_id = schema->fieldId("time");
 
-  csql::CSTableScan cstable_scan(
-      seqscan,
-      cstable_filename.get(),
-      sql_->queryBuilder().get());
+  size_t nrows = 0;
+  reader->fetchRecords(
+      [&result, &nrows, &schema, time_field_id] (const Buffer& record) {
 
-  csql::ExecutionContext context(sql_->scheduler());
+    msg::MessageObject msg;
+    msg::MessageDecoder::decode(record, *schema, &msg);
 
-  cstable_scan.execute(
-      &context,
-      [result, &params] (int argc, const csql::SValue* argv) -> bool {
-    int colidx = 0;
-
-    auto time = UnixTime(argv[colidx++].getInteger());
-    if (time >= params.end_time()) {
-      return true;
+    auto time = msg.getUnixTime(time_field_id);
+    auto row = result->addRow(time);
+    if (row) {
+      row->obj.setData(msg);
     }
 
-    auto line = result->addLine(time);
-    if (!line) {
-      return true;
+    if (++nrows % 10000 == 0) {
+      result->incrRowsScanned(nrows);
+      nrows = 0;
     }
-
-    if (params.return_raw()) {
-      line->raw = argv[colidx++].toString();
-    }
-
-    for (; colidx < argc; ++colidx) {
-      line->columns.emplace_back(argv[colidx].toString());
-    }
-
-    return true;
   });
 
-  result->incrRowsScanned(cstable_scan.rowsScanned());
-  */
+  result->incrRowsScanned(nrows);
 }
 
 void EventsService::scanRemoteTablePartition(
