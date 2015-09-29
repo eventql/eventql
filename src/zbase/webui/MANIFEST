@@ -175,8 +175,8 @@ route {
   path_prefix: "/a/session_tracking/settings/events/"
   view: "edit_session_tracking_event"
   require_module: "widgets/z-menu"
-  require_module: "widgets/z-tabbable"
   require_module: "widgets/z-table"
+  require_module: "widgets/z-dropdown"
   require_module: "widgets/zbase-header"
   require_module: "views/session_tracking"
 }
