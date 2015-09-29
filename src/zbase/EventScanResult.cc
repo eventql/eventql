@@ -7,6 +7,8 @@
  * permission is obtained.
  */
 #include "stx/wallclock.h"
+#include "stx/protobuf/MessageEncoder.h"
+#include "stx/protobuf/MessageDecoder.h"
 #include "zbase/EventScanResult.h"
 
 using namespace stx;
@@ -90,41 +92,38 @@ void EventScanResult::incrRowsScanned(size_t nrows) {
 }
 
 void EventScanResult::encode(OutputStream* os) const {
-  //os->appendVarUInt(rows_scanned_);
-  //os->appendVarUInt(rows_.size());
+  os->appendVarUInt(rows_scanned_);
+  os->appendVarUInt(rows_.size());
 
-  //for (const auto& l : rows_) {
-  //  os->appendVarUInt(l.time.unixMicros());
-  //  os->appendLenencString(l.raw);
-  //  os->appendVarUInt(l.columns.size());
-
-  //  for (const auto& c : l.columns) {
-  //    os->appendLenencString(c);
-  //  }
-  //}
+  for (const auto& r : rows_) {
+    Buffer buf;
+    msg::MessageEncoder::encode(r.obj.data(), *schema_, &buf);
+    os->appendVarUInt(r.time.unixMicros());
+    os->appendVarUInt(buf.size());
+    os->write(buf);
+  }
 }
 
 void EventScanResult::decode(InputStream* is) {
-  //rows_scanned_ += is->readVarUInt();
+  rows_scanned_ += is->readVarUInt();
 
-  //auto nrows = is->readVarUInt();
-  //for (size_t j = 0; j < nrows; ++j) {
-  //  auto line = addLine(is->readVarUInt());
+  auto nrows = is->readVarUInt();
+  for (size_t j = 0; j < nrows; ++j) {
+    auto row = addRow(is->readVarUInt());
+    auto record_size = is->readVarUInt();
 
-  //  if (line) {
-  //    line->raw = is->readLenencString();
-  //    auto ncols = is->readVarUInt();
-  //    for (size_t i = 0; i < ncols; ++i) {
-  //      line->columns.emplace_back(is->readLenencString());
-  //    }
-  //  } else {
-  //    is->readLenencString();
-  //    auto ncols = is->readVarUInt();
-  //    for (size_t i = 0; i < ncols; ++i) {
-  //      is->readLenencString();
-  //    }
-  //  }
-  //}
+    if (row) {
+      Buffer buf(record_size);
+      is->readNextBytes(buf.data(), buf.size());
+
+      msg::MessageObject msg;
+      msg::MessageDecoder::decode(buf, *schema_, &msg);
+
+      row->obj.setData(msg);
+    } else {
+      is->skipNextBytes(record_size);
+    }
+  }
 }
 
 } // namespace zbase
