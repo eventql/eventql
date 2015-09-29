@@ -57,6 +57,16 @@ public:
       EventScanResult* result);
 
   /**
+   * Scan a single logfile partition. This method must be executed on a host
+   * that actually stores this partition
+   */
+  EventScanResult scanLocalTablePartition(
+      const AnalyticsSession& session,
+      const String& table_name,
+      const SHA1Hash& partition,
+      const EventScanParams& params);
+
+  /**
    * Scan a single remote logfile partition, try all hosts in order from first
    * to last
    */
