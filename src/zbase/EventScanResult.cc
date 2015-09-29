@@ -18,7 +18,9 @@ namespace zbase {
 EventScanRow::EventScanRow(RefPtr<msg::MessageSchema> schema) : obj(schema) {}
 
 EventScanResult::EventScanResult(
+    RefPtr<msg::MessageSchema> schema,
     size_t max_rows /* = 1000 */) :
+    schema_(schema),
     max_rows_(max_rows),
     scanned_until_(WallClock::unixMicros()),
     rows_scanned_(0) {}
@@ -57,10 +59,6 @@ EventScanRow* EventScanResult::addRow(UnixTime time) {
 
 RefPtr<msg::MessageSchema> EventScanResult::schema() const {
   return schema_;
-}
-
-void EventScanResult::setSchema(RefPtr<msg::MessageSchema> schema) {
-  schema_ = schema;
 }
 
 const List<EventScanRow>& EventScanResult::rows() const {

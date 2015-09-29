@@ -170,14 +170,11 @@ void EventsAPIServlet::scanTablePartition(
   auto scan_params = msg::decode<EventScanParams>(
       req_stream->request().body());
 
-  EventScanResult result(limit);
-
-  service_->scanLocalTablePartition(
+  auto result = service_->scanLocalTablePartition(
       session,
       table,
       SHA1Hash::fromHexString(partition),
-      scan_params,
-      &result);
+      scan_params);
 
   Buffer res_body;
   {

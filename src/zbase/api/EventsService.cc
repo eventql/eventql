@@ -75,8 +75,7 @@ void EventsService::scanTable(
       time > lookback_limit;
       time -= partition_size) {
 
-    EventScanResult result(remaining);
-    result.setSchema(schema);
+    EventScanResult result(schema, remaining);
 
     auto partition = zbase::TimeWindowPartitioner::partitionKeyFor(
         table_name,
@@ -117,6 +116,27 @@ void EventsService::scanTable(
       break;
     }
   }
+}
+
+EventScanResult EventsService::scanLocalTablePartition(
+    const AnalyticsSession& session,
+    const String& table_name,
+    const SHA1Hash& partition_key,
+    const EventScanParams& params) {
+  auto table = pmap_->findTable(session.customer(), table_name);
+  if (table.isEmpty()) {
+    RAISEF(kNotFoundError, "table not found: $0", table_name);
+  }
+
+  EventScanResult result(table.get()->schema(), params.limit());
+  scanLocalTablePartition(
+      session,
+      table_name,
+      partition_key,
+      params,
+      &result);
+
+  return result;
 }
 
 void EventsService::scanLocalTablePartition(
