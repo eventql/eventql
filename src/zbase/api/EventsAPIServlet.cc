@@ -83,6 +83,7 @@ void EventsAPIServlet::scanTable(
   if (URI::getParam(params, "limit", &limit_str)) {
     limit = std::stoull(limit_str);
   }
+  scan_params.set_limit(limit);
 
   String columns_str;
   if (URI::getParam(params, "columns", &columns_str)) {
@@ -91,55 +92,64 @@ void EventsAPIServlet::scanTable(
     }
   }
 
-  EventScanResult result(limit);
-
   http::HTTPSSEStream sse_stream(req_stream, res_stream);
   sse_stream.start();
 
-  auto send_status_update = [&sse_stream, &result, &scan_params] (bool done) {
+  auto send_result_row = [&sse_stream] (const msg::DynamicMessage& row) {
+    Buffer buf;
+    json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
+    json.beginObject();
+    json.addObjectEntry("event");
+    row.toJSON(&json);
+    json.endObject();
+
+    sse_stream.sendEvent(buf, Some<String>("result"));
+  };
+
+  auto send_status_update = [&sse_stream, &scan_params] (bool done) {
     Buffer buf;
     json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
     json.beginObject();
     json.addObjectEntry("status");
     json.addString(done ? "finished" : "running");
-    json.addComma();
-    json.addObjectEntry("scanned_until");
-    json.addInteger(result.scannedUntil().unixMicros());
-    json.addComma();
-    json.addObjectEntry("rows_scanned");
-    json.addInteger(result.rowScanned());
-    json.addComma();
-    json.addObjectEntry("result");
-    json.beginArray();
+    //json.addComma();
+    //json.addObjectEntry("scanned_until");
+    //json.addInteger(result.scannedUntil().unixMicros());
+    //json.addComma();
+    //json.addObjectEntry("rows_scanned");
+    //json.addInteger(result.rowScanned());
+    //json.addComma();
+    //json.addObjectEntry("results");
+    //json.beginArray();
 
-    size_t nline = 0;
-    for (const auto& l : result.rows()) {
-      if (++nline > 1) {
-        json.addComma();
-      }
+    //size_t nline = 0;
+    //for (const auto& l : result.rows()) {
+    //  if (++nline > 1) {
+    //    json.addComma();
+    //  }
 
-      json.beginObject();
-      json.addObjectEntry("time");
-      json.addInteger(l.time.unixMicros());
-      json.addComma();
+    //  json.beginObject();
+    //  json.addObjectEntry("time");
+    //  json.addInteger(l.time.unixMicros());
+    //  json.addComma();
 
-      json.addObjectEntry("time");
-      l.obj.toJSON(&json);
+    //  json.addObjectEntry("data");
+    //  l.obj.toJSON(&json);
 
-      json.endObject();
-    }
+    //  json.endObject();
+    //}
 
-    json.endArray();
+    //json.endArray();
     json.endObject();
 
-    sse_stream.sendEvent(buf, None<String>());
+    sse_stream.sendEvent(buf, Some<String>("progress"));
   };
 
   service_->scanTable(
       session,
       table_name,
       scan_params,
-      &result,
+      send_result_row,
       send_status_update);
 
   sse_stream.finish();
