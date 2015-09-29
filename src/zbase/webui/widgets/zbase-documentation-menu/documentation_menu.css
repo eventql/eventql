@@ -15,6 +15,8 @@
 .zbase_documentation_menu_sidebar z-menu-item.doc_section {
   margin: 10px 0 10px 20px !important;
   padding-right: 0 !important;
+  border-left: 0 !important;
+  cursor: default;
 }
 
 .zbase_documentation_menu_sidebar z-menu-section > z-menu-item.doc_section {
@@ -24,6 +26,11 @@
 
 .zbase_documentation_menu_sidebar z-menu-item.doc_section a {
   line-height: 20px;
+  color: #737373 !important;
+}
+
+.zbase_documentation_menu_sidebar z-menu-item.doc_section a:hover {
+  color: #000 !important;
 }
 
 .zbase_documentation_menu_sidebar z-menu-item.doc_section span.index {
