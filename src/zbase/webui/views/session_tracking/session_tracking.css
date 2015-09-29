@@ -82,6 +82,16 @@
 .zbase_session_tracking table {
   margin-top: 22px;
   border-top: 1px solid #eee;
+  font-size: 13px;
+}
+
+.zbase_session_tracking table thead tr th {
+  color: #888;
+  font-weight: 400;
+}
+
+.zbase_session_tracking table thead tr th:first-child {
+  width: 50%;
 }
 
 .zbase_session_tracking table td.icon {
@@ -100,16 +110,24 @@
   color: #3498db;
 }
 
-.zbase_session_tracking table.z-table.events tbody tr:hover {
+.zbase_session_tracking table.z-table.schemas tbody tr:hover {
   cursor: pointer;
 }
 
-.zbase_session_tracking table.z-table.events tbody tr td {
-  vertical-align: top;
-  padding-top: 16px;
+.zbase_session_tracking table.z-table.schemas tbody tr td {
+  line-height: 24px;
 }
 
-.zbase_session_tracking table.events .event_name a {
+.zbase_session_tracking table.z-table.schemas tbody tr td.name {
+  color: #000;
+}
+
+.zbase_session_tracking table.z-table.schemas tbody tr td.type {
+  color: #888;
+  text-transform: uppercase;
+}
+
+/*.zbase_session_tracking table.schemas .name a {
   background-color: #f2f8fa;
   border-bottom: 1px solid #c9d0d4;
   position: absolute;
@@ -119,30 +137,8 @@
   font-weight: 500;
   color: rgba(10,10,10,0.8);
   line-height: 18px;
-}
+}*/
 
-.zbase_session_tracking table.events .event_schema {
-  padding: 2px 0 20px 0;
-}
-
-.zbase_session_tracking table.events .event_schema pre {
-  font-family: "Droid Sans Mono", "Courier", monospace;
-  font-size: 12px;
-  line-height: 120%;
-  color: #000;
-  opacity: 0.9;
-}
-
-
-.zbase_session_tracking table.attributes .attribute_name {
-  color: #111;
-  font-weight: 500;
-}
-
-.zbase_session_tracking table.attributes .attribute_type {
-  font-size: 12px;
-  color: #999;
-}
 
 .zbase_session_tracking table.add_attribute {
   margin-top: 0px;
