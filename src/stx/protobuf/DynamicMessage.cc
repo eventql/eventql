@@ -271,6 +271,10 @@ const msg::MessageObject& DynamicMessage::data() const {
   return data_;
 }
 
+void DynamicMessage::setData(msg::MessageObject data) {
+  data_ = data;
+}
+
 RefPtr<msg::MessageSchema> DynamicMessage::schema() const {
   return schema_;
 }
