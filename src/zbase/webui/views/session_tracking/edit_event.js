@@ -1,10 +1,15 @@
 ZBase.registerView((function() {
-  var load = function(path) {
-    $.showLoader();
+  var event_name;
 
-    var path_prefix = "/a/session_tracking/settings/events/";
-    var event_name = path.substr(path_prefix.length);
-    var info_url = "/api/v1/session_tracking/event_info?event=" + event_name;
+  var init = function(path) {
+    var path_prefix = "/a/session_tracking/settings/schema/events/";
+    event_name = path.substr(path_prefix.length);
+
+    load();
+  };
+
+  var load = function() {
+    $.showLoader();
 
     var page = $.getTemplate(
         "views/session_tracking",
@@ -20,6 +25,7 @@ ZBase.registerView((function() {
     $("h3 span", content).innerHTML = event_name;
     $(".zbase_content_pane .session_tracking_content", page).appendChild(content);
 
+    var info_url = "/api/v1/session_tracking/event_info?event=" + event_name;
     $.httpGet(info_url, function(r) {
       if (r.status == 200) {
         render(JSON.parse(r.response).event.schema.columns);
@@ -33,12 +39,11 @@ ZBase.registerView((function() {
     $.replaceViewport(page);
   };
 
-
-  var render = function(columns) {
-    renderTable(columns, $(".zbase_session_tracking table.edit_event tbody"));
+  var render = function(fields) {
+    renderTable(fields, $(".zbase_session_tracking table.edit_event tbody"));
   };
 
-  var renderTable = function(columns, tbody) {
+  var renderTable = function(fields, tbody) {
     var row_tpl = $.getTemplate(
         "views/session_tracking",
         "zbase_session_tracking_edit_event_row_tpl");
@@ -47,17 +52,45 @@ ZBase.registerView((function() {
         "views/session_tracking",
         "zbase_session_tracking_edit_event_table_tpl");
 
-    columns.forEach(function(col) {
+    fields.forEach(function(field) {
       var html = $("tr", row_tpl.cloneNode(true));
-      $(".name", html).innerHTML = col.name;
-      $(".type", html).innerHTML = "[" + col.type.toLowerCase() + "]";
+      $(".name", html).innerHTML = field.name;
+      $(".type", html).innerHTML = "[" + field.type.toLowerCase() + "]";
       tbody.appendChild(html);
 
-      if (col.repeated) {
+      if (field.repeated) {
         var table = table_tpl.cloneNode(true);
-        renderTable(col.schema.columns, $("tbody", table));
+        renderTable(field.schema.fieldumns, $("tbody", table));
         tbody.appendChild(table);
-        console.log(table);
+      }
+
+      $("z-dropdown", html).addEventListener("change", function() {
+        switch (this.getValue()) {
+          case "add":
+            console.log("add");
+            break;
+
+          case "delete":
+            renderDelete(field.name);
+            break;
+        };
+        this.setValue([]);
+      }, false);
+
+    });
+  };
+
+  var renderDelete = function(field_name) {
+    //TODO render popup
+
+    var url =
+        "/a/session_tracking/events/remove_field?event=" +
+        event_name + "field=" + field_name;
+    $.httpPost(url, function(r) {
+      if (r.status == 201) {
+        load();
+      } else {
+        $.fatalError();
       }
     });
   };
@@ -65,8 +98,8 @@ ZBase.registerView((function() {
 
   return {
     name: "edit_session_tracking_event",
-    loadView: function(params) { load(params.path); },
+    loadView: function(params) { init(params.path); },
     unloadView: function() {},
-    handleNavigationChange: load
+    handleNavigationChange: init
   };
 })());
