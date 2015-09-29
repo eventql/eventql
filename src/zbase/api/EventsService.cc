@@ -60,6 +60,10 @@ void EventsService::scanTable(
   auto partition_size =
       table_cfg.time_window_partitioner_config().partition_size();
 
+  if (!partition_size) {
+    partition_size = 4 * kMicrosPerHour;
+  }
+
   result->setSchema(table.get()->schema());
 
   for (auto time = params.end_time();
