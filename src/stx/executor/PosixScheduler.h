@@ -181,13 +181,6 @@ class PosixScheduler : public Scheduler {
   Watcher* unlinkWatcher(Watcher* w);
 
   /**
-   * Retrieves a watcher by file descriptor.
-   *
-   * @note requires the caller to lock the object mutex.
-   */
-  Watcher* getWatcher(int fd);
-
-  /**
    * Computes the timespan the event loop should wait the most.
    *
    * @note requires the caller to lock the object mutex.
@@ -199,8 +192,12 @@ class PosixScheduler : public Scheduler {
   friend std::string inspect(const PosixScheduler&);
 
  private:
+  /**
+   * mutex, to protect access to tasks, timers
+   */
   std::mutex lock_;
-  int wakeupPipe_[2];
+
+  int wakeupPipe_[2];        //!< system pipe, used to wakeup the waiting syscall
 
   Task onPreInvokePending_;  //!< callback to be invoked before any other hot CB
   Task onPostInvokePending_; //!< callback to be invoked after any other hot CB
@@ -208,13 +205,12 @@ class PosixScheduler : public Scheduler {
   std::list<Task> tasks_;            //!< list of pending tasks
   std::list<RefPtr<Timer>> timers_;  //!< ASC-sorted list of timers
 
-  std::mutex watcherMutex_;
   std::vector<Watcher> watchers_;   //!< I/O watchers
   Watcher* firstWatcher_;           //!< I/O watcher with the smallest timeout
   Watcher* lastWatcher_;            //!< I/O watcher with the largest timeout
 
-  std::atomic<size_t> readerCount_;
-  std::atomic<size_t> writerCount_;
+  std::atomic<size_t> readerCount_; //!< number of active read interests
+  std::atomic<size_t> writerCount_; //!< number of active write interests
 };
 
 std::string inspect(PosixScheduler::Mode mode);

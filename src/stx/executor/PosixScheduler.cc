@@ -51,6 +51,14 @@ std::string StringUtil::toString<PosixScheduler::Watcher>(PosixScheduler::Watche
 }
 
 template<>
+std::string StringUtil::toString<PosixScheduler::Watcher*>(PosixScheduler::Watcher* w) {
+  if (!w)
+    return "nil";
+
+  return inspect(*w);
+}
+
+template<>
 std::string StringUtil::toString<const PosixScheduler&>(const PosixScheduler& s) {
   return inspect(s);
 }
@@ -66,7 +74,6 @@ PosixScheduler::PosixScheduler(
       onPostInvokePending_(postInvoke),
       tasks_(),
       timers_(),
-      watcherMutex_(),
       watchers_(),
       firstWatcher_(nullptr),
       lastWatcher_(nullptr) {
@@ -75,6 +82,8 @@ PosixScheduler::PosixScheduler(
   }
   fcntl(wakeupPipe_[0], F_SETFL, O_NONBLOCK);
   fcntl(wakeupPipe_[1], F_SETFL, O_NONBLOCK);
+
+  watchers_.resize(32768); // TODO: detect fd limit
 
   TRACE("ctor: wakeupPipe {read=$0, write=$1}",
       wakeupPipe_[PIPE_READ_END],
@@ -200,6 +209,8 @@ void PosixScheduler::linkWatcher(Watcher* w, Watcher* pred) {
   w->prev = pred;
   w->next = succ;
 
+  TRACE("linkWatcher $0 between $1 and $2", w, pred, succ);
+
   if (pred)
     pred->next = w;
   else
@@ -228,10 +239,6 @@ PosixScheduler::Watcher* PosixScheduler::unlinkWatcher(Watcher* w) {
   w->clear();
 
   return succ;
-}
-
-inline PosixScheduler::Watcher* PosixScheduler::getWatcher(int fd) {
-  return &watchers_[fd];
 }
 
 Scheduler::HandleRef PosixScheduler::executeOnReadable(int fd, Task task, Duration tmo, Task tcb) {
@@ -263,37 +270,38 @@ PosixScheduler::HandleRef PosixScheduler::setupWatcher(
   MonotonicTime timeout = now() + tmo;
 
   if (fd >= watchers_.size()) {
-    watchers_.resize(fd + 1);
+    // we cannot dynamically resize here without also updating the doubly linked
+    // list as a realloc() can potentially change memory locations.
+    RAISE(kIOError, "fd number too high");
   }
 
-  Watcher* w = &watchers_[fd];
+  Watcher* interest = &watchers_[fd];
 
-  if (w->fd >= 0)
+  if (interest->fd >= 0)
     RAISE("AlreadyWatchingOnResource", "Already watching on resource");
     // TODO RAISE_STATUS(AlreadyWatchingOnResource);
 
-  w->reset(fd, mode, task, timeout, tcb);
+  interest->reset(fd, mode, task, timeout, tcb);
 
-  // inject watcher oredred by timeout ascending
+  // inject watcher ordered by timeout ascending
   if (lastWatcher_ != nullptr) {
-    Watcher* pred = lastWatcher_;
+    Watcher* succ = lastWatcher_;
 
-    while (pred != nullptr) {
-      if (w->timeout <= pred->timeout) {
-        linkWatcher(w, pred);
-        return w; // handle;
+    while (succ->prev != nullptr) {
+      if (interest->timeout <= succ->prev->timeout) {
+        linkWatcher(interest, succ->prev);
+        return interest; // handle;
       }
     }
     // put in front
-    w->next = firstWatcher_;
-    firstWatcher_->prev = w;
-    firstWatcher_ = w;
-    return w; // handle;
+    interest->next = firstWatcher_;
+    firstWatcher_->prev = interest;
+    firstWatcher_ = interest;
   } else {
-    firstWatcher_ = lastWatcher_ = w;
+    firstWatcher_ = lastWatcher_ = interest;
   }
 
-  return w; // handle;
+  return interest; // handle;
 }
 
 void PosixScheduler::collectActiveHandles(const fd_set* input,
