@@ -1,42 +1,27 @@
 <template id="zbase_datastore_tables_list_tpl">
   <section class='zbase_page_title medium'>
     <div>
-      <h2 class="pagetitle zbase_datastore_menu_pagetitle">Datastore</h2>
+      <h2 class="pagetitle zbase_datastore_menu_pagetitle">Tables</h2>
     </div>
   </section>
 
-  <div class="zbase_content_pane zbase_datastore zbase_datastore_menu_wrap">
-    <div class="zbase_datastore_menu_sidebar">
+  <div class="zbase_content_pane zbase_datastore zbase_datastore_wrap">
+    <div class="zbase_datastore_tables">
+      <h2 class="pagetitle"><em>All Tables</em></h2>
+
+      <table class="z-table zbase_clickable_table" data-clickable>
+        <thead>
+          <tr>
+            <th>Table</th>
+            <th style="width: 160px;">Size</th>
+            <th style="width: 40px;">&nbsp;</th>
+          </tr>
+        </thead>
+
+        <tbody></tbody>
+      </table>
+
     </div>
-
-    <div class="zbase_datastore_menu_content">
-      <div class="zbase_datastore_tables">
-        <zbase-breadcrumbs>
-          <zbase-breadcrumbs-section>
-            <a href="/a/datastore">Datastore</a>
-          </zbase-breadcrumbs-section>
-          <zbase-breadcrumbs-section>
-            <a href="/a/datastore/tables">Tables</a>
-          </zbase-breadcrumbs-section>
-        </zbase-breadcrumbs>
-        <h2 class="pagetitle"><em>Tables</em></h2>
-
-
-        <table class="z-table zbase_clickable_table" data-clickable>
-          <thead>
-            <tr>
-              <th>Table</th>
-              <th style="width: 160px;">Size</th>
-              <th style="width: 40px;">&nbsp;</th>
-            </tr>
-          </thead>
-
-          <tbody></tbody>
-        </table>
-
-      </div>
-    </div>
-
   </div>
 </template>
 
