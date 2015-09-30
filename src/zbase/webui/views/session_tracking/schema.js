@@ -36,9 +36,8 @@ ZBase.registerView((function() {
       $.hideLoader();
     });
 
-    $.onClick($(".add_session_event .link", page), function() {
-      alert("not yet implemented");
-    });
+
+    $.onClick($("button.add", page), renderAdd);
 
     $.handleLinks(page);
     $.replaceViewport(page);
@@ -85,6 +84,33 @@ ZBase.registerView((function() {
 
       tbody.appendChild(html);
     });
+  };
+
+  var renderAdd = function() {
+    var modal = $(".zbase_session_tracking z-modal.add_to_schema");
+    var tpl = $.getTemplate(
+      "views/session_tracking",
+      "zbase_session_tracking_schema_add_modal_tpl");
+
+    $.onClick($("button.close", tpl), function() {modal.close();});
+    $.onClick($("button.submit", tpl), function() {
+      var name = $("input", modal).value;
+      if (name.length == 0) {
+        $(".error_note", modal).classList.remove("hidden");
+        return;
+      }
+
+      var type = $("z-dropdown", modal).getValue();
+      var qstr = "name=" + name + "&type=" + type;
+
+      alert("post new schema item" + qstr);
+
+      //TODO httpPost and redirect to edit_event if type == "event"
+    });
+
+    $.replaceContent($(".container", modal), tpl);
+
+    modal.show();
   };
 
   return {
