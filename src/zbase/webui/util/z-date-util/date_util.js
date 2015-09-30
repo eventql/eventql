@@ -354,6 +354,21 @@ DateUtil.printTimestamp = function(ts, timezone) {
     this.appendLeadingZero(this.getMilliSeconds(ts, timezone))].join("");
 };
 
+DateUtil.printTimestampShort = function(ts, timezone) {
+  if (!timezone) {
+    timezone = "UTC";
+  }
+
+  var date = new Date(ts);
+  return [
+    date.getFullYear(), "-",
+    this.appendLeadingZero(date.getMonth() + 1), "-",
+    this.appendLeadingZero(date.getDate()), " ",
+    this.appendLeadingZero(this.getHours(ts, timezone)), ":",
+    this.appendLeadingZero(this.getMinutes(ts, timezone)), ":",
+    this.appendLeadingZero(this.getSeconds(ts, timezone))].join("");
+};
+
 DateUtil.appendLeadingZero = function (num) {
   var num = num;
   if (typeof num == 'string') {

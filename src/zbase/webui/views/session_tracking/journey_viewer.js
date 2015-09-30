@@ -50,9 +50,34 @@ ZBase.registerView((function() {
   };
 
   var renderJourney = function(data) {
-    var journey = document.createElement("li");
     console.log(data);
-    journey.innerHTML = data.time;
+    var journey = document.createElement("li");
+
+    var time = document.createElement("span");
+    time.classList.add("time");
+    time.innerHTML =
+        DateUtil.printTimestampShort(data.event.first_seen_time / 1000) +
+        "&mdash;" +
+        DateUtil.printTimestampShort(data.event.last_seen_time / 1000);
+
+    journey.appendChild(time);
+
+    for (k in data.event.attr) {
+      var attr = document.createElement("span");
+      attr.classList.add("event");
+      attr.innerHTML = $.escapeHTML(k + ": "+ data.event.attr[k]);
+      journey.appendChild(attr);
+      console.log(k);
+    }
+
+    for (k in data.event.event) {
+      var attr = document.createElement("span");
+      attr.classList.add("event");
+      attr.innerHTML = $.escapeHTML(k);
+      journey.appendChild(attr);
+      console.log(k);
+    }
+
     $(".zbase_user_journey_viewer .journeys").appendChild(journey);
   };
 
