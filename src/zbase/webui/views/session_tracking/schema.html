@@ -1,18 +1,34 @@
 <template id="zbase_session_tracking_schemas_tpl">
+<div class='zbase_settings zbase_session_tracking_schema'>
   <div class='zbase_settings '>
-    <button class="z-button primary add">Add</button>
-    <h3 class='zbase_settings_title'>Session Tracking Schema</h3>
+    <zbase-breadcrumbs style="margin-top: 20px; margin-bottom: -6px;">
+      <zbase-breadcrumbs-section>
+        <a href="/a/">Apps</a>
+      </zbase-breadcrumbs-section>
+      <zbase-breadcrumbs-section>
+        <a href="/a/session_tracking">User Journeys</a>
+      </zbase-breadcrumbs-section>
+      <zbase-breadcrumbs-section>
+        <a href="/a/session_tracking/settings/schema">Schema</a>
+      </zbase-breadcrumbs-section>
+    </zbase-breadcrumbs>
 
-    <table class='z-table schemas'>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Type</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
+    <h2 class="pagetitle"><em>Schema</em></h2>
+
+    <div class="schema_pane">
+      <table class='z-table schemas'>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Type</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+
+      <button class="z-button primary add">Add</button>
+    </div>
 
     <z-modal class="add_to_schema">
       <z-modal-box>
