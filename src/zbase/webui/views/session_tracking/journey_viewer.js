@@ -65,7 +65,7 @@ ZBase.registerView((function() {
     for (k in data.event.attr) {
       var attr = document.createElement("span");
       attr.classList.add("event");
-      attr.innerHTML = $.escapeHTML(k + ": "+ data.event.attr[k]);
+      attr.innerHTML = "<i class='fa fa-tag'></i> " + $.escapeHTML(k) + ": <em>"+ $.escapeHTML(data.event.attr[k]) + "</em>";
       journey.appendChild(attr);
       console.log(k);
     }
@@ -73,7 +73,7 @@ ZBase.registerView((function() {
     for (k in data.event.event) {
       var attr = document.createElement("span");
       attr.classList.add("event");
-      attr.innerHTML = $.escapeHTML(k);
+      attr.innerHTML = "<i class='fa fa-cube'></i> " + $.escapeHTML(k);
       journey.appendChild(attr);
       console.log(k);
     }

@@ -28,8 +28,7 @@
 
 .zbase_user_journey_viewer ul.journeys li .time {
   display: block;
-  color: #aaa;
-  background: #f9f9f9;
+  color: #666;
   margin-left: -20px;
   margin-right: -20px;
   margin-top: -16px;
@@ -38,18 +37,30 @@
   border-bottom: 1px solid #eee;
   height: 40px;
   line-height: 40px;
+  font-weight: 500;
+  font-size: 12px;
 }
 
 .zbase_user_journey_viewer ul.journeys li .event {
   display: block;
-  border: 1px solid #eee;
+  border: 1px solid rgba(52, 152, 219, 0.3);
   border-radius: 4px;
-  margin-right: 10px;
-  margin-bottom: 10px;
+  margin-right: 14px;
+  margin-bottom: 14px;
   float: left;
   height: 36px;
   line-height: 36px;
-  padding: 0 8px;
+  padding: 0 12px;
+  color: #3498db;
+}
+
+.zbase_user_journey_viewer ul.journeys li .event em {
+  font-weight: 400;
+  color: #666;
+}
+
+.zbase_user_journey_viewer ul.journeys li .event i {
+  margin-right: 5px;
 }
 
 .zbase_user_journey_viewer ul.journeys li:before,
@@ -59,11 +70,11 @@
 }
 
 .zbase_user_journey_viewer ul.journeys li:after {
-    clear: both;
+  clear: both;
 }
 
 .zbase_user_journey_viewer ul.journeys li.loading_bar {
-  background-color: #f2f8fa;
+  background-color: #fff;
   border-bottom: 1px solid #c9d0d4;
   box-shadow: 0 1px 1px rgba(0,0,0,0.1);
   padding: 10px 20px;
@@ -86,7 +97,8 @@
 .zbase_user_journey_viewer .loading_bar h3 {
   margin: 0;
   color: #3498db;
-  line-height: 18px;
+  line-height: 20px;
+  font-weight: 500;
 }
 
 .zbase_user_journey_viewer .loading_bar .loaderanim-outer {
