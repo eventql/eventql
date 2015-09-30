@@ -177,3 +177,7 @@
   padding: 0;
   margin-left: 6px;
 }
+
+.zbase_header .userid_info {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
