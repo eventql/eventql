@@ -24,6 +24,25 @@
   border: 1px solid #ddd;
   border-radius: 4px;
   margin-bottom: 20px;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.zbase_user_journey_viewer ul.journeys li .time:after {
+  content: "\f105";
+  display: block;
+  float: right;
+  font: normal normal normal 14px/1 FontAwesome;
+  text-rendering: auto;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-size: 16px;
+  line-height: 38px;
+}
+
+.zbase_user_journey_viewer ul.journeys li:hover {
+  background: #f9f9f9;
+  border: 1px solid #3498db;
 }
 
 .zbase_user_journey_viewer ul.journeys li .time {
@@ -39,6 +58,12 @@
   line-height: 40px;
   font-weight: 400;
   font-size: 12px;
+  background: #fff;
+}
+
+.zbase_user_journey_viewer ul.journeys li:hover .time {
+  background: #3498db;
+  color: #fff;
 }
 
 .zbase_user_journey_viewer ul.journeys li .event {
@@ -52,6 +77,7 @@
   line-height: 36px;
   padding: 0 12px;
   color: #3498db;
+  background: #fff;
 }
 
 .zbase_user_journey_viewer ul.journeys li .event em {
@@ -61,7 +87,7 @@
 }
 
 .zbase_user_journey_viewer ul.journeys li .event i {
-  margin-right: 5px;
+  margin-right: 3px;
 }
 
 .zbase_user_journey_viewer ul.journeys li:before,
