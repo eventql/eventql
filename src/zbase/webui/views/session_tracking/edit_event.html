@@ -17,51 +17,10 @@
   <z-modal class="add_field">
     <z-modal-box>
       <z-modal-close-icon></z-modal-close-icon>
-      <div class="z-modal-header">Add Field</div>
-
-      <div class="z-modal-content">
-        <div>
-          <label>Field:</label>
-          <input class="z-input" type="text" />
-        </div>
-
-        <div>
-          <label>Type:</label>
-          <z-dropdown data-resolved class="input">
-            <z-dropdown-flyout>
-              <z-dropdown-items>
-                <z-dropdown-item data-value="OBJECT">OBJECT</z-dropdown-item>
-                <z-dropdown-item data-value="BOOLEAN">BOOLEAN</z-dropdown-item>
-                <z-dropdown-item data-value="UINT32">UINT32</z-dropdown-item>
-                <z-dropdown-item data-value="STRING">STRING</z-dropdown-item>
-                <z-dropdown-item data-value="UINT64">UINT64</z-dropdown-item>
-                <z-dropdown-item data-value="DOUBLE">DOUBLE</z-dropdown-item>
-                <z-dropdown-item data-value="DATETIME">DATETIME</z-dropdown-item>
-              </z-dropdown-items>
-            </z-dropdown-flyout>
-          </z-dropdown>
-        </div>
-
-        <div>
-          <z-checkbox></z-checkbox> <label>Repeated</label>
-        </div>
-
-        <div>
-          <z-checkbox data-active="active"></z-checkbox> <label>Optional</label>
-        </div>
-
-
-      </div>
-
-      <div class="z-modal-footer">
-        <button class="z-button primary submit">Submit</button>
-        <button class="z-button secondary close">Cancel</button>
-      </div>
+      <div class="container"></div>
     </z-modal-box>
   </z-modal>
 </template>
-
-
 
 <template id="zbase_session_tracking_edit_event_table_tpl">
   <tr class="table_attached">
@@ -98,4 +57,45 @@
       </z-dropdown>
     </td>
   </tr>
+</template>
+
+<template id="zbase_session_tracking_add_event_modal_tpl">
+  <z-modal-box>
+      <z-modal-close-icon></z-modal-close-icon>
+      <div class="z-modal-header">Add Field</div>
+
+      <div class="z-modal-content">
+        <div class="field">
+          <label>Field:</label>
+          <input class="z-input" type="text" />
+          <div class="error_note hidden">Please add a field name</div>
+        </div>
+
+        <div class="field">
+          <label>Type:</label>
+          <z-dropdown data-resolved class="input">
+            <z-dropdown-flyout>
+              <z-dropdown-items>
+                <z-dropdown-item data-value="OBJECT">OBJECT</z-dropdown-item>
+                <z-dropdown-item data-value="BOOLEAN">BOOLEAN</z-dropdown-item>
+                <z-dropdown-item data-value="UINT32">UINT32</z-dropdown-item>
+                <z-dropdown-item data-value="STRING" data-selected>STRING</z-dropdown-item>
+                <z-dropdown-item data-value="UINT64">UINT64</z-dropdown-item>
+                <z-dropdown-item data-value="DOUBLE">DOUBLE</z-dropdown-item>
+                <z-dropdown-item data-value="DATETIME">DATETIME</z-dropdown-item>
+              </z-dropdown-items>
+            </z-dropdown-flyout>
+          </z-dropdown>
+        </div>
+
+        <div class="field">
+          <z-checkbox></z-checkbox> <label>Repeated</label>
+        </div>
+      </div>
+
+      <div class="z-modal-footer">
+        <button class="z-button primary submit">Submit</button>
+        <button class="z-button secondary close">Cancel</button>
+      </div>
+  </z-modal-box>
 </template>
