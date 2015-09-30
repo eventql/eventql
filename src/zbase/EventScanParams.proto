@@ -11,7 +11,10 @@ package zbase;
 message EventScanParams {
 
   required uint64 end_time = 1;
+
   repeated string columns = 2;
+
+  optional uint64 limit = 3;
 
 };
 

@@ -26,7 +26,9 @@ struct EventScanRow {
 class EventScanResult {
 public:
 
-  EventScanResult(size_t max_rows = 1000);
+  EventScanResult(
+      RefPtr<msg::MessageSchema> schema,
+      size_t max_rows = 1000);
 
   /**
    * Returns a pointer to a mutable (empty) logline if the line was inserted
@@ -58,17 +60,16 @@ public:
   void incrRowsScanned(size_t nrows);
 
   RefPtr<msg::MessageSchema> schema() const;
-  void setSchema(RefPtr<msg::MessageSchema> schema);
 
   void encode(OutputStream* os) const;
   void decode(InputStream* os);
 
 protected:
+  RefPtr<msg::MessageSchema> schema_;
   size_t max_rows_;
   List<EventScanRow> rows_;
   UnixTime scanned_until_;
   size_t rows_scanned_;
-  RefPtr<msg::MessageSchema> schema_;
 };
 
 } // namespace zbase
