@@ -25,20 +25,35 @@ ZBase.registerView((function() {
     $.handleLinks(page);
     $.replaceViewport(page);
 
+    var query = query_mgr.get(
+        "journey_fetch",
+        "/api/v1/events/scan?table=sessions&limit=10");
 
-    //var query = query_mgr.get(
-    //    "journey_fetch",
-    //    "/api/v1/events/scan?table=sessions&limit=10");
+    query.addEventListener('result', function(e) {
+      renderJourney(JSON.parse(e.data));
+    });
 
-    //query.addEventListener('result', function(e) {
-    //  console.log(e);
-    //});
+    query.addEventListener('progress', function(e) {
+      var loading_bar = $(".zbase_user_journey_viewer .journeys .loading_bar");
+      console.log(e);
+      if (JSON.parse(e.data).status == "finished") {
+        query_mgr.close("journey_fetch");
+        loading_bar.remove();
+      }
+    });
   };
 
   var destroy = function() {
     if (query_mgr) {
       query_mgr.closeAll();
     }
+  };
+
+  var renderJourney = function(data) {
+    var journey = document.createElement("li");
+    console.log(data);
+    journey.innerHTML = data.time;
+    $(".zbase_user_journey_viewer .journeys").appendChild(journey);
   };
 
   return {
