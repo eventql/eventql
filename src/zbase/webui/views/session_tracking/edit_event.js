@@ -54,6 +54,11 @@ ZBase.registerView((function() {
         "views/session_tracking",
         "zbase_session_tracking_edit_event_table_tpl");
 
+
+    var delete_modal = $(".zbase_session_tracking z-modal.delete_field");
+    $.onClick($("button.close", delete_modal), delete_modal.close);
+    $.onClick($("button.submit", delete_modal), function(e) {deleteField()});
+
     fields.forEach(function(field) {
       var html = $("tr", row_tpl.cloneNode(true));
       $(".name", html).innerHTML = field.name;
@@ -73,7 +78,8 @@ ZBase.registerView((function() {
             break;
 
           case "delete":
-            renderDelete(field.name);
+            deleteField.bind(null, field.name)();
+            delete_modal.show();
             break;
         };
         this.setValue([]);
@@ -125,12 +131,15 @@ ZBase.registerView((function() {
     input.focus();
   };
 
-  var renderDelete = function(field_name) {
+  var deleteField = function(field_name) {
     //TODO render popup
-
+    console.log(field_name);
+    return;
+    
     var url =
         "/a/session_tracking/events/remove_field?event=" +
         event_name + "field=" + field_name;
+
     $.httpPost(url, "", function(r) {
       if (r.status == 201) {
         load();
