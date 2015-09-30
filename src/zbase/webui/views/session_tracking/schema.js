@@ -17,7 +17,7 @@ ZBase.registerView((function() {
     $(".zbase_content_pane .session_tracking_content", page).appendChild(content);
 
     $.httpGet("/api/v1/session_tracking/events", function(r) {
-      if(r.status == 200) {
+      if (r.status == 200) {
         renderEvents(JSON.parse(r.response).session_events);
         //$.handleLinks(page); //call?
       } else {
@@ -56,7 +56,7 @@ ZBase.registerView((function() {
       $(".type", html).innerHTML = "Event";
 
       $.onClick($("tr", html), function() {
-        $.navigateTo("/a/session_tracking/settings/events/" + ev.event);
+        $.navigateTo("/a/session_tracking/settings/schema/events/" + ev.event);
       });
 
       tbody.appendChild(html);
@@ -69,7 +69,8 @@ ZBase.registerView((function() {
     if (!events_rendered) {
       window.setTimeout(function() {
         renderAttributes(attrs);
-      }, 5);
+      }, 1);
+      return;
     }
 
     var tbody = $("table.schemas tbody");
