@@ -144,6 +144,15 @@
   line-height: 18px;
 }*/
 
+.zbase_session_tracking .zbase_settings_title.edit_event {
+  margin-left: 20px;
+}
+
+.zbase_session_tracking .zbase_settings_title.edit_event i {
+  font-size: 14px;
+  margin: 0 5px;
+}
+
 .zbase_session_tracking button.add_field {
   float: right;
   margin-top: 20px;
@@ -217,6 +226,7 @@
 .zbase_session_tracking table.add_attribute .error_note.hidden {
   display: none;
 }*/
+
 
 .zbase_session_tracking button.z-button {
   font-size: 13px;
