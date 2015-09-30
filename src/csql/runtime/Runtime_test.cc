@@ -586,3 +586,56 @@ TEST_CASE(RuntimeTest, TestWildcardSelect, [] () {
     EXPECT_EQ(result.getNumRows(), 1);
   }
 });
+
+TEST_CASE(RuntimeTest, TestStringStartsWithExpression, [] () {
+  auto runtime = Runtime::getDefaultRuntime();
+
+  {
+    auto v = runtime->evaluateStaticExpression("startswith('fnordblah', 'fnord')");
+    EXPECT_EQ(v.toString(), "true");
+  }
+
+  {
+    auto v = runtime->evaluateStaticExpression("startswith('fnordblah', 'f')");
+    EXPECT_EQ(v.toString(), "true");
+  }
+
+  {
+    auto v = runtime->evaluateStaticExpression("startswith('fnordblah', 'fnordblah')");
+    EXPECT_EQ(v.toString(), "true");
+  }
+
+  {
+    auto v = runtime->evaluateStaticExpression("startswith('fnordblah', 'fnordx')");
+    EXPECT_EQ(v.toString(), "false");
+  }
+
+  {
+    auto v = runtime->evaluateStaticExpression("startswith('fnordblah', 'bar')");
+    EXPECT_EQ(v.toString(), "false");
+  }
+});
+
+TEST_CASE(RuntimeTest, TestStringEndsWithExpression, [] () {
+  auto runtime = Runtime::getDefaultRuntime();
+
+  {
+    auto v = runtime->evaluateStaticExpression("endswith('fnordblah', 'blah')");
+    EXPECT_EQ(v.toString(), "true");
+  }
+
+  {
+    auto v = runtime->evaluateStaticExpression("endswith('fnordblah', 'h')");
+    EXPECT_EQ(v.toString(), "true");
+  }
+
+  {
+    auto v = runtime->evaluateStaticExpression("endswith('fnordblah', 'fnordblah')");
+    EXPECT_EQ(v.toString(), "true");
+  }
+
+  {
+    auto v = runtime->evaluateStaticExpression("endswith('fnordblah', 'bar')");
+    EXPECT_EQ(v.toString(), "false");
+  }
+});

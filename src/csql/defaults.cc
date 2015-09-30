@@ -75,6 +75,10 @@ void installDefaultSymbols(SymbolTable* rt) {
   rt->registerFunction("round", PureFunction(&expressions::roundExpr));
   rt->registerFunction("truncate", PureFunction(&expressions::truncateExpr));
 
+  /* expressions/string.h */
+  rt->registerFunction("startswith", PureFunction(&expressions::startsWithExpr));
+  rt->registerFunction("endswith", PureFunction(&expressions::endsWithExpr));
+
   /* expressions/internal.h */
   rt->registerFunction("repeat_value", expressions::kRepeatValueExpr);
 }
