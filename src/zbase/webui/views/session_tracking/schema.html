@@ -1,5 +1,6 @@
 <template id="zbase_session_tracking_schemas_tpl">
-  <div class='zbase_settings'>
+  <div class='zbase_settings '>
+    <button class="z-button primary add">Add</button>
     <h3 class='zbase_settings_title'>Session Tracking Schema</h3>
 
     <table class='z-table schemas'>
@@ -13,11 +14,12 @@
       <tbody></tbody>
     </table>
 
-    <div class="add_session_event">
-      <a class="link">
-        <i class="fa fa-plus"></i> Add Session Event
-      </a>
-    </div>
+    <z-modal class="add_to_schema">
+      <z-modal-box>
+        <z-modal-close-icon></z-modal-close-icon>
+        <div class="container"></div>
+      </z-modal-box>
+    </z-modal>
 
   </div>
 </template>
@@ -32,4 +34,37 @@
       <a data-action='edit'><i class='fa fa-cog'></i></a>
     </td>
   </tr>
+</template>
+
+<template id="zbase_session_tracking_schema_add_modal_tpl">
+  <div class="z-modal-header">Add</div>
+  <div class="z-modal-content">
+    <div class="field">
+      <label>Name:</label>
+      <input class="z-input" type="text" />
+      <div class="error_note hidden">Please add a name</div>
+    </div>
+
+    <div class="field">
+      <label>Type:</label>
+      <z-dropdown data-resolved class="input">
+        <z-dropdown-flyout>
+          <z-dropdown-items>
+            <z-dropdown-item data-value="EVENT" data-selected>EVENT</z-dropdown-item>
+            <z-dropdown-item data-value="OBJECT">OBJECT</z-dropdown-item>
+            <z-dropdown-item data-value="BOOLEAN">BOOLEAN</z-dropdown-item>
+            <z-dropdown-item data-value="UINT32">UINT32</z-dropdown-item>
+            <z-dropdown-item data-value="STRING">STRING</z-dropdown-item>
+            <z-dropdown-item data-value="UINT64">UINT64</z-dropdown-item>
+            <z-dropdown-item data-value="DOUBLE">DOUBLE</z-dropdown-item>
+            <z-dropdown-item data-value="DATETIME">DATETIME</z-dropdown-item>
+          </z-dropdown-items>
+        </z-dropdown-flyout>
+      </z-dropdown>
+    </div>
+  </div>
+  <div class="z-modal-footer">
+    <button class="z-button secondary close">Cancel</button>
+    <button class="z-button primary submit">Save</button>
+  </div>
 </template>

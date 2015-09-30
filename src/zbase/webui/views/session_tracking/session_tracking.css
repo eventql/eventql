@@ -154,9 +154,15 @@
   margin: 0 5px;
 }
 
+
 .zbase_session_tracking button.add_field {
   float: right;
   margin-top: 20px;
+  margin-right: 20px;
+}
+
+.zbase_session_tracking button.add {
+  float: right;
   margin-right: 20px;
 }
 
@@ -241,27 +247,27 @@
   font-weight: 500;
 }
 
-.zbase_session_tracking z-modal.add_field label {
+.zbase_session_tracking z-modal .field {
+  margin-top: 18px;
+}
+
+.zbase_session_tracking z-modal .field label {
   display: inline-block;
   vertical-align: top;
   color: #333;
   font-size: 14px;
   font-weight: 500;
   line-height: 34px;
-  width: 40px;
+  width: 45px;
 }
 
-.zbase_session_tracking z-modal.add_field .field {
-  margin-top: 18px;
-}
-
-.zbase_session_tracking z-modal.add_field input.z-input {
+.zbase_session_tracking z-modal .field input.z-input {
   font-size: 13px;
   display: inline-block;
   width: auto;
 }
 
-.zbase_session_tracking z-modal.add_field z-checkbox + label {
+.zbase_session_tracking z-modal .field z-checkbox + label {
   line-height: 18px;
 }
 
@@ -269,13 +275,13 @@
   float: right;
 }
 
-.zbase_session_tracking z-modal.add_field .error_note {
+.zbase_session_tracking z-modal .field .error_note {
   display: inline-block;
   font-size: 13px;
   line-height: 34px;
   color: #a94442; 
 }
 
-.zbase_session_tracking z-modal.add_field .error_note.hidden {
+.zbase_session_tracking z-modal .field .error_note.hidden {
   display: none;
 }
