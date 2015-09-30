@@ -69,7 +69,7 @@ ZBase.registerView((function() {
       $("z-dropdown", html).addEventListener("change", function() {
         switch (this.getValue()) {
           case "add":
-            console.log("add");
+            renderAdd(field.name + ".");
             break;
 
           case "delete":

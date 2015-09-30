@@ -144,6 +144,12 @@
   line-height: 18px;
 }*/
 
+.zbase_session_tracking button.add_field {
+  float: right;
+  margin-top: 20px;
+  margin-right: 20px;
+}
+
 .zbase_session_tracking .table_container {
   margin: 20px;
 }
