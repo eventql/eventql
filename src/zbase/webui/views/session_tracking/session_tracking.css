@@ -1,6 +1,5 @@
 .zbase_session_tracking.zbase_content_pane {
   display: table;
-  background: #fff;
   table-layout: fixed;
   width: 100%;
 }
@@ -9,6 +8,7 @@
   display: table-cell;
   width: 220px;
   vertical-align: top;
+  background: #fff;
 }
 
 .zbase_session_tracking .session_tracking_content {
@@ -86,6 +86,10 @@
   font-size: 13px;
 }
 
+.zbase_session_tracking table tr {
+  background: #fff;
+}
+
 .zbase_session_tracking table thead tr th {
   color: #888;
   font-weight: 400;
@@ -140,8 +144,60 @@
   line-height: 18px;
 }*/
 
+.zbase_session_tracking .zbase_settings_title.edit_event {
+  margin-left: 20px;
+}
 
-.zbase_session_tracking table.add_attribute {
+.zbase_session_tracking .zbase_settings_title.edit_event i {
+  font-size: 14px;
+  margin: 0 5px;
+}
+
+.zbase_session_tracking button.add_field {
+  float: right;
+  margin-top: 20px;
+  margin-right: 20px;
+}
+
+.zbase_session_tracking .table_container {
+  margin: 20px;
+}
+
+.zbase_session_tracking table.edit_event {
+  table-layout: fixed;
+}
+
+.zbase_session_tracking table.edit_event tr:hover {
+  cursor: pointer;
+}
+
+.zbase_session_tracking table.edit_event tr td {
+  line-height: 28px;
+}
+
+.zbase_session_tracking table.edit_event tr td .name {
+  color: #000;
+}
+
+.zbase_session_tracking table.edit_event tr td .type {
+  color: #888;
+}
+
+.zbase_session_tracking table.edit_event tr.table_attached {
+  background: #f9f9f9;
+}
+
+.zbase_session_tracking table.edit_event tr.table_attached > td {
+  padding: 0 0 0 80px;
+}
+
+.zbase_session_tracking table.edit_event table {
+  margin: 0;
+  border-top: none;
+  border-bottom: none;
+}
+
+/*.zbase_session_tracking table.add_attribute {
   margin-top: 0px;
   border-top: 1px solid #d4d4d4;
   border-bottom: 2px solid #ddd;
@@ -168,5 +224,57 @@
 }
 
 .zbase_session_tracking table.add_attribute .error_note.hidden {
+  display: none;
+}*/
+
+
+.zbase_session_tracking button.z-button {
+  font-size: 13px;
+}
+
+.zbase_session_tracking z-modal h4 {
+  font-size: 14px;
+  line-height: 34px;
+  margin: 0;
+  color: #333;
+  font-weight: 500;
+}
+
+.zbase_session_tracking z-modal.add_field label {
+  display: inline-block;
+  vertical-align: top;
+  color: #333;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 34px;
+  width: 40px;
+}
+
+.zbase_session_tracking z-modal.add_field .field {
+  margin-top: 18px;
+}
+
+.zbase_session_tracking z-modal.add_field input.z-input {
+  font-size: 13px;
+  display: inline-block;
+  width: auto;
+}
+
+.zbase_session_tracking z-modal.add_field z-checkbox + label {
+  line-height: 18px;
+}
+
+.zbase_session_tracking z-modal .z-modal-footer button {
+  float: right;
+}
+
+.zbase_session_tracking z-modal.add_field .error_note {
+  display: inline-block;
+  font-size: 13px;
+  line-height: 34px;
+  color: #a94442; 
+}
+
+.zbase_session_tracking z-modal.add_field .error_note.hidden {
   display: none;
 }
