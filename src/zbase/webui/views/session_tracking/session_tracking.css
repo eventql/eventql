@@ -182,7 +182,7 @@
   border-bottom: none;
 }
 
-.zbase_session_tracking table.add_attribute {
+/*.zbase_session_tracking table.add_attribute {
   margin-top: 0px;
   border-top: 1px solid #d4d4d4;
   border-bottom: 2px solid #ddd;
@@ -209,5 +209,48 @@
 }
 
 .zbase_session_tracking table.add_attribute .error_note.hidden {
+  display: none;
+}*/
+
+.zbase_session_tracking button.z-button {
+  font-size: 13px;
+}
+
+.zbase_session_tracking z-modal.add_field label {
+  display: inline-block;
+  vertical-align: top;
+  color: #333;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 34px;
+  width: 40px;
+}
+
+.zbase_session_tracking z-modal.add_field .field {
+  margin-top: 18px;
+}
+
+.zbase_session_tracking z-modal.add_field input.z-input {
+  font-size: 13px;
+  display: inline-block;
+  width: auto;
+}
+
+.zbase_session_tracking z-modal.add_field z-checkbox + label {
+  line-height: 18px;
+}
+
+.zbase_session_tracking z-modal.add_field .z-modal-footer button {
+  float: right;
+}
+
+.zbase_session_tracking z-modal.add_field .error_note {
+  display: inline-block;
+  font-size: 13px;
+  line-height: 34px;
+  color: #a94442; 
+}
+
+.zbase_session_tracking z-modal.add_field .error_note.hidden {
   display: none;
 }

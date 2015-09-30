@@ -35,7 +35,7 @@ ZBase.registerView((function() {
 
     $("h3 span", page).innerHTML = event_name;
 
-    $.onClick($("button.add_field", page), renderAdd);
+    $.onClick($("button.add_field", page), function(e) {renderAdd("")});
 
     $.handleLinks(page);
     $.replaceViewport(page);
@@ -84,8 +84,45 @@ ZBase.registerView((function() {
 
   var renderAdd = function(field_prefix) {
     var modal = $(".zbase_session_tracking z-modal.add_field");
+    var tpl = $.getTemplate(
+        "views/session_tracking",
+        "zbase_session_tracking_add_event_modal_tpl");
+
+    var input = $("input", tpl);
+    input.value = field_prefix;
+
+    $.onClick($("button.submit", tpl), function() {
+      if (input.value.length == 0) {
+        input.classList.add("error");
+        $(".error_note", modal).classList.remove("hidden");
+        return;
+      }
+
+      var field_data = {
+        event: event_name,
+        field: $.escapeHTML(input.value),
+        type: $("z-dropdown", modal).getValue(),
+        repeated: $("z-checkbox", modal).hasAttribute("data-active"),
+        optional: true
+      };
+
+      var url =
+          "/a/session_tracking/events/add_field?" +
+          $.buildQueryString(field_data);
+
+      $.httpPost(url, "", function(r) {
+        if (r.status == 200) {
+          load();
+        } else {
+          $.fatalError();
+        }
+      });
+    });
+
+    $.replaceContent($(".container", modal), tpl);
 
     modal.show();
+    input.focus();
   };
 
   var renderDelete = function(field_name) {
@@ -94,7 +131,7 @@ ZBase.registerView((function() {
     var url =
         "/a/session_tracking/events/remove_field?event=" +
         event_name + "field=" + field_name;
-    $.httpPost(url, function(r) {
+    $.httpPost(url, "", function(r) {
       if (r.status == 201) {
         load();
       } else {
