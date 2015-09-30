@@ -1,88 +1,117 @@
 <template id="zbase_session_tracking_journey_viewer_tpl">
   <div class='zbase_settings zbase_user_journey_viewer'>
-    <h2 class='pagetitle'>Journey Viewer</h2>
 
+    <div class="journey_detail hidden">
+      <zbase-breadcrumbs style="margin-top: 20px; margin-bottom: -6px;">
+        <zbase-breadcrumbs-section>
+          <a href="/a/">Apps</a>
+        </zbase-breadcrumbs-section>
+        <zbase-breadcrumbs-section>
+          <a href="/a/">User Journeys</a>
+        </zbase-breadcrumbs-section>
+        <zbase-breadcrumbs-section>
+          <a href="/a/logviewer">Journey Viewer</a>
+        </zbase-breadcrumbs-section>
+      </zbase-breadcrumbs>
 
-    <ul class="journeys">
-      <li class="loading_bar">
-        <h3>
-          <div class="loaderanim-outer">
-            <div class="loaderanim">
-              <div class="rect1"></div>
-              <div class="rect2"></div>
-              <div class="rect3"></div>
-              <div class="rect4"></div>
-              <div class="rect5"></div>
+      <h2 class="pagetitle">User Journey - <em>292b1f9a4f396edfb22063774498b30b</em></h2>
+      <div class="journey_detail_pane">
+      </div>
+    </div>
+
+    <div class="journey_list">
+      <zbase-breadcrumbs style="margin-top: 20px; margin-bottom: -6px;">
+        <zbase-breadcrumbs-section>
+          <a href="/a/">Apps</a>
+        </zbase-breadcrumbs-section>
+        <zbase-breadcrumbs-section>
+          <a href="/a/">User Journeys</a>
+        </zbase-breadcrumbs-section>
+      </zbase-breadcrumbs>
+
+      <h2 class='pagetitle'><em>Journey Viewer</em></h2>
+
+      <ul class="journeys">
+        <li class="loading_bar">
+          <h3>
+            <div class="loaderanim-outer">
+              <div class="loaderanim">
+                <div class="rect1"></div>
+                <div class="rect2"></div>
+                <div class="rect3"></div>
+                <div class="rect4"></div>
+                <div class="rect5"></div>
+              </div>
             </div>
-          </div>
-          Scanning...
-        </h3>
-      </li>
-      <li>
-        <span class="time">2015-09-08 17:23:01</span>
-        <span class="event">session_id: 292b1f9a4f396edfb22063774498b30b</span>
-        <span class="time">2015-09-08 17:23:01</span>
-        <span class="event">session_id: 292b1f9a4f396edfb22063774498b30b</span>
-        <span class="event">page_view</span>
-        <span class="event">page_view</span>
-        <span class="event">search_query</span>
-        <span class="event">search_query</span>
-        <span class="event">page_view</span>
-        <span class="event">page_view</span>
-        <span class="event">search_query</span>
-        <span class="event">search_query</span>
-        <span class="event">search_query</span>
-        <span class="event">search_query</span>
-      </li>
-      <li>
-        <span class="time">2015-09-08 17:23:01</span>
-        <span class="event">session_id: 292b1f9a4f396edfb22063774498b30b</span>
-        <span class="time">2015-09-08 17:23:01</span>
-        <span class="event">session_id: 292b1f9a4f396edfb22063774498b30b</span>
-        <span class="event">page_view</span>
-        <span class="event">page_view</span>
-        <span class="event">search_query</span>
-        <span class="event">search_query</span>
-        <span class="event">page_view</span>
-        <span class="event">page_view</span>
-        <span class="event">search_query</span>
-        <span class="event">search_query</span>
-        <span class="event">search_query</span>
-        <span class="event">search_query</span>
-      </li>
-      <li>
-        <span class="time">2015-09-08 17:23:01</span>
-        <span class="event">session_id: 292b1f9a4f396edfb22063774498b30b</span>
-        <span class="time">2015-09-08 17:23:01</span>
-        <span class="event">session_id: 292b1f9a4f396edfb22063774498b30b</span>
-        <span class="event">page_view</span>
-        <span class="event">page_view</span>
-        <span class="event">search_query</span>
-        <span class="event">search_query</span>
-        <span class="event">page_view</span>
-        <span class="event">page_view</span>
-        <span class="event">search_query</span>
-        <span class="event">search_query</span>
-        <span class="event">search_query</span>
-        <span class="event">search_query</span>
-      </li>
-      <li>
-        <span class="time">2015-09-08 17:23:01</span>
-        <span class="event">session_id: 292b1f9a4f396edfb22063774498b30b</span>
-        <span class="time">2015-09-08 17:23:01</span>
-        <span class="event">session_id: 292b1f9a4f396edfb22063774498b30b</span>
-        <span class="event">page_view</span>
-        <span class="event">page_view</span>
-        <span class="event">search_query</span>
-        <span class="event">search_query</span>
-        <span class="event">page_view</span>
-        <span class="event">page_view</span>
-        <span class="event">search_query</span>
-        <span class="event">search_query</span>
-        <span class="event">search_query</span>
-        <span class="event">search_query</span>
-      </li>
-    </ul>
+            Scanning...
+          </h3>
+        </li>
+        <li>
+          <span class="time">2015-09-08 17:23:01</span>
+          <span class="event">session_id: 292b1f9a4f396edfb22063774498b30b</span>
+          <span class="time">2015-09-08 17:23:01</span>
+          <span class="event">session_id: 292b1f9a4f396edfb22063774498b30b</span>
+          <span class="event">page_view</span>
+          <span class="event">page_view</span>
+          <span class="event">search_query</span>
+          <span class="event">search_query</span>
+          <span class="event">page_view</span>
+          <span class="event">page_view</span>
+          <span class="event">search_query</span>
+          <span class="event">search_query</span>
+          <span class="event">search_query</span>
+          <span class="event">search_query</span>
+        </li>
+        <li>
+          <span class="time">2015-09-08 17:23:01</span>
+          <span class="event">session_id: 292b1f9a4f396edfb22063774498b30b</span>
+          <span class="time">2015-09-08 17:23:01</span>
+          <span class="event">session_id: 292b1f9a4f396edfb22063774498b30b</span>
+          <span class="event">page_view</span>
+          <span class="event">page_view</span>
+          <span class="event">search_query</span>
+          <span class="event">search_query</span>
+          <span class="event">page_view</span>
+          <span class="event">page_view</span>
+          <span class="event">search_query</span>
+          <span class="event">search_query</span>
+          <span class="event">search_query</span>
+          <span class="event">search_query</span>
+        </li>
+        <li>
+          <span class="time">2015-09-08 17:23:01</span>
+          <span class="event">session_id: 292b1f9a4f396edfb22063774498b30b</span>
+          <span class="time">2015-09-08 17:23:01</span>
+          <span class="event">session_id: 292b1f9a4f396edfb22063774498b30b</span>
+          <span class="event">page_view</span>
+          <span class="event">page_view</span>
+          <span class="event">search_query</span>
+          <span class="event">search_query</span>
+          <span class="event">page_view</span>
+          <span class="event">page_view</span>
+          <span class="event">search_query</span>
+          <span class="event">search_query</span>
+          <span class="event">search_query</span>
+          <span class="event">search_query</span>
+        </li>
+        <li>
+          <span class="time">2015-09-08 17:23:01</span>
+          <span class="event">session_id: 292b1f9a4f396edfb22063774498b30b</span>
+          <span class="time">2015-09-08 17:23:01</span>
+          <span class="event">session_id: 292b1f9a4f396edfb22063774498b30b</span>
+          <span class="event">page_view</span>
+          <span class="event">page_view</span>
+          <span class="event">search_query</span>
+          <span class="event">search_query</span>
+          <span class="event">page_view</span>
+          <span class="event">page_view</span>
+          <span class="event">search_query</span>
+          <span class="event">search_query</span>
+          <span class="event">search_query</span>
+          <span class="event">search_query</span>
+        </li>
+      </ul>
+    </div>
   </div>
 </template>
 

@@ -1,3 +1,14 @@
+.zbase_user_journey_viewer .journey_detail_pane {
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 20px;
+}
+
+.zbase_user_journey_viewer > .hidden {
+  display: none;
+}
+
 .zbase_user_journey_viewer ul.journeys {
   list-style-type: none;
   background: #fff;
@@ -9,7 +20,7 @@
 
 .zbase_user_journey_viewer ul.journeys li {
   border-bottom: 1px solid #ddd;
-  padding: 16px 40px 16px 20px;
+  padding: 16px 20px 16px 20px;
   font-size: 14px;
   line-height: 44px;
 }
