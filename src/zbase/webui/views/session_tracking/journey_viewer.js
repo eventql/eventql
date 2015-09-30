@@ -27,7 +27,7 @@ ZBase.registerView((function() {
 
     var query = query_mgr.get(
         "journey_fetch",
-        "/api/v1/events/scan?table=sessions&limit=10");
+        "/api/v1/events/scan?table=sessions&limit=100");
 
     query.addEventListener('result', function(e) {
       renderJourney(JSON.parse(e.data));
