@@ -1,7 +1,8 @@
-.zbase_session_tracking.zbase_content_pane {
+.zbase_session_tracking {
   display: table;
   table-layout: fixed;
   width: 100%;
+  min-height: 900px;
 }
 
 .zbase_session_tracking .session_tracking_sidebar {
