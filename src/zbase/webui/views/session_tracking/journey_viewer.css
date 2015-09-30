@@ -40,7 +40,7 @@
   line-height: 38px;
 }
 
-.zbase_user_journey_viewer ul.journeys li:hover {
+.zbase_user_journey_viewer ul.journeys li.journey:hover {
   background: #f9f9f9;
   border: 1px solid #3498db;
 }

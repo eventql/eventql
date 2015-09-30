@@ -52,6 +52,7 @@ ZBase.registerView((function() {
   var renderJourney = function(data) {
     console.log(data);
     var journey = document.createElement("li");
+    journey.classList.add("journey");
 
     var time = document.createElement("span");
     time.classList.add("time");
