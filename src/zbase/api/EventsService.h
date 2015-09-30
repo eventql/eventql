@@ -42,7 +42,7 @@ public:
       const AnalyticsSession& session,
       const String& table_name,
       const EventScanParams& params,
-      EventScanResult* result,
+      Function<void (const msg::DynamicMessage& event)> on_row,
       Function<void (bool done)> on_progress);
 
   /**
@@ -55,6 +55,16 @@ public:
       const SHA1Hash& partition,
       const EventScanParams& params,
       EventScanResult* result);
+
+  /**
+   * Scan a single logfile partition. This method must be executed on a host
+   * that actually stores this partition
+   */
+  EventScanResult scanLocalTablePartition(
+      const AnalyticsSession& session,
+      const String& table_name,
+      const SHA1Hash& partition,
+      const EventScanParams& params);
 
   /**
    * Scan a single remote logfile partition, try all hosts in order from first
