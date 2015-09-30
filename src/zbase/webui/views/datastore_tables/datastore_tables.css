@@ -48,3 +48,12 @@
 .zbase_datastore_tables table.z-table tbody tr td:first-child a {
   color: #000;
 }
+
+.zbase_datastore_tables table.z-table tbody tr:hover td {
+  border-top: 1px solid rgba(52, 152, 219, 0.3);
+  border-bottom: 1px solid rgba(52, 152, 219, 0.3);
+}
+
+.zbase_datastore_tables table.z-table tbody tr:hover td:first-child a {
+  color: #3498db;
+}
