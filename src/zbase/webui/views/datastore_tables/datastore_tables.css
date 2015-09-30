@@ -1,3 +1,20 @@
+.zbase_datastore_wrap {
+  display: table-cell;
+  min-height: 900px; /* FIXME */
+  padding: 0 20px 20px 20px;
+  background: #fff;
+}
+
+.zbase_datastore_wrap zbase-breadcrumbs {
+  padding: 0;
+  margin: -4px 0 -6px 0;
+  opacity: 0.6;
+}
+
+.zbase_datastore_wrap zbase-breadcrumbs + h2.pagetitle {
+  margin-top: -10px;
+}
+
 .zbase_datastore_tables table.z-table {
   font-size: 13px;
   table-layout: fixed;
