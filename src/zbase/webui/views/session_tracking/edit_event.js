@@ -55,9 +55,6 @@ ZBase.registerView((function() {
         "zbase_session_tracking_edit_event_table_tpl");
 
 
-    var delete_modal = $(".zbase_session_tracking z-modal.delete_field");
-    $.onClick($("button.close", delete_modal), delete_modal.close);
-    $.onClick($("button.submit", delete_modal), function(e) {deleteField()});
 
     fields.forEach(function(field) {
       var html = $("tr", row_tpl.cloneNode(true));
@@ -78,8 +75,7 @@ ZBase.registerView((function() {
             break;
 
           case "delete":
-            deleteField.bind(null, field.name)();
-            delete_modal.show();
+            renderDelete(field.name);
             break;
         };
         this.setValue([]);
@@ -87,6 +83,8 @@ ZBase.registerView((function() {
 
     });
   };
+
+
 
   var renderAdd = function(field_prefix) {
     var modal = $(".zbase_session_tracking z-modal.add_field");
@@ -131,22 +129,25 @@ ZBase.registerView((function() {
     input.focus();
   };
 
-  var deleteField = function(field_name) {
-    //TODO render popup
-    console.log(field_name);
-    return;
-    
-    var url =
+  var renderDelete = function(field_name) {
+    var modal = $(".zbase_session_tracking z-modal.delete_field");
+    $(".field_name", modal).innerHTML = field_name;
+    modal.show();
+
+    $("button.close", modal).onclick = function() {modal.close()};
+    $("button.submit", modal).onclick = function(e) {
+      var url =
         "/a/session_tracking/events/remove_field?event=" +
         event_name + "field=" + field_name;
 
-    $.httpPost(url, "", function(r) {
-      if (r.status == 201) {
-        load();
-      } else {
-        $.fatalError();
-      }
-    });
+      $.httpPost(url, "", function(r) {
+        if (r.status == 201) {
+          load();
+        } else {
+          $.fatalError();
+        }
+      });
+    };
   };
 
 

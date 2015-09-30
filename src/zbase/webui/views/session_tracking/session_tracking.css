@@ -222,6 +222,14 @@
   font-size: 13px;
 }
 
+.zbase_session_tracking z-modal h4 {
+  font-size: 14px;
+  line-height: 34px;
+  margin: 0;
+  color: #333;
+  font-weight: 500;
+}
+
 .zbase_session_tracking z-modal.add_field label {
   display: inline-block;
   vertical-align: top;
@@ -246,7 +254,7 @@
   line-height: 18px;
 }
 
-.zbase_session_tracking z-modal.add_field .z-modal-footer button {
+.zbase_session_tracking z-modal .z-modal-footer button {
   float: right;
 }
 
