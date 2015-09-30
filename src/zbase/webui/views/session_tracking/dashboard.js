@@ -1,17 +1,19 @@
 ZBase.registerView((function() {
 
   var load = function(path) {
-    var page = $.getTemplate(
-        "views/session_tracking",
-        "zbase_session_tracking_main_tpl");
+    $.navigateTo("/a/session_tracking/journey_viewer");
 
-    var menu = SessionTrackingMenu(path);
-    menu.render($(".zbase_content_pane .session_tracking_sidebar", page));
+    //var page = $.getTemplate(
+    //    "views/session_tracking",
+    //    "zbase_session_tracking_main_tpl");
 
-    $(".zbase_content_pane .session_tracking_content", page).innerHTML  = "dashboard";
+    //var menu = SessionTrackingMenu(path);
+    //menu.render($(".zbase_content_pane .session_tracking_sidebar", page));
 
-    $.handleLinks(page);
-    $.replaceViewport(page);
+    //$(".zbase_content_pane .session_tracking_content", page).innerHTML  = "dashboard";
+
+    //$.handleLinks(page);
+    //$.replaceViewport(page);
   };
 
   return {
