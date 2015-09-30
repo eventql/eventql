@@ -1,8 +1,14 @@
 ZBase.registerView((function() {
 
-  var query_mgr = EventSourceHandler();
+  var query_mgr;
 
   var load = function(path) {
+    if (query_mgr) {
+      query_mgr.closeAll();
+    }
+
+    query_mgr = EventSourceHandler();
+
     var page = $.getTemplate(
         "views/session_tracking",
         "zbase_session_tracking_main_tpl");
@@ -30,7 +36,9 @@ ZBase.registerView((function() {
   };
 
   var destroy = function() {
-    query_mgr.closeAll();
+    if (query_mgr) {
+      query_mgr.closeAll();
+    }
   };
 
   return {
