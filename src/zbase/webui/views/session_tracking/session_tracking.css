@@ -23,6 +23,7 @@
   position: relative;
   margin-right: 10px;
   width: auto;
+  font-family: "Roboto", "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
 .zbase_session_tracking .session_tracking_sidebar z-menu-section {
@@ -35,8 +36,10 @@
   margin: 0;
   line-height: 32px;
   padding: 0 20px 0 14px;
-  font-size: 12px;
-  color: #000;
+  font-size: 11px;
+  color: #777;
+  text-transform: uppercase;
+  font-weight: 400;
 }
 
 .zbase_session_tracking .session_tracking_sidebar z-menu-item {
@@ -45,10 +48,10 @@
 }
 
 .zbase_session_tracking .session_tracking_sidebar z-menu-item a {
-  line-height: 32px;
+  line-height: 34px;
   padding: 0 20px 0 28px;
-  font-size: 12px;
-  color: #737373;
+  font-size: 13px;
+  color: #444;
 }
 
 .zbase_session_tracking .session_tracking_sidebar z-menu-item a[data-active] {
