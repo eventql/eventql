@@ -260,12 +260,13 @@ ScopedPtr<InputStream> SQLEngine::executeRemoteGroupByOnHost(
     const csql::RemoteAggregateParams& params) {
   logDebug(
       "zbase",
-      "Executing remote group-by on partition $0",
+      "Executing remote aggreate on $0@$1",
+      params.table_name(),
       host.hostAndPort());
 
   auto url = StringUtil::format(
       "http://$0/api/v1/sql/aggregate_partition",
-      host.hostAndPort());
+      host.ipAndPort());
 
   AnalyticsPrivileges privileges;
   privileges.set_allow_private_api_read_access(true);
