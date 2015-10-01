@@ -1045,6 +1045,9 @@ ValueExpressionNode* QueryPlanBuilder::buildValueExpression(ASTNode* ast) {
     case ASTNode::T_COLUMN_NAME:
       return buildColumnReference(ast);
 
+    case ASTNode::T_COLUMN_INDEX:
+      return buildColumnIndex(ast);
+
     case ASTNode::T_TABLE_NAME:
       return buildColumnReference(ast->getChildren()[0]);
 
@@ -1153,6 +1156,19 @@ ValueExpressionNode* QueryPlanBuilder::buildColumnReference(ASTNode* ast) {
   auto colref = new ColumnReferenceNode(column_name);
   colref->setColumnIndex(ast->getID());
   return colref;
+}
+
+ValueExpressionNode* QueryPlanBuilder::buildColumnIndex(ASTNode* ast) {
+  if (ast->getChildren().size() != 1) {
+    RAISE(kRuntimeError, "internal error: invalid column index reference");
+  }
+
+  auto token = ast->getChildren()[0]->getToken();
+  if (!token || token->getType() != Token::T_NUMERIC) {
+    RAISE(kRuntimeError, "internal error: invalid column index reference");
+  }
+
+  return new ColumnReferenceNode(token->getInteger());
 }
 
 SelectListNode* QueryPlanBuilder::buildSelectList(ASTNode* ast) {
