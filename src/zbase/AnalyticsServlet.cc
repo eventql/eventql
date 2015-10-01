@@ -308,6 +308,14 @@ void AnalyticsServlet::handle(
     return;
   }
 
+  if (uri.path() == "/api/v1/sql/aggregate_partition") {
+    req_stream->readBody();
+    executeSQLAggregatePartition(session, &req, &res);
+    res_stream->writeResponse(res);
+    return;
+  }
+
+
   res.setStatus(http::kStatusNotFound);
   res.addHeader("Content-Type", "text/html; charset=utf-8");
   res.addBody(Assets::getAsset("zbase/webui/404.html"));
@@ -972,6 +980,25 @@ void AnalyticsServlet::executeSQL(
   res->addHeader("Connection", "close");
   res->addBody(result);
 }
+
+void AnalyticsServlet::executeSQLAggregatePartition(
+    const AnalyticsSession& session,
+    const http::HTTPRequest* req,
+    http::HTTPResponse* res) {
+  auto query = req->body().toString();
+
+  Buffer result;
+  auto os = BufferOutputStream::fromBuffer(&result);
+  sql_->executeAggregate(
+      msg::decode<csql::RemoteAggregateParams>(query),
+      app_->getExecutionStrategy(session.customer()),
+      os.get());
+
+  res->setStatus(http::kStatusOK);
+  res->addHeader("Content-Type", "application/octet-stream");
+  res->addBody(result);
+}
+
 
 void AnalyticsServlet::executeSQLStream(
     const URI& uri,
