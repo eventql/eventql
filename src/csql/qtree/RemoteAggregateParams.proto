@@ -6,7 +6,7 @@
  * the information contained herein is strictly forbidden unless prior written
  * permission is obtained.
  */
-package zbase;
+package csql;
 
 message SelectListItem {
   required string expression = 1;

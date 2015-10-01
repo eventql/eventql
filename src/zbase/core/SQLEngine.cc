@@ -14,7 +14,7 @@
 #include <csql/defaults.h>
 #include <csql/qtree/GroupByMergeNode.h>
 #include <csql/qtree/RemoteAggregateNode.h>
-#include <zbase/RemoteAggregateParams.pb.h>
+#include <csql/qtree/RemoteAggregateParams.pb.h>
 
 namespace zbase {
 
@@ -145,45 +145,17 @@ void SQLEngine::shardGroupBy(
         URI::urlEncode(table_ref.table_key),
         partition.toString());
 
+    auto copy = node->get()->deepCopy();
+    auto copy_seq_scan = copy->child(0).asInstanceOf<csql::SequentialScanNode>();
+    copy_seq_scan->setTableName(table_name);
+
     if (replication_scheme->hasLocalReplica(partition)) {
-      auto copy = node->get()->deepCopy();
-      auto copy_seq_scan = copy->child(0).asInstanceOf<csql::SequentialScanNode>();
-      copy_seq_scan->setTableName(table_name);
       shards.emplace_back(copy.get());
     } else {
-      iputs("scan remote.. $0", partition.toString());
-      auto seq_scan = node->get()->child(0).asInstanceOf<csql::SequentialScanNode>();
+      auto remote_aggr = mkRef(new csql::RemoteAggregateNode(
+          copy.asInstanceOf<csql::GroupByNode>()));
 
-      RemoteAggregateParams params;
-      params.set_table_name(table_name);
-      params.set_aggregation_strategy((uint64_t) seq_scan->aggregationStrategy());
-
-      for (const auto& e :
-            node->asInstanceOf<csql::GroupByNode>()->groupExpressions()) {
-        *params.add_group_expression_list() = e->toSQL();
-      }
-
-      for (const auto& e :
-            node->asInstanceOf<csql::GroupByNode>()->selectList()) {
-        auto sl = params.add_aggregate_expression_list();
-        sl->set_expression(e->expression()->toSQL());
-        sl->set_alias(e->columnName());
-      }
-
-      for (const auto& e : seq_scan->selectList()) {
-        auto sl = params.add_select_expression_list();
-        sl->set_expression(e->expression()->toSQL());
-        sl->set_alias(e->columnName());
-      }
-
-      auto where = seq_scan->whereExpression();
-      if (!where.isEmpty()) {
-        params.set_where_expression(where.get()->toSQL());
-      }
-
-      iputs("params: $0", params.DebugString());
-      //auto remote_aggr = mkRef(new csql::RemoteAggregateNode());
-      //shards.emplace_back(remote_aggr.get());
+      shards.emplace_back(remote_aggr.get());
     }
   }
 

@@ -19,9 +19,9 @@ namespace csql {
 class ColumnReferenceNode : public ValueExpressionNode {
 public:
 
-  ColumnReferenceNode(const ColumnReferenceNode& other);
-  ColumnReferenceNode(const String& column_name);
-  ColumnReferenceNode(size_t column_index_);
+  explicit ColumnReferenceNode(const ColumnReferenceNode& other);
+  explicit ColumnReferenceNode(const String& column_name);
+  explicit ColumnReferenceNode(size_t column_index_);
 
   const String& fieldName() const;
 
