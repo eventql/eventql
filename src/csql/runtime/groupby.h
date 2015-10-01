@@ -92,4 +92,26 @@ protected:
   SHA1Hash qtree_fingerprint_;
 };
 
+class RemoteGroupBy : public GroupByExpression {
+public:
+  typedef
+      Function<ScopedPtr<InputStream> (const RemoteAggregateParams& params)>
+      RemoteExecuteFn;
+
+  RemoteGroupBy(
+      const Vector<String>& column_names,
+      Vector<ValueExpression> select_expressions,
+      const RemoteAggregateParams& params,
+      RemoteExecuteFn execute_fn);
+
+  void accumulate(
+      HashMap<String, Vector<VM::Instance >>* groups,
+      ScratchMemory* scratch,
+      ExecutionContext* context) override;
+
+protected:
+  RemoteAggregateParams params_;
+  RemoteExecuteFn execute_fn_;
+};
+
 }

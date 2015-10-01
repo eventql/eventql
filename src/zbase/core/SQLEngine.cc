@@ -152,14 +152,25 @@ void SQLEngine::shardGroupBy(
     if (replication_scheme->hasLocalReplica(partition)) {
       shards.emplace_back(copy.get());
     } else {
-      auto remote_aggr = mkRef(new csql::RemoteAggregateNode(
-          copy.asInstanceOf<csql::GroupByNode>()));
+      auto remote_aggr = mkRef(
+          new csql::RemoteAggregateNode(
+              copy.asInstanceOf<csql::GroupByNode>(),
+              std::bind(
+                  &SQLEngine::executeRemoteGroupBy,
+                  std::placeholders::_1)));
 
       shards.emplace_back(remote_aggr.get());
     }
   }
 
   *node = RefPtr<csql::QueryTreeNode>(new csql::GroupByMergeNode(shards));
+}
+
+ScopedPtr<InputStream> SQLEngine::executeRemoteGroupBy(
+    const csql::RemoteAggregateParams& params) {
+  iputs("execute remote group by: $0", params.DebugString());
+
+  return mkScoped(new MemoryInputStream(nullptr, 0));
 }
 
 }

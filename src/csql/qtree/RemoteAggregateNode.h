@@ -9,6 +9,7 @@
  */
 #pragma once
 #include <stx/stdtypes.h>
+#include <stx/io/inputstream.h>
 #include <csql/qtree/TableExpressionNode.h>
 #include <csql/qtree/GroupByNode.h>
 #include <csql/qtree/RemoteAggregateParams.pb.h>
@@ -19,16 +20,26 @@ namespace csql {
 
 class RemoteAggregateNode : public QueryTreeNode {
 public:
+  typedef
+      Function<ScopedPtr<InputStream> (const RemoteAggregateParams& params)>
+      RemoteExecuteFn;
 
-  RemoteAggregateNode(RefPtr<GroupByNode> group_by);
-  RemoteAggregateNode(const RemoteAggregateParams& params);
+  RemoteAggregateNode(
+      RefPtr<GroupByNode> group_by,
+      RemoteExecuteFn execute_fn);
+
+  Vector<RefPtr<SelectListNode>> selectList() const;
+
+  RemoteAggregateParams remoteAggregateParams() const;
+  RemoteExecuteFn remoteExecuteFunction() const;
 
   RefPtr<QueryTreeNode> deepCopy() const override;
 
   String toString() const override;
 
 protected:
-  RemoteAggregateParams params_;
+  RefPtr<GroupByNode> stmt_;
+  RemoteExecuteFn execute_fn_;
 };
 
 } // namespace csql

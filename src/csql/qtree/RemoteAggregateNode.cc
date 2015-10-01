@@ -14,44 +14,59 @@ using namespace stx;
 
 namespace csql {
 
-RemoteAggregateNode::RemoteAggregateNode(RefPtr<GroupByNode> group_by) {
-  auto seq_scan = group_by->child(0).asInstanceOf<SequentialScanNode>();
+RemoteAggregateNode::RemoteAggregateNode(
+    RefPtr<GroupByNode> group_by,
+    RemoteExecuteFn execute_fn) :
+    stmt_(group_by),
+    execute_fn_(execute_fn) {}
 
-  params_.set_table_name(seq_scan->tableName());
-  params_.set_aggregation_strategy((uint64_t) seq_scan->aggregationStrategy());
+RemoteAggregateNode::RemoteExecuteFn RemoteAggregateNode::remoteExecuteFunction()
+    const {
+  return execute_fn_;
+}
 
-  for (const auto& e : group_by->groupExpressions()) {
-    *params_.add_group_expression_list() = e->toSQL();
+RemoteAggregateParams RemoteAggregateNode::remoteAggregateParams() const {
+  RemoteAggregateParams params;
+
+  auto seq_scan = stmt_->child(0).asInstanceOf<SequentialScanNode>();
+
+  params.set_table_name(seq_scan->tableName());
+  params.set_aggregation_strategy((uint64_t) seq_scan->aggregationStrategy());
+
+  for (const auto& e : stmt_->groupExpressions()) {
+    *params.add_group_expression_list() = e->toSQL();
   }
 
-  for (const auto& e : group_by->selectList()) {
-    auto sl = params_.add_aggregate_expression_list();
+  for (const auto& e : stmt_->selectList()) {
+    auto sl = params.add_aggregate_expression_list();
     sl->set_expression(e->expression()->toSQL());
     sl->set_alias(e->columnName());
   }
 
   for (const auto& e : seq_scan->selectList()) {
-    auto sl = params_.add_select_expression_list();
+    auto sl = params.add_select_expression_list();
     sl->set_expression(e->expression()->toSQL());
     sl->set_alias(e->columnName());
   }
 
   auto where = seq_scan->whereExpression();
   if (!where.isEmpty()) {
-    params_.set_where_expression(where.get()->toSQL());
+    params.set_where_expression(where.get()->toSQL());
   }
+
+  return params;
 }
 
-RemoteAggregateNode::RemoteAggregateNode(
-    const RemoteAggregateParams& params) :
-    params_(params) {}
+Vector<RefPtr<SelectListNode>> RemoteAggregateNode::selectList() const {
+  return stmt_->selectList();
+}
 
 RefPtr<QueryTreeNode> RemoteAggregateNode::deepCopy() const {
-  return new RemoteAggregateNode(params_);
+  return new RemoteAggregateNode(stmt_, execute_fn_);
 }
 
 String RemoteAggregateNode::toString() const {
-  return params_.DebugString();
+  return "<remote-aggregate>";
 }
 
 } // namespace csql
