@@ -64,11 +64,19 @@ protected:
       RefPtr<csql::QueryTreeNode>* node);
 
   static ScopedPtr<InputStream> executeRemoteGroupBy(
-      csql::Runtime* runtime,
       PartitionMap* partition_map,
       ReplicationScheme* replication_scheme,
       CSTableIndex* cstable_index,
       const String& customer,
+      const Vector<InetAddr>& hosts,
+      const csql::RemoteAggregateParams& params);
+
+  static ScopedPtr<InputStream> executeRemoteGroupByOnHost(
+      PartitionMap* partition_map,
+      ReplicationScheme* replication_scheme,
+      CSTableIndex* cstable_index,
+      const String& customer,
+      const InetAddr& host,
       const csql::RemoteAggregateParams& params);
 
 };
