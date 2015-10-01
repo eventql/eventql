@@ -19,6 +19,23 @@ GroupByExpression::GroupByExpression(
     column_names_(column_names),
     select_exprs_(std::move(select_expressions)) {}
 
+void GroupByExpression::executeRemote(
+    ExecutionContext* context,
+    OutputStream* os) {
+  HashMap<String, Vector<VM::Instance>> groups;
+  ScratchMemory scratch;
+
+  try {
+    accumulate(&groups, &scratch, context);
+  } catch (...) {
+    freeResult(&groups);
+    throw;
+  }
+
+  encode(&groups, os);
+  freeResult(&groups);
+}
+
 void GroupByExpression::execute(
     ExecutionContext* context,
     Function<bool (int argc, const SValue* argv)> fn) {

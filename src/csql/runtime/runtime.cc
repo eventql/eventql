@@ -8,6 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <csql/runtime/runtime.h>
+#include <csql/runtime/groupby.h>
 #include <csql/defaults.h>
 
 namespace csql {
@@ -184,9 +185,18 @@ void Runtime::executeAggregate(
                 where_expr,
                 (AggregationStrategy) query.aggregation_strategy())));
 
+  auto expr = query_builder_->buildTableExpression(
+      qtree.get(),
+      execution_strategy->tableProvider(),
+      this);
 
-  iputs("qtree: $0", qtree->toString());
-  RAISE(kNotYetImplementedError, "not yet implemented");
+  auto group_expr = dynamic_cast<GroupByExpression*>(expr.get());
+  if (!group_expr) {
+    RAISE(kIllegalStateError);
+  }
+
+  csql::ExecutionContext context(&tpool_);
+  group_expr->executeRemote(&context, os);
 }
 
 SValue Runtime::evaluateStaticExpression(ASTNode* expr) {
