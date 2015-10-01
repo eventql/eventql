@@ -196,6 +196,10 @@ void Runtime::executeAggregate(
   }
 
   csql::ExecutionContext context(&tpool_);
+  if (!cachedir_.isEmpty()) {
+    context.setCacheDir(cachedir_.get());
+  }
+
   group_expr->executeRemote(&context, os);
 }
 
