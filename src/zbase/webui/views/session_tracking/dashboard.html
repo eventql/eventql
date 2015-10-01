@@ -14,7 +14,8 @@
 
     <h2 class="pagetitle"><em>Dashboard</em></h2>
 
-    <div class="chart_container">
+    <div class="chart_panel">
+      <label>Display:</label>
       <z-dropdown data-resolved class="input metric" name="metric">
         <z-dropdown-flyout>
           <z-dropdown-items>
@@ -32,7 +33,9 @@
           </z-dropdown-items>
         </z-dropdown-flyout>
       </z-dropdown>
+    </div>
 
+    <div class="chart_container">
       <div class="inner_chart" id="dashboard_chart"></div>
     </div>
   </div>
