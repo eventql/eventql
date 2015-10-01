@@ -24,6 +24,16 @@ SequentialScanNode::SequentialScanNode(
     aggr_strategy_(AggregationStrategy::NO_AGGREGATION) {}
 
 SequentialScanNode::SequentialScanNode(
+    const String& table_name,
+    Vector<RefPtr<SelectListNode>> select_list,
+    Option<RefPtr<ValueExpressionNode>> where_expr,
+    AggregationStrategy aggr_strategy) :
+    table_name_(table_name),
+    select_list_(select_list),
+    where_expr_(where_expr),
+    aggr_strategy_(aggr_strategy) {}
+
+SequentialScanNode::SequentialScanNode(
     const SequentialScanNode& other) :
     table_name_(other.table_name_),
     aggr_strategy_(other.aggr_strategy_) {
