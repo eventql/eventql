@@ -13,19 +13,13 @@
 
 namespace csql {
 
-GroupBy::GroupBy(
-    ScopedPtr<TableExpression> source,
+GroupByExpression::GroupByExpression(
     const Vector<String>& column_names,
-    Vector<ValueExpression> select_expressions,
-    Vector<ValueExpression> group_expressions,
-    SHA1Hash qtree_fingerprint) :
-    source_(std::move(source)),
+    Vector<ValueExpression> select_expressions) :
     column_names_(column_names),
-    select_exprs_(std::move(select_expressions)),
-    group_exprs_(std::move(group_expressions)),
-    qtree_fingerprint_(qtree_fingerprint) {}
+    select_exprs_(std::move(select_expressions)) {}
 
-void GroupBy::execute(
+void GroupByExpression::execute(
     ExecutionContext* context,
     Function<bool (int argc, const SValue* argv)> fn) {
   HashMap<String, Vector<VM::Instance >> groups;
@@ -41,6 +35,17 @@ void GroupBy::execute(
 
   freeResult(&groups);
 }
+
+GroupBy::GroupBy(
+    ScopedPtr<TableExpression> source,
+    const Vector<String>& column_names,
+    Vector<ValueExpression> select_expressions,
+    Vector<ValueExpression> group_expressions,
+    SHA1Hash qtree_fingerprint) :
+    GroupByExpression(column_names, std::move(select_expressions)),
+    source_(std::move(source)),
+    group_exprs_(std::move(group_expressions)),
+    qtree_fingerprint_(qtree_fingerprint) {}
 
 void GroupBy::accumulate(
     HashMap<String, Vector<VM::Instance >>* groups,
@@ -85,7 +90,7 @@ void GroupBy::accumulate(
   }
 }
 
-void GroupBy::getResult(
+void GroupByExpression::getResult(
     const HashMap<String, Vector<VM::Instance >>* groups,
     Function<bool (int argc, const SValue* argv)> fn) {
   Vector<SValue> out_row(select_exprs_.size(), SValue{});
@@ -100,7 +105,7 @@ void GroupBy::getResult(
   }
 }
 
-void GroupBy::freeResult(
+void GroupByExpression::freeResult(
     HashMap<String, Vector<VM::Instance >>* groups) {
   for (auto& group : (*groups)) {
     for (size_t i = 0; i < select_exprs_.size(); ++i) {
@@ -109,7 +114,7 @@ void GroupBy::freeResult(
   }
 }
 
-void GroupBy::mergeResult(
+void GroupByExpression::mergeResult(
     const HashMap<String, Vector<VM::Instance >>* src,
     HashMap<String, Vector<VM::Instance >>* dst,
     ScratchMemory* scratch) {
@@ -154,15 +159,15 @@ bool GroupBy::nextRow(
   return true;
 }
 
-Vector<String> GroupBy::columnNames() const {
+Vector<String> GroupByExpression::columnNames() const {
   return column_names_;
 }
 
-size_t GroupBy::numColumns() const {
+size_t GroupByExpression::numColumns() const {
   return column_names_.size();
 }
 
-void GroupBy::encode(
+void GroupByExpression::encode(
     const HashMap<String, Vector<VM::Instance >>* groups,
     OutputStream* os) const {
   os->appendVarUInt(groups->size());
@@ -177,7 +182,7 @@ void GroupBy::encode(
   }
 }
 
-bool GroupBy::decode(
+bool GroupByExpression::decode(
     HashMap<String, Vector<VM::Instance >>* groups,
     ScratchMemory* scratch,
     InputStream* is) const {

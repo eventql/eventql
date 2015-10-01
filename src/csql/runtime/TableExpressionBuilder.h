@@ -21,6 +21,7 @@
 #include <csql/qtree/DrawStatementNode.h>
 #include <csql/qtree/SelectExpressionNode.h>
 #include <csql/qtree/DescribeTableNode.h>
+#include <csql/qtree/RemoteAggregateNode.h>
 #include <csql/runtime/TableExpression.h>
 #include <csql/runtime/tablerepository.h>
 #include <csql/svalue.h>
@@ -79,6 +80,10 @@ protected:
       RefPtr<DescribeTableNode> node,
       QueryBuilder* runtime,
       TableProvider* tables);
+
+  ScopedPtr<TableExpression> buildRemoteAggregate(
+      RefPtr<RemoteAggregateNode> node,
+      QueryBuilder* runtime);
 
 };
 
