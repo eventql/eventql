@@ -33,7 +33,7 @@ ZBase.registerView((function() {
       $.hideLoader();
     });
 
-    $("h3 span", page).innerHTML = event_name;
+    $("zbase-breadcrumbs-section .event_name", page).innerHTML = event_name;
 
     $.onClick($("button.add_field", page), function(e) {renderAdd("")});
 

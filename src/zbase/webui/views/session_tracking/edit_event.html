@@ -1,36 +1,53 @@
 <template id="zbase_session_tracking_edit_event_tpl">
-  <button class="z-button primary add_field">Add Field</button>
-  <h3 class='zbase_settings_title edit_event'>Event Fields<i class="fa fa-chevron-right"></i><span></span></h3>
+  <div class="edit_event">
+    <zbase-breadcrumbs style="margin-top: 20px; margin-bottom: -6px;">
+      <zbase-breadcrumbs-section>
+        <a href="/a/">Apps</a>
+      </zbase-breadcrumbs-section>
+      <zbase-breadcrumbs-section>
+        <a href="/a/session_tracking">User Journeys</a>
+      </zbase-breadcrumbs-section>
+      <zbase-breadcrumbs-section>
+        <a href="/a/session_tracking/settings/schema">Schema</a>
+      </zbase-breadcrumbs-section>
+      <zbase-breadcrumbs-section>
+        <a href="/a/session_tracking/settings/schema">Event <span class="event_name"></span></a>
+      </zbase-breadcrumbs-section>
+    </zbase-breadcrumbs>
 
-  <div class="table_container">
-    <table class="z-table edit_event">
+    <button class="z-button primary add_field">Add Field</button>
+    <h2 class='pagetitle edit_event'><em>Fields</em></h3>
 
-      <tbody></tbody>
-    </table>
+    <div class="table_container">
+      <table class="z-table edit_event">
+
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <z-modal class="add_field">
+      <z-modal-box>
+        <z-modal-close-icon></z-modal-close-icon>
+        <div class="container"></div>
+      </z-modal-box>
+    </z-modal>
+
+    <z-modal class="delete_field">
+      <z-modal-box>
+        <z-modal-close-icon></z-modal-close-icon>
+        <div class="z-modal-header">Delete Field</div>
+        <div class="z-modal-content">
+          <h4>
+            Are you sure you wan to delete the field <span class="field_name"></span>
+          </h4>
+        </div>
+        <div class="z-modal-footer">
+          <button class="z-button secondary close">Cancel</button>
+          <button class="z-button primary submit">Yes</button>
+        </div>
+      </z-modal-box>
+    </z-modal>
   </div>
-
-  <z-modal class="add_field">
-    <z-modal-box>
-      <z-modal-close-icon></z-modal-close-icon>
-      <div class="container"></div>
-    </z-modal-box>
-  </z-modal>
-
-  <z-modal class="delete_field">
-    <z-modal-box>
-      <z-modal-close-icon></z-modal-close-icon>
-      <div class="z-modal-header">Delete Field</div>
-      <div class="z-modal-content">
-        <h4>
-          Are you sure you wan to delete the field <span class="field_name"></span>
-        </h4>
-      </div>
-      <div class="z-modal-footer">
-        <button class="z-button secondary close">Cancel</button>
-        <button class="z-button primary submit">Yes</button>
-      </div>
-    </z-modal-box>
-  </z-modal>
 </template>
 
 <template id="zbase_session_tracking_edit_event_table_tpl">
