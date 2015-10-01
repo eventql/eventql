@@ -25,6 +25,7 @@ RefPtr<csql::QueryTreeNode> SQLEngine::rewriteQuery(
     PartitionMap* partition_map,
     ReplicationScheme* replication_scheme,
     CSTableIndex* cstable_index,
+    AnalyticsAuth* auth,
     const String& tsdb_namespace,
     RefPtr<csql::QueryTreeNode> query) {
   insertPartitionSubqueries(
@@ -32,6 +33,7 @@ RefPtr<csql::QueryTreeNode> SQLEngine::rewriteQuery(
       partition_map,
       replication_scheme,
       cstable_index,
+      auth,
       tsdb_namespace,
       &query);
   return query;
@@ -49,6 +51,7 @@ void SQLEngine::insertPartitionSubqueries(
     PartitionMap* partition_map,
     ReplicationScheme* replication_scheme,
     CSTableIndex* cstable_index,
+    AnalyticsAuth* auth,
     const String& tsdb_namespace,
     RefPtr<csql::QueryTreeNode>* node) {
   // rewrite group by -> sequential scan pairs to sharded group bys
@@ -60,6 +63,7 @@ void SQLEngine::insertPartitionSubqueries(
         partition_map,
         replication_scheme,
         cstable_index,
+        auth,
         tsdb_namespace,
         node);
     return;
@@ -83,6 +87,7 @@ void SQLEngine::insertPartitionSubqueries(
         partition_map,
         replication_scheme,
         cstable_index,
+        auth,
         tsdb_namespace,
         node->get()->mutableChild(i));
   }
@@ -129,6 +134,7 @@ void SQLEngine::shardGroupBy(
     PartitionMap* partition_map,
     ReplicationScheme* replication_scheme,
     CSTableIndex* cstable_index,
+    AnalyticsAuth* auth,
     const String& tsdb_namespace,
     RefPtr<csql::QueryTreeNode>* node) {
   auto seqscan = node->get()->child(0).asInstanceOf<csql::SequentialScanNode>();
@@ -170,6 +176,7 @@ void SQLEngine::shardGroupBy(
                   partition_map,
                   replication_scheme,
                   cstable_index,
+                  auth,
                   tsdb_namespace,
                   replicas,
                   std::placeholders::_1)));
@@ -186,6 +193,7 @@ RefPtr<csql::ExecutionStrategy> SQLEngine::getExecutionStrategy(
     PartitionMap* partition_map,
     ReplicationScheme* replication_scheme,
     CSTableIndex* cstable_index,
+    AnalyticsAuth* auth,
     const String& customer) {
   auto strategy = mkRef(new csql::DefaultExecutionStrategy());
 
@@ -199,6 +207,7 @@ RefPtr<csql::ExecutionStrategy> SQLEngine::getExecutionStrategy(
           partition_map,
           replication_scheme,
           cstable_index,
+          auth,
           customer,
           std::placeholders::_1));
 
@@ -209,6 +218,7 @@ ScopedPtr<InputStream> SQLEngine::executeRemoteGroupBy(
     PartitionMap* partition_map,
     ReplicationScheme* replication_scheme,
     CSTableIndex* cstable_index,
+    AnalyticsAuth* auth,
     const String& customer,
     const Vector<InetAddr>& hosts,
     const csql::RemoteAggregateParams& params) {
@@ -220,6 +230,7 @@ ScopedPtr<InputStream> SQLEngine::executeRemoteGroupBy(
           partition_map,
           replication_scheme,
           cstable_index,
+          auth,
           customer,
           host,
           params);
@@ -227,7 +238,7 @@ ScopedPtr<InputStream> SQLEngine::executeRemoteGroupBy(
       logError(
           "zbase",
           e,
-          "LogfileService::scanRemoteLogfilePartition failed");
+          "LogfileService::executeRemoteGroupBy failed");
 
       errors.emplace_back(e.what());
     }
@@ -235,7 +246,7 @@ ScopedPtr<InputStream> SQLEngine::executeRemoteGroupBy(
 
   RAISEF(
       kRuntimeError,
-      "LogfileService::scanRemoteLogfilePartition failed: $0",
+      "LogfileService::executeRemoteGroupBy failed: $0",
       StringUtil::join(errors, ", "));
 }
 
@@ -243,6 +254,7 @@ ScopedPtr<InputStream> SQLEngine::executeRemoteGroupByOnHost(
     PartitionMap* partition_map,
     ReplicationScheme* replication_scheme,
     CSTableIndex* cstable_index,
+    AnalyticsAuth* auth,
     const String& customer,
     const InetAddr& host,
     const csql::RemoteAggregateParams& params) {
@@ -255,12 +267,14 @@ ScopedPtr<InputStream> SQLEngine::executeRemoteGroupByOnHost(
       "http://$0/api/v1/sql/aggregate_partition",
       host.hostAndPort());
 
-  //auto api_token = auth_->encodeAuthToken(session);
+  AnalyticsPrivileges privileges;
+  privileges.set_allow_private_api_read_access(true);
+  auto api_token = auth->getPrivateAPIToken(customer, privileges);
 
   http::HTTPMessage::HeaderList auth_headers;
-  //auth_headers.emplace_back(
-  //    "Authorization",
-  //    StringUtil::format("Token $0", api_token));
+  auth_headers.emplace_back(
+      "Authorization",
+      StringUtil::format("Token $0", api_token));
 
   http::HTTPClient http_client;
   auto req_body = msg::encode(params);

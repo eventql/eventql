@@ -14,6 +14,7 @@ add_executable(ztracker
     $<TARGET_OBJECTS:brokerd-client>
     $<TARGET_OBJECTS:customerdirectory>
     $<TARGET_OBJECTS:tsdb-server>
+    $<TARGET_OBJECTS:auth>
     ${CMAKE_CURRENT_BINARY_DIR}/ztracker_trackjs.cc
     TrackerServlet.cc
     ztrackid.cc
