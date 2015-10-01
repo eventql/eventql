@@ -238,7 +238,7 @@ ScopedPtr<InputStream> SQLEngine::executeRemoteGroupBy(
       logError(
           "zbase",
           e,
-          "LogfileService::executeRemoteGroupBy failed");
+          "SQLEngine::executeRemoteGroupBy failed");
 
       errors.emplace_back(e.what());
     }
@@ -246,7 +246,7 @@ ScopedPtr<InputStream> SQLEngine::executeRemoteGroupBy(
 
   RAISEF(
       kRuntimeError,
-      "LogfileService::executeRemoteGroupBy failed: $0",
+      "SQLEngine::executeRemoteGroupBy failed: $0",
       StringUtil::join(errors, ", "));
 }
 
