@@ -67,10 +67,13 @@ ZBase.registerView((function() {
   };
 
   var renderChart = function(results) {
-    //REMOVEME
-    var x_values = [1441108800000, 1441112400000, 1441116000000, 1441119600000, 1441123200000, 1441126800000];
-    var y_values = [31109, 29557, 27481, 24851, 27031, 29696];
-    //REMOVEME END
+    var x_values = [];
+    var y_values = [];
+
+    results[0].rows.forEach(function(point) {
+      x_values.push(parseInt(point[0], 10));
+      y_values.push(point[1]);
+    });
 
     var chart_config = {
       data: {
@@ -96,12 +99,13 @@ ZBase.registerView((function() {
     $.hideLoader();
   };
 
-  var buildQueryString = function(metric, time_window) {
+  var buildQueryString = function() {
+    var time_window = parseInt(getParamTimeWindow(), 10);
     switch (getParamMetric()) {
       case "num_sessions":
-        return "select TRUNCATE(time / 3600000000) * " + getParamTimeWindow() +
-        " as time, count(*) as num_sessions from 'sessions.last30d'" +
-        "group by TRUNCATE(time / 3600000000) order by time asc;";
+        return "select TRUNCATE(time / " + time_window * 1000000 + ") * " + time_window * 1000 +
+        " as time, count(*) as num_sessions from 'sessions.last30d' " +
+        "group by TRUNCATE(time / " + time_window * 1000000 +") order by time asc;";
     }
   };
 
