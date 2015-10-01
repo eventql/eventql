@@ -1,4 +1,6 @@
 js_file: "c3_chart.js"
 js_file: "c3.js"
 js_file: "d3.v3.min.js"
+html_file: "c3_chart.html"
 css_file: "c3.css"
+css_file: "c3_chart.css"
