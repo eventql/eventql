@@ -18,11 +18,13 @@ namespace zbase {
 
 RefPtr<csql::QueryTreeNode> SQLEngine::rewriteQuery(
     PartitionMap* partition_map,
+    ReplicationScheme* replication_scheme,
     CSTableIndex* cstable_index,
     const String& tsdb_namespace,
     RefPtr<csql::QueryTreeNode> query) {
   insertPartitionSubqueries(
       partition_map,
+      replication_scheme,
       cstable_index,
       tsdb_namespace,
       &query);
@@ -38,6 +40,7 @@ RefPtr<csql::TableProvider> SQLEngine::tableProviderForNamespace(
 
 void SQLEngine::insertPartitionSubqueries(
     PartitionMap* partition_map,
+    ReplicationScheme* replication_scheme,
     CSTableIndex* cstable_index,
     const String& tsdb_namespace,
     RefPtr<csql::QueryTreeNode>* node) {
@@ -47,6 +50,7 @@ void SQLEngine::insertPartitionSubqueries(
       (dynamic_cast<csql::SequentialScanNode*>(node->get()->child(0).get()))) {
     shardGroupBy(
         partition_map,
+        replication_scheme,
         cstable_index,
         tsdb_namespace,
         node);
@@ -57,6 +61,7 @@ void SQLEngine::insertPartitionSubqueries(
   if (dynamic_cast<csql::SequentialScanNode*>(node->get())) {
     replaceSequentialScanWithUnion(
         partition_map,
+        replication_scheme,
         cstable_index,
         tsdb_namespace,
         node);
@@ -67,6 +72,7 @@ void SQLEngine::insertPartitionSubqueries(
   for (int i = 0; i < ntables; ++i) {
     insertPartitionSubqueries(
         partition_map,
+        replication_scheme,
         cstable_index,
         tsdb_namespace,
         node->get()->mutableChild(i));
@@ -75,6 +81,7 @@ void SQLEngine::insertPartitionSubqueries(
 
 void SQLEngine::replaceSequentialScanWithUnion(
     PartitionMap* partition_map,
+    ReplicationScheme* replication_scheme,
     CSTableIndex* cstable_index,
     const String& tsdb_namespace,
     RefPtr<csql::QueryTreeNode>* node) {
@@ -110,6 +117,7 @@ void SQLEngine::replaceSequentialScanWithUnion(
 
 void SQLEngine::shardGroupBy(
     PartitionMap* partition_map,
+    ReplicationScheme* replication_scheme,
     CSTableIndex* cstable_index,
     const String& tsdb_namespace,
     RefPtr<csql::QueryTreeNode>* node) {

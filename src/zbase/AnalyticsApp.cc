@@ -76,6 +76,7 @@ AnalyticsApp::AnalyticsApp(
     dproc::DefaultApplication("cm.analytics"),
     tsdb_node_(tsdb_node),
     partition_map_(partition_map),
+    replication_scheme_(replication_scheme),
     cstable_index_(cstable_index),
     cdb_(cdb),
     datadir_(datadir),
@@ -738,6 +739,7 @@ RefPtr<csql::ExecutionStrategy> AnalyticsApp::getExecutionStrategy(
       std::bind(
           &zbase::SQLEngine::rewriteQuery,
           partition_map_,
+          replication_scheme_,
           cstable_index_,
           customer,
           std::placeholders::_1));
