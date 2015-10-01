@@ -39,6 +39,12 @@ void DefaultServlet::handleHTTPRequest(
     return;
   }
 
+  if (uri.path() == "/ping") {
+    response->setStatus(http::kStatusOK);
+    response->addBody("pong");
+    return;
+  }
+
   response->setStatus(http::kStatusNotFound);
   response->addHeader("Content-Type", "text/html; charset=utf-8");
   response->addBody(Assets::getAsset("zbase/webui/404.html"));

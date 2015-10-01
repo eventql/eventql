@@ -102,10 +102,12 @@ protected:
 
   zbase::TSDBService* tsdb_node_;
   zbase::PartitionMap* partition_map_;
+  zbase::ReplicationScheme* replication_scheme_;
   zbase::CSTableIndex* cstable_index_;
   AnalyticsQueryFactory queries_;
   HashMap<String, FeedConfig> feeds_;
   ConfigDirectory* cdb_;
+  csql::Runtime* sql_;
   String datadir_;
 
   LogfileService logfile_service_;

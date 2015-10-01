@@ -132,6 +132,12 @@ protected:
       http::HTTPResponse* res,
       RefPtr<http::HTTPResponseStream> res_stream);
 
+  void executeSQLAggregatePartition(
+      const AnalyticsSession& session,
+      const http::HTTPRequest* req,
+      http::HTTPResponse* res);
+
+
   void pipelineInfo(
       const AnalyticsSession& session,
       const http::HTTPRequest* req,

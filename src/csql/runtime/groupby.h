@@ -18,61 +18,38 @@ namespace csql {
 class GroupByExpression : public TableExpression {
 public:
 
+  GroupByExpression(
+      const Vector<String>& column_names,
+      Vector<ValueExpression> select_expressions);
+
   virtual void accumulate(
       HashMap<String, Vector<VM::Instance >>* groups,
       ScratchMemory* scratch,
       ExecutionContext* context) = 0;
 
-  virtual void getResult(
-      const HashMap<String, Vector<VM::Instance >>* groups,
-      Function<bool (int argc, const SValue* argv)> fn) = 0;
-
-  virtual void freeResult(
-      HashMap<String, Vector<VM::Instance >>* groups) = 0;
-
-  virtual void mergeResult(
-      const HashMap<String, Vector<VM::Instance >>* src,
-      HashMap<String, Vector<VM::Instance >>* dst,
-      ScratchMemory* scratch) = 0;
-
-};
-
-class GroupBy : public GroupByExpression {
-public:
-
-  GroupBy(
-      ScopedPtr<TableExpression> source,
-      const Vector<String>& column_names,
-      Vector<ValueExpression> select_expressions,
-      Vector<ValueExpression> group_expressions,
-      SHA1Hash qtree_fingerprint);
-
   void execute(
       ExecutionContext* context,
-      Function<bool (int argc, const SValue* argv)> fn) override;
+      Function<bool (int argc, const SValue* argv)> fn);
 
-  void accumulate(
-      HashMap<String, Vector<VM::Instance >>* groups,
-      ScratchMemory* scratch,
-      ExecutionContext* context) override;
+  void executeRemote(
+      ExecutionContext* context,
+      OutputStream* os);
 
   void getResult(
       const HashMap<String, Vector<VM::Instance >>* groups,
-      Function<bool (int argc, const SValue* argv)> fn) override;
+      Function<bool (int argc, const SValue* argv)> fn);
 
   void freeResult(
-      HashMap<String, Vector<VM::Instance >>* groups) override;
+      HashMap<String, Vector<VM::Instance >>* groups);
 
   void mergeResult(
       const HashMap<String, Vector<VM::Instance >>* src,
       HashMap<String, Vector<VM::Instance >>* dst,
-      ScratchMemory* scratch) override;
+      ScratchMemory* scratch);
 
   Vector<String> columnNames() const override;
 
   size_t numColumns() const override;
-
-  Option<SHA1Hash> cacheKey() const override;
 
 protected:
 
@@ -85,6 +62,29 @@ protected:
       ScratchMemory* scratch,
       InputStream* is) const;
 
+  Vector<String> column_names_;
+  Vector<ValueExpression> select_exprs_;
+};
+
+class GroupBy : public GroupByExpression {
+public:
+
+  GroupBy(
+      ScopedPtr<TableExpression> source,
+      const Vector<String>& column_names,
+      Vector<ValueExpression> select_expressions,
+      Vector<ValueExpression> group_expressions,
+      SHA1Hash qtree_fingerprint);
+
+  void accumulate(
+      HashMap<String, Vector<VM::Instance >>* groups,
+      ScratchMemory* scratch,
+      ExecutionContext* context) override;
+
+  Option<SHA1Hash> cacheKey() const override;
+
+protected:
+
   bool nextRow(
       HashMap<String, Vector<VM::Instance >>* groups,
       ScratchMemory* scratch,
@@ -92,10 +92,30 @@ protected:
       const SValue* argv);
 
   ScopedPtr<TableExpression> source_;
-  Vector<String> column_names_;
-  Vector<ValueExpression> select_exprs_;
   Vector<ValueExpression> group_exprs_;
   SHA1Hash qtree_fingerprint_;
+};
+
+class RemoteGroupBy : public GroupByExpression {
+public:
+  typedef
+      Function<ScopedPtr<InputStream> (const RemoteAggregateParams& params)>
+      RemoteExecuteFn;
+
+  RemoteGroupBy(
+      const Vector<String>& column_names,
+      Vector<ValueExpression> select_expressions,
+      const RemoteAggregateParams& params,
+      RemoteExecuteFn execute_fn);
+
+  void accumulate(
+      HashMap<String, Vector<VM::Instance >>* groups,
+      ScratchMemory* scratch,
+      ExecutionContext* context) override;
+
+protected:
+  RemoteAggregateParams params_;
+  RemoteExecuteFn execute_fn_;
 };
 
 }

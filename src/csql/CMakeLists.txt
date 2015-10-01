@@ -5,6 +5,10 @@
 # the terms of the GNU General Public License v3.0. You should have received a
 # copy of the GNU General Public License along with this program. If not, see
 # <http://www.gnu.org/licenses/>.
+file(GLOB PROTO_FILES **/*.proto)
+PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS ${PROTO_FILES})
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
+
 add_library(chartsql STATIC
     svalue.cc
     SFunction.cc
@@ -50,6 +54,7 @@ add_library(chartsql STATIC
     qtree/DescribeTableNode.cc
     qtree/DrawStatementNode.cc
     qtree/ChartStatementNode.cc
+    qtree/RemoteAggregateNode.cc
     runtime/ASCIITableFormat.cc
     runtime/JSONSSEStreamFormat.cc
     runtime/JSONResultFormat.cc
@@ -90,6 +95,7 @@ add_library(chartsql STATIC
     runtime/charts/linechartbuilder.cc
     runtime/charts/pointchartbuilder.cc
     runtime/charts/seriesadapter.cc
+    ${PROTO_SRCS}
     defaults.cc)
 
 add_executable(test-chartsql-runtime runtime/Runtime_test.cc)
