@@ -8,6 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <csql/runtime/runtime.h>
+#include <csql/runtime/groupby.h>
 #include <csql/defaults.h>
 
 namespace csql {
@@ -93,6 +94,110 @@ void Runtime::executeStatement(
       });
 }
 
+
+void Runtime::executeAggregate(
+    const RemoteAggregateParams& query,
+    RefPtr<ExecutionStrategy> execution_strategy,
+    OutputStream* os) {
+  Vector<RefPtr<SelectListNode>> outer_select_list;
+  for (const auto& e : query.aggregate_expression_list()) {
+    csql::Parser parser;
+    parser.parseValueExpression(
+        e.expression().data(),
+        e.expression().size());
+
+    auto stmts = parser.getStatements();
+    if (stmts.size() != 1) {
+      RAISE(kIllegalArgumentError);
+    }
+
+    auto slnode = mkRef(
+        new SelectListNode(
+            query_plan_builder_->buildValueExpression(stmts[0])));
+
+    if (e.has_alias()) {
+      slnode->setAlias(e.alias());
+    }
+
+    outer_select_list.emplace_back(slnode);
+  }
+
+  Vector<RefPtr<SelectListNode>> inner_select_list;
+  for (const auto& e : query.select_expression_list()) {
+    csql::Parser parser;
+    parser.parseValueExpression(
+        e.expression().data(),
+        e.expression().size());
+
+    auto stmts = parser.getStatements();
+    if (stmts.size() != 1) {
+      RAISE(kIllegalArgumentError);
+    }
+
+    auto slnode = mkRef(
+        new SelectListNode(
+            query_plan_builder_->buildValueExpression(stmts[0])));
+
+    if (e.has_alias()) {
+      slnode->setAlias(e.alias());
+    }
+
+    inner_select_list.emplace_back(slnode);
+  }
+
+  Vector<RefPtr<ValueExpressionNode>> group_exprs;
+  for (const auto& e : query.group_expression_list()) {
+    csql::Parser parser;
+    parser.parseValueExpression(e.data(), e.size());
+
+    auto stmts = parser.getStatements();
+    if (stmts.size() != 1) {
+      RAISE(kIllegalArgumentError);
+    }
+
+    group_exprs.emplace_back(
+        query_plan_builder_->buildValueExpression(stmts[0]));
+  }
+
+  Option<RefPtr<ValueExpressionNode>> where_expr;
+  if (query.has_where_expression()) {
+    csql::Parser parser;
+    parser.parseValueExpression(
+        query.where_expression().data(),
+        query.where_expression().size());
+
+    auto stmts = parser.getStatements();
+    if (stmts.size() != 1) {
+      RAISE(kIllegalArgumentError);
+    }
+
+    where_expr = Some(mkRef(
+        query_plan_builder_->buildValueExpression(stmts[0])));
+  }
+
+  auto qtree = mkRef(
+      new GroupByNode(
+          outer_select_list,
+          group_exprs,
+          new SequentialScanNode(
+                query.table_name(),
+                inner_select_list,
+                where_expr,
+                (AggregationStrategy) query.aggregation_strategy())));
+
+  auto expr = query_builder_->buildTableExpression(
+      qtree.get(),
+      execution_strategy->tableProvider(),
+      this);
+
+  auto group_expr = dynamic_cast<GroupByExpression*>(expr.get());
+  if (!group_expr) {
+    RAISE(kIllegalStateError);
+  }
+
+  csql::ExecutionContext context(&tpool_);
+  group_expr->executeRemote(&context, os);
+}
 
 SValue Runtime::evaluateStaticExpression(ASTNode* expr) {
   auto val_expr = mkRef(query_plan_builder_->buildValueExpression(expr));
