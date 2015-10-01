@@ -107,6 +107,7 @@ protected:
   AnalyticsQueryFactory queries_;
   HashMap<String, FeedConfig> feeds_;
   ConfigDirectory* cdb_;
+  csql::Runtime* sql_;
   String datadir_;
 
   LogfileService logfile_service_;

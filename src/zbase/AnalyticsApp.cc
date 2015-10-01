@@ -79,6 +79,7 @@ AnalyticsApp::AnalyticsApp(
     replication_scheme_(replication_scheme),
     cstable_index_(cstable_index),
     cdb_(cdb),
+    sql_(sql),
     datadir_(datadir),
     logfile_service_(
         cdb,
@@ -731,20 +732,12 @@ dproc::TaskSpec AnalyticsApp::buildFeedQuery(
 
 RefPtr<csql::ExecutionStrategy> AnalyticsApp::getExecutionStrategy(
     const String& customer) {
-  auto strategy = mkRef(new csql::DefaultExecutionStrategy());
-
-  strategy->addTableProvider(getTableProvider(customer));
-
-  strategy->addQueryTreeRewriteRule(
-      std::bind(
-          &zbase::SQLEngine::rewriteQuery,
-          partition_map_,
-          replication_scheme_,
-          cstable_index_,
-          customer,
-          std::placeholders::_1));
-
-  return strategy.get();
+  return SQLEngine::getExecutionStrategy(
+      sql_,
+      partition_map_,
+      replication_scheme_,
+      cstable_index_,
+      customer);
 }
 
 RefPtr<csql::TableProvider> AnalyticsApp::getTableProvider(

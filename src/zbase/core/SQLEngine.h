@@ -24,15 +24,24 @@ public:
       const String& tsdb_namespace);
 
   static RefPtr<csql::QueryTreeNode> rewriteQuery(
+      csql::Runtime* runtime,
       PartitionMap* partition_map,
       ReplicationScheme* replication_scheme,
       CSTableIndex* cstable_index,
       const String& tsdb_namespace,
       RefPtr<csql::QueryTreeNode> query);
 
+  static RefPtr<csql::ExecutionStrategy>getExecutionStrategy(
+      csql::Runtime* runtime,
+      PartitionMap* partition_map,
+      ReplicationScheme* replication_scheme,
+      CSTableIndex* cstable_index,
+      const String& customer);
+
 protected:
 
   static void insertPartitionSubqueries(
+      csql::Runtime* runtime,
       PartitionMap* partition_map,
       ReplicationScheme* replication_scheme,
       CSTableIndex* cstable_index,
@@ -47,6 +56,7 @@ protected:
       RefPtr<csql::QueryTreeNode>* node);
 
   static void shardGroupBy(
+      csql::Runtime* runtime,
       PartitionMap* partition_map,
       ReplicationScheme* replication_scheme,
       CSTableIndex* cstable_index,
@@ -54,6 +64,11 @@ protected:
       RefPtr<csql::QueryTreeNode>* node);
 
   static ScopedPtr<InputStream> executeRemoteGroupBy(
+      csql::Runtime* runtime,
+      PartitionMap* partition_map,
+      ReplicationScheme* replication_scheme,
+      CSTableIndex* cstable_index,
+      const String& customer,
       const csql::RemoteAggregateParams& params);
 
 };

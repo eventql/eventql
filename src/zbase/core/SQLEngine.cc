@@ -19,12 +19,14 @@
 namespace zbase {
 
 RefPtr<csql::QueryTreeNode> SQLEngine::rewriteQuery(
+    csql::Runtime* runtime,
     PartitionMap* partition_map,
     ReplicationScheme* replication_scheme,
     CSTableIndex* cstable_index,
     const String& tsdb_namespace,
     RefPtr<csql::QueryTreeNode> query) {
   insertPartitionSubqueries(
+      runtime,
       partition_map,
       replication_scheme,
       cstable_index,
@@ -41,6 +43,7 @@ RefPtr<csql::TableProvider> SQLEngine::tableProviderForNamespace(
 }
 
 void SQLEngine::insertPartitionSubqueries(
+    csql::Runtime* runtime,
     PartitionMap* partition_map,
     ReplicationScheme* replication_scheme,
     CSTableIndex* cstable_index,
@@ -51,6 +54,7 @@ void SQLEngine::insertPartitionSubqueries(
       node->get()->numChildren() == 1 &&
       (dynamic_cast<csql::SequentialScanNode*>(node->get()->child(0).get()))) {
     shardGroupBy(
+        runtime,
         partition_map,
         replication_scheme,
         cstable_index,
@@ -73,6 +77,7 @@ void SQLEngine::insertPartitionSubqueries(
   auto ntables = node->get()->numChildren();
   for (int i = 0; i < ntables; ++i) {
     insertPartitionSubqueries(
+        runtime,
         partition_map,
         replication_scheme,
         cstable_index,
@@ -118,6 +123,7 @@ void SQLEngine::replaceSequentialScanWithUnion(
 }
 
 void SQLEngine::shardGroupBy(
+    csql::Runtime* runtime,
     PartitionMap* partition_map,
     ReplicationScheme* replication_scheme,
     CSTableIndex* cstable_index,
@@ -157,6 +163,11 @@ void SQLEngine::shardGroupBy(
               copy.asInstanceOf<csql::GroupByNode>(),
               std::bind(
                   &SQLEngine::executeRemoteGroupBy,
+                  runtime,
+                  partition_map,
+                  replication_scheme,
+                  cstable_index,
+                  tsdb_namespace,
                   std::placeholders::_1)));
 
       shards.emplace_back(remote_aggr.get());
@@ -166,11 +177,51 @@ void SQLEngine::shardGroupBy(
   *node = RefPtr<csql::QueryTreeNode>(new csql::GroupByMergeNode(shards));
 }
 
+RefPtr<csql::ExecutionStrategy> SQLEngine::getExecutionStrategy(
+    csql::Runtime* runtime,
+    PartitionMap* partition_map,
+    ReplicationScheme* replication_scheme,
+    CSTableIndex* cstable_index,
+    const String& customer) {
+  auto strategy = mkRef(new csql::DefaultExecutionStrategy());
+
+  strategy->addTableProvider(
+      tableProviderForNamespace(partition_map, cstable_index, customer));
+
+  strategy->addQueryTreeRewriteRule(
+      std::bind(
+          &zbase::SQLEngine::rewriteQuery,
+          runtime,
+          partition_map,
+          replication_scheme,
+          cstable_index,
+          customer,
+          std::placeholders::_1));
+
+  return strategy.get();
+}
+
 ScopedPtr<InputStream> SQLEngine::executeRemoteGroupBy(
+    csql::Runtime* runtime,
+    PartitionMap* partition_map,
+    ReplicationScheme* replication_scheme,
+    CSTableIndex* cstable_index,
+    const String& customer,
     const csql::RemoteAggregateParams& params) {
   iputs("execute remote group by: $0", params.DebugString());
 
-  return mkScoped(new MemoryInputStream(nullptr, 0));
+  auto estrat = getExecutionStrategy(
+      runtime,
+      partition_map,
+      replication_scheme,
+      cstable_index,
+      customer);
+
+  String data;
+  auto os = StringOutputStream::fromString(&data);
+  runtime->executeAggregate(params, estrat, os.get());
+
+  return mkScoped(new StringInputStream(data));
 }
 
 }

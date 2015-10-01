@@ -15,6 +15,7 @@
 #include <memory>
 #include <stx/thread/threadpool.h>
 #include <csql/parser/parser.h>
+#include <csql/qtree/RemoteAggregateParams.pb.h>
 #include <csql/runtime/queryplan.h>
 #include <csql/runtime/queryplanbuilder.h>
 #include <csql/runtime/QueryBuilder.h>
@@ -48,6 +49,11 @@ public:
   void executeStatement(
       ScopedPtr<Statement> statement,
       ResultList* result);
+
+  void executeAggregate(
+      const RemoteAggregateParams& query,
+      RefPtr<ExecutionStrategy> execution_strategy,
+      OutputStream* os);
 
   SValue evaluateStaticExpression(const String& expr);
   SValue evaluateStaticExpression(ASTNode* expr);

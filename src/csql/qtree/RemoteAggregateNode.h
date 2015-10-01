@@ -18,6 +18,13 @@ using namespace stx;
 
 namespace csql {
 
+/**
+ * Execute a group by/aggregation shard on a remote host. you must implement
+ * execute_fn in such a way that it tunnels through to a call to
+ * Runtime::executeAggregate on some remote node (i.e. the execute_fn needs to
+ * return locally the value that was obtained by calling Runtime::executeAggregate
+ * on some remote host)
+ */
 class RemoteAggregateNode : public QueryTreeNode {
 public:
   typedef
