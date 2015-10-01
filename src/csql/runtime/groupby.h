@@ -31,6 +31,10 @@ public:
       ExecutionContext* context,
       Function<bool (int argc, const SValue* argv)> fn);
 
+  void executeRemote(
+      ExecutionContext* context,
+      OutputStream* os);
+
   void getResult(
       const HashMap<String, Vector<VM::Instance >>* groups,
       Function<bool (int argc, const SValue* argv)> fn);
