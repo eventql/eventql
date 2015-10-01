@@ -68,6 +68,7 @@ public:
   TaskScheduler* scheduler();
 
 protected:
+
   RefPtr<SymbolTable> symbol_table_;
   RefPtr<QueryBuilder> query_builder_;
   RefPtr<QueryPlanBuilder> query_plan_builder_;
