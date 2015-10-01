@@ -7,10 +7,7 @@ ZBaseC3Chart = function(config) {
 
   var renderTimeseries = function(elem_id) {
     var x_config = {
-      type: "timeseries",
-      tick: {
-        format: '%Y-%m-%d',
-      }
+      type: "timeseries"
     };
 
     render(x_config, elem_id);
@@ -28,7 +25,10 @@ ZBaseC3Chart = function(config) {
       }
     };
 
-    var x_config = mergeObjects({tick: {count: 10}}, x_pre_config);
+    var x_config = mergeObjects(
+        {tick: {count: 10, format: config.format}},
+        x_pre_config);
+
     chart = c3.generate({
       bindto: "#" + elem_id,
       interaction: true,
@@ -36,8 +36,8 @@ ZBaseC3Chart = function(config) {
         x: 'x',
         type: 'line',
         columns: [
-          config.x,
-          config.y
+          config.data.x,
+          config.data.y
         ],
         selection: {
           enabled: true
