@@ -221,5 +221,23 @@ Option<SHA1Hash> GroupBy::cacheKey() const {
               qtree_fingerprint_.toString())));
 }
 
+RemoteGroupBy::RemoteGroupBy(
+    const Vector<String>& column_names,
+    Vector<ValueExpression> select_expressions,
+    const RemoteAggregateParams& params,
+    RemoteExecuteFn execute_fn) :
+    GroupByExpression(column_names, std::move(select_expressions)),
+    params_(params),
+    execute_fn_(execute_fn) {}
+
+void RemoteGroupBy::accumulate(
+    HashMap<String, Vector<VM::Instance >>* groups,
+    ScratchMemory* scratch,
+    ExecutionContext* context) {
+  auto result = execute_fn_(params_);
+  if (!decode(groups, scratch, result.get())) {
+    RAISE(kRuntimeError, "RemoteGroupBy failed");
+  }
+}
 
 }

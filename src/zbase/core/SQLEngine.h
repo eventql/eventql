@@ -53,6 +53,9 @@ protected:
       const String& tsdb_namespace,
       RefPtr<csql::QueryTreeNode>* node);
 
+  static ScopedPtr<InputStream> executeRemoteGroupBy(
+      const csql::RemoteAggregateParams& params);
+
 };
 
 }

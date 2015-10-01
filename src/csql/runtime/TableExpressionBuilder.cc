@@ -239,6 +239,22 @@ ScopedPtr<TableExpression> TableExpressionBuilder::buildRemoteAggregate(
     RefPtr<RemoteAggregateNode> node,
     QueryBuilder* runtime) {
 
+  Vector<String> column_names;
+  Vector<ValueExpression> select_expressions;
+
+  for (const auto& slnode : node->selectList()) {
+    column_names.emplace_back(slnode->columnName());
+
+    select_expressions.emplace_back(
+        runtime->buildValueExpression(slnode->expression()));
+  }
+
+  return mkScoped(
+      new RemoteGroupBy(
+          column_names,
+          std::move(select_expressions),
+          node->remoteAggregateParams(),
+          node->remoteExecuteFunction()));
 }
 
 } // namespace csql
