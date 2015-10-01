@@ -59,9 +59,6 @@
   color: #fff;
 }
 
-.zbase_session_tracking z-tabbable {
-  font-size: 14px;
-}
 
 .zbase_session_tracking .zbase_settings_title {
   font-weight: 500;
@@ -70,6 +67,7 @@
   margin: 25px 0 5px 10px;
 }
 
+.zbase_session_tracking .add_pane,
 .zbase_session_tracking .add_session_event,
 .zbase_session_tracking .add_session_attribute {
   border-bottom: 2px solid #ddd;
@@ -170,7 +168,7 @@
 }
 
 .zbase_session_tracking .table_container {
-  margin: 20px;
+  margin: 0px;
 }
 
 .zbase_session_tracking table.edit_event {
@@ -179,6 +177,11 @@
 
 .zbase_session_tracking table.edit_event tr:hover {
   cursor: pointer;
+}
+
+.zbase_session_tracking table.edit_event tr {
+  border-left: 1px solid #e1e1e1;
+  border-right: 1px solid #e1e1e1;
 }
 
 .zbase_session_tracking table.edit_event tr td {
@@ -195,6 +198,7 @@
 
 .zbase_session_tracking table.edit_event tr.table_attached {
   background: #f9f9f9;
+  border-left: none;
 }
 
 .zbase_session_tracking table.edit_event tr.table_attached > td {
@@ -205,6 +209,11 @@
   margin: 0;
   border-top: none;
   border-bottom: none;
+  border-right: none;
+}
+
+.zbase_session_tracking table.edit_event tr.table_attached table tr {
+  border-right: none;
 }
 
 /*.zbase_session_tracking table.add_attribute {
