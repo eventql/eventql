@@ -20,6 +20,12 @@ ZBase.registerView((function() {
     $.handleLinks(page);
     $.replaceViewport(page);
 
+    $(".zbase_session_tracking_dashboard z-dropdown.metric").addEventListener(
+        "change", render);
+
+    $(".zbase_session_tracking_dashboard z-dropdown.time_window").addEventListener(
+        "change", render);
+
     render();
   };
 
@@ -35,11 +41,9 @@ ZBase.registerView((function() {
 
   var render = function() {
     $.showLoader();
+    destroy();
 
-    var metric = $(".zbase_session_tracking_dashboard z-dropdown.metric").getValue();
-    var time_window = $(".zbase_session_tracking_dashboard z-dropdown.time_window").getValue();
-    var query_string = getQueryString(metric, time_window);
-
+    var query_string = buildQueryString();
     var query = query_mgr.get(
       "sql_query",
       "/api/v1/sql_stream?query=" + encodeURIComponent(query_string));
@@ -71,24 +75,39 @@ ZBase.registerView((function() {
     var y_values = ["Sessions", 31109, 29557, 27481, 24851, 27031, 29696];
     //REMOVEME END
 
-    var chart_data = {
-      x: x_values,
-      y: y_values,
-      colors: {"Sessions": "#3498db"}
+    var chart_config = {
+      data: {
+        x: x_values,
+        y: y_values
+      },
+      colors: {"Sessions": "#3498db"},
+      format: '%Y-%m-%d'
     };
-    chart = ZBaseC3Chart(chart_data);
+    if (getTimeWindow() == "3600") {
+      chart_config.format += " %H:%M";
+    }
+
+    chart = ZBaseC3Chart(chart_config);
     chart.renderTimeseries("dashboard_chart");
 
     $.hideLoader();
   };
 
-  var getQueryString = function(metric, time_window) {
-    switch (metric) {
+  var buildQueryString = function(metric, time_window) {
+    switch (getMetric()) {
       case "num_sessions":
-        return "select TRUNCATE(time / 3600000000) * " + time_window +
+        return "select TRUNCATE(time / 3600000000) * " + getTimeWindow() +
         " as time, count(*) as num_sessions from 'sessions.last30d'" +
         "group by TRUNCATE(time / 3600000000) order by time asc;";
     }
+  };
+
+  var getMetric = function() {
+    return $(".zbase_session_tracking_dashboard z-dropdown.metric").getValue();
+  };
+
+  var getTimeWindow = function() {
+    return $(".zbase_session_tracking_dashboard z-dropdown.time_window").getValue();
   };
 
 
