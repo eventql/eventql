@@ -10,6 +10,8 @@
 #pragma once
 #include <stx/stdtypes.h>
 #include <csql/qtree/TableExpressionNode.h>
+#include <csql/qtree/GroupByNode.h>
+#include <csql/qtree/RemoteAggregateParams.pb.h>
 
 using namespace stx;
 
@@ -18,13 +20,15 @@ namespace csql {
 class RemoteAggregateNode : public QueryTreeNode {
 public:
 
-  //RemoteAggregateNode();
+  RemoteAggregateNode(RefPtr<GroupByNode> group_by);
+  RemoteAggregateNode(const RemoteAggregateParams& params);
 
   RefPtr<QueryTreeNode> deepCopy() const override;
 
   String toString() const override;
 
 protected:
+  RemoteAggregateParams params_;
 };
 
 } // namespace csql
