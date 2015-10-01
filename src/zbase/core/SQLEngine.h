@@ -25,6 +25,7 @@ public:
 
   static RefPtr<csql::QueryTreeNode> rewriteQuery(
       PartitionMap* partition_map,
+      ReplicationScheme* replication_scheme,
       CSTableIndex* cstable_index,
       const String& tsdb_namespace,
       RefPtr<csql::QueryTreeNode> query);
@@ -33,18 +34,21 @@ protected:
 
   static void insertPartitionSubqueries(
       PartitionMap* partition_map,
+      ReplicationScheme* replication_scheme,
       CSTableIndex* cstable_index,
       const String& tsdb_namespace,
       RefPtr<csql::QueryTreeNode>* node);
 
   static void replaceSequentialScanWithUnion(
       PartitionMap* partition_map,
+      ReplicationScheme* replication_scheme,
       CSTableIndex* cstable_index,
       const String& tsdb_namespace,
       RefPtr<csql::QueryTreeNode>* node);
 
   static void shardGroupBy(
       PartitionMap* partition_map,
+      ReplicationScheme* replication_scheme,
       CSTableIndex* cstable_index,
       const String& tsdb_namespace,
       RefPtr<csql::QueryTreeNode>* node);
