@@ -82,6 +82,7 @@ add_executable(test-recordset
     $<TARGET_OBJECTS:stx-mdb>
     $<TARGET_OBJECTS:tsdb-server>
     $<TARGET_OBJECTS:dproc>
+    ${PROTO_SRCS}
     core/RecordSet_test.cc)
 
 target_link_libraries(test-recordset chartsql cplot sstable cstable stx-http stx-protobuf stx-json stx-base)
@@ -90,6 +91,7 @@ add_executable(test-tsdb-timewindowpartitioner
     $<TARGET_OBJECTS:stx-mdb>
     $<TARGET_OBJECTS:tsdb-server>
     $<TARGET_OBJECTS:dproc>
+    ${PROTO_SRCS}
     core/TimeWindowPartitioner_test.cc)
 
 target_link_libraries(test-tsdb-timewindowpartitioner chartsql cplot sstable cstable stx-http stx-protobuf stx-json stx-base)
