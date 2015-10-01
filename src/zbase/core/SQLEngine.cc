@@ -7,6 +7,8 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
+#include <stx/http/httpclient.h>
+#include <stx/protobuf/msg.h>
 #include <zbase/core/SQLEngine.h>
 #include <zbase/core/TSDBService.h>
 #include <zbase/core/TimeWindowPartitioner.h>
@@ -244,8 +246,34 @@ ScopedPtr<InputStream> SQLEngine::executeRemoteGroupByOnHost(
     const String& customer,
     const InetAddr& host,
     const csql::RemoteAggregateParams& params) {
-  iputs("execute group by on $0 -> $1", host.hostAndPort(), params.DebugString());
-  RAISE(kNotImplementedError);
+  logDebug(
+      "zbase",
+      "Executing remote group-by on partition $0",
+      host.hostAndPort());
+
+  auto url = StringUtil::format(
+      "http://$0/api/v1/sql/aggregate_partition",
+      host.hostAndPort());
+
+  //auto api_token = auth_->encodeAuthToken(session);
+
+  http::HTTPMessage::HeaderList auth_headers;
+  //auth_headers.emplace_back(
+  //    "Authorization",
+  //    StringUtil::format("Token $0", api_token));
+
+  http::HTTPClient http_client;
+  auto req_body = msg::encode(params);
+  auto req = http::HTTPRequest::mkPost(url, *req_body, auth_headers);
+  auto res = http_client.executeRequest(req);
+
+  if (res.statusCode() != 200) {
+    RAISEF(
+        kRuntimeError,
+        "received non-200 response: $0", res.body().toString());
+  }
+
+  return mkScoped(new StringInputStream(res.body().toString()));
 }
 
 }
