@@ -74,6 +74,12 @@ ScopedPtr<TableExpression> TableExpressionBuilder::build(
         tables);
   }
 
+  if (dynamic_cast<RemoteAggregateNode*>(node.get())) {
+    return buildRemoteAggregate(
+        node.asInstanceOf<RemoteAggregateNode>(),
+        runtime);
+  }
+
   RAISE(
       kRuntimeError,
       "cannot figure out how to build a table expression for this QTree node");
@@ -227,6 +233,12 @@ ScopedPtr<TableExpression> TableExpressionBuilder::buildDescribeTableStatment(
   }
 
   return mkScoped(new DescribeTableStatement(table_info.get()));
+}
+
+ScopedPtr<TableExpression> TableExpressionBuilder::buildRemoteAggregate(
+    RefPtr<RemoteAggregateNode> node,
+    QueryBuilder* runtime) {
+
 }
 
 } // namespace csql
