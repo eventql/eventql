@@ -15,6 +15,12 @@
   display: inline-block;
 }
 
+.zbase_session_tracking .zbase_session_tracking_dashboard .chart_panel .chart_legend {
+  float: right;
+  overflow: auto;
+  font-size: 12px;
+}
+
 .zbase_session_tracking .zbase_session_tracking_dashboard .chart_container {
   background: #fff;
   border: 1px solid #eee;

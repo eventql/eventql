@@ -68,16 +68,21 @@ ZBase.registerView((function() {
 
   var renderChart = function(results) {
     //REMOVEME
-    var x_values = ["x", 1441108800000, 1441112400000, 1441116000000, 1441119600000, 1441123200000, 1441126800000];
-    var y_values = ["Sessions", 31109, 29557, 27481, 24851, 27031, 29696];
+    var x_values = [1441108800000, 1441112400000, 1441116000000, 1441119600000, 1441123200000, 1441126800000];
+    var y_values = [31109, 29557, 27481, 24851, 27031, 29696];
     //REMOVEME END
 
     var chart_config = {
       data: {
         x: x_values,
-        y: y_values
+        y: [
+          {
+            name: "Sessions",
+            values: y_values,
+            color: "#3498db"
+          }
+        ]
       },
-      colors: {"Sessions": "#3498db"},
       format: '%Y-%m-%d'
     };
     if (getParamTimeWindow() == "3600") {
@@ -86,6 +91,7 @@ ZBase.registerView((function() {
 
     chart = ZBaseC3Chart(chart_config);
     chart.renderTimeseries("dashboard_chart");
+    chart.renderLegend($(".zbase_session_tracking_dashboard .chart_legend"));
 
     $.hideLoader();
   };
