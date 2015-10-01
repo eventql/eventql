@@ -35,7 +35,7 @@ ZBase.registerView((function() {
 
     $("zbase-breadcrumbs-section .event_name", page).innerHTML = event_name;
 
-    $.onClick($("button.add_field", page), function(e) {renderAdd("")});
+    $.onClick($(".link.add_field", page), function(e) {renderAdd("")});
 
     $.handleLinks(page);
     $.replaceViewport(page);
