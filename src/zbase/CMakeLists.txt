@@ -82,7 +82,8 @@ add_executable(test-recordset
     $<TARGET_OBJECTS:stx-mdb>
     $<TARGET_OBJECTS:tsdb-server>
     $<TARGET_OBJECTS:dproc>
-    ${PROTO_SRCS}
+    $<TARGET_OBJECTS:auth>
+    $<TARGET_OBJECTS:customerdirectory>
     core/RecordSet_test.cc)
 
 target_link_libraries(test-recordset chartsql cplot sstable cstable stx-http stx-protobuf stx-json stx-base)
@@ -91,7 +92,8 @@ add_executable(test-tsdb-timewindowpartitioner
     $<TARGET_OBJECTS:stx-mdb>
     $<TARGET_OBJECTS:tsdb-server>
     $<TARGET_OBJECTS:dproc>
-    ${PROTO_SRCS}
+    $<TARGET_OBJECTS:auth>
+    $<TARGET_OBJECTS:customerdirectory>
     core/TimeWindowPartitioner_test.cc)
 
 target_link_libraries(test-tsdb-timewindowpartitioner chartsql cplot sstable cstable stx-http stx-protobuf stx-json stx-base)
@@ -200,6 +202,7 @@ add_executable(zbasectl
     $<TARGET_OBJECTS:customerdirectory>
     #$<TARGET_OBJECTS:fnord-afx>
     $<TARGET_OBJECTS:dproc>
+    $<TARGET_OBJECTS:auth>
     #sstable/SSTableServlet.cc
     zbasectl.cc)
 
@@ -210,6 +213,7 @@ add_executable(zmaster
     $<TARGET_OBJECTS:stx-rpc>
     $<TARGET_OBJECTS:customerdirectory>
     $<TARGET_OBJECTS:tsdb-server>
+    $<TARGET_OBJECTS:auth>
     master/ConfigDirectoryMaster.cc
     master/MasterServlet.cc
     zmaster.cc)
