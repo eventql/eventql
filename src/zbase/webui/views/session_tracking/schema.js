@@ -37,7 +37,7 @@ ZBase.registerView((function() {
     });
 
 
-    $.onClick($("button.add", page), renderAdd);
+    $.onClick($(".link.add", page), renderAdd);
 
     $.handleLinks(page);
     $.replaceViewport(page);

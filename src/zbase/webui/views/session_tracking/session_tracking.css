@@ -59,9 +59,6 @@
   color: #fff;
 }
 
-.zbase_session_tracking z-tabbable {
-  font-size: 14px;
-}
 
 .zbase_session_tracking .zbase_settings_title {
   font-weight: 500;
@@ -70,6 +67,7 @@
   margin: 25px 0 5px 10px;
 }
 
+.zbase_session_tracking .add_pane,
 .zbase_session_tracking .add_session_event,
 .zbase_session_tracking .add_session_attribute {
   border-bottom: 2px solid #ddd;
