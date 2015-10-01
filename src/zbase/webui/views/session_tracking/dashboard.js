@@ -1,5 +1,6 @@
 ZBase.registerView((function() {
   var query_mgr;
+  var chart;
 
   var load = function(path) {
     query_mgr = EventSourceHandler();
@@ -23,7 +24,13 @@ ZBase.registerView((function() {
   };
 
   var destroy = function() {
-    query_mgr.closeAll();
+    if (query_mgr) {
+      query_mgr.closeAll();
+    }
+
+    if (chart) {
+      chart.destroy();
+    }
   };
 
   var render = function() {
@@ -39,15 +46,12 @@ ZBase.registerView((function() {
 
     query.addEventListener('result', function(e) {
       query_mgr.close("sql_query");
-
       var data = JSON.parse(e.data);
-
-      console.log(data);
+      renderChart(data.results);
     });
 
     query.addEventListener('query_error', function(e) {
       query_mgr.close("sql_query");
-      renderChart(e.data.results);
     });
 
     query.addEventListener('error', function(e) {
@@ -62,12 +66,23 @@ ZBase.registerView((function() {
   };
 
   var renderChart = function(results) {
-    var chart = ZBaseC3Chart(results);
-    chart.render($(".zbase_session_tracking_dashboard .inner_chart"));
+    //REMOVEME
+    var x_values = ["x", 1441108800000, 1441112400000, 1441116000000, 1441119600000, 1441123200000, 1441126800000];
+    var y_values = ["Sessions", 31109, 29557, 27481, 24851, 27031, 29696];
+    //REMOVEME END
+
+    var chart_data = {
+      x: x_values,
+      y: y_values,
+      colors: {"Sessions": "#3498db"}
+    };
+    chart = ZBaseC3Chart(chart_data);
+    chart.renderTimeseries("dashboard_chart");
+
+    $.hideLoader();
   };
 
   var getQueryString = function(metric, time_window) {
-    console.log(time_window);
     switch (metric) {
       case "num_sessions":
         return "select TRUNCATE(time / 3600000000) * " + time_window +
