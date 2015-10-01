@@ -94,6 +94,13 @@ void Runtime::executeStatement(
 }
 
 
+void Runtime::executeAggregate(
+    const RemoteAggregateParams& query,
+    RefPtr<ExecutionStrategy> execution_strategy,
+    OutputStream* os) {
+  RAISE(kNotYetImplementedError, "not yet implemented");
+}
+
 SValue Runtime::evaluateStaticExpression(ASTNode* expr) {
   auto val_expr = mkRef(query_plan_builder_->buildValueExpression(expr));
   auto compiled = query_builder_->buildValueExpression(val_expr);
