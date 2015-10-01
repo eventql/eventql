@@ -20,14 +20,17 @@ ZBase.registerView((function() {
     $.handleLinks(page);
     $.replaceViewport(page);
 
-    $(".zbase_session_tracking_dashboard z-dropdown.metric").addEventListener(
-        "change", render);
+    setParamMetric(UrlUtil.getParamValue(path, "metric"));
+    setParamTimeWindow(UrlUtil.getParamValue(path, "time_window"));
 
-    $(".zbase_session_tracking_dashboard z-dropdown.time_window").addEventListener(
-        "change", render);
+    $(".zbase_session_tracking_dashboard z-dropdown.metric")
+        .addEventListener("change", paramChanged);
+    $(".zbase_session_tracking_dashboard z-dropdown.time_window")
+        .addEventListener("change", paramChanged);
 
     render();
   };
+
 
   var destroy = function() {
     if (query_mgr) {
@@ -54,14 +57,8 @@ ZBase.registerView((function() {
       renderChart(data.results);
     });
 
-    query.addEventListener('query_error', function(e) {
-      query_mgr.close("sql_query");
-    });
-
     query.addEventListener('error', function(e) {
-      query_mgr.close("sql_query");
-      console.log("error");
-      //renderQueryError("Server Error");
+      $.fatalError("Server Error");
     });
 
     query.addEventListener('status', function(e) {
@@ -83,7 +80,7 @@ ZBase.registerView((function() {
       colors: {"Sessions": "#3498db"},
       format: '%Y-%m-%d'
     };
-    if (getTimeWindow() == "3600") {
+    if (getParamTimeWindow() == "3600") {
       chart_config.format += " %H:%M";
     }
 
@@ -94,28 +91,49 @@ ZBase.registerView((function() {
   };
 
   var buildQueryString = function(metric, time_window) {
-    switch (getMetric()) {
+    switch (getParamMetric()) {
       case "num_sessions":
-        return "select TRUNCATE(time / 3600000000) * " + getTimeWindow() +
+        return "select TRUNCATE(time / 3600000000) * " + getParamTimeWindow() +
         " as time, count(*) as num_sessions from 'sessions.last30d'" +
         "group by TRUNCATE(time / 3600000000) order by time asc;";
     }
   };
 
-  var getMetric = function() {
+  var getParamMetric = function() {
     return $(".zbase_session_tracking_dashboard z-dropdown.metric").getValue();
   };
 
-  var getTimeWindow = function() {
+  var getParamTimeWindow = function() {
     return $(".zbase_session_tracking_dashboard z-dropdown.time_window").getValue();
   };
 
+  var setParamMetric = function(value) {
+    if (value) {
+      $(".zbase_session_tracking_dashboard z-dropdown.metric")
+        .setValue([value]);
+    }
+  };
+
+  var setParamTimeWindow = function(value) {
+    if (value) {
+      $(".zbase_session_tracking_dashboard z-dropdown.time_window")
+        .setValue([value]);
+    }
+  };
+
+  var paramChanged = function(e) {
+    var url = UrlUtil.addOrModifyUrlParams(
+      document.location.pathname,
+      [{key: this.getAttribute("name"), value: this.getValue()}]);
+
+    $.navigateTo(url);
+  };
 
   return {
     name: "session_tracking_dashboard",
     loadView: function(params) { load(params.path); },
     unloadView: destroy,
-    handleNavigationChange: load
+    handleNavigationChange: render
   };
 
 })());

@@ -15,7 +15,7 @@
     <h2 class="pagetitle"><em>Dashboard</em></h2>
 
     <div class="chart_container">
-      <z-dropdown data-resolved class="input metric">
+      <z-dropdown data-resolved class="input metric" name="metric">
         <z-dropdown-flyout>
           <z-dropdown-items>
             <z-dropdown-item data-value="num_sessions" data-selected>Number of Sessions</z-dropdown-item>
@@ -23,7 +23,7 @@
         </z-dropdown-flyout>
       </z-dropdown>
 
-      <z-dropdown data-resolved class="time_window">
+      <z-dropdown data-resolved class="time_window" name="time_window">
         <z-dropdown-flyout>
           <z-dropdown-items>
             <z-dropdown-item data-value="3600">Hourly</z-dropdown-item>
