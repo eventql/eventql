@@ -36,7 +36,6 @@ ZBase.registerView((function() {
       $.hideLoader();
     });
 
-
     $.onClick($(".link.add", page), renderAdd);
 
     $.handleLinks(page);
@@ -91,17 +90,17 @@ ZBase.registerView((function() {
     var tpl = $.getTemplate(
       "views/session_tracking",
       "zbase_session_tracking_schema_add_modal_tpl");
+    var input = $("input", tpl);
 
     $.onClick($("button.close", tpl), function() {modal.close();});
     $.onClick($("button.submit", tpl), function() {
-      var name = $("input", modal).value;
-      if (name.length == 0) {
+      if (input.value.length == 0) {
         $(".error_note", modal).classList.remove("hidden");
         return;
       }
 
       var type = $("z-dropdown", modal).getValue();
-      var qstr = "name=" + name + "&type=" + type;
+      var qstr = "name=" + input.value + "&type=" + type;
 
       alert("post new schema item" + qstr);
 
@@ -111,6 +110,7 @@ ZBase.registerView((function() {
     $.replaceContent($(".container", modal), tpl);
 
     modal.show();
+    input.focus();
   };
 
   return {
