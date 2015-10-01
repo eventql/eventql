@@ -1,0 +1,12 @@
+zbase-c3-chart-legend-item {
+  float: left;
+  display: block;
+  font-size: inherit;
+}
+
+zbase-c3-chart-legend-item .circle {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}

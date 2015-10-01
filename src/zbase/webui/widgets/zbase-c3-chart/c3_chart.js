@@ -5,6 +5,21 @@ ZBaseC3Chart = function(config) {
     window.removeEventListener("resize", resize, false);
   };
 
+  var renderLegend = function(elem) {
+    elem.innerHTML = "";
+
+    var tpl = $.getTemplate(
+        "widgets/zbase-c3-chart",
+        "zbase-c3-chart-legend-item-tpl");
+
+    for (var i = 0; i < config.data.y.length; i++) {
+      var html = tpl.cloneNode(true);
+      $(".circle", html).style.backgroundColor = config.data.y[i].color;
+      $(".legend_item_name", html).innerHTML = config.data.y[i].name;
+      elem.appendChild(html);
+    }
+  };
+
   var renderTimeseries = function(elem_id) {
     var x_config = {
       type: "timeseries"
@@ -29,21 +44,26 @@ ZBaseC3Chart = function(config) {
         {tick: {count: 10, format: config.format}},
         x_pre_config);
 
+    config.data.x.unshift("x");
+    var columns = [config.data.x];
+    var colors = {};
+    config.data.y.forEach(function(y_set) {
+      y_set.values.unshift(y_set.name);
+      columns.push(y_set.values);
+      colors[y_set.name] = y_set.color;
+    });
+
     chart = c3.generate({
       bindto: "#" + elem_id,
       interaction: true,
       data: {
         x: 'x',
         type: 'line',
-        columns: [
-          config.data.x,
-          config.data.y
-        ],
+        columns: columns,
         selection: {
           enabled: true
         },
         colors: config.colors
-        //colors names columns
       },
       axis: {
         x: x_config,
@@ -94,6 +114,7 @@ ZBaseC3Chart = function(config) {
 
 
   return {
+    renderLegend: renderLegend,
     renderTimeseries: renderTimeseries,
     destroy: destroy
   }
