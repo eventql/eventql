@@ -33,9 +33,9 @@ ZBase.registerView((function() {
       $.hideLoader();
     });
 
-    $("h3 span", page).innerHTML = event_name;
+    $("zbase-breadcrumbs-section .event_name", page).innerHTML = event_name;
 
-    $.onClick($("button.add_field", page), function(e) {renderAdd("")});
+    $.onClick($(".link.add_field", page), function(e) {renderAdd("")});
 
     $.handleLinks(page);
     $.replaceViewport(page);
@@ -57,16 +57,9 @@ ZBase.registerView((function() {
 
 
     fields.forEach(function(field) {
-      var html = $("tr", row_tpl.cloneNode(true));
+      var html = row_tpl.cloneNode(true);
       $(".name", html).innerHTML = field.name;
       $(".type", html).innerHTML = "[" + field.type.toLowerCase() + "]";
-      tbody.appendChild(html);
-
-      if (field.repeated) {
-        var table = table_tpl.cloneNode(true);
-        renderTable(field.schema.columns, $("tbody", table));
-        tbody.appendChild(table);
-      }
 
       $("z-dropdown", html).addEventListener("change", function() {
         switch (this.getValue()) {
@@ -81,6 +74,13 @@ ZBase.registerView((function() {
         this.setValue([]);
       }, false);
 
+      tbody.appendChild(html);
+
+      if (field.repeated) {
+        var table = table_tpl.cloneNode(true);
+        renderTable(field.schema.columns, $("tbody", table));
+        tbody.appendChild(table);
+      }
     });
   };
 

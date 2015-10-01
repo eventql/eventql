@@ -1,26 +1,145 @@
 ZBase.registerView((function() {
+  var query_mgr;
+  var chart;
 
   var load = function(path) {
-    $.navigateTo("/a/session_tracking/journey_viewer");
+    query_mgr = EventSourceHandler();
 
-    //var page = $.getTemplate(
-    //    "views/session_tracking",
-    //    "zbase_session_tracking_main_tpl");
+    var page = $.getTemplate(
+        "views/session_tracking",
+        "zbase_session_tracking_main_tpl");
 
-    //var menu = SessionTrackingMenu(path);
-    //menu.render($(".zbase_content_pane .session_tracking_sidebar", page));
+    var content = $.getTemplate(
+        "views/session_tracking",
+        "zbase_session_tracking_dashboard_tpl");
 
-    //$(".zbase_content_pane .session_tracking_content", page).innerHTML  = "dashboard";
+    var menu = SessionTrackingMenu(path);
+    menu.render($(".zbase_content_pane .session_tracking_sidebar", page));
+    $(".zbase_content_pane .session_tracking_content", page).appendChild(content);
 
-    //$.handleLinks(page);
-    //$.replaceViewport(page);
+    $.handleLinks(page);
+    $.replaceViewport(page);
+
+    setParamMetric(UrlUtil.getParamValue(path, "metric"));
+    setParamTimeWindow(UrlUtil.getParamValue(path, "time_window"));
+
+    $(".zbase_session_tracking_dashboard z-dropdown.metric")
+        .addEventListener("change", paramChanged);
+    $(".zbase_session_tracking_dashboard z-dropdown.time_window")
+        .addEventListener("change", paramChanged);
+
+    render();
+  };
+
+
+  var destroy = function() {
+    if (query_mgr) {
+      query_mgr.closeAll();
+    }
+
+    if (chart) {
+      chart.destroy();
+    }
+  };
+
+  var render = function() {
+    $.showLoader();
+    destroy();
+
+    var query_string = buildQueryString();
+    var query = query_mgr.get(
+      "sql_query",
+      "/api/v1/sql_stream?query=" + encodeURIComponent(query_string));
+
+    query.addEventListener('result', function(e) {
+      query_mgr.close("sql_query");
+      var data = JSON.parse(e.data);
+      renderChart(data.results);
+    });
+
+    query.addEventListener('error', function(e) {
+      $.fatalError("Server Error");
+    });
+
+    query.addEventListener('status', function(e) {
+      //renderQueryProgress(JSON.parse(e.data));
+    });
+  };
+
+  var renderChart = function(results) {
+    //REMOVEME
+    var x_values = [1441108800000, 1441112400000, 1441116000000, 1441119600000, 1441123200000, 1441126800000];
+    var y_values = [31109, 29557, 27481, 24851, 27031, 29696];
+    //REMOVEME END
+
+    var chart_config = {
+      data: {
+        x: x_values,
+        y: [
+          {
+            name: "Sessions",
+            values: y_values,
+            color: "#3498db"
+          }
+        ]
+      },
+      format: '%Y-%m-%d'
+    };
+    if (getParamTimeWindow() == "3600") {
+      chart_config.format += " %H:%M";
+    }
+
+    chart = ZBaseC3Chart(chart_config);
+    chart.renderTimeseries("dashboard_chart");
+    chart.renderLegend($(".zbase_session_tracking_dashboard .chart_legend"));
+
+    $.hideLoader();
+  };
+
+  var buildQueryString = function(metric, time_window) {
+    switch (getParamMetric()) {
+      case "num_sessions":
+        return "select TRUNCATE(time / 3600000000) * " + getParamTimeWindow() +
+        " as time, count(*) as num_sessions from 'sessions.last30d'" +
+        "group by TRUNCATE(time / 3600000000) order by time asc;";
+    }
+  };
+
+  var getParamMetric = function() {
+    return $(".zbase_session_tracking_dashboard z-dropdown.metric").getValue();
+  };
+
+  var getParamTimeWindow = function() {
+    return $(".zbase_session_tracking_dashboard z-dropdown.time_window").getValue();
+  };
+
+  var setParamMetric = function(value) {
+    if (value) {
+      $(".zbase_session_tracking_dashboard z-dropdown.metric")
+        .setValue([value]);
+    }
+  };
+
+  var setParamTimeWindow = function(value) {
+    if (value) {
+      $(".zbase_session_tracking_dashboard z-dropdown.time_window")
+        .setValue([value]);
+    }
+  };
+
+  var paramChanged = function(e) {
+    var url = UrlUtil.addOrModifyUrlParams(
+      document.location.pathname,
+      [{key: this.getAttribute("name"), value: this.getValue()}]);
+
+    $.navigateTo(url);
   };
 
   return {
     name: "session_tracking_dashboard",
     loadView: function(params) { load(params.path); },
-    unloadView: function() {},
-    handleNavigationChange: load
+    unloadView: destroy,
+    handleNavigationChange: render
   };
 
 })());
