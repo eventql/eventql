@@ -158,16 +158,18 @@ void SQLEngine::shardGroupBy(
     if (replication_scheme->hasLocalReplica(partition)) {
       shards.emplace_back(copy.get());
     } else {
+      auto replicas = replication_scheme->replicaAddrsFor(partition);
+
       auto remote_aggr = mkRef(
           new csql::RemoteAggregateNode(
               copy.asInstanceOf<csql::GroupByNode>(),
               std::bind(
                   &SQLEngine::executeRemoteGroupBy,
-                  runtime,
                   partition_map,
                   replication_scheme,
                   cstable_index,
                   tsdb_namespace,
+                  replicas,
                   std::placeholders::_1)));
 
       shards.emplace_back(remote_aggr.get());
@@ -202,26 +204,48 @@ RefPtr<csql::ExecutionStrategy> SQLEngine::getExecutionStrategy(
 }
 
 ScopedPtr<InputStream> SQLEngine::executeRemoteGroupBy(
-    csql::Runtime* runtime,
     PartitionMap* partition_map,
     ReplicationScheme* replication_scheme,
     CSTableIndex* cstable_index,
     const String& customer,
+    const Vector<InetAddr>& hosts,
     const csql::RemoteAggregateParams& params) {
-  iputs("execute remote group by: $0", params.DebugString());
+  Vector<String> errors;
 
-  auto estrat = getExecutionStrategy(
-      runtime,
-      partition_map,
-      replication_scheme,
-      cstable_index,
-      customer);
+  for (const auto& host : hosts) {
+    try {
+      return executeRemoteGroupByOnHost(
+          partition_map,
+          replication_scheme,
+          cstable_index,
+          customer,
+          host,
+          params);
+    } catch (const StandardException& e) {
+      logError(
+          "zbase",
+          e,
+          "LogfileService::scanRemoteLogfilePartition failed");
 
-  String data;
-  auto os = StringOutputStream::fromString(&data);
-  runtime->executeAggregate(params, estrat, os.get());
+      errors.emplace_back(e.what());
+    }
+  }
 
-  return mkScoped(new StringInputStream(data));
+  RAISEF(
+      kRuntimeError,
+      "LogfileService::scanRemoteLogfilePartition failed: $0",
+      StringUtil::join(errors, ", "));
+}
+
+ScopedPtr<InputStream> SQLEngine::executeRemoteGroupByOnHost(
+    PartitionMap* partition_map,
+    ReplicationScheme* replication_scheme,
+    CSTableIndex* cstable_index,
+    const String& customer,
+    const InetAddr& host,
+    const csql::RemoteAggregateParams& params) {
+  iputs("execute group by on $0 -> $1", host.hostAndPort(), params.DebugString());
+  RAISE(kNotImplementedError);
 }
 
 }
