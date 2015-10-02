@@ -41,9 +41,14 @@ RefPtr<csql::QueryTreeNode> SQLEngine::rewriteQuery(
 
 RefPtr<csql::TableProvider> SQLEngine::tableProviderForNamespace(
     PartitionMap* partition_map,
+    ReplicationScheme* replication_scheme,
     CSTableIndex* cstable_index,
     const String& tsdb_namespace) {
-  return new TSDBTableProvider(tsdb_namespace, partition_map, cstable_index);
+  return new TSDBTableProvider(
+      tsdb_namespace,
+      partition_map,
+      replication_scheme,
+      cstable_index);
 }
 
 void SQLEngine::insertPartitionSubqueries(
@@ -198,7 +203,11 @@ RefPtr<csql::ExecutionStrategy> SQLEngine::getExecutionStrategy(
   auto strategy = mkRef(new csql::DefaultExecutionStrategy());
 
   strategy->addTableProvider(
-      tableProviderForNamespace(partition_map, cstable_index, customer));
+      tableProviderForNamespace(
+          partition_map,
+          replication_scheme,
+          cstable_index,
+          customer));
 
   strategy->addQueryTreeRewriteRule(
       std::bind(
