@@ -27,6 +27,7 @@ public:
   TSDBTableProvider(
       const String& tsdb_namespace,
       PartitionMap* partition_map,
+      ReplicationScheme* replication_scheme,
       CSTableIndex* cstable_index);
 
   Option<ScopedPtr<csql::TableExpression>> buildSequentialScan(
@@ -40,10 +41,21 @@ public:
 
 protected:
 
+  Option<ScopedPtr<csql::TableExpression>> buildLocalSequentialScan(
+        RefPtr<csql::SequentialScanNode> node,
+        const TSDBTableRef& table_ref,
+        csql::QueryBuilder* runtime) const;
+
+  Option<ScopedPtr<csql::TableExpression>> buildRemoteSequentialScan(
+        RefPtr<csql::SequentialScanNode> node,
+        const TSDBTableRef& table_ref,
+        csql::QueryBuilder* runtime) const;
+
   csql::TableInfo tableInfoForTable(const TSDBTableInfo& table) const;
 
   String tsdb_namespace_;
   PartitionMap* partition_map_;
+  ReplicationScheme* replication_scheme_;
   CSTableIndex* cstable_index_;
 };
 
