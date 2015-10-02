@@ -10,6 +10,7 @@
 #include <stx/SHA1.h>
 #include <zbase/core/TSDBTableProvider.h>
 #include <zbase/core/TSDBService.h>
+#include <zbase/core/RemoteTSDBScan.h>
 #include <csql/CSTableScan.h>
 #include <csql/runtime/EmptyTable.h>
 
@@ -98,7 +99,10 @@ Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildRemoteSequentia
     RefPtr<csql::SequentialScanNode> node,
     const TSDBTableRef& table_ref,
     csql::QueryBuilder* runtime) const {
-  RAISE(kNotYetImplementedError, "remote TSDB scan not yet implemented");
+  return Option<ScopedPtr<csql::TableExpression>>(mkScoped(
+      new RemoteTSDBScan(
+          node,
+          table_ref)));
 }
 
 void TSDBTableProvider::listTables(
