@@ -1,3 +1,8 @@
+.zbase_session_tracking .zbase_session_tracking_dashboard .query_progress.hidden,
+.zbase_session_tracking .zbase_session_tracking_dashboard .dashboard.hidden {
+  display: none;
+}
+
 .zbase_session_tracking .zbase_session_tracking_dashboard .chart_panel {
   position: relative;
   top: 10px;

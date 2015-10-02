@@ -1,4 +1,5 @@
 ZBase.registerView((function() {
+  $.showLoader();
   var query_mgr;
   var chart;
 
@@ -29,6 +30,7 @@ ZBase.registerView((function() {
         .addEventListener("change", paramChanged);
 
     render();
+    $.hideLoader();
   };
 
 
@@ -43,7 +45,7 @@ ZBase.registerView((function() {
   };
 
   var render = function() {
-    $.showLoader();
+    renderQueryProgress();
     destroy();
 
     var query_string = buildQueryString();
@@ -62,8 +64,14 @@ ZBase.registerView((function() {
     });
 
     query.addEventListener('status', function(e) {
-      //renderQueryProgress(JSON.parse(e.data));
+      renderQueryProgress(JSON.parse(e.data));
     });
+  };
+
+  var renderQueryProgress = function(progress) {
+    QueryProgressWidget.render(
+        $(".zbase_session_tracking_dashboard .query_progress"),
+        progress);
   };
 
   var renderChart = function(results) {
@@ -96,7 +104,8 @@ ZBase.registerView((function() {
     chart.renderTimeseries("dashboard_chart");
     chart.renderLegend($(".zbase_session_tracking_dashboard .chart_legend"));
 
-    $.hideLoader();
+    $(".zbase_session_tracking_dashboard .query_progress").classList.add("hidden");
+    $(".zbase_session_tracking_dashboard .dashboard").classList.remove("hidden");
   };
 
   var buildQueryString = function() {
