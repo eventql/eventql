@@ -69,6 +69,9 @@ ZBase.registerView((function() {
   };
 
   var renderQueryProgress = function(progress) {
+    $(".zbase_session_tracking_dashboard .query_progress").classList.remove("hidden");
+    $(".zbase_session_tracking_dashboard .dashboard").classList.add("hidden");
+
     QueryProgressWidget.render(
         $(".zbase_session_tracking_dashboard .query_progress"),
         progress);
