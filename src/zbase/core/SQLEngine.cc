@@ -170,26 +170,22 @@ void SQLEngine::shardGroupBy(
     auto copy_seq_scan = copy->child(0).asInstanceOf<csql::SequentialScanNode>();
     copy_seq_scan->setTableName(table_name);
 
-    if (replication_scheme->hasLocalReplica(partition)) {
-      shards.emplace_back(copy.get());
-    } else {
-      auto replicas = replication_scheme->replicaAddrsFor(partition);
+    auto replicas = replication_scheme->replicasFor(partition);
 
-      auto remote_aggr = mkRef(
-          new csql::RemoteAggregateNode(
-              copy.asInstanceOf<csql::GroupByNode>(),
-              std::bind(
-                  &SQLEngine::executeRemoteGroupBy,
-                  partition_map,
-                  replication_scheme,
-                  cstable_index,
-                  auth,
-                  tsdb_namespace,
-                  replicas,
-                  std::placeholders::_1)));
+    auto remote_aggr = mkRef(
+        new csql::RemoteAggregateNode(
+            copy.asInstanceOf<csql::GroupByNode>(),
+            std::bind(
+                &SQLEngine::executeParallelGroupBy,
+                partition_map,
+                replication_scheme,
+                cstable_index,
+                auth,
+                tsdb_namespace,
+                replicas,
+                std::placeholders::_1)));
 
-      shards.emplace_back(remote_aggr.get());
-    }
+    shards.emplace_back(remote_aggr.get());
   }
 
   *node = RefPtr<csql::QueryTreeNode>(new csql::GroupByMergeNode(shards));
@@ -226,25 +222,25 @@ RefPtr<csql::ExecutionStrategy> SQLEngine::getExecutionStrategy(
   return strategy.get();
 }
 
-ScopedPtr<InputStream> SQLEngine::executeRemoteGroupBy(
+ScopedPtr<InputStream> SQLEngine::executeParallelGroupBy(
     PartitionMap* partition_map,
     ReplicationScheme* replication_scheme,
     CSTableIndex* cstable_index,
     AnalyticsAuth* auth,
     const String& customer,
-    const Vector<InetAddr>& hosts,
+    const Vector<ReplicaRef>& hosts,
     const csql::RemoteAggregateParams& params) {
   Vector<String> errors;
 
-  for (const auto& host : hosts) {
+  for (const auto& replica : hosts) {
     try {
-      return executeRemoteGroupByOnHost(
+      return executeRemoteGroupBy(
           partition_map,
           replication_scheme,
           cstable_index,
           auth,
           customer,
-          host,
+          replica.addr,
           params);
     } catch (const StandardException& e) {
       logError(
@@ -262,7 +258,7 @@ ScopedPtr<InputStream> SQLEngine::executeRemoteGroupBy(
       StringUtil::join(errors, ", "));
 }
 
-ScopedPtr<InputStream> SQLEngine::executeRemoteGroupByOnHost(
+ScopedPtr<InputStream> SQLEngine::executeRemoteGroupBy(
     PartitionMap* partition_map,
     ReplicationScheme* replication_scheme,
     CSTableIndex* cstable_index,
