@@ -33,6 +33,22 @@
 
     </div>
 
+    <z-modal class="delete_session_tracking_item">
+      <z-modal-box>
+        <z-modal-close-icon></z-modal-close-icon>
+        <div class="z-modal-header">
+          Delete <span class="item_name"></span>
+        </div>
+        <div class="z-modal-content">
+          <h4>Are you sure you want to delete <span class="item_name"></span>?</h4>
+        </div>
+        <div class="z-modal-footer">
+          <button class="z-button primary submit">Yes</button>
+          <button class="z-button secondary close">Close</button>
+        </div>
+      </z-modal-box>
+    </z-modal>
+
     <z-modal class="add_to_schema">
       <z-modal-box>
         <z-modal-close-icon></z-modal-close-icon>
@@ -43,17 +59,59 @@
   </div>
 </template>
 
-<template id="zbase_session_tracking_schema_row_tpl">
+<template id="zbase_session_tracking_schema_event_row_tpl">
   <tr class="event">
     <td class="name">
     </td>
     <td class="type">
     </td>
     <td class='icon'>
-      <a data-action='edit'><i class='fa fa-cog'></i></a>
+      <z-dropdown data-resolved data-hover>
+        <z-dropdown-header>
+          <z-dropdown-header-value data-static="">
+            <i class="fa fa-cog"></i>
+          </z-dropdown-header-value>
+          <z-dropdown-header-icon></z-dropdown-header-icon>
+        </z-dropdown-header>
+
+        <z-dropdown-flyout>
+          <z-dropdown-items>
+            <z-dropdown-item data-value="edit">Edit</z-dropdown-item>
+            <z-dropdown-item data-value="delete">Delete</z-dropdown-item>
+          </z-dropdown-items>
+        </z-dropdown-flyout>
+      </z-dropdown>
     </td>
   </tr>
 </template>
+
+<template id="zbase_session_tracking_schema_attr_row_tpl">
+  <tr class="attr">
+    <td class="name">
+    </td>
+    <td class="type">
+    </td>
+    <td class='icon'>
+      <z-dropdown data-resolved data-hover>
+        <z-dropdown-header>
+          <z-dropdown-header-value data-static="">
+            <i class="fa fa-cog"></i>
+          </z-dropdown-header-value>
+          <z-dropdown-header-icon></z-dropdown-header-icon>
+        </z-dropdown-header>
+
+        <z-dropdown-flyout>
+          <z-dropdown-items>
+            <z-dropdown-item data-value="delete">Delete</z-dropdown-item>
+          </z-dropdown-items>
+        </z-dropdown-flyout>
+      </z-dropdown>
+    </td>
+  </tr>
+</template>
+
+
+
 
 <template id="zbase_session_tracking_schema_add_modal_tpl">
   <div class="z-modal-header">Add</div>
