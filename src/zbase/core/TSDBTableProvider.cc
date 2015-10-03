@@ -103,7 +103,8 @@ Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildRemoteSequentia
   return Option<ScopedPtr<csql::TableExpression>>(mkScoped(
       new RemoteTSDBScan(
           node,
-          table_ref)));
+          table_ref,
+          replication_scheme_)));
 }
 
 void TSDBTableProvider::listTables(
