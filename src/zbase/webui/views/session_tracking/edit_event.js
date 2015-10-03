@@ -55,8 +55,6 @@ ZBase.registerView((function() {
         "views/session_tracking",
         "zbase_session_tracking_edit_event_table_tpl");
 
-
-
     fields.forEach(function(field) {
       var html = row_tpl.cloneNode(true);
       $(".name", html).innerHTML = field.name;
@@ -147,7 +145,6 @@ ZBase.registerView((function() {
       });
     };
   };
-
 
   return {
     name: "edit_session_tracking_event",
