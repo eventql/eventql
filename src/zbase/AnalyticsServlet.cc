@@ -325,6 +325,12 @@ void AnalyticsServlet::handle(
     return;
   }
 
+  if (uri.path() == "/api/v1/sql/scan_partition") {
+    req_stream->readBody();
+    executeSQLScanPartition(session, &req, &res, res_stream);
+    return;
+  }
+
 
   res.setStatus(http::kStatusNotFound);
   res.addHeader("Content-Type", "text/html; charset=utf-8");
@@ -1009,6 +1015,97 @@ void AnalyticsServlet::executeSQLAggregatePartition(
   res->addBody(result);
 }
 
+void AnalyticsServlet::executeSQLScanPartition(
+    const AnalyticsSession& session,
+    const http::HTTPRequest* req,
+    http::HTTPResponse* res,
+    RefPtr<http::HTTPResponseStream> res_stream) {
+  // FIXME error handling
+  auto query = msg::decode<RemoteTSDBScanParams>(req->body().toString());
+
+  res->setStatus(http::kStatusOK);
+  res->addHeader("Content-Type", "application/octet-stream");
+  res->addHeader("Connection", "close");
+  res_stream->startResponse(*res);
+
+  executeSQLScanPartition(
+      session,
+      query,
+      [&res_stream] (int argc, const csql::SValue* argv) -> bool {
+    Buffer buf(sizeof(uint64_t));
+    auto os = BufferOutputStream::fromBuffer(&buf);
+    for (int i = 0; i < argc; ++i) argv[i].encode(os.get());
+    *((uint64_t*) buf.data()) = buf.size() - sizeof(uint64_t);
+
+    res_stream->writeBodyChunk(buf);
+    res_stream->waitForReader();
+    return true;
+  });
+
+  util::BinaryMessageWriter buf;
+  buf.appendUInt64(0);
+  res_stream->writeBodyChunk(Buffer(buf.data(), buf.size()));
+  res_stream->finishResponse();
+}
+
+void AnalyticsServlet::executeSQLScanPartition(
+    const AnalyticsSession& session,
+    const RemoteTSDBScanParams& query,
+    Function<bool (int argc, const csql::SValue* argv)> fn) {
+  Vector<RefPtr<csql::SelectListNode>> select_list;
+  for (const auto& e : query.select_list()) {
+    csql::Parser parser;
+    parser.parseValueExpression(
+        e.expression().data(),
+        e.expression().size());
+
+    auto stmts = parser.getStatements();
+    if (stmts.size() != 1) {
+      RAISE(kIllegalArgumentError);
+    }
+
+    auto slnode = mkRef(
+        new csql::SelectListNode(
+            sql_->queryPlanBuilder()->buildValueExpression(stmts[0])));
+
+    if (e.has_alias()) {
+      slnode->setAlias(e.alias());
+    }
+
+    select_list.emplace_back(slnode);
+  }
+
+  Option<RefPtr<csql::ValueExpressionNode>> where_expr;
+  if (query.has_where_expression()) {
+    csql::Parser parser;
+    parser.parseValueExpression(
+        query.where_expression().data(),
+        query.where_expression().size());
+
+    auto stmts = parser.getStatements();
+    if (stmts.size() != 1) {
+      RAISE(kIllegalArgumentError);
+    }
+
+    where_expr = Some(mkRef(
+        sql_->queryPlanBuilder()->buildValueExpression(stmts[0])));
+  }
+
+  auto qtree = mkRef(
+      new csql::SequentialScanNode(
+            query.table_name(),
+            select_list,
+            where_expr,
+            (csql::AggregationStrategy) query.aggregation_strategy()));
+
+  auto execution_strategy = app_->getExecutionStrategy(session.customer());
+  auto expr = sql_->queryBuilder()->buildTableExpression(
+      qtree.get(),
+      execution_strategy->tableProvider(),
+      sql_);
+
+  sql_->executeStatement(expr.get(), fn);
+}
 
 void AnalyticsServlet::executeSQLStream(
     const URI& uri,

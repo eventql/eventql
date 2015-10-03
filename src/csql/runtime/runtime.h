@@ -50,6 +50,10 @@ public:
       ScopedPtr<Statement> statement,
       ResultList* result);
 
+  void executeStatement(
+      TableExpression* statement,
+      Function<bool (int argc, const SValue* argv)> fn);
+
   void executeAggregate(
       const RemoteAggregateParams& query,
       RefPtr<ExecutionStrategy> execution_strategy,

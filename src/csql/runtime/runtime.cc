@@ -75,25 +75,30 @@ void Runtime::executeQuery(
 void Runtime::executeStatement(
     ScopedPtr<Statement> statement,
     ResultList* result) {
-  csql::ExecutionContext context(&tpool_);
-  if (!cachedir_.isEmpty()) {
-    context.setCacheDir(cachedir_.get());
-  }
-
   auto table_expr = dynamic_cast<TableExpression*>(statement.get());
   if (!table_expr) {
     RAISE(kRuntimeError, "statement must be a table expression");
   }
 
   result->addHeader(table_expr->columnNames());
-  table_expr->execute(
-      &context,
+  executeStatement(
+      table_expr,
       [result] (int argc, const csql::SValue* argv) -> bool {
-        result->addRow(argv, argc);
-        return true;
-      });
+    result->addRow(argv, argc);
+    return true;
+  });
 }
 
+void Runtime::executeStatement(
+    TableExpression* statement,
+    Function<bool (int argc, const SValue* argv)> fn) {
+  csql::ExecutionContext context(&tpool_);
+  if (!cachedir_.isEmpty()) {
+    context.setCacheDir(cachedir_.get());
+  }
+
+  statement->execute(&context, fn);
+}
 
 void Runtime::executeAggregate(
     const RemoteAggregateParams& query,

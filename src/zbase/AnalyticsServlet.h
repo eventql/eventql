@@ -25,6 +25,7 @@
 #include "zbase/api/EventsAPIServlet.h"
 #include "zbase/docdb/DocumentDB.h"
 #include "zbase/docdb/DocumentDBServlet.h"
+#include "zbase/RemoteTSDBScanParams.pb.h"
 
 using namespace stx;
 
@@ -137,6 +138,16 @@ protected:
       const http::HTTPRequest* req,
       http::HTTPResponse* res);
 
+  void executeSQLScanPartition(
+      const AnalyticsSession& session,
+      const http::HTTPRequest* req,
+      http::HTTPResponse* res,
+      RefPtr<http::HTTPResponseStream> res_stream);
+
+  void executeSQLScanPartition(
+      const AnalyticsSession& session,
+      const RemoteTSDBScanParams& query,
+      Function<bool (int argc, const csql::SValue* argv)> fn);
 
   void pipelineInfo(
       const AnalyticsSession& session,
