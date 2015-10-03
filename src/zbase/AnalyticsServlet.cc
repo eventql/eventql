@@ -213,6 +213,22 @@ void AnalyticsServlet::handle(
     return;
   }
 
+  if (uri.path() == "/api/v1/session_tracking/events/add_event") {
+    expectHTTPPost(req);
+    req_stream->readBody();
+    sessionTrackingEventAdd(session, &req, &res);
+    res_stream->writeResponse(res);
+    return;
+  }
+
+  if (uri.path() == "/api/v1/session_tracking/events/remove_event") {
+    expectHTTPPost(req);
+    req_stream->readBody();
+    sessionTrackingEventRemove(session, &req, &res);
+    res_stream->writeResponse(res);
+    return;
+  }
+
   if (uri.path() == "/api/v1/session_tracking/events/add_field") {
     expectHTTPPost(req);
     req_stream->readBody();
@@ -1301,7 +1317,7 @@ void AnalyticsServlet::sessionTrackingEventInfo(
   res->addBody("not found");
 }
 
-void AnalyticsServlet::sessionTrackingEventRemoveField(
+void AnalyticsServlet::sessionTrackingEventAdd(
     const AnalyticsSession& session,
     const http::HTTPRequest* req,
     http::HTTPResponse* res) {
@@ -1315,27 +1331,58 @@ void AnalyticsServlet::sessionTrackingEventRemoveField(
     return;
   }
 
-  String field_name;
-  if (!URI::getParam(params, "field", &field_name)) {
+  auto customer_conf = customer_dir_->configFor(session.customer())->config;
+  auto logjoin_conf = customer_conf.mutable_logjoin_config();
+
+  for (auto& ev_def : logjoin_conf->session_event_schemas()) {
+    if (ev_def.evtype() == event_name) {
+      RAISE(kRuntimeError, "an event with this name already exists");
+    }
+  }
+
+  auto field_id = logjoin_conf->session_schema_next_field_id();
+  auto ev_def = logjoin_conf->add_session_event_schemas();
+  ev_def->set_evtype(event_name);
+  ev_def->set_evid(field_id);
+
+  msg::MessageSchema schema(nullptr);
+  schema.setName(event_name);
+  ev_def->set_schema(schema.encode().toString());
+
+  logjoin_conf->set_session_schema_next_field_id(field_id + 1);
+  customer_dir_->updateCustomerConfig(customer_conf);
+
+  res->setStatus(http::kStatusCreated);
+  res->addBody("ok");
+  return;
+}
+
+void AnalyticsServlet::sessionTrackingEventRemove(
+    const AnalyticsSession& session,
+    const http::HTTPRequest* req,
+    http::HTTPResponse* res) {
+  URI uri(req->uri());
+  const auto& params = uri.queryParams();
+
+  String event_name;
+  if (!URI::getParam(params, "event", &event_name)) {
     res->setStatus(http::kStatusBadRequest);
-    res->addBody("missing ?field=... parameter");
+    res->addBody("missing ?event=... parameter");
     return;
   }
 
   auto customer_conf = customer_dir_->configFor(session.customer())->config;
   auto logjoin_conf = customer_conf.mutable_logjoin_config();
 
-  for (auto& ev_def : *logjoin_conf->mutable_session_event_schemas()) {
-    if (ev_def.evtype() != event_name) {
-      continue;
+  auto events = logjoin_conf->mutable_session_event_schemas();
+  for (auto i = 0; i < events->size(); ++i) {
+    if (events->Get(i).evtype() == event_name) {
+      events->DeleteSubrange(i, 1);
+      customer_dir_->updateCustomerConfig(customer_conf);
+      res->setStatus(http::kStatusCreated);
+      res->addBody("ok");
+      return;
     }
-
-    eventDefinitonRemoveField(&ev_def, field_name);
-
-    customer_dir_->updateCustomerConfig(customer_conf);
-    res->setStatus(http::kStatusCreated);
-    res->addBody("ok");
-    return;
   }
 
   res->setStatus(http::kStatusNotFound);
@@ -1404,6 +1451,47 @@ void AnalyticsServlet::sessionTrackingEventAddField(
         field_optional);
 
     logjoin_conf->set_session_schema_next_field_id(field_id + 1);
+    customer_dir_->updateCustomerConfig(customer_conf);
+    res->setStatus(http::kStatusCreated);
+    res->addBody("ok");
+    return;
+  }
+
+  res->setStatus(http::kStatusNotFound);
+  res->addBody("event not found");
+}
+
+void AnalyticsServlet::sessionTrackingEventRemoveField(
+    const AnalyticsSession& session,
+    const http::HTTPRequest* req,
+    http::HTTPResponse* res) {
+  URI uri(req->uri());
+  const auto& params = uri.queryParams();
+
+  String event_name;
+  if (!URI::getParam(params, "event", &event_name)) {
+    res->setStatus(http::kStatusBadRequest);
+    res->addBody("missing ?event=... parameter");
+    return;
+  }
+
+  String field_name;
+  if (!URI::getParam(params, "field", &field_name)) {
+    res->setStatus(http::kStatusBadRequest);
+    res->addBody("missing ?field=... parameter");
+    return;
+  }
+
+  auto customer_conf = customer_dir_->configFor(session.customer())->config;
+  auto logjoin_conf = customer_conf.mutable_logjoin_config();
+
+  for (auto& ev_def : *logjoin_conf->mutable_session_event_schemas()) {
+    if (ev_def.evtype() != event_name) {
+      continue;
+    }
+
+    eventDefinitonRemoveField(&ev_def, field_name);
+
     customer_dir_->updateCustomerConfig(customer_conf);
     res->setStatus(http::kStatusCreated);
     res->addBody("ok");
