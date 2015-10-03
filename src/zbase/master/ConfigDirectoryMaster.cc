@@ -65,7 +65,7 @@ ClusterConfig ConfigDirectoryMaster::updateClusterConfig(ClusterConfig config) {
 
   logInfo(
       "dxa-master",
-      "Updating cluster config; head=$1",
+      "Updating cluster config; head=$0",
       head_version);
 
   auto vpath = FileUtil::joinPaths(
