@@ -10,6 +10,7 @@
 #include <stx/SHA1.h>
 #include <zbase/core/TSDBTableProvider.h>
 #include <zbase/core/TSDBService.h>
+#include <zbase/core/RemoteTSDBScan.h>
 #include <csql/CSTableScan.h>
 #include <csql/runtime/EmptyTable.h>
 
@@ -20,14 +21,16 @@ namespace zbase {
 TSDBTableProvider::TSDBTableProvider(
     const String& tsdb_namespace,
     PartitionMap* partition_map,
+    ReplicationScheme* replication_scheme,
     CSTableIndex* cstable_index) :
     tsdb_namespace_(tsdb_namespace),
     partition_map_(partition_map),
+    replication_scheme_(replication_scheme),
     cstable_index_(cstable_index) {}
 
 Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildSequentialScan(
-      RefPtr<csql::SequentialScanNode> node,
-      csql::QueryBuilder* runtime) const {
+    RefPtr<csql::SequentialScanNode> node,
+    csql::QueryBuilder* runtime) const {
   auto table_ref = TSDBTableRef::parse(node->tableName());
   if (partition_map_->findTable(tsdb_namespace_, table_ref.table_key).isEmpty()) {
     return None<ScopedPtr<csql::TableExpression>>();
@@ -46,6 +49,19 @@ Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildSequentialScan(
         "error while opening table '$0': missing partition key",
         node->tableName());
   }
+
+  auto partition_key = table_ref.partition_key.get();
+  if (replication_scheme_->hasLocalReplica(partition_key)) {
+    buildLocalSequentialScan(node, table_ref, runtime);
+  } else {
+    buildRemoteSequentialScan(node, table_ref, runtime);
+  }
+}
+
+Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildLocalSequentialScan(
+    RefPtr<csql::SequentialScanNode> node,
+    const TSDBTableRef& table_ref,
+    csql::QueryBuilder* runtime) const {
 
   auto partition = partition_map_->findPartition(
       tsdb_namespace_,
@@ -77,6 +93,16 @@ Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildSequentialScan(
   }
 
   return Option<ScopedPtr<csql::TableExpression>>(std::move(scan));
+}
+
+Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildRemoteSequentialScan(
+    RefPtr<csql::SequentialScanNode> node,
+    const TSDBTableRef& table_ref,
+    csql::QueryBuilder* runtime) const {
+  return Option<ScopedPtr<csql::TableExpression>>(mkScoped(
+      new RemoteTSDBScan(
+          node,
+          table_ref)));
 }
 
 void TSDBTableProvider::listTables(
