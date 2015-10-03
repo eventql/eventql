@@ -7,8 +7,8 @@
  * copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>.
  */
+#include <stx/logging.h>
 #include <zbase/core/RemoteTSDBScan.h>
-#include <zbase/RemoteTSDBScanParams.pb.h>
 
 using namespace stx;
 
@@ -16,9 +16,11 @@ namespace zbase {
 
 RemoteTSDBScan::RemoteTSDBScan(
     RefPtr<csql::SequentialScanNode> stmt,
-    const TSDBTableRef& table_ref) :
+    const TSDBTableRef& table_ref,
+    ReplicationScheme* replication_scheme) :
     stmt_(stmt),
     table_ref_(table_ref),
+    replication_scheme_(replication_scheme),
     rows_scanned_(0) {}
 
 Vector<String> RemoteTSDBScan::columnNames() const {
@@ -49,7 +51,33 @@ void RemoteTSDBScan::execute(
     params.set_where_expression(where.get()->toSQL());
   }
 
-  iputs("remote scan: $0", params.DebugString());
+  auto replicas = replication_scheme_->replicaAddrsFor(
+      table_ref_.partition_key.get());
+
+  Vector<String> errors;
+  for (const auto& host : replicas) {
+    try {
+      return executeOnHost(params, host);
+    } catch (const StandardException& e) {
+      logError(
+          "zbase",
+          e,
+          "RemoteTSDBScan::executeOnHost failed");
+
+      errors.emplace_back(e.what());
+    }
+  }
+
+  RAISEF(
+      kRuntimeError,
+      "RemoteTSDBScan::execute failed: $0",
+      StringUtil::join(errors, ", "));
+}
+
+void RemoteTSDBScan::executeOnHost(
+    const RemoteTSDBScanParams& params,
+    const InetAddr& host) {
+  iputs("execute scan on $0 => $1", host.hostAndPort(), params.DebugString());
   RAISE(kNotYetImplementedError, "not yet implemented");
 }
 
