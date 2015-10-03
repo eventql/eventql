@@ -70,6 +70,9 @@
 .zbase_session_tracking .add_pane,
 .zbase_session_tracking .add_session_event,
 .zbase_session_tracking .add_session_attribute {
+  border-left: 1px solid #e1e1e1;
+  border-right: 1px solid #e1e1e1;
+  border-bottom: 1px solid #e1e1e1;
   padding: 20px 20px;
   text-align: center;
   font-size: 14px;
