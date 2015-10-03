@@ -1,0 +1,50 @@
+.zbase_session_tracking .zbase_settings_title.edit_event {
+  margin-left: 20px;
+}
+
+.zbase_session_tracking .zbase_settings_title.edit_event i {
+  font-size: 14px;
+  margin: 0 5px;
+}
+
+.zbase_session_tracking table.edit_event {
+  table-layout: fixed;
+}
+
+.zbase_session_tracking table.edit_event tr {
+  border-left: 1px solid #e1e1e1;
+  border-right: 1px solid #e1e1e1;
+}
+
+.zbase_session_tracking table.edit_event tr td {
+  line-height: 28px;
+}
+
+.zbase_session_tracking table.edit_event tr td .name {
+  color: #000;
+}
+
+.zbase_session_tracking table.edit_event tr td .type {
+  color: #888;
+}
+
+.zbase_session_tracking table.edit_event tr.table_attached {
+  background: #f9f9f9;
+  border-left: none;
+}
+
+.zbase_session_tracking table.edit_event tr.table_attached > td {
+  padding: 0 0 0 80px;
+}
+
+.zbase_session_tracking table.edit_event table {
+  margin: 0;
+  border-top: none;
+  border-bottom: none;
+  border-right: none;
+}
+
+.zbase_session_tracking table.edit_event tr.table_attached table tr {
+  border-right: none;
+}
+
