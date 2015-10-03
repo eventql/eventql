@@ -15,6 +15,7 @@
 #include <zbase/RemoteTSDBScanParams.pb.h>
 #include <zbase/core/TSDBTableRef.h>
 #include <zbase/core/ReplicationScheme.h>
+#include <zbase/AnalyticsAuth.h>
 
 using namespace stx;
 
@@ -25,8 +26,10 @@ public:
 
   RemoteTSDBScan(
       RefPtr<csql::SequentialScanNode> stmt,
+      const String& customer,
       const TSDBTableRef& table_ref,
-      ReplicationScheme* replication_scheme);
+      ReplicationScheme* replication_scheme,
+      AnalyticsAuth* auth);
 
   Vector<String> columnNames() const override;
 
@@ -45,8 +48,10 @@ protected:
       const InetAddr& host);
 
   RefPtr<csql::SequentialScanNode> stmt_;
+  String customer_;
   TSDBTableRef table_ref_;
   ReplicationScheme* replication_scheme_;
+  AnalyticsAuth* auth_;
   Vector<String> columns_;
   size_t rows_scanned_;
 };

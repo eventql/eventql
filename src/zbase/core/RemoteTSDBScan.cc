@@ -12,6 +12,7 @@
 #include <stx/http/httpclient.h>
 #include <stx/protobuf/msg.h>
 #include <zbase/core/RemoteTSDBScan.h>
+#include <zbase/AnalyticsSession.pb.h>
 
 using namespace stx;
 
@@ -19,11 +20,15 @@ namespace zbase {
 
 RemoteTSDBScan::RemoteTSDBScan(
     RefPtr<csql::SequentialScanNode> stmt,
+    const String& customer,
     const TSDBTableRef& table_ref,
-    ReplicationScheme* replication_scheme) :
+    ReplicationScheme* replication_scheme,
+    AnalyticsAuth* auth) :
     stmt_(stmt),
+    customer_(customer),
     table_ref_(table_ref),
     replication_scheme_(replication_scheme),
+    auth_(auth),
     rows_scanned_(0) {}
 
 Vector<String> RemoteTSDBScan::columnNames() const {
@@ -120,14 +125,14 @@ void RemoteTSDBScan::executeOnHost(
       "http://$0/api/v1/sql/scan_partition",
       host.ipAndPort());
 
-  //AnalyticsPrivileges privileges;
-  //privileges.set_allow_private_api_read_access(true);
-  //auto api_token = auth->getPrivateAPIToken(customer, privileges);
+  AnalyticsPrivileges privileges;
+  privileges.set_allow_private_api_read_access(true);
+  auto api_token = auth_->getPrivateAPIToken(customer_, privileges);
 
   http::HTTPMessage::HeaderList auth_headers;
-  //auth_headers.emplace_back(
-  //    "Authorization",
-  //    StringUtil::format("Token $0", api_token));
+  auth_headers.emplace_back(
+      "Authorization",
+      StringUtil::format("Token $0", api_token));
 
   http::HTTPClient http_client;
   auto req_body = msg::encode(params);
