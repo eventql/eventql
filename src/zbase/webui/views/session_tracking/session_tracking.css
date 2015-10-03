@@ -134,28 +134,6 @@
   text-transform: uppercase;
 }
 
-/*.zbase_session_tracking table.schemas .name a {
-  background-color: #f2f8fa;
-  border-bottom: 1px solid #c9d0d4;
-  position: absolute;
-  padding: 6px 10px;
-  border-radius: 4px;
-  font-size: 14px;
-  font-weight: 500;
-  color: rgba(10,10,10,0.8);
-  line-height: 18px;
-}*/
-
-.zbase_session_tracking .zbase_settings_title.edit_event {
-  margin-left: 20px;
-}
-
-.zbase_session_tracking .zbase_settings_title.edit_event i {
-  font-size: 14px;
-  margin: 0 5px;
-}
-
-
 .zbase_session_tracking button.add_field {
   float: right;
   margin-top: 20px;
@@ -170,82 +148,6 @@
 .zbase_session_tracking .table_container {
   margin: 0px;
 }
-
-.zbase_session_tracking table.edit_event {
-  table-layout: fixed;
-}
-
-.zbase_session_tracking table.edit_event tr:hover {
-  cursor: pointer;
-}
-
-.zbase_session_tracking table.edit_event tr {
-  border-left: 1px solid #e1e1e1;
-  border-right: 1px solid #e1e1e1;
-}
-
-.zbase_session_tracking table.edit_event tr td {
-  line-height: 28px;
-}
-
-.zbase_session_tracking table.edit_event tr td .name {
-  color: #000;
-}
-
-.zbase_session_tracking table.edit_event tr td .type {
-  color: #888;
-}
-
-.zbase_session_tracking table.edit_event tr.table_attached {
-  background: #f9f9f9;
-  border-left: none;
-}
-
-.zbase_session_tracking table.edit_event tr.table_attached > td {
-  padding: 0 0 0 80px;
-}
-
-.zbase_session_tracking table.edit_event table {
-  margin: 0;
-  border-top: none;
-  border-bottom: none;
-  border-right: none;
-}
-
-.zbase_session_tracking table.edit_event tr.table_attached table tr {
-  border-right: none;
-}
-
-/*.zbase_session_tracking table.add_attribute {
-  margin-top: 0px;
-  border-top: 1px solid #d4d4d4;
-  border-bottom: 2px solid #ddd;
-}
-
-.zbase_session_tracking table.add_attribute.hidden {
-  display: none;
-}
-
-.zbase_session_tracking table.add_attribute td {
-  background: rgba(0,0,0,0.03);
-  height: 60px;
-}
-
-.zbase_session_tracking table.add_attribute button,
-.zbase_session_tracking table.add_attribute input {
-  font-size: 13px;
-}
-
-.zbase_session_tracking table.add_attribute .error_note {
-  font-size: 12px;
-  color: #d95c5c;
-  font-style: italic;
-}
-
-.zbase_session_tracking table.add_attribute .error_note.hidden {
-  display: none;
-}*/
-
 
 .zbase_session_tracking button.z-button {
   font-size: 13px;

@@ -34,6 +34,7 @@ ZBase.registerView((function() {
     });
 
     $("zbase-breadcrumbs-section .event_name", page).innerHTML = event_name;
+    $("h2.pagetitle .event_name", page).innerHTML = event_name;
 
     $.onClick($(".link.add_field", page), function(e) {renderAdd("")});
 
@@ -138,9 +139,10 @@ ZBase.registerView((function() {
     $("button.submit", modal).onclick = function(e) {
       var url =
         "/a/session_tracking/events/remove_field?event=" +
-        event_name + "field=" + field_name;
+        event_name + "&field=" + field_name;
 
       $.httpPost(url, "", function(r) {
+        console.log(r);
         if (r.status == 201) {
           load();
         } else {
