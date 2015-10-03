@@ -35,7 +35,7 @@ public:
       InetAddr master_addr,
       uint64_t topics);
 
-  RefPtr<CustomerConfigRef> clusterConfig() const;
+  ClusterConfig clusterConfig() const;
   void updateClusterConfig(ClusterConfig config);
   void onClusterConfigChange(Function<void (const ClusterConfig& cfg)> fn);
 
