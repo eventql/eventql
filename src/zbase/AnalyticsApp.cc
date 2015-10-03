@@ -746,6 +746,7 @@ RefPtr<csql::TableProvider> AnalyticsApp::getTableProvider(
     const String& customer) const {
   return zbase::SQLEngine::tableProviderForNamespace(
         partition_map_,
+        replication_scheme_,
         cstable_index_,
         customer);
 }

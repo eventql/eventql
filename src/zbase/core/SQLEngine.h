@@ -21,6 +21,7 @@ public:
 
   static RefPtr<csql::TableProvider> tableProviderForNamespace(
       PartitionMap* partition_map,
+      ReplicationScheme* replication_scheme,
       CSTableIndex* cstable_index,
       const String& tsdb_namespace);
 
