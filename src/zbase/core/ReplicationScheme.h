@@ -14,6 +14,7 @@
 #include <stx/random.h>
 #include <stx/option.h>
 #include <stx/net/inetaddr.h>
+#include <zbase/core/ClusterConfig.pb.h>
 
 using namespace stx;
 
@@ -82,6 +83,22 @@ public:
 
 protected:
   Vector<ReplicaRef> replicas_;
+};
+
+
+class DHTReplicationScheme : public ReplicationScheme {
+public:
+
+  DHTReplicationScheme(ClusterConfig cluster_config);
+
+  Vector<ReplicaRef> replicasFor(const SHA1Hash& key) override;
+
+  bool hasLocalReplica(const SHA1Hash& key) override;
+
+  void updateClusterConfig(ClusterConfig cluster_config);
+
+protected:
+  ClusterConfig cluster_config;
 };
 
 

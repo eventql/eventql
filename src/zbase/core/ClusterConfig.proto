@@ -1,0 +1,23 @@
+package zbase;
+
+enum DHTNodeStatus {
+  DHTNODE_JOINING = 0;
+  DHTNODE_LIVE = 1;
+  DHTNODE_MAINTENANCE = 2;
+  DHTNODE_LEAVING = 3;
+};
+
+message DHTNode {
+  required string name = 2;
+  required string addr = 3;
+  required DHTNodeStatus status = 4;
+  repeated bytes sha1_tokens = 1;
+};
+
+message ClusterConfig {
+
+  required string cluster_name = 1;
+
+  repeated DHTNode dht_nodes = 3;
+
+};
