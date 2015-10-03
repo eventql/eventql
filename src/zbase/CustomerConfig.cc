@@ -230,7 +230,16 @@ void eventDefinitonAddField(
     auto prefix = field.substr(0, prefix_len);
 
     cur_field = cur_field.substr(prefix_len + 1);
-    cur_schema = cur_schema->fieldSchema(cur_schema->fieldId(prefix));
+
+    auto next_field_id = cur_schema->fieldId(prefix);
+    if (cur_schema->fieldType(next_field_id) != msg::FieldType::OBJECT) {
+      RAISEF(
+          kRuntimeError,
+          "can't add subfield to '$0' because it is not an object",
+          prefix);
+    }
+
+    cur_schema = cur_schema->fieldSchema(next_field_id);
   }
 
   if (type == msg::FieldType::OBJECT) {
