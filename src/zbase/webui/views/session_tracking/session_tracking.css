@@ -73,10 +73,14 @@
   border-left: 1px solid #e1e1e1;
   border-right: 1px solid #e1e1e1;
   border-bottom: 1px solid #e1e1e1;
-  padding: 20px 20px;
+  padding: 13px;
   text-align: center;
   font-size: 14px;
   background: rgba(0, 0, 0, 0.03)
+}
+
+.zbase_session_tracking .add_pane a.link {
+  text-decoration: underline;
 }
 
 .zbase_session_tracking .add_session_attribute.hidden {

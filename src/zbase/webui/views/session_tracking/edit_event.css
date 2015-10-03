@@ -24,6 +24,7 @@
   color: #000;
 }
 
+.zbase_session_tracking table.edit_event tr td .repeated,
 .zbase_session_tracking table.edit_event tr td .type {
   color: #888;
 }
