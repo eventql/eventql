@@ -21,6 +21,37 @@ ConfigDirectoryClient::ConfigDirectoryClient(
     InetAddr master_addr) :
     master_addr_(master_addr) {}
 
+ClusterConfig ConfigDirectoryClient::fetchClusterConfig() {
+  auto uri = URI(
+      StringUtil::format(
+          "http://$0/analytics/master/fetch_cluster_config",
+          master_addr_.hostAndPort()));
+
+  http::HTTPClient http;
+  auto res = http.executeRequest(http::HTTPRequest::mkGet(uri));
+  if (res.statusCode() != 200) {
+    RAISEF(kRuntimeError, "error: $0", res.body().toString());
+  }
+
+  return msg::decode<ClusterConfig>(res.body());
+}
+
+ClusterConfig ConfigDirectoryClient::updateClusterConfig(
+    const ClusterConfig& config) {
+  auto body = msg::encode(config);
+  auto uri = StringUtil::format(
+        "http://$0/analytics/master/update_cluster_config",
+        master_addr_.hostAndPort());
+
+  http::HTTPClient http;
+  auto res = http.executeRequest(http::HTTPRequest::mkPost(uri, *body));
+  if (res.statusCode() != 201) {
+    RAISEF(kRuntimeError, "error: $0", res.body().toString());
+  }
+
+  return msg::decode<ClusterConfig>(res.body());
+}
+
 ConfigDirectory::ConfigDirectory(
     const String& path,
     const InetAddr master_addr,
@@ -68,18 +99,8 @@ void ConfigDirectory::updateClusterConfig(ClusterConfig config) {
     RAISE(kRuntimeError, "config topic not enabled: CLUSTERCONFIG");
   }
 
-  auto body = msg::encode(config);
-  auto uri = StringUtil::format(
-        "http://$0/analytics/master/update_cluster_config",
-        master_addr_.hostAndPort());
-
-  http::HTTPClient http;
-  auto res = http.executeRequest(http::HTTPRequest::mkPost(uri, *body));
-  if (res.statusCode() != 201) {
-    RAISEF(kRuntimeError, "error: $0", res.body().toString());
-  }
-
-  commitClusterConfig(msg::decode<ClusterConfig>(res.body()));
+  auto cc = cclient_.updateClusterConfig(config);
+  commitClusterConfig(cc);
 }
 
 void ConfigDirectory::onClusterConfigChange(
@@ -318,18 +339,8 @@ void ConfigDirectory::syncObject(const String& obj) {
 }
 
 void ConfigDirectory::syncClusterConfig() {
-  auto uri = URI(
-      StringUtil::format(
-          "http://$0/analytics/master/fetch_cluster_config",
-          master_addr_.hostAndPort()));
-
-  http::HTTPClient http;
-  auto res = http.executeRequest(http::HTTPRequest::mkGet(uri));
-  if (res.statusCode() != 200) {
-    RAISEF(kRuntimeError, "error: $0", res.body().toString());
-  }
-
-  commitClusterConfig(msg::decode<ClusterConfig>(res.body()));
+  auto cc = cclient_.fetchClusterConfig();
+  commitClusterConfig(cc);
 }
 
 void ConfigDirectory::commitClusterConfig(const ClusterConfig& config) {

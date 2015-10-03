@@ -30,6 +30,7 @@
 #include "stx/cli/flagparser.h"
 #include "zbase/dproc/LocalScheduler.h"
 #include "zbase/dproc/DispatchService.h"
+#include "zbase/ConfigDirectory.h"
 #include "sstable/sstablereader.h"
 #include "zbase/JoinedSession.pb.h"
 #include "zbase/core/TimeWindowPartitioner.h"
@@ -46,15 +47,24 @@
 #include "csql/runtime/tablerepository.h"
 
 using namespace stx;
+using namespace zbase;
 
 stx::thread::EventLoop ev;
 
-void cmd_dht_status(const cli::FlagParser& flags) {
-  iputs("dht status", 1);
+void cmd_cluster_status(const cli::FlagParser& flags) {
+  ConfigDirectoryClient cclient(
+      InetAddr::resolve(flags.getString("master")));
+
+  auto cluster = cclient.fetchClusterConfig();
+  iputs("Cluster config:\n$0", cluster.DebugString());
 }
 
-void cmd_dht_add_node(const cli::FlagParser& flags) {
-  iputs("add node: $0", flags.getString("name"));
+void cmd_cluster_add_node(const cli::FlagParser& flags) {
+  ConfigDirectoryClient cclient(
+      InetAddr::resolve(flags.getString("master")));
+
+  auto cluster = cclient.fetchClusterConfig();
+  cclient.updateClusterConfig(cluster);
 }
 
 void cmd_import_session_sstable(const cli::FlagParser& flags) {
@@ -355,11 +365,12 @@ int main(int argc, const char** argv) {
       "input file path",
       "<path>");
 
-  /* command: dht_status */
-  auto dht_status_cmd = cli.defineCommand("dht_status");
-  dht_status_cmd->onCall(std::bind(&cmd_dht_status, std::placeholders::_1));
+  /* command: cluster_status */
+  auto cluster_status_cmd = cli.defineCommand("cluster_status");
+  cluster_status_cmd->onCall(
+      std::bind(&cmd_cluster_status, std::placeholders::_1));
 
-  dht_status_cmd->flags().defineFlag(
+  cluster_status_cmd->flags().defineFlag(
       "master",
       cli::FlagParser::T_STRING,
       true,
@@ -368,11 +379,21 @@ int main(int argc, const char** argv) {
       "url",
       "<addr>");
 
-  /* command: dht_add_node */
-  auto dht_add_node_cmd = cli.defineCommand("dht_add_node");
-  dht_add_node_cmd->onCall(std::bind(&cmd_dht_add_node, std::placeholders::_1));
+  /* command: cluster_add_node */
+  auto cluster_add_node_cmd = cli.defineCommand("cluster_add_node");
+  cluster_add_node_cmd->onCall(
+      std::bind(&cmd_cluster_add_node, std::placeholders::_1));
 
-  dht_add_node_cmd->flags().defineFlag(
+  cluster_add_node_cmd->flags().defineFlag(
+      "master",
+      cli::FlagParser::T_STRING,
+      true,
+      NULL,
+      NULL,
+      "url",
+      "<addr>");
+
+  cluster_add_node_cmd->flags().defineFlag(
       "name",
       stx::cli::FlagParser::T_STRING,
       true,

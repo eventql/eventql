@@ -32,11 +32,8 @@ public:
 
   ConfigDirectoryClient(InetAddr master_addr);
 
-  ClusterConfig fetchClusterConfig(InetAddr master_addr);
-
-  void updateClusterConfig(
-      InetAddr master_addr,
-      ClusterConfig config);
+  ClusterConfig fetchClusterConfig();
+  ClusterConfig updateClusterConfig(const ClusterConfig& config);
 
 protected:
   InetAddr master_addr_;
