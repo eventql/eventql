@@ -112,11 +112,11 @@ ZBase.registerView((function() {
       };
 
       var url =
-          "/a/session_tracking/events/add_field?" +
+          "/api/v1/session_tracking/events/add_field?" +
           $.buildQueryString(field_data);
 
       $.httpPost(url, "", function(r) {
-        if (r.status == 200) {
+        if (r.status == 201) {
           load();
         } else {
           $.fatalError();
@@ -138,7 +138,7 @@ ZBase.registerView((function() {
     $("button.close", modal).onclick = function() {modal.close()};
     $("button.submit", modal).onclick = function(e) {
       var url =
-        "/a/session_tracking/events/remove_field?event=" +
+        "/api/v1/session_tracking/events/remove_field?event=" +
         event_name + "&field=" + field_name;
 
       $.httpPost(url, "", function(r) {
