@@ -203,6 +203,17 @@ protected:
     }
   }
 
+  void catchAndReturnErrors(
+      http::HTTPResponse* resp,
+      Function<void ()> fn) const {
+    try {
+      fn();
+    } catch (const StandardException& e) {
+      resp->setStatus(http::kStatusInternalServerError);
+      resp->addBody(e.what());
+    }
+  }
+
   RefPtr<AnalyticsApp> app_;
   dproc::DispatchService* dproc_;
   EventIngress* ingress_;
