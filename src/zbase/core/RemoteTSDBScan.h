@@ -9,13 +9,10 @@
  */
 #pragma once
 #include <stx/stdtypes.h>
-#include <stx/protobuf/MessageSchema.h>
 #include <csql/qtree/SequentialScanNode.h>
-#include <csql/runtime/compiler.h>
-#include <csql/runtime/defaultruntime.h>
 #include <csql/runtime/TableExpression.h>
 #include <csql/runtime/ValueExpression.h>
-#include <cstable/CSTableReader.h>
+#include <zbase/core/TSDBTableRef.h>
 
 using namespace stx;
 
@@ -41,6 +38,8 @@ public:
 protected:
   RefPtr<csql::SequentialScanNode> stmt_;
   TSDBTableRef table_ref_;
+  Vector<String> columns_;
+  size_t rows_scanned_;
 };
 
 
