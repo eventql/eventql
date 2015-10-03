@@ -52,9 +52,9 @@ Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildSequentialScan(
 
   auto partition_key = table_ref.partition_key.get();
   if (replication_scheme_->hasLocalReplica(partition_key)) {
-    buildLocalSequentialScan(node, table_ref, runtime);
+    return buildLocalSequentialScan(node, table_ref, runtime);
   } else {
-    buildRemoteSequentialScan(node, table_ref, runtime);
+    return buildRemoteSequentialScan(node, table_ref, runtime);
   }
 }
 
@@ -99,6 +99,7 @@ Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildRemoteSequentia
     RefPtr<csql::SequentialScanNode> node,
     const TSDBTableRef& table_ref,
     csql::QueryBuilder* runtime) const {
+  iputs("return remote tsdb scan...", 1);
   return Option<ScopedPtr<csql::TableExpression>>(mkScoped(
       new RemoteTSDBScan(
           node,
