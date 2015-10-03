@@ -13,6 +13,7 @@
 #include <stx/net/inetaddr.h>
 #include <stx/http/httpclient.h>
 #include <zbase/CustomerConfig.h>
+#include <zbase/core/ClusterConfig.pb.h>
 #include <zbase/TableDefinition.h>
 
 using namespace stx;
@@ -22,7 +23,8 @@ namespace zbase {
 enum ConfigTopic : uint64_t {
   CUSTOMERS = 1,
   TABLES = 2,
-  USERDB = 3
+  USERDB = 3,
+  CLUSTERCONFIG = 4
 };
 
 class ConfigDirectory {
@@ -32,6 +34,10 @@ public:
       const String& path,
       InetAddr master_addr,
       uint64_t topics);
+
+  RefPtr<CustomerConfigRef> clusterConfig() const;
+  void updateClusterConfig(ClusterConfig config);
+  void onClusterConfigChange(Function<void (const ClusterConfig& cfg)> fn);
 
   RefPtr<CustomerConfigRef> configFor(const String& customer_key) const;
   void updateCustomerConfig(CustomerConfig config);
@@ -57,6 +63,10 @@ protected:
   HashMap<String, uint64_t> fetchMasterHeads() const;
 
   void syncObject(const String& obj);
+
+  void syncClusterConfig();
+  void commitClusterConfig(const ClusterConfig& config);
+
   void syncCustomerConfig(const String& customer);
   void commitCustomerConfig(const CustomerConfig& config);
 
@@ -70,8 +80,10 @@ protected:
   uint64_t topics_;
   RefPtr<mdb::MDB> db_;
   mutable std::mutex mutex_;
+  ClusterConfig cluster_config_;
   HashMap<String, RefPtr<CustomerConfigRef>> customers_;
 
+  Vector<Function<void (const ClusterConfig& cfg)>> on_cluster_change_;
   Vector<Function<void (const CustomerConfig& cfg)>> on_customer_change_;
   Vector<Function<void (const TableDefinition& cfg)>> on_table_change_;
   Vector<Function<void (const UserConfig& cfg)>> on_user_change_;
