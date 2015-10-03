@@ -59,6 +59,10 @@
       <table class="z-table">
         <tbody></tbody>
       </table>
+
+      <div class="add_pane">
+        <a class="link add_field">Add Field</a>
+      </div>
     </td>
   </tr>
 </template>
@@ -69,22 +73,8 @@
       <span class="name"></span>
       <span class="type"></span>
     </td>
-    <td class='icon'>
-      <z-dropdown data-resolved data-hover>
-        <z-dropdown-header>
-          <z-dropdown-header-value data-static>
-            <i class='fa fa-cog'></i>
-          </z-dropdown-header-value>
-          <z-dropdown-header-icon></z-dropdown-header-icon>
-        </z-dropdown-header>
-
-        <z-dropdown-flyout>
-          <z-dropdown-items>
-            <z-dropdown-item data-value="add">Add</z-dropdown-item>
-            <z-dropdown-item data-value="delete">Delete</z-dropown-item>
-          </z-dropdown-items>
-        </z-dropdown-flyout>
-      </z-dropdown>
+    <td class="icon">
+      <i class="fa fa-trash-o delete"></i>
     </td>
   </tr>
 

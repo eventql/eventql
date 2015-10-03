@@ -62,24 +62,18 @@ ZBase.registerView((function() {
       $(".name", html).innerHTML = field.name;
       $(".type", html).innerHTML = "[" + field.type.toLowerCase() + "]";
 
-      $("z-dropdown", html).addEventListener("change", function() {
-        switch (this.getValue()) {
-          case "add":
-            renderAdd(field.name + ".");
-            break;
-
-          case "delete":
-            renderDelete(field.name);
-            break;
-        };
-        this.setValue([]);
-      }, false);
+      $.onClick($(".delete", html), function(e) {
+        renderDelete(field.name);
+      });
 
       tbody.appendChild(html);
 
-      if (field.repeated) {
+      if (field.type == "OBJECT") {
         var table = table_tpl.cloneNode(true);
         renderTable(field.schema.columns, $("tbody", table));
+        $.onClick($(".add_field", table), function() {
+          renderAdd(field.name + ".");
+        });
         tbody.appendChild(table);
       }
     });
@@ -116,14 +110,11 @@ ZBase.registerView((function() {
           $.buildQueryString(field_data);
 
       $.httpPost(url, "", function(r) {
-        console.log(r);
         if (r.status == 201) {
           load();
         } else {
-          console.log(r.responseText);
           $(".error_field .error_message", modal).innerHTML = r.responseText;
           $(".error_field", modal).classList.remove("hidden");
-          //$.fatalError();
         }
       });
     });
