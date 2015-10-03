@@ -1,6 +1,9 @@
 ZBase.registerView((function() {
   var events_rendered = false;
+  var cur_path = "";
   var load = function(path) {
+    //FIXME destroy
+    cur_path = path;
     $.showLoader();
 
     var page = $.getTemplate(
@@ -64,6 +67,7 @@ ZBase.registerView((function() {
   };
 
   var renderAttributes = function(attrs) {
+    //FIXME destroy timeout
     if (!events_rendered) {
       window.setTimeout(function() {
         renderAttributes(attrs);
@@ -90,7 +94,17 @@ ZBase.registerView((function() {
     var tpl = $.getTemplate(
       "views/session_tracking",
       "zbase_session_tracking_schema_add_modal_tpl");
+
     var input = $("input", tpl);
+    var repeated_field = $(".field.repeated", tpl);
+
+    $("z-dropdown", tpl).addEventListener("change", function() {
+      if (this.getValue() == "EVENT") {
+        repeated_field.classList.add("not_visible");
+      } else {
+        repeated_field.classList.remove("not_visible");
+      }
+    }, false);
 
     $.onClick($("button.close", tpl), function() {modal.close();});
     $.onClick($("button.submit", tpl), function() {
@@ -100,11 +114,33 @@ ZBase.registerView((function() {
       }
 
       var type = $("z-dropdown", modal).getValue();
-      var qstr = "name=" + input.value + "&type=" + type;
+      if (type == "EVENT") {
+        var ev_name = $.escapeHTML(input.value);
+        var url = "/api/v1/session_tracking/events/add_event?event=" + ev_name;
 
-      alert("post new schema item" + qstr);
+        $.httpPost(url, "", function(r) {
+          if (r.status == 201) {
+            //redirect to edit event page
+            $.navigateTo("/a/session_tracking/settings/schema/events/" + ev_name);
+          } else {
+            $.fatalError(r.statusText);
+          }
+        });
 
-      //TODO httpPost and redirect to edit_event if type == "event"
+      } else {
+        var url =
+            "/api/v1/session_tracking/attributes/add_attribute?name=" +
+            $.escapeHTML(input.value) + "&optional=true&type=" + type + "&repeated=" +
+            $("z-checkbox", modal).hasAttribute("data-active");
+
+        $.httpPost(url, "", function(r) {
+          if (r.status == 201) {
+            load(cur_path);
+          } else {
+            $.fatalError(r.statusText);
+          }
+        });
+      }
     });
 
     $.replaceContent($(".container", modal), tpl);

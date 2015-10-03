@@ -205,6 +205,10 @@
   display: none;
 }
 
+.zbase_session_tracking z-modal .field.not_visible {
+  visibility: hidden;
+}
+
 .zbase_session_tracking .error_field {
   border: 1px solid #edc3c3;
   background: #fff0f0;
