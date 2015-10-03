@@ -123,8 +123,13 @@ void SQLEngine::replaceSequentialScanWithUnion(
 
   Vector<RefPtr<csql::QueryTreeNode>> union_tables;
   for (const auto& partition : partitions) {
+    String host = replication_scheme->hasLocalReplica(partition)
+        ? "localhost"
+        : "remote";
+
     auto table_name = StringUtil::format(
-        "tsdb://localhost/$0/$1",
+        "tsdb://$0/$1/$2",
+        host,
         URI::urlEncode(table_ref.table_key),
         partition.toString());
 

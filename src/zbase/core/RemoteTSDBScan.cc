@@ -49,7 +49,10 @@ void RemoteTSDBScan::execute(
 
   RemoteTSDBScanParams params;
 
-  params.set_table_name(stmt_->tableName());
+  auto tbl_name = stmt_->tableName();
+  StringUtil::replaceAll(&tbl_name, "tsdb://remote/", "tsdb://localhost/");
+
+  params.set_table_name(tbl_name);
   params.set_aggregation_strategy((uint64_t) stmt_->aggregationStrategy());
 
   for (const auto& e : stmt_->selectList()) {
