@@ -17,11 +17,16 @@ using namespace stx;
 
 namespace zbase {
 
+ConfigDirectoryClient::ConfigDirectoryClient(
+    InetAddr master_addr) :
+    master_addr_(master_addr) {}
+
 ConfigDirectory::ConfigDirectory(
     const String& path,
     const InetAddr master_addr,
     uint64_t topics) :
     master_addr_(master_addr),
+    cclient_(master_addr),
     topics_(topics),
     watcher_running_(false) {
   mdb::MDBOptions mdb_opts;

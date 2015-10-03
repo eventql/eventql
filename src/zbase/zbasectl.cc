@@ -49,6 +49,14 @@ using namespace stx;
 
 stx::thread::EventLoop ev;
 
+void cmd_dht_status(const cli::FlagParser& flags) {
+  iputs("dht status", 1);
+}
+
+void cmd_dht_add_node(const cli::FlagParser& flags) {
+  iputs("add node: $0", flags.getString("name"));
+}
+
 void cmd_import_session_sstable(const cli::FlagParser& flags) {
   thread::EventLoop ev;
 
@@ -298,6 +306,7 @@ void cmd_backfill_session_sstable(const cli::FlagParser& flags) {
   ev.shutdown();
   evloop_thread.join();
 }
+
 int main(int argc, const char** argv) {
   stx::Application::init();
   stx::Application::logToStderr();
@@ -345,6 +354,32 @@ int main(int argc, const char** argv) {
       NULL,
       "input file path",
       "<path>");
+
+  /* command: dht_status */
+  auto dht_status_cmd = cli.defineCommand("dht_status");
+  dht_status_cmd->onCall(std::bind(&cmd_dht_status, std::placeholders::_1));
+
+  dht_status_cmd->flags().defineFlag(
+      "master",
+      cli::FlagParser::T_STRING,
+      true,
+      NULL,
+      NULL,
+      "url",
+      "<addr>");
+
+  /* command: dht_add_node */
+  auto dht_add_node_cmd = cli.defineCommand("dht_add_node");
+  dht_add_node_cmd->onCall(std::bind(&cmd_dht_add_node, std::placeholders::_1));
+
+  dht_add_node_cmd->flags().defineFlag(
+      "name",
+      stx::cli::FlagParser::T_STRING,
+      true,
+      NULL,
+      NULL,
+      "node name",
+      "<string>");
 
   cli.call(flags.getArgv());
   return 0;
