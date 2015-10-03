@@ -10,6 +10,7 @@
 #include <stx/stdtypes.h>
 #include <stx/SHA1.h>
 #include <zbase/CustomerConfig.h>
+#include <zbase/core/ClusterConfig.pb.h>
 #include <zbase/TableDefinition.h>
 
 using namespace stx;
@@ -20,6 +21,9 @@ class ConfigDirectoryMaster {
 public:
 
   ConfigDirectoryMaster(const String& path);
+
+  ClusterConfig fetchClusterConfig() const;
+  ClusterConfig updateClusterConfig(ClusterConfig config);
 
   CustomerConfig fetchCustomerConfig(const String& customer_key) const;
   CustomerConfig updateCustomerConfig(CustomerConfig config);

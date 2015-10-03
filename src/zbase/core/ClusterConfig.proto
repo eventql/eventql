@@ -16,7 +16,7 @@ message DHTNode {
 
 message ClusterConfig {
 
-  required string cluster_name = 1;
+  optional uint32 version = 1;
 
   repeated DHTNode dht_nodes = 3;
   required uint32 dht_num_copies = 4;
