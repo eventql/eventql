@@ -377,7 +377,7 @@ int main(int argc, const char** argv) {
       "<path>");
 
   /* command: cluster_status */
-  auto cluster_status_cmd = cli.defineCommand("cluster_status");
+  auto cluster_status_cmd = cli.defineCommand("cluster-status");
   cluster_status_cmd->onCall(
       std::bind(&cmd_cluster_status, std::placeholders::_1));
 
@@ -391,7 +391,7 @@ int main(int argc, const char** argv) {
       "<addr>");
 
   /* command: cluster_add_node */
-  auto cluster_add_node_cmd = cli.defineCommand("cluster_add_node");
+  auto cluster_add_node_cmd = cli.defineCommand("cluster-add-node");
   cluster_add_node_cmd->onCall(
       std::bind(&cmd_cluster_add_node, std::placeholders::_1));
 
