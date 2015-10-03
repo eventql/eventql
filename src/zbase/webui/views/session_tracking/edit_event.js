@@ -61,6 +61,9 @@ ZBase.registerView((function() {
       var html = row_tpl.cloneNode(true);
       $(".name", html).innerHTML = field.name;
       $(".type", html).innerHTML = "[" + field.type.toLowerCase() + "]";
+      if (field.repeated) {
+        $(".repeated", html).innerHTML = "[repeated]";
+      }
 
       $.onClick($(".delete", html), function(e) {
         renderDelete(field.name);
@@ -78,8 +81,6 @@ ZBase.registerView((function() {
       }
     });
   };
-
-
 
   var renderAdd = function(field_prefix) {
     var modal = $(".zbase_session_tracking z-modal.add_field");
