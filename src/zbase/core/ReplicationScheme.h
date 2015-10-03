@@ -98,9 +98,9 @@ public:
   void updateClusterConfig(ClusterConfig cluster_config);
 
 protected:
-  ClusterConfig cluster_config;
+  ClusterConfig cluster_config_;
+  OrderedMap<SHA1Hash, ReplicaRef> ring_;
 };
-
 
 
 } // namespace zbase

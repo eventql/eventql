@@ -66,7 +66,7 @@ TEST_CASE(ReplicationSchemeTest, TestHostAssignmentWithTwoNodes, [] () {
     EXPECT_EQ(
         replicas[1].unique_id.toString(),
         "3333333333333333333333333333333333333333");
-    EXPECT_EQ(replicas[1].addr.ipAndPort(), "1.1.1.1:1234");
+    EXPECT_EQ(replicas[1].addr.ipAndPort(), "2.2.2.2:1234");
   }
 
   {
