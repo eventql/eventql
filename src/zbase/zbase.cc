@@ -130,6 +130,15 @@ int main(int argc, const char** argv) {
       "<addr>");
 
   flags.defineFlag(
+      "join",
+      cli::FlagParser::T_STRING,
+      false,
+      NULL,
+      NULL,
+      "url",
+      "<name>");
+
+  flags.defineFlag(
       "loglevel",
       stx::cli::FlagParser::T_STRING,
       false,
@@ -193,8 +202,13 @@ int main(int argc, const char** argv) {
       cluster_config.DebugString());
 
   /* tsdb */
+  Option<String> local_replica;
+  if (flags.isSet("join")) {
+    local_replica = Some(flags.getString("join"));
+  }
+
   auto repl_scheme = RefPtr<zbase::ReplicationScheme>(
-        new zbase::DHTReplicationScheme(cluster_config));
+        new zbase::DHTReplicationScheme(cluster_config, local_replica));
 
   auto tsdb_dir = FileUtil::joinPaths(flags.getString("datadir"), "tsdb");
   if (!FileUtil::exists(tsdb_dir)) {

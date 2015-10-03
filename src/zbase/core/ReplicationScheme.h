@@ -27,6 +27,7 @@ struct ReplicaRef {
 
   SHA1Hash unique_id;
   InetAddr addr;
+  String name;
 };
 
 class ReplicationScheme : public RefCounted {
@@ -89,7 +90,9 @@ protected:
 class DHTReplicationScheme : public ReplicationScheme {
 public:
 
-  DHTReplicationScheme(ClusterConfig cluster_config);
+  DHTReplicationScheme(
+      ClusterConfig cluster_config,
+      Option<String> local_replica = None<String>());
 
   Vector<ReplicaRef> replicasFor(const SHA1Hash& key) override;
 
@@ -99,6 +102,7 @@ public:
 
 protected:
   ClusterConfig cluster_config_;
+  Option<String> local_replica_;
   OrderedMap<SHA1Hash, ReplicaRef> ring_;
 };
 

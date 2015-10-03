@@ -65,14 +65,18 @@ bool FrontendReplicationScheme::hasLocalReplica(const SHA1Hash& key) {
 }
 
 DHTReplicationScheme::DHTReplicationScheme(
-    ClusterConfig cluster_config) :
-    cluster_config_(cluster_config) {
+    ClusterConfig cluster_config,
+    Option<String> local_replica /* = None<String>() */) :
+    cluster_config_(cluster_config),
+    local_replica_(local_replica) {
   for (const auto& node : cluster_config_.dht_nodes()) {
     auto addr = InetAddr::resolve(node.addr());
 
     for (const auto& token_str : node.sha1_tokens()) {
       auto token = SHA1Hash::fromHexString(token_str);
-      ring_.emplace(token, ReplicaRef(token, addr));
+      ReplicaRef rref(token, addr);
+      rref.name = node.name();
+      ring_.emplace(token, rref);
     }
   }
 }
@@ -108,6 +112,17 @@ Vector<ReplicaRef> DHTReplicationScheme::replicasFor(const SHA1Hash& key) {
 }
 
 bool DHTReplicationScheme::hasLocalReplica(const SHA1Hash& key) {
+  if (local_replica_.isEmpty()) {
+    return false;
+  }
+
+  auto replicas = replicasFor(key);
+  for (const auto& r : replicas) {
+    if (r.name == local_replica_.get()) {
+      return true;
+    }
+  }
+
   return false;
 }
 
