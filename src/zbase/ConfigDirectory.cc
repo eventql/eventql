@@ -49,6 +49,45 @@ ConfigDirectory::ConfigDirectory(
   sync();
 }
 
+ClusterConfig ConfigDirectory::clusterConfig() const {
+  if ((topics_ & ConfigTopic::CLUSTERCONFIG) == 0) {
+    RAISE(kRuntimeError, "config topic not enabled: CLUSTERCONFIG");
+  }
+
+  std::unique_lock<std::mutex> lk(mutex_);
+  return cluster_config_;
+}
+
+void ConfigDirectory::updateClusterConfig(ClusterConfig config) {
+  if ((topics_ & ConfigTopic::CLUSTERCONFIG) == 0) {
+    RAISE(kRuntimeError, "config topic not enabled: CLUSTERCONFIG");
+  }
+
+  auto body = msg::encode(config);
+  auto uri = StringUtil::format(
+        "http://$0/analytics/master/update_cluster_config",
+        master_addr_.hostAndPort());
+
+  http::HTTPClient http;
+  auto res = http.executeRequest(http::HTTPRequest::mkPost(uri, *body));
+  if (res.statusCode() != 201) {
+    RAISEF(kRuntimeError, "error: $0", res.body().toString());
+  }
+
+  commitClusterConfig(msg::decode<ClusterConfig>(res.body()));
+}
+
+void ConfigDirectory::onClusterConfigChange(
+    Function<void (const ClusterConfig& cfg)> fn) {
+  if ((topics_ & ConfigTopic::CLUSTERCONFIG) == 0) {
+    RAISE(kRuntimeError, "config topic not enabled: CLUSTERCONFIG");
+  }
+
+  std::unique_lock<std::mutex> lk(mutex_);
+  on_cluster_change_.emplace_back(fn);
+}
+
+
 RefPtr<CustomerConfigRef> ConfigDirectory::configFor(
     const String& customer_key) const {
   if ((topics_ & ConfigTopic::CUSTOMERS) == 0) {
@@ -125,7 +164,6 @@ void ConfigDirectory::updateCustomerConfig(CustomerConfig cfg) {
 
   commitCustomerConfig(msg::decode<CustomerConfig>(res.body()));
 }
-
 
 void ConfigDirectory::updateTableDefinition(
     const TableDefinition& table,
