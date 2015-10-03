@@ -15,6 +15,68 @@ using namespace zbase;
 
 UNIT_TEST(ReplicationSchemeTest);
 
+TEST_CASE(ReplicationSchemeTest, TestHostAssignmentWithoutNodes, [] () {
+  ClusterConfig cc;
+  cc.set_dht_num_copies(3);
+
+  DHTReplicationScheme rscheme(cc);
+
+  {
+    auto replicas = rscheme.replicasFor(
+        SHA1Hash::fromHexString("1111111111111111111111111111111111111111"));
+
+    EXPECT_EQ(replicas.size(), 0);
+  }
+});
+
+TEST_CASE(ReplicationSchemeTest, TestHostAssignmentWithOneNode, [] () {
+  ClusterConfig cc;
+  cc.set_dht_num_copies(3);
+
+  {
+    auto node = cc.add_dht_nodes();
+    node->set_status(DHTNODE_LIVE);
+    node->set_name("nodeA");
+    node->set_addr("1.1.1.1:1234");
+    *node->add_sha1_tokens() = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+  }
+
+  DHTReplicationScheme rscheme(cc);
+
+  {
+    auto replicas = rscheme.replicasFor(
+        SHA1Hash::fromHexString("1111111111111111111111111111111111111111"));
+
+    EXPECT_EQ(replicas.size(), 1);
+    EXPECT_EQ(
+        replicas[0].unique_id.toString(),
+        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+    EXPECT_EQ(replicas[0].addr.ipAndPort(), "1.1.1.1:1234");
+  }
+
+  {
+    auto replicas = rscheme.replicasFor(
+        SHA1Hash::fromHexString("8888888888888888888888888888888888888888"));
+
+    EXPECT_EQ(replicas.size(), 1);
+    EXPECT_EQ(
+        replicas[0].unique_id.toString(),
+        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+    EXPECT_EQ(replicas[0].addr.ipAndPort(), "1.1.1.1:1234");
+  }
+
+  {
+    auto replicas = rscheme.replicasFor(
+        SHA1Hash::fromHexString("dddddddddddddddddddddddddddddddddddddddd"));
+
+    EXPECT_EQ(replicas.size(), 1);
+    EXPECT_EQ(
+        replicas[0].unique_id.toString(),
+        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+    EXPECT_EQ(replicas[0].addr.ipAndPort(), "1.1.1.1:1234");
+  }
+});
+
 TEST_CASE(ReplicationSchemeTest, TestHostAssignmentWithTwoNodes, [] () {
   ClusterConfig cc;
   cc.set_dht_num_copies(3);
