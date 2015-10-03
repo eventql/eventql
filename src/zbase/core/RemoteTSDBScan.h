@@ -45,7 +45,8 @@ protected:
 
   void executeOnHost(
       const RemoteTSDBScanParams& params,
-      const InetAddr& host);
+      const InetAddr& host,
+      Function<bool (int argc, const csql::SValue* argv)> fn);
 
   RefPtr<csql::SequentialScanNode> stmt_;
   String customer_;

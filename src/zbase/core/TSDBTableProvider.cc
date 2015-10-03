@@ -101,7 +101,6 @@ Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildRemoteSequentia
     RefPtr<csql::SequentialScanNode> node,
     const TSDBTableRef& table_ref,
     csql::QueryBuilder* runtime) const {
-  iputs("return remote tsdb scan...", 1);
   return Option<ScopedPtr<csql::TableExpression>>(mkScoped(
       new RemoteTSDBScan(
           node,
