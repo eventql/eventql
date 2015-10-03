@@ -208,7 +208,9 @@ void AnalyticsServlet::handle(
   /* SESSION TRACKING */
   if (uri.path() == "/api/v1/session_tracking/events") {
     req_stream->readBody();
-    sessionTrackingListEvents(session, &req, &res);
+    catchAndReturnErrors(&res, [this, &session, &req, &res] {
+      sessionTrackingListEvents(session, &req, &res);
+    });
     res_stream->writeResponse(res);
     return;
   }
@@ -216,7 +218,9 @@ void AnalyticsServlet::handle(
   if (uri.path() == "/api/v1/session_tracking/events/add_field") {
     expectHTTPPost(req);
     req_stream->readBody();
-    sessionTrackingEventAddField(session, &req, &res);
+    catchAndReturnErrors(&res, [this, &session, &req, &res] {
+      sessionTrackingEventAddField(session, &req, &res);
+    });
     res_stream->writeResponse(res);
     return;
   }
@@ -224,21 +228,27 @@ void AnalyticsServlet::handle(
   if (uri.path() == "/api/v1/session_tracking/events/remove_field") {
     expectHTTPPost(req);
     req_stream->readBody();
-    sessionTrackingEventRemoveField(session, &req, &res);
+    catchAndReturnErrors(&res, [this, &session, &req, &res] {
+      sessionTrackingEventRemoveField(session, &req, &res);
+    });
     res_stream->writeResponse(res);
     return;
   }
 
   if (uri.path() == "/api/v1/session_tracking/event_info") {
     req_stream->readBody();
-    sessionTrackingEventInfo(session, &req, &res);
+    catchAndReturnErrors(&res, [this, &session, &req, &res] {
+      sessionTrackingEventInfo(session, &req, &res);
+    });
     res_stream->writeResponse(res);
     return;
   }
 
   if (uri.path() == "/api/v1/session_tracking/attributes") {
     req_stream->readBody();
-    sessionTrackingListAttributes(session, &req, &res);
+    catchAndReturnErrors(&res, [this, &session, &req, &res] {
+      sessionTrackingListAttributes(session, &req, &res);
+    });
     res_stream->writeResponse(res);
     return;
   }
