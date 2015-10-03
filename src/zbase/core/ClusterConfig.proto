@@ -11,7 +11,7 @@ message DHTNode {
   required string name = 2;
   required string addr = 3;
   required DHTNodeStatus status = 4;
-  repeated bytes sha1_tokens = 1;
+  repeated string sha1_tokens = 1;
 };
 
 message ClusterConfig {
@@ -19,5 +19,6 @@ message ClusterConfig {
   required string cluster_name = 1;
 
   repeated DHTNode dht_nodes = 3;
+  required uint32 dht_num_copies = 4;
 
 };
