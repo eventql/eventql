@@ -48,3 +48,8 @@
   border-right: none;
 }
 
+.zbase_session_tracking table.edit_event tr.table_attached .add_pane {
+  border-right: none;
+  border-bottom: none;
+}
+
