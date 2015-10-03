@@ -65,7 +65,8 @@ void RemoteTSDBScan::execute(
   Vector<String> errors;
   for (const auto& host : replicas) {
     try {
-      return executeOnHost(params, host);
+      executeOnHost(params, host, fn);
+      return;
     } catch (const StandardException& e) {
       logError(
           "zbase",
@@ -84,12 +85,12 @@ void RemoteTSDBScan::execute(
 
 void RemoteTSDBScan::executeOnHost(
     const RemoteTSDBScanParams& params,
-    const InetAddr& host) {
-  iputs("execute scan on $0 => $1", host.hostAndPort(), params.DebugString());
-
+  const InetAddr& host,
+      Function<bool (int argc, const csql::SValue* argv)> fn) {
   Buffer buffer;
   bool eos = false;
-  auto handler = [&buffer, &eos] (const void* data, size_t size) {
+  bool done = false;
+  auto handler = [&buffer, &eos, &done, &fn] (const void* data, size_t size) {
     buffer.append(data, size);
     size_t consumed = 0;
 
@@ -104,8 +105,21 @@ void RemoteTSDBScan::executeOnHost(
       if (rec_len == 0) {
         eos = true;
       } else {
-        Buffer row(reader.read(rec_len), rec_len);
-        iputs("got row: $0", rec_len);
+        auto rec_data = reader.read(rec_len);
+
+        if (!done) {
+          MemoryInputStream is(rec_data, rec_len);
+          Vector<csql::SValue> row;
+          while (!is.eof()) {
+            csql::SValue val;
+            val.decode(&is);
+            row.emplace_back(val);
+
+            if (!fn(row.size(), row.data())) {
+              done = true;
+            }
+          }
+        }
 
         consumed = reader.position();
       }
