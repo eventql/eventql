@@ -8,6 +8,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <zbase/core/RemoteTSDBScan.h>
+#include <zbase/RemoteTSDBScanParams.pb.h>
 
 using namespace stx;
 
@@ -31,6 +32,24 @@ size_t RemoteTSDBScan::numColumns() const {
 void RemoteTSDBScan::execute(
     csql::ExecutionContext* context,
     Function<bool (int argc, const csql::SValue* argv)> fn) {
+
+  RemoteTSDBScanParams params;
+
+  params.set_table_name(stmt_->tableName());
+  params.set_aggregation_strategy((uint64_t) stmt_->aggregationStrategy());
+
+  for (const auto& e : stmt_->selectList()) {
+    auto sl = params.add_select_list();
+    sl->set_expression(e->expression()->toSQL());
+    sl->set_alias(e->columnName());
+  }
+
+  auto where = stmt_->whereExpression();
+  if (!where.isEmpty()) {
+    params.set_where_expression(where.get()->toSQL());
+  }
+
+  iputs("remote scan: $0", params.DebugString());
   RAISE(kNotYetImplementedError, "not yet implemented");
 }
 
