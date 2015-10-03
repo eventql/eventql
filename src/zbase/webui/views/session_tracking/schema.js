@@ -49,16 +49,25 @@ ZBase.registerView((function() {
     var tbody = $("table.schemas tbody");
     var tpl = $.getTemplate(
       "views/session_tracking",
-      "zbase_session_tracking_schema_row_tpl");
+      "zbase_session_tracking_schema_event_row_tpl");
 
     events.forEach(function(ev) {
       var html = tpl.cloneNode(true);
       $(".name", html).innerHTML = ev.event;
       $(".type", html).innerHTML = "Event";
 
+
       $.onClick($("tr", html), function() {
         $.navigateTo("/a/session_tracking/settings/schema/events/" + ev.event);
       });
+
+      $("z-dropdown", html).addEventListener("change", function() {
+        if (this.getValue() == "edit") {
+          $.navigateTo("/a/session_tracking/settings/schema/events/" + ev.event);
+        } else {
+          displayEventDeleteVerfication(ev);
+        }
+      }, false);
 
       tbody.appendChild(html);
     });
@@ -78,12 +87,16 @@ ZBase.registerView((function() {
     var tbody = $("table.schemas tbody");
     var tpl = $.getTemplate(
       "views/session_tracking",
-      "zbase_session_tracking_schema_row_tpl");
+      "zbase_session_tracking_schema_attr_row_tpl");
 
     attrs.columns.forEach(function(attr) {
       var html = tpl.cloneNode(true);
       $(".name", html).innerHTML = attr.name;
       $(".type", html).innerHTML = attr.type;
+
+      $("z-dropdown", html).addEventListener("click", function() {
+        displayAttrDeleteVerfication(attr);
+      }, false);
 
       tbody.appendChild(html);
     });
@@ -148,6 +161,48 @@ ZBase.registerView((function() {
     modal.show();
     input.focus();
   };
+
+  var displayEventDeleteVerfication = function(ev) {
+    var modal = $(".zbase_session_tracking z-modal.delete_session_tracking_item");
+    $(".z-modal-header .item_name", modal).innerHTML = ev.event;
+    $(".z-modal-content .item_name", modal).innerHTML = "the event " + ev.event;
+
+    $("button.close", modal).onclick = function() {modal.close();}
+    $("button.submit", modal).onclick = function() {
+      var url = "/api/v1/session_tracking/events/remove_event?event=" + ev.event;
+      $.httpPost(url, "", function(r) {
+        if (r.status == 201) {
+          load(cur_path);
+        } else {
+          $.fatalError(r.statusText);
+        }
+      });
+    };
+
+    modal.show();
+  };
+
+  var displayAttrDeleteVerfication = function(attr) {
+    var modal = $(".zbase_session_tracking z-modal.delete_session_tracking_item");
+    $(".z-modal-header .item_name", modal).innerHTML = attr.name;
+    $(".z-modal-content .item_name", modal).innerHTML = "the field " + attr.name;
+
+    $("button.close", modal).onclick = function() {modal.close();}
+    $("button.submit", modal).onclick = function() {
+      var url =
+          "/api/v1/session_tracking/events/remove_attribute?name=" + attr.name;
+      $.httpPost(url, "", function(r) {
+        if (r.status == 201) {
+          load(cur_path);
+        } else {
+          $.fatalError(r.statusText);
+        }
+      });
+    };
+
+    modal.show();
+  };
+
 
   return {
     name: "session_tracking_schema",
