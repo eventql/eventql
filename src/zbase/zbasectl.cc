@@ -64,6 +64,17 @@ void cmd_cluster_add_node(const cli::FlagParser& flags) {
       InetAddr::resolve(flags.getString("master")));
 
   auto cluster = cclient.fetchClusterConfig();
+  auto node = cluster.add_dht_nodes();
+  node->set_name(flags.getString("name"));
+  node->set_addr(flags.getString("addr"));
+  node->set_status(DHTNODE_LIVE);
+
+  auto vnodes = flags.getInt("vnodes");
+  for (size_t i = 0; i < vnodes; ++i) {
+    auto token = Random::singleton()->sha1().toString();
+    *node->add_sha1_tokens() = token;
+  }
+
   cclient.updateClusterConfig(cluster);
 }
 
@@ -401,6 +412,24 @@ int main(int argc, const char** argv) {
       NULL,
       "node name",
       "<string>");
+
+  cluster_add_node_cmd->flags().defineFlag(
+      "addr",
+      stx::cli::FlagParser::T_STRING,
+      true,
+      NULL,
+      NULL,
+      "node address",
+      "<ip:port>");
+
+  cluster_add_node_cmd->flags().defineFlag(
+      "vnodes",
+      stx::cli::FlagParser::T_INTEGER,
+      true,
+      NULL,
+      NULL,
+      "number of vnodes to assign",
+      "<num>");
 
   cli.call(flags.getArgv());
   return 0;
