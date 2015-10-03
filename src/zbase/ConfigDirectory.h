@@ -27,6 +27,21 @@ enum ConfigTopic : uint64_t {
   CLUSTERCONFIG = 4
 };
 
+class ConfigDirectoryClient {
+public:
+
+  ConfigDirectoryClient(InetAddr master_addr);
+
+  ClusterConfig fetchClusterConfig(InetAddr master_addr);
+
+  void updateClusterConfig(
+      InetAddr master_addr,
+      ClusterConfig config);
+
+protected:
+  InetAddr master_addr_;
+};
+
 class ConfigDirectory {
 public:
 
@@ -77,6 +92,7 @@ protected:
   void commitUserConfig(const UserConfig& usr);
 
   InetAddr master_addr_;
+  ConfigDirectoryClient cclient_;
   uint64_t topics_;
   RefPtr<mdb::MDB> db_;
   mutable std::mutex mutex_;
