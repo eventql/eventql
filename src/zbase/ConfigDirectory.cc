@@ -37,6 +37,14 @@ ConfigDirectory::ConfigDirectory(
     });
   }
 
+  if (topics_ & ConfigTopic::CLUSTERCONFIG) {
+    auto txn = db_->startTransaction(true);
+    txn->autoAbort();
+    auto cc = txn->get("cluster");
+    if (!cc.isEmpty()) {
+      cluster_config_ = msg::decode<ClusterConfig>(cc.get());
+    }
+  }
 
   sync();
 }
@@ -257,6 +265,48 @@ void ConfigDirectory::syncObject(const String& obj) {
       obj == "userdb") {
     syncUserDB();
     return;
+  }
+
+  if ((topics_ & ConfigTopic::CLUSTERCONFIG) &&
+      obj == "cluster") {
+    syncClusterConfig();
+    return;
+  }
+}
+
+void ConfigDirectory::syncClusterConfig() {
+  auto uri = URI(
+      StringUtil::format(
+          "http://$0/analytics/master/fetch_cluster_config",
+          master_addr_.hostAndPort()));
+
+  http::HTTPClient http;
+  auto res = http.executeRequest(http::HTTPRequest::mkGet(uri));
+  if (res.statusCode() != 200) {
+    RAISEF(kRuntimeError, "error: $0", res.body().toString());
+  }
+
+  commitClusterConfig(msg::decode<ClusterConfig>(res.body()));
+}
+
+void ConfigDirectory::commitClusterConfig(const ClusterConfig& config) {
+  String db_key = "cluster";
+  String hkey = "head~cluster";
+  auto buf = msg::encode(config);
+  auto vstr = StringUtil::toString(config.version());
+
+  std::unique_lock<std::mutex> lk(mutex_);
+  auto txn = db_->startTransaction(false);
+  txn->autoAbort();
+
+  txn->update(db_key.data(), db_key.size(), buf->data(), buf->size());
+  txn->update(hkey.data(), hkey.size(), vstr.data(), vstr.size());
+  txn->commit();
+
+  cluster_config_ = config;
+
+  for (const auto& cb : on_cluster_change_) {
+    cb(config);
   }
 }
 
