@@ -64,4 +64,48 @@ bool FrontendReplicationScheme::hasLocalReplica(const SHA1Hash& key) {
   return false;
 }
 
+DHTReplicationScheme::DHTReplicationScheme(
+    ClusterConfig cluster_config) :
+    cluster_config_(cluster_config) {
+  for (const auto& node : cluster_config_.dht_nodes()) {
+    auto addr = InetAddr::resolve(node.addr());
+
+    for (const auto& token_str : node.sha1_tokens()) {
+      auto token = SHA1Hash::fromHexString(token_str);
+      ring_.emplace(token, ReplicaRef(token, addr));
+    }
+  }
+}
+
+Vector<ReplicaRef> DHTReplicationScheme::replicasFor(const SHA1Hash& key) {
+  Set<String> hosts;
+  Vector<ReplicaRef> replicas;
+
+  auto ncopies = cluster_config_.dht_num_copies();
+  auto begin = ring_.lower_bound(key);
+  if (begin == ring_.end()) {
+    begin = ring_.begin();
+  }
+
+  auto cur = begin;
+  do {
+    auto host = cur->second.addr.ipAndPort();
+
+    if (hosts.count(host) == 0) {
+      replicas.emplace_back(cur->second);
+      hosts.emplace(host);
+    }
+
+    if (++cur == ring_.end()) {
+      cur = ring_.begin();
+    }
+  } while (replicas.size() < ncopies && cur != begin);
+
+  return replicas;
+}
+
+bool DHTReplicationScheme::hasLocalReplica(const SHA1Hash& key) {
+  return false;
+}
+
 } // namespace zbase
