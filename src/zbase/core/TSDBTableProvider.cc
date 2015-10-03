@@ -22,11 +22,13 @@ TSDBTableProvider::TSDBTableProvider(
     const String& tsdb_namespace,
     PartitionMap* partition_map,
     ReplicationScheme* replication_scheme,
-    CSTableIndex* cstable_index) :
+    CSTableIndex* cstable_index,
+    AnalyticsAuth* auth) :
     tsdb_namespace_(tsdb_namespace),
     partition_map_(partition_map),
     replication_scheme_(replication_scheme),
-    cstable_index_(cstable_index) {}
+    cstable_index_(cstable_index),
+    auth_(auth) {}
 
 Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildSequentialScan(
     RefPtr<csql::SequentialScanNode> node,
@@ -99,11 +101,13 @@ Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildRemoteSequentia
     RefPtr<csql::SequentialScanNode> node,
     const TSDBTableRef& table_ref,
     csql::QueryBuilder* runtime) const {
-  iputs("return remote tsdb scan...", 1);
   return Option<ScopedPtr<csql::TableExpression>>(mkScoped(
       new RemoteTSDBScan(
           node,
-          table_ref)));
+          tsdb_namespace_,
+          table_ref,
+          replication_scheme_,
+          auth_)));
 }
 
 void TSDBTableProvider::listTables(

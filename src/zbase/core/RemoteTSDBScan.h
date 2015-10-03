@@ -12,7 +12,10 @@
 #include <csql/qtree/SequentialScanNode.h>
 #include <csql/runtime/TableExpression.h>
 #include <csql/runtime/ValueExpression.h>
+#include <zbase/RemoteTSDBScanParams.pb.h>
 #include <zbase/core/TSDBTableRef.h>
+#include <zbase/core/ReplicationScheme.h>
+#include <zbase/AnalyticsAuth.h>
 
 using namespace stx;
 
@@ -23,7 +26,10 @@ public:
 
   RemoteTSDBScan(
       RefPtr<csql::SequentialScanNode> stmt,
-      const TSDBTableRef& table_ref);
+      const String& customer,
+      const TSDBTableRef& table_ref,
+      ReplicationScheme* replication_scheme,
+      AnalyticsAuth* auth);
 
   Vector<String> columnNames() const override;
 
@@ -36,8 +42,17 @@ public:
   size_t rowsScanned() const;
 
 protected:
+
+  void executeOnHost(
+      const RemoteTSDBScanParams& params,
+      const InetAddr& host,
+      Function<bool (int argc, const csql::SValue* argv)> fn);
+
   RefPtr<csql::SequentialScanNode> stmt_;
+  String customer_;
   TSDBTableRef table_ref_;
+  ReplicationScheme* replication_scheme_;
+  AnalyticsAuth* auth_;
   Vector<String> columns_;
   size_t rows_scanned_;
 };

@@ -748,6 +748,7 @@ RefPtr<csql::TableProvider> AnalyticsApp::getTableProvider(
         partition_map_,
         replication_scheme_,
         cstable_index_,
+        auth_,
         customer);
 }
 
