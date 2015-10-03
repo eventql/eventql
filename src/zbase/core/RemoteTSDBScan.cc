@@ -29,7 +29,11 @@ RemoteTSDBScan::RemoteTSDBScan(
     table_ref_(table_ref),
     replication_scheme_(replication_scheme),
     auth_(auth),
-    rows_scanned_(0) {}
+    rows_scanned_(0) {
+  for (const auto& sl : stmt->selectList()) {
+    columns_.emplace_back(sl->columnName());
+  }
+}
 
 Vector<String> RemoteTSDBScan::columnNames() const {
   return columns_;
