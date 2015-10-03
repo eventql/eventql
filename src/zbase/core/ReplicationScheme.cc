@@ -80,6 +80,9 @@ DHTReplicationScheme::DHTReplicationScheme(
 Vector<ReplicaRef> DHTReplicationScheme::replicasFor(const SHA1Hash& key) {
   Set<String> hosts;
   Vector<ReplicaRef> replicas;
+  if (ring_.empty()) {
+    return replicas;
+  }
 
   auto ncopies = cluster_config_.dht_num_copies();
   auto begin = ring_.lower_bound(key);
