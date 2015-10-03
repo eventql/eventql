@@ -27,6 +27,70 @@ ConfigDirectoryMaster::ConfigDirectoryMaster(
   loadHeads();
 }
 
+ClusterConfig ConfigDirectoryMaster::fetchClusterConfig() const {
+  std::unique_lock<std::mutex> lk(mutex_);
+
+  auto hpath = FileUtil::joinPaths(customerdb_path_, "cluster.HEAD");
+  if (!FileUtil::exists(hpath)) {
+    return ClusterConfig();
+  }
+
+  auto head_version = std::stoull(FileUtil::read(hpath).toString());
+  auto vpath = FileUtil::joinPaths(
+      customerdb_path_,
+      StringUtil::format("cluster.$0", head_version));
+
+  return msg::decode<ClusterConfig>(FileUtil::read(vpath));
+}
+
+ClusterConfig ConfigDirectoryMaster::updateClusterConfig(ClusterConfig config) {
+  std::unique_lock<std::mutex> lk(mutex_);
+  uint64_t head_version = 0;
+
+  auto hpath = FileUtil::joinPaths(customerdb_path_, "cluster.HEAD");
+  if (FileUtil::exists(hpath)) {
+    auto head_version_str = FileUtil::read(hpath);
+    head_version = std::stoull(head_version_str.toString());
+  }
+
+  if (config.version() != head_version) {
+    RAISE(
+        kRuntimeError,
+        "VERSION MISMATCH: can't update customer config because the update is" \
+        " out of date (i.e. it is not based on the latest head version)");
+  }
+
+  config.set_version(++head_version);
+  auto config_buf = msg::encode(config);
+
+  logInfo(
+      "dxa-master",
+      "Updating cluster config; head=$1",
+      head_version);
+
+  auto vpath = FileUtil::joinPaths(
+      customerdb_path_,
+      StringUtil::format("cluster.$0", head_version));
+
+  auto vtmppath = vpath + "~tmp." + Random::singleton()->hex64();
+  {
+    auto tmpfile = File::openFile(vtmppath, File::O_CREATE | File::O_WRITE);
+    tmpfile.write(config_buf->data(), config_buf->size());
+  }
+
+  auto htmppath = hpath + "~tmp." + Random::singleton()->hex64();
+  {
+    auto tmpfile = File::openFile(htmppath, File::O_CREATE | File::O_WRITE);
+    tmpfile.write(StringUtil::toString(head_version));
+  }
+
+  FileUtil::mv(vtmppath, vpath);
+  FileUtil::mv(htmppath, hpath);
+  heads_["cluster"] = head_version;
+
+  return config;
+}
+
 CustomerConfig ConfigDirectoryMaster::fetchCustomerConfig(
     const String& customer_key) const {
   std::unique_lock<std::mutex> lk(mutex_);
@@ -359,6 +423,14 @@ void ConfigDirectoryMaster::loadHeads() {
     auto hpath = FileUtil::joinPaths(userdb_path_, "users.HEAD");
     if (FileUtil::exists(hpath)) {
       heads_["userdb"] =
+          std::stoull(FileUtil::read(hpath).toString());
+    }
+  }
+
+  {
+    auto hpath = FileUtil::joinPaths(userdb_path_, "cluster.HEAD");
+    if (FileUtil::exists(hpath)) {
+      heads_["cluster"] =
           std::stoull(FileUtil::read(hpath).toString());
     }
   }
