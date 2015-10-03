@@ -199,3 +199,17 @@
 .zbase_session_tracking z-modal .field .error_note.hidden {
   display: none;
 }
+
+.zbase_session_tracking .error_field {
+  border: 1px solid #edc3c3;
+  background: #fff0f0;
+  color: #a94442;
+  box-shadow: 0 1px 1px rgba(0,0,0,0.1);
+  padding: 10px 20px;
+  font-size: 13px;
+  font-weight: 400
+}
+
+.zbase_session_tracking .error_field.hidden {
+  display: none;
+}

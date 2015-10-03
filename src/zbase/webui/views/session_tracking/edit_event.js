@@ -116,10 +116,14 @@ ZBase.registerView((function() {
           $.buildQueryString(field_data);
 
       $.httpPost(url, "", function(r) {
+        console.log(r);
         if (r.status == 201) {
           load();
         } else {
-          $.fatalError();
+          console.log(r.responseText);
+          $(".error_field .error_message", modal).innerHTML = r.responseText;
+          $(".error_field", modal).classList.remove("hidden");
+          //$.fatalError();
         }
       });
     });
