@@ -74,6 +74,7 @@ add_library(tsdb-server OBJECT
     core/ReplicationWorker.cc
     core/ReplicationScheme.cc
     core/ReplicationState.cc
+    core/RemoteTSDBScan.cc
     core/StaticPartitionWriter.cc
     core/StaticPartitionReplication.cc
     ${COREPROTO_SRCS})
