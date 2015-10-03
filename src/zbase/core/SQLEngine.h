@@ -23,6 +23,7 @@ public:
       PartitionMap* partition_map,
       ReplicationScheme* replication_scheme,
       CSTableIndex* cstable_index,
+      AnalyticsAuth* auth,
       const String& tsdb_namespace);
 
   static RefPtr<csql::QueryTreeNode> rewriteQuery(
