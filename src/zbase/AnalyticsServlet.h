@@ -164,6 +164,16 @@ protected:
       const http::HTTPRequest* req,
       http::HTTPResponse* res);
 
+  void sessionTrackingEventAdd(
+      const AnalyticsSession& session,
+      const http::HTTPRequest* req,
+      http::HTTPResponse* res);
+
+  void sessionTrackingEventRemove(
+      const AnalyticsSession& session,
+      const http::HTTPRequest* req,
+      http::HTTPResponse* res);
+
   void sessionTrackingEventAddField(
       const AnalyticsSession& session,
       const http::HTTPRequest* req,
