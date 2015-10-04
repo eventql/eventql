@@ -88,7 +88,7 @@ ZBase.registerView((function() {
         x: x_values,
         y: [
           {
-            name: "Sessions",
+            name: "Number of Sessions",
             values: y_values,
             color: "#3498db"
           }
@@ -97,10 +97,7 @@ ZBase.registerView((function() {
       point: {
         show: false
       },
-      types: {
-        data1: 'area',
-        data2: 'area-spline'
-      },
+      type: 'area',
       format: '%Y-%m-%d'
     };
     if (getParamTimeWindow() == "3600") {
