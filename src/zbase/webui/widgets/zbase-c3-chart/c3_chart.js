@@ -58,7 +58,7 @@ ZBaseC3Chart = function(config) {
       interaction: true,
       data: {
         x: 'x',
-        type: 'line',
+        type: config.type,
         columns: columns,
         selection: {
           enabled: true
