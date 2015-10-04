@@ -1,3 +1,5 @@
+@import url(http://fonts.googleapis.com/css?family=Roboto:400,300,500,700);
+
 *{ margin: 0; padding: 0; }
 
 *,
@@ -42,7 +44,10 @@ body{
   user-select: none;
 }
 body, input, textarea, button{ font:16px/24px 'Helvetica Neue', Helvetica, Arial, sans-serif; font-weight:400; }
-h1,h2,h3{ font-weight: normal; }
+h1,h2,h3{
+  font-weight: normal;
+  font-family: "Roboto", "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
 h1 { color: #444; font-size:36px; font-weight:600; }
 h1.large{ font-size: 36px; margin-left: -3px; margin-bottom: 8px; font-weight:400; }
 h1.bold, h1.large.bold{ font-weight:600; }
@@ -58,7 +63,7 @@ a{ font-weight:normal; text-decoration:none; cursor:pointer; color:#333; }
 a:hover {color:#333;}
 a.link,
 .link {
-  color: #1c99d6;
+  color: #3498db;
   text-decoration: none
 }
 a.link:hover { text-decoration: underline; }
@@ -132,12 +137,11 @@ template {
 .zbase_header {
   width: 100%;
   background: #fff;
-  border-bottom: 1px solid #c9d0d4;
-  box-shadow: 0 0 2px rgba(0,0,0,.2);
-  height: 40px;
+  height: 39px;]
   line-height: 30px;
   position: absolute;
   z-index: 99999;
+  font-family: "Roboto", "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
 .zbase_header .navigation_inner {
@@ -320,7 +324,7 @@ template {
  * zbase_page_title
  */
 .zbase_page_title {
-  background-color: #f9f9f9;
+  background-color: #3498db;
   border-bottom: 1px solid #c9d0d4;
   box-shadow: 0 1px 1px rgba(0,0,0,0.1);
   height: 54px;
@@ -340,14 +344,18 @@ template {
   margin: 15px 0 0 0;
   font-size: 18px;
   font-weight: 400;
-  color: #333;
+  color: #fff;
   display: inline-block;
   opacity: .9;
 }
 
+.zbase_page_title h2.pagetitle {
+  color: #fff;
+}
+
 .zbase_page_title.large h1 {
   font-weight: 500;
-  font-size: 19px;
+  font-size: 20px;
   margin: 4px 0 0 0;
 }
 
@@ -374,6 +382,10 @@ section.zbase_page_title zbase-breadcrumbs {
   line-height: 24px;
   display: block;
 }
+section.zbase_page_title zbase-breadcrumbs,
+section.zbase_page_title zbase-breadcrumbs a {
+  color: #fff;
+}
 
 /**
  * h2.pagetitle
@@ -385,13 +397,13 @@ h2.pagetitle {
 
 h2.pagetitle, h2.pagetitle a {
   line-height: 60px;
-  font-size: 19px;
+  font-size: 20px;
   font-weight: 300;
   color: #454545;
 }
 
 h2.pagetitle a:hover {
-  color: #1c99d6;
+  color: #3498db;
 }
 
 h2.pagetitle.editable {

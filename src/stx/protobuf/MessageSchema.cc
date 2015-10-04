@@ -368,6 +368,22 @@ void MessageSchema::addField(const MessageSchemaField& field) {
   fields_.emplace_back(field);
 }
 
+void MessageSchema::removeField(uint32_t id) {
+  for (auto f = fields_.begin(); f != fields_.end(); ++f) {
+    if (f->id != id) {
+      continue;
+    }
+
+    field_ids_.erase(f->name);
+    field_types_.erase(f->id);
+    field_names_.erase(f->id);
+    fields_.erase(f);
+    return;
+  }
+
+  RAISEF(kNotFoundError, "field not found: $0", id);
+}
+
 Buffer MessageSchema::encode() const {
   util::BinaryMessageWriter writer;
   encode(&writer);

@@ -49,6 +49,8 @@ public:
   bool operator<(const SHA1Hash& other) const;
   bool operator>(const SHA1Hash& other) const;
 
+  int compare(const SHA1Hash& other) const;
+
   inline const void* data() const {
     return hash;
   }

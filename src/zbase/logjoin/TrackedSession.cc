@@ -29,6 +29,18 @@ void TrackedSession::insertLogline(
     const String& evtype,
     const String& evid,
     const URI::ParamList& logline) {
+
+  String evdata;
+  if (URI::getParam(logline, "__evdata", &evdata)) {
+    events.emplace_back(
+        time,
+        evid,
+        evtype,
+        evdata);
+
+    return;
+  }
+
   if (evtype.length() != 1) {
     RAISE(kParseError, "e param invalid");
   }

@@ -586,3 +586,144 @@ TEST_CASE(RuntimeTest, TestWildcardSelect, [] () {
     EXPECT_EQ(result.getNumRows(), 1);
   }
 });
+
+TEST_CASE(RuntimeTest, TestStringStartsWithExpression, [] () {
+  auto runtime = Runtime::getDefaultRuntime();
+
+  {
+    auto v = runtime->evaluateStaticExpression("startswith('fnordblah', 'fnord')");
+    EXPECT_EQ(v.toString(), "true");
+  }
+
+  {
+    auto v = runtime->evaluateStaticExpression("startswith('fnordblah', 'f')");
+    EXPECT_EQ(v.toString(), "true");
+  }
+
+  {
+    auto v = runtime->evaluateStaticExpression("startswith('fnordblah', 'fnordblah')");
+    EXPECT_EQ(v.toString(), "true");
+  }
+
+  {
+    auto v = runtime->evaluateStaticExpression("startswith('fnordblah', 'fnordx')");
+    EXPECT_EQ(v.toString(), "false");
+  }
+
+  {
+    auto v = runtime->evaluateStaticExpression("startswith('fnordblah', 'bar')");
+    EXPECT_EQ(v.toString(), "false");
+  }
+});
+
+TEST_CASE(RuntimeTest, TestStringEndsWithExpression, [] () {
+  auto runtime = Runtime::getDefaultRuntime();
+
+  {
+    auto v = runtime->evaluateStaticExpression("endswith('fnordblah', 'blah')");
+    EXPECT_EQ(v.toString(), "true");
+  }
+
+  {
+    auto v = runtime->evaluateStaticExpression("endswith('fnordblah', 'h')");
+    EXPECT_EQ(v.toString(), "true");
+  }
+
+  {
+    auto v = runtime->evaluateStaticExpression("endswith('fnordblah', 'fnordblah')");
+    EXPECT_EQ(v.toString(), "true");
+  }
+
+  {
+    auto v = runtime->evaluateStaticExpression("endswith('fnordblah', 'bar')");
+    EXPECT_EQ(v.toString(), "false");
+  }
+});
+
+TEST_CASE(RuntimeTest, TestLogicalAnd, [] () {
+  auto runtime = Runtime::getDefaultRuntime();
+
+  {
+    auto v = runtime->evaluateStaticExpression("true AND true");
+    EXPECT_EQ(v.toString(), "true");
+  }
+
+  {
+    auto v = runtime->evaluateStaticExpression("true AND false");
+    EXPECT_EQ(v.toString(), "false");
+  }
+
+  {
+    auto v = runtime->evaluateStaticExpression("false AND true");
+    EXPECT_EQ(v.toString(), "false");
+  }
+
+  {
+    auto v = runtime->evaluateStaticExpression("false AND false");
+    EXPECT_EQ(v.toString(), "false");
+  }
+
+  {
+    auto v = runtime->evaluateStaticExpression("logical_and(true, true)");
+    EXPECT_EQ(v.toString(), "true");
+  }
+
+  {
+    auto v = runtime->evaluateStaticExpression("logical_and(false, true)");
+    EXPECT_EQ(v.toString(), "false");
+  }
+
+  {
+    auto v = runtime->evaluateStaticExpression("logical_and(true, false)");
+    EXPECT_EQ(v.toString(), "false");
+  }
+
+  {
+    auto v = runtime->evaluateStaticExpression("logical_and(false, false)");
+    EXPECT_EQ(v.toString(), "false");
+  }
+});
+
+TEST_CASE(RuntimeTest, TestLogicalOr, [] () {
+  auto runtime = Runtime::getDefaultRuntime();
+
+  {
+    auto v = runtime->evaluateStaticExpression("true OR true");
+    EXPECT_EQ(v.toString(), "true");
+  }
+
+  {
+    auto v = runtime->evaluateStaticExpression("true OR false");
+    EXPECT_EQ(v.toString(), "true");
+  }
+
+  {
+    auto v = runtime->evaluateStaticExpression("false OR true");
+    EXPECT_EQ(v.toString(), "true");
+  }
+
+  {
+    auto v = runtime->evaluateStaticExpression("false OR false");
+    EXPECT_EQ(v.toString(), "false");
+  }
+
+  {
+    auto v = runtime->evaluateStaticExpression("logical_or(true, true)");
+    EXPECT_EQ(v.toString(), "true");
+  }
+
+  {
+    auto v = runtime->evaluateStaticExpression("logical_or(false, true)");
+    EXPECT_EQ(v.toString(), "true");
+  }
+
+  {
+    auto v = runtime->evaluateStaticExpression("logical_or(true, false)");
+    EXPECT_EQ(v.toString(), "true");
+  }
+
+  {
+    auto v = runtime->evaluateStaticExpression("logical_or(false, false)");
+    EXPECT_EQ(v.toString(), "false");
+  }
+});

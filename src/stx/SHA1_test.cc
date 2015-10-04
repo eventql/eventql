@@ -34,3 +34,17 @@ TEST_CASE(SHA1Test, TestComputeSHA1, [] () {
     EXPECT_EQ(set.count(SHA1::compute(StringUtil::toString(i))), 1);
   }
 });
+
+TEST_CASE(SHA1Test, TestCompareSHA1, [] () {
+  auto a = SHA1Hash::fromHexString("ffffffffffffffffffffffffffffffffffffffff");
+  auto b = SHA1Hash::fromHexString("1000000000000000000000000000000000000000");
+  auto c = SHA1Hash::fromHexString("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+
+  EXPECT_TRUE(a > b);
+  EXPECT_TRUE(b < a);
+  EXPECT_TRUE(c > b);
+  EXPECT_FALSE(c > a);
+  EXPECT_FALSE(a < a);
+  EXPECT_FALSE(a > a);
+
+});

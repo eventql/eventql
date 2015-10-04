@@ -60,6 +60,7 @@ AnalyticsServlet::AnalyticsServlet(
     tsdb_(tsdb),
     customer_dir_(customer_dir),
     logfile_api_(app->logfileService(), customer_dir, cachedir),
+    events_api_(app->eventsService(), customer_dir, cachedir),
     documents_api_(docdb) {}
 
 void AnalyticsServlet::handleHTTPRequest(
@@ -137,6 +138,11 @@ void AnalyticsServlet::handle(
     return;
   }
 
+  if (StringUtil::beginsWith(uri.path(), "/api/v1/events")) {
+    events_api_.handle(session, req_stream, res_stream);
+    return;
+  }
+
   if (StringUtil::beginsWith(uri.path(), "/api/v1/documents")) {
     req_stream->readBody();
     documents_api_.handle(session, &req, &res);
@@ -202,21 +208,63 @@ void AnalyticsServlet::handle(
   /* SESSION TRACKING */
   if (uri.path() == "/api/v1/session_tracking/events") {
     req_stream->readBody();
-    sessionTrackingListEvents(session, &req, &res);
+    catchAndReturnErrors(&res, [this, &session, &req, &res] {
+      sessionTrackingListEvents(session, &req, &res);
+    });
+    res_stream->writeResponse(res);
+    return;
+  }
+
+  if (uri.path() == "/api/v1/session_tracking/events/add_event") {
+    expectHTTPPost(req);
+    req_stream->readBody();
+    sessionTrackingEventAdd(session, &req, &res);
+    res_stream->writeResponse(res);
+    return;
+  }
+
+  if (uri.path() == "/api/v1/session_tracking/events/remove_event") {
+    expectHTTPPost(req);
+    req_stream->readBody();
+    sessionTrackingEventRemove(session, &req, &res);
+    res_stream->writeResponse(res);
+    return;
+  }
+
+  if (uri.path() == "/api/v1/session_tracking/events/add_field") {
+    expectHTTPPost(req);
+    req_stream->readBody();
+    catchAndReturnErrors(&res, [this, &session, &req, &res] {
+      sessionTrackingEventAddField(session, &req, &res);
+    });
+    res_stream->writeResponse(res);
+    return;
+  }
+
+  if (uri.path() == "/api/v1/session_tracking/events/remove_field") {
+    expectHTTPPost(req);
+    req_stream->readBody();
+    catchAndReturnErrors(&res, [this, &session, &req, &res] {
+      sessionTrackingEventRemoveField(session, &req, &res);
+    });
     res_stream->writeResponse(res);
     return;
   }
 
   if (uri.path() == "/api/v1/session_tracking/event_info") {
     req_stream->readBody();
-    sessionTrackingEventInfo(session, &req, &res);
+    catchAndReturnErrors(&res, [this, &session, &req, &res] {
+      sessionTrackingEventInfo(session, &req, &res);
+    });
     res_stream->writeResponse(res);
     return;
   }
 
   if (uri.path() == "/api/v1/session_tracking/attributes") {
     req_stream->readBody();
-    sessionTrackingListAttributes(session, &req, &res);
+    catchAndReturnErrors(&res, [this, &session, &req, &res] {
+      sessionTrackingListAttributes(session, &req, &res);
+    });
     res_stream->writeResponse(res);
     return;
   }
@@ -285,6 +333,20 @@ void AnalyticsServlet::handle(
     executeSQLStream(uri, session, &req, &res, res_stream);
     return;
   }
+
+  if (uri.path() == "/api/v1/sql/aggregate_partition") {
+    req_stream->readBody();
+    executeSQLAggregatePartition(session, &req, &res);
+    res_stream->writeResponse(res);
+    return;
+  }
+
+  if (uri.path() == "/api/v1/sql/scan_partition") {
+    req_stream->readBody();
+    executeSQLScanPartition(session, &req, &res, res_stream);
+    return;
+  }
+
 
   res.setStatus(http::kStatusNotFound);
   res.addHeader("Content-Type", "text/html; charset=utf-8");
@@ -951,6 +1013,116 @@ void AnalyticsServlet::executeSQL(
   res->addBody(result);
 }
 
+void AnalyticsServlet::executeSQLAggregatePartition(
+    const AnalyticsSession& session,
+    const http::HTTPRequest* req,
+    http::HTTPResponse* res) {
+  auto query = req->body().toString();
+
+  Buffer result;
+  auto os = BufferOutputStream::fromBuffer(&result);
+  sql_->executeAggregate(
+      msg::decode<csql::RemoteAggregateParams>(query),
+      app_->getExecutionStrategy(session.customer()),
+      os.get());
+
+  res->setStatus(http::kStatusOK);
+  res->addHeader("Content-Type", "application/octet-stream");
+  res->addBody(result);
+}
+
+void AnalyticsServlet::executeSQLScanPartition(
+    const AnalyticsSession& session,
+    const http::HTTPRequest* req,
+    http::HTTPResponse* res,
+    RefPtr<http::HTTPResponseStream> res_stream) {
+  // FIXME error handling
+  auto query = msg::decode<RemoteTSDBScanParams>(req->body().toString());
+
+  res->setStatus(http::kStatusOK);
+  res->addHeader("Content-Type", "application/octet-stream");
+  res->addHeader("Connection", "close");
+  res_stream->startResponse(*res);
+
+  executeSQLScanPartition(
+      session,
+      query,
+      [&res_stream] (int argc, const csql::SValue* argv) -> bool {
+    Buffer buf(sizeof(uint64_t));
+    auto os = BufferOutputStream::fromBuffer(&buf);
+    for (int i = 0; i < argc; ++i) argv[i].encode(os.get());
+    *((uint64_t*) buf.data()) = buf.size() - sizeof(uint64_t);
+
+    res_stream->writeBodyChunk(buf);
+    res_stream->waitForReader();
+    return true;
+  });
+
+  util::BinaryMessageWriter buf;
+  buf.appendUInt64(0);
+  res_stream->writeBodyChunk(Buffer(buf.data(), buf.size()));
+  res_stream->finishResponse();
+}
+
+void AnalyticsServlet::executeSQLScanPartition(
+    const AnalyticsSession& session,
+    const RemoteTSDBScanParams& query,
+    Function<bool (int argc, const csql::SValue* argv)> fn) {
+  Vector<RefPtr<csql::SelectListNode>> select_list;
+  for (const auto& e : query.select_list()) {
+    csql::Parser parser;
+    parser.parseValueExpression(
+        e.expression().data(),
+        e.expression().size());
+
+    auto stmts = parser.getStatements();
+    if (stmts.size() != 1) {
+      RAISE(kIllegalArgumentError);
+    }
+
+    auto slnode = mkRef(
+        new csql::SelectListNode(
+            sql_->queryPlanBuilder()->buildValueExpression(stmts[0])));
+
+    if (e.has_alias()) {
+      slnode->setAlias(e.alias());
+    }
+
+    select_list.emplace_back(slnode);
+  }
+
+  Option<RefPtr<csql::ValueExpressionNode>> where_expr;
+  if (query.has_where_expression()) {
+    csql::Parser parser;
+    parser.parseValueExpression(
+        query.where_expression().data(),
+        query.where_expression().size());
+
+    auto stmts = parser.getStatements();
+    if (stmts.size() != 1) {
+      RAISE(kIllegalArgumentError);
+    }
+
+    where_expr = Some(mkRef(
+        sql_->queryPlanBuilder()->buildValueExpression(stmts[0])));
+  }
+
+  auto qtree = mkRef(
+      new csql::SequentialScanNode(
+            query.table_name(),
+            select_list,
+            where_expr,
+            (csql::AggregationStrategy) query.aggregation_strategy()));
+
+  auto execution_strategy = app_->getExecutionStrategy(session.customer());
+  auto expr = sql_->queryBuilder()->buildTableExpression(
+      qtree.get(),
+      execution_strategy->tableProvider(),
+      sql_);
+
+  sql_->executeStatement(expr.get(), fn);
+}
+
 void AnalyticsServlet::executeSQLStream(
     const URI& uri,
     const AnalyticsSession& session,
@@ -1153,6 +1325,191 @@ void AnalyticsServlet::sessionTrackingEventInfo(
 
   res->setStatus(http::kStatusNotFound);
   res->addBody("not found");
+}
+
+void AnalyticsServlet::sessionTrackingEventAdd(
+    const AnalyticsSession& session,
+    const http::HTTPRequest* req,
+    http::HTTPResponse* res) {
+  URI uri(req->uri());
+  const auto& params = uri.queryParams();
+
+  String event_name;
+  if (!URI::getParam(params, "event", &event_name)) {
+    res->setStatus(http::kStatusBadRequest);
+    res->addBody("missing ?event=... parameter");
+    return;
+  }
+
+  auto customer_conf = customer_dir_->configFor(session.customer())->config;
+  auto logjoin_conf = customer_conf.mutable_logjoin_config();
+
+  for (auto& ev_def : logjoin_conf->session_event_schemas()) {
+    if (ev_def.evtype() == event_name) {
+      RAISE(kRuntimeError, "an event with this name already exists");
+    }
+  }
+
+  auto field_id = logjoin_conf->session_schema_next_field_id();
+  auto ev_def = logjoin_conf->add_session_event_schemas();
+  ev_def->set_evtype(event_name);
+  ev_def->set_evid(field_id);
+
+  msg::MessageSchema schema(nullptr);
+  schema.setName(event_name);
+  ev_def->set_schema(schema.encode().toString());
+
+  logjoin_conf->set_session_schema_next_field_id(field_id + 1);
+  customer_dir_->updateCustomerConfig(customer_conf);
+
+  res->setStatus(http::kStatusCreated);
+  res->addBody("ok");
+  return;
+}
+
+void AnalyticsServlet::sessionTrackingEventRemove(
+    const AnalyticsSession& session,
+    const http::HTTPRequest* req,
+    http::HTTPResponse* res) {
+  URI uri(req->uri());
+  const auto& params = uri.queryParams();
+
+  String event_name;
+  if (!URI::getParam(params, "event", &event_name)) {
+    res->setStatus(http::kStatusBadRequest);
+    res->addBody("missing ?event=... parameter");
+    return;
+  }
+
+  auto customer_conf = customer_dir_->configFor(session.customer())->config;
+  auto logjoin_conf = customer_conf.mutable_logjoin_config();
+
+  auto events = logjoin_conf->mutable_session_event_schemas();
+  for (auto i = 0; i < events->size(); ++i) {
+    if (events->Get(i).evtype() == event_name) {
+      events->DeleteSubrange(i, 1);
+      customer_dir_->updateCustomerConfig(customer_conf);
+      res->setStatus(http::kStatusCreated);
+      res->addBody("ok");
+      return;
+    }
+  }
+
+  res->setStatus(http::kStatusNotFound);
+  res->addBody("event not found");
+}
+
+void AnalyticsServlet::sessionTrackingEventAddField(
+    const AnalyticsSession& session,
+    const http::HTTPRequest* req,
+    http::HTTPResponse* res) {
+  URI uri(req->uri());
+  const auto& params = uri.queryParams();
+
+  String event_name;
+  if (!URI::getParam(params, "event", &event_name)) {
+    res->setStatus(http::kStatusBadRequest);
+    res->addBody("missing ?event=... parameter");
+    return;
+  }
+
+  String field_name;
+  if (!URI::getParam(params, "field", &field_name)) {
+    res->setStatus(http::kStatusBadRequest);
+    res->addBody("missing ?field=... parameter");
+    return;
+  }
+
+  String field_type_str;
+  if (!URI::getParam(params, "type", &field_type_str)) {
+    res->setStatus(http::kStatusBadRequest);
+    res->addBody("missing ?type=... parameter");
+    return;
+  }
+
+  auto customer_conf = customer_dir_->configFor(session.customer())->config;
+  auto logjoin_conf = customer_conf.mutable_logjoin_config();
+
+  auto field_type = msg::fieldTypeFromString(field_type_str);
+  bool field_optional = false;
+  bool field_repeated = false;
+  auto field_id = logjoin_conf->session_schema_next_field_id();
+
+  String repeated_str;
+  if (URI::getParam(params, "repeated", &repeated_str) &&
+      repeated_str == "true") {
+    field_repeated = true;
+  }
+
+  String optional_str;
+  if (URI::getParam(params, "optional", &optional_str) &&
+      optional_str == "true") {
+    field_optional = true;
+  }
+
+  for (auto& ev_def : *logjoin_conf->mutable_session_event_schemas()) {
+    if (ev_def.evtype() != event_name) {
+      continue;
+    }
+
+    eventDefinitonAddField(
+        &ev_def,
+        field_name,
+        field_id,
+        field_type,
+        field_repeated,
+        field_optional);
+
+    logjoin_conf->set_session_schema_next_field_id(field_id + 1);
+    customer_dir_->updateCustomerConfig(customer_conf);
+    res->setStatus(http::kStatusCreated);
+    res->addBody("ok");
+    return;
+  }
+
+  res->setStatus(http::kStatusNotFound);
+  res->addBody("event not found");
+}
+
+void AnalyticsServlet::sessionTrackingEventRemoveField(
+    const AnalyticsSession& session,
+    const http::HTTPRequest* req,
+    http::HTTPResponse* res) {
+  URI uri(req->uri());
+  const auto& params = uri.queryParams();
+
+  String event_name;
+  if (!URI::getParam(params, "event", &event_name)) {
+    res->setStatus(http::kStatusBadRequest);
+    res->addBody("missing ?event=... parameter");
+    return;
+  }
+
+  String field_name;
+  if (!URI::getParam(params, "field", &field_name)) {
+    res->setStatus(http::kStatusBadRequest);
+    res->addBody("missing ?field=... parameter");
+    return;
+  }
+
+  auto customer_conf = customer_dir_->configFor(session.customer())->config;
+  auto logjoin_conf = customer_conf.mutable_logjoin_config();
+
+  for (auto& ev_def : *logjoin_conf->mutable_session_event_schemas()) {
+    if (ev_def.evtype() != event_name) {
+      continue;
+    }
+
+    eventDefinitonRemoveField(&ev_def, field_name);
+
+    customer_dir_->updateCustomerConfig(customer_conf);
+    res->setStatus(http::kStatusCreated);
+    res->addBody("ok");
+    return;
+  }
+
+  res->setStatus(http::kStatusNotFound);
+  res->addBody("event not found");
 }
 
 void AnalyticsServlet::performLogin(

@@ -15,6 +15,7 @@
 #include <csql/expressions/datetime.h>
 #include <csql/expressions/math.h>
 #include <csql/expressions/internal.h>
+#include <csql/expressions/string.h>
 
 using namespace stx;
 

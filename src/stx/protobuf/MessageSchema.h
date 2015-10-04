@@ -122,9 +122,10 @@ public:
       json::JSONObject::const_iterator begin,
       json::JSONObject::const_iterator end);
 
-protected:
-
   void addField(const MessageSchemaField& field);
+  void removeField(uint32_t id);
+
+protected:
 
   void findColumns(
       const MessageSchemaField& field,

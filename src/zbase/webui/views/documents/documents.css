@@ -1,5 +1,13 @@
 .zbase_documents .docs_header {
-  margin: 0 20px;
+  padding: 0 20px;
+  background-color: #3498db;
+  border-bottom: 1px solid #c9d0d4;
+  box-shadow: 0 1px 1px rgba(0,0,0,0.1);
+  color: #fff;
+}
+
+.zbase_documents .docs_header h2.pagetitle {
+  color: #fff;
 }
 
 .zbase_documents table.z-table {

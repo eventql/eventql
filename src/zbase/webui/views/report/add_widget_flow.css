@@ -39,6 +39,6 @@
 .zbase_report_pane z-modal.add_report_widget .widget_selection[data-selected] .inner:before {
   font-family: FontAwesome;
   content: "\f00c";
-  color: #1c99d6;
+  color: #3498db;
 }
 

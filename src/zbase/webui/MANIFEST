@@ -120,7 +120,20 @@ route {
 }
 
 route {
-  path_prefix: "/a/reports"
+  path_match: "/a/reports"
+  view: "documents"
+  require_module: "util/z-date-util"
+  require_module: "util/z-url-util"
+  require_module: "widgets/zbase-header"
+  require_module: "widgets/zbase-home-menu"
+  require_module: "widgets/z-menu"
+  require_module: "widgets/z-table"
+  require_module: "widgets/z-dropdown"
+  require_module: "views/documents"
+}
+
+route {
+  path_prefix: "/a/reports/"
   view: "report"
   require_module: "util/doc_sync"
   require_module: "util/event_source_handler"
@@ -148,18 +161,95 @@ route {
 }
 
 route {
-  path_match: "/a/settings/session_tracking"
-  view: "session_tracking_events"
+  path_match: "/a/session_tracking"
+  view: "session_tracking_dashboard"
+  require_module: "util/event_source_handler"
+  require_module: "util/z-url-util"
+  require_module: "widgets/z-menu"
+  require_module: "widgets/z-dropdown"
+  require_module: "widgets/z-table"
+  require_module: "widgets/z-progressbar"
+  require_module: "widgets/zbase-header"
+  require_module: "widgets/zbase-c3-chart"
+  require_module: "widgets/zbase-query-progress"
+  require_module: "views/session_tracking"
+}
+
+route {
+  path_match: "/a/session_tracking/journey_viewer"
+  view: "session_tracking_journey_viewer"
+  require_module: "util/z-date-util"
+  require_module: "util/event_source_handler"
+  require_module: "widgets/z-menu"
+  require_module: "widgets/z-tabbable"
+  require_module: "widgets/z-table"
+  require_module: "widgets/z-button"
+  require_module: "widgets/zbase-header"
+  require_module: "views/session_tracking"
+}
+
+route {
+  path_match: "/a/session_tracking/settings/schema"
+  view: "session_tracking_schema"
+  require_module: "widgets/z-menu"
+  require_module: "widgets/z-tabbable"
+  require_module: "widgets/z-table"
+  require_module: "widgets/z-button"
+  require_module: "widgets/z-modal"
+  require_module: "widgets/z-dropdown"
+  require_module: "widgets/z-input"
+  require_module: "widgets/z-checkbox"
+  require_module: "widgets/zbase-header"
+  require_module: "views/session_tracking"
+}
+
+route {
+  path_match: "/a/session_tracking/settings/tracking_pixel"
+  view: "session_tracking_tracking_pixel"
   require_module: "widgets/z-menu"
   require_module: "widgets/z-tabbable"
   require_module: "widgets/z-table"
   require_module: "widgets/zbase-header"
-  require_module: "widgets/zbase-settings-menu"
-  require_module: "views/settings_session_tracking"
+  require_module: "views/session_tracking"
 }
 
 route {
-  path_match: "/a/settings/session_tracking/attributes"
+  path_match: "/a/session_tracking/settings/api_access"
+  view: "session_tracking_api_access"
+  require_module: "widgets/z-menu"
+  require_module: "widgets/z-tabbable"
+  require_module: "widgets/z-table"
+  require_module: "widgets/zbase-header"
+  require_module: "views/session_tracking"
+}
+
+route {
+  path_match: "/a/session_tracking/settings/webhooks"
+  view: "session_tracking_webhooks"
+  require_module: "widgets/z-menu"
+  require_module: "widgets/z-tabbable"
+  require_module: "widgets/z-table"
+  require_module: "widgets/zbase-header"
+  require_module: "views/session_tracking"
+}
+
+route {
+  path_prefix: "/a/session_tracking/settings/schema/events/"
+  view: "edit_session_tracking_event"
+  require_module: "widgets/z-menu"
+  require_module: "widgets/z-table"
+  require_module: "widgets/z-dropdown"
+  require_module: "widgets/z-button"
+  require_module: "widgets/z-modal"
+  require_module: "widgets/z-input"
+  require_module: "widgets/z-checkbox"
+  require_module: "widgets/zbase-header"
+  require_module: "views/session_tracking"
+}
+
+
+route {
+  path_match: "/a/session_tracking/settings/attributes"
   view: "session_tracking_attributes"
   require_module: "widgets/z-menu"
   require_module: "widgets/z-tabbable"
@@ -168,8 +258,7 @@ route {
   require_module: "widgets/z-input"
   require_module: "widgets/z-button"
   require_module: "widgets/zbase-header"
-  require_module: "widgets/zbase-settings-menu"
-  require_module: "views/settings_session_tracking"
+  require_module: "views/session_tracking"
 }
 
 route {
@@ -211,7 +300,7 @@ route {
 
 route {
   path_match: "/a/"
-  view: "documents"
+  view: "appstore"
   require_module: "util/z-date-util"
   require_module: "util/z-url-util"
   require_module: "widgets/zbase-header"
@@ -219,5 +308,5 @@ route {
   require_module: "widgets/z-menu"
   require_module: "widgets/z-table"
   require_module: "widgets/z-dropdown"
-  require_module: "views/documents"
+  require_module: "views/appstore"
 }
