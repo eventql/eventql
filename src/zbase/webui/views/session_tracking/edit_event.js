@@ -21,6 +21,9 @@ ZBase.registerView((function() {
         "views/session_tracking",
         "zbase_session_tracking_edit_event_tpl");
 
+    $.onClick($("button.back", content), function() {
+      $.navigateTo("/a/session_tracking/settings/schema");
+    });
     $(".zbase_content_pane .session_tracking_content", page).appendChild(content);
 
     var info_url = "/api/v1/session_tracking/event_info?event=" + event_name;

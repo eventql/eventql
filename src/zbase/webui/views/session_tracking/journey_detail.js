@@ -1,6 +1,5 @@
 var JourneyDetail = function() {
   var render = function(page, data) {
-    console.log("render journeyt detail");
     var tpl = $.getTemplate(
         "views/session_tracking",
         "zbase_session_tracking_journey_detail_tpl");
@@ -18,12 +17,14 @@ var JourneyDetail = function() {
       attribute_pane.innerHTML += html;
     }
 
-
     var events_pane = $(".events", tpl);
     for (var ev in data.event.event) {
       renderEvent(ev, data.event.event[ev], events_pane);
     }
 
+    $.onClick($("button.back", tpl), function() {
+      $.navigateTo("/a/session_tracking/journey_viewer");
+    });
     $.replaceContent(page, tpl);
   };
 
