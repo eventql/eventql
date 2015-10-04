@@ -45,7 +45,7 @@ ZBase.registerView((function() {
   };
 
   var render = function() {
-    renderQueryProgress();
+    renderLoader();
     destroy();
 
     var query_string = buildQueryString();
@@ -57,14 +57,11 @@ ZBase.registerView((function() {
       query_mgr.close("sql_query");
       var data = JSON.parse(e.data);
       renderChart(data.results);
+      hideLoader();
     });
 
     query.addEventListener('error', function(e) {
       $.fatalError("Server Error");
-    });
-
-    query.addEventListener('status', function(e) {
-      renderQueryProgress(JSON.parse(e.data));
     });
   };
 
@@ -106,9 +103,16 @@ ZBase.registerView((function() {
     chart = ZBaseC3Chart(chart_config);
     chart.renderTimeseries("dashboard_chart");
     chart.renderLegend($(".zbase_session_tracking_dashboard .chart_legend"));
+  };
 
-    $(".zbase_session_tracking_dashboard .query_progress").classList.add("hidden");
-    $(".zbase_session_tracking_dashboard .dashboard").classList.remove("hidden");
+  var renderLoader = function() {
+    $(".zbase_session_tracking_dashboard .zbase_loader").classList.remove("hidden");
+    $(".zbase_session_tracking_dashboard .inner_chart").classList.add("hidden");
+  };
+
+  var hideLoader = function() {
+    $(".zbase_session_tracking_dashboard .zbase_loader").classList.add("hidden");
+    $(".zbase_session_tracking_dashboard .inner_chart").classList.remove("hidden");
   };
 
   var buildQueryString = function() {

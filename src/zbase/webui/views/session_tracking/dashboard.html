@@ -14,9 +14,7 @@
 
     <h2 class="pagetitle"><em>Dashboard</em></h2>
 
-    <div class="query_progress"></div>
-
-    <div class="dashboard hidden">
+    <div class="dashboard">
       <div class="chart_panel">
         <label>Display:</label>
         <z-dropdown data-resolved class="input metric" name="metric">
@@ -41,6 +39,17 @@
       </div>
 
       <div class="chart_container">
+        <div class="zbase_loader">
+          <div class="spinner_outer">
+            <div class="spinner">
+              <div class="rect1"></div>
+              <div class="rect2"></div>
+              <div class="rect3"></div>
+              <div class="rect4"></div>
+              <div class="rect5"></div>
+            </div>
+          </div>
+        </div>
         <div class="inner_chart" id="dashboard_chart"></div>
       </div>
     </div>
