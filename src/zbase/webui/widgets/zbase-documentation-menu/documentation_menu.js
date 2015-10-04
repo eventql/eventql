@@ -16,7 +16,7 @@ var DocumentationMenu = function() {
       var indexSpan = document.createElement("span");
       var textSpan = document.createElement("span");
       indexSpan.classList.add("index");
-      indexSpan.innerHTML = index.concat(++j).join(".");
+      indexSpan.innerHTML = index.concat(++j).join(".") + ".";
       textSpan.innerHTML = item;
       link.appendChild(indexSpan);
       link.appendChild(textSpan);
