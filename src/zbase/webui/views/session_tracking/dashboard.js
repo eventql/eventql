@@ -88,7 +88,7 @@ ZBase.registerView((function() {
         x: x_values,
         y: [
           {
-            name: "Number of Sessions",
+            name: getMetricTitle(),
             values: y_values,
             color: "#3498db"
           }
@@ -131,6 +131,12 @@ ZBase.registerView((function() {
 
   var getParamMetric = function() {
     return $(".zbase_session_tracking_dashboard z-dropdown.metric").getValue();
+  };
+
+  var getMetricTitle = function() {
+    return $(
+        ".zbase_session_tracking_dashboard z-dropdown-item[data-selected]")
+        .getAttribute("data-title");
   };
 
   var getParamTimeWindow = function() {
