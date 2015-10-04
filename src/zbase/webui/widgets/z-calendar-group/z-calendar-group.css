@@ -1,0 +1,127 @@
+z-calendar-group table {
+  font-size: 1em;
+  line-height: 1em;
+  color: rgba(0, 0, 0, 0.8);
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+z-calendar-group table td {
+  line-height: 1.3em;
+  text-align:center;
+  cursor: default;
+  color: inherit;
+  padding: 0;
+  vertical-align: top;
+}
+
+/*table tr {
+  height: 1.98em;
+}*/
+
+z-calendar-group table th {
+  padding: 0.4em;
+  line-height: 1.3em;
+  text-align: center;
+  font-weight: normal;
+  color: inherit;
+}
+
+z-calendar-group table td.border {
+  border-left: 1px solid rgba(39, 41, 43, 0.15);
+}
+
+z-calendar-group table td.border.bottom {
+  border-bottom: 1px solid rgba(39, 41, 43, 0.15);
+}
+
+z-calendar-group table.calendar td {
+  padding: 0.45em 0.5em;
+}
+
+z-calendar-group table td.selectable:hover {
+  cursor: pointer;
+  background-color: #fffbe6;
+}
+
+z-calendar-group table tr.month_header td {
+  text-align: center;
+  background-color: #F4F4F4;
+  background-image: -webkit-gradient(linear, left top, left bottom, from(#f4f4f4), to(#e9e9e9));
+  background-image: -webkit-linear-gradient(top, #f4f4f4, #e9e9e9);
+  background-image: -moz-linear-gradient(top, #f4f4f4, #e9e9e9);
+  background-image: -ms-linear-gradient(top, #f4f4f4, #e9e9e9);
+  background-image: -o-linear-gradient(top, #f4f4f4, #e9e9e9);
+  background-image: linear-gradient(top, #f4f4f4, #e9e9e9);
+  border-top: 1px solid rgba(39, 41, 43, 0.15);
+}
+
+z-calendar-group table tr.month_picker td {
+  padding: 0;
+}
+
+z-calendar-group .fa {
+  color: inherit;
+  padding-left: 0.4em;
+  padding-right: 0.4em;
+}
+
+z-calendar-group .fa:hover {
+  cursor:pointer;
+}
+
+z-calendar-group .month_picker {
+  vertical-align: top;
+}
+
+z-calendar-group .month_picker .picker {
+  padding: 0.45em;
+  color: rgba(0, 0, 0, 0.8);
+  font-size: 0.8em;
+  background-color: #F4F4F4;
+  background-image: -webkit-gradient(linear, left top, left bottom, from(#f4f4f4), to(#e9e9e9));
+  background-image: -webkit-linear-gradient(top, #f4f4f4, #e9e9e9);
+  background-image: -moz-linear-gradient(top, #f4f4f4, #e9e9e9);
+  background-image: -ms-linear-gradient(top, #f4f4f4, #e9e9e9);
+  background-image: -o-linear-gradient(top, #f4f4f4, #e9e9e9);
+  background-image: linear-gradient(top, #f4f4f4, #e9e9e9);
+  border-top: 1px solid rgba(39, 41, 43, 0.15);
+  border-bottom: 1px solid rgba(39, 41, 43, 0.15);
+}
+
+z-calendar-group .picker.prev {
+  border-left: 1px solid rgba(39, 41, 43, 0.15);
+}
+
+z-calendar-group .picker.next {
+  border-right: 1px solid rgba(39, 41, 43, 0.15);
+}
+
+
+/**********************
+  States
+***********************/
+z-calendar-group table tr.week td {
+ color: rgba(0, 0, 0, 0.6); 
+}
+
+z-calendar-group table tr.week td.selectable {
+  color: rgba(0, 0, 0, 0.85);
+}
+
+z-calendar-group table td.highlight {
+  background-color: #F4F4F4;
+}
+
+z-calendar-group table td.highlight_border {
+ font-weight: bold;
+}
+
+z-calendar-group table td.bright {
+  opacity: 0.6;
+}
+
+z-calendar-group table td.colored {
+  background-color: #F4F4F4;
+}
+
