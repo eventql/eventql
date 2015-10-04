@@ -78,6 +78,7 @@ ZBase.registerView((function() {
     }
 
     $.onClick(journey, function() {
+      destroy();
       var journey_detail = JourneyDetail();
       journey_detail.render($(".zbase_user_journey_viewer"), data);
     });
