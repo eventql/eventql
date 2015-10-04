@@ -54,3 +54,6 @@
   border-bottom: none;
 }
 
+.zbase_session_tracking .edit_event .add_pane {
+  padding: 13px;
+}
