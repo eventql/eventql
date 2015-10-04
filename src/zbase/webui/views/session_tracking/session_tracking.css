@@ -73,14 +73,10 @@
   border-left: 1px solid #e1e1e1;
   border-right: 1px solid #e1e1e1;
   border-bottom: 1px solid #e1e1e1;
-  padding: 13px;
+  padding: 20px;
   text-align: center;
   font-size: 14px;
   background: rgba(0, 0, 0, 0.03)
-}
-
-.zbase_session_tracking .add_pane a.link {
-  text-decoration: underline;
 }
 
 .zbase_session_tracking .add_session_attribute.hidden {
@@ -120,23 +116,6 @@
 .zbase_session_tracking table td.icon i:hover {
   cursor: pointer;
   color: #3498db;
-}
-
-.zbase_session_tracking table.z-table.schemas tbody tr:hover {
-  cursor: pointer;
-}
-
-.zbase_session_tracking table.z-table.schemas tbody tr td {
-  line-height: 24px;
-}
-
-.zbase_session_tracking table.z-table.schemas tbody tr td.name {
-  color: #000;
-}
-
-.zbase_session_tracking table.z-table.schemas tbody tr td.type {
-  color: #888;
-  text-transform: uppercase;
 }
 
 .zbase_session_tracking button.add_field {
