@@ -639,3 +639,91 @@ TEST_CASE(RuntimeTest, TestStringEndsWithExpression, [] () {
     EXPECT_EQ(v.toString(), "false");
   }
 });
+
+TEST_CASE(RuntimeTest, TestLogicalAnd, [] () {
+  auto runtime = Runtime::getDefaultRuntime();
+
+  {
+    auto v = runtime->evaluateStaticExpression("true AND true");
+    EXPECT_EQ(v.toString(), "true");
+  }
+
+  {
+    auto v = runtime->evaluateStaticExpression("true AND false");
+    EXPECT_EQ(v.toString(), "false");
+  }
+
+  {
+    auto v = runtime->evaluateStaticExpression("false AND true");
+    EXPECT_EQ(v.toString(), "false");
+  }
+
+  {
+    auto v = runtime->evaluateStaticExpression("false AND false");
+    EXPECT_EQ(v.toString(), "false");
+  }
+
+  {
+    auto v = runtime->evaluateStaticExpression("logical_and(true, true)");
+    EXPECT_EQ(v.toString(), "true");
+  }
+
+  {
+    auto v = runtime->evaluateStaticExpression("logical_and(false, true)");
+    EXPECT_EQ(v.toString(), "false");
+  }
+
+  {
+    auto v = runtime->evaluateStaticExpression("logical_and(true, false)");
+    EXPECT_EQ(v.toString(), "false");
+  }
+
+  {
+    auto v = runtime->evaluateStaticExpression("logical_and(false, false)");
+    EXPECT_EQ(v.toString(), "false");
+  }
+});
+
+TEST_CASE(RuntimeTest, TestLogicalOr, [] () {
+  auto runtime = Runtime::getDefaultRuntime();
+
+  {
+    auto v = runtime->evaluateStaticExpression("true OR true");
+    EXPECT_EQ(v.toString(), "true");
+  }
+
+  {
+    auto v = runtime->evaluateStaticExpression("true OR false");
+    EXPECT_EQ(v.toString(), "true");
+  }
+
+  {
+    auto v = runtime->evaluateStaticExpression("false OR true");
+    EXPECT_EQ(v.toString(), "true");
+  }
+
+  {
+    auto v = runtime->evaluateStaticExpression("false OR false");
+    EXPECT_EQ(v.toString(), "false");
+  }
+
+  {
+    auto v = runtime->evaluateStaticExpression("logical_or(true, true)");
+    EXPECT_EQ(v.toString(), "true");
+  }
+
+  {
+    auto v = runtime->evaluateStaticExpression("logical_or(false, true)");
+    EXPECT_EQ(v.toString(), "true");
+  }
+
+  {
+    auto v = runtime->evaluateStaticExpression("logical_or(true, false)");
+    EXPECT_EQ(v.toString(), "true");
+  }
+
+  {
+    auto v = runtime->evaluateStaticExpression("logical_or(false, false)");
+    EXPECT_EQ(v.toString(), "false");
+  }
+});

@@ -38,13 +38,6 @@ Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildSequentialScan(
     return None<ScopedPtr<csql::TableExpression>>();
   }
 
-  if (table_ref.host.isEmpty() || table_ref.host.get() != "localhost") {
-    RAISEF(
-        kRuntimeError,
-        "error while opening table '$0': host must be == localhost",
-        node->tableName());
-  }
-
   if (table_ref.partition_key.isEmpty()) {
     RAISEF(
         kRuntimeError,
@@ -52,11 +45,10 @@ Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildSequentialScan(
         node->tableName());
   }
 
-  auto partition_key = table_ref.partition_key.get();
-  if (replication_scheme_->hasLocalReplica(partition_key)) {
-    return buildLocalSequentialScan(node, table_ref, runtime);
-  } else {
+  if (table_ref.host.isEmpty() || table_ref.host.get() != "localhost") {
     return buildRemoteSequentialScan(node, table_ref, runtime);
+  } else {
+    return buildLocalSequentialScan(node, table_ref, runtime);
   }
 }
 

@@ -130,13 +130,13 @@ int main(int argc, const char** argv) {
       "<addr>");
 
   flags.defineFlag(
-      "replicate_to",
+      "join",
       cli::FlagParser::T_STRING,
       false,
       NULL,
       NULL,
       "url",
-      "<addr>");
+      "<name>");
 
   flags.defineFlag(
       "loglevel",
@@ -180,7 +180,8 @@ int main(int argc, const char** argv) {
   ConfigDirectory customer_dir(
       cdb_dir,
       InetAddr::resolve(flags.getString("master")),
-      ConfigTopic::CUSTOMERS | ConfigTopic::TABLES | ConfigTopic::USERDB);
+      ConfigTopic::CUSTOMERS | ConfigTopic::TABLES | ConfigTopic::USERDB |
+      ConfigTopic::CLUSTERCONFIG);
 
   /* dproc */
   auto local_scheduler = mkRef(
@@ -193,44 +194,21 @@ int main(int argc, const char** argv) {
   /* DocumentDB */
   DocumentDB docdb(flags.getString("datadir"));
 
+  /* clusterconfig */
+  auto cluster_config = customer_dir.clusterConfig();
+  logInfo(
+      "zbase",
+      "Starting with cluster config: $0",
+      cluster_config.DebugString());
+
   /* tsdb */
-  RefPtr<zbase::ReplicationScheme> repl_scheme;
-
-  auto repl_targets = flags.getStrings("replicate_to");
-  if (repl_targets.empty()) {
-    repl_scheme = RefPtr<zbase::ReplicationScheme>(
-        new zbase::StandaloneReplicationScheme());
-  } else {
-    Vector<zbase::ReplicaRef> replicas;
-
-    for (const auto& r : repl_targets) {
-      auto addr = r;
-      auto addr_end = StringUtil::find(addr, '+');
-      if (addr_end != String::npos) {
-        addr = addr.substr(0, addr_end);
-      }
-
-      zbase::ReplicaRef rref(
-          SHA1::compute(r),
-          InetAddr::resolve(addr));
-
-      logInfo(
-          "zbase",
-          "Adding Remote Replica: $0 ($1)",
-          rref.addr.hostAndPort(),
-          rref.unique_id.toString());
-
-      replicas.emplace_back(rref);
-    }
-
-    if (flags.isSet("frontend")) {
-      repl_scheme = RefPtr<zbase::ReplicationScheme>(
-          new zbase::FrontendReplicationScheme(replicas));
-    } else {
-      repl_scheme = RefPtr<zbase::ReplicationScheme>(
-          new zbase::FixedReplicationScheme(replicas));
-    }
+  Option<String> local_replica;
+  if (flags.isSet("join")) {
+    local_replica = Some(flags.getString("join"));
   }
+
+  auto repl_scheme = RefPtr<zbase::ReplicationScheme>(
+        new zbase::DHTReplicationScheme(cluster_config, local_replica));
 
   auto tsdb_dir = FileUtil::joinPaths(flags.getString("datadir"), "tsdb");
   if (!FileUtil::exists(tsdb_dir)) {
