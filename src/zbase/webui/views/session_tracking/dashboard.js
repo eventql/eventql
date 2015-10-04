@@ -88,7 +88,7 @@ ZBase.registerView((function() {
         x: x_values,
         y: [
           {
-            name: "Sessions",
+            name: getMetricTitle(),
             values: y_values,
             color: "#3498db"
           }
@@ -97,10 +97,7 @@ ZBase.registerView((function() {
       point: {
         show: false
       },
-      types: {
-        data1: 'area',
-        data2: 'area-spline'
-      },
+      type: 'area',
       format: '%Y-%m-%d'
     };
     if (getParamTimeWindow() == "3600") {
@@ -134,6 +131,12 @@ ZBase.registerView((function() {
 
   var getParamMetric = function() {
     return $(".zbase_session_tracking_dashboard z-dropdown.metric").getValue();
+  };
+
+  var getMetricTitle = function() {
+    return $(
+        ".zbase_session_tracking_dashboard z-dropdown-item[data-selected]")
+        .getAttribute("data-title");
   };
 
   var getParamTimeWindow = function() {
