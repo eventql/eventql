@@ -994,10 +994,10 @@ ValueExpressionNode* QueryPlanBuilder::buildValueExpression(ASTNode* ast) {
       return buildOperator("neq", ast);
 
     case ASTNode::T_AND_EXPR:
-      return buildOperator("and", ast);
+      return buildOperator("logical_and", ast);
 
     case ASTNode::T_OR_EXPR:
-      return buildOperator("or", ast);
+      return buildOperator("logical_or", ast);
 
     case ASTNode::T_NEGATE_EXPR:
       return buildOperator("neg", ast);
