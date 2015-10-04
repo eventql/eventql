@@ -1,0 +1,38 @@
+<template id='z-daterangepicker-base-tpl'>
+  <z-daterangepicker-field>
+    <i class='fa fa-calendar'></i>
+    <div class="field_values"></div>
+    <i class='fa fa-caret-down'></i>
+  </z-daterangepicker-field>
+
+  <z-daterangepicker-widget>
+    <div class="inner">
+
+      <z-calendar-group data-selectable='past' data-select='from'></z-calendar-group>
+
+      <z-daterangepicker-controls>
+
+        <label>Date Range:</label>
+        <z-dropdown class='input' >
+          <z-dropdown-flyout>
+            <z-dropdown-items>
+            </z-dropdown-items>
+          </z-dropdown-flyout>
+        </z-dropdown>
+
+        <div style='clear: both'></div>
+
+        <div class="container">
+          <input class='z-input date-select-highlight' readonly data-action='date-select-from' />
+          <span class="seperator">&#45;</span>
+          <input class='fn-input' readonly data-action='date-select-until' />
+        </div>
+
+        <fn-button data-action='date-select-cancel'>Cancel</fn-button>
+        <fn-button data-action='date-select-apply'>Apply</fn-button>
+
+      </z-daterangepicker-controls>
+
+    </div>
+  </z-daterangepicker-widget>
+</template
