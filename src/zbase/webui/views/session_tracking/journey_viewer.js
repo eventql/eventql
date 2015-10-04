@@ -35,7 +35,6 @@ ZBase.registerView((function() {
 
     query.addEventListener('progress', function(e) {
       var loading_bar = $(".zbase_user_journey_viewer .journeys .loading_bar");
-      console.log(e);
       if (JSON.parse(e.data).status == "finished") {
         query_mgr.close("journey_fetch");
         loading_bar.remove();
@@ -50,7 +49,6 @@ ZBase.registerView((function() {
   };
 
   var renderJourney = function(data) {
-    console.log(data);
     var journey = document.createElement("li");
     journey.classList.add("journey");
 
@@ -68,7 +66,7 @@ ZBase.registerView((function() {
       attr.classList.add("event");
       attr.innerHTML = "<i class='fa fa-tag'></i> " + $.escapeHTML(k) + ": <em>"+ $.escapeHTML(data.event.attr[k]) + "</em>";
       journey.appendChild(attr);
-      console.log(k);
+      //console.log(k);
     }
 
     for (k in data.event.event) {
@@ -76,8 +74,13 @@ ZBase.registerView((function() {
       attr.classList.add("event");
       attr.innerHTML = "<i class='fa fa-cube'></i> " + $.escapeHTML(k);
       journey.appendChild(attr);
-      console.log(k);
+      //console.log(k);
     }
+
+    $.onClick(journey, function() {
+      var journey_detail = JourneyDetail();
+      journey_detail.render($(".zbase_user_journey_viewer"), data);
+    });
 
     $(".zbase_user_journey_viewer .journeys").appendChild(journey);
   };

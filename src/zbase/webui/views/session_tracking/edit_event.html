@@ -15,7 +15,7 @@
       </zbase-breadcrumbs-section>
     </zbase-breadcrumbs>
 
-    <h2 class='pagetitle edit_event'><em>Fields</em></h3>
+    <h2 class='pagetitle edit_event'>Event Fields <em class="event_name"></em></h3>
 
     <div class="table_container">
       <table class="z-table edit_event">
@@ -45,8 +45,8 @@
           </h4>
         </div>
         <div class="z-modal-footer">
-          <button class="z-button secondary close">Cancel</button>
           <button class="z-button primary submit">Yes</button>
+          <button class="z-button secondary close">Cancel</button>
         </div>
       </z-modal-box>
     </z-modal>
@@ -59,6 +59,10 @@
       <table class="z-table">
         <tbody></tbody>
       </table>
+
+      <div class="add_pane">
+        <a class="link add_field">Add Field</a>
+      </div>
     </td>
   </tr>
 </template>
@@ -68,29 +72,12 @@
     <td class="info">
       <span class="name"></span>
       <span class="type"></span>
+      <span class="repeated"></span>
     </td>
-    <td class='icon'>
-      <z-dropdown data-resolved data-hover>
-        <z-dropdown-header>
-          <z-dropdown-header-value data-static>
-            <i class='fa fa-cog'></i>
-          </z-dropdown-header-value>
-          <z-dropdown-header-icon></z-dropdown-header-icon>
-        </z-dropdown-header>
-
-        <z-dropdown-flyout>
-          <z-dropdown-items>
-            <z-dropdown-item data-value="add">Add</z-dropdown-item>
-            <z-dropdown-item data-value="delete">Delete</z-dropown-item>
-          </z-dropdown-items>
-        </z-dropdown-flyout>
-      </z-dropdown>
+    <td class="icon">
+      <i class="fa fa-trash-o delete"></i>
     </td>
   </tr>
-
-  <!--<tr>
-    <td colspan="2" class="add_pane" style="padding: 5px; color: #3498db; text-decoration: underline;">Add</td>
-  </tr>-->
 </template>
 
 <template id="zbase_session_tracking_add_event_modal_tpl">
@@ -99,6 +86,10 @@
       <div class="z-modal-header">Add Field</div>
 
       <div class="z-modal-content">
+        <div class="error_field hidden">
+          Error: <span class="error_message"></span>
+        </div>
+
         <div class="field">
           <label>Field:</label>
           <input class="z-input" type="text" />
