@@ -13,13 +13,13 @@ ZBase.registerView((function() {
 
     var content = $(".zbase_documentation_content");
 
-    if(path) {
+    if(path && path.split("/").length > 3) {
       var key = path.split("/").pop();
       $.httpGet("/a/_/d/" + key + ".html", function(res) {
         if(res.status == 200) {
           content.innerHTML = res.response;
         } else {
-          $.fatalError("Could not get markdown file \"" + key + ".html\"."); 
+          $.fatalError("Could not get markdown file \"" + key + ".html\".");
         }
       });
     }
