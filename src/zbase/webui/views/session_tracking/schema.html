@@ -9,7 +9,7 @@
         <a href="/a/session_tracking">User Journeys</a>
       </zbase-breadcrumbs-section>
       <zbase-breadcrumbs-section>
-        <a href="/a/session_tracking/settings/schema">Schema</a>
+        <a href="/a/session_tracking/settings/schema">Session Schema</a>
       </zbase-breadcrumbs-section>
     </zbase-breadcrumbs>
 
@@ -28,7 +28,7 @@
       </table>
 
       <div class="add_pane">
-        <a class="link add">Add</a>
+        <a class="link add"><i class="fa fa-plus"></i> Add Field</a>
       </div>
 
     </div>
@@ -61,7 +61,8 @@
 
 <template id="zbase_session_tracking_schema_event_row_tpl">
   <tr class="event">
-    <td class="name">
+    <td>
+      <i class="fa fa-cube"></i> <span class="name"></span>
     </td>
     <td class="type">
     </td>
@@ -87,7 +88,8 @@
 
 <template id="zbase_session_tracking_schema_attr_row_tpl">
   <tr class="attr">
-    <td class="name">
+    <td>
+      <i class="fa fa-tag"></i> <span class="name"></span>
     </td>
     <td class="type">
     </td>
