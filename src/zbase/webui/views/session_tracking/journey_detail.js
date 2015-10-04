@@ -5,22 +5,7 @@ var JourneyDetail = function() {
         "zbase_session_tracking_journey_detail_tpl");
 
     $(".session_id", tpl).innerHTML = data.event.session_id;
-    $(".time", tpl).innerHTML =
-        DateUtil.printTimestampShort(data.event.first_seen_time / 1000) +
-        "&mdash;" +
-        DateUtil.printTimestampShort(data.event.last_seen_time / 1000);
-
-    var attribute_pane = $(".attributes", tpl);
-    for (var attr in data.event.attr) {
-      var html =
-          "<div><label>" + attr + ":</label><span>" + data.event.attr[attr] + "</span></div>";
-      attribute_pane.innerHTML += html;
-    }
-
-    var events_pane = $(".events", tpl);
-    for (var ev in data.event.event) {
-      renderEvent(ev, data.event.event[ev], events_pane);
-    }
+    $(".session_json", tpl).innerHTML = prettyPrintJSON(JSON.stringify(data));
 
     $.onClick($("button.back", tpl), function() {
       $.navigateTo("/a/session_tracking/journey_viewer");
@@ -28,16 +13,78 @@ var JourneyDetail = function() {
     $.replaceContent(page, tpl);
   };
 
-  var renderEvent = function(name, json, elem) {
-    console.log(name, json);
+  var prettyPrintJSON = function(json_str) {
+    var pretty_json = "";
+    var space = 0;
+
+    for (var i = 0; i < json_str.length; i++) {
+      if (json_str[i] == "[") {
+        space++;
+        pretty_json += "[ <br />";
+        for (var j = 0; j < space; j++) {
+          pretty_json += "&nbsp;&nbsp;&nbsp;"
+        }
+        continue;
+      }
+      if (json_str[i] == "{") {
+        space++;
+        pretty_json += "{ <br />";
+        for (var j = 0; j < space; j++) {
+          pretty_json += "&nbsp;&nbsp;&nbsp;"
+        }
+        continue;
+      }
+      if (json_str[i] == ",") {
+        pretty_json += ", <br />";
+        for (var j = 0; j < space; j++) {
+          pretty_json += "&nbsp;&nbsp;&nbsp;"
+        }
+        continue;
+      }
+
+      if (json_str[i] == "]") {
+        space--;
+        pretty_json += "<br />";
+        for (var j = 0; j < space; j++) {
+          pretty_json += "&nbsp;&nbsp;&nbsp;"
+        }
+        pretty_json += "]";
+        continue;
+      }
+      if (json_str[i] == "}" ) {
+        space--;
+        pretty_json += "<br />";
+        for (var j = 0; j < space; j++) {
+          pretty_json += "&nbsp;&nbsp;&nbsp;"
+        }
+        pretty_json += "}";
+        continue;
+      }
+      pretty_json += json_str[i];
+    }
+
+    return pretty_json;
+  };
+
+  /*var renderEvent = function(name, events, elem) {
     var tpl = $.getTemplate(
         "views/session_tracking",
         "zbase_session_tracking_journey_detail_event_tpl");
 
     $("h3", tpl).innerHTML = name;
+    var event_data = $(".event_data", tpl);
+
+    for (var i = 0; i < events.length; i++) {
+      var html = document.createElement("div");
+      html.innerHTML = JSON.stringify(events[i]);
+      if (i < events.length - 1) {
+        html.innerHTML += ",";
+      }
+      event_data.appendChild(html);
+    }
 
     elem.appendChild(tpl);
-  };
+  };*/
 
   return {
     render: render
