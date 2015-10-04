@@ -10,6 +10,7 @@
 #pragma once
 #include <stx/stdtypes.h>
 #include <csql/runtime/tablerepository.h>
+#include <zbase/AnalyticsAuth.h>
 #include <zbase/core/TSDBTableRef.h>
 #include <zbase/core/PartitionMap.h>
 #include <zbase/core/CSTableIndex.h>
@@ -27,7 +28,9 @@ public:
   TSDBTableProvider(
       const String& tsdb_namespace,
       PartitionMap* partition_map,
-      CSTableIndex* cstable_index);
+      ReplicationScheme* replication_scheme,
+      CSTableIndex* cstable_index,
+      AnalyticsAuth* auth);
 
   Option<ScopedPtr<csql::TableExpression>> buildSequentialScan(
         RefPtr<csql::SequentialScanNode> node,
@@ -40,11 +43,23 @@ public:
 
 protected:
 
+  Option<ScopedPtr<csql::TableExpression>> buildLocalSequentialScan(
+        RefPtr<csql::SequentialScanNode> node,
+        const TSDBTableRef& table_ref,
+        csql::QueryBuilder* runtime) const;
+
+  Option<ScopedPtr<csql::TableExpression>> buildRemoteSequentialScan(
+        RefPtr<csql::SequentialScanNode> node,
+        const TSDBTableRef& table_ref,
+        csql::QueryBuilder* runtime) const;
+
   csql::TableInfo tableInfoForTable(const TSDBTableInfo& table) const;
 
   String tsdb_namespace_;
   PartitionMap* partition_map_;
+  ReplicationScheme* replication_scheme_;
   CSTableIndex* cstable_index_;
+  AnalyticsAuth* auth_;
 };
 
 

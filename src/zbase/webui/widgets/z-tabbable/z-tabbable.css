@@ -148,7 +148,7 @@ z-tabbable[data-content-attached] z-tab-content[data-active],
 }
 
 .zbase_app z-tabbable.open_tabs z-tab[data-active] {
-  border-top: 2px solid #1c99d6;
+  border-top: 2px solid #3498db;
   border-left: 1px solid #ddd;
   border-right: 1px solid #ddd;
   background: #fff;

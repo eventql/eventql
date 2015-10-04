@@ -209,10 +209,70 @@ void DynamicMessage::fromJSON(
     json::JSONObject::const_iterator begin,
     json::JSONObject::const_iterator end) {
 
+  for (const auto& field : schema_->fields()) {
+    auto field_data = json::objectLookup(begin, end, field.name);
+    if (field_data == end) {
+      continue;
+    }
+
+    switch (field_data->type) {
+
+      case json::JSON_ARRAY_BEGIN: {
+        auto aend = std::min(end, field_data + field_data->size);
+        for (field_data++; field_data < aend; field_data += field_data->size) {
+          switch (field_data->type) {
+
+            case json::JSON_OBJECT_BEGIN: {
+              auto oend = std::min(end, field_data + field_data->size);
+              addObject(
+                  field.name,
+                  [field_data, oend] (msg::DynamicMessage* cld) {
+                cld->fromJSON(field_data, oend);
+              });
+            }
+
+            case json::JSON_STRING:
+            case json::JSON_NUMBER:
+            case json::JSON_TRUE:
+            case json::JSON_FALSE:
+              addField(field.name, field_data->data);
+
+            default:
+              break;
+
+          }
+        }
+        break;
+      }
+
+      case json::JSON_OBJECT_BEGIN: {
+        auto oend = std::min(end, field_data + field_data->size);
+        addObject(
+            field.name,
+            [field_data, oend] (msg::DynamicMessage* cld) {
+          cld->fromJSON(field_data, oend);
+        });
+      }
+
+      case json::JSON_STRING:
+      case json::JSON_NUMBER:
+      case json::JSON_TRUE:
+      case json::JSON_FALSE:
+        addField(field.name, field_data->data);
+
+      default:
+        continue;
+
+    }
+  }
 }
 
 const msg::MessageObject& DynamicMessage::data() const {
   return data_;
+}
+
+void DynamicMessage::setData(msg::MessageObject data) {
+  data_ = data;
 }
 
 RefPtr<msg::MessageSchema> DynamicMessage::schema() const {

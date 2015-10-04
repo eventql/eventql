@@ -30,6 +30,7 @@
 #include "stx/cli/flagparser.h"
 #include "zbase/dproc/LocalScheduler.h"
 #include "zbase/dproc/DispatchService.h"
+#include "zbase/ConfigDirectory.h"
 #include "sstable/sstablereader.h"
 #include "zbase/JoinedSession.pb.h"
 #include "zbase/core/TimeWindowPartitioner.h"
@@ -46,8 +47,36 @@
 #include "csql/runtime/tablerepository.h"
 
 using namespace stx;
+using namespace zbase;
 
 stx::thread::EventLoop ev;
+
+void cmd_cluster_status(const cli::FlagParser& flags) {
+  ConfigDirectoryClient cclient(
+      InetAddr::resolve(flags.getString("master")));
+
+  auto cluster = cclient.fetchClusterConfig();
+  iputs("Cluster config:\n$0", cluster.DebugString());
+}
+
+void cmd_cluster_add_node(const cli::FlagParser& flags) {
+  ConfigDirectoryClient cclient(
+      InetAddr::resolve(flags.getString("master")));
+
+  auto cluster = cclient.fetchClusterConfig();
+  auto node = cluster.add_dht_nodes();
+  node->set_name(flags.getString("name"));
+  node->set_addr(flags.getString("addr"));
+  node->set_status(DHTNODE_LIVE);
+
+  auto vnodes = flags.getInt("vnodes");
+  for (size_t i = 0; i < vnodes; ++i) {
+    auto token = Random::singleton()->sha1().toString();
+    *node->add_sha1_tokens() = token;
+  }
+
+  cclient.updateClusterConfig(cluster);
+}
 
 void cmd_import_session_sstable(const cli::FlagParser& flags) {
   thread::EventLoop ev;
@@ -298,6 +327,7 @@ void cmd_backfill_session_sstable(const cli::FlagParser& flags) {
   ev.shutdown();
   evloop_thread.join();
 }
+
 int main(int argc, const char** argv) {
   stx::Application::init();
   stx::Application::logToStderr();
@@ -345,6 +375,61 @@ int main(int argc, const char** argv) {
       NULL,
       "input file path",
       "<path>");
+
+  /* command: cluster_status */
+  auto cluster_status_cmd = cli.defineCommand("cluster-status");
+  cluster_status_cmd->onCall(
+      std::bind(&cmd_cluster_status, std::placeholders::_1));
+
+  cluster_status_cmd->flags().defineFlag(
+      "master",
+      cli::FlagParser::T_STRING,
+      true,
+      NULL,
+      NULL,
+      "url",
+      "<addr>");
+
+  /* command: cluster_add_node */
+  auto cluster_add_node_cmd = cli.defineCommand("cluster-add-node");
+  cluster_add_node_cmd->onCall(
+      std::bind(&cmd_cluster_add_node, std::placeholders::_1));
+
+  cluster_add_node_cmd->flags().defineFlag(
+      "master",
+      cli::FlagParser::T_STRING,
+      true,
+      NULL,
+      NULL,
+      "url",
+      "<addr>");
+
+  cluster_add_node_cmd->flags().defineFlag(
+      "name",
+      stx::cli::FlagParser::T_STRING,
+      true,
+      NULL,
+      NULL,
+      "node name",
+      "<string>");
+
+  cluster_add_node_cmd->flags().defineFlag(
+      "addr",
+      stx::cli::FlagParser::T_STRING,
+      true,
+      NULL,
+      NULL,
+      "node address",
+      "<ip:port>");
+
+  cluster_add_node_cmd->flags().defineFlag(
+      "vnodes",
+      stx::cli::FlagParser::T_INTEGER,
+      true,
+      NULL,
+      NULL,
+      "number of vnodes to assign",
+      "<num>");
 
   cli.call(flags.getArgv());
   return 0;

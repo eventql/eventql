@@ -82,6 +82,21 @@ protected:
       const std::string& log_line,
       mdb::MDBTransaction* txn);
 
+  void insertLegacyLogline(
+      const std::string& customer_key,
+      const stx::UnixTime& time,
+      const std::string& log_line,
+      mdb::MDBTransaction* txn);
+
+  void appendToSession(
+      const std::string& customer_key,
+      const stx::UnixTime& time,
+      const std::string& uid,
+      const std::string& evid,
+      const std::string& evtype,
+      const String& evdata,
+      mdb::MDBTransaction* txn);
+
   void appendToSession(
       const std::string& customer_key,
       const stx::UnixTime& time,

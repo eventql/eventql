@@ -22,8 +22,10 @@
 #include "zbase/ConfigDirectory.h"
 #include "zbase/core/TSDBService.h"
 #include "zbase/api/LogfileAPIServlet.h"
+#include "zbase/api/EventsAPIServlet.h"
 #include "zbase/docdb/DocumentDB.h"
 #include "zbase/docdb/DocumentDBServlet.h"
+#include "zbase/RemoteTSDBScanParams.pb.h"
 
 using namespace stx;
 
@@ -131,6 +133,22 @@ protected:
       http::HTTPResponse* res,
       RefPtr<http::HTTPResponseStream> res_stream);
 
+  void executeSQLAggregatePartition(
+      const AnalyticsSession& session,
+      const http::HTTPRequest* req,
+      http::HTTPResponse* res);
+
+  void executeSQLScanPartition(
+      const AnalyticsSession& session,
+      const http::HTTPRequest* req,
+      http::HTTPResponse* res,
+      RefPtr<http::HTTPResponseStream> res_stream);
+
+  void executeSQLScanPartition(
+      const AnalyticsSession& session,
+      const RemoteTSDBScanParams& query,
+      Function<bool (int argc, const csql::SValue* argv)> fn);
+
   void pipelineInfo(
       const AnalyticsSession& session,
       const http::HTTPRequest* req,
@@ -142,6 +160,26 @@ protected:
       http::HTTPResponse* res);
 
   void sessionTrackingEventInfo(
+      const AnalyticsSession& session,
+      const http::HTTPRequest* req,
+      http::HTTPResponse* res);
+
+  void sessionTrackingEventAdd(
+      const AnalyticsSession& session,
+      const http::HTTPRequest* req,
+      http::HTTPResponse* res);
+
+  void sessionTrackingEventRemove(
+      const AnalyticsSession& session,
+      const http::HTTPRequest* req,
+      http::HTTPResponse* res);
+
+  void sessionTrackingEventAddField(
+      const AnalyticsSession& session,
+      const http::HTTPRequest* req,
+      http::HTTPResponse* res);
+
+  void sessionTrackingEventRemoveField(
       const AnalyticsSession& session,
       const http::HTTPRequest* req,
       http::HTTPResponse* res);
@@ -186,6 +224,17 @@ protected:
     }
   }
 
+  void catchAndReturnErrors(
+      http::HTTPResponse* resp,
+      Function<void ()> fn) const {
+    try {
+      fn();
+    } catch (const StandardException& e) {
+      resp->setStatus(http::kStatusInternalServerError);
+      resp->addBody(e.what());
+    }
+  }
+
   RefPtr<AnalyticsApp> app_;
   dproc::DispatchService* dproc_;
   EventIngress* ingress_;
@@ -196,6 +245,7 @@ protected:
   ConfigDirectory* customer_dir_;
 
   LogfileAPIServlet logfile_api_;
+  EventsAPIServlet events_api_;
   DocumentDBServlet documents_api_;
 };
 

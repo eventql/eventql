@@ -122,6 +122,8 @@ protected:
 
   ValueExpressionNode* buildColumnReference(ASTNode* ast);
 
+  ValueExpressionNode* buildColumnIndex(ASTNode* ast);
+
   ValueExpressionNode* buildIfStatement(ASTNode* ast);
 
   ValueExpressionNode* buildMethodCall(ASTNode* ast);

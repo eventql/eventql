@@ -3,6 +3,7 @@ ZBase.registerView((function() {
   var load = function(url) {
     var qparams = {
       with_categories: true,
+      type: "report",
       author: "self"
     };
 

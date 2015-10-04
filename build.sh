@@ -91,7 +91,7 @@ if [[ $MAKETOOL == "make" ]]; then
         -H${SOURCE_DIR_REAL}
   fi
 
-  (cd ${TARGET_DIR} && make -j${BUILD_NCPUS})
+  (cd ${TARGET_DIR} && make -j${BUILD_NCPUS}) || exit 1
 
 # build c++ with ninja
 elif [[ $MAKETOOL == "ninja" ]]; then
@@ -103,7 +103,7 @@ elif [[ $MAKETOOL == "ninja" ]]; then
         -H${SOURCE_DIR_REAL}
   fi
 
-  (cd ${TARGET_DIR} && ninja -j${BUILD_NCPUS})
+  (cd ${TARGET_DIR} && ninja -j${BUILD_NCPUS}) || exit 1
 
 else
   echo "error unknown build tool ${MAKETOOL}" >&2
@@ -124,6 +124,10 @@ if [[ $BUILD_ARTIFACTS == "true" ]]; then
   # zbase-master
   tar cz -C ${TARGET_DIR} zmaster \
       > ${ARTIFACTS_DIR}/zbase-master-${TARGET_LBL}.tgz
+
+  # ztracker
+  tar cz -C ${TARGET_DIR} ztracker \
+      > ${ARTIFACTS_DIR}/ztracker-${TARGET_LBL}.tgz
 
   # zbase-logjoin
   tar cz -C ${TARGET_DIR} logjoind \
