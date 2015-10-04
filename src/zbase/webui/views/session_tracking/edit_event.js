@@ -34,6 +34,7 @@ ZBase.registerView((function() {
     });
 
     $("zbase-breadcrumbs-section .event_name", page).innerHTML = event_name;
+    $("h2.pagetitle .event_name", page).innerHTML = event_name;
 
     $.onClick($(".link.add_field", page), function(e) {renderAdd("")});
 
@@ -54,37 +55,30 @@ ZBase.registerView((function() {
         "views/session_tracking",
         "zbase_session_tracking_edit_event_table_tpl");
 
-
-
     fields.forEach(function(field) {
       var html = row_tpl.cloneNode(true);
       $(".name", html).innerHTML = field.name;
       $(".type", html).innerHTML = "[" + field.type.toLowerCase() + "]";
+      if (field.repeated) {
+        $(".repeated", html).innerHTML = "[repeated]";
+      }
 
-      $("z-dropdown", html).addEventListener("change", function() {
-        switch (this.getValue()) {
-          case "add":
-            renderAdd(field.name + ".");
-            break;
-
-          case "delete":
-            renderDelete(field.name);
-            break;
-        };
-        this.setValue([]);
-      }, false);
+      $.onClick($(".delete", html), function(e) {
+        renderDelete(field.name);
+      });
 
       tbody.appendChild(html);
 
-      if (field.repeated) {
+      if (field.type == "OBJECT") {
         var table = table_tpl.cloneNode(true);
         renderTable(field.schema.columns, $("tbody", table));
+        $.onClick($(".add_field", table), function() {
+          renderAdd(field.name + ".");
+        });
         tbody.appendChild(table);
       }
     });
   };
-
-
 
   var renderAdd = function(field_prefix) {
     var modal = $(".zbase_session_tracking z-modal.add_field");
@@ -111,14 +105,15 @@ ZBase.registerView((function() {
       };
 
       var url =
-          "/a/session_tracking/events/add_field?" +
+          "/api/v1/session_tracking/events/add_field?" +
           $.buildQueryString(field_data);
 
       $.httpPost(url, "", function(r) {
-        if (r.status == 200) {
+        if (r.status == 201) {
           load();
         } else {
-          $.fatalError();
+          $(".error_field .error_message", modal).innerHTML = r.responseText;
+          $(".error_field", modal).classList.remove("hidden");
         }
       });
     });
@@ -137,10 +132,11 @@ ZBase.registerView((function() {
     $("button.close", modal).onclick = function() {modal.close()};
     $("button.submit", modal).onclick = function(e) {
       var url =
-        "/a/session_tracking/events/remove_field?event=" +
-        event_name + "field=" + field_name;
+        "/api/v1/session_tracking/events/remove_field?event=" +
+        event_name + "&field=" + field_name;
 
       $.httpPost(url, "", function(r) {
+        console.log(r);
         if (r.status == 201) {
           load();
         } else {
@@ -149,7 +145,6 @@ ZBase.registerView((function() {
       });
     };
   };
-
 
   return {
     name: "edit_session_tracking_event",
