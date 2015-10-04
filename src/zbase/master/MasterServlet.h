@@ -30,6 +30,16 @@ protected:
       http::HTTPRequest* request,
       http::HTTPResponse* response);
 
+  void fetchClusterConfig(
+      const URI& uri,
+      http::HTTPRequest* req,
+      http::HTTPResponse* res);
+
+  void updateClusterConfig(
+      const URI& uri,
+      http::HTTPRequest* request,
+      http::HTTPResponse* response);
+
   void fetchCustomerConfig(
       const URI& uri,
       http::HTTPRequest* req,

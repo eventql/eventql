@@ -14,31 +14,35 @@
 
     <h2 class="pagetitle"><em>Dashboard</em></h2>
 
-    <div class="chart_panel">
-      <label>Display:</label>
-      <z-dropdown data-resolved class="input metric" name="metric">
-        <z-dropdown-flyout>
-          <z-dropdown-items>
-            <z-dropdown-item data-value="num_sessions" data-selected>Number of Sessions</z-dropdown-item>
-          </z-dropdown-items>
-        </z-dropdown-flyout>
-      </z-dropdown>
+    <div class="query_progress"></div>
 
-      <z-dropdown data-resolved class="time_window" name="time_window">
-        <z-dropdown-flyout>
-          <z-dropdown-items>
-            <z-dropdown-item data-value="3600">Hourly</z-dropdown-item>
-            <z-dropdown-item data-value="86400" data-selected>Daily</z-dropdown-item>
-            <z-dropdown-item data-value="604800">Weekly</z-dropdown-item>
-          </z-dropdown-items>
-        </z-dropdown-flyout>
-      </z-dropdown>
+    <div class="dashboard hidden">
+      <div class="chart_panel">
+        <label>Display:</label>
+        <z-dropdown data-resolved class="input metric" name="metric">
+          <z-dropdown-flyout>
+            <z-dropdown-items>
+              <z-dropdown-item data-value="num_sessions" data-selected>Number of Sessions</z-dropdown-item>
+            </z-dropdown-items>
+          </z-dropdown-flyout>
+        </z-dropdown>
 
-      <div class="chart_legend"></div>
-    </div>
+        <z-dropdown data-resolved class="time_window" name="time_window">
+          <z-dropdown-flyout>
+            <z-dropdown-items>
+              <z-dropdown-item data-value="3600">Hourly</z-dropdown-item>
+              <z-dropdown-item data-value="86400" data-selected>Daily</z-dropdown-item>
+              <z-dropdown-item data-value="604800">Weekly</z-dropdown-item>
+            </z-dropdown-items>
+          </z-dropdown-flyout>
+        </z-dropdown>
 
-    <div class="chart_container">
-      <div class="inner_chart" id="dashboard_chart"></div>
+        <div class="chart_legend"></div>
+      </div>
+
+      <div class="chart_container">
+        <div class="inner_chart" id="dashboard_chart"></div>
+      </div>
     </div>
   </div>
 </template>

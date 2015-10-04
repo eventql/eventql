@@ -70,16 +70,16 @@ protected:
       const String& tsdb_namespace,
       RefPtr<csql::QueryTreeNode>* node);
 
-  static ScopedPtr<InputStream> executeRemoteGroupBy(
+  static ScopedPtr<InputStream> executeParallelGroupBy(
       PartitionMap* partition_map,
       ReplicationScheme* replication_scheme,
       CSTableIndex* cstable_index,
       AnalyticsAuth* auth,
       const String& customer,
-      const Vector<InetAddr>& hosts,
+      const Vector<ReplicaRef>& hosts,
       const csql::RemoteAggregateParams& params);
 
-  static ScopedPtr<InputStream> executeRemoteGroupByOnHost(
+  static ScopedPtr<InputStream> executeRemoteGroupBy(
       PartitionMap* partition_map,
       ReplicationScheme* replication_scheme,
       CSTableIndex* cstable_index,
