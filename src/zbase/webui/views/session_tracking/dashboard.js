@@ -94,6 +94,13 @@ ZBase.registerView((function() {
           }
         ]
       },
+      point: {
+        show: false
+      },
+      types: {
+        data1: 'area',
+        data2: 'area-spline'
+      },
       format: '%Y-%m-%d'
     };
     if (getParamTimeWindow() == "3600") {

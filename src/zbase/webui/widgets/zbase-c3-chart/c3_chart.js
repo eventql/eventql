@@ -78,7 +78,7 @@ ZBaseC3Chart = function(config) {
         }
       },
       point: {
-        show: true,
+        show: false,
         r: 3.5
       },
       legend: {
