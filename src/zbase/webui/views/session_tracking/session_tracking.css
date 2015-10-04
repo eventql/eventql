@@ -118,23 +118,6 @@
   color: #3498db;
 }
 
-.zbase_session_tracking table.z-table.schemas tbody tr:hover {
-  cursor: pointer;
-}
-
-.zbase_session_tracking table.z-table.schemas tbody tr td {
-  line-height: 24px;
-}
-
-.zbase_session_tracking table.z-table.schemas tbody tr td.name {
-  color: #000;
-}
-
-.zbase_session_tracking table.z-table.schemas tbody tr td.type {
-  color: #888;
-  text-transform: uppercase;
-}
-
 .zbase_session_tracking button.add_field {
   float: right;
   margin-top: 20px;
