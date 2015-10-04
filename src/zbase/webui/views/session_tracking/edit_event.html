@@ -1,5 +1,6 @@
 <template id="zbase_session_tracking_edit_event_tpl">
   <div class="edit_event">
+    
     <zbase-breadcrumbs style="margin-top: 20px; margin-bottom: -6px;">
       <zbase-breadcrumbs-section>
         <a href="/a/">Apps</a>
@@ -8,14 +9,17 @@
         <a href="/a/session_tracking">User Journeys</a>
       </zbase-breadcrumbs-section>
       <zbase-breadcrumbs-section>
-        <a href="/a/session_tracking/settings/schema">Schema</a>
+        <a href="/a/session_tracking/settings/schema">Session Schema</a>
       </zbase-breadcrumbs-section>
       <zbase-breadcrumbs-section>
-        <a href="/a/session_tracking/settings/schema">Event <span class="event_name"></span></a>
+        <a href="/a/session_tracking/settings/schema"><span class="event_name"></span></a>
       </zbase-breadcrumbs-section>
     </zbase-breadcrumbs>
+    <button class="z-button secondary back" style="float: right; margin-top: 20px;"><i class="fa fa-arrow-left"></i> Back</button>
 
-    <h2 class='pagetitle edit_event'>Event Fields <em class="event_name"></em></h3>
+    <h2 class='pagetitle edit_event'>
+      Event Fields <em class="event_name"></em>
+    </h2>
 
     <div class="table_container">
       <table class="z-table edit_event">
