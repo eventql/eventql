@@ -15,7 +15,7 @@ namespace csql {
 
 ExecutionContext::ExecutionContext(
     TaskScheduler* sched,
-    size_t max_concurrent_tasks /* = 8 */) :
+    size_t max_concurrent_tasks /* = 32 */) :
     sched_(sched),
     max_concurrent_tasks_(max_concurrent_tasks),
     cancelled_(false),
