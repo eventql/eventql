@@ -38,3 +38,8 @@
 .zbase_session_tracking .zbase_session_tracking_dashboard .inner_chart {
   height: 250px;
 }
+
+.zbase_session_tracking .zbase_session_tracking_dashboard z-daterangepicker {
+  float: right;
+  margin-top: 38px;
+}
