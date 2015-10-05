@@ -1,3 +1,7 @@
+z-daterangepicker {
+  position: relative;
+}
+
 z-daterangepicker z-daterangepicker-field {
   display: inline-block;
   line-height: 1.3em;
@@ -41,8 +45,12 @@ z-daterangepicker z-daterangepicker-widget {
   border-bottom-left-radius: 4px;
   border-bottom-right-radius: 4px;
   z-index: 20;
-  margin-top: 12px;
+  margin-top: 14px;
   padding: 0.5em;
+}
+
+z-daterangepicker.open_left z-daterangepicker-widget {
+  left: -719px;
 }
 
 z-daterangepicker z-daterangepicker-widget:before,
@@ -52,22 +60,24 @@ z-daterangepicker z-daterangepicker-widget:after {
   position: absolute;
   width: 0;
   border: 15px solid transparent;
+  left: 80px;
 }
 
 z-daterangepicker z-daterangepicker-widget:before {
   border-bottom-color: #fff;
-  position: absolute;
   top: -29px;
-  left: 80px;
   z-index: 2;
 }
 
 z-daterangepicker z-daterangepicker-widget:after {
   border-bottom-color: #bbb;
-  position: absolute;
   top: -30px;
-  left: 80px;
   z-index: 1;
+}
+
+z-daterangepicker.open_left z-daterangepicker-widget:before,
+z-daterangepicker.open_left z-daterangepicker-widget:after {
+  left: 800px;
 }
 
 z-daterangepicker[data-active] z-daterangepicker-widget {
@@ -134,7 +144,7 @@ z-daterangepicker z-daterangepicker-controls .separator {
   margin: 5px;
 }
 
-z-daterangepicker z-daterangepicker-controls z-button {
+z-daterangepicker z-daterangepicker-controls button {
   float: right;
   font-size: 1em;
   padding-left: 1em;
