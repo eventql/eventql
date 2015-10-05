@@ -1,7 +1,7 @@
 z-daterangepicker z-daterangepicker-field {
   display: inline-block;
   line-height: 1.3em;
-  padding: 0.5em 10px;
+  padding: 0.6em 10px;
   margin: 0;
   -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
   text-align: left;
@@ -16,7 +16,6 @@ z-daterangepicker z-daterangepicker-field {
 z-daterangepicker z-daterangepicker-field i {
   height: 1em;
   vertical-align: top;
-  margin-top: 8px;
   margin-left: 5px;
 }
 
@@ -118,6 +117,7 @@ z-daterangepicker z-daterangepicker-controls input.z-input {
   line-height: 1.3em;
   padding: 0.5em 1em;
   float: left;
+  font-size: inherit;
 }
 z-daterangepicker z-daterangepicker-controls input.z-input.active {
   opacity: 1;
@@ -140,3 +140,8 @@ z-daterangepicker z-daterangepicker-controls z-button {
   padding-right: 1em;
 }
 
+
+/** ZBase Style **/
+z-daterangepicker {
+  font-size: 13px;
+}
