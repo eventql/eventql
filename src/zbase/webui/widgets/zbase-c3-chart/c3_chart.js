@@ -5,6 +5,14 @@ ZBaseC3Chart = function(config) {
     window.removeEventListener("resize", resize, false);
   };
 
+  var getChartWidth = function() {
+    return null;
+  };
+
+  var setChartWidthMethod = function(custom_method) {
+    getChartWidth = custom_method;
+  };
+
   var renderLegend = function(elem) {
     elem.innerHTML = "";
 
@@ -55,6 +63,9 @@ ZBaseC3Chart = function(config) {
 
     chart = c3.generate({
       bindto: "#" + elem_id,
+      size: {
+        width: getChartWidth()
+      },
       interaction: true,
       data: {
         x: 'x',
@@ -106,7 +117,7 @@ ZBaseC3Chart = function(config) {
 
   var resize = function() {
     if (chart != null) {
-      chart.resize();
+      chart.resize({width: getChartWidth()});
     }
   };
 
@@ -116,6 +127,7 @@ ZBaseC3Chart = function(config) {
   return {
     renderLegend: renderLegend,
     renderTimeseries: renderTimeseries,
+    chartWidth: setChartWidthMethod,
     destroy: destroy
   }
 };

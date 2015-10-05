@@ -28,7 +28,7 @@
 .zbase_session_tracking .zbase_session_tracking_dashboard .chart_container {
   background: #fff;
   border: 1px solid #eee;
-  padding: 10px;
+  padding: 10px 15px;
   border-top: none;
   border-bottom-left-radius: 5px;
   border-bottom-right-radius: 5px;
@@ -37,4 +37,9 @@
 .zbase_session_tracking .zbase_session_tracking_dashboard .chart_container .zbase_loader,
 .zbase_session_tracking .zbase_session_tracking_dashboard .inner_chart {
   height: 250px;
+}
+
+.zbase_session_tracking .zbase_session_tracking_dashboard z-daterangepicker {
+  float: right;
+  margin-top: 38px;
 }

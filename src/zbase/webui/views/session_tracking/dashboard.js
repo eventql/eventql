@@ -23,11 +23,21 @@ ZBase.registerView((function() {
 
     setParamMetric(UrlUtil.getParamValue(path, "metric"));
     setParamTimeWindow(UrlUtil.getParamValue(path, "time_window"));
+    setParamsFromAndUntil(
+        UrlUtil.getParamValue(path, "from"),
+        UrlUtil.getParamValue(path, "until"));
 
     $(".zbase_session_tracking_dashboard z-dropdown.metric")
         .addEventListener("change", paramChanged);
     $(".zbase_session_tracking_dashboard z-dropdown.time_window")
         .addEventListener("change", paramChanged);
+
+    //REMOVEME
+    $(".zbase_session_tracking_dashboard z-daterangepicker")
+        .toggleWidgetVisibility = function() {
+            alert("Not yet implemented");
+        };
+    //REMOVEME END
 
     render();
     $.hideLoader();
@@ -61,7 +71,9 @@ ZBase.registerView((function() {
     });
 
     query.addEventListener('error', function(e) {
+      query_mgr.close("sql_query");
       $.fatalError("Server Error");
+      console.log(e);
     });
   };
 
@@ -105,6 +117,12 @@ ZBase.registerView((function() {
     }
 
     chart = ZBaseC3Chart(chart_config);
+
+    var chart_container = $(".zbase_session_tracking_dashboard .chart_container");
+    var padding = 32;
+    chart.chartWidth(function() {
+      return chart_container.offsetWidth - padding;
+    });
     chart.renderTimeseries("dashboard_chart");
     chart.renderLegend($(".zbase_session_tracking_dashboard .chart_legend"));
   };
@@ -135,7 +153,7 @@ ZBase.registerView((function() {
 
   var getMetricTitle = function() {
     return $(
-        ".zbase_session_tracking_dashboard z-dropdown-item[data-selected]")
+        ".zbase_session_tracking_dashboard z-dropdown.metric [data-selected]")
         .getAttribute("data-title");
   };
 
@@ -155,6 +173,19 @@ ZBase.registerView((function() {
       $(".zbase_session_tracking_dashboard z-dropdown.time_window")
         .setValue([value]);
     }
+  };
+
+  var setParamsFromAndUntil = function(from, until) {
+    if (!until) {
+      until = DateUtil.getStartOfDay(Date.now());
+    }
+
+    if (!from) {
+      from = until - DateUtil.millisPerDay * 30;
+    }
+
+    $(".zbase_session_tracking_dashboard z-daterangepicker").setValue(
+        from, until);
   };
 
   var paramChanged = function(e) {
