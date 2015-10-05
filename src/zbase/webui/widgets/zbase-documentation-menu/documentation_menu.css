@@ -1,5 +1,11 @@
+.zbase_documentation_menu_clear {
+  clear: both;
+  visibility: hidden;
+}
+
 .zbase_documentation_menu_sidebar z-menu {
-  position: absolute;
+  position: initial;
+  float: left;
   width: 300px;
   margin-left: -8px;
   margin-top: 6px;
@@ -13,7 +19,7 @@
 }
 
 .zbase_documentation_menu_sidebar z-menu-item.doc_section {
-  margin: 10px 0 10px 20px !important;
+  margin-left: 20px !important;
   padding-right: 0 !important;
   border-left: 0 !important;
   cursor: default;
@@ -22,15 +28,19 @@
 .zbase_documentation_menu_sidebar z-menu-section > z-menu-item.doc_section {
   margin-left: 0 !important;
   padding-right: 0 !important;
+  font-size: 14px;
 }
 
 .zbase_documentation_menu_sidebar z-menu-item.doc_section a {
+  display: block;
+  padding: 8px 15px;
   line-height: 20px;
-  color: #737373 !important;
+  color: #364149 !important;
+  font-size: 14px;
 }
 
 .zbase_documentation_menu_sidebar z-menu-item.doc_section a:hover {
-  color: #000 !important;
+  color: #008cff !important;
 }
 
 .zbase_documentation_menu_sidebar z-menu-item.doc_section span.index {
