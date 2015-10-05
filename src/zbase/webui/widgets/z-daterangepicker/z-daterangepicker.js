@@ -25,19 +25,8 @@ var DateRangePickerComponent = function() {
       2592000000 : 'Last 30 Days'
     }
 
-    if (this.hasAttribute('data-resolved')) {
-      this.init();
-    }
-  };
-
-  this.attributeChangedCallback = function(attr, old_val, new_val) {
-    if (attr == 'data-resolved') {
-      this.init();
-    }
-  };
-
-  this.init = function() {
     var _this = this;
+
 
     this.querySelector("z-daterangepicker-field").onclick = function(e) {
       e.stopPropagation();
@@ -48,17 +37,6 @@ var DateRangePickerComponent = function() {
       e.stopPropagation();
     };
 
-    var from = DateUtil.getStartOfDay(
-      DateUtil.parseTimestamp(this.getAttribute('data-from')));
-    var until = DateUtil.getStartOfDay(
-      DateUtil.parseTimestamp(this.getAttribute('data-until')));
-
-    this.applied = {
-      'from' : from,
-      'until' : until
-    };
-
-    var _this = this;
     //cancel
     this.querySelector("button.cancel").addEventListener("click", function() {
       _this.toggleWidgetVisibility();
@@ -82,19 +60,17 @@ var DateRangePickerComponent = function() {
     //range select
     dropdown.addEventListener('change', function(e) {
       e.stopPropagation();
-      var target = e.target || e.srcElement;
-
-      _this.onRangeDropdownSelect(target.getAttribute('data-value'));
+      _this.onDropdownChange(this.getValue());
     }, false);
 
     //set from
     this.querySelector("input.from").addEventListener("click", function() {
-      _this.onRangeFieldClick("from");
+      _this.onFieldClick("from");
     }, false);
 
     //set until
     this.querySelector("input.until").addEventListener("click", function() {
-      _this.onRangeFieldClick("until");
+      _this.onFieldClick("until");
     }, false);
 
     this.querySelector("z-calendar-group").addEventListener('select', function(e) {
@@ -102,9 +78,32 @@ var DateRangePickerComponent = function() {
     }, false);
 
 
+    if (this.hasAttribute("data-from") && this.hasAttribute("data-until")) {
+      this.setWidget();
+      this.renderPreview();
+    }
+  };
+
+  this.setValue = function(from, until) {
+    var from = DateUtil.getStartOfDay(from);
+    var until = DateUtil.getStartOfDay(until);
+
+    this.setAttribute("data-from", from);
+    this.setAttribute("data-until", until);
+
+    this.applied = {
+      'from' : from,
+      'until' : until
+    };
+
     this.setWidget();
     this.renderPreview();
   };
+
+  this.getValue = function() {
+    return this.applied;
+  };
+
 
   this.setWidget = function() {
     var from = this.applied.from;
@@ -137,21 +136,21 @@ var DateRangePickerComponent = function() {
     calendar.setAttribute('data-until', until);
     calendar.setAttribute('data-timestamp', start);
     calendar.setAttribute('data-select', this.editing.select);
-    calendar.render();
+    calendar.render(start);
   };
 
   this.renderDropdown = function() {
-    var items = this.querySelector("z-dropdown-items");
+    var items = [];
 
     for (var key in this.selectableRanges) {
       var item = document.createElement("z-dropdown-item");
       item.setAttribute('data-value', key);
       item.innerHTML = this.selectableRanges[key];
 
-      items.appendChild(item);
+      items.push(item);
     }
 
-    this.querySelector("z-dropdown").setAttribute('data-resolved', 'resolved');
+    this.querySelector("z-dropdown").setDropdownItems(items);
   };
 
   this.setFields = function(from, until) {
@@ -167,7 +166,7 @@ var DateRangePickerComponent = function() {
       until_field.classList.remove('.active');
     } else {
       //custom
-      this.brightenRangeFields();
+      this.activateFields();
     }
   };
 
@@ -205,6 +204,78 @@ var DateRangePickerComponent = function() {
     }
   };
 
+  this.highlightField = function() {
+    this.querySelector("input.highlight").classList.remove('highlight');
+
+    this.querySelector("input." + this.editing.select)
+        .classList.add("highlight");
+  };
+
+  this.activateFields = function() {
+    var inputs = this.querySelectorAll("input");
+
+    for (var i = 0; i < inputs.length; i++) {
+      inputs[i].classList.add('active');
+    }
+  };
+
+  this.onCalendarSelect = function(timestamp) {
+    var timestamp = DateUtil.getStartOfDay(timestamp);
+
+    if (this.editing.select === 'from') {
+      this.editing.select = 'until';
+      this.editing.from = timestamp;
+    } else {
+      this.editing.select = 'from';
+      this.editing.until = timestamp;
+    }
+
+    this.highlightField();
+    this.activateFields();
+    this.renderCalendar(this.editing.from, this.editing.until);
+    this.setDateRange(this.editing.from, this.editing.until);
+    this.setFields(this.editing.from, this.editing.until);
+  };
+
+  this.onFieldClick = function(range_value) {
+    this.editing.select = range_value;
+    this.activateFields();
+    this.highlightField();
+    this.setDateRange();
+
+    this.renderCalendar(
+      this.editing.from, this.editing.until,
+      this.querySelector("z-calendar-group").firstDate);
+  };
+
+  this.onDropdownChange = function(range) {
+    if (range == 'custom') {
+      this.activateFields();
+      return;
+    }
+
+    //today
+    if (range == 0) {
+      this.editing.until = Date.now();
+      this.editing.from = DateUtil.getStartOfDay(this.editing.until);
+    } else {
+      this.editing.until = DateUtil.getStartOfDay(new Date().getTime());
+      this.editing.from = this.editing.until - range;
+    }
+
+    this.setFields(this.editing.from, this.editing.until);
+    this.renderCalendar(this.editing.from, this.editing.until);
+  };
+
+  this.fireSelectEvent = function() {
+    var ev = new CustomEvent('select', {
+      'detail' : {'from' : this.applied.from, 'until' : this.applied.until},
+      'bubbles' : true,
+      'cancelable' : true
+    });
+
+    this.dispatchEvent(ev);
+  };
 };
 
 var proto = Object.create(HTMLElement.prototype);
