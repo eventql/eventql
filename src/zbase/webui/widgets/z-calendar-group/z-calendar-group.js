@@ -228,7 +228,6 @@ var CalendarGroupComponent = function() {
     return DateUtil.parseTimestamp(timestamp);
   };
 
-      //timestamp -> beginning of last month
   this.datesOfPrevMonth = function(last_month, this_month) {
     var dates = [];
 
