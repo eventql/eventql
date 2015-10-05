@@ -32,6 +32,13 @@ ZBase.registerView((function() {
     $(".zbase_session_tracking_dashboard z-dropdown.time_window")
         .addEventListener("change", paramChanged);
 
+    //REMOVEME
+    $(".zbase_session_tracking_dashboard z-daterangepicker")
+        .toggleWidgetVisibility = function() {
+            alert("Not yet implemented");
+        };
+    //REMOVEME END
+
     render();
     $.hideLoader();
   };
