@@ -6,23 +6,12 @@
   line-height: 1.6;
 }
 
+.zbase_documentation_content * {
+  box-sizing: border-box;
+}
+
 .zbase_documentation_content > *:first-child {
   margin-top: 0 !important;
-}
-
-.zbase_documentation_content h1 {
-  padding-bottom: .3em;
-  font-size: 2.25em;
-  line-height: 1.2;
-  margin: .67em 0;
-}
-
-.zbase_documentation_content h4 {
-  font-size: 1.25em;
-}
-
-.zbase_documentation_content a {
-  color: #000;
 }
 
 .zbase_documentation_content h1,
@@ -40,11 +29,48 @@
 
 .zbase_documentation_content h1,
 .zbase_documentation_content h2 {
+  padding-bottom: .3em;
   border-bottom: 1px solid #eee;
+  margin: .67em 0;
+}
+
+.zbase_documentation_content h1 {
+  font-size: 2.25em;
+  line-height: 1.2;
+}
+
+.zbase_documentation_content h2 {
+  font-size: 1.75em;
+  line-height: 1.225;
+}
+
+.zbase_documentation_content h3 {
+  font-size: 1.5em;
+  line-height: 1.43;
+}
+
+.zbase_documentation_content h4 {
+  font-size: 1.25em;
+}
+
+.zbase_documentation_content h5 {
+  font-size: 1em;
 }
 
 .zbase_documentation_content h6 {
-  color: #000;
+  font-size: 1em;
+  color: #777;
+}
+
+.zbase_documentation_content ol,
+.zbase_documentation_content ul,
+.zbase_documentation_content dl,
+.zbase_documentation_content pre,
+.zbase_documentation_content p,
+.zbase_documentation_content blockquote,
+.zbase_documentation_content table {
+  margin-top: 0;
+  margin-bottom: 16px;
 }
 
 .zbase_documentation_content hr {
@@ -52,42 +78,89 @@
 }
 
 .zbase_documentation_content blockquote {
-  border-color: #000;
+  padding: 0 15px;
+  color: #777;
+  border-left: 4px solid #ddd;
+  margin: 0;
 }
 
 .zbase_documentation_content pre,
 .zbase_documentation_content code {
-  display: block;
-  background: #f3f3f3;
-  color: #000;
-  border-color: #000;
-  border-radius: 3px;
-  font-size: 85%;
-  padding: 16px;
-  line-height: 1.45;
-  margin-bottom: 16px;
   font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
 }
 
-.zbase_documentation_content .highlight {
-  background-color: #000;
+.zbase_documentation_content a {
+  color: #4183c4;
+  text-decoration: none;
+}
+
+.zbase_documentation_content a:hover {
+  text-decoration: underline;
 }
 
 .zbase_documentation_content table {
-
+  display: block;
+  width: 100%;
+  overflow: auto;
+  border-collapse: collapse;
+  border-spacing: 0;
+  border-color: #808080;
 }
 
 .zbase_documentation_content th,
 .zbase_documentation_content td {
-  border-color: #000;
+  padding: 6px 13px;
+  border: 1px solid #ddd;
+  display: table-cell;
+  vertical-align: inherit;
 }
 
 .zbase_documentation_content tr {
-  color: #000;
-  background-color: #000;
-  border-color: #000;
+  display: table-row;
+  background-color: #fff;
+  border-top: 1px solid #ccc;
 }
 
-.zbase_documentation_content tr:nth-child(2n) {
+.zbase_documentation_content th {
+  padding: 6px 13px;
+  border: 1px solid #ddd;
+  font-weight: bold;
+}
 
+.zbase_documentation_content pre {
+  padding: 16px;
+  overflow: auto;
+  font-size: 85%;
+  line-height: 1.45;
+  background-color: #f7f7f7;
+  border: 0;
+  border-radius: 3px;
+}
+
+.zbase_documentation_content code {
+  padding: 0;
+  padding-top: .2em;
+  padding-bottom: .2em;
+  margin: 0;
+  font-size: 85%;
+  background-color: #f7f7f7;
+  border-radius: 3px;
+}
+
+.zbase_documentation_content pre code {
+  display: inline;
+  max-width: initial;
+  overflow: initial;
+  padding: 0;
+  margin: 0;
+  line-height: inherit;
+  word-wrap: normal;
+  background-color: transparent;
+  border: 0;
+}
+
+.zbase_documentation_content pre > code {
+  font-size: 100%;
+  white-space: pre;
+  background: transparent;
 }
