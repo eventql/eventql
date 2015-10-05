@@ -23,6 +23,9 @@ ZBase.registerView((function() {
 
     setParamMetric(UrlUtil.getParamValue(path, "metric"));
     setParamTimeWindow(UrlUtil.getParamValue(path, "time_window"));
+    setParamsFromAndUntil(
+        UrlUtil.getParamValue(path, "from"),
+        UrlUtil.getParamValue(path, "until"));
 
     $(".zbase_session_tracking_dashboard z-dropdown.metric")
         .addEventListener("change", paramChanged);
@@ -135,7 +138,7 @@ ZBase.registerView((function() {
 
   var getMetricTitle = function() {
     return $(
-        ".zbase_session_tracking_dashboard z-dropdown-item[data-selected]")
+        ".zbase_session_tracking_dashboard z-dropdown.metric [data-selected]")
         .getAttribute("data-title");
   };
 
@@ -155,6 +158,19 @@ ZBase.registerView((function() {
       $(".zbase_session_tracking_dashboard z-dropdown.time_window")
         .setValue([value]);
     }
+  };
+
+  var setParamsFromAndUntil = function(from, until) {
+    if (!until) {
+      until = DateUtil.getStartOfDay(Date.now());
+    }
+
+    if (!from) {
+      from = until - DateUtil.millisPerDay * 30;
+    }
+
+    $(".zbase_session_tracking_dashboard z-daterangepicker").setValue(
+        from, until);
   };
 
   var paramChanged = function(e) {
