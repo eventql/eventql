@@ -34,7 +34,7 @@ public:
 
   ExecutionContext(
       TaskScheduler* sched,
-      size_t max_concurrent_tasks = 16);
+      size_t max_concurrent_tasks = 32);
 
   void onStatusChange(Function<void (const ExecutionStatus& status)> fn);
 
