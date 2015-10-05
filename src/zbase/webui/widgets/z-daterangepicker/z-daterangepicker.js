@@ -58,13 +58,151 @@ var DateRangePickerComponent = function() {
       'until' : until
     };
 
-    this.initWidget();
-    this.renderPreviewField();
+    var _this = this;
+    //cancel
+    this.querySelector("button.cancel").addEventListener("click", function() {
+      _this.toggleWidgetVisibility();
+      _this.setWidget();
+    }, false);
 
-    this.observeRangeDropdown();
-    this.observeCalendar();
-    this.observeRangeFields();
-    this.observeButtons();
+    //apply
+    this.querySelector("button.submit").addEventListener("click", function() {
+      _this.applied.from = _this.editing.from;
+      _this.applied.until = _this.editing.until;
+      _this.toggleWidgetVisibility();
+      _this.fireSelectEvent();
+      _this.renderPreview();
+    }, false);
+
+    var dropdown = this.querySelector("z-dropdown");
+    dropdown.closeActiveItems = function(callback) {
+      callback();
+    }
+
+    //range select
+    dropdown.addEventListener('change', function(e) {
+      e.stopPropagation();
+      var target = e.target || e.srcElement;
+
+      _this.onRangeDropdownSelect(target.getAttribute('data-value'));
+    }, false);
+
+    //set from
+    this.querySelector("input.from").addEventListener("click", function() {
+      _this.onRangeFieldClick("from");
+    }, false);
+
+    //set until
+    this.querySelector("input.until").addEventListener("click", function() {
+      _this.onRangeFieldClick("until");
+    }, false);
+
+    this.querySelector("z-calendar-group").addEventListener('select', function(e) {
+        _this.onCalendarSelect(e.detail.timestamp);
+    }, false);
+
+
+    this.setWidget();
+    this.renderPreview();
+  };
+
+  this.setWidget = function() {
+    var from = this.applied.from;
+    var until = this.applied.until;
+
+    this.editing = {
+      'from' : from,
+      'until' : until,
+      'select' : 'from'
+    };
+
+    this.renderCalendar(from, until);
+    this.renderDropdown();
+    this.setFields(from, until);
+    this.setDateRange(from, until);
+  };
+
+  this.renderPreview = function() {
+    this.querySelector(".field_values").innerHTML =
+        this.getDateDescription(this.applied.from) + " - " +
+        this.getDateDescription(this.applied.until);
+  };
+
+  this.renderCalendar = function(from, until, calendar_start) {
+    var calendar = this.querySelector("z-calendar-group");
+    var start = (typeof calendar_start !== 'undefined') ?
+        calendar_start : this.getCalendarStart(from, until);
+
+    calendar.setAttribute('data-from', from);
+    calendar.setAttribute('data-until', until);
+    calendar.setAttribute('data-timestamp', start);
+    calendar.setAttribute('data-select', this.editing.select);
+    calendar.render();
+  };
+
+  this.renderDropdown = function() {
+    var items = this.querySelector("z-dropdown-items");
+
+    for (var key in this.selectableRanges) {
+      var item = document.createElement("z-dropdown-item");
+      item.setAttribute('data-value', key);
+      item.innerHTML = this.selectableRanges[key];
+
+      items.appendChild(item);
+    }
+
+    this.querySelector("z-dropdown").setAttribute('data-resolved', 'resolved');
+  };
+
+  this.setFields = function(from, until) {
+    var from_field = this.querySelector("input.from");
+    var until_field = this.querySelector("input.until");
+    var range = this.selectableRanges[until - from];
+
+    from_field.value = this.getDateDescription(from);
+    until_field.value = this.getDateDescription(until);
+
+    if (range) {
+      from_field.classList.remove('.active');
+      until_field.classList.remove('.active');
+    } else {
+      //custom
+      this.brightenRangeFields();
+    }
+  };
+
+  this.setDateRange = function(from, until) {
+    var range = new Date().getTime() - from ;
+    var value = (range in this.selectableRanges) ?
+      range : 'custom';
+
+    this.querySelector("z-dropdown").setValue([value]);
+  };
+
+  this.getCalendarStart = function(from, until) {
+    var start = DateUtil.getStartOfMonth(new Date().getTime(), -2);
+
+    if (start < from) {
+      return start;
+    }
+
+    return DateUtil.getStartOfMonth(until, -2);
+  };
+
+  this.getDateDescription = function(timestamp) {
+    var date = new Date(timestamp);
+    return (
+      date.getFullYear() + "-" +
+      DateUtil.appendLeadingZero(date.getMonth() + 1) + "-" +
+      DateUtil.appendLeadingZero(date.getDate()));
+  };
+
+  this.toggleWidgetVisibility = function() {
+    if (this.hasAttribute('data-active')) {
+      this.removeAttribute('data-active');
+    } else {
+      this.setAttribute('data-active', 'active');
+    }
   };
 
 };
