@@ -423,3 +423,17 @@
   font-weight: 400;
   color: #000;
 }
+
+.zbase_logviewer .logfile_list table.z-table tbody tr td.icon {
+  width: 150px;
+  text-align:center;
+}
+
+.zbase_logviewer .logfile_list table.z-table tbody tr td.icon z-dropdown {
+  color: #333;
+}
+
+.zbase_logviewer .logfile_list table.z-table tbody tr td.icon z-dropdown-flyout {
+  left: -37px;
+  top: 80%;
+}

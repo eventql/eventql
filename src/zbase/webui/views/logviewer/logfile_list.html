@@ -15,12 +15,13 @@
     </section>
     <div class="zbase_content_pane fullwidth">
       <div class="logfile_list">
-        <table class="z-table zbase_clickable_table">
+        <table class="z-table">
           <thead>
             <tr>
               <th>Name</th>
               <th>Type</th>
               <th>Last opened by me</th>
+              <th></th>
             </tr>
           </thead>
           <tbody>
@@ -29,4 +30,27 @@
       </div>
     </div>
   </div>
+</template>
+
+<template id="zbase_logviewer_logfile_list_row_tpl">
+  <tr>
+    <td class="name"></td>
+    <td class="type">&mdash;</td>
+    <td class="last_opened">&mdash;</td>
+    <td class="icon">
+      <z-dropdown class="edit" data-resolved="" data-hover="">
+        <z-dropdown-header>
+          <z-dropdown-header-value data-static="">
+            <i class="fa fa-gear"></i>
+          </z-dropdown-header-value>
+          <z-dropdown-header-icon></z-dropdown-header-icon>
+        </z-dropdown-header>
+        <z-dropdown-flyout>
+          <z-dropdown-items>
+            <z-dropdown-item data-value="edit">Edit Schema</z-dropdown-item>
+            <z-dropdown-item data-value="open_viewer">Open in Viewer</z-dropdown-item>
+          </z-dropdown-items>
+        </z-dropdown-flyout>
+      </z-dropdown>
+    </td>
 </template>

@@ -19,16 +19,27 @@ ZBase.registerView((function() {
         "views/logviewer",
         "zbase_logviewer_logfile_list_tpl");
 
+    var tr_tpl = $.getTemplate(
+        "views/logviewer",
+        "zbase_logviewer_logfile_list_row_tpl");
+
     var tbody = $("tbody", page);
     logfiles.forEach(function(def) {
-      var url = "/a/logs/view/" + def.name;
-      var tr = document.createElement("tr");
-      tr.innerHTML = 
-          "<td><a href='" + url + "'>" + def.name + "</a></td>" +
-          "<td><a href='" + url + "'>&mdash;</a></td>" +
-          "<td><a href='" + url + "'>&mdash;</a></td>";
+      var tr = tr_tpl.cloneNode(true);
+      $(".name", tr).innerHTML = def.name;
 
-      $.onClick(tr, function() { $.navigateTo(url); });
+      $("z-dropdown", tr).addEventListener("change", function() {
+        switch (this.getValue()) {
+          case "open_viewer":
+            $.navigateTo("/a/logs/view/" + def.name);
+            return;
+
+          case "edit":
+            console.log("edit schema");
+            return;
+        }
+      });
+
       tbody.appendChild(tr);
     });
 
