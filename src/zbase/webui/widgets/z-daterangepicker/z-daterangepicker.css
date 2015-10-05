@@ -1,0 +1,142 @@
+z-daterangepicker z-daterangepicker-field {
+  display: inline-block;
+  line-height: 1.3em;
+  padding: 0.5em 10px;
+  margin: 0;
+  -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
+  text-align: left;
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  color: rgba(0, 0, 0, 0.8);
+  border-radius: 0.2857rem;
+  box-shadow: none;
+  cursor: pointer;
+}
+
+z-daterangepicker z-daterangepicker-field i {
+  height: 1em;
+  vertical-align: top;
+  margin-top: 8px;
+  margin-left: 5px;
+}
+
+z-daterangepicker z-daterangepicker-field i.fa-calendar {
+  margin-right: 1px;
+}
+
+z-daterangepicker z-daterangepicker-field i.fa-chevron-down {
+  margin-left: 1px;
+}
+
+z-daterangepicker z-daterangepicker-field .field_values {
+  display: inline-block;
+}
+
+z-daterangepicker z-daterangepicker-widget {
+  display: none;
+  position: absolute;
+  background: #fff;
+  box-shadow: 0px 1px 2px rgba(0,0,0,.09);
+  border: 1px solid #bbb;
+  border-bottom-left-radius: 4px;
+  border-bottom-right-radius: 4px;
+  z-index: 20;
+  margin-top: 12px;
+  padding: 0.5em;
+}
+
+z-daterangepicker z-daterangepicker-widget:before,
+z-daterangepicker z-daterangepicker-widget:after {
+  content: ' ';
+  height: 0;
+  position: absolute;
+  width: 0;
+  border: 15px solid transparent;
+}
+
+z-daterangepicker z-daterangepicker-widget:before {
+  border-bottom-color: #fff;
+  position: absolute;
+  top: -29px;
+  left: 80px;
+  z-index: 2;
+}
+
+z-daterangepicker z-daterangepicker-widget:after {
+  border-bottom-color: #bbb;
+  position: absolute;
+  top: -30px;
+  left: 80px;
+  z-index: 1;
+}
+
+z-daterangepicker[data-active] z-daterangepicker-widget {
+  display: block;
+}
+
+z-daterangepicker z-daterangepicker-widget .inner {
+  display: table-row;
+}
+
+z-daterangepicker z-daterangepicker-widget z-calendar-group {
+  display: table-cell;
+}
+
+z-daterangepicker z-daterangepicker-controls {
+  display: table-cell;
+  vertical-align: top;
+  padding: 5px;
+}
+
+z-daterangepicker z-daterangepicker-controls label {
+  margin-top: 25px;
+  float: left;
+  margin-bottom: 5px;
+}
+
+z-daterangepicker z-daterangepicker-controls z-dropdown {
+  float: left;
+  margin-left: 5px;
+  margin-top: 20px;
+  display: inline-block;
+}
+
+z-daterangepicker z-daterangepicker-controls z-dropdown-items {
+  max-height: 150px;
+}
+
+z-daterangepicker z-daterangepicker-controls .container {
+  margin: 15px 0 55px;
+  display: block;
+  overflow: auto;
+}
+
+z-daterangepicker z-daterangepicker-controls input.z-input {
+  opacity: 0.5;
+  width: 90px;
+  cursor: pointer;
+  line-height: 1.3em;
+  padding: 0.5em 1em;
+  float: left;
+}
+z-daterangepicker z-daterangepicker-controls input.z-input.active {
+  opacity: 1;
+}
+
+z-daterangepicker z-daterangepicker-controls input.z-input.highlight {
+  border: 2px solid rgba(0, 0, 0, 0.3);
+}
+
+z-daterangepicker z-daterangepicker-controls .separator {
+  display: inline-block;
+  float: left;
+  margin: 5px;
+}
+
+z-daterangepicker z-daterangepicker-controls z-button {
+  float: right;
+  font-size: 1em;
+  padding-left: 1em;
+  padding-right: 1em;
+}
+
