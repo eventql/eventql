@@ -110,6 +110,12 @@ ZBase.registerView((function() {
     }
 
     chart = ZBaseC3Chart(chart_config);
+
+    var chart_container = $(".zbase_session_tracking_dashboard .chart_container");
+    var padding = 32;
+    chart.chartWidth(function() {
+      return chart_container.offsetWidth - padding;
+    });
     chart.renderTimeseries("dashboard_chart");
     chart.renderLegend($(".zbase_session_tracking_dashboard .chart_legend"));
   };
