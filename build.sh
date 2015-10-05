@@ -133,6 +133,10 @@ if [[ $BUILD_ARTIFACTS == "true" ]]; then
   tar cz -C ${TARGET_DIR} logjoind \
       > ${ARTIFACTS_DIR}/zbase-logjoin-${TARGET_LBL}.tgz
 
+  # zbroker
+  tar cz -C ${TARGET_DIR} brokerd brokerctl \
+      > ${ARTIFACTS_DIR}/zbroker-${TARGET_LBL}.tgz
+
   # zen-utils
   if [[ "${BUILD_TYPE}" == "release" ]]; then
     strip ${TARGET_DIR}/zen-csv-upload
