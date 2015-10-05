@@ -247,7 +247,7 @@ var CalendarGroupComponent = function() {
     var timestamp = month_timestamp + (date - 1) * DateUtil.millisPerDay;
 
     td_elem.onclick = function() {
-      var ev = new CustomEvent('fn-calendar-group-select', {
+      var ev = new CustomEvent('select', {
         'detail' : {'timestamp' : timestamp},
         cancelable: true,
         bubbles: true
