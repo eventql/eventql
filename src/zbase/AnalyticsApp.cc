@@ -76,10 +76,20 @@ AnalyticsApp::AnalyticsApp(
     dproc::DefaultApplication("cm.analytics"),
     tsdb_node_(tsdb_node),
     partition_map_(partition_map),
+    replication_scheme_(replication_scheme),
     cstable_index_(cstable_index),
     cdb_(cdb),
+    auth_(auth),
+    sql_(sql),
     datadir_(datadir),
     logfile_service_(
+        cdb,
+        auth,
+        tsdb_node,
+        partition_map,
+        replication_scheme,
+        sql),
+    events_service_(
         cdb,
         auth,
         tsdb_node,
@@ -723,26 +733,22 @@ dproc::TaskSpec AnalyticsApp::buildFeedQuery(
 
 RefPtr<csql::ExecutionStrategy> AnalyticsApp::getExecutionStrategy(
     const String& customer) {
-  auto strategy = mkRef(new csql::DefaultExecutionStrategy());
-
-  strategy->addTableProvider(getTableProvider(customer));
-
-  strategy->addQueryTreeRewriteRule(
-      std::bind(
-          &zbase::SQLEngine::rewriteQuery,
-          partition_map_,
-          cstable_index_,
-          customer,
-          std::placeholders::_1));
-
-  return strategy.get();
+  return SQLEngine::getExecutionStrategy(
+      sql_,
+      partition_map_,
+      replication_scheme_,
+      cstable_index_,
+      auth_,
+      customer);
 }
 
 RefPtr<csql::TableProvider> AnalyticsApp::getTableProvider(
     const String& customer) const {
   return zbase::SQLEngine::tableProviderForNamespace(
         partition_map_,
+        replication_scheme_,
         cstable_index_,
+        auth_,
         customer);
 }
 
@@ -828,6 +834,10 @@ void AnalyticsApp::insertMetric(
 
 LogfileService* AnalyticsApp::logfileService() {
   return &logfile_service_;
+}
+
+EventsService* AnalyticsApp::eventsService() {
+  return &events_service_;
 }
 
 } // namespace zbase

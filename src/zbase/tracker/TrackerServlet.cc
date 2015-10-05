@@ -142,6 +142,12 @@ void TrackerServlet::handleHTTPRequest(
     return;
   }
 
+  if (uri.path() == "/ping") {
+    response->setStatus(http::kStatusOK);
+    response->addBody("pong");
+    return;
+  }
+
   response->setStatus(stx::http::kStatusNotFound);
   response->addBody("not found");
 }

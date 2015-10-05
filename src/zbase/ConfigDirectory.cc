@@ -17,11 +17,47 @@ using namespace stx;
 
 namespace zbase {
 
+ConfigDirectoryClient::ConfigDirectoryClient(
+    InetAddr master_addr) :
+    master_addr_(master_addr) {}
+
+ClusterConfig ConfigDirectoryClient::fetchClusterConfig() {
+  auto uri = URI(
+      StringUtil::format(
+          "http://$0/analytics/master/fetch_cluster_config",
+          master_addr_.hostAndPort()));
+
+  http::HTTPClient http;
+  auto res = http.executeRequest(http::HTTPRequest::mkGet(uri));
+  if (res.statusCode() != 200) {
+    RAISEF(kRuntimeError, "error: $0", res.body().toString());
+  }
+
+  return msg::decode<ClusterConfig>(res.body());
+}
+
+ClusterConfig ConfigDirectoryClient::updateClusterConfig(
+    const ClusterConfig& config) {
+  auto body = msg::encode(config);
+  auto uri = StringUtil::format(
+        "http://$0/analytics/master/update_cluster_config",
+        master_addr_.hostAndPort());
+
+  http::HTTPClient http;
+  auto res = http.executeRequest(http::HTTPRequest::mkPost(uri, *body));
+  if (res.statusCode() != 201) {
+    RAISEF(kRuntimeError, "error: $0", res.body().toString());
+  }
+
+  return msg::decode<ClusterConfig>(res.body());
+}
+
 ConfigDirectory::ConfigDirectory(
     const String& path,
     const InetAddr master_addr,
     uint64_t topics) :
     master_addr_(master_addr),
+    cclient_(master_addr),
     topics_(topics),
     watcher_running_(false) {
   mdb::MDBOptions mdb_opts;
@@ -37,9 +73,46 @@ ConfigDirectory::ConfigDirectory(
     });
   }
 
+  if (topics_ & ConfigTopic::CLUSTERCONFIG) {
+    auto txn = db_->startTransaction(true);
+    txn->autoAbort();
+    auto cc = txn->get("cluster");
+    if (!cc.isEmpty()) {
+      cluster_config_ = msg::decode<ClusterConfig>(cc.get());
+    }
+  }
 
   sync();
 }
+
+ClusterConfig ConfigDirectory::clusterConfig() const {
+  if ((topics_ & ConfigTopic::CLUSTERCONFIG) == 0) {
+    RAISE(kRuntimeError, "config topic not enabled: CLUSTERCONFIG");
+  }
+
+  std::unique_lock<std::mutex> lk(mutex_);
+  return cluster_config_;
+}
+
+void ConfigDirectory::updateClusterConfig(ClusterConfig config) {
+  if ((topics_ & ConfigTopic::CLUSTERCONFIG) == 0) {
+    RAISE(kRuntimeError, "config topic not enabled: CLUSTERCONFIG");
+  }
+
+  auto cc = cclient_.updateClusterConfig(config);
+  commitClusterConfig(cc);
+}
+
+void ConfigDirectory::onClusterConfigChange(
+    Function<void (const ClusterConfig& cfg)> fn) {
+  if ((topics_ & ConfigTopic::CLUSTERCONFIG) == 0) {
+    RAISE(kRuntimeError, "config topic not enabled: CLUSTERCONFIG");
+  }
+
+  std::unique_lock<std::mutex> lk(mutex_);
+  on_cluster_change_.emplace_back(fn);
+}
+
 
 RefPtr<CustomerConfigRef> ConfigDirectory::configFor(
     const String& customer_key) const {
@@ -117,7 +190,6 @@ void ConfigDirectory::updateCustomerConfig(CustomerConfig cfg) {
 
   commitCustomerConfig(msg::decode<CustomerConfig>(res.body()));
 }
-
 
 void ConfigDirectory::updateTableDefinition(
     const TableDefinition& table,
@@ -257,6 +329,38 @@ void ConfigDirectory::syncObject(const String& obj) {
       obj == "userdb") {
     syncUserDB();
     return;
+  }
+
+  if ((topics_ & ConfigTopic::CLUSTERCONFIG) &&
+      obj == "cluster") {
+    syncClusterConfig();
+    return;
+  }
+}
+
+void ConfigDirectory::syncClusterConfig() {
+  auto cc = cclient_.fetchClusterConfig();
+  commitClusterConfig(cc);
+}
+
+void ConfigDirectory::commitClusterConfig(const ClusterConfig& config) {
+  String db_key = "cluster";
+  String hkey = "head~cluster";
+  auto buf = msg::encode(config);
+  auto vstr = StringUtil::toString(config.version());
+
+  std::unique_lock<std::mutex> lk(mutex_);
+  auto txn = db_->startTransaction(false);
+  txn->autoAbort();
+
+  txn->update(db_key.data(), db_key.size(), buf->data(), buf->size());
+  txn->update(hkey.data(), hkey.size(), vstr.data(), vstr.size());
+  txn->commit();
+
+  cluster_config_ = config;
+
+  for (const auto& cb : on_cluster_change_) {
+    cb(config);
   }
 }
 

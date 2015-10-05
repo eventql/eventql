@@ -177,6 +177,10 @@ ASTNode* Parser::methodCall() {
     e->setType(ASTNode::T_IF_EXPR);
   }
 
+  if (e->getToken()->getString() == "subquery_column") {
+    e->setType(ASTNode::T_COLUMN_INDEX);
+  }
+
   /* read arguments */
   do {
     consumeToken();

@@ -23,6 +23,7 @@
 #include "zbase/FeedConfig.pb.h"
 #include "zbase/ReportParams.pb.h"
 #include "zbase/api/LogfileService.h"
+#include "zbase/api/EventsService.h"
 #include "zbase/AnalyticsSession.pb.h"
 #include "csql/runtime/ExecutionStrategy.h"
 #include "zbase/ConfigDirectory.h"
@@ -92,6 +93,7 @@ public:
   void updateTable(const TableDefinition& tbl, bool force = false);
 
   LogfileService* logfileService();
+  EventsService* eventsService();
 
 protected:
 
@@ -100,13 +102,17 @@ protected:
 
   zbase::TSDBService* tsdb_node_;
   zbase::PartitionMap* partition_map_;
+  zbase::ReplicationScheme* replication_scheme_;
   zbase::CSTableIndex* cstable_index_;
   AnalyticsQueryFactory queries_;
   HashMap<String, FeedConfig> feeds_;
   ConfigDirectory* cdb_;
+  AnalyticsAuth* auth_;
+  csql::Runtime* sql_;
   String datadir_;
 
   LogfileService logfile_service_;
+  EventsService events_service_;
 };
 
 zbase::TableDefinition tableDefinitionToTableConfig(const TableDefinition& tbl);

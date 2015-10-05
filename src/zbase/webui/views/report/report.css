@@ -363,4 +363,6 @@
   user-select: none;
 }
 
-
+h2.report_widget_title {
+  font-size: 18px;
+}

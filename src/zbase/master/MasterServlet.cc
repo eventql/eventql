@@ -31,6 +31,14 @@ void MasterServlet::handleHTTPRequest(
       return listHeads(uri, req, res);
     }
 
+    if (StringUtil::endsWith(uri.path(), "/analytics/master/fetch_cluster_config")) {
+      return fetchClusterConfig(uri, req, res);
+    }
+
+    if (StringUtil::endsWith(uri.path(), "/analytics/master/update_cluster_config")) {
+      return updateClusterConfig(uri, req, res);
+    }
+
     if (StringUtil::endsWith(uri.path(), "/analytics/master/fetch_customer_config")) {
       return fetchCustomerConfig(uri, req, res);
     }
@@ -122,6 +130,31 @@ void MasterServlet::updateCustomerConfig(
 
   auto config = msg::decode<CustomerConfig>(req->body());
   auto updated_config = cdb_->updateCustomerConfig(config);
+  res->setStatus(stx::http::kStatusCreated);
+  res->addBody(*msg::encode(updated_config));
+}
+
+void MasterServlet::fetchClusterConfig(
+    const URI& uri,
+    http::HTTPRequest* req,
+    http::HTTPResponse* res) {
+  auto config = cdb_->fetchClusterConfig();
+  auto body = msg::encode(config);
+
+  res->setStatus(stx::http::kStatusOK);
+  res->addBody(*body);
+}
+
+void MasterServlet::updateClusterConfig(
+    const URI& uri,
+    http::HTTPRequest* req,
+    http::HTTPResponse* res) {
+  if (req->method() != http::HTTPMessage::M_POST) {
+    RAISE(kIllegalArgumentError, "expected HTTP POST request");
+  }
+
+  auto config = msg::decode<ClusterConfig>(req->body());
+  auto updated_config = cdb_->updateClusterConfig(config);
   res->setStatus(stx::http::kStatusCreated);
   res->addBody(*msg::encode(updated_config));
 }

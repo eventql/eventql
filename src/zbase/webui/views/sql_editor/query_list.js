@@ -2,7 +2,7 @@ ZBase.registerView((function() {
 
   var load = function() {
     $.showLoader();
-    $.httpGet("/api/v1/documents", function(r) {
+    $.httpGet("/api/v1/documents?type=sql_query", function(r) {
       if (r.status == 200) {
         var documents = JSON.parse(r.response).documents;
         render(documents);

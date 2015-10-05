@@ -11,6 +11,7 @@
 #include <csql/runtime/runtime.h>
 #include <csql/runtime/ResultFormat.h>
 #include <zbase/core/TSDBTableProvider.h>
+#include <zbase/AnalyticsAuth.h>
 
 namespace zbase {
 class TSDBService;
@@ -20,34 +21,72 @@ public:
 
   static RefPtr<csql::TableProvider> tableProviderForNamespace(
       PartitionMap* partition_map,
+      ReplicationScheme* replication_scheme,
       CSTableIndex* cstable_index,
+      AnalyticsAuth* auth,
       const String& tsdb_namespace);
 
   static RefPtr<csql::QueryTreeNode> rewriteQuery(
+      csql::Runtime* runtime,
       PartitionMap* partition_map,
+      ReplicationScheme* replication_scheme,
       CSTableIndex* cstable_index,
+      AnalyticsAuth* auth,
       const String& tsdb_namespace,
       RefPtr<csql::QueryTreeNode> query);
+
+  static RefPtr<csql::ExecutionStrategy> getExecutionStrategy(
+      csql::Runtime* runtime,
+      PartitionMap* partition_map,
+      ReplicationScheme* replication_scheme,
+      CSTableIndex* cstable_index,
+      AnalyticsAuth* auth,
+      const String& customer);
 
 protected:
 
   static void insertPartitionSubqueries(
+      csql::Runtime* runtime,
       PartitionMap* partition_map,
+      ReplicationScheme* replication_scheme,
       CSTableIndex* cstable_index,
+      AnalyticsAuth* auth,
       const String& tsdb_namespace,
       RefPtr<csql::QueryTreeNode>* node);
 
   static void replaceSequentialScanWithUnion(
       PartitionMap* partition_map,
+      ReplicationScheme* replication_scheme,
       CSTableIndex* cstable_index,
       const String& tsdb_namespace,
       RefPtr<csql::QueryTreeNode>* node);
 
   static void shardGroupBy(
+      csql::Runtime* runtime,
       PartitionMap* partition_map,
+      ReplicationScheme* replication_scheme,
       CSTableIndex* cstable_index,
+      AnalyticsAuth* auth,
       const String& tsdb_namespace,
       RefPtr<csql::QueryTreeNode>* node);
+
+  static ScopedPtr<InputStream> executeParallelGroupBy(
+      PartitionMap* partition_map,
+      ReplicationScheme* replication_scheme,
+      CSTableIndex* cstable_index,
+      AnalyticsAuth* auth,
+      const String& customer,
+      const Vector<ReplicaRef>& hosts,
+      const csql::RemoteAggregateParams& params);
+
+  static ScopedPtr<InputStream> executeRemoteGroupBy(
+      PartitionMap* partition_map,
+      ReplicationScheme* replication_scheme,
+      CSTableIndex* cstable_index,
+      AnalyticsAuth* auth,
+      const String& customer,
+      const InetAddr& host,
+      const csql::RemoteAggregateParams& params);
 
 };
 

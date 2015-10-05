@@ -10,6 +10,7 @@
 #include <stx/SHA1.h>
 #include <zbase/core/TSDBTableProvider.h>
 #include <zbase/core/TSDBService.h>
+#include <zbase/core/RemoteTSDBScan.h>
 #include <csql/CSTableScan.h>
 #include <csql/runtime/EmptyTable.h>
 
@@ -20,24 +21,21 @@ namespace zbase {
 TSDBTableProvider::TSDBTableProvider(
     const String& tsdb_namespace,
     PartitionMap* partition_map,
-    CSTableIndex* cstable_index) :
+    ReplicationScheme* replication_scheme,
+    CSTableIndex* cstable_index,
+    AnalyticsAuth* auth) :
     tsdb_namespace_(tsdb_namespace),
     partition_map_(partition_map),
-    cstable_index_(cstable_index) {}
+    replication_scheme_(replication_scheme),
+    cstable_index_(cstable_index),
+    auth_(auth) {}
 
 Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildSequentialScan(
-      RefPtr<csql::SequentialScanNode> node,
-      csql::QueryBuilder* runtime) const {
+    RefPtr<csql::SequentialScanNode> node,
+    csql::QueryBuilder* runtime) const {
   auto table_ref = TSDBTableRef::parse(node->tableName());
   if (partition_map_->findTable(tsdb_namespace_, table_ref.table_key).isEmpty()) {
     return None<ScopedPtr<csql::TableExpression>>();
-  }
-
-  if (table_ref.host.isEmpty() || table_ref.host.get() != "localhost") {
-    RAISEF(
-        kRuntimeError,
-        "error while opening table '$0': host must be == localhost",
-        node->tableName());
   }
 
   if (table_ref.partition_key.isEmpty()) {
@@ -46,6 +44,18 @@ Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildSequentialScan(
         "error while opening table '$0': missing partition key",
         node->tableName());
   }
+
+  if (table_ref.host.isEmpty() || table_ref.host.get() != "localhost") {
+    return buildRemoteSequentialScan(node, table_ref, runtime);
+  } else {
+    return buildLocalSequentialScan(node, table_ref, runtime);
+  }
+}
+
+Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildLocalSequentialScan(
+    RefPtr<csql::SequentialScanNode> node,
+    const TSDBTableRef& table_ref,
+    csql::QueryBuilder* runtime) const {
 
   auto partition = partition_map_->findPartition(
       tsdb_namespace_,
@@ -77,6 +87,19 @@ Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildSequentialScan(
   }
 
   return Option<ScopedPtr<csql::TableExpression>>(std::move(scan));
+}
+
+Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildRemoteSequentialScan(
+    RefPtr<csql::SequentialScanNode> node,
+    const TSDBTableRef& table_ref,
+    csql::QueryBuilder* runtime) const {
+  return Option<ScopedPtr<csql::TableExpression>>(mkScoped(
+      new RemoteTSDBScan(
+          node,
+          tsdb_namespace_,
+          table_ref,
+          replication_scheme_,
+          auth_)));
 }
 
 void TSDBTableProvider::listTables(

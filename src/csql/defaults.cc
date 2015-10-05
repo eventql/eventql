@@ -51,8 +51,8 @@ void installDefaultSymbols(SymbolTable* rt) {
   /* expressions/boolean.h */
   rt->registerFunction("eq",  PureFunction(&expressions::eqExpr));
   rt->registerFunction("neq", PureFunction(&expressions::neqExpr));
-  rt->registerFunction("and", PureFunction(&expressions::andExpr));
-  rt->registerFunction("or",  PureFunction(&expressions::orExpr));
+  rt->registerFunction("logical_and", PureFunction(&expressions::andExpr));
+  rt->registerFunction("logical_or",  PureFunction(&expressions::orExpr));
   rt->registerFunction("neg", PureFunction(&expressions::negExpr));
   rt->registerFunction("lt",  PureFunction(&expressions::ltExpr));
   rt->registerFunction("lte", PureFunction(&expressions::lteExpr));
@@ -74,6 +74,10 @@ void installDefaultSymbols(SymbolTable* rt) {
 
   rt->registerFunction("round", PureFunction(&expressions::roundExpr));
   rt->registerFunction("truncate", PureFunction(&expressions::truncateExpr));
+
+  /* expressions/string.h */
+  rt->registerFunction("startswith", PureFunction(&expressions::startsWithExpr));
+  rt->registerFunction("endswith", PureFunction(&expressions::endsWithExpr));
 
   /* expressions/internal.h */
   rt->registerFunction("repeat_value", expressions::kRepeatValueExpr);

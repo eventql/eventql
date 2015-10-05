@@ -74,6 +74,12 @@ ScopedPtr<TableExpression> TableExpressionBuilder::build(
         tables);
   }
 
+  if (dynamic_cast<RemoteAggregateNode*>(node.get())) {
+    return buildRemoteAggregate(
+        node.asInstanceOf<RemoteAggregateNode>(),
+        runtime);
+  }
+
   RAISE(
       kRuntimeError,
       "cannot figure out how to build a table expression for this QTree node");
@@ -227,6 +233,28 @@ ScopedPtr<TableExpression> TableExpressionBuilder::buildDescribeTableStatment(
   }
 
   return mkScoped(new DescribeTableStatement(table_info.get()));
+}
+
+ScopedPtr<TableExpression> TableExpressionBuilder::buildRemoteAggregate(
+    RefPtr<RemoteAggregateNode> node,
+    QueryBuilder* runtime) {
+
+  Vector<String> column_names;
+  Vector<ValueExpression> select_expressions;
+
+  for (const auto& slnode : node->selectList()) {
+    column_names.emplace_back(slnode->columnName());
+
+    select_expressions.emplace_back(
+        runtime->buildValueExpression(slnode->expression()));
+  }
+
+  return mkScoped(
+      new RemoteGroupBy(
+          column_names,
+          std::move(select_expressions),
+          node->remoteAggregateParams(),
+          node->remoteExecuteFunction()));
 }
 
 } // namespace csql
