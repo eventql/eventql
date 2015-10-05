@@ -4,6 +4,7 @@ z-calendar-group table {
   color: rgba(0, 0, 0, 0.8);
   border-collapse: collapse;
   border-spacing: 0;
+  margin: 0;
 }
 
 z-calendar-group table td {
@@ -125,3 +126,9 @@ z-calendar-group table td.colored {
   background-color: #F4F4F4;
 }
 
+
+/** ZBase Style **/
+.zbase_session_tracking z-calendar-group table {
+  margin-top: 0px;
+  border-top: none;
+}
