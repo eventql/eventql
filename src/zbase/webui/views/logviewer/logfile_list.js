@@ -21,7 +21,7 @@ ZBase.registerView((function() {
 
     var tbody = $("tbody", page);
     logfiles.forEach(function(def) {
-      var url = "/a/logviewer/" + def.name;
+      var url = "/a/logs/view/" + def.name;
       var tr = document.createElement("tr");
       tr.innerHTML = 
           "<td><a href='" + url + "'>" + def.name + "</a></td>" +

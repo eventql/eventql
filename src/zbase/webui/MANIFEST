@@ -37,7 +37,7 @@ route {
 }
 
 route {
-  path_prefix: "/a/logviewer/"
+  path_prefix: "/a/logs/view/"
   view: "logviewer"
   require_module: "util/z-date-util"
   require_module: "util/z-url-util"
@@ -56,7 +56,7 @@ route {
 }
 
 route {
-  path_match: "/a/logviewer"
+  path_match: "/a/logs"
   view: "logviewer_logfile_list"
   require_module: "util/z-date-util"
   require_module: "util/z-url-util"
