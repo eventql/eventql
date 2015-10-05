@@ -28,14 +28,16 @@ var DateRangePickerComponent = function() {
     var _this = this;
 
 
-    this.querySelector("z-daterangepicker-field").onclick = function(e) {
-      e.stopPropagation();
-      _this.toggleWidgetVisibility();
-    };
+    this.querySelector("z-daterangepicker-field")
+      .addEventListener("click", function(e) {
+          e.stopPropagation();
+          _this.toggleWidgetVisibility();
+      }, false);
 
-    this.querySelector("z-daterangepicker-widget").onclick = function(e) {
-      e.stopPropagation();
-    };
+    this.querySelector("z-daterangepicker-widget")
+      .addEventListener("click", function(e) {
+            e.stopPropagation();
+      }, false);
 
     //cancel
     this.querySelector("button.cancel").addEventListener("click", function() {
