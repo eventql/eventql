@@ -64,7 +64,9 @@ ZBase.registerView((function() {
     });
 
     query.addEventListener('error', function(e) {
+      query_mgr.close("sql_query");
       $.fatalError("Server Error");
+      console.log(e);
     });
   };
 
