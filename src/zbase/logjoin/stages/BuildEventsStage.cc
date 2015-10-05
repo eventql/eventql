@@ -25,6 +25,7 @@ void BuildEventsStage::process(RefPtr<SessionContext> ctx) {
         ev.evtype);
 
     loadEvent(ev.data, evptr);
+    evptr->obj.addDateTimeField("time", ev.time);
   }
 }
 

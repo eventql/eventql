@@ -1,6 +1,7 @@
 ZBase.registerView((function() {
 
-  var render = function() {
+  var render = function(path) {
+
     var page = $.getTemplate(
         "views/documentation",
         "documentation_main_tpl");
@@ -11,13 +12,17 @@ ZBase.registerView((function() {
     $.replaceViewport(page);
 
     var content = $(".zbase_documentation_content");
-    var example = $.getTemplate(
-        "views/documentation",
-        "documentation_page_examples");
-        console.log(content);
-    content.appendChild(example);
 
-    var path = window.location.pathname;
+    if(path && path.split("/").length > 3) {
+      var key = path.split("/").pop();
+      $.httpGet("/a/_/d/" + key + ".html", function(res) {
+        if(res.status == 200) {
+          content.innerHTML = res.response;
+        } else {
+          $.fatalError("Could not get markdown file \"" + key + ".html\".");
+        }
+      });
+    }
 
     $.hideLoader();
   };

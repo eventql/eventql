@@ -22,14 +22,10 @@ ZBase.registerView((function() {
         "views/datastore_tables",
         "zbase_datastore_tables_list_tpl");
 
-    var menu = DatastoreMenu();
-    menu.render($(".zbase_datastore_menu_sidebar", page));
-
     var tbody = $("tbody", page);
     tables.forEach(function(table) {
       renderRow(tbody, table);
     });
-
 
     $.handleLinks(page);
     $.replaceViewport(page);
