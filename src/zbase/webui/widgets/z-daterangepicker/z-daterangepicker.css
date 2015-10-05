@@ -112,7 +112,7 @@ z-daterangepicker z-daterangepicker-controls .container {
 
 z-daterangepicker z-daterangepicker-controls input.z-input {
   opacity: 0.5;
-  width: 90px;
+  width: 100px;
   cursor: pointer;
   line-height: 1.3em;
   padding: 0.5em 1em;
