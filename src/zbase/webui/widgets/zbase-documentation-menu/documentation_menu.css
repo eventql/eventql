@@ -39,7 +39,9 @@
   font-size: 14px;
 }
 
-.zbase_documentation_menu_sidebar z-menu-item.doc_section a:hover {
+.zbase_documentation_menu_sidebar z-menu-item.doc_section a:hover,
+.zbase_documentation_menu_sidebar z-menu-item.doc_section a.current
+ {
   color: #008cff !important;
 }
 
