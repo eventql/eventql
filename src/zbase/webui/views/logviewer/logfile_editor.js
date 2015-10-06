@@ -50,7 +50,7 @@ ZBase.registerView((function() {
       $(".type", tr).innerHTML = field.type;
       $(".format", tr).innerHTML = field.format;
 
-      $.onClick($("tr", tr), function() {
+      $.onClick($(".icon", tr), function() {
         onClick(field);
       });
 

@@ -41,12 +41,16 @@
 
 .zbase_logviewer .logfile_editor .editor_pane table.z-table thead th {
  background: #f6f6f6;
- width: 30%;
+ width: 27%;
 }
 
 .zbase_logviewer .logfile_editor .editor_pane table.z-table thead tr th:first-child {
   padding-left: 20px;
   width: 40%;
+}
+
+.zbase_logviewer .logfile_editor .editor_pane table.z-table thead tr th:last-child {
+  width: 6%;
 }
 
 .zbase_logviewer .logfile_editor .editor_pane table.z-table tr td {
@@ -56,6 +60,19 @@
 .zbase_logviewer .logfile_editor .editor_pane table.z-table tr td.name {
   padding-left: 20px;
   color: #333;
+}
+
+.zbase_logviewer .logfile_editor .editor_pane table.z-table tr td.icon {
+  text-align: center;
+}
+
+.zbase_logviewer .logfile_editor .editor_pane table.z-table tr td.icon i {
+  padding: 2px 10px;
+}
+
+.zbase_logviewer .logfile_editor .editor_pane table.z-table tr td.icon i:hover {
+  cursor: pointer;
+  color: #3498db;
 }
 
 .zbase_logviewer .logfile_editor .editor_pane .add_field {
