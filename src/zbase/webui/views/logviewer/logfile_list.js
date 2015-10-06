@@ -19,21 +19,67 @@ ZBase.registerView((function() {
         "views/logviewer",
         "zbase_logviewer_logfile_list_tpl");
 
+    var tr_tpl = $.getTemplate(
+        "views/logviewer",
+        "zbase_logviewer_logfile_list_row_tpl");
+
     var tbody = $("tbody", page);
     logfiles.forEach(function(def) {
-      var url = "/a/logviewer/" + def.name;
-      var tr = document.createElement("tr");
-      tr.innerHTML = 
-          "<td><a href='" + url + "'>" + def.name + "</a></td>" +
-          "<td><a href='" + url + "'>&mdash;</a></td>" +
-          "<td><a href='" + url + "'>&mdash;</a></td>";
+      console.log(def);
+      var tr = tr_tpl.cloneNode(true);
+      $(".name", tr).innerHTML = def.name;
 
-      $.onClick(tr, function() { $.navigateTo(url); });
+      $("z-dropdown", tr).addEventListener("change", function() {
+        switch (this.getValue()) {
+          case "open_viewer":
+            $.navigateTo("/a/logs/view/" + def.name);
+            return;
+
+          case "edit":
+            $.navigateTo("/a/logs/" + def.name);
+            return;
+        }
+      });
+
       tbody.appendChild(tr);
     });
 
+
+    $.onClick($(".link.add", page), displayAddLogfileModal);
+    var add_modal = $("z-modal.add_logfile", page);
+    $.onClick($("button.submit", add_modal), addLogfile);
+    $.onClick($("button.close", add_modal), function() {
+      add_modal.close();
+    });
+
+
     $.handleLinks(page);
     $.replaceViewport(page);
+  };
+
+  var displayAddLogfileModal = function() {
+    var modal = $(".zbase_logviewer .logfile_list z-modal.add_logfile");
+    var tpl = $.getTemplate(
+        "views/logviewer",
+        "zbase_logviewer_logfile_list_modal_tpl");
+
+    $.replaceContent($(".z-modal-content", modal), tpl);
+    modal.show();
+  };
+
+  var addLogfile = function() {
+    var input = $(".zbase_logviewer .logfile_list z-modal.add_logfile input");
+
+    if (input.value == 0) {
+      $(".zbase_logviewer .logfile_list z-modal.add_logfile .error_note")
+          .classList.remove("hidden");
+      input.classList.add("error");
+      return;
+    }
+
+    var url = "/api/v1/logfiles/add_logfile?name=" + $.escapeHTML(input.value);
+    alert("POST " + url);
+    //TODO redirect to edit schema page
   };
 
   return {
@@ -42,5 +88,4 @@ ZBase.registerView((function() {
     unloadView: function() {},
     handleNavigationChange: load
   };
-
 })());

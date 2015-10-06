@@ -7,7 +7,7 @@
             <a href="/a/">Applications</a>
           </zbase-breadcrumbs-section>
           <zbase-breadcrumbs-section>
-            <a href="/a/logviewer">Logfile Viewer</a>
+            <a href="/a/logs">Logfile Viewer</a>
           </zbase-breadcrumbs-section>
         </zbase-breadcrumbs>
         <h1>Logfiles</h1>
@@ -15,18 +15,68 @@
     </section>
     <div class="zbase_content_pane fullwidth">
       <div class="logfile_list">
-        <table class="z-table zbase_clickable_table">
+        <table class="z-table">
           <thead>
             <tr>
               <th>Name</th>
               <th>Type</th>
               <th>Last opened by me</th>
+              <th></th>
             </tr>
           </thead>
           <tbody>
           </tbody>
         </table>
+
+        <div class="add_pane">
+          <a class="link add"><i class="fa fa-plus"></i> Add Logfile</a>
+        </div>
+
+        <z-modal class="add_logfile">
+          <z-modal-box>
+            <z-modal-close-icon></z-modal-close-icon>
+            <div class="z-modal-header">
+              Add a new logfile
+            </div>
+            <div class="z-modal-content"></div>
+            <div class="z-modal-footer">
+              <button class="z-button primary submit">Save</button>
+              <button class="z-button secondary close">Cancel</button>
+            </div>
+          </z-modal-box>
+        </z-modal>
       </div>
     </div>
+  </div>
+</template>
+
+<template id="zbase_logviewer_logfile_list_row_tpl">
+  <tr>
+    <td class="name"></td>
+    <td class="type">&mdash;</td>
+    <td class="last_opened">&mdash;</td>
+    <td class="icon">
+      <z-dropdown class="edit" data-resolved="" data-hover="">
+        <z-dropdown-header>
+          <z-dropdown-header-value data-static="">
+            <i class="fa fa-gear"></i>
+          </z-dropdown-header-value>
+          <z-dropdown-header-icon></z-dropdown-header-icon>
+        </z-dropdown-header>
+        <z-dropdown-flyout>
+          <z-dropdown-items>
+            <z-dropdown-item data-value="edit">Edit Schema</z-dropdown-item>
+            <z-dropdown-item data-value="open_viewer">Open in Viewer</z-dropdown-item>
+          </z-dropdown-items>
+        </z-dropdown-flyout>
+      </z-dropdown>
+    </td>
+</template>
+
+<template id="zbase_logviewer_logfile_list_modal_tpl">
+  <div class="field">
+    <label>Name:</label>
+    <input class="z-input" type="text" />
+    <div class="error_note hidden">Please insert a name</div>
   </div>
 </template>
