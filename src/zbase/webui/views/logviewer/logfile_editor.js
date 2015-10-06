@@ -21,15 +21,24 @@ ZBase.registerView((function() {
     $("h1", page).innerHTML = def.name;
     $("textarea.regex", page).value = def.regex;
 
-    renderSourceFields($(".editor_pane.source_fields", page), def.source_fields);
-    renderRowFields($(".editor_pane.row_fields", page), def.row_fields);
+    renderFields(
+        $(".editor_pane.source_fields", page),
+        def.source_fields,
+        editSourceField);
 
+    renderFields(
+        $(".editor_pane.row_fields", page),
+        def.row_fields,
+        editRowField);
+
+    $.onClick($(".editor_pane.source_fields .add_field", page), addSourceField);
+    $.onClick($(".editor_pane.row_fields .add_field", page), addRowField);
+
+    $.handleLinks(page);
     $.replaceViewport(page);
-    console.log(def);
   };
 
-  var renderSourceFields = function(elem, fields) {
-    console.log(fields);
+  var renderFields = function(elem, fields, onClick) {
     var tbody = $("tbody", elem);
     var tr_tpl = $.getTemplate(
         "views/logviewer",
@@ -41,26 +50,75 @@ ZBase.registerView((function() {
       $(".type", tr).innerHTML = field.type;
       $(".format", tr).innerHTML = field.format;
 
+      $.onClick($("tr", tr), function() {
+        onClick(field);
+      });
+
       tbody.appendChild(tr);
     });
   };
 
-  var renderRowFields = function(elem, fields) {
-    console.log(fields);
-    var tbody = $("tbody", elem);
-    var tr_tpl = $.getTemplate(
+  var editSourceField = function(field) {
+    renderModal(field, "Edit Source Field", function() {
+      
+    });
+  };
+
+  var editRowField = function(field) {
+    renderModal(field, "Edit Row Field", function() {
+      
+    });
+  };
+
+  var addSourceField = function() {
+    var field = {};
+    renderModal(field, "Add Source Field", function() {
+      
+    });
+  };
+
+  var addRowField = function() {
+    var field = {};
+    renderModal(field, "Add Row Field", function() {
+      
+    });
+  };
+
+  var renderModal = function(def, header, callback) {
+    var modal = $(".zbase_logviewer .logfile_editor z-modal.edit_field");
+    var tpl = $.getTemplate(
         "views/logviewer",
-        "zbase_logviewer_logfile_editor_row_tpl");
+        "zbase_logviewer_logfile_editor_modal_tpl");
 
-    fields.forEach(function(field) {
-      var tr = tr_tpl.cloneNode(true);
-      $(".name", tr).innerHTML = field.name;
-      $(".type", tr).innerHTML = field.type;
-      $(".format", tr).innerHTML = field.format;
+    $(".z-modal-header", tpl).innerHTML = header;
 
-      tbody.appendChild(tr);
+    var name_input = $("input.name", tpl);
+    if (def.name) {
+      name_input.value = def.name;
+    }
+
+    var type_control = $("z-dropdown", tpl);
+    if (def.type) {
+      type_control.setValue([def.type]);
+    }
+
+    var format_input = $("input.format", tpl)
+    if (def.format) {
+      format_input.value = def.format;
+    }
+
+    $.onClick($("button.close", tpl), function() {
+      modal.close();
     });
 
+    $.onClick($("button.submit", tpl), function() {
+      console.log("save");
+    });
+
+
+    $.replaceContent($(".container", modal), tpl);
+    modal.show();
+    name_input.focus();
   };
 
   return {

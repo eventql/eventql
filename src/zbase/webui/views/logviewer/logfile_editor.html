@@ -76,6 +76,13 @@
           </div>
 
         </div>
+
+        <z-modal class="edit_field">
+          <z-modal-box>
+            <z-modal-close-icon></z-modal-close-icon>
+            <div class="container"></div>
+          </z-modal-box>
+        </z-modal>
       </div>
     </div>
   </div>
@@ -87,4 +94,38 @@
     <td class="type"></td>
     <td class="format"></td>
   </tr>
+</template>
+
+<template id="zbase_logviewer_logfile_editor_modal_tpl">
+  <div class="z-modal-header"></div>
+  <div class="z-modal-content">
+    <div class="field">
+      <label>Name</label>
+      <input class="z-input name" type="text" />
+    </div>
+
+    <div class="field">
+      <label>Type</label>
+      <z-dropdown class="input" data-resolved>
+        <z-dropdown-flyout>
+          <z-dropdown-items>
+            <z-dropdown-item data-value="STRING">STRING</z-dropdown-item>
+            <z-dropdown-item data-value="DOUBLE">DOUBLE</z-dropdown-item>
+            <z-dropdown-item data-value="UINT32">UINT32</z-dropdown-item>
+            <z-dropdown-item data-value="UINT64">UINT64</z-dropdown-item>
+            <z-dropdown-item data-value="DATETIME">DATETIME</z-dropdown-item>
+          </z-dropdown-items>
+        </z-dropdown-flyout>
+      </z-dropdown>
+    </div>
+
+    <div class="field">
+      <label>Format</label>
+      <input class="z-input format" type="text" />
+    </div>
+  </div>
+  <div class="z-modal-footer">
+    <button class="z-button primary submit">Save</button>
+    <button class="z-button secondary close">Cancel</button>
+  </div>
 </template>
