@@ -117,7 +117,7 @@ TEST_CASE(RuntimeTest, TestSimpleCSTableAggregate, [] () {
   ResultList result;
   auto query = R"(select count(1) from testtable;)";
   auto qplan = runtime->buildQueryPlan(query, estrat.get());
-  runtime->executeStatement(qplan->buildStatement(0), &result);
+  runtime->executeStatement(qplan->getStatement(0), &result);
   EXPECT_EQ(result.getNumColumns(), 1);
   EXPECT_EQ(result.getNumRows(), 1);
   EXPECT_EQ(result.getRow(0)[0], "213");
@@ -135,7 +135,7 @@ TEST_CASE(RuntimeTest, TestNestedCSTableAggregate, [] () {
   ResultList result;
   auto query = R"(select count(event.search_query.time) from testtable;)";
   auto qplan = runtime->buildQueryPlan(query, estrat.get());
-  runtime->executeStatement(qplan->buildStatement(0), &result);
+  runtime->executeStatement(qplan->getStatement(0), &result);
   EXPECT_EQ(result.getNumColumns(), 1);
   EXPECT_EQ(result.getNumRows(), 1);
   EXPECT_EQ(result.getRow(0)[0], "704");
@@ -154,7 +154,7 @@ TEST_CASE(RuntimeTest, TestWithinRecordCSTableAggregate, [] () {
     ResultList result;
     auto query = R"(select sum(event.search_query.num_result_items) from testtable;)";
     auto qplan = runtime->buildQueryPlan(query, estrat.get());
-    runtime->executeStatement(qplan->buildStatement(0), &result);
+    runtime->executeStatement(qplan->getStatement(0), &result);
     EXPECT_EQ(result.getNumColumns(), 1);
     EXPECT_EQ(result.getNumRows(), 1);
     EXPECT_EQ(result.getRow(0)[0], "24793");
@@ -164,7 +164,7 @@ TEST_CASE(RuntimeTest, TestWithinRecordCSTableAggregate, [] () {
     ResultList result;
     auto query = R"(select sum(count(event.search_query.result_items.position) WITHIN RECORD) from testtable;)";
     auto qplan = runtime->buildQueryPlan(query, estrat.get());
-    runtime->executeStatement(qplan->buildStatement(0), &result);
+    runtime->executeStatement(qplan->getStatement(0), &result);
     EXPECT_EQ(result.getNumColumns(), 1);
     EXPECT_EQ(result.getNumRows(), 1);
     EXPECT_EQ(result.getRow(0)[0], "24793");
@@ -177,7 +177,7 @@ TEST_CASE(RuntimeTest, TestWithinRecordCSTableAggregate, [] () {
         count(event.search_query.result_items.position) WITHIN RECORD
       from testtable;)";
   auto qplan = runtime->buildQueryPlan(query, estrat.get());
-  runtime->executeStatement(qplan->buildStatement(0), &result);
+  runtime->executeStatement(qplan->getStatement(0), &result);
   EXPECT_EQ(result.getNumColumns(), 2);
   EXPECT_EQ(result.getNumRows(), 213);
 
@@ -219,7 +219,7 @@ TEST_CASE(RuntimeTest, TestMultiLevelNestedCSTableAggregate, [] () {
           event.search_query.result_items.position
         from testtable;)";
     auto qplan = runtime->buildQueryPlan(query, estrat.get());
-    runtime->executeStatement(qplan->buildStatement(0), &result);
+    runtime->executeStatement(qplan->getStatement(0), &result);
     EXPECT_EQ(result.getNumRows(), 24866);
   }
 
@@ -233,7 +233,7 @@ TEST_CASE(RuntimeTest, TestMultiLevelNestedCSTableAggregate, [] () {
           sum(count(event.search_query.result_items.position) WITHIN RECORD)
         from testtable;)";
     auto qplan = runtime->buildQueryPlan(query, estrat.get());
-    runtime->executeStatement(qplan->buildStatement(0), &result);
+    runtime->executeStatement(qplan->getStatement(0), &result);
 
     EXPECT_EQ(result.getNumColumns(), 4);
     auto cols = result.getColumns();
@@ -268,7 +268,7 @@ TEST_CASE(RuntimeTest, TestMultiLevelNestedCSTableAggregate, [] () {
         from testtable
         group by 1;)";
     auto qplan = runtime->buildQueryPlan(query, estrat.get());
-    runtime->executeStatement(qplan->buildStatement(0), &result);
+    runtime->executeStatement(qplan->getStatement(0), &result);
     EXPECT_EQ(result.getNumColumns(), 5);
     EXPECT_EQ(result.getNumRows(), 1);
     EXPECT_EQ(result.getRow(0)[0], "213");
@@ -297,7 +297,7 @@ TEST_CASE(RuntimeTest, TestMultiLevelNestedCSTableAggrgateWithGroup, [] () {
         from testtable
         where event.search_query.result_items.position = 6;)";
     auto qplan = runtime->buildQueryPlan(query, estrat.get());
-    runtime->executeStatement(qplan->buildStatement(0), &result);
+    runtime->executeStatement(qplan->getStatement(0), &result);
     EXPECT_EQ(result.getNumColumns(), 2);
     EXPECT_EQ(result.getNumRows(), 1);
     EXPECT_EQ(result.getRow(0)[0], "688");
@@ -313,7 +313,7 @@ TEST_CASE(RuntimeTest, TestMultiLevelNestedCSTableAggrgateWithGroup, [] () {
         from testtable
         where event.search_query.result_items.position = 9;)";
     auto qplan = runtime->buildQueryPlan(query, estrat.get());
-    runtime->executeStatement(qplan->buildStatement(0), &result);
+    runtime->executeStatement(qplan->getStatement(0), &result);
     EXPECT_EQ(result.getNumColumns(), 2);
     EXPECT_EQ(result.getNumRows(), 1);
     EXPECT_EQ(result.getRow(0)[0], "679");
@@ -332,7 +332,7 @@ TEST_CASE(RuntimeTest, TestMultiLevelNestedCSTableAggrgateWithGroup, [] () {
         order by event.search_query.result_items.position ASC
         LIMIT 10;)";
     auto qplan = runtime->buildQueryPlan(query, estrat.get());
-    runtime->executeStatement(qplan->buildStatement(0), &result);
+    runtime->executeStatement(qplan->getStatement(0), &result);
 
     EXPECT_EQ(result.getNumColumns(), 3);
     auto cols = result.getColumns();
@@ -368,7 +368,7 @@ TEST_CASE(RuntimeTest, TestMultiLevelNestedCSTableAggrgateWithMultiLevelGroup, [
           order by time desc;)";
 
     auto qplan = runtime->buildQueryPlan(query, estrat.get());
-    runtime->executeStatement(qplan->buildStatement(0), &result);
+    runtime->executeStatement(qplan->getStatement(0), &result);
     EXPECT_EQ(result.getNumColumns(), 3);
     EXPECT_EQ(result.getNumRows(), 1);
     EXPECT_EQ(result.getRow(0)[0], "2015-07-28 00:00:00");
@@ -403,7 +403,7 @@ TEST_CASE(RuntimeTest, TestMultiLevelNestedCSTableAggrgateWithWhere, [] () {
     )";
 
     auto qplan = runtime->buildQueryPlan(query, estrat.get());
-    runtime->executeStatement(qplan->buildStatement(0), &result);
+    runtime->executeStatement(qplan->getStatement(0), &result);
     EXPECT_EQ(result.getNumColumns(), 5);
     result.debugPrint();
     EXPECT_EQ(result.getNumRows(), 1);
@@ -428,7 +428,7 @@ TEST_CASE(RuntimeTest, TestTableNamesWithDots, [] () {
     ResultList result;
     auto query = R"(select count(1) from 'test.tbl';)";
     auto qplan = runtime->buildQueryPlan(query, estrat.get());
-    runtime->executeStatement(qplan->buildStatement(0), &result);
+    runtime->executeStatement(qplan->getStatement(0), &result);
     EXPECT_EQ(result.getNumColumns(), 1);
     EXPECT_EQ(result.getNumRows(), 1);
     EXPECT_EQ(result.getRow(0)[0], "213");
@@ -438,7 +438,7 @@ TEST_CASE(RuntimeTest, TestTableNamesWithDots, [] () {
     ResultList result;
     auto query = R"(select count(1) from `test.tbl`;)";
     auto qplan = runtime->buildQueryPlan(query, estrat.get());
-    runtime->executeStatement(qplan->buildStatement(0), &result);
+    runtime->executeStatement(qplan->getStatement(0), &result);
     EXPECT_EQ(result.getNumColumns(), 1);
     EXPECT_EQ(result.getNumRows(), 1);
     EXPECT_EQ(result.getRow(0)[0], "213");
@@ -448,7 +448,7 @@ TEST_CASE(RuntimeTest, TestTableNamesWithDots, [] () {
     ResultList result;
     auto query = R"(select count(1) from test.tbl;)";
     auto qplan = runtime->buildQueryPlan(query, estrat.get());
-    runtime->executeStatement(qplan->buildStatement(0), &result);
+    runtime->executeStatement(qplan->getStatement(0), &result);
     EXPECT_EQ(result.getNumColumns(), 1);
     EXPECT_EQ(result.getNumRows(), 1);
     EXPECT_EQ(result.getRow(0)[0], "213");
@@ -534,7 +534,7 @@ TEST_CASE(RuntimeTest, TestSelectInvalidColumn, [] () {
     ResultList result;
     auto query = R"(select fnord from 'test.tbl';)";
     auto qplan = runtime->buildQueryPlan(query, estrat.get());
-    runtime->executeStatement(qplan->buildStatement(0), &result);
+    runtime->executeStatement(qplan->getStatement(0), &result);
   });
 });
 
@@ -579,7 +579,7 @@ TEST_CASE(RuntimeTest, TestWildcardSelect, [] () {
     ResultList result;
     auto query = R"(select * from testtable order by time desc limit 1;)";
     auto qplan = runtime->buildQueryPlan(query, estrat.get());
-    runtime->executeStatement(qplan->buildStatement(0), &result);
+    runtime->executeStatement(qplan->getStatement(0), &result);
     EXPECT_EQ(result.getNumColumns(), 63);
     EXPECT_EQ(result.getColumns()[0], "attr.ab_test_group");
     EXPECT_EQ(result.getColumns()[62], "user_id");

@@ -17,6 +17,10 @@ SelectExpression::SelectExpression(
     column_names_(column_names),
     select_exprs_(std::move(select_expressions)) {}
 
+void SelectExpression::prepare(ExecutionContext* context) {
+  context->incrNumSubtasksTotal(1);
+}
+
 void SelectExpression::execute(
     ExecutionContext* context,
     Function<bool (int argc, const SValue* argv)> fn) {
@@ -27,6 +31,7 @@ void SelectExpression::execute(
   }
 
   fn(out_row.size(), out_row.data());
+  context->incrNumSubtasksCompleted(1);
 }
 
 Vector<String> SelectExpression::columnNames() const {

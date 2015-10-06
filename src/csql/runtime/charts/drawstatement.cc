@@ -35,6 +35,12 @@ DrawStatement::DrawStatement(
   }
 }
 
+void DrawStatement::prepare(ExecutionContext* context) {
+  for (auto& source : sources_) {
+    source->prepare(context);
+  }
+}
+
 void DrawStatement::execute(
     ExecutionContext* context,
     stx::chart::Canvas* canvas) {

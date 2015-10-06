@@ -25,13 +25,13 @@ void JSONResultFormat::formatResults(
   json_->beginArray();
 
   for (int i = 0; i < query->numStatements(); ++i) {
-    auto stmt = query->buildStatement(i);
+    auto stmt = query->getStatement(i);
 
     if (i > 0) {
       json_->addComma();
     }
 
-    renderStatement(stmt.get(), context);
+    renderStatement(stmt, context);
   }
 
   json_->endArray();

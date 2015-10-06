@@ -22,6 +22,8 @@ public:
       size_t max_output_column_index,
       ScopedPtr<TableExpression> child);
 
+  void prepare(ExecutionContext* context) override;
+
   void execute(
       ExecutionContext* context,
       Function<bool (int argc, const SValue* argv)> fn) override;

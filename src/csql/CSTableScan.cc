@@ -33,11 +33,13 @@ CSTableScan::CSTableScan(
   }
 }
 
+void CSTableScan::prepare(ExecutionContext* context) {
+  context->incrNumSubtasksTotal(1);
+}
+
 void CSTableScan::execute(
     ExecutionContext* context,
     Function<bool (int argc, const SValue* argv)> fn) {
-  context->incrNumSubtasksTotal(1);
-
   logDebug("sql", "Scanning cstable: $0", cstable_filename_);
 
   Set<String> column_names;
