@@ -1,0 +1,16 @@
+.zbase_logviewer .logfile_editor .editor_pane {
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(0,0,0,.2);
+  border: 1px solid #ddd;
+  margin: 20px;
+}
+
+.zbase_logviewer .logfile_editor .editor_pane .editor_pane_header {
+  padding: 0 20px;
+  height: 60px;
+  overflow: visible;
+}
+
+.zbase_logviewer .logfile_editor .editor_pane .editor_pane_header h2 {
+  font-size: 18px;
+}
