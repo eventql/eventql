@@ -13,4 +13,23 @@
 
 .zbase_logviewer .logfile_editor .editor_pane .editor_pane_header h2 {
   font-size: 18px;
+  float: left;
+}
+
+.zbase_logviewer .logfile_editor .editor_pane .editor_pane_header button.z-button {
+  float: right;
+  font-size: 13px;
+  margin-top: 13px;
+}
+
+
+.zbase_logviewer .logfile_editor .editor_pane textarea {
+  width: 100%;
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.4;
+  padding-left: 20px;
+  padding-right: 20px;
+  border-left: none;
+  border-right: none;
 }

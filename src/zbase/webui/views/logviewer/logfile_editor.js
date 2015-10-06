@@ -19,6 +19,7 @@ ZBase.registerView((function() {
         "zbase_logviewer_logfile_editor_tpl");
 
     $("h1", page).innerHTML = def.name;
+    $("textarea.regex", page).value = def.regex;
     $.replaceViewport(page);
     console.log(def);
   };
