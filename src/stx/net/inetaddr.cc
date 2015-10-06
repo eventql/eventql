@@ -14,6 +14,7 @@
 #include "stx/exception.h"
 #include "stx/stringutil.h"
 #include "stx/net/inetaddr.h"
+#include "stx/sysconfig.h"
 
 namespace stx {
 
