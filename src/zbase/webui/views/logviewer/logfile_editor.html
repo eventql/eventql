@@ -1,0 +1,44 @@
+<template id="zbase_logviewer_logfile_editor_tpl">
+  <div class="zbase_logviewer" style="background: transparent">
+    <section class='zbase_page_title large'>
+      <div>
+        <zbase-breadcrumbs>
+          <zbase-breadcrumbs-section>
+            <a href="/a/">Applications</a>
+          </zbase-breadcrumbs-section>
+          <zbase-breadcrumbs-section>
+            <a href="/a/logs">Logfile Viewer</a>
+          </zbase-breadcrumbs-section>
+          <zbase-breadcrumbs-section>
+            <a href="/a/logs">Logfile Editor</a>
+          </zbase-breadcrumbs-section>
+        </zbase-breadcrumbs>
+        <h1></h1>
+      </div>
+    </section>
+    <div class="zbase_content_pane fullwidth">
+      <div class="logfile_editor">
+        <div class="editor_pane">
+          <div class="editor_pane_header">
+            <h2 class="pagetitle">Regex</h2>
+          </div>
+          <textarea class="z-textarea"></textarea>
+        </div>
+
+        <div class="editor_pane">
+          <div class="editor_pane_header">
+            <h2 class="pagetitle">Source Fields</h2>
+          </div>
+
+        </div>
+
+        <div class="editor_pane">
+          <div class="editor_pane_header">
+            <h2 class="pagetitle">Row Fields</h2>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</template>

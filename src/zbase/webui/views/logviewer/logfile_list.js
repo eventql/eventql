@@ -36,7 +36,7 @@ ZBase.registerView((function() {
             return;
 
           case "edit":
-            console.log("edit schema");
+            $.navigateTo("/a/logs/" + def.name);
             return;
         }
       });
@@ -88,5 +88,4 @@ ZBase.registerView((function() {
     unloadView: function() {},
     handleNavigationChange: load
   };
-
 })());
