@@ -88,6 +88,17 @@
   width: auto;
 }
 
+.zbase_logviewer .logfile_editor z-modal .field .error_note {
+  display: inline-block;
+  font-size: 13px;
+  line-height: 34px;
+  color: #a94442;
+}
+
+.zbase_logviewer .logfile_editor z-modal .field .error_note.hidden {
+  display: none;
+}
+
 .zbase_logviewer .logfile_editor z-modal button.z-button {
   font-size: 13px;
   float: right;
