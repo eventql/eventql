@@ -19,6 +19,9 @@ LimitClause::LimitClause(
     offset_(offset),
     child_(std::move(child)) {}
 
+void LimitClause::prepare(ExecutionContext* context) {
+  child_->prepare(context);
+}
 
 void LimitClause::execute(
     ExecutionContext* context,

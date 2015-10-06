@@ -15,6 +15,8 @@ ShowTablesStatement::ShowTablesStatement(
     RefPtr<TableProvider> tables) :
     tables_(tables) {}
 
+void ShowTablesStatement::prepare(ExecutionContext* context) {}
+
 void ShowTablesStatement::execute(
     ExecutionContext* context,
     Function<bool (int argc, const SValue* argv)> fn) {

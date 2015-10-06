@@ -69,13 +69,17 @@ void Runtime::executeQuery(
     context.setCacheDir(cachedir_.get());
   }
 
+  for (int i = 0; i < query_plan->numStatements(); ++i) {
+    query_plan->getStatement(i)->prepare(&context);
+  }
+
   result_format->formatResults(query_plan, &context);
 }
 
 void Runtime::executeStatement(
-    ScopedPtr<Statement> statement,
+    Statement* statement,
     ResultList* result) {
-  auto table_expr = dynamic_cast<TableExpression*>(statement.get());
+  auto table_expr = dynamic_cast<TableExpression*>(statement);
   if (!table_expr) {
     RAISE(kRuntimeError, "statement must be a table expression");
   }
@@ -97,6 +101,7 @@ void Runtime::executeStatement(
     context.setCacheDir(cachedir_.get());
   }
 
+  statement->prepare(&context);
   statement->execute(&context, fn);
 }
 

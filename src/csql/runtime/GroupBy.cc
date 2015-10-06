@@ -51,6 +51,7 @@ void GroupByExpression::execute(
   }
 
   freeResult(&groups);
+  context->incrNumSubtasksCompleted(1);
 }
 
 GroupBy::GroupBy(
@@ -176,6 +177,11 @@ bool GroupBy::nextRow(
   return true;
 }
 
+void GroupBy::prepare(ExecutionContext* context) {
+  context->incrNumSubtasksTotal(1);
+  source_->prepare(context);
+}
+
 Vector<String> GroupByExpression::columnNames() const {
   return column_names_;
 }
@@ -252,9 +258,14 @@ void RemoteGroupBy::accumulate(
     ScratchMemory* scratch,
     ExecutionContext* context) {
   auto result = execute_fn_(params_);
+  context->incrNumSubtasksCompleted(1);
   if (!decode(groups, scratch, result.get())) {
     RAISE(kRuntimeError, "RemoteGroupBy failed");
   }
+}
+
+void RemoteGroupBy::prepare(ExecutionContext* context) {
+  context->incrNumSubtasksTotal(1);
 }
 
 }

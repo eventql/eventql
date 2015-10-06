@@ -40,6 +40,11 @@ OrderBy::OrderBy(
   }
 }
 
+void OrderBy::prepare(ExecutionContext* context) {
+  context->incrNumSubtasksTotal(1);
+  child_->prepare(context);
+}
+
 // FIXPAUL this should mergesort while inserting...
 void OrderBy::execute(
     ExecutionContext* context,
@@ -83,6 +88,8 @@ void OrderBy::execute(
     /* all dimensions equal */
     return false;
   });
+
+  context->incrNumSubtasksCompleted(1);
 
   for (auto& row : rows) {
     if (!fn(std::min(row.size(), max_output_column_index_), row.data())) {

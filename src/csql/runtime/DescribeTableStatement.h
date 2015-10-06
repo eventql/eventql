@@ -20,6 +20,8 @@ public:
 
   DescribeTableStatement(TableInfo table_info);
 
+  void prepare(ExecutionContext* context) override;
+
   void execute(
       ExecutionContext* context,
       Function<bool (int argc, const SValue* argv)> fn) override;

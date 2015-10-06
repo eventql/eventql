@@ -43,6 +43,10 @@ size_t RemoteTSDBScan::numColumns() const {
   return columns_.size();
 }
 
+void RemoteTSDBScan::prepare(csql::ExecutionContext* context) {
+  context->incrNumSubtasksTotal(1);
+}
+
 void RemoteTSDBScan::execute(
     csql::ExecutionContext* context,
     Function<bool (int argc, const csql::SValue* argv)> fn) {
@@ -73,6 +77,7 @@ void RemoteTSDBScan::execute(
   for (const auto& host : replicas) {
     try {
       executeOnHost(params, host, fn);
+      context->incrNumSubtasksCompleted(1);
       return;
     } catch (const StandardException& e) {
       logError(

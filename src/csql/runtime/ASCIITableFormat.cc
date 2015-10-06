@@ -22,8 +22,8 @@ void ASCIITableFormat::formatResults(
   for (int i = 0; i < query->numStatements(); ++i) {
     output_->write("==== query ====\n");
 
-    auto stmt = query->buildStatement(i);
-    auto select = dynamic_cast<TableExpression*>(stmt.get());
+    auto stmt = query->getStatement(i);
+    auto select = dynamic_cast<TableExpression*>(stmt);
     if (!select) {
       RAISE(
           kRuntimeError,

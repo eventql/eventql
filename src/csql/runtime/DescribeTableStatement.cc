@@ -15,6 +15,8 @@ DescribeTableStatement::DescribeTableStatement(
     TableInfo table_info) :
     table_info_(table_info) {}
 
+void DescribeTableStatement::prepare(ExecutionContext* context) {}
+
 void DescribeTableStatement::execute(
     ExecutionContext* context,
     Function<bool (int argc, const SValue* argv)> fn) {
