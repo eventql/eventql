@@ -7,8 +7,10 @@
   position: initial;
   float: left;
   width: 300px;
-  margin-left: -8px;
-  margin-top: 6px;
+  margin-left: 0px;
+  margin-top: 0px;
+  box-sizing: content-box;
+  border-right: 1px solid #e8e8e8;
 }
 
 .zbase_documentation_menu_content {
