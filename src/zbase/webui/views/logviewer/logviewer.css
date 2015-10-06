@@ -453,3 +453,43 @@
 .zbase_logviewer .logfile_list .add_pane a.link {
   text-decoration: underline;
 }
+
+.zbase_logviewer .logfile_list z-modal.add_logfile .field {
+  margin-top: 18px;
+}
+
+.zbase_logviewer .logfile_list z-modal.add_logfile .field:last-child {
+  margin-bottom: 20px;
+}
+
+.zbase_logviewer .logfile_list z-modal.add_logfile .field label {
+  display: inline-block;
+  vertical-align: top;
+  color: #333;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 34px;
+  width: 45px;
+}
+
+.zbase_logviewer .logfile_list z-modal.add_logfile .field input.z-input {
+  font-size: 13px;
+  display: inline-block;
+  width: auto;
+}
+
+.zbase_logviewer .logfile_list z-modal.add_logfile button.z-button {
+  float: right;
+  font-size: 13px;
+}
+
+.zbase_logviewer .logfile_list z-modal.add_logfile .field .error_note {
+  display: inline-block;
+  font-size: 13px;
+  line-height: 34px;
+  color: #a94442;
+}
+
+.zbase_logviewer .logfile_list z-modal.add_logfile .field .error_note.hidden {
+  display: none;
+}
