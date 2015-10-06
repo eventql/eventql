@@ -441,3 +441,15 @@
   left: -37px;
   top: 80%;
 }
+
+.zbase_logviewer .logfile_list .add_pane {
+  border: 1px solid #e1e1e1;
+  padding: 15px;
+  text-align: center;
+  font-size: 14px;
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.zbase_logviewer .logfile_list .add_pane a.link {
+  text-decoration: underline;
+}
