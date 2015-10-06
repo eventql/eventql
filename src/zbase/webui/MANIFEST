@@ -59,6 +59,7 @@ route {
   path_prefix: "/a/logs/"
   view: "logviewer_logfile_editor"
   require_module: "widgets/z-button"
+  require_module: "widgets/z-table"
   require_module: "widgets/z-textarea"
   require_module: "widgets/zbase-header"
   require_module: "views/logviewer"
