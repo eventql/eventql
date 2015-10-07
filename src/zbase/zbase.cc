@@ -216,7 +216,7 @@ int main(int argc, const char** argv) {
   }
 
   zbase::PartitionMap partition_map(tsdb_dir);
-  zbase::TSDBService tsdb_node(&partition_map, repl_scheme.get());
+  zbase::TSDBService tsdb_node(&partition_map, repl_scheme.get(), &ev);
   zbase::ReplicationWorker tsdb_replication(
       repl_scheme.get(),
       &partition_map,
