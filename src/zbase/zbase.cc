@@ -172,6 +172,10 @@ int main(int argc, const char** argv) {
   http::HTTPConnectionPool http(&ev);
 
   /* customer directory */
+  if (!FileUtil::exists(flags.getString("datadir"))) {
+    RAISE(kRuntimeError, "data dir not found: " + flags.getString("datadir"));
+  }
+
   auto cdb_dir = FileUtil::joinPaths(flags.getString("datadir"), "cdb");
   if (!FileUtil::exists(cdb_dir)) {
     FileUtil::mkdir(cdb_dir);
@@ -221,8 +225,7 @@ int main(int argc, const char** argv) {
       "data/" + node_name);
 
   if (!FileUtil::exists(tsdb_dir)) {
-    RAISE(kRuntimeError, "data dir not found: " + tsdb_dir);
-    //FileUtil::mkdir(tsdb_dir);
+    FileUtil::mkdir_p(tsdb_dir);
   }
 
   auto trash_dir = FileUtil::joinPaths(flags.getString("datadir"), "trash");
