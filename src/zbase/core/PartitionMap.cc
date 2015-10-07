@@ -297,7 +297,7 @@ bool PartitionMap::dropLocalPartition(
       full_copies);
 
   /* freeze partition and unlock waiting writers (they will fail) */
-  //partition_writer->freeze();
+  partition_writer->freeze();
   partition_writer->unlock();
   return false;
 }
