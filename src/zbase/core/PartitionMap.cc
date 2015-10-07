@@ -300,10 +300,6 @@ bool PartitionMap::dropLocalPartition(
   partition_writer->freeze();
   partition_writer->unlock();
 
-  /// BAIL FOR DRY RUN
-  return true;
-  /// EOF DRY RUN
-
   auto db_key = tsdb_namespace + "~";
   db_key.append((char*) partition_key.data(), partition_key.size());
 
