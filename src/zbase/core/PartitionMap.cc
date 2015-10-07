@@ -333,7 +333,7 @@ bool PartitionMap::dropLocalPartition(
     auto dst_path = FileUtil::joinPaths(
         db_path_,
         StringUtil::format(
-            "../trash/$0~$1~$2~$3",
+            "../../trash/$0~$1~$2~$3",
             tsdb_namespace,
             SHA1::compute(table_name).toString(),
             partition_key.toString(),

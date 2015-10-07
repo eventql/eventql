@@ -210,9 +210,19 @@ int main(int argc, const char** argv) {
   auto repl_scheme = RefPtr<zbase::ReplicationScheme>(
         new zbase::DHTReplicationScheme(cluster_config, local_replica));
 
-  auto tsdb_dir = FileUtil::joinPaths(flags.getString("datadir"), "tsdb");
+
+  String node_name = "__anonymous";
+  if (flags.isSet("join")) {
+    node_name = flags.getString("join");
+  }
+
+  auto tsdb_dir = FileUtil::joinPaths(
+      flags.getString("datadir"),
+      "data/" + node_name);
+
   if (!FileUtil::exists(tsdb_dir)) {
-    FileUtil::mkdir(tsdb_dir);
+    RAISE(kRuntimeError, "data dir not found: " + tsdb_dir);
+    //FileUtil::mkdir(tsdb_dir);
   }
 
   auto trash_dir = FileUtil::joinPaths(flags.getString("datadir"), "trash");
