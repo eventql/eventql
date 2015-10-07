@@ -215,6 +215,11 @@ int main(int argc, const char** argv) {
     FileUtil::mkdir(tsdb_dir);
   }
 
+  auto trash_dir = FileUtil::joinPaths(flags.getString("datadir"), "trash");
+  if (!FileUtil::exists(trash_dir)) {
+    FileUtil::mkdir(trash_dir);
+  }
+
   zbase::PartitionMap partition_map(tsdb_dir, repl_scheme);
   zbase::TSDBService tsdb_node(&partition_map, repl_scheme.get(), &ev);
   zbase::ReplicationWorker tsdb_replication(
