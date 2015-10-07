@@ -1,10 +1,14 @@
 ZBase.registerView((function() {
   var logfile;
 
-  var load = function(path) {
+  var init = function(path) {
     var path_prefix = "/a/logs/";
     logfile = path.substr(path_prefix.length);
 
+    load();
+  }
+
+  var load = function() {
     $.httpGet("/api/v1/logfiles/get_definition?logfile=" + logfile, function(r) {
       if (r.status == 200) {
         render(JSON.parse(r.response));
@@ -70,45 +74,37 @@ ZBase.registerView((function() {
 
   var addSourceField = function() {
     renderAdd("Add Source Field", function(field) {
-      var url =
+      return (
           "/api/v1/logfiles/add_source_field?logfile=" +
-          logfile + "&" + $.buildQueryString(field);
-
-      console.log(url);
+          logfile + "&" + $.buildQueryString(field));
     });
   };
 
   var addRowField = function() {
     renderAdd("Add Row Field", function(field) {
-      var url =
+      return (
           "/api/v1/logfiles/add_row_field?logfile=" +
-          logfile + "&" + $.buildQueryString(field);
-
-      console.log(url)
+          logfile + "&" + $.buildQueryString(field));
     });
   };
 
   var deleteSourceField = function(field) {
     renderDelete(field.name, "Delete Source Field", function(def) {
-      var url =
+      return (
           "/api/v1/logfiles/remove_source_field?logfile=" +
-          logfile + "&name=" + field.name;
-
-      console.log(url)
+          logfile + "&name=" + field.name);
     });
   };
 
   var deleteRowField = function(field) {
     renderDelete(field.name, "Delete Row Field", function() {
-     var url =
+     return (
           "/api/v1/logfiles/remove_row_field?logfile=" +
-          logfile + "&name=" + field.name;
-
-      console.log(url) 
+          logfile + "&name=" + field.name);
     });
   };
 
-  var renderAdd = function(header, callback) {
+  var renderAdd = function(header, get_post_url) {
     var modal = $(".zbase_logviewer .logfile_editor z-modal.edit_field");
     var tpl = $.getTemplate(
         "views/logviewer",
@@ -156,7 +152,13 @@ ZBase.registerView((function() {
       }
 
       if (!error) {
-        callback(def);
+        $.httpPost(get_post_url(def), "", function(r) {
+          if (r.status == 201) {
+            load();
+          } else {
+            $.fatalError(r.statusText);
+          }
+        });
       }
     });
 
@@ -165,7 +167,7 @@ ZBase.registerView((function() {
     name_input.focus();
   };
 
-  var renderDelete = function(field_name, header, callback) {
+  var renderDelete = function(field_name, header, get_post_url) {
     var modal =  $(".zbase_logviewer .logfile_editor z-modal.delete_field");
     var tpl = $.getTemplate(
         "views/logviewer",
@@ -177,7 +179,16 @@ ZBase.registerView((function() {
     $.onClick($("button.close", tpl), function() {
       modal.close();
     });
-    $.onClick($("button.submit", tpl), callback);
+
+    $.onClick($("button.submit", tpl), function() {
+      $.httpPost(get_post_url(), "", function(r) {
+        if (r.status == 201) {
+          load();
+        } else {
+          $.fatalError(r.statusText);
+        }
+      });
+    });
 
     $.replaceContent($(".container", modal), tpl);
     modal.show();
@@ -185,8 +196,8 @@ ZBase.registerView((function() {
 
   return {
     name: "logviewer_logfile_editor",
-    loadView: function(params) { load(params.path); },
+    loadView: function(params) { init(params.path); },
     unloadView: function() {},
-    handleNavigationChange: load
+    handleNavigationChange: init
   };
 })());
