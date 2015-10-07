@@ -215,7 +215,7 @@ int main(int argc, const char** argv) {
     FileUtil::mkdir(tsdb_dir);
   }
 
-  zbase::PartitionMap partition_map(tsdb_dir);
+  zbase::PartitionMap partition_map(tsdb_dir, repl_scheme);
   zbase::TSDBService tsdb_node(&partition_map, repl_scheme.get(), &ev);
   zbase::ReplicationWorker tsdb_replication(
       repl_scheme.get(),

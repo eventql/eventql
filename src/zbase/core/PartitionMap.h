@@ -27,7 +27,9 @@ namespace zbase {
 
 class PartitionMap {
 public:
-  PartitionMap(const String& db_path);
+  PartitionMap(
+      const String& db_path,
+      RefPtr<ReplicationScheme> repl_scheme);
 
   void configureTable(const TableDefinition& config);
   void open();
@@ -100,6 +102,7 @@ protected:
 
   String db_path_;
   RefPtr<mdb::MDB> db_;
+  RefPtr<ReplicationScheme> repl_scheme_;
 
   mutable std::mutex mutex_;
   HashMap<String, RefPtr<Table>> tables_;
