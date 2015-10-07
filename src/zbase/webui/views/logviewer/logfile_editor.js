@@ -19,7 +19,8 @@ ZBase.registerView((function() {
         "zbase_logviewer_logfile_editor_tpl");
 
     $("h1", page).innerHTML = def.name;
-    $("textarea.regex", page).value = def.regex;
+
+    renderRegexPane($(".editor_pane.regex", page), def.regex);
 
     renderFields(
         $(".editor_pane.source_fields", page),
@@ -36,6 +37,14 @@ ZBase.registerView((function() {
 
     $.handleLinks(page);
     $.replaceViewport(page);
+  };
+
+  var renderRegexPane = function(elem, regex) {
+    var textarea = $("textarea", elem);
+    textarea.value = regex;
+    $.onClick($("button.submit", elem), function() {
+      console.log("save regex", textarea.value);
+    });
   };
 
   var renderFields = function(elem, fields, onDelete) {
@@ -132,7 +141,6 @@ ZBase.registerView((function() {
         callback(def);
       }
     });
-
 
     $.replaceContent($(".container", modal), tpl);
     modal.show();
