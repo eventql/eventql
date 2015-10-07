@@ -28,6 +28,7 @@ struct ReplicaRef {
   SHA1Hash unique_id;
   InetAddr addr;
   String name;
+  bool is_local;
 };
 
 class ReplicationScheme : public RefCounted {
@@ -62,6 +63,10 @@ public:
 class FixedReplicationScheme : public ReplicationScheme {
 public:
 
+  /**
+   * Construct with a list of all hosts in the cluster, including the local host.
+   * Make sure is_local is set for the local host.
+   */
   FixedReplicationScheme(Vector<ReplicaRef> replicas);
 
   Vector<ReplicaRef> replicasFor(const SHA1Hash& key) override;

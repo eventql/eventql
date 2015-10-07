@@ -18,7 +18,8 @@ ReplicaRef::ReplicaRef(
     SHA1Hash _unique_id,
     InetAddr _addr) :
     unique_id(_unique_id),
-    addr(_addr) {}
+    addr(_addr),
+    is_local(false) {}
 
 Vector<InetAddr> ReplicationScheme::replicaAddrsFor(const SHA1Hash& key) {
   Vector<InetAddr> addrs;
@@ -72,6 +73,11 @@ DHTReplicationScheme::DHTReplicationScheme(
       auto token = SHA1Hash::fromHexString(token_str);
       ReplicaRef rref(token, addr);
       rref.name = node.name();
+
+      if (!local_replica.isEmpty() && node.name() == local_replica_.get()) {
+        rref.is_local = true;
+      }
+
       ring_.emplace(token, rref);
     }
   }
@@ -114,7 +120,7 @@ bool DHTReplicationScheme::hasLocalReplica(const SHA1Hash& key) {
 
   auto replicas = replicasFor(key);
   for (const auto& r : replicas) {
-    if (r.name == local_replica_.get()) {
+    if (r.is_local) {
       return true;
     }
   }

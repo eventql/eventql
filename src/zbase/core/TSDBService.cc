@@ -157,6 +157,10 @@ void TSDBService::insertRecordsRemote(
   Vector<String> errors;
   auto hosts = repl_->replicasFor(partition_key);
   for (const auto& host : hosts) {
+    if (host.is_local) {
+      continue;
+    }
+
     try {
       logDebug(
           "z1.core",

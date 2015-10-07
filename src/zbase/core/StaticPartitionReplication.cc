@@ -33,6 +33,10 @@ bool StaticPartitionReplication::needsReplication() const {
   auto repl_state = fetchReplicationState();
   auto head_version = snap_->state.cstable_version();
   for (const auto& r : replicas) {
+    if (r.is_local) {
+      continue;
+    }
+
     const auto& replica_version = replicatedVersionFor(repl_state, r.unique_id);
     if (replica_version < head_version) {
       return true;
@@ -49,6 +53,10 @@ size_t StaticPartitionReplication::numFullRemoteCopies() const {
   auto head_version = snap_->state.cstable_version();
 
   for (const auto& r : replicas) {
+    if (r.is_local) {
+      continue;
+    }
+
     const auto& replica_version = replicatedVersionFor(repl_state, r.unique_id);
     if (replica_version >= head_version) {
       ncopies += 1;
@@ -61,6 +69,10 @@ size_t StaticPartitionReplication::numFullRemoteCopies() const {
 void StaticPartitionReplication::replicateTo(
     const ReplicaRef& replica,
     uint64_t head_version) {
+  if (replica.is_local) {
+    RAISE(kIllegalStateError, "can't replicate to myself");
+  }
+
   auto tsdb_url = StringUtil::format("http://$0/tsdb", replica.addr.hostAndPort());
   zbase::TSDBClient tsdb_client(tsdb_url, http_);
 
@@ -114,6 +126,10 @@ bool StaticPartitionReplication::replicate() {
   bool success = true;
 
   for (const auto& r : replicas) {
+    if (r.is_local) {
+      continue;
+    }
+
     const auto& replica_version = replicatedVersionFor(repl_state, r.unique_id);
 
     if (replica_version < head_version) {
