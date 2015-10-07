@@ -299,7 +299,50 @@ bool PartitionMap::dropLocalPartition(
   /* freeze partition and unlock waiting writers (they will fail) */
   partition_writer->freeze();
   partition_writer->unlock();
-  return false;
+
+  auto db_key = tsdb_namespace + "~";
+  db_key.append((char*) partition_key.data(), partition_key.size());
+
+  /* grab the main lock */
+  std::unique_lock<std::mutex> lk(mutex_);
+
+  /* delete from in memory partition map */
+  auto iter = partitions_.find(db_key);
+  if (iter == partitions_.end()) {
+    /* somebody else already deleted this partition */
+    return true;
+  } else {
+    partitions_.erase(iter);
+  }
+
+  /* delete from on disk partition map */
+  auto txn = db_->startTransaction(false);
+  txn->del(db_key);
+  txn->commit();
+
+  /* delete partition data from disk (move to trash) */
+  {
+    auto src_path = FileUtil::joinPaths(
+        db_path_,
+        StringUtil::format(
+            "$0/$1/$2",
+            tsdb_namespace,
+            SHA1::compute(table_name).toString(),
+            partition_key.toString()));
+
+    auto dst_path = FileUtil::joinPaths(
+        db_path_,
+        StringUtil::format(
+            "../trash/$0~$1~$2~$3",
+            tsdb_namespace,
+            SHA1::compute(table_name).toString(),
+            partition_key.toString(),
+            Random::singleton()->hex64()));
+
+    FileUtil::mv(src_path, dst_path);
+  }
+
+  return true;
 }
 
 Option<TSDBTableInfo> PartitionMap::tableInfo(
