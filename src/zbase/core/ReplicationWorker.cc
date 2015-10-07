@@ -43,7 +43,10 @@ ReplicationWorker::~ReplicationWorker() {
 
 void ReplicationWorker::enqueuePartition(RefPtr<Partition> partition) {
   std::unique_lock<std::mutex> lk(mutex_);
+  enqueuePartitionWithLock(partition);
+}
 
+void ReplicationWorker::enqueuePartitionWithLock(RefPtr<Partition> partition) {
   auto uuid = partition->uuid();
   if (waitset_.count(uuid) > 0) {
     return;
@@ -124,6 +127,20 @@ void ReplicationWorker::work() {
 
       if (repl->needsReplication()) {
         enqueuePartition(partition);
+      } else {
+        auto snap = partition->getSnapshot();
+        auto full_copies = repl->numFullRemoteCopies();
+        if (!repl_scheme->hasLocalReplica(snap->key) &&
+            full_copies >= repl_scheme->minNumCopies()) {
+          logInfo(
+              "z1.core",
+              "Partition $0/$1/$2 is not owned by this node and has $3 other " \
+              "full copies, trying to unload and drop",
+              snap->state.tsdb_namespace(),
+              snap->state.table_key(),
+              snap->key.toString(),
+              full_copies);
+        }
       }
     } else {
       auto delay = 30 * kMicrosPerSecond; // FIXPAUL increasing delay..

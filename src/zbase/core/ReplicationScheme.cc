@@ -40,6 +40,10 @@ bool StandaloneReplicationScheme::hasLocalReplica(const SHA1Hash& key) {
   return true;
 }
 
+size_t StandaloneReplicationScheme::minNumCopies() const {
+  return 1;
+}
+
 FixedReplicationScheme::FixedReplicationScheme(
     Vector<ReplicaRef> replicas) :
     replicas_(replicas) {}
@@ -52,16 +56,8 @@ bool FixedReplicationScheme::hasLocalReplica(const SHA1Hash& key) {
   return true;
 }
 
-FrontendReplicationScheme::FrontendReplicationScheme(
-    Vector<ReplicaRef> replicas) :
-    replicas_(replicas) {}
-
-Vector<ReplicaRef> FrontendReplicationScheme::replicasFor(const SHA1Hash& key) {
-  return replicas_;
-}
-
-bool FrontendReplicationScheme::hasLocalReplica(const SHA1Hash& key) {
-  return false;
+size_t FixedReplicationScheme::minNumCopies() const {
+  return replicas_.size();
 }
 
 DHTReplicationScheme::DHTReplicationScheme(
@@ -124,6 +120,10 @@ bool DHTReplicationScheme::hasLocalReplica(const SHA1Hash& key) {
   }
 
   return false;
+}
+
+size_t DHTReplicationScheme::minNumCopies() const {
+  return cluster_config_.dht_num_copies();
 }
 
 } // namespace zbase

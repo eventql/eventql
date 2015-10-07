@@ -32,6 +32,8 @@ public:
    */
   bool replicate() override;
 
+  size_t numFullRemoteCopies() const override;
+
 protected:
 
   void replicateTo(const ReplicaRef& replica, uint64_t replicated_offset);
