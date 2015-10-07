@@ -35,9 +35,30 @@ public:
       const String& tmpfile,
       uint64_t version);
 
+  /**
+   * Lock this partition writer (so that all write attempts will block/hang
+   * until the writer is unlocked
+   */
+  void lock();
+
+  /**
+   * Unlock this partition writer
+   */
+  void unlock();
+
+  /**
+   * Freeze this partition writer, i.e. make it immutable. Every write attempt
+   * on a frozen partition writer will return an error. Freezing a partition
+   * can not be undone. (Freezing is used in the partition unload/delete process
+   * to make sure writes to old references of a deleted partition that users
+   * might have kepy around will fail)
+   */
+  void freeze();
+
 protected:
   PartitionSnapshotRef* head_;
   std::mutex mutex_;
+  std::atomic<bool> frozen_;
 };
 
 } // namespace tdsb

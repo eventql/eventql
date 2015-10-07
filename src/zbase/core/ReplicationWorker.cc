@@ -22,6 +22,7 @@ ReplicationWorker::ReplicationWorker(
     PartitionMap* pmap,
     http::HTTPConnectionPool* http) :
     repl_scheme_(repl_scheme),
+    pmap_(pmap),
     http_(http),
     queue_([] (
         const Pair<uint64_t, RefPtr<Partition>>& a,
@@ -125,21 +126,23 @@ void ReplicationWorker::work() {
     if (success) {
       waitset_.erase(partition->uuid());
 
+      repl = partition->getReplicationStrategy(repl_scheme, http_);
       if (repl->needsReplication()) {
-        enqueuePartition(partition);
+        enqueuePartitionWithLock(partition);
       } else {
         auto snap = partition->getSnapshot();
         auto full_copies = repl->numFullRemoteCopies();
         if (!repl_scheme->hasLocalReplica(snap->key) &&
             full_copies >= repl_scheme->minNumCopies()) {
-          logInfo(
-              "z1.core",
-              "Partition $0/$1/$2 is not owned by this node and has $3 other " \
-              "full copies, trying to unload and drop",
-              snap->state.tsdb_namespace(),
-              snap->state.table_key(),
-              snap->key.toString(),
-              full_copies);
+          auto dropped =
+              pmap_->dropLocalPartition(
+                  snap->state.tsdb_namespace(),
+                  snap->state.table_key(),
+                  snap->key);
+
+          if (!dropped) {
+            enqueuePartitionWithLock(partition);
+          }
         }
       }
     } else {
