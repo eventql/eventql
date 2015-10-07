@@ -81,6 +81,56 @@ void TSDBService::insertRecords(const RecordEnvelopeList& record_list) {
   }
 }
 
+void TSDBService::insertRecords(const Vector<RecordEnvelope>& records) {
+  Vector<RefPtr<Partition>> partition_refs;
+  HashMap<String, Vector<RecordRef>> grouped;
+
+  for (const auto& record : records) {
+    SHA1Hash partition_key;
+
+    auto table = pmap_->findTable(
+        record.tsdb_namespace(),
+        record.table_name());
+
+    if (table.isEmpty()) {
+      RAISEF(kNotFoundError, "table not found: $0", record.table_name());
+    }
+
+    if (record.has_partition_sha1()) {
+      partition_key = SHA1Hash::fromHexString(record.partition_sha1());
+    } else {
+      partition_key = table.get()->partitioner()->partitionKeyFor(
+          record.partition_key());
+    }
+
+    auto record_data = record.record_data().data();
+    auto record_size = record.record_data().size();
+
+    auto group_key = StringUtil::format(
+        "$0~$1~$2",
+        record.tsdb_namespace(),
+        record.table_name(),
+        partition_key.toString());
+
+    grouped[group_key].emplace_back(
+        SHA1Hash::fromHexString(record.record_id()),
+        Buffer(record_data, record_size));
+  }
+
+  for (const auto& group : grouped) {
+    auto group_key = StringUtil::split(group.first, "~");
+    if (group_key.size() != 3) {
+      RAISE(kIllegalStateError);
+    }
+
+    insertRecords(
+        group_key[0],
+        group_key[1],
+        SHA1Hash::fromHexString(group_key[2]),
+        group.second);
+  }
+}
+
 void TSDBService::insertRecord(
     const String& tsdb_namespace,
     const String& table_name,

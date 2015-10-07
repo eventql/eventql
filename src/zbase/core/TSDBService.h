@@ -38,6 +38,7 @@ public:
   void createTable(const TableDefinition& config);
 
   void insertRecords(const RecordEnvelopeList& records);
+  void insertRecords(const Vector<RecordEnvelope>& records);
 
   void insertRecord(
       const String& tsdb_namespace,
