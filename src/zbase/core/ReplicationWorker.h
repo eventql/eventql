@@ -43,6 +43,7 @@ protected:
   void work();
 
   RefPtr<ReplicationScheme> repl_scheme_;
+  PartitionMap* pmap_;
   http::HTTPConnectionPool* http_;
 
   Set<SHA1Hash> waitset_;

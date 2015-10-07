@@ -58,6 +58,38 @@ public:
 
   void publishPartitionChange(RefPtr<PartitionChangeNotification> change);
 
+  /**
+   * Attempt to drop a partition from the local host (i.e. delete the partition
+   * data).
+   *
+   * The partition will only be deleted if:
+   *
+   *   - the partition was replicated to and acknowledged by at least N other
+   *     hosts. I.e. we can be sure at least N other copies of the data exist
+   *     in the cluster. N is the min. number of copies as configured by the 
+   *     replication schema.
+   *
+   *   - the local host does not appear in the preference list for this
+   *     partition, i.e. the local host should not store this partition (this
+   *     condition is only met after a cluster rebalance or after a failover
+   *     store into a non-owning replica)
+   *
+   * Note that this method has an inherent race condition: A caller would
+   * usually check that the partition is fully replicated and not locally owned
+   * before calling this method. However there is no way to ensure that no
+   * intermittent stores happen in the partition (in between checking the
+   * precondition and calling this method). So the method returns a boolean
+   * indicating success or failure. 
+   *
+   * The method will return true iff the partition was succesfully dropped. A
+   * false return value indicates that one of the two conditions above weren't
+   * met.
+   */
+  bool dropLocalPartition(
+      const String& tsdb_namespace,
+      const String& table_name,
+      const SHA1Hash& partition_key);
+
 protected:
 
   Option<RefPtr<Table>> findTableWithLock(

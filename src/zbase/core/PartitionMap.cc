@@ -250,6 +250,20 @@ void PartitionMap::listTables(
   }
 }
 
+bool PartitionMap::dropLocalPartition(
+    const String& tsdb_namespace,
+    const String& table_name,
+    const SHA1Hash& partition_key) {
+  logInfo(
+      "z1.core",
+      "Partition $0/$1/$2 is not owned by this node and has $3 other " \
+      "full copies, trying to unload and drop",
+      tsdb_namespace,
+      table_name,
+      partition_key.toString(),
+      0);
+}
+
 Option<TSDBTableInfo> PartitionMap::tableInfo(
       const String& tsdb_namespace,
       const String& table_key) const {
