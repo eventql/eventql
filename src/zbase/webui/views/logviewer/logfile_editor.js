@@ -60,27 +60,27 @@ ZBase.registerView((function() {
 
   var editSourceField = function(field) {
     renderModal(field, "Edit Source Field", function() {
-      
+      console.log(field);
     });
   };
 
   var editRowField = function(field) {
     renderModal(field, "Edit Row Field", function() {
-      
+      console.log(field);
     });
   };
 
   var addSourceField = function() {
     var field = {};
     renderModal(field, "Add Source Field", function() {
-      
+      console.log(field);
     });
   };
 
   var addRowField = function() {
     var field = {};
     renderModal(field, "Add Row Field", function() {
-      
+      console.log(field);
     });
   };
 
@@ -112,7 +112,16 @@ ZBase.registerView((function() {
     });
 
     $.onClick($("button.submit", tpl), function() {
-      console.log("save");
+      if (name_input.value.length == 0) {
+        $(".error_note", modal).classList.remove("hidden");
+        name_input.classList.add("error");
+        return;
+      }
+
+      def.name = $.escapeHTML(name_input.value);
+      def.type = type_control.getValue();
+      def.format = $.escapeHTML(format_input.value);
+      callback();
     });
 
 

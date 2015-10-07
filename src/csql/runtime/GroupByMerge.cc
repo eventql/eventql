@@ -37,6 +37,12 @@ GroupByMerge::GroupByMerge(
   }
 }
 
+void GroupByMerge::prepare(ExecutionContext* context) {
+  for (auto& source : sources_) {
+    source->prepare(context);
+  }
+}
+
 void GroupByMerge::execute(
     ExecutionContext* context,
     Function<bool (int argc, const SValue* argv)> fn) {

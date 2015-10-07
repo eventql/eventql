@@ -15,6 +15,12 @@ ChartStatement::ChartStatement(
     Vector<ScopedPtr<DrawStatement>> draw_statements) :
     draw_statements_(std::move(draw_statements)) {}
 
+void ChartStatement::prepare(ExecutionContext* context) {
+  for (auto& draw_stmt : draw_statements_) {
+    draw_stmt->prepare(context);
+  }
+}
+
 void ChartStatement::execute(
     ExecutionContext* context,
     stx::chart::RenderTarget* target) {

@@ -12,7 +12,6 @@
 
 namespace csql {
 
-
 Union::Union(
     Vector<ScopedPtr<TableExpression>> sources) :
     sources_(std::move(sources)) {
@@ -33,6 +32,12 @@ Union::Union(
     }
 
     ncols = tcols;
+  }
+}
+
+void Union::prepare(ExecutionContext* context) {
+  for (auto& source : sources_) {
+    source->prepare(context);
   }
 }
 

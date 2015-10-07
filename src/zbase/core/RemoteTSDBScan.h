@@ -35,6 +35,8 @@ public:
 
   size_t numColumns() const override;
 
+  void prepare(csql::ExecutionContext* context) override;
+
   void execute(
       csql::ExecutionContext* context,
       Function<bool (int argc, const csql::SValue* argv)> fn) override;
