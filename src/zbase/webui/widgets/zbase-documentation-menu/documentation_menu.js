@@ -1,6 +1,6 @@
 var DocumentationMenu = function() {
 
-  var createMenuItems = function(parent, items, index) {
+  var createMenuItems = function(parent, items, index, current) {
     var j = 0;
 
     for(var i in items) {
@@ -12,6 +12,7 @@ var DocumentationMenu = function() {
       parent.appendChild(section);
 
       var link = document.createElement("a");
+      if(key == current) link.classList.add("current");
       link.href = "/a/documentation/" + key;
       var indexSpan = document.createElement("span");
       var textSpan = document.createElement("span");
@@ -23,12 +24,12 @@ var DocumentationMenu = function() {
       section.appendChild(link);
 
       if(Object.keys(items[i]).length > 0) {
-        createMenuItems(section, items[i], index.concat(+j));
+        createMenuItems(section, items[i], index.concat(+j), current);
       }
     }
   };
 
-  var render = function(elem) {
+  var render = function(elem, key) {
     var tpl = $.getTemplate("widgets/zbase-documentation-menu", "zbase_documentation_menu_main_tpl");
 
     elem.innerHTML = "";
@@ -38,8 +39,8 @@ var DocumentationMenu = function() {
       var docStructure = JSON.parse(res.response);
 
       var menuSection = $("z-menu-section", elem);
-      qax = docStructure;
-      createMenuItems(menuSection, docStructure.toc, []);
+
+      createMenuItems(menuSection, docStructure.toc, [], key);
 
       $.handleLinks(menuSection);
     });
