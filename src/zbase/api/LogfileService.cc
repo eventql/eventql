@@ -349,6 +349,9 @@ void LogfileService::insertLoglines(
     RAISE(kIllegalStateError, "can't import logfile row without time column");
   }
 
+  Vector<RecordEnvelope> records;
+  static const size_t kInsertBatchSize = 512;
+
   for (; is->readLine(&line); line.clear()) {
     Vector<Pair<const char*, size_t>> match;
     if (!regex.match(line, &match)) {
@@ -404,12 +407,22 @@ void LogfileService::insertLoglines(
     auto partition_key = partitioner.get()->partitionKeyFor(
         StringUtil::toString(time.get().unixMicros()));
 
-    tsdb_->insertRecord(
-        customer,
-        table_name,
-        partition_key,
-        record_id,
-        row_buf);
+    RecordEnvelope envelope;
+    envelope.set_tsdb_namespace(customer);
+    envelope.set_table_name(table_name);
+    envelope.set_partition_sha1(partition_key.toString());
+    envelope.set_record_id(record_id.toString());
+    envelope.set_record_data(row_buf.toString());
+    records.emplace_back(envelope);
+
+    if (records.size() > kInsertBatchSize) {
+      tsdb_->insertRecords(records);
+      records.clear();
+    }
+  }
+
+  if (records.size() > 0) {
+    tsdb_->insertRecords(records);
   }
 }
 
