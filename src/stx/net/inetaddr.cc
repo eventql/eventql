@@ -14,6 +14,7 @@
 #include "stx/exception.h"
 #include "stx/stringutil.h"
 #include "stx/net/inetaddr.h"
+#include "stx/sysconfig.h"
 
 namespace stx {
 
@@ -29,7 +30,36 @@ InetAddr InetAddr::resolve(const std::string& addr_str) {
       /* fallthrough */
 
     case 1: {
-      struct hostent* h = gethostbyname(parts[0].c_str());
+      auto hstr = parts[0].c_str();
+
+#ifdef HAVE_GETHOSTBYNAME_R
+      size_t buflen = 1024;
+      auto buf = static_cast<char*>(malloc(buflen));
+      if (buf == nullptr) {
+        RAISE(kMallocError, "malloc() failed");
+      }
+
+      struct hostent* h;
+      struct hostent ret;
+      int err;
+      while (gethostbyname_r(hstr, &ret, buf, buflen, &h, &err) == ERANGE) {
+        buflen *= 2;
+        buf = static_cast<char*>(realloc(buf, buflen));
+        if (buf == nullptr) {
+          RAISE(kMallocError, "malloc() failed");
+        }
+      }
+
+      if (h) {
+        hostname = h->h_name;
+        ip = inet_ntoa(*((struct in_addr *) h->h_addr));
+        free(buf);
+      } else {
+        free(buf);
+        RAISEF(kResolveError, "gethostbyname($0) failed", parts[0]);
+      }
+#else
+      struct hostent* h = gethostbyname(hstr);
 
       if (h == nullptr) {
         RAISEF(kResolveError, "gethostbyname($0) failed", parts[0]);
@@ -37,6 +67,7 @@ InetAddr InetAddr::resolve(const std::string& addr_str) {
 
       hostname = h->h_name;
       ip = inet_ntoa(*((struct in_addr *) h->h_addr));
+#endif
       break;
     }
 

@@ -17,47 +17,55 @@ QueryPlan::QueryPlan(
     RefPtr<TableProvider> tables,
     QueryBuilder* qbuilder,
     Runtime* runtime) :
-    statements_(statements),
+    qtrees_(statements),
     tables_(tables),
     runtime_(runtime),
-    qbuilder_(qbuilder) {}
+    qbuilder_(qbuilder) {
 
-size_t QueryPlan::numStatements() const {
-  return statements_.size();
+  for (const auto& stmt : qtrees_) {
+    if (dynamic_cast<TableExpressionNode*>(stmt.get())) {
+      statements_.emplace_back(qbuilder_->buildTableExpression(
+          stmt.asInstanceOf<TableExpressionNode>(),
+          tables_,
+          runtime_));
+
+      continue;
+    }
+
+    if (dynamic_cast<ChartStatementNode*>(stmt.get())) {
+      statements_.emplace_back(qbuilder_->buildChartStatement(
+          stmt.asInstanceOf<ChartStatementNode>(),
+          tables_,
+          runtime_));
+
+      continue;
+    }
+
+    RAISE(
+        kRuntimeError,
+        "cannot figure out how to execute this query plan");
+
+  }
 }
 
-ScopedPtr<Statement> QueryPlan::buildStatement(size_t stmt_idx) const {
-  if (stmt_idx >= statements_.size()) {
+size_t QueryPlan::numStatements() const {
+  return qtrees_.size();
+}
+
+Statement* QueryPlan::getStatement(size_t stmt_idx) const {
+  if (stmt_idx >= qtrees_.size()) {
     RAISE(kIndexError, "invalid statement index");
   }
 
-  auto stmt = statements_[stmt_idx];
-
-  if (dynamic_cast<TableExpressionNode*>(stmt.get())) {
-    return qbuilder_->buildTableExpression(
-        stmt.asInstanceOf<TableExpressionNode>(),
-        tables_,
-        runtime_);
-  }
-
-  if (dynamic_cast<ChartStatementNode*>(stmt.get())) {
-    return qbuilder_->buildChartStatement(
-        stmt.asInstanceOf<ChartStatementNode>(),
-        tables_,
-        runtime_);
-  }
-
-  RAISE(
-      kRuntimeError,
-      "cannot figure out how to execute this query plan");
+  return statements_[stmt_idx].get();
 }
 
 RefPtr<QueryTreeNode> QueryPlan::getStatementQTree(size_t stmt_idx) const {
-  if (stmt_idx >= statements_.size()) {
+  if (stmt_idx >= qtrees_.size()) {
     RAISE(kIndexError, "invalid statement index");
   }
 
-  return statements_[stmt_idx];
+  return qtrees_[stmt_idx];
 }
 
 }

@@ -47,7 +47,7 @@ public:
       RefPtr<ResultFormat> result_format);
 
   void executeStatement(
-      ScopedPtr<Statement> statement,
+      Statement* statement,
       ResultList* result);
 
   void executeStatement(

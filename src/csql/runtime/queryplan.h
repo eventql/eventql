@@ -27,11 +27,12 @@ public:
 
   size_t numStatements() const;
 
-  ScopedPtr<Statement> buildStatement(size_t stmt_idx) const;
+  Statement* getStatement(size_t stmt_idx) const;
   RefPtr<QueryTreeNode> getStatementQTree(size_t stmt_idx) const;
 
 protected:
-  Vector<RefPtr<QueryTreeNode>> statements_;
+  Vector<RefPtr<QueryTreeNode>> qtrees_;
+  Vector<ScopedPtr<Statement>> statements_;
   RefPtr<TableProvider> tables_;
   Runtime* runtime_;
   QueryBuilder* qbuilder_;

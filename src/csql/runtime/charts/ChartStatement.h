@@ -20,6 +20,8 @@ public:
 
   ChartStatement(Vector<ScopedPtr<DrawStatement>> draw_statements);
 
+  void prepare(ExecutionContext* context) override;
+
   void execute(
       ExecutionContext* context,
       stx::chart::RenderTarget* target);
