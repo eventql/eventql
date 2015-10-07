@@ -65,6 +65,7 @@ ZBase.registerView((function() {
 
     $.replaceContent($(".z-modal-content", modal), tpl);
     modal.show();
+    $("input", modal).focus();
   };
 
   var addLogfile = function() {
@@ -74,12 +75,19 @@ ZBase.registerView((function() {
       $(".zbase_logviewer .logfile_list z-modal.add_logfile .error_note")
           .classList.remove("hidden");
       input.classList.add("error");
+      input.focus();
       return;
     }
 
-    var url = "/api/v1/logfiles/add_logfile?name=" + $.escapeHTML(input.value);
-    alert("POST " + url);
-    //TODO redirect to edit schema page
+    var url = "/api/v1/logfiles/add_logfile?logfile=" + $.escapeHTML(input.value);
+    $.httpPost(url, "", function(r) {
+      if (r.status == 201) {
+        var def = JSON.parse(r.response);
+        $.navigateTo("/a/logs/view/" + def.name);
+      } else {
+        $.fatalError();
+      }
+    });
   };
 
   return {
