@@ -66,12 +66,11 @@
   text-align: center;
 }
 
-.zbase_logviewer .logfile_editor .editor_pane table.z-table tr td.icon i {
-  padding: 2px 10px;
+.zbase_logviewer .logfile_editor .editor_pane table.z-table tr td.icon z-dropdown-header {
+  color: #888;
 }
 
-.zbase_logviewer .logfile_editor .editor_pane table.z-table tr td.icon i:hover {
-  cursor: pointer;
+.zbase_logviewer .logfile_editor .editor_pane table.z-table tr td.icon z-dropdown:hover z-dropdown-header {
   color: #3498db;
 }
 
@@ -119,4 +118,12 @@
 .zbase_logviewer .logfile_editor z-modal button.z-button {
   font-size: 13px;
   float: right;
+}
+
+.zbase_logviewer .logfile_editor z-modal h4 {
+  font-size: 14px;
+  line-height: 34px;
+  margin: 0;
+  color: #333;
+  font-weight: 500;
 }
