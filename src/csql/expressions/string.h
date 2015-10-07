@@ -17,5 +17,9 @@ void startsWithExpr(int argc, SValue* argv, SValue* out);
 
 void endsWithExpr(int argc, SValue* argv, SValue* out);
 
+void upperCaseExpr(int argc, SValue* argv, SValue* out);
+
+void lowerCaseExpr(int argc, SValue* argv, SValue* out);
+
 }
 }

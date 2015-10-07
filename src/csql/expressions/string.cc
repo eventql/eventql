@@ -38,5 +38,19 @@ void endsWithExpr(int argc, SValue* argv, SValue* out) {
   *out = SValue(SValue::BoolType(val));
 }
 
+void upperCaseExpr(int argc, SValue* argv, SValue* out) {
+  checkArgs("UPPERCASE", argc, 1);
+  auto val = argv[0].toString();
+  StringUtil::toUpper(&val);
+  *out = SValue(val);
+}
+
+void lowerCaseExpr(int argc, SValue* argv, SValue* out) {
+  checkArgs("LOWERCASE", argc, 1);
+  auto val = argv[0].toString();
+  StringUtil::toLower(&val);
+  *out = SValue(val);
+}
+
 }
 }

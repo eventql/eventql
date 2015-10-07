@@ -78,6 +78,10 @@ void installDefaultSymbols(SymbolTable* rt) {
   /* expressions/string.h */
   rt->registerFunction("startswith", PureFunction(&expressions::startsWithExpr));
   rt->registerFunction("endswith", PureFunction(&expressions::endsWithExpr));
+  rt->registerFunction("uppercase", PureFunction(&expressions::upperCaseExpr));
+  rt->registerFunction("ucase", PureFunction(&expressions::upperCaseExpr));
+  rt->registerFunction("lowercase", PureFunction(&expressions::lowerCaseExpr));
+  rt->registerFunction("lcase", PureFunction(&expressions::lowerCaseExpr));
 
   /* expressions/internal.h */
   rt->registerFunction("repeat_value", expressions::kRepeatValueExpr);
