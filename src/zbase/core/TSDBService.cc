@@ -109,6 +109,14 @@ void TSDBService::insertRecordsLocal(
     const String& table_name,
     const SHA1Hash& partition_key,
     const Vector<RecordRef>& records) {
+  logDebug(
+      "z1.core",
+      "Inserting $0 records into tsdb://localhost/$1/$2/$3",
+      records.size(),
+      tsdb_namespace,
+      table_name,
+      partition_key.toString());
+
   auto partition = pmap_->findOrCreatePartition(
       tsdb_namespace,
       table_name,
@@ -150,6 +158,15 @@ void TSDBService::insertRecordsRemote(
   auto hosts = repl_->replicasFor(partition_key);
   for (const auto& host : hosts) {
     try {
+      logDebug(
+          "z1.core",
+          "Inserting $0 records into tsdb://$1/$2/$3/$4",
+          records.size(),
+          host.name,
+          tsdb_namespace,
+          table_name,
+          partition_key.toString());
+
       insertRecordsRemote(
           tsdb_namespace,
           table_name,
