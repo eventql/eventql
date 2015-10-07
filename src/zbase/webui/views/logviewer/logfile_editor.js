@@ -24,13 +24,11 @@ ZBase.registerView((function() {
     renderFields(
         $(".editor_pane.source_fields", page),
         def.source_fields,
-        editSourceField,
         deleteSourceField);
 
     renderFields(
         $(".editor_pane.row_fields", page),
         def.row_fields,
-        editRowField,
         deleteRowField);
 
     $.onClick($(".editor_pane.source_fields .add_field", page), addSourceField);
@@ -40,7 +38,7 @@ ZBase.registerView((function() {
     $.replaceViewport(page);
   };
 
-  var renderFields = function(elem, fields, onEdit, onDelete) {
+  var renderFields = function(elem, fields, onDelete) {
     var tbody = $("tbody", elem);
     var tr_tpl = $.getTemplate(
         "views/logviewer",
@@ -52,45 +50,21 @@ ZBase.registerView((function() {
       $(".type", tr).innerHTML = field.type;
       $(".format", tr).innerHTML = field.format;
 
-      $("z-dropdown", tr).addEventListener("change", function() {
-        switch (this.getValue()) {
-          case "edit":
-            onEdit(field);
-            break;
-
-          case "delete":
-            onDelete(field);
-            break;
-        }
-        this.setValue([]);
-      }, false);
+      $.onClick($(".delete", tr), function() {onDelete(field);});
 
       tbody.appendChild(tr);
     });
   };
 
-  var editSourceField = function(field) {
-    renderEdit(field, "Edit Source Field", function() {
-      console.log(field);
-    });
-  };
-
-  var editRowField = function(field) {
-    renderEdit(field, "Edit Row Field", function() {
-      console.log(field);
-    });
-  };
 
   var addSourceField = function() {
-    var field = {};
-    renderEdit(field, "Add Source Field", function() {
+    renderAdd("Add Source Field", function(field) {
       console.log(field);
     });
   };
 
   var addRowField = function() {
-    var field = {};
-    renderEdit(field, "Add Row Field", function() {
+    renderAdd("Add Row Field", function(field) {
       console.log(field);
     });
   };
@@ -107,7 +81,7 @@ ZBase.registerView((function() {
     });
   };
 
-  var renderEdit = function(def, header, callback) {
+  var renderAdd = function(header, callback) {
     var modal = $(".zbase_logviewer .logfile_editor z-modal.edit_field");
     var tpl = $.getTemplate(
         "views/logviewer",
@@ -115,36 +89,48 @@ ZBase.registerView((function() {
 
     $(".z-modal-header", tpl).innerHTML = header;
 
-    var name_input = $("input.name", tpl);
-    if (def.name) {
-      name_input.value = def.name;
-    }
-
-    var type_control = $("z-dropdown", tpl);
-    if (def.type) {
-      type_control.setValue([def.type]);
-    }
-
-    var format_input = $("input.format", tpl)
-    if (def.format) {
-      format_input.value = def.format;
-    }
-
     $.onClick($("button.close", tpl), function() {
       modal.close();
     });
 
+    var name_input = $("input.name", tpl);
     $.onClick($("button.submit", tpl), function() {
-      if (name_input.value.length == 0) {
-        $(".error_note", modal).classList.remove("hidden");
+      var def = {};
+      var error = false;
+
+      //name validation
+      def.name = $.escapeHTML(name_input.value);
+      if (def.name.length == 0) {
+        $(".error_note.name", modal).classList.remove("hidden");
         name_input.classList.add("error");
-        return;
+        name_input.focus();
+        error = true;
+      } else {
+        $(".error_note.name", modal).classList.add("hidden");
+        name_input.classList.remove("error");
       }
 
-      def.name = $.escapeHTML(name_input.value);
-      def.type = type_control.getValue();
+      var format_input = $("input.format", modal);
       def.format = $.escapeHTML(format_input.value);
-      callback();
+
+      //type format validation
+      def.type = $("z-dropdown", modal).getValue();
+      if (def.type == "DATETIME" && def.format.length == 0) {
+        $(".error_note.date_time_format", modal).classList.remove("hidden");
+        format_input.classList.add("error");
+
+        if (!error) {
+          format_input.focus();
+        }
+        error = true;
+      } else {
+        $(".error_note.date_time_format", modal).classList.add("hidden");
+        format_input.classList.remove("error");
+      }
+
+      if (!error) {
+        callback(def);
+      }
     });
 
 

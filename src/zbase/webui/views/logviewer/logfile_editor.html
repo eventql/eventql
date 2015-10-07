@@ -105,20 +105,7 @@
     <td class="type"></td>
     <td class="format"></td>
     <td class="icon">
-      <z-dropdown class="edit" data-resolved="" data-hover="">
-        <z-dropdown-header>
-          <z-dropdown-header-value data-static="">
-            <i class="fa fa-gear"></i>
-          </z-dropdown-header-value>
-          <z-dropdown-header-icon></z-dropdown-header-icon>
-        </z-dropdown-header>
-        <z-dropdown-flyout>
-          <z-dropdown-items>
-            <z-dropdown-item data-value="edit">Edit</z-dropdown-item>
-            <z-dropdown-item data-value="delete">Delete</z-dropdown-item>
-          </z-dropdown-items>
-        </z-dropdown-flyout>
-      </z-dropdown>
+      <i class="fa fa-trash-o delete"></i>
     </td>
   </tr>
 </template>
@@ -129,7 +116,7 @@
     <div class="field">
       <label>Name:</label>
       <input class="z-input name" type="text" />
-      <div class="error_note hidden">Please insert a name</div>
+      <div class="error_note name hidden">Please insert a name</div>
     </div>
 
     <div class="field">
@@ -151,6 +138,7 @@
     <div class="field">
       <label>Format:</label>
       <input class="z-input format" type="text" />
+      <div class="error_note date_time_format hidden">Please insert a format, e.g. '%H:%M:%S'</div>
     </div>
   </div>
   <div class="z-modal-footer">
