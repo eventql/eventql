@@ -230,6 +230,9 @@ int main(int argc, const char** argv) {
     FileUtil::mkdir(trash_dir);
   }
 
+  FileLock server_lock(FileUtil::joinPaths(tsdb_dir, "__lock"));
+  server_lock.lock();
+
   zbase::PartitionMap partition_map(tsdb_dir, repl_scheme);
   zbase::TSDBService tsdb_node(&partition_map, repl_scheme.get(), &ev);
   zbase::ReplicationWorker tsdb_replication(
