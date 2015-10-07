@@ -47,9 +47,18 @@ ZBase.registerView((function() {
   var renderRegexPane = function(elem, regex) {
     var textarea = $("textarea", elem);
     textarea.value = regex;
+
     $.onClick($("button.submit", elem), function() {
       var url = "/api/v1/logfiles/set_regex?logfile=" + logfile;
       var postbody = {regex: textarea.value};
+
+      $.httpPost(url, postbody, function(r) {
+        if (r.status == 201) {
+          load();
+        } else {
+          $.fatalError();
+        }
+      });
     });
   };
 

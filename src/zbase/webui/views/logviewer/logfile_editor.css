@@ -16,14 +16,9 @@
   float: left;
 }
 
-.zbase_logviewer .logfile_editor .editor_pane .editor_pane_header button.z-button {
-  float: right;
-  font-size: 13px;
-  margin-top: 13px;
-}
-
 .zbase_logviewer .logfile_editor .editor_pane.regex .editor_pane_inner {
-  padding: 20px;
+  padding: 0px 20px 20px 20px;
+  overflow: auto;
 }
 
 .zbase_logviewer .logfile_editor .editor_pane textarea {
@@ -32,6 +27,11 @@
   font-size: 14px;
   line-height: 1.4;
   resize: vertical;
+}
+
+.zbase_logviewer .logfile_editor .editor_pane button.z-button {
+  font-size: 13px;
+  float: right;
 }
 
 .zbase_logviewer .logfile_editor .editor_pane table.z-table {
