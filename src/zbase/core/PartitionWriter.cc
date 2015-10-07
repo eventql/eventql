@@ -49,4 +49,12 @@ void PartitionWriter::updateCSTable(
   head_->setSnapshot(snap);
 }
 
+void PartitionWriter::lock() {
+  mutex_.lock();
+}
+
+void PartitionWriter::unlock() {
+  mutex_.unlock();
+}
+
 } // namespace tdsb

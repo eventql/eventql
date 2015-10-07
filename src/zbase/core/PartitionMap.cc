@@ -15,6 +15,7 @@
 #include <sstable/sstablereader.h>
 #include <zbase/core/PartitionMap.h>
 #include <zbase/core/PartitionState.pb.h>
+#include <zbase/core/PartitionReplication.h>
 
 using namespace stx;
 
@@ -27,9 +28,12 @@ static mdb::MDBOptions tsdb_mdb_opts() {
   return opts;
 };
 
-PartitionMap::PartitionMap(const String& db_path) :
+PartitionMap::PartitionMap(
+    const String& db_path,
+    RefPtr<ReplicationScheme> repl_scheme) :
     db_path_(db_path),
-    db_(mdb::MDB::open(db_path, tsdb_mdb_opts())) {}
+    db_(mdb::MDB::open(db_path, tsdb_mdb_opts())),
+    repl_scheme_(repl_scheme) {}
 
 Option<RefPtr<Table>> PartitionMap::findTable(
     const String& stream_ns,
@@ -254,6 +258,35 @@ bool PartitionMap::dropLocalPartition(
     const String& tsdb_namespace,
     const String& table_name,
     const SHA1Hash& partition_key) {
+  auto partition_opt = findPartition(tsdb_namespace, table_name, partition_key);
+  if (partition_opt.isEmpty()) {
+    RAISE(kNotFoundError, "partition not found");
+  }
+
+  auto partition = partition_opt.get();
+  auto partition_writer = partition->getWriter();
+
+  /* lock partition */
+  partition_writer->lock();
+
+  /* check preconditions */
+  size_t full_copies = 0;
+  try {
+    full_copies = partition
+        ->getReplicationStrategy(repl_scheme_, nullptr)
+        ->numFullRemoteCopies();
+
+    if (repl_scheme_->hasLocalReplica(partition_key) ||
+        full_copies < repl_scheme_->minNumCopies()) {
+      RAISE(kIllegalStateError, "can't delete partition");
+    }
+  } catch (const StandardException& e) {
+    /* unlock partition and bail */
+    partition_writer->unlock();
+    return false;
+  }
+
+  /* start deletion */
   logInfo(
       "z1.core",
       "Partition $0/$1/$2 is not owned by this node and has $3 other " \
@@ -261,7 +294,12 @@ bool PartitionMap::dropLocalPartition(
       tsdb_namespace,
       table_name,
       partition_key.toString(),
-      0);
+      full_copies);
+
+  /* freeze partition and unlock waiting writers (they will fail) */
+  //partition_writer->freeze();
+  partition_writer->unlock();
+  return false;
 }
 
 Option<TSDBTableInfo> PartitionMap::tableInfo(
