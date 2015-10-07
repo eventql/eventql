@@ -1,8 +1,9 @@
 ZBase.registerView((function() {
+  var logfile;
 
   var load = function(path) {
     var path_prefix = "/a/logs/";
-    var logfile = path.substr(path_prefix.length);
+    logfile = path.substr(path_prefix.length);
 
     $.httpGet("/api/v1/logfiles/get_definition?logfile=" + logfile, function(r) {
       if (r.status == 200) {
@@ -43,7 +44,8 @@ ZBase.registerView((function() {
     var textarea = $("textarea", elem);
     textarea.value = regex;
     $.onClick($("button.submit", elem), function() {
-      console.log("save regex", textarea.value);
+      var url = "/api/v1/logfiles/set_regex?logfile=" + logfile;
+      var postbody = {regex: textarea.value};
     });
   };
 
@@ -68,25 +70,41 @@ ZBase.registerView((function() {
 
   var addSourceField = function() {
     renderAdd("Add Source Field", function(field) {
-      console.log(field);
+      var url =
+          "/api/v1/logfiles/add_source_field?logfile=" +
+          logfile + "&" + $.buildQueryString(field);
+
+      console.log(url);
     });
   };
 
   var addRowField = function() {
     renderAdd("Add Row Field", function(field) {
-      console.log(field);
+      var url =
+          "/api/v1/logfiles/add_row_field?logfile=" +
+          logfile + "&" + $.buildQueryString(field);
+
+      console.log(url)
     });
   };
 
   var deleteSourceField = function(field) {
-    renderDelete(field.name, "Delete Source Field", function() {
-      console.log("delete", field);
+    renderDelete(field.name, "Delete Source Field", function(def) {
+      var url =
+          "/api/v1/logfiles/remove_source_field?logfile=" +
+          logfile + "&name=" + field.name;
+
+      console.log(url)
     });
   };
 
   var deleteRowField = function(field) {
     renderDelete(field.name, "Delete Row Field", function() {
-      console.log("delete", field);
+     var url =
+          "/api/v1/logfiles/remove_row_field?logfile=" +
+          logfile + "&name=" + field.name;
+
+      console.log(url) 
     });
   };
 
