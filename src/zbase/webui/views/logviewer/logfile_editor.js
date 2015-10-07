@@ -24,12 +24,14 @@ ZBase.registerView((function() {
     renderFields(
         $(".editor_pane.source_fields", page),
         def.source_fields,
-        editSourceField);
+        editSourceField,
+        deleteSourceField);
 
     renderFields(
         $(".editor_pane.row_fields", page),
         def.row_fields,
-        editRowField);
+        editRowField,
+        deleteRowField);
 
     $.onClick($(".editor_pane.source_fields .add_field", page), addSourceField);
     $.onClick($(".editor_pane.row_fields .add_field", page), addRowField);
@@ -38,7 +40,7 @@ ZBase.registerView((function() {
     $.replaceViewport(page);
   };
 
-  var renderFields = function(elem, fields, onClick) {
+  var renderFields = function(elem, fields, onEdit, onDelete) {
     var tbody = $("tbody", elem);
     var tr_tpl = $.getTemplate(
         "views/logviewer",
@@ -50,41 +52,62 @@ ZBase.registerView((function() {
       $(".type", tr).innerHTML = field.type;
       $(".format", tr).innerHTML = field.format;
 
-      $.onClick($(".icon", tr), function() {
-        onClick(field);
-      });
+      $("z-dropdown", tr).addEventListener("change", function() {
+        switch (this.getValue()) {
+          case "edit":
+            onEdit(field);
+            break;
+
+          case "delete":
+            onDelete(field);
+            break;
+        }
+        this.setValue([]);
+      }, false);
 
       tbody.appendChild(tr);
     });
   };
 
   var editSourceField = function(field) {
-    renderModal(field, "Edit Source Field", function() {
+    renderEdit(field, "Edit Source Field", function() {
       console.log(field);
     });
   };
 
   var editRowField = function(field) {
-    renderModal(field, "Edit Row Field", function() {
+    renderEdit(field, "Edit Row Field", function() {
       console.log(field);
     });
   };
 
   var addSourceField = function() {
     var field = {};
-    renderModal(field, "Add Source Field", function() {
+    renderEdit(field, "Add Source Field", function() {
       console.log(field);
     });
   };
 
   var addRowField = function() {
     var field = {};
-    renderModal(field, "Add Row Field", function() {
+    renderEdit(field, "Add Row Field", function() {
       console.log(field);
     });
   };
 
-  var renderModal = function(def, header, callback) {
+  var deleteSourceField = function(field) {
+    renderDelete(field.name, "Delete Source Field", function() {
+      console.log("delete", field);
+    });
+  };
+
+  var deleteRowField = function(field) {
+    renderDelete(field.name, "Delete Row Field", function() {
+      console.log("delete", field);
+    });
+  };
+
+  var renderEdit = function(def, header, callback) {
     var modal = $(".zbase_logviewer .logfile_editor z-modal.edit_field");
     var tpl = $.getTemplate(
         "views/logviewer",
@@ -128,6 +151,24 @@ ZBase.registerView((function() {
     $.replaceContent($(".container", modal), tpl);
     modal.show();
     name_input.focus();
+  };
+
+  var renderDelete = function(field_name, header, callback) {
+    var modal =  $(".zbase_logviewer .logfile_editor z-modal.delete_field");
+    var tpl = $.getTemplate(
+        "views/logviewer",
+        "zbase_logviewer_logfile_editor_delete_modal_tpl");
+
+    $(".z-modal-header", tpl).innerHTML = header;
+    $(".field_name", tpl).innerHTML = field_name;
+
+    $.onClick($("button.close", tpl), function() {
+      modal.close();
+    });
+    $.onClick($("button.submit", tpl), callback);
+
+    $.replaceContent($(".container", modal), tpl);
+    modal.show();
   };
 
   return {

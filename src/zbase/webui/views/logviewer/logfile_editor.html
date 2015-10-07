@@ -7,7 +7,7 @@
             <a href="/a/">Applications</a>
           </zbase-breadcrumbs-section>
           <zbase-breadcrumbs-section>
-            <a href="/a/logs">Logfile Viewer</a>
+            <a href="/a/logs">Logfiles</a>
           </zbase-breadcrumbs-section>
           <zbase-breadcrumbs-section>
             <a href="/a/logs">Logfile Editor</a>
@@ -18,14 +18,6 @@
     </section>
     <div class="zbase_content_pane fullwidth">
       <div class="logfile_editor">
-        <div class="editor_pane regex">
-          <div class="editor_pane_header">
-            <h2 class="pagetitle">Regex</h2>
-            <button class="z-button primary ">Save</button>
-          </div>
-
-          <textarea class="z-textarea regex"></textarea>
-        </div>
 
         <div class="editor_pane source_fields">
           <div class="editor_pane_header">
@@ -52,6 +44,16 @@
           </div>
 
         </div>
+
+        <div class="editor_pane regex">
+          <div class="editor_pane_header">
+            <h2 class="pagetitle">Row Regex</h2>
+            <button class="z-button primary ">Save</button>
+          </div>
+
+          <textarea class="z-textarea regex"></textarea>
+        </div>
+
 
         <div class="editor_pane row_fields">
           <div class="editor_pane_header">
@@ -85,6 +87,13 @@
             <div class="container"></div>
           </z-modal-box>
         </z-modal>
+
+        <z-modal class="delete_field">
+          <z-modal-box>
+            <z-modal-close-icon></z-modal-close-icon>
+            <div class="container"></div>
+          </z-modal-box>
+        </z-modal>
       </div>
     </div>
   </div>
@@ -95,7 +104,22 @@
     <td class="name"></td>
     <td class="type"></td>
     <td class="format"></td>
-    <td class="icon"><i class="fa fa-gear"></i></td>
+    <td class="icon">
+      <z-dropdown class="edit" data-resolved="" data-hover="">
+        <z-dropdown-header>
+          <z-dropdown-header-value data-static="">
+            <i class="fa fa-gear"></i>
+          </z-dropdown-header-value>
+          <z-dropdown-header-icon></z-dropdown-header-icon>
+        </z-dropdown-header>
+        <z-dropdown-flyout>
+          <z-dropdown-items>
+            <z-dropdown-item data-value="edit">Edit</z-dropdown-item>
+            <z-dropdown-item data-value="delete">Delete</z-dropdown-item>
+          </z-dropdown-items>
+        </z-dropdown-flyout>
+      </z-dropdown>
+    </td>
   </tr>
 </template>
 
@@ -131,6 +155,19 @@
   </div>
   <div class="z-modal-footer">
     <button class="z-button primary submit">Save</button>
+    <button class="z-button secondary close">Cancel</button>
+  </div>
+</template>
+
+<template id="zbase_logviewer_logfile_editor_delete_modal_tpl">
+  <div class="z-modal-header"></div>
+  <div class="z-modal-content">
+    <h4>
+      Are you sure you want to delete the field <span class="field_name"></span>
+    </h4>
+  </div>
+  <div class="z-modal-footer">
+    <button class="z-button primary submit">Yes</button>
     <button class="z-button secondary close">Cancel</button>
   </div>
 </template>
