@@ -39,6 +39,8 @@ public:
 
   virtual bool hasLocalReplica(const SHA1Hash& key) = 0;
 
+  virtual size_t minNumCopies() const = 0;
+
 };
 
 /**
@@ -49,6 +51,8 @@ public:
   Vector<ReplicaRef> replicasFor(const SHA1Hash& key) override;
 
   bool hasLocalReplica(const SHA1Hash& key) override;
+
+  size_t minNumCopies() const override;
 
 };
 
@@ -64,28 +68,11 @@ public:
 
   bool hasLocalReplica(const SHA1Hash& key) override;
 
-protected:
-  Vector<ReplicaRef> replicas_;
-};
-
-
-/**
- * Data is replicated on N remote nodes (every remote host has a full copy
- * of the data) but the local node doesn't store any data
- */
-class FrontendReplicationScheme : public ReplicationScheme {
-public:
-
-  FrontendReplicationScheme(Vector<ReplicaRef> replicas);
-
-  Vector<ReplicaRef> replicasFor(const SHA1Hash& key) override;
-
-  bool hasLocalReplica(const SHA1Hash& key) override;
+  size_t minNumCopies() const override;
 
 protected:
   Vector<ReplicaRef> replicas_;
 };
-
 
 class DHTReplicationScheme : public ReplicationScheme {
 public:
@@ -97,6 +84,8 @@ public:
   Vector<ReplicaRef> replicasFor(const SHA1Hash& key) override;
 
   bool hasLocalReplica(const SHA1Hash& key) override;
+
+  size_t minNumCopies() const override;
 
   void updateClusterConfig(ClusterConfig cluster_config);
 

@@ -36,6 +36,8 @@ public:
 
 protected:
 
+  void enqueuePartitionWithLock(RefPtr<Partition> partition);
+
   void start();
   void stop();
   void work();
