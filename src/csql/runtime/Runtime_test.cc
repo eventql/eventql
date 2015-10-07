@@ -727,3 +727,31 @@ TEST_CASE(RuntimeTest, TestLogicalOr, [] () {
     EXPECT_EQ(v.toString(), "false");
   }
 });
+
+TEST_CASE(RuntimeTest, TestStringUppercaseExpression, [] () {
+  auto runtime = Runtime::getDefaultRuntime();
+
+  {
+    auto v = runtime->evaluateStaticExpression("uppercase('blah')");
+    EXPECT_EQ(v.toString(), "BLAH");
+  }
+
+  {
+    auto v = runtime->evaluateStaticExpression("ucase('blah')");
+    EXPECT_EQ(v.toString(), "BLAH");
+  }
+});
+
+TEST_CASE(RuntimeTest, TestStringLowercaseExpression, [] () {
+  auto runtime = Runtime::getDefaultRuntime();
+
+  {
+    auto v = runtime->evaluateStaticExpression("lowercase('FNORD')");
+    EXPECT_EQ(v.toString(), "fnord");
+  }
+
+  {
+    auto v = runtime->evaluateStaticExpression("lcase('FnOrD')");
+    EXPECT_EQ(v.toString(), "fnord");
+  }
+});
