@@ -19,7 +19,11 @@ using namespace stx;
 
 namespace zbase {
 
-TSDBService::TSDBService(PartitionMap* pmap) : pmap_(pmap) {}
+TSDBService::TSDBService(
+    PartitionMap* pmap,
+    ReplicationScheme* repl) :
+    pmap_(pmap),
+    repl_(repl) {}
 
 void TSDBService::createTable(const TableDefinition& table) {
   pmap_->configureTable(table);

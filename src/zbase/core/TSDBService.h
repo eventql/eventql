@@ -29,7 +29,9 @@ namespace zbase {
 class TSDBService {
 public:
 
-  TSDBService(PartitionMap* pmap);
+  TSDBService(
+      PartitionMap* pmap,
+      ReplicationScheme* repl);
 
   void createTable(const TableDefinition& config);
 
@@ -88,6 +90,7 @@ public:
 
 protected:
   PartitionMap* pmap_;
+  ReplicationScheme* repl_;
 };
 
 } // namespace tdsb
