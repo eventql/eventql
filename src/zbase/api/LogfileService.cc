@@ -350,7 +350,7 @@ void LogfileService::insertLoglines(
   }
 
   Vector<RecordEnvelope> records;
-  static const size_t kInsertBatchSize = 512;
+  static const size_t kInsertBatchSize = 1024;
 
   for (; is->readLine(&line); line.clear()) {
     Vector<Pair<const char*, size_t>> match;
