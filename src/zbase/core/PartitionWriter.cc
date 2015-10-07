@@ -19,12 +19,17 @@ namespace zbase {
 
 PartitionWriter::PartitionWriter(
     PartitionSnapshotRef* head) :
-    head_(head) {}
+    head_(head),
+    frozen_(false) {}
 
 void PartitionWriter::updateCSTable(
     const String& tmpfile,
     uint64_t version) {
   std::unique_lock<std::mutex> lk(mutex_);
+  if (frozen_) {
+    RAISE(kIllegalStateError, "partition is frozen");
+  }
+
   auto snap = head_->getSnapshot()->clone();
 
   if (snap->state.cstable_version() >= version) {
@@ -55,6 +60,10 @@ void PartitionWriter::lock() {
 
 void PartitionWriter::unlock() {
   mutex_.unlock();
+}
+
+void PartitionWriter::freeze() {
+  frozen_ = true;
 }
 
 } // namespace tdsb

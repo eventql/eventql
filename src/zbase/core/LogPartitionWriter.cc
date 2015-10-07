@@ -34,6 +34,10 @@ bool LogPartitionWriter::insertRecord(
 
 Set<SHA1Hash> LogPartitionWriter::insertRecords(const Vector<RecordRef>& records) {
   std::unique_lock<std::mutex> lk(mutex_);
+  if (frozen_) {
+    RAISE(kIllegalStateError, "partition is frozen");
+  }
+
   auto snap = head_->getSnapshot()->clone();
 
   stx::logTrace(
