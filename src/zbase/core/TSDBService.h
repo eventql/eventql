@@ -13,6 +13,7 @@
 #include <stx/random.h>
 #include <stx/option.h>
 #include <stx/thread/queue.h>
+#include <stx/thread/eventloop.h>
 #include <zbase/util/mdb/MDB.h>
 #include <zbase/core/TableConfig.pb.h>
 #include <zbase/core/Partition.h>
@@ -31,7 +32,8 @@ public:
 
   TSDBService(
       PartitionMap* pmap,
-      ReplicationScheme* repl);
+      ReplicationScheme* repl,
+      thread::EventLoop* ev);
 
   void createTable(const TableDefinition& config);
 
@@ -43,6 +45,12 @@ public:
       const SHA1Hash& partition_key,
       const SHA1Hash& record_id,
       const Buffer& record);
+
+  void insertRecords(
+      const String& tsdb_namespace,
+      const String& table_name,
+      const SHA1Hash& partition_key,
+      const Vector<RecordRef>& recods);
 
   void updatePartitionCSTable(
       const String& tsdb_namespace,
@@ -89,8 +97,29 @@ public:
       const String& table_key);
 
 protected:
+
+  void insertRecordsLocal(
+      const String& tsdb_namespace,
+      const String& table_name,
+      const SHA1Hash& partition_key,
+      const Vector<RecordRef>& recods);
+
+  void insertRecordsRemote(
+      const String& tsdb_namespace,
+      const String& table_name,
+      const SHA1Hash& partition_key,
+      const Vector<RecordRef>& recods);
+
+  void insertRecordsRemote(
+      const String& tsdb_namespace,
+      const String& table_name,
+      const SHA1Hash& partition_key,
+      const RecordEnvelopeList& envelope,
+      const InetAddr& host);
+
   PartitionMap* pmap_;
   ReplicationScheme* repl_;
+  http::HTTPConnectionPool http_;
 };
 
 } // namespace tdsb

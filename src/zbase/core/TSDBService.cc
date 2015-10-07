@@ -21,9 +21,11 @@ namespace zbase {
 
 TSDBService::TSDBService(
     PartitionMap* pmap,
-    ReplicationScheme* repl) :
+    ReplicationScheme* repl,
+    thread::EventLoop* ev) :
     pmap_(pmap),
-    repl_(repl) {}
+    repl_(repl),
+    http_(ev) {}
 
 void TSDBService::createTable(const TableDefinition& table) {
   pmap_->configureTable(table);
@@ -31,51 +33,51 @@ void TSDBService::createTable(const TableDefinition& table) {
 
 void TSDBService::insertRecords(const RecordEnvelopeList& record_list) {
   Vector<RefPtr<Partition>> partition_refs;
-  HashMap<Partition*, Vector<RecordRef>> grouped;
+  HashMap<String, Vector<RecordRef>> grouped;
+
   for (const auto& record : record_list.records()) {
     SHA1Hash partition_key;
+
+    auto table = pmap_->findTable(
+        record.tsdb_namespace(),
+        record.table_name());
+
+    if (table.isEmpty()) {
+      RAISEF(kNotFoundError, "table not found: $0", record.table_name());
+    }
 
     if (record.has_partition_sha1()) {
       partition_key = SHA1Hash::fromHexString(record.partition_sha1());
     } else {
-      auto table = pmap_->findTable(
-          record.tsdb_namespace(),
-          record.table_name());
-
-      if (table.isEmpty()) {
-        RAISEF(kNotFoundError, "table not found: $0", record.table_name());
-      }
-
       partition_key = table.get()->partitioner()->partitionKeyFor(
           record.partition_key());
     }
 
-    auto partition = pmap_->findOrCreatePartition(
-        record.tsdb_namespace(),
-        record.table_name(),
-        partition_key);
-
     auto record_data = record.record_data().data();
     auto record_size = record.record_data().size();
 
-    if (grouped.count(partition.get()) == 0) {
-      partition_refs.emplace_back(partition);
-    }
+    auto group_key = StringUtil::format(
+        "$0~$1~$2",
+        record.tsdb_namespace(),
+        record.table_name(),
+        partition_key.toString());
 
-    grouped[partition.get()].emplace_back(
+    grouped[group_key].emplace_back(
         SHA1Hash::fromHexString(record.record_id()),
         Buffer(record_data, record_size));
   }
 
   for (const auto& group : grouped) {
-    auto partition = group.first;
-    auto inserted = partition->getWriter()->insertRecords(group.second);
-
-    if (inserted.size() > 0) {
-      auto change = mkRef(new PartitionChangeNotification());
-      change->partition = partition;
-      pmap_->publishPartitionChange(change);
+    auto group_key = StringUtil::split(group.first, "~");
+    if (group_key.size() != 3) {
+      RAISE(kIllegalStateError);
     }
+
+    insertRecords(
+        group_key[0],
+        group_key[1],
+        SHA1Hash::fromHexString(group_key[2]),
+        group.second);
   }
 }
 
@@ -85,18 +87,112 @@ void TSDBService::insertRecord(
     const SHA1Hash& partition_key,
     const SHA1Hash& record_id,
     const Buffer& record) {
+  Vector<RecordRef> records;
+  records.emplace_back(record_id, record);
+  insertRecords(tsdb_namespace, table_name, partition_key, records);
+}
+
+void TSDBService::insertRecords(
+    const String& tsdb_namespace,
+    const String& table_name,
+    const SHA1Hash& partition_key,
+    const Vector<RecordRef>& records) {
+  if (repl_->hasLocalReplica(partition_key)) {
+    insertRecordsLocal(tsdb_namespace, table_name, partition_key, records);
+  } else {
+    insertRecordsRemote(tsdb_namespace, table_name, partition_key, records);
+  }
+}
+
+void TSDBService::insertRecordsLocal(
+    const String& tsdb_namespace,
+    const String& table_name,
+    const SHA1Hash& partition_key,
+    const Vector<RecordRef>& records) {
   auto partition = pmap_->findOrCreatePartition(
       tsdb_namespace,
       table_name,
       partition_key);
 
   auto writer = partition->getWriter();
-  auto inserted = writer->insertRecord(record_id, record);
 
-  if (inserted) {
+  bool dirty = false;
+  for (const auto& r : records) {
+    if (writer->insertRecord(r.record_id, r.record)) {
+      dirty = true;
+    }
+  }
+
+  if (dirty) {
     auto change = mkRef(new PartitionChangeNotification());
     change->partition = partition;
     pmap_->publishPartitionChange(change);
+  }
+}
+
+void TSDBService::insertRecordsRemote(
+    const String& tsdb_namespace,
+    const String& table_name,
+    const SHA1Hash& partition_key,
+    const Vector<RecordRef>& records) {
+  RecordEnvelopeList envelope;
+
+  for (const auto& r : records) {
+    auto record = envelope.add_records();
+    record->set_tsdb_namespace(tsdb_namespace);
+    record->set_table_name(table_name);
+    record->set_partition_sha1(partition_key.toString());
+    record->set_record_id(r.record_id.toString());
+    record->set_record_data(r.record.toString());
+  }
+
+  Vector<String> errors;
+  auto hosts = repl_->replicasFor(partition_key);
+  for (const auto& host : hosts) {
+    try {
+      insertRecordsRemote(
+          tsdb_namespace,
+          table_name,
+          partition_key,
+          envelope,
+          host.addr);
+
+      return;
+    } catch (const StandardException& e) {
+      logError(
+          "zbase",
+          e,
+          "TSDBService::insertRecordsRemote failed");
+
+      errors.emplace_back(e.what());
+    }
+  }
+
+  RAISEF(
+      kRuntimeError,
+      "TSDBService::insertRecordsRemote failed: $0",
+      StringUtil::join(errors, ", "));
+}
+
+void TSDBService::insertRecordsRemote(
+    const String& tsdb_namespace,
+    const String& table_name,
+    const SHA1Hash& partition_key,
+    const RecordEnvelopeList& envelope,
+    const InetAddr& host) {
+
+  auto uri = URI(StringUtil::format("http://$0/tsdb/insert", host.ipAndPort()));
+
+  http::HTTPRequest req(http::HTTPMessage::M_POST, uri.pathAndQuery());
+  req.addHeader("Host", uri.hostAndPort());
+  req.addBody(*msg::encode(envelope));
+
+  auto res = http_.executeRequest(req);
+  res.wait();
+
+  const auto& r = res.get();
+  if (r.statusCode() != 201) {
+    RAISEF(kRuntimeError, "received non-201 response: $0", r.body().toString());
   }
 }
 
