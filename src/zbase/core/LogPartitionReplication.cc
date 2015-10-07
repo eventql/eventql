@@ -35,6 +35,10 @@ bool LogPartitionReplication::needsReplication() const {
   auto repl_state = fetchReplicationState();
   auto head_offset = snap_->nrecs;
   for (const auto& r : replicas) {
+    if (r.is_local) {
+      continue;
+    }
+
     const auto& replica_offset = replicatedOffsetFor(repl_state, r.unique_id);
     if (replica_offset < head_offset) {
       return true;
@@ -51,6 +55,10 @@ size_t LogPartitionReplication::numFullRemoteCopies() const {
   auto head_offset = snap_->nrecs;
 
   for (const auto& r : replicas) {
+    if (r.is_local) {
+      continue;
+    }
+
     const auto& replica_offset = replicatedOffsetFor(repl_state, r.unique_id);
     if (replica_offset >= head_offset) {
       ncopies += 1;
@@ -63,6 +71,10 @@ size_t LogPartitionReplication::numFullRemoteCopies() const {
 void LogPartitionReplication::replicateTo(
     const ReplicaRef& replica,
     uint64_t replicated_offset) {
+  if (replica.is_local) {
+    RAISE(kIllegalStateError, "can't replicate to myself");
+  }
+
   PartitionReader reader(snap_);
 
   size_t batch_size = 0;
@@ -127,6 +139,10 @@ bool LogPartitionReplication::replicate() {
   bool success = true;
 
   for (const auto& r : replicas) {
+    if (r.is_local) {
+      continue;
+    }
+
     const auto& replica_offset = replicatedOffsetFor(repl_state, r.unique_id);
 
     if (replica_offset < head_offset) {
