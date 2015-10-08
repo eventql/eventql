@@ -49,12 +49,14 @@ ZBase.registerView((function() {
     textarea.value = regex;
 
     $.onClick($("button.submit", elem), function() {
-      var url = "/api/v1/logfiles/set_regex?logfile=" + logfile;
-      var postbody = {regex: textarea.value};
+      var url =
+        "/api/v1/logfiles/set_regex?logfile=" + encodeURIComponent(logfile) +
+        "&regex=" + encodeURIComponent(textarea.value);
 
-      $.httpPost(url, postbody, function(r) {
+      $.httpPost(url, "", function(r) {
         if (r.status == 201) {
-          load();
+          console.log(r);
+          //load();
         } else {
           $.fatalError();
         }
