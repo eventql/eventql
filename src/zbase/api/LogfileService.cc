@@ -355,6 +355,14 @@ void LogfileService::insertLoglines(
   for (; is->readLine(&line); line.clear()) {
     Vector<Pair<const char*, size_t>> match;
     if (!regex.match(line, &match)) {
+      logTrace(
+          "z1.logs",
+          "Dropping logline for logfile '$0/$1' because it does not match " \
+          "the parsing regex: $2",
+          customer,
+          logfile.name(),
+          line);
+
       continue;
     }
 
@@ -370,6 +378,14 @@ void LogfileService::insertLoglines(
     }
 
     if (time.isEmpty()) {
+      logTrace(
+          "z1.logs",
+          "Dropping logline for logfile '$0/$1' because it does not have a " \
+          "'time' column: $2",
+          customer,
+          logfile.name(),
+          line);
+
       continue;
     }
 
