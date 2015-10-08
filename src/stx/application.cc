@@ -156,52 +156,42 @@ void Application::dropPrivileges(const std::string& username,
       username.c_str(), groupname.c_str());
 
   if (!groupname.empty() && !getgid()) {
-    if (struct group* gr = getgrnam(groupname.c_str())) {
-      if (setgid(gr->gr_gid) != 0) {
-        logError("application",
-            "could not setgid to %s: %s", groupname.c_str(), strerror(errno));
-        return;
-      }
-
-      setgroups(0, nullptr);
-
-      if (!username.empty()) {
-        initgroups(username.c_str(), gr->gr_gid);
-      }
-    } else {
+    struct group* gr = getgrnam(groupname.c_str());
+    if (!gr) {
       logError("application", "Could not find group: %s", groupname.c_str());
       return;
+    }
+
+    if (setgid(gr->gr_gid) != 0) {
+      logError("application",
+          "could not setgid to %s: %s", groupname.c_str(), strerror(errno));
+      return;
+    }
+
+    setgroups(0, nullptr);
+
+    if (!username.empty()) {
+      initgroups(username.c_str(), gr->gr_gid);
     }
     logTrace("application", "Dropped group privileges to '%s'.", groupname.c_str());
   }
 
   if (!username.empty() && !getuid()) {
-    if (struct passwd* pw = getpwnam(username.c_str())) {
-      if (setuid(pw->pw_uid) != 0) {
-        logError("application", "could not setgid to %s: %s", username.c_str(),
-            strerror(errno));
-        return;
-      }
-      logInfo("application", "Dropped privileges to user %s", username.c_str());
+    struct passwd* pw = getpwnam(username.c_str());
+    if (!pw)
+      RAISE(kRuntimeError, "Could not find group: %s", groupname.c_str());
 
-      if (chdir(pw->pw_dir) < 0) {
-        logError("application", "could not chdir to %s: %s", pw->pw_dir,
-            strerror(errno));
-        return;
-      }
-    } else {
-      logError("application", "Could not find group: %s", groupname.c_str());
-      return;
-    }
+    if (setuid(pw->pw_uid) != 0)
+      RAISE(kRuntimeError, "Could not setgid to %s: %s",
+            username.c_str(), strerror(errno));
+
+    logInfo("application", "Dropped privileges to user %s", username.c_str());
+
+    if (chdir(pw->pw_dir) < 0)
+      RAISE(kRuntimeError, "could not chdir to %s: %s",
+            pw->pw_dir, strerror(errno));
 
     logTrace("application", "Dropped user privileges to '%s'.", username.c_str());
-  }
-
-  if (!::getuid() || !::geteuid() || !::getgid() || !::getegid()) {
-    RAISE(
-        kRuntimeError,
-        "dropping privileges failed; process is still running with " \
-        "administrative permissions.");
   }
 }
 
