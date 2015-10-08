@@ -48,6 +48,13 @@ void LogfileAPIServlet::handle(
     return;
   }
 
+  if (uri.path() == "/api/v1/logfiles/set_regex") {
+    req_stream->readBody();
+    setLogfileRegex(session, uri, &req, &res);
+    res_stream->writeResponse(res);
+    return;
+  }
+
   if (uri.path() == "/api/v1/logfiles/scan") {
     scanLogfile(session, uri, req_stream.get(), res_stream.get());
     return;
@@ -136,6 +143,35 @@ void LogfileAPIServlet::fetchLogfileDefinition(
     res->setHeader("Content-Type", "application/json; charset=utf-8");
     res->addBody(buf);
   }
+}
+
+void LogfileAPIServlet::setLogfileRegex(
+    const AnalyticsSession& session,
+    const URI& uri,
+    const http::HTTPRequest* req,
+    http::HTTPResponse* res) {
+  const auto& params = uri.queryParams();
+  auto customer_conf = cdir_->configFor(session.customer());
+  const auto& logfile_cfg = customer_conf->config.logfile_import_config();
+
+  String logfile_name;
+  if (!URI::getParam(params, "logfile", &logfile_name)) {
+    res->setStatus(http::kStatusBadRequest);
+    res->addBody("error: missing ?logfile=... parameter");
+    return;
+  }
+
+  String regex_str;
+  if (!URI::getParam(params, "regex", &regex_str)) {
+    res->setStatus(http::kStatusBadRequest);
+    res->addBody("error: missing ?regex=... parameter");
+    return;
+  }
+
+  service_->setLogfileRegex(session.customer(), logfile_name, regex_str);
+
+  res->setStatus(http::kStatusCreated);
+  res->addBody("ok");
 }
 
 void LogfileAPIServlet::renderLogfileDefinition(

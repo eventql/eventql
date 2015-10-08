@@ -95,6 +95,11 @@ public:
       const String& customer,
       const String& logfile_name);
 
+  void setLogfileRegex(
+      const String& customer,
+      const String& logfile_name,
+      const String& regex);
+
   RefPtr<msg::MessageSchema> getSchema(
       const LogfileDefinition& cfg);
 
