@@ -44,6 +44,12 @@ protected:
       const http::HTTPRequest* req,
       http::HTTPResponse* res);
 
+  void setLogfileRegex(
+      const AnalyticsSession& session,
+      const URI& uri,
+      const http::HTTPRequest* req,
+      http::HTTPResponse* res);
+
   void scanLogfile(
       const AnalyticsSession& session,
       const URI& uri,

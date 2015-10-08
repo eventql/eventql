@@ -456,6 +456,24 @@ Option<LogfileDefinition> LogfileService::findLogfileDefinition(
   return None<LogfileDefinition>();
 }
 
+void LogfileService::setLogfileRegex(
+    const String& customer,
+    const String& logfile_name,
+    const String& regex) {
+  auto cconf = cdir_->configFor(customer)->config;
+  auto logfile_conf = cconf.mutable_logfile_import_config();
+
+  for (auto& logfile : *logfile_conf->mutable_logfiles()) {
+    if (logfile.name() == logfile_name) {
+      logfile.set_regex(regex);
+      cdir_->updateCustomerConfig(cconf);
+      return;
+    }
+  }
+
+  RAISEF(kNotFoundError, "logfile not found: $0", logfile_name);
+}
+
 RefPtr<msg::MessageSchema> LogfileService::getSchema(
     const LogfileDefinition& cfg) {
   Vector<msg::MessageSchemaField> fields;
