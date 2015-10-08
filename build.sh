@@ -129,9 +129,9 @@ if [[ $BUILD_ARTIFACTS == "true" ]]; then
   tar cz -C ${TARGET_DIR} ztracker \
       > ${ARTIFACTS_DIR}/ztracker-${TARGET_LBL}.tgz
 
-  # zbase-logjoin
-  tar cz -C ${TARGET_DIR} logjoind \
-      > ${ARTIFACTS_DIR}/zbase-logjoin-${TARGET_LBL}.tgz
+  # zlogjoin
+  tar cz -C ${TARGET_DIR} zlogjoin \
+      > ${ARTIFACTS_DIR}/zlogjoin-${TARGET_LBL}.tgz
 
   # zbroker
   tar cz -C ${TARGET_DIR} brokerd brokerctl \
