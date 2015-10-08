@@ -29,7 +29,7 @@ add_library(logjoin-base OBJECT
 
 add_dependencies(logjoin-base customerdirectory)
 
-add_executable(logjoind
+add_executable(zlogjoin
     $<TARGET_OBJECTS:brokerd-client>
     $<TARGET_OBJECTS:inventoryd-client>
     $<TARGET_OBJECTS:stx-mdb>
@@ -40,9 +40,9 @@ add_executable(logjoind
     $<TARGET_OBJECTS:dproc>
     $<TARGET_OBJECTS:customerdirectory>
     $<TARGET_OBJECTS:logjoin-base>
-    logjoind.cc)
+    zlogjoin.cc)
 
-target_link_libraries(logjoind stx-http stx-protobuf stx-json sstable cstable chartsql cplot stx-base)
+target_link_libraries(zlogjoin stx-http stx-protobuf stx-json sstable cstable chartsql cplot stx-base)
 
 add_executable(test-logjoin
     $<TARGET_OBJECTS:brokerd-client>
