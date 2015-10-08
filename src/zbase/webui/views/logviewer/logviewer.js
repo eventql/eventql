@@ -1,6 +1,6 @@
 ZBase.registerView((function() {
 
-  var kBasePath = "/a/logviewer/";
+  var kBasePath = "/a/logs/view/";
 
   var query_mgr;
   var logfiles;
