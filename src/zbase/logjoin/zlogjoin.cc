@@ -192,6 +192,10 @@ int main(int argc, const char** argv) {
   Logger::get()->setMinimumLogLevel(
       strToLogLevel(flags.getString("loglevel")));
 
+  if (!FileUtil::exists(flags.getString("datadir"))) {
+    RAISE(kRuntimeError, "data dir not found: " + flags.getString("datadir"));
+  }
+
   auto dry_run = !flags.isSet("no_dryrun");
 
   /* start event loop */
@@ -218,7 +222,7 @@ int main(int argc, const char** argv) {
       shard.shard_name + "/cdb");
 
   if (!FileUtil::exists(cdb_dir)) {
-    FileUtil::mkdir(cdb_dir);
+    FileUtil::mkdir_p(cdb_dir);
   }
 
   ConfigDirectory customer_dir(
